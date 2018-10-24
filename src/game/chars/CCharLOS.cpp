@@ -203,15 +203,15 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 	// Ok now we should loop through all the points and checking for maptile, staticx, items, multis.
 	// If something is in the way and it has the wrong flags LOS return false
 
-	const CServerMapBlock *pBlock			= NULL;		// Block of the map (for statics)
-	const CUOStaticItemRec *pStatic			= NULL;		// Statics iterator (based on SphereMapBlock)
-	const CSphereMulti *pMulti 				= NULL;		// Multi Def (multi check)
-	const CUOMultiItemRec_HS *pMultiItem	= NULL;		// Multi item iterator
-	CRegion *pRegion					= NULL;		// Nulti regions
+	const CServerMapBlock *pBlock			= nullptr;		// Block of the map (for statics)
+	const CUOStaticItemRec *pStatic			= nullptr;		// Statics iterator (based on SphereMapBlock)
+	const CSphereMulti *pMulti 				= nullptr;		// Multi Def (multi check)
+	const CUOMultiItemRec_HS *pMultiItem	= nullptr;		// Multi item iterator
+	CRegion *pRegion					= nullptr;		// Nulti regions
 	CRegionLinks rlinks;								// Links to multi regions
-	CItem *pItem						= NULL;
-	CItemBase *pItemDef 				= NULL;
-	CItemBaseDupe *pDupeDef				= NULL;
+	CItem *pItem						= nullptr;
+	CItemBase *pItemDef 				= nullptr;
+	CItemBaseDupe *pDupeDef				= nullptr;
 
 	dword wTFlags = 0;
 	height_t Height = 0;
@@ -220,12 +220,12 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 	bool bNullTerrain = false;
 
 	CRegion *pSrcRegion = ptSrc.GetRegion(REGION_TYPE_AREA|REGION_TYPE_ROOM|REGION_TYPE_MULTI);
-	CRegion *pNowRegion = NULL;
+	CRegion *pNowRegion = nullptr;
 
 	int lp_x = 0, lp_y = 0;
 	char min_z = 0, max_z = 0;
 
-	for (size_t i = 0; i < path.size(); lp_x = ptNow.m_x, lp_y = ptNow.m_y, pItemDef = NULL, pStatic = NULL, pMulti = NULL, pMultiItem = NULL, min_z = 0, max_z = 0, ++i )
+	for (size_t i = 0; i < path.size(); lp_x = ptNow.m_x, lp_y = ptNow.m_y, pItemDef = nullptr, pStatic = nullptr, pMulti = nullptr, pMultiItem = nullptr, min_z = 0, max_z = 0, ++i )
 	{
 		ptNow = path[i];
 		WARNLOS(("---------------------------------------------\n"));
@@ -332,7 +332,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 			if ( !((flags & LOS_NB_LOCAL_STATIC) && (pSrcRegion == pNowRegion)) )
 			{
                 uint uiStaticMaxQty = pBlock->m_Statics.GetStaticQty();
-				for ( uint s = 0; s < uiStaticMaxQty; pStatic = NULL, pItemDef = NULL, ++s )
+				for ( uint s = 0; s < uiStaticMaxQty; pStatic = nullptr, pItemDef = nullptr, ++s )
 				{
 					pStatic = pBlock->m_Statics.GetStatic(s);
 					if ( (pStatic->m_x + pBlock->m_x != ptNow.m_x) || (pStatic->m_y + pBlock->m_y != ptNow.m_y) )
@@ -514,7 +514,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 				size_t iQtyr = ptNow.GetRegions(REGION_TYPE_MULTI, rlinks);
 				if ( iQtyr > 0 )
 				{
-					for ( size_t ii = 0; ii < iQtyr; pMulti = NULL, ++ii, pItem = NULL, pRegion = NULL )
+					for ( size_t ii = 0; ii < iQtyr; pMulti = nullptr, ++ii, pItem = nullptr, pRegion = nullptr )
 					{
 						pRegion = rlinks.at(ii);
 						if ( pRegion )
@@ -528,7 +528,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 							continue;
 
 						size_t iQty = pMulti->GetItemCount();
-						for ( size_t iii = 0; iii < iQty; pItemDef = NULL, pMultiItem = NULL, ++iii )
+						for ( size_t iii = 0; iii < iQty; pItemDef = nullptr, pMultiItem = nullptr, ++iii )
 						{
 							pMultiItem = pMulti->GetItem(iii);
 							if ( !pMultiItem )
@@ -652,8 +652,8 @@ bool CChar::CanSeeLOS( const CObjBaseTemplate *pObj, word wFlags, bool bCombatCh
 			char iTotalZ = pt.m_z + pChar->GetHeightMount(true);
 			pt.m_z = minimum(iTotalZ, UO_SIZE_Z);
 		}
-		return CanSeeLOS_New(pt, NULL, pObj->GetVisualRange(), wFlags, bCombatCheck);
+		return CanSeeLOS_New(pt, nullptr, pObj->GetVisualRange(), wFlags, bCombatCheck);
 	}
 	else
-		return CanSeeLOS(pObj->GetTopPoint(), NULL, pObj->GetVisualRange(), wFlags, bCombatCheck);
+		return CanSeeLOS(pObj->GetTopPoint(), nullptr, pObj->GetVisualRange(), wFlags, bCombatCheck);
 }

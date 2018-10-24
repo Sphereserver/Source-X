@@ -112,7 +112,7 @@ bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
 	// Use the OF_READWRITE to append to an existing file.
 	if ( CSFileText::Open( sFileName.GetPtr(), OF_SHARE_DENY_NONE|OF_READWRITE|OF_TEXT ) )
 	{
-		setvbuf(_pStream, NULL, _IONBF, 0);
+		setvbuf(_pStream, nullptr, _IONBF, 0);
 		return true;
 	}
 	return false;

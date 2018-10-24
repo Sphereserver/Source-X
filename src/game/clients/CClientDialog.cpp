@@ -102,7 +102,7 @@ lpctstr const CDialogDef::sm_szLoadKeys[GUMPCTL_QTY+1] =
 	"xmfhtmlgumpcolor",
 	"xmfhtmltok",
 
-	NULL
+	nullptr
 };
 
 
@@ -502,7 +502,7 @@ CDialogDef::CDialogDef( CResourceID rid ) :
 {
 	m_iControls = 0;
 	m_iTexts = 0;
-	m_pObj = NULL;
+	m_pObj = nullptr;
 	m_x = 0;
 	m_y = 0;
 	m_iOriginX = 0;
@@ -589,7 +589,7 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, lp
 bool CClient::Dialog_Setup( CLIMODE_TYPE mode, CResourceIDBase rid, int iPage, CObjBase * pObj, lpctstr Arguments )
 {
 	ADDTOCALLSTACK("CClient::Dialog_Setup");
-	if ( pObj == NULL )
+	if ( pObj == nullptr )
 		return false;
 
 	CResourceDef *	pRes	= g_Cfg.ResourceGetDef( rid );
@@ -639,7 +639,7 @@ void CClient::addGumpInpVal( bool fCancel, INPVAL_STYLE style,
 	// 	m_Targ_UID = pObj->GetUID();
 	//  m_Targ_Text = verb
 
-	if (pObj == NULL)
+	if (pObj == nullptr)
 		return;
 
 	ASSERT( pObj );
@@ -663,7 +663,7 @@ void CClient::addGumpDialog( CLIMODE_TYPE mode, const CSString * psControls, siz
 	// NOTE: These packets can get rather LARGE.
 	// x,y = where on the screen ?
 
-	if ( pObj == NULL )
+	if ( pObj == nullptr )
 		pObj = m_pChar;
 
 	int	context_mode = mode;
@@ -687,9 +687,9 @@ bool CClient::addGumpDialogProps( CUID uid )
 	ADDTOCALLSTACK("CClient::addGumpDialogProps");
 	// put up a prop dialog for the object.
 	CObjBase * pObj = uid.ObjFind();
-	if ( pObj == NULL )
+	if ( pObj == nullptr )
 		return false;
-	if ( m_pChar == NULL )
+	if ( m_pChar == nullptr )
 		return false;
 	if ( ! m_pChar->CanTouch( pObj ))	// probably a security issue.
 		return false;
@@ -713,7 +713,7 @@ TRIGRET_TYPE CClient::Dialog_OnButton( CResourceIDBase rid, dword dwButtonID, CO
 {
 	ADDTOCALLSTACK("CClient::Dialog_OnButton");
 	// one of the gump dialog buttons was pressed.
-	if ( pObj == NULL )		// object is gone ?
+	if ( pObj == nullptr )		// object is gone ?
 		return TRIGRET_ENDIF;
 
 	CResourceLock s;
@@ -807,7 +807,7 @@ TRIGRET_TYPE CClient::Menu_OnSelect( CResourceIDBase rid, int iSelect, CObjBase 
 		return( TRIGRET_ENDIF );
 	}
 
-	if ( pObj == NULL )
+	if ( pObj == nullptr )
 		pObj = m_pChar;
 
 	// execute the menu script.
@@ -822,7 +822,7 @@ TRIGRET_TYPE CClient::Menu_OnSelect( CResourceIDBase rid, int iSelect, CObjBase 
 			if (strnicmp( s.GetArgStr(), "@cancel", 7 ) )
 				continue;
 
-			return pObj->OnTriggerRunVal( s, TRIGRUN_SECTION_TRUE, m_pChar, NULL );
+			return pObj->OnTriggerRunVal( s, TRIGRUN_SECTION_TRUE, m_pChar, nullptr );
 		}
 	}
 	else
@@ -839,7 +839,7 @@ TRIGRET_TYPE CClient::Menu_OnSelect( CResourceIDBase rid, int iSelect, CObjBase 
 			if ( i > iSelect )
 				break;
 
-			return pObj->OnTriggerRunVal( s, TRIGRUN_SECTION_TRUE, m_pChar, NULL );
+			return pObj->OnTriggerRunVal( s, TRIGRUN_SECTION_TRUE, m_pChar, nullptr );
 		}
 	}
 
@@ -872,7 +872,7 @@ bool CMenuItem::ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole 
 	if ( strcmp( pszArgStart, "0" ) != 0 )
 	{
 		CItemBase * pItemBase = CItemBase::FindItemBase((ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, pszArgStart )));
-		if ( pItemBase != NULL )
+		if ( pItemBase != nullptr )
 		{
 			m_id = (word)(pItemBase->GetDispID());
 			pObjBase = pItemBase;
@@ -888,7 +888,7 @@ bool CMenuItem::ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole 
 		m_id = 0;
 	}
 
-	if ( pObjBase != NULL )
+	if ( pObjBase != nullptr )
 		pObjBase->ParseText( pszArgs, pSrc );
 	else
 		g_Serv.ParseText( pszArgs, pSrc );
@@ -935,7 +935,7 @@ void CClient::Menu_Setup( CResourceIDBase rid, CObjBase * pObj )
 		return;
 	}
 
-	if ( pObj == NULL )
+	if ( pObj == nullptr )
 	{
 		pObj = m_pChar;
 	}

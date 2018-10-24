@@ -23,7 +23,7 @@ public:
     static const char *m_sClassName;
     CResourceRef()
     {
-        m_pLink = NULL;
+        m_pLink = nullptr;
     }
     CResourceRef(CResourceLink* pLink) : m_pLink(pLink)
     {
@@ -33,12 +33,12 @@ public:
     CResourceRef(const CResourceRef& copy)
     {
         m_pLink = copy.m_pLink;
-        if (m_pLink != NULL)
+        if (m_pLink != nullptr)
             m_pLink->AddRefInstance();
     }
     ~CResourceRef()
     {
-        if (m_pLink != NULL)
+        if (m_pLink != nullptr)
             m_pLink->DelRefInstance();
     }
     CResourceRef& operator=(const CResourceRef& other)
@@ -55,12 +55,12 @@ public:
     }
     void SetRef(CResourceLink* pLink)
     {
-        if (m_pLink != NULL)
+        if (m_pLink != nullptr)
             m_pLink->DelRefInstance();
 
         m_pLink = pLink;
 
-        if (pLink != NULL)
+        if (pLink != nullptr)
             pLink->AddRefInstance();
     }
     operator CResourceLink*() const

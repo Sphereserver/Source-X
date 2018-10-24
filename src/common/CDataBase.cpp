@@ -38,13 +38,13 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 		return false;
 	}
 
-	_myData = mysql_init(NULL);
+	_myData = mysql_init(nullptr);
 	if ( !_myData )
 		return false;
 
 	int portnum = 0;
-	const char *port = NULL;
-	if ( (port = strchr(host, ':')) != NULL )
+	const char *port = nullptr;
+	if ( (port = strchr(host, ':')) != nullptr )
 	{
 		char *pszTemp = Str_GetTemp();
 		strcpy(pszTemp, host);
@@ -53,13 +53,13 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 		host = pszTemp;
 	}
 
-	if ( !mysql_real_connect(_myData, host, user, password, base, portnum, NULL, CLIENT_MULTI_STATEMENTS ) )
+	if ( !mysql_real_connect(_myData, host, user, password, base, portnum, nullptr, CLIENT_MULTI_STATEMENTS ) )
 	{
 		const char *error = mysql_error(_myData);
 		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "MySQL connect fail: %s\n", error);
 		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "Visit this link for more information: http://dev.mysql.com/doc/mysql/search.php?q=%s\n", error);
 		mysql_close(_myData);
-		_myData = NULL;
+		_myData = nullptr;
 		return false;
 	}
 
@@ -83,7 +83,7 @@ void CDataBase::Close()
 	ADDTOCALLSTACK("CDataBase::Close");
 	SimpleThreadLock lock(m_connectionMutex);
 	mysql_close(_myData);
-	_myData = NULL;
+	_myData = nullptr;
 	m_bConnected = false;
 }
 
@@ -97,8 +97,8 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
 		return false;
 
 	int result;
-	MYSQL_RES * m_res = NULL;
-	const char * myErr = NULL;
+	MYSQL_RES * m_res = nullptr;
+	const char * myErr = nullptr;
 
 	{
 		// connection can only handle one query at a time, so we need to lock until we
@@ -109,7 +109,7 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
 		if ( result == 0 )
 		{
 			m_res = mysql_store_result(_myData);
-			if ( m_res == NULL )
+			if ( m_res == nullptr )
 				return false;
 		}
 		else
@@ -118,7 +118,7 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
 		}
 	}
 
-	if ( m_res != NULL )
+	if ( m_res != nullptr )
 	{
 		MYSQL_FIELD * fields = mysql_fetch_fields(m_res);
 		int num_fields = mysql_num_fields(m_res);
@@ -127,10 +127,10 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
 		mapQueryResult.SetNum("NUMCOLS", num_fields);
 
 		char	key[12];
-		char	**trow = NULL;
+		char	**trow = nullptr;
 		int		rownum = 0;
 		char	*zStore = Str_GetTemp();
-		while ( (trow = mysql_fetch_row(m_res)) != NULL )
+		while ( (trow = mysql_fetch_row(m_res)) != nullptr )
 		{
 			for ( int i = 0; i < num_fields; ++i )
 			{
@@ -196,7 +196,7 @@ bool CDataBase::exec(const char *query)
 			// even though we don't want (or expect) any result data, we must retrieve
 			// is anyway otherwise we will lose our connection to the server
 			MYSQL_RES* res = mysql_store_result(_myData);
-			if (res != NULL)
+			if (res != nullptr)
 				mysql_free_result(res);
 
 			return true;
@@ -326,7 +326,7 @@ lpctstr const CDataBase::sm_szLoadKeys[DBO_QTY+1] =
 	"CONNECTED",
 	"ESCAPEDATA",
 	"ROW",
-	NULL
+	nullptr
 };
 
 enum DBOV_TYPE
@@ -344,7 +344,7 @@ lpctstr const CDataBase::sm_szVerbKeys[DBOV_QTY+1] =
 	"CONNECT",
 	"EXECUTE",
 	"QUERY",
-	NULL
+	nullptr
 };
 
 bool CDataBase::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)

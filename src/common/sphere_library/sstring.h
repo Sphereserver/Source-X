@@ -59,7 +59,7 @@ lpctstr Str_GetArticleAndSpace(lpctstr pszWords);
 * @param pszStrip characters to strip (default "{|}~", non printable characters for client).
 * @return size of the filtered string.
 */
-int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxSize, lpctstr pszStrip = NULL);
+int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxSize, lpctstr pszStrip = nullptr);
 /**
 * @brief replace string representation of special characters by special characters.
 *
@@ -176,7 +176,7 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText);
 * @param pSep the list of separators (by default "=, \t").
 * @return false if there are no more args to parse, true otherwise.
 */
-bool Str_Parse(tchar * pLine, tchar ** ppArg = NULL, lpctstr pSep = NULL);
+bool Str_Parse(tchar * pLine, tchar ** ppArg = nullptr, lpctstr pSep = nullptr);
 /**
 * @brief Parse a list of arguments.
 * @param pCmdLine list of arguments to parse.
@@ -185,7 +185,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg = NULL, lpctstr pSep = NULL);
 * @param pSep the list of separators (by default "=, \t").
 * @return count of arguments parsed.
 */
-int Str_ParseCmds(tchar * pCmdLine, tchar ** ppCmd, int iMax, lpctstr pSep = NULL);
+int Str_ParseCmds(tchar * pCmdLine, tchar ** ppCmd, int iMax, lpctstr pSep = nullptr);
 /**
 * @brief Parse a list of arguments (integer version).
 * @param pCmdLine list of arguments to parse.
@@ -194,7 +194,7 @@ int Str_ParseCmds(tchar * pCmdLine, tchar ** ppCmd, int iMax, lpctstr pSep = NUL
 * @param pSep the list of separators (by default "=, \t").
 * @return count of arguments parsed.
 */
-int Str_ParseCmds(tchar * pCmdLine, int64 * piCmd, int iMax, lpctstr pSep = NULL);
+int Str_ParseCmds(tchar * pCmdLine, int64 * piCmd, int iMax, lpctstr pSep = nullptr);
 /**
 * @brief check if a string matches a regex.
 * @param pPattern regex to match.

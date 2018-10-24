@@ -59,7 +59,7 @@
 
 	const OSVERSIONINFO * Sphere_GetOSInfo()
 	{
-		// NEVER return NULL !
+		// NEVER return nullptr !
 		static OSVERSIONINFO g_osInfo;
 		if ( g_osInfo.dwOSVersionInfoSize != sizeof(g_osInfo) )
 		{
@@ -339,8 +339,8 @@ int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const nchar * pInp, in
 			iInp,			// number of characters in string
 			pOut,			// address of buffer for new string
 			iSizeOutBytes,	// size of buffer in bytes
-			NULL,			// address of default for unmappable characters
-			NULL			// address of flag set when default char. used
+			nullptr,			// address of default for unmappable characters
+			nullptr			// address of flag set when default char. used
 			);
 		if ( iOut < 0 )
 		{

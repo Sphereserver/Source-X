@@ -189,7 +189,7 @@ int CSFileText::Read( void * pBuffer, int sizemax ) const
 
 tchar * CSFileText::_ReadString( tchar * pBuffer, int sizemax )
 {
-    // Read a line of text. NULL/nullptr = EOF
+    // Read a line of text. nullptr/nullptr = EOF
     ADDTOCALLSTACK("CSFileText::_ReadString");
     ASSERT(pBuffer);
 
@@ -229,7 +229,7 @@ bool CSFileText::Write( const void * pData, int iLen )
 #ifdef _WIN32 // Windows flushing, the only safe mode to cancel it ;)
     if ( !_fNoBuffer )
     {
-        setvbuf(_pStream, NULL, _IONBF, 0);
+        setvbuf(_pStream, nullptr, _IONBF, 0);
         _fNoBuffer = true;
     }
 #endif

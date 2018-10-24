@@ -294,7 +294,7 @@ lpctstr const CSQLite::sm_szLoadKeys[LDBO_QTY+1] =
 {
 	"CONNECTED",
 	"ROW",
-	NULL
+	nullptr
 };
 
 enum LDBOV_TYPE
@@ -312,7 +312,7 @@ lpctstr const CSQLite::sm_szVerbKeys[LDBOV_QTY+1] =
 	"CONNECT",
 	"EXECUTE",
 	"QUERY",
-	NULL
+	nullptr
 };
 
 bool CSQLite::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
@@ -653,7 +653,7 @@ size_t UTF8MBSTR::ConvertStringToUTF8( lpctstr strIn, char *& strOutUTF8MB )
 	wchar_t * wChar=new wchar_t[len+1];
 	wChar[0]=0;
 	mbstowcs(wChar,strIn,len+1);
-	int iRequiredSize = (int)(wcstombs(NULL,wChar,len+1));
+	int iRequiredSize = (int)(wcstombs(nullptr,wChar,len+1));
 	strOutUTF8MB=new char[iRequiredSize+1];
 	strOutUTF8MB[0]=0;
 	wcstombs(strOutUTF8MB,wChar,iRequiredSize+1);

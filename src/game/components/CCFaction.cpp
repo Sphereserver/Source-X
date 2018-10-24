@@ -156,7 +156,7 @@ lpctstr const CCFaction::sm_szLoadKeys[CHF_QTY + 1] =
     "SLAYER",
     "FACTIONGROUP",
     "SLAYERGROUP",
-    NULL
+    nullptr
 };
 
 CCFaction::CCFaction(CObjBase* pLink) : CFactionDef(), CComponent(COMP_FACTION, pLink)

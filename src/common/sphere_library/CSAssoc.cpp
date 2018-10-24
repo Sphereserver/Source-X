@@ -9,7 +9,7 @@
 lpctstr CValStr::FindName( int iVal ) const
 {
 	size_t i = 0;
-	ASSERT(this[i].m_pszName != NULL);
+	ASSERT(this[i].m_pszName != nullptr);
 	for ( ; this[i].m_pszName; ++i )
 	{
 		if ( iVal < this[i + 1].m_iVal )

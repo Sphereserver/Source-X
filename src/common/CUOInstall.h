@@ -53,8 +53,8 @@ public:
 	CSVFile m_CsvFiles[8];		// doors.txt, stairs.txt (x2), roof.txt, misc.txt, teleprts.txt, floors.txt, walls.txt
 
 public:
-	CSString GetFullExePath( lpctstr pszName = NULL ) const;
-	CSString GetFullCDPath( lpctstr pszName = NULL ) const;
+	CSString GetFullExePath( lpctstr pszName = nullptr ) const;
+	CSString GetFullCDPath( lpctstr pszName = nullptr ) const;
 
 public:
 	bool FindInstall();
@@ -69,7 +69,7 @@ public:
 	VERFILE_FORMAT GetMulFormat( VERFILE_TYPE i );
 
 	void SetPreferPath( lpctstr pszName );
-	CSString GetPreferPath( lpctstr pszName = NULL ) const;
+	CSString GetPreferPath( lpctstr pszName = nullptr ) const;
 
 	bool ReadMulIndex( VERFILE_TYPE fileindex, VERFILE_TYPE filedata, dword id, CUOIndexRec & Index );
 	bool ReadMulData( VERFILE_TYPE filedata, const CUOIndexRec & Index, void * pData );

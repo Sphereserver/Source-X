@@ -42,7 +42,7 @@ void CClient::Event_ChatButton(const nchar * pszName) // Client's chat button wa
 	// See if they've made a chatname yet
 	// m_ChatPersona.SetClient(this);
 
-	if (m_pChar == NULL)
+	if (m_pChar == nullptr)
 		return;
 
 	if ( IsTrigUsed(TRIGGER_USERCHATBUTTON) )
@@ -71,7 +71,7 @@ void CClient::Event_ChatButton(const nchar * pszName) // Client's chat button wa
 		else
 		{
 			// No chatname yet, see if the client sent one
-			if (pszName == NULL || pszName[0] == 0) // No name was sent, so ask for a permanent chat system nickname (account based)
+			if (pszName == nullptr || pszName[0] == 0) // No name was sent, so ask for a permanent chat system nickname (account based)
 			{
 				addChatSystemMessage(CHATMSG_GetChatName);
 				return;
@@ -111,7 +111,7 @@ void CClient::Event_Item_Dye( CUID uid, HUE_TYPE wHue ) // Rehue an item
 {
 	ADDTOCALLSTACK("CClient::Event_Item_Dye");
 	// CLIMODE_DYE : Result from addDyeOption()
-	if (m_pChar == NULL)
+	if (m_pChar == nullptr)
 		return;
 
 	CObjBase *pObj = uid.ObjFind();
@@ -130,7 +130,7 @@ void CClient::Event_Item_Dye( CUID uid, HUE_TYPE wHue ) // Rehue an item
 		if ( !pObj->IsChar() )
 		{
 			CItem *pItem = dynamic_cast<CItem *>(pObj);
-			if (pItem == NULL || (( pObj->GetBaseID() != 0xFAB ) && (!pItem->IsType(IT_DYE_VAT) || !IsSetOF(OF_DyeType))))
+			if (pItem == nullptr || (( pObj->GetBaseID() != 0xFAB ) && (!pItem->IsType(IT_DYE_VAT) || !IsSetOF(OF_DyeType))))
 				return;
 
 			if ( wHue < HUE_BLUE_LOW )
@@ -175,7 +175,7 @@ void CClient::Event_Book_Title( CUID uid, lpctstr pszTitle, lpctstr pszAuthor )
 {
 	ADDTOCALLSTACK("CClient::Event_Book_Title");
 	// XCMD_BookOpen : user is changing the books title/author info.
-	if ( m_pChar == NULL )
+	if ( m_pChar == nullptr )
 		return;
 
 	CItemMessage * pBook = dynamic_cast <CItemMessage *> (uid.ItemFind());
@@ -199,7 +199,7 @@ void CClient::Event_Item_Pickup(CUID uid, word amount) // Client grabs an item
 	ADDTOCALLSTACK("CClient::Event_Item_Pickup");
 	EXC_TRY("CClient::Event_Item_Pickup");
 	// Player/client is picking up an item.
-	if ( m_pChar == NULL )
+	if ( m_pChar == nullptr )
 		return;
 
 	EXC_SET_BLOCK("Item");
@@ -285,7 +285,7 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 	CObjBase * pObjOn = uidOn.ObjFind();
 
 	// Are we out of sync ?
-	if ( pItem == NULL ||
+	if ( pItem == nullptr ||
 		pItem == pObjOn ||	// silliness.
 		GetTargMode() != CLIMODE_DRAG ||
 		pItem != m_pChar->LayerFind( LAYER_DRAGGING ))
@@ -296,7 +296,7 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 
 	ClearTargMode();	// done dragging
 
-	if ( pObjOn != NULL )	// Put on or in another object
+	if ( pObjOn != nullptr )	// Put on or in another object
 	{
 		if ( ! m_pChar->CanTouch( pObjOn ))	// Must also be LOS !
 		{
@@ -380,7 +380,7 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 			}
 		}
 
-		if ( pContItem != NULL )
+		if ( pContItem != nullptr )
 		{
 			//	bug with shifting selling list by gold coins
 			if ( pContItem->IsType(IT_EQ_VENDOR_BOX) &&
@@ -419,7 +419,7 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 			}
 		}
 
-		if ( pContItem != NULL )
+		if ( pContItem != nullptr )
 		{
 			bool isCheating = false;
 			bool isBank = pContItem->IsType( IT_EQ_BANK_BOX );
@@ -510,10 +510,10 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 	// Game pieces can only be dropped on their game boards.
 	if ( pItem->IsType(IT_GAME_PIECE))
 	{
-		if ( pObjOn == NULL || m_Targ_Prv_UID != pObjOn->GetUID())
+		if ( pObjOn == nullptr || m_Targ_Prv_UID != pObjOn->GetUID())
 		{
 			CItemContainer * pGame = dynamic_cast <CItemContainer *>( m_Targ_Prv_UID.ItemFind());
-			if ( pGame != NULL )
+			if ( pGame != nullptr )
 			{
 				pGame->ContentAdd( pItem, m_Targ_p );
 			}
@@ -525,7 +525,7 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 
 	// do the dragging anim for everyone else to see.
 
-	if ( pObjOn != NULL )
+	if ( pObjOn != nullptr )
 	{
 		// in pack or other CItemContainer.
 		m_pChar->UpdateDrag( pItem, pObjOn );
@@ -544,7 +544,7 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 			if ( !pContOn )
 			{
 				// on ground
-				m_pChar->UpdateDrag( pItem, NULL, &pt );
+				m_pChar->UpdateDrag( pItem, nullptr, &pt );
 				m_pChar->ItemDrop( pItem, pt );
 				return;
 			}
@@ -557,7 +557,7 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 	else
 	{
 		// on ground
-		m_pChar->UpdateDrag( pItem, NULL, &pt );
+		m_pChar->UpdateDrag( pItem, nullptr, &pt );
 		m_pChar->ItemDrop( pItem, pt );
 	}
 }
@@ -569,7 +569,7 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 	ADDTOCALLSTACK("CClient::Event_Skill_Use");
 	// All the push button skills come through here.
 	// Any "Last skill" macro comes here as well. (push button only)
-	if ( m_pChar == NULL )
+	if ( m_pChar == nullptr )
 		return;
 
 	if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex(skill) )
@@ -611,7 +611,7 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 	if ( g_Cfg.IsSkillFlag( skill, SKF_SCRIPTED ) )
 	{
 		const CSkillDef * pSkillDef = g_Cfg.GetSkillDef(skill);
-		if (pSkillDef != NULL && pSkillDef->m_sTargetPrompt.IsEmpty() == false)
+		if (pSkillDef != nullptr && pSkillDef->m_sTargetPrompt.IsEmpty() == false)
 		{
 			m_tmSkillTarg.m_Skill = skill;	// targetting what skill ?
 			addTarget( CLIMODE_TARG_SKILL, pSkillDef->m_sTargetPrompt.GetPtr(), false, fCheckCrime );
@@ -683,7 +683,7 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 	{
 		// Go into targtting mode.
 		const CSkillDef * pSkillDef = g_Cfg.GetSkillDef(skill);
-		if (pSkillDef == NULL || pSkillDef->m_sTargetPrompt.IsEmpty())
+		if (pSkillDef == nullptr || pSkillDef->m_sTargetPrompt.IsEmpty())
 		{
 			DEBUG_ERR(( "%x: Event_Skill_Use bad skill %d\n", GetSocketID(), skill ));
 			return;
@@ -801,7 +801,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 
 		// Check the z height here.
 		// The client already knows this but doesn't tell us.
-		if ( m_pChar->CanMoveWalkTo(pt, true, false, dir) == NULL )
+		if ( m_pChar->CanMoveWalkTo(pt, true, false, dir) == nullptr )
 		{
 			new PacketMovementRej(this, sequence);
 			return false;
@@ -884,7 +884,7 @@ void CClient::Event_CombatMode( bool fWar ) // Only for switching to combat mode
 	ADDTOCALLSTACK("CClient::Event_CombatMode");
 	// If peacemaking then this doens't work ??
 	// Say "you are feeling too peacefull"
-	if ( m_pChar == NULL )
+	if ( m_pChar == nullptr )
 		return;
 
 	bool fCleanSkill = true;
@@ -961,7 +961,7 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 		enum TRIGRET_TYPE tr;
 
 		//	Call the filtering function
-		if ( m_pChar->r_Call(g_Cfg.m_sCommandTrigger, m_pChar, &Args, NULL, &tr) )
+		if ( m_pChar->r_Call(g_Cfg.m_sCommandTrigger, m_pChar, &Args, nullptr, &tr) )
 			if ( tr == TRIGRET_RET_TRUE )
 				return (Args.m_iN2 != 0);
 
@@ -1001,11 +1001,11 @@ void CClient::Event_Attack( CUID uid )
 	ADDTOCALLSTACK("CClient::Event_Attack");
 	// d-click in war mode
 	// I am attacking someone.
-	if ( m_pChar == NULL )
+	if ( m_pChar == nullptr )
 		return;
 
 	CChar * pChar = uid.CharFind();
-	if ( pChar == NULL )
+	if ( pChar == nullptr )
 		return;
 
 	new PacketAttack(this, (m_pChar->Fight_Attack(pChar) ? (dword)pChar->GetUID() : 0));
@@ -1034,7 +1034,7 @@ void CClient::Event_VendorBuy_Cheater( int iCode )
 void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t itemCount)
 {
 	ADDTOCALLSTACK("CClient::Event_VendorBuy");
-	if (m_pChar == NULL || pVendor == NULL || items == NULL || itemCount <= 0)
+	if (m_pChar == nullptr || pVendor == nullptr || items == nullptr || itemCount <= 0)
 		return;
 
 #define MAX_COST (INT32_MAX / 2)
@@ -1052,7 +1052,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 			continue;
 
 		pItem = dynamic_cast <CItemVendable *> (items[i].m_serial.ItemFind());
-		if ( pItem == NULL )
+		if ( pItem == nullptr )
 			continue;
 
 		if ((items[i].m_amount <= 0) || (items[i].m_amount > pItem->GetAmount()))
@@ -1093,7 +1093,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 		pVendor->Speak("Thou hast bought nothing!");
 		return;
 	}
-    costtotal = m_pChar->PayGold(pVendor,(int)costtotal, NULL, PAYGOLD_BUY);
+    costtotal = m_pChar->PayGold(pVendor,(int)costtotal, nullptr, PAYGOLD_BUY);
 	//	Check for gold being enough to buy this
 	bool fBoss = pVendor->NPC_IsOwnedBy(m_pChar);
 	if ( !fBoss )
@@ -1131,7 +1131,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 		pItem = dynamic_cast <CItemVendable *> (items[i].m_serial.ItemFind());
 		word amount = items[i].m_amount;
 
-		if ( pItem == NULL )
+		if ( pItem == nullptr )
 			continue;
 
 		if (( IsTrigUsed(TRIGGER_BUY) ) || ( IsTrigUsed(TRIGGER_ITEMBUY) ))
@@ -1289,14 +1289,14 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, size_t i
 	ADDTOCALLSTACK("CClient::Event_VendorSell");
 	// Player Selling items to the vendor.
 	// Done with the selling action.
-	if (m_pChar == NULL || pVendor == NULL || items == NULL || itemCount <= 0)
+	if (m_pChar == nullptr || pVendor == nullptr || items == nullptr || itemCount <= 0)
 		return;
 
 	CItemContainer	*pBank = pVendor->GetBank();
 	CItemContainer	*pContStock = pVendor->GetBank( LAYER_VENDOR_STOCK );
 	CItemContainer	*pContBuy = pVendor->GetBank( LAYER_VENDOR_BUYS );
 	CItemContainer	*pContExtra = pVendor->GetBank( LAYER_VENDOR_EXTRA );
-	if ( pBank == NULL || pContStock == NULL )
+	if ( pBank == nullptr || pContStock == nullptr )
 	{
 		addVendorClose(pVendor);
 		pVendor->Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_GUARDS));
@@ -1311,7 +1311,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, size_t i
 	for (size_t i = 0; i < itemCount; i++)
 	{
 		CItemVendable * pItem = dynamic_cast <CItemVendable *> (items[i].m_serial.ItemFind());
-		if ( pItem == NULL || pItem->IsValidSaleItem(true) == false )
+		if ( pItem == nullptr || pItem->IsValidSaleItem(true) == false )
 		{
 			Event_VendorSell_Cheater( 0x3 );
 			return;
@@ -1323,7 +1323,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, size_t i
 
 		// Find the valid sell item from vendors stuff.
 		CItemVendable * pItemSell = CChar::NPC_FindVendableItem( pItem, pContBuy, pContStock );
-		if ( pItemSell == NULL )
+		if ( pItemSell == nullptr )
 			continue;
 
 		word amount = items[i].m_amount;
@@ -1408,7 +1408,7 @@ void CClient::Event_Profile( byte fWriteMode, CUID uid, lpctstr pszProfile, int 
 	ADDTOCALLSTACK("CClient::Event_Profile");
 	UNREFERENCED_PARAMETER(iProfileLen);
 	// mode = 0 = Get profile, 1 = Set profile
-	if ( m_pChar == NULL )
+	if ( m_pChar == nullptr )
 		return;
 
 	CChar	*pChar = uid.CharFind();
@@ -1449,11 +1449,11 @@ void CClient::Event_MailMsg( CUID uid1, CUID uid2 )
 	UNREFERENCED_PARAMETER(uid2);
 	// NOTE: How do i protect this from spamming others !!!
 	// Drag the mail bag to this clients char.
-	if ( m_pChar == NULL )
+	if ( m_pChar == nullptr )
 		return;
 
 	CChar * pChar = uid1.CharFind();
-	if ( pChar == NULL )
+	if ( pChar == nullptr )
 	{
 		SysMessageDefault( DEFMSG_MSG_MAILBAG_DROP_1 );
 		return;
@@ -1461,7 +1461,7 @@ void CClient::Event_MailMsg( CUID uid1, CUID uid2 )
 
 	if ( IsTrigUsed(TRIGGER_USERMAILBAG) )
 	{
-		if (pChar->OnTrigger(CTRIG_UserMailBag, m_pChar, NULL) == TRIGRET_RET_TRUE)
+		if (pChar->OnTrigger(CTRIG_UserMailBag, m_pChar, nullptr) == TRIGRET_RET_TRUE)
 			return;
 	}
 
@@ -1481,7 +1481,7 @@ void CClient::Event_ToolTip( CUID uid )
 {
 	ADDTOCALLSTACK("CClient::Event_ToolTip");
 	CObjBase * pObj = uid.ObjFind();
-	if ( pObj == NULL )
+	if ( pObj == nullptr )
 		return;
 
 	if (( IsTrigUsed(TRIGGER_TOOLTIP) ) || (( IsTrigUsed(TRIGGER_ITEMTOOLTIP) )&&(pObj->IsItem())))
@@ -1498,7 +1498,7 @@ void CClient::Event_ToolTip( CUID uid )
 void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dword context2, dword type, bool bNoStrip )
 {
 	ADDTOCALLSTACK("CClient::Event_PromptResp");
-	if (m_pChar == NULL)
+	if (m_pChar == nullptr)
 		return;
 
 	// result of addPrompt
@@ -1527,8 +1527,8 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 			len = Str_GetBare( szText, pszText, CountOf(szText), "|~,=[]{|}~" );
 	}
 
-	lpctstr pszReName = NULL;
-	lpctstr pszPrefix = NULL;
+	lpctstr pszReName = nullptr;
+	lpctstr pszPrefix = nullptr;
 
 	switch ( promptMode )
 	{
@@ -1610,7 +1610,7 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 	CSString sMsg;
 
 	CItem * pItem = m_Prompt_Uid.ItemFind();
-	if ( pItem == NULL || type == 0 || szText[0] == '\0' )
+	if ( pItem == nullptr || type == 0 || szText[0] == '\0' )
 	{
 		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_MSG_RENAME_CANCEL ), pszReName );
 		return;
@@ -1659,8 +1659,8 @@ void CClient::Event_Talk_Common(tchar *szText)	// PC speech
 		pSector->OnHearItem(m_pChar, szText);
 
 	// Find an NPC that may have heard us.
-	CChar *pChar = NULL;
-	CChar *pCharAlt = NULL;
+	CChar *pChar = nullptr;
+	CChar *pCharAlt = nullptr;
 	size_t i = 0;
 	int iAltDist;
 	if (g_Cfg.m_iDistanceTalk > 0)
@@ -1678,7 +1678,7 @@ void CClient::Event_Talk_Common(tchar *szText)	// PC speech
 
 		if ( pChar->IsStatFlag(STATF_COMM_CRYSTAL) )
 		{
-			for ( CItem *pItem = pChar->GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
+			for ( CItem *pItem = pChar->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 				pItem->OnHear(szText, m_pChar);
 		}
 
@@ -1766,7 +1766,7 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 	if ( (wHue < 2) || (wHue > HUE_DYE_HIGH) )
 		wHue = HUE_SAY_DEF;
 
-	pAccount->m_lang.Set( NULL );	// default
+	pAccount->m_lang.Set( nullptr );	// default
 	if ( (mode == TALKMODE_SYSTEM) && (m_pChar->m_SpeechHueOverride == HUE_SAY_DEF) )
 		m_pChar->m_SpeechHue = wHue;
 
@@ -2053,7 +2053,7 @@ bool CClient::Event_DoubleClick( CUID uid, bool fMacro, bool fTestTouch, bool fS
 
 	// Allow some static in game objects to have function?
 	// Not possible with dclick.
-	if ( m_pChar == NULL )
+	if ( m_pChar == nullptr )
 		return false;
 
 	CObjBase * pObj = uid.ObjFind();
@@ -2131,7 +2131,7 @@ void CClient::Event_SingleClick( CUID uid )
 	// PS: Clients using tooltips don't send single click
 	//	   requests when clicking on obj.
 
-	if ( m_pChar == NULL )
+	if ( m_pChar == nullptr )
 		return;
 
 	CObjBase * pObj = uid.ObjFind();
@@ -2172,7 +2172,7 @@ void CClient::Event_Target(dword context, CUID uid, CPointMap pt, byte flags, IT
 	// If player clicks on something with the targetting cursor
 	// Assume addTarget was called before this.
 	// NOTE: Make sure they can actually validly trarget this item !
-	if (m_pChar == NULL)
+	if (m_pChar == nullptr)
 		return;
 
 	if (context != (dword)GetTargMode())
@@ -2200,7 +2200,7 @@ void CClient::Event_Target(dword context, CUID uid, CPointMap pt, byte flags, IT
 	CObjBase* pTarget = uid.ObjFind();
 	if (IsPriv(PRIV_GM))
 	{
-		if (uid.IsValidUID() && pTarget == NULL)
+		if (uid.IsValidUID() && pTarget == nullptr)
 		{
 			addObjectRemoveCantSee(uid, "the target");
 			return;
@@ -2224,7 +2224,7 @@ void CClient::Event_Target(dword context, CUID uid, CPointMap pt, byte flags, IT
 		}
 	}
 
-	if (pTarget != NULL)
+	if (pTarget != nullptr)
 	{
 		// remove the last existing target
 		m_Targ_Last = uid;
@@ -2276,12 +2276,12 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 	if ( !IsSetOF(OF_NoContextMenuLOS) && !m_pChar->CanSeeLOS(pObj) )
 		return;
 
-	if ( m_pPopupPacket != NULL )
+	if ( m_pPopupPacket != nullptr )
 	{
 		DEBUG_ERR(("New popup packet being formed before previous one has been released.\n"));
 
 		delete m_pPopupPacket;
-		m_pPopupPacket = NULL;
+		m_pPopupPacket = nullptr;
 	}
 	m_pPopupPacket = new PacketDisplayPopup(this, uid);
 
@@ -2301,7 +2301,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 		else
 		{
 			delete m_pPopupPacket;
-			m_pPopupPacket = NULL;
+			m_pPopupPacket = nullptr;
 			return;
 		}
 	}
@@ -2318,7 +2318,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 	else
 	{
 		delete m_pPopupPacket;
-		m_pPopupPacket = NULL;
+		m_pPopupPacket = nullptr;
 		return;
 	}
 
@@ -2387,11 +2387,11 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 		}
 		else
 		{
-			if ( m_pChar->m_pParty == NULL && pChar->m_pParty == NULL )
+			if ( m_pChar->m_pParty == nullptr && pChar->m_pParty == nullptr )
 				m_pPopupPacket->addOption(POPUP_PARTY_ADD, 197, POPUPFLAG_COLOR, 0xFFFF);
-			else if ( m_pChar->m_pParty != NULL && m_pChar->m_pParty->IsPartyMaster(m_pChar) )
+			else if ( m_pChar->m_pParty != nullptr && m_pChar->m_pParty->IsPartyMaster(m_pChar) )
 			{
-				if ( m_pChar->m_pParty == NULL )
+				if ( m_pChar->m_pParty == nullptr )
 					m_pPopupPacket->addOption(POPUP_PARTY_ADD, 197, POPUPFLAG_COLOR, 0xFFFF);
 				else if ( pChar->m_pParty == m_pChar->m_pParty )
 					m_pPopupPacket->addOption(POPUP_PARTY_REMOVE, 198, POPUPFLAG_COLOR, 0xFFFF);
@@ -2411,13 +2411,13 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 	if ( m_pPopupPacket->getOptionCount() <= 0 )
 	{
 		delete m_pPopupPacket;
-		m_pPopupPacket = NULL;
+		m_pPopupPacket = nullptr;
 		return;
 	}
 
 	m_pPopupPacket->finalise();
 	m_pPopupPacket->push(this);
-	m_pPopupPacket = NULL;
+	m_pPopupPacket = nullptr;
 }
 
 void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something after a player selected something from a pop-up menu
@@ -2555,7 +2555,7 @@ void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something 
 			break;
 
 		case POPUP_TRADE_OPEN:
-			Cmd_SecureTrade(pChar, NULL);
+			Cmd_SecureTrade(pChar, nullptr);
 			break;
 	}
 }
@@ -2644,7 +2644,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 	{
 		case EXTCMD_OPEN_SPELLBOOK:	// open spell book if we have one.
 		{
-			CItem *pBook = NULL;
+			CItem *pBook = nullptr;
 			switch ( ATOI(ppArgs[0]) )
 			{
 				default:
@@ -2808,7 +2808,7 @@ bool CClient::xPacketFilter( const byte * pData, size_t iLen )
 		}
 
 		//	Call the filtering function
-		if ( g_Serv.r_Call(g_Serv.m_PacketFilter[pData[0]], &g_Serv, &Args, NULL, &trigReturn) )
+		if ( g_Serv.r_Call(g_Serv.m_PacketFilter[pData[0]], &g_Serv, &Args, nullptr, &trigReturn) )
 			if ( trigReturn == TRIGRET_RET_TRUE )
 				return true;	// do not cry about errors
 	}
@@ -2857,7 +2857,7 @@ bool CClient::xOutPacketFilter( const byte * pData, size_t iLen )
 		}
 
 		//	Call the filtering function
-		if ( g_Serv.r_Call(g_Serv.m_OutPacketFilter[pData[0]], &g_Serv, &Args, NULL, &trigReturn) )
+		if ( g_Serv.r_Call(g_Serv.m_OutPacketFilter[pData[0]], &g_Serv, &Args, nullptr, &trigReturn) )
 			if ( trigReturn == TRIGRET_RET_TRUE )
 				return true;
 	}

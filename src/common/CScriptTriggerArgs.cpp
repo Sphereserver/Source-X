@@ -127,7 +127,7 @@ lpctstr const CScriptTriggerArgs::sm_szLoadKeys[AGC_QTY+1] =
     "LOCAL",
     "TRY",
     "TRYSRV",
-    NULL
+    nullptr
 };
 
 

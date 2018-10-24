@@ -309,8 +309,8 @@ size_t fixedgrowingqueue<T>::size() const {
 template <typename T>
 dynamicqueue<T>::dynamicqueue() {
     _size = 0;
-    _front = NULL;
-    _end = NULL;
+    _front = nullptr;
+    _end = nullptr;
 }
 
 template <typename T>
@@ -319,12 +319,12 @@ dynamicqueue<T>::dynamicqueue(size_t _) : dynamicqueue<T>() { UNREFERENCED_PARAM
 template <typename T>
 dynamicqueue<T>::dynamicqueue(const dynamicqueue<T> & o) {
     _size = o._size;
-    _end = _front = NULL;
+    _end = _front = nullptr;
     _dynamicqueueitem * item = o._front;
     if (_size) {
         _front = new _dynamicqueueitem(item->_item);
         _end = _front;
-        while (item->_next != NULL) {
+        while (item->_next != nullptr) {
             item = item->_next;
             _end->_next = new _dynamicqueueitem(item->_item);
             _end = _end->_next;
@@ -341,12 +341,12 @@ template <typename T>
 dynamicqueue<T> & dynamicqueue<T>::operator=(const dynamicqueue<T> & o) {
     clear();
     _size = o._size;
-    _end = _front = NULL;
+    _end = _front = nullptr;
     _dynamicqueueitem * item = o._front;
     if (_size) {
         _front = new _dynamicqueueitem(item->_item);
         _end = _front;
-        while (item->_next != NULL) {
+        while (item->_next != nullptr) {
             item = item->_next;
             _end->_next = new _dynamicqueueitem(item->_item);
             _end = _end->_next;
@@ -401,7 +401,7 @@ size_t dynamicqueue<T>::size() const {
 template <typename T>
 dynamicqueue<T>::_dynamicqueueitem::_dynamicqueueitem(T item) {
 	_item = item;
-	_next = NULL;
+	_next = nullptr;
 }
 
 template <typename T, class Q>

@@ -25,7 +25,7 @@ CPartyDef::CPartyDef( CChar *pCharInvite, CChar *pCharAccept)
     pCharAccept->m_pParty = this;
 	AttachChar(pCharInvite);
 	AttachChar(pCharAccept);
-	SendAddList(NULL);		// send full list to all
+	SendAddList(nullptr);		// send full list to all
 	m_sName.Format("Party_0%x", (dword)pCharAccept->GetUID());
     //UpdateWaypointAll(pCharInvite, PartyMember);
 }
@@ -67,7 +67,7 @@ bool CPartyDef::SetMaster( CChar *pNewMaster )
 		return false;
 
 	size_t i = m_Chars.InsertChar(pNewMaster, 0);
-	SendAddList(NULL);
+	SendAddList(nullptr);
 	return (i == 0);
 }
 
@@ -132,7 +132,7 @@ void CPartyDef::UpdateWaypointAll(CChar * pCharSrc, MAPWAYPOINT_TYPE type)
     if (iQty <= 0)
         return;
 
-    CChar *pChar = NULL;
+    CChar *pChar = nullptr;
     for (size_t i = 0; i < iQty; i++)
     {
         pChar = m_Chars.GetChar(i).CharFind();
@@ -161,7 +161,7 @@ bool CPartyDef::SendMemberMsg( CChar *pCharDest, PacketSend *pPacket )
 	}
 	if ( !m_Chars.IsCharIn(pCharDest) )
 	{
-		pCharDest->m_pParty = NULL;
+		pCharDest->m_pParty = nullptr;
 		return true;
 	}
 
@@ -217,7 +217,7 @@ bool CPartyDef::SendRemoveList( CChar *pCharRemove, bool bFor )
 
 	if ( bFor )
 	{
-		PacketPartyRemoveMember cmd(pCharRemove, NULL);
+		PacketPartyRemoveMember cmd(pCharRemove, nullptr);
 		SendMemberMsg(pCharRemove, &cmd);
 	}
 	else
@@ -237,13 +237,13 @@ bool CPartyDef::MessageEvent( CUID uidDst, CUID uidSrc, const nchar *pText, int 
 {
 	ADDTOCALLSTACK("CPartyDef::MessageEvent");
 	UNREFERENCED_PARAMETER(ilenmsg);
-	if ( pText == NULL )
+	if ( pText == nullptr )
 		return false;
 	if ( uidDst && !IsInParty(uidDst.CharFind()) )
 		return false;
 
 	CChar *pFrom = uidSrc.CharFind();
-	CChar *pTo = NULL;
+	CChar *pTo = nullptr;
 	if ( uidDst != (dword)0 )
 		pTo = uidDst.CharFind();
 
@@ -259,7 +259,7 @@ bool CPartyDef::MessageEvent( CUID uidDst, CUID uidSrc, const nchar *pText, int 
 		Args.m_s1 = szText;
 		Args.m_s1_raw = szText;
 
-		if ( r_Call(m_pSpeechFunction, &g_Serv, &Args, NULL, &tr) )
+		if ( r_Call(m_pSpeechFunction, &g_Serv, &Args, nullptr, &tr) )
 		{
 			if ( tr == TRIGRET_RET_TRUE )
 				return false;
@@ -289,7 +289,7 @@ void CPartyDef::AcceptMember( CChar *pChar )
 
 	pChar->m_pParty = this;
 	AttachChar(pChar);
-	SendAddList(NULL);
+	SendAddList(nullptr);
 }
 
 bool CPartyDef::RemoveMember( CUID uidRemove, CUID uidCommand )
@@ -449,7 +449,7 @@ bool CPartyDef::AcceptEvent( CChar *pCharAccept, CUID uidInviter, bool bForced, 
 		if ( bForced )
 		{
 			pCharAccept->m_pParty->RemoveMember(pCharAccept->GetUID(), pCharAccept->GetUID());
-			pCharAccept->m_pParty = NULL;
+			pCharAccept->m_pParty = nullptr;
 		}
 		else
 			return false;
@@ -497,7 +497,7 @@ lpctstr const CPartyDef::sm_szVerbKeys[PDV_QTY+1] =
 	#define ADD(a,b) b,
 	#include "../../tables/CParty_functions.tbl"
 	#undef ADD
-	NULL
+	nullptr
 };
 
 enum PDC_TYPE
@@ -513,7 +513,7 @@ lpctstr const CPartyDef::sm_szLoadKeys[PDC_QTY+1] =
 	#define ADD(a,b) b,
 	#include "../../tables/CParty_props.tbl"
 	#undef ADD
-	NULL
+	nullptr
 };
 
 bool CPartyDef::r_GetRef( lpctstr &pszKey, CScriptObj *&pRef )
@@ -601,7 +601,7 @@ bool CPartyDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc )
 	CScriptObj *pRef;
 	if ( r_GetRef(pszKey, pRef) )
 	{
-		if ( pRef == NULL )		// good command but bad link.
+		if ( pRef == nullptr )		// good command but bad link.
 		{
 			sVal = "0";
 			return true;

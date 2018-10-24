@@ -45,7 +45,7 @@ private:
 	CNTService& operator=(const CNTService& other);
 
 public:
-	void ReportEvent( WORD wType, DWORD dwMsgID, LPCTSTR lpszMsg, LPCTSTR lpszArgs = NULL );
+	void ReportEvent( WORD wType, DWORD dwMsgID, LPCTSTR lpszMsg, LPCTSTR lpszArgs = nullptr );
 	BOOL SetServiceStatus(DWORD, DWORD, DWORD);
 
 	// command line entries.

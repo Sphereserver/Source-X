@@ -128,7 +128,7 @@ public:
 	bool Set( lpctstr pszLang )
 	{
 		// needs not be terminated!
-		if ( pszLang != NULL )
+		if ( pszLang != nullptr )
 		{
 			memcpy( m_codes, pszLang, 3 );
 			m_codes[3] = 0;
@@ -1735,7 +1735,7 @@ struct CEvent	// event buffer from client to server..
 			ndword m_serial;	// 3-6 = serial
 			ndword m_prompt;	// 7-10 = prompt id
 			ndword m_type;		// 11-14 = type (0=request/esc, 1=reply)
-			char m_lang[4];		// 15-18 = language (3 chars + NULL)
+			char m_lang[4];		// 15-18 = language (3 chars + nullptr)
 			wchar m_utext[1];	// 19+ = null terminated unicode text.
 		} PromptUNICODE;
 		
@@ -2283,7 +2283,7 @@ struct CCommand	// command buffer from server to client.
 			nword m_unk3;	// 3-4 = 0
 			nword m_unk5;	// 5-9 = ?
 			byte  m_unk7;	// 7 = 0, 72, 99, c1, 73
-			ndword m_srcUID; // NULL if from ground.
+			ndword m_srcUID; // nullptr if from ground.
 			nword m_src_x;
 			nword m_src_y;
 			byte m_src_z;
@@ -3100,7 +3100,7 @@ struct CCommand	// command buffer from server to client.
 			ndword m_serial;	// 3-6 = serial
 			ndword m_prompt;	// 7-10 = prompt id
 			ndword m_type;		// 11-14 = type (0=request/esc, 1=reply)
-			char m_lang[4];		// 15-18 = lang (3 chars + NULL)
+			char m_lang[4];		// 15-18 = lang (3 chars + nullptr)
 			wchar m_utext[1];	// 19+ = response
 		} PromptUNICODE;
 		

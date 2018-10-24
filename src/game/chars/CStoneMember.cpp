@@ -18,7 +18,7 @@ lpctstr const CStoneMember::sm_szLoadKeys[STMM_QTY+1] =
 #define ADD(a,b) b,
 #include "../../tables/CStoneMember_props.tbl"
 #undef ADD
-	NULL
+	nullptr
 };
 
 enum STMMV_TYPE
@@ -34,7 +34,7 @@ lpctstr const CStoneMember::sm_szVerbKeys[STMMV_QTY+1] =
 #define ADD(a,b) b,
 #include "../../tables/CStoneMember_functions.tbl"
 #undef ADD
-	NULL
+	nullptr
 };
 
 CStoneMember* CStoneMember::GetNext() const
@@ -379,7 +379,7 @@ CStoneMember::CStoneMember( CItemStone * pStone, CUID uid, STONEPRIV_TYPE iType,
 	if ( ! g_Serv.IsLoading() && pStone->GetMemoryType())
 	{
 		CChar * pChar = uid.CharFind();
-		if ( pChar != NULL )
+		if ( pChar != nullptr )
 		{
 			pChar->Memory_AddObjTypes(pStone, (word)(pStone->GetMemoryType()));
 			if ( pStone->IsTopLevel())
@@ -404,7 +404,7 @@ CStoneMember::~CStoneMember()
 	{
 		// same as declaring peace.
 		CItemStone * pStoneEnemy = dynamic_cast <CItemStone *>( GetLinkUID().ItemFind());
-		if ( pStoneEnemy != NULL )
+		if ( pStoneEnemy != nullptr )
 		{
 			pStoneEnemy->TheyDeclarePeace( pStone, true );
 		}
@@ -443,18 +443,18 @@ lpctstr CStoneMember::GetPrivName() const
 	else
 		pResult = g_Exp.m_VarDefs.GetKey("STONECONFIG_PRIVNAME_PRIVUNK");
 
-	return ( pResult == NULL ) ? "" : pResult->GetValStr();
+	return ( pResult == nullptr ) ? "" : pResult->GetValStr();
 }
 
 bool CStoneMember::SetLoyalTo( const CChar * pCharLoyal )
 {
 	ADDTOCALLSTACK("CStoneMember::SetLoyalTo");
 	CChar * pCharMe = GetLinkUID().CharFind();
-	if ( pCharMe == NULL )	// on shutdown
+	if ( pCharMe == nullptr )	// on shutdown
 		return false;
 
 	m_UIDLoyalTo = GetLinkUID();	// set to self for default.
-	if ( pCharLoyal == NULL )
+	if ( pCharLoyal == nullptr )
 		return true;
 
 	if ( ! IsPrivMember())
@@ -469,7 +469,7 @@ bool CStoneMember::SetLoyalTo( const CChar * pCharLoyal )
 		return false;
 
 	CStoneMember * pNewLOYALTO = pStone->GetMember(pCharLoyal);
-	if ( pNewLOYALTO == NULL || ! pNewLOYALTO->IsPrivMember())
+	if ( pNewLOYALTO == nullptr || ! pNewLOYALTO->IsPrivMember())
 	{
 		// you can't vote for candidates
 		pCharMe->SysMessage( "Can only vote for full members.");

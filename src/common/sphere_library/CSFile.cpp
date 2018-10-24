@@ -41,9 +41,9 @@ void CSFile::_NotifyIOError( lpctstr szMessage ) const
 #ifdef _WIN32
     lpctstr pMsg;
     LPVOID lpMsgBuf;
-    //FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER| FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, NULL, iErrorCode, 0, reinterpret_cast<LPTSTR>(&lpMsgBuf), 0, NULL );
-    FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, NULL, iErrorCode, MAKELANGID(0x9,0x1), //en-US
-        reinterpret_cast<LPTSTR>(&lpMsgBuf), 0, NULL );
+    //FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER| FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, iErrorCode, 0, reinterpret_cast<LPTSTR>(&lpMsgBuf), 0, nullptr );
+    FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, iErrorCode, MAKELANGID(0x9,0x1), //en-US
+        reinterpret_cast<LPTSTR>(&lpMsgBuf), 0, nullptr );
     if (lpMsgBuf == nullptr)
         pMsg = "No System Error";
     else
@@ -132,7 +132,7 @@ bool CSFile::_Open( lpctstr ptcFilename, uint uiModeFlags )
     else
         dwCreationDisposition = OPEN_EXISTING;
 
-    _fileDescriptor = CreateFile( ptcFilename, dwDesiredAccess, dwShareMode, NULL, dwCreationDisposition, FILE_ATTRIBUTE_NORMAL, NULL );
+    _fileDescriptor = CreateFile( ptcFilename, dwDesiredAccess, dwShareMode, nullptr, dwCreationDisposition, FILE_ATTRIBUTE_NORMAL, nullptr );
 #else
     _fileDescriptor = open( ptcFilename, uiModeFlags );
 #endif // _WIN32
@@ -221,7 +221,7 @@ int CSFile::_GetPosition() const
 {
     ADDTOCALLSTACK("CSFile::_GetPosition");
 #ifdef _WIN32
-    DWORD ret = SetFilePointer( _fileDescriptor, 0, NULL, FILE_CURRENT );
+    DWORD ret = SetFilePointer( _fileDescriptor, 0, nullptr, FILE_CURRENT );
     if (ret == INVALID_SET_FILE_POINTER)
     {
         _NotifyIOError("CFile::GetPosition");
@@ -255,7 +255,7 @@ int CSFile::Read( void * pData, int iLength ) const
 
 #ifdef _WIN32
 	DWORD ret;
-	if ( !::ReadFile( _fileDescriptor, pData, (DWORD)iLength, &ret, NULL ) )
+	if ( !::ReadFile( _fileDescriptor, pData, (DWORD)iLength, &ret, nullptr ) )
 	{
 		_NotifyIOError("CFile::Read");
 		return 0;
@@ -286,7 +286,7 @@ int CSFile::_Seek( int iOffset, int iOrigin )
     }
 
 #ifdef _WIN32
-	DWORD ret = SetFilePointer( _fileDescriptor, (LONG)iOffset, NULL, (DWORD)iOrigin );
+	DWORD ret = SetFilePointer( _fileDescriptor, (LONG)iOffset, nullptr, (DWORD)iOrigin );
 #else
 	off_t ret = lseek( _fileDescriptor, iOffset, iOrigin );
 #endif
@@ -333,7 +333,7 @@ bool CSFile::Write( const void * pData, int iLength )
 
 #ifdef _WIN32
 	DWORD dwWritten;
-	BOOL ret = ::WriteFile( _fileDescriptor, pData, (DWORD)iLength, &dwWritten, NULL );
+	BOOL ret = ::WriteFile( _fileDescriptor, pData, (DWORD)iLength, &dwWritten, nullptr );
 	if ( ret == FALSE )
 	{
 		_NotifyIOError("CFile::Write");

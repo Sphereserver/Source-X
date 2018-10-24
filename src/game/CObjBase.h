@@ -148,7 +148,7 @@ public:
 	lpctstr GetTriggerActive() const;
 
     /**
-     * @fn  void CObjBase::SetTriggerActive(lpctstr trig = NULL);
+     * @fn  void CObjBase::SetTriggerActive(lpctstr trig = nullptr);
      *
      * @brief   Sets trigger active ( m_RunningTrigger ).
      *
@@ -485,7 +485,7 @@ public:
 public:
 
     /**
-     * @fn  void CObjBase::SetHue( HUE_TYPE wHue, bool bAvoidTrigger = true, CTextConsole *pSrc = NULL, CObjBase *SourceObj = NULL, llong sound = 0 );
+     * @fn  void CObjBase::SetHue( HUE_TYPE wHue, bool bAvoidTrigger = true, CTextConsole *pSrc = nullptr, CObjBase *SourceObj = nullptr, llong sound = 0 );
      *
      * @brief   Sets Hue given.
      *
@@ -495,7 +495,7 @@ public:
      * @param [in,out]  SourceObj   (Optional) If non-null, source object.
      * @param   sound               The sound.
      */
-	void SetHue( HUE_TYPE wHue, bool bAvoidTrigger = true, CTextConsole *pSrc = NULL, CObjBase *SourceObj = NULL, llong sound = 0 );
+	void SetHue( HUE_TYPE wHue, bool bAvoidTrigger = true, CTextConsole *pSrc = nullptr, CObjBase *SourceObj = nullptr, llong sound = 0 );
 
     /**
      * @fn  HUE_TYPE CObjBase::GetHue() const;
@@ -598,7 +598,7 @@ public:
 	void Sound( SOUND_TYPE id, int iRepeat = 1 ) const;
 
     /**
-     * @fn  void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSource = NULL, byte bspeedseconds = 5, byte bloop = 1, bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
+     * @fn  void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSource = nullptr, byte bspeedseconds = 5, byte bloop = 1, bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
      *
      * @brief   Adds an Effect.
      *
@@ -616,11 +616,11 @@ public:
      * @param   effectuid       The effectuid.
      * @param   type            The type.
      */
-	void Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSource = NULL, byte bspeedseconds = 5, byte bloop = 1,
+	void Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSource = nullptr, byte bspeedseconds = 5, byte bloop = 1,
         bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
 	
 	/**
-	* @fn  void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap &pt, const CObjBase * pSource = NULL, byte bspeedseconds = 5, byte bloop = 1, bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
+	* @fn  void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap &pt, const CObjBase * pSource = nullptr, byte bspeedseconds = 5, byte bloop = 1, bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
 	*
 	* @brief   Adds an Effect to a map point.
 	* @param   motion          The motion.
@@ -638,7 +638,7 @@ public:
 	* @param   effectuid       The effectuid.
 	* @param   type            The type.
 	*/
-	void Effect(EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap &pt, const CObjBase * pSource = NULL, byte bspeedseconds = 5, byte bloop = 1,
+	void Effect(EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap &pt, const CObjBase * pSource = nullptr, byte bspeedseconds = 5, byte bloop = 1,
         bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
 
 	void r_WriteSafe( CScript & s );
@@ -654,7 +654,7 @@ public:
     }
 
     /**
-     * @fn  void CObjBase::Emote(lpctstr pText, CClient * pClientExclude = NULL, bool fPossessive = false);
+     * @fn  void CObjBase::Emote(lpctstr pText, CClient * pClientExclude = nullptr, bool fPossessive = false);
      *
      * @brief   Emote ( You %s, You see %s %s ).
      *
@@ -662,10 +662,10 @@ public:
      * @param [in,out]  pClientExclude  (Optional) If non-null, the client exclude.
      * @param   fPossessive             true to possessive.
      */
-	void Emote(lpctstr pText, CClient * pClientExclude = NULL, bool fPossessive = false);
+	void Emote(lpctstr pText, CClient * pClientExclude = nullptr, bool fPossessive = false);
 
     /**
-     * @fn  void CObjBase::Emote2(lpctstr pText, lpctstr pText2, CClient * pClientExclude = NULL, bool fPossessive = false);
+     * @fn  void CObjBase::Emote2(lpctstr pText, lpctstr pText2, CClient * pClientExclude = nullptr, bool fPossessive = false);
      *
      * @brief   Sends one Emote to this and a different text to others.
      *
@@ -674,7 +674,7 @@ public:
      * @param [in,out]  pClientExclude  (Optional) If non-null, the client exclude.
      * @param   fPossessive             true to possessive.
      */
-	void Emote2(lpctstr pText, lpctstr pText2, CClient * pClientExclude = NULL, bool fPossessive = false);
+	void Emote2(lpctstr pText, lpctstr pText2, CClient * pClientExclude = nullptr, bool fPossessive = false);
 
     /**
      * @fn  virtual void CObjBase::Speak( lpctstr pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL );
@@ -715,7 +715,7 @@ public:
 	virtual void SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
 
     /**
-     * @fn  void CObjBase::RemoveFromView( CClient * pClientExclude = NULL , bool fHardcoded = true );
+     * @fn  void CObjBase::RemoveFromView( CClient * pClientExclude = nullptr , bool fHardcoded = true );
      *
      * @brief   Removes from view.
 
@@ -723,7 +723,7 @@ public:
      * @param [in,out]  pClientExclude  (Optional) If non-null, the client exclude.
      * @param   fHardcoded              true if hardcoded.
      */
-	void RemoveFromView( CClient * pClientExclude = NULL , bool fHardcoded = true );	// remove this item from all clients.
+	void RemoveFromView( CClient * pClientExclude = nullptr , bool fHardcoded = true );	// remove this item from all clients.
 
     /**
      * @fn  void CObjBase::ResendOnEquip( bool fAllClients = false );
@@ -745,14 +745,14 @@ public:
 	void ResendTooltip( bool fSendFull = false, bool fUseCache = false );	// force reload of tooltip for this object
 
     /**
-     * @fn  void CObjBase::UpdateCanSee( PacketSend * pPacket, CClient * pClientExclude = NULL ) const;
+     * @fn  void CObjBase::UpdateCanSee( PacketSend * pPacket, CClient * pClientExclude = nullptr ) const;
      *
      * @brief   Updates the can see.
      *
      * @param [in,out]  pPacket         If non-null, the packet.
      * @param [in,out]  pClientExclude  (Optional) If non-null, the client exclude.
      */
-	void UpdateCanSee( PacketSend * pPacket, CClient * pClientExclude = NULL ) const;
+	void UpdateCanSee( PacketSend * pPacket, CClient * pClientExclude = nullptr ) const;
 
     /**
      * @fn  void CObjBase::UpdateObjMessage( lpctstr pTextThem, lpctstr pTextYou, CClient * pClientExclude, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font = FONT_NORMAL, bool bUnicode = false ) const;
@@ -794,13 +794,13 @@ public:
 	bool IsContainer() const;
 
     /**
-     * @fn  virtual void CObjBase::Update(const CClient * pClientExclude = NULL) = 0;
+     * @fn  virtual void CObjBase::Update(const CClient * pClientExclude = nullptr) = 0;
      *
      * @brief   send this new item to clients.
      *
      * @param   pClientExclude  Do not send to this CClient.
      */
-	virtual void Update(const CClient * pClientExclude = NULL)
+	virtual void Update(const CClient * pClientExclude = nullptr)
 		= 0;
 
     /**

@@ -19,7 +19,7 @@ lpctstr const CItemMessage::sm_szLoadKeys[CIC_QTY+1] = {
     "BODY",
     "PAGES",	// (W)
     "TITLE",	// same as name
-    NULL,
+    nullptr,
 };
 
 void CItemMessage::r_Write(CScript & s)
@@ -35,7 +35,7 @@ void CItemMessage::r_Write(CScript & s)
     {
         sprintf(pszTemp, "BODY.%" PRIuSIZE_T, i);
         lpctstr pszText = GetPageText(i);
-        s.WriteKey(pszTemp, pszText != NULL ? pszText : "");
+        s.WriteKey(pszTemp, pszText != nullptr ? pszText : "");
     }
 }
 
@@ -115,7 +115,7 @@ lpctstr const CItemMessage::sm_szVerbKeys[] =
         {
                 "ERASE",
                 "PAGE",
-                NULL,
+                nullptr,
         };
 
 bool CItemMessage::r_Verb(CScript & s, CTextConsole *pSrc)
@@ -162,7 +162,7 @@ void CItemMessage::DupeCopy(const CItem *pItem)
     CItemVendable::DupeCopy(pItem);
 
     const CItemMessage *pMsgItem = dynamic_cast<const CItemMessage *>(pItem);
-    if ( pMsgItem == NULL )
+    if ( pMsgItem == nullptr )
         return;
 
     m_sAuthor = pMsgItem->m_sAuthor;
@@ -178,15 +178,15 @@ size_t CItemMessage::GetPageCount() const
 lpctstr CItemMessage::GetPageText( size_t iPage ) const
 {
     if ( m_sBodyLines.IsValidIndex(iPage) == false )
-        return NULL;
-    if ( m_sBodyLines[iPage] == NULL )
-        return NULL;
+        return nullptr;
+    if ( m_sBodyLines[iPage] == nullptr )
+        return nullptr;
     return m_sBodyLines[iPage]->GetPtr();
 }
 
 void CItemMessage::SetPageText( size_t iPage, lpctstr pszText )
 {
-    if ( pszText == NULL )
+    if ( pszText == nullptr )
         return;
     m_sBodyLines.assign_at_grow(iPage, new CSString(pszText));
 }

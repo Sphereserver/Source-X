@@ -146,11 +146,11 @@ CResourceDef *CCSpawn::FixDef()
 uint CCSpawn::WriteName(tchar *pszOut) const
 {
     ADDTOCALLSTACK("CCSpawn::GetName");
-    lpctstr pszName = NULL;
+    lpctstr pszName = nullptr;
     CResourceDef *pDef = g_Cfg.ResourceGetDef(_idSpawn);
     if (pDef != nullptr)
         pszName = pDef->GetName();
-    if (pDef == nullptr || pszName == NULL || pszName[0] == '\0')
+    if (pDef == nullptr || pszName == nullptr || pszName[0] == '\0')
         pszName = g_Cfg.ResourceGetName(_idSpawn);
 
     return sprintf(pszOut, " (%s)", pszName);
@@ -514,7 +514,7 @@ lpctstr const CCSpawn::sm_szLoadKeys[ISPW_QTY + 1] =
     "SPAWNID",
     "TIMEHI",
     "TIMELO",
-    NULL
+    nullptr
 };
 
 bool CCSpawn::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole *pSrc)
@@ -770,7 +770,7 @@ enum SPAWN_REF
 lpctstr const CCSpawn::sm_szRefKeys[ISPR_QTY + 1]
 {
     "AT",
-    NULL
+    nullptr
 };
 
 bool CCSpawn::r_GetRef(lpctstr & pszKey, CScriptObj *& pRef)
@@ -840,7 +840,7 @@ lpctstr const CCSpawn::sm_szVerbKeys[ISPV_QTY + 1]
     "RESET",
     "START",
     "STOP",
-    NULL
+    nullptr
 };
 
 bool CCSpawn::r_Verb(CScript & s, CTextConsole * pSrc)

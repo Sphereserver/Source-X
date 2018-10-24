@@ -52,7 +52,7 @@
 
 // since the only way to make windows not to buffer file is to remove buffer, we
 // use this instead flushing
-#define	FILE_SETNOCACHE(_x_)	setvbuf(_x_, NULL, _IONBF, 0)
+#define	FILE_SETNOCACHE(_x_)	setvbuf(_x_, nullptr, _IONBF, 0)
 #define FILE_FLUSH(_x_)
 
 #ifndef STRICT
@@ -83,7 +83,7 @@ extern void NTWindow_DeleteIcon();
 extern bool NTWindow_OnTick(int iWaitmSec);
 extern bool NTWindow_PostMsg(LPCTSTR pszMsg);
 extern bool NTWindow_PostMsgColor(COLORREF color);
-extern void NTWindow_SetWindowTitle(LPCTSTR pText = NULL);
+extern void NTWindow_SetWindowTitle(LPCTSTR pText = nullptr);
 
 
 #endif	// _INC_OS_WINDOWS_H

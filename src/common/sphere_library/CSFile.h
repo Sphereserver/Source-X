@@ -177,12 +177,12 @@ public:     lpctstr GetFileTitle() const;
     /**
     * @brief Gets the file extension, if any.
     * @param pszName file path where get the extension.
-    * @return The extension of the file or NULL if the file has no extension.
+    * @return The extension of the file or nullptr if the file has no extension.
     */
     static lpctstr GetFilesExt( lpctstr pszName );
     /**
     * @brief Gets the file extension, if any.
-    * @return The extension of the file or NULL if the file has no extension.
+    * @return The extension of the file or nullptr if the file has no extension.
     */
     lpctstr GetFileExt() const;
     /**

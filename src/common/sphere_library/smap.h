@@ -303,14 +303,14 @@ void staticmap<K,V>::_resize(size_t s) {
 }
 
 template<typename K, typename V>
-dynamicmap<K,V>::Node::Node() : l(NULL), r(NULL), p(NULL) {}
+dynamicmap<K,V>::Node::Node() : l(nullptr), r(nullptr), p(nullptr) {}
 
 template<typename K, typename V>
 dynamicmap<K,V>::Node::Node(Node & o) {
     key = o.key;
     value = o.value;
-    l = NULL;
-    r = NULL;
+    l = nullptr;
+    r = nullptr;
     p = o.p;
     if (o.l) { l = new Node(*(o.l)); }
     if (o.r) { r = new Node(*(o.r)); }
@@ -325,26 +325,26 @@ dynamicmap<K,V>::Node::~Node() {
 template<typename K, typename V>
 size_t dynamicmap<K,V>::Node::child_count() const {
     size_t count = 0;
-    if (l != NULL) count++;
-    if (r != NULL) count++;
+    if (l != nullptr) count++;
+    if (r != nullptr) count++;
     return count;
 }
 
 template<typename K, typename V>
 void dynamicmap<K,V>::Node::replace_by_child() {
-    if (r != NULL && l != NULL) {
+    if (r != nullptr && l != nullptr) {
         throw CSError(LOGL_FATAL, 0, "Tree inconsistency.");
     }
     Node * replacement;
-    if (l != NULL) {
+    if (l != nullptr) {
         replacement = l;
-        l = NULL;
+        l = nullptr;
     } else {
         replacement = r;
-        r = NULL;
+        r = nullptr;
     }
     replacement->p = p;
-    if (p != NULL) {
+    if (p != nullptr) {
         if (p->l == this) {
             p->l = replacement;
         } else if (p->r == this) {
@@ -358,13 +358,13 @@ void dynamicmap<K,V>::Node::replace_by_child() {
 template<typename K, typename V>
 void dynamicmap<K,V>::Node::remove_child(Node * n) {
     if (l == n) {
-        l = NULL;
+        l = nullptr;
     } else if (r == n) {
-        r = NULL;
+        r = nullptr;
     } else {
         throw CSError(LOGL_FATAL, 0, "Tree inconsistency.");
     }
-    n->p = NULL;
+    n->p = nullptr;
 }
 
 template<typename K, typename V>
@@ -393,7 +393,7 @@ dynamicmap<K,V>::CellPosition::operator V () {
 
 template<typename K, typename V>
 dynamicmap<K,V>::dynamicmap() {
-    _root = NULL;
+    _root = nullptr;
     _size = 0;
 }
 
@@ -438,13 +438,13 @@ dynamicmap<K,V>::CellPosition::CellPosition(dynamicmap * m, Node * n, bool e, K 
 
 template<typename K, typename V>
 typename dynamicmap<K,V>::CellPosition dynamicmap<K,V>::operator[](K key) {
-    Node * n = _root, * n_ant = NULL;
-    while(n != NULL && n->key != key) {
+    Node * n = _root, * n_ant = nullptr;
+    while(n != nullptr && n->key != key) {
         n_ant = n;
         if (n->key < key) { n = n->r; }
         else { n = n->l; }
     }
-    return CellPosition(this, (n != NULL) ? n : n_ant, n != NULL, key);
+    return CellPosition(this, (n != nullptr) ? n : n_ant, n != nullptr, key);
 }
 
 template<typename K, typename V>
@@ -467,7 +467,7 @@ void dynamicmap<K,V>::erase(K key) {
     } else {
         // Search for a minimum.
         Node * min = n->r;
-        while (min->l != NULL) min = min->l;
+        while (min->l != nullptr) min = min->l;
         if (min->child_count() == 1) {
             min->replace_by_child();
         } else {

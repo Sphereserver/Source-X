@@ -42,7 +42,7 @@ bool CChar::TeleportToObj( int iType, tchar * pszArgs )
 			dwUID = 1;
 		}
 		CObjBase * pObj = g_World.FindUID(dwUID);
-		if ( pObj == NULL )
+		if ( pObj == nullptr )
 			continue;
 
 		switch ( iType )
@@ -92,7 +92,7 @@ bool CChar::TeleportToObj( int iType, tchar * pszArgs )
 		}
 
 		CObjBaseTemplate * pObjTop = pObj->GetTopLevelObj();
-		if ( pObjTop == NULL || pObjTop == this )
+		if ( pObjTop == nullptr || pObjTop == this )
 			continue;
 		if ( pObjTop->IsChar() )
 		{
@@ -113,7 +113,7 @@ bool CChar::TeleportToCli( int iType, int iArgs )
 	ADDTOCALLSTACK("CChar::TeleportToCli");
 
 	ClientIterator it;
-	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
+	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
 	{
 		if ( ! iType )
 		{
@@ -121,7 +121,7 @@ bool CChar::TeleportToCli( int iType, int iArgs )
 				continue;
 		}
 		CChar * pChar = pClient->GetChar();
-		if ( pChar == NULL )
+		if ( pChar == nullptr )
 			continue;
 		if ( ! CanDisturb( pChar ))
 			continue;
@@ -154,7 +154,7 @@ void CChar::Jail( CTextConsole * pSrc, bool fSet, int iCell )
 		if ( m_pPlayer )	// allow setting of this to offline chars.
 		{
 			CAccount *pAccount = m_pPlayer->GetAccount();
-			ASSERT(pAccount != NULL);
+			ASSERT(pAccount != nullptr);
 
 			pAccount->SetPrivFlags( PRIV_JAILED );
 			pAccount->m_TagDefs.SetNum("JailCell", iCell, true);
@@ -192,10 +192,10 @@ void CChar::Jail( CTextConsole * pSrc, bool fSet, int iCell )
 		if ( m_pPlayer )
 		{
 			CAccount *pAccount = m_pPlayer->GetAccount();
-			ASSERT(pAccount != NULL);
+			ASSERT(pAccount != nullptr);
 
 			pAccount->ClearPrivFlags( PRIV_JAILED );
-			if ( pAccount->m_TagDefs.GetKey("JailCell") != NULL )
+			if ( pAccount->m_TagDefs.GetKey("JailCell") != nullptr )
 				pAccount->m_TagDefs.DeleteKey("JailCell");
 		}
 		SysMessageDefault( DEFMSG_MSG_FORGIVEN );
@@ -207,7 +207,7 @@ void CChar::AddGoldToPack( int iAmount, CItemContainer * pPack )
 {
 	ADDTOCALLSTACK("CChar::AddGoldToPack");
 
-	if ( pPack == NULL )
+	if ( pPack == nullptr )
 		pPack = GetPackSafe();
 
 	if (iAmount > 25000000)
@@ -216,7 +216,7 @@ void CChar::AddGoldToPack( int iAmount, CItemContainer * pPack )
 		g_Log.EventWarn("The amount of the new Gold to create is too big. Limited to 25.000.000.\n");
 	}
 	word iMax = 0;
-	CItem * pGold = NULL;
+	CItem * pGold = nullptr;
 	while ( iAmount > 0 )
 	{
 		pGold = CItem::CreateScript( ITEMID_GOLD_C1, this );
@@ -242,7 +242,7 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 {
 	ADDTOCALLSTACK("CChar::LayerAdd");
 
-	if ( pItem == NULL )
+	if ( pItem == nullptr )
 		return;
 	if ( (pItem->GetParent() == this) && ( pItem->GetEquipLayer() == layer ) )
 		return;
@@ -256,7 +256,7 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 	if ( g_Serv.IsLoading() == false )
 	{
 		// This takes care of any conflicting items in the slot !
-		layer = CanEquipLayer(pItem, layer, NULL, false);
+		layer = CanEquipLayer(pItem, layer, nullptr, false);
 		if ( layer == LAYER_NONE )
 		{
 			// we should not allow non-layered stuff to be put here ?
@@ -359,7 +359,7 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 			case IT_EQ_MEMORY_OBJ:
 			{
 				CItemMemory *pMemory = dynamic_cast<CItemMemory *>( pItem );
-				if (pMemory != NULL)
+				if (pMemory != nullptr)
 					Memory_UpdateFlags(pMemory);
 				break;
 			}
@@ -465,7 +465,7 @@ void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when r
 		switch ( pItem->GetType())
 		{
 			case IT_COMM_CRYSTAL:
-				if ( ContentFind( CResourceID( RES_TYPEDEF,IT_COMM_CRYSTAL ), 0, 0 ) == NULL )
+				if ( ContentFind( CResourceID( RES_TYPEDEF,IT_COMM_CRYSTAL ), 0, 0 ) == nullptr )
 					StatFlag_Clear(STATF_COMM_CRYSTAL);
 				break;
 			case IT_EQ_HORSE:
@@ -475,7 +475,7 @@ void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when r
 			{
 				// Clear the associated flags.
 				CItemMemory *pMemory = dynamic_cast<CItemMemory*>(pItem);
-				if (pMemory != NULL)
+				if (pMemory != nullptr)
 					Memory_UpdateClearTypes( pMemory, 0xFFFF );
 				break;
 			}
@@ -585,9 +585,9 @@ void CChar::DropAll( CItemContainer * pCorpse, uint64 iAttr )
 		return;	// drop nothing.
 
 	CItemContainer * pPack = GetPack();
-	if ( pPack != NULL )
+	if ( pPack != nullptr )
 	{
-		if ( pCorpse == NULL )
+		if ( pCorpse == nullptr )
 		{
 			pPack->ContentsDump( GetTopPoint(), iAttr );
 		}
@@ -614,8 +614,8 @@ void CChar::UnEquipAllItems( CItemContainer * pDest, bool bLeaveHands )
 		return;
 	CItemContainer *pPack = GetPackSafe();
 
-	CItem *pItemNext = NULL;
-	for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItemNext )
+	CItem *pItemNext = nullptr;
+	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
 	{
 		pItemNext = pItem->GetNext();
 		LAYER_TYPE layer = pItem->GetEquipLayer();
@@ -820,7 +820,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 	if (fTranslate || IsStatFlag(STATF_ONHORSE))
 	{
 		CItem * pWeapon = m_uidWeapon.ItemFind();
-		if (pWeapon != NULL && action == ANIM_ATTACK_WEAPON)
+		if (pWeapon != nullptr && action == ANIM_ATTACK_WEAPON)
 		{
 			// action depends on weapon type (skill) and 2 Hand type.
 			LAYER_TYPE layer = pWeapon->Item_GetDef()->GetEquipLayer();
@@ -1224,7 +1224,7 @@ bool CChar::UpdateAnimate(ANIM_TYPE action, bool fTranslate, bool fBackward , by
 	PacketAction* cmd = new PacketAction(this, action, 1, fBackward, iFrameDelay, iAnimLen);
 
 	ClientIterator it;
-	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
+	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
 	{
 		if (!pClient->CanSee(this))
 			continue;
@@ -1249,15 +1249,15 @@ void CChar::UpdateMode( CClient * pExcludeClient, bool fFull )
 	ADDTOCALLSTACK("CChar::UpdateMode");
 
 	// no need to update the mode in the next tick
-	if ( pExcludeClient == NULL )
+	if ( pExcludeClient == nullptr )
 		m_fStatusUpdate &= ~SU_UPDATE_MODE;
 
 	ClientIterator it;
-	for ( CClient* pClient = it.next(); pClient != NULL; pClient = it.next() )
+	for ( CClient* pClient = it.next(); pClient != nullptr; pClient = it.next() )
 	{
 		if ( pExcludeClient == pClient )
 			continue;
-		if ( pClient->GetChar() == NULL )
+		if ( pClient->GetChar() == nullptr )
 			continue;
 		if ( GetTopPoint().GetDistSight(pClient->GetChar()->GetTopPoint()) > pClient->GetChar()->GetVisualRange() )
 			continue;
@@ -1307,13 +1307,13 @@ void CChar::UpdateMove( const CPointMap & ptOld, CClient * pExcludeClient, bool 
 	ADDTOCALLSTACK("CChar::UpdateMove");
 
 	// no need to update the mode in the next tick
-	if ( pExcludeClient == NULL )
+	if ( pExcludeClient == nullptr )
 		m_fStatusUpdate &= ~SU_UPDATE_MODE;
 
 	EXC_TRY("UpdateMove");
 	EXC_SET_BLOCK("FOR LOOP");
 	ClientIterator it;
-	for ( CClient* pClient = it.next(); pClient != NULL; pClient = it.next() )
+	for ( CClient* pClient = it.next(); pClient != nullptr; pClient = it.next() )
 	{
 		if ( pClient == pExcludeClient )
 			continue;	// no need to see self move
@@ -1327,7 +1327,7 @@ void CChar::UpdateMove( const CPointMap & ptOld, CClient * pExcludeClient, bool 
 
 		EXC_SET_BLOCK("GetChar");
 		CChar * pChar = pClient->GetChar();
-		if ( pChar == NULL )
+		if ( pChar == nullptr )
 			continue;
 
 		bool fCouldSee = (ptOld.GetDistSight(pChar->GetTopPoint()) <= pChar->GetVisualRange());
@@ -1378,11 +1378,11 @@ void CChar::UpdateDir( const CPointMap & pt )
 void CChar::UpdateDir( const CObjBaseTemplate * pObj )
 {
 	ADDTOCALLSTACK("CChar::UpdateDir (CObjBaseTemplate)");
-	if ( pObj == NULL )
+	if ( pObj == nullptr )
 		return;
 
 	pObj = pObj->GetTopLevelObj();
-	if ( pObj == NULL || pObj == this )		// in our own pack
+	if ( pObj == nullptr || pObj == this )		// in our own pack
 		return;
 	UpdateDir(pObj->GetTopPoint());
 }
@@ -1395,15 +1395,15 @@ void CChar::Update(const CClient * pClientExclude )
 	ADDTOCALLSTACK("CChar::Update");
 
 	// no need to update the mode in the next tick
-	if ( pClientExclude == NULL)
+	if ( pClientExclude == nullptr)
 		m_fStatusUpdate &= ~SU_UPDATE_MODE;
 
 	ClientIterator it;
-	for ( CClient* pClient = it.next(); pClient != NULL; pClient = it.next() )
+	for ( CClient* pClient = it.next(); pClient != nullptr; pClient = it.next() )
 	{
 		if ( pClient == pClientExclude )
 			continue;
-		if ( pClient->GetChar() == NULL )
+		if ( pClient->GetChar() == nullptr )
 			continue;
 		if ( GetTopPoint().GetDistSight(pClient->GetChar()->GetTopPoint()) > pClient->GetChar()->GetVisualRange() )
 			continue;
@@ -1440,7 +1440,7 @@ void CChar::SoundChar( CRESND_TYPE type )
 	if ( type == CRESND_HIT )
 	{
 		CItem * pWeapon = m_uidWeapon.ItemFind();
-		if ( pWeapon != NULL )
+		if ( pWeapon != nullptr )
 		{
 			CVarDefCont * pVar = pWeapon->GetDefKey("AMMOSOUNDHIT", true);
 			if ( pVar )
@@ -1645,7 +1645,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 		CClient * client = GetClient();
 		CItem * pItemCont	= dynamic_cast <CItem*> (pItem->GetParent());
 
-		if ( pItemCont != NULL )
+		if ( pItemCont != nullptr )
 		{
 			// Don't allow taking items from the bank unless we opened it here
 			if ( pItemCont->IsType( IT_EQ_BANK_BOX ) && ( pItemCont->m_itEqBankBox.m_pntOpen != GetTopPoint() ) )
@@ -1653,7 +1653,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 
 			// Check sub containers too
 			CChar * pCharTop = dynamic_cast<CChar *>(pObjTop);
-			if ( pCharTop != NULL )
+			if ( pCharTop != nullptr )
 			{
 				bool bItemContIsInsideBankBox = pCharTop->GetBank()->IsItemInside( pItemCont );
 				if ( bItemContIsInsideBankBox && ( pCharTop->GetBank()->m_itEqBankBox.m_pntOpen != GetTopPoint() ))
@@ -1677,7 +1677,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 
 				if ( ( dwTopMostContainerUID == pObjTop->GetUID().GetPrivateUID() ) && ( dwTopContainerUID == dwTopContainerUID_ToCheck ) )
 				{
-					if ( pCharTop != NULL )
+					if ( pCharTop != nullptr )
 					{
 						isInOpenedContainer = true;
 						// probably a pickup check from pack if pCharTop != this?
@@ -1750,7 +1750,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	}
 
 	ITRIG_TYPE trigger;
-	if ( pChar != NULL )
+	if ( pChar != nullptr )
 	{
 		bool bCanTake = false;
         if (IsPriv(PRIV_GM))// higher priv players can take items and undress us
@@ -1833,13 +1833,13 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 		char iItemHeight = pItem->GetHeight();
 		iItemHeight = maximum(iItemHeight, 1);
 		char iStackMaxZ = GetTopZ() + 16;
-		CItem * pStack = NULL;
+		CItem * pStack = nullptr;
 		CPointMap ptNewPlace = pItem->GetTopPoint();
 		CWorldSearch AreaItems(ptNewPlace);
 		for (;;)
 		{
 			pStack = AreaItems.GetItem();
-			if ( pStack == NULL )
+			if ( pStack == nullptr )
 				break;
 			if (( pStack->GetTopZ() <= pItem->GetTopZ()) || ( pStack->GetTopZ() > iStackMaxZ ))
 				continue;
@@ -1883,14 +1883,14 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 bool CChar::ItemBounce( CItem * pItem, bool bDisplayMsg )
 {
 	ADDTOCALLSTACK("CChar::ItemBounce");
-	if ( pItem == NULL )
+	if ( pItem == nullptr )
 		return false;
 
 	CItemContainer * pPack = GetPackSafe();
 	if ( pItem->GetParent() == pPack )
 		return true;
 
-	lpctstr pszWhere = NULL;
+	lpctstr pszWhere = nullptr;
 	bool bCanAddToPack = false;
     bool bDropOnGround = false;
 
@@ -1949,7 +1949,7 @@ bool CChar::ItemBounce( CItem * pItem, bool bDisplayMsg )
 bool CChar::ItemDrop( CItem * pItem, const CPointMap & pt )
 {
 	ADDTOCALLSTACK("CChar::ItemDrop");
-	if ( pItem == NULL )
+	if ( pItem == nullptr )
 		return false;
 
 	if ( IsSetEF( EF_ItemStacking ) )
@@ -1961,12 +1961,12 @@ bool CChar::ItemDrop( CItem * pItem, const CPointMap & pt )
 
 		CPointMap ptStack = pt;
 		char iStackMaxZ = block.m_Top.m_z;	//pt.m_z + 16;
-		CItem * pStack = NULL;
+		CItem * pStack = nullptr;
 		CWorldSearch AreaItems(ptStack);
 		for (;;)
 		{
 			pStack = AreaItems.GetItem();
-			if ( pStack == NULL )
+			if ( pStack == nullptr )
 				break;
 			if ( pStack->GetTopZ() < pt.m_z || pStack->GetTopZ() > iStackMaxZ )
 				continue;
@@ -2275,7 +2275,7 @@ bool CChar::Reveal( uint64 iFlags )
 		return false;
 
 	m_StepStealth = 0;
-	UpdateMode(NULL, true);
+	UpdateMode(nullptr, true);
 	SysMessageDefault(DEFMSG_HIDING_REVEALED);
 	return true;
 }
@@ -2347,14 +2347,14 @@ CItem * CChar::Make_Figurine( CUID uidOwner, ITEMID_TYPE id )
 {
 	ADDTOCALLSTACK("CChar::Make_Figurine");
 	if ( IsDisconnected() || m_pPlayer )
-		return NULL;
+		return nullptr;
 
 	CCharBase* pCharDef = Char_GetDef();
 
 	// turn creature into a figurine.
 	CItem * pItem = CItem::CreateScript( ( id == ITEMID_NOTHING ) ? pCharDef->m_trackID : id, this );
 	if ( !pItem )
-		return NULL;
+		return nullptr;
 
 	pItem->SetType(IT_FIGURINE);
 	pItem->SetName(GetName());
@@ -2383,14 +2383,14 @@ CItem * CChar::NPC_Shrink()
 	if ( IsStatFlag(STATF_CONJURED) )
 	{
 		Stat_SetVal(STAT_STR, 0);
-		return NULL;
+		return nullptr;
 	}
 
 	NPC_PetClearOwners();	// Clear follower slots on pet owner
 
 	CItem * pItem = Make_Figurine(UID_CLEAR, ITEMID_NOTHING);
 	if ( !pItem )
-		return NULL;
+		return nullptr;
 
 	pItem->SetAttr(ATTR_MAGIC);
 	pItem->MoveToCheck(GetTopPoint());
@@ -2404,23 +2404,23 @@ CItem * CChar::Horse_GetMountItem() const
 	ADDTOCALLSTACK("CChar::Horse_GetMountItem");
 
 	if ( ! IsStatFlag( STATF_RIDDEN ))
-		return NULL;
+		return nullptr;
 
 	CItem * pItem = CUID(m_atRidden.m_FigurineUID).ItemFind();
 
-	if ( pItem == NULL )
+	if ( pItem == nullptr )
 	{
 		CItemMemory* pItemMem = Memory_FindTypes( MEMORY_IPET );
 
-		if ( pItemMem != NULL )
+		if ( pItemMem != nullptr )
 		{
 			CChar* pOwner = pItemMem->m_uidLink.CharFind();
 
-			if ( pOwner != NULL )
+			if ( pOwner != nullptr )
 			{
 				CItem* pItemMount = pOwner->LayerFind(LAYER_HORSE);
 
-				if ( pItemMount != NULL && pItemMount->m_itNormal.m_more2 == GetUID().GetObjUID() )
+				if ( pItemMount != nullptr && pItemMount->m_itNormal.m_more2 == GetUID().GetObjUID() )
 				{
 					m_atRidden.m_FigurineUID = pItemMount->GetUID().GetObjUID();
 					pItem = pItemMount;
@@ -2432,8 +2432,8 @@ CItem * CChar::Horse_GetMountItem() const
 		}
 	}
 
-	if ( pItem == NULL || ( ! pItem->IsType( IT_FIGURINE ) && ! pItem->IsType( IT_EQ_HORSE )) )
-		return NULL;
+	if ( pItem == nullptr || ( ! pItem->IsType( IT_FIGURINE ) && ! pItem->IsType( IT_EQ_HORSE )) )
+		return nullptr;
 	return pItem;
 }
 
@@ -2442,8 +2442,8 @@ CChar * CChar::Horse_GetMountChar() const
 {
 	ADDTOCALLSTACK("CChar::Horse_GetMountChar");
 	CItem * pItem = Horse_GetMountItem();
-	if ( pItem == NULL )
-		return NULL;
+	if ( pItem == nullptr )
+		return nullptr;
 	return dynamic_cast <CChar*>( pItem->GetTopLevelObj());
 }
 
@@ -2527,14 +2527,14 @@ bool CChar::Horse_UnMount()
 		return false;
 
 	CItem * pItem = LayerFind(LAYER_HORSE);
-	if ( pItem == NULL || pItem->IsDeleted() )
+	if ( pItem == nullptr || pItem->IsDeleted() )
 	{
 		StatFlag_Clear(STATF_ONHORSE);	// flag got out of sync !
 		return false;
 	}
 
 	CChar * pPet = pItem->m_itFigurine.m_UID.CharFind();
-	if ( IsTrigUsed(TRIGGER_DISMOUNT) && pPet != NULL && pPet->IsDisconnected() && !pPet->IsDeleted() ) // valid horse for trigger
+	if ( IsTrigUsed(TRIGGER_DISMOUNT) && pPet != nullptr && pPet->IsDisconnected() && !pPet->IsDeleted() ) // valid horse for trigger
 	{
 		CScriptTriggerArgs Args(pPet);
 		if ( OnTrigger(CTRIG_Dismount, this, &Args) == TRIGRET_RET_TRUE )
@@ -2596,7 +2596,7 @@ bool CChar::OnTickEquip( CItem * pItem )
 			// NOTE: What if my horse dies (poisoned?)
 			{
 				CChar * pHorse = pItem->m_itFigurine.m_UID.CharFind();
-				if ( pHorse == NULL )
+				if ( pHorse == nullptr )
 					return false;
 				if ( pHorse != this )				//Some scripts can force mounts to have as 'mount' the rider itself (like old ethereal scripts)
 					return pHorse->OnTick();	    // if we call OnTick again on them we'll have an infinite loop.
@@ -2773,7 +2773,7 @@ void CChar::Wake()
 		return;
 
 	CItemCorpse *pCorpse = FindMyCorpse(true);
-	if (pCorpse == NULL)
+	if (pCorpse == nullptr)
 	{
 		Stat_SetVal(STAT_STR, 0);		// death
 		return;
@@ -2792,7 +2792,7 @@ void CChar::SleepStart( bool fFrontFall )
 		return;
 
 	CItemCorpse *pCorpse = MakeCorpse(fFrontFall);
-	if (pCorpse == NULL)
+	if (pCorpse == nullptr)
 	{
 		SysMessageDefault(DEFMSG_MSG_CANTSLEEP);
 		return;
@@ -2829,8 +2829,8 @@ bool CChar::Death()
 	}
 
 	// Look through memories of who I was fighting (make sure they knew they where fighting me)
-	CItem *pItemNext = NULL;
-	for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItemNext )
+	CItem *pItemNext = nullptr;
+	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
 	{
 		pItemNext = pItem->GetNext();
 		if ( pItem->IsType(IT_EQ_TRADE_WINDOW) )
@@ -2850,7 +2850,7 @@ bool CChar::Death()
 
 	// Give credit for the kill to my attacker(s)
 	int iKillers = 0;
-	CChar * pKiller = NULL;
+	CChar * pKiller = nullptr;
 	tchar * pszKillStr = Str_GetTemp();
 	int iKillStrLen = sprintf( pszKillStr, g_Cfg.GetDefaultMsg(DEFMSG_MSG_KILLED_BY), (m_pPlayer)? 'P':'N', GetNameWithoutIncognito() );
 	for ( size_t count = 0; count < m_lastAttackers.size(); ++count )
@@ -2911,7 +2911,7 @@ bool CChar::Death()
 		if ( m_pNPC->m_bonded )
 		{
 			m_CanMask |= CAN_C_GHOST;
-			UpdateMode(NULL, true);
+			UpdateMode(nullptr, true);
 			return true;
 		}
 
@@ -2928,7 +2928,7 @@ bool CChar::Death()
 		if ( !(m_TagDefs.GetKeyNum("DEATHFLAGS", true) & DEATH_NOFAMECHANGE) )
 			Noto_Fame( -Stat_GetAdjusted(STAT_FAME)/10 );
 
-		lpctstr pszGhostName = NULL;
+		lpctstr pszGhostName = nullptr;
 		CCharBase *pCharDefPrev = CCharBase::FindCharBase( m_prev_id );
 		switch ( m_prev_id )
 		{
@@ -2944,7 +2944,7 @@ bool CChar::Death()
 				pszGhostName = ( pCharDefPrev && pCharDefPrev->IsFemale() ? "c_ghost_woman" : "c_ghost_man" );
 				break;
 		}
-		ASSERT(pszGhostName != NULL);
+		ASSERT(pszGhostName != nullptr);
 
 		if ( !IsStatFlag(STATF_WAR) )
 			StatFlag_Set(STATF_INSUBSTANTIAL);	// manifest war mode for ghosts
@@ -3034,32 +3034,32 @@ void CChar::Flip()
 // Affect stamina as if we WILL move !
 // RETURN:
 //  ptDst.m_z = the new z
-//  NULL = failed to walk here.
+//  nullptr = failed to walk here.
 CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fCheckOnly, DIR_TYPE dir, bool fPathFinding )
 {
 	ADDTOCALLSTACK("CChar::CanMoveWalkTo");
 
 	if ( Can(CAN_C_NONMOVER) )
-		return NULL;
+		return nullptr;
 	int iWeightLoadPercent = GetWeightLoadPercent(GetTotalWeight());
 	if ( !fCheckOnly )
 	{
 		if ( OnFreezeCheck() )
 		{
 			SysMessageDefault(DEFMSG_MSG_FROZEN);
-			return NULL;
+			return nullptr;
 		}
 
 		if ( (Stat_GetVal(STAT_DEX) <= 0) && (!IsStatFlag(STATF_DEAD)) )
 		{
 			SysMessageDefault(DEFMSG_MSG_FATIGUE);
-			return NULL;
+			return nullptr;
 		}
 
 		if ( iWeightLoadPercent > 200 )
 		{
 			SysMessageDefault(DEFMSG_MSG_OVERLOAD);
-			return NULL;
+			return nullptr;
 		}
 	}
 
@@ -3071,13 +3071,13 @@ CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fChec
 			ptDst.m_z = GetTopZ();
 			return ptDst.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA);
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	// ok to go here ? physical blocking objects ?
 	dword dwBlockFlags = 0;
 	height_t ClimbHeight = 0;
-	CRegion *pArea = NULL;
+	CRegion *pArea = nullptr;
 
 	EXC_TRY("CanMoveWalkTo");
 
@@ -3087,12 +3087,12 @@ CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fChec
 	{
 		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
 			g_pLog->EventWarn("CheckValidMove failed\n");
-		return NULL;
+		return nullptr;
 	}
 
 	EXC_SET_BLOCK("NPC's will");
 	if ( !fCheckOnly && m_pNPC && !NPC_CheckWalkHere(ptDst, pArea, dwBlockFlags) )	// does the NPC want to walk here?
-		return NULL;
+		return nullptr;
 
 	EXC_SET_BLOCK("Creature bumping");
 	short iStamReq = 0;
@@ -3108,7 +3108,7 @@ CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fChec
 			if ( (pChar == this) || (abs(pChar->GetTopZ() - ptDst.m_z) > 5) || (pChar->IsStatFlag(STATF_INSUBSTANTIAL)) )
 				continue;
 			if ( m_pNPC && pChar->m_pNPC )	// NPCs can't walk over another NPC
-				return NULL;
+				return nullptr;
 
 			iStamReq = 10;
 			if ( IsPriv(PRIV_GM) || pChar->IsStatFlag(STATF_DEAD|STATF_INVISIBLE|STATF_HIDDEN) )
@@ -3124,21 +3124,21 @@ CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fChec
 				iStamReq = (short)(Args.m_iN1);
 
 				if ( iRet == TRIGRET_RET_TRUE )
-					return NULL;
+					return nullptr;
 				if (iStamReq < 0)
 					continue;
 			}
 
 			
 			if ( (iStamReq > 0) && (Stat_GetVal(STAT_DEX) < Stat_GetMax(STAT_DEX)) )
-				return NULL;
+				return nullptr;
 
 			tchar *pszMsg = Str_GetTemp();
 			if ( Stat_GetVal(STAT_DEX) < iStamReq )		// check if we have enough stamina to push the char
 			{
 				sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MSG_CANTPUSH), pChar->GetName());
 				SysMessage(pszMsg);
-				return NULL;
+				return nullptr;
 			}
 			else if (pChar->IsStatFlag(STATF_INVISIBLE) && !(g_Cfg.m_iRevealFlags & REVEALF_OSILIKEPERSONALSPACE) ) {
                 sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE), pChar->GetName());
@@ -3290,7 +3290,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 					if ( IsStatFlag(STATF_FLY) )
 						iSkillLevel /= 2;
 
-					int iDmg = OnTakeDamage( g_Cfg.GetSpellEffect(SPELL_Fire_Field, iSkillLevel), NULL, DAMAGE_FIRE|DAMAGE_GENERAL, 0, 100, 0, 0, 0 );
+					int iDmg = OnTakeDamage( g_Cfg.GetSpellEffect(SPELL_Fire_Field, iSkillLevel), nullptr, DAMAGE_FIRE|DAMAGE_GENERAL, 0, 100, 0, 0, 0 );
                     if (iDmg > 0)
                     {
                         Sound(0x15f);	// fire noise
@@ -3324,7 +3324,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 			case IT_TRAP:
 			case IT_TRAP_ACTIVE:
             {
-                int iDmg = OnTakeDamage( pItem->Use_Trap(), NULL, DAMAGE_HIT_BLUNT|DAMAGE_GENERAL );
+                int iDmg = OnTakeDamage( pItem->Use_Trap(), nullptr, DAMAGE_HIT_BLUNT|DAMAGE_GENERAL );
                 if ( (iDmg > 0) && m_pNPC && fStanding )
                 {
                     m_Act_p.Move((DIR_TYPE)(Calc_GetRandVal(DIR_QTY)));
@@ -3397,7 +3397,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 }
 
 // Moving to a new region. or logging out (not in any region)
-// pNewArea == NULL = we are logging out.
+// pNewArea == nullptr = we are logging out.
 // RETURN:
 //  false = do not allow in this area.
 bool CChar::MoveToRegion( CRegionWorld * pNewArea, bool fAllowReject )
@@ -3441,7 +3441,7 @@ bool CChar::MoveToRegion( CRegionWorld * pNewArea, bool fAllowReject )
 			if ( pNewArea->IsFlag(REGION_FLAG_ANNOUNCE) && !pNewArea->IsInside2d( GetTopPoint()) )	// new area.
 			{
 				CVarDefContStr * pVarStr = dynamic_cast <CVarDefContStr *>( pNewArea->m_TagDefs.GetKey("ANNOUNCEMENT"));
-				SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_ENTER), (pVarStr != NULL) ? pVarStr->GetValStr() : pNewArea->GetName());
+				SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_ENTER), (pVarStr != nullptr) ? pVarStr->GetValStr() : pNewArea->GetName());
 			}
 
 			// Is it guarded / safe / non-pvp?
@@ -3454,12 +3454,12 @@ bool CChar::MoveToRegion( CRegionWorld * pNewArea, bool fAllowReject )
 					if ( pNewArea->IsGuarded() )	// now under the protection
 					{
 						CVarDefContStr *pVarStr = dynamic_cast<CVarDefContStr *>(pNewArea->m_TagDefs.GetKey("GUARDOWNER"));
-						SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_GUARDS_1), (pVarStr != NULL) ? pVarStr->GetValStr() : g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_GUARD_ART));
+						SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_GUARDS_1), (pVarStr != nullptr) ? pVarStr->GetValStr() : g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_GUARD_ART));
 					}
 					else							// have left the protection
 					{
 						CVarDefContStr *pVarStr = dynamic_cast<CVarDefContStr *>(m_pArea->m_TagDefs.GetKey("GUARDOWNER"));
-						SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_GUARDS_2), (pVarStr != NULL) ? pVarStr->GetValStr() : g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_GUARD_ART));
+						SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_GUARDS_2), (pVarStr != nullptr) ? pVarStr->GetValStr() : g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_GUARD_ART));
 					}
 				}
 				if ( redNew != redOld )
@@ -3795,7 +3795,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 	if (( IsTrigUsed(pszCharTrigName) ) && ( iCharAction > XTRIG_UNKNOWN ))
 	{
 		CChar * pChar = pSrc->GetChar();
-		if ( pChar != NULL && this != pChar )
+		if ( pChar != nullptr && this != pChar )
 		{
 			EXC_SET_BLOCK("chardef");
 			CUID uidOldAct = pChar->m_Act_UID;
@@ -3837,7 +3837,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 			}
 		}
 
-		if ( m_pNPC != NULL )
+		if ( m_pNPC != nullptr )
 		{
 			// 3) TEVENTS
 			EXC_SET_BLOCK("NPC triggers"); // TEVENTS (constant events of NPCs)
@@ -3856,7 +3856,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 		}
 
 		// 4) CHARDEF triggers
-		if ( m_pPlayer == NULL ) //	CHARDEF triggers (based on body type)
+		if ( m_pPlayer == nullptr ) //	CHARDEF triggers (based on body type)
 		{
 			EXC_SET_BLOCK("chardef triggers");
 			if ( pCharDef->HasTrigger(iAction) )
@@ -3873,7 +3873,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 
 
 		// 5) EVENTSPET triggers for npcs
-		if (m_pNPC != NULL)
+		if (m_pNPC != nullptr)
 		{
 			EXC_SET_BLOCK("NPC triggers - EVENTSPET"); // EVENTSPET (constant events of NPCs set from sphere.ini)
 			for (size_t i = 0; i < g_Cfg.m_pEventsPetLink.size(); ++i)
@@ -3890,7 +3890,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 			}
 		}
 		// 5) EVENTSPLAYER triggers for players
-		if ( m_pPlayer != NULL )
+		if ( m_pPlayer != nullptr )
 		{
 			//	EVENTSPLAYER triggers (constant events of players set from sphere.ini)
 			EXC_SET_BLOCK("chardef triggers - EVENTSPLAYER");

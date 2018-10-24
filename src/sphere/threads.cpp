@@ -106,7 +106,7 @@ IThread *ThreadHolder::current()
 	init();
 
 	IThread * thread = m_currentThread;
-	if (thread == NULL)
+	if (thread == nullptr)
 		return DummySphereThread::getInstance();
 
 	ASSERT( thread->isSameThread(thread->getId()) );
@@ -144,7 +144,7 @@ void ThreadHolder::pop(IThread *thread)
 IThread * ThreadHolder::getThreadAt(size_t at)
 {
 	if ( at > getActiveThreads() )
-		return NULL;
+		return nullptr;
 
 	SimpleThreadLock lock(m_mutex);
 	for ( spherethreadlist_t::const_iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it )
@@ -155,7 +155,7 @@ IThread * ThreadHolder::getThreadAt(size_t at)
 		--at;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void ThreadHolder::init()
@@ -180,7 +180,7 @@ AbstractThread::AbstractThread(const char *name, IThread::Priority priority)
 	{
 		// no threads were started before - initialise thread subsystem
 #ifdef _WIN32
-		if( CoInitializeEx(NULL, COINIT_MULTITHREADED) != S_OK )
+		if( CoInitializeEx(nullptr, COINIT_MULTITHREADED) != S_OK )
 		{
 			throw CSError(LOGL_FATAL, 0, "OLE is not available, threading model unimplementable");
 		}
@@ -213,7 +213,7 @@ AbstractThread::~AbstractThread()
 void AbstractThread::start()
 {
 #ifdef _WIN32
-	m_handle = reinterpret_cast<spherethread_t>(_beginthreadex(NULL, 0, &runner, this, 0, NULL));
+	m_handle = reinterpret_cast<spherethread_t>(_beginthreadex(nullptr, 0, &runner, this, 0, nullptr));
 #else
 	pthread_attr_t threadAttr;
 	pthread_attr_init(&threadAttr);
@@ -309,7 +309,7 @@ void AbstractThread::run()
 		catch( ... )
 		{
 			gotException = true;
-			g_Log.CatchEvent(NULL, "%s::tick", getName());
+			g_Log.CatchEvent(nullptr, "%s::tick", getName());
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		}
 
@@ -352,7 +352,7 @@ SPHERE_THREADENTRY_RETNTYPE AbstractThread::runner(void *callerThread)
 {
 	// If the caller thread is an AbstractThread, call run, which starts it and make it enter in its main loop
 	AbstractThread * caller = reinterpret_cast<AbstractThread*>(callerThread);
-	if (caller != NULL)
+	if (caller != nullptr)
 	{
 		caller->run();
 		caller->terminate(true);
@@ -510,7 +510,7 @@ char *AbstractSphereThread::allocateBuffer()
 {
 	SimpleThreadLock stlBuffer(g_tmpStringMutex);
 
-	char * buffer = NULL;
+	char * buffer = nullptr;
 	g_tmpStringIndex++;
 
 	if( g_tmpStringIndex >= THREAD_TSTRING_STORAGE )
@@ -545,7 +545,7 @@ TemporaryStringStorage *AbstractSphereThread::allocateStringBuffer()
 
 		// a protection against deadlock. All string buffers are marked as being used somewhere, so we
 		// have few possibilities (the case shows that we have a bug and temporary strings used not such):
-		// a) return NULL and wait for exceptions in the program
+		// a) return nullptr and wait for exceptions in the program
 		// b) allocate a string from a heap
 		if( initialPosition == index )
 		{
@@ -606,7 +606,7 @@ void AbstractSphereThread::printStackTrace()
 /*
  * DummySphereThread
 */
-DummySphereThread *DummySphereThread::instance = NULL;
+DummySphereThread *DummySphereThread::instance = nullptr;
 
 DummySphereThread::DummySphereThread()
 	: AbstractSphereThread("dummy", IThread::Normal)
@@ -615,7 +615,7 @@ DummySphereThread::DummySphereThread()
 
 DummySphereThread *DummySphereThread::getInstance()
 {
-	if( instance == NULL )
+	if( instance == nullptr )
 	{
 		instance = new DummySphereThread();
 	}

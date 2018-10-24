@@ -105,19 +105,19 @@ bool AbstractString::startsWithHead(const char *s)
 size_t AbstractString::indexOf(char c)
 {
 	char *pos = strchr(m_buf, c);
-	return (size_t)(( pos == NULL ) ? -1 : pos - m_buf);
+	return (size_t)(( pos == nullptr ) ? -1 : pos - m_buf);
 }
 
 size_t AbstractString::indexOf(const char *s)
 {
 	char *pos = strstr(m_buf, s);
-	return (size_t)((pos == NULL) ? -1 : pos - m_buf);
+	return (size_t)((pos == nullptr) ? -1 : pos - m_buf);
 }
 
 size_t AbstractString::lastIndexOf(char c)
 {
 	char *pos = strrchr(m_buf, c);
-	return (size_t)((pos == NULL) ? -1 : pos - m_buf);
+	return (size_t)((pos == nullptr) ? -1 : pos - m_buf);
 }
 
 
@@ -131,10 +131,10 @@ String::String()
 
 void String::destroy()
 {
-	if ( m_realLength && ( m_buf != NULL ))
+	if ( m_realLength && ( m_buf != nullptr ))
 	{
 		delete[] m_buf;
-		m_buf = NULL;
+		m_buf = nullptr;
 		m_realLength = 0;
 		m_length = 0;
 	}
@@ -148,12 +148,12 @@ void String::ensureLength(size_t newLength)
 		m_realLength = newLength + newLength/5;
 		char *newBuf = new char[m_realLength+1];
 
-		if ( newBuf == NULL )
+		if ( newBuf == nullptr )
 		{
 			throw CSError(LOGL_FATAL, 0, "Run out of memory while allocating memory for string");
 		}
 
-		if ( m_buf != NULL )
+		if ( m_buf != nullptr )
 		{
 			strncpy(newBuf, m_buf, m_length);
 			delete[] m_buf;
@@ -176,7 +176,7 @@ TemporaryString::TemporaryString()
 {
 	m_useHeap = true;
 	AbstractSphereThread *current = static_cast<AbstractSphereThread*> (ThreadHolder::current());
-	if ( current != NULL )
+	if ( current != nullptr )
 	{
 		// allocate from thread context
 		current->allocateString(*this);
@@ -184,7 +184,7 @@ TemporaryString::TemporaryString()
 	else
 	{
 		// allocate from static buffer when context is not available
-		init(&m_tempStrings[m_tempPosition++][0], NULL);
+		init(&m_tempStrings[m_tempPosition++][0], nullptr);
 		if( m_tempPosition >= MAX_TEMP_LINES_NO_CONTEXT )
 		{
 			m_tempPosition = 0;
@@ -207,7 +207,7 @@ void TemporaryString::init(char *buffer, char *state)
 	m_useHeap = false;
 	m_buf = buffer;
 	m_state = state;
-	if( m_state != NULL )
+	if( m_state != nullptr )
 	{
 		*m_state = 'U';
 		m_realLength = THREAD_STRING_LENGTH;
@@ -227,7 +227,7 @@ void TemporaryString::destroy()
 	}
 	else
 	{
-		if( m_state != NULL )
+		if( m_state != nullptr )
 		{
 			*m_state = '\0';
 		}
@@ -254,17 +254,17 @@ void TemporaryString::ensureLength(size_t newLength)
 			
 			m_realLength = newLength + newLength/5;
 			char *newBuf = new char[m_realLength+1];
-			if ( newBuf == NULL )
+			if ( newBuf == nullptr )
 				throw CSError(LOGL_FATAL, 0, "Run out of memory while allocating memory for string");
 
 			strncpy(newBuf, m_buf, m_length);
 			newBuf[m_length] = '\0';
 			
 			m_buf = newBuf;
-			if ( m_state != NULL )
+			if ( m_state != nullptr )
 			{
 				*m_state = '\0';
-				m_state = NULL;
+				m_state = nullptr;
 			}
 
 			m_useHeap = true;

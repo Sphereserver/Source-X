@@ -24,7 +24,7 @@ bool CChar::NPC_FightArchery(CChar * pChar)
 
     // determine how far we can shoot with this bow
     CItem *pWeapon = m_uidWeapon.ItemFind();
-    if (pWeapon != NULL)
+    if (pWeapon != nullptr)
     {
         iMinDist = pWeapon->RangeH();
         iMaxDist = pWeapon->RangeL();
@@ -65,8 +65,8 @@ CChar * CChar::NPC_FightFindBestTarget()
     {
         int64 threat = 0;
         int iClosest = INT32_MAX;
-        CChar *pChar = NULL;
-        CChar *pClosest = NULL;
+        CChar *pChar = nullptr;
+        CChar *pClosest = nullptr;
         SKILL_TYPE skillWeapon = Fight_GetWeaponSkill();
 
         // Do NOT use iterators here, since in this loop the m_lastAttackers vector can be altered, and so the iterator, making it invalid
@@ -145,7 +145,7 @@ CChar * CChar::NPC_FightFindBestTarget()
     if (pTarget)
         return pTarget;
 
-    return NULL;
+    return nullptr;
 }
 
 void CChar::NPC_Act_Fight()
@@ -175,7 +175,7 @@ void CChar::NPC_Act_Fight()
     }
 
     CChar * pChar = m_Fight_Targ_UID.CharFind();
-    if (pChar == NULL || !pChar->IsTopLevel()) // target is not valid anymore ?
+    if (pChar == nullptr || !pChar->IsTopLevel()) // target is not valid anymore ?
         return;
 
     if (Attacker_GetIgnore(pChar))

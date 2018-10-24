@@ -150,13 +150,13 @@ void CItemContainer::Trade_Status( bool bCheck )
 	{
 		CScriptTriggerArgs Args1(pChar1);
 		ushort i = 1;
-		for ( CItem *pItem = pPartner->GetContentHead(); pItem != NULL; pItem = pItem->GetNext(), ++i )
+		for ( CItem *pItem = pPartner->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext(), ++i )
 			Args1.m_VarObjs.Insert(i, pItem, true);
 		Args1.m_iN1 = --i;
 
 		CScriptTriggerArgs Args2(pChar2);
 		i = 1;
-		for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItem->GetNext(), ++i )
+		for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext(), ++i )
 			Args2.m_VarObjs.Insert(i, pItem, true);
 		Args2.m_iN2 = --i;
 
@@ -167,14 +167,14 @@ void CItemContainer::Trade_Status( bool bCheck )
 	}
 
 	// Transfer items
-	CItem *pItemNext = NULL;
-	for ( CItem *pItem = pPartner->GetContentHead(); pItem != NULL; pItem = pItemNext )
+	CItem *pItemNext = nullptr;
+	for ( CItem *pItem = pPartner->GetContentHead(); pItem != nullptr; pItem = pItemNext )
 	{
 		pItemNext = pItem->GetNext();
 		pChar1->ItemBounce(pItem, false);
 	}
 
-	for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItemNext )
+	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
 	{
 		pItemNext = pItem->GetNext();
 		pChar2->ItemBounce(pItem, false);
@@ -285,8 +285,8 @@ void CItemContainer::Trade_Delete()
 	}
 
 	// Drop items back in my pack.
-	CItem *pItemNext = NULL;
-	for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItemNext )
+	CItem *pItemNext = nullptr;
+	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
 	{
 		pItemNext = pItem->GetNext();
 		pChar->ItemBounce(pItem, false);
@@ -525,7 +525,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 		// Try to stack it.
 		if ( !g_Serv.IsLoading() && pItem->Item_GetDef()->IsStackableType() && !bForceNoStack )
 		{
-			for ( CItem *pTry = GetContentHead(); pTry != NULL; pTry = pTry->GetNext() )
+			for ( CItem *pTry = GetContentHead(); pTry != nullptr; pTry = pTry->GetNext() )
 			{
 				pt = pTry->GetContainedPoint();
 				if ( pItem->Stack(pTry) )
@@ -541,7 +541,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 
 	// check that the grid index isn't already in use
 	bool bValidGrid = true;
-	for ( CItem *pTry = GetContentHead(); pTry != NULL; pTry = pTry->GetNext() )
+	for ( CItem *pTry = GetContentHead(); pTry != nullptr; pTry = pTry->GetNext() )
 	{
 		if ( pTry->GetContainedGridIndex() == gridIndex )
 		{
@@ -556,7 +556,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 		for ( gridIndex = 0; (gridIndex < 255 && !bValidGrid); ++gridIndex )
 		{
 			bValidGrid = true;
-			for ( CItem *pTry = GetContentHead(); pTry != NULL; pTry = pTry->GetNext() )
+			for ( CItem *pTry = GetContentHead(); pTry != nullptr; pTry = pTry->GetNext() )
 			{
 				if ( pTry->GetContainedGridIndex() == gridIndex )
 				{
@@ -720,7 +720,7 @@ void CItemContainer::DupeCopy( const CItem *pItem )
 	if ( !pContItem )
 		return;
 
-	for ( CItem *pContent = pContItem->GetContentHead(); pContent != NULL; pContent = pContent->GetNext() )
+	for ( CItem *pContent = pContItem->GetContentHead(); pContent != nullptr; pContent = pContent->GetNext() )
 		ContentAdd(CreateDupeItem(pContent), pContent->GetContainedPoint());
 }
 
@@ -926,7 +926,7 @@ void CItemContainer::Restock()
 				case LAYER_VENDOR_STOCK:
 					// Magic restock the vendors container.
 				{
-					for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
+					for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 					{
 						CItemVendable *pVendItem = dynamic_cast<CItemVendable *>(pItem);
 						if ( pVendItem )
@@ -944,7 +944,7 @@ void CItemContainer::Restock()
 				case LAYER_VENDOR_BUYS:
 				{
 					// Reset what we will buy from players.
-					for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
+					for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 					{
 						CItemVendable *pVendItem = dynamic_cast<CItemVendable *>(pItem);
 						if ( pVendItem )
@@ -1204,7 +1204,7 @@ lpctstr const CItemContainer::sm_szVerbKeys[ICV_QTY+1] =
 	"EMPTY",
 	"FIXWEIGHT",
 	"OPEN",
-	NULL
+	nullptr
 };
 
 bool CItemContainer::r_Verb( CScript &s, CTextConsole *pSrc )

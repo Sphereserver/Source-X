@@ -541,13 +541,13 @@ public:
 	void addGumpTextDisp( const CObjBase * pObj, GUMP_TYPE gump, lpctstr pszName, lpctstr pszText );
 	void addGumpInpVal( bool fcancel, INPVAL_STYLE style, dword dwmask, lpctstr ptext1, lpctstr ptext2, CObjBase * pObj );
 
-	void addItemMenu( CLIMODE_TYPE mode, const CMenuItem * item, size_t count, CObjBase * pObj = NULL );
-	void addGumpDialog( CLIMODE_TYPE mode, const CSString * sControls, size_t iControls, const CSString * psText, size_t iTexts, int x, int y, CObjBase * pObj = NULL, dword rid = 0 );
+	void addItemMenu( CLIMODE_TYPE mode, const CMenuItem * item, size_t count, CObjBase * pObj = nullptr );
+	void addGumpDialog( CLIMODE_TYPE mode, const CSString * sControls, size_t iControls, const CSString * psText, size_t iTexts, int x, int y, CObjBase * pObj = nullptr, dword rid = 0 );
 
 	bool addGumpDialogProps( CUID uid );
 
 	void addLoginComplete();
-	void addChatSystemMessage(CHATMSG_TYPE iType, lpctstr pszName1 = NULL, lpctstr pszName2 = NULL, CLanguageID lang = 0 );
+	void addChatSystemMessage(CHATMSG_TYPE iType, lpctstr pszName1 = nullptr, lpctstr pszName2 = nullptr, CLanguageID lang = 0 );
 
 	void addCharPaperdoll( CChar * pChar );
 
@@ -610,19 +610,19 @@ public:
 	}
 	bool IsPriv( word flag ) const
 	{	// PRIV_GM
-		if ( GetAccount() == NULL )
+		if ( GetAccount() == nullptr )
 			return false;
 		return( GetAccount()->IsPriv( flag ));
 	}
 	void SetPrivFlags( word wPrivFlags )
 	{
-		if ( GetAccount() == NULL )
+		if ( GetAccount() == nullptr )
 			return;
 		GetAccount()->SetPrivFlags( wPrivFlags );
 	}
 	void ClearPrivFlags( word wPrivFlags )
 	{
-		if ( GetAccount() == NULL )
+		if ( GetAccount() == nullptr )
 			return;
 		GetAccount()->ClearPrivFlags( wPrivFlags );
 	}
@@ -630,25 +630,25 @@ public:
 	// ------------------------------------------------
 	bool IsResDisp( byte flag ) const
 	{
-		if ( GetAccount() == NULL )
+		if ( GetAccount() == nullptr )
 			return false;
 		return( GetAccount()->IsResDisp( flag ) );
 	}
 	byte GetResDisp() const
 	{
-		if ( GetAccount() == NULL )
+		if ( GetAccount() == nullptr )
 			return( UINT8_MAX );
 		return( GetAccount()->GetResDisp() );
 	}
 	bool SetResDisp( byte res )
 	{
-		if ( GetAccount() == NULL )
+		if ( GetAccount() == nullptr )
 			return false;
 		return ( GetAccount()->SetResDisp( res ) );
 	}
 	bool SetGreaterResDisp( byte res )
 	{
-		if ( GetAccount() == NULL )
+		if ( GetAccount() == nullptr )
 			return false;
 		return( GetAccount()->SetGreaterResDisp( res ) );
 	}
@@ -662,13 +662,13 @@ public:
 	PLEVEL_TYPE GetPrivLevel() const
 	{
 		// PLEVEL_Counsel
-		if ( GetAccount() == NULL )
+		if ( GetAccount() == nullptr )
 			return( PLEVEL_Guest );
 		return( GetAccount()->GetPrivLevel());
 	}
 	lpctstr GetName() const
 	{
-		if ( GetAccount() == NULL )
+		if ( GetAccount() == nullptr )
 			return( "NA" );
 		return( GetAccount()->GetName());
 	}
@@ -683,7 +683,7 @@ public:
 
 	bool Dialog_Setup( CLIMODE_TYPE mode, CResourceIDBase rid, int iPage, CObjBase * pObj, lpctstr Arguments = "" );
 	bool Dialog_Close( CObjBase * pObj, dword rid, int buttonID );
-	void Menu_Setup( CResourceIDBase rid, CObjBase * pObj = NULL );
+	void Menu_Setup( CResourceIDBase rid, CObjBase * pObj = nullptr );
 
 	int OnSkill_Info( SKILL_TYPE skill, CUID uid, int iTestLevel, bool fTest );
 

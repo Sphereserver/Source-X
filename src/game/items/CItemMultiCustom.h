@@ -102,7 +102,7 @@ public:
     void BeginCustomize(CClient * pClientSrc);
     void EndCustomize(bool bForce = false);
     void SwitchToLevel(CClient * pClientSrc, uchar iLevel);
-    void CommitChanges(CClient * pClientSrc = NULL);
+    void CommitChanges(CClient * pClientSrc = nullptr);
     void AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z = INT8_MIN, short iStairID = 0);
     void AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z = INT8_MIN, short iStairID = -1);
     void AddRoof(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z);
@@ -112,15 +112,15 @@ public:
     void SendVersionTo(CClient * pClientSrc);
     void SendStructureTo(CClient * pClientSrc);
     void BackupStructure();
-    void RestoreStructure(CClient * pClientSrc = NULL);
-    void RevertChanges(CClient * pClientSrc = NULL);
-    void ResetStructure(CClient * pClientSrc = NULL);
+    void RestoreStructure(CClient * pClientSrc = nullptr);
+    void RevertChanges(CClient * pClientSrc = nullptr);
+    void ResetStructure(CClient * pClientSrc = nullptr);
 
     const CSphereMultiCustom * GetMultiItemDefs();
     const CRect GetDesignArea();
-    size_t GetFixtureCount(DesignDetails * pDesign = NULL);
-    size_t GetComponentsAt(short dx, short dy, char dz, Component ** pComponents, DesignDetails * pDesign = NULL);
-    int GetRevision(const CClient * pClientSrc = NULL) const;
+    size_t GetFixtureCount(DesignDetails * pDesign = nullptr);
+    size_t GetComponentsAt(short dx, short dy, char dz, Component ** pComponents, DesignDetails * pDesign = nullptr);
+    int GetRevision(const CClient * pClientSrc = nullptr) const;
     uchar GetLevelCount();
     short GetStairCount();
 

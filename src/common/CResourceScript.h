@@ -55,7 +55,7 @@ public:
         return (m_dwSize == UINT32_MAX && !m_dateChange.IsTimeValid());
     }
     void ReSync();
-    bool Open( lpctstr pszFilename = NULL, uint wFlags = OF_READ );
+    bool Open( lpctstr pszFilename = nullptr, uint wFlags = OF_READ );
     virtual void Close();
     virtual void CloseForce();
 };

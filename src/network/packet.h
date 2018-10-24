@@ -159,8 +159,8 @@ public:
 
 	void target(const CClient* client); // sets person to send packet to
 
-	void send(const CClient* client = NULL, bool appendTransaction = true); // adds the packet to the send queue
-	void push(const CClient* client = NULL, bool appendTransaction = true); // moves the packet to the send queue (will not be used anywhere else)
+	void send(const CClient* client = nullptr, bool appendTransaction = true); // adds the packet to the send queue
+	void push(const CClient* client = nullptr, bool appendTransaction = true); // moves the packet to the send queue (will not be used anywhere else)
 
 	int getPriority() const { return m_priority; }; // get packet priority
 	NetState* getTarget() const { return m_target; }; // get target state
@@ -237,8 +237,8 @@ public:
 	void setPriority(int priority) { m_packet->m_priority = priority; }
 
 	PacketSend* front(void) { return m_packet; };
-	void pop(void) { m_packet = NULL; }
-	bool empty(void) { return m_packet == NULL; }
+	void pop(void) { m_packet = nullptr; }
+	bool empty(void) { return m_packet == nullptr; }
 };
 
 

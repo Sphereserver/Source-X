@@ -100,7 +100,7 @@ lpctstr const CCItemDamageable::sm_szLoadKeys[CIDMGL_QTY + 1] =
 {
     "HITS",
     "MAXHITS",
-    NULL
+    nullptr
 };
 
 bool CCItemDamageable::r_LoadVal(CScript & s)

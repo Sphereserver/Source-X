@@ -33,7 +33,7 @@ void CClient::Cmd_GM_Page( lpctstr pszReason ) // Help button (Calls GM Call Men
 	bool fFound = false;
 	
 	ClientIterator it;
-	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
+	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
 	{
 		if ( pClient->GetChar() && pClient->IsPriv( PRIV_GM_PAGE )) // found GM
 		{
@@ -53,13 +53,13 @@ void CClient::Cmd_GM_Page( lpctstr pszReason ) // Help button (Calls GM Call Men
 	// Already have a message in the queue ?
 	// Find an existing GM page for this account.
 	CGMPage * pPage = static_cast <CGMPage*>(g_World.m_GMPages.GetHead());
-	for ( ; pPage != NULL; pPage = pPage->GetNext())
+	for ( ; pPage != nullptr; pPage = pPage->GetNext())
 	{
 		if (strcmpi( pPage->GetName(), GetAccount()->GetName()) == 0)
 			break;
 	}
 
-	if ( pPage != NULL )
+	if ( pPage != nullptr )
 	{
 		SysMessageDefault( DEFMSG_MSG_GMPAGE_UPDATE );
 		pPage->SetReason( pszReason );
@@ -99,19 +99,19 @@ void CClient::Cmd_GM_PageMenu( uint iEntryStart )
 	dword entry = 0;
 	word count = 0;
 	CGMPage * pPage = static_cast <CGMPage*>( g_World.m_GMPages.GetHead());
-	for ( ; pPage!= NULL; pPage = pPage->GetNext(), entry++ )
+	for ( ; pPage!= nullptr; pPage = pPage->GetNext(), entry++ )
 	{
 		if ( entry < iEntryStart )
 			continue;
 
 		CClient * pGM = pPage->FindGMHandler();	// being handled ?
-		if ( pGM != NULL )
+		if ( pGM != nullptr )
 			continue;
 
 		if ( ++count >= (CountOf( item )-1) )
 		{
 			// Add the "MORE" option if there is more than 1 more.
-			if ( pPage->GetNext() != NULL )
+			if ( pPage->GetNext() != nullptr )
 			{
 				ASSERT(count < CountOf(item));
 				item[count].m_id = count-1;
@@ -207,7 +207,7 @@ void CClient::Cmd_GM_PageCmd( lpctstr pszCmd )
 	// A GM page command.
 	// Put up a list of GM pages pending.
 
-	if ( pszCmd == NULL || pszCmd[0] == '?' )
+	if ( pszCmd == nullptr || pszCmd[0] == '?' )
 	{
 		for ( size_t i = 0; i < CountOf(sm_pszGMPageVerbsHelp); ++i )
 		{
@@ -227,7 +227,7 @@ void CClient::Cmd_GM_PageCmd( lpctstr pszCmd )
 	int index = FindTableHeadSorted( pszCmd, sm_pszGMPageVerbs, CountOf(sm_pszGMPageVerbs) );
 	if ( index < 0 )
 	{
-		Cmd_GM_PageCmd(NULL);
+		Cmd_GM_PageCmd(nullptr);
 		return;
 	}
 
@@ -251,7 +251,7 @@ void CClient::Cmd_GM_PageCmd( lpctstr pszCmd )
 			return;
 	}
 
-	if ( m_pGMPage == NULL )
+	if ( m_pGMPage == nullptr )
 	{
 		// No gm page has been selected yet.
 		Cmd_GM_PageMenu();
@@ -270,7 +270,7 @@ void CClient::Cmd_GM_PageCmd( lpctstr pszCmd )
 			// /PAGE delete = dispose of this page. We assume it has been handled.
 			SysMessage( "GM Page deleted" );
 			delete m_pGMPage;
-			ASSERT( m_pGMPage == NULL );
+			ASSERT( m_pGMPage == nullptr );
 			return;
 		case GPV_ORIGIN:
 			// /PAGE origin = go to the origin point of the page
@@ -306,7 +306,7 @@ void CClient::Cmd_GM_PageCmd( lpctstr pszCmd )
 	// Manipulate the character only if logged in.
 
 	CClient * pClient = m_pGMPage->FindAccount()->FindClient();
-	if ( pClient == NULL || pClient->GetChar() == NULL )
+	if ( pClient == nullptr || pClient->GetChar() == nullptr )
 	{
 		SysMessage( "The account is not logged in." );
 		if ( index == GPV_GO )
@@ -338,7 +338,7 @@ void CClient::Cmd_GM_PageSelect( size_t iSelect )
 	// 0 = cancel.
 	// 1 based.
 
-	if ( m_pGMPage != NULL )
+	if ( m_pGMPage != nullptr )
 	{
 		SysMessage( "Current message sent back to the queue" );
 		Cmd_GM_PageClear();
@@ -357,7 +357,7 @@ void CClient::Cmd_GM_PageSelect( size_t iSelect )
 	}
 
 	CGMPage * pPage = static_cast <CGMPage*>( g_World.m_GMPages.GetAt( m_tmMenu.m_Item[iSelect] ));
-	if ( pPage != NULL )
+	if ( pPage != nullptr )
 	{
 		if ( pPage->FindGMHandler())
 		{

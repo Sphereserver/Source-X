@@ -6,7 +6,7 @@
 #ifndef _INC_CSOBJLISTREC_H
 #define _INC_CSOBJLISTREC_H
 
-#include <cstddef>  // for NULL
+#include <cstddef>  // for nullptr
 class CSObjList;
 
 
@@ -24,12 +24,12 @@ public:
     */
     ///@{
     /**
-    * @brief set references for parent, next and previous to NULL.
+    * @brief set references for parent, next and previous to nullptr.
     */
     CSObjListRec()
     {
-        m_pParent = NULL;
-        m_pNext = m_pPrev = NULL;
+        m_pParent = nullptr;
+        m_pNext = m_pPrev = nullptr;
     }
     virtual inline ~CSObjListRec();
 private:

@@ -7,7 +7,7 @@
 CChatChanMember::CChatChanMember()
 {
     m_fChatActive = false;
-    m_pChannel = NULL;
+    m_pChannel = nullptr;
     m_fReceiving = true;
     m_fAllowWhoIs = true;
 }
@@ -58,7 +58,7 @@ void CChatChanMember::SetChatActive()
 
         // Send all existing channel names to this client
         const CChatChannel *pChannel = g_Serv.m_Chats.GetFirstChannel();
-        for ( ; pChannel != NULL; pChannel = pChannel->GetNext() )
+        for ( ; pChannel != nullptr; pChannel = pChannel->GetNext() )
         {
             pClient->addChatSystemMessage(CHATMSG_SendChannelName, pChannel->GetName(), pChannel->GetModeString());
         }

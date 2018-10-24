@@ -35,7 +35,7 @@ private:
     size_t FindMemberIndex( lpctstr pszName ) const;
 
 public:
-    explicit CChatChannel(lpctstr pszName, lpctstr pszPassword = NULL);
+    explicit CChatChannel(lpctstr pszName, lpctstr pszPassword = nullptr);
 
 private:
     CChatChannel(const CChatChannel& copy);
@@ -59,7 +59,7 @@ public:
     bool AddMember(CChatChanMember * pMember);
     void KickMember( CChatChanMember *pByMember, CChatChanMember * pMember );
     void Broadcast(CHATMSG_TYPE iType, lpctstr pszName, lpctstr pszText, CLanguageID lang = 0, bool fOverride = false);
-    void SendThisMember(CChatChanMember * pMember, CChatChanMember * pToMember = NULL);
+    void SendThisMember(CChatChanMember * pMember, CChatChanMember * pToMember = nullptr);
     void SendMembers(CChatChanMember * pMember);
     void RemoveMember(CChatChanMember * pMember);
     CChatChanMember * FindMember(lpctstr pszName) const;
@@ -77,7 +77,7 @@ public:
     void RevokeModerator(CChatChanMember * pByMember, lpctstr pszName);
     void ToggleModerator(CChatChanMember * pByMember, lpctstr pszName);
     void SendPrivateMessage(CChatChanMember * pFrom, lpctstr pszTo, lpctstr  pszMsg);
-    void KickAll(CChatChanMember * pMember = NULL);
+    void KickAll(CChatChanMember * pMember = nullptr);
 };
 
 

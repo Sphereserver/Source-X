@@ -176,7 +176,7 @@ void CCChampion::AddWhiteCandle(CUID uid)
     else
         _iSpawnsNextWhite = _iSpawnsNextRed / 5;
 
-    CItem * pCandle = NULL;
+    CItem * pCandle = nullptr;
     CItem *pLink = static_cast<CItem*>(GetLink());
     if (uid != static_cast<CUID>(UID_UNUSED))
     {
@@ -210,7 +210,7 @@ void CCChampion::AddWhiteCandle(CUID uid)
         pCandle->MoveTo(pt);
         pCandle->SetTopZ(pCandle->GetTopZ() + 4);
         pCandle->Update();
-        pCandle->GenerateScript(NULL);
+        pCandle->GenerateScript(nullptr);
     }
     _pWhiteCandles.push_back(pCandle->GetUID());
     pCandle->m_uidLink = pLink->GetUID();	// Link it to the champion, so if it gets removed the candle will be removed too
@@ -219,7 +219,7 @@ void CCChampion::AddWhiteCandle(CUID uid)
 void CCChampion::AddRedCandle(CUID uid)
 {
     ADDTOCALLSTACK("CCChampion::AddRedCandle");
-    CItem * pCandle = NULL;
+    CItem * pCandle = nullptr;
     if (uid != static_cast<CUID>(UID_UNUSED))
     {
         pCandle = uid.ItemFind();
@@ -311,7 +311,7 @@ void CCChampion::AddRedCandle(CUID uid)
         pCandle->SetTopZ(pCandle->GetTopZ() + 4);
         pCandle->SetHue(static_cast<HUE_TYPE>(33));
         pCandle->Update();
-        pCandle->GenerateScript(NULL);
+        pCandle->GenerateScript(nullptr);
         ClearWhiteCandles();
     }
     _pRedCandles.push_back(pCandle->GetUID());
@@ -567,7 +567,7 @@ lpctstr const CCChampion::sm_szLoadKeys[ICHMPL_QTY + 1] =
     "SPAWNSCUR",
     "SPAWNSMAX",
     "WHITECANDLES",
-    NULL
+    nullptr
 };
 
 enum ICHMPV_TYPE
@@ -598,7 +598,7 @@ lpctstr const CCChampion::sm_szVerbKeys[ICHMPV_QTY + 1] =
     "INIT",
     "MULTICREATE",
     "STOP",
-    NULL
+    nullptr
 };
 
 void CCChampion::r_Write(CScript & s)
@@ -860,7 +860,7 @@ lpctstr const CCChampionDef::sm_szLoadKeys[] =
     "NPCGROUP",
     "SPAWNS",
     "TYPE",
-    NULL
+    nullptr
 };
 
 

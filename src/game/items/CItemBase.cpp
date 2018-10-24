@@ -47,7 +47,7 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	{
 		if ( ! CItemBase::GetItemData( id, &tiledata ) )	// some valid items don't show up here !
 		{
-			// return NULL;
+			// return nullptr;
 		}
 	}
 	else
@@ -217,7 +217,7 @@ CREID_TYPE CItemBase::FindCharTrack( ITEMID_TYPE trackID )	// static
 	// IT_FIGURINE
 
 	CItemBase * pItemDef = CItemBase::FindItemBase( trackID );
-	if ( pItemDef == NULL )
+	if ( pItemDef == nullptr )
 		return CREID_INVALID;
 	if ( ! pItemDef->IsType(IT_EQ_HORSE) && ! pItemDef->IsType(IT_FIGURINE) )
 		return CREID_INVALID;
@@ -612,7 +612,7 @@ bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * pData ) // stat
 	}
 	catch (...)
 	{
-		g_Log.CatchEvent(NULL, "GetItemData" );
+		g_Log.CatchEvent(nullptr, "GetItemData" );
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		return false;
 	}
@@ -880,7 +880,7 @@ int CItemBase::CalculateMakeValue( int iQualityLevel ) const
 			continue;
 
 		CItemBase * pItemDef = CItemBase::FindItemBase( (ITEMID_TYPE)(rid.GetResIndex()) );
-		if ( pItemDef == NULL )
+		if ( pItemDef == nullptr )
 			continue;
 
 		lValue += pItemDef->GetMakeValue( iQualityLevel ) * (int)(m_BaseResources[i].GetResQty());
@@ -893,7 +893,7 @@ int CItemBase::CalculateMakeValue( int iQualityLevel ) const
 		if ( rid.GetResType() != RES_SKILL )
 			continue;
 		const CSkillDef* pSkillDef = g_Cfg.GetSkillDef((SKILL_TYPE)(rid.GetResIndex()));
-		if ( pSkillDef == NULL )
+		if ( pSkillDef == nullptr )
 			continue;
 
 		// this is the normal skill required.
@@ -962,7 +962,7 @@ lpctstr const CItemBase::sm_szLoadKeys[IBC_QTY+1] =
 	#define ADD(a,b) b,
 	#include "../../tables/CItemBase_props.tbl"
 	#undef ADD
-	NULL
+	nullptr
 };
 
 bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pChar )
@@ -972,7 +972,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 	EXC_TRY("WriteVal");
 	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
-		//return as string or hex number or NULL if not set
+		//return as string or hex number or nullptr if not set
 		case IBC_ALTERITEM:
 		case IBC_AMMOANIM:
 		case IBC_AMMOANIMHUE:
@@ -1642,7 +1642,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 		case IBC_WEIGHT:
 			// Read in the weight but it may not be decimalized correctly
 			{
-				bool fDecimal = ( strchr( s.GetArgStr(), '.' ) != NULL );
+				bool fDecimal = ( strchr( s.GetArgStr(), '.' ) != nullptr );
 				m_weight = s.GetArgWVal();
 				if ( ! fDecimal )
 					m_weight *= WEIGHT_UNITS;
@@ -1684,7 +1684,7 @@ CItemBase * CItemBase::MakeDupeReplacement( CItemBase * pBase, ITEMID_TYPE idmas
 	}
 
 	CItemBase * pBaseNew = FindItemBase( idmaster );
-	if ( pBaseNew == NULL )
+	if ( pBaseNew == nullptr )
 	{
 		DEBUG_ERR(( "CItemBase:DUPEITEM not exist 0%x==0%x\n", id, idmaster ));
 		return pBase;
@@ -1701,7 +1701,7 @@ CItemBase * CItemBase::MakeDupeReplacement( CItemBase * pBase, ITEMID_TYPE idmas
 
 	// create the dupe stub.
 	CUOItemTypeRec_HS tiledata;
-	CItemBaseDupe * pBaseDupe = NULL;
+	CItemBaseDupe * pBaseDupe = nullptr;
 
 	memset( &tiledata, 0, sizeof(tiledata));
 	pBaseDupe = new CItemBaseDupe( id, pBaseNew );
@@ -1730,7 +1730,7 @@ CItemBase * CItemBaseMulti::MakeMultiRegion( CItemBase * pBase, CScript & s ) //
 	// We must transform this object into a CItemBaseMulti
 
 	if ( !pBase )
-		return NULL;
+		return nullptr;
 
 	if ( ! pBase->IsTypeMulti(pBase->GetType()) )
 	{
@@ -1739,7 +1739,7 @@ CItemBase * CItemBaseMulti::MakeMultiRegion( CItemBase * pBase, CScript & s ) //
 	}
 
 	CItemBaseMulti * pMultiBase = dynamic_cast <CItemBaseMulti *>(pBase);
-	if ( pMultiBase == NULL )
+	if ( pMultiBase == nullptr )
 	{
 		if ( pBase->GetRefInstances() > 0 )
 		{
@@ -1780,7 +1780,7 @@ bool CItemBaseMulti::AddComponent( ITEMID_TYPE id, short dx, short dy, char dz )
 	if ( id > 0 )
 	{
 		CItemBase * pItemBase = FindItemBase(id);
-		if ( pItemBase == NULL )	// make sure the item is valid
+		if ( pItemBase == nullptr )	// make sure the item is valid
 		{
 			DEBUG_ERR(( "Bad COMPONENT 0%x\n", id ));
 			return false;
@@ -1861,7 +1861,7 @@ lpctstr const CItemBaseMulti::sm_szLoadKeys[] =
 	"REGIONFLAGS",
 	"SHIPSPEED",
 	"TSPEECH",
-	NULL
+	nullptr
 };
 
 bool CItemBaseMulti::r_LoadVal(CScript &s)
@@ -1937,7 +1937,7 @@ bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * 
         {
             pszKey += 13;
             const CSphereMulti* pMulti = g_Cfg.GetMultiItemDefs(GetDispID());
-            if (pMulti == NULL)
+            if (pMulti == nullptr)
                 return false;
 
             if (*pszKey == '\0')
@@ -2047,12 +2047,12 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 	// is a like item already loaded.
 
 	if ( id <= 0 )
-		return NULL;
+		return nullptr;
 
 	CResourceID rid = CResourceID( RES_ITEMDEF, id );
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
 	if ( index == g_Cfg.m_ResHash.BadIndex() )
-		return NULL;
+		return nullptr;
 
 	CResourceDef * pBaseStub = g_Cfg.m_ResHash.GetAt( rid, index );
 	ASSERT(pBaseStub);
@@ -2080,7 +2080,7 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 	{
 		// must be scripted. not in the artwork set.
 		g_Log.Event( LOGL_ERROR, "UN-scripted item 0%0x NOT allowed.\n", id );
-		return NULL;
+		return nullptr;
 	}
 
 	// Scan the item definition for keywords such as DUPEITEM and
@@ -2124,24 +2124,24 @@ CItemBaseDupe * CItemBaseDupe::GetDupeRef( ITEMID_TYPE id ) // static
 {
 	ADDTOCALLSTACK("CItemBaseDupe::GetDupeRef");
 	if ( id <= 0 )
-		return NULL;
+		return nullptr;
 
 	CResourceID rid = CResourceID( RES_ITEMDEF, id );
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
 	if ( index == g_Cfg.m_ResHash.BadIndex() )
-		return NULL;
+		return nullptr;
 
 	CResourceDef * pBaseStub = g_Cfg.m_ResHash.GetAt( rid, index );
 
 	CItemBase * pBase = dynamic_cast <CItemBase *>(pBaseStub);
 	if ( pBase )
-		return NULL; //We want to return Dupeitem, not Baseitem
+		return nullptr; //We want to return Dupeitem, not Baseitem
 
 	CItemBaseDupe * pBaseDupe = dynamic_cast <CItemBaseDupe *>(pBaseStub);
 	if ( pBaseDupe )
 		return pBaseDupe;	// this is just a dupeitem
 
-	return NULL; //we suspect item is loaded
+	return nullptr; //we suspect item is loaded
 }
 
 

@@ -20,7 +20,7 @@ class CScriptFileContext
     // Track a temporary context into a script.
     // NOTE: This should ONLY be stack based !
 private:
-    bool m_fOpenScript;	// NULL context may be legit.
+    bool m_fOpenScript;	// nullptr context may be legit.
     const CScript * m_pPrvScriptContext;	// previous general context before this was opened.
 private:
     void _Init()
@@ -60,7 +60,7 @@ class CScriptObjectContext
     // Track a temporary context of an object.
     // NOTE: This should ONLY be stack based !
 private:
-    bool m_fOpenObject;	// NULL context may be legit.
+    bool m_fOpenObject;	// nullptr context may be legit.
     const CScriptObj * m_pPrvObjectContext;	// previous general context before this was opened.
 private:
     void Init()
@@ -71,7 +71,7 @@ public:
     static const char *m_sClassName;
     void OpenObject( const CScriptObj * pObjectContext );
     void Close();
-    CScriptObjectContext() : m_pPrvObjectContext(NULL)
+    CScriptObjectContext() : m_pPrvObjectContext(nullptr)
     {
         Init();
     }

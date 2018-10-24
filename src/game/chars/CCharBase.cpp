@@ -51,7 +51,7 @@ lpctstr CCharBase::GetTradeName() const
 		return pName;
 
 	lpctstr pSpace = strchr( pName, ' ' );
-	if ( pSpace == NULL )
+	if ( pSpace == nullptr )
 		return pName;
 
 	++pSpace;
@@ -111,7 +111,7 @@ bool CCharBase::SetDispID( CREID_TYPE id )
 
 	// Copy the rest of the stuff from the display base.
 	CCharBase * pCharDef = FindCharBase( id );
-	if ( pCharDef == NULL )
+	if ( pCharDef == nullptr )
 	{
 		DEBUG_ERR(( "Creating char SetDispID(0%x) BAD\n", id ));
 		return false;
@@ -149,7 +149,7 @@ lpctstr const CCharBase::sm_szLoadKeys[CBC_QTY+1] =
 	#define ADD(a,b) b,
 	#include "../../tables/CCharBase_props.tbl"
 	#undef ADD
-	NULL
+	nullptr
 };
 
 bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
@@ -159,7 +159,7 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 	EXC_TRY("WriteVal");
 	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
-		//return as string or hex number or NULL if not set
+		//return as string or hex number or nullptr if not set
 		case CBC_THROWDAM:
 		case CBC_THROWOBJ:
 		case CBC_THROWRANGE:

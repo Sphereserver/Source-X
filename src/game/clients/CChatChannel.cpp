@@ -50,7 +50,7 @@ void CChatChannel::WhoIs(lpctstr pszBy, lpctstr pszMember)
     ADDTOCALLSTACK("CChatChannel::WhoIs");
     CChatChanMember * pBy = FindMember(pszBy);
     CChatChanMember * pMember = FindMember(pszMember);
-    CChar * pChar = pMember? pMember->GetClient()->GetChar() : NULL;
+    CChar * pChar = pMember? pMember->GetClient()->GetChar() : nullptr;
     if (!pMember||!pChar)
     {
         pBy->SendChatMsg(CHATMSG_NoPlayer, pszMember);
@@ -186,9 +186,9 @@ void CChatChannel::RemoveMember(CChatChanMember * pMember)
         // Tell the other clients in this channel (if any) you are leaving (including yourself)
         CClient * pClient = m_Members[i]->GetClient();
 
-        if ( pClient == NULL )		//	auto-remove offline clients
+        if ( pClient == nullptr )		//	auto-remove offline clients
         {
-            m_Members[i]->SetChannel(NULL);
+            m_Members[i]->SetChannel(nullptr);
             m_Members.erase(i);
             continue;
         }
@@ -204,21 +204,21 @@ void CChatChannel::RemoveMember(CChatChanMember * pMember)
     }
 
     // Update our persona
-    pMember->SetChannel(NULL);
+    pMember->SetChannel(nullptr);
 }
 
 CChatChanMember * CChatChannel::FindMember(lpctstr pszName) const
 {
     size_t i = FindMemberIndex( pszName );
     if ( i == m_Members.BadIndex() )
-        return NULL;
+        return nullptr;
     return m_Members[i];
 }
 
 bool CChatChannel::RemoveMember(lpctstr pszName)
 {
     CChatChanMember * pMember = FindMember(pszName);
-    if ( pMember == NULL )
+    if ( pMember == nullptr )
         return false;
     RemoveMember(pMember);
     return true;
@@ -277,7 +277,7 @@ void CChatChannel::KickMember(CChatChanMember *pByMember, CChatChanMember * pMem
     ASSERT( pMember );
 
     lpctstr pszByName;
-    if (pByMember) // If NULL, then an ADMIN or a GM did it
+    if (pByMember) // If nullptr, then an ADMIN or a GM did it
     {
         pszByName = pByMember->GetChatName();
         if (!IsModerator(pszByName))
@@ -348,7 +348,7 @@ void CChatChannel::SendThisMember(CChatChanMember * pMember, CChatChanMember * p
             (IsModerator(pMember->GetChatName()) == true) ? "1" :
             (HasVoice(pMember->GetChatName()) == true) ? "0" : "2", pMember->GetChatName());
     // If no particular member is specified in pToMember, then send it out to all members
-    if (pToMember == NULL)
+    if (pToMember == nullptr)
     {
         for (size_t i = 0; i < m_Members.size(); i++)
         {

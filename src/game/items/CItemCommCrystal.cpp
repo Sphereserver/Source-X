@@ -17,7 +17,7 @@ CItemCommCrystal::~CItemCommCrystal()
 lpctstr const CItemCommCrystal::sm_szLoadKeys[] =
 {
 	"SPEECH",
-	NULL,
+	nullptr,
 };
 
 void CItemCommCrystal::OnMoveFrom()

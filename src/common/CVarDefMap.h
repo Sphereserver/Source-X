@@ -171,12 +171,12 @@ public:
 	CVarDefCont * CheckParseKey( lpctstr & pszArgs ) const;
 	bool GetParseVal( lpctstr & pArgs, llong * plVal ) const;
 
-	void DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix = NULL ) const;
-	void ClearKeys(lpctstr mask = NULL);
+	void DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix = nullptr ) const;
+	void ClearKeys(lpctstr mask = nullptr);
 	void DeleteKey( lpctstr key );
 
 	bool r_LoadVal( CScript & s );
-	void r_WritePrefix( CScript & s, lpctstr pszPrefix = NULL, lpctstr pszKeyExclude = NULL );
+	void r_WritePrefix( CScript & s, lpctstr pszPrefix = nullptr, lpctstr pszKeyExclude = nullptr );
 };
 
 #endif // _INC_CVARDEFMAP_H

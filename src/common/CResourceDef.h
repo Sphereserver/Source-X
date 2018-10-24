@@ -22,11 +22,11 @@ protected:
     const CVarDefContNum * m_pDefName;	// The name of the resource. (optional)
 public:
     static const char *m_sClassName;
-    CResourceDef(CResourceID rid, lpctstr pszDefName) : m_rid(rid), m_pDefName(NULL)
+    CResourceDef(CResourceID rid, lpctstr pszDefName) : m_rid(rid), m_pDefName(nullptr)
     {
         SetResourceName(pszDefName);
     }
-    CResourceDef(CResourceID rid, const CVarDefContNum * pDefName = NULL) : m_rid(rid), m_pDefName(pDefName)
+    CResourceDef(CResourceID rid, const CVarDefContNum * pDefName = nullptr) : m_rid(rid), m_pDefName(pDefName)
     {
     }
     virtual ~CResourceDef()

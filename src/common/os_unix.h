@@ -44,8 +44,8 @@
 char * ITOA(int value, char *string, int radix);
 char * LTOA(long value, char *string, int radix);
 void STRREV(char* string);
-#define IsBadReadPtr( p, len )		((p) == NULL)
-#define IsBadStringPtr( p, len )	((p) == NULL)
+#define IsBadReadPtr( p, len )		((p) == nullptr)
+#define IsBadStringPtr( p, len )	((p) == nullptr)
 #define Sleep(mSec)					usleep(mSec*1000)	// arg is microseconds = 1/1000000
 #define SleepEx(mSec, unused)		usleep(mSec*1000)	// arg is microseconds = 1/1000000
 

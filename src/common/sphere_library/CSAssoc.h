@@ -47,7 +47,7 @@ enum ELEM_TYPE	// define types of structure/record elements.
 {
 	ELEM_VOID = 0,	// unknown what this might be. (or just 'other') (must be handled manually)
 	ELEM_CSTRING,	// Size prefix.
-	ELEM_STRING,	// Assume max size of REG_SIZE. NULL TERM string.
+	ELEM_STRING,	// Assume max size of REG_SIZE. nullptr TERM string.
 	ELEM_BOOL,		// bool = just 1 byte i guess.
 	ELEM_BYTE,		// 1 byte.
 	ELEM_MASK_BYTE,	// bits in a byte
@@ -85,9 +85,9 @@ public:
 
 class CAssocReg	// associate members of some class/structure with entries in the registry.
 {
-	// LAST = { NULL, 0, ELEM_VOID }
+	// LAST = { nullptr, 0, ELEM_VOID }
 public:
-	lpctstr m_pszKey;	// A single key identifier to be cat to a base key. NULL=last
+	lpctstr m_pszKey;	// A single key identifier to be cat to a base key. nullptr=last
 	CElementDef m_elem;
 public:
 	static const char *m_sClassName;

@@ -340,7 +340,7 @@ int CChar::NPC_GetVendorMarkup() const
 		return 0;
 
 	// Use char value
-	CVarDefCont	*pVar = NULL;
+	CVarDefCont	*pVar = nullptr;
 	pVar = m_TagDefs.GetKey("VENDORMARKUP");
 	if ( pVar )
 		return static_cast<int>(pVar->GetValNum());
@@ -413,11 +413,11 @@ bool CChar::NPC_CanSpeak() const
 	ADDTOCALLSTACK("CChar::NPC_CanSpeak");
 	ASSERT(m_pNPC);
 	//	players and chars with speech can
-	if ( m_pNPC == NULL || m_pNPC->m_Speech.size() > 0 )
+	if ( m_pNPC == nullptr || m_pNPC->m_Speech.size() > 0 )
 		return true;
 
 	CCharBase * pCharDef = Char_GetDef();
-	return ( pCharDef != NULL && (pCharDef->m_Speech.size() > 0) );
+	return ( pCharDef != nullptr && (pCharDef->m_Speech.size() > 0) );
 }
 
 bool CChar::NPC_FightMayCast(bool fCheckSkill) const
@@ -445,7 +445,7 @@ bool CChar::NPC_IsOwnedBy( const CChar * pChar, bool fAllowGM ) const
 	// BESERK will not listen to commands tho.
 	// fAllowGM = consider GM's to be owners of all NPC's
 
-	if ( pChar == NULL )
+	if ( pChar == nullptr )
 		return false;
 	if ( this == pChar )
 		return true;
@@ -456,7 +456,7 @@ bool CChar::NPC_IsOwnedBy( const CChar * pChar, bool fAllowGM ) const
 	if ( ! IsStatFlag( STATF_PET ) )
 		return false;
 
-	return ( Memory_FindObjTypes( pChar, MEMORY_IPET ) != NULL );
+	return ( Memory_FindObjTypes( pChar, MEMORY_IPET ) != nullptr );
 }
 
 CChar * CChar::NPC_PetGetOwner() const
@@ -466,11 +466,11 @@ CChar * CChar::NPC_PetGetOwner() const
 	// Assume i am a pet. Get my owner. not just friends. used for blame.
 
 	if ( !IsStatFlag(STATF_PET) )
-		return NULL;
+		return nullptr;
 
 	CItemMemory	*pMemory = Memory_FindTypes(MEMORY_IPET);
 	if ( !pMemory )
-		return NULL;
+		return nullptr;
 
 	return pMemory->m_uidLink.CharFind();
 }
@@ -483,14 +483,14 @@ CChar * CChar::NPC_PetGetOwnerRecursive() const
 
 	static int iReentrantCheck_PetGetOwnerRecursive = 0;
 
-	CChar *pCharOwner = NULL, *pCharOwnerNext = const_cast<CChar*>(this);
-	while ((pCharOwnerNext = pCharOwnerNext->NPC_PetGetOwner()) != NULL)
+	CChar *pCharOwner = nullptr, *pCharOwnerNext = const_cast<CChar*>(this);
+	while ((pCharOwnerNext = pCharOwnerNext->NPC_PetGetOwner()) != nullptr)
 	{
 		if (iReentrantCheck_PetGetOwnerRecursive > 30)
 		{
 			DEBUG_ERR(("Too many owners (circular ownership?) to continue searching the primary owner of %s uid=0%x\n", GetName(), GetUID().GetPrivateUID()));
 			iReentrantCheck_PetGetOwnerRecursive = 0;
-			return NULL;
+			return nullptr;
 		}
 		pCharOwner = pCharOwnerNext;
 		if (!pCharOwner->m_pNPC)
@@ -541,7 +541,7 @@ bool CChar::NPC_CheckWalkHere( const CPointBase & pt, const CRegion * pArea, dwo
 	if ( !pt.IsValidXY() )
 		return true;
 
-	if ( m_pArea != NULL )
+	if ( m_pArea != nullptr )
 	{
 		if ( m_pNPC->m_Brain == NPCBRAIN_GUARD && !IsStatFlag(STATF_WAR) )	// guards will want to stay in guard range
 		{
@@ -561,7 +561,7 @@ bool CChar::NPC_CheckWalkHere( const CPointBase & pt, const CRegion * pArea, dwo
 	for (;;)
 	{
 		CItem * pItem = AreaItems.GetItem();
-		if ( pItem == NULL )
+		if ( pItem == nullptr )
 			break;
 
 		if ( abs(pItem->GetTopZ() - pt.m_z) > 5 )
@@ -591,17 +591,17 @@ CItemVendable * CChar::NPC_FindVendableItem( CItemVendable * pVendItem, CItemCon
 	UNREFERENCED_PARAMETER(pContStock);
 	// Does the NPC want to buy this item?
 	if ( !pVendItem || !pContBuy || !pVendItem->IsValidSaleItem(false) )
-		return NULL;
+		return nullptr;
 
 	CItem * pItemTest = pContBuy->ContentFind(CResourceID(RES_ITEMDEF, pVendItem->GetID()));
-	if ( pItemTest == NULL )
-		return NULL;
+	if ( pItemTest == nullptr )
+		return nullptr;
 
 	CItemVendable * pItemSell = dynamic_cast<CItemVendable *>(pItemTest);
-	if ( pItemSell == NULL )	// the item is not vendable
-		return NULL;
+	if ( pItemSell == nullptr )	// the item is not vendable
+		return nullptr;
 	if ( pVendItem->GetType() != pItemSell->GetType())	// sanity check
-		return NULL;
+		return nullptr;
 
 	return pItemSell;
 }
@@ -628,7 +628,7 @@ int CChar::NPC_WantThisItem( CItem * pItem ) const
 		return 0;
 
 	CCharBase * pCharDef = Char_GetDef();
-	ASSERT(pCharDef != NULL);
+	ASSERT(pCharDef != nullptr);
 	size_t iRet = pCharDef->m_Desires.FindResourceMatch(pItem);
 	if ( iRet != pCharDef->m_Desires.BadIndex() )
 		return (int)(pCharDef->m_Desires[iRet].GetResQty());
@@ -671,7 +671,7 @@ int CChar::NPC_GetWeaponUseScore( CItem * pWeapon )
 			return 0;
 
 		// I can't equip this anyhow.
-		if ( CanEquipLayer( pWeapon, LAYER_QTY, NULL, true ) == LAYER_NONE )
+		if ( CanEquipLayer( pWeapon, LAYER_QTY, nullptr, true ) == LAYER_NONE )
 			return 0;
 		// How much damage could i do with this ?
 	}
@@ -714,7 +714,7 @@ int CChar::NPC_GetHostilityLevelToward( const CChar * pCharTarg ) const
 
 	// if it is a pet - register it the same as it's master.
 	CChar * pCharOwn = pCharTarg->GetOwner();
-	if ( pCharOwn != NULL && pCharOwn != this )
+	if ( pCharOwn != nullptr && pCharOwn != this )
 	{
 		static int sm_iReentrant = 0;
 		if (sm_iReentrant > 32)

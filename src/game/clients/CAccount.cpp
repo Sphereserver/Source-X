@@ -58,7 +58,7 @@ bool CAccounts::Account_Load( lpctstr pszNameRaw, CScript & s, bool fChanges )
 	else
 	{
 		pAccount = new CAccount(szName);
-		ASSERT(pAccount != NULL);
+		ASSERT(pAccount != nullptr);
 	}
 	pAccount->r_Load(s);
 
@@ -102,7 +102,7 @@ bool CAccounts::Account_LoadAll( bool fChanges, bool fClearChanges )
 		ASSERT( fChanges );
 		// empty the changes file.
 		s.Close();
-		s.Open(NULL, OF_WRITE|OF_TEXT|OF_DEFAULTMODE);
+		s.Open(nullptr, OF_WRITE|OF_TEXT|OF_DEFAULTMODE);
 		s.WriteString( "// Accounts are periodically moved to the " SPHERE_FILE "accu" SPHERE_SCRIPT " file.\n"
 			"// All account changes should be made here.\n"
 			"// Use the /ACCOUNT UPDATE command to force accounts to update.\n"
@@ -163,10 +163,10 @@ CAccountRef CAccounts::Account_FindChat( lpctstr pszChatName )
 	for ( size_t i = 0; i < m_Accounts.size(); i++ )
 	{
 		CAccountRef pAccount = Account_Get(i);
-		if ( pAccount != NULL && pAccount->m_sChatName.CompareNoCase(pszChatName) == 0 )
+		if ( pAccount != nullptr && pAccount->m_sChatName.CompareNoCase(pszChatName) == 0 )
 			return pAccount;
 	}
-	return NULL;
+	return nullptr;
 }
 
 CAccountRef CAccounts::Account_Find( lpctstr pszName )
@@ -175,13 +175,13 @@ CAccountRef CAccounts::Account_Find( lpctstr pszName )
 	tchar szName[ MAX_ACCOUNT_NAME_SIZE ];
 
 	if ( !CAccount::NameStrip(szName, pszName) )
-		return NULL;
+		return nullptr;
 
 	size_t i = m_Accounts.FindKey(szName);
 	if ( i != m_Accounts.BadIndex() )
 		return Account_Get(i);
 
-	return NULL;
+	return nullptr;
 }
 
 CAccountRef CAccounts::Account_FindCreate( lpctstr pszName, bool fAutoCreate )
@@ -204,18 +204,18 @@ CAccountRef CAccounts::Account_FindCreate( lpctstr pszName, bool fAutoCreate )
 		else
 			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Account '%s': BAD name\n", pszName);
 	}
-	return NULL;
+	return nullptr;
 }
 
 bool CAccounts::Account_Delete( CAccount * pAccount )
 {
 	ADDTOCALLSTACK("CAccounts::Account_Delete");
-	ASSERT(pAccount != NULL);
+	ASSERT(pAccount != nullptr);
 
 	CScriptTriggerArgs Args;
 	Args.Init(pAccount->GetName());
 	enum TRIGRET_TYPE tr = TRIGRET_RET_FALSE;
-	g_Serv.r_Call("f_onaccount_delete", &g_Serv, &Args, NULL, &tr);
+	g_Serv.r_Call("f_onaccount_delete", &g_Serv, &Args, nullptr, &tr);
 	if ( tr == TRIGRET_RET_TRUE )
 	{
 		return false;
@@ -228,14 +228,14 @@ bool CAccounts::Account_Delete( CAccount * pAccount )
 void CAccounts::Account_Add( CAccount * pAccount )
 {
 	ADDTOCALLSTACK("CAccounts::Account_Add");
-	ASSERT(pAccount != NULL);
+	ASSERT(pAccount != nullptr);
 	if ( !g_Serv.IsLoading() )
 	{
 		CScriptTriggerArgs Args;
 		Args.Init(pAccount->GetName());
 		//Accounts are 'created' in server startup so we don't fire the function.
 		TRIGRET_TYPE tRet = TRIGRET_RET_FALSE;
-		g_Serv.r_Call("f_onaccount_create", &g_Serv, &Args, NULL, &tRet);
+		g_Serv.r_Call("f_onaccount_create", &g_Serv, &Args, nullptr, &tRet);
 		if ( tRet == TRIGRET_RET_TRUE )
 		{
 			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Account '%s': Creation blocked via script\n", pAccount->GetName());
@@ -250,21 +250,21 @@ CAccountRef CAccounts::Account_Get( size_t index )
 {
 	ADDTOCALLSTACK("CAccounts::Account_Get");
 	if ( ! m_Accounts.IsValidIndex(index))
-		return NULL;
+		return nullptr;
 	return( CAccountRef( static_cast <CAccount *>( m_Accounts[index])));
 }
 
 bool CAccounts::Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr pszArg, bool md5 )
 {
 	ADDTOCALLSTACK("CAccounts::Cmd_AddNew");
-	if (pszName == NULL || pszName[0] == '\0')
+	if (pszName == nullptr || pszName[0] == '\0')
 	{
 		g_Log.Event(LOGL_ERROR|LOGM_INIT, "Username is required to add an account.\n" );
 		return false;
 	}
 
 	CAccountRef pAccount = Account_Find( pszName );
-	if ( pAccount != NULL )
+	if ( pAccount != nullptr )
 	{
 		pSrc->SysMessagef( "Account '%s' already exists\n", pszName );
 		return false;
@@ -311,7 +311,7 @@ lpctstr const CAccounts::sm_szVerbKeys[] =	// CAccounts:: // account group verbs
 	"JAILED",
 	"UNUSED",
 	"UPDATE",
-	NULL,
+	nullptr,
 };
 
 bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, lpctstr pszDays, lpctstr pszVerb, lpctstr pszArgs, dword dwMask)
@@ -333,7 +333,7 @@ bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, lpctstr pszDays, lpctstr psz
 			i--;
 		}
 		CAccountRef pAccount = Account_Get(i);
-		if ( pAccount == NULL )
+		if ( pAccount == nullptr )
 			break;
 
 		int iDaysAcc = pAccount->m_dateLastConnect.GetDaysTotal();
@@ -347,7 +347,7 @@ bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, lpctstr pszDays, lpctstr psz
 		if ( dwMask && !pAccount->IsPriv((word)(dwMask)) ) continue;
 
 		iCount ++;
-		if ( pszVerb == NULL || pszVerb[0] == '\0' )
+		if ( pszVerb == nullptr || pszVerb[0] == '\0' )
 		{
 			// just list stuff about the account.
 			CScript script("SHOW LASTCONNECTDATE");
@@ -401,7 +401,7 @@ bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 
 	VACS_TYPE index;
 	if ( iQty <= 0 ||
-		ppCmd[0] == NULL ||
+		ppCmd[0] == nullptr ||
 		ppCmd[0][0] == '\0' )
 	{
 		index = VACS_HELP;
@@ -459,7 +459,7 @@ bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 	// Must be a valid account ?
 
 	CAccountRef pAccount = Account_Find( ppCmd[0] );
-	if ( pAccount == NULL )
+	if ( pAccount == nullptr )
 	{
 		pSrc->SysMessagef( "Account '%s' does not exist\n", ppCmd[0] );
 		return false;
@@ -472,7 +472,7 @@ bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 		char	*z = Str_GetTemp();
 		sprintf(z, "Account '%s': PLEVEL:%d, BLOCK:%d, IP:%s, CONNECTED:%s, ONLINE:%s\n",
 			pAccount->GetName(), pAccount->GetPrivLevel(), pAccount->IsPriv(PRIV_BLOCKED),
-			pAccount->m_Last_IP.GetAddrStr(), pAccount->m_dateLastConnect.Format(NULL),
+			pAccount->m_Last_IP.GetAddrStr(), pAccount->m_dateLastConnect.Format(nullptr),
 			( pClient ? ( pClient->GetChar() ? pClient->GetChar()->GetName() : "<not logged>" ) : "no" ));
 		pSrc->SysMessage(z);
 		return true;
@@ -529,7 +529,7 @@ static lpctstr const sm_szPrivLevels[ PLEVEL_QTY+1 ] =
 	"Dev",			// 5 = Not bothererd by GM's
 	"Admin",		// 6 = Can switch in and out of gm mode. assign GM's
 	"Owner",		// 7 = Highest allowed level.
-	NULL
+	nullptr
 };
 
 PLEVEL_TYPE CAccount::GetPrivLevelText( lpctstr pszFlags ) // static
@@ -578,7 +578,7 @@ void CAccount::DeleteChars()
 {
 	ADDTOCALLSTACK("CAccount::DeleteChars");
 	CClient * pClient = FindClient();
-	if ( pClient != NULL )
+	if ( pClient != nullptr )
 	{	// we have no choice but to kick them.
 		pClient->GetNetState()->markReadClosed();
 	}
@@ -590,7 +590,7 @@ void CAccount::DeleteChars()
 		while (i > 0)
 		{
 			CChar * pChar = m_Chars.GetChar(--i).CharFind();
-			if (pChar != NULL)
+			if (pChar != nullptr)
 			{
 				pChar->Delete();
 				pChar->ClearPlayer();
@@ -619,12 +619,12 @@ void CAccount::SetPrivLevel( PLEVEL_TYPE plevel )
 CClient * CAccount::FindClient( const CClient * pExclude ) const
 {
 	ADDTOCALLSTACK("CAccount::FindClient");
-	if ( this == NULL )
-		return NULL;	// this might be possible.
+	if ( this == nullptr )
+		return nullptr;	// this might be possible.
 
-	CClient* pClient = NULL;
+	CClient* pClient = nullptr;
 	ClientIterator it;
-	for (pClient = it.next(); pClient != NULL; pClient = it.next())
+	for (pClient = it.next(); pClient != nullptr; pClient = it.next())
 	{
 		if ( pClient == pExclude )
 			continue;
@@ -637,9 +637,9 @@ CClient * CAccount::FindClient( const CClient * pExclude ) const
 bool CAccount::IsMyAccountChar( const CChar * pChar ) const
 {
 	ADDTOCALLSTACK("CAccount::IsMyAccountChar");
-	if ( pChar == NULL )
+	if ( pChar == nullptr )
 		return false;
-	if ( pChar->m_pPlayer == NULL )
+	if ( pChar->m_pPlayer == nullptr )
 		return false;
 	return(	pChar->m_pPlayer->GetAccount() == this );
 }
@@ -682,7 +682,7 @@ void CAccount::TogPrivFlags( word wPrivFlags, lpctstr pszArgs )
 {
 	ADDTOCALLSTACK("CAccount::TogPrivFlags");
 
-	if ( pszArgs == NULL || pszArgs[0] == '\0' )	// toggle.
+	if ( pszArgs == nullptr || pszArgs[0] == '\0' )	// toggle.
 	{
 		m_PrivFlags ^= wPrivFlags;
 	}
@@ -727,7 +727,7 @@ void CAccount::OnLogin( CClient * pClient )
 		pClient->GetSocketID(), GetName(), pClient->GetPeerStr(), pClient->GetConnectTypeStr(pClient->GetConnectType()) );
 
 	m_Last_IP = pClient->GetPeer();
-	//m_TagDefs.SetStr("LastLogged", false, m_dateLastConnect.Format(NULL));
+	//m_TagDefs.SetStr("LastLogged", false, m_dateLastConnect.Format(nullptr));
 	//m_dateLastConnect = datetime;
 }
 
@@ -885,7 +885,7 @@ bool CAccount::CheckPassword( lpctstr pszPassword )
 	Args.m_VarsLocal.SetStrNew("Account",GetName());
 	Args.m_VarsLocal.SetStrNew("Password",pszPassword);
 	TRIGRET_TYPE tr = TRIGRET_RET_FALSE;
-	g_Serv.r_Call("f_onaccount_connect", &g_Serv, &Args, NULL, &tr);
+	g_Serv.r_Call("f_onaccount_connect", &g_Serv, &Args, nullptr, &tr);
 	if ( tr == TRIGRET_RET_TRUE )
 		return false;
 	if ( tr == TRIGRET_RET_HALFBAKED)
@@ -935,7 +935,7 @@ bool CAccount::SetPassword( lpctstr pszPassword, bool isMD5Hash )
 		Args.Init(GetName());
 		Args.m_VarsLocal.SetStrNew("password",pszPassword);
 		TRIGRET_TYPE tRet = TRIGRET_RET_FALSE;
-		g_Serv.r_Call("f_onaccount_pwchange", &g_Serv, &Args, NULL, &tRet);
+		g_Serv.r_Call("f_onaccount_pwchange", &g_Serv, &Args, nullptr, &tRet);
 		if ( tRet == TRIGRET_RET_TRUE )
 		{
 			return false;
@@ -1104,7 +1104,7 @@ lpctstr const CAccount::sm_szLoadKeys[AC_QTY+1] = // static
 	"TAG0",
 	"TAGCOUNT",
 	"TOTALCONNECTTIME",
-	NULL,
+	nullptr,
 };
 
 bool CAccount::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
@@ -1153,7 +1153,7 @@ bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			sVal.FormatSTVal( m_TagDefs.GetCount() );
 			break;
 		case AC_FIRSTCONNECTDATE:
-			sVal = m_dateFirstConnect.Format(NULL);
+			sVal = m_dateFirstConnect.Format(nullptr);
 			break;
 		case AC_FIRSTIP:
 			sVal = m_First_IP.GetAddrStr();
@@ -1171,7 +1171,7 @@ bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			sVal.FormatHex( m_uidLastChar );
 			break;
 		case AC_LASTCONNECTDATE:
-			sVal = m_dateLastConnect.Format(NULL);
+			sVal = m_dateLastConnect.Format(nullptr);
 			break;
 		case AC_LASTCONNECTTIME:
 			sVal.FormatLLVal( m_Last_Connect_Time );
@@ -1267,7 +1267,7 @@ bool CAccount::r_LoadVal( CScript & s )
 			{
 				CUID uid( s.GetArgVal());
 				CChar * pChar = uid.CharFind();
-				if (pChar == NULL)
+				if (pChar == nullptr)
 				{
 					DEBUG_ERR(( "Invalid CHARUID 0%x for account '%s'\n", (dword)(uid), GetName()));
 					return false;
@@ -1450,7 +1450,7 @@ void CAccount::r_Write(CScript &s)
 
 	if ( m_dateFirstConnect.IsTimeValid())
 	{
-		s.WriteKey( "FIRSTCONNECTDATE", m_dateFirstConnect.Format(NULL));
+		s.WriteKey( "FIRSTCONNECTDATE", m_dateFirstConnect.Format(nullptr));
 	}
 	if ( m_First_IP.IsValidAddr() )
 	{
@@ -1459,7 +1459,7 @@ void CAccount::r_Write(CScript &s)
 
 	if ( m_dateLastConnect.IsTimeValid())
 	{
-		s.WriteKey( "LASTCONNECTDATE", m_dateLastConnect.Format(NULL));
+		s.WriteKey( "LASTCONNECTDATE", m_dateLastConnect.Format(nullptr));
 	}
 	if ( m_Last_IP.IsValidAddr() )
 	{
@@ -1494,7 +1494,7 @@ lpctstr const CAccount::sm_szVerbKeys[] =
 	"DELETE",
 	"KICK",
 	"TAGLIST",
-	NULL,
+	nullptr,
 };
 
 bool CAccount::r_Verb( CScript &s, CTextConsole * pSrc )

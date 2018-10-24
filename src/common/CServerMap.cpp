@@ -361,18 +361,18 @@ CServerMapDiffBlock::CServerMapDiffBlock(dword dwBlockId, int map)
 	m_BlockId = dwBlockId;
 	m_map = map;
 	m_iStaticsCount = -1;
-	m_pStaticsBlock = NULL;
-	m_pTerrainBlock = NULL;
+	m_pStaticsBlock = nullptr;
+	m_pTerrainBlock = nullptr;
 };
 
 CServerMapDiffBlock::~CServerMapDiffBlock()
 {
-	if ( m_pStaticsBlock != NULL )
+	if ( m_pStaticsBlock != nullptr )
 		delete[] m_pStaticsBlock;
-	if ( m_pTerrainBlock != NULL )
+	if ( m_pTerrainBlock != nullptr )
 		delete m_pTerrainBlock;
-	m_pStaticsBlock = NULL;
-	m_pTerrainBlock = NULL;
+	m_pStaticsBlock = nullptr;
+	m_pTerrainBlock = nullptr;
 };
 
 //////////////////////////////////////////////////////////////////
@@ -428,21 +428,21 @@ void CServerStaticsBlock::LoadStatics( uint uiCount, CUOStaticItemRec * pStatics
 	}
 	else
 	{
-		if ( m_pStatics != NULL )
+		if ( m_pStatics != nullptr )
 			delete[] m_pStatics;
-		m_pStatics = NULL;
+		m_pStatics = nullptr;
 	}
 }
 
 CServerStaticsBlock::CServerStaticsBlock()
 {
 	m_iStatics = 0;
-	m_pStatics = NULL;
+	m_pStatics = nullptr;
 }
 
 CServerStaticsBlock::~CServerStaticsBlock()
 {
-	if ( m_pStatics != NULL )
+	if ( m_pStatics != nullptr )
 		delete[] m_pStatics;
 }
 
@@ -501,7 +501,7 @@ void CServerMapBlock::Load( int bx, int by )
 	{
 		int mapNumber = g_MapList.m_mapnum[m_map];
 		CSFile * pFile = &(g_Install.m_Maps[mapNumber]);
-		ASSERT(pFile != NULL);
+		ASSERT(pFile != nullptr);
 		ASSERT(pFile->IsFileOpen());
 
 		// determine the location in the file where the data needs to be read from
@@ -590,12 +590,12 @@ CServerMapBlock::CServerMapBlock(int bx, int by, int map) :
 void CSphereMulti::Init()
 {
 	m_id = MULTI_QTY;
-	m_pItems = NULL;
+	m_pItems = nullptr;
 	m_iItemQty = 0;
 }
 void CSphereMulti::Release()
 {
-	if ( m_pItems != NULL )
+	if ( m_pItems != nullptr )
 	{
 		delete[] m_pItems;
 		Init();
@@ -712,7 +712,7 @@ void CServerMapDiffCollection::LoadMapDiffs()
 
 	dword dwLength = 0, dwBlockId = 0;
 	dword dwOffset = 0, dwRead = 0;
-	CServerMapDiffBlock * pMapDiffBlock = NULL;
+	CServerMapDiffBlock * pMapDiffBlock = nullptr;
 
 	for ( int m = 0; m < 256; ++m )
 	{
@@ -790,7 +790,7 @@ void CServerMapDiffCollection::LoadMapDiffs()
 					delete[] pMapDiffBlock->m_pStaticsBlock;
 
 				pMapDiffBlock->m_iStaticsCount = 0;
-				pMapDiffBlock->m_pStaticsBlock = NULL;
+				pMapDiffBlock->m_pStaticsBlock = nullptr;
 
 				if ( (uint)pFileStadifi->Seek( dwOffset ) != dwOffset )
 				{
@@ -822,7 +822,7 @@ void CServerMapDiffCollection::LoadMapDiffs()
 					// be left with no statics
 					pMapDiffBlock->m_iStaticsCount = 0;
 					delete[] pMapDiffBlock->m_pStaticsBlock;
-					pMapDiffBlock->m_pStaticsBlock = NULL;
+					pMapDiffBlock->m_pStaticsBlock = nullptr;
 					g_Log.EventError("Reading stadif%d.mul FAILED. [index=%u offset=%u]\n", map, dwBlockId, dwOffset);
 					break;
 				}
@@ -867,12 +867,12 @@ CServerMapDiffBlock * CServerMapDiffCollection::GetAtBlock(dword dwBlockId, int 
 	// Retrieve a MapDiff block for the specified block id
 	ADDTOCALLSTACK("CServerMapDiffCollection::GetAtBlock");
 	if ( !g_MapList.IsMapSupported( map ) )
-		return NULL;
+		return nullptr;
 
 	// Locate the requested block
 	size_t index = m_pMapDiffBlocks[map].FindKey( dwBlockId );
 	if ( index == m_pMapDiffBlocks[map].BadIndex() )
-		return NULL;
+		return nullptr;
 
 	return m_pMapDiffBlocks[map].at(index);
 }

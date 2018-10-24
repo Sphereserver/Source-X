@@ -55,7 +55,7 @@ bool CChar::Attacker_Add(CChar * pChar, int64 threat)
         //if ( GetTopSector()->GetCharComplexity() < 7 )
         //{
         sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_COMBAT_ATTACKO), GetName(), pChar->GetName());
-        UpdateObjMessage(z, NULL, pChar->GetClient(), (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_COLOR")), TALKMODE_EMOTE);
+        UpdateObjMessage(z, nullptr, pChar->GetClient(), (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_COLOR")), TALKMODE_EMOTE);
         //}
 
         if (pChar->IsClient() && pChar->CanSee(this))
@@ -124,7 +124,7 @@ CChar * CChar::Attacker_GetLast() const
 {
     ADDTOCALLSTACK("CChar::Attacker_GetLast");
     int64 dwLastTime = INT32_MAX, dwCurTime = 0;
-    CChar * retChar = NULL;
+    CChar * retChar = nullptr;
     for (const LastAttackers & refAttacker : m_lastAttackers)
     {
         dwCurTime = refAttacker.elapsed;
@@ -291,9 +291,9 @@ CChar * CChar::Attacker_GetUID(size_t attackerIndex) const
 {
     ADDTOCALLSTACK("CChar::Attacker_GetUID");
     if (m_lastAttackers.empty())
-        return NULL;
+        return nullptr;
     if (m_lastAttackers.size() <= attackerIndex)
-        return NULL;
+        return nullptr;
     const LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
     CChar * pChar = CUID(refAttacker.charUID).CharFind();
     return pChar;

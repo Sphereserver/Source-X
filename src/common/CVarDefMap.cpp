@@ -97,7 +97,7 @@ bool CVarDefContNum::r_LoadVal( CScript & s )
 	return true;
 }
 
-bool CVarDefContNum::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = NULL )
+bool CVarDefContNum::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr )
 {
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
@@ -151,7 +151,7 @@ bool CVarDefContStr::r_LoadVal( CScript & s )
 	return true;
 }
 
-bool CVarDefContStr::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = NULL )
+bool CVarDefContStr::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr )
 {
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
@@ -182,7 +182,7 @@ CVarDefMap::CVarDefContTest::~CVarDefContTest()
 
 lpctstr CVarDefMap::CVarDefContTest::GetValStr() const 
 { 
-	return NULL; 
+	return nullptr; 
 }
 	
 int64 CVarDefMap::CVarDefContTest::GetValNum() const 
@@ -241,14 +241,14 @@ lpctstr CVarDefMap::FindValStr( lpctstr pVal ) const
 		ASSERT( pVarBase );
 		
 		const CVarDefContStr * pVarStr = dynamic_cast <const CVarDefContStr *>( pVarBase );
-		if ( pVarStr == NULL )
+		if ( pVarStr == nullptr )
 			continue;
 		
 		if ( ! strcmpi( pVal, pVarStr->GetValStr()))
 			return( pVarBase->GetKey() );
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 lpctstr CVarDefMap::FindValNum( int64 iVal ) const
@@ -260,21 +260,21 @@ lpctstr CVarDefMap::FindValNum( int64 iVal ) const
 		ASSERT( pVarBase );
 
 		const CVarDefContNum * pVarNum = dynamic_cast <const CVarDefContNum *>( pVarBase );
-		if ( pVarNum == NULL )
+		if ( pVarNum == nullptr )
 			continue;
 
 		if ( pVarNum->GetValNum() == iVal )
 			return( pVarBase->GetKey() );
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 CVarDefCont * CVarDefMap::GetAt( size_t at ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::GetAt");
 	if ( at > m_Container.size() )
-		return NULL;
+		return nullptr;
 
 	DefSet::iterator i = m_Container.begin();
 	while ( at-- )
@@ -283,7 +283,7 @@ CVarDefCont * CVarDefMap::GetAt( size_t at ) const
 	if ( i != m_Container.end() )
 		return( (*i) );
 	else
-		return NULL;
+		return nullptr;
 }
 
 CVarDefCont * CVarDefMap::GetAtKey( lpctstr at ) const
@@ -296,7 +296,7 @@ CVarDefCont * CVarDefMap::GetAtKey( lpctstr at ) const
 	if ( i != m_Container.end() )
 		return (*i);
 	else
-		return NULL;
+		return nullptr;
 }
 
 void CVarDefMap::DeleteAt( size_t at )
@@ -494,7 +494,7 @@ int CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fZero )
 	DefSet::iterator iResult = m_Container.find(pVarSearch);
 	delete pVarSearch;
 
-	CVarDefCont * pVarBase = NULL;
+	CVarDefCont * pVarBase = nullptr;
 	if ( iResult != m_Container.end() )
 		pVarBase = (*iResult);
 
@@ -545,7 +545,7 @@ int CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, bool fZer
 	if ( !pszName || !pszName[0] )
 		return -1;
 
-	if ( pszVal == NULL || pszVal[0] == '\0' )	// but not if empty
+	if ( pszVal == nullptr || pszVal[0] == '\0' )	// but not if empty
 	{
 		DeleteAtKey(pszName);
 		return -1;
@@ -561,7 +561,7 @@ int CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, bool fZer
 	DefSet::iterator iResult = m_Container.find(pVarSearch);
 	delete pVarSearch;
 
-	CVarDefCont * pVarBase = NULL;
+	CVarDefCont * pVarBase = nullptr;
 	if ( iResult != m_Container.end() )
 		pVarBase = (*iResult);
 
@@ -583,7 +583,7 @@ int CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, bool fZer
 CVarDefCont * CVarDefMap::GetKey( lpctstr pszKey ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::GetKey");
-	CVarDefCont * pReturn = NULL;
+	CVarDefCont * pReturn = nullptr;
 
 	if ( pszKey )
 	{
@@ -602,7 +602,7 @@ int64 CVarDefMap::GetKeyNum( lpctstr pszKey, bool fZero ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::GetKeyNum");
 	CVarDefCont * pVar = GetKey(pszKey);
-	if ( pVar == NULL )
+	if ( pVar == nullptr )
 		return (fZero ? 0 : NULL);
 	return pVar->GetValNum();
 }
@@ -611,7 +611,7 @@ lpctstr CVarDefMap::GetKeyStr( lpctstr pszKey, bool fZero ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::GetKeyStr");
 	CVarDefCont * pVar = GetKey(pszKey);
-	if ( pVar == NULL )
+	if ( pVar == nullptr )
 		return (fZero ? "0" : "");
 	return pVar->GetValStr();
 }
@@ -625,7 +625,7 @@ CVarDefCont * CVarDefMap::CheckParseKey( lpctstr & pszArgs ) const
 	if ( pVar )
 		return pVar;
 
-	return NULL;
+	return nullptr;
 }
 
 CVarDefCont * CVarDefMap::GetParseKey( lpctstr & pszArgs ) const
@@ -643,14 +643,14 @@ CVarDefCont * CVarDefMap::GetParseKey( lpctstr & pszArgs ) const
 		return pVar;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 bool CVarDefMap::GetParseVal( lpctstr & pszArgs, long long * plVal ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::GetParseVal");
 	CVarDefCont * pVarBase = GetParseKey( pszArgs );
-	if ( pVarBase == NULL )
+	if ( pVarBase == nullptr )
 		return false;
 	*plVal = pVarBase->GetValNum();
 	return true;
@@ -661,7 +661,7 @@ void CVarDefMap::DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix ) const
 	ADDTOCALLSTACK("CVarDefMap::DumpKeys");
 	// List out all the keys.
 	ASSERT(pSrc);
-	if ( pszPrefix == NULL )
+	if ( pszPrefix == nullptr )
 		pszPrefix = "";
 
 	for ( DefSet::const_iterator i = m_Container.begin(); i != m_Container.end(); ++i )
@@ -683,7 +683,7 @@ void CVarDefMap::ClearKeys(lpctstr mask)
 		sMask.MakeLower();
 
 		DefSet::iterator i = m_Container.begin();
-		CVarDefCont * pVarBase = NULL;
+		CVarDefCont * pVarBase = nullptr;
 
 		while ( i != m_Container.end() )
 		{

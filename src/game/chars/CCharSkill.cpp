@@ -151,7 +151,7 @@ ushort CChar::Skill_GetAdjusted( SKILL_TYPE skill ) const
 	const CSkillDef * pSkillDef = g_Cfg.GetSkillDef( skill );
 	ushort uiAdjSkill = 0;
 
-	if (pSkillDef != NULL)
+	if (pSkillDef != nullptr)
 	{
 		ushort uiPureBonus =( pSkillDef->m_StatBonus[STAT_STR] * Stat_GetAdjusted(STAT_STR) ) +
 							( pSkillDef->m_StatBonus[STAT_INT] * Stat_GetAdjusted(STAT_INT) ) +
@@ -205,7 +205,7 @@ void CChar::Skill_SetBase( SKILL_TYPE skill, ushort uiValue )
 ushort CChar::Skill_GetMax( SKILL_TYPE skill, bool ignoreLock ) const
 {
 	ADDTOCALLSTACK("CChar::Skill_GetMax");
-	const CVarDefCont * pTagStorage = NULL;
+	const CVarDefCont * pTagStorage = nullptr;
 	TemporaryString tsSkillName;
 	tchar* pszSkillName = static_cast<tchar *>(tsSkillName);
 
@@ -218,7 +218,7 @@ ushort CChar::Skill_GetMax( SKILL_TYPE skill, bool ignoreLock ) const
 
 		sprintf(pszSkillName, "OVERRIDE.SKILLCAP_%d", (int)skill);
 		ushort uiSkillMax;
-		if ( (pTagStorage = GetKey(pszSkillName, true)) != NULL )
+		if ( (pTagStorage = GetKey(pszSkillName, true)) != nullptr )
 			uiSkillMax = (ushort)(pTagStorage->GetValNum());
 		else
 			uiSkillMax = pSkillClass->m_SkillLevelMax[skill];
@@ -245,7 +245,7 @@ ushort CChar::Skill_GetMax( SKILL_TYPE skill, bool ignoreLock ) const
 
 		ushort uiSkillMax = 1000;
 		sprintf(pszSkillName, "OVERRIDE.SKILLCAP_%d", (int)skill);
-		if ( (pTagStorage = GetKey(pszSkillName, true)) != NULL )
+		if ( (pTagStorage = GetKey(pszSkillName, true)) != nullptr )
 			uiSkillMax = (ushort)(pTagStorage->GetValNum());
 
 		return uiSkillMax;
@@ -330,7 +330,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 		return;
 
 	const CSkillDef * pSkillDef = g_Cfg.GetSkillDef(skill);
-	if (pSkillDef == NULL)
+	if (pSkillDef == nullptr)
 		return;
 
 	difficulty *= 10;
@@ -628,7 +628,7 @@ bool CChar::Skill_MakeItem_Success()
 	ADDTOCALLSTACK("CChar::Skill_MakeItem_Success");
 	// Deliver the goods
 
-	CItem *pItem = CItem::CreateTemplate(m_atCreate.m_ItemID, NULL, this);
+	CItem *pItem = CItem::CreateTemplate(m_atCreate.m_ItemID, nullptr, this);
 	if ( !pItem )
 		return false;
 
@@ -649,7 +649,7 @@ bool CChar::Skill_MakeItem_Success()
 		{
 			for ( uint n = 1; n < m_atCreate.m_Amount; ++n )
 			{
-				CItem *ptItem = CItem::CreateTemplate(m_atCreate.m_ItemID, NULL, this);
+				CItem *ptItem = CItem::CreateTemplate(m_atCreate.m_ItemID, nullptr, this);
 				ItemBounce(ptItem);
 			}
 		}
@@ -913,7 +913,7 @@ int CChar::Skill_NaturalResource_Setup( CItem * pResBit )
 
 	// Find the ore type located here based on color.
 	const CRegionResourceDef * pOreDef = dynamic_cast<const CRegionResourceDef *>(g_Cfg.ResourceGetDef(pResBit->m_itResource.m_ridRes));
-	if ( pOreDef == NULL )
+	if ( pOreDef == nullptr )
 		return -1;
 
 	return( pOreDef->m_Skill.GetRandom() / 10 );
@@ -984,7 +984,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	// SKILL_MINING
 	// pItemTarg = forge or another pile of ore.
 	// RETURN: true = success.
-	if ( pItemOre == NULL || pItemOre == pItemTarg )
+	if ( pItemOre == nullptr || pItemOre == pItemTarg )
 	{
 		SysMessageDefault( DEFMSG_MINING_NOT_ORE );
 		return false;
@@ -997,7 +997,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 		return false;
 	}
 
-	if ( pItemOre->IsType( IT_ORE ) && pItemTarg != NULL && pItemTarg->IsType( IT_ORE ))
+	if ( pItemOre->IsType( IT_ORE ) && pItemTarg != nullptr && pItemTarg->IsType( IT_ORE ))
 	{
 		// combine piles.
 		if ( pItemTarg == pItemOre )
@@ -1009,7 +1009,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 		return true;
 	}
 
-	if ( pItemTarg != NULL && pItemTarg->IsTopLevel() && pItemTarg->IsType( IT_FORGE ))
+	if ( pItemTarg != nullptr && pItemTarg->IsTopLevel() && pItemTarg->IsType( IT_FORGE ))
 		m_Act_p = pItemTarg->GetTopPoint();
 	else
 		m_Act_p = g_World.FindItemTypeNearby( GetTopPoint(), IT_FORGE, 3, false );
@@ -1051,7 +1051,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	ushort iMiningSkill = Skill_GetAdjusted(SKILL_MINING);
 	word iOreQty = pItemOre->GetAmount();
 	word iIngotQty = 0;
-	const CItemBase * pIngotDef = NULL;
+	const CItemBase * pIngotDef = nullptr;
 
 	if ( pOreDef->IsType( IT_ORE ))
 	{
@@ -1070,7 +1070,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 				continue;
 
 			const CItemBase * pBaseDef = CItemBase::FindItemBase((ITEMID_TYPE)(rid.GetResIndex()));
-			if ( pBaseDef == NULL )
+			if ( pBaseDef == nullptr )
 				continue;
 
 			if ( pBaseDef->IsType( IT_GEM ))
@@ -1097,7 +1097,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 		}
 	}
 
-	if ( pIngotDef == NULL || !pIngotDef->IsType(IT_INGOT))
+	if ( pIngotDef == nullptr || !pIngotDef->IsType(IT_INGOT))
 	{
 		SysMessageDefault( DEFMSG_MINING_CONSUMED );
 		pItemOre->ConsumeAmount( iOreQty );
@@ -1120,7 +1120,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	// Payoff - What do i get ?
 	// This is the one
 	CItem * pIngots = CItem::CreateScript( pIngotDef->GetID(), this );
-	if ( pIngots == NULL )
+	if ( pIngots == nullptr )
 	{
 		SysMessageDefault( DEFMSG_MINING_NOTHING );
 		return false;
@@ -1142,11 +1142,11 @@ bool CChar::Skill_Tracking( CUID uidTarg, DIR_TYPE & dirPrv, int iDistMax )
 		return false;
 
 	const CObjBase * pObj = uidTarg.ObjFind();
-	if ( pObj == NULL )
+	if ( pObj == nullptr )
 		return false;
 
 	const CObjBaseTemplate * pObjTop = pObj->GetTopLevelObj();
-	if ( pObjTop == NULL )
+	if ( pObjTop == nullptr )
 		return false;
 
 	int dist = GetTopDist3D(pObjTop);	// disconnect = INT16_MAX
@@ -1272,7 +1272,7 @@ int CChar::Skill_Mining( SKTRIG_TYPE stage )
 		SysMessageDefault(DEFMSG_MINING_REACH);
 		return -SKTRIG_QTY;
 	}
-	if ( !CanSeeLOS(m_Act_p, NULL, iMaxRange) )
+	if ( !CanSeeLOS(m_Act_p, nullptr, iMaxRange) )
 	{
 		SysMessageDefault(DEFMSG_MINING_LOS);
 		return -SKTRIG_QTY;
@@ -1366,7 +1366,7 @@ int CChar::Skill_Fishing( SKTRIG_TYPE stage )
 	}
 	if ( (m_pPlayer && (g_Cfg.m_iAdvancedLos & ADVANCEDLOS_PLAYER)) || (m_pNPC && (g_Cfg.m_iAdvancedLos & ADVANCEDLOS_NPC)) )
 	{
-		if ( !CanSeeLOS(m_Act_p, NULL, iMaxRange, LOS_FISHING) )
+		if ( !CanSeeLOS(m_Act_p, nullptr, iMaxRange, LOS_FISHING) )
 		{
 			SysMessageDefault(DEFMSG_FISHING_LOS);
 			return -SKTRIG_QTY;
@@ -1423,7 +1423,7 @@ int CChar::Skill_Lumberjack( SKTRIG_TYPE stage )
 		return 0;
 
 	CItem *pTool = m_Act_Prv_UID.ItemFind();
-	if ( pTool == NULL )
+	if ( pTool == nullptr )
 	{
 		SysMessageDefault(DEFMSG_LUMBERJACKING_TOOL);
 		return -SKTRIG_ABORT;
@@ -1454,7 +1454,7 @@ int CChar::Skill_Lumberjack( SKTRIG_TYPE stage )
 		SysMessageDefault(DEFMSG_LUMBERJACKING_REACH);
 		return -SKTRIG_QTY;
 	}
-	if ( !CanSeeLOS(m_Act_p, NULL, iMaxRange) )
+	if ( !CanSeeLOS(m_Act_p, nullptr, iMaxRange) )
 	{
 		SysMessageDefault(DEFMSG_LUMBERJACKING_LOS);
 		return -SKTRIG_QTY;
@@ -1538,7 +1538,7 @@ int CChar::Skill_DetectHidden( SKTRIG_TYPE stage )
 	for (;;)
 	{
 		CChar *pChar = Area.GetChar();
-		if ( pChar == NULL )
+		if ( pChar == nullptr )
 			break;
 		if ( pChar == this || !pChar->IsStatFlag(STATF_INVISIBLE|STATF_HIDDEN) )
 			continue;
@@ -1604,7 +1604,7 @@ int CChar::Skill_Peacemaking( SKTRIG_TYPE stage )
 		case SKTRIG_START:
 		{
 			// ACTARG1: UID of the instrument i want to play, instead of picking a random one
-			CItem * pInstrument = NULL;
+			CItem * pInstrument = nullptr;
 			if (m_atBard.m_InstrumentUID != 0)
 			{
 				CObjBase * pObj = CUID(m_atBard.m_InstrumentUID).ObjFind();
@@ -1614,7 +1614,7 @@ int CChar::Skill_Peacemaking( SKTRIG_TYPE stage )
 					if (pInstrument->GetType() != IT_MUSICAL)
 					{
 						DEBUG_WARN(("Invalid ACTARG1 when using skill Peacemaking. Expected zero or the UID of an item with type t_musical.\n"));
-						pInstrument = NULL;
+						pInstrument = nullptr;
 					}
 				}
 			}
@@ -1641,7 +1641,7 @@ int CChar::Skill_Peacemaking( SKTRIG_TYPE stage )
 			for (;;)
 			{
 				CChar *pChar = Area.GetChar();
-				if ( pChar == NULL )
+				if ( pChar == nullptr )
 					return -SKTRIG_FAIL;
 				if (( pChar == this ) || !CanSee(pChar) )
 					continue;
@@ -1698,7 +1698,7 @@ int CChar::Skill_Enticement( SKTRIG_TYPE stage )
 		case SKTRIG_START:
 		{
 			// ACTARG1: UID of the instrument i want to play, instead of picking a random one
-			CItem * pInstrument = NULL;
+			CItem * pInstrument = nullptr;
 			if (m_atBard.m_InstrumentUID != 0)
 			{
 				CObjBase * pObj = CUID(m_atBard.m_InstrumentUID).ObjFind();
@@ -1708,7 +1708,7 @@ int CChar::Skill_Enticement( SKTRIG_TYPE stage )
 					if (pInstrument->GetType() != IT_MUSICAL)
 					{
 						DEBUG_WARN(("Invalid ACTARG1 when using skill Enticement. Expected zero or the UID of an item with type t_musical.\n"));
-						pInstrument = NULL;
+						pInstrument = nullptr;
 					}		
 				}
 			}
@@ -1798,7 +1798,7 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 		case SKTRIG_START:
 		{
 			// ACTARG1: UID of the instrument i want to play, instead of picking a random one
-			CItem * pInstrument = NULL;
+			CItem * pInstrument = nullptr;
 			if (m_atBard.m_InstrumentUID != 0)
 			{
 				CObjBase * pObj = CUID(m_atBard.m_InstrumentUID).ObjFind();
@@ -1808,7 +1808,7 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 					if (pInstrument->GetType() != IT_MUSICAL)
 					{
 						DEBUG_WARN(("Invalid ACTARG1 when using skill Provocation. Expected zero or the UID of an item with type t_musical.\n"));
-						pInstrument = NULL;
+						pInstrument = nullptr;
 					}
 				}
 			}
@@ -1891,13 +1891,13 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 			if ( pCharProv->Noto_GetFlag(this) == NOTO_GOOD )
 			{
 				// lose some karma for this.
-				CheckCrimeSeen(SKILL_PROVOCATION, NULL, pCharProv, g_Cfg.GetDefaultMsg( DEFMSG_PROVOKING_CRIME ));
+				CheckCrimeSeen(SKILL_PROVOCATION, nullptr, pCharProv, g_Cfg.GetDefaultMsg( DEFMSG_PROVOKING_CRIME ));
 				return -SKTRIG_ABORT;	// can't provoke a good target!
 			}
 
 			// If we provoke upon a good char we should go criminal for it but skill still succeed.
 			if ( pCharTarg->Noto_GetFlag(this) == NOTO_GOOD )
-				CheckCrimeSeen(SKILL_PROVOCATION, NULL, pCharTarg, "provoking");
+				CheckCrimeSeen(SKILL_PROVOCATION, nullptr, pCharTarg, "provoking");
 
 			pCharProv->Fight_Attack(pCharTarg); // Make the actual provoking.
 			return 0;
@@ -1918,7 +1918,7 @@ int CChar::Skill_Poisoning( SKTRIG_TYPE stage )
 		return 0;
 
 	CItem * pPoison = m_Act_UID.ItemFind();
-	if ( pPoison == NULL || !pPoison->IsType(IT_POTION))
+	if ( pPoison == nullptr || !pPoison->IsType(IT_POTION))
 		return -SKTRIG_ABORT;
 
 	if ( stage == SKTRIG_START )
@@ -1931,7 +1931,7 @@ int CChar::Skill_Poisoning( SKTRIG_TYPE stage )
 		return -SKTRIG_ABORT;
 
 	CItem * pItem = m_Act_Prv_UID.ItemFind();
-	if ( pItem == NULL )
+	if ( pItem == nullptr )
 		return -SKTRIG_QTY;
 
 	if ( stage != SKTRIG_SUCCESS )
@@ -2012,7 +2012,7 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 	// Related to INT ?
 
 	CChar * pChar = m_Act_UID.CharFind();
-	if ( pChar == NULL )
+	if ( pChar == nullptr )
 		return -SKTRIG_QTY;
 
 	if ( pChar == this )
@@ -2133,14 +2133,14 @@ int CChar::Skill_Lockpicking( SKTRIG_TYPE stage )
 		return 0;
 
 	CItem * pPick = m_Act_Prv_UID.ItemFind();
-	if ( pPick == NULL || ! pPick->IsType( IT_LOCKPICK ))
+	if ( pPick == nullptr || ! pPick->IsType( IT_LOCKPICK ))
 	{
 		SysMessageDefault( DEFMSG_LOCKPICKING_NOPICK );
 		return -SKTRIG_QTY;
 	}
 
 	CItem * pLock = m_Act_UID.ItemFind();
-	if ( pLock == NULL )
+	if ( pLock == nullptr )
 	{
 		SysMessageDefault( DEFMSG_LOCKPICKING_WITEM );
 		return -SKTRIG_QTY;
@@ -2208,7 +2208,7 @@ int CChar::Skill_Hiding( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_START )
 	{
 		// Make sure I'm not carrying a light ?
-		for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
+		for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 		{
 			if ( !CItemBase::IsVisibleLayer( pItem->GetEquipLayer()))
 				continue;
@@ -2400,7 +2400,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 		return 0;
 
 	CItem * pBandage = m_Act_Prv_UID.ItemFind();
-	if ( pBandage == NULL )
+	if ( pBandage == nullptr )
 	{
 		SysMessageDefault( DEFMSG_HEALING_NOAIDS );
 		return -SKTRIG_QTY;
@@ -2418,12 +2418,12 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 		return -SKTRIG_QTY;
 	}
 
-	CItemCorpse * pCorpse = NULL;	// resurrect by corpse
+	CItemCorpse * pCorpse = nullptr;	// resurrect by corpse
 	CChar * pChar = m_Act_UID.CharFind();
 	if ( pObj->IsItem())
 	{
 		pCorpse = dynamic_cast<CItemCorpse *>(pObj);
-		if ( pCorpse == NULL )
+		if ( pCorpse == nullptr )
 		{
 			SysMessageDefault( DEFMSG_HEALING_NONCHAR );
 			return -SKTRIG_QTY;
@@ -2431,7 +2431,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 		pChar = pCorpse->m_uidLink.CharFind();
 	}
 
-	if ( pChar == NULL )
+	if ( pChar == nullptr )
 	{
 		SysMessageDefault( DEFMSG_HEALING_BEYOND );
 		return -SKTRIG_QTY;
@@ -2454,7 +2454,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 			return -SKTRIG_QTY;
 		}
 		CRegion * pRegion = pCorpse->GetTopPoint().GetRegion(REGION_TYPE_AREA|REGION_TYPE_MULTI);
-		if ( pRegion == NULL )
+		if ( pRegion == nullptr )
 			return -SKTRIG_QTY;
 		if ( pRegion->IsFlag( REGION_ANTIMAGIC_ALL | REGION_ANTIMAGIC_RECALL_IN | REGION_ANTIMAGIC_TELEPORT ))
 		{
@@ -2520,7 +2520,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 	ItemBounce(pBloodyBandage);
 
 	const CSkillDef * pSkillDef = g_Cfg.GetSkillDef(Skill_GetActive());
-	if (pSkillDef == NULL)
+	if (pSkillDef == nullptr)
 		return -SKTRIG_QTY;
 
 	if ( pCorpse )
@@ -2557,7 +2557,7 @@ int CChar::Skill_RemoveTrap( SKTRIG_TYPE stage )
 		return 0;
 
 	CItem * pTrap = m_Act_UID.ItemFind();
-	if ( pTrap == NULL || ! pTrap->IsType(IT_TRAP))
+	if ( pTrap == nullptr || ! pTrap->IsType(IT_TRAP))
 	{
 		SysMessageDefault( DEFMSG_REMOVETRAPS_WITEM );
 		return -SKTRIG_QTY;
@@ -2591,7 +2591,7 @@ int CChar::Skill_Begging( SKTRIG_TYPE stage )
 	// m_Act_UID = Our begging target..
 
 	CChar * pChar = m_Act_UID.CharFind();
-	if ( pChar == NULL || pChar == this )
+	if ( pChar == nullptr || pChar == this )
 		return -SKTRIG_QTY;
 
 	if ( stage == SKTRIG_START )
@@ -2637,7 +2637,7 @@ int CChar::Skill_Magery( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_SUCCESS )
 	{
 		const CSpellDef * tSpell = g_Cfg.GetSpellDef( m_atMagery.m_Spell );
-		if (tSpell == NULL)
+		if (tSpell == nullptr)
 			return 0;
 
 		if ( IsClient() && IsSetMagicFlags( MAGICF_PRECAST ) && !tSpell->IsSpellType( SPELLFLAG_NOPRECAST ))
@@ -2892,7 +2892,7 @@ int CChar::Skill_Act_Breath( SKTRIG_TYPE stage )
 		return 0;
 
 	CChar * pChar = m_Fight_Targ_UID.CharFind();
-	if ( pChar == NULL )
+	if ( pChar == nullptr )
 		return -SKTRIG_QTY;
 
 	m_Act_p = pChar->GetTopPoint();
@@ -2951,7 +2951,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 		return 0;
 
 	CChar * pChar = m_Fight_Targ_UID.CharFind();
-	if ( pChar == NULL )
+	if ( pChar == nullptr )
 		return -SKTRIG_QTY;
 
 	m_Act_p = pChar->GetTopPoint();
@@ -3585,7 +3585,7 @@ bool CChar::Skill_Snoop_Check(const CItemContainer * pItem)
 {
 	ADDTOCALLSTACK("CChar::Skill_Snoop_Check");
 
-	if (pItem == NULL)
+	if (pItem == nullptr)
 		return true;
 
 	if (pItem->IsContainer())
@@ -3616,8 +3616,8 @@ bool CChar::Skill_Snoop_Check(const CItemContainer * pItem)
 		}
 	}
 
-	CChar * pCharMark = NULL;
-	if (!IsTakeCrime(pItem, &pCharMark) || pCharMark == NULL)
+	CChar * pCharMark = nullptr;
+	if (!IsTakeCrime(pItem, &pCharMark) || pCharMark == nullptr)
 		return false;
 
 	if (Skill_Wait(SKILL_SNOOPING))
@@ -3643,11 +3643,11 @@ int CChar::Skill_Snooping(SKTRIG_TYPE stage)
 
 	// Assume the container is not locked.
 	CItemContainer * pCont = dynamic_cast <CItemContainer *>(m_Act_UID.ItemFind());
-	if (pCont == NULL)
+	if (pCont == nullptr)
 		return (-SKTRIG_QTY);
 
 	CChar * pCharMark;
-	if (!IsTakeCrime(pCont, &pCharMark) || pCharMark == NULL)
+	if (!IsTakeCrime(pCont, &pCharMark) || pCharMark == nullptr)
 		return 0;	// Not a crime really.
 
 	if (GetTopDist3D(pCharMark) > 1)
@@ -3706,24 +3706,24 @@ int CChar::Skill_Stealing(SKTRIG_TYPE stage)
 		return 0;
 
 	CItem * pItem = m_Act_UID.ItemFind();
-	CChar * pCharMark = NULL;
-	if (pItem == NULL)	// on a chars head ? = random steal.
+	CChar * pCharMark = nullptr;
+	if (pItem == nullptr)	// on a chars head ? = random steal.
 	{
 		pCharMark = m_Act_UID.CharFind();
-		if (pCharMark == NULL)
+		if (pCharMark == nullptr)
 		{
 			SysMessageDefault(DEFMSG_STEALING_NOTHING);
 			return (-SKTRIG_QTY);
 		}
 		CItemContainer * pPack = pCharMark->GetPack();
-		if (pPack == NULL)
+		if (pPack == nullptr)
 		{
 		cantsteal:
 			SysMessageDefault(DEFMSG_STEALING_EMPTY);
 			return (-SKTRIG_QTY);
 		}
 		pItem = pPack->ContentFindRandom();
-		if (pItem == NULL)
+		if (pItem == nullptr)
 		{
 			goto cantsteal;
 		}
@@ -3796,7 +3796,7 @@ int CChar::Skill_Stealing(SKTRIG_TYPE stage)
 	Reveal();	// If we take an item off the ground we are revealed.
 
 	bool fGround = false;
-	if (pCharMark != NULL)
+	if (pCharMark != nullptr)
 	{
 		if (GetTopDist3D(pCharMark) > 2)
 		{

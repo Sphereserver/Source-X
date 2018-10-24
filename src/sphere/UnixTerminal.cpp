@@ -15,7 +15,7 @@ UnixTerminal g_UnixTerminal;
 
 UnixTerminal::UnixTerminal() :
 #ifdef _USECURSES
-	m_window(NULL),
+	m_window(nullptr),
 #endif
  m_nextChar('\0'), m_isColorEnabled(true), m_prepared(false)
 {
@@ -129,7 +129,7 @@ void UnixTerminal::setColor(ConsoleTextColor color)
 void UnixTerminal::print(lpctstr message)
 {
 	ADDTOCALLSTACK("UnixTerminal::print");
-	ASSERT(message != NULL);
+	ASSERT(message != nullptr);
 #ifdef _USECURSES
 	waddstr(m_window, message);
 	wrefresh(m_window);
@@ -171,7 +171,7 @@ void UnixTerminal::prepare()
 	if (tcsetattr(STDIN_FILENO, TCSANOW, &term_caps) < 0)
 		throw CSError(LOGL_WARN, 0, "failed to set terminal attributes");
 
-	setbuf(stdin, NULL);
+	setbuf(stdin, nullptr);
 #endif
 
 	prepareColor();
@@ -211,7 +211,7 @@ void UnixTerminal::prepareColor()
 		m_isColorEnabled = false;
 
 		const char * termtype = getenv("TERM");
-		if (termtype != NULL)
+		if (termtype != nullptr)
 		{
 			static const char *sz_Supported_Terminals[] =
 			{
@@ -245,7 +245,7 @@ void UnixTerminal::restore()
 
 #ifdef _USECURSES
 	endwin();	// clean up
-	m_window = NULL;
+	m_window = nullptr;
 	m_nextChar = '\0';
 #else
 	// restore original terminal state

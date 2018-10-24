@@ -79,7 +79,7 @@ lpctstr const CPointBase::sm_szLoadKeys[PT_QTY+1] =
 	"X",
 	"Y",
 	"Z",
-	NULL
+	nullptr
 };
 
 bool CPointBase::operator== ( const CPointBase & pt ) const
@@ -299,7 +299,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 
 		SKIP_SEPARATORS( pszKey );
 
-		const CUOStaticItemRec * pStatic = NULL;
+		const CUOStaticItemRec * pStatic = nullptr;
 		int iStatic = 0;
 		int type = 0;
 
@@ -328,7 +328,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 				return false;
 			}
             uint uiStaticMaxQty = pBlock->m_Statics.GetStaticQty();
-			for ( uint i = 0; i < uiStaticMaxQty; pStatic = NULL, ++i )
+			for ( uint i = 0; i < uiStaticMaxQty; pStatic = nullptr, ++i )
 			{
 				pStatic = pBlock->m_Statics.GetStatic( i );
 				CPointMap ptTest( pStatic->m_x+pBlock->m_x, pStatic->m_y+pBlock->m_y, pStatic->m_z, this->m_map);
@@ -341,7 +341,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 		else
 		{
             uint uiStaticMaxQty = pBlock->m_Statics.GetStaticQty();
-			for ( uint i = 0; i < uiStaticMaxQty; pStatic = NULL, ++i )
+			for ( uint i = 0; i < uiStaticMaxQty; pStatic = nullptr, ++i )
 			{
 				pStatic = pBlock->m_Statics.GetStatic( i );
 				CPointMap ptTest( pStatic->m_x+pBlock->m_x, pStatic->m_y+pBlock->m_y, pStatic->m_z, this->m_map);
@@ -383,7 +383,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 
 		// Check the script def for the item.
 		CItemBase * pItemDef = CItemBase::FindItemBase( idTile );
-		if ( pItemDef == NULL )
+		if ( pItemDef == nullptr )
 		{
 			DEBUG_ERR(("Must have ITEMDEF section for item ID 0%x\n", idTile ));
 			return false;
@@ -396,10 +396,10 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 		pszKey += 10;
 
 		CRegionLinks rlinks;
-		const CRegion* pRegion = NULL;
-		CItem* pItem = NULL;
-		const CSphereMulti* pMulti = NULL;
-		const CUOMultiItemRec_HS* pMultiItem = NULL;
+		const CRegion* pRegion = nullptr;
+		CItem* pItem = nullptr;
+		const CSphereMulti* pMulti = nullptr;
+		const CUOMultiItemRec_HS* pMultiItem = nullptr;
 		size_t iMultiQty = GetRegions(REGION_TYPE_MULTI, rlinks);
 
 		if ( *pszKey == '\0' )
@@ -408,23 +408,23 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			for (size_t i = 0; i < iMultiQty; i++)
 			{
 				pRegion = rlinks.at(i);
-				if (pRegion == NULL)
+				if (pRegion == nullptr)
 					continue;
 
 				pItem = pRegion->GetResourceID().ItemFind();
-				if (pItem == NULL)
+				if (pItem == nullptr)
 					continue;
 
 				const CPointMap ptMulti = pItem->GetTopPoint();
 				pMulti = g_Cfg.GetMultiItemDefs(pItem);
-				if (pMulti == NULL)
+				if (pMulti == nullptr)
 					continue;
 
 				size_t iQty = pMulti->GetItemCount();
 				for (size_t ii = 0; ii < iQty; ii++)
 				{
 					pMultiItem = pMulti->GetItem(ii);
-					if (pMultiItem == NULL)
+					if (pMultiItem == nullptr)
 						break;
 					if (pMultiItem->m_visible == 0)
 						continue;
@@ -465,7 +465,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 		if ( type == RES_ITEMDEF )
 		{
 			const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(iComponent)));
-			if ( pItemDef == NULL )
+			if ( pItemDef == nullptr )
 			{
 				sVal.FormatVal( 0 );
 				return false;
@@ -474,23 +474,23 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			for (size_t i = 0; i < iMultiQty; i++)
 			{
 				pRegion = rlinks.at(i);
-				if (pRegion == NULL)
+				if (pRegion == nullptr)
 					continue;
 
 				pItem = pRegion->GetResourceID().ItemFind();
-				if (pItem == NULL)
+				if (pItem == nullptr)
 					continue;
 
 				const CPointMap ptMulti = pItem->GetTopPoint();
 				pMulti = g_Cfg.GetMultiItemDefs(pItem);
-				if (pMulti == NULL)
+				if (pMulti == nullptr)
 					continue;
 
 				size_t iQty = pMulti->GetItemCount();
-				for (size_t ii = 0; ii < iQty; pMultiItem = NULL, ii++)
+				for (size_t ii = 0; ii < iQty; pMultiItem = nullptr, ii++)
 				{
 					pMultiItem = pMulti->GetItem(ii);
-					if (pMultiItem == NULL)
+					if (pMultiItem == nullptr)
 						break;
 					if (pMultiItem->m_visible == 0)
 						continue;
@@ -499,11 +499,11 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 						continue;
 
 					const CItemBase* pMultiItemDef = CItemBase::FindItemBase(pMultiItem->GetDispID());
-					if (pMultiItemDef != NULL && pMultiItemDef->GetDispID() == pItemDef->GetDispID())
+					if (pMultiItemDef != nullptr && pMultiItemDef->GetDispID() == pItemDef->GetDispID())
 						break;
 				}
 
-				if (pMultiItem != NULL)
+				if (pMultiItem != nullptr)
 					break;
 			}
 		}
@@ -512,23 +512,23 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			for (size_t i = 0; i < iMultiQty; i++)
 			{
 				pRegion = rlinks.at(i);
-				if (pRegion == NULL)
+				if (pRegion == nullptr)
 					continue;
 
 				pItem = pRegion->GetResourceID().ItemFind();
-				if (pItem == NULL)
+				if (pItem == nullptr)
 					continue;
 
 				const CPointMap ptMulti = pItem->GetTopPoint();
 				pMulti = g_Cfg.GetMultiItemDefs(pItem);
-				if (pMulti == NULL)
+				if (pMulti == nullptr)
 					continue;
 
 				size_t iQty = pMulti->GetItemCount();
-				for (size_t ii = 0; ii < iQty; pMultiItem = NULL, ii++)
+				for (size_t ii = 0; ii < iQty; pMultiItem = nullptr, ii++)
 				{
 					pMultiItem = pMulti->GetItem(ii);
-					if (pMultiItem == NULL)
+					if (pMultiItem == nullptr)
 						break;
 					if (pMultiItem->m_visible == 0)
 						continue;
@@ -542,12 +542,12 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 					iComponent--;
 				}
 
-				if (pMultiItem != NULL)
+				if (pMultiItem != nullptr)
 					break;
 			}
 		}
 
-		if ( pMultiItem == NULL )
+		if ( pMultiItem == nullptr )
 		{
 			sVal.FormatHex(0);
 			return true;
@@ -584,7 +584,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 
 		// Check the script def for the item.
 		CItemBase * pItemDef = CItemBase::FindItemBase( idTile );
-		if ( pItemDef == NULL )
+		if ( pItemDef == nullptr )
 		{
 			DEBUG_ERR(("Must have ITEMDEF section for item ID 0%x\n", idTile ));
 			return false;
@@ -693,7 +693,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 					case PT_TYPE:
 					{
 						CItemTypeDef * pTypeDef = g_World.GetTerrainItemTypeDef( pMeter->m_wTerrainIndex );
-						if ( pTypeDef != NULL )
+						if ( pTypeDef != nullptr )
 							sVal = pTypeDef->GetResourceName();
 						else
 							sVal = "";
@@ -889,13 +889,13 @@ CRegion * CPointBase::GetRegion( dword dwType ) const
 	// We only need to update this every 8 or so steps ?
 	// REGION_TYPE_AREA
 	if ( ! IsValidPoint() )
-		return NULL;
+		return nullptr;
 
 	CSector *pSector = GetSector();
 	if ( pSector )
 		return pSector->GetRegion(*this, dwType);
 
-	return NULL;
+	return nullptr;
 }
 
 size_t CPointBase::GetRegions( dword dwType, CRegionLinks & rlinks ) const

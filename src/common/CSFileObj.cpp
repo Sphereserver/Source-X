@@ -18,7 +18,7 @@ lpctstr const CSFileObj::sm_szLoadKeys[FO_QTY+1] =
 #define ADD(a,b) b,
 #include "../tables/CSFileObj_props.tbl"
 #undef ADD
-    NULL
+    nullptr
 };
 
 enum FOV_TYPE
@@ -34,7 +34,7 @@ lpctstr const CSFileObj::sm_szVerbKeys[FOV_QTY+1] =
 #define ADD(a,b) b,
 #include "../tables/CSFileObj_functions.tbl"
 #undef ADD
-    NULL
+    nullptr
 };
 
 CSFileObj::CSFileObj()

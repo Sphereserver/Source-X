@@ -263,7 +263,7 @@ int FindTableHeadSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount, 
 
 bool Str_Check(lpctstr pszIn)
 {
-    if (pszIn == NULL)
+    if (pszIn == nullptr)
         return true;
 
     lpctstr p = pszIn;
@@ -275,7 +275,7 @@ bool Str_Check(lpctstr pszIn)
 
 bool Str_CheckName(lpctstr pszIn)
 {
-    if (pszIn == NULL)
+    if (pszIn == nullptr)
         return true;
 
     lpctstr p = pszIn;
@@ -531,7 +531,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
     // similar to strtok()
     // RETURN: true = the second arg is valid.
 
-    if (pszSep == NULL)	// default sep.
+    if (pszSep == nullptr)	// default sep.
         pszSep = "=, \t";
 
     // skip leading white space.
@@ -569,7 +569,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
         }
         if (ch == '\0')	// no more args i guess.
         {
-            if (ppArg != NULL)
+            if (ppArg != nullptr)
                 *ppArg = pLine;
             return false;
         }
@@ -657,7 +657,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
     }
 
     // skip trailing white space on args as well.
-    if (ppArg != NULL)
+    if (ppArg != nullptr)
         *ppArg = Str_TrimWhitespace(pLine);
 
     if (iCurly || iSquare || iRound || bQuotes)
@@ -677,7 +677,7 @@ int Str_ParseCmds(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSep)
     int iQty = 0;
     GETNONWHITESPACE(pszCmdLine);
 
-    if (pszCmdLine != NULL && pszCmdLine[0] != '\0')
+    if (pszCmdLine != nullptr && pszCmdLine[0] != '\0')
     {
         ppCmd[0] = pszCmdLine;
         ++iQty;
@@ -688,7 +688,7 @@ int Str_ParseCmds(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSep)
         }
     }
     for (int j = iQty; j < iMax; ++j)
-        ppCmd[j] = NULL;	// terminate if possible.
+        ppCmd[j] = nullptr;	// terminate if possible.
     return iQty;
 }
 

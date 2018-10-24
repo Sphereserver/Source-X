@@ -238,7 +238,7 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 	{
 		// If they saw me commit a crime or I am their aggressor then criminal to just them.
 		CItemMemory * pMemory = pCharViewer->Memory_FindObjTypes(this, MEMORY_SAWCRIME | MEMORY_AGGREIVED);
-		if (pMemory != NULL)
+		if (pMemory != nullptr)
 			return NOTO_CRIMINAL;
 	}
 
@@ -358,7 +358,7 @@ void CChar::Noto_Murder()
 		SysMessageDefault(DEFMSG_MSG_MURDERER);
 
 	if ( m_pPlayer && m_pPlayer->m_wMurders )
-		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_Murders, g_Cfg.GetSpellEffect(SPELL_NONE, 0), int(g_Cfg.m_iMurderDecayTime/1000), NULL);
+		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_Murders, g_Cfg.GetSpellEffect(SPELL_NONE, 0), int(g_Cfg.m_iMurderDecayTime/1000), nullptr);
 }
 
 bool CChar::Noto_Criminal( CChar * pChar )

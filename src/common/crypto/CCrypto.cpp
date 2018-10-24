@@ -158,7 +158,7 @@ int CCrypto::GetVerFromString( lpctstr pszVersion )
 	ADDTOCALLSTACK("CCrypt::GetVerFromString");
 	// Get version of old clients, which report the client version as ASCII string (eg: '5.0.2b')
 
-	if ( (pszVersion == NULL) || (*pszVersion == '\0') )
+	if ( (pszVersion == nullptr) || (*pszVersion == '\0') )
 		return 0;
 
 	byte iLetter = 0;
@@ -574,7 +574,7 @@ bool CCrypto::Decrypt( byte * pOutput, const byte * pInput, size_t outLen, size_
 bool CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, size_t inLen )
 {
 	ADDTOCALLSTACK("CCrypto::LoginCryptStart");
-	ASSERT(pEvent != NULL);
+	ASSERT(pEvent != nullptr);
 	byte m_Raw[ MAX_BUFFER ];
 	char pszAccountNameCheck[ MAX_ACCOUNT_NAME_SIZE ];
 
@@ -673,7 +673,7 @@ bool CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, size_t inLen )
 bool CCrypto::GameCryptStart( dword dwIP, byte * pEvent, size_t inLen )
 {
 	ADDTOCALLSTACK("CCrypto::GameCryptStart");
-	ASSERT( pEvent != NULL );
+	ASSERT( pEvent != nullptr );
 
 	byte m_Raw[ MAX_BUFFER ];
 	ASSERT( inLen <= sizeof(m_Raw) );

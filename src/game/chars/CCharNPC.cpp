@@ -14,17 +14,17 @@ lpctstr const CCharNPC::sm_szLoadKeys[CNC_QTY+1] =
 #define ADD(a,b) b,
 #include "../../tables/CCharNpc_props.tbl"
 #undef ADD
-	NULL
+	nullptr
 };
 
 void CChar::ClearNPC()
 {
 	ADDTOCALLSTACK("CChar::ClearNPC");
-	if ( m_pNPC == NULL )
+	if ( m_pNPC == nullptr )
 		return;
 
 	delete m_pNPC;
-	m_pNPC = NULL;
+	m_pNPC = nullptr;
 }
 
 CChar * CChar::CreateNPC( CREID_TYPE baseID )	// static
@@ -152,7 +152,7 @@ bool CCharNPC::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
 	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CNC_QTY ))
 	{
 
-		//return as string or hex number or NULL if not set
+		//return as string or hex number or nullptr if not set
 		//On these ones, check BaseDef too if not found on dynamic
 		case CNC_THROWDAM:
 		case CNC_THROWOBJ:
@@ -262,7 +262,7 @@ bool CCharNPC::IsVendor() const
 int CCharNPC::GetNpcAiFlags( const CChar *pChar ) const 
 {
 	CVarDefCont *pVar = pChar->GetKey( "OVERRIDE.NPCAI", true );
-	if (pVar != NULL)
+	if (pVar != nullptr)
 		return (int)(pVar->GetValNum());
 	return g_Cfg.m_iNpcAi;
 }
@@ -281,10 +281,10 @@ void CChar::NPC_LoadScript( bool fRestock )
 	CCharBase * pCharDef = Char_GetDef();
 
 	// 1) CHARDEF trigger
-	if ( m_pPlayer == NULL ) //	CHARDEF triggers (based on body type)
+	if ( m_pPlayer == nullptr ) //	CHARDEF triggers (based on body type)
 	{
 		CChar * pChar = this->GetChar();
-		if ( pChar != NULL )
+		if ( pChar != nullptr )
 		{
 			CUID uidOldAct = pChar->m_Act_UID;
 			pChar->m_Act_UID = GetUID();

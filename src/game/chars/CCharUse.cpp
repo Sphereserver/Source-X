@@ -73,7 +73,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 			break;
 
 		iItems++;
-		CItem *pPart = CItem::CreateTemplate(id, NULL, this);
+		CItem *pPart = CItem::CreateTemplate(id, nullptr, this);
 		ASSERT(pPart);
 		switch ( pPart->GetType() )
 		{
@@ -465,7 +465,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 	if ( Skill_GetActive() != NPCACT_TRAINING )
 		return false;
 
-	CItem *pAmmo = NULL;
+	CItem *pAmmo = nullptr;
 	CResourceIDBase ridAmmo = pWeapon->Weapon_GetRangedAmmoRes();
 	if ( ridAmmo )
 	{
@@ -984,12 +984,12 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool bCheckFollowerSlots )
 	// NOTE: The figurine is NOT destroyed.
 	bool bCreatedNewNpc = false;
 	if ( !pItem )
-		return NULL;
+		return nullptr;
 
 	if ( pItem->m_uidLink.IsValidUID() && pItem->m_uidLink.IsChar() && pItem->m_uidLink != GetUID() && !IsPriv(PRIV_GM) )
 	{
 		SysMessageDefault(DEFMSG_MSG_FIGURINE_NOTYOURS);
-		return NULL;
+		return nullptr;
 	}
 
 	// Create a new NPC if there's no one linked to this figurine
@@ -1003,7 +1003,7 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool bCheckFollowerSlots )
 			if ( !id )
 			{
 				DEBUG_ERR(("FIGURINE id 0%x, no creature\n", pItem->GetDispID()));
-				return NULL;
+				return nullptr;
 			}
 		}
 		bCreatedNewNpc = true;
@@ -1025,7 +1025,7 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool bCheckFollowerSlots )
 			SysMessageDefault(DEFMSG_PETSLOTS_TRY_CONTROL);
 			if ( bCreatedNewNpc )
 				pPet->Delete();
-			return NULL;
+			return nullptr;
 		}
 	}
 
@@ -1378,7 +1378,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 		}
 
 		case IT_SEED:
-			return Use_Seed(pItem, NULL);
+			return Use_Seed(pItem, nullptr);
 
 		case IT_BEDROLL:
 			return Use_BedRoll(pItem);
@@ -1503,7 +1503,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 		case IT_FIGURINE:
 		{
 			// Create the creature here
-			if (Use_Figurine(pItem) != NULL)
+			if (Use_Figurine(pItem) != nullptr)
 				pItem->Delete();
 			return true;
 		}
@@ -1514,7 +1514,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			// Activate the trap (plus any linked traps)
 			int iDmg = pItem->Use_Trap();
 			if (CanTouch(pItem->GetTopLevelObj()->GetTopPoint()))
-				OnTakeDamage(iDmg, NULL, DAMAGE_HIT_BLUNT | DAMAGE_GENERAL);
+				OnTakeDamage(iDmg, nullptr, DAMAGE_HIT_BLUNT | DAMAGE_GENERAL);
 			break;
 		}
 
@@ -1717,7 +1717,7 @@ bool CChar::Use_Item(CItem *pItem, bool fLink) {
 		for (int i = 0; i < 64; ++i)
 		{ // dumb protection for endless loop
 			pLinkItem = pLinkItem->m_uidLink.ItemFind();
-			if (pLinkItem == NULL || pLinkItem == pItem)
+			if (pLinkItem == nullptr || pLinkItem == pItem)
 				break;
 			result |= Do_Use_Item(pLinkItem, true);
 		}
@@ -1756,19 +1756,19 @@ bool CChar::ItemEquipArmor( bool fForce )
 		for ( size_t i = 0; i < CountOf(iBestScore); ++i )
 		{
 			pBestArmor[i] = LayerFind((LAYER_TYPE)i);
-			if ( pBestArmor[i] != NULL )
+			if ( pBestArmor[i] != nullptr )
 				iBestScore[i] = INT32_MAX;
 		}
 	}
 
-	for ( CItem *pItem = pPack->GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
+	for ( CItem *pItem = pPack->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 	{
 		int iScore = pItem->Armor_GetDefense();
 		if ( !iScore )	// might not be armor
 			continue;
 
 		// Can I even equip this?
-		LAYER_TYPE layer = CanEquipLayer(pItem, LAYER_QTY, NULL, true);
+		LAYER_TYPE layer = CanEquipLayer(pItem, LAYER_QTY, nullptr, true);
 		if ( layer == LAYER_NONE )
 			continue;
 
@@ -1803,10 +1803,10 @@ bool CChar::ItemEquipWeapon( bool fForce )
 
 	// Loop through all my weapons and come up with a score for it's usefulness
 
-	CItem *pBestWeapon = NULL;
-	int iWeaponScoreMax = NPC_GetWeaponUseScore(NULL);	// wrestling
+	CItem *pBestWeapon = nullptr;
+	int iWeaponScoreMax = NPC_GetWeaponUseScore(nullptr);	// wrestling
 
-	for ( CItem *pItem = pPack->GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
+	for ( CItem *pItem = pPack->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 	{
 		int iWeaponScore = NPC_GetWeaponUseScore(pItem);
 		if ( iWeaponScore > iWeaponScoreMax )

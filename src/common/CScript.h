@@ -47,7 +47,7 @@ public:
 	tchar * GetArgRaw() const;				// Not need to parse at all.
 	tchar * GetArgStr( bool * fQuoted );	// this could be a quoted string ?
 	inline tchar * GetArgStr() {
-		return GetArgStr(NULL);
+		return GetArgStr(nullptr);
 	}
 
 	char GetArgCVal();

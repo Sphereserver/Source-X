@@ -53,7 +53,7 @@ lpctstr const CCharNPC::sm_szVerbKeys[NV_QTY+1] =
 	"SHRINK",
 	"TRAIN",
 	"WALK",
-	NULL
+	nullptr
 };
 
 void CChar::Action_StartSpecial( CREID_TYPE id )
@@ -117,11 +117,11 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 	case NV_BUY:
 	{
 		// Open up the buy dialog.
-		if ( pCharSrc == NULL || !pCharSrc->IsClient())
+		if ( pCharSrc == nullptr || !pCharSrc->IsClient())
 			return false;
 
 		CClient * pClientSrc = pCharSrc->GetClient();
-		ASSERT(pClientSrc != NULL);
+		ASSERT(pClientSrc != nullptr);
 		if ( !pClientSrc->addShopMenuBuy(this) )
 			Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_NO_GOODS));
 		else
@@ -171,11 +171,11 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 	case NV_SELL:
 	{
 		// Open up the sell dialog.
-		if ( pCharSrc == NULL || !pCharSrc->IsClient() )
+		if ( pCharSrc == nullptr || !pCharSrc->IsClient() )
 			return false;
 
 		CClient * pClientSrc = pCharSrc->GetClient();
-		ASSERT(pClientSrc != NULL);
+		ASSERT(pClientSrc != nullptr);
 		if ( ! pClientSrc->addShopMenuSell( this ))
 			Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_NOTHING_BUY));
 		else
@@ -193,7 +193,7 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 			if (s.HasArgs())
 				pCharSrc->ItemBounce(pItem);
 
-			return ( pItem != NULL );
+			return ( pItem != nullptr );
 		}
 	case NV_TRAIN:
 		return( NPC_OnTrainHear( pCharSrc, s.GetArgStr()));
@@ -254,7 +254,7 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 				if ( NPC_Act_Talk() )
 				{
 					CChar * pCharOld = m_Act_UID.CharFind();
-					if (pCharOld != NULL)
+					if (pCharOld != nullptr)
 					{
 						tchar * z = Str_GetTemp();
 						sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_NPC_GENERIC_INTERRUPT), pCharOld->GetName(), pSrc->GetName());
@@ -269,7 +269,7 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 
 	// I've heard them for the first time.
 	CItemMemory * pMemory = Memory_FindObjTypes( pSrc, MEMORY_SPEAK );
-	if ( pMemory == NULL )
+	if ( pMemory == nullptr )
 	{
 		// This or CTRIG_SeeNewPlayer will be our first contact with people.
 		if ( IsTrigUsed(TRIGGER_NPCHEARGREETING) )
@@ -308,7 +308,7 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 	}
 
 	CCharBase * pCharDef = Char_GetDef();
-	ASSERT(pCharDef != NULL);
+	ASSERT(pCharDef != nullptr);
 	for ( size_t i = 0; i < pCharDef->m_Speech.size(); i++ )
 	{
 		CResourceLink * pLink = pCharDef->m_Speech[i];
@@ -883,7 +883,7 @@ bool CChar::NPC_LookAtCharHealer( CChar * pChar )
 	// Attempt to res.
 	Speak( sm_szHealer[ Calc_GetRandVal( CountOf( sm_szHealer )) ] );
 	UpdateAnimate( ANIM_CAST_AREA );
-	if ( ! pChar->OnSpellEffect( SPELL_Resurrection, this, 1000, NULL ))
+	if ( ! pChar->OnSpellEffect( SPELL_Resurrection, this, 1000, nullptr ))
 	{
 		if ( Calc_GetRandVal(2))
 			Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_HEALER_FAIL_1 ) );
@@ -929,7 +929,7 @@ bool CChar::NPC_LookAtItem( CItem * pItem, int iDist )
 	}
 
 	// Loot nearby corpses
-	if ( pItem->IsType(IT_CORPSE) && (NPC_GetAiFlags() & NPC_AI_LOOTING) && (Memory_FindObj(pItem) == NULL) )
+	if ( pItem->IsType(IT_CORPSE) && (NPC_GetAiFlags() & NPC_AI_LOOTING) && (Memory_FindObj(pItem) == nullptr) )
 	{
 		m_Act_UID = pItem->GetUID();
 		NPC_Act_Looting();
@@ -1116,7 +1116,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 
 	// Any interesting chars here ?
 	int iDist = 0;
-	CChar *pChar = NULL;
+	CChar *pChar = nullptr;
 	CWorldSearch AreaChars(GetTopPoint(), iRange);
 	for (;;)
 	{
@@ -1145,7 +1145,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 
 	if ( fForceCheckItems )
 	{
-		CItem *pItem = NULL;
+		CItem *pItem = nullptr;
 		CWorldSearch AreaItems(GetTopPoint(), iRange);
 		for (;;)
 		{
@@ -1239,7 +1239,7 @@ void CChar::NPC_Act_Guard()
 	// Protect our target or owner. (m_Act_UID)
 
 	CChar * pChar = m_Act_UID.CharFind();
-	if ( pChar != NULL && pChar != this && CanSeeLOS(pChar, LOS_NB_WINDOWS) )
+	if ( pChar != nullptr && pChar != this && CanSeeLOS(pChar, LOS_NB_WINDOWS) )
 	{
 		if ( pChar->Fight_IsActive() )	// protect the target if they're in a fight
 		{
@@ -1265,7 +1265,7 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 
 	EXC_TRY("NPC_Act_Follow")
 	CChar * pChar = Fight_IsActive() ? m_Fight_Targ_UID.CharFind() : m_Act_UID.CharFind();
-	if (pChar == NULL)
+	if (pChar == nullptr)
 	{
 		// free to do as i wish !
 		Skill_Start(SKILL_NONE);
@@ -1371,7 +1371,7 @@ bool CChar::NPC_Act_Talk()
 	//  true = just keep waiting.
 
 	CChar * pChar = m_Act_UID.CharFind();
-	if ( pChar == NULL )	// they are gone ?
+	if ( pChar == nullptr )	// they are gone ?
 		return false;
 
 	// too far away.
@@ -1519,7 +1519,7 @@ void CChar::NPC_Act_Looting()
 		return;
 
 	CItem * pItem = m_Act_UID.ItemFind();
-	if ( pItem == NULL )
+	if ( pItem == nullptr )
 		return;
 
 	if ( GetDist(pItem) > 2 )	// move toward it
@@ -1674,16 +1674,16 @@ bool CChar::NPC_Act_Food()
 
 	short	iEatAmount = 1;
 	int		iSearchDistance = 2;
-	CItem	*pClosestFood = NULL;
+	CItem	*pClosestFood = nullptr;
 	int		iClosestFood = 100;
 	int		iMyZ = GetTopPoint().m_z;
 	bool	bSearchGrass = false;
-	CItem	* pCropItem = NULL;
+	CItem	* pCropItem = nullptr;
 
 	CItemContainer	*pPack = GetPack();
 	if ( pPack )
 	{
-		for ( CItem *pFood = pPack->GetContentHead(); pFood != NULL; pFood = pFood->GetNext() )
+		for ( CItem *pFood = pPack->GetContentHead(); pFood != nullptr; pFood = pFood->GetNext() )
 		{
 			// I have some food personaly, so no need to search for something
 			if ( pFood->IsType(IT_FOOD) )
@@ -1975,7 +1975,7 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 				Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_MONEY));
                 CCharBase * pCharDef = Char_GetDef();
                 int iWage = pCharDef->GetHireDayWage();
-                iWage = pCharSrc->PayGold(this, iWage, NULL, PAYGOLD_HIRE);
+                iWage = pCharSrc->PayGold(this, iWage, nullptr, PAYGOLD_HIRE);
 				NPC_OnHirePayMore(pItem,iWage);
 			}
 			else
@@ -2345,7 +2345,7 @@ void CChar::NPC_Food()
 	int		iFoodLevel = Food_GetLevelPercent();
 	short	iEatAmount = 1;
 	int		iSearchDistance = 2;
-	CItem	*pClosestFood = NULL;
+	CItem	*pClosestFood = nullptr;
 	int		iClosestFood = 100;
 	int		iMyZ = GetTopPoint().m_z;
 	bool	bSearchGrass = false;
@@ -2359,7 +2359,7 @@ void CChar::NPC_Food()
 	if ( pPack )
 	{
 		EXC_SET_BLOCK("searching in pack");
-		for ( CItem *pFood = pPack->GetContentHead(); pFood != NULL; pFood = pFood->GetNext() )
+		for ( CItem *pFood = pPack->GetContentHead(); pFood != nullptr; pFood = pFood->GetNext() )
 		{
 			// i have some food personaly, so no need to search for something
 			if ( pFood->IsType(IT_FOOD) )
@@ -2497,7 +2497,7 @@ void CChar::NPC_Food()
 							{
 								// we found grass nearby, but has it already been consumed?
 								pResBit = g_World.CheckNaturalResource(pt, IT_GRASS, false, this);
-								if ( pResBit != NULL && pResBit->GetAmount() && CanMoveWalkTo(pt) )
+								if ( pResBit != nullptr && pResBit->GetAmount() && CanMoveWalkTo(pt) )
 								{
 									EXC_SET_BLOCK("walking to grass");
 									pResBit->m_TagDefs.SetNum("NOSAVE", 1);

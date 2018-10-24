@@ -25,7 +25,7 @@ dword ahextoi( lpctstr pszStr ) // Convert hex string to integer
 	// Unfortunatly the library func cant handle the number FFFFFFFF
 	// tchar * sstop; return( strtol( s, &sstop, 16 ));
 
-	if ( pszStr == NULL )
+	if ( pszStr == nullptr )
 		return 0;
 	bool bHex = false;
 
@@ -65,7 +65,7 @@ dword ahextoi( lpctstr pszStr ) // Convert hex string to integer
 
 int64 ahextoi64( lpctstr pszStr ) // Convert hex string to int64
 {
-	if ( pszStr == NULL )
+	if ( pszStr == nullptr )
 		return 0;
 	bool bHex = false;
 
@@ -248,11 +248,11 @@ static size_t GetIdentifierString( tchar * szTag, lpctstr pszArgs )
 bool IsValidDef( lpctstr pszTest )
 {
 	CVarDefCont * pVarBase = g_Exp.m_VarDefs.CheckParseKey( pszTest );
-	if ( pVarBase == NULL )
+	if ( pVarBase == nullptr )
 	{
 		//check VAR.X also
 		pVarBase = g_Exp.m_VarGlobals.CheckParseKey( pszTest );
-		if ( pVarBase == NULL )
+		if ( pVarBase == nullptr )
 			return false;
 	}
 	return true;
@@ -263,7 +263,7 @@ bool IsValidGameObjDef( lpctstr pszTest )
 	if (!IsSimpleNumberString(pszTest))
 	{
 		CVarDefCont * pVarBase = g_Exp.m_VarDefs.CheckParseKey( pszTest );
-		if ( pVarBase == NULL )
+		if ( pVarBase == nullptr )
 			return false;
 		tchar ch = *pVarBase->GetValStr();
 		if (( ! ch ) || ( ch == '<'))
@@ -1043,7 +1043,7 @@ llong CExpression::GetVal( lpctstr & pExpr )
 	//	{ animal_colors 1 no_colors 1 } // weighted range
 	//	{ red_colors 1 {34 39} 1 }		// same (red_colors expands to a range)
 
-	if ( pExpr == NULL )
+	if ( pExpr == nullptr )
 		return 0;
 
 	++g_getval_reentrant_check;
@@ -1064,7 +1064,7 @@ int CExpression::GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty, bool
 	ADDTOCALLSTACK("CExpression::GetRangeVals");
 	// Get a list of values.
 
-	if (pExpr == NULL)
+	if (pExpr == nullptr)
 		return 0;
 	ASSERT(piVals);
 
@@ -1116,7 +1116,7 @@ int CExpression::GetRangeArgsPos(lpctstr & pExpr, lpctstr (&pArgPos)[128][2], in
 	ADDTOCALLSTACK("CExpression::GetRangeArgsPos");
 	// Get the start and end pointers for each argument in the range
 
-	if ( pExpr == NULL )
+	if ( pExpr == nullptr )
 		return 0;
 	//ASSERT(pArgPos);
 

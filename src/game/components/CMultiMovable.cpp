@@ -770,7 +770,7 @@ lpctstr const CMultiMovable::sm_szVerbKeys[CMV_QTY + 1] =
     "SHIPTURNLEFT",
     "SHIPTURNRIGHT",
     "SHIPUP",		// up one space.
-    NULL
+    nullptr
 };
 
 bool CMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from script
@@ -1085,7 +1085,7 @@ lpctstr const CMultiMovable::sm_szLoadKeys[CML_QTY + 1] =
     "PILOT",
     "SHIPSPEED",
     "SPEEDMODE",
-    NULL
+    nullptr
 };
 
 

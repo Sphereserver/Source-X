@@ -77,7 +77,7 @@ bool CListDefContNum::r_LoadVal( CScript & s )
 	return true;
 }
 
-bool CListDefContNum::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = NULL )
+bool CListDefContNum::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr )
 {
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
@@ -132,7 +132,7 @@ bool CListDefContStr::r_LoadVal( CScript & s )
 	return true;
 }
 
-bool CListDefContStr::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = NULL )
+bool CListDefContStr::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr )
 {
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
@@ -229,7 +229,7 @@ inline CListDefContElem* CListDefCont::ElementAt(size_t nIndex) const
 {
 	ADDTOCALLSTACK("CListDefCont::ElementAt");
 	if ( nIndex >= m_listElements.size() )
-		return NULL;
+		return nullptr;
 
 	DefList::const_iterator it = m_listElements.begin();
 
@@ -241,7 +241,7 @@ inline CListDefContElem* CListDefCont::ElementAt(size_t nIndex) const
 		++it;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 lpctstr CListDefCont::GetValStr(size_t nIndex) const
@@ -250,7 +250,7 @@ lpctstr CListDefCont::GetValStr(size_t nIndex) const
 	CListDefContElem* pElem = ElementAt(nIndex);
 
 	if ( !pElem )
-		return NULL;
+		return nullptr;
 
 	return pElem->GetValStr();
 }
@@ -286,7 +286,7 @@ int CListDefCont::FindValStr( lpctstr pVal, size_t nStartIndex /* = 0 */ ) const
 
 		const CListDefContStr * pListStr = dynamic_cast <const CListDefContStr *>( pListBase );
 
-		if ( pListStr == NULL )
+		if ( pListStr == nullptr )
 			continue;
 
 		if ( ! strcmpi( pVal, pListStr->GetValStr()))
@@ -313,7 +313,7 @@ int CListDefCont::FindValNum( int64 iVal, size_t nStartIndex /* = 0 */ ) const
 
 		const CListDefContNum * pListNum = dynamic_cast <const CListDefContNum *>( pListBase );
 
-		if ( pListNum == NULL )
+		if ( pListNum == nullptr )
 			continue;
 
 		if ( pListNum->GetValNum() == iVal )
@@ -571,7 +571,7 @@ void CListDefCont::PrintElements(CSString& strElements) const
 	strElements.SetAt(strElements.GetLength() - 1, '}');
 }
 
-void CListDefCont::DumpElements( CTextConsole * pSrc, lpctstr pszPrefix /* = NULL */ ) const
+void CListDefCont::DumpElements( CTextConsole * pSrc, lpctstr pszPrefix /* = nullptr */ ) const
 {
 	ADDTOCALLSTACK("CListDefCont::DumpElements");
 	CSString strResult;
@@ -671,7 +671,7 @@ CListDefCont * CListDefMap::GetAt( size_t at )
 	ADDTOCALLSTACK("CListDefMap::GetAt");
 
 	if ( at > m_Container.size() )
-		return NULL;
+		return nullptr;
 
 	DefSet::iterator i = m_Container.begin();
 	while ( at-- )
@@ -680,7 +680,7 @@ CListDefCont * CListDefMap::GetAt( size_t at )
 	if ( i != m_Container.end() )
 		return( (*i) );
 	else
-		return NULL;
+		return nullptr;
 }
 
 CListDefCont * CListDefMap::GetAtKey( lpctstr at )
@@ -694,7 +694,7 @@ CListDefCont * CListDefMap::GetAtKey( lpctstr at )
 	if ( i != m_Container.end() )
 		return( (*i) );
 	else
-		return NULL;
+		return nullptr;
 }
 
 inline void CListDefMap::DeleteAt( size_t at )
@@ -750,7 +750,7 @@ void CListDefMap::Empty()
 	ADDTOCALLSTACK("CListDefMap::Empty");
 
 	DefSet::iterator i = m_Container.begin();
-	CListDefCont * pListBase = NULL;
+	CListDefCont * pListBase = nullptr;
 
 	while ( i != m_Container.end() )
 	{
@@ -793,7 +793,7 @@ CListDefCont* CListDefMap::GetKey( lpctstr pszKey ) const
 {
 	ADDTOCALLSTACK("CListDefMap::GetKey");
 
-	CListDefCont * pReturn = NULL;
+	CListDefCont * pReturn = nullptr;
 
 	if ( pszKey && *pszKey )
 	{
@@ -828,7 +828,7 @@ void CListDefMap::DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix )
 	// List out all the keys.
 	ASSERT(pSrc);
 
-	if ( pszPrefix == NULL )
+	if ( pszPrefix == nullptr )
 		pszPrefix = "";
 
 	for ( DefSet::const_iterator i = m_Container.begin(); i != m_Container.end(); ++i )
@@ -850,7 +850,7 @@ void CListDefMap::ClearKeys(lpctstr mask)
 		sMask.MakeLower();
 
 		DefSet::iterator i = m_Container.begin();
-		CListDefCont * pListBase = NULL;
+		CListDefCont * pListBase = nullptr;
 
 		while ( i != m_Container.end() )
 		{
@@ -920,7 +920,7 @@ bool CListDefMap::r_LoadVal( lpctstr pszKey, CScript & s )
 				if (( pListBase ) && ( !strnicmp(ppCmds[1], "set", 3) ))
 				{
 					DeleteKey(ppCmds[0]);
-					pListBase = NULL;
+					pListBase = nullptr;
 				}
 				
 				if ( !pListBase )

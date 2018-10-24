@@ -497,7 +497,7 @@ public:
 	ITEMID_TYPE GetNextFlipID( ITEMID_TYPE id ) const;
 
 	virtual bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = NULL );
+	bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr );
 
 	bool IsMovableType() const
 	{
@@ -582,7 +582,7 @@ public:
 	static CItemBaseDupe * GetDupeRef( ITEMID_TYPE id );
 	virtual void UnLink()
 	{
-		m_MasterItem.SetRef(NULL);
+		m_MasterItem.SetRef(nullptr);
 		CResourceDef::UnLink();
 	}
 	dword GetTFlags() const

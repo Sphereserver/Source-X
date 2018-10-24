@@ -54,7 +54,7 @@ static void socketslave_cb(struct ev_loop *loop, struct ev_io *w, int revents)
 			g_NetworkOut.onAsyncSendComplete(state, true);
 #else
 			NetworkThread* thread = state->getParentThread();
-			if (thread != NULL)
+			if (thread != nullptr)
 				thread->onAsyncSendComplete(state, true);	// we can send (again) data
 #endif
 		}
@@ -69,7 +69,7 @@ static void socketslave_cb(struct ev_loop *loop, struct ev_io *w, int revents)
 LinuxEv::LinuxEv(void) : AbstractSphereThread("T_NetworkEvents", IThread::High)
 {
 	m_eventLoop = ev_loop_new(EV_BACKEND_LIST);
-	ASSERT(m_eventLoop != NULL);	// libev probably couldn't find sys/poll.h, select.h and other includes (compiling on ubuntu with both x86_64 and i386 compilers? or more gcc versions?)
+	ASSERT(m_eventLoop != nullptr);	// libev probably couldn't find sys/poll.h, select.h and other includes (compiling on ubuntu with both x86_64 and i386 compilers? or more gcc versions?)
 	ev_set_io_collect_interval(m_eventLoop, 0.01);
 	
 	memset(&m_watchMainsock, 0, sizeof(ev_io));
@@ -104,7 +104,7 @@ void LinuxEv::registerClient(NetState * state, EventsID eventCheck)
 	// we call it with eventCheck = LinuxEv::Write, so we check when the socket will be again writable
 
 	ADDTOCALLSTACK("LinuxEv::registerClient");
-	ASSERT(state != NULL);
+	ASSERT(state != nullptr);
 	
 	memset(state->iocb(), 0, sizeof(ev_io));
 
@@ -125,7 +125,7 @@ void LinuxEv::registerClient(NetState * state, EventsID eventCheck)
 void LinuxEv::unregisterClient(NetState * state)
 {
 	ADDTOCALLSTACK("LinuxEv::unregisterClient");
-	ASSERT(state != NULL);
+	ASSERT(state != nullptr);
 
 	state->setSendingAsync(false);
 	
@@ -135,7 +135,7 @@ void LinuxEv::unregisterClient(NetState * state)
 void LinuxEv::forceClientevent(NetState * state, EventsID eventForce)
 {
 	ADDTOCALLSTACK("LinuxEv::forceClientevent");
-	ASSERT(state != NULL);
+	ASSERT(state != nullptr);
 	ev_invoke(m_eventLoop, state->iocb(), (int)eventForce);
 }
 

@@ -260,7 +260,7 @@ const CServerMapBlock * CSectorBase::GetMapBlock( const CPointMap & pt )
 	if ( !pt.IsValidXY() )
 	{
 		g_Log.EventWarn("Attempting to access invalid memory block at %s.\n", pt.WriteUsed());
-		return NULL;
+		return nullptr;
 	}
 
 	CServerMapBlock * pMapBlock;
@@ -278,19 +278,19 @@ const CServerMapBlock * CSectorBase::GetMapBlock( const CPointMap & pt )
 	try
 	{
 		pMapBlock = new CServerMapBlock(pntBlock);
-		ASSERT(pMapBlock != NULL);
+		ASSERT(pMapBlock != nullptr);
 	}
 	catch ( const CSError& e )
 	{
 		g_Log.EventError("Exception creating new memory block at %s. (%s)\n", pntBlock.WriteUsed(), e.m_pszDescription);
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
-		return NULL;
+		return nullptr;
 	}
 	catch (...)
 	{
 		g_Log.EventError("Exception creating new memory block at %s.\n", pntBlock.WriteUsed());
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
-		return NULL;
+		return nullptr;
 	}
 
 	// Add it to the cache.
@@ -354,7 +354,7 @@ CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 			continue;
 		return( pRegion );
 	}
-	return NULL;
+	return nullptr;
 }
 
 // Balkon: get regions list (to cicle through intercepted house regions)
@@ -462,13 +462,13 @@ CTeleport * CSectorBase::GetTeleport( const CPointMap & pt ) const
 
 	size_t i = m_Teleports.FindKey(pt.GetPointSortIndex());
 	if ( i == m_Teleports.BadIndex() )
-		return NULL;
+		return nullptr;
 
 	CTeleport *pTeleport = static_cast<CTeleport *>(m_Teleports[i]);
 	if ( pTeleport->m_map != pt.m_map )
-		return NULL;
+		return nullptr;
 	if ( abs(pTeleport->m_z - pt.m_z) > 5 )
-		return NULL;
+		return nullptr;
 
 	return pTeleport;
 }

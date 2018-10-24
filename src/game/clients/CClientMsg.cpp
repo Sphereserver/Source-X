@@ -52,7 +52,7 @@ void CClient::resendBuffs() const
 	word iStatEffect = 0;
 	word iTimerEffect = 0;
 
-	for ( CItem *pItem = pChar->GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
+	for ( CItem *pItem = pChar->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 	{
 		if ( !pItem->IsType(IT_SPELL) )
 			continue;
@@ -366,7 +366,7 @@ void CClient::addItem_OnGround( CItem * pItem ) // Send items (on ground)
 	{
 		// send house design version
 		CItemMultiCustom *pItemMulti = static_cast<CItemMultiCustom *>(pItem);
-		if (pItemMulti != NULL)
+		if (pItemMulti != nullptr)
 			pItemMulti->SendVersionTo(this);
 	}
 }
@@ -377,7 +377,7 @@ void CClient::addItem_Equipped( const CItem * pItem )
 	ASSERT(pItem);
 	// Equip a single item on a CChar.
 	CChar * pChar = dynamic_cast <CChar*> (pItem->GetParent());
-	ASSERT( pChar != NULL );
+	ASSERT( pChar != nullptr );
 
 	if ( ! m_pChar->CanSeeItem( pItem ) && m_pChar != pChar )
 		return;
@@ -392,7 +392,7 @@ void CClient::addItem_InContainer( const CItem * pItem )
 	ADDTOCALLSTACK("CClient::addItem_InContainer");
 	ASSERT(pItem);
 	CItemContainer * pCont = dynamic_cast <CItemContainer*> (pItem->GetParent());
-	if ( pCont == NULL )
+	if ( pCont == nullptr )
 		return;
 
 	new PacketItemContainer(this, pItem);
@@ -466,7 +466,7 @@ bool CClient::addContainerSetup( const CItemContainer * pContainer ) // Send Bac
 void CClient::LogOpenedContainer(const CItemContainer* pContainer) // record a container in opened container list
 {
 	ADDTOCALLSTACK("CClient::LogOpenedContainer");
-	if (pContainer == NULL)
+	if (pContainer == nullptr)
 		return;
 
 	CObjBaseTemplate * pTopMostContainer = pContainer->GetTopLevelObj();
@@ -475,7 +475,7 @@ void CClient::LogOpenedContainer(const CItemContainer* pContainer) // record a c
 	dword dwTopMostContainerUID = pTopMostContainer->GetUID().GetPrivateUID();
 	dword dwTopContainerUID = 0;
 
-	if ( pTopContainer != NULL )
+	if ( pTopContainer != nullptr )
 		dwTopContainerUID = pTopContainer->GetUID().GetPrivateUID();
 	else
 		dwTopContainerUID = dwTopMostContainerUID;
@@ -573,7 +573,7 @@ bool CClient::addKick( CTextConsole * pSrc, bool fBlock )
 	ADDTOCALLSTACK("CClient::addKick");
 	// Kick me out.
 	ASSERT( pSrc );
-	if ( GetAccount() == NULL )
+	if ( GetAccount() == nullptr )
 	{
 		GetNetState()->markReadClosed();
 		return true;
@@ -822,7 +822,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 			{
 				if ( CArgs.GetLength() )
 					CArgs += "\t";
-				CArgs += ( !strcmp(ppArgs[i], "NULL") ? " " : ppArgs[i] );
+				CArgs += ( !strcmp(ppArgs[i], "nullptr") ? " " : ppArgs[i] );
 			}
 
 			addBarkLocalizedEx( iClilocId, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), (AFFIX_TYPE)(iAffixType), ppArgs[2], CArgs.GetPtr());
@@ -839,7 +839,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 			{
 				if ( CArgs.GetLength() )
 					CArgs += "\t";
-				CArgs += ( !strcmp(ppArgs[i], "NULL") ? " " : ppArgs[i] );
+				CArgs += ( !strcmp(ppArgs[i], "nullptr") ? " " : ppArgs[i] );
 			}
 
 			addBarkLocalized( iClilocId, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), CArgs.GetPtr());
@@ -872,7 +872,7 @@ bark_default:
 void CClient::addBark( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font ) const
 {
 	ADDTOCALLSTACK("CClient::addBark");
-	if ( pszText == NULL )
+	if ( pszText == nullptr )
 		return;
 
 	if ( ! IsConnectTypePacket() )
@@ -1031,8 +1031,8 @@ void CClient::GetAdjustedCharID( const CChar * pChar, CREID_TYPE &id, HUE_TYPE &
 		if ( pChar != m_pChar )
 		{
 			// Get a random creature from the artwork.
-			pCharDef = NULL;
-			while ( pCharDef == NULL )
+			pCharDef = nullptr;
+			while ( pCharDef == nullptr )
 			{
 				id = static_cast<CREID_TYPE>(Calc_GetRandVal(CREID_EQUIP_GM_ROBE));
 				if ( id != CREID_SEA_CREATURE )		// skip this chardef, it can crash many clients
@@ -1131,7 +1131,7 @@ void CClient::addItemName( const CItem * pItem )
 	size_t len = strncpylen( szName, pszNameFull, CountOf(szName) );
 
 	const CContainer* pCont = dynamic_cast<const CContainer*>(pItem);
-	if ( pCont != NULL )
+	if ( pCont != nullptr )
 	{
 		// ??? Corpses show hair as an item !!
 		len += sprintf( szName+len, g_Cfg.GetDefaultMsg(DEFMSG_CONT_ITEMS), pCont->GetCount(), pCont->GetTotalWeight() / WEIGHT_UNITS);
@@ -1150,7 +1150,7 @@ void CClient::addItemName( const CItem * pItem )
 
 	// Show the priced value
 	CItemContainer * pMyCont = dynamic_cast <CItemContainer *>( pItem->GetParent());
-	if ( pMyCont != NULL && pMyCont->IsType(IT_EQ_VENDOR_BOX))
+	if ( pMyCont != nullptr && pMyCont->IsType(IT_EQ_VENDOR_BOX))
 	{
 		const CItemVendable * pVendItem = dynamic_cast <const CItemVendable *> (pItem);
 		if ( pVendItem )
@@ -1177,7 +1177,7 @@ void CClient::addItemName( const CItem * pItem )
 			len += strcpylen( szName+len, " (invis)" );
 		}
 		// Show the restock count
-		if ( pMyCont != NULL && pMyCont->IsType(IT_EQ_VENDOR_BOX) )
+		if ( pMyCont != nullptr && pMyCont->IsType(IT_EQ_VENDOR_BOX) )
 		{
 			len += sprintf( szName+len, " (%d restock)", pItem->GetContainedLayer());
 		}
@@ -1223,7 +1223,7 @@ void CClient::addItemName( const CItem * pItem )
 
 		lpctstr pNewStr = Args.m_VarsLocal.GetKeyStr("ClickMsgText");
 
-		if ( pNewStr != NULL )
+		if ( pNewStr != nullptr )
 			strncpynull(szName, pNewStr, CountOf(szName));
 
 		wHue = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("ClickMsgHue", true));
@@ -1343,7 +1343,7 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 
 		lpctstr pNewStr = Args.m_VarsLocal.GetKeyStr("ClickMsgText");
 
-		if ( pNewStr != NULL )
+		if ( pNewStr != nullptr )
 			strcpy(pszTemp, pNewStr);
 
 		wHue = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("ClickMsgHue", true));
@@ -1372,7 +1372,7 @@ void CClient::addPlayerStart( CChar * pChar )
 	CSector *pSector = pt.GetSector();
 
 	CItem * pItemChange = m_pChar->LayerFind(LAYER_FLAG_ClientLinger);
-	if ( pItemChange != NULL )
+	if ( pItemChange != nullptr )
 		pItemChange->Delete();
 
 	if ( g_Cfg.m_bAutoResDisp )
@@ -1397,7 +1397,7 @@ void CClient::addPlayerStart( CChar * pChar )
 	if ( pSector != nullptr )
 		addSeason(pSector->GetSeason());
 	if (pChar->m_pParty)
-		pChar->m_pParty->SendAddList(NULL);
+		pChar->m_pParty->SendAddList(nullptr);
 
 	addKRToolbar(pChar->m_pPlayer->getKrToolbarStatus());
 	resendBuffs();
@@ -1425,7 +1425,7 @@ bool CClient::addBookOpen( CItem * pBook ) const
 {
 	ADDTOCALLSTACK("CClient::addBookOpen");
 	// word wrap is done when typed in the client. (it has a var size font)
-	if (pBook == NULL)
+	if (pBook == nullptr)
 		return false;
 
 	size_t iPagesNow = 0;
@@ -1497,7 +1497,7 @@ size_t CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 	{
 		CUID uid(pAccount->m_Chars.GetChar(i));
 		CChar* pChar = uid.CharFind();
-		if ( pChar == NULL )
+		if ( pChar == nullptr )
 			continue;
 		if ( pCharFirst == pChar )
 			continue;
@@ -1551,7 +1551,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 		case CLIMODE_TARG_USE_ITEM:
 		{
 			CItem * pItemUse = m_Targ_UID.ItemFind();
-			if ( pItemUse != NULL && (( IsTrigUsed(TRIGGER_TARGON_CANCEL) ) || ( IsTrigUsed(TRIGGER_ITEMTARGON_CANCEL) ) ))
+			if ( pItemUse != nullptr && (( IsTrigUsed(TRIGGER_TARGON_CANCEL) ) || ( IsTrigUsed(TRIGGER_ITEMTARGON_CANCEL) ) ))
 			{
 				if ( pItemUse->OnTrigger( ITRIG_TARGON_CANCEL, m_pChar ) == TRIGRET_RET_TRUE )
 					bSuppressCancelMessage = true;
@@ -1561,7 +1561,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 		case CLIMODE_TARG_SKILL_MAGERY:
 		{
 			const CSpellDef* pSpellDef = g_Cfg.GetSpellDef(m_tmSkillMagery.m_Spell);
-			if (m_pChar != NULL && pSpellDef != NULL)
+			if (m_pChar != nullptr && pSpellDef != nullptr)
 			{
 				CScriptTriggerArgs Args(m_tmSkillMagery.m_Spell, 0, m_Targ_Prv_UID.ObjFind());
 
@@ -1606,7 +1606,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 					break;
 			}
 
-			if (action != SKILL_NONE && m_pChar != NULL)
+			if (action != SKILL_NONE && m_pChar != nullptr)
 			{
 				if ( IsTrigUsed(TRIGGER_SKILLTARGETCANCEL) )
 				{
@@ -1641,7 +1641,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 	{
 		//If there's any item in LAYER_DRAGGING we remove it from view and then bounce it
 		CItem * pItem = m_pChar->LayerFind( LAYER_DRAGGING );
-		if (pItem != NULL)
+		if (pItem != nullptr)
 		{
 			pItem->RemoveFromView();		//Removing from view to avoid seeing it in the cursor
 			m_pChar->ItemBounce(pItem);
@@ -1820,7 +1820,7 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 	CRegion *pCurrentCharRegion = m_pChar->GetTopPoint().GetRegion(REGION_TYPE_HOUSE);
 
 	// Nearby items on ground
-	CItem *pItem = NULL;
+	CItem *pItem = nullptr;
 	uint iSeeCurrent = 0;
 	uint iSeeMax = g_Cfg.m_iMaxItemComplexity * 30;
 
@@ -1877,7 +1877,7 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 	}
 
 	// Nearby chars
-	CChar *pChar = NULL;
+	CChar *pChar = nullptr;
 	iSeeCurrent = 0;
 	iSeeMax = g_Cfg.m_iMaxCharComplexity * 5;
 
@@ -1935,7 +1935,7 @@ void CClient::addReSync()
 void CClient::addMap() const
 {
 	ADDTOCALLSTACK("CClient::addMap");
-	if ( m_pChar == NULL )
+	if ( m_pChar == nullptr )
 		return;
 
 	CPointMap pt = m_pChar->GetTopPoint();
@@ -2164,7 +2164,7 @@ void CClient::addCustomSpellbookOpen( CItem * pBook, dword gumpID )
 		return;
 
 	int count=0;
-	for ( CItem *pItem = pContainer->GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
+	for ( CItem *pItem = pContainer->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 	{
 		if ( !pItem->IsType( IT_SCROLL ) )
 			continue;
@@ -2281,7 +2281,7 @@ bool CClient::addShopMenuSell( CChar * pVendor )
 	addItem( pContainer3 );
 
 	if ( pVendor->IsStatFlag( STATF_PET ) )	// player vendor
-		pContainer2 = NULL;		// no stock
+		pContainer2 = nullptr;		// no stock
 
 	PacketVendorSellList cmd( pVendor );
 	size_t count = cmd.fillSellList( this, m_pChar->GetPackSafe(), pContainer1, pContainer2, -pVendor->NPC_GetVendorMarkup() );
@@ -2371,7 +2371,7 @@ void CClient::addBulletinBoard( const CItemContainer * pBoard )
 	ADDTOCALLSTACK("CClient::addBulletinBoard");
 	// Open up the bulletin board and all it's messages
 	// PacketBulletinBoardReq::onReceive
-	if (pBoard == NULL)
+	if (pBoard == nullptr)
 		return;
 
 	// Give the bboard name.
@@ -2436,7 +2436,7 @@ void CClient::addItemMenu( CLIMODE_TYPE mode, const CMenuItem * item, size_t cou
 	if (count <= 0)
 		return;
 
-	if (pObj == NULL)
+	if (pObj == nullptr)
 		pObj = m_pChar;
 
 	new PacketDisplayMenu(this, mode, item, count, pObj);
@@ -2591,7 +2591,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 	{
 		if ( !fNoMessages )
 		{
-			addBark(g_szServerDescription, NULL, HUE_YELLOW, TALKMODE_SYSTEM, FONT_NORMAL);
+			addBark(g_szServerDescription, nullptr, HUE_YELLOW, TALKMODE_SYSTEM, FONT_NORMAL);
 
 			sprintf(z, (g_Serv.StatGet(SERV_STAT_CLIENTS)==2) ?
 				g_Cfg.GetDefaultMsg( DEFMSG_LOGIN_PLAYER ) : g_Cfg.GetDefaultMsg( DEFMSG_LOGIN_PLAYERS ),
@@ -2618,7 +2618,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 	if ( IsPriv(PRIV_JAILED) )
 		m_pChar->Jail(&g_Serv, true, (int)(GetAccount()->m_TagDefs.GetKeyNum("JailCell", true)));
 	if ( g_Serv.m_timeShutdown > 0 )
-		addBarkParse(g_Cfg.GetDefaultMsg(DEFMSG_MSG_SERV_SHUTDOWN_SOON), NULL, HUE_TEXT_DEF, TALKMODE_SYSTEM, FONT_BOLD);
+		addBarkParse(g_Cfg.GetDefaultMsg(DEFMSG_MSG_SERV_SHUTDOWN_SOON), nullptr, HUE_TEXT_DEF, TALKMODE_SYSTEM, FONT_BOLD);
 
 	GetAccount()->m_TagDefs.DeleteKey("LastLogged");
 	Announce(true);		// announce you to the world
@@ -2676,7 +2676,7 @@ byte CClient::Setup_Play( uint iSlot ) // After hitting "Play Character" button
 
 	// LastLogged update
 	CSTime datetime = CSTime::GetCurrentTime();
-	GetAccount()->m_TagDefs.SetStr("LastLogged", false, GetAccount()->m_dateLastConnect.Format(NULL));
+	GetAccount()->m_TagDefs.SetStr("LastLogged", false, GetAccount()->m_dateLastConnect.Format(nullptr));
 	GetAccount()->m_dateLastConnect = datetime;
 
 	return Setup_Start( pChar );
@@ -2713,7 +2713,7 @@ byte CClient::Setup_Delete( dword iSlot ) // Deletion of character
 	enum TRIGRET_TYPE tr;
 	CScriptTriggerArgs Args;
 	Args.m_pO1 = this;
-	pChar->r_Call("f_onchar_delete", pChar, &Args, NULL, &tr);
+	pChar->r_Call("f_onchar_delete", pChar, &Args, nullptr, &tr);
 	if ( tr == TRIGRET_RET_TRUE )
 	{
 		return PacketDeleteError::InvalidRequest;
@@ -2787,7 +2787,7 @@ byte CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, 
 byte CClient::LogIn( CAccountRef pAccount, CSString & sMsg )
 {
 	ADDTOCALLSTACK("CClient::LogIn");
-	if ( pAccount == NULL )
+	if ( pAccount == nullptr )
 		return( PacketLoginError::Invalid );
 
 	if ( pAccount->IsPriv( PRIV_BLOCKED ))
@@ -2799,7 +2799,7 @@ byte CClient::LogIn( CAccountRef pAccount, CSString & sMsg )
 
 	// Look for this account already in use.
 	CClient * pClientPrev = pAccount->FindClient( this );
-	if ( pClientPrev != NULL )
+	if ( pClientPrev != nullptr )
 	{
 		// Only if it's from a diff ip ?
 		ASSERT( pClientPrev != this );
@@ -2873,7 +2873,7 @@ byte CClient::LogIn( CAccountRef pAccount, CSString & sMsg )
 	Args.m_iN1 = GetConnectType();
 	Args.m_pO1 = this;
 	enum TRIGRET_TYPE tr;
-	g_Serv.r_Call("f_onaccount_login", &g_Serv, &Args, NULL, &tr);
+	g_Serv.r_Call("f_onaccount_login", &g_Serv, &Args, nullptr, &tr);
 	if ( tr == TRIGRET_RET_TRUE )
 	{
 		sMsg = g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_DENIED );
@@ -2940,7 +2940,7 @@ byte CClient::LogIn( lpctstr pszAccName, lpctstr pszPassword, CSString & sMsg )
 			CAccountRef pAccount = g_Accounts.Account_FindCreate(pszTemp, true );
 			ASSERT( pAccount );
 
-			if ( pAccount->FindClient() == NULL )
+			if ( pAccount->FindClient() == nullptr )
 			{
 				pszAccName = pAccount->GetName();
 				break;

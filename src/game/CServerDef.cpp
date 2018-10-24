@@ -30,8 +30,8 @@
 
 	//	PSAPI external definitions
 	typedef	BOOL (WINAPI *pGetProcessMemoryInfo)(HANDLE, PPROCESS_MEMORY_COUNTERS, dword);
-	HMODULE	m_hmPsapiDll = NULL;
-	pGetProcessMemoryInfo m_GetProcessMemoryInfo = NULL;
+	HMODULE	m_hmPsapiDll = nullptr;
+	pGetProcessMemoryInfo m_GetProcessMemoryInfo = nullptr;
 	PROCESS_MEMORY_COUNTERS	pcnt;
 #else			// (Unix)
 	#include <sys/resource.h>
@@ -72,7 +72,7 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 			{
 				EXC_SET_BLOCK("load process info");
 				m_hmPsapiDll = LoadLibrary(TEXT("psapi.dll"));
-				if (m_hmPsapiDll == NULL)
+				if (m_hmPsapiDll == nullptr)
 				{
 					m_bPmemory = false;
 					g_Log.EventError(("Unable to load process information PSAPI.DLL library. Memory information will be not available.\n"));
@@ -116,7 +116,7 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 						if ( !inf.ReadString(buf, SCRIPT_MAX_LINE_LEN) )
 							break;
 
-						if ( (head = strstr(buf, "VmSize:")) != NULL )
+						if ( (head = strstr(buf, "VmSize:")) != nullptr )
 						{
 							head += 7;
 							GETNONWHITESPACE(head)
@@ -233,7 +233,7 @@ lpctstr const CServerDef::sm_szLoadKeys[SC_QTY+1] =	// static
 	"URL",			// m_sURL
 	"URLLINK",
 	"VERSION",
-	NULL
+	nullptr
 };
 
 static lpctstr const sm_AccAppTable[ ACCAPP_QTY ] =
@@ -443,7 +443,7 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 	default:
 		{
 			lpctstr pszArgs = strchr(pszKey, ' ');
-			if (pszArgs != NULL)
+			if (pszArgs != nullptr)
 				GETNONWHITESPACE(pszArgs);
 
 			CScriptTriggerArgs Args( pszArgs ? pszArgs : "" );

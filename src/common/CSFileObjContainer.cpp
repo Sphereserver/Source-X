@@ -19,7 +19,7 @@ lpctstr const CSFileObjContainer::sm_szLoadKeys[CFO_QTY+1] =
 #define ADD(a,b) b,
 #include "../tables/CSFileObjContainer_props.tbl"
 #undef ADD
-    NULL
+    nullptr
 };
 
 enum CFOV_TYPE
@@ -35,7 +35,7 @@ lpctstr const CSFileObjContainer::sm_szVerbKeys[CFOV_QTY+1] =
 #define ADD(a,b) b,
 #include "../tables/CSFileObjContainer_functions.tbl"
 #undef ADD
-    NULL
+    nullptr
 };
 
 void CSFileObjContainer::ResizeContainer( size_t iNewRange )

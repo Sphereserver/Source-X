@@ -23,7 +23,7 @@ void CChar::OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark )
 
 	// Make my owner criminal too (if I have one)
 	/*CChar * pOwner = pCriminal->GetOwner();
-	if ( pOwner != NULL && pOwner != this )
+	if ( pOwner != nullptr && pOwner != this )
 		OnNoticeCrime( pOwner, pCharMark );*/
 
 	if ( m_pPlayer )
@@ -97,7 +97,7 @@ bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObj
 	for (;;)
 	{
 		CChar * pChar = AreaChars.GetChar();
-		if ( pChar == NULL )
+		if ( pChar == nullptr )
 			break;
 		if ( this == pChar )
 			continue;	// I saw myself before.
@@ -201,7 +201,7 @@ bool CChar::CallGuards( CChar * pCriminal )
 
     m_timeLastCallGuards = g_World.GetCurrentTime().GetTimeRaw();
 
-	CChar *pGuard = NULL;
+	CChar *pGuard = nullptr;
 	if (m_pNPC && m_pNPC->m_Brain == NPCBRAIN_GUARD)
 	{
 		// I'm a guard, why summon someone else to do my work? :)
@@ -211,8 +211,8 @@ bool CChar::CallGuards( CChar * pCriminal )
 	{
 		// Search for a free guards nearby
 		CWorldSearch AreaGuard(GetTopPoint(), UO_MAP_VIEW_SIGHT);
-		CChar *pGuardFound = NULL;
-		while ((pGuardFound = AreaGuard.GetChar()) != NULL)
+		CChar *pGuardFound = nullptr;
+		while ((pGuardFound = AreaGuard.GetChar()) != nullptr)
 		{
 			if (pGuardFound->m_pNPC && (pGuardFound->m_pNPC->m_Brain == NPCBRAIN_GUARD) && // Char found must be a guard
 				(pGuardFound->m_Fight_Targ_UID == pCriminal->GetUID() || !pGuardFound->IsStatFlag(STATF_WAR)))	// and will be eligible to fight this target if it's not already on a fight or if its already attacking this target (to avoid spamming docens of guards at the same target).
@@ -238,7 +238,7 @@ bool CChar::CallGuards( CChar * pCriminal )
 		if ( (int)Args.m_iN1 != rid.GetResIndex())
 			rid = CResourceID(RES_CHARDEF, (int)Args.m_iN1);
 		if (Args.m_iN2 > 0)	//ARGN2: If set to 1, a new guard will be spawned regardless of whether a nearby guard is available.
-			pGuard = NULL;
+			pGuard = nullptr;
 	}
 	if (!pGuard)		//	spawn a new guard
 	{
@@ -299,7 +299,7 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, int iHarmQty, bool fCommandPet, bool 
 	ADDTOCALLSTACK("CChar::OnAttackedBy");
 	UNREFERENCED_PARAMETER(iHarmQty);
 
-	if (pCharSrc == NULL)
+	if (pCharSrc == nullptr)
 		return true;	// field spell ?
 	if (pCharSrc == this)
 		return true;	// self induced
@@ -325,7 +325,7 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, int iHarmQty, bool fCommandPet, bool 
 		{
 			// If it is a pet then this a crime others can report.
 			CChar * pCharMark = IsStatFlag(STATF_PET) ? NPC_PetGetOwner() : this;
-			pCharSrc->CheckCrimeSeen(Skill_GetActive(), pCharMark, NULL, NULL);
+			pCharSrc->CheckCrimeSeen(Skill_GetActive(), pCharMark, nullptr, nullptr);
 		}
 	}
 
@@ -389,7 +389,7 @@ int CChar::CalcArmorDefense() const
 	for ( int i = 0; i < ARMOR_QTY; ++i )
 		ArmorRegionMax[i] = 0;
 
-	for ( CItem* pItem=GetContentHead(); pItem!=NULL; pItem=pItem->GetNext() )
+	for ( CItem* pItem=GetContentHead(); pItem!=nullptr; pItem=pItem->GetNext() )
 	{
 		int iDefense = pItem->Armor_GetDefense();
 		if ( !iDefense && !pItem->IsType(IT_SPELL) )
@@ -540,7 +540,7 @@ int CChar::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType, int iDmgPhys
 {
 	ADDTOCALLSTACK("CChar::OnTakeDamage");
 
-	if ( pSrc == NULL )
+	if ( pSrc == nullptr )
 		pSrc = this;
 
 	if ( IsStatFlag(STATF_DEAD) )	// already dead
@@ -687,7 +687,7 @@ effect_bounce:
 
     if (IsSetCombatFlags(COMBAT_SLAYER))
     {
-		CItem *pWeapon = NULL;
+		CItem *pWeapon = nullptr;
 		if (uType & DAMAGE_MAGIC)	// If the damage is magic
 		{
 			pWeapon = pSrc->LayerFind(LAYER_HAND1);	// Search for an equipped spellbook
@@ -844,7 +844,7 @@ effect_bounce:
 		else
 		{
 			CChar * pSrcOwner = pSrc->GetOwner();
-			if ( pSrcOwner != NULL )
+			if ( pSrcOwner != nullptr )
 			{
 				if ( pSrcOwner->IsClient() )
 					pSrcOwner->m_pClient->addShowDamage( iDmg, (dword)(GetUID()) );
@@ -875,7 +875,7 @@ SKILL_TYPE CChar::Fight_GetWeaponSkill() const
 {
 	ADDTOCALLSTACK_INTENSIVE("CChar::Fight_GetWeaponSkill");
 	CItem * pWeapon = m_uidWeapon.ItemFind();
-	if ( pWeapon == NULL )
+	if ( pWeapon == nullptr )
 		return( SKILL_WRESTLING );
 	return( pWeapon->Weapon_GetSkill());
 }
@@ -956,7 +956,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 	int iDmgMax = 0;
 	STAT_TYPE iStatBonus = (STAT_TYPE)(GetDefNum("COMBATBONUSSTAT"));
 	int iStatBonusPercent = (int)(GetDefNum("COMBATBONUSPERCENT"));
-	if ( pWeapon != NULL )
+	if ( pWeapon != nullptr )
 	{
 		iDmgMin = pWeapon->Weapon_GetAttack(false);
 		iDmgMax = pWeapon->Weapon_GetAttack(true);
@@ -1021,7 +1021,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 				if ( Skill_GetBase(SKILL_ANATOMY) >= 1000 )
 					iDmgBonus += 10;
 
-				if ( pWeapon != NULL && pWeapon->IsType(IT_WEAPON_AXE) )
+				if ( pWeapon != nullptr && pWeapon->IsType(IT_WEAPON_AXE) )
 				{
 					iDmgBonus += Skill_GetBase(SKILL_LUMBERJACKING) / 50;
 					if ( Skill_GetBase(SKILL_LUMBERJACKING) >= 1000 )
@@ -1047,7 +1047,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 				if ( Skill_GetBase(SKILL_ANATOMY) >= 1000 )
 					iDmgBonus += 5;
 
-				if ( pWeapon != NULL && pWeapon->IsType(IT_WEAPON_AXE) )
+				if ( pWeapon != nullptr && pWeapon->IsType(IT_WEAPON_AXE) )
 				{
 					iDmgBonus += Skill_GetBase(SKILL_LUMBERJACKING) / 50;
 					if ( Skill_GetBase(SKILL_LUMBERJACKING) >= 1000 )
@@ -1126,7 +1126,7 @@ bool CChar::Fight_Clear(CChar *pChar, bool bForced)
 			Fight_ClearAll();
 	}
 
-	return (pChar != NULL);	// I did not know about this ?
+	return (pChar != nullptr);	// I did not know about this ?
 }
 
 // We want to attack some one.
@@ -1162,7 +1162,7 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool btoldByMaster )
 	if ( g_Cfg.m_fAttackingIsACrime )
 	{
 		if ( pCharTarg->Noto_GetFlag(this) == NOTO_GOOD )
-			CheckCrimeSeen(SKILL_NONE, pTarget, NULL, NULL);
+			CheckCrimeSeen(SKILL_NONE, pTarget, nullptr, nullptr);
 	}
 
 	int64 threat = 0;

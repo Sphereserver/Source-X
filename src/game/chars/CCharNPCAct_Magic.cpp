@@ -98,7 +98,7 @@ void CChar::NPC_GetAllSpellbookSpells()		// Add all spells found on spellbooks t
     ASSERT(m_pNPC);
 
     //	search for suitable book in hands first
-    for (CItem *pBook = GetContentHead(); pBook != NULL; pBook = pBook->GetNext())
+    for (CItem *pBook = GetContentHead(); pBook != nullptr; pBook = pBook->GetNext())
     {
         if (pBook->IsTypeSpellbook())
             NPC_AddSpellsFromBook(pBook);
@@ -108,7 +108,7 @@ void CChar::NPC_GetAllSpellbookSpells()		// Add all spells found on spellbooks t
     CItemContainer *pPack = GetPack();
     if (pPack)
     {
-        for (CItem *pBook = pPack->GetContentHead(); pBook != NULL; pBook = pBook->GetNext())
+        for (CItem *pBook = pPack->GetContentHead(); pBook != nullptr; pBook = pBook->GetNext())
         {
             if (pBook->IsTypeSpellbook())
                 NPC_AddSpellsFromBook(pBook);
@@ -156,7 +156,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
     if (pWand)
     {
         if (pWand->GetType() != IT_WAND || pWand->m_itWeapon.m_spellcharges <= 0)// If the item is really a wand and have it charges it's a valid wand, if not ... we get rid of it.
-            pWand = NULL;
+            pWand = nullptr;
     }
     if ((iSpellCount < 1) && !pWand)
         return false;
@@ -258,7 +258,7 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
     if (skill == SKILL_NONE)
     {
         int iSkillTest = 0;
-        if (!pSpellDef->GetPrimarySkill(&iSkillTest, NULL))
+        if (!pSpellDef->GetPrimarySkill(&iSkillTest, nullptr))
             iSkillTest = SKILL_MAGERY;
         skill = (SKILL_TYPE)iSkillTest;
     }
@@ -280,7 +280,7 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                 CChar	*pTarget = pTarg->GetUID().CharFind();
 
                 pFriend[0] = this;
-                pFriend[1] = pFriend[2] = pFriend[3] = NULL;
+                pFriend[1] = pFriend[2] = pFriend[3] = nullptr;
                 iFriendIndex = 1;
 
                 if (NPC_GetAiFlags()&NPC_AI_COMBAT)
@@ -309,7 +309,7 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                     pFriend[0] = pFriend[1];
                     pFriend[1] = pFriend[2];
                     pFriend[2] = pFriend[3];
-                    pFriend[3] = NULL;
+                    pFriend[3] = nullptr;
                 }
                 for (iFriendIndex = 0; iFriendIndex < 4; iFriendIndex++)
                 {

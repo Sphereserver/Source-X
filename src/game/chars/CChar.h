@@ -149,7 +149,7 @@ public:
 	HUE_TYPE m_prev_Hue;		// Backup of skin color. in case of polymorph etc.
 	HUE_TYPE m_wBloodHue;		// Replicating CharDef's BloodColor on the char, or overriding it.
 	bool IsTriggerActive(lpctstr trig) { return static_cast<CObjBase*>(const_cast<CChar*>(this))->IsTriggerActive(trig); }
-	void SetTriggerActive(lpctstr trig = NULL) { static_cast<CObjBase*>(const_cast<CChar*>(this))->SetTriggerActive(trig); }
+	void SetTriggerActive(lpctstr trig = nullptr) { static_cast<CObjBase*>(const_cast<CChar*>(this))->SetTriggerActive(trig); }
 
 	// Client's local light (might be useful in the future for NPCs also? keep it here for now)
 	byte m_LocalLight;
@@ -366,7 +366,7 @@ public:
 	height_t GetHeightMount( bool fEyeSubstract = false ) const;
 	height_t GetHeight() const;
 
-	bool CanSeeAsDead( const CChar * pChar = NULL ) const;
+	bool CanSeeAsDead( const CChar * pChar = nullptr ) const;
 	bool CanSeeInContainer( const CItemContainer * pContItem ) const;
 	bool CanSee( const CObjBaseTemplate * pObj ) const;
 	bool CanSeeLOS_New_Failed( CPointMap * pptBlock, CPointMap &ptNow ) const;
@@ -416,7 +416,7 @@ public:
 	short	Stat_GetMax( STAT_TYPE i ) const;
 	short	Stat_GetSum() const;
 	short	Stat_GetLimit( STAT_TYPE i ) const;
-	bool Stat_Decrease( STAT_TYPE stat, SKILL_TYPE skill = (SKILL_TYPE)NULL);
+	bool Stat_Decrease( STAT_TYPE stat, SKILL_TYPE skill = SKILL_NONE);
 	bool Stats_Regen();
 	ushort Stats_GetRegenVal(STAT_TYPE iStat, bool bGetTicks);
 	SKILLLOCK_TYPE Stat_GetLock(STAT_TYPE stat);
@@ -483,20 +483,20 @@ public:
 	ANIM_TYPE GenerateAnimate(ANIM_TYPE action, bool fTranslate = true, bool fBackward = false, byte iFrameDelay = 0, byte iAnimLen = 7);
 	bool UpdateAnimate(ANIM_TYPE action, bool fTranslate = true, bool fBackward = false, byte iFrameDelay = 0, byte iAnimLen = 7);
 
-	void UpdateMode( CClient * pExcludeClient = NULL, bool fFull= false );
+	void UpdateMode( CClient * pExcludeClient = nullptr, bool fFull= false );
 	void UpdateSpeedMode();
 	void UpdateVisualRange();
-	void UpdateMove( const CPointMap & ptOld, CClient * pClientExclude = NULL, bool bFull = false );
+	void UpdateMove( const CPointMap & ptOld, CClient * pClientExclude = nullptr, bool bFull = false );
 	void UpdateDir( DIR_TYPE dir );
 	void UpdateDir( const CPointMap & pt );
 	void UpdateDir( const CObjBaseTemplate * pObj );
-	void UpdateDrag( CItem * pItem, CObjBase * pCont = NULL, CPointMap * pt = NULL );
-	void Update(const CClient * pClientExclude = NULL);
+	void UpdateDrag( CItem * pItem, CObjBase * pCont = nullptr, CPointMap * pt = nullptr );
+	void Update(const CClient * pClientExclude = nullptr);
 
 public:
 	lpctstr GetPronoun() const;	// he
 	lpctstr GetPossessPronoun() const;	// his
-	byte GetModeFlag( const CClient *pViewer = NULL ) const;
+	byte GetModeFlag( const CClient *pViewer = nullptr ) const;
 	byte GetDirFlag(bool fSquelchForwardStep = false) const;
 	dword GetMoveBlockFlags(bool bIgnoreGM = false) const;
 
@@ -527,11 +527,11 @@ public:
 	CItemContainer * GetBank( LAYER_TYPE layer = LAYER_BANKBOX );
 	CItemContainer * GetPackSafe();
 	CItem * GetBackpackItem(ITEMID_TYPE item);
-	void AddGoldToPack( int iAmount, CItemContainer * pPack=NULL );
+	void AddGoldToPack( int iAmount, CItemContainer * pPack=nullptr );
 
 	//private:
 	virtual TRIGRET_TYPE OnTrigger( lpctstr pTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
-	TRIGRET_TYPE OnTrigger( CTRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = NULL );
+	TRIGRET_TYPE OnTrigger( CTRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = nullptr );
 
 public:
 	// Load/Save----------------------------------
@@ -540,7 +540,7 @@ public:
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_Load( CScript & s );  // Load a character from Script
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc = NULL );
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc = nullptr );
 	virtual void r_Write( CScript & s );
 
 	void r_WriteParity( CScript & s );
@@ -698,7 +698,7 @@ public:
 	* @param pChar: on who I performed criminal actions or saw me commiting a crime and flagged me as criminal.
 	* @return true if I really became a criminal.
 	*/
-	bool Noto_Criminal( CChar * pChar = NULL);
+	bool Noto_Criminal( CChar * pChar = nullptr);
 
 	/**
 	* @brief I am a murderer (it seems) (update my murder decay item).
@@ -784,7 +784,7 @@ public:
 	* @param ppCharMark = The character we are offending.
 	* @return false = no crime.
 	*/
-	bool IsTakeCrime( const CItem * pItem, CChar ** ppCharMark = NULL ) const;
+	bool IsTakeCrime( const CItem * pItem, CChar ** ppCharMark = nullptr ) const;
 
 
 	/**
@@ -795,7 +795,7 @@ public:
 	* @param delta, amount of exp gaining (or losing?)
 	* @param ppCharDead from who we gained the experience.
 	*/
-	void ChangeExperience(int delta = 0, CChar *pCharDead = NULL);
+	void ChangeExperience(int delta = 0, CChar *pCharDead = nullptr);
 	uint GetSkillTotal(int what = 0, bool how = true);
 
 	// skills and actions. -------------------------------------------
@@ -1057,7 +1057,7 @@ public:
 	bool FollowersUpdate( CChar * pChar, short iFollowerSlots = 0, bool fCheckOnly = false );
 
 	int  ItemPickup( CItem * pItem, word amount );
-	bool ItemEquip( CItem * pItem, CChar * pCharMsg = NULL, bool fFromDClick = false );
+	bool ItemEquip( CItem * pItem, CChar * pCharMsg = nullptr, bool fFromDClick = false );
 	bool ItemEquipWeapon( bool fForce );
 	bool ItemEquipArmor( bool fForce );
 	bool ItemBounce( CItem * pItem, bool bDisplayMsg = true );
@@ -1100,8 +1100,8 @@ public:
 	virtual void SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
 
 	bool OnFreezeCheck();
-	void DropAll( CItemContainer * pCorpse = NULL, uint64 dwAttr = 0 );
-	void UnEquipAllItems( CItemContainer * pCorpse = NULL, bool bLeaveHands = false );
+	void DropAll( CItemContainer * pCorpse = nullptr, uint64 dwAttr = 0 );
+	void UnEquipAllItems( CItemContainer * pCorpse = nullptr, bool bLeaveHands = false );
 	void Wake();
 	void SleepStart( bool fFrontFall );
 
@@ -1156,7 +1156,7 @@ private:
 	bool NPC_CheckHirelingStatus();
 	ushort NPC_GetTrainMax( const CChar * pStudent, SKILL_TYPE Skill ) const;
 
-	bool NPC_OnVerb( CScript &s, CTextConsole * pSrc = NULL );
+	bool NPC_OnVerb( CScript &s, CTextConsole * pSrc = nullptr );
 	void NPC_OnHirePayMore( CItem * pGold, int iWage, bool fHire = false );
 public:
 	bool NPC_OnHirePay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGold );

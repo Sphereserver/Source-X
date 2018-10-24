@@ -14,16 +14,16 @@ CItemStone * CChar::Guild_Find( MEMORY_TYPE MemType ) const
 {
 	ADDTOCALLSTACK("CChar::Guild_Find");
 	if ( ! m_pPlayer )
-		return NULL;
+		return nullptr;
 	CItemMemory * pMyGMem = Memory_FindTypes((word)(MemType));
 	if ( ! pMyGMem )
-		return NULL;
+		return nullptr;
 	CItemStone * pMyStone = dynamic_cast <CItemStone*>( pMyGMem->m_uidLink.ItemFind());
-	if ( pMyStone == NULL )
+	if ( pMyStone == nullptr )
 	{
 		// Some sort of mislink ! fix it.
 		const_cast <CChar*>(this)->Memory_ClearTypes((word)(MemType)); 	// Make them forget they were ever in this guild....again!
-		return NULL;
+		return nullptr;
 	}
 	return( pMyStone );
 }
@@ -33,14 +33,14 @@ CStoneMember * CChar::Guild_FindMember( MEMORY_TYPE MemType ) const
 {
 	ADDTOCALLSTACK("CChar::Guild_FindMember");
 	CItemStone * pMyStone = Guild_Find(MemType);
-	if ( pMyStone == NULL )
-		return NULL;
+	if ( pMyStone == nullptr )
+		return nullptr;
 	CStoneMember * pMember = pMyStone->GetMember( this );
-	if ( pMember == NULL )
+	if ( pMember == nullptr )
 	{
 		// Some sort of mislink ! fix it.
 		const_cast <CChar*>(this)->Memory_ClearTypes((word)(MemType)); 	// Make them forget they were ever in this guild....again!
-		return NULL;
+		return nullptr;
 	}
 	return( pMember );
 }
@@ -55,7 +55,7 @@ void CChar::Guild_Resign( MEMORY_TYPE MemType )
 		return;
 
 	CStoneMember * pMember = Guild_FindMember(MemType);
-	if ( pMember == NULL )
+	if ( pMember == nullptr )
 		return ;
 
 	if ( pMember->IsPrivMember())
@@ -77,14 +77,14 @@ lpctstr CChar::Guild_Abbrev( MEMORY_TYPE MemType ) const
 {
 	ADDTOCALLSTACK("CChar::Guild_Abbrev");
 	CStoneMember * pMember = Guild_FindMember(MemType);
-	if ( pMember == NULL )
-		return NULL;
+	if ( pMember == nullptr )
+		return nullptr;
 	if ( ! pMember->IsAbbrevOn())
-		return NULL;
+		return nullptr;
 	CItemStone * pMyStone = pMember->GetParentStone();
-	if ( pMyStone == NULL ||
+	if ( pMyStone == nullptr ||
 		! pMyStone->GetAbbrev()[0] )
-		return NULL;
+		return nullptr;
 	return( pMyStone->GetAbbrev());
 }
 
@@ -93,8 +93,8 @@ lpctstr CChar::Guild_AbbrevBracket( MEMORY_TYPE MemType ) const
 {
 	ADDTOCALLSTACK("CChar::Guild_AbbrevBracket");
 	lpctstr pszAbbrev = Guild_Abbrev(MemType);
-	if ( pszAbbrev == NULL )
-		return NULL;
+	if ( pszAbbrev == nullptr )
+		return nullptr;
 	tchar * pszTemp = Str_GetTemp();
 	sprintf( pszTemp, " [%s]", pszAbbrev );
 	return( pszTemp );
@@ -154,7 +154,7 @@ bool CChar::Memory_UpdateClearTypes( CItemMemory * pMemory, word MemTypes )
 	if ( MemTypes & MEMORY_IPET )
 	{
 		// Am i still a pet of some sort ?
-		if ( Memory_FindTypes( MEMORY_IPET ) == NULL )
+		if ( Memory_FindTypes( MEMORY_IPET ) == nullptr )
 		{
 			StatFlag_Clear( STATF_PET );
 		}
@@ -197,8 +197,8 @@ CItemMemory * CChar::Memory_CreateObj( CUID uid, word MemTypes )
 	ADDTOCALLSTACK("CChar::Memory_CreateObj");
 
 	CItemMemory * pMemory = dynamic_cast <CItemMemory *>(CItem::CreateBase( ITEMID_MEMORY ));
-	if ( pMemory == NULL )
-		return NULL;
+	if ( pMemory == nullptr )
+		return nullptr;
 
 	pMemory->SetType(IT_EQ_MEMORY_OBJ);
 	pMemory->SetAttr(ATTR_NEWBIE);
@@ -220,8 +220,8 @@ CItemMemory * CChar::Memory_CreateObj( const CObjBase * pObj, word MemTypes )
 void CChar::Memory_ClearTypes( word MemTypes )
 {
 	ADDTOCALLSTACK("CChar::Memory_ClearTypes");
-	CItem *pItemNext = NULL;
-	for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItemNext )
+	CItem *pItemNext = nullptr;
+	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
 	{
 		pItemNext = pItem->GetNext();
 		if ( !pItem->IsMemoryTypes(MemTypes) )
@@ -237,7 +237,7 @@ void CChar::Memory_ClearTypes( word MemTypes )
 CItemMemory * CChar::Memory_FindObj( CUID uid ) const
 {
 	ADDTOCALLSTACK("CChar::Memory_FindObj");
-	for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
+	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 	{
 		if ( !pItem->IsType(IT_EQ_MEMORY_OBJ) )
 			continue;
@@ -245,13 +245,13 @@ CItemMemory * CChar::Memory_FindObj( CUID uid ) const
 			continue;
 		return dynamic_cast<CItemMemory *>(pItem);
 	}
-	return NULL;
+	return nullptr;
 }
 
 CItemMemory * CChar::Memory_FindObj( const CObjBase * pObj ) const
 {
-	if ( pObj == NULL )
-		return NULL;
+	if ( pObj == nullptr )
+		return nullptr;
 	return Memory_FindObj( pObj->GetUID());
 }
 
@@ -261,24 +261,24 @@ CItemMemory * CChar::Memory_FindTypes( word MemTypes ) const
 {
 	ADDTOCALLSTACK("CChar::Memory_FindTypes");
 	if ( !MemTypes )
-		return NULL;
+		return nullptr;
 
-	for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
+	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 	{
 		if ( !pItem->IsMemoryTypes(MemTypes) )
 			continue;
 		return dynamic_cast<CItemMemory *>(pItem);
 	}
-	return NULL;
+	return nullptr;
 }
 
 CItemMemory * CChar::Memory_FindObjTypes( const CObjBase * pObj, word MemTypes ) const
 {
 	CItemMemory * pMemory = Memory_FindObj(pObj);
-	if ( pMemory == NULL )
-		return NULL;
+	if ( pMemory == nullptr )
+		return nullptr;
 	if ( ! pMemory->IsMemoryTypes( MemTypes ))
-		return NULL;
+		return nullptr;
 	return( pMemory );
 }
 
@@ -301,7 +301,7 @@ TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, C
 
 	if ( wMemType )
 	{
-		for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
+		for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 		{
 			if ( !pItem->IsMemoryTypes(wMemType) )
 				continue;
@@ -337,7 +337,7 @@ CItemMemory * CChar::Memory_AddObjTypes( CUID uid, word MemTypes )
 {
 	ADDTOCALLSTACK("CChar::Memory_AddObjTypes");
 	CItemMemory * pMemory = Memory_FindObj( uid );
-	if ( pMemory == NULL )
+	if ( pMemory == nullptr )
 		return Memory_CreateObj( uid, MemTypes );
 
 	Memory_AddTypes( pMemory, MemTypes );
@@ -359,7 +359,7 @@ bool CChar::Memory_OnTick( CItemMemory * pMemory )
 	ASSERT(pMemory);
 
 	CObjBase * pObj = pMemory->m_uidLink.ObjFind();
-	if ( pObj == NULL )
+	if ( pObj == nullptr )
 		return false;
 
 	if ( pMemory->IsMemoryTypes( MEMORY_FIGHT ))
@@ -378,7 +378,7 @@ bool CChar::Memory_OnTick( CItemMemory * pMemory )
 void CChar::Memory_Fight_Retreat( CChar * pTarg, CItemMemory * pFight )
 {
 	ADDTOCALLSTACK("CChar::Memory_Fight_Retreat");
-	if ( pTarg == NULL || pTarg->IsStatFlag( STATF_DEAD ))
+	if ( pTarg == nullptr || pTarg->IsStatFlag( STATF_DEAD ))
 		return;
 
 	ASSERT(pFight);
@@ -410,7 +410,7 @@ bool CChar::Memory_Fight_OnTick( CItemMemory * pMemory )
 
 	ASSERT(pMemory);
 	CChar * pTarg = pMemory->m_uidLink.CharFind();
-	if ( pTarg == NULL )
+	if ( pTarg == nullptr )
 		return false;	// They are gone for some reason ?
 
 	int64 elapsed = Attacker_GetElapsed(Attacker_GetID(pTarg));
@@ -453,12 +453,12 @@ void CChar::Memory_Fight_Start( const CChar * pTarg )
 
 	word MemTypes;
 	CItemMemory * pMemory = Memory_FindObj( pTarg );
-	if ( pMemory == NULL )
+	if ( pMemory == nullptr )
 	{
 		// I have no memory of them yet.
 		// There was no fight. Am I the aggressor ?
 		CItemMemory * pTargMemory = pTarg->Memory_FindObj( this );
-		if ( pTargMemory != NULL )	// My target remembers me.
+		if ( pTargMemory != nullptr )	// My target remembers me.
 		{
 			if ( pTargMemory->IsMemoryTypes( MEMORY_IAGGRESSOR ))
 				MemTypes = MEMORY_HARMEDBY;

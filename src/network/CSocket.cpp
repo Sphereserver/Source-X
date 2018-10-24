@@ -87,9 +87,9 @@ bool CSocketAddressIP::IsSameIP( const CSocketAddressIP & ip ) const
 bool CSocketAddressIP::SetHostStruct( const struct hostent * pHost )
 {
 	// Set the ip from the address name we looked up.
-	if ( pHost == NULL ||
-		pHost->h_addr_list == NULL ||
-		pHost->h_addr == NULL )	// can't resolve the address.
+	if ( pHost == nullptr ||
+		pHost->h_addr_list == nullptr ||
+		pHost->h_addr == nullptr )	// can't resolve the address.
 	{
 		return false;
 	}
@@ -181,10 +181,10 @@ bool CSocketAddress::SetPortExtStr( tchar * pszIP )
 {
 	// assume the port is at the end of the line.
 	tchar * pszPort = strchr( pszIP, ',' );
-	if ( pszPort == NULL )
+	if ( pszPort == nullptr )
 	{
 		pszPort = strchr( pszIP, ':' );
-		if ( pszPort == NULL )
+		if ( pszPort == nullptr )
 			return false;
 	}
 

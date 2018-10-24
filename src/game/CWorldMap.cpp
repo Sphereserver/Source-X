@@ -17,7 +17,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 	ADDTOCALLSTACK("CWorld::CheckNaturalResource");
 	// RETURN:
 	//  The resource tracking item.
-	//  NULL = nothing here.
+	//  nullptr = nothing here.
 
 	if ( !pt.IsValidPoint() )
 		return nullptr;

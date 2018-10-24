@@ -52,7 +52,7 @@ void CSString::Empty(bool bTotal)
 			gMemAmount -= m_iMaxLength;
 #endif
 			delete[] m_pchData;
-			m_pchData = NULL;
+			m_pchData = nullptr;
 			m_iMaxLength = 0;
 		}
 	}

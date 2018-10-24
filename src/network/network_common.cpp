@@ -23,7 +23,7 @@
 void xRecordPacketData(const CClient* client, const byte* data, size_t length, lpctstr heading)
 {
 #ifdef _DUMPSUPPORT
-	if (client->GetAccount() != NULL && strnicmp(client->GetAccount()->GetName(), (lpctstr) g_Cfg.m_sDumpAccPackets, strlen( client->GetAccount()->GetName())))
+	if (client->GetAccount() != nullptr && strnicmp(client->GetAccount()->GetName(), (lpctstr) g_Cfg.m_sDumpAccPackets, strlen( client->GetAccount()->GetName())))
 		return;
 #else
 	if (!(g_Cfg.m_iDebugFlags & DEBUGF_PACKETS))
@@ -37,7 +37,7 @@ void xRecordPacketData(const CClient* client, const byte* data, size_t length, l
 void xRecordPacket(const CClient* client, Packet* packet, lpctstr heading)
 {
 #ifdef _DUMPSUPPORT
-	if (client->GetAccount() != NULL && strnicmp(client->GetAccount()->GetName(), (lpctstr) g_Cfg.m_sDumpAccPackets, strlen( client->GetAccount()->GetName())))
+	if (client->GetAccount() != nullptr && strnicmp(client->GetAccount()->GetName(), (lpctstr) g_Cfg.m_sDumpAccPackets, strlen( client->GetAccount()->GetName())))
 		return;
 #else
 	if (!(g_Cfg.m_iDebugFlags & DEBUGF_PACKETS))
@@ -90,14 +90,14 @@ void xRecordPacket(const CClient* client, Packet* packet, lpctstr heading)
 NetState::NetState(int id)
 {
 	m_id = id;
-	m_client = NULL;
+	m_client = nullptr;
 	m_needsFlush = false;
 	m_useAsync = false;
-	m_outgoing.currentTransaction = NULL;
-	m_outgoing.pendingTransaction = NULL;
-	m_incoming.buffer = NULL;
+	m_outgoing.currentTransaction = nullptr;
+	m_outgoing.pendingTransaction = nullptr;
+	m_incoming.buffer = nullptr;
 #ifdef _MTNETWORK
-	m_incoming.rawBuffer = NULL;
+	m_incoming.rawBuffer = nullptr;
 #endif
 	m_packetExceptions = 0;
 	m_clientType = CLIENTTYPE_2D;
@@ -105,7 +105,7 @@ NetState::NetState(int id)
 	m_reportedVersion = 0;
 	m_isInUse = false;
 #ifdef _MTNETWORK
-	m_parent = NULL;
+	m_parent = nullptr;
 #endif
 
 	clear();
@@ -124,7 +124,7 @@ void NetState::clear(void)
 	m_isWriteClosed = true;
 	m_needsFlush = false;
 
-	if (m_client != NULL)
+	if (m_client != nullptr)
 	{
 		g_Serv.StatDec(SERV_STAT_CLIENTS);
 		if ( m_client->GetConnectType() == CONNECT_LOGIN )
@@ -162,7 +162,7 @@ void NetState::clear(void)
 #endif
 
 	m_socket.Close();
-	m_client = NULL;
+	m_client = nullptr;
 
 	// empty queues
 	clearQueues();
@@ -175,29 +175,29 @@ void NetState::clear(void)
 	m_incoming.rawPackets.clean();
 #endif
 
-	if (m_outgoing.currentTransaction != NULL)
+	if (m_outgoing.currentTransaction != nullptr)
 	{
 		delete m_outgoing.currentTransaction;
-		m_outgoing.currentTransaction = NULL;
+		m_outgoing.currentTransaction = nullptr;
 	}
 
-	if (m_outgoing.pendingTransaction != NULL)
+	if (m_outgoing.pendingTransaction != nullptr)
 	{
 		delete m_outgoing.pendingTransaction;
-		m_outgoing.pendingTransaction = NULL;
+		m_outgoing.pendingTransaction = nullptr;
 	}
 
-	if (m_incoming.buffer != NULL)
+	if (m_incoming.buffer != nullptr)
 	{
 		delete m_incoming.buffer;
-		m_incoming.buffer = NULL;
+		m_incoming.buffer = nullptr;
 	}
 
 #ifdef _MTNETWORK
-	if (m_incoming.rawBuffer != NULL)
+	if (m_incoming.rawBuffer != nullptr)
 	{
 		delete m_incoming.rawBuffer;
-		m_incoming.rawBuffer = NULL;
+		m_incoming.rawBuffer = nullptr;
 	}
 #endif
 
@@ -289,7 +289,7 @@ bool NetState::isInUse(const CClient* client) const volatile
 	if (m_isInUse == false)
 		return false;
 
-	return client == NULL || m_client == client;
+	return client == nullptr || m_client == client;
 }
 
 void NetState::markReadClosed(void) volatile
@@ -301,7 +301,7 @@ void NetState::markReadClosed(void) volatile
 	DEBUGNETWORK(("%x:Client being closed by read-thread\n", m_id));
 	m_isReadClosed = true;
 #ifdef _MTNETWORK
-	if (m_parent != NULL && m_parent->getPriority() == IThread::Disabled)
+	if (m_parent != nullptr && m_parent->getPriority() == IThread::Disabled)
 		m_parent->awaken();
 #endif
 }
@@ -331,7 +331,7 @@ void NetState::detectAsyncMode(void)
 		setAsyncMode(true);
 
 	// http clients do not want to be using async networking unless they have keep-alive set
-	else if (getClient() != NULL && getClient()->GetConnectType() == CONNECT_HTTP)
+	else if (getClient() != nullptr && getClient()->GetConnectType() == CONNECT_HTTP)
 		setAsyncMode(false);
 
 	// only use async with clients newer than 4.0.0
@@ -375,7 +375,7 @@ bool NetState::hasPendingData(void) const
 		return true;
 
 	// check current transaction
-	if (m_outgoing.currentTransaction != NULL)
+	if (m_outgoing.currentTransaction != nullptr)
 		return true;
 
 	return false;
@@ -383,13 +383,13 @@ bool NetState::hasPendingData(void) const
 
 bool NetState::canReceive(PacketSend* packet) const
 {
-	if (isInUse() == false || m_socket.IsOpen() == false || packet == NULL)
+	if (isInUse() == false || m_socket.IsOpen() == false || packet == nullptr)
 		return false;
 
 	if (isClosing() && packet->getPriority() < NETWORK_DISCONNECTPRI)
 		return false;
 
-	if (packet->getTarget()->m_client == NULL)
+	if (packet->getTarget()->m_client == nullptr)
 		return false;
 
 	return true;
@@ -398,7 +398,7 @@ bool NetState::canReceive(PacketSend* packet) const
 void NetState::beginTransaction(int priority)
 {
 	ADDTOCALLSTACK("NetState::beginTransaction");
-	if (m_outgoing.pendingTransaction != NULL)
+	if (m_outgoing.pendingTransaction != nullptr)
 	{
 		DEBUGNETWORK(("%x:New network transaction started whilst a previous is still open.\n", id()));
 	}
@@ -414,7 +414,7 @@ void NetState::beginTransaction(int priority)
 void NetState::endTransaction(void)
 {
 	ADDTOCALLSTACK("NetState::endTransaction");
-	if (m_outgoing.pendingTransaction == NULL)
+	if (m_outgoing.pendingTransaction == nullptr)
 		return;
 
 	//DEBUGNETWORK(("%x:Scheduling packet transaction to be sent.\n", id()));
@@ -424,7 +424,7 @@ void NetState::endTransaction(void)
 #else
 	m_parent->queuePacketTransaction(m_outgoing.pendingTransaction);
 #endif
-	m_outgoing.pendingTransaction = NULL;
+	m_outgoing.pendingTransaction = nullptr;
 }
 
 
@@ -751,11 +751,11 @@ void PacketManager::unregisterPacket(uint id)
 	// delete standard packet handler
 	ADDTOCALLSTACK("PacketManager::unregisterPacket");
 	ASSERT(id < CountOf(m_handlers));
-	if (m_handlers[id] == NULL)
+	if (m_handlers[id] == nullptr)
 		return;
 
 	delete m_handlers[id];
-	m_handlers[id] = NULL;
+	m_handlers[id] = nullptr;
 }
 
 void PacketManager::unregisterExtended(uint id)
@@ -763,11 +763,11 @@ void PacketManager::unregisterExtended(uint id)
 	// delete extended packet handler
 	ADDTOCALLSTACK("PacketManager::unregisterExtended");
 	ASSERT(id < CountOf(m_extended));
-	if (m_extended[id] == NULL)
+	if (m_extended[id] == nullptr)
 		return;
 
 	delete m_extended[id];
-	m_extended[id] = NULL;
+	m_extended[id] = nullptr;
 }
 
 void PacketManager::unregisterEncoded(uint id)
@@ -775,18 +775,18 @@ void PacketManager::unregisterEncoded(uint id)
 	// delete encoded packet handler
 	ADDTOCALLSTACK("PacketManager::unregisterEncoded");
 	ASSERT(id < CountOf(m_encoded));
-	if (m_encoded[id] == NULL)
+	if (m_encoded[id] == nullptr)
 		return;
 
 	delete m_encoded[id];
-	m_encoded[id] = NULL;
+	m_encoded[id] = nullptr;
 }
 
 Packet* PacketManager::getHandler(uint id) const
 {
 	// get standard packet handler
 	if (id >= CountOf(m_handlers))
-		return NULL;
+		return nullptr;
 
 	return m_handlers[id];
 }
@@ -795,7 +795,7 @@ Packet* PacketManager::getExtendedHandler(uint id) const
 {
 	// get extended packet handler
 	if (id >= CountOf(m_extended))
-		return NULL;
+		return nullptr;
 
 	return m_extended[id];
 }
@@ -804,7 +804,7 @@ Packet* PacketManager::getEncodedHandler(uint id) const
 {
 	// get encoded packet handler
 	if (id >= CountOf(m_encoded))
-		return NULL;
+		return nullptr;
 
 	return m_encoded[id];
 }
@@ -821,29 +821,29 @@ Packet* PacketManager::getEncodedHandler(uint id) const
 #ifndef _MTNETWORK
 ClientIterator::ClientIterator(const NetworkIn* network)
 {
-	m_network = (network == NULL? &g_NetworkIn : network);
+	m_network = (network == nullptr? &g_NetworkIn : network);
 	m_nextClient = static_cast <CClient*> (m_network->m_clients.GetHead());
 }
 #else
 ClientIterator::ClientIterator(const NetworkManager* network)
 {
-	m_network = (network == NULL? &g_NetworkManager : network);
+	m_network = (network == nullptr? &g_NetworkManager : network);
 	m_nextClient = static_cast<CClient*> (m_network->m_clients.GetHead());
 }
 #endif
 
 ClientIterator::~ClientIterator(void)
 {
-	m_network = NULL;
-	m_nextClient = NULL;
+	m_network = nullptr;
+	m_nextClient = nullptr;
 }
 
 CClient* ClientIterator::next(bool includeClosing)
 {
-	for (CClient* current = m_nextClient; current != NULL; current = current->GetNext())
+	for (CClient* current = m_nextClient; current != nullptr; current = current->GetNext())
 	{
 		// skip clients without a state, or whose state is invalid/closed
-		if (current->GetNetState() == NULL || current->GetNetState()->isInUse(current) == false || current->GetNetState()->isClosed())
+		if (current->GetNetState() == nullptr || current->GetNetState()->isInUse(current) == false || current->GetNetState()->isClosed())
 			continue;
 
 		// skip clients whose connection is being closed
@@ -854,6 +854,6 @@ CClient* ClientIterator::next(bool includeClosing)
 		return current;
 	}
 
-	return NULL;
+	return nullptr;
 }
 

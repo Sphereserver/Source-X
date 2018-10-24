@@ -96,7 +96,7 @@ public:     virtual bool IsEOF() const;
     * @brief Reads from a file a line (up to sizemax - 1 characters).
     * @param pBuffer buffer where store the readed data.
     * @param sizemax count of characters to read.
-    * @return the str readed if success, NULL on errors.
+    * @return the str readed if success, nullptr on errors.
     */
 protected:  virtual tchar * _ReadString( tchar * pBuffer, int sizemax );
 public:     virtual tchar * ReadString( tchar * pBuffer, int sizemax );

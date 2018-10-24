@@ -46,8 +46,8 @@ int CTextConsole::OnConsoleKey( CSString & sText, tchar nChar, bool fEcho )
     }
     else if ( nChar == 9 )			// TAB (auto-completion)
     {
-        lpctstr p = NULL;
-        lpctstr tmp = NULL;
+        lpctstr p = nullptr;
+        lpctstr tmp = nullptr;
         size_t inputLen = 0;
         bool matched(false);
 
@@ -58,25 +58,25 @@ int CTextConsole::OnConsoleKey( CSString & sText, tchar nChar, bool fEcho )
         inputLen = strlen(p);
 
         // search in the auto-complete list for starting on P, and save coords of 1st and Last matched
-        CSStringListRec	*firstmatch = NULL;
-        CSStringListRec	*lastmatch = NULL;
-        CSStringListRec	*curmatch = NULL;	// the one that should be set
-        for ( curmatch = g_AutoComplete.GetHead(); curmatch != NULL; curmatch = curmatch->GetNext() )
+        CSStringListRec	*firstmatch = nullptr;
+        CSStringListRec	*lastmatch = nullptr;
+        CSStringListRec	*curmatch = nullptr;	// the one that should be set
+        for ( curmatch = g_AutoComplete.GetHead(); curmatch != nullptr; curmatch = curmatch->GetNext() )
         {
             if ( !strnicmp(curmatch->GetPtr(), p, inputLen) )	// matched
             {
-                if ( firstmatch == NULL ) firstmatch = lastmatch = curmatch;
+                if ( firstmatch == nullptr ) firstmatch = lastmatch = curmatch;
                 else lastmatch = curmatch;
             }
             else if ( lastmatch ) break;					// if no longer matches - save time by instant quit
         }
 
-        if (( firstmatch != NULL ) && ( firstmatch == lastmatch ))	// there IS a match and the ONLY
+        if (( firstmatch != nullptr ) && ( firstmatch == lastmatch ))	// there IS a match and the ONLY
         {
             tmp = firstmatch->GetPtr() + inputLen;
             matched = true;
         }
-        else if ( firstmatch != NULL )						// also make SE (if SERV/SERVER in dic) to become SERV
+        else if ( firstmatch != nullptr )						// also make SE (if SERV/SERVER in dic) to become SERV
         {
             p = tmp = firstmatch->GetPtr();
             tmp += inputLen;

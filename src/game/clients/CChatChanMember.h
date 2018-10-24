@@ -59,7 +59,7 @@ public:
 
     CChatChannel * GetChannel() const;
     void SetChannel(CChatChannel * pChannel);
-    void SendChatMsg( CHATMSG_TYPE iType, lpctstr pszName1 = NULL, lpctstr pszName2 = NULL, CLanguageID lang = 0 );
+    void SendChatMsg( CHATMSG_TYPE iType, lpctstr pszName1 = nullptr, lpctstr pszName2 = nullptr, CLanguageID lang = 0 );
     void RenameChannel(lpctstr pszName);
 
     void Ignore(lpctstr pszName);

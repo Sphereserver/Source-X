@@ -23,7 +23,7 @@ void CItemVendable::DupeCopy( const CItem * pItem )
 	CItem::DupeCopy( pItem );
 
 	const CItemVendable * pVendItem = dynamic_cast <const CItemVendable *>(pItem);
-	if ( pVendItem == NULL )
+	if ( pVendItem == nullptr )
 		return;
 
 	m_price = pVendItem->m_price;
@@ -41,7 +41,7 @@ lpctstr const CItemVendable::sm_szLoadKeys[IVC_QTY+1] =
 {
 	"PRICE",
 	"QUALITY",
-	NULL
+	nullptr
 };
 
 bool CItemVendable::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc)

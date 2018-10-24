@@ -34,7 +34,7 @@ public:
     CScriptTriggerArgs() :
         m_iN1(0),  m_iN2(0), m_iN3(0)
     {
-        m_pO1 = NULL;
+        m_pO1 = nullptr;
     }
 
     explicit CScriptTriggerArgs( lpctstr pszStr );
@@ -47,12 +47,12 @@ public:
     explicit CScriptTriggerArgs( int64 iVal1 ) :
         m_iN1(iVal1),  m_iN2(0), m_iN3(0)
     {
-        m_pO1 = NULL;
+        m_pO1 = nullptr;
     }
     CScriptTriggerArgs( int64 iVal1, int64 iVal2, int64 iVal3 = 0 ) :
         m_iN1(iVal1), m_iN2(iVal2), m_iN3(iVal3)
     {
-        m_pO1 = NULL;
+        m_pO1 = nullptr;
     }
 
     CScriptTriggerArgs( int64 iVal1, int64 iVal2, CScriptObj * pObj ) :
@@ -69,7 +69,7 @@ private:
     CScriptTriggerArgs& operator=(const CScriptTriggerArgs& other);
 
 public:
-    void getArgNs( int64 *iVar1 = NULL, int64 *iVar2 = NULL, int64 *iVar3 = NULL) //Puts the ARGN's into the specified variables
+    void getArgNs( int64 *iVar1 = nullptr, int64 *iVar2 = nullptr, int64 *iVar3 = nullptr) //Puts the ARGN's into the specified variables
     {
         if (iVar1)
             *iVar1 = this->m_iN1;

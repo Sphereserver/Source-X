@@ -96,7 +96,7 @@ public:
 	lpctstr GetTradeName() const;
 
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = NULL );
+	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr );
 	bool r_Load( CScript & s );
 };
 

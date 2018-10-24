@@ -44,7 +44,7 @@ void CTimedFunctionHandler::OnTick()
 				CScript s(tf->funcname);
 				CObjBase * obj = tf->uid.ObjFind();
 
-				if ( obj != NULL ) //just in case
+				if ( obj != nullptr ) //just in case
 				{
 					CObjBaseTemplate * topobj = obj->GetTopLevelObj();
 					CTextConsole* src;
@@ -181,7 +181,7 @@ TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScrip
 void CTimedFunctionHandler::Add( CUID uid, int numSeconds, lpctstr funcname )
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Add");
-	ASSERT(funcname != NULL);
+	ASSERT(funcname != nullptr);
 	ASSERT(strlen(funcname) < 1024);
 
 	int tick = m_curTick;
@@ -209,7 +209,7 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
 	ADDTOCALLSTACK("CTimedFunctionHandler::Load");
 	UNREFERENCED_PARAMETER(fQuoted);
 	static char tempBuffer[1024];
-	static TimedFunction *tf = NULL;
+	static TimedFunction *tf = nullptr;
 
 	if ( !pszName )
 		return -1;
@@ -234,7 +234,7 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
 				int uid = ATOI(ppVal[1]);
 				int elapsed = ATOI(ppVal[2]);
 				int isNew = 0;
-				if ( tf == NULL )
+				if ( tf == nullptr )
 				{
 					tf = new TimedFunction;
 					tf->funcname[0] = 0;
@@ -245,7 +245,7 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
 				if ( !isNew )
 				{
 					m_timedFunctions[tick].push_back( tf );
-					tf = NULL;
+					tf = nullptr;
 				}
 				else
 				{
@@ -261,7 +261,7 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
 	else if ( !strnicmp( pszName, "TimerFCall", 11 ) )
 	{
 		int isNew = 0;
-		if ( tf == NULL )
+		if ( tf == nullptr )
 		{
 			tf = new TimedFunction;
 			isNew = 1;

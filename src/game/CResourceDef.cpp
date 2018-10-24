@@ -41,7 +41,7 @@ bool CValueRangeDef::Load( tchar * pszDef )
 const tchar * CValueRangeDef::Write() const
 {
 	ADDTOCALLSTACK("CValueRangeDef::Write");
-	return NULL;
+	return nullptr;
 }
 
 //*******************************************
@@ -190,7 +190,7 @@ lpctstr const CSkillDef::sm_szTrigName[SKTRIG_QTY+1] =
 	"@TargetCancel",
 	"@UseQuick",
 	"@Wait",
-	NULL,
+	nullptr,
 };
 
 enum SKC_TYPE
@@ -240,7 +240,7 @@ lpctstr const CSkillDef::sm_szLoadKeys[SKC_QTY+1] =
 	"STAT_STR",
 	"TITLE",
 	"VALUES",
-	NULL
+	nullptr
 };
 
 CSkillDef::CSkillDef( SKILL_TYPE skill ) :
@@ -430,7 +430,7 @@ lpctstr const CSkillClassDef::sm_szLoadKeys[SCC_QTY+1] =
 	"NAME",
 	"SKILLSUM",
 	"STATSUM",
-	NULL
+	nullptr
 };
 
 void CSkillClassDef::Init()
@@ -551,7 +551,7 @@ lpctstr const CSpellDef::sm_szTrigName[SPTRIG_QTY+1] =
 	"@START",
 	"@SUCCESS",
 	"@TARGETCANCEL",
-	NULL,
+	nullptr,
 };
 
 enum SPC_TYPE
@@ -599,7 +599,7 @@ lpctstr const CSpellDef::sm_szLoadKeys[SPC_QTY+1] =
 	"SKILLREQ",
 	"SOUND",
 	"TITHINGUSE",
-	NULL
+	nullptr
 };
 
 CSpellDef::CSpellDef( SPELL_TYPE id ) :
@@ -825,13 +825,13 @@ bool CSpellDef::GetPrimarySkill( int * piSkill, int * piQty ) const
 	ADDTOCALLSTACK("CSpellDef::GetPrimarySkill");
 	size_t i = m_SkillReq.FindResourceType( RES_SKILL );
 	if ( i == m_SkillReq.BadIndex() )
-		return NULL;
+		return nullptr;
 
-	if ( piQty != NULL )
+	if ( piQty != nullptr )
 		*piQty = (int)(m_SkillReq[i].GetResQty());
-	if ( piSkill != NULL )
+	if ( piSkill != nullptr )
 		*piSkill = m_SkillReq[i].GetResIndex();
-	return (g_Cfg.GetSkillDef((SKILL_TYPE)(m_SkillReq[i].GetResIndex())) != NULL);
+	return (g_Cfg.GetSkillDef((SKILL_TYPE)(m_SkillReq[i].GetResIndex())) != nullptr);
 }
 
 //*******************************************
@@ -862,7 +862,7 @@ lpctstr const CSRandGroupDef::sm_szLoadKeys[RGC_QTY+1] =
 	"RESOURCES",
 	"SUBSECTION",
 	"WEIGHT",
-	NULL
+	nullptr
 };
 
 int CSRandGroupDef::CalcTotalWeight()
@@ -971,7 +971,7 @@ bool CSRandGroupDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * 
 			GETNONWHITESPACE( pszKey );
 
 			if ( pszKey[0] == '\0' )
-				sVal.FormatSTVal( GetRandMemberIndex(NULL, false) );
+				sVal.FormatSTVal( GetRandMemberIndex(nullptr, false) );
 			else
 			{
 				CUID uidTofind = Exp_GetDWVal(pszKey);
@@ -1051,7 +1051,7 @@ size_t CSRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) con
 
 	int iWeight = 0;
 	size_t i;
-	if ( pCharSrc == NULL )
+	if ( pCharSrc == nullptr )
 	{
 		iWeight	= Calc_GetRandVal( m_iTotalWeight ) + 1;
 
@@ -1074,7 +1074,7 @@ size_t CSRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) con
 	{
 		CRegionResourceDef * pOreDef = dynamic_cast <CRegionResourceDef *>( g_Cfg.ResourceGetDef( m_Members[i].GetResourceID() ) );
 		// If no regionresource, return just some random entry!
-		if (pOreDef != NULL)
+		if (pOreDef != nullptr)
 		{
 			rid = pOreDef->m_ReapItem;
 			if (rid != 0)
@@ -1083,7 +1083,7 @@ size_t CSRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) con
 					continue;
 				if (IsTrigUsed(TRIGGER_RESOURCETEST))
 				{
-					if (bTrigger && pOreDef->OnTrigger("@ResourceTest", pCharSrc, NULL) == TRIGRET_RET_TRUE)
+					if (bTrigger && pOreDef->OnTrigger("@ResourceTest", pCharSrc, nullptr) == TRIGRET_RET_TRUE)
 						continue;
 				}
 			}
@@ -1126,7 +1126,7 @@ lpctstr const CRegionResourceDef::sm_szLoadKeys[RMC_QTY+1] =
 	"REAPAMOUNT",
 	"REGEN",
 	"SKILL",
-	NULL
+	nullptr
 };
 
 lpctstr const CRegionResourceDef::sm_szTrigName[RRTRIG_QTY+1] =	// static
@@ -1135,7 +1135,7 @@ lpctstr const CRegionResourceDef::sm_szTrigName[RRTRIG_QTY+1] =	// static
 	"@ResourceFound",
 	"@ResourceGather",
 	"@ResourceTest",
-	NULL,
+	nullptr,
 };
 
 

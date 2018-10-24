@@ -101,7 +101,7 @@ void CItemMap::DupeCopy(const CItem *pItem)
     CItemVendable::DupeCopy(pItem);
 
     const CItemMap *pMapItem = dynamic_cast<const CItemMap *>(pItem);
-    if ( pMapItem == NULL )
+    if ( pMapItem == nullptr )
         return;
     m_Pins = pMapItem->m_Pins;
 }

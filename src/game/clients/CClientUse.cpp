@@ -115,7 +115,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 				return false;
 			}
 
-			if ( !m_pChar->ItemEquip(pItem, NULL, true) )
+			if ( !m_pChar->ItemEquip(pItem, nullptr, true) )
 				return false;
 		}
 	}
@@ -227,7 +227,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			GUMP_TYPE gumpid = pItemDef->m_ttContainer.m_idGump;
 			if ( !gumpid )
 				return false;
-			addGumpTextDisp(pItem, gumpid, pItem->GetName(), pItem->IsIndividualName() ? pItem->GetName() : NULL);
+			addGumpTextDisp(pItem, gumpid, pItem->GetName(), pItem->IsIndividualName() ? pItem->GetName() : nullptr);
 			return true;
 		}
 
@@ -254,7 +254,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			{
 				// If we click directly on poison potion, we will drink poison and get ill.
 				// To use it on Poisoning skill, the skill will request to target the potion.
-				m_pChar->OnSpellEffect(SPELL_Poison, m_pChar, pItem->m_itSpell.m_spelllevel, NULL);
+				m_pChar->OnSpellEffect(SPELL_Poison, m_pChar, pItem->m_itSpell.m_spelllevel, nullptr);
 				return true;
 			}
 			if ( RES_GET_INDEX(pItem->m_itPotion.m_Type) == SPELL_Explosion )
@@ -326,7 +326,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			if ( IsSetMagicFlags(MAGICF_PRECAST) && !pSpellDef->IsSpellType(SPELLFLAG_NOPRECAST) )
 			{
 				int skill;
-				if ( !pSpellDef->GetPrimarySkill(&skill, NULL) )
+				if ( !pSpellDef->GetPrimarySkill(&skill, nullptr) )
 					return false;
 
 				m_tmSkillMagery.m_Spell = spell;	// m_atMagery.m_Spell
@@ -362,7 +362,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			return true;
 
 		case IT_ORE:
-			return m_pChar->Skill_Mining_Smelt(pItem, NULL);
+			return m_pChar->Skill_Mining_Smelt(pItem, nullptr);
 
 		case IT_INGOT:
 			return Cmd_Skill_Smith(pItem);
@@ -619,7 +619,7 @@ void CClient::Cmd_EditItem( CObjBase *pObj, int iSelect )
 	item[0].m_sText.Format("Contents of %s", pObj->GetName());
 
 	size_t count = 0;
-	for ( CItem *pItem = pContainer->GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
+	for ( CItem *pItem = pContainer->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 	{
 		count++;
 		m_tmMenu.m_Item[count] = pItem->GetUID();
@@ -671,7 +671,7 @@ bool CClient::Cmd_Skill_Menu( CResourceIDBase rid, int iSelect )
 	bool fLimitReached = false;
 
 	if ( iSelect == 0 )		// menu cancelled
-		return (Cmd_Skill_Menu_Build(rid, iSelect, NULL, 0, fShowMenu, fLimitReached) > 0);
+		return (Cmd_Skill_Menu_Build(rid, iSelect, nullptr, 0, fShowMenu, fLimitReached) > 0);
 
 	CMenuItem item[minimum(CountOf(m_tmMenu.m_Item), MAX_MENU_ITEMS)];
 	size_t iShowCount = Cmd_Skill_Menu_Build(rid, iSelect, item, CountOf(item), fShowMenu, fLimitReached);
@@ -758,7 +758,7 @@ size_t CClient::Cmd_Skill_Menu_Build( CResourceIDBase rid, int iSelect, CMenuIte
 			if ( strcmpi(s.GetArgStr(), "@Cancel") )
 				continue;
 
-			if ( m_pChar->OnTriggerRunVal(s, TRIGRUN_SECTION_TRUE, m_pChar, NULL) == TRIGRET_RET_TRUE )
+			if ( m_pChar->OnTriggerRunVal(s, TRIGRUN_SECTION_TRUE, m_pChar, nullptr) == TRIGRET_RET_TRUE )
 				return 0;
 
 			break;
@@ -798,7 +798,7 @@ size_t CClient::Cmd_Skill_Menu_Build( CResourceIDBase rid, int iSelect, CMenuIte
 					return 1;
 
 				iShowCount++;
-				if ( !item[iSelect == -2 ? 0 : iShowCount].ParseLine(s.GetArgRaw(), NULL, m_pChar) )
+				if ( !item[iSelect == -2 ? 0 : iShowCount].ParseLine(s.GetArgRaw(), nullptr, m_pChar) )
 				{
 					// remove if the item is invalid.
 					iShowCount--;
@@ -919,7 +919,7 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 	if ( IsSetMagicFlags(MAGICF_PRECAST) && iSpell == m_tmSkillMagery.m_Spell )
 	{
 		pSpellDef = g_Cfg.GetSpellDef(m_tmSkillMagery.m_Spell);
-		if ( pSpellDef != NULL && !pSpellDef->IsSpellType(SPELLFLAG_NOPRECAST) )
+		if ( pSpellDef != nullptr && !pSpellDef->IsSpellType(SPELLFLAG_NOPRECAST) )
 			iSpell = m_tmSkillMagery.m_Spell;
 	}
 	else
@@ -1006,7 +1006,7 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 	else
 	{
 		int skill;
-		if ( !pSpellDef->GetPrimarySkill(&skill, NULL) )
+		if ( !pSpellDef->GetPrimarySkill(&skill, nullptr) )
 			return false;
 
 		return m_pChar->Skill_Start((SKILL_TYPE)(skill));
@@ -1265,7 +1265,7 @@ bool CClient::Cmd_SecureTrade( CChar *pChar, CItem *pItem )
 	}
 
 	// Check if the trade window is already open
-	for ( CItem *pItemCont = m_pChar->GetContentHead(); pItemCont != NULL; pItemCont = pItemCont->GetNext() )
+	for ( CItem *pItemCont = m_pChar->GetContentHead(); pItemCont != nullptr; pItemCont = pItemCont->GetNext() )
 	{
 		if ( !pItemCont->IsType(IT_EQ_TRADE_WINDOW) )
 			continue;

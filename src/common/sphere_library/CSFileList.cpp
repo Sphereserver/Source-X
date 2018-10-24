@@ -82,7 +82,7 @@ int CSFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 	}
 	
 	DIR* dirp = opendir(szFileDir);
-	struct dirent * fileinfo = NULL;
+	struct dirent * fileinfo = nullptr;
 
 	if ( !dirp )
 #endif
@@ -118,7 +118,7 @@ int CSFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 
 	_findclose(lFind);
 #else
-	while ( fileinfo != NULL );
+	while ( fileinfo != nullptr );
 
 	closedir(dirp);
 #endif

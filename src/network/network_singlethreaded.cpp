@@ -30,14 +30,14 @@
 
 SafeClientIterator::SafeClientIterator(const NetworkIn* network)
 {
-	m_network = (network == NULL? &g_NetworkIn : network);
+	m_network = (network == nullptr? &g_NetworkIn : network);
 	m_id = -1;
 	m_max = m_network->m_stateCount;
 }
 
 SafeClientIterator::~SafeClientIterator(void)
 {
-	m_network = NULL;
+	m_network = nullptr;
 }
 
 CClient* SafeClientIterator::next(bool includeClosing)
@@ -60,7 +60,7 @@ CClient* SafeClientIterator::next(bool includeClosing)
 		return state->getClient();
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -75,36 +75,36 @@ CClient* SafeClientIterator::next(bool includeClosing)
 NetworkIn::NetworkIn(void) : AbstractSphereThread("NetworkIn", IThread::Highest)
 {
 	m_lastGivenSlot = 0;
-	m_buffer = NULL;
-	m_decryptBuffer = NULL;
-	m_states = NULL;
+	m_buffer = nullptr;
+	m_decryptBuffer = nullptr;
+	m_states = nullptr;
 	m_stateCount = 0;
 }
 
 NetworkIn::~NetworkIn(void)
 {
-	if (m_buffer != NULL)
+	if (m_buffer != nullptr)
 	{
 		delete[] m_buffer;
-		m_buffer = NULL;
+		m_buffer = nullptr;
 	}
 
-	if (m_decryptBuffer != NULL)
+	if (m_decryptBuffer != nullptr)
 	{
 		delete[] m_decryptBuffer;
-		m_decryptBuffer = NULL;
+		m_decryptBuffer = nullptr;
 	}
 
-	if (m_states != NULL)
+	if (m_states != nullptr)
 	{
 		for (int i = 0; i < m_stateCount; i++)
 		{
 			delete m_states[i];
-			m_states[i] = NULL;
+			m_states[i] = nullptr;
 		}
 
 		delete[] m_states;
-		m_states = NULL;
+		m_states = nullptr;
 	}
 
 	m_clients.DeleteAll();
@@ -168,11 +168,11 @@ void NetworkIn::tick(void)
 
 		EXC_SET_BLOCK("messages - next client");
 		NetState* client = m_states[i];
-		ASSERT(client != NULL);
+		ASSERT(client != nullptr);
 
 		EXC_SET_BLOCK("messages - check client");
 		if (client->isInUse() == false || client->isClosing() ||
-			client->getClient() == NULL || client->m_socket.IsOpen() == false)
+			client->getClient() == nullptr || client->m_socket.IsOpen() == false)
 			continue;
 
 		EXC_SET_BLOCK("messages - check frozen");
@@ -431,7 +431,7 @@ void NetworkIn::tick(void)
             return false;
         }
 
-		if (client->m_incoming.buffer == NULL)
+		if (client->m_incoming.buffer == nullptr)
 		{
 			// create new buffer
 			client->m_incoming.buffer = new Packet(m_decryptBuffer, received);
@@ -459,7 +459,7 @@ void NetworkIn::tick(void)
 			byte packetID = packet->getRemainingData()[0];
 			Packet* handler = m_packets.getHandler(packetID);
 
-			if (handler != NULL)
+			if (handler != nullptr)
 			{
 				size_t packetLength = handler->checkLength(client, packet);
 				//				DEBUGNETWORK(("Checking length: counted %u.\n", packetLength));
@@ -523,7 +523,7 @@ void NetworkIn::tick(void)
 		g_Log.EventDebug("%x:Parsing %s", client->id(), (lpctstr)tsDump);
 
 		client->m_packetExceptions++;
-		if (client->m_packetExceptions > 10 && client->m_client != NULL)
+		if (client->m_packetExceptions > 10 && client->m_client != nullptr)
 		{
 			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN, "%x:Disconnecting client from account '%s' since it is causing exceptions problems\n", client->id(), client->m_client->GetAccount() ? client->m_client->GetAccount()->GetName() : "");
 			client->m_client->addKick(&g_Serv, false);
@@ -534,7 +534,7 @@ void NetworkIn::tick(void)
 		// delete the buffer once it has been exhausted
 		if (len <= 0)
 		{
-			client->m_incoming.buffer = NULL;
+			client->m_incoming.buffer = nullptr;
 			delete packet;
 		}
 	}
@@ -637,7 +637,7 @@ int NetworkIn::checkForData(fd_set* storage)
 	Timeout.tv_usec=100;	// micro seconds = 1/1000000
 
 	EXC_SET_BLOCK("perform select");
-	return select(nfds+1, storage, NULL, NULL, &Timeout);
+	return select(nfds+1, storage, nullptr, nullptr, &Timeout);
 
 	EXC_CATCH;
 	EXC_DEBUG_START;
@@ -718,7 +718,7 @@ void NetworkIn::acceptConnection(void)
 				DEBUGNETWORK(("%x:State initialised, registering client instance.\n", slot));
 
 				EXC_SET_BLOCK("recording client");
-				if (m_states[slot]->m_client != NULL)
+				if (m_states[slot]->m_client != nullptr)
 					m_clients.InsertHead(m_states[slot]->getClient());
 
 				DEBUGNETWORK(("%x:Client successfully initialised.\n", slot));
@@ -765,7 +765,7 @@ void NetworkIn::periodic(void)
 		int connecting = 0;
 
 		ClientIterator clients(this);
-		for (const CClient* client = clients.next(); client != NULL; client = clients.next())
+		for (const CClient* client = clients.next(); client != nullptr; client = clients.next())
 		{
 			if (client->IsConnecting())
 			{
@@ -821,7 +821,7 @@ void NetworkIn::periodic(void)
 		for (int i = max; i < m_stateCount; i++)
 		{
 			delete m_states[i];
-			m_states[i] = NULL;
+			m_states[i] = nullptr;
 		}
 
 		m_stateCount = max;
@@ -839,7 +839,7 @@ void NetworkIn::defragSlots(int fromSlot)
 	for (int i = 0; i < m_stateCount; i++)
 	{
 		// don't interfere with in-use states
-		if (m_states[i] != NULL && m_states[i]->isInUse())
+		if (m_states[i] != nullptr && m_states[i]->isInUse())
 			continue;
 
 		// find next used slot
@@ -850,7 +850,7 @@ void NetworkIn::defragSlots(int fromSlot)
 				break;
 
 			NetState* state = m_states[nextUsedSlot];
-			if (state != NULL && state->isInUse())
+			if (state != nullptr && state->isInUse())
 				slotFound = true;
 		}
 
@@ -891,10 +891,10 @@ NetworkOut::NetworkOut(void) : AbstractSphereThread("NetworkOut", IThread::RealT
 
 NetworkOut::~NetworkOut(void)
 {
-	if (m_encryptBuffer != NULL)
+	if (m_encryptBuffer != nullptr)
 	{
 		delete[] m_encryptBuffer;
-		m_encryptBuffer = NULL;
+		m_encryptBuffer = nullptr;
 	}
 }
 
@@ -943,7 +943,7 @@ void NetworkOut::tick(void)
 	while (CClient* client = clients.next())
 	{
 		const NetState* state = client->GetNetState();
-		ASSERT(state != NULL);
+		ASSERT(state != nullptr);
 
 		EXC_SET_BLOCK("highest");
 		if (toProcess[PacketSend::PRI_HIGHEST] && state->isWriteClosed() == false)
@@ -989,7 +989,7 @@ void NetworkOut::schedule(const PacketSend* packet, bool appendTransaction)
 {
 	ADDTOCALLSTACK("NetworkOut::schedule");
 
-	ASSERT(packet != NULL);
+	ASSERT(packet != nullptr);
 	scheduleOnce(packet->clone(), appendTransaction);
 }
 
@@ -997,18 +997,18 @@ void NetworkOut::scheduleOnce(PacketSend* packet, bool appendTransaction)
 {
 	ADDTOCALLSTACK("NetworkOut::scheduleOnce");
 
-	ASSERT(packet != NULL);
+	ASSERT(packet != nullptr);
 	NetState* state = packet->m_target;
-	ASSERT(state != NULL);
+	ASSERT(state != nullptr);
 
 	// don't bother queuing packets for invalid sockets
-	if (state == NULL || state->isInUse() == false || state->isWriteClosed())
+	if (state == nullptr || state->isInUse() == false || state->isWriteClosed())
 	{
 		delete packet;
 		return;
 	}
 
-	if (state->m_outgoing.pendingTransaction != NULL && appendTransaction)
+	if (state->m_outgoing.pendingTransaction != nullptr && appendTransaction)
 		state->m_outgoing.pendingTransaction->push_back(packet);
 	else
 		scheduleOnce(new SimplePacketTransaction(packet));
@@ -1018,12 +1018,12 @@ void NetworkOut::scheduleOnce(PacketTransaction* transaction)
 {
 	ADDTOCALLSTACK("NetworkOut::scheduleOnce[2]");
 
-	ASSERT(transaction != NULL);
+	ASSERT(transaction != nullptr);
 	NetState* state = transaction->getTarget();
-	ASSERT(state != NULL);
+	ASSERT(state != nullptr);
 
 	// don't bother queuing packets for invalid sockets
-	if (state == NULL || state->isInUse() == false || state->isWriteClosed())
+	if (state == nullptr || state->isInUse() == false || state->isWriteClosed())
 	{
 		delete transaction;
 		return;
@@ -1067,10 +1067,10 @@ void NetworkOut::flush(CClient* client)
 {
 	ADDTOCALLSTACK("NetworkOut::flush");
 
-	ASSERT(client != NULL);
+	ASSERT(client != nullptr);
 
 	NetState* state = client->GetNetState();
-	ASSERT(state != NULL);
+	ASSERT(state != nullptr);
 	if (state->isInUse(client) == false)
 		return;
 
@@ -1103,7 +1103,7 @@ void NetworkOut::proceedFlush(void)
 	while (CClient* client = clients.next(true))
 	{
 		NetState* state = client->GetNetState();
-		ASSERT(state != NULL);
+		ASSERT(state != nullptr);
 
 		if (state->isWriteClosed())
 			continue;
@@ -1124,9 +1124,9 @@ int NetworkOut::proceedQueue(CClient* client, int priority)
 	int maxClientLength = NETWORK_MAXPACKETLEN;
 
 	NetState* state = client->GetNetState();
-	ASSERT(state != NULL);
+	ASSERT(state != nullptr);
 
-	if (state->isWriteClosed() || (state->m_outgoing.queue[priority].empty() && state->m_outgoing.currentTransaction == NULL))
+	if (state->isWriteClosed() || (state->m_outgoing.queue[priority].empty() && state->m_outgoing.currentTransaction == nullptr))
 		return 0;
 
 	int length = 0;
@@ -1136,7 +1136,7 @@ int NetworkOut::proceedQueue(CClient* client, int priority)
 	for (i = 0; i < maxClientPackets; i++)
 	{
 		// select next transaction
-		while (state->m_outgoing.currentTransaction == NULL)
+		while (state->m_outgoing.currentTransaction == nullptr)
 		{
 			if (state->m_outgoing.queue[priority].empty())
 				break;
@@ -1146,17 +1146,17 @@ int NetworkOut::proceedQueue(CClient* client, int priority)
 		}
 
 		PacketTransaction* transaction = state->m_outgoing.currentTransaction;
-		if (transaction == NULL)
+		if (transaction == nullptr)
 			break;
 
 		// acquire next packet from the transaction
-		PacketSend* packet = transaction->empty()? NULL : transaction->front();
+		PacketSend* packet = transaction->empty()? nullptr : transaction->front();
 		transaction->pop();
 
 		if (transaction->empty())
 		{
 			// no more packets left in the transacton, clear it so we can move on to the next one
-			state->m_outgoing.currentTransaction = NULL;
+			state->m_outgoing.currentTransaction = nullptr;
 			delete transaction;
 		}
 
@@ -1201,7 +1201,7 @@ int NetworkOut::proceedQueueAsync(CClient* client)
 	ADDTOCALLSTACK("NetworkOut::proceedQueueAsync");
 
 	NetState* state = client->GetNetState();
-	ASSERT(state != NULL);
+	ASSERT(state != nullptr);
 
 	if (state->isWriteClosed() || state->isAsyncMode() == false)
 		return 0;
@@ -1211,7 +1211,7 @@ int NetworkOut::proceedQueueAsync(CClient* client)
 		return 0;
 
 	// get next packet
-	PacketSend* packet = NULL;
+	PacketSend* packet = nullptr;
 
 	while (state->m_outgoing.asyncQueue.empty() == false)
 	{
@@ -1220,10 +1220,10 @@ int NetworkOut::proceedQueueAsync(CClient* client)
 
 		if (state->canReceive(packet) == false || packet->onSend(client) == false)
 		{
-			if (packet != NULL)
+			if (packet != nullptr)
 			{
 				delete packet;
-				packet = NULL;
+				packet = nullptr;
 			}
 
 			continue;
@@ -1233,7 +1233,7 @@ int NetworkOut::proceedQueueAsync(CClient* client)
 	}
 
 	// start sending
-	if (packet != NULL)
+	if (packet != nullptr)
 	{
 		if (sendPacketNow(client, packet) == false)
 		{
@@ -1252,7 +1252,7 @@ void NetworkOut::proceedQueueBytes(CClient* client)
 	ADDTOCALLSTACK("NetworkOut::proceedQueueBytes");
 
 	NetState* state = client->GetNetState();
-	ASSERT(state != NULL);
+	ASSERT(state != nullptr);
 
 	if (state->isWriteClosed() || state->m_outgoing.bytes.GetDataQty() <= 0)
 		return;
@@ -1274,7 +1274,7 @@ void NetworkOut::onAsyncSendComplete(NetState* state, bool success)
 	ADDTOCALLSTACK("NetworkOut::onAsyncSendComplete");
 
 	//DEBUGNETWORK(("AsyncSendComplete\n"));
-	ASSERT(state != NULL);
+	ASSERT(state != nullptr);
 
 	state->setSendingAsync(false);
 	if (success == false)
@@ -1289,7 +1289,7 @@ bool NetworkOut::sendPacket(CClient* client, PacketSend* packet)
 	ADDTOCALLSTACK("NetworkOut::sendPacket");
 
 	NetState* state = client->GetNetState();
-	ASSERT(state != NULL);
+	ASSERT(state != nullptr);
 
 	// only allow high-priority packets to be sent to queued for closed sockets
 	if (state->canReceive(packet) == false)
@@ -1315,7 +1315,7 @@ void CALLBACK SendCompleted_Winsock(dword dwError, dword cbTransferred, LPWSAOVE
 	ADDTOCALLSTACK("SendCompleted_Winsock");
 
 	NetState* state = reinterpret_cast<NetState *>(lpOverlapped->hEvent);
-	if (state == NULL)
+	if (state == nullptr)
 	{
 		DEBUGNETWORK(("Async i/o operation completed without client context.\n"));
 		return;
@@ -1340,7 +1340,7 @@ bool NetworkOut::sendPacketNow(CClient* client, PacketSend* packet)
 	ADDTOCALLSTACK("NetworkOut::sendPacketNow");
 
 	NetState* state = client->GetNetState();
-	ASSERT(state != NULL);
+	ASSERT(state != nullptr);
 
 	EXC_TRY("proceedQueue");
 
@@ -1349,10 +1349,10 @@ bool NetworkOut::sendPacketNow(CClient* client, PacketSend* packet)
 	EXC_SET_BLOCK("send trigger");
 	if (packet->onSend(client))
 	{
-		byte* sendBuffer = NULL;
+		byte* sendBuffer = nullptr;
 		dword sendBufferLength = 0;
 
-		if (state->m_client == NULL)
+		if (state->m_client == nullptr)
 		{
 			DEBUGNETWORK(("%x:Sending packet to closed client?\n", state->id()));
 
@@ -1465,7 +1465,7 @@ int NetworkOut::sendBytesNow(CClient* client, const byte* data, dword length)
 	ADDTOCALLSTACK("NetworkOut::sendBytesNow");
 
 	NetState* state = client->GetNetState();
-	ASSERT(state != NULL);
+	ASSERT(state != nullptr);
 
 	EXC_TRY("sendBytesNow");
 	int ret = 0;

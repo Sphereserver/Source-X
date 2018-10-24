@@ -102,7 +102,7 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 	// I am a stable master.
 	// I will stable a pet for the player.
 
-	if ( pCharPlayer == NULL )
+	if ( pCharPlayer == nullptr )
 		return false;
 	if ( ! pCharPlayer->IsClient())
 		return false;
@@ -145,7 +145,7 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 	if ( iMaxPlayerPets )
 		iPetMax = iMaxPlayerPets;
 
-	for ( CItem *pItem = pBank->GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
+	for ( CItem *pItem = pBank->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 	{
 		if ( pItem->IsType(IT_FIGURINE) && pItem->m_uidLink == pCharPlayer->GetUID() )
 			++iCount;
@@ -172,8 +172,8 @@ bool CChar::NPC_StablePetRetrieve( CChar * pCharPlayer )
 		return false;
 
 	int iCount = 0;
-	CItem *pItemNext = NULL;
-	for ( CItem *pItem = GetBank()->GetContentHead(); pItem != NULL; pItem = pItemNext )
+	CItem *pItemNext = nullptr;
+	for ( CItem *pItem = GetBank()->GetContentHead(); pItem != nullptr; pItem = pItemNext )
 	{
 		pItemNext = pItem->GetNext();
 		if ( pItem->IsType(IT_FIGURINE) && pItem->m_uidLink == pCharPlayer->GetUID() )
@@ -392,7 +392,7 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 	// Just tell them what we can teach them or set up a memory to train.
 	strcpy( pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_PRICE_1 ) );
 
-	lpctstr pPrvSkill = NULL;
+	lpctstr pPrvSkill = nullptr;
 
 	size_t iCount = 0;
 	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; i++ )

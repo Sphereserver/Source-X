@@ -60,19 +60,19 @@ public:
     /**
     * @brief Get the nth element of the list.
     * @param index of the element to get.
-    * @return nth element if lenght is greater or equal to index, NULL otherwise.
+    * @return nth element if lenght is greater or equal to index, nullptr otherwise.
     */
     CSObjListRec * GetAt( size_t index ) const;
     /**
     * @brief Get the first record of the CSObjList.
-    * @return The first record of the CSObjList if list is not empty, NULL otherwise.
+    * @return The first record of the CSObjList if list is not empty, nullptr otherwise.
     */
     inline CSObjListRec * GetHead() const {
         return m_pHead;
     }
     /**
     * @brief Get the last record of the CSObjList.
-    * @return The last record of the CSObjList if list is not empty, NULL otherwise.
+    * @return The last record of the CSObjList if list is not empty, nullptr otherwise.
     */
     inline CSObjListRec * GetTail() const {
         return m_pTail;
@@ -88,17 +88,17 @@ public:
     /**
     * @brief Insert a record after the referenced record.
     *
-    * If the position referenced is NULL, the record is inserted at head.
+    * If the position referenced is nullptr, the record is inserted at head.
     * @param pNewRec record to insert.
     * @param pPrev position to insert after.
     */
-    virtual void InsertAfter( CSObjListRec * pNewRec, CSObjListRec * pPrev = NULL );
+    virtual void InsertAfter( CSObjListRec * pNewRec, CSObjListRec * pPrev = nullptr );
     /**
     * @brief Insert a record at head.
     * @param pNewRec record to insert.
     */
     inline void InsertHead( CSObjListRec * pNewRec ) {
-        InsertAfter(pNewRec, NULL);
+        InsertAfter(pNewRec, nullptr);
     }
     /**
     * @brief Insert a record at tail.

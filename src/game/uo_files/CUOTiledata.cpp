@@ -15,7 +15,7 @@ ITEMID_TYPE CUOTiledata::GetMaxTileDataItem() // static
     ADDTOCALLSTACK("CUOTiledata::GetMaxTileDataItem");
 
     CSFile* pTileData = g_Install.GetMulFile(VERFILE_TILEDATA);
-    ASSERT(pTileData != NULL);
+    ASSERT(pTileData != nullptr);
 
     dword dwLength = (dword)pTileData->GetLength();	// length of file
     dword dwEntrySize = 0;							// size of tiledata entry

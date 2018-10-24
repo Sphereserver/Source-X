@@ -11,7 +11,7 @@
 CGMPage::CGMPage( lpctstr pszAccount ) :
 	m_sAccount( pszAccount )
 {
-	m_pGMClient = NULL;
+	m_pGMClient = nullptr;
 	m_timePage = g_World.GetCurrentTime().GetTimeRaw();
 	// Put at the end of the list.
 	g_World.m_GMPages.InsertTail( this );
@@ -51,13 +51,13 @@ int64 CGMPage::GetAge() const
 
 void CGMPage::ClearGMHandler()
 {
-	if ( m_pGMClient != NULL)	// break the link to the client.
+	if ( m_pGMClient != nullptr)	// break the link to the client.
 	{
 		ASSERT( m_pGMClient->m_pGMPage == this );
-		m_pGMClient->m_pGMPage = NULL;
+		m_pGMClient->m_pGMPage = nullptr;
 	}
 
-	m_pGMClient = NULL;
+	m_pGMClient = nullptr;
 }
 
 void CGMPage::SetGMHandler(CClient* pClient)
@@ -65,11 +65,11 @@ void CGMPage::SetGMHandler(CClient* pClient)
 	if ( m_pGMClient == pClient )
 		return;
 
-	if ( m_pGMClient != NULL)	// break the link to the previous client.
+	if ( m_pGMClient != nullptr)	// break the link to the previous client.
 		ClearGMHandler();
 
 	m_pGMClient = pClient;
-	if ( m_pGMClient != NULL )
+	if ( m_pGMClient != nullptr )
 		m_pGMClient->m_pGMPage = this;
 }
 
@@ -99,7 +99,7 @@ lpctstr const CGMPage::sm_szLoadKeys[GC_QTY+1] =
 	"REASON",
 	"STATUS",
 	"TIME",
-	NULL
+	nullptr
 };
 
 bool CGMPage::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
@@ -172,9 +172,9 @@ lpctstr CGMPage::GetAccountStatus() const
 {
 	ADDTOCALLSTACK("CGMPage::GetAccountStatus");
 	CClient * pClient = FindAccount()->FindClient();
-	if ( pClient==NULL )
+	if ( pClient==nullptr )
 		return "OFFLINE";
-	else if ( pClient->GetChar() == NULL )
+	else if ( pClient->GetChar() == nullptr )
 		return "LOGIN";
 	else
 		return pClient->GetChar()->GetName();

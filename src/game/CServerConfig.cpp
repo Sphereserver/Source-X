@@ -290,7 +290,7 @@ CServerConfig::~CServerConfig()
 		for ( size_t j = 0; j < m_ResHash.m_Array[i].size(); ++j )
 		{
 			CResourceDef* pResDef = m_ResHash.m_Array[i][j];
-			if ( pResDef != NULL )
+			if ( pResDef != nullptr )
 				pResDef->UnLink();
 		}
 	}
@@ -304,10 +304,10 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CServerConfig::r_GetRef");
 	tchar * pszSep = const_cast<tchar*>(strchr( pszKey, '(' ));	// acts like const_cast
-	if ( pszSep == NULL )
+	if ( pszSep == nullptr )
 	{
 		pszSep = const_cast<tchar*>(strchr( pszKey, '.' ));
-		if ( pszSep == NULL )
+		if ( pszSep == nullptr )
 			return false;
 	}
 
@@ -339,12 +339,12 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 		return false;
 
 	pszSep = const_cast<tchar*>(strchr( pszKey, '.' ));
-	if ( pszSep != NULL )
+	if ( pszSep != nullptr )
 		*pszSep = '\0';
 
 	if ( iResType == RES_SERVERS )
 	{
-		pRef = NULL;
+		pRef = nullptr;
 	}
 	else if ( iResType == RES_CHARDEF )
 	{
@@ -363,7 +363,7 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 		pszKey++;
 		size_t iOrder = Exp_GetVal( pszKey );
 		if ( !m_SpellDefs_Sorted.IsValidIndex( iOrder ) )
-			pRef = NULL;
+			pRef = nullptr;
 		else
 			pRef = m_SpellDefs_Sorted[iOrder];
 	}
@@ -376,7 +376,7 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 			pRef = ResourceGetDef( rid );
 	}
 
-	if ( pszSep != NULL )
+	if ( pszSep != nullptr )
 	{
 		*pszSep = oldChar; //*pszSep = '.';
 		pszKey = pszSep+1;
@@ -873,7 +873,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "WOPSTAFF",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fWordsOfPowerStaff),	0 }},
 	{ "WORLDSAVE",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sWorldBaseDir),		0 }},
 	{ "ZEROPOINT",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sZeroPoint),			0 }},
-	{ NULL,						{ ELEM_VOID,	0,											0 }}
+	{ nullptr,						{ ELEM_VOID,	0,											0 }}
 };
 
 bool CServerConfig::r_LoadVal( CScript &s )
@@ -1320,7 +1320,7 @@ const CSkillDef * CServerConfig::SkillLookup( lpctstr pszKey )
 			:	!strnicmp( pszKey, pDef->m_sName, iLen ) )
 			return pDef;
 	}
-	return NULL;
+	return nullptr;
 }
 
 
@@ -1511,7 +1511,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 		{
 			bool bGuild = !strnicmp( pszKey, "GUILDSTONES.",12);
 			lpctstr pszCmd = pszKey + 11 + ( (bGuild) ? 1 : 0 );
-			CItemStone * pStone = NULL;
+			CItemStone * pStone = nullptr;
 			size_t x = 0;
 
 			if (!strnicmp(pszCmd,"COUNT", 5))
@@ -1519,7 +1519,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 				for ( size_t i = 0; i < g_World.m_Stones.size(); ++i )
 				{
 					pStone = g_World.m_Stones[i];
-					if ( pStone == NULL )
+					if ( pStone == nullptr )
 						continue;
 
 					if (( pStone->GetType() == IT_STONE_GUILD ) && bGuild )
@@ -1539,7 +1539,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			for ( size_t i = 0; i < g_World.m_Stones.size(); ++i )
 			{
 				pStone = g_World.m_Stones[i];
-				if ( pStone == NULL )
+				if ( pStone == nullptr )
 					continue;
 
 				if (( pStone->GetType() == IT_STONE_GUILD ) && bGuild )
@@ -1571,15 +1571,15 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 
 			sVal.FormatVal(0);
 			ClientIterator it;
-			for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
+			for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
 			{
 				if ( cli_num == i )
 				{
 					CChar * pChar = pClient->GetChar();
 
 					if ( *pszKey == '\0' ) // checking reference
-						sVal.FormatVal( pChar != NULL? 1 : 0 );
-					else if ( pChar != NULL )
+						sVal.FormatVal( pChar != nullptr? 1 : 0 );
+					else if ( pChar != nullptr )
 						return pChar->r_WriteVal(pszKey, sVal, pSrc);
 					else
 						return pClient->r_WriteVal(pszKey, sVal, pSrc);
@@ -1753,7 +1753,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			sVal.FormatHex( g_Log.GetLogMask());
 			break;
 		case RC_MULFILES:
-			sVal = g_Install.GetPreferPath(NULL);
+			sVal = g_Install.GetPreferPath(nullptr);
 			break;
 		case RC_MAPCACHETIME:
 			sVal.FormatLLVal( m_iMapCacheTime / MSECS_PER_SEC );
@@ -1830,7 +1830,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 						time_t lTime = Exp_GetVal(ppVal[0]);
 
 						CSTime datetime(lTime);
-						sVal = datetime.Format(iQty > 1? ppVal[1]: NULL);
+						sVal = datetime.Format(iQty > 1? ppVal[1]: nullptr);
 					}
 				}
 			}
@@ -1838,7 +1838,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 		case RC_RTIME:
 			{
 				if ( pszKey[5] != '.' )
-					sVal = CSTime::GetCurrentTime().Format(NULL);
+					sVal = CSTime::GetCurrentTime().Format(nullptr);
 				else
 				{
 					pszKey += 5;
@@ -1957,7 +1957,7 @@ SKILL_TYPE CServerConfig::FindSkillKey( lpctstr pszKey ) const
 	}
 
 	const CSkillDef * pSkillDef = FindSkillDef( pszKey );
-	if ( pSkillDef == NULL )
+	if ( pSkillDef == nullptr )
 		return SKILL_NONE;
 	return (SKILL_TYPE)(pSkillDef->GetResourceID().GetResIndex());
 }
@@ -1976,7 +1976,7 @@ int CServerConfig::GetSpellEffect( SPELL_TYPE spell, int iSkillVal ) const
 	if ( !spell )
 		return 0;
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef( spell );
-	if ( pSpellDef == NULL )
+	if ( pSpellDef == nullptr )
 		return 0;
 	return pSpellDef->m_Effect.GetLinear( iSkillVal );
 }
@@ -1994,7 +1994,7 @@ lpctstr CServerConfig::GetNotoTitle( int iLevel, bool bFemale ) const
 	{
 		// check if a female title is present
 		lpctstr pFemaleTitle = strchr(m_NotoTitles[iLevel]->GetPtr(), ',');
-		if (pFemaleTitle == NULL)
+		if (pFemaleTitle == nullptr)
 			return m_NotoTitles[iLevel]->GetPtr();
 
 		pFemaleTitle++;
@@ -2040,35 +2040,35 @@ CServerRef CServerConfig::Server_GetDef( size_t index )
 {
 	ADDTOCALLSTACK("CServerConfig::Server_GetDef");
 	if ( ! m_Servers.IsValidIndex(index))
-		return NULL;
+		return nullptr;
 	return CServerRef( static_cast <CServerDef*>( m_Servers[index] ));
 }
 
 CWebPageDef * CServerConfig::FindWebPage( lpctstr pszPath ) const
 {
 	ADDTOCALLSTACK("CServerConfig::FindWebPage");
-	if ( pszPath == NULL )
+	if ( pszPath == nullptr )
 	{
 		if (m_WebPages.size() <= 0 )
-			return NULL;
+			return nullptr;
 		// Take this as the default page.
 		return static_cast <CWebPageDef*>( m_WebPages[0] );
 	}
 
 	lpctstr pszTitle = CSFile::GetFilesTitle(pszPath);
 
-	if ( pszTitle == NULL || pszTitle[0] == '\0' )
+	if ( pszTitle == nullptr || pszTitle[0] == '\0' )
 	{
 		// This is just the root index.
 		if (m_WebPages.size() <= 0 )
-			return NULL;
+			return nullptr;
 		// Take this as the default page.
 		return static_cast <CWebPageDef*>( m_WebPages[0] );
 	}
 
 	for ( size_t i = 0; i < m_WebPages.size(); i++ )
 	{
-		if ( m_WebPages[i] == NULL )	// not sure why this would happen
+		if ( m_WebPages[i] == nullptr )	// not sure why this would happen
 			continue;
 		CWebPageDef * pWeb = static_cast <CWebPageDef*>(m_WebPages[i] );
 		ASSERT(pWeb);
@@ -2076,7 +2076,7 @@ CWebPageDef * CServerConfig::FindWebPage( lpctstr pszPath ) const
 			return pWeb;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 bool CServerConfig::IsObscene( lpctstr pszText ) const
@@ -2162,7 +2162,7 @@ const CSphereMulti * CServerConfig::GetMultiItemDefs( CItem * pItem )
 {
 	ADDTOCALLSTACK("CServerConfig::GetMultiItemDefs(CItem*)");
 	if ( !pItem )
-		return NULL;
+		return nullptr;
 
 	CItemMultiCustom *pItemMultiCustom = dynamic_cast<CItemMultiCustom*>(pItem);
 	if ( pItemMultiCustom )
@@ -2175,7 +2175,7 @@ const CSphereMulti * CServerConfig::GetMultiItemDefs( ITEMID_TYPE itemid )
 {
 	ADDTOCALLSTACK("CServerConfig::GetMultiItemDefs(ITEMID_TYPE)");
 	if ( !CItemBase::IsID_Multi(itemid) )
-		return NULL;
+		return nullptr;
 
 	MULTI_TYPE id = static_cast<MULTI_TYPE>(itemid - ITEMID_MULTI);
 	size_t index = m_MultiDefs.FindKey(id);
@@ -2239,14 +2239,14 @@ bool CServerConfig::CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd,
 
 	// can i use this verb on this object ?
 
-	if ( pSrc->GetChar() == NULL )
+	if ( pSrc->GetChar() == nullptr )
 	{
 		// I'm not a cchar. what am i ?
 		CClient * pClient = dynamic_cast <CClient *>(pSrc);
 		if ( pClient )
 		{
 			// We are not logged in as a player char ? so we cannot do much !
-			if ( pClient->GetAccount() == NULL )
+			if ( pClient->GetAccount() == nullptr )
 			{
 				// must be a console or web page ?
 				// I guess we can just login !
@@ -2270,7 +2270,7 @@ bool CServerConfig::CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd,
 	myCmd[pOs] = '\0';
 
 	tchar * pOd; //position of dot :)
-	while ( (pOd = strchr(myCmd, '.')) != NULL )
+	while ( (pOd = strchr(myCmd, '.')) != nullptr )
 	{
 		ilevel = GetPrivCommandLevel( myCmd );
 		if ( ilevel > pSrc->GetPrivLevel())
@@ -2322,7 +2322,7 @@ CPointMap CServerConfig::GetRegionPoint( lpctstr pCmd ) const // Decode a telepo
 	{
 		// Match the region name with global regions.
 		CRegion * pRegion = GetRegion(pCmd);
-		if ( pRegion != NULL )
+		if ( pRegion != nullptr )
 		{
 			return pRegion->m_pt;
 		}
@@ -2345,7 +2345,7 @@ CRegion * CServerConfig::GetRegion( lpctstr pKey ) const
 			ASSERT(pResDef);
 
 			CRegion * pRegion = dynamic_cast <CRegion*> (pResDef);
-			if ( pRegion == NULL )
+			if ( pRegion == nullptr )
 				continue;
 
 			if ( ! pRegion->GetNameStr().CompareNoCase( pKey ) ||
@@ -2357,7 +2357,7 @@ CRegion * CServerConfig::GetRegion( lpctstr pKey ) const
 	}
 
 	// no match.
-	return NULL;
+	return nullptr;
 }
 
 void CServerConfig::LoadSortSpells()
@@ -2375,14 +2375,14 @@ void CServerConfig::LoadSortSpells()
 			continue;
 
 		int	iVal = 0;
-		m_SpellDefs[i]->GetPrimarySkill( NULL, &iVal );
+		m_SpellDefs[i]->GetPrimarySkill( nullptr, &iVal );
 
 		size_t iQty = m_SpellDefs_Sorted.size();
 		size_t k = 1;
 		while ( k < iQty )
 		{
 			int	iVal2 = 0;
-			m_SpellDefs_Sorted[k]->GetPrimarySkill( NULL, &iVal2 );
+			m_SpellDefs_Sorted[k]->GetPrimarySkill( nullptr, &iVal2 );
 			if ( iVal2 > iVal )
 				break;
 			++k;
@@ -2556,7 +2556,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 	// Index or read any resource blocks we know how to handle.
 	ASSERT(pScript);
 	CScriptFileContext FileContext( pScript );	// set this as the context.
-	CVarDefContNum * pVarNum = NULL;
+	CVarDefContNum * pVarNum = nullptr;
 	CResourceID rid;
 	lpctstr	pszSection	= pScript->GetSection();
 
@@ -2597,7 +2597,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 	{
 		lpctstr	pszDef = pScript->GetArgStr();
 		CVarDefCont * pVarBase = g_Exp.m_VarDefs.GetKey( pszDef );
-		pVarNum = NULL;
+		pVarNum = nullptr;
 		if ( pVarBase )
 			pVarNum = dynamic_cast <CVarDefContNum*>( pVarBase );
 		if ( !pVarNum )
@@ -2609,12 +2609,12 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		rid.SetPrivateUID( (uint)pVarNum->GetValNum() );
 		restype	= rid.GetResType();
 
-		CResourceDef *	pRes = NULL;
+		CResourceDef *	pRes = nullptr;
 		size_t index = m_ResHash.FindKey( rid );
 		if ( index != m_ResHash.BadIndex() )
 			pRes = dynamic_cast <CResourceDef*> (m_ResHash.GetAt( rid, index ) );
 
-		if ( pRes == NULL )
+		if ( pRes == nullptr )
 		{
 			g_Log.Event( LOGL_WARN|LOGM_INIT, "Resource '%s' not found\n", pszDef );
 			return false;
@@ -2647,9 +2647,9 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 	// NOTE: It is possible to be replacing an existing entry !!! Check for this.
 
-	CResourceLink * pNewLink = NULL;
-	CResourceDef * pNewDef = NULL;
-	CResourceDef * pPrvDef = NULL;
+	CResourceLink * pNewLink = nullptr;
+	CResourceDef * pNewDef = nullptr;
+	CResourceDef * pPrvDef = nullptr;
 
 	if ( m_ResourceList.ContainsKey( const_cast<tchar *>(pszSection) ))
 	{
@@ -2928,7 +2928,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			for ( size_t i = 0; i < iQty; i++ )
 			{
 				if (g_World.m_TileTypes.at(i) == pTypeDef )
-					g_World.m_TileTypes.assign(i, NULL);
+					g_World.m_TileTypes.assign(i, nullptr);
 			}
 
 		}
@@ -2937,7 +2937,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			pNewLink = new CItemTypeDef( rid );
 			ASSERT(pNewLink);
 			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
-			if (pLinkResScript != NULL)
+			if (pLinkResScript != nullptr)
 				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
@@ -2972,7 +2972,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			pNewLink = new CResourceLink( rid );
 			ASSERT(pNewLink);
 			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
-			if (pLinkResScript != NULL)
+			if (pLinkResScript != nullptr)
 				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
@@ -2990,7 +2990,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			pNewLink = new CDialogDef( rid );
 			ASSERT(pNewLink);
 			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
-			if (pLinkResScript != NULL)
+			if (pLinkResScript != nullptr)
 				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
@@ -3009,7 +3009,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			pNewLink = new CRegionResourceDef( rid );
 			ASSERT(pNewLink);
 			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
-			if (pLinkResScript != NULL)
+			if (pLinkResScript != nullptr)
 				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
@@ -3094,7 +3094,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			pNewLink = new CSRandGroupDef( rid );
 			ASSERT(pNewLink);
 			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
-			if (pLinkResScript != NULL)
+			if (pLinkResScript != nullptr)
 				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
@@ -3119,7 +3119,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
             if (pNewLink) 
             {
                 CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
-                if (pLinkResScript != NULL)
+                if (pLinkResScript != nullptr)
                     pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
                 m_ResHash.AddSortKey(rid, pNewLink);
             }
@@ -3143,7 +3143,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			pNewLink = new CSkillClassDef( rid );
 			ASSERT(pNewLink);
 			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
-			if (pLinkResScript != NULL)
+			if (pLinkResScript != nullptr)
 				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
@@ -3179,7 +3179,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			pNewLink = new CResourceLink(rid);
 			ASSERT(pNewLink);
 			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
-			if (pLinkResScript != NULL)
+			if (pLinkResScript != nullptr)
 				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
@@ -3218,7 +3218,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			// Link the CResourceLink to the CResourceScript it was read and created,
 			//	so later we can retrieve the file and the line for debugging purposes.
 			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
-			if (pLinkResScript != NULL)
+			if (pLinkResScript != nullptr)
 				pNewLink->SetLink(pLinkResScript);
 
 			m_Functions.AddSortKey(pNewLink, pNewLink->GetName());
@@ -3242,7 +3242,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				}
 				else
 					pServ = Server_GetDef(i);
-				ASSERT(pServ != NULL);
+				ASSERT(pServ != nullptr);
 
 				if ( pScript->ReadKey())
 				{
@@ -3374,7 +3374,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		while ( pScript->ReadKeyParse() )
 		{
 			CDialogDef *pDef = dynamic_cast<CDialogDef *>( g_Cfg.ResourceGetDefByName(RES_DIALOG, pScript->GetKey()) );
-			if ( pDef != NULL )
+			if ( pDef != nullptr )
 				g_Cfg.SetKRDialogMap( (dword)pDef->GetResourceID(), pScript->GetArgVal());
 			else
 				DEBUG_ERR(("Dialog '%s' not found...\n", pScript->GetKey()));
@@ -3415,7 +3415,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 		// NOTE: we should not be linking to stuff in the *WORLD.SCP file.
 		CResourceScript* pResScript = dynamic_cast <CResourceScript*>(pScript);
-		if ( pResScript == NULL )	// can only link to it if it's a CResourceScript !
+		if ( pResScript == nullptr )	// can only link to it if it's a CResourceScript !
 		{
 			DEBUG_ERR(( "Can't link resources in the world save file\n" ));
 			return false;
@@ -3570,7 +3570,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 		if ( !fNewStyleDef )
 		{
 			// Name is not the defname or id, just find a free id.
-			pszName = NULL;	// fake it out for now.
+			pszName = nullptr;	// fake it out for now.
 			break;
 		}
 		// otherwise, passthrough to default
@@ -3640,7 +3640,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 			// just check to see if this is a strange type conflict ?
 
 			CVarDefContNum * pVarNum = dynamic_cast <CVarDefContNum*>( pVarBase );
-			if ( pVarNum == NULL )
+			if ( pVarNum == nullptr )
 			{
 				switch (restype)
 				{
@@ -3652,7 +3652,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 					case RES_WORLDSCRIPT:
 					{
 						const CVarDefContStr * pVarStr = dynamic_cast <CVarDefContStr*>( pVarBase );
-						if ( pVarStr != NULL )
+						if ( pVarStr != nullptr )
 							return ResourceGetNewID(restype, pVarStr->GetValStr(), ppVarNum, fNewStyleDef);
 					}
 					default:
@@ -3834,7 +3834,7 @@ CResourceDef * CServerConfig::ResourceGetDef( CResourceIDBase rid ) const
 	//	restype = id must be this type.
 
 	if ( ! rid.IsValidUID() )
-		return NULL;
+		return nullptr;
 
 	size_t index = rid.GetResIndex();
 	switch ( rid.GetResType() )
@@ -3842,21 +3842,21 @@ CResourceDef * CServerConfig::ResourceGetDef( CResourceIDBase rid ) const
 		case RES_WEBPAGE:
 			index = m_WebPages.FindKey( rid );
 			if ( ! m_WebPages.IsValidIndex(index) )
-				return NULL;
+				return nullptr;
 			return m_WebPages.at(index);
 
 		case RES_SKILL:
 			if ( ! m_SkillIndexDefs.IsValidIndex(index) )
-				return NULL;
+				return nullptr;
 			return m_SkillIndexDefs[ index ];
 
 		case RES_SPELL:
 			if ( ! m_SpellDefs.IsValidIndex(index) )
-				return NULL;
+				return nullptr;
 			return m_SpellDefs[ index ];
 
 		case RES_UNKNOWN:	// legal to use this as a ref but it is unknown
-			return NULL;
+			return nullptr;
 
 		case RES_BOOK:				// A book or a page from a book.
 		case RES_EVENTS:
@@ -3882,7 +3882,7 @@ CResourceDef * CServerConfig::ResourceGetDef( CResourceIDBase rid ) const
 			break;
 
 		default:
-			return NULL;
+			return nullptr;
 	}
 
 	return CResourceBase::ResourceGetDef( rid );
@@ -3908,7 +3908,7 @@ void CServerConfig::OnTick( bool fNow )
 			CWebPageDef * pWeb = static_cast <CWebPageDef *>(m_WebPages[i]);
 			if ( pWeb )
 			{
-				pWeb->WebPageUpdate(fNow, NULL, &g_Serv);
+				pWeb->WebPageUpdate(fNow, nullptr, &g_Serv);
 				pWeb->WebPageLog();
 			}
 			EXC_CATCH;
@@ -4044,7 +4044,7 @@ void CServerConfig::Unload( bool fResync )
 		for ( size_t j = 0; ; j++ )
 		{
 			CResourceScript * pResFile = GetResourceFile(j);
-			if ( pResFile == NULL )
+			if ( pResFile == nullptr )
 				break;
 			pResFile->CloseForce();
 		}
@@ -4129,7 +4129,7 @@ bool CServerConfig::Load( bool fResync )
 	catch (...)
 	{
 		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".ini file is corrupt or missing\n" );
-		g_Log.CatchEvent( NULL, "g_VerData.Load" );
+		g_Log.CatchEvent( nullptr, "g_VerData.Load" );
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		return false;
 	}
@@ -4365,12 +4365,12 @@ bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpc
 		for (;;)
 		{
 			bool isValid = true;
-			if (g_Exp.m_VarDefs.GetKey(pOutput) != NULL)
+			if (g_Exp.m_VarDefs.GetKey(pOutput) != nullptr)
 			{
 				// check loaded defnames
 				isValid = false;
 			}
-			else if (vDefnames && vDefnames->GetKey(pOutput) != NULL)
+			else if (vDefnames && vDefnames->GetKey(pOutput) != nullptr)
 			{
 				isValid = false;
 			}
@@ -4386,7 +4386,7 @@ bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpc
 	}
 
 	// record defname
-	if (vDefnames != NULL)
+	if (vDefnames != nullptr)
 		vDefnames->SetNum(pOutput, 1);
 
 	return true;
@@ -4395,10 +4395,10 @@ bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpc
 bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilename )
 {
 	ADDTOCALLSTACK("CServerConfig::DumpUnscriptedItems");
-	if ( pSrc == NULL )
+	if ( pSrc == nullptr )
 		return false;
 
-	if ( pszFilename == NULL || pszFilename[0] == '\0' )
+	if ( pszFilename == nullptr || pszFilename[0] == '\0' )
 		pszFilename	= "unscripted_items" SPHERE_SCRIPT;
 	else if ( strlen( pszFilename ) <= 4 )
 		return false;
@@ -4413,7 +4413,7 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 	tchar * pDefnameBuffer = static_cast<tchar *>(tsDefnameBuffer);
 	CVarDefMap defnames;
 
-	s.Printf("// Unscripted items, generated by " SPHERE_TITLE " at %s\n", CSTime::GetCurrentTime().Format(NULL));
+	s.Printf("// Unscripted items, generated by " SPHERE_TITLE " at %s\n", CSTime::GetCurrentTime().Format(nullptr));
 
 	ITEMID_TYPE idMaxItem = CUOTiledata::GetMaxTileDataItem();
 	if (idMaxItem > ITEMID_MULTI)

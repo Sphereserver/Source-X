@@ -60,7 +60,7 @@ public:
     bool ResourceLock( CResourceLock & s );
 
 public:
-    CResourceLink( CResourceID rid, const CVarDefContNum * pDef = NULL );
+    CResourceLink( CResourceID rid, const CVarDefContNum * pDef = nullptr );
     virtual ~CResourceLink();
 
 private:

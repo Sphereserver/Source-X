@@ -315,7 +315,7 @@ TlsValue<T>::TlsValue()
 	_key = TlsAlloc();
 	_ready = (_key != TLS_OUT_OF_INDEXES);
 #else
-	_ready = (pthread_key_create(&_key, NULL) == 0);
+	_ready = (pthread_key_create(&_key, nullptr) == 0);
 #endif
 }
 	
@@ -347,7 +347,7 @@ template<class T>
 T TlsValue<T>::get() const
 {
 	if (_ready == false)
-		return NULL;
+		return nullptr;
 #ifdef _WIN32
 	return reinterpret_cast<T>(TlsGetValue(_key));
 #else
@@ -367,13 +367,13 @@ public:
 	inline StackDebugInformation(const char *name)
 	{
 		m_context = static_cast<AbstractSphereThread *>(ThreadHolder::current());
-		if (m_context != NULL)
+		if (m_context != nullptr)
 			m_context->pushStackCall(name);
 	}
 
 	inline ~StackDebugInformation()
 	{
-		if (m_context != NULL)
+		if (m_context != nullptr)
 			m_context->popStackCall();
 	}
 

@@ -18,7 +18,7 @@ CUOMapList::CUOMapList()
     for (int i = 0; i < 6; i++)
         Load(i, 0, 0, 0, i, i);
 
-    m_pMapDiffCollection = NULL;
+    m_pMapDiffCollection = nullptr;
 }
 
 // CUOMapList:: Modifiers.

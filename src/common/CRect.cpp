@@ -267,7 +267,7 @@ CSector * CRect::GetSector( int i ) const	// ge all the sectors that make up thi
 {
 	ADDTOCALLSTACK("CRect::GetSector");
 	// get all the CSector(s) that overlap this rect.
-	// RETURN: NULL = no more
+	// RETURN: nullptr = no more
 
 	// Align new rect.
 	CRectMap rect;
@@ -289,7 +289,7 @@ CSector * CRect::GetSector( int i ) const	// ge all the sectors that make up thi
 	{
 		if ( ! i )
 			return g_World.GetSector(m_map, iBase);
-		return NULL;
+		return nullptr;
 	}
 
 	int indexoffset = (( i / width ) * g_MapList.GetSectorCols(m_map)) + ( i % width );

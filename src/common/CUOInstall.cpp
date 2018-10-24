@@ -41,7 +41,7 @@ bool CUOInstall::FindInstall()
 		"Software\\Electronic Arts\\EA Games\\Ultima Online Classic"
 	};
 	
-	HKEY hKey = NULL;
+	HKEY hKey = nullptr;
 	LSTATUS lRet = 0;
 	for ( size_t i = 0; i < CountOf(m_szKeys); ++i )
 	{
@@ -59,7 +59,7 @@ bool CUOInstall::FindInstall()
 	tchar szValue[ _MAX_PATH ];
 	DWORD lSize = sizeof( szValue );
 	DWORD dwType = REG_SZ;
-	lRet = RegQueryValueEx(hKey, "ExePath", NULL, &dwType, (byte*)szValue, &lSize);
+	lRet = RegQueryValueEx(hKey, "ExePath", nullptr, &dwType, (byte*)szValue, &lSize);
 
 	if ( lRet == ERROR_SUCCESS && dwType == REG_SZ )
 	{
@@ -69,7 +69,7 @@ bool CUOInstall::FindInstall()
 	}
 	else
 	{
-		lRet = RegQueryValueEx(hKey, "InstallDir", NULL, &dwType, (byte*)szValue, &lSize);
+		lRet = RegQueryValueEx(hKey, "InstallDir", nullptr, &dwType, (byte*)szValue, &lSize);
 		if ( lRet == ERROR_SUCCESS && dwType == REG_SZ )
 			m_sExePath = szValue;
 	}
@@ -77,7 +77,7 @@ bool CUOInstall::FindInstall()
 	// ??? Find CDROM install base as well, just in case.
 	// uo.cfg CdRomDataPath=e:\uo
 
-	lRet = RegQueryValueEx(hKey, "InstCDPath", NULL, &dwType, (byte*)szValue, &lSize);
+	lRet = RegQueryValueEx(hKey, "InstCDPath", nullptr, &dwType, (byte*)szValue, &lSize);
 
 	if ( lRet == ERROR_SUCCESS && dwType == REG_SZ )
 	{
@@ -156,24 +156,24 @@ lpctstr CUOInstall::GetBaseFileName( VERFILE_TYPE i ) // static
 		"map0.mul",		// MAP(s)
 		"staidx0.mul",	// STAIDX(s)
 		"statics0.mul",	// Static objects on MAP(s)
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
 		"tiledata.mul", // Data about tiles in ART. name and flags, etc
 		"animdata.mul", //
 		"hues.mul"		// the 16 bit color pallete we use for everything.
 	};
 
-	return ( i<0 || i>=VERFILE_QTY ) ? NULL : sm_szFileNames[i];
+	return ( i<0 || i>=VERFILE_QTY ) ? nullptr : sm_szFileNames[i];
 }
 
 CSFile * CUOInstall::GetMulFile( VERFILE_TYPE i )

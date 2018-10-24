@@ -51,7 +51,7 @@ public:
 	time_t GetTime() const;
 
 	// Attributes
-	struct tm* GetLocalTm(struct tm* ptm = NULL) const;
+	struct tm* GetLocalTm(struct tm* ptm = nullptr) const;
 
 	int GetYear() const;
 	int GetMonth() const;

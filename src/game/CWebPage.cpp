@@ -28,7 +28,7 @@ lpctstr const CWebPageDef::sm_szVerbKeys[WV_QTY+1] =
 	"GUILDLIST",	// make a table of the guilds.
 	"TOWNLIST",		// make a table of the towns.
 	"WEBPAGE",		// feed a web page to the source caller
-	NULL
+	nullptr
 };
 
 
@@ -52,7 +52,7 @@ public:
 	}
 	virtual void SysMessage( lpctstr pszMessage ) const
 	{
-		if ( pszMessage == NULL || ISINTRESOURCE(pszMessage) )
+		if ( pszMessage == nullptr || ISINTRESOURCE(pszMessage) )
 			return;
 		(const_cast <CSFileConsole*>(this))->m_FileOut.WriteString(pszMessage);
 	}
@@ -107,7 +107,7 @@ lpctstr const CWebPageDef::sm_szLoadKeys[WC_QTY+1] =
 	"WEBPAGELOG",			// daily log a copy of this page.
 	"WEBPAGESRC",			// the source name of the web page.
 	"WEBPAGEUPDATE",		// how often to generate a page ? (seconds)
-	NULL
+	nullptr
 };
 
 bool CWebPageDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
@@ -194,18 +194,18 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 			{
 			// serv a web page to the pSrc
 				CClient * pClient = dynamic_cast <CClient *>(pSrc);
-				if ( pClient == NULL )
+				if ( pClient == nullptr )
 					return false;
-				return ServPage( pClient, s.GetArgStr(), NULL );
+				return ServPage( pClient, s.GetArgStr(), nullptr );
 			}
 
 		case WV_CLIENTLIST:
 			{
 				ClientIterator it;
-				for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
+				for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
 				{
 					CChar * pChar = pClient->GetChar();
-					if ( pChar == NULL )
+					if ( pChar == nullptr )
 						continue;
 					if (( pChar->IsStatFlag(STATF_INSUBSTANTIAL) ) && (!pChar->IsStatFlag(STATF_DEAD)))
 						continue;
@@ -250,7 +250,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 				if ( ! s.HasArgs())
 					return false;
 				CGMPage * pPage = static_cast <CGMPage*>( g_World.m_GMPages.GetHead());
-				for ( ; pPage!=NULL; pPage = pPage->GetNext())
+				for ( ; pPage!=nullptr; pPage = pPage->GetNext())
 				{
 					sm_iListIndex++;
 					strcpy( pszTmp2, s.GetArgStr() );
@@ -322,7 +322,7 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 		strcpy( pszTmp, FileRead.GetKey());
 
 		tchar * pszHead = strstr( pszTmp, "<script language=\"Sphere\">" );
-		if ( pszHead != NULL )
+		if ( pszHead != nullptr )
 		{
 			// Deal with the stuff preceding the scripts.
 			*pszHead = '\0';
@@ -343,7 +343,7 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 			tchar * pszFormat = pszHead;
 
 			pszHead = strstr( pszFormat, "</script>" );
-			if ( pszHead != NULL )
+			if ( pszHead != nullptr )
 			{
 				*pszHead = '\0';
 				pszHead += 9;
@@ -438,7 +438,7 @@ bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient )
 		return false;
 
 	lpctstr pszExt = CSFile::GetFilesExt( pszName );
-	if ( pszExt == NULL || pszExt[0] == '\0' )
+	if ( pszExt == nullptr || pszExt[0] == '\0' )
 		return false;
 
 	int iType = FindTableSorted( pszExt, sm_szPageExt, CountOf( sm_szPageExt ));
@@ -446,7 +446,7 @@ bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient )
 		return false;
 	m_type = sm_szPageExtType[iType];
 
-	if ( pClient == NULL )
+	if ( pClient == nullptr )
 	{
 		// this is being set via the Script files.
 		// make sure the file is valid
@@ -477,7 +477,7 @@ bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient )
 bool CWebPageDef::IsMatch( lpctstr pszMatch ) const
 {
 	ADDTOCALLSTACK("CWebPageDef::IsMatch");
-	if ( pszMatch == NULL )	// match all.
+	if ( pszMatch == nullptr )	// match all.
 		return true;
 
 	lpctstr pszDstName = GetDstName();
@@ -504,14 +504,14 @@ lpctstr const CWebPageDef::sm_szPageType[WEBPAGE_QTY+1] =
 	"image/x-xbitmap",	// WEBPAGE_BMP,
 	"image/gif",		// WEBPAGE_GIF,
 	"image/jpeg",		// WEBPAGE_JPG,
-	NULL,				// WEBPAGE_QTY
+	nullptr,				// WEBPAGE_QTY
 };
 
 lpctstr const CWebPageDef::sm_szTrigName[WTRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
 	"@Load",
-	NULL,
+	nullptr,
 };
 
 int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime * pdateIfModifiedSince )
@@ -531,14 +531,14 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 		CResourceLock s;
 		if ( ResourceLock(s))
 		{
-			if (CScriptObj::OnTriggerScript( s, sm_szTrigName[WTRIG_Load], pClient, NULL ) == TRIGRET_RET_TRUE)
+			if (CScriptObj::OnTriggerScript( s, sm_szTrigName[WTRIG_Load], pClient, nullptr ) == TRIGRET_RET_TRUE)
 				return 0;	// Block further action.
 		}
 	}
 
 	if ( m_privlevel )
 	{
-		if ( pClient->GetAccount() == NULL )
+		if ( pClient->GetAccount() == nullptr )
 			return 401;	// Authorization required
 		if ( pClient->GetPrivLevel() < m_privlevel )
 			return 403;	// Forbidden
@@ -579,7 +579,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 		return 500;
 	}
 
-	const char *sDate = datetime.FormatGmt(NULL);	// current date.
+	const char *sDate = datetime.FormatGmt(nullptr);	// current date.
 
 	if ( !fGenerate || !pdateIfModifiedSince || (pdateIfModifiedSince->IsTimeValid() && pdateIfModifiedSince->GetTime() > dateChange) )
 	{
@@ -609,7 +609,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 	if ( m_type == WEBPAGE_TEMPLATE )
 		iLen += sprintf(szTmp + iLen, "Expires: 0\r\n");
 	else
-		iLen += sprintf(szTmp + iLen, "Last-Modified: %s\r\n",  CSTime(dateChange).FormatGmt(NULL));
+		iLen += sprintf(szTmp + iLen, "Last-Modified: %s\r\n",  CSTime(dateChange).FormatGmt(nullptr));
 
 	iLen += sprintf( szTmp + iLen,
 		"Content-Length: %u\r\n"
@@ -691,7 +691,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 
 	ASSERT(pClient);
 
-	if ( pContentData == NULL || stContentLength <= 0 )
+	if ( pContentData == nullptr || stContentLength <= 0 )
 		return false;
 	if ( ! HasTrigger(XTRIG_UNKNOWN))	// this form has no triggers.
 		return false;
@@ -807,7 +807,7 @@ bool CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateIf
 	pWebPage = g_Cfg.FindWebPage(pszTemp);
 	if ( pWebPage )
 	{
-		if ( ! pWebPage->ServPageRequest( pClient, pszPage, NULL ))
+		if ( ! pWebPage->ServPageRequest( pClient, pszPage, nullptr ))
 			return true;
 	}
 
@@ -825,7 +825,7 @@ bool CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateIf
 	}
 
 	CSTime datetime = CSTime::GetCurrentTime();
-	const char *sDate = datetime.FormatGmt(NULL);
+	const char *sDate = datetime.FormatGmt(nullptr);
 	CSString sMsgHead;
 	CSString sText;
 

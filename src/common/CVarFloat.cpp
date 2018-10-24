@@ -327,8 +327,8 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 			tchar * ppCmd[5];
 			realtype dResult;
 			size_t iCount;
-			const char * cparg1 = NULL; //some functions need a const char instead of a char and GCC cannot bear it :)
-			const char * cparg2 = NULL; //some functions need a const char instead of a char and GCC cannot bear it :)
+			const char * cparg1 = nullptr; //some functions need a const char instead of a char and GCC cannot bear it :)
+			const char * cparg2 = nullptr; //some functions need a const char instead of a char and GCC cannot bear it :)
 
 			switch ( iIntrinsic )
 			{
@@ -785,7 +785,7 @@ int CVarFloat::GetRangeVals( lpctstr & pExpr, realtype * piVals, short int iMaxQ
 {
 	ADDTOCALLSTACK("CVarFloat::GetRangeVals");
 	// Get a list of values.
-	if ( pExpr == NULL )
+	if ( pExpr == nullptr )
 		return 0;
 
 	ASSERT(piVals);
@@ -844,10 +844,10 @@ CObjBase * CLocalObjMap::Get( ushort Number )
 {
 	ADDTOCALLSTACK("CLocalObjMap::Get");
 	if ( !Number )
-		return NULL;
+		return nullptr;
 	ObjMap::iterator i = m_ObjMap.find(Number);
 	if ( i == m_ObjMap.end() )
-		return NULL;
+		return nullptr;
 	return i->second;
 }
 

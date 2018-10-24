@@ -310,7 +310,7 @@ private:
 
 public:
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = NULL );
+	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr );
 	TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
 };
 
@@ -435,7 +435,7 @@ public:
 	bool ServPagePost(CClient * pClient, lpctstr pszURLArgs, tchar * pPostData, size_t stContentLength);
 
 	virtual bool r_LoadVal(CScript & s);
-	virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = NULL);
+	virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr);
 	virtual bool r_Verb(CScript & s, CTextConsole * pSrc);	// some command on this object as a target
 
 															/**
@@ -569,7 +569,7 @@ public:
 	bool r_LoadVal( CScript & s );
 	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
 
-	bool GetPrimarySkill( int * piSkill = NULL, int * piQty = NULL ) const;
+	bool GetPrimarySkill( int * piSkill = nullptr, int * piQty = nullptr ) const;
 };
 
 /**
@@ -608,8 +608,8 @@ private:
 
 public:
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pKey, CSString &sVal, CTextConsole * pSrc = NULL );
-	size_t GetRandMemberIndex( CChar * pCharSrc = NULL, bool bTrigger = true ) const;
+	virtual bool r_WriteVal( lpctstr pKey, CSString &sVal, CTextConsole * pSrc = nullptr );
+	size_t GetRandMemberIndex( CChar * pCharSrc = nullptr, bool bTrigger = true ) const;
 	CResourceQty GetMember( size_t i ) const
 	{
 		return m_Members[i];
@@ -1261,7 +1261,7 @@ public:
 	CResourceDef * ResourceGetDef( CResourceIDBase rid ) const;
 
 	// Print EF/OF Flags
-	void PrintEFOFFlags( bool bEF = true, bool bOF = true, CTextConsole *pSrc = NULL );
+	void PrintEFOFFlags( bool bEF = true, bool bOF = true, CTextConsole *pSrc = nullptr );
 
 	// ResDisp Flag
 	int GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res = RDS_T2A, uchar chars = 5 );
@@ -1358,7 +1358,7 @@ public:
 	{
 		// future: underlying type for SPELL_TYPE to avoid casts
 		if (index == SPELL_NONE || m_SpellDefs.IsValidIndex((size_t)(index)) == false)
-			return NULL;
+			return nullptr;
 		return m_SpellDefs[(size_t)(index)];
 	}
 
@@ -1375,7 +1375,7 @@ public:
 	{
 		// future: underlying type for SPELL_TYPE to avoid casts
 		if (index == SPELL_NONE || m_SpellDefs.IsValidIndex((size_t)(index)) == false)
-			return NULL;
+			return nullptr;
 		return m_SpellDefs[(size_t)(index)];
 	}
 
@@ -1392,7 +1392,7 @@ public:
 	{
 		// future: underlying type for SPELL_TYPE to avoid casts
 		if (m_SkillIndexDefs.IsValidIndex((size_t)(index)) == false)
-			return NULL;
+			return nullptr;
 		return ( m_SkillIndexDefs[(size_t)(index)]->GetKey());
 	}
 
@@ -1409,7 +1409,7 @@ public:
 	bool IsSkillFlag( SKILL_TYPE index, SKF_TYPE skf ) const
 	{
 		const CSkillDef * pSkillDef = GetSkillDef( index );
-		return ( pSkillDef != NULL && (pSkillDef->m_dwFlags & skf) );
+		return ( pSkillDef != nullptr && (pSkillDef->m_dwFlags & skf) );
 	}
 
     /**
@@ -1424,7 +1424,7 @@ public:
 	const CSkillDef* GetSkillDef( SKILL_TYPE index ) const
 	{
 		if (m_SkillIndexDefs.IsValidIndex((size_t)(index)) == false)
-			return NULL;
+			return nullptr;
 		return m_SkillIndexDefs[(size_t)(index)];
 	}
 
@@ -1440,7 +1440,7 @@ public:
 	CSkillDef* GetSkillDef( SKILL_TYPE index )
 	{
 		if (m_SkillIndexDefs.IsValidIndex((size_t)index) == false )
-			return NULL;
+			return nullptr;
 		return m_SkillIndexDefs[(size_t)(index)];
 	}
 
@@ -1459,7 +1459,7 @@ public:
 		// RETURN: SKILL_NONE = error.
 		size_t i = m_SkillNameDefs.FindKey( pszKey );
 		if ( i == m_SkillNameDefs.BadIndex() )
-			return NULL;
+			return nullptr;
 		return static_cast <const CSkillDef*>(m_SkillNameDefs[i]);
 	}
 
@@ -1686,7 +1686,7 @@ typedef std::map<dword,dword> KRGumpsMap;
 	dword GetKRDialogMap(dword idKRDialog);
 	dword GetKRDialog(dword rid);
 
-	bool GenerateDefname(tchar *pObjectName, size_t iInputLength, lpctstr pPrefix, tchar *pOutput, bool bCheckConflict = true, CVarDefMap* vDefnames = NULL);
+	bool GenerateDefname(tchar *pObjectName, size_t iInputLength, lpctstr pPrefix, tchar *pOutput, bool bCheckConflict = true, CVarDefMap* vDefnames = nullptr);
 	bool DumpUnscriptedItems(CTextConsole * pSrc, lpctstr pszFilename);
 } g_Cfg;
 

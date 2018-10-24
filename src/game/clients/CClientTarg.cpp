@@ -20,7 +20,7 @@ bool CClient::OnTarg_Obj_Set( CObjBase * pObj )
 	// ARGS:
 	//  m_Targ_Text = new command and value.
 
-	if ( pObj == NULL )
+	if ( pObj == nullptr )
 	{
 		SysMessage( g_Cfg.GetDefaultMsg(DEFMSG_MSG_TARG_UNEXPECTED) );
 		return false;
@@ -147,7 +147,7 @@ bool CClient::Cmd_Control( CChar * pChar2 )
 	// I wish to control pChar2
 	// Leave my own body behind.
 
-	if ( pChar2 == NULL )
+	if ( pChar2 == nullptr )
 		return false;
 	if ( pChar2->IsDisconnected())
 		return false;	// char is not on-line. (then we should make it so !)
@@ -159,8 +159,8 @@ bool CClient::Cmd_Control( CChar * pChar2 )
 	CChar * pChar1 = m_pChar;
 
 	// Put my newbie equipped items on it.
-	CItem *pItemNext = NULL;
-	for ( CItem *pItem = pChar1->GetContentHead(); pItem != NULL; pItem = pItemNext )
+	CItem *pItemNext = nullptr;
+	for ( CItem *pItem = pChar1->GetContentHead(); pItem != nullptr; pItem = pItemNext )
 	{
 		pItemNext = pItem->GetNext();
 		if ( !pItem->IsAttr(ATTR_MOVE_NEVER) )
@@ -185,7 +185,7 @@ bool CClient::Cmd_Control( CChar * pChar2 )
 	CItemContainer *pPack2 = pChar2->GetPackSafe();
 	if ( pPack1 && pPack2 )
 	{
-		for ( CItem *pItem = pPack1->GetContentHead(); pItem != NULL; pItem = pItemNext )
+		for ( CItem *pItem = pPack1->GetContentHead(); pItem != nullptr; pItem = pItemNext )
 		{
 			pItemNext = pItem->GetNext();
 			if ( !pItem->IsAttr(ATTR_MOVE_NEVER) )	// keep newbie stuff.
@@ -195,12 +195,12 @@ bool CClient::Cmd_Control( CChar * pChar2 )
 	}
 
 	pChar1->ClientDetach();
-	m_pChar = NULL;
+	m_pChar = nullptr;
 	CClient * pClient2 = pChar2->GetClient();
 	if ( pClient2 )	// controled char is a player/client.
 	{
 		pChar2->ClientDetach();
-		pClient2->m_pChar = NULL;
+		pClient2->m_pChar = nullptr;
 	}
 
 	CCharPlayer * pPlayer1 = pChar1->m_pPlayer;
@@ -219,9 +219,9 @@ bool CClient::Cmd_Control( CChar * pChar2 )
 	pChar1->m_pPlayer = pPlayer2;
 	pChar2->m_pPlayer = pPlayer1;
 
-	ASSERT( pChar1->m_pNPC == NULL );
+	ASSERT( pChar1->m_pNPC == nullptr );
 	pChar1->m_pNPC = pChar2->m_pNPC;	// Turn my old body into a NPC. (if it was)
-	pChar2->m_pNPC = NULL;
+	pChar2->m_pNPC = nullptr;
 
 	if ( pPlayer1 )
 	{
@@ -291,8 +291,8 @@ bool CClient::OnTarg_UnExtract( CObjBase * pObj, const CPointMap & pt )
 		int64 piCmd[4];		// Maximum parameters in one line
 		Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
 
-		CItem * pItem = CItem::CreateTemplate((ITEMID_TYPE)(ATOI(s.GetKey())), NULL, m_pChar);
-		if ( pItem == NULL )
+		CItem * pItem = CItem::CreateTemplate((ITEMID_TYPE)(ATOI(s.GetKey())), nullptr, m_pChar);
+		if ( pItem == nullptr )
 			return false;
 
 		CPointMap ptOffset( (word)(piCmd[0]), (word)(piCmd[1]), (char)(piCmd[2]) );
@@ -343,7 +343,7 @@ bool CClient::OnTarg_Item_Add( CObjBase * pObj, CPointMap & pt )
 	if ( pObj && pObj->IsItemInContainer() )
 		return false;
 
-	CItem *pItem = CItem::CreateTemplate((ITEMID_TYPE)m_tmAdd.m_id, NULL, m_pChar);
+	CItem *pItem = CItem::CreateTemplate((ITEMID_TYPE)m_tmAdd.m_id, nullptr, m_pChar);
 	if ( !pItem )
 		return false;
 
@@ -366,7 +366,7 @@ bool CClient::OnTarg_Item_Link( CObjBase * pObj2 )
 	ADDTOCALLSTACK("CClient::OnTarg_Item_Link");
 	// CLIMODE_LINK
 
-	if ( pObj2 == NULL )
+	if ( pObj2 == nullptr )
 	{
 		SysMessage( g_Cfg.GetDefaultMsg(DEFMSG_MSG_TARG_DYNAMIC) );
 		return false;
@@ -374,9 +374,9 @@ bool CClient::OnTarg_Item_Link( CObjBase * pObj2 )
 
 	CItem * pItem2 = dynamic_cast <CItem*>(pObj2);
 	CItem * pItem1 = m_Targ_UID.ItemFind();
-	if ( pItem1 == NULL )
+	if ( pItem1 == nullptr )
 	{
-		if ( pItem2 == NULL )
+		if ( pItem2 == nullptr )
 		{
 			m_Targ_UID.InitUID();
 			addTarget( CLIMODE_TARG_LINK, g_Cfg.GetDefaultMsg( DEFMSG_MSG_TARG_LINK ) );
@@ -445,7 +445,7 @@ int CClient::Cmd_Extract( CScript * pScript, CRectMap &rect, int & zlowest )
 		{
 			CPointMap ptCur((word)(mx), (word)(my), 0, (uchar)(rect.m_map));
 			const CServerMapBlock * pBlock = g_World.GetMapBlock( ptCur );
-			if ( pBlock == NULL )
+			if ( pBlock == nullptr )
 				continue;
 			size_t iQty = pBlock->m_Statics.GetStaticQty();
 			if ( iQty <= 0 )  // no static items here.
@@ -490,7 +490,7 @@ int CClient::Cmd_Extract( CScript * pScript, CRectMap &rect, int & zlowest )
 	for (;;)
 	{
 		CItem * pItem = AreaItem.GetItem();
-		if ( pItem == NULL )
+		if ( pItem == nullptr )
 			break;
 		if ( ! rect.IsInside2d( pItem->GetTopPoint()))
 			continue;
@@ -563,7 +563,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 		// First find the lowest Z to use as a base
 		// and count the statics
 		int zlowest = UO_SIZE_Z;
-		iCount = Cmd_Extract( NULL, rect, zlowest );
+		iCount = Cmd_Extract( nullptr, rect, zlowest );
 		if ( iCount )
 		{
 			CScript s;
@@ -600,7 +600,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 			for (;;)
 			{
 				CItem * pItem = AreaItem.GetItem();
-				if ( pItem == NULL )
+				if ( pItem == nullptr )
 					break;
 				if ( ! rect.IsInside2d( pItem->GetTopPoint()))
 					continue;
@@ -616,7 +616,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 			for (;;)
 			{
 				CChar* pChar = AreaChar.GetChar();
-				if ( pChar == NULL )
+				if ( pChar == nullptr )
 					break;
 				if ( ! rect.IsInside2d( pChar->GetTopPoint()))
 					continue;
@@ -638,7 +638,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 			for (;;)
 			{
 				CItem * pItem = AreaItem.GetItem();
-				if ( pItem == NULL )
+				if ( pItem == nullptr )
 					break;
 				if ( ! rect.IsInside2d( pItem->GetTopPoint()))
 					continue;
@@ -667,7 +667,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 			for (;;)
 			{
 				CChar* pChar = AreaChar.GetChar();
-				if ( pChar == NULL )
+				if ( pChar == nullptr )
 					break;
 				if ( ! rect.IsInside2d( pChar->GetTopPoint()))
 					continue;
@@ -705,7 +705,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 				{
 					if ( ++iArg >= iArgQty )
 						iArg = 1;
-					CItem * pItem = CItem::CreateTemplate((ITEMID_TYPE)(RES_GET_INDEX(piArgs[iArg])), NULL, m_pChar);
+					CItem * pItem = CItem::CreateTemplate((ITEMID_TYPE)(RES_GET_INDEX(piArgs[iArg])), nullptr, m_pChar);
 					ASSERT(pItem);
 					pItem->SetAttr( ATTR_MOVE_NEVER );
 					CPointMap ptCur((word)mx, (word)my, z, pt.m_map);
@@ -740,7 +740,7 @@ int CClient::OnSkill_AnimalLore( CUID uid, int iSkillLevel, bool fTest )
 	// ex. liche = the remnants of a powerful wizard
 
 	CChar * pChar = uid.CharFind();
-	if ( pChar == NULL )
+	if ( pChar == nullptr )
 	{
 		SysMessageDefault( DEFMSG_NON_ALIVE );
 		return -1;
@@ -775,7 +775,7 @@ int CClient::OnSkill_AnimalLore( CUID uid, int iSkillLevel, bool fTest )
 
 	// Who is master ?
 	CChar * pCharOwner = pChar->NPC_PetGetOwner();
-	if ( pCharOwner == NULL )
+	if ( pCharOwner == nullptr )
 	{
 		sprintf(pszTemp, g_Cfg.GetDefaultMsg( DEFMSG_ANIMALLORE_FREE ), pszHe, pszHis);
 	}
@@ -804,7 +804,7 @@ int CClient::OnSkill_ItemID( CUID uid, int iSkillLevel, bool fTest )
 	// SKILL_ITEMID
 
 	CObjBase * pObj = uid.ObjFind();
-	if ( pObj == NULL )
+	if ( pObj == nullptr )
 	{
 		return -1;
 	}
@@ -840,7 +840,7 @@ int CClient::OnSkill_ItemID( CUID uid, int iSkillLevel, bool fTest )
 	// ??? Estimate it's worth ?
 
 	CItemVendable * pItemVend = dynamic_cast <CItemVendable *>(pItem);
-	if ( pItemVend == NULL )
+	if ( pItemVend == nullptr )
 	{
 		SysMessage( g_Cfg.GetDefaultMsg( DEFMSG_ITEMID_NOVAL ));
 	}
@@ -876,7 +876,7 @@ int CClient::OnSkill_EvalInt( CUID uid, int iSkillLevel, bool fTest )
 	// SKILL_EVALINT
 	// iSkillLevel = 0 to 1000
 	CChar * pChar = uid.CharFind();
-	if ( pChar == NULL )
+	if ( pChar == nullptr )
 	{
 		SysMessageDefault( DEFMSG_NON_ALIVE );
 		return -1;
@@ -977,7 +977,7 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 	ADDTOCALLSTACK("CClient::OnSkill_ArmsLore");
 	// SKILL_ARMSLORE
 	CItem * pItem = uid.ItemFind();
-	if ( pItem == NULL || ! pItem->IsTypeArmorWeapon())
+	if ( pItem == nullptr || ! pItem->IsTypeArmorWeapon())
 	{
 		SysMessageDefault( DEFMSG_ARMSLORE_UNABLE );
 		return -SKTRIG_QTY;
@@ -1068,7 +1068,7 @@ int CClient::OnSkill_Anatomy( CUID uid, int iSkillLevel, bool fTest )
 	ADDTOCALLSTACK("CClient::OnSkill_Anatomy");
 	// SKILL_ANATOMY
 	CChar * pChar = uid.CharFind();
-	if ( pChar == NULL )
+	if ( pChar == nullptr )
 	{
 		addObjMessage( g_Cfg.GetDefaultMsg( DEFMSG_NON_ALIVE ), pChar );
 		return -1;
@@ -1158,7 +1158,7 @@ int CClient::OnSkill_Forensics( CUID uid, int iSkillLevel, bool fTest )
 		return (pCorpse->m_uidLink == m_pChar->GetUID()) ? 2 : Calc_GetRandVal(60);
 
 	CChar * pCharKiller = pCorpse->m_itCorpse.m_uidKiller.CharFind();
-	lpctstr pName = pCharKiller ? pCharKiller->GetName() : NULL;
+	lpctstr pName = pCharKiller ? pCharKiller->GetName() : nullptr;
 
 	if ( pCorpse->IsCorpseSleeping() )
 	{
@@ -1197,7 +1197,7 @@ int CClient::OnSkill_TasteID( CUID uid, int iSkillLevel, bool fTest )
 	// Differntiate potion types ?
 
 	CItem * pItem = uid.ItemFind();
-	if ( pItem == NULL )
+	if ( pItem == nullptr )
 	{
 		if ( uid == m_pChar->GetUID())
 		{
@@ -1291,7 +1291,7 @@ bool CClient::OnTarg_Skill( CObjBase * pObj )
 	// response to CLIMODE_TARG_SKILL
 	// from Event_Skill_Use() select button from skill window
 
-	if ( pObj == NULL )
+	if ( pObj == nullptr )
 		return false;
 
 	SetTargMode();	// just make sure last targ mode is gone.
@@ -1302,7 +1302,7 @@ bool CClient::OnTarg_Skill( CObjBase * pObj )
 	{
 		// is this scripted skill a targeted skill ?
 		const CSkillDef * pSkillDef = g_Cfg.GetSkillDef(m_tmSkillTarg.m_Skill);
-		if (pSkillDef != NULL && pSkillDef->m_sTargetPrompt.IsEmpty() == false)
+		if (pSkillDef != nullptr && pSkillDef->m_sTargetPrompt.IsEmpty() == false)
 		{
 			m_pChar->m_Act_UID = m_Targ_UID;
 			return m_pChar->Skill_Start( m_tmSkillTarg.m_Skill );
@@ -1375,7 +1375,7 @@ bool CClient::OnTarg_Skill_Poison( CObjBase * pObj )
 {
 	ADDTOCALLSTACK("CClient::OnTarg_Skill_Poison");
 	// CLIMODE_TARG_SKILL_POISON
-	if ( pObj == NULL )
+	if ( pObj == nullptr )
 		return false;
 	m_pChar->m_Act_Prv_UID = m_Targ_UID;	// poison this
 	m_pChar->m_Act_UID = pObj->GetUID();				// with this poison
@@ -1466,7 +1466,7 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 	}
 
 	int skill;
-	if (!pSpell->GetPrimarySkill(&skill, NULL))
+	if (!pSpell->GetPrimarySkill(&skill, nullptr))
 		return false;
 
 	return( m_pChar->Skill_Start((SKILL_TYPE)skill));
@@ -1490,7 +1490,7 @@ bool CClient::OnTarg_Pet_Command( CObjBase * pObj, const CPointMap & pt )
 		for (;;)
 		{
 			CChar * pCharPet = AreaChars.GetChar();
-			if ( pCharPet == NULL )
+			if ( pCharPet == nullptr )
 				break;
 			if ( pCharPet == m_pChar )
 				continue;
@@ -1507,7 +1507,7 @@ bool CClient::OnTarg_Pet_Command( CObjBase * pObj, const CPointMap & pt )
 	else
 	{
 		CChar * pCharPet = m_Targ_UID.CharFind();
-		if ( pCharPet == NULL )
+		if ( pCharPet == nullptr )
 			return false;
 		return pCharPet->NPC_OnHearPetCmdTarg( m_tmPetCmd.m_iCmd, GetChar(), pObj, pt, m_Targ_Text );
 	}
@@ -1524,7 +1524,7 @@ bool CClient::OnTarg_Pet_Stable( CChar * pCharPet )
 	if ( !pCharMaster || !pCharMaster->m_pNPC )
 		return false;
 
-	if ( (pCharPet == NULL) || pCharPet->m_pPlayer || (pCharMaster == pCharPet) )
+	if ( (pCharPet == nullptr) || pCharPet->m_pPlayer || (pCharMaster == pCharPet) )
 	{
 		pCharMaster->Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_TARG_FAIL ) );
 		return false;
@@ -1560,7 +1560,7 @@ bool CClient::OnTarg_Pet_Stable( CChar * pCharPet )
 
 	// Shrink the pet and put it in the bank box of the stable master.
 	CItem * pPetItem = pCharPet->Make_Figurine( m_pChar->GetUID());
-	if ( pPetItem == NULL )
+	if ( pPetItem == nullptr )
 	{
 		pCharMaster->Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_TARG_FAIL ) );
 		return false;
@@ -1633,7 +1633,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 	//  true = success.
 
 	CItem * pItemUse = m_Targ_UID.ItemFind();
-	if ( pItemUse == NULL )
+	if ( pItemUse == nullptr )
 	{
 		SysMessage( g_Cfg.GetDefaultMsg(DEFMSG_MSG_TARG_GONE) );
 		return false;
@@ -1650,7 +1650,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 	m_Targ_p = pt;
 
 	ITRIG_TYPE trigtype;
-	if ( pObjTarg == NULL )
+	if ( pObjTarg == nullptr )
 	{
 		m_Targ_UID.ClearUID();
 		if ( pt.IsCharValid())
@@ -1709,7 +1709,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 				return false;
 
 			// Check if we have clear LOS to target location and also if it's not over a wall (to prevent hit chars on the other side of the wall)
-			if ( m_pChar->CanSeeLOS(pt, NULL, UO_MAP_VIEW_SIGHT, LOS_NB_WINDOWS) && !g_World.IsItemTypeNear(pt, IT_WALL, 0, true) )
+			if ( m_pChar->CanSeeLOS(pt, nullptr, UO_MAP_VIEW_SIGHT, LOS_NB_WINDOWS) && !g_World.IsItemTypeNear(pt, IT_WALL, 0, true) )
 			{
 				pItemUse->SetAttr(ATTR_MOVE_NEVER);
 				pItemUse->MoveToUpdate(pt);
@@ -1742,7 +1742,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		pItemUse->Effect( EFFECT_OBJ, ITEMID_FX_TELE_VANISH, pItemUse, 9, 6 );
 
 		// just explode on the ground ?
-		if ( pObjTarg != NULL )
+		if ( pObjTarg != nullptr )
 		{
 			// Check distance and LOS.
 			if ( pItemUse->GetDist( pObjTarg ) > UO_MAP_VIEW_SIGHT )
@@ -1775,7 +1775,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		// SKILL_HERDING
 		// Selected a creature to herd
 		// Move the selected item or char to this location.
-		if ( pCharTarg == NULL )
+		if ( pCharTarg == nullptr )
 		{
 			// hit it ?
 			SysMessageDefault( DEFMSG_ITEMUSE_CROOK_TRY );
@@ -1786,7 +1786,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 
 	case IT_WEAPON_MACE_SMITH:		// Can be used for smithing.
 		// Near a forge ? smithing ?
-		if ( pItemTarg == NULL )
+		if ( pItemTarg == nullptr )
 			break;
 		if ( pItemTarg->IsType(IT_INGOT) )
 		{
@@ -1807,7 +1807,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 	case IT_WEAPON_SWORD:		// 23 =
 
 		// Use sharp weapon on something.
-		if ( pCharTarg != NULL )
+		if ( pCharTarg != nullptr )
 		{
 			// on some person ?
 			if ( ! m_pChar->CanTouch(pCharTarg) )
@@ -1951,7 +1951,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 
 	case IT_BANDAGE:	// SKILL_HEALING, or SKILL_VETERINARY
 		// Use bandages on some creature.
-		if ( pCharTarg == NULL )
+		if ( pCharTarg == nullptr )
 			return false;
 		m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID;
 		m_pChar->m_Act_UID = m_Targ_UID;
@@ -1966,7 +1966,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 	case IT_WOOL:
 	case IT_COTTON:
 		// Use on a spinning wheel.
-		if ( pItemTarg == NULL )
+		if ( pItemTarg == nullptr )
 			break;
 		if ( ! pItemTarg->IsType(IT_SPINWHEEL))
 			break;
@@ -2001,10 +2001,10 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 	case IT_KEYRING:
 		// it acts as a key.
 		{
-		if ( pItemTarg == NULL )
+		if ( pItemTarg == nullptr )
 			return false;
 		CItemContainer* pKeyRing = dynamic_cast <CItemContainer*>(pItemUse);
-		if ( pKeyRing == NULL )
+		if ( pKeyRing == nullptr )
 			return false;
 
 		if ( pItemTarg == pItemUse )
@@ -2014,7 +2014,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			return true;
 		}
 
-		CItem * pKey = NULL;
+		CItem * pKey = nullptr;
 		bool fLockable = pItemTarg->IsTypeLockable();
 
 		if ( fLockable && pItemTarg->m_itContainer.m_UIDLock )
@@ -2022,7 +2022,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			// try all the keys on the object.
 			pKey = pKeyRing->ContentFind( CResourceID(RES_TYPEDEF,IT_KEY), pItemTarg->m_itContainer.m_UIDLock );
 		}
-		if ( pKey == NULL )
+		if ( pKey == nullptr )
 		{
 			// are we trying to lock it down ?
 			if ( m_pChar->m_pArea->GetResourceID().IsItem())
@@ -2046,7 +2046,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		}
 
 	case IT_SCISSORS:
-		if ( pItemTarg != NULL )
+		if ( pItemTarg != nullptr )
 		{
 			if ( ! m_pChar->CanUse( pItemTarg, true ))
 				return false;
@@ -2099,7 +2099,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 	case IT_THREAD:
 		// Use this on a loom.
 		// use on a spinning wheel.
-		if ( pItemTarg == NULL )
+		if ( pItemTarg == nullptr )
 			break;
 		if ( ! pItemTarg->IsType( IT_LOOM ))
 			break;
@@ -2126,7 +2126,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 		{
 			// throw away what was on here before
 			SysMessageDefault( DEFMSG_ITEMUSE_LOOM_REMOVE );
-			CItem * pItemCloth = CItem::CreateTemplate( ClothID, NULL, m_pChar );
+			CItem * pItemCloth = CItem::CreateTemplate( ClothID, nullptr, m_pChar );
 			pItemCloth->SetAmount( (word)pItemTarg->m_itLoom.m_ClothQty );
 			pItemTarg->m_itLoom.m_ClothQty = 0;
 			pItemTarg->m_itLoom.m_ridCloth.ClearUID();
@@ -2203,7 +2203,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 
 	case IT_LOCKPICK:
 		// Using a lock pick on something.
-		if ( pItemTarg== NULL )
+		if ( pItemTarg== nullptr )
 			return false;
 		m_pChar->m_Act_UID = m_Targ_UID;	// the locked item to be picked
 		m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID;	// the pick
@@ -2220,8 +2220,8 @@ static lpctstr const sm_Txt_LoomUse[] =
 		break;
 
 	case IT_DYE:
-		if (( pItemTarg != NULL && pItemTarg->IsType(IT_DYE_VAT)) ||
-			( pCharTarg != NULL && ( pCharTarg == m_pChar || IsPriv( PRIV_GM ))))	// Change skin color.
+		if (( pItemTarg != nullptr && pItemTarg->IsType(IT_DYE_VAT)) ||
+			( pCharTarg != nullptr && ( pCharTarg == m_pChar || IsPriv( PRIV_GM ))))	// Change skin color.
 		{
 			addDyeOption( pObjTarg );
 			return true;
@@ -2232,7 +2232,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 	case IT_DYE_VAT:
 		{
 		// Use the dye vat on some object.
-		if ( pObjTarg == NULL )
+		if ( pObjTarg == nullptr )
 			return false;
 
 		if ( pObjTarg->GetTopLevelObj() != m_pChar &&
@@ -2241,17 +2241,17 @@ static lpctstr const sm_Txt_LoomUse[] =
 			SysMessageDefault( DEFMSG_ITEMUSE_DYE_REACH );
 			return false;
 		}
-		if ( pCharTarg != NULL )
+		if ( pCharTarg != nullptr )
 		{
 			// Dye hair.
 			pObjTarg = pCharTarg->LayerFind( LAYER_HAIR );
-			if ( pObjTarg != NULL )
+			if ( pObjTarg != nullptr )
 			{
 				pObjTarg->SetHue( pItemUse->GetHue(), false, this->GetChar(), pItemUse, 0x23e);
 				pObjTarg->Update();
 			}
 			pObjTarg = pCharTarg->LayerFind( LAYER_BEARD );
-			if ( pObjTarg == NULL )
+			if ( pObjTarg == nullptr )
 				return true;
 			// fall through
 		}
@@ -2294,7 +2294,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 
 	case IT_SEWING_KIT:
 		// Use on cloth or hides
-		if ( pItemTarg == NULL)
+		if ( pItemTarg == nullptr)
 			break;
 		if ( ! m_pChar->CanUse( pItemTarg, true ))
 			return false;
@@ -2344,7 +2344,7 @@ bool CClient::OnTarg_Stone_Recruit(CChar* pChar, bool bFull)
 	CItemStone * pStone = dynamic_cast <CItemStone*> (m_Targ_UID.ItemFind());
 	if ( !pStone )
 		return false;
-	return ( pStone->AddRecruit(pChar, STONEPRIV_CANDIDATE, bFull) != NULL );
+	return ( pStone->AddRecruit(pChar, STONEPRIV_CANDIDATE, bFull) != nullptr );
 }
 
 bool CClient::OnTarg_Party_Add( CChar * pChar )
@@ -2353,7 +2353,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 	// CLIMODE_TARG_PARTY_ADD
 	// Invite this person to join our party. PARTYMSG_Add
 
-	if ( pChar == NULL )
+	if ( pChar == nullptr )
 	{
 		SysMessageDefault( DEFMSG_PARTY_SELECT );
 		return false;
@@ -2392,7 +2392,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 		return true;
 	}
 
-	if ( pChar->m_pParty != NULL )	// Already in a party !
+	if ( pChar->m_pParty != nullptr )	// Already in a party !
 	{
 		if ( m_pChar->m_pParty == pChar->m_pParty )	// already in this party
 		{

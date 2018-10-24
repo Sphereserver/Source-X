@@ -213,7 +213,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@UserVirtueInvoke",
 	"@UserWarmode",	        // War mode ?
 	
-        NULL
+        nullptr
 };
 
 
@@ -221,7 +221,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 // -CChar
 
 // Create the "basic" NPC. Not NPC or player yet.
-// NOTE: NEVER return NULL
+// NOTE: NEVER return nullptr
 CChar * CChar::CreateBasic(CREID_TYPE baseID) // static
 {
 	ADDTOCALLSTACK("CChar::CreateBasic");
@@ -235,12 +235,12 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 {
 	g_Serv.StatInc( SERV_STAT_CHARS );	// Count created CChars.
 
-	m_pArea = NULL;
-	m_pParty = NULL;
-	m_pClient = NULL;	// is the char a logged in player?
-	m_pPlayer = NULL;	// May even be an off-line player!
-	m_pNPC	  = NULL;
-	m_pRoom = NULL;
+	m_pArea = nullptr;
+	m_pParty = nullptr;
+	m_pClient = nullptr;	// is the char a logged in player?
+	m_pPlayer = nullptr;	// May even be an off-line player!
+	m_pNPC	  = nullptr;
+	m_pRoom = nullptr;
 	m_iStatFlag = 0;
 
 	if ( g_World.m_fSaveParity )
@@ -362,8 +362,8 @@ void CChar::ClientDetach()
 	ADDTOCALLSTACK("CChar::ClientDetach");
 
 	// remove all trade windows.
-	CItem *pItemNext = NULL;
-	for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItemNext )
+	CItem *pItemNext = nullptr;
+	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
 	{
 		pItemNext = pItem->GetNext();
 		if ( pItem->IsType(IT_EQ_TRADE_WINDOW) )
@@ -376,7 +376,7 @@ void CChar::ClientDetach()
 	{
 		// Party must disband if the master is logged out.
 		m_pParty->Disband(GetUID());
-		m_pParty = NULL;
+		m_pParty = nullptr;
 	}
 
 	// If this char is on a IT_SHIP then we need to stop the ship !
@@ -389,7 +389,7 @@ void CChar::ClientDetach()
 
     CSector * pSector = GetTopSector();
     pSector->ClientDetach( this );
-    m_pClient = NULL;	
+    m_pClient = nullptr;	
 }
 
 // Client is Attaching to this CChar.
@@ -411,7 +411,7 @@ void CChar::ClientAttach( CClient * pClient )
 
 bool CChar::IsClient() const
 {
-	return ( m_pClient != NULL );
+	return ( m_pClient != nullptr );
 }
 
 CClient * CChar::GetClient() const
@@ -431,12 +431,12 @@ void CChar::SetDisconnected()
 	if ( m_pParty )
 	{
 		m_pParty->RemoveMember( GetUID(), (dword) GetUID() );
-		m_pParty = NULL;
+		m_pParty = nullptr;
 	}
 	if ( IsDisconnected())
 		return;
 	RemoveFromView();	// Remove from views.
-	MoveToRegion(NULL,false);
+	MoveToRegion(nullptr,false);
 	GetTopSector()->m_Chars_Disconnect.InsertHead( this );
 }
 
@@ -534,7 +534,7 @@ int CChar::IsWeird() const
 
 				// Make sure we are still linked back to the world.
 				CItem * pItem = Horse_GetMountItem();
-				if ( pItem == NULL )
+				if ( pItem == nullptr )
 				{
 					iResultCode = 0x1104;
 					return iResultCode;
@@ -654,7 +654,7 @@ void CChar::StatFlag_Mod(uint64 iStatFlag, bool fMod )
 
 bool CChar::IsPriv( word flag ) const
 {	// PRIV_GM flags
-	if ( m_pPlayer == NULL )
+	if ( m_pPlayer == nullptr )
 		return false;	// NPC's have no privs.
 	return( m_pPlayer->GetAccount()->IsPriv( flag ));
 }
@@ -720,13 +720,13 @@ int CChar::FixWeirdness()
 	if ( IsStatFlag( STATF_HASSHIELD ))
 	{
 		CItem * pShield = LayerFind( LAYER_HAND2 );
-		if ( pShield == NULL )
+		if ( pShield == nullptr )
 			StatFlag_Clear( STATF_HASSHIELD );
 	}
 	if ( IsStatFlag( STATF_ONHORSE ))
 	{
 		CItem * pHorse = LayerFind( LAYER_HORSE );
-		if ( pHorse == NULL )
+		if ( pHorse == nullptr )
 			StatFlag_Clear( STATF_ONHORSE );
 	}
 	if ( IsStatFlag( STATF_SPAWNED ))
@@ -737,7 +737,7 @@ int CChar::FixWeirdness()
 	if ( IsStatFlag( STATF_PET ))
 	{
 		CItemMemory *pMemory = Memory_FindTypes( MEMORY_IPET );
-		if ( pMemory == NULL )
+		if ( pMemory == nullptr )
 			StatFlag_Clear( STATF_PET );
 	}
 	if ( IsStatFlag( STATF_RIDDEN ))
@@ -753,7 +753,7 @@ int CChar::FixWeirdness()
 				return iResultCode;
 			}
 			CItem * pFigurine = Horse_GetMountItem();
-			if ( pFigurine == NULL )
+			if ( pFigurine == nullptr )
 			{
 				iResultCode = 0x1204;
 				return iResultCode;
@@ -769,7 +769,7 @@ int CChar::FixWeirdness()
 	if ( IsStatFlag( STATF_CRIMINAL ))
 	{
 		CItem * pMemory = LayerFind( LAYER_FLAG_Criminal );
-		if ( pMemory == NULL )
+		if ( pMemory == nullptr )
 			StatFlag_Clear( STATF_CRIMINAL );
 	}
 
@@ -794,7 +794,7 @@ int CChar::FixWeirdness()
 		Memory_ClearTypes( MEMORY_IPET );
 		StatFlag_Clear( STATF_RIDDEN );
 
-		if ( m_pPlayer->GetSkillClass() == NULL )	// this should never happen.
+		if ( m_pPlayer->GetSkillClass() == nullptr )	// this should never happen.
 		{
 			m_pPlayer->SetSkillClass( this, CResourceID( RES_SKILLCLASS ));
 			ASSERT(m_pPlayer->GetSkillClass());
@@ -1011,7 +1011,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 			pItem->SetAttr(ATTR_NEWBIE);
 			if (pItem->IsType(IT_CONTAINER) )
 			{
-				for ( CItem *pItemCont = static_cast<CItemContainer*>(pItem)->GetContentHead(); pItemCont != NULL; pItemCont = pItemCont->GetNext() )
+				for ( CItem *pItemCont = static_cast<CItemContainer*>(pItem)->GetContentHead(); pItemCont != nullptr; pItemCont = pItemCont->GetNext() )
 				{
 					pItemCont->SetAttr(ATTR_NEWBIE);
 
@@ -1087,7 +1087,7 @@ bool CChar::ReadScript(CResourceLock &s, bool bVendor)
 	ADDTOCALLSTACK("CChar::ReadScript");
 	bool fFullInterp = false;
 
-	CItem * pItem = NULL;
+	CItem * pItem = nullptr;
 	while ( s.ReadKeyParse() )
 	{
 		if ( s.IsKeyHead("ON", 2) )
@@ -1111,11 +1111,11 @@ bool CChar::ReadScript(CResourceLock &s, bool bVendor)
 								if ( pItem )
 									pItem->m_TagDefs.SetNum("NOSAVE", 1);
 							}
-							pItem = NULL;
+							pItem = nullptr;
 							continue;
 						}
 					default:
-						pItem = NULL;
+						pItem = nullptr;
 						continue;
 				}
 			}
@@ -1156,7 +1156,7 @@ bool CChar::ReadScript(CResourceLock &s, bool bVendor)
 							break; // conjured creates have no loot.
 
 						pItem = CItem::CreateHeader( s.GetArgRaw(), this, iCmd == ITC_ITEMNEWBIE );
-						if ( pItem == NULL )
+						if ( pItem == nullptr )
 						{
 							m_UIDLastNewItem = GetUID();	// Setting m_UIDLastNewItem to CChar's UID to prevent calling any following functions meant to be called on that item
 							continue;
@@ -1170,14 +1170,14 @@ bool CChar::ReadScript(CResourceLock &s, bool bVendor)
 							pItem->SetAttr(ATTR_NEWBIE);
 
 						if ( !pItem->IsItemInContainer() && !pItem->IsItemEquipped())
-							pItem = NULL;
+							pItem = nullptr;
 						continue;
 					}
 
 				case ITC_BREAK:
 				case ITC_BUY:
 				case ITC_SELL:
-					pItem = NULL;
+					pItem = nullptr;
 					continue;
 			}
 
@@ -1185,7 +1185,7 @@ bool CChar::ReadScript(CResourceLock &s, bool bVendor)
 
 		if ( m_UIDLastNewItem == GetUID() )
 			continue;
-		if ( pItem != NULL )
+		if ( pItem != nullptr )
 		{
 			if ( fFullInterp )	// Modify the item.
 				pItem->r_Verb( s, &g_Serv );
@@ -1194,7 +1194,7 @@ bool CChar::ReadScript(CResourceLock &s, bool bVendor)
 		}
 		else
 		{
-			TRIGRET_TYPE tRet = OnTriggerRun( s, TRIGRUN_SINGLE_EXEC, &g_Serv, NULL, NULL );
+			TRIGRET_TYPE tRet = OnTriggerRun( s, TRIGRUN_SINGLE_EXEC, &g_Serv, nullptr, nullptr );
 			if ( (tRet == TRIGRET_RET_FALSE) && fFullInterp )
 				;
 			else if ( tRet != TRIGRET_RET_DEFAULT )
@@ -1287,13 +1287,13 @@ CREID_TYPE CChar::GetDispID() const
 }
 
 // Just set the base id and not the actual display id.
-// NOTE: Never return NULL
+// NOTE: Never return nullptr
 void CChar::SetID( CREID_TYPE id )
 {
 	ADDTOCALLSTACK("CChar::SetID");
 
 	CCharBase * pCharDef = CCharBase::FindCharBase(id);
-	if ( pCharDef == NULL )
+	if ( pCharDef == nullptr )
 	{
 		if ( id != -1 && id != CREID_INVALID )
 			DEBUG_ERR(("Create Invalid chardef 0%x\n", id));
@@ -1322,7 +1322,7 @@ void CChar::SetID( CREID_TYPE id )
 
 	if ( !Can(CAN_C_EQUIP) )	// new body may not be capable of equipping items (except maybe on hands)
 	{
-		UnEquipAllItems(NULL, Can(CAN_C_USEHANDS));
+		UnEquipAllItems(nullptr, Can(CAN_C_USEHANDS));
 	}
 	else if ( !Can(CAN_C_USEHANDS) )
 	{
@@ -1334,7 +1334,7 @@ void CChar::SetID( CREID_TYPE id )
 		if ( pHand )
 			GetPackSafe()->ContentAdd(pHand);
 	}
-	UpdateMode(NULL, true);
+	UpdateMode(nullptr, true);
 }
 
 
@@ -1347,9 +1347,9 @@ lpctstr CChar::GetNameWithoutIncognito() const
 {
 	if ( IsStatFlag( STATF_INCOGNITO ) )
 	{
-		CItem * pSpell = NULL;
+		CItem * pSpell = nullptr;
 		pSpell = LayerFind(LAYER_SPELL_Incognito);
-		if ( pSpell == NULL )
+		if ( pSpell == nullptr )
 			pSpell = LayerFind(LAYER_FLAG_Potion);
 
 		if ( pSpell && pSpell->IsType(IT_SPELL) && (pSpell->m_itSpell.m_spell == SPELL_Incognito))
@@ -1857,7 +1857,7 @@ lpctstr const CChar::sm_szRefKeys[CHR_QTY+1] =
 	"REGION",
     "SHIP",
 	"WEAPON",
-	NULL
+	nullptr
 };
 
 bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
@@ -1879,7 +1879,7 @@ bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 			case CHR_ACCOUNT:
 				if ( pszKey[-1] != '.' )	// only used as a ref !
 					break;
-				pRef = m_pPlayer ? m_pPlayer->GetAccount() : NULL;
+				pRef = m_pPlayer ? m_pPlayer->GetAccount() : nullptr;
 				return true;
 			case CHR_ACT:
 				if ( pszKey[-1] != '.' )	// only used as a ref !
@@ -1951,7 +1951,7 @@ lpctstr const CChar::sm_szLoadKeys[CHC_QTY+1] =
 	#define ADD(a,b) b,
 	#include "../../tables/CChar_props.tbl"
 	#undef ADD
-	NULL
+	nullptr
 };
 
 bool CChar::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
@@ -2492,7 +2492,7 @@ do_default:
 				ptDst.Move( dir );
 				dword		dwBlockFlags	= 0;
 				CRegion	*	pArea;
-				pArea = CheckValidMove( ptDst, &dwBlockFlags, dir, NULL );
+				pArea = CheckValidMove( ptDst, &dwBlockFlags, dir, nullptr );
 				sVal.FormatHex( pArea ? pArea->GetResourceID() : 0 );
 			}
 			return true;
@@ -2540,8 +2540,8 @@ do_default:
 			sVal.FormatVal( IsPriv(PRIV_GM));
 			return true;
 		case CHC_ISINPARTY:
-			if ( m_pPlayer != NULL )
-				sVal = ( m_pParty != NULL ) ? "1" : "0";
+			if ( m_pPlayer != nullptr )
+				sVal = ( m_pParty != nullptr ) ? "1" : "0";
 			else
 				sVal = "0";
 			return true;
@@ -2551,12 +2551,12 @@ do_default:
 			sVal = NPC_IsOwnedBy( pCharSrc, true ) ? "1" : "0";
 			return true;
 		case CHC_ISONLINE:
-			if ( m_pPlayer != NULL )
+			if ( m_pPlayer != nullptr )
 			{
 				sVal = IsClient() ? "1" : "0";
 				return true;
 			}
-			if ( m_pNPC != NULL )
+			if ( m_pNPC != nullptr )
 			{
 				sVal = IsDisconnected() ? "0" : "1";
 				return true;
@@ -2610,7 +2610,7 @@ do_default:
 				}
 				else
 					pMemory	= Memory_FindObj( pCharSrc );
-				if ( pMemory != NULL )
+				if ( pMemory != nullptr )
 				{
 					iFlags = pMemory->GetMemoryTypes();
 				}
@@ -2681,7 +2681,7 @@ do_default:
 		case CHC_ACCOUNT:
 			if ( pszKey[7] == '.' )	// used as a ref ?
 			{
-				if ( m_pPlayer != NULL )
+				if ( m_pPlayer != nullptr )
 				{
 					pszKey += 7;
 					SKIP_SEPARATORS(pszKey);
@@ -2695,7 +2695,7 @@ do_default:
 					}
 				}
 			}
-			if ( m_pPlayer == NULL )
+			if ( m_pPlayer == nullptr )
 				sVal.Empty();
 			else
 				sVal = m_pPlayer->GetAccount()->GetName();
@@ -2732,7 +2732,7 @@ do_default:
 		case CHC_ACTION:
 		{
 			const CSkillDef* pSkillDef = g_Cfg.GetSkillDef(Skill_GetActive());
-			if (pSkillDef != NULL)
+			if (pSkillDef != nullptr)
 				sVal = pSkillDef->GetKey();
 			else
 			{
@@ -3420,7 +3420,7 @@ do_default:
 				StatFlag_Mod(STATF_STONE,fSet);
 				if ( fChange )
 				{
-					UpdateMode(NULL, true);
+					UpdateMode(nullptr, true);
 					if ( IsClient() )
 						m_pClient->addCharMove(this);
 				}
@@ -3544,7 +3544,7 @@ void CChar::r_Write( CScript & s )
 	{
 		const CSkillDef* pSkillDef = g_Cfg.GetSkillDef(Skill_GetActive());
 		tchar * pszActionTemp;
-		if (pSkillDef != NULL)
+		if (pSkillDef != nullptr)
 			pszActionTemp = const_cast<tchar*>(pSkillDef->GetKey());
 		else
 		{
@@ -3681,7 +3681,7 @@ lpctstr const CChar::sm_szVerbKeys[CHV_QTY+1] =
 	#define ADD(a,b) b,
 	#include "../../tables/CChar_functions.tbl"
 	#undef ADD
-	NULL
+	nullptr
 };
 
 bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from script
@@ -3763,7 +3763,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			break;
 		case CHV_BANK:
 			// Open the bank box for this person
-			if ( pCharSrc == NULL || ! pCharSrc->IsClient() )
+			if ( pCharSrc == nullptr || ! pCharSrc->IsClient() )
 				return false;
 			pCharSrc->GetClient()->addBankOpen( this, ((s.HasArgs()) ? (LAYER_TYPE)(s.GetArgVal()) : LAYER_BANKBOX ) );
 			break;
@@ -3779,7 +3779,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			break;
 
 		case CHV_CONTROL: // Possess
-			if ( pCharSrc == NULL || ! pCharSrc->IsClient())
+			if ( pCharSrc == nullptr || ! pCharSrc->IsClient())
 				return false;
 			return pCharSrc->GetClient()->Cmd_Control(this);
 
@@ -3865,7 +3865,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			else if (IsStrNumeric(pszVerbArg))
 			{
 				CObjBase* pTowards = CUID(s.GetArgVal()).ObjFind();
-				if (pTowards != NULL)
+				if (pTowards != nullptr)
 				{
 					UpdateDir(pTowards);
 					return true;
@@ -3911,7 +3911,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			{
 				CUID uid( s.GetArgVal());
 				CObjBaseTemplate * pObj = uid.ObjFind();
-				if ( pObj == NULL )
+				if ( pObj == nullptr )
 					return false;
 				pObj = pObj->GetTopLevelObj();
 				Spell_Teleport( pObj->GetTopPoint(), true, false );
@@ -3940,7 +3940,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			if ( pSrc )
 			{
                 m_iStatFlag = s.GetArgLLFlag( m_iStatFlag, STATF_INSUBSTANTIAL );
-				UpdateMode(NULL, true);
+				UpdateMode(nullptr, true);
 				if ( IsStatFlag(STATF_INSUBSTANTIAL) )
 				{
 					if ( IsClient() )
@@ -4028,7 +4028,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			{
 				if ( m_pNPC && !m_pPlayer && !IsStatFlag(STATF_CONJURED) )
 				{
-					CItem *pItem = CItem::CreateHeader(s.GetArgStr(), NULL, false, this);
+					CItem *pItem = CItem::CreateHeader(s.GetArgStr(), nullptr, false, this);
 					if ( !pItem )
 						g_World.m_uidNew = (dword)0;
 					else
@@ -4057,7 +4057,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
         }
 
 		case CHV_PACK:
-			if ( pCharSrc == NULL || ! pCharSrc->IsClient())
+			if ( pCharSrc == nullptr || ! pCharSrc->IsClient())
 				return false;
 			pCharSrc->m_pClient->addBankOpen( this, LAYER_PACK ); // Send Backpack (with items)
 			break;
@@ -4092,7 +4092,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			}
 
 			int skill;
-			if ( !pSpellDef->GetPrimarySkill(&skill, NULL) )
+			if ( !pSpellDef->GetPrimarySkill(&skill, nullptr) )
 				return false;
 
 			Skill_Start((SKILL_TYPE)skill);
@@ -4131,9 +4131,9 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_RESURRECT:
 			{
 				if ( !s.GetArgVal() )
-					return OnSpellEffect( SPELL_Resurrection, pCharSrc, 1000, NULL );
+					return OnSpellEffect( SPELL_Resurrection, pCharSrc, 1000, nullptr );
 				else
-					return Spell_Resurrection( NULL, pCharSrc, true );
+					return Spell_Resurrection( nullptr, pCharSrc, true );
 			}
 		case CHV_REVEAL:
 			Reveal( s.GetArgDWVal());
@@ -4172,19 +4172,19 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			Stat_SetVal( STAT_STR, 0 );
 			break;
 		case CHV_SUMMONCAGE: // i just got summoned
-			if ( pCharSrc != NULL )
+			if ( pCharSrc != nullptr )
 			{
 				// Let's make a cage to put the player in
 				ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, "i_multi_cage" ));
 				if ( id < 0 )
 					return false;
 				CItemMulti * pItem = dynamic_cast <CItemMulti*>( CItem::CreateBase( id ));
-				if ( pItem == NULL )
+				if ( pItem == nullptr )
 					return false;
 				CPointMap pt = pCharSrc->GetTopPoint();
 				pt.MoveN( pCharSrc->m_dirFace, 3 );
 				pItem->MoveToDecay( pt, 10*60* MSECS_PER_SEC);	// make the cage vanish after 10 minutes.
-				pItem->Multi_Setup( NULL, UID_CLEAR );
+				pItem->Multi_Setup( nullptr, UID_CLEAR );
 				Spell_Teleport( pt, true, false );
 				break;
 			}
@@ -4410,7 +4410,7 @@ void CChar::ChangeExperience(int delta, CChar *pCharDead)
 				(m_pNPC ? "NPC" : "Player"), GetName(), m_exp, delta, m_exp + delta));
 		}
 
-		bool bShowMsg = (m_pClient != NULL);
+		bool bShowMsg = (m_pClient != nullptr);
 
 		if (IsTrigUsed(TRIGGER_EXPCHANGE))
 		{
@@ -4463,7 +4463,7 @@ void CChar::ChangeExperience(int delta, CChar *pCharDead)
 		{
 			delta = level - m_level;
 
-			bool bShowMsg = (m_pClient != NULL);
+			bool bShowMsg = (m_pClient != nullptr);
 
 			if (IsTrigUsed(TRIGGER_EXPLEVELCHANGE))
 			{

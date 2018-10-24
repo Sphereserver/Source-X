@@ -126,7 +126,7 @@ lpctstr const CItemShip::sm_szLoadKeys[IMCS_QTY + 1] = // static
     "HATCH",
     "PLANKS",
     "TILLER",
-    NULL
+    nullptr
 };
 
 bool CItemShip::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
@@ -312,7 +312,7 @@ CItem * CItemShip::GetShipPlank(size_t index)
     }
 
     if (index >= m_uidPlanks.size())
-        return NULL;
+        return nullptr;
 
     CUID uid = m_uidPlanks.at(index);
     return uid.ItemFind();

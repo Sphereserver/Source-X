@@ -71,8 +71,8 @@ void CChar::Spell_Dispel(int iLevel)
 	// remove all the spells. NOT if caused by objects worn !!!
 	// ATTR_MAGIC && ! ATTR_MOVE_NEVER
 
-	CItem *pItemNext = NULL;
-	for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItemNext )
+	CItem *pItemNext = nullptr;
+	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
 	{
 		pItemNext = pItem->GetNext();
 		if ( iLevel <= 100 && pItem->IsAttr(ATTR_MOVE_NEVER) )	// we don't lose this.
@@ -138,7 +138,7 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool bTakePets, bool bCheckAntiMagi
 	// Is it a valid teleport location that allows this ?
 	if ( bCheckAntiMagic && !IsPriv(PRIV_GM) )
 	{
-		CRegion * pArea = CheckValidMove(ptNew, NULL, DIR_QTY, NULL);
+		CRegion * pArea = CheckValidMove(ptNew, nullptr, DIR_QTY, nullptr);
 		if ( !pArea )
 		{
 			SysMessageDefault(DEFMSG_SPELL_TELE_CANT);
@@ -182,7 +182,7 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool bTakePets, bool bCheckAntiMagi
 			for (;;)
 			{
 				CChar * pChar = Area.GetChar();
-				if ( pChar == NULL )
+				if ( pChar == nullptr )
 					break;
 				if ( pChar == this )
 					continue;
@@ -199,7 +199,7 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool bTakePets, bool bCheckAntiMagi
 	MoveTo(ptNew);		// move character
 
 	CClient *pClient = GetClient();
-	CClient *pClientIgnore = NULL;
+	CClient *pClientIgnore = nullptr;
 	if ( pClient && (ptNew.m_map != ptOld.m_map) )
 	{
 		pClient->addReSync();
@@ -237,15 +237,15 @@ CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap pntTarg )
 
 	int skill;
 	CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
-	if ( !pSpellDef || !pSpellDef->GetPrimarySkill(&skill, NULL) )
-		return NULL;
+	if ( !pSpellDef || !pSpellDef->GetPrimarySkill(&skill, nullptr) )
+		return nullptr;
 
 	if ( !pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ|SPELLFLAG_TARG_XYZ) )
 		pntTarg = GetTopPoint();
 
 	CChar *pChar = CChar::CreateBasic(id);
-	if ( pChar == NULL )
-		return NULL;
+	if ( pChar == nullptr )
+		return nullptr;
 
 	if ( !IsPriv(PRIV_GM) )
 	{
@@ -260,7 +260,7 @@ CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap pntTarg )
 			{
 				SysMessageDefault(DEFMSG_MSG_SUMMON_INVALIDTARG);
 				pChar->Delete();
-				return NULL;
+				return nullptr;
 			}
 		}
 
@@ -271,7 +271,7 @@ CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap pntTarg )
 			{
 				SysMessageDefault(DEFMSG_PETSLOTS_TRY_SUMMON);
 				pChar->Delete();
-				return NULL;
+				return nullptr;
 			}
 		}
 
@@ -279,7 +279,7 @@ CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap pntTarg )
 		{
 			SysMessageDefault(DEFMSG_MSG_SUMMON_CEILING);
 			pChar->Delete();
-			return NULL;
+			return nullptr;
 		}
 	}
 
@@ -290,7 +290,7 @@ CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap pntTarg )
 	pChar->m_pNPC->m_Home_Dist_Wander = 10;
 	pChar->NPC_CreateTrigger();		// removed from NPC_LoadScript() and triggered after char placement
 	pChar->NPC_PetSetOwner(this);
-	pChar->OnSpellEffect(SPELL_Summon, this, Skill_GetAdjusted((SKILL_TYPE)(skill)), NULL);
+	pChar->OnSpellEffect(SPELL_Summon, this, Skill_GetAdjusted((SKILL_TYPE)(skill)), nullptr);
 
 	pChar->Update();
 	pChar->UpdateAnimate(ANIM_CAST_DIR);
@@ -311,7 +311,7 @@ bool CChar::Spell_Recall(CItem * pRune, bool fGate)
 			return true;
 	}
 
-	if (pRune == NULL || (!pRune->IsType(IT_RUNE) && !pRune->IsType(IT_TELEPAD)))
+	if (pRune == nullptr || (!pRune->IsType(IT_RUNE) && !pRune->IsType(IT_TELEPAD)))
 	{
 		SysMessageDefault(DEFMSG_SPELL_RECALL_NOTRUNE);
 		return false;
@@ -331,7 +331,7 @@ bool CChar::Spell_Recall(CItem * pRune, bool fGate)
 	if (fGate)
 	{
 		CRegion * pArea = pRune->m_itRune.m_pntMark.GetRegion(REGION_TYPE_AREA | REGION_TYPE_MULTI | REGION_TYPE_ROOM);
-		if (pArea == NULL)
+		if (pArea == nullptr)
 			return false;
 
 		if (pArea->IsFlag(REGION_ANTIMAGIC_ALL | REGION_ANTIMAGIC_GATE | REGION_ANTIMAGIC_RECALL_IN | REGION_ANTIMAGIC_RECALL_OUT | REGION_ANTIMAGIC_RECALL_IN))	//anti-magic
@@ -1278,7 +1278,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			return;
 		case SPELL_Clumsy:
 			{
-				if ( pCaster != NULL && IsSetMagicFlags(MAGICF_OSIFORMULAS) )
+				if ( pCaster != nullptr && IsSetMagicFlags(MAGICF_OSIFORMULAS) )
 				{
 					iStatEffect = 8 + (pCaster->Skill_GetBase(SKILL_EVALINT) / 100) - (Skill_GetBase(SKILL_MAGICRESISTANCE) / 100);
 					pSpell->m_itSpell.m_spelllevel = iStatEffect;
@@ -1308,7 +1308,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			return;
 		case SPELL_Feeblemind:
 			{
-				if ( pCaster != NULL && IsSetMagicFlags(MAGICF_OSIFORMULAS) )
+				if ( pCaster != nullptr && IsSetMagicFlags(MAGICF_OSIFORMULAS) )
 				{
 					iStatEffect = 8 + (pCaster->Skill_GetBase(SKILL_EVALINT) / 100) - (Skill_GetBase(SKILL_MAGICRESISTANCE) / 100);
 					pSpell->m_itSpell.m_spelllevel = iStatEffect;
@@ -1324,7 +1324,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			return;
 		case SPELL_Weaken:
 			{
-				if ( pCaster != NULL && IsSetMagicFlags(MAGICF_OSIFORMULAS) )
+				if ( pCaster != nullptr && IsSetMagicFlags(MAGICF_OSIFORMULAS) )
 				{
 					iStatEffect = 8 + (pCaster->Skill_GetBase(SKILL_EVALINT) / 100) - (Skill_GetBase(SKILL_MAGICRESISTANCE) / 100);
 					pSpell->m_itSpell.m_spelllevel = iStatEffect;
@@ -1340,7 +1340,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			return;
 		case SPELL_Curse:
 			{
-				if ( pCaster != NULL && IsSetMagicFlags(MAGICF_OSIFORMULAS) )
+				if ( pCaster != nullptr && IsSetMagicFlags(MAGICF_OSIFORMULAS) )
 				{
 					iStatEffect = 8 + (pCaster->Skill_GetBase(SKILL_EVALINT) / 100) - (Skill_GetBase(SKILL_MAGICRESISTANCE) / 100);
 					pSpell->m_itSpell.m_spelllevel = iStatEffect;
@@ -1376,7 +1376,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			return;
 		case SPELL_Agility:
 			{
-				if ( pCaster != NULL && IsSetMagicFlags(MAGICF_OSIFORMULAS) )
+				if ( pCaster != nullptr && IsSetMagicFlags(MAGICF_OSIFORMULAS) )
 				{
 					iStatEffect = 1 + (pCaster->Skill_GetBase(SKILL_EVALINT) / 100);
 					pSpell->m_itSpell.m_spelllevel = iStatEffect;
@@ -1392,7 +1392,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			return;
 		case SPELL_Cunning:
 			{
-				if ( pCaster != NULL && IsSetMagicFlags(MAGICF_OSIFORMULAS) )
+				if ( pCaster != nullptr && IsSetMagicFlags(MAGICF_OSIFORMULAS) )
 				{
 					iStatEffect = 1 + (pCaster->Skill_GetBase(SKILL_EVALINT) / 100);
 					pSpell->m_itSpell.m_spelllevel = iStatEffect;
@@ -1408,7 +1408,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			return;
 		case SPELL_Strength:
 			{
-				if ( pCaster != NULL && IsSetMagicFlags(MAGICF_OSIFORMULAS) )
+				if ( pCaster != nullptr && IsSetMagicFlags(MAGICF_OSIFORMULAS) )
 				{
 					iStatEffect = 1 + (pCaster->Skill_GetBase(SKILL_EVALINT) / 100);
 					pSpell->m_itSpell.m_spelllevel = iStatEffect;
@@ -1424,7 +1424,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			return;
 		case SPELL_Bless:
 			{
-				if ( pCaster != NULL && IsSetMagicFlags(MAGICF_OSIFORMULAS) )
+				if ( pCaster != nullptr && IsSetMagicFlags(MAGICF_OSIFORMULAS) )
 				{
 					iStatEffect = 1 + (pCaster->Skill_GetBase(SKILL_EVALINT) / 100);
 					pSpell->m_itSpell.m_spelllevel = iStatEffect;
@@ -1444,7 +1444,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			return;
 		case SPELL_Mana_Drain:
 			{
-				if ( pCaster != NULL )
+				if ( pCaster != nullptr )
 				{
 					iStatEffect = (400 + pCaster->Skill_GetBase(SKILL_EVALINT) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 10;
 					if ( iStatEffect > Stat_GetVal(STAT_INT) )
@@ -1791,7 +1791,7 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEff
 
 
 	// Check if there's any previous effect to clear before apply the new effect
-	for ( CItem *pSpellPrev = GetContentHead(); pSpellPrev != NULL; pSpellPrev = pSpellPrev->GetNext() )
+	for ( CItem *pSpellPrev = GetContentHead(); pSpellPrev != nullptr; pSpellPrev = pSpellPrev->GetNext() )
 	{
 		if ( layer != pSpellPrev->GetEquipLayer() )
 			continue;
@@ -1801,7 +1801,7 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEff
 		if ( pSpellPrev->GetTimerAdjusted() == -1 )
 		{
 			pSpellPrev->Delete();
-			return NULL;
+			return nullptr;
 		}
 
 		// Check if stats spells can stack
@@ -1853,21 +1853,21 @@ void CChar::Spell_Area( CPointMap pntTarg, int iDist, int iSkillLevel )
 
 	SPELL_TYPE spelltype = m_atMagery.m_Spell;
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spelltype);
-	if ( pSpellDef == NULL )
+	if ( pSpellDef == nullptr )
 		return;
 
 	CWorldSearch AreaChar( pntTarg, iDist );
 	for (;;)
 	{
 		CChar * pChar = AreaChar.GetChar();
-		if ( pChar == NULL )
+		if ( pChar == nullptr )
 			break;
 		if ( pChar == this )
 		{
 			if ( pSpellDef->IsSpellType(SPELLFLAG_HARM) && !IsSetMagicFlags(MAGICF_CANHARMSELF) )
 				continue;
 		}
-		pChar->OnSpellEffect( spelltype, this, iSkillLevel, NULL );
+		pChar->OnSpellEffect( spelltype, this, iSkillLevel, nullptr );
 	}
 
 	if ( !pSpellDef->IsSpellType( SPELLFLAG_DAMAGE ))	// prevent damage nearby items on ground
@@ -1876,9 +1876,9 @@ void CChar::Spell_Area( CPointMap pntTarg, int iDist, int iSkillLevel )
 		for (;;)
 		{
 			CItem * pItem = AreaItem.GetItem();
-			if ( pItem == NULL )
+			if ( pItem == nullptr )
 				break;
-			pItem->OnSpellEffect( spelltype, this, iSkillLevel, NULL );
+			pItem->OnSpellEffect( spelltype, this, iSkillLevel, nullptr );
 		}
 	}
 }
@@ -1986,7 +1986,7 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 			for (;;)
 			{
 				CChar * pChar = AreaChar.GetChar();
-				if ( pChar == NULL )
+				if ( pChar == nullptr )
 					break;
 
 				if ( pChar->GetPrivLevel() > GetPrivLevel() )	// skip higher priv characters
@@ -2021,14 +2021,14 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 			for (;;)
 			{
 				CItem * pItem = AreaItem.GetItem();
-				if ( pItem == NULL )
+				if ( pItem == nullptr )
 					break;
 				if ( pItem->IsType(IT_SPELL) && IsSetMagicFlags(MAGICF_OVERRIDEFIELDS) )
 				{
 					pItem->Delete();
 					continue;
 				}
-				pItem->OnSpellEffect( m_atMagery.m_Spell, this, iSkillLevel, NULL );
+				pItem->OnSpellEffect( m_atMagery.m_Spell, this, iSkillLevel, nullptr );
 			}
 
 			CItem * pSpell = CItem::CreateBase( id );
@@ -2051,18 +2051,18 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 	ADDTOCALLSTACK("CChar::Spell_CanCast");
 	// ARGS:
 	//  pSrc = possible scroll or wand source.
-	if ( spell <= SPELL_NONE || pSrc == NULL )
+	if ( spell <= SPELL_NONE || pSrc == nullptr )
 		return false;
 
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
-	if ( pSpellDef == NULL )
+	if ( pSpellDef == nullptr )
 		return false;
 	if ( pSpellDef->IsSpellType( SPELLFLAG_DISABLED ))
 		return false;
 
 	SKILL_TYPE skill = SKILL_NONE;
 	int iSkillTest = 0;
-	if (!pSpellDef->GetPrimarySkill(&iSkillTest, NULL))
+	if (!pSpellDef->GetPrimarySkill(&iSkillTest, nullptr))
 		iSkillTest = SKILL_MAGERY;
 	skill = (SKILL_TYPE)iSkillTest;
 
@@ -2126,7 +2126,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 	if ( spell != Args.m_iN1 )
 	{
 		pSpellDef = g_Cfg.GetSpellDef(spell);
-		if ( pSpellDef == NULL )
+		if ( pSpellDef == nullptr )
 			return false;
 		spell = (SPELL_TYPE)(Args.m_iN1);
 	}
@@ -2194,7 +2194,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 
 			// check the spellbook for it.
 			CItem * pBook = GetSpellbook( spell );
-			if ( pBook == NULL )
+			if ( pBook == nullptr )
 			{
 				if ( fFailMsg )
 					SysMessageDefault( DEFMSG_SPELL_TRY_NOBOOK );
@@ -2301,15 +2301,15 @@ bool CChar::Spell_TargCheck()
 	// Is the spells target or target pos valid ?
 
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
-	if ( pSpellDef == NULL )
+	if ( pSpellDef == nullptr )
 	{
 		DEBUG_ERR(( "Bad Spell %d, uid 0%0x\n", m_atMagery.m_Spell, (dword)GetUID()));
 		return false;
 	}
 
 	CObjBase * pObj = m_Act_UID.ObjFind();
-	CObjBaseTemplate * pObjTop = NULL;
-	if ( pObj != NULL )
+	CObjBaseTemplate * pObjTop = nullptr;
+	if ( pObj != nullptr )
 	{
 		pObjTop = pObj->GetTopLevelObj();
 	}
@@ -2371,7 +2371,7 @@ bool CChar::Spell_Unequip( LAYER_TYPE layer )
 {
 	ADDTOCALLSTACK("CChar::Spell_Unequip");
 	CItem * pItemPrev = LayerFind( layer );
-	if ( pItemPrev != NULL )
+	if ( pItemPrev != nullptr )
 	{
 
 		if ( IsSetMagicFlags(MAGICF_NOCASTFROZENHANDS) && IsStatFlag( STATF_FREEZE ))
@@ -2428,7 +2428,7 @@ bool CChar::Spell_CastDone()
 
 	SPELL_TYPE spell = m_atMagery.m_Spell;
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
-	if (pSpellDef == NULL)
+	if (pSpellDef == nullptr)
 		return false;
 
 	bool bIsSpellField = pSpellDef->IsSpellType(SPELLFLAG_FIELD);
@@ -2442,7 +2442,7 @@ bool CChar::Spell_CastDone()
 	{
 		// Get the strength of the item. IT_SCROLL or IT_WAND
 		CItem * pItem = dynamic_cast <CItem*>(pObjSrc);
-		if (pItem == NULL)
+		if (pItem == nullptr)
 			return false;
 		if (!pItem->m_itWeapon.m_spelllevel)
 			iSkillLevel = Calc_GetRandVal(500);
@@ -2686,12 +2686,12 @@ bool CChar::Spell_CastDone()
 			case SPELL_Dispel_Field:
 			{
 				CItem * pItem = dynamic_cast <CItem*> (pObj);
-				if (pItem == NULL || pItem->IsAttr(ATTR_MOVE_NEVER) || !pItem->IsType(IT_SPELL))
+				if (pItem == nullptr || pItem->IsAttr(ATTR_MOVE_NEVER) || !pItem->IsType(IT_SPELL))
 				{
 					SysMessageDefault(DEFMSG_SPELL_DISPELLF_WT);
 					return false;
 				}
-				pItem->OnSpellEffect(SPELL_Dispel_Field, this, iSkillLevel, NULL);
+				pItem->OnSpellEffect(SPELL_Dispel_Field, this, iSkillLevel, nullptr);
 				break;
 			}
 
@@ -2707,7 +2707,7 @@ bool CChar::Spell_CastDone()
 						iDiff = -iDiff;
 					}
 					int iMax = pChar->Stat_GetMax(STAT_STR) / 2;
-					pChar->OnSpellEffect(spell, this, minimum(iDiff, iMax), NULL);
+					pChar->OnSpellEffect(spell, this, minimum(iDiff, iMax), nullptr);
 				}
 				break;
 
@@ -2717,7 +2717,7 @@ bool CChar::Spell_CastDone()
 				if (!iT1)
 					iT1 = ITEMID_FX_FLAMESTRIKE;
 
-				if (pObj == NULL)
+				if (pObj == nullptr)
 				{
                     CPointMap pt = m_Act_p;
                     Effect(EFFECT_XYZ, iT1, pt, nullptr, 20, 30);
@@ -2757,7 +2757,7 @@ bool CChar::Spell_CastDone()
 			case SPELL_Animate_Dead:
 			{
 				CItemCorpse * pCorpse = dynamic_cast <CItemCorpse*> (pObj);
-				if (pCorpse == NULL)
+				if (pCorpse == nullptr)
 				{
 					SysMessageDefault(DEFMSG_SPELL_ANIMDEAD_NC);
 					return false;
@@ -2792,7 +2792,7 @@ bool CChar::Spell_CastDone()
 			case SPELL_Bone_Armor:
 			{
 				CItemCorpse * pCorpse = dynamic_cast <CItemCorpse*> (pObj);
-				if (pCorpse == NULL)
+				if (pCorpse == nullptr)
 				{
 					SysMessage("That is not a corpse!");
 					return false;
@@ -2840,7 +2840,7 @@ bool CChar::Spell_CastDone()
 		}
 	}
 
-	if ( g_Cfg.m_fHelpingCriminalsIsACrime && pSpellDef->IsSpellType(SPELLFLAG_GOOD) && pObj != NULL && pObj->IsChar() && pObj != this )
+	if ( g_Cfg.m_fHelpingCriminalsIsACrime && pSpellDef->IsSpellType(SPELLFLAG_GOOD) && pObj != nullptr && pObj->IsChar() && pObj != this )
 	{
 		CChar * pChar = dynamic_cast <CChar*> ( pObj );
 		ASSERT( pChar );
@@ -3066,7 +3066,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	// Spell has a direct effect on this char.
 	// This should effect noto of source.
 	// ARGS:
-	//  pSourceItem = the potion, wand, scroll etc. NULL = cast (IT_SPELL)
+	//  pSourceItem = the potion, wand, scroll etc. nullptr = cast (IT_SPELL)
 	//  iSkillLevel = 0-1000 = difficulty. may be slightly larger .
 	// RETURN:
 	//  false = the spell did not work. (should we get credit ?)
@@ -3366,7 +3366,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		case SPELL_Dispel:
 		case SPELL_Mass_Dispel:
 			// ??? should be difficult to dispel SPELL_Summon creatures
-			Spell_Dispel( (pCharSrc != NULL && pCharSrc->IsPriv(PRIV_GM)) ? 150 : 50);
+			Spell_Dispel( (pCharSrc != nullptr && pCharSrc->IsPriv(PRIV_GM)) ? 150 : 50);
 			break;
 
 		case SPELL_Reveal:
@@ -3426,7 +3426,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			break;
 
 		case SPELL_Resurrection:
-			return Spell_Resurrection(NULL, pCharSrc, (pSourceItem && pSourceItem->IsType(IT_SHRINE)));
+			return Spell_Resurrection(nullptr, pCharSrc, (pSourceItem && pSourceItem->IsType(IT_SHRINE)));
 
 		case SPELL_Light:
 			Effect(EFFECT_OBJ, iEffectID, this, 9, 6, fExplode, iColor, dwRender);
@@ -3575,7 +3575,7 @@ int CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc
     * Duration calcs, do selective durations for magery spells if MagicF_OSIFormulas is enabled
     * or for newer spells (only magery spells needs backwards compat
     */
-	if (pCharSrc != NULL && (IsSetMagicFlags(MAGICF_OSIFORMULAS) || spell >= SPELL_Animate_Dead_AOS))
+	if (pCharSrc != nullptr && (IsSetMagicFlags(MAGICF_OSIFORMULAS) || spell >= SPELL_Animate_Dead_AOS))
 	{
 		switch ( spell )
 		{

@@ -92,7 +92,7 @@ public:
 		CException& operator=(const CException& other);
 
 	public:
-		virtual bool GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelpContext = NULL ) const;
+		virtual bool GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelpContext = nullptr ) const;
 	};
 #endif
 

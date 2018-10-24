@@ -66,7 +66,7 @@ public:
 		}
 		virtual void SysMessage( LPCTSTR pszMessage ) const
 		{
-			if ( pszMessage == NULL || ISINTRESOURCE(pszMessage))
+			if ( pszMessage == nullptr || ISINTRESOURCE(pszMessage))
 				return;
 
 			TCHAR * ppMessages[255];
@@ -235,7 +235,7 @@ BOOL CNTWindow::COptionsDlg::DefDialogProc( UINT message, WPARAM wParam, LPARAM 
 
 void CNTWindow::CStatusWnd::FillClients()
 {
-	if ( m_wndListClients.m_hWnd == NULL )
+	if ( m_wndListClients.m_hWnd == nullptr )
 		return;
 	m_wndListClients.ResetContent();
 	CNTWindow::CListTextConsole capture( m_wndListClients.m_hWnd );
@@ -246,7 +246,7 @@ void CNTWindow::CStatusWnd::FillClients()
 
 void CNTWindow::CStatusWnd::FillStats()
 {
-	if ( m_wndListStats.m_hWnd == NULL )
+	if ( m_wndListStats.m_hWnd == nullptr )
 		return;
 
 	m_wndListStats.ResetContent();
@@ -257,7 +257,7 @@ void CNTWindow::CStatusWnd::FillStats()
 	for ( size_t iThreads = 0; iThreads < iThreadCount; ++iThreads)
 	{
 		IThread* thrCurrent = ThreadHolder::getThreadAt(iThreads);
-		if (thrCurrent == NULL)
+		if (thrCurrent == nullptr)
 			continue;
 
 		const ProfileData& profile = static_cast<AbstractSphereThread*>(thrCurrent)->m_profile;
@@ -326,7 +326,7 @@ CNTWindow::CNTWindow()
 	m_dwColorNew		= RGB( 0xaf,0xaf,0xaf );
 	m_dwColorPrv		= RGB( 0xaf,0xaf,0xaf );
 	m_iHeightInput		= 0;
-   	m_hLogFont			= NULL;
+   	m_hLogFont			= nullptr;
 	memset(m_zCommands, 0, sizeof(m_zCommands));
 }
 
@@ -395,9 +395,9 @@ bool CNTWindow::RegisterClass(char *className)	// static
 	wc.lpfnWndProc = WindowProc;
 	wc.hInstance = theApp.m_hInstance;
 	wc.hIcon = theApp.LoadIcon( IDR_MAINFRAME );
-	wc.hCursor = LoadCursor( NULL, IDC_ARROW );
-	wc.hbrBackground = NULL;
-	wc.lpszMenuName = NULL;
+	wc.hCursor = LoadCursor( nullptr, IDC_ARROW );
+	wc.hbrBackground = nullptr;
+	wc.lpszMenuName = nullptr;
 	wc.lpszClassName = className;
 
 	ATOM frc = ::RegisterClass( &wc );
@@ -415,12 +415,12 @@ int CNTWindow::OnCreate( HWND hWnd, LPCREATESTRUCT lParam )
 	UNREFERENCED_PARAMETER(lParam);
 	CSWindow::OnCreate(hWnd);
 
-	m_wndLog.m_hWnd = ::CreateWindow( RICHEDIT_CLASS, NULL,
+	m_wndLog.m_hWnd = ::CreateWindow( RICHEDIT_CLASS, nullptr,
 		ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | /* ES_OEMCONVERT | */
 		WS_CHILD | WS_VISIBLE | WS_VSCROLL,
 		0, 0, 10, 10,
 		m_hWnd,
-		(HMENU)(UINT) IDC_M_LOG, theApp.m_hInstance, NULL );
+		(HMENU)(UINT) IDC_M_LOG, theApp.m_hInstance, nullptr );
 	ASSERT( m_wndLog.m_hWnd );
 	m_wndLog.SetSel(0, 0);
 
@@ -439,11 +439,11 @@ int CNTWindow::OnCreate( HWND hWnd, LPCREATESTRUCT lParam )
 	m_wndLog.SetDefaultCharFormat( cf );
 	m_wndLog.SetEventMask( ENM_LINK | ENM_MOUSEEVENTS | ENM_KEYEVENTS );
 
-	m_wndInput.m_hWnd = ::CreateWindow("EDIT", NULL,
+	m_wndInput.m_hWnd = ::CreateWindow("EDIT", nullptr,
 		ES_LEFT | ES_AUTOHSCROLL | WS_CHILD|WS_VISIBLE|WS_BORDER|WS_TABSTOP,
 		0, 0, 10, 10,
 		m_hWnd,
-		(HMENU)(UINT) IDC_M_INPUT, theApp.m_hInstance, NULL );
+		(HMENU)(UINT) IDC_M_INPUT, theApp.m_hInstance, nullptr );
 	ASSERT( m_wndInput.m_hWnd );
 
 	if ( Sphere_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
@@ -487,7 +487,7 @@ LRESULT CNTWindow::OnUserTrayNotify( WPARAM wID, LPARAM lEvent )
 		// Context menu ?
 		{
 			HMENU hMenu = theApp.LoadMenu( IDM_POP_TRAY );
-			if ( hMenu == NULL )
+			if ( hMenu == nullptr )
 				break;
 			HMENU hMenuPop = GetSubMenu(hMenu,0);
 			if ( hMenuPop )
@@ -495,7 +495,7 @@ LRESULT CNTWindow::OnUserTrayNotify( WPARAM wID, LPARAM lEvent )
 				POINT point;
 				if ( GetCursorPos( &point ))
 				{
-					TrackPopupMenu( hMenuPop, TPM_RIGHTBUTTON, point.x, point.y, 0, m_hWnd, NULL );
+					TrackPopupMenu( hMenuPop, TPM_RIGHTBUTTON, point.x, point.y, 0, m_hWnd, nullptr );
 				}
 			}
 			DestroyMenu( hMenu );
@@ -578,7 +578,7 @@ bool CNTWindow::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl )
 	case IDC_M_LOG:
 		break;
 	case IDM_STATUS:
-		if ( theApp.m_wndStatus.m_hWnd == NULL )
+		if ( theApp.m_wndStatus.m_hWnd == nullptr )
 		{
 			theApp.m_wndStatus.m_hWnd = ::CreateDialogParam(
 				theApp.m_hInstance,
@@ -673,7 +673,7 @@ bool CNTWindow::OnSysCommand( WPARAM uCmdType, int xPos, int yPos )
 void CNTWindow::SetLogFont( const char * pszFont )
 {
 	// use an even spaced font
-	if ( pszFont == NULL )
+	if ( pszFont == nullptr )
 	{
 		m_hLogFont	= (HFONT) GetStockObject(SYSTEM_FONT);
 	}
@@ -685,11 +685,11 @@ void CNTWindow::SetLogFont( const char * pszFont )
 
 		// calculate height for a 10pt font, some systems can produce an unreadable
 		// font size if we let CreateFontIndirect pick a system default size
-		HDC hdc = GetDC(NULL);
-		if (hdc != NULL)
+		HDC hdc = GetDC(nullptr);
+		if (hdc != nullptr)
 		{
 			logfont.lfHeight = IMulDiv(10, GetDeviceCaps(hdc, LOGPIXELSY), 72);
-			ReleaseDC(NULL, hdc);
+			ReleaseDC(nullptr, hdc);
 		}
 
 		logfont.lfPitchAndFamily = FF_MODERN;
@@ -733,7 +733,7 @@ LRESULT CNTWindow::OnNotify( int idCtrl, NMHDR * pnmh )
 					{
 						POINT point;
 						if ( GetCursorPos( &point ))
-							TrackPopupMenu( hMenuPop, TPM_RIGHTBUTTON, point.x, point.y, 0, m_hWnd, NULL );
+							TrackPopupMenu( hMenuPop, TPM_RIGHTBUTTON, point.x, point.y, 0, m_hWnd, nullptr );
 					}
 					DestroyMenu(hMenu);
 					return 1;
@@ -756,7 +756,7 @@ LRESULT CNTWindow::OnNotify( int idCtrl, NMHDR * pnmh )
 
 					//	use dclick to open the corresponding script file
 					TCHAR * pos = strstr(zTemp, SPHERE_SCRIPT);
-					if ( pos != NULL )
+					if ( pos != nullptr )
 					{
 						//	use two formats of file names:
 						//		Loading filepath/filename/name.scp
@@ -775,13 +775,13 @@ LRESULT CNTWindow::OnNotify( int idCtrl, NMHDR * pnmh )
 
 						if ( *start != '\0' )
 						{
-							LPCTSTR filePath = NULL;
+							LPCTSTR filePath = nullptr;
 
 							// search script files for a matching name
 							size_t i = 0;
-							for (const CResourceScript * s = g_Cfg.GetResourceFile(i++); s != NULL; s = g_Cfg.GetResourceFile(i++))
+							for (const CResourceScript * s = g_Cfg.GetResourceFile(i++); s != nullptr; s = g_Cfg.GetResourceFile(i++))
 							{
-								if ( strstr(s->GetFilePath(), start) == NULL )
+								if ( strstr(s->GetFilePath(), start) == nullptr )
 									continue;
 
 								filePath = s->GetFilePath();
@@ -789,7 +789,7 @@ LRESULT CNTWindow::OnNotify( int idCtrl, NMHDR * pnmh )
 							}
 
 							// since certain files aren't listed, handle these separately
-							if (filePath == NULL)
+							if (filePath == nullptr)
 							{
 								if ( strstr(SPHERE_FILE "tables" SPHERE_SCRIPT, start) )
 								{
@@ -800,15 +800,15 @@ LRESULT CNTWindow::OnNotify( int idCtrl, NMHDR * pnmh )
 								}
 							}
 
-							if (filePath != NULL)
+							if (filePath != nullptr)
 							{
 								// ShellExecute fails when a relative path is passed to it that uses forward slashes as a path
 								// separator.. to workaround this we can use GetFullPathName (which accepts forward slashes) to
 								// resolve the relative path to an absolute path
 								TCHAR * z = Str_GetTemp();
-								if (GetFullPathName(filePath, THREAD_STRING_LENGTH, z, NULL) > 0)
+								if (GetFullPathName(filePath, THREAD_STRING_LENGTH, z, nullptr) > 0)
 								{
-									INT_PTR r = reinterpret_cast<INT_PTR>(ShellExecute(NULL, NULL, z, NULL, NULL, SW_SHOW));
+									INT_PTR r = reinterpret_cast<INT_PTR>(ShellExecute(nullptr, nullptr, z, nullptr, nullptr, SW_SHOW));
 									if (r > 32)
 										return 1;
 								}
@@ -891,7 +891,7 @@ LRESULT WINAPI CNTWindow::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LP
 	}
 	catch (...)	// catch all
 	{
-		g_Log.CatchEvent(NULL, "Window");
+		g_Log.CatchEvent(nullptr, "Window");
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 	}
 	return ::DefWindowProc(hWnd, message, wParam, lParam);
@@ -906,7 +906,7 @@ bool NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLine, int nCmdShow)
 	//	read target window name from the arguments
 	char	className[32] = SPHERE_TITLE "Svr";
 	TCHAR	*argv[32];
-	argv[0] = NULL;
+	argv[0] = nullptr;
 	size_t argc = Str_ParseCmds(lpCmdLine, &argv[1], CountOf(argv)-1, " \t") + 1;
 	if (( argc > 1 ) && _IS_SWITCH(*argv[1]) )
 	{
@@ -927,9 +927,9 @@ bool NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLine, int nCmdShow)
 		CW_USEDEFAULT,  // window width
 		CW_USEDEFAULT,	// window height
 		HWND_DESKTOP,      // handle to parent or owner window
-		NULL,          // menu handle or child identifier
+		nullptr,          // menu handle or child identifier
 		theApp.m_hInstance,  // handle to application instance
-		NULL        // window-creation data
+		nullptr        // window-creation data
 		);
 
 	theApp.m_wndMain.ShowWindow(nCmdShow);
@@ -963,7 +963,7 @@ void NTWindow_Exit()
 
 void NTWindow_SetWindowTitle( LPCTSTR pszText )
 {
-	if ( theApp.m_wndMain.m_hWnd == NULL )
+	if ( theApp.m_wndMain.m_hWnd == nullptr )
 		return;
 	// set the title to reflect mode.
 
@@ -1016,7 +1016,7 @@ void NTWindow_SetWindowTitle( LPCTSTR pszText )
 bool NTWindow_PostMsgColor( COLORREF color )
 {
 	// Set the color for the next text.
-	if ( theApp.m_wndMain.m_hWnd == NULL )
+	if ( theApp.m_wndMain.m_hWnd == nullptr )
 		return false;
 
 	if ( ! color )
@@ -1036,7 +1036,7 @@ bool NTWindow_PostMsg( LPCTSTR pszMsg )
 	// RETURN:
 	//  false = post did not work.
 
-	if ( theApp.m_wndMain.m_hWnd == NULL )
+	if ( theApp.m_wndMain.m_hWnd == nullptr )
 		return false;
 
 	COLORREF color = theApp.m_wndMain.m_dwColorNew;
@@ -1084,7 +1084,7 @@ bool NTWindow_OnTick( int iWaitmSec )
 		// any windows messages ? (blocks until a message arrives)
 		if ( iWaitmSec )
 		{
-			if ( ! GetMessage( &msg, NULL, 0, 0 ))
+			if ( ! GetMessage( &msg, nullptr, 0, 0 ))
 			{
 				g_Serv.SetExitFlag( 5 );
 				return false;
@@ -1099,7 +1099,7 @@ bool NTWindow_OnTick( int iWaitmSec )
 		}
 		else
 		{
-			if (! PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ))
+			if (! PeekMessage( &msg, nullptr, 0, 0, PM_REMOVE ))
 			{
 				return true;
 			}
@@ -1176,15 +1176,15 @@ bool NTWindow_OnTick( int iWaitmSec )
 						inputLen = strlen(p);
 
 						// search in the auto-complete list for starting on P, and save coords of 1st and Last matched
-						CSStringListRec	*firstmatch = NULL;
-						CSStringListRec	*lastmatch = NULL;
-						CSStringListRec	*curmatch = NULL;	// the one that should be set
+						CSStringListRec	*firstmatch = nullptr;
+						CSStringListRec	*lastmatch = nullptr;
+						CSStringListRec	*curmatch = nullptr;	// the one that should be set
 
-						for ( curmatch = g_AutoComplete.GetHead(); curmatch != NULL; curmatch = curmatch->GetNext() )
+						for ( curmatch = g_AutoComplete.GetHead(); curmatch != nullptr; curmatch = curmatch->GetNext() )
 						{
 							if ( !strnicmp(curmatch->GetPtr(), p, inputLen) )	// matched
 							{
-								if ( firstmatch == NULL )
+								if ( firstmatch == nullptr )
 								{
 									firstmatch = lastmatch = curmatch;
 								}
@@ -1199,7 +1199,7 @@ bool NTWindow_OnTick( int iWaitmSec )
 							}
 						}
 
-						if ( firstmatch != NULL )	// there IS a match
+						if ( firstmatch != nullptr )	// there IS a match
 						{
 							bool bOnly(false);
 							if ( firstmatch == lastmatch )					// and the match is the ONLY

@@ -3,8 +3,8 @@
 #include "crashdump.h"
 
 bool CrashDump::m_bEnabled = false;
-HMODULE CrashDump::m_hDll = NULL;
-MINIDUMPWRITEDUMP CrashDump::m_tDumpFunction = NULL;
+HMODULE CrashDump::m_hDll = nullptr;
+MINIDUMPWRITEDUMP CrashDump::m_tDumpFunction = nullptr;
 
 bool CrashDump::IsEnabled()
 {
@@ -35,25 +35,25 @@ void CrashDump::Disable()
 {
 	m_bEnabled = false;
 
-	if (m_tDumpFunction != NULL)
-		m_tDumpFunction = NULL;
+	if (m_tDumpFunction != nullptr)
+		m_tDumpFunction = nullptr;
 
-	if (m_hDll != NULL)
+	if (m_hDll != nullptr)
 	{
 		FreeLibrary(m_hDll);
-		m_hDll = NULL;
+		m_hDll = nullptr;
 	}
 }
 
 void CrashDump::StartCrashDump( DWORD processID, DWORD threadID, struct _EXCEPTION_POINTERS* pExceptionData ) 
 {
-	HANDLE process = NULL, dumpFile = NULL;
+	HANDLE process = nullptr, dumpFile = nullptr;
 	
 	if (!processID || !threadID || !pExceptionData)
 		return;
 
 	process = GetCurrentProcess();
-	if (process == NULL)
+	if (process == nullptr)
 		return;
 	
 	char buf[128] = "";
@@ -69,7 +69,7 @@ void CrashDump::StartCrashDump( DWORD processID, DWORD threadID, struct _EXCEPTI
 	eInfo.ExceptionPointers = pExceptionData;
 	eInfo.ClientPointers = true;
 	
-	m_tDumpFunction(process, processID, dumpFile, MiniDumpWithDataSegs, &eInfo, NULL, NULL);
+	m_tDumpFunction(process, processID, dumpFile, MiniDumpWithDataSegs, &eInfo, nullptr, nullptr);
 	
 	CloseHandle(dumpFile);
 	return;

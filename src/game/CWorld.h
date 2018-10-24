@@ -293,7 +293,7 @@ public:
 	{
 		const CServerMapBlock * pMapBlock = pt.GetSector()->GetMapBlock(pt);
 		if ( !pMapBlock )
-			return NULL;
+			return nullptr;
 		return( pMapBlock->GetTerrain( UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y)));
 	}
 
@@ -302,7 +302,7 @@ public:
 
 	CPointMap FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance = 0 );
 	bool IsTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance = 0 );
-	CItem * CheckNaturalResource( const CPointMap & pt, IT_TYPE Type, bool fTest = true, CChar * pCharSrc = NULL );
+	CItem * CheckNaturalResource( const CPointMap & pt, IT_TYPE Type, bool fTest = true, CChar * pCharSrc = nullptr );
 
 	static bool OpenScriptBackup( CScript & s, lpctstr pszBaseDir, lpctstr pszBaseName, int savecount );
 
@@ -324,7 +324,7 @@ public:
 	void __cdecl Broadcastf( lpctstr pMsg, ...) __printfargs(2,3);
 
 	bool Export( lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, int dx = 0, int dy = 0 );
-	bool Import( lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, tchar *pszAgs1 = NULL, tchar *pszAgs2 = NULL );
+	bool Import( lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, tchar *pszAgs1 = nullptr, tchar *pszAgs2 = nullptr );
     bool CheckAvailableSpaceForSave(bool fStatics);
 	bool Save( bool fForceImmediate ); // Save world state
 	void SaveStatics();
@@ -364,7 +364,7 @@ private:
 public:
 	void SetAllShow( bool fView );
 	void SetSearchSquare( bool fSquareSearch );
-	void RestartSearch();		// Setting current obj to NULL will restart the search 
+	void RestartSearch();		// Setting current obj to nullptr will restart the search 
 	CChar * GetChar();
 	CItem * GetItem();
 };

@@ -45,7 +45,7 @@ bool CScriptKey::IsKeyHead( lpctstr pszName, size_t len ) const
 void CScriptKey::InitKey()
 {
 	ADDTOCALLSTACK("CScriptKey::InitKey");
-	m_pszArg = m_pszKey = NULL;
+	m_pszArg = m_pszKey = nullptr;
 }
 
 lpctstr CScriptKey::GetKey() const
@@ -297,7 +297,7 @@ int CScriptKey::GetArgRange()
 	return Exp_GetRange( m_pszArg );
 }
 
-CScriptKey::CScriptKey() : m_pszKey(NULL), m_pszArg(NULL)
+CScriptKey::CScriptKey() : m_pszKey(nullptr), m_pszArg(nullptr)
 {
 }
 
@@ -848,20 +848,20 @@ bool _cdecl CScript::WriteSection( lpctstr pszSection, ... )
 bool CScript::WriteKey( lpctstr pszKey, lpctstr pszVal )
 {
 	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKey");
-	if ( pszKey == NULL || pszKey[0] == '\0' )
+	if ( pszKey == nullptr || pszKey[0] == '\0' )
 	{
 		return false;
 	}
 
 	tchar ch = '\0';
 	tchar * pszSep;
-	if ( pszVal == NULL || pszVal[0] == '\0' )
+	if ( pszVal == nullptr || pszVal[0] == '\0' )
 	{
 		pszSep = const_cast<tchar*>(strchr( pszKey, '\n' ));
-		if ( pszSep == NULL )
+		if ( pszSep == nullptr )
 			pszSep = const_cast<tchar*>(strchr( pszKey, '\r' )); // acts like const_cast
 
-		if ( pszSep != NULL )
+		if ( pszSep != nullptr )
 		{
 			g_Log.Event( LOGL_WARN|LOGM_CHEAT, "carriage return in key (book?) - truncating\n" );
 			ch = *pszSep;
@@ -871,16 +871,16 @@ bool CScript::WriteKey( lpctstr pszKey, lpctstr pszVal )
 		// Books are like this. No real keys.
 		Printf( "%s\n", pszKey );
 
-		if ( pszSep != NULL )
+		if ( pszSep != nullptr )
 			*pszSep	= ch;
 	}
 	else
 	{
 		pszSep = const_cast<tchar*>(strchr( pszVal, '\n' ));
-		if ( pszSep == NULL )
+		if ( pszSep == nullptr )
 			pszSep = const_cast<tchar*>(strchr( pszVal, '\r' )); // acts like const_cast
 
-		if ( pszSep != NULL )
+		if ( pszSep != nullptr )
 		{
 			g_Log.Event( LOGL_WARN|LOGM_CHEAT, "carriage return in key value - truncating\n" );
 			ch = *pszSep;
@@ -889,7 +889,7 @@ bool CScript::WriteKey( lpctstr pszKey, lpctstr pszVal )
 
 		Printf( "%s=%s\n", pszKey, pszVal );
 
-		if ( pszSep != NULL )
+		if ( pszSep != nullptr )
 			*pszSep	= ch;
 	}
 

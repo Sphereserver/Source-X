@@ -666,7 +666,7 @@ public:
 	virtual bool MoveTo(CPointMap pt, bool bForceFix = false); // Put item on the ground here.
 	bool MoveToUpdate(CPointMap pt, bool bForceFix = false);
 	bool MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool bForceFix = false);
-	bool MoveToCheck( const CPointMap & pt, CChar * pCharMover = NULL );
+	bool MoveToCheck( const CPointMap & pt, CChar * pCharMover = nullptr );
 	virtual bool MoveNearObj( const CObjBaseTemplate *pItem, word iSteps = 0 );
 
 	inline CItem* GetNext() const
@@ -683,7 +683,7 @@ public:
 	uchar GetContainedGridIndex() const;
 	void SetContainedGridIndex(uchar index);
 
-	void Update( const CClient * pClientExclude = NULL );		// send this new item to everyone.
+	void Update( const CClient * pClientExclude = nullptr );		// send this new item to everyone.
 	void Flip();
 	bool LoadSetContainer( CUID uid, LAYER_TYPE layer );
 
@@ -704,7 +704,7 @@ protected:
 	TRIGRET_TYPE OnTriggerCreate(CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
 
 public:
-	TRIGRET_TYPE OnTrigger( ITRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = NULL );
+	TRIGRET_TYPE OnTrigger( ITRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = nullptr );
 
 	// Item type specific stuff.
     inline bool IsType(IT_TYPE type) const {
@@ -786,14 +786,14 @@ public:
 	bool Plant_Use( CChar * pChar );
 
 	virtual void DupeCopy( const CItem * pItem );
-	CItem * UnStackSplit( word amount, CChar * pCharSrc = NULL );
+	CItem * UnStackSplit( word amount, CChar * pCharSrc = nullptr );
 
 	static CItem * CreateBase( ITEMID_TYPE id );
-	static CItem * CreateHeader( tchar * pArg, CObjBase * pCont = NULL, bool fDupeCheck = false, CChar * pSrc = NULL );
-	static CItem * CreateScript(ITEMID_TYPE id, CChar * pSrc = NULL);
-	CItem * GenerateScript(CChar * pSrc = NULL);
-	static CItem * CreateDupeItem( const CItem * pItem, CChar * pSrc = NULL, bool fSetNew = false );
-	static CItem * CreateTemplate( ITEMID_TYPE id, CObjBase* pCont = NULL, CChar * pSrc = NULL );
+	static CItem * CreateHeader( tchar * pArg, CObjBase * pCont = nullptr, bool fDupeCheck = false, CChar * pSrc = nullptr );
+	static CItem * CreateScript(ITEMID_TYPE id, CChar * pSrc = nullptr);
+	CItem * GenerateScript(CChar * pSrc = nullptr);
+	static CItem * CreateDupeItem( const CItem * pItem, CChar * pSrc = nullptr, bool fSetNew = false );
+	static CItem * CreateTemplate( ITEMID_TYPE id, CObjBase* pCont = nullptr, CChar * pSrc = nullptr );
 
 	static CItem * ReadTemplate( CResourceLock & s, CObjBase * pCont );
 

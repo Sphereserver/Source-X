@@ -147,7 +147,7 @@ public:
 
 	CListDefCont * CopySelf();
 	void PrintElements(CSString& strElements) const;
-	void DumpElements( CTextConsole * pSrc, lpctstr pszPrefix = NULL ) const;
+	void DumpElements( CTextConsole * pSrc, lpctstr pszPrefix = nullptr ) const;
 	void r_WriteSave( CScript& s );
 	bool r_LoadVal( CScript& s );
 	bool r_LoadVal( lpctstr pszArg );
@@ -196,8 +196,8 @@ public:
 
 	CListDefCont* AddList(lpctstr pszKey);
 
-	void DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix = NULL );
-	void ClearKeys(lpctstr mask = NULL);
+	void DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix = nullptr );
+	void ClearKeys(lpctstr mask = nullptr);
 	void DeleteKey( lpctstr key );
 
 	bool r_LoadVal( lpctstr pszKey, CScript & s );

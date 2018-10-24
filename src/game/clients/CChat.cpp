@@ -24,7 +24,7 @@ void CChat::EventMsg( CClient * pClient, const nchar * pszText, int len, CLangua
 	if (pMe->IsChatActive() == false)
 	{
 		// simulate the chat button being clicked
-		pClient->Event_ChatButton(NULL);
+		pClient->Event_ChatButton(nullptr);
 
 		// if chat isn't active now then cancel processing the event
 		if (pMe->IsChatActive() == false)
@@ -81,7 +81,7 @@ not_in_a_channel:
 	};
 	case 'c':	// c = client creating (and joining) new channel
 	{
-		tchar * pszPassword = NULL;
+		tchar * pszPassword = nullptr;
 		size_t iMsgLength = strlen(szMsg);
 		for (size_t i = 0; i < iMsgLength; i++)
 		{
@@ -311,15 +311,15 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 		"WHEREIS"
 	};
 
-	ASSERT(pBy != NULL);
-	ASSERT(szMsg != NULL);
+	ASSERT(pBy != nullptr);
+	ASSERT(szMsg != nullptr);
 
 	tchar buffer[2048];
 	ASSERT(strlen(szMsg) < CountOf(buffer));
 	strcpy(buffer, szMsg);
 
 	tchar * pszCommand = buffer;
-	tchar * pszText = NULL;
+	tchar * pszText = nullptr;
 	size_t iCommandLength = strlen(pszCommand);
 	for (size_t i = 0; i < iCommandLength; i++)
 	{
@@ -334,13 +334,13 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 	CSString sFrom;
 	CChatChannel * pChannel = pBy->GetChannel();
 	CClient * pByClient = pBy->GetClient();
-	ASSERT(pByClient != NULL);
+	ASSERT(pByClient != nullptr);
 
 	switch ( FindTableSorted( pszCommand, sm_szCmd_Chat, CountOf(sm_szCmd_Chat)))
 	{
 		case 0: // "ALLKICK"
 		{
-			if (pChannel == NULL)
+			if (pChannel == nullptr)
 			{
 				pBy->SendChatMsg(CHATMSG_MustBeInAConference);
 				return;
@@ -353,7 +353,7 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 			}
 
 			pChannel->KickAll(pBy);
-			DecorateName(sFrom, NULL, true);
+			DecorateName(sFrom, nullptr, true);
 			pBy->SendChatMsg(CHATMSG_PlayerTalk, sFrom, "All members have been kicked!", "");
 			return;
 		}
@@ -362,7 +362,7 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 			if ( ! pByClient->IsPriv( PRIV_GM ))
 			{
 	need_gm_privs:
-				DecorateName(sFrom, NULL, true);
+				DecorateName(sFrom, nullptr, true);
 				pBy->SendChatMsg(CHATMSG_PlayerTalk, sFrom, "You need to have GM privs to use this command.");
 				return;
 			}
@@ -386,7 +386,7 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 			if (!m_fChatsOK)
 			{
 				m_fChatsOK = true;
-				Broadcast(NULL, "Conference creation is enabled.");
+				Broadcast(nullptr, "Conference creation is enabled.");
 			}
 			return;
 		}
@@ -410,7 +410,7 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 
 			if (m_fChatsOK)
 			{
-				Broadcast(NULL, "Conference creation is now disabled.");
+				Broadcast(nullptr, "Conference creation is now disabled.");
 				m_fChatsOK = false;
 			}
 			return;
@@ -420,7 +420,7 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 			if ( ! pByClient->IsPriv( PRIV_GM ))
 				goto need_gm_privs;
 
-			Broadcast(NULL, pszText, "", true);
+			Broadcast(nullptr, pszText, "", true);
 			return;
 		}
 		case 8:	// "WHEREIS"
@@ -433,7 +433,7 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 			tchar *pszMsg = Str_GetTemp();
 			sprintf(pszMsg, "Unknown command: '%s'", pszCommand);
 
-			DecorateName(sFrom, NULL, true);
+			DecorateName(sFrom, nullptr, true);
 			pBy->SendChatMsg(CHATMSG_PlayerTalk, sFrom, pszMsg);
 			return;
 		}
@@ -445,7 +445,7 @@ void CChat::KillChannels()
 	ADDTOCALLSTACK("CChat::KillChannels");
 	CChatChannel * pChannel = GetFirstChannel();
 	// First /kick everyone
-	for ( ; pChannel != NULL; pChannel = pChannel->GetNext())
+	for ( ; pChannel != nullptr; pChannel = pChannel->GetNext())
 		pChannel->KickAll();
 	m_Channels.Clear();
 }
@@ -455,7 +455,7 @@ void CChat::WhereIs(CChatChanMember * pBy, lpctstr pszName ) const
 	ADDTOCALLSTACK("CChat::WhereIs");
 	
 	ClientIterator it;
-	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
+	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
 	{
 		if ( ! strcmp( pClient->GetChatName(), pszName))
 			continue;
@@ -466,7 +466,7 @@ void CChat::WhereIs(CChatChanMember * pBy, lpctstr pszName ) const
 		else
 			sprintf(pszMsg, "%s is in conference '%s'.", pszName, pClient->GetChannel()->GetName());
 		CSString sFrom;
-		DecorateName(sFrom, NULL, true);
+		DecorateName(sFrom, nullptr, true);
 		pBy->SendChatMsg(CHATMSG_PlayerTalk, sFrom, pszMsg);
 		return;
 	}
@@ -487,7 +487,7 @@ void CChat::SendDeleteChannel(CChatChannel * pChannel)
 	// Send a delete channel name message to all clients using the chat system
 	
 	ClientIterator it;
-	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
+	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
 	{
 		if ( ! pClient->IsChatActive())
 			continue;
@@ -524,7 +524,7 @@ void CChat::SendNewChannel(CChatChannel * pNewChannel)
 	ADDTOCALLSTACK("CChat::SendNewChannel");
 	// Send this new channel name to all clients using the chat system
 	ClientIterator it;
-	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
+	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
 	{
 		if ( ! pClient->IsChatActive())
 			continue;
@@ -535,7 +535,7 @@ void CChat::SendNewChannel(CChatChannel * pNewChannel)
 void CChat::DecorateName(CSString &sName, const CChatChanMember * pMember, bool fSystem) // static
 {
 	ADDTOCALLSTACK("CChat::DecorateName");
-	CChatChannel * pChannel = NULL;
+	CChatChannel * pChannel = nullptr;
 	if (pMember)
 		pChannel = pMember->GetChannel();
 	// 0 = yellow
@@ -565,22 +565,22 @@ void CChat::DecorateName(CSString &sName, const CChatChanMember * pMember, bool 
 
 void CChat::GenerateChatName(CSString &sName, const CClient * pClient) // static
 {
-	if (pClient == NULL)
+	if (pClient == nullptr)
 		return;
 
 	// decide upon 'base' name
-	lpctstr pszName = NULL;
-	if (pClient->GetChar() != NULL)
+	lpctstr pszName = nullptr;
+	if (pClient->GetChar() != nullptr)
 		pszName = pClient->GetChar()->GetName();
-	else if (pClient->GetAccount() != NULL)
+	else if (pClient->GetAccount() != nullptr)
 		pszName = pClient->GetAccount()->GetName();
 
-	if (pszName == NULL)
+	if (pszName == nullptr)
 		return;
 
 	// try the base name
 	CSString sTempName(pszName);
-	if (g_Accounts.Account_FindChat(sTempName.GetPtr()) != NULL)
+	if (g_Accounts.Account_FindChat(sTempName.GetPtr()) != nullptr)
 	{
 		sTempName.Empty();
 
@@ -588,7 +588,7 @@ void CChat::GenerateChatName(CSString &sName, const CClient * pClient) // static
 		for (uint attempts = 2; attempts <= g_Accounts.Account_GetCount(); attempts++)
 		{
 			sTempName.Format("%s (%u)", pszName, attempts);
-			if (g_Accounts.Account_FindChat(static_cast<lpctstr>(sTempName)) == NULL)
+			if (g_Accounts.Account_FindChat(static_cast<lpctstr>(sTempName)) == nullptr)
 				break;
 
 			sTempName.Empty();
@@ -603,7 +603,7 @@ void CChat::Broadcast(CChatChanMember *pFrom, lpctstr pszText, CLanguageID lang,
 {
 	ADDTOCALLSTACK("CChat::Broadcast");
 	ClientIterator it;
-	for (CClient *pClient = it.next(); pClient != NULL; pClient = it.next())
+	for (CClient *pClient = it.next(); pClient != nullptr; pClient = it.next())
 	{
 		if (!pClient->IsChatActive())
 			continue;
@@ -629,8 +629,8 @@ void CChat::CreateJoinChannel(CChatChanMember * pByMember, lpctstr pszName, lpct
 	}
 	else
 	{
-		if ( CreateChannel(pszName, ((pszPassword != NULL) ? pszPassword : ""), pByMember))
-			JoinChannel(pByMember, pszName, ((pszPassword != NULL) ? pszPassword : ""));
+		if ( CreateChannel(pszName, ((pszPassword != nullptr) ? pszPassword : ""), pByMember))
+			JoinChannel(pByMember, pszName, ((pszPassword != nullptr) ? pszPassword : ""));
 	}
 }
 
@@ -640,7 +640,7 @@ bool CChat::CreateChannel(lpctstr pszName, lpctstr pszPassword, CChatChanMember 
 	if (!m_fChatsOK)
 	{
 		CSString sName;
-		DecorateName(sName, NULL, true);
+		DecorateName(sName, nullptr, true);
 		pMember->SendChatMsg(CHATMSG_PlayerTalk, sName, "Conference creation is disabled.");
 		return false;
 	}
@@ -655,13 +655,13 @@ bool CChat::CreateChannel(lpctstr pszName, lpctstr pszPassword, CChatChanMember 
 bool CChat::JoinChannel(CChatChanMember * pMember, lpctstr pszChannel, lpctstr pszPassword)
 {
 	ADDTOCALLSTACK("CChat::JoinChannel");
-	ASSERT(pMember != NULL);
+	ASSERT(pMember != nullptr);
 	CClient * pMemberClient = pMember->GetClient();
-	ASSERT(pMemberClient != NULL);
+	ASSERT(pMemberClient != nullptr);
 
 	// Are we in a channel now?
 	CChatChannel * pCurrentChannel = pMember->GetChannel();
-	if (pCurrentChannel != NULL)
+	if (pCurrentChannel != nullptr)
 	{
 		// Is it the same channel as the one I'm already in?
 		if (strcmp(pszChannel, pCurrentChannel->GetName()) == 0)
@@ -673,7 +673,7 @@ bool CChat::JoinChannel(CChatChanMember * pMember, lpctstr pszChannel, lpctstr p
 	}
 
 	CChatChannel * pNewChannel = FindChannel(pszChannel);
-	if (pNewChannel == NULL)
+	if (pNewChannel == nullptr)
 	{
 		pMemberClient->addChatSystemMessage(CHATMSG_NoConference, pszChannel );
 		return false;
@@ -688,7 +688,7 @@ bool CChat::JoinChannel(CChatChanMember * pMember, lpctstr pszChannel, lpctstr p
 
 	// Leave the old channel 1st
 	// Remove from old channel (if any)
-	if (pCurrentChannel != NULL)
+	if (pCurrentChannel != nullptr)
 	{
 		// Remove myself from the channels list of members
 		pCurrentChannel->RemoveMember(pMember);
@@ -723,7 +723,7 @@ bool CChat::JoinChannel(CChatChanMember * pMember, lpctstr pszChannel, lpctstr p
 CChatChannel * CChat::FindChannel(lpctstr pszChannel) const
 {
 	CChatChannel * pChannel = GetFirstChannel();
-	for ( ; pChannel != NULL; pChannel = pChannel->GetNext())
+	for ( ; pChannel != nullptr; pChannel = pChannel->GetNext())
 	{
 		if (strcmp(pChannel->GetName(), pszChannel) == 0)
 			break;
@@ -743,7 +743,7 @@ CChatChannel * CChat::GetFirstChannel() const
 
 bool CChat::IsDuplicateChannelName(const char * pszName) const
 {
-	return FindChannel(pszName) != NULL;
+	return FindChannel(pszName) != nullptr;
 }
 
 

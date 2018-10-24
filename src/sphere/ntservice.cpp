@@ -15,7 +15,7 @@ CNTService g_Service;
 
 CNTService::CNTService()
 {
-	m_hStatusHandle = NULL;
+	m_hStatusHandle = nullptr;
 	m_fIsNTService = false;
 }
 
@@ -145,7 +145,7 @@ int CNTService::ServiceStart(DWORD dwArgc, LPTSTR *lpszArgv)
 		return rc;
 
 	// Create the event object.  The control handler function signals this event when it receives a "stop" control code
-	m_hServerStopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	m_hServerStopEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
 	if ( !m_hServerStopEvent )
 		return rc;
 
@@ -157,9 +157,9 @@ bailout1:
 	}
 
 	// Create the event object used in overlapped i/o
-	HANDLE hEvents[2] = {NULL, NULL};
+	HANDLE hEvents[2] = {nullptr, nullptr};
 	hEvents[0] = m_hServerStopEvent;
-	hEvents[1] = CreateEvent(NULL, TRUE, FALSE, NULL);
+	hEvents[1] = CreateEvent(nullptr, TRUE, FALSE, nullptr);
 	if ( !hEvents[1] )
 		goto bailout1;
 
@@ -182,8 +182,8 @@ bailout3:
 		goto bailout2;
 	}
 
-	// Add a NULL descriptor ACL to the security descriptor
-	if ( !SetSecurityDescriptorDacl(pSD, TRUE, NULL, FALSE) )
+	// Add a nullptr descriptor ACL to the security descriptor
+	if ( !SetSecurityDescriptorDacl(pSD, TRUE, nullptr, FALSE) )
 		goto bailout3;
 
 	SECURITY_ATTRIBUTES sa;
@@ -254,14 +254,14 @@ void CNTService::CmdInstallService()
 	ReportEvent(EVENTLOG_INFORMATION_TYPE, 0, "Installing Service.");
 
 	// Try to determine the name and path of this application.
-	if ( !GetModuleFileName(NULL, szPath, sizeof(szPath)) )
+	if ( !GetModuleFileName(nullptr, szPath, sizeof(szPath)) )
 	{
 		ReportEvent(EVENTLOG_ERROR_TYPE, 0, "Install GetModuleFileName", GetLastErrorText(szErr, sizeof(szErr)));
 		return;
 	}
 
 	// Try to open the Service Control Manager
-	SC_HANDLE schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+	SC_HANDLE schSCManager = OpenSCManager(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
 	if ( !schSCManager )
 	{
 		ReportEvent(EVENTLOG_ERROR_TYPE, 0, "Install OpenSCManager", GetLastErrorText(szErr, sizeof(szErr)));
@@ -281,7 +281,7 @@ void CNTService::CmdInstallService()
 		SERVICE_AUTO_START,				// Start automatically when the OS starts
 		SERVICE_ERROR_NORMAL,
 		szPath,							// Path and filename of this executable
-		NULL, NULL, NULL, NULL, NULL
+		nullptr, nullptr, nullptr, nullptr, nullptr
 	);
 	if ( !schService )
 	{
@@ -314,8 +314,8 @@ bailout1:
 
 	SERVICE_FAILURE_ACTIONS sfaFailure;
 	sfaFailure.dwResetPeriod = (1 * 60 * 60); // reset failure count after an hour passes with no fails
-	sfaFailure.lpRebootMsg = NULL;	// no reboot message
-	sfaFailure.lpCommand = NULL;	// no command executed
+	sfaFailure.lpRebootMsg = nullptr;	// no reboot message
+	sfaFailure.lpCommand = nullptr;	// no command executed
 	sfaFailure.cActions = CountOf(scAction);		// number of actions
 	sfaFailure.lpsaActions = scAction;	//
 	if ( !ChangeServiceConfig2(schService, SERVICE_CONFIG_FAILURE_ACTIONS, &sfaFailure) )
@@ -375,7 +375,7 @@ void CNTService::CmdRemoveService()
 
 	ReportEvent(EVENTLOG_INFORMATION_TYPE, 0, "Removing Service.");
 
-	SC_HANDLE schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+	SC_HANDLE schSCManager = OpenSCManager(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
 	if ( !schSCManager )
 	{
 		ReportEvent(EVENTLOG_ERROR_TYPE, 0, "Remove OpenSCManager failed", GetLastErrorText(szErr, sizeof(szErr)));
@@ -434,7 +434,7 @@ void CNTService::CmdMainStart()
 	SERVICE_TABLE_ENTRY dispatchTable[] =
 	{
 		{ szTmp, (LPSERVICE_MAIN_FUNCTION)service_main },
-		{ NULL, NULL },
+		{ nullptr, nullptr },
 	};
 
 	if ( !StartServiceCtrlDispatcher(dispatchTable) )
@@ -451,7 +451,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	UNREFERENCED_PARAMETER(hPrevInstance);
 
 	TCHAR	*argv[32];
-	argv[0] = NULL;
+	argv[0] = nullptr;
 	int argc = (int)Str_ParseCmds(lpCmdLine, &argv[1], CountOf(argv)-1, " \t") + 1;
 
 	if ( Sphere_GetOSInfo()->dwPlatformId != VER_PLATFORM_WIN32_NT )
@@ -471,7 +471,7 @@ do_not_nt_service:
 		// Try to determine the name and path of this application.
 		char szPath[_MAX_PATH];
 
-		GetModuleFileName(NULL, szPath, sizeof(szPath));
+		GetModuleFileName(nullptr, szPath, sizeof(szPath));
 
 		if ( !szPath[0] )
 			return -2;

@@ -150,7 +150,7 @@ public:
 	void clearQueues(void);					// clears outgoing data queues
 
 	void init(SOCKET socket, CSocketAddress addr);		// initialized socket
-	bool isInUse(const CClient* client = NULL) const volatile; // does this socket still belong to this/a client?
+	bool isInUse(const CClient* client = nullptr) const volatile; // does this socket still belong to this/a client?
 	bool hasPendingData(void) const;			// is there any data waiting to be sent?
 	bool canReceive(PacketSend* packet) const;	// can the state receive the given packet?
 
@@ -327,9 +327,9 @@ protected:
 
 public:
 #ifndef _MTNETWORK
-	explicit ClientIterator(const NetworkIn* network = NULL);
+	explicit ClientIterator(const NetworkIn* network = nullptr);
 #else
-	explicit ClientIterator(const NetworkManager* network = NULL);
+	explicit ClientIterator(const NetworkManager* network = nullptr);
 #endif
 	~ClientIterator(void);
 
@@ -357,7 +357,7 @@ protected:
 	int m_max;
 
 public:
-	explicit SafeClientIterator(const NetworkIn* network = NULL);
+	explicit SafeClientIterator(const NetworkIn* network = nullptr);
 	~SafeClientIterator(void);
 
 private:

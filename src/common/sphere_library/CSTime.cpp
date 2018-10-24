@@ -47,16 +47,16 @@ CSTime::CSTime( struct tm atm )
 CSTime CSTime::GetCurrentTime()	// static
 {
 	// return the current system time
-	return CSTime(::time(NULL));
+	return CSTime(::time(nullptr));
 }
 
 struct tm* CSTime::GetLocalTm(struct tm* ptm) const
 {
-	if (ptm != NULL)
+	if (ptm != nullptr)
 	{
 		struct tm* ptmTemp = localtime(&m_time);
-		if (ptmTemp == NULL)
-			return NULL;    // indicates the m_time was not initialized!
+		if (ptmTemp == nullptr)
+			return nullptr;    // indicates the m_time was not initialized!
 
 		*ptm = *ptmTemp;
 		return ptm;
@@ -87,9 +87,9 @@ void __cdecl invalidParameterHandler(const wchar_t* expression, const wchar_t* f
 
 void FormatDateTime(tchar * pszTemp, lpctstr pszFormat, const struct tm * ptmTemp)
 {
-	ASSERT(pszTemp != NULL);
-	ASSERT(pszFormat != NULL);
-	ASSERT(ptmTemp != NULL);
+	ASSERT(pszTemp != nullptr);
+	ASSERT(pszFormat != nullptr);
+	ASSERT(ptmTemp != nullptr);
 
 #ifdef _WIN32
 #ifdef _MSC_VER
@@ -125,11 +125,11 @@ lpctstr CSTime::Format(lpctstr pszFormat) const
 {
 	tchar * pszTemp = Str_GetTemp();
 
-	if ( pszFormat == NULL )
+	if ( pszFormat == nullptr )
 		pszFormat = "%Y/%m/%d %H:%M:%S";
 
 	struct tm* ptmTemp = localtime(&m_time);
-	if (ptmTemp == NULL )
+	if (ptmTemp == nullptr )
 	{
 		pszTemp[0] = '\0';
 		return( pszTemp );
@@ -142,11 +142,11 @@ lpctstr CSTime::Format(lpctstr pszFormat) const
 lpctstr CSTime::FormatGmt(lpctstr pszFormat) const
 {
 	tchar * pszTemp = Str_GetTemp();
-	if ( pszFormat == NULL )
+	if ( pszFormat == nullptr )
 		pszFormat = "%a, %d %b %Y %H:%M:%S GMT";
 
 	struct tm* ptmTemp = gmtime(&m_time);
-	if (ptmTemp == NULL )
+	if (ptmTemp == nullptr )
 	{
 		pszTemp[0] = '\0';
 		return( pszTemp );
@@ -234,27 +234,27 @@ time_t CSTime::GetTime() const
 
 int CSTime::GetYear() const
 {
-	return (GetLocalTm(NULL)->tm_year) + 1900;
+	return (GetLocalTm(nullptr)->tm_year) + 1900;
 }
 
 int CSTime::GetMonth() const       // month of year (1 = Jan)
 {
-	return GetLocalTm(NULL)->tm_mon + 1;
+	return GetLocalTm(nullptr)->tm_mon + 1;
 }
 
 int CSTime::GetDay() const         // day of month
 {
-	return GetLocalTm(NULL)->tm_mday;
+	return GetLocalTm(nullptr)->tm_mday;
 }
 
 int CSTime::GetHour() const
 {
-	return GetLocalTm(NULL)->tm_hour;
+	return GetLocalTm(nullptr)->tm_hour;
 }
 
 int CSTime::GetMinute() const
 {
-	return GetLocalTm(NULL)->tm_min;
+	return GetLocalTm(nullptr)->tm_min;
 }
 
 void CSTime::Init()

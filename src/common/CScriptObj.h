@@ -54,8 +54,8 @@ private:
 	TRIGRET_TYPE OnTriggerForLoop( CScript &s, int iType, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult );
 public:
 	static const char *m_sClassName;
-	TRIGRET_TYPE OnTriggerScript( CScript &s, lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = NULL );
-	virtual TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = NULL );
+	TRIGRET_TYPE OnTriggerScript( CScript &s, lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = nullptr );
+	virtual TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = nullptr );
 	bool OnTriggerFind( CScript & s, lpctstr pszTrigName );
 	TRIGRET_TYPE OnTriggerRun( CScript &s, TRIGRUN_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pReturn );
 	TRIGRET_TYPE OnTriggerRunVal( CScript &s, TRIGRUN_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
@@ -63,12 +63,12 @@ public:
 	virtual lpctstr GetName() const = 0;	// ( every object must have at least a type name )
 
 	// Flags = 1 = html
-	size_t ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFlags = 0, CScriptTriggerArgs * pArgs = NULL );
+	size_t ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFlags = 0, CScriptTriggerArgs * pArgs = nullptr );
 
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
-	bool r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * psVal = NULL, TRIGRET_TYPE * piRet = NULL );
+	bool r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * psVal = nullptr, TRIGRET_TYPE * piRet = nullptr );
 
 	bool r_SetVal( lpctstr pszKey, lpctstr pszVal );
 	virtual bool r_LoadVal( CScript & s );

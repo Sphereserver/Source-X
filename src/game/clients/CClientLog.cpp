@@ -178,7 +178,7 @@ void CClient::addSysMessage(lpctstr pszMsg) // System message (In lower left cor
 			strcpy(m_zLastMessage, pszMsg);
 	}
 
-	addBarkParse(pszMsg, NULL, HUE_TEXT_DEF, TALKMODE_SYSTEM);
+	addBarkParse(pszMsg, nullptr, HUE_TEXT_DEF, TALKMODE_SYSTEM);
 }
 
 
@@ -272,7 +272,7 @@ bool CClient::Login_Relay( uint iRelay ) // Relay player to a selected IP
 	{
 		iRelay --;
 		pServ = g_Cfg.Server_GetDef(iRelay);
-		if ( pServ == NULL )
+		if ( pServ == nullptr )
 		{
 			DEBUG_ERR(( "%x:Login_Relay BAD index! %u\n", GetSocketID(), iRelay ));
 			return false;
@@ -356,12 +356,12 @@ bool CClient::OnRxConsole( const byte * pData, size_t iLen )
 
 	while ( iLen -- )
 	{
-		int iRet = OnConsoleKey( m_Targ_Text, *pData++, GetAccount() != NULL );
+		int iRet = OnConsoleKey( m_Targ_Text, *pData++, GetAccount() != nullptr );
 		if ( ! iRet )
 			return false;
 		if ( iRet == 2 )
 		{
-			if ( GetAccount() == NULL )
+			if ( GetAccount() == nullptr )
 			{
 				if ( !m_zLogin[0] )
 				{
@@ -381,7 +381,7 @@ bool CClient::OnRxConsole( const byte * pData, size_t iLen )
 					CSString sMsg;
 
 					CAccountRef pAccount = g_Accounts.Account_Find(m_zLogin);
-					if (( pAccount == NULL ) || ( pAccount->GetPrivLevel() < PLEVEL_Admin ))
+					if (( pAccount == nullptr ) || ( pAccount->GetPrivLevel() < PLEVEL_Admin ))
 					{
 						SysMessagef("%s\n", g_Cfg.GetDefaultMsg(DEFMSG_CONSOLE_NOT_PRIV));
 						m_Targ_Text.Empty();
@@ -421,12 +421,12 @@ bool CClient::OnRxAxis( const byte * pData, size_t iLen )
 
 	while ( iLen -- )
 	{
-		int iRet = OnConsoleKey( m_Targ_Text, *pData++, GetAccount() != NULL );
+		int iRet = OnConsoleKey( m_Targ_Text, *pData++, GetAccount() != nullptr );
 		if ( ! iRet )
 			return false;
 		if ( iRet == 2 )
 		{
-			if ( GetAccount() == NULL )
+			if ( GetAccount() == nullptr )
 			{
 				if ( !m_zLogin[0] )
 				{
@@ -439,7 +439,7 @@ bool CClient::OnRxAxis( const byte * pData, size_t iLen )
 					CSString sMsg;
 
 					CAccountRef pAccount = g_Accounts.Account_Find(m_zLogin);
-					if (( pAccount == NULL ) || ( pAccount->GetPrivLevel() < PLEVEL_Counsel ))
+					if (( pAccount == nullptr ) || ( pAccount->GetPrivLevel() < PLEVEL_Counsel ))
 					{
 						SysMessagef("\"MSG:%s\"", g_Cfg.GetDefaultMsg(DEFMSG_AXIS_NOT_PRIV));
 						m_Targ_Text.Empty();
@@ -459,7 +459,7 @@ bool CClient::OnRxAxis( const byte * pData, size_t iLen )
 							Args.m_VarsLocal.SetStrNew("Account",GetName());
 							Args.m_VarsLocal.SetStrNew("IP",GetPeer().GetAddrStr());
 							TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
-							r_Call("f_axis_preload", this, &Args, NULL, &tRet);
+							r_Call("f_axis_preload", this, &Args, nullptr, &tRet);
 							if ( tRet == TRIGRET_RET_FALSE )
 								return false;
 							if ( tRet == TRIGRET_RET_TRUE )
@@ -681,7 +681,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t iLen )
 	// Look for what they want to do with the connection.
 	bool fKeepAlive = false;
 	CSTime dateIfModifiedSince;
-	tchar * pszReferer = NULL;
+	tchar * pszReferer = nullptr;
 	size_t stContentLength = 0;
 	for ( size_t j = 1; j < iQtyLines; j++ )
 	{
@@ -701,7 +701,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t iLen )
 		{
 			pszArgs += 15;
 			GETNONWHITESPACE(pszArgs);
-			stContentLength = strtoul(pszArgs, NULL, 10);
+			stContentLength = strtoul(pszArgs, nullptr, 10);
 		}
 		else if ( ! strnicmp( pszArgs, "If-Modified-Since:", 18 ))
 		{
@@ -804,7 +804,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 	// NOTE: Anything else we get at this point is tossed !
 	ASSERT( GetConnectType() == CONNECT_CRYPT );
 	ASSERT( !m_Crypt.IsInit());
-	ASSERT( pEvent != NULL );
+	ASSERT( pEvent != nullptr );
 	ASSERT( iLen > 0 );
 
 	// Try all client versions on the msg.

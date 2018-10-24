@@ -16,7 +16,7 @@ void CSObjListRec::RemoveSelf()
 
 CSObjList::CSObjList()
 {
-	m_pHead = m_pTail = NULL;
+	m_pHead = m_pTail = nullptr;
 	m_iCount = 0;
 }
 
@@ -25,7 +25,7 @@ CSObjList::CSObjList()
 CSObjListRec * CSObjList::GetAt( size_t index ) const
 {
 	CSObjListRec * pRec = GetHead();
-	while ( index > 0 && pRec != NULL )
+	while ( index > 0 && pRec != nullptr )
 	{
 		pRec = pRec->GetNext();
 		--index;
@@ -41,29 +41,29 @@ void CSObjList::Clear()
 	for (;;)	// iterate the list.
 	{
 		CSObjListRec * pRec = GetHead();
-		if ( pRec == NULL )
+		if ( pRec == nullptr )
 			break;
 		ASSERT( pRec->GetParent() == this );
 		delete pRec;
 	}
 	m_iCount = 0;
-	m_pHead = NULL;
-	m_pTail = NULL;
+	m_pHead = nullptr;
+	m_pTail = nullptr;
 }
 
 void CSObjList::InsertAfter( CSObjListRec * pNewRec, CSObjListRec * pPrev )
 {
 	// Add after pPrev.
-	// pPrev = NULL == add to the start.
-	ASSERT( pNewRec != NULL );
+	// pPrev = nullptr == add to the start.
+	ASSERT( pNewRec != nullptr );
 	pNewRec->RemoveSelf();	// Get out of previous list first.
 	ASSERT( pPrev != pNewRec );
-	ASSERT( pNewRec->GetParent() == NULL );
+	ASSERT( pNewRec->GetParent() == nullptr );
 
 	pNewRec->m_pParent = this;
 
 	CSObjListRec * pNext;
-	if ( pPrev != NULL )		// Its the first.
+	if ( pPrev != nullptr )		// Its the first.
 	{
 		ASSERT( pPrev->GetParent() == this );
 		pNext = pPrev->GetNext();
@@ -77,7 +77,7 @@ void CSObjList::InsertAfter( CSObjListRec * pNewRec, CSObjListRec * pPrev )
 
 	pNewRec->m_pPrev = pPrev;
 
-	if ( pNext != NULL )
+	if ( pNext != nullptr )
 	{
 		ASSERT( pNext->GetParent() == this );
 		pNext->m_pPrev = pNewRec;
@@ -94,25 +94,25 @@ void CSObjList::InsertAfter( CSObjListRec * pNewRec, CSObjListRec * pPrev )
 void CSObjList::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when removed from list.
 {
 	// just remove from list. DON'T delete !
-	if ( pObRec == NULL )
+	if ( pObRec == nullptr )
 		return;
 	ASSERT( pObRec->GetParent() == this );
 
 	CSObjListRec * pNext = pObRec->GetNext();
 	CSObjListRec * pPrev = pObRec->GetPrev();
 
-	if ( pNext != NULL )
+	if ( pNext != nullptr )
 		pNext->m_pPrev = pPrev;
 	else
 		m_pTail = pPrev;
-	if ( pPrev != NULL )
+	if ( pPrev != nullptr )
 		pPrev->m_pNext = pNext;
 	else
 		m_pHead = pNext;
 
-	pObRec->m_pNext = NULL;	// this should not really be necessary.
-	pObRec->m_pPrev = NULL;
-	pObRec->m_pParent = NULL;	// We are now unlinked.
+	pObRec->m_pNext = nullptr;	// this should not really be necessary.
+	pObRec->m_pPrev = nullptr;
+	pObRec->m_pParent = nullptr;	// We are now unlinked.
 	--m_iCount;
 }
 

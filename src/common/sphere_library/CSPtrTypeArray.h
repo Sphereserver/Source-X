@@ -119,7 +119,7 @@ bool CSPtrTypeArray<TYPE>::IsValidIndex( size_t i ) const
 {
     if ( i >= this->size() )
         return false;
-    return (this->at(i) != NULL );
+    return (this->at(i) != nullptr );
 }
 
 #endif // _INC_CSPTRTYPEARRAY_H

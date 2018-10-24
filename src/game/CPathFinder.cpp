@@ -107,7 +107,7 @@ CPathFinder::~CPathFinder()
 int CPathFinder::FindPath() //A* algorithm
 {
 	ADDTOCALLSTACK("CPathFinder::FindPath");
-	ASSERT(m_pChar != NULL);
+	ASSERT(m_pChar != nullptr);
 
 	int X = m_pChar->GetTopPoint().m_x - m_RealX;
 	int Y = m_pChar->GetTopPoint().m_y - m_RealY;

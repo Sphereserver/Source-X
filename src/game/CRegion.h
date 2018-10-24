@@ -177,7 +177,7 @@ public:
 	bool MakeRegionName();
 
 public:
-	explicit CRegion( CResourceID rid, lpctstr pszName = NULL );
+	explicit CRegion( CResourceID rid, lpctstr pszName = nullptr );
 	virtual ~CRegion();
 
 private:
@@ -209,7 +209,7 @@ public:
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 
 public:
-	explicit CRegionWorld( CResourceID rid, lpctstr pszName = NULL );
+	explicit CRegionWorld( CResourceID rid, lpctstr pszName = nullptr );
 	virtual ~CRegionWorld();
 
 private:

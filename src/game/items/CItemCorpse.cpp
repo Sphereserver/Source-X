@@ -26,14 +26,14 @@ CChar *CItemCorpse::IsCorpseSleeping() const
 	if ( !IsType(IT_CORPSE) )
 	{
 		DEBUG_ERR(("Corpse (0%x) doesn't have type T_CORPSE! (it has %d)\n", (dword)GetUID(), GetType()));
-		return NULL;
+		return nullptr;
 	}
 
 	CChar *pCharCorpse = m_uidLink.CharFind();
 	if ( pCharCorpse && pCharCorpse->IsStatFlag(STATF_SLEEPING) && !GetTimeStamp() )
 		return pCharCorpse;
 
-	return NULL;
+	return nullptr;
 }
 
 int CItemCorpse::GetWeight(word amount) const
@@ -63,7 +63,7 @@ bool CChar::CheckCorpseCrime( CItemCorpse *pCorpse, bool fLooting, bool fTest )
 		if ( !fTest )
 		{
 			// Anyone saw me doing this?
-			CheckCrimeSeen(SKILL_NONE, pCharGhost, pCorpse, fLooting ? g_Cfg.GetDefaultMsg(DEFMSG_LOOTING_CRIME) : NULL);
+			CheckCrimeSeen(SKILL_NONE, pCharGhost, pCorpse, fLooting ? g_Cfg.GetDefaultMsg(DEFMSG_LOOTING_CRIME) : nullptr);
 			Noto_Criminal();
 		}
 		return true;
@@ -92,7 +92,7 @@ CItemCorpse *CChar::FindMyCorpse( bool ignoreLOS, int iRadius ) const
 			continue;
 		return pCorpse;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // Create the char corpse when i die (STATF_DEAD) or fall asleep (STATF_SLEEPING)
@@ -103,16 +103,16 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 
 	word wFlags = (word)(m_TagDefs.GetKeyNum("DEATHFLAGS", true));
 	if (wFlags & DEATH_NOCORPSE)
-		return NULL;
+		return nullptr;
 	if (IsStatFlag(STATF_CONJURED) && !(wFlags & (DEATH_NOCONJUREDEFFECT|DEATH_HASCORPSE)))
 	{
 		Effect(EFFECT_XYZ, ITEMID_FX_SPELL_FAIL, this, 1, 30);
-		return NULL;
+		return nullptr;
 	}
 
 	CItemCorpse *pCorpse = dynamic_cast<CItemCorpse *>(CItem::CreateScript(ITEMID_CORPSE, this));
-	if (pCorpse == NULL)	// weird internal error
-		return NULL;
+	if (pCorpse == nullptr)	// weird internal error
+		return nullptr;
 
 	tchar *pszMsg = Str_GetTemp();
 	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MSG_CORPSE_OF), GetName());
@@ -168,8 +168,8 @@ bool CChar::RaiseCorpse( CItemCorpse * pCorpse )
 	if ( pCorpse->GetCount() > 0 )
 	{
 		CItemContainer *pPack = GetPackSafe();
-		CItem *pItemNext = NULL;
-		for ( CItem *pItem = pCorpse->GetContentHead(); pItem != NULL; pItem = pItemNext )
+		CItem *pItemNext = nullptr;
+		for ( CItem *pItem = pCorpse->GetContentHead(); pItem != nullptr; pItem = pItemNext )
 		{
 			pItemNext = pItem->GetNext();
 			if ( pItem->IsType(IT_HAIR) || pItem->IsType(IT_BEARD) )	// hair on corpse was copied!

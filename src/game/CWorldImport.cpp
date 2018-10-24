@@ -21,7 +21,7 @@ public:
 	CImportSer( dword dwSer ) :
 		m_dwSer( dwSer )
 	{
-		m_pObj = NULL;
+		m_pObj = nullptr;
 		m_dwContSer = UID_UNUSED;
 		m_layer = LAYER_NONE;
 	}
@@ -53,10 +53,10 @@ public:
 		m_ptCenter(ptCenter),
 		m_iDist(iDist)
 	{
-		m_pCurSer = NULL;
-		m_pCurObj = NULL;
-		m_pszArg1 = NULL;
-		m_pszArg2 = NULL;
+		m_pCurSer = nullptr;
+		m_pCurObj = nullptr;
+		m_pszArg1 = nullptr;
+		m_pszArg2 = nullptr;
 	}
 private:
 	CImportFile(const CImportFile& copy);
@@ -74,9 +74,9 @@ void CImportFile::CheckLast()
 	ADDTOCALLSTACK("CImportFile::CheckLast");
 	// Make sure the object we where last working on is linked to the world.
 
-	if ( m_pCurSer != NULL )
+	if ( m_pCurSer != nullptr )
 	{
-		if ( m_pCurObj != NULL && m_pCurSer->m_pObj == m_pCurObj )
+		if ( m_pCurObj != nullptr && m_pCurSer->m_pObj == m_pCurObj )
 		{
 			// Do we even want it ?
 			if ( m_iDist &&
@@ -88,19 +88,19 @@ void CImportFile::CheckLast()
 			}
 			else
 			{
-				m_pCurObj = NULL;	// accept it.
+				m_pCurObj = nullptr;	// accept it.
 			}
 		}
 		else
 		{
 			delete m_pCurSer;
 		}
-		m_pCurSer = NULL;
+		m_pCurSer = nullptr;
 	}
-	if ( m_pCurObj != NULL )
+	if ( m_pCurObj != nullptr )
 	{
 		delete m_pCurObj;
-		m_pCurObj = NULL;
+		m_pCurObj = nullptr;
 	}
 }
 
@@ -115,10 +115,10 @@ void CImportFile::ImportFix()
 
 	CImportSer * pSerNext;
 	m_pCurSer = static_cast <CImportSer*> ( m_ListSer.GetHead());
-	for ( ; m_pCurSer != NULL; m_pCurSer = pSerNext )
+	for ( ; m_pCurSer != nullptr; m_pCurSer = pSerNext )
 	{
 		pSerNext = static_cast <CImportSer*> ( m_pCurSer->GetNext());
-		if ( m_pCurSer->m_pObj == NULL )		// NEver created correctly
+		if ( m_pCurSer->m_pObj == nullptr )		// NEver created correctly
 		{
 			delete m_pCurSer;
 			continue;
@@ -138,7 +138,7 @@ void CImportFile::ImportFix()
 				for (;;)
 				{
 					CItem * pItem = AreaItems.GetItem();
-					if ( pItem == NULL )
+					if ( pItem == nullptr )
 						break;
 					if ( ! pItem->IsSameType( m_pCurSer->m_pObj ))
 						continue;
@@ -163,7 +163,7 @@ void CImportFile::ImportFix()
 		}
 
 		pItemTest = dynamic_cast <CItem*> (m_pCurSer->m_pObj);
-		if ( pItemTest == NULL )
+		if ( pItemTest == nullptr )
 		{
 		item_delete:
 			delete m_pCurSer->m_pObj;
@@ -174,10 +174,10 @@ void CImportFile::ImportFix()
 
 		// Find it's container.
 		CImportSer* pSerCont = static_cast <CImportSer*> ( m_ListSer.GetHead());
-		CObjBase * pObjCont = NULL;
-		for ( ; pSerCont != NULL; pSerCont = static_cast <CImportSer*> ( pSerCont->GetNext()))
+		CObjBase * pObjCont = nullptr;
+		for ( ; pSerCont != nullptr; pSerCont = static_cast <CImportSer*> ( pSerCont->GetNext()))
 		{
-			if ( pSerCont->m_pObj == NULL )
+			if ( pSerCont->m_pObj == nullptr )
 				continue;
 			if ( pSerCont->m_dwSer == m_pCurSer->m_dwContSer )
 			{
@@ -190,13 +190,13 @@ void CImportFile::ImportFix()
 				break;
 			}
 		}
-		if ( ! m_pCurSer->IsTopLevel() || pObjCont == NULL)
+		if ( ! m_pCurSer->IsTopLevel() || pObjCont == nullptr)
 		{
 			goto item_delete;
 		}
 
 		// Is it a dupe in the container or equipped ?
-		for ( CItem *pItem = dynamic_cast<CContainer*>(pObjCont)->GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
+		for ( CItem *pItem = dynamic_cast<CContainer*>(pObjCont)->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 		{
 			if ( pItemTest == pItem )
 				continue;
@@ -260,14 +260,14 @@ bool CImportFile::ImportSCP( CScript & s, word wModeFlags )
 			continue;
 		}
 
-		if ( m_pCurObj == NULL )
+		if ( m_pCurObj == nullptr )
 			continue;
 
 		while ( s.ReadKeyParse())
 		{
 			if ( s.IsKey( "SERIAL"))
 			{
-				if ( m_pCurSer != NULL )
+				if ( m_pCurSer != nullptr )
 					return false;
 				m_pCurSer = new CImportSer( s.GetArgVal());
 				m_pCurSer->m_pObj = m_pCurObj;
@@ -275,7 +275,7 @@ bool CImportFile::ImportSCP( CScript & s, word wModeFlags )
 				continue;
 			}
 
-			if ( m_pCurSer == NULL )
+			if ( m_pCurSer == nullptr )
 				continue;
 
 			if ( s.IsKey( "CONT" ))
@@ -303,8 +303,8 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 
 	IMPFLAGS_TYPE mode = IMPFLAGS_NOTHING;
 	CSString sName;
-	CItem * pItem = NULL;
-	CChar * pChar = NULL;
+	CItem * pItem = nullptr;
+	CChar * pChar = nullptr;
 
 	while ( s.ReadTextLine(true))
 	{
@@ -338,9 +338,9 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 
 		// Parse the line.
 		tchar* pKey = const_cast<tchar*>(strchr(s.GetKey(), ' '));
-		lpctstr pArg = NULL;
+		lpctstr pArg = nullptr;
 
-		if (pKey != NULL)
+		if (pKey != nullptr)
 		{
 			*pKey++ = '\0';
 			GETNONWHITESPACE(pKey);
@@ -353,7 +353,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 
 		if ( s.IsKey("SERIAL" ))
 		{
-			if ( m_pCurSer != NULL )
+			if ( m_pCurSer != nullptr )
 				return false;
 
 			dword dwSerial = ATOI( pArg );
@@ -372,7 +372,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			if ( mode == IMPFLAGS_ITEMS )
 				continue;
 		}
-		if ( m_pCurSer == NULL )
+		if ( m_pCurSer == nullptr )
 		{
 			DEBUG_ERR(( "Import:No serial number\n" ));
 			break;
@@ -382,7 +382,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 		{
 			if ( s.IsKey("ID" ))
 			{
-				if ( m_pCurObj != NULL )
+				if ( m_pCurObj != nullptr )
 					return false;
 				pItem = CItem::CreateTemplate((ITEMID_TYPE)(ATOI(pArg)));
 				pItem->SetName( sName );
@@ -391,7 +391,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 				continue;
 			}
 
-			if ( m_pCurObj == NULL )
+			if ( m_pCurObj == nullptr )
 			{
 				DEBUG_ERR(( "Import:Bad Item Key '%s'\n", s.GetKey()));
 				break;
@@ -405,7 +405,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 				m_pCurSer->m_layer = static_cast<LAYER_TYPE>(ATOI(pArg));
 				continue;
 			}
-			else if (pItem == NULL)
+			else if (pItem == nullptr)
 			{
 				DEBUG_ERR(( "Import:Found '%s' before ID.\n", s.GetKey()));
 				continue;
@@ -488,7 +488,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 		{
 			if ( s.IsKey("NAME" ))
 			{
-				if ( m_pCurObj != NULL )
+				if ( m_pCurObj != nullptr )
 					return false;
 				pChar = CChar::CreateBasic( CREID_MAN );
 				pChar->SetName( sName );
@@ -496,12 +496,12 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 				m_pCurSer->m_pObj = pChar;
 				continue;
 			}
-			if ( m_pCurObj == NULL )
+			if ( m_pCurObj == nullptr )
 			{
 				DEBUG_ERR(( "Import:Bad Item Key '%s'\n", s.GetKey()));
 				break;
 			}
-			else if (pChar == NULL)
+			else if (pChar == nullptr)
 			{
 				DEBUG_ERR(( "Import:Found '%s' before NAME.\n", s.GetKey()));
 				continue;
@@ -695,10 +695,10 @@ bool CWorld::Import( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 bool CWorld::DumpAreas( CTextConsole * pSrc, lpctstr pszFilename )
 {
 	ADDTOCALLSTACK("CWorld::DumpAreas");
-	if ( pSrc == NULL )
+	if ( pSrc == nullptr )
 		return false;
 
-	if ( pszFilename == NULL || *pszFilename == '\0' )
+	if ( pszFilename == nullptr || *pszFilename == '\0' )
 		pszFilename	= "map_all" SPHERE_SCRIPT;
 	else if ( strlen( pszFilename ) <= 4 )
 		return false;
@@ -730,7 +730,7 @@ bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 	// dx = change in x from world to file.
 	// dy = change in y
 
-	if ( pSrc == NULL )
+	if ( pSrc == nullptr )
 		return false;
 
 	size_t iLen = strlen( pszFilename );
@@ -756,7 +756,7 @@ bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 		for (;;)
 		{
 			CItem * pItem = AreaItems.GetItem();
-			if ( pItem == NULL )
+			if ( pItem == nullptr )
 				break;
 			pItem->WriteUOX( s, index++ );
 		}
@@ -772,7 +772,7 @@ bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 		for (;;)
 		{
 			CChar * pChar = AreaChars.GetChar();
-			if ( pChar == NULL )
+			if ( pChar == nullptr )
 				break;
 			pChar->r_WriteSafe( s );
 		}
@@ -787,7 +787,7 @@ bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 		for (;;)
 		{
 			CItem * pItem = AreaItems.GetItem();
-			if ( pItem == NULL )
+			if ( pItem == nullptr )
 				break;
 			pItem->r_WriteSafe( s );
 		}

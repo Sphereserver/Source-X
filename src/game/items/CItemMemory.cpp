@@ -30,7 +30,7 @@ CItemStone *CItemMemory::Guild_GetLink()
 {
 	ADDTOCALLSTACK("CItemMemory::Guild_GetLink");
 	if ( !IsMemoryTypes(MEMORY_TOWN|MEMORY_GUILD) )
-		return NULL;
+		return nullptr;
 	return dynamic_cast<CItemStone*>(m_uidLink.ItemFind());
 }
 

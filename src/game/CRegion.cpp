@@ -82,7 +82,7 @@ void CRegion::UnRealizeRegion()
 	for ( int i=0; ; i++ )
 	{
 		CSector * pSector = GetSector(i);
-		if ( pSector == NULL )
+		if ( pSector == nullptr )
 			break;
 		// Does the rect overlap ?
 		if ( ! IsOverlapped( pSector->GetRect()))
@@ -140,7 +140,7 @@ bool CRegion::AddRegionRect( const CRectMap & rect )
 void CRegion::SetName( lpctstr pszName )
 {
 	ADDTOCALLSTACK("CRegion::SetName");
-	if ( pszName == NULL || pszName[0] == '%' )
+	if ( pszName == nullptr || pszName[0] == '%' )
 	{
 		m_sName = g_Serv.GetName();
 	}
@@ -221,7 +221,7 @@ lpctstr const CRegion::sm_szLoadKeys[RC_QTY+1] =	// static (Sorted)
 	"TYPE",
 	"UID",
 	"UNDERGROUND",
-	NULL
+	nullptr
 };
 
 bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
@@ -253,7 +253,7 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 				for ( ; ; i++ )
 				{
 					CSector	*pSector = GetSector(i);
-					if ( pSector == NULL ) break;
+					if ( pSector == nullptr ) break;
 					iClients += pSector->m_Chars_Active.HasClients();
 				}
 				sVal.FormatVal((int)(iClients));
@@ -390,12 +390,12 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			}
 		case RC_TYPEREGION:
 			{
-				const CItemBase * pBase = NULL;
+				const CItemBase * pBase = nullptr;
 				const CItem * pItem = GetResourceID().ItemFind();
-				if (pItem != NULL)
+				if (pItem != nullptr)
 					pBase = pItem->Item_GetDef();
 
-				if (pBase != NULL)
+				if (pBase != nullptr)
 					sVal = pBase->GetResourceName();
 				else
 					sVal = "";
@@ -686,7 +686,7 @@ lpctstr const CRegion::sm_szVerbKeys[RV_QTY+1] =
 {
 	"ALLCLIENTS",
 	"TAGLIST",
-	NULL
+	nullptr
 };
 
 //	actualy part of CSector, here we need SEV_QTY to know that the command is part of the sector
@@ -719,7 +719,7 @@ bool CRegion::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		{
 			s.ParseKey(s.GetKey(), s.GetArgStr());
 			ClientIterator it;
-			for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
+			for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
 			{
 				CChar * pChar = pClient->GetChar();
 				if ( !pChar || ( pChar->GetRegion() != this ))
@@ -767,7 +767,7 @@ bool CRegion::SendSectorsVerb( lpctstr pszVerb, lpctstr pszArgs, CTextConsole * 
 	for ( int i=0; ; i++ )
 	{
 		CSector * pSector = GetSector(i);
-		if ( pSector == NULL )
+		if ( pSector == nullptr )
 			break;
 
 		// Does the rect overlap ?
@@ -788,7 +788,7 @@ lpctstr const CRegion::sm_szTrigName[RTRIG_QTY+1] =	// static
 	"@EXIT",
 	"@REGPERIODIC",
 	"@STEP",
-	NULL,
+	nullptr,
 };
 
 TRIGRET_TYPE CRegion::OnRegionTrigger( CTextConsole * pSrc, RTRIG_TYPE iAction )
@@ -854,7 +854,7 @@ lpctstr const CRegionWorld::sm_szLoadKeys[RWC_QTY+1] =	// static
 	"DEFNAME",
 	"REGION",
 	"RESOURCES",
-	NULL
+	nullptr
 };
 
 bool CRegionWorld::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
@@ -973,7 +973,7 @@ void CRegionWorld::r_Write( CScript &s )
 /*lpctstr const CRegionWorld::sm_szVerbKeys[] =
 {
 	"TAGLIST",
-	NULL
+	nullptr
 };*/
 
 bool CRegionWorld::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from script
@@ -1023,5 +1023,5 @@ const CSRandGroupDef * CRegionWorld::FindNaturalResource(int type) const
 		if ( pLink->GetResPage() == type )
 			return (dynamic_cast <const CSRandGroupDef *>(pLink));
 	}
-	return NULL;
+	return nullptr;
 }

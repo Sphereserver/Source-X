@@ -46,8 +46,8 @@ void CChar::Stat_SetMod( STAT_TYPE i, short iVal )
 	if ( i == STAT_STR && iVal < iStatVal )
 	{
 		// ModSTR is being decreased, so check if the char still have enough STR to use current equipped items
-		CItem *pItemNext = NULL;
-		for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItemNext )
+		CItem *pItemNext = nullptr;
+		for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
 		{
 			pItemNext = pItem->GetNext();
 			if ( !CanEquipStr(pItem) )
@@ -272,8 +272,8 @@ void CChar::Stat_SetBase( STAT_TYPE i, short iVal )
 	if ( i == STAT_STR && iVal < iStatVal )
 	{
 		// STR is being decreased, so check if the char still have enough STR to use current equipped items
-		CItem *pItemNext = NULL;
-		for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItemNext )
+		CItem *pItemNext = nullptr;
+		for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
 		{
 			pItemNext = pItem->GetNext();
 			if ( !CanEquipStr(pItem) )
@@ -296,7 +296,7 @@ void CChar::Stat_SetBase( STAT_TYPE i, short iVal )
 short CChar::Stat_GetLimit( STAT_TYPE i ) const
 {
 	ADDTOCALLSTACK("CChar::Stat_GetLimit");
-	const CVarDefCont * pTagStorage = NULL;
+	const CVarDefCont * pTagStorage = nullptr;
 	TemporaryString tsStatName;
 	tchar* pszStatName = static_cast<tchar *>(tsStatName);
 
@@ -313,7 +313,7 @@ short CChar::Stat_GetLimit( STAT_TYPE i ) const
 
 		sprintf(pszStatName, "OVERRIDE.STATCAP_%d", (int)(i));
 		short iStatMax;
-		if ( (pTagStorage = GetKey(pszStatName, true)) != NULL )
+		if ( (pTagStorage = GetKey(pszStatName, true)) != nullptr )
 			iStatMax = (short)(pTagStorage->GetValNum());
 		else
 			iStatMax = pSkillClass->m_StatMax[i];
@@ -336,7 +336,7 @@ short CChar::Stat_GetLimit( STAT_TYPE i ) const
 
 		short iStatMax = 100;
 		sprintf(pszStatName, "OVERRIDE.STATCAP_%d", (int)(i));
-		if ( (pTagStorage = GetKey(pszStatName, true)) != NULL )
+		if ( (pTagStorage = GetKey(pszStatName, true)) != nullptr )
 			iStatMax = (short)(pTagStorage->GetValNum());
 
 		return iStatMax;
@@ -491,7 +491,7 @@ bool CChar::Stat_Decrease(STAT_TYPE stat, SKILL_TYPE skill)
 		return true;
 
 	int iminval;
-	if ( skill )
+	if ( skill != SKILL_NONE )
 		iminval = Stat_GetMax(stat);
 	else
 		iminval = Stat_GetAdjusted(stat);
@@ -504,14 +504,14 @@ bool CChar::Stat_Decrease(STAT_TYPE stat, SKILL_TYPE skill)
 		// Find the stat that was used least recently and degrade it.
 		int imin = -1;
 		int ival = 0;
-		for ( int i = STAT_STR; i<STAT_BASE_QTY; i++ )
+		for ( int i = STAT_STR; i<STAT_BASE_QTY; ++i )
 		{
 			if ( (STAT_TYPE)(i) == stat )
 				continue;
 			if ( Stat_GetLock( (STAT_TYPE)(i) ) != SKILLLOCK_DOWN )
 				continue;
 
-			if ( skill )
+			if ( skill != SKILL_NONE )
 			{
 				const CSkillDef * pSkillDef = g_Cfg.GetSkillDef(skill);
 				ival = pSkillDef->m_StatBonus[i];

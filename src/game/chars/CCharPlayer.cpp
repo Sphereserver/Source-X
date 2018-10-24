@@ -15,13 +15,13 @@ lpctstr const CCharPlayer::sm_szLoadKeys[CPC_QTY+1] =
 #define ADD(a,b) b,
 #include "../../tables/CCharPlayer_props.tbl"
 #undef ADD
-	NULL
+	nullptr
 };
 
 void CChar::ClearPlayer()
 {
 	ADDTOCALLSTACK("CChar::ClearPlayer");
-	if ( m_pPlayer == NULL )
+	if ( m_pPlayer == nullptr )
 		return;
 
 	// unlink me from my account.
@@ -36,7 +36,7 @@ void CChar::ClearPlayer()
 	// Is this valid ?
 	m_pPlayer->GetAccount()->DetachChar( this );
 	delete m_pPlayer;
-	m_pPlayer = NULL;
+	m_pPlayer = nullptr;
 }
 
 // Set up the char as a Player.
@@ -73,7 +73,7 @@ bool CChar::SetPlayerAccount( lpctstr pszAccName )
 {
 	ADDTOCALLSTACK("CChar::SetPlayerAccount");
 	CAccountRef pAccount = g_Accounts.Account_FindCreate( pszAccName, g_Serv.m_eAccApp == ACCAPP_Free );
-	if ( pAccount == NULL )
+	if ( pAccount == nullptr )
 	{
 		DEBUG_ERR(( "SetPlayerAccount '%s' can't find '%s'!\n", GetName(), pszAccName ));
 		return false;
@@ -88,16 +88,16 @@ bool CChar::SetNPCBrain( NPCBRAIN_TYPE NPCBrain )
 	if ( NPCBrain == NPCBRAIN_NONE )
 		return false;
 
-	if ( m_pPlayer != NULL )
+	if ( m_pPlayer != nullptr )
 	{
-		if ( m_pPlayer->GetAccount() != NULL )
+		if ( m_pPlayer->GetAccount() != nullptr )
 			DEBUG_ERR(( "SetNPCBrain to Player Account '%s'\n", m_pPlayer->GetAccount()->GetName() ));
 		else
 			DEBUG_ERR(( "SetNPCBrain to Player Name '%s'\n", GetName()));
 		return false;
 	}
 
-	if ( m_pNPC == NULL )
+	if ( m_pNPC == nullptr )
 		m_pNPC = new CCharNPC( this, NPCBrain );
 	else
 		m_pNPC->m_Brain = NPCBrain;		// just replace existing brain
@@ -161,14 +161,14 @@ bool CCharPlayer::SetSkillClass( CChar * pChar, CResourceID rid )
 	return true;
 }
 
-// This should always return NON-NULL.
+// This should always return NON-nullptr.
 CSkillClassDef * CCharPlayer::GetSkillClass() const
 {
 	ADDTOCALLSTACK("CCharPlayer::GetSkillClass");
 
 	CResourceLink * pLink = m_SkillClass.GetRef();
-	if ( pLink == NULL )
-		return NULL;
+	if ( pLink == nullptr )
+		return nullptr;
 	return( static_cast <CSkillClassDef *>(pLink));
 }
 
@@ -372,7 +372,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 				return false;
 
 			CGMPage* pPage = static_cast <CGMPage*> (g_World.m_GMPages.GetAt(index));
-			if ( pPage == NULL )
+			if ( pPage == nullptr )
 				return false;
 
 			SKIP_SEPARATORS(pszKey);
@@ -383,11 +383,11 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 				if ( *pszArgs )
 					ppChar = dynamic_cast<CChar*>(g_World.FindUID(s.GetArgVal()));
 
-				if ( ppChar == NULL )
+				if ( ppChar == nullptr )
 					return false;
 
 				CClient *pClient = ppChar->GetClient();
-				if ( pClient == NULL )
+				if ( pClient == nullptr )
 					return false;
 
 				pPage->SetGMHandler(pClient);
@@ -399,7 +399,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 			else if ( pPage->FindGMHandler() )
 			{
 				CClient* pClient = pChar->GetClient();
-				if ( pClient != NULL && pClient->GetChar() != NULL )
+				if ( pClient != nullptr && pClient->GetChar() != nullptr )
 					pClient->Cmd_GM_PageCmd(pszKey);
 			}
 			else
@@ -572,7 +572,7 @@ lpctstr const CCharPlayer::sm_szVerbKeys[CPV_QTY+1] =
 	#define ADD(a,b) b,
 	#include "../../tables/CCharPlayer_functions.tbl"
 	#undef ADD
-	NULL
+	nullptr
 };
 
 // Execute command from script
@@ -625,7 +625,7 @@ bool CChar::Player_OnVerb( CScript &s, CTextConsole * pSrc )
 			}
 
 			CAccount * pAccount = m_pPlayer->GetAccount();
-			ASSERT(pAccount != NULL);
+			ASSERT(pAccount != nullptr);
 
 			if ( !s.HasArgs() )
 			{

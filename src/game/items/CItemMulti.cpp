@@ -1862,7 +1862,7 @@ lpctstr const CItemMulti::sm_szRefKeys[SHR_QTY + 1] =
     "REGION",
     "SECURED",
     "VENDOR",
-    NULL
+    nullptr
 };
 
 bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
@@ -2084,7 +2084,7 @@ lpctstr const CItemMulti::sm_szVerbKeys[SHV_QTY + 1] =
     "REMOVEALLCOMPS",
     "REMOVEKEYS",
     "UNLOCKITEM",
-    NULL
+    nullptr
 };
 
 bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from script
@@ -2374,7 +2374,7 @@ const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
     "REMOVEKEYS",
     "SECURE",
     "VENDORS",
-    NULL
+    nullptr
 };
 
 void CItemMulti::r_Write(CScript & s)

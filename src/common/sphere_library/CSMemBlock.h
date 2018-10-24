@@ -46,12 +46,12 @@ protected:
 	byte * AllocBase( size_t uiSize );
 public:
 	/**
-	* @brief Clear internal data pointer if it is not NULL.
+	* @brief Clear internal data pointer if it is not nullptr.
 	*/
 	void Free();
 protected:
 	/**
-	* @brief Sets the internal data pointer. Fails when internal data pointer is not NULL.
+	* @brief Sets the internal data pointer. Fails when internal data pointer is not nullptr.
 	*/
 	void MemLink( byte * pData );
 	///@}
@@ -61,7 +61,7 @@ protected:
 public:
 	/**
 	* @brief Gets the internal data pointer.
-	* @return The internal data pointer (can be NULL).
+	* @return The internal data pointer (can be nullptr).
 	*/
 	byte * GetData() const {
 		return m_pData;

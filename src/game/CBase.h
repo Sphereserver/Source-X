@@ -252,7 +252,7 @@ public:
      */
 	virtual void UnLink();
 
-	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = NULL );
+	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr );
 	virtual bool r_LoadVal( CScript & s );
 
     /**

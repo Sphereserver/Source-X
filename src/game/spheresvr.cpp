@@ -72,7 +72,7 @@ bool WritePidFile(int iMode = 0)
 
 int CEventLog::VEvent( dword dwMask, lpctstr pszFormat, va_list args )
 {
-	if ( pszFormat == NULL || pszFormat[0] == '\0' )
+	if ( pszFormat == nullptr || pszFormat[0] == '\0' )
 		return 0;
 
 	TemporaryString tsTemp;
@@ -381,11 +381,11 @@ int Sphere_InitServer( int argc, char *argv[] )
 				if ( *pszTemp )
 				{
 					tchar *c = strchr(pszTemp, '\r');
-					if ( c != NULL )
+					if ( c != nullptr )
 						*c = '\0';
 
 					c = strchr(pszTemp, '\n');
-					if ( c != NULL )
+					if ( c != nullptr )
 						*c = '\0';
 
 					if ( *pszTemp != '\0' )
@@ -414,7 +414,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 #endif
 
 	// Trigger server start
-	g_Serv.r_Call("f_onserver_start", &g_Serv, NULL);
+	g_Serv.r_Call("f_onserver_start", &g_Serv, nullptr);
 	return g_Serv.GetExitFlag();
 
 	EXC_CATCH;
@@ -428,7 +428,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 void Sphere_ExitServer()
 {
 	// Trigger server quit
-	g_Serv.r_Call("f_onserver_exit", &g_Serv, NULL);
+	g_Serv.r_Call("f_onserver_exit", &g_Serv, nullptr);
 
 	g_Serv.SetServerMode(SERVMODE_Exiting);
 
@@ -598,14 +598,14 @@ void dword_q_sort(dword numbers[], dword left, dword right)
 
 void defragSphere(char *path)
 {
-	ASSERT(path != NULL);
+	ASSERT(path != nullptr);
 
 	CSFileText inf;
 	CSFile ouf;
 	char z[256], z1[256], buf[1024];
 	size_t i;
 	dword uid(0);
-	char *p(NULL), *p1(NULL);
+	char *p(nullptr), *p1(nullptr);
 	size_t dBytesRead;
 	size_t dTotalMb;
 	size_t mb10(10*1024*1024);

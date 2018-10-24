@@ -205,7 +205,7 @@ lpctstr GetReasonForGarbageCode(int iCode = -1)
 
 void ReportGarbageCollection(CObjBase * pObj, int iResultCode)
 {
-	ASSERT(pObj != NULL);
+	ASSERT(pObj != nullptr);
 
 	DEBUG_ERR(("GC: Deleted UID=0%" PRIx32 ", Defname='%s', Name='%s'. Invalid code=0x%x (%s).\n",
 		(dword)pObj->GetUID(), pObj->Base_GetDef()->GetResourceName(), pObj->GetName(), iResultCode, GetReasonForGarbageCode(iResultCode)));
@@ -214,7 +214,7 @@ void ReportGarbageCollection(CObjBase * pObj, int iResultCode)
 	{
 		// Object was created via NEWITEM or NEWNPC in scripts, tell me where
 		CResourceScript* pResFile = g_Cfg.GetResourceFile((size_t)(pObj->m_iCreatedResScriptIdx));
-		if (pResFile == NULL)
+		if (pResFile == nullptr)
 			return;
 		DEBUG_ERR(("GC:\t Object was created in '%s', line %d.\n", (lpctstr)pResFile->GetFilePath(), pObj->m_iCreatedResScriptLine));
 	}
@@ -231,7 +231,7 @@ CWorldSearch::CWorldSearch( const CPointMap & pt, int iDist ) :
 	// define a search of the world.
 	m_fAllShow = false;
 	m_fSearchSquare = false;
-	m_pObj = m_pObjNext = NULL;
+	m_pObj = m_pObjNext = nullptr;
 	m_fInertToggle = false;
 
 	m_pSectorBase = m_pSector = pt.GetSector();
@@ -258,11 +258,11 @@ bool CWorldSearch::GetNextSector()
 	for (;;)
 	{
 		m_pSector = m_rectSector.GetSector(m_iSectorCur++);
-		if ( m_pSector == NULL )
+		if ( m_pSector == nullptr )
 			return false;	// done searching.
 		if ( m_pSectorBase == m_pSector )
 			continue;	// same as base.
-		m_pObj = NULL;	// start at head of next Sector.
+		m_pObj = nullptr;	// start at head of next Sector.
 		return true;
 	}
 }
@@ -272,7 +272,7 @@ CItem * CWorldSearch::GetItem()
 	ADDTOCALLSTACK("CWorldSearch::GetItem");
 	for (;;)
 	{
-		if ( m_pObj == NULL )
+		if ( m_pObj == nullptr )
 		{
 			m_fInertToggle = false;
 			m_pObj = static_cast <CObjBase*> ( m_pSector->m_Items_Inert.GetHead());
@@ -281,18 +281,18 @@ CItem * CWorldSearch::GetItem()
 		{
 			m_pObj = m_pObjNext;
 		}
-		if ( m_pObj == NULL )
+		if ( m_pObj == nullptr )
 		{
 			if ( ! m_fInertToggle )
 			{
 				m_fInertToggle = true;
 				m_pObj = static_cast <CObjBase*> ( m_pSector->m_Items_Timer.GetHead());
-				if ( m_pObj != NULL )
+				if ( m_pObj != nullptr )
 					goto jumpover;
 			}
 			if ( GetNextSector() )
 				continue;
-			return NULL;
+			return nullptr;
 		}
 
 jumpover:
@@ -341,7 +341,7 @@ void CWorldSearch::SetSearchSquare( bool fSquareSearch )
 void CWorldSearch::RestartSearch()
 {
 	ADDTOCALLSTACK("CWorldSearch::RestartSearch");
-	m_pObj = NULL;
+	m_pObj = nullptr;
 }
 
 CChar * CWorldSearch::GetChar()
@@ -349,7 +349,7 @@ CChar * CWorldSearch::GetChar()
 	ADDTOCALLSTACK("CWorldSearch::GetChar");
 	for (;;)
 	{
-		if ( m_pObj == NULL )
+		if ( m_pObj == nullptr )
 		{
 			m_fInertToggle = false;
 			m_pObj = static_cast <CObjBase*> ( m_pSector->m_Chars_Active.GetHead());
@@ -357,18 +357,18 @@ CChar * CWorldSearch::GetChar()
 		else
 			m_pObj = m_pObjNext;
 
-		if ( m_pObj == NULL )
+		if ( m_pObj == nullptr )
 		{
 			if ( ! m_fInertToggle && m_fAllShow )
 			{
 				m_fInertToggle = true;
 				m_pObj = static_cast <CObjBase*> ( m_pSector->m_Chars_Disconnect.GetHead());
-				if ( m_pObj != NULL )
+				if ( m_pObj != nullptr )
 					goto jumpover;
 			}
 			if ( GetNextSector() )
 				continue;
-			return NULL;
+			return nullptr;
 		}
 
 jumpover:
@@ -427,10 +427,10 @@ void CWorldThread::CloseAllUIDs()
 	m_ObjNew.Clear();		// empty our list of objects to delete (and delete the objects in the list)
 	m_UIDs.clear();
 
-	if ( m_FreeUIDs != NULL )
+	if ( m_FreeUIDs != nullptr )
 	{
 		free(m_FreeUIDs);
-		m_FreeUIDs = NULL;
+		m_FreeUIDs = nullptr;
 	}
 	m_FreeOffset = FREE_UIDS_SIZE;
 }
@@ -448,16 +448,16 @@ dword CWorldThread::GetUIDCount() const
 CObjBase *CWorldThread::FindUID(dword dwIndex) const
 {
 	if ( !dwIndex || dwIndex >= GetUIDCount() )
-		return NULL;
+		return nullptr;
 	if ( m_UIDs[ dwIndex ] == UID_PLACE_HOLDER )	// unusable for now. (background save is going on)
-		return NULL;
+		return nullptr;
 	return m_UIDs[dwIndex];
 }
 
 void CWorldThread::FreeUID(dword dwIndex)
 {
 	// Can't free up the UID til after the save !
-	m_UIDs[dwIndex] = IsSaving() ? UID_PLACE_HOLDER : NULL;
+	m_UIDs[dwIndex] = IsSaving() ? UID_PLACE_HOLDER : nullptr;
 }
 
 dword CWorldThread::AllocUID( dword dwIndex, CObjBase * pObj )
@@ -473,7 +473,7 @@ dword CWorldThread::AllocUID( dword dwIndex, CObjBase * pObj )
 			goto setcount;
 		}
 
-		if ( m_FreeOffset < FREE_UIDS_SIZE && m_FreeUIDs != NULL )
+		if ( m_FreeOffset < FREE_UIDS_SIZE && m_FreeUIDs != nullptr )
 		{
 			//	We do have a free uid's array. Use it if possible to determine the first free element
 			for ( ; m_FreeOffset < FREE_UIDS_SIZE && m_FreeUIDs[m_FreeOffset] != 0; m_FreeOffset++ )
@@ -490,7 +490,7 @@ dword CWorldThread::AllocUID( dword dwIndex, CObjBase * pObj )
 										// use default allocation for a while, till the next garbage collection
 		dword dwCount = dwCountTotal - 1;
 		dwIndex = m_iUIDIndexLast;
-		while ( m_UIDs[dwIndex] != NULL )
+		while ( m_UIDs[dwIndex] != nullptr )
 		{
 			if ( ! -- dwIndex )
 			{
@@ -530,7 +530,7 @@ void CWorldThread::SaveThreadClose()
 	for ( size_t i = 1; i < GetUIDCount(); ++i )
 	{
 		if ( m_UIDs[i] == UID_PLACE_HOLDER )
-			m_UIDs[i] = NULL;
+			m_UIDs[i] = nullptr;
 	}
 
 	m_FileData.Close();
@@ -582,7 +582,7 @@ int CWorldThread::FixObj( CObjBase * pObj, dword dwUID )
 	}
 	catch (...)	// catch all
 	{
-		g_Log.CatchEvent(NULL, "FixObj" );
+		g_Log.CatchEvent(nullptr, "FixObj" );
 		iResultCode = 0xFFFF;	// bad mem ?
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 	}
@@ -598,7 +598,7 @@ int CWorldThread::FixObj( CObjBase * pObj, dword dwUID )
 		if ( pObj->IsItem())
 		{
 			CItem * pItem = dynamic_cast <CItem*>(pObj);
-			if ( pItem != NULL && pItem->IsType(IT_EQ_MEMORY_OBJ) )
+			if ( pItem != nullptr && pItem->IsType(IT_EQ_MEMORY_OBJ) )
 			{
 				pObj->Delete();
 				return iResultCode;
@@ -623,7 +623,7 @@ int CWorldThread::FixObj( CObjBase * pObj, dword dwUID )
 	}
 	catch (...)	// catch all
 	{
-		g_Log.CatchEvent( NULL, "UID=0%x, Asserted cleanup", dwUID );
+		g_Log.CatchEvent( nullptr, "UID=0%x, Asserted cleanup", dwUID );
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 	}
 	return iResultCode;
@@ -642,7 +642,7 @@ void CWorldThread::GarbageCollection_New()
 		for (size_t i = 0; i < iObjCount; ++i)
 		{
 			CObjBase * pObj = dynamic_cast<CObjBase*>(m_ObjNew.GetAt(i));
-			if (pObj == NULL)
+			if (pObj == nullptr)
 				continue;
 
 			ReportGarbageCollection(pObj, 0x3202);
@@ -653,7 +653,7 @@ void CWorldThread::GarbageCollection_New()
 
 	// Make sure all GM pages have accounts.
 	CGMPage *pPage = static_cast<CGMPage *>(g_World.m_GMPages.GetHead());
-	while ( pPage != NULL )
+	while ( pPage != nullptr )
 	{
 		CGMPage * pPageNext = pPage->GetNext();
 		if ( ! pPage->FindAccount()) // Open script file
@@ -704,7 +704,7 @@ void CWorldThread::GarbageCollection_UIDs()
 		}
 		catch (...)
 		{
-			g_Log.CatchEvent(NULL, "GarbageCollection_UIDs");
+			g_Log.CatchEvent(nullptr, "GarbageCollection_UIDs");
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		}
 	}
@@ -716,7 +716,7 @@ void CWorldThread::GarbageCollection_UIDs()
 	else
 		g_Log.Event(LOGL_EVENT|LOGM_NOCONTEXT, "Garbage Collection: done. %" PRIu32 " Objects accounted for.\n", iCount);
 
-	if ( m_FreeUIDs != NULL )	// new UID engine - search for empty holes and store it in a huge array
+	if ( m_FreeUIDs != nullptr )	// new UID engine - search for empty holes and store it in a huge array
 	{							// the size of the array should be enough even for huge shards
 								// to survive till next garbage collection
 		memset(m_FreeUIDs, 0, FREE_UIDS_SIZE * sizeof(dword));
@@ -818,7 +818,7 @@ CWorld::CWorld()
 	m_timeRespawn = 0;
 	m_timeStartup = 0;
 	m_timeCallUserFunc = 0;
-	m_Sectors = NULL;
+	m_Sectors = nullptr;
 	m_SectorsQty = 0;
 }
 
@@ -999,7 +999,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		g_World.m_TimedFunctions.r_Write(m_FileData);
 
 		m_FileData.WriteSection("GLOBALS");
-		g_Exp.m_VarGlobals.r_WritePrefix(m_FileData, NULL);
+		g_Exp.m_VarGlobals.r_WritePrefix(m_FileData, nullptr);
 
 		g_Exp.m_ListGlobals.r_WriteSave(m_FileData);
 
@@ -1016,7 +1016,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 
 		// GM_Pages.
 		CGMPage *pPage = static_cast <CGMPage*>(m_GMPages.GetHead());
-		for ( ; pPage != NULL; pPage = pPage->GetNext())
+		for ( ; pPage != nullptr; pPage = pPage->GetNext())
 		{
 			pPage->r_Write(m_FileData);
 		}
@@ -1148,7 +1148,7 @@ bool CWorld::SaveForce() // Save world state
 		}
 		continue;
 failedstage:
-		g_Log.CatchEvent( NULL, "Save FAILED for stage %u (%s).", m_iSaveStage, pCurBlock);
+		g_Log.CatchEvent( nullptr, "Save FAILED for stage %u (%s).", m_iSaveStage, pCurBlock);
 		bSuccess = false;
 	}
 
@@ -1309,7 +1309,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 		CScriptTriggerArgs Args(fForceImmediate, m_iSaveStage);
 		enum TRIGRET_TYPE tr;
 
-		if ( g_Serv.r_Call("f_onserver_save", &g_Serv, &Args, NULL, &tr) )
+		if ( g_Serv.r_Call("f_onserver_save", &g_Serv, &Args, nullptr, &tr) )
 			if ( tr == TRIGRET_RET_TRUE )
 				return false;
 		//Fushing before the server should fix #2306
@@ -1352,7 +1352,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 	}
 	catch (...)	// catch all
 	{
-		g_Log.CatchEvent( NULL, "Save FAILED" );
+		g_Log.CatchEvent( nullptr, "Save FAILED" );
 		Broadcast("Save FAILED. " SPHERE_TITLE " is UNSTABLE!");
 		m_FileData.Close();		// close if not already closed.
 		m_FileWorld.Close();	// close if not already closed.
@@ -1407,7 +1407,7 @@ void CWorld::SaveStatics()
                     continue;
 
 				pItem = static_cast <CItem*>(pSector->m_Items_Inert.GetHead());
-				for ( ; pItem != NULL; pItem = pNext )
+				for ( ; pItem != nullptr; pItem = pNext )
 				{
 					pNext = pItem->GetNext();
                     if (pItem->IsTypeMulti())
@@ -1419,7 +1419,7 @@ void CWorld::SaveStatics()
 				}
 
 				pItem = static_cast <CItem*>(pSector->m_Items_Timer.GetHead());
-				for ( ; pItem != NULL; pItem = pNext )
+				for ( ; pItem != nullptr; pItem = pNext )
 				{
 					pNext = pItem->GetNext();
 					if ( pItem->IsTypeMulti() )
@@ -1443,7 +1443,7 @@ void CWorld::SaveStatics()
 	}
 	catch (...)
 	{
-		g_Log.CatchEvent(NULL, "Statics Save FAILED.");
+		g_Log.CatchEvent(nullptr, "Statics Save FAILED.");
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 	}
 }
@@ -1560,7 +1560,7 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 		}
 		catch (...)
 		{
-			g_Log.CatchEvent(NULL, "Load Exception line %d " SPHERE_TITLE " is UNSTABLE!\n", s.GetContext().m_iLineNum);
+			g_Log.CatchEvent(nullptr, "Load Exception line %d " SPHERE_TITLE " is UNSTABLE!\n", s.GetContext().m_iLineNum);
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		}
 	}
@@ -1772,7 +1772,7 @@ lpctstr const CWorld::sm_szLoadKeys[WC_QTY+1] =	// static
     "TIMEHIRES",
 	"TITLE",
 	"VERSION",
-	NULL
+	nullptr
 };
 
 bool CWorld::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
@@ -1800,13 +1800,13 @@ bool CWorld::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 
 			SKIP_SEPARATORS(pszKey);
 			CGMPage* pPage = static_cast <CGMPage*> (m_GMPages.GetAt(index));
-			if ( pPage == NULL )
+			if ( pPage == nullptr )
 				return false;
 
 			if ( !strnicmp(pszKey, "HANDLED", 7) )
 			{
 				CClient *pClient = pPage->FindGMHandler();
-				if ( pClient != NULL && pClient->GetChar() != NULL )
+				if ( pClient != nullptr && pClient->GetChar() != nullptr )
 					sVal.FormatHex(pClient->GetChar()->GetUID());
 				else
 					sVal.FormatVal(0);
@@ -1924,11 +1924,11 @@ void CWorld::Restock()
 		for ( size_t j = 0; j < g_Cfg.m_ResHash.m_Array[i].size(); ++j )
 		{
 			CResourceDef * pResDef = g_Cfg.m_ResHash.m_Array[i][j];
-			if ( pResDef == NULL || ( pResDef->GetResType() != RES_ITEMDEF ))
+			if ( pResDef == nullptr || ( pResDef->GetResType() != RES_ITEMDEF ))
 				continue;
 
 			CItemBase * pBase = dynamic_cast<CItemBase *>(pResDef);
-			if ( pBase != NULL )
+			if ( pBase != nullptr )
 				pBase->Restock();
 		}
 	}
@@ -1941,7 +1941,7 @@ void CWorld::Restock()
 		for ( int s = 0; s < g_MapList.GetSectorQty(m); ++s )
 		{
 			CSector	*pSector = GetSector(m, s);
-			if ( pSector != NULL )
+			if ( pSector != nullptr )
 				pSector->Restock();
 		}
 	}
@@ -1961,7 +1961,7 @@ void CWorld::Close()
 	m_Parties.Clear();
 	m_GMPages.Clear();
 
-	if ( m_Sectors != NULL )
+	if ( m_Sectors != nullptr )
 	{
 		//	free memory allocated by sectors
 		for ( uint s = 0; s < m_SectorsQty; ++s )
@@ -1975,20 +1975,20 @@ void CWorld::Close()
 		{
 			// delete the sectors
 			delete m_Sectors[s];
-			m_Sectors[s] = NULL;
+			m_Sectors[s] = nullptr;
 		}
 
 		delete[] m_Sectors;
-		m_Sectors = NULL;
+		m_Sectors = nullptr;
 		m_SectorsQty = 0;
 	}
 
 	memset(g_MapList.m_maps, 0, sizeof(g_MapList.m_maps));
 
-	if ( g_MapList.m_pMapDiffCollection != NULL )
+	if ( g_MapList.m_pMapDiffCollection != nullptr )
 	{
 		delete g_MapList.m_pMapDiffCollection;
-		g_MapList.m_pMapDiffCollection = NULL;
+		g_MapList.m_pMapDiffCollection = nullptr;
 	}
 
 	CloseAllUIDs();
@@ -2034,10 +2034,10 @@ void CWorld::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE wHu
 
 	// For things
 	bool fCanSee = false;
-	CChar * pChar = NULL;
+	CChar * pChar = nullptr;
 
 	ClientIterator it;
-	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next(), fCanSee = false, pChar = NULL)
+	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next(), fCanSee = false, pChar = nullptr)
 	{
 		if ( ! pClient->CanHear( pSrc, mode ) )
 			continue;
@@ -2047,7 +2047,7 @@ void CWorld::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE wHu
 		lpctstr pszSpeak = pszText;
 		pChar = pClient->GetChar();
 
-		if ( pChar != NULL )
+		if ( pChar != nullptr )
 		{
 			fCanSee = pChar->CanSee(pSrc);
 
@@ -2105,7 +2105,7 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pwText, 
 {
 	ADDTOCALLSTACK("CWorld::SpeakUNICODE");
 	bool fSpeakAsGhost = false;
-	const CChar * pSrcChar = NULL;
+	const CChar * pSrcChar = nullptr;
 
 	if ( pSrc )
 	{
@@ -2143,10 +2143,10 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pwText, 
 
 	// For things
 	bool fCanSee = false;
-	CChar * pChar = NULL;
+	CChar * pChar = nullptr;
 
 	ClientIterator it;
-	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next(), fCanSee = false, pChar = NULL)
+	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next(), fCanSee = false, pChar = nullptr)
 	{
 		if ( ! pClient->CanHear( pSrc, mode ) )
 			continue;
@@ -2154,7 +2154,7 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pwText, 
 		const nchar * pwSpeak = pwText;
 		pChar = pClient->GetChar();
 
-		if ( pChar != NULL )
+		if ( pChar != nullptr )
 		{
 			// Cansee?
 			fCanSee = pChar->CanSee( pSrc );
@@ -2222,7 +2222,7 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pwText, 
 void CWorld::Broadcast(lpctstr pMsg) // System broadcast in bold text
 {
 	ADDTOCALLSTACK("CWorld::Broadcast");
-	Speak( NULL, pMsg, HUE_TEXT_DEF, TALKMODE_BROADCAST, FONT_BOLD );
+	Speak( nullptr, pMsg, HUE_TEXT_DEF, TALKMODE_BROADCAST, FONT_BOLD );
 }
 
 void __cdecl CWorld::Broadcastf(lpctstr pMsg, ...) // System broadcast in bold text
@@ -2532,12 +2532,12 @@ CSector *CWorld::GetSector(int map, int i) const	// gets sector # from one map
 
 	// if the map is not supported, return empty sector
 	if (( map < 0 ) || ( map >= 256 ) || !g_MapList.m_maps[map] )
-		return NULL;
+		return nullptr;
 
 	if ( i >= g_MapList.GetSectorQty(map) )
 	{
 		g_Log.EventError("Unsupported sector #%d for map #%d specified.\n", i, map);
-		return NULL;
+		return nullptr;
 	}
 
 	int base = 0;
@@ -2549,12 +2549,12 @@ CSector *CWorld::GetSector(int map, int i) const	// gets sector # from one map
 		if ( m == map )
 		{
 			if ( g_MapList.GetSectorQty(map) < i )
-				return NULL;
+				return nullptr;
 
 			return m_Sectors[base + i];
 		}
 
 		base += g_MapList.GetSectorQty(m);
 	}
-	return NULL;
+	return nullptr;
 }

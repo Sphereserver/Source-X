@@ -5,7 +5,7 @@
 AutoResetEvent::AutoResetEvent()
 {
 #ifdef _WIN32
-	m_handle = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_handle = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 #else
 	pthread_mutexattr_init(&m_criticalSectionAttr);
 	pthread_mutexattr_settype(&m_criticalSectionAttr, PTHREAD_MUTEX_RECURSIVE_NP);
@@ -88,7 +88,7 @@ void AutoResetEvent::signal()
 ManualResetEvent::ManualResetEvent()
 {
 #ifdef _WIN32
-	m_handle = CreateEvent(NULL, TRUE, FALSE, NULL);
+	m_handle = CreateEvent(nullptr, TRUE, FALSE, nullptr);
 #else
 	m_value = false;
 	pthread_mutexattr_init(&m_criticalSectionAttr);

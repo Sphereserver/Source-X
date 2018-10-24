@@ -139,13 +139,13 @@ public:
 	/** @name Constructors, Destructor, Asign operator:
 	*/
 	///@{
-	inline ManualThreadLock() : m_mutex(NULL), m_locked(false) {
+	inline ManualThreadLock() : m_mutex(nullptr), m_locked(false) {
 	}
 	inline explicit ManualThreadLock(SimpleMutex * mutex) : m_locked(false) {
 		setMutex(mutex);
 	}
 	inline ~ManualThreadLock() {
-		if (m_mutex != NULL)
+		if (m_mutex != nullptr)
 			doUnlock();
 	}
 private:

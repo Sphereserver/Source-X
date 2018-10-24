@@ -17,7 +17,7 @@ lpctstr const CBaseBaseDef::sm_szLoadKeys[OBC_QTY+1] =
 	#define ADD(a,b) b,
 	#include "../tables/CBaseBaseDef_props.tbl"
 	#undef ADD
-	NULL
+	nullptr
 };
 
 
@@ -90,7 +90,7 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 
 	switch ( index )
 	{
-		//return as string or hex number or NULL if not set
+		//return as string or hex number or nullptr if not set
 		case OBC_CATEGORY:
 		case OBC_DESCRIPTION:
 		case OBC_SUBSECTION:

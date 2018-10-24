@@ -90,7 +90,7 @@ lpctstr const CScriptObj::sm_szLoadKeys[SSC_QTY+1] =
 	#define ADD(a,b) b,
 	#include "../tables/CScriptObj_functions.tbl"
 	#undef ADD
-	NULL
+	nullptr
 };
 
 bool CScriptObj::r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * psVal, TRIGRET_TYPE * piRet )
@@ -909,7 +909,7 @@ lpctstr const CScriptObj::sm_szVerbKeys[SSV_QTY+1] =
     "NEWSUMMON",
 	"OBJ",
 	"SHOW",
-	NULL
+	nullptr
 };
 
 
@@ -1801,7 +1801,7 @@ lpctstr const CScriptObj::sm_szScriptKeys[SK_QTY+1] =
 	"IF",
 	"RETURN",
 	"WHILE",
-	NULL
+	nullptr
 };
 
 

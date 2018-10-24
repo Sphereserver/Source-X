@@ -73,7 +73,7 @@ lpctstr const CSector::sm_szLoadKeys[SC_QTY+1] =
 	"RAINCHANCE",
 	"SEASON",
 	"WEATHER",
-	NULL
+	nullptr
 };
 
 bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
@@ -86,7 +86,7 @@ bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		{ "HIGH", INT32_MIN },	// speech can be very complex if low char count
 		{ "MEDIUM", 5 },
 		{ "LOW", 10 },
-		{ NULL, INT32_MAX }
+		{ nullptr, INT32_MAX }
 	};
 
 	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
@@ -157,9 +157,9 @@ void CSector::GoSleep()
     ProfileTask charactersTask(PROFILE_TIMERS);
     CTimedObject::GoSleep();
 
-    CChar * pCharNext = NULL;
+    CChar * pCharNext = nullptr;
     CChar * pChar = static_cast <CChar*>(m_Chars_Active.GetHead());
-    for (; pChar != NULL; pChar = pCharNext)
+    for (; pChar != nullptr; pChar = pCharNext)
     {
         pChar->GoSleep();
         if (pChar->m_pNPC)
@@ -168,9 +168,9 @@ void CSector::GoSleep()
         }
     }
 
-    CItem * pItemNext = NULL;
+    CItem * pItemNext = nullptr;
     CItem * pItem = static_cast <CItem*>( m_Items_Timer.GetHead());
-    for (; pItem != NULL; pItem = pItemNext)
+    for (; pItem != nullptr; pItem = pItemNext)
     {
         pItem->GoSleep();
     }
@@ -182,30 +182,30 @@ void CSector::GoAwake()
     ProfileTask charactersTask(PROFILE_TIMERS);
     CTimedObject::GoAwake();  // Awake it first, otherwise other things won't work.
 
-    CChar * pCharNext = NULL;
+    CChar * pCharNext = nullptr;
     CChar * pChar = static_cast <CChar*>(m_Chars_Active.GetHead());
-    for (; pChar != NULL; pChar = pCharNext)
+    for (; pChar != nullptr; pChar = pCharNext)
     {
         pCharNext = pChar->GetNext();
         pChar->GoAwake();
     }
 
     pChar = static_cast<CChar*>(m_Chars_Disconnect.GetHead());
-    for (; pChar != NULL; pChar = pCharNext)
+    for (; pChar != nullptr; pChar = pCharNext)
     {
         pCharNext = pChar->GetNext();
         pChar->GoAwake();
     }
 
-    CItem * pItemNext = NULL;
+    CItem * pItemNext = nullptr;
     CItem * pItem = static_cast <CItem*>(m_Items_Timer.GetHead());
-    for (; pItem != NULL; pItem = pItemNext)
+    for (; pItem != nullptr; pItem = pItemNext)
     {
         pItemNext = pItem->GetNext();
         pItem->GoAwake();
     }
     pItem = static_cast <CItem*>(m_Items_Inert.GetHead());
-    for (; pItem != NULL; pItem = pItemNext)
+    for (; pItem != nullptr; pItem = pItemNext)
     {
         pItemNext = pItem->GetNext();
         pItem->GoAwake();
@@ -281,7 +281,7 @@ lpctstr const CSector::sm_szVerbKeys[SEV_QTY+1] =
 	#define ADD(a,b) b,
 	#include "../tables/CSector_functions.tbl"
 	#undef ADD
-	NULL
+	nullptr
 };
 
 bool CSector::r_Verb( CScript & s, CTextConsole * pSrc )
@@ -393,23 +393,23 @@ void CSector::r_Write()
 	}
 
 	// Chars in the sector.
-	CChar *pCharNext = NULL;
-	for ( CChar *pChar = static_cast<CChar*>(m_Chars_Active.GetHead()); pChar != NULL; pChar = pCharNext )
+	CChar *pCharNext = nullptr;
+	for ( CChar *pChar = static_cast<CChar*>(m_Chars_Active.GetHead()); pChar != nullptr; pChar = pCharNext )
 	{
 		pCharNext = pChar->GetNext();
 		pChar->r_WriteParity(pChar->m_pPlayer ? g_World.m_FilePlayers : g_World.m_FileWorld);
 	}
 
 	// Inactive Client Chars, ridden horses and dead NPCs (NOTE: Push inactive player chars out to the account files here?)
-	for ( CChar *pChar = static_cast<CChar*>(m_Chars_Disconnect.GetHead()); pChar != NULL; pChar = pCharNext )
+	for ( CChar *pChar = static_cast<CChar*>(m_Chars_Disconnect.GetHead()); pChar != nullptr; pChar = pCharNext )
 	{
 		pCharNext = pChar->GetNext();
 		pChar->r_WriteParity(pChar->m_pPlayer ? g_World.m_FilePlayers : g_World.m_FileWorld);
 	}
 
 	// Items on the ground.
-	CItem *pItemNext = NULL;
-	for ( CItem *pItem = static_cast<CItem*>(m_Items_Inert.GetHead()); pItem != NULL; pItem = pItemNext )
+	CItem *pItemNext = nullptr;
+	for ( CItem *pItem = static_cast<CItem*>(m_Items_Inert.GetHead()); pItem != nullptr; pItem = pItemNext )
 	{
 		pItemNext = pItem->GetNext();
         if (pItem->IsTypeMulti())
@@ -422,7 +422,7 @@ void CSector::r_Write()
         }
 	}
 
-	for ( CItem *pItem = static_cast<CItem*>(m_Items_Timer.GetHead()); pItem != NULL; pItem = pItemNext )
+	for ( CItem *pItem = static_cast<CItem*>(m_Items_Timer.GetHead()); pItem != nullptr; pItem = pItemNext )
 	{
 		pItemNext = pItem->GetNext();
         if (pItem->IsTypeMulti())
@@ -442,7 +442,7 @@ bool CSector::v_AllChars( CScript & s, CTextConsole * pSrc )
 	CScript script(s.GetArgStr());
 	script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
 	script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
-	CChar * pChar = NULL;
+	CChar * pChar = nullptr;
 	bool fRet = false;
 
 	// Loop through all the characters in m_Chars_Active.
@@ -453,7 +453,7 @@ bool CSector::v_AllChars( CScript & s, CTextConsole * pSrc )
 		pChar = static_cast <CChar*>(m_Chars_Active.GetAt(--i));
 
 		// Check that a character was returned and keep looking if not.
-		if (pChar == NULL)
+		if (pChar == nullptr)
 			continue;
 
 		// Execute the verb on the character
@@ -468,7 +468,7 @@ bool CSector::v_AllCharsIdle( CScript & s, CTextConsole * pSrc )
 	CScript script(s.GetArgStr());
 	script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
 	script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
-	CChar * pChar = NULL;
+	CChar * pChar = nullptr;
 	bool fRet = false;
 
 	// Loop through all the characters in m_Chars_Disconnect.
@@ -479,7 +479,7 @@ bool CSector::v_AllCharsIdle( CScript & s, CTextConsole * pSrc )
 		pChar = static_cast <CChar*>(m_Chars_Disconnect.GetAt(--i));
 
 		// Check that a character was returned and keep looking if not.
-		if (pChar == NULL)
+		if (pChar == nullptr)
 			continue;
 
 		// Execute the verb on the character
@@ -494,7 +494,7 @@ bool CSector::v_AllItems( CScript & s, CTextConsole * pSrc )
 	CScript script(s.GetArgStr());
 	script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
 	script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
-	CItem * pItem = NULL;
+	CItem * pItem = nullptr;
 	bool fRet = false;
 
 	// Loop through all the items in m_Items_Timer.
@@ -506,7 +506,7 @@ bool CSector::v_AllItems( CScript & s, CTextConsole * pSrc )
 		pItem = static_cast <CItem*>(m_Items_Timer.GetAt(--i));
 
 		// Check that an item was returned and keep looking if not.
-		if (pItem == NULL)
+		if (pItem == nullptr)
 			continue;
 
 		// Execute the verb on the item
@@ -522,7 +522,7 @@ bool CSector::v_AllItems( CScript & s, CTextConsole * pSrc )
 		pItem = static_cast <CItem*>(m_Items_Inert.GetAt(--i));
 
 		// Check that an item was returned and keep looking if not.
-		if (pItem == NULL)
+		if (pItem == nullptr)
 			continue;
 
 		// Execute the verb on the item
@@ -537,7 +537,7 @@ bool CSector::v_AllClients( CScript & s, CTextConsole * pSrc )
 	CScript script(s.GetArgStr());
 	script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
 	script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
-	CChar * pChar = NULL;
+	CChar * pChar = nullptr;
 	bool fRet = false;
 
 	// Loop through all the characters in m_Chars_Active.
@@ -548,7 +548,7 @@ bool CSector::v_AllClients( CScript & s, CTextConsole * pSrc )
 		pChar = static_cast <CChar*>(m_Chars_Active.GetAt(--i));
 
 		// Check that a character was returned and keep looking if not.
-		if (pChar == NULL)
+		if (pChar == nullptr)
 			continue;
 
 		// Check that the character is a client (we only want to affect clients with this)
@@ -738,7 +738,7 @@ void CSector::SetLightNow( bool fFlash )
 	// Set the light level for all the CClients here.
 
 	CChar * pChar = static_cast <CChar*>( m_Chars_Active.GetHead());
-	for ( ; pChar != NULL; pChar = pChar->GetNext())
+	for ( ; pChar != nullptr; pChar = pChar->GetNext())
 	{
 		if ( pChar->IsStatFlag( STATF_DEAD | STATF_NIGHTSIGHT ))
 			continue;
@@ -838,7 +838,7 @@ void CSector::SetWeather( WEATHER_TYPE w )
 	m_Env.m_Weather = w;
 
 	CChar * pChar = static_cast <CChar*>( m_Chars_Active.GetHead());
-	for ( ; pChar != NULL; pChar = pChar->GetNext())
+	for ( ; pChar != nullptr; pChar = pChar->GetNext())
 	{
 		if ( pChar->IsClient())
 			pChar->GetClient()->addWeather( w );
@@ -859,7 +859,7 @@ void CSector::SetSeason( SEASON_TYPE season )
 	m_Env.m_Season = season;
 
 	CChar * pChar = static_cast <CChar*>( m_Chars_Active.GetHead());
-	for ( ; pChar != NULL; pChar = pChar->GetNext())
+	for ( ; pChar != nullptr; pChar = pChar->GetNext())
 	{
 		if ( pChar->IsClient() )
 			pChar->GetClient()->addSeason(season);
@@ -904,13 +904,13 @@ void CSector::OnHearItem( CChar * pChar, tchar * szText )
 
 	CItem * pItemNext;
 	CItem * pItem = static_cast <CItem*>( m_Items_Timer.GetHead());
-	for ( ; pItem != NULL; pItem = pItemNext )
+	for ( ; pItem != nullptr; pItem = pItemNext )
 	{
 		pItemNext = pItem->GetNext();
 		pItem->OnHear( szText, pChar );
 	}
 	pItem = static_cast <CItem*>( m_Items_Inert.GetHead());
-	for ( ; pItem != NULL; pItem = pItemNext )
+	for ( ; pItem != nullptr; pItem = pItemNext )
 	{
 		pItemNext = pItem->GetNext();
 		pItem->OnHear( szText, pChar );
@@ -1048,7 +1048,7 @@ void CSector::RespawnDeadNPCs()
 	// Respawn dead NPC's
 	CChar * pCharNext;
 	CChar * pChar = static_cast <CChar *>( m_Chars_Disconnect.GetHead());
-	for ( ; pChar != NULL; pChar = pCharNext )
+	for ( ; pChar != nullptr; pChar = pCharNext )
 	{
 		pCharNext = pChar->GetNext();
 		if ( ! pChar->m_pNPC )
@@ -1214,9 +1214,9 @@ bool CSector::OnTick()
     // Check environ changes and inform clients of it.
 	ProfileTask charactersTask(PROFILE_CHARS);
 
-	CChar * pCharNext = NULL;
+	CChar * pCharNext = nullptr;
 	CChar * pChar = static_cast <CChar*>( m_Chars_Active.GetHead());
-	for ( ; pChar != NULL; pChar = pCharNext )
+	for ( ; pChar != nullptr; pChar = pCharNext )
 	{
 		EXC_TRYSUB("TickChar");
 

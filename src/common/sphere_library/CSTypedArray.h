@@ -30,7 +30,7 @@ public:
     /**
     * @brief Initializes array.
     *
-    * Sets m_pData to NULL and counters to zero.
+    * Sets m_pData to nullptr and counters to zero.
     */
     CSTypedArray() {}
     /**

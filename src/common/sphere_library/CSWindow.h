@@ -28,7 +28,7 @@ public:
 	}
 	CSWindow()
 	{
-		m_hWnd = NULL;
+		m_hWnd = nullptr;
 	}
 	virtual ~CSWindow()
 	{
@@ -41,7 +41,7 @@ private:
 
 public:
 	// Standard message handlers.
-	BOOL OnCreate( HWND hwnd, LPCREATESTRUCT lpCreateStruct = NULL  )
+	BOOL OnCreate( HWND hwnd, LPCREATESTRUCT lpCreateStruct = nullptr  )
 	{
 		UNREFERENCED_PARAMETER(lpCreateStruct);
 		m_hWnd = hwnd;
@@ -49,20 +49,20 @@ public:
 	}
 	void OnDestroy()
 	{
-		m_hWnd = NULL;
+		m_hWnd = nullptr;
 	}
 	void OnDestroy( HWND hwnd )
 	{
 		UNREFERENCED_PARAMETER(hwnd);
-		m_hWnd = NULL;
+		m_hWnd = nullptr;
 	}
 
 	// Basic window functions.
 	BOOL IsWindow() const
 	{
-		if ( this == NULL )
+		if ( this == nullptr )
 			return false;
-		if ( m_hWnd == NULL )
+		if ( m_hWnd == nullptr )
 			return false;
 		return( ::IsWindow( m_hWnd ));
 	}
@@ -95,10 +95,10 @@ public:
 	// Create/Destroy
 	void DestroyWindow()
 	{
-		if ( m_hWnd == NULL )
+		if ( m_hWnd == nullptr )
 			return;
 		::DestroyWindow( m_hWnd );
-		ASSERT( m_hWnd == NULL );
+		ASSERT( m_hWnd == nullptr );
 	}
 
 	// Area and location
@@ -149,7 +149,7 @@ public:
 	UINT_PTR SetTimer( UINT_PTR uTimerID, UINT uWaitmSec )
 	{
 		ASSERT(m_hWnd);
-		return ::SetTimer( m_hWnd, uTimerID, uWaitmSec, NULL );
+		return ::SetTimer( m_hWnd, uTimerID, uWaitmSec, nullptr );
 	}
 	BOOL KillTimer( UINT_PTR uTimerID )
 	{
@@ -158,7 +158,7 @@ public:
 	}
 	int MessageBox( lpctstr lpszText, lpctstr lpszTitle, UINT fuStyle = MB_OK ) const
 	{
-		// ASSERT( m_hWnd ); ok for this to be NULL !
+		// ASSERT( m_hWnd ); ok for this to be nullptr !
 		return ::MessageBox( m_hWnd, lpszText, lpszTitle, fuStyle );
 	}
 	INT_PTR SetWindowLongPtr( int nIndex, INT_PTR dwNewLong )
@@ -225,9 +225,9 @@ public:
 	CWinApp()
 	{
 		m_pszAppName = "";
-		m_hInstance = NULL;
-		m_lpCmdLine = NULL;
-		m_pMainWnd = NULL;
+		m_hInstance = nullptr;
+		m_lpCmdLine = nullptr;
+		m_pMainWnd = nullptr;
 	}
 
 	virtual ~CWinApp()
@@ -251,9 +251,9 @@ public:
 		m_pszExeName = szFileName;
 
         lptstr pszTmp = const_cast<lptstr>(strrchr( m_pszExeName, '\\' ));	// Get title
-        lstrcpy( szFileName, ( pszTmp == NULL ) ? m_pszExeName : ( pszTmp + 1 ));
+        lstrcpy( szFileName, ( pszTmp == nullptr ) ? m_pszExeName : ( pszTmp + 1 ));
 		pszTmp = strrchr( szFileName, '.' );	// Get extension.
-		if ( pszTmp != NULL )
+		if ( pszTmp != nullptr )
 			pszTmp[0] = '\0';
 		lstrcat( szFileName, ".INI" );
 

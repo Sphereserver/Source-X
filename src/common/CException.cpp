@@ -49,8 +49,8 @@ int IsDebuggerPresent(void)
 		//	RETURN VALUE:
 		//		destination buffer
 
-		LPCVOID lpSource = NULL;
-		va_list* Arguments = NULL;
+		LPCVOID lpSource = nullptr;
+		va_list* Arguments = nullptr;
 		DWORD nChars = ::FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			lpSource,
 			dwError, LANG_NEUTRAL,
@@ -256,7 +256,7 @@ void SetExceptionTranslator()
 			signal( sig, &Signal_Terminate);
 			sigemptyset(&set);
 			sigaddset(&set, sig);
-			sigprocmask(SIG_UNBLOCK, &set, NULL);
+			sigprocmask(SIG_UNBLOCK, &set, nullptr);
 		}
 
 		g_Serv.SetExitFlag(SIGABRT);
@@ -281,7 +281,7 @@ void SetExceptionTranslator()
 			signal( sig, &Signal_Break );
 			sigemptyset(&set);
 			sigaddset(&set, sig);
-			sigprocmask(SIG_UNBLOCK, &set, NULL);
+			sigprocmask(SIG_UNBLOCK, &set, nullptr);
 		}
 	}
 
@@ -300,7 +300,7 @@ void SetExceptionTranslator()
 			signal( sig, &Signal_Illegal_Instruction );
 			sigemptyset(&set);
 			sigaddset(&set, sig);
-			sigprocmask(SIG_UNBLOCK, &set, NULL);
+			sigprocmask(SIG_UNBLOCK, &set, nullptr);
 		}
 
 		UNPAUSECALLSTACK;

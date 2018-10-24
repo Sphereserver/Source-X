@@ -134,7 +134,7 @@ CItemContainer *CChar::GetBank( LAYER_TYPE layer )
 		case LAYER_VENDOR_EXTRA:
 		case LAYER_VENDOR_BUYS:
 			if ( !NPC_IsVendor() )
-				return NULL;
+				return nullptr;
 			id = ITEMID_VENDOR_BOX;
 			break;
 
@@ -177,13 +177,13 @@ CItem *CChar::GetBackpackItem(ITEMID_TYPE id)
 	CItemContainer *pPack = GetPack();
 	if ( pPack )
 	{
-		for ( CItem *pItem = pPack->GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
+		for ( CItem *pItem = pPack->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 		{
 			if ( pItem->GetID() == id )
 				return pItem;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 CItem *CChar::LayerFind( LAYER_TYPE layer ) const
@@ -191,12 +191,12 @@ CItem *CChar::LayerFind( LAYER_TYPE layer ) const
 	ADDTOCALLSTACK("CChar::LayerFind");
 	// Find an item i have equipped.
 
-	for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
+	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 	{
 		if ( pItem->GetEquipLayer() == layer )
 			return pItem;
 	}
-	return NULL;
+	return nullptr;
 }
 
 TRIGRET_TYPE CChar::OnCharTrigForLayerLoop( CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs, CSString *pResult, LAYER_TYPE layer )
@@ -205,7 +205,7 @@ TRIGRET_TYPE CChar::OnCharTrigForLayerLoop( CScript &s, CTextConsole *pSrc, CScr
 	CScriptLineContext StartContext = s.GetContext();
 	CScriptLineContext EndContext = StartContext;
 
-	for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
+	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 	{
 		if ( pItem->GetEquipLayer() == layer )
 		{
@@ -326,7 +326,7 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 	if ( (pItem->GetParent() == this) && (pItem->GetEquipLayer() == layer) ) // not a visible item LAYER_TYPE
 		return layer;
 
-	CItem *pItemPrev = NULL;
+	CItem *pItemPrev = nullptr;
 	bool fCantEquip = false;
 
 	switch ( layer )
@@ -386,7 +386,7 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 				// Unequip 2 handed weapons if we must use the other hand
 				pItemPrev = LayerFind(LAYER_HAND2);
 				if ( pItemPrev && !pItemPrev->IsTypeWeapon() && !pItemPrev->IsType(IT_FISH_POLE) )
-					pItemPrev = NULL;
+					pItemPrev = nullptr;
 			}
 			break;
 		}
@@ -727,7 +727,7 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 	CItemContainer *pPack = GetPack();
 	if ( pPack )
 	{
-		for ( CItem *pItem = pPack->GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
+		for ( CItem *pItem = pPack->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 		{
 			if ( !pItem->IsTypeSpellbook() )
 				continue;
@@ -841,10 +841,10 @@ CChar * CChar::GetOwner() const
 	ADDTOCALLSTACK("CChar::GetOwner");
 
 	if (m_pPlayer)
-		return NULL;
+		return nullptr;
 	if (m_pNPC)
 		return NPC_PetGetOwner();
-	return NULL;
+	return nullptr;
 }
 
 bool CChar::IsOwnedBy( const CChar * pChar, bool fAllowGM ) const
@@ -908,7 +908,7 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER", true)) },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER_NINJITSU), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER", true)) },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY_NINJITSU), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY", true)) },
-			{ NULL, INT32_MAX }
+			{ nullptr, INT32_MAX }
 		};
 		len = snprintf(pTemp, STR_TEMPLENGTH, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
 	}
@@ -927,7 +927,7 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER", true)) },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER_BUSHIDO), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER", true)) },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY_BUSHIDO), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY", true)) },
-			{ NULL, INT32_MAX }
+			{ nullptr, INT32_MAX }
 		};
 		len = snprintf(pTemp, STR_TEMPLENGTH, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
 	}
@@ -946,7 +946,7 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER),(int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER", true)) },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER", true)) },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY", true)) },
-			{ NULL, INT32_MAX }
+			{ nullptr, INT32_MAX }
 		};
 		len = snprintf(pTemp, STR_TEMPLENGTH, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
 	}
@@ -1187,7 +1187,7 @@ bool CChar::CanTouch( const CPointMap &pt ) const
 	// Check for blocking objects.
 	// It this in a container we can't get to ?
 
-	return CanSeeLOS(pt, NULL, 6);
+	return CanSeeLOS(pt, nullptr, 6);
 }
 
 bool CChar::CanTouch( const CObjBase *pObj ) const
@@ -1200,7 +1200,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 	if ( !pObj )
 		return false;
 
-	const CItem *pItem = NULL;
+	const CItem *pItem = nullptr;
 	const CObjBaseTemplate *pObjTop = pObj->GetTopLevelObj();
 	int iDist = GetTopDist3D(pObjTop);
 
@@ -1238,7 +1238,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 	}
 
 	//	search up to top level object
-	const CChar *pChar = NULL;
+	const CChar *pChar = nullptr;
 	if ( pObjTop && (pObjTop != this) )
 	{
 		if ( pObjTop->IsChar() )
@@ -1254,7 +1254,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 				return false;
 		}
 
-		CObjBase *pObjCont = NULL;
+		CObjBase *pObjCont = nullptr;
 		const CObjBase *pObjTest = pObj;
 		for (;;)
 		{
@@ -1280,9 +1280,9 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 	{
 		if ( GetAbilityFlags() & CAN_C_DCIGNORELOS )
 			return true;
-		else if ( pObj->IsChar() && (pChar != NULL) && (pChar->GetAbilityFlags() & CAN_C_DCIGNORELOS) )
+		else if ( pObj->IsChar() && (pChar != nullptr) && (pChar->GetAbilityFlags() & CAN_C_DCIGNORELOS) )
 			return true;
-		else if ( pObj->IsItem() && (pItem != NULL) && (pItem->GetAbilityFlags() & CAN_I_DCIGNORELOS) )
+		else if ( pObj->IsItem() && (pItem != nullptr) && (pItem->GetAbilityFlags() & CAN_I_DCIGNORELOS) )
 			return true;
 		else
 			return false;
@@ -1291,9 +1291,9 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 	{
 		if ( GetAbilityFlags() & CAN_C_DCIGNOREDIST )
 			return true;
-		else if ( pObj->IsChar() && (pChar != NULL) && (pChar->GetAbilityFlags() & CAN_C_DCIGNOREDIST) )
+		else if ( pObj->IsChar() && (pChar != nullptr) && (pChar->GetAbilityFlags() & CAN_C_DCIGNOREDIST) )
 			return true;
-		else if ( pObj->IsItem() && (pItem != NULL) && (pItem->GetAbilityFlags() & CAN_I_DCIGNOREDIST) )
+		else if ( pObj->IsItem() && (pItem != nullptr) && (pItem->GetAbilityFlags() & CAN_I_DCIGNOREDIST) )
 			return true;
 		else
 			return false;
@@ -1433,13 +1433,13 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
 		return false;
 
 	bool fCanSpeech = false;
-	CVarDefCont *pValue = pSrcRegion->GetResourceID().IsItem() ? pSrcRegion->GetResourceID().ItemFind()->GetKey("NOMUTESPEECH", false) : NULL;
+	CVarDefCont *pValue = pSrcRegion->GetResourceID().IsItem() ? pSrcRegion->GetResourceID().ItemFind()->GetKey("NOMUTESPEECH", false) : nullptr;
 	if ( pValue && pValue->GetValNum() > 0 )
 		fCanSpeech = true;
 	if ( pSrcRegion->GetResourceID().IsItem() && !pSrcRegion->IsFlag(REGION_FLAG_SHIP) && !fCanSpeech )
 		return false;
 
-	pValue = m_pArea->GetResourceID().IsItem() ? m_pArea->GetResourceID().ItemFind()->GetKey("NOMUTESPEECH", false) : NULL;
+	pValue = m_pArea->GetResourceID().IsItem() ? m_pArea->GetResourceID().ItemFind()->GetKey("NOMUTESPEECH", false) : nullptr;
 	if ( pValue && pValue->GetValNum() > 0 )
 		fCanSpeech = true;
 	if ( m_pArea->GetResourceID().IsItem() && !m_pArea->IsFlag(REGION_FLAG_SHIP) && !fCanSpeech )
@@ -1561,13 +1561,13 @@ bool CChar::IsTakeCrime( const CItem *pItem, CChar ** ppCharMark ) const
 
 	CObjBaseTemplate *pObjTop = pItem->GetTopLevelObj();
 	CChar *pCharMark = dynamic_cast<CChar*>(pObjTop);
-	if ( ppCharMark != NULL )
+	if ( ppCharMark != nullptr )
 		*ppCharMark = pCharMark;
 
 	if ( static_cast<const CChar*>(pObjTop) == this )
 		return false;	// this is yours
 
-	if ( pCharMark == NULL )	// In some (or is) container.
+	if ( pCharMark == nullptr )	// In some (or is) container.
 	{
 		if ( pItem->IsAttr(ATTR_OWNED) && pItem->m_uidLink != GetUID() )
 			return true;
@@ -1586,7 +1586,7 @@ bool CChar::IsTakeCrime( const CItem *pItem, CChar ** ppCharMark ) const
 		return false;	// I guess it's not a crime
 	}
 
-	if ( pCharMark->IsOwnedBy(this) || (pCharMark->Memory_FindObjTypes(this, MEMORY_FRIEND) != NULL) )	// he lets you
+	if ( pCharMark->IsOwnedBy(this) || (pCharMark->Memory_FindObjTypes(this, MEMORY_FRIEND) != nullptr) )	// he lets you
 		return false;
 
 	// Pack animal has no owner ?
@@ -1685,12 +1685,12 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 		ptTest = GetTopPoint();
 		ptTest.Move(dirTest1);
 		if ( !CheckValidMove(ptTest, pdwBlockFlags, DIR_QTY, pClimbHeight) )
-			return NULL;
+			return nullptr;
 
 		ptTest = GetTopPoint();
 		ptTest.Move(dirTest2);
 		if ( !CheckValidMove(ptTest, pdwBlockFlags, DIR_QTY, pClimbHeight) )
-			return NULL;
+			return nullptr;
 	}
 
 	CRegion *pArea = ptDest.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA|REGION_TYPE_ROOM);
@@ -1698,14 +1698,14 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 	{
 		//if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
 		g_pLog->EventWarn("WalkCheck: failed to get the destination region (UID: 0%x, name: %s).\n", GetUID().GetObjUID(), GetName());
-		return NULL;
+		return nullptr;
 	}
 
 	dword dwCan = GetMoveBlockFlags();
 	if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
 		g_pLog->EventWarn("GetMoveBlockFlags() (0x%" PRIx32 ").\n", dwCan);
 	if ( !(dwCan & (CAN_C_SWIM| CAN_C_WALK|CAN_C_FLY|CAN_C_RUN|CAN_C_HOVER)) )
-		return NULL;	// cannot move at all, so WTF?
+		return nullptr;	// cannot move at all, so WTF?
 
 	dword dwBlockFlags = dwCan;
 	if ( dwCan & CAN_C_WALK )
@@ -1724,7 +1724,7 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 	{
 		DEBUG_ERR(("Character 0%x on %d,%d,%d wants to move into an invalid location %d,%d,%d.\n",
 			GetUID().GetObjUID(), GetTopPoint().m_x, GetTopPoint().m_y, GetTopPoint().m_z, ptDest.m_x, ptDest.m_y, ptDest.m_z));
-		return NULL;
+		return nullptr;
 	}
 	g_World.GetHeightPoint(ptDest, block, true);
 
@@ -1776,10 +1776,10 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 				if ( block.m_Bottom.m_dwTile > TERRAIN_QTY )
 				{
 					if ( block.m_Bottom.m_z > ptDest.m_z + m_zClimbHeight + 2 ) // Too high to climb.
-						return NULL;
+						return nullptr;
 				}
 				else if ( block.m_Bottom.m_z > ptDest.m_z + m_zClimbHeight + GetHeightMount() + 3 )
-					return NULL;
+					return nullptr;
 			}
 		}
 
@@ -1789,9 +1789,9 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 		//dword dwMoveBlock = (dwBlockFlags & CAN_I_MOVEMASK) &~ (CAN_I_CLIMB|CAN_I_ROOF);
 		//if ( dwMoveBlock &~ dwCan )
 		if ( (dwBlockFlags & CAN_I_BLOCK) && !Can(CAN_C_PASSWALLS) )
-			return NULL;
+			return nullptr;
 		if ( block.m_Bottom.m_z >= UO_SIZE_Z )
-			return NULL;
+			return nullptr;
 	}
 
 	if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
@@ -1799,7 +1799,7 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 	if ( (GetHeightMount() + ptDest.m_z >= block.m_Top.m_z) && g_Cfg.m_iMountHeight && !IsPriv(PRIV_GM) && !IsPriv(PRIV_ALLMOVE) )
 	{
 		SysMessageDefault(DEFMSG_MSG_MOUNT_CEILING);
-		return NULL;
+		return nullptr;
 	}
 
 	if ( pdwBlockFlags )

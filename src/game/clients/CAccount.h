@@ -351,9 +351,9 @@ public:
 	* @brief Get the client logged into a CAccount.
 	* Can be used to check if the CAccount is logged in.
 	* @param pExclude excluded client.
-	* @return CClient logged into de CAccount, NULL otherwise.
+	* @return CClient logged into de CAccount, nullptr otherwise.
 	*/
-	CClient * FindClient( const CClient * pExclude = NULL ) const;
+	CClient * FindClient( const CClient * pExclude = nullptr ) const;
 };
 
 /**
@@ -443,12 +443,12 @@ public:
 	/**
 	* @brief Get a CAccountRef of an CAccount by his index.
 	* @param index array index of the CAccount.
-	* @return CAccountRef of the CAccount if index is valid, NULL otherwise.
+	* @return CAccountRef of the CAccount if index is valid, nullptr otherwise.
 	*/
 	CAccountRef Account_Get( size_t index );
 	/**
 	* @brief Get a CAccountRef from a valid name.
-	* If the name is not valid NULL is returned.
+	* If the name is not valid nullptr is returned.
 	* @param pszName the name of the CAccount we are looking for.
 	* @return CAccountRef if pszName si a valid account name and exists an CAccount with that name, Null otherwise.
 	*/
@@ -457,16 +457,16 @@ public:
 	* @brief Get or create an CAccount in some circumstances.
 	* If there is an CAccount with the provided name, a CAccountRef of the account is returned.
 	* If there is not an CAccount with the providded name, AutoAccount is enabled in sphere.ini and the name is a valid account name, a CAcount is created and a CAccountRef of the returned.
-	* Otherwise, NULL is returned.
+	* Otherwise, nullptr is returned.
 	* @param pszName name of the account.
 	* @param fAutoCreate try to create the account if not exists.
-	* @return CAccountRef if account exists or created, NULL otherwise.
+	* @return CAccountRef if account exists or created, nullptr otherwise.
 	*/
 	CAccountRef Account_FindCreate( lpctstr pszName, bool fCreate = false );
 	/**
 	* @brief Check if a chat name is already used.
 	* @param pszChatName string containing the name.
-	* @return CAccountRef if the name is already used, NULL otherwise.
+	* @return CAccountRef if the name is already used, nullptr otherwise.
 	*/
 	CAccountRef Account_FindChat( lpctstr pszName );
 	/**

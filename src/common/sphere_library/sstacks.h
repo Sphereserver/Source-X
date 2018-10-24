@@ -264,7 +264,7 @@ size_t fixedgrowingstack<T>::size() const {
 
 template <typename T>
 dynamicstack<T>::dynamicstack() {
-    _top = NULL;
+    _top = nullptr;
     _size = 0;
 }
 
@@ -274,14 +274,14 @@ dynamicstack<T>::dynamicstack(size_t _) : dynamicstack<T>() { UNREFERENCED_PARAM
 template <typename T>
 dynamicstack<T>::dynamicstack(const dynamicstack<T> & o) {
     _size = o._size;
-    _top = NULL;
+    _top = nullptr;
     _dynamicstackitem * next = o._top, * prev;
     if (next) {
-        _top = new _dynamicstackitem(next->_item, NULL);
+        _top = new _dynamicstackitem(next->_item, nullptr);
         prev = _top;
         next = next->_next;
         while (next) {
-            prev->_next = new _dynamicstackitem(next->_item, NULL);
+            prev->_next = new _dynamicstackitem(next->_item, nullptr);
             prev = prev->_next;
             next = next->_next;
         }
@@ -296,14 +296,14 @@ dynamicstack<T>::~dynamicstack() {
 template <typename T>
 dynamicstack<T> & dynamicstack<T>::operator=(const dynamicstack<T> & o) {
     _size = o._size;
-    _top = NULL;
+    _top = nullptr;
     _dynamicstackitem * next = o._top, * prev;
     if (next) {
-        _top = new _dynamicstackitem(next->_item, NULL);
+        _top = new _dynamicstackitem(next->_item, nullptr);
         prev = _top;
         next = next->_next;
         while (next) {
-            prev->_next = new _dynamicstackitem(next->_item, NULL);
+            prev->_next = new _dynamicstackitem(next->_item, nullptr);
             prev = prev->_next;
             next = next->_next;
         }
@@ -320,7 +320,7 @@ void dynamicstack<T>::push(T t) {
 
 template <typename T>
 void dynamicstack<T>::pop() {
-    if (_top == NULL) {
+    if (_top == nullptr) {
         throw CSError(LOGL_FATAL, 0, "stack is empty.");
     }
     _dynamicstackitem * oldtop = _top;
@@ -331,7 +331,7 @@ void dynamicstack<T>::pop() {
 
 template <typename T>
 T dynamicstack<T>::top() const {
-    if (_top == NULL) {
+    if (_top == nullptr) {
         throw CSError(LOGL_FATAL, 0, "stack is empty.");
     }
     return _top->_item;
@@ -346,7 +346,7 @@ void dynamicstack<T>::clear() {
 
 template <typename T>
 bool dynamicstack<T>::empty() const {
-    return _top == NULL;
+    return _top == nullptr;
 }
 
 template <typename T>

@@ -103,7 +103,7 @@ static lpctstr const sm_IntrinsicFunctions[INTRINSIC_QTY+1] =
 	"STRMATCH",	// STRMATCH(str,*?pattern)
 	"STRREGEX",
 	"TAN",		// tan()
-	NULL
+	nullptr
 };
 
 extern class CExpression

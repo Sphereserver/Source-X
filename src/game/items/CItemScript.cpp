@@ -18,11 +18,11 @@ CItemScript::~CItemScript()
 }
 
 lpctstr const CItemScript::sm_szLoadKeys[] = {
-    NULL,
+    nullptr,
 };
 
 lpctstr const CItemScript::sm_szVerbKeys[] = {
-    NULL,
+    nullptr,
 };
 
 void CItemScript::r_Write(CScript & s)

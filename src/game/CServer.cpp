@@ -35,7 +35,7 @@ CServer::CServer() : CServerDef( SPHERE_TITLE, CSocketAddressIP( SOCKET_LOCAL_AD
 {
 	SetExitFlag(0);
 	m_fResyncPause = false;
-	m_fResyncRequested = NULL;
+	m_fResyncRequested = nullptr;
 
 	m_iAdminClients = 0;
 
@@ -176,7 +176,7 @@ void CServer::PrintTelnet( lpctstr pszMsg ) const
 		return;
 
 	ClientIterator it;
-	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
+	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
 	{
 		if (( pClient->GetConnectType() == CONNECT_TELNET ) && pClient->GetAccount() )
 		{
@@ -287,20 +287,20 @@ void CServer::ListClients( CTextConsole *pConsole ) const
 	ADDTOCALLSTACK("CServer::ListClients");
 	// Mask which clients we want ?
 	// Give a format of what info we want to SHOW ?
-	if ( pConsole == NULL )
+	if ( pConsole == nullptr )
 		return;
 
 	const CChar *pCharCmd = pConsole->GetChar();
-	const CChar *pChar = NULL;
-	const CAccount *pAcc = NULL;
+	const CChar *pChar = nullptr;
+	const CAccount *pAcc = nullptr;
 	tchar *pszMsg = Str_GetTemp();
 	tchar *tmpMsg = Str_GetTemp();
 	tchar chRank = 0;
-	lpcstr pszState = NULL;
+	lpcstr pszState = nullptr;
 	size_t numClients = 0;
 
 	ClientIterator it;
-	for ( const CClient *pClient = it.next(); pClient != NULL; pClient = it.next() )
+	for ( const CClient *pClient = it.next(); pClient != nullptr; pClient = it.next() )
 	{
 		numClients++;
 		pChar = pClient->GetChar();
@@ -477,11 +477,11 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 						CScriptProfiler::CScriptProfilerFunction	*pFun;
 						CScriptProfiler::CScriptProfilerTrigger		*pTrig;
 
-						for ( pFun = g_profiler.FunctionsHead; pFun != NULL; pFun = pFun->next )
+						for ( pFun = g_profiler.FunctionsHead; pFun != nullptr; pFun = pFun->next )
 						{
 							pFun->average = pFun->max = pFun->min = pFun->total = pFun->called = 0;
 						}
-						for ( pTrig = g_profiler.TriggersHead; pTrig != NULL; pTrig = pTrig->next )
+						for ( pTrig = g_profiler.TriggersHead; pTrig != nullptr; pTrig = pTrig->next )
 						{
 							pTrig->average = pTrig->max = pTrig->min = pTrig->total = pTrig->called = 0;
 						}
@@ -556,7 +556,7 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 				for ( size_t iThreads = 0; iThreads < iThreadCount; ++iThreads )
 				{
 					IThread * thrCurrent = ThreadHolder::getThreadAt(iThreads);
-					if ( thrCurrent != NULL )
+					if ( thrCurrent != nullptr )
 						pSrc->SysMessagef("%" PRIuSIZE_T " - Id: %u, Priority: %d, Name: %s.\n", (iThreads + 1), thrCurrent->getId(),
 											thrCurrent->getPriority(), thrCurrent->getName() );
 				}
@@ -633,9 +633,9 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 				int j = 0;
 				i /= j;
 			}
-		case '&':	// throw NULL pointer exception
+		case '&':	// throw nullptr pointer exception
 			{
-				CChar *character = NULL;
+				CChar *character = nullptr;
 				character->SetName("yo!");
 			}
 		case '*':	// throw custom exception
@@ -686,7 +686,7 @@ longcommand:
 					return false;
 				}
 
-				while ( (script = g_Cfg.GetResourceFile(i++)) != NULL )
+				while ( (script = g_Cfg.GetResourceFile(i++)) != nullptr )
 				{
 					strcpy(z, script->GetFilePath());
 					f = fopen(z, "r");
@@ -740,7 +740,7 @@ longcommand:
 					return false;
 				}
 
-				while ( (script = g_Cfg.GetResourceFile(i++)) != NULL )
+				while ( (script = g_Cfg.GetResourceFile(i++)) != nullptr )
 				{
 					strcpy(z, script->GetFilePath());
 					f = fopen(z, "r");
@@ -821,7 +821,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 	if ( !pSrc )
 		return;
 
-	CSFileText * ftDump = NULL;
+	CSFileText * ftDump = nullptr;
 
 	if ( bDump )
 	{
@@ -829,19 +829,19 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 		if ( ! ftDump->Open("profiler_dump.txt", OF_CREATE|OF_TEXT) )
 		{
 			delete ftDump;
-			ftDump = NULL;
+			ftDump = nullptr;
 		}
 	}
 
 	pSrc->SysMessagef("Profiles %s: (%d sec total)\n", CurrentProfileData.IsActive() ? "ON" : "OFF", CurrentProfileData.GetActiveWindow());
-	if (ftDump != NULL)
+	if (ftDump != nullptr)
 		ftDump->Printf("Profiles %s: (%d sec total)\n", CurrentProfileData.IsActive() ? "ON" : "OFF", CurrentProfileData.GetActiveWindow());
 
 	size_t iThreadCount = ThreadHolder::getActiveThreads();
 	for ( size_t iThreads = 0; iThreads < iThreadCount; ++iThreads)
 	{
 		IThread* thrCurrent = ThreadHolder::getThreadAt(iThreads);
-		if (thrCurrent == NULL)
+		if (thrCurrent == nullptr)
 			continue;
 
 		const ProfileData& profile = static_cast<AbstractSphereThread*>(thrCurrent)->m_profile;
@@ -849,7 +849,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 			continue;
 
 		pSrc->SysMessagef("Thread %u, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
-		if (ftDump != NULL)
+		if (ftDump != nullptr)
 			ftDump->Printf("Thread %u, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
 
 		for (int i = 0; i < PROFILE_QTY; i++)
@@ -858,7 +858,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 				continue;
 
 			pSrc->SysMessagef( "%-10s = %s\n", profile.GetName(static_cast<PROFILE_TYPE>(i)), profile.GetDescription(static_cast<PROFILE_TYPE>(i)) );
-			if (ftDump != NULL)
+			if (ftDump != nullptr)
 				ftDump->Printf( "%-10s = %s\n", profile.GetName(static_cast<PROFILE_TYPE>(i)), profile.GetDescription(static_cast<PROFILE_TYPE>(i)) );
 		}
 	}
@@ -883,7 +883,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 					(int)(average / divby),
 					(int)(((average * 10000) / (divby)) % 10000)
 			);
-			if (ftDump != NULL)
+			if (ftDump != nullptr)
 				ftDump->Printf("Scripts: called %u times and took %i.%04i msec (%i.%04i msec average). Reporting with highest average.\n",
 					g_profiler.called,
 					(int)(g_profiler.total / divby),
@@ -892,7 +892,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 					(int)(((average * 10000) / (divby)) % 10000)
 				);
 
-			for ( pFun = g_profiler.FunctionsHead; pFun != NULL; pFun = pFun->next )
+			for ( pFun = g_profiler.FunctionsHead; pFun != nullptr; pFun = pFun->next )
 			{
 				if ( pFun->average > average )
 				{
@@ -908,7 +908,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 						(int)(pFun->total / divby),
 						(int)(((pFun->total * 10000) / (divby)) % 10000)
 					);
-					if (ftDump != NULL)
+					if (ftDump != nullptr)
 						ftDump->Printf("FUNCTION '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
 							pFun->name,
 							pFun->called,
@@ -923,7 +923,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 						);
 				}
 			}
-			for ( pTrig = g_profiler.TriggersHead; pTrig != NULL; pTrig = pTrig->next )
+			for ( pTrig = g_profiler.TriggersHead; pTrig != nullptr; pTrig = pTrig->next )
 			{
 				if ( pTrig->average > average )
 				{
@@ -939,7 +939,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 						(int)(pTrig->total / divby),
 						(int)(((pTrig->total * 10000) / (divby)) % 10000)
 					);
-					if (ftDump != NULL)
+					if (ftDump != nullptr)
 						ftDump->Printf("TRIGGER '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
 							pTrig->name,
 							pTrig->called,
@@ -963,7 +963,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 		pSrc->SysMessage("Script profiler feature is not enabled on Sphere.ini.\n");
 	}
 
-	if ( ftDump != NULL )
+	if ( ftDump != nullptr )
 	{
 		ftDump->Close();
 		delete ftDump;
@@ -1017,7 +1017,7 @@ bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 	if ( !strnicmp(pszKey, "ACCOUNT.", 8) )
 	{
 		pszKey += 8;
-		CAccountRef pAccount = NULL;
+		CAccountRef pAccount = nullptr;
 
 		// extract account name/index to a temporary buffer
 		tchar * pszTemp = Str_GetTemp();
@@ -1025,7 +1025,7 @@ bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 
 		strcpy(pszTemp, pszKey);
 		tchar * split = strchr(pszTemp, '.');
-		if ( split != NULL )
+		if ( split != nullptr )
 			*split = '\0';
 
 		// adjust pszKey to point to end of account name/index
@@ -1040,7 +1040,7 @@ bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		}
 
 		//	indexes failed, try to fetch using names
-		if ( pAccount == NULL )
+		if ( pAccount == nullptr )
 		{
 			pszTemp = pszTempStart;
 			pAccount = g_Accounts.Account_Find(pszTemp);
@@ -1141,7 +1141,7 @@ lpctstr const CServer::sm_szVerbKeys[SV_QTY+1] =
 	"TIME", // read only
 	"UNBLOCKIP",
 	"VARLIST",
-	NULL
+	nullptr
 };
 
 bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
@@ -1152,7 +1152,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 
 	EXC_TRY("Verb");
 	lpctstr pszKey = s.GetKey();
-	tchar *pszMsg = NULL;
+	tchar *pszMsg = nullptr;
 
 	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 
@@ -1168,7 +1168,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			index = SV_ACCOUNT;
 			pszKey += 8;
 
-			CAccountRef pAccount = NULL;
+			CAccountRef pAccount = nullptr;
 			char *pszTemp = Str_GetTemp();
 
 			strcpy(pszTemp, pszKey);
@@ -1215,9 +1215,9 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			{
 				// Send a verb to all clients
 				ClientIterator it;
-				for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
+				for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
 				{
-					if ( pClient->GetChar() == NULL )
+					if ( pClient->GetChar() == nullptr )
 						continue;
 					CScript script(s.GetArgStr());
 					script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
@@ -1269,7 +1269,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 		case SV_CRASH:
 			{
 				g_Log.Event(0, "Testing exceptions.\n");
-				pSrc = NULL;
+				pSrc = nullptr;
 				pSrc->GetChar();
 			} break;
 #endif
@@ -1345,7 +1345,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			break;
 		case SV_LOAD:
 			// Load a resource file.
-			if ( g_Cfg.LoadResourcesAdd( s.GetArgStr()) == NULL )
+			if ( g_Cfg.LoadResourcesAdd( s.GetArgStr()) == nullptr )
 				return false;
 			return true;
 
@@ -1560,7 +1560,7 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 							PrintPercent( (ssize_t)i, (ssize_t)g_Exp.m_VarDefs.GetCount() );
 
 						CVarDefCont * pCont = g_Exp.m_VarDefs.GetAt(i);
-						if ( pCont != NULL )
+						if ( pCont != nullptr )
 						{
 							File.Printf( "%s=%s\n", pCont->GetKey(), pCont->GetValStr());
 						}
@@ -1694,7 +1694,7 @@ bool CServer::SocketsInit() // Initialize sockets
 	// Tell the admin what we know.
 
 	tchar szName[ _MAX_PATH ];
-	struct hostent * pHost = NULL;
+	struct hostent * pHost = nullptr;
 
 	int iRet = gethostname(szName, sizeof(szName));
 	if ( iRet )
@@ -1709,7 +1709,7 @@ bool CServer::SocketsInit() // Initialize sockets
 	g_Log.Event( LOGM_INIT, "Server started on hostname '%s'\n", szName);
 	if ( !iRet && pHost && pHost->h_addr )
 	{
-		for ( size_t i = 0; pHost->h_addr_list[i] != NULL; i++ )
+		for ( size_t i = 0; pHost->h_addr_list[i] != nullptr; i++ )
 		{
 			CSocketAddressIP ip;
 			ip.SetAddrIP(*((dword*)(pHost->h_addr_list[i]))); // 0.1.2.3
@@ -1758,7 +1758,7 @@ void CServer::OnTick()
 	}
 
 	EXC_SET_BLOCK("ResyncCommand");
-	if ( m_fResyncRequested != NULL )
+	if ( m_fResyncRequested != nullptr )
 	{
 		if ( !m_fResyncPause )
 		{
@@ -1766,7 +1766,7 @@ void CServer::OnTick()
 			SetResyncPause(false, m_fResyncRequested);
 		}
 		else SetResyncPause(false, m_fResyncRequested, true);
-		m_fResyncRequested = NULL;
+		m_fResyncRequested = nullptr;
 	}
 
 	EXC_SET_BLOCK("SetTime");

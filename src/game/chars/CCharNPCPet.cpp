@@ -156,7 +156,7 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 
 	bool bTargAllowGround = false;
 	bool bCheckCrime = false;
-	lpctstr pTargPrompt = NULL;
+	lpctstr pTargPrompt = nullptr;
 	CCharBase *pCharDef = Char_GetDef();
 
 	switch ( iCmd )
@@ -249,7 +249,7 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 		}
 
 		case PC_DROP_ALL:
-			DropAll(NULL, ATTR_OWNED);
+			DropAll(nullptr, ATTR_OWNED);
 			break;
 
 		case PC_SPEAK:
@@ -570,8 +570,8 @@ void CChar::NPC_PetClearOwners()
 				if ( !pCont )
 					continue;
 
-				CItem *pItemNext = NULL;
-				for ( CItem *pItem = pCont->GetContentHead(); pItem != NULL; pItem = pItemNext )
+				CItem *pItemNext = nullptr;
+				for ( CItem *pItem = pCont->GetContentHead(); pItem != nullptr; pItem = pItemNext )
 				{
 					pItemNext = pItem->GetNext();
 					pBankOwner->ContentAdd(pItem);
@@ -708,7 +708,7 @@ void CChar::NPC_OnHirePayMore( CItem * pGold, int iWage, bool fHire )
 		}
 
 		pBank->m_itEqBankBox.m_Check_Amount += pGold->GetAmount();
-		Sound( pGold->GetDropSound( NULL ));
+		Sound( pGold->GetDropSound( nullptr ));
 		pGold->Delete();
 	}
 
@@ -780,7 +780,7 @@ bool CChar::NPC_OnHireHear( CChar * pCharSrc )
 		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_NOT_FOR_HIRE ) );
 		return false;
 	}
-    iWage = pCharSrc->PayGold(this, iWage, NULL, PAYGOLD_HIRE);
+    iWage = pCharSrc->PayGold(this, iWage, nullptr, PAYGOLD_HIRE);
 	CItemMemory * pMemory = Memory_FindObj( pCharSrc );
 	if ( pMemory )
 	{
@@ -788,7 +788,7 @@ bool CChar::NPC_OnHireHear( CChar * pCharSrc )
 		{
 			// Next gold i get goes toward hire.
 			pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_SPEAK_HIRE;
-			NPC_OnHirePayMore( NULL, iWage, false );
+			NPC_OnHirePayMore( nullptr, iWage, false );
 			return true;
 		}
 		if ( pMemory->IsMemoryTypes( MEMORY_FIGHT|MEMORY_HARMEDBY|MEMORY_IRRITATEDBY ))
@@ -826,7 +826,7 @@ bool CChar::NPC_SetVendorPrice( CItem * pItem, int iPrice )
 	if ( ! NPC_IsVendor())
 		return false;
 
-	if ( pItem == NULL ||
+	if ( pItem == nullptr ||
 		pItem->GetTopLevelObj() != this ||
 		pItem->GetParent() == this )
 	{
@@ -835,7 +835,7 @@ bool CChar::NPC_SetVendorPrice( CItem * pItem, int iPrice )
 	}
 
 	CItemVendable * pVendItem = dynamic_cast <CItemVendable *> (pItem);
-	if ( pVendItem == NULL )
+	if ( pVendItem == nullptr )
 	{
 		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_CANTSELL ) );
 		return false;
@@ -868,7 +868,7 @@ void CChar::NPC_PetDesert()
 
 	if ( IsTrigUsed(TRIGGER_PETDESERT) )
 	{
-		if ( OnTrigger( CTRIG_PetDesert, pCharOwn, NULL ) == TRIGRET_RET_TRUE )
+		if ( OnTrigger( CTRIG_PetDesert, pCharOwn, nullptr ) == TRIGRET_RET_TRUE )
 			return;
 	}
 
