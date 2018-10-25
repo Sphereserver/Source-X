@@ -1078,7 +1078,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 			CCharBase *pPetDef = CCharBase::FindCharBase( pItem->m_itFigurine.m_ID );
 			if ( pPetDef )
 			{
-				short iFollowerSlots = (short)pPetDef->GetDefNum("FOLLOWERSLOTS", true);
+				short iFollowerSlots = (short)pPetDef->GetDefNum("FOLLOWERSLOTS");
 				if ( !m_pChar->FollowersUpdate(pVendor, (maximum(1, iFollowerSlots))) )
 				{
 					m_pChar->SysMessageDefault( DEFMSG_PETSLOTS_TRY_CONTROL );

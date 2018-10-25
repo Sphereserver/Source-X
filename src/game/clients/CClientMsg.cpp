@@ -697,14 +697,14 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 					goto forcesay;
 			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_COLOR"));
 			defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_FONT"));
-			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_UNICODE", true) > 0 ? true : false;
+			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_UNICODE") > 0 ? true : false;
 			break;
 		}
 		case TALKMODE_EMOTE:
 		{
 			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_COLOR"));
 			defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_FONT"));
-			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_UNICODE", true) > 0 ? true : false;
+			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_UNICODE") > 0 ? true : false;
 			break;
 		}
 		case TALKMODE_SAY:
@@ -712,14 +712,14 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 			forcesay:
 			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_COLOR"));
 			defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_FONT"));
-			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_UNICODE", true) > 0 ? true : false;
+			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_UNICODE") > 0 ? true : false;
 			break;
 		}
 		case TALKMODE_OBJ:
 		{
 			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("MSG_DEF_COLOR"));
 			defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("MSG_DEF_FONT"));
-			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("MSG_DEF_UNICODE", true) > 0 ? true : false;
+			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("MSG_DEF_UNICODE") > 0 ? true : false;
 			break;
 		}
 		case TALKMODE_ITEM:
@@ -727,13 +727,13 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 			if ( pSrc->IsChar() )
 			{
 				defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("CMSG_DEF_FONT"));
-				defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("CMSG_DEF_UNICODE", true) > 0 ? true : false;
+				defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("CMSG_DEF_UNICODE") > 0 ? true : false;
 			}
 			else
 			{
 				defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_COLOR"));
 				defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_FONT"));
-				defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_UNICODE", true) > 0 ? true : false;
+				defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_UNICODE") > 0 ? true : false;
 			}
 		}
 		default:
@@ -1226,7 +1226,7 @@ void CClient::addItemName( const CItem * pItem )
 		if ( pNewStr != nullptr )
 			strncpynull(szName, pNewStr, CountOf(szName));
 
-		wHue = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("ClickMsgHue", true));
+		wHue = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("ClickMsgHue"));
 	}
 
 	addObjMessage( szName, pItem, wHue, TALKMODE_ITEM );
@@ -1346,7 +1346,7 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 		if ( pNewStr != nullptr )
 			strcpy(pszTemp, pNewStr);
 
-		wHue = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("ClickMsgHue", true));
+		wHue = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("ClickMsgHue"));
 	}
 
 	addObjMessage( pszTemp, pChar, wHue, TALKMODE_ITEM );
@@ -1854,8 +1854,8 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
             {
                 if (!pItem->GetTopLevelObj()->GetTopPoint().GetRegion(REGION_TYPE_HOUSE)		// item is not in a house (ships are ok)
                     || (pItem->m_uidLink.IsValidUID() && pItem->m_uidLink.IsItem() && pItem->m_uidLink.ItemFind()->IsTypeMulti())	// item is linked to a multi
-                    || pItem->IsTypeMulti()		                    // item is an multi
-                    || pItem->GetKeyNum("ALWAYSSEND", true, true))	// item has ALWAYSSEND tag set
+                    || pItem->IsTypeMulti()		        // item is an multi
+                    || pItem->GetKeyNum("ALWAYSSEND"))  // item has ALWAYSSEND tag set
                 {
                     bSee = true;
                 }
@@ -2605,7 +2605,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 		{
 			const CVarDefContStr * pVarStr = dynamic_cast <CVarDefContStr *>( m_pChar->m_pArea->m_TagDefs.GetKey("GUARDOWNER"));
 			SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_GUARDSP), ( pVarStr ) ? pVarStr->GetValStr() : g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_GUARDSPT));
-			if ( m_pChar->m_pArea->m_TagDefs.GetKeyNum("RED", true) )
+			if ( m_pChar->m_pArea->m_TagDefs.GetKeyNum("RED") )
 				SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_REDDEF), g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_REDENTER));
 		}
 	}
@@ -2616,7 +2616,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 		addSysMessage(z);
 	}
 	if ( IsPriv(PRIV_JAILED) )
-		m_pChar->Jail(&g_Serv, true, (int)(GetAccount()->m_TagDefs.GetKeyNum("JailCell", true)));
+		m_pChar->Jail(&g_Serv, true, (int)(GetAccount()->m_TagDefs.GetKeyNum("JailCell")));
 	if ( g_Serv.m_timeShutdown > 0 )
 		addBarkParse(g_Cfg.GetDefaultMsg(DEFMSG_MSG_SERV_SHUTDOWN_SOON), nullptr, HUE_TEXT_DEF, TALKMODE_SYSTEM, FONT_BOLD);
 

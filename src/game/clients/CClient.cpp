@@ -1380,8 +1380,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					pPrompt = pSpellDef->m_sTargetPrompt;
 
 				int64 SpellTimeout = g_Cfg.m_iSpellTimeout;
-				if ( GetDefNum("SPELLTIMEOUT", true) )
-					SpellTimeout = GetDefNum("SPELLTIMEOUT", true) * MSECS_PER_SEC; //tenths to msecs.
+				if ( GetDefNum("SPELLTIMEOUT") )
+					SpellTimeout = GetDefNum("SPELLTIMEOUT") * MSECS_PER_SEC; //tenths to msecs.
 
 				addTarget(CLIMODE_TARG_SKILL_MAGERY, pPrompt, pSpellDef->IsSpellType(SPELLFLAG_TARG_XYZ), pSpellDef->IsSpellType(SPELLFLAG_HARM), SpellTimeout);
 				break;

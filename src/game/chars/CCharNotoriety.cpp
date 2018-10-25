@@ -19,7 +19,7 @@ bool CChar::Noto_IsEvil() const
 	int	iKarma = Stat_GetAdjusted(STAT_KARMA);
 
 	//	guarded areas could be both RED and BLUE ones.
-	if ( m_pArea && m_pArea->IsGuarded() && m_pArea->m_TagDefs.GetKeyNum("RED", true) )
+	if ( m_pArea && m_pArea->IsGuarded() && m_pArea->m_TagDefs.GetKeyNum("RED") )
 	{
 		//	red zone is opposite to blue - murders are considered normal here
 		//	while people with 0 kills and good karma are considered bad here
@@ -138,7 +138,7 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 	// This allows the noto attack check in the client.
 	// NOTO_GOOD = it is criminal to attack me.
 
-	NOTO_TYPE iNotoFlag = (NOTO_TYPE)(m_TagDefs.GetKeyNum("OVERRIDE.NOTO", true));
+	NOTO_TYPE iNotoFlag = (NOTO_TYPE)(m_TagDefs.GetKeyNum("OVERRIDE.NOTO"));
 	if (iNotoFlag != NOTO_INVALID)
 		return iNotoFlag;
 
@@ -245,7 +245,7 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 	if (IsStatFlag(STATF_CRIMINAL))	// criminal to everyone.
 		return NOTO_CRIMINAL;
 
-	if (Noto_IsNeutral() || m_TagDefs.GetKeyNum("NOTO.PERMAGREY", true))
+	if (Noto_IsNeutral() || m_TagDefs.GetKeyNum("NOTO.PERMAGREY"))
 		return NOTO_NEUTRAL;
 
 	return NOTO_GOOD;

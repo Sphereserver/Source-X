@@ -248,7 +248,7 @@ bool CChar::CallGuards( CChar * pCriminal )
 		if (!pGuard)
 			return false;
 
-		if (pCriminal->m_pArea->m_TagDefs.GetKeyNum("RED", true))
+		if (pCriminal->m_pArea->m_TagDefs.GetKeyNum("RED"))
 			pGuard->m_TagDefs.SetNum("NAME.HUE", g_Cfg.m_iColorNotoEvil, true);
 		pGuard->Spell_Effect_Create(SPELL_Summon, LAYER_SPELL_Summon, g_Cfg.GetSpellEffect(SPELL_Summon, 1000), int(g_Cfg.m_iGuardLingerTime/1000));
 		pGuard->Spell_Teleport(pCriminal->GetTopPoint(), false, false);
@@ -658,10 +658,10 @@ effect_bounce:
 		uType = (DAMAGE_TYPE)(Args.m_iN2);
 	}
 
-	int iItemDamageChance = (int)(Args.m_VarsLocal.GetKeyNum("ItemDamageChance", true));
+	int iItemDamageChance = (int)(Args.m_VarsLocal.GetKeyNum("ItemDamageChance"));
 	if ( (iItemDamageChance > Calc_GetRandVal(100)) && !Can(CAN_C_NONHUMANOID) )
 	{
-		LAYER_TYPE iHitLayer = static_cast<LAYER_TYPE>(Args.m_VarsLocal.GetKeyNum("ItemDamageLayer", true));
+		LAYER_TYPE iHitLayer = (LAYER_TYPE)(Args.m_VarsLocal.GetKeyNum("ItemDamageLayer"));
 		CItem *pItemHit = LayerFind(iHitLayer);
 		if ( pItemHit )
 			pItemHit->OnTakeDamage(iDmg, pSrc, uType);
@@ -1254,7 +1254,7 @@ void CChar::Fight_HitTry()
             Fight_SetDefaultSwingDelays();
             const int64 iTimeCur = g_World.GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH;
             // Time required to perform the previous normal hit, without the PreHit delay reduction.
-            const int64 iPreHit_LastHitTag_FullHit_Prev = GetKeyNum("LastHit", true);   // TAG.LastHit is in tenths of second
+            const int64 iPreHit_LastHitTag_FullHit_Prev = GetKeyNum("LastHit");   // TAG.LastHit is in tenths of second
             // Time required to perform the shortened hit with PreHit.
             const int64 iPreHit_LastHitTag_PreHit = iTimeCur + COMBAT_MIN_SWING_ANIMATION_DELAY;   // it's the new m_iRecoilDelay (0) + the new m_iSwingAnimationDelay (COMBAT_MIN_SWING_ANIMATION_DELAY)
             iPreHit_LastHitTag_FullHit = iTimeCur + m_atFight.m_iRecoilDelay + m_atFight.m_iSwingAnimationDelay;
@@ -1478,7 +1478,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 		m_atFight.m_War_Swing_State = (WAR_SWING_TYPE)(pArgs.m_iN1);
         iDmgType = (DAMAGE_TYPE)(pArgs.m_iN2);
-        fSwingNoRange = (bool)pArgs.m_VarsLocal.GetKeyNum("Recoil_NoRange", true);
+        fSwingNoRange = (bool)pArgs.m_VarsLocal.GetKeyNum("Recoil_NoRange");
 
         if (tRet != -2)     // if @HitCheck returns -2, just continue with the hardcoded stuff
         {
@@ -1533,7 +1533,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
     if ( IsSetCombatFlags(COMBAT_PREHIT) && (m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING) && (!m_atFight.m_iSwingIgnoreLastHitTag) )
     {
-        int64 iTimeDiff = ((g_World.GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH) - GetKeyNum("LastHit", true));
+        int64 iTimeDiff = ((g_World.GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH) - GetKeyNum("LastHit"));
         if (iTimeDiff < 0)
         {
             return WAR_SWING_EQUIPPING;
@@ -1635,9 +1635,9 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
             if ( OnTrigger(CTRIG_HitTry, pCharTarg, &Args) == TRIGRET_RET_TRUE )
                 return WAR_SWING_READY;
 
-            m_atFight.m_iSwingAnimation = (int16)(Args.m_VarsLocal.GetKeyNum("Anim", false));
+            m_atFight.m_iSwingAnimation = (int16)(Args.m_VarsLocal.GetKeyNum("Anim"));
             iARGN1Var = (int16)(Args.m_iN1);
-            iAnimDelayVar = (int16)(Args.m_VarsLocal.GetKeyNum("AnimDelay", true));
+            iAnimDelayVar = (int16)(Args.m_VarsLocal.GetKeyNum("AnimDelay"));
             //if (m_atFight.m_iSwingAnimation < (ANIM_TYPE)-1)
             //    m_atFight.m_iSwingAnimation = (int16)animSwingDefault;
             if ( m_atFight.m_iRecoilDelay < 1 )
@@ -1827,7 +1827,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		}
 
 		// Check if the weapon will be damaged
-		int iDamageChance = (int)(Args.m_VarsLocal.GetKeyNum("ItemDamageChance", true));
+		int iDamageChance = (int)(Args.m_VarsLocal.GetKeyNum("ItemDamageChance"));
 		if ( iDamageChance > Calc_GetRandVal(100) )
 			pWeapon->OnTakeDamage(iDmg, pCharTarg);
 	}

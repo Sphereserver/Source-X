@@ -2205,10 +2205,10 @@ void CChar::EatAnim( lpctstr pszName, short iQty )
 		if ( OnTrigger(CTRIG_Eat, this, &Args) == TRIGRET_RET_TRUE )
 			return;
 
-		iHits = (short)(Args.m_VarsLocal.GetKeyNum("Hits", true)) + Stat_GetVal(STAT_STR);
-		iMana = (short)(Args.m_VarsLocal.GetKeyNum("Mana", true)) + Stat_GetVal(STAT_INT);
-		iStam = (short)(Args.m_VarsLocal.GetKeyNum("Stam", true)) + Stat_GetVal(STAT_DEX);
-		iFood = (short)(Args.m_VarsLocal.GetKeyNum("Food", true)) + Stat_GetVal(STAT_FOOD);
+		iHits = (short)(Args.m_VarsLocal.GetKeyNum("Hits")) + Stat_GetVal(STAT_STR);
+		iMana = (short)(Args.m_VarsLocal.GetKeyNum("Mana")) + Stat_GetVal(STAT_INT);
+		iStam = (short)(Args.m_VarsLocal.GetKeyNum("Stam")) + Stat_GetVal(STAT_DEX);
+		iFood = (short)(Args.m_VarsLocal.GetKeyNum("Food")) + Stat_GetVal(STAT_FOOD);
 		iStatsLimit = (short)(Args.m_iN1);
 	}
 
@@ -2925,7 +2925,7 @@ bool CChar::Death()
 	if ( m_pPlayer )
 	{
 		ChangeExperience(-((int)(m_exp) / 10), pKiller);
-		if ( !(m_TagDefs.GetKeyNum("DEATHFLAGS", true) & DEATH_NOFAMECHANGE) )
+		if ( !(m_TagDefs.GetKeyNum("DEATHFLAGS") & DEATH_NOFAMECHANGE) )
 			Noto_Fame( -Stat_GetAdjusted(STAT_FAME)/10 );
 
 		lpctstr pszGhostName = nullptr;
@@ -3003,7 +3003,7 @@ bool CChar::OnFreezeCheck()
 
 	if ( IsStatFlag(STATF_FREEZE|STATF_STONE) && !IsPriv(PRIV_GM) )
 		return true;
-	if ( GetKeyNum("NoMoveTill", true) > (g_World.GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH)) // in tenths of second.
+	if ( GetKeyNum("NoMoveTill") > (g_World.GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH)) // in tenths of second.
 		return true;
 
 	if ( m_pPlayer )
@@ -3447,8 +3447,8 @@ bool CChar::MoveToRegion( CRegionWorld * pNewArea, bool fAllowReject )
 			// Is it guarded / safe / non-pvp?
 			else if ( m_pArea && !IsStatFlag(STATF_DEAD) )
 			{
-				bool redNew = ( pNewArea->m_TagDefs.GetKeyNum("RED", true) != 0 );
-				bool redOld = ( m_pArea->m_TagDefs.GetKeyNum("RED", true) != 0 );
+				bool redNew = ( pNewArea->m_TagDefs.GetKeyNum("RED") != 0 );
+				bool redOld = ( m_pArea->m_TagDefs.GetKeyNum("RED") != 0 );
 				if ( pNewArea->IsGuarded() != m_pArea->IsGuarded() )
 				{
 					if ( pNewArea->IsGuarded() )	// now under the protection

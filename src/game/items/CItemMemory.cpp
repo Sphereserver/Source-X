@@ -68,8 +68,7 @@ int CItemMemory::Guild_SetLoyalTo(CUID uid)
 CUID CItemMemory::Guild_GetLoyalTo() const
 {
 	ADDTOCALLSTACK("CItemMemory::Guild_GetLoyalTo");
-	CItemMemory *pObj = const_cast<CItemMemory *>(this);
-	CUID iUid((dword)(pObj->GetTagDefs()->GetKeyNum("LoyalTo", true)));
+	CUID iUid((dword)(GetKeyNum("LoyalTo", true)));
 	return iUid;
 }
 
@@ -82,7 +81,7 @@ int CItemMemory::Guild_SetTitle(lpctstr pszTitle)
 lpctstr CItemMemory::Guild_GetTitle() const
 {
 	ADDTOCALLSTACK("CItemMemory::Guild_GetTitle");
-	return m_TagDefs.GetKeyStr("Title", false);
+	return GetKeyStr("Title", false);
 }
 
 int CItemMemory::FixWeirdness()

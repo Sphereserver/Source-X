@@ -79,9 +79,9 @@ public:
      *
      * @return  The definition number.
      */
-	int64 GetDefNum( lpctstr pszKey, bool fZero = false ) const
+	int64 GetDefNum( lpctstr pszKey ) const
 	{
-		return m_BaseDefs.GetKeyNum( pszKey, fZero );
+		return m_BaseDefs.GetKeyNum( pszKey );
 	}
 
     /**

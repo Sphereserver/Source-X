@@ -142,7 +142,7 @@ void CItemBase::CopyBasic( const CItemBase * pBase )
 	m_type		= pBase->m_type;
 	m_layer		= pBase->m_layer;
     m_CanUse    = pBase->m_CanUse;
-	SetDefNum("RANGE",pBase->GetDefNum("RANGE",true));	//m_range	= pBase->m_range;
+	SetDefNum("RANGE", pBase->GetDefNum("RANGE"));	//m_range	= pBase->m_range;
 	// Just applies to weapons/armor.
 	m_ttNormal.m_tData1 = pBase->m_ttNormal.m_tData1;
 	m_ttNormal.m_tData2 = pBase->m_ttNormal.m_tData2;
@@ -1033,7 +1033,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 		case IBC_BONUSHITSMAX:
 		case IBC_BONUSSTAMMAX:
 		case IBC_BONUSMANAMAX:
-			sVal.FormatLLVal(GetDefNum(pszKey, true));
+			sVal.FormatLLVal(GetDefNum(pszKey));
 			break;
 
 
@@ -2151,7 +2151,7 @@ word CItemBase::GetMaxAmount()
 	if (!IsStackableType())
 		return 0;
 
-	int64 iMax = GetDefNum("MaxAmount", false);
+	int64 iMax = GetDefNum("MaxAmount");
 	if (iMax)
 		return (word)minimum(iMax, UINT16_MAX);
 	else

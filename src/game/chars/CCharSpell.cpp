@@ -119,7 +119,7 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool bTakePets, bool bCheckAntiMagi
 
 			int iCell = 0;
 			if ( m_pPlayer && m_pPlayer->GetAccount() )
-				iCell = (int)(m_pPlayer->GetAccount()->m_TagDefs.GetKeyNum("JailCell", true));
+				iCell = (int)(m_pPlayer->GetAccount()->m_TagDefs.GetKeyNum("JailCell"));
 
 			if ( iCell )
 			{
@@ -2131,7 +2131,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 		spell = (SPELL_TYPE)(Args.m_iN1);
 	}
 	iManaUse = (short)(Args.m_iN2);
-	iTithingUse = (short)(Args.m_VarsLocal.GetKeyNum("TithingUse",true));
+	iTithingUse = (short)(Args.m_VarsLocal.GetKeyNum("TithingUse"));
 
 	if ( pSrc != this )
 	{
@@ -2499,17 +2499,17 @@ bool CChar::Spell_CastDone()
 	if (bIsSpellField)
 	{
 		//Setting new IDs as another variables to pass as different arguments to the field function.
-		it1test = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1", true)));
-		it2test = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject2", true)));
-		fieldWidth = (uint)Args.m_VarsLocal.GetKeyNum("fieldWidth", true);
-		fieldGauge = (uint)Args.m_VarsLocal.GetKeyNum("fieldGauge", true);
+		it1test = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1")));
+		it2test = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject2")));
+		fieldWidth = (uint)Args.m_VarsLocal.GetKeyNum("fieldWidth");
+		fieldGauge = (uint)Args.m_VarsLocal.GetKeyNum("fieldGauge");
 	}
 
-	iC1 = (CREID_TYPE)(Args.m_VarsLocal.GetKeyNum("CreateObject1", true) & 0xFFFF);
-	areaRadius = (uint)Args.m_VarsLocal.GetKeyNum("areaRadius", true);
-	int iDuration = (int)(Args.m_VarsLocal.GetKeyNum("duration", true));
+	iC1 = (CREID_TYPE)(Args.m_VarsLocal.GetKeyNum("CreateObject1") & 0xFFFF);
+	areaRadius = (uint)Args.m_VarsLocal.GetKeyNum("areaRadius");
+	int iDuration = (int)(Args.m_VarsLocal.GetKeyNum("duration"));
 	iDuration = maximum(0, iDuration);
-	iColor = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("EffectColor", true));
+	iColor = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("EffectColor"));
 
 	// Consume the reagents/mana/scroll/charge
 	if (!Spell_CanCast(spell, false, pObjSrc, true))
@@ -2888,10 +2888,10 @@ void CChar::Spell_CastFail()
 			return;
 	}
 
-	HUE_TYPE iColor = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("EffectColor", true));
-	dword dwRender = (dword)Args.m_VarsLocal.GetKeyNum("EffectRender", true);
+	HUE_TYPE iColor = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("EffectColor"));
+	dword dwRender = (dword)Args.m_VarsLocal.GetKeyNum("EffectRender");
 
-	iT1 = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1", true)));
+	iT1 = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1")));
 	if (iT1)
 		Effect(EFFECT_OBJ, iT1, this, 1, 30, false, iColor, dwRender);
 	Sound( SOUND_SPELL_FIZZLE );
@@ -3023,11 +3023,11 @@ int CChar::Spell_CastStart()
 	if ( !pSpellDef->IsSpellType(SPELLFLAG_NO_CASTANIM) && !IsSetMagicFlags(MAGICF_NOANIM) )
 		UpdateAnimate(pSpellDef->IsSpellType(SPELLFLAG_DIR_ANIM) ? ANIM_CAST_DIR : ANIM_CAST_AREA);
 
-	fWOP = Args.m_VarsLocal.GetKeyNum("WOP", true) > 0 ? true : false;
+	fWOP = Args.m_VarsLocal.GetKeyNum("WOP") > 0 ? true : false;
 	if ( fWOP )
 	{
-		WOPColor = Args.m_VarsLocal.GetKeyNum("WOPColor", true);
-		WOPFont = Args.m_VarsLocal.GetKeyNum("WOPFont", true);
+		WOPColor = Args.m_VarsLocal.GetKeyNum("WOPColor");
+		WOPFont = Args.m_VarsLocal.GetKeyNum("WOPFont");
 
 		// Correct talk mode for spells WOP is TALKMODE_SPELL, but since sphere doesn't have any delay between spell casts this can allow WOP flood on screen.
 		// So to avoid this problem we must use TALKMODE_SAY, which is not the correct type but with this type the client only show last 3 messages on screen.
@@ -3179,16 +3179,16 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 	spell = (SPELL_TYPE)(Args.m_iN1);
 	iSkillLevel = (int)(Args.m_iN2);		// remember that effect/duration is calculated before triggers
-	DAMAGE_TYPE iDmgType = (DAMAGE_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("DamageType", true)));
-	ITEMID_TYPE iEffectID = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1", true)));
-	fExplode = Args.m_VarsLocal.GetKeyNum("EffectExplode", true) > 0 ? true : false;
-	iSound = (SOUND_TYPE)(Args.m_VarsLocal.GetKeyNum("Sound", true));
-	iEffect = (int)(Args.m_VarsLocal.GetKeyNum("Effect", true));
-	uiResist = (ushort)(Args.m_VarsLocal.GetKeyNum("Resist", true));
-	iDuration = (int)(Args.m_VarsLocal.GetKeyNum("Duration", true));
+	DAMAGE_TYPE iDmgType = (DAMAGE_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("DamageType")));
+	ITEMID_TYPE iEffectID = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1")));
+	fExplode = Args.m_VarsLocal.GetKeyNum("EffectExplode") > 0 ? true : false;
+	iSound = (SOUND_TYPE)(Args.m_VarsLocal.GetKeyNum("Sound"));
+	iEffect = (int)(Args.m_VarsLocal.GetKeyNum("Effect"));
+	uiResist = (ushort)(Args.m_VarsLocal.GetKeyNum("Resist"));
+	iDuration = (int)(Args.m_VarsLocal.GetKeyNum("Duration"));
 
-	HUE_TYPE iColor = (HUE_TYPE)Args.m_VarsLocal.GetKeyNum("EffectColor", true);
-	dword dwRender = (dword)Args.m_VarsLocal.GetKeyNum("EffectRender", true);
+	HUE_TYPE iColor = (HUE_TYPE)Args.m_VarsLocal.GetKeyNum("EffectColor");
+	dword dwRender = (dword)Args.m_VarsLocal.GetKeyNum("EffectRender");
 
 	if ( iEffectID > ITEMID_QTY )
 		iEffectID = pSpellDef->m_idEffect;

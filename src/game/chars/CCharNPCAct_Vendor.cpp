@@ -260,7 +260,7 @@ bool CChar::NPC_OnTrainPay(CChar *pCharSrc, CItemMemory *pMemory, CItem * pGold)
 	}
 
     ushort uiTrainVal = NPC_OnTrainCheck(pCharSrc, skill);
-    ushort uiTrainMult = (ushort)GetKeyNum("OVERRIDE.TRAINSKILLCOST", true);
+    ushort uiTrainMult = (ushort)GetKeyNum("OVERRIDE.TRAINSKILLCOST");
 	if ( !uiTrainMult)
         uiTrainMult = (ushort)g_Cfg.m_iTrainSkillCost;
 

@@ -336,7 +336,7 @@ void CObjBase::r_WriteSafe( CScript & s )
 		uid = GetUID();
 
 		//	objects with TAG.NOSAVE set are not saved
-		if ( m_TagDefs.GetKeyNum("NOSAVE", true) )
+		if ( m_TagDefs.GetKeyNum("NOSAVE") )
 			return;
 
 		if ( !g_Cfg.m_fSaveGarbageCollect )
@@ -3191,11 +3191,11 @@ lpctstr CObjBase::GetKeyStr( lpctstr pszKey, bool fZero, bool fDef ) const
 	return pVar->GetValStr();
 }
 
-int64 CObjBase::GetKeyNum( lpctstr pszKey, bool fZero, bool fDef ) const
+int64 CObjBase::GetKeyNum( lpctstr pszKey, bool fDef ) const
 {
 	CVarDefCont	* pVar = GetKey( pszKey, fDef );
 	if ( pVar == nullptr )
-		return (fZero ? 0 : NULL);
+		return 0;
 	return pVar->GetValNum();
 }
 

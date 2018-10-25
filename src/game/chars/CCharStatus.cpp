@@ -898,16 +898,16 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 		static const CValStr sm_SkillTitles[] =
 		{
 			{ "", INT32_MIN },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NEOPHYTE),	(int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NEOPHYTE", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NOVICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NOVICE", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_APPRENTICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_APPRENTICE", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_JOURNEYMAN), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_JOURNEYMAN", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_EXPERT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_EXPERT", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ADEPT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ADEPT", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_MASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_MASTER", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER_NINJITSU), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY_NINJITSU), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NEOPHYTE),	(int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NEOPHYTE")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NOVICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NOVICE")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_APPRENTICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_APPRENTICE")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_JOURNEYMAN), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_JOURNEYMAN")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_EXPERT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_EXPERT")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ADEPT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ADEPT")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_MASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_MASTER")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER_NINJITSU), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY_NINJITSU), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY")) },
 			{ nullptr, INT32_MAX }
 		};
 		len = snprintf(pTemp, STR_TEMPLENGTH, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
@@ -917,16 +917,16 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 		static const CValStr sm_SkillTitles[] =
 		{
 			{ "", INT32_MIN },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NEOPHYTE),	(int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NEOPHYTE", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NOVICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NOVICE", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_APPRENTICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_APPRENTICE", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_JOURNEYMAN), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_JOURNEYMAN", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_EXPERT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_EXPERT", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ADEPT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ADEPT", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_MASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_MASTER", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER_BUSHIDO), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY_BUSHIDO), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NEOPHYTE),	(int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NEOPHYTE")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NOVICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NOVICE")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_APPRENTICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_APPRENTICE")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_JOURNEYMAN), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_JOURNEYMAN")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_EXPERT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_EXPERT")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ADEPT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ADEPT")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_MASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_MASTER")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER_BUSHIDO), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY_BUSHIDO), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY")) },
 			{ nullptr, INT32_MAX }
 		};
 		len = snprintf(pTemp, STR_TEMPLENGTH, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
@@ -936,16 +936,16 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 		static const CValStr sm_SkillTitles[] =
 		{
 			{ "", INT32_MIN },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NEOPHYTE),	(int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NEOPHYTE", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NOVICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NOVICE", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_APPRENTICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_APPRENTICE", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_JOURNEYMAN), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_JOURNEYMAN", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_EXPERT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_EXPERT", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ADEPT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ADEPT", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_MASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_MASTER", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER),(int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NEOPHYTE),	(int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NEOPHYTE")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NOVICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NOVICE")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_APPRENTICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_APPRENTICE")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_JOURNEYMAN), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_JOURNEYMAN")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_EXPERT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_EXPERT")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ADEPT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ADEPT")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_MASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_MASTER")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER),(int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER")) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY")) },
 			{ nullptr, INT32_MAX }
 		};
 		len = snprintf(pTemp, STR_TEMPLENGTH, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
@@ -1172,7 +1172,7 @@ bool CChar::CanSeeItem( const CItem * pItem ) const
 		tchar *uidCheck = Str_GetTemp();
 		sprintf(uidCheck, "SeenBy_0%x", (dword)(GetUID()));
 
-		if (!pItem->m_TagDefs.GetKeyNum(uidCheck, false))
+		if (!pItem->m_TagDefs.GetKeyNum(uidCheck))
 			return false;
 	}
 	return true;

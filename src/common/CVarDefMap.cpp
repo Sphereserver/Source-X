@@ -598,12 +598,12 @@ CVarDefCont * CVarDefMap::GetKey( lpctstr pszKey ) const
 	return pReturn;
 }
 
-int64 CVarDefMap::GetKeyNum( lpctstr pszKey, bool fZero ) const
+int64 CVarDefMap::GetKeyNum( lpctstr pszKey ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::GetKeyNum");
 	CVarDefCont * pVar = GetKey(pszKey);
 	if ( pVar == nullptr )
-		return (fZero ? 0 : NULL);
+		return 0;
 	return pVar->GetValNum();
 }
 

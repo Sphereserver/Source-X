@@ -399,7 +399,7 @@ CItem * CItem::GenerateScript( CChar * pSrc)
 				int iBlood = 0;
 				if ( pItemDef )
 				{
-					iBlood = (int)(pItemDef->m_TagDefs.GetKeyNum("MAXBLOOD", true));
+					iBlood = (int)(pItemDef->m_TagDefs.GetKeyNum("MAXBLOOD"));
 				}
 				if ( !iBlood )
 					iBlood = 5;
@@ -4578,13 +4578,13 @@ SKILL_TYPE CItem::Weapon_GetSkill() const
 	CItemBase * pItemDef = Item_GetDef();
 	ASSERT(pItemDef);
 
-	int iSkillOverride = (int)(m_TagDefs.GetKeyNum("OVERRIDE_SKILL", true) - 1);
+	int iSkillOverride = (int)(m_TagDefs.GetKeyNum("OVERRIDE_SKILL") - 1);
 	if ( iSkillOverride == -1)
-		iSkillOverride = (int)(m_TagDefs.GetKeyNum("OVERRIDE.SKILL", true) - 1);
-	if ( iSkillOverride > SKILL_NONE && iSkillOverride < (int)(g_Cfg.m_iMaxSkill) )
+		iSkillOverride = (int)(m_TagDefs.GetKeyNum("OVERRIDE.SKILL") - 1);
+	if ( (iSkillOverride > SKILL_NONE) && (iSkillOverride < (int)g_Cfg.m_iMaxSkill) )
 		return (SKILL_TYPE)(iSkillOverride);
 
-	if ( pItemDef->m_iSkill > SKILL_NONE && pItemDef->m_iSkill < (SKILL_TYPE)(g_Cfg.m_iMaxSkill) )
+	if ( (pItemDef->m_iSkill > SKILL_NONE) && (pItemDef->m_iSkill < (SKILL_TYPE)g_Cfg.m_iMaxSkill) )
 		return pItemDef->m_iSkill;
 
 	switch ( pItemDef->GetType() )
@@ -4936,7 +4936,7 @@ bool CItem::Use_Light()
 	if ( IsType(IT_LIGHT_OUT) && (m_itLight.m_burned || IsItemInContainer()) )
 		return false;
 
-	ITEMID_TYPE id = (ITEMID_TYPE)(m_TagDefs.GetKeyNum("OVERRIDE_LIGHTID", true));
+	ITEMID_TYPE id = (ITEMID_TYPE)(m_TagDefs.GetKeyNum("OVERRIDE_LIGHTID"));
 	if ( !id )
 	{
 		id = (ITEMID_TYPE)Item_GetDef()->m_ttLightSource.m_ridLight.GetResIndex();

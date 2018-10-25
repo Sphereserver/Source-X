@@ -313,12 +313,11 @@ public:
      * @brief   Gets key number from m_TagDefs.
      *
      * @param   pszKey  The key.
-     * @param   fZero   true to zero.
      * @param   fDef    true to definition.
      *
      * @return  The key number.
      */
-	int64 GetKeyNum( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
+	int64 GetKeyNum( lpctstr pszKey, bool fDef = false ) const;
 
     /**
      * @fn  CVarDefCont * CObjBase::GetKey( lpctstr pszKey, bool fDef ) const;

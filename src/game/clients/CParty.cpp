@@ -87,7 +87,7 @@ bool CPartyDef::GetLootFlag( const CChar *pChar )
 	ADDTOCALLSTACK("CPartyDef::GetLootFlag");
 	ASSERT(pChar);
 	if ( IsInParty(pChar) )
-		return (pChar->GetKeyNum("PARTY_CANLOOTME", true) != 0);
+		return (pChar->GetKeyNum("PARTY_CANLOOTME") != 0);
 
 	return false;
 }
@@ -885,9 +885,9 @@ lpctstr CPartyDef::GetDefStr( lpctstr pszKey, bool fZero ) const
 	return m_BaseDefs.GetKeyStr( pszKey, fZero );
 }
 
-int64 CPartyDef::GetDefNum( lpctstr pszKey, bool fZero ) const
+int64 CPartyDef::GetDefNum( lpctstr pszKey ) const
 {
-	return m_BaseDefs.GetKeyNum( pszKey, fZero );
+	return m_BaseDefs.GetKeyNum( pszKey );
 }
 
 void CPartyDef::SetDefNum(lpctstr pszKey, int64 iVal, bool fZero )

@@ -361,7 +361,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 	int iGainRadius = pSkillDef->m_GainRadius;
 	if ((iGainRadius > 0) && ((difficulty + iGainRadius) < uiSkillLevelFixed))
 	{
-		if ( GetKeyNum("NOSKILLMSG", true) )
+		if ( GetKeyNum("NOSKILLMSG") )
 			SysMessage( g_Cfg.GetDefaultMsg(DEFMSG_GAINRADIUS_NOT_MET) );
 		return;
 	}
@@ -1646,7 +1646,7 @@ int CChar::Skill_Peacemaking( SKTRIG_TYPE stage )
 				if (( pChar == this ) || !CanSee(pChar) )
 					continue;
 
-				int iBardingDiff = (int)pChar->GetKeyNum("BARDING.DIFF", true, true);
+				int iBardingDiff = (int)pChar->GetKeyNum("BARDING.DIFF");
 
 				int iPeaceDiff = pChar->Skill_GetAdjusted(SKILL_PEACEMAKING);
 				if (iBardingDiff != 0)
@@ -1721,7 +1721,7 @@ int CChar::Skill_Enticement( SKTRIG_TYPE stage )
 				return -SKTRIG_ABORT;
 			}
 			
-			int iBaseDiff = (int)pChar->GetKeyNum("BARDING.DIFF", true, true);
+			int iBaseDiff = (int)pChar->GetKeyNum("BARDING.DIFF");
 			if (iBaseDiff != 0)
 				iBaseDiff = iBaseDiff / 18;
 			else
@@ -1820,7 +1820,7 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 				g_Log.EventError("Act empty in skill Provocation, trigger @Start.\n");
 				return -SKTRIG_ABORT;
 			}
-			int iBaseDiff = (int)pAct->GetKeyNum("BARDING.DIFF", true, true);
+			int iBaseDiff = (int)pAct->GetKeyNum("BARDING.DIFF");
 			if (iBaseDiff != 0)
 				iBaseDiff = iBaseDiff / 18;
 			else
@@ -3157,16 +3157,16 @@ int CChar::Skill_Stroke( bool fResource )
 		if ( Skill_OnTrigger(skill, SKTRIG_STROKE, &args) == TRIGRET_RET_TRUE )
 			return -SKTRIG_ABORT;
 
-		sound = (SOUND_TYPE)(args.m_VarsLocal.GetKeyNum("Sound", false));
-		delay = args.m_VarsLocal.GetKeyNum("Delay", true);
-		anim = static_cast<ANIM_TYPE>(args.m_VarsLocal.GetKeyNum("Anim", true));
+		sound = (SOUND_TYPE)(args.m_VarsLocal.GetKeyNum("Sound"));
+		delay = args.m_VarsLocal.GetKeyNum("Delay");
+		anim = static_cast<ANIM_TYPE>(args.m_VarsLocal.GetKeyNum("Anim"));
 
 		if ( args.m_iN1 == 1 )
 			UpdateDir(m_Act_p);
 		if ( fResource )
-			m_atResource.m_Stroke_Count = (word)(args.m_VarsLocal.GetKeyNum("Strokes", false));
+			m_atResource.m_Stroke_Count = (word)(args.m_VarsLocal.GetKeyNum("Strokes"));
 		else
-			m_atCreate.m_Stroke_Count = (word)(args.m_VarsLocal.GetKeyNum("Strokes", false));
+			m_atCreate.m_Stroke_Count = (word)(args.m_VarsLocal.GetKeyNum("Strokes"));
 	}
 
 	if ( sound )
@@ -3978,14 +3978,14 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		if ( bCraftSkill )
 		{
 			// read crafting parameters
-			pResBase.SetPrivateUID((dword)(pArgs.m_VarsLocal.GetKeyNum("CraftItemdef", true)));
-			m_atCreate.m_Stroke_Count = (word)pArgs.m_VarsLocal.GetKeyNum("CraftStrokeCnt", true);
+			pResBase.SetPrivateUID((dword)(pArgs.m_VarsLocal.GetKeyNum("CraftItemdef")));
+			m_atCreate.m_Stroke_Count = (word)pArgs.m_VarsLocal.GetKeyNum("CraftStrokeCnt");
 			m_atCreate.m_Stroke_Count = maximum(1,m_atCreate.m_Stroke_Count);
 			m_atCreate.m_ItemID = (ITEMID_TYPE)(pResBase.GetResIndex());
-			m_atCreate.m_Amount = (word)(pArgs.m_VarsLocal.GetKeyNum("CraftAmount", true));
+			m_atCreate.m_Amount = (word)(pArgs.m_VarsLocal.GetKeyNum("CraftAmount"));
 		}
 		if ( bGatherSkill )
-			m_atResource.m_Stroke_Count = (word)(pArgs.m_VarsLocal.GetKeyNum("GatherStrokeCnt", true));
+			m_atResource.m_Stroke_Count = (word)(pArgs.m_VarsLocal.GetKeyNum("GatherStrokeCnt"));
 
 		// Casting sound & animation when starting, Skill_Stroke() will do it the next times.
 		if ( bCraftSkill || bGatherSkill )

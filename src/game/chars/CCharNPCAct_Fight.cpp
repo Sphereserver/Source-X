@@ -215,10 +215,10 @@ void CChar::NPC_Act_Fight()
             break;
         case (TRIGRET_TYPE)(2) :
         {
-            SKILL_TYPE iSkillforced = (SKILL_TYPE)(Args.m_VarsLocal.GetKeyNum("skill", false));
+            SKILL_TYPE iSkillforced = (SKILL_TYPE)(Args.m_VarsLocal.GetKeyNum("skill"));
             if (iSkillforced)
             {
-                SPELL_TYPE iSpellforced = (SPELL_TYPE)(Args.m_VarsLocal.GetKeyNum("spell", false));
+                SPELL_TYPE iSpellforced = (SPELL_TYPE)(Args.m_VarsLocal.GetKeyNum("spell"));
                 if (g_Cfg.IsSkillFlag(iSkillforced, SKF_MAGIC))
                     m_atMagery.m_Spell = iSpellforced;
 

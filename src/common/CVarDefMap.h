@@ -165,7 +165,7 @@ public:
 
 	CVarDefCont * GetAt( size_t at ) const;
 	CVarDefCont * GetKey( lpctstr pszKey ) const;
-	int64 GetKeyNum( lpctstr pszKey, bool fZero = false ) const;
+	int64 GetKeyNum( lpctstr pszKey ) const;
 	lpctstr GetKeyStr( lpctstr pszKey, bool fZero = false ) const;
 	CVarDefCont * GetParseKey( lpctstr & pArgs ) const;
 	CVarDefCont * CheckParseKey( lpctstr & pszArgs ) const;

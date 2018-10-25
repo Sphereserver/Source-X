@@ -2404,7 +2404,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 		return false;
 	}
 
-	if ( pChar->GetKeyNum("PARTY_AUTODECLINEINVITE", true) )
+	if ( pChar->GetKeyNum("PARTY_AUTODECLINEINVITE") )
 	{
 		SysMessageDefault( DEFMSG_PARTY_AUTODECLINE );
 		return false;

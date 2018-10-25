@@ -95,8 +95,14 @@ private:
 	CAccount& operator=(const CAccount& other);
 public:
 
-	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const { return m_BaseDefs.GetKeyStr( pszKey, fZero ); }
-	int64 GetDefNum( lpctstr pszKey, bool fZero = false ) const	{ return m_BaseDefs.GetKeyNum( pszKey, fZero );	}
+	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const
+    {
+        return m_BaseDefs.GetKeyStr( pszKey, fZero );
+    }
+	int64 GetDefNum( lpctstr pszKey ) const
+    {
+        return m_BaseDefs.GetKeyNum( pszKey );
+    }
 	void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true)
 	{
 		m_BaseDefs.SetNum(pszKey, iVal, fZero);

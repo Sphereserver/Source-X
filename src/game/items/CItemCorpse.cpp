@@ -101,7 +101,7 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 {
 	ADDTOCALLSTACK("CChar::MakeCorpse");
 
-	word wFlags = (word)(m_TagDefs.GetKeyNum("DEATHFLAGS", true));
+	word wFlags = (word)(m_TagDefs.GetKeyNum("DEATHFLAGS"));
 	if (wFlags & DEATH_NOCORPSE)
 		return nullptr;
 	if (IsStatFlag(STATF_CONJURED) && !(wFlags & (DEATH_NOCONJUREDEFFECT|DEATH_HASCORPSE)))

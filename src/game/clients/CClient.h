@@ -740,9 +740,9 @@ public:
 		return m_BaseDefs.GetKeyStr( pszKey, fZero );
 	}
 
-	int64 GetDefNum( lpctstr pszKey, bool fZero = false ) const
+	int64 GetDefNum( lpctstr pszKey ) const
 	{
-		return m_BaseDefs.GetKeyNum( pszKey, fZero );
+		return m_BaseDefs.GetKeyNum( pszKey );
 	}
 
 	void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true)

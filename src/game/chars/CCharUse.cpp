@@ -52,7 +52,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 	CPointMap pnt = pCorpse->GetTopLevelObj()->GetTopPoint();
 
 	UpdateAnimate(ANIM_BOW);
-	if ( pCorpse->m_TagDefs.GetKeyNum("BLOOD", true) )
+	if ( pCorpse->m_TagDefs.GetKeyNum("BLOOD") )
 	{
 		CItem *pBlood = CItem::CreateBase(ITEMID_BLOOD4);
 		ASSERT(pBlood);

@@ -196,7 +196,7 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 		case OBC_WEIGHTREDUCTION:
 		case OBC_COMBATBONUSSTAT:
 		case OBC_COMBATBONUSPERCENT:
-			sVal.FormatLLVal(GetDefNum(pszKey, true));
+			sVal.FormatLLVal(GetDefNum(pszKey));
 			break;
 
 		case OBC_DEFNAME:
@@ -619,13 +619,13 @@ bool CBaseBaseDef::IsValid() const
 
 byte CBaseBaseDef::RangeL() const
 {
-	return (byte)(GetDefNum("RANGE",true) & 0xff);
+	return (byte)(GetDefNum("RANGE") & 0xff);
 	//return (m_range & 0xff);
 }
 
 byte CBaseBaseDef::RangeH() const
 {
-	return (byte)((GetDefNum("RANGE",true)>>8) & 0xff);
+	return (byte)((GetDefNum("RANGE")>>8) & 0xff);
 	//return ((m_range>>8) & 0xff);
 }
 

@@ -36,7 +36,7 @@ private:
 
 public:
 	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const;
-	int64 GetDefNum( lpctstr pszKey, bool fZero = false ) const;
+	int64 GetDefNum( lpctstr pszKey ) const;
 	void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true);
 	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true);
 	void DeleteDef(lpctstr pszKey);

@@ -391,15 +391,15 @@ bool CChar::Stats_Regen()
 				continue;
 			}
 
-			i = (STAT_TYPE)(Args.m_VarsLocal.GetKeyNum("StatID", true));
+			i = (STAT_TYPE)(Args.m_VarsLocal.GetKeyNum("StatID"));
 			if (i < STAT_STR)
 				i = STAT_STR;
 			else if (i > STAT_FOOD)
 				i = STAT_FOOD;
-			mod = (short)(Args.m_VarsLocal.GetKeyNum("Value", true));
-			StatLimit = (ushort)(Args.m_VarsLocal.GetKeyNum("StatLimit", true));
+			mod = (short)(Args.m_VarsLocal.GetKeyNum("Value"));
+			StatLimit = (ushort)(Args.m_VarsLocal.GetKeyNum("StatLimit"));
 			if (i == STAT_FOOD)
-				HitsHungerLoss = (int)(Args.m_VarsLocal.GetKeyNum("HitsHungerLoss", true));
+				HitsHungerLoss = (int)(Args.m_VarsLocal.GetKeyNum("HitsHungerLoss"));
 		}
 		if (mod == 0)
 			continue;

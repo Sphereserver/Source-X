@@ -1513,7 +1513,7 @@ void CChar::NPC_Act_Looting()
 
 	if ( !(NPC_GetAiFlags() & NPC_AI_LOOTING) )
 		return;
-	if ( m_pNPC->m_Brain != NPCBRAIN_MONSTER || !Can(CAN_C_USEHANDS) || IsStatFlag(STATF_CONJURED|STATF_PET) || (m_TagDefs.GetKeyNum("DEATHFLAGS", true) & DEATH_NOCORPSE) )
+	if ( m_pNPC->m_Brain != NPCBRAIN_MONSTER || !Can(CAN_C_USEHANDS) || IsStatFlag(STATF_CONJURED|STATF_PET) || (GetKeyNum("DEATHFLAGS") & DEATH_NOCORPSE) )
 		return;
 	if ( m_pArea->IsFlag(REGION_FLAG_SAFE|REGION_FLAG_GUARDED) )
 		return;
