@@ -583,10 +583,16 @@ public:
 	virtual void OnHear( lpctstr pszCmd, CChar * pSrc );
 	CItemBase * Item_GetDef() const;
 	ITEMID_TYPE GetID() const;
-	word GetBaseID() const;
+    inline word GetBaseID() const {
+        return (word)GetID();
+    }
 	bool SetBaseID( ITEMID_TYPE id );
 	bool SetID( ITEMID_TYPE id );
-	ITEMID_TYPE GetDispID() const;
+    inline ITEMID_TYPE GetDispID() const {
+        // This is what the item looks like.
+        // May not be the same as the item that defines it's type.
+        return m_dwDispIndex;
+    }
 	bool IsSameDispID( ITEMID_TYPE id ) const;	// account for flipped types ?
 	bool SetDispID( ITEMID_TYPE id );
 	void SetAnim( ITEMID_TYPE id, int64 iTicksTimeout); // time in ticks

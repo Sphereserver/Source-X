@@ -74,22 +74,34 @@ public:
 	CSector * GetTopSector() const;
 	// Location
 
-	LAYER_TYPE GetEquipLayer() const;
+    LAYER_TYPE GetEquipLayer() const {
+        return (LAYER_TYPE)(m_pt.m_z);
+    }
 	void SetEquipLayer( LAYER_TYPE layer );
 
-	byte GetContainedLayer() const;
+    inline byte GetContainedLayer() const {
+        // used for corpse or Restock count as well in Vendor container.
+        return m_pt.m_z;
+    }
 	void SetContainedLayer( byte layer );
-	const CPointMap & GetContainedPoint() const;
+    inline const CPointMap & GetContainedPoint() const {
+        return m_pt;
+    }
 	void SetContainedPoint( const CPointMap & pt );
 
 	void SetTopPoint( const CPointMap & pt );
-	const CPointMap & GetTopPoint() const;
+    inline const CPointMap & GetTopPoint() const {
+        return m_pt;
+    }
 	virtual void SetTopZ( char z );
 	char GetTopZ() const;
 	uchar GetTopMap() const;
 
 	void SetUnkPoint( const CPointMap & pt );
-	const CPointMap & GetUnkPoint() const;
+    inline const CPointMap & GetUnkPoint() const {
+        // don't care where this
+        return m_pt;
+    }
 	char GetUnkZ() const;
 
 	// Distance and direction

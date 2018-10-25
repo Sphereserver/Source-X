@@ -44,11 +44,6 @@ CSector * CObjBaseTemplate::GetTopSector() const
 }
 // Location
 
-LAYER_TYPE CObjBaseTemplate::GetEquipLayer() const
-{
-	return static_cast<LAYER_TYPE>(m_pt.m_z);
-}
-
 void CObjBaseTemplate::SetEquipLayer( LAYER_TYPE layer )
 {
 	SetContainerFlags( UID_O_EQUIPPED );
@@ -59,21 +54,10 @@ void CObjBaseTemplate::SetEquipLayer( LAYER_TYPE layer )
 	m_pt.m_map = 0;
 }
 
-byte CObjBaseTemplate::GetContainedLayer() const
-{
-	// used for corpse or Restock count as well in Vendor container.
-	return m_pt.m_z;
-}
-
 void CObjBaseTemplate::SetContainedLayer( byte layer )
 {
 	// used for corpse or Restock count as well in Vendor container.
 	m_pt.m_z = layer;
-}
-
-const CPointMap & CObjBaseTemplate::GetContainedPoint() const
-{
-	return m_pt;
 }
 
 void CObjBaseTemplate::SetContainedPoint( const CPointMap & pt )
@@ -90,11 +74,6 @@ void CObjBaseTemplate::SetTopPoint( const CPointMap & pt )
 	SetContainerFlags(0);
 	ASSERT( pt.IsValidPoint() );	// already checked b4.
 	m_pt = pt;
-}
-
-const CPointMap & CObjBaseTemplate::GetTopPoint() const
-{
-	return m_pt;
 }
 
 void CObjBaseTemplate::SetTopZ( char z )
@@ -115,12 +94,6 @@ uchar CObjBaseTemplate::GetTopMap() const
 void CObjBaseTemplate::SetUnkPoint( const CPointMap & pt )
 {
 	m_pt = pt;
-}
-
-const CPointMap & CObjBaseTemplate::GetUnkPoint() const
-{
-	// don't care where this
-	return m_pt;
 }
 
 char CObjBaseTemplate::GetUnkZ() const	// Equal to GetTopZ ?

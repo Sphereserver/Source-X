@@ -1965,10 +1965,6 @@ ITEMID_TYPE CItem::GetID() const
 	ASSERT(pItemDef);
 	return pItemDef->GetID();
 }
-word CItem::GetBaseID() const
-{
-	return (word)GetID();
-}
 
 bool CItem::SetID( ITEMID_TYPE id )
 {
@@ -1982,12 +1978,6 @@ bool CItem::SetID( ITEMID_TYPE id )
 	return true;
 }
 
-ITEMID_TYPE CItem::GetDispID() const
-{
-	// This is what the item looks like.
-	// May not be the same as the item that defines it's type.
-	return m_dwDispIndex;
-}
 bool CItem::IsSameDispID( ITEMID_TYPE id ) const	// account for flipped types ?
 {
 	const CItemBase * pItemDef = Item_GetDef();
@@ -2207,8 +2197,9 @@ void CItem::r_Write( CScript & s )
 
 	if ( GetDispID() != GetID() )	// the item is flipped.
 		s.WriteKey("DISPID", g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, GetDispID())));
-	if ( GetAmount() != 1 )
-		s.WriteKeyVal("AMOUNT", GetAmount());
+    int iAmount = GetAmount();
+	if ( iAmount != 1 )
+		s.WriteKeyVal("AMOUNT", iAmount);
 	if ( !pItemDef->IsType(m_type) )
 		s.WriteKey("TYPE", g_Cfg.ResourceGetName(CResourceID(RES_TYPEDEF, m_type)));
 	if ( m_uidLink.IsValidUID() )
@@ -2234,7 +2225,7 @@ void CItem::r_Write( CScript & s )
 	if ( m_itNormal.m_morep.m_x || m_itNormal.m_morep.m_y || m_itNormal.m_morep.m_z || m_itNormal.m_morep.m_map )
 		s.WriteKey("MOREP", m_itNormal.m_morep.WriteUsed());
 
-	CObjBase *pCont = GetContainer();
+	const CObjBase *pCont = GetContainer();
 	if ( pCont )
 	{
 		if ( pCont->IsChar() )
@@ -2252,7 +2243,8 @@ void CItem::r_Write( CScript & s )
 	}
 	else
 		s.WriteKey("P", GetTopPoint().WriteUsed());
-    static_cast<CEntity*>(this)->r_Write(s);
+
+    CEntity::r_Write(s);
 }
 
 bool CItem::LoadSetContainer( CUID uid, LAYER_TYPE layer )

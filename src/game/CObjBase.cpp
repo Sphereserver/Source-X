@@ -2030,8 +2030,8 @@ void CObjBase::r_Write( CScript & s )
 		s.WriteKeyVal( "TIMER", GetTimerAdjusted());
 	if ( m_timestamp > 0 )
 		s.WriteKeyVal( "TIMESTAMP", GetTimeStamp());
-	if ( GetSpawn() )
-		s.WriteKeyHex("SPAWNITEM", GetSpawn()->GetLink()->GetUID());
+	if ( const CCSpawn* pSpawn = GetSpawn() )
+		s.WriteKeyHex("SPAWNITEM", pSpawn->GetLink()->GetUID());
 	if ( m_ModAr )
 		s.WriteKeyVal("MODAR", m_ModAr);
 	if ( m_ModMaxWeight )

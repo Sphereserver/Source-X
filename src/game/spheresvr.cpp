@@ -544,7 +544,7 @@ static void Sphere_MainMonitorLoop()
 				break;
 
 #ifdef _WIN32
-			NTWindow_OnTick(1000);
+			NTWindow_OnTick(250);
 #else
 			Sleep(1000);
 #endif

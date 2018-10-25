@@ -3503,8 +3503,9 @@ void CChar::r_Write( CScript & s )
 	if ( m_pNPC )
 		m_pNPC->r_WriteChar(this, s);
 
-	if ( GetTopPoint().IsValidPoint() )
-		s.WriteKey("P", GetTopPoint().WriteUsed());
+    const CPointMap& pt = GetTopPoint();
+	if ( pt.IsValidPoint() )
+		s.WriteKey("P", pt.WriteUsed());
 	if ( !m_sTitle.IsEmpty() )
 		s.WriteKey("TITLE", m_sTitle);
 	if ( m_fonttype != FONT_NORMAL )
@@ -3540,16 +3541,17 @@ void CChar::r_Write( CScript & s )
         s.WriteKeyVal("MaxShips", _iMaxShips);
     }
     GetMultiStorage()->r_Write(s);
-	if ( Skill_GetActive() != SKILL_NONE )
+    SKILL_TYPE action = Skill_GetActive();
+	if ( action != SKILL_NONE )
 	{
-		const CSkillDef* pSkillDef = g_Cfg.GetSkillDef(Skill_GetActive());
+		const CSkillDef* pSkillDef = g_Cfg.GetSkillDef(action);
 		tchar * pszActionTemp;
 		if (pSkillDef != nullptr)
 			pszActionTemp = const_cast<tchar*>(pSkillDef->GetKey());
 		else
 		{
 			pszActionTemp = Str_GetTemp();
-			sprintf(pszActionTemp, "%d", Skill_GetActive());
+			sprintf(pszActionTemp, "%d", action);
 		}
 		s.WriteKey("ACTION", pszActionTemp);
 		/* We save ACTARG1/ACTARG2/ACTARG3 only if the following conditions are satisfied:
@@ -3557,7 +3559,6 @@ void CChar::r_Write( CScript & s )
 		The character action is one of the valid skill OR
 		The character action is one of the NPC Action that uses ACTARG1/ACTARG2/ACTARG3
 		*/
-		SKILL_TYPE action = Skill_GetActive();
 		if ((m_atUnk.m_Arg1 != 0) && ((action > SKILL_NONE && action < SKILL_QTY) || action == NPCACT_FLEE || action == NPCACT_TALK || action == NPCACT_TALK_FOLLOW || action == NPCACT_RIDDEN))
 			s.WriteKeyHex("ACTARG1", m_atUnk.m_Arg1);
 		if ((m_atUnk.m_Arg2 != 0) && ((action > SKILL_NONE && action < SKILL_QTY) || action == NPCACT_FLEE || action == NPCACT_TALK || action == NPCACT_TALK_FOLLOW || action == NPCACT_RIDDEN))
@@ -3599,12 +3600,13 @@ void CChar::r_Write( CScript & s )
 		}
 	}
 
-	if ( Stat_GetAdjusted(STAT_STR) != Stat_GetMax(STAT_STR) )
-		s.WriteKeyVal("MAXHITS", Stat_GetMax(STAT_STR));
-	if ( Stat_GetAdjusted(STAT_DEX) != Stat_GetMax(STAT_DEX) )
-		s.WriteKeyVal("MAXSTAM", Stat_GetMax(STAT_DEX));
-	if ( Stat_GetAdjusted(STAT_INT) != Stat_GetMax(STAT_INT) )
-		s.WriteKeyVal("MAXMANA", Stat_GetMax(STAT_INT));
+    short uiMaxStat;
+	if ( Stat_GetAdjusted(STAT_STR) != (uiMaxStat = Stat_GetMax(STAT_STR)) )
+		s.WriteKeyVal("MAXHITS", uiMaxStat);
+	if ( Stat_GetAdjusted(STAT_DEX) != (uiMaxStat = Stat_GetMax(STAT_DEX)) )
+		s.WriteKeyVal("MAXSTAM", uiMaxStat);
+	if ( Stat_GetAdjusted(STAT_INT) != (uiMaxStat = Stat_GetMax(STAT_INT)) )
+		s.WriteKeyVal("MAXMANA", uiMaxStat);
 
 	s.WriteKeyVal("HITS", Stat_GetVal(STAT_STR));
 	s.WriteKeyVal("STAM", Stat_GetVal(STAT_DEX));
@@ -3613,11 +3615,14 @@ void CChar::r_Write( CScript & s )
 
 	for ( j = 0; j < g_Cfg.m_iMaxSkill; ++j )
 	{
-		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)j) || Skill_GetBase((SKILL_TYPE)j) == 0 )
+		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)j) )
 			continue;
-		s.WriteKeyVal(g_Cfg.GetSkillDef((SKILL_TYPE)j)->GetKey(), Skill_GetBase((SKILL_TYPE)j) );
+        ushort uiSkillVal = Skill_GetBase((SKILL_TYPE)j);
+        if (uiSkillVal == 0)
+            continue;
+		s.WriteKeyVal(g_Cfg.GetSkillDef((SKILL_TYPE)j)->GetKey(), uiSkillVal );
 	}
-    static_cast<CEntity*>(this)->r_Write(s);
+    CEntity::r_Write(s);
 
 	r_WriteContent(s);
 	EXC_CATCH;
