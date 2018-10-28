@@ -2062,13 +2062,13 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 
     if ( m_pPlayer && !IsPriv(PRIV_GM) )
     {
-        if (IsStatFlag( STATF_DEAD|STATF_SLEEPING ))
+        if (IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_STONE))
         {
             if ( fFailMsg )
                 SysMessageDefault( DEFMSG_SPELL_TRY_DEAD );
             return false;
         }
-        else if (IsStatFlag( STATF_FREEZE|STATF_STONE ))
+        else if (IsStatFlag(STATF_FREEZE) && !IsSetMagicFlags(MAGICF_CASTPARALYZED))
         {
             if ( fFailMsg )
                 SysMessageDefault( DEFMSG_SPELL_TRY_FROZENHANDS );

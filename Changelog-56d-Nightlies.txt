@@ -1250,3 +1250,4 @@ Added: Now Sectors store their adjacent sectors:
 28-10-2018, Nolok
 - Fixed: Players could cast spells even when paralyzed or stoned (Issue #135).
 - Fixed: When Game Masters casted a spell with a wand or a scroll, they were consumed.
+- Added: ini MagicFlag MAGICF_CASTPARALYZED, to be able to cast even if the character is paralyzed.
