@@ -2363,9 +2363,9 @@ void CWorld::OnTick()
         _mWorldTickList._mTimedObjects[iTime].THREAD_CMUTEX.unlock();
         _mWorldTickList.THREAD_CMUTEX.unlock();
     }
-    for (const auto &objMap : tmpMap)    // Loop through all msecs stored, unless we passed the timestamp.
+    for (const auto &pairObj : tmpMap)    // Loop through all msecs stored, unless we passed the timestamp.
     {
-        for (auto *pObj : objMap.second)
+        for (CTimedObject* pObj : pairObj.second)
         {
             PROFILE_TYPE profile = pObj->GetProfileType();
             ProfileTask profileTask(profile);
@@ -2447,29 +2447,29 @@ void CWorld::OnTick()
             }
         }
         _mWorldTickList.THREAD_CMUTEX.lock();
-        _mWorldTickList._mTimedObjects.erase(objMap.first);  // entirelly remove this map's entry.
+        _mWorldTickList._mTimedObjects.erase(pairObj.first);  // entirely remove this map's entry.
         _mWorldTickList.THREAD_CMUTEX.unlock();
     }
 
     ProfileTask taskChars(PROFILE_CHARS);
-    std::map<int64, TimedCharsContainer>::iterator mapit = _mCharTickList._mTimedChars.begin();
+    std::map<int64, TimedCharsContainer>::iterator mapIt = _mCharTickList._mTimedChars.begin();
     std::map<int64, std::vector<CChar*>> tmpCharMap;
-    while (mapit != _mCharTickList._mTimedChars.end() && iCurTime > (iTime = mapit->first))
+    while (mapIt != _mCharTickList._mTimedChars.end() && iCurTime > (iTime = mapIt->first))
     {
         _mCharTickList.THREAD_CMUTEX.lock();
         _mCharTickList._mTimedChars[iTime].THREAD_CMUTEX.lock();
 
         {
-            tmpCharMap[iTime] = mapit->second._TimedCharsContainer;
+            tmpCharMap[iTime] = mapIt->second._TimedCharsContainer;
         }
-        ++mapit;
+        ++mapIt;
         _mCharTickList._mTimedChars[iTime].THREAD_CMUTEX.unlock();
         _mCharTickList.THREAD_CMUTEX.unlock();
     }
 
-    for (const auto &charit : tmpCharMap)    // Loop through all msecs stored, unless we passed the timestamp.
+    for (const auto &pairChar : tmpCharMap)    // Loop through all msecs stored, unless we passed the timestamp.
     {
-        for (auto *pChar : charit.second)
+        for (CChar* pChar : pairChar.second)
         {
             if (pChar->OnTickPeriodic())
             {
@@ -2482,7 +2482,7 @@ void CWorld::OnTick()
         }
 
         _mCharTickList.THREAD_CMUTEX.lock();
-        _mCharTickList._mTimedChars.erase(charit.first);
+        _mCharTickList._mTimedChars.erase(pairChar.first);
         _mCharTickList.THREAD_CMUTEX.unlock();
     }
 

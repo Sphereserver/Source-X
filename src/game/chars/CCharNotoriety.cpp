@@ -16,7 +16,7 @@ bool CChar::Noto_IsMurderer() const
 bool CChar::Noto_IsEvil() const
 {
 	ADDTOCALLSTACK("CChar::Noto_IsEvil");
-	int	iKarma = Stat_GetAdjusted(STAT_KARMA);
+	short iKarma = GetKarma();
 
 	//	guarded areas could be both RED and BLUE ones.
 	if ( m_pArea && m_pArea->IsGuarded() && m_pArea->m_TagDefs.GetKeyNum("RED") )
@@ -67,25 +67,25 @@ bool CChar::Noto_IsNeutral() const
 {
 	ADDTOCALLSTACK("CChar::Noto_IsNeutral");
 	// Should neutrality change in guarded areas ?
-	int iKarma = Stat_GetAdjusted(STAT_KARMA);
+	short iKarma = GetKarma();
 	switch ( GetNPCBrain() )
 	{
 		case NPCBRAIN_MONSTER:
 		case NPCBRAIN_BERSERK:
-			return( iKarma<= 0 );
+			return ( iKarma<= 0 );
 		case NPCBRAIN_ANIMAL:
-			return( iKarma<= 100 );
+			return ( iKarma<= 100 );
 		default:
 			break;
 	}
 	if ( m_pPlayer )
 	{
-		return( iKarma<g_Cfg.m_iPlayerKarmaNeutral );
+		return ( iKarma < g_Cfg.m_iPlayerKarmaNeutral );
 	}
-	return( iKarma<0 );
+	return ( iKarma < 0 );
 }
 
-NOTO_TYPE CChar::Noto_GetFlag(const CChar * pCharViewer, bool fAllowIncog, bool fAllowInvul, bool bOnlyColor) const
+NOTO_TYPE CChar::Noto_GetFlag(const CChar * pCharViewer, bool fAllowIncog, bool fAllowInvul, bool fOnlyColor) const
 {
 	ADDTOCALLSTACK("CChar::Noto_GetFlag");
 	CChar * pThis = const_cast<CChar*>(this);
@@ -102,15 +102,15 @@ NOTO_TYPE CChar::Noto_GetFlag(const CChar * pCharViewer, bool fAllowIncog, bool 
 		id = pThis->NotoSave_GetID(pTarget);
 
 		if (id != -1)
-			return pThis->NotoSave_GetValue(id, bOnlyColor);
+			return pThis->NotoSave_GetValue(id, fOnlyColor);
 	}
 
 	if (IsTrigUsed(TRIGGER_NOTOSEND))
 	{
 		CScriptTriggerArgs args;
 		pThis->OnTrigger(CTRIG_NotoSend, pTarget, &args);
-		iNoto = static_cast<NOTO_TYPE>(args.m_iN1);
-		iColor = static_cast<NOTO_TYPE>(args.m_iN2);
+		iNoto = (NOTO_TYPE)(args.m_iN1);
+		iColor = (NOTO_TYPE)(args.m_iN2);
 		if (iNoto < NOTO_INVALID)
 			iNoto = NOTO_INVALID;
 	}
@@ -121,7 +121,7 @@ NOTO_TYPE CChar::Noto_GetFlag(const CChar * pCharViewer, bool fAllowIncog, bool 
 		iColor = iNoto;
 	pThis->NotoSave_Add(pTarget, iNoto, iColor);
 
-	return bOnlyColor ? iColor : iNoto;
+	return fOnlyColor ? iColor : iNoto;
 }
 
 // NOTO_GOOD            1
@@ -301,13 +301,16 @@ lpctstr CChar::Noto_GetFameTitle() const
 		}
 		switch ( GetPrivLevel() )
 		{
-			case PLEVEL_Seer: return g_Cfg.GetDefaultMsg( DEFMSG_TITLE_SEER );	//"Seer ";
-			case PLEVEL_Counsel: return g_Cfg.GetDefaultMsg( DEFMSG_TITLE_COUNSEL );	//"Counselor ";
-			default: break;
+			case PLEVEL_Seer:
+                return g_Cfg.GetDefaultMsg( DEFMSG_TITLE_SEER );	//"Seer ";
+			case PLEVEL_Counsel:
+                return g_Cfg.GetDefaultMsg( DEFMSG_TITLE_COUNSEL );	//"Counselor ";
+			default:
+                break;
 		}
 	}
 
-	if (( Stat_GetAdjusted(STAT_FAME) > 9900 ) && (m_pPlayer || !g_Cfg.m_NPCNoFameTitle))
+	if (( GetFame() > 9900 ) && (m_pPlayer || !g_Cfg.m_NPCNoFameTitle))
 		return Char_GetDef()->IsFemale() ? g_Cfg.GetDefaultMsg( DEFMSG_TITLE_LADY ) : g_Cfg.GetDefaultMsg( DEFMSG_TITLE_LORD );	//"Lady " : "Lord ";
 
 	return "";
@@ -318,13 +321,13 @@ int CChar::Noto_GetLevel() const
 	ADDTOCALLSTACK("CChar::Noto_GetLevel");
 
 	size_t i = 0;
-	short iKarma = Stat_GetAdjusted(STAT_KARMA);
-	for ( ; i < g_Cfg.m_NotoKarmaLevels.size() && iKarma < g_Cfg.m_NotoKarmaLevels.at(i); i++ )
+	short iKarma = GetKarma();
+	for ( ; i < g_Cfg.m_NotoKarmaLevels.size() && iKarma < g_Cfg.m_NotoKarmaLevels[i]; ++i )
 		;
 
 	size_t j = 0;
-	short iFame = Stat_GetAdjusted(STAT_FAME);
-	for ( ; j < g_Cfg.m_NotoFameLevels.size() && iFame > g_Cfg.m_NotoFameLevels.at(j); j++ )
+	const ushort uiFame = GetFame();
+	for ( ; j < g_Cfg.m_NotoFameLevels.size() && uiFame > g_Cfg.m_NotoFameLevels[j]; ++j )
 		;
 
 	return (int)( ( i * (g_Cfg.m_NotoFameLevels.size() + 1) ) + j );
@@ -340,7 +343,7 @@ lpctstr CChar::Noto_GetTitle() const
 		pFameTitle = Noto_GetFameTitle();
 
 	tchar * pTemp = Str_GetTemp();
-	sprintf( pTemp, "%s%s%s%s%s%s",
+	snprintf( pTemp, STR_TEMPLENGTH, "%s%s%s%s%s%s",
 		(pTitle[0]) ? ( Char_GetDef()->IsFemale() ? g_Cfg.GetDefaultMsg( DEFMSG_TITLE_ARTICLE_FEMALE ) : g_Cfg.GetDefaultMsg( DEFMSG_TITLE_ARTICLE_MALE ) )  : "",
 		pTitle,
 		(pTitle[0]) ? " " : "",
@@ -435,12 +438,11 @@ void CChar::Noto_Fame( int iFameChange )
 	if ( ! iFameChange )
 		return;
 
-	int iFame = Stat_GetAdjusted(STAT_FAME);
-	iFame = maximum(iFame, 0);
+	const int iFame = GetFame();
 	if ( iFameChange > 0 )
 	{
 		if ( iFame + iFameChange > g_Cfg.m_iMaxFame )
-			iFameChange = g_Cfg.m_iMaxFame - iFame;
+			iFameChange = (g_Cfg.m_iMaxFame - iFame);
 	}
 	else
 	{
@@ -461,16 +463,15 @@ void CChar::Noto_Fame( int iFameChange )
 	if ( ! iFameChange )
 		return;
 
-	iFame += iFameChange;
-	Noto_ChangeDeltaMsg( iFame - Stat_GetAdjusted(STAT_FAME), g_Cfg.GetDefaultMsg( DEFMSG_NOTO_FAME ) );
-	Stat_SetBase(STAT_FAME, (short)(iFame));
+	SetFame((ushort)(iFame + iFameChange));
+    Noto_ChangeDeltaMsg( GetFame() - (short)iFame, g_Cfg.GetDefaultMsg( DEFMSG_NOTO_FAME ) );
 }
 
-void CChar::Noto_Karma( int iKarmaChange, int iBottom, bool bMessage )
+void CChar::Noto_Karma( int iKarmaChange, int iBottom, bool fMessage )
 {
 	ADDTOCALLSTACK("CChar::Noto_Karma");
 
-	int	iKarma = Stat_GetAdjusted(STAT_KARMA);
+	const int iKarma = GetKarma();
 	iKarmaChange = g_Cfg.Calc_KarmaScale( iKarma, iKarmaChange );
 
 	if ( iKarmaChange > 0 )
@@ -499,14 +500,12 @@ void CChar::Noto_Karma( int iKarmaChange, int iBottom, bool bMessage )
 	if ( ! iKarmaChange )
 		return;
 
-	iKarma += iKarmaChange;
-	Noto_ChangeDeltaMsg( iKarma - Stat_GetAdjusted(STAT_KARMA), g_Cfg.GetDefaultMsg( DEFMSG_NOTO_KARMA ) );
-	Stat_SetBase(STAT_KARMA, (short)(iKarma));
+    SetKarma((short)(iKarma + iKarmaChange));
+    Noto_ChangeDeltaMsg( GetKarma() - (short)iKarma, g_Cfg.GetDefaultMsg( DEFMSG_NOTO_KARMA ) );
 	NotoSave_Update();
-	if ( bMessage == true )
+	if ( fMessage == true )
 	{
-		int iPrvLevel = Noto_GetLevel();
-		Noto_ChangeNewMsg( iPrvLevel );
+		Noto_ChangeNewMsg( Noto_GetLevel() );
 	}
 }
 

@@ -234,7 +234,7 @@ int CServerConfig::Calc_FameKill( CChar * pKill )
 	ADDTOCALLSTACK("CServerConfig::Calc_FameKill");
 	// Translate the fame for a Kill.
 
-	int iFameChange = pKill->Stat_GetAdjusted(STAT_FAME);
+	int iFameChange = pKill->GetFame();
 
 	// Check if the victim is a PC, then higher gain/loss.
 	if ( pKill->m_pPlayer )
@@ -242,7 +242,7 @@ int CServerConfig::Calc_FameKill( CChar * pKill )
 	else
 		iFameChange /= 200;
 
-	return( iFameChange );
+	return iFameChange;
 }
 
 int CServerConfig::Calc_KarmaKill( CChar * pKill, NOTO_TYPE NotoThem )
@@ -250,7 +250,7 @@ int CServerConfig::Calc_KarmaKill( CChar * pKill, NOTO_TYPE NotoThem )
 	ADDTOCALLSTACK("CServerConfig::Calc_KarmaKill");
 	// Karma change on kill ?
 
-	int iKarmaChange = -pKill->Stat_GetAdjusted(STAT_KARMA);
+	int iKarmaChange = -(pKill->GetKarma());
 	if ( NotoThem >= NOTO_CRIMINAL )
 	{
 		// No bad karma for killing a criminal or my aggressor.
@@ -277,7 +277,7 @@ int CServerConfig::Calc_KarmaKill( CChar * pKill, NOTO_TYPE NotoThem )
 		iKarmaChange /= 20;	// Not as harsh penalty as with player chars.
 	}
 
-	return( iKarmaChange );
+	return iKarmaChange;
 }
 
 int CServerConfig::Calc_KarmaScale( int iKarma, int iKarmaChange )

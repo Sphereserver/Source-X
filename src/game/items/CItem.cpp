@@ -1309,9 +1309,9 @@ int64 CItem::GetDecayTime() const
 		case IT_MULTI:
 		case IT_SHIP:
 		case IT_MULTI_CUSTOM:
-			return( 14*24*60*60* MSECS_PER_SEC);		// very long decay updated as people use it
+			return ( 14*24*60*60* MSECS_PER_SEC);		// very long decay updated as people use it
 		case IT_TRASH_CAN:
-			return( 3*60* MSECS_PER_SEC);		// empties in 3 minutes
+			return ( 3*60* MSECS_PER_SEC);		// empties in 3 minutes
 		default:
 			break;
 	}
@@ -1319,7 +1319,7 @@ int64 CItem::GetDecayTime() const
 	if (IsAttr(ATTR_MOVE_NEVER|ATTR_STATIC|ATTR_LOCKEDDOWN|ATTR_SECURE) || !IsMovableType())
 		return -1;
 
-	return g_Cfg.m_iDecay_Item;
+	return g_Cfg.m_iDecay_Item * MSECS_PER_SEC * 60;
 }
 
 void CItem::SetTimeout( int64 iMsecs )
@@ -3964,7 +3964,7 @@ void CItem::ConvertBolttoCloth()
 		}
 		else
 		{
-			pItemNew->MoveToDecay(GetTopPoint(), g_Cfg.m_iDecay_Item);
+			pItemNew->MoveToDecay(GetTopPoint(), g_Cfg.m_iDecay_Item * 60 * MSECS_PER_SEC);
 		}
 	}
 }

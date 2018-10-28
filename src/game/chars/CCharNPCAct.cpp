@@ -220,7 +220,7 @@ void CChar::NPC_ActStart_SpeakTo( CChar * pSrc )
 	m_atTalk.m_WaitCount = 20;
 	m_atTalk.m_HearUnknown = 0;
 
-	Skill_Start( ( pSrc->Stat_GetAdjusted(STAT_FAME) > 7000 ) ? NPCACT_TALK_FOLLOW : NPCACT_TALK );
+	Skill_Start( ( pSrc->GetFame() > 7000 ) ? NPCACT_TALK_FOLLOW : NPCACT_TALK );
 	SetTimeoutS(3);
 	UpdateDir(pSrc);
 }

@@ -1850,7 +1850,7 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 
 		case SKTRIG_SUCCESS:
 			// They are just too good for this.
-			if ( pCharProv->Stat_GetAdjusted(STAT_KARMA) >= Calc_GetRandVal2(1000, 10000) )
+			if ( pCharProv->GetKarma() >= Calc_GetRandVal2(1000, 10000) )
 			{
 				pCharProv->Emote(g_Cfg.GetDefaultMsg(DEFMSG_PROVOCATION_EMOTE_1));
 				return -SKTRIG_ABORT;

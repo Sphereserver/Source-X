@@ -530,7 +530,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("BODY" ))
 			{
-				pChar->SetID(static_cast<CREID_TYPE>(ATOI(pArg)));
+				pChar->SetID((CREID_TYPE)(ATOI(pArg)));
 				continue;
 			}
 			else if ( s.IsKey("SKIN" ))
@@ -540,14 +540,14 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("DIR" ))
 			{
-				pChar->m_dirFace = static_cast<DIR_TYPE>(ATOI(pArg));
-				if ( pChar->m_dirFace < 0 || pChar->m_dirFace >= DIR_QTY )
+				pChar->m_dirFace = (DIR_TYPE)(ATOI(pArg));
+				if ( (pChar->m_dirFace < 0) || (pChar->m_dirFace >= DIR_QTY) )
 					pChar->m_dirFace = DIR_SE;
 				continue;
 			}
 			else if ( s.IsKey("XBODY" ))
 			{
-				pChar->m_prev_id = static_cast<CREID_TYPE>(ATOI(pArg));
+				pChar->m_prev_id = (CREID_TYPE)(ATOI(pArg));
 				continue;
 			}
 			else if ( s.IsKey("XSKIN" ))
@@ -562,12 +562,12 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("KARMA" ))
 			{
-				pChar->Stat_SetBase(STAT_KARMA, (short)(ATOI(pArg)));
+				pChar->SetKarma((short)(ATOI(pArg)));
 				continue;
 			}
 			else if ( s.IsKey("FAME" ))
 			{
-				pChar->Stat_SetBase(STAT_FAME, (short)(ATOI(pArg)));
+				pChar->SetFame((ushort)(ATOI(pArg)));
 				continue;
 			}
 			else if ( s.IsKey("TITLE" ))

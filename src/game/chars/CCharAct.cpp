@@ -2926,7 +2926,7 @@ bool CChar::Death()
 	{
 		ChangeExperience(-((int)(m_exp) / 10), pKiller);
 		if ( !(m_TagDefs.GetKeyNum("DEATHFLAGS") & DEATH_NOFAMECHANGE) )
-			Noto_Fame( -Stat_GetAdjusted(STAT_FAME)/10 );
+			Noto_Fame( -GetFame()/10 );
 
 		lpctstr pszGhostName = nullptr;
 		CCharBase *pCharDefPrev = CCharBase::FindCharBase( m_prev_id );

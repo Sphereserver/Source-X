@@ -2009,6 +2009,19 @@ do_default:
 				sVal.FormatVal(Stat_GetBase((STAT_TYPE)i));
 				return true;
 			}
+            else
+            {
+                if (!strnicmp(pszKey+1, "KARMA", 5))
+                {
+                    sVal.FormatSVal(GetKarma());
+                    return true;
+                }
+                else if (!strnicmp(pszKey+1, "FAME", 4))
+                {
+                    sVal.FormatUSVal(GetFame());
+                    return true;
+                }
+            }
 		}
 
 		if ( !strnicmp( pszKey, "MOD", 3 ) )
@@ -2266,8 +2279,11 @@ do_default:
 			// How much respect do i give this person ?
 			// Fame is never negative !
 			{
-				if ( pszKey[4] != '.' )
-					goto do_default;
+                if (pszKey[4] != '.')
+                {
+                    sVal.FormatUSVal(GetFame());
+                    break;
+                }
 
 				if (g_Cfg.m_Fame.size() <= 0 )
 				{
@@ -2282,7 +2298,7 @@ do_default:
 				tchar * pszFameAt0 = new tchar[pFameAt0->GetLength() + 1];
 				strcpylen(pszFameAt0, pFameAt0->GetPtr());
 
-				int iFame = Stat_GetAdjusted(STAT_FAME);
+				int iFame = GetFame();
 				int i = Str_ParseCmds( pszFameAt0, ppLevel_sep, CountOf(ppLevel_sep), "," ) - 1; //range
 				for (;;)
 				{
@@ -2357,10 +2373,13 @@ do_default:
 		case CHC_KARMA:
 			// What do i think of this person.
 			{
-				if ( pszKey[5] != '.' )
-					goto do_default;
+                if (pszKey[5] != '.')
+                {
+                    sVal.FormatSVal(GetKarma());
+                    break;
+                }
 
-				if (g_Cfg.m_Karma.size() <= 0 )
+				if (g_Cfg.m_Karma.empty())
 				{
 					DEBUG_ERR(("KARMA ranges have not been defined.\n"));
 					sVal.FormatVal( 0 );
@@ -2373,7 +2392,7 @@ do_default:
 				tchar * pszKarmaAt0 = new tchar[pKarmaAt0->GetLength() + 1];
 				strcpylen(pszKarmaAt0, pKarmaAt0->GetPtr());
 
-				int iKarma = Stat_GetAdjusted(STAT_KARMA);
+				short iKarma = GetKarma();
 
 				int i = Str_ParseCmds( pszKarmaAt0, ppLevel_sep, CountOf(ppLevel_sep), "," ) - 1; //range
 				for (;;)
@@ -2906,7 +2925,7 @@ bool CChar::r_LoadVal( CScript & s )
 	ADDTOCALLSTACK("CChar::r_LoadVal");
 	EXC_TRY("LoadVal");
 
-    if (static_cast<CEntity*>(this)->r_LoadVal(s))
+    if (CEntity::r_LoadVal(s))
     {
         return true;
     }
@@ -2915,7 +2934,6 @@ bool CChar::r_LoadVal( CScript & s )
 	CHC_TYPE iKeyNum = (CHC_TYPE) FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( iKeyNum < 0 )
 	{
-do_default:
 		if ( m_pPlayer )
 		{
 			if ( m_pPlayer->r_LoadVal( this, s ))
@@ -2957,8 +2975,21 @@ do_default:
 					Stat_SetBase((STAT_TYPE)i, s.GetArgSVal());
 					return true;
 				}
+                else
+                {
+                    if (!strnicmp(pszKey+1, "KARMA", 5))
+                    {
+                        SetKarma(s.GetArgSVal());
+                        return true;
+                    }
+                    else if (!strnicmp(pszKey+1, "FAME", 4))
+                    {
+                        SetFame(s.GetArgUSVal());
+                        return true;
+                    }
+                }
 			}
-			if ( !strnicmp( pszKey, "MOD", 3 ) )
+			else if ( !strnicmp( pszKey, "MOD", 3 ) )
 			{
 				i = g_Cfg.FindStatKey( pszKey+3 );
 				if ( i >= 0 )
@@ -3334,8 +3365,10 @@ do_default:
 			}
 			break;
 		case CHC_FAME:
+            SetFame(s.GetArgUSVal());
+            break;
 		case CHC_KARMA:
-			goto do_default;
+			SetKarma(s.GetArgSVal());
 		case CHC_SKILLUSEQUICK:
 			{
 				if ( s.GetArgStr() )
@@ -3599,6 +3632,10 @@ void CChar::r_Write( CScript & s )
 			s.WriteKeyVal(szTmp, Stat_GetBase((STAT_TYPE)j) );
 		}
 	}
+
+    // Storing them with the O prefix for backwards compatibility
+    s.WriteKeyVal("OKARMA", GetKarma() );
+    s.WriteKeyVal("OFAME", GetFame() );
 
     short uiMaxStat;
 	if ( Stat_GetAdjusted(STAT_STR) != (uiMaxStat = Stat_GetMax(STAT_STR)) )

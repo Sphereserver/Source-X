@@ -53,6 +53,7 @@
 - Fixed: wrong parsing when an unicode prompt response packet is received.
 
 29-05-2016, Kaylala (Khaos)
+(Source)
 Gump Enums, New Container Defines, Misc Switches from Prop Attributes to Flags, Added AlterItem Prop.
 
 - Added: uofiles_enums.h - New Gump Enums for several new containers, cards, and other miscellaneous assets.
@@ -328,7 +329,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fix for the spellchanneling item property.
 
 03-01-2018, Drk84
-- Added missing parenthesis to MulDivLL and MulDiv.
+- (Source) Added missing parenthesis to MulDivLL and MulDiv.
 
 03-01-2018, Nolok
 - Fixed: when playing a sound from a character from Samurai Empire and later expansions, it was chosen the wrong sound ID for the given action. This is caused by the different
@@ -591,6 +592,7 @@ Changed CCFaction into a CComponent.
 (Server)
 Fixed NPCs not casting/fighting continuously and going to wander randomly (CChar::NPC_Act_Idle()), also reformatted some files.
 Fixed some Spell's related stuff not returning correctly the spell required for NPCs.
+
 (Scripts)
 SPAWNS:
 	-Added Keywords SpawnID, TimeLo, TimeHi and MaxDist, explained bellow.

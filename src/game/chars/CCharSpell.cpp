@@ -343,7 +343,7 @@ bool CChar::Spell_Recall(CItem * pRune, bool fGate)
 
 		const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(SPELL_Gate_Travel);
 		ASSERT(pSpellDef);
-		int iDuration = GetSpellDuration(SPELL_Gate_Travel, Skill_GetBase(SKILL_MAGERY), nullptr);
+		int64 iDurationMs = MSECS_PER_TENTH * GetSpellDuration(SPELL_Gate_Travel, Skill_GetBase(SKILL_MAGERY), nullptr);
 
 		CItem * pGate = CItem::CreateBase(pSpellDef->m_idEffect);
 		ASSERT(pGate);
@@ -352,7 +352,7 @@ bool CChar::Spell_Recall(CItem * pRune, bool fGate)
 		pGate->SetAttr(ATTR_MAGIC | ATTR_MOVE_NEVER | ATTR_CAN_DECAY);	// why is this movable ?
 		pGate->SetHue((HUE_TYPE)(pArea->IsGuarded() ? HUE_DEFAULT : HUE_RED));
 		pGate->m_itTelepad.m_pntMark = pRune->m_itRune.m_pntMark;
-		pGate->MoveToDecay(GetTopPoint(), iDuration);
+		pGate->MoveToDecay(GetTopPoint(), iDurationMs );
 		pGate->Effect(EFFECT_OBJ, ITEMID_MOONGATE_FX_BLUE, pGate, 2);
 		pGate->Sound(pSpellDef->m_sound);
 
@@ -361,7 +361,7 @@ bool CChar::Spell_Recall(CItem * pRune, bool fGate)
 		ASSERT(pGate);
 		pGate->SetHue((HUE_TYPE)((m_pArea && m_pArea->IsGuarded()) ? HUE_DEFAULT : HUE_RED));
 		pGate->m_itTelepad.m_pntMark = GetTopPoint();
-		pGate->MoveToDecay(pRune->m_itRune.m_pntMark, iDuration);
+		pGate->MoveToDecay(pRune->m_itRune.m_pntMark, iDurationMs);
 		pGate->Effect(EFFECT_OBJ, ITEMID_MOONGATE_FX_BLUE, pGate, 2);
 		pGate->Sound(pSpellDef->m_sound);
 	}
@@ -1774,7 +1774,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 	return false;
 }
 
-CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int64 iDuration, CObjBase * pSrc, bool bEquip )
+CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int64 iDurationInTenths, CObjBase * pSrc, bool bEquip )
 {
 	ADDTOCALLSTACK("CChar::Spell_Effect_Create");
 	// Attach an effect to the Character.
@@ -1829,7 +1829,7 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEff
 	g_World.m_uidNew = pSpell->GetUID();
 	pSpell->SetAttr(pSpellDef ? ATTR_NEWBIE|ATTR_MAGIC : ATTR_NEWBIE);
 	pSpell->SetType(IT_SPELL);
-	pSpell->SetDecayTime(iDuration*MSECS_PER_SEC);
+	pSpell->SetDecayTime(iDurationInTenths * MSECS_PER_TENTH);
 	pSpell->m_itSpell.m_spell = (word)spell;
 	pSpell->m_itSpell.m_spelllevel = (word)iEffect;
 	pSpell->m_itSpell.m_spellcharges = 1;
@@ -1905,17 +1905,14 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 	// get the dir of the field.
 	int dx = abs( pntTarg.m_x - GetTopPoint().m_x );
 	int dy = abs( pntTarg.m_y - GetTopPoint().m_y );
-	ITEMID_TYPE id = (dx > dy) ? idnewNS ? idnewNS : idNS: idnewEW ? idnewEW : idEW;
+	ITEMID_TYPE id = (dx > dy) ? (idnewNS ? idnewNS : idNS) : (idnewEW ? idnewEW : idEW);
 
 	int minX = (int)((fieldWidth - 1) / 2) - (fieldWidth - 1);
 	int maxX = minX + (fieldWidth - 1);
 
 	int minY = (int)((fieldGauge - 1) / 2) - (fieldGauge - 1);
-	int maxY = minY+(fieldGauge - 1);
-
-	if (iDuration <= 0)
-		iDuration = GetSpellDuration( m_atMagery.m_Spell, iSkillLevel, pCharSrc );
-
+	int maxY = minY + (fieldGauge - 1);
+	
 	if ( IsSetMagicFlags( MAGICF_NOFIELDSOVERWALLS ) )
 	{
 		// check if anything is blocking the field from fully extending to its desired width
@@ -1923,7 +1920,7 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 		// first checks center piece, then left direction (minX), and finally right direction (maxX)
 		// (structure of the loop looks a little odd but it should be more effective for wide fields (we don't really
 		// want to be testing the far left or right of the field when it has been blocked towards the center))
-		for (int ix = 0; ; ix <= 0? ix-- : ix++)
+		for (int ix = 0; ; ix <= 0 ? --ix : ++ix)
 		{
 			if (ix < minX)
 				ix = 1;	// start checking right extension
@@ -1962,9 +1959,9 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 		}
 	}
 
-	for ( int ix = minX; ix <= maxX; ix++ )
+	for ( int ix = minX; ix <= maxX; ++ix )
 	{
-		for ( int iy = minY; iy <= maxY; iy++)
+		for ( int iy = minY; iy <= maxY; ++iy)
 		{
 			bool fGoodLoc = true;
 
@@ -2031,6 +2028,9 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 				pItem->OnSpellEffect( m_atMagery.m_Spell, this, iSkillLevel, nullptr );
 			}
 
+            if (iDuration <= 0)
+                iDuration = GetSpellDuration( m_atMagery.m_Spell, iSkillLevel, pCharSrc );
+
 			CItem * pSpell = CItem::CreateBase( id );
 			ASSERT(pSpell);
 			pSpell->m_itSpell.m_spell = (word)(m_atMagery.m_Spell);
@@ -2041,7 +2041,7 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 			pSpell->SetAttr(ATTR_MAGIC);
 			pSpell->SetHue(iColor);
 			pSpell->GenerateScript(this);
-			pSpell->MoveToDecay( ptg, iDuration * MSECS_PER_SEC, true);
+			pSpell->MoveToDecay( ptg, iDuration * MSECS_PER_TENTH, true);
 		}
 	}
 }
@@ -2481,7 +2481,7 @@ bool CChar::Spell_CastDone()
 	Args.m_VarsLocal.SetNum("fieldWidth", 0);
 	Args.m_VarsLocal.SetNum("fieldGauge", 0);
 	Args.m_VarsLocal.SetNum("areaRadius", 0);
-	Args.m_VarsLocal.SetNum("duration", GetSpellDuration(spell, iSkillLevel, this), true);
+	Args.m_VarsLocal.SetNum("duration", GetSpellDuration(spell, iSkillLevel, this), true);  // tenths of second
 
 	if (bIsSpellField)
 	{
@@ -3105,7 +3105,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 	iSkillLevel = iSkillLevel / 2 + Calc_GetRandVal(iSkillLevel / 2);	// randomize the potency
 	int iEffect = g_Cfg.GetSpellEffect(spell, iSkillLevel);
-	int iDuration = pSpellDef->m_idLayer ? GetSpellDuration(spell, iSkillLevel, pCharSrc) : 0;
+	int64 iDuration = pSpellDef->m_idLayer ? GetSpellDuration(spell, iSkillLevel, pCharSrc) : 0;    // tenths of second
 	SOUND_TYPE iSound = pSpellDef->m_sound;
 	bool fExplode = (pSpellDef->IsSpellType(SPELLFLAG_FX_BOLT) && !pSpellDef->IsSpellType(SPELLFLAG_GOOD));		// bolt (chasing) spells have explode = 1 by default (if not good spell)
 	bool fPotion = (pSourceItem && pSourceItem->IsType(IT_POTION));
@@ -3536,12 +3536,12 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 		case SPELL_Regenerate:		// Set number of charges based on effect level.
 		{
-			iDuration /= (2*TENTHS_PER_SEC); // tenths of seconds to seconds
+			iDuration /= (2 * TENTHS_PER_SEC); // tenths of second to seconds
 			if ( iDuration <= 0 )
 				iDuration = 1;
 			CItem * pSpell = Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_STATS, iEffect, iDuration*1000, pCharSrc );
 			ASSERT(pSpell);
-			pSpell->m_itSpell.m_spellcharges = iDuration;
+			pSpell->m_itSpell.m_spellcharges = (int)iDuration;
 		}
 		break;
 
@@ -3587,13 +3587,13 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	return true;
 }
 
-int CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc )
+int64 CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc )
 {
 	ADDTOCALLSTACK("CChar::GetSpellDuration");
-	int iDuration = -1;
+	int64 iDuration = -1;   // tenths of second
     /*
     * Duration calcs, do selective durations for magery spells if MagicF_OSIFormulas is enabled
-    * or for newer spells (only magery spells needs backwards compat
+    * or for newer spells (only magery spells needs backwards compat)
     */
 	if (pCharSrc != nullptr && (IsSetMagicFlags(MAGICF_OSIFORMULAS) || spell >= SPELL_Animate_Dead_AOS))
 	{
@@ -3678,7 +3678,7 @@ int CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc
 				break;
 
             case SPELL_Gate_Travel:
-                iDuration = 60 * MSECS_PER_SEC; //Fixed time: 60 seconds
+                iDuration = 60; //Fixed time: 60 seconds
                 break;
 
 			case SPELL_Polymorph:
@@ -3730,8 +3730,12 @@ int CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc
 	{
 		const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
 		ASSERT(pSpellDef);
-		iDuration = pSpellDef->m_Duration.GetLinear(iSkillLevel) / TENTHS_PER_SEC;
+		iDuration = pSpellDef->m_Duration.GetLinear(iSkillLevel);   // this is in tenths of second
 	}
+    else
+    {
+        iDuration *= 10; // From seconds to tenths of second
+    }
 
 	return iDuration; // tenths of seconds
 }

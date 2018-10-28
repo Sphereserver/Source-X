@@ -94,9 +94,7 @@ lpctstr const g_Stat_Name[STAT_QTY] =	// not sorted obviously.
 	"STR",
 	"INT",
 	"DEX",
-	"FOOD",
-	"KARMA",
-	"FAME",
+	"FOOD"
 };
 
 lpctstr g_szServerDescription =	SPHERE_TITLE " Version " SPHERE_VERSION " " SPHERE_VER_FILEOS_STR	" by www.spherecommunity.net";

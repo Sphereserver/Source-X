@@ -148,8 +148,6 @@ public:
 	CREID_TYPE m_prev_id;		// Backup of body type for ghosts and poly
 	HUE_TYPE m_prev_Hue;		// Backup of skin color. in case of polymorph etc.
 	HUE_TYPE m_wBloodHue;		// Replicating CharDef's BloodColor on the char, or overriding it.
-	bool IsTriggerActive(lpctstr trig) { return static_cast<CObjBase*>(const_cast<CChar*>(this))->IsTriggerActive(trig); }
-	void SetTriggerActive(lpctstr trig = nullptr) { static_cast<CObjBase*>(const_cast<CChar*>(this))->SetTriggerActive(trig); }
 
 	// Client's local light (might be useful in the future for NPCs also? keep it here for now)
 	byte m_LocalLight;
@@ -164,12 +162,14 @@ public:
 	// Skills, Stats and health
 	struct
 	{
-		short	m_base;
-		short	m_mod;			// signed for modifier
-		short	m_val;			// signed for karma
-		short	m_max;			// max
-		int64   m_regen;	    // msecs for the next regen.
+		ushort m_base;
+		short  m_mod;		// signed for modifier
+		ushort m_val;
+		ushort m_max;		// max
+		int64  m_regen;	    // msecs for the next regen.
 	} m_Stat[STAT_QTY];
+    short m_iKarma;
+    ushort m_uiFame;
 
 	int64 _timeNextRegen;	// When did i get my last regen tick ?
     int16 _iRegenTickCount; // ticks until next regen.
@@ -187,7 +187,7 @@ public:
 	CPointBase  m_Act_p;			// Moving to this location. or location of forge we are working on.
 	int			m_StepStealth;		// Max steps allowed to walk invisible while using Stealth skill
 
-									// Args related to specific actions type (m_Act_SkillCurrent)
+	// Args related to specific actions type (m_Act_SkillCurrent)
 	union
 	{
 		// README! To access the various items with ACTARG1/2/3, each struct member must have a size of 4 bytes.
@@ -421,7 +421,10 @@ public:
 	ushort Stats_GetRegenVal(STAT_TYPE iStat, bool bGetTicks);
 	SKILLLOCK_TYPE Stat_GetLock(STAT_TYPE stat);
 	void Stat_SetLock(STAT_TYPE stat, SKILLLOCK_TYPE state);
-
+    short GetKarma() const;
+    void SetKarma(short iNewKarma);
+    ushort GetFame() const;
+    void SetFame(ushort uiNewFame);
 
 	// Location and movement ------------------------------------
 private:
@@ -558,7 +561,7 @@ private:
 	* @param iBottom is the lower value you can have for this execution.
 	* @param bMessage show message to the char or not.
 	*/
-	void Noto_Karma( int iKarma, int iBottom=INT32_MIN, bool bMessage = false );
+	void Noto_Karma( int iKarmaChange, int iBottom = INT32_MIN, bool fMessage = false );
 
 	/**
 	* @brief Update Fame with the given value.
@@ -598,10 +601,10 @@ public:
 	* @param pChar is the CChar that needs to know what I am (good, evil, criminal, neutral...) to him.
 	* @param fIncog if set to true and he has STATF_INCOGNITO, this character will be gray for the viever (pChar).
 	* @param fInvul if set to true invulnerable characters will return NOTO_INVUL (yellow bar, etc).
-	* @param bGetColor if set to true only the color will be returned and not the notoriety (note that they can differ if set to so in the @NotoSend trigger).
+	* @param fGetColor if set to true only the color will be returned and not the notoriety (note that they can differ if set to so in the @NotoSend trigger).
 	* @return NOTO_TYPE notoriety level.
 	*/
-	NOTO_TYPE Noto_GetFlag( const CChar * pChar, bool fIncog = true, bool fInvul = false, bool bGetColor = false ) const;
+	NOTO_TYPE Noto_GetFlag( const CChar * pChar, bool fIncog = true, bool fInvul = false, bool fGetColor = false ) const;
 
 	/**
 	* @brief Notoriety calculations
@@ -908,7 +911,7 @@ private:
 	void Spell_Dispel( int iskilllevel );
 	CChar * Spell_Summon( CREID_TYPE id, CPointMap pt );
 	bool Spell_Recall(CItem * pRune, bool fGate);
-    CItem * Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int64 iDuration, CObjBase * pSrc = nullptr, bool bEquip = true );
+    CItem * Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int64 iDurationInTenths, CObjBase * pSrc = nullptr, bool bEquip = true );
 	SPELL_TYPE Spell_GetIndex(SKILL_TYPE skill = SKILL_NONE);	//gets first spell for the magic skill given.
 	SPELL_TYPE Spell_GetMax(SKILL_TYPE skill = SKILL_NONE);	//gets first spell for the magic skill given.
 	bool Spell_Equip_OnTick( CItem * pItem );
@@ -932,7 +935,7 @@ public:
 	bool Spell_CastDone();
 	bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool fReflecting = false );
 	bool Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool fFailMsg, bool fCheckAntiMagic = true );
-	int	GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc = nullptr );
+	int64 GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc = nullptr ); // in tenths of second
 
 	// Memories about objects in the world. -------------------
 	bool Memory_OnTick( CItemMemory * pMemory );

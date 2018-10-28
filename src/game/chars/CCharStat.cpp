@@ -176,10 +176,6 @@ short CChar::Stat_GetAdjusted( STAT_TYPE i ) const
 {
 	ADDTOCALLSTACK("CChar::Stat_GetAdjusted");
 	short val = Stat_GetBase(i) + Stat_GetMod(i);
-	if ( i == STAT_KARMA )
-		val = (short)(maximum(g_Cfg.m_iMinKarma, minimum(g_Cfg.m_iMaxKarma, val)));
-	else if ( i == STAT_FAME )
-		val = (short)(maximum(0, minimum(g_Cfg.m_iMaxFame, val)));
 
 	return val;
 }
@@ -189,8 +185,6 @@ short CChar::Stat_GetBase( STAT_TYPE i ) const
 	ADDTOCALLSTACK("CChar::Stat_GetBase");
 	ASSERT(i >= 0 && i < STAT_QTY);
 
-	if ( i == STAT_FAME && m_Stat[i].m_base < 0 )
-		return 0;
 	return m_Stat[i].m_base;
 }
 
@@ -257,12 +251,6 @@ void CChar::Stat_SetBase( STAT_TYPE i, short iVal )
 			break;
 		case STAT_FOOD:
 			break;
-		case STAT_KARMA:
-			iVal = (short)(maximum(g_Cfg.m_iMinKarma, minimum(g_Cfg.m_iMaxKarma, iVal)));
-			break;
-		case STAT_FAME:
-			iVal = (short)(maximum(0, minimum(g_Cfg.m_iMaxFame, iVal)));
-			break;
 		default:
 			throw CSError(LOGL_CRIT, 0, "Stat_SetBase: index out of range");
 	}
@@ -289,8 +277,6 @@ void CChar::Stat_SetBase( STAT_TYPE i, short iVal )
 		m_Stat[i].m_val = iMaxValue;
 
 	UpdateStatsFlag();
-	if ( !g_Serv.IsLoading() && i == STAT_KARMA )
-		NotoSave_Update();
 }
 
 short CChar::Stat_GetLimit( STAT_TYPE i ) const
@@ -471,6 +457,28 @@ void CChar::Stat_SetLock(STAT_TYPE stat, SKILLLOCK_TYPE state)
 	if (!m_pPlayer)
 		return;
 	return m_pPlayer->Stat_SetLock(stat,state);
+}
+
+short CChar::GetKarma() const
+{
+    return (short)(maximum(g_Cfg.m_iMinKarma, minimum(g_Cfg.m_iMaxKarma, m_iKarma)));
+}
+
+void CChar::SetKarma(short iNewKarma)
+{
+    m_iKarma = (short)(maximum(g_Cfg.m_iMinKarma, minimum(g_Cfg.m_iMaxKarma, iNewKarma)));
+    if ( !g_Serv.IsLoading() )
+        NotoSave_Update();
+}
+
+ushort CChar::GetFame() const
+{
+    return (ushort)(minimum(g_Cfg.m_iMaxFame, m_uiFame));
+}
+
+void CChar::SetFame(ushort uiNewFame)
+{
+    m_uiFame = (ushort)(minimum(g_Cfg.m_iMaxFame, uiNewFame));
 }
 
 bool CChar::Stat_Decrease(STAT_TYPE stat, SKILL_TYPE skill)

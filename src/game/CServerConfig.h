@@ -638,9 +638,6 @@ enum STAT_TYPE
 	STAT_BASE_QTY,
 	STAT_FOOD = 3,      // just used as a regen rate. (as karma does not decay)
 
-	// Notoriety.
-	STAT_KARMA = 4,		// g_Cfg.m_iMinKarma to g_Cfg.m_iMaxKarma - also used as the food consumption main timer.
-	STAT_FAME,			// 0 to g_Cfg.m_iMaxFame
 	STAT_QTY
 };
 
@@ -1607,7 +1604,7 @@ public:
 	bool Calc_CrimeSeen( const CChar * pCharThief, CChar * pCharViewer, SKILL_TYPE SkillToSee, bool fBonus ) const;
 
     /**
-     * @fn  int CServerConfig::Calc_FameKill( CChar * pKill );
+     * @fn  ushort CServerConfig::Calc_FameKill( CChar * pKill );
      *
      * @brief   Calculates the fame given by the kill.
      *
