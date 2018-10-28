@@ -3369,6 +3369,7 @@ bool CChar::r_LoadVal( CScript & s )
             break;
 		case CHC_KARMA:
 			SetKarma(s.GetArgSVal());
+            break;
 		case CHC_SKILLUSEQUICK:
 			{
 				if ( s.GetArgStr() )

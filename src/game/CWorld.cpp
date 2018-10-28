@@ -1004,7 +1004,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		g_Exp.m_ListGlobals.r_WriteSave(m_FileData);
 
 		size_t iQty = g_Cfg.m_RegionDefs.size();
-		for ( size_t i = 0; i < iQty; i++ )
+		for ( size_t i = 0; i < iQty; ++i )
 		{
 			CRegion *pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs.at(i));
 			if ( !pRegion || !pRegion->HasResourceName() || !pRegion->m_iModified )
@@ -1041,10 +1041,10 @@ bool CWorld::SaveStage() // Save world state in stages.
 		m_iSaveCountID++;	// Save only counts if we get to the end winout trapping.
 		m_timeSave = g_World.GetCurrentTime().GetTimeRaw() + g_Cfg.m_iSavePeriod;	// next save time.
 
-		g_Log.Event(LOGM_SAVE, "World data saved   (%s).\n", static_cast<lpctstr>(m_FileWorld.GetFilePath()));
-		g_Log.Event(LOGM_SAVE, "Player data saved  (%s).\n", static_cast<lpctstr>(m_FilePlayers.GetFilePath()));
-		g_Log.Event(LOGM_SAVE, "Multi data saved   (%s).\n", static_cast<lpctstr>(m_FileMultis.GetFilePath()));
-		g_Log.Event(LOGM_SAVE, "Context data saved (%s).\n", static_cast<lpctstr>(m_FileData.GetFilePath()));
+		g_Log.Event(LOGM_SAVE, "World data saved   (%s).\n", m_FileWorld.GetFilePath());
+		g_Log.Event(LOGM_SAVE, "Player data saved  (%s).\n", m_FilePlayers.GetFilePath());
+		g_Log.Event(LOGM_SAVE, "Multi data saved   (%s).\n", m_FileMultis.GetFilePath());
+		g_Log.Event(LOGM_SAVE, "Context data saved (%s).\n", m_FileData.GetFilePath());
 
 		llong	llTicksEnd;
 		llong	llTicksStart = m_savetimer;
@@ -1393,12 +1393,12 @@ void CWorld::SaveStatics()
 #endif
 
 		//	loop through all sectors and save static items
-		for ( int m = 0; m < 256; m++ )
+		for ( int m = 0; m < 256; ++m )
 		{
 			if ( !g_MapList.m_maps[m] )
                 continue;
 
-			for ( int d = 0; d < g_MapList.GetSectorQty(m); d++ )
+			for ( int d = 0; d < g_MapList.GetSectorQty(m); ++d )
 			{
 				CItem	*pNext, *pItem;
 				CSector	*pSector = GetSector(m, d);
@@ -1473,7 +1473,7 @@ void CWorld::DelTimedObject(int64 iTimeout, CTimedObject * pTimedObject)
     TimedObjectsContainer newcont;   // new container.
     if (cont._TimedObjectsContainer.size() > 1) // if the old container only has 1 entry we don't need to create a new one.
     {
-        for (auto& pObj : cont._TimedObjectsContainer)    // Loop until the old container is empty
+        for (CTimedObject* pObj : cont._TimedObjectsContainer)    // Loop until the old container is empty
         {
             if (pObj == pTimedObject)   // if pTimedObject is this entry skip it to remove it from the container.
             {
@@ -1492,7 +1492,7 @@ void CWorld::DelTimedObject(int64 iTimeout, CTimedObject * pTimedObject)
     if (!newcont._TimedObjectsContainer.empty())
     {
         cont.THREAD_CMUTEX.lock();
-        for (auto& pObj : newcont._TimedObjectsContainer)
+        for (CTimedObject* pObj : newcont._TimedObjectsContainer)
         {
             cont._TimedObjectsContainer.emplace_back(pObj);
         }
@@ -1529,9 +1529,9 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 	if ( ! s.Open( pszLoadName, OF_READ|OF_TEXT|OF_DEFAULTMODE ) )
 	{
 		if ( fError )
-			g_Log.Event(LOGM_INIT|LOGL_ERROR, "Can't Load %s\n", static_cast<lpctstr>(pszLoadName));
+			g_Log.Event(LOGM_INIT|LOGL_ERROR, "Can't Load %s\n", pszLoadName);
 		else
-			g_Log.Event(LOGM_INIT|LOGL_WARN, "Can't Load %s\n", static_cast<lpctstr>(pszLoadName));
+			g_Log.Event(LOGM_INIT|LOGL_WARN, "Can't Load %s\n", pszLoadName);
 		return false;
 	}
 
@@ -1572,7 +1572,7 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 		return true;
 	}
 
-	g_Log.Event( LOGM_INIT|LOGL_CRIT, "No [EOF] marker. '%s' is corrupt!\n", static_cast<lpctstr>(s.GetFilePath()));
+	g_Log.Event( LOGM_INIT|LOGL_CRIT, "No [EOF] marker. '%s' is corrupt!\n", s.GetFilePath());
 	return false;
 }
 
