@@ -246,7 +246,7 @@ public:
      * @return  The definition number.
      */
 
-	int64 GetDefNum( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
+	int64 GetDefNum( lpctstr pszKey, bool fDef = false ) const;
 
     /**
      * @fn  void CObjBase::SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true);

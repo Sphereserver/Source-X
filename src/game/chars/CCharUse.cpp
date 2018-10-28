@@ -1019,7 +1019,7 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool bCheckFollowerSlots )
 
 	if ( bCheckFollowerSlots && IsSetOF(OF_PetSlots) )
 	{
-		short iFollowerSlots = (short)pPet->GetDefNum("FOLLOWERSLOTS", true, true);
+		short iFollowerSlots = (short)pPet->GetDefNum("FOLLOWERSLOTS", true);
 		if ( !FollowersUpdate(pPet, (maximum(1, iFollowerSlots)), true) )
 		{
 			SysMessageDefault(DEFMSG_PETSLOTS_TRY_CONTROL);
@@ -1060,8 +1060,8 @@ bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool fCheckOnl
 		iFollowerSlots = (short)(Args.m_iN2);
 	}
 
-	short iCurFollower = (short)(GetDefNum("CURFOLLOWER", true, true));
-	short iMaxFollower = (short)(GetDefNum("MAXFOLLOWER", true, true));
+	short iCurFollower = (short)(GetDefNum("CURFOLLOWER", true));
+	short iMaxFollower = (short)(GetDefNum("MAXFOLLOWER", true));
 	short iSetFollower = iCurFollower + iFollowerSlots;
 
 	if ( (iSetFollower > iMaxFollower) && !IsPriv(PRIV_GM) )

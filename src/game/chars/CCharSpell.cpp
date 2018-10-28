@@ -266,7 +266,7 @@ CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap pntTarg )
 
 		if ( IsSetOF(OF_PetSlots) )
 		{
-			short iFollowerSlots = (short)pChar->GetDefNum("FOLLOWERSLOTS", true, true);
+			short iFollowerSlots = (short)pChar->GetDefNum("FOLLOWERSLOTS", true);
 			if ( !FollowersUpdate(pChar, maximum(1, iFollowerSlots)), true )
 			{
 				SysMessageDefault(DEFMSG_PETSLOTS_TRY_SUMMON);
@@ -727,10 +727,10 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		{
 			if ( m_pPlayer )
 			{
-				SetDefNum("RESFIREMAX", GetDefNum("RESFIREMAX", true, true) + 10);
-				SetDefNum("RESCOLDMAX", GetDefNum("RESCOLDMAX", true, true) + 10);
-				SetDefNum("RESPOISONMAX", GetDefNum("RESPOISONMAX", true, true) + 10);
-				SetDefNum("RESENERGYMAX", GetDefNum("RESENERGYMAX", true, true) + 10);
+				SetDefNum("RESFIREMAX", GetDefNum("RESFIREMAX", true) + 10);
+				SetDefNum("RESCOLDMAX", GetDefNum("RESCOLDMAX", true) + 10);
+				SetDefNum("RESPOISONMAX", GetDefNum("RESPOISONMAX", true) + 10);
+				SetDefNum("RESENERGYMAX", GetDefNum("RESENERGYMAX", true) + 10);
 			}
 			for (int i = STAT_STR; i < STAT_BASE_QTY; i++ )
 				Stat_AddMod((STAT_TYPE)(i), iStatEffect);
@@ -1347,10 +1347,10 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				}
 				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && m_pPlayer )		// Curse also decrease max resistances on players
 				{
-					SetDefNum("RESFIREMAX", GetDefNum("RESFIREMAX", true, true) - 10);
-					SetDefNum("RESCOLDMAX", GetDefNum("RESCOLDMAX", true, true) - 10);
-					SetDefNum("RESPOISONMAX", GetDefNum("RESPOISONMAX", true, true) - 10);
-					SetDefNum("RESENERGYMAX", GetDefNum("RESENERGYMAX", true, true) - 10);
+					SetDefNum("RESFIREMAX", GetDefNum("RESFIREMAX", true) - 10);
+					SetDefNum("RESCOLDMAX", GetDefNum("RESCOLDMAX", true) - 10);
+					SetDefNum("RESPOISONMAX", GetDefNum("RESPOISONMAX", true) - 10);
+					SetDefNum("RESENERGYMAX", GetDefNum("RESENERGYMAX", true) - 10);
 				}
 				for ( int i = STAT_STR; i < STAT_BASE_QTY; i++ )
 					Stat_AddMod((STAT_TYPE)(i), -iStatEffect);
@@ -2085,8 +2085,8 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 	if ( !Skill_CanUse(skill) )
 		return false;
 
-	short iLowerManaCost = (short)GetDefNum("LOWERMANACOST", true, true);
-	short iLowerReagentCost = (short)GetDefNum("LOWERREAGENTCOST", true, true);
+	short iLowerManaCost = (short)GetDefNum("LOWERMANACOST", true);
+	short iLowerReagentCost = (short)GetDefNum("LOWERREAGENTCOST", true);
 	short iManaUse = ((short)pSpellDef->m_wManaUse * (100 - minimum(iLowerManaCost, 40)) / 100);
 	short iTithingUse = ((short)pSpellDef->m_wTithingUse * (100 - minimum(iLowerReagentCost, 40)) / 100);
 
@@ -2987,7 +2987,7 @@ int CChar::Spell_CastStart()
 	}
 
     int64 iWaitTime = IsPriv(PRIV_GM) ? (MSECS_PER_TENTH/10) : (int64)(pSpellDef->m_CastTime.GetLinear(Skill_GetBase((SKILL_TYPE)iSkill)) * MSECS_PER_TENTH); // in tenths of second, converted to MSECS.
-	iWaitTime -= GetDefNum("FASTERCASTING", true, true) * 2;	//correct value is 0.25, but for backwards compatibility let's handle only 0.2.
+	iWaitTime -= GetDefNum("FASTERCASTING", true) * 2;	//correct value is 0.25, but for backwards compatibility let's handle only 0.2.
 	if ( iWaitTime < 1 || IsPriv(PRIV_GM) )
 		iWaitTime = 1;
 

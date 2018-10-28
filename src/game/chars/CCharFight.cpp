@@ -980,7 +980,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 
 	if ( m_pPlayer )	// only players can have damage bonus
 	{
-		int iIncreaseDam = (int)(GetDefNum("INCREASEDAM", true, true));
+		int iIncreaseDam = (int)(GetDefNum("INCREASEDAM", true));
 		int iDmgBonus = minimum(iIncreaseDam, 100);		// Damage Increase is capped at 100%
 
 		// Racial Bonus (Berserk), gargoyles gains +15% Damage Increase per each 20 HP lost
@@ -1847,11 +1847,11 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		iDmg,
 		this,
         iDmgType,
-		(int)(GetDefNum("DAMPHYSICAL", true, true)),
-		(int)(GetDefNum("DAMFIRE", true, true)),
-		(int)(GetDefNum("DAMCOLD", true, true)),
-		(int)(GetDefNum("DAMPOISON", true, true)),
-		(int)(GetDefNum("DAMENERGY", true, true))
+		(int)(GetDefNum("DAMPHYSICAL", true)),
+		(int)(GetDefNum("DAMFIRE", true)),
+		(int)(GetDefNum("DAMCOLD", true)),
+		(int)(GetDefNum("DAMPOISON", true)),
+		(int)(GetDefNum("DAMENERGY", true))
 		);
 
 	if ( iDmg > 0 )

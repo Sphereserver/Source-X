@@ -485,17 +485,17 @@ void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when r
 
 		if ( pItem->IsTypeArmorWeapon() )
 		{
-			SetDefNum("DAMPHYSICAL", GetDefNum("DAMPHYSICAL", true) - pItem->GetDefNum("DAMPHYSICAL", true, true));
-			SetDefNum("DAMFIRE", GetDefNum("DAMFIRE", true) - pItem->GetDefNum("DAMFIRE", true, true));
-			SetDefNum("DAMCOLD", GetDefNum("DAMCOLD", true) - pItem->GetDefNum("DAMCOLD", true, true));
-			SetDefNum("DAMPOISON", GetDefNum("DAMPOISON", true) - pItem->GetDefNum("DAMPOISON", true, true));
-			SetDefNum("DAMENERGY", GetDefNum("DAMENERGY", true) - pItem->GetDefNum("DAMENERGY", true, true));
+			SetDefNum("DAMPHYSICAL", GetDefNum("DAMPHYSICAL", true) - pItem->GetDefNum("DAMPHYSICAL", true));
+			SetDefNum("DAMFIRE", GetDefNum("DAMFIRE", true) - pItem->GetDefNum("DAMFIRE", true));
+			SetDefNum("DAMCOLD", GetDefNum("DAMCOLD", true) - pItem->GetDefNum("DAMCOLD", true));
+			SetDefNum("DAMPOISON", GetDefNum("DAMPOISON", true) - pItem->GetDefNum("DAMPOISON", true));
+			SetDefNum("DAMENERGY", GetDefNum("DAMENERGY", true) - pItem->GetDefNum("DAMENERGY", true));
 
-			SetDefNum("RESPHYSICAL", GetDefNum("RESPHYSICAL", true) - pItem->GetDefNum("RESPHYSICAL", true, true));
-			SetDefNum("RESFIRE", GetDefNum("RESFIRE", true) - pItem->GetDefNum("RESFIRE", true, true));
-			SetDefNum("RESCOLD", GetDefNum("RESCOLD", true) - pItem->GetDefNum("RESCOLD", true, true));
-			SetDefNum("RESPOISON", GetDefNum("RESPOISON", true) - pItem->GetDefNum("RESPOISON", true, true));
-			SetDefNum("RESENERGY", GetDefNum("RESENERGY", true) - pItem->GetDefNum("RESENERGY", true, true));
+			SetDefNum("RESPHYSICAL", GetDefNum("RESPHYSICAL", true) - pItem->GetDefNum("RESPHYSICAL", true));
+			SetDefNum("RESFIRE", GetDefNum("RESFIRE", true) - pItem->GetDefNum("RESFIRE", true));
+			SetDefNum("RESCOLD", GetDefNum("RESCOLD", true) - pItem->GetDefNum("RESCOLD", true));
+			SetDefNum("RESPOISON", GetDefNum("RESPOISON", true) - pItem->GetDefNum("RESPOISON", true));
+			SetDefNum("RESENERGY", GetDefNum("RESENERGY", true) - pItem->GetDefNum("RESENERGY", true));
 		}
 
 		if ( pItem->IsTypeWeapon() )
@@ -505,67 +505,67 @@ void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when r
 				pItem->SetDefNum("HitLeechLife", pItem->GetDefNum("HitLeechLife", true) - pCursedMemory->m_itSpell.m_spelllevel, true);
 		}
 
-		short iStrengthBonus = (short)(pItem->GetDefNum("BONUSSTR", true, true));
+		short iStrengthBonus = (short)(pItem->GetDefNum("BONUSSTR", true));
 		if (iStrengthBonus != 0)
 			Stat_SetMod(STAT_STR, Stat_GetMod(STAT_STR) - iStrengthBonus);
 
-		short iDexterityBonus = (short)(pItem->GetDefNum("BONUSDEX", true, true));
+		short iDexterityBonus = (short)(pItem->GetDefNum("BONUSDEX", true));
 		if (iDexterityBonus != 0)
 			Stat_SetMod(STAT_DEX, Stat_GetMod(STAT_DEX) - iDexterityBonus);
 
-		short iIntelligenceBonus = (short)(pItem->GetDefNum("BONUSINT", true, true));
+		short iIntelligenceBonus = (short)(pItem->GetDefNum("BONUSINT", true));
 		if (iIntelligenceBonus != 0)
 			Stat_SetMod(STAT_INT, Stat_GetMod(STAT_INT) - iIntelligenceBonus);
 
-		short iHitpointIncrease = (short)(pItem->GetDefNum("BONUSHITS", true, true));
+		short iHitpointIncrease = (short)(pItem->GetDefNum("BONUSHITS", true));
 		if (iHitpointIncrease != 0)
 			Stat_SetMax(STAT_STR, Stat_GetMax(STAT_STR) - iHitpointIncrease);
 
-		short iStaminaIncrease = (short)(pItem->GetDefNum("BONUSSTAM", true, true));
+		short iStaminaIncrease = (short)(pItem->GetDefNum("BONUSSTAM", true));
 		if (iStaminaIncrease != 0)
             Stat_SetMax(STAT_DEX, Stat_GetMax(STAT_DEX) - iStaminaIncrease);
 
-		short iManaIncrease = (short)(pItem->GetDefNum("BONUSMANA", true, true));
+		short iManaIncrease = (short)(pItem->GetDefNum("BONUSMANA", true));
 		if (iManaIncrease != 0)
             Stat_SetMax(STAT_INT, Stat_GetMax(STAT_INT) - iManaIncrease);
 
-		int64 iDamageIncrease = pItem->GetDefNum("INCREASEDAM", true, true);
+		int64 iDamageIncrease = pItem->GetDefNum("INCREASEDAM", true);
 		if ( iDamageIncrease != 0 )
 			SetDefNum("INCREASEDAM", GetDefNum("INCREASEDAM", true) - iDamageIncrease);
 
-		int64 iDefenseChanceIncrease = pItem->GetDefNum("INCREASEDEFCHANCE", true, true);
+		int64 iDefenseChanceIncrease = pItem->GetDefNum("INCREASEDEFCHANCE", true);
 		if ( iDefenseChanceIncrease != 0 )
 			SetDefNum("INCREASEDEFCHANCE", GetDefNum("INCREASEDEFCHANCE", true) - iDefenseChanceIncrease);
 
-		int64 iFasterCasting = pItem->GetDefNum("FASTERCASTING", true, true);
+		int64 iFasterCasting = pItem->GetDefNum("FASTERCASTING", true);
 		if ( iFasterCasting != 0 )
 			SetDefNum("FASTERCASTING", GetDefNum("FASTERCASTING", true) - iFasterCasting);
 
-		int64 iHitChanceIncrease = pItem->GetDefNum("INCREASEHITCHANCE", true, true);
+		int64 iHitChanceIncrease = pItem->GetDefNum("INCREASEHITCHANCE", true);
 		if ( iHitChanceIncrease != 0 )
 			SetDefNum("INCREASEHITCHANCE", GetDefNum("INCREASEHITCHANCE", true) - iHitChanceIncrease);
 
-		int64 iSpellDamageIncrease = pItem->GetDefNum("INCREASESPELLDAM", true, true);
+		int64 iSpellDamageIncrease = pItem->GetDefNum("INCREASESPELLDAM", true);
 		if ( iSpellDamageIncrease != 0 )
 			SetDefNum("INCREASESPELLDAM", GetDefNum("INCREASESPELLDAM", true) - iSpellDamageIncrease);
 
-		int64 iSwingSpeedIncrease = pItem->GetDefNum("INCREASESWINGSPEED", true, true);
+		int64 iSwingSpeedIncrease = pItem->GetDefNum("INCREASESWINGSPEED", true);
 		if ( iSwingSpeedIncrease != 0 )
 			SetDefNum("INCREASESWINGSPEED", GetDefNum("INCREASESWINGSPEED", true) - iSwingSpeedIncrease);
 
-		int64 iEnhancePotions = pItem->GetDefNum("ENHANCEPOTIONS", true, true);
+		int64 iEnhancePotions = pItem->GetDefNum("ENHANCEPOTIONS", true);
 		if (iEnhancePotions != 0)
 			SetDefNum("ENHANCEPOTIONS", GetDefNum("ENHANCEPOTIONS", true) - iEnhancePotions);
 
-		int64 iLowerManaCost = pItem->GetDefNum("LOWERMANACOST", true, true);
+		int64 iLowerManaCost = pItem->GetDefNum("LOWERMANACOST", true);
 		if (iLowerManaCost != 0)
 			SetDefNum("LOWERMANACOST", GetDefNum("LOWERMANACOST", true) - iLowerManaCost);
 
-		int64 iLuck = pItem->GetDefNum("LUCK", true, true);
+		int64 iLuck = pItem->GetDefNum("LUCK", true);
 		if ( iLuck != 0 )
 			SetDefNum("LUCK", GetDefNum("LUCK", true) - iLuck);
 
-		if ( pItem->GetDefNum("NIGHTSIGHT", true, true))
+		if ( pItem->GetDefNum("NIGHTSIGHT", true))
 		{
 			StatFlag_Mod( STATF_NIGHTSIGHT, 0 );
 			if ( IsClient() )
@@ -2083,17 +2083,17 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 
 	if (pItem->IsTypeArmorWeapon())
 	{
-		SetDefNum("DAMPHYSICAL", GetDefNum("DAMPHYSICAL", true) + pItem->GetDefNum("DAMPHYSICAL", true, true));
-		SetDefNum("DAMFIRE", GetDefNum("DAMFIRE", true) + pItem->GetDefNum("DAMFIRE", true, true));
-		SetDefNum("DAMCOLD", GetDefNum("DAMCOLD", true) + pItem->GetDefNum("DAMCOLD", true, true));
-		SetDefNum("DAMPOISON", GetDefNum("DAMPOISON", true) + pItem->GetDefNum("DAMPOISON", true, true));
-		SetDefNum("DAMENERGY", GetDefNum("DAMENERGY", true) + pItem->GetDefNum("DAMENERGY", true, true));
+		SetDefNum("DAMPHYSICAL", GetDefNum("DAMPHYSICAL", true) + pItem->GetDefNum("DAMPHYSICAL", true));
+		SetDefNum("DAMFIRE", GetDefNum("DAMFIRE", true) + pItem->GetDefNum("DAMFIRE", true));
+		SetDefNum("DAMCOLD", GetDefNum("DAMCOLD", true) + pItem->GetDefNum("DAMCOLD", true));
+		SetDefNum("DAMPOISON", GetDefNum("DAMPOISON", true) + pItem->GetDefNum("DAMPOISON", true));
+		SetDefNum("DAMENERGY", GetDefNum("DAMENERGY", true) + pItem->GetDefNum("DAMENERGY", true));
 
-		SetDefNum("RESPHYSICAL", GetDefNum("RESPHYSICAL", true) + pItem->GetDefNum("RESPHYSICAL", true, true));
-		SetDefNum("RESFIRE", GetDefNum("RESFIRE", true) + pItem->GetDefNum("RESFIRE", true, true));
-		SetDefNum("RESCOLD", GetDefNum("RESCOLD", true) + pItem->GetDefNum("RESCOLD", true, true));
-		SetDefNum("RESPOISON", GetDefNum("RESPOISON", true) + pItem->GetDefNum("RESPOISON", true, true));
-		SetDefNum("RESENERGY", GetDefNum("RESENERGY", true) + pItem->GetDefNum("RESENERGY", true, true));
+		SetDefNum("RESPHYSICAL", GetDefNum("RESPHYSICAL", true) + pItem->GetDefNum("RESPHYSICAL", true));
+		SetDefNum("RESFIRE", GetDefNum("RESFIRE", true) + pItem->GetDefNum("RESFIRE", true));
+		SetDefNum("RESCOLD", GetDefNum("RESCOLD", true) + pItem->GetDefNum("RESCOLD", true));
+		SetDefNum("RESPOISON", GetDefNum("RESPOISON", true) + pItem->GetDefNum("RESPOISON", true));
+		SetDefNum("RESENERGY", GetDefNum("RESENERGY", true) + pItem->GetDefNum("RESENERGY", true));
 	}
 
 	if (pItem->IsTypeWeapon())
@@ -2103,67 +2103,67 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 			pItem->SetDefNum("HitLeechLife", pItem->GetDefNum("HitLeechLife", true) + pCursedMemory->m_itSpell.m_spelllevel, true);
 	}
 
-	short iStrengthBonus = (short)(pItem->GetDefNum("BONUSSTR", true, true));
+	short iStrengthBonus = (short)(pItem->GetDefNum("BONUSSTR", true));
 	if (iStrengthBonus != 0)
 		Stat_SetMod(STAT_STR, Stat_GetMod(STAT_STR) + iStrengthBonus);
 
-	short iDexterityBonus = (short)(pItem->GetDefNum("BONUSDEX", true, true));
+	short iDexterityBonus = (short)(pItem->GetDefNum("BONUSDEX", true));
 	if (iDexterityBonus != 0)
 		Stat_SetMod(STAT_DEX, Stat_GetMod(STAT_DEX) + iDexterityBonus);
 
-	short iIntelligenceBonus = (short)(pItem->GetDefNum("BONUSINT", true, true));
+	short iIntelligenceBonus = (short)(pItem->GetDefNum("BONUSINT", true));
 	if (iIntelligenceBonus != 0)
 		Stat_SetMod(STAT_INT, Stat_GetMod(STAT_INT) + iIntelligenceBonus);
 
-	short iHitpointIncrease = (short)(pItem->GetDefNum("BONUSHITS", true, true));
+	short iHitpointIncrease = (short)(pItem->GetDefNum("BONUSHITS", true));
 	if (iHitpointIncrease != 0)
         Stat_SetMax(STAT_STR, Stat_GetMax(STAT_STR) + iHitpointIncrease);
 
-	short iStaminaIncrease = (short)(pItem->GetDefNum("BONUSSTAM", true, true));
+	short iStaminaIncrease = (short)(pItem->GetDefNum("BONUSSTAM", true));
 	if (iStaminaIncrease != 0)
         Stat_SetMax(STAT_DEX, Stat_GetMax(STAT_DEX) + iStaminaIncrease);
 
-	short iManaIncrease = (short)(pItem->GetDefNum("BONUSMANA", true, true));
+	short iManaIncrease = (short)(pItem->GetDefNum("BONUSMANA", true));
 	if (iManaIncrease != 0)
         Stat_SetMax(STAT_INT, Stat_GetMax(STAT_INT) + iManaIncrease);
 
-	int64 iDamageIncrease = pItem->GetDefNum("INCREASEDAM", true, true);
+	int64 iDamageIncrease = pItem->GetDefNum("INCREASEDAM", true);
 	if (iDamageIncrease != 0)
 		SetDefNum("INCREASEDAM", GetDefNum("INCREASEDAM", true) + iDamageIncrease);
 
-	int64 iDefenseChanceIncrease = pItem->GetDefNum("INCREASEDEFCHANCE", true, true);
+	int64 iDefenseChanceIncrease = pItem->GetDefNum("INCREASEDEFCHANCE", true);
 	if (iDefenseChanceIncrease != 0)
 		SetDefNum("INCREASEDEFCHANCE", GetDefNum("INCREASEDEFCHANCE", true) + iDefenseChanceIncrease);
 
-	int64 iFasterCasting = pItem->GetDefNum("FASTERCASTING", true, true);
+	int64 iFasterCasting = pItem->GetDefNum("FASTERCASTING", true);
 	if (iFasterCasting != 0)
 		SetDefNum("FASTERCASTING", GetDefNum("FASTERCASTING", true) + iFasterCasting);
 
-	int64 iHitChanceIncrease = pItem->GetDefNum("INCREASEHITCHANCE", true, true);
+	int64 iHitChanceIncrease = pItem->GetDefNum("INCREASEHITCHANCE", true);
 	if (iHitChanceIncrease != 0)
 		SetDefNum("INCREASEHITCHANCE", GetDefNum("INCREASEHITCHANCE", true) + iHitChanceIncrease);
 
-	int64 iSpellDamageIncrease = pItem->GetDefNum("INCREASESPELLDAM", true, true);
+	int64 iSpellDamageIncrease = pItem->GetDefNum("INCREASESPELLDAM", true);
 	if (iSpellDamageIncrease != 0)
 		SetDefNum("INCREASESPELLDAM", GetDefNum("INCREASESPELLDAM", true) + iSpellDamageIncrease);
 
-	int64 iSwingSpeedIncrease = pItem->GetDefNum("INCREASESWINGSPEED", true, true);
+	int64 iSwingSpeedIncrease = pItem->GetDefNum("INCREASESWINGSPEED", true);
 	if (iSwingSpeedIncrease != 0)
 		SetDefNum("INCREASESWINGSPEED", GetDefNum("INCREASESWINGSPEED", true) + iSwingSpeedIncrease);
 
-	int64 iEnhancePotions = pItem->GetDefNum("ENHANCEPOTIONS", true, true);
+	int64 iEnhancePotions = pItem->GetDefNum("ENHANCEPOTIONS", true);
 	if (iEnhancePotions != 0)
 		SetDefNum("ENHANCEPOTIONS", GetDefNum("ENHANCEPOTIONS", true) + iEnhancePotions);
 
-	int64 iLowerManaCost = pItem->GetDefNum("LOWERMANACOST", true, true);
+	int64 iLowerManaCost = pItem->GetDefNum("LOWERMANACOST", true);
 	if (iLowerManaCost != 0)
 		SetDefNum("LOWERMANACOST", GetDefNum("LOWERMANACOST", true) + iLowerManaCost);
 
-	int64 iLuck = pItem->GetDefNum("LUCK", true, true);
+	int64 iLuck = pItem->GetDefNum("LUCK", true);
 	if (iLuck != 0)
 		SetDefNum("LUCK", GetDefNum("LUCK", true) + iLuck);
 
-	if (pItem->GetDefNum("NIGHTSIGHT", true, true))
+	if (pItem->GetDefNum("NIGHTSIGHT", true))
 	{
 		StatFlag_Mod(STATF_NIGHTSIGHT, 1);
 		if (IsClient())

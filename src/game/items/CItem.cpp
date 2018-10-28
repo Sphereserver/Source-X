@@ -5359,7 +5359,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 	if ( iDmg <= 0 )
 		return 0;
 
-	int64 iSelfRepair = GetDefNum("SELFREPAIR", true, true);
+	int64 iSelfRepair = GetDefNum("SELFREPAIR", true);
 	if ( iSelfRepair > Calc_GetRandVal(10) )
 	{
 		m_itArmor.m_Hits_Cur += 2;

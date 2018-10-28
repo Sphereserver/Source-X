@@ -285,7 +285,7 @@ bool CChar::CanEquipStr( CItem *pItem ) const
 	if ( !pItemDef->IsTypeEquippable() || !CItemBase::IsVisibleLayer(layer) )
 		return true;
 
-	if ( Stat_GetAdjusted(STAT_STR) >= pItemDef->m_ttEquippable.m_iStrReq * (100 - pItem->GetDefNum("LOWERREQ", true, true)) / 100 )
+	if ( Stat_GetAdjusted(STAT_STR) >= pItemDef->m_ttEquippable.m_iStrReq * (100 - pItem->GetDefNum("LOWERREQ", true)) / 100 )
 		return true;
 
 	return false;

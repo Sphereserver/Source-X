@@ -1568,7 +1568,7 @@ bool CClient::OnTarg_Pet_Stable( CChar * pCharPet )
 
 	if ( IsSetOF(OF_PetSlots) )
 	{
-		short iFollowerSlots =  (short)pCharPet->GetDefNum("FOLLOWERSLOTS", true, true);
+		short iFollowerSlots =  (short)pCharPet->GetDefNum("FOLLOWERSLOTS", true);
 		m_pChar->FollowersUpdate(pCharPet,(-maximum(1, iFollowerSlots)));
 	}
 

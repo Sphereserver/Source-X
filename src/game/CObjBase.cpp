@@ -3129,11 +3129,11 @@ lpctstr CObjBase::GetDefStr( lpctstr pszKey, bool fZero, bool fDef ) const
 	return pVar->GetValStr();
 }
 
-int64 CObjBase::GetDefNum( lpctstr pszKey, bool fZero, bool fDef ) const
+int64 CObjBase::GetDefNum( lpctstr pszKey, bool fDef ) const
 {
 	CVarDefCont	* pVar = GetDefKey( pszKey, fDef );
 	if ( pVar == nullptr )
-		return (fZero ? 0 : NULL);
+		return 0;
 	return pVar->GetValNum();
 }
 
