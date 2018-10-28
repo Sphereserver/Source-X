@@ -1244,3 +1244,7 @@ Added: Now Sectors store their adjacent sectors:
 - Fixed: Now equipping a light source item doesn't check the CAN flags.
 - Added: Now it's possible to change an item's CONT in @DropOn_Self when the trigger is fired via a drop client event (before it worked only if fired by the BOUNCE keyword).
 	If a RETURN 1 is performed and a new (different) CONT has not been set via scripts on the trigger call, the item drop event fails as before, otherwise the item is left in the new CONT.
+
+28-10-2018, Nolok
+- Fixed: Players could cast spells even when paralyzed or stoned (Issue #135).
+- Fixed: When Game Masters casted a spell with a wand or a scroll, they were consumed.

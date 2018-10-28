@@ -2060,6 +2060,22 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 	if ( pSpellDef->IsSpellType( SPELLFLAG_DISABLED ))
 		return false;
 
+    if ( m_pPlayer && !IsPriv(PRIV_GM) )
+    {
+        if (IsStatFlag( STATF_DEAD|STATF_SLEEPING ))
+        {
+            if ( fFailMsg )
+                SysMessageDefault( DEFMSG_SPELL_TRY_DEAD );
+            return false;
+        }
+        else if (IsStatFlag( STATF_FREEZE|STATF_STONE ))
+        {
+            if ( fFailMsg )
+                SysMessageDefault( DEFMSG_SPELL_TRY_FROZENHANDS );
+            return false;
+        }
+    }
+ 
 	SKILL_TYPE skill = SKILL_NONE;
 	int iSkillTest = 0;
 	if (!pSpellDef->GetPrimarySkill(&iSkillTest, nullptr))
@@ -2152,6 +2168,10 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 				SysMessageDefault( DEFMSG_SPELL_ENCHANT_ACTIVATE );
 			return false;
 		}
+
+        if (IsPriv(PRIV_GM))
+            return true;
+
 		if ( pItem->IsType(IT_WAND))
 		{
 			// Must have charges.
@@ -2164,7 +2184,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 			//iManaUse = 0;
 			if ( ! fTest && pItem->m_itWeapon.m_spellcharges != 255 )
 			{
-				pItem->m_itWeapon.m_spellcharges --;
+                -- pItem->m_itWeapon.m_spellcharges;
 				pItem->UpdatePropertyFlag(AUTOTOOLTIP_FLAG_WANDCHARGES);
 			}
 		}
@@ -2185,7 +2205,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 
 		if ( m_pPlayer )
 		{
-			if ( IsStatFlag( STATF_DEAD|STATF_SLEEPING ) || ! pSpellDef->m_SkillReq.IsResourceMatchAll(this))
+			if (! pSpellDef->m_SkillReq.IsResourceMatchAll(this))
 			{
 				if ( fFailMsg )
 					SysMessageDefault( DEFMSG_SPELL_TRY_DEAD );
@@ -2210,7 +2230,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 			// check for reagents
 			if ( g_Cfg.m_fReagentsRequired && ! m_pNPC && pSrc == this )
 			{
-				if ( GetDefNum("LOWERREAGENTCOST", true, true) <= Calc_GetRandVal(100))
+				if ( GetDefNum("LOWERREAGENTCOST", true) <= Calc_GetRandVal(100))
 				{
 					const CResourceQtyArray * pRegs = &(pSpellDef->m_Reags);
 					CItemContainer * pPack = GetPack();
@@ -2966,7 +2986,7 @@ int CChar::Spell_CastStart()
 		}
 	}
 
-    int64 iWaitTime = IsPriv(PRIV_GM) ? 10 : (int64)(pSpellDef->m_CastTime.GetLinear(Skill_GetBase((SKILL_TYPE)iSkill)) * MSECS_PER_TENTH); // in tenths of second, converted to MSECS.
+    int64 iWaitTime = IsPriv(PRIV_GM) ? (MSECS_PER_TENTH/10) : (int64)(pSpellDef->m_CastTime.GetLinear(Skill_GetBase((SKILL_TYPE)iSkill)) * MSECS_PER_TENTH); // in tenths of second, converted to MSECS.
 	iWaitTime -= GetDefNum("FASTERCASTING", true, true) * 2;	//correct value is 0.25, but for backwards compatibility let's handle only 0.2.
 	if ( iWaitTime < 1 || IsPriv(PRIV_GM) )
 		iWaitTime = 1;
