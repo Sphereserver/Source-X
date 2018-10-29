@@ -101,10 +101,10 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 {
 	ADDTOCALLSTACK("CChar::MakeCorpse");
 
-	word wFlags = (word)(m_TagDefs.GetKeyNum("DEATHFLAGS"));
-	if (wFlags & DEATH_NOCORPSE)
+	uint uiFlags = (uint)(m_TagDefs.GetKeyNum("DEATHFLAGS"));
+	if (uiFlags & DEATH_NOCORPSE)
 		return nullptr;
-	if (IsStatFlag(STATF_CONJURED) && !(wFlags & (DEATH_NOCONJUREDEFFECT|DEATH_HASCORPSE)))
+	if (IsStatFlag(STATF_CONJURED) && !(uiFlags & (DEATH_NOCONJUREDEFFECT|DEATH_HASCORPSE)))
 	{
 		Effect(EFFECT_XYZ, ITEMID_FX_SPELL_FAIL, this, 1, 30);
 		return nullptr;
@@ -115,7 +115,7 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 		return nullptr;
 
 	tchar *pszMsg = Str_GetTemp();
-	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MSG_CORPSE_OF), GetName());
+	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_CORPSE_OF), GetName());
 	pCorpse->SetName(pszMsg);
 	pCorpse->SetHue(GetHue());
 	pCorpse->SetCorpseType(GetDispID());
@@ -123,11 +123,12 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 	pCorpse->m_itCorpse.m_BaseID = m_prev_id;	// id the corpse type here !
 	pCorpse->m_itCorpse.m_facing_dir = m_dirFace;
 	pCorpse->m_uidLink = GetUID();
+    pCorpse->m_ModMaxWeight = g_Cfg.Calc_MaxCarryWeight(this);		// set corpse maxweight to prevent weird exploits like when someone place many items on an player corpse just to make this player get stuck on resurrect
 
 	// TO-DO: Fix corpses always turning to the same dir (DIR_N) after resend it to clients
 
 	if (fFrontFall)
-		pCorpse->m_itCorpse.m_facing_dir = static_cast<DIR_TYPE>(m_dirFace|0x80);
+		pCorpse->m_itCorpse.m_facing_dir = (DIR_TYPE)(m_dirFace|0x80);
 
 	int64 iDecayTimer = -1;	// never decay
 	if (IsStatFlag(STATF_DEAD))
@@ -150,10 +151,9 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 	if ((m_pNPC && m_pNPC->m_bonded) || IsStatFlag(STATF_CONJURED|STATF_SLEEPING))
 		pCorpse->m_itCorpse.m_carved = 1;	// corpse of bonded and summoned creatures (or sleeping players) can't be carved
 
-	if ( !(wFlags & DEATH_NOLOOTDROP) )		// move non-newbie contents of the pack to corpse
+	if ( !(uiFlags & DEATH_NOLOOTDROP) )		// move non-newbie contents of the pack to corpse
 		DropAll( pCorpse );
-
-	pCorpse->m_ModMaxWeight = g_Cfg.Calc_MaxCarryWeight(this);		// set corpse maxweight to prevent weird exploits like when someone place many items on an player corpse just to make this player get stuck on resurrect
+	
 	pCorpse->MoveToDecay(GetTopPoint(), iDecayTimer);
 	return pCorpse;
 }

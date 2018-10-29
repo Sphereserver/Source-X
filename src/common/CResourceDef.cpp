@@ -14,7 +14,7 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
     ASSERT(pszName);
 
     // This is the global def for this item.
-    for ( size_t i = 0; pszName[i]; i++ )
+    for ( size_t i = 0; pszName[i]; ++i )
     {
         if ( i >= EXPRESSION_MAX_KEY_LEN )
         {

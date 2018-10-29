@@ -94,7 +94,7 @@ public:
 
 	bool Can(dword dwCan) const
 	{
-		return ((GetCanFlags() & dwCan) == dwCan );
+		return (GetCanFlags() & dwCan);
 	}
 
 	/**

@@ -70,7 +70,7 @@ void CBaseBaseDef::SetTypeName( lpctstr pszName )
 
 bool CBaseBaseDef::Can( dword dwCan ) const
 {
-	return ((m_Can & dwCan) == dwCan);
+	return (m_Can & dwCan);
 }
 
 void CBaseBaseDef::UnLink()

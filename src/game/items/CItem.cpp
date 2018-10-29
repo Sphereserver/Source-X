@@ -3998,7 +3998,7 @@ word CItem::ConsumeAmount( word iQty, bool fTest )
 
 CREID_TYPE CItem::GetCorpseType() const
 {
-	return static_cast<CREID_TYPE>(GetAmount());	// What does the corpse look like ?
+	return (CREID_TYPE)(GetAmount());	// What does the corpse look like ?
 }
 
 void CItem::SetCorpseType( CREID_TYPE id )
@@ -4011,7 +4011,7 @@ SPELL_TYPE CItem::GetScrollSpell() const
 {
 	ADDTOCALLSTACK("CItem::GetScrollSpell");
 	// Given a scroll type. what spell is this ?
-	for (size_t i = SPELL_Clumsy; i < g_Cfg.m_SpellDefs.size(); i++)
+	for (size_t i = SPELL_Clumsy; i < g_Cfg.m_SpellDefs.size(); ++i)
 	{
 		const CSpellDef * pSpellDef = g_Cfg.GetSpellDef((SPELL_TYPE)i);
 		if ( pSpellDef == nullptr || pSpellDef->m_idScroll == ITEMID_NOTHING )
