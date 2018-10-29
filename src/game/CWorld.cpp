@@ -1453,10 +1453,15 @@ void CWorld::SaveStatics()
 void CWorld::AddTimedObject(int64 iTimeout, CTimedObject * pTimedObject)
 {
     ADDTOCALLSTACK("CWorld::AddTimedObject");
+    //if (iTimeout < g_World.GetCurrentTime().GetTimeRaw())    // We do that to get them tick as sooner as possible
+    //    return;
+
     ProfileTask timersTask(PROFILE_TIMERS);
-    TimedObjectsContainer& timedObjCont = _mWorldTickList._mTimedObjects[iTimeout];
+    _mWorldTickList.THREAD_CMUTEX.lock();
+    TimedObjectsContainer& timedObjCont = _mWorldTickList[iTimeout];
+    _mWorldTickList.THREAD_CMUTEX.unlock();
     timedObjCont.THREAD_CMUTEX.lock();
-    timedObjCont._TimedObjectsContainer.emplace_back(pTimedObject);
+    timedObjCont.emplace_back(pTimedObject);
     timedObjCont.THREAD_CMUTEX.unlock();
 }
 
@@ -1468,33 +1473,39 @@ void CWorld::DelTimedObject(int64 iTimeout, CTimedObject * pTimedObject)
     {
         return;
     }
-    _mWorldTickList._mTimedObjects[iTimeout].THREAD_CMUTEX.lock();
-    TimedObjectsContainer& cont = _mWorldTickList._mTimedObjects[iTimeout];  // direct access to the container.
-    TimedObjectsContainer newcont;   // new container.
-    if (cont._TimedObjectsContainer.size() > 1) // if the old container only has 1 entry we don't need to create a new one.
+    _mWorldTickList.THREAD_CMUTEX.lock();
+    auto itContainer =  _mWorldTickList.find(iTimeout);
+    auto itContainerEnd = _mWorldTickList.end();
+    _mWorldTickList.THREAD_CMUTEX.unlock();
+    if (itContainer == itContainerEnd)
+        return;
+    TimedObjectsContainer& cont = itContainer->second;  // direct access to the container.
+    std::vector<CTimedObject*> tmpCont;   // new container.
+    cont.THREAD_CMUTEX.lock();
+    if (cont.size() > 1) // if the old container only has 1 entry we don't need to create a new one.
     {
-        for (CTimedObject* pObj : cont._TimedObjectsContainer)    // Loop until the old container is empty
+        for (CTimedObject* pObj : cont)    // Loop until the old container is empty
         {
             if (pObj == pTimedObject)   // if pTimedObject is this entry skip it to remove it from the container.
             {
                 continue;
             }
-            newcont._TimedObjectsContainer.emplace_back(pObj);  // otherwise add it to the new container.
+            tmpCont.emplace_back(pObj);  // otherwise add it to the new container.
         }
     }
-    cont._TimedObjectsContainer.clear();
+    cont.clear();
     cont.THREAD_CMUTEX.unlock();
     /*
     * All references to the given CTimedObject have been taken out from the container
     * and the new one have been populated ? so let's add the new container to the main
     * container, if it has any entry, or clear the top container recursively.
     */
-    if (!newcont._TimedObjectsContainer.empty())
+    if (!tmpCont.empty())
     {
         cont.THREAD_CMUTEX.lock();
-        for (CTimedObject* pObj : newcont._TimedObjectsContainer)
+        for (CTimedObject* pObj : tmpCont)
         {
-            cont._TimedObjectsContainer.emplace_back(pObj);
+            cont.emplace_back(pObj);
         }
         cont.THREAD_CMUTEX.unlock();
     }
@@ -1506,20 +1517,33 @@ void CWorld::AddCharTicking(CChar * pChar)
     {
         return; // Do not allow ticks on sleeping sectors;
     }
-    int64 iTickNext = pChar->_timeNextRegen;
-    TimedCharsContainer& timedObjCont = _mCharTickList._mTimedChars[iTickNext];
+    const int64 iTickNext = pChar->_timeNextRegen;
+    //if (iTickNext < g_World.GetCurrentTime().GetTimeRaw())    // We do that to get them tick as sooner as possible
+    //    return;
+
+    _mWorldTickList.THREAD_CMUTEX.lock();
+    TimedCharsContainer& timedObjCont = _mCharTickList[iTickNext];
+    _mWorldTickList.THREAD_CMUTEX.unlock();
     timedObjCont.THREAD_CMUTEX.lock();
-    timedObjCont._TimedCharsContainer.emplace_back(pChar);
+    timedObjCont.emplace_back(pChar);
     timedObjCont.THREAD_CMUTEX.unlock();
 }
 
 void CWorld::DelCharTicking(CChar * pChar)
 {
-    int64 iTickNext = pChar->_timeNextRegen;
-    _mCharTickList._mTimedChars[iTickNext].THREAD_CMUTEX.lock();
-    std::vector<CChar*> &vec = _mCharTickList._mTimedChars[pChar->_timeNextRegen]._TimedCharsContainer;
-    vec.erase(std::remove(vec.begin(), vec.end(), pChar), vec.end());
-    _mCharTickList._mTimedChars[iTickNext].THREAD_CMUTEX.unlock();
+    const int64 iTickNext = pChar->_timeNextRegen;
+
+    _mWorldTickList.THREAD_CMUTEX.lock();
+    auto it = _mCharTickList.find(iTickNext);
+    auto itEnd = _mCharTickList.end();
+    _mWorldTickList.THREAD_CMUTEX.unlock();
+    if (it == itEnd)
+        return;
+
+    TimedCharsContainer &cont = it->second;
+    cont.THREAD_CMUTEX.lock();
+    cont.erase(std::remove(cont.begin(), cont.end(), pChar), cont.end());
+    cont.THREAD_CMUTEX.unlock();
 }
 
 bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from script
@@ -2342,28 +2366,29 @@ void CWorld::OnTick()
 
     }
 
-    // World's tick
+    /* World ticking (timers) */
     // Items, Chars ... Everything relying on CTimedObject (excepting CObjBase, which inheritance is only virtual)
     ProfileTask timersTask(PROFILE_TIMERS);
     int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
-    
-    std::map<int64, TimedObjectsContainer>::iterator it = _mWorldTickList._mTimedObjects.begin();
+    std::map<int64, TimedObjectsContainer>::iterator it = _mWorldTickList.begin();
     std::map<int64, std::vector<CTimedObject*>> tmpMap;
     int64 iTime;
-    while ( it != _mWorldTickList._mTimedObjects.end() && iCurTime > (iTime = it->first))
+    while ( it != _mWorldTickList.end() && iCurTime > (iTime = it->first))
     {
         _mWorldTickList.THREAD_CMUTEX.lock();
-        _mWorldTickList._mTimedObjects[iTime].THREAD_CMUTEX.lock();
+        TimedObjectsContainer& cont = it->second;
+        cont.THREAD_CMUTEX.lock();
 
-        {   // Copying code
-            tmpMap[iTime] = _mWorldTickList._mTimedObjects[iTime]._TimedObjectsContainer;
-            ++it;
-        }   // end of copying code
+        // Copying code
+        tmpMap[iTime] = cont;
+        ++it;
+        // end of copying code
         
-        _mWorldTickList._mTimedObjects[iTime].THREAD_CMUTEX.unlock();
+        cont.THREAD_CMUTEX.unlock();
         _mWorldTickList.THREAD_CMUTEX.unlock();
     }
-    for (const auto &pairObj : tmpMap)    // Loop through all msecs stored, unless we passed the timestamp.
+
+    for (auto &pairObj : tmpMap)    // Loop through all msecs stored, unless we passed the timestamp.
     {
         for (CTimedObject* pObj : pairObj.second)
         {
@@ -2447,26 +2472,28 @@ void CWorld::OnTick()
             }
         }
         _mWorldTickList.THREAD_CMUTEX.lock();
-        _mWorldTickList._mTimedObjects.erase(pairObj.first);  // entirely remove this map's entry.
+        _mWorldTickList.erase(pairObj.first);  // entirely remove this map's entry.
         _mWorldTickList.THREAD_CMUTEX.unlock();
     }
 
     ProfileTask taskChars(PROFILE_CHARS);
-    std::map<int64, TimedCharsContainer>::iterator mapIt = _mCharTickList._mTimedChars.begin();
+    std::map<int64, TimedCharsContainer>::iterator mapIt = _mCharTickList.begin();
     std::map<int64, std::vector<CChar*>> tmpCharMap;
-    while (mapIt != _mCharTickList._mTimedChars.end() && iCurTime > (iTime = mapIt->first))
+    while (mapIt != _mCharTickList.end() && iCurTime > (iTime = mapIt->first))
     {
         _mCharTickList.THREAD_CMUTEX.lock();
-        _mCharTickList._mTimedChars[iTime].THREAD_CMUTEX.lock();
+        TimedCharsContainer& cont = mapIt->second;
+        cont.THREAD_CMUTEX.lock();
 
-        {
-            tmpCharMap[iTime] = mapIt->second._TimedCharsContainer;
-        }
+        tmpCharMap[iTime] = cont;
+        
         ++mapIt;
-        _mCharTickList._mTimedChars[iTime].THREAD_CMUTEX.unlock();
+        cont.THREAD_CMUTEX.unlock();
         _mCharTickList.THREAD_CMUTEX.unlock();
     }
 
+
+    /* Periodic, automatic ticking for every char */
     for (const auto &pairChar : tmpCharMap)    // Loop through all msecs stored, unless we passed the timestamp.
     {
         for (CChar* pChar : pairChar.second)
@@ -2482,7 +2509,7 @@ void CWorld::OnTick()
         }
 
         _mCharTickList.THREAD_CMUTEX.lock();
-        _mCharTickList._mTimedChars.erase(pairChar.first);
+        _mCharTickList.erase(pairChar.first);
         _mCharTickList.THREAD_CMUTEX.unlock();
     }
 

@@ -42,6 +42,8 @@ enum NPCBRAIN_TYPE	// General AI type.
 class CChar : public CObjBase, public CContainer, public CTextConsole, public virtual CTimedObject
 {
 	// RES_WORLDCHAR
+    THREAD_CMUTEX_DEF;
+
 private:
 	// Spell type effects.
 #define STATF_INVUL			0x00000001	// Invulnerability
@@ -83,7 +85,6 @@ private:
 	ushort m_Skill[SKILL_QTY];	// List of skills ( skill * 10 )
 
 	CClient * m_pClient;	// is the char a logged in m_pPlayer ?
-    mutable std::shared_mutex _mutex;
 
 public:
 	struct LastAttackers

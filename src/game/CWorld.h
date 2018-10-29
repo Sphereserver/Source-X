@@ -132,28 +132,24 @@ public:
 	static int64 GetSystemClock(); // in milliseconds
 };
 
-struct TimedObjectsContainer
+struct TimedObjectsContainer : public std::vector<CTimedObject*>
 {
     THREAD_CMUTEX_DEF;
-    std::vector<CTimedObject*> _TimedObjectsContainer;
 };
 
-struct WorldTickList
+struct WorldTickList : public std::map<int64, TimedObjectsContainer>
 {
     THREAD_CMUTEX_DEF;
-    std::map<int64, TimedObjectsContainer> _mTimedObjects;
 };
 
-struct TimedCharsContainer
+struct TimedCharsContainer : public std::vector<CChar*>
 {
     THREAD_CMUTEX_DEF;
-    std::vector<CChar*> _TimedCharsContainer;
 };
 
-struct CharTickList
+struct CharTickList : public std::map<int64, TimedCharsContainer>
 {
     THREAD_CMUTEX_DEF;
-    std::map<int64, TimedCharsContainer> _mTimedChars;
 };
 
 extern class CWorld : public CScriptObj, public CWorldThread

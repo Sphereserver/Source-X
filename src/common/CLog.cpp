@@ -340,7 +340,8 @@ void _cdecl CLog::CatchStdException(const std::exception * pExc, lpctstr pszCatc
 
     va_list vargs;
     va_start(vargs, pszCatchContext);
-    vsnprintf(szMsg, sizeof(szMsg), pszCatchContext, vargs);
+    size_t iLen = vsnprintf(szMsg, sizeof(szMsg), pszCatchContext, vargs);
+    strncat(szMsg, "\n", sizeof(szMsg)-iLen);
     va_end(vargs);
     EventStr(LOGL_CRIT, szMsg);
 
