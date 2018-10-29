@@ -1256,3 +1256,5 @@ Added: Now Sectors store their adjacent sectors:
 - Changed: CAN_I_BLOCKLOS flag (which works only if ADVANCEDLOS is enabled) now blocks the Line of Sight regardlessly of the height of the viewer and of the item being checked.
 - Added: CAN_I_BLOCKLOS_HEIGHT flag (which works only if ADVANCEDLOS is enabled) which does what CAN_I_BLOCKLOS actually did in the past: it blocks the LoS only if the item is too high for the char to see above it.
 - [sphere_defs.scp]: Added the def: CAN_I_BLOCKLOS_HEIGHT (04000000).
+- Fixed: CanSeeLOS, when AdvancedLOS is enabled, read the dynamic item CAN flags from its base itemdef instead of its actual CAN flags. Example: if i created a i_dagger_super item with ID=i_dagger, CanSeeLOS checked i_dagger
+	CAN flags instead of the ones from i_dagger_super. Now it supports also flags modified by CANMASK.

@@ -440,7 +440,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 					if ( (pItem->GetUnkPoint().m_x == ptDst.m_x) && (pItem->GetUnkPoint().m_y == ptDst.m_y) && (pItem->GetUnkPoint().m_z >= GetTopZ()) && (pItem->GetUnkPoint().m_z <= ptSrc.m_z) )
 						continue;
 
-					pItemDef = CItemBase::FindItemBase(pItem->GetDispID());
+					pItemDef = static_cast<CItemBase*>(pItem->Base_GetDef());
 					wTFlags = 0;
 					Height = 0;
 					bNullTerrain = false;
@@ -451,15 +451,15 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 					}
 					else
 					{
-                        if (pItemDef->Can(CAN_I_BLOCKLOS))
+                        if (pItem->Can(CAN_I_BLOCKLOS))
                         {
                             WARNLOS(("pItem blocked by CAN_I_BLOCKLOS"));
                             bPath = false;
                             break;
                         }
 
-						if ( (flags & LOS_FISHING) && (ptSrc.GetDist(ptNow) >= 2) && (pItemDef->GetType() != IT_WATER) &&
-							( pItemDef->Can(CAN_I_DOOR | CAN_I_PLATFORM | CAN_I_BLOCK | CAN_I_CLIMB | CAN_I_FIRE | CAN_I_ROOF | CAN_I_BLOCKLOS | CAN_I_BLOCKLOS_HEIGHT) ) )
+						if ( (flags & LOS_FISHING) && (ptSrc.GetDist(ptNow) >= 2) && (pItem->GetType() != IT_WATER) &&
+							( pItem->Can(CAN_I_DOOR | CAN_I_PLATFORM | CAN_I_BLOCK | CAN_I_CLIMB | CAN_I_FIRE | CAN_I_ROOF | CAN_I_BLOCKLOS | CAN_I_BLOCKLOS_HEIGHT) ) )
 						{
 							WARNLOS(("pItem blocked - flags & 0800, distance >= 2 and type of pItemDef is not IT_WATER\n"));
 							bPath = false;
@@ -493,7 +493,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 
 						Height = (wTFlags & UFLAG2_CLIMBABLE) ? Height / 2 : Height;
 
-						if ( ((wTFlags & (UFLAG1_WALL|UFLAG1_BLOCK|UFLAG2_PLATFORM)) || pItemDef->Can(CAN_I_BLOCKLOS_HEIGHT)) && !((wTFlags & UFLAG2_WINDOW) && (flags & LOS_NB_WINDOWS)) )
+						if ( ((wTFlags & (UFLAG1_WALL|UFLAG1_BLOCK|UFLAG2_PLATFORM)) || pItem->Can(CAN_I_BLOCKLOS_HEIGHT)) && !((wTFlags & UFLAG2_WINDOW) && (flags & LOS_NB_WINDOWS)) )
 						{
 							WARNLOS(("pItem %0x(%0x) %d,%d,%d - %d\n", (dword)pItem->GetUID(), pItem->GetDispID(), pItem->GetUnkPoint().m_x, pItem->GetUnkPoint().m_y, pItem->GetUnkPoint().m_z, Height));
 							min_z = pItem->GetUnkPoint().m_z;

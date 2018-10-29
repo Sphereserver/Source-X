@@ -519,10 +519,10 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 		case OBC_BASEID:
 			return false;
         case OBC_CAN:
-            m_Can = s.GetArgVal();// | ( m_Can & ( CAN_C_INDOORS|CAN_C_EQUIP|CAN_C_USEHANDS|CAN_C_NONHUMANOID )); //Fixed #2326 ?
+            m_Can = s.GetArgDWVal(); // | ( m_Can & ( CAN_C_INDOORS|CAN_C_EQUIP|CAN_C_USEHANDS|CAN_C_NONHUMANOID )); //Fixed #2326 ?
             return true;
         case OBC_CANUSE:
-            m_CanUse = s.GetArgVal();
+            m_CanUse = s.GetArgDWVal();
             return true;
 
 		case OBC_DEFNAME:
