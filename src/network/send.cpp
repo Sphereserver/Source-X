@@ -2120,7 +2120,7 @@ PacketBulletinBoard::PacketBulletinBoard(const CClient* target, BBOARDF_TYPE act
 	writeStringFixedASCII(message->GetName(), lenstr);
 
 	// message time
-	sprintf(tempstr, "Day %lld", (g_World.GetGameWorldTime(message->GetTimeStamp()) / (MSECS_PER_TENTH * 24 * 60)) % 365);
+	sprintf(tempstr, "Day %lld", (g_World.GetGameWorldTime(message->GetTimeStamp()) / (MSECS_PER_SEC * 24 * 60)) % 365);
 	lenstr = strlen(tempstr) + 1;
 
 	writeByte((byte)lenstr);
