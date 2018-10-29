@@ -28,7 +28,7 @@ void CCharsActiveList::OnRemoveObj( CSObjListRec * pObRec )
 {
 	ADDTOCALLSTACK("CCharsActiveList::OnRemoveObj");
 	// Override this = called when removed from group.
-	CChar * pChar = static_cast <CChar*>(pObRec);
+	CChar * pChar = dynamic_cast <CChar*>(pObRec);
 	ASSERT( pChar );
 	if ( pChar->IsClient())
 	{
@@ -41,7 +41,7 @@ void CCharsActiveList::OnRemoveObj( CSObjListRec * pObRec )
 
 size_t CCharsActiveList::HasClients() const
 {
-	return( m_iClients );
+	return m_iClients;
 }
 
 void CCharsActiveList::AddCharToSector( CChar * pChar )
@@ -59,13 +59,13 @@ void CCharsActiveList::AddCharToSector( CChar * pChar )
 void CCharsActiveList::ClientAttach()
 {
 	ADDTOCALLSTACK("CCharsActiveList::ClientAttach");
-	m_iClients++;
+	++m_iClients;
 }
 
 void CCharsActiveList::ClientDetach()
 {
 	ADDTOCALLSTACK("CCharsActiveList::ClientDetach");
-	m_iClients--;
+	--m_iClients;
 }
 
 //////////////////////////////////////////////////////////////
@@ -77,7 +77,7 @@ void CItemsList::OnRemoveObj( CSObjListRec * pObRec )
 {
 	ADDTOCALLSTACK("CItemsList::OnRemoveObj");
 	// Item is picked up off the ground. (may be put right back down though)
-	CItem * pItem = static_cast <CItem*>(pObRec);
+	CItem * pItem = dynamic_cast <CItem*>(pObRec);
 	ASSERT( pItem );
 
 	if ( ! sm_fNotAMove )
@@ -320,7 +320,7 @@ CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 	// REGION_TYPE_MULTI => RES_WORLDITEM = UID linked types in general = CRegionWorld
 
 	size_t iQty = m_RegionLinks.size();
-	for ( size_t i = 0; i < iQty; i++ )
+	for ( size_t i = 0; i < iQty; ++i )
 	{
 		CRegion * pRegion = m_RegionLinks[i];
 		ASSERT(pRegion);
@@ -352,7 +352,7 @@ CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 			continue;
 		if ( ! pRegion->IsInside2d( pt ))
 			continue;
-		return( pRegion );
+		return pRegion;
 	}
 	return nullptr;
 }
@@ -362,7 +362,7 @@ size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLink
 {
 	ADDTOCALLSTACK("CSectorBase::GetRegions");
 	size_t iQty = m_RegionLinks.size();
-	for ( size_t i = 0; i < iQty; i++ )
+	for ( size_t i = 0; i < iQty; ++i )
 	{
 		CRegion * pRegion = m_RegionLinks[i];
 		ASSERT(pRegion);
@@ -396,7 +396,7 @@ size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLink
 			continue;
 		rlist.push_back(pRegion);
 	}
-	return(rlist.size() );
+	return rlist.size();
 }
 
 bool CSectorBase::UnLinkRegion( CRegion * pRegionOld )
@@ -415,10 +415,10 @@ bool CSectorBase::LinkRegion( CRegion * pRegionNew )
 	// Later added regions from the MAP file should be the smaller ones, 
 	//  according to the old rules.
 	ASSERT(pRegionNew);
-	ASSERT( pRegionNew->IsOverlapped( GetRect()));
+	ASSERT( pRegionNew->IsOverlapped(GetRect()) );
 	size_t iQty = m_RegionLinks.size();
 
-	for ( size_t i = 0; i < iQty; i++ )
+	for ( size_t i = 0; i < iQty; ++i )
 	{
 		CRegion * pRegion = m_RegionLinks[i];
 		ASSERT(pRegion);
@@ -491,7 +491,7 @@ bool CSectorBase::AddTeleport( CTeleport * pTeleport )
 
 bool CSectorBase::IsFlagSet( dword dwFlag ) const
 {
-	return(( m_dwFlags & dwFlag) ? true : false );
+	return (( m_dwFlags & dwFlag) ? true : false );
 }
 
 CPointMap CSectorBase::GetBasePoint() const
@@ -503,7 +503,7 @@ CPointMap CSectorBase::GetBasePoint() const
 		(word)((m_index / g_MapList.GetSectorCols(m_map)) * g_MapList.GetSectorSize(m_map)),
 		0,
 		(uchar)(m_map));
-	return( pt );
+	return pt;
 }
 
 CRectMap CSectorBase::GetRect() const
@@ -517,5 +517,5 @@ CRectMap CSectorBase::GetRect() const
 	rect.m_right = pt.m_x + g_MapList.GetSectorSize(pt.m_map);	// East
 	rect.m_bottom = pt.m_y + g_MapList.GetSectorSize(pt.m_map);	// South
 	rect.m_map = pt.m_map;
-	return( rect );
+	return rect;
 }

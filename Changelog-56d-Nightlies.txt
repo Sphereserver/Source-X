@@ -1251,3 +1251,8 @@ Added: Now Sectors store their adjacent sectors:
 - Fixed: Players could cast spells even when paralyzed or stoned (Issue #135).
 - Fixed: When Game Masters casted a spell with a wand or a scroll, they were consumed.
 - Added: ini MagicFlag MAGICF_CASTPARALYZED, to be able to cast even if the character is paralyzed.
+
+29-10-2018, Nolok
+- Changed: CAN_I_BLOCKLOS flag (which works only if ADVANCEDLOS is enabled) now blocks the Line of Sight regardlessly of the height of the viewer and of the item being checked.
+- Added: CAN_I_BLOCKLOS_HEIGHT flag (which works only if ADVANCEDLOS is enabled) which does what CAN_I_BLOCKLOS actually did in the past: it blocks the LoS only if the item is too high for the char to see above it.
+- [sphere_defs.scp]: Added the def: CAN_I_BLOCKLOS_HEIGHT (04000000).

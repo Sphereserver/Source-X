@@ -148,25 +148,26 @@ public:
 #define CAN_C_MOVEMASK      (CAN_C_GHOST|CAN_C_SWIM|CAN_C_WALK|CAN_C_PASSWALLS|CAN_C_FLY|CAN_C_FIRE_IMMUNE|CAN_C_INDOORS|CAN_C_HOVER)
 #define CAN_I_MOVEMASK      (CAN_I_DOOR|CAN_I_WATER|CAN_I_PLATFORM|CAN_I_BLOCK|CAN_I_CLIMB|CAN_I_FIRE|CAN_I_ROOF|CAN_I_HOVER)
 
-	// CItemBase specific defs.
-#define CAN_I_PILE          0x0100      // Can item be piled UFLAG2_STACKABLE (*.mul).
-#define CAN_I_DYE           0x0200      // Can item be dyed UFLAG3_CLOTH? (sort of).
-#define CAN_I_FLIP          0x0400      // will flip by default.
-#define CAN_I_LIGHT         0x0800      // UFLAG3_LIGHT.
-#define CAN_I_REPAIR        0x1000      // Is it repairable (difficulty based on value).
-#define CAN_I_REPLICATE     0x2000      // Things like arrows are pretty much all the same.
-#define CAN_I_DCIGNORELOS   0x4000      // when dclicked, ignore LOS checks.
-#define CAN_I_DCIGNOREDIST  0x8000      // when dclicked, ignore distance checks.
-#define CAN_I_BLOCKLOS      0x10000     // blocks LOS without blocking walkchecks.
-#define CAN_I_EXCEPTIONAL   0x20000     // can items be exceptional.
-#define CAN_I_MAKERSMARK    0x40000     // can items hold makers mark.
-#define CAN_I_RETAINCOLOR   0x80000     // can items retain material colors.
-#define CAN_I_ENCHANT       0x100000    // can items be enchanted (runic).
-#define CAN_I_IMBUE         0x200000    // can items be imbued (imbuing).
-#define CAN_I_RECYCLE       0x400000    // Can items be recycled.
-#define CAN_I_REFORGE       0x800000    // Can items be Runic Reforged.
-#define CAN_I_FORCEDC       0x1000000   // Can force DClick skipping other checks (LOS,Distance, Cont...).
-#define CAN_I_DAMAGEABLE	0x2000000	// Display item health bar on HS clients >= 7.0.30.0 (MORE1L = cur hitpoints / MORE1H = max hitpoints)
+// CItemBase specific defs.
+#define CAN_I_PILE              0x0100      // Can item be piled UFLAG2_STACKABLE (*.mul).
+#define CAN_I_DYE               0x0200      // Can item be dyed UFLAG3_CLOTH? (sort of).
+#define CAN_I_FLIP              0x0400      // will flip by default.
+#define CAN_I_LIGHT             0x0800      // UFLAG3_LIGHT.
+#define CAN_I_REPAIR            0x1000      // Is it repairable (difficulty based on value).
+#define CAN_I_REPLICATE         0x2000      // Things like arrows are pretty much all the same.
+#define CAN_I_DCIGNORELOS       0x4000      // when dclicked, ignore LOS checks.
+#define CAN_I_DCIGNOREDIST      0x8000      // when dclicked, ignore distance checks.
+#define CAN_I_BLOCKLOS          0x10000     // blocks LOS without blocking walkchecks.
+#define CAN_I_EXCEPTIONAL       0x20000     // can items be exceptional.
+#define CAN_I_MAKERSMARK        0x40000     // can items hold makers mark.
+#define CAN_I_RETAINCOLOR       0x80000     // can items retain material colors.
+#define CAN_I_ENCHANT           0x100000    // can items be enchanted (runic).
+#define CAN_I_IMBUE             0x200000    // can items be imbued (imbuing).
+#define CAN_I_RECYCLE           0x400000    // Can items be recycled.
+#define CAN_I_REFORGE           0x800000    // Can items be Runic Reforged.
+#define CAN_I_FORCEDC           0x1000000   // Can force DClick skipping other checks (LOS,Distance, Cont...).
+#define CAN_I_DAMAGEABLE	    0x2000000	// Display item health bar on HS clients >= 7.0.30.0 (MORE1L = cur hitpoints / MORE1H = max hitpoints)
+#define CAN_I_BLOCKLOS_HEIGHT   0x4000000   // blocks LOS without blocking walkchecks, but only if the item is too high for the viewer.
 
 #define CAN_U_ALL           0x000       // Can be used by everyone.
 #define CAN_U_MALE          0x001       // Can be used by males.
@@ -176,7 +177,7 @@ public:
 #define CAN_U_GARGOYLE      0x010       // Can be used by gargoyles.
 #define CAN_U_NONE          0x020       // Can not be used.
 
-	// CCharBase specific defs.
+// CCharBase specific defs.
 #define CAN_C_EQUIP         0x00100 // Can equip stuff. (humanoid).
 #define CAN_C_USEHANDS      0x00200	// Can wield weapons (INT dependant), open doors ?, pick up/manipulate things.
 #define CAN_C_MOUNT         0x00400	// can mount rides.
@@ -234,15 +235,15 @@ public:
 	virtual void SetTypeName( lpctstr pszName );
 
     /**
-     * @fn  bool Can( word wCan ) const;
+     * @fn  bool Can( dword dwCan ) const;
      *
-     * @brief   Cans the given w can.
+     * @brief   Has the given Can flag.
      *
-     * @param   wCan    The can.
+     * @param   dwCan    The can flags.
      *
      * @return  true if it succeeds, false if it fails.
      */
-	bool Can( dword wCan ) const;
+	bool Can( dword dwCan ) const;
 
     /**
      * @fn  virtual void UnLink();

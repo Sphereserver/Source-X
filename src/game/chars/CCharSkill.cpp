@@ -1279,7 +1279,7 @@ int CChar::Skill_Mining( SKTRIG_TYPE stage )
 	}
 
 	// Resource check
-	CItem *pResBit = g_World.CheckNaturalResource(m_Act_p, static_cast<IT_TYPE>(GETINTRESOURCE(m_atResource.m_ridType)), stage == SKTRIG_START, this);
+	CItem *pResBit = g_World.CheckNaturalResource(m_Act_p, (IT_TYPE)(GETINTRESOURCE(m_atResource.m_ridType)), stage == SKTRIG_START, this);
 	if ( !pResBit )
 	{
 		SysMessageDefault(DEFMSG_MINING_1);

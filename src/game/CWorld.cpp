@@ -2447,7 +2447,7 @@ void CWorld::OnTick()
                     CItemMulti *pMulti = dynamic_cast<CItemMulti*>(pObj);
                     if (pMulti)
                     {
-                        fRemove = pMulti->OnTick();
+                        fRemove = !pMulti->OnTick();
                     }
                 }
                 break;
@@ -2456,7 +2456,7 @@ void CWorld::OnTick()
                     CItemShip *pShip = static_cast<CItemShip*>(dynamic_cast<CItem*>(pObj));
                     if (pShip)
                     {
-                        fRemove = pShip->OnTick();
+                        fRemove = !pShip->OnTick();
                     }
                 }
                 break;

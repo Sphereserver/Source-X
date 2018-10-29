@@ -182,7 +182,7 @@ int CItemMulti::Multi_GetMaxDist() const
 const CItemBaseMulti * CItemMulti::Multi_GetDef(ITEMID_TYPE id) // static
 {
     ADDTOCALLSTACK("CItemMulti::Multi_GetDef");
-    return(dynamic_cast <const CItemBaseMulti *> (CItemBase::FindItemBase(id)));
+    return (dynamic_cast <const CItemBaseMulti *> (CItemBase::FindItemBase(id)));
 }
 
 bool CItemMulti::MultiRealizeRegion()
@@ -217,8 +217,7 @@ bool CItemMulti::MultiRealizeRegion()
     ASSERT(pRegionBack != m_pRegion);
 
     // Create the new region rectangle.
-    CRectMap rect;
-    reinterpret_cast<CRect&>(rect) = pMultiDef->m_rect;
+    CRectMap rect = pMultiDef->m_rect;
     rect.m_map = pt.m_map;
     rect.OffsetRect(pt.m_x, pt.m_y);
     m_pRegion->SetRegionRect(rect);
