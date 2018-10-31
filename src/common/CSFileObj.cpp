@@ -412,7 +412,10 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
             while ( uiLinelen > 0 )
             {
                 --uiLinelen;
-                if ( isgraph(psReadBuf[uiLinelen]) || (psReadBuf[uiLinelen] == 0x20) || (psReadBuf[uiLinelen] == '\t') )
+                char iChar = psReadBuf[uiLinelen];
+                // iChar needs to be converted to unsigned for the use with isgraph because, if it's a valid UTF-8 but invalid ASCII char, it means that its value is > 127
+                //  which is a quantity that will be represented as a negative number in a signed char. Passing a number < -1 to isgraph makes a debug assertion to fail.
+                if ( isgraph((uchar)iChar) || (iChar == 0x20) || (iChar == '\t') )
                 {
                     ++uiLinelen;
                     psReadBuf[uiLinelen] = '\0';
