@@ -505,6 +505,7 @@ void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when r
 				pItem->SetDefNum("HitLeechLife", pItem->GetDefNum("HitLeechLife", true) - pCursedMemory->m_itSpell.m_spelllevel, true);
 		}
 
+        // Leave the stat bonuses signed, since they can be used also as a malus (negative sign)
 		short iStrengthBonus = (short)(pItem->GetDefNum("BONUSSTR", true));
 		if (iStrengthBonus != 0)
 			Stat_SetMod(STAT_STR, Stat_GetMod(STAT_STR) - iStrengthBonus);
@@ -764,10 +765,10 @@ void CChar::UpdateStamFlag() const
 		GetClient()->addUpdateStamFlag();
 }
 
-void CChar::UpdateRegenTimers(STAT_TYPE iStat, short iVal)
+void CChar::UpdateRegenTimers(STAT_TYPE iStat, int64 iValMsecs)
 {
 	ADDTOCALLSTACK("CChar::UpdateRegenTimers");
-	m_Stat[iStat].m_regen = iVal;
+	m_Stat[iStat].m_regen = iValMsecs;
 }
 
 void CChar::UpdateStatVal( STAT_TYPE type, short iChange, short iLimit )

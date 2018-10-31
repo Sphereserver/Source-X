@@ -325,7 +325,7 @@ public:
      * @brief   Gets a key from m_TagDefs.
      *
      * @param   pszKey  The key.
-     * @param   fDef    true to definition.
+     * @param   fDef    Check also for base TagDefs (CHARDEF, ITEMDEF, etc).
      *
      * @return  null if it fails, else the key.
      */

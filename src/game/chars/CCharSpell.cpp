@@ -601,12 +601,12 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			CItem *pBeard = LayerFind(LAYER_BEARD);
 			if (pBeard)
 				pBeard->SetHue((HUE_TYPE)(pSpell->GetTagDefs()->GetKeyNum("COLOR.BEARD")));
-				
+
 			NotoSave_Update();
 			if (pClient)
 				pClient->removeBuff(BI_INCOGNITO);
 
-				
+
 			return;
 		}
 
@@ -954,10 +954,10 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					break;
 			}
 
-			short SPELL_MAX_POLY_STAT = (short)(g_Cfg.m_iMaxPolyStats);
+			const ushort SPELL_MAX_POLY_STAT = (ushort)(g_Cfg.m_iMaxPolyStats);
 			SetID(m_atMagery.m_SummonID);
 
-			CCharBase * pCharDef = Char_GetDef();
+			const CCharBase * pCharDef = Char_GetDef();
 			ASSERT(pCharDef);
 
 			// re-apply our incognito name
@@ -969,30 +969,30 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			{
 				if (pCharDef->m_Str)
 				{
-					short iChange = pCharDef->m_Str - Stat_GetBase(STAT_STR);
+					int iChange = pCharDef->m_Str - Stat_GetBase(STAT_STR);
 					if (iChange > SPELL_MAX_POLY_STAT)			// Can't pass from SPELL_MAX_POLY_STAT defined in .ini (MaxPolyStats)
 						iChange = SPELL_MAX_POLY_STAT;
-					else if ( iChange < 0 && iChange * -1 > SPELL_MAX_POLY_STAT )	// Limit it to negative values too
+					else if ( (iChange < 0) && ((iChange * -1) > SPELL_MAX_POLY_STAT) )	// Limit it to negative values too
 						iChange = -SPELL_MAX_POLY_STAT;
 					if (iChange + Stat_GetBase(STAT_STR) < 0)
 						iChange = -Stat_GetBase(STAT_STR);
-					Stat_AddMod(STAT_STR, iChange);
-					pSpell->m_itSpell.m_PolyStr = iChange;
+					Stat_AddMod(STAT_STR, (short)iChange);
+					pSpell->m_itSpell.m_PolyStr = (short)iChange;
 				}
 				else
 					pSpell->m_itSpell.m_PolyStr = 0;
 
 				if (pCharDef->m_Dex)
 				{
-					short iChange = pCharDef->m_Dex - Stat_GetBase(STAT_DEX);
+					int iChange = pCharDef->m_Dex - Stat_GetBase(STAT_DEX);
 					if (iChange > SPELL_MAX_POLY_STAT)
 						iChange = SPELL_MAX_POLY_STAT;
-					else if (iChange < 0 && iChange * -1 > SPELL_MAX_POLY_STAT)	// Limit it to negative values too
+					else if ((iChange < 0) && ((iChange * -1) > SPELL_MAX_POLY_STAT))	// Limit it to negative values too
 						iChange = -SPELL_MAX_POLY_STAT;
 					if (iChange + Stat_GetBase(STAT_DEX) < 0)
 						iChange = -Stat_GetBase(STAT_DEX);
-					Stat_AddMod(STAT_DEX, iChange);
-					pSpell->m_itSpell.m_PolyDex = iChange;
+					Stat_AddMod(STAT_DEX, (short)iChange);
+					pSpell->m_itSpell.m_PolyDex = (short)iChange;
 				}
 				else
 					pSpell->m_itSpell.m_PolyDex = 0;
@@ -1782,7 +1782,7 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEff
 	// ARGS:
 	// spell = SPELL_Invis, etc.
 	// layer == LAYER_FLAG_Potion, etc.
-	// iEffect = The effect value, for spells is usually calculated by using g_Cfg.GetSpellEffect(spell, iSkillLevel) but other specific values can be used. 
+	// iEffect = The effect value, for spells is usually calculated by using g_Cfg.GetSpellEffect(spell, iSkillLevel) but other specific values can be used.
 	// iDuration = how much the spell will last, in seconds
 	// bEquip automatically equips the memory, false requires manual equipment... usefull to setup everything before calling @MemoryEquip
 	//
@@ -1912,7 +1912,7 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 
 	int minY = (int)((fieldGauge - 1) / 2) - (fieldGauge - 1);
 	int maxY = minY + (fieldGauge - 1);
-	
+
 	if ( IsSetMagicFlags( MAGICF_NOFIELDSOVERWALLS ) )
 	{
 		// check if anything is blocking the field from fully extending to its desired width
@@ -2075,7 +2075,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
             return false;
         }
     }
- 
+
 	SKILL_TYPE skill = SKILL_NONE;
 	int iSkillTest = 0;
 	if (!pSpellDef->GetPrimarySkill(&iSkillTest, nullptr))
@@ -3580,7 +3580,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			case SPELL_Wither:
 			case SPELL_Exorcism:*/
 		default:
-			if (pSpellDef->m_idLayer >= LAYER_SPELL_STATS) //Equip a spell item in the appropriate layer 
+			if (pSpellDef->m_idLayer >= LAYER_SPELL_STATS) //Equip a spell item in the appropriate layer
 				Spell_Effect_Create(spell, fPotion ? LAYER_FLAG_Potion : pSpellDef->m_idLayer, iEffect, iDuration, pCharSrc);
 			break;
 	}

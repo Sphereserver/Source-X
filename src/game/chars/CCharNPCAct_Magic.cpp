@@ -172,16 +172,16 @@ bool CChar::NPC_FightMagery(CChar * pChar)
         return false;
     }
     int skill = (int)SKILL_NONE;
-    short iStatInt = Stat_GetBase(STAT_INT);
-    short mana = Stat_GetVal(STAT_INT);
-    int iChance = ((mana >= (iStatInt / 2)) ? mana : (iStatInt - mana));
+    ushort uiStatInt = Stat_GetBase(STAT_INT);
+    ushort uiMana = Stat_GetVal(STAT_INT);
+    int iChance = ((uiMana >= (uiStatInt / 2)) ? uiMana : (uiStatInt - uiMana));
 
     CObjBase * pSrc = this;
-    if (Calc_GetRandVal(iChance) < iStatInt / 4)
+    if (Calc_GetRandVal(iChance) < uiStatInt / 4)
     {
         // we failed this test, but we could be casting next time
         // back off from the target a bit
-        if (mana > (iStatInt / 3) && Calc_GetRandVal(iStatInt))
+        if (uiMana > (uiStatInt / 3) && Calc_GetRandVal(uiStatInt))
         {
             if (iDist < 4 || iDist > 8)	// Here is fine?
                 NPC_Act_Follow(false, Calc_GetRandVal(3) + 2, true);
@@ -228,7 +228,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 BeginCast:	//Start casting
             // KRJ - give us some distance
             // if the opponent is close, get away from him
-    if ((mana > iStatInt / 3) && Calc_GetRandVal(iStatInt << 1))
+    if ((uiMana > uiStatInt / 3) && Calc_GetRandVal(uiStatInt << 1))
     {
         if (iDist < 4 || iDist > 8)	// Here is fine?
             NPC_Act_Follow(false, 5, true);

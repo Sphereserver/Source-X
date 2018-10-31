@@ -811,9 +811,9 @@ int CChar::FixWeirdness()
 			{
 				for ( int j = STAT_STR; j < STAT_BASE_QTY; ++j )
 				{
-					short iStatMax = Stat_GetLimit((STAT_TYPE)j);
-					if ( Stat_GetAdjusted((STAT_TYPE)j) > iStatMax*g_Cfg.m_iOverSkillMultiply )
-						Stat_SetBase((STAT_TYPE)j, (short)iStatMax);
+					ushort uiStatMax = Stat_GetLimit((STAT_TYPE)j);
+					if ( Stat_GetAdjusted((STAT_TYPE)j) > (uiStatMax * g_Cfg.m_iOverSkillMultiply) )
+						Stat_SetBase((STAT_TYPE)j, uiStatMax);
 				}
 			}
 		}
@@ -827,14 +827,14 @@ int CChar::FixWeirdness()
 		}
 
 		// An NPC. Don't keep track of unused skills.
-		for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; i++ )
+		for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 		{
 			if ( m_Skill[i] > 0 && m_Skill[i] < g_Cfg.m_iSaveNPCSkills )
 				Skill_SetBase((SKILL_TYPE)i, 0);
 		}
 	}
 
-	if ( GetTimerAdjusted() > 60*60 )
+	if ( GetTimerSAdjusted() > 60*60 )
 		SetTimeout(1);	// unreasonably long for a char?
 
 	return IsWeird();
@@ -1371,7 +1371,7 @@ lpctstr CChar::GetName( bool fAllowAlt ) const
 }
 
 // Create a brand new Player char. Called directly from the packet.
-void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale, RACE_TYPE rtRace, short wStr, short wDex, short wInt,
+void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale, RACE_TYPE rtRace, ushort wStr, ushort wDex, ushort wInt,
 	PROFESSION_TYPE prProf, SKILL_TYPE skSkill1, ushort uiSkillVal1, SKILL_TYPE skSkill2, ushort uiSkillVal2, SKILL_TYPE skSkill3, ushort uiSkillVal3, SKILL_TYPE skSkill4, ushort uiSkillVal4,
 	HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, ITEMID_TYPE idFace, int iStartLoc )
 {
@@ -1955,7 +1955,7 @@ bool CChar::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 	if ( IsClient() && GetClient()->r_WriteVal(pszKey, sVal, pSrc) )
 		return true;
 
-    if (static_cast<CEntity*>(this)->r_WriteVal(pszKey, sVal, pSrc)) // Checking CComponents first.
+    if (CEntity::r_WriteVal(pszKey, sVal, pSrc)) // Checking CComponents first.
     {
         return true;
     }
@@ -1991,7 +1991,7 @@ do_default:
 		i = g_Cfg.FindStatKey( pszKey );
 		if ( i >= 0 )
 		{
-			sVal.FormatVal(Stat_GetAdjusted((STAT_TYPE)i));
+			sVal.FormatUSVal(Stat_GetAdjusted((STAT_TYPE)i));
 			return true;
 		}
 
@@ -2000,7 +2000,7 @@ do_default:
 			i = g_Cfg.FindStatKey( pszKey+1 );
 			if ( i >= 0 )
 			{
-				sVal.FormatVal(Stat_GetBase((STAT_TYPE)i));
+				sVal.FormatUSVal(Stat_GetBase((STAT_TYPE)i));
 				return true;
 			}
             else
@@ -2023,7 +2023,7 @@ do_default:
 			i = g_Cfg.FindStatKey( pszKey+3 );
 			if ( i >= 0 )
 			{
-				sVal.FormatVal(Stat_GetMod((STAT_TYPE)i));
+				sVal.FormatSVal(Stat_GetMod((STAT_TYPE)i));
 				return true;
 			}
 		}
@@ -2032,8 +2032,8 @@ do_default:
 		if ( IsSkillBase((SKILL_TYPE)i))
 		{
 			// Check some skill name.
-			ushort iVal = Skill_GetBase( (SKILL_TYPE)i );
-			sVal.Format( "%i.%i", iVal/10, iVal%10 );
+			ushort uiVal = Skill_GetBase( (SKILL_TYPE)i );
+			sVal.Format( "%u.%u", uiVal/10, uiVal%10 );
 			return true;
 		}
 
@@ -2786,36 +2786,36 @@ do_default:
 			sVal.FormatWVal( m_SpeechHueOverride );
 			break;
 		case CHC_FOOD:
-			sVal.FormatSVal( Stat_GetVal(STAT_FOOD) );
+			sVal.FormatUSVal( Stat_GetVal(STAT_FOOD) );
 			break;
 		case CHC_HEIGHT:
 			sVal.FormatUCVal( GetHeight() );
 			break;
 		case CHC_HITPOINTS:
 		case CHC_HITS:
-			sVal.FormatSVal( Stat_GetVal(STAT_STR) );
+			sVal.FormatUSVal( Stat_GetVal(STAT_STR) );
 			break;
 		case CHC_STAM:
 		case CHC_STAMINA:
-			sVal.FormatSVal( Stat_GetVal(STAT_DEX) );
+			sVal.FormatUSVal( Stat_GetVal(STAT_DEX) );
 			break;
 		case CHC_STEPSTEALTH:
 			sVal.FormatVal( m_StepStealth );
 			break;
 		case CHC_MANA:
-			sVal.FormatSVal( Stat_GetVal(STAT_INT) );
+			sVal.FormatUSVal( Stat_GetVal(STAT_INT) );
 			break;
 		case CHC_MAXFOOD:
-			sVal.FormatSVal( Stat_GetMax(STAT_FOOD) );
+			sVal.FormatUSVal( Stat_GetMax(STAT_FOOD) );
 			break;
 		case CHC_MAXHITS:
-			sVal.FormatSVal( Stat_GetMax(STAT_STR) );
+			sVal.FormatUSVal( Stat_GetMax(STAT_STR) );
 			break;
 		case CHC_MAXMANA:
-			sVal.FormatSVal( Stat_GetMax(STAT_INT) );
+			sVal.FormatUSVal( Stat_GetMax(STAT_INT) );
 			break;
 		case CHC_MAXSTAM:
-			sVal.FormatSVal( Stat_GetMax(STAT_DEX) );
+			sVal.FormatUSVal( Stat_GetMax(STAT_DEX) );
 			break;
 		case CHC_HIT:
 			{
@@ -2951,13 +2951,7 @@ bool CChar::r_LoadVal( CScript & s )
 			i = g_Cfg.FindStatKey( pszKey );
 			if ( i >= 0 )
 			{
-				int iVal = s.GetArgVal();
-				if (iVal > INT16_MAX)
-					iVal = INT16_MAX;
-				else if (iVal < INT16_MIN)
-					iVal = INT16_MIN;
-
-				Stat_SetBase((STAT_TYPE)i, (short)iVal);
+				Stat_SetBase((STAT_TYPE)i, s.GetArgUSVal());
 				return true;
 			}
 
@@ -2966,7 +2960,7 @@ bool CChar::r_LoadVal( CScript & s )
 				i = g_Cfg.FindStatKey( pszKey+1 );
 				if ( i >= 0 )
 				{
-					Stat_SetBase((STAT_TYPE)i, s.GetArgSVal());
+					Stat_SetBase((STAT_TYPE)i, s.GetArgUSVal());
 					return true;
 				}
                 else
@@ -3012,7 +3006,7 @@ bool CChar::r_LoadVal( CScript & s )
             {
                 ePriv = (HOUSE_PRIV)piCmd[1];
             }
-            GetMultiStorage()->AddHouse((CUID((dword)piCmd[0])), ePriv);
+            GetMultiStorage()->AddHouse(CUID((dword)piCmd[0]), ePriv);
             break;
         }
         case CHC_DELHOUSE:
@@ -3024,7 +3018,7 @@ bool CChar::r_LoadVal( CScript & s )
             }
             else
             {
-                GetMultiStorage()->DelHouse((CUID)dwUID);
+                GetMultiStorage()->DelHouse(CUID(dwUID));
             }
             break;
         }
@@ -3041,7 +3035,7 @@ bool CChar::r_LoadVal( CScript & s )
             {
                 ePriv = (HOUSE_PRIV)piCmd[1];
             }
-            GetMultiStorage()->AddShip((CUID((dword)piCmd[0])), ePriv);
+            GetMultiStorage()->AddShip(CUID((dword)piCmd[0]), ePriv);
             break;
         }
         case CHC_DELSHIP:
@@ -3053,27 +3047,30 @@ bool CChar::r_LoadVal( CScript & s )
             }
             else
             {
-                GetMultiStorage()->DelShip((CUID)dwUID);
+                GetMultiStorage()->DelShip(CUID(dwUID));
             }
             break;
         }
 		//Status Update Variables
 		case CHC_REGENHITS:
 			{
-				SetDefNum(s.GetKey(), s.GetArgVal(), false);
-				UpdateRegenTimers(STAT_STR, s.GetArgSVal());
+                llong iVal = s.GetArgVal();
+				SetDefNum(s.GetKey(), iVal, false);
+				UpdateRegenTimers(STAT_STR, iVal*MSECS_PER_SEC);
 			}
 			break;
 		case CHC_REGENSTAM:
 			{
-				SetDefNum(s.GetKey(), s.GetArgVal(), false);
-				UpdateRegenTimers(STAT_DEX, s.GetArgSVal());
+                llong iVal = s.GetArgVal();
+				SetDefNum(s.GetKey(), iVal, false);
+				UpdateRegenTimers(STAT_DEX, iVal*MSECS_PER_SEC);
 			}
 			break;
 		case CHC_REGENMANA:
 			{
-				SetDefNum(s.GetKey(), s.GetArgVal(), false);
-				UpdateRegenTimers(STAT_INT, s.GetArgSVal());
+                llong iVal = s.GetArgVal();
+				SetDefNum(s.GetKey(), iVal, false);
+				UpdateRegenTimers(STAT_INT, iVal*MSECS_PER_SEC);
 			}
 			break;
 		case CHC_INCREASEHITCHANCE:
@@ -3121,16 +3118,16 @@ bool CChar::r_LoadVal( CScript & s )
 			m_wBloodHue = (HUE_TYPE)(s.GetArgVal());
 			break;
 		case CHC_MAXFOOD:
-			Stat_SetMax(STAT_FOOD, s.GetArgSVal());
+			Stat_SetMax(STAT_FOOD, s.GetArgUSVal());
 			break;
 		case CHC_MAXHITS:
-			Stat_SetMax(STAT_STR, s.GetArgSVal());
+			Stat_SetMax(STAT_STR, s.GetArgUSVal());
 			break;
 		case CHC_MAXMANA:
-			Stat_SetMax(STAT_INT, s.GetArgSVal());
+			Stat_SetMax(STAT_INT, s.GetArgUSVal());
 			break;
 		case CHC_MAXSTAM:
-			Stat_SetMax(STAT_DEX, s.GetArgSVal());
+			Stat_SetMax(STAT_DEX, s.GetArgUSVal());
 			break;
 		case CHC_ACCOUNT:
 			return SetPlayerAccount( s.GetArgStr() );
@@ -3314,27 +3311,27 @@ bool CChar::r_LoadVal( CScript & s )
 			m_SpeechHueOverride = (HUE_TYPE)s.GetArgWVal();
 			break;
 		case CHC_FOOD:
-			Stat_SetVal(STAT_FOOD, s.GetArgSVal());
+			Stat_SetVal(STAT_FOOD, s.GetArgUSVal());
 			break;
 		case CHC_HITPOINTS:
 		case CHC_HITS:
-			Stat_SetVal(STAT_STR, s.GetArgSVal());
+			Stat_SetVal(STAT_STR, s.GetArgUSVal());
 			UpdateHitsFlag();
 			break;
 		case CHC_MANA:
-			Stat_SetVal(STAT_INT, s.GetArgSVal());
+			Stat_SetVal(STAT_INT, s.GetArgUSVal());
 			UpdateManaFlag();
 			break;
 		case CHC_STAM:
 		case CHC_STAMINA:
-			Stat_SetVal(STAT_DEX, s.GetArgSVal());
+			Stat_SetVal(STAT_DEX, s.GetArgUSVal());
 			UpdateStamFlag();
 			break;
 		case CHC_STEPSTEALTH:
 			m_StepStealth = s.GetArgVal();
 			break;
 		case CHC_HEIGHT:
-			m_height = static_cast<height_t>(s.GetArgVal());
+			m_height = (height_t)(s.GetArgVal());
 			break;
 		case CHC_HOME:
 			if ( ! s.HasArgs() )
@@ -3406,10 +3403,10 @@ bool CChar::r_LoadVal( CScript & s )
 			}
 			break;
 		case CHC_NPC:
-			return SetNPCBrain(static_cast<NPCBRAIN_TYPE>(s.GetArgVal()));
+			return SetNPCBrain((NPCBRAIN_TYPE)(s.GetArgVal()));
 		case CHC_OBODY:
 			{
-				CREID_TYPE id = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType( RES_CHARDEF, s.GetArgStr()));
+				CREID_TYPE id = (CREID_TYPE)(g_Cfg.ResourceGetIndexType( RES_CHARDEF, s.GetArgStr()));
 				if ( ! CCharBase::FindCharBase( id ) )
 				{
 					DEBUG_ERR(( "OBODY Invalid Char 0%x\n", id ));
@@ -3419,7 +3416,7 @@ bool CChar::r_LoadVal( CScript & s )
 			}
 			break;
 		case CHC_OSKIN:
-			m_prev_Hue = (HUE_TYPE)(s.GetArgVal());
+			m_prev_Hue = (HUE_TYPE)(s.GetArgWVal());
 			break;
 		case CHC_P:
 			{
@@ -3456,9 +3453,10 @@ bool CChar::r_LoadVal( CScript & s )
 			break;
 		case CHC_SWING:
 			{
-				if ( s.GetArgVal() && ((s.GetArgVal() < -1) || (s.GetArgVal() > WAR_SWING_SWINGING) ) )
+                int iVal = s.GetArgVal();
+				if ( iVal && ((iVal < -1) || (iVal > WAR_SWING_SWINGING) ) )
 					return false;
-				m_atFight.m_War_Swing_State = (WAR_SWING_TYPE)s.GetArgVal();
+				m_atFight.m_War_Swing_State = (WAR_SWING_TYPE)iVal;
 			}
 			break;
 		case CHC_TITLE:
@@ -3470,11 +3468,11 @@ bool CChar::r_LoadVal( CScript & s )
 				m_pClient->addLight();
 			break;
 		case CHC_EXP:
-			m_exp = s.GetArgVal();
+			m_exp = s.GetArgUVal();
 			ChangeExperience();			//	auto-update level if applicable
 			break;
 		case CHC_LEVEL:
-			m_level = s.GetArgVal();
+			m_level = s.GetArgUVal();
 			ChangeExperience();
 			break;
         case CHC_GOLD:
@@ -3632,7 +3630,7 @@ void CChar::r_Write( CScript & s )
     s.WriteKeyVal("OKARMA", GetKarma() );
     s.WriteKeyVal("OFAME", GetFame() );
 
-    short uiMaxStat;
+    ushort uiMaxStat;
 	if ( Stat_GetAdjusted(STAT_STR) != (uiMaxStat = Stat_GetMax(STAT_STR)) )
 		s.WriteKeyVal("MAXHITS", uiMaxStat);
 	if ( Stat_GetAdjusted(STAT_DEX) != (uiMaxStat = Stat_GetMax(STAT_DEX)) )

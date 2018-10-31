@@ -15,12 +15,12 @@ function (toolchain_exe_stuff)
 	#-- Setting compiler flags common to all builds.
 
 	SET (C_WARNING_OPTS
-		"-Wall -Wextra -Wno-pragmas -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-parentheses\
+		"-Wall -Wextra -Wno-pragmas -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-parentheses -Wno-implicit-fallthrough\
 		-Wno-unused-variable -Wno-unused-function -Wno-unused-parameter -Wno-uninitialized -Wno-error=maybe-uninitialized -Wno-error=unused-but-set-variable\
 		-Wno-implicit-function-declaration -Wno-type-limits -Wno-incompatible-pointer-types -Wno-array-bounds")
 		# last 2 lines are for warnings issued by 3rd party C code
 	SET (CXX_WARNING_OPTS
-		"-Wall -Wextra -Wno-pragmas -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-parentheses -Wno-conversion-null -Wno-invalid-offsetof")
+		"-Wall -Wextra -Wno-pragmas -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-parentheses -Wno-conversion-null -Wno-invalid-offsetof -Wno-implicit-fallthrough")
 	SET (C_ARCH_OPTS	"-march=x86-64 -m64")
 	SET (CXX_ARCH_OPTS	"-march=x86-64 -m64")
 	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")

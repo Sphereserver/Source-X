@@ -603,8 +603,8 @@ SPAWNS:
 -TYPES = t_spawn_item, t_spawn_char. Each one generates a different type of objects in the game (it may be revised in the future to merge both*, not soon anyway).
 -SPAWNID/MORE/MORE1(R/W) = spawn's ID (can be an Item/Template of items(for t_spawn_item) or a Char/Template of chars(for t_spawn_char)).
 NOTE:MORE2 works different for each spawn type.
---MORE2/COUNT(R) on t_spawn_char: returns the total spawned characters.
---MORE2/PILE(R/W) on t_spawn_item: Total amount of items that may be generated at once.
+-MORE2/COUNT(R) on t_spawn_char: returns the total spawned characters.
+-MORE2/PILE(R/W) on t_spawn_item: Total amount of items that may be generated at once.
 
 -MOREX/TIMELO(R/W) = Minimum spawn time in minutes.
 -MOREY/TIMEHI(R/W) = Maximum spawn time in minutes.
@@ -629,9 +629,9 @@ Simple explanation:
 
 
 05-05-2018, XuN:
-[Port from Source, 20-01-2017, Coruja}
+[Port from Source, 20-01-2017, Coruja]
 Added: New function MAPWAYPOINT to add/remove waypoints on client radar map (enhanced clients only).
-	Sintax: MAPWAYPOINT ObjectUID, WaypointType
+	Syntax: MAPWAYPOINT ObjectUID, WaypointType
 	Waypoint types:
 		0 = Remove waypoint
 		1 = Corpse
@@ -886,8 +886,8 @@ Note: Ships generated before this change will not be updated on the player's lis
 linked to the ship,since there was no default behaviour other than this and each ship script handles it differently, there will be no hardcoded update
 to the new system, each ship system should be updated according to it's behaviour (ie: removing the memory and setting AddShip <ShipUID>)
 
--Added MaxShips(RW) property for accounts, Default = Serv.MaxShipsAccount.
--Added MaxShips(RW) property for chars (meant for players), Default = Serv.MaxShipsPlayer.
+- Added MaxShips(RW) property for accounts, Default = Serv.MaxShipsAccount.
+- Added MaxShips(RW) property for chars (meant for players), Default = Serv.MaxShipsPlayer.
 * Setting MaxShips = 0 for Players will skip the setting and read it from it's Account.
 * Setting MaxShips = 0 for Players and Accounts will allow to build without limit.
 
@@ -907,14 +907,14 @@ Updated the checks too to work OSI like:
 - Expanded key's generation to ships with a new ini setting.
 
 - Added to sphere.ini:
-// Do ships generate keys automatically?
-AutoShipKeys=1
+	// Do ships generate keys automatically?
+	AutoShipKeys=1
 
-// Max houses a guild can have (default 1).
-MaxHousesGuild = 1
+	// Max houses a guild can have (default 1).
+	MaxHousesGuild = 1
 
-// Max ships a guild can have (default 1).
-MaxShipsGuild = 1
+	// Max ships a guild can have (default 1).
+	MaxShipsGuild = 1
 
 14-05-2018, Nolok
 - Fixed: multiple party related exceptions.
@@ -1258,3 +1258,7 @@ Added: Now Sectors store their adjacent sectors:
 - [sphere_defs.scp]: Added the def: CAN_I_BLOCKLOS_HEIGHT (04000000).
 - Fixed: CanSeeLOS, when AdvancedLOS is enabled, read the dynamic item CAN flags from its base itemdef instead of its actual CAN flags. Example: if i created a i_dagger_super item with ID=i_dagger, CanSeeLOS checked i_dagger
 	CAN flags instead of the ones from i_dagger_super. Now it supports also flags modified by CANMASK.
+
+31-10-2018, Nolok
+- Changed: Stats maximum value extended from 32767 to 65535 (maximum value actually supported by the client) (Issue #75).
+- Fixed: Stats regen timers were broken.

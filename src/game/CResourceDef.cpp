@@ -459,10 +459,10 @@ bool CSkillClassDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole *
 		sVal = m_sName;
 		break;
 	case SCC_SKILLSUM:
-		sVal.FormatVal( m_SkillSumMax );
+		sVal.FormatUVal( m_SkillSumMax );
 		break;
 	case SCC_STATSUM:
-		sVal.FormatVal( m_StatSumMax );
+		sVal.FormatUVal( m_StatSumMax );
 		break;
 	default:
 		{
@@ -470,14 +470,14 @@ bool CSkillClassDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole *
 			if ( i != SKILL_NONE )
 			{
 				ASSERT( i >= 0 && (size_t)(i) < CountOf(m_SkillLevelMax));
-				sVal.FormatVal( m_SkillLevelMax[i] );
+				sVal.FormatUSVal( m_SkillLevelMax[i] );
 				break;
 			}
 			i = g_Cfg.FindStatKey( pszKey);
 			if ( i >= 0 )
 			{
 				ASSERT( (size_t)(i) < CountOf(m_StatMax));
-				sVal.FormatVal( m_StatMax[i] );
+				sVal.FormatUSVal( m_StatMax[i] );
 				break;
 			}
 		}
@@ -505,10 +505,10 @@ bool CSkillClassDef::r_LoadVal( CScript &s )
 		m_sName = s.GetArgStr();
 		break;
 	case SCC_SKILLSUM:
-		m_SkillSumMax = s.GetArgVal();
+		m_SkillSumMax = s.GetArgUVal();
 		break;
 	case SCC_STATSUM:
-		m_StatSumMax = (word)(s.GetArgVal());
+		m_StatSumMax = s.GetArgUVal();
 		break;
 	default:
 		{
@@ -516,14 +516,14 @@ bool CSkillClassDef::r_LoadVal( CScript &s )
 			if ( i != SKILL_NONE )
 			{
 				ASSERT( i >= 0 && (size_t)i < CountOf(m_SkillLevelMax));
-				m_SkillLevelMax[i] = (word)(s.GetArgVal());
+				m_SkillLevelMax[i] = s.GetArgUSVal();
 				break;
 			}
 			i = g_Cfg.FindStatKey( s.GetKey());
 			if ( i >= 0 )
 			{
 				ASSERT( (size_t)i < CountOf(m_StatMax));
-				m_StatMax[i] = (word)(s.GetArgVal());
+				m_StatMax[i] = s.GetArgUSVal();
 				break;
 			}
 		}

@@ -14,9 +14,9 @@ void CChar::Stat_AddMod( STAT_TYPE i, short iVal )
 	ASSERT(i >= 0 && i < STAT_QTY);
 	m_Stat[i].m_mod	+= iVal;
 
-	short iMaxValue = Stat_GetMax(i);		// make sure the current value is not higher than new max value
-	if ( m_Stat[i].m_val > iMaxValue )
-		m_Stat[i].m_val = iMaxValue;
+	const ushort uiMaxValue = Stat_GetMax(i);		// make sure the current value is not higher than new max value
+	if ( m_Stat[i].m_val > uiMaxValue )
+		m_Stat[i].m_val = uiMaxValue;
 
 	UpdateStatsFlag();
 }
@@ -58,9 +58,9 @@ void CChar::Stat_SetMod( STAT_TYPE i, short iVal )
 		}
 	}
 
-	short iMaxValue = Stat_GetMax(i);		// make sure the current value is not higher than new max value
-	if ( m_Stat[i].m_val > iMaxValue )
-		m_Stat[i].m_val = iMaxValue;
+	const ushort uiMaxValue = Stat_GetMax(i);		// make sure the current value is not higher than new max value
+	if ( m_Stat[i].m_val > uiMaxValue )
+		m_Stat[i].m_val = uiMaxValue;
 
 	UpdateStatsFlag();
 }
@@ -72,19 +72,19 @@ short CChar::Stat_GetMod( STAT_TYPE i ) const
 	return m_Stat[i].m_mod;
 }
 
-void CChar::Stat_SetVal( STAT_TYPE i, short iVal )
+void CChar::Stat_SetVal( STAT_TYPE i, ushort uiVal )
 {
 	ADDTOCALLSTACK("CChar::Stat_SetVal");
 	if (i > STAT_BASE_QTY || i == STAT_FOOD) // Food must trigger Statchange. Redirect to Base value
 	{
-		Stat_SetBase(i, iVal);
+		Stat_SetBase(i, uiVal);
 		return;
 	}
 	ASSERT(i >= 0 && i < STAT_QTY); // allow for food
-	m_Stat[i].m_val = iVal;
+	m_Stat[i].m_val = uiVal;
 }
 
-short CChar::Stat_GetVal( STAT_TYPE i ) const
+ushort CChar::Stat_GetVal( STAT_TYPE i ) const
 {
 	ADDTOCALLSTACK("CChar::Stat_GetVal");
 	if ( i > STAT_BASE_QTY || i == STAT_FOOD ) // Food must trigger Statchange. Redirect to Base value
@@ -94,35 +94,34 @@ short CChar::Stat_GetVal( STAT_TYPE i ) const
 }
 
 
-void CChar::Stat_SetMax( STAT_TYPE i, short iVal )
+void CChar::Stat_SetMax( STAT_TYPE i, ushort uiVal )
 {
 	ADDTOCALLSTACK("CChar::Stat_SetMax");
 	ASSERT(i >= 0 && i < STAT_QTY); // allow for food
 
-	if ( g_Cfg.m_iStatFlag && ((g_Cfg.m_iStatFlag & STAT_FLAG_DENYMAX) || (m_pPlayer && g_Cfg.m_iStatFlag & STAT_FLAG_DENYMAXP) || (m_pNPC && g_Cfg.m_iStatFlag & STAT_FLAG_DENYMAXN)) )
+	if ( g_Cfg.m_iStatFlag && ((g_Cfg.m_iStatFlag & STAT_FLAG_DENYMAX) || (m_pPlayer && (g_Cfg.m_iStatFlag & STAT_FLAG_DENYMAXP)) || (m_pNPC && (g_Cfg.m_iStatFlag & STAT_FLAG_DENYMAXN))) )
 		m_Stat[i].m_max = 0;
 	else
 	{
-		int iStatVal = Stat_GetMax(i);
 		if ( IsTrigUsed(TRIGGER_STATCHANGE) && !IsTriggerActive("CREATE") )
 		{
 			if ( i >= STAT_STR && i <= STAT_FOOD )		// only STR, DEX, INT, FOOD fire MaxHits, MaxMana, MaxStam, MaxFood for @StatChange
 			{
 				CScriptTriggerArgs args;
 				args.m_iN1 = i + 4;		// shift by 4 to indicate MaxHits, etc..
-				args.m_iN2 = iStatVal;
-				args.m_iN3 = iVal;
+				args.m_iN2 = Stat_GetMax(i);
+				args.m_iN3 = uiVal;
 				if ( OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE )
 					return;
 				// do not restore argn1 to i, bad things will happen! leave it untouched. (matex)
-				iVal = (short)(args.m_iN3);
+				uiVal = (ushort)(args.m_iN3);
 			}
 		}
-		m_Stat[i].m_max = iVal;
+		m_Stat[i].m_max = uiVal;
 
-		short iMaxValue = Stat_GetMax(i);		// make sure the current value is not higher than new max value
-		if ( m_Stat[i].m_val > iMaxValue )
-			m_Stat[i].m_val = iMaxValue;
+		const ushort uiMaxValue = Stat_GetMax(i);		// make sure the current value is not higher than new max value
+		if ( m_Stat[i].m_val > uiMaxValue )
+			m_Stat[i].m_val = uiMaxValue;
 
 		if ( i == STAT_STR )
 			UpdateHitsFlag();
@@ -133,10 +132,10 @@ void CChar::Stat_SetMax( STAT_TYPE i, short iVal )
 	}
 }
 
-short CChar::Stat_GetMax( STAT_TYPE i ) const
+ushort CChar::Stat_GetMax( STAT_TYPE i ) const
 {
 	ADDTOCALLSTACK("CChar::Stat_GetMax");
-	short val;
+	ushort uiVal;
 	ASSERT(i >= 0 && i < STAT_QTY); // allow for food
 	if ( m_Stat[i].m_max < 1 )
 	{
@@ -144,43 +143,41 @@ short CChar::Stat_GetMax( STAT_TYPE i ) const
 		{
 			CCharBase * pCharDef = Char_GetDef();
 			ASSERT(pCharDef);
-			val = pCharDef->m_MaxFood;
+            uiVal = pCharDef->m_MaxFood;
 		}
 		else
-			val	= Stat_GetAdjusted(i);
+            uiVal = Stat_GetAdjusted(i);
 
 		if ( i == STAT_INT )
 		{
 			if ( (g_Cfg.m_iRacialFlags & RACIALF_ELF_WISDOM) && IsElf() )
-				val += 20;		// elves always have +20 max mana (Wisdom racial trait)
+                uiVal += 20;		// elves always have +20 max mana (Wisdom racial trait)
 		}
-		return (val < 0 ? (m_pPlayer ? 1 : 0) : val);
+		return (uiVal < 0 ? (m_pPlayer ? 1 : 0) : uiVal);
 	}
-	val	= m_Stat[i].m_max;
+    uiVal = m_Stat[i].m_max;
 	if ( i >= STAT_BASE_QTY )
-		val += m_Stat[i].m_mod;
-	return (val < 0 ? (m_pPlayer ? 1 : 0) : val);
+        uiVal += m_Stat[i].m_mod;
+	return (uiVal < 0 ? (m_pPlayer ? 1 : 0) : uiVal);
 }
 
-short CChar::Stat_GetSum() const
+uint CChar::Stat_GetSum() const
 {
 	ADDTOCALLSTACK("CChar::Stat_GetSum");
-	short iStatSum = 0;
-	for ( int i = 0; i < STAT_BASE_QTY; i++ )
-		iStatSum += Stat_GetBase((STAT_TYPE)(i));
+	ushort uiStatSum = 0;
+	for ( int i = 0; i < STAT_BASE_QTY; ++i )
+		uiStatSum += Stat_GetBase((STAT_TYPE)i);
 
-	return iStatSum;
+	return uiStatSum;
 }
 
-short CChar::Stat_GetAdjusted( STAT_TYPE i ) const
+ushort CChar::Stat_GetAdjusted( STAT_TYPE i ) const
 {
 	ADDTOCALLSTACK("CChar::Stat_GetAdjusted");
-	short val = Stat_GetBase(i) + Stat_GetMod(i);
-
-	return val;
+    return (Stat_GetBase(i) + Stat_GetMod(i));
 }
 
-short CChar::Stat_GetBase( STAT_TYPE i ) const
+ushort CChar::Stat_GetBase( STAT_TYPE i ) const
 {
 	ADDTOCALLSTACK("CChar::Stat_GetBase");
 	ASSERT(i >= 0 && i < STAT_QTY);
@@ -188,18 +185,18 @@ short CChar::Stat_GetBase( STAT_TYPE i ) const
 	return m_Stat[i].m_base;
 }
 
-void CChar::Stat_AddBase( STAT_TYPE i, short iVal )
+void CChar::Stat_AddBase( STAT_TYPE i, ushort uiVal )
 {
 	ADDTOCALLSTACK("CChar::Stat_AddBase");
-	Stat_SetBase( i, Stat_GetBase( i ) + iVal );
+	Stat_SetBase( i, Stat_GetBase(i) + uiVal );
 }
 
-void CChar::Stat_SetBase( STAT_TYPE i, short iVal )
-{
+void CChar::Stat_SetBase( STAT_TYPE i, ushort uiVal )
+{ 
 	ADDTOCALLSTACK("CChar::Stat_SetBase");
 	ASSERT(i >= 0 && i < STAT_QTY);
 
-	int iStatVal = Stat_GetBase(i);
+	ushort uiStatVal = Stat_GetBase(i);
 	if (IsTrigUsed(TRIGGER_STATCHANGE) && !g_Serv.IsLoading() && !IsTriggerActive("CREATE"))
 	{
 		// Only Str, Dex, Int, Food fire @StatChange here
@@ -207,22 +204,22 @@ void CChar::Stat_SetBase( STAT_TYPE i, short iVal )
 		{
 			CScriptTriggerArgs args;
 			args.m_iN1 = i;
-			args.m_iN2 = iStatVal;
-			args.m_iN3 = iVal;
+			args.m_iN2 = uiStatVal;
+			args.m_iN3 = uiVal;
 			if (OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE)
 				return;
 			// do not restore argn1 to i, bad things will happen! leave i untouched. (matex)
-			iVal = (short)(args.m_iN3);
+			uiVal = (ushort)(args.m_iN3);
 
 			if (i != STAT_FOOD && m_Stat[i].m_max < 1) // MaxFood cannot depend on something, otherwise if the Stat depends on STR, INT, DEX, fire MaxHits, MaxMana, MaxStam
 			{
 				args.m_iN1 = i+4; // Shift by 4 to indicate MaxHits, MaxMana, MaxStam
-				args.m_iN2 = iStatVal;
-				args.m_iN3 = iVal;
+				args.m_iN2 = uiStatVal;
+				args.m_iN3 = uiVal;
 				if (OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE)
 					return;
 				// do not restore argn1 to i, bad things will happen! leave i untouched. (matex)
-				iVal = (short)(args.m_iN3);
+				uiVal = (ushort)(args.m_iN3);
 			}
 		}
 	}
@@ -232,21 +229,21 @@ void CChar::Stat_SetBase( STAT_TYPE i, short iVal )
 			{
 				CCharBase * pCharDef = Char_GetDef();
 				if ( pCharDef && !pCharDef->m_Str )
-					pCharDef->m_Str = iVal;
+					pCharDef->m_Str = uiVal;
 			}
 			break;
 		case STAT_INT:
 			{
 				CCharBase * pCharDef = Char_GetDef();
 				if ( pCharDef && !pCharDef->m_Int )
-					pCharDef->m_Int = iVal;
+					pCharDef->m_Int = uiVal;
 			}
 			break;
 		case STAT_DEX:
 			{
 				CCharBase * pCharDef = Char_GetDef();
 				if ( pCharDef && !pCharDef->m_Dex )
-					pCharDef->m_Dex = iVal;
+					pCharDef->m_Dex = uiVal;
 			}
 			break;
 		case STAT_FOOD:
@@ -255,9 +252,9 @@ void CChar::Stat_SetBase( STAT_TYPE i, short iVal )
 			throw CSError(LOGL_CRIT, 0, "Stat_SetBase: index out of range");
 	}
 
-	m_Stat[i].m_base = iVal;
+	m_Stat[i].m_base = uiVal;
 
-	if ( i == STAT_STR && iVal < iStatVal )
+	if ( (i == STAT_STR) && (uiVal < uiStatVal) )
 	{
 		// STR is being decreased, so check if the char still have enough STR to use current equipped items
 		CItem *pItemNext = nullptr;
@@ -272,14 +269,14 @@ void CChar::Stat_SetBase( STAT_TYPE i, short iVal )
 		}
 	}
 
-	short iMaxValue = Stat_GetMax(i);		// make sure the current value is not higher than new max value
-	if ( m_Stat[i].m_val > iMaxValue )
-		m_Stat[i].m_val = iMaxValue;
+	const ushort uiMaxValue = Stat_GetMax(i);    // make sure the current value is not higher than new max value
+	if ( m_Stat[i].m_val > uiMaxValue )
+		m_Stat[i].m_val = uiMaxValue;
 
 	UpdateStatsFlag();
 }
 
-short CChar::Stat_GetLimit( STAT_TYPE i ) const
+ushort CChar::Stat_GetLimit( STAT_TYPE i ) const
 {
 	ADDTOCALLSTACK("CChar::Stat_GetLimit");
 	const CVarDefCont * pTagStorage = nullptr;
@@ -290,44 +287,52 @@ short CChar::Stat_GetLimit( STAT_TYPE i ) const
 	{
 		const CSkillClassDef * pSkillClass = m_pPlayer->GetSkillClass();
 		ASSERT(pSkillClass);
-		if ( i == STAT_QTY )
-		{
-			pTagStorage = GetKey("OVERRIDE.STATSUM", true);
-			return pTagStorage ? ((short)(pTagStorage->GetValNum())) : (short)(pSkillClass->m_StatSumMax);
-		}
 		ASSERT( i >= 0 && i < STAT_BASE_QTY );
 
-		sprintf(pszStatName, "OVERRIDE.STATCAP_%d", (int)(i));
-		short iStatMax;
+		sprintf(pszStatName, "OVERRIDE.STATCAP_%d", (int)i);
+		ushort uiStatMax;
 		if ( (pTagStorage = GetKey(pszStatName, true)) != nullptr )
-			iStatMax = (short)(pTagStorage->GetValNum());
+			uiStatMax = (ushort)(pTagStorage->GetValNum());
 		else
-			iStatMax = pSkillClass->m_StatMax[i];
+			uiStatMax = pSkillClass->m_StatMax[i];
 
 		if ( m_pPlayer->Stat_GetLock(i) >= SKILLLOCK_DOWN )
 		{
-			short iStatLevel = Stat_GetBase(i);
-			if ( iStatLevel < iStatMax )
-				iStatMax = iStatLevel;
+			ushort uiStatLevel = Stat_GetBase(i);
+			if ( uiStatLevel < uiStatMax )
+				uiStatMax = uiStatLevel;
 		}
-		return( iStatMax );
+		return uiStatMax;
 	}
 	else
 	{
-		if ( i == STAT_QTY )
-		{
-			pTagStorage = GetKey("OVERRIDE.STATSUM", true);
-			return pTagStorage ? (short)(pTagStorage->GetValNum()) : 300;
-		}
-
-		short iStatMax = 100;
-		sprintf(pszStatName, "OVERRIDE.STATCAP_%d", (int)(i));
+		ushort uiStatMax = 100;
+		sprintf(pszStatName, "OVERRIDE.STATCAP_%d", (int)i);
 		if ( (pTagStorage = GetKey(pszStatName, true)) != nullptr )
-			iStatMax = (short)(pTagStorage->GetValNum());
+			uiStatMax = (ushort)(pTagStorage->GetValNum());
 
-		return iStatMax;
+		return uiStatMax;
 	}
 }
+
+uint CChar::Stat_GetSumLimit() const
+{
+    ADDTOCALLSTACK("CChar::Stat_GetSumLimit");
+    // The return value is uint, but the value supported by the packets is a word (which is smaller)
+    if ( m_pPlayer )
+    {
+        const CSkillClassDef * pSkillClass = m_pPlayer->GetSkillClass();
+        ASSERT(pSkillClass);
+        const CVarDefCont * pTagStorage = GetKey("OVERRIDE.STATSUM", true);
+        return pTagStorage ? ((uint)(pTagStorage->GetValNum())) : (uint)(pSkillClass->m_StatSumMax);
+    }
+    else
+    {
+        const CVarDefCont * pTagStorage = GetKey("OVERRIDE.STATSUM", true);
+        return pTagStorage ? (uint)(pTagStorage->GetValNum()) : 300;
+    }
+}
+
 
 bool CChar::Stats_Regen()
 {
@@ -335,8 +340,8 @@ bool CChar::Stats_Regen()
 	// Calling regens in all stats and checking REGEN%s/REGEN%sVAL where %s is hits/stam... to check values/delays
 	// Food decay called here too.
 	// calling @RegenStat for each stat if proceed.
-	int HitsHungerLoss = g_Cfg.m_iHitsHungerLoss ? g_Cfg.m_iHitsHungerLoss : 0;
-    int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();
+	int iHitsHungerLoss = g_Cfg.m_iHitsHungerLoss ? g_Cfg.m_iHitsHungerLoss : 0;
+    const int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();
 	for (STAT_TYPE i = STAT_STR; i <= STAT_FOOD; i = (STAT_TYPE)(i + 1))
 	{
         int64 iRegenDelay = Stats_GetRegenVal(i, true) * MSECS_PER_SEC; // Get chars regen[n] delay (if none, check's for sphere.ini's value)
@@ -350,26 +355,26 @@ bool CChar::Stats_Regen()
         }
         m_Stat[i].m_regen = iCurTime + iRegenDelay; // in msecs
 
-		short mod = (short)Stats_GetRegenVal(i,false);
+		ushort uiMod = (ushort)Stats_GetRegenVal(i, false);
 		if ((i == STAT_STR) && (g_Cfg.m_iRacialFlags & RACIALF_HUMAN_TOUGH) && IsHuman())
-			mod += 2;		// Humans always have +2 hitpoint regeneration (Tough racial trait)
+            uiMod += 2;		// Humans always have +2 hitpoint regeneration (Tough racial trait)
 		
 		if (g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B)
 		{
 			int iGain = Skill_Focus(i);
 			if (iGain > 0)
-			     mod += (short)iGain;
+                uiMod += (ushort)iGain;
 		}
-		short StatLimit = Stat_GetMax(i);
+		ushort uiStatLimit = Stat_GetMax(i);
 
 		if (IsTrigUsed(TRIGGER_REGENSTAT))
 		{
 			CScriptTriggerArgs Args;
 			Args.m_VarsLocal.SetNum("StatID", i, true);
-			Args.m_VarsLocal.SetNum("Value", mod, true);
-			Args.m_VarsLocal.SetNum("StatLimit", StatLimit, true);
+			Args.m_VarsLocal.SetNum("Value", uiMod, true);
+			Args.m_VarsLocal.SetNum("StatLimit", uiStatLimit, true);
 			if (i == STAT_FOOD)
-				Args.m_VarsLocal.SetNum("HitsHungerLoss", HitsHungerLoss);
+				Args.m_VarsLocal.SetNum("HitsHungerLoss", iHitsHungerLoss);
 
 			if (OnTrigger(CTRIG_RegenStat, this, &Args) == TRIGRET_RET_TRUE)
 			{
@@ -382,27 +387,27 @@ bool CChar::Stats_Regen()
 				i = STAT_STR;
 			else if (i > STAT_FOOD)
 				i = STAT_FOOD;
-			mod = (short)(Args.m_VarsLocal.GetKeyNum("Value"));
-			StatLimit = (ushort)(Args.m_VarsLocal.GetKeyNum("StatLimit"));
+            uiMod = (ushort)(Args.m_VarsLocal.GetKeyNum("Value"));
+			uiStatLimit = (ushort)(Args.m_VarsLocal.GetKeyNum("StatLimit"));
 			if (i == STAT_FOOD)
-				HitsHungerLoss = (int)(Args.m_VarsLocal.GetKeyNum("HitsHungerLoss"));
+				iHitsHungerLoss = (int)(Args.m_VarsLocal.GetKeyNum("HitsHungerLoss"));
 		}
-		if (mod == 0)
+		if (uiMod == 0)
 			continue;
 
 		if (i == STAT_FOOD)
-			OnTickFood(mod, HitsHungerLoss);
+			OnTickFood(uiMod, iHitsHungerLoss);
 		else
-			UpdateStatVal(i, mod, StatLimit);
+			UpdateStatVal(i, uiMod, uiStatLimit);
 	}
 	return true;
 }
-ushort CChar::Stats_GetRegenVal(STAT_TYPE iStat, bool bGetTicks)
+ushort CChar::Stats_GetRegenVal(STAT_TYPE iStat, bool fGetTicks)
 {
 	ADDTOCALLSTACK("CChar::Stats_GetRegenVal");
 	// Return regen rates and regen val for the given stat.
-	// bGetTicks = true returns the regen ticks
-	// bGetTicks = false returns the values of regeneration.
+	// fGetTicks = true returns the regen ticks (in seconds)
+	// fGetTicks = false returns the values of regeneration.
 
 	lpctstr stat = "";
 	switch ( iStat )
@@ -426,7 +431,7 @@ ushort CChar::Stats_GetRegenVal(STAT_TYPE iStat, bool bGetTicks)
 	if ( iStat <= STAT_FOOD )
 	{
 		char sRegen[21];
-		if ( bGetTicks )
+		if ( fGetTicks )
 		{
 			sprintf(sRegen, "REGEN%s", stat);   // in seconds
 			ushort iRate = (ushort)(GetDefNum(sRegen, true)); // in seconds
@@ -489,32 +494,32 @@ bool CChar::Stat_Decrease(STAT_TYPE stat, SKILL_TYPE skill)
 		return false;
 
 	// Check for stats degrade.
-	int iStatSumAvg = Stat_GetLimit(STAT_QTY);
-	int iStatSum = Stat_GetSum() + 1;	// +1 here assuming we are going to have +1 stat at some point thus we are calling this function
+	const uint uiStatSumLimit = Stat_GetSumLimit();
+	const uint uiStatSum = Stat_GetSum() + 1;	// +1 here assuming we are going to have +1 stat at some point thus we are calling this function
 	
 	/*Before there was iStatSum < iStatSumAvg:
 	In that case, if the sum of the player's Stats(iStatSum) was at StatCap - 1 (before adding the +1 above) the selected Stat will not increase
 	unless one of the other stats was set for decreasing (stat arrow down) */
-	if (iStatSum <= iStatSumAvg)		//No need to lower any stat.
+	if (uiStatSum <= uiStatSumLimit)		//No need to lower any stat.
 		return true;
 
-	int iminval;
+	uint uiMinval;
 	if ( skill != SKILL_NONE )
-		iminval = Stat_GetMax(stat);
+        uiMinval = Stat_GetMax(stat);
 	else
-		iminval = Stat_GetAdjusted(stat);
+        uiMinval = Stat_GetAdjusted(stat);
 
 	// We are at a point where our skills can degrade a bit.
-	int iStatSumMax = iStatSumAvg + iStatSumAvg / 4;
-	int iChanceForLoss = Calc_GetSCurve(iStatSumMax - iStatSum, (iStatSumMax - iStatSumAvg) / 4);
+	uint uiStatSumMax = uiStatSumLimit + uiStatSumLimit / 4;
+	const int iChanceForLoss = Calc_GetSCurve(uiStatSumMax - uiStatSumLimit, (uiStatSumMax - uiStatSumLimit) / 4);
 	if ( iChanceForLoss > Calc_GetRandVal(1000) )
 	{
 		// Find the stat that was used least recently and degrade it.
-		int imin = -1;
-		int ival = 0;
+		int iMin = -1;
+		uint uiVal = 0;
 		for ( int i = STAT_STR; i<STAT_BASE_QTY; ++i )
 		{
-			if ( (STAT_TYPE)(i) == stat )
+			if ( (STAT_TYPE)i == stat )
 				continue;
 			if ( Stat_GetLock( (STAT_TYPE)(i) ) != SKILLLOCK_DOWN )
 				continue;
@@ -522,25 +527,25 @@ bool CChar::Stat_Decrease(STAT_TYPE stat, SKILL_TYPE skill)
 			if ( skill != SKILL_NONE )
 			{
 				const CSkillDef * pSkillDef = g_Cfg.GetSkillDef(skill);
-				ival = pSkillDef->m_StatBonus[i];
+				uiVal = pSkillDef->m_StatBonus[i];
 			}
 			else
-				ival = Stat_GetBase( (STAT_TYPE)(i) );
+				uiVal = Stat_GetBase( (STAT_TYPE)(i) );
 
-			if ( iminval > ival )
+			if ( uiMinval > uiVal )
 			{
-				imin = i;
-				iminval = ival;
+				iMin = i;
+                uiMinval = uiVal;
 			}
 		}
 
-		if ( imin < 0 )
+		if ( iMin < 0 )
 			return false;
 
-		short iStatVal = Stat_GetBase((STAT_TYPE)(imin));
-		if ( iStatVal > 10 )
+		ushort uiStatVal = Stat_GetBase((STAT_TYPE)iMin);
+		if ( uiStatVal > 10 )
 		{
-			Stat_SetBase((STAT_TYPE)(imin), (short)(iStatVal - 1));
+			Stat_SetBase((STAT_TYPE)iMin, (ushort)(uiStatVal - 1));
 			return true;
 		}
 	}

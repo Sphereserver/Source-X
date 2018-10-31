@@ -399,13 +399,13 @@ int CChar::NPC_WalkToPoint( bool fRun )
 	if (Can(CAN_C_NONMOVER))
 		return 0;
 
-	int			iDex = Stat_GetAdjusted(STAT_DEX);
-	int			iInt = Stat_GetAdjusted(STAT_INT);
+    const CCharBase	*pCharDef = Char_GetDef();
+    const CPointMap	pTarg = m_Act_p;
 	CPointMap	pMe = GetTopPoint();
-	CPointMap	pTarg = m_Act_p;
+    int iDex = Stat_GetAdjusted(STAT_DEX);
+    int iInt = Stat_GetAdjusted(STAT_INT);
 	DIR_TYPE	Dir = pMe.GetDir(pTarg);
 	bool		bUsePathfinding = false;
-	CCharBase	*pCharDef = Char_GetDef();
 
 	EXC_TRY("NPC_WalkToPoint");
 	if ( Dir >= DIR_QTY )
@@ -1447,7 +1447,7 @@ void CChar::NPC_Act_GoHome()
 			if ( ! IsStatFlag(STATF_CONJURED))
 			{
 				StatFlag_Set( STATF_CONJURED );
-				Stat_SetVal(STAT_STR, -1000);
+				Stat_SetVal(STAT_STR, 0);
 				return;
 			}
 		}

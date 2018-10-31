@@ -577,27 +577,27 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("STRENGTH" ))
 			{
-				pChar->Stat_SetBase(STAT_STR, (short)(ATOI(pArg)));
+				pChar->Stat_SetBase(STAT_STR, (ushort)(ATOI(pArg)));
 			}
 			else if ( s.IsKey("DEXTERITY" ))
 			{
-				pChar->Stat_SetBase(STAT_DEX, (short)(ATOI(pArg)));
+				pChar->Stat_SetBase(STAT_DEX, (ushort)(ATOI(pArg)));
 			}
 			else if ( s.IsKey("INTELLIGENCE" ))
 			{
-				pChar->Stat_SetBase(STAT_INT, (short)(ATOI(pArg)));
+				pChar->Stat_SetBase(STAT_INT, (ushort)(ATOI(pArg)));
 			}
 			else if ( s.IsKey("HITPOINTS" ))
 			{
-				pChar->Stat_SetVal(STAT_STR,(short)(ATOI(pArg)));
+				pChar->Stat_SetVal(STAT_STR,(ushort)(ATOI(pArg)));
 			}
 			else if ( s.IsKey("STAMINA" ))
 			{
-				pChar->Stat_SetVal(STAT_DEX,(short)(ATOI(pArg)));
+				pChar->Stat_SetVal(STAT_DEX,(ushort)(ATOI(pArg)));
 			}
 			else if ( s.IsKey( "MANA" ))
 			{
-				pChar->Stat_SetVal(STAT_INT,(short)(ATOI(pArg)));
+				pChar->Stat_SetVal(STAT_INT,(ushort)(ATOI(pArg)));
 			}
 			else if ( s.IsKeyHead( "SKILL", 5 ))
 			{

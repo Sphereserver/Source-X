@@ -155,7 +155,7 @@ void CSTypedArray<TYPE>::assign_at_grow(size_t nIndex, TYPE newElement)
 // CSTypedArray:: Operations.
 
 template<class TYPE>
-size_t CSTypedArray<TYPE>::BadIndex() const
+inline size_t CSTypedArray<TYPE>::BadIndex() const
 {
     return INTPTR_MAX;
 }

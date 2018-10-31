@@ -129,10 +129,10 @@ void CCharBase::SetFoodType( lpctstr pszFood )
 
   	// Try to determine the real value
 	m_MaxFood = 0;
-	for ( size_t i = 0; i < m_FoodType.size(); i++ )
+	for ( size_t i = 0; i < m_FoodType.size(); ++i )
 	{
 		if ( m_MaxFood < m_FoodType[i].GetResQty())
-			m_MaxFood = (short)(m_FoodType[i].GetResQty());
+			m_MaxFood = (ushort)(m_FoodType[i].GetResQty());
 	}
 }
 
@@ -317,7 +317,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 			m_Desires.Load( s.GetArgStr() );
 			break;
 		case CBC_DEX:
-			m_Dex = s.GetArgSVal();
+			m_Dex = s.GetArgUSVal();
 			break;
 		case CBC_DISPID:
 			return false;
@@ -336,15 +336,15 @@ bool CCharBase::r_LoadVal( CScript & s )
 			}
 			break;
 		case CBC_ID:
-			return SetDispID(static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType( RES_CHARDEF, s.GetArgStr())));
+			return SetDispID((CREID_TYPE)(g_Cfg.ResourceGetIndexType( RES_CHARDEF, s.GetArgStr())));
 		case CBC_INT:
-			m_Int = s.GetArgSVal();
+			m_Int = s.GetArgUSVal();
 			break;
 		case CBC_MAXFOOD:
-			m_MaxFood = s.GetArgSVal();
+			m_MaxFood = s.GetArgUSVal();
 			break;
 		case CBC_MOVERATE:
-			m_iMoveRate = s.GetArgSVal();
+			m_iMoveRate = s.GetArgUSVal();
 			break;
 		case CBC_RESDISPDNID:
 			SetResDispDnId((word)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr())));
@@ -368,7 +368,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 			m_soundNotice = (SOUND_TYPE)(s.GetArgVal());
 			break;
 		case CBC_STR:
-			m_Str = s.GetArgSVal();
+			m_Str = s.GetArgUSVal();
 			break;
 		case CBC_TSPEECH:
 			return( m_Speech.r_LoadVal( s, RES_SPEECH ));

@@ -71,7 +71,7 @@ enum EF_TYPE
 	EF_UsePingServer				= 0x0008000,    // Enable the experimental Ping Server (for showing pings on the server list, uses UDP port 12000)
 	EF_FixCanSeeInClosedConts		= 0x0020000,    // Change CANSEE to return 0 for items inside containers that a client hasn't opened
 #ifndef _MTNETWORK
-	EF_NetworkOutThread				= 0x0800000,    //
+	EF_NetworkOutThread				= 0x0800000     //
 #endif
 };
 
@@ -637,8 +637,11 @@ enum STAT_TYPE
 	STAT_DEX,
 	STAT_BASE_QTY,
 	STAT_FOOD = 3,      // just used as a regen rate. (as karma does not decay)
-
-	STAT_QTY
+    STAT_QTY
+    // MaxHits  (4)
+    // MaxInt   (5)
+    // MaxDex   (6)
+    // MaxFood  (7)
 };
 
 /**
@@ -655,8 +658,8 @@ public:
 	static const char *m_sClassName;
 	CSString m_sName;	// The name of this skill class.
 
-	ushort m_StatSumMax;	// Max Stat sum.
-	uint   m_SkillSumMax;	// Max Skill sum.
+    uint    m_StatSumMax;	// Max Stat sum.
+	uint    m_SkillSumMax;	// Max Skill sum.
 
 	ushort m_StatMax[STAT_BASE_QTY];      // Max Stat value.
 	ushort m_SkillLevelMax[ SKILL_QTY ];  // Max Skill Value.

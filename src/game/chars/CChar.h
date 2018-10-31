@@ -404,22 +404,23 @@ public:
 	lpctstr Food_GetLevelMessage( bool fPet, bool fHappy ) const;
 
 public:
-	short	Stat_GetAdjusted( STAT_TYPE i ) const;
-	void	Stat_SetBase( STAT_TYPE i, short iVal );
-	short	Stat_GetBase( STAT_TYPE i ) const;
-	void	Stat_AddBase( STAT_TYPE i, short iVal );
+	ushort	Stat_GetAdjusted( STAT_TYPE i ) const;
+	void	Stat_SetBase( STAT_TYPE i, ushort uiVal );
+	ushort	Stat_GetBase( STAT_TYPE i ) const;
+	void	Stat_AddBase( STAT_TYPE i, ushort uiVal );
 	void	Stat_AddMod( STAT_TYPE i, short iVal );
 	void	Stat_SetMod( STAT_TYPE i, short iVal );
 	short	Stat_GetMod( STAT_TYPE i ) const;
-	void	Stat_SetVal( STAT_TYPE i, short iVal );
-	short	Stat_GetVal( STAT_TYPE i ) const;
-	void	Stat_SetMax( STAT_TYPE i, short iVal );
-	short	Stat_GetMax( STAT_TYPE i ) const;
-	short	Stat_GetSum() const;
-	short	Stat_GetLimit( STAT_TYPE i ) const;
+	void	Stat_SetVal( STAT_TYPE i, ushort uiVal );
+	ushort	Stat_GetVal( STAT_TYPE i ) const;
+	void	Stat_SetMax( STAT_TYPE i, ushort uiVal );
+	ushort	Stat_GetMax( STAT_TYPE i ) const;
+	uint    Stat_GetSum() const;
+	ushort	Stat_GetLimit( STAT_TYPE i ) const;     // Or STATCAP
+    uint	Stat_GetSumLimit() const;               // Or STATSUM (intended as the maximum value allowed for the sum of the stats)
 	bool Stat_Decrease( STAT_TYPE stat, SKILL_TYPE skill = SKILL_NONE);
 	bool Stats_Regen();
-	ushort Stats_GetRegenVal(STAT_TYPE iStat, bool bGetTicks);
+	ushort Stats_GetRegenVal(STAT_TYPE iStat, bool fGetTicks);  // return value is in seconds
 	SKILLLOCK_TYPE Stat_GetLock(STAT_TYPE stat);
 	void Stat_SetLock(STAT_TYPE stat, SKILLLOCK_TYPE state);
     short GetKarma() const;
@@ -483,7 +484,7 @@ public:
 	void UpdateModeFlag();
 	void UpdateManaFlag() const;
 	void UpdateStamFlag() const;
-	void UpdateRegenTimers( STAT_TYPE iStat, short iVal);
+	void UpdateRegenTimers( STAT_TYPE iStat, int64 iValMsecs);
 	ANIM_TYPE GenerateAnimate(ANIM_TYPE action, bool fTranslate = true, bool fBackward = false, byte iFrameDelay = 0, byte iAnimLen = 7);
 	bool UpdateAnimate(ANIM_TYPE action, bool fTranslate = true, bool fBackward = false, byte iFrameDelay = 0, byte iAnimLen = 7);
 
@@ -1037,7 +1038,7 @@ public:
 
 	//
 	bool Player_OnVerb( CScript &s, CTextConsole * pSrc );
-	void InitPlayer( CClient * pClient, const char * pszCharname, bool bFemale, RACE_TYPE rtRace, short wStr, short wDex, short wInt,
+	void InitPlayer( CClient * pClient, const char * pszCharname, bool bFemale, RACE_TYPE rtRace, ushort wStr, ushort wDex, ushort wInt,
 		PROFESSION_TYPE iProf, SKILL_TYPE skSkill1, ushort uiSkillVal1, SKILL_TYPE skSkill2, ushort uiSkillVal2, SKILL_TYPE skSkill3, ushort uiSkillVal3, SKILL_TYPE skSkill4, ushort uiSkillVal4,
 		HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, ITEMID_TYPE idFace, int iStartLoc );
 	bool ReadScriptTrig(CCharBase * pCharDef, CTRIG_TYPE trig, bool bVendor = false);

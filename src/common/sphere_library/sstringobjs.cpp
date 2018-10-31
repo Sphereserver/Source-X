@@ -87,7 +87,7 @@ bool AbstractString::startsWith(const char *s)
 
 bool AbstractString::startsWithHead(const char *s)
 {
-	for ( int i = 0; ; i++ )
+	for ( int i = 0; ; ++i )
 	{
 		char ch1 = (uchar)(tolower(m_buf[0]));
 		char ch2 = (uchar)(tolower(s[0]));

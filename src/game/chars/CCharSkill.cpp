@@ -153,7 +153,7 @@ ushort CChar::Skill_GetAdjusted( SKILL_TYPE skill ) const
 
 	if (pSkillDef != nullptr)
 	{
-		ushort uiPureBonus =( pSkillDef->m_StatBonus[STAT_STR] * Stat_GetAdjusted(STAT_STR) ) +
+		uint uiPureBonus =( pSkillDef->m_StatBonus[STAT_STR] * Stat_GetAdjusted(STAT_STR) ) +
 							( pSkillDef->m_StatBonus[STAT_INT] * Stat_GetAdjusted(STAT_INT) ) +
 							( pSkillDef->m_StatBonus[STAT_DEX] * Stat_GetAdjusted(STAT_DEX) );
 
@@ -415,8 +415,8 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 	////////////////////////////////////////////////////////
 	// Dish out any stat gains - even for failures.
 
-	short iStatSum = Stat_GetSum();
-	short iStatCap = Stat_GetLimit(STAT_QTY);
+	uint uiStatSum = Stat_GetSum();
+	uint uiStatSumMax = Stat_GetSumLimit();
 
 	// Stat effects are unrelated to advance in skill !
 	for ( int i = STAT_STR; i < STAT_BASE_QTY; ++i )
@@ -428,26 +428,26 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 		if ( Stat_GetLock((STAT_TYPE)i) != SKILLLOCK_UP)
 			continue;
 
-		short iStatVal = Stat_GetBase((STAT_TYPE)i);
-		if ( iStatVal <= 0 )	// some odd condition
+		ushort uiStatVal = Stat_GetBase((STAT_TYPE)i);
+		if ( uiStatVal <= 0 )	// some odd condition
 			continue;
 		
-		/*Before there was iStatSum >= iStatCap:
+		/*Before there was uiStatSum >= uiStatSumMax:
 		That condition prevented the decrease of stats when the player's Stats were equal to the StatCap */
-		if (iStatSum > iStatCap)	// stat cap already reached
+		if (uiStatSum > uiStatSumMax)	// stat cap already reached
 			break;
 
-		short iStatMax = Stat_GetLimit((STAT_TYPE)i);
-		if ( iStatVal >= iStatMax )
+		ushort uiStatMax = Stat_GetLimit((STAT_TYPE)i);
+		if ( uiStatVal >= uiStatMax )
 			continue;	// nothing grows past this. (even for NPC's)
 
 		// You will tend toward these stat vals if you use this skill a lot
-		byte iStatTarg = pSkillDef->m_Stat[i];
-		if ( iStatVal >= iStatTarg )
+		byte bStatTarg = pSkillDef->m_Stat[i];
+		if ( uiStatVal >= bStatTarg )
 			continue;		// you've got higher stats than this skill is good for
 
 		// Adjust the chance by the percent of this that the skill uses
-		difficulty = IMulDiv( iStatVal, 1000, iStatTarg );
+		difficulty = IMulDiv( uiStatVal, 1000, bStatTarg );
 		iChance = g_Cfg.m_StatAdv[i].GetChancePercent( difficulty );
 		if ( pSkillDef->m_StatPercent )
 			iChance = ( iChance * pSkillDef->m_StatBonus[i] * pSkillDef->m_StatPercent ) / 10000;
@@ -457,11 +457,11 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 
 		bool decrease = Stat_Decrease((STAT_TYPE)i, skill);
 		if (decrease)
-			iStatSum = Stat_GetSum();
+			uiStatSum = Stat_GetSum();
 
 		if ( (iChance > Calc_GetRandVal(1000)) && decrease )
 		{
-			Stat_SetBase((STAT_TYPE)i, (iStatVal + 1));
+			Stat_SetBase((STAT_TYPE)i, (uiStatVal + 1));
 			break;
 		}
 	}

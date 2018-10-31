@@ -449,7 +449,7 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 int CChar::GetHealthPercent() const
 {
 	ADDTOCALLSTACK("CChar::GetHealthPercent");
-	short str = Stat_GetAdjusted(STAT_STR);
+	ushort str = Stat_GetAdjusted(STAT_STR);
 	if ( !str )
 		return 0;
 	return IMulDiv(Stat_GetVal(STAT_STR), 100, str);

@@ -208,17 +208,17 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
 {
 	const CCharBase * otherDefinition = other->Char_GetDef();
 
-	short strength = other->Stat_GetAdjusted(STAT_STR);
-	if (strength < 0)
-		strength = 0;
+	ushort strength = other->Stat_GetAdjusted(STAT_STR);
+	//if (strength < 0)
+	//	strength = 0;
 
-	short dexterity = other->Stat_GetAdjusted(STAT_DEX);
-	if (dexterity < 0)
-		dexterity = 0;
+	ushort dexterity = other->Stat_GetAdjusted(STAT_DEX);
+	//if (dexterity < 0)
+	//	dexterity = 0;
 
-	short intelligence = other->Stat_GetAdjusted(STAT_INT);
-	if (intelligence < 0)
-		intelligence = 0;
+	ushort intelligence = other->Stat_GetAdjusted(STAT_INT);
+	//if (intelligence < 0)
+	//	intelligence = 0;
 
 	writeBool(otherDefinition->IsFemale());
 	writeInt16((word)(strength));
@@ -281,10 +281,11 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
 
 	if (version >= 2) // T2A attributes
 	{
-		short statcap = other->Stat_GetLimit(STAT_QTY);
-		if (statcap < 0) statcap = 0;
+		uint statcap = other->Stat_GetSumLimit();
+		//if (statcap < 0)
+        //    statcap = 0;
 
-		writeInt16(statcap);
+		writeInt16((word)statcap);
 	}
 
 	if (version >= 3) // Renaissance attributes

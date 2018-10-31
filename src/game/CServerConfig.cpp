@@ -3995,6 +3995,8 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 	}
 }
 
+#undef catresname
+
 bool CServerConfig::LoadIni( bool fTest )
 {
 	ADDTOCALLSTACK("CServerConfig::LoadIni");
