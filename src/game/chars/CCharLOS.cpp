@@ -377,9 +377,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 							pDupeDef = CItemBaseDupe::GetDupeRef((ITEMID_TYPE)(pStatic->GetDispID()));
 							if ( !pDupeDef )
 							{
-								g_Log.EventDebug("Failed to get non-parent reference (static) (DispID 0%x) (X: %d Y: %d Z: %d)\n", pStatic->GetDispID(), ptNow.m_x, ptNow.m_y, pStatic->m_z);
-								wTFlags = pItemDef->GetTFlags();
-								Height = pItemDef->GetHeight();
+								g_Log.EventDebug("AdvancedLoS: Failed to get non-parent reference (static) (DispID 0%x) (X: %d Y: %d Z: %hhd M: %hhu)\n", pStatic->GetDispID(), ptNow.m_x, ptNow.m_y, pStatic->m_z, ptNow.m_map);
 							}
 							else
 							{
@@ -476,12 +474,19 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 							pDupeDef = CItemBaseDupe::GetDupeRef((ITEMID_TYPE)(pItem->GetDispID()));
 							if ( !pDupeDef )
 							{
-								g_Log.EventDebug("Failed to get non-parent reference (dynamic) (DispID 0%x) (X: %d Y: %d Z: %d)\n", pItem->GetDispID(), ptNow.m_x, ptNow.m_y, pItem->GetUnkZ());
-								wTFlags = pItemDef->GetTFlags();
-								Height = pItemDef->GetHeight();
+                                // Not an error: i have changed the DISPID of the item.
+                                CItemBase* pParentDef = CItemBase::FindItemBase(pItem->GetDispID());
+                                if (pParentDef)
+                                {
+                                    wTFlags = pParentDef->GetTFlags();
+                                    Height = pParentDef->GetHeight();
+                                }
+                                else
+                                    g_Log.EventDebug("AdvancedLoS: Failed to get reference (dynamic): non-dupe, baseless dispid (DispID 0%x) (X: %d Y: %d Z: %hhd M: %hhu)\n", pItem->GetDispID(), ptNow.m_x, ptNow.m_y, pItem->GetUnkZ(), ptNow.m_map);
 							}
 							else
 							{
+                                // It's a dupe item
 								wTFlags = pDupeDef->GetTFlags();
 								Height = pDupeDef->GetHeight();
 							}
@@ -588,9 +593,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 									pDupeDef = CItemBaseDupe::GetDupeRef((ITEMID_TYPE)(pMultiItem->GetDispID()));
 									if ( !pDupeDef )
 									{
-										g_Log.EventDebug("Failed to get non-parent reference (multi) (DispID 0%x) (X: %d Y: %d Z: %d)\n", pMultiItem->GetDispID(), ptNow.m_x, ptNow.m_y, pMultiItem->m_dz + pItem->GetTopPoint().m_z);
-										wTFlags = pItemDef->GetTFlags();
-										Height = pItemDef->GetHeight();
+										g_Log.EventDebug("AdvancedLoS: Failed to get non-parent reference (multi) (DispID 0%x) (X: %d Y: %d Z: %hhd M: %hhu)\n", pMultiItem->GetDispID(), ptNow.m_x, ptNow.m_y, pMultiItem->m_dz + pItem->GetTopPoint().m_z, ptNow.m_map);
 									}
 									else
 									{
