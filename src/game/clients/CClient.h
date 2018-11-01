@@ -134,18 +134,18 @@ private:
 	} m_BfAntiCheat;
 
 	// Promptconsole
-	CLIMODE_TYPE m_Prompt_Mode;			// type of prompt
-	CUID m_Prompt_Uid;					// context uid
-	CSString m_Prompt_Text;				// text (i.e. callback function)
+	CLIMODE_TYPE m_Prompt_Mode;		// type of prompt
+	CUID m_Prompt_Uid;				// context uid
+	CSString m_Prompt_Text;			// text (i.e. callback function)
 
 public:
-	CONNECT_TYPE m_iConnectType;		// what sort of a connection is this ?
-	CAccount * m_pAccount;				// The account name. we logged in on
+	CONNECT_TYPE m_iConnectType;	// what sort of a connection is this ?
+	CAccount * m_pAccount;			// The account name. we logged in on
 
-	int64 m_timeLogin;			// World clock of login time. "LASTCONNECTTIME"
-	int64 m_timeLastEvent;		// Last time we got event from client.
-	int64 m_timeLastEventWalk;	// Last time we got a walk event from client
-	int64 m_timeNextEventWalk;			// Fastwalk prevention: only allow more walk requests after this timer
+	int64 m_timeLogin;			    // World clock of login time. "LASTCONNECTTIME"
+	int64 m_timeLastEvent;		    // Last time we got event from client.
+	int64 m_timeLastEventWalk;	    // Last time we got a walk event from client
+	int64 m_timeNextEventWalk;		// Fastwalk prevention: only allow more walk requests after this timer
 
 	// GM only stuff.
 	CGMPage * m_pGMPage;	// Current GM page we are connected to.

@@ -1760,7 +1760,7 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 	ADDTOCALLSTACK("CClient::Event_Talk");
 
 	CAccount *pAccount = GetAccount();
-	if ( !pAccount || !m_pChar )
+	ASSERT(pAccount && m_pChar && m_pChar->m_pPlayer);
 
 	if ( mode < 0 || mode > 14 ) // Less or greater is an exploit
 		return;
@@ -1773,8 +1773,8 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 		wHue = HUE_SAY_DEF;
 
 	pAccount->m_lang.Set( nullptr );	// default
-	if ( (mode == TALKMODE_SYSTEM) && (m_pChar->m_SpeechHueOverride == HUE_SAY_DEF) )
-		m_pChar->m_SpeechHue = wHue;
+	if ( (mode == TALKMODE_SYSTEM) && !m_pChar->m_SpeechHueOverride )
+		m_pChar->m_pPlayer->m_SpeechHue = wHue;
 
 	// Rip out the unprintables first
 	tchar szText[MAX_TALK_BUFFER];
@@ -1841,7 +1841,7 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 		if ( !fCancelSpeech && ( len <= 128 ) ) // From this point max 128 chars
 		{
 			// For both client ASCII and Unicode speech requests, Sphere sends a Unicode speech.
-			m_pChar->SpeakUTF8(z, wHue, static_cast<TALKMODE_TYPE>(mode), m_pChar->m_fonttype, GetAccount()->m_lang);
+			m_pChar->SpeakUTF8(z, wHue, (TALKMODE_TYPE)mode, m_pChar->m_fonttype, GetAccount()->m_lang);
 			Event_Talk_Common(static_cast<tchar*>(z));
 		}
 	}
@@ -1857,8 +1857,7 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 	// mode == TALKMODE_SYSTEM if coming from player talking.
 
 	CAccount *pAccount = GetAccount();
-	if ( !pAccount || !m_pChar )	// this should not happen
-		return;
+    ASSERT(pAccount && m_pChar && m_pChar->m_pPlayer);
 
 	if ( iTextLen <= 0 )
 		return;
@@ -1874,8 +1873,8 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 		wHue = HUE_SAY_DEF;
 
 	pAccount->m_lang.Set(pszLang);
-	if ( (mMode == TALKMODE_SYSTEM) && (m_pChar->m_SpeechHueOverride == HUE_SAY_DEF) )
-		m_pChar->m_SpeechHue = wHue;
+	if ( (mMode == TALKMODE_SYSTEM) && (!m_pChar->m_SpeechHueOverride) )
+		m_pChar->m_pPlayer->m_SpeechHue = wHue;
 
 	tchar szText[MAX_TALK_BUFFER];
 	const nword * puText = wszText;

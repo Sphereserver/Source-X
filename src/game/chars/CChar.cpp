@@ -248,8 +248,7 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 	m_UIDLastNewItem.InitUID();
 	m_dirFace = DIR_SE;
 	m_fonttype = FONT_NORMAL;
-	m_SpeechHue = HUE_TEXT_DEF;
-	m_SpeechHueOverride = HUE_SAY_DEF;
+	m_SpeechHueOverride = 0;
     _iMaxHouses = g_Cfg._iMaxHousesPlayer;
     _iMaxShips = g_Cfg._iMaxShipsPlayer;
     _pMultiStorage = nullptr;
@@ -907,7 +906,6 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 
 	m_dirFace = pChar->m_dirFace;
 	m_fonttype = pChar->m_fonttype;
-	m_SpeechHue = pChar->m_SpeechHue;
 	m_SpeechHueOverride = pChar->m_SpeechHueOverride;
 
 	m_height = pChar->m_height;
@@ -1480,9 +1478,9 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 			Skill_SetBase(skSkill4, uiSkillVal4 * 10);
 	}
 
-	m_fonttype			= FONT_NORMAL;		// Set speech font type
-	m_SpeechHue			= HUE_TEXT_DEF;		// Set default client-sent speech color
-	m_SpeechHueOverride = HUE_SAY_DEF;		// Set no server-side speech color override
+    m_pPlayer->m_SpeechHue = HUE_TEXT_DEF;	// Set default client-sent speech color
+	m_fonttype			 = FONT_NORMAL;		// Set speech font type
+	m_SpeechHueOverride  = 0;		        // Set no server-side speech color override
 	m_sTitle.Empty();						// Set title
 
 	GetBank(LAYER_BANKBOX);			// Create bankbox
@@ -2779,9 +2777,6 @@ do_default:
 		case CHC_FONT:
 			sVal.FormatVal( m_fonttype );
 			break;
-		case CHC_SPEECHCOLOR:
-			sVal.FormatWVal( m_SpeechHue );
-			break;
 		case CHC_SPEECHCOLOROVERRIDE:
 			sVal.FormatWVal( m_SpeechHueOverride );
 			break;
@@ -3300,14 +3295,7 @@ bool CChar::r_LoadVal( CScript & s )
 			if ( m_fonttype < 0 || m_fonttype >= FONT_QTY )
 				m_fonttype = FONT_NORMAL;
 			break;
-		case CHC_SPEECHCOLOR:
-			if ( m_pPlayer )	// read-only on players, set SPEECHCOLOROVERRIDE instead
-				return false;
-			m_SpeechHue = (HUE_TYPE)s.GetArgWVal();
-			break;
 		case CHC_SPEECHCOLOROVERRIDE:
-			if ( !m_pPlayer )	// valid only for players
-				return false;
 			m_SpeechHueOverride = (HUE_TYPE)s.GetArgWVal();
 			break;
 		case CHC_FOOD:
@@ -3536,9 +3524,7 @@ void CChar::r_Write( CScript & s )
 		s.WriteKey("TITLE", m_sTitle);
 	if ( m_fonttype != FONT_NORMAL )
 		s.WriteKeyVal("FONT", m_fonttype);
-	if ( m_SpeechHue != HUE_TEXT_DEF )
-		s.WriteKeyVal("SPEECHCOLOR", m_SpeechHue);
-	if (m_SpeechHueOverride != HUE_SAY_DEF)
+	if (m_SpeechHueOverride)
 		s.WriteKeyVal("SPEECHCOLOROVERRIDE", m_SpeechHueOverride);
 	if ( m_dirFace != DIR_SE )
 		s.WriteKeyVal("DIR", m_dirFace);

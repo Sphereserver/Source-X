@@ -153,12 +153,12 @@ ushort CChar::Stat_GetMax( STAT_TYPE i ) const
 			if ( (g_Cfg.m_iRacialFlags & RACIALF_ELF_WISDOM) && IsElf() )
                 uiVal += 20;		// elves always have +20 max mana (Wisdom racial trait)
 		}
-		return (uiVal < 0 ? (m_pPlayer ? 1 : 0) : uiVal);
+		return uiVal;
 	}
     uiVal = m_Stat[i].m_max;
 	if ( i >= STAT_BASE_QTY )
         uiVal += m_Stat[i].m_mod;
-	return (uiVal < 0 ? (m_pPlayer ? 1 : 0) : uiVal);
+	return uiVal;
 }
 
 uint CChar::Stat_GetSum() const

@@ -142,8 +142,7 @@ public:
 
 	// Speech
 	FONT_TYPE m_fonttype;			// speech font to use (client send this to server, but it's not used)
-	HUE_TYPE m_SpeechHue;			// speech hue to use (sent by client)
-	HUE_TYPE m_SpeechHueOverride;	// speech hue to use (ignore the one sent by the client and use this)
+	HUE_TYPE m_SpeechHueOverride;	// speech hue to use (ignore the one sent by the client, if a player, and from the defname and use this)
 
 	// In order to revert to original Hue and body.
 	CREID_TYPE m_prev_id;		// Backup of body type for ghosts and poly

@@ -67,8 +67,6 @@ bool CChar::SetPlayerAccount(CAccount *pAccount)
 	return true;
 }
 
-
-
 bool CChar::SetPlayerAccount( lpctstr pszAccName )
 {
 	ADDTOCALLSTACK("CChar::SetPlayerAccount");
@@ -109,6 +107,7 @@ bool CChar::SetNPCBrain( NPCBRAIN_TYPE NPCBrain )
 
 CCharPlayer::CCharPlayer(CChar *pChar, CAccount *pAccount) : m_pAccount(pAccount)
 {
+    m_SpeechHue = 0;
 	m_wDeaths = m_wMurders = 0;
 	m_speedMode = 0;
 	m_pflag = 0;
@@ -279,6 +278,9 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
 		case CPC_ACCOUNT:
 			sVal = GetAccount()->GetName();
 			return true;
+        case CPC_SPEECHCOLOR:
+            sVal.FormatWVal( m_SpeechHue );
+            return true;
 		case CPC_DEATHS:
 			sVal.FormatVal( m_wDeaths );
 			return true;
@@ -426,6 +428,9 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 
 	switch ( FindTableHeadSorted( s.GetKey(), sm_szLoadKeys, CPC_QTY ))
 	{
+        case CPC_SPEECHCOLOR:
+            m_SpeechHue = (HUE_TYPE)s.GetArgWVal();
+            break;
 		case CPC_DEATHS:
 			m_wDeaths = (word)(s.GetArgVal());
 			return true;
@@ -519,6 +524,8 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 		s.WriteKeyVal("SPEEDMODE", m_speedMode);
 	if (( GetAccount()->GetResDisp() >= RDS_KR ) && m_bKrToolbarEnabled )
 		s.WriteKeyVal("KRTOOLBARSTATUS", m_bKrToolbarEnabled);
+    if ( m_SpeechHue )
+        s.WriteKeyVal("SPEECHCOLOR", m_SpeechHue);
 
 	EXC_SET_BLOCK("saving dynamic speech");
 	if (m_Speech.size() > 0 )

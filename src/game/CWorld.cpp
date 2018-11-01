@@ -2147,14 +2147,11 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pwText, 
 
 	if (mode != TALKMODE_SPELL)
 	{
-		if (pSrcChar)
+		if (pSrcChar && pSrcChar->m_SpeechHueOverride)
 		{
 			// This hue overwriting part for ASCII text isn't done in CWorld::Speak but in CClient::AddBarkParse.
-			// If a specific hue is not given, use SpeechHue (NPC) or SpeechHueOverride (PG).
-			if (pSrcChar->m_pNPC && (pSrcChar->m_SpeechHue != HUE_TEXT_DEF))
-				wHue = pSrcChar->m_SpeechHue;
-			else if (!pSrcChar->m_pNPC && (pSrcChar->m_SpeechHueOverride != HUE_SAY_DEF))
-					wHue = pSrcChar->m_SpeechHueOverride;
+			// If a specific hue is not given, use SpeechHueOverride.
+			wHue = pSrcChar->m_SpeechHueOverride;
 		}
 	}
 

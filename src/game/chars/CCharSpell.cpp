@@ -2998,10 +2998,12 @@ int CChar::Spell_CastStart()
 	int64 WOPColor;
 	if (g_Cfg.m_iWordsOfPowerColor > 0)
 		WOPColor = g_Cfg.m_iWordsOfPowerColor;
-	else if (m_SpeechHueOverride != HUE_SAY_DEF)
+	else if (m_SpeechHueOverride)
 		WOPColor = m_SpeechHueOverride;
-	else
-		WOPColor = m_SpeechHue;
+	else if (m_pPlayer && m_pPlayer->m_SpeechHue)
+		WOPColor = m_pPlayer->m_SpeechHue;
+    else
+        WOPColor = HUE_TEXT_DEF;
 	Args.m_VarsLocal.SetNum("WOPColor", WOPColor, true);
 	Args.m_VarsLocal.SetNum("WOPFont", WOPFont, true);
 

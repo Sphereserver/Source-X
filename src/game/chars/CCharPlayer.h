@@ -38,6 +38,8 @@ public:
 
 	CSString m_sProfile;	// limited to SCRIPT_MAX_LINE_LEN-16
 
+    HUE_TYPE m_SpeechHue;			// speech hue to use (sent by client)
+
 	word m_wMurders;		// Murder count.
 	word m_wDeaths;			// How many times have i died ?
 	byte m_speedMode;		// speed mode (0x0 = Normal movement, 0x1 = Fast movement, 0x2 = Slow movement, 0x3 and above = Hybrid movement)

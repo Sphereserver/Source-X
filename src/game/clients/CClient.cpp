@@ -34,7 +34,6 @@ CClient::CClient(NetState* state)
 
 	m_Crypt.SetClientVer( g_Serv.m_ClientVersion );
 	m_pAccount = nullptr;
-
 	m_pChar = nullptr;
 	m_pGMPage = nullptr;
 

@@ -780,24 +780,11 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	{
 		if ( pSrcChar )
 		{
-			// If a specific hue is not given, use SpeechHue (NPC) or SpeechHueOverride (PG);
-			//	if they aren't enabled (default value), use the defaultHue got from the defname.
-			if (pSrcChar->m_pNPC)
-			{
-				if (pSrcChar->m_SpeechHue != HUE_TEXT_DEF)
-					Args[0] = pSrcChar->m_SpeechHue;
+			// If a specific hue is not given, use SpeechHueOverride (if set), otherwise use the defaultHue got from the defname.
+				if (pSrcChar->m_SpeechHueOverride && (mode != TALKMODE_EMOTE))
+					Args[0] = (word)pSrcChar->m_SpeechHueOverride;
 				else if (Args[0] == HUE_TEXT_DEF)
-					Args[0] = (word)defaultHue;
-			}
-			else if (!pSrcChar->m_pNPC)
-			{
-				if (pSrcChar->m_SpeechHueOverride != HUE_SAY_DEF)
-					Args[0] = pSrcChar->m_SpeechHueOverride;
-				else if ((Args[0] == HUE_TEXT_DEF) && (mode == TALKMODE_EMOTE))
-					Args[0] = (word)defaultHue;
-				else if (Args[0] == HUE_SAY_DEF)
-					Args[0] = (word)defaultHue;
-			}
+                    Args[0] = (word)defaultHue;
 		}
 
 		if ( Args[1] == FONT_NORMAL )
