@@ -9,7 +9,7 @@ CCItemDamageable::CCItemDamageable(CObjBase * pLink) : CComponent(COMP_ITEMDAMAG
 {
     _iCurHits = 0;
     _iMaxHits = 0;
-    g_World.m_ObjStatusUpdates.push_back(pLink);
+    g_World.m_ObjStatusUpdates.emplace_back(pLink);
 }
 
 CCItemDamageable::~CCItemDamageable()
@@ -159,8 +159,8 @@ bool CCItemDamageable::r_WriteVal(lpctstr pszKey, CSString & s, CTextConsole * p
 void CCItemDamageable::r_Write(CScript & s)
 {
     ADDTOCALLSTACK("CCItemDamageable::r_Write");
-    word iCur = GetCurHits();
-    word iMax = GetMaxHits();
+    const word iCur = GetCurHits();
+    const word iMax = GetMaxHits();
     if (iCur > 0)
     {
         s.WriteKeyVal("HITS", iCur);
@@ -200,5 +200,5 @@ void CCItemDamageable::Copy(const CComponent * target)
 CCRET_TYPE CCItemDamageable::OnTick()
 {
     ADDTOCALLSTACK("CCItemDamageable::OnTick");
-    return CCRET_CONTINUE;  // Skip code here, OnTick is done separatelly from OnTickStatsUpdate
+    return CCRET_CONTINUE;  // Skip code here, OnTick is done separately from OnTickStatsUpdate
 }

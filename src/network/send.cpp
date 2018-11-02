@@ -158,7 +158,7 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 	{
 		// Send real (not percentual) hitpoints if these infos regard myself
 		writeInt16((word)(objectChar->Stat_GetVal(STAT_STR)));
-		writeInt16((word)(objectChar->Stat_GetMax(STAT_STR)));
+		writeInt16((word)(objectChar->Stat_GetMaxAdjusted(STAT_STR)));
 		writeBool(canRename);
 		writeByte(version);
 		WriteVersionSpecific(target, objectChar, version);
@@ -171,7 +171,7 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 		{
 			canRename = objectChar->IsOwnedBy(character);
 			iHitsCurrent = (word)objectChar->Stat_GetVal(STAT_STR);
-            iHitsMax = (word)objectChar->Stat_GetMax(STAT_STR);
+            iHitsMax = (word)objectChar->Stat_GetMaxAdjusted(STAT_STR);
 		}
 		else
 		{
@@ -225,9 +225,9 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
 	writeInt16((word)(dexterity));
 	writeInt16((word)(intelligence));
 	writeInt16((word)(other->Stat_GetVal(STAT_DEX)));
-	writeInt16((word)(other->Stat_GetMax(STAT_DEX)));
+	writeInt16((word)(other->Stat_GetMaxAdjusted(STAT_DEX)));
 	writeInt16((word)(other->Stat_GetVal(STAT_INT)));
-	writeInt16((word)(other->Stat_GetMax(STAT_INT)));
+	writeInt16((word)(other->Stat_GetMaxAdjusted(STAT_INT)));
 
     if (g_Cfg.m_iFeatureTOL & FEATURE_TOL_VIRTUALGOLD)
     {
@@ -3048,13 +3048,13 @@ PacketHealthUpdate::PacketHealthUpdate(const CChar* character, bool full) : Pack
 
 	if ( full )
 	{
-		writeInt16((word)(character->Stat_GetMax(STAT_STR)));
+		writeInt16((word)(character->Stat_GetMaxAdjusted(STAT_STR)));
 		writeInt16((word)(character->Stat_GetVal(STAT_STR)));
 	}
 	else
 	{
 		writeInt16(100);
-		short iStatMax = character->Stat_GetMax(STAT_STR);
+		short iStatMax = character->Stat_GetMaxAdjusted(STAT_STR);
 		writeInt16((word)((character->Stat_GetVal(STAT_STR) * 100) / maximum(iStatMax, 1)));
 	}
 }
@@ -3075,13 +3075,13 @@ PacketManaUpdate::PacketManaUpdate(const CChar* character, bool full) : PacketSe
 
 	if ( full )
 	{
-		writeInt16((word)(character->Stat_GetMax(STAT_INT)));
+		writeInt16((word)(character->Stat_GetMaxAdjusted(STAT_INT)));
 		writeInt16((word)(character->Stat_GetVal(STAT_INT)));
 	}
 	else
 	{
 		writeInt16(100);
-		short iStatMax = character->Stat_GetMax(STAT_INT);
+		short iStatMax = character->Stat_GetMaxAdjusted(STAT_INT);
 		writeInt16((word)((character->Stat_GetVal(STAT_INT) * 100) / maximum(iStatMax, 1)));
 	}
 }
@@ -3102,13 +3102,13 @@ PacketStaminaUpdate::PacketStaminaUpdate(const CChar* character, bool full) : Pa
 
 	if ( full )
 	{
-		writeInt16((word)(character->Stat_GetMax(STAT_DEX)));
+		writeInt16((word)(character->Stat_GetMaxAdjusted(STAT_DEX)));
 		writeInt16((word)(character->Stat_GetVal(STAT_DEX)));
 	}
 	else
 	{
 		writeInt16(100);
-		short iStatMax = character->Stat_GetMax(STAT_DEX);
+		short iStatMax = character->Stat_GetMaxAdjusted(STAT_DEX);
 		writeInt16((word)((character->Stat_GetVal(STAT_DEX) * 100) / maximum(iStatMax, 1)));
 	}
 }

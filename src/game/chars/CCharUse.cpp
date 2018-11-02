@@ -795,12 +795,15 @@ void CChar::Use_EatQty( CItem * pFood, short iQty )
 	if ( iRestore < 1 )
 		iRestore = 1;
 
-	short iSpace = Stat_GetMax(STAT_FOOD) - Stat_GetVal(STAT_FOOD);
+	int iSpace = Stat_GetMaxAdjusted(STAT_FOOD) - Stat_GetVal(STAT_FOOD);
 	if ( iSpace <= 0 )
 		return;
 
-	if ( iQty > 1 && (iRestore * iQty > iSpace) )
-		iQty = maximum(1, iSpace / iRestore);
+	if ( (iQty > 1) && ((iRestore * iQty) > iSpace) )
+    {
+		iQty = short(iSpace / iRestore);
+        iQty = maximum(1, iQty);
+    }
 
 	switch ( pFood->GetType() )
 	{
@@ -835,7 +838,8 @@ bool CChar::Use_Eat( CItem * pItemFood, short iQty )
 		return false;
 	}
 
-	if ( Stat_GetMax(STAT_FOOD) == 0 )
+    ushort iFoodMax = Stat_GetMaxAdjusted(STAT_FOOD);
+	if ( iFoodMax == 0 )
 	{
 		SysMessageDefault(DEFMSG_FOOD_CANTEAT);
 		return false;
@@ -848,7 +852,7 @@ bool CChar::Use_Eat( CItem * pItemFood, short iQty )
 		return false;
 	}
 
-	if ( Stat_GetVal(STAT_FOOD) >= Stat_GetMax(STAT_FOOD) )
+	if ( Stat_GetVal(STAT_FOOD) >= iFoodMax )
 	{
 		SysMessageDefault(DEFMSG_FOOD_CANTEATF);
 		return false;
@@ -857,7 +861,7 @@ bool CChar::Use_Eat( CItem * pItemFood, short iQty )
 	Use_EatQty(pItemFood, iQty);
 
 	lpctstr pMsg;
-	int index = IMulDiv(Stat_GetVal(STAT_FOOD), 5, Stat_GetMax(STAT_FOOD));
+	int index = IMulDiv(Stat_GetVal(STAT_FOOD), 5, iFoodMax);
 	switch ( index )
 	{
 		case 0:
@@ -958,7 +962,7 @@ void CChar::Use_Drink( CItem * pItem )
 		if ( iRestore < 1 )
 			iRestore = 1;
 
-		if ( Stat_GetVal(STAT_FOOD) >= Stat_GetMax(STAT_FOOD) )
+		if ( Stat_GetVal(STAT_FOOD) >= Stat_GetMaxAdjusted(STAT_FOOD) )
 		{
 			SysMessageDefault(DEFMSG_DRINK_FULL);
 			return;

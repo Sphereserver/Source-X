@@ -986,7 +986,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 		// Racial Bonus (Berserk), gargoyles gains +15% Damage Increase per each 20 HP lost
 		if ((g_Cfg.m_iRacialFlags & RACIALF_GARG_BERSERK) && IsGargoyle())
 		{
-			int iStrDiff = (Stat_GetMax(STAT_STR) - Stat_GetVal(STAT_STR));
+			int iStrDiff = (Stat_GetMaxAdjusted(STAT_STR) - Stat_GetVal(STAT_STR));
 			iDmgBonus += minimum(15 * (iStrDiff / 20), 60);		// value is capped at 60%
 		}
 
@@ -1865,7 +1865,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		if ( iHitLifeLeech )
 		{
 			iHitLifeLeech = (short)(Calc_GetRandVal2(0, (iDmg * iHitLifeLeech * 30) / 10000));	// leech 0% ~ 30% of damage value
-			UpdateStatVal(STAT_STR, iHitLifeLeech, Stat_GetMax(STAT_STR));
+			UpdateStatVal(STAT_STR, iHitLifeLeech);
 			bMakeLeechSound = true;
 		}
 
@@ -1873,13 +1873,13 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		if ( iHitManaLeech )
 		{
 			iHitManaLeech = (short)(Calc_GetRandVal2(0, (iDmg * iHitManaLeech * 40) / 10000));	// leech 0% ~ 40% of damage value
-			UpdateStatVal(STAT_INT, iHitManaLeech, Stat_GetMax(STAT_INT));
+			UpdateStatVal(STAT_INT, iHitManaLeech);
 			bMakeLeechSound = true;
 		}
 
 		if ( GetDefNum("HitLeechStam", true) > Calc_GetRandLLVal(100) )
 		{
-			UpdateStatVal(STAT_DEX, (short)(iDmg), Stat_GetMax(STAT_DEX));	// leech 100% of damage value
+			UpdateStatVal(STAT_DEX, (short)iDmg);	// leech 100% of damage value
 			bMakeLeechSound = true;
 		}
 
@@ -1900,7 +1900,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		if ( iManaDrain > 0 )
 		{
 			pCharTarg->UpdateStatVal(STAT_INT, iTargMana - iManaDrain);
-			UpdateStatVal(STAT_INT, iManaDrain, Stat_GetMax(STAT_INT));
+			UpdateStatVal(STAT_INT, iManaDrain);
 			bMakeLeechSound = true;
 		}
 

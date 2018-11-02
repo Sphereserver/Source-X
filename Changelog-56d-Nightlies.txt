@@ -1266,3 +1266,7 @@ Added: Now Sectors store their adjacent sectors:
 	the dragging is cancelled but the corpse will take the appearance of an ogre until a new UPDATE.
 - Changed: Default value for SpeechColorOverride changed from SAY_DEF_COLOR (52) to 0. There aren't any compatibility issues with previous save files, since SpeechColorOverride was only saved if different from the default value (Issue #134).
 - Changed: SpeechColorOverride now works for both NPCs and Clients. SpeechColor is now an invalid property for an NPC, but for a Player it is as always the last speech hue sent by the client.
+
+02-11-2018, Nolok
+- Added: ModMaxHits, ModMaxMana, ModMaxStam properties. To avoid CONFLICTS, remove or comment the scripted functions with the same name in the sphere_events_npcs.scp of the default scriptpack.
+- Added: @StatChange fires also when a ModMax* property changes. ARGN1 = 12 for ModMaxHits, 13 for ModMaxMana and 14 ModMaxStam.

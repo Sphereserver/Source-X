@@ -639,8 +639,8 @@ enum STAT_TYPE
 	STAT_FOOD = 3,      // just used as a regen rate. (as karma does not decay)
     STAT_QTY
     // MaxHits  (4)
-    // MaxInt   (5)
-    // MaxDex   (6)
+    // MaxMana  (5)
+    // MaxStam  (6)
     // MaxFood  (7)
 };
 

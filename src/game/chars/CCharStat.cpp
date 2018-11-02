@@ -14,7 +14,7 @@ void CChar::Stat_AddMod( STAT_TYPE i, short iVal )
 	ASSERT(i >= 0 && i < STAT_QTY);
 	m_Stat[i].m_mod	+= iVal;
 
-	const ushort uiMaxValue = Stat_GetMax(i);		// make sure the current value is not higher than new max value
+	const ushort uiMaxValue = Stat_GetMaxAdjusted(i);		// make sure the current value is not higher than new max value
 	if ( m_Stat[i].m_val > uiMaxValue )
 		m_Stat[i].m_val = uiMaxValue;
 
@@ -58,7 +58,7 @@ void CChar::Stat_SetMod( STAT_TYPE i, short iVal )
 		}
 	}
 
-	const ushort uiMaxValue = Stat_GetMax(i);		// make sure the current value is not higher than new max value
+	const ushort uiMaxValue = Stat_GetMaxAdjusted(i);		// make sure the current value is not higher than new max value
 	if ( m_Stat[i].m_val > uiMaxValue )
 		m_Stat[i].m_val = uiMaxValue;
 
@@ -70,6 +70,55 @@ short CChar::Stat_GetMod( STAT_TYPE i ) const
 	ADDTOCALLSTACK("CChar::Stat_GetMod");
 	ASSERT(i >= 0 && i < STAT_QTY);
 	return m_Stat[i].m_mod;
+}
+
+void CChar::Stat_SetMaxMod( STAT_TYPE i, short iVal )
+{
+    ADDTOCALLSTACK("CChar::Stat_SetMod");
+    ASSERT(i >= 0 && i < STAT_QTY);
+    short iStatVal = Stat_GetMaxMod(i);
+    if ( IsTrigUsed(TRIGGER_STATCHANGE) && !IsTriggerActive("CREATE") )
+    {
+        if ( i >= STAT_STR && i <= STAT_DEX )
+        {
+            CScriptTriggerArgs args;
+            args.m_iN1 = i+12;	// shift by 12 to indicate modMaxHits, modMaxMana, modMaxStam
+            args.m_iN2 = iStatVal;
+            args.m_iN3 = iVal;
+            if ( OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE )
+                return;
+            // do not restore argn1 to i, bad things will happen! leave i untouched. (matex)
+            iVal = (short)(args.m_iN3);
+        }
+    }
+
+    m_Stat[i].m_maxMod = iVal;
+
+    const ushort uiMaxValue = Stat_GetMaxAdjusted(i);		// make sure the current value is not higher than new max value
+    if ( m_Stat[i].m_val > uiMaxValue )
+        m_Stat[i].m_val = uiMaxValue;
+
+    UpdateStatsFlag();
+}
+
+void CChar::Stat_AddMaxMod( STAT_TYPE i, short iVal )
+{
+    ADDTOCALLSTACK("CChar::Stat_AddMaxMod");
+    ASSERT(i >= 0 && i < STAT_QTY);
+    m_Stat[i].m_maxMod	+= iVal;
+
+    const ushort uiMaxValue = Stat_GetMaxAdjusted(i);		// make sure the current value is not higher than new max value
+    if ( m_Stat[i].m_val > uiMaxValue )
+        m_Stat[i].m_val = uiMaxValue;
+
+    UpdateStatsFlag();
+}
+
+short CChar::Stat_GetMaxMod( STAT_TYPE i ) const
+{
+    ADDTOCALLSTACK("CChar::Stat_GetMaxMod");
+    ASSERT(i >= 0 && i < STAT_QTY);
+    return m_Stat[i].m_maxMod;
 }
 
 void CChar::Stat_SetVal( STAT_TYPE i, ushort uiVal )
@@ -119,7 +168,7 @@ void CChar::Stat_SetMax( STAT_TYPE i, ushort uiVal )
 		}
 		m_Stat[i].m_max = uiVal;
 
-		const ushort uiMaxValue = Stat_GetMax(i);		// make sure the current value is not higher than new max value
+		const ushort uiMaxValue = Stat_GetMaxAdjusted(i);		// make sure the current value is not higher than new max value
 		if ( m_Stat[i].m_val > uiMaxValue )
 			m_Stat[i].m_val = uiMaxValue;
 
@@ -135,8 +184,8 @@ void CChar::Stat_SetMax( STAT_TYPE i, ushort uiVal )
 ushort CChar::Stat_GetMax( STAT_TYPE i ) const
 {
 	ADDTOCALLSTACK("CChar::Stat_GetMax");
-	ushort uiVal;
 	ASSERT(i >= 0 && i < STAT_QTY); // allow for food
+    ushort uiVal;
 	if ( m_Stat[i].m_max < 1 )
 	{
 		if ( i == STAT_FOOD )
@@ -156,9 +205,13 @@ ushort CChar::Stat_GetMax( STAT_TYPE i ) const
 		return uiVal;
 	}
     uiVal = m_Stat[i].m_max;
-	if ( i >= STAT_BASE_QTY )
-        uiVal += m_Stat[i].m_mod;
 	return uiVal;
+}
+
+ushort CChar::Stat_GetMaxAdjusted( STAT_TYPE i ) const
+{
+    ADDTOCALLSTACK("CChar::Stat_GetMaxAdjusted");
+    return (Stat_GetMax(i) + Stat_GetMaxMod(i));
 }
 
 uint CChar::Stat_GetSum() const
@@ -269,7 +322,7 @@ void CChar::Stat_SetBase( STAT_TYPE i, ushort uiVal )
 		}
 	}
 
-	const ushort uiMaxValue = Stat_GetMax(i);    // make sure the current value is not higher than new max value
+	const ushort uiMaxValue = Stat_GetMaxAdjusted(i);    // make sure the current value is not higher than new max value
 	if ( m_Stat[i].m_val > uiMaxValue )
 		m_Stat[i].m_val = uiMaxValue;
 
@@ -365,7 +418,7 @@ bool CChar::Stats_Regen()
 			if (iGain > 0)
                 uiMod += (ushort)iGain;
 		}
-		ushort uiStatLimit = Stat_GetMax(i);
+		ushort uiStatLimit = Stat_GetMaxAdjusted(i);
 
 		if (IsTrigUsed(TRIGGER_REGENSTAT))
 		{

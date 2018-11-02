@@ -2337,7 +2337,7 @@ int CChar::Skill_Meditation( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_START )
 	{
-		if ( Stat_GetVal(STAT_INT) >= Stat_GetMax(STAT_INT))
+		if ( Stat_GetVal(STAT_INT) >= Stat_GetMaxAdjusted(STAT_INT))
 		{
 			SysMessageDefault( DEFMSG_MEDITATION_PEACE_1 );
 			return -SKTRIG_QTY;
@@ -2352,7 +2352,7 @@ int CChar::Skill_Meditation( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_SUCCESS )
 	{
-		if ( Stat_GetVal(STAT_INT) >= Stat_GetMax(STAT_INT))
+		if ( Stat_GetVal(STAT_INT) >= Stat_GetMaxAdjusted(STAT_INT))
 		{
 			if ( IsClient() )
 				GetClient()->removeBuff(BI_ACTIVEMEDITATION);
@@ -2471,7 +2471,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 		return -SKTRIG_QTY;
 	}
 
-	if ( !pChar->IsStatFlag( STATF_POISONED|STATF_DEAD ) && pChar->Stat_GetVal(STAT_STR) >= pChar->Stat_GetMax(STAT_STR) )
+	if ( !pChar->IsStatFlag( STATF_POISONED|STATF_DEAD ) && (pChar->Stat_GetVal(STAT_STR) >= pChar->Stat_GetMaxAdjusted(STAT_STR)) )
 	{
 		if ( pChar == this )
 			SysMessageDefault( DEFMSG_HEALING_HEALTHY );

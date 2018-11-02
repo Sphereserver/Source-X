@@ -232,13 +232,13 @@ STAT_TYPE CCharPlayer::Stat_GetLockType( lpctstr pszKey ) const
 SKILLLOCK_TYPE CCharPlayer::Stat_GetLock( STAT_TYPE stat ) const
 {
 	ASSERT( (stat >= 0) && ((size_t)stat < CountOf(m_StatLock)));
-	return static_cast<SKILLLOCK_TYPE>(m_StatLock[stat]);
+	return (SKILLLOCK_TYPE)m_StatLock[stat];
 }
 
 void CCharPlayer::Stat_SetLock( STAT_TYPE stat, SKILLLOCK_TYPE state )
 {
 	ASSERT( (stat >= 0) && ((size_t)stat < CountOf(m_StatLock)));
-	m_StatLock[stat] = (uchar)(state);
+	m_StatLock[stat] = (uchar)state;
 }
 
 bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )

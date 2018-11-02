@@ -750,7 +750,7 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 short CChar::Food_GetLevelPercent() const
 {
 	ADDTOCALLSTACK("CChar::Food_GetLevelPercent");
-	short max	= Stat_GetMax(STAT_FOOD);
+	ushort max = Stat_GetMaxAdjusted(STAT_FOOD);
 	if ( max == 0 )
 		return 100;
 	return (short)(IMulDiv(Stat_GetVal(STAT_FOOD), 100, max));
@@ -759,7 +759,7 @@ short CChar::Food_GetLevelPercent() const
 lpctstr CChar::Food_GetLevelMessage(bool fPet, bool fHappy) const
 {
 	ADDTOCALLSTACK("CChar::Food_GetLevelMessage");
-	short max = Stat_GetMax(STAT_FOOD);
+	ushort max = Stat_GetMaxAdjusted(STAT_FOOD);
 	if ( max == 0 )
 		return g_Cfg.GetDefaultMsg(DEFMSG_PET_HAPPY_UNAFFECTED);
 

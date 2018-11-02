@@ -508,27 +508,27 @@ void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when r
         // Leave the stat bonuses signed, since they can be used also as a malus (negative sign)
 		short iStrengthBonus = (short)(pItem->GetDefNum("BONUSSTR", true));
 		if (iStrengthBonus != 0)
-			Stat_SetMod(STAT_STR, Stat_GetMod(STAT_STR) - iStrengthBonus);
+			Stat_AddMod(STAT_STR, -iStrengthBonus);
 
 		short iDexterityBonus = (short)(pItem->GetDefNum("BONUSDEX", true));
 		if (iDexterityBonus != 0)
-			Stat_SetMod(STAT_DEX, Stat_GetMod(STAT_DEX) - iDexterityBonus);
+			Stat_AddMod(STAT_DEX, -iDexterityBonus);
 
 		short iIntelligenceBonus = (short)(pItem->GetDefNum("BONUSINT", true));
 		if (iIntelligenceBonus != 0)
-			Stat_SetMod(STAT_INT, Stat_GetMod(STAT_INT) - iIntelligenceBonus);
+			Stat_AddMod(STAT_INT, -iIntelligenceBonus);
 
 		short iHitpointIncrease = (short)(pItem->GetDefNum("BONUSHITS", true));
 		if (iHitpointIncrease != 0)
-			Stat_SetMax(STAT_STR, Stat_GetMax(STAT_STR) - iHitpointIncrease);
+			Stat_AddMaxMod(STAT_STR, -iHitpointIncrease);
 
 		short iStaminaIncrease = (short)(pItem->GetDefNum("BONUSSTAM", true));
 		if (iStaminaIncrease != 0)
-            Stat_SetMax(STAT_DEX, Stat_GetMax(STAT_DEX) - iStaminaIncrease);
+            Stat_AddMaxMod(STAT_DEX, -iStaminaIncrease);
 
 		short iManaIncrease = (short)(pItem->GetDefNum("BONUSMANA", true));
 		if (iManaIncrease != 0)
-            Stat_SetMax(STAT_INT, Stat_GetMax(STAT_INT) - iManaIncrease);
+            Stat_AddMaxMod(STAT_INT, -iManaIncrease);
 
 		int64 iDamageIncrease = pItem->GetDefNum("INCREASEDAM", true);
 		if ( iDamageIncrease != 0 )
@@ -777,7 +777,7 @@ void CChar::UpdateStatVal( STAT_TYPE type, short iChange, short iLimit )
 	short iValPrev = Stat_GetVal(type);
 	short iVal = iValPrev + iChange;
 	if ( !iLimit )
-		iLimit = Stat_GetMax(type);
+		iLimit = Stat_GetMaxAdjusted(type);
 
 	if ( iVal < 0 )
 		iVal = 0;
@@ -2106,27 +2106,27 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 
 	short iStrengthBonus = (short)(pItem->GetDefNum("BONUSSTR", true));
 	if (iStrengthBonus != 0)
-		Stat_SetMod(STAT_STR, Stat_GetMod(STAT_STR) + iStrengthBonus);
+		Stat_AddMod(STAT_STR, iStrengthBonus);
 
 	short iDexterityBonus = (short)(pItem->GetDefNum("BONUSDEX", true));
 	if (iDexterityBonus != 0)
-		Stat_SetMod(STAT_DEX, Stat_GetMod(STAT_DEX) + iDexterityBonus);
+        Stat_AddMod(STAT_DEX, iDexterityBonus);
 
 	short iIntelligenceBonus = (short)(pItem->GetDefNum("BONUSINT", true));
 	if (iIntelligenceBonus != 0)
-		Stat_SetMod(STAT_INT, Stat_GetMod(STAT_INT) + iIntelligenceBonus);
+        Stat_AddMod(STAT_INT, iIntelligenceBonus);
 
 	short iHitpointIncrease = (short)(pItem->GetDefNum("BONUSHITS", true));
 	if (iHitpointIncrease != 0)
-        Stat_SetMax(STAT_STR, Stat_GetMax(STAT_STR) + iHitpointIncrease);
+        Stat_AddMaxMod(STAT_STR, iHitpointIncrease);
 
 	short iStaminaIncrease = (short)(pItem->GetDefNum("BONUSSTAM", true));
 	if (iStaminaIncrease != 0)
-        Stat_SetMax(STAT_DEX, Stat_GetMax(STAT_DEX) + iStaminaIncrease);
+        Stat_AddMaxMod(STAT_DEX, iStaminaIncrease);
 
 	short iManaIncrease = (short)(pItem->GetDefNum("BONUSMANA", true));
 	if (iManaIncrease != 0)
-        Stat_SetMax(STAT_INT, Stat_GetMax(STAT_INT) + iManaIncrease);
+        Stat_AddMaxMod(STAT_INT, iManaIncrease);
 
 	int64 iDamageIncrease = pItem->GetDefNum("INCREASEDAM", true);
 	if (iDamageIncrease != 0)
@@ -3131,7 +3131,7 @@ CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fChec
 			}
 
 			
-			if ( (iStamReq > 0) && (Stat_GetVal(STAT_DEX) < Stat_GetMax(STAT_DEX)) )
+			if ( (iStamReq > 0) && (Stat_GetVal(STAT_DEX) < Stat_GetMaxAdjusted(STAT_DEX)) )
 				return nullptr;
 
 			tchar *pszMsg = Str_GetTemp();
@@ -3962,7 +3962,7 @@ void CChar::OnTickStatusUpdate()
 void CChar::OnTickFood(short iVal, int HitsHungerLoss)
 {
 	ADDTOCALLSTACK("CChar::OnTickFood");
-	if ( IsStatFlag(STATF_DEAD|STATF_CONJURED|STATF_SPAWNED) || !Stat_GetMax(STAT_FOOD) )
+	if ( IsStatFlag(STATF_DEAD|STATF_CONJURED|STATF_SPAWNED) || !Stat_GetMaxAdjusted(STAT_FOOD) )
 		return;
 	if ( IsStatFlag(STATF_PET) && !NPC_CheckHirelingStatus() )		// this may be money instead of food
 		return;

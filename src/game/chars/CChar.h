@@ -162,11 +162,12 @@ public:
 	// Skills, Stats and health
 	struct
 	{
-		ushort m_base;
-		short  m_mod;		// signed for modifier
-		ushort m_val;
-		ushort m_max;		// max
-		int64  m_regen;	    // msecs for the next regen.
+		ushort m_base;      // Base stat: STR, INT, DEX
+		short  m_mod;		// Modifier to base stat: ModSTR, ModINT, ModDex (signed to allow negative modifiers)
+		ushort m_val;       // Hits, Mana, Stam
+		ushort m_max;		// MaxVal: MaxHits, MaxMana, MaxStam
+        short m_maxMod;     // Modifier to MaxVal: ModMaxHits, ModMaxMana, ModMaxStam
+		int64  m_regen;	    // Milliseconds for the next regen.
 	} m_Stat[STAT_QTY];
     short m_iKarma;
     ushort m_uiFame;
@@ -414,6 +415,10 @@ public:
 	ushort	Stat_GetVal( STAT_TYPE i ) const;
 	void	Stat_SetMax( STAT_TYPE i, ushort uiVal );
 	ushort	Stat_GetMax( STAT_TYPE i ) const;
+    void	Stat_SetMaxMod( STAT_TYPE i, short iVal );
+    void	Stat_AddMaxMod( STAT_TYPE i, short iVal );
+    short	Stat_GetMaxMod( STAT_TYPE i ) const;
+    ushort	Stat_GetMaxAdjusted( STAT_TYPE i ) const;
 	uint    Stat_GetSum() const;
 	ushort	Stat_GetLimit( STAT_TYPE i ) const;     // Or STATCAP
     uint	Stat_GetSumLimit() const;               // Or STATSUM (intended as the maximum value allowed for the sum of the stats)

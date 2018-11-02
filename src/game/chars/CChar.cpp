@@ -299,7 +299,7 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 		Stat_SetMax((STAT_TYPE)i, 0);
 		m_Stat[i].m_regen = 0;
 	}
-	Stat_SetVal( STAT_FOOD, Stat_GetMax(STAT_FOOD) );
+	Stat_SetVal( STAT_FOOD, Stat_GetMaxAdjusted(STAT_FOOD) );
 
 	for ( i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
@@ -846,9 +846,9 @@ void CChar::CreateNewCharCheck()
 	m_prev_id = GetID();
 	m_prev_Hue = GetHue();
 
-	Stat_SetVal(STAT_STR, Stat_GetMax(STAT_STR));
-	Stat_SetVal(STAT_DEX, Stat_GetMax(STAT_DEX));
-	Stat_SetVal(STAT_INT, Stat_GetMax(STAT_INT));
+	Stat_SetVal(STAT_STR, Stat_GetMaxAdjusted(STAT_STR));
+	Stat_SetVal(STAT_DEX, Stat_GetMaxAdjusted(STAT_DEX));
+	Stat_SetVal(STAT_INT, Stat_GetMaxAdjusted(STAT_INT));
 
 	if ( !m_pPlayer )	// need a starting brain tick.
 	{
@@ -859,7 +859,7 @@ void CChar::CreateNewCharCheck()
 			{
 				CCharBase *pCharDef = Char_GetDef();
 
-				int mult = (Stat_GetMax(STAT_STR) + (Stat_GetMax(STAT_DEX) / 2) + Stat_GetMax(STAT_INT)) / 3;
+				int mult = (Stat_GetMaxAdjusted(STAT_STR) + (Stat_GetMaxAdjusted(STAT_DEX) / 2) + Stat_GetMaxAdjusted(STAT_INT)) / 3;
 				ushort iSkillArchery = Skill_GetBase(SKILL_ARCHERY), iSkillThrowing = Skill_GetBase(SKILL_THROWING), iSkillSwordsmanship = Skill_GetBase(SKILL_SWORDSMANSHIP);
 				ushort iSkillMacefighting = Skill_GetBase(SKILL_MACEFIGHTING), iSkillFencing = Skill_GetBase(SKILL_FENCING), iSkillWrestling = Skill_GetBase(SKILL_WRESTLING);
 				m_exp = maximum(
@@ -945,6 +945,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 		Stat_SetMod((STAT_TYPE)i, pChar->Stat_GetMod((STAT_TYPE)i));
 		Stat_SetVal((STAT_TYPE)i, pChar->Stat_GetVal((STAT_TYPE)i));
 		Stat_SetMax((STAT_TYPE)i, pChar->Stat_GetMax((STAT_TYPE)i));
+        Stat_SetMaxMod((STAT_TYPE)i, pChar->Stat_GetMaxMod((STAT_TYPE)i));
 		m_Stat[i].m_regen = 0;
 	}
 
@@ -1983,50 +1984,7 @@ do_default:
 			return true;
 
 		// special write values
-		int i;
-
-		// Adjusted stats
-		i = g_Cfg.FindStatKey( pszKey );
-		if ( i >= 0 )
-		{
-			sVal.FormatUSVal(Stat_GetAdjusted((STAT_TYPE)i));
-			return true;
-		}
-
-		if ( !strnicmp( pszKey, "O", 1 ) )
-		{
-			i = g_Cfg.FindStatKey( pszKey+1 );
-			if ( i >= 0 )
-			{
-				sVal.FormatUSVal(Stat_GetBase((STAT_TYPE)i));
-				return true;
-			}
-            else
-            {
-                if (!strnicmp(pszKey+1, "KARMA", 5))
-                {
-                    sVal.FormatSVal(GetKarma());
-                    return true;
-                }
-                else if (!strnicmp(pszKey+1, "FAME", 4))
-                {
-                    sVal.FormatUSVal(GetFame());
-                    return true;
-                }
-            }
-		}
-
-		if ( !strnicmp( pszKey, "MOD", 3 ) )
-		{
-			i = g_Cfg.FindStatKey( pszKey+3 );
-			if ( i >= 0 )
-			{
-				sVal.FormatSVal(Stat_GetMod((STAT_TYPE)i));
-				return true;
-			}
-		}
-
-		i = g_Cfg.FindSkillKey( pszKey );
+		int i = g_Cfg.FindSkillKey( pszKey );
 		if ( IsSkillBase((SKILL_TYPE)i))
 		{
 			// Check some skill name.
@@ -2267,6 +2225,7 @@ do_default:
 		case CHC_BLOODCOLOR:
 			sVal.FormatHex( m_wBloodHue );
 			break;
+        case CHC_OFAME:
 		case CHC_FAME:
 			// How much respect do i give this person ?
 			// Fame is never negative !
@@ -2362,6 +2321,7 @@ do_default:
 				sVal = ( pCharDef->IsFemale()) ? ppArgs[1] : ppArgs[0];
 			}
 			return true;
+        case CHC_OKARMA:
 		case CHC_KARMA:
 			// What do i think of this person.
 			{
@@ -2780,12 +2740,39 @@ do_default:
 		case CHC_SPEECHCOLOROVERRIDE:
 			sVal.FormatWVal( m_SpeechHueOverride );
 			break;
-		case CHC_FOOD:
-			sVal.FormatUSVal( Stat_GetVal(STAT_FOOD) );
-			break;
+        case CHC_STEPSTEALTH:
+            sVal.FormatVal( m_StepStealth );
+            break;
 		case CHC_HEIGHT:
 			sVal.FormatUCVal( GetHeight() );
 			break;
+        case CHC_OSTR:
+            sVal.FormatUSVal( Stat_GetBase(STAT_STR) );
+            break;
+        case CHC_MODSTR:
+            sVal.FormatSVal( Stat_GetMod(STAT_STR) );
+            break;
+        case CHC_STR:
+            sVal.FormatUSVal( Stat_GetAdjusted(STAT_STR) );
+            break;
+        case CHC_ODEX:
+            sVal.FormatUSVal( Stat_GetBase(STAT_DEX) );
+            break;
+        case CHC_MODDEX:
+            sVal.FormatSVal( Stat_GetMod(STAT_DEX) );
+            break;
+        case CHC_DEX:
+            sVal.FormatUSVal( Stat_GetAdjusted(STAT_DEX) );
+            break;
+        case CHC_OINT:
+            sVal.FormatUSVal( Stat_GetBase(STAT_INT) );
+            break;
+        case CHC_MODINT:
+            sVal.FormatSVal( Stat_GetMod(STAT_INT) );
+            break;
+        case CHC_INT:
+            sVal.FormatUSVal( Stat_GetAdjusted(STAT_INT) );
+            break;
 		case CHC_HITPOINTS:
 		case CHC_HITS:
 			sVal.FormatUSVal( Stat_GetVal(STAT_STR) );
@@ -2794,24 +2781,45 @@ do_default:
 		case CHC_STAMINA:
 			sVal.FormatUSVal( Stat_GetVal(STAT_DEX) );
 			break;
-		case CHC_STEPSTEALTH:
-			sVal.FormatVal( m_StepStealth );
-			break;
-		case CHC_MANA:
-			sVal.FormatUSVal( Stat_GetVal(STAT_INT) );
-			break;
+        case CHC_MANA:
+            sVal.FormatUSVal( Stat_GetVal(STAT_INT) );
+            break;
+        case CHC_OFOOD:
+            sVal.FormatUSVal( Stat_GetBase(STAT_FOOD) );
+            break;
+        case CHC_FOOD:
+            sVal.FormatUSVal( Stat_GetVal(STAT_FOOD) );
+            break;
 		case CHC_MAXFOOD:
-			sVal.FormatUSVal( Stat_GetMax(STAT_FOOD) );
+			sVal.FormatUSVal( Stat_GetMaxAdjusted(STAT_FOOD) );
 			break;
 		case CHC_MAXHITS:
-			sVal.FormatUSVal( Stat_GetMax(STAT_STR) );
+			sVal.FormatUSVal( Stat_GetMaxAdjusted(STAT_STR) );
 			break;
+        case CHC_OMAXHITS:
+            sVal.FormatUSVal( Stat_GetMax(STAT_STR) );
+            break;
 		case CHC_MAXMANA:
-			sVal.FormatUSVal( Stat_GetMax(STAT_INT) );
+			sVal.FormatUSVal( Stat_GetMaxAdjusted(STAT_INT) );
 			break;
+        case CHC_OMAXMANA:
+            sVal.FormatUSVal( Stat_GetMax(STAT_INT) );
+            break;
 		case CHC_MAXSTAM:
-			sVal.FormatUSVal( Stat_GetMax(STAT_DEX) );
+			sVal.FormatUSVal( Stat_GetMaxAdjusted(STAT_DEX) );
 			break;
+        case CHC_OMAXSTAM:
+            sVal.FormatUSVal( Stat_GetMax(STAT_DEX) );
+            break;
+        case CHC_MODMAXHITS:
+            sVal.FormatSVal( Stat_GetMaxMod(STAT_STR) );
+            break;
+        case CHC_MODMAXMANA:
+            sVal.FormatSVal( Stat_GetMaxMod(STAT_INT) );
+            break;
+        case CHC_MODMAXSTAM:
+            sVal.FormatSVal( Stat_GetMaxMod(STAT_DEX) );
+            break;
 		case CHC_HIT:
 			{
 			}break;
@@ -2919,7 +2927,7 @@ bool CChar::r_LoadVal( CScript & s )
         return true;
     }
 
-	lpctstr	pszKey	=  s.GetKey();
+	lpctstr	pszKey = s.GetKey();
 	CHC_TYPE iKeyNum = (CHC_TYPE) FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( iKeyNum < 0 )
 	{
@@ -2934,53 +2942,13 @@ bool CChar::r_LoadVal( CScript & s )
 				return true;
 		}
 
+        // special load values
+		int i = g_Cfg.FindSkillKey( pszKey );
+		if ( i != SKILL_NONE )
 		{
-			int i = g_Cfg.FindSkillKey( pszKey );
-			if ( i != SKILL_NONE )
-			{
-				// Check some skill name.
-				Skill_SetBase((SKILL_TYPE)i, s.GetArgUSVal() );
-				return true;
-			}
-
-			i = g_Cfg.FindStatKey( pszKey );
-			if ( i >= 0 )
-			{
-				Stat_SetBase((STAT_TYPE)i, s.GetArgUSVal());
-				return true;
-			}
-
-			if ( !strnicmp( pszKey, "O", 1 ) )
-			{
-				i = g_Cfg.FindStatKey( pszKey+1 );
-				if ( i >= 0 )
-				{
-					Stat_SetBase((STAT_TYPE)i, s.GetArgUSVal());
-					return true;
-				}
-                else
-                {
-                    if (!strnicmp(pszKey+1, "KARMA", 5))
-                    {
-                        SetKarma(s.GetArgSVal());
-                        return true;
-                    }
-                    else if (!strnicmp(pszKey+1, "FAME", 4))
-                    {
-                        SetFame(s.GetArgUSVal());
-                        return true;
-                    }
-                }
-			}
-			else if ( !strnicmp( pszKey, "MOD", 3 ) )
-			{
-				i = g_Cfg.FindStatKey( pszKey+3 );
-				if ( i >= 0 )
-				{
-					Stat_SetMod((STAT_TYPE)i, s.GetArgSVal());
-					return true;
-				}
-			}
+			// Check some skill name.
+			Skill_SetBase((SKILL_TYPE)i, s.GetArgUSVal() );
+			return true;
 		}
 
 		return CObjBase::r_LoadVal( s );
@@ -3112,18 +3080,50 @@ bool CChar::r_LoadVal( CScript & s )
 		case CHC_BLOODCOLOR:
 			m_wBloodHue = (HUE_TYPE)(s.GetArgVal());
 			break;
+        case CHC_MODSTR:
+            Stat_SetMod(STAT_STR, s.GetArgSVal());
+            break;
+        case CHC_OSTR:
+        case CHC_STR:
+            Stat_SetBase(STAT_STR, s.GetArgUSVal());
+            break;
+        case CHC_MODDEX:
+            Stat_SetMod(STAT_DEX, s.GetArgSVal());
+            break;
+        case CHC_ODEX:
+        case CHC_DEX:
+            Stat_SetBase(STAT_DEX, s.GetArgUSVal());
+            break;
+        case CHC_MODINT:
+            Stat_SetMod(STAT_INT, s.GetArgSVal());
+            break;
+        case CHC_OINT:
+        case CHC_INT:
+            Stat_SetBase(STAT_INT, s.GetArgUSVal());
 		case CHC_MAXFOOD:
 			Stat_SetMax(STAT_FOOD, s.GetArgUSVal());
 			break;
-		case CHC_MAXHITS:
-			Stat_SetMax(STAT_STR, s.GetArgUSVal());
-			break;
-		case CHC_MAXMANA:
-			Stat_SetMax(STAT_INT, s.GetArgUSVal());
-			break;
-		case CHC_MAXSTAM:
-			Stat_SetMax(STAT_DEX, s.GetArgUSVal());
-			break;
+        case CHC_MODMAXHITS:
+            Stat_SetMaxMod(STAT_STR, s.GetArgSVal());
+            break;
+		case CHC_MAXHITS:   // In the save files OMaxHits is stored as MaxHits (for backwards compatibility)
+        case CHC_OMAXHITS:
+            Stat_SetMax(STAT_STR, s.GetArgUSVal());
+            break;
+        case CHC_MODMAXSTAM:
+            Stat_SetMaxMod(STAT_DEX, s.GetArgSVal());
+            break;
+        case CHC_MAXSTAM:   // In the save files OMaxStam is stored as MaxStam (for backwards compatibility)
+        case CHC_OMAXSTAM:
+            Stat_SetMax(STAT_DEX, s.GetArgUSVal());
+            break;
+        case CHC_MODMAXMANA:
+            Stat_SetMaxMod(STAT_INT, s.GetArgSVal());
+            break;
+        case CHC_MAXMANA:   // In the save files OMaxMana is stored as MaxMana (for backwards compatibility)
+        case CHC_OMAXMANA:
+            Stat_SetMax(STAT_INT, s.GetArgUSVal());
+            break;
 		case CHC_ACCOUNT:
 			return SetPlayerAccount( s.GetArgStr() );
         case CHC_MAXHOUSES:
@@ -3298,6 +3298,9 @@ bool CChar::r_LoadVal( CScript & s )
 		case CHC_SPEECHCOLOROVERRIDE:
 			m_SpeechHueOverride = (HUE_TYPE)s.GetArgWVal();
 			break;
+        case CHC_OFOOD: // used in the save file
+            Stat_SetBase(STAT_FOOD, s.GetArgUSVal());
+            break;
 		case CHC_FOOD:
 			Stat_SetVal(STAT_FOOD, s.GetArgUSVal());
 			break;
@@ -3343,9 +3346,11 @@ bool CChar::r_LoadVal( CScript & s )
 					SetName( s.GetArgStr() );
 			}
 			break;
+        case CHC_OFAME:
 		case CHC_FAME:
             SetFame(s.GetArgUSVal());
             break;
+        case CHC_OKARMA:
 		case CHC_KARMA:
 			SetKarma(s.GetArgSVal());
             break;
@@ -3571,13 +3576,15 @@ void CChar::r_Write( CScript & s )
 		The character action is one of the valid skill OR
 		The character action is one of the NPC Action that uses ACTARG1/ACTARG2/ACTARG3
 		*/
-		if ((m_atUnk.m_Arg1 != 0) && ((action > SKILL_NONE && action < SKILL_QTY) || action == NPCACT_FLEE || action == NPCACT_TALK || action == NPCACT_TALK_FOLLOW || action == NPCACT_RIDDEN))
-			s.WriteKeyHex("ACTARG1", m_atUnk.m_Arg1);
-		if ((m_atUnk.m_Arg2 != 0) && ((action > SKILL_NONE && action < SKILL_QTY) || action == NPCACT_FLEE || action == NPCACT_TALK || action == NPCACT_TALK_FOLLOW || action == NPCACT_RIDDEN))
-			s.WriteKeyHex("ACTARG2", m_atUnk.m_Arg2);
-		if ((m_atUnk.m_Arg3 != 0) && ((action > SKILL_NONE && action < SKILL_QTY) || action == NPCACT_FLEE || action == NPCACT_TALK || action == NPCACT_TALK_FOLLOW || action == NPCACT_RIDDEN))
-			s.WriteKeyHex("ACTARG3", m_atUnk.m_Arg3);
-
+        if ((action > SKILL_NONE && action < SKILL_QTY) || action == NPCACT_FLEE || action == NPCACT_TALK || action == NPCACT_TALK_FOLLOW || action == NPCACT_RIDDEN)
+        {
+            if (m_atUnk.m_Arg1 != 0)
+                s.WriteKeyHex("ACTARG1", m_atUnk.m_Arg1);
+            if (m_atUnk.m_Arg2 != 0)
+                s.WriteKeyHex("ACTARG2", m_atUnk.m_Arg2);
+            if (m_atUnk.m_Arg3 != 0)
+                s.WriteKeyHex("ACTARG3", m_atUnk.m_Arg3);
+        }
 	}
 
 	if ( m_virtualGold )
@@ -3595,41 +3602,53 @@ void CChar::r_Write( CScript & s )
 	if ( m_StepStealth )
 		s.WriteKeyVal("STEPSTEALTH", m_StepStealth);
 
-	tchar szTmp[100];
-	size_t j = 0;
-	for ( j = 0; j < STAT_QTY; ++j )
-	{
-		// this is VERY important, saving the MOD first
-		if ( Stat_GetMod((STAT_TYPE)j) )
-		{
-			sprintf(szTmp, "MOD%s", g_Stat_Name[j]);
-			s.WriteKeyVal(szTmp, Stat_GetMod((STAT_TYPE)j) );
-		}
-		if ( Stat_GetBase((STAT_TYPE)j) )
-		{
-			sprintf(szTmp, "O%s", g_Stat_Name[j]);
-			s.WriteKeyVal(szTmp, Stat_GetBase((STAT_TYPE)j) );
-		}
-	}
-
     // Storing them with the O prefix for backwards compatibility
     s.WriteKeyVal("OKARMA", GetKarma() );
     s.WriteKeyVal("OFAME", GetFame() );
 
-    ushort uiMaxStat;
-	if ( Stat_GetAdjusted(STAT_STR) != (uiMaxStat = Stat_GetMax(STAT_STR)) )
-		s.WriteKeyVal("MAXHITS", uiMaxStat);
-	if ( Stat_GetAdjusted(STAT_DEX) != (uiMaxStat = Stat_GetMax(STAT_DEX)) )
-		s.WriteKeyVal("MAXSTAM", uiMaxStat);
-	if ( Stat_GetAdjusted(STAT_INT) != (uiMaxStat = Stat_GetMax(STAT_INT)) )
-		s.WriteKeyVal("MAXMANA", uiMaxStat);
+    int iVal;
 
-	s.WriteKeyVal("HITS", Stat_GetVal(STAT_STR));
-	s.WriteKeyVal("STAM", Stat_GetVal(STAT_DEX));
-	s.WriteKeyVal("MANA", Stat_GetVal(STAT_INT));
-	s.WriteKeyVal("FOOD", Stat_GetVal(STAT_FOOD));
+    if ( (iVal = Stat_GetMod(STAT_FOOD)) != 0 )
+        s.WriteKeyVal("MODFOOD", iVal);
+    if ( (iVal = Stat_GetBase(STAT_FOOD)) != Char_GetDef()->m_MaxFood )
+        s.WriteKeyVal("OFOOD", iVal );
+    s.WriteKeyVal("FOOD", Stat_GetVal(STAT_FOOD));
 
-	for ( j = 0; j < g_Cfg.m_iMaxSkill; ++j )
+	for ( int j = 0; j < STAT_BASE_QTY; ++j )
+	{
+        tchar szTmp[100];
+		// this is VERY important, saving the MOD first
+		if ( (iVal = Stat_GetMod((STAT_TYPE)j)) != 0 )
+		{
+			sprintf(szTmp, "MOD%s", g_Stat_Name[j]);
+			s.WriteKeyVal(szTmp, iVal);
+		}
+		if ( (iVal = Stat_GetBase((STAT_TYPE)j)) != 0 )
+		{
+			sprintf(szTmp, "O%s", g_Stat_Name[j]);
+			s.WriteKeyVal(szTmp, iVal );
+		}
+	}
+
+    if ( (iVal = Stat_GetMaxMod(STAT_STR)) != 0 )
+        s.WriteKeyVal("MODMAXHITS", iVal);
+    if ( (iVal = Stat_GetMax(STAT_STR)) != Stat_GetAdjusted(STAT_STR) )
+        s.WriteKeyVal("MAXHITS", iVal);     // should be OMAXHITS, but we keep it like this for backwards compatibility
+    s.WriteKeyVal("HITS", Stat_GetVal(STAT_STR));
+
+    if ( (iVal = Stat_GetMaxMod(STAT_DEX)) != 0 )
+        s.WriteKeyVal("MODMAXSTAM", iVal);
+    if ( (iVal = Stat_GetMax(STAT_DEX)) != Stat_GetAdjusted(STAT_DEX) )
+        s.WriteKeyVal("MAXSTAM", iVal);     // should be OMAXSTAM, but we keep it like this for backwards compatibility
+    s.WriteKeyVal("STAM", Stat_GetVal(STAT_DEX));
+
+    if ( (iVal = Stat_GetMaxMod(STAT_INT)) != 0 )
+        s.WriteKeyVal("MODMAXMANA", iVal);
+    if ( (iVal = Stat_GetMax(STAT_INT)) != Stat_GetAdjusted(STAT_INT) )
+        s.WriteKeyVal("MAXMANA", iVal);     // should be OMAXMANA, but we keep it like this for backwards compatibility
+    s.WriteKeyVal("MANA", Stat_GetVal(STAT_INT));
+
+	for ( uint j = 0; j < g_Cfg.m_iMaxSkill; ++j )
 	{
 		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)j) )
 			continue;

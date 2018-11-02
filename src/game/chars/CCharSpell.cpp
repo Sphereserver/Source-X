@@ -399,7 +399,7 @@ bool CChar::Spell_Resurrection(CItemCorpse * pCorpse, CChar * pCharSrc, bool fNo
 		return false;
 	}
 
-	short hits = (short)IMulDiv(Stat_GetMax(STAT_STR), g_Cfg.m_iHitpointPercentOnRez, 100);
+	short hits = (short)IMulDiv(Stat_GetMaxAdjusted(STAT_STR), g_Cfg.m_iHitpointPercentOnRez, 100);
 	if (!pCorpse)
 		pCorpse = FindMyCorpse();
 
@@ -565,8 +565,8 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			{
 				Stat_AddMod(STAT_STR, -pSpell->m_itSpell.m_PolyStr);
 				Stat_AddMod(STAT_DEX, -pSpell->m_itSpell.m_PolyDex);
-				short iValStr = Stat_GetVal(STAT_STR), iMaxStr = Stat_GetMax(STAT_STR);
-				short iValDex = Stat_GetVal(STAT_DEX), iMaxDex = Stat_GetMax(STAT_DEX);
+				ushort iValStr = Stat_GetVal(STAT_STR), iMaxStr = Stat_GetMaxAdjusted(STAT_STR);
+				ushort iValDex = Stat_GetVal(STAT_DEX), iMaxDex = Stat_GetMaxAdjusted(STAT_DEX);
 				Stat_SetVal(STAT_STR, minimum(iValStr, iMaxStr));
 				Stat_SetVal(STAT_DEX, minimum(iValDex, iMaxDex));
 			}
@@ -1636,24 +1636,24 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 				switch (pItem->m_itSpell.m_spelllevel)
 				{
 					case 4:
-						iDmg = IMulDiv(Stat_GetMax(STAT_STR), Calc_GetRandVal2(16, 33), 100);
+						iDmg = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(16, 33), 100);
                         iSecondsDelay = 5;
 						break;
 					case 3:
-						iDmg = IMulDiv(Stat_GetMax(STAT_STR), Calc_GetRandVal2(15, 30), 100);
+						iDmg = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(15, 30), 100);
                         iSecondsDelay = 5;
 						break;
 					case 2:
-						iDmg = IMulDiv(Stat_GetMax(STAT_STR), Calc_GetRandVal2(7, 15), 100);
+						iDmg = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(7, 15), 100);
                         iSecondsDelay = 4;
 						break;
 					case 1:
-						iDmg = IMulDiv(Stat_GetMax(STAT_STR), Calc_GetRandVal2(5, 10), 100);;
+						iDmg = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(5, 10), 100);;
                         iSecondsDelay = 3;
 						break;
 					default:
 					case 0:
-						iDmg = IMulDiv(Stat_GetVal(STAT_STR), Calc_GetRandVal2(4, 7), 100);
+						iDmg = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(4, 7), 100);
                         iSecondsDelay = 2;
 						break;
 				}
@@ -1695,7 +1695,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 					iLevel = 3;
 
 				pItem->m_itSpell.m_spelllevel -= 50;	// gets weaker too.	Only on old formulas
-				iDmg = IMulDiv(Stat_GetMax(STAT_STR), iLevel * 2, 100);
+				iDmg = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), iLevel * 2, 100);
 				pItem->SetTimeout((5 + Calc_GetRandLLVal(4)) * MSECS_PER_SEC);
 
 				static lpctstr const sm_Poison_Message[] =
@@ -2726,7 +2726,7 @@ bool CChar::Spell_CastDone()
 						pChar = this;	// spell revereses !
 						iDiff = -iDiff;
 					}
-					int iMax = pChar->Stat_GetMax(STAT_STR) / 2;
+					int iMax = pChar->Stat_GetMaxAdjusted(STAT_STR) / 2;
 					pChar->OnSpellEffect(spell, this, minimum(iDiff, iMax), nullptr);
 				}
 				break;
@@ -3161,7 +3161,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 				// Racial Bonus (Berserk), gargoyles gains +3% Spell Damage Increase per each 20 HP lost
 				if ( (g_Cfg.m_iRacialFlags & RACIALF_GARG_BERSERK) && IsGargoyle() )
 				{
-					int iInc = 3 * ((Stat_GetMax(STAT_STR) - Stat_GetVal(STAT_STR)) / 20);
+					int iInc = 3 * ((Stat_GetMaxAdjusted(STAT_STR) - Stat_GetVal(STAT_STR)) / 20);
 					DamageBonus += minimum(iInc, 12);		// value is capped at 12%
 				}
 
