@@ -11,6 +11,7 @@
 #include "../common/CTextConsole.h"
 #include "../common/CDataBase.h"
 #include "../common/sqlite/SQLite.h"
+#include "../sphere/ConsoleInterface.h"
 #include "clients/CChat.h"
 #include "CServerDef.h"
 #include <atomic>
@@ -89,8 +90,11 @@ public:
 	bool Load();
 
 	void SysMessage( lpctstr pMsg ) const;
+    void SysMessage(ConsoleOutput *pMsg) const;
 	void PrintTelnet( lpctstr pszMsg ) const;
-	void PrintStr( lpctstr pMsg ) const;
+    void PrintStr(lpctstr pMsg) const;
+    void PrintStr(COLORREF iColor, lpctstr pMsg) const;
+    void PrintOutput(ConsoleOutput *pOutput) const;
 	ssize_t  PrintPercent( ssize_t iCount, ssize_t iTotal );
 
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );

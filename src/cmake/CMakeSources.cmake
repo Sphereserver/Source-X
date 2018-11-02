@@ -3,6 +3,8 @@ SET (sphere_SRCS
 sphere/asyncdb.cpp
 sphere/asyncdb.h
 sphere/containers.h
+sphere/ConsoleInterface.cpp
+sphere/ConsoleInterface.h
 sphere/linuxev.cpp
 sphere/linuxev.h
 sphere/ProfileData.cpp
@@ -14,6 +16,7 @@ sphere/threads.h
 sphere/ntservice.cpp
 sphere/ntservice.h
 sphere/ntwindow.cpp
+sphere/ntwindow.h
 sphere/UnixTerminal.cpp
 sphere/UnixTerminal.h
 sphere/SphereSvr.rc

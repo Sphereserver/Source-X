@@ -19,6 +19,7 @@
 #include "../network/network.h" // network thread
 #include "../network/PingServer.h"
 #include "../sphere/asyncdb.h"
+#include "../sphere/ntwindow.h"
 #include "clients/CAccount.h"
 #include "items/CItemMap.h"
 #include "items/CItemMessage.h"
@@ -131,6 +132,7 @@ CAccounts		g_Accounts;			// All the player accounts. name sorted CAccount
 CSStringList	g_AutoComplete;		// auto-complete list
 CScriptProfiler g_profiler;			// script profiler
 CUOMapList		g_MapList;			// global maps information
+CNTWindow       g_Window;
 
 
 
@@ -542,7 +544,7 @@ static void Sphere_MainMonitorLoop()
 				break;
 
 #ifdef _WIN32
-			NTWindow_OnTick(250);
+			g_Window.NTWindow_OnTick(10);
 #else
 			Sleep(1000);
 #endif
@@ -906,7 +908,7 @@ int _cdecl main( int argc, char * argv[] )
 	}
 
 #ifdef _WIN32
-	NTWindow_DeleteIcon();
+    g_Window.NTWindow_DeleteIcon();
 #endif
 
 	Sphere_ExitServer();

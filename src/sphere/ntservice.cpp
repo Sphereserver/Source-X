@@ -9,6 +9,7 @@
 #include "../game/CObjBase.h"
 #include "../game/CServer.h"
 #include "../game/spheresvr.h"
+#include "ntwindow.h"
 #include "ntservice.h"
 
 CNTService g_Service;
@@ -458,9 +459,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	{
 		// We are running Win9x - So we are not an NT service.
 do_not_nt_service:
-		NTWindow_Init(hInstance, lpCmdLine, nCmdShow);
+        g_Window.NTWindow_Init(hInstance, lpCmdLine, nCmdShow);
 		int iRet = Sphere_MainEntryPoint(argc, argv);
-		NTWindow_Exit();
+        g_Window.NTWindow_Exit();
 		TerminateProcess(GetCurrentProcess(), iRet);
 		return iRet;
 	}

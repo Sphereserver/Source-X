@@ -17,6 +17,7 @@
 #include "../common/sphereversion.h"	// sphere version
 #include "../network/network.h"
 #include "../sphere/ProfileTask.h"
+#include "../sphere/ntwindow.h"
 #include "chars/CChar.h"
 #include "clients/CAccount.h"
 #include "clients/CClient.h"
@@ -91,7 +92,7 @@ void CServer::SetServerMode( SERVMODE_TYPE mode )
 	ADDTOCALLSTACK("CServer::SetServerMode");
 	m_iModeCode.store(mode, std::memory_order_release);
 #ifdef _WIN32
-	NTWindow_SetWindowTitle();
+    g_Window.NTWindow_SetWindowTitle();
 #endif
 }
 
@@ -163,10 +164,21 @@ void CServer::SysMessage( lpctstr pszMsg ) const
 	if ( !pszMsg || ISINTRESOURCE(pszMsg) )
 		return;
 
-#ifdef _WIN32
-	NTWindow_PostMsg(pszMsg);
-#else
+#ifndef _WIN32
 	g_UnixTerminal.print(pszMsg);
+#endif
+}
+
+void CServer::SysMessage(ConsoleOutput *pszMsg) const
+{
+    // Print just to the main console.
+    if (!pszMsg || ISINTRESOURCE(pszMsg))
+        return;
+
+#ifdef _WIN32
+    g_Window.NTWindow_PostMsg(pszMsg);
+#else
+    //g_UnixTerminal.print(pszMsg);
 #endif
 }
 
@@ -191,6 +203,19 @@ void CServer::PrintStr( lpctstr pszMsg ) const
 	// print to all consoles.
 	SysMessage( pszMsg );
 	PrintTelnet( pszMsg );
+}
+
+void CServer::PrintStr(COLORREF iColor, lpctstr pMsg) const
+{
+    // print to all consoles.
+    SysMessage(new ConsoleOutput(iColor, pMsg));
+    SysMessage(pMsg);// for linux until it gets working with the new ConsoleInterface
+    PrintTelnet(pMsg);
+}
+
+void CServer::PrintOutput(ConsoleOutput * pOutput) const
+{
+    SysMessage(pOutput);
 }
 
 ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal )
@@ -224,7 +249,7 @@ ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal )
 #endif
 
 #ifdef _WIN32
-	NTWindow_SetWindowTitle(pszTemp);
+    g_Window.NTWindow_SetWindowTitle(pszTemp);
 	g_Service.OnTick();
 #endif
 	return iPercent;
@@ -376,7 +401,7 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 	switch ( low )
 	{
 		case '?':
-			pSrc->SysMessagef(
+			g_Log.Event(LOGL_EVENT,
 				"Available commands:\n"
 				"#         Immediate save world (## to save both world and statics)\n"
 				"A         Update pending changes on Accounts file\n"
@@ -434,11 +459,27 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 						pszKey++;	GETNONWHITESPACE( pszKey );
 						if ( !g_World.DumpAreas( pSrc, pszKey ) )
 						{
-							pSrc->SysMessage( "Area dump failed.\n" );
+                            if (pSrc != this)
+                            {
+                                pSrc->SysMessage("Area dump failed.\n");
+                            }
+                            else
+                            {
+                                g_Log.Event(LOGL_EVENT, "Area dump failed.\n");
+                            }
 							fRet = false;
 						}
-						else
-							pSrc->SysMessage( "Area dump successful.\n" );
+                        else
+                        {
+                            if (pSrc != this)
+                            {
+                                pSrc->SysMessage("Area dump successful.\n");
+                            }
+                            else
+                            {
+                                g_Log.Event(LOGL_EVENT, "Area dump successful.\n");
+                            }
+                        }
 						break;
 
 					case 'u': // unscripted
@@ -451,11 +492,27 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 								pszKey++;	GETNONWHITESPACE( pszKey );
 								if ( !g_Cfg.DumpUnscriptedItems( pSrc, pszKey ) )
 								{
-									pSrc->SysMessage( "Unscripted item dump failed.\n" );
+                                    if (pSrc != this)
+                                    {
+                                        pSrc->SysMessage("Unscripted item dump failed.\n");
+                                    }
+                                    else
+                                    {
+                                        g_Log.Event(LOGL_EVENT, "Unscripted item dump failed.\n");
+                                    }
 									fRet = false;
 								}
-								else
-									pSrc->SysMessage( "Unscripted item dump successful.\n" );
+                                else
+                                {
+                                    if (pSrc != this)
+                                    {
+                                        pSrc->SysMessage("Unscripted item dump successful.\n");
+                                    }
+                                    else
+                                    {
+                                        g_Log.Event(LOGL_EVENT, "Unscripted item dump successful.\n");
+                                    }
+                                }
 								break;
 							}
 
@@ -487,26 +544,42 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 						}
 
 						g_profiler.total = g_profiler.called = 0;
-						pSrc->SysMessage("Scripts profiler info cleared\n");
+                        g_Log.Event(LOGL_EVENT, "Scripts profiler info cleared\n");
 					}
 				}
-				else
-					pSrc->SysMessage("Script profiler feature is not enabled on Sphere.ini.\n");
-				pSrc->SysMessage("Complete!\n");
+                else
+                {
+                    g_Log.Event(LOGL_EVENT, "Script profiler feature is not enabled on Sphere.ini.\n");
+                }
+                g_Log.Event(LOGL_EVENT, "Complete!\n");
 			} break;
 		case 'g':
 			{
 				if ( g_Serv.m_fResyncPause )
 				{
-	do_resync:
-					pSrc->SysMessage("Not allowed during resync pause. Use 'R' to restart.\n");
+                do_resync:
+                    if (pSrc != this)
+                    {
+                        pSrc->SysMessage("Not allowed during resync pause. Use 'R' to restart.\n");
+                    }
+                    else
+                    {
+                        g_Log.Event(LOGL_EVENT, "Not allowed during resync pause. Use 'R' to restart.\n");
+                    }
 					fRet = false;
 					break;
 				}
 				if ( g_World.IsSaving() )
 				{
-	do_saving:
-					pSrc->SysMessage("Not allowed during background worldsave. Use '#' to finish.\n");
+	            do_saving:
+                    if (pSrc != this)
+                    {
+                        pSrc->SysMessage("Not allowed during background worldsave. Use '#' to finish.\n");
+                    }
+                    else
+                    {
+                        g_Log.Event(LOGL_EVENT, "Not allowed during background worldsave. Use '#' to finish.\n");
+                    }
 					fRet = false;
 					break;
 				}
@@ -535,7 +608,7 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 			{
 				if ( pSrc != this ) // not from console
 				{
-					pSrc->SysMessage("Not allowed to use 'r' command via telnet. Use 'resync' instead.\n");
+					pSrc->SysMessage("'r' command only allowed in the console. Use 'resync' instead.\n");
 				}
 				else
 				{
@@ -551,7 +624,14 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 			} break;
 		case 't':
 			{
-				pSrc->SysMessagef("Current active threads: %" PRIuSIZE_T ".\n", ThreadHolder::getActiveThreads());
+                if (pSrc != this)
+                {
+                    pSrc->SysMessagef("Current active threads: %" PRIuSIZE_T ".\n", ThreadHolder::getActiveThreads());
+                }
+                else
+                {
+                    g_Log.Event(LOGL_EVENT, "Current active threads: %" PRIuSIZE_T ".\n", ThreadHolder::getActiveThreads());
+                }
 				size_t iThreadCount = ThreadHolder::getActiveThreads();
 				for ( size_t iThreads = 0; iThreads < iThreadCount; ++iThreads )
 				{
@@ -578,7 +658,14 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 				}
 				else if ( g_Cfg.m_fSecure )
 				{
-					pSrc->SysMessage( "NOTE: Secure mode prevents keyboard exit!\n" );
+                    if (pSrc != this)
+                    {
+                        pSrc->SysMessage("NOTE: Secure mode prevents keyboard exit!\n");
+                    }
+                    else
+                    {
+                        g_Log.Event(LOGL_EVENT, "NOTE: Secure mode prevents keyboard exit!\n");
+                    }
 					fRet = false;
 				}
 				else
@@ -665,7 +752,14 @@ longcommand:
 
 			if ( g_Cfg.m_sStripPath.IsEmpty() )
 			{
-				pSrc->SysMessage("StripPath not defined, function aborted.\n");
+                if (pSrc != this)
+                {
+                    pSrc->SysMessage("StripPath not defined, function aborted.\n");
+                }
+                else
+                {
+                    g_Log.Event(LOGL_EVENT, "StripPath not defined, function aborted.\n");
+                }
 				return false;
 			}
 
@@ -676,13 +770,27 @@ longcommand:
 			{
 				strcpy(z, dirname);
 				strcat(z, "sphere_strip_tng" SPHERE_SCRIPT);
-				pSrc->SysMessagef("StripFile is %s.\n", z);
+                if (pSrc != this)
+                {
+                    pSrc->SysMessagef("StripFile is %s.\n", z);
+                }
+                else
+                {
+                    g_Log.Event(LOGL_EVENT, "StripFile is %s.\n", z);
+                }
 
 				f1 = fopen(z, "w");
 
 				if ( !f1 )
 				{
-					pSrc->SysMessagef("Cannot open file %s for writing.\n", z);
+                    if (pSrc != this)
+                    {
+                        pSrc->SysMessagef("Cannot open file %s for writing.\n", z);
+                    }
+                    else
+                    {
+                        g_Log.Event(LOGL_EVENT, "Cannot open file %s for writing.\n", z);
+                    }
 					return false;
 				}
 
@@ -692,7 +800,14 @@ longcommand:
 					f = fopen(z, "r");
 					if ( !f )
 					{
-						pSrc->SysMessagef("Cannot open file %s for reading.\n", z);
+                        if (pSrc != this)
+                        {
+                            pSrc->SysMessagef("Cannot open file %s for reading.\n", z);
+                        }
+                        else
+                        {
+                            g_Log.Event(LOGL_EVENT, "Cannot open file %s for reading.\n", z);
+                        }
 						continue;
 					}
 
@@ -723,20 +838,41 @@ longcommand:
 					fclose(f);
 				}
 				fclose(f1);
-				pSrc->SysMessagef("Scripts have just been stripped.\n");
+                if (pSrc != this)
+                {
+                    pSrc->SysMessage("Scripts have just been stripped.\n");
+                }
+                else
+                {
+                    g_Log.Event(LOGL_EVENT, "Scripts have just been stripped.\n");
+                }
 				return true;
 			}
 			else if ( !strnicmp(pszText, "strip axis", 10) || !strnicmp(pszText, "strip", 5) )
 			{
 				strcpy(z, dirname);
 				strcat(z, "sphere_strip_axis" SPHERE_SCRIPT);
-				pSrc->SysMessagef("StripFile is %s.\n", z);
+                if (pSrc != this)
+                {
+                    pSrc->SysMessagef("StripFile is %s.\n", z);
+                }
+                else
+                {
+                    g_Log.Event(LOGL_EVENT, "StripFile is %s.\n", z);
+                }
 
 				f1 = fopen(z, "w");
 
 				if ( !f1 )
 				{
-					pSrc->SysMessagef("Cannot open file %s for writing.\n", z);
+                    if (pSrc != this)
+                    {
+                        pSrc->SysMessagef("Cannot open file %s for writing.\n", z);
+                    }
+                    else
+                    {
+                        g_Log.Event(LOGL_EVENT, "Cannot open file %s for writing.\n", z);
+                    }
 					return false;
 				}
 
@@ -746,7 +882,14 @@ longcommand:
 					f = fopen(z, "r");
 					if ( !f )
 					{
-						pSrc->SysMessagef("Cannot open file %s for reading.\n", z);
+                        if (pSrc != this)
+                        {
+                            pSrc->SysMessagef("Cannot open file %s for reading.\n", z);
+                        }
+                        else
+                        {
+                            g_Log.Event(LOGL_EVENT, "Cannot open file %s for reading.\n", z);
+                        }
 						continue;
 					}
 
@@ -777,7 +920,14 @@ longcommand:
 					fclose(f);
 				}
 				fclose(f1);
-				pSrc->SysMessagef("Scripts have just been stripped.\n");
+                if (pSrc != this)
+                {
+                    pSrc->SysMessagef("Scripts have just been stripped.\n");
+                }
+                else
+                {
+                    g_Log.Event(LOGL_EVENT, "Scripts have just been stripped.\n");
+                }
 				return true;
 			}
 		}
@@ -788,18 +938,39 @@ longcommand:
 		CScript	script(pszText);
 		if ( !g_Cfg.CanUsePrivVerb(this, pszText, pSrc) )
 		{
-			pSrc->SysMessagef("not privileged for command '%s'\n", pszText);
+            if (pSrc != this)
+            {
+                pSrc->SysMessagef("not privileged for command '%s'\n", pszText);
+            }
+            else
+            {
+                g_Log.Event(LOGL_EVENT, "not privileged for command '%s'\n", pszText);
+            }
 			fRet = false;
 		}
 		else if ( !r_Verb(script, pSrc) )
 		{
-			pSrc->SysMessagef("unknown command '%s'\n", pszText);
+            if (pSrc != this)
+            {
+                pSrc->SysMessagef("unknown command '%s'\n", pszText);
+            }
+            else
+            {
+                g_Log.Event(LOGL_EVENT, "unknown command '%s'\n", pszText);
+            }
 			fRet = false;
 		}
 	}
 	else
 	{
-		pSrc->SysMessagef("unknown command '%s'\n", static_cast<lpctstr>(sText));
+        if (pSrc != this)
+        {
+            pSrc->SysMessagef("unknown command '%s'\n", static_cast<lpctstr>(sText));
+        }
+        else
+        {
+            g_Log.Event(LOGL_EVENT, "unknown command '%s'\n", static_cast<lpctstr>(sText));
+        }
 		fRet = false;
 	}
 
@@ -833,9 +1004,18 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 		}
 	}
 
-	pSrc->SysMessagef("Profiles %s: (%d sec total)\n", CurrentProfileData.IsActive() ? "ON" : "OFF", CurrentProfileData.GetActiveWindow());
-	if (ftDump != nullptr)
-		ftDump->Printf("Profiles %s: (%d sec total)\n", CurrentProfileData.IsActive() ? "ON" : "OFF", CurrentProfileData.GetActiveWindow());
+    if (pSrc != this)
+    {
+        pSrc->SysMessagef("Profiles %s: (%d sec total)\n", CurrentProfileData.IsActive() ? "ON" : "OFF", CurrentProfileData.GetActiveWindow());
+    }
+    else
+    {
+        g_Log.Event(LOGL_EVENT, "Profiles %s: (%d sec total)\n", CurrentProfileData.IsActive() ? "ON" : "OFF", CurrentProfileData.GetActiveWindow());
+    }
+    if (ftDump != nullptr)
+    {
+        ftDump->Printf("Profiles %s: (%d sec total)\n", CurrentProfileData.IsActive() ? "ON" : "OFF", CurrentProfileData.GetActiveWindow());
+    }
 
 	size_t iThreadCount = ThreadHolder::getActiveThreads();
 	for ( size_t iThreads = 0; iThreads < iThreadCount; ++iThreads)
@@ -848,7 +1028,14 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 		if (profile.IsEnabled() == false)
 			continue;
 
-		pSrc->SysMessagef("Thread %u, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
+        if (pSrc != this)
+        {
+            pSrc->SysMessagef("Thread %u, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
+        }
+        else
+        {
+            g_Log.Event(LOGL_EVENT, "Thread %u, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
+        }
 		if (ftDump != nullptr)
 			ftDump->Printf("Thread %u, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
 
@@ -857,7 +1044,14 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 			if (profile.IsEnabled(static_cast<PROFILE_TYPE>(i)) == false)
 				continue;
 
-			pSrc->SysMessagef( "%-10s = %s\n", profile.GetName(static_cast<PROFILE_TYPE>(i)), profile.GetDescription(static_cast<PROFILE_TYPE>(i)) );
+            if (pSrc != this)
+            {
+                pSrc->SysMessagef("%-10s = %s\n", profile.GetName(static_cast<PROFILE_TYPE>(i)), profile.GetDescription(static_cast<PROFILE_TYPE>(i)));
+            }
+            else
+            {
+                g_Log.Event(LOGL_EVENT, "%-10s = %s\n", profile.GetName(static_cast<PROFILE_TYPE>(i)), profile.GetDescription(static_cast<PROFILE_TYPE>(i)));
+            }
 			if (ftDump != nullptr)
 				ftDump->Printf( "%-10s = %s\n", profile.GetName(static_cast<PROFILE_TYPE>(i)), profile.GetDescription(static_cast<PROFILE_TYPE>(i)) );
 		}
@@ -865,10 +1059,28 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 
 	if ( IsSetEF(EF_Script_Profiler) )
 	{
-		if ( g_profiler.initstate != 0xf1 )
-			pSrc->SysMessagef("Scripts profiler is not initialized\n");
-		else if ( !g_profiler.called )
-			pSrc->SysMessagef("Script profiler is not yet informational\n");
+        if (g_profiler.initstate != 0xf1)
+        {
+            if (pSrc != this)
+            {
+                pSrc->SysMessage("Scripts profiler is not initialized\n");
+            }
+            else
+            {
+                g_Log.Event(LOGL_EVENT, "Scripts profiler is not initialized\n");
+            }
+        }
+        else if (!g_profiler.called)
+        {
+            if (pSrc != this)
+            {
+                pSrc->SysMessage("Script profiler is not yet informational\n");
+            }
+            else
+            {
+                g_Log.Event(LOGL_EVENT, "Script profiler is not yet informational\n");
+            }
+        }
 		else
 		{
 			llong average = g_profiler.total / g_profiler.called;
@@ -876,58 +1088,63 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 			CScriptProfiler::CScriptProfilerTrigger * pTrig;
 			llong divby = llTimeProfileFrequency / 1000;
 
-			pSrc->SysMessagef( "Scripts: called %u times and took %i.%04i msec (%i.%04i msec average). Reporting with highest average.\n",
-					g_profiler.called,
-					(int)(g_profiler.total / divby),
-					(int)(((g_profiler.total * 10000) / (divby)) % 10000),
-					(int)(average / divby),
-					(int)(((average * 10000) / (divby)) % 10000)
-			);
-			if (ftDump != nullptr)
-				ftDump->Printf("Scripts: called %u times and took %i.%04i msec (%i.%04i msec average). Reporting with highest average.\n",
-					g_profiler.called,
-					(int)(g_profiler.total / divby),
-					(int)(((g_profiler.total * 10000) / (divby)) % 10000),
-					(int)(average / divby),
-					(int)(((average * 10000) / (divby)) % 10000)
-				);
+            lpctstr tmpstring = Str_GetTemp();
+            printf_s(tmpstring, "Scripts: called %u times and took %i.%04i msec (%i.%04i msec average). Reporting with highest average.\n",
+                g_profiler.called,
+                (int)(g_profiler.total / divby),
+                (int)(((g_profiler.total * 10000) / (divby)) % 10000),
+                (int)(average / divby),
+                (int)(((average * 10000) / (divby)) % 10000));
+            if (pSrc != this)
+            {
+                pSrc->SysMessage(tmpstring);
+            }
+            else
+            {
+                g_Log.Event(LOGL_EVENT, tmpstring);
+            }
+            if (ftDump != nullptr)
+            {
+                ftDump->Printf(tmpstring);
+            }
 
+            tmpstring = Str_GetTemp();
 			for ( pFun = g_profiler.FunctionsHead; pFun != nullptr; pFun = pFun->next )
 			{
 				if ( pFun->average > average )
 				{
-					pSrc->SysMessagef( "FUNCTION '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
-						pFun->name,
-						pFun->called,
-						(int)(pFun->average / divby),
-						(int)(((pFun->average * 10000) / (divby)) % 10000),
-						(int)(pFun->min / divby),
-						(int)(((pFun->min * 10000) / (divby)) % 10000),
-						(int)(pFun->max / divby),
-						(int)(((pFun->max * 10000) / (divby)) % 10000),
-						(int)(pFun->total / divby),
-						(int)(((pFun->total * 10000) / (divby)) % 10000)
-					);
-					if (ftDump != nullptr)
-						ftDump->Printf("FUNCTION '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
-							pFun->name,
-							pFun->called,
-							(int)(pFun->average / divby),
-							(int)(((pFun->average * 10000) / (divby)) % 10000),
-							(int)(pFun->min / divby),
-							(int)(((pFun->min * 10000) / (divby)) % 10000),
-							(int)(pFun->max / divby),
-							(int)(((pFun->max * 10000) / (divby)) % 10000),
-							(int)(pFun->total / divby),
-							(int)(((pFun->total * 10000) / (divby)) % 10000)
-						);
+                    printf_s(tmpstring, "FUNCTION '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
+                        pFun->name,
+                        pFun->called,
+                        (int)(pFun->average / divby),
+                        (int)(((pFun->average * 10000) / (divby)) % 10000),
+                        (int)(pFun->min / divby),
+                        (int)(((pFun->min * 10000) / (divby)) % 10000),
+                        (int)(pFun->max / divby),
+                        (int)(((pFun->max * 10000) / (divby)) % 10000),
+                        (int)(pFun->total / divby),
+                        (int)(((pFun->total * 10000) / (divby)) % 10000));
+
+                    if (pSrc != this)
+                    {
+                        pSrc->SysMessage(tmpstring);
+                    }
+                    else
+                    {
+                        g_Log.Event(LOGL_EVENT, tmpstring);
+                    }
+                    if (ftDump != nullptr)
+                    {
+                        ftDump->Printf(tmpstring);
+                    }
 				}
 			}
+            tmpstring = Str_GetTemp();
 			for ( pTrig = g_profiler.TriggersHead; pTrig != nullptr; pTrig = pTrig->next )
 			{
 				if ( pTrig->average > average )
 				{
-					pSrc->SysMessagef( "TRIGGER '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
+					printf_s(tmpstring, "TRIGGER '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
 						pTrig->name,
 						pTrig->called,
 						(int)(pTrig->average / divby),
@@ -939,29 +1156,42 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 						(int)(pTrig->total / divby),
 						(int)(((pTrig->total * 10000) / (divby)) % 10000)
 					);
-					if (ftDump != nullptr)
-						ftDump->Printf("TRIGGER '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
-							pTrig->name,
-							pTrig->called,
-							(int)(pTrig->average / divby),
-							(int)(((pTrig->average * 10000) / (divby)) % 10000),
-							(int)(pTrig->min / divby),
-							(int)(((pTrig->min * 10000) / (divby)) % 10000),
-							(int)(pTrig->max / divby),
-							(int)(((pTrig->max * 10000) / (divby)) % 10000),
-							(int)(pTrig->total / divby),
-							(int)(((pTrig->total * 10000) / (divby)) % 10000)
-						);
+                    if (pSrc != this)
+                    {
+                        pSrc->SysMessage(tmpstring);
+                    }
+                    else
+                    {
+                        g_Log.Event(LOGL_EVENT, tmpstring);
+                    }
+                    if (ftDump != nullptr)
+                    {
+                        ftDump->Printf(tmpstring);
+                    }
 				}
 			}
 
-			pSrc->SysMessage("Report complete!\n");
+            if (pSrc != this)
+            {
+                pSrc->SysMessage("Report complete!\n");
+            }
+            else
+            {
+                g_Log.Event(LOGL_EVENT, "Report complete!\n");
+            }
 		}
 	}
-	else
-	{
-		pSrc->SysMessage("Script profiler feature is not enabled on Sphere.ini.\n");
-	}
+    else
+    {
+        if (pSrc != this)
+        {
+            pSrc->SysMessage("Script profiler feature is not enabled on Sphere.ini.\n");
+        }
+        else
+        {
+            g_Log.Event(LOGL_EVENT, "Script profiler feature is not enabled on Sphere.ini.\n");
+        }
+    }
 
 	if ( ftDump != nullptr )
 	{
@@ -1249,10 +1479,28 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 				HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(ppArgs[0]);
 #endif
 
-				if (iTimeDecay >= 0)
-					pSrc->SysMessagef("IP blocked for %d seconds\n", iTimeDecay);
-				else
-					pSrc->SysMessagef("IP%s blocked\n", history.m_blocked ? " already" : "");
+                if (iTimeDecay >= 0)
+                {
+                    if (pSrc != this)
+                    {
+                        pSrc->SysMessagef("IP blocked for %d seconds\n", iTimeDecay);
+                    }
+                    else
+                    {
+                        g_Log.Event(LOGL_EVENT, "IP blocked for %d seconds\n", iTimeDecay);
+                    }
+                }
+                else
+                {
+                    if (pSrc != this)
+                    {
+                        pSrc->SysMessagef("IP%s blocked\n", history.m_blocked ? " already" : "");
+                    }
+                    else
+                    {
+                        g_Log.Event(LOGL_EVENT, "IP%s blocked\n", history.m_blocked ? " already" : "");
+                    }
+                }
 
 				history.setBlocked(true, iTimeDecay);
 			}
@@ -1288,18 +1536,39 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 					(Arg_Qty >= 2) ? (word)ATOI(Arg_ppCmd[1]) : (word)IMPFLAGS_ITEMS,
 					(Arg_Qty >= 3)? ATOI(Arg_ppCmd[2]) : INT16_MAX ))
 				{
-					pSrc->SysMessage( "Export failed\n" );
+                    if (pSrc != this)
+                    {
+                        pSrc->SysMessage("Export failed\n");
+                    }
+                    else
+                    {
+                        g_Log.Event(LOGL_EVENT, "Export failed\n");
+                    }
 				}
 			}
 			else
 			{
-				pSrc->SysMessage( "EXPORT name [flags] [area distance]" );
+                if (pSrc != this)
+                {
+                    pSrc->SysMessage("EXPORT name [flags] [area distance]");
+                }
+                else
+                {
+                    g_Log.Event(LOGL_EVENT, "EXPORT name [flags] [area distance]");
+                }
 			}
 			break;
 		case SV_GARBAGE:
 			if ( g_Serv.m_fResyncPause || g_World.IsSaving() )
 			{
-				pSrc->SysMessage( "Not allowed during world save and/or resync pause" );
+                if (pSrc != this)
+                {
+                    pSrc->SysMessage("Not allowed during world save and/or resync pause");
+                }
+                else
+                {
+                    g_Log.Event(LOGL_EVENT, "Not allowed during world save and/or resync pause");
+                }
 				break;
 			}
 			else
@@ -1317,8 +1586,18 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			break;
 
 		case SV_INFORMATION:
-			pSrc->SysMessage( GetStatusString( 0x22 ));
-			pSrc->SysMessage( GetStatusString( 0x24 ));
+            {
+                if (pSrc != this)
+                {
+                    pSrc->SysMessage(GetStatusString(0x22));
+                    pSrc->SysMessage(GetStatusString(0x24));
+                }
+                else
+                {
+                    g_Log.Event(LOGL_EVENT, "%s", GetStatusString(0x22));
+                    g_Log.Event(LOGL_EVENT, "%s", GetStatusString(0x24));
+                }
+            }
 			break;
 
 		case SV_IMPORT: // "IMPORT" name [flags] [area distance]
@@ -1333,14 +1612,30 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 					break;
 				}
 				// IMPFLAGS_ITEMS
-				if ( ! g_World.Import( Arg_ppCmd[0], pSrc->GetChar(),
-					(Arg_Qty >= 2) ? (word)(ATOI(Arg_ppCmd[1])) : (word)IMPFLAGS_BOTH,
-					(Arg_Qty>=3)?ATOI(Arg_ppCmd[2]) : INT16_MAX ))
-					pSrc->SysMessage( "Import failed\n" );
+                if (!g_World.Import(Arg_ppCmd[0], pSrc->GetChar(),
+                    (Arg_Qty >= 2) ? (word)(ATOI(Arg_ppCmd[1])) : (word)IMPFLAGS_BOTH,
+                    (Arg_Qty >= 3) ? ATOI(Arg_ppCmd[2]) : INT16_MAX))
+                {
+                    if (pSrc != this)
+                    {
+                        pSrc->SysMessage("Import failed\n");
+                    }
+                    else
+                    {
+                        g_Log.Event(LOGL_EVENT, "Import failed\n");
+                    }
+                }
 			}
 			else
 			{
-				pSrc->SysMessage( "IMPORT name [flags] [area distance]" );
+                if (pSrc != this)
+                {
+                    pSrc->SysMessage("IMPORT name [flags] [area distance]");
+                }
+                else
+                {
+                    g_Log.Event(LOGL_EVENT, "IMPORT name [flags] [area distance]");
+                }
 			}
 			break;
 		case SV_LOAD:
@@ -1388,11 +1683,25 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 					IMPFLAGS_BOTH|IMPFLAGS_ACCOUNT, INT16_MAX,
 					Arg_ppCmd[1], Arg_ppCmd[2] ))
 				{
-					pSrc->SysMessage( "Restore failed\n" );
+                    if (pSrc != this)
+                    {
+                        pSrc->SysMessage("Restore failed\n");
+                    }
+                    else
+                    {
+                        g_Log.Event(LOGL_EVENT, "Restore failed\n");
+                    }
 				}
 				else
 				{
-					pSrc->SysMessage( "Restore success\n" );
+                    if (pSrc != this)
+                    {
+                        pSrc->SysMessage("Restore success\n");
+                    }
+                    else
+                    {
+                        g_Log.Event(LOGL_EVENT, "Restore success\n");
+                    }
 				}
 			}
 			break;
@@ -1421,17 +1730,24 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 #ifdef _WIN32
 				if ( Sphere_GetOSInfo()->dwPlatformId != 2 )
 				{
-					g_Log.EventError( "Command not avaible on Windows 95/98/ME.\n" );
+					g_Log.EventError("Command not avaible on Windows 95/98/ME.\n");
 					return false;
 				}
 
 				if ( !SetProcessWorkingSetSize(GetCurrentProcess(), static_cast<SIZE_T>(-1), static_cast<SIZE_T>(-1)) )
 				{
-					g_Log.EventError( "Error during process shrink.\n" );
+					g_Log.EventError("Error during process shrink.\n");
 					return false;
 				}
 
-				pSrc->SysMessage( "Memory shrinked succesfully.\n" );
+                if (pSrc != this)
+                {
+                    pSrc->SysMessage("Memory shrinked succesfully.\n");
+                }
+                else
+                {
+                    g_Log.Event(LOGL_EVENT, "Memory shrinked succesfully.\n");
+                }
 #else
 				g_Log.EventError( "Command not avaible on *NIX os.\n" );
 				return false;
@@ -1450,7 +1766,14 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 #else
 				HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(s.GetArgRaw());
 #endif
-				pSrc->SysMessagef("IP%s unblocked\n", history.m_blocked ? "" : " already");
+                if (pSrc != this)
+                {
+                    pSrc->SysMessagef("IP%s unblocked\n", history.m_blocked ? "" : " already");
+                }
+                else
+                {
+                    g_Log.Event(LOGL_EVENT, "IP%s unblocked\n", history.m_blocked ? "" : " already");
+                }
 				history.setBlocked(false);
 			}
 			break;
@@ -1472,8 +1795,17 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			return CScriptObj::r_Verb(s, pSrc);
 	}
 
-	if ( pszMsg && *pszMsg )
-		pSrc->SysMessage(pszMsg);
+    if (pszMsg && *pszMsg)
+    {
+        if (pSrc != this)
+        {
+            pSrc->SysMessage(pszMsg);
+        }
+        else
+        {
+            g_Log.Event(LOGL_EVENT, pszMsg);
+        }
+    }
 
 	return true;
 	EXC_CATCH;
@@ -1600,7 +1932,7 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool bMessage)
 	if ( fPause )
 	{
 		m_fResyncPause = true;
-		g_Serv.SysMessagef("%s\n",g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
+        g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
 
 		if ( bMessage )
 			g_World.Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
@@ -1612,12 +1944,12 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool bMessage)
 	}
 	else
 	{
-		g_Serv.SysMessagef("%s\n",g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_RESTART));
+        g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_RESTART));
 		SetServerMode(SERVMODE_ResyncLoad);
 
 		if ( !g_Cfg.Load(true) )
 		{
-			g_Serv.SysMessagef("%s\n",g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
+            g_Log.EventError("%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
 			if ( bMessage )
 				g_World.Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
 			else if ( pSrc && pSrc->GetChar() )
@@ -1625,7 +1957,7 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool bMessage)
 		}
 		else
 		{
-			g_Serv.SysMessagef("%s\n",g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS));
+            g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS));
 			if ( bMessage )
 				g_World.Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS));
 			else if ( pSrc && pSrc->GetChar() )

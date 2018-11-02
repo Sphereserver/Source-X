@@ -14,6 +14,7 @@
 #include "../game/spheresvr.h"
 #include "ProfileTask.h"
 #include "resource.h"
+#include "ntwindow.h"
 #include <commctrl.h>	// NM_RCLICK
 
 #define WM_USER_POST_MSG		(WM_USER+10)
@@ -21,125 +22,6 @@
 #define IDC_M_LOG	10
 #define IDC_M_INPUT 11
 #define IDT_ONTICK	1
-
-class CNTWindow : public CSWindow						//	CNTWindow
-{
-public:
-	static const char *m_sClassName;
-	class CAboutDlg : public CDialogBase				//	CNTWindow::CAboutDlg
-	{
-	private:
-		bool OnInitDialog();
-		bool OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl );
-	public:
-		virtual BOOL DefDialogProc( UINT message, WPARAM wParam, LPARAM lParam );
-	};
-
-	class COptionsDlg : public CDialogBase				//	CNTWindow::COptionsDlg
-	{
-	private:
-		bool OnInitDialog();
-		bool OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl );
-	public:
-		virtual BOOL DefDialogProc( UINT message, WPARAM wParam, LPARAM lParam );
-	};
-
-	class CListTextConsole : public CTextConsole		//	CNTWindow::CListTextConsole
-	{
-		CListbox m_wndList;
-	public:
-		CListTextConsole( HWND hWndList )
-		{
-			m_wndList.m_hWnd = hWndList;
-		}
-		~CListTextConsole()
-		{
-			m_wndList.OnDestroy();
-		}
-		virtual PLEVEL_TYPE GetPrivLevel() const
-		{
-			return PLEVEL_Admin;
-		}
-		virtual LPCTSTR GetName() const
-		{
-			return "Stats";
-		}
-		virtual void SysMessage( LPCTSTR pszMessage ) const
-		{
-			if ( pszMessage == nullptr || ISINTRESOURCE(pszMessage))
-				return;
-
-			TCHAR * ppMessages[255];
-			size_t iQty = Str_ParseCmds( const_cast<TCHAR*>(pszMessage), ppMessages, CountOf(ppMessages), "\n" );
-			for ( size_t i = 0; i < iQty; ++i )
-			{
-				if ( *ppMessages[i] )
-					m_wndList.AddString( ppMessages[i] );
-			}
-		}
-	};
-
-	class CStatusWnd : public CDialogBase				//	CNTWindow::CStatusWnd
-	{
-	public:
-		CListbox m_wndListClients;
-		CListbox m_wndListStats;
-	private:
-		bool OnInitDialog();
-		bool OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl );
-	public:
-		void FillClients();
-		void FillStats();
-		virtual BOOL DefDialogProc( UINT message, WPARAM wParam, LPARAM lParam );
-	};
-
-	COLORREF		m_dwColorNew;	// set the color for the next block written.
-	COLORREF		m_dwColorPrv;
-	CRichEditCtrl	m_wndLog;
-	int				m_iLogTextLen;
-
-	CEdit			m_wndInput;		// the text input portion at the bottom.
-	int				m_iHeightInput;
-
-   	HFONT			m_hLogFont;
-
-	bool m_fLogScrollLock;	// lock with the rolling text ?
-
-private:
-	int OnCreate( HWND hWnd, LPCREATESTRUCT lParam );
-	bool OnSysCommand( WPARAM uCmdType, int xPos, int yPos );
-	void OnSize( WPARAM nType, int cx, int cy );
-	void OnDestroy();
-	void OnSetFocus( HWND hWndLoss );
-	bool OnClose();
-	void OnUserPostMessage( COLORREF color, CSString * psMsg );
-	LRESULT OnUserTrayNotify( WPARAM wID, LPARAM lEvent );
-	LRESULT OnNotify( int idCtrl, NMHDR * pnmh );
-	void	SetLogFont( const char * pszFont );
-
-public:
-	bool OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl );
-
-	static bool RegisterClass(char *className);
-	static LRESULT WINAPI WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
-
-	void List_Clear();
-	void List_Add( COLORREF color, LPCTSTR pszText );
-
-	CNTWindow();
-	virtual ~CNTWindow();
-
-	char	m_zCommands[5][256];
-};
-
-class CNTApp : public CWinApp
-{
-public:
-	static const char *m_sClassName;
-	CNTWindow m_wndMain;
-	CNTWindow::CStatusWnd	m_wndStatus;
-	CNTWindow::COptionsDlg	m_dlgOptions;
-};
 
 CNTApp theApp;
 
@@ -899,7 +781,7 @@ LRESULT WINAPI CNTWindow::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LP
 
 //************************************
 
-bool NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLine, int nCmdShow)
+bool CNTWindow::NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
 	theApp.InitInstance(SPHERE_TITLE " V" SPHERE_VERSION, hInstance, lpCmdLine);
 
@@ -936,7 +818,7 @@ bool NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLine, int nCmdShow)
 	return true;
 }
 
-void NTWindow_DeleteIcon()
+void CNTWindow::NTWindow_DeleteIcon()
 {
 	if ( Sphere_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
 	{
@@ -945,7 +827,7 @@ void NTWindow_DeleteIcon()
 	}
 }
 
-void NTWindow_Exit()
+void CNTWindow::NTWindow_Exit()
 {
 	// Unattach the window.
 	int iExitFlag = g_Serv.GetExitFlag();
@@ -961,7 +843,7 @@ void NTWindow_Exit()
 	}
 }
 
-void NTWindow_SetWindowTitle( LPCTSTR pszText )
+void CNTWindow::NTWindow_SetWindowTitle( LPCTSTR pszText )
 {
 	if ( theApp.m_wndMain.m_hWnd == nullptr )
 		return;
@@ -1013,7 +895,7 @@ void NTWindow_SetWindowTitle( LPCTSTR pszText )
 	}
 }
 
-bool NTWindow_PostMsgColor( COLORREF color )
+bool CNTWindow::NTWindow_PostMsgColor( COLORREF color )
 {
 	// Set the color for the next text.
 	if ( theApp.m_wndMain.m_hWnd == nullptr )
@@ -1029,7 +911,7 @@ bool NTWindow_PostMsgColor( COLORREF color )
 	return true;
 }
 
-bool NTWindow_PostMsg( LPCTSTR pszMsg )
+bool CNTWindow::NTWindow_PostMsg(ConsoleOutput *output )
 {
 	// Post a message to print out on the main display.
 	// If we use AttachThreadInput we don't need to post ?
@@ -1038,34 +920,15 @@ bool NTWindow_PostMsg( LPCTSTR pszMsg )
 
 	if ( theApp.m_wndMain.m_hWnd == nullptr )
 		return false;
-
-	COLORREF color = theApp.m_wndMain.m_dwColorNew;
-
-//	if ( g_Serv.m_dwParentThread != CThread::GetCurrentThreadId())
-//	{
-//		// A thread safe way to do text.
-//		CSString * psMsg = new CSString( pszMsg );
-//		ASSERT(psMsg);
-//		if ( ! theApp.m_wndMain.PostMessage( WM_USER_POST_MSG, (WPARAM) color, (LPARAM)psMsg ))
-//		{
-//			delete psMsg;
-//			return false;
-//		}
-//	}
-//	else
-//	{
-		// just add it now.
-		theApp.m_wndMain.List_Add( color, pszMsg );
-//	}
-
+    
+    AddConsoleOutput(output);
 	return true;
 }
 
-bool NTWindow_OnTick( int iWaitmSec )
+bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
 {
 	// RETURN: false = exit the app.
 
-	const char *m_sClassName = "NTWindow";
 	if ( iWaitmSec )
 	{
 		if ( !theApp.m_wndMain.m_hWnd || !theApp.m_wndMain.SetTimer(IDT_ONTICK, iWaitmSec) )
@@ -1073,6 +936,22 @@ bool NTWindow_OnTick( int iWaitmSec )
 			iWaitmSec = 0;
 		}
 	}
+
+    SwitchQueues();
+    _outMutex.lock();
+    while (!(*_qOutput)->empty())
+    {
+        auto output = (*_qOutput)->front();
+        if (output->GetHourColor() != -1)
+        {
+            theApp.m_wndMain.List_Add(output->GetHourColor(), output->GetHourString());
+        }
+        theApp.m_wndMain.List_Add(output->GetLogTypeColor(), output->GetLogTypeString());
+        theApp.m_wndMain.List_Add(output->GetTextColor(), output->GetTextString());
+        (*_qOutput)->pop();
+        delete output;
+    }
+    _outMutex.unlock();
 
 	// Give the windows message loops a tick.
 	for (;;)

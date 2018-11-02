@@ -4,6 +4,7 @@
 
 #include <vector>
 #include "../common/sphereproto.h"
+#include "../common/CLog.h"
 #include "CServer.h"
 #include "triggers.h"
 
@@ -87,10 +88,14 @@ void TriglistPrint()
 {
     for ( auto it = g_triggers.begin(), end = g_triggers.end(); it != end; ++it )
     {
-        if ( it->m_used )
-            g_Serv.SysMessagef("Trigger %s : used %d time%s.\n", it->m_name, it->m_used, (it->m_used > 1) ? "s" : "");
+        if (it->m_used)
+        {
+            g_Log.Event(LOGM_INIT, "Trigger %s : used %d time%s.\n", it->m_name, it->m_used, (it->m_used > 1) ? "s" : "");
+        }
         else
-            g_Serv.SysMessagef("Trigger %s : NOT used.\n", it->m_name);
+        {
+            g_Log.Event(LOGM_INIT, "Trigger %s : NOT used.\n", it->m_name);
+        }
     }
 }
 

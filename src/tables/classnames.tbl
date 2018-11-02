@@ -27,6 +27,7 @@ ADD(CCharPlayer,			"CCharPlayer");
 ADD(CClient,				"CClient");
 ADD(CDialogDef,				"CDialogDef");
 ADD(CDialogResponseArgs,	"CDialogResponseArgs");
+ADD(CNTWindow,              "CNTWindow");
 ADD(CSectorBase,			"CSectorBase");
 ADD(CSFileObj,				"CSFileObj");
 ADD(CSFileObjContainer,		"CSFileObjContainer");

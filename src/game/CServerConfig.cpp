@@ -5,6 +5,7 @@
 #include "../network/CSocket.h"
 #include "../network/network.h"
 #include "../sphere/ProfileTask.h"
+#include "../sphere/ntwindow.h"
 #include "clients/CAccount.h"
 #include "chars/CChar.h"
 #include "chars/CCharBase.h"
@@ -4173,7 +4174,7 @@ bool CServerConfig::Load( bool fResync )
 			pResFile->ReSync();
 
 #ifdef _WIN32
-		NTWindow_OnTick(0);
+        g_Window.NTWindow_OnTick(0);
 #endif
 		g_Serv.PrintPercent( (size_t)(j + 1), count);
 	}
@@ -4198,7 +4199,7 @@ bool CServerConfig::Load( bool fResync )
 	{
 		int total, used;
 		Triglist(total, used);
-		g_Serv.SysMessagef("Done loading scripts (%d of %d triggers used).\n", used, total);
+        g_Log.Event(LOGL_EVENT, "Done loading scripts (%d of %d triggers used).\n", used, total);
 	}
 	else
 		g_Log.Event(LOGM_INIT, "Done loading scripts.\n");
@@ -4254,7 +4255,7 @@ bool CServerConfig::Load( bool fResync )
 	}
 
 	LoadSortSpells();
-	g_Serv.SysMessage("\n");
+    g_Log.Event(LOGL_EVENT, "\n");
 
 
 	// Load crypt keys from SphereCrypt.ini
@@ -4450,7 +4451,7 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 	s.Close();
 
 #ifdef _WIN32
-	NTWindow_SetWindowTitle();
+    g_Window.NTWindow_SetWindowTitle();
 #endif
 	return true;
 }

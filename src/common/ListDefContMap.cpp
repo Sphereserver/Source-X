@@ -1,5 +1,6 @@
 
 #include "../common/sphere_library/sstringobjs.h"
+#include "../common/CLog.h"
 #include "../sphere/threads.h"
 #include "CExpression.h"
 #include "CScript.h"
@@ -577,7 +578,14 @@ void CListDefCont::DumpElements( CTextConsole * pSrc, lpctstr pszPrefix /* = nul
 	CSString strResult;
 
 	PrintElements(strResult);
-	pSrc->SysMessagef("%s%s=%s\n", static_cast<lpctstr>(pszPrefix), static_cast<lpctstr>(m_Key.GetPtr()), static_cast<lpctstr>(strResult));
+    if (pSrc->GetChar())
+    {
+        pSrc->SysMessagef("%s%s=%s\n", static_cast<lpctstr>(pszPrefix), static_cast<lpctstr>(m_Key.GetPtr()), static_cast<lpctstr>(strResult));
+    }
+    else
+    {
+        g_Log.Event(LOGL_EVENT, "%s%s=%s\n", static_cast<lpctstr>(pszPrefix), static_cast<lpctstr>(m_Key.GetPtr()), static_cast<lpctstr>(strResult));
+    }
 }
 
 size_t CListDefCont::GetCount() const

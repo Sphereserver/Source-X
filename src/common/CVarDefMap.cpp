@@ -664,10 +664,19 @@ void CVarDefMap::DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix ) const
 	if ( pszPrefix == nullptr )
 		pszPrefix = "";
 
+    bool fIsClient = pSrc->GetChar();
 	for ( DefSet::const_iterator i = m_Container.begin(); i != m_Container.end(); ++i )
 	{
 		const CVarDefCont * pVar = (*i);
-		pSrc->SysMessagef(pSrc->GetChar()? "%s%s=%s" : "%s%s=%s\n", static_cast<lpctstr>(pszPrefix), static_cast<lpctstr>(pVar->GetKey()), static_cast<lpctstr>(pVar->GetValStr()));
+
+        if (fIsClient)
+        {
+            pSrc->SysMessagef(pSrc->GetChar() ? "%s%s=%s" : "%s%s=%s\n", static_cast<lpctstr>(pszPrefix), static_cast<lpctstr>(pVar->GetKey()), static_cast<lpctstr>(pVar->GetValStr()));
+        }
+        else
+        {
+            g_Log.Event(LOGL_EVENT, pSrc->GetChar() ? "%s%s=%s" : "%s%s=%s\n", static_cast<lpctstr>(pszPrefix), static_cast<lpctstr>(pVar->GetKey()), static_cast<lpctstr>(pVar->GetValStr()));
+        }
 	}
 }
 

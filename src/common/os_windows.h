@@ -75,15 +75,7 @@
 	#define __except(P)		catch(int)
 #endif  // _MSC_VER
 
-
 const OSVERSIONINFO * Sphere_GetOSInfo();
-extern bool NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLinel, int nCmdShow);
-extern void NTWindow_Exit();
-extern void NTWindow_DeleteIcon();
-extern bool NTWindow_OnTick(int iWaitmSec);
-extern bool NTWindow_PostMsg(LPCTSTR pszMsg);
-extern bool NTWindow_PostMsgColor(COLORREF color);
-extern void NTWindow_SetWindowTitle(LPCTSTR pText = nullptr);
 
 
 #endif	// _INC_OS_WINDOWS_H

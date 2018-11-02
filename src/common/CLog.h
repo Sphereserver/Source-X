@@ -10,6 +10,7 @@
 #include "sphere_library/CSTime.h"
 #include "sphere_library/smutex.h"
 #include "common.h"
+#include "../sphere/ConsoleInterface.h"
 #include "../sphere/UnixTerminal.h"
 #include <exception>
 
@@ -189,7 +190,9 @@ private:
 	* @name SetColor
 	* @brief Changes current console text color to the specified one. Note, that the color should be reset after being set
 	*/
-	void SetColor(ConsoleTextColor color);
+    void SetColor(ConsoleTextColor color);
+public:
+    COLORREF GetColor(ConsoleTextColor color);
 } g_Log;		// Log file
 
 
