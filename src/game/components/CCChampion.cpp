@@ -32,7 +32,7 @@ CCChampion::~CCChampion()
 {
 };
 
-CCRET_TYPE CCChampion::OnTick()
+CCRET_TYPE CCChampion::OnTickComponent()
 {
     ADDTOCALLSTACK("CCChampion::OnTick");
     if (!_pRedCandles.empty())

@@ -149,7 +149,7 @@ public:
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;
     virtual void Copy(const CComponent *target) override;
     bool r_Load(CScript & s);  // Load a character from Script
-    virtual CCRET_TYPE OnTick();
+    virtual CCRET_TYPE OnTickComponent();
     /*
         Sets the Group to the specified type.
     */

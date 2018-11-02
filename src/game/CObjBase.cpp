@@ -75,7 +75,6 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 	m_CallingObjTrigger = nullptr;
 
 	m_wHue = HUE_DEFAULT;
-	m_timeout = 0;
 	m_timestamp = 0;
 
 	m_CanMask = 0;
@@ -3237,7 +3236,10 @@ void CObjBase::DupeCopy( const CObjBase * pObj )
 {
 	CObjBaseTemplate::DupeCopy( pObj );
 	m_wHue = pObj->GetHue();
-	// m_timeout = pObj->m_timeout;
+    if (pObj->IsTimerSet())
+    {
+        SetTimeout(pObj->GetTimerAdjusted());
+    }
 	m_TagDefs.Copy( &( pObj->m_TagDefs ) );
 	m_BaseDefs.Copy(&(pObj->m_BaseDefs));
 }

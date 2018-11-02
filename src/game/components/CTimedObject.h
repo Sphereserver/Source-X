@@ -13,6 +13,7 @@
 class CTimedObject
 {
 private:
+    THREAD_CMUTEX_DEF;
     int64 _timeout;
     PROFILE_TYPE _profileType;
     SimpleMutex _mutex;

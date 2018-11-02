@@ -169,10 +169,17 @@ void CSector::GoSleep()
     }
 
     CItem * pItemNext = nullptr;
-    CItem * pItem = static_cast <CItem*>( m_Items_Timer.GetHead());
+    CItem * pItem = static_cast <CItem*>(m_Items_Timer.GetHead());
     for (; pItem != nullptr; pItem = pItemNext)
     {
         pItem->GoSleep();
+    }
+    pItemNext = nullptr;
+    pItem = static_cast <CItem*>(m_Items_Inert.GetHead());
+    for (; pItem != nullptr; pItem = pItemNext)
+    {
+        pItemNext = pItem->GetNext();
+        pItem->GoAwake();
     }
 }
 
@@ -992,7 +999,7 @@ bool CSector::CanSleep() const
 		else
 			return true;	// no active client inside, instant sleep
 	}
-    static int maxloops[DIR_QTY] = {1}; // a max of 1 sector's checks in each direction
+    static int maxloops[DIR_QTY] = {1, 1, 1, 1, 1, 1, 1, 1}; // a max of 1 sector's checks in each direction
     static const CSector *pLast = nullptr;
     for (int i = 0; i < (int)DIR_QTY; ++i)// Check for adjacent's sectors sleeping allowance.
     {
@@ -1097,7 +1104,7 @@ void CSector::Restock()
             CCSpawn *pSpawn = pItem->GetSpawn();
             if (pSpawn)
             {
-                pSpawn->OnTick();
+                pSpawn->OnTickComponent();
             }
         }
     }

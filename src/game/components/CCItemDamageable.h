@@ -33,6 +33,6 @@ public:
     virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;
     virtual void Copy(const CComponent *target) override;
-    virtual CCRET_TYPE OnTick() override;
+    virtual CCRET_TYPE OnTickComponent() override;
 };
 #endif //_INC_CCItemDamageable_H

@@ -216,7 +216,7 @@ CCRET_TYPE CEntity::OnTick()
         CComponent *pComponent = it->second;
         if (pComponent)
         {
-            CCRET_TYPE iRet = pComponent->OnTick();
+            CCRET_TYPE iRet = pComponent->OnTickComponent();
             if (iRet == CCRET_CONTINUE)   // Continue the loop.
             {
                 continue;

@@ -5646,7 +5646,7 @@ bool CItem::OnTick()
 
 	EXC_TRY("Tick");
 
-	EXC_SET_BLOCK("timer trigger");
+    EXC_SET_BLOCK("sleep check");
 
     if (GetTopSector()->IsSleeping())
     {
@@ -5655,14 +5655,20 @@ bool CItem::OnTick()
         return true;
     }
 
+
+    EXC_SET_BLOCK("timer trigger");
 	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
 
 	if (( IsTrigUsed(TRIGGER_TIMER) ) || ( IsTrigUsed(TRIGGER_ITEMTIMER) ))
 	{
 		iRet = OnTrigger( ITRIG_TIMER, &g_Serv );
-		if( iRet == TRIGRET_RET_TRUE )
-			return true;
+        if (iRet == TRIGRET_RET_TRUE)
+        {
+            return true;
+        }
 	}
+
+    EXC_SET_BLOCK("component's ticking");
 
     /*
     * CComponent's ticking:
@@ -5674,14 +5680,12 @@ bool CItem::OnTick()
     CCRET_TYPE iCompRet = static_cast<CEntity*>(this)->OnTick();
     if (iCompRet != CCRET_CONTINUE) // if return = CCRET_TRUE or CCRET_FALSE
     {
-        return iCompRet;    // Stop here
+        return !iCompRet;    // Stop here
     }
 
 	EXC_SET_BLOCK("GetType");
-	IT_TYPE type = m_type;
-
 	EXC_SET_BLOCK("default behaviour");
-	switch ( type )
+	switch ( m_type )
 	{
 		case IT_CORPSE:
 			{
@@ -5803,28 +5807,6 @@ bool CItem::OnTick()
 				}
 			}
 			break;
-
-		case IT_SPAWN_CHAR:	// Spawn a creature (if we are under count).
-		case IT_SPAWN_ITEM:	// Spawn an item (if we are under count).
-			{
-				EXC_SET_BLOCK("default behaviour::IT_SPAWN"); // TODO: CCSpawn is a CComponent and so, it should be moved out of this switch to a loop running this CEntity's CComponents.
-                CCSpawn *pSpawn = static_cast<CCSpawn*>(GetComponent(COMP_SPAWN));
-                if (pSpawn)
-                {
-                    pSpawn->OnTick();
-                }
-			}
-			return true;
-        case IT_SPAWN_CHAMPION:
-            {
-                EXC_SET_BLOCK("default behaviour::IT_SPAWN_CHAMPION");
-                CCChampion *pChampion = static_cast<CCChampion*>(GetComponent(COMP_CHAMPION));
-                if (pChampion)
-                {
-                    pChampion->OnTick();
-                }
-            }
-        return true;
 
 		case IT_CROPS:
 		case IT_FOLIAGE:

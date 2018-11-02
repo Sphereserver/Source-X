@@ -12,6 +12,7 @@
 #include "../items/CItemBase.h"
 #include "../uo_files/uofiles_enums_itemid.h"
 #include "../uo_files/uofiles_enums_creid.h"
+#include "CTimedObject.h"
 
 
 class CCharBase;
@@ -105,8 +106,7 @@ public:
     * more1 Resource Check
     * resource (item/char) generation
     */
-    virtual CCRET_TYPE OnTick() override;
-
+    virtual CCRET_TYPE OnTickComponent() override;
     /**
     * @brief Removes everything created by this spawn, if still belongs to the spawn.
     */
@@ -182,6 +182,9 @@ public:
     virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;
     virtual void Copy(const CComponent *target) override;
+    /*virtual bool IsDeleted();
+    virtual void GoAwake();
+    virtual void GoSleep();*/
 };
 
 #endif // _INC_CCSpawn_H

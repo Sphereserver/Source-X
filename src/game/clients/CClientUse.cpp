@@ -298,7 +298,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			else
 			{
 				SysMessageDefault(DEFMSG_ITEMUSE_SPAWN_RESET);
-				pSpawn->OnTick();		// Forcing the spawn to work and create some objects ( START ).
+				pSpawn->OnTickComponent();		// Forcing the spawn to work and create some objects ( START ).
 			}
 			return true;
 		}

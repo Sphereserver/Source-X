@@ -202,7 +202,7 @@ bool CCFaction::r_Load(CScript & s)
     return true;
 }
 
-CCRET_TYPE CCFaction::OnTick()
+CCRET_TYPE CCFaction::OnTickComponent()
 {
     return CCRET_CONTINUE;
 }

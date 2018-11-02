@@ -2417,7 +2417,7 @@ void CWorld::OnTick()
                     }
                     else
                     {
-                        fRemove = !pItem->OnTick();
+                        fRemove = (pItem->OnTick() == false);
                         break;
                     }
                 }

@@ -30,7 +30,6 @@ class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, pub
 	static lpctstr const sm_szRefKeys[];    // All Instances of CItem or CChar have these base attributes.
 
 private:
-	int64 m_timeout;        // when does this rot away ? or other action. 0 = never, else system time
 	int64 m_timestamp;      // TimeStamp
 	HUE_TYPE m_wHue;			// Hue or skin color. (CItems must be < 0x4ff or so)
 	lpctstr m_RunningTrigger;   // Current trigger being run on this object. Used to prevent the same trigger being called over and over.

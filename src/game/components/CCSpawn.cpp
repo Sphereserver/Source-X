@@ -369,9 +369,9 @@ void CCSpawn::AddObj(CUID uid)
         pItem->ResendTooltip();
 }
 
-CCRET_TYPE CCSpawn::OnTick()
+CCRET_TYPE CCSpawn::OnTickComponent()
 {
-    ADDTOCALLSTACK("CCSpawn::OnTick");
+    ADDTOCALLSTACK("CCSpawn::OnTickComponent");
     int64 iMinutes;
     CItem *pItem = static_cast<CItem*>(GetLink());
     if (_iTimeHi <= 0)
@@ -380,29 +380,25 @@ CCRET_TYPE CCSpawn::OnTick()
     }
     else
     {
-        iMinutes = minimum(_iTimeHi, _iTimeLo) + Calc_GetRandVal(abs(_iTimeHi - _iTimeLo));
+        iMinutes = Calc_GetRandVal2(_iTimeLo, _iTimeHi);
     }
 
     if (iMinutes <= 0)
     {
         iMinutes = 1;
     }
-
-    if (pItem->IsTimerExpired())
-    {
-        pItem->SetTimeoutS(iMinutes * 60);	// set time to check again.
-    }
+    pItem->SetTimeoutS(iMinutes * 60);	// set time to check again.
 
     if (GetCurrentSpawned() >= GetAmount())
     {
-        return CCRET_CONTINUE;
+        return CCRET_TRUE;
     }
 
     CResourceDef *pDef = FixDef();
     if (!pDef)
     {
         g_Log.EventError("Bad Spawn point uid=0%08x. Invalid id=%s\n", (dword)pItem->GetUID(), g_Cfg.ResourceGetName(_idSpawn));
-        return CCRET_CONTINUE;
+        return CCRET_TRUE;
     }
 
     if (pItem->IsType(IT_SPAWN_CHAR))
@@ -413,7 +409,7 @@ CCRET_TYPE CCSpawn::OnTick()
     {
         GenerateItem(pDef);
     }
-    return CCRET_CONTINUE;
+    return CCRET_TRUE;
 }
 
 void CCSpawn::KillChildren()
@@ -863,7 +859,7 @@ bool CCSpawn::r_Verb(CScript & s, CTextConsole * pSrc)
         }
         case ISPV_RESET:
             KillChildren();
-            OnTick();
+            OnTickComponent();
             return true;
         case ISPV_START:
             pItem->SetTimeout(0);
@@ -895,3 +891,20 @@ void CCSpawn::Copy(const CComponent * target)
 
     // Not copying created objects.
 }
+/*
+bool CCSpawn::IsDeleted()
+{
+    ADDTOCALLSTACK("CCSpawn::IsDeleted");
+    return dynamic_cast<CItem*>(this)->IsDeleted();
+}
+
+void CCSpawn::GoAwake()
+{
+    CTimedObject::GoAwake();
+}
+
+void CCSpawn::GoSleep()
+{
+    CTimedObject::GoSleep();
+}
+*/

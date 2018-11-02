@@ -28,9 +28,9 @@ void CTimedObject::GoAwake()
     * if the timeout did expire then it got ignored on it's tick and removed from the tick's map so we add it again,
     * otherwise it's not needed since the timer is already there.
     */
-    if (_timeout > 0)
+    if ((_timeout > 0) && (_timeout < CServerTime::GetCurrentTime().GetTimeRaw()))
     {
-        SetTimer(_timeout);
+        SetTimeout(1);  // set to 1msec to tick it ASAP.
     }
     _fIsSleeping = false;
 }
@@ -62,7 +62,9 @@ void CTimedObject::SetTimer(int64 iDelayInMsecs)
     * Only called from CObjBase::r_LoadVal when server is loading to set the raw timer
     * instead of doing conversions to msecs.
     */
+    THREAD_CMUTEX.lock();
     _timeout = iDelayInMsecs;
+    THREAD_CMUTEX.unlock();
 }
 
 void CTimedObject::SetTimeout(int64 iDelayInMsecs)

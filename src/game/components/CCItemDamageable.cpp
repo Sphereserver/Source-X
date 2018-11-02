@@ -197,7 +197,7 @@ void CCItemDamageable::Copy(const CComponent * target)
     SetMaxHits(pTarget->GetMaxHits());
 }
 
-CCRET_TYPE CCItemDamageable::OnTick()
+CCRET_TYPE CCItemDamageable::OnTickComponent()
 {
     ADDTOCALLSTACK("CCItemDamageable::OnTick");
     return CCRET_CONTINUE;  // Skip code here, OnTick is done separately from OnTickStatsUpdate
