@@ -4087,7 +4087,7 @@ SKILL_TYPE CItem::GetSpellBookSkill()
 			return SKILL_SPELLWEAVING;
 		case IT_SPELLBOOK_MYSTIC:
 			return SKILL_MYSTICISM;
-		case IT_SPELLBOOK_BARD:
+		case IT_SPELLBOOK_MASTERY:
 		case IT_SPELLBOOK_EXTRA:
 		default:
 			break;

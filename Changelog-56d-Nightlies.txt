@@ -1270,3 +1270,10 @@ Added: Now Sectors store their adjacent sectors:
 02-11-2018, Nolok
 - Added: ModMaxHits, ModMaxMana, ModMaxStam properties. To avoid CONFLICTS, remove or comment the scripted functions with the same name in the sphere_events_npcs.scp of the default scriptpack.
 - Added: @StatChange fires also when a ModMax* property changes. ARGN1 = 12 for ModMaxHits, 13 for ModMaxMana and 14 ModMaxStam.
+- [Port from Source, 12-01-2017, Coruja] Fixed: FeatureSE setting on sphere.ini not working correctly.
+
+03-11-2018, Nolok
+- Fixed: Broken BTFISH encryption/decryption (used by clients <= 2.0.3 and >= 2.0.0x) and wrong login encryption/decryption algorithm chosen for some old clients < 2.0.0x.
+- Added: Initial support for very old clients (< 1.26.4) which use the same rotation cypher for both login and game server encryption.
+	Those clients require also a precise sequence of packets to be received and there isn't much documentation around. For now, some of them (tested with 1.25.35) work until after the character selection.
+- [SphereCrypt.ini] Added keys up to Classic Client 7.0.73 and Enhanced Client 4.0.73. Added keys for some old clients between versions 1.23.27 and 1.26.4.

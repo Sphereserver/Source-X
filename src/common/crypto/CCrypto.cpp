@@ -405,13 +405,13 @@ bool CCrypto::RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t o
 
 	// assume that clients prior to 2.0.4 do not double encrypt
 	// (note: assumption has been made based on the encryption type in spherecrypt.ini, further testing is required!)
-	if ( GetClientVer() < 0x200040 )
+	if ( GetClientVer() < 2000400u )
 	{
 		InitBlowFish();
 		InitTwoFish();
 		if (!Decrypt(pOutput, pInput, outLen, inLen))
         {
-            g_Log.EventError("NET-IN: RelayGameCryptStart failed (Decrypt, ClientVer < 0x200040).\n");
+            g_Log.EventError("NET-IN: RelayGameCryptStart failed (Decrypt, ClientVer < 2.00.04.0).\n");
             return false;
         }
         return true;
@@ -436,9 +436,9 @@ bool CCrypto::RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t o
 	bool bFoundEncrypt = false;
 	if ( inLen == 65 )
 	{
-		for (int i = ENC_NONE; i < ENC_QTY; ++i)
+		for (int i = ENC_NONE; i <= ENC_TFISH; ++i)
 		{
-			SetEncryptionType(static_cast<ENCRYPTION_TYPE>(i));
+			SetEncryptionType( (ENCRYPTION_TYPE)i );
 
 			InitBlowFish();
 			InitTwoFish();
@@ -488,26 +488,40 @@ bool CCrypto::Encrypt( byte * pOutput, const byte * pInput, size_t outLen, size_
 	if ( m_ConnectType == CONNECT_LOGIN )
 		return false;
 
-	if ( GetEncryptionType() == ENC_TFISH )
+    const ENCRYPTION_TYPE enc = GetEncryptionType();
+	if ( enc == ENC_TFISH )
 	{
 		if (!EncryptMD5( pOutput, pInput, outLen, inLen ))
             return false;
 	}
-
+    // It appears that prior to client version 1.26.04, the client performs no decryption of data received from any server.
+    //  Should we send unencrypted data?
+    /*
+    else if (enc == ENC_LOGIN)
+    {
+        //const dword dwOCryptMaskLo = m_CryptMaskLo, dwOCryptMaskHi = m_CryptMaskHi;
+        bool fRes = DecryptLogin(pOutput, pInput, outLen, inLen);
+        //m_CryptMaskLo = dwOCryptMaskLo;
+        //m_CryptMaskHi = dwOCryptMaskHi;
+        if (!fRes)
+            return false;
+    }
+    */
 	memcpy( pOutput, pInput, inLen );
     return true;
 }
 
-
-bool CCrypto::Decrypt( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen  )
+bool CCrypto::Decrypt( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen )
 {
 	ADDTOCALLSTACK("CCrypto::Decrypt");
 	if ( ! inLen )
 		return false;
 
-	if ( m_ConnectType == CONNECT_LOGIN )
+    ENCRYPTION_TYPE enc = GetEncryptionType();
+	if ( (m_ConnectType == CONNECT_LOGIN) || ( enc == ENC_LOGIN ) )
 	{
-		if (!DecryptLogin( pOutput, pInput, outLen, inLen ))
+        bool fRes = DecryptLogin( pOutput, pInput, outLen, inLen );
+        if (!fRes)
         {
             g_Log.EventError("NET-IN: Trying to decrypt (Login) too much data. Packet will not be parsed further.\n");
             return false;
@@ -525,39 +539,36 @@ bool CCrypto::Decrypt( byte * pOutput, const byte * pInput, size_t outLen, size_
         return true;
 	}
 
-	if ( GetEncryptionType() == ENC_NONE )
+	if ( enc == ENC_NONE )
 	{
+        if (outLen < inLen)
+        {
+            g_Log.EventError("NET-IN: Trying to decrypt (NoCrypt) too much data. Packet will not be parsed further.\n");
+            return false;
+        }
 		memcpy( pOutput, pInput, inLen );
 		return true;
 	}
 
-    if (GetEncryptionType() == ENC_TFISH || GetEncryptionType() == ENC_BTFISH)
+    if ( enc == ENC_TFISH || enc == ENC_BTFISH)
     {
         if (!DecryptTwoFish( pOutput, pInput, outLen, inLen ))
         {
-            g_Log.EventError("NET-IN: Trying to decrypt (TFISH/BTFISH=%s) too much data. Packet will not be parsed further.\n", (GetEncryptionType() == ENC_TFISH) ? "TFISH" : "BTFISH");
+            g_Log.EventError("NET-IN: Trying to decrypt (TFISH/BTFISH=%s) too much data. Packet will not be parsed further.\n", (enc == ENC_TFISH) ? "TFISH" : "BTFISH");
             return false;
         }
     }
 
-	if ( GetEncryptionType() == ENC_BFISH || GetEncryptionType() == ENC_BTFISH )
+	if ( enc == ENC_BFISH || enc == ENC_BTFISH )
 	{
-
-		if ( GetEncryptionType() == ENC_BTFISH )
+        bool fRes = DecryptBlowFish( pOutput, pInput, outLen, inLen );
+        if (!fRes)
         {
-            if (!DecryptBlowFish( pOutput, pOutput, outLen, inLen ))
-            {
+            if ( enc == ENC_BTFISH )
                 g_Log.EventError("NET-IN: Trying to decrypt (BTFISH) too much data. Packet will not be parsed further.\n");
-                return false;
-            }
-        }
-		else
-        {
-			if (!DecryptBlowFish( pOutput, pInput, outLen, inLen ))
-            {
+            else
                 g_Log.EventError("NET-IN: Trying to decrypt (BFISH) too much data. Packet will not be parsed further.\n");
-                return false;
-            }
+            return false;
         }
 	}
 
@@ -589,8 +600,7 @@ bool CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, size_t inLen )
 	SetClientVerIndex(0);
 	SetCryptMask(m_tmp_CryptMaskHi, m_tmp_CryptMaskLo);
 
-	size_t i = 0, iAccountNameLen = 0;
-	for (;;)
+	for (size_t i = 0, iAccountNameLen = 0;;)
 	{
 		if ( i >= client_keys.size() )
 		{
@@ -684,13 +694,12 @@ bool CCrypto::GameCryptStart( dword dwIP, byte * pEvent, size_t inLen )
 
 	bool bOut = false;
 
-	for ( size_t i = ENC_NONE; i < ENC_QTY; ++i )
+    // Auto-detect if the encryption is BFISH, BTFISH or TFISH
+	for ( size_t i = ENC_NONE; i <= ENC_TFISH; ++i )
 	{
-		SetEncryptionType(static_cast<ENCRYPTION_TYPE>(i));
-
+		SetEncryptionType( (ENCRYPTION_TYPE)i );
 		if ( GetEncryptionType() == ENC_TFISH || GetEncryptionType() == ENC_BTFISH )
 			InitTwoFish();
-
 		if ( GetEncryptionType() == ENC_BFISH || GetEncryptionType() == ENC_BTFISH )
 			InitBlowFish();
 
@@ -704,13 +713,66 @@ bool CCrypto::GameCryptStart( dword dwIP, byte * pEvent, size_t inLen )
 		DEBUG_MSG(("GameCrypt %" PRIuSIZE_T " (%" PRIu32 ") type %" PRIx8 "-%" PRIx8 "\n", i, GetClientVer(), m_Raw[0], pEvent[0]));
 #endif
 
-		if ( m_Raw[0] == 0x91 && m_Raw[34] == 0x00 && m_Raw[64] == 0x00 )
+		if ( m_Raw[0] == 0x91 )
 		{
-			// Ok the new detected encryption is ok
-			bOut = true;
-			break;
+            if (m_Raw[34] == 0x00 && m_Raw[64] == 0x00)
+            {
+                bOut = true;    // Ok the new detected encryption is ok (legit post-login packet: 0x91)
+                break;
+            }
 		}
 	}
+
+    // Auto-detect if the encryption is LOGIN (clients < 1.26.0 use as game encryption/decryption the same algorithm used for the login encryption)
+    if (!bOut)
+    {
+        const dword m_tmp_CryptMaskLo = (((~m_seed) ^ 0x00001357) << 16) | ((( m_seed) ^ 0xffffaaaa) & 0x0000ffff);
+        const dword m_tmp_CryptMaskHi = ((( m_seed) ^ 0x43210000) >> 16) | (((~m_seed) ^ 0xabcdffff) & 0xffff0000);
+        SetClientVerIndex(0);
+
+        for (size_t i = 0;;)
+        {
+            if ( i >= client_keys.size() )
+            {
+                // Unknown client !!! Set as unencrypted and let Sphere do the rest.
+#ifdef DEBUG_CRYPT_MSGS
+                DEBUG_ERR(("Unknown client, i = %" PRIuSIZE_T "\n", i));
+#endif
+                SetClientVerIndex(0);
+				SetCryptMask(m_tmp_CryptMaskHi, m_tmp_CryptMaskLo); // Hi - Lo
+                break;
+            }
+
+            // Set client version properties
+			SetCryptMask(m_tmp_CryptMaskHi, m_tmp_CryptMaskLo); // Hi - Lo
+            SetClientVerIndex(i);
+            if (GetEncryptionType() != ENC_LOGIN)
+            {
+                ++i;
+                continue;
+            }
+
+            // Test Decrypt
+            if (!Decrypt( m_Raw, pEvent, MAX_BUFFER, inLen ))
+            {
+                g_Log.EventError("NET-IN: LoginCryptStart failed (decrypt).\n");
+				SetCryptMask(m_tmp_CryptMaskHi, m_tmp_CryptMaskLo); // Hi - Lo
+                SetClientVerIndex(0);
+                return false;
+            }
+
+            if ( m_Raw[0] == 0x91 )
+            {
+                if (m_Raw[34] == 0x00 && m_Raw[64] == 0x00)
+                {
+                    bOut = true;    // Ok the new detected encryption is ok (legit post-login packet: 0x91)
+                    SetCryptMask(m_tmp_CryptMaskHi, m_tmp_CryptMaskLo); 
+                    break;
+                }
+            }
+            ++i;
+        }
+    }
 
 	// Well no ecryption guessed, set it to none and let Sphere do the dirty job :P
 	if ( !bOut )
@@ -721,7 +783,6 @@ bool CCrypto::GameCryptStart( dword dwIP, byte * pEvent, size_t inLen )
 	{
 		if ( GetEncryptionType() == ENC_TFISH || GetEncryptionType() == ENC_BTFISH )
 			InitTwoFish();
-
 		if ( GetEncryptionType() == ENC_BFISH || GetEncryptionType() == ENC_BTFISH )
 			InitBlowFish();
 	}

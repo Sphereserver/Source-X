@@ -85,7 +85,7 @@ private:
     void ClearFloor(char iFloor);
 
 private:
-    typedef std::map<ITEMID_TYPE, int> ValidItemsContainer;	// ItemID, FeatureMask
+    typedef std::map<ITEMID_TYPE, uint> ValidItemsContainer;	// ItemID, FeatureMask
     static ValidItemsContainer sm_mapValidItems;
     static bool LoadValidItems();
 

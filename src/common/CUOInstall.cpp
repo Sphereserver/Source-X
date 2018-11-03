@@ -659,7 +659,7 @@ void CVerDataMul::Load(CSFile & file)
 	QSort(0, dwQty - 1);
 
 #ifdef _DEBUG
-	for (size_t i = 0; i < (dwQty - 1); i++)
+	for (size_t i = 0; i < (dwQty - 1); ++i)
 	{
 		dword dwIndex1 = GetEntry(i)->GetIndex();
 		dword dwIndex2 = GetEntry(i + 1)->GetIndex();

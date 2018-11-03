@@ -3318,27 +3318,30 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 		}
 	}
 
-	int flags = g_Cfg.GetPacketFlag(true, (RESDISPLAY_VERSION)(account->GetResDisp()),
-		maximum(account->GetMaxChars(), (byte)(account->m_Chars.GetCharCount())));
-	if ( !target->GetNetState()->getClientType() )
-		flags |= 0x400;
-	writeInt32(flags);
+    if (tmVer > 1260000)
+    {
+        dword flags = g_Cfg.GetPacketFlag(true, (RESDISPLAY_VERSION)(account->GetResDisp()),
+            maximum(account->GetMaxChars(), (byte)(account->m_Chars.GetCharCount())));
+        if ( !target->GetNetState()->getClientType() )
+            flags |= 0x400;
+        writeInt32(flags);
 
-	if ( target->GetNetState()->isClientEnhanced() )
-	{
-		word iLastCharSlot = 0;
-		for ( size_t i = 0; i < count; ++i )
-		{
-			if ( !account->m_Chars.IsValidIndex(i) )
-				continue;
-			if ( account->m_Chars.GetChar(i) != account->m_uidLastChar )
-				continue;
+        if ( target->GetNetState()->isClientEnhanced() )
+        {
+            word iLastCharSlot = 0;
+            for ( size_t i = 0; i < count; ++i )
+            {
+                if ( !account->m_Chars.IsValidIndex(i) )
+                    continue;
+                if ( account->m_Chars.GetChar(i) != account->m_uidLastChar )
+                    continue;
 
-			iLastCharSlot = (word)i;
-			break;
-		}
-		writeInt16(iLastCharSlot);
-	}
+                iLastCharSlot = (word)i;
+                break;
+            }
+            writeInt16(iLastCharSlot);
+        }
+    }
 
 	push(target);
 }

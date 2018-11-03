@@ -34,6 +34,7 @@ enum ENCRYPTION_TYPE
 	ENC_BFISH,
 	ENC_BTFISH,
 	ENC_TFISH,
+    ENC_LOGIN,  // the same login encryption is used by old clients (< 1.26.0) for game encryption/decryption
 	ENC_QTY
 };
 

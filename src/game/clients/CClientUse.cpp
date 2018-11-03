@@ -485,12 +485,9 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_SPELLBOOK_NINJITSU:
 		case IT_SPELLBOOK_ARCANIST:
 		case IT_SPELLBOOK_MYSTIC:
-		case IT_SPELLBOOK_BARD:
+		case IT_SPELLBOOK_MASTERY:
         {
-            {
-                addItem(m_pChar->GetPackSafe());
-            }
-            addItem(pItem);
+            //addItem(m_pChar->GetPackSafe());
             addSpellbookOpen(pItem);
             return true;
         }

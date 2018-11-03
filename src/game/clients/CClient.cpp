@@ -1494,10 +1494,11 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					if ( ppArgs[2] )
 						affix = Exp_GetVal( ppArgs[2] );
 
-					if ( hue == -1 )	hue = HUE_TEXT_DEF;
+					if ( hue == -1 )
+                        hue = HUE_TEXT_DEF;
 
 					CSString CArgs;
-					for (int i = 4; i < iArgQty; i++ )
+					for (int i = 4; i < iArgQty; ++i )
 					{
 						if ( CArgs.GetLength() )
 							CArgs += "\t";

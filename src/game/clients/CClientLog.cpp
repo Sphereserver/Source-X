@@ -903,8 +903,10 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 					if ( tmSid != 0 && tmSid == pEvent->CharListReq.m_Account )
 					{
 						// request client version if the client has not reported it to server yet
-						if ( tmVerReported == 0 )
+						if ( (tmVerReported == 0) && (tmVer > 1260400) )
+                        {   // if we send this packet to clients < 1.26.04.00 we'll desynchronize the stream and break the login process
 							new PacketClientVersionReq(this);
+                        }
 
 						if ( tmVerReported != 0 )
 						{

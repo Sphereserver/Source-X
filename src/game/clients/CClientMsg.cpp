@@ -1496,7 +1496,7 @@ size_t CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 		pPacket->writeStringFixedASCII(pChar->GetName(), MAX_NAME_SIZE);
 		pPacket->writeStringFixedASCII("", MAX_NAME_SIZE);
 
-		count++;
+		++count;
 	}
 
 	// always show max count for some stupid reason. (client bug)
@@ -1505,7 +1505,7 @@ size_t CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 	if (GetNetState()->isClientVersion(MINCLIVER_PADCHARLIST) || !GetNetState()->getCryptVersion())
 		iClientMin = maximum(iQty, 5);
 
-	for ( ; count < iClientMin; count++)
+	for ( ; count < iClientMin; ++count)
 	{
 		pPacket->writeStringFixedASCII("", MAX_NAME_SIZE);
 		pPacket->writeStringFixedASCII("", MAX_NAME_SIZE);
@@ -2096,6 +2096,9 @@ void CClient::addBondedStatus( const CChar * pChar, bool bIsDead ) const
 void CClient::addSpellbookOpen( CItem * pBook )
 {
 	ADDTOCALLSTACK("CClient::addSpellbookOpen");
+    // NOTE: New spellbook types needs tooltip feature enabled to display gump content.
+    //		 Enhanced clients need tooltip on all spellbook types otherwise it will crash.
+    //		 Clients can also crash if open spellbook gump when spellbook item is not loaded yet.
 
 	if ( !m_pChar )
 		return;
@@ -2107,9 +2110,6 @@ void CClient::addSpellbookOpen( CItem * pBook )
 			return;
 	}
 
-	// NOTE: if the spellbook item is not present on the client it will crash.
-	// count what spells I have.
-
 	if ( pBook->GetDispID() == ITEMID_SPELLBOOK2 )
 	{
 		// weird client bug.
@@ -2118,18 +2118,17 @@ void CClient::addSpellbookOpen( CItem * pBook )
 		return;
 	}
 
+    // count what spells I have.
 	int count = pBook->GetSpellcountInBook();
 	if ( count == -1 )
 		return;
-	addItem(pBook);
+	addItem(pBook); 	// NOTE: if the spellbook item is not present on the client it will crash.
 	OpenPacketTransaction transaction(this, PacketSend::PRI_NORMAL);
 	addOpenGump( pBook, GUMP_OPEN_SPELLBOOK );
 
-	//
 	// New AOS spellbook packet required by client 4.0.0 and above.
 	// Old packet is still required if both FEATURE_AOS_TOOLTIP and FEATURE_AOS_UPDATE aren't sent.
-	//
-	if ( PacketSpellbookContent::CanSendTo(GetNetState()) && GetNetState()->isClientVersion(MINCLIVER_SPELLBOOK) && IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
+	if ( PacketSpellbookContent::CanSendTo(GetNetState()) && IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
 	{
 		// Handle new AOS spellbook stuff (old packets no longer work)
 		new PacketSpellbookContent( this, pBook, (word)(pBook->Item_GetDef()->m_ttSpellbook.m_iOffset + 1) );
@@ -2762,9 +2761,18 @@ byte CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, 
 		return PacketLoginError::Blocked;	//Setup_Start() returns false only when login blocked by Return 1 in @Login
 	}*/
 
-	new PacketEnableFeatures(this,
-		g_Cfg.GetPacketFlag( false, (RESDISPLAY_VERSION)(m_pAccount->GetResDisp()),
-		(uchar)(maximum(m_pAccount->GetMaxChars(), m_pAccount->m_Chars.GetCharCount()))) );
+    dword dwFeatureFlags;
+    dword dwCliVer = m_Crypt.GetClientVer();
+    if ( dwCliVer && (dwCliVer < 1260000) )
+    {
+        dwFeatureFlags = 0x03;
+    }
+    else
+    {
+        uchar uiChars = (uchar)(maximum(m_pAccount->GetMaxChars(), m_pAccount->m_Chars.GetCharCount()));
+        dwFeatureFlags = g_Cfg.GetPacketFlag( false, (RESDISPLAY_VERSION)(m_pAccount->GetResDisp()), uiChars );
+    }
+	new PacketEnableFeatures(this, dwFeatureFlags);
 	new PacketCharacterList(this);
 
 	m_Targ_Mode = CLIMODE_SETUP_CHARLIST;

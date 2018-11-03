@@ -2394,13 +2394,12 @@ void CServerConfig::LoadSortSpells()
 
 //*************************************************************
 
-int CServerConfig::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar chars )
+uint CServerConfig::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar chars )
 {
 	// This is needed by the packet 0xB9, which is sent to the client very early, before we can know if this is a 2D, KR, EC, 3D client.
 	// Using the NetState here to know which kind of client is it is pointless, because at this time the client type is always the default value (2D).
 
-	int retValue = 0;
-	bool bResOk = false;
+	uint retValue = 0;
 
 	// retValue size:
 	//	byte[2] feature# (<= 6.0.14.1)
@@ -2434,34 +2433,29 @@ int CServerConfig::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar 
 
 		// T2A - LBR don't have char list flags
 
-		bResOk = ( res >= RDS_AOS );
-		if ( bResOk )
+		if ( res >= RDS_AOS )
 		{
 			retValue |= ( m_iFeatureAOS & FEATURE_AOS_POPUP ) ? 0x008 : 0x00;
 			retValue |= ( m_iFeatureAOS & FEATURE_AOS_UPDATE_B ) ? 0x020 : 0x00;
 		}
 
-		bResOk = ( res >= RDS_SE );
-		if ( bResOk )
+		if ( res >= RDS_SE )
 		{
-			retValue |= ( m_iFeatureSE & FEATURE_SE_UPDATE ) ? 0x080 : 0x00;
+			retValue |= ( m_iFeatureSE & FEATURE_SE_NINJASAM ) ? 0x080 : 0x00;
 		}
 
-		bResOk = ( res >= RDS_ML );
-		if ( bResOk )
+		if ( res >= RDS_ML )
 		{
 			retValue |= ( m_iFeatureML & FEATURE_ML_UPDATE ) ? 0x0100 : 0x00;
 		}
 
-		bResOk = ( res >= RDS_KR );
-		if ( bResOk )
+		if ( res >= RDS_KR )
 		{
 			retValue |= ( m_iFeatureKR & FEATURE_KR_UPDATE ) ? 0x200 : 0x00;
 			retValue |= ( m_iFeatureKR & FEATURE_KR_CLIENTTYPE ) ? 0x400 : 0x00;
 		}
 
-		bResOk = ( res >= RDS_SA );
-		if ( bResOk )
+		if ( res >= RDS_SA )
 		{
 			retValue |= ( m_iFeatureSA & FEATURE_SA_MOVEMENT ) ? 0x4000 : 0x00;
 		}
@@ -2496,38 +2490,31 @@ int CServerConfig::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar 
 		0x40000:	enable Gothic housing tiles
 		0x80000:	enable Rustic housing tiles
 		*/
-		bResOk = ( res >= RDS_T2A );
-		if ( bResOk )
+		if ( res >= RDS_T2A )
 		{
 			retValue |= ( m_iFeatureT2A & FEATURE_T2A_UPDATE ) ? CLI_FEAT_T2A_FULL : 0x00;
 			retValue |= ( m_iFeatureT2A & FEATURE_T2A_CHAT ) ? CLI_FEAT_T2A_CHAT : 0x00;
 		}
 
-		bResOk = ( res >= RDS_LBR );
-		if ( bResOk )
+		if ( res >= RDS_LBR )
 		{
 			retValue |= ( m_iFeatureLBR & FEATURE_LBR_UPDATE ) ? CLI_FEAT_LBR_FULL : 0x00;
 			retValue |= ( m_iFeatureLBR & FEATURE_LBR_SOUND  ) ? CLI_FEAT_LBR_SOUND : 0x00;
 		}
 
-		bResOk = ( res >= RDS_AOS );
-		if ( bResOk )
-			retValue |= ( m_iFeatureAOS & FEATURE_AOS_UPDATE_A ) ? 0x08010 : 0x00;
+		if ( res >= RDS_AOS )
+			retValue |= ( m_iFeatureAOS & FEATURE_AOS_UPDATE_A ) ? 0x08000|0x10 : 0x00;
 
-		bResOk = ( res >= RDS_SE );
-		if ( bResOk )
+		if ( res >= RDS_SE )
 			retValue |= ( m_iFeatureSE & FEATURE_SE_NINJASAM ) ? 0x040 : 0x00;
 
-		bResOk = ( res >= RDS_ML );
-		if ( bResOk )
+		if ( res >= RDS_ML )
 			retValue |= ( m_iFeatureML & FEATURE_ML_UPDATE ) ? 0x080 : 0x00;
 
-		bResOk = ( res >= RDS_SA );
-		if ( bResOk )
+		if ( res >= RDS_SA )
 			retValue |= ( m_iFeatureSA & FEATURE_SA_UPDATE ) ? 0x10000 : 0x00;
 
-		bResOk = ( res >= RDS_TOL );
-		if ( bResOk )
+		if ( res >= RDS_TOL )
 			retValue |= ( m_iFeatureTOL & FEATURE_TOL_UPDATE ) ? 0x400000 : 0x00;
 
 		retValue |= ( m_iFeatureExtra & FEATURE_EXTRA_CRYSTAL ) ? 0x0200 : 0x00;

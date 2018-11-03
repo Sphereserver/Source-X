@@ -1817,7 +1817,7 @@ bool CItemMultiCustom::IsValidItem(ITEMID_TYPE id, CClient * pClientSrc, bool bM
         return false;
 
     // check if client enabled features contains the item FeatureMask
-    int iFeatureFlag = g_Cfg.GetPacketFlag(false, (RESDISPLAY_VERSION)(pClientSrc->GetResDisp()));
+    uint iFeatureFlag = g_Cfg.GetPacketFlag(false, (RESDISPLAY_VERSION)(pClientSrc->GetResDisp()));
     if ((iFeatureFlag & it->second) != it->second)
         return false;
 
@@ -1832,7 +1832,8 @@ bool CItemMultiCustom::LoadValidItems()
     if (!sm_mapValidItems.empty())	// already loaded?
         return true;
 
-    static const char * sm_szItemFiles[][32] = {
+    static const char * sm_szItemFiles[][32] =
+    {
         // list of files containing valid items
         { "doors.txt", "Piece1", "Piece2", "Piece3", "Piece4", "Piece5", "Piece6", "Piece7", "Piece8", nullptr },
         { "misc.txt", "Piece1", "Piece2", "Piece3", "Piece4", "Piece5", "Piece6", "Piece7", "Piece8", nullptr },
@@ -1854,12 +1855,12 @@ bool CItemMultiCustom::LoadValidItems()
 
     EXC_TRY("LoadCSVFiles");
 
-    for (i = 0; sm_szItemFiles[i][0] != nullptr || !bMultiFile; i++, iFileIndex++)
+    for (i = 0; sm_szItemFiles[i][0] != nullptr || !bMultiFile; ++i, ++iFileIndex)
     {
         if (sm_szItemFiles[i][0] == nullptr)
         {
             bMultiFile = true;
-            iFileIndex--;
+            --iFileIndex;
             continue;
         }
 
@@ -1868,9 +1869,9 @@ bool CItemMultiCustom::LoadValidItems()
 
         while (g_Install.m_CsvFiles[iFileIndex].ReadNextRowContent(csvDataRow))
         {
-            for (int ii = 1; sm_szItemFiles[i][ii] != nullptr; ii++)
+            for (int ii = 1; sm_szItemFiles[i][ii] != nullptr; ++ii)
             {
-                ITEMID_TYPE itemid = (ITEMID_TYPE)(ATOI(csvDataRow[sm_szItemFiles[i][ii]].c_str()));
+                ITEMID_TYPE itemid = (ITEMID_TYPE)std::stoul(csvDataRow[sm_szItemFiles[i][ii]], nullptr, 10);
                 if (itemid <= 0 || itemid >= ITEMID_MULTI)
                     continue;
 
@@ -1881,7 +1882,7 @@ bool CItemMultiCustom::LoadValidItems()
                         continue;
                 }
 
-                sm_mapValidItems[itemid] = ATOI(csvDataRow["FeatureMask"].c_str());
+                sm_mapValidItems[itemid] = (uint)std::stoul(csvDataRow["FeatureMask"], nullptr, 10);
             }
         }
 

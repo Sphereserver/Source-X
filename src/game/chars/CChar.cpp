@@ -1857,7 +1857,7 @@ bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CChar::r_GetRef");
 
-    if (static_cast<CEntity*>(this)->r_GetRef(pszKey, pRef))
+    if (CEntity::r_GetRef(pszKey, pRef))
     {
         return true;
     }
@@ -2820,12 +2820,6 @@ do_default:
         case CHC_MODMAXSTAM:
             sVal.FormatSVal( Stat_GetMaxMod(STAT_DEX) );
             break;
-		case CHC_HIT:
-			{
-			}break;
-		case CHC_HITTRY:
-			{
-			}break;
 		case CHC_HOME:
 			sVal = m_ptHome.WriteUsed();
 			break;
@@ -2834,7 +2828,8 @@ do_default:
 				//sVal.FormatVal(IsStatFlag(STATF_NIGHTSIGHT));
 				CVarDefCont * pVar = GetDefKey(pszKey, true);
 				sVal.FormatLLVal(pVar ? pVar->GetValNum() : 0);
-				}break;
+			}
+            break;
 		case CHC_NOTOGETFLAG:
 			{
 				pszKey += 11;
@@ -2975,7 +2970,7 @@ bool CChar::r_LoadVal( CScript & s )
         case CHC_DELHOUSE:
         {
             dword dwUID = s.GetArgDWVal();
-            if (dwUID == UINT_MAX)
+            if (dwUID == UINT32_MAX)
             {
                 GetMultiStorage()->ClearHouses();
             }
@@ -3180,7 +3175,7 @@ bool CChar::r_LoadVal( CScript & s )
 						if ( !m_lastAttackers.empty() )
 						{
 							int idx = s.GetArgVal();
-							CChar *pChar = static_cast<CChar *>(static_cast<CUID>(idx).CharFind());
+							CChar *pChar = static_cast<CChar *>(CUID(idx).CharFind());
 							if (!pChar)
 								return false;
 							Attacker_Delete(idx, false, ATTACKER_CLEAR_SCRIPT);
@@ -3189,7 +3184,7 @@ bool CChar::r_LoadVal( CScript & s )
 					}
 					else if ( !strnicmp(pszKey, "ADD", 3) )
 					{
-						CChar *pChar = static_cast<CUID>(s.GetArgVal()).CharFind();
+						CChar *pChar = CUID(s.GetArgVal()).CharFind();
 						if ( !pChar )
 							return false;
 						Fight_Attack(pChar);
@@ -3197,7 +3192,7 @@ bool CChar::r_LoadVal( CScript & s )
 					}
 					else if ( !strnicmp(pszKey, "TARGET", 6) )
 					{
-						CChar *pChar = static_cast<CUID>(s.GetArgVal()).CharFind();
+						CChar *pChar = CUID(s.GetArgVal()).CharFind();
 						if ( !pChar || (pChar == this) )	// can't set ourself as target
 						{
 							m_Fight_Targ_UID.InitUID();
@@ -3246,7 +3241,7 @@ bool CChar::r_LoadVal( CScript & s )
 			return false;
 		}
 		case CHC_BODY:
-			SetID(static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType( RES_CHARDEF, s.GetArgStr())));
+			SetID( (CREID_TYPE)(g_Cfg.ResourceGetIndexType( RES_CHARDEF, s.GetArgStr())) );
 			break;
 		case CHC_BREATH:
 			{

@@ -915,7 +915,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 	case IT_SPELLBOOK_NINJITSU:
 	case IT_SPELLBOOK_ARCANIST:
 	case IT_SPELLBOOK_MYSTIC:
-	case IT_SPELLBOOK_BARD:
+	case IT_SPELLBOOK_MASTERY:
 	{
 		int count = pItem->GetSpellcountInBook();
 		if (count > 0)

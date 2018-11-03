@@ -2,11 +2,13 @@
 #include "CCrypto.h"
 
 // Encryption used when logging in, to access the server list
-bool CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen  )
+bool CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen )
 {
 	ADDTOCALLSTACK("CCrypto::DecryptLogin");
+    // Algorithm: a kind of rotation cipher
 
-	if ( GetClientVer() >= 0x125370 )
+    const dword dwCliVer = GetClientVer();
+	if ( dwCliVer >= 1253700u )
 	{
 		for ( size_t i = 0; i < inLen; ++i )
 		{
@@ -21,9 +23,17 @@ bool CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, 
 		}
 		return true;
 	}
-
-	if ( GetClientVer() == 0x125360 )
+    else if ( dwCliVer == 1253600u )
 	{
+        // Special multi key.
+        /*
+        #define CLIKEY_12536_HI1 0x387fc5cc
+        #define CLIKEY_12536_HI2 0x35ce9581
+        #define CLIKEY_12536_HI3 0x07afcc37
+        #define CLIKEY_12536_LO1 0x021510c6
+        #define CLIKEY_12536_LO2 0x4c3a1353
+        #define CLIKEY_12536_LO3 0x16ef783f
+        */
 		for ( size_t i = 0; i < inLen; ++i )
 		{
             if (i >= outLen)
@@ -44,8 +54,7 @@ bool CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, 
 		}
 		return true;
 	}
-
-	if ( GetClientVer() ) // CLIENT_VER <= 0x125350
+    else if ( dwCliVer ) // CLIENT_VER <= 1253500
 	{
 		for ( size_t i = 0; i < inLen; ++i )
 		{
@@ -59,9 +68,12 @@ bool CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, 
 		}
 		return true;
 	}
-
-	if ( pOutput != pInput )
-		memcpy( pOutput, pInput, inLen );
+    else if (pOutput != pInput)   // no crypt
+    {
+        if (inLen >= outLen)
+            return false; // error: i'm trying to write more bytes than the output buffer length
+        memcpy( pOutput, pInput, inLen );
+    }
 
     return true;
 }
