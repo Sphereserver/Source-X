@@ -135,7 +135,7 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 	{
 		iDecayTimer = (m_pPlayer) ? g_Cfg.m_iDecay_CorpsePlayer : g_Cfg.m_iDecay_CorpseNPC;
         if (iDecayTimer != -1)
-            iDecayTimer *= 60 * MSECS_PER_SEC;
+            iDecayTimer *= 60;
 		pCorpse->SetTimeStamp(g_World.GetCurrentTime().GetTimeRaw());	// death time
 		if (Attacker_GetLast())
 			pCorpse->m_itCorpse.m_uidKiller = Attacker_GetLast()->GetUID();
@@ -154,7 +154,14 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 	if ( !(uiFlags & DEATH_NOLOOTDROP) )		// move non-newbie contents of the pack to corpse
 		DropAll( pCorpse );
 	
-	pCorpse->MoveToDecay(GetTopPoint(), iDecayTimer);
+    if (iDecayTimer != -1)
+    {
+        pCorpse->MoveToDecay(GetTopPoint(), iDecayTimer);
+    }
+    else
+    {
+        pCorpse->MoveTo(GetTopPoint());
+    }
 	return pCorpse;
 }
 

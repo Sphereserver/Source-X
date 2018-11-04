@@ -223,10 +223,10 @@ void CSector::GoAwake()
     * of NPCs being stop until you enter the sector, or all the spawns
     * generating NPCs at once.
     */
-    static bool bAdjacent = 0;
-    if (bAdjacent == 0)
+    static CSector *pLast = nullptr;
+    if (pLast != this)
     {
-        bAdjacent = 1;  // do this only for the awaken sector
+        pLast = this;  // do this only for the awaken sector
         for (int i = 0; i < (int)DIR_QTY; ++i)
         {
             CSector *pSector = GetAdjacentSector((DIR_TYPE)i);
@@ -999,24 +999,29 @@ bool CSector::CanSleep() const
 		else
 			return true;	// no active client inside, instant sleep
 	}
-    static int maxloops[DIR_QTY] = {1, 1, 1, 1, 1, 1, 1, 1}; // a max of 1 sector's checks in each direction
+    /*static int maxloops[DIR_QTY] = {1, 1, 1, 1, 1, 1, 1, 1}; // a max of 1 sector's checks in each direction
     static const CSector *pLast = nullptr;
-    for (int i = 0; i < (int)DIR_QTY; ++i)// Check for adjacent's sectors sleeping allowance.
+    
+    if (pLast != this)
     {
-        const CSector *pSector = GetAdjacentSector(DIR_N);
-        /*
-        * Only check if this sector exist and it's not the last checked (sectors in the hedges of the map doesn't have adjacent on those directions)
-        * && Only check if the sector isn't sleeping (IsSleeping()) and then check if CanSleep().
-        *
-        * || if the counter in this direction reached 0
-        */
-        if ((pSector && (pSector!= pLast) && (!pSector->IsSleeping() && !pSector->CanSleep())) || (maxloops[i] == 0))
+        for (int i = 0; i < (int)DIR_QTY; ++i)// Check for adjacent's sectors sleeping allowance.
         {
-            return false;   // asume the base sector can't sleep.
+            pLast = GetAdjacentSector((DIR_TYPE)i);    // set this as the last sector to avoid this code in the adjacent one and return if it can sleep or not instead of searching its adjacents.
+            --maxloops[i]; //Decrease the counter for this direction in each iteration to avoid an infinite loop.
+            /*
+            * Only check if this sector exist and it's not the last checked (sectors in the hedges of the map doesn't have adjacent on those directions)
+            * && Only check if the sector isn't sleeping (IsSleeping()) and then check if CanSleep().
+            */
+            /*if (!pLast || pLast->IsSleeping())
+            {
+                continue;
+            }
+            if (!pLast->CanSleep())
+            {
+                return false;   // asume the base sector can't sleep.
+            }
         }
-        --maxloops[i]; //Decrease the counter for this direction in each iteration to avoid an infinite loop.
-        pLast = this;
-    }
+    }*/
 	//default behaviour
 	return (-g_World.GetTimeDiff(GetLastClientTime()) > g_Cfg.m_iSectorSleepMask); // Sector Sleep timeout.
 }
