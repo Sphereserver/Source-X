@@ -224,7 +224,7 @@ void CSector::GoAwake()
     * generating NPCs at once.
     */
     static CSector *pLast = nullptr;
-    if (pLast != this)
+    if (pLast && pLast != this)
     {
         pLast = this;  // do this only for the awaken sector
         for (int i = 0; i < (int)DIR_QTY; ++i)
