@@ -4,7 +4,9 @@
 #include "../common/sphere_library/CSString.h"
 #include "../common/sphere_library/smutex.h"
 #include <queue>
-#include <windef.h>
+#ifdef _WINDOWS
+    #include <windef.h>
+#endif
 
 class ConsoleOutput
 {

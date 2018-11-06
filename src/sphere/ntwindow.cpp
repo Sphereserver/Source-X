@@ -942,11 +942,6 @@ bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
     while (!(*_qOutput)->empty())
     {
         auto output = (*_qOutput)->front();
-        if (output->GetHourColor() != -1)
-        {
-            theApp.m_wndMain.List_Add(output->GetHourColor(), output->GetHourString());
-        }
-        theApp.m_wndMain.List_Add(output->GetLogTypeColor(), output->GetLogTypeString());
         theApp.m_wndMain.List_Add(output->GetTextColor(), output->GetTextString());
         (*_qOutput)->pop();
         delete output;
