@@ -4,14 +4,10 @@
 #include "../common/sphere_library/CSString.h"
 #include "../common/sphere_library/smutex.h"
 #include <queue>
+#include <windef.h>
 
 class ConsoleOutput
 {
-    CSString _sContextString;
-    COLORREF _iHourColor;
-    CSString _sHourString;
-    COLORREF _iLogTypeColor;
-    CSString _sLogTypeString;
     COLORREF _iTextColor;
     CSString _sTextString;
 public:
@@ -19,10 +15,6 @@ public:
     ConsoleOutput(COLORREF iLogColor, CSString sLogString);
     ConsoleOutput(CSString sLogString);
     ~ConsoleOutput();
-    COLORREF GetHourColor();
-    CSString GetHourString();
-    COLORREF GetLogTypeColor();
-    CSString GetLogTypeString();
     COLORREF GetTextColor();
     CSString GetTextString();
 };

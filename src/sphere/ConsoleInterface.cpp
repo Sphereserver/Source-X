@@ -18,26 +18,6 @@ ConsoleOutput::~ConsoleOutput()
 {
 }
 
-COLORREF ConsoleOutput::GetHourColor()
-{
-    return _iHourColor;
-}
-
-CSString ConsoleOutput::GetHourString()
-{
-    return _sHourString;
-}
-
-COLORREF ConsoleOutput::GetLogTypeColor()
-{
-    return _iLogTypeColor;
-}
-
-CSString ConsoleOutput::GetLogTypeString()
-{
-    return _sLogTypeString;
-}
-
 COLORREF ConsoleOutput::GetTextColor()
 {
     return _iTextColor;
