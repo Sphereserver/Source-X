@@ -1354,12 +1354,12 @@ void CItem::SetTimeoutS(int64 iSeconds)
 
 void CItem::SetTimeoutT(int64 iTicks)
 {
-    SetTimeout(iTicks * TICKS_PER_SEC);
+    SetTimeout(iTicks * MSECS_PER_TICK);
 }
 
 void CItem::SetTimeoutD(int64 iTenths)
 {
-    SetTimeout(iTenths * TENTHS_PER_SEC);
+    SetTimeout(iTenths * MSECS_PER_TENTH);
 }
 
 void CItem::OnMoveFrom()	// Moving from current location.

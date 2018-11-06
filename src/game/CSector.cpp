@@ -179,7 +179,7 @@ void CSector::GoSleep()
     for (; pItem != nullptr; pItem = pItemNext)
     {
         pItemNext = pItem->GetNext();
-        pItem->GoAwake();
+        pItem->GoSleep();
     }
 }
 
