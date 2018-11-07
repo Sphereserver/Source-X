@@ -40,12 +40,14 @@ CSector::~CSector()
 
 enum SC_TYPE
 {
+    SC_CANSLEEP,
 	SC_CLIENTS,
 	SC_COLDCHANCE,
 	SC_COMPLEXITY,
 	SC_FLAGS,
 	SC_ISDARK,
 	SC_ISNIGHTTIME,
+    SC_ISSLEEPING,
     SC_ITEMCOUNT,
 	SC_LIGHT,
 	SC_LOCALTIME,
@@ -59,12 +61,14 @@ enum SC_TYPE
 
 lpctstr const CSector::sm_szLoadKeys[SC_QTY+1] =
 {
+    "CANSLEEP"
 	"CLIENTS",
 	"COLDCHANCE",
 	"COMPLEXITY",
 	"FLAGS",
 	"ISDARK",
 	"ISNIGHTTIME",
+    "ISSLEEPING",
 	"ITEMCOUNT",
 	"LIGHT",
 	"LOCALTIME",
@@ -91,6 +95,9 @@ bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 
 	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
+        case SC_CANSLEEP:
+            sVal.FormatBVal(CanSleep());
+            return true;
 		case SC_CLIENTS:
 			sVal.FormatSTVal(m_Chars_Active.HasClients());
 			return true;
@@ -130,6 +137,9 @@ bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 				sVal = ( iMinutes < 7*60 || iMinutes > (9+12)*60 ) ? "1" : "0";
 			}
 			return true;
+        case SC_ISSLEEPING:
+            sVal.FormatBVal(IsSleeping());
+            return true;
 		case SC_RAINCHANCE:
 			sVal.FormatVal( GetRainChance());
 			return true;
@@ -311,6 +321,15 @@ bool CSector::r_Verb( CScript & s, CTextConsole * pSrc )
 		case SEV_ALLITEMS:		// "ALLITEMS"
 			v_AllItems( s, pSrc );
 			break;
+        case SEV_AWAKE:
+            {
+                if (!IsSleeping())
+                {
+                    break;
+                }
+                GoAwake();
+            }
+            break;
 		case SEV_DRY:	// "DRY"
 			SetWeather( WEATHER_DRY );
 			break;
@@ -333,6 +352,22 @@ bool CSector::r_Verb( CScript & s, CTextConsole * pSrc )
 		case SEV_SEASON:
 			SetSeason(static_cast<SEASON_TYPE>(s.GetArgVal()));
 			break;
+        case SEV_SLEEP:
+            {
+                if (IsSleeping())
+                {
+                    break;
+                }
+                if (!s.HasArgs())// with no args it will check if it can sleep before, to avoid possible problems.
+                {
+                    if (!CanSleep())
+                    {
+                        break;
+                    }
+                }
+                GoSleep();
+            }
+            break;
 		case SEV_SNOW:
 			SetWeather( WEATHER_SNOW );
 			break;

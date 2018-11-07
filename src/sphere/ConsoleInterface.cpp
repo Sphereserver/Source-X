@@ -42,6 +42,7 @@ ConsoleInterface::~ConsoleInterface()
 void ConsoleInterface::SwitchQueues()
 {
     _inMutex.lock();
+    _outMutex.lock();
     if (_qOutput == &_qStorage1)
     {
         _qOutput = &_qStorage2;
@@ -50,6 +51,7 @@ void ConsoleInterface::SwitchQueues()
     {
         _qOutput = &_qStorage1;
     }
+    _outMutex.unlock();
     _inMutex.unlock();
 }
 

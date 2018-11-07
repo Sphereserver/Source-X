@@ -1290,6 +1290,11 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 					sVal.FormatVal( 0 );
 				return true;
 			}
+        case OC_ISSLEEPING:
+        {
+            sVal.FormatVal(IsSleeping() ? 1 : 0);
+            return true;
+        }
 		case OC_ISDIALOGOPEN:
 			{
 				pszKey += 12;
