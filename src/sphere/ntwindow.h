@@ -5,7 +5,7 @@
 
 #ifndef _INC_NTWINDOW_H
 #define _INC_NTWINDOW_H
-
+#ifdef _WINDOWS
 #include "ConsoleInterface.h"
 #include "../common/sphere_library/CSWindow.h"
 #include "../common/CTextConsole.h"
@@ -137,5 +137,6 @@ public:
     CNTWindow::COptionsDlg	m_dlgOptions;
 };
 
+#endif // _WINDOWS
 
 #endif // _INC_NTWINDOW_H
