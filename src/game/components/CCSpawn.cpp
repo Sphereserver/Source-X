@@ -194,7 +194,7 @@ void CCSpawn::GenerateItem(CResourceDef *pDef)
     }
 
     pItem->ClrAttr(pItem->m_Attr & (ATTR_OWNED | ATTR_MOVE_ALWAYS));
-    pItem->SetDecayTime(g_Cfg.m_iDecay_Item * 60 * MSECS_PER_SEC);	// it will decay eventually to be replaced later
+    pItem->SetDecayTime(g_Cfg.m_iDecay_Item);	// it will decay eventually to be replaced later
     if (!pItem->MoveNearObj(pSpawnItem, _iMaxDist ? (word)(Calc_GetRandVal(_iMaxDist) + 1) : 1))
     {
         // If this fails, try placing the char ON the spawn

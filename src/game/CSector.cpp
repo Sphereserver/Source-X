@@ -61,7 +61,7 @@ enum SC_TYPE
 
 lpctstr const CSector::sm_szLoadKeys[SC_QTY+1] =
 {
-    "CANSLEEP"
+    "CANSLEEP",
 	"CLIENTS",
 	"COLDCHANCE",
 	"COMPLEXITY",
@@ -93,11 +93,16 @@ bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		{ nullptr, INT32_MAX }
 	};
 
-	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+    SC_TYPE key = (SC_TYPE)FindTableHead(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+	switch ( key )
 	{
         case SC_CANSLEEP:
-            sVal.FormatBVal(CanSleep());
-            return true;
+            {
+                pszKey += 8;
+                bool fCheckAdjacents = Exp_GetVal(pszKey);
+                sVal.FormatBVal(CanSleep(fCheckAdjacents));
+                return true;
+            }
 		case SC_CLIENTS:
 			sVal.FormatSTVal(m_Chars_Active.HasClients());
 			return true;
@@ -360,7 +365,7 @@ bool CSector::r_Verb( CScript & s, CTextConsole * pSrc )
                 }
                 if (!s.HasArgs())// with no args it will check if it can sleep before, to avoid possible problems.
                 {
-                    if (!CanSleep())
+                    if (!CanSleep(true))
                     {
                         break;
                     }
@@ -1021,44 +1026,40 @@ bool CSector::MoveCharToSector( CChar * pChar )
 	return true;
 }
 
-bool CSector::CanSleep() const
+bool CSector::CanSleep(bool fCheckAdjacents) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CSector::CanSleep");
 	if ( IsFlagSet(SECF_NoSleep) )
 		return false;	// never sleep
 
+    if (m_Chars_Active.HasClients() > 0)
+        return false;	// has at least one client, no sleep
 	if ( IsFlagSet(SECF_InstaSleep) )
 	{
-		if ( m_Chars_Active.HasClients() > 0 )
-			return false;	// has at least one client, no sleep
-		else
-			return true;	// no active client inside, instant sleep
+		return true;	// no active client inside, instant sleep
 	}
-    /*static int maxloops[DIR_QTY] = {1, 1, 1, 1, 1, 1, 1, 1}; // a max of 1 sector's checks in each direction
-    static const CSector *pLast = nullptr;
     
-    if (pLast != this)
+    if (fCheckAdjacents)
     {
         for (int i = 0; i < (int)DIR_QTY; ++i)// Check for adjacent's sectors sleeping allowance.
         {
-            pLast = GetAdjacentSector((DIR_TYPE)i);    // set this as the last sector to avoid this code in the adjacent one and return if it can sleep or not instead of searching its adjacents.
-            --maxloops[i]; //Decrease the counter for this direction in each iteration to avoid an infinite loop.
+            CSector *pAdjacent = GetAdjacentSector((DIR_TYPE)i);    // set this as the last sector to avoid this code in the adjacent one and return if it can sleep or not instead of searching its adjacents.
             /*
             * Only check if this sector exist and it's not the last checked (sectors in the hedges of the map doesn't have adjacent on those directions)
             * && Only check if the sector isn't sleeping (IsSleeping()) and then check if CanSleep().
             */
-            /*if (!pLast || pLast->IsSleeping())
+            if (!pAdjacent || pAdjacent->IsSleeping())
             {
                 continue;
             }
-            if (!pLast->CanSleep())
+            if (!pAdjacent->CanSleep(false))
             {
                 return false;   // asume the base sector can't sleep.
             }
         }
-    }*/
-	//default behaviour
-	return (-g_World.GetTimeDiff(GetLastClientTime()) > g_Cfg.m_iSectorSleepMask); // Sector Sleep timeout.
+    }
+	//default behaviour;
+	return ((g_World.GetCurrentTime().GetTimeRaw() - GetLastClientTime()) > g_Cfg._iSectorSleepDelay); // Sector Sleep timeout.
 }
 
 void CSector::SetSectorWakeStatus()
@@ -1172,7 +1173,7 @@ bool CSector::OnTick()
 	// world light levels will be shitty
 	bool fEnvironChange = false;
 	bool fLightChange = false;
-	bool fCanSleep = CanSleep();
+	bool fCanSleep = CanSleep(true);
     int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();
 
 	// check for local light level change ?
@@ -1190,7 +1191,7 @@ bool CSector::OnTick()
 	if ( clients <= 0 ) // having no clients inside
 	{
 		// Put the sector to sleep if no clients been here in a while.
-		if (fCanSleep && g_Cfg.m_iSectorSleepMask > 0)
+		if (fCanSleep && g_Cfg._iSectorSleepDelay > 0)
 		{
             if (!IsSleeping())
             {

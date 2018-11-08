@@ -29,7 +29,7 @@ CServerConfig::CServerConfig()
 	m_fUseHTTP			= 2;
 	m_fUseAuthID		= true;
 	m_iMapCacheTime		= 2*60 * MSECS_PER_SEC;
-	m_iSectorSleepMask	= (1 << 10) - 1;
+	_iSectorSleepDelay	= (1 << 10) - 1;
 	m_fUseMapDiffs		= false;
 
 	m_iDebugFlags			= 0;	//DEBUGF_NPC_EMOTE
@@ -583,7 +583,7 @@ enum RC_TYPE
 	RC_SAVESECTORSPERTICK,		// m_iSaveSectorsPerTick
     RC_SAVESTEPMAXCOMPLEXITY,	// m_iSaveStepMaxComplexity
 	RC_SCPFILES,
-	RC_SECTORSLEEP,				// m_iSectorSleepMask
+	RC_SECTORSLEEP,				// _iSectorSleepDelay
 	RC_SECURE,
 	RC_SKILLPRACTICEMAX,		// m_iSkillPracticeMax
 	RC_SNOOPCRIMINAL,
@@ -827,7 +827,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "SAVESECTORSPERTICK",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveSectorsPerTick),	0 }},
 	{ "SAVESTEPMAXCOMPLEXITY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveStepMaxComplexity),	0 }},
 	{ "SCPFILES",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sSCPBaseDir),			0 }},
-	{ "SECTORSLEEP",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSectorSleepMask),		0 }},
+	{ "SECTORSLEEP",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iSectorSleepDelay),		0 }},
 	{ "SECURE",					{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fSecure),				0 }},
 	{ "SKILLPRACTICEMAX",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSkillPracticeMax),	0 }},
 	{ "SNOOPCRIMINAL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSnoopCriminal),		0 }},
@@ -1075,13 +1075,13 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			m_iDeadSocketTime = s.GetArgVal()*60*MSECS_PER_SEC;
 			break;
 		case RC_DECAYTIMER:
-			m_iDecay_Item = s.GetArgVal() *60*MSECS_PER_SEC;
+			m_iDecay_Item = s.GetArgVal() * 60 * MSECS_PER_SEC;
 			break;
 		case RC_FREEZERESTARTTIME:
 			m_iFreezeRestartTime = s.GetArgVal() * MSECS_PER_SEC;
 			break;
 		case RC_GAMEMINUTELENGTH:
-			m_iGameMinuteLength = s.GetArgVal() * 60 * MSECS_PER_SEC;
+			m_iGameMinuteLength = s.GetArgVal() * MSECS_PER_SEC;
 			break;
 		case RC_GUARDLINGER:
 			m_iGuardLingerTime = s.GetArgVal() * 60 * MSECS_PER_SEC;
@@ -1216,7 +1216,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 
 		case RC_SECTORSLEEP:
 			{
-				m_iSectorSleepMask = s.GetArgVal() * MSECS_PER_SEC;
+				_iSectorSleepDelay = s.GetArgVal() * MSECS_PER_SEC;
 			}
 			break;
 
@@ -1862,7 +1862,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			sVal.FormatLLVal( m_iSavePeriod / (60*MSECS_PER_SEC));
 			break;
 		case RC_SECTORSLEEP:
-			sVal.FormatVal(m_iSectorSleepMask / MSECS_PER_SEC);
+			sVal.FormatVal(_iSectorSleepDelay / MSECS_PER_SEC);
 			break;
 		case RC_SAVEBACKGROUND:
 			sVal.FormatLLVal( m_iSaveBackgroundTime / (60 * MSECS_PER_SEC));

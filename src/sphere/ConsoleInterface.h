@@ -1,12 +1,12 @@
 #ifndef _INC_CONSOLEINTERFACE_H
 #define _INC_CONSOLEINTERFACE_H
 
+#ifdef _WINDOWS
+
 #include "../common/sphere_library/CSString.h"
 #include "../common/sphere_library/smutex.h"
 #include <queue>
-#ifdef _WINDOWS
-    #include <windef.h>
-#endif
+#include <windef.h>
 
 class ConsoleOutput
 {
@@ -38,4 +38,5 @@ protected:
 public:
     void AddConsoleOutput(ConsoleOutput *output);
 };
+#endif
 #endif //_INC_CONSOLEINTERFACE_H

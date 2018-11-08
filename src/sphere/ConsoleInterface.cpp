@@ -1,3 +1,5 @@
+#ifdef _WINDOWS
+
 #include "ConsoleInterface.h"
 #include "../common/CLog.h"
 
@@ -61,3 +63,5 @@ void ConsoleInterface::AddConsoleOutput(ConsoleOutput * output)
     (*_qOutput)->push(output);
     _inMutex.unlock();
 }
+
+#endif

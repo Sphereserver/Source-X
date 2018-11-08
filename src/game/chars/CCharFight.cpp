@@ -1710,7 +1710,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		if ( pAmmo && m_pPlayer && (40 >= Calc_GetRandVal(100)) )
 		{
 			pAmmo->UnStackSplit(1);
-			pAmmo->MoveToDecay(pCharTarg->GetTopPoint(), g_Cfg.m_iDecay_Item * 60 * MSECS_PER_SEC);
+			pAmmo->MoveToDecay(pCharTarg->GetTopPoint(), g_Cfg.m_iDecay_Item);
 		}
 
 		if ( IsPriv(PRIV_DETAIL) )

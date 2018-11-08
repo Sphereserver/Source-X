@@ -1277,3 +1277,10 @@ Added: Now Sectors store their adjacent sectors:
 - Added: Initial support for very old clients (< 1.26.4) which use the same rotation cypher for both login and game server encryption.
 	Those clients require also a precise sequence of packets to be received and there isn't much documentation around. For now, some of them (tested with 1.25.35) work until after the character selection.
 - [SphereCrypt.ini] Added keys up to Classic Client 7.0.73 and Enhanced Client 4.0.73. Added keys for some old clients between versions 1.23.27 and 1.26.4.
+
+7-11-2018, XuN
+Added IsSleeping (Read Only) function for sectors, items and chars.
+Added Sleep and Awake functions (Write Only) for sectors (Sleep will do it's normal checks before sleep, Sleep 1 will skip these checks).
+NOTE: Sleep will not work if the sector is already sleeping and Awake will not work if the sector is not sleeping.
+NOTE: Awake will awake the sector, tho it will insta sleep again since it checks for clients or how much time passed since it's last client departed from it (compared against SectorSleep .ini value). This can be used to force all items inside to tick.
+Added CanSleep function (Read Only) for sectors to check wether a sector can Sleep or not (use CanSleep 1 to check for adjacent's sectors too (source checks does it like this)).

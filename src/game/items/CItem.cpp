@@ -1294,7 +1294,7 @@ bool CItem::Stack( CItem * pItem )
 int64 CItem::GetDecayTime() const
 {
 	ADDTOCALLSTACK("CItem::GetDecayTime");
-	// Return time in minutes that it will take to decay this item.
+	// Return time in milliseconds that it will take to decay this item.
 	// -1 = never decays.
 
 	switch (GetType())
@@ -1304,14 +1304,14 @@ int64 CItem::GetDecayTime() const
         {
             int64 timeNextNewMoon = g_World.GetNextNewMoon((GetTopPoint().m_map == 1) ? false : true);
             int64 iMinutesDelay = Calc_GetRandLLVal(20) * g_Cfg.m_iGameMinuteLength;
-			return g_World.GetTimeDiff(timeNextNewMoon + iMinutesDelay);
+			return ( g_World.GetTimeDiff( timeNextNewMoon + iMinutesDelay ) * MSECS_PER_SEC );
         }
 		case IT_MULTI:
 		case IT_SHIP:
 		case IT_MULTI_CUSTOM:
-			return ( 14*24*60*60* MSECS_PER_SEC);		// very long decay updated as people use it
+			return ( 14 * 24 * 60 * 60 * MSECS_PER_SEC );		// very long decay updated as people use it
 		case IT_TRASH_CAN:
-			return ( 3*60* MSECS_PER_SEC);		// empties in 3 minutes
+			return ( 3 * 60 * MSECS_PER_SEC );		// empties in 3 minutes
 		default:
 			break;
 	}
@@ -1319,7 +1319,7 @@ int64 CItem::GetDecayTime() const
 	if (IsAttr(ATTR_MOVE_NEVER|ATTR_STATIC|ATTR_LOCKEDDOWN|ATTR_SECURE) || !IsMovableType())
 		return -1;
 
-	return g_Cfg.m_iDecay_Item * MSECS_PER_SEC * 60;
+	return g_Cfg.m_iDecay_Item;
 }
 
 void CItem::SetTimeout( int64 iMsecs )
@@ -3964,7 +3964,7 @@ void CItem::ConvertBolttoCloth()
 		}
 		else
 		{
-			pItemNew->MoveToDecay(GetTopPoint(), g_Cfg.m_iDecay_Item * 60 * MSECS_PER_SEC);
+			pItemNew->MoveToDecay(GetTopPoint(), g_Cfg.m_iDecay_Item);
 		}
 	}
 }
