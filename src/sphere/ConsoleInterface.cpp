@@ -1,10 +1,8 @@
-#ifdef _WINDOWS
-
 #include "ConsoleInterface.h"
 #include "../common/CLog.h"
 
 
-ConsoleOutput::ConsoleOutput(COLORREF iLogColor, CSString sLogString)
+ConsoleOutput::ConsoleOutput(dword iLogColor, CSString sLogString)
 {
     _iTextColor = iLogColor;
     _sTextString = sLogString;
@@ -20,7 +18,7 @@ ConsoleOutput::~ConsoleOutput()
 {
 }
 
-COLORREF ConsoleOutput::GetTextColor()
+dword ConsoleOutput::GetTextColor()
 {
     return _iTextColor;
 }
@@ -63,5 +61,3 @@ void ConsoleInterface::AddConsoleOutput(ConsoleOutput * output)
     (*_qOutput)->push(output);
     _inMutex.unlock();
 }
-
-#endif

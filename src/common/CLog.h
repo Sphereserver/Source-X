@@ -14,7 +14,6 @@
 #include "../sphere/UnixTerminal.h"
 #include <exception>
 
-
 // -----------------------------
 //	CEventLog
 // -----------------------------
@@ -192,7 +191,7 @@ private:
 	*/
     void SetColor(ConsoleTextColor color);
 public:
-    COLORREF GetColor(ConsoleTextColor color);
+    dword GetColor(ConsoleTextColor color);
 } g_Log;		// Log file
 
 

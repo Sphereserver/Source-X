@@ -205,7 +205,7 @@ void CServer::PrintStr( lpctstr pszMsg ) const
 	PrintTelnet( pszMsg );
 }
 
-void CServer::PrintStr(COLORREF iColor, lpctstr pMsg) const
+void CServer::PrintStr(dword iColor, lpctstr pMsg) const
 {
     // print to all consoles.
     SysMessage(new ConsoleOutput(iColor, pMsg));

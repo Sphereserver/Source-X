@@ -942,7 +942,7 @@ bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
     while (!(*_qOutput)->empty())
     {
         auto output = (*_qOutput)->front();
-        theApp.m_wndMain.List_Add(output->GetTextColor(), output->GetTextString());
+        theApp.m_wndMain.List_Add((COLORREF)output->GetTextColor(), output->GetTextString());
         (*_qOutput)->pop();
         delete output;
     }

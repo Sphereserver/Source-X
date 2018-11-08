@@ -153,7 +153,7 @@ void CLog::SetColor(ConsoleTextColor color)
 #endif
 }
 
-COLORREF CLog::GetColor(ConsoleTextColor color)
+dword CLog::GetColor(ConsoleTextColor color)
 {
     switch (color)
     {
@@ -195,9 +195,8 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 
 	try
 	{
-        COLORREF iHourColor = GetColor(CTCOL_DEFAULT);
-        COLORREF iLogTextColor = iHourColor;
-        COLORREF iLogTypeColor = RGB(0,0,0);
+        dword iLogTextColor = GetColor(CTCOL_DEFAULT);
+        dword iLogTypeColor = iLogTextColor;
 
 		// Put up the date/time.
 		CSTime datetime = CSTime::GetCurrentTime();	// last real time stamp.
@@ -242,8 +241,6 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 		{
 			if ( !(dwMask & LOGM_INIT) && !g_Serv.IsLoading() )
 			{
-                iHourColor = GetColor(CTCOL_YELLOW);
-
                 SetColor(CTCOL_YELLOW);
 				g_Serv.PrintStr(GetColor(CTCOL_YELLOW), szTime );
 				SetColor(CTCOL_DEFAULT);
