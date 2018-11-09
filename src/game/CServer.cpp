@@ -1090,7 +1090,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 			llong divby = llTimeProfileFrequency / 1000;
 
             char tmpstring[255];
-            sprintf_s(tmpstring, "Scripts: called %u times and took %i.%04i msec (%i.%04i msec average). Reporting with highest average.\n",
+            sprintf(tmpstring, "Scripts: called %u times and took %i.%04i msec (%i.%04i msec average). Reporting with highest average.\n",
                 g_profiler.called,
                 (int)(g_profiler.total / divby),
                 (int)(((g_profiler.total * 10000) / (divby)) % 10000),
@@ -1113,7 +1113,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 			{
 				if ( pFun->average > average )
 				{
-                    sprintf_s(tmpstring, "FUNCTION '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
+                    sprintf(tmpstring, "FUNCTION '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
                         pFun->name,
                         pFun->called,
                         (int)(pFun->average / divby),
@@ -1143,7 +1143,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 			{
 				if ( pTrig->average > average )
 				{
-					sprintf_s(tmpstring, "TRIGGER '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
+					sprintf(tmpstring, "TRIGGER '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
 						pTrig->name,
 						pTrig->called,
 						(int)(pTrig->average / divby),
