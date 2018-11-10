@@ -143,7 +143,7 @@ bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			}
 			return true;
         case SC_ISSLEEPING:
-            sVal.FormatBVal(IsSleeping());
+            sVal.FormatVal(IsSleeping());
             return true;
 		case SC_RAINCHANCE:
 			sVal.FormatVal( GetRainChance());
@@ -1010,9 +1010,10 @@ bool CSector::MoveCharToSector( CChar * pChar )
 		}
 	}
 
-    CClient *pClient = pChar->GetClient();
-    if (IsSleeping() && pClient)
+    m_Chars_Active.AddCharToSector(pChar);	// remove from previous spot.
+    if (IsSleeping())
     {
+        CClient *pClient = pChar->GetClient();
         if (pClient)    // A client just entered
         {
             GoAwake();    // Awake the sector
@@ -1022,7 +1023,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
             pChar->GoSleep(); // then make the NPC sleep too.
         }
     }
-	m_Chars_Active.AddCharToSector(pChar);	// remove from previous spot.
+	
 	return true;
 }
 
@@ -1449,7 +1450,7 @@ int64 CSector::GetLastClientTime() const
 
 void CSector::ClientAttach( CChar * pChar )
 {
-	if ( ! IsCharActiveIn( pChar ))
+	if ( IsCharActiveIn( pChar ))
 		return;
 	m_Chars_Active.ClientAttach();
 }

@@ -1289,9 +1289,9 @@ void CChar::SetID( CREID_TYPE id )
 	if ( pCharDef == nullptr )
 	{
 		if ( id != -1 && id != CREID_INVALID )
-			DEBUG_ERR(("Create Invalid chardef 0%x\n", id));
+			DEBUG_ERR(("Create Invalid Char 0%x\n", id));
 
-		id = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, "DEFAULTCHAR"));
+		id = (CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, "DEFAULTCHAR"));
 		if ( id < CREID_INVALID )
 			id = CREID_MAN;
 

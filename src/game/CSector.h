@@ -17,7 +17,7 @@ class CItemStone;
 class CSector : public CScriptObj, public CSectorBase, public CTimedObject	// square region of the world.
 {
 	// A square region of the world. ex: MAP0.MUL Dungeon Sectors are 256 by 256 meters
-#define SECTOR_TICK_PERIOD (TICKS_PER_SEC/2) // after how much ticks do we start a pulse.
+#define SECTOR_TICK_PERIOD (TICKS_PER_SEC / 2) // after how much ticks do we start a pulse.
 
 public:
 	static const char *m_sClassName;
@@ -31,7 +31,6 @@ private:
 	byte m_RainChance;		// 0 to 100%
 	byte m_ColdChance;		// Will be snow if rain chance success.
 	byte m_ListenItems;		// Items on the ground that listen ?
-    bool _fIsSleeping;      // Is this sector in sleep mode?
 
 private:
 	WEATHER_TYPE GetWeatherCalc() const;

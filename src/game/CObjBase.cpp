@@ -1292,7 +1292,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			}
         case OC_ISSLEEPING:
         {
-            sVal.FormatVal(IsSleeping() ? 1 : 0);
+            sVal.FormatVal(IsSleeping());
             return true;
         }
 		case OC_ISDIALOGOPEN:
@@ -1952,7 +1952,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 			if (!this->IsItem())
 				return false;
 			CItem * pItem = static_cast<CItem*>(this);
-			pItem->m_speed = (byte)(s.GetArgVal());
+			pItem->m_speed = s.GetArgBVal();
 			pItem->ResendTooltip();
 			return true;
 		}
