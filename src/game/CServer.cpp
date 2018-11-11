@@ -93,7 +93,7 @@ void CServer::SetServerMode( SERVMODE_TYPE mode )
 	ADDTOCALLSTACK("CServer::SetServerMode");
 	m_iModeCode.store(mode, std::memory_order_release);
 #ifdef _WIN32
-    g_Window.NTWindow_SetWindowTitle();
+    g_NTWindow.NTWindow_SetWindowTitle();
 #endif
 }
 
@@ -177,7 +177,7 @@ void CServer::SysMessage(ConsoleOutput *pszMsg) const
         return;
 
 #ifdef _WIN32
-    g_Window.NTWindow_PostMsg(pszMsg);
+    g_NTWindow.NTWindow_PostMsg(pszMsg);
 #else
     //g_UnixTerminal.print(pszMsg);
 #endif
@@ -209,8 +209,11 @@ void CServer::PrintStr( lpctstr pszMsg ) const
 void CServer::PrintStr(dword iColor, lpctstr pMsg) const
 {
     // print to all consoles.
+#ifdef _WIN32
     SysMessage(new ConsoleOutput(iColor, pMsg));
-    SysMessage(pMsg);// for linux until it gets working with the new ConsoleInterface
+#else
+    SysMessage(pMsg); // for linux until it gets working with the new ConsoleInterface
+#endif
     PrintTelnet(pMsg);
 }
 
@@ -250,8 +253,8 @@ ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal )
 #endif
 
 #ifdef _WIN32
-    g_Window.NTWindow_SetWindowTitle(pszTemp);
-	g_Service.OnTick();
+    g_NTWindow.NTWindow_SetWindowTitle(pszTemp);
+	g_NTService.OnTick();
 #endif
 	return iPercent;
 }

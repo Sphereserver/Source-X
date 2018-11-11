@@ -58,7 +58,7 @@ public:
 	{
 		return( m_fIsNTService );
 	}
-} g_Service;
+} g_NTService;  // extern class
 
 
 #endif // _WIN32

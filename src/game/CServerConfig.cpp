@@ -4174,7 +4174,7 @@ bool CServerConfig::Load( bool fResync )
 			pResFile->ReSync();
 
 #ifdef _WIN32
-        g_Window.NTWindow_OnTick(0);
+        g_NTWindow.NTWindow_OnTick(0);
 #endif
 		g_Serv.PrintPercent( (size_t)(j + 1), count);
 	}
@@ -4451,7 +4451,7 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 	s.Close();
 
 #ifdef _WIN32
-    g_Window.NTWindow_SetWindowTitle();
+    g_NTWindow.NTWindow_SetWindowTitle();
 #endif
 	return true;
 }

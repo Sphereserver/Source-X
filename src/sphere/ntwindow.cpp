@@ -1,13 +1,13 @@
 // Put up a window for data (other than the console)
 #ifdef _WIN32
 
+#include "../common/sphere_library/CSWindow.h"
+#include "../common/sphere_library/CSString.h"
 #include "../common/CException.h"
 #include "../common/CResourceBase.h"
 #include "../common/CTextConsole.h"
-#include "../common/sphere_library/CSWindow.h"
-#include "../common/sphereversion.h"	// sphere version
-#include "../common/sphere_library/CSString.h"
 #include "../common/CLog.h"
+#include "../common/sphereversion.h"	// sphere version
 #include "../game/CObjBase.h"
 #include "../game/CServerConfig.h"
 #include "../game/CServer.h"
@@ -24,6 +24,8 @@
 #define IDT_ONTICK	1
 
 CNTApp theApp;
+CNTWindow g_NTWindow;
+
 
 //************************************
 // -CAboutDlg
@@ -929,24 +931,34 @@ bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
 {
 	// RETURN: false = exit the app.
 
-	if ( iWaitmSec )
-	{
-		if ( !theApp.m_wndMain.m_hWnd || !theApp.m_wndMain.SetTimer(IDT_ONTICK, iWaitmSec) )
-		{
-			iWaitmSec = 0;
-		}
-	}
-
-    SwitchQueues();
-    _outMutex.lock();
-    while (!(*_qOutput)->empty())
+    if ( iWaitmSec )
     {
-        auto output = (*_qOutput)->front();
-        theApp.m_wndMain.List_Add((COLORREF)output->GetTextColor(), output->GetTextString());
-        (*_qOutput)->pop();
-        delete output;
+        if ( !theApp.m_wndMain.m_hWnd || !theApp.m_wndMain.SetTimer(IDT_ONTICK, iWaitmSec) )
+        {
+            iWaitmSec = 0;
+        }
+    }
+
+    std::vector<ConsoleOutput*> outMessages;
+    _inMutex.lock();
+    _outMutex.lock();
+    _SwitchQueues();
+    _inMutex.unlock();
+    outMessages.reserve(_qOutput->size());
+    while (!_qOutput->empty())
+    {
+        outMessages.emplace_back(_qOutput->front());
+        _qOutput->pop();
+        
     }
     _outMutex.unlock();
+    
+	// No idea of the reason, but it seems that if we have some mutex locked while doing List_Add, sometimes we'll have a deadlock
+    for (ConsoleOutput* co : outMessages)
+    {
+        theApp.m_wndMain.List_Add((COLORREF)co->GetTextColor(), co->GetTextString().GetPtr());
+        delete co;
+    } 
 
 	// Give the windows message loops a tick.
 	for (;;)

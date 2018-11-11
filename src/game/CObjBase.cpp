@@ -1321,7 +1321,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 
 					if ( itGumpFound != pClientToCheck->m_mapOpenedGumps.end() )
 					{
-						sVal.FormatVal( (*itGumpFound).second );
+						sVal.FormatVal( itGumpFound->second );
 					}
 					else
 					{

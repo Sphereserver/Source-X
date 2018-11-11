@@ -1154,7 +1154,7 @@ void CSector::Restock()
 
 bool CSector::OnTick()
 {
-	ADDTOCALLSTACK_INTENSIVE("CSector::OnTick");
+	ADDTOCALLSTACK("CSector::OnTick");
 	/*Ticking sectors from CWorld
     * Timer is automatically updated at the end with a 30 seconds default delay
     * Any return before it will threat this CSector as Sleep and will make it
@@ -1162,44 +1162,39 @@ bool CSector::OnTick()
     * players already inside).
     */
 
-
 	EXC_TRY("Tick");
-	EXC_SET_BLOCK("light change");
 
 	//	do not tick sectors on maps not supported by server
 	if ( !g_MapList.m_maps[m_map] )
 		return true;
 
+    EXC_SET_BLOCK("light change");
 	// Check for light change before putting the sector to sleep, since in other case the
 	// world light levels will be shitty
 	bool fEnvironChange = false;
 	bool fLightChange = false;
-	bool fCanSleep = CanSleep(true);
-    int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();
 
 	// check for local light level change ?
-	byte blightprv = m_Env.m_Light;
+	byte bLightPrv = m_Env.m_Light;
 	m_Env.m_Light = GetLightCalc( false );
-	if ( m_Env.m_Light != blightprv )
+	if ( m_Env.m_Light != bLightPrv )
 	{
 		fEnvironChange = true;
 		fLightChange = true;
 	}
 
 	EXC_SET_BLOCK("sector sleeping?");
-	size_t clients = m_Chars_Active.HasClients();
+    bool fCanSleep = CanSleep(true);
+    int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();
 
-	if ( clients <= 0 ) // having no clients inside
+	// Put the sector to sleep if no clients been here in a while.
+	if (fCanSleep && (g_Cfg._iSectorSleepDelay > 0))
 	{
-		// Put the sector to sleep if no clients been here in a while.
-		if (fCanSleep && g_Cfg._iSectorSleepDelay > 0)
-		{
-            if (!IsSleeping())
-            {
-                GoSleep();
-            }
-			return true;
-		}
+        if (!IsSleeping())
+        {
+            GoSleep();
+        }
+		return true;
 	}
 
 	EXC_SET_BLOCK("sound effects");
@@ -1220,7 +1215,7 @@ bool CSector::OnTick()
 	}
 
 	// Random area noises. Only do if clients about.
-	if ( clients > 0 )
+	if ( HasClients() > 0 )
 	{
 		iRegionPeriodic = 2;
 

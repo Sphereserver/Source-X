@@ -10,7 +10,7 @@
 #include "../common/sphere_library/CSWindow.h"
 #include "../common/CTextConsole.h"
 
-extern class CNTWindow : public CSWindow, public ConsoleInterface						//	CNTWindow
+extern class CNTWindow : public CSWindow, public ConsoleInterface
 {
 public:
     bool NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLinel, int nCmdShow);
@@ -126,7 +126,7 @@ public:
     virtual ~CNTWindow();
 
     char	m_zCommands[5][256];
-} g_Window;
+} g_NTWindow;   // extern class
 
 class CNTApp : public CWinApp
 {
@@ -136,6 +136,7 @@ public:
     CNTWindow::CStatusWnd	m_wndStatus;
     CNTWindow::COptionsDlg	m_dlgOptions;
 };
+
 
 #endif // _WINDOWS
 

@@ -18,25 +18,35 @@ ConsoleOutput::~ConsoleOutput()
 {
 }
 
-dword ConsoleOutput::GetTextColor()
+dword ConsoleOutput::GetTextColor() const
 {
     return _iTextColor;
 }
 
-CSString ConsoleOutput::GetTextString()
+const CSString& ConsoleOutput::GetTextString() const
 {
     return _sTextString;
 }
 
 ConsoleInterface::ConsoleInterface()
 {
-    _qStorage1 = new std::queue<ConsoleOutput*>;
-    _qStorage2 = new std::queue<ConsoleOutput*>;
     _qOutput = &_qStorage1;
 }
 
 ConsoleInterface::~ConsoleInterface()
 {
+}
+
+void ConsoleInterface::_SwitchQueues()
+{
+    if (_qOutput == &_qStorage1)
+    {
+        _qOutput = &_qStorage2;
+    }
+    else
+    {
+        _qOutput = &_qStorage1;
+    }
 }
 
 void ConsoleInterface::SwitchQueues()
@@ -58,6 +68,6 @@ void ConsoleInterface::SwitchQueues()
 void ConsoleInterface::AddConsoleOutput(ConsoleOutput * output)
 {
     _inMutex.lock();
-    (*_qOutput)->push(output);
+    _qOutput->push(output);
     _inMutex.unlock();
 }

@@ -132,8 +132,6 @@ CAccounts		g_Accounts;			// All the player accounts. name sorted CAccount
 CSStringList	g_AutoComplete;		// auto-complete list
 CScriptProfiler g_profiler;			// script profiler
 CUOMapList		g_MapList;			// global maps information
-CNTWindow       g_Window;
-
 
 
 lpctstr GetTimeMinDesc( int minutes )
@@ -480,7 +478,7 @@ int Sphere_OnTick()
 	EXC_TRY("Tick");
 #ifdef _WIN32
 	EXC_SET_BLOCK("service");
-	g_Service.OnTick();
+    g_NTService.OnTick();
 #endif
 
 	EXC_SET_BLOCK("world");
@@ -544,7 +542,7 @@ static void Sphere_MainMonitorLoop()
 				break;
 
 #ifdef _WIN32
-			g_Window.NTWindow_OnTick(10);
+            g_NTWindow.NTWindow_OnTick(10);
 #else
 			Sleep(1000);
 #endif
@@ -908,7 +906,7 @@ int _cdecl main( int argc, char * argv[] )
 	}
 
 #ifdef _WIN32
-    g_Window.NTWindow_DeleteIcon();
+    g_NTWindow.NTWindow_DeleteIcon();
 #endif
 
 	Sphere_ExitServer();

@@ -12,7 +12,7 @@
 #include "ntwindow.h"
 #include "ntservice.h"
 
-CNTService g_Service;
+CNTService g_NTService;
 
 CNTService::CNTService()
 {
@@ -23,7 +23,7 @@ CNTService::CNTService()
 // Try to create the registry key containing the working directory for the application
 static void ExtractPath(LPTSTR szPath)
 {
-	TCHAR	*pszPath = strrchr(szPath, '\\');
+	TCHAR *pszPath = strrchr(szPath, '\\');
 	if ( pszPath )
 		*pszPath = 0;
 }
@@ -100,14 +100,14 @@ BOOL CNTService::SetServiceStatus( DWORD dwCurrentState, DWORD dwWin32ExitCode, 
 void WINAPI CNTService::service_ctrl(DWORD dwCtrlCode) // static
 {
 	if ( dwCtrlCode == SERVICE_CONTROL_STOP )
-		g_Service.ServiceStop();
-	g_Service.SetServiceStatus(g_Service.m_sStatus.dwCurrentState, NO_ERROR, 0);
+        g_NTService.ServiceStop();
+    g_NTService.SetServiceStatus(g_NTService.m_sStatus.dwCurrentState, NO_ERROR, 0);
 }
 
 //	PURPOSE: is called by the SCM, and takes care of some initialization and calls ServiceStart().
 void WINAPI CNTService::service_main(DWORD dwArgc, LPTSTR *lpszArgv) // static
 {
-	g_Service.ServiceStartMain(dwArgc, lpszArgv);
+    g_NTService.ServiceStartMain(dwArgc, lpszArgv);
 }
 
 //	PURPOSE:  starts the service. (synchronous)
@@ -459,9 +459,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	{
 		// We are running Win9x - So we are not an NT service.
 do_not_nt_service:
-        g_Window.NTWindow_Init(hInstance, lpCmdLine, nCmdShow);
+        g_NTWindow.NTWindow_Init(hInstance, lpCmdLine, nCmdShow);
 		int iRet = Sphere_MainEntryPoint(argc, argv);
-        g_Window.NTWindow_Exit();
+        g_NTWindow.NTWindow_Exit();
 		TerminateProcess(GetCurrentProcess(), iRet);
 		return iRet;
 	}
@@ -484,7 +484,7 @@ do_not_nt_service:
 	if ( !g_Cfg.m_fUseNTService )	// since there is no way to detect how did we start, use config for that
 		goto do_not_nt_service;
 
-	g_Service.SetServiceStatus(SERVICE_START_PENDING, NO_ERROR, 5000);
+    g_NTService.SetServiceStatus(SERVICE_START_PENDING, NO_ERROR, 5000);
 
 	// process the command line arguments...
 	if (( argc > 1 ) && _IS_SWITCH(*argv[1]) )
@@ -497,11 +497,11 @@ do_not_nt_service:
 			}
 			else if ( !strcmp(argv[2], "install") )
 			{
-				g_Service.CmdInstallService();
+                g_NTService.CmdInstallService();
 			}
 			else if ( !strcmp(argv[2], "remove") )
 			{
-				g_Service.CmdRemoveService();
+                g_NTService.CmdRemoveService();
 			}
 			return 0;
 		}
@@ -509,10 +509,10 @@ do_not_nt_service:
 
 	// If the argument does not match any of the above parameters, the Service Control Manager (SCM) may
 	// be attempting to start the service, so we must call StartServiceCtrlDispatcher.
-	g_Service.ReportEvent(EVENTLOG_INFORMATION_TYPE, 0, "Starting Service.");
+    g_NTService.ReportEvent(EVENTLOG_INFORMATION_TYPE, 0, "Starting Service.");
 
-	g_Service.CmdMainStart();
-	g_Service.SetServiceStatus(SERVICE_STOPPED, NO_ERROR, 0);
+    g_NTService.CmdMainStart();
+    g_NTService.SetServiceStatus(SERVICE_STOPPED, NO_ERROR, 0);
 	return -1;
 }
 
