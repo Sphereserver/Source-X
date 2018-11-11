@@ -6,25 +6,10 @@
 #ifndef _INC_UNIXTERMINAL_H
 #define _INC_UNIXTERMINAL_H
 
-enum ConsoleTextColor			// needed by both windows and unix
-{
-	// these are the basic colors supported by all unix terminals
-	CTCOL_DEFAULT = 0,
-	CTCOL_RED,
-	CTCOL_GREEN,
-	CTCOL_YELLOW,
-	CTCOL_BLUE,
-	CTCOL_MAGENTA,
-	CTCOL_CYAN,
-	CTCOL_WHITE,
-	CTCOL_QTY
-};
-
-
 #ifndef _WIN32
 
-
-#include "../common/common.h"
+#include "threads.h"
+#include "ConsoleInterface.h"
 
 #ifdef _USECURSES
 	#include <curses.h>
@@ -33,7 +18,7 @@ enum ConsoleTextColor			// needed by both windows and unix
 #endif
 
 
-class UnixTerminal
+struct UnixTerminal : public AbstractSphereThread, public ConsoleInterface
 {
 	private:
 	#ifdef _USECURSES
@@ -54,6 +39,8 @@ class UnixTerminal
 		UnixTerminal & operator=(const UnixTerminal & other);
 
 	public:
+        virtual void onStart();
+        virtual void tick();
 		bool isReady();
 		tchar read();
 		void prepare();

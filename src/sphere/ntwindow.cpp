@@ -150,12 +150,12 @@ void CNTWindow::CStatusWnd::FillStats()
 
 		capture.SysMessagef("Thread %u - '%s'\n", thrCurrent->getId(), thrCurrent->getName());
 
-		for (int i = 0; i < PROFILE_QTY; i++)
+		for (int i = 0; i < PROFILE_QTY; ++i)
 		{
-			if (profile.IsEnabled(static_cast<PROFILE_TYPE>(i)) == false)
+			if (profile.IsEnabled( (PROFILE_TYPE)i ) == false)
 				continue;
 
-			capture.SysMessagef("'%-10s' = %s\n", profile.GetName(static_cast<PROFILE_TYPE>(i)), profile.GetDescription(static_cast<PROFILE_TYPE>(i)));
+			capture.SysMessagef("'%-10s' = %s\n", profile.GetName((PROFILE_TYPE)i), profile.GetDescription((PROFILE_TYPE)i));
 		}
 	}
 }
@@ -939,26 +939,31 @@ bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
         }
     }
 
-    std::vector<ConsoleOutput*> outMessages;
-    _inMutex.lock();
-    _outMutex.lock();
-    _SwitchQueues();
-    _inMutex.unlock();
-    outMessages.reserve(_qOutput->size());
-    while (!_qOutput->empty())
+    ConsoleInterface::_ciQueueMutex.lock();
+    if (!_qOutput.empty())
     {
-        outMessages.emplace_back(_qOutput->front());
-        _qOutput->pop();
-        
+        std::vector<ConsoleOutput*> outMessages;
+        outMessages.reserve(_qOutput.size());
+        while (!_qOutput.empty())
+        {
+            outMessages.emplace_back(_qOutput.front());
+            _qOutput.pop();
+        }
+        ConsoleInterface::_ciQueueMutex.unlock();
+
+        // No idea of the reason, but it seems that if we have some mutex locked while doing List_Add, sometimes we'll have a deadlock.
+        //  In any case, it's best to keep the mutex locked for the least time possible.
+        for (ConsoleOutput* co : outMessages)
+        {
+            theApp.m_wndMain.List_Add((COLORREF)CTColToRGB(co->GetTextColor()), co->GetTextString().GetPtr());
+            delete co;
+        } 
     }
-    _outMutex.unlock();
-    
-	// No idea of the reason, but it seems that if we have some mutex locked while doing List_Add, sometimes we'll have a deadlock
-    for (ConsoleOutput* co : outMessages)
+    else
     {
-        theApp.m_wndMain.List_Add((COLORREF)co->GetTextColor(), co->GetTextString().GetPtr());
-        delete co;
-    } 
+        ConsoleInterface::_ciQueueMutex.unlock();
+    }
+	
 
 	// Give the windows message loops a tick.
 	for (;;)

@@ -165,8 +165,10 @@ void CServer::SysMessage( lpctstr pszMsg ) const
 	if ( !pszMsg || ISINTRESOURCE(pszMsg) )
 		return;
 
-#ifndef _WIN32
-	g_UnixTerminal.print(pszMsg);
+#ifdef _WIN32
+    g_NTWindow.NTWindow_PostMsg(new ConsoleOutput(pszMsg));
+#else
+    g_UnixTerminal.AddConsoleOutput(new ConsoleOutput(pszMsg));
 #endif
 }
 
@@ -179,7 +181,7 @@ void CServer::SysMessage(ConsoleOutput *pszMsg) const
 #ifdef _WIN32
     g_NTWindow.NTWindow_PostMsg(pszMsg);
 #else
-    //g_UnixTerminal.print(pszMsg);
+    g_UnixTerminal.AddConsoleOutput(pszMsg);
 #endif
 }
 
@@ -206,14 +208,10 @@ void CServer::PrintStr( lpctstr pszMsg ) const
 	PrintTelnet( pszMsg );
 }
 
-void CServer::PrintStr(dword iColor, lpctstr pMsg) const
+void CServer::PrintStr(ConsoleTextColor iColor, lpctstr pMsg) const
 {
     // print to all consoles.
-#ifdef _WIN32
     SysMessage(new ConsoleOutput(iColor, pMsg));
-#else
-    SysMessage(pMsg); // for linux until it gets working with the new ConsoleInterface
-#endif
     PrintTelnet(pMsg);
 }
 

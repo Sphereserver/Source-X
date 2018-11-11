@@ -29,6 +29,7 @@ const CScriptObj * CLog::SetObjectContext( const CScriptObj * pObjectContext )
 	m_pObjectContext = pObjectContext;
 	return pOldObject;
 }
+
 bool CLog::SetFilePath( lpctstr pszName )
 {
 	ASSERT( ! IsFileOpen());
@@ -118,70 +119,6 @@ bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
 	return false;
 }
 
-void CLog::SetColor(ConsoleTextColor color)
-{
-#ifdef _WIN32
-	switch (color)
-	{
-		case CTCOL_RED:
-			//NTWindow_PostMsgColor(RGB(255, 0, 0));
-			break;
-		case CTCOL_GREEN:
-			//NTWindow_PostMsgColor(RGB(0, 255, 0));
-			break;
-		case CTCOL_YELLOW:
-			//NTWindow_PostMsgColor(RGB(127, 127, 0));
-			break;
-		case CTCOL_BLUE:
-			//NTWindow_PostMsgColor(RGB(0, 0, 255));
-			break;
-		case CTCOL_MAGENTA:
-			//NTWindow_PostMsgColor(RGB(255, 0, 255));
-			break;
-		case CTCOL_CYAN:
-			//NTWindow_PostMsgColor(RGB(0, 127, 255));
-			break;
-		case CTCOL_WHITE:
-			//NTWindow_PostMsgColor(RGB(255, 255, 255));
-			break;        
-        default:
-            //NTWindow_PostMsgColor(0);
-            break;
-	}
-#else
-	g_UnixTerminal.setColor(color);
-#endif
-}
-
-dword CLog::GetColor(ConsoleTextColor color)
-{
-    switch (color)
-    {
-        case CTCOL_RED:
-            return RGB(255, 0, 0);
-            break;
-        case CTCOL_GREEN:
-            return RGB(0, 255, 0);
-            break;
-        case CTCOL_YELLOW:
-            return RGB(127, 127, 0);
-            break;
-        case CTCOL_BLUE:
-            return RGB(0, 0, 255);
-            break;
-        case CTCOL_MAGENTA:
-            return RGB(255, 0, 255);
-            break;
-        case CTCOL_CYAN:
-            return RGB(0, 127, 255);
-            break;
-        default:
-        case CTCOL_WHITE:
-            return RGB(255, 255, 255);
-            break;
-    }
-}
-
 int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 {
 	// NOTE: This could be called in odd interrupt context so don't use dynamic stuff
@@ -195,8 +132,8 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 
 	try
 	{
-        dword iLogTextColor = GetColor(CTCOL_DEFAULT);
-        dword iLogTypeColor = iLogTextColor;
+        ConsoleTextColor iLogTextColor = CTCOL_DEFAULT;
+        ConsoleTextColor iLogTypeColor = CTCOL_DEFAULT;
 
 		// Put up the date/time.
 		CSTime datetime = CSTime::GetCurrentTime();	// last real time stamp.
@@ -208,19 +145,19 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 		{
 			case LOGL_FATAL:	// fatal error !
 				pszLabel = "FATAL:";
-                iLogTypeColor = GetColor(CTCOL_RED);
+                iLogTypeColor = CTCOL_RED;
 				break;
 			case LOGL_CRIT:		// critical.
 				pszLabel = "CRITICAL:";
-                iLogTypeColor = GetColor(CTCOL_RED);
+                iLogTypeColor = CTCOL_RED;
 				break;
 			case LOGL_ERROR:	// non-fatal errors.
 				pszLabel = "ERROR:";
-                iLogTypeColor = GetColor(CTCOL_RED);
+                iLogTypeColor = CTCOL_RED;
 				break;
 			case LOGL_WARN:
                 pszLabel = "WARNING:";
-                iLogTypeColor = GetColor(CTCOL_RED);
+                iLogTypeColor = CTCOL_RED;
 				break;
 		}
 
@@ -241,47 +178,34 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 		{
 			if ( !(dwMask & LOGM_INIT) && !g_Serv.IsLoading() )
 			{
-                SetColor(CTCOL_YELLOW);
-				g_Serv.PrintStr(GetColor(CTCOL_YELLOW), szTime );
-				SetColor(CTCOL_DEFAULT);
+				g_Serv.PrintStr(CTCOL_YELLOW, szTime );
 			}
 
 			if ( pszLabel )	// some sort of error
 			{
-				SetColor(CTCOL_RED);
-				g_Serv.PrintStr( GetColor(CTCOL_RED), pszLabel );
-                iLogTypeColor = GetColor(CTCOL_RED);
+				g_Serv.PrintStr( iLogTypeColor, pszLabel );
                 if ((dwMask & 0x07) == LOGL_WARN)
                 {
-                    SetColor(CTCOL_DEFAULT);
-                    iLogTextColor = GetColor(CTCOL_DEFAULT);
+                    iLogTextColor = CTCOL_DEFAULT;
                 }
                 else
                 {
-                    SetColor(CTCOL_WHITE);
-                    iLogTextColor = GetColor(CTCOL_WHITE);
+                    iLogTextColor = CTCOL_WHITE;
                 }
 			}
 			else if ((dwMask & LOGM_DEBUG) && !(dwMask & LOGM_INIT))	// debug log
 			{
 				pszLabel = "DEBUG:";
-                iLogTypeColor = GetColor(CTCOL_RED);
-				SetColor(CTCOL_MAGENTA);
-				g_Serv.PrintStr(GetColor(CTCOL_MAGENTA), pszLabel);
-				SetColor(CTCOL_DEFAULT);
+				g_Serv.PrintStr(CTCOL_MAGENTA, pszLabel);
 			}
 
 			if ( szScriptContext[0] )
 			{
-				SetColor(CTCOL_CYAN);
-				g_Serv.PrintStr( GetColor(CTCOL_CYAN), szScriptContext );
-				SetColor(CTCOL_DEFAULT);
+				g_Serv.PrintStr( CTCOL_CYAN, szScriptContext );
 			}
 			g_Serv.PrintStr( iLogTextColor, pszMsg );
-			// Back to normal color.
-			SetColor(CTCOL_DEFAULT);
 		}
-		
+
 		// Print to log file.
 		if ( !(dwMask & LOGF_CONSOLE_ONLY) )
 		{
@@ -346,7 +270,7 @@ void _cdecl CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...
 			eSeverity = pErr->m_eSeverity;
 			const CAssert * pAssertErr = dynamic_cast<const CAssert*>(pErr);
 			if (pAssertErr)
-				pAssertErr->GetErrorMessage(szMsg, sizeof(szMsg));				
+				pAssertErr->GetErrorMessage(szMsg, sizeof(szMsg));
 			else
 				pErr->GetErrorMessage(szMsg, sizeof(szMsg));
 			stLen = strlen(szMsg);

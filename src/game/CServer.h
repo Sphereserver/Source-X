@@ -93,7 +93,7 @@ public:
     void SysMessage(ConsoleOutput *pMsg) const;
 	void PrintTelnet( lpctstr pszMsg ) const;
     void PrintStr(lpctstr pMsg) const;
-    void PrintStr(dword iColor, lpctstr pMsg) const;
+    void PrintStr(ConsoleTextColor iColor, lpctstr pMsg) const;
     void PrintOutput(ConsoleOutput *pOutput) const;
 	ssize_t  PrintPercent( ssize_t iCount, ssize_t iTotal );
 

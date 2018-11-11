@@ -861,8 +861,7 @@ int _cdecl main( int argc, char * argv[] )
 #endif
 {
 #ifndef _WIN32
-	// Initialize nonblocking IO and disable readline on linux
-	g_UnixTerminal.prepare();
+    g_UnixTerminal.start();
 #endif
 
 	g_Serv.SetExitFlag( Sphere_InitServer( argc, argv ));
@@ -889,8 +888,7 @@ int _cdecl main( int argc, char * argv[] )
 #endif
 
 		bool shouldRunInThread = ( g_Cfg.m_iFreezeRestartTime > 0 );
-
-		if( shouldRunInThread )
+		if (shouldRunInThread)
 		{
 			g_Main.start();				// Starts another thread to do all the work (it does Sphere_OnTick())
 			IThread::setThreadName("T_Monitor");
@@ -898,7 +896,7 @@ int _cdecl main( int argc, char * argv[] )
 		}
 		else
 		{
-			while( !g_Serv.GetExitFlag() )
+			while ( !g_Serv.GetExitFlag() )
 			{
 				g_Main.tick();			// Use this thread to do all the work, without monitoring the other threads state
 			}

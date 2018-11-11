@@ -9,7 +9,6 @@
 #include "sphere_library/CSFileText.h"
 #include "sphere_library/CSTime.h"
 #include "sphere_library/smutex.h"
-#include "common.h"
 #include "../sphere/ConsoleInterface.h"
 #include "../sphere/UnixTerminal.h"
 #include <exception>
@@ -46,7 +45,7 @@ enum LOG_TYPE
 	LOGM_KILLS			= 0x010000,	// Log player combat results.
 	LOGM_HTTP			= 0x020000,
 	LOGM_NOCONTEXT		= 0x040000,	// do not include context information
-	LOGM_DEBUG			= 0x080000	// debug kind of message with "DEBUG:" prefix	
+	LOGM_DEBUG			= 0x080000	// debug kind of message with "DEBUG:" prefix
 };
 
 class CSError;
@@ -184,14 +183,6 @@ public:
 private:
 	CLog(const CLog& copy);
 	CLog& operator=(const CLog& other);
-
-	/**
-	* @name SetColor
-	* @brief Changes current console text color to the specified one. Note, that the color should be reset after being set
-	*/
-    void SetColor(ConsoleTextColor color);
-public:
-    dword GetColor(ConsoleTextColor color);
 } g_Log;		// Log file
 
 

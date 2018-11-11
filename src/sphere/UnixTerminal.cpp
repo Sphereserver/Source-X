@@ -2,7 +2,7 @@
 #ifndef _WIN32
 
 #include "../common/CException.h"
-#include "threads.h"
+#include "../game/CServer.h"
 #include "UnixTerminal.h"
 
 #ifndef _USECURSES
@@ -13,7 +13,7 @@
 
 UnixTerminal g_UnixTerminal;
 
-UnixTerminal::UnixTerminal() :
+UnixTerminal::UnixTerminal() : AbstractSphereThread("T_UnixTerm", IThread::Highest),
 #ifdef _USECURSES
 	m_window(nullptr),
 #endif
@@ -23,6 +23,7 @@ UnixTerminal::UnixTerminal() :
 
 UnixTerminal::~UnixTerminal()
 {
+    ConsoleInterface::_ciQueueCV.notify_one();  // tell to the condition variable to stop waiting, it's time to exit
 	restore();
 }
 
@@ -234,7 +235,7 @@ void UnixTerminal::prepareColor()
 		}
 	}
 */
-	
+
 #endif
 }
 
@@ -259,6 +260,42 @@ void UnixTerminal::restore()
 void UnixTerminal::setColorEnabled(bool enable)
 {
 	m_isColorEnabled = enable;
+}
+
+void UnixTerminal::onStart()
+{
+    AbstractSphereThread::onStart();
+    // Initialize nonblocking IO and disable readline on linux
+    prepare();
+}
+
+void UnixTerminal::tick()
+{
+    while (!shouldExit() && !g_Serv.GetExitFlag())
+    {
+        std::unique_lock<std::mutex> lock(ConsoleInterface::_ciQueueMutex);
+        while (_qOutput.empty())
+        {
+            ConsoleInterface::_ciQueueCV.wait(lock);
+        }
+
+        std::vector<ConsoleOutput*> outMessages;
+        outMessages.reserve(_qOutput.size());
+        while (!_qOutput.empty())
+        {
+            outMessages.emplace_back(_qOutput.front());
+            _qOutput.pop();
+        }
+        lock.unlock();   // Better keep the mutex locked for the least time possible.
+
+        for (ConsoleOutput* co : outMessages)
+        {
+            setColor(co->GetTextColor());
+            print(co->GetTextString().GetPtr());
+            setColor(CTCOL_DEFAULT);
+            delete co;
+        }
+    }
 }
 
 

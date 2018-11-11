@@ -1,8 +1,9 @@
 #include "ConsoleInterface.h"
-#include "../common/CLog.h"
 
 
-ConsoleOutput::ConsoleOutput(dword iLogColor, CSString sLogString)
+// ConsoleOutput
+
+ConsoleOutput::ConsoleOutput(ConsoleTextColor iLogColor, CSString sLogString)
 {
     _iTextColor = iLogColor;
     _sTextString = sLogString;
@@ -10,7 +11,7 @@ ConsoleOutput::ConsoleOutput(dword iLogColor, CSString sLogString)
 
 ConsoleOutput::ConsoleOutput(CSString sLogString)
 {
-    _iTextColor = g_Log.GetColor(CTCOL_DEFAULT);
+    _iTextColor = CTCOL_DEFAULT;
     _sTextString = sLogString;
 }
 
@@ -18,7 +19,7 @@ ConsoleOutput::~ConsoleOutput()
 {
 }
 
-dword ConsoleOutput::GetTextColor() const
+ConsoleTextColor ConsoleOutput::GetTextColor() const
 {
     return _iTextColor;
 }
@@ -28,46 +29,49 @@ const CSString& ConsoleOutput::GetTextString() const
     return _sTextString;
 }
 
+
+// ConsoleInterface
+
 ConsoleInterface::ConsoleInterface()
 {
-    _qOutput = &_qStorage1;
 }
 
 ConsoleInterface::~ConsoleInterface()
 {
 }
 
-void ConsoleInterface::_SwitchQueues()
+uint ConsoleInterface::CTColToRGB(ConsoleTextColor color) // static
 {
-    if (_qOutput == &_qStorage1)
+    auto MakeRGB = [](uchar r, uchar g, uchar b) -> uint
     {
-        _qOutput = &_qStorage2;
-    }
-    else
+        return ((uint)r | (g << 8) | (b << 16));
+    };
+    switch (color)
     {
-        _qOutput = &_qStorage1;
+        case CTCOL_RED:
+            return MakeRGB(255, 0, 0);
+        case CTCOL_GREEN:
+            return MakeRGB(0, 255, 0);
+        case CTCOL_YELLOW:
+            return MakeRGB(127, 127, 0);
+        case CTCOL_BLUE:
+            return MakeRGB(0, 0, 255);
+        case CTCOL_MAGENTA:
+            return MakeRGB(255, 0, 255);
+        case CTCOL_CYAN:
+            return MakeRGB(0, 127, 255);
+        case CTCOL_WHITE:
+            return MakeRGB(255, 255, 255);
+        default:
+            return MakeRGB(175, 175, 175);
     }
-}
-
-void ConsoleInterface::SwitchQueues()
-{
-    _inMutex.lock();
-    _outMutex.lock();
-    if (_qOutput == &_qStorage1)
-    {
-        _qOutput = &_qStorage2;
-    }
-    else
-    {
-        _qOutput = &_qStorage1;
-    }
-    _outMutex.unlock();
-    _inMutex.unlock();
 }
 
 void ConsoleInterface::AddConsoleOutput(ConsoleOutput * output)
 {
-    _inMutex.lock();
-    _qOutput->push(output);
-    _inMutex.unlock();
+    std::unique_lock<std::mutex> lock(_ciQueueMutex);
+    _qOutput.push(output);
+#ifndef _WIN32
+    _ciQueueCV.notify_one();
+#endif
 }
