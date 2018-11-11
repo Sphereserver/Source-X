@@ -1018,10 +1018,14 @@ bool CSector::MoveCharToSector( CChar * pChar )
         {
             GoAwake();    // Awake the sector
         }
-        else    // An NPC entered, but the sector is sleeping
+        else if (!pChar->IsSleeping())    // An NPC entered, but the sector is sleeping
         {
             pChar->GoSleep(); // then make the NPC sleep too.
         }
+    }
+    else if (pChar->m_pNPC && pChar->IsSleeping())
+    {
+        pChar->GoAwake();
     }
 	
 	return true;
@@ -1092,7 +1096,8 @@ void CSector::RespawnDeadNPCs()
 {
 	ADDTOCALLSTACK("CSector::RespawnDeadNPCs");
 	// skip sectors in unsupported maps
-	if ( !g_MapList.m_maps[m_map] ) return;
+	if ( !g_MapList.m_maps[m_map] )
+        return;
 
 	// Respawn dead NPC's
 	CChar * pCharNext;

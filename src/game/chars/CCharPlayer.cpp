@@ -70,10 +70,10 @@ bool CChar::SetPlayerAccount(CAccount *pAccount)
 bool CChar::SetPlayerAccount( lpctstr pszAccName )
 {
 	ADDTOCALLSTACK("CChar::SetPlayerAccount");
-	CAccountRef pAccount = g_Accounts.Account_FindCreate( pszAccName, g_Serv.m_eAccApp == ACCAPP_Free );
+	CAccountRef pAccount = g_Accounts.Account_Find( pszAccName );
 	if ( pAccount == nullptr )
 	{
-		DEBUG_ERR(( "SetPlayerAccount '%s' can't find '%s'!\n", GetName(), pszAccName ));
+		DEBUG_ERR(( "Trying to attach Char '%s' to unexistent Account '%s'!\n", GetName(), pszAccName ));
 		return false;
 	}
 	return( SetPlayerAccount( pAccount ));

@@ -2970,16 +2970,22 @@ bool CChar::Death()
 			{
 				pClient->addPlayerUpdate();
                 pClient->addPlayerWarMode();
-				pClient->addContainerSetup(GetPack());	// update backpack contents
 			}
 
             m_pClient->addSeason(SEASON_Desolate);
             m_pClient->addMapWaypoint(pCorpse, Corpse);		// add corpse map waypoint on enhanced clients
 
+            CItem *pPack = LayerFind(LAYER_PACK);
+            if ( pPack )
+            {
+                pPack->RemoveFromView();
+                pPack->Update();
+            }
+
 		    // Remove the characters which I can't see as dead from the screen
             if (g_Cfg.m_fDeadCannotSeeLiving)
             {
-                CWorldSearch AreaChars(GetTopPoint(), pClient->GetChar()->GetVisualRange());
+                CWorldSearch AreaChars(GetTopPoint(), UO_MAP_VIEW_SIZE_MAX);
                 AreaChars.SetSearchSquare(true);
                 for (;;)
                 {
@@ -3096,7 +3102,7 @@ CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fChec
 		return nullptr;
 
 	EXC_SET_BLOCK("Creature bumping");
-	short iStamReq = 0;
+	short uiStamReq = 0;
 	if ( fCheckChars && !IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_INSUBSTANTIAL) )
 	{
 		CItem *pPoly = LayerFind(LAYER_SPELL_Polymorph);
@@ -3111,31 +3117,30 @@ CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fChec
 			if ( m_pNPC && pChar->m_pNPC )	// NPCs can't walk over another NPC
 				return nullptr;
 
-			iStamReq = 10;
+			uiStamReq = 10;
 			if ( IsPriv(PRIV_GM) || pChar->IsStatFlag(STATF_DEAD|STATF_INVISIBLE|STATF_HIDDEN) )
-				iStamReq = 0;
+				uiStamReq = 0;
 			else if ( (pPoly && pPoly->m_itSpell.m_spell == SPELL_Wraith_Form) && (GetTopMap() == 0) )		// chars under Wraith Form effect can always walk through chars in Felucca
-				iStamReq = 0;
+				uiStamReq = 0;
 
 			TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
 			if ( IsTrigUsed(TRIGGER_PERSONALSPACE) )
 			{
-				CScriptTriggerArgs Args(iStamReq);
+				CScriptTriggerArgs Args(uiStamReq);
 				iRet = pChar->OnTrigger(CTRIG_PersonalSpace, this, &Args);
-				iStamReq = (short)(Args.m_iN1);
-
 				if ( iRet == TRIGRET_RET_TRUE )
 					return nullptr;
-				if (iStamReq < 0)
+                uiStamReq = (ushort)(Args.m_iN1);
+				if (uiStamReq < 0)
 					continue;
 			}
 
 			
-			if ( (iStamReq > 0) && (Stat_GetVal(STAT_DEX) < Stat_GetMaxAdjusted(STAT_DEX)) )
+			if ( (uiStamReq > 0) && (Stat_GetVal(STAT_DEX) < Stat_GetMaxAdjusted(STAT_DEX)) )
 				return nullptr;
 
 			tchar *pszMsg = Str_GetTemp();
-			if ( Stat_GetVal(STAT_DEX) < iStamReq )		// check if we have enough stamina to push the char
+			if ( Stat_GetVal(STAT_DEX) < uiStamReq )		// check if we have enough stamina to push the char
 			{
 				sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MSG_CANTPUSH), pChar->GetName());
 				SysMessage(pszMsg);
@@ -3173,10 +3178,10 @@ CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fChec
 		pVal = GetKey("OVERRIDE.STAMINALOSSATWEIGHT", true);
 		int iChanceForStamLoss = Calc_GetSCurve(iWeightLoadPercent - (pVal ? (int)(pVal->GetValNum()) : g_Cfg.m_iStaminaLossAtWeight), 10);
 		if ( iChanceForStamLoss > Calc_GetRandVal(1000) )
-			iStamReq += 1;
+			uiStamReq += 1;
 
-		if ( iStamReq )
-			UpdateStatVal(STAT_DEX, -iStamReq);
+		if ( uiStamReq )
+			UpdateStatVal(STAT_DEX, -uiStamReq);
 
 		StatFlag_Mod(STATF_INDOORS, (dwBlockFlags & CAN_I_ROOF) || pArea->IsFlag(REGION_FLAG_UNDERGROUND));
 		m_zClimbHeight = (dwBlockFlags & CAN_I_CLIMB) ? ClimbHeight : 0;
@@ -3610,9 +3615,8 @@ bool CChar::MoveToChar(CPointMap pt, bool bForceFix)
 		return false;
 
 	CPointMap ptOld = GetUnkPoint();
+    SetTopPoint(pt);
 	bool fSectorChange = pt.GetSector()->MoveCharToSector(this);
-	SetTopPoint(pt);
-    GoAwake(); //Try to awake it if it's not already.
 
 	if ( !m_fClimbUpdated || bForceFix )
 		FixClimbHeight();

@@ -3249,22 +3249,24 @@ void CObjBase::DupeCopy( const CObjBase * pObj )
 	m_BaseDefs.Copy(&(pObj->m_BaseDefs));
 }
 
-void CObjBase::Delete(bool bforce)
+void CObjBase::DeleteCleanup(bool fForce)
 {
-	ADDTOCALLSTACK("CObjBase::Delete");
-	UNREFERENCED_PARAMETER(bforce);	// CObjBase doesnt use it, but CItem and CChar does use it, do not remove.
-
+	ADDTOCALLSTACK("CObjBase::DeleteCleanup");
     if (GetSpawn())    // If I was created from a Spawn
     {
         //pEntity->Unsuscribe(GetSpawn());    // Avoiding recursive calls from CCSpawn::DelObj when forcing the pChar/pItem to Delete();
         GetSpawn()->DelObj(GetUID());  // Then I should be removed from it's list.
     }
-    CEntity *pEntity = static_cast<CEntity*>(this);
-    pEntity->Delete(bforce);
+    CEntity::Delete(fForce);
+    CTimedObject::Delete(fForce);
+    g_World.m_TimedFunctions.Erase( GetUID() );
+}
 
-    CTimedObject::Delete(bforce);
+void CObjBase::Delete(bool fForce)
+{
+	ADDTOCALLSTACK("CObjBase::Delete");
+    DeleteCleanup(fForce);
 	DeletePrepare();
-	g_World.m_TimedFunctions.Erase( GetUID() );
 	g_World.m_ObjDelete.InsertHead(this);
 }
 

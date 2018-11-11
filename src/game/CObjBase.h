@@ -420,7 +420,14 @@ public:
      *
      * @param   bforce  The bforce to delete.
      */
-	virtual void Delete(bool bforce = false);
+	virtual void Delete(bool fforce = false);
+
+    /**
+    * @fn  void CObjBase::DeleteCleanup();
+    *
+    * @brief   Removes this object from the internal lists it is linked to.
+    */
+    void DeleteCleanup(bool fForce = true);
 
 	// Accessors
 

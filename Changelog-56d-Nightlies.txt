@@ -1284,3 +1284,8 @@ Added Sleep and Awake functions (Write Only) for sectors (Sleep will do it's nor
 NOTE: Sleep will not work if the sector is already sleeping and Awake will not work if the sector is not sleeping.
 NOTE: Awake will awake the sector, tho it will insta sleep again since it checks for clients or how much time passed since it's last client departed from it (compared against SectorSleep .ini value). This can be used to force all items inside to tick.
 Added CanSleep function (Read Only) for sectors to check wether a sector can Sleep or not (use CanSleep 1 to check for adjacent's sectors too (source checks does it like this)).
+
+11-11-2018, Nolok
+- [Port from Source, 15-02-2017, Coruja] Fixed: Enhanced clients not updating backpack content on death.
+- Added: Error console message when trying to load from the saves a char attached to an invalid account.
+- Added: Error console message when trying to define a resource (itemdef, chardef, etc) with an invalid ID (> 03FFFF), instead of letting sphere throw an assertion failure.

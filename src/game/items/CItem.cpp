@@ -77,17 +77,17 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 /////////////////////////////////////////////////////////////////
 // -CItem
 
-    void CItem::SetComponentOfMulti(CUID uidMulti)
-    {
-        _uidMultiComponent = uidMulti;
-    }
+void CItem::SetComponentOfMulti(CUID uidMulti)
+{
+    _uidMultiComponent = uidMulti;
+}
 
-    void CItem::SetLockDownOfMulti(CUID uidMulti)
-    {
-        _uidMultiLockDown = uidMulti;
-    }
+void CItem::SetLockDownOfMulti(CUID uidMulti)
+{
+    _uidMultiLockDown = uidMulti;
+}
 
-    CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEMS), CObjBase( true )
+CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEMS), CObjBase( true )
 {
 	ASSERT( pItemDef );
 

@@ -688,6 +688,7 @@ void CWorldThread::GarbageCollection_UIDs()
 			if ( iResultCode )
 			{
 				// Do an immediate delete here instead of Delete()
+                pObj->DeleteCleanup(true);
 				delete pObj;
 				FreeUID(i);	// Get rid of junk uid if all fails..
 				continue;
@@ -2323,7 +2324,8 @@ void CWorld::OnTick()
 	if ( g_Serv.IsLoading() || !m_Clock.Advance() )
 		return;
 
-
+    EXC_TRY("CWorld::OnTick");
+    EXC_SET_BLOCK("Once per tick stuff");
     // Do this once per tick.
     // Update status flags from objects, update current tick.
     if (_iLastTick <= GetCurrentTick())
@@ -2360,35 +2362,44 @@ void CWorld::OnTick()
         EXC_TRYSUB("Tick::TimerF");
         m_TimedFunctions.OnTick();
         EXC_CATCHSUB("CTimedFunction");
-
     }
 
     /* World ticking (timers) */
     // Items, Chars ... Everything relying on CTimedObject (excepting CObjBase, which inheritance is only virtual)
+    EXC_SET_BLOCK("WorldObjects selection");
     ProfileTask timersTask(PROFILE_TIMERS);
     int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
     std::map<int64, TimedObjectsContainer>::iterator it = _mWorldTickList.begin();
     std::map<int64, std::vector<CTimedObject*>> tmpMap;
     int64 iTime;
-    while ( it != _mWorldTickList.end() && iCurTime > (iTime = it->first))
     {
-        _mWorldTickList.THREAD_CMUTEX.lock();
-        TimedObjectsContainer& cont = it->second;
-        cont.THREAD_CMUTEX.lock();
+        // Need here a new, inner scope to get rid of EXC_TRYSUB variables
+        EXC_TRYSUB("Tick::WorldObj");
+        while ( it != _mWorldTickList.end() && iCurTime > (iTime = it->first))
+        {
+            _mWorldTickList.THREAD_CMUTEX.lock();
+            TimedObjectsContainer& cont = it->second;
+            cont.THREAD_CMUTEX.lock();
 
-        // Copying code
-        tmpMap[iTime] = cont;
-        ++it;
-        // end of copying code
+            // Copying code
+            tmpMap[iTime] = cont;
+            ++it;
+            // end of copying code
         
-        cont.THREAD_CMUTEX.unlock();
-        _mWorldTickList.THREAD_CMUTEX.unlock();
+            cont.THREAD_CMUTEX.unlock();
+            _mWorldTickList.THREAD_CMUTEX.unlock();
+        }
+        EXC_CATCHSUB("Reading from _mWorldTickList");
     }
 
+    EXC_SET_BLOCK("WorldObjects loop");
     for (auto &pairObj : tmpMap)    // Loop through all msecs stored, unless we passed the timestamp.
     {
+        lpctstr ptcSubDesc = "\0";
         for (CTimedObject* pObj : pairObj.second)
         {
+            EXC_TRYSUB("Tick::WorldObj::Elapsed");
+            ptcSubDesc = "\0";
             PROFILE_TYPE profile = pObj->GetProfileType();
             ProfileTask profileTask(profile);
             /*
@@ -2406,6 +2417,7 @@ void CWorld::OnTick()
             {
                 case PROFILE_ITEMS:
                 {
+                    ptcSubDesc = "Item";
                     CItem *pItem = dynamic_cast<CItem*>(pObj);
                     ASSERT(pItem);
                     if (pItem->IsItemEquipped())
@@ -2424,6 +2436,7 @@ void CWorld::OnTick()
                 break;
                 case PROFILE_CHARS:
                 {
+                    ptcSubDesc = "Char";
                     fRemove = !pObj->OnTick();
                     CChar* pChar = dynamic_cast<CChar*>(pObj);
                     ASSERT(pChar);
@@ -2435,12 +2448,14 @@ void CWorld::OnTick()
                 break;
                 case PROFILE_SECTORS:
                 {
+                    ptcSubDesc = "Sector";
                     fRemove = false;    // sectors should NEVER be deleted.
                     pObj->OnTick();
                 }
                 break;
                 case PROFILE_MULTIS:
                 {
+                    ptcSubDesc = "Multi";
                     CItemMulti *pMulti = dynamic_cast<CItemMulti*>(pObj);
                     if (pMulti)
                     {
@@ -2450,6 +2465,7 @@ void CWorld::OnTick()
                 break;
                 case PROFILE_SHIPS:
                 {
+                    ptcSubDesc = "Ship";
                     CItemShip *pShip = static_cast<CItemShip*>(dynamic_cast<CItem*>(pObj));
                     if (pShip)
                     {
@@ -2459,6 +2475,7 @@ void CWorld::OnTick()
                 break;
                 default:
                 {
+                    ptcSubDesc = "Default";
                     fRemove = !pObj->OnTick(); // do tick.
                 }
                 break;
@@ -2467,47 +2484,60 @@ void CWorld::OnTick()
             {
                 pObj->Delete();
             }
+            EXC_CATCHSUB(ptcSubDesc);
         }
         _mWorldTickList.THREAD_CMUTEX.lock();
         _mWorldTickList.erase(pairObj.first);  // entirely remove this map's entry.
         _mWorldTickList.THREAD_CMUTEX.unlock();
     }
 
+    EXC_SET_BLOCK("PeriodicChars selection");
     ProfileTask taskChars(PROFILE_CHARS);
     std::map<int64, TimedCharsContainer>::iterator mapIt = _mCharTickList.begin();
     std::map<int64, std::vector<CChar*>> tmpCharMap;
-    while (mapIt != _mCharTickList.end() && iCurTime > (iTime = mapIt->first))
     {
-        _mCharTickList.THREAD_CMUTEX.lock();
-        TimedCharsContainer& cont = mapIt->second;
-        cont.THREAD_CMUTEX.lock();
+        // Need here a new, inner scope to get rid of EXC_TRYSUB variables
+        EXC_TRYSUB("Tick::PeriodicChar");
+        while (mapIt != _mCharTickList.end() && iCurTime > (iTime = mapIt->first))
+        {
+            _mCharTickList.THREAD_CMUTEX.lock();
+            TimedCharsContainer& cont = mapIt->second;
+            cont.THREAD_CMUTEX.lock();
 
-        tmpCharMap[iTime] = cont;
+            tmpCharMap[iTime] = cont;
         
-        ++mapIt;
-        cont.THREAD_CMUTEX.unlock();
-        _mCharTickList.THREAD_CMUTEX.unlock();
+            ++mapIt;
+            cont.THREAD_CMUTEX.unlock();
+            _mCharTickList.THREAD_CMUTEX.unlock();
+        }
+        EXC_CATCHSUB("Reading from _mCharTickList");
     }
 
 
     /* Periodic, automatic ticking for every char */
-    for (const auto &pairChar : tmpCharMap)    // Loop through all msecs stored, unless we passed the timestamp.
+    EXC_SET_BLOCK("PeriodicChars loop");
     {
-        for (CChar* pChar : pairChar.second)
+        // Need here a new, inner scope to get rid of EXC_TRYSUB variables
+        EXC_TRYSUB("Tick::PeriodicChar::Elapsed");
+        for (const auto &pairChar : tmpCharMap)    // Loop through all msecs stored, unless we passed the timestamp.
         {
-            if (pChar->OnTickPeriodic())
+            for (CChar* pChar : pairChar.second)
             {
-                AddCharTicking(pChar);
+                if (pChar->OnTickPeriodic())
+                {
+                    AddCharTicking(pChar);
+                }
+                else
+                {
+                    pChar->Delete();
+                }
             }
-            else
-            {
-                pChar->Delete();
-            }
-        }
 
-        _mCharTickList.THREAD_CMUTEX.lock();
-        _mCharTickList.erase(pairChar.first);
-        _mCharTickList.THREAD_CMUTEX.unlock();
+            _mCharTickList.THREAD_CMUTEX.lock();
+            _mCharTickList.erase(pairChar.first);
+            _mCharTickList.THREAD_CMUTEX.unlock();
+        }
+        EXC_CATCHSUB("");
     }
 
     m_ObjDelete.Clear();	// clean up our delete list (this DOES delete the objects, thanks to the virtual destructors).
@@ -2548,6 +2578,8 @@ void CWorld::OnTick()
 			g_Serv.r_Call("f_onserver_timer", &g_Serv, &args);
 		}
 	}
+
+    EXC_CATCH;
 }
 
 CSector *CWorld::GetSector(int map, int i) const	// gets sector # from one map

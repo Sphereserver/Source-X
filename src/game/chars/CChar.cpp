@@ -484,23 +484,19 @@ CMultiStorage *CChar::GetMultiStorage()
 
 void CChar::GoSleep()
 {
-    if (!IsSleeping())
-    {
-        g_World.DelCharTicking(this);   // do not insert into the mutex' lock, it access back to this char.
-        THREAD_UNIQUE_LOCK_SET;
-        CTimedObject::GoSleep();
-    }
+    ASSERT(!IsSleeping());
+    g_World.DelCharTicking(this);   // do not insert into the mutex' lock, it access back to this char.
+    THREAD_UNIQUE_LOCK_SET;
+    CTimedObject::GoSleep();
 }
 
 void CChar::GoAwake()
 {
-    if (IsSleeping())   //assert?
-    {
-        THREAD_UNIQUE_LOCK_SET;
-        CTimedObject::GoAwake();// Awake it first, otherwise some other things won't work
-        g_World.AddCharTicking(this);
-        SetTimeout(Calc_GetRandVal(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
-    }
+    ASSERT(IsSleeping());
+    THREAD_UNIQUE_LOCK_SET;
+    CTimedObject::GoAwake();// Awake it first, otherwise some other things won't work
+    g_World.AddCharTicking(this);
+    SetTimeout(Calc_GetRandVal(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
 }
 
 // Is there something wrong with this char?
