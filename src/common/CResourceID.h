@@ -122,7 +122,7 @@ public:
     }
     int GetResPage() const
     {
-        return RES_GET_PAGE(m_dwInternalVal);;
+        return RES_GET_PAGE(m_dwInternalVal);
     }
     bool operator == (const CResourceIDBase & rid) const
     {

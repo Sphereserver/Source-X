@@ -3580,6 +3580,11 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 		if ( IsDigit(pszName[0]) )	// Its just an index.
 		{
 			index = Exp_GetVal(pszName);
+            if (index > RES_INDEX_MASK)
+            {
+                g_Log.EventError("Requested resource with invalid ID. Value is too high (> 0%x).\n", RES_INDEX_MASK);
+                return ridinvalid;
+            }
 			rid = CResourceID( restype, index );
 			switch ( restype )
 			{
