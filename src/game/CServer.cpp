@@ -46,7 +46,7 @@ CServer::CServer() : CServerDef( SPHERE_TITLE, CSocketAddressIP( SOCKET_LOCAL_AD
 	m_fConsoleTextReadyFlag = false;
 
 	// we are in start up mode. // IsLoading()
-	SetServerMode( SERVMODE_Loading );
+	SetServerMode( SERVMODE_PreLoadingINI );
 
 	memset(m_PacketFilter, 0, sizeof(m_PacketFilter));
 	memset(m_OutPacketFilter, 0, sizeof(m_OutPacketFilter));
@@ -166,7 +166,7 @@ void CServer::SysMessage( lpctstr pszMsg ) const
 		return;
 
 #ifdef _WIN32
-    g_NTWindow.NTWindow_PostMsg(new ConsoleOutput(pszMsg));
+    g_NTWindow.AddConsoleOutput(new ConsoleOutput(pszMsg));
 #else
     g_UnixTerminal.AddConsoleOutput(new ConsoleOutput(pszMsg));
 #endif
@@ -179,7 +179,7 @@ void CServer::SysMessage(ConsoleOutput *pszMsg) const
         return;
 
 #ifdef _WIN32
-    g_NTWindow.NTWindow_PostMsg(pszMsg);
+    g_NTWindow.AddConsoleOutput(pszMsg);
 #else
     g_UnixTerminal.AddConsoleOutput(pszMsg);
 #endif

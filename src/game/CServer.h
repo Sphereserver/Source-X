@@ -27,6 +27,7 @@ enum SERVMODE_TYPE
 	SERVMODE_Run,				// Game is up and running.
 	SERVMODE_ResyncPause,		// Server paused during resync.
 
+    SERVMODE_PreLoadingINI,     // Initial (first) parsing of the sphere.ini
 	SERVMODE_Loading,			// Initial load.
 	SERVMODE_ResyncLoad,		// Loading after resync.
 	SERVMODE_Exiting			// Closing down.

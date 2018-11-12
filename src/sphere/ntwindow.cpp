@@ -203,7 +203,8 @@ BOOL CNTWindow::CStatusWnd::DefDialogProc( UINT message, WPARAM wParam, LPARAM l
 	return false;
 }
 
-CNTWindow::CNTWindow()
+CNTWindow::CNTWindow() : AbstractSphereThread("T_ConsoleWindow", IThread::Highest),
+    _NTWindow_InitParams{}
 {
 	m_iLogTextLen		= 0;
 	m_fLogScrollLock	= false;
@@ -212,6 +213,53 @@ CNTWindow::CNTWindow()
 	m_iHeightInput		= 0;
    	m_hLogFont			= nullptr;
 	memset(m_zCommands, 0, sizeof(m_zCommands));
+}
+
+void CNTWindow::onStart()
+{
+    NTWindow_Init(_NTWindow_InitParams.hInstance, _NTWindow_InitParams.lpCmdLine, _NTWindow_InitParams.nCmdShow);
+}
+
+void CNTWindow::terminate(bool ended)
+{
+    NTWindow_DeleteIcon();
+    AbstractSphereThread::terminate(ended);
+}
+
+bool CNTWindow::shouldExit()
+{
+    return AbstractThread::shouldExit();
+}
+
+void CNTWindow::tick()
+{
+    ConsoleInterface::_ciQueueMutex.lock();
+    if (!_qOutput.empty())
+    {
+        std::vector<ConsoleOutput*> outMessages;
+        outMessages.reserve(_qOutput.size());
+        while (!_qOutput.empty())
+        {
+            outMessages.emplace_back(_qOutput.front());
+            _qOutput.pop();
+        }
+        ConsoleInterface::_ciQueueMutex.unlock();
+
+        // No idea of the reason, but it seems that if we have some mutex locked while doing List_Add, sometimes we'll have a deadlock.
+        //  In any case, it's best to keep the mutex locked for the least time possible.
+        for (ConsoleOutput* co : outMessages)
+        {
+            theApp.m_wndMain.List_Add((COLORREF)CTColToRGB(co->GetTextColor()), co->GetTextString().GetPtr());
+            delete co;
+        } 
+    }
+    else
+    {
+        ConsoleInterface::_ciQueueMutex.unlock();
+    }
+
+    if (!NTWindow_OnTick(0))
+        terminate(true);
 }
 
 CNTWindow::~CNTWindow()
@@ -829,7 +877,7 @@ void CNTWindow::NTWindow_DeleteIcon()
 	}
 }
 
-void CNTWindow::NTWindow_Exit()
+void CNTWindow::NTWindow_ExitServer()
 {
 	// Unattach the window.
 	int iExitFlag = g_Serv.GetExitFlag();
@@ -838,10 +886,6 @@ void CNTWindow::NTWindow_Exit()
 		TCHAR *pszMsg = Str_GetTemp();
 		sprintf(pszMsg, "Server terminated by error %d!", iExitFlag);
 		theApp.m_wndMain.MessageBox(pszMsg, theApp.m_pszAppName, MB_OK|MB_ICONEXCLAMATION );
-		// just sit here for a bit til the user wants to close the window.
-		while ( NTWindow_OnTick(500) )
-		{
-		}
 	}
 }
 
@@ -866,6 +910,7 @@ void CNTWindow::NTWindow_SetWindowTitle( LPCTSTR pszText )
 	case SERVMODE_Run:			// Game is up and running
 		pszMode = "Running";
 		break;
+    case SERVMODE_PreLoadingINI:
 	case SERVMODE_Loading:		// Initial load.
 		pszMode = "Loading";
 		break;
@@ -897,36 +942,6 @@ void CNTWindow::NTWindow_SetWindowTitle( LPCTSTR pszText )
 	}
 }
 
-bool CNTWindow::NTWindow_PostMsgColor( COLORREF color )
-{
-	// Set the color for the next text.
-	if ( theApp.m_wndMain.m_hWnd == nullptr )
-		return false;
-
-	if ( ! color )
-	{
-		// set to default color.
-		color = theApp.m_wndMain.m_dwColorPrv;
-	}
-
-	theApp.m_wndMain.m_dwColorNew = color;
-	return true;
-}
-
-bool CNTWindow::NTWindow_PostMsg(ConsoleOutput *output )
-{
-	// Post a message to print out on the main display.
-	// If we use AttachThreadInput we don't need to post ?
-	// RETURN:
-	//  false = post did not work.
-
-	if ( theApp.m_wndMain.m_hWnd == nullptr )
-		return false;
-    
-    AddConsoleOutput(output);
-	return true;
-}
-
 bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
 {
 	// RETURN: false = exit the app.
@@ -937,31 +952,6 @@ bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
         {
             iWaitmSec = 0;
         }
-    }
-
-    ConsoleInterface::_ciQueueMutex.lock();
-    if (!_qOutput.empty())
-    {
-        std::vector<ConsoleOutput*> outMessages;
-        outMessages.reserve(_qOutput.size());
-        while (!_qOutput.empty())
-        {
-            outMessages.emplace_back(_qOutput.front());
-            _qOutput.pop();
-        }
-        ConsoleInterface::_ciQueueMutex.unlock();
-
-        // No idea of the reason, but it seems that if we have some mutex locked while doing List_Add, sometimes we'll have a deadlock.
-        //  In any case, it's best to keep the mutex locked for the least time possible.
-        for (ConsoleOutput* co : outMessages)
-        {
-            theApp.m_wndMain.List_Add((COLORREF)CTColToRGB(co->GetTextColor()), co->GetTextString().GetPtr());
-            delete co;
-        } 
-    }
-    else
-    {
-        ConsoleInterface::_ciQueueMutex.unlock();
     }
 	
 

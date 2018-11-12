@@ -5,20 +5,32 @@
 
 #ifndef _INC_NTWINDOW_H
 #define _INC_NTWINDOW_H
+
 #ifdef _WINDOWS
+
+#include "threads.h"
 #include "ConsoleInterface.h"
 #include "../common/sphere_library/CSWindow.h"
 #include "../common/CTextConsole.h"
 
-extern class CNTWindow : public CSWindow, public ConsoleInterface
+extern struct CNTWindow : public AbstractSphereThread, public CSWindow, public ConsoleInterface
 {
-public:
+    struct
+    {
+        HINSTANCE hInstance;
+        LPTSTR lpCmdLine;
+        int nCmdShow;
+    } _NTWindow_InitParams;
+
+    virtual void onStart();
+    virtual void terminate(bool ended);
+    virtual bool shouldExit();
+    virtual void tick();
+
     bool NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLinel, int nCmdShow);
-    void NTWindow_Exit();
+    void NTWindow_ExitServer();
     void NTWindow_DeleteIcon();
     bool NTWindow_OnTick(int iWaitmSec);
-    bool NTWindow_PostMsg(ConsoleOutput *output);
-    bool NTWindow_PostMsgColor(COLORREF color);
     void NTWindow_SetWindowTitle(LPCTSTR pText = nullptr);
 
     static const char *m_sClassName;

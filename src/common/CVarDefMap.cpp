@@ -276,10 +276,7 @@ CVarDefCont * CVarDefMap::GetAt( size_t at ) const
 	if ( at > m_Container.size() )
 		return nullptr;
 
-	DefSet::iterator i = m_Container.begin();
-	while ( at-- )
-		++i;
-
+	DefSet::const_iterator i = std::next(m_Container.begin(), at);
 	if ( i != m_Container.end() )
 		return( (*i) );
 	else
@@ -289,9 +286,8 @@ CVarDefCont * CVarDefMap::GetAt( size_t at ) const
 CVarDefCont * CVarDefMap::GetAtKey( lpctstr at ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::GetAtKey");
-	CVarDefContTest * pVarBase = new CVarDefContTest(at);
-	DefSet::iterator i = m_Container.find(pVarBase);
-	delete pVarBase;
+	CVarDefContTest pVarBase(at);
+	DefSet::const_iterator i = m_Container.find(&pVarBase);
 
 	if ( i != m_Container.end() )
 		return (*i);
@@ -305,19 +301,14 @@ void CVarDefMap::DeleteAt( size_t at )
 	if ( at > m_Container.size() )
 		return;
 
-	DefSet::iterator i = m_Container.begin();
-	while ( at-- ) 
-		++i;
-
-	DeleteAtIterator(i);
+	DeleteAtIterator(std::next(m_Container.begin(), at));
 }
 
 void CVarDefMap::DeleteAtKey( lpctstr at )
 {
 	ADDTOCALLSTACK("CVarDefMap::DeleteAtKey");
-	CVarDefContStr * pVarBased = new CVarDefContStr(at);
-	DefSet::iterator i = m_Container.find(pVarBased);
-	delete pVarBased;
+	CVarDefContStr pVarBased(at);
+	DefSet::iterator i = m_Container.find(&pVarBased);
 
 	DeleteAtIterator(i);
 }
@@ -490,9 +481,8 @@ int CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fZero )
 		return -1;
 	}
 
-	CVarDefContTest * pVarSearch = new CVarDefContTest(pszName);
-	DefSet::iterator iResult = m_Container.find(pVarSearch);
-	delete pVarSearch;
+	CVarDefContTest pVarSearch(pszName);
+	DefSet::iterator iResult = m_Container.find(&pVarSearch);
 
 	CVarDefCont * pVarBase = nullptr;
 	if ( iResult != m_Container.end() )
@@ -557,9 +547,8 @@ int CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, bool fZer
 		return SetNum( pszName, Exp_GetLLVal( pszVal ), fZero);
 	}
 
-	CVarDefContTest * pVarSearch = new CVarDefContTest(pszName);
-	DefSet::iterator iResult = m_Container.find(pVarSearch);
-	delete pVarSearch;
+	CVarDefContTest pVarSearch(pszName);
+	DefSet::iterator iResult = m_Container.find(&pVarSearch);
 
 	CVarDefCont * pVarBase = nullptr;
 	if ( iResult != m_Container.end() )
@@ -587,9 +576,8 @@ CVarDefCont * CVarDefMap::GetKey( lpctstr pszKey ) const
 
 	if ( pszKey )
 	{
-		CVarDefContTest * pVarBase = new CVarDefContTest(pszKey);
-		DefSet::const_iterator i = m_Container.find(pVarBase);
-		delete pVarBase;
+		CVarDefContTest pVarBase(pszKey);
+		DefSet::const_iterator i = m_Container.find(&pVarBase);
 		
 		if ( i != m_Container.end() )
 			pReturn = (*i);

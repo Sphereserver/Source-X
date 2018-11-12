@@ -882,6 +882,9 @@ bool CServerConfig::r_LoadVal( CScript &s )
 	ADDTOCALLSTACK("CServerConfig::r_LoadVal");
 	EXC_TRY("LoadVal");
 
+#define DEBUG_MSG_NOINIT(x) if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) DEBUG_MSG(x)
+#define DEBUG_ERR_NOINIT(x) if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) DEBUG_ERR(x)
+
 	int i = FindTableHeadSorted( s.GetKey(), reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf( sm_szLoadKeys )-1, sizeof(sm_szLoadKeys[0]));
 	if ( i < 0 )
 	{
@@ -961,7 +964,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 					}
 				}
 			}
-			DEBUG_ERR(("Bad usage of MAPx. Check your sphere.ini or scripts (SERV.MAP is a read only property)\n"));
+			DEBUG_ERR_NOINIT(("Bad usage of MAPx. Check your sphere.ini or scripts (SERV.MAP is a read only property)\n"));
 			return false;
 		}
 		else if ( s.IsKeyHead("PACKET", 6) )	//	PACKETx=<function name to execute upon packet>
@@ -975,7 +978,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 				else
 				{
 					strcpy(g_Serv.m_PacketFilter[index], args);
-					DEBUG_MSG(("PACKET FILTER: Hooked packet 0x%x with function %s.\n", index, args));
+					DEBUG_MSG_NOINIT(("PACKET FILTER: Hooked packet 0x%x with function %s.\n", index, args));
 					return true;
 				}
 			}
@@ -993,7 +996,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 				else
 				{
 					strcpy(g_Serv.m_OutPacketFilter[index], args);
-					DEBUG_MSG(("OUTGOING PACKET FILTER: Hooked packet 0x%x with function %s.\n", index, args));
+					DEBUG_MSG_NOINIT(("OUTGOING PACKET FILTER: Hooked packet 0x%x with function %s.\n", index, args));
 					return true;
 				}
 			}
@@ -1306,6 +1309,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 	return false;
 }
 
+#undef DEBUG_MSG_NOINIT
 
 const CSkillDef * CServerConfig::SkillLookup( lpctstr pszKey )
 {
@@ -4116,14 +4120,14 @@ bool CServerConfig::Load( bool fResync )
 	}
 	catch ( const CSError& e )
 	{
-		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".ini file is corrupt or missing\n" );
+		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".ini file is corrupt, missing, or there was an error while loading the settings.\n" );
 		g_Log.CatchEvent( &e, "g_VerData.Load" );
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		return false;
 	}
 	catch (...)
 	{
-		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".ini file is corrupt or missing\n" );
+		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".ini file is corrupt, missing, or there was an error while loading the settings.\n" );
 		g_Log.CatchEvent( nullptr, "g_VerData.Load" );
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		return false;
@@ -4178,9 +4182,6 @@ bool CServerConfig::Load( bool fResync )
 		else
 			pResFile->ReSync();
 
-#ifdef _WIN32
-        g_NTWindow.NTWindow_OnTick(0);
-#endif
 		g_Serv.PrintPercent( (size_t)(j + 1), count);
 	}
 

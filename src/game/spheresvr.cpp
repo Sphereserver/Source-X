@@ -469,6 +469,10 @@ void Sphere_ExitServer()
 
 	g_Log.Event(LOGM_INIT|LOGL_FATAL, "Server terminated: %s (code %d)\n", Reason, iExitFlag);
 	g_Log.Close();
+
+#ifdef _WIN32
+    g_NTWindow.NTWindow_ExitServer();
+#endif
 }
 
 int Sphere_OnTick()
@@ -541,11 +545,7 @@ static void Sphere_MainMonitorLoop()
 			if ( g_Serv.GetExitFlag() )
 				break;
 
-#ifdef _WIN32
-            g_NTWindow.NTWindow_OnTick(10);
-#else
 			Sleep(1000);
-#endif
 		}
 
 		EXC_SET_BLOCK("Checks");
@@ -861,9 +861,11 @@ int _cdecl main( int argc, char * argv[] )
 #endif
 {
 #ifndef _WIN32
+    IThread::setThreadName("T_SphereStartup");
     g_UnixTerminal.start();
 #endif
 
+    g_Serv.SetServerMode(SERVMODE_Loading);
 	g_Serv.SetExitFlag( Sphere_InitServer( argc, argv ));
 	if ( ! g_Serv.GetExitFlag() )
 	{
@@ -903,12 +905,14 @@ int _cdecl main( int argc, char * argv[] )
 		}
 	}
 
-#ifdef _WIN32
-    g_NTWindow.NTWindow_DeleteIcon();
-#endif
-
 	Sphere_ExitServer();
 	WritePidFile(1);
+#ifdef _WIN32
+    while (g_NTWindow.isActive())
+    {
+        Sleep (100);
+    }
+#endif
 	return( g_Serv.GetExitFlag() );
 }
 

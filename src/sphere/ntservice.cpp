@@ -450,6 +450,7 @@ void CNTService::CmdMainStart()
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
+    IThread::setThreadName("T_SphereStartup");
 
 	TCHAR	*argv[32];
 	argv[0] = nullptr;
@@ -459,9 +460,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	{
 		// We are running Win9x - So we are not an NT service.
 do_not_nt_service:
-        g_NTWindow.NTWindow_Init(hInstance, lpCmdLine, nCmdShow);
+        g_NTWindow._NTWindow_InitParams.hInstance = hInstance;
+        g_NTWindow._NTWindow_InitParams.lpCmdLine = lpCmdLine;
+        g_NTWindow._NTWindow_InitParams.nCmdShow = nCmdShow;
+        g_NTWindow.start();
+
 		int iRet = Sphere_MainEntryPoint(argc, argv);
-        g_NTWindow.NTWindow_Exit();
+        
 		TerminateProcess(GetCurrentProcess(), iRet);
 		return iRet;
 	}
@@ -478,6 +483,8 @@ do_not_nt_service:
 			return -2;
 
 		ExtractPath(szPath);
+
+        g_Serv.SetServerMode(SERVMODE_Loading);
 		g_Cfg.LoadIni(false);
 	}
 
