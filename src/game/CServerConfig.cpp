@@ -1307,9 +1307,11 @@ bool CServerConfig::r_LoadVal( CScript &s )
 	EXC_ADD_SCRIPT;
 	EXC_DEBUG_END;
 	return false;
-}
 
 #undef DEBUG_MSG_NOINIT
+#undef DEBUG_ERR_NOINIT
+}
+
 
 const CSkillDef * CServerConfig::SkillLookup( lpctstr pszKey )
 {

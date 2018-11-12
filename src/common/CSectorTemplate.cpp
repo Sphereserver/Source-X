@@ -496,7 +496,7 @@ bool CSectorBase::IsFlagSet( dword dwFlag ) const
 
 CPointMap CSectorBase::GetBasePoint() const
 {
-	ADDTOCALLSTACK("CSectorBase::GetBasePoint");
+	ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetBasePoint");
 	// What is the coord base of this sector. upper left point.
 	ASSERT( m_index >= 0 && m_index < g_MapList.GetSectorQty(m_map) );
 	CPointMap pt(( (word)((m_index % g_MapList.GetSectorCols(m_map)) * g_MapList.GetSectorSize(m_map))),
@@ -508,7 +508,7 @@ CPointMap CSectorBase::GetBasePoint() const
 
 CRectMap CSectorBase::GetRect() const
 {
-	ADDTOCALLSTACK("CSectorBase::GetRect");
+    ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetRect");
 	// Get a rectangle for the sector.
 	CPointMap pt = GetBasePoint();
 	CRectMap rect;
