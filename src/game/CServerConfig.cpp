@@ -3815,9 +3815,9 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 
 	if ( pszName )
 	{
-		int iVarNum = g_Exp.m_VarDefs.SetNum( pszName, rid.GetPrivateUID() );
-		if ( iVarNum >= 0 )
-			*ppVarNum = dynamic_cast <CVarDefContNum*>( g_Exp.m_VarDefs.GetAt(iVarNum));
+		CVarDefContNum* pVarTemp = g_Exp.m_VarDefs.SetNum( pszName, rid.GetPrivateUID() );
+		if ( pVarTemp )
+			*ppVarNum = pVarTemp;
 	}
 
 	return rid;

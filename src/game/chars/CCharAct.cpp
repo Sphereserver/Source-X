@@ -3615,8 +3615,12 @@ bool CChar::MoveToChar(CPointMap pt, bool bForceFix)
 		return false;
 
 	CPointMap ptOld = GetUnkPoint();
-    SetTopPoint(pt);
 	bool fSectorChange = pt.GetSector()->MoveCharToSector(this);
+    SetTopPoint(pt);
+    if (m_pNPC && IsSleeping())
+    {
+        GoAwake();
+    }
 
 	if ( !m_fClimbUpdated || bForceFix )
 		FixClimbHeight();

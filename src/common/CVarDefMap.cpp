@@ -443,42 +443,42 @@ size_t CVarDefMap::GetCount() const
 	return m_Container.size();
 }
 
-int CVarDefMap::SetNumNew( lpctstr pszName, int64 iVal )
+CVarDefContNum* CVarDefMap::SetNumNew( lpctstr pszName, int64 iVal )
 {
 	ADDTOCALLSTACK("CVarDefMap::SetNumNew");
-	CVarDefCont * pVarNum = new CVarDefContNum( pszName, iVal );
+	CVarDefContNum * pVarNum = new CVarDefContNum( pszName, iVal );
 	if ( !pVarNum )
-		return -1;
+		return nullptr;
 
-	DefPairResult res = m_Container.insert(pVarNum);
+	DefPairResult res = m_Container.insert(static_cast<CVarDefCont*>(pVarNum));
 	if ( res.second )
-		return (int)(std::distance(m_Container.begin(), res.first));
+		return pVarNum;
 	else
     {
         delete pVarNum;
-		return -1;
+		return nullptr;
     }
 }
 
-int CVarDefMap::SetNumOverride( lpctstr pszKey, int64 iVal )
+CVarDefContNum* CVarDefMap::SetNumOverride( lpctstr pszKey, int64 iVal )
 {
 	ADDTOCALLSTACK("CVarDefMap::SetNumOverride");
 	DeleteAtKey(pszKey);
 	return SetNumNew(pszKey,iVal);
 }
 
-int CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fZero )
+CVarDefContNum* CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fZero )
 {
 	ADDTOCALLSTACK("CVarDefMap::SetNum");
 	ASSERT(pszName);
 
 	if ( pszName[0] == '\0' )
-		return -1;
+		return nullptr;
 
 	if ( fZero && (iVal == 0) )
 	{
 		DeleteAtKey(pszName);
-		return -1;
+		return nullptr;
 	}
 
 	CVarDefContTest pVarSearch(pszName);
@@ -501,44 +501,44 @@ int CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fZero )
 		return SetNumOverride( pszName, iVal );
 	}
 
-	return (int)(std::distance(m_Container.begin(), iResult));
+	return pVarNum;
 }
 
-int CVarDefMap::SetStrNew( lpctstr pszName, lpctstr pszVal )
+CVarDefContStr* CVarDefMap::SetStrNew( lpctstr pszName, lpctstr pszVal )
 {
 	ADDTOCALLSTACK("CVarDefMap::SetStrNew");
-	CVarDefCont * pVarStr = new CVarDefContStr( pszName, pszVal );
+	CVarDefContStr * pVarStr = new CVarDefContStr( pszName, pszVal );
 	if ( !pVarStr )
-		return -1;
+		return nullptr;
 
 	DefPairResult res = m_Container.insert(pVarStr);
 	if ( res.second )
-		return (int)(std::distance(m_Container.begin(), res.first));
+		return pVarStr;
 	else
     {
         delete pVarStr;
-		return -1;
+		return nullptr;
     }
 }
 
-int CVarDefMap::SetStrOverride( lpctstr pszKey, lpctstr pszVal )
+CVarDefContStr* CVarDefMap::SetStrOverride( lpctstr pszKey, lpctstr pszVal )
 {
 	ADDTOCALLSTACK("CVarDefMap::SetStrOverride");
 	DeleteAtKey(pszKey);
 	return SetStrNew(pszKey,pszVal);
 }
 
-int CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, bool fZero )
+CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, bool fZero )
 {
 	ADDTOCALLSTACK("CVarDefMap::SetStr");
 	// ASSUME: This has been clipped of unwanted beginning and trailing spaces.
 	if ( !pszName || !pszName[0] )
-		return -1;
+		return nullptr;
 
 	if ( pszVal == nullptr || pszVal[0] == '\0' )	// but not if empty
 	{
 		DeleteAtKey(pszName);
-		return -1;
+		return nullptr;
 	}
 
 	if ( !fQuoted && IsSimpleNumberString(pszVal))
@@ -566,7 +566,7 @@ int CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, bool fZer
 			DEBUG_WARN(( "Replace existing VarNum '%s' with string: '%s^\n", pVarBase->GetKey(), pszVal ));
 		return SetStrOverride( pszName, pszVal );
 	}
-	return (int)(std::distance(m_Container.begin(), iResult) );
+	return pVarStr;
 }
 
 CVarDefCont * CVarDefMap::GetKey( lpctstr pszKey ) const

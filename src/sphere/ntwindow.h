@@ -20,7 +20,7 @@ extern struct CNTWindow : public AbstractSphereThread, public CSWindow, public C
         HINSTANCE hInstance;
         LPTSTR lpCmdLine;
         int nCmdShow;
-    } _NTWindow_InitParams;
+    } _NTWInitParams;
 
     virtual void onStart();
     virtual void terminate(bool ended);

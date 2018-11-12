@@ -28,9 +28,8 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
         }
     }
 
-    int iVarNum;
-
-    CVarDefCont * pVarKey = g_Exp.m_VarDefs.GetKey( pszName );
+    const CVarDefCont * pVarKey = g_Exp.m_VarDefs.GetKey( pszName );
+	CVarDefContNum* pVarKeyNum = nullptr;
     if ( pVarKey )
     {
         dword keyVal = (dword)pVarKey->GetValNum();
@@ -47,17 +46,17 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
         else
             DEBUG_WARN(( "DEFNAME=%s: redefinition (0%" PRIx32 "!=0%" PRIx32 ")\n", pszName, RES_GET_INDEX(keyVal), GetResourceID().GetResIndex() ));
 
-        iVarNum = g_Exp.m_VarDefs.SetNum( pszName, GetResourceID().GetPrivateUID() );
+        pVarKeyNum = g_Exp.m_VarDefs.SetNum( pszName, GetResourceID().GetPrivateUID() );
     }
     else
     {
-        iVarNum = g_Exp.m_VarDefs.SetNumNew( pszName, GetResourceID().GetPrivateUID() );
+        pVarKeyNum = g_Exp.m_VarDefs.SetNumNew( pszName, GetResourceID().GetPrivateUID() );
     }
 
-    if ( iVarNum < 0 )
+    if ( pVarKeyNum == nullptr )
         return false;
 
-    SetResourceVar( dynamic_cast <const CVarDefContNum*>( g_Exp.m_VarDefs.GetAt( iVarNum )) );
+    SetResourceVar( pVarKeyNum );
     return true;
 }
 

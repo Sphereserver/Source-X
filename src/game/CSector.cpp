@@ -176,25 +176,26 @@ void CSector::GoSleep()
     CChar * pChar = static_cast <CChar*>(m_Chars_Active.GetHead());
     for (; pChar != nullptr; pChar = pCharNext)
     {
-        pChar->GoSleep();
-        if (pChar->m_pNPC)
-        {
-            g_World.DelCharTicking(pChar);
-        }
+		pCharNext = pChar->GetNext();
+        if (!pChar->IsSleeping())
+            pChar->GoSleep();
     }
 
     CItem * pItemNext = nullptr;
     CItem * pItem = static_cast <CItem*>(m_Items_Timer.GetHead());
     for (; pItem != nullptr; pItem = pItemNext)
     {
-        pItem->GoSleep();
+		pItemNext = pItem->GetNext();
+        if (!pItem->IsSleeping())
+			pItem->GoSleep();
     }
     pItemNext = nullptr;
     pItem = static_cast <CItem*>(m_Items_Inert.GetHead());
     for (; pItem != nullptr; pItem = pItemNext)
     {
         pItemNext = pItem->GetNext();
-        pItem->GoSleep();
+		if (!pItem->IsSleeping())
+	        pItem->GoSleep();
     }
 }
 
@@ -209,14 +210,16 @@ void CSector::GoAwake()
     for (; pChar != nullptr; pChar = pCharNext)
     {
         pCharNext = pChar->GetNext();
-        pChar->GoAwake();
+        if (pChar->IsSleeping())
+            pChar->GoAwake();
     }
 
     pChar = static_cast<CChar*>(m_Chars_Disconnect.GetHead());
     for (; pChar != nullptr; pChar = pCharNext)
     {
         pCharNext = pChar->GetNext();
-        pChar->GoAwake();
+        if (pChar->IsSleeping())
+            pChar->GoAwake();
     }
 
     CItem * pItemNext = nullptr;
@@ -224,13 +227,15 @@ void CSector::GoAwake()
     for (; pItem != nullptr; pItem = pItemNext)
     {
         pItemNext = pItem->GetNext();
-        pItem->GoAwake();
+		if (pItem->IsSleeping())
+        	pItem->GoAwake();
     }
     pItem = static_cast <CItem*>(m_Items_Inert.GetHead());
     for (; pItem != nullptr; pItem = pItemNext)
     {
         pItemNext = pItem->GetNext();
-        pItem->GoAwake();
+        if (pItem->IsSleeping())
+			pItem->GoAwake();
     }
 
     /*
@@ -1023,10 +1028,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
             pChar->GoSleep(); // then make the NPC sleep too.
         }
     }
-    else if (pChar->m_pNPC && pChar->IsSleeping())
-    {
-        pChar->GoAwake();
-    }
+    // NPCs are awaken in MoveToChar, after actually setting the P
 	
 	return true;
 }

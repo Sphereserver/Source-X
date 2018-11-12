@@ -460,9 +460,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	{
 		// We are running Win9x - So we are not an NT service.
 do_not_nt_service:
-        g_NTWindow._NTWindow_InitParams.hInstance = hInstance;
-        g_NTWindow._NTWindow_InitParams.lpCmdLine = lpCmdLine;
-        g_NTWindow._NTWindow_InitParams.nCmdShow = nCmdShow;
+        g_NTWindow._NTWInitParams = {hInstance, lpCmdLine, nCmdShow};
         g_NTWindow.start();
 
 		int iRet = Sphere_MainEntryPoint(argc, argv);

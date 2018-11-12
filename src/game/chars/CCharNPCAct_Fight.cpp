@@ -329,8 +329,11 @@ void CChar::NPC_Act_Fight()
     int iRange = Fight_CalcRange(m_uidWeapon.ItemFind());
     if (!NPC_Act_Follow(false, iRange, false))
     {
+        // Enemy gone?
         m_Act_UID.InitUID();
-        SetTimeoutD(1);
+        NPC_LookAround();
+        if (!IsTimerSet())
+			SetTimeoutD(1);
     }
     if (!IsTimerSet()) // Nothing could be done, tick again in a while
     {

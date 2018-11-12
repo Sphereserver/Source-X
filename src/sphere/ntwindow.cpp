@@ -204,7 +204,7 @@ BOOL CNTWindow::CStatusWnd::DefDialogProc( UINT message, WPARAM wParam, LPARAM l
 }
 
 CNTWindow::CNTWindow() : AbstractSphereThread("T_ConsoleWindow", IThread::Highest),
-    _NTWindow_InitParams{}
+    _NTWInitParams{}
 {
 	m_iLogTextLen		= 0;
 	m_fLogScrollLock	= false;
@@ -215,14 +215,19 @@ CNTWindow::CNTWindow() : AbstractSphereThread("T_ConsoleWindow", IThread::Highes
 	memset(m_zCommands, 0, sizeof(m_zCommands));
 }
 
+CNTWindow::~CNTWindow()
+{
+    NTWindow_DeleteIcon();
+    DestroyWindow();
+}
+
 void CNTWindow::onStart()
 {
-    NTWindow_Init(_NTWindow_InitParams.hInstance, _NTWindow_InitParams.lpCmdLine, _NTWindow_InitParams.nCmdShow);
+    NTWindow_Init(_NTWInitParams.hInstance, _NTWInitParams.lpCmdLine, _NTWInitParams.nCmdShow);
 }
 
 void CNTWindow::terminate(bool ended)
 {
-    NTWindow_DeleteIcon();
     AbstractSphereThread::terminate(ended);
 }
 
@@ -260,11 +265,6 @@ void CNTWindow::tick()
 
     if (!NTWindow_OnTick(0))
         terminate(true);
-}
-
-CNTWindow::~CNTWindow()
-{
-	DestroyWindow();
 }
 
 void CNTWindow::List_Clear()

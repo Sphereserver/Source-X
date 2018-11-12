@@ -38,9 +38,9 @@ public:
 	void Guild_SetAbbrev( bool fAbbrevShow );
 	word Guild_GetVotes() const;
 	void Guild_SetVotes( word wVotes );
-	int Guild_SetLoyalTo( CUID uid );
+	bool Guild_SetLoyalTo( CUID uid );
 	CUID Guild_GetLoyalTo() const;
-	int Guild_SetTitle( lpctstr pszTitle );
+	bool Guild_SetTitle( lpctstr pszTitle );
 	lpctstr Guild_GetTitle() const;
 	CItemStone * Guild_GetLink();
 

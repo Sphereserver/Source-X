@@ -83,7 +83,7 @@ private:
 
 public:
     inline lpctstr GetValStr() const {
-        return m_sVal; 
+        return m_sVal.GetPtr(); 
     }
 	void SetValStr( lpctstr pszVal );
 	int64 GetValNum() const;
@@ -136,8 +136,8 @@ private:
 	void DeleteAtKey( lpctstr at );
 	void DeleteAtIterator( DefSet::iterator it );
 
-	int SetNumOverride( lpctstr pszKey, int64 iVal );
-	int SetStrOverride( lpctstr pszKey, lpctstr pszVal );
+    CVarDefContNum* SetNumOverride( lpctstr pszKey, int64 iVal );
+    CVarDefContStr* SetStrOverride( lpctstr pszKey, lpctstr pszVal );
 
 public:
 	void Copy( const CVarDefMap * pArray );
@@ -158,10 +158,10 @@ public:
 	lpctstr FindValNum( int64 iVal ) const;
 	lpctstr FindValStr( lpctstr pVal ) const;
 
-	int SetNumNew( lpctstr pszKey, int64 iVal );
-	int SetNum( lpctstr pszKey, int64 iVal, bool fZero = false );
-	int SetStrNew( lpctstr pszKey, lpctstr pszVal );
-	int SetStr( lpctstr pszKey, bool fQuoted, lpctstr pszVal, bool fZero = false );
+    CVarDefContNum* SetNumNew( lpctstr pszKey, int64 iVal );
+    CVarDefContNum* SetNum( lpctstr pszKey, int64 iVal, bool fZero = false );
+    CVarDefContStr* SetStrNew( lpctstr pszKey, lpctstr pszVal );
+    CVarDefCont* SetStr( lpctstr pszKey, bool fQuoted, lpctstr pszVal, bool fZero = false );
 
 	CVarDefCont * GetAt( size_t at ) const;
 	CVarDefCont * GetKey( lpctstr pszKey ) const;
