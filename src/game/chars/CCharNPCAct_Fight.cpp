@@ -331,13 +331,16 @@ void CChar::NPC_Act_Fight()
     {
         // Enemy gone?
         m_Act_UID.InitUID();
-        NPC_LookAround();
-        if (!IsTimerSet())
-			SetTimeoutD(1);
+        SetTimeoutD(1);
+        return;
     }
     if (!IsTimerSet()) // Nothing could be done, tick again in a while
     {
-        g_Log.EventWarn("%s [0x%04x] found nothing to do in the fight routines.\n", GetName(), (dword)GetUID());
-        SetTimeoutS(1);
+        NPC_LookAround();
+        if (!IsTimerSet())
+        {
+            g_Log.EventWarn("%s [0x%04x] found nothing to do in the fight routines.\n", GetName(), (dword)GetUID());
+            SetTimeoutS(1);
+        }
     }
 }

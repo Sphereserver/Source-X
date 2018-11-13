@@ -1213,7 +1213,7 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool btoldByMaster )
         pTarget = NPC_FightFindBestTarget();
     }
 
-	m_Fight_Targ_UID = pTarget ? pTarget->GetUID() : static_cast<CUID>(UID_UNUSED);
+	m_Fight_Targ_UID = pTarget ? pTarget->GetUID() : CUID(UID_UNUSED);
 	Skill_Start(skillWeapon);
 	return true;
 }
