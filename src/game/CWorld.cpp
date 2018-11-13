@@ -2417,11 +2417,11 @@ void CWorld::OnTick()
             {
                 case PROFILE_ITEMS:
                 {
-                    ptcSubDesc = "Item";
                     CItem *pItem = dynamic_cast<CItem*>(pObj);
                     ASSERT(pItem);
                     if (pItem->IsItemEquipped())
                     {
+                        ptcSubDesc = "ItemEquipped";
                         CChar *pChar = static_cast<CChar*>(pItem->GetTopLevelObj());
                         ASSERT(pChar);
                         fRemove = !pChar->OnTickEquip(pItem);
@@ -2429,6 +2429,7 @@ void CWorld::OnTick()
                     }
                     else
                     {
+                        ptcSubDesc = "Item";
                         fRemove = (pItem->OnTick() == false);
                         break;
                     }

@@ -223,6 +223,7 @@ CNTWindow::~CNTWindow()
 
 void CNTWindow::onStart()
 {
+    AbstractThread::onStart();
     NTWindow_Init(_NTWInitParams.hInstance, _NTWInitParams.lpCmdLine, _NTWInitParams.nCmdShow);
 }
 
