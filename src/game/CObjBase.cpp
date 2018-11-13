@@ -107,8 +107,17 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 
 CObjBase::~CObjBase()
 {
+    RemoveSelf();
+    if (GetSpawn())    // If I was created from a Spawn
+    {
+        //pEntity->Unsuscribe(GetSpawn());    // Avoiding recursive calls from CCSpawn::DelObj when forcing the pChar/pItem to Delete();
+        GetSpawn()->DelObj(GetUID());  // Then I should be removed from it's list.
+    }
+    g_World.m_ObjStatusUpdates.RemovePtr(this);
+    g_World.m_TimedFunctions.Erase( GetUID() );
+    g_World.m_ObjDelete.InsertHead(this);
+
 	FreePropertyList();
-	g_World.m_ObjStatusUpdates.RemovePtr(this);
 
 	--sm_iCount;
 	ASSERT( IsDisconnected());
@@ -3249,25 +3258,11 @@ void CObjBase::DupeCopy( const CObjBase * pObj )
 	m_BaseDefs.Copy(&(pObj->m_BaseDefs));
 }
 
-void CObjBase::DeleteCleanup(bool fForce)
-{
-	ADDTOCALLSTACK("CObjBase::DeleteCleanup");
-    if (GetSpawn())    // If I was created from a Spawn
-    {
-        //pEntity->Unsuscribe(GetSpawn());    // Avoiding recursive calls from CCSpawn::DelObj when forcing the pChar/pItem to Delete();
-        GetSpawn()->DelObj(GetUID());  // Then I should be removed from it's list.
-    }
-    CEntity::Delete(fForce);
-    CTimedObject::Delete(fForce);
-    g_World.m_TimedFunctions.Erase( GetUID() );
-}
-
 void CObjBase::Delete(bool fForce)
 {
 	ADDTOCALLSTACK("CObjBase::Delete");
-    DeleteCleanup(fForce);
 	DeletePrepare();
-	g_World.m_ObjDelete.InsertHead(this);
+    CEntity::Delete(fForce);
 }
 
 TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgs * pArgs )

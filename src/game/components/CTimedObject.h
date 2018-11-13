@@ -55,13 +55,6 @@ public:
      */
     virtual bool OnTick();
 
-    /**
-     * @fn  virtual void CTimedObject::Delete(bool bforce = false) = 0;
-     *
-     * @brief   Delete this object.
-     */
-    virtual void Delete(bool bforce = false);
-
     /*
     * @fn virtual bool CTimedObject::IsDeleted() = 0;
     *

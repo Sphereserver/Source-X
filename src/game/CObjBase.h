@@ -416,18 +416,12 @@ public:
     /**
      * @fn  virtual void CObjBase::Delete(bool bforce = false);
      *
-     * @brief   Deletes the given bforce.
+     * @brief   Deletes this CObjBase from game (doesn't delete the raw class instance).
      *
-     * @param   bforce  The bforce to delete.
+     * @param   bforce  Force deletion.
      */
 	virtual void Delete(bool fforce = false);
 
-    /**
-    * @fn  void CObjBase::DeleteCleanup();
-    *
-    * @brief   Removes this object from the internal lists it is linked to.
-    */
-    void DeleteCleanup(bool fForce = true);
 
 	// Accessors
 

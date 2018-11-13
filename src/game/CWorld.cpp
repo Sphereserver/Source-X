@@ -688,7 +688,6 @@ void CWorldThread::GarbageCollection_UIDs()
 			if ( iResultCode )
 			{
 				// Do an immediate delete here instead of Delete()
-                pObj->DeleteCleanup(true);
 				delete pObj;
 				FreeUID(i);	// Get rid of junk uid if all fails..
 				continue;
@@ -2483,7 +2482,9 @@ void CWorld::OnTick()
             }
             if (fRemove)
             {
-                pObj->Delete();
+                CObjBase* pObjBase = dynamic_cast<CObjBase*>(pObj);
+                ASSERT(pObjBase);
+                pObjBase->Delete();
             }
             EXC_CATCHSUB(ptcSubDesc);
         }

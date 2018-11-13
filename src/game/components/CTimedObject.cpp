@@ -20,20 +20,10 @@ CTimedObject::CTimedObject(PROFILE_TYPE profile)
 CTimedObject::~CTimedObject()
 {
     ADDTOCALLSTACK("CTimedObject::~CTimedObject");
-    // If this assertion fails, it means that this object was deleted without calling the Delete method, and this WILL lead to problems
-    //  (like an exception for dereferencing an invalid pointer in the world object ticking code, because g_World.DelTimedObject(_timeout, this) isn't executed)
-    PERSISTANT_ASSERT(_profileType == PROFILE_TYPE(-1));
-}
-
-void CTimedObject::Delete(bool bForce)
-{
-    ADDTOCALLSTACK("CTimedObject::Delete");
-    UNREFERENCED_PARAMETER(bForce);
     if (_timeout > 0)
     {
         g_World.DelTimedObject(_timeout, this);
     }
-    _profileType = PROFILE_TYPE(-1);    // setting the profile to an invalid value to ensure that we delete&destruct this object immediately after
 }
 
 void CTimedObject::GoSleep()
