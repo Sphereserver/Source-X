@@ -31,7 +31,7 @@ private:
 
 public:
     CTimedObject(PROFILE_TYPE profile);
-    virtual ~CTimedObject() = default;
+    virtual ~CTimedObject();
     inline bool IsSleeping() const {
         return _fIsSleeping;
     }
