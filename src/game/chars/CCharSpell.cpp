@@ -480,7 +480,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 
 	CClient *pClient = GetClient();
 	CChar *pCaster = pSpell->m_uidLink.CharFind();
-	short iStatEffect = (short)(pSpell->m_itSpell.m_spelllevel);
+	ushort uiStatEffect = (ushort)(pSpell->m_itSpell.m_spelllevel);
 
 	if (IsTrigUsed(TRIGGER_EFFECTREMOVE))
 	{
@@ -695,7 +695,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 	switch (spell)	// the rest of the effects are handled directly by each spell
 	{
 		case SPELL_Clumsy:
-			Stat_AddMod(STAT_DEX, iStatEffect);
+			Stat_AddMod(STAT_DEX, uiStatEffect);
 			if (pClient)
 				pClient->removeBuff(BI_CLUMSY);
 			return;
@@ -714,12 +714,12 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			}
 			return;
 		case SPELL_Feeblemind:
-			Stat_AddMod( STAT_INT, iStatEffect );
+			Stat_AddMod( STAT_INT, uiStatEffect );
 			if (pClient)
 				pClient->removeBuff(BI_FEEBLEMIND);
 			return;
 		case SPELL_Weaken:
-			Stat_AddMod( STAT_STR, iStatEffect );
+			Stat_AddMod( STAT_STR, uiStatEffect );
 			if (pClient)
 				pClient->removeBuff(BI_WEAKEN);
 			return;
@@ -732,37 +732,37 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 				SetDefNum("RESPOISONMAX", GetDefNum("RESPOISONMAX", true) + 10);
 				SetDefNum("RESENERGYMAX", GetDefNum("RESENERGYMAX", true) + 10);
 			}
-			for (int i = STAT_STR; i < STAT_BASE_QTY; i++ )
-				Stat_AddMod((STAT_TYPE)(i), iStatEffect);
+			for (int i = STAT_STR; i < STAT_BASE_QTY; ++i )
+				Stat_AddMod((STAT_TYPE)i, uiStatEffect);
 			if (pClient)
 				pClient->removeBuff(BI_CURSE);
 			return;
 		}
 		case SPELL_Agility:
-			Stat_AddMod( STAT_DEX, -iStatEffect );
+			Stat_AddMod( STAT_DEX, -uiStatEffect );
 			if (pClient)
 				pClient->removeBuff(BI_AGILITY);
 			return;
 		case SPELL_Cunning:
-			Stat_AddMod( STAT_INT, -iStatEffect );
+			Stat_AddMod( STAT_INT, -uiStatEffect );
 			if (pClient)
 				pClient->removeBuff(BI_CUNNING);
 			return;
 		case SPELL_Strength:
-			Stat_AddMod( STAT_STR, -iStatEffect );
+			Stat_AddMod( STAT_STR, -uiStatEffect );
 			if (pClient)
 				pClient->removeBuff(BI_STRENGTH);
 			return;
 		case SPELL_Bless:
 		{
 			for ( int i = STAT_STR; i < STAT_BASE_QTY; ++i )
-				Stat_AddMod((STAT_TYPE)(i), -iStatEffect);
+				Stat_AddMod((STAT_TYPE)i, -uiStatEffect);
 			if (pClient)
 				pClient->removeBuff(BI_BLESS);
 			return;
 		}
 		case SPELL_Mana_Drain:
-			UpdateStatVal( STAT_INT, +iStatEffect );
+			UpdateStatVal( STAT_INT, +uiStatEffect );
 			Effect( EFFECT_OBJ, ITEMID_FX_SPARKLE_2, this, 10, 25 );
 			Sound( 0x28E );
 			return;
@@ -824,7 +824,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		/*case SPELL_Chameleon:		// 106 // makes your skin match the colors of whatever is behind you.
 			return;*/
 		case SPELL_Trance:			// 111 // temporarily increases your meditation skill.
-			Skill_SetBase(SKILL_MEDITATION, Skill_GetBase(SKILL_MEDITATION) - (ushort)g_Cfg.GetSpellEffect(spell, iStatEffect));
+			Skill_SetBase(SKILL_MEDITATION, Skill_GetBase(SKILL_MEDITATION) - (ushort)g_Cfg.GetSpellEffect(spell, uiStatEffect));
 			return;
 		/*case SPELL_Shield:			// 113 // erects a temporary force field around you. Nobody approaching will be able to get within 1 tile of you, though you can move close to them if you wish.
 			return;*/
@@ -1429,7 +1429,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					iStatEffect = 1 + (pCaster->Skill_GetBase(SKILL_EVALINT) / 100);
 					pSpell->m_itSpell.m_spelllevel = iStatEffect;
 				}
-				for ( int i = STAT_STR; i < STAT_BASE_QTY; i++ )
+				for ( int i = STAT_STR; i < STAT_BASE_QTY; ++i )
 					Stat_AddMod((STAT_TYPE)(i), iStatEffect);
 
 				if (pClient && IsSetOF(OF_Buffs))

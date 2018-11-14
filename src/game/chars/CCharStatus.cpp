@@ -814,7 +814,7 @@ lpctstr CChar::Food_GetLevelMessage(bool fPet, bool fHappy) const
 	return sm_szFoodLevel[index];
 }
 
-short CChar::Food_CanEat( CObjBase *pObj ) const
+ushort CChar::Food_CanEat( CObjBase *pObj ) const
 {
 	ADDTOCALLSTACK("CChar::Food_CanEat");
 	// Would i want to eat this creature ? hehe
@@ -831,7 +831,7 @@ short CChar::Food_CanEat( CObjBase *pObj ) const
 
 	size_t iRet = pCharDef->m_FoodType.FindResourceMatch(pObj);
 	if ( iRet != pCharDef->m_FoodType.BadIndex() )
-		return (short)(pCharDef->m_FoodType[iRet].GetResQty());	// how bad do i want it?
+		return (ushort)(pCharDef->m_FoodType[iRet].GetResQty());	// how bad do i want it?
 
 	return 0;
 }

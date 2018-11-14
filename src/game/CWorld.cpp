@@ -163,7 +163,7 @@ lpctstr GetReasonForGarbageCode(int iCode = -1)
 			break;
 
 		case 0x3101:
-			pStr = "Object is totaly lost, no parent exists";
+			pStr = "Object is totally lost, no parent exists";
 			break;
 
 		case 0x3102:
@@ -1856,7 +1856,7 @@ bool CWorld::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			sVal.FormatVal( m_iSaveCountID );
 			break;
 		case WC_TIME:	    // "TIME"
-			sVal.FormatLLVal(GetCurrentTime().GetTimeRaw() / TENTHS_PER_SEC);  // in tenths of second, for backwards compatibility
+			sVal.FormatLLVal(GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH);  // in tenths of second, for backwards compatibility
 			break;
         case WC_TIMEHIRES:	// "TIMEHIRES"
             sVal.FormatLLVal( GetCurrentTime().GetTimeRaw() );      // in milliseconds

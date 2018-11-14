@@ -8,10 +8,15 @@
 
 //----------------------------------------------------------------------
 
-void CChar::Stat_AddMod( STAT_TYPE i, short iVal )
+void CChar::Stat_AddMod( STAT_TYPE i, int iVal )
 {
 	ADDTOCALLSTACK("CChar::Stat_AddMod");
 	ASSERT(i >= 0 && i < STAT_QTY);
+
+    if (iVal > UINT16_MAX)
+        iVal = UINT16_MAX;
+    else if (iVal < -UINT16_MAX)
+        iVal = -UINT16_MAX;
 	m_Stat[i].m_mod	+= iVal;
 
 	const ushort uiMaxValue = Stat_GetMaxAdjusted(i);		// make sure the current value is not higher than new max value
@@ -21,11 +26,16 @@ void CChar::Stat_AddMod( STAT_TYPE i, short iVal )
 	UpdateStatsFlag();
 }
 
-void CChar::Stat_SetMod( STAT_TYPE i, short iVal )
+void CChar::Stat_SetMod( STAT_TYPE i, int iVal )
 {
 	ADDTOCALLSTACK("CChar::Stat_SetMod");
 	ASSERT(i >= 0 && i < STAT_QTY);
-	short iStatVal = Stat_GetMod(i);
+
+	int iStatVal = Stat_GetMod(i);
+    if (iVal > UINT16_MAX)
+        iVal = UINT16_MAX;
+    else if (iVal < -UINT16_MAX)
+        iVal = -UINT16_MAX;
 	if ( IsTrigUsed(TRIGGER_STATCHANGE) && !IsTriggerActive("CREATE") )
 	{
 		if ( i >= STAT_STR && i <= STAT_DEX )
@@ -37,7 +47,11 @@ void CChar::Stat_SetMod( STAT_TYPE i, short iVal )
 			if ( OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE )
 				return;
 			// do not restore argn1 to i, bad things will happen! leave i untouched. (matex)
-			iVal = (short)(args.m_iN3);
+			iVal = (int)(args.m_iN3);
+            if (iVal > UINT16_MAX)
+                iVal = UINT16_MAX;
+            else if (iVal < -UINT16_MAX)
+                iVal = -UINT16_MAX;
 		}
 	}
 
@@ -65,18 +79,23 @@ void CChar::Stat_SetMod( STAT_TYPE i, short iVal )
 	UpdateStatsFlag();
 }
 
-short CChar::Stat_GetMod( STAT_TYPE i ) const
+int CChar::Stat_GetMod( STAT_TYPE i ) const
 {
 	ADDTOCALLSTACK("CChar::Stat_GetMod");
 	ASSERT(i >= 0 && i < STAT_QTY);
 	return m_Stat[i].m_mod;
 }
 
-void CChar::Stat_SetMaxMod( STAT_TYPE i, short iVal )
+void CChar::Stat_SetMaxMod( STAT_TYPE i, int iVal )
 {
     ADDTOCALLSTACK("CChar::Stat_SetMod");
     ASSERT(i >= 0 && i < STAT_QTY);
-    short iStatVal = Stat_GetMaxMod(i);
+
+    int iStatVal = Stat_GetMaxMod(i);
+    if (iVal > UINT16_MAX)
+        iVal = UINT16_MAX;
+    else if (iVal < -UINT16_MAX)
+        iVal = -UINT16_MAX;
     if ( IsTrigUsed(TRIGGER_STATCHANGE) && !IsTriggerActive("CREATE") )
     {
         if ( i >= STAT_STR && i <= STAT_DEX )
@@ -88,7 +107,11 @@ void CChar::Stat_SetMaxMod( STAT_TYPE i, short iVal )
             if ( OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE )
                 return;
             // do not restore argn1 to i, bad things will happen! leave i untouched. (matex)
-            iVal = (short)(args.m_iN3);
+            iVal = (int)(args.m_iN3);
+            if (iVal > UINT16_MAX)
+                iVal = UINT16_MAX;
+            else if (iVal < -UINT16_MAX)
+                iVal = -UINT16_MAX;
         }
     }
 
@@ -101,10 +124,15 @@ void CChar::Stat_SetMaxMod( STAT_TYPE i, short iVal )
     UpdateStatsFlag();
 }
 
-void CChar::Stat_AddMaxMod( STAT_TYPE i, short iVal )
+void CChar::Stat_AddMaxMod( STAT_TYPE i, int iVal )
 {
     ADDTOCALLSTACK("CChar::Stat_AddMaxMod");
     ASSERT(i >= 0 && i < STAT_QTY);
+
+    if (iVal > UINT16_MAX)
+        iVal = UINT16_MAX;
+    else if (iVal < -UINT16_MAX)
+        iVal = -UINT16_MAX;
     m_Stat[i].m_maxMod	+= iVal;
 
     const ushort uiMaxValue = Stat_GetMaxAdjusted(i);		// make sure the current value is not higher than new max value
@@ -114,7 +142,7 @@ void CChar::Stat_AddMaxMod( STAT_TYPE i, short iVal )
     UpdateStatsFlag();
 }
 
-short CChar::Stat_GetMaxMod( STAT_TYPE i ) const
+int CChar::Stat_GetMaxMod( STAT_TYPE i ) const
 {
     ADDTOCALLSTACK("CChar::Stat_GetMaxMod");
     ASSERT(i >= 0 && i < STAT_QTY);
@@ -141,7 +169,6 @@ ushort CChar::Stat_GetVal( STAT_TYPE i ) const
 	ASSERT(i >= 0 && i < STAT_QTY); // allow for food
 	return m_Stat[i].m_val;
 }
-
 
 void CChar::Stat_SetMax( STAT_TYPE i, ushort uiVal )
 {
@@ -211,7 +238,7 @@ ushort CChar::Stat_GetMax( STAT_TYPE i ) const
 ushort CChar::Stat_GetMaxAdjusted( STAT_TYPE i ) const
 {
     ADDTOCALLSTACK("CChar::Stat_GetMaxAdjusted");
-    return (Stat_GetMax(i) + Stat_GetMaxMod(i));
+    return ushort(Stat_GetMax(i) + Stat_GetMaxMod(i));
 }
 
 uint CChar::Stat_GetSum() const
@@ -227,7 +254,7 @@ uint CChar::Stat_GetSum() const
 ushort CChar::Stat_GetAdjusted( STAT_TYPE i ) const
 {
 	ADDTOCALLSTACK("CChar::Stat_GetAdjusted");
-    return (Stat_GetBase(i) + Stat_GetMod(i));
+    return ushort(Stat_GetBase(i) + Stat_GetMod(i));
 }
 
 ushort CChar::Stat_GetBase( STAT_TYPE i ) const
@@ -397,7 +424,7 @@ bool CChar::Stats_Regen()
     const int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();
 	for (STAT_TYPE i = STAT_STR; i <= STAT_FOOD; i = (STAT_TYPE)(i + 1))
 	{
-        int64 iRegenDelay = Stats_GetRegenVal(i, true) * MSECS_PER_SEC; // Get chars regen[n] delay (if none, check's for sphere.ini's value)
+        const int64 iRegenDelay = Stats_GetRegenRate(i); // Get chars regen[n] delay (if none, check's for sphere.ini's value)
         if (iRegenDelay < 0)    // No value (on both char & ini)? then do not regen this stat.
         {
             continue;
@@ -408,7 +435,7 @@ bool CChar::Stats_Regen()
         }
         m_Stat[i].m_regen = iCurTime + iRegenDelay; // in msecs
 
-		ushort uiMod = (ushort)Stats_GetRegenVal(i, false);
+		ushort uiMod = (ushort)Stats_GetRegenVal(i);
 		if ((i == STAT_STR) && (g_Cfg.m_iRacialFlags & RACIALF_HUMAN_TOUGH) && IsHuman())
             uiMod += 2;		// Humans always have +2 hitpoint regeneration (Tough racial trait)
 		
@@ -416,7 +443,7 @@ bool CChar::Stats_Regen()
 		{
 			int iGain = Skill_Focus(i);
 			if (iGain > 0)
-                uiMod += (ushort)iGain;
+                uiMod += (ushort)minimum(iGain, USHRT_MAX);
 		}
 		ushort uiStatLimit = Stat_GetMaxAdjusted(i);
 
@@ -455,12 +482,47 @@ bool CChar::Stats_Regen()
 	}
 	return true;
 }
-ushort CChar::Stats_GetRegenVal(STAT_TYPE iStat, bool fGetTicks)
+
+int64 CChar::Stats_GetRegenRate(STAT_TYPE iStat)
+{
+    ADDTOCALLSTACK("CChar::Stats_GetRegenRate");
+    // Return regen rate for the given stat.
+
+    lpctstr stat = "";
+    switch ( iStat )
+    {
+        case STAT_STR:
+            stat = "HITS";
+            break;
+        case STAT_INT:
+            stat = "MANA";
+            break;
+        case STAT_DEX:
+            stat = "STAM";
+            break;
+        case STAT_FOOD:
+            stat = "FOOD";
+            break;
+        default:
+            break;
+    }
+
+    if ( iStat <= STAT_FOOD )
+    {
+        char pcRegen[21];
+        snprintf(pcRegen, sizeof(pcRegen), "REGEN%s", stat);    // in seconds
+        int64 iRate = MSECS_PER_SEC * GetDefNum(pcRegen, true); // def is in seconds, iRate in milliseconds
+        if ( iRate )
+            return iRate;
+        return (maximum(0, g_Cfg.m_iRegenRate[iStat]));         // in milliseconds
+    }
+    return 0;
+}
+
+ushort CChar::Stats_GetRegenVal(STAT_TYPE iStat)
 {
 	ADDTOCALLSTACK("CChar::Stats_GetRegenVal");
-	// Return regen rates and regen val for the given stat.
-	// fGetTicks = true returns the regen ticks (in seconds)
-	// fGetTicks = false returns the values of regeneration.
+	// Return regen val for the given stat.
 
 	lpctstr stat = "";
 	switch ( iStat )
@@ -483,22 +545,10 @@ ushort CChar::Stats_GetRegenVal(STAT_TYPE iStat, bool fGetTicks)
 
 	if ( iStat <= STAT_FOOD )
 	{
-		char sRegen[21];
-		if ( fGetTicks )
-		{
-			sprintf(sRegen, "REGEN%s", stat);   // in seconds
-			ushort iRate = (ushort)(GetDefNum(sRegen, true)); // in seconds
-			if ( iRate )
-				return iRate; //maximum(0, iRate);
-
-			return (ushort)(maximum(0, g_Cfg.m_iRegenRate[iStat])); // in seconds
-		}
-		else
-		{
-			sprintf(sRegen, "REGENVAL%s", stat);
-			ushort iRate = (ushort)GetDefNum(sRegen, true);
-			return maximum(1, iRate);
-		}
+        char pcRegen[21];
+	    snprintf(pcRegen, sizeof(pcRegen), "REGENVAL%s", stat);
+		ushort uiRate = (ushort)GetDefNum(pcRegen, true);
+		return maximum(1, uiRate);
 	}
 	return 0;
 }

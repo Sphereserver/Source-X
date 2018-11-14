@@ -1289,3 +1289,16 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 - [Port from Source, 15-02-2017, Coruja] Fixed: Enhanced clients not updating backpack content on death.
 - Added: Error console message when trying to load from the saves a char attached to an invalid account.
 - Added: Error console message when trying to define a resource (itemdef, chardef, etc) with an invalid ID (> 03FFFF), instead of letting sphere throw an assertion failure.
+
+14-11-2018, Nolok
+- Fixed: SERV.TIME and SERV.CREATE returned the time in hundredths of second instead of in tenths of second; SERV.AGE reported a wrong value due to a wrong time conversion.
+- Fixed: Chars sometimes couldn't fight after the server restart if COMBAT_PREHIT was on.
+- Fixed: COMBAT_SWING_NORANGE wasn't working as intended.
+- Fixed: MinCharDeleteTime ini value wasn't read correctly.
+- Fixed: For damageable items (CCItemDamageable) status update, hits regen rate was used instead of the ItemHitpointsUpdate ini setting.
+- Fixed: Regen rates were incorrectly converted from seconds to the internally used milliseconds, breaking them.
+- Fixed: Food stat still used internally a signed short instead of an ushort data type, limiting its max value.
+- Fixed: Stats and derived values still had somewhere the limit of a short type instead of using a ushort.
+- Changed: Stats and maxstats mods could only have a value between 32767 and 32767, changed it to -65535 and 65535 (which is the actual new stat limit).
+- Fixed: Vendors restocked after a wrong amount of time.
+- Fixed: The time required to wait before another potion use was of 1,5 seconds instead of 15.

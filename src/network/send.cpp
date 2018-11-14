@@ -3054,7 +3054,7 @@ PacketHealthUpdate::PacketHealthUpdate(const CChar* character, bool full) : Pack
 	else
 	{
 		writeInt16(100);
-		short iStatMax = character->Stat_GetMaxAdjusted(STAT_STR);
+		ushort iStatMax = character->Stat_GetMaxAdjusted(STAT_STR);
 		writeInt16((word)((character->Stat_GetVal(STAT_STR) * 100) / maximum(iStatMax, 1)));
 	}
 }
@@ -3081,7 +3081,7 @@ PacketManaUpdate::PacketManaUpdate(const CChar* character, bool full) : PacketSe
 	else
 	{
 		writeInt16(100);
-		short iStatMax = character->Stat_GetMaxAdjusted(STAT_INT);
+		ushort iStatMax = character->Stat_GetMaxAdjusted(STAT_INT);
 		writeInt16((word)((character->Stat_GetVal(STAT_INT) * 100) / maximum(iStatMax, 1)));
 	}
 }
@@ -3108,7 +3108,7 @@ PacketStaminaUpdate::PacketStaminaUpdate(const CChar* character, bool full) : Pa
 	else
 	{
 		writeInt16(100);
-		short iStatMax = character->Stat_GetMaxAdjusted(STAT_DEX);
+		ushort iStatMax = character->Stat_GetMaxAdjusted(STAT_DEX);
 		writeInt16((word)((character->Stat_GetVal(STAT_DEX) * 100) / maximum(iStatMax, 1)));
 	}
 }

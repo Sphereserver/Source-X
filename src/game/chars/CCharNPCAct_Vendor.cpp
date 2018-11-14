@@ -52,14 +52,14 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 		{
 			CVarDefCont *vardef = region->m_TagDefs.GetKey("RestockVendors");
 			if( vardef != nullptr )
-                iRestockDelay = vardef->GetValNum();
+                iRestockDelay = vardef->GetValNum() * MSECS_PER_TENTH;  // backwards: it was working on tenths in scripts before, keep it like that and update it to seconds.
 			if ( region->m_TagDefs.GetKey("NoRestock") != nullptr )
 				bRestockNow = false;
 		}
 		if ( m_TagDefs.GetKey("NoRestock") != nullptr )
 			bRestockNow = false;
 	}
-    int64 iNextRestock = g_World.GetCurrentTime().GetTimeRaw() + (iRestockDelay * MSECS_PER_TENTH); // backwards: it was working on tenths in scripts before, keep it like that and update it to seconds.
+    int64 iNextRestock = g_World.GetCurrentTime().GetTimeRaw() + iRestockDelay;
     
 	// At restock the containers are actually emptied
 	if ( bRestockNow )

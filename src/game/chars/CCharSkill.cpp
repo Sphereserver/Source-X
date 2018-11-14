@@ -2371,7 +2371,7 @@ int CChar::Skill_Meditation( SKTRIG_TYPE stage )
 
 		CSkillDef * pSkillDef = g_Cfg.GetSkillDef(SKILL_MEDITATION);
 		if (!pSkillDef->m_Effect.m_aiValues.empty())
-			UpdateStatVal(STAT_INT, (short)pSkillDef->m_Effect.GetLinear(Skill_GetBase(SKILL_MEDITATION)));
+			UpdateStatVal(STAT_INT, (ushort)pSkillDef->m_Effect.GetLinear(Skill_GetBase(SKILL_MEDITATION)));
 		else
 			UpdateStatVal( STAT_INT, 1 );
 		Skill_SetTimeout();		// next update (depends on skill)
@@ -2543,7 +2543,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 	}
 
 	// LAYER_FLAG_Bandage
-	pChar->UpdateStatVal( STAT_STR, (short)(pSkillDef->m_Effect.GetLinear(iSkillLevel)) );
+	pChar->UpdateStatVal( STAT_STR, (ushort)(pSkillDef->m_Effect.GetLinear(iSkillLevel)) );
 	return 0;
 }
 
@@ -2960,7 +2960,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_START )
 	{
-		UpdateStatVal( STAT_DEX, -(short)( 4 + Calc_GetRandVal(6) ) );
+		UpdateStatVal( STAT_DEX, -(ushort)( 4 + Calc_GetRandVal(6) ) );
 		if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOANIM ) )
 			UpdateAnimate( ANIM_MON_Stomp );
 

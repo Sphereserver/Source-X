@@ -775,34 +775,34 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	return fSuccess;
 }
 
-void CChar::Use_EatQty( CItem * pFood, short iQty )
+void CChar::Use_EatQty( CItem * pFood, ushort uiQty )
 {
 	ADDTOCALLSTACK("CChar::Use_EatQty");
 	// low level eat
 	ASSERT(pFood);
-	if ( iQty <= 0 )
+	if ( uiQty <= 0 )
 		return;
 
-	if ( iQty > pFood->GetAmount() )
-		iQty = pFood->GetAmount();
+	if ( uiQty > pFood->GetAmount() )
+        uiQty = pFood->GetAmount();
 
-	short iRestore = 0;
+	ushort uiRestore = 0;
 	if ( pFood->m_itFood.m_foodval )
-		iRestore = (short)(pFood->m_itFood.m_foodval);
+		uiRestore = pFood->m_itFood.m_foodval;
 	else
-		iRestore = pFood->Item_GetDef()->GetVolume();	// some food should have more value than other !
+		uiRestore = pFood->Item_GetDef()->GetVolume();	// some food should have more value than other !
 
-	if ( iRestore < 1 )
-		iRestore = 1;
+	if ( uiRestore < 1 )
+		uiRestore = 1;
 
 	int iSpace = Stat_GetMaxAdjusted(STAT_FOOD) - Stat_GetVal(STAT_FOOD);
 	if ( iSpace <= 0 )
 		return;
 
-	if ( (iQty > 1) && ((iRestore * iQty) > iSpace) )
+	if ( (uiQty > 1) && ((uiRestore * uiQty) > iSpace) )
     {
-		iQty = short(iSpace / iRestore);
-        iQty = maximum(1, iQty);
+        uiQty = ushort(iSpace / uiRestore);
+        uiQty = maximum(1, uiQty);
     }
 
 	switch ( pFood->GetType() )
@@ -818,11 +818,11 @@ void CChar::Use_EatQty( CItem * pFood, short iQty )
 	}
 
 	UpdateDir(pFood);
-	EatAnim(pFood->GetName(), iRestore * iQty);
-	pFood->ConsumeAmount(iQty);
+	EatAnim(pFood->GetName(), uiRestore * uiQty);
+	pFood->ConsumeAmount(uiQty);
 }
 
-bool CChar::Use_Eat( CItem * pItemFood, short iQty )
+bool CChar::Use_Eat( CItem * pItemFood, ushort uiQty )
 {
 	ADDTOCALLSTACK("CChar::Use_Eat");
 	// What we can eat should depend on body type.
@@ -838,8 +838,8 @@ bool CChar::Use_Eat( CItem * pItemFood, short iQty )
 		return false;
 	}
 
-    ushort iFoodMax = Stat_GetMaxAdjusted(STAT_FOOD);
-	if ( iFoodMax == 0 )
+    ushort uiFoodMax = Stat_GetMaxAdjusted(STAT_FOOD);
+	if ( uiFoodMax == 0 )
 	{
 		SysMessageDefault(DEFMSG_FOOD_CANTEAT);
 		return false;
@@ -852,16 +852,16 @@ bool CChar::Use_Eat( CItem * pItemFood, short iQty )
 		return false;
 	}
 
-	if ( Stat_GetVal(STAT_FOOD) >= iFoodMax )
+	if ( Stat_GetVal(STAT_FOOD) >= uiFoodMax )
 	{
 		SysMessageDefault(DEFMSG_FOOD_CANTEATF);
 		return false;
 	}
 
-	Use_EatQty(pItemFood, iQty);
+	Use_EatQty(pItemFood, uiQty);
 
 	lpctstr pMsg;
-	int index = IMulDiv(Stat_GetVal(STAT_FOOD), 5, iFoodMax);
+	int index = IMulDiv(Stat_GetVal(STAT_FOOD), 5, uiFoodMax);
 	switch ( index )
 	{
 		case 0:
@@ -949,7 +949,7 @@ void CChar::Use_Drink( CItem * pItem )
 		OnSpellEffect((SPELL_TYPE)(RES_GET_INDEX(pItem->m_itPotion.m_Type)), this, iSkillQuality, pItem);
 
 		// Give me the marker that i've used a potion.
-		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_PotionUsed, g_Cfg.GetSpellEffect(SPELL_NONE, iSkillQuality), 15, this);
+		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_PotionUsed, g_Cfg.GetSpellEffect(SPELL_NONE, iSkillQuality), 150, this);
 	}
 	else if ( pItem->IsType(IT_DRINK) && IsSetOF(OF_DrinkIsFood) )
 	{
@@ -1749,10 +1749,8 @@ bool CChar::ItemEquipArmor( bool fForce )
 	if ( !pPack || !Can(CAN_C_EQUIP) )
 		return false;
 
-	int iBestScore[LAYER_HORSE];
-	memset(iBestScore, 0, sizeof(iBestScore));
-	CItem *pBestArmor[LAYER_HORSE];
-	memset(pBestArmor, 0, sizeof(pBestArmor));
+    int iBestScore[LAYER_HORSE] = {};
+    CItem *pBestArmor[LAYER_HORSE] = {};
 
 	if ( !fForce )
 	{

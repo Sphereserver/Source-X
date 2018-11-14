@@ -500,7 +500,8 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 		// Is the item movable ?
 		if ( ! pItem->IsMovableType() && pCont && pCont->IsItem())
 		{
-			DEBUG_ERR(( "Script Error: 0%x item is not movable type, cont=0%x\n", id, (dword)(pCont->GetUID()) ));			pItem->Delete();
+			g_Log.EventWarn("Script Warning: Created item 0%x, which is not of a movable type, inside cont=0%x\n", id, (dword)(pCont->GetUID()));
+            pItem->Delete();
 			return nullptr;
 		}
 

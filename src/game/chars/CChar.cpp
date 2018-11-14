@@ -942,7 +942,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 		Stat_SetVal((STAT_TYPE)i, pChar->Stat_GetVal((STAT_TYPE)i));
 		Stat_SetMax((STAT_TYPE)i, pChar->Stat_GetMax((STAT_TYPE)i));
         Stat_SetMaxMod((STAT_TYPE)i, pChar->Stat_GetMaxMod((STAT_TYPE)i));
-		m_Stat[i].m_regen = 0;
+		m_Stat[i].m_regen = pChar->m_Stat[i].m_regen;
 	}
 
 	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
@@ -980,12 +980,12 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	//Not calling NPC_LoadScript() because, in some part, it's breaking the name and looking for template names.
 	// end of CChar
 
-    static_cast<CEntity*>(this)->Copy(static_cast<CEntity*>(pChar));
+    CEntity::Copy(static_cast<CEntity*>(pChar));
 	// Begin copying items.
 	LAYER_TYPE layer;
-	for ( int i = 0 ; i < LAYER_QTY; i++)
+	for ( int i = 0 ; i < LAYER_QTY; ++i)
 	{
-		layer = static_cast<LAYER_TYPE>(i);
+		layer = (LAYER_TYPE)i;
 		CItem * myLayer = LayerFind(layer);
 		if ( myLayer )
 			myLayer->Delete();
@@ -993,8 +993,8 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 		if ( !pChar->LayerFind( layer ) )
 			continue;
 
-		CItem * pItem = CItem::CreateDupeItem(pChar->LayerFind( static_cast<LAYER_TYPE>(i) ),this,true);
-		pItem->LoadSetContainer(GetUID(),static_cast<LAYER_TYPE>(i));
+		CItem * pItem = CItem::CreateDupeItem(pChar->LayerFind( (LAYER_TYPE)i ), this, true);
+		pItem->LoadSetContainer(GetUID(), (LAYER_TYPE)i);
 		if ( fNewbieItems )
 		{
 			pItem->SetAttr(ATTR_NEWBIE);
@@ -1004,25 +1004,25 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 				{
 					pItemCont->SetAttr(ATTR_NEWBIE);
 
-					CChar *pTest = static_cast<CUID>(pItemCont->m_itNormal.m_more1).CharFind();
+					CChar *pTest = CUID(pItemCont->m_itNormal.m_more1).CharFind();
 					if ( pTest && pTest == pChar )
 						pItemCont->m_itNormal.m_more1 = this->GetUID();
 
-					CChar *pTest2 = static_cast<CUID>(pItemCont->m_itNormal.m_more2).CharFind();
+					CChar *pTest2 = CUID(pItemCont->m_itNormal.m_more2).CharFind();
 					if ( pTest2 && pTest2 == pChar )
 						pItemCont->m_itNormal.m_more2 = this->GetUID();
 
-					CChar *pTest3 = static_cast<CUID>(pItemCont->m_uidLink).CharFind();
+					CChar *pTest3 = CUID(pItemCont->m_uidLink).CharFind();
 					if ( pTest3 && pTest3 == pChar )
 						pItemCont->m_uidLink = this->GetUID();
 				}
 			}
 		}
-		CChar * pTest = static_cast<CUID>(pItem->m_itNormal.m_more1).CharFind();
+		CChar * pTest = CUID(pItem->m_itNormal.m_more1).CharFind();
 		if ( pTest && pTest == pChar)
 			pItem->m_itNormal.m_more1 = this->GetUID();
 
-		CChar * pTest2 = static_cast<CUID>(pItem->m_itNormal.m_more2).CharFind();
+		CChar * pTest2 = CUID(pItem->m_itNormal.m_more2).CharFind();
 		if ( pTest2)
 		{
 			if ( pTest2 == pChar)
@@ -1044,7 +1044,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 			}
 		}
 
-		CChar * pTest3 = static_cast<CUID>(pItem->m_uidLink).CharFind();
+		CChar * pTest3 = CUID(pItem->m_uidLink).CharFind();
 		if ( pTest3 && pTest3 == pChar)
 			pItem->m_uidLink = this->GetUID();
 
@@ -2713,12 +2713,12 @@ do_default:
 			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, GetDispID()) );
 			break;
 		case CHC_CREATE:
-			sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate) / TENTHS_PER_SEC));  // Displayed in Tenths of Second.
+			sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate) / MSECS_PER_TENTH));  // Displayed in Tenths of Second.
 			break;
 		case CHC_DIR:
 			{
 				pszKey +=3;
-				CChar * pChar = static_cast<CChar*>(static_cast<CUID>(Exp_GetSingle(pszKey)).CharFind());
+				CChar * pChar = static_cast<CChar*>(CUID(Exp_GetSingle(pszKey)).CharFind());
 				if ( pChar )
 					sVal.FormatVal( GetDir(pChar) );
 				else
@@ -2746,7 +2746,7 @@ do_default:
             sVal.FormatUSVal( Stat_GetBase(STAT_STR) );
             break;
         case CHC_MODSTR:
-            sVal.FormatSVal( Stat_GetMod(STAT_STR) );
+            sVal.FormatVal( Stat_GetMod(STAT_STR) );
             break;
         case CHC_STR:
             sVal.FormatUSVal( Stat_GetAdjusted(STAT_STR) );
@@ -2755,7 +2755,7 @@ do_default:
             sVal.FormatUSVal( Stat_GetBase(STAT_DEX) );
             break;
         case CHC_MODDEX:
-            sVal.FormatSVal( Stat_GetMod(STAT_DEX) );
+            sVal.FormatVal( Stat_GetMod(STAT_DEX) );
             break;
         case CHC_DEX:
             sVal.FormatUSVal( Stat_GetAdjusted(STAT_DEX) );
@@ -2764,7 +2764,7 @@ do_default:
             sVal.FormatUSVal( Stat_GetBase(STAT_INT) );
             break;
         case CHC_MODINT:
-            sVal.FormatSVal( Stat_GetMod(STAT_INT) );
+            sVal.FormatVal( Stat_GetMod(STAT_INT) );
             break;
         case CHC_INT:
             sVal.FormatUSVal( Stat_GetAdjusted(STAT_INT) );
@@ -2808,13 +2808,13 @@ do_default:
             sVal.FormatUSVal( Stat_GetMax(STAT_DEX) );
             break;
         case CHC_MODMAXHITS:
-            sVal.FormatSVal( Stat_GetMaxMod(STAT_STR) );
+            sVal.FormatVal( Stat_GetMaxMod(STAT_STR) );
             break;
         case CHC_MODMAXMANA:
-            sVal.FormatSVal( Stat_GetMaxMod(STAT_INT) );
+            sVal.FormatVal( Stat_GetMaxMod(STAT_INT) );
             break;
         case CHC_MODMAXSTAM:
-            sVal.FormatSVal( Stat_GetMaxMod(STAT_DEX) );
+            sVal.FormatVal( Stat_GetMaxMod(STAT_DEX) );
             break;
 		case CHC_HOME:
 			sVal = m_ptHome.WriteUsed();
@@ -3501,11 +3501,11 @@ bool CChar::r_LoadVal( CScript & s )
 
 void CChar::r_Write( CScript & s )
 {
-	ADDTOCALLSTACK_INTENSIVE("CChar::r_Write");
+	ADDTOCALLSTACK("CChar::r_Write");
 	EXC_TRY("r_Write");
 
 	s.WriteSection("WORLDCHAR %s", GetResourceName());
-	//s.WriteKeyVal("CREATE", -(g_World.GetTimeDiff(m_timeCreate) / 1000)); // Do we need to save it?
+	//s.WriteKeyVal("CREATE", -(g_World.GetTimeDiff(m_timeCreate) / MSECS_PER_TENTH)); // Do we need to save it?
 
 	CObjBase::r_Write(s);
 	if ( m_pPlayer )
@@ -3677,9 +3677,6 @@ bool CChar::r_Load( CScript & s ) // Load a character from script
 	ADDTOCALLSTACK("CChar::r_Load");
 	CScriptObj::r_Load(s);
 
-	if (m_pNPC)
-		NPC_GetAllSpellbookSpells();
-
 	// Init the STATF_SAVEPARITY flag.
 	// StatFlag_Mod( STATF_SAVEPARITY, g_World.m_fSaveParity );
 
@@ -3694,7 +3691,15 @@ bool CChar::r_Load( CScript & s ) // Load a character from script
 	{
 		DEBUG_ERR(( "Char 0%x Invalid, id='%s', code=0%x\n", (dword)GetUID(), GetResourceName(), iResultCode ));
 		Delete();
+        return true;
 	}
+
+    if (m_pNPC)
+        NPC_GetAllSpellbookSpells();
+
+    // Remove TAG.LastHit (used by PreHit combat flag). It's based on the server uptime, so if this tag isn't zeroed,
+    //  after the server restart the char may not be able to attack until the server reaches the serv.time when the previous TAG.LastHit was set.
+    m_TagDefs.SetNum("LastHit", 0, true);
 
 	return true;
 }
@@ -3724,7 +3729,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 	if ( IsClient() && GetClient()->r_Verb(s, pSrc) )
 		return true;
 
-    if (static_cast<CEntity*>(this)->r_Verb(s, pSrc))
+    if (CEntity::r_Verb(s, pSrc))
     {
         return true;
     }
@@ -3733,7 +3738,9 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 
 	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
 	if ( index < 0 )
+    {
 		return ( (m_pNPC && NPC_OnVerb(s, pSrc)) || (m_pPlayer && Player_OnVerb(s, pSrc)) || CObjBase::r_Verb(s, pSrc) );
+    }
 
 	CChar * pCharSrc = pSrc->GetChar();
 

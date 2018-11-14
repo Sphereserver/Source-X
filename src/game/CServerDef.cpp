@@ -381,7 +381,7 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 		}
 		break;
 	case SC_CREATE:
-		sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate)) );
+		sVal.FormatLLVal( (- g_World.GetTimeDiff(m_timeCreate))/MSECS_PER_TENTH );
 		break;
 	case SC_LANG:
 		sVal = m_sLang;
@@ -466,5 +466,5 @@ int64 CServerDef::GetAgeHours() const
 {
 	ADDTOCALLSTACK("CServerDef::GetAgeHours");
 	// This is just the amount of time it has been listed.
-	return (( - g_World.GetTimeDiff( m_timeCreate )) / ( 60 * 60 ));
+	return ( (- g_World.GetTimeDiff(m_timeCreate)) / ( MSECS_PER_SEC * 60 * 60 ));
 }

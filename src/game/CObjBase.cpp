@@ -115,7 +115,6 @@ CObjBase::~CObjBase()
     }
     g_World.m_ObjStatusUpdates.RemovePtr(this);
     g_World.m_TimedFunctions.Erase( GetUID() );
-    g_World.m_ObjDelete.InsertHead(this);
 
 	FreePropertyList();
 
@@ -3263,12 +3262,13 @@ void CObjBase::Delete(bool fForce)
 	ADDTOCALLSTACK("CObjBase::Delete");
 	DeletePrepare();
     CEntity::Delete(fForce);
+    g_World.m_ObjDelete.InsertHead(this);
 }
 
 TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgs * pArgs )
 {
 	ADDTOCALLSTACK("CObjBase::Spell_OnTrigger");
-	CSpellDef	* pSpellDef = g_Cfg.GetSpellDef( spell );
+	CSpellDef * pSpellDef = g_Cfg.GetSpellDef( spell );
 	if ( !pSpellDef )
 		return TRIGRET_RET_TRUE;
 

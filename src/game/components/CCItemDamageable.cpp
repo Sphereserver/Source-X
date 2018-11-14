@@ -9,6 +9,7 @@ CCItemDamageable::CCItemDamageable(CObjBase * pLink) : CComponent(COMP_ITEMDAMAG
 {
     _iCurHits = 0;
     _iMaxHits = 0;
+    _iTimeLastUpdate = 0;
     g_World.m_ObjStatusUpdates.emplace_back(pLink);
 }
 
@@ -52,9 +53,9 @@ void CCItemDamageable::OnTickStatsUpdate()
     {
         return;
     }
-    int64 iCurtime = g_World.GetCurrentTime().GetTimeRaw();
+    const int64 iCurtime = g_World.GetCurrentTime().GetTimeRaw();
 
-    if (_iTimeLastUpdate + g_Cfg.m_iRegenRate[0] < iCurtime)
+    if (_iTimeLastUpdate + g_Cfg._iItemHitpointsUpdate < iCurtime)
     {
         _iTimeLastUpdate = iCurtime;
 

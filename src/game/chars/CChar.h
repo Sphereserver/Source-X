@@ -162,12 +162,12 @@ public:
 	// Skills, Stats and health
 	struct
 	{
-		ushort m_base;      // Base stat: STR, INT, DEX
-		short  m_mod;		// Modifier to base stat: ModSTR, ModINT, ModDex (signed to allow negative modifiers)
-		ushort m_val;       // Hits, Mana, Stam
-		ushort m_max;		// MaxVal: MaxHits, MaxMana, MaxStam
-        short m_maxMod;     // Modifier to MaxVal: ModMaxHits, ModMaxMana, ModMaxStam
-		int64  m_regen;	    // Milliseconds for the next regen.
+		ushort  m_base;      // Base stat: STR, INT, DEX
+		int     m_mod;	     // Modifier to base stat: ModSTR, ModINT, ModDex (signed to allow negative modifiers). Accepted values between -UINT16_MAX and +UINT16_MAX
+		ushort  m_val;       // Hits, Mana, Stam
+		ushort  m_max;		 // MaxVal: MaxHits, MaxMana, MaxStam
+        int     m_maxMod;    // Modifier to MaxVal: ModMaxHits, ModMaxMana, ModMaxStam
+		int64   m_regen;	 // Milliseconds for the next regen.
 	} m_Stat[STAT_QTY];
     short m_iKarma;
     ushort m_uiFame;
@@ -399,7 +399,7 @@ public:
 	bool CanUse( CItem * pItem, bool fMoveOrConsume ) const;
 	bool IsMountCapable() const;
 
-	short  Food_CanEat( CObjBase * pObj ) const;
+	ushort  Food_CanEat( CObjBase * pObj ) const;
 	short  Food_GetLevelPercent() const;
 	lpctstr Food_GetLevelMessage( bool fPet, bool fHappy ) const;
 
@@ -408,23 +408,24 @@ public:
 	void	Stat_SetBase( STAT_TYPE i, ushort uiVal );
 	ushort	Stat_GetBase( STAT_TYPE i ) const;
 	void	Stat_AddBase( STAT_TYPE i, ushort uiVal );
-	void	Stat_AddMod( STAT_TYPE i, short iVal );
-	void	Stat_SetMod( STAT_TYPE i, short iVal );
-	short	Stat_GetMod( STAT_TYPE i ) const;
+	void	Stat_AddMod( STAT_TYPE i, int iVal );
+	void	Stat_SetMod( STAT_TYPE i, int iVal );
+    int	    Stat_GetMod( STAT_TYPE i ) const;
 	void	Stat_SetVal( STAT_TYPE i, ushort uiVal );
 	ushort	Stat_GetVal( STAT_TYPE i ) const;
 	void	Stat_SetMax( STAT_TYPE i, ushort uiVal );
 	ushort	Stat_GetMax( STAT_TYPE i ) const;
-    void	Stat_SetMaxMod( STAT_TYPE i, short iVal );
-    void	Stat_AddMaxMod( STAT_TYPE i, short iVal );
-    short	Stat_GetMaxMod( STAT_TYPE i ) const;
+    void	Stat_SetMaxMod( STAT_TYPE i, int iVal );
+    void	Stat_AddMaxMod( STAT_TYPE i, int iVal );
+    int	    Stat_GetMaxMod( STAT_TYPE i ) const;
     ushort	Stat_GetMaxAdjusted( STAT_TYPE i ) const;
 	uint    Stat_GetSum() const;
 	ushort	Stat_GetLimit( STAT_TYPE i ) const;     // Or STATCAP
     uint	Stat_GetSumLimit() const;               // Or STATSUM (intended as the maximum value allowed for the sum of the stats)
 	bool Stat_Decrease( STAT_TYPE stat, SKILL_TYPE skill = SKILL_NONE);
 	bool Stats_Regen();
-	ushort Stats_GetRegenVal(STAT_TYPE iStat, bool fGetTicks);  // return value is in seconds
+	ushort Stats_GetRegenVal(STAT_TYPE iStat);
+    int64 Stats_GetRegenRate(STAT_TYPE iStat);  // return value is in milliseconds
 	SKILLLOCK_TYPE Stat_GetLock(STAT_TYPE stat);
 	void Stat_SetLock(STAT_TYPE stat, SKILLLOCK_TYPE state);
     short GetKarma() const;
@@ -483,7 +484,7 @@ public:
 	void SysMessage( lpctstr pMsg ) const;
 
 	void UpdateStatsFlag() const;
-	void UpdateStatVal( STAT_TYPE type, short iChange = 0, short iLimit = 0 );
+	void UpdateStatVal( STAT_TYPE type, int iChange = 0, ushort uiLimit = 0 );
 	void UpdateHitsFlag();
 	void UpdateModeFlag();
 	void UpdateManaFlag() const;
@@ -993,7 +994,7 @@ public:
 	void Fight_HitTry();
 	WAR_SWING_TYPE Fight_Hit( CChar * pCharTarg );
 	bool Fight_Parry(CItem * &pItemParry);
-	WAR_SWING_TYPE Fight_CanHit(CChar * pCharTarg, bool fIgnoreDistance = false);
+	WAR_SWING_TYPE Fight_CanHit(CChar * pCharTarg, bool fSwingNoRange = false);
 	SKILL_TYPE Fight_GetWeaponSkill() const;
     DAMAGE_TYPE Fight_GetWeaponDamType(const CItem* pWeapon = nullptr) const;
 	int Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom = false, bool bGetMax = true ) const;
@@ -1082,7 +1083,7 @@ public:
 	bool Death();
 	bool Reveal( uint64 iFlags = 0 );
 	void Jail( CTextConsole * pSrc, bool fSet, int iCell );
-	void EatAnim( lpctstr pszName, short iQty );
+	void EatAnim( lpctstr pszName, ushort uiQty );
 	/**
 	* @Brief I'm calling guards (Player speech)
 	*
@@ -1120,8 +1121,8 @@ public:
 	lpctstr Guild_Abbrev( MEMORY_TYPE memtype ) const;
 	lpctstr Guild_AbbrevBracket( MEMORY_TYPE memtype ) const;
 
-	void Use_EatQty( CItem * pFood, short iQty = 1 );
-	bool Use_Eat( CItem * pItem, short iQty = 1 );
+	void Use_EatQty( CItem * pFood, ushort uiQty = 1 );
+	bool Use_Eat( CItem * pItem, ushort uiQty = 1 );
 	bool Use_MultiLockDown( CItem * pItemTarg );
 	void Use_CarveCorpse( CItemCorpse * pCorpse );
 	bool Use_Repair( CItem * pItem );
@@ -1248,7 +1249,7 @@ public:
 	bool OnAttackedBy( CChar * pCharSrc, int iHarmQty, bool fPetsCommand = false, bool fShouldReveal = true );
 
 	bool OnTickEquip( CItem * pItem );
-	void OnTickFood( short iVal, int HitsHungerLoss );
+	void OnTickFood( ushort uiVal, int HitsHungerLoss );
 	void OnTickStatusUpdate();
 	bool OnTick();  // OnTick timeout for skills, AI, etc
     void OnTickSkill(); // OnTick timeout specific for the skill behavior

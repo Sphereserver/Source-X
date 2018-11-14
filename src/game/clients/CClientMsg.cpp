@@ -2685,9 +2685,9 @@ byte CClient::Setup_Delete( dword iSlot ) // Deletion of character
 		return PacketDeleteError::InUse;
 	}
 
-	// Make sure the char is at least x days old.
+	// Make sure the char is at least x seconds old.
 	if ( g_Cfg.m_iMinCharDeleteTime &&
-		(- g_World.GetTimeDiff( pChar->m_timeCreate )) < g_Cfg.m_iMinCharDeleteTime )
+		(- g_World.GetTimeDiff(pChar->m_timeCreate)/MSECS_PER_TENTH) < g_Cfg.m_iMinCharDeleteTime )
 	{
 		if ( GetPrivLevel() < PLEVEL_Counsel )
 		{

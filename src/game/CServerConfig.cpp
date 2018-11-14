@@ -891,7 +891,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 		if ( s.IsKeyHead( "REGEN", 5 ))			//	REGENx=<stat regeneration rate>
 		{
 			int index = ATOI(s.GetKey()+5);
-			if (index < 0 || index >= STAT_QTY)
+			if (index < 0 || index > STAT_FOOD)
 				return false;
 			g_Cfg.m_iRegenRate[index] = (s.GetArgVal() * MSECS_PER_SEC);
 			return true;
@@ -1152,7 +1152,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			m_iWoolGrowthTime = s.GetArgVal() * 60 * MSECS_PER_SEC;
 			break;
         case RC_ITEMHITPOINTSUPDATE:
-            _iItemHitpointsUpdate = s.GetArgVal();
+            _iItemHitpointsUpdate = s.GetArgVal() * MSECS_PER_SEC;
             break;
 		case RC_PROFILE:
 			{
@@ -1793,7 +1793,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			sVal.FormatLLVal( m_iWoolGrowthTime /( 60*MSECS_PER_SEC ));
 			break;
         case RC_ITEMHITPOINTSUPDATE:
-            sVal.FormatVal(_iItemHitpointsUpdate);
+            sVal.FormatLLVal(_iItemHitpointsUpdate / MSECS_PER_SEC);
             break;
 		case RC_PROFILE:
 			sVal.FormatVal(CurrentProfileData.GetActiveWindow());

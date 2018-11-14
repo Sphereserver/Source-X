@@ -506,27 +506,27 @@ void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when r
 		}
 
         // Leave the stat bonuses signed, since they can be used also as a malus (negative sign)
-		short iStrengthBonus = (short)(pItem->GetDefNum("BONUSSTR", true));
+		ushort iStrengthBonus = (ushort)(pItem->GetDefNum("BONUSSTR", true));
 		if (iStrengthBonus != 0)
 			Stat_AddMod(STAT_STR, -iStrengthBonus);
 
-		short iDexterityBonus = (short)(pItem->GetDefNum("BONUSDEX", true));
+		ushort iDexterityBonus = (ushort)(pItem->GetDefNum("BONUSDEX", true));
 		if (iDexterityBonus != 0)
 			Stat_AddMod(STAT_DEX, -iDexterityBonus);
 
-		short iIntelligenceBonus = (short)(pItem->GetDefNum("BONUSINT", true));
+		ushort iIntelligenceBonus = (ushort)(pItem->GetDefNum("BONUSINT", true));
 		if (iIntelligenceBonus != 0)
 			Stat_AddMod(STAT_INT, -iIntelligenceBonus);
 
-		short iHitpointIncrease = (short)(pItem->GetDefNum("BONUSHITS", true));
+		ushort iHitpointIncrease = (ushort)(pItem->GetDefNum("BONUSHITS", true));
 		if (iHitpointIncrease != 0)
 			Stat_AddMaxMod(STAT_STR, -iHitpointIncrease);
 
-		short iStaminaIncrease = (short)(pItem->GetDefNum("BONUSSTAM", true));
+		ushort iStaminaIncrease = (ushort)(pItem->GetDefNum("BONUSSTAM", true));
 		if (iStaminaIncrease != 0)
             Stat_AddMaxMod(STAT_DEX, -iStaminaIncrease);
 
-		short iManaIncrease = (short)(pItem->GetDefNum("BONUSMANA", true));
+		ushort iManaIncrease = (ushort)(pItem->GetDefNum("BONUSMANA", true));
 		if (iManaIncrease != 0)
             Stat_AddMaxMod(STAT_INT, -iManaIncrease);
 
@@ -771,23 +771,23 @@ void CChar::UpdateRegenTimers(STAT_TYPE iStat, int64 iValMsecs)
 	m_Stat[iStat].m_regen = iValMsecs;
 }
 
-void CChar::UpdateStatVal( STAT_TYPE type, short iChange, short iLimit )
+void CChar::UpdateStatVal( STAT_TYPE type, int iChange, ushort uiLimit )
 {
 	ADDTOCALLSTACK("CChar::UpdateStatVal");
-	short iValPrev = Stat_GetVal(type);
-	short iVal = iValPrev + iChange;
-	if ( !iLimit )
-		iLimit = Stat_GetMaxAdjusted(type);
+	ushort uiValPrev = Stat_GetVal(type);
+	ushort uiVal = ushort(uiValPrev + iChange);
+	if ( !uiLimit )
+        uiLimit = Stat_GetMaxAdjusted(type);
 
-	if ( iVal < 0 )
-		iVal = 0;
-	else if ( iVal > iLimit )
-		iVal = iLimit;
+	if ( uiVal < 0 )
+		uiVal = 0;
+	else if ( uiVal > uiLimit )
+		uiVal = uiLimit;
 
-	if ( iVal == iValPrev )
+	if ( uiVal == uiValPrev )
 		return;
 
-	Stat_SetVal(type, iVal);
+	Stat_SetVal(type, uiVal);
 
 	switch ( type )
 	{
@@ -2104,27 +2104,27 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 			pItem->SetDefNum("HitLeechLife", pItem->GetDefNum("HitLeechLife", true) + pCursedMemory->m_itSpell.m_spelllevel, true);
 	}
 
-	short iStrengthBonus = (short)(pItem->GetDefNum("BONUSSTR", true));
+	ushort iStrengthBonus = (ushort)(pItem->GetDefNum("BONUSSTR", true));
 	if (iStrengthBonus != 0)
 		Stat_AddMod(STAT_STR, iStrengthBonus);
 
-	short iDexterityBonus = (short)(pItem->GetDefNum("BONUSDEX", true));
+	ushort iDexterityBonus = (ushort)(pItem->GetDefNum("BONUSDEX", true));
 	if (iDexterityBonus != 0)
         Stat_AddMod(STAT_DEX, iDexterityBonus);
 
-	short iIntelligenceBonus = (short)(pItem->GetDefNum("BONUSINT", true));
+	ushort iIntelligenceBonus = (ushort)(pItem->GetDefNum("BONUSINT", true));
 	if (iIntelligenceBonus != 0)
         Stat_AddMod(STAT_INT, iIntelligenceBonus);
 
-	short iHitpointIncrease = (short)(pItem->GetDefNum("BONUSHITS", true));
+	ushort iHitpointIncrease = (ushort)(pItem->GetDefNum("BONUSHITS", true));
 	if (iHitpointIncrease != 0)
         Stat_AddMaxMod(STAT_STR, iHitpointIncrease);
 
-	short iStaminaIncrease = (short)(pItem->GetDefNum("BONUSSTAM", true));
+	ushort iStaminaIncrease = (ushort)(pItem->GetDefNum("BONUSSTAM", true));
 	if (iStaminaIncrease != 0)
         Stat_AddMaxMod(STAT_DEX, iStaminaIncrease);
 
-	short iManaIncrease = (short)(pItem->GetDefNum("BONUSMANA", true));
+	ushort iManaIncrease = (ushort)(pItem->GetDefNum("BONUSMANA", true));
 	if (iManaIncrease != 0)
         Stat_AddMaxMod(STAT_INT, iManaIncrease);
 
@@ -2177,7 +2177,7 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 // OnEat()
 // Generating eating animation
 // also calling @Eat and setting food's level (along with other possible stats 'local.hits',etc?)
-void CChar::EatAnim( lpctstr pszName, short iQty )
+void CChar::EatAnim( lpctstr pszName, ushort uiQty )
 {
 	ADDTOCALLSTACK("CChar::EatAnim");
 	static const SOUND_TYPE sm_EatSounds[] = { 0x03a, 0x03b, 0x03c };
@@ -2190,37 +2190,37 @@ void CChar::EatAnim( lpctstr pszName, short iQty )
 	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EATSOME), pszName);
 	Emote(pszMsg);
 
-	short iHits = 0;
-	short iMana = 0;
-	short iStam = (short)( Calc_GetRandVal2(3, 6) + (iQty / 5) );
-	short iFood = iQty;
-	short iStatsLimit = 0;
+	ushort uiHits = 0;
+	ushort uiMana = 0;
+	ushort uiStam = (ushort)( Calc_GetRandVal2(3, 6) + (uiQty / 5) );
+	ushort uiFood = uiQty;
+	ushort uiStatsLimit = 0;
 	if ( IsTrigUsed(TRIGGER_EAT) )
 	{
 		CScriptTriggerArgs Args;
-		Args.m_VarsLocal.SetNumNew("Hits", iHits);
-		Args.m_VarsLocal.SetNumNew("Mana", iMana);
-		Args.m_VarsLocal.SetNumNew("Stam", iStam);
-		Args.m_VarsLocal.SetNumNew("Food", iFood);
-		Args.m_iN1 = iStatsLimit;
+		Args.m_VarsLocal.SetNumNew("Hits", uiHits);
+		Args.m_VarsLocal.SetNumNew("Mana", uiMana);
+		Args.m_VarsLocal.SetNumNew("Stam", uiStam);
+		Args.m_VarsLocal.SetNumNew("Food", uiFood);
+		Args.m_iN1 = uiStatsLimit;
 		if ( OnTrigger(CTRIG_Eat, this, &Args) == TRIGRET_RET_TRUE )
 			return;
 
-		iHits = (short)(Args.m_VarsLocal.GetKeyNum("Hits")) + Stat_GetVal(STAT_STR);
-		iMana = (short)(Args.m_VarsLocal.GetKeyNum("Mana")) + Stat_GetVal(STAT_INT);
-		iStam = (short)(Args.m_VarsLocal.GetKeyNum("Stam")) + Stat_GetVal(STAT_DEX);
-		iFood = (short)(Args.m_VarsLocal.GetKeyNum("Food")) + Stat_GetVal(STAT_FOOD);
-		iStatsLimit = (short)(Args.m_iN1);
+		uiHits = (ushort)(Args.m_VarsLocal.GetKeyNum("Hits")) + Stat_GetVal(STAT_STR);
+		uiMana = (ushort)(Args.m_VarsLocal.GetKeyNum("Mana")) + Stat_GetVal(STAT_INT);
+		uiStam = (ushort)(Args.m_VarsLocal.GetKeyNum("Stam")) + Stat_GetVal(STAT_DEX);
+		uiFood = (ushort)(Args.m_VarsLocal.GetKeyNum("Food")) + Stat_GetVal(STAT_FOOD);
+		uiStatsLimit = (ushort)(Args.m_iN1);
 	}
 
-	if ( iHits )
-		UpdateStatVal(STAT_STR, iHits, iStatsLimit);
-	if ( iMana )
-		UpdateStatVal(STAT_INT, iMana, iStatsLimit);
-	if ( iStam )
-		UpdateStatVal(STAT_DEX, iStam, iStatsLimit);
-	if ( iFood )
-		UpdateStatVal(STAT_FOOD, iFood, iStatsLimit);
+	if ( uiHits )
+		UpdateStatVal(STAT_STR, uiHits, uiStatsLimit);
+	if ( uiMana )
+		UpdateStatVal(STAT_INT, uiMana, uiStatsLimit);
+	if ( uiStam )
+		UpdateStatVal(STAT_DEX, uiStam, uiStatsLimit);
+	if ( uiFood )
+		UpdateStatVal(STAT_FOOD, uiFood, uiStatsLimit);
 }
 
 // Some outside influence may be revealing us.
@@ -3102,7 +3102,7 @@ CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fChec
 		return nullptr;
 
 	EXC_SET_BLOCK("Creature bumping");
-	short uiStamReq = 0;
+	ushort uiStamReq = 0;
 	if ( fCheckChars && !IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_INSUBSTANTIAL) )
 	{
 		CItem *pPoly = LayerFind(LAYER_SPELL_Polymorph);
@@ -3967,7 +3967,7 @@ void CChar::OnTickStatusUpdate()
 
 // Food decay, decrease FOOD value.
 // Call for hunger penalties if food < 40%
-void CChar::OnTickFood(short iVal, int HitsHungerLoss)
+void CChar::OnTickFood(ushort uiVal, int HitsHungerLoss)
 {
 	ADDTOCALLSTACK("CChar::OnTickFood");
 	if ( IsStatFlag(STATF_DEAD|STATF_CONJURED|STATF_SPAWNED) || !Stat_GetMaxAdjusted(STAT_FOOD) )
@@ -3978,10 +3978,10 @@ void CChar::OnTickFood(short iVal, int HitsHungerLoss)
 		return;
 
 	// Decrease food level
-	short iFood = Stat_GetVal(STAT_FOOD) - iVal;
+	int iFood = Stat_GetVal(STAT_FOOD) - uiVal;
 	if ( iFood < 0 )
 		iFood = 0;
-	Stat_SetVal(STAT_FOOD, iFood);
+	Stat_SetVal(STAT_FOOD, (ushort)iFood);
 
 	// Show hunger message if food level is getting low
 	short iFoodLevel = Food_GetLevelPercent();

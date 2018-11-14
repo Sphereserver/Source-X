@@ -831,7 +831,7 @@ effect_bounce:
 
 	// Apply damage
 	SoundChar(CRESND_GETHIT);
-	UpdateStatVal( STAT_STR, (short)(-iDmg));
+	UpdateStatVal( STAT_STR, -iDmg);
 	if ( pSrc->IsClient() )
 		pSrc->GetClient()->addHitsUpdate( this );	// always send updates to src
 
@@ -1312,9 +1312,9 @@ void CChar::Fight_HitTry()
 		case WAR_SWING_EQUIPPING:	// keep hitting the same target
         case WAR_SWING_EQUIPPING_NOWAIT:
 		{
-            if (m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING) // Ready to start a new swing
+            if ((m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING)
+                || (IsSetCombatFlags(COMBAT_SWING_NORANGE) && (m_atFight.m_War_Swing_State == WAR_SWING_READY)) ) // Ready to start a new swing, check swingTypeHold in Fight_Hit
             {
-                
                 if (retHit == WAR_SWING_EQUIPPING_NOWAIT)
                 {
                     // Reactivate as soon as possible (without waiting for a new tick) the fighting routines, which are normally called by OnTick(), which in turn calls
@@ -1330,7 +1330,6 @@ void CChar::Fight_HitTry()
                     //  and the combat code and this function will be called recursively.
                     SetTimeoutD(1);
                 }
-                
             }
 			return;
 		}
@@ -1349,6 +1348,13 @@ void CChar::Fight_HitTry()
 			return;
 		}
 		case WAR_SWING_SWINGING:	// must come back here again to complete
+            if (!IsTimerSet())
+            {
+                // This happens (only with both PreHit and Swing_NoRange on) if i can't land the hit right now, otherwise retHit
+                //  should be WAR_SWING_EQUIPPING. If this isn't the case, there's something wrong (asserts are placed to intercept this situations).
+                SetTimeoutD(1);
+                ASSERT(IsSetCombatFlags(COMBAT_PREHIT|COMBAT_SWING_NORANGE));
+            }
 			return;
 		default:
 			break;
@@ -1386,7 +1392,7 @@ void CChar::Fight_SetDefaultSwingDelays()
     }
 }
 
-WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc, bool fIgnoreDistance)
+WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc, bool fSwingNoRange)
 {
 	ADDTOCALLSTACK("CChar::Fight_CanHit");
 	// Very basic check on possibility to hit
@@ -1412,7 +1418,10 @@ WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc, bool fIgnoreDistance)
         return WAR_SWING_INVALID;
     }
 
-    if (!fIgnoreDistance)
+    // Ignore the distance and the line of sight if fSwingNoRange is true, but only if i'm starting the swing. To land the hit i need to be in range.
+    if (!fSwingNoRange ||
+        (IsSetCombatFlags(COMBAT_ANIM_HIT_SMOOTH) && (m_atFight.m_War_Swing_State == WAR_SWING_SWINGING)) || 
+        (!IsSetCombatFlags(COMBAT_ANIM_HIT_SMOOTH) && (m_atFight.m_War_Swing_State == WAR_SWING_READY)))
     {
         int dist = GetTopDist3D(pCharSrc);
         if (dist > GetVisualRange())
@@ -1424,7 +1433,7 @@ WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc, bool fIgnoreDistance)
         }
         word wLOSFlags = (g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_RANGED )) ? LOS_NB_WINDOWS : 0;
         if (!CanSeeLOS(pCharSrc, wLOSFlags, true))
-            return WAR_SWING_EQUIPPING;
+            return IsSetCombatFlags(COMBAT_ANIM_HIT_SMOOTH) ? WAR_SWING_SWINGING : WAR_SWING_EQUIPPING;
     }
 
 	// I am on ship. Should be able to combat only inside the ship to avoid free sea and ground characters hunting
@@ -1441,6 +1450,7 @@ WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc, bool fIgnoreDistance)
 			return WAR_SWING_INVALID;
 		}
 	}
+
 	return WAR_SWING_READY;
 }
 
@@ -1511,8 +1521,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
         }
 	}
 
-    // Ignore the distance and the line of sight if fSwingNoRange is true, but only if i'm starting the swing. To land the hit i need to be in range.
-	WAR_SWING_TYPE iHitCheck = Fight_CanHit(pCharTarg, (fSwingNoRange && (m_atFight.m_War_Swing_State != WAR_SWING_READY)));
+	WAR_SWING_TYPE iHitCheck = Fight_CanHit(pCharTarg, fSwingNoRange);
 	if (iHitCheck != WAR_SWING_READY)
 		return iHitCheck;
 
@@ -1857,50 +1866,50 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	if ( iDmg > 0 )
 	{
 		CItem *pCurseWeapon = LayerFind(LAYER_SPELL_Curse_Weapon);
-		short iHitLifeLeech = (short)(GetDefNum("HitLeechLife", true));
+		ushort uiHitLifeLeech = (ushort)(GetDefNum("HitLeechLife", true));
 		if ( pWeapon && pCurseWeapon )
-			iHitLifeLeech += pCurseWeapon->m_itSpell.m_spelllevel;
+			uiHitLifeLeech += pCurseWeapon->m_itSpell.m_spelllevel;
 
 		bool bMakeLeechSound = false;
-		if ( iHitLifeLeech )
+		if ( uiHitLifeLeech )
 		{
-			iHitLifeLeech = (short)(Calc_GetRandVal2(0, (iDmg * iHitLifeLeech * 30) / 10000));	// leech 0% ~ 30% of damage value
-			UpdateStatVal(STAT_STR, iHitLifeLeech);
+			uiHitLifeLeech = (ushort)(Calc_GetRandVal2(0, (iDmg * uiHitLifeLeech * 30) / 10000));	// leech 0% ~ 30% of damage value
+			UpdateStatVal(STAT_STR, uiHitLifeLeech);
 			bMakeLeechSound = true;
 		}
 
-		short iHitManaLeech = (short)(GetDefNum("HitLeechMana", true));
-		if ( iHitManaLeech )
+		ushort uiHitManaLeech = (ushort)(GetDefNum("HitLeechMana", true));
+		if ( uiHitManaLeech )
 		{
-			iHitManaLeech = (short)(Calc_GetRandVal2(0, (iDmg * iHitManaLeech * 40) / 10000));	// leech 0% ~ 40% of damage value
-			UpdateStatVal(STAT_INT, iHitManaLeech);
+			uiHitManaLeech = (ushort)(Calc_GetRandVal2(0, (iDmg * uiHitManaLeech * 40) / 10000));	// leech 0% ~ 40% of damage value
+			UpdateStatVal(STAT_INT, uiHitManaLeech);
 			bMakeLeechSound = true;
 		}
 
 		if ( GetDefNum("HitLeechStam", true) > Calc_GetRandLLVal(100) )
 		{
-			UpdateStatVal(STAT_DEX, (short)iDmg);	// leech 100% of damage value
+			UpdateStatVal(STAT_DEX, (ushort)iDmg);	// leech 100% of damage value
 			bMakeLeechSound = true;
 		}
 
-		short iManaDrain = 0;
+		ushort uiManaDrain = 0;
 		if ( g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B )
 		{
 			CItem *pPoly = LayerFind(LAYER_SPELL_Polymorph);
 			if ( pPoly && pPoly->m_itSpell.m_spell == SPELL_Wraith_Form )
-				iManaDrain += 5 + (15 * Skill_GetBase(SKILL_SPIRITSPEAK) / 1000);
+				uiManaDrain += 5 + (15 * Skill_GetBase(SKILL_SPIRITSPEAK) / 1000);
 		}
 		if ( GetDefNum("HitManaDrain", true) > Calc_GetRandLLVal(100) )
-			iManaDrain += (short)IMulDivLL(iDmg, 20, 100);		// leech 20% of damage value
+			uiManaDrain += (ushort)IMulDivLL(iDmg, 20, 100);		// leech 20% of damage value
 
-		short iTargMana = pCharTarg->Stat_GetVal(STAT_INT);
-		if ( iManaDrain > iTargMana )
-			iManaDrain = iTargMana;
+		ushort uiTargMana = pCharTarg->Stat_GetVal(STAT_INT);
+		if ( uiManaDrain > uiTargMana )
+			uiManaDrain = uiTargMana;
 
-		if ( iManaDrain > 0 )
+		if ( uiManaDrain > 0 )
 		{
-			pCharTarg->UpdateStatVal(STAT_INT, iTargMana - iManaDrain);
-			UpdateStatVal(STAT_INT, iManaDrain);
+			pCharTarg->UpdateStatVal(STAT_INT, uiTargMana - uiManaDrain);
+			UpdateStatVal(STAT_INT, uiManaDrain);
 			bMakeLeechSound = true;
 		}
 

@@ -646,7 +646,7 @@ bool CChar::NPC_CheckHirelingStatus()
 		return true;
 
 	CCharBase * pCharDef = Char_GetDef();
-	int64 iFoodConsumeRate = g_Cfg.m_iRegenRate[STAT_FOOD];
+	int64 iFoodConsumeRate = g_Cfg.m_iRegenRate[STAT_FOOD] / MSECS_PER_SEC;
 
 	uint iWage = pCharDef->GetHireDayWage();
 	if ( ! iWage || ! iFoodConsumeRate )

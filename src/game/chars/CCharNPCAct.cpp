@@ -101,7 +101,7 @@ void CChar::Action_StartSpecial( CREID_TYPE id )
 			return;
 	}
 
-	UpdateStatVal( STAT_DEX, (short)(-(5 + Calc_GetRandVal(5)) ));	// the stamina cost
+	UpdateStatVal( STAT_DEX, (ushort)(-(5 + Calc_GetRandVal(5)) ));	// the stamina cost
 }
 
 bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command from script
@@ -405,7 +405,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
     int iDex = Stat_GetAdjusted(STAT_DEX);
     int iInt = Stat_GetAdjusted(STAT_INT);
 	DIR_TYPE	Dir = pMe.GetDir(pTarg);
-	bool		bUsePathfinding = false;
+	bool		fUsePathfinding = false;
 
 	EXC_TRY("NPC_WalkToPoint");
 	if ( Dir >= DIR_QTY )
@@ -429,7 +429,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 		// so, use default movements
 		if (local.m_x > 0 && local.m_y > 0)
 		{
-			bUsePathfinding = true;
+            fUsePathfinding = true;
 
 			if ( pMe.GetDist(local) != 1 )
 			{
@@ -470,9 +470,9 @@ int CChar::NPC_WalkToPoint( bool fRun )
 		if ( iRand < 30 )	// do nothing.
 		{
 			// whilst pathfinding we should keep trying to find new ways to our destination
-			if ( bUsePathfinding == true )
+			if ( fUsePathfinding == true )
 			{
-				SetTimeout( 500 ); // wait a moment before finding a new route
+				SetTimeoutD( 5 ); // wait a moment before finding a new route
 				return 1;
 			}
 			return 2;
@@ -488,10 +488,11 @@ int CChar::NPC_WalkToPoint( bool fRun )
 		pMe.Move( Dir );
 		if ( ! CanMoveWalkTo(pMe, true, false, Dir ))
 		{
-			bool bClearedWay = false;
+			bool fClearedWay = false;
 			// Some object in my way that i could move ? Try to move it.
-			if ( !Can(CAN_C_USEHANDS) || IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_FREEZE|STATF_STONE) ) ;		// i cannot use hands or i am frozen, so cannot move objects
-			else if (( NPC_GetAiFlags()&NPC_AI_MOVEOBSTACLES ) && ( iInt > iRand ))
+			if ( !Can(CAN_C_USEHANDS) || IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_FREEZE|STATF_STONE) )
+                ;   // i cannot use hands or i am frozen, so cannot move objects
+			else if ( (NPC_GetAiFlags() & NPC_AI_MOVEOBSTACLES) && (iInt > iRand) )
 			{
 				int			i;
 				CPointMap	point;
@@ -508,17 +509,17 @@ int CChar::NPC_WalkToPoint( bool fRun )
 						if ( !pItem )	break;
 						else if ( abs(pItem->GetTopZ() - pMe.m_z) > 3 )		continue;		// item is too high
 						else if ( !pItem->Can(CAN_I_BLOCK) )				continue;		// this item not blocking me
-						else if ( !CanMove(pItem) || !CanCarry(pItem) )		bClearedWay = false;
+						else if ( !CanMove(pItem) || !CanCarry(pItem) )		fClearedWay = false;
 						else
 						{
 							//	move this item to the position I am currently in
 							pItem->MoveToUpdate(GetTopPoint());
-							bClearedWay = true;
+                            fClearedWay = true;
 							break;
 						}
 					}
 
-					if ( bClearedWay )
+					if ( fClearedWay )
 						break;
 					//	If not cleared the way still, but I am still clever enough
 					//	I should try to move in the first step I was trying to move to
@@ -527,21 +528,21 @@ int CChar::NPC_WalkToPoint( bool fRun )
 				}
 
 				//	we have just cleared our way
-				if ( bClearedWay )
+				if ( fClearedWay )
 				{
 					if ( point == ptFirstTry )
 					{
 						Dir = GetTopPoint().GetDir(m_Act_p);
 						ASSERT(Dir > DIR_INVALID && Dir < DIR_QTY);
 						if (Dir >= DIR_QTY)
-							bClearedWay = false;
+                            fClearedWay = false;
 					}
 				}
 			}
-			if ( !bClearedWay )
+			if ( !fClearedWay )
 			{
 				// whilst pathfinding we should keep trying to find new ways to our destination
-				if ( bUsePathfinding == true )
+				if ( fUsePathfinding )
 				{
 					SetTimeoutD( 5 ); // wait a moment before finding a new route
 					return 1;
@@ -1671,7 +1672,7 @@ bool CChar::NPC_Act_Food()
 
 	m_pNPC->m_Act_Motivation = (uchar)(50 - (iFoodLevel / 2));
 
-	short	iEatAmount = 1;
+	ushort	uiEatAmount = 1;
 	int		iSearchDistance = 2;
 	CItem	*pClosestFood = nullptr;
 	int		iClosestFood = 100;
@@ -1687,9 +1688,9 @@ bool CChar::NPC_Act_Food()
 			// I have some food personaly, so no need to search for something
 			if ( pFood->IsType(IT_FOOD) )
 			{
-				if ( (iEatAmount = Food_CanEat(pFood)) > 0 )
+				if ( (uiEatAmount = Food_CanEat(pFood)) > 0 )
 				{
-					Use_EatQty(pFood, iEatAmount);
+					Use_EatQty(pFood, uiEatAmount);
 					return true;
 				}
 			}
@@ -1724,7 +1725,7 @@ bool CChar::NPC_Act_Food()
 		if ( pItem->IsAttr(ATTR_MOVE_NEVER|ATTR_STATIC|ATTR_LOCKEDDOWN|ATTR_SECURE) )
 			continue;
 
-		if ( (iEatAmount = Food_CanEat(pItem)) > 0 )
+		if ( (uiEatAmount = Food_CanEat(pItem)) > 0 )
 		{
 			int iDist = GetDist(pItem);
 			if ( pClosestFood )
@@ -1748,8 +1749,8 @@ bool CChar::NPC_Act_Food()
 		if ( iClosestFood <= 1 )
 		{
 			//	can take and eat just in place
-			short iEaten = (short)(pClosestFood->ConsumeAmount(iEatAmount));
-			EatAnim(pClosestFood->GetName(), iEaten);
+			ushort uiEaten = (ushort)(pClosestFood->ConsumeAmount(uiEatAmount));
+			EatAnim(pClosestFood->GetName(), uiEaten);
 			if ( !pClosestFood->GetAmount() )
 			{
 				pClosestFood->Plant_CropReset();	// set growth if this is a plant
@@ -1813,7 +1814,7 @@ bool CChar::NPC_Act_Food()
 			CItem	*pResBit = g_World.CheckNaturalResource(GetTopPoint(), IT_GRASS, true, this);
 			if ( pResBit && pResBit->GetAmount() && ( pResBit->GetTopPoint().m_z == iMyZ ) )
 			{
-				short iEaten = (short)(pResBit->ConsumeAmount(10));
+				ushort iEaten = pResBit->ConsumeAmount(10);
 				EatAnim("grass", iEaten/10);
 
 				//	the bit is not needed in a worldsave, timeout of 10 minutes
@@ -2342,7 +2343,7 @@ void CChar::NPC_Food()
 
 	int		iFood = Stat_GetVal(STAT_FOOD);
 	int		iFoodLevel = Food_GetLevelPercent();
-	short	iEatAmount = 1;
+	ushort	uiEatAmount = 1;
 	int		iSearchDistance = 2;
 	CItem	*pClosestFood = nullptr;
 	int		iClosestFood = 100;
@@ -2363,10 +2364,10 @@ void CChar::NPC_Food()
 			// i have some food personaly, so no need to search for something
 			if ( pFood->IsType(IT_FOOD) )
 			{
-				if ( (iEatAmount = Food_CanEat(pFood)) > 0 )
+				if ( (uiEatAmount = Food_CanEat(pFood)) > 0 )
 				{
 					EXC_SET_BLOCK("eating from pack");
-					Use_EatQty(pFood, iEatAmount);
+					Use_EatQty(pFood, uiEatAmount);
 					return;
 				}
 			}
@@ -2387,7 +2388,7 @@ void CChar::NPC_Food()
 		if ( (pItem->GetTopPoint().m_z < iMyZ) || (pItem->GetTopPoint().m_z > (iMyZ + (m_height / 2))) )
 			continue;
 
-		if ( (iEatAmount = Food_CanEat(pItem)) > 0 )
+		if ( (uiEatAmount = Food_CanEat(pItem)) > 0 )
 		{
 			int iDist = GetDist(pItem);
 			if ( pClosestFood )
@@ -2412,8 +2413,8 @@ void CChar::NPC_Food()
 		{
 			//	can take and eat just in place
 			EXC_SET_BLOCK("eating nearby");
-			short iEaten = (short)(pClosestFood->ConsumeAmount(iEatAmount));
-			EatAnim(pClosestFood->GetName(), iEaten);
+			ushort uiEaten = pClosestFood->ConsumeAmount(uiEatAmount);
+			EatAnim(pClosestFood->GetName(), uiEaten);
 			if ( !pClosestFood->GetAmount() )
 			{
 				pClosestFood->Plant_CropReset();	// set growth if this is a plant
@@ -2469,8 +2470,8 @@ void CChar::NPC_Food()
 			if ( pResBit && pResBit->GetAmount() && ( pResBit->GetTopPoint().m_z == iMyZ ) )
 			{
 				EXC_SET_BLOCK("eating grass");
-				short iEaten = (short)(pResBit->ConsumeAmount(15));
-				EatAnim("grass", iEaten/10);
+				ushort uiEaten = pResBit->ConsumeAmount(15);
+				EatAnim("grass", uiEaten/10);
 
 				//	the bit is not needed in a worldsave, timeout of 10 minutes
 				pResBit->m_TagDefs.SetNum("NOSAVE", 1);

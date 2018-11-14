@@ -141,7 +141,7 @@ int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg)
 
 	if (!pCharTarg)
 		return 50;	// must be a training dummy
-	if (pChar->m_pNPC && pChar->m_pNPC->m_Brain == NPCBRAIN_GUARD && m_fGuardsInstantKill)
+	if (pChar->m_pNPC && (pChar->m_pNPC->m_Brain == NPCBRAIN_GUARD) && m_fGuardsInstantKill)
 		return 100;
 	SKILL_TYPE skillAttacker = pChar->Fight_GetWeaponSkill();
 	SKILL_TYPE skillTarget = pCharTarg->Fight_GetWeaponSkill();
@@ -187,7 +187,7 @@ int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg)
 			else if (iDiff > 100)
 				iDiff = 100;	// just means it's very hard.
 
-			return(Calc_GetRandVal(iDiff));	// always need to have some chance. );
+			return Calc_GetRandVal(iDiff);	// always need to have some chance. );
 		}
 		case 1:
 		{
@@ -224,7 +224,7 @@ int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg)
 				iChance = 2;	// minimum hit chance is 2%
 			else if (iChance > 100)
 				iChance = 100;
-			return(iChance);
+			return iChance;
 		}
 	}
 }
