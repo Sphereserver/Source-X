@@ -204,7 +204,7 @@ BOOL CNTWindow::CStatusWnd::DefDialogProc( UINT message, WPARAM wParam, LPARAM l
 }
 
 CNTWindow::CNTWindow() : AbstractSphereThread("T_ConsoleWindow", IThread::Highest),
-    _NTWInitParams{}
+    _NTWInitParams{}, m_zCommands {{}}
 {
 	m_iLogTextLen		= 0;
 	m_fLogScrollLock	= false;
@@ -212,7 +212,8 @@ CNTWindow::CNTWindow() : AbstractSphereThread("T_ConsoleWindow", IThread::Highes
 	m_dwColorPrv		= RGB( 0xaf,0xaf,0xaf );
 	m_iHeightInput		= 0;
    	m_hLogFont			= nullptr;
-	memset(m_zCommands, 0, sizeof(m_zCommands));
+
+    _fNewWindowTitle = false;
 }
 
 CNTWindow::~CNTWindow()
@@ -265,6 +266,8 @@ void CNTWindow::tick()
     {
         ConsoleInterface::_ciQueueMutex.unlock();
     }
+
+    NTWindow_CheckUpdateWindowTitle();
 
     if (!NTWindow_OnTick(0))
         _thread_selfTerminateAfterThisTick = true;
@@ -319,6 +322,14 @@ void CNTWindow::List_Add( COLORREF color, LPCTSTR pszText )
 			m_wndLog.Scroll();
 		}
 	}
+}
+
+void CNTWindow::SetWindowTitle(LPCTSTR pText)
+{
+    std::unique_lock<std::shared_mutex> lock(_mutexWindowTitle);
+    if (pText)
+        _strWindowTitle = pText;
+    _fNewWindowTitle = true;
 }
 
 bool CNTWindow::RegisterClass(char *className)	// static
@@ -393,7 +404,7 @@ int CNTWindow::OnCreate( HWND hWnd, LPCREATESTRUCT lParam )
 		Shell_NotifyIcon(NIM_ADD, &pnid);
 	}
 
-	NTWindow_SetWindowTitle();
+	SetWindowTitle();
 
 	return 0;
 }
@@ -891,10 +902,22 @@ void CNTWindow::NTWindow_ExitServer()
 	}
 }
 
-void CNTWindow::NTWindow_SetWindowTitle( LPCTSTR pszText )
+void CNTWindow::NTWindow_CheckUpdateWindowTitle()
 {
 	if ( theApp.m_wndMain.m_hWnd == nullptr )
 		return;
+
+    _mutexWindowTitle.lock_shared();
+    if (!_fNewWindowTitle)
+    {
+        _mutexWindowTitle.unlock_shared();
+        return;
+    }
+    std::string strNewTitle = _strWindowTitle;
+    _strWindowTitle.clear();
+    _fNewWindowTitle = false;
+    _mutexWindowTitle.unlock_shared();
+
 	// set the title to reflect mode.
 
 	LPCTSTR pszMode;
@@ -933,7 +956,7 @@ void CNTWindow::NTWindow_SetWindowTitle( LPCTSTR pszText )
 	// Number of connections ?
 
 	char *psTitle = Str_GetTemp();
-	sprintf(psTitle, "%s - %s (%s) %s", theApp.m_pszAppName, g_Serv.GetName(), pszMode, pszText ? pszText : "" );
+	snprintf(psTitle, STR_TEMPLENGTH, "%s - %s (%s) %s", theApp.m_pszAppName, g_Serv.GetName(), pszMode, strNewTitle.c_str() );
 	theApp.m_wndMain.SetWindowText( psTitle );
 
 	if ( Sphere_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )

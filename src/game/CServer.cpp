@@ -93,7 +93,7 @@ void CServer::SetServerMode( SERVMODE_TYPE mode )
 	ADDTOCALLSTACK("CServer::SetServerMode");
 	m_iModeCode.store(mode, std::memory_order_release);
 #ifdef _WIN32
-    g_NTWindow.NTWindow_SetWindowTitle();
+    g_NTWindow.SetWindowTitle();
 #endif
 }
 
@@ -251,7 +251,7 @@ ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal )
 #endif
 
 #ifdef _WIN32
-    g_NTWindow.NTWindow_SetWindowTitle(pszTemp);
+    g_NTWindow.SetWindowTitle(pszTemp);
 	g_NTService.OnTick();
 #endif
 	return iPercent;

@@ -4459,7 +4459,7 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 	s.Close();
 
 #ifdef _WIN32
-    g_NTWindow.NTWindow_SetWindowTitle();
+    g_NTWindow.SetWindowTitle();
 #endif
 	return true;
 }

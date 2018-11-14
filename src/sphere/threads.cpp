@@ -385,7 +385,7 @@ SPHERE_THREADENTRY_RETNTYPE AbstractThread::runner(void *callerThread)
 
 bool AbstractThread::isActive() const
 {
-	return m_handle != 0;
+	return (m_handle != 0);
 }
 
 void AbstractThread::waitForClose()

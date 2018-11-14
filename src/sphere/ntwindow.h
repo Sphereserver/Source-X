@@ -27,11 +27,17 @@ extern struct CNTWindow : public AbstractSphereThread, public CSWindow, public C
     virtual bool shouldExit();
     virtual void tick();
 
+    std::string _strWindowTitle;
+    bool _fNewWindowTitle;
+    std::shared_mutex _mutexWindowTitle;
+
+    void SetWindowTitle(LPCTSTR pText = nullptr);
+
     bool NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLinel, int nCmdShow);
     void NTWindow_ExitServer();
     void NTWindow_DeleteIcon();
     bool NTWindow_OnTick(int iWaitmSec);
-    void NTWindow_SetWindowTitle(LPCTSTR pText = nullptr);
+    void NTWindow_CheckUpdateWindowTitle();
 
     static const char *m_sClassName;
     class CAboutDlg : public CDialogBase				//	CNTWindow::CAboutDlg
