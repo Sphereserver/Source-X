@@ -138,6 +138,9 @@ private:
 // Thread implementation. See IThread for list of available methods.
 class AbstractThread : public IThread
 {
+protected:
+    bool _thread_selfTerminateAfterThisTick;
+
 private:
 	threadid_t m_id;
 	const char *m_name;

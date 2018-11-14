@@ -471,7 +471,8 @@ void Sphere_ExitServer()
 	g_Log.Close();
 
 #ifdef _WIN32
-    g_NTWindow.NTWindow_ExitServer();
+    if (iExitFlag != 5)
+        g_NTWindow.NTWindow_ExitServer();
 #endif
 }
 

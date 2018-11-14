@@ -41,10 +41,9 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 		return false;
 
 	bool bRestockNow = false;
-    int64 iTimeDiff = g_World.GetTimeDiff(m_pNPC->m_timeRestock);
-    int64 iRestockDelay = 10 * 60;  // 10 Minutes delay
+    int64 iRestockDelay = 10 * 60 * MSECS_PER_SEC;  // 10 Minutes delay
 
-	if ( !bForce && iTimeDiff < 0)
+	if ( !bForce && (g_World.GetTimeDiff(m_pNPC->m_timeRestock) < 0))
 	{
         bRestockNow = true; // restock timeout has expired, make it restock again (unless it's declared to do not restock in the bellow lines).
 		CRegionWorld *region = GetRegion();
@@ -64,7 +63,6 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 	// At restock the containers are actually emptied
 	if ( bRestockNow )
 	{
-
 		for ( size_t i = 0; i < CountOf(sm_VendorLayers); ++i )
 		{
 			CItemContainer *pCont = GetBank(sm_VendorLayers[i]);

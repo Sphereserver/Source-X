@@ -25,6 +25,7 @@ UnixTerminal::~UnixTerminal()
 {
     ConsoleInterface::_ciQueueCV.notify_one();  // tell to the condition variable to stop waiting, it's time to exit
 	restore();
+    //_thread_selfTerminateAfterThisTick = true;  // just to be sure
 }
 
 bool UnixTerminal::isReady()
@@ -271,7 +272,7 @@ void UnixTerminal::onStart()
 
 void UnixTerminal::tick()
 {
-    while (!shouldExit() && !g_Serv.GetExitFlag())
+    while (!shouldExit())
     {
         std::unique_lock<std::mutex> lock(ConsoleInterface::_ciQueueMutex);
         while (_qOutput.empty())

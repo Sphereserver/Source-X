@@ -191,6 +191,7 @@ AbstractThread::AbstractThread(const char *name, IThread::Priority priority)
 	m_name = name;
 	m_handle = 0;
 	m_hangCheck = 0;
+    _thread_selfTerminateAfterThisTick = true;
 	m_terminateRequested = true;
 	setPriority(priority);
 }
@@ -198,7 +199,7 @@ AbstractThread::AbstractThread(const char *name, IThread::Priority priority)
 AbstractThread::~AbstractThread()
 {
 	terminate(false);
-	AbstractThread::m_threadsAvailable--;
+	--AbstractThread::m_threadsAvailable;
 	if( AbstractThread::m_threadsAvailable == 0 )
 	{
 		// all running threads have gone, the thread subsystem is no longer needed
@@ -280,14 +281,18 @@ void AbstractThread::run()
 
 	int exceptions = 0;
 	bool lastWasException = false;
+    _thread_selfTerminateAfterThisTick = false;
 	m_terminateRequested = false;
 
 	for (;;)
 	{
+        if (shouldExit())
+            break;
+
 		bool gotException = false;
 
 		//	report me being alive if I am being checked for status
-		if( m_hangCheck != 0 )
+		if (m_hangCheck != 0)
 		{
 			m_hangCheck = 0;
 		}
@@ -296,20 +301,37 @@ void AbstractThread::run()
 		{
 			tick();
 
-			// ensure this is recorded as 'idle' time (ideally this should
-			// be in tick() but we cannot guarantee it to be called there
-			CurrentProfileData.Start(PROFILE_IDLE);
+            if (shouldExit())
+                break;
+
+            // ensure this is recorded as 'idle' time for this thread (ideally this should
+            // be in tick() but we cannot guarantee it to be called there
+            CurrentProfileData.Start(PROFILE_IDLE);
 		}
+        /*
+        catch( const CAssert& e )
+        {
+            gotException = true;
+            g_Log.CatchEvent(&e, "[TR] ExcType=CAssert in %s::tick", getName());
+            CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+        }
+        */
 		catch( const CSError& e )
 		{
 			gotException = true;
-			g_Log.CatchEvent(&e, "%s::tick", getName());
+			g_Log.CatchEvent(&e, "[TR] ExcType=CSError in %s::tick", getName());
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		}
+        catch( const std::exception& e )
+        {
+            gotException = true;
+            g_Log.CatchStdException(&e, "[TR] ExcType=std::exception in %s::tick", getName());
+            CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+        }
 		catch( ... )
 		{
 			gotException = true;
-			g_Log.CatchEvent(nullptr, "%s::tick", getName());
+			g_Log.CatchEvent(nullptr, "[TR] ExcType=pure in %s::tick", getName());
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		}
 
@@ -317,7 +339,7 @@ void AbstractThread::run()
 		{
 			if( lastWasException )
 			{
-				exceptions++;
+				++exceptions;
 			}
 			else
 			{
@@ -368,6 +390,10 @@ bool AbstractThread::isActive() const
 
 void AbstractThread::waitForClose()
 {
+    // Another thread has requested us to close and it's waiting for us to complete the current tick, 
+    //  or to forcefully be forcefully terminated after a THREADJOIN_TIMEOUT, which of the two happens first.
+
+    // TODO? add a mutex here to protect at least the changes to m_terminateRequested?
 	if (isActive())
 	{
 		if (isCurrentThread() == false)
@@ -483,7 +509,7 @@ void AbstractThread::setPriority(IThread::Priority pri)
 
 bool AbstractThread::shouldExit()
 {
-	return m_terminateRequested;
+	return m_terminateRequested || _thread_selfTerminateAfterThisTick;
 }
 
 /*
@@ -567,7 +593,7 @@ void AbstractSphereThread::allocateString(TemporaryString &string)
 
 bool AbstractSphereThread::shouldExit()
 {
-	if ( g_Serv.GetServerMode() == SERVMODE_Exiting )
+	if ( g_Serv.GetExitFlag() != 0 )
 		return true;
 
 	return AbstractThread::shouldExit();

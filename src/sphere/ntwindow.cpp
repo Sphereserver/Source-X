@@ -217,8 +217,10 @@ CNTWindow::CNTWindow() : AbstractSphereThread("T_ConsoleWindow", IThread::Highes
 
 CNTWindow::~CNTWindow()
 {
+    g_Serv.SetExitFlag(5);
     NTWindow_DeleteIcon();
     DestroyWindow();
+    _thread_selfTerminateAfterThisTick = true;
 }
 
 void CNTWindow::onStart()
@@ -265,7 +267,7 @@ void CNTWindow::tick()
     }
 
     if (!NTWindow_OnTick(0))
-        terminate(true);
+        _thread_selfTerminateAfterThisTick = true;
 }
 
 void CNTWindow::List_Clear()
@@ -496,7 +498,6 @@ bool CNTWindow::OnClose()
 	}
 
 	PostQuitMessage(0);
-	g_Serv.SetExitFlag( 5 );
 	return true;	// ok to close.
 }
 

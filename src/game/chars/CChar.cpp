@@ -231,7 +231,7 @@ CChar * CChar::CreateBasic(CREID_TYPE baseID) // static
 }
 
 CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false ), 
-    m_Stat{}
+    m_Stat{}, m_Skill{}
 {
 	g_Serv.StatInc( SERV_STAT_CHARS );	// Count created CChars.
 
@@ -252,6 +252,10 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
     _iMaxHouses = g_Cfg._iMaxHousesPlayer;
     _iMaxShips = g_Cfg._iMaxShipsPlayer;
     _pMultiStorage = nullptr;
+
+    m_exp = 0;
+    m_level = 0;
+    m_defense = 0;
 	m_height = 0;
 	m_ModMaxWeight = 0;
 
@@ -259,14 +263,7 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 	m_iVisualRange = UO_MAP_VIEW_SIZE_DEFAULT;
 	m_virtualGold = 0;
 
-	m_exp = 0;
-	m_level = 0;
-	m_defense = 0;
-	m_atUnk.m_Arg1 = 0;
-	m_atUnk.m_Arg2 = 0;
-	m_atUnk.m_Arg3 = 0;
-
-	m_timeCreate = g_World.GetCurrentTime().GetTimeRaw();
+    m_timeCreate = g_World.GetCurrentTime().GetTimeRaw();
     m_timeLastHitsUpdate = g_World.GetCurrentTime().GetTimeRaw();
     _timeNextRegen = m_timeLastHitsUpdate + MSECS_PER_SEC;  // make it regen in one second from now, no need to instant regen.
     _iRegenTickCount = 0;
@@ -276,6 +273,7 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 	m_prev_Hue = HUE_DEFAULT;
 	m_prev_id = CREID_INVALID;
 	SetID( baseID );
+
 	CCharBase* pCharDef = Char_GetDef();
 	ASSERT(pCharDef);
 	m_attackBase = pCharDef->m_attackBase;
@@ -286,25 +284,16 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 
 	SetName( pCharDef->GetTypeName());	// set the name in case there is a name template.
 
+    Stat_SetVal( STAT_FOOD, Stat_GetMaxAdjusted(STAT_FOOD) );
+    m_uiFame = 0;
+    m_iKarma = 0;
+
 	Skill_Cleanup();
+    m_atUnk.m_Arg1 = 0;
+    m_atUnk.m_Arg2 = 0;
+    m_atUnk.m_Arg3 = 0;
 
 	g_World.m_uidLastNewChar = GetUID();	// for script access.
-
-	size_t i = 0;
-	for ( ; i < STAT_QTY; ++i )
-	{
-		Stat_SetBase((STAT_TYPE)i, 0);
-		Stat_SetMod((STAT_TYPE)i, 0);
-		Stat_SetVal((STAT_TYPE)i, 0);
-		Stat_SetMax((STAT_TYPE)i, 0);
-		m_Stat[i].m_regen = 0;
-	}
-	Stat_SetVal( STAT_FOOD, Stat_GetMaxAdjusted(STAT_FOOD) );
-
-	for ( i = 0; i < g_Cfg.m_iMaxSkill; ++i )
-	{
-		m_Skill[i] = 0;
-	}
 
 	m_LocalLight = 0;
 	m_fClimbUpdated = false;
