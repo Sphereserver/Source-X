@@ -2552,7 +2552,8 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 	CScriptFileContext FileContext( pScript );	// set this as the context.
 	CVarDefContNum * pVarNum = nullptr;
 	CResourceID rid;
-	lpctstr	pszSection	= pScript->GetSection();
+    CSString sSection = pScript->GetSection();
+    lpctstr pszSection = sSection.GetPtr();
 
 	RES_TYPE restype;
 	if ( !strnicmp( pszSection, "DEFMESSAGE", 10 ) )
@@ -2620,7 +2621,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 	if ( restype < 0 )
 	{
-		g_Log.Event( LOGL_WARN|LOGM_INIT, "Unknown section '%s' in '%s'\n", static_cast<lpctstr>(pScript->GetKey()), static_cast<lpctstr>(pScript->GetFileTitle()));
+		g_Log.Event( LOGL_WARN|LOGM_INIT, "Unknown section '%s' in '%s'\n", pScript->GetKey(), pScript->GetFileTitle());
 		return false;
 	}
 	else
@@ -2633,7 +2634,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 	if ( !rid.IsValidUID() )
 	{
-		DEBUG_ERR(( "Invalid %s block, index '%s'\n", pszSection, static_cast<lpctstr>(pScript->GetArgStr())));
+		DEBUG_ERR(( "Invalid %s block, index '%s'\n", pszSection, pScript->GetArgStr()));
 		return false;
 	}
 
@@ -2711,7 +2712,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			{
 				//	search for this.
 				size_t l;
-				for ( l = 0; l < DEFMSG_QTY; l++ )
+				for ( l = 0; l < DEFMSG_QTY; ++l )
 				{
 					if ( !strcmpi(pszKey, g_Exp.sm_szMsgNames[l]) )
 					{
@@ -2919,9 +2920,9 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 			// clear old tile links to this type
 			size_t iQty = g_World.m_TileTypes.size();
-			for ( size_t i = 0; i < iQty; i++ )
+			for ( size_t i = 0; i < iQty; ++i )
 			{
-				if (g_World.m_TileTypes.at(i) == pTypeDef )
+				if (g_World.m_TileTypes[i] == pTypeDef )
 					g_World.m_TileTypes.assign(i, nullptr);
 			}
 
@@ -3428,7 +3429,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("section '%s' args '%s'\n", pszSection, pScript ? pScript->GetArgStr() : "");
+	g_Log.EventDebug("ExcInfo: section '%s' key '%s' args '%s'\n", pszSection,  pScript ? pScript->GetKey() : "",  pScript ? pScript->GetArgStr() : "");
 	EXC_DEBUG_END;
 	return false;
 }

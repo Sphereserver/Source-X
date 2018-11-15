@@ -309,6 +309,9 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 CChar::~CChar()
 {
     DeletePrepare();    // remove me early so virtuals will work.
+
+    g_World.DelCharTicking(this);
+
     if ( IsStatFlag( STATF_RIDDEN ))
     {
         CItem * pItem = Horse_GetMountItem();
@@ -325,23 +328,24 @@ CChar::~CChar()
         m_pClient->GetNetState()->markReadClosed();
     }
 
-    Guild_Resign(MEMORY_GUILD);
-    Guild_Resign(MEMORY_TOWN);
-
     if ( m_pParty )
     {
         m_pParty->RemoveMember( GetUID(), (dword) GetUID() );
         m_pParty = nullptr;
     }
+    Guild_Resign(MEMORY_GUILD);
+    Guild_Resign(MEMORY_TOWN);
     Attacker_RemoveChar();      // Removing me from enemy's attacker list (I asume that if he is on my list, I'm on his one and no one have me on their list if I dont have them)
     if (m_pNPC)
         NPC_PetClearOwners();   // Clear follower slots on pet owner
+
     Clear();                    // Remove me early so virtuals will work
     ClearNPC();
     ClearPlayer();
-    g_Serv.StatDec( SERV_STAT_CHARS );
     delete _pMultiStorage;
     _pMultiStorage = nullptr;
+
+    g_Serv.StatDec( SERV_STAT_CHARS );
 }
 
 // Client is detaching from this CChar.
@@ -460,8 +464,6 @@ void CChar::Delete(bool bforce)
 
 	// Detach from account now
 	ClearPlayer();
-
-    g_World.DelCharTicking(this);
 
 	CObjBase::Delete();
 }
