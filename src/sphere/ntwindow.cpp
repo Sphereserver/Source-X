@@ -260,7 +260,11 @@ void CNTWindow::tick()
         {
             theApp.m_wndMain.List_Add((COLORREF)CTColToRGB(co->GetTextColor()), co->GetTextString().GetPtr());
             delete co;
-        } 
+        }
+
+        // Just scroll once, after we have printed all the output
+        if (NTWindow_CanScroll())
+            theApp.m_wndMain.m_wndLog.ScrollBottomRight();
     }
     else
     {
@@ -270,7 +274,22 @@ void CNTWindow::tick()
     NTWindow_CheckUpdateWindowTitle();
 
     if (!NTWindow_OnTick(0))
+    {
         _thread_selfTerminateAfterThisTick = true;
+    }
+}
+
+bool CNTWindow::NTWindow_CanScroll()
+{
+    // If the select is on screen then keep scrolling.
+    if ( ! m_fLogScrollLock && ! GetCapture() )
+    {
+        if ( Sphere_GetOSInfo()->dwPlatformId == VER_PLATFORM_WIN32_NT )
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 void CNTWindow::List_Clear()
@@ -314,14 +333,11 @@ void CNTWindow::List_Add( COLORREF color, LPCTSTR pszText )
 	m_wndLog.GetSel( iSelBegin, iSelEnd );
 	m_iLogTextLen = iSelBegin;	// make sure it's correct.
 
-	// If the select is on screen then keep scrolling.
-	if ( ! m_fLogScrollLock && ! GetCapture() )
-	{
-		if ( Sphere_GetOSInfo()->dwPlatformId == VER_PLATFORM_WIN32_NT )
-		{
-			m_wndLog.Scroll();
-		}
-	}
+    /*
+    // Scroll down a line each time we print a message
+    if (NTWindow_CanScroll())
+        theApp.m_wndMain.m_wndLog.ScrollLine();
+    */
 }
 
 void CNTWindow::SetWindowTitle(LPCTSTR pText)

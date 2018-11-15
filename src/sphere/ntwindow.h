@@ -38,6 +38,7 @@ extern struct CNTWindow : public AbstractSphereThread, public CSWindow, public C
     void NTWindow_DeleteIcon();
     bool NTWindow_OnTick(int iWaitmSec);
     void NTWindow_CheckUpdateWindowTitle();
+    bool NTWindow_CanScroll();
 
     static const char *m_sClassName;
     class CAboutDlg : public CDialogBase				//	CNTWindow::CAboutDlg
