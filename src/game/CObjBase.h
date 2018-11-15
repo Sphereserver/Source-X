@@ -536,14 +536,14 @@ public:
      * @brief   Move To Location.
      *
      * @param   pt          The point.
-     * @param   bForceFix   true to force fix.
+     * @param   fForceFix   true to force fix.
      *
      * @return  true if it succeeds, false if it fails.
      */
-	virtual bool MoveTo(CPointMap pt, bool bForceFix = false) = 0;	// Move to a location at top level.
+	virtual bool MoveTo(const CPointMap& pt, bool fForceFix = false) = 0;	// Move to a location at top level.
 
     /**
-     * @fn  virtual bool CObjBase::MoveNear( CPointMap pt, word iSteps = 0 );
+     * @fn  bool CObjBase::MoveNear( CPointMap pt, word iSteps = 0 );
      *
      * @brief   Move near of a location.
      *
@@ -552,7 +552,7 @@ public:
      *
      * @return  true if it succeeds, false if it fails.
      */
-	virtual bool MoveNear( CPointMap pt, word iSteps = 0 );
+	bool MoveNear(CPointMap pt, ushort iSteps = 0 );
 
     /**
      * @fn  virtual bool CObjBase::MoveNearObj( const CObjBaseTemplate *pObj, word iSteps = 0 );
@@ -564,7 +564,7 @@ public:
      *
      * @return  true if it succeeds, false if it fails.
      */
-	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, word iSteps = 0 );
+	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, ushort iSteps = 0 );
 
     /**
      * @fn  void inline CObjBase::SetNamePool_Fail( tchar * ppTitles );

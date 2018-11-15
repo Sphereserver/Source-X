@@ -3577,14 +3577,14 @@ bool CChar::MoveToRoom( CRegion * pNewRoom, bool fAllowReject)
 
 bool CChar::MoveToRegionReTest( dword dwType )
 {
-	return( MoveToRegion( dynamic_cast <CRegionWorld *>( GetTopPoint().GetRegion( dwType )), false));
+	return MoveToRegion( dynamic_cast <CRegionWorld *>( GetTopPoint().GetRegion( dwType )), false);
 }
 
 // Same as MoveTo
 // This could be us just taking a step or being teleported.
 // Low level: DOES NOT UPDATE DISPLAYS or container flags. (may be offline)
 // This does not check for gravity.
-bool CChar::MoveToChar(CPointMap pt, bool bForceFix)
+bool CChar::MoveToChar(const CPointMap& pt, bool fForceFix)
 {
 	ADDTOCALLSTACK("CChar::MoveToChar");
 
@@ -3622,7 +3622,7 @@ bool CChar::MoveToChar(CPointMap pt, bool bForceFix)
         GoAwake();
     }
 
-	if ( !m_fClimbUpdated || bForceFix )
+	if ( !m_fClimbUpdated || fForceFix )
 		FixClimbHeight();
 
 	if ( fSectorChange && !g_Serv.IsLoading() )
@@ -3637,10 +3637,10 @@ bool CChar::MoveToChar(CPointMap pt, bool bForceFix)
 	return true;
 }
 
-bool CChar::MoveTo(CPointMap pt, bool bForceFix)
+bool CChar::MoveTo(const CPointMap& pt, bool fForceFix)
 {
 	m_fClimbUpdated = false; // update climb height
-	return MoveToChar( pt, bForceFix);
+	return MoveToChar( pt, fForceFix);
 }
 
 void CChar::SetTopZ( char z )
@@ -3652,7 +3652,7 @@ void CChar::SetTopZ( char z )
 
 // Move from here to a valid spot.
 // ASSUME "here" is not a valid spot. (even if it really is)
-bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool bFromShip)
+bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool fFromShip)
 {
 	ADDTOCALLSTACK("CChar::MoveToValidSpot");
 
@@ -3682,7 +3682,7 @@ bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool bFromS
 
 			// don't allow characters to pass through walls or other blocked
 			// paths when they're disembarking from a ship
-			if ( bFromShip && (dwBlockFlags & CAN_I_BLOCK) && !(dwCan & CAN_C_PASSWALLS) && (pt.m_z > startZ) )
+			if ( fFromShip && (dwBlockFlags & CAN_I_BLOCK) && !(dwCan & CAN_C_PASSWALLS) && (pt.m_z > startZ) )
 			{
 				break;
 			}
@@ -3690,7 +3690,7 @@ bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool bFromS
 			if ( ! ( dwBlockFlags &~ dwCan ))
 			{
 				// we can go here. (maybe)
-				if ( Spell_Teleport(pt, true, !bFromShip, false) )
+				if ( Spell_Teleport(pt, true, !fFromShip, false) )
 					return true;
 			}
 		}
@@ -3699,14 +3699,9 @@ bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool bFromS
 	return false;
 }
 
-bool CChar::MoveNearObj( const CObjBaseTemplate *pObj, word iSteps )
+bool CChar::MoveNearObj( const CObjBaseTemplate *pObj, ushort iSteps )
 {
 	return CObjBase::MoveNearObj(pObj, iSteps);
-}
-
-bool CChar::MoveNear( CPointMap pt, word iSteps )
-{
-	return CObjBase::MoveNear(pt, iSteps);
 }
 
 // "PRIVSET"

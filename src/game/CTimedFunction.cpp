@@ -265,9 +265,9 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
             errno = oldErrno;
             return -1;
         }
-        errno = 0;
         uint uid = (uint)uidTest;
 
+        errno = 0;
         int elapsed = (int)std::strtol(ppVal[2], nullptr, 10);
         if (errno == ERANGE)
         {

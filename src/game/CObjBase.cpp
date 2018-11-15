@@ -322,7 +322,7 @@ bool CObjBase::SetNamePool( lpctstr pszName )
 	return true;
 }
 
-bool CObjBase::MoveNearObj( const CObjBaseTemplate *pObj, word iSteps )
+bool CObjBase::MoveNearObj( const CObjBaseTemplate *pObj, ushort iSteps )
 {
 	ADDTOCALLSTACK("CObjBase::MoveNearObj");
 	ASSERT(pObj);
@@ -551,7 +551,7 @@ void CObjBase::SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mo
 	g_World.SpeakUNICODE( this, pText, wHue, mode, font, lang );
 }
 
-bool CObjBase::MoveNear( CPointMap pt, word iSteps )
+bool CObjBase::MoveNear(CPointMap pt, ushort iSteps )
 {
 	ADDTOCALLSTACK("CObjBase::MoveNear");
 	// Move to nearby this other object.

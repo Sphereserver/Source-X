@@ -451,12 +451,11 @@ public:
 	bool IsSwimming() const;
 
 	bool MoveToRegionReTest( dword dwType );
-	bool MoveToChar(CPointMap pt, bool bForceFix = false);
-	bool MoveTo(CPointMap pt, bool bForceFix = false);
+	bool MoveToChar(const CPointMap& pt, bool fForceFix = false);
+	bool MoveTo(const CPointMap& pt, bool fForceFix = false);
 	virtual void SetTopZ( char z );
-	bool MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart = 1, bool bFromShip = false);
-	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, word iSteps = 0 );
-	bool MoveNear( CPointMap pt, word iSteps = 0 );
+	bool MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart = 1, bool fFromShip = false);
+	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, ushort iSteps = 0 );
 
 	CRegion * CanMoveWalkTo( CPointBase & pt, bool fCheckChars = true, bool fCheckOnly = false, DIR_TYPE dir = DIR_QTY, bool fPathFinding = false );
 	void CheckRevealOnMove();

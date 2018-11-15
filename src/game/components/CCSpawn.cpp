@@ -24,11 +24,11 @@ CCSpawn::CCSpawn(CObjBase *pLink) : CComponent(COMP_SPAWN, pLink)
     _iTimeHi = 30;
     _idSpawn.InitUID();
     _fKillingChildren = false;
-    _uidList.clear();
 }
 
 CCSpawn::~CCSpawn()
 {
+    KillChildren();
 }
 
 uint16 CCSpawn::GetAmount() const
@@ -73,7 +73,7 @@ void CCSpawn::SetAmount(uint16 iAmount)
     _iAmount = iAmount;
 }
 
-CCharBase *CCSpawn::TryChar(CREID_TYPE &id)
+CCharBase *CCSpawn::TryChar(CREID_TYPE id)
 {
     ADDTOCALLSTACK("CCSpawn:TryChar");
     CCharBase *pCharDef = CCharBase::FindCharBase(id);
@@ -85,7 +85,7 @@ CCharBase *CCSpawn::TryChar(CREID_TYPE &id)
     return nullptr;
 }
 
-CItemBase *CCSpawn::TryItem(ITEMID_TYPE &id)
+CItemBase *CCSpawn::TryItem(ITEMID_TYPE id)
 {
     ADDTOCALLSTACK("CCSpawn:TryItem");
     CItemBase *pItemDef = CItemBase::FindItemBase(id);
@@ -106,17 +106,25 @@ CResourceDef *CCSpawn::FixDef()
     {
         return nullptr;
     }
+
+    CResourceDef* pResDef = g_Cfg.ResourceGetDef(_idSpawn);
+    if (pResDef)
+    {
+        return pResDef; // It's a valid def
+    }
+
     // No type info here !?
+    const int iIndex = _idSpawn.GetResIndex();
     if (pItem->IsType(IT_SPAWN_CHAR))
     {
-        CREID_TYPE id = static_cast<CREID_TYPE>(_idSpawn.GetResIndex());
+        CREID_TYPE id = (CREID_TYPE)iIndex;
         if (id < SPAWNTYPE_START)
         {
             return TryChar(id);
         }
 
         // try a spawn group.
-        CResourceIDBase rid = CResourceID(RES_SPAWN, _idSpawn.GetResIndex());
+        const CResourceIDBase rid = CResourceID(RES_SPAWN, iIndex);
         CResourceDef *pDef = g_Cfg.ResourceGetDef(rid);
         if (pDef)
         {
@@ -127,12 +135,12 @@ CResourceDef *CCSpawn::FixDef()
     }
     else
     {
-        ITEMID_TYPE id = (ITEMID_TYPE)(_idSpawn.GetResIndex());
+        ITEMID_TYPE id = (ITEMID_TYPE)iIndex;
         if (id < ITEMID_TEMPLATE)
             return TryItem(id);
 
         // try a template.
-        CResourceIDBase rid = CResourceID(RES_TEMPLATE, _idSpawn.GetResIndex());
+        CResourceIDBase rid = CResourceID(RES_TEMPLATE, iIndex);
         CResourceDef *pDef = g_Cfg.ResourceGetDef(rid);
         if (pDef)
         {
@@ -167,22 +175,22 @@ void CCSpawn::GenerateItem(CResourceDef *pDef)
 {
     ADDTOCALLSTACK("CCSpawn::GenerateItem");
 
-    CResourceIDBase rid = pDef->GetResourceID();
-    ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
-    CItem *pSpawnItem = static_cast<CItem*>(GetLink());
+    const CResourceIDBase rid = pDef->GetResourceID();
+    const ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
+    const CItem *pSpawnItem = static_cast<CItem*>(GetLink());
 
     if (GetCurrentSpawned() >= GetAmount())
     {
         return;
     }
 
-    CItem *pItem = pSpawnItem->CreateTemplate(id);
+    CItem *pItem = CItem::CreateTemplate(id);
     if (!pItem)
     {
         return;
     }
 
-    uint16 iAmountPile = (uint16)(minimum(UINT16_MAX, _iPile));
+    const uint16 iAmountPile = (uint16)(minimum(UINT16_MAX, _iPile));
     if (iAmountPile > 1)
     {
         CItemBase *pItemDef = pItem->Item_GetDef();
@@ -606,7 +614,7 @@ bool CCSpawn::r_LoadVal(CScript & s)
     {
         case ISPW_ADDOBJ:
         {
-            AddObj(CUID(s.GetArgDWVal()));
+            AddObj(s.GetArgDWVal());
             return true;
         }
         case ISPW_AMOUNT:
@@ -627,12 +635,38 @@ bool CCSpawn::r_LoadVal(CScript & s)
             {
                 case IT_SPAWN_CHAR:
                 {
-                    _idSpawn = CResourceID(RES_CHARDEF, ridIndex);   // Ensuring there's no negative value
+                    if (ridIndex < SPAWNTYPE_START)
+                    {
+                        _idSpawn = CResourceID(RES_CHARDEF, ridIndex);   // Ensuring there's no negative value
+                    }
+                    else
+                    {
+                        // try a spawn group.
+                        CResourceIDBase rid = CResourceID(RES_SPAWN, ridIndex);
+                        CResourceDef *pDef = g_Cfg.ResourceGetDef(rid);
+                        if (pDef)
+                            _idSpawn = rid;
+                        else
+                            _idSpawn = CResourceID(RES_CHARDEF, ridIndex);
+                    }
                     break;
                 }
                 case IT_SPAWN_ITEM:
                 {
-                    _idSpawn = CResourceID(RES_ITEMDEF, ridIndex);
+                    if (ridIndex < ITEMID_TEMPLATE)
+                    {
+                        _idSpawn = CResourceID(RES_ITEMDEF, ridIndex);   // Ensuring there's no negative value
+                    }
+                    else
+                    {
+                        // try a template
+                        CResourceIDBase rid = CResourceID(RES_TEMPLATE, ridIndex);
+                        CResourceDef *pDef = g_Cfg.ResourceGetDef(rid);
+                        if (pDef)
+                            _idSpawn = rid;
+                        else
+                            _idSpawn = CResourceID(RES_ITEMDEF, ridIndex);
+                    }
                     break;
                 }
                 case IT_SPAWN_CHAMPION: // handled on CCChampion
@@ -724,15 +758,17 @@ void CCSpawn::r_Write(CScript & s)
     EXC_TRY("Write");
     CItem *pItem = static_cast<CItem*>(GetLink());
 
-    if (GetAmount() != 1)
+    uint16 uiAmount = GetAmount();
+    if (uiAmount != 1)
     {
-        s.WriteKeyVal("AMOUNT", GetAmount());
+        s.WriteKeyVal("AMOUNT", uiAmount);
     }
     CSString sVal = g_Cfg.ResourceGetName(_idSpawn);    // need to create the CSString to get the name, otherwise the index is used for [SPAWN ] groups
-    s.WriteKey("SPAWNID", sVal);
-    if (GetPile() > 1 && pItem->GetType() == IT_SPAWN_ITEM)
+    s.WriteKey("SPAWNID", sVal.GetPtr());
+    uint16 uiPile = GetPile();
+    if ((uiPile > 1) && (pItem->GetType() == IT_SPAWN_ITEM))
     {
-        s.WriteKeyVal("PILE", GetPile());
+        s.WriteKeyVal("PILE", uiPile);
     }
     s.WriteKeyVal("TIMELO", GetTimeLo());
     s.WriteKeyVal("TIMEHI", GetTimeHi());
@@ -743,14 +779,14 @@ void CCSpawn::r_Write(CScript & s)
         return;
     }
 
-    for (std::vector<CUID>::iterator it = _uidList.begin(); it != _uidList.end(); ++it)
+    for (const CUID& uid : _uidList)
     {
-        if (!it->IsValidUID())
+        if (!uid.IsValidUID())
             continue;
-        CObjBase *pObj = it->ObjFind();
+        const CObjBase *pObj = uid.ObjFind();
         if (pObj)
         {
-            s.WriteKeyHex("ADDOBJ", pObj->GetUID().GetObjUID());
+            s.WriteKeyHex("ADDOBJ", uid.GetObjUID());
         }
     }
 

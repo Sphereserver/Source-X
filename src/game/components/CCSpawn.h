@@ -150,14 +150,14 @@ public:
     *
     * @param ID of the char to check.
     */
-    inline CCharBase * TryChar(CREID_TYPE &id);
+    inline CCharBase * TryChar(CREID_TYPE id);
 
     /**
     * @brief Test if the item from more1 exists.
     *
     * @param ID of the item to check.
     */
-    inline CItemBase * TryItem(ITEMID_TYPE &id);
+    inline CItemBase * TryItem(ITEMID_TYPE id);
 
     /**
     * @brief Get a proper RESOURCE_ID from the id provided.

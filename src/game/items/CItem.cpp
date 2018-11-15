@@ -1367,11 +1367,11 @@ void CItem::OnMoveFrom()	// Moving from current location.
 {
 }
 
-bool CItem::MoveToUpdate(CPointMap pt, bool bForceFix)
+bool CItem::MoveToUpdate(const CPointMap& pt, bool fForceFix)
 {
-	bool bReturn = MoveTo(pt, bForceFix);
+	bool fReturn = MoveTo(pt, fForceFix);
 	Update();
-	return bReturn;
+	return fReturn;
 }
 
 bool CItem::MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool bForceFix)
@@ -1454,7 +1454,7 @@ SOUND_TYPE CItem::GetDropSound( const CObjBase * pObjOn ) const
 		return ( iSnd );
 }
 
-bool CItem::MoveTo(CPointMap pt, bool bForceFix) // Put item on the ground here.
+bool CItem::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the ground here.
 {
 	ADDTOCALLSTACK("CItem::MoveTo");
 	// Move this item to it's point in the world. (ground/top level)
@@ -1476,7 +1476,7 @@ bool CItem::MoveTo(CPointMap pt, bool bForceFix) // Put item on the ground here.
 	}
 
 	SetTopPoint( pt );
-	if ( bForceFix )
+	if ( fForceFix )
 		SetTopZ(GetFixZ(GetTopPoint()));
 
 	return true;
@@ -1550,7 +1550,7 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	return true;
 }
 
-bool CItem::MoveNearObj( const CObjBaseTemplate *pObj, word iSteps )
+bool CItem::MoveNearObj( const CObjBaseTemplate *pObj, ushort iSteps )
 {
 	ADDTOCALLSTACK("CItem::MoveNearObj");
 	// Put in the same container as another item.

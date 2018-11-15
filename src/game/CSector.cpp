@@ -1118,8 +1118,8 @@ void CSector::RespawnDeadNPCs()
 		pChar->NPC_LoadScript(true);
 
 		// Res them back to their "home".
-		word iDist = pChar->m_pNPC->m_Home_Dist_Wander;
-		pChar->MoveNear( pChar->m_ptHome, iDist );
+		ushort uiDist = pChar->m_pNPC->m_Home_Dist_Wander;
+		pChar->MoveNear( pChar->m_ptHome, uiDist );
 		pChar->NPC_CreateTrigger(); //Removed from NPC_LoadScript() and triggered after char placement
 		pChar->Spell_Resurrection();
 	}

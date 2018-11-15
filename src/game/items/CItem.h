@@ -669,11 +669,11 @@ public:
     virtual void SetTimeoutD(int64 iTenths);
 
 	virtual void OnMoveFrom();
-	virtual bool MoveTo(CPointMap pt, bool bForceFix = false); // Put item on the ground here.
-	bool MoveToUpdate(CPointMap pt, bool bForceFix = false);
+	virtual bool MoveTo(const CPointMap& pt, bool bForceFix = false); // Put item on the ground here.
+	bool MoveToUpdate(const CPointMap& pt, bool bForceFix = false);
 	bool MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool bForceFix = false);
-	bool MoveToCheck( const CPointMap & pt, CChar * pCharMover = nullptr );
-	virtual bool MoveNearObj( const CObjBaseTemplate *pItem, word iSteps = 0 );
+	bool MoveToCheck(const CPointMap & pt, CChar * pCharMover = nullptr );
+	virtual bool MoveNearObj( const CObjBaseTemplate *pItem, ushort iSteps = 0 );
 
 	inline CItem* GetNext() const
 	{
@@ -744,7 +744,7 @@ public:
 	SPELL_TYPE GetScrollSpell() const;
 	bool IsSpellInBook( SPELL_TYPE spell ) const;
 	int GetSpellcountInBook() const;
-	int  AddSpellbookScroll( CItem * pItem );
+	int AddSpellbookScroll( CItem * pItem );
 	int AddSpellbookSpell( SPELL_TYPE spell, bool fUpdate );
 
 	//Doors

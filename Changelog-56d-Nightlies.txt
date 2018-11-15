@@ -1302,3 +1302,6 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 - Changed: Stats and maxstats mods could only have a value between 32767 and 32767, changed it to -65535 and 65535 (which is the actual new stat limit).
 - Fixed: Vendors restocked after a wrong amount of time.
 - Fixed: The time required to wait before another potion use was of 1,5 seconds instead of 15.
+
+15-11-2018, Nolok
+- Fixed: T_SPAWN_ITEM spawning templates and T_SPAWN_CHAR spawning spawn groups didn't correctly load the id of the resource to spawn from the save file (Issue #153).
