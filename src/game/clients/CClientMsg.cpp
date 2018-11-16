@@ -38,91 +38,92 @@ void CClient::resendBuffs() const
 	if ( pChar->IsStatFlag(STATF_HIDDEN | STATF_INSUBSTANTIAL) )
 		addBuff(BI_HIDDEN, 1075655, 1075656);
 
-	CItem *pStuck = pChar->LayerFind(LAYER_FLAG_Stuck);
+	const CItem *pStuck = pChar->LayerFind(LAYER_FLAG_Stuck);
 	if ( pStuck )
 	{
 		removeBuff(BI_PARALYZE);
-		addBuff(BI_PARALYZE, 1075827, 1075828, (word)(pStuck->GetTimerAdjusted()));
+		addBuff(BI_PARALYZE, 1075827, 1075828, (word)(pStuck->GetTimerSAdjusted()));
 	}
 
 	// Spells
 	tchar NumBuff[7][8];
 	lpctstr pNumBuff[7] = { NumBuff[0], NumBuff[1], NumBuff[2], NumBuff[3], NumBuff[4], NumBuff[5], NumBuff[6] };
 
-	word iStatEffect = 0;
-	word iTimerEffect = 0;
+	word wStatEffect = 0;
+	word wTimerEffect = 0;
 
-	for ( CItem *pItem = pChar->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+	for ( const CItem *pItem = pChar->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 	{
 		if ( !pItem->IsType(IT_SPELL) )
 			continue;
 
-		iStatEffect = pItem->m_itSpell.m_spelllevel;
-		iTimerEffect = (word)(maximum(pItem->GetTimerAdjusted(), 0));
+		wStatEffect = pItem->m_itSpell.m_spelllevel;
+        int64 iTimerEffectSigned = pItem->GetTimerSAdjusted();
+		wTimerEffect = (word)(maximum(iTimerEffectSigned, 0));
 
 		switch ( pItem->m_itSpell.m_spell )
 		{
 			case SPELL_Night_Sight:
 				removeBuff(BI_NIGHTSIGHT);
-				addBuff(BI_NIGHTSIGHT, 1075643, 1075644, iTimerEffect);
+				addBuff(BI_NIGHTSIGHT, 1075643, 1075644, wTimerEffect);
 				break;
 			case SPELL_Clumsy:
-				ITOA(iStatEffect, NumBuff[0], 10);
+				ITOA(wStatEffect, NumBuff[0], 10);
 				removeBuff(BI_CLUMSY);
-				addBuff(BI_CLUMSY, 1075831, 1075832, iTimerEffect, pNumBuff, 1);
+				addBuff(BI_CLUMSY, 1075831, 1075832, wTimerEffect, pNumBuff, 1);
 				break;
 			case SPELL_Weaken:
-				ITOA(iStatEffect, NumBuff[0], 10);
+				ITOA(wStatEffect, NumBuff[0], 10);
 				removeBuff(BI_WEAKEN);
-				addBuff(BI_WEAKEN, 1075837, 1075838, iTimerEffect, pNumBuff, 1);
+				addBuff(BI_WEAKEN, 1075837, 1075838, wTimerEffect, pNumBuff, 1);
 				break;
 			case SPELL_Feeblemind:
-				ITOA(iStatEffect, NumBuff[0], 10);
+				ITOA(wStatEffect, NumBuff[0], 10);
 				removeBuff(BI_FEEBLEMIND);
-				addBuff(BI_FEEBLEMIND, 1075833, 1075834, iTimerEffect, pNumBuff, 1);
+				addBuff(BI_FEEBLEMIND, 1075833, 1075834, wTimerEffect, pNumBuff, 1);
 				break;
 			case SPELL_Curse:
 			{
 				for ( int idx = STAT_STR; idx < STAT_BASE_QTY; ++idx )
-					ITOA(iStatEffect, NumBuff[idx], 10);
+					ITOA(wStatEffect, NumBuff[idx], 10);
 				for ( int idx = 3; idx < 7; ++idx )
 					ITOA(10, NumBuff[idx], 10);
 
 				removeBuff(BI_CURSE);
-				addBuff(BI_CURSE, 1075835, 1075836, iTimerEffect, pNumBuff, 7);
+				addBuff(BI_CURSE, 1075835, 1075836, wTimerEffect, pNumBuff, 7);
 				break;
 			}
 			case SPELL_Mass_Curse:
 			{
 				for ( int idx = STAT_STR; idx < STAT_BASE_QTY; ++idx )
-					ITOA(iStatEffect, NumBuff[idx], 10);
+					ITOA(wStatEffect, NumBuff[idx], 10);
 
 				removeBuff(BI_MASSCURSE);
-				addBuff(BI_MASSCURSE, 1075839, 1075840, iTimerEffect, pNumBuff, 3);
+				addBuff(BI_MASSCURSE, 1075839, 1075840, wTimerEffect, pNumBuff, 3);
 				break;
 			}
 			case SPELL_Strength:
-				ITOA(iStatEffect, NumBuff[0], 10);
+				ITOA(wStatEffect, NumBuff[0], 10);
 				removeBuff(BI_STRENGTH);
-				addBuff(BI_STRENGTH, 1075845, 1075846, iTimerEffect, pNumBuff, 1);
+				addBuff(BI_STRENGTH, 1075845, 1075846, wTimerEffect, pNumBuff, 1);
 				break;
 			case SPELL_Agility:
-				ITOA(iStatEffect, NumBuff[0], 10);
+				ITOA(wStatEffect, NumBuff[0], 10);
 				removeBuff(BI_AGILITY);
-				addBuff(BI_AGILITY, 1075841, 1075842, iTimerEffect, pNumBuff, 1);
+				addBuff(BI_AGILITY, 1075841, 1075842, wTimerEffect, pNumBuff, 1);
 				break;
 			case SPELL_Cunning:
-				ITOA(iStatEffect, NumBuff[0], 10);
+				ITOA(wStatEffect, NumBuff[0], 10);
 				removeBuff(BI_CUNNING);
-				addBuff(BI_CUNNING, 1075843, 1075844, iTimerEffect, pNumBuff, 1);
+				addBuff(BI_CUNNING, 1075843, 1075844, wTimerEffect, pNumBuff, 1);
 				break;
 			case SPELL_Bless:
 			{
 				for ( int idx = STAT_STR; idx < STAT_BASE_QTY; ++idx )
-					ITOA(iStatEffect, NumBuff[idx], 10);
+					ITOA(wStatEffect, NumBuff[idx], 10);
 
 				removeBuff(BI_BLESS);
-				addBuff(BI_BLESS, 1075847, 1075848, iTimerEffect, pNumBuff, STAT_BASE_QTY);
+				addBuff(BI_BLESS, 1075847, 1075848, wTimerEffect, pNumBuff, STAT_BASE_QTY);
 				break;
 			}
 			case SPELL_Reactive_Armor:
@@ -130,15 +131,15 @@ void CClient::resendBuffs() const
 				removeBuff(BI_REACTIVEARMOR);
 				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 				{
-					ITOA(iStatEffect, NumBuff[0], 10);
+					ITOA(wStatEffect, NumBuff[0], 10);
 					for ( int idx = 1; idx < 5; ++idx )
 						ITOA(5, NumBuff[idx], 10);
 
-					addBuff(BI_REACTIVEARMOR, 1075812, 1075813, iTimerEffect, pNumBuff, 5);
+					addBuff(BI_REACTIVEARMOR, 1075812, 1075813, wTimerEffect, pNumBuff, 5);
 				}
 				else
 				{
-					addBuff(BI_REACTIVEARMOR, 1075812, 1070722, iTimerEffect);
+					addBuff(BI_REACTIVEARMOR, 1075812, 1070722, wTimerEffect);
 				}
 				break;
 			}
@@ -158,46 +159,46 @@ void CClient::resendBuffs() const
 				{
 					ITOA(-pItem->m_itSpell.m_PolyStr, NumBuff[0], 10);
 					ITOA(-pItem->m_itSpell.m_PolyDex / 10, NumBuff[1], 10);
-					addBuff(BuffIcon, BuffCliloc, 1075815, iTimerEffect, pNumBuff, 2);
+					addBuff(BuffIcon, BuffCliloc, 1075815, wTimerEffect, pNumBuff, 2);
 				}
 				else
 				{
-					addBuff(BuffIcon, BuffCliloc, 1070722, iTimerEffect);
+					addBuff(BuffIcon, BuffCliloc, 1070722, wTimerEffect);
 				}
 				break;
 			}
 			case SPELL_Poison:
 				removeBuff(BI_POISON);
-				addBuff(BI_POISON, 1017383, 1070722, iTimerEffect);
+				addBuff(BI_POISON, 1017383, 1070722, wTimerEffect);
 				break;
 			case SPELL_Incognito:
 				removeBuff(BI_INCOGNITO);
-				addBuff(BI_INCOGNITO, 1075819, 1075820, iTimerEffect);
+				addBuff(BI_INCOGNITO, 1075819, 1075820, wTimerEffect);
 				break;
 			case SPELL_Paralyze:
 				removeBuff(BI_PARALYZE);
-				addBuff(BI_PARALYZE, 1075827, 1075828, iTimerEffect);
+				addBuff(BI_PARALYZE, 1075827, 1075828, wTimerEffect);
 				break;
 			case SPELL_Magic_Reflect:
 			{
 				removeBuff(BI_MAGICREFLECTION);
 				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 				{
-					ITOA(-iStatEffect, NumBuff[0], 10);
+					ITOA(-wStatEffect, NumBuff[0], 10);
 					for ( int idx = 1; idx < 5; ++idx )
 						ITOA(10, NumBuff[idx], 10);
 
-					addBuff(BI_MAGICREFLECTION, 1075817, 1075818, iTimerEffect, pNumBuff, 5);
+					addBuff(BI_MAGICREFLECTION, 1075817, 1075818, wTimerEffect, pNumBuff, 5);
 				}
 				else
 				{
-					addBuff(BI_MAGICREFLECTION, 1075817, 1070722, iTimerEffect);
+					addBuff(BI_MAGICREFLECTION, 1075817, 1070722, wTimerEffect);
 				}
 				break;
 			}
 			case SPELL_Invis:
 				removeBuff(BI_INVISIBILITY);
-				addBuff(BI_INVISIBILITY, 1075825, 1075826, iTimerEffect);
+				addBuff(BI_INVISIBILITY, 1075825, 1075826, wTimerEffect);
 				break;
 			default:
 				break;
@@ -206,7 +207,7 @@ void CClient::resendBuffs() const
 	}
 }
 
-void CClient::addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word Time, lpctstr* pArgs, size_t iArgCount) const
+void CClient::addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word durationSeconds, lpctstr* pArgs, size_t iArgCount) const
 {
 	ADDTOCALLSTACK("CClient::addBuff");
 	if ( !IsSetOF(OF_Buffs) )
@@ -214,7 +215,7 @@ void CClient::addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dwo
 	if ( PacketBuff::CanSendTo(GetNetState()) == false )
 		return;
 
-	new PacketBuff(this, IconId, ClilocOne, ClilocTwo, Time, pArgs, iArgCount);
+	new PacketBuff(this, IconId, ClilocOne, ClilocTwo, durationSeconds, pArgs, iArgCount);
 }
 
 void CClient::removeBuff(const BUFF_ICONS IconId) const

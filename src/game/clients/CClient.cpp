@@ -882,12 +882,12 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 						++ArgsCount;
 				}
 
-				addBuff(static_cast<BUFF_ICONS>(iArgs[0]), iArgs[1], iArgs[2], (word)(iArgs[3]), Args, ArgsCount);
+				addBuff((BUFF_ICONS)iArgs[0], iArgs[1], iArgs[2], (word)(iArgs[3]), Args, ArgsCount);
 			}
 			break;
 		case CV_REMOVEBUFF:
 			{
-				BUFF_ICONS IconId = static_cast<BUFF_ICONS>(s.GetArgVal());
+				BUFF_ICONS IconId = (BUFF_ICONS)s.GetArgVal();
 				if (IconId < BI_START || IconId > BI_QTY/* || IconId == 0x3EB || IconId == 0x3EC*/)
 				{
 					DEBUG_ERR(("Invalid RemoveBuff icon ID\n"));

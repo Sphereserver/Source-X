@@ -195,7 +195,7 @@ void CTimedFunctionHandler::Add( CUID uid, int numSeconds, lpctstr funcname )
 	}
 	tf->uid = uid;
 	tf->elapsed = numSeconds;
-	strcpy( tf->funcname, funcname );
+	strncpy( tf->funcname, funcname, sizeof(tf->funcname) );
 	if ( m_isBeingProcessed )
 		m_tfQueuedToBeAdded.emplace_back( tf );
 	else
@@ -311,7 +311,7 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
 void CTimedFunctionHandler::r_Write( CScript & s )
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::r_Write");
-	s.WriteKeyFormat( "CurTick", "%i", m_curTick );
+	s.WriteKeyFormat( "CurTick", "%d", m_curTick );
 	for ( int tick = 0; tick < TICKS_PER_SEC; ++tick )
 	{
 		for ( auto it = m_timedFunctions[tick].begin(), end = m_timedFunctions[tick].end(); it != end; ++it )
@@ -320,7 +320,7 @@ void CTimedFunctionHandler::r_Write( CScript & s )
 			if ( tf->uid.IsValidUID() )
 			{
 				s.WriteKeyFormat( "TimerFCall", "%s", tf->funcname );
-				s.WriteKeyFormat( "TimerFNumbers", "%i,%u,%i", tick, tf->uid.GetObjUID(), tf->elapsed );
+				s.WriteKeyFormat( "TimerFNumbers", "%d,%u,%d", tick, tf->uid.GetObjUID(), tf->elapsed );
 			}
 		}
 	}
