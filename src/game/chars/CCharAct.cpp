@@ -646,7 +646,7 @@ void CChar::UnEquipAllItems( CItemContainer * pDest, bool bLeaveHands )
 					CItem *pDupe = CItem::CreateDupeItem(pItem);
 					pDest->ContentAdd(pDupe);
 					// Equip layer only matters on a corpse.
-					pDupe->SetContainedLayer((byte)(layer));
+					pDupe->SetContainedLayer((byte)layer);
 				}
 				continue;
 			case LAYER_DRAGGING:

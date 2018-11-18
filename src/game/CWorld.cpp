@@ -2392,13 +2392,14 @@ void CWorld::OnTick()
     }
 
     EXC_SET_BLOCK("WorldObjects loop");
-    for (auto &pairObj : tmpMap)    // Loop through all msecs stored, unless we passed the timestamp.
+    for (const auto &pairObj : tmpMap)    // Loop through all msecs stored, unless we passed the timestamp.
     {
         lpctstr ptcSubDesc = "\0";
         for (CTimedObject* pObj : pairObj.second)
         {
-            EXC_TRYSUB("Tick::WorldObj::Elapsed");
-            ptcSubDesc = "\0";
+            EXC_TRYSUB("Tick::WorldObj");
+            EXC_SETSUB_BLOCK("Elapsed");
+            ptcSubDesc = "Generic";
             PROFILE_TYPE profile = pObj->GetProfileType();
             ProfileTask profileTask(profile);
             /*
@@ -2416,6 +2417,7 @@ void CWorld::OnTick()
             {
                 case PROFILE_ITEMS:
                 {
+                    ptcSubDesc = "Item (Generic)";
                     CItem *pItem = dynamic_cast<CItem*>(pObj);
                     ASSERT(pItem);
                     if (pItem->IsItemEquipped())
@@ -2482,6 +2484,7 @@ void CWorld::OnTick()
             }
             if (fRemove)
             {
+                EXC_SETSUB_BLOCK("Delete");
                 CObjBase* pObjBase = dynamic_cast<CObjBase*>(pObj);
                 ASSERT(pObjBase);
                 pObjBase->Delete();

@@ -20,15 +20,6 @@ CListDefContElem::CListDefContElem( lpctstr pszKey )
 	m_Key.MakeLower();
 }
 
-CListDefContElem::~CListDefContElem()
-{
-}
-
-lpctstr CListDefContElem::GetKey() const 
-{ 
-	return( m_Key.GetPtr() ); 
-}
-
 void CListDefContElem::SetKey( lpctstr pszKey )
 {
 	m_Key = pszKey;
@@ -50,21 +41,7 @@ CListDefContNum::CListDefContNum( lpctstr pszKey ) : CListDefContElem( pszKey ),
 {
 }
 
-CListDefContNum::~CListDefContNum()
-{
-}
-
-int64 CListDefContNum::GetValNum() const 
-{ 
-	return( m_iVal ); 
-}
-
-void CListDefContNum::SetValNum( int64 iVal ) 
-{ 
-	m_iVal = iVal;
-}
-
-inline lpctstr CListDefContNum::GetValStr() const
+lpctstr CListDefContNum::GetValStr() const
 {
 	TemporaryString tsTemp;
 	tchar* pszTemp = static_cast<tchar *>(tsTemp);
@@ -104,15 +81,6 @@ CListDefContStr::CListDefContStr( lpctstr pszKey, lpctstr pszVal ) : CListDefCon
 
 CListDefContStr::CListDefContStr( lpctstr pszKey ) : CListDefContElem( pszKey )
 {
-}
-
-CListDefContStr::~CListDefContStr()
-{
-}
-
-lpctstr CListDefContStr::GetValStr() const 
-{ 
-	return( m_sVal ); 
 }
 
 inline int64 CListDefContStr::GetValNum() const
@@ -156,15 +124,6 @@ CListDefContElem * CListDefContStr::CopySelf() const
 CListDefCont::CListDefCont( lpctstr pszKey ) : m_Key( pszKey ) 
 { 
 	m_Key.MakeLower(); 
-}
-
-CListDefCont::~CListDefCont()
-{
-}
-
-lpctstr CListDefCont::GetKey() const 
-{ 
-	return( m_Key.GetPtr() ); 
 }
 
 void CListDefCont::SetKey( lpctstr pszKey )
@@ -213,9 +172,9 @@ bool CListDefCont::SetStrAt(size_t nIndex, lpctstr pszVal)
 inline CListDefCont::DefList::iterator CListDefCont::_GetAt(size_t nIndex)
 {
 	ADDTOCALLSTACK("CListDefCont::_GetAt");
-	DefList::iterator it = m_listElements.begin();
+	DefList::iterator it = m_listElements.begin(), itEnd = m_listElements.end();
 
-	while ( it != m_listElements.end() )
+	while ( it != itEnd )
 	{
 		if ( nIndex-- == 0 )
 			return it;
@@ -232,9 +191,9 @@ inline CListDefContElem* CListDefCont::ElementAt(size_t nIndex) const
 	if ( nIndex >= m_listElements.size() )
 		return nullptr;
 
-	DefList::const_iterator it = m_listElements.begin();
+	DefList::const_iterator it = m_listElements.begin(), itEnd = m_listElements.end();
 
-	while ( it != m_listElements.end() )
+	while ( it != itEnd )
 	{
 		if ( nIndex-- == 0 )
 			return (*it);
@@ -301,10 +260,10 @@ int CListDefCont::FindValNum( int64 iVal, size_t nStartIndex /* = 0 */ ) const
 {
 	ADDTOCALLSTACK("CListDefCont::FindValNum");
 
-	DefList::const_iterator i;
+	DefList::const_iterator i, iEnd;
 	size_t nIndex = 0;
 
-	for ( i = m_listElements.begin(), nIndex = 0; i != m_listElements.end(); ++i, ++nIndex )
+	for ( i = m_listElements.begin(), iEnd = m_listElements.end(), nIndex = 0; i != iEnd; ++i, ++nIndex )
 	{
 		if ( nIndex < nStartIndex )
 			continue;
@@ -330,7 +289,7 @@ bool CListDefCont::AddElementNum(int64 iVal)
 	if ( (m_listElements.size() + 1) >= INTPTR_MAX )	// overflow? is it even useful?
 		return false;
 
-	m_listElements.push_back( new CListDefContNum(m_Key.GetPtr(), iVal) );
+	m_listElements.emplace_back( new CListDefContNum(m_Key.GetPtr(), iVal) );
 
 	return true;
 }
@@ -343,7 +302,7 @@ bool CListDefCont::AddElementStr(lpctstr pszKey)
 
 	REMOVE_QUOTES( pszKey );
 
-	m_listElements.push_back( new CListDefContStr(m_Key.GetPtr(), pszKey) );
+	m_listElements.emplace_back( new CListDefContStr(m_Key.GetPtr(), pszKey) );
 
 	return true;
 }

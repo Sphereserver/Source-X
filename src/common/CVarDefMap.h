@@ -48,15 +48,19 @@ public:
 
 	CVarDefContNum( lpctstr pszKey, int64 iVal );
 	CVarDefContNum( lpctstr pszKey );
-	virtual ~CVarDefContNum();
+	virtual ~CVarDefContNum() = default;
 
 private:
 	CVarDefContNum(const CVarDefContNum& copy);
 	CVarDefContNum& operator=(const CVarDefContNum& other);
 
 public:
-	int64 GetValNum() const;
-	void SetValNum( int64 iVal );
+    inline int64 GetValNum() const {
+        return m_iVal;
+    }
+    inline void SetValNum(int64 iVal) {
+        m_iVal = iVal;
+    }
 	lpctstr GetValStr() const;
 
 	bool r_LoadVal( CScript & s );
@@ -75,7 +79,7 @@ public:
 
 	CVarDefContStr( lpctstr pszKey, lpctstr pszVal );
 	explicit CVarDefContStr( lpctstr pszKey );
-	virtual ~CVarDefContStr();
+	virtual ~CVarDefContStr() = default;
 
 private:
 	CVarDefContStr(const CVarDefContStr& copy);
@@ -100,7 +104,7 @@ class CVarDefMap
 private:
 	struct ltstr
 	{
-		bool operator()(CVarDefCont * s1, CVarDefCont * s2) const;
+		bool operator()(const CVarDefCont * s1, const CVarDefCont * s2) const;
 	};
 
 	typedef std::set<CVarDefCont *, ltstr> DefSet;
@@ -112,7 +116,7 @@ private:
 			static const char *m_sClassName;
 
 			CVarDefContTest( lpctstr pszKey );
-			virtual ~CVarDefContTest();
+			virtual ~CVarDefContTest() = default;
 
 		private:
 			CVarDefContTest(const CVarDefContTest& copy);
@@ -160,6 +164,7 @@ public:
 
     CVarDefContNum* SetNumNew( lpctstr pszKey, int64 iVal );
     CVarDefContNum* SetNum( lpctstr pszKey, int64 iVal, bool fZero = false );
+    CVarDefContNum* ModNum( lpctstr pszKey, int64 iMod, bool fZero = false );
     CVarDefContStr* SetStrNew( lpctstr pszKey, lpctstr pszVal );
     CVarDefCont* SetStr( lpctstr pszKey, bool fQuoted, lpctstr pszVal, bool fZero = false );
 

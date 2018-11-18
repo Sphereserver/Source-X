@@ -69,20 +69,6 @@ CVarDefContNum::CVarDefContNum( lpctstr pszKey ) : CVarDefCont( pszKey ), m_iVal
 {
 }
 
-CVarDefContNum::~CVarDefContNum()
-{
-}
-
-int64 CVarDefContNum::GetValNum() const 
-{ 
-	return( m_iVal ); 
-}
-
-void CVarDefContNum::SetValNum( int64 iVal ) 
-{ 
-	m_iVal = iVal;
-}
-
 lpctstr CVarDefContNum::GetValStr() const
 {
 	TemporaryString tsTemp;
@@ -126,10 +112,6 @@ CVarDefContStr::CVarDefContStr( lpctstr pszKey ) : CVarDefCont( pszKey )
 {
 }
 
-CVarDefContStr::~CVarDefContStr()
-{
-}
-
 inline int64 CVarDefContStr::GetValNum() const
 {
 	lpctstr pszStr = m_sVal;
@@ -138,8 +120,9 @@ inline int64 CVarDefContStr::GetValNum() const
 
 void CVarDefContStr::SetValStr( lpctstr pszVal ) 
 {
-	if (strlen(pszVal) <= SCRIPT_MAX_LINE_LEN/2)
-		m_sVal.Copy( pszVal );
+    size_t uiLen = strlen(pszVal);
+	if (uiLen <= SCRIPT_MAX_LINE_LEN/2)
+		m_sVal.CopyLen( pszVal, (int)uiLen );
 	else
 		g_Log.EventWarn("Setting max length of %d was exceeded on (VAR,TAG,LOCAL).%s \r", SCRIPT_MAX_LINE_LEN/2, GetKey() );
 }
@@ -176,10 +159,6 @@ CVarDefMap::CVarDefContTest::CVarDefContTest( lpctstr pszKey ) : CVarDefCont( ps
 {
 }
 
-CVarDefMap::CVarDefContTest::~CVarDefContTest()
-{
-}
-
 lpctstr CVarDefMap::CVarDefContTest::GetValStr() const 
 { 
 	return nullptr; 
@@ -203,14 +182,14 @@ CVarDefCont * CVarDefMap::CVarDefContTest::CopySelf() const
 *
 ***************************************************************************/
 
-bool CVarDefMap::ltstr::operator()(CVarDefCont * s1, CVarDefCont * s2) const
+bool CVarDefMap::ltstr::operator()(const CVarDefCont * s1, const CVarDefCont * s2) const
 {
 	//ADDTOCALLSTACK("CVarDefMap::ltstr::operator()");
 	if (!s1)
 		throw CSError(LOGL_ERROR, 0, "s1 empty!");
 	else if (!s2)
 		throw CSError(LOGL_ERROR, 0, "s2 empty!");
-	return( strcmpi(s1->GetKey(), s2->GetKey()) < 0 );
+	return ( strcmpi(s1->GetKey(), s2->GetKey()) < 0 );
 }
 
 /***************************************************************************
@@ -254,11 +233,9 @@ lpctstr CVarDefMap::FindValStr( lpctstr pVal ) const
 lpctstr CVarDefMap::FindValNum( int64 iVal ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::FindValNum");
-	for ( DefSet::const_iterator i = m_Container.begin(); i != m_Container.end(); ++i )
+    for (const CVarDefCont* pVarBase : m_Container)
 	{
-		const CVarDefCont * pVarBase = (*i);
 		ASSERT( pVarBase );
-
 		const CVarDefContNum * pVarNum = dynamic_cast <const CVarDefContNum *>( pVarBase );
 		if ( pVarNum == nullptr )
 			continue;
@@ -278,7 +255,7 @@ CVarDefCont * CVarDefMap::GetAt( size_t at ) const
 
 	DefSet::const_iterator i = std::next(m_Container.begin(), at);
 	if ( i != m_Container.end() )
-		return( (*i) );
+		return (*i);
 	else
 		return nullptr;
 }
@@ -372,9 +349,9 @@ void CVarDefMap::Copy( const CVarDefMap * pArray )
 	if ( pArray->GetCount() <= 0 )
 		return;
 
-	for ( DefSet::const_iterator i = pArray->m_Container.begin(); i != pArray->m_Container.end(); ++i )
+    for (const CVarDefCont* pVar : pArray->m_Container)
 	{
-		m_Container.insert( (*i)->CopySelf() );
+		m_Container.insert( pVar->CopySelf() );
 	}
 }
 
@@ -390,9 +367,8 @@ bool CVarDefMap::Compare( const CVarDefMap * pArray )
 
 	if (pArray->GetCount())
 	{
-		for ( DefSet::const_iterator i = pArray->m_Container.begin(); i != pArray->m_Container.end(); ++i )
+        for (const CVarDefCont* pVar : pArray->m_Container)
 		{
-			const CVarDefCont * pVar = (*i);
 			lpctstr sKey = pVar->GetKey();
 			if (!GetKey(sKey))
 				return false;
@@ -414,9 +390,8 @@ bool CVarDefMap::CompareAll( const CVarDefMap * pArray )
 
 	if (pArray->GetCount())
 	{
-		for ( DefSet::const_iterator i = pArray->m_Container.begin(); i != pArray->m_Container.end(); ++i )
+        for (const CVarDefCont* pVar : pArray->m_Container)
 		{
-			const CVarDefCont * pVar = (*i);
 			lpctstr sKey = pVar->GetKey();
 
 			if (strcmpi(GetKeyStr(sKey, true),pVar->GetValStr()))
@@ -425,9 +400,8 @@ bool CVarDefMap::CompareAll( const CVarDefMap * pArray )
 	}
 	if (GetCount())
 	{
-		for ( DefSet::const_iterator i = m_Container.begin(); i != m_Container.end(); ++i )
+        for (const CVarDefCont* pVar : m_Container)
 		{
-			const CVarDefCont * pVar = (*i);
 			lpctstr sKey = pVar->GetKey();
 
 			if (strcmpi(pArray->GetKeyStr(sKey, true),pVar->GetValStr()))
@@ -463,8 +437,37 @@ CVarDefContNum* CVarDefMap::SetNumNew( lpctstr pszName, int64 iVal )
 CVarDefContNum* CVarDefMap::SetNumOverride( lpctstr pszKey, int64 iVal )
 {
 	ADDTOCALLSTACK("CVarDefMap::SetNumOverride");
+    CVarDefContNum* pKeyNum = dynamic_cast<CVarDefContNum*>(GetKey(pszKey));
+    if (pKeyNum)
+    {
+        pKeyNum->SetValNum(iVal);
+        return pKeyNum;
+    }
 	DeleteAtKey(pszKey);
 	return SetNumNew(pszKey,iVal);
+}
+
+CVarDefContNum* CVarDefMap::ModNum(lpctstr pszName, int64 iMod, bool fZero)
+{
+    CVarDefCont* pVarDef = GetKey(pszName);
+    if (pVarDef)
+    {
+        CVarDefContNum* pVarDefNum = dynamic_cast<CVarDefContNum*>(pVarDef);
+        if (pVarDefNum)
+        {
+            const int64 iNewVal = pVarDefNum->GetValNum() + iMod;
+            if ((iNewVal == 0) && fZero)
+            {
+                DefSet::iterator it = m_Container.find(pVarDef);
+                ASSERT (it != m_Container.end());
+                DeleteAtIterator(it);
+                return nullptr;
+            }
+            pVarDefNum->SetValNum(iNewVal);
+            return pVarDefNum;
+        }
+    }
+    return SetNum(pszName, iMod, fZero);
 }
 
 CVarDefContNum* CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fZero )
@@ -524,6 +527,12 @@ CVarDefContStr* CVarDefMap::SetStrNew( lpctstr pszName, lpctstr pszVal )
 CVarDefContStr* CVarDefMap::SetStrOverride( lpctstr pszKey, lpctstr pszVal )
 {
 	ADDTOCALLSTACK("CVarDefMap::SetStrOverride");
+    CVarDefContStr* pKeyStr = dynamic_cast<CVarDefContStr*>(GetKey(pszKey));
+    if (pKeyStr)
+    {
+        pKeyStr->SetValStr(pszVal);
+        return pKeyStr;
+    }
 	DeleteAtKey(pszKey);
 	return SetStrNew(pszKey,pszVal);
 }
@@ -653,17 +662,15 @@ void CVarDefMap::DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix ) const
 		pszPrefix = "";
 
     bool fIsClient = pSrc->GetChar();
-	for ( DefSet::const_iterator i = m_Container.begin(); i != m_Container.end(); ++i )
+    for (const CVarDefCont* pVar : m_Container)
 	{
-		const CVarDefCont * pVar = (*i);
-
         if (fIsClient)
         {
-            pSrc->SysMessagef(pSrc->GetChar() ? "%s%s=%s" : "%s%s=%s\n", static_cast<lpctstr>(pszPrefix), static_cast<lpctstr>(pVar->GetKey()), static_cast<lpctstr>(pVar->GetValStr()));
+            pSrc->SysMessagef(pSrc->GetChar() ? "%s%s=%s" : "%s%s=%s\n", pszPrefix, pVar->GetKey(), pVar->GetValStr());
         }
         else
         {
-            g_Log.Event(LOGL_EVENT, pSrc->GetChar() ? "%s%s=%s" : "%s%s=%s\n", static_cast<lpctstr>(pszPrefix), static_cast<lpctstr>(pVar->GetKey()), static_cast<lpctstr>(pVar->GetValStr()));
+            g_Log.Event(LOGL_EVENT, pSrc->GetChar() ? "%s%s=%s" : "%s%s=%s\n", pszPrefix, pVar->GetKey(), pVar->GetValStr());
         }
 	}
 }
@@ -716,20 +723,19 @@ void CVarDefMap::r_WritePrefix( CScript & s, lpctstr pszPrefix, lpctstr pszKeyEx
 	TemporaryString tsZ;
 	tchar* z = static_cast<tchar *>(tsZ);
 	lpctstr		pszVal;
-	bool bHasPrefix = (pszPrefix && *pszPrefix);
-	bool bHasExclude = (pszKeyExclude && *pszKeyExclude);
+	bool fHasPrefix = (pszPrefix && *pszPrefix);
+	bool fHasExclude = (pszKeyExclude && *pszKeyExclude);
 
 	// Write with any prefix.
-	for ( DefSet::const_iterator i = m_Container.begin(); i != m_Container.end(); ++i )
+    for (const CVarDefCont* pVar : m_Container)
 	{
-		const CVarDefCont * pVar = (*i);
 		if ( !pVar )
 			continue;	// This should not happen, a warning maybe?
 
-		if ( bHasExclude && !strcmpi(pszKeyExclude, pVar->GetKey()))
+		if ( fHasExclude && !strcmpi(pszKeyExclude, pVar->GetKey()))
 			continue;
 
-		if ( bHasPrefix )
+		if ( fHasPrefix )
 			sprintf(z, "%s.%s", pszPrefix, pVar->GetKey());
 		else
 			sprintf(z, "%s", pVar->GetKey());

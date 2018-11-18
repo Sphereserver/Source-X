@@ -41,15 +41,16 @@ void CTimedFunctionHandler::OnTick()
 			tf->elapsed -= 1;
 			if ( tf->elapsed <= 1 )
 			{
-				CScript s(tf->funcname);
 				CObjBase * obj = tf->uid.ObjFind();
 
 				if ( obj != nullptr ) //just in case
 				{
+                    CScript s(tf->funcname);
 					CObjBaseTemplate * topobj = obj->GetTopLevelObj();
+                    ASSERT(topobj);
 					CTextConsole* src;
 
-					if ( topobj->IsChar() )
+					if ( topobj->IsChar() ) // only chars are derived classes from CTextConsole
 						src = dynamic_cast <CTextConsole*> ( topobj );
 					else
 						src = &g_Serv;
@@ -136,7 +137,8 @@ void CTimedFunctionHandler::Stop( CUID uid, lpctstr funcname )
 	}
 }
 
-TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext, CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult)
+TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext,
+    CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult)
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Loop");
 	bool endLooping = false;
@@ -155,9 +157,14 @@ TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScrip
 			if (!strcmpi(tf->funcname, funcname))
 			{
 				CObjBase * pObj = tf->uid.ObjFind();
+                if (!pObj)
+                {
+                    goto LoopStop;
+                }
 				TRIGRET_TYPE iRet = pObj->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult);
 				if (iRet == TRIGRET_BREAK)
 				{
+                LoopStop:
 					EndContext = StartContext;
 					endLooping = true;
 					break;
@@ -222,7 +229,7 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
 
         auto oldErrno = errno;
         int tick = (int)std::strtol(pszVal, nullptr, 10);
-        if (tick > TICKS_PER_SEC)
+        if (tick >= TICKS_PER_SEC)
         {
             g_Log.Event(LOGM_INIT|LOGL_ERROR, "Invalid CurTick in %sdata.scp (value=%d is too high).\n", SPHERE_FILE, tick);
             errno = oldErrno;
@@ -258,7 +265,7 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
         }
 
         errno = 0;
-        unsigned long uidTest = std::strtoul(ppVal[1], nullptr, 0);
+        unsigned long uidTest = std::strtoul(ppVal[1], nullptr, 10);
         if ((errno == ERANGE) || (uidTest > UINT32_MAX))
         {
             g_Log.Event(LOGM_INIT|LOGL_ERROR, "Invalid TimerFNumbers in %sdata.scp. Invalid UID (second value=%ul).\n", SPHERE_FILE, uidTest);

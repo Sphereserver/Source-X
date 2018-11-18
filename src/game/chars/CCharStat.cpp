@@ -161,6 +161,19 @@ void CChar::Stat_SetVal( STAT_TYPE i, ushort uiVal )
 	m_Stat[i].m_val = uiVal;
 }
 
+void CChar::Stat_AddVal( STAT_TYPE i, int iVal )
+{
+    ADDTOCALLSTACK("CChar::Stat_AddVal");
+    if (i > STAT_BASE_QTY || i == STAT_FOOD) // Food must trigger Statchange. Redirect to Base value
+    {
+        Stat_AddBase(i, iVal);
+        return;
+    }
+    ASSERT(i >= 0 && i < STAT_QTY); // allow for food
+    iVal = m_Stat[i].m_val + iVal;
+    m_Stat[i].m_val = (ushort)(maximum(0, iVal));
+}
+
 ushort CChar::Stat_GetVal( STAT_TYPE i ) const
 {
 	ADDTOCALLSTACK("CChar::Stat_GetVal");
@@ -265,10 +278,10 @@ ushort CChar::Stat_GetBase( STAT_TYPE i ) const
 	return m_Stat[i].m_base;
 }
 
-void CChar::Stat_AddBase( STAT_TYPE i, ushort uiVal )
+void CChar::Stat_AddBase( STAT_TYPE i, int iVal )
 {
 	ADDTOCALLSTACK("CChar::Stat_AddBase");
-	Stat_SetBase( i, Stat_GetBase(i) + uiVal );
+	Stat_SetBase( i, ushort(Stat_GetBase(i) + iVal) );
 }
 
 void CChar::Stat_SetBase( STAT_TYPE i, ushort uiVal )

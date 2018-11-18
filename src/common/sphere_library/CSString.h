@@ -237,6 +237,13 @@ public:
 	* @param pStr string to copy.
 	*/
 	void Copy(lpctstr pStr);
+    /**
+    * @brief Copy a string of known length into the CSString.
+    * @see SetLength()
+    * @see strcpylen()
+    * @param pStr string to copy.
+    */
+    void CopyLen(lpctstr pStr, int iLen);
 	/**
 	* @brief Changes the capitalization of CSString to upper.
 	*/
@@ -602,7 +609,7 @@ private:
 	*/
 	void Init();
 
-	tchar *m_pchData;		// Data pointer.
+	tchar *m_pchData;	// Data pointer.
 	int	m_iLength;		// Length of string.
 	int	m_iMaxLength;	// Size of memory allocated pointed by m_pchData.
 };

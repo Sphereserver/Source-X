@@ -1604,7 +1604,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 		if (Str_ParseCmds(s.GetArgStr(), ppArgs, CountOf(ppArgs), " \t,") >= 1)
 		{
 			char funcname[1024];
-			strcpy(funcname, ppArgs[0]);
+			strncpy(funcname, ppArgs[0], sizeof(funcname));
 
 			TRIGRET_TYPE iRet = g_World.m_TimedFunctions.Loop(funcname, LoopsMade, StartContext, EndContext, s, pSrc, pArgs, pResult);
 			if ((iRet != TRIGRET_ENDIF) && (iRet != TRIGRET_CONTINUE))

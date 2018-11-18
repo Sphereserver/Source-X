@@ -407,11 +407,12 @@ public:
 	ushort	Stat_GetAdjusted( STAT_TYPE i ) const;
 	void	Stat_SetBase( STAT_TYPE i, ushort uiVal );
 	ushort	Stat_GetBase( STAT_TYPE i ) const;
-	void	Stat_AddBase( STAT_TYPE i, ushort uiVal );
+	void	Stat_AddBase( STAT_TYPE i, int iVal );
 	void	Stat_AddMod( STAT_TYPE i, int iVal );
 	void	Stat_SetMod( STAT_TYPE i, int iVal );
     int	    Stat_GetMod( STAT_TYPE i ) const;
 	void	Stat_SetVal( STAT_TYPE i, ushort uiVal );
+    void	Stat_AddVal( STAT_TYPE i, int iVal );
 	ushort	Stat_GetVal( STAT_TYPE i ) const;
 	void	Stat_SetMax( STAT_TYPE i, ushort uiVal );
 	ushort	Stat_GetMax( STAT_TYPE i ) const;

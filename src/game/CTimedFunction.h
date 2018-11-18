@@ -22,7 +22,7 @@ public:
     };
 
 private:
-    std::vector<TimedFunction *> m_timedFunctions[MSECS_PER_SEC];
+    std::vector<TimedFunction *> m_timedFunctions[TICKS_PER_SEC];
     int m_curTick;
     int m_processedFunctionsPerTick;
     std::vector<TimedFunction *> m_tfRecycled;

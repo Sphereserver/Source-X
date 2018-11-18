@@ -24,14 +24,16 @@ public:
 	static const char *m_sClassName;
 
 	explicit CListDefContElem(lpctstr pszKey);
-	virtual ~CListDefContElem(void);
+	virtual ~CListDefContElem() = default;
 
 private:
 	CListDefContElem(const CListDefContElem& copy);
 	CListDefContElem& operator=(const CListDefContElem& other);
 
 public:
-	lpctstr GetKey() const;
+    inline lpctstr GetKey() const {
+        return m_Key.GetPtr();
+    }
 	void SetKey( lpctstr pszKey );
 
 	virtual lpctstr GetValStr() const = 0;
@@ -50,15 +52,19 @@ public:
 
 	explicit CListDefContNum(lpctstr pszKey);
 	CListDefContNum(lpctstr pszKey, int64 iVal);
-	~CListDefContNum(void);
+	~CListDefContNum() = default;
 
 private:
 	CListDefContNum(const CListDefContNum& copy);
 	CListDefContNum& operator=(const CListDefContNum& other);
 
 public:
-	int64 GetValNum() const;
-	void SetValNum( int64 iVal );
+    inline int64 GetValNum() const {
+        return m_iVal;
+    }
+    inline void SetValNum(int64 iVal) {
+        m_iVal = iVal;
+    }
 	lpctstr GetValStr() const;
 
 	bool r_LoadVal( CScript & s );
@@ -78,14 +84,16 @@ public:
 
 	CListDefContStr(lpctstr pszKey, lpctstr pszVal);
 	explicit CListDefContStr(lpctstr pszKey);
-	~CListDefContStr(void);
+	~CListDefContStr() = default;
 
 private:
 	CListDefContStr(const CListDefContStr& copy);
 	CListDefContStr& operator=(const CListDefContStr& other);
 
 public:
-	lpctstr GetValStr() const;
+    inline lpctstr GetValStr() const {
+        return m_sVal.GetPtr(); 
+    }
 	void SetValStr( lpctstr pszVal );
 	int64 GetValNum() const;
 
@@ -114,14 +122,16 @@ public:
 	static const char *m_sClassName;
 
 	explicit CListDefCont(lpctstr pszKey);
-	~CListDefCont(void);
+	~CListDefCont() = default;
 
 private:
 	CListDefCont(const CListDefCont& copy);
 	CListDefCont& operator=(const CListDefCont& other);
 
 public:
-	lpctstr GetKey() const;
+    inline lpctstr GetKey() const {
+        return m_Key.GetPtr();
+    }
 	void SetKey( lpctstr pszKey );
 
 	CListDefContElem* GetAt(size_t nIndex) const;

@@ -225,27 +225,27 @@ public:
      *
      * @brief   Gets definition string from m_BaseDefs.
      *
-     * @param   pszKey  The key.
-     * @param   fZero   true to zero.
-     * @param   fDef    true to definition.
+     * @param   pszKey      The key.
+     * @param   fZero       true to zero.
+     * @param   fBaseDef    if the def doesn't exist, then check for a base def.
      *
      * @return  The definition string.
      */
-	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
+	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false, bool fBaseDef = false ) const;
 
     /**
      * @fn  int64 CObjBase::GetDefNum( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
      *
      * @brief   Gets definition number from m_BaseDefs.
      *
-     * @param   pszKey  The key.
-     * @param   fZero   true to zero.
-     * @param   fDef    true to definition.
+     * @param   pszKey      The key.
+     * @param   fZero       true to zero.
+     * @param   fBaseDef    if the def doesn't exist, then check for a base def.
      *
      * @return  The definition number.
      */
 
-	int64 GetDefNum( lpctstr pszKey, bool fDef = false ) const;
+	int64 GetDefNum( lpctstr pszKey, bool fBaseDef = false ) const;
 
     /**
      * @fn  void CObjBase::SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true);
@@ -253,11 +253,24 @@ public:
      * @brief   Sets definition number from m_BaseDefs.
      *
      * @param   pszKey  The key.
-     * @param   iVal    Zero-based index of the value.
-     * @param   fZero   true to zero.
+     * @param   iVal    Value.
+     * @param   fZero   If iVal == 0, delete the def.
      */
 
 	void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true);
+
+    /**
+    * @fn  void CObjBase::ModDefNum(lpctstr pszKey, int64 iMod, bool fZero = true);
+    *
+    * @brief   Add iVal to the numeric definition from m_BaseDefs.
+    *
+    * @param   pszKey   The key.
+    * @param   iMod     Value to sum to the current value of the def.
+    * @param   fBaseDef if the def doesn't exist, then check for a base def and use that value to create a new def.
+    * @param   fZero    If new def value == 0, delete the def.
+    */
+
+    void ModDefNum(lpctstr pszKey, int64 iMod, bool fBaseDef = false, bool fZero = true);
 
     /**
      * @fn  void CObjBase::SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true);

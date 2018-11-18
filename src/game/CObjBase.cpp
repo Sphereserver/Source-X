@@ -3166,6 +3166,49 @@ void CObjBase::SetDefNum(lpctstr pszKey, int64 iVal, bool fZero )
 	m_BaseDefs.SetNum(pszKey, iVal, fZero);
 }
 
+void CObjBase::ModDefNum(lpctstr pszKey, int64 iMod, bool fBaseDef, bool fZero )
+{
+    bool fVarFromBase = false;
+    CVarDefCont	* pVar	= m_BaseDefs.GetKey( pszKey );
+    if (fBaseDef && !pVar)
+    {
+        const CBaseBaseDef* pBase = Base_GetDef();
+        ASSERT (pBase);
+        pVar = pBase->m_BaseDefs.GetKey( pszKey );
+        fVarFromBase = true;
+    }
+
+    if (!pVar)
+    {
+        // It doesn't exist yet, so create a new def
+        m_BaseDefs.SetNum(pszKey, iMod, fZero);
+        return;
+    }
+    CVarDefContNum* pVarNum = dynamic_cast<CVarDefContNum*>(pVar);
+    if (!pVarNum)
+    {
+        // Actually there's a def with that name, but it's a CVarDefContStr, so we need to clear that and create a new CVarDefContNum
+        m_BaseDefs.SetNum(pszKey, iMod, fZero);
+        return;
+    }
+    const int64 iNewVal = pVarNum->GetValNum() + iMod;
+    if ((iNewVal == 0) && fZero && !fVarFromBase)   // Shouldn't delete a CBaseBaseDef VarDef
+    {
+        // If fZero and the new value of the def is 0, just delete the def
+        m_BaseDefs.DeleteKey(pszKey);
+        return;
+    }
+    if (fVarFromBase)
+    {
+        // Shouldn't change the value of a CBaseBaseDef VarDef, so get the value from that, add the iMod and set
+        //  this value to a new CObjBase VarDef.
+        m_BaseDefs.SetNum(pszKey, iNewVal, fZero);
+        return;
+    }
+    // Update the CObjBase VarDef value.
+    pVarNum->SetValNum(iNewVal);
+}
+
 void CObjBase::SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted, bool fZero )
 {
 	m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero);
@@ -3181,18 +3224,9 @@ CVarDefCont * CObjBase::GetDefKey( lpctstr pszKey, bool fDef ) const
 	CVarDefCont	* pVar	= m_BaseDefs.GetKey( pszKey );
 	if ( !fDef || pVar )
 		return pVar;
-	if (IsItem())
-	{
-		CItemBase * pItemDef = static_cast <CItemBase*>( Base_GetDef());
-		ASSERT(pItemDef);
-		return pItemDef-> m_BaseDefs.GetKey( pszKey );
-	}
-	else
-	{
-		CCharBase * pCharDef = static_cast <CCharBase*>( Base_GetDef());
-		ASSERT(pCharDef);
-		return pCharDef-> m_BaseDefs.GetKey( pszKey );
-	}
+    const CBaseBaseDef* pBase = Base_GetDef();
+    ASSERT (pBase);
+    return pBase->m_BaseDefs.GetKey( pszKey );
 }
 
 lpctstr CObjBase::GetKeyStr( lpctstr pszKey, bool fZero, bool fDef ) const

@@ -6,7 +6,6 @@
 #include "sstringobjs.h"
 
 
-
 /**
 * @brief Default memory alloc size for CSString.
 *
@@ -120,7 +119,7 @@ void CSString::Add(lpctstr pszStr)
 	if (iLenCat)
 	{
 		SetLength(iLenCat + m_iLength);
-		strcat(m_pchData, pszStr);
+		strncat(m_pchData, pszStr, m_iLength);
 		m_iLength = (int)strlen(m_pchData);
 	}
 }
@@ -132,6 +131,15 @@ void CSString::Copy(lpctstr pszStr)
 		SetLength((int)strlen(pszStr));
 		strncpy(m_pchData, pszStr, m_iLength);
 	}
+}
+
+void CSString::CopyLen(lpctstr pszStr, int iLen)
+{
+    if ((pszStr != m_pchData) && pszStr)
+    {
+        SetLength(iLen);
+        strncpy(m_pchData, pszStr, m_iLength);
+    }
 }
 
 // CSString:: Formatting
@@ -185,7 +193,7 @@ int CSString::indexOf(CSString str, int offset)
 		return -1;
 
 	tchar * str_value = new tchar[slen + 1];
-	strcpy(str_value, str.GetPtr());
+	strncpy(str_value, str.GetPtr(), slen+1);
 	tchar firstChar = str_value[0];
 
 	for (int i = offset; i < len; ++i)
