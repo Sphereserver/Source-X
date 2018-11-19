@@ -16,18 +16,28 @@ CLog::CLog()
 	SetFilePath( SPHERE_FILE "log.log" );	// default name to go to.
 }
 
-const CScript * CLog::SetScriptContext( const CScript * pScriptContext )
+const CScript * CLog::_SetScriptContext( const CScript * pScriptContext )
 {
 	const CScript * pOldScript = m_pScriptContext;
 	m_pScriptContext = pScriptContext;
 	return pOldScript;
 }
 
-const CScriptObj * CLog::SetObjectContext( const CScriptObj * pObjectContext )
+const CScript * CLog::SetScriptContext(const CScript * pScriptContext)
+{
+    THREAD_UNIQUE_LOCK_RETURN(_SetScriptContext(pScriptContext));
+}
+
+const CScriptObj * CLog::_SetObjectContext( const CScriptObj * pObjectContext )
 {
 	const CScriptObj * pOldObject = m_pObjectContext;
 	m_pObjectContext = pObjectContext;
 	return pOldObject;
+}
+
+const CScriptObj * CLog::SetObjectContext(const CScriptObj * pObjectContext)
+{
+    THREAD_UNIQUE_LOCK_RETURN(_SetObjectContext(pObjectContext));
 }
 
 bool CLog::SetFilePath( lpctstr pszName )
@@ -121,6 +131,7 @@ bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
 
 int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 {
+    ADDTOCALLSTACK("CLog::EventStr");
 	// NOTE: This could be called in odd interrupt context so don't use dynamic stuff
 	if ( !IsLogged(dwMask) )	// I don't care about these.
 		return 0;

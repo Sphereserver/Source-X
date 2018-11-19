@@ -29,6 +29,7 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
 {
     ADDTOCALLSTACK("CCacheableScriptFile::_Open");
 
+    _uiMode = uiModeFlags;
     if ( _useDefaultFile() ) 
         return CSFileText::_Open(ptcFilename, uiModeFlags);
 
@@ -43,7 +44,6 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
     }
 
     _strFileName = ptcFilename;
-    _uiMode = uiModeFlags;
     lpctstr ptcModeStr = _GetModeStr();
     _pStream = fopen(ptcFilename, ptcModeStr);
     if ( _pStream == nullptr ) 

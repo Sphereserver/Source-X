@@ -1548,9 +1548,11 @@ void CWorld::DelCharTicking(CChar * pChar)
 
 bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from script
 {
-	CScript s;
+    ADDTOCALLSTACK("CWorld::LoadFile");
+    EXC_TRY("LoadFile");
     g_Log.Event(LOGM_INIT, "Loading %s...\n", pszLoadName);
-	if ( ! s.Open( pszLoadName, OF_READ|OF_TEXT|OF_DEFAULTMODE ) )
+    CScript s;
+	if ( ! s.Open( pszLoadName, OF_READ|OF_TEXT|OF_DEFAULTMODE ) )  // don't cache this script
 	{
 		if ( fError )
 			g_Log.Event(LOGM_INIT|LOGL_ERROR, "Can't Load %s\n", pszLoadName);
@@ -1560,8 +1562,8 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 	}
 
 	// Find the size of the file.
-	size_t uiLoadSize = s.GetLength();
-	int iLoadStage = 0;
+	int iLoadSize = s.GetLength();
+    int iLoadStage = 0;
 
 	CScriptFileContext ScriptContext( &s );
 
@@ -1571,7 +1573,7 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 	while ( s.FindNextSection() )
 	{
 		if (! ( ++iLoadStage & 0x1FF ))	// don't update too often
-			g_Serv.PrintPercent( s.GetPosition(), uiLoadSize );
+			g_Serv.PrintPercent( s.GetPosition(), iLoadSize );
 
 		try
 		{
@@ -1596,13 +1598,16 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 		return true;
 	}
 
+    s.Close();
 	g_Log.Event( LOGM_INIT|LOGL_CRIT, "No [EOF] marker. '%s' is corrupt!\n", s.GetFilePath());
-	return false;
+    EXC_CATCH;
+    return false;
 }
 
 
 bool CWorld::LoadWorld() // Load world from script
 {
+    ADDTOCALLSTACK("CWorld::LoadWorld");
 	EXC_TRY("LoadWorld");
 	// Auto change to the most recent previous backup !
 	// Try to load a backup file instead ?
@@ -1630,11 +1635,12 @@ bool CWorld::LoadWorld() // Load world from script
 		LoadFile(sStaticsName, false);
 		if ( LoadFile(sWorldName) && LoadFile(sCharsName) && LoadFile(sMultisName, false))
 		{
-				return true;
+		    return true;
 		}
 
 		// If we could not open the file at all then it was a bust!
-		if ( m_iSaveCountID == iPrevSaveCount ) break;
+		if ( m_iSaveCountID == iPrevSaveCount )
+            break;
 
 		// Reset everything that has been loaded
 		m_Stones.clear();

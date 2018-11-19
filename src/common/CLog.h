@@ -158,9 +158,11 @@ public:
 	bool m_fLockOpen;
 	SimpleMutex m_mutex;
 
-public:
-	const CScript * SetScriptContext( const CScript * pScriptContext );
-	const CScriptObj * SetObjectContext( const CScriptObj * pObjectContext );
+protected:	const CScript * _SetScriptContext( const CScript * pScriptContext );
+public:     const CScript * SetScriptContext( const CScript * pScriptContext );
+protected:  const CScriptObj * _SetObjectContext( const CScriptObj * pObjectContext );
+public:	    const CScriptObj * SetObjectContext( const CScriptObj * pObjectContext );
+
 	bool SetFilePath( lpctstr pszName );
 
 	lpctstr GetLogDir() const;

@@ -24,7 +24,7 @@
 #define OF_NONCRIT			0x40000000	// just a test.
 #define OF_TEXT				0x20000000
 #define OF_BINARY			0x10000000
-#define OF_DEFAULTMODE		0x80000000
+#define OF_DEFAULTMODE		0x80000000  // don't cache this script (use CFileText methods instead of CCacheableScriptFile ones)
 
 
 /**
