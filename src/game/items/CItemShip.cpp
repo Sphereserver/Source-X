@@ -116,7 +116,7 @@ void CItemShip::r_Write(CScript & s)
 enum IMCS_TYPE
 {
     IMCS_HATCH,
-    IMCS_PLANKS,
+    IMCS_PLANK,
     IMCS_TILLER,
     IMCS_QTY
 };
@@ -124,7 +124,7 @@ enum IMCS_TYPE
 lpctstr const CItemShip::sm_szLoadKeys[IMCS_QTY + 1] = // static
 {
     "HATCH",
-    "PLANKS",
+    "PLANK",
     "TILLER",
     nullptr
 };
@@ -148,7 +148,7 @@ bool CItemShip::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
                 sVal.FormatVal(0);
         } break;
 
-        case IMCS_PLANKS:
+        case IMCS_PLANK:
         {
             pszKey += 6;
             sVal.FormatSTVal(GetShipPlankCount());
@@ -197,7 +197,7 @@ bool CItemShip::r_LoadVal(CScript & s)
                 m_uidLink = s.GetArgDWVal();
                 return true;
             }
-            case IMCS_PLANKS:
+            case IMCS_PLANK:
             {
                 m_uidPlanks.emplace_back(s.GetArgDWVal());
                 return true;
