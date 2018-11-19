@@ -3009,7 +3009,7 @@ void CObjBase::UpdatePropertyFlag(int mask)
 
     // Items equipped, inside containers or with timer expired doesn't receive ticks and need to be added to a list of items to be processed separately
     if ( (!IsTopLevel() || IsTimerExpired()) && !g_World.m_ObjStatusUpdates.ContainsPtr(this) )
-        g_World.m_ObjStatusUpdates.push_back(this);
+        g_World.m_ObjStatusUpdates.emplace_back(this);
 }
 
 void CObjBase::OnTickStatusUpdate()
@@ -3151,13 +3151,6 @@ int64 CObjBase::GetDefNum( lpctstr pszKey, bool fDef ) const
 
 void CObjBase::SetTriggerActive(lpctstr trig)
 {
-	if (trig)
-	{
-		char *text = Str_GetTemp();
-		sprintf(text, "Trigger: %s", trig);
-		ADDTOCALLSTACK(text);
-	}
-
 	m_RunningTrigger = trig ? trig : nullptr;
 }
 
@@ -3250,18 +3243,9 @@ CVarDefCont * CObjBase::GetKey( lpctstr pszKey, bool fDef ) const
 	CVarDefCont	* pVar	= m_TagDefs.GetKey( pszKey );
 	if ( !fDef || pVar )
 		return pVar;
-	if (IsItem())
-	{
-		CItemBase * pItemDef = static_cast <CItemBase*>( Base_GetDef());
-		ASSERT(pItemDef);
-		return pItemDef-> m_TagDefs.GetKey( pszKey );
-	}
-	else
-	{
-		CCharBase * pCharDef = static_cast <CCharBase*>( Base_GetDef());
-		ASSERT(pCharDef);
-		return pCharDef-> m_TagDefs.GetKey( pszKey );
-	}
+    const CBaseBaseDef* pBase = Base_GetDef();
+    ASSERT(pBase);
+    return pBase->m_TagDefs.GetKey( pszKey );
 }
 
 void CObjBase::SetKeyNum(lpctstr pszKey, int64 iVal)
@@ -3287,7 +3271,7 @@ void CObjBase::DupeCopy( const CObjBase * pObj )
     {
         SetTimeout(pObj->GetTimerAdjusted());
     }
-	m_TagDefs.Copy( &( pObj->m_TagDefs ) );
+	m_TagDefs.Copy( &(pObj->m_TagDefs) );
 	m_BaseDefs.Copy(&(pObj->m_BaseDefs));
 }
 
@@ -3403,17 +3387,23 @@ DIR_TYPE GetDirStr( lpctstr pszDir )
 
 	switch ( iDir )
 	{
-		case 'E': return DIR_E;
-		case 'W': return DIR_W;
+		case 'E':
+            return DIR_E;
+		case 'W':
+            return DIR_W;
 		case 'N':
 			iDir2 = static_cast< char >( toupper( pszDir[ 1 ] ) );
-			if ( iDir2 == 'E' ) return DIR_NE;
-			if ( iDir2 == 'W' ) return DIR_NW;
+			if ( iDir2 == 'E' )
+                return DIR_NE;
+			if ( iDir2 == 'W' )
+                return DIR_NW;
 			return DIR_N;
 		case 'S':
 			iDir2 = static_cast< char >( toupper( pszDir[ 1 ] ) );
-			if ( iDir2 == 'E' ) return DIR_SE;
-			if ( iDir2 == 'W' ) return DIR_SW;
+			if ( iDir2 == 'E' )
+                return DIR_SE;
+			if ( iDir2 == 'W' )
+                return DIR_SW;
 			return DIR_S;
 		default:
 			if ( ( iDir >= '0' ) && ( iDir <= '7' ) )

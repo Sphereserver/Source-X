@@ -319,7 +319,7 @@ void CCChampion::AddRedCandle(CUID uid)
         pCandle->GenerateScript(nullptr);
         ClearWhiteCandles();
     }
-    _pRedCandles.push_back(pCandle->GetUID());
+    _pRedCandles.emplace_back(pCandle->GetUID());
     pCandle->m_uidLink = pLink->GetUID();	// Link it to the champion, so if it gets removed the candle will be removed too
 }
 

@@ -42,7 +42,7 @@ void TriglistInit()
     T_TRIGGERS	trig;
     g_triggers.clear();
 
-#define ADD(_a_)	strcpy(trig.m_name, "@"); strcat(trig.m_name, #_a_); trig.m_used = 0; g_triggers.push_back(trig);
+#define ADD(_a_)	strcpy(trig.m_name, "@"); strcat(trig.m_name, #_a_); trig.m_used = 0; g_triggers.emplace_back(trig);
 #include "../tables/triggers.tbl"
 
 }

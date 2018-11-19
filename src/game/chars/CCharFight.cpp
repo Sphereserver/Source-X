@@ -802,7 +802,7 @@ effect_bounce:
 			attacker.elapsed = 0;
 			attacker.amountDone = maximum( 0, iDmg );
 			attacker.threat = maximum( 0, iDmg );
-			m_lastAttackers.push_back(attacker);
+			m_lastAttackers.emplace_back(std::move(attacker));
 		}
 
 		// A physical blow of some sort.

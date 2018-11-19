@@ -8,7 +8,7 @@
 
 #include "../common/CScript.h"
 #include "../common/CScriptObj.h"
-#include "../common/sphere_library/CSString.h"
+
 
 enum COMP_TYPE
 {

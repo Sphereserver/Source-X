@@ -3,12 +3,11 @@
 *
 */
 
-#ifndef _INC_CTimedObject_H
-#define _INC_CTimedObject_H
+#ifndef _INC_CTIMEDOBJECT_H
+#define _INC_CTIMEDOBJECT_H
 
 #include "../CComponent.h"
 #include "../../sphere/ProfileData.h"
-#include "../../common/sphere_library/smutex.h"
 
 class CTimedObject
 {
@@ -16,7 +15,6 @@ private:
     THREAD_CMUTEX_DEF;
     int64 _timeout;
     PROFILE_TYPE _profileType;
-    SimpleMutex _mutex;
     bool _fIsSleeping;
 
     /**
@@ -182,4 +180,4 @@ inline bool CTimedObject::IsTimerExpired() const
 {
     return (GetTimerDiff() <= 0);
 }
-#endif //_INC_CTimedObject_H
+#endif //_INC_CTIMEDOBJECT_H

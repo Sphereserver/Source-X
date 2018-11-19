@@ -910,7 +910,7 @@ bool CSRandGroupDef::r_LoadVal( CScript &s )
 					g_Cfg.ResourceGetID(RES_CHARDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(ppCmd[0]))),
 					( iArgs > 1 && ppCmd[1][0] ) ? Exp_GetVal(ppCmd[1]) : 1 );
 				m_iTotalWeight += (int)(rec.GetResQty());
-                m_Members.push_back(rec);
+                m_Members.emplace_back(rec);
 			}
 			break;
 
@@ -920,7 +920,7 @@ bool CSRandGroupDef::r_LoadVal( CScript &s )
 			break;
 
 		case RGC_WEIGHT: // Modify the weight of the last item.
-			if (m_Members.size() > 0 )
+			if (!m_Members.empty() )
 			{
 				int iWeight = s.GetArgVal();
 				m_Members[m_Members.size() - 1].SetResQty(iWeight);
@@ -1088,7 +1088,7 @@ size_t CSRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) con
 				}
 			}
 		}
-        members.push_back(i);
+        members.emplace_back(i);
 		iTotalWeight += (int)(m_Members[i].GetResQty());
 	}
 	iWeight = Calc_GetRandVal( iTotalWeight ) + 1;

@@ -47,7 +47,7 @@ bool CItemMap::r_LoadVal(CScript & s)	// load an item script
             CPointMap pntTemp;
             pntTemp.Read(s.GetArgStr());
             CMapPinRec pin(pntTemp.m_x, pntTemp.m_y);
-            m_Pins.push_back(pin);
+            m_Pins.emplace_back(pin);
             return true;
         }
         return CItem::r_LoadVal(s);

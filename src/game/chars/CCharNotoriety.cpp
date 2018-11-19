@@ -637,7 +637,7 @@ void CChar::NotoSave_Add( CChar * pChar, NOTO_TYPE value, NOTO_TYPE color  )
 	refNoto.time = 0;
 	refNoto.value = value;
 	refNoto.color = color;
-	m_notoSaves.push_back(refNoto);
+	m_notoSaves.emplace_back(std::move(refNoto));
 }
 
 NOTO_TYPE CChar::NotoSave_GetValue( int id, bool bGetColor )

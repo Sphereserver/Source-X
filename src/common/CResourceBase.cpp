@@ -149,13 +149,6 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
         delete pNewRes;
         return nullptr;
     }
-    /*
-    CScript s;
-    if ( ! OpenResourceFind( s, szName ))
-        return nullptr;
-
-    pNewRes = new CResourceScript( s.GetFilePath() );
-    */
 
     pNewRes->m_iResourceFileIndex = (int)m_ResourceFiles.push_back(pNewRes);
     return pNewRes;

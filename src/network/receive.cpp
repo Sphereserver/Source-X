@@ -2223,13 +2223,13 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 	CDialogResponseArgs resp;
 
 	// store the returned checked boxes' ids for possible later use
-	for (size_t i = 0; i < checkCount; i++)
+	for (size_t i = 0; i < checkCount; ++i)
 		resp.m_CheckArray.push_back(readInt32());
 
 
 	dword textCount = readInt32();
 	tchar* text = Str_GetTemp();
-	for (size_t i = 0; i < textCount; i++)
+	for (size_t i = 0; i < textCount; ++i)
 	{
 		word id = readInt16();
 		word length = readInt16();

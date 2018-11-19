@@ -33,8 +33,7 @@ void CPathFinder::GetChildren(CPathFinderPointRef& Point, std::list<CPathFinderP
 			}
 
 
-			CPathFinderPointRef PtRef( m_Points[RealX][RealY] );
-			ChildrenRefList.push_back( PtRef  );
+			ChildrenRefList.emplace_back( m_Points[RealX][RealY] );
 		}
 	}
 }
@@ -129,7 +128,7 @@ int CPathFinder::FindPath() //A* algorithm
 	Start.m_Point->HValue = Heuristic(Start, End);
 	Start.m_Point->FValue = Start.m_Point->HValue;
 
-	m_Opened.push_back( Start );
+	m_Opened.emplace_back( Start );
 
 	std::list<CPathFinderPointRef> Children;
 	CPathFinderPointRef Child, Current;
@@ -141,7 +140,7 @@ int CPathFinder::FindPath() //A* algorithm
 		Current = *m_Opened.begin();
 
 		m_Opened.pop_front();
-		m_Closed.push_back( Current );
+		m_Closed.emplace_back( Current );
 
 		if ( Current == End )
 		{
@@ -182,7 +181,7 @@ int CPathFinder::FindPath() //A* algorithm
 
 					Child.m_Point->HValue = Heuristic( Child, End );
 					Child.m_Point->FValue = Child.m_Point->GValue + Child.m_Point->HValue;
-					m_Opened.push_back( Child );
+					m_Opened.emplace_back( Child );
 					//sort ( m_Opened.begin(), m_Opened.end() );
 				}
 				else

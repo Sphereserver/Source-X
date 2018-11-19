@@ -3341,7 +3341,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 		{
 			if (!pCharSrc)
 				return false;
-			CItem * pTarg = static_cast<CItem*>(static_cast<CUID>(s.GetArgVal()).ItemFind());
+			CItem * pTarg = static_cast<CItem*>( CUID(s.GetArgVal()).ItemFind() );
 			return pCharSrc->Skill_Mining_Smelt(this, pTarg ? pTarg : nullptr);
 		}
 
@@ -3414,7 +3414,6 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 
 	if ( IsTrigUsed(pszTrigName) )
 	{
-
 		//	2) EVENTS
 		EXC_SET_BLOCK("events");
 		size_t origEvents = m_OEvents.size();
@@ -3792,7 +3791,7 @@ void CItem::DupeCopy( const CItem * pItem )
 	m_TagDefs.Copy(&(pItem->m_TagDefs));
 	m_BaseDefs.Copy(&(pItem->m_BaseDefs));
 	m_OEvents = pItem->m_OEvents;
-    static_cast<CEntity*>(this)->Copy(static_cast<CEntity*>(const_cast<CItem*>(pItem)));
+    CEntity::Copy(static_cast<const CEntity*>(pItem));
 }
 
 void CItem::SetAnim( ITEMID_TYPE id, int64 iTicksTimeout)

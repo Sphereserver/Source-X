@@ -62,7 +62,7 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
             // Add a single knowledge fragment or appropriate group item.
 
             if ( pszCmd[0] == '+' )
-                pszCmd ++;
+                ++pszCmd;
 
             CResourceLink * pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, pszCmd ));
             if ( pResourceLink == nullptr )

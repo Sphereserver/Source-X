@@ -98,10 +98,10 @@ bool CRegionBase::AddRegionRect( const CRectMap & rect )
 		{
 			if ( rect.IsInside( m_rectUnion ))
 				return true;
-			m_Rects.push_back(m_rectUnion);
+			m_Rects.emplace_back(m_rectUnion);
 		}
 
-		m_Rects.push_back(rect);
+		m_Rects.emplace_back(rect);
 		m_rectUnion.UnionRect( rect );
 	}
 	return true;

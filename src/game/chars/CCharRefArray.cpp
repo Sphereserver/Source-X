@@ -34,7 +34,7 @@ size_t CCharRefArray::AttachChar( const CChar *pChar )
     size_t i = FindChar(pChar);
     if ( i != m_uidCharArray.BadIndex() )
         return i;
-    return m_uidCharArray.push_back(pChar->GetUID());
+    return m_uidCharArray.emplace_back(pChar->GetUID());
 }
 
 size_t CCharRefArray::InsertChar( const CChar *pChar, size_t i )

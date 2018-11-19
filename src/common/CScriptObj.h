@@ -10,7 +10,6 @@
 #include "CVarDefMap.h"
 #include "CVarFloat.h"
 #include "CTextConsole.h"
-#include <vector>
 
 class CScript;
 class CSFileText;

@@ -1449,7 +1449,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 						continue;
 					if ( IsSameDispID(id))
 						continue;
-					m_flip_id.push_back(id);
+					m_flip_id.emplace_back(id);
 				}
 			}
 			break;
@@ -1697,7 +1697,7 @@ CItemBase * CItemBase::MakeDupeReplacement( CItemBase * pBase, ITEMID_TYPE idmas
 	}
 
 	if ( ! pBaseNew->IsSameDispID(id))	// already here ?!
-		pBaseNew->m_flip_id.push_back(id);
+		pBaseNew->m_flip_id.emplace_back(id);
 
 	// create the dupe stub.
 	CUOItemTypeRec_HS tiledata;
@@ -1791,7 +1791,7 @@ bool CItemBaseMulti::AddComponent( ITEMID_TYPE id, short dx, short dy, char dz )
 		comp.m_dx = dx;
 		comp.m_dy = dy;
 		comp.m_dz = dz;
-		m_Components.push_back(comp);
+		m_Components.emplace_back(std::move(comp));
 	}
 
 	return true;

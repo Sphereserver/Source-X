@@ -546,7 +546,7 @@ void NetworkThread::checkNewStates(void)
 
 		ASSERT(state != nullptr);
 		state->setParentThread(this);
-		m_states.push_back(state);
+		m_states.emplace_back(state);
 	}
 }
 
@@ -1864,7 +1864,7 @@ void NetworkOutput::QueuePacket(PacketSend* packet, bool appendTransaction)
 	}
 
 	if (state->m_outgoing.pendingTransaction != nullptr && appendTransaction)
-		state->m_outgoing.pendingTransaction->push_back(packet);
+		state->m_outgoing.pendingTransaction->emplace_back(packet);
 	else
 		QueuePacketTransaction(new SimplePacketTransaction(packet));
 }

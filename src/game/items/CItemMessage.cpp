@@ -190,9 +190,10 @@ void CItemMessage::SetPageText( size_t iPage, lpctstr pszText )
         return;
     m_sBodyLines.assign_at_grow(iPage, new CSString(pszText));
 }
+
 void CItemMessage::AddPageText( lpctstr pszText )
 {
-    m_sBodyLines.push_back(new CSString(pszText));
+    m_sBodyLines.emplace_back(new CSString(pszText) );
 }
 
 void CItemMessage::UnLoadSystemPages()

@@ -578,7 +578,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 	// to be added to a separate list since it won't receive ticks whilst in
 	// this container
 	if ( pItem->m_fStatusUpdate != 0 && g_World.m_ObjStatusUpdates.ContainsPtr(pItem) == false )
-        g_World.m_ObjStatusUpdates.push_back(pItem);
+        g_World.m_ObjStatusUpdates.emplace_back(pItem);
 
 	switch ( GetType() )
 	{

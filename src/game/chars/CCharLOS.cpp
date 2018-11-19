@@ -172,11 +172,11 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 			{
 				CPointMap ptEnd = path[path.size() - 1];
 				if ( ptEnd.m_x != dx || ptEnd.m_y != dy || ptEnd.m_z != dz )
-					path.push_back(CPointMap((word)dx, (word)dy, (char)dz, ptSrc.m_map));
+					path.emplace_back((word)dx, (word)dy, (char)dz, ptSrc.m_map);
 			}
 			else
 			{
-				path.push_back(CPointMap((word)dx, (word)dy, (char)dz, ptSrc.m_map));
+				path.emplace_back((word)dx, (word)dy, (char)dz, ptSrc.m_map);
 			}
 			WARNLOS(("PATH X:%d Y:%d Z:%d\n", dx, dy, dz));
 
@@ -191,7 +191,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 	if ( !path.empty() )
 	{
 		if ( path[path.size() - 1] != ptDst )
-			path.push_back(CPointMap(ptDst.m_x, ptDst.m_y, ptDst.m_z, ptDst.m_map));
+			path.emplace_back(ptDst.m_x, ptDst.m_y, ptDst.m_z, ptDst.m_map);
 	}
 	else
 	{

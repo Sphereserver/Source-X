@@ -58,7 +58,7 @@ int CSFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 #ifdef _WIN32
 	if ( len > 0 )
 	{
-		len--;
+		--len;
 		if ( szFileDir[len] == '\\' || szFileDir[len] == '/' )
 			strcat( szFileDir, "*.*" );
 	}

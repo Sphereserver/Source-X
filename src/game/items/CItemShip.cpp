@@ -199,8 +199,7 @@ bool CItemShip::r_LoadVal(CScript & s)
             }
             case IMCS_PLANKS:
             {
-                CUID uid = s.GetArgDWVal();
-                m_uidPlanks.push_back(uid);
+                m_uidPlanks.emplace_back(s.GetArgDWVal());
                 return true;
             }
             default:
@@ -307,7 +306,7 @@ CItem * CItemShip::GetShipPlank(size_t index)
                 continue;
 
             if (pItem->IsType(IT_SHIP_PLANK) || pItem->IsType(IT_SHIP_SIDE) || pItem->IsType(IT_SHIP_SIDE_LOCKED))
-                m_uidPlanks.push_back(pItem->GetUID());
+                m_uidPlanks.emplace_back(pItem->GetUID());
         }
     }
 
@@ -333,7 +332,7 @@ void CItemShip::OnComponentCreate(CItem * pComponent)
         case IT_SHIP_PLANK:
         case IT_SHIP_SIDE:
         case IT_SHIP_SIDE_LOCKED:
-            m_uidPlanks.push_back(pComponent->GetUID());
+            m_uidPlanks.emplace_back(pComponent->GetUID());
             break;
 
         default:

@@ -559,7 +559,7 @@ HistoryIP& IPHistoryManager::getHistoryForIP(const CSocketAddressIP& ip)
 	hist.m_pingDecay = NETHISTORY_PINGDECAY;
 	hist.update();
 
-	m_ips.push_back(hist);
+	m_ips.emplace_back(hist);
 	return getHistoryForIP(ip);
 }
 

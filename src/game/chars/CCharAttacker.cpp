@@ -45,7 +45,7 @@ bool CChar::Attacker_Add(CChar * pChar, int64 threat)
     attacker.elapsed = 0;
     attacker.threat = (m_pPlayer) ? 0 : threat;
     attacker.ignore = fIgnore;
-    m_lastAttackers.push_back(attacker);
+    m_lastAttackers.emplace_back(std::move(attacker));
 
     // Record the start of the fight.
     Memory_Fight_Start(pChar);

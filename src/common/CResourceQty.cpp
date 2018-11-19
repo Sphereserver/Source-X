@@ -215,16 +215,16 @@ size_t CResourceQtyArray::Load(lpctstr pszCmds)
                 }
                 else
                 {
-                    push_back(res);
+                    emplace_back(std::move(res));
                 }
-                iValid++;
+                ++iValid;
             }
         }
 
         if ( *pszCmds != ',' )
             break;
 
-        pszCmds++;
+        ++pszCmds;
     }
 
     return iValid;

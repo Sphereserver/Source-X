@@ -521,8 +521,8 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
     pComponent->m_isStair = iStairID;
     pComponent->m_isFloor = bFloor;
 
-    m_designWorking.m_vectorComponents.push_back(pComponent);
-    m_designWorking.m_iRevision++;
+    m_designWorking.m_vectorComponents.emplace_back(pComponent);
+    ++m_designWorking.m_iRevision;
 
     if (!g_Serv.IsLoading()) // quick fix, change it to execute only on customize mode
 

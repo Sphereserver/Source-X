@@ -1089,9 +1089,9 @@ bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
 						TCHAR *p = &pszTemp[strlen(pszTemp) - 1];
 						while (( p >= pszTemp ) && ( *p != '.' ) && ( *p != ' ' ) && ( *p != '/' ) && ( *p != '=' ))
 						{
-							p--;
+							--p;
 						}
-						p++;
+						++p;
 
 						// remove the selected part of the message
 						pszTemp[selStart] = '\0';

@@ -8,6 +8,8 @@
 #include "CSWindow.h"
 
 
+/* CSWindow */
+
 CSWindow::operator HWND () const       // cast as a HWND
 {
     return m_hWnd;
@@ -20,9 +22,6 @@ CSWindow::~CSWindow()
 {
     DestroyWindow();
 }
-
-
-/* CSWindow */
 
 // Standard message handlers.
 BOOL CSWindow::OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)

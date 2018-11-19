@@ -269,10 +269,11 @@ public:
 	int getPriority(void) const { return m_priority; }
 	void setPriority(int priority) { m_priority = priority; }
 
-	void push_back(PacketSend* packet) { m_packets.push_back(packet); }
-	PacketSend* front(void) { return m_packets.front(); };
-	void pop(void) { m_packets.pop_front(); }
-	bool empty(void) { return m_packets.empty(); }
+	inline void push_back(PacketSend* packet) { m_packets.push_back(packet); }
+    inline void emplace_back(PacketSend* packet) { m_packets.emplace_back(packet); }
+    inline PacketSend* front(void) { return m_packets.front(); };
+    inline void pop(void) { m_packets.pop_front(); }
+    inline bool empty(void) { return m_packets.empty(); }
 };
 
 
