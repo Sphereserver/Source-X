@@ -45,10 +45,6 @@ public:
     virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc );
     virtual bool r_LoadVal( CScript & s );
     virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
-    virtual bool IsDeleted()
-    {
-        return CItem::IsDeleted();
-    }
 
     size_t GetPageCount() const;
     lpctstr GetPageText( size_t iPage ) const;

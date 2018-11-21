@@ -30,10 +30,8 @@ private:
 public:
     CTimedObject(PROFILE_TYPE profile);
     virtual ~CTimedObject();
-    inline bool IsSleeping() const {
-        return _fIsSleeping;
-    }
-    virtual void GoSleep();
+    inline bool IsSleeping() const;
+    inline virtual void GoSleep();
     virtual void GoAwake();
     /**
     * @fm PROFILE_TYPE CTimedObject::GetProfileType();
@@ -42,7 +40,7 @@ public:
     *
     * @return the type.
     */
-    PROFILE_TYPE GetProfileType();
+    inline PROFILE_TYPE GetProfileType() const;
 
     /**
      * @fn  virtual bool CTimedObject::OnTick() = 0;
@@ -114,7 +112,7 @@ public:
      *
      * @return  true if timer set, false if not.
      */
-    bool IsTimerSet() const;
+    inline bool IsTimerSet() const;
 
     /**
      * @fn  int64 CObjBase::GetTimerDiff() const;
@@ -132,7 +130,7 @@ public:
      *
      * @return  true if timer expired, false if not.
      */
-    bool IsTimerExpired() const;
+    inline bool IsTimerExpired() const;
 
     /**
      * @fn  int64 CObjBase::GetTimerAdjusted() const;
@@ -171,13 +169,29 @@ public:
     int64 GetTimerSAdjusted() const;
 };
 
-inline bool CTimedObject::IsTimerSet() const
+bool CTimedObject::IsSleeping() const
+{
+    return _fIsSleeping;
+}
+
+void CTimedObject::GoSleep()
+{
+    _fIsSleeping = true;
+}
+
+bool CTimedObject::IsTimerSet() const
 {
     return _timeout > 0;
 }
 
-inline bool CTimedObject::IsTimerExpired() const
+bool CTimedObject::IsTimerExpired() const
 {
     return (GetTimerDiff() <= 0);
 }
+
+PROFILE_TYPE CTimedObject::GetProfileType() const
+{
+    return _profileType;
+}
+
 #endif //_INC_CTIMEDOBJECT_H

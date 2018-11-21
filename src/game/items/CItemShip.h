@@ -28,10 +28,6 @@ private:
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc); // Execute command from script
     virtual int FixWeirdness();
     virtual void OnComponentCreate(CItem * pComponent);
-    virtual bool IsDeleted()
-    {
-        return CItem::IsDeleted();
-    }
 
 public:
     static const char *m_sClassName;

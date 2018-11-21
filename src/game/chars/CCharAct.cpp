@@ -4056,7 +4056,7 @@ bool CChar::OnTick()
     * take in mind that return will prevent this char's stats updates,
     *  attacker, notoriety, death status, etc from happening.
     */
-    CCRET_TYPE iCompRet = CEntity::OnTick();
+    const CCRET_TYPE iCompRet = CEntity::OnTick();
     if (iCompRet != CCRET_CONTINUE) // if return != CCRET_TRUE
     {
         return iCompRet;    // Stop here
@@ -4079,7 +4079,7 @@ bool CChar::OnTick()
 
             if (!IsStatFlag(STATF_DEAD))
             {
-                int iFlags = NPC_GetAiFlags();
+                const int iFlags = NPC_GetAiFlags();
                 if ((iFlags & NPC_AI_FOOD) && !(iFlags & NPC_AI_INTFOOD))
                 {
                     NPC_Food();

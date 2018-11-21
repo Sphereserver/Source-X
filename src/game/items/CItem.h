@@ -14,7 +14,6 @@
 #include "../CObjBase.h"
 #include "../CObjBaseTemplate.h"
 #include "../CServerMap.h"
-//#include "../CUID.h"
 #include "../game_enums.h"
 #include "../game_macros.h"
 #include "../CServerConfig.h"
@@ -35,7 +34,7 @@ enum ITC_TYPE	// Item Template commands
 	ITC_QTY
 };
 
-class CItem : public CObjBase, public virtual CTimedObject
+class CItem : public CObjBase
 {
 	// RES_WORLDITEM
 public:
@@ -803,14 +802,8 @@ public:
 
 	static CItem * ReadTemplate( CResourceLock & s, CObjBase * pCont );
 
-	int GetAbilityFlags() const;
-
 	virtual void Delete(bool bforce = false);
 	virtual bool NotifyDelete();
-    virtual bool IsDeleted()
-    {
-        return CObjBase::IsDeleted();
-    }
 };
 
 #endif // _INC_CITEM_H

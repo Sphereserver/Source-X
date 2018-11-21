@@ -39,7 +39,7 @@ enum NPCBRAIN_TYPE	// General AI type.
 	NPCBRAIN_QTY
 };
 
-class CChar : public CObjBase, public CContainer, public CTextConsole, public virtual CTimedObject
+class CChar : public CObjBase, public CContainer, public CTextConsole
 {
 	// RES_WORLDCHAR
     THREAD_CMUTEX_DEF;
@@ -308,10 +308,6 @@ public:
 public:
 	CChar( CREID_TYPE id );
 	virtual ~CChar(); // Delete character
-    virtual bool IsDeleted()
-    {
-        return CObjBase::IsDeleted();
-    }
 	bool DupeFrom( CChar * pChar, bool fNewbieItems);
 
 private:
@@ -1257,9 +1253,6 @@ public:
 
 	static CChar * CreateBasic( CREID_TYPE baseID );
 	static CChar * CreateNPC( CREID_TYPE id );
-
-	int GetAbilityFlags() const;
-
 };
 
 inline bool CChar::IsSkillBase( SKILL_TYPE skill ) // static

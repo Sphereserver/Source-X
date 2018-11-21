@@ -491,11 +491,11 @@ void CItemMulti::OnMoveFrom()
     }
 }
 
-bool CItemMulti::MoveTo(CPointMap pt, bool bForceFix) // Put item on the ground here.
+bool CItemMulti::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the ground here.
 {
     ADDTOCALLSTACK("CItemMulti::MoveTo");
     // Move this item to it's point in the world. (ground/top level)
-    if (!CItem::MoveTo(pt, bForceFix))
+    if (!CItem::MoveTo(pt, fForceFix))
     {
         return false;
     }

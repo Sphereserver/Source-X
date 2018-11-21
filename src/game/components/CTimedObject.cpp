@@ -26,11 +26,6 @@ CTimedObject::~CTimedObject()
     }
 }
 
-void CTimedObject::GoSleep()
-{
-    _fIsSleeping = true;
-}
-
 void CTimedObject::GoAwake()
 {
     /*
@@ -42,11 +37,6 @@ void CTimedObject::GoAwake()
         SetTimeout(1);  // set to 1msec to tick it ASAP.
     }
     _fIsSleeping = false;
-}
-
-PROFILE_TYPE CTimedObject::GetProfileType()
-{
-    return _profileType;
 }
 
 bool CTimedObject::OnTick()

@@ -2238,7 +2238,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 					{
 						if ( fFailMsg )
 						{
-							CResourceDef * pReagDef = g_Cfg.ResourceGetDef(pRegs->at(iMissing).GetResourceID() );
+							const CResourceDef * pReagDef = g_Cfg.ResourceGetDef((*pRegs)[iMissing].GetResourceID() );
 							SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_SPELL_TRY_NOREGS ), pReagDef ? pReagDef->GetName() : g_Cfg.GetDefaultMsg( DEFMSG_SPELL_TRY_THEREG ) );
 						}
 						return false;
@@ -2277,11 +2277,12 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 	}
 
 	// Check for Tithing
-	int wTithing = (int)(GetDefNum("Tithing"));
-	if ( wTithing < iTithingUse)
+    CVarDefContNum* pVarTithing = GetDefKeyNum("Tithing", false);
+    int iValTithing = pVarTithing ? (int)pVarTithing->GetValNum() : 0;
+	if (iValTithing < iTithingUse)
 	{
 		if (fFailMsg)
-			SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TRY_NOTITHING),iTithingUse);
+			SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TRY_NOTITHING), iTithingUse);
 		return false;
 	}
 	if (!fTest && iTithingUse)
@@ -2291,7 +2292,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 		{
 			iTithingUse = iTithingUse / 2 + (ushort)(Calc_GetRandVal(iTithingUse / 2 + iTithingUse / 4));
 		}
-		SetDefNum("Tithing", wTithing - iTithingUse);
+        pVarTithing->SetValNum(iValTithing - iTithingUse);
 	}
 
 	return true;
@@ -2985,9 +2986,12 @@ int CChar::Spell_CastStart()
 		}
 	}
 
-    int64 iWaitTime = IsPriv(PRIV_GM) ? (MSECS_PER_TENTH/10) : (int64)(pSpellDef->m_CastTime.GetLinear(Skill_GetBase((SKILL_TYPE)iSkill))); // in tenths of second
-	iWaitTime -= GetDefNum("FASTERCASTING", true);
-	if ( iWaitTime < 1 || IsPriv(PRIV_GM) )
+    int64 iWaitTime = IsPriv(PRIV_GM) ? 1 : pSpellDef->m_CastTime.GetLinear(Skill_GetBase((SKILL_TYPE)iSkill)); // in tenths of second
+
+    // For every point in faster casting, the casting time is shortened by 0.25 or 1/4 of a second. (Keeping 0,2 and not 0,25 for backwards compatibility).
+	iWaitTime -= 2 * GetDefNum("FASTERCASTING", true);
+
+	if ( iWaitTime < 1 )
 		iWaitTime = 1;
 
 	CScriptTriggerArgs Args((int)m_atMagery.m_Spell, iDifficulty, pItem);
@@ -3027,9 +3031,9 @@ int CChar::Spell_CastStart()
 			return -1;
 	}
 
-	m_atMagery.m_Spell = (SPELL_TYPE)(Args.m_iN1);
+	m_atMagery.m_Spell = (SPELL_TYPE)Args.m_iN1;
 	iDifficulty = (int)Args.m_iN2;
-	iWaitTime = (int64)(Args.m_iN3);
+	iWaitTime = Args.m_iN3;
 
 	pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
 	if ( !pSpellDef )
@@ -3072,7 +3076,7 @@ int CChar::Spell_CastStart()
 			if ( len > 0 )
 			{
 				pszTemp[len] = 0;
-				Speak(pszTemp, (HUE_TYPE)WOPColor, TALKMODE_SAY, (FONT_TYPE)(WOPFont));
+				Speak(pszTemp, (HUE_TYPE)WOPColor, TALKMODE_SAY, (FONT_TYPE)WOPFont);
 			}
 		}
 	}

@@ -302,9 +302,39 @@ public:
      * @param   pszKey  The key.
      * @param   fDef    true to definition.
      *
-     * @return  null if it fails, else the definition key.
+     * @return  nullptr if it fails to find the def, else the pointer to the def.
      */
 	CVarDefCont * GetDefKey( lpctstr pszKey, bool fDef ) const;
+
+    /**
+    * @fn  CVarDefContNum * CObjBase::GetDefKeyNum( lpctstr pszKey, bool fDef ) const;
+    *
+    * @brief   Gets definition key from m_BaseDefs.
+    *
+    * @param   pszKey  The key.
+    * @param   fDef    true to definition.
+    *
+    * @return  nullptr if it doesn't find a numeric def, else the pointer to the def.
+    */
+    inline CVarDefContNum * GetDefKeyNum(lpctstr pszKey, bool fDef) const
+    {
+        return dynamic_cast<CVarDefContNum*>(GetDefKey(pszKey, fDef));
+    }
+
+    /**
+    * @fn  CVarDefContStr * CObjBase::GetDefKeyStr( lpctstr pszKey, bool fDef ) const;
+    *
+    * @brief   Gets definition key from m_BaseDefs.
+    *
+    * @param   pszKey  The key.
+    * @param   fDef    true to definition.
+    *
+    * @return  nullptr if it doesn't find a string def, else the pointer to the def.
+    */
+    inline CVarDefContStr * GetDefKeyStr(lpctstr pszKey, bool fDef) const
+    {
+        return dynamic_cast<CVarDefContStr*>(GetDefKey(pszKey, fDef));
+    }
 
     /**
      * @fn  lpctstr CObjBase::GetKeyStr( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
@@ -660,7 +690,7 @@ public:
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );	// some command on this object as a target
-    virtual bool IsDeleted()
+    inline virtual bool IsDeleted()
     {
         return CObjBaseTemplate::IsDeleted();
     }

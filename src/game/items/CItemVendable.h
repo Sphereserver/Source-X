@@ -44,10 +44,6 @@ public:
 	virtual void r_Write( CScript & s );
 	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
 	virtual bool r_LoadVal( CScript & s );
-    virtual bool IsDeleted()
-    {
-        return CItem::IsDeleted();
-    }
 };
 
 

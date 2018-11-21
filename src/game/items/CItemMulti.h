@@ -562,10 +562,6 @@ public:
     static const char *m_sClassName;
     CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef, bool fTurnable = false);
     virtual ~CItemMulti();
-    virtual bool IsDeleted()
-    {
-        return CItem::IsDeleted();
-    }
 
 private:
     CItemMulti(const CItemMulti& copy);
@@ -580,10 +576,10 @@ public:
     /**
     * @brief Place the multi.
     * @param pt Position.
-    * @param bForceFix force a fix.
+    * @param fForceFix force a fix.
     * @return bool if can be moved.
     */
-    virtual bool MoveTo(CPointMap pt, bool bForceFix = false);
+    virtual bool MoveTo(const CPointMap& pt, bool fForceFix = false) override;
     /**
     * @brief Moving from current location.
     */

@@ -4213,7 +4213,7 @@ bool CServerConfig::Load( bool fResync )
 	else
 		g_Log.Event(LOGM_INIT, "Done loading scripts.\n");
 
-	if (m_StartDefs.size() <= 0 )
+	if (m_StartDefs.empty() )
 	{
 		g_Log.Event(LOGM_INIT|LOGL_ERROR, "No START locations specified. Add them and try again.\n");
 		return false;
@@ -4224,7 +4224,7 @@ bool CServerConfig::Load( bool fResync )
 		size_t iMax = g_Cfg.m_RegionDefs.size();
 		for ( size_t k = 0; k < iMax; ++k )
 		{
-			CRegion * pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs.at(i));
+			CRegion * pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs[i]);
 			if ( !pRegion )
 				continue;
 			pRegion->MakeRegionName();

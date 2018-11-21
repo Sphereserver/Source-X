@@ -1,5 +1,3 @@
-#include <algorithm>    // for std::vector.erase(std::remove())
-
 #include "../common/CDataBase.h"
 #include "../common/CException.h"
 #include "../common/CUIDExtra.h"
@@ -23,6 +21,7 @@
     #include <sys/statvfs.h>
 #endif
 #include <sys/stat.h>
+#include <algorithm>    // for std::vector.erase(std::remove())
 #include <ctime>
 #include <chrono>
 

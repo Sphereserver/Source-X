@@ -5677,7 +5677,7 @@ bool CItem::OnTick()
     * timer checks.
     * CCRET_CONTINUE will allow the normal ticking proccess to happen.
     */
-    CCRET_TYPE iCompRet = static_cast<CEntity*>(this)->OnTick();
+    const CCRET_TYPE iCompRet = CEntity::OnTick();
     if (iCompRet != CCRET_CONTINUE) // if return = CCRET_TRUE or CCRET_FALSE
     {
         return !iCompRet;    // Stop here
@@ -5691,12 +5691,13 @@ bool CItem::OnTick()
 			{
 				EXC_SET_BLOCK("default behaviour::IT_CORPSE");
 				// turn player corpse into bones
-				CChar * pSrc = m_uidLink.CharFind();
+				const CChar * pSrc = m_uidLink.CharFind();
 				if ( pSrc && pSrc->m_pPlayer )
 				{
-                    if (pSrc->GetClient())
+                    const CClient* pClient = pSrc->GetClient();
+                    if (pClient)
                     {
-                        pSrc->GetClient()->addMapWaypoint(this, Remove);	// remove corpse map waypoint on enhanced clients
+                        pClient->addMapWaypoint(this, Remove);	// remove corpse map waypoint on enhanced clients
                     }
 					SetID((ITEMID_TYPE)(Calc_GetRandVal2(ITEMID_SKELETON_1, ITEMID_SKELETON_9)));
 					SetHue((HUE_TYPE)(HUE_DEFAULT));
@@ -5716,7 +5717,7 @@ bool CItem::OnTick()
 				if ( IsAttr(ATTR_MOVE_NEVER|ATTR_STATIC) )	// infinite charges
 					return true;
 
-				m_itLight.m_charges--;
+				--m_itLight.m_charges;
 				if ( m_itLight.m_charges > 0 )
 					SetTimeoutS(60);
 				else
@@ -5796,7 +5797,7 @@ bool CItem::OnTick()
 					}
 					else
 					{
-						m_itPotion.m_tick --;
+						--m_itPotion.m_tick;
 						tchar *pszMsg = Str_GetTemp();
 						CObjBase* pObj = static_cast<CObjBase*>(GetTopLevelObj());
 						ASSERT(pObj);
@@ -5869,7 +5870,3 @@ bool CItem::OnTick()
 	return true;
 }
 
-int CItem::GetAbilityFlags() const
-{
-	return GetCanFlags();
-}

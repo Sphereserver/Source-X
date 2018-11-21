@@ -1278,25 +1278,25 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 
 	if ( !CanSeeLOS(pObjTop) )
 	{
-		if ( GetAbilityFlags() & CAN_C_DCIGNORELOS )
+        const uint uiCanFlags = GetCanFlags();
+		if ( uiCanFlags & CAN_C_DCIGNORELOS )
 			return true;
-		else if ( pObj->IsChar() && (pChar != nullptr) && (pChar->GetAbilityFlags() & CAN_C_DCIGNORELOS) )
+		else if ( pObj->IsChar() && (pChar != nullptr) && (uiCanFlags & CAN_C_DCIGNORELOS) )
 			return true;
-		else if ( pObj->IsItem() && (pItem != nullptr) && (pItem->GetAbilityFlags() & CAN_I_DCIGNORELOS) )
+		else if ( pObj->IsItem() && (pItem != nullptr) && (uiCanFlags & CAN_I_DCIGNORELOS) )
 			return true;
-		else
-			return false;
+		return false;
 	}
 	if ( iDist > 3 )
 	{
-		if ( GetAbilityFlags() & CAN_C_DCIGNOREDIST )
+        const uint uiCanFlags = GetCanFlags();
+		if ( uiCanFlags & CAN_C_DCIGNOREDIST )
 			return true;
-		else if ( pObj->IsChar() && (pChar != nullptr) && (pChar->GetAbilityFlags() & CAN_C_DCIGNOREDIST) )
+		else if ( pObj->IsChar() && (pChar != nullptr) && (uiCanFlags & CAN_C_DCIGNOREDIST) )
 			return true;
-		else if ( pObj->IsItem() && (pItem != nullptr) && (pItem->GetAbilityFlags() & CAN_I_DCIGNOREDIST) )
+		else if ( pObj->IsItem() && (pItem != nullptr) && (uiCanFlags & CAN_I_DCIGNOREDIST) )
 			return true;
-		else
-			return false;
+		return false;
 	}
 	return true;
 }
@@ -1639,7 +1639,7 @@ bool CChar::IsMountCapable() const
 
 	if ( IsStatFlag(STATF_DEAD) )
 		return false;
-	if ( IsHuman() || IsElf() || (GetAbilityFlags() & CAN_C_MOUNT) )
+	if ( IsHuman() || IsElf() || (GetCanFlags() & CAN_C_MOUNT) )
 		return true;
 
 	return false;

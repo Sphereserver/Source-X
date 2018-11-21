@@ -4558,7 +4558,3 @@ uint CChar::GetSkillTotal(int what, bool how)
 	return uiTotal;
 }
 
-int CChar::GetAbilityFlags() const
-{
-	return GetCanFlags();
-}
