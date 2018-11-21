@@ -475,6 +475,7 @@ CMultiStorage *CChar::GetMultiStorage()
 
 void CChar::GoSleep()
 {
+    ADDTOCALLSTACK("CChar::GoSleep");
     ASSERT(!IsSleeping());
     g_World.DelCharTicking(this);   // do not insert into the mutex' lock, it access back to this char.
     THREAD_UNIQUE_LOCK_SET;
@@ -483,6 +484,7 @@ void CChar::GoSleep()
 
 void CChar::GoAwake()
 {
+    ADDTOCALLSTACK("CChar::GoAwake");
     ASSERT(IsSleeping());
     THREAD_UNIQUE_LOCK_SET;
     CTimedObject::GoAwake();// Awake it first, otherwise some other things won't work

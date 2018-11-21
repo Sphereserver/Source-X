@@ -223,8 +223,8 @@ bool CChar::CallGuards( CChar * pCriminal )
 		}
 	}
 
-	CVarDefCont *pVarDef = pCriminal->m_pArea->m_TagDefs.GetKey("OVERRIDE.GUARDS");
-	CResourceID rid = g_Cfg.ResourceGetIDType(RES_CHARDEF, (pVarDef ? pVarDef->GetValStr() : "GUARDS"));
+	const CVarDefCont *pVarDefGuards = pCriminal->m_pArea->m_TagDefs.GetKey("OVERRIDE.GUARDS");
+	CResourceID rid = g_Cfg.ResourceGetIDType(RES_CHARDEF, (pVarDefGuards ? pVarDefGuards->GetValStr() : "GUARDS"));
 	if (IsTrigUsed(TRIGGER_CALLGUARDS))
 	{
 		CScriptTriggerArgs Args(pGuard);
@@ -294,10 +294,9 @@ void CChar::OnHarmedBy( CChar * pCharSrc )
 //
 // RETURN: true = ok.
 //  false = we are immune to this char ! (or they to us)
-bool CChar::OnAttackedBy(CChar * pCharSrc, int iHarmQty, bool fCommandPet, bool fShouldReveal)
+bool CChar::OnAttackedBy(CChar * pCharSrc, bool fCommandPet, bool fShouldReveal)
 {
 	ADDTOCALLSTACK("CChar::OnAttackedBy");
-	UNREFERENCED_PARAMETER(iHarmQty);
 
 	if (pCharSrc == nullptr)
 		return true;	// field spell ?
@@ -575,7 +574,7 @@ effect_bounce:
 				}
 				if (pSrc->m_pNPC)
 				{
-					CChar* pOwner = pSrc->NPC_PetGetOwnerRecursive();
+					const CChar* pOwner = pSrc->NPC_PetGetOwnerRecursive();
 					if (pOwner && pOwner->m_pPlayer)	// pet attacking player
 						goto effect_bounce;
 				}
@@ -585,7 +584,7 @@ effect_bounce:
 
 	// Make some notoriety checks
 	// Don't reveal attacker if the damage has DAMAGE_NOREVEAL flag set (this is set by default for poison and spell damage)
-	if ( !OnAttackedBy(pSrc, iDmg, false, !(uType & DAMAGE_NOREVEAL)) )
+	if ( !OnAttackedBy(pSrc, false, !(uType & DAMAGE_NOREVEAL)) )
 		return 0;
 
 	// Apply Necromancy cursed effects
@@ -606,7 +605,7 @@ effect_bounce:
 		}
 	}
 
-	CCharBase * pCharDef = Char_GetDef();
+	const CCharBase * pCharDef = Char_GetDef();
 	ASSERT(pCharDef);
 
 	// MAGICF_IGNOREAR bypasses defense completely
@@ -757,7 +756,7 @@ effect_bounce:
 	{
 		// Check if my spell can be interrupted
 		int iDisturbChance = 0;
-		int iSpellSkill;
+		int iSpellSkill = -1;
 		const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
 		if ( pSpellDef && pSpellDef->GetPrimarySkill(&iSpellSkill) )
 			iDisturbChance = pSpellDef->m_Interrupt.GetLinear(Skill_GetBase((SKILL_TYPE)iSpellSkill));
@@ -768,7 +767,7 @@ effect_bounce:
 			CItem *pProtectionSpell = LayerFind(LAYER_SPELL_Protection);
 			if ( pProtectionSpell )
 			{
-				int iChance = pProtectionSpell->m_itSpell.m_spelllevel;
+				const int iChance = pProtectionSpell->m_itSpell.m_spelllevel;
 				if ( iChance > Calc_GetRandVal(1000) )
 					iDisturbChance = 0;
 			}
@@ -782,10 +781,10 @@ effect_bounce:
 	{
 		// Update attacker list
 		bool bAttackerExists = false;
-		for (std::vector<LastAttackers>::iterator it = m_lastAttackers.begin(), end = m_lastAttackers.end(); it != end; ++it)
+        const uint uiSrcUID = pSrc->GetUID().GetPrivateUID();
+		for (LastAttackers& refAttacker : m_lastAttackers)
 		{
-			LastAttackers & refAttacker = *it;
-			if ( refAttacker.charUID == pSrc->GetUID().GetPrivateUID() )
+			if ( refAttacker.charUID == uiSrcUID )
 			{
 				refAttacker.elapsed = 0;
 				refAttacker.amountDone += maximum( 0, iDmg );
@@ -794,11 +793,10 @@ effect_bounce:
 				break;
 			}
 		}
-
 		if (bAttackerExists == false)
 		{
 			LastAttackers attacker;
-			attacker.charUID = pSrc->GetUID().GetPrivateUID();
+			attacker.charUID = uiSrcUID;
 			attacker.elapsed = 0;
 			attacker.amountDone = maximum( 0, iDmg );
 			attacker.threat = maximum( 0, iDmg );

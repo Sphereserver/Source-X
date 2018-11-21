@@ -182,9 +182,9 @@ public:
     virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;
     virtual void Copy(const CComponent *target) override;
-    /*virtual bool IsDeleted();
-    virtual void GoAwake();
-    virtual void GoSleep();*/
+    /*virtual bool IsDeleted() const override;
+    virtual void GoAwake() override;
+    virtual void GoSleep() override;*/
 };
 
 #endif // _INC_CCSpawn_H

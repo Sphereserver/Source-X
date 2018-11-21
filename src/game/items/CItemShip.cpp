@@ -295,7 +295,7 @@ CItem * CItemShip::GetShipPlank(size_t index)
         CWorldSearch Area(GetTopPoint(), Multi_GetMaxDist());
         for (;;)
         {
-            CItem * pItem = Area.GetItem();
+            const CItem * pItem = Area.GetItem();
             if (pItem == nullptr)
                 break;
 
@@ -313,8 +313,7 @@ CItem * CItemShip::GetShipPlank(size_t index)
     if (index >= m_uidPlanks.size())
         return nullptr;
 
-    CUID uid = m_uidPlanks.at(index);
-    return uid.ItemFind();
+    return m_uidPlanks[index].ItemFind();
 }
 
 void CItemShip::OnComponentCreate(CItem * pComponent)

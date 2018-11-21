@@ -690,7 +690,7 @@ public:
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );	// some command on this object as a target
-    inline virtual bool IsDeleted()
+    inline virtual bool IsDeleted() const override
     {
         return CObjBaseTemplate::IsDeleted();
     }

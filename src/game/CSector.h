@@ -49,11 +49,7 @@ private:
 
 public:
 	virtual bool OnTick();
-    virtual void Delete(bool bForce = false) // virtual for CTimedObject compat, this should never be called!!!
-    {
-        UNREFERENCED_PARAMETER(bForce);
-    };
-    inline virtual bool IsDeleted()
+    inline virtual bool IsDeleted() const override
     {
         return false;   // Sectors should never be deleted in runtime.
     }
@@ -106,10 +102,12 @@ public:
 	void ClientDetach( CChar * pChar );
 	bool MoveCharToSector( CChar * pChar );
 
-	// General.
+	// CTimedObject
 private:
-    void GoSleep();
-    void GoAwake();
+    virtual void GoSleep() override;
+    virtual void GoAwake() override;
+
+    // General.
 public:
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
@@ -127,7 +125,7 @@ public:
 	void RespawnDeadNPCs();
 
 	void Close();
-	lpctstr GetName() const { return( "Sector" ); }
+	lpctstr GetName() const { return "Sector"; }
 };
 
 

@@ -52,13 +52,13 @@ public:
     virtual bool OnTick();
 
     /*
-    * @fn virtual bool CTimedObject::IsDeleted() = 0;
+    * @fn virtual bool CTimedObject::IsDeleted() const = 0;
     *
     * @brief Check if IsDeleted();
     *
     * @return true if it's deleted.
     */
-    virtual bool IsDeleted() = 0;
+    virtual bool IsDeleted() const = 0;
 
     /**
      * @fn  virtual void CTimedObject::SetTimer( int64 iDelayInMsecs );

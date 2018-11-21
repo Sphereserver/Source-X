@@ -1988,7 +1988,7 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 				if ( pChar->GetPrivLevel() > GetPrivLevel() )	// skip higher priv characters
 					continue;
 
-				if (( pSpellDef->IsSpellType(SPELLFLAG_HARM) ) && ( !pChar->OnAttackedBy( this, 1, false ) ))	// they should know they where attacked.
+				if (( pSpellDef->IsSpellType(SPELLFLAG_HARM) ) && ( !pChar->OnAttackedBy(this) ))	// they should know they where attacked.
 					continue;
 
 				if ( !pSpellDef->IsSpellType(SPELLFLAG_NOUNPARALYZE) )
@@ -3235,7 +3235,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			return false;
 		}
 
-		if ( !OnAttackedBy(pCharSrc, 1, false, !pSpellDef->IsSpellType(SPELLFLAG_FIELD)) && !fReflecting )
+		if ( !OnAttackedBy(pCharSrc, false, !pSpellDef->IsSpellType(SPELLFLAG_FIELD)) && !fReflecting )
 			return false;
 
 		// Check if the spell can be reflected

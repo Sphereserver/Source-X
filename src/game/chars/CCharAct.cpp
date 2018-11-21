@@ -774,20 +774,20 @@ void CChar::UpdateRegenTimers(STAT_TYPE iStat, int64 iValMsecs)
 void CChar::UpdateStatVal( STAT_TYPE type, int iChange, ushort uiLimit )
 {
 	ADDTOCALLSTACK("CChar::UpdateStatVal");
-	ushort uiValPrev = Stat_GetVal(type);
-	ushort uiVal = ushort(uiValPrev + iChange);
-	if ( !uiLimit )
+	int iValPrev = Stat_GetVal(type);
+	int iVal = iValPrev + iChange;
+	if ( uiLimit == 0 )
         uiLimit = Stat_GetMaxAdjusted(type);
 
-	if ( uiVal < 0 )
-		uiVal = 0;
-	else if ( uiVal > uiLimit )
-		uiVal = uiLimit;
+	if ( iVal < 0 )
+		iVal = 0;
+	else if ( iVal > uiLimit )
+		iVal = uiLimit;
 
-	if ( uiVal == uiValPrev )
+	if ( iVal == iValPrev )
 		return;
 
-	Stat_SetVal(type, uiVal);
+	Stat_SetVal(type, (ushort)iVal);
 
 	switch ( type )
 	{
@@ -4043,6 +4043,10 @@ bool CChar::OnTick()
     // RETURN: false = delete this.
     EXC_TRY("Tick");
 
+    if (IsSleeping())
+    {
+        return true;
+    }
     if (GetTopSector()->IsSleeping())
     {
         SetTimeout(1);      //Make it tick after sector's awakening.

@@ -55,18 +55,17 @@ private:
 	CVarDefContNum& operator=(const CVarDefContNum& other);
 
 public:
-    inline int64 GetValNum() const {
-        return m_iVal;
-    }
     inline void SetValNum(int64 iVal) {
         m_iVal = iVal;
     }
-	lpctstr GetValStr() const;
+    inline virtual int64 GetValNum() const override {
+        return m_iVal;
+    }
+	virtual lpctstr GetValStr() const override;
+    virtual CVarDefCont * CopySelf() const override;
 
 	bool r_LoadVal( CScript & s );
 	bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc );
-
-	virtual CVarDefCont * CopySelf() const;
 };
 
 class CVarDefContStr : public CVarDefCont
@@ -86,16 +85,15 @@ private:
 	CVarDefContStr& operator=(const CVarDefContStr& other);
 
 public:
-    inline lpctstr GetValStr() const {
+    void SetValStr( lpctstr pszVal );
+    inline virtual lpctstr GetValStr() const override {
         return m_sVal.GetPtr(); 
     }
-	void SetValStr( lpctstr pszVal );
-	int64 GetValNum() const;
+    virtual int64 GetValNum() const override;
+    virtual CVarDefCont * CopySelf() const override;
 
 	bool r_LoadVal( CScript & s );
 	bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc );
-
-	virtual CVarDefCont * CopySelf() const;
 };
 
 
@@ -123,9 +121,9 @@ private:
 			CVarDefContTest& operator=(const CVarDefContTest& other);
 
 		public:
-			lpctstr GetValStr() const;
-			int64 GetValNum() const;
-			virtual CVarDefCont * CopySelf() const;
+			virtual lpctstr GetValStr() const override;
+			virtual int64 GetValNum() const override;
+			virtual CVarDefCont * CopySelf() const override;
 	};
 
 private:
@@ -151,7 +149,7 @@ public:
 	size_t GetCount() const;
 
 public:
-	CVarDefMap() { };
+	CVarDefMap() = default;
 	~CVarDefMap();
 	CVarDefMap & operator = ( const CVarDefMap & array );
 
@@ -170,7 +168,9 @@ public:
 
 	CVarDefCont * GetAt( size_t at ) const;
 	CVarDefCont * GetKey( lpctstr pszKey ) const;
+    inline CVarDefContNum * GetKeyDefNum( lpctstr pszKey ) const;
 	int64 GetKeyNum( lpctstr pszKey ) const;
+    inline CVarDefContStr * GetKeyDefStr( lpctstr pszKey ) const;
 	lpctstr GetKeyStr( lpctstr pszKey, bool fZero = false ) const;
 	CVarDefCont * GetParseKey( lpctstr & pArgs ) const;
 	CVarDefCont * CheckParseKey( lpctstr & pszArgs ) const;
@@ -183,5 +183,18 @@ public:
 	bool r_LoadVal( CScript & s );
 	void r_WritePrefix( CScript & s, lpctstr pszPrefix = nullptr, lpctstr pszKeyExclude = nullptr );
 };
+
+
+/* Inline methods definitions */
+
+CVarDefContNum * CVarDefMap::GetKeyDefNum(lpctstr pszKey) const
+{
+    return dynamic_cast<CVarDefContNum*>(GetKey(pszKey));
+}
+
+CVarDefContStr * CVarDefMap::GetKeyDefStr(lpctstr pszKey) const
+{
+    return dynamic_cast<CVarDefContStr*>(GetKey(pszKey));
+}
 
 #endif // _INC_CVARDEFMAP_H
