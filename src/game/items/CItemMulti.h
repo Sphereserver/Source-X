@@ -611,14 +611,14 @@ public:
 
     // Scripts virtuals.
 
-    virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef);
-    virtual bool r_Verb(CScript & s, CTextConsole * pSrc);
+    virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef) override;
+    virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;
 
-    virtual void r_Write(CScript & s);
-    virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc);
-    virtual bool r_LoadVal(CScript & s);
-    virtual void DupeCopy(const CItem * pItem);
-    virtual void Delete(bool bforce = false);
+    virtual void r_Write(CScript & s) override;
+    virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc) override;
+    virtual bool r_LoadVal(CScript & s) override;
+    virtual void DupeCopy(const CItem * pItem) override;  // overriding CItem::DupeCopy
+    virtual void Delete(bool bforce = false) override;
 };
 
 /*

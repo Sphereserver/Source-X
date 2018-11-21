@@ -62,11 +62,11 @@ private:
     CSphereMultiCustom * m_pSphereMulti;
     int _iMaxPlane;
 
-    virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef);
-    virtual void r_Write(CScript & s);
-    virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc);
-    virtual bool r_LoadVal(CScript & s);
-    virtual bool r_Verb(CScript & s, CTextConsole * pSrc); // Execute command from script
+    virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef) override;
+    virtual void r_Write(CScript & s) override;
+    virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc) override;
+    virtual bool r_LoadVal(CScript & s) override;
+    virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override; // Execute command from script
 
     const CPointMap GetComponentPoint(Component * pComponent) const;
     const CPointMap GetComponentPoint(short dx, short dy, char dz) const;/**

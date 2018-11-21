@@ -74,8 +74,8 @@ public:
 	virtual bool r_Load( CScript & s );
 
 public:
-	CScriptObj() { };
-	virtual ~CScriptObj() { };
+	CScriptObj() = default;
+	virtual ~CScriptObj() = default;
 
 private:
 	CScriptObj(const CScriptObj& copy);

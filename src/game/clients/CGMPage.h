@@ -49,9 +49,9 @@ public:
 	void SetGMHandler( CClient * pClient );
 	int64 GetAge() const;
 
-	bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc ) override;
 	void r_Write( CScript & s ) const;
-	bool r_LoadVal( CScript & s );
+	virtual bool r_LoadVal( CScript & s ) override;
 
 	CGMPage * GetNext() const;
 };

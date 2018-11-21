@@ -45,10 +45,10 @@ private:
 
 public:
     virtual bool IsSameType( const CObjBase * pObj ) const;
-    virtual void r_Write( CScript & s );
-    virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr );
-    virtual bool r_LoadVal( CScript & s );
-    virtual void DupeCopy( const CItem * pItem );
+    virtual void r_Write( CScript & s ) override;
+    virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr ) override;
+    virtual bool r_LoadVal( CScript & s ) override;
+    virtual void DupeCopy( const CItem * pItem ) override;  // overriding CItem::DupeCopy
 };
 
 #endif // _INC_CITEMMAP_H

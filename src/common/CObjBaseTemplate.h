@@ -20,7 +20,7 @@ private:
 	CSString	m_sName;	// unique name for the individual object.
 	CPointMap	m_pt;		// List is sorted by m_z_sort.
 protected:
-	void DupeCopy( const CObjBaseTemplate * pObj );
+	void DupeCopy( const CObjBaseTemplate * pObj ); // it's not a virtual, pay attention to the argument of this method!
 
 	void SetUID( dword dwIndex );
 	void SetUnkZ( char z );

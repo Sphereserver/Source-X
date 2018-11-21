@@ -25,11 +25,11 @@ private:
     CItemScript& operator=(const CItemScript& other);
 
 public:
-    virtual bool r_Verb( CScript & s, CTextConsole * pSrc );	// some command on this object as a target
-    virtual void r_Write( CScript & s );
-    virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr );
-    virtual bool r_LoadVal( CScript & s );
-    virtual void DupeCopy( const CItem * pItem );
+    virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;	// some command on this object as a target
+    virtual void r_Write( CScript & s ) override;
+    virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr ) override;
+    virtual bool r_LoadVal( CScript & s ) override;
+    virtual void DupeCopy( const CItem * pItem ) override;  // overriding CItem::DupeCopy
 };
 
 

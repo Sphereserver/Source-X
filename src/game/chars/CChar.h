@@ -321,8 +321,8 @@ public:
 	// Status and attributes ------------------------------------
 	int IsWeird() const;
 	char GetFixZ( CPointMap pt, dword dwBlockFlags = 0);
-	virtual void Delete(bool bforce = false);
-	virtual bool NotifyDelete();
+	virtual void Delete(bool bforce = false) override;
+	bool NotifyDelete();
 	bool IsStatFlag( uint64 iStatFlag ) const;
 	void StatFlag_Set(uint64 iStatFlag);
 	void StatFlag_Clear(uint64 iStatFlag);
@@ -542,12 +542,12 @@ public:
 public:
 	// Load/Save----------------------------------
 
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
-	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
-	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_Load( CScript & s );  // Load a character from Script
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc = nullptr );
-	virtual void r_Write( CScript & s );
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
+	virtual bool r_LoadVal( CScript & s ) override;
+	virtual bool r_Load( CScript & s ) override;  // Load a character from Script
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc = nullptr ) override;
+	virtual void r_Write( CScript & s ) override;
 
 	void r_WriteParity( CScript & s );
 

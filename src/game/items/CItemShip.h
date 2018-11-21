@@ -21,12 +21,12 @@ private:
     CUID m_uidHold;
     std::vector<CUID> m_uidPlanks;
 
-    virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef);
-    virtual void r_Write(CScript & s);
-    virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc);
-    virtual bool r_LoadVal(CScript & s);
-    virtual bool r_Verb(CScript & s, CTextConsole * pSrc); // Execute command from script
-    virtual int FixWeirdness();
+    virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef) override;
+    virtual void r_Write(CScript & s) override;
+    virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc) override;
+    virtual bool r_LoadVal(CScript & s) override;
+    virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override; // Execute command from script
+    virtual int FixWeirdness() override;
     virtual void OnComponentCreate(CItem * pComponent);
 
 public:

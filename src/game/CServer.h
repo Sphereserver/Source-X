@@ -96,12 +96,12 @@ public:
     void PrintStr(lpctstr pMsg) const;
     void PrintStr(ConsoleTextColor iColor, lpctstr pMsg) const;
     void PrintOutput(ConsoleOutput *pOutput) const;
-	ssize_t  PrintPercent( ssize_t iCount, ssize_t iTotal );
+	ssize_t PrintPercent( ssize_t iCount, ssize_t iTotal );
 
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr );
-	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr ) override;
+	virtual bool r_LoadVal( CScript & s ) override;
+	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
 
 	lpctstr GetStatusString( byte iIndex = 0 ) const;
 	int64 GetAgeHours() const;

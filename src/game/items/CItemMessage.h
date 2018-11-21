@@ -41,17 +41,17 @@ private:
     CItemMessage& operator=(const CItemMessage& other);
 
 public:
-    virtual void r_Write( CScript & s );
-    virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc );
-    virtual bool r_LoadVal( CScript & s );
-    virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
+    virtual void r_Write( CScript & s ) override;
+    virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc ) override;
+    virtual bool r_LoadVal( CScript & s ) override;
+    virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute command from script
 
     size_t GetPageCount() const;
     lpctstr GetPageText( size_t iPage ) const;
     void SetPageText( size_t iPage, lpctstr pszText );
     void AddPageText( lpctstr pszText );
 
-    virtual void DupeCopy( const CItem * pItem );
+    virtual void DupeCopy( const CItem * pItem ) override;  // overriding CItem::DupeCopy
     void UnLoadSystemPages();
 };
 

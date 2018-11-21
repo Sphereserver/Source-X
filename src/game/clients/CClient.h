@@ -403,9 +403,9 @@ public:
 		return ( static_cast <CClient*>( CSObjListRec::GetNext()));
 	}
 
-	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute script type command on me
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc );
-	virtual bool r_LoadVal( CScript & s );
+	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute script type command on me
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc ) override;
+	virtual bool r_LoadVal( CScript & s ) override;
 
 	// Low level message traffic.
 	static size_t xCompress( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );

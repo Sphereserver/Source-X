@@ -267,8 +267,8 @@ public:
     explicit CCChampionDef(CResourceID rid);
     virtual ~CCChampionDef();
     lpctstr GetName() const { return(m_sName); }
-    bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc);
-    bool r_LoadVal(CScript & s);
+    virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc) override;
+    virtual bool r_LoadVal(CScript & s) override;
 };
 
 #endif //_INC_CCChampion_H

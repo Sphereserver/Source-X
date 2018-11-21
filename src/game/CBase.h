@@ -251,10 +251,10 @@ public:
      * @brief   Un link.
      *
      */
-	virtual void UnLink();
+	virtual void UnLink() override;
 
-	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr );
-	virtual bool r_LoadVal( CScript & s );
+	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr ) override;
+	virtual bool r_LoadVal( CScript & s ) override;
 
     /**
      * @fn  bool IsValid() const;
@@ -273,7 +273,7 @@ public:
      *
      * @return  Value.
      */
-	byte	RangeL() const;
+	byte RangeL() const;
 
     /**
      * @fn  byte RangeH() const;
@@ -282,7 +282,7 @@ public:
      *
      * @return  Value.
      */
-	byte	RangeH() const;
+	byte RangeH() const;
 
     /**
      * @fn  height_t GetHeight() const;

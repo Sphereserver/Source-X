@@ -180,9 +180,10 @@ void CResourceBase::AddResourceDir( lpctstr pszDirName )
 	if ( iRet <= 0 )	// no files here.
 		return;
 
-	CSStringListRec * psFile = filelist.GetHead();
-	for ( ; psFile; psFile = psFile->GetNext())
+	CSStringListRec * psFile = filelist.GetHead(), *psFileNext = nullptr;
+	for ( ; psFile; psFile = psFileNext )
 	{
+        psFileNext = psFile->GetNext();
 		sFilePath = CSFile::GetMergedFileName( pszDirName, *psFile );
 		AddResourceFile( sFilePath );
 	}

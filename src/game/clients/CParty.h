@@ -88,11 +88,11 @@ public:
 	// -------------------------------
 
 	lpctstr GetName() const { return static_cast<lpctstr>(m_sName); }
-	bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
-	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
-	bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
-	bool r_LoadVal( CScript & s );
-	bool r_Load( CScript & s );
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+    virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc ) override;
+    virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute command from script
+    virtual bool r_LoadVal( CScript & s ) override;
+    virtual bool r_Load( CScript & s ) override;
 };
 
 

@@ -2405,7 +2405,7 @@ void CWorld::OnTick()
             EXC_TRYSUB("Tick::WorldObj");
             EXC_SETSUB_BLOCK("Elapsed");
             ptcSubDesc = "Generic";
-            PROFILE_TYPE profile = pObj->GetProfileType();
+            const PROFILE_TYPE profile = pObj->GetProfileType();
             ProfileTask profileTask(profile);
             /*
             * Doing a SetTimeout() in the object's tick will force CWorld to search for that object's

@@ -116,8 +116,8 @@ public:
 	void SetValidTime();
 	int64 GetTimeSinceLastValid() const;
 
-	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pKey, CSString &sVal, CTextConsole * pSrc = nullptr );
+	virtual bool r_LoadVal( CScript & s ) override;
+	virtual bool r_WriteVal( lpctstr pKey, CSString &sVal, CTextConsole * pSrc = nullptr ) override;
 
 	bool IsConnected() const {
 		return m_timeLastValid > 0;

@@ -1550,7 +1550,7 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	return true;
 }
 
-bool CItem::MoveNearObj( const CObjBaseTemplate *pObj, ushort iSteps )
+bool CItem::MoveNearObj( const CObjBaseTemplate *pObj, ushort uiSteps )
 {
 	ADDTOCALLSTACK("CItem::MoveNearObj");
 	// Put in the same container as another item.
@@ -1565,7 +1565,7 @@ bool CItem::MoveNearObj( const CObjBaseTemplate *pObj, ushort iSteps )
 	else
 	{
 		// Equipped or on the ground so put on ground nearby.
-		return CObjBase::MoveNearObj(pObj, iSteps);
+		return CObjBase::MoveNearObj(pObj, uiSteps);
 	}
 }
 

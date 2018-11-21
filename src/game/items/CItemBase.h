@@ -461,11 +461,11 @@ public:
 
 	IT_TYPE GetType() const
 	{
-		return( m_type );
+		return m_type;
 	}
 	bool IsType( IT_TYPE type ) const
 	{
-		return( type == m_type );
+		return ( type == m_type );
 	}
 
 	void SetTypeName( lpctstr pszName );
@@ -491,41 +491,41 @@ public:
 	}
 	dword GetTFlags() const
 	{
-		return( m_dwFlags );
+		return m_dwFlags;
 	}
 	bool IsSameDispID( ITEMID_TYPE id ) const;
 	ITEMID_TYPE GetNextFlipID( ITEMID_TYPE id ) const;
 
-	virtual bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr );
+	virtual bool r_LoadVal( CScript & s ) override;
+	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr ) override;
 
 	bool IsMovableType() const
 	{
-		return( m_weight != UINT16_MAX );
+		return ( m_weight != UINT16_MAX );
 	}
 	bool IsStackableType() const
 	{
-		return( Can( CAN_I_PILE ));
+		return Can( CAN_I_PILE );
 	}
 	word GetWeight() const
 	{
 		// Get weight in tenths of a stone.
 #define WEIGHT_UNITS 10
 		if ( ! IsMovableType())
-			return( WEIGHT_UNITS );	// If we can pick them up then we should be able to move them
-		return( m_weight );
+			return WEIGHT_UNITS;	// If we can pick them up then we should be able to move them
+		return m_weight;
 	}
 	byte GetSpeed() const;
 	word GetVolume() const
 	{
-		return( m_weight / WEIGHT_UNITS );
+		return ( m_weight / WEIGHT_UNITS );
 	}
 
 	int GetMakeValue( int iSkillLevel );
 	void ResetMakeValue();
 	void Restock();
 
-	virtual void UnLink()
+	virtual void UnLink() override
 	{
         m_flip_id.clear();
         m_SkillMake.clear();
@@ -580,7 +580,7 @@ public:
 		return( pItemDef );
 	}
 	static CItemBaseDupe * GetDupeRef( ITEMID_TYPE id );
-	virtual void UnLink()
+	virtual void UnLink() override
 	{
 		m_MasterItem.SetRef(nullptr);
 		CResourceDef::UnLink();
@@ -651,8 +651,8 @@ public:
 	bool AddComponent( ITEMID_TYPE id, short dx, short dy, char dz );
 	bool AddComponent( tchar * pArgs );
 	void SetMultiRegion( tchar * pArgs );
-	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pChar );
+	virtual bool r_LoadVal( CScript & s ) override;
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pChar ) override;
 
 	static CItemBase * MakeMultiRegion( CItemBase * pBase, CScript & s );
 };

@@ -35,9 +35,9 @@ private:
     static lpctstr const sm_szVerbKeys[];
 
 public:
-    virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc);
-    virtual bool r_LoadVal(CScript & s);
-    virtual bool r_Verb(CScript & s, CTextConsole * pSrc); // Execute command from script
+    bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc);
+    bool r_LoadVal(CScript & s);
+    bool r_Verb(CScript & s, CTextConsole * pSrc); // Execute command from script
 
 protected:
     ShipSpeed m_shipSpeed;  // Speed of ships (IT_SHIP)

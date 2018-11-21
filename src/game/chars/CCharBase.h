@@ -68,7 +68,7 @@ private:
 	CCharBase& operator=(const CCharBase& other);
 
 public:
-	virtual void UnLink();
+	virtual void UnLink() override;
 
 	CREID_TYPE GetID() const
 	{
@@ -96,9 +96,9 @@ public:
 
 	lpctstr GetTradeName() const;
 
-	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr );
-	bool r_Load( CScript & s );
+	bool r_LoadVal( CScript & s ) override;
+	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr ) override;
+	bool r_Load( CScript & s ) override;
 };
 
 

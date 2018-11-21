@@ -597,7 +597,7 @@ void CBaseBaseDef::CopyBasic( const CBaseBaseDef * pBase )
 	m_defenseBase = pBase->m_defenseBase;
 	m_defenseRange = pBase->m_defenseRange;
 	m_Can = pBase->m_Can;
-    _pFaction.SetFactionID(const_cast<CBaseBaseDef*>(pBase)->_pFaction.GetFactionID());
+    _pFaction.SetFactionID(pBase->_pFaction.GetFactionID());
 }
 
 void CBaseBaseDef::CopyTransfer( CBaseBaseDef * pBase )

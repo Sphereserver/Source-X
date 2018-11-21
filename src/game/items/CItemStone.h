@@ -90,11 +90,11 @@ private:
 	CItemStone& operator=(const CItemStone& other);
 
 public:
-	virtual void r_Write( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc );
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
-	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
+	virtual void r_Write( CScript & s ) override;
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc ) override;
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+	virtual bool r_LoadVal( CScript & s ) override;
+	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute command from script
 
 	lpctstr GetTypeName() const;
 	static bool IsUniqueName( lpctstr pName );

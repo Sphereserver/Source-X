@@ -46,10 +46,10 @@ public:
     bool IsInUse();
     void FlushAndClose();
 
-    virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
-    virtual bool r_LoadVal( CScript & s );
-    virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc );
-    virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
+    virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+    virtual bool r_LoadVal( CScript & s ) override;
+    virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc ) override;
+    virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
 
     lpctstr GetName() const
     {

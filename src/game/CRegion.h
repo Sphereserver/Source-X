@@ -133,11 +133,11 @@ public:
 
 	void r_WriteBase( CScript & s );
 
-	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc );
+	virtual bool r_LoadVal( CScript & s ) override;
+	virtual bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc ) override;
 	virtual void r_WriteBody( CScript & s, lpctstr pszPrefix );
 	virtual void r_WriteModified( CScript & s );
-	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
+	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute command from script
 	virtual void r_Write( CScript & s );
 
 	virtual bool AddRegionRect( const CRectMap & rect );
@@ -200,13 +200,13 @@ public:
 	const CSRandGroupDef * FindNaturalResource( int /* IT_TYPE */ type ) const;
 
 public:
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
-	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc );
-	virtual void r_WriteBody( CScript &s, lpctstr pszPrefix );
-	virtual void r_WriteModified( CScript &s );
-	virtual void r_Write( CScript & s );
-	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+	virtual bool r_LoadVal( CScript & s ) override;
+	virtual bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc ) override;
+	virtual void r_WriteBody( CScript &s, lpctstr pszPrefix ) override;
+	virtual void r_WriteModified( CScript &s ) override;
+	virtual void r_Write( CScript & s ) override;
+	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute command from script
 
 public:
 	explicit CRegionWorld( CResourceID rid, lpctstr pszName = nullptr );

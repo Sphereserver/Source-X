@@ -672,7 +672,7 @@ public:
 	bool MoveToUpdate(const CPointMap& pt, bool bForceFix = false);
 	bool MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool bForceFix = false);
 	bool MoveToCheck(const CPointMap & pt, CChar * pCharMover = nullptr );
-	virtual bool MoveNearObj( const CObjBaseTemplate *pItem, ushort iSteps = 0 );
+	virtual bool MoveNearObj( const CObjBaseTemplate *pItem, ushort uiSteps = 0 ) override;
 
 	inline CItem* GetNext() const
 	{
@@ -697,12 +697,12 @@ public:
 	void r_WriteMore1( CSString & sVal );
 	void r_WriteMore2( CSString & sVal );
 
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
-	virtual void r_Write( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc );
-	virtual bool r_LoadVal( CScript & s  );
-	virtual bool r_Load( CScript & s ); // Load an item from script
-	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+	virtual void r_Write( CScript & s ) override;
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc ) override;
+	virtual bool r_LoadVal( CScript & s ) override;
+	virtual bool r_Load( CScript & s ) override; // Load an item from script
+	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute command from script
 
 protected:
 	TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
@@ -802,7 +802,7 @@ public:
 
 	static CItem * ReadTemplate( CResourceLock & s, CObjBase * pCont );
 
-	virtual void Delete(bool bforce = false);
+	virtual void Delete(bool bforce = false) override;
 	virtual bool NotifyDelete();
 };
 

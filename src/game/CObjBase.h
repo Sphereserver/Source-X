@@ -411,7 +411,7 @@ protected:
      *
      * @param   pObj    The object.
      */
-	virtual void DupeCopy( const CObjBase * pObj );
+	void DupeCopy( const CObjBase * pObj );
 
 public:
 
@@ -685,11 +685,11 @@ public:
 
 	void r_WriteSafe( CScript & s );
 
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
 	virtual void r_Write( CScript & s );
-	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc );
-	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );	// some command on this object as a target
+	virtual bool r_LoadVal( CScript & s ) override;
+	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc ) override;
+	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;	// some command on this object as a target
     inline virtual bool IsDeleted() const override
     {
         return CObjBaseTemplate::IsDeleted();

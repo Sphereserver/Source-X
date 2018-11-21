@@ -309,8 +309,8 @@ private:
 	CRegionResourceDef& operator=(const CRegionResourceDef& other);
 
 public:
-	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr );
+	virtual bool r_LoadVal( CScript & s ) override;
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr ) override;
 	TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
 };
 
@@ -434,16 +434,16 @@ public:
 	*/
 	bool ServPagePost(CClient * pClient, lpctstr pszURLArgs, tchar * pPostData, size_t stContentLength);
 
-	virtual bool r_LoadVal(CScript & s);
-	virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr);
-	virtual bool r_Verb(CScript & s, CTextConsole * pSrc);	// some command on this object as a target
+	virtual bool r_LoadVal(CScript & s) override;
+	virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr) override;
+	virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;	// some command on this object as a target
 
-															/**
-															* @fn  void CWebPageDef::WebPageLog();
-															*
-															* @brief   Web page log.
-															*
-															*/
+     /**
+     * @fn  void CWebPageDef::WebPageLog();
+     *
+     * @brief   Web page log.
+     *
+     */
 	void WebPageLog();
 
 	/**
@@ -551,14 +551,12 @@ public:
      */
 	bool IsSpellType( dword wFlags ) const
 	{
-		return(( m_dwFlags & wFlags ) ? true : false );
+		return (( m_dwFlags & wFlags ) ? true : false );
 	}
 
 public:
 	explicit CSpellDef( SPELL_TYPE id );
-	virtual ~CSpellDef()
-	{
-	}
+	virtual ~CSpellDef() = default;
 
 private:
 	CSpellDef(const CSpellDef& copy);
@@ -566,8 +564,8 @@ private:
 
 public:
 	lpctstr GetName() const { return( m_sName ); }
-	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
+	bool r_LoadVal( CScript & s ) override;
+	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc ) override;
 
 	bool GetPrimarySkill( int * piSkill = nullptr, int * piQty = nullptr ) const;
 };
@@ -580,7 +578,7 @@ public:
  *          [SPAWN n] [REGIONTYPE x]
  *
  */
-class CSRandGroupDef	: public CResourceLink
+class CSRandGroupDef : public CResourceLink
 {
 private:
 	static lpctstr const sm_szLoadKeys[];
@@ -594,9 +592,7 @@ public:
 	{
 		m_iTotalWeight = 0;
 	}
-	virtual ~CSRandGroupDef()
-	{
-	}
+	virtual ~CSRandGroupDef() = default;
 
 	CSString	m_sCategory;        // Axis Category
 	CSString	m_sSubsection;      // Axis SubSection
@@ -607,8 +603,8 @@ private:
 	CSRandGroupDef& operator=(const CSRandGroupDef& other);
 
 public:
-	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pKey, CSString &sVal, CTextConsole * pSrc = nullptr );
+	virtual bool r_LoadVal( CScript & s ) override;
+	virtual bool r_WriteVal( lpctstr pKey, CSString &sVal, CTextConsole * pSrc = nullptr ) override;
 	size_t GetRandMemberIndex( CChar * pCharSrc = nullptr, bool bTrigger = true ) const;
 	CResourceQty GetMember( size_t i ) const
 	{
@@ -672,9 +668,7 @@ public:
 		// If there was none defined in scripts.
 		Init();
 	}
-	virtual ~CSkillClassDef()
-	{
-	}
+	virtual ~CSkillClassDef() = default;
 
 private:
 	CSkillClassDef(const CSkillClassDef& copy);
@@ -683,8 +677,8 @@ private:
 public:
 	lpctstr GetName() const { return( m_sName ); }
 
-	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
-	bool r_LoadVal( CScript & s );
+	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc ) override;
+	bool r_LoadVal( CScript & s ) override;
 };
 
 /**
@@ -725,7 +719,7 @@ public:
 	// Delay before skill complete. modified by skill level of course !
 public:
 	explicit CSkillDef( SKILL_TYPE iSkill );
-	virtual ~CSkillDef() { };
+	virtual ~CSkillDef() = default;
 
 private:
 	CSkillDef(const CSkillDef& copy);
@@ -749,8 +743,8 @@ public:
 	{
 		return GetKey();
 	}
-	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
+	virtual bool r_LoadVal( CScript & s ) override;
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc ) override;
 };
 
 class CSkillKeySortArray : public CSObjSortArray< CValStr*, lpctstr >
@@ -1183,9 +1177,9 @@ private:
 	CServerConfig& operator=(const CServerConfig& other);
 
 public:
-	bool r_LoadVal( CScript &s );
-	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
-	bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
+	virtual bool r_LoadVal( CScript &s ) override;
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc ) override;
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
 
     /**
      * @fn  bool CServerConfig::LoadIni( bool fTest );
@@ -1700,13 +1694,13 @@ public:
 	static const char *m_sClassName;
 	bool GumpSetup( int iPage, CClient * pClientSrc, CObjBase * pObj, lpctstr Arguments = "" );
 	size_t GumpAddText( lpctstr pszText );		// add text to the text section, return insertion index
-	bool r_Verb( CScript &s, CTextConsole * pSrc );
-	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc );
+	virtual bool r_Verb( CScript &s, CTextConsole * pSrc ) override;
+    virtual bool r_LoadVal( CScript & s ) override;
+    virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc ) override;
 
 public:
 	explicit CDialogDef( CResourceID rid );
-	virtual ~CDialogDef() { };
+	virtual ~CDialogDef() = default;
 
 private:
 	CDialogDef(const CDialogDef& copy);
@@ -1744,7 +1738,7 @@ private:
 	CItemTypeDef& operator=(const CItemTypeDef& other);
 
 public:
-	bool r_LoadVal( CScript & s );
+	virtual bool r_LoadVal( CScript & s ) override;
 	int GetItemType() const;
 };
 

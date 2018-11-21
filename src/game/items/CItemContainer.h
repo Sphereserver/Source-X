@@ -21,8 +21,8 @@ public:
 
 	// bool m_fTinkerTrapped;	// magic trap is diff.
 
-	bool NotifyDelete();
-	void DeletePrepare();
+	virtual bool NotifyDelete() override;
+	virtual void DeletePrepare() override;
 
     void SetSecuredOfMulti(CUID uidMulti);
     void SetCrateOfMulti(CUID uidMulti);
@@ -43,7 +43,7 @@ public:
 	bool CanContainerHold(const CItem * pItem, const CChar * pCharMsg );
 
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
-	virtual void r_Write( CScript & s );
+	virtual void r_Write( CScript & s ) override;
 	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 
@@ -66,7 +66,7 @@ public:
 	void Restock();
 	bool OnTick();
 
-	virtual void DupeCopy( const CItem * pItem );
+	virtual void DupeCopy( const CItem * pItem ) override;  // overriding CItem::DupeCopy
 
 	CPointMap GetRandContainerLoc() const;
 
