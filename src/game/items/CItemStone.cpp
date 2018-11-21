@@ -1135,8 +1135,10 @@ void CItemStone::ElectMaster()
 
 	// Validate the items and Clear the votes field
 	CStoneMember * pMember = static_cast <CStoneMember *>(GetHead());
-	for ( ; pMember != nullptr; pMember = pMember->GetNext())
+    CStoneMember * pMemberNext = nullptr;
+	for ( ; pMember != nullptr; pMember = pMemberNext)
 	{
+        pMemberNext = pMember->GetNext();
 		if ( pMember->GetPriv() == STONEPRIV_MASTER )
 		{
 			pMaster = pMember;	// find current master.
@@ -1146,13 +1148,14 @@ void CItemStone::ElectMaster()
 			continue;
 		}
 		pMember->m_Member.m_iVoteTally = 0;
-		iCountMembers++;
+		++iCountMembers;
 	}
 
 	// Now tally the votes.
-	pMember = static_cast <CStoneMember *>(GetHead());
-	for ( ; pMember != nullptr; pMember = pMember->GetNext())
+	pMemberNext = nullptr, pMember = static_cast <CStoneMember *>(GetHead());
+	for ( ; pMember != nullptr; pMember = pMemberNext)
 	{
+        pMemberNext = pMember->GetNext();
 		if ( ! pMember->IsPrivMember())
 			continue;
 
@@ -1162,7 +1165,7 @@ void CItemStone::ElectMaster()
 			CStoneMember * pMemberVote = GetMember( pCharVote );
 			if ( pMemberVote != nullptr )
 			{
-				pMemberVote->m_Member.m_iVoteTally ++;
+				++ pMemberVote->m_Member.m_iVoteTally;
 				continue;
 			}
 		}
@@ -1170,15 +1173,16 @@ void CItemStone::ElectMaster()
 		// not valid to vote for. change to self.
 		pMember->SetLoyalTo(nullptr);
 		// Assume I voted for myself.
-		pMember->m_Member.m_iVoteTally ++;
+		++ pMember->m_Member.m_iVoteTally;
 	}
 
 	// Find who won.
 	bool fTie = false;
 	CStoneMember * pMemberHighest = nullptr;
-	pMember = static_cast <CStoneMember *>(GetHead());
-	for ( ; pMember != nullptr; pMember = pMember->GetNext())
+    pMemberNext = nullptr, pMember = static_cast <CStoneMember *>(GetHead());
+	for ( ; pMember != nullptr; pMember = pMemberNext)
 	{
+        pMemberNext = pMember->GetNext();
 		if ( ! pMember->IsPrivMember())
 			continue;
 		if ( pMemberHighest == nullptr )
@@ -1208,9 +1212,10 @@ void CItemStone::ElectMaster()
 	if ( ! iCountMembers )
 	{
 		// No more members, declare peace (by force)
-		pMember = static_cast <CStoneMember *>(GetHead());
-		for (; pMember != nullptr; pMember = pMember->GetNext())
+        pMemberNext = nullptr, pMember = static_cast <CStoneMember *>(GetHead());
+		for (; pMember != nullptr; pMember = pMemberNext)
 		{
+            pMemberNext = pMember->GetNext();
 			WeDeclarePeace(pMember->GetLinkUID(), true);
 		}
 	}
