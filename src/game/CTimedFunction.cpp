@@ -159,15 +159,15 @@ TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScrip
 				CObjBase * pObj = tf->uid.ObjFind();
                 if (!pObj)
                 {
-                    goto LoopStop;
+                LoopStop:
+                    EndContext = StartContext;
+                    endLooping = true;
+                    break;
                 }
 				TRIGRET_TYPE iRet = pObj->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult);
 				if (iRet == TRIGRET_BREAK)
 				{
-                LoopStop:
-					EndContext = StartContext;
-					endLooping = true;
-					break;
+                    goto LoopStop;
 				}
 				if ((iRet != TRIGRET_ENDIF) && (iRet != TRIGRET_CONTINUE))
 					return iRet;
@@ -257,7 +257,7 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
         
         auto oldErrno = errno;
         int tick = (int)std::strtol(ppVal[0], nullptr, 10);
-        if (tick > sizeof(m_timedFunctions))
+        if (tick > TICKS_PER_SEC)
         {
             g_Log.Event(LOGM_INIT|LOGL_ERROR, "Invalid TimerFNumbers in %sdata.scp. Tick (first value=%d) is too high.\n", SPHERE_FILE, tick);
             errno = oldErrno;

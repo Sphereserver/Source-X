@@ -6,6 +6,7 @@
 #define _INC_CSCRIPTTRIGGERARGS_H
 
 #include "CScriptObj.h"
+#include <vector>
 
 class CScriptTriggerArgs : public CScriptObj
 {
