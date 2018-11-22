@@ -6,9 +6,9 @@
 #ifndef _INC_SQLITE_H
 #define _INC_SQLITE_H
 
-#include "../common.h"
 #include "sqlite3.h"
 #include "../CScriptObj.h"
+#include <vector>
 
 
 //////////////////////////////////////////////////////////////////////////
