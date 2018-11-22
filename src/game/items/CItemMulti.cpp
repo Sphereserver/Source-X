@@ -1551,7 +1551,7 @@ void CItemMulti::SetBaseStorage(uint16 iLimit)
     _iBaseStorage = iLimit;
 }
 
-uint16 CItemMulti::GetBaseStorage()
+uint16 CItemMulti::GetBaseStorage() const
 {
     return _iBaseStorage;
 }
@@ -1561,17 +1561,17 @@ void CItemMulti::SetIncreasedStorage(uint16 iIncrease)
     _iIncreasedStorage = iIncrease;
 }
 
-uint16 CItemMulti::GetIncreasedStorage()
+uint16 CItemMulti::GetIncreasedStorage() const
 {
     return _iIncreasedStorage;
 }
 
-uint16 CItemMulti::GetMaxStorage()
+uint16 CItemMulti::GetMaxStorage() const
 {
     return _iBaseStorage + ((_iBaseStorage * _iIncreasedStorage) / 100);
 }
 
-uint16 CItemMulti::GetCurrentStorage()
+uint16 CItemMulti::GetCurrentStorage() const
 {
     return (int16)(_lLockDowns.size() + _lSecureContainers.size());
 }
@@ -1581,23 +1581,22 @@ void CItemMulti::SetBaseVendors(uint8 iLimit)
     _iBaseVendors = iLimit;
 }
 
-uint8 CItemMulti::GetBaseVendors()
+uint8 CItemMulti::GetBaseVendors() const
 {
     return _iBaseVendors;
 }
 
-uint8 CItemMulti::GetMaxVendors()
+uint8 CItemMulti::GetMaxVendors() const
 {
     return (uint8)(_iBaseVendors + (_iBaseVendors * GetIncreasedStorage()) / 100);
 }
 
-
-uint16 CItemMulti::GetMaxLockdowns()
+uint16 CItemMulti::GetMaxLockdowns() const
 {
     return (GetMaxStorage() - (GetMaxStorage() - (GetMaxStorage() * (uint16)GetLockdownsPercent()) / 100));
 }
 
-uint8 CItemMulti::GetLockdownsPercent()
+uint8 CItemMulti::GetLockdownsPercent() const
 {
     return _iLockdownsPercent;
 }
@@ -1723,7 +1722,7 @@ void CItemMulti::Release(CUID uidContainer)
     pContainer->SetSecuredOfMulti(UID_UNUSED);
 }
 
-int CItemMulti::GetSecuredContainerPos(CUID uidContainer) const
+int CItemMulti::GetSecuredContainerPos(const CUID uidContainer) const
 {
     ADDTOCALLSTACK("CItemMulti::GetSecuredContainerPos");
     if (_lSecureContainers.empty())
@@ -1740,7 +1739,7 @@ int CItemMulti::GetSecuredContainerPos(CUID uidContainer) const
     return -1;
 }
 
-int16 CItemMulti::GetSecuredItemsCount()
+int16 CItemMulti::GetSecuredItemsCount() const
 {
     ADDTOCALLSTACK("CItemMulti::GetSecuredItemsCount");
     size_t iCount = 0;
@@ -1755,7 +1754,7 @@ int16 CItemMulti::GetSecuredItemsCount()
     return (int16)iCount;
 }
 
-size_t CItemMulti::GetSecuredContainersCount()
+size_t CItemMulti::GetSecuredContainersCount() const
 {
     return _lSecureContainers.size();
 }
@@ -1797,7 +1796,7 @@ void CItemMulti::DelVendor(CUID uidVendor)
     }
 }
 
-int CItemMulti::GetHouseVendorPos(CUID uidVendor)
+int CItemMulti::GetHouseVendorPos(const CUID uidVendor) const
 {
     ADDTOCALLSTACK("CItemMulti::GetHouseVendorPos");
     if (_lVendors.empty())

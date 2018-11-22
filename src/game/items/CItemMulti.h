@@ -424,7 +424,7 @@ public:
     * @brief Returns the Base Storage.
     * @return the total.
     */
-    uint16 GetBaseStorage();
+    uint16 GetBaseStorage() const;
     /**
     * @brief Sets the modifier of Base Storage.
     * @param iIncrease the modifier.
@@ -434,17 +434,17 @@ public:
     * @brief Returns the modifier for Base Storage.
     * @return the modifier.
     */
-    uint16 GetIncreasedStorage();
+    uint16 GetIncreasedStorage() const;
     /**
     * @brief returns the Max Storage.
     * @return the value.
     */
-    uint16 GetMaxStorage();
+    uint16 GetMaxStorage() const;
     /**
     * @brief returns the current Storage used.
     * @return the value.
     */
-    uint16 GetCurrentStorage();
+    uint16 GetCurrentStorage() const;
 
     // -- (Limits & values)Vendors
     /**
@@ -456,23 +456,23 @@ public:
     * @brief Returns the Base Vendors.
     * @param the value.
     */
-    uint8 GetBaseVendors();
+    uint8 GetBaseVendors() const;
     /**
     * @brief Returns the max allowed vendors.
     * @return the total
     */
-    uint8 GetMaxVendors();
+    uint8 GetMaxVendors() const;
     // -- (Limits & values)LockDowns
     /**
     * @brief Returns the maximum lockdowns allowed.
     * @return the max
     */
-    uint16 GetMaxLockdowns();
+    uint16 GetMaxLockdowns() const;
     /**
     * @brief Returns the Lockdowns Percent.
     * @return the percent
     */
-    uint8 GetLockdownsPercent();
+    uint8 GetLockdownsPercent() const;
     /**
     * @brief Sets the Lockdowns Percent.
     * @param iPercent the percent.
@@ -520,12 +520,12 @@ public:
     * @brief Returns the total items secured on containers.
     * @return the count
     */
-    int16 GetSecuredItemsCount();
+    int16 GetSecuredItemsCount() const;
     /**
     * @brief Returns the total containers secured.
     * @return the count.
     */
-    size_t GetSecuredContainersCount();
+    size_t GetSecuredContainersCount() const;
     // -Vendors
     /**
     * @brief Adds a char to the vendors list.
@@ -542,7 +542,7 @@ public:
     * @param pVendor the char
     * @return the pos.
     */
-    int GetHouseVendorPos(CUID uidVendor);
+    int GetHouseVendorPos(const CUID uidVendor) const;
     /**
     * @brief Returns the total vendors.
     * @return the count.
