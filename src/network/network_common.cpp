@@ -843,11 +843,12 @@ CClient* ClientIterator::next(bool includeClosing)
 	for (CClient* current = m_nextClient; current != nullptr; current = current->GetNext())
 	{
 		// skip clients without a state, or whose state is invalid/closed
-		if (current->GetNetState() == nullptr || current->GetNetState()->isInUse(current) == false || current->GetNetState()->isClosed())
+        const NetState* ns = current->GetNetState();
+		if (ns == nullptr || ns->isInUse(current) == false || ns->isClosed())
 			continue;
 
 		// skip clients whose connection is being closed
-		if (includeClosing == false && current->GetNetState()->isClosing())
+		if (includeClosing == false && ns->isClosing())
 			continue;
 
 		m_nextClient = current->GetNext();

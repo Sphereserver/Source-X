@@ -144,7 +144,7 @@ void CItemStone::r_Write( CScript & s )
 			s.WriteKeyFormat( "MEMBER",
 				"0%x,%s,%i,0%x,%i,%i,%i",
 				(dword) pMember->GetLinkUID() | (pMember->GetLinkUID().IsItem() ? UID_F_ITEM : 0),
-				static_cast<lpctstr>(pMember->GetTitle()),
+				pMember->GetTitle(),
 				pMember->GetPriv(),
 				(dword)(pMember->GetLoyalToUID()),
 				pMember->m_UnDef.m_Val1,
