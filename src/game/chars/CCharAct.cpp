@@ -3131,8 +3131,6 @@ CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fChec
 				if ( iRet == TRIGRET_RET_TRUE )
 					return nullptr;
                 uiStamReq = (ushort)(Args.m_iN1);
-				if (uiStamReq < 0)
-					continue;
 			}
 
 			
