@@ -5,12 +5,11 @@
 #include "../../sphere/threads.h"
 #include "../sphereproto.h"
 #include "../CExpression.h"
-#include "../common.h"
 #include "../CLog.h"
 #include "CCrypto.h"
 
 // For TwoFish and MD5 we only provide an interface, so we include the headers of the code doing all the related crypto stuff
-#include "twofish.h"
+#include "twofish/twofish.h"
 #include "CMD5.h"
 
 

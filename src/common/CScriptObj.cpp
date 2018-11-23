@@ -9,13 +9,13 @@
 #include "../game/clients/CClient.h"
 #include "../game/CScriptProfiler.h"
 #include "../sphere/ProfileTask.h"
+#include "crypto/CBCrypt.h"
 #include "crypto/CMD5.h"
 #include "CExpression.h"
 #include "CResourceLock.h"
 #include "CUIDExtra.h"
 #include "CSFileObjContainer.h"
 #include "CScriptTriggerArgs.h"
-//#include "CScriptObj.h" // already included by "CScriptTriggerArgs.h"
 
 class CStoneMember;
 
@@ -216,14 +216,14 @@ bool CScriptObj::r_LoadVal( CScript & s )
 				g_Exp.m_VarGlobals.SetStr( pszKey+4, fQuoted, s.GetArgStr( &fQuoted ), false );
 				return true;
 			}
-		case  SSC_VAR0:
+		case SSC_VAR0:
 			{
 				bool fQuoted = false;
 				g_Exp.m_VarGlobals.SetStr( pszKey+5, fQuoted, s.GetArgStr( &fQuoted ), true );
 				return true;
 			}
 
-		case  SSC_LIST:
+		case SSC_LIST:
 			{
 				if ( !g_Exp.m_ListGlobals.r_LoadVal(pszKey + 5, s) )
 					DEBUG_ERR(("Unable to process command '%s %s'\n", pszKey, s.GetArgRaw()));
@@ -669,6 +669,7 @@ badcmd:
 			return true;
 		case SSC_StrEat:
 			{
+
 				GETNONWHITESPACE( pszKey );
 				while ( *pszKey && !IsSpace( *pszKey ) && *pszKey != ',' )
 					++pszKey;
@@ -832,13 +833,36 @@ badcmd:
 				CMD5::fastDigest( digest, pszKey );
 				sVal.Format("%s", digest);
 			} return true;
+
+        case SSC_BCRYPTHASH:
+        {
+            tchar * ppCmd[3];
+            size_t iQty = Str_ParseCmds(const_cast<tchar*>(pszKey), ppCmd, CountOf(ppCmd), ", ");
+            if ( iQty < 3 )
+                return false;
+            int iPrefixCode = ATOI(ppCmd[0]);
+            int iCost = ATOI(ppCmd[1]);
+            CSString sHash = CBCrypt::HashBCrypt(ppCmd[2], iPrefixCode, maximum(4,minimum(31,iCost)));
+            sVal.Format("%s", sHash.GetPtr());
+        } return true;
+
+        case SSC_BCRYPTVALIDATE:
+        {
+            tchar * ppCmd[2];
+            size_t iQty = Str_ParseCmds(const_cast<tchar*>(pszKey), ppCmd, CountOf(ppCmd), ", ");
+            if ( iQty < 2 )
+                return false;
+            bool fValidated = CBCrypt::ValidateBCrypt(ppCmd[0], ppCmd[1]);
+            sVal.FormatVal((int)fValidated);
+        } return true;
+
 		case SSC_MULDIV:
 			{
-				int64	iNum	= Exp_GetLLVal( pszKey );
+				int64 iNum = Exp_GetLLVal( pszKey );
 				SKIP_ARGSEP(pszKey);
-				int64	iMul	= Exp_GetLLVal( pszKey );
+				int64 iMul = Exp_GetLLVal( pszKey );
 				SKIP_ARGSEP(pszKey);
-				int64	iDiv	= Exp_GetLLVal( pszKey );
+				int64 iDiv = Exp_GetLLVal( pszKey );
 				int64 iRes = 0;
 
 				if ( iDiv == 0 )

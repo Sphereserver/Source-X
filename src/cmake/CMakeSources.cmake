@@ -44,6 +44,8 @@ SOURCE_GROUP (network FILES ${network_SRCS})
 
 # Login encryption handling
 SET (crypto_SRCS
+common/crypto/CBCrypt.cpp
+common/crypto/CBCrypt.h
 common/crypto/CCrypto.cpp
 common/crypto/CCrypto.h
 common/crypto/CCryptoBlowFish.cpp
@@ -53,9 +55,15 @@ common/crypto/CCryptoMD5Interface.cpp
 common/crypto/CCryptoTwoFishInterface.cpp
 common/crypto/CMD5.cpp
 common/crypto/CMD5.h
-common/crypto/twofish.cpp
-common/crypto/twofish.h
-common/crypto/twofish_aux.h
+common/crypto/bcrypt/crypt_blowfish.c
+common/crypto/bcrypt/crypt_blowfish.h
+common/crypto/bcrypt/crypt_gensalt.c
+common/crypto/bcrypt/crypt_gensalt.h
+common/crypto/bcrypt/ow-crypt.h
+common/crypto/bcrypt/wrapper.c
+common/crypto/twofish/twofish.cpp
+common/crypto/twofish/twofish.h
+common/crypto/twofish/twofish_aux.h
 )
 SOURCE_GROUP (common\\crypto FILES ${crypto_SRCS})
 

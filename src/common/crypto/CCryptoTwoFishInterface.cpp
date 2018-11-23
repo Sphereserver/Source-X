@@ -1,7 +1,7 @@
 #include "../../sphere/threads.h"
 #include "../sphereproto.h"
+#include "twofish/twofish.h"
 #include "CCrypto.h"
-#include "twofish.h"
 
 
 void CCrypto::InitTwoFish()

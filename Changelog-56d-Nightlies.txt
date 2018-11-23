@@ -1305,3 +1305,10 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 
 15-11-2018, Nolok
 - Fixed: T_SPAWN_ITEM spawning templates and T_SPAWN_CHAR spawning spawn groups didn't correctly load the id of the resource to spawn from the save file (Issue #153).
+
+23-11-2018, Nolok
+- Added: BCrypt string hashing and string validation (Issue #109). Usage:
+	- "BCRYPTHASH prefix code, cost-factor, string" returns the hashed string.
+		Prefix code: 0 for "$2a$", 1 for "$2b$", 2 for "$2y$", 3 for "$1$", 4 for "_".
+		Warning: higher cost-factors (minimum 4, maximum 31) means way slower hashing, which can even block Sphere!
+	- "BCRYPTVALIDATE string, hash" returns 1 if the hash matches the string, otherwise 0.

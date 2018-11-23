@@ -215,6 +215,7 @@ protected:
 	bool LoginCryptStart( dword dwIP, byte * pEvent, size_t inLen );
 	bool GameCryptStart( dword dwIP, byte * pEvent, size_t inLen );
 	bool RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
+   
 };
 
 #endif // _INC_CENCRYPT_H
