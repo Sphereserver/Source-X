@@ -1990,6 +1990,20 @@ void CWorld::Close()
 	m_Parties.Clear();
 	m_GMPages.Clear();
 
+    // Disconnect the players, so that we have none of them in a sector
+    ClientIterator it;
+    for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
+    {
+        //pClient->GetNetState()->clear();
+        pClient->GetNetState()->markReadClosed();
+        CChar* pChar = pClient->GetChar();
+        if (pChar)
+        {
+            CSector* pSector = pChar->GetTopSector();
+            pSector->ClientDetach(pChar);
+        }
+    }
+
 	if ( m_Sectors != nullptr )
 	{
 		//	free memory allocated by sectors

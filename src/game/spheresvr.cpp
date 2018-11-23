@@ -446,28 +446,31 @@ void Sphere_ExitServer()
 	g_Serv.SocketsClose();
 	g_World.Close();
 
-	lpctstr Reason;
+	lpctstr ptcReason;
 	int iExitFlag = g_Serv.GetExitFlag();
 	switch ( iExitFlag )
 	{
-		case -10:	Reason = "Unexpected error occurred";			break;
-		case -9:	Reason = "Failed to bind server IP/port";		break;
-		case -8:	Reason = "Failed to load worldsave files";		break;
-		case -3:	Reason = "Failed to load server settings";		break;
-		case -1:	Reason = "Shutdown via commandline";			break;
+		case -10:	ptcReason = "Unexpected error occurred";			break;
+		case -9:	ptcReason = "Failed to bind server IP/port";		break;
+		case -8:	ptcReason = "Failed to load worldsave files";		break;
+		case -3:	ptcReason = "Failed to load server settings";		break;
+		case -1:	ptcReason = "Shutdown via commandline";			    break;
 #ifdef _WIN32
-		case 1:		Reason = "X command on console";				break;
+		case 1:		ptcReason = "X command on console";				    break;
 #else
-		case 1:		Reason = "Terminal closed by SIGHUP signal";	break;
+		case 1:		ptcReason = "Terminal closed by SIGHUP signal";	    break;
 #endif
-		case 2:		Reason = "SHUTDOWN command executed";			break;
-		case 4:		Reason = "Service shutdown";					break;
-		case 5:		Reason = "Console window closed";				break;
-		case 6:		Reason = "Proccess aborted by SIGABRT signal";	break;
-		default:	Reason = "Server shutdown complete";			break;
+		case 2:		ptcReason = "SHUTDOWN command executed";			break;
+		case 4:		ptcReason = "Service shutdown";					    break;
+		case 5:		ptcReason = "Console window closed";				break;
+		case 6:		ptcReason = "Proccess aborted by SIGABRT signal";	break;
+		default:	ptcReason = "Server shutdown complete";			    break;
 	}
 
-	g_Log.Event(LOGM_INIT|LOGL_FATAL, "Server terminated: %s (code %d)\n", Reason, iExitFlag);
+	g_Log.Event(LOGM_INIT|LOGL_FATAL, "Server terminated: %s (code %d)\n", ptcReason, iExitFlag);
+#ifdef _WIN32
+    g_Log.Event(LOGM_INIT|LOGF_CONSOLE_ONLY, "You can now close this window.\n");
+#endif
 	g_Log.Close();
 
 #ifdef _WIN32
