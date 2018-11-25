@@ -137,6 +137,21 @@ void CTimedFunctionHandler::Stop( CUID uid, lpctstr funcname )
 	}
 }
 
+void CTimedFunctionHandler::Clear()
+{
+    ADDTOCALLSTACK("CTimedFunctionHandler::Clear");
+
+    m_curTick = 0;
+    m_processedFunctionsPerTick = 0;
+
+    for (uint i = 0; i < TICKS_PER_SEC; ++i)
+    {
+        m_timedFunctions[i].clear();
+    }
+    m_tfQueuedToBeAdded.clear();
+    m_tfRecycled.clear();
+}
+
 TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext,
     CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult)
 {

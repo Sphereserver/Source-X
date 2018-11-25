@@ -45,6 +45,7 @@ public:
     void Add(CUID uid, int numSeconds, lpctstr funcname);
     void Erase(CUID uid);
     void Stop(CUID uid, lpctstr funcname);
+    void Clear();
     TRIGRET_TYPE Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext,
         CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult);
     int IsTimer(CUID uid, lpctstr funcname);

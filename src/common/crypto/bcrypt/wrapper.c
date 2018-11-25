@@ -15,9 +15,9 @@
  */
 
 #ifdef _WIN32
-#define __strdup _strdup
+#define STRDUP _strdup
 #else
-#define __strdup strdup
+#define STRDUP strdup
 #endif
 
 #include <stdlib.h>
@@ -249,7 +249,7 @@ char *__crypt_gensalt_ra(const char *prefix, unsigned long count,
 		input, size, output, sizeof(output));
 
 	if (retval) {
-		retval = (char*)__strdup(retval);
+		retval = STRDUP(retval);
 #ifndef __GLIBC__
 		/* strdup(3) on glibc sets errno, so we don't need to bother */
 		if (!retval)

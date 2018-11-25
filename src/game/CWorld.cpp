@@ -1769,8 +1769,9 @@ bool CWorld::LoadWorld() // Load world from script
             break;
 
 		// Reset everything that has been loaded
-		m_Stones.clear();
 		m_ObjStatusUpdates.clear();
+        m_Stones.clear();
+		m_TimedFunctions.Clear();
 		m_Parties.Clear();
 		m_GMPages.Clear();
 
