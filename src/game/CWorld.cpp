@@ -1449,36 +1449,31 @@ void CWorld::SaveStatics()
 
 /////////////////////////////////////////////////////////////////////
 
-void CWorld::AddTimedObject(int64 iTimeout, CTimedObject * pTimedObject)
+void CWorld::_InsertTimedObject(int64 iTimeout, CTimedObject *pTimedObject)
 {
-    ADDTOCALLSTACK("CWorld::AddTimedObject");
-    //if (iTimeout < g_World.GetCurrentTime().GetTimeRaw())    // We do that to get them tick as sooner as possible
-    //    return;
-
-    ProfileTask timersTask(PROFILE_TIMERS);
     _mWorldTickList.THREAD_CMUTEX.lock();
     TimedObjectsContainer& timedObjCont = _mWorldTickList[iTimeout];
     _mWorldTickList.THREAD_CMUTEX.unlock();
+
     timedObjCont.THREAD_CMUTEX.lock();
     timedObjCont.emplace_back(pTimedObject);
     timedObjCont.THREAD_CMUTEX.unlock();
 }
 
-void CWorld::DelTimedObject(int64 iTimeout, CTimedObject * pTimedObject)
+void CWorld::_RemoveTimedObject(const int64 iOldTimeout, const CTimedObject* pTimedObject)
 {
-    ADDTOCALLSTACK("CWorld::DelTimedObject");
-    ProfileTask timersTask(PROFILE_TIMERS);
-    if (iTimeout <= 0)
+    _mWorldTickList.THREAD_CMUTEX.lock();
+    auto itList =  _mWorldTickList.find(iOldTimeout);
+    if (itList == _mWorldTickList.end())
     {
+        // This shouldn't happen, since this function is called only after we found pChar in the lookup list and retrieved its iOldTimeout.
+        // If this happens: there was an exception in the ticking code, or we are calling this method when we shouldn't.
+        _mWorldTickList.THREAD_CMUTEX.unlock();
         return;
     }
-    _mWorldTickList.THREAD_CMUTEX.lock();
-    auto itContainer =  _mWorldTickList.find(iTimeout);
-    auto itContainerEnd = _mWorldTickList.end();
+    TimedObjectsContainer& cont = itList->second;  // direct access to the container.
     _mWorldTickList.THREAD_CMUTEX.unlock();
-    if (itContainer == itContainerEnd)
-        return;
-    TimedObjectsContainer& cont = itContainer->second;  // direct access to the container.
+
     std::vector<CTimedObject*> tmpCont;   // new container.
     cont.THREAD_CMUTEX.lock();
     if (cont.size() > 1) // if the old container only has 1 entry we don't need to create a new one.
@@ -1493,7 +1488,7 @@ void CWorld::DelTimedObject(int64 iTimeout, CTimedObject * pTimedObject)
         }
     }
     cont.clear();
-    cont.THREAD_CMUTEX.unlock();
+
     /*
     * All references to the given CTimedObject have been taken out from the container
     * and the new one have been populated ? so let's add the new container to the main
@@ -1501,48 +1496,180 @@ void CWorld::DelTimedObject(int64 iTimeout, CTimedObject * pTimedObject)
     */
     if (!tmpCont.empty())
     {
-        cont.THREAD_CMUTEX.lock();
-        for (CTimedObject* pObj : tmpCont)
-        {
-            cont.emplace_back(pObj);
-        }
-        cont.THREAD_CMUTEX.unlock();
+        cont.swap(tmpCont);
     }
+    cont.THREAD_CMUTEX.unlock();
 }
 
-void CWorld::AddCharTicking(CChar * pChar)
+void CWorld::AddTimedObject(int64 iTimeout, CTimedObject * pTimedObject)
 {
-    if (pChar->GetTopSector()->IsSleeping())
-    {
-        return; // Do not allow ticks on sleeping sectors;
-    }
-    const int64 iTickNext = pChar->_timeNextRegen;
-    //if (iTickNext < g_World.GetCurrentTime().GetTimeRaw())    // We do that to get them tick as sooner as possible
+    ADDTOCALLSTACK("CWorld::AddTimedObject");
+    //if (iTimeout < g_World.GetCurrentTime().GetTimeRaw())    // We do that to get them tick as sooner as possible
     //    return;
 
+    EXC_TRY("AddTimedObject");
+    EXC_SET_BLOCK("Lookup");
+
+    ProfileTask timersTask(PROFILE_TIMERS);
+    std::unique_lock<std::shared_mutex> lookupLock(_mWorldTickLookup.THREAD_CMUTEX);
+
+    auto itLookup = _mWorldTickLookup.find(pTimedObject);
+    if (itLookup != _mWorldTickLookup.end())
+    {
+        // Adding an object already on the list? Am i setting a new timeout without deleting the previous one?
+        // It shouldn't happen, but if it does, this fixes it.
+        EXC_SET_BLOCK("LookupReplace");
+        _RemoveTimedObject(itLookup->second, itLookup->first);
+        itLookup->second = iTimeout;
+    }
+    else
+    {
+        EXC_SET_BLOCK("LookupInsert");
+        _mWorldTickLookup.insert(std::make_pair(pTimedObject, iTimeout));
+    }
+    
+    EXC_SET_BLOCK("InsertTimedObject");
+    _InsertTimedObject(iTimeout, pTimedObject);
+
+    EXC_CATCH;
+}
+
+void CWorld::DelTimedObject(CTimedObject * pTimedObject)
+{
+    ADDTOCALLSTACK("CWorld::DelTimedObject");
+    EXC_TRY("AddTimedObject");
+    EXC_SET_BLOCK("Lookup");
+
+    ProfileTask timersTask(PROFILE_TIMERS);
+    std::unique_lock<std::shared_mutex> lookupLock(_mWorldTickLookup.THREAD_CMUTEX);
+
+    auto lookupIt = _mWorldTickLookup.find(pTimedObject);
+    if (lookupIt == _mWorldTickLookup.end())
+        return;
+
+    EXC_SET_BLOCK("LookupRemove");
+    const int64 iOldTimeout = lookupIt->second;
+    _mWorldTickLookup.erase(lookupIt);
+
+    EXC_SET_BLOCK("RemoveTimedObject");
+    _RemoveTimedObject(iOldTimeout, pTimedObject);
+
+    EXC_CATCH;
+}
+
+void CWorld::_InsertCharTicking(int64 iTickNext, CChar* pChar)
+{
     _mWorldTickList.THREAD_CMUTEX.lock();
     TimedCharsContainer& timedObjCont = _mCharTickList[iTickNext];
     _mWorldTickList.THREAD_CMUTEX.unlock();
+
     timedObjCont.THREAD_CMUTEX.lock();
     timedObjCont.emplace_back(pChar);
     timedObjCont.THREAD_CMUTEX.unlock();
 }
 
+void CWorld::_RemoveCharTicking(const int64 iOldTimeout, const CChar* pChar)
+{
+    _mCharTickList.THREAD_CMUTEX.lock();
+    auto itList =  _mCharTickList.find(iOldTimeout);
+    if (itList == _mCharTickList.end())
+    {
+        // This shouldn't happen, since this function is called only after we found pChar in the lookup list and retrieved its iOldTimeout.
+        // If this happens: there was an exception in the ticking code, or we are calling this method when we shouldn't.
+        _mCharTickList.THREAD_CMUTEX.unlock();
+        return;
+    }
+    TimedCharsContainer& cont = itList->second;  // direct access to the container.
+    _mCharTickList.THREAD_CMUTEX.unlock();
+
+    std::vector<CChar*> tmpCont;   // new container.
+    cont.THREAD_CMUTEX.lock();
+    if (cont.size() > 1) // if the old container only has 1 entry we don't need to create a new one.
+    {
+        for (CChar* pCharLoop : cont)    // Loop until the old container is empty
+        {
+            if (pCharLoop == pChar)   // if pTimedObject is this entry skip it to remove it from the container.
+            {
+                continue;
+            }
+            tmpCont.emplace_back(pCharLoop);  // otherwise add it to the new container.
+        }
+    }
+    cont.clear();
+
+    /*
+    * All references to the given CChar have been taken out from the container
+    * and the new one have been populated ? so let's add the new container to the main
+    * container, if it has any entry, or clear the top container recursively.
+    */
+    if (!tmpCont.empty())
+    {
+        cont.swap(tmpCont);
+    }
+    cont.THREAD_CMUTEX.unlock();
+}
+
+void CWorld::AddCharTicking(CChar * pChar)
+{
+    ADDTOCALLSTACK("CWorld::AddCharTicking");
+    EXC_TRY("AddCharTicking");
+
+    if (pChar->GetTopSector()->IsSleeping())
+    {
+        return; // Do not allow ticks on sleeping sectors;
+    }
+
+    EXC_SET_BLOCK("Lookup");
+
+    ProfileTask timersTask(PROFILE_TIMERS);
+    std::unique_lock<std::shared_mutex> lookupLock(_mCharTickLookup.THREAD_CMUTEX);
+    
+    const int64 iTickNext = pChar->_timeNextRegen;
+    //if (iTickNext < g_World.GetCurrentTime().GetTimeRaw())    // We do that to get them tick as sooner as possible
+    //    return;
+
+    auto itLookup = _mCharTickLookup.find(pChar);
+    if (itLookup != _mCharTickLookup.end())
+    {
+        // Adding an object already on the list? Am i setting a new timeout without deleting the previous one?
+        // It shouldn't happen, but if it does, this fixes it.
+        EXC_SET_BLOCK("LookupReplace");
+        _RemoveCharTicking(itLookup->second, itLookup->first);
+        itLookup->second = iTickNext;
+    }
+    else
+    {
+        EXC_SET_BLOCK("LookupInsert");
+        _mCharTickLookup.insert(std::make_pair(pChar, iTickNext));
+    }
+
+    EXC_SET_BLOCK("InsertCharTicking");
+    _InsertCharTicking(iTickNext, pChar);
+
+    EXC_CATCH;
+}
+
 void CWorld::DelCharTicking(CChar * pChar)
 {
-    const int64 iTickNext = pChar->_timeNextRegen;
+    ADDTOCALLSTACK("CWorld::DelCharTicking");
+    EXC_TRY("DelCharTicking");
+    EXC_SET_BLOCK("Lookup");
 
-    _mWorldTickList.THREAD_CMUTEX.lock();
-    auto it = _mCharTickList.find(iTickNext);
-    auto itEnd = _mCharTickList.end();
-    _mWorldTickList.THREAD_CMUTEX.unlock();
-    if (it == itEnd)
+    ProfileTask timersTask(PROFILE_TIMERS);
+    std::unique_lock<std::shared_mutex> lookupLock(_mCharTickLookup.THREAD_CMUTEX);
+
+    auto lookupIt = _mCharTickLookup.find(pChar);
+    if (lookupIt == _mCharTickLookup.end())
         return;
 
-    TimedCharsContainer &cont = it->second;
-    cont.THREAD_CMUTEX.lock();
-    cont.erase(std::remove(cont.begin(), cont.end(), pChar), cont.end());
-    cont.THREAD_CMUTEX.unlock();
+    EXC_SET_BLOCK("LookupRemove");
+    const int64 iOldTimeout = lookupIt->second;
+    _mCharTickLookup.erase(lookupIt);
+
+    EXC_SET_BLOCK("RemoveCharTicking");
+    _RemoveCharTicking(iOldTimeout, pChar);
+
+    EXC_CATCH;
 }
 
 bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from script
@@ -2386,7 +2513,7 @@ void CWorld::OnTick()
     // Items, Chars ... Everything relying on CTimedObject (excepting CObjBase, which inheritance is only virtual)
     EXC_SET_BLOCK("WorldObjects selection");
     ProfileTask timersTask(PROFILE_TIMERS);
-    int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
+    const int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
     std::map<int64, TimedObjectsContainer>::iterator it = _mWorldTickList.begin();
     std::map<int64, std::vector<CTimedObject*>> tmpMap;
     int64 iTime;
@@ -2421,6 +2548,7 @@ void CWorld::OnTick()
             ptcSubDesc = "Generic";
             const PROFILE_TYPE profile = pObj->GetProfileType();
             ProfileTask profileTask(profile);
+            
             /*
             * Doing a SetTimeout() in the object's tick will force CWorld to search for that object's
             * current timeout to remove it from any list, prevent that to happen here since it should
@@ -2509,62 +2637,68 @@ void CWorld::OnTick()
                 pObjBase->Delete();
             }
             EXC_CATCHSUB(ptcSubDesc);
+            _mWorldTickLookup.THREAD_CMUTEX.lock();
+            _mWorldTickLookup.erase(pObj);
+            _mWorldTickLookup.THREAD_CMUTEX.unlock();
         }
         _mWorldTickList.THREAD_CMUTEX.lock();
         _mWorldTickList.erase(pairObj.first);  // entirely remove this map's entry.
         _mWorldTickList.THREAD_CMUTEX.unlock();
     }
 
+
+    /* Periodic, automatic ticking for every char */
+
     EXC_SET_BLOCK("PeriodicChars selection");
     ProfileTask taskChars(PROFILE_CHARS);
-    std::map<int64, TimedCharsContainer>::iterator mapIt = _mCharTickList.begin();
+    std::map<int64, TimedCharsContainer>::iterator charIt = _mCharTickList.begin(), charItEnd = _mCharTickList.end();
     std::map<int64, std::vector<CChar*>> tmpCharMap;
     {
         // Need here a new, inner scope to get rid of EXC_TRYSUB variables
         EXC_TRYSUB("Tick::PeriodicChar");
-        while (mapIt != _mCharTickList.end() && iCurTime > (iTime = mapIt->first))
+        while (charIt != charItEnd && iCurTime > (iTime = charIt->first))
         {
             _mCharTickList.THREAD_CMUTEX.lock();
-            TimedCharsContainer& cont = mapIt->second;
+            TimedCharsContainer& cont = charIt->second;
             cont.THREAD_CMUTEX.lock();
 
             tmpCharMap[iTime] = cont;
         
-            ++mapIt;
+            ++charIt;
             cont.THREAD_CMUTEX.unlock();
             _mCharTickList.THREAD_CMUTEX.unlock();
         }
         EXC_CATCHSUB("Reading from _mCharTickList");
     }
 
-
-    /* Periodic, automatic ticking for every char */
     EXC_SET_BLOCK("PeriodicChars loop");
+    for (const auto &pairChar : tmpCharMap)    // Loop through all msecs stored, unless we passed the timestamp.
     {
-        // Need here a new, inner scope to get rid of EXC_TRYSUB variables
         EXC_TRYSUB("Tick::PeriodicChar::Elapsed");
-        for (const auto &pairChar : tmpCharMap)    // Loop through all msecs stored, unless we passed the timestamp.
+        for (CChar* pChar : pairChar.second)
         {
-            for (CChar* pChar : pairChar.second)
-            {
-                if (pChar->OnTickPeriodic())
-                {
-                    AddCharTicking(pChar);
-                }
-                else
-                {
-                    pChar->Delete();
-                }
-            }
+            _mCharTickLookup.THREAD_CMUTEX.lock();
+            _mCharTickLookup.erase(pChar);
+            _mCharTickLookup.THREAD_CMUTEX.unlock();
 
-            _mCharTickList.THREAD_CMUTEX.lock();
-            _mCharTickList.erase(pairChar.first);
-            _mCharTickList.THREAD_CMUTEX.unlock();
+            if (pChar->OnTickPeriodic())
+            {
+                AddCharTicking(pChar);
+            }
+            else
+            {
+                pChar->Delete();
+            }
         }
         EXC_CATCHSUB("");
+
+        _mCharTickList.THREAD_CMUTEX.lock();
+        _mCharTickList.erase(pairChar.first);
+        _mCharTickList.THREAD_CMUTEX.unlock();
     }
 
     m_ObjDelete.Clear();	// clean up our delete list (this DOES delete the objects, thanks to the virtual destructors).
+
 
     // Save state checks
     // Notifications

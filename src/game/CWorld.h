@@ -136,8 +136,11 @@ struct TimedObjectsContainer : public std::vector<CTimedObject*>
 {
     THREAD_CMUTEX_DEF;
 };
-
 struct WorldTickList : public std::map<int64, TimedObjectsContainer>
+{
+    THREAD_CMUTEX_DEF;
+};
+struct TimedObjectLookupList : public std::map<CTimedObject*, int64>
 {
     THREAD_CMUTEX_DEF;
 };
@@ -146,8 +149,11 @@ struct TimedCharsContainer : public std::vector<CChar*>
 {
     THREAD_CMUTEX_DEF;
 };
-
 struct CharTickList : public std::map<int64, TimedCharsContainer>
+{
+    THREAD_CMUTEX_DEF;
+};
+struct CharTickLookupList : public std::map<CChar*, int64>
 {
     THREAD_CMUTEX_DEF;
 };
@@ -171,13 +177,22 @@ private:
 	llong	m_savetimer; // Time it takes to save
 
     WorldTickList _mWorldTickList;
+    TimedObjectLookupList _mWorldTickLookup;
     CharTickList _mCharTickList;
+    CharTickLookupList _mCharTickLookup;
 
 public:
     void AddTimedObject(int64 iTimeout, CTimedObject *pTimedObject);
-    void DelTimedObject(int64 iTimeout, CTimedObject* pTimedObject);
+    void DelTimedObject(CTimedObject* pTimedObject);
     void AddCharTicking(CChar *pChar);
     void DelCharTicking(CChar *pChar);
+private:
+    void _InsertTimedObject(int64 iTimeout, CTimedObject* pTimedObject);
+    void _RemoveTimedObject(const int64 iOldTimeout, const CTimedObject* pTimedObject);
+    void _InsertCharTicking(int64 iTickNext, CChar* pChar);
+    void _RemoveCharTicking(const int64 iOldTimeout, const CChar* pChar);
+
+public:
 	static const char *m_sClassName;
 	// World data.
 	CSector **m_Sectors;

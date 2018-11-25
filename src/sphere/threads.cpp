@@ -611,7 +611,7 @@ void AbstractSphereThread::printStackTrace()
     lpctstr threadName = getName();
 
 	g_Log.EventDebug("Printing STACK TRACE for debugging.\n");
-	g_Log.EventDebug(" _ thread (num) name __ |  # | _____________ function _____________ | ticks passed from previous function start\n", threadId);
+	g_Log.EventDebug(" __ thread (id) name __ |  # | _____________ function _____________ | ticks passed from previous function start\n");
 	for ( size_t i = 0; i < 0x1000; ++i )
 	{
 		if( m_stackInfo[i].startTime == 0 )

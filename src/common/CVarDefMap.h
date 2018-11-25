@@ -113,7 +113,7 @@ private:
 		public:
 			static const char *m_sClassName;
 
-			CVarDefContTest( lpctstr pszKey );
+            inline CVarDefContTest( lpctstr pszKey ) : CVarDefCont( pszKey ) {}
 			virtual ~CVarDefContTest() = default;
 
 		private:

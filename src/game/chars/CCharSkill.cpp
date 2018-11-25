@@ -552,7 +552,7 @@ void CChar::Skill_Cleanup()
 	// We are starting the skill or ended dealing with it (started / succeeded / failed / aborted)
 	m_Act_Difficulty = 0;
 	m_Act_SkillCurrent = SKILL_NONE;
-	SetTimeout( m_pPlayer ? -1 : 1 );	// we should get a brain tick next time
+	SetTimeoutD( m_pPlayer ? -1 : 1 );	// we should get a brain tick next time
 }
 
 lpctstr CChar::Skill_GetName( bool fUse ) const

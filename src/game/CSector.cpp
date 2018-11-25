@@ -1321,7 +1321,7 @@ bool CSector::OnTick()
 	}
 	EXC_CATCH;
 
-    g_World.AddTimedObject(CServerTime::GetCurrentTime().GetTimeRaw() + 30 * MSECS_PER_SEC, this);  // Sector is Awake, make it tick after 30 seconds.
+    SetTimeoutS(30);  // Sector is Awake, make it tick after 30 seconds.
 
 	EXC_DEBUG_START;
 	CPointMap pt = GetBasePoint();

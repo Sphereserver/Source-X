@@ -4138,13 +4138,14 @@ bool CChar::OnTickPeriodic()
 
     if (IsClient())
     {
+        CClient* pClient = GetClient();
         // Players have a silly "always run" flag that gets stuck on.
-        if (-(g_World.GetTimeDiff(GetClient()->m_timeLastEventWalk)) > 2 * MSECS_PER_TENTH)
+        if (-(g_World.GetTimeDiff(pClient->m_timeLastEventWalk)) > 2 * MSECS_PER_TENTH)
             StatFlag_Clear(STATF_FLY);
 
         // Check targeting timeout, if set
-        if (GetClient()->m_Targ_Timeout > 0 && (g_World.GetTimeDiff(GetClient()->m_Targ_Timeout) <= 0))
-            GetClient()->addTargetCancel();
+        if ((pClient->m_Targ_Timeout > 0) && (g_World.GetTimeDiff(pClient->m_Targ_Timeout) <= 0))
+            pClient->addTargetCancel();
     }
 
     if (fRegen)

@@ -155,10 +155,6 @@ CVarDefCont * CVarDefContStr::CopySelf() const
 *
 ***************************************************************************/
 
-CVarDefMap::CVarDefContTest::CVarDefContTest( lpctstr pszKey ) : CVarDefCont( pszKey )
-{
-}
-
 lpctstr CVarDefMap::CVarDefContTest::GetValStr() const 
 { 
 	return nullptr; 

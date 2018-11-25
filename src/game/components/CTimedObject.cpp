@@ -20,10 +20,10 @@ CTimedObject::CTimedObject(PROFILE_TYPE profile)
 CTimedObject::~CTimedObject()
 {
     ADDTOCALLSTACK("CTimedObject::~CTimedObject");
-    if (_timeout > 0)
-    {
-        g_World.DelTimedObject(_timeout, this);
-    }
+    //if (_timeout > 0)
+    //{
+        g_World.DelTimedObject(this);
+    //}
 }
 
 void CTimedObject::GoAwake()
@@ -65,10 +65,10 @@ void CTimedObject::SetTimeout(int64 iDelayInMsecs)
     * Setting the new timer must remove any entry from the current world tick's map
     * Should never happen if g_Serv.IsLoading()
     */
-    if (_timeout > 0)
-    {
-        g_World.DelTimedObject(_timeout, this);
-    }
+    //if (_timeout > 0)
+    //{
+        g_World.DelTimedObject(this);
+    //}
     if (IsDeleted()) //prevent deleted objects from setting new timers to avoid nullptr calls
     {
         return;
