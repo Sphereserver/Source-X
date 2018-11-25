@@ -501,33 +501,34 @@ int64 CChar::Stats_GetRegenRate(STAT_TYPE iStat)
     ADDTOCALLSTACK("CChar::Stats_GetRegenRate");
     // Return regen rate for the given stat.
 
-    lpctstr stat = "";
-    switch ( iStat )
-    {
-        case STAT_STR:
-            stat = "HITS";
-            break;
-        case STAT_INT:
-            stat = "MANA";
-            break;
-        case STAT_DEX:
-            stat = "STAM";
-            break;
-        case STAT_FOOD:
-            stat = "FOOD";
-            break;
-        default:
-            break;
-    }
-
     if ( iStat <= STAT_FOOD )
     {
-        char pcRegen[21];
-        snprintf(pcRegen, sizeof(pcRegen), "REGEN%s", stat);    // in seconds
-        int64 iRate = MSECS_PER_SEC * GetDefNum(pcRegen, true); // def is in seconds, iRate in milliseconds
+        lpctstr ptcRegen = nullptr;
+        switch ( iStat )
+        {
+            case STAT_STR:
+                ptcRegen = "REGENHITS";
+                break;
+            case STAT_INT:
+                ptcRegen = "REGENMANA";
+                break;
+            case STAT_DEX:
+                ptcRegen = "REGENSTAM";
+                break;
+            case STAT_FOOD:
+                ptcRegen = "REGENFOOD";
+                break;
+            default:
+                break;
+        }
+        ASSERT(ptcRegen != nullptr);
+        int64 iRate = GetDefNum(ptcRegen, true); // def is in seconds, iRate in milliseconds
         if ( iRate )
-            return iRate;
-        return (maximum(0, g_Cfg.m_iRegenRate[iStat]));         // in milliseconds
+        {
+            return MSECS_PER_SEC * iRate;
+        }
+        iRate = g_Cfg.m_iRegenRate[iStat];  // in milliseconds
+        return (maximum(0, iRate));
     }
     return 0;
 }
@@ -537,30 +538,28 @@ ushort CChar::Stats_GetRegenVal(STAT_TYPE iStat)
 	ADDTOCALLSTACK("CChar::Stats_GetRegenVal");
 	// Return regen val for the given stat.
 
-	lpctstr stat = "";
-	switch ( iStat )
-	{
-		case STAT_STR:
-			stat = "HITS";
-			break;
-		case STAT_INT:
-			stat = "MANA";
-			break;
-		case STAT_DEX:
-			stat = "STAM";
-			break;
-		case STAT_FOOD:
-			stat = "FOOD";
-			break;
-		default:
-			break;
-	}
-
 	if ( iStat <= STAT_FOOD )
 	{
-        char pcRegen[21];
-	    snprintf(pcRegen, sizeof(pcRegen), "REGENVAL%s", stat);
-		ushort uiRate = (ushort)GetDefNum(pcRegen, true);
+        lpctstr ptcRegen = nullptr;
+        switch ( iStat )
+        {
+            case STAT_STR:
+                ptcRegen = "REGENVALHITS";
+                break;
+            case STAT_INT:
+                ptcRegen = "REGENVALMANA";
+                break;
+            case STAT_DEX:
+                ptcRegen = "REGENVALSTAM";
+                break;
+            case STAT_FOOD:
+                ptcRegen = "REGENVALFOOD";
+                break;
+            default:
+                break;
+        }
+        ASSERT(ptcRegen != nullptr);
+		ushort uiRate = (ushort)GetDefNum(ptcRegen, true);
 		return maximum(1, uiRate);
 	}
 	return 0;

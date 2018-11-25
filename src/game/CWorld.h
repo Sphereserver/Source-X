@@ -6,16 +6,14 @@
 #ifndef _INC_CWORLD_H
 #define _INC_CWORLD_H
 
-#include <shared_mutex>
-#include "../common/common.h"
 #include "../common/CScript.h"
-#include "../common/CScriptObj.h"
 #include "../common/CUID.h"
 #include "items/CItemStone.h"
 #include "components/CTimedObject.h"
 #include "CServerTime.h"
 #include "CSector.h"
 #include "CTimedFunction.h"
+#include <unordered_map>
 
 class CObjBase;
 class CItemTypeDef;
@@ -115,7 +113,7 @@ private:
 
 public:
 	void Init();
-	void InitTime( int64 ullTimeBase );
+	void InitTime( int64 iTimeBase );
 	bool Advance();
     inline void AdvanceTick()
     {
@@ -140,7 +138,7 @@ struct WorldTickList : public std::map<int64, TimedObjectsContainer>
 {
     THREAD_CMUTEX_DEF;
 };
-struct TimedObjectLookupList : public std::map<CTimedObject*, int64>
+struct TimedObjectLookupList : public std::unordered_map<CTimedObject*, int64>
 {
     THREAD_CMUTEX_DEF;
 };
@@ -153,7 +151,7 @@ struct CharTickList : public std::map<int64, TimedCharsContainer>
 {
     THREAD_CMUTEX_DEF;
 };
-struct CharTickLookupList : public std::map<CChar*, int64>
+struct CharTickLookupList : public std::unordered_map<CChar*, int64>
 {
     THREAD_CMUTEX_DEF;
 };

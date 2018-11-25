@@ -3135,7 +3135,7 @@ void CObjBase::SetTimeStamp( int64 t_time)
 
 lpctstr CObjBase::GetDefStr( lpctstr pszKey, bool fZero, bool fDef ) const
 {
-	CVarDefCont	* pVar = GetDefKey( pszKey, fDef );
+    const CVarDefCont * pVar = GetDefKey( pszKey, fDef );
 	if ( pVar == nullptr )
 		return (fZero ? "0" : "");
 	return pVar->GetValStr();
@@ -3143,7 +3143,7 @@ lpctstr CObjBase::GetDefStr( lpctstr pszKey, bool fZero, bool fDef ) const
 
 int64 CObjBase::GetDefNum( lpctstr pszKey, bool fDef ) const
 {
-	CVarDefCont	* pVar = GetDefKey( pszKey, fDef );
+	const CVarDefCont * pVar = GetDefKey( pszKey, fDef );
 	if ( pVar == nullptr )
 		return 0;
 	return pVar->GetValNum();
@@ -3224,7 +3224,7 @@ CVarDefCont * CObjBase::GetDefKey( lpctstr pszKey, bool fDef ) const
 
 lpctstr CObjBase::GetKeyStr( lpctstr pszKey, bool fZero, bool fDef ) const
 {
-	CVarDefCont	* pVar = GetKey( pszKey, fDef );
+    const CVarDefCont * pVar = GetKey( pszKey, fDef );
 	if ( pVar == nullptr )
 		return (fZero ? "0" : "");
 	return pVar->GetValStr();
@@ -3232,7 +3232,7 @@ lpctstr CObjBase::GetKeyStr( lpctstr pszKey, bool fZero, bool fDef ) const
 
 int64 CObjBase::GetKeyNum( lpctstr pszKey, bool fDef ) const
 {
-	CVarDefCont	* pVar = GetKey( pszKey, fDef );
+    const CVarDefCont * pVar = GetKey( pszKey, fDef );
 	if ( pVar == nullptr )
 		return 0;
 	return pVar->GetValNum();

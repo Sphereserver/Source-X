@@ -747,12 +747,12 @@ int64 CWorldClock::GetSystemClock() // static
     return std::chrono::duration_cast<std::chrono::milliseconds>(timeMaxResolution).count();
 }
 
-void CWorldClock::InitTime( int64 ullTimeBase )
+void CWorldClock::InitTime( int64 iTimeBase )
 {
 	ADDTOCALLSTACK("CWorldClock::InitTime");
 	m_Clock_SysPrev = GetSystemClock();
-	m_timeClock.InitTime(ullTimeBase+MSECS_PER_TICK);
-    _iCurTick = ullTimeBase;
+	m_timeClock.InitTime(iTimeBase+MSECS_PER_TICK);
+    _iCurTick = iTimeBase;
 }
 
 void CWorldClock::Init()
