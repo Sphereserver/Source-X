@@ -930,12 +930,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 
 	for ( size_t i = 0; i < STAT_QTY; ++i )
 	{
-		Stat_SetBase((STAT_TYPE)i, pChar->Stat_GetBase((STAT_TYPE)i));
-		Stat_SetMod((STAT_TYPE)i, pChar->Stat_GetMod((STAT_TYPE)i));
-		Stat_SetVal((STAT_TYPE)i, pChar->Stat_GetVal((STAT_TYPE)i));
-		Stat_SetMax((STAT_TYPE)i, pChar->Stat_GetMax((STAT_TYPE)i));
-        Stat_SetMaxMod((STAT_TYPE)i, pChar->Stat_GetMaxMod((STAT_TYPE)i));
-		m_Stat[i].m_regen = pChar->m_Stat[i].m_regen;
+        m_Stat[i] = pChar->m_Stat[i];
 	}
 
 	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
@@ -2014,14 +2009,6 @@ do_default:
 		case CHC_RESPOISONMAX:
 		case CHC_RESENERGY:
 		case CHC_RESENERGYMAX:
-		case CHC_REGENFOOD:
-		case CHC_REGENHITS:
-		case CHC_REGENSTAM:
-		case CHC_REGENMANA:
-		case CHC_REGENVALFOOD:
-		case CHC_REGENVALHITS:
-		case CHC_REGENVALSTAM:
-		case CHC_REGENVALMANA:
 		case CHC_SPELLTIMEOUT:
 		case CHC_TITHING:
 			sVal.FormatLLVal(GetDefNum(pszKey, true));
@@ -2809,6 +2796,30 @@ do_default:
         case CHC_MODMAXSTAM:
             sVal.FormatVal( Stat_GetMaxMod(STAT_DEX) );
             break;
+        case CHC_REGENFOOD:
+            sVal.FormatLLVal( Stats_GetRegenRate(STAT_FOOD) / MSECS_PER_SEC );
+            break;
+        case CHC_REGENHITS:
+            sVal.FormatLLVal( Stats_GetRegenRate(STAT_STR) / MSECS_PER_SEC );
+            break;
+        case CHC_REGENSTAM:
+            sVal.FormatLLVal( Stats_GetRegenRate(STAT_DEX) / MSECS_PER_SEC );
+            break;
+        case CHC_REGENMANA:
+            sVal.FormatLLVal( Stats_GetRegenRate(STAT_INT) / MSECS_PER_SEC );
+            break;
+        case CHC_REGENVALFOOD:
+            sVal.FormatUSVal( Stats_GetRegenVal(STAT_FOOD) );
+            break;
+        case CHC_REGENVALHITS:
+            sVal.FormatUSVal( Stats_GetRegenVal(STAT_STR) );
+            break;
+        case CHC_REGENVALSTAM:
+            sVal.FormatUSVal( Stats_GetRegenVal(STAT_DEX) );
+            break;
+        case CHC_REGENVALMANA:
+            sVal.FormatUSVal( Stats_GetRegenVal(STAT_INT) );
+            break;
 		case CHC_HOME:
 			sVal = m_ptHome.WriteUsed();
 			break;
@@ -2998,29 +3009,34 @@ bool CChar::r_LoadVal( CScript & s )
             }
             break;
         }
+
 		//Status Update Variables
 		case CHC_REGENHITS:
-			{
-                llong iVal = s.GetArgVal();
-				SetDefNum(s.GetKey(), iVal, false);
-				UpdateRegenTimers(STAT_STR, iVal*MSECS_PER_SEC);
-			}
+			Stats_SetRegenRate(STAT_STR, s.GetArg64Val()*MSECS_PER_SEC);
 			break;
 		case CHC_REGENSTAM:
-			{
-                llong iVal = s.GetArgVal();
-				SetDefNum(s.GetKey(), iVal, false);
-				UpdateRegenTimers(STAT_DEX, iVal*MSECS_PER_SEC);
-			}
+            Stats_SetRegenRate(STAT_DEX, s.GetArg64Val()*MSECS_PER_SEC);
 			break;
 		case CHC_REGENMANA:
-			{
-                llong iVal = s.GetArgVal();
-				SetDefNum(s.GetKey(), iVal, false);
-				UpdateRegenTimers(STAT_INT, iVal*MSECS_PER_SEC);
-			}
+            Stats_SetRegenRate(STAT_INT, s.GetArg64Val()*MSECS_PER_SEC);
 			break;
-		case CHC_INCREASEHITCHANCE:
+        case CHC_REGENFOOD:
+            Stats_SetRegenRate(STAT_FOOD, s.GetArg64Val()*MSECS_PER_SEC);
+            break;
+        case CHC_REGENVALHITS:
+            Stats_SetRegenVal(STAT_STR, s.GetArgUSVal());
+            break;
+        case CHC_REGENVALSTAM:
+            Stats_SetRegenVal(STAT_DEX, s.GetArgUSVal());
+            break;
+        case CHC_REGENVALMANA:
+            Stats_SetRegenVal(STAT_INT, s.GetArgUSVal());
+            break;
+        case CHC_REGENVALFOOD:
+            Stats_SetRegenVal(STAT_FOOD, s.GetArgUSVal());
+            break;
+
+        case CHC_INCREASEHITCHANCE:
 		case CHC_INCREASESWINGSPEED:
 		case CHC_INCREASEDAM:
 		case CHC_LOWERREAGENTCOST:
@@ -3043,11 +3059,6 @@ bool CChar::r_LoadVal( CScript & s )
 		case CHC_LUCK:
 		case CHC_CURFOLLOWER:
 		case CHC_MAXFOLLOWER:
-		case CHC_REGENFOOD:
-		case CHC_REGENVALFOOD:
-		case CHC_REGENVALHITS:
-		case CHC_REGENVALSTAM:
-		case CHC_REGENVALMANA:
 		case CHC_TITHING:
 			{
 				SetDefNum(s.GetKey(), s.GetArgVal(), false);

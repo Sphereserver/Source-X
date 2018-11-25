@@ -3069,17 +3069,14 @@ void CObjBase::DeletePrepare()
 
 bool CObjBase::IsTriggerActive(lpctstr trig) const
 {
-	return m_RunningTrigger == trig ? true : false;
+    if (m_RunningTrigger == nullptr)
+        return false;
+	return !strcmpi(m_RunningTrigger, trig) ? true : false;
 }
 
 lpctstr CObjBase::GetTriggerActive() const
 {
 	return m_RunningTrigger ? m_RunningTrigger : "none";
-}
-
-CVarDefMap * CObjBase::GetTagDefs()
-{
-	return &m_TagDefs;
 }
 
 CCSpawn * CObjBase::GetSpawn()

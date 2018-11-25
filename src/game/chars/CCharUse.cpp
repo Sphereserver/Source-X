@@ -953,14 +953,14 @@ void CChar::Use_Drink( CItem * pItem )
 	}
 	else if ( pItem->IsType(IT_DRINK) && IsSetOF(OF_DrinkIsFood) )
 	{
-		short iRestore = 0;
+		ushort uiRestore = 0;
 		if ( pItem->m_itDrink.m_foodval )
-			iRestore = (short)(pItem->m_itDrink.m_foodval);
+			uiRestore = (ushort)(pItem->m_itDrink.m_foodval);
 		else
-			iRestore = (short)(pItem->Item_GetDef()->GetVolume());
+			uiRestore = (ushort)(pItem->Item_GetDef()->GetVolume());
 
-		if ( iRestore < 1 )
-			iRestore = 1;
+		if ( uiRestore < 1 )
+			uiRestore = 1;
 
 		if ( Stat_GetVal(STAT_FOOD) >= Stat_GetMaxAdjusted(STAT_FOOD) )
 		{
@@ -968,7 +968,7 @@ void CChar::Use_Drink( CItem * pItem )
 			return;
 		}
 
-		Stat_SetVal(STAT_FOOD, Stat_GetVal(STAT_FOOD) + iRestore);
+		Stat_AddVal(STAT_FOOD, + uiRestore);
 		if ( pItem->m_itFood.m_poison_skill )
 			SetPoison(pItem->m_itFood.m_poison_skill * 10, 1 + (pItem->m_itFood.m_poison_skill / 50), this);
 	}

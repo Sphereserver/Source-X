@@ -350,7 +350,7 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
         if (pItem == nullptr)
             break;
 
-        if ((dword)pItem->GetTagDefs()->GetKeyNum("FIXTURE") != (dword)GetUID())
+        if ((dword)pItem->m_TagDefs.GetKeyNum("FIXTURE") != (dword)GetUID())
             continue;
 
         pItem->Delete();
@@ -379,7 +379,7 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
         pItem->m_uidLink = GetUID();
         pItem->ClrAttr(ATTR_DECAY | ATTR_CAN_DECAY);
         pItem->SetAttr(ATTR_MOVE_NEVER);
-        pItem->GetTagDefs()->SetNum("FIXTURE", (int64)(GetUID()));
+        pItem->m_TagDefs.SetNum("FIXTURE", (int64)(GetUID()));
 
         if (pItem->IsType(IT_TELEPAD))
         {
@@ -1185,7 +1185,7 @@ void CItemMultiCustom::DelComp(CUID uidComponent)
         any heavy load, trigger, or player iteraction/notifications.
     */
     /*CItem *pComp = uidComponent.ItemFind();
-    if (pComp->GetTagDefs()->GetKeyNum("FIXTURE", true) > 0)
+    if (pComp->m_TagDefs.GetKeyNum("FIXTURE", true) > 0)
     {
         CPointMap pt = pComp->GetTopPoint();
         pt.m_x -= GetTopPoint().m_x;

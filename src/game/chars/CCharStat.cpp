@@ -501,36 +501,22 @@ int64 CChar::Stats_GetRegenRate(STAT_TYPE iStat)
     ADDTOCALLSTACK("CChar::Stats_GetRegenRate");
     // Return regen rate for the given stat.
 
-    if ( iStat <= STAT_FOOD )
-    {
-        lpctstr ptcRegen = nullptr;
-        switch ( iStat )
-        {
-            case STAT_STR:
-                ptcRegen = "REGENHITS";
-                break;
-            case STAT_INT:
-                ptcRegen = "REGENMANA";
-                break;
-            case STAT_DEX:
-                ptcRegen = "REGENSTAM";
-                break;
-            case STAT_FOOD:
-                ptcRegen = "REGENFOOD";
-                break;
-            default:
-                break;
-        }
-        ASSERT(ptcRegen != nullptr);
-        int64 iRate = GetDefNum(ptcRegen, true); // def is in seconds, iRate in milliseconds
-        if ( iRate )
-        {
-            return MSECS_PER_SEC * iRate;
-        }
-        iRate = g_Cfg.m_iRegenRate[iStat];  // in milliseconds
-        return (maximum(0, iRate));
-    }
-    return 0;
+    ASSERT ( (iStat >= STAT_STR) && (iStat <= STAT_FOOD) );
+    int64 iRate = m_Stat[iStat].m_regen;
+    if (iRate < 0)    // never regen
+        return 0;
+    if (iRate == 0)
+        iRate = g_Cfg.m_iRegenRate[iStat];
+    return iRate;
+}
+
+void CChar::Stats_SetRegenRate(STAT_TYPE iStat, int64 iRateMilliseconds)
+{
+    ADDTOCALLSTACK("CChar::Stats_SetRegenRate");
+    // Sets regen rate for the given stat (in milliseconds).
+
+    ASSERT ( (iStat >= STAT_STR) && (iStat <= STAT_FOOD) );
+    m_Stat[iStat].m_regen = iRateMilliseconds;
 }
 
 ushort CChar::Stats_GetRegenVal(STAT_TYPE iStat)
@@ -538,31 +524,27 @@ ushort CChar::Stats_GetRegenVal(STAT_TYPE iStat)
 	ADDTOCALLSTACK("CChar::Stats_GetRegenVal");
 	// Return regen val for the given stat.
 
-	if ( iStat <= STAT_FOOD )
-	{
-        lpctstr ptcRegen = nullptr;
-        switch ( iStat )
-        {
-            case STAT_STR:
-                ptcRegen = "REGENVALHITS";
-                break;
-            case STAT_INT:
-                ptcRegen = "REGENVALMANA";
-                break;
-            case STAT_DEX:
-                ptcRegen = "REGENVALSTAM";
-                break;
-            case STAT_FOOD:
-                ptcRegen = "REGENVALFOOD";
-                break;
-            default:
-                break;
-        }
-        ASSERT(ptcRegen != nullptr);
-		ushort uiRate = (ushort)GetDefNum(ptcRegen, true);
-		return maximum(1, uiRate);
-	}
-	return 0;
+	ASSERT ( (iStat >= STAT_STR) && (iStat <= STAT_FOOD) );
+    const ushort uiVal = m_Stat[iStat].m_regenVal;
+	return maximum(1, uiVal);
+}
+
+void CChar::Stats_SetRegenVal(STAT_TYPE iStat, ushort uiVal)
+{
+    ADDTOCALLSTACK("CChar::Stats_SetRegenVal");
+    // Sets regen val for the given stat.
+
+    ASSERT ( (iStat >= STAT_STR) && (iStat <= STAT_FOOD) );
+    m_Stat[iStat].m_regenVal = uiVal;
+}
+
+void CChar::Stats_AddRegenVal(STAT_TYPE iStat, int iVal)
+{
+    ADDTOCALLSTACK("CChar::Stats_AddRegenVal");
+    // Updated the regen val for the given stat.
+
+    ASSERT ( (iStat >= STAT_STR) && (iStat <= STAT_FOOD) );
+    m_Stat[iStat].m_regenVal = ushort(m_Stat[iStat].m_regenVal + iVal);
 }
 
 SKILLLOCK_TYPE CChar::Stat_GetLock(STAT_TYPE stat)

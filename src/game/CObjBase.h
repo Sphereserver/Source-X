@@ -111,15 +111,6 @@ public:
 	bool CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull);
 
     /**
-     * @fn  CVarDefMap * CObjBase::GetTagDefs();
-     *
-     * @brief   Gets tags.
-     *
-     * @return  null if it fails, else the tag defs.
-     */
-	CVarDefMap * GetTagDefs();
-
-    /**
      * @fn  virtual void CObjBase::DeletePrepare();
      *
      * @brief   Prepares to delete.

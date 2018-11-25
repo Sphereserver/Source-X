@@ -168,6 +168,7 @@ public:
 		ushort  m_max;		 // MaxVal: MaxHits, MaxMana, MaxStam
         int     m_maxMod;    // Modifier to MaxVal: ModMaxHits, ModMaxMana, ModMaxStam
 		int64   m_regen;	 // Milliseconds for the next regen.
+        ushort  m_regenVal;  // Amount of Stat to gain at each regen
 	} m_Stat[STAT_QTY];
     short m_iKarma;
     ushort m_uiFame;
@@ -422,7 +423,10 @@ public:
 	bool Stat_Decrease( STAT_TYPE stat, SKILL_TYPE skill = SKILL_NONE);
 	bool Stats_Regen();
 	ushort Stats_GetRegenVal(STAT_TYPE iStat);
+    void Stats_SetRegenVal(STAT_TYPE iStat, ushort uiVal);
+    void Stats_AddRegenVal(STAT_TYPE iStat, int iVal);
     int64 Stats_GetRegenRate(STAT_TYPE iStat);  // return value is in milliseconds
+    void Stats_SetRegenRate(STAT_TYPE iStat, int64 iRateMilliseconds);
 	SKILLLOCK_TYPE Stat_GetLock(STAT_TYPE stat);
 	void Stat_SetLock(STAT_TYPE stat, SKILLLOCK_TYPE state);
     short GetKarma() const;
@@ -485,7 +489,6 @@ public:
 	void UpdateModeFlag();
 	void UpdateManaFlag() const;
 	void UpdateStamFlag() const;
-	void UpdateRegenTimers( STAT_TYPE iStat, int64 iValMsecs);
 	ANIM_TYPE GenerateAnimate(ANIM_TYPE action, bool fTranslate = true, bool fBackward = false, byte iFrameDelay = 0, byte iAnimLen = 7);
 	bool UpdateAnimate(ANIM_TYPE action, bool fTranslate = true, bool fBackward = false, byte iFrameDelay = 0, byte iAnimLen = 7);
 

@@ -402,7 +402,7 @@ bool CPartyDef::DeclineEvent( CChar *pCharDecline, CUID uidInviter )	// static
 	if ( !pCharInviter || !pCharDecline || uidInviter == pCharDecline->GetUID() )
 		return false;
 
-	CVarDefCont *sTempVal = pCharInviter->GetTagDefs()->GetKey("PARTY_LASTINVITE");
+	CVarDefCont *sTempVal = pCharInviter->m_TagDefs.GetKey("PARTY_LASTINVITE");
 	if ( !sTempVal || (dword)sTempVal->GetValNum() != (dword)pCharDecline->GetUID() )
 		return false;
 
@@ -431,7 +431,7 @@ bool CPartyDef::AcceptEvent( CChar *pCharAccept, CUID uidInviter, bool bForced, 
 	CPartyDef *pParty = pCharInviter->m_pParty;
 	if ( !bForced )
 	{
-		CVarDefCont *sTempVal = pCharInviter->GetTagDefs()->GetKey("PARTY_LASTINVITE");
+		CVarDefCont *sTempVal = pCharInviter->m_TagDefs.GetKey("PARTY_LASTINVITE");
 		if ( !sTempVal || (dword)sTempVal->GetValNum() != (dword)pCharAccept->GetUID() )
 			return false;
 

@@ -343,9 +343,9 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
 		writeInt16((word)(other->GetDefNum("INCREASESWINGSPEED", true)));
 		writeInt16((word)(other->GetDefNum("INCREASEDAM", true)));
 		writeInt16((word)(other->GetDefNum("LOWERREAGENTCOST", true)));
-		writeInt16((word)(other->GetDefNum("REGENHITS", true)));
-		writeInt16((word)(other->GetDefNum("REGENSTAM", true)));
-		writeInt16((word)(other->GetDefNum("REGENMANA", true)));
+		writeInt16((word)(other->Stats_GetRegenRate(STAT_STR)/MSECS_PER_SEC));
+		writeInt16((word)(other->Stats_GetRegenRate(STAT_DEX)/MSECS_PER_SEC));
+		writeInt16((word)(other->Stats_GetRegenRate(STAT_INT)/MSECS_PER_SEC));
 		writeInt16((word)(other->GetDefNum("REFLECTPHYSICALDAM", true)));
 		writeInt16((word)(other->GetDefNum("ENHANCEPOTIONS", true)));
 		writeInt16((word)(other->GetDefNum("INCREASEDEFCHANCE", true)));

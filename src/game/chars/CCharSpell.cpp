@@ -517,7 +517,19 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		}
 		case LAYER_SPELL_Polymorph:
 		{
+            auto _EffectSetRegenVal = [this](STAT_TYPE stat, auto& spellPow) -> void
+            {
+                int iMod = Stats_GetRegenVal(stat) - spellPow;
+                if (iMod < 0)
+                {
+                    // Reduce spellPow, because we don't want to go below 0 with the RegenVal
+                    spellPow += static_cast<std::remove_reference_t<decltype(spellPow)>>(iMod);
+                    iMod = 0;
+                }
+                Stats_SetRegenVal(stat, (ushort)iMod);
+            };
 			BUFF_ICONS iBuffIcon = BI_START;
+
 			switch (spell)
 			{
 				case SPELL_Polymorph:
@@ -527,12 +539,12 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 					break;
 				case SPELL_Horrific_Beast:
 					iBuffIcon = BI_HORRIFICBEAST;
-					ModDefNum("RegenHitsVal", - pSpell->m_itSpell.m_spellcharges, true);
+                    _EffectSetRegenVal(STAT_STR, pSpell->m_itSpell.m_spellcharges);
 					break;
 				case SPELL_Lich_Form:
 					iBuffIcon = BI_LICHFORM;
-                    ModDefNum("RegenManaVal", - pSpell->m_itSpell.m_PolyStr, true);
-                    ModDefNum("RegenHitsVal", + pSpell->m_itSpell.m_PolyDex, true);
+                    _EffectSetRegenVal(STAT_INT, pSpell->m_itSpell.m_PolyStr);
+                    _EffectSetRegenVal(STAT_STR, pSpell->m_itSpell.m_PolyDex);
                     ModDefNum("ResFire", + pSpell->m_itSpell.m_spellcharges, true);
                     ModDefNum("ResPoison", - pSpell->m_itSpell.m_spellcharges, true);
                     ModDefNum("ResCold", - pSpell->m_itSpell.m_spellcharges, true);
@@ -540,15 +552,15 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 				case SPELL_Vampiric_Embrace:
 					iBuffIcon = BI_VAMPIRICEMBRACE;
                     ModDefNum("HitLeechLife", - pSpell->m_itSpell.m_PolyStr, true);
-                    ModDefNum("RegenStamVal", - pSpell->m_itSpell.m_PolyDex, true);
-                    ModDefNum("RegenManaVal", - pSpell->m_itSpell.m_spellcharges, true);
+                    _EffectSetRegenVal(STAT_DEX, pSpell->m_itSpell.m_PolyDex);
+                    _EffectSetRegenVal(STAT_INT, pSpell->m_itSpell.m_spellcharges);
                     ModDefNum("ResFire", + pSpell->m_itSpell.m_spelllevel, true);
 					break;
 				case SPELL_Wraith_Form:
 					iBuffIcon = BI_WRAITHFORM;
-                    ModDefNum("ResPhysical", - 15, true);
-                    ModDefNum("ResFire", + 5, true);
-                    ModDefNum("ResEnergy", + 5, true);
+                    ModDefNum("ResPhysical", - pSpell->m_itSpell.m_PolyStr, true);
+                    ModDefNum("ResFire", + pSpell->m_itSpell.m_PolyDex, true);
+                    ModDefNum("ResEnergy", + pSpell->m_itSpell.m_spellcharges, true);
 					break;
 				case SPELL_Reaper_Form:
 					iBuffIcon = BI_REAPERFORM;
@@ -596,11 +608,11 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 
 			CItem *pHair = LayerFind(LAYER_HAIR);
 			if (pHair)
-				pHair->SetHue((HUE_TYPE)(pSpell->GetTagDefs()->GetKeyNum("COLOR.HAIR")));
+				pHair->SetHue((HUE_TYPE)(pSpell->m_TagDefs.GetKeyNum("COLOR.HAIR")));
 
 			CItem *pBeard = LayerFind(LAYER_BEARD);
 			if (pBeard)
-				pBeard->SetHue((HUE_TYPE)(pSpell->GetTagDefs()->GetKeyNum("COLOR.BEARD")));
+				pBeard->SetHue((HUE_TYPE)(pSpell->m_TagDefs.GetKeyNum("COLOR.BEARD")));
 
 			NotoSave_Update();
 			if (pClient)
@@ -901,45 +913,35 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					iBuffIcon = BI_POLYMORPH;
 					break;
 				case SPELL_Lich_Form:
-					pSpell->m_itSpell.m_PolyStr = 13;		// +RegenManaVal
-					pSpell->m_itSpell.m_PolyDex = 5;		// -RegenHitsVal
-					pSpell->m_itSpell.m_spellcharges = 10;	// -ResFire, +ResPoison, +ResCold
 					m_atMagery.m_SummonID = CREID_LICH;
-					ModDefNum("RegenManaVal", + pSpell->m_itSpell.m_PolyStr, true);	// RegenManaVal
-                    ModDefNum("RegenHitsVal", - pSpell->m_itSpell.m_PolyDex, true);	// RegenHitsVal
+					Stats_AddRegenVal(STAT_INT, + pSpell->m_itSpell.m_PolyStr);	// RegenManaVal
+                    Stats_AddRegenVal(STAT_STR, - pSpell->m_itSpell.m_PolyDex);	// RegenHitsVal
                     ModDefNum("ResFire", - pSpell->m_itSpell.m_spellcharges, true);		// ResFire, ResPoison, ResCold
                     ModDefNum("ResPoison", + pSpell->m_itSpell.m_spellcharges, true);
                     ModDefNum("ResCold", + pSpell->m_itSpell.m_spellcharges, true);
 					iBuffIcon = BI_LICHFORM;
 					break;
 				case SPELL_Wraith_Form:
-					pSpell->m_itSpell.m_PolyDex = 15;
-					pSpell->m_itSpell.m_PolyStr = 5;
 					m_atMagery.m_SummonID = CREID_SPECTRE;
 					iBuffIcon = BI_WRAITHFORM;
-                    ModDefNum("ResPhysical", + 15, true);
-                    ModDefNum("ResFire", - 5, true);
-                    ModDefNum("ResEnergy", - 5, true);
+                    pSpell->m_itSpell.m_PolyStr = 15;
+                    pSpell->m_itSpell.m_PolyDex = 5;
+                    pSpell->m_itSpell.m_spellcharges = 5;
+                    ModDefNum("ResPhysical", + pSpell->m_itSpell.m_PolyStr, true);
+                    ModDefNum("ResFire", - pSpell->m_itSpell.m_PolyDex, true);
+                    ModDefNum("ResEnergy", - pSpell->m_itSpell.m_spellcharges, true);
 					break;
 				case SPELL_Horrific_Beast:
-					pSpell->m_itSpell.m_PolyStr = 5;			// UnArmed DamLo
-					pSpell->m_itSpell.m_PolyDex = 9;			// UnArmed DamHi
-					pSpell->m_itSpell.m_spelllevel = 25;		// Melee Damage Increase
-					pSpell->m_itSpell.m_spellcharges = 20;	// RegenHitsVal
 					m_atMagery.m_SummonID = CREID_HORRIFIC_BEAST;
-                    ModDefNum("RegenHitsVal", + pSpell->m_itSpell.m_spellcharges, true);
+                    Stats_AddRegenVal(STAT_STR, + pSpell->m_itSpell.m_spellcharges);
 					iBuffIcon = BI_HORRIFICBEAST;
 					break;
 				case SPELL_Vampiric_Embrace:
-					pSpell->m_itSpell.m_PolyStr = 13;		// +Hit Leech Life
-					pSpell->m_itSpell.m_PolyDex = 5;		// +RegenStamVal
-					pSpell->m_itSpell.m_spellcharges = 3;	// +RegenManaVal
-					pSpell->m_itSpell.m_spelllevel = 25;	// -ResFire
 					m_atMagery.m_SummonID = CREID_VAMPIRE_BAT;
                     ModDefNum("HitLeechLife", + pSpell->m_itSpell.m_PolyStr, true);		// +Hit Leech Life
-                    ModDefNum("RegenStamVal", + pSpell->m_itSpell.m_PolyDex, true);		// +RegenStamVal
-                    ModDefNum("RegenManaVal", + pSpell->m_itSpell.m_spellcharges, true);	// RegenManaVal
-                    ModDefNum("ResFire", - pSpell->m_itSpell.m_spelllevel, true);				// ResFire
+                    Stats_AddRegenVal(STAT_DEX, + pSpell->m_itSpell.m_PolyDex);		    // +RegenStamVal
+                    Stats_AddRegenVal(STAT_INT, + pSpell->m_itSpell.m_spellcharges);	// RegenManaVal
+                    ModDefNum("ResFire", - pSpell->m_itSpell.m_spelllevel, true);		// ResFire
 					iBuffIcon = BI_VAMPIRICEMBRACE;
 					break;
 				case SPELL_Stone_Form:
@@ -976,8 +978,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 						iChange = -SPELL_MAX_POLY_STAT;
 					if (iChange + Stat_GetBase(STAT_STR) < 0)
 						iChange = -Stat_GetBase(STAT_STR);
-					Stat_AddMod(STAT_STR, (ushort)iChange);
-					pSpell->m_itSpell.m_PolyStr = (ushort)iChange;
+					Stat_AddMod(STAT_STR, iChange);
+					pSpell->m_itSpell.m_PolyStr = (short)iChange;
 				}
 				else
 					pSpell->m_itSpell.m_PolyStr = 0;
@@ -991,7 +993,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 						iChange = -SPELL_MAX_POLY_STAT;
 					if (iChange + Stat_GetBase(STAT_DEX) < 0)
 						iChange = -Stat_GetBase(STAT_DEX);
-					Stat_AddMod(STAT_DEX, (ushort)iChange);
+					Stat_AddMod(STAT_DEX, iChange);
 					pSpell->m_itSpell.m_PolyDex = (ushort)iChange;
 				}
 				else
@@ -1050,14 +1052,14 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				CItem *pHair = LayerFind(LAYER_HAIR);
 				if (pHair)
 				{
-					pSpell->GetTagDefs()->SetNum("COLOR.HAIR", (int64)(pHair->GetHue()));
+					pSpell->m_TagDefs.SetNum("COLOR.HAIR", (int64)(pHair->GetHue()));
 					pHair->SetHue(RandomHairHue);
 				}
 
 				CItem *pBeard = LayerFind(LAYER_BEARD);
 				if (pBeard)
 				{
-					pSpell->GetTagDefs()->SetNum("COLOR.BEARD", (int64)(pBeard->GetHue()));
+					pSpell->m_TagDefs.SetNum("COLOR.BEARD", (int64)(pBeard->GetHue()));
 					pBeard->SetHue(RandomHairHue);
 				}
 
@@ -1503,8 +1505,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					uiMagicResist = minimum(uiMyMagicResistance, 350 - (uiMyInscription / 20));
 
 					pSpell->m_itSpell.m_spelllevel = wStatEffect;
-					pSpell->m_itSpell.m_PolyStr = (ushort)uiPhysicalResist;
-					pSpell->m_itSpell.m_PolyDex = (ushort)uiMagicResist;
+					pSpell->m_itSpell.m_PolyStr = (short)(minimum(SHRT_MAX,uiPhysicalResist));
+					pSpell->m_itSpell.m_PolyDex = (short)(minimum(SHRT_MAX,uiMagicResist));
 
                     ModDefNum("RESPHYSICAL", - uiPhysicalResist, true);
                     ModDefNum("FASTERCASTING", - 2, true);

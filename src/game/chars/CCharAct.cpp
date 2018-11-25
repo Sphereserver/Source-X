@@ -765,12 +765,6 @@ void CChar::UpdateStamFlag() const
 		GetClient()->addUpdateStamFlag();
 }
 
-void CChar::UpdateRegenTimers(STAT_TYPE iStat, int64 iValMsecs)
-{
-	ADDTOCALLSTACK("CChar::UpdateRegenTimers");
-	m_Stat[iStat].m_regen = iValMsecs;
-}
-
 void CChar::UpdateStatVal( STAT_TYPE type, int iChange, ushort uiLimit )
 {
 	ADDTOCALLSTACK("CChar::UpdateStatVal");
