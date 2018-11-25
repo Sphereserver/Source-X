@@ -382,7 +382,7 @@ bool CVarDefMap::Compare( const CVarDefMap * pArray )
 
 bool CVarDefMap::CompareAll( const CVarDefMap * pArray )
 {
-	ADDTOCALLSTACK("CVarDefMap::Compare");
+	ADDTOCALLSTACK("CVarDefMap::CompareAll");
 	if ( !pArray )
 		return false;
 	if ( pArray == this )
@@ -449,6 +449,8 @@ CVarDefContNum* CVarDefMap::SetNumOverride( lpctstr pszKey, int64 iVal )
 
 CVarDefContNum* CVarDefMap::ModNum(lpctstr pszName, int64 iMod, bool fZero)
 {
+    ADDTOCALLSTACK("CVarDefMap::ModNum");
+    ASSERT(pszName);
     CVarDefCont* pVarDef = GetKey(pszName);
     if (pVarDef)
     {
@@ -722,9 +724,17 @@ void CVarDefMap::r_WritePrefix( CScript & s, lpctstr pszPrefix, lpctstr pszKeyEx
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::r_WritePrefix");
 	TemporaryString tsZ;
 	tchar* z = static_cast<tchar *>(tsZ);
-	lpctstr		pszVal;
+	lpctstr	pszVal;
 	bool fHasPrefix = (pszPrefix && *pszPrefix);
 	bool fHasExclude = (pszKeyExclude && *pszKeyExclude);
+
+    auto _WritePrefix = [&z, fHasPrefix, pszPrefix](lpctstr ptcKey) -> void
+    {
+        if ( fHasPrefix )
+            sprintf(z, "%s.%s", pszPrefix, ptcKey);
+        else
+            sprintf(z, "%s", ptcKey);
+    };
 
 	// Write with any prefix.
     for (const CVarDefCont* pVar : m_Container)
@@ -732,19 +742,26 @@ void CVarDefMap::r_WritePrefix( CScript & s, lpctstr pszPrefix, lpctstr pszKeyEx
 		if ( !pVar )
 			continue;	// This should not happen, a warning maybe?
 
-		if ( fHasExclude && !strcmpi(pszKeyExclude, pVar->GetKey()))
+        lpctstr ptcKey = pVar->GetKey();
+		if ( fHasExclude && !strcmpi(pszKeyExclude, ptcKey))
 			continue;
-
-		if ( fHasPrefix )
-			sprintf(z, "%s.%s", pszPrefix, pVar->GetKey());
-		else
-			sprintf(z, "%s", pVar->GetKey());
-
-		pszVal = pVar->GetValStr();
-		const CVarDefContStr * pVarStr = dynamic_cast <const CVarDefContStr *>(pVar);
-		if ( pVarStr ) // IsSpace(pszVal[0]) || IsSpace( pszVal[strlen(pszVal)-1] )
-			s.WriteKeyFormat(z, "\"%s\"", pszVal);
-		else
-			s.WriteKey(z, pszVal);
+		
+        const CVarDefContNum * pVarNum = dynamic_cast<const CVarDefContNum*>(pVar);
+        if (pVarNum)
+        {
+            // Save VarNums only if they are != 0, otherwise it's a waste of space in the save file
+            if (pVarNum->GetValNum() != 0)
+            {
+                _WritePrefix(ptcKey);
+                pszVal = pVar->GetValStr();
+                s.WriteKey(z, pszVal);
+            }
+        }
+        else
+        {
+            _WritePrefix(ptcKey);
+            pszVal = pVar->GetValStr();
+            s.WriteKeyFormat(z, "\"%s\"", pszVal);
+        }
 	}
 }

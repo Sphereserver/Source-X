@@ -32,14 +32,14 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
     tchar * ppBlocks[128];	// max is arbitrary
     size_t iArgCount = Str_ParseCmds( pszCmd, ppBlocks, CountOf(ppBlocks));
 
-    for ( size_t i = 0; i < iArgCount; i++ )
+    for ( size_t i = 0; i < iArgCount; ++i )
     {
         pszCmd = ppBlocks[i];
 
         if ( pszCmd[0] == '-' )
         {
             // remove a frag or all frags.
-            pszCmd ++;
+            ++pszCmd;
             if ( pszCmd[0] == '0' || pszCmd[0] == '*' )
             {
                 clear();
@@ -99,7 +99,7 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
                 continue;
             }
 
-            push_back(pResourceLink);
+            emplace_back(pResourceLink);
         }
     }
     return fRet;
@@ -179,7 +179,7 @@ size_t CResourceRefArray::FindResourceName( RES_TYPE restype, lpctstr pszKey ) c
 void CResourceRefArray::r_Write( CScript & s, lpctstr pszKey ) const
 {
     ADDTOCALLSTACK_INTENSIVE("CResourceRefArray::r_Write");
-    for ( size_t j = 0; j < size(); j++ )
+    for ( size_t j = 0, sz = size(); j < sz; ++j )
     {
         s.WriteKey( pszKey, GetResourceName( j ));
     }

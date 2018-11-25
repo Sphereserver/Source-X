@@ -3500,7 +3500,23 @@ void CChar::r_Write( CScript & s )
 	s.WriteSection("WORLDCHAR %s", GetResourceName());
 	//s.WriteKeyVal("CREATE", -(g_World.GetTimeDiff(m_timeCreate) / MSECS_PER_TENTH)); // Do we need to save it?
 
+    // Do not save TAG.LastHit (used by PreHit combat flag). It's based on the server uptime, so if this tag isn't zeroed,
+    //  after the server restart the char may not be able to attack until the server reaches the serv.time when the previous TAG.LastHit was set.
+    int64 iValLastHit = 0;
+    CVarDefContNum* pVarLastHit = m_TagDefs.GetKeyDefNum("LastHit");
+    if (pVarLastHit)
+    {
+        iValLastHit = pVarLastHit->GetValNum();
+        pVarLastHit->SetValNum(0);
+    }
+
 	CObjBase::r_Write(s);
+
+    if (iValLastHit != 0)
+    {
+        pVarLastHit->SetValNum(iValLastHit);
+    }
+
 	if ( m_pPlayer )
 		m_pPlayer->r_WriteChar(this, s);
 	if ( m_pNPC )
@@ -3689,10 +3705,6 @@ bool CChar::r_Load( CScript & s ) // Load a character from script
 
     if (m_pNPC)
         NPC_GetAllSpellbookSpells();
-
-    // Remove TAG.LastHit (used by PreHit combat flag). It's based on the server uptime, so if this tag isn't zeroed,
-    //  after the server restart the char may not be able to attack until the server reaches the serv.time when the previous TAG.LastHit was set.
-    m_TagDefs.SetNum("LastHit", 0, true);
 
 	return true;
 }

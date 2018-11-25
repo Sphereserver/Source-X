@@ -73,6 +73,7 @@ int bcrypt_gensalt(const char* prefix, int factor, char salt[BCRYPT_HASHSIZE])
     std::mt19937 rng;
     rng.seed(std::random_device()());
     std::uniform_int_distribution<uint16_t> dist;
+    input = dist(rng);
 
 	/* Generate salt. */
 	workf = (factor < 4 || factor > 31)?12:factor;

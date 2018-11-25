@@ -608,17 +608,18 @@ void AbstractSphereThread::printStackTrace()
 	llong startTime = m_stackInfo[0].startTime;
 	int timedelta;
 	uint threadId = getId();
+    lpctstr threadName = getName();
 
 	g_Log.EventDebug("Printing STACK TRACE for debugging.\n");
-	g_Log.EventDebug("__ thread (%u) _ |  # | _____________ function _____________ | ticks passed from previous function start\n", threadId);
-	for ( size_t i = 0; i < 0x1000; i++ )
+	g_Log.EventDebug(" _ thread (num) name __ |  # | _____________ function _____________ | ticks passed from previous function start\n", threadId);
+	for ( size_t i = 0; i < 0x1000; ++i )
 	{
 		if( m_stackInfo[i].startTime == 0 )
 			break;
 
 		timedelta = (int)(m_stackInfo[i].startTime - startTime);
-		g_Log.EventDebug(">>         %u    | %2d | %36.36s | +%d %s\n",
-			threadId, i, m_stackInfo[i].functionName, timedelta,
+		g_Log.EventDebug("(%0.5u)%16.16s | %2d | %36.36s | +%d %s\n",
+			threadId, threadName, i, m_stackInfo[i].functionName, timedelta,
 				( i == (m_stackPos - 1) ) ?
 				"<-- exception catch point (below is guessed and could be incorrect!)" :
 				"");
