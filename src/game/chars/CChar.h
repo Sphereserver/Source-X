@@ -538,7 +538,27 @@ public:
 	CItem * GetBackpackItem(ITEMID_TYPE item);
 	void AddGoldToPack( int iAmount, CItemContainer * pPack=nullptr );
 
-	//private:
+public:
+    /**
+    * @fn  bool CObjBase::IsTriggerActive(lpctstr trig);
+    *
+    * @brief   Queries if a trigger is active ( m_RunningTrigger ) .
+    *
+    * @param   trig    The trig.
+    *
+    * @return  true if the trigger is active, false if not.
+    */
+    bool IsTriggerActive(lpctstr trig) const;
+
+    /**
+    * @fn  void CObjBase::SetTriggerActive(lpctstr trig = nullptr);
+    *
+    * @brief   Sets trigger active ( m_RunningTrigger ).
+    *
+    * @param   trig    The trig.
+    */
+    void SetTriggerActive(lpctstr trig = nullptr);
+ 
 	virtual TRIGRET_TYPE OnTrigger( lpctstr pTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
 	TRIGRET_TYPE OnTrigger( CTRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = nullptr );
 

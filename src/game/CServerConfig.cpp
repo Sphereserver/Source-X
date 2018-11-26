@@ -4468,7 +4468,7 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 int CItemTypeDef::GetItemType() const
 {
 	ADDTOCALLSTACK("CItemTypeDef::GetItemType");
-	return GETINTRESOURCE(GetResourceID());
+	return (int)(GetResourceID().GetPrivateUID() & 0xFFFF);
 }
 
 bool CItemTypeDef::r_LoadVal( CScript & s )

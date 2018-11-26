@@ -704,11 +704,28 @@ public:
 	virtual bool r_Load( CScript & s ) override; // Load an item from script
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute command from script
 
-protected:
+public:    /**
+    * @fn  bool CObjBase::IsTriggerActive(lpctstr trig);
+    *
+    * @brief   Queries if a trigger is active ( m_RunningTrigger ) .
+    *
+    * @param   trig    The trig.
+    *
+    * @return  true if the trigger is active, false if not.
+    */
+    bool IsTriggerActive(lpctstr trig) const;
+
+    /**
+    * @fn  void CObjBase::SetTriggerActive(lpctstr trig = nullptr);
+    *
+    * @brief   Sets trigger active ( m_RunningTrigger ).
+    *
+    * @param   trig    The trig.
+    */
+    void SetTriggerActive(lpctstr trig = nullptr);
+
 	TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
 	TRIGRET_TYPE OnTriggerCreate(CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
-
-public:
 	TRIGRET_TYPE OnTrigger( ITRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = nullptr );
 
 	// Item type specific stuff.

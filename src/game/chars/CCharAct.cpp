@@ -3739,6 +3739,43 @@ bool CChar::SetPrivLevel(CTextConsole * pSrc, lpctstr pszFlags)
 	return true;
 }
 
+bool CChar::IsTriggerActive(lpctstr trig) const
+{
+    if (((_iRunningTriggerId == -1) && _sRunningTrigger.IsEmpty()) || (trig == nullptr))
+        return false;
+    if (_iRunningTriggerId != -1)
+    {
+        ASSERT(_iRunningTriggerId < ITRIG_QTY);
+        int iAction = FindTableSorted( trig, sm_szTrigName, CountOf(sm_szTrigName)-1 );
+        return (_iRunningTriggerId == iAction);
+    }
+    if (_sRunningTrigger.IsEmpty())
+    {
+        ASSERT(0);
+        return false;
+    }
+    return !_sRunningTrigger.CompareNoCase(trig) ? true : false;
+}
+
+void CChar::SetTriggerActive(lpctstr trig)
+{
+    if (trig == nullptr)
+    {
+        _iRunningTriggerId = -1;
+        _sRunningTrigger.Empty();
+        return;
+    }
+    int iAction = FindTableSorted( trig, sm_szTrigName, CountOf(sm_szTrigName)-1 );
+    if (iAction != -1)
+    {
+        _iRunningTriggerId = iAction;
+        _sRunningTrigger.Empty();
+        return;
+    }
+    _sRunningTrigger = trig;
+    _iRunningTriggerId = -1;
+}
+
 // Running a trigger for chars
 // order:
 // 1) CHAR's triggers
@@ -3757,35 +3794,20 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 	if ( !pSrc )
 		pSrc = &g_Serv;
 
-	// Attach some trigger to the cchar. (PC or NPC)
-	// RETURN: true = block further action.
 	CCharBase* pCharDef = Char_GetDef();
-	if ( !pCharDef )
-		return TRIGRET_RET_DEFAULT;
+    ASSERT(pCharDef);
 
-	CTRIG_TYPE iAction;
-
-	if ( ISINTRESOURCE( pszTrigName ) )
-	{
-		iAction = (CTRIG_TYPE) GETINTRESOURCE( pszTrigName );
-		pszTrigName = sm_szTrigName[iAction];
-	}
-	else
-	{
-		iAction = (CTRIG_TYPE) FindTableSorted( pszTrigName, sm_szTrigName, CountOf(sm_szTrigName)-1 );
-	}
-	SetTriggerActive( pszTrigName );
-
-	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
+    SetTriggerActive( pszTrigName );
+    CTRIG_TYPE iAction = (CTRIG_TYPE)_iRunningTriggerId;
+    // Attach some trigger to the cchar. (PC or NPC)
+    // RETURN: true = block further action.
+    TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
 
 	EXC_TRY("Trigger");
-
 	TemporaryString tsCharTrigName;
 	tchar* pszCharTrigName = static_cast<tchar *>(tsCharTrigName);
 	sprintf(pszCharTrigName, "@char%s", pszTrigName + 1);
-
 	int iCharAction = (CTRIG_TYPE) FindTableSorted( pszCharTrigName, sm_szTrigName, CountOf(sm_szTrigName)-1 );
-
 
 	// 1) Triggers installed on characters, sensitive to actions on all chars
 	if (( IsTrigUsed(pszCharTrigName) ) && ( iCharAction > XTRIG_UNKNOWN ))
@@ -3920,7 +3942,7 @@ stopandret:
 TRIGRET_TYPE CChar::OnTrigger( CTRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
 {
 	ASSERT( trigger < CTRIG_QTY );
-	return( OnTrigger( MAKEINTRESOURCE(trigger), pSrc, pArgs ));
+	return OnTrigger( CChar::sm_szTrigName[trigger], pSrc, pArgs );
 }
 
 // process m_fStatusUpdate flags

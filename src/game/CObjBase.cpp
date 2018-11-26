@@ -71,8 +71,8 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 	sm_iCount ++;
 	m_iCreatedResScriptIdx = (size_t)-1;
 	m_iCreatedResScriptLine = -1;
-	m_RunningTrigger = nullptr;
-	m_CallingObjTrigger = nullptr;
+    _iRunningTriggerId = -1;
+    _iCallingObjTriggerId = -1;
 
 	m_wHue = HUE_DEFAULT;
 	m_timestamp = 0;
@@ -1464,9 +1464,9 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				if ( *pszKey )
 				{
 					TRIGRET_TYPE trReturn = TRIGRET_RET_FALSE;
-					m_CallingObjTrigger = m_RunningTrigger;
+                    _iCallingObjTriggerId = _iRunningTriggerId;
 					bool bTrigReturn = CallPersonalTrigger(const_cast<tchar *>(pszKey), pSrc, trReturn,false);
-					m_CallingObjTrigger = nullptr;
+					_iCallingObjTriggerId = -1;
 					if ( bTrigReturn )
 						sVal.FormatVal(trReturn);
 
@@ -2625,9 +2625,9 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( s.HasArgs() )
 				{
 					TRIGRET_TYPE tResult;
-					m_CallingObjTrigger = m_RunningTrigger;
+					_iCallingObjTriggerId = _iRunningTriggerId;
 					CallPersonalTrigger(s.GetArgRaw(), pSrc, tResult,false);
-					m_CallingObjTrigger = nullptr;
+					_iCallingObjTriggerId = -1;
 				}
 			} break;
 		case OV_DIALOG:
@@ -3067,18 +3067,6 @@ void CObjBase::DeletePrepare()
 	RemoveSelf();	// Must remove early or else virtuals will fail.
 }
 
-bool CObjBase::IsTriggerActive(lpctstr trig) const
-{
-    if (m_RunningTrigger == nullptr)
-        return false;
-	return !strcmpi(m_RunningTrigger, trig) ? true : false;
-}
-
-lpctstr CObjBase::GetTriggerActive() const
-{
-	return m_RunningTrigger ? m_RunningTrigger : "none";
-}
-
 CCSpawn * CObjBase::GetSpawn()
 {
     if (_uidSpawn != UID_UNUSED)
@@ -3144,11 +3132,6 @@ int64 CObjBase::GetDefNum( lpctstr pszKey, bool fDef ) const
 	if ( pVar == nullptr )
 		return 0;
 	return pVar->GetValNum();
-}
-
-void CObjBase::SetTriggerActive(lpctstr trig)
-{
-	m_RunningTrigger = trig ? trig : nullptr;
 }
 
 void CObjBase::SetDefNum(lpctstr pszKey, int64 iVal, bool fZero )

@@ -15,7 +15,6 @@
 #include "CEntity.h"
 #include "CBase.h"
 #include "CServerConfig.h"
-#include <memory>
 
 
 class CBaseBase;
@@ -30,19 +29,15 @@ class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, pub
 	static lpctstr const sm_szRefKeys[];    // All Instances of CItem or CChar have these base attributes.
 
 private:
-	int64 m_timestamp;      // TimeStamp
+	int64 m_timestamp;          // TimeStamp
 	HUE_TYPE m_wHue;			// Hue or skin color. (CItems must be < 0x4ff or so)
-	lpctstr m_RunningTrigger;   // Current trigger being run on this object. Used to prevent the same trigger being called over and over.
-	lpctstr m_CallingObjTrigger;// I am running a trigger called via TRIGGER (CallPersonalTrigger method). In which trigger (OF THIS SAME OBJECT) was this call executed?
 
 protected:
 	CResourceRef m_BaseRef;     // Pointer to the resource that describes this type.
-	inline lpctstr GetRunningTrigger() const {
-		return m_RunningTrigger;
-	}
-	inline lpctstr GetCallingObjTrigger() const {
-		return m_CallingObjTrigger;
-	}
+
+    int _iRunningTriggerId;     // Current trigger being run on this object. Used to prevent the same trigger being called over and over.
+    CSString _sRunningTrigger;
+    int _iCallingObjTriggerId;  // I am running a trigger called via TRIGGER (CallPersonalTrigger method). In which trigger (OF THIS SAME OBJECT) was this call executed?
 
 public:
     static const char *m_sClassName;
@@ -116,35 +111,6 @@ public:
      * @brief   Prepares to delete.
      */
 	virtual void DeletePrepare();
-
-    /**
-     * @fn  bool CObjBase::IsTriggerActive(lpctstr trig);
-     *
-     * @brief   Queries if a trigger is active ( m_RunningTrigger ) .
-     *
-     * @param   trig    The trig.
-     *
-     * @return  true if the trigger is active, false if not.
-     */
-	bool IsTriggerActive(lpctstr trig) const;
-
-    /**
-     * @fn  lpctstr CObjBase::GetTriggerActive();
-     *
-     * @brief   Gets trigger active ( m_RunningTrigger ).
-     *
-     * @return  The trigger active.
-     */
-	lpctstr GetTriggerActive() const;
-
-    /**
-     * @fn  void CObjBase::SetTriggerActive(lpctstr trig = nullptr);
-     *
-     * @brief   Sets trigger active ( m_RunningTrigger ).
-     *
-     * @param   trig    The trig.
-     */
-	void SetTriggerActive(lpctstr trig = nullptr);
 
 public:
 

@@ -37,11 +37,6 @@ typedef uint	ERROR_CODE;
 // MAKELONG:  defined in minwindef.h, we use it only on Windows (CSWindow.h). on Linux is missing, we created a define but is commented.
 #define MAKEDWORD(low, high) ((dword)(((word)low) | (((dword)((word)high)) << 16)))
 
-// Desguise an id as a pointer.
-#define ISINTRESOURCE(r)	((((size_t)r) >> 16) == 0)
-#define GETINTRESOURCE(r)	(((size_t)r)&0xFFFF)
-
-
 #define IsNegative(c)		(((c) < 0)?1:0)
 
 //#define IMulDiv(a,b,c)		(((((int)(a)*(int)(b)) + (int)(c / 2)) / (int)(c)) - (IsNegative((int)(a)*(int)(b))))

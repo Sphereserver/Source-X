@@ -218,14 +218,16 @@ void CClient::SysMessage( lpctstr pszMsg ) const // System message (In lower lef
 		case CONNECT_TELNET:
 		case CONNECT_AXIS:
 			{
-				if ( ISINTRESOURCE(pszMsg) || *pszMsg == '\0' ) return;
+				if ( *pszMsg == '\0' )
+                    return;
 
 				new PacketTelnet(this, pszMsg);
 			}
 			return;
 		case CONNECT_UOG:
 			{
-				if ( ISINTRESOURCE(pszMsg) || *pszMsg == '\0' ) return;
+				if ( *pszMsg == '\0' )
+                    return;
 
 				new PacketTelnet(this, pszMsg, true);
 			}

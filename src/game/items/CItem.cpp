@@ -3195,7 +3195,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
             return CObjBase::r_LoadVal(s);
         }
 	}
-	if (GetCallingObjTrigger() != sm_szTrigName[ITRIG_CLIENTTOOLTIP])
+	if (_iCallingObjTriggerId != ITRIG_CLIENTTOOLTIP)
 	{
 		// Avoid @ClientTooltip calling TRIGGER @Create, and this calling again ResendTooltip() and the @ClientTooltip trigger
 		ResendTooltip();
@@ -3341,7 +3341,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 		{
 			if (!pCharSrc)
 				return false;
-			CItem * pTarg = static_cast<CItem*>( CUID(s.GetArgVal()).ItemFind() );
+			CItem * pTarg = CUID(s.GetArgVal()).ItemFind();
 			return pCharSrc->Skill_Mining_Smelt(this, pTarg ? pTarg : nullptr);
 		}
 
@@ -3357,6 +3357,43 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 	return false;
 }
 
+bool CItem::IsTriggerActive(lpctstr trig) const
+{
+    if (((_iRunningTriggerId == -1) && _sRunningTrigger.IsEmpty()) || (trig == nullptr))
+        return false;
+    if (_iRunningTriggerId != -1)
+    {
+        ASSERT(_iRunningTriggerId < ITRIG_QTY);
+        int iAction = FindTableSorted( trig, sm_szTrigName, CountOf(sm_szTrigName)-1 );
+        return (_iRunningTriggerId == iAction);
+    }
+    if (_sRunningTrigger.IsEmpty())
+    {
+        ASSERT(0);
+        return false;
+    }
+    return !_sRunningTrigger.CompareNoCase(trig) ? true : false;
+}
+
+void CItem::SetTriggerActive(lpctstr trig)
+{
+    if (trig == nullptr)
+    {
+        _iRunningTriggerId = -1;
+        _sRunningTrigger.Empty();
+        return;
+    }
+    int iAction = FindTableSorted( trig, sm_szTrigName, CountOf(sm_szTrigName)-1 );
+    if (iAction != -1)
+    {
+        _iRunningTriggerId = iAction;
+        _sRunningTrigger.Empty();
+        return;
+    }
+    _sRunningTrigger = trig;
+    _iRunningTriggerId = -1;
+}
+
 TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
 {
 	ADDTOCALLSTACK("CItem::OnTrigger");
@@ -3367,30 +3404,19 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 	if ( !pSrc )
 		pSrc = &g_Serv;
 
-	ITRIG_TYPE iAction;
-	if ( ISINTRESOURCE(pszTrigName))
-	{
-		iAction = (ITRIG_TYPE) GETINTRESOURCE(pszTrigName);
-		pszTrigName = sm_szTrigName[iAction];
-	}
-	else
-	{
-		iAction = (ITRIG_TYPE) FindTableSorted( pszTrigName, sm_szTrigName, CountOf(sm_szTrigName)-1 );
-	}
-	SetTriggerActive(pszTrigName);
-
-	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
+    CItemBase * pItemDef = Item_GetDef();
+    ASSERT(pItemDef);
 
 	// Is there trigger code in the script file ?
 	// RETURN:
 	//   false = continue default process normally.
 	//   true = don't allow this.  (halt further processing)
+    TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
+    SetTriggerActive( pszTrigName );
+    CTRIG_TYPE iAction = (CTRIG_TYPE)_iRunningTriggerId;
+
 	EXC_TRY("Trigger");
-
-	CItemBase * pItemDef = Item_GetDef();
-	ASSERT(pItemDef);
 	CChar * pChar = pSrc->GetChar();
-
 	TemporaryString tsCharTrigName;
 	tchar* pszCharTrigName = static_cast<tchar *>(tsCharTrigName);
 	sprintf(pszCharTrigName, "@item%s", pszTrigName + 1);
@@ -3529,34 +3555,22 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 	if ( !pSrc )
 		pSrc = &g_Serv;
 
-	ITRIG_TYPE iAction;
-	lpctstr pszTrigName = sm_szTrigName[ITRIG_Create];
-	if ( ISINTRESOURCE(pszTrigName))
-	{
-		iAction = (ITRIG_TYPE) GETINTRESOURCE(pszTrigName);
-		pszTrigName = sm_szTrigName[iAction];
-	}
-	else
-	{
-		iAction = (ITRIG_TYPE) FindTableSorted( pszTrigName, sm_szTrigName, CountOf(sm_szTrigName)-1 );
-	}
+    CItemBase * pItemDef = Item_GetDef();
+    ASSERT(pItemDef);
 
-	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
+    lpctstr pszTrigName = "@create";
+    SetTriggerActive( pszTrigName );
+    CTRIG_TYPE iAction = (CTRIG_TYPE)_iRunningTriggerId;
 
 	// Is there trigger code in the script file ?
 	// RETURN:
 	//   false = continue default process normally.
 	//   true = don't allow this.  (halt further processing)
+    TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
+
 	EXC_TRY("Trigger");
-
-	CItemBase * pItemDef = Item_GetDef();
-	ASSERT(pItemDef);
 	CChar * pChar = pSrc->GetChar();
-
-	TemporaryString tsCharTrigName;
-	tchar* pszCharTrigName = static_cast<tchar *>(tsCharTrigName);
-	sprintf(pszCharTrigName, "@item%s", pszTrigName+1);
-
+    lpctstr pszCharTrigName = "@itemcreate";
 	int iCharAction = (CTRIG_TYPE) FindTableSorted( pszCharTrigName, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName)-1 );
 
 	// 1) Look up the trigger in the RES_ITEMDEF. (default)
@@ -3658,7 +3672,7 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 TRIGRET_TYPE CItem::OnTrigger( ITRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
 {
 	ASSERT( trigger < ITRIG_QTY );
-	return OnTrigger( MAKEINTRESOURCE(trigger), pSrc, pArgs );
+	return OnTrigger( CItem::sm_szTrigName[trigger], pSrc, pArgs );
 }
 
 // Item type specific stuff.

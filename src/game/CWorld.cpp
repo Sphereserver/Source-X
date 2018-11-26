@@ -2124,12 +2124,7 @@ void CWorld::Close()
     {
         //pClient->GetNetState()->clear();
         pClient->GetNetState()->markReadClosed();
-        CChar* pChar = pClient->GetChar();
-        if (pChar)
-        {
-            CSector* pSector = pChar->GetTopSector();
-            pSector->ClientDetach(pChar);
-        }
+        pClient->CharDisconnect();
     }
 
 	if ( m_Sectors != nullptr )

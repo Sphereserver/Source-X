@@ -81,7 +81,7 @@ extern struct CNTWindow : public AbstractSphereThread, public CSWindow, public C
         }
         virtual void SysMessage(LPCTSTR pszMessage) const
         {
-            if (pszMessage == nullptr || ISINTRESOURCE(pszMessage))
+            if (pszMessage == nullptr)
                 return;
 
             TCHAR * ppMessages[255];

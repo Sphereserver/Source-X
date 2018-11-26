@@ -162,7 +162,7 @@ void CServer::Shutdown( int64 iMinutes ) // If shutdown is initialized
 void CServer::SysMessage( lpctstr pszMsg ) const
 {
 	// Print just to the main console.
-	if ( !pszMsg || ISINTRESOURCE(pszMsg) )
+	if ( !pszMsg )
 		return;
 
 #ifdef _WIN32
@@ -175,7 +175,7 @@ void CServer::SysMessage( lpctstr pszMsg ) const
 void CServer::SysMessage(ConsoleOutput *pszMsg) const
 {
     // Print just to the main console.
-    if (!pszMsg || ISINTRESOURCE(pszMsg))
+    if ( !pszMsg )
         return;
 
 #ifdef _WIN32
