@@ -3364,14 +3364,10 @@ bool CItem::IsTriggerActive(lpctstr trig) const
     if (_iRunningTriggerId != -1)
     {
         ASSERT(_iRunningTriggerId < ITRIG_QTY);
-        int iAction = FindTableSorted( trig, sm_szTrigName, CountOf(sm_szTrigName)-1 );
+        int iAction = FindTableSorted( trig, CItem::sm_szTrigName, CountOf(CItem::sm_szTrigName)-1 );
         return (_iRunningTriggerId == iAction);
     }
-    if (_sRunningTrigger.IsEmpty())
-    {
-        ASSERT(0);
-        return false;
-    }
+    ASSERT(!_sRunningTrigger.IsEmpty());
     return !_sRunningTrigger.CompareNoCase(trig) ? true : false;
 }
 
@@ -3383,7 +3379,7 @@ void CItem::SetTriggerActive(lpctstr trig)
         _sRunningTrigger.Empty();
         return;
     }
-    int iAction = FindTableSorted( trig, sm_szTrigName, CountOf(sm_szTrigName)-1 );
+    int iAction = FindTableSorted( trig, CItem::sm_szTrigName, CountOf(CItem::sm_szTrigName)-1 );
     if (iAction != -1)
     {
         _iRunningTriggerId = iAction;
