@@ -431,14 +431,16 @@ bool CRegion::r_LoadVal( CScript & s )
 	{
 		SetModified( REGMOD_TAGS );
 		bool fQuoted = false;
-		m_TagDefs.SetStr( s.GetKey()+ 4, fQuoted, s.GetArgStr( &fQuoted ), false );
+        tchar* ptcArg = s.GetArgStr( &fQuoted );
+		m_TagDefs.SetStr( s.GetKey()+ 4, fQuoted, ptcArg, false );
 		return true;
 	}
 	if ( s.IsKeyHead( "TAG0.", 5 ))
 	{
 		SetModified( REGMOD_TAGS );
 		bool fQuoted = false;
-		m_TagDefs.SetStr( s.GetKey()+ 5, fQuoted, s.GetArgStr( &fQuoted ), false );
+        tchar* ptcArg = s.GetArgStr( &fQuoted );
+		m_TagDefs.SetStr( s.GetKey()+ 5, fQuoted, ptcArg, false );
 		return true;
 	}
 

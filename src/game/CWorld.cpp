@@ -2566,7 +2566,7 @@ void CWorld::OnTick()
                     if (pItem->IsItemEquipped())
                     {
                         ptcSubDesc = "ItemEquipped";
-                        CChar *pChar = static_cast<CChar*>(pItem->GetTopLevelObj());
+                        CChar *pChar = dynamic_cast<CChar*>(pItem->GetTopLevelObj());
                         ASSERT(pChar);
                         fRemove = !pChar->OnTickEquip(pItem);
                         break;
@@ -2602,20 +2602,16 @@ void CWorld::OnTick()
                 {
                     ptcSubDesc = "Multi";
                     CItemMulti *pMulti = dynamic_cast<CItemMulti*>(pObj);
-                    if (pMulti)
-                    {
-                        fRemove = !pMulti->OnTick();
-                    }
+                    ASSERT(pMulti);
+                    fRemove = !pMulti->OnTick();
                 }
                 break;
                 case PROFILE_SHIPS:
                 {
                     ptcSubDesc = "Ship";
-                    CItemShip *pShip = static_cast<CItemShip*>(dynamic_cast<CItem*>(pObj));
-                    if (pShip)
-                    {
-                        fRemove = !pShip->OnTick();
-                    }
+                    CItemShip *pShip = dynamic_cast<CItemShip*>(dynamic_cast<CItem*>(pObj));
+                    ASSERT(pShip);
+                    fRemove = !pShip->OnTick();
                 }
                 break;
                 default:

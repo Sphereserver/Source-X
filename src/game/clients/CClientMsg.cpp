@@ -1256,7 +1256,7 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 
 	if ( pChar->m_pNPC && g_Cfg.m_fVendorTradeTitle )
 	{
-		if ( pChar->GetNPCBrain() == NPCBRAIN_HUMAN )
+		if ( pChar->GetNPCBrainGroup() == NPCBRAIN_HUMAN )
 		{
 			lpctstr title = pChar->GetTradeTitle();
 			if ( *title )
@@ -2205,7 +2205,7 @@ bool CClient::addShopMenuBuy( CChar * pVendor )
 
 	// Non-player vendors could be restocked on-the-fly
 	if ( !pVendor->IsStatFlag(STATF_PET) )
-		pVendor->NPC_Vendor_Restock(false, true);
+		pVendor->NPC_Vendor_Restock();
 
 	CItemContainer *pContainer = pVendor->GetBank(LAYER_VENDOR_STOCK);
 	CItemContainer *pContainerExtra = pVendor->GetBank(LAYER_VENDOR_EXTRA);
@@ -2256,7 +2256,7 @@ bool CClient::addShopMenuSell( CChar * pVendor )
 
 	//	non-player vendors could be restocked on-the-fly
 	if ( !pVendor->IsStatFlag( STATF_PET ) )
-		pVendor->NPC_Vendor_Restock( false, true );
+		pVendor->NPC_Vendor_Restock();
 
 	CItemContainer *pContainer1 = pVendor->GetBank( LAYER_VENDOR_BUYS );
 	CItemContainer *pContainer2 = pVendor->GetBank( LAYER_VENDOR_STOCK );

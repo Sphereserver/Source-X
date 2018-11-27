@@ -2104,7 +2104,7 @@ bool CClient::Event_DoubleClick( CUID uid, bool fMacro, bool fTestTouch, bool fS
 			}
 		}
 
-		if ( pChar->m_pNPC && (pChar->GetNPCBrain() != NPCBRAIN_HUMAN) )
+		if ( pChar->m_pNPC && (pChar->GetNPCBrainGroup() != NPCBRAIN_HUMAN) )
 		{
 			if ( m_pChar->Horse_Mount(pChar) )
 				return true;

@@ -1312,3 +1312,7 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 		Prefix code: 0 for "$2a$", 1 for "$2b$", 2 for "$2y$", 3 for "$1$", 4 for "_".
 		Warning: higher cost-factors (minimum 4, maximum 31) means way slower hashing, which can even block Sphere!
 	- "BCRYPTVALIDATE string, hash" returns 1 if the hash matches the string, otherwise 0.
+
+27-11-2018, Nolok
+- Fixed: Setting a TAG with a quoted numerical value didn't force it to treat the argument as a string.
+- Fixed: Everytime a player opened a buy/sell gump, the vendor had a forced restock.

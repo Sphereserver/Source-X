@@ -358,13 +358,15 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 	if ( s.IsKeyHead( "TAG.", 4 ))
 	{
 		bool fQuoted = false;
-		m_TagDefs.SetStr( s.GetKey()+4, fQuoted, s.GetArgStr( &fQuoted ), false );
+        tchar* ptcArg = s.GetArgStr( &fQuoted );
+		m_TagDefs.SetStr( s.GetKey()+4, fQuoted, ptcArg, false );
 		return true;
 	}
 	if ( s.IsKeyHead( "TAG0.", 5 ))
 	{
 		bool fQuoted = false;
-		m_TagDefs.SetStr( s.GetKey()+5, fQuoted, s.GetArgStr( &fQuoted ), true );
+        tchar* ptcArg = s.GetArgStr( &fQuoted );
+		m_TagDefs.SetStr( s.GetKey()+5, fQuoted, ptcArg, true );
 		return true;
 	}
 

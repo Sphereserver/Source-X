@@ -442,21 +442,21 @@ bool CChar::Stats_Regen()
         {
             continue;
         }
-        if (m_Stat[i].m_regen > iCurTime) // Check if enough time elapsed till the next regen.
+        if (m_Stat[i].m_regenLast > iCurTime) // Check if enough time elapsed till the next regen.
         {
             continue;
         }
-        m_Stat[i].m_regen = iCurTime + iRegenDelay; // in msecs
+        m_Stat[i].m_regenLast = iCurTime + iRegenDelay; // in msecs
 
-		ushort uiMod = (ushort)Stats_GetRegenVal(i);
+		int iMod = (int)Stats_GetRegenVal(i);
 		if ((i == STAT_STR) && (g_Cfg.m_iRacialFlags & RACIALF_HUMAN_TOUGH) && IsHuman())
-            uiMod += 2;		// Humans always have +2 hitpoint regeneration (Tough racial trait)
+            iMod += 2;		// Humans always have +2 hitpoint regeneration (Tough racial trait)
 		
 		if (g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B)
 		{
 			int iGain = Skill_Focus(i);
 			if (iGain > 0)
-                uiMod += (ushort)minimum(iGain, USHRT_MAX);
+                iMod += minimum(iGain, USHRT_MAX);
 		}
 		ushort uiStatLimit = Stat_GetMaxAdjusted(i);
 
@@ -464,14 +464,14 @@ bool CChar::Stats_Regen()
 		{
 			CScriptTriggerArgs Args;
 			Args.m_VarsLocal.SetNum("StatID", i, true);
-			Args.m_VarsLocal.SetNum("Value", uiMod, true);
+			Args.m_VarsLocal.SetNum("Value", iMod, true);
 			Args.m_VarsLocal.SetNum("StatLimit", uiStatLimit, true);
 			if (i == STAT_FOOD)
 				Args.m_VarsLocal.SetNum("HitsHungerLoss", iHitsHungerLoss);
 
 			if (OnTrigger(CTRIG_RegenStat, this, &Args) == TRIGRET_RET_TRUE)
 			{
-				m_Stat[i].m_regen = 0;
+				m_Stat[i].m_regenLast = 0;
 				continue;
 			}
 
@@ -480,18 +480,18 @@ bool CChar::Stats_Regen()
 				i = STAT_STR;
 			else if (i > STAT_FOOD)
 				i = STAT_FOOD;
-            uiMod = (ushort)(Args.m_VarsLocal.GetKeyNum("Value"));
+            iMod = (int)(Args.m_VarsLocal.GetKeyNum("Value"));
 			uiStatLimit = (ushort)(Args.m_VarsLocal.GetKeyNum("StatLimit"));
 			if (i == STAT_FOOD)
 				iHitsHungerLoss = (int)(Args.m_VarsLocal.GetKeyNum("HitsHungerLoss"));
 		}
-		if (uiMod == 0)
+		if (iMod == 0)
 			continue;
 
 		if (i == STAT_FOOD)
-			OnTickFood(uiMod, iHitsHungerLoss);
+			OnTickFood((ushort)iMod, iHitsHungerLoss);
 		else
-			UpdateStatVal(i, uiMod, uiStatLimit);
+			UpdateStatVal(i, iMod, uiStatLimit);
 	}
 	return true;
 }
@@ -502,7 +502,7 @@ int64 CChar::Stats_GetRegenRate(STAT_TYPE iStat)
     // Return regen rate for the given stat.
 
     ASSERT ( (iStat >= STAT_STR) && (iStat <= STAT_FOOD) );
-    int64 iRate = m_Stat[iStat].m_regen;
+    int64 iRate = m_Stat[iStat].m_regenRate;
     if (iRate < 0)    // never regen
         return 0;
     if (iRate == 0)
@@ -516,7 +516,7 @@ void CChar::Stats_SetRegenRate(STAT_TYPE iStat, int64 iRateMilliseconds)
     // Sets regen rate for the given stat (in milliseconds).
 
     ASSERT ( (iStat >= STAT_STR) && (iStat <= STAT_FOOD) );
-    m_Stat[iStat].m_regen = iRateMilliseconds;
+    m_Stat[iStat].m_regenRate = iRateMilliseconds;
 }
 
 ushort CChar::Stats_GetRegenVal(STAT_TYPE iStat)

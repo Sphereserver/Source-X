@@ -44,7 +44,7 @@ bool CChar::Noto_IsEvil() const
 	// animals and humans given more leeway.
 	if ( Noto_IsMurderer() )
 		return true;
-	switch ( GetNPCBrain() )
+	switch ( GetNPCBrainGroup() )
 	{
 		case NPCBRAIN_MONSTER:
 		case NPCBRAIN_DRAGON:
@@ -68,13 +68,13 @@ bool CChar::Noto_IsNeutral() const
 	ADDTOCALLSTACK("CChar::Noto_IsNeutral");
 	// Should neutrality change in guarded areas ?
 	short iKarma = GetKarma();
-	switch ( GetNPCBrain() )
+	switch ( GetNPCBrainGroup() )
 	{
 		case NPCBRAIN_MONSTER:
 		case NPCBRAIN_BERSERK:
-			return ( iKarma<= 0 );
+			return ( iKarma <= 0 );
 		case NPCBRAIN_ANIMAL:
-			return ( iKarma<= 100 );
+			return ( iKarma <= 100 );
 		default:
 			break;
 	}

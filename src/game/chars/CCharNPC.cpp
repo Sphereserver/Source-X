@@ -275,7 +275,7 @@ void CChar::NPC_LoadScript( bool fRestock )
 	{
 		// Set a default brain type til we get the real one from scripts.
 		// should have a default brain. watch out for override vendor.
-		SetNPCBrain(GetNPCBrain(false));	
+		SetNPCBrain(GetNPCBrainAuto());	
 	}					
 
 	CCharBase * pCharDef = Char_GetDef();

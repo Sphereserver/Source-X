@@ -1788,7 +1788,7 @@ bool CChar::NPC_Act_Food()
 	else
 	{
 
-		NPCBRAIN_TYPE	brain = GetNPCBrain();
+		const NPCBRAIN_TYPE brain = GetNPCBrainGroup();
 		if ( brain == NPCBRAIN_ANIMAL )						// animals eat grass always
 			bSearchGrass = true;
 		//else if (( brain == NPCBRAIN_HUMAN ) && !iFood )	// human eat grass if starving nearly to death
@@ -1806,16 +1806,16 @@ bool CChar::NPC_Act_Food()
 	}
 	if ( bSearchGrass )
 	{
-		CCharBase			*pCharDef = Char_GetDef();
+		CCharBase *pCharDef = Char_GetDef();
 		CResourceIDBase	rid = CResourceID(RES_TYPEDEF, IT_GRASS);
 
 		if ( pCharDef->m_FoodType.ContainsResourceID(rid) ) // do I accept grass as food?
 		{
-			CItem	*pResBit = g_World.CheckNaturalResource(GetTopPoint(), IT_GRASS, true, this);
+			CItem *pResBit = g_World.CheckNaturalResource(GetTopPoint(), IT_GRASS, true, this);
 			if ( pResBit && pResBit->GetAmount() && ( pResBit->GetTopPoint().m_z == iMyZ ) )
 			{
-				ushort iEaten = pResBit->ConsumeAmount(10);
-				EatAnim("grass", iEaten/10);
+				ushort uiEaten = pResBit->ConsumeAmount(10);
+				EatAnim("grass", uiEaten/10);
 
 				//	the bit is not needed in a worldsave, timeout of 10 minutes
 				pResBit->m_TagDefs.SetNum("NOSAVE", 1);
@@ -2451,7 +2451,7 @@ void CChar::NPC_Food()
 					// no food around, but maybe i am ok with grass?
 	else
 	{
-		NPCBRAIN_TYPE	brain = GetNPCBrain();
+		NPCBRAIN_TYPE brain = GetNPCBrainGroup();
 		if ( brain == NPCBRAIN_ANIMAL )						// animals eat grass always
 			bSearchGrass = true;
 		else if (( brain == NPCBRAIN_HUMAN ) && !iFood )	// human eat grass if starving nearly dead
@@ -2526,7 +2526,7 @@ void CChar::NPC_ExtraAI()
 
 	if ( !m_pNPC )
 		return;
-	if ( GetNPCBrain() != NPCBRAIN_HUMAN )
+	if ( GetNPCBrainGroup() != NPCBRAIN_HUMAN )
 		return;
 
 	EXC_SET_BLOCK("init");

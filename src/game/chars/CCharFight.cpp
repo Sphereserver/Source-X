@@ -63,7 +63,7 @@ void CChar::OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark )
 	if ( !NPC_CanSpeak() )
 		return;	// I can't talk anyhow.
 
-	if (GetNPCBrain() != NPCBRAIN_HUMAN)
+	if (GetNPCBrainGroup() != NPCBRAIN_HUMAN)
 	{
 		// Good monsters don't call for guards outside guarded areas.
 		if (!m_pArea || !m_pArea->IsGuarded())

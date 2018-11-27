@@ -2373,7 +2373,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 	ADDTOCALLSTACK("CItem::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-    if (static_cast<CEntity*>(this)->r_WriteVal(pszKey, sVal, pSrc)) // Checking CComponents first.
+    if (CEntity::r_WriteVal(pszKey, sVal, pSrc)) // Checking CComponents first.
     {
         return true;
     }
@@ -2696,7 +2696,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 	ADDTOCALLSTACK("CItem::r_LoadVal");
 	EXC_TRY("LoadVal");
 
-    if (static_cast<CEntity*>(this)->r_LoadVal(s))
+    if (CEntity::r_LoadVal(s))
     {
         return true;
     }

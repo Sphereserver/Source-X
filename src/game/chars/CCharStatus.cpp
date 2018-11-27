@@ -491,29 +491,40 @@ bool CChar::IsSwimming() const
 	return false;
 }
 
-NPCBRAIN_TYPE CChar::GetNPCBrain(bool fDefault) const
+NPCBRAIN_TYPE CChar::GetNPCBrain() const
 {
-	ADDTOCALLSTACK("CChar::GetNPCBrain");
-	// Return NPCBRAIN_ANIMAL for animals, _HUMAN for NPC human and PCs, >= _MONSTER for monsters
-	//	(can return also _BERSERK and _DRAGON)
-	// For tracking and other purposes.
+    ADDTOCALLSTACK_INTENSIVE("CChar::GetNPCBrain");
+    ASSERT(m_pNPC);
+    return m_pNPC->m_Brain;
+}
 
-	if (fDefault)
-	{
-		if (m_pNPC)
-		{
-			if ((m_pNPC->m_Brain >= NPCBRAIN_HUMAN) && (m_pNPC->m_Brain <= NPCBRAIN_STABLE))
-				return NPCBRAIN_HUMAN;
+NPCBRAIN_TYPE CChar::GetNPCBrainGroup() const
+{
+    ADDTOCALLSTACK("CChar::GetNPCBrainGroup");
+    // Return NPCBRAIN_ANIMAL for animals, _HUMAN for NPC human and PCs, >= _MONSTER for monsters
+    //	(can return also _BERSERK and _DRAGON)
+    // For tracking and other purposes.
 
-			return m_pNPC->m_Brain;
-		}
-		else if (m_pPlayer)
-			return NPCBRAIN_HUMAN;
-	}
-	
+    if (m_pNPC)
+    {
+        if ((m_pNPC->m_Brain >= NPCBRAIN_HUMAN) && (m_pNPC->m_Brain <= NPCBRAIN_STABLE))
+            return NPCBRAIN_HUMAN;
 
-	// Handle the exceptions (or voluntarily auto-detect the brain, if fDefault == false)
-	CREID_TYPE id = GetDispID();
+        if ((m_pNPC->m_Brain <= NPCBRAIN_NONE) || (m_pNPC->m_Brain >= NPCBRAIN_QTY))
+            return GetNPCBrainAuto();
+        return m_pNPC->m_Brain;
+    }
+    else if (m_pPlayer)
+        return NPCBRAIN_HUMAN;
+    //ASSERT(0);
+    return NPCBRAIN_NONE;
+}
+
+NPCBRAIN_TYPE CChar::GetNPCBrainAuto() const
+{
+	ADDTOCALLSTACK("CChar::GetNPCBrainAuto");
+	// Auto-detect the brain
+	const CREID_TYPE id = GetDispID();
 	if ( id >= CREID_IRON_GOLEM )
 	{
 		switch ( id )

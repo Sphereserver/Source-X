@@ -1086,7 +1086,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 				continue;
 
 			CCharBase *pCharDef = pChar->Char_GetDef();
-			NPCBRAIN_TYPE basic_type = pChar->GetNPCBrain();
+			NPCBRAIN_TYPE basic_type = pChar->GetNPCBrainGroup();
 			if ( basic_type == NPCBRAIN_DRAGON || basic_type == NPCBRAIN_BERSERK )
 				basic_type = NPCBRAIN_MONSTER;
 

@@ -167,7 +167,8 @@ public:
 		ushort  m_val;       // Hits, Mana, Stam
 		ushort  m_max;		 // MaxVal: MaxHits, MaxMana, MaxStam
         int     m_maxMod;    // Modifier to MaxVal: ModMaxHits, ModMaxMana, ModMaxStam
-		int64   m_regen;	 // Milliseconds for the next regen.
+		int64   m_regenRate; // Regen each this much milliseconds.
+        int64   m_regenLast; // Time of the last regen.
         ushort  m_regenVal;  // Amount of Stat to gain at each regen
 	} m_Stat[STAT_QTY];
     short m_iKarma;
@@ -475,7 +476,9 @@ public:
 	bool SetPlayerAccount( CAccount * pAccount );
 	bool SetPlayerAccount( lpctstr pszAccount );
 	bool SetNPCBrain( NPCBRAIN_TYPE NPCBrain );
-	NPCBRAIN_TYPE GetNPCBrain( bool fDefault = true ) const;  // Return NPCBRAIN_ANIMAL for animals, _HUMAN for NPC human and PCs, >= _MONSTER for monsters
+	NPCBRAIN_TYPE GetNPCBrain() const;
+    NPCBRAIN_TYPE GetNPCBrainGroup() const;     // Return NPCBRAIN_ANIMAL for animals, _HUMAN for NPC human and PCs, >= _MONSTER for monsters
+    NPCBRAIN_TYPE GetNPCBrainAuto() const;    // Guess default NPC brain
 	void ClearNPC();
 	void ClearPlayer();
 
