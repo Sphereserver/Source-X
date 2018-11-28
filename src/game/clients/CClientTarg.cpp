@@ -1955,7 +1955,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			return false;
 		m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID;
 		m_pChar->m_Act_UID = m_Targ_UID;
-		return m_pChar->Skill_Start( (pCharTarg->GetNPCBrain() == NPCBRAIN_ANIMAL) ? SKILL_VETERINARY : SKILL_HEALING );
+		return m_pChar->Skill_Start( (pCharTarg->m_pNPC && (pCharTarg->GetNPCBrain() == NPCBRAIN_ANIMAL)) ? SKILL_VETERINARY : SKILL_HEALING );
 
 	case IT_SEED:
 		return m_pChar->Use_Seed( pItemUse, &pt );

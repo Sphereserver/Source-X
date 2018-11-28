@@ -2507,28 +2507,34 @@ void CWorld::OnTick()
 
     /* World ticking (timers) */
     // Items, Chars ... Everything relying on CTimedObject (excepting CObjBase, which inheritance is only virtual)
+    const int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
+
     EXC_SET_BLOCK("WorldObjects selection");
     ProfileTask timersTask(PROFILE_TIMERS);
-    const int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
-    std::map<int64, TimedObjectsContainer>::iterator it = _mWorldTickList.begin();
     std::map<int64, std::vector<CTimedObject*>> tmpMap;
-    int64 iTime;
     {
-        // Need here a new, inner scope to get rid of EXC_TRYSUB variables
+        // Need here a new, inner scope to get rid of EXC_TRYSUB variables and for the unique_lock
         EXC_TRYSUB("Tick::WorldObj");
-        while ( it != _mWorldTickList.end() && iCurTime > (iTime = it->first))
+        std::unique_lock<std::shared_mutex> lock(_mWorldTickList.THREAD_CMUTEX);
+        std::unique_lock<std::shared_mutex> lockLookup(_mWorldTickLookup.THREAD_CMUTEX);
+        std::map<int64, TimedObjectsContainer>::iterator it = _mWorldTickList.begin();
+        const std::map<int64, TimedObjectsContainer>::iterator itEnd = _mWorldTickList.end();
+        int64 iTime;
+        while ( (it != itEnd) && (iCurTime > (iTime = it->first)))
         {
-            _mWorldTickList.THREAD_CMUTEX.lock();
             TimedObjectsContainer& cont = it->second;
-            cont.THREAD_CMUTEX.lock();
-
-            // Copying code
+            std::shared_lock<std::shared_mutex> lockCont(cont.THREAD_CMUTEX);
+            
+            for (CTimedObject* pTimedObj : cont)
+            {
+                if (_mWorldTickLookup.erase(pTimedObj) == 0)    // Double check: ensure this object exists also in the lookup cont
+                {
+                    it = _mWorldTickList.erase(it);
+                    continue;
+                }
+            }
             tmpMap[iTime] = cont;
-            ++it;
-            // end of copying code
-        
-            cont.THREAD_CMUTEX.unlock();
-            _mWorldTickList.THREAD_CMUTEX.unlock();
+            it = _mWorldTickList.erase(it);
         }
         EXC_CATCHSUB("Reading from _mWorldTickList");
     }
@@ -2562,19 +2568,24 @@ void CWorld::OnTick()
                 {
                     ptcSubDesc = "Item (Generic)";
                     CItem *pItem = dynamic_cast<CItem*>(pObj);
+                    ptcSubDesc = "Item (Casted)";
                     ASSERT(pItem);
                     if (pItem->IsItemEquipped())
                     {
-                        ptcSubDesc = "ItemEquipped";
-                        CChar *pChar = dynamic_cast<CChar*>(pItem->GetTopLevelObj());
+                        ptcSubDesc = "ItemEquipped (CObjBaseTemplate)";
+                        CObjBaseTemplate* pObjTop = pItem->GetTopLevelObj();
+                        ptcSubDesc = "ItemEquipped (CObjBaseTemplateCasted)";
+                        ASSERT(pObjTop);
+                        CChar *pChar = dynamic_cast<CChar*>(pObjTop);
                         ASSERT(pChar);
+                        ptcSubDesc = "ItemEquipped (CCharCasted)";
                         fRemove = !pChar->OnTickEquip(pItem);
                         break;
                     }
                     else
                     {
                         ptcSubDesc = "Item";
-                        fRemove = (pItem->OnTick() == false);
+                        fRemove = (pObj->OnTick() == false);
                         break;
                     }
                 }
@@ -2583,7 +2594,9 @@ void CWorld::OnTick()
                 {
                     ptcSubDesc = "Char";
                     fRemove = !pObj->OnTick();
+                    ptcSubDesc = "Char (PostTick)";
                     CChar* pChar = dynamic_cast<CChar*>(pObj);
+                    ptcSubDesc = "Char (Casted)";
                     ASSERT(pChar);
                     if (pChar->m_pNPC && !pObj->IsTimerSet())
                     {
@@ -2602,6 +2615,7 @@ void CWorld::OnTick()
                 {
                     ptcSubDesc = "Multi";
                     CItemMulti *pMulti = dynamic_cast<CItemMulti*>(pObj);
+                    ptcSubDesc = "Multi (Casted)";
                     ASSERT(pMulti);
                     fRemove = !pMulti->OnTick();
                 }
@@ -2609,9 +2623,12 @@ void CWorld::OnTick()
                 case PROFILE_SHIPS:
                 {
                     ptcSubDesc = "Ship";
-                    CItemShip *pShip = dynamic_cast<CItemShip*>(dynamic_cast<CItem*>(pObj));
-                    ASSERT(pShip);
-                    fRemove = !pShip->OnTick();
+                    CItem* pItem = dynamic_cast<CItem*>(pObj);
+                    ptcSubDesc = "Ship (CItem Casted)";
+                    ASSERT(pItem);
+                    ASSERT(dynamic_cast<CItemShip*>(pItem));
+                    ptcSubDesc = "Ship (CItemShip Casted)";
+                    fRemove = !pObj->OnTick();
                 }
                 break;
                 default:
@@ -2629,13 +2646,7 @@ void CWorld::OnTick()
                 pObjBase->Delete();
             }
             EXC_CATCHSUB(ptcSubDesc);
-            _mWorldTickLookup.THREAD_CMUTEX.lock();
-            _mWorldTickLookup.erase(pObj);
-            _mWorldTickLookup.THREAD_CMUTEX.unlock();
         }
-        _mWorldTickList.THREAD_CMUTEX.lock();
-        _mWorldTickList.erase(pairObj.first);  // entirely remove this map's entry.
-        _mWorldTickList.THREAD_CMUTEX.unlock();
     }
 
 
@@ -2643,22 +2654,31 @@ void CWorld::OnTick()
 
     EXC_SET_BLOCK("PeriodicChars selection");
     ProfileTask taskChars(PROFILE_CHARS);
-    std::map<int64, TimedCharsContainer>::iterator charIt = _mCharTickList.begin(), charItEnd = _mCharTickList.end();
     std::map<int64, std::vector<CChar*>> tmpCharMap;
     {
-        // Need here a new, inner scope to get rid of EXC_TRYSUB variables
+        // Need here a new, inner scope to get rid of EXC_TRYSUB variables, and for the unique_lock
         EXC_TRYSUB("Tick::PeriodicChar");
-        while (charIt != charItEnd && iCurTime > (iTime = charIt->first))
+        std::unique_lock<std::shared_mutex> lock(_mCharTickList.THREAD_CMUTEX);
+        std::unique_lock<std::shared_mutex> lockLookup(_mCharTickLookup.THREAD_CMUTEX);
+        std::map<int64, TimedCharsContainer>::iterator charIt = _mCharTickList.begin();
+        const std::map<int64, TimedCharsContainer>::iterator charItEnd = _mCharTickList.end();
+        int64 iTime;
+        while ((charIt != charItEnd) && (iCurTime > (iTime = charIt->first)))
         {
-            _mCharTickList.THREAD_CMUTEX.lock();
             TimedCharsContainer& cont = charIt->second;
-            cont.THREAD_CMUTEX.lock();
+            std::shared_lock<std::shared_mutex> lockCont(cont.THREAD_CMUTEX);
 
+            for (CChar* pChar : cont)
+            {
+                if (_mCharTickLookup.erase(pChar) == 0) // Double check: ensure this object exists also in the lookup cont
+                {
+                    charIt = _mCharTickList.erase(charIt);
+                    continue;
+                }
+            }
             tmpCharMap[iTime] = cont;
-        
-            ++charIt;
-            cont.THREAD_CMUTEX.unlock();
-            _mCharTickList.THREAD_CMUTEX.unlock();
+            charIt = _mCharTickList.erase(charIt);
+            
         }
         EXC_CATCHSUB("Reading from _mCharTickList");
     }
@@ -2669,10 +2689,6 @@ void CWorld::OnTick()
         EXC_TRYSUB("Tick::PeriodicChar::Elapsed");
         for (CChar* pChar : pairChar.second)
         {
-            _mCharTickLookup.THREAD_CMUTEX.lock();
-            _mCharTickLookup.erase(pChar);
-            _mCharTickLookup.THREAD_CMUTEX.unlock();
-
             if (pChar->OnTickPeriodic())
             {
                 AddCharTicking(pChar);
@@ -2683,10 +2699,6 @@ void CWorld::OnTick()
             }
         }
         EXC_CATCHSUB("");
-
-        _mCharTickList.THREAD_CMUTEX.lock();
-        _mCharTickList.erase(pairChar.first);
-        _mCharTickList.THREAD_CMUTEX.unlock();
     }
 
     m_ObjDelete.Clear();	// clean up our delete list (this DOES delete the objects, thanks to the virtual destructors).
