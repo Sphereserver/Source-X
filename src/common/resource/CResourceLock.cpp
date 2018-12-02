@@ -3,7 +3,7 @@
 *
 */
 
-#include "../sphere/threads.h"
+#include "../../sphere/threads.h"
 #include "CResourceScript.h"
 #include "CResourceLock.h"
 

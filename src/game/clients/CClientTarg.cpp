@@ -1,11 +1,12 @@
 // An item is targetted.
 
-#include "../../common/CLog.h"
-#include "../../common/CUIDExtra.h"
 #include "../../network/send.h"
+#include "../resource/blocks/CItemTypeDef.h"
 #include "../chars/CChar.h"
 #include "../items/CItemMulti.h"
 #include "../items/CItemVendable.h"
+#include "../CLog.h"
+#include "../CUIDExtra.h"
 #include "../triggers.h"
 #include "CClient.h"
 

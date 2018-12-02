@@ -7,9 +7,9 @@
 #define _INC_CCONTAINER_H
 
 #include "../common/sphere_library/CSObjList.h"
+#include "../common/resource/CResourceBase.h"
 #include "../common/CUID.h"
 #include "../common/CRect.h"
-#include "../common/CResourceBase.h"
 
 
 class CItemContainer;

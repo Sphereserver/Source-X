@@ -6,10 +6,10 @@
 #ifndef _INC_COBJBASE_H
 #define _INC_COBJBASE_H
 
+#include "../common/resource/CResourceBase.h"
+#include "../common/resource/CResourceRef.h"
 #include "../common/CObjBaseTemplate.h"
 #include "../common/CScriptObj.h"
-#include "../common/CResourceBase.h"
-#include "../common/CResourceRef.h"
 #include "clients/CClientTooltip.h"
 #include "components/CTimedObject.h"
 #include "CEntity.h"

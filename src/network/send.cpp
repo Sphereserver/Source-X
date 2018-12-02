@@ -3,6 +3,11 @@
 	#include <sys/time.h>
 #endif
 
+#include "../common/resource/CResourceLock.h"
+#include "../common/CLog.h"
+#include "../common/CUOInstall.h"
+#include "../common/CUIDExtra.h"
+#include "../common/CObjBaseTemplate.h"
 #include "../game/chars/CChar.h"
 #include "../game/clients/CClient.h"
 #include "../game/clients/CClientTooltip.h"
@@ -16,11 +21,6 @@
 #include "../game/components/CCItemDamageable.h"
 #include "../game/CObjBase.h"
 #include "../game/CWorld.h"
-#include "../common/CLog.h"
-#include "../common/CUOInstall.h"
-#include "../common/CUIDExtra.h"
-#include "../common/CObjBaseTemplate.h"
-#include "../common/CResourceLock.h"
 #include "network.h"
 #include "packet.h"
 #include "send.h"

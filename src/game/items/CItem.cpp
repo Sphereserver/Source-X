@@ -1,4 +1,5 @@
 
+#include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
 #include "../../common/CUIDExtra.h"
 #include "../../network/network.h"
@@ -10,7 +11,6 @@
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../clients/CClient.h"
-#include "../CResourceLock.h"
 #include "../triggers.h"
 #include "CItem.h"
 #include "CItemCommCrystal.h"

@@ -3,10 +3,13 @@
 *
 */
 
-#include "../game/chars/CChar.h"
-#include "../game/items/CItem.h"
-#include "../game/CServerConfig.h"
-#include "../game/triggers.h"
+#include "../../game/chars/CChar.h"
+#include "../../game/items/CItem.h"
+#include "../../game/triggers.h"
+#include "blocks/CSkillDef.h"
+#include "blocks/CSpellDef.h"
+#include "blocks/CRegionResourceDef.h"
+#include "blocks/CWebPageDef.h"
 #include "CResourceLock.h"
 #include "CResourceLink.h"
 

@@ -4,7 +4,6 @@
 #include "../game/CServerConfig.h"
 #include "../game/CWorld.h"
 #include "sphere_library/CSRand.h"
-#include "CResourceBase.h"
 #include "CException.h"
 #include "CExpression.h"
 

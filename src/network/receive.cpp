@@ -1,5 +1,7 @@
 
+#include "../common/resource/blocks/CDialogDef.h"
 #include "../common/CUIDExtra.h"
+#include "../common/CLog.h"
 #include "../game/chars/CChar.h"
 #include "../game/clients/CClient.h"
 #include "../game/items/CItem.h"
@@ -8,7 +10,6 @@
 #include "../game/items/CItemMultiCustom.h"
 #include "../game/items/CItemShip.h"
 #include "../game/items/CItemVendable.h"
-#include "../common/CLog.h"
 #include "../game/CServerTime.h"
 #include "../game/triggers.h"
 #include "network.h"

@@ -11,8 +11,9 @@
 #include "../sphere/ProfileTask.h"
 #include "crypto/CBCrypt.h"
 #include "crypto/CMD5.h"
+#include "resource/blocks/CResourceNamedDef.h"
+#include "resource/CResourceLock.h"
 #include "CExpression.h"
-#include "CResourceLock.h"
 #include "CUIDExtra.h"
 #include "CSFileObjContainer.h"
 #include "CScriptTriggerArgs.h"
@@ -108,7 +109,7 @@ bool CScriptObj::r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTrigge
 	if ( index == g_Cfg.m_Functions.BadIndex() )
 		return false;
 
-	CResourceNamed * pFunction = static_cast <CResourceNamed *>( g_Cfg.m_Functions[index] );
+	CResourceNamedDef * pFunction = static_cast <CResourceNamedDef *>( g_Cfg.m_Functions[index] );
 	ASSERT(pFunction);
 	CResourceLock sFunction;
 	if ( pFunction->ResourceLock(sFunction) )

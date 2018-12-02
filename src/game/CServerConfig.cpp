@@ -1,4 +1,10 @@
-﻿#include "../common/sphere_library/CSFileList.h"
+﻿#include "../common/resource/blocks/CDialogDef.h"
+#include "../common/resource/blocks/CItemTypeDef.h"
+#include "../common/resource/blocks/CSkillClassDef.h"
+#include "../common/resource/blocks/CRandGroupDef.h"
+#include "../common/resource/blocks/CRegionResourceDef.h"
+#include "../common/resource/blocks/CResourceNamedDef.h"
+#include "../common/sphere_library/CSFileList.h"
 #include "../common/CException.h"
 #include "../common/CUOInstall.h"
 #include "../common/sphereversion.h"
@@ -7,18 +13,18 @@
 #include "../sphere/ProfileTask.h"
 #include "../sphere/ntwindow.h"
 #include "clients/CAccount.h"
+#include "clients/CClient.h"
 #include "chars/CChar.h"
 #include "chars/CCharBase.h"
-#include "clients/CClient.h"
 #include "items/CItemBase.h"
 #include "items/CItemStone.h"
+#include "components/CCChampion.h"
 #include "uo_files/CUOItemInfo.h"
 #include "uo_files/CUOTerrainInfo.h"
 #include "CServerTime.h"
 #include "CWorld.h"
 #include "spheresvr.h"
 #include "triggers.h"
-#include "components/CCChampion.h"
 
 
 CServerConfig::CServerConfig()
@@ -350,7 +356,7 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	else if ( iResType == RES_CHARDEF )
 	{
 		//pRef = CCharBase::FindCharBase(static_cast<CREID_TYPE>(Exp_GetVal(pszKey)));
-		pRef = CCharBase::FindCharBase(static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, pszKey)));
+		pRef = CCharBase::FindCharBase((CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, pszKey)));
 	}
 	else if ( iResType == RES_ITEMDEF )
 	{
@@ -3081,12 +3087,12 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		pPrvDef = ResourceGetDef( rid );
 		if ( pPrvDef )
 		{
-			pNewLink = dynamic_cast <CSRandGroupDef*>(pPrvDef);
+			pNewLink = dynamic_cast <CRandGroupDef*>(pPrvDef);
 			ASSERT(pNewLink);
 		}
 		else
 		{
-			pNewLink = new CSRandGroupDef( rid );
+			pNewLink = new CRandGroupDef( rid );
 			ASSERT(pNewLink);
 			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
 			if (pLinkResScript != nullptr)
@@ -3208,7 +3214,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 	case RES_FUNCTION:
 		{
 			// Define a char macro. (Name is NOT DEFNAME)
-			pNewLink = new CResourceNamed(rid, pScript->GetArgStr());
+			pNewLink = new CResourceNamedDef(rid, pScript->GetArgStr());
 
 			// Link the CResourceLink to the CResourceScript it was read and created,
 			//	so later we can retrieve the file and the line for debugging purposes.
@@ -4463,55 +4469,4 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
     g_NTWindow.SetWindowTitle();
 #endif
 	return true;
-}
-
-int CItemTypeDef::GetItemType() const
-{
-	ADDTOCALLSTACK("CItemTypeDef::GetItemType");
-	return (int)(GetResourceID().GetPrivateUID() & 0xFFFF);
-}
-
-bool CItemTypeDef::r_LoadVal( CScript & s )
-{
-	ADDTOCALLSTACK("CItemTypeDef::r_LoadVal");
-	EXC_TRY("LoadVal");
-	lpctstr		pszKey	= s.GetKey();
-	lpctstr		pszArgs	= s.GetArgStr();
-
-	if ( !strnicmp( pszKey, "TERRAIN", 7 ) )
-	{
-		size_t iLo = Exp_GetVal( pszArgs );
-		GETNONWHITESPACE( pszArgs );
-
-		if ( *pszArgs == ',' )
-		{
-			pszArgs++;
-			GETNONWHITESPACE( pszArgs );
-		}
-
-		size_t iHi;
-		if ( *pszArgs == '\0' )
-			iHi	= iLo;
-		else
-			iHi	= Exp_GetVal( pszArgs );
-
-		if ( iLo > iHi )		// swap
-		{
-			size_t iTmp = iHi;
-			iHi	= iLo;
-			iLo	= iTmp;
-		}
-
-		for ( size_t i = iLo; i <= iHi; i++ )
-		{
-			g_World.m_TileTypes.assign_at_grow(i, this);
-		}
-		return true;
-	}
-	EXC_CATCH;
-
-	EXC_DEBUG_START;
-	EXC_ADD_SCRIPT;
-	EXC_DEBUG_END;
-	return false;
 }

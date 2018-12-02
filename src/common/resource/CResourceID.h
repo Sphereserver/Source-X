@@ -6,7 +6,7 @@
 #ifndef _INC_CRESOURCEID_H
 #define _INC_CRESOURCEID_H
 
-#include "CUID.h"
+#include "../CUID.h"
 
 enum RES_TYPE	// all the script resource blocks we know how to deal with !
 {

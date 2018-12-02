@@ -1,5 +1,6 @@
 //  CChar is either an NPC or a Player.
 
+#include "../../common/resource/blocks/CSkillClassDef.h"
 #include "../../common/CException.h"
 #include "../../common/CScriptTriggerArgs.h"
 #include "../triggers.h"

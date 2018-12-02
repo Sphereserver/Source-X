@@ -5,13 +5,12 @@
 #ifndef _INC_CCChampion_H
 #define _INC_CCChampion_H
 
-#include "CCSpawn.h"
+#include "../../common/sphere_library/CSString.h"
+#include "../../common/resource/CResourceBase.h"
+#include "../uo_files/uofiles_enums_creid.h"
 #include "../items/CItemMulti.h"
 #include "../chars/CChar.h"
-#include "../uo_files/uofiles_enums_creid.h"
-#include "../../common/sphere_library/CSString.h"
-#include "../../common/datatypes.h"
-#include "../../common/CResourceBase.h"
+#include "CCSpawn.h"
 
 enum CHAMPION_ID
 {

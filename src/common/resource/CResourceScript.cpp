@@ -3,11 +3,10 @@
 *
 */
 
-#include "../sphere/threads.h"
-#include "../game/CServer.h"
-#include "../game/CServerConfig.h"
-#include "sphere_library/CSFileList.h"
-#include "CLog.h"
+#include "../../sphere/threads.h"
+#include "../../game/CServer.h"
+#include "../../game/CServerConfig.h"
+#include "../sphere_library/CSFileList.h"
 #include "CResourceScript.h"
 
 

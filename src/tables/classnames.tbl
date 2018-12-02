@@ -3,6 +3,11 @@
 //	Set:	class  names
 //
 
+#include "../common/resource/blocks/CDialogDef.h"
+#include "../common/resource/blocks/CItemTypeDef.h"
+#include "../common/resource/blocks/CRandGroupDef.h"
+#include "../common/resource/blocks/CRegionResourceDef.h"
+#include "../common/resource/blocks/CSkillClassDef.h"
 #include "../game/CPathFinder.h"
 #include "../game/chars/CCharBase.h"
 #include "../game/chars/CCharPlayer.h"
@@ -43,7 +48,7 @@ ADD(CServerDef,				"CServerDef");
 ADD(CServer,				"CServer");
 ADD(CSector,				"CSector");
 ADD(CRegionResourceDef,		"CRegionResourceDef");
-ADD(CSRandGroupDef,			"CSRandGroupDef");
+ADD(CRandGroupDef,			"CRandGroupDef");
 ADD(CSpellDef,				"CSpellDef");
 ADD(CSkillClassDef,			"CSkillClassDef");
 ADD(CItemTypeDef,			"CItemTypeDef");

@@ -8,13 +8,6 @@
 #include "CClient.h"
 
 
-extern "C"
-{
-	void globalstartsymbol() {}	// put this here as just the starting offset.
-	const int globalstartdata = 0xffffffff;
-}
-
-
 //**********************************************************************
 // -CAccounts
 

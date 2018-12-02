@@ -6,8 +6,8 @@
 #ifndef _INC_CREGION_H
 #define _INC_CREGION_H
 
-#include "../common/CResourceBase.h"
-#include "../common/CResourceRef.h"
+#include "../common/resource/CResourceBase.h"
+#include "../common/resource/CResourceRef.h"
 #include "CRegionBase.h"
 
 class CItemMulti;
@@ -185,7 +185,7 @@ private:
 	CRegion& operator=(const CRegion& other);
 };
 
-class CSRandGroupDef;
+class CRandGroupDef;
 
 class CRegionWorld : public CRegion
 {
@@ -197,7 +197,7 @@ public:
 	static lpctstr const sm_szVerbKeys[];
 
 public:
-	const CSRandGroupDef * FindNaturalResource( int /* IT_TYPE */ type ) const;
+	const CRandGroupDef * FindNaturalResource( int /* IT_TYPE */ type ) const;
 
 public:
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;

@@ -1,7 +1,8 @@
 // Common for client and server.
 
+#include "../common/resource/blocks/CRandGroupDef.h"
+#include "../common/resource/CResourceLock.h"
 #include "../common/CUIDExtra.h"
-#include "../common/CResourceLock.h"
 #include "../common/CScript.h"
 #include "../sphere/threads.h"
 #include "chars/CChar.h"
@@ -1010,7 +1011,7 @@ bool CRegionWorld::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command
 }
 
 
-const CSRandGroupDef * CRegionWorld::FindNaturalResource(int type) const
+const CRandGroupDef * CRegionWorld::FindNaturalResource(int type) const
 {
 	ADDTOCALLSTACK("CRegionWorld::FindNaturalResource");
 	// Find the natural resources assinged to this region.
@@ -1023,7 +1024,7 @@ const CSRandGroupDef * CRegionWorld::FindNaturalResource(int type) const
 			continue;
 
 		if ( pLink->GetResPage() == type )
-			return (dynamic_cast <const CSRandGroupDef *>(pLink));
+			return (dynamic_cast <const CRandGroupDef *>(pLink));
 	}
 	return nullptr;
 }

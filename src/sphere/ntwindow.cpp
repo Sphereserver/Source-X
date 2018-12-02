@@ -4,7 +4,6 @@
 #include "../common/sphere_library/CSWindow.h"
 #include "../common/sphere_library/CSString.h"
 #include "../common/CException.h"
-#include "../common/CResourceBase.h"
 #include "../common/CTextConsole.h"
 #include "../common/CLog.h"
 #include "../common/sphereversion.h"	// sphere version

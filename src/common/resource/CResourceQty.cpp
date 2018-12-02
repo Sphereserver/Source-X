@@ -3,11 +3,11 @@
 *
 */
 
-#include "../game/uo_files/uofiles_enums_itemid.h"
-#include "../game/items/CItemBase.h"
-#include "../game/chars/CChar.h"
-#include "../game/CObjBase.h"
-#include "../sphere/threads.h"
+#include "../../game/uo_files/uofiles_enums_itemid.h"
+#include "../../game/items/CItemBase.h"
+#include "../../game/chars/CChar.h"
+#include "../../game/CObjBase.h"
+#include "../../sphere/threads.h"
 #include "CResourceBase.h"
 #include "CResourceQty.h"
 

@@ -1,9 +1,9 @@
 //  CChar is either an NPC or a Player.
 
+#include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
 #include "../../common/CUID.h"
 #include "../../common/CUIDExtra.h"
-#include "../../common/CResourceLock.h"
 #include "../../common/CObjBaseTemplate.h"
 #include "../../common/CRect.h"
 #include "../../common/CLog.h"

@@ -13,7 +13,6 @@
 
 #include "../../common/CException.h"
 #include "../../common/CScript.h"
-#include "../../common/CResourceBase.h"
 #include "../../common/CUIDExtra.h"
 #include "../chars/CChar.h"
 #include "../CWorld.h"

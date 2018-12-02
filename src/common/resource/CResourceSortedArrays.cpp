@@ -3,7 +3,7 @@
 *
 */
 
-#include "CScriptObj.h"
+#include "../CScriptObj.h"
 #include "CResourceSortedArrays.h"
 
 

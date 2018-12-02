@@ -333,6 +333,26 @@ enum DIR_TYPE	// Walking directions. m_dir
 };
 
 
+/**
+* @enum    STAT_TYPE
+*
+* @brief   Character stats.
+*/
+enum STAT_TYPE
+{
+    STAT_NONE = -1,
+    STAT_STR = 0,
+    STAT_INT,
+    STAT_DEX,
+    STAT_BASE_QTY,
+    STAT_FOOD = 3,      // just used as a regen rate. (as karma does not decay)
+    STAT_QTY
+    // MaxHits  (4)
+    // MaxMana  (5)
+    // MaxStam  (6)
+    // MaxFood  (7)
+};
+
 enum SKILL_TYPE	// List of skill numbers (things that can be done at a given time)
 {
     SKILL_NONE = -1,

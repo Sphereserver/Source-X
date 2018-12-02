@@ -7,7 +7,7 @@
 #define _INC_CCHARBASE_H
 
 #include "../../common/sphere_library/CSString.h"
-#include "../../common/CResourceBase.h"
+#include "../../common/resource/CResourceBase.h"
 #include "../../common/sphereproto.h"
 #include "../../common/CScript.h"
 #include "../../common/CScriptObj.h"

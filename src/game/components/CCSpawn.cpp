@@ -1,4 +1,5 @@
 
+#include "../../common/resource/blocks/CRandGroupDef.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
 #include "../../common/CObjBaseTemplate.h"
@@ -227,7 +228,7 @@ void CCSpawn::GenerateChar(CResourceDef *pDef)
     CResourceIDBase rid = pDef->GetResourceID();
     if (rid.GetResType() == RES_SPAWN)
     {
-        const CSRandGroupDef *pSpawnGroup = static_cast<const CSRandGroupDef *>(pDef);
+        const CRandGroupDef *pSpawnGroup = static_cast<const CRandGroupDef *>(pDef);
         ASSERT(pSpawnGroup);
         size_t i = pSpawnGroup->GetRandMemberIndex();
         if (i != pSpawnGroup->BadMemberIndex())

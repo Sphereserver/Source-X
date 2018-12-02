@@ -1,6 +1,6 @@
 
+#include "../common/resource/CResourceLock.h"
 #include "../common/CException.h"
-#include "../common/CResourceLock.h"
 #include "../common/CUIDExtra.h"
 #include "../common/sphereversion.h"
 #include "../common/CLog.h"

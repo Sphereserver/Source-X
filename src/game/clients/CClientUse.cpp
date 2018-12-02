@@ -1,11 +1,11 @@
 
+#include "../../common/resource/CResourceLock.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../items/CItemMap.h"
 #include "../components/CCSpawn.h"
 #include "../CUIDExtra.h"
 #include "../CLog.h"
-#include "../CResourceLock.h"
 #include "../triggers.h"
 #include "CClient.h"
 

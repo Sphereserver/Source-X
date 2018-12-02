@@ -6,7 +6,7 @@
 #ifndef _INC_NTWINDOW_H
 #define _INC_NTWINDOW_H
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 
 #include "threads.h"
 #include "ConsoleInterface.h"

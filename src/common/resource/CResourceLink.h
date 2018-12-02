@@ -6,8 +6,8 @@
 #ifndef _INC_CRESOURCELINK_H
 #define _INC_CRESOURCELINK_H
 
+#include "../CScriptContexts.h"
 #include "CResourceDef.h"
-#include "CScriptContexts.h"
 
 class CResourceScript;
 
@@ -66,32 +66,6 @@ public:
 private:
     CResourceLink(const CResourceLink& copy);
     CResourceLink& operator=(const CResourceLink& other);
-};
-
-
-class CResourceNamed : public CResourceLink
-{
-    // Private name pool. (does not use DEFNAME) RES_FUNCTION
-public:
-    static const char *m_sClassName;
-    const CSString m_sName;
-public:
-    CResourceNamed(CResourceID rid, lpctstr pszName) : CResourceLink(rid), m_sName(pszName)
-    {
-    }
-    virtual ~CResourceNamed()
-    {
-    }
-
-private:
-    CResourceNamed(const CResourceNamed& copy);
-    CResourceNamed& operator=(const CResourceNamed& other);
-
-public:
-    lpctstr GetName() const
-    {
-        return m_sName;
-    }
 };
 
 #endif // _INC_CRESOURCELINK_H

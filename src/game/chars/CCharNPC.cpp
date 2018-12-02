@@ -1,8 +1,8 @@
 
 // Actions specific to an NPC.
 
+#include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
-#include "../../common/CResourceLock.h"
 #include "../clients/CClient.h"
 #include "../CWorld.h"
 #include "../triggers.h"

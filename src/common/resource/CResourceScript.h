@@ -6,8 +6,8 @@
 #ifndef _INC_CRESOURCESCRIPT_H
 #define _INC_CRESOURCESCRIPT_H
 
-#include "sphere_library/CSTime.h"
-#include "CScript.h"
+#include "../sphere_library/CSTime.h"
+#include "../CScript.h"
 
 
 class CResourceScript : public CScript

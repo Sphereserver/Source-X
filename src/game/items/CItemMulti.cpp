@@ -1,11 +1,10 @@
-
+#include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
 #include "../../common/CUIDExtra.h"
 #include "../../common/sphereproto.h"
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
 #include "../CWorld.h"
-#include "../CResourceLock.h"
 #include "../triggers.h"
 #include "CItemMulti.h"
 #include "CItemShip.h"

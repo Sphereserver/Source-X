@@ -2,6 +2,7 @@
 // CItemMultiCustom.cpp
 //
 
+#include "../../common/resource/blocks/CDialogDef.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
 #include "../../common/CUOInstall.h"

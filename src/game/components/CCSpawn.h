@@ -6,12 +6,11 @@
 #ifndef _INC_CCSpawn_H
 #define _INC_CCSpawn_H
 
-//#include "CItem.h"
-#include "../CComponent.h"
-#include "../CResourceBase.h"
+#include "../resource/CResourceBase.h"
 #include "../items/CItemBase.h"
 #include "../uo_files/uofiles_enums_itemid.h"
 #include "../uo_files/uofiles_enums_creid.h"
+#include "../CComponent.h"
 #include "CTimedObject.h"
 
 

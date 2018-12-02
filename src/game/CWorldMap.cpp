@@ -1,6 +1,9 @@
 //************************
 // Natural resources.
 
+#include "../common/resource/blocks/CItemTypeDef.h"
+#include "../common/resource/blocks/CRandGroupDef.h"
+#include "../common/resource/blocks/CRegionResourceDef.h"
 #include "../common/CException.h"
 #include "../common/CScriptTriggerArgs.h"
 #include "../common/CRect.h"
@@ -94,7 +97,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 
 	// Find RES_REGIONTYPE
 	EXC_SET_BLOCK("resource group");
-	const CSRandGroupDef * pResGroup = pRegion->FindNaturalResource(Type);
+	const CRandGroupDef * pResGroup = pRegion->FindNaturalResource(Type);
 	if ( !pResGroup )
 		return nullptr;
 

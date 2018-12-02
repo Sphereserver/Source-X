@@ -6,8 +6,8 @@
 #ifndef _INC_CRESOURCEDEF_H
 #define _INC_CRESOURCEDEF_H
 
-#include "CScript.h"
-#include "CScriptObj.h"
+#include "../CScript.h"
+#include "../CScriptObj.h"
 #include "CResourceID.h"
 
 

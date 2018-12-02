@@ -3,9 +3,9 @@
 *
 */
 
-#include "../game/CServerConfig.h"
-#include "CException.h"
-#include "CScript.h"
+#include "../../game/CServerConfig.h"
+#include "../CException.h"
+#include "../CScript.h"
 #include "CResourceRef.h"
 
 lpctstr CResourceRefArray::GetResourceName( size_t iIndex ) const
@@ -130,10 +130,12 @@ void CResourceRefArray::WriteResourceRefList( CSString & sVal ) const
     sVal = pszVal;
 }
 
-CResourceRefArray::CResourceRefArray(const CResourceRefArray& copy) : CSPtrTypeArray<CResourceRef>(static_cast<const CSPtrTypeArray<CResourceRef> &>(copy)) {
+CResourceRefArray::CResourceRefArray(const CResourceRefArray& copy) : CSPtrTypeArray<CResourceRef>(static_cast<const CSPtrTypeArray<CResourceRef> &>(copy))
+{
 }
 
-CResourceRefArray& CResourceRefArray::operator=(const CResourceRefArray& other) {
+CResourceRefArray& CResourceRefArray::operator=(const CResourceRefArray& other)
+{
     static_cast<CSPtrTypeArray<CResourceRef> &>(*this) = static_cast<const CSPtrTypeArray<CResourceRef> &>(other);
     return *this;
 }

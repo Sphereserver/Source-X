@@ -6,7 +6,7 @@
 #ifndef _INC_CRESOURCESORTEDARRAYS_H
 #define _INC_CRESOURCESORTEDARRAYS_H
 
-#include "sphere_library/CSObjSortArray.h"
+#include "../sphere_library/CSObjSortArray.h"
 
 class CSCriptObj;
 

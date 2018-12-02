@@ -1,13 +1,12 @@
 
 // Actions specific to an NPC.
 
-#include "../../common/CLog.h"
+#include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
 #include "../../common/CUIDExtra.h"
 #include "../../network/receive.h"
 #include "../clients/CClient.h"
 #include "../CPathFinder.h"
-#include "../CResourceLock.h"
 #include "../triggers.h"
 #include "CCharNPC.h"
 

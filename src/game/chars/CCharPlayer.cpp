@@ -1,6 +1,7 @@
 
 // Actions specific to a Player.
 
+#include "../../common/resource/blocks/CSkillClassDef.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
 #include "../clients/CClient.h"

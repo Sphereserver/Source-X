@@ -127,25 +127,6 @@ common/CPointBase.cpp
 common/CPointBase.h
 common/CRect.cpp
 common/CRect.h
-common/CResourceBase.cpp
-common/CResourceBase.h
-common/CResourceDef.cpp
-common/CResourceDef.h
-common/CResourceID.h
-common/CResourceHash.cpp
-common/CResourceHash.h
-common/CResourceLink.cpp
-common/CResourceLink.h
-common/CResourceLock.cpp
-common/CResourceLock.h
-common/CResourceRef.cpp
-common/CResourceRef.h
-common/CResourceScript.cpp
-common/CResourceScript.h
-common/CResourceSortedArrays.cpp
-common/CResourceSortedArrays.h
-common/CResourceQty.cpp
-common/CResourceQty.h
 common/CScript.cpp
 common/CScript.h
 common/CScriptContexts.cpp
@@ -180,6 +161,52 @@ common/os_windows.h
 common/regex/deelx.h
 )
 SOURCE_GROUP (common FILES ${common_SRCS})
+
+SET (resource_SRCS
+common/resource/CResourceBase.cpp
+common/resource/CResourceBase.h
+common/resource/CResourceDef.cpp
+common/resource/CResourceDef.h
+common/resource/CResourceID.h
+common/resource/CResourceHash.cpp
+common/resource/CResourceHash.h
+common/resource/CResourceLink.cpp
+common/resource/CResourceLink.h
+common/resource/CResourceLock.cpp
+common/resource/CResourceLock.h
+common/resource/CResourceRef.cpp
+common/resource/CResourceRef.h
+common/resource/CResourceScript.cpp
+common/resource/CResourceScript.h
+common/resource/CResourceSortedArrays.cpp
+common/resource/CResourceSortedArrays.h
+common/resource/CResourceQty.cpp
+common/resource/CResourceQty.h
+common/resource/CValueDefs.cpp
+common/resource/CValueDefs.h
+)
+SOURCE_GROUP (common\\resource FILES ${resource_SRCS})
+
+SET (resourceblocks_SRCS
+common/resource/blocks/CDialogDef.cpp
+common/resource/blocks/CDialogDef.h
+common/resource/blocks/CItemTypeDef.cpp
+common/resource/blocks/CItemTypeDef.h
+common/resource/blocks/CRandGroupDef.cpp
+common/resource/blocks/CRandGroupDef.h
+common/resource/blocks/CRegionResourceDef.cpp
+common/resource/blocks/CRegionResourceDef.h
+common/resource/blocks/CResourceNamedDef.h
+common/resource/blocks/CSkillClassDef.cpp
+common/resource/blocks/CSkillClassDef.h
+common/resource/blocks/CSkillDef.cpp
+common/resource/blocks/CSkillDef.h
+common/resource/blocks/CSpellDef.cpp
+common/resource/blocks/CSpellDef.h
+common/resource/blocks/CWebPageDef.cpp
+common/resource/blocks/CWebPageDef.h
+)
+SOURCE_GROUP (common\\resource\\blocks FILES ${resourceblocks_SRCS})
 
 # Sphere library files
 SET (spherelibrary_SRCS
@@ -243,7 +270,6 @@ game/CRegion.h
 game/CRegionBase.cpp
 game/CRegionBase.h
 game/CResourceCalc.cpp
-game/CResourceDef.cpp
 game/CScriptProfiler.h
 game/CSector.cpp
 game/CSector.h
@@ -259,7 +285,6 @@ game/CServerTime.cpp
 game/CServerTime.h
 game/CTimedFunction.cpp
 game/CTimedFunction.h
-game/CWebPage.cpp
 game/CWorld.cpp
 game/CWorld.h
 game/CWorldImport.cpp

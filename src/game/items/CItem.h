@@ -6,11 +6,11 @@
 #ifndef _INC_CITEM_H
 #define _INC_CITEM_H
 
+#include "../resource/CResourceBase.h"
 #include "../components/CCFaction.h"
 #include "../components/CTimedObject.h"
 #include "../CBase.h"
 #include "../CRect.h"
-#include "../CResourceBase.h"
 #include "../CObjBase.h"
 #include "../CObjBaseTemplate.h"
 #include "../CServerMap.h"

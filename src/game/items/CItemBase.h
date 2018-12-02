@@ -6,7 +6,7 @@
 #ifndef _INC_CITEMBASE_H
 #define _INC_CITEMBASE_H
 
-#include "../../common/CResourceBase.h"
+#include "../../common/resource/CResourceBase.h"
 #include "../uo_files/uofiles_enums_itemid.h"
 #include "../uo_files/uofiles_enums_creid.h"
 #include "../uo_files/CUOItemTypeRec.h"

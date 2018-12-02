@@ -6,10 +6,12 @@
 #ifndef _INC_CCHARPLAYER_H
 #define _INC_CCHARPLAYER_H
 
-#include "../../common/CResourceBase.h"
+#include "../../common/resource/CResourceBase.h"
 #include "../../common/sphereproto.h"
 #include "../clients/CAccount.h"
 #include "../CServerConfig.h"
+
+class CSkillClassDef;
 
 
 enum CPC_TYPE	// Player char.

@@ -1,14 +1,13 @@
 
-#include "../common/sphere_library/CSFileList.h"
-#include "../common/CException.h"
-#include "../common/CResourceLock.h"
-#include "../common/sphereversion.h"
-#include "../network/network.h"
-#include "../network/send.h"
-#include "chars/CChar.h"
-#include "clients/CClient.h"
-#include "CServer.h"
-#include "CWorld.h"
+#include "../../../game/chars/CChar.h"
+#include "../../../game/clients/CClient.h"
+#include "../../../game/CServer.h"
+#include "../../../game/CWorld.h"
+#include "../../sphere_library/CSFileList.h"
+#include "../../CException.h"
+#include "../../sphereversion.h"
+#include "../CResourceLock.h"
+#include "CWebPageDef.h"
 
 
 enum WV_TYPE
@@ -840,7 +839,7 @@ bool CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateIf
 		iError,
 		iError,
 		iError,
-		static_cast<lpctstr>(pszErrText));
+		pszErrText);
 
 	sMsgHead.Format(
 		"HTTP/1.1 %d %s\r\n"
@@ -850,7 +849,7 @@ bool CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateIf
 		"Content-Length: %d\r\n"
 		"Connection: close\r\n"
 		"\r\n%s",
-		iError, static_cast<lpctstr>(pszErrText),
+		iError, pszErrText,
 		static_cast<lpctstr>(sDate),
 		sText.GetLength(),
 		static_cast<lpctstr>(sText));

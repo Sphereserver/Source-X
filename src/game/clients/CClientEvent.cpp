@@ -1,4 +1,5 @@
 
+#include "../../common/resource/CResourceLock.h"
 #include "../../network/network.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
@@ -10,7 +11,6 @@
 #include "../items/CItemVendable.h"
 #include "../CException.h"
 #include "../CUIDExtra.h"
-#include "../CResourceLock.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"

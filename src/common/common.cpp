@@ -4,6 +4,12 @@
 #include "common.h"
 #include "sphereproto.h"
 
+extern "C"
+{
+    void globalstartsymbol() {}	// put this here as just the starting offset.
+    const int globalstartdata = 0xffffffff;
+}
+
 #ifndef _WIN32
 
 	#include <cstdio>

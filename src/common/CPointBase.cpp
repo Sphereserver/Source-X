@@ -1,4 +1,5 @@
 
+#include "../common/resource/blocks/CItemTypeDef.h"
 #include "../game/items/CItem.h"
 #include "../game/CSector.h"
 #include "../game/CServer.h"

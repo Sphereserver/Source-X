@@ -5,9 +5,8 @@
 #include "../game/CServerConfig.h"
 #include "../game/CWorld.h"
 #include "../sphere/threads.h"
+#include "resource/CResourceLock.h"
 #include "CExpression.h"
-#include "common.h"
-#include "CResourceBase.h"
 #include "CScriptObj.h"
 #include "CVarFloat.h"
 

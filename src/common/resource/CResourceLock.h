@@ -6,8 +6,8 @@
 #ifndef _INC_CRESOURCELOCK_H
 #define _INC_CRESOURCELOCK_H
 
-#include "CScript.h"
-#include "CScriptContexts.h"
+#include "../CScript.h"
+#include "../CScriptContexts.h"
 
 class CResourceScript;
 
