@@ -2625,7 +2625,7 @@ void CWorld::OnTick()
                     ptcSubDesc = "Ship";
                     CItem* pItem = dynamic_cast<CItem*>(pObj);
                     ptcSubDesc = "Ship (CItem Casted)";
-                    ASSERT(pItem);
+                    ASSERT(pItem); UNREFERENCED_PARAMETER(pItem);
                     ASSERT(dynamic_cast<CItemShip*>(pItem));
                     ptcSubDesc = "Ship (CItemShip Casted)";
                     fRemove = !pObj->OnTick();
