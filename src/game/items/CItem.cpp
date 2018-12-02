@@ -2977,7 +2977,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				if (!normcont)
 				{
 					SERVMODE_TYPE iModeCode = g_Serv.GetServerMode();
-					if ((iModeCode == SERVMODE_Loading) || (iModeCode == SERVMODE_GarbageCollection))						
+					if ((iModeCode == SERVMODE_Loading) || (iModeCode == SERVMODE_GarbageCollection))
 						Delete();	//	since the item is no longer in container, it should be deleted
 				}
 				return normcont;
@@ -3984,8 +3984,6 @@ word CItem::ConsumeAmount( word iQty, bool fTest )
 	ADDTOCALLSTACK("CItem::ConsumeAmount");
 	// Eat or drink specific item. delete it when gone.
 	// return: the amount we used.
-	if ( this == nullptr )	// can use none if there is nothing? or can we use all?
-		return iQty;
 
 	word iQtyMax = GetAmount();
 	if ( iQty < iQtyMax )
@@ -5869,7 +5867,7 @@ bool CItem::OnTick()
 
 	EXC_SET_BLOCK("default behaviour4");
 	DEBUG_ERR(( "Timer expired without DECAY flag '%s' (UID=0%x)?\n", GetName(), (dword)GetUID()));
-	
+
     EXC_CATCH;
 
 	EXC_DEBUG_START;

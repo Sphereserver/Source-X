@@ -75,10 +75,10 @@ How to set a toolchain:
 * Via CMake CLI (command line interface): pass the parameter `-DCMAKE_TOOLCHAIN_FILE="..."`
 <br>When using Unix Makefiles, you can specify a build type by setting (also this via GUI or CLI) `CMAKE_BUILD_TYPE="build"`, where build is Nightly, Debug or Release. If the build type
  was not set, by default the makefiles for all of the three build types are generated.<br>
-<br>
+<br />
 You can also add other compiler flags, like optimization flags, with the custom variables C_FLAGS_EXTRA and CXX_FLAGS_EXTRA.<br>
-Example of CMake CLI additional parameters:
-<br />```
+Example of CMake CLI additional parameters: <br>
+```
 -DC_FLAGS_EXTRA="-mtune=native" -DCXX_FLAGS_EXTRA="-mtune=native"
 ```
 <br />(Use the -mtune=native flag only if you are compiling on the same machine on which you will execute Sphere!)

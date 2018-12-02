@@ -16,7 +16,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 typedef std::basic_string<tchar> stdstring;
-typedef std::vector<tchar> stdvstring; 
+typedef std::vector<tchar> stdvstring;
 typedef std::vector<stdvstring> vstrlist;
 typedef vstrlist row;
 
@@ -88,15 +88,15 @@ class Table
 public:
 	Table(void){ m_iRows=m_iCols=0;	m_iPos=-1; };
 	virtual ~Table() {};
-		
+
 	// Gets the number of columns
-	int GetColCount(){ if (this==0) return 0; return m_iCols; };
+	int GetColCount(){ return m_iCols; };
 
 	// Gets the number of rows
-	int GetRowCount(){ if (this==0) return 0; return m_iRows; };
+	int GetRowCount(){ return m_iRows; };
 
 	// Gets the current selected row. -1 when no rows exists.
-	int GetCurRow(){ if (this==0) return -1; return m_iPos; };
+	int GetCurRow(){ return m_iPos; };
 
 	// Gets the column name at m_iCol index.
 	// Returns null if the index is out of bounds.
@@ -168,7 +168,7 @@ public:
 	// Copy constructor.
 	// Will prevent the original TablePtr from deleting the table.
 	// If you have a previous table connected to this class,
-	//   you do not have to worry, 
+	//   you do not have to worry,
 	//   it will commit suicide before eating the new table.
 	TablePtr( const TablePtr& cTablePtr );
 
@@ -178,7 +178,7 @@ public:
 	// Copy operator.
 	// Will prevent the original TablePtr from deleting the table.
 	// If you have a previous table connected to this class,
-	//   you do not have to worry, 
+	//   you do not have to worry,
 	//   it will commit suicide before eating the new table.
 	void operator =(const TablePtr& cTablePtr);
 

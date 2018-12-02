@@ -1222,14 +1222,14 @@ bool CChar::UpdateAnimate(ANIM_TYPE action, bool fTranslate, bool fBackward , by
 	{
 		if (!pClient->CanSee(this))
 			continue;
-		
+
 		NetState* state = pClient->GetNetState();
 		if (state->isClientEnhanced() || state->isClientKR())
 			cmdnew->send(pClient);
 		else if (IsGargoyle() && state->isClientVersion(MINCLIVER_NEWMOBILEANIM))
 			cmdnew->send(pClient);
 		else
-			cmd->send(pClient);	
+			cmd->send(pClient);
 	}
 	delete cmdnew;
 	delete cmd;
@@ -1489,7 +1489,7 @@ void CChar::SoundChar( CRESND_TYPE type )
 
 		}
 	}
-	
+
 	if ( id == SOUND_NONE )	// i'm not hitting with a weapon
 	{
 		const CCharBase* pCharDef = Char_GetDef();
@@ -1531,13 +1531,13 @@ void CChar::SoundChar( CRESND_TYPE type )
 		{
 			// I have no override, check that i have a valid SOUND (m_soundBase) property.
 			id = pCharDef->m_soundBase;
-			switch ( id )	
+			switch ( id )
 			{
 				case SOUND_NONE:
 					// some creatures have no base sounds, in this case i shouldn't even attempt to play them...
 					//DEBUG_MSG(("CHARDEF %s has no base SOUND!\n", GetResourceName()));
 					return;
-				
+
 				// Special (hardcoded) sounds
 				case SOUND_SPECIAL_HUMAN:
 				{
@@ -1753,7 +1753,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
         }
         else if (pChar == this) // we can always take our own items
         {
-            bCanTake = true;         
+            bCanTake = true;
         }
         else if ((pItem->GetContainer() != pChar) || (g_Cfg.m_fCanUndressPets == true)) // our owners can take items from us (with CanUndressPets=true, they can undress us too)
         {
@@ -1905,7 +1905,9 @@ bool CChar::ItemBounce( CItem * pItem, bool bDisplayMsg )
 		}
 	}
     else
+    {
         bDropOnGround = true;
+    }
 
 	if (bCanAddToPack)
 	{
@@ -2058,7 +2060,7 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 
 	Spell_Effect_Add(pItem);	// if it has a magic effect.
 
-	
+
     if (CItemBase::IsVisibleLayer(layer))	// visible layer ?
     {
         SOUND_TYPE iSound = 0x57;
@@ -2462,7 +2464,7 @@ bool CChar::Horse_Mount(CChar *pHorse)
 	tchar * sMountID = Str_GetTemp();
 	sprintf(sMountID, "mount_0x%x", pHorse->GetDispID());
 	lpctstr sMemoryID = g_Exp.m_VarDefs.GetKeyStr(sMountID);			// get the mount item defname from the mount_0x** defname
-	
+
 	CResourceID memoryRid = g_Cfg.ResourceGetID(RES_ITEMDEF, sMemoryID);
 	ITEMID_TYPE memoryId = (ITEMID_TYPE)(memoryRid.GetResIndex());	// get the ID of the memory (mount item)
 	if ( memoryId <= ITEMID_NOTHING )
@@ -3126,7 +3128,7 @@ CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fChec
                 uiStamReq = (ushort)(Args.m_iN1);
 			}
 
-			
+
 			if ( (uiStamReq > 0) && (Stat_GetVal(STAT_DEX) < Stat_GetMaxAdjusted(STAT_DEX)) )
 				return nullptr;
 
@@ -3309,7 +3311,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 				// tile that got overlapped. But Sphere doesn't use this method, so this workaround is needed.
 				if (fSpellHit)
                     continue;
-			    
+
                 fSpellHit = OnSpellEffect((SPELL_TYPE)(RES_GET_INDEX(pItem->m_itSpell.m_spell)),
                     pItem->m_uidLink.CharFind(), (int)(pItem->m_itSpell.m_spelllevel), pItem);
                 if (fSpellHit && m_pNPC && fStanding)

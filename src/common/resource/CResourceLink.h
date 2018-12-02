@@ -61,7 +61,7 @@ public:
 
 public:
     CResourceLink( CResourceID rid, const CVarDefContNum * pDef = nullptr );
-    virtual ~CResourceLink();
+    virtual ~CResourceLink() = default;
 
 private:
     CResourceLink(const CResourceLink& copy);

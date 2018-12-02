@@ -64,11 +64,11 @@ public:
     CSString m_sName;       // fancy skill name
     CSString m_sTargetPrompt;// targetting prompt. (if needed)
 
-    CValueCurveDef m_Delay; // The base delay for the skill. (tenth of seconds).
+    CValueCurveDef m_Delay; // Delay before skill complete (tenth of seconds).
     CValueCurveDef m_Effect;// Effectiveness of the skill, depends on skill.
 
-                            // Stat effects.
-                            // You will tend toward these stat vals if you use this skill a lot.
+    // Stat effects.
+    // You will tend toward these stat vals if you use this skill a lot.
     byte m_Stat[STAT_BASE_QTY];     // STAT_STR, STAT_INT, STAT_DEX...
     byte m_StatPercent;             // BONUS_STATS = % of success depending on stats
     byte m_StatBonus[STAT_BASE_QTY];// % of each stat toward success at skill, total 100
@@ -81,7 +81,6 @@ public:
     dword			m_dwFlags;      // Skill Flags.
     dword			m_dwGroup;      // Skill Group.
 
-                                    // Delay before skill complete. modified by skill level of course !
 public:
     explicit CSkillDef( SKILL_TYPE iSkill );
     virtual ~CSkillDef() = default;

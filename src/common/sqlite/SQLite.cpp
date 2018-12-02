@@ -38,7 +38,6 @@ void CSQLite::Close()
 
 bool CSQLite::IsOpen()
 {
-	if (this==0) return false;
 	return m_sqlite3!=0;
 }
 
@@ -123,7 +122,7 @@ Table CSQLite::QuerySQL( lpctstr strSQL)
 		for (int iCol=0; iCol<iCols; iCol++)
 		{
 			retTable.m_lstRows[iRow].push_back(stdvstring());
-					
+
 			if (retStrings[iPos])
 				ConvertUTF8ToString( retStrings[iPos], retTable.m_lstRows[iRow].back() );
 			else retTable.m_lstRows[iRow].back().push_back('\0');
@@ -252,7 +251,7 @@ bool CSQLite::BeginTransaction()
 {
 	if (!IsOpen())
 	{
-		m_iLastError=SQLITE_ERROR; 
+		m_iLastError=SQLITE_ERROR;
 		return false;
 	}
 	m_iLastError = ExecuteSQL("BEGIN TRANSACTION");
@@ -261,9 +260,9 @@ bool CSQLite::BeginTransaction()
 
 bool CSQLite::CommitTransaction()
 {
-	if (!IsOpen()) 
+	if (!IsOpen())
 	{
-		m_iLastError=SQLITE_ERROR; 
+		m_iLastError=SQLITE_ERROR;
 		return false;
 	}
 	m_iLastError = ExecuteSQL("COMMIT TRANSACTION");
@@ -272,7 +271,7 @@ bool CSQLite::CommitTransaction()
 
 bool CSQLite::RollbackTransaction()
 {
-	if (!IsOpen()) 
+	if (!IsOpen())
 	{
 		m_iLastError=SQLITE_ERROR;
 		return false;
@@ -416,31 +415,30 @@ lpctstr Table::GetColName( int iCol )
 }
 
 bool Table::GoFirst()
-{ 
-	if (this==0) return false;
-	if (m_lstRows.size()) 
+{
+	if (m_lstRows.size())
 	{
-		m_iPos=0; 
+		m_iPos=0;
 		return true;
 	}
 	return false;
 }
 
 bool Table::GoLast()
-{ 
-	if (m_lstRows.size()) 
+{
+	if (m_lstRows.size())
 	{
-		m_iPos=(int)m_lstRows.size()-1; 
+		m_iPos=(int)m_lstRows.size()-1;
 		return true;
 	}
 	return false;
 }
 
 bool Table::GoNext()
-{ 
-	if (m_iPos+1<(int)m_lstRows.size()) 
+{
+	if (m_iPos+1<(int)m_lstRows.size())
 	{
-		m_iPos++; 
+		m_iPos++;
 		return true;
 	}
 	return false;
@@ -458,7 +456,6 @@ bool Table::GoPrev()
 
 bool Table::GoRow(uint iRow)
 {
-	if (this==0) return false;
 	if (iRow<m_lstRows.size())
 	{
 		m_iPos=iRow;
@@ -529,13 +526,13 @@ void Table::JoinTable(Table & tblJoin)
 }
 
 TablePtr::TablePtr( )
-{ 
-	m_pTable=0; 
+{
+	m_pTable=0;
 }
 
 TablePtr::TablePtr( Table * pTable )
 {
-	m_pTable = pTable; 
+	m_pTable = pTable;
 }
 
 TablePtr::TablePtr( const TablePtr& cTablePtr )
@@ -545,8 +542,8 @@ TablePtr::TablePtr( const TablePtr& cTablePtr )
 }
 
 TablePtr::~TablePtr()
-{ 
-	if (m_pTable) delete m_pTable; 
+{
+	if (m_pTable) delete m_pTable;
 }
 
 void TablePtr::operator =( const TablePtr& cTablePtr )
@@ -586,7 +583,7 @@ UTF8MBSTR::UTF8MBSTR( lpctstr lpStr )
 {
 	if (lpStr)
 		m_iLen=ConvertStringToUTF8(lpStr, m_strUTF8_MultiByte);
-	else 
+	else
 	{
 		m_strUTF8_MultiByte=new char[1];
 		m_strUTF8_MultiByte[0]=0;
@@ -614,7 +611,7 @@ void UTF8MBSTR::operator =( lpctstr lpStr )
 
 	if (lpStr)
 		m_iLen=ConvertStringToUTF8(lpStr, m_strUTF8_MultiByte);
-	else 
+	else
 	{
 		m_strUTF8_MultiByte=new char[1];
 		m_strUTF8_MultiByte[0]=0;

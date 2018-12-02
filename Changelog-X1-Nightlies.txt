@@ -1,5 +1,5 @@
 ﻿
----- 0.56d --------------------------------------------------------------------
+---- 0.56d (eXperimental branch forked from 0.56d) --------------------------------------------------------------
 ---- 11/04/2016
 
 10-04-2016, Coruja
@@ -17,6 +17,9 @@
 
 19-04-2016, Coruja
 - Fixed: Protection spell not working correctly if COMBAT_ELEMENTAL_ENGINE combat flag is disabled.
+
+
+---- X1 (Milestone 1 opened)
 
 14-05-2016, XuN
 - Fixed: Pets not gaining Karma (it can be blocked through @KarmaChange trigger, no reason to stop it from the source).

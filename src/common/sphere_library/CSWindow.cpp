@@ -45,8 +45,6 @@ void CSWindow::OnDestroy( HWND hwnd )
 // Basic window functions.
 BOOL CSWindow::IsWindow() const
 {
-    if (this == nullptr)
-        return false;
     if (m_hWnd == nullptr)
         return false;
     return ::IsWindow(m_hWnd);
