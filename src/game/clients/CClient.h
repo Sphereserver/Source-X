@@ -313,8 +313,8 @@ private:
 
 	// Commands from client
 	void Event_Skill_Use( SKILL_TYPE x ); // Skill is clicked on the skill list
-	void Event_Talk_Common(tchar * szText ); // PC speech
-	bool Event_Command( lpctstr pszCommand, TALKMODE_TYPE mode = TALKMODE_SYSTEM ); // Client entered a '/' command like /ADD
+	void Event_Talk_Common(lpctstr pszText ); // PC speech
+	bool Event_Command( lpctstr pszCommand, TALKMODE_TYPE mode = TALKMODE_SAY ); // Client entered a '/' command like /ADD
 
 public:
 	void GetAdjustedCharID( const CChar * pChar, CREID_TYPE & id, HUE_TYPE &wHue ) const;
@@ -496,7 +496,7 @@ public:
 	void addBarkLocalizedEx( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD, AFFIX_TYPE affix = AFFIX_APPEND, lpctstr pAffix = nullptr, lpctstr pArgs = nullptr ) const;
 	void addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font = FONT_NORMAL, bool bUnicode = false, lpctstr name = "" ) const;
 	void addSysMessage( lpctstr pMsg ); // System message (In lower left corner)
-	void addObjMessage( lpctstr pMsg, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_OBJ ); // The message when an item is clicked
+	void addObjMessage( lpctstr pMsg, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY ); // The message when an item is clicked
 
 	void addDyeOption( const CObjBase * pBase );
 	void addWebLaunch( lpctstr pMsg ); // Direct client to a web page

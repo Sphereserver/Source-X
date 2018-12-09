@@ -1267,12 +1267,11 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 			// sVal.FormatVal( m_type );
 			{
 				CResourceID	rid( RES_TYPEDEF, m_type );
-				CResourceDef *	pRes	= g_Cfg.ResourceGetDef( rid );
+				CResourceDef *pRes = g_Cfg.ResourceGetDef( rid );
 				if ( !pRes )
 					sVal.FormatVal( m_type );
 				else
 					sVal = pRes->GetResourceName();
-
 			}
 			break;
 		case IBC_VALUE:
@@ -1629,7 +1628,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 			}
 			break;
 		case IBC_TYPE:
-			m_type = static_cast<IT_TYPE>(g_Cfg.ResourceGetIndexType( RES_TYPEDEF, s.GetArgStr()));
+			m_type = (IT_TYPE)(g_Cfg.ResourceGetIndexType( RES_TYPEDEF, s.GetArgStr()));
 			if ( m_type == IT_CONTAINER_LOCKED )
 			{
 				// At this level it just means to add a key for it.

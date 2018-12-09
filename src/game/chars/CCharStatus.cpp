@@ -1365,67 +1365,11 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
 
 	if ( !pSrc )	// must be broadcast I guess
 		return true;
-
-	bool fThrough = false;
-	int iHearRange = 0;
-	switch ( mode )
-	{
-		case TALKMODE_YELL:
-			if ( g_Cfg.m_iDistanceYell < 0 )
-				return false;
-			else if ( g_Cfg.m_iDistanceYell == 0 )
-			{
-				int dist = GetVisualRange();
-				if ( dist == 0 )
-					return true;
-				iHearRange = dist;
-				break;
-			}
-			iHearRange = g_Cfg.m_iDistanceYell;
-			fThrough = true;
-			break;
-		case TALKMODE_BROADCAST:
-			return true;
-		case TALKMODE_WHISPER:
-			if ( g_Cfg.m_iDistanceWhisper < 0 )
-				return false;
-			else if ( g_Cfg.m_iDistanceWhisper == 0 )
-			{
-				int dist = GetVisualRange();
-				if ( dist == 0 )
-					return true;
-				iHearRange = dist;
-				break;
-			}
-			iHearRange = g_Cfg.m_iDistanceWhisper;
-			break;
-		default:	// this is executed also when playing a sound (TALKMODE_OBJ)
-			if ( g_Cfg.m_iDistanceTalk < 0 )
-				return false;
-			else if ( g_Cfg.m_iDistanceTalk == 0 )
-			{
-				int dist = GetVisualRange();
-				if ( dist == 0 )
-					return true;
-				iHearRange = dist;
-				break;
-			}
-			iHearRange = g_Cfg.m_iDistanceTalk;
-			break;
-	}
-
-	pSrc = pSrc->GetTopLevelObj();
-	int iDist = GetTopDist3D(pSrc);
-	if ( iDist > iHearRange )	// too far away
-		return false;
-	if ( IsSetOF(OF_NoHouseMuteSpeech) )
-		return true;
-	if ( IsPriv(PRIV_GM) )
-		return true;
-	if ( fThrough )		// a yell goes through walls..
-		return true;
+    if ( IsPriv(PRIV_GM) )
+        return true;
 
 	// sound can be blocked if in house.
+    pSrc = pSrc->GetTopLevelObj();
 	CRegionWorld *pSrcRegion;
 	if ( pSrc->IsChar() )
 	{
@@ -1436,27 +1380,89 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
 			return true;
 	}
 	else
+    {
 		pSrcRegion = dynamic_cast<CRegionWorld *>(pSrc->GetTopPoint().GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA));
-
-	if ( m_pArea == pSrcRegion )	// same region is always ok.
-		return true;
-	if ( !pSrcRegion || !m_pArea ) // should not happen really.
+    }	
+	if ( !pSrcRegion || !m_pArea )  // should not happen really.
 		return false;
 
-	bool fCanSpeech = false;
-	CVarDefCont *pValue = pSrcRegion->GetResourceID().IsItem() ? pSrcRegion->GetResourceID().ItemFind()->GetKey("NOMUTESPEECH", false) : nullptr;
-	if ( pValue && pValue->GetValNum() > 0 )
-		fCanSpeech = true;
-	if ( pSrcRegion->GetResourceID().IsItem() && !pSrcRegion->IsFlag(REGION_FLAG_SHIP) && !fCanSpeech )
-		return false;
+    bool fThrough = false;
+    int iHearRange = 0;
+    switch ( mode )
+    {
+        case TALKMODE_YELL:
+            if ( g_Cfg.m_iDistanceYell < 0 )
+                return false;
+            else if ( g_Cfg.m_iDistanceYell == 0 )
+            {
+                int dist = GetVisualRange();
+                if ( dist == 0 )
+                    return true;
+                iHearRange = dist;
+                break;
+            }
+            iHearRange = g_Cfg.m_iDistanceYell;
+            fThrough = true;
+            break;
+        case TALKMODE_BROADCAST:
+            return true;
+        case TALKMODE_WHISPER:
+            if ( g_Cfg.m_iDistanceWhisper < 0 )
+                return false;
+            else if ( g_Cfg.m_iDistanceWhisper == 0 )
+            {
+                int dist = GetVisualRange();
+                if ( dist == 0 )
+                    return true;
+                iHearRange = dist;
+                break;
+            }
+            iHearRange = g_Cfg.m_iDistanceWhisper;
+            break;
+        default:	// this is executed also when playing a sound
+            if ( g_Cfg.m_iDistanceTalk < 0 )
+                return false;
+            else if ( g_Cfg.m_iDistanceTalk == 0 )
+            {
+                int dist = GetVisualRange();
+                if ( dist == 0 )
+                    return true;
+                iHearRange = dist;
+                break;
+            }
+            iHearRange = g_Cfg.m_iDistanceTalk;
+            break;
+    }
 
-	pValue = m_pArea->GetResourceID().IsItem() ? m_pArea->GetResourceID().ItemFind()->GetKey("NOMUTESPEECH", false) : nullptr;
-	if ( pValue && pValue->GetValNum() > 0 )
-		fCanSpeech = true;
-	if ( m_pArea->GetResourceID().IsItem() && !m_pArea->IsFlag(REGION_FLAG_SHIP) && !fCanSpeech )
-		return false;
+    int iDist = GetTopDist3D(pSrc);
+    if ( iDist > iHearRange )	// too far away
+        return false;
 
-	return true;
+    // Check if i can hear from a different region
+    if ( fThrough )		        // a yell goes through walls..
+        return true;
+    if ( m_pArea == pSrcRegion )// same region is always ok.
+       return true;
+
+    // Different region (which can be a multi or an areadef). 
+    if ( IsSetOF(OF_NoHouseMuteSpeech) )
+        return true;
+
+    auto _RegionBlocksSpeech = [](const CRegion* pRegion) -> bool
+    {
+        bool fCanSpeech = false;
+        const CVarDefCont *pValue = pRegion->GetResourceID().IsItem() ? pRegion->GetResourceID().ItemFind()->GetKey("NOMUTESPEECH", false) : nullptr;
+        if ( pValue && pValue->GetValNum() > 0 )
+            fCanSpeech = true;
+        if ( pRegion->GetResourceID().IsItem() && !pRegion->IsFlag(REGION_FLAG_SHIP) && !fCanSpeech )
+            return false;
+        return true;
+    };
+    if (!_RegionBlocksSpeech(pSrcRegion))
+        return false;
+    if (!_RegionBlocksSpeech(m_pArea))
+        return false;
+    return true;
 }
 
 bool CChar::CanMove( CItem *pItem, bool fMsg ) const

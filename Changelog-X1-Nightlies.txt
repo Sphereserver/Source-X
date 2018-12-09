@@ -1319,3 +1319,16 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 27-11-2018, Nolok
 - Fixed: Setting a TAG with a quoted numerical value didn't force it to treat the argument as a string.
 - Fixed: Everytime a player opened a buy/sell gump, the vendor had a forced restock.
+
+09-12-2018, Nolok
+- Added: GO command now accepts the map index as a second argument. It's useful when there are more places with the same name, but located in different maps.
+	Example: "GO britain, 0" teleports to Britain in map0, "GO britain, 1" teleports to Britain in map1 (if that region is defined in the map script file).
+- Fixed: Every worldgem bit (so also the resource bits) was treated as spawn items.
+- Fixed: Spawns didn't accept 0 as MAXDIST, in that case they defaulted it to 1 (Issue #156).
+- Fixed: Every new account was created with the HEARALL flag on.
+- Fixed: Resource gathering skills (fishing, lumberjacking, mining), had inverted ACTARG1/2/3, so that setting one of them via scripts didn't change the expected value, breaking the skill operation (Issue #158).
+- Changed: talkmode_system (0) to talkmode_say, talkmode_prompt (1) to talkmode_system, as it should be according to the packet guides (moreover, if you try to send a colored text to the Enhanced
+	Client with a talkmode different from 0, which is the correct "talk" mode, the client will ignore the color and use its default one).
+	Also, Sphere in some cases used talkmodes 3 (old talkmode_say) and 4 (old talkmode_obj), which behave as the correct talkmode_say (0) and aren't reported as valid talkmodes by any packet guide,
+	so they got removed and replaced with talkmode 0.
+	As result, defs MSG_DEF_COLOR, MSG_DEF_FONT, MSG_DEF_UNICODE aren't used anymore.

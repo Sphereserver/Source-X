@@ -15,7 +15,7 @@
 #include "../common/CLog.h"
 #include "triggers.h"
 
-CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fTest, CChar * pCharSrc )
+CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, bool fTest, CChar * pCharSrc )
 {
 	ADDTOCALLSTACK("CWorld::CheckNaturalResource");
 	// RETURN:
@@ -34,14 +34,14 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 	if ( fTest )	// Is the resource avail at all here ?
 	{
 		EXC_SET_BLOCK("is item near type");
-		if ((Type != IT_TREE) && (Type != IT_ROCK) )
+		if ((iType != IT_TREE) && (iType != IT_ROCK) )
 		{
-			if ( !g_World.IsTypeNear_Top(pt, Type, 0) )
+			if ( !g_World.IsTypeNear_Top(pt, iType, 0) )
 				return nullptr;
 		}
 		else
 		{
-			if ( !g_World.IsItemTypeNear(pt, Type, 0, false) ) //cannot be used, because it does no Z check... what if there is a static tile 70 tiles under me?
+			if ( !g_World.IsItemTypeNear(pt, iType, 0, false) ) //cannot be used, because it does no Z check... what if there is a static tile 70 tiles under me?
 				return nullptr;
 		}
 	}
@@ -58,7 +58,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 		// NOTE: ??? Not all resource objects are world gems. should they be ?
 		// I wanted to make tree stumps etc be the resource block some day.
 
-		if ( pResBit->IsType(Type) && pResBit->GetID() == ITEMID_WorldGem )
+		if ( pResBit->IsType(iType) && pResBit->GetID() == ITEMID_WorldGem )
 			break;
 	}
 
@@ -84,7 +84,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 		CItem *pItem = AreaItems.GetItem();
 		if ( !pItem )
 			break;
-		if ( pItem->GetType() != Type )
+		if ( pItem->GetType() != iType )
 			return nullptr;
 	}
 
@@ -97,7 +97,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 
 	// Find RES_REGIONTYPE
 	EXC_SET_BLOCK("resource group");
-	const CRandGroupDef * pResGroup = pRegion->FindNaturalResource(Type);
+	const CRandGroupDef * pResGroup = pRegion->FindNaturalResource(iType);
 	if ( !pResGroup )
 		return nullptr;
 
@@ -119,11 +119,10 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 		return nullptr;
 
 	EXC_SET_BLOCK("create bit");
-	pResBit = CItem::CreateScript(ITEMID_WorldGem, pCharSrc);
+	pResBit = CItem::CreateScript(ITEMID_WorldGem, pCharSrc, iType); // override the type, otherwise the worldgem will be treated as a spawn item
 	if ( !pResBit )
 		return nullptr;
 
-	pResBit->SetType(Type);
 	pResBit->SetAttr(ATTR_INVIS|ATTR_MOVE_NEVER);
 	pResBit->m_itResource.m_ridRes = pOreDef->GetResourceID();
 
@@ -131,16 +130,15 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 	word amount = (word)pOreDef->m_Amount.GetRandom();
 	if ( (g_Cfg.m_iRacialFlags & RACIALF_HUMAN_WORKHORSE) && pCharSrc->IsHuman() )
 	{
-		if ( (Type == IT_ROCK) && (pCharSrc->GetTopMap() == 0) )
+		if ( (iType == IT_ROCK) && (pCharSrc->GetTopMap() == 0) )
 			amount += 1;	// Workhorse racial bonus, giving +1 ore to humans in Felucca.
-		else if ( (Type == IT_TREE) && (pCharSrc->GetTopMap() == 1) )
+		else if ( (iType == IT_TREE) && (pCharSrc->GetTopMap() == 1) )
 			amount += 2;	// Workhorse racial bonus, giving +2 logs to humans in Trammel.
 	}
 	pResBit->SetAmount( amount );
 	pResBit->MoveToDecay(pt, pOreDef->m_iRegenerateTime.GetRandom() * MSECS_PER_SEC);	// Delete myself in this amount of time.
 
 	EXC_SET_BLOCK("resourcefound");
-
 	if ( pCharSrc != nullptr )
 	{
 		CScriptTriggerArgs Args(0, 0, pResBit);
@@ -162,7 +160,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("point '%d,%d,%d,%d' type '%d' [0%x]\n", pt.m_x, pt.m_y, pt.m_z, pt.m_map, (int)(Type),
+	g_Log.EventDebug("point '%d,%d,%d,%d' type '%d' [0%x]\n", pt.m_x, pt.m_y, pt.m_z, pt.m_map, (int)(iType),
 		pCharSrc ? (dword)(pCharSrc->GetUID()) : 0);
 	EXC_DEBUG_END;
 	return nullptr;

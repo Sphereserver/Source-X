@@ -6,8 +6,13 @@
 #ifndef _INC_CCOMPONENT_H
 #define _INC_CCOMPONENT_H
 
-#include "../common/CScript.h"
-#include "../common/CScriptObj.h"
+#include "../common.h"
+
+class CSString;
+class CScript;
+class CScriptObj;
+class CTextConsole;
+class CObjBase;
 
 
 enum COMP_TYPE
@@ -27,7 +32,6 @@ enum CCRET_TYPE
     CCRET_CONTINUE  // Continue: just continue the loop.
 };
 
-class CObjBase;
 
 class CComponent
 {

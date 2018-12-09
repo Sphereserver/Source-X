@@ -2255,11 +2255,6 @@ void CWorld::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE wHu
 				sprintf(myName, "<%s [%x]>", pSrc->GetName(), (dword)pSrc->GetUID());
 		}
 
-		// Changing talkmode from say to system on EC, because system is the only talkmode to allow a custom (non client defined) hue.
-		// Also, this trick will work only with the Unicode packet, so MSG_DEF_UNICODE in sphere_msgs.scp must be set to 1.
-		if (pClient->GetNetState()->isClientEnhanced() && (mode == TALKMODE_SAY))
-			mode = TALKMODE_SYSTEM;
-
 		if (*myName)
 			pClient->addBarkParse( pszSpeak, pSrc, wHue, mode, font, false, myName );
 		else

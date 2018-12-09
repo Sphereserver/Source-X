@@ -204,8 +204,15 @@ void CCSpawn::GenerateItem(CResourceDef *pDef)
 
     pItem->ClrAttr(pItem->m_Attr & (ATTR_OWNED | ATTR_MOVE_ALWAYS));
     pItem->SetDecayTime(g_Cfg.m_iDecay_Item);	// it will decay eventually to be replaced later
-    if (!pItem->MoveNearObj(pSpawnItem, _iMaxDist ? (word)(Calc_GetRandVal(_iMaxDist) + 1) : 1))
+    CPointMap ptSpawn = pSpawnItem->GetTopPoint();
+    if (_iMaxDist == 0)
     {
+        if (!pItem->MoveTo(ptSpawn))
+            goto move_failed;
+    }
+    else if (!pItem->MoveNearObj(pSpawnItem, (word)(Calc_GetRandVal(_iMaxDist) + 1) ))
+    {
+    move_failed:
         // If this fails, try placing the char ON the spawn
         if (!pItem->MoveTo(pSpawnItem->GetTopPoint()))
         {
@@ -474,7 +481,7 @@ CCharBase *CCSpawn::SetTrackID()
 
     if (rid.GetResType() == RES_CHARDEF)
     {
-        CREID_TYPE id = static_cast<CREID_TYPE>(rid.GetResIndex());
+        CREID_TYPE id = (CREID_TYPE)(rid.GetResIndex());
         pCharDef = CCharBase::FindCharBase(id);
     }
     pItem->SetDispID(pCharDef ? pCharDef->m_trackID : ITEMID_TRACK_WISP);	// They must want it to look like this.

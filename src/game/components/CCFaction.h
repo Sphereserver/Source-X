@@ -6,10 +6,10 @@
 #ifndef _INC_CCFaction_H
 #define _INC_CCFaction_H
 
-#include "../../common/datatypes.h"
-#include "../../common/CScript.h"
-#include "../../common/CTextConsole.h"
 #include "../CComponent.h"
+
+class CItem;
+
 
 /*
     The Original Slayers fall into 6 groups. Abyss, Arachnid, Elemental, Humanoid, Reptilian and Undead.
@@ -48,6 +48,7 @@ enum NPC_GROUP
     NPCGROUP_REPTILIAN  = 0x40,
     NPCGROUP_QTY
 };
+
 /*
     Faction IDs
 */
@@ -140,7 +141,8 @@ class CCFaction : public CFactionDef, public CComponent
 public:
     CCFaction(CObjBase* pLink);
     CCFaction(CCFaction *copy, CObjBase* pLink);
-	virtual ~CCFaction() {}
+	virtual ~CCFaction() = default;
+    static bool CanSuscribe(const CItem* pItem);
     virtual void Delete(bool fForced = false) override;
     virtual bool r_LoadVal(CScript & s) override;
     virtual bool r_WriteVal(lpctstr pszKey, CSString & s, CTextConsole * pSrc = nullptr) override;

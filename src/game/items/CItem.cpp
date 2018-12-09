@@ -99,7 +99,6 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEM
 	m_containedGridIndex = 0;
 	m_dwDispIndex = ITEMID_NOTHING;
 
-
 	m_itNormal.m_more1 = 0;
 	m_itNormal.m_more2 = 0;
 	m_itNormal.m_morep.ZeroPoint();
@@ -118,13 +117,11 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEM
     /* CCItemDamageable is also added from CObjBase::r_LoadVal(OC_CANMASK) for manual override of can flags
     * but it's required to add it also on item's creation depending on it's CItemBase can flags.
     */
-    bool fCanIDamageable = pItemDef->Can(CAN_I_DAMAGEABLE);
-    if (fCanIDamageable)
+    if (CCItemDamageable::CanSuscribe(this))
     {
         Suscribe(new CCItemDamageable(this));
     }
-    LAYER_TYPE iLayer = GetEquipLayer();
-    if ( (iLayer > LAYER_NONE && iLayer < LAYER_EQUIP_QTY) || IsType(IT_MUSICAL))
+    if (CCFaction::CanSuscribe(this))
     {
         Suscribe(new CCFaction(this));  // Adding it only to equippable items
     }
@@ -198,7 +195,7 @@ CItem::~CItem()
 	g_Serv.StatDec(SERV_STAT_ITEMS);
 }
 
-CItem * CItem::CreateBase( ITEMID_TYPE id )	// static
+CItem * CItem::CreateBase( ITEMID_TYPE id, IT_TYPE type )	// static
 {
 	ADDTOCALLSTACK("CItem::CreateBase");
 	// All CItem creates come thru here.
@@ -220,8 +217,9 @@ CItem * CItem::CreateBase( ITEMID_TYPE id )	// static
 	}
 
 	CItem * pItem = nullptr;
-    IT_TYPE iType = pItemDef->GetType();
-	switch (iType)
+    if (type == IT_INVALID)
+        type = pItemDef->GetType();
+	switch (type)
 	{
 		case IT_MAP:
 		case IT_MAP_BLANK:
@@ -272,20 +270,6 @@ CItem * CItem::CreateBase( ITEMID_TYPE id )	// static
 		case IT_SCRIPT:
 			pItem = new CItemScript( id, pItemDef );
 			break;
-		case IT_SPAWN_CHAR:
-		case IT_SPAWN_ITEM:
-        {
-            pItem = new CItem(id, pItemDef);
-            pItem->Suscribe(new CCSpawn(pItem));
-            break;
-        }
-        case IT_SPAWN_CHAMPION:
-        {
-            pItem = new CItem(id, pItemDef);
-            pItem->Suscribe(new CCSpawn(pItem));
-            pItem->Suscribe(new CCChampion(pItem));
-            break;
-        }
 		default:
         {
             if (pItemDef->GetMakeValue(0))
@@ -298,50 +282,14 @@ CItem * CItem::CreateBase( ITEMID_TYPE id )	// static
         }
 	}
 
-    if (pItem)
-    {
-        return pItem;
-    }
-
     /*
-    * Post CComponent's type check.
+    * Post-type CComponents check in SetType.
     * In the future, when all CItem* classes are moved to CComponents all will be passed
     * from here and the first switch can be removed, and so this comment.
     */
+    ASSERT(pItem);
+    pItem->SetType(type);
 
-    pItem = new CItem(id, pItemDef);    // The item should be created always.
-    switch (iType)  // and the CComponents creation & subscription begins here.
-    {
-        case IT_SPAWN_CHAR:
-        case IT_SPAWN_ITEM:
-        {
-            pItem->Suscribe(new CCSpawn(pItem));
-            break;
-        }
-        case IT_SPAWN_CHAMPION:
-        {
-            pItem->Suscribe(new CCSpawn(pItem));
-            pItem->Suscribe(new CCChampion(pItem));
-            break;
-        }
-        case IT_MUSICAL:
-            pItem->Suscribe(new CCItemDamageable(pItem));
-            break;
-        default:
-        {
-            break;
-        }
-    }
-
-    /* CCItemDamageable is also added from CObjBase::r_LoadVal(OC_CANMASK) for manual override of can flags
-    * but it's required to add it also on item's creation depending on it's CItemBase can flags.
-    */
-    if (pItemDef->Can(CAN_I_DAMAGEABLE))
-    {
-        pItem->Suscribe(new CCItemDamageable(pItem));
-    }
-
-	ASSERT( pItem );
 	if (idErrorMsg && idErrorMsg != -1)
 		DEBUG_ERR(("CreateBase invalid item ID=0%" PRIx32 ", defaulting to ID=0%" PRIx32 ". Created UID=0%" PRIx32 "\n", idErrorMsg, id, (dword)pItem->GetUID()));
 
@@ -354,7 +302,7 @@ CItem * CItem::CreateDupeItem( const CItem * pItem, CChar * pSrc, bool fSetNew )
 	// Dupe this item.
 	if ( pItem == nullptr )
 		return nullptr;
-	CItem * pItemNew = CreateBase( pItem->GetID());
+	CItem * pItemNew = CreateBase( pItem->GetID(), pItem->GetType() );
 	ASSERT(pItemNew);
 	pItemNew->DupeCopy( pItem );
 
@@ -364,15 +312,15 @@ CItem * CItem::CreateDupeItem( const CItem * pItem, CChar * pSrc, bool fSetNew )
 	if ( fSetNew )
 		g_World.m_uidNew = pItemNew->GetUID();
 
-	return( pItemNew );
+	return pItemNew;
 }
 
-CItem * CItem::CreateScript(ITEMID_TYPE id, CChar * pSrc) // static
+CItem * CItem::CreateScript(ITEMID_TYPE id, CChar * pSrc, IT_TYPE type) // static
 {
 	ADDTOCALLSTACK("CItem::CreateScript");
 	// Create item from the script id.
 
-	CItem * pItem = CreateBase(id);
+	CItem * pItem = CreateBase(id, type);
 	ASSERT(pItem);
 	pItem->GenerateScript(pSrc);
 	return pItem;
@@ -1050,7 +998,7 @@ int CItem::FixWeirdness()
 			{
 				if ( GetType() < IT_TRIGGER )
 				{
-					m_type = pItemDef->GetType();
+					SetType(pItemDef->GetType());
 				}
 			}
 	}
@@ -1907,7 +1855,7 @@ bool CItem::SetBase( CItemBase * pItemDef )
 	CContainer * pParentCont = dynamic_cast <CContainer*> (GetParent());
 	int iWeightOld = 0;
 
-	if ( pItemOldDef)
+	if ( pItemOldDef )
 	{
 		if ( pParentCont )
 			iWeightOld = GetWeight();
@@ -1928,7 +1876,7 @@ bool CItem::SetBase( CItemBase * pItemDef )
 		pParentCont->OnWeightChange( GetWeight() - iWeightOld );
 	}
 
-	m_type = pItemDef->GetType();	// might change the type.
+	m_type = pItemDef->GetType();
 	return true;
 }
 
@@ -1944,7 +1892,9 @@ bool CItem::SetBaseID( ITEMID_TYPE id )
 		DEBUG_ERR(( "SetBaseID 0%x invalid item uid=0%x\n",	id, (dword) GetUID()));
 		return false;
 	}
-	SetBase( pItemDef );	// set new m_type etc
+	// SetBase sets the type, but only SetType does the components check
+	SetBase(pItemDef);
+    SetType(pItemDef->GetType());
 	return true;
 }
 
@@ -2043,7 +1993,6 @@ void CItem::SetAmount(word amount )
 	UpdatePropertyFlag(AUTOTOOLTIP_FLAG_AMOUNT);
 }
 
-
 word CItem::GetMaxAmount()
 {
 	ADDTOCALLSTACK("CItem::GetMaxAmount");
@@ -2077,7 +2026,18 @@ void CItem::SetAmountUpdate(word amount )
 		// Strange client thing. You have to remove before it will update this.
 		RemoveFromView();
 	}
-	Update();
+    if (CanSendAmount())
+    {
+	    Update();
+    }
+}
+
+bool CItem::CanSendAmount() const
+{
+    // return false -> don't send to the client the real amount for this item (send 1 instead)
+    if (GetDispID() == ITEMID_WorldGem) // it can be a natural resource worldgem bit (used for lumberjacking, mining...)
+        return false;
+    return true;
 }
 
 void CItem::WriteUOX( CScript & s, int index )
@@ -3188,7 +3148,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			}
 			return true;
 		case IC_TYPE:
-			SetType(static_cast<IT_TYPE>(g_Cfg.ResourceGetIndexType( RES_TYPEDEF, s.GetArgStr())));
+			SetType( (IT_TYPE)(g_Cfg.ResourceGetIndexType( RES_TYPEDEF, s.GetArgStr() )) );
 			break;
 		default:
         {
@@ -3503,7 +3463,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 					DEBUG_ERR(( "0%x '%s' has unhandled [TYPEDEF %d] for 0%x '%s'\n", (dword) GetUID(), GetName(), GetType(), (dword) pChar->GetUID(), pChar->GetName()));
 				else
 					DEBUG_ERR(( "0%x '%s' has unhandled [TYPEDEF %d]\n", (dword) GetUID(), GetName(), GetType() ));
-				m_type = Item_GetDef()->GetType();
+				SetType(Item_GetDef()->GetType());
 				iRet = TRIGRET_RET_DEFAULT;
 				goto stopandret;//return( TRIGRET_RET_DEFAULT );
 			}
@@ -3639,8 +3599,8 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 					DEBUG_ERR(( "0%x '%s' has unhandled [TYPEDEF %d] for 0%x '%s'\n", (dword) GetUID(), GetName(), GetType(), (dword) pChar->GetUID(), pChar->GetName()));
 				else
 					DEBUG_ERR(( "0%x '%s' has unhandled [TYPEDEF %d]\n", (dword) GetUID(), GetName(), GetType() ));
-				m_type = Item_GetDef()->GetType();
-				return( TRIGRET_RET_DEFAULT );
+				SetType(Item_GetDef()->GetType());
+				return TRIGRET_RET_DEFAULT;
 			}
 
 			if ( pResourceLink->HasTrigger( iAction ))
@@ -3664,7 +3624,6 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 	return iRet;
 }
 
-
 TRIGRET_TYPE CItem::OnTrigger( ITRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
 {
 	ASSERT( trigger < ITRIG_QTY );
@@ -3676,6 +3635,69 @@ CItem * CItem::SetType(IT_TYPE type)
 {
 	ADDTOCALLSTACK("CItem::SetType");
 	m_type = type;
+
+    // CComponents sanity check.
+    // Ensure that an item that should have a given component has it, and if the item shouldn't have a given component, check if it's subscribed, in that case unsubscribe it.
+    CComponent* pComp;
+    pComp = GetComponent(COMP_SPAWN);
+    bool fIsSpawn = false;
+    if ((type != IT_SPAWN_CHAR) && (type != IT_SPAWN_ITEM))
+    {
+        if (pComp)
+            Unsuscribe(pComp);
+    }
+    else if (!pComp)
+    {
+        Suscribe(new CCSpawn(this));
+        fIsSpawn = true;
+    }
+
+    if (type != IT_SPAWN_CHAMPION)
+    {
+        if (!fIsSpawn)
+        {
+            pComp = GetComponent(COMP_CHAMPION);
+            if (pComp)
+                Unsuscribe(pComp);
+            pComp = GetComponent(COMP_SPAWN);
+            if (pComp)
+                Unsuscribe(pComp);
+        }
+    }
+    else
+    {
+        pComp = GetComponent(COMP_CHAMPION);
+        if (!pComp)
+            Suscribe(new CCChampion(this));
+        pComp = GetComponent(COMP_SPAWN);
+        if (!pComp)
+            Suscribe(new CCSpawn(this));
+    }
+
+    pComp = GetComponent(COMP_ITEMDAMAGEABLE);
+    if (!CCItemDamageable::CanSuscribe(this))
+    {
+        if (pComp)
+            Unsuscribe(pComp);
+    }
+    else if (!pComp)
+    {
+        /* CCItemDamageable is also added from CObjBase::r_LoadVal(OC_CANMASK) for manual override of can flags
+        * but it's required to add it also on item's creation depending on it's CItemBase can flags. */
+        Suscribe(new CCItemDamageable(this));
+    }
+
+    pComp = GetComponent(COMP_FACTION);
+    if (!CCFaction::CanSuscribe(this))
+    {
+        if (pComp)
+            Unsuscribe(pComp);
+    }
+    else if (!pComp)
+    {
+        Suscribe(new CCFaction(this));
+    }
+
 	return this;
 }
 
@@ -3787,7 +3809,7 @@ void CItem::DupeCopy( const CItem * pItem )
 	m_dwDispIndex = pItem->m_dwDispIndex;
 	SetBase( pItem->Item_GetDef() );
 	SetTimeout( pItem->GetTimerDiff() );
-	m_type = pItem->m_type;
+	SetType(pItem->m_type);
 	m_amount = pItem->m_amount;
 	m_Attr  = pItem->m_Attr;
 	m_CanMask = pItem->m_CanMask;
@@ -3812,7 +3834,7 @@ void CItem::SetAnim( ITEMID_TYPE id, int64 iTicksTimeout)
 	m_itAnim.m_PrevID = GetDispID(); // save old id.
 	m_itAnim.m_PrevType = m_type;
 	SetDispID( id );
-	m_type = IT_ANIM_ACTIVE;
+	m_type = IT_ANIM_ACTIVE;    // Do not change the components? SetType(IT_ANIM_ACTIVE);
 	SetTimeout(iTicksTimeout);
 	//RemoveFromView();
 	Update();
@@ -4829,7 +4851,7 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 		if ( iDist <= UO_MAP_VIEW_RADAR && // if it's visible in the radar window as a boat, report it
 			pItem->m_type == IT_SHIP )
 		{
-			iBoatSighted ++; // Keep a tally of how many we see
+			++iBoatSighted; // Keep a tally of how many we see
 			if (!pBoatSighted || iDist < ptCoords.GetDist(pBoatSighted->GetTopPoint())) // Only find closer items to us
 			{
 				pBoatSighted = pItem;
@@ -5127,7 +5149,7 @@ bool CItem::SetMagicLock( CChar * pCharSrc, int iSkillLevel )
 		case IT_CONTAINER:
 			if ( pCharSrc->ContentFindKeyFor( this ))
 			{
-				m_type=IT_CONTAINER_LOCKED;
+				SetType(IT_CONTAINER_LOCKED);
 				pCharSrc->SysMessage( g_Cfg.GetDefaultMsg( DEFMSG_LOCK_CONT_OK ) );
 			}
 			else
@@ -5143,7 +5165,7 @@ bool CItem::SetMagicLock( CChar * pCharSrc, int iSkillLevel )
 		case IT_DOOR_OPEN:
 			if ( pCharSrc->ContentFindKeyFor( this ))
 			{
-				m_type=IT_DOOR_LOCKED;
+				SetType(IT_DOOR_LOCKED);
 				pCharSrc->SysMessage( g_Cfg.GetDefaultMsg( DEFMSG_LOCK_DOOR_OK ) );
 			}
 			else
@@ -5155,7 +5177,7 @@ bool CItem::SetMagicLock( CChar * pCharSrc, int iSkillLevel )
 		case IT_SHIP_HOLD:
 			if ( pCharSrc->ContentFindKeyFor( this ))
 			{
-				m_type=IT_SHIP_HOLD_LOCK;
+				SetType(IT_SHIP_HOLD_LOCK);
 				pCharSrc->SysMessage( g_Cfg.GetDefaultMsg( DEFMSG_LOCK_HOLD_OK ) );
 			}
 			else
@@ -5165,7 +5187,7 @@ bool CItem::SetMagicLock( CChar * pCharSrc, int iSkillLevel )
 			}
 			break;
 		case IT_SHIP_SIDE:
-			m_type=IT_SHIP_SIDE_LOCKED;
+			SetType(IT_SHIP_SIDE_LOCKED);
 			pCharSrc->SysMessage( g_Cfg.GetDefaultMsg( DEFMSG_LOCK_SHIP_OK ) );
 			break;
 		default:
@@ -5776,7 +5798,7 @@ bool CItem::OnTick()
 				EXC_SET_BLOCK("default behaviour::IT_ANIM_ACTIVE");
 				RemoveFromView();
 				SetDispID( m_itAnim.m_PrevID );
-				m_type = m_itAnim.m_PrevType;
+				m_type = m_itAnim.m_PrevType;   // don't change the components SetType(m_itAnim.m_PrevType);
 				SetTimeout( -1 );
 				Update();
 			}

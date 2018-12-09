@@ -19,8 +19,10 @@ enum IT_TYPE		// double click type action.
 {
 	// NOTE: Never change this list as it will mess up the RES_ITEMDEF or RES_WORLDITEM already stored.
 	// Just add stuff to end.
+    IT_INVALID = -1,
+
 	IT_NORMAL = 0,
-	IT_CONTAINER = 1,		// any unlocked container or corpse. CContainer based
+	IT_CONTAINER,		    // any unlocked container or corpse. CContainer based
 	IT_CONTAINER_LOCKED,	// 2 =
 	IT_DOOR,				// 3 = door can be opened
 	IT_DOOR_LOCKED,			// 4 = a locked door.

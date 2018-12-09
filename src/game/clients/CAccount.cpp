@@ -530,7 +530,7 @@ PLEVEL_TYPE CAccount::GetPrivLevelText( lpctstr pszFlags ) // static
 	ADDTOCALLSTACK("CAccount::GetPrivLevelText");
 	int level = FindTable( pszFlags, sm_szPrivLevels, CountOf(sm_szPrivLevels)-1 );
 	if ( level >= 0 )
-		return static_cast<PLEVEL_TYPE>(level);
+		return (PLEVEL_TYPE)level;
 
 	level = Exp_GetVal( pszFlags );
 	if ( level < PLEVEL_Guest )
@@ -538,7 +538,7 @@ PLEVEL_TYPE CAccount::GetPrivLevelText( lpctstr pszFlags ) // static
 	if ( level > PLEVEL_Owner )
 		return PLEVEL_Owner;
 
-	return static_cast<PLEVEL_TYPE>(level);
+	return (PLEVEL_TYPE)level;
 }
 
 CAccount::CAccount( lpctstr pszName, bool fGuest )

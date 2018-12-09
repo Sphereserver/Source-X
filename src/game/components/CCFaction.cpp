@@ -4,7 +4,8 @@
 */
 
 #include "CCFaction.h"
-#include "../CObjBase.h"
+#include "../items/CItem.h"
+
 
 CFactionDef::CFactionDef()
 {
@@ -170,6 +171,12 @@ CCFaction::CCFaction(CCFaction *copy, CObjBase* pLink) : CFactionDef(), CCompone
 {
     ADDTOCALLSTACK_INTENSIVE("CCFaction::CCFaction(CCFaction*)");
     Copy(copy);
+}
+
+bool CCFaction::CanSuscribe(const CItem* pItem) // static
+{
+    LAYER_TYPE iLayer = pItem->GetEquipLayer();
+    return ( (iLayer > LAYER_NONE && iLayer < LAYER_EQUIP_QTY) || pItem->IsType(IT_MUSICAL) );
 }
 
 void CCFaction::Delete(bool fForced)

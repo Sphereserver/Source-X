@@ -1047,20 +1047,18 @@ enum NOTO_TYPE
 
 enum TALKMODE_TYPE	// Modes we can talk/bark in.
 {
-	TALKMODE_SYSTEM = 0,	// 0 = Normal system message
-	TALKMODE_PROMPT,		// 1 = Display as system prompt
-	TALKMODE_EMOTE,			// 2 = *smiles* at object (client shortcut: :+space)
-	TALKMODE_SAY,			// 3 = A chacter speaking.
-	TALKMODE_OBJ,			// 4 = At object
-	TALKMODE_NOTHING,		// 5 = Does not display
-	TALKMODE_ITEM,			// 6 = text labeling an item. Preceeded by "You see"
-	TALKMODE_NOSCROLL,		// 7 = As a status msg. Does not scroll
-	TALKMODE_WHISPER,		// 8 = Only those close can here. (client shortcut: ;+space)
-	TALKMODE_YELL,			// 9 = Can be heard 2 screens away. (client shortcut: !+space)
-	TALKMODE_SPELL,			// 10 = Used by spells
-	TALKMODE_GUILD = 0xd,	// 13 = Used by guild chat (client shortcut: \)
-	TALKMODE_ALLIANCE,		// 14 = Used by alliance chat (client shortcut: shift+\)
-	TALKMODE_BROADCAST = 0xFF
+	TALKMODE_SAY        = 0,    // 0 = A character speaking.
+	TALKMODE_SYSTEM     = 1,	// 1 = Display as system prompt
+	TALKMODE_EMOTE      = 2,	// 2 = *smiles* at object (client shortcut: :+space)
+	TALKMODE_ITEM       = 6,	// 6 = text labeling an item. Preceeded by "You see"
+	TALKMODE_NOSCROLL   = 7,	// 7 = As a status msg. Does not scroll (as reported by the packet guides)
+	TALKMODE_WHISPER    = 8,	// 8 = Only those close can here. (client shortcut: ;+space)
+	TALKMODE_YELL       = 9,	// 9 = Can be heard 2 screens away. (client shortcut: !+space)
+	TALKMODE_SPELL      = 10,	// 10 = Used by spells
+	TALKMODE_GUILD      = 0xD,	// 13 = Used by guild chat (client shortcut: \)
+	TALKMODE_ALLIANCE   = 0xE,	// 14 = Used by alliance chat (client shortcut: shift+\)
+    TALKMODE_COMMAND    = 0xF,  // 15 = GM command prompt
+	TALKMODE_BROADCAST  = 0xFF  // Special value used internally by Sphere, it will be converted to something else.
 };
 
 enum SKILLLOCK_TYPE

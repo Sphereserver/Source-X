@@ -121,7 +121,7 @@ bool CEntity::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
     return false;
 }
 
-void CEntity::r_Write(CScript & s) ///< Storing data in the worldsave.
+void CEntity::r_Write(CScript & s) // Storing data in the worldsave.
 {
     if (_List.empty() && !s.IsWriteMode())
         return;
@@ -211,6 +211,7 @@ CCRET_TYPE CEntity::OnTick()
 {
     if (_List.empty())
         return CCRET_CONTINUE;
+
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
     {
         CComponent *pComponent = it->second;

@@ -1636,9 +1636,7 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 }
 
 
-
-
-void CClient::Event_Talk_Common(tchar *szText)	// PC speech
+void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 {
 	ADDTOCALLSTACK("CClient::Event_Talk_Common");
 	if ( !m_pChar || !m_pChar->m_pPlayer || !m_pChar->m_pArea )
@@ -1648,21 +1646,21 @@ void CClient::Event_Talk_Common(tchar *szText)	// PC speech
 	lpctstr pszMsgGuards = g_Exp.m_VarDefs.GetKeyStr("guardcall");
 	if ( !strnicmp(pszMsgGuards, "", 0) )
 		pszMsgGuards = "GUARD,GUARDS";
-	if ( FindStrWord(szText, pszMsgGuards) > 0 )
+	if ( FindStrWord(pszText, pszMsgGuards) > 0 )
 		m_pChar->CallGuards();
 
 	// Are we in a region that can hear ?
 	if ( m_pChar->m_pArea->GetResourceID().IsItem() )
 	{
-		CItemMulti *pItemMulti = static_cast<CItemMulti *>(m_pChar->m_pArea->GetResourceID().ItemFind());
+		CItemMulti *pItemMulti = dynamic_cast<CItemMulti *>(m_pChar->m_pArea->GetResourceID().ItemFind());
 		if ( pItemMulti )
-			pItemMulti->OnHearRegion(szText, m_pChar);
+			pItemMulti->OnHearRegion(pszText, m_pChar);
 	}
 
 	// Are there items on the ground that might hear u ?
 	CSector *pSector = m_pChar->GetTopSector();
 	if ( pSector->HasListenItems() )
-		pSector->OnHearItem(m_pChar, szText);
+		pSector->OnHearItem(m_pChar, pszText);
 
 	// Find an NPC that may have heard us.
 	CChar *pChar = nullptr;
@@ -1685,7 +1683,7 @@ void CClient::Event_Talk_Common(tchar *szText)	// PC speech
 		if ( pChar->IsStatFlag(STATF_COMM_CRYSTAL) )
 		{
 			for ( CItem *pItem = pChar->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
-				pItem->OnHear(szText, m_pChar);
+				pItem->OnHear(pszText, m_pChar);
 		}
 
 		if ( pChar == m_pChar )
@@ -1697,20 +1695,22 @@ void CClient::Event_Talk_Common(tchar *szText)	// PC speech
 
 		bool bNamed = false;
 		i = 0;
-		if ( !strnicmp(szText, "ALL ", 4) )
+		if ( !strnicmp(pszText, "ALL ", 4) )
+        {
 			i = 4;
+        }
 		else
 		{
 			// Named the char specifically ?
-			i = pChar->NPC_OnHearName(szText);
+			i = pChar->NPC_OnHearName(pszText);
 			bNamed = true;
 		}
 		if ( i > 0 )
 		{
-			while ( ISWHITESPACE(szText[i]) )
-				i++;
+			while ( ISWHITESPACE(pszText[i]) )
+				++i;
 
-			if ( pChar->NPC_OnHearPetCmd(szText + i, m_pChar, !bNamed) )
+			if ( pChar->NPC_OnHearPetCmd(pszText + i, m_pChar, !bNamed) )
 			{
 				if ( bNamed || (GetTargMode() == CLIMODE_TARG_PET_CMD) )
 					return;
@@ -1747,11 +1747,8 @@ void CClient::Event_Talk_Common(tchar *szText)	// PC speech
 			return;	// no one heard it.
 	}
 
-	// Change to all upper case for ease of search. ???
-	_strupr(szText);
-
 	// The char hears you say this.
-	pChar->NPC_OnHear(&szText[i], m_pChar);
+	pChar->NPC_OnHear(&pszText[i], m_pChar);
 }
 
 // PC speech: response to ASCII speech request
@@ -1773,7 +1770,7 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 		wHue = HUE_SAY_DEF;
 
 	pAccount->m_lang.Set( nullptr );	// default
-	if ( (mode == TALKMODE_SYSTEM) && !m_pChar->m_SpeechHueOverride )
+	if ( (mode == TALKMODE_SAY) && !m_pChar->m_SpeechHueOverride )
 		m_pChar->m_pPlayer->m_SpeechHue = wHue;
 
 	// Rip out the unprintables first
@@ -1854,7 +1851,6 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 	// Get the text in wide bytes.
 	// ENU = English
 	// FRC = French
-	// mode == TALKMODE_SYSTEM if coming from player talking.
 
 	CAccount *pAccount = GetAccount();
     ASSERT(pAccount && m_pChar && m_pChar->m_pPlayer);
@@ -1873,7 +1869,7 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 		wHue = HUE_SAY_DEF;
 
 	pAccount->m_lang.Set(pszLang);
-	if ( (mMode == TALKMODE_SYSTEM) && (!m_pChar->m_SpeechHueOverride) )
+	if ( (mMode == TALKMODE_SAY) && (!m_pChar->m_SpeechHueOverride) )
 		m_pChar->m_pPlayer->m_SpeechHue = wHue;
 
 	tchar szText[MAX_TALK_BUFFER];
@@ -1925,7 +1921,7 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 		if ( !fCancelSpeech && ( iLen <= 128 ) ) // From this point max 128 chars
 		{
 			m_pChar->SpeakUTF8Ex(puText, wHue, mMode, font, pAccount->m_lang);
-			Event_Talk_Common(static_cast<tchar*>(pszText));
+			Event_Talk_Common(pszText);
 		}
 	}
 }

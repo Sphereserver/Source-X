@@ -376,7 +376,7 @@ void CObjBase::Sound( SOUND_TYPE id, int iOnce ) const // Play sound effect for 
 	ClientIterator it;
 	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
 	{
-		if ( ! pClient->CanHear( this, TALKMODE_OBJ ) )
+		if ( ! pClient->CanHear( this, TALKMODE_SAY ) )
 			continue;
 		pClient->addSound( id, this, iOnce );
 	}
@@ -2297,7 +2297,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET_BLOCK("MESSAGE or MSG");
 				if ( pCharSrc == nullptr )
-					UpdateObjMessage(s.GetArgStr(), s.GetArgStr(), nullptr, HUE_TEXT_DEF, TALKMODE_OBJ);
+					UpdateObjMessage(s.GetArgStr(), s.GetArgStr(), nullptr, HUE_TEXT_DEF, TALKMODE_SAY);
 				else
 					pCharSrc->ObjMessage(s.GetArgStr(), this);
 			}

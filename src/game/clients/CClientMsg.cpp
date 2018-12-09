@@ -631,7 +631,7 @@ void CClient::addBarkUNICODE( const nchar * pwText, const CObjBaseTemplate * pSr
 
 	if ( mode == TALKMODE_BROADCAST )
 	{
-		mode = TALKMODE_SYSTEM;
+		mode = TALKMODE_SAY;
 		pSrc = nullptr;
 	}
 
@@ -649,7 +649,7 @@ void CClient::addBarkLocalized( int iClilocId, const CObjBaseTemplate * pSrc, HU
 
 	if ( mode == TALKMODE_BROADCAST )
 	{
-		mode = TALKMODE_SYSTEM;
+		mode = TALKMODE_SAY;
 		pSrc = nullptr;
 	}
 
@@ -667,7 +667,7 @@ void CClient::addBarkLocalizedEx( int iClilocId, const CObjBaseTemplate * pSrc, 
 
 	if ( mode == TALKMODE_BROADCAST )
 	{
-		mode = TALKMODE_SYSTEM;
+		mode = TALKMODE_SAY;
 		pSrc = nullptr;
 	}
 
@@ -683,6 +683,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	HUE_TYPE defaultHue = HUE_TEXT_DEF;
 	FONT_TYPE defaultFont = FONT_NORMAL;
 	bool defaultUnicode = false;
+    bool fUseSpeechHueOverride = false;
 	const CChar * pSrcChar = nullptr;
 	if (pSrc && pSrc->IsChar())
 	    pSrcChar = static_cast<const CChar *>(pSrc);
@@ -691,11 +692,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	{
 		case TALKMODE_SYSTEM:
 		{
-			// If the Client is Enhanced, we have forced the NPC speech to SYSTEM talkmode, since
-			//	this is the only one to allow a custom hue
-			if (pSrcChar)
-				if (GetNetState()->isClientEnhanced() && pSrcChar->m_pNPC)
-					goto forcesay;
+		talkmode_system:
 			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_COLOR"));
 			defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_FONT"));
 			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_UNICODE") > 0 ? true : false;
@@ -710,17 +707,15 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		}
 		case TALKMODE_SAY:
 		{
-			forcesay:
+            if (pSrc == nullptr)
+            {
+                // It's a SYSMESSAGE
+                goto talkmode_system;
+            }
+            fUseSpeechHueOverride = true;
 			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_COLOR"));
 			defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_FONT"));
 			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_UNICODE") > 0 ? true : false;
-			break;
-		}
-		case TALKMODE_OBJ:
-		{
-			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("MSG_DEF_COLOR"));
-			defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("MSG_DEF_FONT"));
-			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("MSG_DEF_UNICODE") > 0 ? true : false;
 			break;
 		}
 		case TALKMODE_ITEM:
@@ -768,7 +763,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 			++i;
 
 			if ( *s == ',' )
-				s++;
+				++s;
 			else
 				break;	// no more args here!
 		}
@@ -777,20 +772,22 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 			Args[1] = (word)FONT_NORMAL;
 	}
 
-	if (mode != TALKMODE_SPELL)
+	if (fUseSpeechHueOverride && pSrcChar)
 	{
-		if ( pSrcChar )
-		{
-			// If a specific hue is not given, use SpeechHueOverride (if set), otherwise use the defaultHue got from the defname.
-				if (pSrcChar->m_SpeechHueOverride && (mode != TALKMODE_EMOTE))
-					Args[0] = (word)pSrcChar->m_SpeechHueOverride;
-				else if (Args[0] == HUE_TEXT_DEF)
-                    Args[0] = (word)defaultHue;
-		}
-
-		if ( Args[1] == FONT_NORMAL )
-			Args[1] = (word)defaultFont;
+        if (pSrcChar->m_SpeechHueOverride)
+            Args[0] = (word)pSrcChar->m_SpeechHueOverride;
 	}
+    else if (mode <= TALKMODE_YELL)
+    {
+        if (Args[0] == HUE_TEXT_DEF)
+            Args[0] = (word)defaultHue;
+    }
+
+    if (mode != TALKMODE_SPELL)
+    {
+        if ( Args[1] == FONT_NORMAL )
+            Args[1] = (word)defaultFont;
+    }
 
 	if ( Args[2] == 0 )
 		Args[2] = (word)defaultUnicode;
@@ -855,8 +852,6 @@ bark_default:
 	}
 }
 
-
-
 void CClient::addBark( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font ) const
 {
 	ADDTOCALLSTACK("CClient::addBark");
@@ -871,7 +866,7 @@ void CClient::addBark( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE 
 
 	if ( mode == TALKMODE_BROADCAST )
 	{
-		mode = TALKMODE_SYSTEM;
+		mode = TALKMODE_SAY;
 		pSrc = nullptr;
 	}
 
@@ -2578,7 +2573,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 	{
 		if ( !fNoMessages )
 		{
-			addBark(g_szServerDescription, nullptr, HUE_YELLOW, TALKMODE_SYSTEM, FONT_NORMAL);
+			addBark(g_szServerDescription, nullptr, HUE_YELLOW, TALKMODE_SAY, FONT_NORMAL);
 
 			sprintf(z, (g_Serv.StatGet(SERV_STAT_CLIENTS)==2) ?
 				g_Cfg.GetDefaultMsg( DEFMSG_LOGIN_PLAYER ) : g_Cfg.GetDefaultMsg( DEFMSG_LOGIN_PLAYERS ),
@@ -2605,7 +2600,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 	if ( IsPriv(PRIV_JAILED) )
 		m_pChar->Jail(&g_Serv, true, (int)(GetAccount()->m_TagDefs.GetKeyNum("JailCell")));
 	if ( g_Serv.m_timeShutdown > 0 )
-		addBarkParse(g_Cfg.GetDefaultMsg(DEFMSG_MSG_SERV_SHUTDOWN_SOON), nullptr, HUE_TEXT_DEF, TALKMODE_SYSTEM, FONT_BOLD);
+		addBarkParse(g_Cfg.GetDefaultMsg(DEFMSG_MSG_SERV_SHUTDOWN_SOON), nullptr, HUE_TEXT_DEF, TALKMODE_SAY, FONT_BOLD);
 
 	GetAccount()->m_TagDefs.DeleteKey("LastLogged");
 	Announce(true);		// announce you to the world

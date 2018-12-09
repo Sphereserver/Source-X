@@ -164,6 +164,7 @@ public:
 	*/
 	inline tchar GetAt(int nIndex) const
 	{
+        ASSERT(nIndex >= 0);
 		ASSERT(nIndex <= m_iLength);  // Allow to get the null char.
 		return m_pchData[nIndex];
 	}
@@ -174,6 +175,7 @@ public:
 	*/
 	inline tchar & ReferenceAt(int nIndex)
 	{
+        ASSERT(nIndex >= 0);
 		ASSERT(nIndex < m_iLength);
 		return m_pchData[nIndex];
 	}

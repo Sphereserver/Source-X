@@ -420,7 +420,13 @@ PacketItemWorld::PacketItemWorld(const CClient* target, CItem *item) : PacketSen
 	ADDTOCALLSTACK("PacketItemWorld::PacketItemWorld");
 
 	dword uid = item->GetUID();
-	word amount = ( item->GetAmount() > 1 ) ? item->GetAmount() : 0;
+	word amount = 0;
+    if (item->CanSendAmount())
+    {
+        word itemAmount = item->GetAmount();
+        if (itemAmount > 1)
+            amount = itemAmount;
+    }
 	ITEMID_TYPE id = item->GetDispID();
 	CPointMap p = item->GetTopPoint();
 	DIR_TYPE dir = DIR_N;
@@ -742,7 +748,7 @@ PacketDragAnimation::PacketDragAnimation(const CChar* source, const CItem* item,
 	writeInt16((word)(item->GetDispID()));
 	writeByte(0);
 	writeInt16((word)(item->GetHue()));
-	writeInt16(item->GetAmount());
+	writeInt16(item->CanSendAmount() ? item->GetAmount() : 1);
 
 	const CPointMap& sourcepos = source->GetTopPoint();
 
@@ -5022,7 +5028,13 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, CItem *item) : Pac
 	dword uid = item->GetUID();
 	ITEMID_TYPE id = item->GetDispID();
 	DIR_TYPE dir = DIR_N;
-	word amount = item->GetAmount();
+    word amount = 0;
+    if (item->CanSendAmount())
+    {
+        word itemAmount = item->GetAmount();
+        if (itemAmount > 1)
+            amount = itemAmount;
+    }
 	CPointMap pt = item->GetTopPoint();
 	HUE_TYPE hue = item->GetHue();
 	byte light = 0;

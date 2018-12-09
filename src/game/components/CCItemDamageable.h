@@ -8,6 +8,8 @@
 
 #include "../CComponent.h"
 
+class CItem;
+
 
 class CCItemDamageable : public CComponent
 {
@@ -19,6 +21,8 @@ class CCItemDamageable : public CComponent
 public:
     CCItemDamageable(CObjBase *pLink);
     virtual ~CCItemDamageable();
+
+    static bool CanSuscribe(const CItem* pItem);
 
     void SetCurHits(word iCurHits);
     void SetMaxHits(word iMaxHits);

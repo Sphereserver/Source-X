@@ -178,7 +178,7 @@ void CClient::addSysMessage(lpctstr pszMsg) // System message (In lower left cor
 			strcpy(m_zLastMessage, pszMsg);
 	}
 
-	addBarkParse(pszMsg, nullptr, HUE_TEXT_DEF, TALKMODE_SYSTEM);
+	addBarkParse(pszMsg, nullptr, HUE_TEXT_DEF, TALKMODE_SAY);
 }
 
 

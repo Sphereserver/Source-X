@@ -192,7 +192,7 @@ CServerConfig::CServerConfig()
 	m_iAdvancedLos		= 0;
 
 	// New ones
-	m_iFeatureT2A		= (FEATURE_T2A_UPDATE|FEATURE_T2A_CHAT);
+	m_iFeatureT2A		= FEATURE_T2A_UPDATE;
 	m_iFeatureLBR		= 0;
 	m_iFeatureAOS		= 0;
 	m_iFeatureSE		= 0;
@@ -208,7 +208,7 @@ CServerConfig::CServerConfig()
 	m_iMaxLoopTimes		= 100000;
 
 	m_bAutoResDisp		= true;
-	m_iAutoPrivFlags	= PRIV_DETAIL;
+	m_iAutoPrivFlags	= 0;
 
 	// Third Party Tools
 	m_fCUOStatus		= true;
@@ -228,7 +228,6 @@ CServerConfig::CServerConfig()
 	m_bMySqlTicks			= false;
 
     m_bAutoResDisp          = true;
-    m_iAutoPrivFlags        = 0x10;
 
 	m_cCommandPrefix		= '.';
 
@@ -2314,7 +2313,7 @@ CPointMap CServerConfig::GetRegionPoint( lpctstr pCmd ) const // Decode a telepo
 		size_t i = ( - ATOI(pCmd)) - 1;
 		if ( ! m_StartDefs.IsValidIndex( i ))
 		{
-			if (m_StartDefs.size() <= 0 )
+			if (m_StartDefs.empty())
 				return CPointMap();
 
 			i = 0;
@@ -2348,26 +2347,59 @@ CRegion * CServerConfig::GetRegion( lpctstr pKey ) const
 {
 	ADDTOCALLSTACK("CServerConfig::GetRegion");
 	// get a region from a name or areadef.
+    // pKey format: "name" or "name, map"
 
 	GETNONWHITESPACE( pKey );
-	for ( size_t i = 0; i < CountOf(m_ResHash.m_Array); i++ )
-	{
-		for ( size_t j = 0; j < m_ResHash.m_Array[i].size(); j++ )
-		{
-			CResourceDef * pResDef = m_ResHash.m_Array[i][j];
-			ASSERT(pResDef);
+    lpctstr ptcColonPos = strchr(pKey, ',');
+    if (ptcColonPos == nullptr)
+    {
+        // No map specified: return the one with lower map index
+        std::vector<CRegion*> regions;
+        for (CRegion* pRegion : m_RegionDefs)
+        {
+            if ( ! pRegion->GetNameStr().CompareNoCase(pKey) || ! strcmpi(pRegion->GetResourceName(), pKey) )
+            {
+                regions.emplace_back(pRegion);
+            }
+        }
 
-			CRegion * pRegion = dynamic_cast <CRegion*> (pResDef);
-			if ( pRegion == nullptr )
-				continue;
+        CRegion* pRet = nullptr;
+        uchar minMap = 255;
+        for (CRegion* pRegion : regions)
+        {
+            uchar m = pRegion->GetRegionCorner(DIR_N).m_map;
+            if (m <= minMap)
+            {
+                minMap = m;
+                pRet = pRegion;
+            }
+        }
+        return pRet;
+    }
+    else
+    {
+        CSString sName(pKey);
+        sName[int(ptcColonPos - pKey)] = '\0';
+        std::vector<CRegion*> regions;
+        for (CRegion* pRegion : m_RegionDefs)
+        {
+            if ( ! sName.CompareNoCase(pRegion->GetNameStr()) || ! sName.CompareNoCase(pRegion->GetResourceName()) )
+            {
+                regions.emplace_back(pRegion);
+            }
+        }
 
-			if ( ! pRegion->GetNameStr().CompareNoCase( pKey ) ||
-				! strcmpi( pRegion->GetResourceName(), pKey ))
-			{
-				return pRegion;
-			}
-		}
-	}
+        ptcColonPos += 1; // skip the , (which now is \0)
+        uchar uiMapIdx = Exp_GetUCVal(ptcColonPos);
+        for (CRegion* pRegion : regions)
+        {
+            uchar m = pRegion->GetRegionCorner(DIR_N).m_map;
+            if (uiMapIdx == m)
+            {
+                return pRegion;
+            }
+        }
+    }
 
 	// no match.
 	return nullptr;

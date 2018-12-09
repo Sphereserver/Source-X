@@ -347,8 +347,8 @@ public:
 			byte	m_iDist;		// morez = distance range of damage.
 		} m_itExplode;	// Make this asyncronous.
 
-						// IT_BOOK
-						// IT_MESSAGE
+		// IT_BOOK
+		// IT_MESSAGE
 		struct
 		{
 			CResourceIDBase m_ResID;	// more1 = preconfigured book id from RES_BOOK or Time date stamp for the book/message creation. (if |0x80000000)
@@ -640,12 +640,10 @@ public:
 		return Can(CAN_I_PILE);
 	}
 
-	virtual bool  IsSameType( const CObjBase * pObj ) const;
+	virtual bool IsSameType( const CObjBase * pObj ) const;
 	bool Stack( CItem * pItem );
 	word ConsumeAmount( word iQty = 1, bool fTest = false );
 
-	CREID_TYPE GetCorpseType() const;
-	void  SetCorpseType( CREID_TYPE id );
 	virtual void SetAmount( word amount );
 	word GetMaxAmount();
 	bool SetMaxAmount( word amount );
@@ -654,10 +652,13 @@ public:
 	{
 		return m_amount;
 	}
+    bool CanSendAmount() const;
+
+    CREID_TYPE GetCorpseType() const;
+    void  SetCorpseType( CREID_TYPE id );
 
 	lpctstr GetName() const;	// allowed to be default name.
 	lpctstr GetNameFull( bool fIdentified ) const;
-
 	virtual bool SetName( lpctstr pszName );
 
 	virtual int GetWeight(word amount = 0) const;
@@ -810,9 +811,9 @@ public:    /**
 	virtual void DupeCopy( const CItem * pItem );
 	CItem * UnStackSplit( word amount, CChar * pCharSrc = nullptr );
 
-	static CItem * CreateBase( ITEMID_TYPE id );
+	static CItem * CreateBase( ITEMID_TYPE id, IT_TYPE type = IT_INVALID ); // If type == IT_INVALID, read the type from the def (default behaviour)
 	static CItem * CreateHeader( tchar * pArg, CObjBase * pCont = nullptr, bool fDupeCheck = false, CChar * pSrc = nullptr );
-	static CItem * CreateScript(ITEMID_TYPE id, CChar * pSrc = nullptr);
+	static CItem * CreateScript(ITEMID_TYPE id, CChar * pSrc = nullptr, IT_TYPE type = IT_INVALID); // If type == IT_INVALID, read the type from the def (default behaviour)
 	CItem * GenerateScript(CChar * pSrc = nullptr);
 	static CItem * CreateDupeItem( const CItem * pItem, CChar * pSrc = nullptr, bool fSetNew = false );
 	static CItem * CreateTemplate( ITEMID_TYPE id, CObjBase* pCont = nullptr, CChar * pSrc = nullptr );

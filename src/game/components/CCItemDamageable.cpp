@@ -18,6 +18,11 @@ CCItemDamageable::~CCItemDamageable()
     g_World.m_ObjStatusUpdates.RemovePtr(GetLink());
 }
 
+bool CCItemDamageable::CanSuscribe(const CItem* pItem) // static
+{
+    return pItem->Can(CAN_I_DAMAGEABLE);
+}
+
 void CCItemDamageable::SetCurHits(word iCurHits)
 {
     if (!g_Serv.IsLoading() && (_iCurHits != iCurHits))

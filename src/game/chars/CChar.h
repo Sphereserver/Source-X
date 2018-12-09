@@ -234,9 +234,9 @@ public:
 		// SKILL_FISHING
 		struct
 		{
-			dword m_Stroke_Count;		// ACTARG1 = All requiring multi strokes.
-			dword m_ridType;			// ACTARG2 = Type of item we're harvesting
-			dword m_bounceItem;			// ACTARG3 = Drop item on backpack (true) or drop it on ground (false)
+			CResourceIDBase m_ridType;	// ACTARG1 = Type of item we're harvesting
+			dword m_bounceItem;			// ACTARG2 = Drop item on backpack (true) or drop it on ground (false)
+            dword m_Stroke_Count;		// ACTARG3 = All requiring multi strokes.
 		} m_atResource;
 
 		// SKILL_TAMING

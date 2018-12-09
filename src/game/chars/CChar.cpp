@@ -879,7 +879,6 @@ void CChar::CreateNewCharCheck()
 	}
 }
 
-
 bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 {
 	// CChar part

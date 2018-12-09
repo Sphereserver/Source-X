@@ -8,6 +8,7 @@
 
 //#include "../common/sphere_library/smap.h"
 #include "CComponent.h"
+#include <map>
 
 class CEntity
 {

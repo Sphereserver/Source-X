@@ -329,7 +329,7 @@ bool CClient::CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const
 
 	if ( IsPriv( PRIV_HEARALL ) &&
 		pSrc->IsChar() &&
-		( mode == TALKMODE_SYSTEM || mode == TALKMODE_SAY || mode == TALKMODE_WHISPER || mode == TALKMODE_YELL ) )
+		( mode == TALKMODE_SAY || mode == TALKMODE_WHISPER || mode == TALKMODE_YELL ) )
 	{
 		const CChar * pCharSrc = dynamic_cast <const CChar*> ( pSrc );
 		ASSERT(pCharSrc);
@@ -1450,7 +1450,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					// anyway.. I'd like to keep the syntax similar to SAYUA
 			 		nchar szBuffer[ MAX_TALK_BUFFER ];
 					CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), pszArgs[4], -1 );
-					addBarkUNICODE( szBuffer, nullptr, (HUE_TYPE)(Exp_GetVal(pszArgs[0])), TALKMODE_SYSTEM, FONT_NORMAL, pszArgs[3] );
+					addBarkUNICODE( szBuffer, nullptr, (HUE_TYPE)(Exp_GetVal(pszArgs[0])), TALKMODE_SAY, FONT_NORMAL, pszArgs[3] );
 				}
 			}
 			break;
@@ -1477,7 +1477,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 						CArgs += ( !strncmp(ppArgs[i], "nullptr", 4) ? " " : ppArgs[i] );
 					}
 
-					addBarkLocalized(iClilocId, nullptr, (HUE_TYPE)(hue), TALKMODE_SYSTEM, FONT_NORMAL, CArgs.GetPtr());
+					addBarkLocalized(iClilocId, nullptr, (HUE_TYPE)(hue), TALKMODE_SAY, FONT_NORMAL, CArgs.GetPtr());
 				}
 			}
 			break;
@@ -1507,7 +1507,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 						CArgs += ( !strncmp(ppArgs[i], "nullptr", 4) ? " " : ppArgs[i] );
 					}
 
-					addBarkLocalizedEx( iClilocId, nullptr, (HUE_TYPE)(hue), TALKMODE_SYSTEM, FONT_NORMAL, (AFFIX_TYPE)(affix), ppArgs[3], CArgs.GetPtr() );
+					addBarkLocalizedEx( iClilocId, nullptr, (HUE_TYPE)(hue), TALKMODE_SAY, FONT_NORMAL, (AFFIX_TYPE)(affix), ppArgs[3], CArgs.GetPtr() );
 				}
 			}
 			break;

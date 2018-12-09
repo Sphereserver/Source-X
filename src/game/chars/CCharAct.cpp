@@ -1801,7 +1801,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	}
 
 
-	if ( pItem->Item_GetDef()->IsStackableType() && amount )
+	if ( amount && pItem->Item_GetDef()->IsStackableType() && pItem->CanSendAmount() )
 	{
 		// Did we only pick up part of it ?
 		// part or all of a pile. Only if pilable !

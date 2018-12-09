@@ -1281,7 +1281,7 @@ int CChar::Skill_Mining( SKTRIG_TYPE stage )
 	}
 
 	// Resource check
-	CItem *pResBit = g_World.CheckNaturalResource(m_Act_p, (IT_TYPE)(RES_GET_INDEX(m_atResource.m_ridType)), stage == SKTRIG_START, this);
+	CItem *pResBit = g_World.CheckNaturalResource(m_Act_p, (IT_TYPE)(m_atResource.m_ridType.GetResIndex()), stage == SKTRIG_START, this);
 	if ( !pResBit )
 	{
 		SysMessageDefault(DEFMSG_MINING_1);
@@ -1376,7 +1376,7 @@ int CChar::Skill_Fishing( SKTRIG_TYPE stage )
 	}
 
 	// Resource check
-	CItem *pResBit = g_World.CheckNaturalResource(m_Act_p, (IT_TYPE)(RES_GET_INDEX(m_atResource.m_ridType)), stage == SKTRIG_START, this);
+	CItem *pResBit = g_World.CheckNaturalResource(m_Act_p, (IT_TYPE)(m_atResource.m_ridType.GetResIndex()), stage == SKTRIG_START, this);
 	if ( !pResBit )
 	{
 		SysMessageDefault(DEFMSG_FISHING_1);
@@ -1463,7 +1463,7 @@ int CChar::Skill_Lumberjack( SKTRIG_TYPE stage )
 	}
 
 	// Resource check
-	CItem *pResBit = g_World.CheckNaturalResource(m_Act_p, (IT_TYPE)(RES_GET_INDEX(m_atResource.m_ridType)), stage == SKTRIG_START, this);
+	CItem *pResBit = g_World.CheckNaturalResource(m_Act_p, (IT_TYPE)(m_atResource.m_ridType.GetResIndex()), stage == SKTRIG_START, this);
 	if ( !pResBit )
 	{
 		if ( pTool->IsType(IT_WEAPON_FENCE) )	//dagger

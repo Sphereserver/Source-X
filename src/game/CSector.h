@@ -87,7 +87,7 @@ public:
 	void AddListenItem();
 	void RemoveListenItem();
 	bool HasListenItems() const;
-	void OnHearItem( CChar * pChar, tchar * szText );
+	void OnHearItem( CChar * pChar, lpctstr pszText );
 
 	// Chars in the sector.
 	bool IsCharActiveIn( const CChar * pChar );

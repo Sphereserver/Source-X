@@ -947,7 +947,7 @@ void CSector::SetWeatherChance( bool fRain, int iChance )
 	SetWeather( GetWeatherCalc());
 }
 
-void CSector::OnHearItem( CChar * pChar, tchar * szText )
+void CSector::OnHearItem( CChar * pChar, lpctstr pszText )
 {
 	ADDTOCALLSTACK("CSector::OnHearItem");
 	// report to any of the items that something was said.
@@ -959,13 +959,13 @@ void CSector::OnHearItem( CChar * pChar, tchar * szText )
 	for ( ; pItem != nullptr; pItem = pItemNext )
 	{
 		pItemNext = pItem->GetNext();
-		pItem->OnHear( szText, pChar );
+		pItem->OnHear( pszText, pChar );
 	}
 	pItem = static_cast <CItem*>( m_Items_Inert.GetHead());
 	for ( ; pItem != nullptr; pItem = pItemNext )
 	{
 		pItemNext = pItem->GetNext();
-		pItem->OnHear( szText, pChar );
+		pItem->OnHear( pszText, pChar );
 	}
 }
 
