@@ -376,7 +376,7 @@ void CObjBase::Sound( SOUND_TYPE id, int iOnce ) const // Play sound effect for 
 	ClientIterator it;
 	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
 	{
-		if ( ! pClient->CanHear( this, TALKMODE_SAY ) )
+		if ( ! pClient->CanHear( this, TALKMODE_SOUND ) )
 			continue;
 		pClient->addSound( id, this, iOnce );
 	}

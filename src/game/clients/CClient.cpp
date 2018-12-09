@@ -327,9 +327,9 @@ bool CClient::CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const
 	if ( !m_pChar )
 		return false;
 
-	if ( IsPriv( PRIV_HEARALL ) &&
+	if ( IsPriv(PRIV_HEARALL) &&
 		pSrc->IsChar() &&
-		( mode == TALKMODE_SAY || mode == TALKMODE_WHISPER || mode == TALKMODE_YELL ) )
+		( mode == TALKMODE_SAY || mode == TALKMODE_WHISPER || mode == TALKMODE_YELL ) ) // HEARALL works only for this talkmodes
 	{
 		const CChar * pCharSrc = dynamic_cast <const CChar*> ( pSrc );
 		ASSERT(pCharSrc);
@@ -337,7 +337,7 @@ bool CClient::CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const
 			return true;
 	}
 
-	return( m_pChar->CanHear( pSrc, mode ));
+	return m_pChar->CanHear( pSrc, mode );
 }
 
 ////////////////////////////////////////////////////

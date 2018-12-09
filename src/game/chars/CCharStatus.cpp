@@ -1365,8 +1365,6 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
 
 	if ( !pSrc )	// must be broadcast I guess
 		return true;
-    if ( IsPriv(PRIV_GM) )
-        return true;
 
 	// sound can be blocked if in house.
     pSrc = pSrc->GetTopLevelObj();
@@ -1419,7 +1417,9 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
             }
             iHearRange = g_Cfg.m_iDistanceWhisper;
             break;
-        default:	// this is executed also when playing a sound
+        //case TALKMODE_SOUND:
+        //case TALKMODE_SAY:
+        default:
             if ( g_Cfg.m_iDistanceTalk < 0 )
                 return false;
             else if ( g_Cfg.m_iDistanceTalk == 0 )
@@ -1437,6 +1437,9 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
     int iDist = GetTopDist3D(pSrc);
     if ( iDist > iHearRange )	// too far away
         return false;
+
+    if ( IsPriv(PRIV_GM) )
+        return true;
 
     // Check if i can hear from a different region
     if ( fThrough )		        // a yell goes through walls..
@@ -1458,9 +1461,7 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
             return false;
         return true;
     };
-    if (!_RegionBlocksSpeech(pSrcRegion))
-        return false;
-    if (!_RegionBlocksSpeech(m_pArea))
+    if (!_RegionBlocksSpeech(pSrcRegion) || !_RegionBlocksSpeech(m_pArea))
         return false;
     return true;
 }
