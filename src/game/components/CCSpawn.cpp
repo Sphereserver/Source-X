@@ -180,11 +180,6 @@ void CCSpawn::GenerateItem(CResourceDef *pDef)
     const ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
     const CItem *pSpawnItem = static_cast<CItem*>(GetLink());
 
-    if (GetCurrentSpawned() >= GetAmount())
-    {
-        return;
-    }
-
     CItem *pItem = CItem::CreateTemplate(id);
     if (!pItem)
     {
@@ -245,7 +240,7 @@ void CCSpawn::GenerateChar(CResourceDef *pDef)
     if ((rid.GetResType() != RES_CHARDEF) && (rid.GetResType() != RES_UNKNOWN))
         return;
 
-    CChar *pChar = CChar::CreateBasic(static_cast<CREID_TYPE>(rid.GetResIndex()));
+    CChar *pChar = CChar::CreateBasic( (CREID_TYPE)rid.GetResIndex() );
     if (!pChar)
         return;
 
@@ -335,7 +330,7 @@ void CCSpawn::AddObj(CUID uid)
 
     uint16 iMax = maximum(GetAmount(), 1);
     CItem *pItem = static_cast<CItem*>(GetLink());
-    if ((_uidList.size() >= iMax) && pItem->IsType(IT_SPAWN_CHAR))  // char spawns have a limit, champions may spawn a lot of npcs
+    if ((_uidList.size() >= iMax) && !pItem->IsType(IT_SPAWN_CHAMPION))  // char/item spawns have a limit, champions may spawn a lot of npcs
     {
         return;
     }

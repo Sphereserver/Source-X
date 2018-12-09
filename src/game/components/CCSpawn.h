@@ -3,8 +3,8 @@
 *
 */
 
-#ifndef _INC_CCSpawn_H
-#define _INC_CCSpawn_H
+#ifndef _INC_CCSPAWN_H
+#define _INC_CCSPAWN_H
 
 #include "../resource/CResourceBase.h"
 #include "../items/CItemBase.h"
@@ -21,7 +21,6 @@ class CUID;
 class CCSpawn : public CComponent
 {
 private:
-    CItem * _pLink;             ///< Link this object to it's parent CItem.
     static lpctstr const sm_szLoadKeys[];
     static lpctstr const sm_szVerbKeys[];
     static lpctstr const sm_szRefKeys[];
@@ -186,4 +185,4 @@ public:
     virtual void GoSleep() override;*/
 };
 
-#endif // _INC_CCSpawn_H
+#endif // _INC_CCSPAWN_H

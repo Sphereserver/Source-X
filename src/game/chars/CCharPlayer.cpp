@@ -529,7 +529,7 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
         s.WriteKeyVal("SPEECHCOLOR", m_SpeechHue);
 
 	EXC_SET_BLOCK("saving dynamic speech");
-	if (m_Speech.size() > 0 )
+	if (!m_Speech.empty())
 	{
 		CSString sVal;
 		m_Speech.WriteResourceRefList( sVal );
