@@ -13,9 +13,9 @@
 /////////////////////////////////////////////////////////////////////////////
 
 CItemMulti::CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef, bool fTurnable) :	// CItemBaseMulti
-    CTimedObject(PROFILE_MULTIS),
+    CCTimedObject(PROFILE_MULTIS),
     CItem(id, pItemDef),
-    CMultiMovable(fTurnable)
+    CCMultiMovable(fTurnable)
 {
     CItemBaseMulti * pItemBase = static_cast<CItemBaseMulti*>(Base_GetDef());
     m_shipSpeed.period = pItemBase->m_shipSpeed.period;
@@ -452,7 +452,7 @@ CItem * CItemMulti::Multi_FindItemType(IT_TYPE type) const
 
 bool CItemMulti::OnTick()
 {
-    if (!CMultiMovable::OnTick())
+    if (!CCMultiMovable::OnTick())
     {
         return CItem::OnTick();
     }
@@ -2082,7 +2082,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
     // Speaking in this multis region.
     // return: true = command for the multi.
 
-    if (CMultiMovable::r_Verb(s, pSrc))
+    if (CCMultiMovable::r_Verb(s, pSrc))
     {
         return true;
     }
@@ -2461,7 +2461,7 @@ void CItemMulti::r_Write(CScript & s)
 bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
 {
     ADDTOCALLSTACK("CItemMulti::r_WriteVal");
-    if (CMultiMovable::r_WriteVal(pszKey, sVal, pSrc))
+    if (CCMultiMovable::r_WriteVal(pszKey, sVal, pSrc))
     {
         return true;
     }
@@ -2736,7 +2736,7 @@ bool CItemMulti::r_LoadVal(CScript & s)
     ADDTOCALLSTACK("CItemMulti::r_LoadVal");
     EXC_TRY("LoadVal");
 
-    if (CMultiMovable::r_LoadVal(s))
+    if (CCMultiMovable::r_LoadVal(s))
     {
         return true;
     }

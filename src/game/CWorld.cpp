@@ -1449,7 +1449,7 @@ void CWorld::SaveStatics()
 
 /////////////////////////////////////////////////////////////////////
 
-void CWorld::_InsertTimedObject(int64 iTimeout, CTimedObject *pTimedObject)
+void CWorld::_InsertTimedObject(int64 iTimeout, CCTimedObject *pTimedObject)
 {
     _mWorldTickList.THREAD_CMUTEX.lock();
     TimedObjectsContainer& timedObjCont = _mWorldTickList[iTimeout];
@@ -1460,7 +1460,7 @@ void CWorld::_InsertTimedObject(int64 iTimeout, CTimedObject *pTimedObject)
     timedObjCont.THREAD_CMUTEX.unlock();
 }
 
-void CWorld::_RemoveTimedObject(const int64 iOldTimeout, const CTimedObject* pTimedObject)
+void CWorld::_RemoveTimedObject(const int64 iOldTimeout, const CCTimedObject* pTimedObject)
 {
     _mWorldTickList.THREAD_CMUTEX.lock();
     auto itList =  _mWorldTickList.find(iOldTimeout);
@@ -1474,11 +1474,11 @@ void CWorld::_RemoveTimedObject(const int64 iOldTimeout, const CTimedObject* pTi
     TimedObjectsContainer& cont = itList->second;  // direct access to the container.
     _mWorldTickList.THREAD_CMUTEX.unlock();
 
-    std::vector<CTimedObject*> tmpCont;   // new container.
+    std::vector<CCTimedObject*> tmpCont;   // new container.
     cont.THREAD_CMUTEX.lock();
     if (cont.size() > 1) // if the old container only has 1 entry we don't need to create a new one.
     {
-        for (CTimedObject* pObj : cont)    // Loop until the old container is empty
+        for (CCTimedObject* pObj : cont)    // Loop until the old container is empty
         {
             if (pObj == pTimedObject)   // if pTimedObject is this entry skip it to remove it from the container.
             {
@@ -1490,7 +1490,7 @@ void CWorld::_RemoveTimedObject(const int64 iOldTimeout, const CTimedObject* pTi
     cont.clear();
 
     /*
-    * All references to the given CTimedObject have been taken out from the container
+    * All references to the given CCTimedObject have been taken out from the container
     * and the new one have been populated ? so let's add the new container to the main
     * container, if it has any entry, or clear the top container recursively.
     */
@@ -1501,7 +1501,7 @@ void CWorld::_RemoveTimedObject(const int64 iOldTimeout, const CTimedObject* pTi
     cont.THREAD_CMUTEX.unlock();
 }
 
-void CWorld::AddTimedObject(int64 iTimeout, CTimedObject * pTimedObject)
+void CWorld::AddTimedObject(int64 iTimeout, CCTimedObject * pTimedObject)
 {
     ADDTOCALLSTACK("CWorld::AddTimedObject");
     //if (iTimeout < g_World.GetCurrentTime().GetTimeRaw())    // We do that to get them tick as sooner as possible
@@ -1534,7 +1534,7 @@ void CWorld::AddTimedObject(int64 iTimeout, CTimedObject * pTimedObject)
     EXC_CATCH;
 }
 
-void CWorld::DelTimedObject(CTimedObject * pTimedObject)
+void CWorld::DelTimedObject(CCTimedObject * pTimedObject)
 {
     ADDTOCALLSTACK("CWorld::DelTimedObject");
     EXC_TRY("AddTimedObject");
@@ -2473,7 +2473,7 @@ void CWorld::OnTick()
         * called (whereas other items can receive the OnTickStatusUpdate() call via their normal
         * tick method).
         * note: ideally, a better solution to accomplish this should be found if possible
-        * TODO: implement a new class inheriting from CTimedObject to get rid of this code.
+        * TODO: implement a new class inheriting from CCTimedObject to get rid of this code.
         */
         if (!m_ObjStatusUpdates.empty())
         {
@@ -2501,12 +2501,12 @@ void CWorld::OnTick()
     }
 
     /* World ticking (timers) */
-    // Items, Chars ... Everything relying on CTimedObject (excepting CObjBase, which inheritance is only virtual)
+    // Items, Chars ... Everything relying on CCTimedObject (excepting CObjBase, which inheritance is only virtual)
     const int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
 
     EXC_SET_BLOCK("WorldObjects selection");
     ProfileTask timersTask(PROFILE_TIMERS);
-    std::map<int64, std::vector<CTimedObject*>> tmpMap;
+    std::map<int64, std::vector<CCTimedObject*>> tmpMap;
     {
         // Need here a new, inner scope to get rid of EXC_TRYSUB variables and for the unique_lock
         EXC_TRYSUB("Tick::WorldObj");
@@ -2520,7 +2520,7 @@ void CWorld::OnTick()
             TimedObjectsContainer& cont = it->second;
             std::shared_lock<std::shared_mutex> lockCont(cont.THREAD_CMUTEX);
             
-            for (CTimedObject* pTimedObj : cont)
+            for (CCTimedObject* pTimedObj : cont)
             {
                 if (_mWorldTickLookup.erase(pTimedObj) == 0)    // Double check: ensure this object exists also in the lookup cont
                 {
@@ -2538,7 +2538,7 @@ void CWorld::OnTick()
     for (const auto &pairObj : tmpMap)    // Loop through all msecs stored, unless we passed the timestamp.
     {
         lpctstr ptcSubDesc = "\0";
-        for (CTimedObject* pObj : pairObj.second)
+        for (CCTimedObject* pObj : pairObj.second)
         {
             EXC_TRYSUB("Tick::WorldObj");
             EXC_SETSUB_BLOCK("Elapsed");

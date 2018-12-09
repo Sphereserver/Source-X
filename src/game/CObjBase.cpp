@@ -66,7 +66,7 @@ bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 // -CObjBase stuff
 // Either a player, npc or item.
 
-CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not a real CTimedObject, it just needs it's virtual inheritance.
+CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not a real CCTimedObject, it just needs it's virtual inheritance.
 {
 	sm_iCount ++;
 	m_iCreatedResScriptIdx = (size_t)-1;
@@ -110,7 +110,7 @@ CObjBase::~CObjBase()
     RemoveSelf();
     if (GetSpawn())    // If I was created from a Spawn
     {
-        //pEntity->Unsuscribe(GetSpawn());    // Avoiding recursive calls from CCSpawn::DelObj when forcing the pChar/pItem to Delete();
+        //pEntity->Unsubscribe(GetSpawn());    // Avoiding recursive calls from CCSpawn::DelObj when forcing the pChar/pItem to Delete();
         GetSpawn()->DelObj(GetUID());  // Then I should be removed from it's list.
     }
     g_World.m_ObjStatusUpdates.RemovePtr(this);
@@ -1876,12 +1876,12 @@ bool CObjBase::r_LoadVal( CScript & s )
                 if ((dwFlags & CAN_I_DAMAGEABLE) && !pItemDmg)
                 {
                     //g_Log.EventDebug("CObjBase::r_LoadVal(OC_CANMASK) 1\n");
-                    Suscribe(new CCItemDamageable(this));
+                    Subscribe(new CCItemDamageable(this));
                 }
                 else if (!(dwFlags & CAN_I_DAMAGEABLE) && pItemDmg)
                 {
                     //g_Log.EventDebug("CObjBase::r_LoadVal(OC_CANMASK) 2\n");
-                    Unsuscribe(pItemDmg);
+                    Unsubscribe(pItemDmg);
                 }
                 Update();   // Required to force the client to allow dragging the item's bar or to do not allow it anymore before trying to do it.
             }

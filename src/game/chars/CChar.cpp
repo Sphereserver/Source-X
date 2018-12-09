@@ -230,7 +230,7 @@ CChar * CChar::CreateBasic(CREID_TYPE baseID) // static
 	return pChar;
 }
 
-CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false ), 
+CChar::CChar( CREID_TYPE baseID ) : CCTimedObject(PROFILE_CHARS), CObjBase( false ), 
     m_Skill{}, m_Stat{}
 {
 	g_Serv.StatInc( SERV_STAT_CHARS );	// Count created CChars.
@@ -298,9 +298,9 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 	m_LocalLight = 0;
 	m_fClimbUpdated = false;
 
-    Suscribe(new CCFaction(this));
+    Subscribe(new CCFaction(this));
 
-    CTimedObject::GoSleep();  // Make it be sleeping at first, to awake it when placing it in the world (errors will show up otherwise).
+    CCTimedObject::GoSleep();  // Make it be sleeping at first, to awake it when placing it in the world (errors will show up otherwise).
 
 	ASSERT(IsDisconnected());
 }
@@ -479,7 +479,7 @@ void CChar::GoSleep()
     ASSERT(!IsSleeping());
     g_World.DelCharTicking(this);   // do not insert into the mutex' lock, it access back to this char.
     THREAD_UNIQUE_LOCK_SET;
-    CTimedObject::GoSleep();
+    CCTimedObject::GoSleep();
 }
 
 void CChar::GoAwake()
@@ -487,7 +487,7 @@ void CChar::GoAwake()
     ADDTOCALLSTACK("CChar::GoAwake");
     ASSERT(IsSleeping());
     THREAD_UNIQUE_LOCK_SET;
-    CTimedObject::GoAwake();// Awake it first, otherwise some other things won't work
+    CCTimedObject::GoAwake();// Awake it first, otherwise some other things won't work
     g_World.AddCharTicking(this);
     SetTimeout(Calc_GetRandVal(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
 }

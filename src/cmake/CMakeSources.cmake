@@ -401,12 +401,12 @@ game/components/CCFaction.cpp
 game/components/CCFaction.h
 game/components/CCItemDamageable.cpp
 game/components/CCItemDamageable.h
+game/components/CCMultiMovable.cpp
+game/components/CCMultiMovable.h
 game/components/CCSpawn.cpp
 game/components/CCSpawn.h
-game/components/CTimedObject.cpp
-game/components/CTimedObject.h
-game/components/CMultiMovable.cpp
-game/components/CMultiMovable.h
+game/components/CCTimedObject.cpp
+game/components/CCTimedObject.h
 )
 SOURCE_GROUP (game\\components FILES ${components_SRCS})
 

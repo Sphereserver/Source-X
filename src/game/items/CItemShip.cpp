@@ -14,7 +14,7 @@
 
 
 CItemShip::CItemShip(ITEMID_TYPE id, CItemBase * pItemDef) :
-    CTimedObject(PROFILE_SHIPS),
+    CCTimedObject(PROFILE_SHIPS),
     CItemMulti(id, pItemDef, true)
 {
 }
@@ -237,7 +237,7 @@ int CItemShip::FixWeirdness()
 
 bool CItemShip::OnTick()
 {
-    CMultiMovable::OnTick();
+    CCMultiMovable::OnTick();
     return true;    // Ships always return true, can't 'decay'
 }
 

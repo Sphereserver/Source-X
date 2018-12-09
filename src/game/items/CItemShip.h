@@ -7,7 +7,7 @@
 #define _INC_CITEMSHIP_H
 
 #include "CItemMulti.h"
-#include "../components/CMultiMovable.h"
+#include "../components/CCMultiMovable.h"
 
 
 class CItemShip : public CItemMulti

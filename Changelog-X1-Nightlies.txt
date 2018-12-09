@@ -582,8 +582,8 @@ Added the basics of an ECS: CEntity and CComponent so we can split into modules 
          case IT_SPAWN_CHAMPION:
         {
             pItem = new CItem(id, pItemDef);
-            pItem->Suscribe(new CCSpawn(pItem));
-            pItem->Suscribe(new CCChampion(pItem));
+            pItem->Subscribe(new CCSpawn(pItem));
+            pItem->Subscribe(new CCChampion(pItem));
             break;
         }
 Changed CItemSpawn into a CComponent 'CCSpawn'
@@ -1159,8 +1159,8 @@ transfer_secured	= 08	// Transfer Secured Containers.
 
 28-09-2018, XuN
 - Updated the whole code to cleanup latest changes regarding timers.
-- Added new CTimedObject class to control the whole timer's behaviours from now on.
-- Updated some classes (CObjBase, CChar, CItem (and it's childrens)) to inherit from CTimedObject (still more to come ... CTimedFunction, CMapBlockCache, etc).
+- Added new CCTimedObject class to control the whole timer's behaviours from now on.
+- Updated some classes (CObjBase, CChar, CItem (and it's childrens)) to inherit from CCTimedObject (still more to come ... CTimedFunction, CMapBlockCache, etc).
 - Updated world's ticking procedure:
     Removed the old world->maps->sectors->items/chars huge loop for ticks
     CTimedOBject add/deletes the objects into a new listing with msec precission timers which CWorld reads constantly looping only throught what really needs to tick.
@@ -1172,8 +1172,8 @@ transfer_secured	= 08	// Transfer Secured Containers.
 
 01-10-2018, XuN
 - Fixed some crashes and removed some debug msgs from last commit(s).
-- Changed Ship's movement to a new CMultiMovable class
-- Added CMultiMovable class to all multi objects so now every multi can move like a ship without external scripts.
+- Changed Ship's movement to a new CCMultiMovable class
+- Added CCMultiMovable class to all multi objects so now every multi can move like a ship without external scripts.
     - In order to move, all movable multis need ShipSpeed.period and ShipSpeed.tiles to be higher than 0.
     - Also the house that can move needs the spk_ship_cmds speech on them for player speech (if giving support for speech) also since the multis doesnt have direction like ships, it's direction is inverted:
         Forward will move to the south

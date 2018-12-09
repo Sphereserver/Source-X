@@ -4,7 +4,7 @@
 #include "CItemVendable.h"
 
 CItemMessage::CItemMessage( ITEMID_TYPE id, CItemBase * pItemDef ) :
-    CTimedObject(PROFILE_ITEMS), CItemVendable( id, pItemDef )
+    CCTimedObject(PROFILE_ITEMS), CItemVendable( id, pItemDef )
 {
 }
 

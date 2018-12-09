@@ -2,8 +2,8 @@
 * @file CCChampion.h
 */
 
-#ifndef _INC_CCChampion_H
-#define _INC_CCChampion_H
+#ifndef _INC_CCCHAMPION_H
+#define _INC_CCCHAMPION_H
 
 #include "../../common/sphere_library/CSString.h"
 #include "../../common/resource/CResourceBase.h"
@@ -270,4 +270,4 @@ public:
     virtual bool r_LoadVal(CScript & s) override;
 };
 
-#endif //_INC_CCChampion_H
+#endif //_INC_CCCHAMPION_H

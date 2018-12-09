@@ -28,7 +28,7 @@ void CEntity::Delete(bool fForce)
         {
             pComponent->Delete(fForce);
         }
-        Unsuscribe(it, false);
+        Unsubscribe(it, false);
     }
     _List.clear();
 }
@@ -48,7 +48,7 @@ void CEntity::ClearComponents()
     _List.clear();
 }
 
-void CEntity::Suscribe(CComponent * pComponent)
+void CEntity::Subscribe(CComponent * pComponent)
 {
     COMP_TYPE compType = pComponent->GetType();
     if (_List.count(compType))
@@ -60,7 +60,7 @@ void CEntity::Suscribe(CComponent * pComponent)
     _List[compType] = pComponent;
 }
 
-void CEntity::Unsuscribe(std::map<COMP_TYPE, CComponent*>::iterator& it, bool fEraseFromMap)
+void CEntity::Unsubscribe(std::map<COMP_TYPE, CComponent*>::iterator& it, bool fEraseFromMap)
 {
     delete it->second;
     if (fEraseFromMap)
@@ -69,7 +69,7 @@ void CEntity::Unsuscribe(std::map<COMP_TYPE, CComponent*>::iterator& it, bool fE
     }
 }
 
-void CEntity::Unsuscribe(CComponent *pComponent)
+void CEntity::Unsubscribe(CComponent *pComponent)
 {
     if (_List.empty())
     {
@@ -85,7 +85,7 @@ void CEntity::Unsuscribe(CComponent *pComponent)
     _List.erase(compType);  // iterator invalidation!
 }
 
-bool CEntity::IsSuscribed(CComponent *pComponent) const
+bool CEntity::IsSusbcribed(CComponent *pComponent) const
 {
     if (!_List.empty() && _List.count(pComponent->GetType()))
     {

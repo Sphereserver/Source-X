@@ -7,7 +7,7 @@
 #define _INC_CITEMMULTI_H
 
 #include "CItem.h"
-#include "../components/CMultiMovable.h"
+#include "../components/CCMultiMovable.h"
 
 #define MAX_MULTI_LIST_OBJS 128
 #define MAX_MULTI_CONTENT 1024
@@ -32,9 +32,9 @@ class CChar;
 class CItemStone;
 class CItemContainer;
 class CItemShip;
-class CItemMulti : public CItem, public CMultiMovable
+class CItemMulti : public CItem, public CCMultiMovable
 {
-    friend class CMultiMovable;
+    friend class CCMultiMovable;
 // IT_MULTI IT_SHIP
 // A ship or house etc.
 private:

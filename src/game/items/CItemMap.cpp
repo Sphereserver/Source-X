@@ -6,7 +6,7 @@
 // -CItemMap
 
 CItemMap::CItemMap( ITEMID_TYPE id, CItemBase * pItemDef ) :
-    CTimedObject(PROFILE_ITEMS), CItemVendable( id, pItemDef )
+    CCTimedObject(PROFILE_ITEMS), CItemVendable( id, pItemDef )
 {
     m_fPlotMode = false;
 }

@@ -42,7 +42,7 @@ protected:
     CComponent(COMP_TYPE type, CObjBase *pLink);
 
 public:
-    virtual ~CComponent() {}
+    virtual ~CComponent() = default;
     COMP_TYPE GetType() const;
     virtual CObjBase *GetLink() const;
 

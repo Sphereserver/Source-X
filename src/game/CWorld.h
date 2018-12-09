@@ -9,7 +9,7 @@
 #include "../common/CScript.h"
 #include "../common/CUID.h"
 #include "items/CItemStone.h"
-#include "components/CTimedObject.h"
+#include "components/CCTimedObject.h"
 #include "CServerTime.h"
 #include "CSector.h"
 #include "CTimedFunction.h"
@@ -130,7 +130,7 @@ public:
 	static int64 GetSystemClock(); // in milliseconds
 };
 
-struct TimedObjectsContainer : public std::vector<CTimedObject*>
+struct TimedObjectsContainer : public std::vector<CCTimedObject*>
 {
     THREAD_CMUTEX_DEF;
 };
@@ -138,7 +138,7 @@ struct WorldTickList : public std::map<int64, TimedObjectsContainer>
 {
     THREAD_CMUTEX_DEF;
 };
-struct TimedObjectLookupList : public std::unordered_map<CTimedObject*, int64>
+struct TimedObjectLookupList : public std::unordered_map<CCTimedObject*, int64>
 {
     THREAD_CMUTEX_DEF;
 };
@@ -180,13 +180,13 @@ private:
     CharTickLookupList _mCharTickLookup;
 
 public:
-    void AddTimedObject(int64 iTimeout, CTimedObject *pTimedObject);
-    void DelTimedObject(CTimedObject* pTimedObject);
+    void AddTimedObject(int64 iTimeout, CCTimedObject *pTimedObject);
+    void DelTimedObject(CCTimedObject* pTimedObject);
     void AddCharTicking(CChar *pChar);
     void DelCharTicking(CChar *pChar);
 private:
-    void _InsertTimedObject(int64 iTimeout, CTimedObject* pTimedObject);
-    void _RemoveTimedObject(const int64 iOldTimeout, const CTimedObject* pTimedObject);
+    void _InsertTimedObject(int64 iTimeout, CCTimedObject* pTimedObject);
+    void _RemoveTimedObject(const int64 iOldTimeout, const CCTimedObject* pTimedObject);
     void _InsertCharTicking(int64 iTickNext, CChar* pChar);
     void _RemoveCharTicking(const int64 iOldTimeout, const CChar* pChar);
 

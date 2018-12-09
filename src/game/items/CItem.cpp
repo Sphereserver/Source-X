@@ -87,7 +87,7 @@ void CItem::SetLockDownOfMulti(CUID uidMulti)
     _uidMultiLockDown = uidMulti;
 }
 
-CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEMS), CObjBase( true )
+CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CCTimedObject(PROFILE_ITEMS), CObjBase( true )
 {
 	ASSERT( pItemDef );
 
@@ -119,11 +119,11 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEM
     */
     if (CCItemDamageable::CanSuscribe(this))
     {
-        Suscribe(new CCItemDamageable(this));
+        Subscribe(new CCItemDamageable(this));
     }
     if (CCFaction::CanSuscribe(this))
     {
-        Suscribe(new CCFaction(this));  // Adding it only to equippable items
+        Subscribe(new CCFaction(this));  // Adding it only to equippable items
     }
 }
 
@@ -3644,11 +3644,11 @@ CItem * CItem::SetType(IT_TYPE type)
     if ((type != IT_SPAWN_CHAR) && (type != IT_SPAWN_ITEM))
     {
         if (pComp)
-            Unsuscribe(pComp);
+            Unsubscribe(pComp);
     }
     else if (!pComp)
     {
-        Suscribe(new CCSpawn(this));
+        Subscribe(new CCSpawn(this));
         fIsSpawn = true;
     }
 
@@ -3658,44 +3658,44 @@ CItem * CItem::SetType(IT_TYPE type)
         {
             pComp = GetComponent(COMP_CHAMPION);
             if (pComp)
-                Unsuscribe(pComp);
+                Unsubscribe(pComp);
             pComp = GetComponent(COMP_SPAWN);
             if (pComp)
-                Unsuscribe(pComp);
+                Unsubscribe(pComp);
         }
     }
     else
     {
         pComp = GetComponent(COMP_CHAMPION);
         if (!pComp)
-            Suscribe(new CCChampion(this));
+            Subscribe(new CCChampion(this));
         pComp = GetComponent(COMP_SPAWN);
         if (!pComp)
-            Suscribe(new CCSpawn(this));
+            Subscribe(new CCSpawn(this));
     }
 
     pComp = GetComponent(COMP_ITEMDAMAGEABLE);
     if (!CCItemDamageable::CanSuscribe(this))
     {
         if (pComp)
-            Unsuscribe(pComp);
+            Unsubscribe(pComp);
     }
     else if (!pComp)
     {
         /* CCItemDamageable is also added from CObjBase::r_LoadVal(OC_CANMASK) for manual override of can flags
         * but it's required to add it also on item's creation depending on it's CItemBase can flags. */
-        Suscribe(new CCItemDamageable(this));
+        Subscribe(new CCItemDamageable(this));
     }
 
     pComp = GetComponent(COMP_FACTION);
     if (!CCFaction::CanSuscribe(this))
     {
         if (pComp)
-            Unsuscribe(pComp);
+            Unsubscribe(pComp);
     }
     else if (!pComp)
     {
-        Suscribe(new CCFaction(this));
+        Subscribe(new CCFaction(this));
     }
 
 	return this;

@@ -3,8 +3,8 @@
 *
 */
 
-#ifndef _INC_CCFaction_H
-#define _INC_CCFaction_H
+#ifndef _INC_CCFACTION_H
+#define _INC_CCFACTION_H
 
 #include "../CComponent.h"
 
@@ -233,4 +233,4 @@ public:
 
 };
 
-#endif // _INC_CCFaction_H
+#endif // _INC_CCFACTION_H

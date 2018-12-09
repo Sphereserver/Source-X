@@ -8,7 +8,7 @@
 
 #include "../resource/CResourceBase.h"
 #include "../components/CCFaction.h"
-#include "../components/CTimedObject.h"
+#include "../components/CCTimedObject.h"
 #include "../CBase.h"
 #include "../CRect.h"
 #include "../CObjBase.h"

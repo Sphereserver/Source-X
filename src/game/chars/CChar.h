@@ -15,7 +15,7 @@
 #include "../items/CItemStone.h"
 #include "../game_macros.h"
 #include "../CObjBase.h"
-#include "../components/CTimedObject.h"
+#include "../components/CCTimedObject.h"
 #include "CCharBase.h"
 #include "CCharPlayer.h"
 
