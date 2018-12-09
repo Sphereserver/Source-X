@@ -3,6 +3,7 @@
 	#include "../sphere/ntservice.h"	// g_Service
 #else
 	#include "../sphere/UnixTerminal.h"
+    #include <sys/resource.h>   // for setpriority
 #endif
 
 #if defined(_WIN32) && !defined(_DEBUG)
@@ -27,7 +28,8 @@
 #include "triggers.h"
 #include "CScriptProfiler.h"
 #include "CServer.h"
-#include <stdio.h>
+#include <cstdio>
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -81,6 +83,41 @@ void CServer::SetSignals( bool fMsg )
 			"The world is now running in SECURE MODE" :
 			"WARNING: The world is NOT running in SECURE MODE" );
 	}
+}
+
+bool CServer::SetProcessPriority(int iPriorityLevel)
+{
+    bool fSuccess;
+#ifdef _WIN32
+    HANDLE hCurrentProcess = GetCurrentProcess();
+    DWORD dwPri;
+    switch (iPriorityLevel)
+    {
+        case -1:    dwPri = BELOW_NORMAL_PRIORITY_CLASS;    break;
+        default:
+        case 0:     dwPri = NORMAL_PRIORITY_CLASS;          break;
+        case 1:     dwPri = ABOVE_NORMAL_PRIORITY_CLASS;    break;
+        case 2:     dwPri = HIGH_PRIORITY_CLASS;            break;
+    }
+    fSuccess = (bool)SetPriorityClass(hCurrentProcess, dwPri);
+#else
+    int iPri;
+    switch (iPriorityLevel)
+    {
+        case -1:    iPri = 7;   break;
+        default:
+        case 0:     iPri = 0;   break;
+        case 1:     iPri = -8;  break;
+        case 2:     iPri = -15; break;
+    }
+    // This will FAIL if you aren't running Sphere as root, or if root didn't set for this process the s bit (chmod +x).
+    if ( setpriority(PRIO_PROCESS, 0, iPri) == -1 )
+        fSuccess = false;
+    else
+        fSuccess = true;
+    //needed option for mac?
+#endif
+    return fSuccess;
 }
 
 SERVMODE_TYPE CServer::GetServerMode() const
@@ -2199,6 +2236,13 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 
 	EXC_SET_BLOCK("setting signals");
 	SetSignals();
+
+    if (g_Cfg.m_iAutoProcessPriority != 0)
+    {
+        EXC_SET_BLOCK("setting process priority");
+        bool fPrioritySuccess = SetProcessPriority(g_Cfg.m_iAutoProcessPriority);
+        g_Log.Event(LOGM_INIT, "Setting process priority... %s.\n", fPrioritySuccess ? "Success" : "Failed");
+    }
 
 	EXC_SET_BLOCK("loading scripts");
 	TriglistInit();

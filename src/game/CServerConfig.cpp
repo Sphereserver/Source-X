@@ -167,6 +167,7 @@ CServerConfig::CServerConfig()
 
 	m_fNoResRobe		= 0;
 	m_iLostNPCTeleport	= 50;
+    m_iAutoProcessPriority = 0;
 	m_iExperimentalFlags= 0;
 	m_iDistanceYell		= UO_MAP_VIEW_RADAR;
 	m_iDistanceWhisper	= 3;
@@ -411,6 +412,7 @@ enum RC_TYPE
     RC_AUTOHOUSEKEYS,           // _fAutoHouseKeys
 	RC_AUTONEWBIEKEYS,			// m_fAutoNewbieKeys
 	RC_AUTOPRIVFLAGS,			// m_iAutoPrivFlags
+    RC_AUTOPROCESSPRIORITY,     // m_iAutoProcessPriority
 	RC_AUTORESDISP,				// m_bAutoResDisp
     RC_AUTOSHIPKEYS,            // _fAutoShipKeys
 	RC_AUTOTOOLTIPRESEND,		// m_iAutoTooltipResend
@@ -638,7 +640,6 @@ enum RC_TYPE
 	RC_QTY
 };
 
-
 const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 {
 	{ "ACCTFILES",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sAcctBaseDir),			0 }},
@@ -655,13 +656,14 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
     { "AUTOHOUSEKEYS",          { ELEM_BOOL,	OFFSETOF(CServerConfig,_fAutoHouseKeys),		0 }},
 	{ "AUTONEWBIEKEYS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fAutoNewbieKeys),		0 }},
 	{ "AUTOPRIVFLAGS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAutoPrivFlags),		0 }},
+    { "AUTOPROCESSPRIORITY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAutoProcessPriority),	0 }},
 	{ "AUTORESDISP",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAutoResDisp),			0 }},
     { "AUTOSHIPKEYS",           { ELEM_BOOL,	OFFSETOF(CServerConfig,_fAutoShipKeys),		    0 }},
 	{ "AUTOTOOLTIPRESEND",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAutoTooltipResend),	0 }},
 	{ "BACKUPLEVELS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveBackupLevels),	0 }},
 	{ "BANKMAXITEMS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iBankIMax),			0 }},
 	{ "BANKMAXWEIGHT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iBankWMax),			0 }},
-	{ "BUILD",					{ ELEM_VOID,	0,											0 }},
+	{ "BUILD",					{ ELEM_VOID,	0,											    0 }},
 	{ "CANUNDRESSPETS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fCanUndressPets),		0 }},
 	{ "CHARTAGS",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fCharTags),			0 }},
 	{ "CLIENTLINGER",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientLingerTime),	0 }},
@@ -669,7 +671,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "CLIENTLOGINTEMPBAN",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientLoginTempBan),	0 }},
 	{ "CLIENTMAX",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientsMax),			0 }},
 	{ "CLIENTMAXIP",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientsMaxIP),		0 }},
-	{ "CLIENTS",				{ ELEM_VOID,	0,											0 }},	// duplicate
+	{ "CLIENTS",				{ ELEM_VOID,	0,											    0 }},	// duplicate
 	{ "COLORHIDDEN",			{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorHidden),			0 }},
 	{ "COLORINVIS",				{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorInvis),			0 }},
 	{ "COLORINVISSPELL",		{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorInvisSpell),		0 }},

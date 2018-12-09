@@ -83,6 +83,7 @@ public:
     bool IsLoading() const;
 	void Shutdown( int64 iMinutes );
 	void SetSignals( bool fMsg = true );
+    bool SetProcessPriority(int iPriorityLevel);
 
 	bool SocketsInit(); // Initialize sockets
 	bool SocketsInit( CSocket & socket );

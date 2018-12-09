@@ -1332,3 +1332,4 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 	Also, Sphere in some cases used talkmodes 3 (old talkmode_say) and 4 (old talkmode_obj), which behave as the correct talkmode_say (0) and aren't reported as valid talkmodes by any packet guide,
 	so they got removed and replaced with talkmode 0.
 	As result, defs MSG_DEF_COLOR, MSG_DEF_FONT, MSG_DEF_UNICODE aren't used anymore.
+- Added: AutoProcessPriority ini flag, to automatically set the process priority at the startup. Check the ini for more informations.

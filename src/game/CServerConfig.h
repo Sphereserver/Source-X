@@ -279,10 +279,12 @@ public:
 	int  m_iMaxFame;				// Maximum fame level
 
 	// other
-	bool m_fNoResRobe;          // Adding resurrection robe to resurrected players or not.
-	int	 m_iLostNPCTeleport;    // if Distance from HOME is greater than this, NPC will teleport to it instead of walking.
+	
+    int  m_iAutoProcessPriority;
 	uint m_iExperimentalFlags;	// Experimental Flags.
 	uint m_iOptionFlags;		// Option Flags.
+    bool m_fNoResRobe;          // Adding resurrection robe to resurrected players or not.
+    int	 m_iLostNPCTeleport;    // if Distance from HOME is greater than this, NPC will teleport to it instead of walking.
 	int64 m_iWoolGrowthTime;     // how long till wool grows back on sheared sheep, in minutes.
 	uint m_iAttackerTimeout;    // Timeout for attacker.
 	int64 m_iNotoTimeout;       // Timeout for NOTOriety checks.
