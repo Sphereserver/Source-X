@@ -99,7 +99,7 @@ int CSFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 #if defined(_WIN32)
 		if ( fileinfo.name[0] == '.' )
 			continue;
-		AddHead(fileinfo.name);
+		AddTail(fileinfo.name);
 #else
 		fileinfo = readdir(dirp);
 		if ( !fileinfo )
@@ -110,7 +110,7 @@ int CSFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 		sprintf(szFilename, "%s%s", szFileDir, fileinfo->d_name);
 		len = strlen(szFilename);
 		if ( len > 4 && !strcmpi(&szFilename[len - 4], SPHERE_SCRIPT) )
-			AddHead(fileinfo->d_name);
+            AddTail(fileinfo->d_name);
 #endif
 	}
 #if defined(_WIN32)
