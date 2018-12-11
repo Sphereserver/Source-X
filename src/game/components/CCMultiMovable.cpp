@@ -260,7 +260,6 @@ bool CCMultiMovable::MoveDelta(CPointBase pdelta)
                             //If client is on Ship
                             if (tMe->GetRegion()->GetResourceID().GetObjUID() == pItemThis->GetUID())
                             {
-                                pClient->addPlayerView(CPointMap(), true);
                                 break; //skip to next client
                             }
                         }
@@ -268,10 +267,12 @@ bool CCMultiMovable::MoveDelta(CPointBase pdelta)
                             pClient->addObjectRemove(pObj);	//it will be added again in the if clause below
                     }
                 }
+                const CPointMap& ptMe = tMe->GetTopPoint();
+                const NetState* pNetState = pClient->GetNetState();
                 if (pObj->IsItem())
                 {
-                    if ((tMe->GetTopPoint().GetDistSight(pt) < tViewDist)
-                        && ((tMe->GetTopPoint().GetDistSight(ptOld) >= tViewDist) || !(pClient->GetNetState()->isClientVersion(MINCLIVER_HS) || pClient->GetNetState()->isClientEnhanced()) || IsSetOF(OF_NoSmoothSailing)))
+                    if ((ptMe.GetDistSight(pt) < tViewDist)
+                        && ((ptMe.GetDistSight(ptOld) >= tViewDist) || !(pNetState->isClientVersion(MINCLIVER_HS) || pNetState->isClientEnhanced()) || IsSetOF(OF_NoSmoothSailing)))
                     {
                         CItem *pItem = dynamic_cast <CItem *>(pObj);
                         pClient->addItem(pItem);
@@ -283,10 +284,10 @@ bool CCMultiMovable::MoveDelta(CPointBase pdelta)
                     CChar *pChar = dynamic_cast <CChar *>(pObj);
                     if (pClient == pChar->GetClient())
                         pClient->addPlayerView(ptOld);
-                    else if ((tMe->GetTopPoint().GetDistSight(pt) <= tViewDist)
-                        && ((tMe->GetTopPoint().GetDistSight(ptOld) > tViewDist) || !(pClient->GetNetState()->isClientVersion(MINCLIVER_HS) || pClient->GetNetState()->isClientEnhanced()) || IsSetOF(OF_NoSmoothSailing)))
+                    else if ((ptMe.GetDistSight(pt) <= tViewDist)
+                        && ((ptMe.GetDistSight(ptOld) > tViewDist) || !(pNetState->isClientVersion(MINCLIVER_HS) || pNetState->isClientEnhanced()) || IsSetOF(OF_NoSmoothSailing)))
                     {
-                        if ((pt.GetDist(ptOld) > 1) && (pClient->GetNetState()->isClientLessVersion(MINCLIVER_HS)) && (pChar->GetTopPoint().GetDistSight(ptOld) < tViewDist))
+                        if ((pt.GetDist(ptOld) > 1) && (pNetState->isClientLessVersion(MINCLIVER_HS)) && (pChar->GetTopPoint().GetDistSight(ptOld) < tViewDist))
                             pClient->addCharMove(pChar);
                         else
                         {
@@ -563,15 +564,10 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
         }
 
 #ifdef _DEBUG
-        // In debug builds, this flashes some spots over tiles as they are checked for valid movement
-        CItem* pItemDebug = nullptr;
-#define SPAWNSHIPTRACK(a,b)		pItemDebug = CItem::CreateBase(ITEMID_FRUIT_APPLE);	\
-								pItemDebug->SetType(IT_NORMAL);						\
-								pItemDebug->SetAttr(ATTR_MOVE_NEVER|ATTR_DECAY|ATTR_INVIS);	\
-								pItemDebug->SetHue(b);								\
-								pItemDebug->MoveToDecay(a, MSECS_PER_TENTH);
+     // In debug builds, this flashes some spots over tiles as they are checked for valid movement
+    #define SPAWNSHIPTRACK(a,b)		pMulti->Effect(EFFECT_XYZ, ITEMID_FRUIT_APPLE, a, pMulti, 1, 0, false, b)
 #else
-#define SPAWNSHIPTRACK(a,b)
+    #define SPAWNSHIPTRACK(a,b)
 #endif
 
         // Test along the ship's edge to make sure nothing is blocking movement, this is split into two switch

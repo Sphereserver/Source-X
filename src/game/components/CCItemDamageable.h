@@ -22,7 +22,7 @@ public:
     CCItemDamageable(CObjBase *pLink);
     virtual ~CCItemDamageable();
 
-    static bool CanSuscribe(const CItem* pItem);
+    static bool CanSubscribe(const CItem* pItem);
 
     void SetCurHits(word iCurHits);
     void SetMaxHits(word iMaxHits);

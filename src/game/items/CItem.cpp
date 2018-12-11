@@ -117,11 +117,11 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CCTimedObject(PROFILE_ITE
     /* CCItemDamageable is also added from CObjBase::r_LoadVal(OC_CANMASK) for manual override of can flags
     * but it's required to add it also on item's creation depending on it's CItemBase can flags.
     */
-    if (CCItemDamageable::CanSuscribe(this))
+    if (CCItemDamageable::CanSubscribe(this))
     {
         Subscribe(new CCItemDamageable(this));
     }
-    if (CCFaction::CanSuscribe(this))
+    if (CCFaction::CanSubscribe(this))
     {
         Subscribe(new CCFaction(this));  // Adding it only to equippable items
     }
@@ -3677,7 +3677,7 @@ CItem * CItem::SetType(IT_TYPE type)
     }
 
     pComp = GetComponent(COMP_ITEMDAMAGEABLE);
-    if (!CCItemDamageable::CanSuscribe(this))
+    if (!CCItemDamageable::CanSubscribe(this))
     {
         if (pComp)
             Unsubscribe(pComp);
@@ -3690,7 +3690,7 @@ CItem * CItem::SetType(IT_TYPE type)
     }
 
     pComp = GetComponent(COMP_FACTION);
-    if (!CCFaction::CanSuscribe(this))
+    if (!CCFaction::CanSubscribe(this))
     {
         if (pComp)
             Unsubscribe(pComp);

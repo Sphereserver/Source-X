@@ -18,7 +18,7 @@ CCItemDamageable::~CCItemDamageable()
     g_World.m_ObjStatusUpdates.RemovePtr(GetLink());
 }
 
-bool CCItemDamageable::CanSuscribe(const CItem* pItem) // static
+bool CCItemDamageable::CanSubscribe(const CItem* pItem) // static
 {
     return pItem->Can(CAN_I_DAMAGEABLE);
 }

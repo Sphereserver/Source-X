@@ -1312,7 +1312,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 	return true;
 }
 
-IT_TYPE CChar::CanTouchStatic( CPointMap &pt, ITEMID_TYPE id, CItem *pItem )
+IT_TYPE CChar::CanTouchStatic( CPointMap &pt, ITEMID_TYPE id, const CItem *pItem )
 {
 	ADDTOCALLSTACK("CChar::CanTouchStatic");
 	// Might be a dynamic or a static.
@@ -1466,7 +1466,7 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
     return true;
 }
 
-bool CChar::CanMove( CItem *pItem, bool fMsg ) const
+bool CChar::CanMove( const CItem *pItem, bool fMsg ) const
 {
 	ADDTOCALLSTACK("CChar::CanMove");
 	// Is it possible that i could move this ?
@@ -1513,7 +1513,7 @@ bool CChar::CanMove( CItem *pItem, bool fMsg ) const
 		// Can't move equipped cursed items
 		if ( pItem->IsAttr(ATTR_CURSED|ATTR_CURSED2) && pItem->IsItemEquipped() )
 		{
-			pItem->SetAttr(ATTR_IDENTIFIED);
+			//pItem->SetAttr(ATTR_IDENTIFIED);
 			if ( fMsg )
 				SysMessagef("%s %s", pItem->GetName(), g_Cfg.GetDefaultMsg(DEFMSG_CANTMOVE_CURSED));
 

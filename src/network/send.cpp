@@ -415,7 +415,7 @@ PacketItemWorld::PacketItemWorld(byte id, size_t size, CUID uid) : PacketSend(id
 {
 }
 
-PacketItemWorld::PacketItemWorld(const CClient* target, CItem *item) : PacketSend(XCMD_Put, 20, PRI_NORMAL), m_item(item->GetUID())
+PacketItemWorld::PacketItemWorld(const CClient* target, const CItem *item) : PacketSend(XCMD_Put, 20, PRI_NORMAL), m_item(item->GetUID())
 {
 	ADDTOCALLSTACK("PacketItemWorld::PacketItemWorld");
 
@@ -478,7 +478,7 @@ PacketItemWorld::PacketItemWorld(const CClient* target, CItem *item) : PacketSen
 	push(target);
 }
 
-void PacketItemWorld::adjustItemData(const CClient* target, CItem* item, ITEMID_TYPE &id, HUE_TYPE &hue, word &amount, CPointMap &p, DIR_TYPE &dir, byte &flags, byte& light)
+void PacketItemWorld::adjustItemData(const CClient* target, const CItem* item, ITEMID_TYPE &id, HUE_TYPE &hue, word &amount, CPointMap &p, DIR_TYPE &dir, byte &flags, byte& light)
 {
 	ADDTOCALLSTACK("PacketItemWorld::adjustItemData");
 	UNREFERENCED_PARAMETER(p);
@@ -5020,7 +5020,7 @@ PacketItemWorldNew::PacketItemWorldNew(byte id, size_t size, CUID uid) : PacketI
 {
 }
 
-PacketItemWorldNew::PacketItemWorldNew(const CClient* target, CItem *item) : PacketItemWorld(XCMD_PutNew, 26, item->GetUID())
+PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item) : PacketItemWorld(XCMD_PutNew, 26, item->GetUID())
 {
 	ADDTOCALLSTACK("PacketItemWorldNew::PacketItemWorldNew");
 
@@ -5074,7 +5074,7 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, CItem *item) : Pac
 	push(target);
 }
 
-PacketItemWorldNew::PacketItemWorldNew(const CClient* target, CChar* mobile) : PacketItemWorld(XCMD_PutNew, 26, mobile->GetUID())
+PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CChar* mobile) : PacketItemWorld(XCMD_PutNew, 26, mobile->GetUID())
 {
 	DataSource source = Character;
 	dword uid = mobile->GetUID();

@@ -153,9 +153,9 @@ protected:
 	PacketItemWorld(byte id, size_t size, CUID uid);
 
 public:
-	PacketItemWorld(const CClient* target, CItem* item);
+	PacketItemWorld(const CClient* target, const CItem* item);
 
-	void adjustItemData(const CClient* target, CItem* item, ITEMID_TYPE &id, HUE_TYPE &hue, word &amount, CPointMap &p, DIR_TYPE &dir, byte &flags, byte &light);
+	void adjustItemData(const CClient* target, const CItem* item, ITEMID_TYPE &id, HUE_TYPE &hue, word &amount, CPointMap &p, DIR_TYPE &dir, byte &flags, byte &light);
 
 	virtual bool onSend(const CClient* client);
 };
@@ -1912,8 +1912,8 @@ public:
 		Damageable	= 0x3
 	};
 
-	PacketItemWorldNew(const CClient* target, CItem* item);
-	PacketItemWorldNew(const CClient* target, CChar* mobile);
+	PacketItemWorldNew(const CClient* target, const CItem* item);
+	PacketItemWorldNew(const CClient* target, const CChar* mobile);
 
 	virtual bool canSendTo(const NetState* state) const { return CanSendTo(state); }
 	static bool CanSendTo(const NetState* state)

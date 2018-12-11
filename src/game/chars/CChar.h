@@ -391,14 +391,14 @@ public:
 	bool CanSeeItem( const CItem * pItem ) const;
 	bool CanTouch( const CPointMap & pt ) const;
 	bool CanTouch( const CObjBase * pObj ) const;
-	IT_TYPE CanTouchStatic( CPointMap & pt, ITEMID_TYPE id, CItem * pItem );
-	bool CanMove( CItem * pItem, bool fMsg = true ) const;
+	IT_TYPE CanTouchStatic( CPointMap & pt, ITEMID_TYPE id, const CItem * pItem );
+	bool CanMove( const CItem * pItem, bool fMsg = true ) const;
 	byte GetLightLevel() const;
 	bool CanUse( CItem * pItem, bool fMoveOrConsume ) const;
 	bool IsMountCapable() const;
 
 	ushort  Food_CanEat( CObjBase * pObj ) const;
-	short  Food_GetLevelPercent() const;
+	short   Food_GetLevelPercent() const;
 	lpctstr Food_GetLevelMessage( bool fPet, bool fHappy ) const;
 
 public:

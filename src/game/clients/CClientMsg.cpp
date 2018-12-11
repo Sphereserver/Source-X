@@ -352,7 +352,7 @@ void CClient::addItem_OnGround( CItem * pItem ) // Send items (on ground)
 	// send corpse clothing
 	if ( !IsPriv(PRIV_DEBUG) && ((pItem->GetDispID() == ITEMID_CORPSE) && CCharBase::IsPlayableID(pItem->GetCorpseType())) )	// cloths on corpse
 	{
-		CItemCorpse *pCorpse = static_cast<CItemCorpse *>(pItem);
+		const CItemCorpse *pCorpse = static_cast<const CItemCorpse *>(pItem);
 		if ( pCorpse )
 		{
 			addContainerContents( pCorpse, false, true );	// send all corpse items
@@ -366,7 +366,7 @@ void CClient::addItem_OnGround( CItem * pItem ) // Send items (on ground)
 	if ( (pItem->IsType(IT_MULTI_CUSTOM)) && (m_pChar->GetTopPoint().GetDistSight(pItem->GetTopPoint()) <= m_pChar->GetVisualRange()) )
 	{
 		// send house design version
-		CItemMultiCustom *pItemMulti = static_cast<CItemMultiCustom *>(pItem);
+		const CItemMultiCustom *pItemMulti = static_cast<const CItemMultiCustom *>(pItem);
 		if (pItemMulti != nullptr)
 			pItemMulti->SendVersionTo(this);
 	}

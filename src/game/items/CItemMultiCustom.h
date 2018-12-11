@@ -105,7 +105,7 @@ public:
     void RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z);
     bool RemoveStairs(Component * pStairComponent);
     void RemoveRoof(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z);
-    void SendVersionTo(CClient * pClientSrc);
+    void SendVersionTo(CClient * pClientSrc) const;
     void SendStructureTo(CClient * pClientSrc);
     void BackupStructure();
     void RestoreStructure(CClient * pClientSrc = nullptr);

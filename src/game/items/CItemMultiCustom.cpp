@@ -787,7 +787,7 @@ void CItemMultiCustom::RemoveRoof(CClient * pClientSrc, ITEMID_TYPE id, short x,
     RemoveItem(pClientSrc, id, x, y, z);
 }
 
-void CItemMultiCustom::SendVersionTo(CClient * pClientSrc)
+void CItemMultiCustom::SendVersionTo(CClient * pClientSrc) const
 {
     ADDTOCALLSTACK("CItemMultiCustom::SendVersionTo");
     // send the revision number of this building to the given
