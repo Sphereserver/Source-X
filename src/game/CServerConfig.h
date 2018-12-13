@@ -685,13 +685,7 @@ public:
      *
      * @return  null if it fails, else the spell definition.
      */
-	const CSpellDef * GetSpellDef( SPELL_TYPE index ) const
-	{
-		// future: underlying type for SPELL_TYPE to avoid casts
-		if (index == SPELL_NONE || m_SpellDefs.IsValidIndex((size_t)(index)) == false)
-			return nullptr;
-		return m_SpellDefs[(size_t)(index)];
-	}
+	const CSpellDef * GetSpellDef( SPELL_TYPE index ) const;
 
     /**
     * @fn  const CSpellDef * CServerConfig::GetSpellDef( SPELL_TYPE index ) const
@@ -702,13 +696,7 @@ public:
     *
     * @return  null if it fails, else the spell definition.
     */
-	CSpellDef * GetSpellDef( SPELL_TYPE index )
-	{
-		// future: underlying type for SPELL_TYPE to avoid casts
-		if (index == SPELL_NONE || m_SpellDefs.IsValidIndex((size_t)(index)) == false)
-			return nullptr;
-		return m_SpellDefs[(size_t)(index)];
-	}
+	CSpellDef * GetSpellDef( SPELL_TYPE index );
 
     /**
      * @fn  lpctstr CServerConfig::GetSkillKey( SKILL_TYPE index ) const
@@ -719,13 +707,7 @@ public:
      *
      * @return  The skill key.
      */
-	lpctstr GetSkillKey( SKILL_TYPE index ) const
-	{
-		// future: underlying type for SPELL_TYPE to avoid casts
-		if (m_SkillIndexDefs.IsValidIndex((size_t)(index)) == false)
-			return nullptr;
-		return ( m_SkillIndexDefs[(size_t)(index)]->GetKey());
-	}
+	lpctstr GetSkillKey( SKILL_TYPE index ) const;
 
     /**
      * @fn  bool CServerConfig::IsSkillFlag( SKILL_TYPE index, SKF_TYPE skf ) const
@@ -740,7 +722,7 @@ public:
 	bool IsSkillFlag( SKILL_TYPE index, SKF_TYPE skf ) const
 	{
 		const CSkillDef * pSkillDef = GetSkillDef( index );
-		return ( pSkillDef != nullptr && (pSkillDef->m_dwFlags & skf) );
+		return ( pSkillDef && (pSkillDef->m_dwFlags & skf) );
 	}
 
     /**
@@ -752,12 +734,7 @@ public:
      *
      * @return  null if it fails, else the skill definition.
      */
-	const CSkillDef* GetSkillDef( SKILL_TYPE index ) const
-	{
-		if (m_SkillIndexDefs.IsValidIndex((size_t)(index)) == false)
-			return nullptr;
-		return m_SkillIndexDefs[(size_t)(index)];
-	}
+	const CSkillDef* GetSkillDef( SKILL_TYPE index ) const;
 
     /**
     * @fn  const CSkillDef* CServerConfig::GetSkillDef( SKILL_TYPE index ) const
@@ -768,12 +745,7 @@ public:
     *
     * @return  null if it fails, else the skill definition.
     */
-	CSkillDef* GetSkillDef( SKILL_TYPE index )
-	{
-		if (m_SkillIndexDefs.IsValidIndex((size_t)index) == false )
-			return nullptr;
-		return m_SkillIndexDefs[(size_t)(index)];
-	}
+	CSkillDef* GetSkillDef( SKILL_TYPE index );
 
     /**
      * @fn  const CSkillDef* CServerConfig::FindSkillDef( lpctstr pszKey ) const
@@ -784,15 +756,7 @@ public:
      *
      * @return  null if it fails, else the found skill definition.
      */
-	const CSkillDef* FindSkillDef( lpctstr pszKey ) const
-	{
-		// Find the skill name in the alpha sorted list.
-		// RETURN: SKILL_NONE = error.
-		size_t i = m_SkillNameDefs.FindKey( pszKey );
-		if ( i == m_SkillNameDefs.BadIndex() )
-			return nullptr;
-		return static_cast <const CSkillDef*>(m_SkillNameDefs[i]);
-	}
+	const CSkillDef* FindSkillDef( lpctstr pszKey ) const;
 
     /**
      * @fn  const CSkillDef* CServerConfig::SkillLookup( lpctstr pszKey );

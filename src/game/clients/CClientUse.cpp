@@ -697,7 +697,7 @@ bool CClient::Cmd_Skill_Menu( CResourceIDBase rid, int iSelect )
 			sm_iReentrant++;
 
 			// If there is just one menu then select it.
-			bool fSuccess = Cmd_Skill_Menu(rid, m_tmMenu.m_Item[1]);
+			bool fSuccess = Cmd_Skill_Menu(rid, 1);
 
 			sm_iReentrant--;
 			return fSuccess;
@@ -763,12 +763,11 @@ size_t CClient::Cmd_Skill_Menu_Build( CResourceIDBase rid, int iSelect, CMenuIte
 		return 1;
 	}
 
-	if ( iSelect < 0 )
-	{
-		item[0].m_sText = s.GetKey();
-		if ( iSelect == -1 )
-			m_tmMenu.m_ResourceID = rid;
-	}
+    if ( iSelect == -1 )
+    {
+        item[0].m_sText = s.GetKey();   // Set the title
+		m_tmMenu.m_ResourceID = rid;
+    }
 
 	bool fSkip = false;		// skip this if we lack resources or skill.
 	int iOnCount = 0;
@@ -795,7 +794,7 @@ size_t CClient::Cmd_Skill_Menu_Build( CResourceIDBase rid, int iSelect, CMenuIte
 					return 1;
 
 				iShowCount++;
-				if ( !item[iSelect == -2 ? 0 : iShowCount].ParseLine(s.GetArgRaw(), nullptr, m_pChar) )
+				if ( !item[iShowCount].ParseLine(s.GetArgRaw(), nullptr, m_pChar) )
 				{
 					// remove if the item is invalid.
 					iShowCount--;

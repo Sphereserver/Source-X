@@ -2947,7 +2947,7 @@ bool CChar::Death()
 
 		++m_pPlayer->m_wDeaths;
 		SetHue( HUE_DEFAULT );	// get all pale
-		SetID( static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType( RES_CHARDEF, pszGhostName )) );
+		SetID( (CREID_TYPE)(g_Cfg.ResourceGetIndexType( RES_CHARDEF, pszGhostName )) );
 		LayerAdd( CItem::CreateScript( ITEMID_DEATHSHROUD, this ) );
 
 		CClient * pClient = GetClient();
@@ -4166,7 +4166,8 @@ bool CChar::OnTickPeriodic()
         // Check location periodically for standing in fire fields, traps, etc.
         EXC_SET_BLOCK("check location");
         CheckLocation(true);
-        Stats_Regen();
+        if (!IsStatFlag(STATF_DEAD))
+            Stats_Regen();
     }
 
     EXC_SET_BLOCK("update stats");

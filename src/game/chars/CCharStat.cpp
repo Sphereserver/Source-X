@@ -160,6 +160,10 @@ void CChar::Stat_SetVal( STAT_TYPE i, ushort uiVal )
 	}
 	ASSERT(i >= 0 && i < STAT_QTY); // allow for food
 	m_Stat[i].m_val = uiVal;
+    if ((i == STAT_STR) && (uiVal == 0))
+    {   // Ensure this char will tick and die
+        g_World.AddCharTicking(this, true, false);
+    }
 }
 
 void CChar::Stat_AddVal( STAT_TYPE i, int iVal )
@@ -173,6 +177,10 @@ void CChar::Stat_AddVal( STAT_TYPE i, int iVal )
     ASSERT(i >= 0 && i < STAT_QTY); // allow for food
     iVal = m_Stat[i].m_val + iVal;
     m_Stat[i].m_val = (ushort)(maximum(0, iVal));
+    if ((i == STAT_STR) && (iVal <= 0))
+    {   // Ensure this char will tick and die
+        g_World.AddCharTicking(this, true, false);
+    }
 }
 
 ushort CChar::Stat_GetVal( STAT_TYPE i ) const

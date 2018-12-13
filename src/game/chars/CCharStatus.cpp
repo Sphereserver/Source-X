@@ -1232,6 +1232,17 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 			bDeathImmune = true;
 			break;
 
+        case IT_ARCHERY_BUTTE:
+        {
+            CItem * pWeapon = m_uidWeapon.ItemFind();
+            if (pWeapon)
+            {
+                IT_TYPE iType = pWeapon->GetType();
+                if ((iType == IT_WEAPON_BOW) || (iType == IT_WEAPON_XBOW))
+                    return (iDist <= pWeapon->RangeL());
+            }
+        }
+
 		case IT_SHIP_PLANK:
 		case IT_SHIP_SIDE:
 		case IT_SHIP_SIDE_LOCKED:

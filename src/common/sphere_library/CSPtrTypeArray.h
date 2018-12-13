@@ -105,9 +105,9 @@ size_t CSPtrTypeArray<TYPE>::FindPtr( TYPE pData ) const
     if ( !pData )
         return this->BadIndex();
 
-    for ( size_t nIndex = 0; nIndex < this->size(); ++nIndex )
+    for ( size_t nIndex = 0, nSize = this->size(); nIndex < nSize; ++nIndex )
     {
-        if (this->at(nIndex) == pData )
+        if ((*this)[nIndex] == pData )
             return nIndex;
     }
 
@@ -117,9 +117,7 @@ size_t CSPtrTypeArray<TYPE>::FindPtr( TYPE pData ) const
 template<class TYPE>
 bool CSPtrTypeArray<TYPE>::IsValidIndex( size_t i ) const
 {
-    if ( i >= this->size() )
-        return false;
-    return (this->at(i) != nullptr );
+    return ( (i < this->size()) && ((*this)[i] != nullptr) );
 }
 
 #endif // _INC_CSPTRTYPEARRAY_H

@@ -422,7 +422,8 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 		{
 			pszKey += 1;
 			CItemStone *pMyGuild = pChar->Guild_Find(bIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
-			if ( pMyGuild ) return pMyGuild->r_SetVal(pszKey, s.GetArgRaw());
+			if ( pMyGuild )
+                return pMyGuild->r_SetVal(pszKey, s.GetArgRaw());
 		}
 		return false;
 	}
@@ -431,7 +432,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 	{
         case CPC_SPEECHCOLOR:
             m_SpeechHue = (HUE_TYPE)s.GetArgWVal();
-            break;
+            return true;
 		case CPC_DEATHS:
 			m_wDeaths = (word)(s.GetArgVal());
 			return true;

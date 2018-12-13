@@ -169,8 +169,6 @@ void CClient::Event_Tips( word i) // Tip of the day window
 	addScrollScript( s, SCROLL_TYPE_TIPS, i + 1 );
 }
 
-
-
 void CClient::Event_Book_Title( CUID uid, lpctstr pszTitle, lpctstr pszAuthor )
 {
 	ADDTOCALLSTACK("CClient::Event_Book_Title");

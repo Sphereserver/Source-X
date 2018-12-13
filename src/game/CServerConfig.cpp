@@ -1319,6 +1319,68 @@ bool CServerConfig::r_LoadVal( CScript &s )
 #undef DEBUG_ERR_NOINIT
 }
 
+const CSpellDef * CServerConfig::GetSpellDef( SPELL_TYPE index ) const
+{
+    // future: underlying type for SPELL_TYPE to avoid casts
+    if (index <= SPELL_NONE)
+        return nullptr;
+    size_t uiIndex = (size_t)index;
+    if (!m_SpellDefs.IsValidIndex(uiIndex))
+        return nullptr;
+    return m_SpellDefs[uiIndex];
+}
+
+CSpellDef * CServerConfig::GetSpellDef( SPELL_TYPE index )
+{
+    // future: underlying type for SPELL_TYPE to avoid casts
+    if (index <= SPELL_NONE)
+        return nullptr;
+    size_t uiIndex = (size_t)index;
+    if (!m_SpellDefs.IsValidIndex(uiIndex))
+        return nullptr;
+    return m_SpellDefs[uiIndex];
+}
+
+lpctstr CServerConfig::GetSkillKey( SKILL_TYPE index ) const
+{
+    // future: underlying type for SPELL_TYPE to avoid casts
+    if (index < 0)
+        return nullptr;
+    size_t uiIndex = (size_t)index;
+    if (!m_SkillIndexDefs.IsValidIndex(uiIndex))
+        return nullptr;
+    return m_SkillIndexDefs[uiIndex]->GetKey();
+}
+
+const CSkillDef* CServerConfig::GetSkillDef( SKILL_TYPE index ) const
+{
+    if (index < 0)
+        return nullptr;
+    size_t uiIndex = (size_t)index;
+    if (!m_SkillIndexDefs.IsValidIndex(uiIndex) )
+        return nullptr;
+    return m_SkillIndexDefs[uiIndex];
+}
+
+CSkillDef* CServerConfig::GetSkillDef( SKILL_TYPE index )
+{
+    if (index < 0)
+        return nullptr;
+    size_t uiIndex = (size_t)index;
+    if (!m_SkillIndexDefs.IsValidIndex(uiIndex) )
+        return nullptr;
+    return m_SkillIndexDefs[uiIndex];
+}
+
+const CSkillDef* CServerConfig::FindSkillDef( lpctstr pszKey ) const
+{
+    // Find the skill name in the alpha sorted list.
+    // RETURN: SKILL_NONE = error.
+    size_t i = m_SkillNameDefs.FindKey( pszKey );
+    if ( i == m_SkillNameDefs.BadIndex() )
+        return nullptr;
+    return static_cast <const CSkillDef*>(m_SkillNameDefs[i]);
+}
 
 const CSkillDef * CServerConfig::SkillLookup( lpctstr pszKey )
 {

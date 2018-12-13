@@ -1336,3 +1336,9 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 
 11-12-2018, Nolok
 - Fixed: When smooth sailing was on, the screen wasn't updated smoothly.
+
+13-12-2018, Nolok
+- Fixed: Craft menus shown a wrong title (Issue #164).
+- Fixed: SPEECHCOLOR wasn't recognized as a valid keyword (Issue #163).
+- Fixed: Stat regens working also on dead players (Issue #160).
+- Fixed: Archery butte not usable by players ("You can't reach that") (Issue #159).

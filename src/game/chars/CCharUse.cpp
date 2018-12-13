@@ -1478,7 +1478,8 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 				ItemBounce(CItem::CreateScript(id, this));
 				--pItem->m_itBeeHive.m_honeycount;
 			}
-			else {
+			else
+            {
 				SysMessageDefault(DEFMSG_ITEMUSE_BEEHIVE_STING);
 				OnTakeDamage(Calc_GetRandVal(5), this, DAMAGE_POISON | DAMAGE_GENERAL);
 			}
@@ -1713,10 +1714,12 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 	return fAction | MASK_RETURN_FOLLOW_LINKS;
 }
 
-bool CChar::Use_Item(CItem *pItem, bool fLink) {
+bool CChar::Use_Item(CItem *pItem, bool fLink)
+{
 	ADDTOCALLSTACK("CChar::Use_Item");
 	int result = Do_Use_Item(pItem, fLink);
-	if ((result & MASK_RETURN_FOLLOW_LINKS) == MASK_RETURN_FOLLOW_LINKS) {
+	if ((result & MASK_RETURN_FOLLOW_LINKS) == MASK_RETURN_FOLLOW_LINKS)
+    {
 		CItem *pLinkItem = pItem;
 		for (int i = 0; i < 64; ++i)
 		{ // dumb protection for endless loop

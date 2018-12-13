@@ -89,7 +89,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, bool f
 	}
 
 	// just use the background (default) region for this
-	if (pRegion->m_Events.size() <= 0 )
+	if (pRegion->m_Events.empty())
 	{
 		CPointMap ptZero(0,0,0,pt.m_map);
 		pRegion = dynamic_cast<CRegionWorld*>(ptZero.GetRegion(REGION_TYPE_AREA));

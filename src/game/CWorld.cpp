@@ -1609,18 +1609,17 @@ void CWorld::_RemoveCharTicking(const int64 iOldTimeout, const CChar* pChar)
     cont.THREAD_CMUTEX.unlock();
 }
 
-void CWorld::AddCharTicking(CChar * pChar)
+void CWorld::AddCharTicking(CChar * pChar, bool fIgnoreSleep, bool fOverwrite)
 {
     ADDTOCALLSTACK("CWorld::AddCharTicking");
     EXC_TRY("AddCharTicking");
 
-    if (pChar->GetTopSector()->IsSleeping())
+    if (!fIgnoreSleep && pChar->GetTopSector()->IsSleeping())
     {
         return; // Do not allow ticks on sleeping sectors;
     }
 
     EXC_SET_BLOCK("Lookup");
-
     ProfileTask timersTask(PROFILE_TIMERS);
     std::unique_lock<std::shared_mutex> lookupLock(_mCharTickLookup.THREAD_CMUTEX);
     
@@ -1628,14 +1627,22 @@ void CWorld::AddCharTicking(CChar * pChar)
     //if (iTickNext < g_World.GetCurrentTime().GetTimeRaw())    // We do that to get them tick as sooner as possible
     //    return;
 
+    bool fDoNotInsert = false;
     auto itLookup = _mCharTickLookup.find(pChar);
     if (itLookup != _mCharTickLookup.end())
     {
         // Adding an object already on the list? Am i setting a new timeout without deleting the previous one?
         // It shouldn't happen, but if it does, this fixes it.
         EXC_SET_BLOCK("LookupReplace");
-        _RemoveCharTicking(itLookup->second, itLookup->first);
-        itLookup->second = iTickNext;
+        if (fOverwrite)
+        {
+            _RemoveCharTicking(itLookup->second, itLookup->first);
+            itLookup->second = iTickNext;
+        }
+        else
+        {
+            fDoNotInsert = true;
+        }
     }
     else
     {
@@ -1643,9 +1650,12 @@ void CWorld::AddCharTicking(CChar * pChar)
         _mCharTickLookup.insert(std::make_pair(pChar, iTickNext));
     }
 
-    EXC_SET_BLOCK("InsertCharTicking");
-    _InsertCharTicking(iTickNext, pChar);
-
+    if (!fDoNotInsert)
+    {
+        EXC_SET_BLOCK("InsertCharTicking");
+        _InsertCharTicking(iTickNext, pChar);
+    }
+    
     EXC_CATCH;
 }
 

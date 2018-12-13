@@ -182,7 +182,7 @@ private:
 public:
     void AddTimedObject(int64 iTimeout, CCTimedObject *pTimedObject);
     void DelTimedObject(CCTimedObject* pTimedObject);
-    void AddCharTicking(CChar *pChar);
+    void AddCharTicking(CChar *pChar, bool fIgnoreSleep = false, bool fOverwrite = true);
     void DelCharTicking(CChar *pChar);
 private:
     void _InsertTimedObject(int64 iTimeout, CCTimedObject* pTimedObject);

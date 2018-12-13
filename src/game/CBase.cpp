@@ -272,8 +272,10 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 			break;
 
 		case OBC_RANGE:
-			if ( RangeH() == 0 ) sVal.Format( "%d", RangeL() );
-			else sVal.Format( "%d,%d", RangeH(), RangeL() );
+			if ( RangeH() == 0 )
+                sVal.Format( "%d", RangeL() );
+			else
+                sVal.Format( "%d,%d", RangeH(), RangeL() );
 			break;
 		case OBC_RANGEL: // internally: rangel seems to be Range Highest value
 			sVal.FormatVal( RangeH() );
