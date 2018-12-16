@@ -260,7 +260,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			if ( RES_GET_INDEX(pItem->m_itPotion.m_Type) == SPELL_Explosion )
 			{
 				// Throw explosion potion
-				if ( !m_pChar->ItemPickup(pItem, 1) )	// put the potion in our hand
+				if ( m_pChar->ItemPickup(pItem, 1) == -1 )	// put the potion in our hand
 					return false;
 
 				pItem->m_itPotion.m_tick = 4;		// countdown to explode
@@ -1308,7 +1308,7 @@ bool CClient::Cmd_SecureTrade( CChar *pChar, CItem *pItem )
 	if ( !pItem1 )
 		return false;
 
-	CItemContainer *pCont1 = static_cast<CItemContainer *>(pItem1);
+	CItemContainer *pCont1 = dynamic_cast<CItemContainer *>(pItem1);
 	if ( !pCont1 )
 	{
 		DEBUG_ERR(("Item 0%x must be a container type to enable player trading.\n", ITEMID_Bulletin1));

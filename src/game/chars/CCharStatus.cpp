@@ -1309,7 +1309,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 			return true;
 		return false;
 	}
-	if ( iDist > 3 )
+	if ( iDist > 2 )
 	{
         const uint uiCanFlags = GetCanFlags();
 		if ( uiCanFlags & CAN_C_DCIGNOREDIST )

@@ -1343,15 +1343,14 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 - Fixed: Stat regens working also on dead players (Issue #160).
 - Fixed: Archery butte not usable by players ("You can't reach that") (Issue #159).
 
-14-12-2018, Nolok
+16-12-2018, Nolok
 - Added: Option flag OF_NoTargetTurn, to avoid the char to turn against the targetted point.
 - [Port from Source, 02-08-2018, Coruja]
 	Changed: Internal improvements on Teleport / Recall / Gate Travel spells.
 		- Gate Travel now will use proper blue/red moongate ITEMDEFs instead always use blue moongate changing its color when needed
 		- Gate Travel now will link moongates to each other based on UID instead MOREP. This will make possible cast Gate Travel inside moving boats (if multi region flags allow cast it)
-- [Port from Source, 05-08-2018, Coruja]
-Added: EFFECT function now supports client fade screen effect (EFFECT 4,[0-4]).
-	- NOTE: It can be used only directly on client chars and requires client >= 6x]
+- [Port from Source, 05-08-2018, Coruja] Added: EFFECT function now supports client fade screen effect (EFFECT 4,[0-4]).
+	NOTE: It can be used only directly on client chars and requires client >= 6x]
 - [Port from Source, 06-08-2018, Coruja] Fixed: Tooltips not updating correctly when TooltipMode=1 is set on sphere.ini.
 - [Port from Source, 08-08-2018, Coruja] Fixed: EFFECT_ID/SOUND not working correctly on some spells.
 - [Port from Source, 01-09-2018, Coruja]
@@ -1361,3 +1360,12 @@ Added: EFFECT function now supports client fade screen effect (EFFECT 4,[0-4]).
 - [Port from Source, 25-09-2018, Coruja] Added: New function CODEXOFWISDOM to open client Codex of Wisdom menu at given topic ID.
 	Syntax: CODEXOFWISDOM TopicID (1~176), [ForceOpen (0/1)]
 - [Port from Source, 01-11-2018, Coruja] Added: Support for new Whip weapon type.
+
+17-12-2018, Nolok
+- [Port from Source, 04-07-2018, Coruja]
+	- Added: Support for 'EquipLastWeapon' client macro.
+	- Changed: Reduced DClick/PickUp_Ground reachable distance [3 tiles -> 2 tiles] to match client internal DropOn_Ground distance.
+- [Port from Source, 21-07-2018, Coruja]
+	- Added: Support for 'combat ability' (@UserSpecialMove) and 'virtue' (@UserVirtue) slots on KR toolbar (@UserKRToolbar).
+		NOTE: KR clients still obsolete and not supported, but triggers will be called if someone want use it
+	- Fixed: FOR loop not working correctly when range value is negative.

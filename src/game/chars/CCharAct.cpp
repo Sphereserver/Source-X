@@ -297,6 +297,8 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 			if ( pItem->IsTypeWeapon())
 			{
 				m_uidWeapon = pItem->GetUID();
+                if (m_pPlayer)
+                    m_pPlayer->m_uidWeaponLast = m_uidWeapon;
 				if ( Fight_IsActive() )
 					Skill_Start(Fight_GetWeaponSkill());	// update char action
 			}

@@ -3303,7 +3303,7 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 {
 	ADDTOCALLSTACK("PacketCharacterList::PacketCharacterList");
 
-	const CAccountRef account = target->GetAccount();
+	const CAccount * account = target->GetAccount();
 	ASSERT(account != nullptr);
 
 	initLength();
@@ -3761,7 +3761,7 @@ PacketEnableFeatures::PacketEnableFeatures(const CClient* target, dword flags) :
 {
 	ADDTOCALLSTACK("PacketEnableFeatures::PacketEnableFeatures");
 	
-	const CAccountRef account = target->GetAccount();
+	const CAccount * account = target->GetAccount();
 	ASSERT(account != nullptr);
 	dword tmVer = (dword)(account->m_TagDefs.GetKeyNum("clientversion"));
 	dword tmVerReported = (dword)(account->m_TagDefs.GetKeyNum("reportedcliver"));
