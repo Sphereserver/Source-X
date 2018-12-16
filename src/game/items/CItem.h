@@ -391,7 +391,7 @@ public:
 		{
 			int m_Strength;			// more1 = How many uses til a rune will wear out ?
 			dword m_junk2;
-			CPointBase m_pntMark;	// morep = rune marked to a location or a teleport ?
+			CPointMap m_ptMark;		// morep = rune marked to a location or a teleport ?
 		} m_itRune;
 
 		// IT_TELEPAD
@@ -400,7 +400,7 @@ public:
 		{
 			int m_fPlayerOnly;		// more1 = The gate is player only. (no npcs, xcept pets)
 			int m_fQuiet;			// more2 = The gate/telepad makes no noise.
-			CPointBase m_pntMark;	// morep = marked to a location or a teleport ?
+			CPointMap m_ptMark;		// morep = marked to a location or a teleport ?
 		} m_itTelepad;
 
 		// IT_EQ_MEMORY_OBJ

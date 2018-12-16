@@ -478,7 +478,7 @@ public:
 	void addEffect( EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate * pDst, const CObjBaseTemplate * pSrc,
         byte speed = 5, byte loop = 1, bool explode = false, dword color = 0, dword render = 0, word effectid = 0,
         dword explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0 ) const;
-	void addEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap &pt, const CObjBaseTemplate * pSrc,
+	void addEffectXYZ(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptSrc, const CPointMap *ptDest,
         byte speed = 5, byte loop = 1, bool explode = false, dword color = 0, dword render = 0, word effectid = 0,
         dword explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
 
@@ -498,6 +498,7 @@ public:
 	void addSysMessage( lpctstr pMsg ); // System message (In lower left corner)
 	void addObjMessage( lpctstr pMsg, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY ); // The message when an item is clicked
 
+    void addCodexOfWisdom(dword dwTopicID, bool fForceOpen = false);
 	void addDyeOption( const CObjBase * pBase );
 	void addWebLaunch( lpctstr pMsg ); // Direct client to a web page
 

@@ -382,14 +382,24 @@ void CObjBase::Sound( SOUND_TYPE id, int iOnce ) const // Play sound effect for 
 	}
 }
 
-void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSource, byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, word explodeid, word explodesound, dword effectuid, byte type) const
+void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSource,
+    byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, word explodeid, word explodesound, dword effectuid, byte type) const
 {
 	ADDTOCALLSTACK("CObjBase::Effect");
-	// show for everyone near by.
-	//
-	// bSpeedSeconds
-	// bLoop
-	// fExplode
+	
+    if ( motion == EFFECT_FADE_SCREEN )
+    {
+        // This effect must be used only on client chars (and send it only to this client)
+        if (IsChar())
+        {
+            const CChar *pChar = static_cast<const CChar *>(this);
+            if (pChar->IsClient())
+            {
+                pChar->GetClient()->addEffect(motion, id, nullptr, nullptr);
+            }
+        }
+        return;
+    }
 
 	ClientIterator it;
 	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
@@ -407,15 +417,26 @@ void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSour
 	}
 }
 
-void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap & pt ,const CObjBase * pSource, byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, word explodeid, word explodesound, dword effectuid, byte type) const
+void CObjBase::EffectXYZ(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptSrc, const CPointMap *ptDest,
+    byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, word explodeid, word explodesound, dword effectuid, byte type) const
 {
-	ADDTOCALLSTACK("CObjBase::Effect");
-	// show for everyone near by.
-	//
-	// bSpeedSeconds
-	// bLoop
-	// fExplode
-
+	ADDTOCALLSTACK("CObjBase::EffectXYZ");
+	
+    if ( motion == EFFECT_FADE_SCREEN )
+    {
+        // This effect must be used only on client chars (and send it only to this client)
+        if (IsChar())
+        {
+            const CChar *pChar = static_cast<const CChar *>(this);
+            if (pChar->IsClient())
+            {
+                pChar->GetClient()->addEffect(motion, id, nullptr, nullptr);
+            }
+        }
+        return;
+    }
+    
+    // show for everyone nearby
 	ClientIterator it;
 	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
 	{
@@ -428,7 +449,7 @@ void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap & pt ,const 
 		if (pClient->GetNetState()->isClientEnhanced())
 			bLoopAdjusted *= 3;
 
-		pClient->addEffect(motion, id, pt, pSource, bSpeedSeconds, bLoopAdjusted, fExplode, color, render, effectid, explodeid, explodesound, effectuid, type);
+		pClient->addEffectXYZ(motion, id, ptDest, ptSrc, bSpeedSeconds, bLoopAdjusted, fExplode, color, render, effectid, explodeid, explodesound, effectuid, type);
 	}
 }
 
@@ -704,7 +725,7 @@ bool CObjBase::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
             {
                 if (_uidSpawn != UID_UNUSED && pszKey[-1] != '.')
                     break;
-                CItem *pItem = static_cast<CItem*>(_uidSpawn.ItemFind());
+                CItem *pItem = _uidSpawn.ItemFind();
                 if (pItem)
                 {
                     pRef = pItem;
@@ -748,13 +769,13 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 
     int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
     if ( index < 0 )
-        {
+    {
         // RES_FUNCTION call
         // Is it a function returning a value ? Parse args ?
-            lpctstr pszArgs = strchr(pszKey, ' ');
+        lpctstr pszArgs = strchr(pszKey, ' ');
         if ( pszArgs != nullptr )
         {
-            pszArgs++;
+            ++pszArgs;
             SKIP_SEPARATORS(pszArgs);
         }
 
@@ -782,7 +803,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 		return CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
 	}
 
-	bool	fZero	= false;
+	bool fZero = false;
 	switch (index)
 	{
 		//return as string or hex number or nullptr if not set
@@ -926,7 +947,9 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 					CChar * pChar = static_cast<CChar*>(this);
 					sVal.FormatVal( pChar->m_defense );
 					break;
-				} else {
+				}
+                else
+                {
 					pszKey += strlen(sm_szLoadKeys[index]); // 9;
 					if ( *pszKey == '.' )
 					{
@@ -1768,20 +1791,18 @@ bool CObjBase::r_LoadVal( CScript & s )
 		case OC_REGENVALMANA:
 		case OC_COMBATBONUSSTAT:
 		case OC_COMBATBONUSPERCENT:
-			{
-				SetDefNum(s.GetKey(),s.GetArgVal());
+			SetDefNum(s.GetKey(),s.GetArgVal());
 
-				// This should be used in case items with these properties updates the character in the moment without any script to make status reflect the update.
-				// Maybe too a cliver check to not send update if not needed.
-				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
-				{
-					CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
-					if (pChar)
-						pChar->UpdateStatsFlag();
-				}
-                fResendTooltip = true;
-				break;
+			// This should be used in case items with these properties updates the character in the moment without any script to make status reflect the update.
+			// Maybe too a cliver check to not send update if not needed.
+			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+			{
+				CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
+				if (pChar)
+					pChar->UpdateStatsFlag();
 			}
+            fResendTooltip = true;
+			break;
         case OC_RECIPEALCHEMY:
         case OC_RECIPEBLACKSMITH:
         case OC_RECIPEBOWCRAFT:
@@ -1793,79 +1814,77 @@ bool CObjBase::r_LoadVal( CScript & s )
         case OC_RECIPEMASONRY:
         case OC_RECIPETAILORING:
         case OC_RECIPETINKERING:
-        {
             SetDefNum(s.GetKey(), s.GetArgLLVal());
             fResendTooltip = true;
             break;
-        }
 		case OC_ARMOR:
-			{
-				if ( IsChar() )
-					return false;
+        {
+            if (IsChar())
+                return false;
 
-				int64 piVal[2];
-				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, CountOf(piVal));
-				m_defenseBase = (uchar)(piVal[0]);
-				if ( iQty > 1 )
-					m_defenseRange = (uchar)(piVal[1]) - m_defenseBase;
-				else
-					m_defenseRange = 0;
-				CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
-				if ( pChar )
-					pChar->UpdateStatsFlag();
-                fResendTooltip = true;
-				break;
-			}
-		case OC_DAM:
-			{
-				int64 piVal[2];
-				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, CountOf(piVal));
-				m_attackBase = (uchar)(piVal[0]);
-				if ( iQty > 1 )
-					m_attackRange = (uchar)(piVal[1]) - m_attackBase;
-				else
-					m_attackRange = 0;
-				CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
-				if (pChar)
-					pChar->UpdateStatsFlag();
-                fResendTooltip = true;
-			}
-			break;
-		case OC_WEIGHTREDUCTION:
-			{
-				int oldweight = GetWeight();
-				SetDefNum(s.GetKey(),s.GetArgVal(), false);
-				CContainer * pCont = dynamic_cast <CContainer*> (GetParent());
-				if (pCont)
-				{
-					ASSERT( IsItemEquipped() || IsItemInContainer());
-					pCont->OnWeightChange(GetWeight() - oldweight);
-				}
-                fResendTooltip = true;
-			}
-			return true;
+            int64 piVal[2];
+            size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, CountOf(piVal));
+            m_defenseBase = (uchar)(piVal[0]);
+            if (iQty > 1)
+                m_defenseRange = (uchar)(piVal[1]) - m_defenseBase;
+            else
+                m_defenseRange = 0;
+            CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
+            if (pChar)
+                pChar->UpdateStatsFlag();
+            fResendTooltip = true;
+            break;
+        }
+        case OC_DAM:
+        {
+            int64 piVal[2];
+            size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, CountOf(piVal));
+            m_attackBase = (uchar)(piVal[0]);
+            if (iQty > 1)
+                m_attackRange = (uchar)(piVal[1]) - m_attackBase;
+            else
+                m_attackRange = 0;
+            CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
+            if (pChar)
+                pChar->UpdateStatsFlag();
+            fResendTooltip = true;
+        }
+        break;
+        case OC_WEIGHTREDUCTION:
+        {
+            int oldweight = GetWeight();
+            SetDefNum(s.GetKey(), s.GetArgVal(), false);
+            CContainer * pCont = dynamic_cast <CContainer*> (GetParent());
+            if (pCont)
+            {
+                ASSERT(IsItemEquipped() || IsItemInContainer());
+                pCont->OnWeightChange(GetWeight() - oldweight);
+            }
+            fResendTooltip = true;
+        }
+        return true;
 
-		case OC_RANGE:
-			{
-				int64 piVal[2];
-				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, CountOf(piVal));
-				if ( iQty > 1 )
-				{
-					int64 iRange = ((piVal[0] & 0xff) << 8) & 0xff00;
-					iRange |= (piVal[1] & 0xff);
-					SetDefNum(s.GetKey(),iRange, false);
-				}
-				else
-				{
-					SetDefNum(s.GetKey(),piVal[0], false);
-				}
-                fResendTooltip = true;
-			}
-			break;
+        case OC_RANGE:
+        {
+            int64 piVal[2];
+            size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, CountOf(piVal));
+            if (iQty > 1)
+            {
+                int64 iRange = ((piVal[0] & 0xff) << 8) & 0xff00;
+                iRange |= (piVal[1] & 0xff);
+                SetDefNum(s.GetKey(), iRange, false);
+            }
+            else
+            {
+                SetDefNum(s.GetKey(), piVal[0], false);
+            }
+            fResendTooltip = true;
+        }
+        break;
 
-		case OC_CAN:
-			return false;
-		case OC_CANMASK:
+        case OC_CAN:
+            return false;
+        case OC_CANMASK:
         {
             dword dwFlags = s.GetArgDWVal();
             m_CanMask = dwFlags;
@@ -1883,44 +1902,47 @@ bool CObjBase::r_LoadVal( CScript & s )
                     //g_Log.EventDebug("CObjBase::r_LoadVal(OC_CANMASK) 2\n");
                     Unsubscribe(pItemDmg);
                 }
+                else
+                {
+                    break;
+                }
                 Update();   // Required to force the client to allow dragging the item's bar or to do not allow it anymore before trying to do it.
             }
             break;
         }
-		case OC_MODMAXWEIGHT:
+        case OC_MODMAXWEIGHT:
         {
-			m_ModMaxWeight = s.GetArgVal();
+            m_ModMaxWeight = s.GetArgVal();
             CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
-            if ( pChar )
+            if (pChar)
                 pChar->UpdateStatsFlag();
             fResendTooltip = true;
         }
-			break;
-		case OC_COLOR:
+        break;
+        case OC_COLOR:
         {
             tchar* ptcArg = s.GetArgStr();
-			if ( !strnicmp( ptcArg, "match_shirt", 11 ) || !strnicmp( ptcArg, "match_hair", 10 ))
-			{
-				CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
-				if ( pChar )
-				{
-					CItem * pHair = pChar->LayerFind( !strnicmp( ptcArg+6, "shirt", 5 ) ? LAYER_SHIRT : LAYER_HAIR );
-					if ( pHair )
-					{
-						m_wHue = pHair->GetHue();
-						break;
-					}
-				}
-				m_wHue = HUE_GRAY;
-				break;
-			}
-			RemoveFromView();
-			SetHue((HUE_TYPE)(s.GetArgVal()), false, &g_Serv); //@Dye is called from @Create/.xcolor/script command here // since we can not receive pSrc on this r_LoadVal function ARGO/SRC will be null
-			Update();
+            if (!strnicmp(ptcArg, "match_shirt", 11) || !strnicmp(ptcArg, "match_hair", 10))
+            {
+                const CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
+                if (pChar)
+                {
+                    const CItem * pHair = pChar->LayerFind(!strnicmp(ptcArg+6, "shirt", 5) ? LAYER_SHIRT : LAYER_HAIR);
+                    if (pHair)
+                    {
+                        m_wHue = pHair->GetHue();
+                        break;
+                    }
+                }
+                m_wHue = HUE_DEFAULT;
+                break;
+            }
+            SetHue((HUE_TYPE)(s.GetArgVal()), false, &g_Serv); //@Dye is called from @Create/.xcolor/script command here // since we can not receive pSrc on this r_LoadVal function ARGO/SRC will be null
+            Update();
         }
-			break;
+        break;
 		case OC_EVENTS:
-			return( m_OEvents.r_LoadVal( s, RES_EVENTS ));
+			return m_OEvents.r_LoadVal( s, RES_EVENTS );
 		case OC_MAP:
 			// Move to another map
 			if ( ! IsTopLevel())
@@ -1943,12 +1965,15 @@ bool CObjBase::r_LoadVal( CScript & s )
 			{
 				m_ModAr = s.GetArgVal();
 				CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
-				if ( pChar && pChar->IsChar() )
+				if ( pChar )
 				{
 					pChar->m_defense = (word)(pChar->CalcArmorDefense());
 					pChar->UpdateStatsFlag();
 				}
-                fResendTooltip = true;
+                else
+                {
+                    fResendTooltip = true;
+                }
 			}
 			break;
 		case OC_NAME:
@@ -1959,11 +1984,11 @@ bool CObjBase::r_LoadVal( CScript & s )
 			return false;
 		case OC_SPEED:
 		{
-			if (!this->IsItem())
+			if (!IsItem())
 				return false;
 			CItem * pItem = static_cast<CItem*>(this);
 			pItem->m_speed = s.GetArgBVal();
-			pItem->ResendTooltip();
+			fResendTooltip = true;
 			return true;
 		}
 		case OC_TIMER:
@@ -2218,8 +2243,8 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				return false;
 			CObjBase *pThis = this;
 
-			CPointMap pt((short)piCmd[0], (short)piCmd[1], (char)piCmd[2]);
-			if (!pt.IsValidPoint())
+            CPointMap ptDest((short)piCmd[0], (short)piCmd[1], (char)piCmd[2]);
+			if (!ptDest.IsValidPoint())
 				return false;
 
 			//DEBUG_ERR(("this->GetUID() 0%x \n", (dword)this->GetUID()));
@@ -2234,9 +2259,10 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 			}
 			//DEBUG_ERR(("this->GetUID() 0%x pThis->GetUID() 0%x pCharSrc->GetUID() 0%x\n",(dword)this->GetUID(),(dword)pThis->GetUID(),(dword)pCharSrc->GetUID()));
-			pThis->Effect(static_cast<EFFECT_TYPE>(piCmd[3]), (ITEMID_TYPE)(RES_GET_INDEX(piCmd[4])),
-				pt,
-				pCharSrc,
+            const CPointMap& ptSrc = pCharSrc->GetTopPoint();
+			pThis->EffectXYZ((EFFECT_TYPE)(piCmd[3]), (ITEMID_TYPE)(RES_GET_INDEX(piCmd[4])),
+				&ptSrc,
+                &ptDest,
 				(iArgQty >= 3) ? (uchar)(piCmd[5]) : 5,		// byte bSpeedSeconds = 5,
 				(iArgQty >= 4) ? (uchar)(piCmd[6]) : 1,		// byte bLoop = 1,
 				(iArgQty >= 5) ? (piCmd[7] != 0) : false,	// bool fExplode = false
@@ -3012,6 +3038,11 @@ void CObjBase::UpdatePropertyFlag(int mask)
     // Items equipped, inside containers or with timer expired doesn't receive ticks and need to be added to a list of items to be processed separately
     if ( (!IsTopLevel() || IsTimerExpired()) && !g_World.m_ObjStatusUpdates.ContainsPtr(this) )
         g_World.m_ObjStatusUpdates.emplace_back(this);
+}
+
+dword CObjBase::GetPropertyHash() const
+{
+    return m_PropertyHash;
 }
 
 void CObjBase::OnTickStatusUpdate()

@@ -187,7 +187,7 @@ public:
 	CUID		m_Fight_Targ_UID;	// Current combat target
 	CUID		m_Act_Prv_UID;		// Previous target.
 	int			m_Act_Difficulty;	// -1 = fail skill. (0-100) for skill advance calc.
-	CPointBase  m_Act_p;			// Moving to this location. or location of forge we are working on.
+	CPointMap   m_Act_p;			// Moving to this location. or location of forge we are working on.
 	int			m_StepStealth;		// Max steps allowed to walk invisible while using Stealth skill
 
 	// Args related to specific actions type (m_Act_SkillCurrent)
@@ -857,7 +857,8 @@ public:
 	*/
 	bool Skill_CanUse( SKILL_TYPE skill );
 
-	void Skill_SetBase( SKILL_TYPE skill, ushort iValue );
+	void Skill_SetBase( SKILL_TYPE skill, ushort uiValue );
+    void Skill_AddBase( SKILL_TYPE skill, int iChange );
 	bool Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain = true, bool bUseBellCurve = true );
 
 	bool Skill_CheckSuccess( SKILL_TYPE skill, int difficulty, bool bUseBellCurve = true ) const;
@@ -958,12 +959,13 @@ private:
 
 public:
     bool Spell_Resurrection(CItemCorpse * pCorpse = nullptr, CChar * pCharSrc = nullptr, bool fNoFail = false);
-    bool Spell_Teleport( CPointMap pt, bool fTakePets = false, bool fCheckAntiMagic = true, bool fDisplayEffect = true,
+    bool Spell_Teleport( CPointMap ptDest, bool fTakePets = false, bool fCheckAntiMagic = true, bool fDisplayEffect = true,
         ITEMID_TYPE iEffect = ITEMID_NOTHING, SOUND_TYPE iSound = SOUND_NONE );
+    bool Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic = true);
 	bool Spell_SimpleEffect( CObjBase * pObj, CObjBase * pObjSrc, SPELL_TYPE &spell, int &iSkillLevel );
 	bool Spell_CastDone();
 	bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool fReflecting = false );
-	bool Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool fFailMsg, bool fCheckAntiMagic = true );
+	bool Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bool fFailMsg, bool fCheckAntiMagic = true );
 	int64 GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc = nullptr ); // in tenths of second
 
 	// Memories about objects in the world. -------------------

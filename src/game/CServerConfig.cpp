@@ -1141,6 +1141,12 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			if (m_iMaxKarma < m_iMinKarma)
 				m_iMaxKarma = m_iMinKarma;
 			break;
+        case RC_MAXPOLYSTATS:
+        {
+            int iMax = s.GetArgVal();
+            m_iMaxPolyStats = (ushort)minimum(iMax, UINT16_MAX);
+            break;
+        }
 		case RC_MINCHARDELETETIME:
 			m_iMinCharDeleteTime = s.GetArgVal() * MSECS_PER_SEC;
 			break;
@@ -2593,11 +2599,15 @@ uint CServerConfig::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar
 		0x1000:		7th character slot
 		0x2000:		enable KR (roleplay) faces
 		0x4000:		trial account
-		0x8000:		non-trial (live) account
+		0x8000:		non-trial (live) account (required on clients 4.0.0+, otherwise bits 3..14 will be ignored)
 		0x10000:	enable SA features:				gargoyle race, spells, skills, housing tiles
 		0x20000:	enable HS features:
 		0x40000:	enable Gothic housing tiles
 		0x80000:	enable Rustic housing tiles
+        0x100000:	enable Jungle custom house tiles
+        0x200000:	enable Shadowguard custom house tiles
+        0x400000:	enable TOL features
+        0x800000:	free account (Endless Journey)
 		*/
 		if ( res >= RDS_T2A )
 		{
@@ -4027,16 +4037,18 @@ void CServerConfig::OnTick( bool fNow )
 	m_timePeriodic = g_World.GetCurrentTime().GetTimeRaw() + ( 60 * MSECS_PER_SEC );
 }
 
+void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
+{
+	ADDTOCALLSTACK("CServerConfig::PrintEFOFFlags");
+	if ( g_Serv.IsLoading() )
+        return;
+
 #define catresname(a,b)	\
 {	\
 	if ( *(a) ) strcat(a, " + "); \
 	strcat(a, b); \
 }
 
-void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
-{
-	ADDTOCALLSTACK("CServerConfig::PrintEFOFFlags");
-	if ( g_Serv.IsLoading() ) return;
 	if ( bOF )
 	{
 		tchar zOptionFlags[512];
@@ -4058,7 +4070,8 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 		if ( IsSetOF(OF_NoPrefix) )					catresname(zOptionFlags, "NoPrefix");
 		if ( IsSetOF(OF_DyeType) )					catresname(zOptionFlags, "DyeType");
 		if ( IsSetOF(OF_DrinkIsFood) )				catresname(zOptionFlags, "DrinkIsFood");
-		if ( IsSetOF(OF_DClickNoTurn) )				catresname(zOptionFlags, "DClickNoTurn");
+		if ( IsSetOF(OF_NoDClickTurn) )				catresname(zOptionFlags, "NoDClickTurn");
+        if ( IsSetOF(OF_NoTargTurn) )				catresname(zOptionFlags, "NoTargTurn");
 
 		if ( zOptionFlags[0] != '\0' )
 		{
@@ -4095,9 +4108,9 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 				g_Log.Event(LOGM_INIT, "Experimental flags: %s\n", zExperimentalFlags);
 		}
 	}
-}
 
 #undef catresname
+}
 
 bool CServerConfig::LoadIni( bool fTest )
 {

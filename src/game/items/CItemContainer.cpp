@@ -387,7 +387,7 @@ CPointMap CItemContainer::GetRandContainerLoc() const
         { GUMP_CHEST_WOOD_FINISH, 10, 10, 170, 115 },
         { GUMP_DRAWER_RED, 10, 10, 170, 115 },
         //{ GUMP_BLESSED_STATUE, 0, 0, 0, 0 },		// TO-DO: confirm gump size
-        //{ GUMP_MAIL_BOX, 0, 0, 0, 0 },			// TO-DO: confirm gump size
+        //{ GUMP_MAILBOX, 0, 0, 0, 0 },			// TO-DO: confirm gump size
         { GUMP_GIFT_BOX_CUBE, 23, 51, 163, 151 },
         { GUMP_GIFT_BOX_CYLINDER, 16, 51, 156, 166 },
         { GUMP_GIFT_BOX_OCTOGON, 25, 51, 165, 166 },
@@ -397,9 +397,13 @@ CPointMap CItemContainer::GetRandContainerLoc() const
         //{ GUMP_GIFT_BOX_TALL, 0, 0, 0, 0 },		// TO-DO: confirm gump size
         { GUMP_GIFT_BOX_CHRISTMAS, 16, 51, 156, 166 },
         //{ GUMP_WALL_SAFE, 0, 0, 0, 0 },			// TO-DO: confirm gump size
-        { GUMP_TREASURE_CHEST, 0, 0, 0, 0 },		// TO-DO: confirm gump size
+        { GUMP_CHEST_PIRATE, 0, 0, 0, 0 },		    // TO-DO: confirm gump size
         //{ GUMP_FOUNTAIN_LIFE, 0, 0, 0, 0 },		// TO-DO: confirm gump size
-        //{ GUMP_SECRET_CHEST, 0, 0, 0, 0 },		// TO-DO: confirm gump size
+		//{ GUMP_SECRET_CHEST, 0, 0, 0, 0 },		// TO-DO: confirm gump size
+		//{ GUMP_MAILBOX_DOLPHIN, 0, 0, 0, 0 },		// TO-DO: confirm gump size
+		//{ GUMP_MAILBOX_SQUIRREL, 0, 0, 0, 0 },	// TO-DO: confirm gump size
+		//{ GUMP_MAILBOX_BARREL, 0, 0, 0, 0 },		// TO-DO: confirm gump size
+		//{ GUMP_MAILBOX_LANTERN, 0, 0, 0, 0 },		// TO-DO: confirm gump size
         { GUMP_SECURE_TRADE, 20, 30, 380, 180 },
         { GUMP_BOARD_CHECKER, 0, 0, 282, 230 },
         { GUMP_BOARD_BACKGAMMON, 0, 0, 282, 210 },
@@ -414,6 +418,12 @@ CPointMap CItemContainer::GetRandContainerLoc() const
         { GUMP_CRATE_FLETCHING, 24, 96, 196, 152 },
         { GUMP_CHEST_WOODEN, 10, 10, 170, 115 },
         //{ GUMP_PILLOW_HEART, 0, 0, 0, 0 },		// TO-DO: confirm gump size
+        { GUMP_CHEST_METAL_LARGE, 50, 60, 500, 300 },
+		{ GUMP_CHEST_METAL_GOLD_LARGE, 50, 60, 500, 300 },
+		{ GUMP_CHEST_WOOD_LARGE, 50, 60, 500, 300 },
+		{ GUMP_CHEST_CRATE_LARGE, 50, 60, 500, 300 },
+		{ GUMP_MINERS_SATCHEL, 44, 65, 186, 159 },
+		{ GUMP_LUMBERJACKS_SATCHEL, 44, 65, 186, 159 },
         { GUMP_CHEST_METAL2, 18, 105, 162, 178 }
 	};
 
@@ -539,35 +549,24 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 			pt = GetRandContainerLoc();
 	}
 
-	// check that the grid index isn't already in use
-	bool bValidGrid = true;
-	for ( CItem *pTry = GetContentHead(); pTry != nullptr; pTry = pTry->GetNext() )
-	{
-		if ( pTry->GetContainedGridIndex() == gridIndex )
-		{
-			bValidGrid = false;
-			break;
-		}
-	}
+    // Try drop it on given container grid index (if not available, drop it on next free index)
+    bool fGridAvailable;
+    for ( uint i = 0; i < UCHAR_MAX; ++i )
+    {
+        fGridAvailable = true;
+        for ( CItem *pTry = GetContentHead(); pTry != nullptr; pTry = pTry->GetNext() )
+        {
+            if ( pTry->GetContainedGridIndex() == gridIndex )
+            {
+                fGridAvailable = false;
+                break;
+            }
+        }
+        if ( fGridAvailable )
+            break;
 
-	if ( !bValidGrid )
-	{
-		// the grid index we've been given is already in use, so find the first unused grid index
-		for ( gridIndex = 0; (gridIndex < 255 && !bValidGrid); ++gridIndex )
-		{
-			bValidGrid = true;
-			for ( CItem *pTry = GetContentHead(); pTry != nullptr; pTry = pTry->GetNext() )
-			{
-				if ( pTry->GetContainedGridIndex() == gridIndex )
-				{
-					bValidGrid = false;
-					break;
-				}
-			}
-
-			if ( bValidGrid )
-				break;
-		}
+        if ( ++gridIndex >= g_Cfg.m_iContainerMaxItems )
+            gridIndex = 0;
 	}
 
 	CContainer::ContentAddPrivate(pItem);

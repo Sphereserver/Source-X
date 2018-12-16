@@ -4,6 +4,7 @@
 */
 
 #include "../../common/CUOInstall.h"
+#include "../../game/items/CItemBase.h"
 #include "CUOItemInfo.h"
 
 
@@ -17,7 +18,7 @@ CUOItemInfo::CUOItemInfo( ITEMID_TYPE id )
         m_layer = LAYER_NONE;
         m_dwAnim = 0;
         m_height = 0;
-        strcpy( m_name, ( id <= ITEMID_SHIP6_W ) ? "ship" : "structure" );
+        strcpy( m_name, CItemBase::IsID_Ship(id) ? "ship" : "structure" );
         return;
     }
 

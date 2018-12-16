@@ -393,7 +393,7 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
                 if ((*j)->m_item.GetDispID() != (*i)->m_item.GetDispID())
                     continue;
 
-                pItem->m_itTelepad.m_pntMark = GetComponentPoint(*j);
+                pItem->m_itTelepad.m_ptMark = GetComponentPoint(*j);
                 break;
             }
         }
@@ -1539,6 +1539,8 @@ bool CItemMultiCustom::r_Verb(CScript & s, CTextConsole * pSrc) // Execute comma
         {
             if (s.HasArgs())
                 pChar = CUID(s.GetArgVal()).CharFind();
+            else if (pSrc)
+                pChar = pSrc->GetChar();
 
             if (pChar == nullptr || !pChar->IsClient())
                 return false;

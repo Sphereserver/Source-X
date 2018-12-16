@@ -110,31 +110,42 @@ void CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 			}
 		}
 
-#define DOHASH( value ) hash ^= ((value) & 0x3FFFFFF); \
-						hash ^= ((value) >> 26) & 0x3F;
+#define DOHASH( value ) dwHash ^= ((value) & 0x3FFFFFF); \
+						dwHash ^= ((value) >> 26) & 0x3F;
 
 		// build a hash value from the tooltip entries
-		dword hash = 0;
-		dword argumentHash = 0;
+		dword dwHash = 0;
+		dword dwArgumentHash = 0;
 		for (size_t i = 0; i < pObj->m_TooltipData.size(); ++i)
 		{
 			CClientTooltip* tipEntry = pObj->m_TooltipData[i].get();
-			argumentHash = HashString(tipEntry->m_args, strlen(tipEntry->m_args));
+            dwArgumentHash = HashString(tipEntry->m_args, strlen(tipEntry->m_args));
 
 			DOHASH(tipEntry->m_clilocid);
-			DOHASH(argumentHash);
+			DOHASH(dwArgumentHash);
 		}
-		hash |= UID_F_ITEM;
+        dwHash |= UID_F_ITEM;
 
 #undef DOHASH
 
-		// clients actually expect to use an incremental revision number and not a
+        if ( g_Cfg.m_iTooltipMode == TOOLTIPMODE_SENDVERSION )
+        {
+            // If client receive an tooltip with given obj UID / revision, and for some reason
+            // the server delete this obj and create another one with the same UID / revision,
+            // the client will show the previous cached tooltip on the new obj. To avoid this,
+            // compare both tooltip hashes to check if it really got changed, and if positive,
+            // send the full tooltip instead just the revision number
+            if ( pObj->GetPropertyHash() != dwHash )
+                fRequested = true;
+        }
+
+		// Clients actually expect to use an incremental revision number and not a
 		// hash to check if a tooltip needs updating - the client will not request
 		// updated tooltip data if the hash happens to be less than the previous one
 		//
 		// we still want to generate a hash though, so we don't have to increment
 		// the revision number if the tooltip hasn't actually been changed
-		dword revision = pObj->UpdatePropertyRevision(hash);
+		dword revision = pObj->UpdatePropertyRevision(dwHash);
 		propertyList = new PacketPropertyList(pObj, revision, pObj->m_TooltipData);
 
 		// cache the property list for next time, unless property list is
@@ -644,8 +655,11 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 			t->FormatArgs("%" PRId64, StrengthRequirement);
 		}
 
-		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060639)); // durability ~1_val~ / ~2_val~
-		t->FormatArgs("%hu\t%hu", pItem->m_itArmor.m_Hits_Cur, pItem->m_itArmor.m_Hits_Max);
+        if ( pItem->m_itArmor.m_Hits_Max > 0 )
+        {
+		    PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060639)); // durability ~1_val~ / ~2_val~
+		    t->FormatArgs("%hu\t%hu", pItem->m_itArmor.m_Hits_Cur, pItem->m_itArmor.m_Hits_Max);
+        }
 	}
 	break;
 
@@ -859,8 +873,11 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 			}
 		}
 
-		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060639)); // durability ~1_val~ / ~2_val~
-		t->FormatArgs("%hu\t%hu", pItem->m_itWeapon.m_Hits_Cur, pItem->m_itWeapon.m_Hits_Max);
+        if ( pItem->m_itWeapon.m_Hits_Max > 0 )
+        {
+		    PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060639)); // durability ~1_val~ / ~2_val~
+		    t->FormatArgs("%hu\t%hu", pItem->m_itWeapon.m_Hits_Cur, pItem->m_itWeapon.m_Hits_Max);
+        }
 	}
 	break;
 
@@ -874,13 +891,13 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		if (this->IsPriv(PRIV_GM))
 		{
 			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060658)); // ~1_val~: ~2_val~
-			t->FormatArgs("%s\t%s", g_Cfg.GetDefaultMsg(DEFMSG_TOOLTIP_TAG_DESTINATION), pItem->m_itTelepad.m_pntMark.WriteUsed());
+			t->FormatArgs("%s\t%s", g_Cfg.GetDefaultMsg(DEFMSG_TOOLTIP_TAG_DESTINATION), pItem->m_itTelepad.m_ptMark.WriteUsed());
 		}
 		break;
 
 	case IT_RUNE:
 	{
-		const CPointMap pt = pItem->m_itTelepad.m_pntMark;
+		const CPointMap& pt = pItem->m_itTelepad.m_ptMark;
 		if (!pt.IsValidPoint())
 			break;
 

@@ -1651,31 +1651,20 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 	m_Targ_p = pt;
 
 	ITRIG_TYPE trigtype;
-	if ( pObjTarg == nullptr )
-	{
-		m_Targ_UID.ClearUID();
-		if ( pt.IsCharValid())
-		{
-			if ( !IsSetOF(OF_DClickNoTurn) )
-				m_pChar->UpdateDir(pt);
-		}
-		trigtype = ITRIG_TARGON_GROUND;
-	}
-	else
-	{
-		m_Targ_UID = pObjTarg->GetUID();
-		if ( !IsSetOF(OF_DClickNoTurn) )
-			m_pChar->UpdateDir(pObjTarg);
-
-		if ( pObjTarg->IsChar() )
-		{
-			trigtype = ITRIG_TARGON_CHAR;
-		}
-		else
-		{
-			trigtype = ITRIG_TARGON_ITEM;
-		}
-	}
+    if ( pObjTarg )
+    {
+        trigtype = pObjTarg->IsChar() ? ITRIG_TARGON_CHAR : ITRIG_TARGON_ITEM;
+        m_Targ_UID = pObjTarg->GetUID();
+        if (!IsSetOF(OF_NoTargTurn))
+            m_pChar->UpdateDir(pObjTarg);
+    }
+    else
+    {
+        trigtype = ITRIG_TARGON_GROUND;
+        m_Targ_UID.ClearUID();
+        if ( !IsSetOF(OF_NoTargTurn) && pt.IsValidPoint() )
+            m_pChar->UpdateDir(pt);
+    }
 
 	if (( IsTrigUsed(CItem::sm_szTrigName[trigtype]) ) || ( IsTrigUsed(CChar::sm_szTrigName[(CTRIG_itemAfterClick - 1) + trigtype]) )) //ITRIG_TARGON_GROUND, ITRIG_TARGON_CHAR, ITRIG_TARGON_ITEM
 	{

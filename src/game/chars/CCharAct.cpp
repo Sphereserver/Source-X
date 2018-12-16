@@ -413,7 +413,7 @@ void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when r
 				StatFlag_Clear( STATF_HASSHIELD );
 				UpdateStatsFlag();
 			}
-			if (( this->m_Act_SkillCurrent == SKILL_MINING ) || ( this->m_Act_SkillCurrent == SKILL_FISHING ) || ( this->m_Act_SkillCurrent == SKILL_LUMBERJACKING ))
+            if ( g_Cfg.IsSkillFlag(m_Act_SkillCurrent, SKF_GATHER) )
 			{
 				Skill_Cleanup();
 			}
@@ -843,6 +843,9 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 			case IT_WEAPON_XBOW:
 				action = ANIM_ATTACK_XBOW;
 				break;
+            case IT_WEAPON_WHIP:
+                action = ANIM_ATTACK_1H_BASH;
+                break;
 			default:
 				break;
 			}
@@ -1121,6 +1124,9 @@ bool CChar::UpdateAnimate(ANIM_TYPE action, bool fTranslate, bool fBackward , by
 				case IT_WEAPON_XBOW:
 					subaction = NANIM_ATTACK_CROSSBOW;
 					break;
+                case IT_WEAPON_WHIP:
+                    subaction = NANIM_ATTACK_1H_BASH;
+                    break;
 				default:
 					break;
 			}
@@ -1482,6 +1488,9 @@ void CChar::SoundChar( CRESND_TYPE type )
 						// 0x5D2 = throwH
 						id = 0x5D2;
 						break;
+                    case IT_WEAPON_WHIP:
+                        id = 0x67E;		//whip01
+                        break;
 					default:
 						break;
 				}
@@ -2757,7 +2766,7 @@ bool CChar::SetPoison( int iSkill, int iHits, CChar * pCharSrc )
 
 	SysMessageDefault(DEFMSG_JUST_BEEN_POISONED);
 	StatFlag_Set(STATF_POISONED);
-	UpdateStatsFlag();
+	UpdateModeFlag();
 	return true;
 }
 

@@ -1663,13 +1663,13 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 				len += strcpylen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ) );
 			break;
 		case IT_RUNE:
-			if ( ! m_itRune.m_pntMark.IsCharValid())
+			if ( ! m_itRune.m_ptMark.IsCharValid())
 				len += strcpylen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ) );
 			else if ( ! m_itRune.m_Strength )
 				len += strcpylen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_FADED ) );
 			break;
 		case IT_TELEPAD:
-			if ( ! m_itTelepad.m_pntMark.IsValidPoint())
+			if ( ! m_itTelepad.m_ptMark.IsValidPoint())
 				len += strcpylen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ) );
 			break;
 		default:
@@ -4535,6 +4535,7 @@ bool CItem::Armor_IsRepairable() const
 		case IT_WEAPON_FENCE:
 		case IT_WEAPON_AXE:
 		case IT_WEAPON_THROWING:
+        case IT_WEAPON_WHIP:
 			break;
 
 		case IT_WEAPON_BOW:
@@ -4618,19 +4619,20 @@ SKILL_TYPE CItem::Weapon_GetSkill() const
 		case IT_WEAPON_MACE_SMITH:	// Can be used for smithing ?
 		case IT_WEAPON_MACE_STAFF:
 		case IT_WEAPON_MACE_SHARP:	// war axe can be used to cut/chop trees.
-			return( SKILL_MACEFIGHTING );
+        case IT_WEAPON_WHIP:
+			return SKILL_MACEFIGHTING;
 		case IT_WEAPON_SWORD:
 		case IT_WEAPON_AXE:
-			return( SKILL_SWORDSMANSHIP );
+			return SKILL_SWORDSMANSHIP;
 		case IT_WEAPON_FENCE:
-			return( SKILL_FENCING );
+			return SKILL_FENCING;
 		case IT_WEAPON_BOW:
 		case IT_WEAPON_XBOW:
-			return( SKILL_ARCHERY );
+			return SKILL_ARCHERY;
 		case IT_WEAPON_THROWING:
-			return ( SKILL_THROWING );
+			return SKILL_THROWING;
 		default:
-			return( SKILL_WRESTLING );
+			return SKILL_WRESTLING;
 	}
 }
 
@@ -5204,9 +5206,9 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 {
 	ADDTOCALLSTACK("CItem::OnSpellEffect");
 	UNREFERENCED_PARAMETER(bReflecting);	// items are not affected by Magic Reflection
-											// A spell is cast on this item.
-											// ARGS:
-											//  iSkillLevel = 0-1000 = difficulty. may be slightly larger . how advanced is this spell (might be from a wand)
+    // A spell is cast on this item.
+    // ARGS:
+    //  iSkillLevel = 0-1000 = difficulty. may be slightly larger . how advanced is this spell (might be from a wand)
 
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
 	CScriptTriggerArgs Args( spell, iSkillLevel, pSourceItem );
@@ -5259,15 +5261,17 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		return false;
 	}
 
-	word uDamage = 0;
+    ITEMID_TYPE iEffectID = pSpellDef->m_idEffect;
+	DAMAGE_TYPE uiDamageType = 0;
 	switch ( spell )
 	{
 		case SPELL_Dispel_Field:
 			if ( GetType() == IT_SPELL )
 			{
 				if ( IsTopLevel() )
-					Effect( EFFECT_XYZ, ITEMID_FX_HEAL_EFFECT, pCharSrc, 9, 20 );
+					Effect( EFFECT_XYZ, iEffectID, pCharSrc, 9, 20 );
 				Delete();
+                return true;
 			}
 			break;
 		case SPELL_Dispel:
@@ -5275,8 +5279,9 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			if ( GetType() == IT_SPELL )
 			{
 				if ( IsTopLevel() )
-					Effect( EFFECT_XYZ, ITEMID_FX_TELE_VANISH, pCharSrc, 8, 20 );
+					Effect( EFFECT_XYZ, iEffectID, pCharSrc, 8, 20 );
 				Delete();
+                return true;
 			}
 			break;
 		case SPELL_Bless:
@@ -5291,7 +5296,7 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		case SPELL_Fire_Field:
 		case SPELL_Flame_Strike:
 		case SPELL_Meteor_Swarm:
-			uDamage = DAMAGE_FIRE;
+            uiDamageType = DAMAGE_FIRE;
 			break;
 
 		case SPELL_Magic_Lock:
@@ -5331,7 +5336,7 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 				}
 			}
 
-			m_itRune.m_pntMark = pCharSrc->GetTopPoint();
+			m_itRune.m_ptMark = pCharSrc->GetTopPoint();
 			if ( IsType(IT_RUNE) )
 			{
 				m_itRune.m_Strength = pSpellDef->m_Effect.GetLinear( iSkillLevel );
@@ -5344,7 +5349,19 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 	// ??? Potions should explode when hit (etc..)
 	if ( pSpellDef->IsSpellType( SPELLFLAG_HARM ))
-		OnTakeDamage( 1, pCharSrc, DAMAGE_MAGIC|uDamage );
+		OnTakeDamage( 1, pCharSrc, DAMAGE_MAGIC|uiDamageType );
+
+    if ( (iEffectID > ITEMID_NOTHING) && (iEffectID < ITEMID_QTY) )
+    {
+        bool fExplode = (pSpellDef->IsSpellType(SPELLFLAG_FX_BOLT) && !pSpellDef->IsSpellType(SPELLFLAG_GOOD));		// bolt (chasing) spells have explode = 1 by default (if not good spell)
+        dword dwColor = (dword)(Args.m_VarsLocal.GetKeyNum("EffectColor"));
+        dword dwRender = (dword)(Args.m_VarsLocal.GetKeyNum("EffectRender"));
+
+        if ( pSpellDef->IsSpellType(SPELLFLAG_FX_BOLT) )
+            Effect(EFFECT_BOLT, iEffectID, pCharSrc, 5, 1, fExplode, dwColor, dwRender);
+        if ( pSpellDef->IsSpellType(SPELLFLAG_FX_TARG) )
+            Effect(EFFECT_OBJ, iEffectID, this, 0, 15, fExplode, dwColor, dwRender);
+    }
 
 	return true;
 }

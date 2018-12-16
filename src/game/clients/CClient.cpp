@@ -1119,6 +1119,20 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			}
 			break;
 
+        case CV_CODEXOFWISDOM:
+        {
+            int64 piArgs[2];
+            size_t iArgQty = Str_ParseCmds(s.GetArgStr(), piArgs, CountOf(piArgs));
+            if ( iArgQty < 1 )
+            {
+                SysMessage("Usage: CODEXOFWISDOM TopicID [ForceOpen]");
+                break;
+            }
+
+            addCodexOfWisdom((dword)(piArgs[0]), (bool)(piArgs[1]));
+            break;
+        }
+
 		case CV_DYE:
 			if ( s.HasArgs() )
 			{

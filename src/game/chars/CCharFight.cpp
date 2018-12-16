@@ -1922,12 +1922,12 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 			for ( int i = 0; i < iBloodQty; ++i )
 			{
-                CPointMap pt = pCharTarg->GetTopPoint();
-				ITEMID_TYPE iBloodID = sm_Blood[Calc_GetRandVal(CountOf(sm_Blood))];
+                ITEMID_TYPE iBloodID = sm_Blood[Calc_GetRandVal(CountOf(sm_Blood))];
 
+                CPointMap pt = pCharTarg->GetTopPoint();
                 pt.m_x += (short)Calc_GetRandVal2(-1, 1);
                 pt.m_y += (short)Calc_GetRandVal2(-1, 1);
-                Effect(EFFECT_XYZ, iBloodID, pt, this, 50, 0, false, pCharTarg->m_wBloodHue);
+                EffectXYZ(EFFECT_XYZ, iBloodID, nullptr, &pt, 50, 0, false, pCharTarg->m_wBloodHue);
 			}
 		}
 

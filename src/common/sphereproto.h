@@ -157,6 +157,7 @@ enum XCMD_TYPE	// XCMD_* messages are unique in both directions.
 	XCMD_Status			= 0x11,
 	XCMD_ExtCmd			= 0x12,
 	XCMD_ItemEquipReq	= 0x13,
+    XCMD_HealthBarColorNew	= 0x16,
 	XCMD_HealthBarColor	= 0x17,
 	XCMD_Put			= 0x1a,
 	XCMD_Start			= 0x1b,
@@ -983,7 +984,8 @@ enum EFFECT_TYPE
 	EFFECT_BOLT = 0,	// a targetted bolt
 	EFFECT_LIGHTNING,	// lightning bolt.
 	EFFECT_XYZ,			// Stay at current xyz ??? not sure about this.
-	EFFECT_OBJ			// effect at single Object.
+	EFFECT_OBJ,			// effect at single Object.
+    EFFECT_FADE_SCREEN  // Fade client screen (only available on clients >= 6.0.0.0)
 };
 
 enum NOTO_TYPE

@@ -165,6 +165,19 @@ ushort CChar::Skill_GetAdjusted( SKILL_TYPE skill ) const
 	return ( Skill_GetBase(skill) + uiAdjSkill );
 }
 
+void CChar::Skill_AddBase( SKILL_TYPE skill, int iChange )
+{
+    ADDTOCALLSTACK("CChar::Skill_AddBase");
+    ASSERT( IsSkillBase(skill));
+
+    int iNewVal = m_Skill[skill] + iChange;
+    if (iNewVal < 0)
+        iNewVal = 0;
+    else if (iNewVal > UINT16_MAX)
+        iNewVal = UINT16_MAX;
+    Skill_SetBase(skill, (ushort)iNewVal);
+}
+
 void CChar::Skill_SetBase( SKILL_TYPE skill, ushort uiValue )
 {
 	ADDTOCALLSTACK("CChar::Skill_SetBase");

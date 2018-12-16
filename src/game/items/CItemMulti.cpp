@@ -2992,6 +2992,7 @@ CItemMulti *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, C
     * Note: this fix is added here, before GM check, because otherwise they will place houses on wrong position.
     */
     if (CItemBase::IsID_Multi(pItemDef->GetID()) || pItemDef->IsType(IT_MULTI_ADDON))
+    // or is this happening only for houses? if (CItemBase::IsID_House(pItemDef->GetID()))
     {
         pt.m_y -= (short)(pMultiDef->m_rect.m_bottom - 1);
     }

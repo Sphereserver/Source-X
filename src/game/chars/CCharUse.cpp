@@ -136,7 +136,12 @@ void CChar::Use_MoonGate( CItem * pItem )
 	ADDTOCALLSTACK("CChar::Use_MoonGate");
 	ASSERT(pItem);
 
-	CPointBase pt = pItem->m_itTelepad.m_pntMark;
+    // If telepad is linked to an obj, use this obj P instead telepad static MOREP
+    // This is required on telepads pointing to dynamic dests (like moongates inside moving boats)
+    CObjBase *pLink = pItem->m_uidLink.ObjFind();
+    if (pLink && !pLink->IsTopLevel())
+        return;
+    CPointMap pt = pLink ? pLink->GetTopPoint() : pItem->m_itTelepad.m_ptMark;
 
 	if ( pItem->IsType(IT_MOONGATE) )
 	{
@@ -1650,6 +1655,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 		case IT_WEAPON_MACE_STAFF:
 		case IT_JEWELRY:
 		case IT_WEAPON_THROWING:
+        case IT_WEAPON_WHIP:
 		{
 			if (fLink)
 				return false;

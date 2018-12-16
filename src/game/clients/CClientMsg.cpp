@@ -912,7 +912,7 @@ void CClient::addEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTempla
 }
 
 /* Effect at a Map Point instead of an Object */
-void CClient::addEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap & pt, const CObjBaseTemplate * pSrc,
+void CClient::addEffectXYZ(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptSrc, const CPointMap *ptDest,
     byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type) const
 {
 	ADDTOCALLSTACK("CClient::addEffect");
@@ -920,15 +920,14 @@ void CClient::addEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap & pt
 
 	ASSERT(m_pChar);
 
-	if ((pSrc == nullptr) && (motion == EFFECT_BOLT)) // source required for bolt effect
-		return;
+    const CPointMap *ptSrcToUse = (ptDest && (motion == EFFECT_BOLT)) ? ptSrc : ptDest;
 
 	if (effectid || explodeid)
-		new PacketEffect(this, motion, id, pt, pSrc, bSpeedSeconds, bLoop, fExplode, color, render, effectid, explodeid, explodesound, effectuid, type);
+		new PacketEffect(this, motion, id, ptDest, ptSrcToUse, bSpeedSeconds, bLoop, fExplode, color, render, effectid, explodeid, explodesound, effectuid, type);
 	else if (color || render)
-		new PacketEffect(this, motion, id, pt, pSrc, bSpeedSeconds, bLoop, fExplode, color, render);
+		new PacketEffect(this, motion, id, ptDest, ptSrcToUse, bSpeedSeconds, bLoop, fExplode, color, render);
 	else
-		new PacketEffect(this, motion, id, pt, pSrc, bSpeedSeconds, bLoop, fExplode);
+		new PacketEffect(this, motion, id, ptDest, ptSrcToUse, bSpeedSeconds, bLoop, fExplode);
 }
 
 void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMID_TYPE & id, HUE_TYPE & wHue ) const
@@ -1758,6 +1757,14 @@ void CClient::addTargetCancel()
 	new PacketAddTarget(this, PacketAddTarget::Object, 0, PacketAddTarget::Cancel);
 }
 
+void CClient::addCodexOfWisdom(dword dwTopicID, bool fForceOpen)
+{
+    ADDTOCALLSTACK("CClient::addCodexOfWisdom");
+    // Open Codex of Wisdom
+
+    new PacketCodexOfWisdom(this, dwTopicID, fForceOpen);
+}
+
 void CClient::addDyeOption( const CObjBase * pObj )
 {
 	ADDTOCALLSTACK("CClient::addDyeOption");
@@ -2076,8 +2083,11 @@ void CClient::addHealthBarUpdate( const CChar * pChar ) const
 	if ( pChar == nullptr )
 		return;
 
-	if ( PacketHealthBarUpdate::CanSendTo(GetNetState()) )
-		new PacketHealthBarUpdate(this, pChar);
+    const NetState* pNetState = GetNetState();
+    if ( PacketHealthBarUpdateNew::CanSendTo(pNetState) )
+        new PacketHealthBarUpdateNew(this, pChar);
+    else if ( PacketHealthBarUpdate::CanSendTo(pNetState) )
+        new PacketHealthBarUpdate(this, pChar);
 }
 
 void CClient::addBondedStatus( const CChar * pChar, bool bIsDead ) const

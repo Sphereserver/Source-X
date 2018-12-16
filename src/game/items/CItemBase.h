@@ -220,9 +220,11 @@ enum IT_TYPE		// double click type action.
 	IT_COOKING,				// 196 = cooking tool
 	IT_PILOT,				// 197 = ship's pilot (PacketWheelMove)
 	IT_ROPE,				// 198 = t_rope (working like t_ship_plank but without id changes)
-	IT_HEALING_STONE,		// 199 = t_healing_stone
-    IT_SPAWN_CHAMPION,      // 200 = t_spawn_champion
-    IT_MULTI_ADDON,         // 201 = t_multi_addon
+    IT_WEAPON_WHIP,			// 199
+    
+    // New SphereX hardcoded types starting from 300
+    IT_SPAWN_CHAMPION = 300,// 300 = t_spawn_champion
+    IT_MULTI_ADDON,         // 301 = t_multi_addon
 
 	IT_QTY,
 	IT_TRIGGER = 1000	// custom triggers starts from here
@@ -450,8 +452,15 @@ public:
 	// NOTE: ??? All this stuff should be moved to scripts !
 	// Classify item by ID
 	static bool IsID_Multi( ITEMID_TYPE id );
+    static bool IsID_House( ITEMID_TYPE id );
 	static int	IsID_Door( ITEMID_TYPE id );
 	static bool IsID_DoorOpen( ITEMID_TYPE id );
+    static bool IsID_Ship( ITEMID_TYPE id );
+    static bool IsID_GamePiece( ITEMID_TYPE id );
+    static bool IsID_Track( ITEMID_TYPE id );
+    static bool IsID_WaterFish( ITEMID_TYPE id );
+    static bool IsID_WaterWash( ITEMID_TYPE id );
+    static bool IsID_Chair( ITEMID_TYPE id );
 
 	static bool IsVisibleLayer( LAYER_TYPE layer );
 

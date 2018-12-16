@@ -255,6 +255,7 @@ bool CItemBase::IsTypeWeapon( IT_TYPE type )  // static
 		case IT_WEAPON_SWORD:
 		case IT_WEAPON_FENCE:
 		case IT_WEAPON_BOW:
+        case IT_WEAPON_WHIP:
 		case IT_WAND:
 			return true;
 
@@ -357,7 +358,7 @@ bool CItemBase::IsTypeEquippable() const
 		case IT_EQ_TRADE_WINDOW:
 		case IT_EQ_MEMORY_OBJ:
 		case IT_EQ_SCRIPT:
-			if ( IsVisibleLayer( static_cast<LAYER_TYPE>(m_layer)))
+			if (IsVisibleLayer( (LAYER_TYPE)m_layer ))
 				return false;
 			return true;
 		default:
@@ -371,6 +372,13 @@ bool CItemBase::IsID_Multi( ITEMID_TYPE id ) // static
 {
 	// NOTE: Ships are also multi's
 	return ( id >= ITEMID_MULTI && id < ITEMID_MULTI_MAX );
+}
+
+bool CItemBase::IsID_House(ITEMID_TYPE id)
+{
+    // IT_MULTI
+    // IT_MULTI_CUSTOM
+    return (((id >= ITEMID_HOUSE_SMALL_ST_PL) && (id <= ITEMID_HOUSE_SMALL_SHOP_MB)) || ((id >= ITEMID_HOUSEFOUNDATION_7x7) && (id <= ITEMID_HOUSEFOUNDATION_30x30)));
 }
 
 int CItemBase::IsID_Door( ITEMID_TYPE id ) // static
@@ -449,23 +457,23 @@ bool CItemBase::IsID_DoorOpen( ITEMID_TYPE id ) // static
 	return false;
 }
 
-bool IsID_Ship( ITEMID_TYPE id )
+bool CItemBase::IsID_Ship( ITEMID_TYPE id )
 {
 	// IT_SHIP
-	return ( id >= ITEMID_MULTI && id <= ITEMID_SHIP6_W );
+	return ( id >= ITEMID_MULTI && id <= ITEMID_GALLEON_BRIT2_W );
 }
 
-bool IsID_GamePiece( ITEMID_TYPE id ) // static
+bool CItemBase::IsID_GamePiece( ITEMID_TYPE id ) // static
 {
 	return ( id >= ITEMID_GAME1_CHECKER && id <= ITEMID_GAME_HI );
 }
 
-bool IsID_Track( ITEMID_TYPE id ) // static
+bool CItemBase::IsID_Track( ITEMID_TYPE id ) // static
 {
 	return ( id >= ITEMID_TRACK_BEGIN && id <= ITEMID_TRACK_END );
 }
 
-bool IsID_WaterFish( ITEMID_TYPE id ) // static
+bool CItemBase::IsID_WaterFish( ITEMID_TYPE id ) // static
 {
 	// IT_WATER
 	// Assume this means water we can fish in.
@@ -477,7 +485,7 @@ bool IsID_WaterFish( ITEMID_TYPE id ) // static
 	return false;
 }
 
-bool IsID_WaterWash( ITEMID_TYPE id ) // static
+bool CItemBase::IsID_WaterWash( ITEMID_TYPE id ) // static
 {
 	// IT_WATER_WASH
 	if ( id >= ITEMID_WATER_TROUGH_1 && id <= ITEMID_WATER_TROUGH_2	)
@@ -485,8 +493,7 @@ bool IsID_WaterWash( ITEMID_TYPE id ) // static
 	return( IsID_WaterFish( id ));
 }
 
-//static bool IsID_Chair( ITEMID_TYPE id ) // static
-bool IsID_Chair( ITEMID_TYPE id ) // static
+bool CItemBase::IsID_Chair( ITEMID_TYPE id ) // static
 {
 	// Strangely there is not chair flag in the statics.mul file ??? !!!
 	// IT_CHAIR
@@ -1156,6 +1163,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 					case IT_WEAPON_MACE_SMITH:	// Can be used for smithing ?
 					case IT_WEAPON_MACE_STAFF:
 					case IT_WEAPON_MACE_SHARP:	// war axe can be used to cut/chop trees.
+                    case IT_WEAPON_WHIP:
 						skill = SKILL_MACEFIGHTING;
 						break;
 					case IT_WEAPON_SWORD:

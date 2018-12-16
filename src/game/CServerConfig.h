@@ -51,8 +51,9 @@ enum OF_TYPE
 	OF_NoPrefix					= 0x0004000,    // Don't show "a" and "an" prefix on item names
 	OF_DyeType					= 0x0008000,    // Allow use i_dye on all items with t_dye_vat typedef instead only on i_dye_tub itemdef
 	OF_DrinkIsFood				= 0x0010000,    // Typedef t_drink will increase food level like t_food
-	OF_DClickNoTurn				= 0x0020000,    // Don't turn the player when DClick or targ an item
-	OF_NoPaperdollTradeTitle	= 0x0040000		// Don't show the trade title on the paperdoll
+	OF_NoDClickTurn				= 0x0020000,    // Don't turn the player when DClick something
+	OF_NoPaperdollTradeTitle	= 0x0040000,	// Don't show the trade title on the paperdoll
+    OF_NoTargTurn				= 0x0080000     // // Don't turn the player when targetting something
 };
 
 /**

@@ -108,6 +108,36 @@ private:
 };
 
 /***************************************************************************
+*
+*
+*	Packet 0x16 : PacketHealthBarUpdateNew		update health bar colour (LOW)
+*
+*
+***************************************************************************/
+class PacketHealthBarUpdateNew : public PacketSend
+{
+private:
+    CUID m_character;
+
+public:
+    enum Color
+    {
+        GreenBar	= 0x1,
+        YellowBar	= 0x2
+    };
+
+    PacketHealthBarUpdateNew(const CClient* target, const CChar* character);
+
+    virtual bool onSend(const CClient* client);
+
+    virtual bool canSendTo(const NetState* state) const { return CanSendTo(state); }
+    static bool CanSendTo(const NetState* state)
+    {
+        return state->isClientEnhanced();
+    }
+};
+
+/***************************************************************************
  *
  *
  *	Packet 0x17 : PacketHealthBarUpdate		update health bar colour (LOW)
@@ -133,7 +163,7 @@ public:
 	virtual bool canSendTo(const NetState* state) const { return CanSendTo(state); }
 	static bool CanSendTo(const NetState* state)
 	{
-	    return state->isClientVersion(MINCLIVER_SA) || state->isClientEnhanced();
+	    return state->isClientVersion(MINCLIVER_SA) || state->isClientKR();
 	}
 };
 
@@ -675,10 +705,10 @@ public:
 	void writeBasicEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode);
 	
 	/*Effect at a Map Point instead of an Object*/
-	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode);
-	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render);
-	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type);
-	void writeBasicEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode);
+	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptDest, const CPointMap *ptSrc, byte speed, byte loop, bool explode);
+	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptDest, const CPointMap *ptSrc, byte speed, byte loop, bool explode, dword hue, dword render);
+	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptDest, const CPointMap *ptSrc, byte speed, byte loop, bool explode, dword hue, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type);
+	void writeBasicEffectXYZ(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptSrc, const CPointMap *ptDest, byte speed, byte loop, bool explode);
 	
 	void writeHuedEffect(dword hue, dword render);
 };
@@ -1465,6 +1495,19 @@ class PacketCloseContainer : public PacketExtended
 {
 public:
 	PacketCloseContainer(const CClient* target, const CObjBase* object);
+};
+
+/***************************************************************************
+*
+*
+*	Packet 0xBF.0x17 : PacketCodexOfWisdom		open Codex of Wisdom (LOW)
+*
+*
+***************************************************************************/
+class PacketCodexOfWisdom : public PacketExtended
+{
+public:
+    PacketCodexOfWisdom(const CClient *target, dword dwTopicID, bool fForceOpen);
 };
 
 /***************************************************************************
