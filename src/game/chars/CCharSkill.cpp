@@ -1211,7 +1211,7 @@ int CChar::Skill_Tracking( SKTRIG_TYPE stage )
 	// SKILL_TRACKING
 	// m_Act_UID = what am i tracking ?
 	// m_atTracking.m_PrvDir = the previous dir it was in.
-
+	// m_atTracking.m_DistMax = the maximum tracking distance.
 	if ( stage == SKTRIG_START )
 		return 0;	// already checked difficulty earlier
 
@@ -1227,11 +1227,8 @@ int CChar::Skill_Tracking( SKTRIG_TYPE stage )
 		if ( Skill_Stroke(false) == -SKTRIG_ABORT )
 			return -SKTRIG_ABORT;
 
-		int iSkillLevel = Skill_GetAdjusted(SKILL_TRACKING);
-		if ( (g_Cfg.m_iRacialFlags & RACIALF_HUMAN_JACKOFTRADES) && IsHuman() )
-			iSkillLevel = maximum( iSkillLevel, 200 );			// humans always have a 20.0 minimum skill (racial traits)
-
-		if ( !Skill_Tracking( m_Act_UID, m_atTracking.m_PrvDir, iSkillLevel/10 + 10 ))
+		//Use the maximum distance stored in m_AtTracking.m_DistMax(ACTARG2), calculated in Cmd_Skill_Tracking, when continuing to track the creature.
+		if ( !Skill_Tracking( m_Act_UID, m_atTracking.m_PrvDir, m_atTracking.m_DistMax))
 			return -SKTRIG_ABORT;
 		Skill_SetTimeout();			// next update.
 		return( -SKTRIG_STROKE );	// keep it active.
@@ -1547,6 +1544,11 @@ int CChar::Skill_DetectHidden( SKTRIG_TYPE stage )
 
 	int iSkill = Skill_GetAdjusted(SKILL_DETECTINGHIDDEN);
 	int iRadius = iSkill / 100;
+
+	//If Effect property is defined on the Detect Hidden skill use it instead of the hardcoded radius value.
+	CSkillDef * pSkillDef = g_Cfg.GetSkillDef(SKILL_DETECTINGHIDDEN);
+	if (!pSkillDef->m_Effect.m_aiValues.empty())
+		iRadius = pSkillDef->m_Effect.GetLinear(iSkill);
 
 	CWorldSearch Area(GetTopPoint(), iRadius);
 	bool bFound = false;
@@ -2384,9 +2386,10 @@ int CChar::Skill_Meditation( SKTRIG_TYPE stage )
 		}
 		++m_atTaming.m_Stroke_Count;
 
+		//If Effect property is defined on the Meditation skill use it instead of the hardcoded  value.
 		CSkillDef * pSkillDef = g_Cfg.GetSkillDef(SKILL_MEDITATION);
 		if (!pSkillDef->m_Effect.m_aiValues.empty())
-			UpdateStatVal(STAT_INT, (ushort)pSkillDef->m_Effect.GetLinear(Skill_GetBase(SKILL_MEDITATION)));
+			UpdateStatVal(STAT_INT, (ushort)pSkillDef->m_Effect.GetLinear(Skill_GetAdjusted(SKILL_MEDITATION)));
 		else
 			UpdateStatVal( STAT_INT, 1 );
 		Skill_SetTimeout();		// next update (depends on skill)

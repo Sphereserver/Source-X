@@ -1072,7 +1072,19 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 		item[0].m_sText = g_Cfg.GetDefaultMsg(DEFMSG_TRACKING_SKILLMENU_TITLE);
 		m_tmMenu.m_Item[0] = track_sel;
 
-		CWorldSearch AreaChars(m_pChar->GetTopPoint(), m_pChar->Skill_GetBase(SKILL_TRACKING) / 10 + 10);
+		/*
+		When the Tracking skill starts and the Effect property is defined on the Tracking skill use it
+		instead of the hardcoded formula for the maximum distance.
+		*/
+		int iSkillLevel = m_pChar->Skill_GetAdjusted(SKILL_TRACKING);
+		if ((g_Cfg.m_iRacialFlags & RACIALF_HUMAN_JACKOFTRADES) && m_pChar->IsHuman())
+			iSkillLevel = maximum(iSkillLevel, 200);			// humans always have a 20.0 minimum skill (racial traits)
+		m_pChar->m_atTracking.m_DistMax = iSkillLevel / 10 + 10;
+		CSkillDef * pSkillDef = g_Cfg.GetSkillDef(SKILL_TRACKING);
+		if (!pSkillDef->m_Effect.m_aiValues.empty())
+			m_pChar->m_atTracking.m_DistMax = pSkillDef->m_Effect.GetLinear(iSkillLevel);
+
+		CWorldSearch AreaChars(m_pChar->GetTopPoint(), m_pChar->m_atTracking.m_DistMax);
 		for (;;)
 		{
 			CChar *pChar = AreaChars.GetChar();
