@@ -16,6 +16,8 @@
 #include "../items/CItemMemory.h"
 #include "../items/CItemShip.h"
 #include "../items/CItemMulti.h"
+#include "../components/CCPropsChar.h"
+#include "../components/CCPropsItemChar.h"
 #include "../components/CCSpawn.h"
 #include "../CContainer.h"
 #include "../CServer.h"
@@ -298,7 +300,12 @@ CChar::CChar( CREID_TYPE baseID ) : CCTimedObject(PROFILE_CHARS), CObjBase( fals
 	m_LocalLight = 0;
 	m_fClimbUpdated = false;
 
-    Subscribe(new CCFaction(this));
+    // SubscribeComponent Prop Components
+    SubscribeComponentProps(new CCPropsChar());
+    SubscribeComponentProps(new CCPropsItemChar());
+
+    // SubscribeComponent regular Components
+    SubscribeComponent(new CCFaction(this));
 
     CCTimedObject::GoSleep();  // Make it be sleeping at first, to awake it when placing it in the world (errors will show up otherwise).
 
@@ -1933,17 +1940,27 @@ lpctstr const CChar::sm_szLoadKeys[CHC_QTY+1] =
 bool CChar::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CChar::r_WriteVal");
+    EXC_TRY("WriteVal");
 
 	if ( IsClient() && GetClient()->r_WriteVal(pszKey, sVal, pSrc) )
 		return true;
 
-    if (CEntity::r_WriteVal(pszKey, sVal, pSrc)) // Checking CComponents first.
+    // Checking Props CComponents first (first check CChar props, if not found then check CCharBase)
+    EXC_SET_BLOCK("EntityProp");
+    CCharBase* pCharBase = Char_GetDef();
+    if (CEntityProps::r_WritePropVal(pszKey, sVal) || pCharBase->CEntityProps::r_WritePropVal(pszKey, sVal))
     {
         return true;
     }
 
-	EXC_TRY("WriteVal");
+    // Now check regular CComponents
+    EXC_SET_BLOCK("Entity");
+    if (CEntity::r_WriteVal(pszKey, sVal, pSrc))
+    {
+        return true;
+    }
 
+    EXC_SET_BLOCK("Keyword");
 	CCharBase * pCharDef = Char_GetDef();
 	ASSERT(pCharDef);
 	CChar * pCharSrc = pSrc->GetChar();
@@ -1983,31 +2000,10 @@ do_default:
 	{
 		//return as decimal number or 0 if not set
 		case CHC_CURFOLLOWER:
-			sVal.FormatLLVal(GetDefNum(pszKey,true));
+			sVal.FormatLLVal(GetDefNum(pszKey,false));
 			break;
 		//On these ones, check BaseDef if not found on dynamic
-		case CHC_FASTERCASTRECOVERY:
-		case CHC_FASTERCASTING:
-		case CHC_INCREASEHITCHANCE:
-		case CHC_INCREASESWINGSPEED:
-		case CHC_INCREASEDAM:
-		case CHC_INCREASEDEFCHANCE:
-		case CHC_INCREASEDEFCHANCEMAX:
-		case CHC_INCREASESPELLDAM:
-		case CHC_LOWERMANACOST:
-		case CHC_LOWERREAGENTCOST:
-		case CHC_LUCK:
 		case CHC_MAXFOLLOWER:
-		case CHC_RESPHYSICAL:
-		case CHC_RESPHYSICALMAX:
-		case CHC_RESFIRE:
-		case CHC_RESFIREMAX:
-		case CHC_RESCOLD:
-		case CHC_RESCOLDMAX:
-		case CHC_RESPOISON:
-		case CHC_RESPOISONMAX:
-		case CHC_RESENERGY:
-		case CHC_RESENERGYMAX:
 		case CHC_SPELLTIMEOUT:
 		case CHC_TITHING:
 			sVal.FormatLLVal(GetDefNum(pszKey, true));
@@ -2825,8 +2821,7 @@ do_default:
 		case CHC_NIGHTSIGHT:
 			{
 				//sVal.FormatVal(IsStatFlag(STATF_NIGHTSIGHT));
-				CVarDefCont * pVar = GetDefKey(pszKey, true);
-				sVal.FormatLLVal(pVar ? pVar->GetValNum() : 0);
+				sVal.FormatVal(GetPropNum(COMP_PROPS_CHAR, PROPCH_NIGHTSIGHT, true));
 			}
             break;
 		case CHC_NOTOGETFLAG:
@@ -2916,11 +2911,22 @@ bool CChar::r_LoadVal( CScript & s )
 	ADDTOCALLSTACK("CChar::r_LoadVal");
 	EXC_TRY("LoadVal");
 
+    // Checking Props CComponents first (first check CChar props, if not found then check CCharBase)
+    EXC_SET_BLOCK("EntityProps");
+    CCharBase* pItemBase = Char_GetDef();
+    if (CEntityProps::r_LoadPropVal(s, this) || pItemBase->CEntityProps::r_LoadPropVal(s, this))
+    {
+        return true;
+    }
+
+    // Now check regular CComponents
+    EXC_SET_BLOCK("CEntity");
     if (CEntity::r_LoadVal(s))
     {
         return true;
     }
 
+    EXC_SET_BLOCK("Keyword");
 	lpctstr	pszKey = s.GetKey();
 	CHC_TYPE iKeyNum = (CHC_TYPE) FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( iKeyNum < 0 )
@@ -3035,27 +3041,6 @@ bool CChar::r_LoadVal( CScript & s )
             Stats_SetRegenVal(STAT_FOOD, s.GetArgUSVal());
             break;
 
-        case CHC_INCREASEHITCHANCE:
-		case CHC_INCREASESWINGSPEED:
-		case CHC_INCREASEDAM:
-		case CHC_LOWERREAGENTCOST:
-		case CHC_LOWERMANACOST:
-		case CHC_FASTERCASTRECOVERY:
-		case CHC_FASTERCASTING:
-		case CHC_INCREASEDEFCHANCE:
-		case CHC_INCREASEDEFCHANCEMAX:
-		case CHC_INCREASESPELLDAM:
-		case CHC_RESPHYSICAL:
-		case CHC_RESPHYSICALMAX:
-		case CHC_RESFIRE:
-		case CHC_RESFIREMAX:
-		case CHC_RESCOLD:
-		case CHC_RESCOLDMAX:
-		case CHC_RESPOISON:
-		case CHC_RESPOISONMAX:
-		case CHC_RESENERGY:
-		case CHC_RESENERGYMAX:
-		case CHC_LUCK:
 		case CHC_CURFOLLOWER:
 		case CHC_MAXFOLLOWER:
 		case CHC_TITHING:
@@ -3380,10 +3365,12 @@ bool CChar::r_LoadVal( CScript & s )
 			break;
 		case CHC_NIGHTSIGHT:
 			{
-				int fNightsight = s.GetArgVal();
-				if (!fNightsight)	// Keep old 'switch' from 0 to 1 and viceversa behaviour while no args are given.
+				int fNightsight;
+				if (!s.HasArgs())	// Keep old 'switch' from 0 to 1 and viceversa behaviour while no args are given.
 					 fNightsight = !IsStatFlag(STATF_NIGHTSIGHT);
-				SetDefNum(s.GetKey(), fNightsight, false);
+                else
+                    fNightsight = s.GetArgVal();
+                SetPropNum(COMP_PROPS_CHAR, PROPCH_NIGHTSIGHT, fNightsight);
 				StatFlag_Mod( STATF_NIGHTSIGHT, fNightsight > 0 ? true : false );
 				if ( IsClient() )
 					m_pClient->addLight();
@@ -3668,6 +3655,7 @@ void CChar::r_Write( CScript & s )
 		s.WriteKeyVal(g_Cfg.GetSkillDef((SKILL_TYPE)j)->GetKey(), uiSkillVal );
 	}
     CEntity::r_Write(s);
+    CEntityProps::r_Write(s);
 
 	r_WriteContent(s);
 	EXC_CATCH;

@@ -5,8 +5,9 @@
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
 
-CCItemDamageable::CCItemDamageable(CObjBase * pLink) : CComponent(COMP_ITEMDAMAGEABLE, pLink)
+CCItemDamageable::CCItemDamageable(CItem * pLink) : CComponent(COMP_ITEMDAMAGEABLE)
 {
+    _pLink = pLink;
     _iCurHits = 0;
     _iMaxHits = 0;
     _iTimeLastUpdate = 0;
@@ -16,6 +17,11 @@ CCItemDamageable::CCItemDamageable(CObjBase * pLink) : CComponent(COMP_ITEMDAMAG
 CCItemDamageable::~CCItemDamageable()
 {
     g_World.m_ObjStatusUpdates.RemovePtr(GetLink());
+}
+
+CItem * CCItemDamageable::GetLink() const
+{
+    return _pLink;
 }
 
 bool CCItemDamageable::CanSubscribe(const CItem* pItem) // static

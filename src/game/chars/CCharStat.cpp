@@ -13,6 +13,8 @@ void CChar::Stat_AddMod( STAT_TYPE i, int iVal )
 {
 	ADDTOCALLSTACK("CChar::Stat_AddMod");
 	ASSERT(i >= 0 && i < STAT_QTY);
+    if (iVal == 0)
+        return;
 
     if (iVal > UINT16_MAX)
         iVal = UINT16_MAX;
@@ -129,6 +131,8 @@ void CChar::Stat_AddMaxMod( STAT_TYPE i, int iVal )
 {
     ADDTOCALLSTACK("CChar::Stat_AddMaxMod");
     ASSERT(i >= 0 && i < STAT_QTY);
+    if (iVal == 0)
+        return;
 
     if (iVal > UINT16_MAX)
         iVal = UINT16_MAX;
@@ -169,6 +173,9 @@ void CChar::Stat_SetVal( STAT_TYPE i, ushort uiVal )
 void CChar::Stat_AddVal( STAT_TYPE i, int iVal )
 {
     ADDTOCALLSTACK("CChar::Stat_AddVal");
+    if (iVal == 0)
+        return;
+
     if (i > STAT_BASE_QTY || i == STAT_FOOD) // Food must trigger Statchange. Redirect to Base value
     {
         Stat_AddBase(i, iVal);
@@ -290,6 +297,9 @@ ushort CChar::Stat_GetBase( STAT_TYPE i ) const
 void CChar::Stat_AddBase( STAT_TYPE i, int iVal )
 {
 	ADDTOCALLSTACK("CChar::Stat_AddBase");
+    if (iVal == 0)
+        return;
+
 	Stat_SetBase( i, ushort(Stat_GetBase(i) + iVal) );
 }
 
@@ -435,7 +445,6 @@ uint CChar::Stat_GetSumLimit() const
     }
 }
 
-
 bool CChar::Stats_Regen()
 {
 	ADDTOCALLSTACK("CChar::Stats_Regen");
@@ -551,8 +560,10 @@ void CChar::Stats_AddRegenVal(STAT_TYPE iStat, int iVal)
 {
     ADDTOCALLSTACK("CChar::Stats_AddRegenVal");
     // Updated the regen val for the given stat.
-
     ASSERT ( (iStat >= STAT_STR) && (iStat <= STAT_FOOD) );
+    if (iVal == 0)
+        return;
+
     m_Stat[iStat].m_regenVal = ushort(m_Stat[iStat].m_regenVal + iVal);
 }
 

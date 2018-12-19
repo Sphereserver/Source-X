@@ -1,8 +1,10 @@
 
 #include "../common/CException.h"
 #include "../common/common.h"
-#include "CBase.h"
+#include "components/CCPropsItemChar.h"
+#include "components/CCPropsItemWeapon.h"
 #include "CServerConfig.h"
+#include "CBase.h"
 
 enum OBC_TYPE
 {
@@ -36,7 +38,6 @@ CBaseBaseDef::CBaseBaseDef( CResourceID id ) :
 	m_defenseRange			= 0;
 	m_Height				= 0;
 	m_Can					= CAN_C_INDOORS;	// most things can cover us from the weather.
-	SetDefNum("RANGE",1);	//m_range			= 1;
 	m_ResLevel				= RDS_T2A;
 	m_ResDispDnHue			= HUE_DEFAULT;
 	m_ResDispDnId			= 0;
@@ -85,117 +86,23 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CBaseBaseDef::r_WriteVal");
 	EXC_TRY("WriteVal");
+
 	bool fZero = false;
 	int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
-
 	switch ( index )
 	{
 		//return as string or hex number or nullptr if not set
 		case OBC_CATEGORY:
 		case OBC_DESCRIPTION:
 		case OBC_SUBSECTION:
-		case OBC_HITSPELL:
 		case OBC_ABILITYPRIMARY:
 		case OBC_ABILITYSECONDARY:
-		case OBC_MANABURST:
 			sVal = GetDefStr(pszKey, false);
 			break;
 		//return as decimal number or 0 if not set
-		case OBC_CASTINGFOCUS:
-		case OBC_DAMCHAOS:
-		case OBC_DAMCOLD:
-		case OBC_DAMDIRECT:
-		case OBC_DAMENERGY:
-		case OBC_DAMFIRE:
-		case OBC_DAMMODIFIER:
-		case OBC_DAMPHYSICAL:
-		case OBC_DECREASEHITCHANCE:
-		case OBC_DAMPOISON:
-		case OBC_EATERCOLD:
-		case OBC_EATERDAM:
-		case OBC_EATERENERGY:
-		case OBC_EATERFIRE:
-		case OBC_EATERKINETIC:
-		case OBC_EATERPOISON:
-		case OBC_ENHANCEPOTIONS:
 		case OBC_EXPANSION:
-		case OBC_FASTERCASTING:
-		case OBC_FASTERCASTRECOVERY:
-		case OBC_HITAREACOLD:
-		case OBC_HITAREAENERGY:
-		case OBC_HITAREAFIRE:
-		case OBC_HITAREAPHYSICAL:
-		case OBC_HITAREAPOISON:
-		case OBC_HITCURSE:
-		case OBC_HITDISPEL:
-		case OBC_HITFATIGUE:
-		case OBC_HITFIREBALL:
-		case OBC_HITHARM:
-		case OBC_HITLEECHLIFE:
-		case OBC_HITLEECHMANA:
-		case OBC_HITLEECHSTAM:
-		case OBC_HITLIGHTNING:
-		case OBC_HITLOWERATK:
-		case OBC_HITLOWERDEF:
-		case OBC_HITMAGICARROW:
-		case OBC_HITMANADRAIN:
-		case OBC_INCREASEDAM:
-		case OBC_INCREASEDEFCHANCE:
-		case OBC_INCREASEDEFCHANCEMAX:
-		case OBC_INCREASEHITCHANCE:
-		case OBC_INCREASEGOLD:
-		case OBC_INCREASEKARMALOSS:
-		case OBC_INCREASESPELLDAM:
-		case OBC_INCREASESWINGSPEED:
-		case OBC_LOWERAMMOCOST:
-		case OBC_LOWERMANACOST:
-		case OBC_LOWERREAGENTCOST:
-		case OBC_LOWERREQ:
-		case OBC_LUCK:
-		case OBC_MANABURSTFREQUENCY:
-		case OBC_MANABURSTKARMA:
-		case OBC_NIGHTSIGHT:
-		case OBC_RAGEFOCUS:
-		case OBC_REACTIVEPARALYZE:
-		case OBC_REFLECTPHYSICALDAM:
-		case OBC_REGENFOOD:
-		case OBC_REGENHITS:
-		case OBC_REGENMANA:
-		case OBC_REGENSTAM:
-		case OBC_REGENVALFOOD:
-		case OBC_REGENVALHITS:
-		case OBC_REGENVALMANA:
-		case OBC_REGENVALSTAM:
-		case OBC_RESCOLD:
-		case OBC_RESFIRE:
-		case OBC_RESENERGY:
-		case OBC_RESPHYSICAL:
-		case OBC_RESPOISON:
-		case OBC_RESCOLDMAX:
-		case OBC_RESFIREMAX:
-		case OBC_RESENERGYMAX:
-		case OBC_RESPHYSICALMAX:
-		case OBC_RESPOISONMAX:
-		case OBC_RESONANCECOLD:
-		case OBC_RESONANCEENERGY:
-		case OBC_RESONANCEFIRE:
-		case OBC_RESONANCEKINETIC:
-		case OBC_RESONANCEPOISON:
-		case OBC_SOULCHARGE:
-		case OBC_SOULCHARGECOLD:
-		case OBC_SOULCHARGEENERGY:
-		case OBC_SOULCHARGEFIRE:
-		case OBC_SOULCHARGEKINETIC:
-		case OBC_SOULCHARGEPOISON:
-		case OBC_SPELLCONSUMPTION:
-		case OBC_SPELLFOCUSING:
 		case OBC_VELOCITY:
-		case OBC_SPELLCHANNELING:
 		case OBC_NAMELOC:
-		case OBC_HITSPELLSTR:
-		case OBC_WEIGHTREDUCTION:
-		case OBC_COMBATBONUSSTAT:
-		case OBC_COMBATBONUSPERCENT:
 			sVal.FormatLLVal(GetDefNum(pszKey));
 			break;
 
@@ -269,19 +176,6 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 			break;
 		case OBC_NAME:
 			sVal = GetName();
-			break;
-
-		case OBC_RANGE:
-			if ( RangeH() == 0 )
-                sVal.Format( "%d", RangeL() );
-			else
-                sVal.Format( "%d,%d", RangeH(), RangeL() );
-			break;
-		case OBC_RANGEL: // internally: rangel seems to be Range Highest value
-			sVal.FormatVal( RangeH() );
-			break;
-		case OBC_RANGEH: // but rangeh seems to be the Range Lowest value.
-			sVal.FormatVal( RangeL() );
 			break;
 
 		case OBC_RESOURCES:		// Print the resources
@@ -372,13 +266,12 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 		return true;
 	}
 
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+    int i = FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+	switch (i)
 	{
 		//Set as Strings
-		case OBC_HITSPELL:
 		case OBC_ABILITYPRIMARY:
 		case OBC_ABILITYSECONDARY:
-		case OBC_MANABURST:
 			{
 				bool fQuoted = false;
 				SetDefStr(s.GetKey(), s.GetArgStr( &fQuoted ), fQuoted);
@@ -389,101 +282,9 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
             GetFaction().SetFactionID(NPC_FACTION(s.GetArgVal()));
             return true;
 		//Set as number only
-		case OBC_CASTINGFOCUS:
-		case OBC_DAMCHAOS:
-		case OBC_DAMCOLD:
-		case OBC_DAMDIRECT:
-		case OBC_DAMENERGY:
-		case OBC_DAMFIRE:
-		case OBC_DAMMODIFIER:
-		case OBC_DAMPHYSICAL:
-		case OBC_DECREASEHITCHANCE:
-		case OBC_DAMPOISON:
-		case OBC_EATERCOLD:
-		case OBC_EATERDAM:
-		case OBC_EATERENERGY:
-		case OBC_EATERFIRE:
-		case OBC_EATERKINETIC:
-		case OBC_EATERPOISON:
-		case OBC_ENHANCEPOTIONS:
 		case OBC_EXPANSION:
-		case OBC_FASTERCASTING:
-		case OBC_FASTERCASTRECOVERY:
-		case OBC_HITAREACOLD:
-		case OBC_HITAREAENERGY:
-		case OBC_HITAREAFIRE:
-		case OBC_HITAREAPHYSICAL:
-		case OBC_HITAREAPOISON:
-		case OBC_HITCURSE:
-		case OBC_HITDISPEL:
-		case OBC_HITFATIGUE:
-		case OBC_HITFIREBALL:
-		case OBC_HITHARM:
-		case OBC_HITLEECHLIFE:
-		case OBC_HITLEECHMANA:
-		case OBC_HITLEECHSTAM:
-		case OBC_HITLIGHTNING:
-		case OBC_HITLOWERATK:
-		case OBC_HITLOWERDEF:
-		case OBC_HITMAGICARROW:
-		case OBC_HITMANADRAIN:
-		case OBC_INCREASEDAM:
-		case OBC_INCREASEDEFCHANCE:
-		case OBC_INCREASEDEFCHANCEMAX:
-		case OBC_INCREASEHITCHANCE:
-		case OBC_INCREASEGOLD:
-		case OBC_INCREASEKARMALOSS:
-		case OBC_INCREASESPELLDAM:
-		case OBC_INCREASESWINGSPEED:
-		case OBC_LOWERAMMOCOST:
-		case OBC_LOWERMANACOST:
-		case OBC_LOWERREAGENTCOST:
-		case OBC_LOWERREQ:
-		case OBC_LUCK:
-		case OBC_MANABURSTFREQUENCY:
-		case OBC_MANABURSTKARMA:
-		case OBC_NIGHTSIGHT:
-		case OBC_RAGEFOCUS:
-		case OBC_REACTIVEPARALYZE:
-		case OBC_REFLECTPHYSICALDAM:
-		case OBC_REGENFOOD:
-		case OBC_REGENHITS:
-		case OBC_REGENMANA:
-		case OBC_REGENSTAM:
-		case OBC_REGENVALFOOD:
-		case OBC_REGENVALHITS:
-		case OBC_REGENVALMANA:
-		case OBC_REGENVALSTAM:
-		case OBC_RESCOLD:
-		case OBC_RESFIRE:
-		case OBC_RESENERGY:
-		case OBC_RESPHYSICAL:
-		case OBC_RESPOISON:
-		case OBC_RESCOLDMAX:
-		case OBC_RESFIREMAX:
-		case OBC_RESENERGYMAX:
-		case OBC_RESPHYSICALMAX:
-		case OBC_RESPOISONMAX:
-		case OBC_RESONANCECOLD:
-		case OBC_RESONANCEENERGY:
-		case OBC_RESONANCEFIRE:
-		case OBC_RESONANCEKINETIC:
-		case OBC_RESONANCEPOISON:
-		case OBC_SOULCHARGE:
-		case OBC_SOULCHARGECOLD:
-		case OBC_SOULCHARGEENERGY:
-		case OBC_SOULCHARGEFIRE:
-		case OBC_SOULCHARGEKINETIC:
-		case OBC_SOULCHARGEPOISON:
-		case OBC_SPELLCONSUMPTION:
-		case OBC_SPELLFOCUSING:
 		case OBC_VELOCITY:
-		case OBC_SPELLCHANNELING:
 		case OBC_NAMELOC:
-		case OBC_HITSPELLSTR:
-		case OBC_WEIGHTREDUCTION:
-		case OBC_COMBATBONUSSTAT:
-		case OBC_COMBATBONUSPERCENT:
 			{
 				SetDefNum(s.GetKey(),s.GetArgVal());
 				return true;
@@ -540,25 +341,6 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 		case OBC_NAME:
 			SetTypeName( s.GetArgStr());
 			return true;
-		case OBC_RANGE:
-			{
-				int64 piVal[2];
-				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, CountOf(piVal));
-				if ( iQty > 1 )
-				{
-					int64 iRange = ((piVal[0] & 0xff) << 8) & 0xff00;
-					iRange |= (piVal[1] & 0xff);
-					SetDefNum(s.GetKey(),iRange, false);
-					//m_range	 = ((piVal[0] & 0xff) << 8) & 0xff00;
-					//m_range	|= (piVal[1] & 0xff);
-				}
-				else
-				{
-					SetDefNum(s.GetKey(),piVal[0], false);
-					//m_range	= (word)(piVal[0]);
-				}
-			}
-			return true;
 		case OBC_RESOURCES:
 			m_BaseResources.Load( s.GetArgStr());
 			return true;
@@ -602,6 +384,7 @@ void CBaseBaseDef::CopyBasic( const CBaseBaseDef * pBase )
 	m_defenseRange = pBase->m_defenseRange;
 	m_Can = pBase->m_Can;
     _pFaction.SetFactionID(pBase->_pFaction.GetFactionID());
+    CEntityProps::Copy(pBase);
 }
 
 void CBaseBaseDef::CopyTransfer( CBaseBaseDef * pBase )
@@ -623,13 +406,15 @@ bool CBaseBaseDef::IsValid() const
 
 byte CBaseBaseDef::RangeL() const
 {
-	return (byte)(GetDefNum("RANGE") & 0xff);
+    const CCPropsItemWeapon *pCCPItemWeapon = GetCCPropsItemWeapon();
+	return (byte)(pCCPItemWeapon->GetPropertyNum(PROPIWEAP_RANGE) & 0xff);
 	//return (m_range & 0xff);
 }
 
 byte CBaseBaseDef::RangeH() const
 {
-	return (byte)((GetDefNum("RANGE")>>8) & 0xff);
+    const CCPropsItemWeapon *pCCPItemWeapon = GetCCPropsItemWeapon();
+	return (byte)((pCCPItemWeapon->GetPropertyNum(PROPIWEAP_RANGE) >> 8) & 0xff);
 	//return ((m_range>>8) & 0xff);
 }
 
@@ -642,7 +427,6 @@ void CBaseBaseDef::SetHeight( height_t Height )
 {
 	m_Height = Height;
 }
-
 
 byte CBaseBaseDef::GetResLevel() const
 {

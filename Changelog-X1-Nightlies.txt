@@ -582,8 +582,8 @@ Added the basics of an ECS: CEntity and CComponent so we can split into modules 
          case IT_SPAWN_CHAMPION:
         {
             pItem = new CItem(id, pItemDef);
-            pItem->Subscribe(new CCSpawn(pItem));
-            pItem->Subscribe(new CCChampion(pItem));
+            pItem->SubscribeComponent(new CCSpawn(pItem));
+            pItem->SubscribeComponent(new CCChampion(pItem));
             break;
         }
 Changed CItemSpawn into a CComponent 'CCSpawn'
@@ -1369,3 +1369,15 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 	- Added: Support for 'combat ability' (@UserSpecialMove) and 'virtue' (@UserVirtue) slots on KR toolbar (@UserKRToolbar).
 		NOTE: KR clients still obsolete and not supported, but triggers will be called if someone want use it
 	- Fixed: FOR loop not working correctly when range value is negative.
+
+23-12-2018, Nolok
+- Changed: now most of the dynamic (in the C++ source) properties (like DAMFIRE, MANABURST, HITAREACOLD, SPELLCHANNELING...) are internally stored in a different and faster kind of container.
+	For this purpose, the classes CEntityProps, CComponentProps and the relative specializations were created. Think at each ComponentProps as a container, which can hold specific kind of properties and generate the related tooltips.
+	For example, CCPropsItemWeapon can hold the properties MAGEWEAPON, USEBESTWEAPONSKILL, etc, CCPropsItemEquippable can hold FASTERCASTING, RESFIRE, etc. For items, the right ComponentProps are attached when their TYPE changes.
+- Changed: PROPLIST now shows also the properties stored in ComponentProps, preceded by the name of the component inside square brackets.
+- Added: BASETAGLIST and BASEPROPLIST, which output the tags and the props stored in the Base Def block (Chardef/Itemdef...).
+- Added properties (only the keyword, no functionality for now) for:
+	- Items: LavaInfused, Prized, ShipwreckItem, Unlucky, Unwieldly.
+	- Weapons: Antique, AssassinHoned.
+- Removed properties: BonusHitsMax, BonusStamMax, BonusManaMax.
+- Changed: RANGE is now a dynamic script property, meaning that it can be changed per-instance and is no longer a base-only prop.

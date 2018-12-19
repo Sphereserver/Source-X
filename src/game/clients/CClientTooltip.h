@@ -20,7 +20,9 @@ public:
     tchar m_args[MAX_TOOLTIP_LEN];
 
 public:
-    explicit CClientTooltip(dword clilocid, lpctstr args = nullptr);
+    CClientTooltip(dword dwClilocID);
+    CClientTooltip(dword dwClilocID, lpctstr ptcArgs);
+    CClientTooltip(dword dwClilocID, int64 iArgs);
 
 private:
     CClientTooltip(const CClientTooltip& copy);

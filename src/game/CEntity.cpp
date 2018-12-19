@@ -28,7 +28,7 @@ void CEntity::Delete(bool fForce)
         {
             pComponent->Delete(fForce);
         }
-        Unsubscribe(it, false);
+        UnsubscribeComponent(it, false);
     }
     _List.clear();
 }
@@ -48,19 +48,20 @@ void CEntity::ClearComponents()
     _List.clear();
 }
 
-void CEntity::Subscribe(CComponent * pComponent)
+void CEntity::SubscribeComponent(CComponent * pComponent)
 {
     COMP_TYPE compType = pComponent->GetType();
     if (_List.count(compType))
     {
-        g_Log.EventError("Trying to duplicate component (%d) for %s '0x%08x'\n", (int)pComponent->GetType(), pComponent->GetLink()->GetName(), pComponent->GetLink()->GetUID());
         delete pComponent;
+        ASSERT(0);  // This should never happen
+        //g_Log.EventError("Trying to duplicate component (%d) for %s '0x%08x'\n", (int)pComponent->GetType(), pComponent->GetLink()->GetName(), pComponent->GetLink()->GetUID());
         return;
     }
     _List[compType] = pComponent;
 }
 
-void CEntity::Unsubscribe(std::map<COMP_TYPE, CComponent*>::iterator& it, bool fEraseFromMap)
+void CEntity::UnsubscribeComponent(std::map<COMP_TYPE, CComponent*>::iterator& it, bool fEraseFromMap)
 {
     delete it->second;
     if (fEraseFromMap)
@@ -69,7 +70,7 @@ void CEntity::Unsubscribe(std::map<COMP_TYPE, CComponent*>::iterator& it, bool f
     }
 }
 
-void CEntity::Unsubscribe(CComponent *pComponent)
+void CEntity::UnsubscribeComponent(CComponent *pComponent)
 {
     if (_List.empty())
     {
@@ -85,13 +86,9 @@ void CEntity::Unsubscribe(CComponent *pComponent)
     _List.erase(compType);  // iterator invalidation!
 }
 
-bool CEntity::IsSusbcribed(CComponent *pComponent) const
+bool CEntity::IsComponentSubscribed(CComponent *pComponent) const
 {
-    if (!_List.empty() && _List.count(pComponent->GetType()))
-    {
-        return true;
-    }
-    return false;
+    return (!_List.empty() && _List.count(pComponent->GetType()));
 }
 
 CComponent * CEntity::GetComponent(COMP_TYPE type)

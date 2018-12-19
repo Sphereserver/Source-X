@@ -12,8 +12,9 @@
 #include "../common/sphere_library/CSString.h"
 #include "uo_files/uofiles_types.h"
 #include "components/CCFaction.h"
+#include "CEntityProps.h"
 
-struct CBaseBaseDef : public CResourceLink
+struct CBaseBaseDef : public CResourceLink, public CEntityProps
 {
 	// Minimal amount of common info to define RES_ITEMDEF or RES_CHARDEF, (it might just be a DUPE)
 	// The unique index id.	(WILL not be the same as artwork if outside artwork range)

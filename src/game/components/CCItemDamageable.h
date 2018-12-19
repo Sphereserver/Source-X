@@ -3,8 +3,8 @@
 *
 */
 
-#ifndef _INC_CCItemDamageable_H
-#define _INC_CCItemDamageable_H
+#ifndef _INC_CCITEMDAMAGEABLE_H
+#define _INC_CCITEMDAMAGEABLE_H
 
 #include "../CComponent.h"
 
@@ -13,14 +13,18 @@ class CItem;
 
 class CCItemDamageable : public CComponent
 {
+    CItem *_pLink;
+    static lpctstr const sm_szLoadKeys[];
+
     word _iCurHits;
     word _iMaxHits;
     int64 _iTimeLastUpdate;
     bool _fNeedUpdate;
-    static lpctstr const sm_szLoadKeys[];
+    
 public:
-    CCItemDamageable(CObjBase *pLink);
+    CCItemDamageable(CItem *pLink);
     virtual ~CCItemDamageable();
+    CItem *GetLink() const;
 
     static bool CanSubscribe(const CItem* pItem);
 
@@ -39,4 +43,4 @@ public:
     virtual void Copy(const CComponent *target) override;
     virtual CCRET_TYPE OnTickComponent() override;
 };
-#endif //_INC_CCItemDamageable_H
+#endif //_INC_CCITEMDAMAGEABLE_H

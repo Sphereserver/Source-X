@@ -1,9 +1,10 @@
 //  CChar is either an NPC or a Player.
 
 #include "../../common/CUIDExtra.h"
+#include "../../common/CLog.h"
+#include "../components/CCPropsItemEquippable.h"
 #include "../../network/network.h"
 #include "../clients/CClient.h"
-#include "../../common/CLog.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CChar.h"
@@ -285,7 +286,7 @@ bool CChar::CanEquipStr( CItem *pItem ) const
 	if ( !pItemDef->IsTypeEquippable() || !CItemBase::IsVisibleLayer(layer) )
 		return true;
 
-	if ( Stat_GetAdjusted(STAT_STR) >= pItemDef->m_ttEquippable.m_iStrReq * (100 - pItem->GetDefNum("LOWERREQ", true)) / 100 )
+	if ( Stat_GetAdjusted(STAT_STR) >= pItemDef->m_ttEquippable.m_iStrReq * (100 - pItem->GetPropNum(COMP_PROPS_ITEMEQUIPPABLE, PROPIEQUIP_LOWERREQ, true)) / 100 )
 		return true;
 
 	return false;

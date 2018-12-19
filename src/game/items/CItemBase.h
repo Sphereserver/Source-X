@@ -478,14 +478,16 @@ public:
 	{
 		return ( type == m_type );
 	}
+    void SetType(IT_TYPE type);
 
 	void SetTypeName( lpctstr pszName );
 
 	LAYER_TYPE GetEquipLayer() const
 	{
 		// Is this item really equippable ?
-		return static_cast<LAYER_TYPE>(m_layer);
+		return (LAYER_TYPE)m_layer;
 	}
+    static bool IsTypeEquippable(IT_TYPE type, LAYER_TYPE layer);
 	bool IsTypeEquippable() const;
 	GUMP_TYPE IsTypeContainer() const;
 

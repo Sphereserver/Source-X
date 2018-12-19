@@ -4,6 +4,8 @@
 #include "CServerTime.h"
 #include "chars/CChar.h"
 #include "chars/CCharNPC.h"
+#include "components/CCPropsChar.h"
+
 
 //********************************
 // Movement
@@ -42,7 +44,7 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 		return 1;
 
     const int iSpeedScaleFactor = g_Cfg.m_iSpeedScaleFactor;
-	const int iSwingSpeedIncrease = (int)(pChar->GetDefNum("INCREASESWINGSPEED", true));
+	const int iSwingSpeedIncrease = (int)(pChar->GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASESWINGSPEED, true));
 	int iBaseSpeed = 50;	// Base Wrestling speed (on ML formula it's 2.50)
 	if ( pWeapon )			// If we have a weapon, base speed should match weapon's value.
 		iBaseSpeed = pWeapon->GetSpeed();
@@ -206,7 +208,7 @@ int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg)
 		{
 			// AOS formula
 			int iAttackerSkill = pChar->Skill_GetBase(skillAttacker);
-			int iAttackerHitChance = (int)(pChar->GetDefNum("INCREASEHITCHANCE", true));
+			int iAttackerHitChance = (int)(pChar->GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASEHITCHANCE, true));
 			if ((g_Cfg.m_iRacialFlags & RACIALF_GARG_DEADLYAIM) && pChar->IsGargoyle())
 			{
 				// Racial traits: Deadly Aim. Gargoyles always have +5 Hit Chance Increase and a minimum of 20.0 Throwing skill (not shown in skills gump)
@@ -216,7 +218,7 @@ int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg)
 			}
 			iAttackerSkill = ((iAttackerSkill / 10) + 20) * (100 + minimum(iAttackerHitChance, 45));
 
-			int iTargetIncreaseDefChance = (int)pCharTarg->GetDefNum("INCREASEDEFCHANCE", true);
+			int iTargetIncreaseDefChance = (int)(pChar->GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASEDEFCHANCE, true));
 			int iTargetSkill = ((pCharTarg->Skill_GetBase(skillTarget) / 10) + 20) * (100 + minimum(iTargetIncreaseDefChance, 45));
 
 			int iChance = iAttackerSkill * 100 / (iTargetSkill * 2);

@@ -43,6 +43,7 @@ class CCChampion : public CComponent
     // IT_CHAMPION
     // Champion Spawn
 private:
+    CItem *_pLink;
     // Scripts communication.
     static lpctstr const sm_szLoadKeys[];   ///< Script fields.
     static lpctstr const sm_szVerbKeys[];   ///< Action list.
@@ -226,11 +227,14 @@ public:
     /************************************************************************
     * CItem related section.
     ************************************************************************/
-    CCChampion(CObjBase *pLink);
+    CCChampion(CItem *pLink);
     /**
     @brief Champion is being removed, spawns and candles must be removed too!
     */
     virtual ~CCChampion();
+
+    CItem *GetLink() const;
+
     /**
     * @brief Timer expired, overriding default tick:
     *
