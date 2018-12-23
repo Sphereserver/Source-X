@@ -74,7 +74,7 @@ void CCPropsItem::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLink
 {
     ADDTOCALLSTACK("CCPropsItem::SetPropertyStr");
     ASSERT(ptcVal);
-    if (fZero && (ptcVal == '\0'))
+    if (fZero && (*ptcVal == '\0'))
         ptcVal = "0";
     _mPropsStr[iPropIndex] = ptcVal;
 

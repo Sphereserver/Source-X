@@ -116,7 +116,7 @@ void CCPropsChar::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLink
 {
     ADDTOCALLSTACK("CCPropsChar::SetPropertyStr");
     ASSERT(ptcVal);
-    if (fZero && (ptcVal == '\0'))
+    if (fZero && (*ptcVal == '\0'))
         ptcVal = "0";
     _mPropsStr[iPropIndex] = ptcVal;
 
