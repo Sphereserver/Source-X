@@ -151,7 +151,7 @@ bool CCPropsChar::r_LoadPropVal(CScript & s, CObjBase* pLinkedObj)
         return false;   // handle it in CChar::r_LoadVal
     
     bool fPropStr = IsPropertyStr(i);
-    if (!fPropStr && (s.GetArgRaw() == '\0'))
+    if (!fPropStr && (*s.GetArgRaw() == '\0'))
     {
         DeletePropertyNum(i);
         return true;

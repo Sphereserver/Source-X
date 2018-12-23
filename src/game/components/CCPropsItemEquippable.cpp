@@ -105,7 +105,7 @@ bool CCPropsItemEquippable::r_LoadPropVal(CScript & s, CObjBase* pLinkedObj)
         return false;
 
     bool fPropStr = IsPropertyStr(i);
-    if (!fPropStr && (s.GetArgRaw() == '\0'))
+    if (!fPropStr && (*s.GetArgRaw() == '\0'))
     {
         DeletePropertyNum(i);
         return true;
