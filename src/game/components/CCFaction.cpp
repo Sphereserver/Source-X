@@ -160,23 +160,28 @@ lpctstr const CCFaction::sm_szLoadKeys[CHF_QTY + 1] =
     nullptr
 };
 
-CCFaction::CCFaction(CObjBase* pLink) : CFactionDef(), CComponent(COMP_FACTION, pLink)
+CCFaction::CCFaction(CObjBase* pLink) : CFactionDef(), CComponent(COMP_FACTION)
 {
     ADDTOCALLSTACK_INTENSIVE("CCFaction::CCFaction(FACTION_TYPE)");
-    _iFaction = FACTION_NONE;
     _pLink = pLink;
+    _iFaction = FACTION_NONE;
 }
 
-CCFaction::CCFaction(CCFaction *copy, CObjBase* pLink) : CFactionDef(), CComponent(COMP_FACTION, pLink)
+CCFaction::CCFaction(CCFaction *copy, CObjBase* pLink) : CFactionDef(), CComponent(COMP_FACTION)
 {
     ADDTOCALLSTACK_INTENSIVE("CCFaction::CCFaction(CCFaction*)");
+    _pLink = pLink;
     Copy(copy);
+}
+
+CObjBase * CCFaction::GetLink() const
+{
+    return _pLink;
 }
 
 bool CCFaction::CanSubscribe(const CItem* pItem) // static
 {
-    LAYER_TYPE iLayer = pItem->GetEquipLayer();
-    return ( (iLayer > LAYER_NONE && iLayer < LAYER_EQUIP_QTY) || pItem->IsType(IT_MUSICAL) );
+    return pItem->IsTypeEquippable();
 }
 
 void CCFaction::Delete(bool fForced)
@@ -187,7 +192,7 @@ void CCFaction::Delete(bool fForced)
 bool CCFaction::r_LoadVal(CScript & s)
 {
     ADDTOCALLSTACK("CCFaction::r_LoadVal");
-    CHF_TYPE iKeyNum = (CHF_TYPE)FindTableHeadSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    CHF_TYPE iKeyNum = (CHF_TYPE)FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     switch (iKeyNum)
     {
         case CHF_FACTION:
@@ -217,7 +222,7 @@ CCRET_TYPE CCFaction::OnTickComponent()
 bool CCFaction::r_WriteVal(lpctstr pszKey, CSString & s, CTextConsole * pSrc)
 {
     ADDTOCALLSTACK("CCFaction::CCFaction");
-    CHF_TYPE iKeyNum = (CHF_TYPE)FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    CHF_TYPE iKeyNum = (CHF_TYPE)FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     UNREFERENCED_PARAMETER(pSrc);
     switch (iKeyNum)
     {

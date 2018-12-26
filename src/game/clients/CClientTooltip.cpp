@@ -5,13 +5,23 @@
 #include "CClientTooltip.h"
 
 
-CClientTooltip::CClientTooltip(dword clilocid, lpctstr args)
+CClientTooltip::CClientTooltip(dword dwClilocID)
 {
-    m_clilocid = clilocid;
-    if ( args )
-        strncpy(m_args, args, MAX_TOOLTIP_LEN - 1);
-    else
-        m_args[0] = '\0';
+    m_clilocid = dwClilocID;
+    m_args[0] = '\0';
+}
+
+CClientTooltip::CClientTooltip(dword dwClilocID, lpctstr ptcArgs)
+{
+    ASSERT(ptcArgs);
+    m_clilocid = dwClilocID;
+    strncpy(m_args, ptcArgs, MAX_TOOLTIP_LEN - 1);
+}
+
+CClientTooltip::CClientTooltip(dword dwClilocID, int64 iArgs)
+{
+    m_clilocid = dwClilocID;
+    snprintf(m_args, MAX_TOOLTIP_LEN - 1, "%" PRId64, iArgs);
 }
 
 void __cdecl CClientTooltip::FormatArgs(lpctstr format, ...)

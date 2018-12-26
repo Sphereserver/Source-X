@@ -19,6 +19,7 @@
 #include "../game/items/CItemShip.h"
 #include "../game/items/CItemVendable.h"
 #include "../game/components/CCItemDamageable.h"
+#include "../game/components/CCPropsChar.h"
 #include "../game/CObjBase.h"
 #include "../game/CWorld.h"
 #include "network.h"
@@ -206,24 +207,14 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 
 void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* other, byte version)
 {
+    bool fElemental = IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE);
 	const CCharBase * otherDefinition = other->Char_GetDef();
-
-	ushort strength = other->Stat_GetAdjusted(STAT_STR);
-	//if (strength < 0)
-	//	strength = 0;
-
-	ushort dexterity = other->Stat_GetAdjusted(STAT_DEX);
-	//if (dexterity < 0)
-	//	dexterity = 0;
-
-	ushort intelligence = other->Stat_GetAdjusted(STAT_INT);
-	//if (intelligence < 0)
-	//	intelligence = 0;
+    const CCPropsChar* pCCPChar = other->GetCCPropsChar(), *pBaseCCPChar = otherDefinition->GetCCPropsChar();
 
 	writeBool(otherDefinition->IsFemale());
-	writeInt16((word)(strength));
-	writeInt16((word)(dexterity));
-	writeInt16((word)(intelligence));
+	writeInt16((word)(other->Stat_GetAdjusted(STAT_STR)));
+	writeInt16((word)(other->Stat_GetAdjusted(STAT_DEX)));
+	writeInt16((word)(other->Stat_GetAdjusted(STAT_INT)));
 	writeInt16((word)(other->Stat_GetVal(STAT_DEX)));
 	writeInt16((word)(other->Stat_GetMaxAdjusted(STAT_DEX)));
 	writeInt16((word)(other->Stat_GetVal(STAT_INT)));
@@ -242,8 +233,8 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
         writeInt32(other->ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD)));
     }
 
-	if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
-		writeInt16((word)(other->GetDefNum("RESPHYSICAL", true)));
+	if (fElemental)
+		writeInt16((word)other->GetPropNum(pCCPChar, PROPCH_RESPHYSICAL, pBaseCCPChar));
 	else
 		writeInt16(other->m_defense + otherDefinition->m_defense);
 
@@ -281,11 +272,7 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
 
 	if (version >= 2) // T2A attributes
 	{
-		uint statcap = other->Stat_GetSumLimit();
-		//if (statcap < 0)
-        //    statcap = 0;
-
-		writeInt16((word)statcap);
+		writeInt16((word) other->Stat_GetSumLimit());
 	}
 
 	if (version >= 3) // Renaissance attributes
@@ -304,11 +291,18 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
 
 	if (version >= 4) // AOS attributes
 	{
-		writeInt16((word)(other->GetDefNum("RESFIRE", true)));
-		writeInt16((word)(other->GetDefNum("RESCOLD", true)));
-		writeInt16((word)(other->GetDefNum("RESPOISON", true)));
-		writeInt16((word)(other->GetDefNum("RESENERGY", true)));
-		writeInt16((word)(other->GetDefNum("LUCK", true)));
+        if (fElemental)
+        {
+            writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESFIRE, pBaseCCPChar));
+            writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESCOLD, pBaseCCPChar));
+            writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESPOISON, pBaseCCPChar));
+            writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESENERGY, pBaseCCPChar));
+        }
+        else
+        {
+            writeInt64(0);
+        }
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_LUCK, pBaseCCPChar));
 
 		const CItem* weapon = other->m_uidWeapon.ItemFind();
 		writeInt16((word)(other->Fight_CalcDamage(weapon, true, false)));
@@ -319,49 +313,55 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
 
 	if (version >= 6)	// SA attributes
 	{
-		writeInt16((word)(other->GetDefNum("RESPHYSICALMAX", true)));
-		writeInt16((word)(other->GetDefNum("RESFIREMAX", true)));
-		writeInt16((word)(other->GetDefNum("RESCOLDMAX", true)));
-		writeInt16((word)(other->GetDefNum("RESPOISONMAX", true)));
-		writeInt16((word)(other->GetDefNum("RESENERGYMAX", true)));
-		writeInt16((word)(other->GetDefNum("INCREASEDEFCHANCE", true)));
-		writeInt16((word)(other->GetDefNum("INCREASEDEFCHANCEMAX", true)));
-		writeInt16((word)(other->GetDefNum("INCREASEHITCHANCE", true)));
-		writeInt16((word)(other->GetDefNum("INCREASESWINGSPEED", true)));
-		writeInt16((word)(other->GetDefNum("INCREASEDAM", true)));
-		writeInt16((word)(other->GetDefNum("LOWERREAGENTCOST", true)));
-		writeInt16((word)(other->GetDefNum("INCREASESPELLDAM", true)));
-		writeInt16((word)(other->GetDefNum("FASTERCASTRECOVERY", true)));
-		writeInt16((word)(other->GetDefNum("FASTERCASTING", true)));
-		writeInt16((word)(other->GetDefNum("LOWERMANACOST", true)));
+        if (fElemental)
+        {
+            writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESPHYSICALMAX, pBaseCCPChar));
+            writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESFIREMAX, pBaseCCPChar));
+            writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESCOLDMAX, pBaseCCPChar));
+            writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESPOISONMAX, pBaseCCPChar));
+            writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESENERGYMAX, pBaseCCPChar));
+        }
+        else
+        {
+            writeInt16(0);
+            writeInt64(0);
+        }
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASEDEFCHANCE, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASEDEFCHANCEMAX, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASEHITCHANCE, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASESWINGSPEED, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASEDAM, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_LOWERREAGENTCOST, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASESPELLDAM, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_FASTERCASTRECOVERY, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_FASTERCASTING, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_LOWERMANACOST, pBaseCCPChar));
 	}
-	/* We really don't know what is going on here. RUOSI Packet Guide was way off... -Khaos
-	Possible KR client status info... -Ben*/
 	if (target->GetNetState()->isClientKR())
 	{
-		writeInt16((word)(other->GetDefNum("INCREASEHITCHANCE", true)));
-		writeInt16((word)(other->GetDefNum("INCREASESWINGSPEED", true)));
-		writeInt16((word)(other->GetDefNum("INCREASEDAM", true)));
-		writeInt16((word)(other->GetDefNum("LOWERREAGENTCOST", true)));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASEHITCHANCE, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASESWINGSPEED, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASEDAM, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_LOWERREAGENTCOST, pBaseCCPChar));
 		writeInt16((word)(other->Stats_GetRegenRate(STAT_STR)/MSECS_PER_SEC));
 		writeInt16((word)(other->Stats_GetRegenRate(STAT_DEX)/MSECS_PER_SEC));
 		writeInt16((word)(other->Stats_GetRegenRate(STAT_INT)/MSECS_PER_SEC));
-		writeInt16((word)(other->GetDefNum("REFLECTPHYSICALDAM", true)));
-		writeInt16((word)(other->GetDefNum("ENHANCEPOTIONS", true)));
-		writeInt16((word)(other->GetDefNum("INCREASEDEFCHANCE", true)));
-		writeInt16((word)(other->GetDefNum("INCREASESPELLDAM", true)));
-		writeInt16((word)(other->GetDefNum("FASTERCASTRECOVERY", true)));
-		writeInt16((word)(other->GetDefNum("FASTERCASTING", true)));
-		writeInt16((word)(other->GetDefNum("LOWERMANACOST", true)));
-		writeInt16((word)(other->GetDefNum("BONUSSTR", true)));
-		writeInt16((word)(other->GetDefNum("BONUSDEX", true)));
-		writeInt16((word)(other->GetDefNum("BONUSINT", true)));
-		writeInt16((word)(other->GetDefNum("BONUSHITS", true)));
-		writeInt16((word)(other->GetDefNum("BONUSSTAM", true)));
-		writeInt16((word)(other->GetDefNum("BONUSMANA", true)));
-		writeInt16((word)(other->GetDefNum("BONUSHITSMAX", true)));
-		writeInt16((word)(other->GetDefNum("BONUSSTAMMAX", true)));
-		writeInt16((word)(other->GetDefNum("BONUSMANAMAX", true)));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_REFLECTPHYSICALDAM, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_ENHANCEPOTIONS, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASEDEFCHANCE, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASESPELLDAM, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_FASTERCASTRECOVERY, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_FASTERCASTING, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_LOWERMANACOST, pBaseCCPChar));
+        writeInt16((word)other->Stat_GetMod(STAT_STR));     // Gained from items with the prop BONUSSTR?
+        writeInt16((word)other->Stat_GetMod(STAT_DEX));     // Gained from items with the prop BONUSDEX?
+        writeInt16((word)other->Stat_GetMod(STAT_INT));     // Gained from items with the prop BONUSINT?
+        writeInt16((word)(other->GetDefNum("BONUSHITS", true)));    // What's that for? Should it be instead the Regen Val maybe?
+        writeInt16((word)(other->GetDefNum("BONUSSTAM", true)));    // What's that for? Should it be instead the Regen Val maybe?
+        writeInt16((word)(other->GetDefNum("BONUSMANA", true)));    // What's that for? Should it be instead the Regen Val maybe?
+        writeInt16((word)other->Stat_GetMaxMod(STAT_STR));  // Gained from items with the prop BONUSHITSMAX?
+        writeInt16((word)other->Stat_GetMaxMod(STAT_DEX));  // Gained from items with the prop BONUSSTAMMAX?
+        writeInt16((word)other->Stat_GetMaxMod(STAT_INT));  // Gained from items with the prop BONUSMANAMAX?
 	}
 }
 
@@ -3303,7 +3303,7 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 {
 	ADDTOCALLSTACK("PacketCharacterList::PacketCharacterList");
 
-	const CAccountRef account = target->GetAccount();
+	const CAccount * account = target->GetAccount();
 	ASSERT(account != nullptr);
 
 	initLength();
@@ -3761,7 +3761,7 @@ PacketEnableFeatures::PacketEnableFeatures(const CClient* target, dword flags) :
 {
 	ADDTOCALLSTACK("PacketEnableFeatures::PacketEnableFeatures");
 	
-	const CAccountRef account = target->GetAccount();
+	const CAccount * account = target->GetAccount();
 	ASSERT(account != nullptr);
 	dword tmVer = (dword)(account->m_TagDefs.GetKeyNum("clientversion"));
 	dword tmVerReported = (dword)(account->m_TagDefs.GetKeyNum("reportedcliver"));

@@ -36,15 +36,14 @@ enum CCRET_TYPE
 class CComponent
 {
     COMP_TYPE _iType;
-    CObjBase *_pLink;
+    
 
 protected:
-    CComponent(COMP_TYPE type, CObjBase *pLink);
+    CComponent(COMP_TYPE type);
 
 public:
     virtual ~CComponent() = default;
     COMP_TYPE GetType() const;
-    virtual CObjBase *GetLink() const;
 
     /* Script's compatibility
     * All methods here are meant to be proccessed from CEntity so they may behave a little different

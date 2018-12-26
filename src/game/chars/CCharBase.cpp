@@ -2,6 +2,8 @@
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
 #include "../../common/CLog.h"
+#include "../components/CCPropsChar.h"
+#include "../components/CCPropsItemChar.h"
 #include "../CServerConfig.h"
 #include "CCharBase.h"
 
@@ -34,6 +36,10 @@ CCharBase::CCharBase( CREID_TYPE id ) :
 		m_dwDispIndex = 0;	// must read from SCP file later
 
 	SetResDispDnId(CREID_MAN);
+
+    // SubscribeComponent Prop Components
+    SubscribeComponentProps(new CCPropsChar());
+    SubscribeComponentProps(new CCPropsItemChar());
 }
 
 CCharBase::~CCharBase()
@@ -156,7 +162,16 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 {
 	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CCharBase::r_WriteVal");
-	EXC_TRY("WriteVal");
+    EXC_TRY("WriteVal");
+
+    // Checking Props CComponents first
+    EXC_SET_BLOCK("EntityProps");
+    if (CEntityProps::r_WritePropVal(pszKey, sVal))
+    {
+        return true;
+    }
+
+    EXC_SET_BLOCK("Keyword");
 	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		//return as string or hex number or nullptr if not set
@@ -279,6 +294,15 @@ bool CCharBase::r_LoadVal( CScript & s )
 	EXC_TRY("LoadVal");
 	if ( ! s.HasArgs())
 		return false;
+
+    // Checking Props CComponents first
+    EXC_SET_BLOCK("EntityProps");
+    if (CEntityProps::r_LoadPropVal(s, nullptr))
+    {
+        return true;
+    }
+
+    EXC_SET_BLOCK("Keyword");
 	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		//Set as Strings

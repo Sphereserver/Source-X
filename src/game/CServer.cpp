@@ -1284,7 +1284,7 @@ bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 	if ( !strnicmp(pszKey, "ACCOUNT.", 8) )
 	{
 		pszKey += 8;
-		CAccountRef pAccount = nullptr;
+		CAccount * pAccount = nullptr;
 
 		// extract account name/index to a temporary buffer
 		tchar * pszTemp = Str_GetTemp();
@@ -1435,7 +1435,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			index = SV_ACCOUNT;
 			pszKey += 8;
 
-			CAccountRef pAccount = nullptr;
+			CAccount * pAccount = nullptr;
 			char *pszTemp = Str_GetTemp();
 
 			strcpy(pszTemp, pszKey);

@@ -142,6 +142,7 @@ public:
     CCFaction(CObjBase* pLink);
     CCFaction(CCFaction *copy, CObjBase* pLink);
 	virtual ~CCFaction() = default;
+    CObjBase *GetLink() const;
     static bool CanSubscribe(const CItem* pItem);
     virtual void Delete(bool fForced = false) override;
     virtual bool r_LoadVal(CScript & s) override;

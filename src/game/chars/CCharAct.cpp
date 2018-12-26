@@ -8,6 +8,10 @@
 #include "../clients/CClient.h"
 #include "../items/CItem.h"
 #include "../components/CCSpawn.h"
+#include "../components/CCPropsChar.h"
+#include "../components/CCPropsItemChar.h"
+#include "../components/CCPropsItemEquippable.h"
+#include "../components/CCPropsItemWeapon.h"
 #include "../CContainer.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
@@ -297,6 +301,8 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 			if ( pItem->IsTypeWeapon())
 			{
 				m_uidWeapon = pItem->GetUID();
+                if (m_pPlayer)
+                    m_pPlayer->m_uidWeaponLast = m_uidWeapon;
 				if ( Fight_IsActive() )
 					Skill_Start(Fight_GetWeaponSkill());	// update char action
 			}
@@ -458,123 +464,89 @@ void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when r
 			break;
 	}
 
-	// Items with magic effects.
-	if ( layer != LAYER_DRAGGING )
-	{
-		switch ( pItem->GetType())
-		{
-			case IT_COMM_CRYSTAL:
-				if ( ContentFind( CResourceID( RES_TYPEDEF,IT_COMM_CRYSTAL ), 0, 0 ) == nullptr )
-					StatFlag_Clear(STATF_COMM_CRYSTAL);
-				break;
-			case IT_EQ_HORSE:
-				StatFlag_Clear(STATF_ONHORSE);
-				break;
-			case IT_EQ_MEMORY_OBJ:
-			{
-				// Clear the associated flags.
-				CItemMemory *pMemory = dynamic_cast<CItemMemory*>(pItem);
-				if (pMemory != nullptr)
-					Memory_UpdateClearTypes( pMemory, 0xFFFF );
-				break;
-			}
-			default:
-				break;
-		}
+    // Items with magic effects.
+    if (layer == LAYER_DRAGGING)
+        return; // Stop here
 
-		if ( pItem->IsTypeArmorWeapon() )
-		{
-			SetDefNum("DAMPHYSICAL", GetDefNum("DAMPHYSICAL", true) - pItem->GetDefNum("DAMPHYSICAL", true));
-			SetDefNum("DAMFIRE", GetDefNum("DAMFIRE", true) - pItem->GetDefNum("DAMFIRE", true));
-			SetDefNum("DAMCOLD", GetDefNum("DAMCOLD", true) - pItem->GetDefNum("DAMCOLD", true));
-			SetDefNum("DAMPOISON", GetDefNum("DAMPOISON", true) - pItem->GetDefNum("DAMPOISON", true));
-			SetDefNum("DAMENERGY", GetDefNum("DAMENERGY", true) - pItem->GetDefNum("DAMENERGY", true));
+    switch (pItem->GetType())
+    {
+        case IT_COMM_CRYSTAL:
+            if (ContentFind(CResourceID(RES_TYPEDEF, IT_COMM_CRYSTAL), 0, 0) == nullptr)
+                StatFlag_Clear(STATF_COMM_CRYSTAL);
+            break;
+        case IT_EQ_HORSE:
+            StatFlag_Clear(STATF_ONHORSE);
+            break;
+        case IT_EQ_MEMORY_OBJ:
+        {
+            // Clear the associated flags.
+            CItemMemory *pMemory = dynamic_cast<CItemMemory*>(pItem);
+            if (pMemory != nullptr)
+                Memory_UpdateClearTypes(pMemory, 0xFFFF);
+            break;
+        }
+        default:
+            break;
+    }
 
-			SetDefNum("RESPHYSICAL", GetDefNum("RESPHYSICAL", true) - pItem->GetDefNum("RESPHYSICAL", true));
-			SetDefNum("RESFIRE", GetDefNum("RESFIRE", true) - pItem->GetDefNum("RESFIRE", true));
-			SetDefNum("RESCOLD", GetDefNum("RESCOLD", true) - pItem->GetDefNum("RESCOLD", true));
-			SetDefNum("RESPOISON", GetDefNum("RESPOISON", true) - pItem->GetDefNum("RESPOISON", true));
-			SetDefNum("RESENERGY", GetDefNum("RESENERGY", true) - pItem->GetDefNum("RESENERGY", true));
-		}
+    
+    const CBaseBaseDef* pItemBase = pItem->Base_GetDef();
 
-		if ( pItem->IsTypeWeapon() )
-		{
-			CItem * pCursedMemory = LayerFind(LAYER_SPELL_Curse_Weapon);	// Remove the cursed state from SPELL_Curse_Weapon.
-			if (pCursedMemory)
-				pItem->SetDefNum("HitLeechLife", pItem->GetDefNum("HitLeechLife", true) - pCursedMemory->m_itSpell.m_spelllevel, true);
-		}
+    // Start of CCPropsItemEquippable props
+    CCPropsChar *pCCPChar = GetCCPropsChar();
+    CCPropsItemEquippable *pItemCCPItemEquippable = pItem->GetCCPropsItemEquippable();
+    const CCPropsItemEquippable *pItemBaseCCPItemEquippable = pItemBase->GetCCPropsItemEquippable();
 
+    if (pItemCCPItemEquippable || pItemBaseCCPItemEquippable)
+    {
         // Leave the stat bonuses signed, since they can be used also as a malus (negative sign)
-		ushort iStrengthBonus = (ushort)(pItem->GetDefNum("BONUSSTR", true));
-		if (iStrengthBonus != 0)
-			Stat_AddMod(STAT_STR, -iStrengthBonus);
+        Stat_AddMod(STAT_STR,       - (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_BONUSSTR, pItemBaseCCPItemEquippable));
+        Stat_AddMod(STAT_DEX,       - (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_BONUSDEX, pItemBaseCCPItemEquippable));
+        Stat_AddMod(STAT_INT,       - (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_BONUSINT, pItemBaseCCPItemEquippable));
+        Stat_AddMaxMod(STAT_STR,    - (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_BONUSHITSMAX, pItemBaseCCPItemEquippable));
+        Stat_AddMaxMod(STAT_DEX,    - (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_BONUSSTAMMAX, pItemBaseCCPItemEquippable));
+        Stat_AddMaxMod(STAT_INT,    - (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_BONUSMANAMAX, pItemBaseCCPItemEquippable));
 
-		ushort iDexterityBonus = (ushort)(pItem->GetDefNum("BONUSDEX", true));
-		if (iDexterityBonus != 0)
-			Stat_AddMod(STAT_DEX, -iDexterityBonus);
+        ModPropNum(pCCPChar, PROPCH_RESPHYSICAL,  - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESPHYSICAL, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_RESFIRE,      - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESFIRE, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_RESCOLD,      - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESCOLD, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_RESPOISON,    - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESPOISON, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_RESENERGY,    - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESENERGY, pItemBaseCCPItemEquippable));
 
-		ushort iIntelligenceBonus = (ushort)(pItem->GetDefNum("BONUSINT", true));
-		if (iIntelligenceBonus != 0)
-			Stat_AddMod(STAT_INT, -iIntelligenceBonus);
+        ModPropNum(pCCPChar, PROPCH_INCREASEDAM,          - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASEDAM, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_INCREASEDEFCHANCE,    - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASEDEFCHANCE, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_FASTERCASTING,        - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_FASTERCASTING, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_INCREASEHITCHANCE,    - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASEHITCHANCE, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_INCREASESPELLDAM,     - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASESPELLDAM, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_INCREASESWINGSPEED,   - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASESWINGSPEED, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_ENHANCEPOTIONS,       - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_ENHANCEPOTIONS, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_LOWERMANACOST,        - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_LOWERMANACOST, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_LUCK,                 - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_LUCK, pItemBaseCCPItemEquippable));
 
-		ushort iHitpointIncrease = (ushort)(pItem->GetDefNum("BONUSHITS", true));
-		if (iHitpointIncrease != 0)
-			Stat_AddMaxMod(STAT_STR, -iHitpointIncrease);
+        ModPropNum(pCCPChar, PROPCH_DAMPHYSICAL,   - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMPHYSICAL, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_DAMFIRE,       - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMFIRE, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_DAMCOLD,       - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMCOLD, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_DAMPOISON,     - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMPOISON, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_DAMENERGY,     - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
 
-		ushort iStaminaIncrease = (ushort)(pItem->GetDefNum("BONUSSTAM", true));
-		if (iStaminaIncrease != 0)
-            Stat_AddMaxMod(STAT_DEX, -iStaminaIncrease);
+        if (pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_NIGHTSIGHT, pItemBaseCCPItemEquippable))
+        {
+            StatFlag_Mod(STATF_NIGHTSIGHT, 0);
+            if (IsClient())
+                m_pClient->addLight();
+        }
 
-		ushort iManaIncrease = (ushort)(pItem->GetDefNum("BONUSMANA", true));
-		if (iManaIncrease != 0)
-            Stat_AddMaxMod(STAT_INT, -iManaIncrease);
+        if (pItem->IsTypeWeapon())
+        {
+            CItem * pCursedMemory = LayerFind(LAYER_SPELL_Curse_Weapon);	// Remove the cursed state from SPELL_Curse_Weapon.
+            if (pCursedMemory)
+                pItem->ModPropNum(pItemCCPItemEquippable, PROPIEQUIP_HITLEECHLIFE, - pCursedMemory->m_itSpell.m_spelllevel, pItemBaseCCPItemEquippable);
+        }
+    }
+    // End of CCPropsItemEquippable props
 
-		int64 iDamageIncrease = pItem->GetDefNum("INCREASEDAM", true);
-		if ( iDamageIncrease != 0 )
-			SetDefNum("INCREASEDAM", GetDefNum("INCREASEDAM", true) - iDamageIncrease);
-
-		int64 iDefenseChanceIncrease = pItem->GetDefNum("INCREASEDEFCHANCE", true);
-		if ( iDefenseChanceIncrease != 0 )
-			SetDefNum("INCREASEDEFCHANCE", GetDefNum("INCREASEDEFCHANCE", true) - iDefenseChanceIncrease);
-
-		int64 iFasterCasting = pItem->GetDefNum("FASTERCASTING", true);
-		if ( iFasterCasting != 0 )
-			SetDefNum("FASTERCASTING", GetDefNum("FASTERCASTING", true) - iFasterCasting);
-
-		int64 iHitChanceIncrease = pItem->GetDefNum("INCREASEHITCHANCE", true);
-		if ( iHitChanceIncrease != 0 )
-			SetDefNum("INCREASEHITCHANCE", GetDefNum("INCREASEHITCHANCE", true) - iHitChanceIncrease);
-
-		int64 iSpellDamageIncrease = pItem->GetDefNum("INCREASESPELLDAM", true);
-		if ( iSpellDamageIncrease != 0 )
-			SetDefNum("INCREASESPELLDAM", GetDefNum("INCREASESPELLDAM", true) - iSpellDamageIncrease);
-
-		int64 iSwingSpeedIncrease = pItem->GetDefNum("INCREASESWINGSPEED", true);
-		if ( iSwingSpeedIncrease != 0 )
-			SetDefNum("INCREASESWINGSPEED", GetDefNum("INCREASESWINGSPEED", true) - iSwingSpeedIncrease);
-
-		int64 iEnhancePotions = pItem->GetDefNum("ENHANCEPOTIONS", true);
-		if (iEnhancePotions != 0)
-			SetDefNum("ENHANCEPOTIONS", GetDefNum("ENHANCEPOTIONS", true) - iEnhancePotions);
-
-		int64 iLowerManaCost = pItem->GetDefNum("LOWERMANACOST", true);
-		if (iLowerManaCost != 0)
-			SetDefNum("LOWERMANACOST", GetDefNum("LOWERMANACOST", true) - iLowerManaCost);
-
-		int64 iLuck = pItem->GetDefNum("LUCK", true);
-		if ( iLuck != 0 )
-			SetDefNum("LUCK", GetDefNum("LUCK", true) - iLuck);
-
-		if ( pItem->GetDefNum("NIGHTSIGHT", true))
-		{
-			StatFlag_Mod( STATF_NIGHTSIGHT, 0 );
-			if ( IsClient() )
-				m_pClient->addLight();
-		}
-
-		// If items are magical then remove effect here.
-		Spell_Effect_Remove(pItem);
-	}
+    // If items are magical then remove effect here.
+    Spell_Effect_Remove(pItem);
 }
 
 // shrunk or died. (or sleeping)
@@ -2067,9 +2039,6 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 	if ( !pItem->IsItemEquipped() )	// Equip failed ? (cursed?) Did it just go into pack ?
 		return false;
 
-	Spell_Effect_Add(pItem);	// if it has a magic effect.
-
-
     if (CItemBase::IsVisibleLayer(layer))	// visible layer ?
     {
         SOUND_TYPE iSound = 0x57;
@@ -2086,94 +2055,63 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 	if ( fFromDClick )
 		pItem->ResendOnEquip();
 
-	if (pItem->IsTypeArmorWeapon())
-	{
-		SetDefNum("DAMPHYSICAL", GetDefNum("DAMPHYSICAL", true) + pItem->GetDefNum("DAMPHYSICAL", true));
-		SetDefNum("DAMFIRE", GetDefNum("DAMFIRE", true) + pItem->GetDefNum("DAMFIRE", true));
-		SetDefNum("DAMCOLD", GetDefNum("DAMCOLD", true) + pItem->GetDefNum("DAMCOLD", true));
-		SetDefNum("DAMPOISON", GetDefNum("DAMPOISON", true) + pItem->GetDefNum("DAMPOISON", true));
-		SetDefNum("DAMENERGY", GetDefNum("DAMENERGY", true) + pItem->GetDefNum("DAMENERGY", true));
 
-		SetDefNum("RESPHYSICAL", GetDefNum("RESPHYSICAL", true) + pItem->GetDefNum("RESPHYSICAL", true));
-		SetDefNum("RESFIRE", GetDefNum("RESFIRE", true) + pItem->GetDefNum("RESFIRE", true));
-		SetDefNum("RESCOLD", GetDefNum("RESCOLD", true) + pItem->GetDefNum("RESCOLD", true));
-		SetDefNum("RESPOISON", GetDefNum("RESPOISON", true) + pItem->GetDefNum("RESPOISON", true));
-		SetDefNum("RESENERGY", GetDefNum("RESENERGY", true) + pItem->GetDefNum("RESENERGY", true));
-	}
+    const CBaseBaseDef* pItemBase = pItem->Base_GetDef();
 
-	if (pItem->IsTypeWeapon())
-	{
-		CItem * pCursedMemory = LayerFind(LAYER_SPELL_Curse_Weapon);	// Mark the weapon as cursed if SPELL_Curse_Weapon is active.
-		if (pCursedMemory)
-			pItem->SetDefNum("HitLeechLife", pItem->GetDefNum("HitLeechLife", true) + pCursedMemory->m_itSpell.m_spelllevel, true);
-	}
+    // Start of CCPropsItemEquippable props
+    CCPropsChar *pCCPChar = GetCCPropsChar();
+    const CCPropsItemEquippable *pItemBaseCCPItemEquippable = pItemBase->GetCCPropsItemEquippable();
+    CCPropsItemEquippable *pItemCCPItemEquippable = pItem->GetCCPropsItemEquippable();
 
-	ushort iStrengthBonus = (ushort)(pItem->GetDefNum("BONUSSTR", true));
-	if (iStrengthBonus != 0)
-		Stat_AddMod(STAT_STR, iStrengthBonus);
+    if (pItemCCPItemEquippable || pItemBaseCCPItemEquippable)
+    {
+        // Leave the stat bonuses signed, since they can be used also as a malus (negative sign)
+        Stat_AddMod(STAT_STR,       + (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_BONUSSTR, pItemBaseCCPItemEquippable));
+        Stat_AddMod(STAT_DEX,       + (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_BONUSDEX, pItemBaseCCPItemEquippable));
+        Stat_AddMod(STAT_INT,       + (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_BONUSINT, pItemBaseCCPItemEquippable));
+        Stat_AddMaxMod(STAT_STR,    + (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_BONUSHITSMAX, pItemBaseCCPItemEquippable));
+        Stat_AddMaxMod(STAT_DEX,    + (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_BONUSSTAMMAX, pItemBaseCCPItemEquippable));
+        Stat_AddMaxMod(STAT_INT,    + (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_BONUSMANAMAX, pItemBaseCCPItemEquippable));
 
-	ushort iDexterityBonus = (ushort)(pItem->GetDefNum("BONUSDEX", true));
-	if (iDexterityBonus != 0)
-        Stat_AddMod(STAT_DEX, iDexterityBonus);
+        ModPropNum(pCCPChar, PROPCH_RESPHYSICAL,  + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESPHYSICAL, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_RESFIRE,      + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESFIRE, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_RESCOLD,      + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESCOLD, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_RESPOISON,    + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESPOISON, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_RESENERGY,    + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESENERGY, pItemBaseCCPItemEquippable));
 
-	ushort iIntelligenceBonus = (ushort)(pItem->GetDefNum("BONUSINT", true));
-	if (iIntelligenceBonus != 0)
-        Stat_AddMod(STAT_INT, iIntelligenceBonus);
+        ModPropNum(pCCPChar, PROPCH_INCREASEDAM,          + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASEDAM, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_INCREASEDEFCHANCE,    + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASEDEFCHANCE, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_FASTERCASTING,        + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_FASTERCASTING, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_INCREASEHITCHANCE,    + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASEHITCHANCE, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_INCREASESPELLDAM,     + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASESPELLDAM, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_INCREASESWINGSPEED,   + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASESWINGSPEED, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_ENHANCEPOTIONS,       + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_ENHANCEPOTIONS, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_LOWERMANACOST,        + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_LOWERMANACOST, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_LUCK,                 + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_LUCK, pItemBaseCCPItemEquippable));
 
-	ushort iHitpointIncrease = (ushort)(pItem->GetDefNum("BONUSHITS", true));
-	if (iHitpointIncrease != 0)
-        Stat_AddMaxMod(STAT_STR, iHitpointIncrease);
+        ModPropNum(pCCPChar, PROPCH_DAMPHYSICAL,   + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMPHYSICAL, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_DAMFIRE,       + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMFIRE, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_DAMCOLD,       + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMCOLD, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_DAMPOISON,     + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMPOISON, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_DAMENERGY,     + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
 
-	ushort iStaminaIncrease = (ushort)(pItem->GetDefNum("BONUSSTAM", true));
-	if (iStaminaIncrease != 0)
-        Stat_AddMaxMod(STAT_DEX, iStaminaIncrease);
+        if ( pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_NIGHTSIGHT, pItemBaseCCPItemEquippable) )
+        {
+            StatFlag_Mod( STATF_NIGHTSIGHT, 1 );
+            if ( IsClient() )
+                m_pClient->addLight();
+        }
 
-	ushort iManaIncrease = (ushort)(pItem->GetDefNum("BONUSMANA", true));
-	if (iManaIncrease != 0)
-        Stat_AddMaxMod(STAT_INT, iManaIncrease);
+        if (pItem->IsTypeWeapon())
+        {
+            CItem * pCursedMemory = LayerFind(LAYER_SPELL_Curse_Weapon);	// Remove the cursed state from SPELL_Curse_Weapon.
+            if (pCursedMemory)
+                pItem->ModPropNum(pItemCCPItemEquippable, PROPIEQUIP_HITLEECHLIFE, + pCursedMemory->m_itSpell.m_spelllevel, pItemBaseCCPItemEquippable);
+        }
+    }
+    // End of CCPropsItemEquippable props
 
-	int64 iDamageIncrease = pItem->GetDefNum("INCREASEDAM", true);
-	if (iDamageIncrease != 0)
-		SetDefNum("INCREASEDAM", GetDefNum("INCREASEDAM", true) + iDamageIncrease);
-
-	int64 iDefenseChanceIncrease = pItem->GetDefNum("INCREASEDEFCHANCE", true);
-	if (iDefenseChanceIncrease != 0)
-		SetDefNum("INCREASEDEFCHANCE", GetDefNum("INCREASEDEFCHANCE", true) + iDefenseChanceIncrease);
-
-	int64 iFasterCasting = pItem->GetDefNum("FASTERCASTING", true);
-	if (iFasterCasting != 0)
-		SetDefNum("FASTERCASTING", GetDefNum("FASTERCASTING", true) + iFasterCasting);
-
-	int64 iHitChanceIncrease = pItem->GetDefNum("INCREASEHITCHANCE", true);
-	if (iHitChanceIncrease != 0)
-		SetDefNum("INCREASEHITCHANCE", GetDefNum("INCREASEHITCHANCE", true) + iHitChanceIncrease);
-
-	int64 iSpellDamageIncrease = pItem->GetDefNum("INCREASESPELLDAM", true);
-	if (iSpellDamageIncrease != 0)
-		SetDefNum("INCREASESPELLDAM", GetDefNum("INCREASESPELLDAM", true) + iSpellDamageIncrease);
-
-	int64 iSwingSpeedIncrease = pItem->GetDefNum("INCREASESWINGSPEED", true);
-	if (iSwingSpeedIncrease != 0)
-		SetDefNum("INCREASESWINGSPEED", GetDefNum("INCREASESWINGSPEED", true) + iSwingSpeedIncrease);
-
-	int64 iEnhancePotions = pItem->GetDefNum("ENHANCEPOTIONS", true);
-	if (iEnhancePotions != 0)
-		SetDefNum("ENHANCEPOTIONS", GetDefNum("ENHANCEPOTIONS", true) + iEnhancePotions);
-
-	int64 iLowerManaCost = pItem->GetDefNum("LOWERMANACOST", true);
-	if (iLowerManaCost != 0)
-		SetDefNum("LOWERMANACOST", GetDefNum("LOWERMANACOST", true) + iLowerManaCost);
-
-	int64 iLuck = pItem->GetDefNum("LUCK", true);
-	if (iLuck != 0)
-		SetDefNum("LUCK", GetDefNum("LUCK", true) + iLuck);
-
-	if (pItem->GetDefNum("NIGHTSIGHT", true))
-	{
-		StatFlag_Mod(STATF_NIGHTSIGHT, 1);
-		if (IsClient())
-			m_pClient->addLight();
-	}
+    Spell_Effect_Add(pItem);	// if it has a magic effect.
 
 	return true;
 }

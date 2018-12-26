@@ -2,6 +2,11 @@
 // define the base types of an item (rather than the instance)
 
 #include "../../sphere/ProfileTask.h"
+#include "../components/CCPropsItem.h"
+#include "../components/CCPropsItemChar.h"
+#include "../components/CCPropsItemEquippable.h"
+#include "../components/CCPropsItemWeapon.h"
+#include "../components/CCPropsItemWeaponRanged.h"
 #include "../resource/CResourceLock.h"
 #include "../uo_files/CUOItemInfo.h"
 #include "../CLog.h"
@@ -18,8 +23,6 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	m_weight		= 0;
 	m_speed			= 0;
 	m_iSkill		= SKILL_NONE;
-	SetDefNum("RANGE",1);			//m_range = 1;
-	m_type			= IT_NORMAL;
 	m_layer			= LAYER_NONE;
 	m_CanUse		= CAN_U_ALL;
 	// Just applies to equippable weapons/armor.
@@ -56,7 +59,11 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	}
 
 	m_dwFlags = tiledata.m_flags;
-	m_type = GetTypeBase( id, tiledata );
+
+    SubscribeComponentProps(new CCPropsItem());
+    SubscribeComponentProps(new CCPropsItemChar());
+
+	SetType(GetTypeBase( id, tiledata ));
 
 	// Stuff read from .mul file.
 	// Some items (like hair) have no names !
@@ -139,10 +146,9 @@ void CItemBase::CopyBasic( const CItemBase * pBase )
 	m_speed		= pBase->m_speed;
 	m_weight	= pBase->m_weight;
 	m_flip_id	= pBase->m_flip_id;
-	m_type		= pBase->m_type;
 	m_layer		= pBase->m_layer;
+    SetType(pBase->m_type);
     m_CanUse    = pBase->m_CanUse;
-	SetDefNum("RANGE", pBase->GetDefNum("RANGE"));	//m_range	= pBase->m_range;
 	// Just applies to weapons/armor.
 	m_ttNormal.m_tData1 = pBase->m_ttNormal.m_tData1;
 	m_ttNormal.m_tData2 = pBase->m_ttNormal.m_tData2;
@@ -322,50 +328,57 @@ bool CItemBase::IsTypeMulti( IT_TYPE type )	// static
 	}
 }
 
+bool CItemBase::IsTypeEquippable(IT_TYPE type, LAYER_TYPE layer)  // static
+{
+    ADDTOCALLSTACK("CItemBase::IsTypeEquippable(static)");
+
+    // Equippable on (possibly) visible layers.
+
+    switch ( type )
+    {
+        case IT_LIGHT_LIT:
+        case IT_LIGHT_OUT:	// Torches and lanterns.
+        case IT_FISH_POLE:
+        case IT_HAIR:
+        case IT_BEARD:
+        case IT_JEWELRY:
+        case IT_EQ_HORSE:
+            return true;
+        default:
+            break;
+    }
+    if ( IsTypeSpellbook( type ) )
+        return true;
+    if ( IsTypeArmor( type ) )
+        return true;
+    if ( IsTypeWeapon( type ) )
+        return true;
+
+    // Even not visible things.
+    switch ( type )
+    {
+        case IT_EQ_BANK_BOX:
+        case IT_EQ_VENDOR_BOX:
+        case IT_EQ_CLIENT_LINGER:
+        case IT_EQ_MURDER_COUNT:
+        case IT_EQ_STUCK:
+        case IT_EQ_TRADE_WINDOW:
+        case IT_EQ_MEMORY_OBJ:
+        case IT_EQ_SCRIPT:
+            if (IsVisibleLayer( layer ))
+                return false;
+            return true;
+        default:
+            break;
+    }
+
+    return false;
+}
+
 bool CItemBase::IsTypeEquippable() const
 {
 	ADDTOCALLSTACK("CItemBase::IsTypeEquippable");
-	// Equippable on (possibly) visible layers.
-
-	switch ( m_type )
-	{
-		case IT_LIGHT_LIT:
-		case IT_LIGHT_OUT:	// Torches and lanterns.
-		case IT_FISH_POLE:
-		case IT_HAIR:
-		case IT_BEARD:
-		case IT_JEWELRY:
-		case IT_EQ_HORSE:
-			return true;
-		default:
-			break;
-	}
-	if ( IsTypeSpellbook( m_type ) )
-		return true;
-	if ( IsTypeArmor( m_type ) )
-		return true;
-	if ( IsTypeWeapon( m_type ) )
-		return true;
-
-	// Even not visible things.
-	switch ( m_type )
-	{
-		case IT_EQ_BANK_BOX:
-		case IT_EQ_VENDOR_BOX:
-		case IT_EQ_CLIENT_LINGER:
-		case IT_EQ_MURDER_COUNT:
-		case IT_EQ_STUCK:
-		case IT_EQ_TRADE_WINDOW:
-		case IT_EQ_MEMORY_OBJ:
-		case IT_EQ_SCRIPT:
-			if (IsVisibleLayer( (LAYER_TYPE)m_layer ))
-				return false;
-			return true;
-		default:
-			break;
-	}
-
-	return false;
+	return IsTypeEquippable(m_type, (LAYER_TYPE)m_layer);
 }
 
 bool CItemBase::IsID_Multi( ITEMID_TYPE id ) // static
@@ -972,22 +985,23 @@ lpctstr const CItemBase::sm_szLoadKeys[IBC_QTY+1] =
 	nullptr
 };
 
-bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pChar )
+bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
-	UNREFERENCED_PARAMETER(pChar);
 	ADDTOCALLSTACK("CItemBase::r_WriteVal");
-	EXC_TRY("WriteVal");
+    EXC_TRY("WriteVal");
+
+    // Checking Props CComponents first
+    EXC_SET_BLOCK("EntityProps");
+    if (CEntityProps::r_WritePropVal(pszKey, sVal))
+    {
+        return true;
+    }
+
+    EXC_SET_BLOCK("Keyword");
 	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		//return as string or hex number or nullptr if not set
 		case IBC_ALTERITEM:
-		case IBC_AMMOANIM:
-		case IBC_AMMOANIMHUE:
-		case IBC_AMMOANIMRENDER:
-		case IBC_AMMOCONT:
-		case IBC_AMMOTYPE:
-		case IBC_AMMOSOUNDHIT:
-		case IBC_AMMOSOUNDMISS:
 		case IBC_DROPSOUND:
 		case IBC_PICKUPSOUND:
 		case IBC_EQUIPSOUND:
@@ -1019,7 +1033,6 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 		case IBC_ITEMSETCOLOR:
 		case IBC_RARITY:
 		case IBC_LIFESPAN:
-		case IBC_MAGEWEAPON:
 		case IBC_SELFREPAIR:
 		case IBC_DURABILITY:
 		case IBC_USESCUR:
@@ -1031,15 +1044,6 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 		case IBC_BONUSCRAFTINGEXCEPAMT:
 		case IBC_NPCKILLERAMT:
 		case IBC_NPCPROTECTIONAMT:
-		case IBC_BONUSSTR:
-		case IBC_BONUSDEX:
-		case IBC_BONUSINT:
-		case IBC_BONUSHITS:
-		case IBC_BONUSSTAM:
-		case IBC_BONUSMANA:
-		case IBC_BONUSHITSMAX:
-		case IBC_BONUSSTAMMAX:
-		case IBC_BONUSMANAMAX:
 			sVal.FormatLLVal(GetDefNum(pszKey));
 			break;
 
@@ -1300,7 +1304,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	EXC_ADD_KEYRET(pChar);
+	EXC_ADD_KEYRET(pSrc);
 	EXC_DEBUG_END;
 	return false;
 }
@@ -1308,19 +1312,21 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 bool CItemBase::r_LoadVal( CScript &s )
 {
 	ADDTOCALLSTACK("CItemBase::r_LoadVal");
-	EXC_TRY("LoadVal");
+    EXC_TRY("LoadVal");
+
+    // Checking Props CComponents first
+    EXC_SET_BLOCK("EntityProps");
+    if (CEntityProps::r_LoadPropVal(s, nullptr))
+    {
+        return true;
+    }
+
+    EXC_SET_BLOCK("Keyword");
 	lpctstr	pszKey = s.GetKey();
 	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ) )
 	{
 		//Set as Strings
 		case IBC_ALTERITEM:
-		case IBC_AMMOANIM:
-		case IBC_AMMOANIMHUE:
-		case IBC_AMMOANIMRENDER:
-		case IBC_AMMOCONT:
-		case IBC_AMMOTYPE:
-		case IBC_AMMOSOUNDHIT:
-		case IBC_AMMOSOUNDMISS:
 		case IBC_DROPSOUND:
 		case IBC_PICKUPSOUND:
 		case IBC_EQUIPSOUND:
@@ -1355,7 +1361,6 @@ bool CItemBase::r_LoadVal( CScript &s )
 		case IBC_ITEMSETCOLOR:
 		case IBC_RARITY:
 		case IBC_LIFESPAN:
-		case IBC_MAGEWEAPON:
 		case IBC_SELFREPAIR:
 		case IBC_DURABILITY:
 		case IBC_USESCUR:
@@ -1367,15 +1372,6 @@ bool CItemBase::r_LoadVal( CScript &s )
 		case IBC_BONUSCRAFTINGEXCEPAMT:
 		case IBC_NPCKILLERAMT:
 		case IBC_NPCPROTECTIONAMT:
-		case IBC_BONUSSTR:
-		case IBC_BONUSDEX:
-		case IBC_BONUSINT:
-		case IBC_BONUSHITS:
-		case IBC_BONUSSTAM:
-		case IBC_BONUSMANA:
-		case IBC_BONUSHITSMAX:
-		case IBC_BONUSSTAMMAX:
-		case IBC_BONUSMANAMAX:
 			SetDefNum(s.GetKey(), s.GetArgVal(), false);
 			break;
 		case IBC_MAXAMOUNT:
@@ -1399,7 +1395,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 			pszKey += 9;
 			if (*pszKey == '.')
 			{
-				pszKey++;
+				++pszKey;
 				CItemBaseMulti *pItemMulti = dynamic_cast<CItemBaseMulti*>(dynamic_cast<CItemBase*>(this));
 				if (!strnicmp(pszKey, "TILES", 5))
 				{
@@ -1636,11 +1632,11 @@ bool CItemBase::r_LoadVal( CScript &s )
 			}
 			break;
 		case IBC_TYPE:
-			m_type = (IT_TYPE)(g_Cfg.ResourceGetIndexType( RES_TYPEDEF, s.GetArgStr()));
+			SetType((IT_TYPE)(g_Cfg.ResourceGetIndexType( RES_TYPEDEF, s.GetArgStr())));
 			if ( m_type == IT_CONTAINER_LOCKED )
 			{
 				// At this level it just means to add a key for it.
-				m_type = IT_CONTAINER;
+				SetType(IT_CONTAINER);
 			}
 			break;
 		case IBC_VALUE:
@@ -1726,6 +1722,32 @@ CItemBase * CItemBase::MakeDupeReplacement( CItemBase * pBase, ITEMID_TYPE idmas
 	return pBaseNew;
 }
 
+
+void CItemBase::SetType(IT_TYPE type)
+{
+    m_type = type;
+
+    CComponentProps* pCompProps;
+
+    // Never unsubscribe Props Components, because if the type is changed to an unsubscribable type and then again to the previous type, the component will be deleted and created again.
+    //  This means that all the properties (base and "dynamic") are lost.
+    // Add first the most specific components, so that the tooltips will be better ordered
+    pCompProps = GetComponentProps(COMP_PROPS_ITEMWEAPONRANGED);
+    if (!pCompProps && CCPropsItemWeaponRanged::CanSubscribe(this))
+    {
+        SubscribeComponentProps(new CCPropsItemWeaponRanged());
+    }
+    pCompProps = GetComponentProps(COMP_PROPS_ITEMWEAPON);
+    if (!pCompProps && CCPropsItemWeapon::CanSubscribe(this))
+    {
+        SubscribeComponentProps(new CCPropsItemWeapon());
+    }
+    pCompProps = GetComponentProps(COMP_PROPS_ITEMEQUIPPABLE);
+    if (!pCompProps && CCPropsItemEquippable::CanSubscribe(this))
+    {
+        SubscribeComponentProps(new CCPropsItemEquippable());
+    }
+}
 
 //**************************************************
 // -CItemBaseMulti

@@ -9,6 +9,8 @@
 #include "../sphere/ProfileTask.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"
+#include "components/CCPropsItemChar.h"
+#include "components/CCPropsItemWeapon.h"
 #include "components/CCSpawn.h"
 #include "components/CCItemDamageable.h"
 #include "CObjBase.h"
@@ -110,7 +112,7 @@ CObjBase::~CObjBase()
     RemoveSelf();
     if (GetSpawn())    // If I was created from a Spawn
     {
-        //pEntity->Unsubscribe(GetSpawn());    // Avoiding recursive calls from CCSpawn::DelObj when forcing the pChar/pItem to Delete();
+        //pEntity->UnsubscribeComponent(GetSpawn());    // Avoiding recursive calls from CCSpawn::DelObj when forcing the pChar/pItem to Delete();
         GetSpawn()->DelObj(GetUID());  // Then I should be removed from it's list.
     }
     g_World.m_ObjStatusUpdates.RemovePtr(this);
@@ -809,14 +811,12 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 		//return as string or hex number or nullptr if not set
 		//On these ones, check BaseDef if not found on dynamic
 		case OC_NAMELOC:
-		case OC_HITSPELL:
 		case OC_SLAYER:
 		case OC_SLAYERLESSER:
 		case OC_SLAYERMISC:
 		case OC_SLAYERSUPER:
 		case OC_ABILITYPRIMARY:
 		case OC_ABILITYSECONDARY:
-		case OC_MANABURST:
 			{
 				CVarDefCont * pVar = GetDefKey(pszKey, true);
 				sVal = pVar ? pVar->GetValStr() : "";
@@ -824,100 +824,8 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			break;
 		//return as decimal number or 0 if not set
 		//On these ones, check BaseDef if not found on dynamic
-		case OC_CASTINGFOCUS:
-		case OC_DAMCHAOS:
-		case OC_DAMCOLD:
-		case OC_DAMDIRECT:
-		case OC_DAMENERGY:
-		case OC_DAMFIRE:
-		case OC_DAMMODIFIER:
-		case OC_DAMPHYSICAL:
-		case OC_DAMPOISON:
-		case OC_DECREASEHITCHANCE:
-		case OC_EATERCOLD:
-		case OC_EATERDAM:
-		case OC_EATERENERGY:
-		case OC_EATERFIRE:
-		case OC_EATERKINETIC:
-		case OC_EATERPOISON:
-		case OC_ENHANCEPOTIONS:
-		case OC_EXPANSION:
-		case OC_FASTERCASTING:
-		case OC_FASTERCASTRECOVERY:
-		case OC_HITAREACOLD:
-		case OC_HITAREAENERGY:
-		case OC_HITAREAFIRE:
-		case OC_HITAREAPHYSICAL:
-		case OC_HITAREAPOISON:
-		case OC_HITCURSE:
-		case OC_HITDISPEL:
-		case OC_HITFATIGUE:
-		case OC_HITFIREBALL:
-		case OC_HITHARM:
-		case OC_HITLEECHLIFE:
-		case OC_HITLEECHMANA:
-		case OC_HITLEECHSTAM:
-		case OC_HITLIGHTNING:
-		case OC_HITLOWERATK:
-		case OC_HITLOWERDEF:
-		case OC_HITMAGICARROW:
-		case OC_HITMANADRAIN:
-		case OC_HITSPELLSTR:
-		case OC_INCREASEDAM:
-		case OC_INCREASEDEFCHANCE:
-		case OC_INCREASEDEFCHANCEMAX:
-		case OC_INCREASEGOLD:
-		case OC_INCREASEHITCHANCE:
-		case OC_INCREASEKARMALOSS:
-		case OC_INCREASESPELLDAM:
-		case OC_INCREASESWINGSPEED:
-		case OC_LOWERREAGENTCOST:
-		case OC_LOWERMANACOST:
-		case OC_LOWERAMMOCOST:
-		case OC_LOWERREQ:
-		case OC_LUCK:
-		case OC_MANABURSTFREQUENCY:
-		case OC_MANABURSTKARMA:
-		case OC_NIGHTSIGHT:
-		case OC_RAGEFOCUS:
-		case OC_REACTIVEPARALYZE:
-		case OC_REFLECTPHYSICALDAM:
-		case OC_REGENFOOD:
-		case OC_REGENHITS:
-		case OC_REGENMANA:
-		case OC_REGENSTAM:
-		case OC_REGENVALFOOD:
-		case OC_REGENVALHITS:
-		case OC_REGENVALMANA:
-		case OC_REGENVALSTAM:
-		case OC_RESCOLD:
-		case OC_RESFIRE:
-		case OC_COMBATBONUSSTAT:
-		case OC_COMBATBONUSPERCENT:
-		case OC_RESENERGY:
-		case OC_RESPOISON:
-		case OC_RESCOLDMAX:
-		case OC_RESFIREMAX:
-		case OC_RESENERGYMAX:
-		case OC_RESPHYSICALMAX:
-		case OC_RESPOISONMAX:
-		case OC_RESONANCECOLD:
-		case OC_RESONANCEENERGY:
-		case OC_RESONANCEFIRE:
-		case OC_RESONANCEKINETIC:
-		case OC_RESONANCEPOISON:
-		case OC_SOULCHARGE:
-		case OC_SOULCHARGECOLD:
-		case OC_SOULCHARGEENERGY:
-		case OC_SOULCHARGEFIRE:
-		case OC_SOULCHARGEKINETIC:
-		case OC_SOULCHARGEPOISON:
-		case OC_SPELLCHANNELING:
-		case OC_SPELLCONSUMPTION:
-		case OC_SPELLFOCUSING:
-		case OC_VELOCITY:
-		case OC_WEIGHTREDUCTION:
-		case OC_RESPHYSICAL:
+		
+		case OC_EXPANSION:	
 			{
 				CVarDefCont * pVar = GetDefKey(pszKey, true);
 				sVal.FormatLLVal(pVar ? pVar->GetValNum() : 0);
@@ -987,20 +895,6 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 					sVal.Format( "%d,%d", m_attackBase, m_attackBase+m_attackRange );
 				}
 			} break;
-		case OC_RANGE:
-			{
-				if ( RangeH() == 0 )
-					sVal.Format( "%d", RangeL() );
-				else
-					sVal.Format( "%d,%d", RangeH(), RangeL() );
-			}
-			break;
-		case OC_RANGEL:
-			sVal.FormatVal( RangeH() );
-			break;
-		case OC_RANGEH:
-			sVal.FormatVal( RangeL() );
-			break;
 		case OC_CAN:
 			sVal.FormatHex( GetCanFlags() );
 			break;
@@ -1561,7 +1455,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
  				if ( *pszKey == '.' )	// do we have an argument?
  				{
  					SKIP_SEPARATORS( pszKey );
- 					size_t iQty = (size_t)( Exp_GetVal( pszKey ) );
+ 					size_t iQty = Exp_GetSTVal( pszKey );
 					if ( iQty >= m_TagDefs.GetCount() )
  						return false; // trying to get non-existant tag
 
@@ -1572,12 +1466,12 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
  					SKIP_SEPARATORS( pszKey );
  					if ( ! *pszKey )
  					{
- 						sVal.Format("%s=%s", static_cast<lpctstr>(pTagAt->GetKey()), static_cast<lpctstr>(pTagAt->GetValStr()));
+ 						sVal.Format("%s=%s", pTagAt->GetKey(), pTagAt->GetValStr());
  						return true;
  					}
  					else if ( !strnicmp( pszKey, "KEY", 3 )) // key?
  					{
- 						sVal = static_cast<lpctstr>(pTagAt->GetKey());
+ 						sVal = pTagAt->GetKey();
  						return true;
  					}
  					else if ( !strnicmp( pszKey, "VAL", 3 )) // val?
@@ -1599,7 +1493,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
  				if ( *pszKey == '.' )	// do we have an argument?
  				{
  					SKIP_SEPARATORS( pszKey );
- 					size_t iQty = (size_t)( Exp_GetVal( pszKey ) );
+ 					size_t iQty = Exp_GetSTVal( pszKey );
 					if ( iQty >= m_BaseDefs.GetCount() )
  						return false; // trying to get non-existant tag
 
@@ -1610,12 +1504,12 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
  					SKIP_SEPARATORS( pszKey );
  					if ( ! *pszKey )
  					{
- 						sVal.Format("%s=%s", static_cast<lpctstr>(pTagAt->GetKey()), static_cast<lpctstr>(pTagAt->GetValStr()));
+ 						sVal.Format("%s=%s", pTagAt->GetKey(), pTagAt->GetValStr());
  						return true;
  					}
  					else if ( !strnicmp( pszKey, "KEY", 3 )) // key?
  					{
- 						sVal = static_cast<lpctstr>(pTagAt->GetKey());
+ 						sVal = pTagAt->GetKey();
  						return true;
  					}
  					else if ( !strnicmp( pszKey, "VAL", 3 )) // val?
@@ -1677,14 +1571,12 @@ bool CObjBase::r_LoadVal( CScript & s )
 	switch ( index )
 	{
 		//Set as Strings
-		case OC_HITSPELL:
 		case OC_SLAYER:
 		case OC_SLAYERLESSER:
 		case OC_SLAYERMISC:
 		case OC_SLAYERSUPER:
 		case OC_ABILITYPRIMARY:
 		case OC_ABILITYSECONDARY:
-		case OC_MANABURST:
 			{
 				bool fQuoted = false;
 				SetDefStr(s.GetKey(), s.GetArgStr( &fQuoted ), fQuoted);
@@ -1692,117 +1584,14 @@ bool CObjBase::r_LoadVal( CScript & s )
 			}
 			break;
 		//Set as number only
-		case OC_INCREASEHITCHANCE:
-		case OC_CASTINGFOCUS:
-		case OC_DAMCHAOS:
-		case OC_DAMCOLD:
-		case OC_DAMDIRECT:
-		case OC_DAMENERGY:
-		case OC_DAMFIRE:
-		case OC_DAMMODIFIER:
-		case OC_DAMPHYSICAL:
-		case OC_DAMPOISON:
-		case OC_DECREASEHITCHANCE:
-		case OC_EATERCOLD:
-		case OC_EATERDAM:
-		case OC_EATERENERGY:
-		case OC_EATERFIRE:
-		case OC_EATERKINETIC:
-		case OC_EATERPOISON:
-		case OC_ENHANCEPOTIONS:
 		case OC_EXPANSION:
-		case OC_HITAREACOLD:
-		case OC_HITAREAENERGY:
-		case OC_HITAREAFIRE:
-		case OC_HITAREAPHYSICAL:
-		case OC_HITAREAPOISON:
-		case OC_HITCURSE:
-		case OC_HITDISPEL:
-		case OC_HITFATIGUE:
-		case OC_HITFIREBALL:
-		case OC_HITHARM:
-		case OC_HITLEECHLIFE:
-		case OC_HITLEECHMANA:
-		case OC_HITLEECHSTAM:
-		case OC_HITLIGHTNING:
-		case OC_HITLOWERATK:
-		case OC_HITLOWERDEF:
-		case OC_HITMAGICARROW:
-		case OC_HITMANADRAIN:
-		case OC_HITSPELLSTR:
-		case OC_INCREASEGOLD:
-		case OC_INCREASEKARMALOSS:
-		case OC_LOWERAMMOCOST:
-		case OC_LOWERREQ:
-		case OC_MANABURSTFREQUENCY:
-		case OC_MANABURSTKARMA:
-		case OC_NIGHTSIGHT:
-		case OC_RAGEFOCUS:
-		case OC_REACTIVEPARALYZE:
-		case OC_REFLECTPHYSICALDAM:
-		case OC_RESONANCECOLD:
-		case OC_RESONANCEENERGY:
-		case OC_RESONANCEFIRE:
-		case OC_RESONANCEKINETIC:
-		case OC_RESONANCEPOISON:
-		case OC_SOULCHARGE:
-		case OC_SOULCHARGECOLD:
-		case OC_SOULCHARGEENERGY:
-		case OC_SOULCHARGEFIRE:
-		case OC_SOULCHARGEKINETIC:
-		case OC_SOULCHARGEPOISON:
-		case OC_SPELLCHANNELING:
-		case OC_SPELLCONSUMPTION:
-		case OC_SPELLFOCUSING:
-		case OC_VELOCITY:
 		case OC_NAMELOC:
         {
             SetDefNum(s.GetKey(), s.GetArgVal(), false);
             fResendTooltip = true;
             break;
         }
-		case OC_INCREASESWINGSPEED:
-		case OC_INCREASEDAM:
-		case OC_LOWERREAGENTCOST:
-		case OC_LOWERMANACOST:
-		case OC_FASTERCASTRECOVERY:
-		case OC_FASTERCASTING:
-		case OC_INCREASEDEFCHANCE:
-		case OC_INCREASEDEFCHANCEMAX:
-		case OC_INCREASESPELLDAM:
-		case OC_RESCOLDMAX:
-		case OC_RESFIREMAX:
-		case OC_RESENERGYMAX:
-		case OC_RESPOISONMAX:
-		case OC_RESPHYSICAL:
-		case OC_RESPHYSICALMAX:
-		case OC_RESFIRE:
-		case OC_RESCOLD:
-		case OC_RESPOISON:
-		case OC_RESENERGY:
-		case OC_LUCK:
-		case OC_REGENFOOD:
-		case OC_REGENHITS:
-		case OC_REGENSTAM:
-		case OC_REGENMANA:
-		case OC_REGENVALFOOD:
-		case OC_REGENVALHITS:
-		case OC_REGENVALSTAM:
-		case OC_REGENVALMANA:
-		case OC_COMBATBONUSSTAT:
-		case OC_COMBATBONUSPERCENT:
-			SetDefNum(s.GetKey(),s.GetArgVal());
 
-			// This should be used in case items with these properties updates the character in the moment without any script to make status reflect the update.
-			// Maybe too a cliver check to not send update if not needed.
-			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
-			{
-				CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
-				if (pChar)
-					pChar->UpdateStatsFlag();
-			}
-            fResendTooltip = true;
-			break;
         case OC_RECIPEALCHEMY:
         case OC_RECIPEBLACKSMITH:
         case OC_RECIPEBOWCRAFT:
@@ -1850,37 +1639,6 @@ bool CObjBase::r_LoadVal( CScript & s )
             fResendTooltip = true;
         }
         break;
-        case OC_WEIGHTREDUCTION:
-        {
-            int oldweight = GetWeight();
-            SetDefNum(s.GetKey(), s.GetArgVal(), false);
-            CContainer * pCont = dynamic_cast <CContainer*> (GetParent());
-            if (pCont)
-            {
-                ASSERT(IsItemEquipped() || IsItemInContainer());
-                pCont->OnWeightChange(GetWeight() - oldweight);
-            }
-            fResendTooltip = true;
-        }
-        return true;
-
-        case OC_RANGE:
-        {
-            int64 piVal[2];
-            size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, CountOf(piVal));
-            if (iQty > 1)
-            {
-                int64 iRange = ((piVal[0] & 0xff) << 8) & 0xff00;
-                iRange |= (piVal[1] & 0xff);
-                SetDefNum(s.GetKey(), iRange, false);
-            }
-            else
-            {
-                SetDefNum(s.GetKey(), piVal[0], false);
-            }
-            fResendTooltip = true;
-        }
-        break;
 
         case OC_CAN:
             return false;
@@ -1890,17 +1648,15 @@ bool CObjBase::r_LoadVal( CScript & s )
             m_CanMask = dwFlags;
             if (IsItem())
             {
-                //g_Log.EventDebug("CObjBase::r_LoadVal(OC_CANMASK)\n");
+                CItem* pItem = static_cast<CItem*>(this);
                 CCItemDamageable *pItemDmg = static_cast<CCItemDamageable*>(GetComponent(COMP_ITEMDAMAGEABLE));
                 if ((dwFlags & CAN_I_DAMAGEABLE) && !pItemDmg)
                 {
-                    //g_Log.EventDebug("CObjBase::r_LoadVal(OC_CANMASK) 1\n");
-                    Subscribe(new CCItemDamageable(this));
+                    SubscribeComponent(new CCItemDamageable(pItem));
                 }
                 else if (!(dwFlags & CAN_I_DAMAGEABLE) && pItemDmg)
                 {
-                    //g_Log.EventDebug("CObjBase::r_LoadVal(OC_CANMASK) 2\n");
-                    Unsubscribe(pItemDmg);
+                    UnsubscribeComponent(pItemDmg);
                 }
                 else
                 {
@@ -2453,15 +2209,15 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				int64 piCmd[2];
 				int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd) );
 
-				bool bSendFull = false;
-				bool bUseCache = false;
+				bool fSendFull = false;
+				bool fUseCache = false;
 
 				if (iArgQty >= 1)
-					bSendFull = (piCmd[0] != 0);
+					fSendFull = (piCmd[0] != 0);
 				if (iArgQty >= 2)
-					bUseCache = (piCmd[1] != 0);
+					fUseCache = (piCmd[1] != 0);
 
-				ResendTooltip(bSendFull, bUseCache);
+				ResendTooltip(fSendFull, fUseCache);
 				return true;
 			}
 		case OV_SAY: //speak so everyone can here
@@ -2532,21 +2288,39 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				OnSpellEffect((SPELL_TYPE)(RES_GET_INDEX(piCmd[0])), pCharSrc, (int)(piCmd[1]), pItemSrc);
 			}
 			break;
-		case OV_TAGLIST:
-			{
-				EXC_SET_BLOCK("TAGLIST");
-				if ( ! strcmpi( s.GetArgStr(), "log" ))
-					pSrc = &g_Serv;
-				m_TagDefs.DumpKeys(pSrc, "TAG.");
-			}break;
 
-		case OC_PROPSLIST:
-			{
-				EXC_SET_BLOCK("PROPSLIST");
-				if ( ! strcmpi( s.GetArgStr(), "log" ))
-					pSrc = &g_Serv;
-				m_BaseDefs.DumpKeys(pSrc, nullptr);
-			}break;
+        case OV_TAGLIST:
+        {
+            EXC_SET_BLOCK("TAGLIST");
+            if (! strcmpi(s.GetArgStr(), "log"))
+                pSrc = &g_Serv;
+            m_TagDefs.DumpKeys(pSrc, "TAG.");
+        }break;
+        case OV_BASETAGLIST:
+        {
+            EXC_SET_BLOCK("BASETAGLIST");
+            if (! strcmpi(s.GetArgStr(), "log"))
+                pSrc = &g_Serv;
+            Base_GetDef()->m_TagDefs.DumpKeys(pSrc, "[Base]TAG.");
+        }break;
+
+        case OV_PROPLIST:
+        {
+            EXC_SET_BLOCK("PROPLIST");
+            if (! strcmpi(s.GetArgStr(), "log"))
+                pSrc = &g_Serv;
+            m_BaseDefs.DumpKeys(pSrc, nullptr);
+            DumpComponentProps(pSrc);
+        }break;
+        case OV_BASEPROPLIST:
+        {
+            EXC_SET_BLOCK("BASEPROPLIST");
+            if (! strcmpi(s.GetArgStr(), "log"))
+                pSrc = &g_Serv;
+            const CBaseBaseDef* pBase = Base_GetDef();
+            pBase->m_BaseDefs.DumpKeys(pSrc, nullptr);
+            pBase->DumpComponentProps(pSrc, "[Base]");
+        }break;
 
 		case OV_TARGET:
 			{
@@ -3069,7 +2843,9 @@ void CObjBase::ResendTooltip(bool fSendFull, bool fUseCache)
 	// Send tooltip packet to all nearby clients
 	m_fStatusUpdate &= ~SU_UPDATE_TOOLTIP;
 
-	if ( IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) == false )
+    if (g_Serv.IsLoading())
+        return;
+	else if ( IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) == false )
 		return; // tooltips are disabled.
 	else if ( IsDisconnected())
 		return;	// not in the world.
@@ -3131,14 +2907,12 @@ CCFaction * CObjBase::GetFaction()
 
 byte CObjBase::RangeL() const
 {
-	CVarDefCont * pRange = GetDefKey("RANGE", true);
-	return (byte)((pRange ? pRange->GetValNum() : 0) & 0xff);
+	return (byte)(GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_RANGE, true) & 0xff);
 }
 
 byte CObjBase::RangeH() const
 {
-	CVarDefCont * pRange = GetDefKey("RANGE", true);
-	return (byte)(((pRange ? pRange->GetValNum() : 0)>>8) & 0xff);
+	return (byte)((GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_RANGE, true) >> 8) & 0xff);
 }
 
 int64 CObjBase::GetTimeStamp() const
@@ -3149,6 +2923,141 @@ int64 CObjBase::GetTimeStamp() const
 void CObjBase::SetTimeStamp( int64 t_time)
 {
 	m_timestamp = t_time;
+}
+
+CSString CObjBase::GetPropStr( const CComponentProps* pCompProps, int iPropIndex, bool fZero, const CComponentProps* pBaseCompProps ) const
+{
+    CSString sProp;
+    if (pCompProps->GetPropertyStrPtr(iPropIndex, &sProp, fZero))
+        return sProp;
+    
+    if (!pBaseCompProps)
+        return sProp;
+    pBaseCompProps->GetPropertyStrPtr(iPropIndex, &sProp, fZero);
+    return sProp;
+}
+
+CSString CObjBase::GetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, bool fZero, bool fDef ) const
+{
+    CSString sProp;
+    const CComponentProps* pCompProps = GetComponentProps(iCompPropsType);
+    if (!pCompProps)
+        return sProp;
+    if (!pCompProps->GetPropertyStrPtr(iPropIndex, &sProp, fZero) && !fDef)
+        return sProp;
+
+    const CBaseBaseDef* pBase = Base_GetDef();
+    const CComponentProps* pBaseCompProps = pBase->GetComponentProps(iCompPropsType);
+    if (!pBaseCompProps)
+        return sProp;
+    pBaseCompProps->GetPropertyStrPtr(iPropIndex, &sProp, fZero);
+    return sProp;
+}
+
+CComponentProps::PropertyValNum_t CObjBase::GetPropNum( const CComponentProps* pCompProps, int iPropIndex, const CComponentProps* pBaseCompProps ) const
+{
+    CComponentProps::PropertyValNum_t iProp = 0;
+    if (pCompProps->GetPropertyNumPtr(iPropIndex, &iProp))
+        return iProp;
+
+    if (!pBaseCompProps)
+        return iProp;
+    pBaseCompProps->GetPropertyNumPtr(iPropIndex, &iProp);
+    return iProp;
+}
+
+CComponentProps::PropertyValNum_t CObjBase::GetPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, bool fDef ) const
+{
+    CComponentProps::PropertyValNum_t iProp = 0;
+    const CComponentProps* pCompProps = GetComponentProps(iCompPropsType);
+    if (!pCompProps)
+        return iProp;
+    if (!pCompProps->GetPropertyNumPtr(iPropIndex, &iProp) && !fDef)
+        return iProp;
+
+    const CBaseBaseDef* pBase = Base_GetDef();
+    const CComponentProps* pBaseCompProps = pBase->GetComponentProps(iCompPropsType);
+    if (!pBaseCompProps)
+        return iProp;
+    pBaseCompProps->GetPropertyNumPtr(iPropIndex, &iProp);
+    return iProp;
+}
+
+void CObjBase::SetPropStr( CComponentProps* pCompProps, int iPropIndex, lpctstr ptcVal, bool fZero )
+{
+    pCompProps->SetPropertyStr(iPropIndex, ptcVal, this, fZero);
+}
+
+void CObjBase::SetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, lpctstr ptcVal, bool fZero )
+{
+    CComponentProps* pCompProps = GetComponentProps(iCompPropsType);
+    if (!pCompProps)
+    {
+        g_Log.EventDebug("CEntityProps: SetPropStr on unsubscribed CCProps. iCompPropsType %d, iPropIndex %d.\n", iCompPropsType, iPropIndex);
+        CreateSubscribeComponentProps(iCompPropsType);
+    }
+    pCompProps->SetPropertyStr(iPropIndex, ptcVal, this, fZero);
+}
+
+void CObjBase::SetPropNum( CComponentProps* pCompProps, int iPropIndex, CComponentProps::PropertyValNum_t iVal )
+{
+    pCompProps->SetPropertyNum(iPropIndex, iVal, this);
+}
+
+void CObjBase::SetPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CComponentProps::PropertyValNum_t iVal )
+{
+    CComponentProps* pCompProps = GetComponentProps(iCompPropsType);
+    if (!pCompProps)
+    {
+        g_Log.EventDebug("CEntityProps: SetPropNum on unsubscribed CCProps. iCompPropsType %d, iPropIndex %d.\n", iCompPropsType, iPropIndex);
+        CreateSubscribeComponentProps(iCompPropsType);
+    }
+    pCompProps->SetPropertyNum(iPropIndex, iVal, this);
+}
+
+void CObjBase::ModPropNum( CComponentProps* pCompProps, int iPropIndex, CComponentProps::PropertyValNum_t iMod, const CComponentProps* pBaseCompProps )
+{
+    CComponentProps::PropertyValNum_t iVal = 0;
+    bool fPropExists = false;
+    if (pCompProps)
+    {
+        pCompProps->GetPropertyNumPtr(iPropIndex, &iVal);
+        return;
+    }
+    if (!fPropExists && pBaseCompProps)
+    {
+        pCompProps->SetPropertyNum(iPropIndex, iMod + iVal, this);
+        return;
+    }
+    if (!pCompProps && !pBaseCompProps)
+    {
+        //g_Log.EventDebug("CEntityProps: ModPropNum on nullptr CCProps and base CCProps. iPropIndex %d.\n", iPropIndex);
+        ASSERT(0); // Should never happen!
+    }
+}
+
+void CObjBase::ModPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CComponentProps::PropertyValNum_t iMod, bool fBaseDef )
+{
+    CComponentProps::PropertyValNum_t iVal = 0;
+    CComponentProps* pCompProps = GetComponentProps(iCompPropsType);
+    bool fPropExists;
+    if (!pCompProps)
+    {
+        g_Log.EventDebug("CEntityProps: ModPropNum on unsubscribed CCProps. iCompPropsType %d, iPropIndex %d, fBaseDef %d.\n", iCompPropsType, iPropIndex, (int)fBaseDef);
+        CreateSubscribeComponentProps(iCompPropsType);
+        fPropExists = false;
+    }
+    else
+    {
+        fPropExists = pCompProps->GetPropertyNumPtr(iPropIndex, &iVal);
+    }
+    if (!fPropExists && fBaseDef)
+    {
+        const CBaseBaseDef* pBase = Base_GetDef();
+        const CComponentProps* pBaseCompProps = pBase->GetComponentProps(iCompPropsType);
+        pBaseCompProps->GetPropertyNumPtr(iPropIndex, &iVal);
+    }
+    pCompProps->SetPropertyNum(iPropIndex, iVal + iMod, this);
 }
 
 lpctstr CObjBase::GetDefStr( lpctstr pszKey, bool fZero, bool fDef ) const
@@ -3286,6 +3195,7 @@ void CObjBase::DupeCopy( const CObjBase * pObj )
     }
 	m_TagDefs.Copy( &(pObj->m_TagDefs) );
 	m_BaseDefs.Copy(&(pObj->m_BaseDefs));
+    CEntityProps::Copy(pObj);
 }
 
 void CObjBase::Delete(bool fForce)

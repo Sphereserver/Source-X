@@ -1,6 +1,8 @@
 
 #include "../../common/CUIDExtra.h"
 #include "../../network/send.h"
+#include "../components/CCPropsChar.h"
+#include "../components/CCPropsItemEquippable.h"
 #include "../clients/CClient.h"
 #include "../triggers.h"
 #include "CChar.h"
@@ -593,8 +595,9 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
                 }
                 Stats_SetRegenVal(stat, (ushort)iMod);
             };
-			BUFF_ICONS iBuffIcon = BI_START;
 
+			BUFF_ICONS iBuffIcon = BI_START;
+            CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
 			switch (spell)
 			{
 				case SPELL_Polymorph:
@@ -610,22 +613,22 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 					iBuffIcon = BI_LICHFORM;
                     _EffectSetRegenVal(STAT_INT, pSpell->m_itSpell.m_PolyStr);
                     _EffectSetRegenVal(STAT_STR, pSpell->m_itSpell.m_PolyDex);
-                    ModDefNum("ResFire", + pSpell->m_itSpell.m_spellcharges, true);
-                    ModDefNum("ResPoison", - pSpell->m_itSpell.m_spellcharges, true);
-                    ModDefNum("ResCold", - pSpell->m_itSpell.m_spellcharges, true);
+                    ModPropNum(pCCPChar, PROPCH_RESFIRE,   + pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
+                    ModPropNum(pCCPChar, PROPCH_RESPOISON, - pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
+                    ModPropNum(pCCPChar, PROPCH_RESCOLD,   - pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
 					break;
 				case SPELL_Vampiric_Embrace:
 					iBuffIcon = BI_VAMPIRICEMBRACE;
-                    ModDefNum("HitLeechLife", - pSpell->m_itSpell.m_PolyStr, true);
+                    ModPropNum(pCCPChar, PROPCH_HITLEECHLIFE,   - pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);
                     _EffectSetRegenVal(STAT_DEX, pSpell->m_itSpell.m_PolyDex);
                     _EffectSetRegenVal(STAT_INT, pSpell->m_itSpell.m_spellcharges);
-                    ModDefNum("ResFire", + pSpell->m_itSpell.m_spelllevel, true);
+                    ModPropNum(pCCPChar, PROPCH_RESFIRE,   + pSpell->m_itSpell.m_spelllevel, pBaseCCPChar);
 					break;
 				case SPELL_Wraith_Form:
 					iBuffIcon = BI_WRAITHFORM;
-                    ModDefNum("ResPhysical", - pSpell->m_itSpell.m_PolyStr, true);
-                    ModDefNum("ResFire", + pSpell->m_itSpell.m_PolyDex, true);
-                    ModDefNum("ResEnergy", + pSpell->m_itSpell.m_spellcharges, true);
+                    ModPropNum(pCCPChar, PROPCH_RESPHYSICAL,  - pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);
+                    ModPropNum(pCCPChar, PROPCH_RESFIRE,      + pSpell->m_itSpell.m_PolyDex, pBaseCCPChar);
+                    ModPropNum(pCCPChar, PROPCH_RESENERGY,    + pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
 					break;
 				case SPELL_Reaper_Form:
 					iBuffIcon = BI_REAPERFORM;
@@ -753,13 +756,16 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			return;
 		}
 		case LAYER_SPELL_Corpse_Skin:
-			ModDefNum("ResPhysical", - pSpell->m_itSpell.m_PolyStr, true);
-            ModDefNum("ResFire", + pSpell->m_itSpell.m_PolyDex, true);
-            ModDefNum("ResCold", - pSpell->m_itSpell.m_PolyStr, true);
-            ModDefNum("ResPoison", + pSpell->m_itSpell.m_PolyDex, true);
+        {
+            CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+            ModPropNum(pCCPChar, PROPCH_RESPHYSICAL, - pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);
+            ModPropNum(pCCPChar, PROPCH_RESFIRE,   + pSpell->m_itSpell.m_PolyDex, pBaseCCPChar);
+            ModPropNum(pCCPChar, PROPCH_RESCOLD,   - pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);
+            ModPropNum(pCCPChar, PROPCH_RESPOISON, + pSpell->m_itSpell.m_PolyDex, pBaseCCPChar);
 			if (pClient)
 				pClient->removeBuff(BI_CORPSESKIN);
 			return;
+        }
 
 		case LAYER_SPELL_Pain_Spike:
 			if (pClient)
@@ -802,12 +808,13 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			return;
 		case SPELL_Curse:
 		{
-			if ( m_pPlayer )
+			if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && m_pPlayer )
 			{
-                ModDefNum("RESFIREMAX", + 10, true);
-                ModDefNum("RESCOLDMAX", + 10, true);
-                ModDefNum("RESPOISONMAX", + 10, true);
-                ModDefNum("RESENERGYMAX", + 10, true);
+                CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+                ModPropNum(pCCPChar, PROPCH_RESFIREMAX,   + 10, pBaseCCPChar);
+                ModPropNum(pCCPChar, PROPCH_RESCOLDMAX,   + 10, pBaseCCPChar);
+                ModPropNum(pCCPChar, PROPCH_RESPOISONMAX, + 10, pBaseCCPChar);
+                ModPropNum(pCCPChar, PROPCH_RESENERGYMAX, + 10, pBaseCCPChar);
 			}
 			for (int i = STAT_STR; i < STAT_BASE_QTY; ++i )
 				Stat_AddMod((STAT_TYPE)i, uiStatEffect);
@@ -844,11 +851,12 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		case SPELL_Reactive_Armor:
 			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
 			{
-				ModDefNum("RESPHYSICAL", - pSpell->m_itSpell.m_spelllevel, true);
-                ModDefNum("RESFIRE", + 5, true);
-                ModDefNum("RESCOLD", + 5, true);
-                ModDefNum("RESPOISON", + 5, true);
-                ModDefNum("RESENERGY", + 5, true);
+                CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+                ModPropNum(pCCPChar, PROPCH_RESPHYSICAL, - pSpell->m_itSpell.m_spelllevel, pBaseCCPChar);
+                ModPropNum(pCCPChar, PROPCH_RESFIRE,   +5, pBaseCCPChar);
+                ModPropNum(pCCPChar, PROPCH_RESCOLD,   +5, pBaseCCPChar);
+                ModPropNum(pCCPChar, PROPCH_RESPOISON, +5, pBaseCCPChar);
+                ModPropNum(pCCPChar, PROPCH_RESENERGY, +5, pBaseCCPChar);
 			}
 			else
 			{
@@ -861,11 +869,12 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			StatFlag_Clear(STATF_REFLECTION);
 			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
 			{
-                ModDefNum("RESPHYSICAL", + pSpell->m_itSpell.m_spelllevel, true);
-                ModDefNum("RESFIRE", - 10, true);
-                ModDefNum("RESCOLD", - 10, true);
-                ModDefNum("RESPOISON", - 10, true);
-                ModDefNum("RESENERGY", - 10, true);
+                CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+                ModPropNum(pCCPChar, PROPCH_RESPHYSICAL, + pSpell->m_itSpell.m_spelllevel, pBaseCCPChar);
+                ModPropNum(pCCPChar, PROPCH_RESFIRE,   -10, pBaseCCPChar);
+                ModPropNum(pCCPChar, PROPCH_RESCOLD,   -10, pBaseCCPChar);
+                ModPropNum(pCCPChar, PROPCH_RESPOISON, -10, pBaseCCPChar);
+                ModPropNum(pCCPChar, PROPCH_RESENERGY, -10, pBaseCCPChar);
 			}
 			if (pClient)
 				pClient->removeBuff(BI_MAGICREFLECTION);
@@ -876,8 +885,9 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		case SPELL_Arch_Prot:
 			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
 			{
-				ModDefNum("RESPHYSICAL", + pSpell->m_itSpell.m_PolyStr, true);
-				ModDefNum("FASTERCASTING", + 2, true);
+                CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+                ModPropNum(pCCPChar, PROPCH_RESPHYSICAL, + pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);
+                ModPropNum(pCCPChar, PROPCH_FASTERCASTING, +2, pBaseCCPChar);
                 _CheckLimitEffectSkill(pSpell->m_itSpell.m_PolyDex, this, SKILL_MAGICRESISTANCE);
 				Skill_AddBase(SKILL_MAGICRESISTANCE, pSpell->m_itSpell.m_PolyDex);
 			}
@@ -902,7 +912,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		/*case SPELL_Shield:			// 113 // erects a temporary force field around you. Nobody approaching will be able to get within 1 tile of you, though you can move close to them if you wish.
 			return;*/
 		case SPELL_Mind_Rot:
-			ModDefNum("LowerManaCost", + pSpell->m_itSpell.m_spelllevel, true);
+            ModPropNum(COMP_PROPS_CHAR, PROPCH_LOWERMANACOST, pSpell->m_itSpell.m_spelllevel, true);
 			if (pClient)
 				pClient->removeBuff(BI_MINDROT);
 			return;
@@ -910,7 +920,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			{
 				CItem * pWeapon = m_uidWeapon.ItemFind();
 				if (pWeapon)
-					pWeapon->ModDefNum("HitLeechLife", - pSpell->m_itSpell.m_spelllevel, true);	// Adding 50% HitLeechLife to the weapon, since damaging with it should return 50% of the damage dealt.
+					pWeapon->ModPropNum(COMP_PROPS_ITEMEQUIPPABLE, PROPCH_HITLEECHLIFE, - pSpell->m_itSpell.m_spelllevel, true);	// Adding 50% HitLeechLife to the weapon, since damaging with it should return 50% of the damage dealt.
 			}
 			return;
 		default:
@@ -966,6 +976,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case LAYER_SPELL_Polymorph:
 		{
 			BUFF_ICONS iBuffIcon = BI_START;
+            CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+
 			switch (spell)
 			{
 				case SPELL_BeastForm:		// 107 // polymorphs you into an animal for a while.
@@ -977,9 +989,9 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					m_atMagery.m_SummonID = CREID_LICH;
 					Stats_AddRegenVal(STAT_INT, + pSpell->m_itSpell.m_PolyStr);	// RegenManaVal
                     Stats_AddRegenVal(STAT_STR, - pSpell->m_itSpell.m_PolyDex);	// RegenHitsVal
-                    ModDefNum("ResFire", - pSpell->m_itSpell.m_spellcharges, true);		// ResFire, ResPoison, ResCold
-                    ModDefNum("ResPoison", + pSpell->m_itSpell.m_spellcharges, true);
-                    ModDefNum("ResCold", + pSpell->m_itSpell.m_spellcharges, true);
+                    ModPropNum(pCCPChar, PROPCH_RESFIRE,   - pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
+                    ModPropNum(pCCPChar, PROPCH_RESPOISON, + pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
+                    ModPropNum(pCCPChar, PROPCH_RESCOLD,    + pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
 					iBuffIcon = BI_LICHFORM;
 					break;
 				case SPELL_Wraith_Form:
@@ -988,9 +1000,9 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
                     pSpell->m_itSpell.m_PolyStr = 15;
                     pSpell->m_itSpell.m_PolyDex = 5;
                     pSpell->m_itSpell.m_spellcharges = 5;
-                    ModDefNum("ResPhysical", + pSpell->m_itSpell.m_PolyStr, true);
-                    ModDefNum("ResFire", - pSpell->m_itSpell.m_PolyDex, true);
-                    ModDefNum("ResEnergy", - pSpell->m_itSpell.m_spellcharges, true);
+                    ModPropNum(pCCPChar, PROPCH_RESPHYSICAL,  + pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);
+                    ModPropNum(pCCPChar, PROPCH_RESFIRE,      - pSpell->m_itSpell.m_PolyDex, pBaseCCPChar);
+                    ModPropNum(pCCPChar, PROPCH_RESENERGY,    - pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
 					break;
 				case SPELL_Horrific_Beast:
 					m_atMagery.m_SummonID = CREID_HORRIFIC_BEAST;
@@ -999,10 +1011,10 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					break;
 				case SPELL_Vampiric_Embrace:
 					m_atMagery.m_SummonID = CREID_VAMPIRE_BAT;
-                    ModDefNum("HitLeechLife", + pSpell->m_itSpell.m_PolyStr, true);		// +Hit Leech Life
+                    ModPropNum(pCCPChar, PROPCH_HITLEECHLIFE, + pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);	// +Hit Leech Life
                     Stats_AddRegenVal(STAT_DEX, + pSpell->m_itSpell.m_PolyDex);		    // +RegenStamVal
                     Stats_AddRegenVal(STAT_INT, + pSpell->m_itSpell.m_spellcharges);	// RegenManaVal
-                    ModDefNum("ResFire", - pSpell->m_itSpell.m_spelllevel, true);		// ResFire
+                    ModPropNum(pCCPChar, PROPCH_RESFIRE,      - pSpell->m_itSpell.m_spelllevel, pBaseCCPChar); // ResFire
 					iBuffIcon = BI_VAMPIRICEMBRACE;
 					break;
 				case SPELL_Stone_Form:
@@ -1267,6 +1279,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			}
 			return;
 		case LAYER_SPELL_Corpse_Skin:
+        {
 			if (pClient && IsSetOF(OF_Buffs))
 			{
 				pClient->removeBuff(BI_CORPSESKIN);
@@ -1274,14 +1287,18 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			}
 			pSpell->m_itSpell.m_PolyDex = 15;
 			pSpell->m_itSpell.m_PolyStr = 10;
-            ModDefNum("ResFire", - pSpell->m_itSpell.m_PolyDex, true);
-            ModDefNum("ResPoison", - pSpell->m_itSpell.m_PolyDex, true);
-            ModDefNum("ResCold", + pSpell->m_itSpell.m_PolyStr, true);
-            ModDefNum("ResPhysical", + pSpell->m_itSpell.m_PolyStr, true);
-			return;
+
+            CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+            
+            ModPropNum(pCCPChar, PROPCH_RESFIRE,   - pSpell->m_itSpell.m_PolyDex, pBaseCCPChar);
+            ModPropNum(pCCPChar, PROPCH_RESPOISON, - pSpell->m_itSpell.m_PolyDex, pBaseCCPChar);
+            ModPropNum(pCCPChar, PROPCH_RESCOLD,     + pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);
+            ModPropNum(pCCPChar, PROPCH_RESPHYSICAL, + pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);
+            return;
+        }
 		case LAYER_SPELL_Mind_Rot:
             wStatEffectRef = 10;	// -10% LOWERMANACOST
-            ModDefNum("LowerManaCost", - wStatEffectRef, true);
+            ModPropNum(COMP_PROPS_CHAR, PROPCH_LOWERMANACOST, - wStatEffectRef, true);
 			return;
 		case LAYER_SPELL_Curse_Weapon:
 			{
@@ -1292,7 +1309,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					return;
 				}
                 wStatEffectRef = 50;	// +50% HitLeechLife
-				pWeapon->ModDefNum("HitLeechLife", + pSpell->m_itSpell.m_spelllevel, true);	// Adding 50% HitLeechLife to the weapon, since damaging with it should return 50% of the damage dealt.
+                // Adding 50% HitLeechLife to the weapon, since damaging with it should return 50% of the damage dealt.
+                pWeapon->ModPropNum(COMP_PROPS_ITEMEQUIPPABLE, PROPIEQUIP_HITLEECHLIFE, + wStatEffectRef, true);
 			}
 			return;
 		default:
@@ -1324,11 +1342,12 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			{
                 wStatEffectRef = 15 + (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
 
-                ModDefNum("RESPHYSICAL", + wStatEffectRef, true);
-                ModDefNum("RESFIRE", - 5, true);
-                ModDefNum("RESCOLD", - 5, true);
-                ModDefNum("RESPOISON", - 5, true);
-                ModDefNum("RESENERGY", - 5, true);
+                CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+                ModPropNum(pCCPChar, PROPCH_RESPHYSICAL, + wStatEffectRef, pBaseCCPChar);
+                ModPropNum(pCCPChar, PROPCH_RESFIRE,   -5, pBaseCCPChar);
+                ModPropNum(pCCPChar, PROPCH_RESCOLD,   -5, pBaseCCPChar);
+                ModPropNum(pCCPChar, PROPCH_RESPOISON, -5, pBaseCCPChar);
+                ModPropNum(pCCPChar, PROPCH_RESENERGY, -5, pBaseCCPChar);
 			}
 			else
 			{
@@ -1424,10 +1443,11 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				}
 				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && m_pPlayer )		// Curse also decrease max resistances on players
 				{
-                    ModDefNum("RESFIREMAX", - 10, true);
-                    ModDefNum("RESCOLDMAX", - 10, true);
-                    ModDefNum("RESPOISONMAX", - 10, true);
-                    ModDefNum("RESENERGYMAX", - 10, true);
+                    CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+                    ModPropNum(pCCPChar, PROPCH_RESFIREMAX,   - 10, pBaseCCPChar);
+                    ModPropNum(pCCPChar, PROPCH_RESCOLDMAX,   - 10, pBaseCCPChar);
+                    ModPropNum(pCCPChar, PROPCH_RESPOISONMAX, - 10, pBaseCCPChar);
+                    ModPropNum(pCCPChar, PROPCH_RESENERGYMAX, - 10, pBaseCCPChar);
 				}
 				for ( int i = STAT_STR; i < STAT_BASE_QTY; ++i )
                 {
@@ -1540,11 +1560,12 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			{
                 wStatEffectRef = 25 - (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
 
-                ModDefNum("RESPHYSICAL", - wStatEffectRef, true);
-                ModDefNum("RESFIRE", + 10, true);
-                ModDefNum("RESCOLD", + 10, true);
-                ModDefNum("RESPOISON", + 10, true);
-                ModDefNum("RESENERGY", + 10, true);
+                CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+                ModPropNum(pCCPChar, PROPCH_RESPHYSICAL, - wStatEffectRef, pBaseCCPChar);
+                ModPropNum(pCCPChar, PROPCH_RESFIRE,   +10, pBaseCCPChar);
+                ModPropNum(pCCPChar, PROPCH_RESCOLD,   +10, pBaseCCPChar);
+                ModPropNum(pCCPChar, PROPCH_RESPOISON, +10, pBaseCCPChar);
+                ModPropNum(pCCPChar, PROPCH_RESENERGY, +10, pBaseCCPChar);
 			}
 			if (pClient && IsSetOF(OF_Buffs))
 			{
@@ -1584,8 +1605,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					pSpell->m_itSpell.m_PolyDex = (short)(maximum(-INT16_MAX, minimum(INT16_MAX,uiMagicResist)));
                     _CheckLimitEffectSkill(pSpell->m_itSpell.m_PolyDex, this, SKILL_MAGICRESISTANCE);
 
-                    ModDefNum("RESPHYSICAL", - uiPhysicalResist, true);
-                    ModDefNum("FASTERCASTING", - 2, true);
+                    ModPropNum(COMP_PROPS_CHAR, PROPCH_RESPHYSICAL, -uiPhysicalResist, true);
+                    ModPropNum(COMP_PROPS_CHAR, PROPCH_FASTERCASTING, -2, true);
 					Skill_AddBase(SKILL_MAGICRESISTANCE, - pSpell->m_itSpell.m_PolyDex);
 				}
 				else
@@ -2166,8 +2187,9 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 	if ( !Skill_CanUse(skill) )
 		return false;
 
-	int iLowerManaCost = (int)GetDefNum("LOWERMANACOST", true);
-	int iLowerReagentCost = (int)GetDefNum("LOWERREAGENTCOST", true);
+    const CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+	const int iLowerManaCost = (int)GetPropNum(pCCPChar, PROPCH_LOWERMANACOST, pBaseCCPChar);
+	const int iLowerReagentCost = (int)GetPropNum(pCCPChar, PROPCH_LOWERREAGENTCOST, pBaseCCPChar);
 	ushort iManaUse = (ushort)(pSpellDef->m_wManaUse * (100 - minimum(iLowerManaCost, 40)) / 100);
 	ushort iTithingUse = (ushort)(pSpellDef->m_wTithingUse * (100 - minimum(iLowerReagentCost, 40)) / 100);
 
@@ -2309,9 +2331,9 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 			}
 
 			// check for reagents
-			if ( g_Cfg.m_fReagentsRequired && ! m_pNPC && pSrc == this )
+			if ( g_Cfg.m_fReagentsRequired && ! m_pNPC && (pSrc == this) )
 			{
-				if ( GetDefNum("LOWERREAGENTCOST", true) <= Calc_GetRandVal(100))
+				if ( iLowerReagentCost <= Calc_GetRandVal(100))
 				{
 					const CResourceQtyArray * pRegs = &(pSpellDef->m_Reags);
 					CItemContainer * pPack = GetPack();
@@ -2475,7 +2497,6 @@ bool CChar::Spell_Unequip( LAYER_TYPE layer )
 	CItem * pItemPrev = LayerFind( layer );
 	if ( pItemPrev != nullptr )
 	{
-
 		if ( IsSetMagicFlags(MAGICF_NOCASTFROZENHANDS) && IsStatFlag( STATF_FREEZE ))
 		{
 			SysMessageDefault( DEFMSG_SPELL_TRY_FROZENHANDS );
@@ -2485,8 +2506,7 @@ bool CChar::Spell_Unequip( LAYER_TYPE layer )
 		{
 			return false;
 		}
-
-		else if ( !pItemPrev->IsTypeSpellbook() && !pItemPrev->IsType(IT_WAND) && !pItemPrev->GetDefNum("SPELLCHANNELING",true))
+		else if ( !pItemPrev->IsTypeSpellbook() && !pItemPrev->IsType(IT_WAND) && !pItemPrev->GetPropNum(COMP_PROPS_CHAR, PROPCH_SPELLCHANNELING, true))
 		{
 			ItemBounce( pItemPrev );
 		}
@@ -3070,7 +3090,7 @@ int CChar::Spell_CastStart()
     int64 iWaitTime = IsPriv(PRIV_GM) ? 1 : pSpellDef->m_CastTime.GetLinear(Skill_GetBase((SKILL_TYPE)iSkill)); // in tenths of second
 
     // For every point in faster casting, the casting time is shortened by 0.25 or 1/4 of a second. (Keeping 0,2 and not 0,25 for backwards compatibility).
-	iWaitTime -= 2 * GetDefNum("FASTERCASTING", true);
+	iWaitTime -= 2 * GetPropNum(COMP_PROPS_CHAR, PROPCH_FASTERCASTING, true);
 
 	if ( iWaitTime < 1 )
 		iWaitTime = 1;
@@ -3232,7 +3252,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
             iEffect *= ((pCharSrc->Skill_GetBase(SKILL_EVALINT) * 3) / 1000) + 1;
 
             // Spell Damage Increase bonus
-            int DamageBonus = (int)(pCharSrc->GetDefNum("INCREASESPELLDAM", true));
+            int DamageBonus = (int)(pCharSrc->GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASESPELLDAM, true));
             if (m_pPlayer && pCharSrc->m_pPlayer && DamageBonus > 15)		// Spell Damage Increase is capped at 15% on PvP
                 DamageBonus = 15;
 

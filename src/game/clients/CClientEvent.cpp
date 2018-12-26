@@ -881,7 +881,35 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 	return true;
 }
 
+// Client selected an combat ability on book
+void CClient::Event_CombatAbilitySelect(dword dwAbility)
+{
+    ADDTOCALLSTACK("CClient::Event_CombatAbilitySelect");
+    if ( !m_pChar )
+        return;
 
+    if ( IsTrigUsed(TRIGGER_USERSPECIALMOVE) )
+    {
+        CScriptTriggerArgs Args;
+        Args.m_iN1 = dwAbility;
+        m_pChar->OnTrigger(CTRIG_UserSpecialMove, m_pChar, &Args);
+    }
+}
+
+// Client selected an virtue on gump
+void CClient::Event_VirtueSelect(dword dwVirtue, CChar *pCharTarg)
+{
+    ADDTOCALLSTACK("CClient::Event_VirtueSelect");
+    if ( !m_pChar )
+        return;
+
+    if ( IsTrigUsed(TRIGGER_USERVIRTUE) )
+    {
+        CScriptTriggerArgs Args(pCharTarg);
+        Args.m_iN1 = dwVirtue;
+        m_pChar->OnTrigger(CTRIG_UserVirtue, m_pChar, &Args);
+    }
+}
 
 void CClient::Event_CombatMode( bool fWar ) // Only for switching to combat mode
 {
@@ -2589,34 +2617,30 @@ void CClient::Event_UseToolbar(byte bType, dword dwArg)
 			return;
 	}
 
-	switch(bType)
+	switch (bType)
 	{
 		case 0x01: // Spell call
-		{
-			Cmd_Skill_Magery((SPELL_TYPE)(dwArg), m_pChar);
-		} break;
+        if ( (SPELL_TYPE)dwArg <= SPELL_SPELLWEAVING_QTY )	// KR clients only have support up to spellweaving spells
+        {
+			Cmd_Skill_Magery((SPELL_TYPE)dwArg, m_pChar);
+		}
+        break;
 
-		case 0x02: // Weapon ability
-		{
-
-		} break;
+		case 0x02: // Combat ability
+        break;
 
 		case 0x03: // Skill
-		{
-			Event_Skill_Use((SKILL_TYPE)(dwArg));
-		} break;
+			Event_Skill_Use((SKILL_TYPE)dwArg);
+		    break;
 
 		case 0x04: // Item
-		{
-			Event_DoubleClick(CUID(dwArg), true, true);
-		} break;
+			Event_DoubleClick(dwArg, true, true);
+            break;
 
-		case 0x05: // Scroll
-		{
-
-		} break;
+        case 0x5:	// virtue
+            Event_VirtueSelect(dwArg, m_pChar);
+            return;
 	}
-
 }
 
 //----------------------------------------------------------------------

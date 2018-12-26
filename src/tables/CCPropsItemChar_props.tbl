@@ -1,0 +1,7 @@
+//
+//	Class:	CCPropsItemChar
+//	Set:	attributes
+//	Prefix:	(special) PROPITCH_
+//
+
+ADD(WEIGHTREDUCTION,	"WEIGHTREDUCTION")

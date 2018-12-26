@@ -21,10 +21,6 @@ CCMultiMovable::CCMultiMovable(bool fCanTurn)
     _fCanTurn = fCanTurn;
 }
 
-CCMultiMovable::~CCMultiMovable()
-{
-}
-
 void CCMultiMovable::SetCaptain(CTextConsole * pSrc)
 {
     _pCaptain = pSrc;
@@ -1177,7 +1173,7 @@ bool CCMultiMovable::r_LoadVal(CScript & s)
 {
     ADDTOCALLSTACK("CItemShip::r_LoadVal");
     lpctstr	pszKey = s.GetKey();
-    CML_TYPE index = (CML_TYPE)FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    CML_TYPE index = (CML_TYPE)FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     CItem *pItemThis = dynamic_cast<CItem*>(this);
     ASSERT(pItemThis);
 

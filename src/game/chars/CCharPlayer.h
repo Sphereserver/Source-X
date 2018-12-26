@@ -39,8 +39,8 @@ public:
 	int64 m_timeLastUsed;	// Time the player char was last used.
 
 	CSString m_sProfile;	// limited to SCRIPT_MAX_LINE_LEN-16
-
-    HUE_TYPE m_SpeechHue;			// speech hue to use (sent by client)
+    HUE_TYPE m_SpeechHue;	// speech hue used (sent by client)
+    CUID m_uidWeaponLast;   // last equipped weapon (only used by 'EquipLastWeapon' client macro)
 
 	word m_wMurders;		// Murder count.
 	word m_wDeaths;			// How many times have i died ?
@@ -69,7 +69,7 @@ public:
 
 	bool getKrToolbarStatus();
 
-	CAccountRef GetAccount() const;
+	CAccount * GetAccount() const;
 
 public:
 	CCharPlayer( CChar * pChar, CAccount * pAccount );

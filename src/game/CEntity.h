@@ -35,7 +35,7 @@ public:
     *
     * @param pComponent the CComponent to suscribe.
     */
-    void Subscribe(CComponent *pComponent);
+    void SubscribeComponent(CComponent *pComponent);
 
     /**
     * @brief Unsuscribes a CComponent. Use this if looping through the components with an iterator!
@@ -43,14 +43,14 @@ public:
     * @param it Iterator to the component to unsubscribe.
     * @param fEraseFromMap Should i erase this component from the internal map? Use false if you're going to erase it manually later
     */
-    void Unsubscribe(std::map<COMP_TYPE, CComponent*>::iterator& it, bool fEraseFromMap = true);
+    void UnsubscribeComponent(std::map<COMP_TYPE, CComponent*>::iterator& it, bool fEraseFromMap = true);
 
     /**
     * @brief Unsuscribes a CComponent.
     *
     * @param pComponent the CComponent to unsuscribe.
     */
-    void Unsubscribe(CComponent *pComponent);
+    void UnsubscribeComponent(CComponent *pComponent);
 
     /**
     * @brief Checks if a CComponent is actually suscribed.
@@ -58,7 +58,7 @@ public:
     * @param pComponent the CComponent to check.
     * @return true if the pComponent is suscribed.
     */
-    bool IsSusbcribed(CComponent *pComponent) const;
+    bool IsComponentSubscribed(CComponent *pComponent) const;
 
     /**
     * @brief Gets a pointer to the given CComponent type.

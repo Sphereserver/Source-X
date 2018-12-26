@@ -268,7 +268,7 @@ private:
 	bool OnRxPing( const byte * pData, size_t len );
 	bool OnRxWebPageRequest( byte * pRequest, size_t len );
 
-	byte LogIn( CAccountRef pAccount, CSString & sMsg );
+	byte LogIn( CAccount * pAccount, CSString & sMsg );
 	byte LogIn( lpctstr pszName, lpctstr pPassword, CSString & sMsg );
 
 	bool CanInstantLogOut() const;
@@ -325,6 +325,7 @@ public:
 	void Event_BugReport( const tchar * pszText, int len, BUGREPORT_TYPE type, CLanguageID lang = 0 );
 	void Event_ChatButton(const nchar * pszName); // Client's chat button was pressed
 	void Event_ChatText( const nchar * pszText, int len, CLanguageID lang = 0 ); // Text from a client
+    void Event_CombatAbilitySelect(dword dwAbility);
 	void Event_CombatMode( bool fWar ); // Only for switching to combat mode
 	bool Event_DoubleClick( CUID uid, bool fMacro, bool fTestTouch, bool fScript = false );
 	void Event_ExtCmd( EXTCMD_TYPE type, tchar * pszName );
@@ -347,6 +348,7 @@ public:
 	void Event_VendorBuy_Cheater( int iCode = 0 );
 	void Event_VendorSell(CChar* pVendor, const VendorItem* items, size_t itemCount);
 	void Event_VendorSell_Cheater( int iCode = 0 );
+    void Event_VirtueSelect(dword dwVirtue, CChar *pCharTarg);
 	bool Event_Walk( byte rawdir, byte sequence = 0 ); // Player moves
 	bool Event_CheckWalkBuffer();
 
@@ -605,7 +607,7 @@ public:
 	void LogOpenedContainer(const CItemContainer* pContainer);
 
 	// Test what I can do
-	CAccountRef GetAccount() const
+	CAccount * GetAccount() const
 	{
 		return( m_pAccount );
 	}

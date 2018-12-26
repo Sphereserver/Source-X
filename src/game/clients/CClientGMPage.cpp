@@ -285,7 +285,7 @@ void CClient::Cmd_GM_PageCmd( lpctstr pszCmd )
 		case GPV_BAN:
 			// This should work even if they are not logged in.
 			{
-				CAccountRef pAccount = m_pGMPage->FindAccount();
+				CAccount * pAccount = m_pGMPage->FindAccount();
 				if ( pAccount )
 				{
 					if ( ! pAccount->Kick( this, true ))

@@ -826,7 +826,7 @@ CScriptLineContext CScript::GetContext() const
     CScriptLineContext LineContext;
     LineContext.m_iLineNum = m_iLineNum;
     LineContext.m_iOffset = _GetPosition();
-    TS_RETURN(LineContext);
+    return LineContext;
 }
 
 bool _cdecl CScript::WriteSection( lpctstr pszSection, ... )

@@ -1,0 +1,198 @@
+#include "../../common/sphere_library/CSString.h"
+#include "../items/CItem.h"
+#include "CCPropsItemWeaponRanged.h"
+
+
+lpctstr const CCPropsItemWeaponRanged::_ptcPropertyKeys[PROPIWEAPRNG_QTY + 1] =
+{
+    #define ADD(a,b) b,
+    #include "../../tables/CCPropsItemWeaponRanged_props.tbl"
+    #undef ADD
+    nullptr
+};
+
+CCPropsItemWeaponRanged::CCPropsItemWeaponRanged() : CComponentProps(COMP_PROPS_ITEMWEAPONRANGED)
+{
+}
+
+bool CanSubscribeTypeIWR(IT_TYPE type)
+{
+    return (type == IT_WEAPON_BOW || type == IT_WEAPON_XBOW);
+}
+
+bool CCPropsItemWeaponRanged::CanSubscribe(const CItemBase* pItemBase) // static
+{
+    return CanSubscribeTypeIWR(pItemBase->GetType());
+}
+
+bool CCPropsItemWeaponRanged::CanSubscribe(const CItem* pItem) // static
+{
+    return CanSubscribeTypeIWR(pItem->GetType());
+}
+
+
+lpctstr CCPropsItemWeaponRanged::GetPropertyName(int iPropIndex) const
+{
+    ASSERT(iPropIndex < PROPIWEAPRNG_QTY);
+    return _ptcPropertyKeys[iPropIndex];
+}
+
+bool CCPropsItemWeaponRanged::IsPropertyStr(int iPropIndex) const
+{
+    switch (iPropIndex)
+    {
+        case PROPIWEAPRNG_AMMOTYPE:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool CCPropsItemWeaponRanged::GetPropertyNumPtr(int iPropIndex, PropertyValNum_t* piOutVal) const
+{
+    ADDTOCALLSTACK("CCPropsItemWeaponRanged::GetPropertyNumPtr");
+    return BaseCont_GetPropertyNum(&_mPropsNum, iPropIndex, piOutVal);
+}
+
+bool CCPropsItemWeaponRanged::GetPropertyStrPtr(int iPropIndex, CSString* psOutVal, bool fZero) const
+{
+    ADDTOCALLSTACK("CCPropsItemWeaponRanged::GetPropertyStrPtr");
+    return BaseCont_GetPropertyStr(&_mPropsStr, iPropIndex, psOutVal, fZero);
+}
+
+void CCPropsItemWeaponRanged::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj)
+{
+    ADDTOCALLSTACK("CCPropsItemWeaponRanged::SetPropertyNum");
+    UNREFERENCED_PARAMETER(pLinkedObj);
+    _mPropsNum[iPropIndex] = iVal;
+
+    if (!pLinkedObj)
+        return;
+
+    // Do stuff to the pLinkedObj
+    pLinkedObj->ResendTooltip();
+}
+
+void CCPropsItemWeaponRanged::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, bool fZero)
+{
+    ADDTOCALLSTACK("CCPropsItemWeaponRanged::SetPropertyStr");
+    ASSERT(ptcVal);
+    if (fZero && (*ptcVal == '\0'))
+        ptcVal = "0";
+    _mPropsStr[iPropIndex] = ptcVal;
+
+    if (!pLinkedObj)
+        return;
+
+    // Do stuff to the pLinkedObj
+    pLinkedObj->ResendTooltip();
+}
+
+void CCPropsItemWeaponRanged::DeletePropertyNum(int iPropIndex)
+{
+    ADDTOCALLSTACK("CCPropsItemWeaponRanged::DeletePropertyNum");
+    ASSERT(_mPropsNum.count(iPropIndex));
+    _mPropsNum.erase(iPropIndex);
+}
+
+void CCPropsItemWeaponRanged::DeletePropertyStr(int iPropIndex)
+{
+    ADDTOCALLSTACK("CCPropsItemWeaponRanged::DeletePropertyStr");
+    ASSERT(_mPropsStr.count(iPropIndex));
+    _mPropsStr.erase(iPropIndex);
+}
+
+bool CCPropsItemWeaponRanged::r_LoadPropVal(CScript & s, CObjBase* pLinkedObj)
+{
+    ADDTOCALLSTACK("CCPropsItemWeaponRanged::r_LoadPropVal");
+    int i = FindTableSorted(s.GetKey(), _ptcPropertyKeys, CountOf(_ptcPropertyKeys)-1);
+    if (i == -1)
+        return false;
+
+    bool fPropStr = IsPropertyStr(i);
+    if (!fPropStr && (*s.GetArgRaw() == '\0'))
+    {
+        DeletePropertyNum(i);
+        return true;
+    }
+
+    BaseCont_LoadPropVal(i, fPropStr, s, pLinkedObj);
+
+    return true;
+}
+
+bool CCPropsItemWeaponRanged::r_WritePropVal(lpctstr pszKey, CSString & s)
+{
+    ADDTOCALLSTACK("CCPropsItemWeaponRanged::r_WritePropVal");
+    int i = FindTableSorted(pszKey, _ptcPropertyKeys, CountOf(_ptcPropertyKeys)-1);
+    if (i == -1)
+        return false;
+
+    BaseCont_WritePropVal(i, IsPropertyStr(i), s);
+    return true;
+}
+
+void CCPropsItemWeaponRanged::r_Write(CScript & s)
+{
+    ADDTOCALLSTACK("CCPropsItemWeaponRanged::r_Write");
+    // r_Write isn't called by CItemBase/CCharBase, so we don't get base props saved
+    BaseCont_Write_ContNum(&_mPropsNum, _ptcPropertyKeys, s);
+    BaseCont_Write_ContStr(&_mPropsStr, _ptcPropertyKeys, s);
+}
+
+void CCPropsItemWeaponRanged::Copy(const CComponentProps * target)
+{
+    ADDTOCALLSTACK("CCPropsItemWeaponRanged::Copy");
+    const CCPropsItemWeaponRanged *pTarget = static_cast<const CCPropsItemWeaponRanged*>(target);
+    if (!pTarget)
+    {
+        return;
+    }
+    _mPropsNum = pTarget->_mPropsNum;
+    _mPropsStr = pTarget->_mPropsStr;
+}
+
+void CCPropsItemWeaponRanged::AddTooltipData(CObjBase* pLinkedObj)
+{
+#define TOOLTIP_APPEND(t)   pLinkedObj->m_TooltipData.emplace_back(t)
+#define ADDT(tooltipID)     TOOLTIP_APPEND(new CClientTooltip(tooltipID))
+#define ADDTNUM(tooltipID)  TOOLTIP_APPEND(new CClientTooltip(tooltipID, iVal))
+#define ADDTSTR(tooltipID)  TOOLTIP_APPEND(new CClientTooltip(tooltipID, ptcVal))
+
+    UNREFERENCED_PARAMETER(pLinkedObj);
+    /* Tooltips for "dynamic" properties (stored in the BaseConts: _mPropsNum and _mPropsStr) */
+/*
+    // Numeric properties
+    for (const BaseContNumPair_t& propPair : _mPropsNum)
+    {
+        int prop = propPair.first;
+        PropertyValNum_t iVal = propPair.second;
+
+        if (iVal == 0)
+            continue;
+
+        switch (prop)
+        {
+            default:
+                break;
+        }
+    }
+    // End of Numeric properties
+*/
+
+/*
+    // String properties
+    for (const BaseContStrPair_t& propPair : _mPropsStr)
+    {
+        int prop = propPair.first;
+        lpctstr ptcVal = propPair.second.GetPtr();
+
+        switch (prop)
+        {
+            default:
+                break;
+        }
+    }
+    // End of String properties
+*/
+}

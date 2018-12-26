@@ -476,7 +476,7 @@ CVarDefContNum* CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fZero )
 	if ( pszName[0] == '\0' )
 		return nullptr;
 
-	if ( fZero && (iVal == 0) )
+	if ( (iVal == 0) && !fZero )
 	{
 		DeleteAtKey(pszName);
 		return nullptr;
@@ -542,7 +542,7 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, 
 	if ( !pszName || !pszName[0] )
 		return nullptr;
 
-	if ( pszVal == nullptr || pszVal[0] == '\0' )	// but not if empty
+	if ( !fZero && (pszVal == nullptr) || (pszVal[0] == '\0') )	// but not if empty
 	{
 		DeleteAtKey(pszName);
 		return nullptr;
