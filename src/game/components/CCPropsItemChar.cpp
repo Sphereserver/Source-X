@@ -79,13 +79,13 @@ void CCPropsItemChar::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObj
             {
                 ASSERT(pItemLink->IsItemEquipped() || pItemLink->IsItemInContainer());
                 pCont->OnWeightChange(pItemLink->GetWeight() - oldweight);
-                pLinkedObj->ResendTooltip();
+                pLinkedObj->UpdatePropertyFlag();
             }
             break;
         }
 
         //default:
-        //    pLinkedObj->ResendTooltip();
+        //    pLinkedObj->UpdatePropertyFlag();
         //    break;
     }
 }
@@ -102,7 +102,7 @@ void CCPropsItemChar::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* p
         return;
 
     // Do stuff to the pLinkedObj
-    pLinkedObj->ResendTooltip();
+    pLinkedObj->UpdatePropertyFlag();
 }
 
 void CCPropsItemChar::DeletePropertyNum(int iPropIndex)

@@ -461,6 +461,8 @@ void CChar::Delete(bool bforce)
 	if (( NotifyDelete() == false ) && !bforce)
 		return;
 
+    g_World.DelCharTicking(this);
+
 	// Character has been deleted
 	if ( IsClient() )
 	{

@@ -115,7 +115,7 @@ CObjBase::~CObjBase()
         //pEntity->UnsubscribeComponent(GetSpawn());    // Avoiding recursive calls from CCSpawn::DelObj when forcing the pChar/pItem to Delete();
         GetSpawn()->DelObj(GetUID());  // Then I should be removed from it's list.
     }
-    g_World.m_ObjStatusUpdates.RemovePtr(this);
+    g_World.m_ObjStatusUpdates.erase(this);
     g_World.m_TimedFunctions.Erase( GetUID() );
 
 	FreePropertyList();
@@ -320,7 +320,7 @@ bool CObjBase::SetNamePool( lpctstr pszName )
 			return false;
 	}
 
-	UpdatePropertyFlag(AUTOTOOLTIP_FLAG_NAME);
+	UpdatePropertyFlag();
 	return true;
 }
 
@@ -1802,7 +1802,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 	}
     if (fResendTooltip)
     {
-        ResendTooltip();
+        UpdatePropertyFlag();
     }
 	return true;
 	EXC_CATCH;
@@ -2801,17 +2801,17 @@ dword CObjBase::UpdatePropertyRevision(dword hash)
 	return m_PropertyRevision;
 }
 
-void CObjBase::UpdatePropertyFlag(int mask)
+void CObjBase::UpdatePropertyFlag()
 {
 	ADDTOCALLSTACK("CObjBase::UpdatePropertyFlag");
-	if ( g_Serv.IsLoading() || ((g_Cfg.m_iAutoTooltipResend & mask) == 0) )
+	if ( g_Serv.IsLoading() )
 		return;
 
 	m_fStatusUpdate |= SU_UPDATE_TOOLTIP;
 
     // Items equipped, inside containers or with timer expired doesn't receive ticks and need to be added to a list of items to be processed separately
-    if ( (!IsTopLevel() || IsTimerExpired()) && !g_World.m_ObjStatusUpdates.ContainsPtr(this) )
-        g_World.m_ObjStatusUpdates.emplace_back(this);
+    if ( !IsTopLevel() || IsTimerExpired() )
+        g_World.m_ObjStatusUpdates.emplace(this);
 }
 
 dword CObjBase::GetPropertyHash() const
@@ -2838,7 +2838,7 @@ void CObjBase::OnTickStatusUpdate()
 
 void CObjBase::ResendTooltip(bool fSendFull, bool fUseCache)
 {
-	ADDTOCALLSTACK("CObjBase::ResendTooltip");
+	ADDTOCALLSTACK("CObjBase::UpdatePropertyFlag");
 
 	// Send tooltip packet to all nearby clients
 	m_fStatusUpdate &= ~SU_UPDATE_TOOLTIP;

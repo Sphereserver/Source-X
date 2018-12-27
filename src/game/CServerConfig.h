@@ -440,14 +440,6 @@ public:
 	int64 m_iTooltipCache;            // time in seconds to cache tooltip for.
 	int	m_iTooltipMode;             // tooltip mode (TOOLTIP_TYPE)
 	int	m_iContextMenuLimit;        // max amount of options per context menu
-#define AUTOTOOLTIP_FLAG_NAME          0x0001   // item or character name changes
-#define AUTOTOOLTIP_FLAG_AMOUNT        0x0002   // item amount changes
-#define AUTOTOOLTIP_FLAG_WEIGHT        0x0004   // container weight changes
-#define AUTOTOOLTIP_FLAG_DURABILITY    0x0008   // weapon or armor durability changes
-#define AUTOTOOLTIP_FLAG_POISON        0x0010   // weapon poison charge changes
-#define AUTOTOOLTIP_FLAG_WANDCHARGES   0x0020   // wand charge changes
-#define AUTOTOOLTIP_FLAG_SPELLBOOK     0x0040   // spell added to spellbook
-	uint m_iAutoTooltipResend;       // automatically resend tooltip
 
 	int64   m_iRegenRate[STAT_QTY]; // Regen's delay for each stat (in seconds in the ini, then converted to msecs).
     int64   _iItemHitpointsUpdate;  // Update period for CCItemDamageable (in seconds in the ini, then converted to msecs).

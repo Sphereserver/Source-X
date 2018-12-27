@@ -67,7 +67,7 @@ void CCPropsItem::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase
         return;
 
     // Do stuff to the pLinkedObj
-    pLinkedObj->ResendTooltip();
+    pLinkedObj->UpdatePropertyFlag();
 }
 
 void CCPropsItem::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, bool fZero)
@@ -82,7 +82,7 @@ void CCPropsItem::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLink
         return;
 
     // Do stuff to the pLinkedObj
-    pLinkedObj->ResendTooltip();
+    pLinkedObj->UpdatePropertyFlag();
 }
 
 void CCPropsItem::DeletePropertyNum(int iPropIndex)

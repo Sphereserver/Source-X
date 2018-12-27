@@ -324,7 +324,7 @@ void CCSpawn::DelObj(CUID uid)
             break;
         }
     }
-    pItem->ResendTooltip();
+    pItem->UpdatePropertyFlag();
 }
 
 void CCSpawn::AddObj(CUID uid)
@@ -383,7 +383,7 @@ void CCSpawn::AddObj(CUID uid)
         }
     }
     if (!g_Serv.IsLoading())
-        pItem->ResendTooltip();
+        pItem->UpdatePropertyFlag();
 }
 
 CCRET_TYPE CCSpawn::OnTickComponent()

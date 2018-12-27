@@ -107,7 +107,7 @@ void CCPropsChar::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase
         }
         
         default:
-            pLinkedObj->ResendTooltip();
+            pLinkedObj->UpdatePropertyFlag();
             break;
     }
 }
@@ -124,7 +124,7 @@ void CCPropsChar::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLink
         return;
 
     // Do stuff to the pLinkedObj
-    pLinkedObj->ResendTooltip();
+    pLinkedObj->UpdatePropertyFlag();
 }
 
 void CCPropsChar::DeletePropertyNum(int iPropIndex)

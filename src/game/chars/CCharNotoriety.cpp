@@ -681,7 +681,7 @@ void CChar::NotoSave_Update()
 	ADDTOCALLSTACK("CChar::NotoSave_Update");
 	NotoSave_Clear();
 	UpdateMode();
-	ResendTooltip();
+	UpdatePropertyFlag();
 }
 
 void CChar::NotoSave_CheckTimeout()

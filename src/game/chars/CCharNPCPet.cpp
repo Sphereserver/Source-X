@@ -230,7 +230,7 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 			SoundChar(CRESND_NOTICE);
 			Skill_Start(SKILL_NONE);
 			NPC_PetClearOwners();
-			ResendTooltip();
+			UpdatePropertyFlag();
 			break;
 
 		case PC_DROP:

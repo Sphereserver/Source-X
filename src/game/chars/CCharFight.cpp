@@ -1834,7 +1834,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			pCharTarg->SetPoison(10 * iPoisonDeliver, iPoisonDeliver / 5, this);
 
 			pWeapon->m_itWeapon.m_poison_skill -= iPoisonDeliver / 2;	// reduce weapon poison charges
-			pWeapon->UpdatePropertyFlag(AUTOTOOLTIP_FLAG_POISON);
+			pWeapon->UpdatePropertyFlag();
 		}
 
 		// Check if the weapon will be damaged

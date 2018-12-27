@@ -89,7 +89,7 @@ void CCPropsItemWeapon::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CO
         return;
 
     // Do stuff to the pLinkedObj
-    pLinkedObj->ResendTooltip();
+    pLinkedObj->UpdatePropertyFlag();
 }
 
 void CCPropsItemWeapon::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, bool fZero)
@@ -104,7 +104,7 @@ void CCPropsItemWeapon::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase*
         return;
 
     // Do stuff to the pLinkedObj
-    pLinkedObj->ResendTooltip();
+    pLinkedObj->UpdatePropertyFlag();
 }
 
 void CCPropsItemWeapon::DeletePropertyNum(int iPropIndex)

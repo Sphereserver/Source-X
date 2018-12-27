@@ -453,7 +453,7 @@ public:
 	bool IsSwimming() const;
 
 	bool MoveToRegionReTest( dword dwType );
-	bool MoveToChar(const CPointMap& pt, bool fForceFix = false);
+	bool MoveToChar(const CPointMap& pt, bool fForceFix = false, bool fAllowReject = true);
 	bool MoveTo(const CPointMap& pt, bool fForceFix = false);
 	virtual void SetTopZ( char z );
 	bool MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart = 1, bool fFromShip = false);

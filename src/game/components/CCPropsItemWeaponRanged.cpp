@@ -70,7 +70,7 @@ void CCPropsItemWeaponRanged::SetPropertyNum(int iPropIndex, PropertyValNum_t iV
         return;
 
     // Do stuff to the pLinkedObj
-    pLinkedObj->ResendTooltip();
+    pLinkedObj->UpdatePropertyFlag();
 }
 
 void CCPropsItemWeaponRanged::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, bool fZero)
@@ -85,7 +85,7 @@ void CCPropsItemWeaponRanged::SetPropertyStr(int iPropIndex, lpctstr ptcVal, COb
         return;
 
     // Do stuff to the pLinkedObj
-    pLinkedObj->ResendTooltip();
+    pLinkedObj->UpdatePropertyFlag();
 }
 
 void CCPropsItemWeaponRanged::DeletePropertyNum(int iPropIndex)

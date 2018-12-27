@@ -1381,3 +1381,8 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 	- Weapons: Antique, AssassinHoned.
 - Removed properties: BonusHitsMax, BonusStamMax, BonusManaMax.
 - Changed: RANGE is now a dynamic script property, meaning that it can be changed per-instance and is no longer a base-only prop.
+
+27-12-2018, Nolok
+- Fixed: New player starting with TIMER=0 and couldn't finish any action (Issue #171).
+- Fixed: Tooltips not refreshing fast enough (Issue #170).
+- Fixed: ARGN1 was in ms in trigger @DROPON_GROUND (Issue #168).

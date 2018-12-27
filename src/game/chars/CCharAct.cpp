@@ -3524,7 +3524,7 @@ bool CChar::MoveToRegionReTest( dword dwType )
 // This could be us just taking a step or being teleported.
 // Low level: DOES NOT UPDATE DISPLAYS or container flags. (may be offline)
 // This does not check for gravity.
-bool CChar::MoveToChar(const CPointMap& pt, bool fForceFix)
+bool CChar::MoveToChar(const CPointMap& pt, bool fForceFix, bool fAllowReject)
 {
 	ADDTOCALLSTACK("CChar::MoveToChar");
 
@@ -3545,22 +3545,22 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fForceFix)
 		return true;
 	}
 
+    // This needs to be called before the other code, to be sure that the char is actually attached to a sector.
+    //  When we create a new player char, first we change only its P, then we actually attach it to the sector in this function.
+    
+
 	// Did we step into a new region ?
 	CRegionWorld * pAreaNew = dynamic_cast<CRegionWorld *>(pt.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA));
-	if ( !MoveToRegion(pAreaNew, true) )
+	if ( !MoveToRegion(pAreaNew, fAllowReject) )
 		return false;
 
 	CRegion * pRoomNew = pt.GetRegion(REGION_TYPE_ROOM);
-	if ( !MoveToRoom(pRoomNew, true) )
+	if ( !MoveToRoom(pRoomNew, fAllowReject) )
 		return false;
 
 	CPointMap ptOld = GetUnkPoint();
-	bool fSectorChange = pt.GetSector()->MoveCharToSector(this);
     SetTopPoint(pt);
-    if (m_pNPC && IsSleeping())
-    {
-        GoAwake();
-    }
+    bool fSectorChange = pt.GetSector()->MoveCharToSector(this);
 
 	if ( !m_fClimbUpdated || fForceFix )
 		FixClimbHeight();
@@ -3569,7 +3569,7 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fForceFix)
 	{
 		if ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) )
 		{
-			CScriptTriggerArgs	Args(ptOld.m_x, ptOld.m_y, ((uchar)ptOld.m_z << 16) | ptOld.m_map);
+			CScriptTriggerArgs Args(ptOld.m_x, ptOld.m_y, ((uchar)ptOld.m_z << 16) | ptOld.m_map);
 			OnTrigger(CTRIG_EnvironChange, this, &Args);
 		}
 	}
