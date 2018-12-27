@@ -407,7 +407,7 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 	// Just read info on a single item carryed by a CChar.
 	// ITEM=#id,#amount,R#chance
 
-	CResourceID rid = g_Cfg.ResourceGetID( RES_ITEMDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pArg)) );
+	CResourceID rid = g_Cfg.ResourceGetID( RES_ITEMDEF, pArg);
 	if ( ! rid.IsValidUID())
 		return nullptr;
 	if ( rid.GetResType() != RES_ITEMDEF && rid.GetResType() != RES_TEMPLATE )
@@ -655,12 +655,12 @@ int CItem::GetVisualRange() const	// virtual
 // Doing this way lets speed be changed for all created weapons from the script itself instead of rewriting one by one.
 byte CItem::GetSpeed() const
 {
-	if (m_TagDefs.GetKey("OVERRIDE.SPEED"))
-		return (byte)(m_TagDefs.GetKeyNum("OVERRIDE.SPEED"));
-	CItemBase * pItemDef = dynamic_cast<CItemBase *>(Base_GetDef());
+    const CVarDefCont *pVarDef = GetKey("OVERRIDE.SPEED", true);
+	if (pVarDef)
+		return (byte)pVarDef->GetValNum();
+	const CItemBase * pItemDef = static_cast<CItemBase *>(Base_GetDef());
 	return pItemDef->GetSpeed();
 }
-
 
 int CItem::IsWeird() const
 {
@@ -1473,7 +1473,7 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 		if ( IsDeleted() )
 			return false;
 
-		iDecayTime = args.m_iN1;
+		iDecayTime = args.m_iN1 * MSECS_PER_TENTH;
 	}
 
 	if ( ttResult != TRIGRET_RET_TRUE )

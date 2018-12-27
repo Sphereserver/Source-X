@@ -1275,7 +1275,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				pItem = dynamic_cast<CItem*> (uid.ObjFind());
 				if (pItem == nullptr)
 				{
-					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetID(RES_ITEMDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pszArg))).GetResIndex());
+					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetID(RES_ITEMDEF, pszArg).GetResIndex());
 					const CItemBase * pItemDef = CItemBase::FindItemBase( id );
 					if ( pItemDef != nullptr )
 					{
@@ -1315,7 +1315,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				pItem = dynamic_cast<CItem*> (uid.ObjFind());
 				if ( pItem == nullptr )
 				{
-					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetID(RES_ITEMDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pszArg))).GetResIndex());
+					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetID(RES_ITEMDEF, pszArg).GetResIndex());
 					const CItemBase * pItemDef = CItemBase::FindItemBase( id );
 					if (pItemDef != nullptr)
 					{
@@ -2903,16 +2903,6 @@ void CObjBase::SetSpawn(CCSpawn * spawn)
 CCFaction * CObjBase::GetFaction()
 {
     return static_cast<CCFaction*>(GetComponent(COMP_FACTION));
-}
-
-byte CObjBase::RangeL() const
-{
-	return (byte)(GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_RANGE, true) & 0xff);
-}
-
-byte CObjBase::RangeH() const
-{
-	return (byte)((GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_RANGE, true) >> 8) & 0xff);
 }
 
 int64 CObjBase::GetTimeStamp() const

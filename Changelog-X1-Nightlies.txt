@@ -1384,5 +1384,7 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 
 27-12-2018, Nolok
 - Fixed: New player starting with TIMER=0 and couldn't finish any action (Issue #171).
+- Changed: Removed AutoTooltipResend ini setting.
 - Fixed: Tooltips not refreshing fast enough (Issue #170).
 - Fixed: ARGN1 was in ms in trigger @DROPON_GROUND (Issue #168).
+- Fixed: Now RANGEL stores the lowest range value, and RANGEH the highest. It was inverted again in the past, no idea when.

@@ -141,23 +141,6 @@ public:
     */
     CCFaction *GetFaction();
 
-    /**
-     * @fn  byte CObjBase::RangeL() const;
-     *
-     * @brief   Returns RangeLow.
-     *
-     * @return  The Value.
-     */
-	byte	RangeL() const;
-
-    /**
-    * @fn  byte CObjBase::RangeH() const;
-    *
-    * @brief   Returns RangeHigh.
-    *
-    * @return  The Value.
-    */
-	byte	RangeH() const;
 
     /**
      * @fn  int64 CObjBase::GetTimeStamp() const;

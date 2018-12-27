@@ -5,6 +5,7 @@
 #include "../../network/send.h"
 #include "../clients/CClient.h"
 #include "../components/CCPropsChar.h"
+#include "../components/CCPropsItemWeapon.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
@@ -870,14 +871,24 @@ effect_bounce:
 
 //********************************************************
 
+byte CChar::RangeL() const
+{
+    return (byte)(_iRange & 0xff);
+}
+
+byte CChar::RangeH() const
+{
+    return (byte)((_iRange >> 8) & 0xff);
+}
+
 // What sort of weapon am i using?
 SKILL_TYPE CChar::Fight_GetWeaponSkill() const
 {
 	ADDTOCALLSTACK_INTENSIVE("CChar::Fight_GetWeaponSkill");
 	CItem * pWeapon = m_uidWeapon.ItemFind();
 	if ( pWeapon == nullptr )
-		return( SKILL_WRESTLING );
-	return( pWeapon->Weapon_GetSkill());
+		return SKILL_WRESTLING;
+	return pWeapon->Weapon_GetSkill();
 }
 
 DAMAGE_TYPE CChar::Fight_GetWeaponDamType(const CItem* pWeapon) const
@@ -1369,7 +1380,7 @@ int CChar::Fight_CalcRange( CItem * pWeapon ) const
 	ADDTOCALLSTACK("CChar::Fight_CalcRange");
 
 	int iCharRange = RangeL();
-	int iWeaponRange = pWeapon ? pWeapon->RangeL() : 0;
+	int iWeaponRange = pWeapon ? pWeapon->GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_RANGEL, true) : 0;
 
 	return ( maximum(iCharRange , iWeaponRange) );
 }
@@ -1590,8 +1601,9 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
             // If we are using Swing_NoRange, we can start the swing regardless of the distance, but we can land the hit only when we are at the right distance
             const WAR_SWING_TYPE swingTypeHold = fSwingNoRange ? m_atFight.m_War_Swing_State : WAR_SWING_READY;
 
-            int	iMinDist = pWeapon ? pWeapon->RangeH() : g_Cfg.m_iArcheryMinDist;
-            int	iMaxDist = pWeapon ? pWeapon->RangeL() : g_Cfg.m_iArcheryMaxDist;
+            const CCPropsItemWeapon *pCCPItemWeapon = pWeapon->GetCCPropsItemWeapon(), *pBaseCCPItemWeapon = pWeapon->Base_GetDef()->GetCCPropsItemWeapon();
+            int	iMinDist = pWeapon ? GetPropNum(pCCPItemWeapon, PROPIWEAP_RANGEH, pBaseCCPItemWeapon) : g_Cfg.m_iArcheryMinDist;
+            int	iMaxDist = pWeapon ? GetPropNum(pCCPItemWeapon, PROPIWEAP_RANGEL, pBaseCCPItemWeapon) : g_Cfg.m_iArcheryMaxDist;
             if ( !iMaxDist || (iMinDist == 0 && iMaxDist == 1) )
                 iMaxDist = g_Cfg.m_iArcheryMaxDist;
             if ( !iMinDist )
@@ -1619,7 +1631,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
             // If we are using PreHit_NoRange, we can start the swing regardless of the distance, but we can land the hit only when we are at the right distance
             const WAR_SWING_TYPE swingTypeHold = fSwingNoRange ? m_atFight.m_War_Swing_State : WAR_SWING_READY;
 
-		    int	iMinDist = pWeapon ? pWeapon->RangeH() : 0;
+		    int	iMinDist = pWeapon ? pWeapon->GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_RANGEH, true) : 0;
 		    int	iMaxDist = Fight_CalcRange(pWeapon);
 		    if ( (dist < iMinDist) || (dist > iMaxDist) )
 		    {

@@ -3,6 +3,7 @@
 #include "../../common/CUIDExtra.h"
 #include "../../common/CLog.h"
 #include "../components/CCPropsItemEquippable.h"
+#include "../components/CCPropsItemWeapon.h"
 #include "../../network/network.h"
 #include "../clients/CClient.h"
 #include "../spheresvr.h"
@@ -1240,7 +1241,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
             {
                 IT_TYPE iType = pWeapon->GetType();
                 if ((iType == IT_WEAPON_BOW) || (iType == IT_WEAPON_XBOW))
-                    return (iDist <= pWeapon->RangeL());
+                    return (iDist <= pWeapon->GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_RANGEL, true));
             }
         }
 

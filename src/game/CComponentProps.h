@@ -116,8 +116,8 @@ public:
 protected:
     bool BaseCont_GetPropertyNum(const BaseContNum_t* container, int iPropIndex, PropertyValNum_t* piOutVal) const;
     bool BaseCont_GetPropertyStr(const BaseContStr_t* container, int iPropIndex, CSString *psOutVal, bool fZero = false) const;
-    void BaseCont_LoadPropVal(int iPropIndex, bool fPropStr, CScript & s, CObjBase* pLinkedObj);
-    void BaseCont_WritePropVal(int iPropIndex, bool fPropStr, CSString & s);
+    void BaseProp_LoadPropVal(int iPropIndex, bool fPropStr, CScript & s, CObjBase* pLinkedObj);
+    bool BaseProp_WritePropVal(int iPropIndex, bool fPropStr, CSString & s);
     static void BaseCont_Write_ContNum(const BaseContNum_t* container, const lpctstr *ptcPropsTable, CScript &s);
     static void BaseCont_Write_ContStr(const BaseContStr_t* container, const lpctstr *ptcPropsTable, CScript &s);
 

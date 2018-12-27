@@ -476,11 +476,11 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061167)); // weapon speed ~1_val~
 		t->FormatArgs("%hhu", pItem->GetSpeed());
 
-		byte Range = pItem->RangeL();
+		int Range = pItem->GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_RANGEH, true);
 		if (Range > 1)
 		{
 			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061169)); // range ~1_val~
-			t->FormatArgs("%hhu", Range);
+			t->FormatArgs("%d", Range);
 		}
 
 		int64 StrengthRequirement = pItem->Item_GetDef()->m_ttEquippable.m_iStrReq - pItem->GetPropNum(pCCPItemEquip, PROPIEQUIP_LOWERREQ, pBaseCCPItemEquip);

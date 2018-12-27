@@ -122,6 +122,7 @@ public:
 	// Combat stuff. cached data. (not saved)
 	CUID m_uidWeapon;			// current Wielded weapon.	(could just get rid of this ?)
 	word m_defense;				// calculated armor worn (NOT intrinsic armor)
+    int _iRange;
 
 	height_t m_height;			// Height set in-game or under some trigger (height=) - for both items and chars
 
@@ -1001,6 +1002,20 @@ public:
 
 private:
 	// Armor, weapons and combat ------------------------------------
+
+    /**
+    * @fn  byte CChar::RangeL() const;
+    * @brief   Returns Range Lowest byte.
+    * @return  The Value.
+    */
+    byte RangeL() const;
+
+    /**
+    * @fn  byte CChar::RangeH() const;
+    * @brief   Returns Range Highest byte.
+    * @return  The Value.
+    */
+    byte RangeH() const;
 	int	Fight_CalcRange( CItem * pWeapon = nullptr ) const;
     void Fight_SetDefaultSwingDelays();
 	

@@ -931,8 +931,9 @@ int CItemBase::CalculateMakeValue( int iQualityLevel ) const
 
 byte CItemBase::GetSpeed() const
 {
-	if (m_TagDefs.GetKey("OVERRIDE.SPEED"))
-		return (byte)(m_TagDefs.GetKeyNum("OVERRIDE.SPEED"));
+    const CVarDefCont *pVarDef = m_TagDefs.GetKey("OVERRIDE.SPEED");
+	if (pVarDef)
+		return (byte)pVarDef->GetValNum();
 	return m_speed;
 }
 

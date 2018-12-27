@@ -827,7 +827,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					return true;
 				}
 
-				CResourceID rid = g_Cfg.ResourceGetID( RES_QTY, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(ppszArgs[0])));
+				CResourceID rid = g_Cfg.ResourceGetID( RES_QTY, ppszArgs[0]);
 				m_tmAdd.m_id = rid.GetResIndex();
 				if (iQty > 1)
 				{

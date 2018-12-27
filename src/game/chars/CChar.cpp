@@ -260,6 +260,7 @@ CChar::CChar( CREID_TYPE baseID ) : CCTimedObject(PROFILE_CHARS), CObjBase( fals
     m_defense = 0;
 	m_height = 0;
 	m_ModMaxWeight = 0;
+    _iRange = 0;
 
 	m_StepStealth = 0;
 	m_iVisualRange = UO_MAP_VIEW_SIZE_DEFAULT;
@@ -905,9 +906,6 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	m_fonttype = pChar->m_fonttype;
 	m_SpeechHueOverride = pChar->m_SpeechHueOverride;
 
-	m_height = pChar->m_height;
-	m_ModMaxWeight = pChar->m_ModMaxWeight;
-
 	m_StepStealth = pChar->m_StepStealth;
 	m_iVisualRange = pChar->m_iVisualRange;
 	m_virtualGold = pChar->m_virtualGold;
@@ -915,6 +913,10 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	m_exp = pChar->m_exp;
 	m_level = pChar->m_level;
 	m_defense = pChar->m_defense;
+    m_height = pChar->m_height;
+    m_ModMaxWeight = pChar->m_ModMaxWeight;
+    _iRange = pChar->_iRange;
+
 	m_atUnk.m_Arg1 = pChar->m_atUnk.m_Arg1;
 	m_atUnk.m_Arg2 = pChar->m_atUnk.m_Arg2;
 	m_atUnk.m_Arg3 = pChar->m_atUnk.m_Arg3;
@@ -2861,6 +2863,22 @@ do_default:
 			break;
 		case CHC_P:
 			goto do_default;
+        case CHC_RANGE:
+        {
+            const int iRangeH = RangeH();
+            const int iRangeL = RangeL();
+            if ( iRangeH == 0 )
+                sVal.Format( "%d", iRangeL );
+            else
+                sVal.Format( "%d,%d", iRangeH, iRangeL );
+            break;
+        }
+        case CHC_RANGEH:
+            sVal.FormatVal(RangeH());
+            break;
+        case CHC_RANGEL:
+            sVal.FormatVal(RangeL());
+            break;
 		case CHC_STONE:
 			sVal.FormatVal( IsStatFlag( STATF_STONE ));
 			break;
@@ -3404,6 +3422,28 @@ bool CChar::r_LoadVal( CScript & s )
                     return false;
 			}
 			break;
+        case CHC_RANGE:
+        {
+            int64 piVal[2];
+            tchar *ptcTmp = Str_GetTemp();
+            strncpy(ptcTmp, s.GetArgStr(), STR_TEMPLENGTH);
+            int iQty = Str_ParseCmds( ptcTmp, piVal, CountOf(piVal));
+            int iRange;
+            if ( iQty > 1 )
+            {
+                iRange = (int)((piVal[1] & 0xff) << 8); // highest byte contains the lowest value
+                iRange |= (int)(piVal[0] & 0xff);            // lowest byte contains the highest value
+            }
+            else
+            {
+                iRange = (int)(piVal[0] << 8);
+            }
+            _iRange = iRange;
+            break;
+        }
+        case CHC_RANGEH:
+        case CHC_RANGEL:
+            return false;
 		case CHC_STONE:
 			{
 				bool fSet;

@@ -3,6 +3,7 @@
 #include "../../common/CScriptTriggerArgs.h"
 #include "../../common/CUIDExtra.h"
 #include "../../network/receive.h"
+#include "../components/CCPropsItemWeapon.h"
 #include "../CPathFinder.h"
 #include "../triggers.h"
 #include "CChar.h"
@@ -26,8 +27,9 @@ bool CChar::NPC_FightArchery(CChar * pChar)
     CItem *pWeapon = m_uidWeapon.ItemFind();
     if (pWeapon != nullptr)
     {
-        iMinDist = pWeapon->RangeH();
-        iMaxDist = pWeapon->RangeL();
+        const CCPropsItemWeapon *pCCPItemWeapon = pWeapon->GetCCPropsItemWeapon(), *pBaseCCPItemWeapon = pWeapon->Base_GetDef()->GetCCPropsItemWeapon();
+        iMinDist = pWeapon->GetPropNum(pCCPItemWeapon, PROPIWEAP_RANGEH, pBaseCCPItemWeapon);
+        iMaxDist = pWeapon->GetPropNum(pCCPItemWeapon, PROPIWEAP_RANGEL, pBaseCCPItemWeapon);
     }
 
     // if range is not set on the weapon, default to ini settings

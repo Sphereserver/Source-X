@@ -50,18 +50,22 @@ bool CCPropsItemChar::IsPropertyStr(int iPropIndex) const
 bool CCPropsItemChar::GetPropertyNumPtr(int iPropIndex, PropertyValNum_t* piOutVal) const
 {
     ADDTOCALLSTACK("CCPropsItemChar::GetPropertyNumPtr");
+    ASSERT(!IsPropertyStr(iPropIndex));
     return BaseCont_GetPropertyNum(&_mPropsNum, iPropIndex, piOutVal);
 }
 
 bool CCPropsItemChar::GetPropertyStrPtr(int iPropIndex, CSString* psOutVal, bool fZero) const
 {
     ADDTOCALLSTACK("CCPropsItemChar::GetPropertyStrPtr");
+    ASSERT(IsPropertyStr(iPropIndex));
     return BaseCont_GetPropertyStr(&_mPropsStr, iPropIndex, psOutVal, fZero);
 }
 
 void CCPropsItemChar::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj)
 {
     ADDTOCALLSTACK("CCPropsItemChar::SetPropertyNum");
+
+    ASSERT(!IsPropertyStr(iPropIndex));
     _mPropsNum[iPropIndex] = iVal;
 
     if (!pLinkedObj)
@@ -96,6 +100,8 @@ void CCPropsItemChar::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* p
     ASSERT(ptcVal);
     if (fZero && (*ptcVal == '\0'))
         ptcVal = "0";
+
+    ASSERT(IsPropertyStr(iPropIndex));
     _mPropsStr[iPropIndex] = ptcVal;
 
     if (!pLinkedObj)
@@ -133,7 +139,7 @@ bool CCPropsItemChar::r_LoadPropVal(CScript & s, CObjBase* pLinkedObj)
         return true;
     }
 
-    BaseCont_LoadPropVal(i, fPropStr, s, pLinkedObj);
+    BaseProp_LoadPropVal(i, fPropStr, s, pLinkedObj);
     return true;
 }
 
@@ -144,8 +150,7 @@ bool CCPropsItemChar::r_WritePropVal(lpctstr pszKey, CSString & s)
     if (i == -1)
         return false;
 
-    BaseCont_WritePropVal(i, IsPropertyStr(i), s);
-    return true;
+    return BaseProp_WritePropVal(i, IsPropertyStr(i), s);
 }
 
 void CCPropsItemChar::r_Write(CScript & s)

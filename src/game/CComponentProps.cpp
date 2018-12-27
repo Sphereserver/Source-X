@@ -43,27 +43,28 @@ bool CComponentProps::BaseCont_GetPropertyStr(const BaseContStr_t* container, in
     return false;
 }
 
-void CComponentProps::BaseCont_LoadPropVal(int iPropIndex, bool fPropStr, CScript & s, CObjBase* pLinkedObj)
+void CComponentProps::BaseProp_LoadPropVal(int iPropIndex, bool fPropStr, CScript & s, CObjBase* pLinkedObj)
 {
-    ADDTOCALLSTACK("CComponentProps::BaseCont_LoadPropVal");
+    ADDTOCALLSTACK("CComponentProps::BaseProp_LoadPropVal");
     if (fPropStr)
         SetPropertyStr(iPropIndex, s.GetArgStr(), pLinkedObj, true);
     else
         SetPropertyNum(iPropIndex, s.GetArgVal(), pLinkedObj);
 }
 
-void CComponentProps::BaseCont_WritePropVal(int iPropIndex, bool fPropStr, CSString & s)
+bool CComponentProps::BaseProp_WritePropVal(int iPropIndex, bool fPropStr, CSString & s)
 {
-    ADDTOCALLSTACK("CComponentProps::BaseCont_WritePropVal");
+    ADDTOCALLSTACK("CComponentProps::BaseProp_WritePropVal");
     if (fPropStr)
     {
-        GetPropertyStrPtr(iPropIndex, &s);
+        return GetPropertyStrPtr(iPropIndex, &s);
     }
     else
     {
         PropertyValNum_t iVal = 0;
-        GetPropertyNumPtr(iPropIndex, &iVal);
+        bool fRet = GetPropertyNumPtr(iPropIndex, &iVal);
         s.FormatLLVal(iVal);
+        return fRet;
     }
 }
 

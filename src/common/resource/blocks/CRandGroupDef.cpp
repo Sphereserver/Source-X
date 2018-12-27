@@ -76,7 +76,7 @@ bool CRandGroupDef::r_LoadVal( CScript &s )
             CResourceQty rec;
 
             rec.SetResourceID(
-                g_Cfg.ResourceGetID(RES_CHARDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(ppCmd[0]))),
+                g_Cfg.ResourceGetID(RES_CHARDEF, ppCmd[0]),
                 ( iArgs > 1 && ppCmd[1][0] ) ? Exp_GetVal(ppCmd[1]) : 1 );
             m_iTotalWeight += (int)(rec.GetResQty());
             m_Members.emplace_back(rec);

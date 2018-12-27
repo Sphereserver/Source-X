@@ -38,7 +38,8 @@ public:
 	static lpctstr GetResourceBlockName( RES_TYPE restype );
 	lpctstr GetName() const;
 	CResourceScript * GetResourceFile( size_t i );
-	CResourceID ResourceGetID( RES_TYPE restype, lpctstr & pszName );
+    CResourceID ResourceGetIDParse( RES_TYPE restype, lpctstr &pszName );
+	CResourceID ResourceGetID( RES_TYPE restype, lpctstr ptcName );
 	CResourceID ResourceGetIDType( RES_TYPE restype, lpctstr pszName );
 	int ResourceGetIndexType( RES_TYPE restype, lpctstr pszName );
 	lpctstr ResourceGetName( CResourceIDBase rid ) const;
