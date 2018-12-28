@@ -22,7 +22,7 @@ class PacketSend;
 class PacketPropertyList;
 class CCSpawn;
 
-class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, public virtual CCTimedObject
+class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, public CEntityProps, public virtual CCTimedObject
 {
 	static lpctstr const sm_szLoadKeys[];   // All Instances of CItem or CChar have these base attributes.
 	static lpctstr const sm_szVerbKeys[];   // All Instances of CItem or CChar have these base attributes.
@@ -141,23 +141,6 @@ public:
     */
     CCFaction *GetFaction();
 
-    /**
-     * @fn  byte CObjBase::RangeL() const;
-     *
-     * @brief   Returns RangeLow.
-     *
-     * @return  The Value.
-     */
-	byte	RangeL() const;
-
-    /**
-    * @fn  byte CObjBase::RangeH() const;
-    *
-    * @brief   Returns RangeHigh.
-    *
-    * @return  The Value.
-    */
-	byte	RangeH() const;
 
     /**
      * @fn  int64 CObjBase::GetTimeStamp() const;
@@ -176,6 +159,93 @@ public:
      * @param   t_time  The time.
      */
 	void SetTimeStamp(int64 t_time);
+
+    /**
+    *@brief Returns the value of the string-type prop from the CComponentProps. Faster than the variant accepting a COMPPROPS_TYPE if you need to retrieve multiple props from the same CComponentProps
+    *@param pCompProps The CComponentProps which the property belongs
+    *@param iPropIndex The index (enum) of the property for that CComponentProps
+    *@param fZero If the prop val is an empty string, return "0" instead.
+    *@param pBaseCompProps If nullptr and the prop doesn't exist, stop. Otherwise, this should point to the same type of CComponentProps, but in the object's CBaseBaseDef. So, check if the Base Property exists
+    */
+    CSString GetPropStr( const CComponentProps* pCompProps, int iPropIndex, bool fZero, const CComponentProps* pBaseCompProps = nullptr ) const;
+
+    /**
+    *@brief Returns the value of the string-type prop from the CComponentProps
+    *@param iCompPropsType The CComponentProps which the property belongs
+    *@param iPropIndex The index (enum) of the property for that CComponentProps
+    *@param fZero If the prop val is an empty string, return "0" instead
+    *@param fDef If true, if the prop wasn't found, check the Base Prop (in my CBaseBaseDef).
+    */
+    CSString GetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, bool fZero, bool fDef = false ) const;
+
+    /**
+    *@brief Returns the value of the numerical-type prop from the CComponentProps. Faster than the variant accepting a COMPPROPS_TYPE if you need to retrieve multiple props from the same CComponentProps
+    *@param pCompProps The CComponentProps which the property belongs
+    *@param iPropIndex The index (enum) of the property for that CComponentProps
+    *@param pBaseCompProps If nullptr and the prop doesn't exist, stop. Otherwise, this should point to the same type of CComponentProps, but in the object's CBaseBaseDef. So, check if the Base Property exists
+    */
+    CComponentProps::PropertyValNum_t GetPropNum( const CComponentProps* pCompProps, int iPropIndex, const CComponentProps* pBaseCompProps = nullptr ) const;
+
+    /**
+    *@brief Returns the value of the numerical-type prop from the CComponentProps.
+    *@param iCompPropsType The CComponentProps which the property belongs
+    *@param iPropIndex The index (enum) of the property for that CComponentProps
+    *@param fDef If true, if the prop wasn't found, check the Base Prop (in my CBaseBaseDef).
+    */
+    CComponentProps::PropertyValNum_t GetPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, bool fDef = false ) const;
+
+    /**
+    *@brief Sets the value of the string-type prop from the CComponentProps. Faster than the variant accepting a COMPPROPS_TYPE if you need to set multiple props from the same CComponentProps
+    *@param pCompProps The CComponentProps which the property belongs
+    *@param iPropIndex The index (enum) of the property for that CComponentProps
+    *@param ptcVal The property value
+    *@param fZero If the prop val is an empty string, return "0" instead
+    */
+    void SetPropStr( CComponentProps* pCompProps, int iPropIndex, lpctstr ptcVal, bool fZero = false);
+
+    /**
+    *@brief Sets the value of the string-type prop from the CComponentProps.
+    *@param iCompPropsType The CComponentProps which the property belongs
+    *@param iPropIndex The index (enum) of the property for that CComponentProps
+    *@param ptcVal The property value
+    *@param fZero If the prop val is an empty string, return "0" instead
+    */
+    void SetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, lpctstr ptcVal, bool fZero = false);
+
+    /**
+    *@brief Sets the value of the numerical-type prop from the CComponentProps. Faster than the variant accepting a COMPPROPS_TYPE if you need to set multiple props from the same CComponentProps
+    *@param pCompProps The CComponentProps which the property belongs
+    *@param iPropIndex The index (enum) of the property for that CComponentProps
+    *@param iVal The property value
+    */
+    void SetPropNum( CComponentProps* pCompProps, int iPropIndex, CComponentProps::PropertyValNum_t iVal );
+
+    /*
+    *@brief Sets the value of the numerical-type prop from the CComponentProps.
+    *@param iCompPropsType The CComponentProps which the property belongs
+    *@param iPropIndex The index (enum) of the property for that CComponentProps
+    *@param iVal The property value
+    */
+    void SetPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CComponentProps::PropertyValNum_t iVal );
+
+    /**
+    *@brief Sums a number to the value of the numerical-type prop from the CComponentProps. Faster than the variant accepting a COMPPROPS_TYPE if you need to set multiple props from the same CComponentProps
+    *@param pCompProps The CComponentProps which the property belongs
+    *@param iPropIndex The index (enum) of the property for that CComponentProps
+    *@param iMod The signed number to sum to the prop value
+    *@param pBaseCompProps If nullptr and the prop doesn't exist, consider 0 as the previous value. Otherwise, this should point to the same type of CComponentProps, but in the object's CBaseBaseDef.
+    *       So, check if the Base Property exists and use its value as the previous value. If it doesn't exists, use 0.
+    */
+    void ModPropNum( CComponentProps* pCompProps, int iPropIndex, CComponentProps::PropertyValNum_t iMod, const CComponentProps* pBaseCompProps = nullptr);
+
+    /**
+    *@brief Sums a number to the value of the numerical-type prop from the CComponentProps.
+    *@param iCompPropsType The CComponentProps which the property belongs
+    *@param iPropIndex The index (enum) of the property for that CComponentProps
+    *@param iMod The signed number to sum to the prop value
+    *@param fBaseDef If false and the prop doesn't exist, consider 0 as the previous value. Otherwise, check if the Base Property exists and use its value as the previous value. If it doesn't exists, use 0.
+    */
+    void ModPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CComponentProps::PropertyValNum_t iMod, bool fBaseDef = false);
 
     /**
      * @fn  lpctstr CObjBase::GetDefStr( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
@@ -227,7 +297,7 @@ public:
     * @param   fZero    If new def value == 0, delete the def.
     */
 
-    void ModDefNum(lpctstr pszKey, int64 iMod, bool fBaseDef = false, bool fZero = true);
+    void ModDefNum(lpctstr pszKey, int64 iMod, bool fBaseDef = false, bool fZero = false);
 
     /**
      * @fn  void CObjBase::SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true);
@@ -734,7 +804,7 @@ public:
 	void ResendOnEquip( bool fAllClients = false );	// Fix for Enhanced Client when equipping items via DClick, these must be removed from where they are and sent again.
 
     /**
-     * @fn  void CObjBase::ResendTooltip( bool bSendFull = false, bool bUseCache = false );
+     * @fn  void CObjBase::ResendTooltip( bool fSendFull = false, bool fUseCache = false );
      *
      * @brief   Resend tooltip.
      *
@@ -918,13 +988,11 @@ public:
     dword GetPropertyHash() const;
 
     /**
-     * @fn  void CObjBase::UpdatePropertyFlag(int mask);
+     * @fn  void CObjBase::UpdatePropertyFlag();
      *
-     * @brief   Updates the property flag described by mask.
-     *
-     * @param   mask    The mask.
+     * @brief   Updates the property status update flag.
      */
-	void UpdatePropertyFlag(int mask);
+	void UpdatePropertyFlag();
 };
 
 

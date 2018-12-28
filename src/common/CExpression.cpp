@@ -269,7 +269,8 @@ bool IsValidGameObjDef( lpctstr pszTest )
 			return false;
 
 		CResourceID rid = g_Cfg.ResourceGetID( RES_QTY, pszTest);
-		if (( rid.GetResType() != RES_CHARDEF ) && ( rid.GetResType() != RES_ITEMDEF ) && ( rid.GetResType() != RES_SPAWN ) && ( rid.GetResType() != RES_TEMPLATE ))
+        RES_TYPE resType = rid.GetResType();
+		if (( resType != RES_CHARDEF ) && ( resType != RES_ITEMDEF ) && ( resType != RES_SPAWN ) && ( resType != RES_TEMPLATE ))
 			return false;
 	}
 

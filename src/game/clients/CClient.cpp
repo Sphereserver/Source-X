@@ -719,7 +719,7 @@ bool CClient::r_LoadVal( CScript & s )
 			if ( GetPrivLevel() >= PLEVEL_GM )
 			{
 				GetAccount()->TogPrivFlags( PRIV_GM, s.GetArgStr() );
-                GetChar()->ResendTooltip();
+                GetChar()->UpdatePropertyFlag();
 				if ( IsSetOF( OF_Command_Sysmsgs ) )
                     GetChar()->SysMessage( IsPriv(PRIV_GM)? "GM ON" : "GM OFF" );
 			}
@@ -740,7 +740,7 @@ bool CClient::r_LoadVal( CScript & s )
 				else
 					GetAccount()->SetPrivFlags( PRIV_PRIV_NOSHOW );
 
-                GetChar()->ResendTooltip();
+                GetChar()->UpdatePropertyFlag();
 				if ( IsSetOF( OF_Command_Sysmsgs ) )
                     GetChar()->SysMessage( IsPriv(PRIV_PRIV_NOSHOW)? "Privshow OFF" : "Privshow ON" );
 			}
@@ -827,7 +827,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					return true;
 				}
 
-				CResourceID rid = g_Cfg.ResourceGetID( RES_QTY, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(ppszArgs[0])));
+				CResourceID rid = g_Cfg.ResourceGetID( RES_QTY, ppszArgs[0]);
 				m_tmAdd.m_id = rid.GetResIndex();
 				if (iQty > 1)
 				{

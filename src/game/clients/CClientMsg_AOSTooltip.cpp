@@ -4,6 +4,9 @@
 #include "../items/CItem.h"
 #include "../items/CItemStone.h"
 #include "../components/CCSpawn.h"
+//#include "../components/CCPropsItemChar.h"
+#include "../components/CCPropsItemEquippable.h"
+#include "../components/CCPropsItemWeapon.h"
 #include "../triggers.h"
 #include "CClient.h"
 
@@ -107,6 +110,8 @@ void CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 					AOSTooltip_addDefaultCharData(pChar);
 				else if (pItem)	// Item specific stuff
 					AOSTooltip_addDefaultItemData(pItem);
+
+                pObj->AddPropsTooltipData(pObj);
 			}
 		}
 
@@ -315,6 +320,8 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 {
 	// TODO: add check to ATTR_IDENTIFIED, then add tooltips: stolen, BonusSkill1/2/3/4/5, minlevel/maxlevel, shurikencount
 
+    //const CCPropsItemChar *pCCPItemChar = pItem->GetCCPropsItemChar(), *pBaseCCPItemChar = pItem->Base_GetDef()->GetCCPropsItemChar();
+    const CCPropsItemEquippable *pCCPItemEquip = pItem->GetCCPropsItemEquippable(), *pBaseCCPItemEquip = pItem->Base_GetDef()->GetCCPropsItemEquippable();
 	CClientTooltip* t = nullptr;
 
 	if (pItem->IsAttr(ATTR_LOCKEDDOWN))
@@ -375,191 +382,11 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 
 	if (pItem->IsTypeArmorWeapon())
 	{
-		if (pItem->GetDefNum("BALANCED", true))
-			PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1072792)); // balanced
-
-		int64 DamageIncrease = pItem->GetDefNum("INCREASEDAM", true);
-		if (DamageIncrease != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060401)); // damage increase ~1_val~%
-			t->FormatArgs("%" PRId64, DamageIncrease);
-		}
-
-		int64 DefenceChanceIncrease = pItem->GetDefNum("INCREASEDEFCHANCE", true);
-		if (DefenceChanceIncrease != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060408)); // defense chance increase ~1_val~%
-			t->FormatArgs("%" PRId64, DefenceChanceIncrease);
-		}
-
-		int64 DexterityBonus = pItem->GetDefNum("BONUSDEX", true);
-		if (DexterityBonus != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060409)); // dexterity bonus ~1_val~
-			t->FormatArgs("%" PRId64, DexterityBonus);
-		}
-
-		int64 EnhancePotions = pItem->GetDefNum("ENHANCEPOTIONS", true);
-		if (EnhancePotions != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060411)); // enhance potions ~1_val~%
-			t->FormatArgs("%" PRId64, EnhancePotions);
-		}
-
-		int64 FasterCastRecovery = pItem->GetDefNum("FASTERCASTRECOVERY", true);
-		if (FasterCastRecovery != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060412)); // faster cast recovery ~1_val~
-			t->FormatArgs("%" PRId64, FasterCastRecovery);
-		}
-
-		int64 FasterCasting = pItem->GetDefNum("FASTERCASTING", true);
-		if (FasterCasting != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060413)); // faster casting ~1_val~
-			t->FormatArgs("%" PRId64, FasterCasting);
-		}
-
-		int64 HitChanceIncrease = pItem->GetDefNum("INCREASEHITCHANCE", true);
-		if (HitChanceIncrease != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060415)); // hit chance increase ~1_val~%
-			t->FormatArgs("%" PRId64, HitChanceIncrease);
-		}
-
-		int64 HitPointIncrease = pItem->GetDefNum("BONUSHITS", true);
-		if (HitPointIncrease != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060431)); // hit point increase ~1_val~%
-			t->FormatArgs("%" PRId64, HitPointIncrease);
-		}
-
-		int64 IntelligenceBonus = pItem->GetDefNum("BONUSINT", true);
-		if (IntelligenceBonus != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060432)); // intelligence bonus ~1_val~
-			t->FormatArgs("%" PRId64, IntelligenceBonus);
-		}
-
-		int64 LowerManaCost = pItem->GetDefNum("LOWERMANACOST", true);
-		if (LowerManaCost != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060433)); // lower mana cost ~1_val~%
-			t->FormatArgs("%" PRId64, LowerManaCost);
-		}
-
-		int64 LowerReagentCost = pItem->GetDefNum("LOWERREAGENTCOST", true);
-		if (LowerReagentCost != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060434)); // lower reagent cost ~1_val~%
-			t->FormatArgs("%" PRId64, LowerReagentCost);
-		}
-
-		int64 LowerRequirements = pItem->GetDefNum("LOWERREQ", true);
-		if (LowerRequirements != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060435)); // lower requirements ~1_val~%
-			t->FormatArgs("%" PRId64, LowerRequirements);
-		}
-
-		int64 Luck = pItem->GetDefNum("LUCK", true);
-		if (Luck != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060436)); // luck ~1_val~
-			t->FormatArgs("%" PRId64, Luck);
-		}
-
-		if (pItem->GetDefNum("MAGEARMOR", true))
-			PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1060437)); // mage armor
-
-		int64 MageWeapon = pItem->GetDefNum("MAGEWEAPON", true);
-		if (MageWeapon != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060438)); // mage weapon -~1_val~ skill
-			t->FormatArgs("%" PRId64, MageWeapon);
-		}
-
-		int64 ManaIncrease = pItem->GetDefNum("BONUSMANA", true);
-		if (ManaIncrease != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060439)); // mana increase ~1_val~
-			t->FormatArgs("%" PRId64, ManaIncrease);
-		}
-
-		int64 ManaRegeneration = pItem->GetDefNum("REGENMANA", true);
-		if (ManaRegeneration != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060440)); // mana regeneration ~1_val~
-			t->FormatArgs("%" PRId64, ManaRegeneration);
-		}
-
-		if (pItem->GetDefNum("NIGHTSIGHT", true))
-			PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1060441)); // night sight
-
-		int64 ReflectPhysicalDamage = pItem->GetDefNum("REFLECTPHYSICALDAM", true);
-		if (ReflectPhysicalDamage != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060442)); // reflect physical damage ~1_val~%
-			t->FormatArgs("%" PRId64, ReflectPhysicalDamage);
-		}
-
-		int64 StaminaRegeneration = pItem->GetDefNum("REGENSTAM", true);
-		if (StaminaRegeneration != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060443)); // stamina regeneration ~1_val~
-			t->FormatArgs("%" PRId64, StaminaRegeneration);
-		}
-
-		int64 HitPointRegeneration = pItem->GetDefNum("REGENHITS", true);
-		if (HitPointRegeneration != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060444)); // hit point regeneration ~1_val~
-			t->FormatArgs("%" PRId64, HitPointRegeneration);
-		}
-
 		int64 SelfRepair = pItem->GetDefNum("SELFREPAIR", true);
 		if (SelfRepair != 0)
 		{
 			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060450)); // self repair ~1_val~
 			t->FormatArgs("%" PRId64, SelfRepair);
-		}
-
-		if (pItem->GetDefNum("SPELLCHANNELING", true))
-			PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1060482)); // spell channeling
-
-		int64 SpellDamageIncrease = pItem->GetDefNum("INCREASESPELLDAM", true);
-		if (SpellDamageIncrease != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060483)); // spell damage increase ~1_val~%
-			t->FormatArgs("%" PRId64, SpellDamageIncrease);
-		}
-
-		int64 StaminaIncrease = pItem->GetDefNum("BONUSSTAM", true);
-		if (StaminaIncrease != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060484)); // stamina increase ~1_val~
-			t->FormatArgs("%" PRId64, StaminaIncrease);
-		}
-
-		int64 StrengthBonus = pItem->GetDefNum("BONUSSTR", true);
-		if (StrengthBonus != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060485)); // strength bonus ~1_val~
-			t->FormatArgs("%" PRId64, StrengthBonus);
-		}
-
-		int64 SwingSpeedIncrease = pItem->GetDefNum("INCREASESWINGSPEED", true);
-		if (SwingSpeedIncrease != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060486)); // swing speed increase ~1_val~%
-			t->FormatArgs("%" PRId64, SwingSpeedIncrease);
-		}
-
-		int64 IncreasedKarmaLoss = pItem->GetDefNum("INCREASEKARMALOSS", true);
-		if (IncreasedKarmaLoss != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1075210)); // increased karma loss ~1val~%
-			t->FormatArgs("%" PRId64, IncreasedKarmaLoss);
 		}
 	}
 
@@ -601,44 +428,6 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 	case IT_CLOTHING:
 	case IT_SHIELD:
 	{
-		if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
-		{
-			int64 PhysicalResist = pItem->GetDefNum("RESPHYSICAL", true);
-			if (PhysicalResist != 0)
-			{
-				PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060448)); // physical resist ~1_val~%
-				t->FormatArgs("%" PRId64, PhysicalResist);
-			}
-
-			int64 FireResist = pItem->GetDefNum("RESFIRE", true);
-			if (FireResist != 0)
-			{
-				PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060447)); // fire resist ~1_val~%
-				t->FormatArgs("%" PRId64, FireResist);
-			}
-
-			int64 ColdResist = pItem->GetDefNum("RESCOLD", true);
-			if (ColdResist != 0)
-			{
-				PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060445)); // cold resist ~1_val~%
-				t->FormatArgs("%" PRId64, ColdResist);
-			}
-
-			int64 PoisonResist = pItem->GetDefNum("RESPOISON", true);
-			if (PoisonResist != 0)
-			{
-				PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060449)); // poison resist ~1_val~%
-				t->FormatArgs("%" PRId64, PoisonResist);
-			}
-
-			int64 EnergyResist = pItem->GetDefNum("RESENERGY", true);
-			if (EnergyResist != 0)
-			{
-				PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060446)); // energy resist ~1_val~%
-				t->FormatArgs("%" PRId64, EnergyResist);
-			}
-		}
-
 		int ArmorRating = pItem->Armor_GetDefense();
 		if (ArmorRating != 0)
 		{
@@ -648,7 +437,9 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 			t->FormatArgs("%s\t%d", g_Cfg.GetDefaultMsg(DEFMSG_TOOLTIP_TAG_ARMOR), ArmorRating);
 		}
 
-		int64 StrengthRequirement = pItem->Item_GetDef()->m_ttEquippable.m_iStrReq - pItem->GetDefNum("LOWERREQ", true);
+		int64 StrengthRequirement = pItem->Item_GetDef()->m_ttEquippable.m_iStrReq;
+        if (pCCPItemEquip || pBaseCCPItemEquip)
+            StrengthRequirement -= pItem->GetPropNum(pCCPItemEquip, PROPIEQUIP_LOWERREQ, pBaseCCPItemEquip);
 		if (StrengthRequirement > 0)
 		{
 			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061170)); // strength requirement ~1_val~
@@ -674,166 +465,10 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 	case IT_WEAPON_AXE:
 	case IT_WEAPON_XBOW:
 	case IT_WEAPON_THROWING:
+    case IT_WEAPON_WHIP:
 	{
 		if (pItem->m_itWeapon.m_poison_skill)
 			PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1017383)); // poisoned
-
-		if (pItem->GetDefNum("USEBESTWEAPONSKILL", true))
-			PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1060400)); // use best weapon skill
-
-		int64 HitColdArea = pItem->GetDefNum("HITAREACOLD", true);
-		if (HitColdArea != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060416)); // hit cold area ~1_val~%
-			t->FormatArgs("%" PRId64, HitColdArea);
-		}
-
-		int64 HitDispel = pItem->GetDefNum("HITDISPEL", true);
-		if (HitDispel != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060417)); // hit dispel ~1_val~%
-			t->FormatArgs("%" PRId64, HitDispel);
-		}
-
-		int64 HitEnergyArea = pItem->GetDefNum("HITAREAENERGY", true);
-		if (HitEnergyArea != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060418)); // hit energy area ~1_val~%
-			t->FormatArgs("%" PRId64, HitEnergyArea);
-		}
-
-		int64 HitFireArea = pItem->GetDefNum("HITAREAFIRE", true);
-		if (HitFireArea != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060419)); // hit fire area ~1_val~%
-			t->FormatArgs("%" PRId64, HitFireArea);
-		}
-
-		int64 HitFireball = pItem->GetDefNum("HITFIREBALL", true);
-		if (HitFireball != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060420)); // hit fireball ~1_val~%
-			t->FormatArgs("%" PRId64, HitFireball);
-		}
-
-		int64 HitHarm = pItem->GetDefNum("HITHARM", true);
-		if (HitHarm != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060421)); // hit harm ~1_val~%
-			t->FormatArgs("%" PRId64, HitHarm);
-		}
-
-		int64 HitLifeLeech = pItem->GetDefNum("HITLEECHLIFE", true);
-		if (HitLifeLeech != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060422)); // hit life leech ~1_val~%
-			t->FormatArgs("%" PRId64, HitLifeLeech);
-		}
-
-		int64 HitLightning = pItem->GetDefNum("HITLIGHTNING", true);
-		if (HitLightning != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060422)); // hit lightning ~1_val~%
-			t->FormatArgs("%" PRId64, HitLightning);
-		}
-
-		int64 HitLowerAttack = pItem->GetDefNum("HITLOWERATK", true);
-		if (HitLowerAttack != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060424)); // hit lower attack ~1_val~%
-			t->FormatArgs("%" PRId64, HitLowerAttack);
-		}
-
-		int64 HitLowerDefense = pItem->GetDefNum("HITLOWERDEF", true);
-		if (HitLowerDefense != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060425)); // hit lower defense ~1_val~%
-			t->FormatArgs("%" PRId64, HitLowerDefense);
-		}
-
-		int64 HitMagicArrow = pItem->GetDefNum("HITMAGICARROW", true);
-		if (HitMagicArrow != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060426)); // hit magic arrow ~1_val~%
-			t->FormatArgs("%" PRId64, HitMagicArrow);
-		}
-
-		int64 HitManaLeech = pItem->GetDefNum("HITLEECHMANA", true);
-		if (HitManaLeech != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060427)); // hit mana leech ~1_val~%
-			t->FormatArgs("%" PRId64, HitManaLeech);
-		}
-
-		int64 HitPhysicalArea = pItem->GetDefNum("HITAREAPHYSICAL", true);
-		if (HitPhysicalArea != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060428)); // hit physical area ~1_val~%
-			t->FormatArgs("%" PRId64, HitPhysicalArea);
-		}
-
-		int64 HitPoisonArea = pItem->GetDefNum("HITAREAPOISON", true);
-		if (HitPoisonArea != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060429)); // hit poison area ~1_val~%
-			t->FormatArgs("%" PRId64, HitPoisonArea);
-		}
-
-		int64 HitStaminaLeech = pItem->GetDefNum("HITLEECHSTAM", true);
-		if (HitStaminaLeech != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060430)); // hit stamina leech ~1_val~%
-			t->FormatArgs("%" PRId64, HitStaminaLeech);
-		}
-
-		int64 PhysicalDamage = pItem->GetDefNum("DAMPHYSICAL", true);
-		if (PhysicalDamage != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060403)); // physical damage ~1_val~%
-			t->FormatArgs("%" PRId64, PhysicalDamage);
-		}
-
-		int64 FireDamage = pItem->GetDefNum("DAMFIRE", true);
-		if (FireDamage != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060405)); // fire damage ~1_val~%
-			t->FormatArgs("%" PRId64, FireDamage);
-		}
-
-		int64 ColdDamage = pItem->GetDefNum("DAMCOLD", true);
-		if (ColdDamage != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060404)); // cold damage ~1_val~%
-			t->FormatArgs("%" PRId64, ColdDamage);
-		}
-
-		int64 PoisonDamage = pItem->GetDefNum("DAMPOISON", true);
-		if (PoisonDamage != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060406)); // poison damage ~1_val~%
-			t->FormatArgs("%" PRId64, PoisonDamage);
-		}
-
-		int64 EnergyDamage = pItem->GetDefNum("DAMENERGY", true);
-		if (EnergyDamage != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060407)); // energy damage ~1_val~%
-			t->FormatArgs("%" PRId64, EnergyDamage);
-		}
-
-		int64 ChaosDamage = pItem->GetDefNum("DAMCHAOS", true);
-		if (ChaosDamage != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1072846)); // chaos damage ~1_val~%
-			t->FormatArgs("%" PRId64, ChaosDamage);
-		}
-
-		int64 DirectDamage = pItem->GetDefNum("DAMDIRECT", true);
-		if (DirectDamage != 0)
-		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1079978)); // direct damage: ~1_PERCENT~%
-			t->FormatArgs("%" PRId64, DirectDamage);
-		}
 
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061168)); // weapon damage ~1_val~ - ~2_val~
 		t->FormatArgs("%d\t%d", pItem->m_attackBase + pItem->m_ModAr, pItem->Weapon_GetAttack(true));
@@ -841,14 +476,14 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061167)); // weapon speed ~1_val~
 		t->FormatArgs("%hhu", pItem->GetSpeed());
 
-		byte Range = pItem->RangeL();
+		int Range = pItem->GetRangeH();
 		if (Range > 1)
 		{
 			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061169)); // range ~1_val~
-			t->FormatArgs("%hhu", Range);
+			t->FormatArgs("%d", Range);
 		}
 
-		int64 StrengthRequirement = pItem->Item_GetDef()->m_ttEquippable.m_iStrReq - pItem->GetDefNum("LOWERREQ", true);
+		int64 StrengthRequirement = pItem->Item_GetDef()->m_ttEquippable.m_iStrReq - pItem->GetPropNum(pCCPItemEquip, PROPIEQUIP_LOWERREQ, pBaseCCPItemEquip);
 		if (StrengthRequirement > 0)
 		{
 			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061170)); // strength requirement ~1_val~
@@ -860,7 +495,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		else
 			PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1061824)); // one-handed weapon
 
-		if (!pItem->GetDefNum("USEBESTWEAPONSKILL", true))
+		if (!pItem->GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_USEBESTWEAPONSKILL, true))
 		{
 			switch (pItem->Weapon_GetSkill())
 			{

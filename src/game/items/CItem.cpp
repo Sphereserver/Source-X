@@ -8,6 +8,11 @@
 #include "../components/CCChampion.h"
 #include "../components/CCItemDamageable.h"
 #include "../components/CCSpawn.h"
+#include "../components/CCPropsItem.h"
+#include "../components/CCPropsItemChar.h"
+#include "../components/CCPropsItemEquippable.h"
+#include "../components/CCPropsItemWeapon.h"
+#include "../components/CCPropsItemWeaponRanged.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../clients/CClient.h"
@@ -119,12 +124,14 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CCTimedObject(PROFILE_ITE
     */
     if (CCItemDamageable::CanSubscribe(this))
     {
-        Subscribe(new CCItemDamageable(this));
+        SubscribeComponent(new CCItemDamageable(this));
     }
     if (CCFaction::CanSubscribe(this))
     {
-        Subscribe(new CCFaction(this));  // Adding it only to equippable items
+        SubscribeComponent(new CCFaction(this));  // Adding it only to equippable items
     }
+    SubscribeComponentProps(new CCPropsItem());
+    SubscribeComponentProps(new CCPropsItemChar());
 }
 
 bool CItem::NotifyDelete()
@@ -400,7 +407,7 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 	// Just read info on a single item carryed by a CChar.
 	// ITEM=#id,#amount,R#chance
 
-	CResourceID rid = g_Cfg.ResourceGetID( RES_ITEMDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pArg)) );
+	CResourceID rid = g_Cfg.ResourceGetID( RES_ITEMDEF, pArg);
 	if ( ! rid.IsValidUID())
 		return nullptr;
 	if ( rid.GetResType() != RES_ITEMDEF && rid.GetResType() != RES_TEMPLATE )
@@ -648,12 +655,22 @@ int CItem::GetVisualRange() const	// virtual
 // Doing this way lets speed be changed for all created weapons from the script itself instead of rewriting one by one.
 byte CItem::GetSpeed() const
 {
-	if (m_TagDefs.GetKey("OVERRIDE.SPEED"))
-		return (byte)(m_TagDefs.GetKeyNum("OVERRIDE.SPEED"));
-	CItemBase * pItemDef = dynamic_cast<CItemBase *>(Base_GetDef());
+    const CVarDefCont *pVarDef = GetKey("OVERRIDE.SPEED", true);
+	if (pVarDef)
+		return (byte)pVarDef->GetValNum();
+	const CItemBase * pItemDef = static_cast<CItemBase *>(Base_GetDef());
 	return pItemDef->GetSpeed();
 }
 
+byte CItem::GetRangeL() const
+{
+    return (byte)GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_RANGEL, true);
+}
+
+byte CItem::GetRangeH() const
+{
+    return (byte)GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_RANGEH, true);
+}
 
 int CItem::IsWeird() const
 {
@@ -1227,14 +1244,14 @@ bool CItem::Stack( CItem * pItem )
 		word amount = destMaxAmount - pItem->GetAmount();
 		pItem->SetAmountUpdate(pItem->GetAmount() + amount);
 		SetAmountUpdate(GetAmount() - amount);
-		ResendTooltip();
-		pItem->ResendTooltip();
+		UpdatePropertyFlag();
+		pItem->UpdatePropertyFlag();
 		return false;
 	}
 	else
 	{
 		SetAmount(pItem->GetAmount() + GetAmount());
-		ResendTooltip();
+		UpdatePropertyFlag();
 		pItem->Delete();
 	}
 	return true;
@@ -1293,7 +1310,7 @@ void CItem::SetTimeout( int64 iMsecs )
 	CItemsList::sm_fNotAMove = true;
 	pSector->MoveItemToSector( this, iMsecs >= 0 );
 	CItemsList::sm_fNotAMove = false;
-	SetContainerFlags(0);
+	SetUIDContainerFlags(0);
 }
 
 void CItem::SetTimeoutS(int64 iSeconds)
@@ -1425,7 +1442,7 @@ bool CItem::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the groun
 
 	SetTopPoint( pt );
 	if ( fForceFix )
-		SetTopZ(GetFixZ(GetTopPoint()));
+		SetTopZ(GetFixZ(pt));
 
 	return true;
 }
@@ -1460,13 +1477,13 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	if ( IsTrigUsed(TRIGGER_DROPON_GROUND) || IsTrigUsed(TRIGGER_ITEMDROPON_GROUND) )
 	{
 		CScriptTriggerArgs args;
-		args.m_iN1 = iDecayTime;		// ARGN1 = Decay time for the dropped item (in ticks)
+		args.m_iN1 = iDecayTime / MSECS_PER_TENTH;  // ARGN1 = Decay time for the dropped item (in tenths of second)
 		ttResult = OnTrigger(ITRIG_DROPON_GROUND, pCharMover, &args);
 
 		if ( IsDeleted() )
 			return false;
 
-		iDecayTime = args.m_iN1;
+		iDecayTime = args.m_iN1 * MSECS_PER_TENTH;
 	}
 
 	if ( ttResult != TRIGRET_RET_TRUE )
@@ -1797,16 +1814,15 @@ bool CItem::SetName( lpctstr pszName )
 int CItem::GetWeight(word amount) const
 {
 	int iWeight = m_weight * (amount ? amount : GetAmount());
-	CVarDefCont * pReduction = GetDefKey("WEIGHTREDUCTION", true);
-	if (pReduction)
+    int64 iReduction = GetPropNum(COMP_PROPS_ITEMCHAR, PROPITCH_WEIGHTREDUCTION, true);
+	if (iReduction)
 	{
-		iWeight -= (int)IMulDivLL( iWeight, pReduction->GetValNum(), 100 );
+		iWeight -= (int)IMulDivLL( iWeight, iReduction, 100 );
 		if ( iWeight < 0)
 			iWeight = 0;
 	}
 	return iWeight;
 }
-
 
 height_t CItem::GetHeight() const
 {
@@ -1990,7 +2006,7 @@ void CItem::SetAmount(word amount )
 		pParentCont->OnWeightChange(GetWeight(amount) - GetWeight(oldamount));
 	}
 
-	UpdatePropertyFlag(AUTOTOOLTIP_FLAG_AMOUNT);
+	UpdatePropertyFlag();
 }
 
 word CItem::GetMaxAmount()
@@ -2207,6 +2223,7 @@ void CItem::r_Write( CScript & s )
 		s.WriteKey("P", GetTopPoint().WriteUsed());
 
     CEntity::r_Write(s);
+    CEntityProps::r_Write(s);
 }
 
 bool CItem::LoadSetContainer( CUID uid, LAYER_TYPE layer )
@@ -2281,7 +2298,7 @@ bool CItem::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CItem::r_GetRef");
 
-    if (static_cast<CEntity*>(this)->r_GetRef(pszKey, pRef))
+    if (CEntity::r_GetRef(pszKey, pRef))
     {
         return true;
     }
@@ -2334,16 +2351,27 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 	ADDTOCALLSTACK("CItem::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-    if (CEntity::r_WriteVal(pszKey, sVal, pSrc)) // Checking CComponents first.
+    // Checking Props CComponents first (first check CItem props, if not found then check CItemBase)
+    EXC_SET_BLOCK("EntityProp");
+    CItemBase* pItemBase = Item_GetDef();
+    if (CEntityProps::r_WritePropVal(pszKey, sVal) || pItemBase->CEntityProps::r_WritePropVal(pszKey, sVal))
     {
         return true;
     }
 
+    // Now check regular CComponents
+    EXC_SET_BLOCK("Entity");
+    if (CEntity::r_WriteVal(pszKey, sVal, pSrc))
+    {
+        return true;
+    }
+
+    EXC_SET_BLOCK("Keyword");
 	int index;
 	if ( !strnicmp( CItem::sm_szLoadKeys[IC_ADDSPELL], pszKey, 8 ) )
-		index	= IC_ADDSPELL;
+		index = IC_ADDSPELL;
 	else
-		index	= FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+		index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 
 	bool fDoDefault = false;
 
@@ -2363,13 +2391,6 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			sVal = GetDefStr(pszKey);
 			break;
 		//On these ones, check BaseDef if not found on dynamic
-		case IC_AMMOANIM:
-		case IC_AMMOANIMHUE:
-		case IC_AMMOANIMRENDER:
-		case IC_AMMOCONT:
-		case IC_AMMOTYPE:
-		case IC_AMMOSOUNDHIT:
-		case IC_AMMOSOUNDMISS:
 		case IC_DROPSOUND:
 		case IC_PICKUPSOUND:
 		case IC_EQUIPSOUND:
@@ -2394,15 +2415,6 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			break;
 		//return as decimal number or 0 if not set
 		//On these ones, check BaseDef if not found on dynamic
-		case IC_BONUSSTR:
-		case IC_BONUSDEX:
-		case IC_BONUSINT:
-		case IC_BONUSHITS:
-		case IC_BONUSSTAM:
-		case IC_BONUSMANA:
-		case IC_BONUSHITSMAX:
-		case IC_BONUSSTAMMAX:
-		case IC_BONUSMANAMAX:
 		case IC_BONUSSKILL1AMT:
 		case IC_BONUSSKILL2AMT:
 		case IC_BONUSSKILL3AMT:
@@ -2413,7 +2425,6 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case IC_ITEMSETAMTMAX:
 		case IC_ITEMSETCOLOR:
 		case IC_LIFESPAN:
-		case IC_MAGEWEAPON:
 		case IC_RARITY:
 		case IC_RECHARGE:
 		case IC_RECHARGEAMT:
@@ -2469,30 +2480,6 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case IC_CANUSE:
 			sVal.FormatLLHex( m_CanUse );
 			break;
-		case IC_BALANCED:
-			sVal.FormatLLVal( m_Attr & ATTR_BALANCED );
-			break;
-		case IC_BANE:
-			sVal.FormatLLVal( m_Attr & ATTR_BANE );
-			break;
-		case IC_BATTLELUST:
-			sVal.FormatLLVal( m_Attr & ATTR_BATTLELUST );
-			break;
-		case IC_BLOODDRINKER:
-			sVal.FormatLLVal( m_Attr & ATTR_BLOODDRINKER );
-			break;
-		case IC_BRITTLE:
-			sVal.FormatLLVal( m_Attr & ATTR_BRITTLE );
-			break;
-		case IC_EPHEMERAL:
-			sVal.FormatLLVal( m_Attr & ATTR_EPHEMERAL );
-			break;
-		case IC_MAGEARMOR:
-			sVal.FormatLLVal( m_Attr & ATTR_MAGEARMOR );
-			break;
-		case IC_MANAPHASE:
-			sVal.FormatLLVal( m_Attr & ATTR_MANAPHASE );
-			break;
 		case IC_NODROP:
 			sVal.FormatLLVal( m_Attr & ATTR_NODROP );
 			break;
@@ -2501,15 +2488,6 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			break;
 		case IC_QUESTITEM:
 			sVal.FormatLLVal( m_Attr & ATTR_QUESTITEM );
-			break;
-		case IC_SEARINGWEAPON:
-			sVal.FormatLLVal( m_Attr & ATTR_SEARINGWEAPON );
-			break;
-		case IC_SPLINTERINGWEAPON:
-			sVal.FormatLLVal( m_Attr & ATTR_SPLINTERINGWEAPON );
-			break;
-		case IC_USEBESTWEAPONSKILL:
-			sVal.FormatLLVal( m_Attr & ATTR_USEBESTWEAPONSKILL );
 			break;
 		case IC_CONT:
 			{
@@ -2655,25 +2633,29 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 {
 	ADDTOCALLSTACK("CItem::r_LoadVal");
-	EXC_TRY("LoadVal");
+    EXC_TRY("LoadVal");
+	
+    // Checking Props CComponents first (first check CChar props, if not found then check CCharBase)
+    EXC_SET_BLOCK("EntityProp");
+    CItemBase* pItemBase = Item_GetDef();
+    if (CEntityProps::r_LoadPropVal(s, this) || pItemBase->CEntityProps::r_LoadPropVal(s, this))
+    {
+        return true;
+    }
 
+    // Now check regular CComponents
+    EXC_SET_BLOCK("Entity");
     if (CEntity::r_LoadVal(s))
     {
         return true;
     }
-    int index = FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
 
+    EXC_SET_BLOCK("Keyword");
+    int index = FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
 	switch (index)
 	{
 		//Set as Strings
 		case IC_CRAFTEDBY:
-		case IC_AMMOANIM:
-		case IC_AMMOANIMHUE:
-		case IC_AMMOANIMRENDER:
-		case IC_AMMOCONT:
-		case IC_AMMOTYPE:
-		case IC_AMMOSOUNDHIT:
-		case IC_AMMOSOUNDMISS:
 		case IC_DROPSOUND:
 		case IC_PICKUPSOUND:
 		case IC_EQUIPSOUND:
@@ -2709,22 +2691,12 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		case IC_ITEMSETAMTMAX:
 		case IC_ITEMSETCOLOR:
 		case IC_LIFESPAN:
-		case IC_MAGEWEAPON:
 		case IC_RARITY:
 		case IC_RECHARGE:
 		case IC_RECHARGEAMT:
 		case IC_RECHARGERATE:
 		case IC_SELFREPAIR:
 		case IC_USESCUR:
-		case IC_BONUSSTR:
-		case IC_BONUSDEX:
-		case IC_BONUSINT:
-		case IC_BONUSHITS:
-		case IC_BONUSSTAM:
-		case IC_BONUSMANA:
-		case IC_BONUSHITSMAX:
-		case IC_BONUSSTAMMAX:
-		case IC_BONUSMANAMAX:
 		case IC_BONUSCRAFTINGAMT:
 		case IC_BONUSCRAFTINGEXCEPAMT:
 		case IC_NPCKILLERAMT:
@@ -2736,78 +2708,6 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			SetDefNum(s.GetKey(),s.GetArgVal(), false);
 			break;
 
-		case IC_BALANCED:
-			if ( !s.HasArgs() )
-				m_Attr |= ATTR_BALANCED;
-			else
-				if ( s.GetArgVal() )
-					m_Attr |= ATTR_BALANCED;
-				else
-					m_Attr &= ~ATTR_BALANCED;
-			break;
-		case IC_BANE:
-			if ( !s.HasArgs() )
-				m_Attr |= ATTR_BANE;
-			else
-				if ( s.GetArgVal() )
-					m_Attr |= ATTR_BANE;
-				else
-					m_Attr &= ~ATTR_BANE;
-			break;
-		case IC_BATTLELUST:
-			if ( !s.HasArgs() )
-				m_Attr |= ATTR_BATTLELUST;
-			else
-				if ( s.GetArgVal() )
-					m_Attr |= ATTR_BATTLELUST;
-				else
-					m_Attr &= ~ATTR_BATTLELUST;
-			break;
-		case IC_BLOODDRINKER:
-			if ( !s.HasArgs() )
-				m_Attr |= ATTR_BLOODDRINKER;
-			else
-				if ( s.GetArgVal() )
-					m_Attr |= ATTR_BLOODDRINKER;
-				else
-					m_Attr &= ~ATTR_BLOODDRINKER;
-			break;
-		case IC_BRITTLE:
-			if ( !s.HasArgs() )
-				m_Attr |= ATTR_BRITTLE;
-			else
-				if ( s.GetArgVal() )
-					m_Attr |= ATTR_BRITTLE;
-				else
-					m_Attr &= ~ATTR_BRITTLE;
-			break;
-		case IC_EPHEMERAL:
-			if ( !s.HasArgs() )
-				m_Attr |= ATTR_EPHEMERAL;
-			else
-				if ( s.GetArgVal() )
-					m_Attr |= ATTR_EPHEMERAL;
-				else
-					m_Attr &= ~ATTR_EPHEMERAL;
-			break;
-		case IC_MAGEARMOR:
-			if ( !s.HasArgs() )
-				m_Attr |= ATTR_MAGEARMOR;
-			else
-				if ( s.GetArgVal() )
-					m_Attr |= ATTR_MAGEARMOR;
-				else
-					m_Attr &= ~ATTR_MAGEARMOR;
-			break;
-		case IC_MANAPHASE:
-			if ( !s.HasArgs() )
-				m_Attr |= ATTR_MANAPHASE;
-			else
-				if ( s.GetArgVal() )
-					m_Attr |= ATTR_MANAPHASE;
-				else
-					m_Attr &= ~ATTR_MANAPHASE;
-			break;
 		case IC_NODROP:
 			if ( !s.HasArgs() )
 				m_Attr |= ATTR_NODROP;
@@ -2834,33 +2734,6 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 					m_Attr |= ATTR_QUESTITEM;
 				else
 					m_Attr &= ~ATTR_QUESTITEM;
-			break;
-		case IC_SEARINGWEAPON:
-			if ( !s.HasArgs() )
-				m_Attr |= ATTR_SEARINGWEAPON;
-			else
-				if ( s.GetArgVal() )
-					m_Attr |= ATTR_SEARINGWEAPON;
-				else
-					m_Attr &= ~ATTR_SEARINGWEAPON;
-			break;
-		case IC_SPLINTERINGWEAPON:
-			if ( !s.HasArgs() )
-				m_Attr |= ATTR_SPLINTERINGWEAPON;
-			else
-				if ( s.GetArgVal() )
-					m_Attr |= ATTR_SPLINTERINGWEAPON;
-				else
-					m_Attr &= ~ATTR_SPLINTERINGWEAPON;
-			break;
-		case IC_USEBESTWEAPONSKILL:
-			if ( !s.HasArgs() )
-				m_Attr |= ATTR_USEBESTWEAPONSKILL;
-			else
-				if ( s.GetArgVal() )
-					m_Attr |= ATTR_USEBESTWEAPONSKILL;
-				else
-					m_Attr &= ~ATTR_USEBESTWEAPONSKILL;
 			break;
 		case IC_USESMAX:
 		{
@@ -3007,7 +2880,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				return false;
 			}
 			m_itArmor.m_Hits_Cur = m_itArmor.m_Hits_Max = (word)(s.GetArgVal());
-			UpdatePropertyFlag(AUTOTOOLTIP_FLAG_DURABILITY);
+			UpdatePropertyFlag();
 			return true;
 		case IC_ID:
 		{
@@ -3158,8 +3031,8 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 	}
 	if (_iCallingObjTriggerId != ITRIG_CLIENTTOOLTIP)
 	{
-		// Avoid @ClientTooltip calling TRIGGER @Create, and this calling again ResendTooltip() and the @ClientTooltip trigger
-		ResendTooltip();
+		// Avoid @ClientTooltip calling TRIGGER @Create, and this calling again UpdatePropertyFlag() and the @ClientTooltip trigger
+		UpdatePropertyFlag();
 	}
 	return true;
 	EXC_CATCH;
@@ -3638,20 +3511,46 @@ CItem * CItem::SetType(IT_TYPE type)
 	m_type = type;
 
     // CComponents sanity check.
-    // Ensure that an item that should have a given component has it, and if the item shouldn't have a given component, check if it's subscribed, in that case unsubscribe it.
     CComponent* pComp;
+    CComponentProps* pCompProps;
+
+    // Never unsubscribe Props Components, because if the type is changed to an unsubscribable type and then again to the previous type, the component will be deleted and created again.
+    //  This means that all the properties (base and "dynamic") are lost.
+    // Add first the most specific components, so that the tooltips will be better ordered
+    pCompProps = GetComponentProps(COMP_PROPS_ITEMWEAPONRANGED);
+    if (!pCompProps && CCPropsItemWeaponRanged::CanSubscribe(this))
+    {
+        SubscribeComponentProps(new CCPropsItemWeaponRanged());
+    }
+    pCompProps = GetComponentProps(COMP_PROPS_ITEMWEAPON);
+    if (!pCompProps && CCPropsItemWeapon::CanSubscribe(this))
+    {
+        SubscribeComponentProps(new CCPropsItemWeapon());
+    }
+    pCompProps = GetComponentProps(COMP_PROPS_ITEMEQUIPPABLE);
+    if (!pCompProps && CCPropsItemEquippable::CanSubscribe(this))
+    {
+        SubscribeComponentProps(new CCPropsItemEquippable());
+    }
+    pCompProps = GetComponentProps(COMP_PROPS_ITEMCHAR);
+    if (!pCompProps)
+    {
+        SubscribeComponentProps(new CCPropsItemChar());
+    }
+
+    // Ensure that an item that should have a given component has it, and if the item shouldn't have a given component, check if it's subscribed, in that case unsubscribe it.
     pComp = GetComponent(COMP_SPAWN);
     bool fIsSpawn = false;
     if ((type != IT_SPAWN_CHAR) && (type != IT_SPAWN_ITEM))
     {
         if (pComp)
-            Unsubscribe(pComp);
+            UnsubscribeComponent(pComp);
     }
     else
     {
         fIsSpawn = true;
         if (!pComp)
-            Subscribe(new CCSpawn(this));
+            SubscribeComponent(new CCSpawn(this));
     }
 
     if (type != IT_SPAWN_CHAMPION)
@@ -3660,44 +3559,44 @@ CItem * CItem::SetType(IT_TYPE type)
         {
             pComp = GetComponent(COMP_CHAMPION);
             if (pComp)
-                Unsubscribe(pComp);
+                UnsubscribeComponent(pComp);
             pComp = GetComponent(COMP_SPAWN);
             if (pComp)
-                Unsubscribe(pComp);
+                UnsubscribeComponent(pComp);
         }
     }
     else
     {
         pComp = GetComponent(COMP_CHAMPION);
         if (!pComp)
-            Subscribe(new CCChampion(this));
+            SubscribeComponent(new CCChampion(this));
         pComp = GetComponent(COMP_SPAWN);
         if (!pComp)
-            Subscribe(new CCSpawn(this));
+            SubscribeComponent(new CCSpawn(this));
     }
 
     pComp = GetComponent(COMP_ITEMDAMAGEABLE);
     if (!CCItemDamageable::CanSubscribe(this))
     {
         if (pComp)
-            Unsubscribe(pComp);
+            UnsubscribeComponent(pComp);
     }
     else if (!pComp)
     {
         /* CCItemDamageable is also added from CObjBase::r_LoadVal(OC_CANMASK) for manual override of can flags
         * but it's required to add it also on item's creation depending on it's CItemBase can flags. */
-        Subscribe(new CCItemDamageable(this));
+        SubscribeComponent(new CCItemDamageable(this));
     }
 
     pComp = GetComponent(COMP_FACTION);
     if (!CCFaction::CanSubscribe(this))
     {
         if (pComp)
-            Unsubscribe(pComp);
+            UnsubscribeComponent(pComp);
     }
     else if (!pComp)
     {
-        Subscribe(new CCFaction(this));
+        SubscribeComponent(new CCFaction(this));
     }
 
 	return this;
@@ -3799,6 +3698,12 @@ bool CItem::IsTypeSpellable() const
 		default:
 			return( IsTypeArmorWeapon() );
 	}
+}
+
+bool CItem::IsTypeEquippable() const
+{
+    ADDTOCALLSTACK("CItem::IsTypeEquippable");
+    return CItemBase::IsTypeEquippable(GetType(), GetEquipLayer());
 }
 
 void CItem::DupeCopy( const CItem * pItem )
@@ -4182,7 +4087,7 @@ int CItem::AddSpellbookSpell( SPELL_TYPE spell, bool fUpdate )
 		}
 	}
 
-	UpdatePropertyFlag(AUTOTOOLTIP_FLAG_SPELLBOOK);
+	UpdatePropertyFlag();
 	return 0;
 }
 
@@ -4667,7 +4572,7 @@ void CItem::Weapon_GetRangedAmmoAnim(ITEMID_TYPE &id, dword &hue, dword &render)
 	if ( pVarAnim )
 	{
 		lpctstr t_Str = pVarAnim->GetValStr();
-		CResourceIDBase rid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
+		CResourceIDBase rid(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
 		id = (ITEMID_TYPE)rid.GetResIndex();
 	}
 	else
@@ -4691,11 +4596,11 @@ CResourceIDBase CItem::Weapon_GetRangedAmmoRes()
 	ADDTOCALLSTACK("CItem::Weapon_GetRangedAmmoRes");
 	// Get ammo resource id of this ranged weapon (archery/throwing)
 
-	CVarDefCont *pVarType = GetDefKey("AMMOTYPE", true);
-	if ( pVarType )
+    CSString sAmmoID = GetPropStr(COMP_PROPS_ITEMWEAPONRANGED, PROPIWEAPRNG_AMMOTYPE, true, true);
+	if ( !sAmmoID.IsEmpty() )
 	{
-		lpctstr pszAmmoID = pVarType->GetValStr();
-		return static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, pszAmmoID));
+		lpctstr pszAmmoID = sAmmoID.GetPtr();
+		return CResourceIDBase(g_Cfg.ResourceGetID(RES_ITEMDEF, pszAmmoID));
 	}
 
 	CItemBase *pItemDef = Item_GetDef();
@@ -4713,7 +4618,7 @@ CItem *CItem::Weapon_FindRangedAmmo(CResourceIDBase id)
 	if ( pVarCont )
 	{
 		// Search container using UID
-		CUID uidCont = CUID((dword)pVarCont->GetValNum());
+		CUID uidCont((dword)pVarCont->GetValNum());
 		CContainer *pCont = dynamic_cast<CContainer *>(uidCont.ItemFind());
 		if ( pCont )
 			return pCont->ContentFind(id);
@@ -4722,7 +4627,7 @@ CItem *CItem::Weapon_FindRangedAmmo(CResourceIDBase id)
 		if ( pParent )
 		{
 			lpctstr pszContID = pVarCont->GetValStr();
-			CResourceIDBase ridCont = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, pszContID));
+			CResourceIDBase ridCont(g_Cfg.ResourceGetID(RES_ITEMDEF, pszContID));
 			pCont = dynamic_cast<CContainer *>(pParent->ContentFind(ridCont));
 			if ( pCont )
 				return pCont->ContentFind(id);
@@ -4972,7 +4877,7 @@ bool CItem::Use_Light()
 
 	SetID(id);
 	Update();
-	ResendTooltip();
+	UpdatePropertyFlag();
 
 	if ( IsType(IT_LIGHT_LIT) )
 	{
@@ -5250,8 +5155,8 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 				m_itWeapon.m_spellcharges = 0;
 			}
 
-			m_itWeapon.m_spellcharges++;
-			UpdatePropertyFlag(AUTOTOOLTIP_FLAG_WANDCHARGES);
+			++m_itWeapon.m_spellcharges;
+			UpdatePropertyFlag();
 		}
 	}
 
@@ -5517,7 +5422,7 @@ forcedamage:
 		int previousDamage = Weapon_GetAttack();
 
 		--m_itArmor.m_Hits_Cur;
-		UpdatePropertyFlag(AUTOTOOLTIP_FLAG_DURABILITY);
+		UpdatePropertyFlag();
 
 		if (pChar != nullptr && IsItemEquipped() )
 		{

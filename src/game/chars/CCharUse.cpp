@@ -4,6 +4,7 @@
 #include "../clients/CClient.h"
 #include "../items/CItem.h"
 #include "../items/CItemCorpse.h"
+#include "../components/CCPropsChar.h"
 #include "../components/CCSpawn.h"
 #include "../triggers.h"
 #include "CChar.h"
@@ -775,7 +776,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	if ( pItemArmor->m_itArmor.m_Hits_Cur <= 0 )
 		pItemArmor->Delete();
 	else
-		pItemArmor->UpdatePropertyFlag(AUTOTOOLTIP_FLAG_DURABILITY);
+		pItemArmor->UpdatePropertyFlag();
 
 	return fSuccess;
 }
@@ -947,7 +948,7 @@ void CChar::Use_Drink( CItem * pItem )
 
 		// Convey the effect of the potion.
 		int iSkillQuality = pItem->m_itPotion.m_skillquality;
-		int iEnhance = (int)(GetDefNum("EnhancePotions", false));
+		int iEnhance = (int)GetPropNum(COMP_PROPS_CHAR, PROPCH_ENHANCEPOTIONS, true);
 		if ( iEnhance )
 			iSkillQuality += IMulDiv(iSkillQuality, iEnhance, 100);
 

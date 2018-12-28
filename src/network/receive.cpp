@@ -153,7 +153,7 @@ bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_
 
 	CClient* client = net->getClient();
 	ASSERT(client);
-	const CAccountRef account = client->GetAccount();
+	const CAccount * account = client->GetAccount();
 	ASSERT(account);
 
 	if (client->GetChar() != nullptr)
@@ -2166,12 +2166,7 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 				if (!viewed)
 					viewed = character;
 			}
-			if (IsTrigUsed(TRIGGER_USERVIRTUE))
-			{
-				CScriptTriggerArgs Args(viewed);
-				Args.m_iN1 = button;
-				character->OnTrigger(CTRIG_UserVirtue, static_cast<CTextConsole *>(character), &Args);
-			}
+            client->Event_VirtueSelect(button, viewed);
 			return true;
 		}
 		else if (context == CLIMODE_DIALOG_FACESELECTION)
@@ -2183,7 +2178,7 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 				if (pFace)
 					pFace->Delete();
 
-				pFace = CItem::CreateBase((ITEMID_TYPE)(button));
+				pFace = CItem::CreateBase((ITEMID_TYPE)button);
 				if (pFace)
 				{
 					pFace->SetHue(character->GetHue());
@@ -3962,7 +3957,26 @@ PacketEquipLastWeapon::PacketEquipLastWeapon() : Packet(0)
 bool PacketEquipLastWeapon::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketEquipLastWeapon::onReceive");
-	UNREFERENCED_PARAMETER(net);
+
+    CClient *pClient = net->getClient();
+    ASSERT(pClient);
+    CChar *pChar = pClient->GetChar();
+    if ( !pChar )
+        return false;
+    CCharPlayer* pCharPlayer = pChar->m_pPlayer;
+    if ( !pCharPlayer )
+        return false;
+
+    if (!pCharPlayer->m_uidWeaponLast.IsValidUID())
+        return true;
+    if ( pCharPlayer->m_uidWeaponLast == pChar->m_uidWeapon )
+        return true;
+
+    CItem *pWeapon = pCharPlayer->m_uidWeaponLast.ItemFind();
+    if ( pWeapon && pChar->ItemPickup(pWeapon, 1) == -1 )
+        return true;
+
+    pChar->ItemEquip(pWeapon);
 
 	return true;
 }

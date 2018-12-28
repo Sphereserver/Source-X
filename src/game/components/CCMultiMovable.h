@@ -22,19 +22,19 @@ struct ShipSpeed // speed of a ship
 
 class CCMultiMovable
 {
-public:
-    CCMultiMovable(bool fCanTurn);
-    ~CCMultiMovable();
-
-    virtual bool OnTick();
-private:
-    CTextConsole *_pCaptain;
-    bool _fCanTurn;
-
+    CItem *_pLink;
     static lpctstr const sm_szLoadKeys[];
     static lpctstr const sm_szVerbKeys[];
 
+    CTextConsole *_pCaptain;
+    bool _fCanTurn;
+
 public:
+    CCMultiMovable(bool fCanTurn);
+    virtual ~CCMultiMovable() = default;
+    CItem *GetLink() const;
+
+    bool OnTick();
     bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc);
     bool r_LoadVal(CScript & s);
     bool r_Verb(CScript & s, CTextConsole * pSrc); // Execute command from script

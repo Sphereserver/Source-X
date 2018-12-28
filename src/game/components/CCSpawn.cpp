@@ -15,9 +15,10 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-CCSpawn::CCSpawn(CObjBase *pLink) : CComponent(COMP_SPAWN, pLink)
+CCSpawn::CCSpawn(CItem *pLink) : CComponent(COMP_SPAWN)
 {
     ADDTOCALLSTACK("CCSpawn::CCSpawn");
+    _pLink = pLink;
     _iAmount = 1;
     _iPile = 1;
     _iMaxDist = 15;
@@ -30,6 +31,11 @@ CCSpawn::CCSpawn(CObjBase *pLink) : CComponent(COMP_SPAWN, pLink)
 CCSpawn::~CCSpawn()
 {
     KillChildren();
+}
+
+CItem * CCSpawn::GetLink() const
+{
+    return _pLink;
 }
 
 uint16 CCSpawn::GetAmount() const
@@ -318,7 +324,7 @@ void CCSpawn::DelObj(CUID uid)
             break;
         }
     }
-    pItem->ResendTooltip();
+    pItem->UpdatePropertyFlag();
 }
 
 void CCSpawn::AddObj(CUID uid)
@@ -377,7 +383,7 @@ void CCSpawn::AddObj(CUID uid)
         }
     }
     if (!g_Serv.IsLoading())
-        pItem->ResendTooltip();
+        pItem->UpdatePropertyFlag();
 }
 
 CCRET_TYPE CCSpawn::OnTickComponent()
@@ -811,7 +817,7 @@ lpctstr const CCSpawn::sm_szRefKeys[ISPR_QTY + 1]
 bool CCSpawn::r_GetRef(lpctstr & pszKey, CScriptObj *& pRef)
 {
     ADDTOCALLSTACK("CCSpawn::r_GetRef");
-    int iCmd = FindTableHeadSorted(pszKey, sm_szRefKeys, CountOf(sm_szRefKeys) - 1);
+    int iCmd = FindTableSorted(pszKey, sm_szRefKeys, CountOf(sm_szRefKeys) - 1);
 
     if (iCmd < 0)
     {

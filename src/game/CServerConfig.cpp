@@ -279,8 +279,6 @@ CServerConfig::CServerConfig()
 
 	m_iTooltipCache			= 30 * MSECS_PER_SEC;
 	m_iTooltipMode			= TOOLTIPMODE_SENDVERSION;
-	m_iAutoTooltipResend	= (AUTOTOOLTIP_FLAG_NAME|AUTOTOOLTIP_FLAG_AMOUNT|AUTOTOOLTIP_FLAG_WEIGHT|AUTOTOOLTIP_FLAG_DURABILITY|
-								AUTOTOOLTIP_FLAG_POISON|AUTOTOOLTIP_FLAG_WANDCHARGES|AUTOTOOLTIP_FLAG_SPELLBOOK);
 	m_iContextMenuLimit		= 15;
 
 	m_iClientLoginMaxTries	= 0;		// maximum bad password tries before a temp ip ban
@@ -415,7 +413,6 @@ enum RC_TYPE
     RC_AUTOPROCESSPRIORITY,     // m_iAutoProcessPriority
 	RC_AUTORESDISP,				// m_bAutoResDisp
     RC_AUTOSHIPKEYS,            // _fAutoShipKeys
-	RC_AUTOTOOLTIPRESEND,		// m_iAutoTooltipResend
 	RC_BACKUPLEVELS,			// m_iSaveBackupLevels
 	RC_BANKMAXITEMS,
 	RC_BANKMAXWEIGHT,
@@ -659,7 +656,6 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
     { "AUTOPROCESSPRIORITY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAutoProcessPriority),	0 }},
 	{ "AUTORESDISP",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAutoResDisp),			0 }},
     { "AUTOSHIPKEYS",           { ELEM_BOOL,	OFFSETOF(CServerConfig,_fAutoShipKeys),		    0 }},
-	{ "AUTOTOOLTIPRESEND",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAutoTooltipResend),	0 }},
 	{ "BACKUPLEVELS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveBackupLevels),	0 }},
 	{ "BANKMAXITEMS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iBankIMax),			0 }},
 	{ "BANKMAXWEIGHT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iBankWMax),			0 }},

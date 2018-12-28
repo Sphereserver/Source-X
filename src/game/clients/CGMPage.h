@@ -13,7 +13,6 @@
 
 
 class CClient;	//fixme
-//class CAccountRef;
 class CGMPage : public CSObjListRec, public CScriptObj
 {
 	// RES_GMPAGE
@@ -39,7 +38,7 @@ private:
 	CGMPage& operator=(const CGMPage& other);
 
 public:
-	CAccountRef FindAccount() const;
+	CAccount * FindAccount() const;
 	lpctstr GetAccountStatus() const;
 	lpctstr GetName() const;
 	lpctstr GetReason() const;

@@ -16,6 +16,8 @@
 #include "../items/CItemMemory.h"
 #include "../items/CItemShip.h"
 #include "../items/CItemMulti.h"
+#include "../components/CCPropsChar.h"
+#include "../components/CCPropsItemChar.h"
 #include "../components/CCSpawn.h"
 #include "../CContainer.h"
 #include "../CServer.h"
@@ -258,6 +260,7 @@ CChar::CChar( CREID_TYPE baseID ) : CCTimedObject(PROFILE_CHARS), CObjBase( fals
     m_defense = 0;
 	m_height = 0;
 	m_ModMaxWeight = 0;
+    _iRange = 0;
 
 	m_StepStealth = 0;
 	m_iVisualRange = UO_MAP_VIEW_SIZE_DEFAULT;
@@ -298,7 +301,12 @@ CChar::CChar( CREID_TYPE baseID ) : CCTimedObject(PROFILE_CHARS), CObjBase( fals
 	m_LocalLight = 0;
 	m_fClimbUpdated = false;
 
-    Subscribe(new CCFaction(this));
+    // SubscribeComponent Prop Components
+    SubscribeComponentProps(new CCPropsChar());
+    SubscribeComponentProps(new CCPropsItemChar());
+
+    // SubscribeComponent regular Components
+    SubscribeComponent(new CCFaction(this));
 
     CCTimedObject::GoSleep();  // Make it be sleeping at first, to awake it when placing it in the world (errors will show up otherwise).
 
@@ -453,6 +461,8 @@ void CChar::Delete(bool bforce)
 
 	if (( NotifyDelete() == false ) && !bforce)
 		return;
+
+    g_World.DelCharTicking(this);
 
 	// Character has been deleted
 	if ( IsClient() )
@@ -896,9 +906,6 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	m_fonttype = pChar->m_fonttype;
 	m_SpeechHueOverride = pChar->m_SpeechHueOverride;
 
-	m_height = pChar->m_height;
-	m_ModMaxWeight = pChar->m_ModMaxWeight;
-
 	m_StepStealth = pChar->m_StepStealth;
 	m_iVisualRange = pChar->m_iVisualRange;
 	m_virtualGold = pChar->m_virtualGold;
@@ -906,6 +913,10 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	m_exp = pChar->m_exp;
 	m_level = pChar->m_level;
 	m_defense = pChar->m_defense;
+    m_height = pChar->m_height;
+    m_ModMaxWeight = pChar->m_ModMaxWeight;
+    _iRange = pChar->_iRange;
+
 	m_atUnk.m_Arg1 = pChar->m_atUnk.m_Arg1;
 	m_atUnk.m_Arg2 = pChar->m_atUnk.m_Arg2;
 	m_atUnk.m_Arg3 = pChar->m_atUnk.m_Arg3;
@@ -1205,37 +1216,39 @@ bool CChar::SetName( lpctstr pszName )
 
 height_t CChar::GetHeightMount( bool fEyeSubstract ) const
 {
-	ADDTOCALLSTACK("CChar::GetHeightMount");
+	ADDTOCALLSTACK_INTENSIVE("CChar::GetHeightMount");
 	height_t height = GetHeight();
 	if ( IsStatFlag(STATF_ONHORSE|STATF_HOVERING) )
 		height += 4;
 	if ( fEyeSubstract )
 		--height;
-	return ( height ); //if mounted +4, if not -1 (let's say it's eyes' height)
+	return height; //if mounted +4, if not -1 (let's say it's eyes' height)
 }
 
 height_t CChar::GetHeight() const
 {
-	ADDTOCALLSTACK("CChar::GetHeight");
+	ADDTOCALLSTACK_INTENSIVE("CChar::GetHeight");
 	if ( m_height ) //set by a dynamic variable (On=@Create  Height=10)
 		return m_height;
 
 	height_t tmpHeight;
 
-	CCharBase * pCharDef = Char_GetDef();
+	const CCharBase * pCharDef = Char_GetDef();
 	tmpHeight = pCharDef->GetHeight();
 	if ( tmpHeight ) //set by a chardef variable ([CHARDEF 10]  Height=10)
 		return tmpHeight;
 
+    // This is SLOW (since this method is called very frequently)! Move those defs value to CharDef!
 	char * heightDef = Str_GetTemp();
+    uint uiDispID = (uint)pCharDef->GetDispID();
 
-	sprintf(heightDef, "height_0%x", (uint)(pCharDef->GetDispID()));
-	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
+	sprintf(heightDef, "height_0%x", uiDispID);
+	tmpHeight = (height_t)(g_Exp.m_VarDefs.GetKeyNum(heightDef));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_0a)
 		return tmpHeight;
 
-	sprintf(heightDef, "height_%u", (uint)(pCharDef->GetDispID()));
-	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
+	sprintf(heightDef, "height_%u", uiDispID);
+	tmpHeight = (height_t)(g_Exp.m_VarDefs.GetKeyNum(heightDef));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_10)
 		return tmpHeight;
 
@@ -1933,17 +1946,27 @@ lpctstr const CChar::sm_szLoadKeys[CHC_QTY+1] =
 bool CChar::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CChar::r_WriteVal");
+    EXC_TRY("WriteVal");
 
 	if ( IsClient() && GetClient()->r_WriteVal(pszKey, sVal, pSrc) )
 		return true;
 
-    if (CEntity::r_WriteVal(pszKey, sVal, pSrc)) // Checking CComponents first.
+    // Checking Props CComponents first (first check CChar props, if not found then check CCharBase)
+    EXC_SET_BLOCK("EntityProp");
+    CCharBase* pCharBase = Char_GetDef();
+    if (CEntityProps::r_WritePropVal(pszKey, sVal) || pCharBase->CEntityProps::r_WritePropVal(pszKey, sVal))
     {
         return true;
     }
 
-	EXC_TRY("WriteVal");
+    // Now check regular CComponents
+    EXC_SET_BLOCK("Entity");
+    if (CEntity::r_WriteVal(pszKey, sVal, pSrc))
+    {
+        return true;
+    }
 
+    EXC_SET_BLOCK("Keyword");
 	CCharBase * pCharDef = Char_GetDef();
 	ASSERT(pCharDef);
 	CChar * pCharSrc = pSrc->GetChar();
@@ -1983,31 +2006,10 @@ do_default:
 	{
 		//return as decimal number or 0 if not set
 		case CHC_CURFOLLOWER:
-			sVal.FormatLLVal(GetDefNum(pszKey,true));
+			sVal.FormatLLVal(GetDefNum(pszKey,false));
 			break;
 		//On these ones, check BaseDef if not found on dynamic
-		case CHC_FASTERCASTRECOVERY:
-		case CHC_FASTERCASTING:
-		case CHC_INCREASEHITCHANCE:
-		case CHC_INCREASESWINGSPEED:
-		case CHC_INCREASEDAM:
-		case CHC_INCREASEDEFCHANCE:
-		case CHC_INCREASEDEFCHANCEMAX:
-		case CHC_INCREASESPELLDAM:
-		case CHC_LOWERMANACOST:
-		case CHC_LOWERREAGENTCOST:
-		case CHC_LUCK:
 		case CHC_MAXFOLLOWER:
-		case CHC_RESPHYSICAL:
-		case CHC_RESPHYSICALMAX:
-		case CHC_RESFIRE:
-		case CHC_RESFIREMAX:
-		case CHC_RESCOLD:
-		case CHC_RESCOLDMAX:
-		case CHC_RESPOISON:
-		case CHC_RESPOISONMAX:
-		case CHC_RESENERGY:
-		case CHC_RESENERGYMAX:
 		case CHC_SPELLTIMEOUT:
 		case CHC_TITHING:
 			sVal.FormatLLVal(GetDefNum(pszKey, true));
@@ -2457,7 +2459,7 @@ do_default:
 				pszKey += 4;
 				GETNONWHITESPACE(pszKey);
 
-				CPointBase	ptDst	= GetTopPoint();
+				CPointBase ptDst = GetTopPoint();
 				ptDst.Move( GetDirStr( pszKey ) );
 				CRegion * pArea = ptDst.GetRegion( REGION_TYPE_MULTI | REGION_TYPE_AREA );
 				if ( !pArea )
@@ -2825,8 +2827,7 @@ do_default:
 		case CHC_NIGHTSIGHT:
 			{
 				//sVal.FormatVal(IsStatFlag(STATF_NIGHTSIGHT));
-				CVarDefCont * pVar = GetDefKey(pszKey, true);
-				sVal.FormatLLVal(pVar ? pVar->GetValNum() : 0);
+				sVal.FormatVal(GetPropNum(COMP_PROPS_CHAR, PROPCH_NIGHTSIGHT, true));
 			}
             break;
 		case CHC_NOTOGETFLAG:
@@ -2864,6 +2865,21 @@ do_default:
 			break;
 		case CHC_P:
 			goto do_default;
+        case CHC_RANGE:
+        {
+            const int iRangeH = GetRangeH(), iRangeL = GetRangeL();
+            if ( iRangeH == 0 )
+                sVal.Format( "%d", iRangeL );
+            else
+                sVal.Format( "%d,%d", iRangeH, iRangeL );
+            break;
+        }
+        case CHC_RANGEH:
+            sVal.FormatVal(GetRangeH());
+            break;
+        case CHC_RANGEL:
+            sVal.FormatVal(GetRangeL());
+            break;
 		case CHC_STONE:
 			sVal.FormatVal( IsStatFlag( STATF_STONE ));
 			break;
@@ -2916,11 +2932,22 @@ bool CChar::r_LoadVal( CScript & s )
 	ADDTOCALLSTACK("CChar::r_LoadVal");
 	EXC_TRY("LoadVal");
 
+    // Checking Props CComponents first (first check CChar props, if not found then check CCharBase)
+    EXC_SET_BLOCK("EntityProps");
+    CCharBase* pItemBase = Char_GetDef();
+    if (CEntityProps::r_LoadPropVal(s, this) || pItemBase->CEntityProps::r_LoadPropVal(s, this))
+    {
+        return true;
+    }
+
+    // Now check regular CComponents
+    EXC_SET_BLOCK("CEntity");
     if (CEntity::r_LoadVal(s))
     {
         return true;
     }
 
+    EXC_SET_BLOCK("Keyword");
 	lpctstr	pszKey = s.GetKey();
 	CHC_TYPE iKeyNum = (CHC_TYPE) FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( iKeyNum < 0 )
@@ -3035,27 +3062,6 @@ bool CChar::r_LoadVal( CScript & s )
             Stats_SetRegenVal(STAT_FOOD, s.GetArgUSVal());
             break;
 
-        case CHC_INCREASEHITCHANCE:
-		case CHC_INCREASESWINGSPEED:
-		case CHC_INCREASEDAM:
-		case CHC_LOWERREAGENTCOST:
-		case CHC_LOWERMANACOST:
-		case CHC_FASTERCASTRECOVERY:
-		case CHC_FASTERCASTING:
-		case CHC_INCREASEDEFCHANCE:
-		case CHC_INCREASEDEFCHANCEMAX:
-		case CHC_INCREASESPELLDAM:
-		case CHC_RESPHYSICAL:
-		case CHC_RESPHYSICALMAX:
-		case CHC_RESFIRE:
-		case CHC_RESFIREMAX:
-		case CHC_RESCOLD:
-		case CHC_RESCOLDMAX:
-		case CHC_RESPOISON:
-		case CHC_RESPOISONMAX:
-		case CHC_RESENERGY:
-		case CHC_RESENERGYMAX:
-		case CHC_LUCK:
 		case CHC_CURFOLLOWER:
 		case CHC_MAXFOLLOWER:
 		case CHC_TITHING:
@@ -3380,10 +3386,12 @@ bool CChar::r_LoadVal( CScript & s )
 			break;
 		case CHC_NIGHTSIGHT:
 			{
-				int fNightsight = s.GetArgVal();
-				if (!fNightsight)	// Keep old 'switch' from 0 to 1 and viceversa behaviour while no args are given.
+				int fNightsight;
+				if (!s.HasArgs())	// Keep old 'switch' from 0 to 1 and viceversa behaviour while no args are given.
 					 fNightsight = !IsStatFlag(STATF_NIGHTSIGHT);
-				SetDefNum(s.GetKey(), fNightsight, false);
+                else
+                    fNightsight = s.GetArgVal();
+                SetPropNum(COMP_PROPS_CHAR, PROPCH_NIGHTSIGHT, fNightsight);
 				StatFlag_Mod( STATF_NIGHTSIGHT, fNightsight > 0 ? true : false );
 				if ( IsClient() )
 					m_pClient->addLight();
@@ -3415,6 +3423,28 @@ bool CChar::r_LoadVal( CScript & s )
                     return false;
 			}
 			break;
+        case CHC_RANGE:
+        {
+            int64 piVal[2];
+            tchar *ptcTmp = Str_GetTemp();
+            strncpy(ptcTmp, s.GetArgStr(), STR_TEMPLENGTH);
+            int iQty = Str_ParseCmds( ptcTmp, piVal, CountOf(piVal));
+            int iRange;
+            if ( iQty > 1 )
+            {
+                iRange = (int)((piVal[1] & 0xff) << 8); // highest byte contains the lowest value
+                iRange |= (int)(piVal[0] & 0xff);       // lowest byte contains the highest value
+            }
+            else
+            {
+                iRange = (int)(piVal[0] << 8);
+            }
+            _iRange = iRange;
+            break;
+        }
+        case CHC_RANGEH:
+        case CHC_RANGEL:
+            return false;
 		case CHC_STONE:
 			{
 				bool fSet;
@@ -3668,6 +3698,7 @@ void CChar::r_Write( CScript & s )
 		s.WriteKeyVal(g_Cfg.GetSkillDef((SKILL_TYPE)j)->GetKey(), uiSkillVal );
 	}
     CEntity::r_Write(s);
+    CEntityProps::r_Write(s);
 
 	r_WriteContent(s);
 	EXC_CATCH;

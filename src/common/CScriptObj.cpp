@@ -761,7 +761,7 @@ badcmd:
 				int child_pid = vfork();
 				if ( child_pid < 0 )
 				{
-					g_Log.EventError("SYSSPAWN failed when executing %s.\n", pszKey);
+                    g_Log.EventError("%s failed when executing '%s'\n", sm_szLoadKeys[index], pszKey);
 					return false;
 				}
 				else if ( child_pid == 0 )
@@ -771,9 +771,9 @@ badcmd:
 										Arg_ppCmd[3], Arg_ppCmd[4], Arg_ppCmd[5], Arg_ppCmd[6],
 										Arg_ppCmd[7], Arg_ppCmd[8], Arg_ppCmd[9], nullptr );
 
-					g_Log.EventError("SYSSPAWN failed with error %d (\"%s\") when executing %s.\n", errno, strerror(errno), pszKey);
-					raise(SIGKILL);
-					g_Log.EventError("Failed errorhandling in SYSSPAWN. Server is UNSTABLE.\n");
+                    g_Log.EventError("%s failed with error %d (\"%s\") when executing '%s'\n", sm_szLoadKeys[index], errno, strerror(errno), pszKey);
+                    raise(SIGKILL);
+                    g_Log.EventError("%s failed to handle error. Server is UNSTABLE\n", sm_szLoadKeys[index]);
 					while(true) {} // do NOT leave here until the process receives SIGKILL otherwise it will free up resources
 								   // it inherited from the main process, which pretty will fuck everything up. Normally this point should never be reached.
 				}
@@ -1344,14 +1344,16 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 			++LoopsMade;
 			if ( g_Cfg.m_iMaxLoopTimes && ( LoopsMade >= g_Cfg.m_iMaxLoopTimes ))
 				goto toomanyloops;
-
-			pArgs->m_VarsLocal.SetNum( "_WHILE", iWhile, false );
-			++iWhile;
+			
 			strcpy( pszTemp, pszOrig.GetPtr() );
 			pszCond	= pszTemp;
 			ParseText( pszCond, pSrc, 0, pArgs );
 			if ( !Exp_GetVal( pszCond ) )
 				break;
+
+            pArgs->m_VarsLocal.SetNum( "_WHILE", iWhile, false );
+            ++iWhile;
+
 			TRIGRET_TYPE iRet = OnTriggerRun( s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult );
 			if ( iRet == TRIGRET_BREAK )
 			{
@@ -1368,8 +1370,9 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 		}
 	}
 	else
+    {
 		ParseText( s.GetArgStr(), pSrc, 0, pArgs );
-
+    }
 
 
 	if ( iType & 4 )		// FOR
@@ -1389,16 +1392,16 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 			iMax = Exp_GetSingle( ppArgs[0] );
 			break;
 		case 2:
-			if ( IsDigit( *ppArgs[0] ) )
+            if ( IsDigit(*ppArgs[0]) || ((*ppArgs[0] == '-') && IsDigit(*(ppArgs[0] + 1))) )
 			{
 				iMin = Exp_GetSingle( ppArgs[0] );
 				iMax = Exp_GetSingle( ppArgs[1] );
 			}
 			else
 			{
+                sLoopVar = ppArgs[0];
 				iMin = 1;
 				iMax = Exp_GetSingle( ppArgs[1] );
-				sLoopVar = ppArgs[0];
 			}
 			break;
 		case 3:
@@ -1549,7 +1552,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 
 		if (Str_ParseCmds( s.GetArgStr(), ppArgs, CountOf( ppArgs ), " \t," ) >= 1)
 		{
-			rid = g_Cfg.ResourceGetID(RES_UNKNOWN, const_cast<lpctstr &>(static_cast<lptstr &>(ppArgs[0])));
+			rid = g_Cfg.ResourceGetID(RES_UNKNOWN, ppArgs[0]);
 		}
 		else
 		{

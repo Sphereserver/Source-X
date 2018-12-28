@@ -20,10 +20,11 @@ class CUID;
 
 class CCSpawn : public CComponent
 {
-private:
+    CItem* _pLink;
     static lpctstr const sm_szLoadKeys[];
     static lpctstr const sm_szVerbKeys[];
     static lpctstr const sm_szRefKeys[];
+
     std::vector<CUID> _uidList; // Storing UIDs of the created items/chars.
     bool _fKillingChildren;     // For internal usage, set to true when KillChildren() is in proccess to prevent DelObj() being called from CObjBase when deleteing the objs.
 
@@ -37,6 +38,20 @@ private:
 
 public:
     static const char *m_sClassName;
+
+    CCSpawn(CItem *pLink);
+    virtual ~CCSpawn();
+    CItem *GetLink() const;
+    virtual void Delete(bool fForce = false) override;
+    virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc) override;
+    virtual bool r_LoadVal(CScript & s) override;
+    virtual void r_Write(CScript & s) override;
+    virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef) override;
+    virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;
+    virtual void Copy(const CComponent *target) override;
+    /*virtual bool IsDeleted() const override;
+    virtual void GoAwake() override;
+    virtual void GoSleep() override;*/
 
     /*  I don't want to inherit SetAmount, GetAmount and _iAmount from the parent CItem class. I need to redefine them for CCSpawn class
     *   so that when i set AMOUNT to the spawn item, i don't really set the "item amount/quantity" property, but the "spawn item AMOUNT" property.
@@ -170,19 +185,6 @@ public:
     * @return the name of the resource.
     */
     uint WriteName(tchar * pszOut) const;
-
-    CCSpawn(CObjBase *pLink);
-    virtual ~CCSpawn();
-    virtual void Delete(bool fForce = false) override;
-    virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc) override;
-    virtual bool r_LoadVal(CScript & s) override;
-    virtual void r_Write(CScript & s) override;
-    virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef) override;
-    virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;
-    virtual void Copy(const CComponent *target) override;
-    /*virtual bool IsDeleted() const override;
-    virtual void GoAwake() override;
-    virtual void GoSleep() override;*/
 };
 
 #endif // _INC_CCSPAWN_H

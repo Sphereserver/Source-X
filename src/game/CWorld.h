@@ -14,6 +14,7 @@
 #include "CSector.h"
 #include "CTimedFunction.h"
 #include <unordered_map>
+#include <unordered_set>
 
 class CObjBase;
 class CItemTypeDef;
@@ -218,7 +219,7 @@ public:
 
 	// TimedFunction Container/Wrapper
 	CTimedFunctionHandler m_TimedFunctions;
-	CSPtrTypeArray<CObjBase*> m_ObjStatusUpdates; // objects that need OnTickStatusUpdate called
+	std::unordered_set<CObjBase*> m_ObjStatusUpdates; // objects that need OnTickStatusUpdate called
 
 private:
 	bool LoadFile( lpctstr pszName, bool fError = true );

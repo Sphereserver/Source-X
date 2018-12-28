@@ -380,7 +380,7 @@ bool CClient::OnRxConsole( const byte * pData, size_t iLen )
 				{
 					CSString sMsg;
 
-					CAccountRef pAccount = g_Accounts.Account_Find(m_zLogin);
+					CAccount * pAccount = g_Accounts.Account_Find(m_zLogin);
 					if (( pAccount == nullptr ) || ( pAccount->GetPrivLevel() < PLEVEL_Admin ))
 					{
 						SysMessagef("%s\n", g_Cfg.GetDefaultMsg(DEFMSG_CONSOLE_NOT_PRIV));
@@ -438,7 +438,7 @@ bool CClient::OnRxAxis( const byte * pData, size_t iLen )
 				{
 					CSString sMsg;
 
-					CAccountRef pAccount = g_Accounts.Account_Find(m_zLogin);
+					CAccount * pAccount = g_Accounts.Account_Find(m_zLogin);
 					if (( pAccount == nullptr ) || ( pAccount->GetPrivLevel() < PLEVEL_Counsel ))
 					{
 						SysMessagef("\"MSG:%s\"", g_Cfg.GetDefaultMsg(DEFMSG_AXIS_NOT_PRIV));
@@ -549,7 +549,7 @@ bool CClient::OnRxPing( const byte * pData, size_t iLen )
 
 				if ( GetPeer().IsLocalAddr() )
 				{
-					CAccountRef pAccount = g_Accounts.Account_Find("Administrator");
+					CAccount * pAccount = g_Accounts.Account_Find("Administrator");
 					if ( !pAccount )
 						pAccount = g_Accounts.Account_Find("RemoteAdmin");
 					if ( pAccount )
@@ -857,7 +857,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 			if ( lErr == PacketLoginError::Success )
 			{
 				Str_GetBare( szAccount, pEvent->ServersReq.m_acctname, sizeof(szAccount)-1 );
-				CAccountRef pAcc = g_Accounts.Account_Find( szAccount );
+				CAccount * pAcc = g_Accounts.Account_Find( szAccount );
 				if (pAcc)
 				{
 					pAcc->m_TagDefs.SetNum("clientversion", m_Crypt.GetClientVer());
@@ -883,7 +883,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 			{
 				// pass detected client version to the game server to make valid cliver used
 				Str_GetBare( szAccount, pEvent->CharListReq.m_acctname, sizeof(szAccount)-1 );
-				CAccountRef pAcc = g_Accounts.Account_Find( szAccount );
+				CAccount * pAcc = g_Accounts.Account_Find( szAccount );
 				if (pAcc)
 				{
 					dword tmSid = 0x7f000001;

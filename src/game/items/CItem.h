@@ -59,7 +59,8 @@ public:
     void SetComponentOfMulti(CUID uidMulti);
     void SetLockDownOfMulti(CUID uidMulti);
 	byte	m_speed;
-	// Attribute flags.
+
+// Attribute flags.
 #define ATTR_IDENTIFIED			0x0001				// This is the identified name. ???
 #define ATTR_DECAY				0x0002				// Timer currently set to decay.
 #define ATTR_NEWBIE				0x0004				// Not lost on death or sellable ?
@@ -76,6 +77,8 @@ public:
 #define ATTR_STOLEN				0x2000				// The item is hot. m_uidLink = previous owner.
 #define ATTR_CAN_DECAY			0x4000				// This item can decay. but it would seem that it would not (ATTR_MOVE_NEVER etc)
 #define ATTR_STATIC				0x8000				// WorldForge merge marker. (used for statics saves)
+
+// Not listed by AxisII
 #define ATTR_EXCEPTIONAL		0x10000				// Is Exceptional
 #define ATTR_ENCHANTED			0x20000				// Is Enchanted
 #define ATTR_IMBUED				0x40000				// Is Imbued
@@ -91,34 +94,14 @@ public:
 #define ATTR_SHARDBOUND			0x10000000
 #define ATTR_ACCOUNTBOUND  		0x20000000
 #define ATTR_CHARACTERBOUND		0x40000000
-#define ATTR_BALANCED			0x80000000
-#define ATTR_USEBESTWEAPONSKILL	0x100000000
-#define ATTR_MAGEARMOR			0x200000000
-#define ATTR_SPELLCHANNELING	0x400000000
-#define ATTR_BANE				0x800000000
-#define ATTR_BLOODDRINKER		0x1000000000
-#define ATTR_BATTLELUST			0x2000000000
-#define ATTR_MANAPHASE			0x4000000000
-#define ATTR_SEARINGWEAPON		0x8000000000
-#define ATTR_REACTIVEPARALYZE	0x10000000000		//
-#define ATTR_SPELLFOCUSING		0x20000000000		// Still needs prop on char
-#define ATTR_CASTINGFOCUS		0x40000000000		// Still needs prop on char
-#define ATTR_RAGEFOCUS			0x80000000000		// Still needs prop on char
-#define ATTR_ANTIQUE			0x100000000000
-#define ATTR_BRITTLE			0x200000000000		// Can't be powdered. Defaulty 255 durability
+
+// TODO
 #define ATTR_CANNOTREPAIR		0x400000000000		// No repair, no fortify
-#define ATTR_MASSIVE			0x800000000000		// Increased str requirement
-#define ATTR_PRIZED				0x1000000000000		// Increase Item insurance, cannot be blessed
-#define ATTR_UNLUCKY			0x2000000000000		// -100 lucky (cant have lucky property)
-#define ATTR_UNWIELDY			0x4000000000000		// Increased weight
-#define ATTR_EPHEMERAL			0x8000000000000
-#define ATTR_LAVAINFUSED		0x10000000000000	// Lava infused
-#define ATTR_BARNACLECOVERED	0x20000000000000	// Barnacle covered
-#define ATTR_SHIPWRECKITEM		0x40000000000000	// Recovered from shipwreck
-#define ATTR_FACTIONITEM		0x80000000000000	// Faction Item (Has cliloc)
-#define ATTR_VVVITEM			0x100000000000000	// VvV Item (Has CliLoc)
-#define ATTR_SPLINTERINGWEAPON	0x200000000000000
+#define ATTR_FACTIONITEM		0x80000000000000	// ? Faction Item (Has cliloc)
+#define ATTR_VVVITEM			0x100000000000000	// ? VvV Item (Has CliLoc)
+
 	uint64	m_Attr;
+
 	// NOTE: If this link is set but not valid -> then delete the whole object !
 	CUID m_uidLink;		// Linked to this other object in the world. (owned, key, etc)
 
@@ -599,6 +582,21 @@ public:
 	int IsWeird() const;
 	char GetFixZ(CPointMap pt, dword dwBlockFlags = 0 );
 	byte GetSpeed() const;
+
+    /**
+    * @fn  byte GetRangeL() const;
+    * @brief   Returns the RangeLow.
+    * @return  Value.
+    */
+    byte GetRangeL() const;
+
+    /**
+    * @fn  byte GetRangeH() const;
+    * @brief   Returns the RangeHigh.
+    * @return  Value.
+    */
+    byte GetRangeH() const;
+
 	void SetAttr(uint64 iAttr)
 	{
 		m_Attr |= iAttr;
@@ -747,6 +745,7 @@ public:    /**
 	bool IsTypeLocked() const;
 	bool IsTypeLockable() const;
 	bool IsTypeSpellable() const;
+    bool IsTypeEquippable() const;
 
 	bool IsResourceMatch( CResourceIDBase rid, dword dwArg );
 

@@ -19,6 +19,7 @@ CEntity::~CEntity()
 
 void CEntity::Delete(bool fForce)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::Delete");
     if (_List.empty())
         return;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
@@ -28,13 +29,14 @@ void CEntity::Delete(bool fForce)
         {
             pComponent->Delete(fForce);
         }
-        Unsubscribe(it, false);
+        UnsubscribeComponent(it, false);
     }
     _List.clear();
 }
 
 void CEntity::ClearComponents()
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::ClearComponents");
     if (_List.empty())
         return;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
@@ -48,20 +50,23 @@ void CEntity::ClearComponents()
     _List.clear();
 }
 
-void CEntity::Subscribe(CComponent * pComponent)
+void CEntity::SubscribeComponent(CComponent * pComponent)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::SubscribeComponent");
     COMP_TYPE compType = pComponent->GetType();
     if (_List.count(compType))
     {
-        g_Log.EventError("Trying to duplicate component (%d) for %s '0x%08x'\n", (int)pComponent->GetType(), pComponent->GetLink()->GetName(), pComponent->GetLink()->GetUID());
         delete pComponent;
+        ASSERT(0);  // This should never happen
+        //g_Log.EventError("Trying to duplicate component (%d) for %s '0x%08x'\n", (int)pComponent->GetType(), pComponent->GetLink()->GetName(), pComponent->GetLink()->GetUID());
         return;
     }
     _List[compType] = pComponent;
 }
 
-void CEntity::Unsubscribe(std::map<COMP_TYPE, CComponent*>::iterator& it, bool fEraseFromMap)
+void CEntity::UnsubscribeComponent(std::map<COMP_TYPE, CComponent*>::iterator& it, bool fEraseFromMap)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::UnsubscribeComponent(it)");
     delete it->second;
     if (fEraseFromMap)
     {
@@ -69,8 +74,9 @@ void CEntity::Unsubscribe(std::map<COMP_TYPE, CComponent*>::iterator& it, bool f
     }
 }
 
-void CEntity::Unsubscribe(CComponent *pComponent)
+void CEntity::UnsubscribeComponent(CComponent *pComponent)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::UnsubscribeComponent");
     if (_List.empty())
     {
         return;
@@ -85,17 +91,15 @@ void CEntity::Unsubscribe(CComponent *pComponent)
     _List.erase(compType);  // iterator invalidation!
 }
 
-bool CEntity::IsSusbcribed(CComponent *pComponent) const
+bool CEntity::IsComponentSubscribed(CComponent *pComponent) const
 {
-    if (!_List.empty() && _List.count(pComponent->GetType()))
-    {
-        return true;
-    }
-    return false;
+    ADDTOCALLSTACK_INTENSIVE("CEntity::IsComponentSubscribed");
+    return (!_List.empty() && _List.count(pComponent->GetType()));
 }
 
 CComponent * CEntity::GetComponent(COMP_TYPE type)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::GetComponent");
     if (!_List.empty() && _List.count(type))
     {
         return _List[type];
@@ -105,6 +109,7 @@ CComponent * CEntity::GetComponent(COMP_TYPE type)
 
 bool CEntity::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::r_GetRef");
     if (_List.empty())
         return false;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
@@ -123,6 +128,7 @@ bool CEntity::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 
 void CEntity::r_Write(CScript & s) // Storing data in the worldsave.
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::r_Write");
     if (_List.empty() && !s.IsWriteMode())
         return;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
@@ -137,6 +143,7 @@ void CEntity::r_Write(CScript & s) // Storing data in the worldsave.
 
 bool CEntity::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::r_WriteVal");
     if (_List.empty())
         return false;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
@@ -155,6 +162,7 @@ bool CEntity::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
 
 bool CEntity::r_LoadVal(CScript & s)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::r_LoadVal");
     if (_List.empty())
         return false;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
@@ -171,8 +179,9 @@ bool CEntity::r_LoadVal(CScript & s)
     return false;
 }
 
-bool CEntity::r_Verb(CScript & s, CTextConsole * pSrc) ///< Execute command from script.
+bool CEntity::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from script.
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::r_Verb");
     if (_List.empty())
         return false;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
@@ -191,6 +200,7 @@ bool CEntity::r_Verb(CScript & s, CTextConsole * pSrc) ///< Execute command from
 
 void CEntity::Copy(const CEntity *target)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::Copy");
     if (_List.empty())
         return;
     for (std::map<COMP_TYPE, CComponent*>::const_iterator it = target->_List.begin(); it != target->_List.end(); ++it)
@@ -209,6 +219,7 @@ void CEntity::Copy(const CEntity *target)
 
 CCRET_TYPE CEntity::OnTick()
 {
+    ADDTOCALLSTACK("CEntity::OnTick");
     if (_List.empty())
         return CCRET_CONTINUE;
 

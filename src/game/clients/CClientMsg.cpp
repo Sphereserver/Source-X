@@ -1371,7 +1371,7 @@ void CClient::addPlayerStart( CChar * pChar )
 
 	new PacketPlayerStart(this);
 	addMapDiff();
-	m_pChar->MoveToChar(pt);	// make sure we are in active list
+	m_pChar->MoveToChar(pt, false, false);	// make sure we are in active list
 	m_pChar->Update();
 	addPlayerWarMode();
 	addLoginComplete();
@@ -2754,7 +2754,7 @@ byte CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, 
 
 
 	/*
-	CAccountRef pAcc = GetAccount();
+	CAccount * pAcc = GetAccount();
 	ASSERT( pAcc );
 
 	CChar *pCharLast = pAcc->m_uidLastChar.CharFind();
@@ -2785,7 +2785,7 @@ byte CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, 
 	return PacketLoginError::Success;
 }
 
-byte CClient::LogIn( CAccountRef pAccount, CSString & sMsg )
+byte CClient::LogIn( CAccount * pAccount, CSString & sMsg )
 {
 	ADDTOCALLSTACK("CClient::LogIn");
 	if ( pAccount == nullptr )
@@ -2938,7 +2938,7 @@ byte CClient::LogIn( lpctstr pszAccName, lpctstr pszPassword, CSString & sMsg )
 			}
 
 			sprintf(pszTemp, "GUEST%d", i);
-			CAccountRef pAccount = g_Accounts.Account_FindCreate(pszTemp, true );
+			CAccount * pAccount = g_Accounts.Account_FindCreate(pszTemp, true );
 			ASSERT( pAccount );
 
 			if ( pAccount->FindClient() == nullptr )
@@ -2958,7 +2958,7 @@ byte CClient::LogIn( lpctstr pszAccName, lpctstr pszPassword, CSString & sMsg )
 	}
 
 	bool fAutoCreate = ( g_Serv.m_eAccApp == ACCAPP_Free || g_Serv.m_eAccApp == ACCAPP_GuestAuto || g_Serv.m_eAccApp == ACCAPP_GuestTrial );
-	CAccountRef pAccount = g_Accounts.Account_FindCreate(pszAccName, fAutoCreate);
+	CAccount * pAccount = g_Accounts.Account_FindCreate(pszAccName, fAutoCreate);
 	if ( ! pAccount )
 	{
 		g_Log.Event(LOGM_CLIENTS_LOG, "%x: Account '%s' does not exist\n", GetSocketID(), pszAccName);

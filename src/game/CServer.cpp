@@ -1284,7 +1284,7 @@ bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 	if ( !strnicmp(pszKey, "ACCOUNT.", 8) )
 	{
 		pszKey += 8;
-		CAccountRef pAccount = nullptr;
+		CAccount * pAccount = nullptr;
 
 		// extract account name/index to a temporary buffer
 		tchar * pszTemp = Str_GetTemp();
@@ -1435,7 +1435,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			index = SV_ACCOUNT;
 			pszKey += 8;
 
-			CAccountRef pAccount = nullptr;
+			CAccount * pAccount = nullptr;
 			char *pszTemp = Str_GetTemp();
 
 			strcpy(pszTemp, pszKey);
@@ -2260,12 +2260,10 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 			return false;
 		}
 	}
-
-	EXC_SET_BLOCK("finalizing");
+	
 #ifdef _WIN32
-	char *pszTemp = Str_GetTemp();
-	sprintf(pszTemp, SPHERE_TITLE " V" SPHERE_VERSION " - %s", GetName());
-	SetConsoleTitle(pszTemp);
+    EXC_SET_BLOCK("finalizing");
+    g_NTWindow.SetWindowTitle();
 #endif
 
 	return true;

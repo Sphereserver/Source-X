@@ -36,7 +36,7 @@ void CCharsActiveList::OnRemoveObj( CSObjListRec * pObRec )
         m_timeLastClient = g_World.GetCurrentTime().GetTimeRaw();	// mark time in case it's the last client
 	}
 	CSObjList::OnRemoveObj(pObRec);
-	pChar->SetContainerFlags(UID_O_DISCONNECT);
+	pChar->SetUIDContainerFlags(UID_O_DISCONNECT);
 }
 
 size_t CCharsActiveList::HasClients() const
@@ -49,11 +49,14 @@ void CCharsActiveList::AddCharToSector( CChar * pChar )
 	ADDTOCALLSTACK("CCharsActiveList::AddCharToSector");
 	ASSERT( pChar );
 	// ASSERT( pChar->m_pt.IsValid());
-	if ( pChar->IsClient())
-	{
-		ClientAttach();
-	}
-	CSObjList::InsertHead(pChar);
+	CSObjList::InsertHead(pChar); // this also removes the Char from the old sector
+    // UID_O_DISCONNECT is removed also by SetTopPoint. But the calls are in this order: SetTopPoint, then AddCharToSector -> CSObjList::InsertHead(pChar) ->-> OnRemoveObj
+    //  (which sets UID_O_DISCONNECT), then we return in AddCharToSector, where we need to manually remove this flag, otherwise we need to call SetTopPoint() here.
+    pChar->RemoveUIDFlags(UID_O_DISCONNECT);
+    if ( pChar->IsClient())
+    {
+        ClientAttach();
+    }
 }
 
 void CCharsActiveList::ClientAttach()
@@ -86,7 +89,7 @@ void CItemsList::OnRemoveObj( CSObjListRec * pObRec )
 	}
 
 	CSObjList::OnRemoveObj(pObRec);
-	pItem->SetContainerFlags(UID_O_DISCONNECT);	// It is no place for the moment.
+	pItem->SetUIDContainerFlags(UID_O_DISCONNECT);	// It is no place for the moment.
 }
 
 void CItemsList::AddItemToSector( CItem * pItem )
@@ -95,7 +98,8 @@ void CItemsList::AddItemToSector( CItem * pItem )
 	// Add to top level.
 	// Either MoveTo() or SetTimeout is being called.
 	ASSERT( pItem );
-	CSObjList::InsertHead( pItem );
+	CSObjList::InsertHead( pItem ); // this also removes the Char from the old sector
+    pItem->RemoveUIDFlags(UID_O_DISCONNECT);
 }
 
 CItemsList::CItemsList()

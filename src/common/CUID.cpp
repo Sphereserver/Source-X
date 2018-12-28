@@ -64,6 +64,11 @@ void CUIDBase::SetObjContainerFlags( dword dwFlags )
 	m_dwInternalVal = ( m_dwInternalVal & (UID_O_INDEX_MASK|UID_F_ITEM) ) | dwFlags;
 }
 
+void CUIDBase::RemoveObjFlags( dword dwFlags )
+{
+    m_dwInternalVal &= ~dwFlags;
+}
+
 dword CUIDBase::GetObjUID() const
 {
 	return ( m_dwInternalVal & (UID_O_INDEX_MASK|UID_F_ITEM) );

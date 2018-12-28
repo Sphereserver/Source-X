@@ -478,14 +478,16 @@ public:
 	{
 		return ( type == m_type );
 	}
+    void SetType(IT_TYPE type);
 
 	void SetTypeName( lpctstr pszName );
 
 	LAYER_TYPE GetEquipLayer() const
 	{
 		// Is this item really equippable ?
-		return static_cast<LAYER_TYPE>(m_layer);
+		return (LAYER_TYPE)m_layer;
 	}
+    static bool IsTypeEquippable(IT_TYPE type, LAYER_TYPE layer);
 	bool IsTypeEquippable() const;
 	GUMP_TYPE IsTypeContainer() const;
 
@@ -518,15 +520,24 @@ public:
 	{
 		return Can( CAN_I_PILE );
 	}
-	word GetWeight() const
-	{
-		// Get weight in tenths of a stone.
 #define WEIGHT_UNITS 10
-		if ( ! IsMovableType())
-			return WEIGHT_UNITS;	// If we can pick them up then we should be able to move them
-		return m_weight;
-	}
+	word GetWeight() const; // Get weight in tenths of a stone.
 	byte GetSpeed() const;
+
+    /**
+    * @fn  byte GetRangeL() const;
+    * @brief   Returns the RangeLow.
+    * @return  Value.
+    */
+    byte GetRangeL() const;
+
+    /**
+    * @fn  byte GetRangeH() const;
+    * @brief   Returns the RangeHigh.
+    * @return  Value.
+    */
+    byte GetRangeH() const;
+
 	word GetVolume() const
 	{
 		return ( m_weight / WEIGHT_UNITS );
@@ -536,12 +547,7 @@ public:
 	void ResetMakeValue();
 	void Restock();
 
-	virtual void UnLink() override
-	{
-        m_flip_id.clear();
-        m_SkillMake.clear();
-		CBaseBaseDef::UnLink();
-	}
+	virtual void UnLink() override;
 
 	void CopyBasic( const CItemBase * pBase );
 	void CopyTransfer( CItemBase * pBase );

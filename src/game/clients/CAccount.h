@@ -362,10 +362,6 @@ public:
 	CClient * FindClient( const CClient * pExclude = nullptr ) const;
 };
 
-/**
-* CAccount reference.
-*/
-typedef CAccount * CAccountRef;
 
 /**
 * @brief The full accounts database.
@@ -447,34 +443,34 @@ public:
 	*/
 	size_t Account_GetCount() const;
 	/**
-	* @brief Get a CAccountRef of an CAccount by his index.
+	* @brief Get a CAccount * of an CAccount by his index.
 	* @param index array index of the CAccount.
-	* @return CAccountRef of the CAccount if index is valid, nullptr otherwise.
+	* @return CAccount * of the CAccount if index is valid, nullptr otherwise.
 	*/
-	CAccountRef Account_Get( size_t index );
+	CAccount * Account_Get( size_t index );
 	/**
-	* @brief Get a CAccountRef from a valid name.
+	* @brief Get a CAccount * from a valid name.
 	* If the name is not valid nullptr is returned.
 	* @param pszName the name of the CAccount we are looking for.
-	* @return CAccountRef if pszName si a valid account name and exists an CAccount with that name, Null otherwise.
+	* @return CAccount * if pszName si a valid account name and exists an CAccount with that name, Null otherwise.
 	*/
-	CAccountRef Account_Find( lpctstr pszName );
+	CAccount * Account_Find( lpctstr pszName );
 	/**
 	* @brief Get or create an CAccount in some circumstances.
-	* If there is an CAccount with the provided name, a CAccountRef of the account is returned.
-	* If there is not an CAccount with the providded name, AutoAccount is enabled in sphere.ini and the name is a valid account name, a CAcount is created and a CAccountRef of the returned.
+	* If there is an CAccount with the provided name, a CAccount * of the account is returned.
+	* If there is not an CAccount with the providded name, AutoAccount is enabled in sphere.ini and the name is a valid account name, a CAcount is created and a CAccount * of the returned.
 	* Otherwise, nullptr is returned.
 	* @param pszName name of the account.
 	* @param fAutoCreate try to create the account if not exists.
-	* @return CAccountRef if account exists or created, nullptr otherwise.
+	* @return CAccount * if account exists or created, nullptr otherwise.
 	*/
-	CAccountRef Account_FindCreate( lpctstr pszName, bool fCreate = false );
+	CAccount * Account_FindCreate( lpctstr pszName, bool fCreate = false );
 	/**
 	* @brief Check if a chat name is already used.
 	* @param pszChatName string containing the name.
-	* @return CAccountRef if the name is already used, nullptr otherwise.
+	* @return CAccount * if the name is already used, nullptr otherwise.
 	*/
-	CAccountRef Account_FindChat( lpctstr pszName );
+	CAccount * Account_FindChat( lpctstr pszName );
 	/**
 	* @brief Remove an CAccount.
 	* First try to call the f_onaccount_delete server trigger. If trigger returns true, do not remove the account and return false. If trigger returns false, remove the account and return true.

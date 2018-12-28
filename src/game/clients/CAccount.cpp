@@ -38,7 +38,7 @@ bool CAccounts::Account_Load( lpctstr pszNameRaw, CScript & s, bool fChanges )
 	}
 	m_fLoading = true;
 
-	CAccountRef pAccount = Account_Find(szName);
+	CAccount * pAccount = Account_Find(szName);
 	if ( pAccount )
 	{
 		// Look for existing duplicate ?
@@ -137,9 +137,9 @@ bool CAccounts::Account_SaveAll()
 		"// Any file changes must be made to " SPHERE_FILE "accu" SPHERE_SCRIPT ". This is read in at save time.\n",
 		g_Serv.GetName());
 
-	for ( size_t i = 0; i < m_Accounts.size(); i++ )
+	for ( size_t i = 0; i < m_Accounts.size(); ++i )
 	{
-		CAccountRef pAccount = Account_Get(i);
+		CAccount * pAccount = Account_Get(i);
 		if ( pAccount )
 			pAccount->r_Write(s);
 	}
@@ -150,19 +150,19 @@ bool CAccounts::Account_SaveAll()
 	return false;
 }
 
-CAccountRef CAccounts::Account_FindChat( lpctstr pszChatName )
+CAccount * CAccounts::Account_FindChat( lpctstr pszChatName )
 {
 	ADDTOCALLSTACK("CAccounts::Account_FindChat");
 	for ( size_t i = 0; i < m_Accounts.size(); i++ )
 	{
-		CAccountRef pAccount = Account_Get(i);
+		CAccount * pAccount = Account_Get(i);
 		if ( pAccount != nullptr && pAccount->m_sChatName.CompareNoCase(pszChatName) == 0 )
 			return pAccount;
 	}
 	return nullptr;
 }
 
-CAccountRef CAccounts::Account_Find( lpctstr pszName )
+CAccount * CAccounts::Account_Find( lpctstr pszName )
 {
 	ADDTOCALLSTACK("CAccounts::Account_Find");
 	tchar szName[ MAX_ACCOUNT_NAME_SIZE ];
@@ -177,11 +177,11 @@ CAccountRef CAccounts::Account_Find( lpctstr pszName )
 	return nullptr;
 }
 
-CAccountRef CAccounts::Account_FindCreate( lpctstr pszName, bool fAutoCreate )
+CAccount * CAccounts::Account_FindCreate( lpctstr pszName, bool fAutoCreate )
 {
 	ADDTOCALLSTACK("CAccounts::Account_FindCreate");
 
-	CAccountRef pAccount = Account_Find(pszName);
+	CAccount * pAccount = Account_Find(pszName);
 	if ( pAccount )
 		return pAccount;
 
@@ -239,12 +239,12 @@ void CAccounts::Account_Add( CAccount * pAccount )
 	m_Accounts.AddSortKey(pAccount,pAccount->GetName());
 }
 
-CAccountRef CAccounts::Account_Get( size_t index )
+CAccount * CAccounts::Account_Get( size_t index )
 {
 	ADDTOCALLSTACK("CAccounts::Account_Get");
 	if ( ! m_Accounts.IsValidIndex(index))
 		return nullptr;
-	return( CAccountRef( static_cast <CAccount *>( m_Accounts[index])));
+	return static_cast <CAccount *>( m_Accounts[index] );
 }
 
 bool CAccounts::Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr pszArg, bool md5 )
@@ -256,7 +256,7 @@ bool CAccounts::Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr pszArg
 		return false;
 	}
 
-	CAccountRef pAccount = Account_Find( pszName );
+	CAccount * pAccount = Account_Find( pszName );
 	if ( pAccount != nullptr )
 	{
 		pSrc->SysMessagef( "Account '%s' already exists\n", pszName );
@@ -325,7 +325,7 @@ bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, lpctstr pszDays, lpctstr psz
 			iCountCheck--;
 			i--;
 		}
-		CAccountRef pAccount = Account_Get(i);
+		CAccount * pAccount = Account_Get(i);
 		if ( pAccount == nullptr )
 			break;
 
@@ -451,7 +451,7 @@ bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 
 	// Must be a valid account ?
 
-	CAccountRef pAccount = Account_Find( ppCmd[0] );
+	CAccount * pAccount = Account_Find( ppCmd[0] );
 	if ( pAccount == nullptr )
 	{
 		pSrc->SysMessagef( "Account '%s' does not exist\n", ppCmd[0] );

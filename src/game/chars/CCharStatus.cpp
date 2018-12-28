@@ -1,9 +1,11 @@
 //  CChar is either an NPC or a Player.
 
 #include "../../common/CUIDExtra.h"
+#include "../../common/CLog.h"
+#include "../components/CCPropsItemEquippable.h"
+#include "../components/CCPropsItemWeapon.h"
 #include "../../network/network.h"
 #include "../clients/CClient.h"
-#include "../../common/CLog.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CChar.h"
@@ -285,7 +287,7 @@ bool CChar::CanEquipStr( CItem *pItem ) const
 	if ( !pItemDef->IsTypeEquippable() || !CItemBase::IsVisibleLayer(layer) )
 		return true;
 
-	if ( Stat_GetAdjusted(STAT_STR) >= pItemDef->m_ttEquippable.m_iStrReq * (100 - pItem->GetDefNum("LOWERREQ", true)) / 100 )
+	if ( Stat_GetAdjusted(STAT_STR) >= pItemDef->m_ttEquippable.m_iStrReq * (100 - pItem->GetPropNum(COMP_PROPS_ITEMEQUIPPABLE, PROPIEQUIP_LOWERREQ, true)) / 100 )
 		return true;
 
 	return false;
@@ -1239,7 +1241,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
             {
                 IT_TYPE iType = pWeapon->GetType();
                 if ((iType == IT_WEAPON_BOW) || (iType == IT_WEAPON_XBOW))
-                    return (iDist <= pWeapon->RangeL());
+                    return (iDist <= pWeapon->GetRangeH());
             }
         }
 
@@ -1309,7 +1311,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 			return true;
 		return false;
 	}
-	if ( iDist > 3 )
+	if ( iDist > 2 )
 	{
         const uint uiCanFlags = GetCanFlags();
 		if ( uiCanFlags & CAN_C_DCIGNOREDIST )

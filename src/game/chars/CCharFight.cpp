@@ -4,6 +4,8 @@
 #include "../../common/CUIDExtra.h"
 #include "../../network/send.h"
 #include "../clients/CClient.h"
+#include "../components/CCPropsChar.h"
+#include "../components/CCPropsItemWeapon.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
@@ -607,6 +609,7 @@ effect_bounce:
 
 	const CCharBase * pCharDef = Char_GetDef();
 	ASSERT(pCharDef);
+    const CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = pCharDef->GetCCPropsChar();
 
 	// MAGICF_IGNOREAR bypasses defense completely
 	if ( (uType & DAMAGE_MAGIC) && IsSetMagicFlags(MAGICF_IGNOREAR) )
@@ -621,11 +624,11 @@ effect_bounce:
 			if ( iDmgPhysical == 0 )		// if physical damage is not set, let's assume it as the remaining value
 				iDmgPhysical = 100 - (iDmgFire + iDmgCold + iDmgPoison + iDmgEnergy);
 
-			int iPhysicalDamage = iDmg * iDmgPhysical * (100 - (int)(GetDefNum("RESPHYSICAL", true)));
-			int iFireDamage = iDmg * iDmgFire * (100 - (int)(GetDefNum("RESFIRE", true)));
-			int iColdDamage = iDmg * iDmgCold * (100 - (int)(GetDefNum("RESCOLD", true)));
-			int iPoisonDamage = iDmg * iDmgPoison * (100 - (int)(GetDefNum("RESPOISON", true)));
-			int iEnergyDamage = iDmg * iDmgEnergy * (100 - (int)(GetDefNum("RESENERGY", true)));
+			int iPhysicalDamage = iDmg * iDmgPhysical * (100 - (int)GetPropNum(pCCPChar, PROPCH_RESPHYSICAL, pBaseCCPChar));
+			int iFireDamage = iDmg * iDmgFire * (100 - (int)GetPropNum(pCCPChar, PROPCH_RESFIRE, pBaseCCPChar));
+			int iColdDamage = iDmg * iDmgCold * (100 - (int)GetPropNum(pCCPChar, PROPCH_RESCOLD, pBaseCCPChar));
+			int iPoisonDamage = iDmg * iDmgPoison * (100 - (int)GetPropNum(pCCPChar, PROPCH_RESPOISON, pBaseCCPChar));
+			int iEnergyDamage = iDmg * iDmgEnergy * (100 - (int)GetPropNum(pCCPChar, PROPCH_RESENERGY, pBaseCCPChar));
 
 			iDmg = (iPhysicalDamage + iFireDamage + iColdDamage + iPoisonDamage + iEnergyDamage) / 10000;
 		}
@@ -868,14 +871,28 @@ effect_bounce:
 
 //********************************************************
 
+byte CChar::GetRangeL() const
+{
+    if (_iRange == 0)
+        return Char_GetDef()->GetRangeL();
+    return (byte)(_iRange & 0xff);
+}
+
+byte CChar::GetRangeH() const
+{
+    if (_iRange == 0)
+        return Char_GetDef()->GetRangeH();
+    return (byte)((_iRange >> 8) & 0xff);
+}
+
 // What sort of weapon am i using?
 SKILL_TYPE CChar::Fight_GetWeaponSkill() const
 {
 	ADDTOCALLSTACK_INTENSIVE("CChar::Fight_GetWeaponSkill");
 	CItem * pWeapon = m_uidWeapon.ItemFind();
 	if ( pWeapon == nullptr )
-		return( SKILL_WRESTLING );
-	return( pWeapon->Weapon_GetSkill());
+		return SKILL_WRESTLING;
+	return pWeapon->Weapon_GetSkill();
 }
 
 DAMAGE_TYPE CChar::Fight_GetWeaponDamType(const CItem* pWeapon) const
@@ -952,8 +969,8 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 
 	int iDmgMin = 0;
 	int iDmgMax = 0;
-	STAT_TYPE iStatBonus = (STAT_TYPE)(GetDefNum("COMBATBONUSSTAT"));
-	int iStatBonusPercent = (int)(GetDefNum("COMBATBONUSPERCENT"));
+	STAT_TYPE iStatBonus = (STAT_TYPE)GetPropNum(COMP_PROPS_CHAR, PROPCH_COMBATBONUSSTAT, true);
+	int iStatBonusPercent = (int)GetPropNum(COMP_PROPS_CHAR, PROPCH_COMBATBONUSPERCENT, true);
 	if ( pWeapon != nullptr )
 	{
 		iDmgMin = pWeapon->Weapon_GetAttack(false);
@@ -978,7 +995,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 
 	if ( m_pPlayer )	// only players can have damage bonus
 	{
-		int iIncreaseDam = (int)(GetDefNum("INCREASEDAM", true));
+		int iIncreaseDam = (int)GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASEDAM, true);
 		int iDmgBonus = minimum(iIncreaseDam, 100);		// Damage Increase is capped at 100%
 
 		// Racial Bonus (Berserk), gargoyles gains +15% Damage Increase per each 20 HP lost
@@ -1366,8 +1383,8 @@ int CChar::Fight_CalcRange( CItem * pWeapon ) const
 {
 	ADDTOCALLSTACK("CChar::Fight_CalcRange");
 
-	int iCharRange = RangeL();
-	int iWeaponRange = pWeapon ? pWeapon->RangeL() : 0;
+	int iCharRange = GetRangeH();
+	int iWeaponRange = pWeapon ? pWeapon->GetRangeH() : 0;
 
 	return ( maximum(iCharRange , iWeaponRange) );
 }
@@ -1503,15 +1520,17 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
                 if ( iDmgType & DAMAGE_FIXED )
                     iDmgType &= ~DAMAGE_FIXED;
 
+                const CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+
                 pCharTarg->OnTakeDamage(
                     Fight_CalcDamage(m_uidWeapon.ItemFind()),
                     this,
                     iDmgType,
-                    (int)(GetDefNum("DAMPHYSICAL", true)),
-                    (int)(GetDefNum("DAMFIRE", true)),
-                    (int)(GetDefNum("DAMCOLD", true)),
-                    (int)(GetDefNum("DAMPOISON", true)),
-                    (int)(GetDefNum("DAMENERGY", true))
+                    (int)GetPropNum(pCCPChar, PROPCH_DAMPHYSICAL, pBaseCCPChar),
+                    (int)GetPropNum(pCCPChar, PROPCH_DAMFIRE,     pBaseCCPChar),
+                    (int)GetPropNum(pCCPChar, PROPCH_DAMCOLD,     pBaseCCPChar),
+                    (int)GetPropNum(pCCPChar, PROPCH_DAMPOISON,   pBaseCCPChar),
+                    (int)GetPropNum(pCCPChar, PROPCH_DAMENERGY,   pBaseCCPChar)
                 );
 
                 return WAR_SWING_EQUIPPING;
@@ -1586,8 +1605,8 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
             // If we are using Swing_NoRange, we can start the swing regardless of the distance, but we can land the hit only when we are at the right distance
             const WAR_SWING_TYPE swingTypeHold = fSwingNoRange ? m_atFight.m_War_Swing_State : WAR_SWING_READY;
 
-            int	iMinDist = pWeapon ? pWeapon->RangeH() : g_Cfg.m_iArcheryMinDist;
-            int	iMaxDist = pWeapon ? pWeapon->RangeL() : g_Cfg.m_iArcheryMaxDist;
+            int	iMinDist = pWeapon ? pWeapon->GetRangeL() : g_Cfg.m_iArcheryMinDist;
+            int	iMaxDist = pWeapon ? pWeapon->GetRangeH() : g_Cfg.m_iArcheryMaxDist;
             if ( !iMaxDist || (iMinDist == 0 && iMaxDist == 1) )
                 iMaxDist = g_Cfg.m_iArcheryMaxDist;
             if ( !iMinDist )
@@ -1615,7 +1634,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
             // If we are using PreHit_NoRange, we can start the swing regardless of the distance, but we can land the hit only when we are at the right distance
             const WAR_SWING_TYPE swingTypeHold = fSwingNoRange ? m_atFight.m_War_Swing_State : WAR_SWING_READY;
 
-		    int	iMinDist = pWeapon ? pWeapon->RangeH() : 0;
+		    int	iMinDist = pWeapon ? pWeapon->GetRangeL() : 0;
 		    int	iMaxDist = Fight_CalcRange(pWeapon);
 		    if ( (dist < iMinDist) || (dist > iMaxDist) )
 		    {
@@ -1830,7 +1849,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			pCharTarg->SetPoison(10 * iPoisonDeliver, iPoisonDeliver / 5, this);
 
 			pWeapon->m_itWeapon.m_poison_skill -= iPoisonDeliver / 2;	// reduce weapon poison charges
-			pWeapon->UpdatePropertyFlag(AUTOTOOLTIP_FLAG_POISON);
+			pWeapon->UpdatePropertyFlag();
 		}
 
 		// Check if the weapon will be damaged
@@ -1850,21 +1869,22 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	}
 
 	// Took my swing. Do Damage !
-	iDmg = pCharTarg->OnTakeDamage(
-		iDmg,
-		this,
+    const CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+    pCharTarg->OnTakeDamage(
+        Fight_CalcDamage(m_uidWeapon.ItemFind()),
+        this,
         iDmgType,
-		(int)(GetDefNum("DAMPHYSICAL", true)),
-		(int)(GetDefNum("DAMFIRE", true)),
-		(int)(GetDefNum("DAMCOLD", true)),
-		(int)(GetDefNum("DAMPOISON", true)),
-		(int)(GetDefNum("DAMENERGY", true))
-		);
+        (int)GetPropNum(pCCPChar, PROPCH_DAMPHYSICAL, pBaseCCPChar),
+        (int)GetPropNum(pCCPChar, PROPCH_DAMFIRE,     pBaseCCPChar),
+        (int)GetPropNum(pCCPChar, PROPCH_DAMCOLD,     pBaseCCPChar),
+        (int)GetPropNum(pCCPChar, PROPCH_DAMPOISON,   pBaseCCPChar),
+        (int)GetPropNum(pCCPChar, PROPCH_DAMENERGY,   pBaseCCPChar)
+    );
 
 	if ( iDmg > 0 )
 	{
 		CItem *pCurseWeapon = LayerFind(LAYER_SPELL_Curse_Weapon);
-		ushort uiHitLifeLeech = (ushort)(GetDefNum("HitLeechLife", true));
+		ushort uiHitLifeLeech = (ushort)GetPropNum(pCCPChar, PROPCH_HITLEECHLIFE, pBaseCCPChar);
 		if ( pWeapon && pCurseWeapon )
 			uiHitLifeLeech += pCurseWeapon->m_itSpell.m_spelllevel;
 
@@ -1876,7 +1896,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			bMakeLeechSound = true;
 		}
 
-		ushort uiHitManaLeech = (ushort)(GetDefNum("HitLeechMana", true));
+		ushort uiHitManaLeech = (ushort)GetPropNum(pCCPChar, PROPCH_HITLEECHMANA, pBaseCCPChar);
 		if ( uiHitManaLeech )
 		{
 			uiHitManaLeech = (ushort)(Calc_GetRandVal2(0, (iDmg * uiHitManaLeech * 40) / 10000));	// leech 0% ~ 40% of damage value
@@ -1884,7 +1904,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			bMakeLeechSound = true;
 		}
 
-		if ( GetDefNum("HitLeechStam", true) > Calc_GetRandLLVal(100) )
+		if ( GetPropNum(pCCPChar, PROPCH_HITLEECHSTAM, pBaseCCPChar) > Calc_GetRandLLVal(100) )
 		{
 			UpdateStatVal(STAT_DEX, (ushort)iDmg);	// leech 100% of damage value
 			bMakeLeechSound = true;
@@ -1897,7 +1917,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			if ( pPoly && pPoly->m_itSpell.m_spell == SPELL_Wraith_Form )
 				uiManaDrain += 5 + (15 * Skill_GetBase(SKILL_SPIRITSPEAK) / 1000);
 		}
-		if ( GetDefNum("HitManaDrain", true) > Calc_GetRandLLVal(100) )
+		if ( GetPropNum(pCCPChar, PROPCH_HITMANADRAIN, pBaseCCPChar) > Calc_GetRandLLVal(100) )
 			uiManaDrain += (ushort)IMulDivLL(iDmg, 20, 100);		// leech 20% of damage value
 
 		ushort uiTargMana = pCharTarg->Stat_GetVal(STAT_INT);

@@ -305,43 +305,49 @@ CResourceScript * CResourceBase::GetResourceFile( size_t i )
 	return m_ResourceFiles[i];
 }
 
-CResourceID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr & pszName )
+CResourceID CResourceBase::ResourceGetIDParse(RES_TYPE restype, lpctstr &ptcName)
+{
+    ADDTOCALLSTACK("CResourceBase::ResourceGetIDParse");
+    // Find the Resource ID given this name.
+    // We are NOT creating a new resource. just looking up an existing one
+    // NOTE: Do not enforce the restype.
+    //		Just fill it in if we are not sure what the type is.
+    // NOTE:
+    //  Some restype's have private name spaces. (ie. RES_AREA)
+    // RETURN:
+    //  pszName is now set to be after the expression.
+
+    // We are NOT creating.
+    CResourceID rid;
+
+    // Try to handle private name spaces.
+    /*
+    switch ( restype )
+    {
+    case RES_ACCOUNT:
+    case RES_AREA:
+    case RES_GMPAGE:
+    case RES_ROOM:
+    case RES_SECTOR:
+    break;
+
+    default:
+    break;
+    }
+    */
+
+    rid.SetPrivateUID(Exp_GetVal(ptcName));	// May be some complex expression {}
+
+    if ( restype != RES_UNKNOWN && rid.GetResType() == RES_UNKNOWN )
+        return CResourceID( restype, rid.GetResIndex());	// Label it with the type we want.
+
+    return rid;
+}
+
+CResourceID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr ptcName )
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetID");
-	// Find the Resource ID given this name.
-	// We are NOT creating a new resource. just looking up an existing one
-	// NOTE: Do not enforce the restype.
-	//		Just fill it in if we are not sure what the type is.
-	// NOTE:
-	//  Some restype's have private name spaces. (ie. RES_AREA)
-	// RETURN:
-	//  pszName is now set to be after the expression.
-
-	// We are NOT creating.
-	CResourceID rid;
-
-	// Try to handle private name spaces.
-	/*
-	switch ( restype )
-	{
-		case RES_ACCOUNT:
-		case RES_AREA:
-		case RES_GMPAGE:
-		case RES_ROOM:
-		case RES_SECTOR:
-			break;
-
-		default:
-			break;
-	}
-	*/
-
-	rid.SetPrivateUID(Exp_GetVal(pszName));	// May be some complex expression {}
-
-	if ( restype != RES_UNKNOWN && rid.GetResType() == RES_UNKNOWN )
-		return CResourceID( restype, rid.GetResIndex());	// Label it with the type we want.
-
-	return rid;
+	return ResourceGetIDParse(restype, ptcName);
 }
 
 CResourceID CResourceBase::ResourceGetIDType( RES_TYPE restype, lpctstr pszName )

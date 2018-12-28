@@ -582,8 +582,8 @@ Added the basics of an ECS: CEntity and CComponent so we can split into modules 
          case IT_SPAWN_CHAMPION:
         {
             pItem = new CItem(id, pItemDef);
-            pItem->Subscribe(new CCSpawn(pItem));
-            pItem->Subscribe(new CCChampion(pItem));
+            pItem->SubscribeComponent(new CCSpawn(pItem));
+            pItem->SubscribeComponent(new CCChampion(pItem));
             break;
         }
 Changed CItemSpawn into a CComponent 'CCSpawn'
@@ -1343,15 +1343,14 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 - Fixed: Stat regens working also on dead players (Issue #160).
 - Fixed: Archery butte not usable by players ("You can't reach that") (Issue #159).
 
-14-12-2018, Nolok
+16-12-2018, Nolok
 - Added: Option flag OF_NoTargetTurn, to avoid the char to turn against the targetted point.
 - [Port from Source, 02-08-2018, Coruja]
 	Changed: Internal improvements on Teleport / Recall / Gate Travel spells.
 		- Gate Travel now will use proper blue/red moongate ITEMDEFs instead always use blue moongate changing its color when needed
 		- Gate Travel now will link moongates to each other based on UID instead MOREP. This will make possible cast Gate Travel inside moving boats (if multi region flags allow cast it)
-- [Port from Source, 05-08-2018, Coruja]
-Added: EFFECT function now supports client fade screen effect (EFFECT 4,[0-4]).
-	- NOTE: It can be used only directly on client chars and requires client >= 6x]
+- [Port from Source, 05-08-2018, Coruja] Added: EFFECT function now supports client fade screen effect (EFFECT 4,[0-4]).
+	NOTE: It can be used only directly on client chars and requires client >= 6x]
 - [Port from Source, 06-08-2018, Coruja] Fixed: Tooltips not updating correctly when TooltipMode=1 is set on sphere.ini.
 - [Port from Source, 08-08-2018, Coruja] Fixed: EFFECT_ID/SOUND not working correctly on some spells.
 - [Port from Source, 01-09-2018, Coruja]
@@ -1361,8 +1360,40 @@ Added: EFFECT function now supports client fade screen effect (EFFECT 4,[0-4]).
 - [Port from Source, 25-09-2018, Coruja] Added: New function CODEXOFWISDOM to open client Codex of Wisdom menu at given topic ID.
 	Syntax: CODEXOFWISDOM TopicID (1~176), [ForceOpen (0/1)]
 - [Port from Source, 01-11-2018, Coruja] Added: Support for new Whip weapon type.
+	
+17-12-2018, Nolok
+- [Port from Source, 04-07-2018, Coruja]
+	- Added: Support for 'EquipLastWeapon' client macro.
+	- Changed: Reduced DClick/PickUp_Ground reachable distance [3 tiles -> 2 tiles] to match client internal DropOn_Ground distance.
+- [Port from Source, 21-07-2018, Coruja]
+	- Added: Support for 'combat ability' (@UserSpecialMove) and 'virtue' (@UserVirtue) slots on KR toolbar (@UserKRToolbar).
+		NOTE: KR clients still obsolete and not supported, but triggers will be called if someone want use it
+	- Fixed: FOR loop not working correctly when range value is negative.
 
-18-12-2018, Drk84
+23-12-2018, Nolok
+- Changed: now most of the dynamic (in the C++ source) properties (like DAMFIRE, MANABURST, HITAREACOLD, SPELLCHANNELING...) are internally stored in a different and faster kind of container.
+	For this purpose, the classes CEntityProps, CComponentProps and the relative specializations were created. Think at each ComponentProps as a container, which can hold specific kind of properties and generate the related tooltips.
+	For example, CCPropsItemWeapon can hold the properties MAGEWEAPON, USEBESTWEAPONSKILL, etc, CCPropsItemEquippable can hold FASTERCASTING, RESFIRE, etc. For items, the right ComponentProps are attached when their TYPE changes.
+- Changed: PROPLIST now shows also the properties stored in ComponentProps, preceded by the name of the component inside square brackets.
+- Added: BASETAGLIST and BASEPROPLIST, which output the tags and the props stored in the Base Def block (Chardef/Itemdef...).
+- Added properties (only the keyword, no functionality for now) for:
+	- Items: LavaInfused, Prized, ShipwreckItem, Unlucky, Unwieldly.
+	- Weapons: Antique, AssassinHoned.
+- Removed properties: BonusHitsMax, BonusStamMax, BonusManaMax.
+- Changed: RANGE is now a dynamic script property, meaning that it can be changed per-instance and is no longer a base-only prop.
+
+27-12-2018, Nolok
+- Fixed: New player starting with TIMER=0 and couldn't finish any action (Issue #171).
+- Changed: Removed AutoTooltipResend ini setting.
+- Fixed: Tooltips not refreshing fast enough (Issue #170).
+- Fixed: ARGN1 was in ms in trigger @DROPON_GROUND (Issue #168).
+- Fixed: Now RANGEL stores the lowest range value, and RANGEH the highest. It was inverted again in the past, no idea when.
+
+28-12-2018, Nolok
+- Fixed: MOVE and MOVENEAR not removing from the screen the object if it was moved farther than the player view distance.
+- Fixed: MOVENEAR always sent an UPDATE for the moved item, independently from the 3rd argument's value.
+
+28-12-2018, Drk84
 - Added: Detecting Hidden skill can use the values stored inside the EFFECT property, these values are used for determining the search radius.
 	If EFFECT is not defined in the SKILL definition the default formula is used:
 	SearchRadius = DetectingHidden / 100
@@ -1381,5 +1412,3 @@ Added: EFFECT function now supports client fade screen effect (EFFECT 4,[0-4]).
 	When using the Tracking skill, the maximum distance is stored in ACTARG2, this means that the value can be changed in the @PreStart, @Start and
 	@Stroke triggers, but because the maximum distance is calculated after @Select and before @PreStart changing the value in @PreStart and @Start will take
 	effect on the next @Stroke trigger.
-
-	

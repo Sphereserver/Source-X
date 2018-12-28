@@ -21,9 +21,10 @@
 
 #define CANDLESNEXTRED 4
 
-CCChampion::CCChampion(CObjBase *pLink) : CComponent(COMP_CHAMPION, pLink)
+CCChampion::CCChampion(CItem *pLink) : CComponent(COMP_CHAMPION)
 {
     ADDTOCALLSTACK("CCChampion::CCChampion");
+    _pLink = pLink;
     Init();
 }
 
@@ -32,6 +33,11 @@ CCChampion::~CCChampion()
     ADDTOCALLSTACK("CCChampion::~CCChampion");
     ClearWhiteCandles();
     ClearRedCandles();
+}
+
+CItem * CCChampion::GetLink() const
+{
+    return _pLink;
 }
 
 CCRET_TYPE CCChampion::OnTickComponent()
@@ -880,7 +886,7 @@ bool CCChampionDef::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * p
 {
     ADDTOCALLSTACK("CCChampionDef::r_WriteVal");
     UNREFERENCED_PARAMETER(pSrc);
-    CHAMPIONDEF_TYPE iCmd = (CHAMPIONDEF_TYPE)FindTableHeadSorted(pszKey, sm_szLoadKeys, CHAMPIONDEF_QTY);
+    CHAMPIONDEF_TYPE iCmd = (CHAMPIONDEF_TYPE)FindTableSorted(pszKey, sm_szLoadKeys, CHAMPIONDEF_QTY);
 
     switch (iCmd)
     {
@@ -933,7 +939,7 @@ bool CCChampionDef::r_LoadVal(CScript & s)
 {
     ADDTOCALLSTACK("CCChampionDef::r_LoadVal");
     lpctstr pszKey = s.GetKey();
-    CHAMPIONDEF_TYPE iCmd = (CHAMPIONDEF_TYPE)FindTableHeadSorted(pszKey, sm_szLoadKeys, (int)CountOf(sm_szLoadKeys) - 1);
+    CHAMPIONDEF_TYPE iCmd = (CHAMPIONDEF_TYPE)FindTableSorted(pszKey, sm_szLoadKeys, (int)CountOf(sm_szLoadKeys) - 1);
 
     switch (iCmd)
     {

@@ -71,7 +71,7 @@ bool CChar::SetPlayerAccount(CAccount *pAccount)
 bool CChar::SetPlayerAccount( lpctstr pszAccName )
 {
 	ADDTOCALLSTACK("CChar::SetPlayerAccount");
-	CAccountRef pAccount = g_Accounts.Account_Find( pszAccName );
+	CAccount * pAccount = g_Accounts.Account_Find( pszAccName );
 	if ( pAccount == nullptr )
 	{
 		DEBUG_ERR(( "Trying to attach Char '%s' to unexistent Account '%s'!\n", GetName(), pszAccName ));
@@ -125,7 +125,7 @@ CCharPlayer::~CCharPlayer()
 	m_Speech.clear();
 }
 
-CAccountRef CCharPlayer::GetAccount() const
+CAccount * CCharPlayer::GetAccount() const
 {
 	ASSERT( m_pAccount );
 	return m_pAccount;

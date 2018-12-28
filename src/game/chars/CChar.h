@@ -122,6 +122,7 @@ public:
 	// Combat stuff. cached data. (not saved)
 	CUID m_uidWeapon;			// current Wielded weapon.	(could just get rid of this ?)
 	word m_defense;				// calculated armor worn (NOT intrinsic armor)
+    int _iRange;
 
 	height_t m_height;			// Height set in-game or under some trigger (height=) - for both items and chars
 
@@ -454,7 +455,7 @@ public:
 	bool IsSwimming() const;
 
 	bool MoveToRegionReTest( dword dwType );
-	bool MoveToChar(const CPointMap& pt, bool fForceFix = false);
+	bool MoveToChar(const CPointMap& pt, bool fForceFix = false, bool fAllowReject = true);
 	bool MoveTo(const CPointMap& pt, bool fForceFix = false);
 	virtual void SetTopZ( char z );
 	bool MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart = 1, bool fFromShip = false);
@@ -1002,6 +1003,21 @@ public:
 
 private:
 	// Armor, weapons and combat ------------------------------------
+
+    /**
+    * @fn  byte CChar::GetRangeL() const;
+    * @brief   Returns Range Lowest byte.
+    * @return  The Value.
+    */
+    byte GetRangeL() const;
+
+    /**
+    * @fn  byte CChar::GetRangeH() const;
+    * @brief   Returns Range Highest byte.
+    * @return  The Value.
+    */
+    byte GetRangeH() const;
+
 	int	Fight_CalcRange( CItem * pWeapon = nullptr ) const;
     void Fight_SetDefaultSwingDelays();
 	
