@@ -1360,7 +1360,7 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 - [Port from Source, 25-09-2018, Coruja] Added: New function CODEXOFWISDOM to open client Codex of Wisdom menu at given topic ID.
 	Syntax: CODEXOFWISDOM TopicID (1~176), [ForceOpen (0/1)]
 - [Port from Source, 01-11-2018, Coruja] Added: Support for new Whip weapon type.
-
+	
 17-12-2018, Nolok
 - [Port from Source, 04-07-2018, Coruja]
 	- Added: Support for 'EquipLastWeapon' client macro.
@@ -1392,3 +1392,23 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 28-12-2018, Nolok
 - Fixed: MOVE and MOVENEAR not removing from the screen the object if it was moved farther than the player view distance.
 - Fixed: MOVENEAR always sent an UPDATE for the moved item, independently from the 3rd argument's value.
+
+28-12-2018, Drk84
+- Added: Detecting Hidden skill can use the values stored inside the EFFECT property, these values are used for determining the search radius.
+	If EFFECT is not defined in the SKILL definition the default formula is used:
+	SearchRadius = DetectingHidden / 100
+	Examples
+  	With an EFFECT value of 20 we will always search inside a 20 tiles radius, no matter the skill score.
+	With an EFFECT value of 1,20 the search radius will vary from 1 to 20 depending from the player skill score.
+	If EFFECT is not defined and we have 90.0 in DetectingHidden the search radius will be 9 (900/100, this is the default behaviour).
+-Added: Tracking skill can use the values stored inside the EFFECT property, these values are used for determining the tracking maximum distance.
+    If EFFECT is not defined in the SKILL definition the default formula is used:
+	MaximumDistance = Tracking / 10 + 10
+	Examples
+	With an EFFECT value of 20 the maximum tracking distance is 20 tiles, no matter the skill score.
+	With an EFFECT value of 10,100 the maximum tracking distance will vary from 10 to 100 tiles depending from the player Tracking skill.
+    If EFFECT is not defined and we have 90.0 in Tracking Skill the maximum tracking distance will be 100 tiles (900 / 10 + 10, this is the default behaviour)	
+	Notes
+	When using the Tracking skill, the maximum distance is stored in ACTARG2, this means that the value can be changed in the @PreStart, @Start and
+	@Stroke triggers, but because the maximum distance is calculated after @Select and before @PreStart changing the value in @PreStart and @Start will take
+	effect on the next @Stroke trigger.

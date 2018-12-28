@@ -282,6 +282,7 @@ public:
 		struct
 		{
 			DIR_TYPE m_PrvDir;			// ACTARG1 = Previous direction of tracking target, used for when to notify player
+			dword m_DistMax;			// ACTARG2 = Maximum distance when starting and continuing to use the Tracking skill.
 		} m_atTracking;
 
 		// NPCACT_RIDDEN
