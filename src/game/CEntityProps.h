@@ -112,7 +112,7 @@ public:
     /**
     *@brief Generate and the tooltip data for the properties inside this CEntityProps to pObj
     */
-    void AddTooltipData(CObjBase* pObj);
+    void AddPropsTooltipData(CObjBase* pObj);
 
     /**
     * @brief Copies contents of the components from the target

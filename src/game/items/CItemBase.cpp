@@ -140,6 +140,13 @@ lpctstr CItemBase::GetArticleAndSpace() const
 	return "";
 }
 
+void CItemBase::UnLink()
+{
+    m_flip_id.clear();
+    m_SkillMake.clear();
+    CBaseBaseDef::UnLink();
+}
+
 void CItemBase::CopyBasic( const CItemBase * pBase )
 {
 	ADDTOCALLSTACK("CItemBase::CopyBasic");
@@ -929,12 +936,32 @@ int CItemBase::CalculateMakeValue( int iQualityLevel ) const
 	return lValue;
 }
 
+word CItemBase::GetWeight() const
+{
+    // Get weight in tenths of a stone.
+    if ( ! IsMovableType())
+        return WEIGHT_UNITS;	// If we can pick them up then we should be able to move them
+    return m_weight;
+}
+
 byte CItemBase::GetSpeed() const
 {
     const CVarDefCont *pVarDef = m_TagDefs.GetKey("OVERRIDE.SPEED");
 	if (pVarDef)
 		return (byte)pVarDef->GetValNum();
 	return m_speed;
+}
+
+byte CItemBase::GetRangeL() const
+{
+    const CCPropsItemWeapon *pCCPItemWeapon = GetCCPropsItemWeapon();
+    return (byte)pCCPItemWeapon->GetPropertyNum(PROPIWEAP_RANGEL);
+}
+
+byte CItemBase::GetRangeH() const
+{
+    const CCPropsItemWeapon *pCCPItemWeapon = GetCCPropsItemWeapon();
+    return (byte)pCCPItemWeapon->GetPropertyNum(PROPIWEAP_RANGEH);
 }
 
 int CItemBase::GetMakeValue( int iQualityLevel )

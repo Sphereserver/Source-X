@@ -52,7 +52,7 @@ public:
     virtual void r_Write(CScript & s) override;
     virtual void Copy(const CComponentProps *target) override;
 
-    virtual void AddTooltipData(CObjBase* pLinkedObj) override;
+    virtual void AddPropsTooltipData(CObjBase* pLinkedObj) override;
 
 private:
     BaseContNum_t _mPropsNum;

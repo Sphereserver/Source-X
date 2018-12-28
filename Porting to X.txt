@@ -37,6 +37,7 @@ Compatibility changes from 0.56d to X1
 - Added/changed some keywords for spawns (read the changelog for more). This causes a SAVE FILES INCOMPATIBILITY between x and 56d, because new x-only
   keywords will be saved, and those won't be recognized by 56d. If you want to port back the saves, you have to replace in sphereworld.scp the
   keyword SPAWNID with MORE1 in t_spawn_char and t_spawn_item items.
+- Changed: RANGEL returns the lowest range value, while RANGEH returns the highest range value (as it should have been, but it looks like it got changed in 56c or 56d).
 - Now t_multi objects will be saved too in spheremultis.scp, along with t_multi_custom. This causes a SAVE FILES INCOMPATIBILITY between x and 56d.
   If you want to port back the saves, you'll need to manually move saved multis from spheremultis.scp to sphereworld.scp.
 - Reworked and added MULTIDEF properties.
@@ -44,3 +45,7 @@ Compatibility changes from 0.56d to X1
 - [sphere_defs_types_hardcoded.scp] Added: t_multi_addon=201.
 - [sphere_msgs.scp] Added: PROVOCATION_KIND.
 - [sphere_def.scp] Added: DEFNAMEs house_types, DEFNAMEs house_transfer_types, CAN_I_BLOCKLOS_HEIGHT.
+
+Suggestions
+------------------------
+- Move the char height value from the DEFs height_0x or height_ to the CharDef! It's way faster to access that property from the chardef, and Sphere checks it VERY often!

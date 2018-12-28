@@ -662,6 +662,16 @@ byte CItem::GetSpeed() const
 	return pItemDef->GetSpeed();
 }
 
+byte CItem::GetRangeL() const
+{
+    return (byte)GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_RANGEL, true);
+}
+
+byte CItem::GetRangeH() const
+{
+    return (byte)GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_RANGEH, true);
+}
+
 int CItem::IsWeird() const
 {
 	ADDTOCALLSTACK_INTENSIVE("CItem::IsWeird");

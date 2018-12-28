@@ -3545,10 +3545,6 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fForceFix, bool fAllowReject)
 		return true;
 	}
 
-    // This needs to be called before the other code, to be sure that the char is actually attached to a sector.
-    //  When we create a new player char, first we change only its P, then we actually attach it to the sector in this function.
-    
-
 	// Did we step into a new region ?
 	CRegionWorld * pAreaNew = dynamic_cast<CRegionWorld *>(pt.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA));
 	if ( !MoveToRegion(pAreaNew, fAllowReject) )
@@ -3560,12 +3556,12 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fForceFix, bool fAllowReject)
 
 	CPointMap ptOld = GetUnkPoint();
     SetTopPoint(pt);
-    bool fSectorChange = pt.GetSector()->MoveCharToSector(this);
+    bool fSectorChanged = pt.GetSector()->MoveCharToSector(this);
 
 	if ( !m_fClimbUpdated || fForceFix )
 		FixClimbHeight();
 
-	if ( fSectorChange && !g_Serv.IsLoading() )
+	if ( fSectorChanged && !g_Serv.IsLoading() )
 	{
 		if ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) )
 		{

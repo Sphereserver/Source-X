@@ -111,7 +111,7 @@ void CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 				else if (pItem)	// Item specific stuff
 					AOSTooltip_addDefaultItemData(pItem);
 
-                pObj->AddTooltipData(pObj);
+                pObj->AddPropsTooltipData(pObj);
 			}
 		}
 
@@ -476,7 +476,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061167)); // weapon speed ~1_val~
 		t->FormatArgs("%hhu", pItem->GetSpeed());
 
-		int Range = pItem->GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_RANGEH, true);
+		int Range = pItem->GetRangeH();
 		if (Range > 1)
 		{
 			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061169)); // range ~1_val~

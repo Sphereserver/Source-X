@@ -97,7 +97,7 @@ public:
     @brief Generate and append the tooltip data for the given object
     @param pLinkedObj CObjBase to append the data to
     */
-    virtual void AddTooltipData(CObjBase* pLinkedObj) = 0;
+    virtual void AddPropsTooltipData(CObjBase* pLinkedObj) = 0;
 
     /*
     *@brief Retrieve the numerical value for the given property

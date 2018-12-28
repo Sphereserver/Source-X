@@ -16,11 +16,13 @@ CEntityProps::CEntityProps()
 
 CEntityProps::~CEntityProps()
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntityProps::~CEntityProps");
     ClearPropComponents();
 }
 
 void CEntityProps::ClearPropComponents()
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntityProps::ClearPropComponents");
     if (_List.empty())
         return;
     for (auto it = _List.begin(); it != _List.end(); ++it)
@@ -36,6 +38,7 @@ void CEntityProps::ClearPropComponents()
 
 void CEntityProps::SubscribeComponentProps(CComponentProps * pComponent)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntityProps::SubscribeComponentProps");
     COMPPROPS_TYPE compType = pComponent->GetType();
     if (_List.count(compType))
     {
@@ -49,6 +52,7 @@ void CEntityProps::SubscribeComponentProps(CComponentProps * pComponent)
 
 void CEntityProps::UnsubscribeComponentProps(std::map<COMPPROPS_TYPE, CComponentProps*>::iterator& it, bool fEraseFromMap)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntityProps::UnsubscribeComponentProps(it)");
     delete it->second;
     if (fEraseFromMap)
     {
@@ -58,6 +62,7 @@ void CEntityProps::UnsubscribeComponentProps(std::map<COMPPROPS_TYPE, CComponent
 
 void CEntityProps::UnsubscribeComponentProps(CComponentProps *pComponent)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntityProps::UnsubscribeComponentProps");
     if (_List.empty())
     {
         return;
@@ -74,6 +79,7 @@ void CEntityProps::UnsubscribeComponentProps(CComponentProps *pComponent)
 
 void CEntityProps::CreateSubscribeComponentProps(COMPPROPS_TYPE iComponentPropsType)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntityProps::CreateSubscribeComponentProps");
     switch (iComponentPropsType)
     {
         case COMP_PROPS_CHAR:
@@ -103,11 +109,13 @@ void CEntityProps::CreateSubscribeComponentProps(COMPPROPS_TYPE iComponentPropsT
 
 bool CEntityProps::IsSubscribedComponentProps(CComponentProps *pComponent) const
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntityProps::IsSubscribedComponentProps");
     return (!_List.empty() && _List.count(pComponent->GetType()));
 }
 
 CComponentProps * CEntityProps::GetComponentProps(COMPPROPS_TYPE type)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntityProps::GetComponentProps");
     if (!_List.empty() && _List.count(type))
     {
         return _List.at(type);
@@ -117,6 +125,7 @@ CComponentProps * CEntityProps::GetComponentProps(COMPPROPS_TYPE type)
 
 const CComponentProps * CEntityProps::GetComponentProps(COMPPROPS_TYPE type) const
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntityProps::GetComponentProps(const)");
     if (!_List.empty() && _List.count(type))
     {
         return _List.at(type);
@@ -126,6 +135,7 @@ const CComponentProps * CEntityProps::GetComponentProps(COMPPROPS_TYPE type) con
 
 void CEntityProps::r_Write(CScript & s) // Storing data in the worldsave.
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntityProps::r_Write");
     if (_List.empty() && !s.IsWriteMode())
         return;
     for (auto it = _List.begin(); it != _List.end(); ++it)
@@ -140,6 +150,7 @@ void CEntityProps::r_Write(CScript & s) // Storing data in the worldsave.
 
 bool CEntityProps::r_LoadPropVal(CScript & s, CObjBase* pLinkedObj)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntityProps::r_LoadPropVal");
     if (_List.empty())
         return false;
     for (auto it = _List.begin(); it != _List.end(); ++it)
@@ -158,6 +169,7 @@ bool CEntityProps::r_LoadPropVal(CScript & s, CObjBase* pLinkedObj)
 
 bool CEntityProps::r_WritePropVal(lpctstr pszKey, CSString & s)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntityProps::r_WritePropVal");
     if (_List.empty())
         return false;
     for (auto it = _List.begin(); it != _List.end(); ++it)
@@ -174,8 +186,9 @@ bool CEntityProps::r_WritePropVal(lpctstr pszKey, CSString & s)
     return false;
 }
 
-void CEntityProps::AddTooltipData(CObjBase* pObj)
+void CEntityProps::AddPropsTooltipData(CObjBase* pObj)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntityProps::AddPropsTooltipData");
     if (_List.empty())
         return;
     for (auto it = _List.begin(); it != _List.end(); ++it)
@@ -183,7 +196,7 @@ void CEntityProps::AddTooltipData(CObjBase* pObj)
         CComponentProps *pComponent = it->second;
         if (pComponent)
         {
-            pComponent->AddTooltipData(pObj);
+            pComponent->AddPropsTooltipData(pObj);
         }
     }
     return;
@@ -191,6 +204,7 @@ void CEntityProps::AddTooltipData(CObjBase* pObj)
 
 void CEntityProps::Copy(const CEntityProps *target)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntityProps::Copy");
     if (_List.empty())
         return;
     for (auto it = target->_List.begin(); it != target->_List.end(); ++it)
@@ -244,9 +258,9 @@ void CEntityProps::DumpComponentProps(CTextConsole *pSrc, lpctstr ptcPrefix) con
             {
                 lpctstr ptcPropName = pCCP->GetPropertyName(iPropIndex);
                 if (fIsClient)
-                    pSrc->SysMessagef(pSrc->GetChar() ? "[%s]%s%s=%s" : "[%s]%s%s=%s\n", ptcCCPName, ptcPrefix, ptcPropName, sPropVal.GetPtr());
+                    pSrc->SysMessagef("[%s]%s%s=%s", ptcCCPName, ptcPrefix, ptcPropName, sPropVal.GetPtr());
                 else
-                    g_Log.Event(LOGL_EVENT, pSrc->GetChar() ? "[%s]%s%s=%s" : "[%s]%s%s=%s\n", ptcCCPName, ptcPrefix, ptcPropName, sPropVal.GetPtr());
+                    g_Log.Event(LOGL_EVENT,"[%s]%s%s=%s\n", ptcCCPName, ptcPrefix, ptcPropName, sPropVal.GetPtr());
             }
 
         }

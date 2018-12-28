@@ -664,11 +664,11 @@ void CVarDefMap::DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix ) const
 	{
         if (fIsClient)
         {
-            pSrc->SysMessagef(pSrc->GetChar() ? "%s%s=%s" : "%s%s=%s\n", pszPrefix, pVar->GetKey(), pVar->GetValStr());
+            pSrc->SysMessagef("%s%s=%s", pszPrefix, pVar->GetKey(), pVar->GetValStr());
         }
         else
         {
-            g_Log.Event(LOGL_EVENT, pSrc->GetChar() ? "%s%s=%s" : "%s%s=%s\n", pszPrefix, pVar->GetKey(), pVar->GetValStr());
+            g_Log.Event(LOGL_EVENT, "%s%s=%s\n", pszPrefix, pVar->GetKey(), pVar->GetValStr());
         }
 	}
 }

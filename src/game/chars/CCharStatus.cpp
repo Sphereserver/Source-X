@@ -1241,7 +1241,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
             {
                 IT_TYPE iType = pWeapon->GetType();
                 if ((iType == IT_WEAPON_BOW) || (iType == IT_WEAPON_XBOW))
-                    return (iDist <= pWeapon->GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_RANGEL, true));
+                    return (iDist <= pWeapon->GetRangeH());
             }
         }
 

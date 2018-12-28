@@ -256,7 +256,7 @@ void CCPropsItemWeapon::Copy(const CComponentProps * target)
     _mPropsStr = pTarget->_mPropsStr;
 }
 
-void CCPropsItemWeapon::AddTooltipData(CObjBase* pLinkedObj)
+void CCPropsItemWeapon::AddPropsTooltipData(CObjBase* pLinkedObj)
 {
 #define TOOLTIP_APPEND(t)   pLinkedObj->m_TooltipData.emplace_back(t)
 #define ADDT(tooltipID)     TOOLTIP_APPEND(new CClientTooltip(tooltipID))

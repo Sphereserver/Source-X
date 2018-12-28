@@ -2918,12 +2918,10 @@ void CObjBase::SetTimeStamp( int64 t_time)
 CSString CObjBase::GetPropStr( const CComponentProps* pCompProps, int iPropIndex, bool fZero, const CComponentProps* pBaseCompProps ) const
 {
     CSString sProp;
-    if (pCompProps->GetPropertyStrPtr(iPropIndex, &sProp, fZero))
+    if (pCompProps && pCompProps->GetPropertyStrPtr(iPropIndex, &sProp, fZero))
         return sProp;
-    
-    if (!pBaseCompProps)
+    if (pBaseCompProps && pBaseCompProps->GetPropertyStrPtr(iPropIndex, &sProp, fZero))
         return sProp;
-    pBaseCompProps->GetPropertyStrPtr(iPropIndex, &sProp, fZero);
     return sProp;
 }
 
@@ -2947,12 +2945,10 @@ CSString CObjBase::GetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, bo
 CComponentProps::PropertyValNum_t CObjBase::GetPropNum( const CComponentProps* pCompProps, int iPropIndex, const CComponentProps* pBaseCompProps ) const
 {
     CComponentProps::PropertyValNum_t iProp = 0;
-    if (pCompProps->GetPropertyNumPtr(iPropIndex, &iProp))
+    if (pCompProps && pCompProps->GetPropertyNumPtr(iPropIndex, &iProp))
         return iProp;
-
-    if (!pBaseCompProps)
+    if (pBaseCompProps && pBaseCompProps->GetPropertyNumPtr(iPropIndex, &iProp))
         return iProp;
-    pBaseCompProps->GetPropertyNumPtr(iPropIndex, &iProp);
     return iProp;
 }
 
@@ -2975,6 +2971,7 @@ CComponentProps::PropertyValNum_t CObjBase::GetPropNum( COMPPROPS_TYPE iCompProp
 
 void CObjBase::SetPropStr( CComponentProps* pCompProps, int iPropIndex, lpctstr ptcVal, bool fZero )
 {
+    ASSERT(pCompProps);
     pCompProps->SetPropertyStr(iPropIndex, ptcVal, this, fZero);
 }
 
@@ -2991,6 +2988,7 @@ void CObjBase::SetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, lpctst
 
 void CObjBase::SetPropNum( CComponentProps* pCompProps, int iPropIndex, CComponentProps::PropertyValNum_t iVal )
 {
+    ASSERT(pCompProps);
     pCompProps->SetPropertyNum(iPropIndex, iVal, this);
 }
 
@@ -3007,23 +3005,14 @@ void CObjBase::SetPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CCompo
 
 void CObjBase::ModPropNum( CComponentProps* pCompProps, int iPropIndex, CComponentProps::PropertyValNum_t iMod, const CComponentProps* pBaseCompProps )
 {
+    ASSERT(pCompProps);
     CComponentProps::PropertyValNum_t iVal = 0;
-    bool fPropExists = false;
-    if (pCompProps)
-    {
-        pCompProps->GetPropertyNumPtr(iPropIndex, &iVal);
-        return;
-    }
+    bool fPropExists = pCompProps->GetPropertyNumPtr(iPropIndex, &iVal);
     if (!fPropExists && pBaseCompProps)
     {
-        pCompProps->SetPropertyNum(iPropIndex, iMod + iVal, this);
-        return;
+        pBaseCompProps->GetPropertyNumPtr(iPropIndex, &iVal);
     }
-    if (!pCompProps && !pBaseCompProps)
-    {
-        //g_Log.EventDebug("CEntityProps: ModPropNum on nullptr CCProps and base CCProps. iPropIndex %d.\n", iPropIndex);
-        ASSERT(0); // Should never happen!
-    }
+    pCompProps->SetPropertyNum(iPropIndex, iMod + iVal, this);
 }
 
 void CObjBase::ModPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CComponentProps::PropertyValNum_t iMod, bool fBaseDef )
@@ -3193,6 +3182,10 @@ void CObjBase::Delete(bool fForce)
 	ADDTOCALLSTACK("CObjBase::Delete");
 	DeletePrepare();
     CEntity::Delete(fForce);
+    CCTimedObject::Delete();
+    g_World.m_ObjStatusUpdates.erase(this);
+    g_World.m_TimedFunctions.Erase( GetUID() );
+
     g_World.m_ObjDelete.InsertHead(this);
 }
 

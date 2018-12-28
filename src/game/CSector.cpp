@@ -992,6 +992,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
 {
 	ADDTOCALLSTACK("CSector::MoveCharToSector");
 	// Move a CChar into this CSector.
+    ASSERT(pChar);
 
 	if ( IsCharActiveIn(pChar) )
 		return false;	// already here

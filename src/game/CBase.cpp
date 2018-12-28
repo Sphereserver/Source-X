@@ -404,20 +404,6 @@ bool CBaseBaseDef::IsValid() const
 	return( m_sName.IsValid());
 }
 
-byte CBaseBaseDef::RangeL() const
-{
-    const CCPropsItemWeapon *pCCPItemWeapon = GetCCPropsItemWeapon();
-	return (byte)(pCCPItemWeapon->GetPropertyNum(PROPIWEAP_RANGE) & 0xff);
-	//return (m_range & 0xff);
-}
-
-byte CBaseBaseDef::RangeH() const
-{
-    const CCPropsItemWeapon *pCCPItemWeapon = GetCCPropsItemWeapon();
-	return (byte)((pCCPItemWeapon->GetPropertyNum(PROPIWEAP_RANGE) >> 8) & 0xff);
-	//return ((m_range>>8) & 0xff);
-}
-
 height_t CBaseBaseDef::GetHeight() const
 {
 	return( m_Height );

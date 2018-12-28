@@ -27,9 +27,8 @@ bool CChar::NPC_FightArchery(CChar * pChar)
     CItem *pWeapon = m_uidWeapon.ItemFind();
     if (pWeapon != nullptr)
     {
-        const CCPropsItemWeapon *pCCPItemWeapon = pWeapon->GetCCPropsItemWeapon(), *pBaseCCPItemWeapon = pWeapon->Base_GetDef()->GetCCPropsItemWeapon();
-        iMinDist = pWeapon->GetPropNum(pCCPItemWeapon, PROPIWEAP_RANGEH, pBaseCCPItemWeapon);
-        iMaxDist = pWeapon->GetPropNum(pCCPItemWeapon, PROPIWEAP_RANGEL, pBaseCCPItemWeapon);
+        iMinDist = GetRangeL();
+        iMaxDist = GetRangeH();
     }
 
     // if range is not set on the weapon, default to ini settings

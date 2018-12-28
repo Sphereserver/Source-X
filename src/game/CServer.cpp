@@ -2265,7 +2265,7 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 #ifdef _WIN32
 	char *pszTemp = Str_GetTemp();
 	sprintf(pszTemp, SPHERE_TITLE " V" SPHERE_VERSION " - %s", GetName());
-	SetConsoleTitle(pszTemp);
+    g_NTWindow.SetWindowTitle(pszTemp);
 #endif
 
 	return true;

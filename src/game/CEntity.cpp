@@ -19,6 +19,7 @@ CEntity::~CEntity()
 
 void CEntity::Delete(bool fForce)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::Delete");
     if (_List.empty())
         return;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
@@ -35,6 +36,7 @@ void CEntity::Delete(bool fForce)
 
 void CEntity::ClearComponents()
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::ClearComponents");
     if (_List.empty())
         return;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
@@ -50,6 +52,7 @@ void CEntity::ClearComponents()
 
 void CEntity::SubscribeComponent(CComponent * pComponent)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::SubscribeComponent");
     COMP_TYPE compType = pComponent->GetType();
     if (_List.count(compType))
     {
@@ -63,6 +66,7 @@ void CEntity::SubscribeComponent(CComponent * pComponent)
 
 void CEntity::UnsubscribeComponent(std::map<COMP_TYPE, CComponent*>::iterator& it, bool fEraseFromMap)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::UnsubscribeComponent(it)");
     delete it->second;
     if (fEraseFromMap)
     {
@@ -72,6 +76,7 @@ void CEntity::UnsubscribeComponent(std::map<COMP_TYPE, CComponent*>::iterator& i
 
 void CEntity::UnsubscribeComponent(CComponent *pComponent)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::UnsubscribeComponent");
     if (_List.empty())
     {
         return;
@@ -88,11 +93,13 @@ void CEntity::UnsubscribeComponent(CComponent *pComponent)
 
 bool CEntity::IsComponentSubscribed(CComponent *pComponent) const
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::IsComponentSubscribed");
     return (!_List.empty() && _List.count(pComponent->GetType()));
 }
 
 CComponent * CEntity::GetComponent(COMP_TYPE type)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::GetComponent");
     if (!_List.empty() && _List.count(type))
     {
         return _List[type];
@@ -102,6 +109,7 @@ CComponent * CEntity::GetComponent(COMP_TYPE type)
 
 bool CEntity::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::r_GetRef");
     if (_List.empty())
         return false;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
@@ -120,6 +128,7 @@ bool CEntity::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 
 void CEntity::r_Write(CScript & s) // Storing data in the worldsave.
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::r_Write");
     if (_List.empty() && !s.IsWriteMode())
         return;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
@@ -134,6 +143,7 @@ void CEntity::r_Write(CScript & s) // Storing data in the worldsave.
 
 bool CEntity::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::r_WriteVal");
     if (_List.empty())
         return false;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
@@ -152,6 +162,7 @@ bool CEntity::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
 
 bool CEntity::r_LoadVal(CScript & s)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::r_LoadVal");
     if (_List.empty())
         return false;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
@@ -168,8 +179,9 @@ bool CEntity::r_LoadVal(CScript & s)
     return false;
 }
 
-bool CEntity::r_Verb(CScript & s, CTextConsole * pSrc) ///< Execute command from script.
+bool CEntity::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from script.
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::r_Verb");
     if (_List.empty())
         return false;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
@@ -188,6 +200,7 @@ bool CEntity::r_Verb(CScript & s, CTextConsole * pSrc) ///< Execute command from
 
 void CEntity::Copy(const CEntity *target)
 {
+    ADDTOCALLSTACK_INTENSIVE("CEntity::Copy");
     if (_List.empty())
         return;
     for (std::map<COMP_TYPE, CComponent*>::const_iterator it = target->_List.begin(); it != target->_List.end(); ++it)
@@ -206,6 +219,7 @@ void CEntity::Copy(const CEntity *target)
 
 CCRET_TYPE CEntity::OnTick()
 {
+    ADDTOCALLSTACK("CEntity::OnTick");
     if (_List.empty())
         return CCRET_CONTINUE;
 

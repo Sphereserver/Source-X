@@ -2865,8 +2865,7 @@ do_default:
 			goto do_default;
         case CHC_RANGE:
         {
-            const int iRangeH = RangeH();
-            const int iRangeL = RangeL();
+            const int iRangeH = GetRangeH(), iRangeL = GetRangeL();
             if ( iRangeH == 0 )
                 sVal.Format( "%d", iRangeL );
             else
@@ -2874,10 +2873,10 @@ do_default:
             break;
         }
         case CHC_RANGEH:
-            sVal.FormatVal(RangeH());
+            sVal.FormatVal(GetRangeH());
             break;
         case CHC_RANGEL:
-            sVal.FormatVal(RangeL());
+            sVal.FormatVal(GetRangeL());
             break;
 		case CHC_STONE:
 			sVal.FormatVal( IsStatFlag( STATF_STONE ));

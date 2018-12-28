@@ -582,6 +582,21 @@ public:
 	int IsWeird() const;
 	char GetFixZ(CPointMap pt, dword dwBlockFlags = 0 );
 	byte GetSpeed() const;
+
+    /**
+    * @fn  byte GetRangeL() const;
+    * @brief   Returns the RangeLow.
+    * @return  Value.
+    */
+    byte GetRangeL() const;
+
+    /**
+    * @fn  byte GetRangeH() const;
+    * @brief   Returns the RangeHigh.
+    * @return  Value.
+    */
+    byte GetRangeH() const;
+
 	void SetAttr(uint64 iAttr)
 	{
 		m_Attr |= iAttr;

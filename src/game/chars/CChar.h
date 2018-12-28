@@ -1004,18 +1004,19 @@ private:
 	// Armor, weapons and combat ------------------------------------
 
     /**
-    * @fn  byte CChar::RangeL() const;
+    * @fn  byte CChar::GetRangeL() const;
     * @brief   Returns Range Lowest byte.
     * @return  The Value.
     */
-    byte RangeL() const;
+    byte GetRangeL() const;
 
     /**
-    * @fn  byte CChar::RangeH() const;
+    * @fn  byte CChar::GetRangeH() const;
     * @brief   Returns Range Highest byte.
     * @return  The Value.
     */
-    byte RangeH() const;
+    byte GetRangeH() const;
+
 	int	Fight_CalcRange( CItem * pWeapon = nullptr ) const;
     void Fight_SetDefaultSwingDelays();
 	
