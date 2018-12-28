@@ -1388,3 +1388,7 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 - Fixed: Tooltips not refreshing fast enough (Issue #170).
 - Fixed: ARGN1 was in ms in trigger @DROPON_GROUND (Issue #168).
 - Fixed: Now RANGEL stores the lowest range value, and RANGEH the highest. It was inverted again in the past, no idea when.
+
+28-12-2018, Nolok
+- Fixed: MOVE and MOVENEAR not removing from the screen the object if it was moved farther than the player view distance.
+- Fixed: MOVENEAR always sent an UPDATE for the moved item, independently from the 3rd argument's value.

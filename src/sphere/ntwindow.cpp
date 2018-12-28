@@ -344,6 +344,8 @@ void CNTWindow::SetWindowTitle(LPCTSTR pText)
     std::unique_lock<std::shared_mutex> lock(_mutexWindowTitle);
     if (pText)
         _strWindowTitle = pText;
+    else
+        _strWindowTitle.clear();
     _fNewWindowTitle = true;
 }
 
@@ -861,7 +863,8 @@ LRESULT WINAPI CNTWindow::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LP
 
 bool CNTWindow::NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
-	theApp.InitInstance(SPHERE_TITLE " V" SPHERE_VERSION, hInstance, lpCmdLine);
+#define SPHERE_WINDOW_TITLE_BASE     SPHERE_TITLE " V" SPHERE_VERSION
+	theApp.InitInstance(SPHERE_WINDOW_TITLE_BASE, hInstance, lpCmdLine);
 
 	//	read target window name from the arguments
 	char	className[32] = SPHERE_TITLE "Svr";
@@ -880,7 +883,7 @@ bool CNTWindow::NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLine, int nCmdSho
 
 	theApp.m_wndMain.m_hWnd = ::CreateWindow(
 		className,
-		SPHERE_TITLE " V" SPHERE_VERSION, // window name
+        SPHERE_WINDOW_TITLE_BASE, // window name
 		WS_OVERLAPPEDWINDOW,   // window style
 		CW_USEDEFAULT,  // horizontal position of window
 		CW_USEDEFAULT,  // vertical position of window

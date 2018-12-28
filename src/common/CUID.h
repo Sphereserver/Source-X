@@ -50,7 +50,8 @@ public:
 	bool IsItemEquipped() const;
 	bool IsItemInContainer() const;
 
-	void SetObjContainerFlags(dword dwFlags = 0);
+	void SetObjContainerFlags(dword dwFlags);
+    void RemoveObjFlags(dword dwFlags);
 
 	inline void SetPrivateUID(dword dwVal) {
 		m_dwInternalVal = dwVal;

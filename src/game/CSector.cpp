@@ -978,9 +978,20 @@ void CSector::MoveItemToSector( CItem * pItem, bool fActive )
     if (IsSleeping())
     {
         if (CanSleep(true))
+        {
             pItem->GoSleep();
+        }
         else
-            GoAwake();        
+        {
+            GoAwake();
+            if (pItem->IsSleeping())
+                pItem->GoAwake();
+        }
+    }
+    else
+    {
+        if (pItem->IsSleeping())
+            pItem->GoAwake();
     }
 	if ( fActive )
 		m_Items_Timer.AddItemToSector( pItem );

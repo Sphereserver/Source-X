@@ -91,7 +91,7 @@ void CContainer::OnRemoveObj( CSObjListRec *pObRec )	// Override this = called w
 	CSObjList::OnRemoveObj(pItem);
 	ASSERT(pItem->GetParent() == nullptr);
 
-	pItem->SetContainerFlags(UID_O_DISCONNECT);		// It is no place for the moment.
+	pItem->SetUIDContainerFlags(UID_O_DISCONNECT);		// It is no place for the moment.
 	OnWeightChange(-pItem->GetWeight());
 }
 

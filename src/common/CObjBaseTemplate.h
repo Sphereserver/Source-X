@@ -64,9 +64,12 @@ public:
 	}
 	bool IsDeleted() const;
 
-	void SetContainerFlags(dword dwFlags = 0) {
+	void SetUIDContainerFlags(dword dwFlags) {
 		m_UID.SetObjContainerFlags( dwFlags );
 	}
+    void RemoveUIDFlags(dword dwFlags) {
+        m_UID.RemoveObjFlags( dwFlags );
+    }
 
 	virtual int IsWeird() const;
 	virtual CObjBaseTemplate * GetTopLevelObj() const = 0;

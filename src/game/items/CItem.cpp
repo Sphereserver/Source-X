@@ -1310,7 +1310,7 @@ void CItem::SetTimeout( int64 iMsecs )
 	CItemsList::sm_fNotAMove = true;
 	pSector->MoveItemToSector( this, iMsecs >= 0 );
 	CItemsList::sm_fNotAMove = false;
-	SetContainerFlags(0);
+	SetUIDContainerFlags(0);
 }
 
 void CItem::SetTimeoutS(int64 iSeconds)
@@ -1442,7 +1442,7 @@ bool CItem::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the groun
 
 	SetTopPoint( pt );
 	if ( fForceFix )
-		SetTopZ(GetFixZ(GetTopPoint()));
+		SetTopZ(GetFixZ(pt));
 
 	return true;
 }

@@ -100,7 +100,7 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 		// Find a free UID slot for this.
 		SetUID(UID_CLEAR, fItem);
 		ASSERT(IsValidUID());
-		SetContainerFlags(UID_O_DISCONNECT);	// it is no place for now
+		SetUIDContainerFlags(UID_O_DISCONNECT);	// it is no place for now
 	}
 
 	// Put in the idle list by default. (til placed in the world)
@@ -605,13 +605,7 @@ bool CObjBase::MoveNear(CPointMap pt, ushort iSteps )
 			return false;
 	}
 
-	if ( MoveTo(pt) )
-	{
-		if ( IsItem() )
-			Update();
-		return true;
-	}
-	return false;
+	return MoveTo(pt);
 }
 
 void CObjBase::UpdateObjMessage( lpctstr pTextThem, lpctstr pTextYou, CClient * pClientExclude, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, bool bUnicode ) const
@@ -2113,6 +2107,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				CPointMap pt = GetTopPoint();
 				if ( ! GetDeltaStr( pt, s.GetArgStr()))
 					return false;
+                RemoveFromView();
 				MoveTo( pt );
 				Update();
 			}
@@ -2120,7 +2115,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_MOVENEAR:
 			{
 				EXC_SET_BLOCK("MOVENEAR");
-				CObjBase *	pObjNear;
+				CObjBase *pObjNear;
 				int64 piCmd[4];
 
 				int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd) );
@@ -2135,6 +2130,8 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				pObjNear = uid.ObjFind();
 				if ( !pObjNear )
 					return false;
+                if ( piCmd[2] )
+                    RemoveFromView();
 				MoveNearObj( pObjNear, (word)(piCmd[1]) );
 				if ( piCmd[2] )
 					Update();

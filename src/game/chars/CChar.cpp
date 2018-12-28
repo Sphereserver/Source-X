@@ -1216,37 +1216,39 @@ bool CChar::SetName( lpctstr pszName )
 
 height_t CChar::GetHeightMount( bool fEyeSubstract ) const
 {
-	ADDTOCALLSTACK("CChar::GetHeightMount");
+	ADDTOCALLSTACK_INTENSIVE("CChar::GetHeightMount");
 	height_t height = GetHeight();
 	if ( IsStatFlag(STATF_ONHORSE|STATF_HOVERING) )
 		height += 4;
 	if ( fEyeSubstract )
 		--height;
-	return ( height ); //if mounted +4, if not -1 (let's say it's eyes' height)
+	return height; //if mounted +4, if not -1 (let's say it's eyes' height)
 }
 
 height_t CChar::GetHeight() const
 {
-	ADDTOCALLSTACK("CChar::GetHeight");
+	ADDTOCALLSTACK_INTENSIVE("CChar::GetHeight");
 	if ( m_height ) //set by a dynamic variable (On=@Create  Height=10)
 		return m_height;
 
 	height_t tmpHeight;
 
-	CCharBase * pCharDef = Char_GetDef();
+	const CCharBase * pCharDef = Char_GetDef();
 	tmpHeight = pCharDef->GetHeight();
 	if ( tmpHeight ) //set by a chardef variable ([CHARDEF 10]  Height=10)
 		return tmpHeight;
 
+    // This is SLOW (since this method is called very frequently)! Move those defs value to CharDef!
 	char * heightDef = Str_GetTemp();
+    uint uiDispID = (uint)pCharDef->GetDispID();
 
-	sprintf(heightDef, "height_0%x", (uint)(pCharDef->GetDispID()));
-	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
+	sprintf(heightDef, "height_0%x", uiDispID);
+	tmpHeight = (height_t)(g_Exp.m_VarDefs.GetKeyNum(heightDef));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_0a)
 		return tmpHeight;
 
-	sprintf(heightDef, "height_%u", (uint)(pCharDef->GetDispID()));
-	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
+	sprintf(heightDef, "height_%u", uiDispID);
+	tmpHeight = (height_t)(g_Exp.m_VarDefs.GetKeyNum(heightDef));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_10)
 		return tmpHeight;
 
@@ -2457,7 +2459,7 @@ do_default:
 				pszKey += 4;
 				GETNONWHITESPACE(pszKey);
 
-				CPointBase	ptDst	= GetTopPoint();
+				CPointBase ptDst = GetTopPoint();
 				ptDst.Move( GetDirStr( pszKey ) );
 				CRegion * pArea = ptDst.GetRegion( REGION_TYPE_MULTI | REGION_TYPE_AREA );
 				if ( !pArea )
@@ -3431,7 +3433,7 @@ bool CChar::r_LoadVal( CScript & s )
             if ( iQty > 1 )
             {
                 iRange = (int)((piVal[1] & 0xff) << 8); // highest byte contains the lowest value
-                iRange |= (int)(piVal[0] & 0xff);            // lowest byte contains the highest value
+                iRange |= (int)(piVal[0] & 0xff);       // lowest byte contains the highest value
             }
             else
             {

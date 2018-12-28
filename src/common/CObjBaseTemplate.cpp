@@ -46,7 +46,7 @@ CSector * CObjBaseTemplate::GetTopSector() const
 
 void CObjBaseTemplate::SetEquipLayer( LAYER_TYPE layer )
 {
-	SetContainerFlags( UID_O_EQUIPPED );
+	SetUIDContainerFlags( UID_O_EQUIPPED );
 	m_pt.m_x = 0;	// these don't apply.
 	m_pt.m_y = 0;
 	// future: strongly typed enums will remove the need for this cast
@@ -62,7 +62,7 @@ void CObjBaseTemplate::SetContainedLayer( byte layer )
 
 void CObjBaseTemplate::SetContainedPoint( const CPointMap & pt )
 {
-	SetContainerFlags( UID_O_CONTAINED );
+    SetUIDContainerFlags( UID_O_CONTAINED );
 	m_pt.m_x = pt.m_x;
 	m_pt.m_y = pt.m_y;
 	m_pt.m_z = LAYER_NONE;
@@ -71,7 +71,7 @@ void CObjBaseTemplate::SetContainedPoint( const CPointMap & pt )
 
 void CObjBaseTemplate::SetTopPoint( const CPointMap & pt )
 {
-	SetContainerFlags(0);
+    SetUIDContainerFlags(0);
 	ASSERT( pt.IsValidPoint() );	// already checked b4.
 	m_pt = pt;
 }
