@@ -11,6 +11,9 @@ lpctstr const CCPropsItemEquippable::_ptcPropertyKeys[PROPIEQUIP_QTY + 1] =
     #undef ADD
     nullptr
 };
+KeyTableDesc_s CCPropsItemEquippable::GetPropertyKeysData() const {
+    return {_ptcPropertyKeys, (int)CountOf(_ptcPropertyKeys)};
+}
 
 CCPropsItemEquippable::CCPropsItemEquippable() : CComponentProps(COMP_PROPS_ITEMEQUIPPABLE)
 {
@@ -103,32 +106,24 @@ void CCPropsItemEquippable::DeletePropertyStr(int iPropIndex)
     _mPropsStr.erase(iPropIndex);
 }
 
-bool CCPropsItemEquippable::r_LoadPropVal(CScript & s, CObjBase* pLinkedObj)
+bool CCPropsItemEquippable::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, int iPropIndex, bool fPropStr)
 {
-    ADDTOCALLSTACK("CCPropsItemEquippable::r_LoadPropVal");
-    int i = FindTableSorted(s.GetKey(), _ptcPropertyKeys, CountOf(_ptcPropertyKeys)-1);
-    if (i == -1)
-        return false;
-
-    bool fPropStr = IsPropertyStr(i);
+    ADDTOCALLSTACK("CCPropsItemEquippable::FindLoadPropVal");
     if (!fPropStr && (*s.GetArgRaw() == '\0'))
     {
-        DeletePropertyNum(i);
+        DeletePropertyNum(iPropIndex);
         return true;
     }
 
-    BaseProp_LoadPropVal(i, fPropStr, s, pLinkedObj);
+    BaseProp_LoadPropVal(iPropIndex, fPropStr, s, pLinkedObj);
     return true;
 }
 
-bool CCPropsItemEquippable::r_WritePropVal(lpctstr pszKey, CSString & s)
+bool CCPropsItemEquippable::FindWritePropVal(CSString & sVal, int iPropIndex, bool fPropStr) const
 {
-    ADDTOCALLSTACK("CCPropsItemEquippable::r_WritePropVal");
-    int i = FindTableSorted(pszKey, _ptcPropertyKeys, CountOf(_ptcPropertyKeys)-1);
-    if (i == -1)
-        return false;
+    ADDTOCALLSTACK("CCPropsItemEquippable::FindWritePropVal");
 
-    return BaseProp_WritePropVal(i, IsPropertyStr(i), s);
+    return BaseProp_WritePropVal(iPropIndex, fPropStr, sVal);
 }
 
 void CCPropsItemEquippable::r_Write(CScript & s)

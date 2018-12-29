@@ -57,7 +57,7 @@ void CEntity::SubscribeComponent(CComponent * pComponent)
     if (_List.count(compType))
     {
         delete pComponent;
-        ASSERT(0);  // This should never happen
+        PERSISTANT_ASSERT(0);  // This should never happen
         //g_Log.EventError("Trying to duplicate component (%d) for %s '0x%08x'\n", (int)pComponent->GetType(), pComponent->GetLink()->GetName(), pComponent->GetLink()->GetUID());
         return;
     }

@@ -19,6 +19,11 @@ enum MATCH_TYPE
     MATCH_PATTERN		// bad pattern
 };
 
+struct KeyTableDesc_s
+{
+    const lpctstr *pptcTable;
+    int iTableSize;
+};
 
 /** @name String utilities: Modifiers
 */
@@ -112,7 +117,7 @@ tchar * Str_TrimWhitespace(tchar * pStr);
 * @param iElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTable(lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));
+int FindTable(const lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));
 /**
 * @brief Look for a string in a table (binary search).
 * @param pFind string we are looking for.
@@ -121,7 +126,7 @@ int FindTable(lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize 
 * @param iElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTableSorted(lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));
+int FindTableSorted(const lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));
 /**
 * @brief Look for a string header in a table (uses Str_CmpHeadI to compare instead of strcmpi).
 * @param pFind string we are looking for.
@@ -130,7 +135,7 @@ int FindTableSorted(lpctstr pFind, lpctstr const * ppTable, int iCount, int iEle
 * @param iElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTableHead(lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));
+int FindTableHead(const lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));
 /**
 * @brief Look for a string header in a table (binary search, uses Str_CmpHeadI to compare instead of strcmpi).
 * @param pFind string we are looking for.
@@ -139,7 +144,7 @@ int FindTableHead(lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemS
 * @param iElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTableHeadSorted(lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));
+int FindTableHeadSorted(const lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));
 /**
 * @param pszIn string to check.
 * @return true if string is empty or has '\c' or '\n' characters, false otherwise.

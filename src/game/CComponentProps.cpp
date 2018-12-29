@@ -52,18 +52,18 @@ void CComponentProps::BaseProp_LoadPropVal(int iPropIndex, bool fPropStr, CScrip
         SetPropertyNum(iPropIndex, s.GetArgVal(), pLinkedObj);
 }
 
-bool CComponentProps::BaseProp_WritePropVal(int iPropIndex, bool fPropStr, CSString & s)
+bool CComponentProps::BaseProp_WritePropVal(int iPropIndex, bool fPropStr, CSString & sVal) const
 {
     ADDTOCALLSTACK("CComponentProps::BaseProp_WritePropVal");
     if (fPropStr)
     {
-        return GetPropertyStrPtr(iPropIndex, &s);
+        return GetPropertyStrPtr(iPropIndex, &sVal);
     }
     else
     {
         PropertyValNum_t iVal = 0;
         bool fRet = GetPropertyNumPtr(iPropIndex, &iVal);
-        s.FormatLLVal(iVal);
+        sVal.FormatLLVal(iVal);
         return fRet;
     }
 }

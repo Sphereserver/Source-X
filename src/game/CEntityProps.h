@@ -17,6 +17,8 @@ class CCPropsItemEquippable;
 class CCPropsItemWeapon;
 class CCPropsItemWeaponRanged;
 class CTextConsole;
+class CObjBase;
+struct CBaseBaseDef;
 
 
 class CEntityProps
@@ -94,20 +96,23 @@ public:
     *
     * @param pszKey the property's key to search for (eg: name, ResCold, etc).
     * @param sVal the storage that will contain property's value.
+    * @param pObjEntityProps The CObjBase holding the dynamic properties. nullptr if this method is called from a CBaseBaseDef.
+    * @param pBaseEntityProps The CBaseBaseDef holding the base properties.
     *
     * @return true if there was a key to retrieve.
     */
-    bool r_WritePropVal(lpctstr pszKey, CSString & s);
+    static bool r_WritePropVal(lpctstr pszKey, CSString & sVal, const CObjBase *pObjEntityProps, const CBaseBaseDef *pBaseEntityProps);
 
     /**
     * @brief Try to store the property in one of the Prop Components subscribed to this Entity.
     *
     * @param s the container with the keys and values to set.
-    * @param pLinkedObj CObjBase from which the method is called. Use nullptr if calling from CItemBase or CCharBase.
+    * @param pObjEntityProps The CObjBase holding the dynamic properties. nullptr if this method is called from a CBaseBaseDef.
+    * @param pBaseEntityProps The CBaseBaseDef holding the base properties.
     *
     * @return true if the prop was stored in a Component
     */
-    bool r_LoadPropVal(CScript & s, CObjBase* pLinkedObj);
+    static bool r_LoadPropVal(CScript & s, CObjBase *pObjEntityProps, CBaseBaseDef *pBaseEntityProps);
 
     /**
     *@brief Generate and the tooltip data for the properties inside this CEntityProps to pObj

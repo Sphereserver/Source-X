@@ -925,6 +925,7 @@ bool CAccount::SetPassword( lpctstr pszPassword, bool isMD5Hash )
 		CScriptTriggerArgs Args;
 		Args.Init(GetName());
 		Args.m_VarsLocal.SetStrNew("password",pszPassword);
+        Args.m_VarsLocal.SetStrNew("oldPassword",m_sCurPassword.GetPtr());
 		TRIGRET_TYPE tRet = TRIGRET_RET_FALSE;
 		g_Serv.r_Call("f_onaccount_pwchange", &g_Serv, &Args, nullptr, &tRet);
 		if ( tRet == TRIGRET_RET_TRUE )

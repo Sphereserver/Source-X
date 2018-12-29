@@ -2353,8 +2353,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 
     // Checking Props CComponents first (first check CItem props, if not found then check CItemBase)
     EXC_SET_BLOCK("EntityProp");
-    CItemBase* pItemBase = Item_GetDef();
-    if (CEntityProps::r_WritePropVal(pszKey, sVal) || pItemBase->CEntityProps::r_WritePropVal(pszKey, sVal))
+    if (CEntityProps::r_WritePropVal(pszKey, sVal, this, Base_GetDef()))
     {
         return true;
     }
@@ -2637,8 +2636,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 	
     // Checking Props CComponents first (first check CChar props, if not found then check CCharBase)
     EXC_SET_BLOCK("EntityProp");
-    CItemBase* pItemBase = Item_GetDef();
-    if (CEntityProps::r_LoadPropVal(s, this) || pItemBase->CEntityProps::r_LoadPropVal(s, this))
+    if (CEntityProps::r_LoadPropVal(s, this, Base_GetDef()))
     {
         return true;
     }

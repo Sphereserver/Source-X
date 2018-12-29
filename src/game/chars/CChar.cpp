@@ -1953,8 +1953,7 @@ bool CChar::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 
     // Checking Props CComponents first (first check CChar props, if not found then check CCharBase)
     EXC_SET_BLOCK("EntityProp");
-    CCharBase* pCharBase = Char_GetDef();
-    if (CEntityProps::r_WritePropVal(pszKey, sVal) || pCharBase->CEntityProps::r_WritePropVal(pszKey, sVal))
+    if (CEntityProps::r_WritePropVal(pszKey, sVal, this, Base_GetDef()))
     {
         return true;
     }
@@ -2934,8 +2933,7 @@ bool CChar::r_LoadVal( CScript & s )
 
     // Checking Props CComponents first (first check CChar props, if not found then check CCharBase)
     EXC_SET_BLOCK("EntityProps");
-    CCharBase* pItemBase = Char_GetDef();
-    if (CEntityProps::r_LoadPropVal(s, this) || pItemBase->CEntityProps::r_LoadPropVal(s, this))
+    if (CEntityProps::r_LoadPropVal(s, this, Base_GetDef()))
     {
         return true;
     }

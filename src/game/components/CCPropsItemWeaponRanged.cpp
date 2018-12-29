@@ -10,6 +10,9 @@ lpctstr const CCPropsItemWeaponRanged::_ptcPropertyKeys[PROPIWEAPRNG_QTY + 1] =
     #undef ADD
     nullptr
 };
+KeyTableDesc_s CCPropsItemWeaponRanged::GetPropertyKeysData() const {
+    return {_ptcPropertyKeys, (int)CountOf(_ptcPropertyKeys)};
+}
 
 CCPropsItemWeaponRanged::CCPropsItemWeaponRanged() : CComponentProps(COMP_PROPS_ITEMWEAPONRANGED)
 {
@@ -107,33 +110,24 @@ void CCPropsItemWeaponRanged::DeletePropertyStr(int iPropIndex)
     _mPropsStr.erase(iPropIndex);
 }
 
-bool CCPropsItemWeaponRanged::r_LoadPropVal(CScript & s, CObjBase* pLinkedObj)
+bool CCPropsItemWeaponRanged::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, int iPropIndex, bool fPropStr)
 {
-    ADDTOCALLSTACK("CCPropsItemWeaponRanged::r_LoadPropVal");
-    int i = FindTableSorted(s.GetKey(), _ptcPropertyKeys, CountOf(_ptcPropertyKeys)-1);
-    if (i == -1)
-        return false;
-
-    bool fPropStr = IsPropertyStr(i);
+    ADDTOCALLSTACK("CCPropsItemWeaponRanged::FindLoadPropVal");
     if (!fPropStr && (*s.GetArgRaw() == '\0'))
     {
-        DeletePropertyNum(i);
+        DeletePropertyNum(iPropIndex);
         return true;
     }
 
-    BaseProp_LoadPropVal(i, fPropStr, s, pLinkedObj);
-
+    BaseProp_LoadPropVal(iPropIndex, fPropStr, s, pLinkedObj);
     return true;
 }
 
-bool CCPropsItemWeaponRanged::r_WritePropVal(lpctstr pszKey, CSString & s)
+bool CCPropsItemWeaponRanged::FindWritePropVal(CSString & sVal, int iPropIndex, bool fPropStr) const
 {
-    ADDTOCALLSTACK("CCPropsItemWeaponRanged::r_WritePropVal");
-    int i = FindTableSorted(pszKey, _ptcPropertyKeys, CountOf(_ptcPropertyKeys)-1);
-    if (i == -1)
-        return false;
+    ADDTOCALLSTACK("CCPropsItemWeaponRanged::FindWritePropVal");
 
-    return BaseProp_WritePropVal(i, IsPropertyStr(i), s);
+    return BaseProp_WritePropVal(iPropIndex, fPropStr, sVal);
 }
 
 void CCPropsItemWeaponRanged::r_Write(CScript & s)

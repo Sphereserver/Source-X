@@ -10,6 +10,9 @@ lpctstr const CCPropsChar::_ptcPropertyKeys[PROPCH_QTY + 1] =
     #undef ADD
     nullptr
 };
+KeyTableDesc_s CCPropsChar::GetPropertyKeysData() const {
+    return {_ptcPropertyKeys, (int)CountOf(_ptcPropertyKeys)};
+}
 
 CCPropsChar::CCPropsChar() : CComponentProps(COMP_PROPS_CHAR)
 {
@@ -147,36 +150,30 @@ void CCPropsChar::DeletePropertyStr(int iPropIndex)
     _mPropsStr.erase(iPropIndex);
 }
 
-bool CCPropsChar::r_LoadPropVal(CScript & s, CObjBase* pLinkedObj)
+bool CCPropsChar::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, int iPropIndex, bool fPropStr)
 {
-    ADDTOCALLSTACK("CCPropsChar::r_LoadPropVal");
-    int i = FindTableSorted(s.GetKey(), _ptcPropertyKeys, CountOf(_ptcPropertyKeys)-1);
-    if (i == -1)
-        return false;
-    if (i == PROPCH_NIGHTSIGHT)
-        return false;   // handle it in CChar::r_LoadVal
-    
-    bool fPropStr = IsPropertyStr(i);
+    ADDTOCALLSTACK("CCPropsChar::FindLoadPropVal");
     if (!fPropStr && (*s.GetArgRaw() == '\0'))
     {
-        DeletePropertyNum(i);
+        DeletePropertyNum(fPropStr);
         return true;
     }
 
-    BaseProp_LoadPropVal(i, fPropStr, s, pLinkedObj);
+    if (iPropIndex == PROPCH_NIGHTSIGHT)
+        return false;   // handle it in CChar::r_LoadVal
+
+    BaseProp_LoadPropVal(iPropIndex, fPropStr, s, pLinkedObj);
     return true;
 }
 
-bool CCPropsChar::r_WritePropVal(lpctstr pszKey, CSString & s)
+bool CCPropsChar::FindWritePropVal(CSString & sVal, int iPropIndex, bool fPropStr) const
 {
-    ADDTOCALLSTACK("CCPropsChar::r_WritePropVal");
-    int i = FindTableSorted(pszKey, _ptcPropertyKeys, CountOf(_ptcPropertyKeys)-1);
-    if (i == -1)
-        return false;
-    if (i == PROPCH_NIGHTSIGHT)
+    ADDTOCALLSTACK("CCPropsChar::FindWritePropVal");
+
+    if (iPropIndex == PROPCH_NIGHTSIGHT)
         return false;   // handle it in CChar::r_LoadVal
 
-    return BaseProp_WritePropVal(i, IsPropertyStr(i), s);
+    return BaseProp_WritePropVal(iPropIndex, fPropStr, sVal);
 }
 
 void CCPropsChar::r_Write(CScript & s)

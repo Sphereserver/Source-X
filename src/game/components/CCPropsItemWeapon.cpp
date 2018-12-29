@@ -10,6 +10,9 @@ lpctstr const CCPropsItemWeapon::_ptcPropertyKeys[PROPIWEAP_QTY + 1] =
     #undef ADD
     nullptr
 };
+KeyTableDesc_s CCPropsItemWeapon::GetPropertyKeysData() const {
+    return {_ptcPropertyKeys, (int)CountOf(_ptcPropertyKeys)};
+}
 
 CCPropsItemWeapon::CCPropsItemWeapon() : CComponentProps(COMP_PROPS_ITEMWEAPON)
 {
@@ -205,37 +208,29 @@ void CCPropsItemWeapon::DeletePropertyStr(int iPropIndex)
     _mPropsStr.erase(iPropIndex);
 }
 
-bool CCPropsItemWeapon::r_LoadPropVal(CScript & s, CObjBase* pLinkedObj)
+bool CCPropsItemWeapon::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, int iPropIndex, bool fPropStr)
 {
-    ADDTOCALLSTACK("CCPropsItemWeapon::r_LoadPropVal");
-    int i = FindTableSorted(s.GetKey(), _ptcPropertyKeys, CountOf(_ptcPropertyKeys)-1);
-    if (i == -1)
-        return false;
-
-    bool fPropStr = IsPropertyStr(i);
+    ADDTOCALLSTACK("CCPropsItemWeapon::FindLoadPropVal");
     if (!fPropStr && (*s.GetArgRaw() == '\0'))
     {
-        DeletePropertyNum(i);
+        DeletePropertyNum(iPropIndex);
         return true;
     }
 
-    BaseProp_LoadPropVal(i, fPropStr, s, pLinkedObj);
+    BaseProp_LoadPropVal(iPropIndex, fPropStr, s, pLinkedObj);
     return true;
 }
 
-bool CCPropsItemWeapon::r_WritePropVal(lpctstr pszKey, CSString & s)
+bool CCPropsItemWeapon::FindWritePropVal(CSString & sVal, int iPropIndex, bool fPropStr) const
 {
-    ADDTOCALLSTACK("CCPropsItemWeapon::r_WritePropVal");
-    int i = FindTableSorted(pszKey, _ptcPropertyKeys, CountOf(_ptcPropertyKeys)-1);
-    if (i == -1)
-        return false;
+    ADDTOCALLSTACK("CCPropsItemWeapon::FindWritePropVal");
 
-    return BaseProp_WritePropVal(i, IsPropertyStr(i), s);
+    return BaseProp_WritePropVal(iPropIndex, fPropStr, sVal);
 }
 
 void CCPropsItemWeapon::r_Write(CScript & s)
 {
-    ADDTOCALLSTACK("CCPropsItemWeapon::r_Write");
+    ADDTOCALLSTACK("CCPropsItemWeapon::Write");
     // r_Write isn't called by CItemBase/CCharBase, so we don't get base props saved
 
     if (_iRange != 0)

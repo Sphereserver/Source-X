@@ -168,7 +168,7 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 
     // Checking Props CComponents first
     EXC_SET_BLOCK("EntityProps");
-    if (CEntityProps::r_WritePropVal(pszKey, sVal))
+    if (CEntityProps::r_WritePropVal(pszKey, sVal, nullptr, this))
     {
         return true;
     }
@@ -314,7 +314,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 
     // Checking Props CComponents first
     EXC_SET_BLOCK("EntityProps");
-    if (CEntityProps::r_LoadPropVal(s, nullptr))
+    if (CEntityProps::r_LoadPropVal(s, nullptr, this))
     {
         return true;
     }
