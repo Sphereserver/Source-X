@@ -2,7 +2,6 @@
 #define _INC_CCMULTIMOVABLE_H
 
 #include "CCTimedObject.h"
-#include "../CPointBase.h"
 #include "../CRegion.h"
 
 
@@ -46,7 +45,7 @@ protected:
     void SetNextMove();
     size_t ListObjs(CObjBase ** ppObjList);
     bool CanMoveTo(const CPointMap & pt) const;
-    bool MoveDelta(CPointBase pdelta);
+    bool MoveDelta(const CPointMap& ptDelta);
     bool MoveToRegion(CRegionWorld *pRegionOld, CRegionWorld* pRegionNew) const;
     bool OnMoveTick();
 

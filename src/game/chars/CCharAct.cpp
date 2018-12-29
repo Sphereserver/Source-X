@@ -2984,7 +2984,7 @@ void CChar::Flip()
 // RETURN:
 //  ptDst.m_z = the new z
 //  nullptr = failed to walk here.
-CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fCheckOnly, DIR_TYPE dir, bool fPathFinding )
+CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheckOnly, DIR_TYPE dir, bool fPathFinding )
 {
 	ADDTOCALLSTACK("CChar::CanMoveWalkTo");
 

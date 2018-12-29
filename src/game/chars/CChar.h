@@ -324,7 +324,7 @@ public:
     virtual void GoAwake();
 	// Status and attributes ------------------------------------
 	int IsWeird() const;
-	char GetFixZ( CPointMap pt, dword dwBlockFlags = 0);
+	char GetFixZ( const CPointMap& pt, dword dwBlockFlags = 0);
 	virtual void Delete(bool bforce = false) override;
 	bool NotifyDelete();
 	bool IsStatFlag( uint64 iStatFlag ) const;
@@ -442,11 +442,11 @@ private:
 	bool TeleportToCli( int iType, int iArgs );
 	bool TeleportToObj( int iType, tchar * pszArgs );
 private:
-	CRegion * CheckValidMove( CPointBase & ptDest, dword * pdwBlockFlags, DIR_TYPE dir, height_t * ClimbHeight, bool fPathFinding = false ) const;
+	CRegion * CheckValidMove( CPointMap & ptDest, dword * pdwBlockFlags, DIR_TYPE dir, height_t * ClimbHeight, bool fPathFinding = false ) const;
 	void FixClimbHeight();
 	bool MoveToRegion( CRegionWorld * pNewArea, bool fAllowReject);
 	bool MoveToRoom( CRegion * pNewRoom, bool fAllowReject);
-	bool IsVerticalSpace( CPointMap ptDest, bool fForceMount = false );
+	bool IsVerticalSpace( const CPointMap& ptDest, bool fForceMount = false ) const;
 
 public:
 	CChar* GetNext() const;
@@ -461,7 +461,7 @@ public:
 	bool MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart = 1, bool fFromShip = false);
 	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, ushort iSteps = 0 );
 
-	CRegion * CanMoveWalkTo( CPointBase & pt, bool fCheckChars = true, bool fCheckOnly = false, DIR_TYPE dir = DIR_QTY, bool fPathFinding = false );
+	CRegion * CanMoveWalkTo( CPointMap & pt, bool fCheckChars = true, bool fCheckOnly = false, DIR_TYPE dir = DIR_QTY, bool fPathFinding = false );
 	void CheckRevealOnMove();
 	TRIGRET_TYPE CheckLocation( bool fStanding = false );
 
@@ -1218,7 +1218,7 @@ public:
 	bool NPC_TrainSkill( CChar * pCharSrc, SKILL_TYPE skill, ushort uiAmountToTrain );
     int PayGold(CChar * pCharSrc, int iGold, CItem * pGold, ePayGold iReason);
 private:
-	bool NPC_CheckWalkHere( const CPointBase & pt, const CRegion * pArea, dword dwBlockFlags ) const;
+	bool NPC_CheckWalkHere( const CPointMap & pt, const CRegion * pArea, dword dwBlockFlags ) const;
 	void NPC_OnNoticeSnoop( const CChar * pCharThief, const CChar * pCharMark );
 
 	void NPC_LootMemory( CItem * pItem );

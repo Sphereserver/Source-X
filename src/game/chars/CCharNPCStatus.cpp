@@ -532,7 +532,7 @@ ushort CChar::NPC_GetTrainMax( const CChar * pStudent, SKILL_TYPE Skill ) const
 	return minimum(uiMax, uiStudentMax);
 }
 
-bool CChar::NPC_CheckWalkHere( const CPointBase & pt, const CRegion * pArea, dword dwBlockFlags ) const
+bool CChar::NPC_CheckWalkHere( const CPointMap & pt, const CRegion * pArea, dword dwBlockFlags ) const
 {
 	ADDTOCALLSTACK("CChar::NPC_CheckWalkHere");
 	ASSERT(m_pNPC);

@@ -568,7 +568,7 @@ int CChar::IsWeird() const
 }
 
 // Get the Z we should be at
-char CChar::GetFixZ( CPointMap pt, dword dwBlockFlags)
+char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
 {
 	if ( !dwBlockFlags )
 		dwBlockFlags = GetMoveBlockFlags();
@@ -576,14 +576,15 @@ char CChar::GetFixZ( CPointMap pt, dword dwBlockFlags)
 	if ( dwCan & CAN_C_WALK )
 		dwBlockFlags |= CAN_I_CLIMB; // If we can walk than we can climb. Ignore CAN_C_FLY at all here
 
-	CServerMapBlockState block( dwBlockFlags, pt.m_z, pt.m_z + m_zClimbHeight + GetHeightMount( false ), pt.m_z + m_zClimbHeight + 2, GetHeightMount( false ) );
+    height_t iHeightMount = GetHeightMount( false );
+	CServerMapBlockState block( dwBlockFlags, pt.m_z, pt.m_z + m_zClimbHeight + iHeightMount, pt.m_z + m_zClimbHeight + 2, iHeightMount );
 	g_World.GetFixPoint( pt, block );
 
 	dwBlockFlags = block.m_Bottom.m_dwBlockFlags;
 	if ( block.m_Top.m_dwBlockFlags )
 	{
 		dwBlockFlags |= CAN_I_ROOF;	// we are covered by something.
-		if ( block.m_Top.m_z < pt.m_z + (m_zClimbHeight + (block.m_Top.m_dwTile > TERRAIN_QTY ? GetHeightMount( false ) : GetHeightMount( false )/2 )) )
+		if ( block.m_Top.m_z < pt.m_z + (m_zClimbHeight + (block.m_Top.m_dwTile > TERRAIN_QTY ? iHeightMount : iHeightMount/2 )) )
 			dwBlockFlags |= CAN_I_BLOCK; // we can't fit under this!
 	}
 	if (( dwCan != 0xFFFFFFFF ) && ( dwBlockFlags != 0x0 ))
@@ -603,7 +604,7 @@ char CChar::GetFixZ( CPointMap pt, dword dwBlockFlags)
 					if ( block.m_Bottom.m_z > pt.m_z + m_zClimbHeight + 2) // Too high to climb.
 						return pt.m_z;
 				}
-				else if ( block.m_Bottom.m_z > pt.m_z + m_zClimbHeight + GetHeightMount( false ) + 3)
+				else if ( block.m_Bottom.m_z > pt.m_z + m_zClimbHeight + iHeightMount + 3)
 					return pt.m_z;
 			}
 		}
@@ -613,7 +614,7 @@ char CChar::GetFixZ( CPointMap pt, dword dwBlockFlags)
 		if ( block.m_Bottom.m_z >= UO_SIZE_Z )
 			return pt.m_z;
 	}
-	if (( GetHeightMount( false ) + pt.m_z >= block.m_Top.m_z ) && ( g_Cfg.m_iMountHeight ) && ( !IsPriv( PRIV_GM ) ) && ( !IsPriv( PRIV_ALLMOVE ) ))
+	if (( iHeightMount + pt.m_z >= block.m_Top.m_z ) && ( g_Cfg.m_iMountHeight ) && ( !IsPriv( PRIV_GM ) ) && ( !IsPriv( PRIV_ALLMOVE ) ))
 		return pt.m_z;
 	return block.m_Bottom.m_z;
 }
@@ -2434,10 +2435,10 @@ do_default:
 				pszKey += 7;
 				GETNONWHITESPACE(pszKey);
 
-				CPointBase	ptDst	= GetTopPoint();
-				DIR_TYPE	dir = GetDirStr(pszKey);
+				CPointMap	ptDst = GetTopPoint();
+				DIR_TYPE	dir   = GetDirStr(pszKey);
 				ptDst.Move( dir );
-				dword		dwBlockFlags	= 0;
+				dword		dwBlockFlags = 0;
 				CRegion	*	pArea;
 				pArea = CheckValidMove( ptDst, &dwBlockFlags, dir, nullptr );
 				sVal.FormatHex( pArea ? pArea->GetResourceID() : 0 );
@@ -2458,7 +2459,7 @@ do_default:
 				pszKey += 4;
 				GETNONWHITESPACE(pszKey);
 
-				CPointBase ptDst = GetTopPoint();
+                CPointMap ptDst = GetTopPoint();
 				ptDst.Move( GetDirStr( pszKey ) );
 				CRegion * pArea = ptDst.GetRegion( REGION_TYPE_MULTI | REGION_TYPE_AREA );
 				if ( !pArea )
@@ -2512,8 +2513,7 @@ do_default:
 			return true;
 		case CHC_ISSTUCK:
 			{
-				CPointBase	pt = GetTopPoint();
-
+				CPointMap pt = GetTopPoint();
 				if ( OnFreezeCheck() )
 					sVal.FormatVal(1);
 				else if ( CanMoveWalkTo(pt, true, true, DIR_N) || CanMoveWalkTo(pt, true, true, DIR_E) || CanMoveWalkTo(pt, true, true, DIR_S) || CanMoveWalkTo(pt, true, true, DIR_W) )
@@ -3955,7 +3955,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			}
 			else
 			{
-				CPointBase pt;
+                CPointMap pt;
 				pt.InitPoint();
 				pt.Read(s.GetArgStr());
 				if (pt.IsValidPoint())
