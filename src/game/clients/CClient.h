@@ -221,7 +221,7 @@ public:
 		// CLIMODE_TARG_UNEXTRACT
 		struct
 		{
-			CPointBase m_ptFirst; // Multi stage targetting.
+			CPointMap m_ptFirst; // Multi stage targetting.
 			int m_Code;
 			int m_id;
 		} m_tmTile;

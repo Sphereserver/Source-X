@@ -170,7 +170,7 @@ size_t CCMultiMovable::ListObjs(CObjBase ** ppObjList)
     return iCount;
 }
 
-bool CCMultiMovable::MoveDelta(CPointBase pdelta)
+bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta)
 {
     ADDTOCALLSTACK("CCMultiMovable::MoveDelta");
     // Move the ship one space in some direction.
@@ -180,20 +180,20 @@ bool CCMultiMovable::MoveDelta(CPointBase pdelta)
     CItemMulti *pMulti = static_cast<CItemMulti*>(pItemThis);
     ASSERT(pMulti->GetRegion()->m_iLinkedSectors);
 
-    int znew = pItemThis->GetTopZ() + pdelta.m_z;
-    if (pdelta.m_z > 0)
+    int znew = pItemThis->GetTopZ() + ptDelta.m_z;
+    if (ptDelta.m_z > 0)
     {
         if (znew >= (UO_SIZE_Z - PLAYER_HEIGHT) - 1)
             return false;
     }
-    else if (pdelta.m_z < 0)
+    else if (ptDelta.m_z < 0)
     {
         if (znew <= (UO_SIZE_MIN_Z + 3))
             return false;
     }
-    CPointBase ptTemp = pItemThis->GetTopPoint();
+    CPointMap ptTemp = pItemThis->GetTopPoint();
     CRegionWorld *pRegionOld = dynamic_cast<CRegionWorld*>(ptTemp.GetRegion(REGION_TYPE_AREA));
-    ptTemp += pdelta;
+    ptTemp += ptDelta;
     CRegionWorld *pRegionNew = dynamic_cast<CRegionWorld*>(ptTemp.GetRegion(REGION_TYPE_AREA));
     if (!MoveToRegion(pRegionOld, pRegionNew))
     {
@@ -210,7 +210,7 @@ bool CCMultiMovable::MoveDelta(CPointBase pdelta)
         if (!pObj)
             continue;
         CPointMap pt = pObj->GetTopPoint();
-        pt += pdelta;
+        pt += ptDelta;
 
         if (!pt.IsValidPoint())  // boat goes out of bounds !
         {
@@ -234,7 +234,7 @@ bool CCMultiMovable::MoveDelta(CPointBase pdelta)
             if (!pObj) continue; //no object anymore? skip!
             CPointMap pt = pObj->GetTopPoint();
             CPointMap ptOld(pt);
-            ptOld -= pdelta;
+            ptOld -= ptDelta;
 
             //Remove objects that just moved out of sight
             if ((tMe->GetTopPoint().GetDistSight(pt) >= tViewDist) && (tMe->GetTopPoint().GetDistSight(ptOld) < tViewDist))

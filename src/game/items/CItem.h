@@ -113,7 +113,7 @@ public:
 		{
 			dword m_more1;
 			dword m_more2;
-			CPointBase m_morep;
+            CPointBase m_morep;
 		} m_itNormal;
 
 		// IT_CONTAINER
@@ -144,7 +144,7 @@ public:
 		{
 			dword m_Check_Amount;		// more1=Current amount of gold in account..
 			dword m_Check_Restock;		// more2= amount to restock the bank account to
-			CPointBase m_pntOpen;		// morep=point we are standing on when opened bank box.
+            CPointMap m_pntOpen;		// morep=point we are standing on when opened bank box.
 		} m_itEqBankBox;
 
 		// IT_EQ_VENDOR_BOX
@@ -152,7 +152,7 @@ public:
 		{
 			dword m_junk1;
 			dword m_junk2;
-			CPointBase m_pntOpen;		// morep=point we are standing on when opened vendor box.
+            CPointMap m_pntOpen;		// morep=point we are standing on when opened vendor box.
 		} m_itEqVendorBox;
 
 		// IT_GAME_BOARD
@@ -393,7 +393,7 @@ public:
 			word m_Action;		// more1l = NPC_MEM_ACT_TYPE What sort of action is this memory about ? (1=training, 2=hire, etc)
 			word m_Skill;		// more1h = SKILL_TYPE = training a skill ?
 			dword m_junk2;		// more2 = When did the fight start or action take place ? (Now Placed inside TIMESTAMP for int64 support)
-			CPointBase m_pt;	// morep = Location the memory occured.
+            CPointMap m_pt;	    // morep = Location the memory occured.
 								// m_uidLink = what is this memory linked to. (must be valid)
 		} m_itEqMemory;
 
@@ -582,6 +582,21 @@ public:
 	int IsWeird() const;
 	char GetFixZ(CPointMap pt, dword dwBlockFlags = 0 );
 	byte GetSpeed() const;
+
+    /**
+    * @fn  byte GetRangeL() const;
+    * @brief   Returns the RangeLow.
+    * @return  Value.
+    */
+    byte GetRangeL() const;
+
+    /**
+    * @fn  byte GetRangeH() const;
+    * @brief   Returns the RangeHigh.
+    * @return  Value.
+    */
+    byte GetRangeH() const;
+
 	void SetAttr(uint64 iAttr)
 	{
 		m_Attr |= iAttr;

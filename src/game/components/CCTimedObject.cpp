@@ -26,6 +26,15 @@ CCTimedObject::~CCTimedObject()
     //}
 }
 
+void CCTimedObject::Delete()
+{
+    ADDTOCALLSTACK("CCTimedObject::Delete");
+    //if (_timeout > 0)
+    //{
+        g_World.DelTimedObject(this);
+    //}
+}
+
 void CCTimedObject::GoAwake()
 {
     /*

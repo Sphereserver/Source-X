@@ -2984,7 +2984,7 @@ void CChar::Flip()
 // RETURN:
 //  ptDst.m_z = the new z
 //  nullptr = failed to walk here.
-CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fCheckOnly, DIR_TYPE dir, bool fPathFinding )
+CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheckOnly, DIR_TYPE dir, bool fPathFinding )
 {
 	ADDTOCALLSTACK("CChar::CanMoveWalkTo");
 
@@ -3524,7 +3524,7 @@ bool CChar::MoveToRegionReTest( dword dwType )
 // This could be us just taking a step or being teleported.
 // Low level: DOES NOT UPDATE DISPLAYS or container flags. (may be offline)
 // This does not check for gravity.
-bool CChar::MoveToChar(const CPointMap& pt, bool fForceFix)
+bool CChar::MoveToChar(const CPointMap& pt, bool fForceFix, bool fAllowReject)
 {
 	ADDTOCALLSTACK("CChar::MoveToChar");
 
@@ -3547,29 +3547,25 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fForceFix)
 
 	// Did we step into a new region ?
 	CRegionWorld * pAreaNew = dynamic_cast<CRegionWorld *>(pt.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA));
-	if ( !MoveToRegion(pAreaNew, true) )
+	if ( !MoveToRegion(pAreaNew, fAllowReject) )
 		return false;
 
 	CRegion * pRoomNew = pt.GetRegion(REGION_TYPE_ROOM);
-	if ( !MoveToRoom(pRoomNew, true) )
+	if ( !MoveToRoom(pRoomNew, fAllowReject) )
 		return false;
 
 	CPointMap ptOld = GetUnkPoint();
-	bool fSectorChange = pt.GetSector()->MoveCharToSector(this);
     SetTopPoint(pt);
-    if (m_pNPC && IsSleeping())
-    {
-        GoAwake();
-    }
+    bool fSectorChanged = pt.GetSector()->MoveCharToSector(this);
 
 	if ( !m_fClimbUpdated || fForceFix )
 		FixClimbHeight();
 
-	if ( fSectorChange && !g_Serv.IsLoading() )
+	if ( fSectorChanged && !g_Serv.IsLoading() )
 	{
 		if ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) )
 		{
-			CScriptTriggerArgs	Args(ptOld.m_x, ptOld.m_y, ((uchar)ptOld.m_z << 16) | ptOld.m_map);
+			CScriptTriggerArgs Args(ptOld.m_x, ptOld.m_y, ((uchar)ptOld.m_z << 16) | ptOld.m_map);
 			OnTrigger(CTRIG_EnvironChange, this, &Args);
 		}
 	}

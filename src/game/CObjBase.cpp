@@ -100,7 +100,7 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 		// Find a free UID slot for this.
 		SetUID(UID_CLEAR, fItem);
 		ASSERT(IsValidUID());
-		SetContainerFlags(UID_O_DISCONNECT);	// it is no place for now
+		SetUIDContainerFlags(UID_O_DISCONNECT);	// it is no place for now
 	}
 
 	// Put in the idle list by default. (til placed in the world)
@@ -115,7 +115,7 @@ CObjBase::~CObjBase()
         //pEntity->UnsubscribeComponent(GetSpawn());    // Avoiding recursive calls from CCSpawn::DelObj when forcing the pChar/pItem to Delete();
         GetSpawn()->DelObj(GetUID());  // Then I should be removed from it's list.
     }
-    g_World.m_ObjStatusUpdates.RemovePtr(this);
+    g_World.m_ObjStatusUpdates.erase(this);
     g_World.m_TimedFunctions.Erase( GetUID() );
 
 	FreePropertyList();
@@ -320,7 +320,7 @@ bool CObjBase::SetNamePool( lpctstr pszName )
 			return false;
 	}
 
-	UpdatePropertyFlag(AUTOTOOLTIP_FLAG_NAME);
+	UpdatePropertyFlag();
 	return true;
 }
 
@@ -580,7 +580,7 @@ bool CObjBase::MoveNear(CPointMap pt, ushort iSteps )
 	// Move to nearby this other object.
 	// Actually move it within +/- iSteps
 
-	CPointBase ptOld = pt;
+	CPointMap ptOld = pt;
 	for ( uint i = 0; i < iSteps; ++i )
 	{
 		pt = ptOld;
@@ -605,13 +605,7 @@ bool CObjBase::MoveNear(CPointMap pt, ushort iSteps )
 			return false;
 	}
 
-	if ( MoveTo(pt) )
-	{
-		if ( IsItem() )
-			Update();
-		return true;
-	}
-	return false;
+	return MoveTo(pt);
 }
 
 void CObjBase::UpdateObjMessage( lpctstr pTextThem, lpctstr pTextYou, CClient * pClientExclude, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, bool bUnicode ) const
@@ -1275,7 +1269,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				pItem = dynamic_cast<CItem*> (uid.ObjFind());
 				if (pItem == nullptr)
 				{
-					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetID(RES_ITEMDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pszArg))).GetResIndex());
+					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetID(RES_ITEMDEF, pszArg).GetResIndex());
 					const CItemBase * pItemDef = CItemBase::FindItemBase( id );
 					if ( pItemDef != nullptr )
 					{
@@ -1315,7 +1309,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				pItem = dynamic_cast<CItem*> (uid.ObjFind());
 				if ( pItem == nullptr )
 				{
-					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetID(RES_ITEMDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pszArg))).GetResIndex());
+					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetID(RES_ITEMDEF, pszArg).GetResIndex());
 					const CItemBase * pItemDef = CItemBase::FindItemBase( id );
 					if (pItemDef != nullptr)
 					{
@@ -1802,7 +1796,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 	}
     if (fResendTooltip)
     {
-        ResendTooltip();
+        UpdatePropertyFlag();
     }
 	return true;
 	EXC_CATCH;
@@ -2113,6 +2107,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				CPointMap pt = GetTopPoint();
 				if ( ! GetDeltaStr( pt, s.GetArgStr()))
 					return false;
+                RemoveFromView();
 				MoveTo( pt );
 				Update();
 			}
@@ -2120,7 +2115,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_MOVENEAR:
 			{
 				EXC_SET_BLOCK("MOVENEAR");
-				CObjBase *	pObjNear;
+				CObjBase *pObjNear;
 				int64 piCmd[4];
 
 				int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd) );
@@ -2135,6 +2130,8 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				pObjNear = uid.ObjFind();
 				if ( !pObjNear )
 					return false;
+                if ( piCmd[2] )
+                    RemoveFromView();
 				MoveNearObj( pObjNear, (word)(piCmd[1]) );
 				if ( piCmd[2] )
 					Update();
@@ -2801,17 +2798,17 @@ dword CObjBase::UpdatePropertyRevision(dword hash)
 	return m_PropertyRevision;
 }
 
-void CObjBase::UpdatePropertyFlag(int mask)
+void CObjBase::UpdatePropertyFlag()
 {
 	ADDTOCALLSTACK("CObjBase::UpdatePropertyFlag");
-	if ( g_Serv.IsLoading() || ((g_Cfg.m_iAutoTooltipResend & mask) == 0) )
+	if ( g_Serv.IsLoading() )
 		return;
 
 	m_fStatusUpdate |= SU_UPDATE_TOOLTIP;
 
     // Items equipped, inside containers or with timer expired doesn't receive ticks and need to be added to a list of items to be processed separately
-    if ( (!IsTopLevel() || IsTimerExpired()) && !g_World.m_ObjStatusUpdates.ContainsPtr(this) )
-        g_World.m_ObjStatusUpdates.emplace_back(this);
+    if ( !IsTopLevel() || IsTimerExpired() )
+        g_World.m_ObjStatusUpdates.emplace(this);
 }
 
 dword CObjBase::GetPropertyHash() const
@@ -2838,7 +2835,7 @@ void CObjBase::OnTickStatusUpdate()
 
 void CObjBase::ResendTooltip(bool fSendFull, bool fUseCache)
 {
-	ADDTOCALLSTACK("CObjBase::ResendTooltip");
+	ADDTOCALLSTACK("CObjBase::UpdatePropertyFlag");
 
 	// Send tooltip packet to all nearby clients
 	m_fStatusUpdate &= ~SU_UPDATE_TOOLTIP;
@@ -2905,16 +2902,6 @@ CCFaction * CObjBase::GetFaction()
     return static_cast<CCFaction*>(GetComponent(COMP_FACTION));
 }
 
-byte CObjBase::RangeL() const
-{
-	return (byte)(GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_RANGE, true) & 0xff);
-}
-
-byte CObjBase::RangeH() const
-{
-	return (byte)((GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_RANGE, true) >> 8) & 0xff);
-}
-
 int64 CObjBase::GetTimeStamp() const
 {
 	return m_timestamp;
@@ -2928,12 +2915,10 @@ void CObjBase::SetTimeStamp( int64 t_time)
 CSString CObjBase::GetPropStr( const CComponentProps* pCompProps, int iPropIndex, bool fZero, const CComponentProps* pBaseCompProps ) const
 {
     CSString sProp;
-    if (pCompProps->GetPropertyStrPtr(iPropIndex, &sProp, fZero))
+    if (pCompProps && pCompProps->GetPropertyStrPtr(iPropIndex, &sProp, fZero))
         return sProp;
-    
-    if (!pBaseCompProps)
+    if (pBaseCompProps && pBaseCompProps->GetPropertyStrPtr(iPropIndex, &sProp, fZero))
         return sProp;
-    pBaseCompProps->GetPropertyStrPtr(iPropIndex, &sProp, fZero);
     return sProp;
 }
 
@@ -2957,12 +2942,10 @@ CSString CObjBase::GetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, bo
 CComponentProps::PropertyValNum_t CObjBase::GetPropNum( const CComponentProps* pCompProps, int iPropIndex, const CComponentProps* pBaseCompProps ) const
 {
     CComponentProps::PropertyValNum_t iProp = 0;
-    if (pCompProps->GetPropertyNumPtr(iPropIndex, &iProp))
+    if (pCompProps && pCompProps->GetPropertyNumPtr(iPropIndex, &iProp))
         return iProp;
-
-    if (!pBaseCompProps)
+    if (pBaseCompProps && pBaseCompProps->GetPropertyNumPtr(iPropIndex, &iProp))
         return iProp;
-    pBaseCompProps->GetPropertyNumPtr(iPropIndex, &iProp);
     return iProp;
 }
 
@@ -2985,6 +2968,7 @@ CComponentProps::PropertyValNum_t CObjBase::GetPropNum( COMPPROPS_TYPE iCompProp
 
 void CObjBase::SetPropStr( CComponentProps* pCompProps, int iPropIndex, lpctstr ptcVal, bool fZero )
 {
+    ASSERT(pCompProps);
     pCompProps->SetPropertyStr(iPropIndex, ptcVal, this, fZero);
 }
 
@@ -3001,6 +2985,7 @@ void CObjBase::SetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, lpctst
 
 void CObjBase::SetPropNum( CComponentProps* pCompProps, int iPropIndex, CComponentProps::PropertyValNum_t iVal )
 {
+    ASSERT(pCompProps);
     pCompProps->SetPropertyNum(iPropIndex, iVal, this);
 }
 
@@ -3017,23 +3002,14 @@ void CObjBase::SetPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CCompo
 
 void CObjBase::ModPropNum( CComponentProps* pCompProps, int iPropIndex, CComponentProps::PropertyValNum_t iMod, const CComponentProps* pBaseCompProps )
 {
+    ASSERT(pCompProps);
     CComponentProps::PropertyValNum_t iVal = 0;
-    bool fPropExists = false;
-    if (pCompProps)
-    {
-        pCompProps->GetPropertyNumPtr(iPropIndex, &iVal);
-        return;
-    }
+    bool fPropExists = pCompProps->GetPropertyNumPtr(iPropIndex, &iVal);
     if (!fPropExists && pBaseCompProps)
     {
-        pCompProps->SetPropertyNum(iPropIndex, iMod + iVal, this);
-        return;
+        pBaseCompProps->GetPropertyNumPtr(iPropIndex, &iVal);
     }
-    if (!pCompProps && !pBaseCompProps)
-    {
-        //g_Log.EventDebug("CEntityProps: ModPropNum on nullptr CCProps and base CCProps. iPropIndex %d.\n", iPropIndex);
-        ASSERT(0); // Should never happen!
-    }
+    pCompProps->SetPropertyNum(iPropIndex, iMod + iVal, this);
 }
 
 void CObjBase::ModPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CComponentProps::PropertyValNum_t iMod, bool fBaseDef )
@@ -3203,6 +3179,10 @@ void CObjBase::Delete(bool fForce)
 	ADDTOCALLSTACK("CObjBase::Delete");
 	DeletePrepare();
     CEntity::Delete(fForce);
+    CCTimedObject::Delete();
+    g_World.m_ObjStatusUpdates.erase(this);
+    g_World.m_TimedFunctions.Erase( GetUID() );
+
     g_World.m_ObjDelete.InsertHead(this);
 }
 

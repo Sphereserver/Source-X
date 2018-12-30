@@ -776,7 +776,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	if ( pItemArmor->m_itArmor.m_Hits_Cur <= 0 )
 		pItemArmor->Delete();
 	else
-		pItemArmor->UpdatePropertyFlag(AUTOTOOLTIP_FLAG_DURABILITY);
+		pItemArmor->UpdatePropertyFlag();
 
 	return fSuccess;
 }

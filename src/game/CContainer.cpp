@@ -91,7 +91,7 @@ void CContainer::OnRemoveObj( CSObjListRec *pObRec )	// Override this = called w
 	CSObjList::OnRemoveObj(pItem);
 	ASSERT(pItem->GetParent() == nullptr);
 
-	pItem->SetContainerFlags(UID_O_DISCONNECT);		// It is no place for the moment.
+	pItem->SetUIDContainerFlags(UID_O_DISCONNECT);		// It is no place for the moment.
 	OnWeightChange(-pItem->GetWeight());
 }
 
@@ -507,7 +507,7 @@ bool CContainer::r_GetRefContainer( lpctstr &pszKey, CScriptObj *&pRef )
 		{
 			pszKey += 2;
 			SKIP_SEPARATORS(pszKey);
-			pRef = ContentFind(g_Cfg.ResourceGetID(RES_ITEMDEF, pszKey));
+			pRef = ContentFind(g_Cfg.ResourceGetIDParse(RES_ITEMDEF, pszKey));
 			SKIP_SEPARATORS(pszKey);
 			return true;
 		}
@@ -523,7 +523,7 @@ bool CContainer::r_GetRefContainer( lpctstr &pszKey, CScriptObj *&pRef )
 		{
 			pszKey += 4;
 			SKIP_SEPARATORS(pszKey);
-			pRef = ContentFind(g_Cfg.ResourceGetID(RES_TYPEDEF, pszKey));
+			pRef = ContentFind(g_Cfg.ResourceGetIDParse(RES_TYPEDEF, pszKey));
 			SKIP_SEPARATORS(pszKey);
 			return true;
 		}

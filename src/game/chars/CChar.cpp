@@ -260,6 +260,7 @@ CChar::CChar( CREID_TYPE baseID ) : CCTimedObject(PROFILE_CHARS), CObjBase( fals
     m_defense = 0;
 	m_height = 0;
 	m_ModMaxWeight = 0;
+    _iRange = 0;
 
 	m_StepStealth = 0;
 	m_iVisualRange = UO_MAP_VIEW_SIZE_DEFAULT;
@@ -461,6 +462,8 @@ void CChar::Delete(bool bforce)
 	if (( NotifyDelete() == false ) && !bforce)
 		return;
 
+    g_World.DelCharTicking(this);
+
 	// Character has been deleted
 	if ( IsClient() )
 	{
@@ -565,7 +568,7 @@ int CChar::IsWeird() const
 }
 
 // Get the Z we should be at
-char CChar::GetFixZ( CPointMap pt, dword dwBlockFlags)
+char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
 {
 	if ( !dwBlockFlags )
 		dwBlockFlags = GetMoveBlockFlags();
@@ -573,14 +576,15 @@ char CChar::GetFixZ( CPointMap pt, dword dwBlockFlags)
 	if ( dwCan & CAN_C_WALK )
 		dwBlockFlags |= CAN_I_CLIMB; // If we can walk than we can climb. Ignore CAN_C_FLY at all here
 
-	CServerMapBlockState block( dwBlockFlags, pt.m_z, pt.m_z + m_zClimbHeight + GetHeightMount( false ), pt.m_z + m_zClimbHeight + 2, GetHeightMount( false ) );
+    height_t iHeightMount = GetHeightMount( false );
+	CServerMapBlockState block( dwBlockFlags, pt.m_z, pt.m_z + m_zClimbHeight + iHeightMount, pt.m_z + m_zClimbHeight + 2, iHeightMount );
 	g_World.GetFixPoint( pt, block );
 
 	dwBlockFlags = block.m_Bottom.m_dwBlockFlags;
 	if ( block.m_Top.m_dwBlockFlags )
 	{
 		dwBlockFlags |= CAN_I_ROOF;	// we are covered by something.
-		if ( block.m_Top.m_z < pt.m_z + (m_zClimbHeight + (block.m_Top.m_dwTile > TERRAIN_QTY ? GetHeightMount( false ) : GetHeightMount( false )/2 )) )
+		if ( block.m_Top.m_z < pt.m_z + (m_zClimbHeight + (block.m_Top.m_dwTile > TERRAIN_QTY ? iHeightMount : iHeightMount/2 )) )
 			dwBlockFlags |= CAN_I_BLOCK; // we can't fit under this!
 	}
 	if (( dwCan != 0xFFFFFFFF ) && ( dwBlockFlags != 0x0 ))
@@ -600,7 +604,7 @@ char CChar::GetFixZ( CPointMap pt, dword dwBlockFlags)
 					if ( block.m_Bottom.m_z > pt.m_z + m_zClimbHeight + 2) // Too high to climb.
 						return pt.m_z;
 				}
-				else if ( block.m_Bottom.m_z > pt.m_z + m_zClimbHeight + GetHeightMount( false ) + 3)
+				else if ( block.m_Bottom.m_z > pt.m_z + m_zClimbHeight + iHeightMount + 3)
 					return pt.m_z;
 			}
 		}
@@ -610,7 +614,7 @@ char CChar::GetFixZ( CPointMap pt, dword dwBlockFlags)
 		if ( block.m_Bottom.m_z >= UO_SIZE_Z )
 			return pt.m_z;
 	}
-	if (( GetHeightMount( false ) + pt.m_z >= block.m_Top.m_z ) && ( g_Cfg.m_iMountHeight ) && ( !IsPriv( PRIV_GM ) ) && ( !IsPriv( PRIV_ALLMOVE ) ))
+	if (( iHeightMount + pt.m_z >= block.m_Top.m_z ) && ( g_Cfg.m_iMountHeight ) && ( !IsPriv( PRIV_GM ) ) && ( !IsPriv( PRIV_ALLMOVE ) ))
 		return pt.m_z;
 	return block.m_Bottom.m_z;
 }
@@ -903,9 +907,6 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	m_fonttype = pChar->m_fonttype;
 	m_SpeechHueOverride = pChar->m_SpeechHueOverride;
 
-	m_height = pChar->m_height;
-	m_ModMaxWeight = pChar->m_ModMaxWeight;
-
 	m_StepStealth = pChar->m_StepStealth;
 	m_iVisualRange = pChar->m_iVisualRange;
 	m_virtualGold = pChar->m_virtualGold;
@@ -913,6 +914,10 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	m_exp = pChar->m_exp;
 	m_level = pChar->m_level;
 	m_defense = pChar->m_defense;
+    m_height = pChar->m_height;
+    m_ModMaxWeight = pChar->m_ModMaxWeight;
+    _iRange = pChar->_iRange;
+
 	m_atUnk.m_Arg1 = pChar->m_atUnk.m_Arg1;
 	m_atUnk.m_Arg2 = pChar->m_atUnk.m_Arg2;
 	m_atUnk.m_Arg3 = pChar->m_atUnk.m_Arg3;
@@ -1212,37 +1217,39 @@ bool CChar::SetName( lpctstr pszName )
 
 height_t CChar::GetHeightMount( bool fEyeSubstract ) const
 {
-	ADDTOCALLSTACK("CChar::GetHeightMount");
+	ADDTOCALLSTACK_INTENSIVE("CChar::GetHeightMount");
 	height_t height = GetHeight();
 	if ( IsStatFlag(STATF_ONHORSE|STATF_HOVERING) )
 		height += 4;
 	if ( fEyeSubstract )
 		--height;
-	return ( height ); //if mounted +4, if not -1 (let's say it's eyes' height)
+	return height; //if mounted +4, if not -1 (let's say it's eyes' height)
 }
 
 height_t CChar::GetHeight() const
 {
-	ADDTOCALLSTACK("CChar::GetHeight");
+	ADDTOCALLSTACK_INTENSIVE("CChar::GetHeight");
 	if ( m_height ) //set by a dynamic variable (On=@Create  Height=10)
 		return m_height;
 
 	height_t tmpHeight;
 
-	CCharBase * pCharDef = Char_GetDef();
+	const CCharBase * pCharDef = Char_GetDef();
 	tmpHeight = pCharDef->GetHeight();
 	if ( tmpHeight ) //set by a chardef variable ([CHARDEF 10]  Height=10)
 		return tmpHeight;
 
+    // This is SLOW (since this method is called very frequently)! Move those defs value to CharDef!
 	char * heightDef = Str_GetTemp();
+    uint uiDispID = (uint)pCharDef->GetDispID();
 
-	sprintf(heightDef, "height_0%x", (uint)(pCharDef->GetDispID()));
-	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
+	sprintf(heightDef, "height_0%x", uiDispID);
+	tmpHeight = (height_t)(g_Exp.m_VarDefs.GetKeyNum(heightDef));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_0a)
 		return tmpHeight;
 
-	sprintf(heightDef, "height_%u", (uint)(pCharDef->GetDispID()));
-	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
+	sprintf(heightDef, "height_%u", uiDispID);
+	tmpHeight = (height_t)(g_Exp.m_VarDefs.GetKeyNum(heightDef));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_10)
 		return tmpHeight;
 
@@ -1947,8 +1954,7 @@ bool CChar::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 
     // Checking Props CComponents first (first check CChar props, if not found then check CCharBase)
     EXC_SET_BLOCK("EntityProp");
-    CCharBase* pCharBase = Char_GetDef();
-    if (CEntityProps::r_WritePropVal(pszKey, sVal) || pCharBase->CEntityProps::r_WritePropVal(pszKey, sVal))
+    if (CEntityProps::r_WritePropVal(pszKey, sVal, this, Base_GetDef()))
     {
         return true;
     }
@@ -2429,10 +2435,10 @@ do_default:
 				pszKey += 7;
 				GETNONWHITESPACE(pszKey);
 
-				CPointBase	ptDst	= GetTopPoint();
-				DIR_TYPE	dir = GetDirStr(pszKey);
+				CPointMap	ptDst = GetTopPoint();
+				DIR_TYPE	dir   = GetDirStr(pszKey);
 				ptDst.Move( dir );
-				dword		dwBlockFlags	= 0;
+				dword		dwBlockFlags = 0;
 				CRegion	*	pArea;
 				pArea = CheckValidMove( ptDst, &dwBlockFlags, dir, nullptr );
 				sVal.FormatHex( pArea ? pArea->GetResourceID() : 0 );
@@ -2453,7 +2459,7 @@ do_default:
 				pszKey += 4;
 				GETNONWHITESPACE(pszKey);
 
-				CPointBase	ptDst	= GetTopPoint();
+                CPointMap ptDst = GetTopPoint();
 				ptDst.Move( GetDirStr( pszKey ) );
 				CRegion * pArea = ptDst.GetRegion( REGION_TYPE_MULTI | REGION_TYPE_AREA );
 				if ( !pArea )
@@ -2507,8 +2513,7 @@ do_default:
 			return true;
 		case CHC_ISSTUCK:
 			{
-				CPointBase	pt = GetTopPoint();
-
+				CPointMap pt = GetTopPoint();
 				if ( OnFreezeCheck() )
 					sVal.FormatVal(1);
 				else if ( CanMoveWalkTo(pt, true, true, DIR_N) || CanMoveWalkTo(pt, true, true, DIR_E) || CanMoveWalkTo(pt, true, true, DIR_S) || CanMoveWalkTo(pt, true, true, DIR_W) )
@@ -2859,6 +2864,21 @@ do_default:
 			break;
 		case CHC_P:
 			goto do_default;
+        case CHC_RANGE:
+        {
+            const int iRangeH = GetRangeH(), iRangeL = GetRangeL();
+            if ( iRangeH == 0 )
+                sVal.Format( "%d", iRangeL );
+            else
+                sVal.Format( "%d,%d", iRangeH, iRangeL );
+            break;
+        }
+        case CHC_RANGEH:
+            sVal.FormatVal(GetRangeH());
+            break;
+        case CHC_RANGEL:
+            sVal.FormatVal(GetRangeL());
+            break;
 		case CHC_STONE:
 			sVal.FormatVal( IsStatFlag( STATF_STONE ));
 			break;
@@ -2913,8 +2933,7 @@ bool CChar::r_LoadVal( CScript & s )
 
     // Checking Props CComponents first (first check CChar props, if not found then check CCharBase)
     EXC_SET_BLOCK("EntityProps");
-    CCharBase* pItemBase = Char_GetDef();
-    if (CEntityProps::r_LoadPropVal(s, this) || pItemBase->CEntityProps::r_LoadPropVal(s, this))
+    if (CEntityProps::r_LoadPropVal(s, this, Base_GetDef()))
     {
         return true;
     }
@@ -3402,6 +3421,28 @@ bool CChar::r_LoadVal( CScript & s )
                     return false;
 			}
 			break;
+        case CHC_RANGE:
+        {
+            int64 piVal[2];
+            tchar *ptcTmp = Str_GetTemp();
+            strncpy(ptcTmp, s.GetArgStr(), STR_TEMPLENGTH);
+            int iQty = Str_ParseCmds( ptcTmp, piVal, CountOf(piVal));
+            int iRange;
+            if ( iQty > 1 )
+            {
+                iRange = (int)((piVal[1] & 0xff) << 8); // highest byte contains the lowest value
+                iRange |= (int)(piVal[0] & 0xff);       // lowest byte contains the highest value
+            }
+            else
+            {
+                iRange = (int)(piVal[0] << 8);
+            }
+            _iRange = iRange;
+            break;
+        }
+        case CHC_RANGEH:
+        case CHC_RANGEL:
+            return false;
 		case CHC_STONE:
 			{
 				bool fSet;
@@ -3914,7 +3955,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			}
 			else
 			{
-				CPointBase pt;
+                CPointMap pt;
 				pt.InitPoint();
 				pt.Read(s.GetArgStr());
 				if (pt.IsValidPoint())

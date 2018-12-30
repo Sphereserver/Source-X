@@ -1266,7 +1266,7 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 	}
 }
 
-char CWorld::GetHeightPoint( const CPointBase & pt, dword & dwBlockFlags, bool fHouseCheck )
+char CWorld::GetHeightPoint( const CPointMap & pt, dword & dwBlockFlags, bool fHouseCheck )
 {
 	ADDTOCALLSTACK_INTENSIVE("CWorld::GetHeightPoint");
 	dword dwCan = dwBlockFlags;
@@ -1455,7 +1455,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 	}
 }
 
-char CWorld::GetHeightPoint2( const CPointBase & pt, dword & dwBlockFlags, bool fHouseCheck ) // Height of player who walked to X/Y/OLDZ
+char CWorld::GetHeightPoint2( const CPointMap & pt, dword & dwBlockFlags, bool fHouseCheck ) // Height of player who walked to X/Y/OLDZ
 {
 	ADDTOCALLSTACK("CWorld::GetHeightPoint2");
 	// Given our coords at pt including pt.m_z

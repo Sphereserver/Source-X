@@ -320,7 +320,7 @@ void CItemContainer::OnWeightChange( int iChange )
 {
 	ADDTOCALLSTACK("CItemContainer::OnWeightChange");
 	CContainer::OnWeightChange(iChange);
-	UpdatePropertyFlag(AUTOTOOLTIP_FLAG_WEIGHT);
+	UpdatePropertyFlag();
 
 	if ( iChange == 0 )
 		return;	// no change
@@ -576,8 +576,8 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 	// if an item needs OnTickStatusUpdate called on the next tick, it needs
 	// to be added to a separate list since it won't receive ticks whilst in
 	// this container
-	if ( pItem->m_fStatusUpdate != 0 && g_World.m_ObjStatusUpdates.ContainsPtr(pItem) == false )
-        g_World.m_ObjStatusUpdates.emplace_back(pItem);
+	if ( pItem->m_fStatusUpdate != 0 )
+        g_World.m_ObjStatusUpdates.emplace(pItem);
 
 	switch ( GetType() )
 	{
@@ -626,7 +626,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 	}
 
 	pItem->Update();
-    UpdatePropertyFlag(AUTOTOOLTIP_FLAG_WEIGHT);
+    UpdatePropertyFlag();
 }
 
 void CItemContainer::ContentAdd( CItem *pItem, bool bForceNoStack )
@@ -701,7 +701,7 @@ void CItemContainer::OnRemoveObj( CSObjListRec *pObRec )	// Override this = call
 			pItemVend->SetPlayerVendorPrice(0);
 	}
 	CContainer::OnRemoveObj(pObRec);
-    UpdatePropertyFlag(AUTOTOOLTIP_FLAG_WEIGHT);
+    UpdatePropertyFlag();
 
 	if ( IsType(IT_KEYRING) )	// key ring.
 		SetKeyRing();

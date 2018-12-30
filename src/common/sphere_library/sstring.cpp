@@ -169,7 +169,7 @@ tchar * Str_TrimWhitespace(tchar * pStr)
 
 // String utilities: String operations
 
-int FindTable(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
+int FindTable(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
 {
     // A non-sorted table.
     for (int i = 0; i < iCount; ++i)
@@ -181,7 +181,7 @@ int FindTable(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemS
     return -1;
 }
 
-int FindTableSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
+int FindTableSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
 {
     // Do a binary search (un-cased) on a sorted table.
     // RETURN: -1 = not found
@@ -205,7 +205,7 @@ int FindTableSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int 
     return -1;
 }
 
-static int Str_CmpHeadI(lpctstr pszFind, lpctstr pszTable)
+static int Str_CmpHeadI(const lpctstr pszFind, lpctstr pszTable)
 {
     tchar ch0 = '_';
     for (int i = 0; ; ++i)
@@ -225,7 +225,7 @@ static int Str_CmpHeadI(lpctstr pszFind, lpctstr pszTable)
     }
 }
 
-int FindTableHead(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
+int FindTableHead(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
 {
     for (int i = 0; i < iCount; ++i)
     {
@@ -237,7 +237,7 @@ int FindTableHead(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iE
     return -1;
 }
 
-int FindTableHeadSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
+int FindTableHeadSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
 {
     // Do a binary search (un-cased) on a sorted table.
     // RETURN: -1 = not found

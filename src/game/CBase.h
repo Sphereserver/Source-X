@@ -268,24 +268,6 @@ public:
 	bool IsValid() const;
 
     /**
-     * @fn  byte RangeL() const;
-     *
-     * @brief   Returns the RangeLow.
-     *
-     * @return  Value.
-     */
-	byte RangeL() const;
-
-    /**
-     * @fn  byte RangeH() const;
-     *
-     * @brief   Returns the RangeHigh.
-     *
-     * @return  Value.
-     */
-	byte RangeH() const;
-
-    /**
      * @fn  height_t GetHeight() const;
      *
      * @brief   Gets the height.

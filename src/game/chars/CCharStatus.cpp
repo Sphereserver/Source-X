@@ -3,6 +3,7 @@
 #include "../../common/CUIDExtra.h"
 #include "../../common/CLog.h"
 #include "../components/CCPropsItemEquippable.h"
+#include "../components/CCPropsItemWeapon.h"
 #include "../../network/network.h"
 #include "../clients/CClient.h"
 #include "../spheresvr.h"
@@ -1240,7 +1241,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
             {
                 IT_TYPE iType = pWeapon->GetType();
                 if ((iType == IT_WEAPON_BOW) || (iType == IT_WEAPON_XBOW))
-                    return (iDist <= pWeapon->RangeL());
+                    return (iDist <= pWeapon->GetRangeH());
             }
         }
 
@@ -1675,7 +1676,7 @@ bool CChar::IsMountCapable() const
 	return false;
 }
 
-bool CChar::IsVerticalSpace( CPointMap ptDest, bool fForceMount )
+bool CChar::IsVerticalSpace( const CPointMap& ptDest, bool fForceMount ) const
 {
 	ADDTOCALLSTACK("CChar::IsVerticalSpace");
 	if ( IsPriv(PRIV_GM | PRIV_ALLMOVE) || !ptDest.IsValidPoint() )
@@ -1685,15 +1686,16 @@ bool CChar::IsVerticalSpace( CPointMap ptDest, bool fForceMount )
 	if ( dwBlockFlags & CAN_C_WALK )
 		dwBlockFlags |= CAN_I_CLIMB;
 
-	CServerMapBlockState block(dwBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 2, GetHeightMount());
+    const height_t iHeightMount = GetHeightMount();
+	CServerMapBlockState block(dwBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + iHeightMount, ptDest.m_z + m_zClimbHeight + 2, iHeightMount);
 	g_World.GetHeightPoint(ptDest, block, true);
 
-	if ( GetHeightMount() + ptDest.m_z + (fForceMount ? 4 : 0) >= block.m_Top.m_z )		// 4 is the mount height
+	if ( iHeightMount + ptDest.m_z + (fForceMount ? 4 : 0) >= block.m_Top.m_z )		// 4 is the mount height
 		return false;
 	return true;
 }
 
-CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TYPE dir, height_t *pClimbHeight, bool fPathFinding ) const
+CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYPE dir, height_t *pClimbHeight, bool fPathFinding ) const
 {
 	ADDTOCALLSTACK("CChar::CheckValidMove");
 	// Is it ok to move here ? is it blocked ?
@@ -1723,6 +1725,13 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 			return nullptr;
 	}
 
+    if ( !ptDest.IsValidPoint() )
+    {
+        DEBUG_ERR(("Character 0%x on %d,%d,%d wants to move into an invalid location %d,%d,%d.\n",
+            GetUID().GetObjUID(), GetTopPoint().m_x, GetTopPoint().m_y, GetTopPoint().m_z, ptDest.m_x, ptDest.m_y, ptDest.m_z));
+        return nullptr;
+    }
+
 	CRegion *pArea = ptDest.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA|REGION_TYPE_ROOM);
 	if ( !pArea )
 	{
@@ -1745,17 +1754,12 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 			g_pLog->EventWarn("dwBlockFlags (0%x) dwCan(0%x)\n", dwBlockFlags, dwCan);
 	}
 
-	CServerMapBlockState block(dwBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 3, GetHeightMount());
+    const height_t iHeightMount = GetHeightMount();
+	CServerMapBlockState block(dwBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + iHeightMount, ptDest.m_z + m_zClimbHeight + 3, iHeightMount);
 	if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
 		g_pLog->EventWarn("\t\tCServerMapBlockState block( 0%x, %d, %d, %d );ptDest.m_z(%d) m_zClimbHeight(%d).\n",
-					dwBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 2, ptDest.m_z, m_zClimbHeight);
+					dwBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + iHeightMount, ptDest.m_z + m_zClimbHeight + 2, ptDest.m_z, m_zClimbHeight);
 
-	if ( !ptDest.IsValidPoint() )
-	{
-		DEBUG_ERR(("Character 0%x on %d,%d,%d wants to move into an invalid location %d,%d,%d.\n",
-			GetUID().GetObjUID(), GetTopPoint().m_x, GetTopPoint().m_y, GetTopPoint().m_z, ptDest.m_x, ptDest.m_y, ptDest.m_z));
-		return nullptr;
-	}
 	g_World.GetHeightPoint(ptDest, block, true);
 
 	// Pass along my results.
@@ -1767,7 +1771,7 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
 			g_pLog->EventWarn("block.m_Top.m_z (%hhd) > ptDest.m_z (%hhd) + m_zClimbHeight (%hhu) + (block.m_Top.m_dwTile (0x%" PRIx32 ") > TERRAIN_QTY ? PLAYER_HEIGHT : PLAYER_HEIGHT/2 )(%hhu).\n",
 				block.m_Top.m_z, ptDest.m_z, m_zClimbHeight, block.m_Top.m_dwTile, (height_t)(ptDest.m_z - (m_zClimbHeight + (block.m_Top.m_dwTile > TERRAIN_QTY ? PLAYER_HEIGHT : PLAYER_HEIGHT / 2))) );
-		if ( block.m_Top.m_z < block.m_Bottom.m_z + (m_zClimbHeight + (block.m_Top.m_dwTile > TERRAIN_QTY ? GetHeightMount() : GetHeightMount() / 2)) )
+		if ( block.m_Top.m_z < block.m_Bottom.m_z + (m_zClimbHeight + (block.m_Top.m_dwTile > TERRAIN_QTY ? iHeightMount : iHeightMount / 2)) )
 			dwBlockFlags |= CAN_I_BLOCK;		// we can't fit under this!
 	}
 
@@ -1808,7 +1812,7 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 					if ( block.m_Bottom.m_z > ptDest.m_z + m_zClimbHeight + 2 ) // Too high to climb.
 						return nullptr;
 				}
-				else if ( block.m_Bottom.m_z > ptDest.m_z + m_zClimbHeight + GetHeightMount() + 3 )
+				else if ( block.m_Bottom.m_z > ptDest.m_z + m_zClimbHeight + iHeightMount + 3 )
 					return nullptr;
 			}
 		}
@@ -1825,8 +1829,8 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 	}
 
 	if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-		g_pLog->EventWarn("GetHeightMount() %hhu, block.m_Top.m_z %hhd, ptDest.m_z %hhd.\n", GetHeightMount(), block.m_Top.m_z, ptDest.m_z);
-	if ( (GetHeightMount() + ptDest.m_z >= block.m_Top.m_z) && g_Cfg.m_iMountHeight && !IsPriv(PRIV_GM) && !IsPriv(PRIV_ALLMOVE) )
+		g_pLog->EventWarn("GetHeightMount() %hhu, block.m_Top.m_z %hhd, ptDest.m_z %hhd.\n", iHeightMount, block.m_Top.m_z, ptDest.m_z);
+	if ( (iHeightMount + ptDest.m_z >= block.m_Top.m_z) && g_Cfg.m_iMountHeight && !IsPriv(PRIV_GM) && !IsPriv(PRIV_ALLMOVE) )
 	{
 		SysMessageDefault(DEFMSG_MSG_MOUNT_CEILING);
 		return nullptr;
@@ -1844,8 +1848,9 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 void CChar::FixClimbHeight()
 {
 	ADDTOCALLSTACK("CChar::FixClimbHeight");
-	CPointBase pt = GetTopPoint();
-	CServerMapBlockState block(CAN_I_CLIMB, pt.m_z, pt.m_z + GetHeightMount() + 3, pt.m_z + 2, GetHeightMount());
+	CPointMap pt = GetTopPoint();
+    const height_t iHeightMount = GetHeightMount();
+	CServerMapBlockState block(CAN_I_CLIMB, pt.m_z, pt.m_z + iHeightMount + 3, pt.m_z + 2, iHeightMount);
 	g_World.GetHeightPoint(pt, block, true);
 
 	if ( (block.m_Bottom.m_z == pt.m_z) && (block.m_dwBlockFlags & CAN_I_CLIMB) )	// we are standing on stairs

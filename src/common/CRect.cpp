@@ -210,7 +210,7 @@ CPointBase CRect::GetCenter() const
     pt.m_y = (short)((m_top + m_bottom) / 2);
     pt.m_z = 0;
     pt.m_map = (uchar)(m_map);
-    return( pt );
+    return pt;
 }
 
 CPointBase CRect::GetRectCorner( DIR_TYPE dir ) const
@@ -270,20 +270,23 @@ CSector * CRect::GetSector( int i ) const	// ge all the sectors that make up thi
 	// RETURN: nullptr = no more
 
 	// Align new rect.
+    const int iSectorSize = g_MapList.GetSectorSize(m_map);
 	CRectMap rect;
-	rect.m_left = m_left &~ (g_MapList.GetSectorSize(m_map)-1);
-	rect.m_right = ( m_right | (g_MapList.GetSectorSize(m_map)-1)) + 1;
-	rect.m_top = m_top &~ (g_MapList.GetSectorSize(m_map)-1);
-	rect.m_bottom = ( m_bottom | (g_MapList.GetSectorSize(m_map)-1)) + 1;
+	rect.m_left = m_left &~ (iSectorSize-1);
+	rect.m_right = ( m_right | (iSectorSize-1)) + 1;
+	rect.m_top = m_top &~ (iSectorSize-1);
+	rect.m_bottom = ( m_bottom | (iSectorSize-1)) + 1;
 	rect.m_map = m_map;
 	rect.NormalizeRectMax();
 
-	int width = (rect.GetWidth()) / g_MapList.GetSectorSize(m_map);
-	ASSERT(width <= g_MapList.GetSectorCols(m_map));
-	int height = (rect.GetHeight()) / g_MapList.GetSectorSize(m_map);
-	ASSERT(height <= g_MapList.GetSectorRows(m_map));
+    const int iSectorCols = g_MapList.GetSectorCols(m_map);
+    const int iSectorRows = g_MapList.GetSectorRows(m_map);
+	int width = (rect.GetWidth()) / iSectorSize;
+	ASSERT(width <= iSectorCols);
+	int height = (rect.GetHeight()) / iSectorSize;
+	ASSERT(height <= iSectorRows);
 
-	int iBase = (( rect.m_top / g_MapList.GetSectorSize(m_map)) * g_MapList.GetSectorCols(m_map)) + ( rect.m_left / g_MapList.GetSectorSize(m_map) );
+	int iBase = (( rect.m_top / iSectorSize) * iSectorCols) + ( rect.m_left / iSectorSize );
 
 	if ( i >= ( height * width ))
 	{
@@ -292,7 +295,7 @@ CSector * CRect::GetSector( int i ) const	// ge all the sectors that make up thi
 		return nullptr;
 	}
 
-	int indexoffset = (( i / width ) * g_MapList.GetSectorCols(m_map)) + ( i % width );
+	int indexoffset = (( i / width ) * iSectorCols) + ( i % width );
 
 	return g_World.GetSector(m_map, iBase+indexoffset);
 }

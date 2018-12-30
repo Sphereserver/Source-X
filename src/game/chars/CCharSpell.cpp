@@ -428,7 +428,7 @@ bool CChar::Spell_Recall(CItem * pRune, bool fGate)
 		if (!IsPriv(PRIV_GM))
         {
 			-- pRune->m_itRune.m_Strength;
-            pRune->UpdatePropertyFlag(AUTOTOOLTIP_FLAG_DURABILITY);
+            pRune->UpdatePropertyFlag();
         }
 		if (pRune->m_itRune.m_Strength < 10)
 			SysMessageDefault(DEFMSG_SPELL_RECALL_SFADE);
@@ -2288,7 +2288,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 			if ( ! fTest && pItem->m_itWeapon.m_spellcharges != 255 )
 			{
                 -- pItem->m_itWeapon.m_spellcharges;
-				pItem->UpdatePropertyFlag(AUTOTOOLTIP_FLAG_WANDCHARGES);
+				pItem->UpdatePropertyFlag();
 			}
 		}
 		else	// Scroll

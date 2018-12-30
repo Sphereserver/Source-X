@@ -141,23 +141,6 @@ public:
     */
     CCFaction *GetFaction();
 
-    /**
-     * @fn  byte CObjBase::RangeL() const;
-     *
-     * @brief   Returns RangeLow.
-     *
-     * @return  The Value.
-     */
-	byte	RangeL() const;
-
-    /**
-    * @fn  byte CObjBase::RangeH() const;
-    *
-    * @brief   Returns RangeHigh.
-    *
-    * @return  The Value.
-    */
-	byte	RangeH() const;
 
     /**
      * @fn  int64 CObjBase::GetTimeStamp() const;
@@ -821,7 +804,7 @@ public:
 	void ResendOnEquip( bool fAllClients = false );	// Fix for Enhanced Client when equipping items via DClick, these must be removed from where they are and sent again.
 
     /**
-     * @fn  void CObjBase::ResendTooltip( bool bSendFull = false, bool bUseCache = false );
+     * @fn  void CObjBase::ResendTooltip( bool fSendFull = false, bool fUseCache = false );
      *
      * @brief   Resend tooltip.
      *
@@ -1005,13 +988,11 @@ public:
     dword GetPropertyHash() const;
 
     /**
-     * @fn  void CObjBase::UpdatePropertyFlag(int mask);
+     * @fn  void CObjBase::UpdatePropertyFlag();
      *
-     * @brief   Updates the property flag described by mask.
-     *
-     * @param   mask    The mask.
+     * @brief   Updates the property status update flag.
      */
-	void UpdatePropertyFlag(int mask);
+	void UpdatePropertyFlag();
 };
 
 

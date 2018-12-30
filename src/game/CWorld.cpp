@@ -1672,12 +1672,12 @@ void CWorld::DelCharTicking(CChar * pChar)
     if (lookupIt == _mCharTickLookup.end())
         return;
 
-    EXC_SET_BLOCK("LookupRemove");
-    const int64 iOldTimeout = lookupIt->second;
-    _mCharTickLookup.erase(lookupIt);
-
     EXC_SET_BLOCK("RemoveCharTicking");
+    const int64 iOldTimeout = lookupIt->second;
     _RemoveCharTicking(iOldTimeout, pChar);
+
+    EXC_SET_BLOCK("LookupRemove");
+    _mCharTickLookup.erase(lookupIt);
 
     EXC_CATCH;
 }
@@ -2491,10 +2491,8 @@ void CWorld::OnTick()
 
             // loop backwards to avoid possible infinite loop if a status update is triggered
             // as part of the status update (e.g. property changed under tooltip trigger)
-            size_t i = m_ObjStatusUpdates.size();
-            while (i > 0)
+            for (CObjBase * pObj : m_ObjStatusUpdates)
             {
-                CObjBase * pObj = m_ObjStatusUpdates[--i];
                 if (pObj != nullptr)
                     pObj->OnTickStatusUpdate();
             }

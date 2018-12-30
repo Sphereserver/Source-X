@@ -133,6 +133,7 @@ int CPointBase::GetDistZAdj( const CPointBase & pt ) const
 }
 int CPointBase::GetDistBase( const CPointBase & pt ) const // Distance between points
 {
+    ADDTOCALLSTACK("CPointBase::GetDistBase");
 	// Do not consider z or m_map.
 	int dx = abs(m_x - pt.m_x);
 	int dy = abs(m_y - pt.m_y);
@@ -160,6 +161,7 @@ int CPointBase::GetDist( const CPointBase & pt ) const // Distance between point
 
 int CPointBase::GetDistSightBase( const CPointBase & pt ) const // Distance between points based on UO sight
 {
+    ADDTOCALLSTACK("CPointBase::GetDistSightBase");
 	int dx = abs(m_x - pt.m_x);
 	int dy = abs(m_y - pt.m_y);
 	return maximum(dx, dy);

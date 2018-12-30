@@ -407,7 +407,7 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 	// Just read info on a single item carryed by a CChar.
 	// ITEM=#id,#amount,R#chance
 
-	CResourceID rid = g_Cfg.ResourceGetID( RES_ITEMDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pArg)) );
+	CResourceID rid = g_Cfg.ResourceGetID( RES_ITEMDEF, pArg);
 	if ( ! rid.IsValidUID())
 		return nullptr;
 	if ( rid.GetResType() != RES_ITEMDEF && rid.GetResType() != RES_TEMPLATE )
@@ -655,12 +655,22 @@ int CItem::GetVisualRange() const	// virtual
 // Doing this way lets speed be changed for all created weapons from the script itself instead of rewriting one by one.
 byte CItem::GetSpeed() const
 {
-	if (m_TagDefs.GetKey("OVERRIDE.SPEED"))
-		return (byte)(m_TagDefs.GetKeyNum("OVERRIDE.SPEED"));
-	CItemBase * pItemDef = dynamic_cast<CItemBase *>(Base_GetDef());
+    const CVarDefCont *pVarDef = GetKey("OVERRIDE.SPEED", true);
+	if (pVarDef)
+		return (byte)pVarDef->GetValNum();
+	const CItemBase * pItemDef = static_cast<CItemBase *>(Base_GetDef());
 	return pItemDef->GetSpeed();
 }
 
+byte CItem::GetRangeL() const
+{
+    return (byte)GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_RANGEL, true);
+}
+
+byte CItem::GetRangeH() const
+{
+    return (byte)GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_RANGEH, true);
+}
 
 int CItem::IsWeird() const
 {
@@ -1234,14 +1244,14 @@ bool CItem::Stack( CItem * pItem )
 		word amount = destMaxAmount - pItem->GetAmount();
 		pItem->SetAmountUpdate(pItem->GetAmount() + amount);
 		SetAmountUpdate(GetAmount() - amount);
-		ResendTooltip();
-		pItem->ResendTooltip();
+		UpdatePropertyFlag();
+		pItem->UpdatePropertyFlag();
 		return false;
 	}
 	else
 	{
 		SetAmount(pItem->GetAmount() + GetAmount());
-		ResendTooltip();
+		UpdatePropertyFlag();
 		pItem->Delete();
 	}
 	return true;
@@ -1300,7 +1310,7 @@ void CItem::SetTimeout( int64 iMsecs )
 	CItemsList::sm_fNotAMove = true;
 	pSector->MoveItemToSector( this, iMsecs >= 0 );
 	CItemsList::sm_fNotAMove = false;
-	SetContainerFlags(0);
+	SetUIDContainerFlags(0);
 }
 
 void CItem::SetTimeoutS(int64 iSeconds)
@@ -1432,7 +1442,7 @@ bool CItem::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the groun
 
 	SetTopPoint( pt );
 	if ( fForceFix )
-		SetTopZ(GetFixZ(GetTopPoint()));
+		SetTopZ(GetFixZ(pt));
 
 	return true;
 }
@@ -1467,13 +1477,13 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	if ( IsTrigUsed(TRIGGER_DROPON_GROUND) || IsTrigUsed(TRIGGER_ITEMDROPON_GROUND) )
 	{
 		CScriptTriggerArgs args;
-		args.m_iN1 = iDecayTime;		// ARGN1 = Decay time for the dropped item (in ticks)
+		args.m_iN1 = iDecayTime / MSECS_PER_TENTH;  // ARGN1 = Decay time for the dropped item (in tenths of second)
 		ttResult = OnTrigger(ITRIG_DROPON_GROUND, pCharMover, &args);
 
 		if ( IsDeleted() )
 			return false;
 
-		iDecayTime = args.m_iN1;
+		iDecayTime = args.m_iN1 * MSECS_PER_TENTH;
 	}
 
 	if ( ttResult != TRIGRET_RET_TRUE )
@@ -1996,7 +2006,7 @@ void CItem::SetAmount(word amount )
 		pParentCont->OnWeightChange(GetWeight(amount) - GetWeight(oldamount));
 	}
 
-	UpdatePropertyFlag(AUTOTOOLTIP_FLAG_AMOUNT);
+	UpdatePropertyFlag();
 }
 
 word CItem::GetMaxAmount()
@@ -2343,8 +2353,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 
     // Checking Props CComponents first (first check CItem props, if not found then check CItemBase)
     EXC_SET_BLOCK("EntityProp");
-    CItemBase* pItemBase = Item_GetDef();
-    if (CEntityProps::r_WritePropVal(pszKey, sVal) || pItemBase->CEntityProps::r_WritePropVal(pszKey, sVal))
+    if (CEntityProps::r_WritePropVal(pszKey, sVal, this, Base_GetDef()))
     {
         return true;
     }
@@ -2627,8 +2636,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 	
     // Checking Props CComponents first (first check CChar props, if not found then check CCharBase)
     EXC_SET_BLOCK("EntityProp");
-    CItemBase* pItemBase = Item_GetDef();
-    if (CEntityProps::r_LoadPropVal(s, this) || pItemBase->CEntityProps::r_LoadPropVal(s, this))
+    if (CEntityProps::r_LoadPropVal(s, this, Base_GetDef()))
     {
         return true;
     }
@@ -2870,7 +2878,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				return false;
 			}
 			m_itArmor.m_Hits_Cur = m_itArmor.m_Hits_Max = (word)(s.GetArgVal());
-			UpdatePropertyFlag(AUTOTOOLTIP_FLAG_DURABILITY);
+			UpdatePropertyFlag();
 			return true;
 		case IC_ID:
 		{
@@ -3021,8 +3029,8 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 	}
 	if (_iCallingObjTriggerId != ITRIG_CLIENTTOOLTIP)
 	{
-		// Avoid @ClientTooltip calling TRIGGER @Create, and this calling again ResendTooltip() and the @ClientTooltip trigger
-		ResendTooltip();
+		// Avoid @ClientTooltip calling TRIGGER @Create, and this calling again UpdatePropertyFlag() and the @ClientTooltip trigger
+		UpdatePropertyFlag();
 	}
 	return true;
 	EXC_CATCH;
@@ -4077,7 +4085,7 @@ int CItem::AddSpellbookSpell( SPELL_TYPE spell, bool fUpdate )
 		}
 	}
 
-	UpdatePropertyFlag(AUTOTOOLTIP_FLAG_SPELLBOOK);
+	UpdatePropertyFlag();
 	return 0;
 }
 
@@ -4867,7 +4875,7 @@ bool CItem::Use_Light()
 
 	SetID(id);
 	Update();
-	ResendTooltip();
+	UpdatePropertyFlag();
 
 	if ( IsType(IT_LIGHT_LIT) )
 	{
@@ -5145,8 +5153,8 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 				m_itWeapon.m_spellcharges = 0;
 			}
 
-			m_itWeapon.m_spellcharges++;
-			UpdatePropertyFlag(AUTOTOOLTIP_FLAG_WANDCHARGES);
+			++m_itWeapon.m_spellcharges;
+			UpdatePropertyFlag();
 		}
 	}
 
@@ -5412,7 +5420,7 @@ forcedamage:
 		int previousDamage = Weapon_GetAttack();
 
 		--m_itArmor.m_Hits_Cur;
-		UpdatePropertyFlag(AUTOTOOLTIP_FLAG_DURABILITY);
+		UpdatePropertyFlag();
 
 		if (pChar != nullptr && IsItemEquipped() )
 		{

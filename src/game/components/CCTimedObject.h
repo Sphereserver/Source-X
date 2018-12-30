@@ -30,6 +30,7 @@ private:
 public:
     CCTimedObject(PROFILE_TYPE profile);
     virtual ~CCTimedObject();
+    void Delete();
     inline bool IsSleeping() const;
     inline virtual void GoSleep();
     virtual void GoAwake();

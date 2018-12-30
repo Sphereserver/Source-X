@@ -978,9 +978,20 @@ void CSector::MoveItemToSector( CItem * pItem, bool fActive )
     if (IsSleeping())
     {
         if (CanSleep(true))
+        {
             pItem->GoSleep();
+        }
         else
-            GoAwake();        
+        {
+            GoAwake();
+            if (pItem->IsSleeping())
+                pItem->GoAwake();
+        }
+    }
+    else
+    {
+        if (pItem->IsSleeping())
+            pItem->GoAwake();
     }
 	if ( fActive )
 		m_Items_Timer.AddItemToSector( pItem );
@@ -992,7 +1003,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
 {
 	ADDTOCALLSTACK("CSector::MoveCharToSector");
 	// Move a CChar into this CSector.
-	// ASSUME: called from CChar.MoveToChar() assume ACtive char.
+    ASSERT(pChar);
 
 	if ( IsCharActiveIn(pChar) )
 		return false;	// already here
@@ -1031,7 +1042,13 @@ bool CSector::MoveCharToSector( CChar * pChar )
             pChar->GoSleep(); // then make the NPC sleep too.
         }
     }
-    // NPCs are awaken in MoveToChar, after actually setting the P
+    else
+    {
+        if (pChar->m_pNPC && pChar->IsSleeping())
+        {
+            pChar->GoAwake();
+        }
+    }
 	
 	return true;
 }

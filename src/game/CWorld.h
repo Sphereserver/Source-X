@@ -14,6 +14,7 @@
 #include "CSector.h"
 #include "CTimedFunction.h"
 #include <unordered_map>
+#include <unordered_set>
 
 class CObjBase;
 class CItemTypeDef;
@@ -218,7 +219,7 @@ public:
 
 	// TimedFunction Container/Wrapper
 	CTimedFunctionHandler m_TimedFunctions;
-	CSPtrTypeArray<CObjBase*> m_ObjStatusUpdates; // objects that need OnTickStatusUpdate called
+	std::unordered_set<CObjBase*> m_ObjStatusUpdates; // objects that need OnTickStatusUpdate called
 
 private:
 	bool LoadFile( lpctstr pszName, bool fError = true );
@@ -284,10 +285,10 @@ public:
 
 	// CSector World Map stuff.
 	void GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck = false );
-	char GetHeightPoint2(const CPointBase & pt, dword & dwBlockFlags, bool fHouseCheck = false); // Height of player who walked to X/Y/OLDZ
+	char GetHeightPoint2(const CPointMap & pt, dword & dwBlockFlags, bool fHouseCheck = false); // Height of player who walked to X/Y/OLDZ
 
 	void GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck = false );
-	char GetHeightPoint( const CPointBase & pt, dword & dwBlockFlags, bool fHouseCheck = false );
+	char GetHeightPoint( const CPointMap & pt, dword & dwBlockFlags, bool fHouseCheck = false );
 
 	void GetFixPoint( const CPointMap & pt, CServerMapBlockState & block);
 

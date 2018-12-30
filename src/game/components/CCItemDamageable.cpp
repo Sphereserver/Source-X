@@ -11,12 +11,12 @@ CCItemDamageable::CCItemDamageable(CItem * pLink) : CComponent(COMP_ITEMDAMAGEAB
     _iCurHits = 0;
     _iMaxHits = 0;
     _iTimeLastUpdate = 0;
-    g_World.m_ObjStatusUpdates.emplace_back(pLink);
+    g_World.m_ObjStatusUpdates.emplace(pLink);
 }
 
 CCItemDamageable::~CCItemDamageable()
 {
-    g_World.m_ObjStatusUpdates.RemovePtr(GetLink());
+    g_World.m_ObjStatusUpdates.erase(GetLink());
 }
 
 CItem * CCItemDamageable::GetLink() const

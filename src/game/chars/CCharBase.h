@@ -39,6 +39,8 @@ public:
 	ushort m_Dex;
 	ushort m_Int;
 
+    int _iRange;
+
 	short m_iMoveRate;	// move rate percent
 
 						// NPC info ----------------------------------------------------
@@ -81,6 +83,20 @@ public:
 	bool SetDispID( CREID_TYPE id );
 
 	uint GetHireDayWage() const { return( m_iHireDayWage ); }
+
+    /**
+    * @fn  byte GetRangeL() const;
+    * @brief   Returns the RangeLow.
+    * @return  Value.
+    */
+    byte GetRangeL() const;
+
+    /**
+    * @fn  byte GetRangeH() const;
+    * @brief   Returns the RangeHigh.
+    * @return  Value.
+    */
+    byte GetRangeH() const;
 
 	static CCharBase * FindCharBase( CREID_TYPE id );
 	static bool IsValidDispID( CREID_TYPE id );

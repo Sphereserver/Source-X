@@ -324,7 +324,7 @@ void CCSpawn::DelObj(CUID uid)
             break;
         }
     }
-    pItem->ResendTooltip();
+    pItem->UpdatePropertyFlag();
 }
 
 void CCSpawn::AddObj(CUID uid)
@@ -383,7 +383,7 @@ void CCSpawn::AddObj(CUID uid)
         }
     }
     if (!g_Serv.IsLoading())
-        pItem->ResendTooltip();
+        pItem->UpdatePropertyFlag();
 }
 
 CCRET_TYPE CCSpawn::OnTickComponent()
@@ -594,10 +594,7 @@ bool CCSpawn::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole *pSrc)
         }
         case ISPW_MOREP:
         {
-            tchar * pszBuffer = Str_GetTemp();
-            sprintf(pszBuffer, "%" PRIu16 ",%" PRIu16 ",%" PRIu8, _iTimeLo, _iTimeHi, _iMaxDist);
-
-            sVal.Format(pszBuffer);
+            sVal.Format("%" PRIu16 ",%" PRIu16 ",%" PRIu8, _iTimeLo, _iTimeHi, _iMaxDist);
             return true;
         }
         default:

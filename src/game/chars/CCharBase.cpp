@@ -27,6 +27,7 @@ CCharBase::CCharBase( CREID_TYPE id ) :
 	m_Str = 0;
 	m_Dex = 0;
 	m_Int = 0;
+    _iRange = 0;
 
 	m_iMoveRate = (short)(g_Cfg.m_iMoveRate);
 
@@ -85,6 +86,7 @@ void CCharBase::CopyBasic( const CCharBase * pCharDef )
 
 	m_defense = pCharDef->m_defense;
 	m_Anims = pCharDef->m_Anims;
+    _iRange = pCharDef->_iRange;
 
 	m_BaseResources = pCharDef->m_BaseResources;
     _pFaction = pCharDef->_pFaction;
@@ -166,7 +168,7 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 
     // Checking Props CComponents first
     EXC_SET_BLOCK("EntityProps");
-    if (CEntityProps::r_WritePropVal(pszKey, sVal))
+    if (CEntityProps::r_WritePropVal(pszKey, sVal, nullptr, this))
     {
         return true;
     }
@@ -247,6 +249,21 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 		case CBC_MOVERATE:
 			sVal.FormatVal(m_iMoveRate);
 			break;
+        case CBC_RANGE:
+        {
+            const int iRangeH = GetRangeH(), iRangeL = GetRangeL();
+            if ( iRangeH == 0 )
+                sVal.Format( "%d", iRangeL );
+            else
+                sVal.Format( "%d,%d", iRangeH, iRangeL );
+            break;
+        }
+        case CBC_RANGEH:
+            sVal.FormatVal(GetRangeH());
+            break;
+        case CBC_RANGEL:
+            sVal.FormatVal(GetRangeL());
+            break;
 		case CBC_RESDISPDNID:
 			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, GetResDispDnId()));
 			break;
@@ -297,7 +314,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 
     // Checking Props CComponents first
     EXC_SET_BLOCK("EntityProps");
-    if (CEntityProps::r_LoadPropVal(s, nullptr))
+    if (CEntityProps::r_LoadPropVal(s, nullptr, this))
     {
         return true;
     }
@@ -370,6 +387,28 @@ bool CCharBase::r_LoadVal( CScript & s )
 		case CBC_MOVERATE:
 			m_iMoveRate = s.GetArgUSVal();
 			break;
+        case CBC_RANGE:
+        {
+            int64 piVal[2];
+            tchar *ptcTmp = Str_GetTemp();
+            strncpy(ptcTmp, s.GetArgStr(), STR_TEMPLENGTH);
+            int iQty = Str_ParseCmds( ptcTmp, piVal, CountOf(piVal));
+            int iRange;
+            if ( iQty > 1 )
+            {
+                iRange = (int)((piVal[1] & 0xff) << 8); // highest byte contains the lowest value
+                iRange |= (int)(piVal[0] & 0xff);            // lowest byte contains the highest value
+            }
+            else
+            {
+                iRange = (int)(piVal[0] << 8);
+            }
+            _iRange = iRange;
+            break;
+        }
+        case CBC_RANGEH:
+        case CBC_RANGEL:
+            return false;
 		case CBC_RESDISPDNID:
 			SetResDispDnId((word)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr())));
 			break;
@@ -395,10 +434,10 @@ bool CCharBase::r_LoadVal( CScript & s )
 			m_Str = s.GetArgUSVal();
 			break;
 		case CBC_TSPEECH:
-			return( m_Speech.r_LoadVal( s, RES_SPEECH ));
+			return m_Speech.r_LoadVal( s, RES_SPEECH );
 		default:
         {
-            return(CBaseBaseDef::r_LoadVal(s));
+            return CBaseBaseDef::r_LoadVal(s);
         }
 	}
 	return true;
@@ -431,6 +470,17 @@ bool CCharBase::r_Load( CScript & s )
 		g_Log.Event(LOGL_WARN, "Char script '%s' has no CAN flags specified!\n", GetResourceName());
 
 	return true;
+}
+
+
+byte CCharBase::GetRangeL() const
+{
+    return (byte)(_iRange & 0xff);
+}
+
+byte CCharBase::GetRangeH() const
+{
+    return (byte)((_iRange >> 8) & 0xff);
 }
 
 ////////////////////////////////////////////
