@@ -456,39 +456,22 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	argv[0] = nullptr;
 	int argc = (int)Str_ParseCmds(lpCmdLine, &argv[1], CountOf(argv)-1, " \t") + 1;
 
-	if ( Sphere_GetOSInfo()->dwPlatformId != VER_PLATFORM_WIN32_NT )
-	{
-		// We are running Win9x - So we are not an NT service.
-do_not_nt_service:
+	// We need to find out what the server name is and the log files folder... look it up in the .ini file
+    g_Cfg.LoadIni(false);
+
+    if (!g_Cfg.m_fUseNTService ||	// since there is no way to detect how did we start, use config for that
+        Sphere_GetOSInfo()->dwPlatformId != VER_PLATFORM_WIN32_NT) // We are running Win9x - So we are not an NT service.
+    {
         g_NTWindow._NTWInitParams = {hInstance, lpCmdLine, nCmdShow};
         g_NTWindow.start();
 
-		int iRet = Sphere_MainEntryPoint(argc, argv);
-        
-		TerminateProcess(GetCurrentProcess(), iRet);
-		return iRet;
-	}
+        int iRet = Sphere_MainEntryPoint(argc, argv);
 
-	// We need to find out what the server name is....look it up in the .ini file
-	if ( !g_Cfg.LoadIni(true) )
-	{
-		// Try to determine the name and path of this application.
-		char szPath[_MAX_PATH];
+        TerminateProcess(GetCurrentProcess(), iRet);
+        return iRet;
+    }
 
-		GetModuleFileName(nullptr, szPath, sizeof(szPath));
-
-		if ( !szPath[0] )
-			return -2;
-
-		ExtractPath(szPath);
-
-        g_Serv.SetServerMode(SERVMODE_Loading);
-		g_Cfg.LoadIni(false);
-	}
-
-	if ( !g_Cfg.m_fUseNTService )	// since there is no way to detect how did we start, use config for that
-		goto do_not_nt_service;
-
+    // We are running as a NT Service
     g_NTService.SetServiceStatus(SERVICE_START_PENDING, NO_ERROR, 5000);
 
 	// process the command line arguments...

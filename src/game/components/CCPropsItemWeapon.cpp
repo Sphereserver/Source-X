@@ -17,6 +17,7 @@ KeyTableDesc_s CCPropsItemWeapon::GetPropertyKeysData() const {
 CCPropsItemWeapon::CCPropsItemWeapon() : CComponentProps(COMP_PROPS_ITEMWEAPON)
 {
     // All the unset properties have to be 0
+    #define PROP_RANGE_DEFAULT  1   // minimum value for Range, even if not set
     _iRange = 0;
 }
 
@@ -64,7 +65,7 @@ bool CCPropsItemWeapon::GetPropertyNumPtr(int iPropIndex, PropertyValNum_t* piOu
         case PROPIWEAP_RANGEH:
             if (_iRange == 0)
             {
-                *piOutVal = 0;
+                *piOutVal = PROP_RANGE_DEFAULT;
                 return false;   // not set
             }
             if (iPropIndex == PROPIWEAP_RANGEL)
@@ -92,7 +93,10 @@ bool CCPropsItemWeapon::GetPropertyStrPtr(int iPropIndex, CSString* psOutVal, bo
         case PROPIWEAP_RANGE:
         {
             if (_iRange == 0)
+            {
+                psOutVal->FormatVal(PROP_RANGE_DEFAULT);
                 return false;   // not set
+            }
             int iRangeH = (_iRange >> 8) & 0xFF;
             int iRangeL = _iRange & 0xFF;
             if ( iRangeL == 0 )
@@ -115,7 +119,7 @@ void CCPropsItemWeapon::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CO
     {
         case PROPIWEAP_RANGEH:  // internally: rangeh seems to be the Range Lowest value.
         /*{
-            //iVal = maximum(iVal, 1);
+            //iVal = maximum(iVal, PROP_RANGE_DEFAULT);
             int iRange = GetPropertyNum(iPropIndex);
             if (iRange == 0)
                 iRange = iVal;
@@ -126,7 +130,7 @@ void CCPropsItemWeapon::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CO
             break;
         case PROPIWEAP_RANGEL: // rangel seems to be Range Highest value
         /*{
-            //iVal = maximum(iVal, 1);
+            //iVal = maximum(iVal, PROP_RANGE_DEFAULT);
             int iRange = GetPropertyNum(iPropIndex);
             if (iRange == 0)
                 iRange = iVal << 8;
@@ -185,6 +189,7 @@ void CCPropsItemWeapon::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase*
         default:
             ASSERT(IsPropertyStr(iPropIndex));
             _mPropsStr[iPropIndex] = ptcVal;
+            break;
     }
 
     if (!pLinkedObj)

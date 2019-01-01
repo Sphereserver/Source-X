@@ -4116,8 +4116,8 @@ bool CServerConfig::LoadIni( bool fTest )
 	{
 		if( !fTest )
 		{
-			g_Log.Event(LOGL_FATAL|LOGM_INIT, SPHERE_FILE ".ini has not been found.\n");
-			g_Log.Event(LOGL_FATAL|LOGM_INIT, "Download a sample sphere.ini from https://github.com/Sphereserver/Source-experimental/tree/master/src\n");
+			g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, SPHERE_FILE ".ini has not been found.\n");
+			g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, "Download a sample sphere.ini from https://github.com/Sphereserver/Source-experimental/tree/master/src\n");
 		}
 		return false;
 	}

@@ -2441,10 +2441,8 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			}
 			break;
 		case IC_MAXAMOUNT:
-			{
-				sVal.FormatVal(GetMaxAmount() );
-
-			}break;
+		    sVal.FormatVal(GetMaxAmount() );
+		    break;
 		case IC_SPELLCOUNT:
 			{
 				if ( !IsTypeSpellbook() )
