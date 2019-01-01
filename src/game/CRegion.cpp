@@ -158,6 +158,7 @@ enum RC_TYPE
 	RC_BUILDABLE,
 	RC_CLIENTS,
 	RC_COLDCHANCE,
+    RC_DEFNAME,
 	RC_EVENTS,
 	RC_FLAGS,
 	RC_GATE,
@@ -195,6 +196,7 @@ lpctstr const CRegion::sm_szLoadKeys[RC_QTY+1] =	// static (Sorted)
 	"BUILDABLE",
 	"CLIENTS",
 	"COLDCHANCE",
+    "DEFNAME",
 	"EVENTS",
 	"FLAGS",
 	"GATE",
@@ -260,6 +262,9 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 				sVal.FormatVal((int)(iClients));
 				break;
 			}
+        case RC_DEFNAME: // "DEFNAME" = for the speech system.
+            sVal = GetResourceName();
+            break;
 		case RC_EVENTS:
 			m_Events.WriteResourceRefList( sVal );
 			break;
@@ -463,6 +468,8 @@ bool CRegion::r_LoadVal( CScript & s )
 		case RC_COLDCHANCE:
 			SendSectorsVerb( s.GetKey(), s.GetArgStr(), &g_Serv );
 			break;
+        case RC_DEFNAME: // "DEFNAME" = for the speech system.
+            return SetResourceName( s.GetArgStr());
 		case RC_EVENTS:
 			SetModified( REGMOD_EVENTS );
 			return( m_Events.r_LoadVal( s, RES_REGIONTYPE ));
@@ -474,7 +481,7 @@ bool CRegion::r_LoadVal( CScript & s )
 			TogRegionFlags( REGION_ANTIMAGIC_GATE, ! s.GetArgVal());
 			break;
 		case RC_GROUP:
-			m_sGroup	= s.GetArgStr();
+			m_sGroup = s.GetArgStr();
 			SetModified( REGMOD_GROUP );
 			break;
 		case RC_GUARDED:
@@ -780,7 +787,7 @@ bool CRegion::SendSectorsVerb( lpctstr pszVerb, lpctstr pszArgs, CTextConsole * 
 			fRet |= pSector->r_Verb( script, pSrc );
 		}
 	}
-	return fRet ;
+	return fRet;
 }
 
 lpctstr const CRegion::sm_szTrigName[RTRIG_QTY+1] =	// static
@@ -846,7 +853,6 @@ CRegionWorld::~CRegionWorld()
 
 enum RWC_TYPE
 {
-	RWC_DEFNAME,
 	RWC_REGION,
 	RWC_RESOURCES,
 	RWC_QTY
@@ -854,7 +860,6 @@ enum RWC_TYPE
 
 lpctstr const CRegionWorld::sm_szLoadKeys[RWC_QTY+1] =	// static
 {
-	"DEFNAME",
 	"REGION",
 	"RESOURCES",
 	nullptr
@@ -873,9 +878,6 @@ bool CRegionWorld::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 	//bool	fZero	= false;
 	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
-		case RWC_DEFNAME: // "DEFNAME" = for the speech system.
-			sVal = GetResourceName();
-			break;
 		case RWC_RESOURCES:
 			m_Events.WriteResourceRefList( sVal );
 			break;
@@ -921,8 +923,6 @@ bool CRegionWorld::r_LoadVal( CScript &s )
 	// Load the values for the region from script.
 	switch ( FindTableHeadSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
-		case RWC_DEFNAME: // "DEFNAME" = for the speech system.
-			return SetResourceName( s.GetArgStr());
 		case RWC_RESOURCES:
 			SetModified( REGMOD_EVENTS );
 			return( m_Events.r_LoadVal( s, RES_REGIONTYPE ));

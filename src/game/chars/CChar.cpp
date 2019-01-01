@@ -260,7 +260,7 @@ CChar::CChar( CREID_TYPE baseID ) : CCTimedObject(PROFILE_CHARS), CObjBase( fals
     m_defense = 0;
 	m_height = 0;
 	m_ModMaxWeight = 0;
-    _iRange = 0;
+    _iRange = 1;
 
 	m_StepStealth = 0;
 	m_iVisualRange = UO_MAP_VIEW_SIZE_DEFAULT;

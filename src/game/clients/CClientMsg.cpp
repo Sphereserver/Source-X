@@ -2873,7 +2873,7 @@ byte CClient::LogIn( CAccount * pAccount, CSString & sMsg )
 	Args.Init(pAccount->GetName());
 	Args.m_iN1 = GetConnectType();
 	Args.m_pO1 = this;
-	enum TRIGRET_TYPE tr;
+	TRIGRET_TYPE tr = TRIGRET_RET_DEFAULT;
 	g_Serv.r_Call("f_onaccount_login", &g_Serv, &Args, nullptr, &tr);
 	if ( tr == TRIGRET_RET_TRUE )
 	{

@@ -872,7 +872,7 @@ bool CAccount::CheckPassword( lpctstr pszPassword )
 			return false;
 	}
 
-	CScriptTriggerArgs Args;
+    CScriptTriggerArgs Args;
 	Args.m_VarsLocal.SetStrNew("Account",GetName());
 	Args.m_VarsLocal.SetStrNew("Password",pszPassword);
 	TRIGRET_TYPE tr = TRIGRET_RET_FALSE;
