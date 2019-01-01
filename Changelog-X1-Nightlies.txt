@@ -1416,6 +1416,9 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 29-12-2018, Nolok
 - Added: f_onaccount_pwchange now has a LOCAL.OLDPASSWORD storing the old password, before the requested change is done.
 
+01-01-2019, Nolok
+- Added: DEFNAME readable property to ROOMDEF (Issue #174).
+
 01-01-2019, xwerswoodx
 - Added: strToken function to tokenize strings. Instead of explode, this function does not override commas so you can get strings with commas without having any problem.
 	Usage:
