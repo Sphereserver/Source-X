@@ -1418,3 +1418,19 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 
 01-01-2019, Nolok
 - Added: DEFNAME readable property to ROOMDEF (Issue #174).
+
+02-01-2019, xwerswoodx
+- Added: strToken function to tokenize strings. Instead of explode, this function does not override commas so you can get strings with commas without having any problem.
+	Usage:
+		<strToken "<args>", "value", "seperator">
+	Seperator:
+		Character for tokenize array. Usage is same with explode, could be " " for space, "," for comma, or just character for any char.
+	Values:
+		0: Return length of the token.
+		Number: Return specific element of string.
+		startNumber-endNumber: Return specific elements with range.
+	Examples:
+		<strToken "A.B.C", 0, .> RETURNS 3
+		<strToken "A.B.C", 2, .> RETURNS B
+		<strToken "A.B.C", 1-2, .> RETURNS A.B
+		<strToken "A,B.C", 1, .> RETURNS A,B

@@ -791,6 +791,81 @@ badcmd:
 				g_Log.EventDebug("Process execution finished\n");
 				return true;
 			}
+			
+		case SSC_StrToken:
+			{
+				tchar *ppArgs[3];
+				size_t iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs), ",");
+				if ( iQty < 3 )
+					return false;
+				
+				if ( *ppArgs[2] == '"')
+					ppArgs[2]++;
+					
+				for (tchar *pEnd = ppArgs[2] + strlen(ppArgs[2]) - 1; pEnd >= ppArgs[2]; pEnd--)
+				{
+					if ( *pEnd == '"')
+					{
+						*pEnd = '\0';
+						break;
+					}
+				}
+				tchar *iSep = ppArgs[2];
+				for (tchar *iSeperator = ppArgs[2] + strlen(ppArgs[2]) - 1; iSeperator > ppArgs[2]; iSeperator--)
+				{
+					*iSeperator = '\0';
+				}
+				
+				if ( *ppArgs[0] == '"')
+					ppArgs[0]++;
+					
+				for (tchar *pEnd = ppArgs[0] + strlen(ppArgs[0]) - 1; pEnd >= ppArgs[0]; pEnd--)
+				{
+					if ( *pEnd == '"')
+					{
+						*pEnd = '\0';
+						break;
+					}
+				}
+				sVal = "";
+				tchar *ppCmd[255];
+				size_t count = Str_ParseCmds(ppArgs[0], ppCmd, CountOf(ppCmd), iSep);
+				tchar *ppArrays[2];
+				size_t iArrays = Str_ParseCmds(ppArgs[1], ppArrays, CountOf(ppArrays), "-");
+				int64 iValue = Exp_GetLLVal(ppArgs[1]);
+				int64 iValueEnd = iValue;
+				
+				if (iArrays > 1)
+				{
+					iValue = Exp_GetLLVal(ppArrays[0]);
+					iValueEnd = Exp_GetLLVal(ppArrays[1]);
+					if (iValueEnd <= 0 || iValueEnd > count)
+						iValueEnd = count;
+				}
+				
+				if (iValue < 0)
+					return false;
+				else if (iValue > 0)
+				{
+					if (iValue > count)
+						return false;
+					else if (iValue == iValueEnd)
+						sVal = ppCmd[iValue - 1];
+					else
+					{
+						sVal.Add(ppCmd[iValue - 1]);
+						int64 i = iValue + 1;
+						for ( ; i <= iValueEnd; i++)
+						{
+							sVal.Add(iSep);
+							sVal.Add(ppCmd[i - 1]);
+						}
+					}
+				}
+				else
+					sVal.FormatVal((int)count);
+			} return true;
+			
 
 		case SSC_EXPLODE:
 			{
