@@ -832,13 +832,13 @@ badcmd:
 				size_t count = Str_ParseCmds(ppArgs[0], ppCmd, CountOf(ppCmd), iSep);
 				tchar *ppArrays[2];
 				size_t iArrays = Str_ParseCmds(ppArgs[1], ppArrays, CountOf(ppArrays), "-");
-				int64 iValue = Exp_GetVal(ppArgs[1]);
+				int64 iValue = Exp_GetLLVal(ppArgs[1]);
 				int64 iValueEnd = iValue;
 				
 				if (iArrays > 1)
 				{
-					iValue = Exp_GetVal(ppArrays[0]);
-					iValueEnd = Exp_GetVal(ppArrays[1]);
+					iValue = Exp_GetLLVal(ppArrays[0]);
+					iValueEnd = Exp_GetLLVal(ppArrays[1]);
 					if (iValueEnd <= 0 || iValueEnd > count)
 						iValueEnd = count;
 				}
@@ -863,7 +863,7 @@ badcmd:
 					}
 				}
 				else
-					sVal.FormatVal(static_cast<long>(count));
+					sVal.FormatVal((int)count);
 			} return true;
 			
 
