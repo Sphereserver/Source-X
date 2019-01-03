@@ -260,7 +260,7 @@ CChar::CChar( CREID_TYPE baseID ) : CCTimedObject(PROFILE_CHARS), CObjBase( fals
     m_defense = 0;
 	m_height = 0;
 	m_ModMaxWeight = 0;
-    _iRange = 1;
+    _iRange = 1 << 8;   // RangeH = 1; RangeL = 0
 
 	m_StepStealth = 0;
 	m_iVisualRange = UO_MAP_VIEW_SIZE_DEFAULT;
@@ -2823,12 +2823,6 @@ do_default:
 		case CHC_HOME:
 			sVal = m_ptHome.WriteUsed();
 			break;
-		case CHC_NIGHTSIGHT:
-			{
-				//sVal.FormatVal(IsStatFlag(STATF_NIGHTSIGHT));
-				sVal.FormatVal(GetPropNum(COMP_PROPS_CHAR, PROPCH_NIGHTSIGHT, true));
-			}
-            break;
 		case CHC_NOTOGETFLAG:
 			{
 				pszKey += 11;
@@ -3380,19 +3374,6 @@ bool CChar::r_LoadVal( CScript & s )
 				dword	dwFlags	= (uint)piCmd[1];
 
 				Memory_AddObjTypes( uid, (word)dwFlags );
-			}
-			break;
-		case CHC_NIGHTSIGHT:
-			{
-				int fNightsight;
-				if (!s.HasArgs())	// Keep old 'switch' from 0 to 1 and viceversa behaviour while no args are given.
-					 fNightsight = !IsStatFlag(STATF_NIGHTSIGHT);
-                else
-                    fNightsight = s.GetArgVal();
-                SetPropNum(COMP_PROPS_CHAR, PROPCH_NIGHTSIGHT, fNightsight);
-				StatFlag_Mod( STATF_NIGHTSIGHT, fNightsight > 0 ? true : false );
-				if ( IsClient() )
-					m_pClient->addLight();
 			}
 			break;
 		case CHC_NPC:
@@ -4429,7 +4410,10 @@ uint Calc_ExpGet_Level(uint exp)
 	uint req = g_Cfg.m_iLevelNextAt; // required xp for next level
 
 	if (req < 1)	//Must do this check in case ini's LevelNextAt is not set or server will freeze because exp will never decrease in the while.
+    {
+        g_Log.EventWarn("Invalid LextNevelAt value.\n");
 		return 0;
+    }
 
 	while (exp >= req)
 	{
@@ -4444,7 +4428,7 @@ uint Calc_ExpGet_Level(uint exp)
 				break;
 			case LEVEL_MODE_DOUBLE:
 			default:
-				req += g_Cfg.m_iLevelNextAt;
+				req += (g_Cfg.m_iLevelNextAt * level);
 				break;
 		}
 	}
@@ -4452,7 +4436,7 @@ uint Calc_ExpGet_Level(uint exp)
 	return level;
 }
 
-void CChar::ChangeExperience(int delta, CChar *pCharDead)
+void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 {
 	ADDTOCALLSTACK("CChar::ChangeExperience");
 
@@ -4481,8 +4465,8 @@ void CChar::ChangeExperience(int delta, CChar *pCharDead)
 			if (g_Cfg.m_bLevelSystem && g_Cfg.m_iExperienceMode&EXP_MODE_DOWN_NOLEVEL)
 			{
 				uint exp = Calc_ExpGet_Exp(m_level);
-				if (m_exp + delta < exp)
-					delta = m_exp - exp;
+				if (delta + m_exp < exp)
+					delta = (llong)exp - m_exp;
 			}
 		}
 
@@ -4496,29 +4480,29 @@ void CChar::ChangeExperience(int delta, CChar *pCharDead)
 
 		if (IsTrigUsed(TRIGGER_EXPCHANGE))
 		{
-			CScriptTriggerArgs	args(delta, bShowMsg);
+			CScriptTriggerArgs args(delta, bShowMsg);
 			args.m_pO1 = pCharDead;
 			if (OnTrigger(CTRIG_ExpChange, this, &args) == TRIGRET_RET_TRUE)
 				return;
-			delta = (int)(args.m_iN1);
+			delta = args.m_iN1;
 			bShowMsg = (args.m_iN2 != 0);
 		}
 
 		// Do not allow an underflow due to negative Exp Change.
-		if( delta < 0 && (int)(m_exp) < abs(delta) )
+		if( delta < 0 && m_exp < abs(delta) )
 			m_exp = 0;
 		else
-			m_exp += delta;
+			m_exp = (uint)(m_exp + delta);
 
 		if (m_pClient && bShowMsg && delta)
 		{
 			int iWord = 0;
-			int absval = abs(delta);
-			int maxval = (g_Cfg.m_bLevelSystem && g_Cfg.m_iLevelNextAt) ? maximum(g_Cfg.m_iLevelNextAt, 1000) : 1000;
+			llong absval = abs(delta);
+			llong maxval = (g_Cfg.m_bLevelSystem && g_Cfg.m_iLevelNextAt) ? maximum(g_Cfg.m_iLevelNextAt, 1000) : 1000;
 
 			if (absval >= maxval)				// 100%
 				iWord = 7;
-			else if (absval >= (maxval * 2) / 3)	//  66%
+			else if (absval >= (maxval * 2) / 3)//  66%
 				iWord = 6;
 			else if (absval >= maxval / 2)		//  50%
 				iWord = 5;
@@ -4539,7 +4523,7 @@ void CChar::ChangeExperience(int delta, CChar *pCharDead)
 
 	if (g_Cfg.m_bLevelSystem)
 	{
-		uint level = Calc_ExpGet_Level(m_exp);
+		llong level = Calc_ExpGet_Level(m_exp);
 
 		if (level != m_level)
 		{
@@ -4549,23 +4533,23 @@ void CChar::ChangeExperience(int delta, CChar *pCharDead)
 
 			if (IsTrigUsed(TRIGGER_EXPLEVELCHANGE))
 			{
-				CScriptTriggerArgs	args(delta);
+				CScriptTriggerArgs args(delta);
 				if (OnTrigger(CTRIG_ExpLevelChange, this, &args) == TRIGRET_RET_TRUE)
 					return;
-				delta = (int)(args.m_iN1);
+				delta = args.m_iN1;
 				bShowMsg = (args.m_iN2 != 0);
 			}
 
-			level = m_level + delta;
+			level = delta + m_level;
 			// Prevent integer underflow due to negative level change
-			if( delta < 0 && abs(delta) > (int)(m_level) )
+			if( delta < 0 && abs(delta) > m_level )
 				level = 0;
 			if (g_Cfg.m_iDebugFlags&DEBUGF_LEVEL)
 			{
 				DEBUG_ERR(("%s %s level change (was %u, delta %d, now %u)\n",
 					(m_pNPC ? "NPC" : "Player"), GetName(), m_level, delta, level));
 			}
-			m_level = level;
+			m_level = (uint)level;
 
 			if (m_pClient && bShowMsg)
 			{
@@ -4591,7 +4575,7 @@ uint CChar::GetSkillTotal(int what, bool how)
 			if ( what < 0 )
 			{
 				if ( uiBase >= -what )
-				continue;
+				    continue;
 			}
 			else if ( uiBase < what )
 				continue;

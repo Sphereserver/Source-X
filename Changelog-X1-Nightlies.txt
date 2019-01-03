@@ -1434,3 +1434,6 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 		<strToken "A.B.C", 2, .> RETURNS B
 		<strToken "A.B.C", 1-2, .> RETURNS A.B
 		<strToken "A,B.C", 1, .> RETURNS A,B
+
+03-01-2019, Nolok
+- Fixed: ExperienceMode 08 flag (don't go below the current level when losing exp) didn't work (Issue #167).

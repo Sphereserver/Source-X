@@ -800,9 +800,10 @@ badcmd:
 					return false;
 				
 				if ( *ppArgs[2] == '"')
-					ppArgs[2]++;
+					++ppArgs[2];
 					
-				for (tchar *pEnd = ppArgs[2] + strlen(ppArgs[2]) - 1; pEnd >= ppArgs[2]; pEnd--)
+                const size_t uiArgs2Len = strlen(ppArgs[2]);
+				for (tchar *pEnd = ppArgs[2] + uiArgs2Len - 1; pEnd >= ppArgs[2]; --pEnd)
 				{
 					if ( *pEnd == '"')
 					{
@@ -811,15 +812,15 @@ badcmd:
 					}
 				}
 				tchar *iSep = ppArgs[2];
-				for (tchar *iSeperator = ppArgs[2] + strlen(ppArgs[2]) - 1; iSeperator > ppArgs[2]; iSeperator--)
+				for (tchar *iSeperator = ppArgs[2] + uiArgs2Len - 1; iSeperator > ppArgs[2]; --iSeperator)
 				{
 					*iSeperator = '\0';
 				}
 				
 				if ( *ppArgs[0] == '"')
-					ppArgs[0]++;
+					++ppArgs[0];
 					
-				for (tchar *pEnd = ppArgs[0] + strlen(ppArgs[0]) - 1; pEnd >= ppArgs[0]; pEnd--)
+				for (tchar *pEnd = ppArgs[0] + strlen(ppArgs[0]) - 1; pEnd >= ppArgs[0]; --pEnd)
 				{
 					if ( *pEnd == '"')
 					{
@@ -829,11 +830,11 @@ badcmd:
 				}
 				sVal = "";
 				tchar *ppCmd[255];
-				size_t count = Str_ParseCmds(ppArgs[0], ppCmd, CountOf(ppCmd), iSep);
+				int count = Str_ParseCmds(ppArgs[0], ppCmd, CountOf(ppCmd), iSep);
 				tchar *ppArrays[2];
-				size_t iArrays = Str_ParseCmds(ppArgs[1], ppArrays, CountOf(ppArrays), "-");
-				int64 iValue = Exp_GetLLVal(ppArgs[1]);
-				int64 iValueEnd = iValue;
+				int iArrays = Str_ParseCmds(ppArgs[1], ppArrays, CountOf(ppArrays), "-");
+				llong iValue = Exp_GetLLVal(ppArgs[1]);
+				llong iValueEnd = iValue;
 				
 				if (iArrays > 1)
 				{
@@ -855,7 +856,7 @@ badcmd:
 					{
 						sVal.Add(ppCmd[iValue - 1]);
 						int64 i = iValue + 1;
-						for ( ; i <= iValueEnd; i++)
+						for ( ; i <= iValueEnd; ++i)
 						{
 							sVal.Add(iSep);
 							sVal.Add(ppCmd[i - 1]);
@@ -863,7 +864,7 @@ badcmd:
 					}
 				}
 				else
-					sVal.FormatVal((int)count);
+					sVal.FormatVal(count);
 			} return true;
 			
 

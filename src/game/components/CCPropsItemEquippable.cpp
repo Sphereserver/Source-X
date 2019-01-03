@@ -95,14 +95,12 @@ void CCPropsItemEquippable::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjB
 void CCPropsItemEquippable::DeletePropertyNum(int iPropIndex)
 {
     ADDTOCALLSTACK("CCPropsItemEquippable::DeletePropertyNum");
-    ASSERT(_mPropsNum.count(iPropIndex));
     _mPropsNum.erase(iPropIndex);
 }
 
 void CCPropsItemEquippable::DeletePropertyStr(int iPropIndex)
 {
     ADDTOCALLSTACK("CCPropsItemEquippable::DeletePropertyStr");
-    ASSERT(_mPropsStr.count(iPropIndex));
     _mPropsStr.erase(iPropIndex);
 }
 

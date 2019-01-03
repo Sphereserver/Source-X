@@ -17,7 +17,7 @@ KeyTableDesc_s CCPropsItemWeapon::GetPropertyKeysData() const {
 CCPropsItemWeapon::CCPropsItemWeapon() : CComponentProps(COMP_PROPS_ITEMWEAPON)
 {
     // All the unset properties have to be 0
-    #define PROP_RANGE_DEFAULT  1   // minimum value for Range, even if not set
+    #define PROP_RANGE_DEFAULT  (1 << 8)   // minimum value for Range, even if not set: RangeH = 1; RangeL = 0
     _iRange = 0;
 }
 
@@ -202,14 +202,12 @@ void CCPropsItemWeapon::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase*
 void CCPropsItemWeapon::DeletePropertyNum(int iPropIndex)
 {
     ADDTOCALLSTACK("CCPropsItemWeapon::DeletePropertyNum");
-    ASSERT(_mPropsNum.count(iPropIndex));
     _mPropsNum.erase(iPropIndex);
 }
 
 void CCPropsItemWeapon::DeletePropertyStr(int iPropIndex)
 {
     ADDTOCALLSTACK("CCPropsItemWeapon::DeletePropertyStr");
-    ASSERT(_mPropsStr.count(iPropIndex));
     _mPropsStr.erase(iPropIndex);
 }
 

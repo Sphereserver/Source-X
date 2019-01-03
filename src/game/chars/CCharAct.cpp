@@ -2867,7 +2867,8 @@ bool CChar::Death()
 
 	if ( m_pPlayer )
 	{
-		ChangeExperience(-((int)(m_exp) / 10), pKiller);
+        llong iDelta = m_exp / 10;
+		ChangeExperience(- maximum(1, iDelta), pKiller);
 		if ( !(m_TagDefs.GetKeyNum("DEATHFLAGS") & DEATH_NOFAMECHANGE) )
 			Noto_Fame( -GetFame()/10 );
 

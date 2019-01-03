@@ -1,6 +1,7 @@
 
 #include "CCPropsChar.h"
 #include "../chars/CChar.h"
+#include "../clients/CClient.h"
 
 
 lpctstr const CCPropsChar::_ptcPropertyKeys[PROPCH_QTY + 1] =
@@ -74,6 +75,15 @@ void CCPropsChar::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase
     // Do stuff to the pLinkedObj
     switch (iPropIndex)
     {
+        case PROPCH_NIGHTSIGHT:
+        {
+            CChar * pChar = static_cast <CChar*>(pLinkedObj);
+            pChar->StatFlag_Mod( STATF_NIGHTSIGHT, iVal > 0 ? true : false );
+            if ( pChar->IsClient() )
+                pChar->GetClient()->addLight();
+            break;
+        }
+
         case PROPCH_RESCOLDMAX:
         case PROPCH_RESFIREMAX:
         case PROPCH_RESENERGYMAX:
@@ -114,7 +124,7 @@ void CCPropsChar::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase
         }
         
         default:
-            pLinkedObj->UpdatePropertyFlag();
+            //pLinkedObj->UpdatePropertyFlag();
             break;
     }
 }
@@ -133,34 +143,40 @@ void CCPropsChar::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLink
         return;
 
     // Do stuff to the pLinkedObj
-    pLinkedObj->UpdatePropertyFlag();
+    //pLinkedObj->UpdatePropertyFlag();
 }
 
 void CCPropsChar::DeletePropertyNum(int iPropIndex)
 {
     ADDTOCALLSTACK("CCPropsChar::DeletePropertyNum");
-    ASSERT(_mPropsNum.count(iPropIndex));
     _mPropsNum.erase(iPropIndex);
 }
 
 void CCPropsChar::DeletePropertyStr(int iPropIndex)
 {
     ADDTOCALLSTACK("CCPropsChar::DeletePropertyStr");
-    ASSERT(_mPropsStr.count(iPropIndex));
     _mPropsStr.erase(iPropIndex);
 }
 
 bool CCPropsChar::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, int iPropIndex, bool fPropStr)
 {
     ADDTOCALLSTACK("CCPropsChar::FindLoadPropVal");
+    if (iPropIndex == PROPCH_NIGHTSIGHT)
+    {
+        // Special case if it has empty args: Keep old 'switch' from 0 to 1 and viceversa behaviour
+        if (!s.HasArgs())
+        {
+            int iVal = ! static_cast <CChar*>(pLinkedObj)->IsStatFlag(STATF_NIGHTSIGHT);
+            SetPropertyNum(iPropIndex, iVal, pLinkedObj);
+            return true;
+        }
+    }
+    
     if (!fPropStr && (*s.GetArgRaw() == '\0'))
     {
         DeletePropertyNum(fPropStr);
         return true;
     }
-
-    if (iPropIndex == PROPCH_NIGHTSIGHT)
-        return false;   // handle it in CChar::r_LoadVal
 
     BaseProp_LoadPropVal(iPropIndex, fPropStr, s, pLinkedObj);
     return true;
@@ -169,10 +185,6 @@ bool CCPropsChar::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, int iPropIn
 bool CCPropsChar::FindWritePropVal(CSString & sVal, int iPropIndex, bool fPropStr) const
 {
     ADDTOCALLSTACK("CCPropsChar::FindWritePropVal");
-
-    if (iPropIndex == PROPCH_NIGHTSIGHT)
-        return false;   // handle it in CChar::r_LoadVal
-
     return BaseProp_WritePropVal(iPropIndex, fPropStr, sVal);
 }
 

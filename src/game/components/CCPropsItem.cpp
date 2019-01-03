@@ -97,14 +97,12 @@ void CCPropsItem::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLink
 void CCPropsItem::DeletePropertyNum(int iPropIndex)
 {
     ADDTOCALLSTACK("CCPropsItem::DeletePropertyNum");
-    ASSERT(_mPropsNum.count(iPropIndex));
     _mPropsNum.erase(iPropIndex);
 }
 
 void CCPropsItem::DeletePropertyStr(int iPropIndex)
 {
     ADDTOCALLSTACK("CCPropsItem::DeletePropertyStr");
-    ASSERT(_mPropsStr.count(iPropIndex));
     _mPropsStr.erase(iPropIndex);
 }
 

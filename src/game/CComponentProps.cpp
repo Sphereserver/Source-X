@@ -21,6 +21,7 @@ bool CComponentProps::BaseCont_GetPropertyNum(const BaseContNum_t* container, in
         *piOutVal = it->second;
         return true;
     }
+    *piOutVal = 0;
     return false;
 }
 

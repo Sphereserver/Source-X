@@ -443,7 +443,7 @@ CVarDefContNum* CVarDefMap::SetNumOverride( lpctstr pszKey, int64 iVal )
 	return SetNumNew(pszKey,iVal);
 }
 
-CVarDefContNum* CVarDefMap::ModNum(lpctstr pszName, int64 iMod, bool fZero)
+CVarDefContNum* CVarDefMap::ModNum(lpctstr pszName, int64 iMod, bool fDeleteZero)
 {
     ADDTOCALLSTACK_INTENSIVE("CVarDefMap::ModNum");
     ASSERT(pszName);
@@ -454,7 +454,7 @@ CVarDefContNum* CVarDefMap::ModNum(lpctstr pszName, int64 iMod, bool fZero)
         if (pVarDefNum)
         {
             const int64 iNewVal = pVarDefNum->GetValNum() + iMod;
-            if ((iNewVal == 0) && fZero)
+            if ((iNewVal == 0) && fDeleteZero)
             {
                 DefSet::iterator it = m_Container.find(pVarDef);
                 ASSERT (it != m_Container.end());
@@ -465,10 +465,10 @@ CVarDefContNum* CVarDefMap::ModNum(lpctstr pszName, int64 iMod, bool fZero)
             return pVarDefNum;
         }
     }
-    return SetNum(pszName, iMod, fZero);
+    return SetNum(pszName, iMod, fDeleteZero);
 }
 
-CVarDefContNum* CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fZero )
+CVarDefContNum* CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fDeleteZero )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::SetNum");
 	ASSERT(pszName);
@@ -476,7 +476,7 @@ CVarDefContNum* CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fZero )
 	if ( pszName[0] == '\0' )
 		return nullptr;
 
-	if ( (iVal == 0) && !fZero )
+	if ( (iVal == 0) && fDeleteZero )
 	{
 		DeleteAtKey(pszName);
 		return nullptr;
@@ -535,14 +535,14 @@ CVarDefContStr* CVarDefMap::SetStrOverride( lpctstr pszKey, lpctstr pszVal )
 	return SetStrNew(pszKey,pszVal);
 }
 
-CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, bool fZero )
+CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, bool fDeleteZero )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::SetStr");
 	// ASSUME: This has been clipped of unwanted beginning and trailing spaces.
 	if ( !pszName || !pszName[0] )
 		return nullptr;
 
-	if ( !fZero && (pszVal == nullptr) || (pszVal[0] == '\0') )	// but not if empty
+	if ( fDeleteZero && (pszVal == nullptr) || (pszVal[0] == '\0') )	// but not if empty
 	{
 		DeleteAtKey(pszName);
 		return nullptr;
@@ -551,7 +551,7 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, 
 	if ( !fQuoted && IsSimpleNumberString(pszVal))
 	{
 		// Just store the number and not the string.
-		return SetNum( pszName, Exp_GetLLVal( pszVal ), fZero);
+		return SetNum( pszName, Exp_GetLLVal( pszVal ), fDeleteZero);
 	}
 
 	CVarDefContTest pVarSearch(pszName);

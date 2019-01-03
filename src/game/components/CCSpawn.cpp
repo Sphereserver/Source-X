@@ -69,7 +69,7 @@ uint8 CCSpawn::GetMaxDist() const
     return _iMaxDist;
 }
 
-CResourceIDBase CCSpawn::GetSpawnID() const
+const CResourceID& CCSpawn::GetSpawnID() const
 {
     return _idSpawn;
 }
@@ -131,7 +131,7 @@ CResourceDef *CCSpawn::FixDef()
         }
 
         // try a spawn group.
-        const CResourceIDBase rid = CResourceID(RES_SPAWN, iIndex);
+        const CResourceID rid = CResourceID(RES_SPAWN, iIndex);
         CResourceDef *pDef = g_Cfg.ResourceGetDef(rid);
         if (pDef)
         {
@@ -147,7 +147,7 @@ CResourceDef *CCSpawn::FixDef()
             return TryItem(id);
 
         // try a template.
-        CResourceIDBase rid = CResourceID(RES_TEMPLATE, iIndex);
+        const CResourceID rid = CResourceID(RES_TEMPLATE, iIndex);
         CResourceDef *pDef = g_Cfg.ResourceGetDef(rid);
         if (pDef)
         {
@@ -182,7 +182,7 @@ void CCSpawn::GenerateItem(CResourceDef *pDef)
 {
     ADDTOCALLSTACK("CCSpawn::GenerateItem");
 
-    const CResourceIDBase rid = pDef->GetResourceID();
+    const CResourceID rid = pDef->GetResourceID();
     const ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
     const CItem *pSpawnItem = static_cast<CItem*>(GetLink());
 
@@ -233,7 +233,7 @@ void CCSpawn::GenerateChar(CResourceDef *pDef)
     if (!pItem->IsTopLevel())
         return;
 
-    CResourceIDBase rid = pDef->GetResourceID();
+    CResourceID rid = pDef->GetResourceID();
     if (rid.GetResType() == RES_SPAWN)
     {
         const CRandGroupDef *pSpawnGroup = static_cast<const CRandGroupDef *>(pDef);
@@ -478,7 +478,7 @@ CCharBase *CCSpawn::SetTrackID()
     }
 
     CCharBase *pCharDef = nullptr;
-    CResourceIDBase rid = _idSpawn;
+    const CResourceID& rid = _idSpawn;
 
     if (rid.GetResType() == RES_CHARDEF)
     {
@@ -648,7 +648,7 @@ bool CCSpawn::r_LoadVal(CScript & s)
                     else
                     {
                         // try a spawn group.
-                        CResourceIDBase rid = CResourceID(RES_SPAWN, ridIndex);
+                        CResourceID rid = CResourceID(RES_SPAWN, ridIndex);
                         CResourceDef *pDef = g_Cfg.ResourceGetDef(rid);
                         if (pDef)
                             _idSpawn = rid;
@@ -666,7 +666,7 @@ bool CCSpawn::r_LoadVal(CScript & s)
                     else
                     {
                         // try a template
-                        CResourceIDBase rid = CResourceID(RES_TEMPLATE, ridIndex);
+                        CResourceID rid = CResourceID(RES_TEMPLATE, ridIndex);
                         CResourceDef *pDef = g_Cfg.ResourceGetDef(rid);
                         if (pDef)
                             _idSpawn = rid;

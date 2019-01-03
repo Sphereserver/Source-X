@@ -42,7 +42,7 @@ public:
 	CResourceID ResourceGetID( RES_TYPE restype, lpctstr ptcName );
 	CResourceID ResourceGetIDType( RES_TYPE restype, lpctstr pszName );
 	int ResourceGetIndexType( RES_TYPE restype, lpctstr pszName );
-	lpctstr ResourceGetName( CResourceIDBase rid ) const;
+	lpctstr ResourceGetName( const CResourceIDBase& rid ) const;
 	CScriptObj * ResourceGetDefByName( RES_TYPE restype, lpctstr pszName )
 	{
 		// resolve a name to the actual resource def.

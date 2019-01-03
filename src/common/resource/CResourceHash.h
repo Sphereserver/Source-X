@@ -39,7 +39,7 @@ private:
     CResourceHash(const CResourceHash& copy);
     CResourceHash& operator=(const CResourceHash& other);
 private:
-    int GetHashArray(CResourceIDBase rid) const
+    int GetHashArray(const CResourceIDBase& rid) const
     {
         return (rid.GetResIndex() & 0x0F);
     }
@@ -48,10 +48,10 @@ public:
     {
         return m_Array[0].BadIndex();
     }
-    size_t FindKey(CResourceIDBase rid) const;
-    CResourceDef* GetAt(CResourceIDBase rid, size_t index) const;
-    size_t AddSortKey(CResourceIDBase rid, CResourceDef* pNew);
-    void SetAt(CResourceIDBase rid, size_t index, CResourceDef* pNew);
+    size_t FindKey(const CResourceIDBase& rid) const;
+    CResourceDef* GetAt(const CResourceIDBase& rid, size_t index) const;
+    size_t AddSortKey(const CResourceIDBase& rid, CResourceDef* pNew);
+    void SetAt(const CResourceIDBase& rid, size_t index, CResourceDef* pNew);
 };
 
 

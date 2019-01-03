@@ -275,12 +275,12 @@ bool CResourceBase::LoadResourceSection( CScript * pScript )
 //*********************************************************
 // Resource Block Definitions
 
-lpctstr CResourceBase::ResourceGetName( CResourceIDBase rid ) const
+lpctstr CResourceBase::ResourceGetName( const CResourceIDBase& rid ) const
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetName");
 	// Get a portable name for the resource id type.
 
-	CResourceDef * pResourceDef = dynamic_cast <CResourceDef *>( ResourceGetDef( rid ) );
+	CResourceDef * pResourceDef = ResourceGetDef( rid );
 	if ( pResourceDef )
 		return pResourceDef->GetResourceName();
 
