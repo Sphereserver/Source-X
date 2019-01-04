@@ -3018,7 +3018,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
     if ( pRock )
 	{
 		lpctstr t_Str = pRock->GetValStr();
-		CResourceIDBase rid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID( RES_ITEMDEF, t_Str ));
+		CResourceID rid = static_cast<CResourceID>(g_Cfg.ResourceGetID( RES_ITEMDEF, t_Str ));
 		id = (ITEMID_TYPE)(rid.GetResIndex());
 		if (!iDamage)
 			iDamage = Stat_GetVal(STAT_DEX)/4 + Calc_GetRandVal( Stat_GetVal(STAT_DEX)/4 );

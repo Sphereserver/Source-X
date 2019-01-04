@@ -2188,20 +2188,23 @@ void CItem::r_Write( CScript & s )
 		s.WriteKeyFormat("DAM", "%hu,%hu", m_attackBase, m_attackBase + m_attackRange);
 	if ( m_defenseBase )
 		s.WriteKeyFormat("ARMOR", "%hu,%hu", m_defenseBase, m_defenseBase + m_defenseRange);
-	if ( m_itNormal.m_more1 )
-	{
-		CSString sVal;
-		r_WriteMore1(sVal);
-		s.WriteKey("MORE1", sVal);
-	}
-	if ( m_itNormal.m_more2 )
-	{
-		CSString sVal;
-		r_WriteMore2(sVal);
-		s.WriteKey("MORE2", sVal);
-	}
-	if ( m_itNormal.m_morep.m_x || m_itNormal.m_morep.m_y || m_itNormal.m_morep.m_z || m_itNormal.m_morep.m_map )
-		s.WriteKey("MOREP", m_itNormal.m_morep.WriteUsed());
+    if (!GetSpawn())
+    {
+        if ( m_itNormal.m_more1 )
+        {
+            CSString sVal;
+            r_WriteMore1(sVal);
+            s.WriteKey("MORE1", sVal);
+        }
+        if ( m_itNormal.m_more2 )
+        {
+            CSString sVal;
+            r_WriteMore2(sVal);
+            s.WriteKey("MORE2", sVal);
+        }
+        if ( m_itNormal.m_morep.m_x || m_itNormal.m_morep.m_y || m_itNormal.m_morep.m_z || m_itNormal.m_morep.m_map )
+            s.WriteKey("MOREP", m_itNormal.m_morep.WriteUsed());
+    }
 
 	const CObjBase *pCont = GetContainer();
 	if ( pCont )
@@ -4568,7 +4571,7 @@ void CItem::Weapon_GetRangedAmmoAnim(ITEMID_TYPE &id, dword &hue, dword &render)
 	if ( pVarAnim )
 	{
 		lpctstr t_Str = pVarAnim->GetValStr();
-		CResourceIDBase rid(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
+		CResourceID rid(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
 		id = (ITEMID_TYPE)rid.GetResIndex();
 	}
 	else
@@ -4587,7 +4590,7 @@ void CItem::Weapon_GetRangedAmmoAnim(ITEMID_TYPE &id, dword &hue, dword &render)
 		render = (dword)pVarAnimRender->GetValNum();
 }
 
-CResourceIDBase CItem::Weapon_GetRangedAmmoRes()
+CResourceID CItem::Weapon_GetRangedAmmoRes()
 {
 	ADDTOCALLSTACK("CItem::Weapon_GetRangedAmmoRes");
 	// Get ammo resource id of this ranged weapon (archery/throwing)
@@ -4596,14 +4599,14 @@ CResourceIDBase CItem::Weapon_GetRangedAmmoRes()
 	if ( !sAmmoID.IsEmpty() )
 	{
 		lpctstr pszAmmoID = sAmmoID.GetPtr();
-		return CResourceIDBase(g_Cfg.ResourceGetID(RES_ITEMDEF, pszAmmoID));
+		return CResourceID(g_Cfg.ResourceGetID(RES_ITEMDEF, pszAmmoID));
 	}
 
 	CItemBase *pItemDef = Item_GetDef();
 	return pItemDef->m_ttWeaponBow.m_ridAmmo;
 }
 
-CItem *CItem::Weapon_FindRangedAmmo(CResourceIDBase id)
+CItem *CItem::Weapon_FindRangedAmmo(CResourceID id)
 {
 	ADDTOCALLSTACK("CItem::Weapon_FindRangedAmmo");
 	// Find ammo used by this ranged weapon (archery/throwing)
@@ -4623,7 +4626,7 @@ CItem *CItem::Weapon_FindRangedAmmo(CResourceIDBase id)
 		if ( pParent )
 		{
 			lpctstr pszContID = pVarCont->GetValStr();
-			CResourceIDBase ridCont(g_Cfg.ResourceGetID(RES_ITEMDEF, pszContID));
+			CResourceID ridCont(g_Cfg.ResourceGetID(RES_ITEMDEF, pszContID));
 			pCont = dynamic_cast<CContainer *>(pParent->ContentFind(ridCont));
 			if ( pCont )
 				return pCont->ContentFind(id);
@@ -5508,7 +5511,7 @@ void CItem::OnExplosion()
 	Sound(0x307);
 }
 
-bool CItem::IsResourceMatch( CResourceIDBase rid, dword dwArg )
+bool CItem::IsResourceMatch( CResourceID rid, dword dwArg )
 {
 	ADDTOCALLSTACK("CItem::IsResourceMatch");
 	// Check for all the matching special cases.

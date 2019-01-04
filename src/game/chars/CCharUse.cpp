@@ -472,7 +472,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 		return false;
 
 	CItem *pAmmo = nullptr;
-	CResourceIDBase ridAmmo = pWeapon->Weapon_GetRangedAmmoRes();
+	CResourceID ridAmmo = pWeapon->Weapon_GetRangedAmmoRes();
 	if ( ridAmmo )
 	{
 		pAmmo = pWeapon->Weapon_FindRangedAmmo(ridAmmo);

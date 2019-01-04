@@ -133,7 +133,7 @@ public:
      * @param   iDecendLevels   Zero-based index of the decend levels.
      * @return  null if it fails, else a pointer to a CItem.
      */
-	CItem * ContentFind( CResourceIDBase rid, dword dwArg = 0, int iDecendLevels = 255 ) const;
+	CItem * ContentFind( CResourceID rid, dword dwArg = 0, int iDecendLevels = 255 ) const;
 
     /**
      * @fn  TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, RESOURCE_ID_BASE rid, dword dwArg = 0, int iDecendLevels = 255 );
@@ -150,7 +150,7 @@ public:
      *
      * @return  A TRIGRET_TYPE.
      */
-	TRIGRET_TYPE OnContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, CResourceIDBase rid, dword dwArg = 0, int iDecendLevels = 255 );
+	TRIGRET_TYPE OnContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, CResourceID rid, dword dwArg = 0, int iDecendLevels = 255 );
 
     /**
      * @fn  TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, int iDecendLevels = 255 );
@@ -174,7 +174,7 @@ public:
      * @param   dwArg   The argument.
      * @return  An int.
      */
-	int ContentCount( CResourceIDBase rid, dword dwArg = 0 );
+	int ContentCount( CResourceID rid, dword dwArg = 0 );
 
     /**
      * @fn  size_t CContainer::ContentCountAll() const;
@@ -193,7 +193,7 @@ public:
      *
      * @return  An int.
      */
-	int ContentConsume( CResourceIDBase rid, int iQty = 1, bool fTest = false, dword dwArg = 0 );
+	int ContentConsume( CResourceID rid, int iQty = 1, bool fTest = false, dword dwArg = 0 );
 
     /**
      * @fn  int CContainer::ResourceConsume( const CResourceQtyArray * pResources, int iReplicationQty, bool fTest = false, dword dwArg = 0 );

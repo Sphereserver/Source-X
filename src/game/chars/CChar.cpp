@@ -2152,7 +2152,7 @@ do_default:
 					if ( !strnicmp(pszKey, "ID", 2 ) )
 					{
 						pszKey += 2;	// ID + whitspace
-						CChar * pChar = static_cast<CChar*>(static_cast<CUID>(Exp_GetSingle(pszKey)).CharFind());
+						CChar * pChar = static_cast<CChar*>( CUID(Exp_GetSingle(pszKey)).CharFind() );
 						if ( !NotoSave_GetID(pChar) )
 							sVal.FormatVal( -1 );
 						else
@@ -4386,54 +4386,51 @@ lbl_cchar_ontriggerspeech:
 // Gaining exp
 uint Calc_ExpGet_Exp(uint level)
 {
-	uint exp = 0;
-	for ( uint lev = 1; lev <= level; lev++ )
-	{
-		switch ( g_Cfg.m_iLevelMode )
-		{
-			case LEVEL_MODE_LINEAR:
-				exp += g_Cfg.m_iLevelNextAt;
-				break;
-			case LEVEL_MODE_DOUBLE:
-			default:
-				exp += (g_Cfg.m_iLevelNextAt * (lev + 1));
-				break;
-		}
-	}
-	return exp;
+    if (level <= 1)
+        return 0;
+    if (g_Cfg.m_iLevelMode == LEVEL_MODE_LINEAR)
+    {
+        return ((level-1) * g_Cfg.m_iLevelNextAt);
+    }
+    else // if (g_Cfg.m_iLevelMode == LEVEL_MODE_DOUBLE) // default
+    {
+        uint exp = 0;
+        for ( uint lev = 1; lev < level; ++lev )
+        {
+            exp += (g_Cfg.m_iLevelNextAt * (lev + 1));
+        }
+        return exp;
+    }
 }
 
 // Increasing level
 uint Calc_ExpGet_Level(uint exp)
 {
-	uint level = 0; // current level
-	uint req = g_Cfg.m_iLevelNextAt; // required xp for next level
-
-	if (req < 1)	//Must do this check in case ini's LevelNextAt is not set or server will freeze because exp will never decrease in the while.
+	if (g_Cfg.m_iLevelNextAt < 1)	//Must do this check in case ini's LevelNextAt is not set or server will freeze because exp will never decrease in the while.
     {
-        g_Log.EventWarn("Invalid LextNevelAt value.\n");
+        g_Log.EventError("Invalid LextNevelAt value.\n");
 		return 0;
     }
 
-	while (exp >= req)
-	{
-		// reduce xp and raise level
-		exp -= req;
-		++level;
+    if (g_Cfg.m_iLevelMode == LEVEL_MODE_LINEAR)
+    {
+        return 1 + (exp / g_Cfg.m_iLevelNextAt);
+    }
+    else // if (g_Cfg.m_iLevelMode == LEVEL_MODE_DOUBLE) // default
+    {
+        uint level = 0;
+        uint iNextLevelReq = 0;
+        while (exp >= iNextLevelReq)
+        {
+            // reduce xp and raise level
+            exp -= iNextLevelReq;
+            ++level;
 
-		// calculate requirement for next level
-		switch ( g_Cfg.m_iLevelMode )
-		{
-			case LEVEL_MODE_LINEAR:
-				break;
-			case LEVEL_MODE_DOUBLE:
-			default:
-				req += (g_Cfg.m_iLevelNextAt * level);
-				break;
-		}
-	}
-
-	return level;
+            // calculate requirement for next level
+            iNextLevelReq = (g_Cfg.m_iLevelNextAt * (level+1));
+        }
+        return level;
+    }
 }
 
 void CChar::ChangeExperience(llong delta, CChar *pCharDead)
@@ -4472,8 +4469,8 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 
 		if (g_Cfg.m_iDebugFlags&DEBUGF_EXP)
 		{
-			DEBUG_ERR(("%s %s experience change (was %u, delta %d, now %u)\n",
-				(m_pNPC ? "NPC" : "Player"), GetName(), m_exp, delta, m_exp + delta));
+			g_Log.EventDebug("%s %s experience change (was %u, delta %d, now %u)\n",
+				(m_pNPC ? "NPC" : "Player"), GetName(), m_exp, delta, m_exp + delta);
 		}
 
 		bool bShowMsg = (m_pClient != nullptr);
@@ -4546,8 +4543,8 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 				level = 0;
 			if (g_Cfg.m_iDebugFlags&DEBUGF_LEVEL)
 			{
-				DEBUG_ERR(("%s %s level change (was %u, delta %d, now %u)\n",
-					(m_pNPC ? "NPC" : "Player"), GetName(), m_level, delta, level));
+				g_Log.EventDebug("%s %s level change (was %u, delta %d, now %u)\n",
+					(m_pNPC ? "NPC" : "Player"), GetName(), m_level, delta, level);
 			}
 			m_level = (uint)level;
 

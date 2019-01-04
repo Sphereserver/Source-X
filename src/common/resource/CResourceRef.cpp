@@ -154,7 +154,7 @@ size_t CResourceRefArray::FindResourceType( RES_TYPE restype ) const
     return BadIndex();
 }
 
-size_t CResourceRefArray::FindResourceID( CResourceIDBase rid ) const
+size_t CResourceRefArray::FindResourceID( CResourceID rid ) const
 {
     ADDTOCALLSTACK("CResourceRefArray::FindResourceID");
     // Is this resource already in the list ?

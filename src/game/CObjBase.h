@@ -472,7 +472,7 @@ public:
      *
      * @return  true if resource match, false if not.
      */
-	virtual bool IsResourceMatch( CResourceIDBase rid, dword dwArg ) = 0;
+	virtual bool IsResourceMatch( CResourceID rid, dword dwArg ) = 0;
 
     /**
      * @fn  virtual int CObjBase::IsWeird() const;

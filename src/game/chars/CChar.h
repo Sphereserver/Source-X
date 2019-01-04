@@ -235,7 +235,7 @@ public:
 		// SKILL_FISHING
 		struct
 		{
-			CResourceIDBase m_ridType;	// ACTARG1 = Type of item we're harvesting
+			CResourceID m_ridType;	// ACTARG1 = Type of item we're harvesting
 			dword m_bounceItem;			// ACTARG2 = Drop item on backpack (true) or drop it on ground (false)
             dword m_Stroke_Count;		// ACTARG3 = All requiring multi strokes.
 		} m_atResource;
@@ -340,8 +340,8 @@ public:
 	int GetVisualRange() const;
 	void SetVisualRange(byte newSight);
 
-	bool IsResourceMatch( CResourceIDBase rid, dword dwArg );
-	bool IsResourceMatch( CResourceIDBase rid, dword dwArg, dword dwArgResearch );
+	bool IsResourceMatch( CResourceID rid, dword dwArg );
+	bool IsResourceMatch( CResourceID rid, dword dwArg, dword dwArgResearch );
 
 	bool IsSpeakAsGhost() const;
 	bool CanUnderstandGhost() const;

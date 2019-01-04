@@ -132,7 +132,7 @@ size_t CResourceQtyArray::FindResourceType( RES_TYPE type ) const
     return BadIndex();
 }
 
-size_t CResourceQtyArray::FindResourceID( CResourceIDBase rid ) const
+size_t CResourceQtyArray::FindResourceID( CResourceID rid ) const
 {
     ADDTOCALLSTACK("CResourceQtyArray::FindResourceID");
     // is this RESOURCE_ID in the array ?

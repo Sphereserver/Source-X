@@ -11,7 +11,7 @@
 #include "CClient.h"
 
 
-bool CClient::Dialog_Setup( CLIMODE_TYPE mode, CResourceIDBase rid, int iPage, CObjBase * pObj, lpctstr Arguments )
+bool CClient::Dialog_Setup( CLIMODE_TYPE mode, CResourceID rid, int iPage, CObjBase * pObj, lpctstr Arguments )
 {
 	ADDTOCALLSTACK("CClient::Dialog_Setup");
 	if ( pObj == nullptr )
@@ -131,7 +131,7 @@ bool CClient::addGumpDialogProps( CUID uid )
 	return true;
 }
 
-TRIGRET_TYPE CClient::Dialog_OnButton( CResourceIDBase rid, dword dwButtonID, CObjBase * pObj, CDialogResponseArgs * pArgs )
+TRIGRET_TYPE CClient::Dialog_OnButton( CResourceID rid, dword dwButtonID, CObjBase * pObj, CDialogResponseArgs * pArgs )
 {
 	ADDTOCALLSTACK("CClient::Dialog_OnButton");
 	// one of the gump dialog buttons was pressed.
@@ -212,7 +212,7 @@ bool CClient::Dialog_Close( CObjBase * pObj, dword rid, int buttonID )
 	return true;
 }
 
-TRIGRET_TYPE CClient::Menu_OnSelect( CResourceIDBase rid, int iSelect, CObjBase * pObj ) // Menus for general purpose
+TRIGRET_TYPE CClient::Menu_OnSelect( CResourceID rid, int iSelect, CObjBase * pObj ) // Menus for general purpose
 {
 	ADDTOCALLSTACK("CClient::Menu_OnSelect");
 	// A select was made. so run the script.
@@ -341,7 +341,7 @@ bool CMenuItem::ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole 
 	return( !m_sText.IsEmpty() );
 }
 
-void CClient::Menu_Setup( CResourceIDBase rid, CObjBase * pObj )
+void CClient::Menu_Setup( CResourceID rid, CObjBase * pObj )
 {
 	ADDTOCALLSTACK("CClient::Menu_Setup");
 	// Menus for general purpose

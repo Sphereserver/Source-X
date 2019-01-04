@@ -2526,17 +2526,20 @@ void CWorld::OnTick()
         while ( (it != itEnd) && (iCurTime > (iTime = it->first)))
         {
             TimedObjectsContainer& cont = it->second;
-            std::shared_lock<std::shared_mutex> lockCont(cont.THREAD_CMUTEX);
-            
-            for (CCTimedObject* pTimedObj : cont)
             {
-                if (_mWorldTickLookup.erase(pTimedObj) == 0)    // Double check: ensure this object exists also in the lookup cont
+                // Need here a new, inner scope for the shared_lock
+                std::shared_lock<std::shared_mutex> lockCont(cont.THREAD_CMUTEX);
+
+                for (CCTimedObject* pTimedObj : cont)
                 {
-                    it = _mWorldTickList.erase(it);
-                    continue;
+                    if (_mWorldTickLookup.erase(pTimedObj) == 0)    // Double check: ensure this object exists also in the lookup cont
+                    {
+                        it = _mWorldTickList.erase(it);
+                        continue;
+                    }
                 }
+                tmpMap[iTime] = cont;
             }
-            tmpMap[iTime] = cont;
             it = _mWorldTickList.erase(it);
         }
         EXC_CATCHSUB("Reading from _mWorldTickList");
@@ -2669,17 +2672,20 @@ void CWorld::OnTick()
         while ((charIt != charItEnd) && (iCurTime > (iTime = charIt->first)))
         {
             TimedCharsContainer& cont = charIt->second;
-            std::shared_lock<std::shared_mutex> lockCont(cont.THREAD_CMUTEX);
-
-            for (CChar* pChar : cont)
             {
-                if (_mCharTickLookup.erase(pChar) == 0) // Double check: ensure this object exists also in the lookup cont
+                // Need here a new, inner scope for the shared_lock
+                std::shared_lock<std::shared_mutex> lockCont(cont.THREAD_CMUTEX);
+
+                for (CChar* pChar : cont)
                 {
-                    charIt = _mCharTickList.erase(charIt);
-                    continue;
+                    if (_mCharTickLookup.erase(pChar) == 0) // Double check: ensure this object exists also in the lookup cont
+                    {
+                        charIt = _mCharTickList.erase(charIt);
+                        continue;
+                    }
                 }
+                tmpCharMap[iTime] = cont;
             }
-            tmpCharMap[iTime] = cont;
             charIt = _mCharTickList.erase(charIt);
             
         }
@@ -2706,39 +2712,40 @@ void CWorld::OnTick()
 
     m_ObjDelete.Clear();	// clean up our delete list (this DOES delete the objects, thanks to the virtual destructors).
 
+    const int64 iCurTimeRaw = GetCurrentTime().GetTimeRaw();
 
     // Save state checks
     // Notifications
-	if ( (m_bSaveNotificationSent == false) && ((m_timeSave - (10 * MSECS_PER_SEC)) <= GetCurrentTime().GetTimeRaw()) )
+	if ( (m_bSaveNotificationSent == false) && ((m_timeSave - (10 * MSECS_PER_SEC)) <= iCurTimeRaw) )
 	{
 		Broadcast( g_Cfg.GetDefaultMsg( DEFMSG_SERVER_WORLDSAVE_NOTIFY ) );
 		m_bSaveNotificationSent = true;
 	}
 
     // Save
-	if ( m_timeSave <= GetCurrentTime().GetTimeRaw())
+	if ( m_timeSave <= iCurTimeRaw)
 	{
 		// Auto save world
-		m_timeSave = GetCurrentTime().GetTimeRaw() + g_Cfg.m_iSavePeriod;
+		m_timeSave = iCurTimeRaw + g_Cfg.m_iSavePeriod;
 		g_Log.Flush();
 		Save( false );
 	}
 
     // Global (ini) stuff.
     // Respawn Dead NPCs
-	if ( m_timeRespawn <= GetCurrentTime().GetTimeRaw())
+	if ( m_timeRespawn <= iCurTimeRaw)
 	{
 		// Time to regen all the dead NPC's in the world.
-		m_timeRespawn = GetCurrentTime().GetTimeRaw() + (20 * 60 * MSECS_PER_SEC);
+		m_timeRespawn = iCurTimeRaw + (20 * 60 * MSECS_PER_SEC);
 		RespawnDeadNPCs();
 	}
 
     // f_onserver_timer function.
-	if ( m_timeCallUserFunc < GetCurrentTime().GetTimeRaw())
+	if ( m_timeCallUserFunc < iCurTimeRaw)
 	{
 		if ( g_Cfg._iTimerCall )
 		{
-			m_timeCallUserFunc = GetCurrentTime().GetTimeRaw() + g_Cfg._iTimerCall;
+			m_timeCallUserFunc = iCurTimeRaw + g_Cfg._iTimerCall;
 			CScriptTriggerArgs args(g_Cfg._iTimerCall/(60 * MSECS_PER_SEC));
 			g_Serv.r_Call("f_onserver_timer", &g_Serv, &args);
 		}

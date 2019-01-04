@@ -12,7 +12,7 @@
 class CResourceDef;
 
 
-class CResourceHashArray : public CSObjSortArray< CResourceDef*, CResourceIDBase >
+class CResourceHashArray : public CSObjSortArray< CResourceDef*, CResourceID >
 {
     // This list OWNS the CResourceDef and CResourceLink objects.
     // Sorted array of RESOURCE_ID
@@ -23,7 +23,7 @@ private:
     CResourceHashArray(const CResourceHashArray& copy);
     CResourceHashArray& operator=(const CResourceHashArray& other);
 public:
-    int CompareKey( CResourceIDBase rid, CResourceDef * pBase, bool fNoSpaces ) const;
+    int CompareKey( CResourceID rid, CResourceDef * pBase, bool fNoSpaces ) const;
 };
 
 class CResourceHash
@@ -39,7 +39,7 @@ private:
     CResourceHash(const CResourceHash& copy);
     CResourceHash& operator=(const CResourceHash& other);
 private:
-    int GetHashArray(const CResourceIDBase& rid) const
+    int GetHashArray(const CResourceID& rid) const
     {
         return (rid.GetResIndex() & 0x0F);
     }
@@ -48,10 +48,10 @@ public:
     {
         return m_Array[0].BadIndex();
     }
-    size_t FindKey(const CResourceIDBase& rid) const;
-    CResourceDef* GetAt(const CResourceIDBase& rid, size_t index) const;
-    size_t AddSortKey(const CResourceIDBase& rid, CResourceDef* pNew);
-    void SetAt(const CResourceIDBase& rid, size_t index, CResourceDef* pNew);
+    size_t FindKey(const CResourceID& rid) const;
+    CResourceDef* GetAt(const CResourceID& rid, size_t index) const;
+    size_t AddSortKey(const CResourceID& rid, CResourceDef* pNew);
+    void SetAt(const CResourceID& rid, size_t index, CResourceDef* pNew);
 };
 
 

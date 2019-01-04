@@ -3934,7 +3934,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 	return rid;
 }
 
-CResourceDef * CServerConfig::ResourceGetDef( CResourceIDBase rid ) const
+CResourceDef * CServerConfig::ResourceGetDef( const CResourceID& rid ) const
 {
 	ADDTOCALLSTACK("CServerConfig::ResourceGetDef");
 	// Get a CResourceDef from the RESOURCE_ID.

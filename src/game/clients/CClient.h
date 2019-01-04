@@ -191,7 +191,7 @@ public:
 		struct
 		{
 			CUIDBase m_UID;
-			CResourceIDBase m_PrvGumpID;	// the gump that was up before this
+			CResourceID m_PrvGumpID;	// the gump that was up before this
 		} m_tmInpVal;
 
 		// CLIMODE_MENU_*
@@ -200,7 +200,7 @@ public:
 		struct
 		{
 			CUIDBase m_UID;
-			CResourceIDBase m_ResourceID;		// What menu is this ?
+			CResourceID m_ResourceID;		// What menu is this ?
 			dword m_Item[MAX_MENU_ITEMS];	// This saves the inrange tracking targets or other context
 		} m_tmMenu;	// the menu that is up.
 
@@ -352,8 +352,8 @@ public:
 	bool Event_Walk( byte rawdir, byte sequence = 0 ); // Player moves
 	bool Event_CheckWalkBuffer();
 
-	TRIGRET_TYPE Menu_OnSelect( CResourceIDBase rid, int iSelect, CObjBase * pObj );
-	TRIGRET_TYPE Dialog_OnButton( CResourceIDBase rid, dword dwButtonID, CObjBase * pObj, CDialogResponseArgs * pArgs );
+	TRIGRET_TYPE Menu_OnSelect( CResourceID rid, int iSelect, CObjBase * pObj );
+	TRIGRET_TYPE Dialog_OnButton( CResourceID rid, dword dwButtonID, CObjBase * pObj, CDialogResponseArgs * pArgs );
 
 	bool Login_Relay( uint iServer ); // Relay player to a certain IP
 	byte Login_ServerList( const char * pszAccount, const char * pszPassword ); // Initial login (Login on "loginserver", new format)
@@ -369,14 +369,14 @@ public:
 private:
 	void Cmd_GM_PageInfo();
 	int Cmd_Extract( CScript * pScript, CRectMap &rect, int & zlowest );
-	size_t Cmd_Skill_Menu_Build( CResourceIDBase rid, int iSelect, CMenuItem* item, size_t iMaxSize, bool &fShowMenu, bool &fLimitReached );
+	size_t Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem* item, size_t iMaxSize, bool &fShowMenu, bool &fLimitReached );
 public:
 	void Cmd_GM_PageMenu( uint iEntryStart = 0 );
 	void Cmd_GM_PageCmd( lpctstr pCmd );
 	void Cmd_GM_PageSelect( size_t iSelect );
 	void Cmd_GM_Page( lpctstr pszreason); // Help button (Calls GM Call Menus up)
 
-	bool Cmd_Skill_Menu( CResourceIDBase rid, int iSelect = -1 );
+	bool Cmd_Skill_Menu( CResourceID rid, int iSelect = -1 );
 	bool Cmd_Skill_Smith( CItem * pIngots );
 	bool Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase * pSrc );
 	bool Cmd_Skill_Tracking( uint track_type = UINT32_MAX, bool fExec = false ); // Fill menu with specified creature types
@@ -684,9 +684,9 @@ public:
 	bool CanSee( const CObjBaseTemplate * pObj ) const;
 	bool CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const;
 
-	bool Dialog_Setup( CLIMODE_TYPE mode, CResourceIDBase rid, int iPage, CObjBase * pObj, lpctstr Arguments = "" );
+	bool Dialog_Setup( CLIMODE_TYPE mode, CResourceID rid, int iPage, CObjBase * pObj, lpctstr Arguments = "" );
 	bool Dialog_Close( CObjBase * pObj, dword rid, int buttonID );
-	void Menu_Setup( CResourceIDBase rid, CObjBase * pObj = nullptr );
+	void Menu_Setup( CResourceID rid, CObjBase * pObj = nullptr );
 
 	int OnSkill_Info( SKILL_TYPE skill, CUID uid, int iTestLevel, bool fTest );
 

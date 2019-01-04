@@ -92,7 +92,7 @@ enum RES_TYPE	// all the script resource blocks we know how to deal with !
 #define RES_NEWBIE_PROF_NINJA		(10000+10)
 
 
-struct CResourceIDBase : public CUIDBase
+struct CResourceID : public CUIDBase
 {
     // What is a Resource? Look at the comment made to the RES_TYPE enum.
     // RES_TYPE: Resource Type (look at the RES_TYPE enum entries).
@@ -112,26 +112,6 @@ struct CResourceIDBase : public CUIDBase
 #define RES_GET_PAGE(dw)    ( ( (dw) >> RES_PAGE_SHIFT ) & RES_PAGE_MASK )
 
 public:
-    RES_TYPE GetResType() const
-    {
-        return (RES_TYPE)(RES_GET_TYPE(m_dwInternalVal));
-    }
-    int GetResIndex() const
-    {
-        return RES_GET_INDEX(m_dwInternalVal);
-    }
-    int GetResPage() const
-    {
-        return RES_GET_PAGE(m_dwInternalVal);
-    }
-    bool operator == (const CResourceIDBase & rid) const
-    {
-        return (rid.m_dwInternalVal == m_dwInternalVal);
-    }
-};
-
-struct CResourceID : public CResourceIDBase
-{
     CResourceID()
     {
         InitUID();
@@ -152,12 +132,29 @@ struct CResourceID : public CResourceIDBase
         ASSERT(iPage < RES_PAGE_MASK);
         m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT) | (iPage << RES_PAGE_SHIFT) | index;
     }
-    CResourceIDBase & operator = (const CResourceIDBase & rid)
+    CResourceID & operator = (const CResourceID & rid)
     {
         ASSERT(rid.IsValidUID());
         ASSERT(rid.IsResource());
         m_dwInternalVal = rid.GetPrivateUID();
         return *this;
+    }
+
+    RES_TYPE GetResType() const
+    {
+        return (RES_TYPE)(RES_GET_TYPE(m_dwInternalVal));
+    }
+    int GetResIndex() const
+    {
+        return RES_GET_INDEX(m_dwInternalVal);
+    }
+    int GetResPage() const
+    {
+        return RES_GET_PAGE(m_dwInternalVal);
+    }
+    bool operator == (const CResourceID & rid) const
+    {
+        return (rid.m_dwInternalVal == m_dwInternalVal);
     }
 };
 

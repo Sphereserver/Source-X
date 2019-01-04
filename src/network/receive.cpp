@@ -2245,7 +2245,7 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 	if (net->isClientKR())
 		context = g_Cfg.GetKRDialogMap(context);
 
-	CResourceIDBase	rid	= CResourceID(RES_DIALOG, context);
+	CResourceID	rid	= CResourceID(RES_DIALOG, context);
 	//
 	// Call the scripted response. Lose all the checks and text.
 	//

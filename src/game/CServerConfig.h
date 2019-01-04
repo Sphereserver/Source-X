@@ -582,7 +582,7 @@ public:
      *
      * @return  null if it fails, else a pointer to a CResourceDef.
      */
-	CResourceDef * ResourceGetDef( CResourceIDBase rid ) const;
+	CResourceDef * ResourceGetDef( const CResourceID& rid ) const;
 
 	// Print EF/OF Flags
 	void PrintEFOFFlags( bool bEF = true, bool bOF = true, CTextConsole *pSrc = nullptr );

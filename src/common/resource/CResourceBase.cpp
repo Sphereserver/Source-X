@@ -275,7 +275,7 @@ bool CResourceBase::LoadResourceSection( CScript * pScript )
 //*********************************************************
 // Resource Block Definitions
 
-lpctstr CResourceBase::ResourceGetName( const CResourceIDBase& rid ) const
+lpctstr CResourceBase::ResourceGetName( const CResourceID& rid ) const
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetName");
 	// Get a portable name for the resource id type.
@@ -372,7 +372,7 @@ int CResourceBase::ResourceGetIndexType( RES_TYPE restype, lpctstr pszName )
 	return rid.GetResIndex();
 }
 
-CResourceDef * CResourceBase::ResourceGetDef( CResourceIDBase rid ) const
+CResourceDef * CResourceBase::ResourceGetDef( CResourceID rid ) const
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetDef");
 	if ( ! rid.IsValidUID() )
@@ -386,7 +386,7 @@ CResourceDef * CResourceBase::ResourceGetDef( CResourceIDBase rid ) const
 //*******************************************************
 // Open resource blocks.
 
-bool CResourceBase::ResourceLock( CResourceLock & s, CResourceIDBase rid )
+bool CResourceBase::ResourceLock( CResourceLock & s, CResourceID rid )
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceLock");
 	// Lock a referenced resource object.

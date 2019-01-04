@@ -70,12 +70,12 @@ public:
     void WriteKeys( tchar * pszArgs, size_t index = 0, bool fQtyOnly = false, bool fKeyOnly = false ) const;
     void WriteNames( tchar * pszArgs, size_t index = 0 ) const;
 
-    size_t FindResourceID( CResourceIDBase rid ) const;
+    size_t FindResourceID( CResourceID rid ) const;
     size_t FindResourceType( RES_TYPE type ) const;
     size_t FindResourceMatch( CObjBase * pObj ) const;
     bool IsResourceMatchAll( CChar * pChar ) const;
 
-    inline bool ContainsResourceID( CResourceIDBase & rid ) const
+    inline bool ContainsResourceID( CResourceID & rid ) const
     {
         return FindResourceID(rid) != BadIndex();
     }

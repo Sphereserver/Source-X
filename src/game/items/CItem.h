@@ -248,7 +248,7 @@ public:
 		// IT_MEAT_RAW
 		struct
 		{
-			CResourceIDBase m_ridCook;	// more1=Cooks into this. (only if raw)
+			CResourceID m_ridCook;	// more1=Cooks into this. (only if raw)
 			CREID_TYPE m_MeatType;		// more2= Meat from what type of creature ?
 			word m_spell;				// morex=SPELL_TYPE = The magic spell cast on this. ( effect of eating.)
 			word m_spelllevel;			// morey=level of the spell. (0-1000)
@@ -259,7 +259,7 @@ public:
 		// IT_DRINK
 		struct
 		{
-			CResourceIDBase m_ridCook;	// more1=Cooks into this. (only if raw)
+			CResourceID m_ridCook;	// more1=Cooks into this. (only if raw)
 			CREID_TYPE m_MeatType;		// more2= Meat from what type of creature ?
 			word m_spell;				// morex=SPELL_TYPE = The magic spell cast on this. ( effect of eating.)
 			word m_spelllevel;			// morey=level of the spell. (0-1000)
@@ -302,7 +302,7 @@ public:
 		// IT_SPAWN_ITEM
 		struct
 		{
-			CResourceIDBase m_ItemID;	// more1=The ITEMID_* or template for items
+			CResourceID m_ItemID;	// more1=The ITEMID_* or template for items
 			dword	m_pile;				// more2=The max # of items to spawn per interval.  If this is 0, spawn up to the total amount.
 			word	m_TimeLoMin;		// morex=Lo time in minutes.
 			word	m_TimeHiMin;		// morey=Hi time in minutes.
@@ -313,7 +313,7 @@ public:
 		// IT_SPAWN_CHAR
 		struct
 		{
-			CResourceIDBase m_CharID;	// more1=CREID_*,  or SPAWNTYPE_*,
+			CResourceID m_CharID;	// more1=CREID_*,  or SPAWNTYPE_*,
 			dword	m_unused;		// more2=used only by IT_SPAWN_ITEM, keeping it only for mantaining the structure of the union.
 			word	m_TimeLoMin;		// morex=Lo time in minutes.
 			word	m_TimeHiMin;		// morey=Hi time in minutes.
@@ -334,7 +334,7 @@ public:
 		// IT_MESSAGE
 		struct
 		{
-			CResourceIDBase m_ResID;	// more1 = preconfigured book id from RES_BOOK or Time date stamp for the book/message creation. (if |0x80000000)
+			CResourceID m_ResID;	// more1 = preconfigured book id from RES_BOOK or Time date stamp for the book/message creation. (if |0x80000000)
 		} m_itBook;
 
 		// IT_DEED
@@ -349,7 +349,7 @@ public:
 		struct
 		{
 			int m_Respawn_Sec;					// more1 = plant respawn time in seconds. (for faster growth plants)
-			CResourceIDBase m_ridFruitOverride;	// more2 = Override for TDATA2 = What is the fruit of this plant
+			CResourceID m_ridFruitOverride;	// more2 = Override for TDATA2 = What is the fruit of this plant
 		} m_itCrop;
 
 		// IT_TREE
@@ -358,7 +358,7 @@ public:
 		// ? IT_GRASS
 		struct	// Natural resources. tend to be statics.
 		{
-			CResourceIDBase m_ridRes;	// more1 = base resource type. RES_REGIONRESOURCE
+			CResourceID m_ridRes;	// more1 = base resource type. RES_REGIONRESOURCE
 		} m_itResource;
 
 		// IT_FIGURINE
@@ -436,14 +436,14 @@ public:
 		// IT_LOOM
 		struct
 		{
-			CResourceIDBase m_ridCloth;	// more1 = the cloth type currenctly loaded here.
+			CResourceID m_ridCloth;	// more1 = the cloth type currenctly loaded here.
 			int m_ClothQty;				// more2 = IS the loom loaded with cloth ?
 		} m_itLoom;
 
 		// IT_ARCHERY_BUTTE
 		struct
 		{
-			CResourceIDBase m_ridAmmoType;	// more1 = arrow or bolt currently stuck in it.
+			CResourceID m_ridAmmoType;	// more1 = arrow or bolt currently stuck in it.
 			int m_AmmoCount;				// more2 = how many arrows or bolts ?
 		} m_itArcheryButte;
 
@@ -747,7 +747,7 @@ public:    /**
 	bool IsTypeSpellable() const;
     bool IsTypeEquippable() const;
 
-	bool IsResourceMatch( CResourceIDBase rid, dword dwArg );
+	bool IsResourceMatch( CResourceID rid, dword dwArg );
 
 	bool IsValidLockLink( CItem * pItemLock ) const;
 	bool IsValidLockUID() const;
@@ -795,8 +795,8 @@ public:    /**
 	SOUND_TYPE Weapon_GetSoundHit() const;
 	SOUND_TYPE Weapon_GetSoundMiss() const;
 	void Weapon_GetRangedAmmoAnim(ITEMID_TYPE &id, dword &hue, dword &render);
-	CResourceIDBase Weapon_GetRangedAmmoRes();
-	CItem *Weapon_FindRangedAmmo(CResourceIDBase id);
+	CResourceID Weapon_GetRangedAmmoRes();
+	CItem *Weapon_FindRangedAmmo(CResourceID id);
 
 	bool IsMemoryTypes( word wType ) const;
 

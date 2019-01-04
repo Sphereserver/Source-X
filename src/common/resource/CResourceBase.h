@@ -42,13 +42,13 @@ public:
 	CResourceID ResourceGetID( RES_TYPE restype, lpctstr ptcName );
 	CResourceID ResourceGetIDType( RES_TYPE restype, lpctstr pszName );
 	int ResourceGetIndexType( RES_TYPE restype, lpctstr pszName );
-	lpctstr ResourceGetName( const CResourceIDBase& rid ) const;
+	lpctstr ResourceGetName( const CResourceID& rid ) const;
 	CScriptObj * ResourceGetDefByName( RES_TYPE restype, lpctstr pszName )
 	{
 		// resolve a name to the actual resource def.
 		return ResourceGetDef(ResourceGetID(restype, pszName));
 	}
-	bool ResourceLock( CResourceLock & s, CResourceIDBase rid );
+	bool ResourceLock( CResourceLock & s, CResourceID rid );
 	bool ResourceLock( CResourceLock & s, RES_TYPE restype, lpctstr pszName )
 	{
 		return ResourceLock(s, ResourceGetIDType(restype, pszName));
@@ -57,7 +57,7 @@ public:
 	CResourceScript * FindResourceFile( lpctstr pszTitle );
 	CResourceScript * LoadResourcesAdd( lpctstr pszNewName );
 
-	virtual CResourceDef * ResourceGetDef( CResourceIDBase rid ) const;
+	virtual CResourceDef * ResourceGetDef( CResourceID rid ) const;
 	virtual bool OpenResourceFind( CScript &s, lpctstr pszFilename, bool bCritical = true );
 	virtual bool LoadResourceSection( CScript * pScript ) = 0;
 

@@ -292,7 +292,7 @@ void CChar::NPC_Act_Fight()
                 if (pRock)
                 {
                     lpctstr t_Str = pRock->GetValStr();
-                    CResourceIDBase rid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
+                    CResourceID rid = static_cast<CResourceID>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
                     ITEMID_TYPE obj = (ITEMID_TYPE)(rid.GetResIndex());
                     if (ContentFind(CResourceID(RES_ITEMDEF, obj), 0, 2))
                         id = ITEMID_NODRAW;
