@@ -1437,3 +1437,6 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 
 03-01-2019, Nolok
 - Fixed: ExperienceMode 08 flag (don't go below the current level when losing exp) didn't work (Issue #167).
+
+05-01-2019, Nolok
+- Fixed: Sometimes setting a spawn's SpawnID to a spawn group or a template generated bad spawn point with an invalid SpawnID (Issue #179).

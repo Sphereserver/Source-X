@@ -969,8 +969,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 						if ( !pSector )
 							continue;
 
-						CItem	*pNext;
-						CItem	*pItem = static_cast <CItem*>(pSector->m_Items_Timer.GetHead());
+						CItem *pNext;
+						CItem *pItem = static_cast <CItem*>(pSector->m_Items_Timer.GetHead());
 						for ( ; pItem != nullptr && !fFound; pItem = pNext )
 						{
 							pNext = pItem->GetNext();
@@ -983,9 +983,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
                                     const CResourceDef *pDef = pSpawn->FixDef();
                                     if (!pDef)
                                     {
-                                        CResourceID	rid = (pItem->IsType(IT_SPAWN_ITEM) ? pItem->m_itSpawnItem.m_ItemID : pItem->m_itSpawnChar.m_CharID);
-
-                                        const CPointMap& pt = pItem->GetTopPoint();
+                                        const CResourceID& rid = pSpawn->GetSpawnID();
+                                        const CPointMap&   pt  = pItem->GetTopPoint();
                                         m_pChar->Spell_Teleport(pt, true, false);
                                         m_pChar->m_Act_UID = pItem->GetUID();
                                         SysMessagef("Bad spawn (0%x, id=%s). Set as ACT", (dword)pItem->GetUID(), g_Cfg.ResourceGetName(rid));

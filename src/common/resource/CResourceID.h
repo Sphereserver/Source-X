@@ -134,7 +134,6 @@ public:
     }
     CResourceID & operator = (const CResourceID & rid)
     {
-        ASSERT(rid.IsValidUID());
         ASSERT(rid.IsResource());
         m_dwInternalVal = rid.GetPrivateUID();
         return *this;

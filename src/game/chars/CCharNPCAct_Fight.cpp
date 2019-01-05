@@ -340,7 +340,7 @@ void CChar::NPC_Act_Fight()
         NPC_LookAround();
         if (!IsTimerSet())
         {
-            g_Log.EventWarn("%s [0x%04x] found nothing to do in the fight routines.\n", GetName(), (dword)GetUID());
+            DEBUG_MSG(("%s [0x%04x] found nothing to do in the fight routines.\n", GetName(), (dword)GetUID()));
             SetTimeoutS(1);
         }
     }

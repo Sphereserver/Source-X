@@ -280,14 +280,14 @@ lpctstr CResourceBase::ResourceGetName( const CResourceID& rid ) const
 	ADDTOCALLSTACK("CResourceBase::ResourceGetName");
 	// Get a portable name for the resource id type.
 
-	CResourceDef * pResourceDef = ResourceGetDef( rid );
+	const CResourceDef * pResourceDef = ResourceGetDef( rid );
 	if ( pResourceDef )
 		return pResourceDef->GetResourceName();
 
 	tchar * pszTmp = Str_GetTemp();
 	ASSERT(pszTmp);
 	if ( !rid.IsValidUID() )
-		sprintf( pszTmp, "%" PRIx32, rid.GetPrivateUID() );
+		sprintf( pszTmp, "%d", (int)rid.GetPrivateUID() );
 	else
 		sprintf( pszTmp, "0%" PRIx32, rid.GetResIndex() );
 	return pszTmp;
@@ -317,8 +317,6 @@ CResourceID CResourceBase::ResourceGetIDParse(RES_TYPE restype, lpctstr &ptcName
     // RETURN:
     //  pszName is now set to be after the expression.
 
-    // We are NOT creating.
-    CResourceID rid;
 
     // Try to handle private name spaces.
     /*
@@ -336,11 +334,16 @@ CResourceID CResourceBase::ResourceGetIDParse(RES_TYPE restype, lpctstr &ptcName
     }
     */
 
-    rid.SetPrivateUID(Exp_GetVal(ptcName));	// May be some complex expression {}
+    dword dwPrivateUID = Exp_GetDWVal(ptcName);    // May be some complex expression {}
 
-    if ( restype != RES_UNKNOWN && rid.GetResType() == RES_UNKNOWN )
-        return CResourceID( restype, rid.GetResIndex());	// Label it with the type we want.
+    // We are NOT creating.
+    if ( (restype != RES_UNKNOWN) && (RES_GET_TYPE(dwPrivateUID) == RES_UNKNOWN) )
+        return CResourceID( restype, RES_GET_INDEX(dwPrivateUID));	// Label it with the type we want.
 
+    if ( !(dwPrivateUID & UID_F_RESOURCE) ) // This typically happens when ptcName is not a valid/existing resource, so dwPrivateUID is 0.
+        dwPrivateUID |= UID_F_RESOURCE;     // Do this because CResourceID always needs to be a valid resource (there's an ASSERT in CResourceID copy constructor).
+    CResourceID rid;
+    rid.SetPrivateUID(dwPrivateUID);
     return rid;
 }
 
