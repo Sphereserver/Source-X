@@ -980,12 +980,12 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
                                 CCSpawn *pSpawn = pItem->GetSpawn();
                                 if (pSpawn)
                                 {
-                                    CResourceDef *pDef = pSpawn->FixDef();
+                                    const CResourceDef *pDef = pSpawn->FixDef();
                                     if (!pDef)
                                     {
                                         CResourceID	rid = (pItem->IsType(IT_SPAWN_ITEM) ? pItem->m_itSpawnItem.m_ItemID : pItem->m_itSpawnChar.m_CharID);
 
-                                        CPointMap pt = pItem->GetTopPoint();
+                                        const CPointMap& pt = pItem->GetTopPoint();
                                         m_pChar->Spell_Teleport(pt, true, false);
                                         m_pChar->m_Act_UID = pItem->GetUID();
                                         SysMessagef("Bad spawn (0%x, id=%s). Set as ACT", (dword)pItem->GetUID(), g_Cfg.ResourceGetName(rid));

@@ -128,42 +128,42 @@ public:
     /**
     * @brief Setting display ID based on Character's Figurine or the default display ID if this is an IT_SPAWN_ITEM.
     */
-    CCharBase * SetTrackID();
+    const CCharBase * SetTrackID();
 
     /**
     * @brief Generate a *pDef item from this spawn.
     *
     * @param pDef resource to create
     */
-    void GenerateItem(CResourceDef * pDef);
+    void GenerateItem(const CResourceDef * pDef);
 
     /**
     * @brief Generate a *pDef char from this spawn.
     *
     * @param pDef resource to create
     */
-    void GenerateChar(CResourceDef * pDef);
+    void GenerateChar(const CResourceDef * pDef);
 
     /**
     * @brief Removing one UID in Spawn's m_obj[].
     *
     * @param UID of the obj to remove.
     */
-    void DelObj(CUID uid);
+    void DelObj(const CUID& uid);
 
     /**
     * @brief Storing one UID in Spawn's m_obj[].
     *
     * @param UID of the obj to add.
     */
-    void AddObj(CUID uid);
+    void AddObj(const CUID& uid);
 
     /**
-    * @brief Get a proper RESOURCE_ID from the id provided.
+    * @brief Get a proper CResourceID from the id provided.
     *
-    * @return a valid RESOURCE_ID.
+    * @return a valid CResourceDef.
     */
-    CResourceDef * FixDef();
+    const CResourceDef * FixDef();
 
     /**
     * @brief Gets the name of the resource created (item or char).
