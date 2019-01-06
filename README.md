@@ -40,13 +40,13 @@ Install MySQL client: `sudo apt-get install libmysql++`
 Install MySQL client (the default repository supports only the MariaDB client, so we need to install MySQL manually):<br>
 For 64 bits builds:<br>
 ```
-wget http://security.debian.org/debian-security/pool/updates/main/m/mysql-5.5/libmysqlclient18_5.5.60-0+deb8u1_amd64.deb
-sudo dpkg -i libmysqlclient18_5.5.60-0+deb8u1_amd64.deb
+wget http://security.debian.org/debian-security/pool/updates/main/m/mysql-5.5/libmysqlclient18_5.5.62-0+deb8u1_amd64.deb
+sudo dpkg -i libmysqlclient18_5.5.62-0+deb8u1_amd64.deb
 ```
 For 32 bits builds:<br>
 ```
-wget http://security.debian.org/debian-security/pool/updates/main/m/mysql-5.5/libmysqlclient18_5.5.60-0+deb8u1_i386.deb
-sudo dpkg -i libmysqlclient18_5.5.60-0+deb8u1_i386.deb
+wget http://security.debian.org/debian-security/pool/updates/main/m/mysql-5.5/libmysqlclient18_5.5.62-0+deb8u1_i386.deb
+sudo dpkg -i libmysqlclient18_5.5.62-0+deb8u1_i386.deb
 ```
 
 #### CentOS 6 / 7 - Red Hat 6 / 7 - Fedora 26+
@@ -77,7 +77,7 @@ How to set a toolchain:
  was not set, by default the makefiles for all of the three build types are generated.<br>
 <br />
 You can also add other compiler flags, like optimization flags, with the custom variables C_FLAGS_EXTRA and CXX_FLAGS_EXTRA.<br>
-Example of CMake CLI additional parameters: <br>
+Example of CMake CLI additional parameters:<br>
 ```
 -DC_FLAGS_EXTRA="-mtune=native" -DCXX_FLAGS_EXTRA="-mtune=native"
 ```

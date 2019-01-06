@@ -151,6 +151,92 @@ void CRegion::SetName( lpctstr pszName )
 	}
 }
 
+bool CRegion::MakeRegionDefname()
+{
+    ADDTOCALLSTACK("CRegion::MakeRegionDefname");
+    if ( m_pDefName )
+        return true;
+
+    tchar ch;
+    lpctstr pszKey = nullptr;	// auxiliary, the key of a similar CVarDef, if any found
+    tchar * pbuf = Str_GetTemp();
+    tchar * pszDef = pbuf + 2;
+    strcpy(pbuf, "a_");
+
+    lpctstr pszName = GetName();
+    GETNONWHITESPACE( pszName );
+
+    if ( !strnicmp( "the ", pszName, 4 ) )
+        pszName	+= 4;
+    else if ( !strnicmp( "a ", pszName, 2 ) )
+        pszName	+= 2;
+    else if ( !strnicmp( "an ", pszName, 3 ) )
+        pszName	+= 3;
+    else if ( !strnicmp( "ye ", pszName, 3 ) )
+        pszName	+= 3;
+
+    for ( ; *pszName; ++pszName )
+    {
+        if ( !strnicmp( " of ", pszName, 4 ) || !strnicmp( " in ", pszName, 4 ) )
+        {	pszName	+= 4;	continue;	}
+        if ( !strnicmp( " the ", pszName, 5 )  )
+        {	pszName	+= 5;	continue;	}
+
+        ch	= *pszName;
+        if ( ch == ' ' || ch == '\t' || ch == '-' )
+            ch	= '_';
+        else if ( !iswalnum( ch ) )
+            continue;
+        // collapse multiple spaces together
+        if ( ch == '_' && *(pszDef-1) == '_' )
+            continue;
+        *pszDef = static_cast<tchar>(tolower(ch));
+        ++pszDef;
+    }
+    *pszDef	= '_';
+    *(++pszDef)	= '\0';
+
+
+    size_t iMax = g_Cfg.m_RegionDefs.size();
+    int iVar = 1;
+    size_t iLen = strlen( pbuf );
+
+    for ( size_t i = 0; i < iMax; ++i )
+    {
+        CRegion * pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs[i]);
+        if ( !pRegion )
+            continue;
+        pszKey = pRegion->GetResourceName();
+        if ( !pszKey )
+            continue;
+
+        // Is this a similar key?
+        if ( strnicmp( pbuf, pszKey, iLen ) != 0 )
+            continue;
+
+        // skip underscores
+        pszKey = pszKey + iLen;
+        while ( *pszKey	== '_' )
+            ++pszKey;
+
+        // Is this is subsequent key with a number? Get the highest (plus one)
+        if ( IsStrNumericDec( pszKey ) )
+        {
+            int iVarThis = ATOI( pszKey );
+            if ( iVarThis >= iVar )
+                iVar = iVarThis + 1;
+        }
+        else
+            ++iVar;
+    }
+
+    // Only one, no need for the extra "_"
+    sprintf( pszDef, "%i", iVar );
+    SetResourceName( pbuf );
+    // Assign name
+    return true;
+}
+
 enum RC_TYPE
 {
 	RC_ANNOUNCE,

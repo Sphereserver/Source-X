@@ -17,7 +17,7 @@ CCacheableScriptFile::CCacheableScriptFile()
 
 CCacheableScriptFile::~CCacheableScriptFile() 
 {
-    Close();
+    //_Close(); // No need to Close(), since it's already done by CSFileText destructor.
     if ( _fRealFile && _fileContent )   // be sure that i'm the original file and not a copy/link
     {
         delete _fileContent;

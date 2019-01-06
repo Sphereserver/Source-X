@@ -1106,6 +1106,7 @@ Multis:
 - Fixed: multi (ships or houses) keys were only added to the bank, without adding a copy on the backpack.
 
 22-08-2018, XuN
+WARNING: This commit has 
 - Changed tick periods from 0.1s to 0.25s, read https://github.com/Sphereserver/Source-experimental/issues/125 for more information.
 - DEPRECATED TIMERD, a warning will be shown each time it's used.
 - ADDED TIMERT timing each TICK.
@@ -1440,3 +1441,7 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 
 05-01-2019, Nolok
 - Fixed: Sometimes setting a spawn's SpawnID to a spawn group or a template generated bad spawn point with an invalid SpawnID (Issue #179).
+
+06-01-2019, Nolok
+- Changed: Now the resync won't reload again tiledata.mul and verdata.mul and it won't index again the client files, since those files were already write-locked while Sphere was running.
+- Fixed: The feature of auto-generating a defname for malformed AREADEFs lacking a defname but having a name set wasn't working.

@@ -132,17 +132,13 @@ public:
 
     /**
     * @brief Generate a *pDef item from this spawn.
-    *
-    * @param pDef resource to create
     */
-    void GenerateItem(const CResourceDef * pDef);
+    void GenerateItem();
 
     /**
     * @brief Generate a *pDef char from this spawn.
-    *
-    * @param pDef resource to create
     */
-    void GenerateChar(const CResourceDef * pDef);
+    void GenerateChar();
 
     /**
     * @brief Removing one UID in Spawn's m_obj[].

@@ -19,7 +19,10 @@ CSFile::CSFile()
 
 CSFile::~CSFile()
 {
-    CSFile::Close();
+    if ( CSFile::_IsFileOpen() )
+    {
+        CSFile::Close();
+    }
 }
 
 

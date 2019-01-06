@@ -119,20 +119,29 @@ public:
     CResourceID(RES_TYPE restype)
     {
         // single instance type.
+        ASSERT(restype < RES_TYPE_MASK);
         m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT);
     }
-    CResourceID(RES_TYPE restype, int index)
+    CResourceID(RES_TYPE restype, int iIndex)
     {
-        ASSERT(index < RES_INDEX_MASK);
-        m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT) | index;
+        ASSERT(restype < RES_TYPE_MASK);
+        ASSERT(iIndex < RES_INDEX_MASK);
+        m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT) | iIndex;
     }
-    CResourceID(RES_TYPE restype, int index, int iPage)
+    CResourceID(RES_TYPE restype, int iIndex, int iPage)
     {
-        ASSERT(index < RES_INDEX_MASK);
+        ASSERT(restype < RES_TYPE_MASK);
+        ASSERT(iIndex < RES_INDEX_MASK);
         ASSERT(iPage < RES_PAGE_MASK);
-        m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT) | (iPage << RES_PAGE_SHIFT) | index;
+        m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT) | (iPage << RES_PAGE_SHIFT) | iIndex;
     }
-    CResourceID & operator = (const CResourceID & rid)
+
+    CResourceID(const CResourceID & rid)                // copy constructor
+    {
+        ASSERT(rid.IsResource());
+        m_dwInternalVal = rid.GetPrivateUID();
+    }
+    CResourceID & operator = (const CResourceID & rid)  // assignment operator
     {
         ASSERT(rid.IsResource());
         m_dwInternalVal = rid.GetPrivateUID();

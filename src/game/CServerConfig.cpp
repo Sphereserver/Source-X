@@ -3148,7 +3148,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				// if it's old style but has a defname, it's already set via r_Load,
 				// so this will do nothing, which is good
 				// if ( !fNewStyleDef )
-				//	pRegion->MakeRegionName();
+				//	pRegion->MakeRegionDefname();
 				m_RegionDefs.push_back(pRegion);
 			}
 		}
@@ -3178,7 +3178,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				// if it's old style but has a defname, it's already set via r_Load,
 				// so this will do nothing, which is good
 				// if ( !fNewStyleDef )
-				//	pRegion->MakeRegionName();
+				//	pRegion->MakeRegionDefname();
 				m_RegionDefs.push_back(pRegion);
 			}
 		}
@@ -4152,9 +4152,11 @@ void CServerConfig::Unload( bool fResync )
 	ADDTOCALLSTACK("CServerConfig::Unload");
 	if ( fResync )
 	{
-		// Unlock all the SCP and MUL files.
-		g_Install.CloseFiles();
-		for ( size_t j = 0; ; j++ )
+		// Unlock all the MUL/UOP files.
+		//g_Install.CloseFiles();   // Don't do this, since now we don't load again those files on resync.
+
+        // Unlock all the SCP files.
+		for ( size_t j = 0; ; ++j )
 		{
 			CResourceScript * pResFile = GetResourceFile(j);
 			if ( pResFile == nullptr )
@@ -4203,48 +4205,48 @@ bool CServerConfig::Load( bool fResync )
 	if ( ! fResync )
 	{
 		g_Install.FindInstall();
+
+        // Open the MUL files I need.
+        g_Log.Event(LOGM_INIT, "\nIndexing the client files...\n");
+        VERFILE_TYPE i = g_Install.OpenFiles(
+            (1ull<<VERFILE_MAP)|
+            (1<<VERFILE_STAIDX)|
+            (1<<VERFILE_STATICS)|
+            (1<<VERFILE_TILEDATA)|
+            (1<<VERFILE_MULTIIDX)|
+            (1<<VERFILE_MULTI)|
+            (1<<VERFILE_VERDATA)
+        );
+        if ( i != VERFILE_QTY )
+        {
+            g_Log.Event( LOGL_FATAL|LOGM_INIT, "File '%s' not found...\n", g_Install.GetBaseFileName(i));
+            return false;
+        }
+
+        // Load the optional verdata cache. (modifies MUL stuff)
+        try
+        {
+            g_VerData.Load( g_Install.m_File[VERFILE_VERDATA] );
+        }
+        catch ( const CSError& e )
+        {
+            g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".ini file is corrupt, missing, or there was an error while loading the settings.\n" );
+            g_Log.CatchEvent( &e, "g_VerData.Load" );
+            CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+            return false;
+        }
+        catch (...)
+        {
+            g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".ini file is corrupt, missing, or there was an error while loading the settings.\n" );
+            g_Log.CatchEvent( nullptr, "g_VerData.Load" );
+            CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+            return false;
+        }
 	}
 	else
 	{
 		m_scpIni.ReSync();
 		m_scpIni.CloseForce();
-	}
-
-	// Open the MUL files I need.
-	g_Log.Event(LOGM_INIT, "\nIndexing the client files...\n");
-	VERFILE_TYPE i = g_Install.OpenFiles(
-		(1<<VERFILE_MAP)|
-		(1<<VERFILE_STAIDX)|
-		(1<<VERFILE_STATICS)|
-		(1<<VERFILE_TILEDATA)|
-		(1<<VERFILE_MULTIIDX)|
-		(1<<VERFILE_MULTI)|
-		(1<<VERFILE_VERDATA)
-		);
-	if ( i != VERFILE_QTY )
-	{
-		g_Log.Event( LOGL_FATAL|LOGM_INIT, "File '%s' not found...\n", g_Install.GetBaseFileName(i));
-		return false;
-	}
-
-	// Load the optional verdata cache. (modifies MUL stuff)
-	try
-	{
-		g_VerData.Load( g_Install.m_File[VERFILE_VERDATA] );
-	}
-	catch ( const CSError& e )
-	{
-		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".ini file is corrupt, missing, or there was an error while loading the settings.\n" );
-		g_Log.CatchEvent( &e, "g_VerData.Load" );
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
-		return false;
-	}
-	catch (...)
-	{
-		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".ini file is corrupt, missing, or there was an error while loading the settings.\n" );
-		g_Log.CatchEvent( nullptr, "g_VerData.Load" );
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
-		return false;
 	}
 
 	// Now load the *TABLES.SCP file.
@@ -4270,8 +4272,8 @@ bool CServerConfig::Load( bool fResync )
 	{
 		g_Log.Printf("\n");
 		g_Log.Event(LOGM_INIT, "Initializing the world...\n");
+        g_World.Init();
 	}
-	g_World.Init();
 
 	// open and index all my script files i'm going to use.
 	AddResourceDir( m_sSCPBaseDir );		// if we want to get *.SCP files from elsewhere.
@@ -4331,16 +4333,14 @@ bool CServerConfig::Load( bool fResync )
 	}
 
 	// Make region DEFNAMEs
-	{
-		size_t iMax = g_Cfg.m_RegionDefs.size();
-		for ( size_t k = 0; k < iMax; ++k )
-		{
-			CRegion * pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs[i]);
-			if ( !pRegion )
-				continue;
-			pRegion->MakeRegionName();
-		}
-	}
+    size_t iRegionMax = g_Cfg.m_RegionDefs.size();
+    for (size_t k = 0; k < iRegionMax; ++k)
+    {
+        CRegion * pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs[k]);
+        if (!pRegion)
+            continue;
+        pRegion->MakeRegionDefname();
+    }
 
 	// parse eventsitem
 	m_iEventsItemLink.clear();
