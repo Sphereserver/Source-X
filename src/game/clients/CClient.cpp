@@ -1081,40 +1081,40 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 
 		case CV_CLOSEPAPERDOLL:
 			{
-				CChar *pChar = m_pChar;
+                const CChar *pChar = m_pChar;
 				if ( s.HasArgs() )
 				{
-					CUID uid = s.GetArgVal();
+                    const CUID uid(s.GetArgDWVal());
 					pChar = uid.CharFind();
 				}
 				if ( pChar )
-					closeUIWindow(pChar, 0x01);
+					closeUIWindow(pChar, PacketCloseUIWindow::Paperdoll);
 			}
 			break;
 
 		case CV_CLOSEPROFILE:
 			{
-				CChar *pChar = m_pChar;
+				const CChar *pChar = m_pChar;
 				if ( s.HasArgs() )
 				{
-					CUID uid = s.GetArgVal();
+                    const CUID uid(s.GetArgDWVal());
 					pChar = uid.CharFind();
 				}
 				if ( pChar )
-					closeUIWindow(pChar, 0x08);
+					closeUIWindow(pChar, PacketCloseUIWindow::Profile);
 			}
 			break;
 
 		case CV_CLOSESTATUS:
 			{
-				CChar *pChar = m_pChar;
+                const CChar *pChar = m_pChar;
 				if ( s.HasArgs() )
 				{
-					CUID uid = s.GetArgVal();
+                    const CUID uid(s.GetArgDWVal());
 					pChar = uid.CharFind();
 				}
 				if ( pChar )
-					closeUIWindow(pChar, 0x02);
+					closeUIWindow(pChar, PacketCloseUIWindow::Status);
 			}
 			break;
 

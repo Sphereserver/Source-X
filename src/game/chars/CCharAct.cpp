@@ -2906,8 +2906,7 @@ bool CChar::Death()
 			if ( g_Cfg.m_iPacketDeathAnimation )
 			{
 				// Display death animation to client ("You are dead")
-				new PacketDeathMenu(pClient, PacketDeathMenu::ServerSent);
-				new PacketDeathMenu(pClient, PacketDeathMenu::Ghost);
+				new PacketDeathMenu(pClient, PacketDeathMenu::Dead);
 			}
 			else
 			{

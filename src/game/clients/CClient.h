@@ -443,10 +443,10 @@ public:
     void addWeather( WEATHER_TYPE weather = WEATHER_DEFAULT ); // Send new weather to player
     void addLight() const;
 	void addTime( bool fCurrent = false ) const;
-	void addObjectRemoveCantSee( CUID uid, lpctstr pszName = nullptr ) const;
+	void addObjectRemoveCantSee( const CUID& uid, lpctstr pszName = nullptr ) const;
 	void closeContainer( const CObjBase * pObj ) const;
-	void closeUIWindow( const CChar* character, dword command ) const;
-	void addObjectRemove( CUID uid ) const;
+	void closeUIWindow( const CObjBase* pObj, PacketCloseUIWindow::UIWindow windowType ) const;
+	void addObjectRemove( const CUID& uid ) const;
 	void addObjectRemove( const CObjBase * pObj ) const;
 	void addRemoveAll( bool fItems, bool fChars );
 

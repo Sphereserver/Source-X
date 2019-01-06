@@ -261,7 +261,7 @@ void CClient::addTime( bool fCurrent ) const
 	}
 }
 
-void CClient::addObjectRemoveCantSee( CUID uid, lpctstr pszName ) const
+void CClient::addObjectRemoveCantSee( const CUID& uid, lpctstr pszName ) const
 {
 	ADDTOCALLSTACK("CClient::addObjectRemoveCantSee");
 	// Seems this object got out of sync some how.
@@ -277,13 +277,13 @@ void CClient::closeContainer( const CObjBase * pObj ) const
 	new PacketCloseContainer(this, pObj);
 }
 
-void CClient::closeUIWindow( const CChar* character, dword command ) const
+void CClient::closeUIWindow( const CObjBase* pObj, PacketCloseUIWindow::UIWindow windowType ) const
 {
 	ADDTOCALLSTACK("CClient::closeUIWindow");
-	new PacketCloseUIWindow(this, character, command);
+	new PacketCloseUIWindow(this, pObj, windowType);
 }
 
-void CClient::addObjectRemove( CUID uid ) const
+void CClient::addObjectRemove( const CUID& uid ) const
 {
 	ADDTOCALLSTACK("CClient::addObjectRemove");
 	// Tell the client to remove the item or char

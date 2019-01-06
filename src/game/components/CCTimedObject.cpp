@@ -107,11 +107,6 @@ void CCTimedObject::SetTimeoutS(int64 iSeconds)
     SetTimeout(iSeconds * MSECS_PER_SEC);
 }
 
-void CCTimedObject::SetTimeoutT(int64 iTicks)
-{
-    SetTimeout(iTicks * MSECS_PER_TICK);
-}
-
 void CCTimedObject::SetTimeoutD(int64 iTenths)
 {
     SetTimeout(iTenths * MSECS_PER_TENTH);

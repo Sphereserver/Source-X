@@ -388,9 +388,9 @@ class PacketDeathMenu : public PacketSend
 public:
 	enum Reason
 	{
-		ServerSent = 0x00,
-		Resurrect = 0x01,
-		Ghost = 0x02
+		//Alive/Server sent = 0x00,     // Unused/invalid
+        //?/Resurrect = 0x1,            // Unused/invalid
+		Dead = 0x02
 	};
 
 	PacketDeathMenu(const CClient* target, Reason reason);
@@ -1481,7 +1481,15 @@ public:
 class PacketCloseUIWindow : public PacketExtended
 {
 public:
-	PacketCloseUIWindow(const CClient* target, const CChar* character, dword command);
+    enum UIWindow
+    {
+        Paperdoll = 1,
+        Status = 2,
+        Profile = 8,
+        Container = 0xC
+    };
+
+	PacketCloseUIWindow(const CClient* target, const CObjBase* obj, UIWindow command);
 };
 
 /***************************************************************************

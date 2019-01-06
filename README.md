@@ -77,11 +77,12 @@ How to set a toolchain:
  was not set, by default the makefiles for all of the three build types are generated.<br>
 <br />
 You can also add other compiler flags, like optimization flags, with the custom variables C_FLAGS_EXTRA and CXX_FLAGS_EXTRA.<br>
+
 Example of CMake CLI additional parameters:<br>
 ```
 -DC_FLAGS_EXTRA="-mtune=native" -DCXX_FLAGS_EXTRA="-mtune=native"
 ```
-<br />(Use the -mtune=native flag only if you are compiling on the same machine on which you will execute Sphere!)
+(Use the -mtune=native flag only if you are compiling on the same machine on which you will execute Sphere!)
 
 Example to build makefiles on Linux for a 64 bits Nightly version, inside the "build" directory (run it inside the project's root folder, not inside "src"):<br>
 ```

@@ -89,15 +89,6 @@ public:
     void SetTimeoutS(int64 iSeconds);
 
     /**
-    * @fn  virtual void CObjBase::SetTimeoutT( int64 iDelayInTicks );
-    *
-    * @brief   &lt; Timer.
-    *
-    * @param   iDelayInTicks   Zero-based index of the delay in ticks.
-    */
-    void SetTimeoutT(int64 iTicks);
-
-    /**
     * @fn  virtual void CObjBase::SetTimeoutD( int64 iDelayInTenths );
     *
     * @brief   &lt; Timer.
