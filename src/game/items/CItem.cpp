@@ -717,7 +717,7 @@ int CItem::IsWeird() const
 
 char CItem::GetFixZ( CPointMap pt, dword dwBlockFlags )
 {
-	height_t zHeight = CItemBase::GetItemHeight( GetDispID(), dwBlockFlags );
+	height_t zHeight = CItemBase::GetItemHeight( GetDispID(), &dwBlockFlags );
 	CServerMapBlockState block( dwBlockFlags, pt.m_z, pt.m_z + zHeight, pt.m_z + 2, zHeight );
 	g_World.GetFixPoint( pt, block );
 	return block.m_Bottom.m_z;

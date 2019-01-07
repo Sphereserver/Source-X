@@ -334,17 +334,18 @@ CResourceID CResourceBase::ResourceGetIDParse(RES_TYPE restype, lpctstr &ptcName
     }
     */
 
-    dword dwPrivateUID = Exp_GetDWVal(ptcName);    // May be some complex expression {}
+    dword dwEvalPrivateUID = Exp_GetDWVal(ptcName);    // May be some complex expression {}
+    int iEvalResType  = RES_GET_TYPE(dwEvalPrivateUID);
+    int iEvalResIndex = RES_GET_INDEX(dwEvalPrivateUID);
 
     // We are NOT creating.
-    if ( (restype != RES_UNKNOWN) && (RES_GET_TYPE(dwPrivateUID) == RES_UNKNOWN) )
-        return CResourceID( restype, RES_GET_INDEX(dwPrivateUID));	// Label it with the type we want.
-
-    if ( !(dwPrivateUID & UID_F_RESOURCE) ) // This typically happens when ptcName is not a valid/existing resource, so dwPrivateUID is 0.
-        dwPrivateUID |= UID_F_RESOURCE;     // Do this because CResourceID always needs to be a valid resource (there's an ASSERT in CResourceID copy constructor).
-    CResourceID rid;
-    rid.SetPrivateUID(dwPrivateUID);
-    return rid;
+    if ((restype != RES_UNKNOWN) && (iEvalResType == RES_UNKNOWN))
+    {
+        // Label it with the type we want.
+        return CResourceID(restype, iEvalResIndex);
+    }
+    // CResourceID always needs to be a valid resource (there's an ASSERT in CResourceID copy constructor).
+    return CResourceID((RES_TYPE)iEvalResType, iEvalResIndex, RES_GET_PAGE(dwEvalPrivateUID));
 }
 
 CResourceID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr ptcName )

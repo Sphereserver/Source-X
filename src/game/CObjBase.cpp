@@ -1635,7 +1635,7 @@ bool CObjBase::r_LoadVal( CScript & s )
             return false;
         case OC_CANMASK:
         {
-            m_CanMask = s.GetArgDWVal();;
+            m_CanMask = s.GetArgDWVal();
             if (IsItem())
             {
                 CItem* pItem = static_cast<CItem*>(this);

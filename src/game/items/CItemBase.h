@@ -435,9 +435,9 @@ private:
 protected:
 	static void ReplaceItemBase( CItemBase * pOld, CResourceDef * pNew );
 public:
-	static void GetItemTiledataFlags( dword & wBlockThis, ITEMID_TYPE id );
-	static height_t GetItemHeightFlags( const CUOItemTypeRec_HS & tile, dword & wBlockThis );
-	static void GetItemSpecificFlags( const CUOItemTypeRec_HS & tile, dword & wBlockThis, IT_TYPE type, ITEMID_TYPE id );
+	static void GetItemTiledataFlags( dword *pdwCanFlags, ITEMID_TYPE id );
+	static height_t GetItemHeightFlags( const CUOItemTypeRec_HS & tile, dword *pdwCanFlags );
+	static void GetItemSpecificFlags( const CUOItemTypeRec_HS & tile, dword *pdwCanFlags, IT_TYPE type, ITEMID_TYPE id );
 	static bool IsTypeArmor( IT_TYPE type );
 	static bool IsTypeWeapon( IT_TYPE type );
 	static bool IsTypeSpellbook( IT_TYPE type );
@@ -466,7 +466,7 @@ public:
 
 	static tchar * GetNamePluralize( lpctstr pszNameBase, bool fPluralize );
 	static bool GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * ptile );
-	static height_t GetItemHeight( ITEMID_TYPE id, dword & MoveFlags );
+	static height_t GetItemHeight( ITEMID_TYPE id, dword *pdwBlockFlags );
 
 	static CREID_TYPE FindCharTrack( ITEMID_TYPE trackID );
 

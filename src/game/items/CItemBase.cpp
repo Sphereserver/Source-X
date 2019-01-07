@@ -81,9 +81,9 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 
 	// Do some special processing for certain items.
 
-	SetHeight( GetItemHeightFlags( tiledata, m_Can ));
+	SetHeight( GetItemHeightFlags( tiledata, &m_Can ));
 
-	GetItemSpecificFlags( tiledata, m_Can, m_type, id );
+	GetItemSpecificFlags( tiledata, &m_Can, m_type, id );
 
 	if ( (tiledata.m_weight == 0xFF) ||			// not movable.
 		( m_dwFlags & UFLAG1_WATER ) )	// water can't be picked up.
@@ -665,61 +665,61 @@ bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * pData ) // stat
 	return true;
 }
 
-void CItemBase::GetItemSpecificFlags( const CUOItemTypeRec_HS & tiledata, dword & dwBlockThis, IT_TYPE type, ITEMID_TYPE id ) // static
+void CItemBase::GetItemSpecificFlags( const CUOItemTypeRec_HS & tiledata, dword *pdwBlockFlags, IT_TYPE type, ITEMID_TYPE id ) // static
 {
 	ADDTOCALLSTACK("CItemBase::GetItemSpecificFlags");
 	if ( type == IT_DOOR )
 	{
-		dwBlockThis &= ~CAN_I_BLOCK;
+        *pdwBlockFlags &= ~CAN_I_BLOCK;
 		if ( IsID_DoorOpen(id))
-			dwBlockThis &= ~CAN_I_DOOR;
+            *pdwBlockFlags &= ~CAN_I_DOOR;
 		else
-			dwBlockThis |= CAN_I_DOOR;
+            *pdwBlockFlags |= CAN_I_DOOR;
 	}
 
 	if ( tiledata.m_flags & UFLAG3_LIGHT )	// this may actually be a moon gate or fire ?
-		dwBlockThis |= CAN_I_LIGHT;	// normally of type IT_LIGHT_LIT;
+        *pdwBlockFlags |= CAN_I_LIGHT;	// normally of type IT_LIGHT_LIT;
 
 	if ( (tiledata.m_flags & UFLAG2_STACKABLE) || type == IT_REAGENT || id == ITEMID_EMPTY_BOTTLE )
-		dwBlockThis |= CAN_I_PILE;
+        *pdwBlockFlags |= CAN_I_PILE;
 }
 
-void CItemBase::GetItemTiledataFlags( dword & dwBlockThis, ITEMID_TYPE id ) // static
+void CItemBase::GetItemTiledataFlags( dword *pdwCanFlags, ITEMID_TYPE id ) // static
 {
 	ADDTOCALLSTACK("CItemBase::GetItemTiledataFlags");
 
     CUOItemTypeRec_HS tiledata = {};
 	if ( ! CItemBase::GetItemData( id, &tiledata ))
 	{
-		dwBlockThis = 0;
+        *pdwCanFlags = 0;
 		return;
 	}
 
 	if ( tiledata.m_flags & UFLAG4_DOOR )
-		dwBlockThis |= CAN_I_DOOR;
+        *pdwCanFlags |= CAN_I_DOOR;
 	if ( tiledata.m_flags & UFLAG1_WATER )
-		dwBlockThis |= CAN_I_WATER;
+        *pdwCanFlags |= CAN_I_WATER;
 	if ( tiledata.m_flags & UFLAG2_PLATFORM )
-		dwBlockThis |= CAN_I_PLATFORM;
+        *pdwCanFlags |= CAN_I_PLATFORM;
 	if ( tiledata.m_flags & UFLAG1_BLOCK )
-		dwBlockThis |= CAN_I_BLOCK;
+        *pdwCanFlags |= CAN_I_BLOCK;
 	if ( tiledata.m_flags & UFLAG2_CLIMBABLE )
-		dwBlockThis |= CAN_I_CLIMB;
+        *pdwCanFlags |= CAN_I_CLIMB;
 	if ( tiledata.m_flags & UFLAG1_DAMAGE )
-		dwBlockThis |= CAN_I_FIRE;
+        *pdwCanFlags |= CAN_I_FIRE;
 	if ( tiledata.m_flags & UFLAG4_ROOF )
-		dwBlockThis |= CAN_I_ROOF;
+        *pdwCanFlags |= CAN_I_ROOF;
 	if ( tiledata.m_flags & UFLAG4_HOVEROVER )
-		dwBlockThis |= CAN_I_HOVER;
+        *pdwCanFlags |= CAN_I_HOVER;
 }
 
-height_t CItemBase::GetItemHeightFlags( const CUOItemTypeRec_HS & tiledata, dword & dwBlockThis ) // static
+height_t CItemBase::GetItemHeightFlags( const CUOItemTypeRec_HS & tiledata, dword *pdwCanFlags ) // static
 {
 	ADDTOCALLSTACK("CItemBase::GetItemHeightFlags");
 	// Chairs are marked as blocking for some reason ?
 	if ( tiledata.m_flags & UFLAG4_DOOR ) // door
 	{
-		dwBlockThis = CAN_I_DOOR;
+		*pdwCanFlags = CAN_I_DOOR;
 		return tiledata.m_height;
 	}
 
@@ -727,36 +727,36 @@ height_t CItemBase::GetItemHeightFlags( const CUOItemTypeRec_HS & tiledata, dwor
 	{
 		if ( tiledata.m_flags & UFLAG1_WATER )	// water
 		{
-			dwBlockThis = CAN_I_WATER;
+            *pdwCanFlags = CAN_I_WATER;
 			return tiledata.m_height;
 		}
-		dwBlockThis = CAN_I_BLOCK;
+        *pdwCanFlags = CAN_I_BLOCK;
 	}
 	else
 	{
 		//DEBUG_ERR(("tiledata.m_flags 0x%x\n",tiledata.m_flags));
-		dwBlockThis = 0;
+        *pdwCanFlags = 0;
 		if ( ! ( tiledata.m_flags & (UFLAG2_PLATFORM|UFLAG4_ROOF|UFLAG4_HOVEROVER) ))
 			return 0;	// have no effective height if it doesn't block.
 	}
 
 	if ( tiledata.m_flags & UFLAG4_ROOF)
-		dwBlockThis |= CAN_I_ROOF;
+        *pdwCanFlags |= CAN_I_ROOF;
 	else if ( tiledata.m_flags & UFLAG2_PLATFORM )
-		dwBlockThis |= CAN_I_PLATFORM;
+        *pdwCanFlags |= CAN_I_PLATFORM;
 
 	if ( tiledata.m_flags & UFLAG2_CLIMBABLE )
 	{
 		// actual standing height is height/2
-		dwBlockThis |= CAN_I_CLIMB;
+        *pdwCanFlags |= CAN_I_CLIMB;
 	}
 	if ( tiledata.m_flags & UFLAG4_HOVEROVER )
-		dwBlockThis |= CAN_I_HOVER;
+        *pdwCanFlags |= CAN_I_HOVER;
 	//DEBUG_WARN(("tiledata.m_height(%d)\n",tiledata.m_height));
 	return tiledata.m_height;
 }
 
-height_t CItemBase::GetItemHeight( ITEMID_TYPE id, dword & dwBlockThis ) // static
+height_t CItemBase::GetItemHeight( ITEMID_TYPE id, dword *pdwBlockFlags ) // static
 {
 	ADDTOCALLSTACK_INTENSIVE("CItemBase::GetItemHeight");
 	// Get just the height and the blocking flags for the item by id.
@@ -771,7 +771,7 @@ height_t CItemBase::GetItemHeight( ITEMID_TYPE id, dword & dwBlockThis ) // stat
 		CItemBase * pBase = dynamic_cast <CItemBase *>(pBaseStub);
 		if ( pBase )
 		{
-			dwBlockThis = pBase->m_Can & CAN_I_MOVEMASK;
+			*pdwBlockFlags = pBase->m_Can & CAN_I_MOVEMASK;
 			return pBase->GetHeight();
 		}
 	}
@@ -780,15 +780,15 @@ height_t CItemBase::GetItemHeight( ITEMID_TYPE id, dword & dwBlockThis ) // stat
     CUOItemTypeRec_HS tiledata = {};
 	if ( ! GetItemData( id, &tiledata ))
 	{
-		dwBlockThis = CAN_I_MOVEMASK;
+		*pdwBlockFlags = CAN_I_MOVEMASK;
 		return UO_SIZE_Z;
 	}
 	if ( IsID_Chair( id ) )
 	{
-		dwBlockThis = 0;
+		*pdwBlockFlags = 0;
 		return 0;	// have no effective height if they don't block.
 	}
-	return GetItemHeightFlags( tiledata, dwBlockThis );
+	return GetItemHeightFlags( tiledata, pdwBlockFlags );
 }
 
 IT_TYPE CItemBase::GetTypeBase( ITEMID_TYPE id, const CUOItemTypeRec_HS &tiledata ) // static
@@ -1732,7 +1732,7 @@ CItemBase * CItemBase::MakeDupeReplacement( CItemBase * pBase, ITEMID_TYPE idmas
 	if ( CItemBase::GetItemData( id, &tiledata ) )
 	{
 		pBaseDupe->SetTFlags( tiledata.m_flags );
-		height_t Height = CItemBase::GetItemHeightFlags( tiledata, pBaseDupe->m_Can );
+		height_t Height = CItemBase::GetItemHeightFlags( tiledata, &pBaseDupe->m_Can );
 		//Height = ( pBaseDupe->GetTFlags() & 0x400 ) ? ( Height / 2 ) : ( Height ); //should not be done here
 		Height = IsID_Chair( id ) ? 0 : Height;
 		pBaseDupe->SetHeight( Height );
