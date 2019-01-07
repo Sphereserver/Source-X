@@ -696,6 +696,7 @@ void PacketManager::registerStandardPackets(void)
 	registerExtended(EXTDATA_HouseDesignDet, new PacketHouseDesignReq());		// house design request
 	registerExtended(EXTDATA_AntiCheat, new PacketAntiCheat());					// anti-cheat / unknown
 	registerExtended(EXTDATA_BandageMacro, new PacketBandageMacro());			//
+    registerExtended(EXTDATA_TargetedSkill, new PacketTargetedSkill());		    // use targeted skill
 	registerExtended(EXTDATA_GargoyleFly, new PacketGargoyleFly());				// gargoyle flying action
 	registerExtended(EXTDATA_WheelBoatMove, new PacketWheelBoatMove());			// wheel boat movement
 

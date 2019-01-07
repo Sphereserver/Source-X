@@ -1454,3 +1454,12 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 - Fixed: Server not sending to client a Season Update packet after resurrection, so it still shown the "desolated" season (Issue #182).
 - Removed: TIMERT keyword, just continue to use TIMER and TIMERD as always (and the new TIMERMS if fits your purpose). The "tick" for world objects isn't a concept since some time,
 	for more infos check in this changelog for the 28-09-2018 commit (Issue #125).
+
+07-01-2019, Nolok
+- Fixed: The death status packet (sent by the client when the server sent the complementary packet, enabled with the PacketDeathAnimation ini setting) was incorrectly parsed,
+	desynchronizing the input packet queue and making Sphere think it was receiving malformed or unknown packets (Issue #181).
+- Fixed: Tooltip info for spawns.
+- Fixed: PacketScreenSize (0xBF.0x05) parsing incorrectly the received data.
+- Added: Packet UseTargetedSkill (0xBF.0x2E) functionality.
+- Added: In debug builds, when an unknown packet is received, its data is dumped to the console and to the log.
+- Fixed: EFFECT with id of 4 caused an exception.

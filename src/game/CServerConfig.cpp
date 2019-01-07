@@ -155,7 +155,7 @@ CServerConfig::CServerConfig()
 	m_iHitsUpdateRate		= MSECS_PER_SEC;
 	m_iSpeedScaleFactor		= 80000;
 	m_iCombatFlags			= 0;
-	m_iCombatArcheryMovementDelay = MSECS_PER_SEC;
+	m_iCombatArcheryMovementDelay = 10;
 	m_iCombatDamageEra		= 0;
 	m_iCombatHitChanceEra	= 0;
 	m_iCombatSpeedEra		= 3;
@@ -1055,10 +1055,10 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 		case RC_COMBATARCHERYMOVEMENTDELAY:
 		{
-			int iVal = s.GetArgVal();
+			const int iVal = s.GetArgVal();
 			m_iCombatArcheryMovementDelay = maximum(iVal, 0);
+            break;
 		}
-			break;
         case RC_CONTAINERMAXITEMS:
         {
             uint uiVal = s.GetArgUVal();

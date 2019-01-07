@@ -386,14 +386,14 @@ public:
 class PacketDeathMenu : public PacketSend
 {
 public:
-	enum Reason
+	enum Mode
 	{
-		//Alive/Server sent = 0x00,     // Unused/invalid
-        //?/Resurrect = 0x1,            // Unused/invalid
-		Dead = 0x02
+		Dead = 0x00,        // Old "server sent"
+        //Resurrect = 0x1,    // Sent by the client
+		//Alive = 0x02        // Sent by the client
 	};
 
-	PacketDeathMenu(const CClient* target, Reason reason);
+	PacketDeathMenu(const CClient* target, Mode mode);
 };
 
 /***************************************************************************

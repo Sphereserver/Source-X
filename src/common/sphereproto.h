@@ -375,7 +375,7 @@ enum EXTDATA_TYPE
 	//
 	EXTDATA_HouseCustom		= 0x20,
 	EXTDATA_Ability_Confirm	= 0x21,	// server (empty packet only id is required)
-	EXTDATA_DamagePacketOld	= 0x22,	//  server
+	EXTDATA_DamagePacketOld	= 0x22,	// server
 	//
 	EXTDATA_Unk23			= 0x23,
 	EXTDATA_AntiCheat		= 0x24, // Sent by SE clients, every second or so.
@@ -388,7 +388,7 @@ enum EXTDATA_TYPE
 	//
 	EXTDATA_BandageMacro	= 0x2c, // client message
 	//
-	//
+	EXTDATA_TargetedSkill   = 0x2e, // Use targeted skill (from client)
 	//
 	//
 	//
@@ -493,8 +493,10 @@ union CExtData
 
 	struct	// EXTDATA_ScreenSize = 0x05
 	{
-		ndword m_x;
-		ndword m_y;
+        nword m_garbagex;
+		nword m_x;
+		nword m_y;
+        nword m_garbagey;
 	} ScreenSize;	// from client
 
 	struct	// EXTDATA_Arrow_Click = 0x07
@@ -602,13 +604,8 @@ union CExtData
 		ndword m_UID;
 		nword m_ItemId;
 		nword m_Offset;
-#ifdef _WIN32
-		dword m_Content0;
-		dword m_Content1;
-#else
 		ndword m_Content0;
 		ndword m_Content1;
-#endif
 	} NewSpellbook;
 
 	struct  // EXTDATA_NewSpellSelect = 0x1C
@@ -676,10 +673,16 @@ union CExtData
 		ndword m_targetSerial;
 	} BandageMacro;
 
+    struct // EXTDATA_TargetedSkill = 0x2e
+    {
+        nword m_skillID;
+        ndword m_targetUID;
+    } TargetedSkill;
+
 	struct // EXTDATA_GargoyleFly = 0x32
 	{
 		nword m_one;	// always 1
-		dword m_zero;	// always 0
+		ndword m_zero;	// always 0
 	} GargoyleFly;
 
 }PACK_NEEDED;
@@ -1071,13 +1074,6 @@ enum SKILLLOCK_TYPE
 	SKILLLOCK_UP = 0,
 	SKILLLOCK_DOWN,
 	SKILLLOCK_LOCK
-};
-
-enum DEATH_MODE_TYPE	// DeathMenu
-{
-	DEATH_MODE_MANIFEST = 0,
-	DEATH_MODE_RES_IMMEDIATE,
-	DEATH_MODE_PLAY_GHOST
 };
 
 enum DELETE_ERR_TYPE

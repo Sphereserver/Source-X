@@ -397,7 +397,7 @@ void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSour
             const CChar *pChar = static_cast<const CChar *>(this);
             if (pChar->IsClient())
             {
-                pChar->GetClient()->addEffect(motion, id, nullptr, nullptr);
+                pChar->GetClient()->addEffect(motion, id, pChar, nullptr);
             }
         }
         return;

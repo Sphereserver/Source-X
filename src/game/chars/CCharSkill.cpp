@@ -409,7 +409,6 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 
 		if ( difficulty > 0 )
 		{
-//#ifdef _DEBUG
 			if ( IsPriv(PRIV_DETAIL) && (GetPrivLevel() >= PLEVEL_GM) && (g_Cfg.m_iDebugFlags & DEBUGF_ADVANCE_STATS) )
 			{
 				SysMessagef( "%s=%hu.%hu Difficult=%d Gain Chance=%" PRId64 ".%" PRId64 "%% Roll=%d%%",
@@ -417,7 +416,6 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 					uiSkillLevel/10, (uiSkillLevel)%10,
 					difficulty/10, iChance/10, iChance%10, iRoll/10 );
 			}
-//#endif
 
 			if ( iRoll <= iChance )
 			{

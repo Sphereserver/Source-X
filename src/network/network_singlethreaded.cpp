@@ -510,6 +510,13 @@ void NetworkIn::tick(void)
 				// strange behaviours (it's unlikely that only 1 byte is incorrect), so
 				// it's best to discard everything we have
 				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN, "%x:Unknown game packet (0x%x) received.\n", client->id(), packetID);
+
+#ifdef _DEBUG
+                TemporaryString tsDump;
+                packet->dump(tsDump);
+                g_Log.EventDebug("%x:%s %s\n", client->GetSocketID(), "(unknown packet) client -> server", (lpctstr)tsDump);
+#endif
+
 				packet->skip(len);
 				len = 0;
 			}

@@ -122,8 +122,8 @@ private:
 	// Screensize
 	struct __screensize
 	{
-		dword x;
-		dword y;
+		ushort x;
+        ushort y;
 	} m_ScreenSize;
 
 	// OxBF - 0x24 AntiCheat
@@ -656,7 +656,7 @@ public:
 		return( GetAccount()->SetGreaterResDisp( res ) );
 	}
 	// ------------------------------------------------
-	void SetScreenSize(dword x, dword y)
+	void SetScreenSize(ushort x, ushort y)
 	{
 		m_ScreenSize.x = x;
 		m_ScreenSize.y = y;

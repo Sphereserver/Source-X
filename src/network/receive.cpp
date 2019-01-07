@@ -576,23 +576,6 @@ PacketDeathStatus::PacketDeathStatus() : Packet(2)
 {
 }
 
-size_t PacketDeathStatus::getExpectedLength(NetState* net, Packet* packet)
-{
-	ADDTOCALLSTACK("PacketDeathStatus::getExpectedLength");
-	UNREFERENCED_PARAMETER(net);
-
-	// different size depending on client
-	size_t pos = packet->getPosition();
-	packet->skip(1);
-	DEATH_MODE_TYPE mode = static_cast<DEATH_MODE_TYPE>(readByte());
-	packet->seek(pos);
-
-	if (mode != DEATH_MODE_MANIFEST)
-		return 2;
-
-	return 7;
-}
-
 bool PacketDeathStatus::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketDeathStatus::onReceive");
@@ -603,22 +586,15 @@ bool PacketDeathStatus::onReceive(NetState* net)
 	if (ghost == nullptr)
 		return false;
 
-	DEATH_MODE_TYPE mode = static_cast<DEATH_MODE_TYPE>(readByte());
-	if (mode != DEATH_MODE_MANIFEST)
+    Mode mode = (Mode)readByte();
+	if (mode != Mode::Dead)
 	{
 		// Play as a ghost.
 		client->SysMessage("You are a ghost");
 		client->addSound(0x17f);
 		client->addPlayerStart(ghost); // Do practically a full reset (to clear death menu)
-		return true;
 	}
 
-	// toggle manifest mode (more data)
-	skip(1); // unknown
-	bool manifest = readBool();
-	skip(3); // unknown
-
-	client->Event_CombatMode(manifest);
 	return true;
 }
 
@@ -2525,10 +2501,12 @@ bool PacketScreenSize::onReceive(NetState* net)
 	CClient* client = net->getClient();
 	ASSERT(client);
 
-	dword x = readInt32();
-	dword y = readInt32();
+    skip(2);
+    ushort x = readInt16();
+    ushort y = readInt16();
+    skip(2);
 
-	DEBUG_MSG(("0x%x - 0x%x (%d-%d)\n", x, y, x, y));
+	//DEBUG_MSG(("PacketScreenSize::onReceive 0x%hx - 0x%hx (%hu-%hu)\n", x, y, x, y));
 
 	client->SetScreenSize(x, y);
 	return true;
@@ -3148,6 +3126,50 @@ bool PacketBandageMacro::onReceive(NetState* net)
 	return true;
 }
 
+/***************************************************************************
+*
+*
+*	Packet 0xBF.0x2E : PacketTargetedSkill		    use targeted skill
+*
+*
+***************************************************************************/
+PacketTargetedSkill::PacketTargetedSkill() : Packet(0)
+{
+}
+
+bool PacketTargetedSkill::onReceive(NetState* net)
+{
+    ADDTOCALLSTACK("PacketAntiCheat::onReceive");
+    
+    word  wSkillID    = readInt16();    // if SkillID = 0, it means that is lastskill
+    dword dwTargetUID = readInt32();
+
+    if ((wSkillID != 0) && !CChar::IsSkillBase((SKILL_TYPE)wSkillID))
+    {
+        DEBUG_MSG(("PacketTargetedSkill::onReceive invalid SkillID=%d.\n", (int)wSkillID));
+        return true;
+    }
+
+    const CUID uidTarget(dwTargetUID);
+    CObjBase * pTarget = uidTarget.ObjFind();
+    if (pTarget)
+    {
+        CClient* pClient = net->getClient();
+        ASSERT(pClient);
+        CChar* pChar = pClient->GetChar();
+        if (pChar == nullptr)
+            return true;
+
+        pChar->m_Act_UID = uidTarget;
+        pChar->Skill_Start((SKILL_TYPE)wSkillID);
+    }
+    else
+    {
+        DEBUG_MSG(("PacketTargetedSkill::onReceive invalid uidTarget=0%x.\n", (uint)dwTargetUID));
+    }
+
+    return true;
+}
 
 /***************************************************************************
  *

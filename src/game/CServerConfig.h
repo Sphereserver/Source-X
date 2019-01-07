@@ -245,7 +245,7 @@ public:
 	int  m_iArcheryMaxDist;			// Max distance allowed for archery.
 	int  m_iArcheryMinDist;			// Min distance required for archery.
 	int64 m_iHitsUpdateRate;			// how often (seconds) send my hits updates to visible clients..
-	int64 m_iCombatArcheryMovementDelay; // If COMBAT_ARCHERYCANMOVE is not enabled, wait this much tenth of seconds (minimum=0) after the player stopped moving before starting a new attack..
+	int  m_iCombatArcheryMovementDelay; // If COMBAT_ARCHERYCANMOVE is not enabled, wait this much tenth of seconds (minimum=0) after the player stopped moving before starting a new attack..
 	int  m_iCombatDamageEra;		// define damage formula to use on physical combat.
 	int  m_iCombatHitChanceEra;		// define hit chance formula to use on physical combat.
 	int  m_iCombatSpeedEra;			// define swing speed formula to use on physical combat.

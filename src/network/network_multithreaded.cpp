@@ -1017,6 +1017,13 @@ bool NetworkInput::processGameClientData(NetState* state, Packet* buffer)
 			// strange behaviours (it's unlikely that only 1 byte is incorrect), so
 			// it's best to just discard everything we have
 			g_Log.Event(LOGL_WARN, "%x:Unknown game packet (0x%x) received.\n", state->id(), packetId);
+
+#ifdef _DEBUG
+            TemporaryString tsDump;
+            packet->dump(tsDump);
+            g_Log.EventDebug("%x:%s %s\n", client->GetSocketID(), "(unknown packet data) client -> server", (lpctstr)tsDump);
+#endif
+
 			packet->skip((int)(remainingLength));
 			remainingLength = 0;
 		}

@@ -144,7 +144,7 @@ public:
 		{
 			dword m_Check_Amount;		// more1=Current amount of gold in account..
 			dword m_Check_Restock;		// more2= amount to restock the bank account to
-            CPointMap m_pntOpen;		// morep=point we are standing on when opened bank box.
+            CPointBase m_pntOpen;		// morep=point we are standing on when opened bank box.
 		} m_itEqBankBox;
 
 		// IT_EQ_VENDOR_BOX
@@ -152,7 +152,7 @@ public:
 		{
 			dword m_junk1;
 			dword m_junk2;
-            CPointMap m_pntOpen;		// morep=point we are standing on when opened vendor box.
+            CPointBase m_pntOpen;		// morep=point we are standing on when opened vendor box.
 		} m_itEqVendorBox;
 
 		// IT_GAME_BOARD
@@ -299,27 +299,6 @@ public:
 			byte	m_bCheck;		// morex = Check box for trade window.
 		} m_itEqTradeWindow;
 
-		// IT_SPAWN_ITEM
-		struct
-		{
-			CResourceID m_ItemID;	// more1=The ITEMID_* or template for items
-			dword	m_pile;				// more2=The max # of items to spawn per interval.  If this is 0, spawn up to the total amount.
-			word	m_TimeLoMin;		// morex=Lo time in minutes.
-			word	m_TimeHiMin;		// morey=Hi time in minutes.
-			byte	m_DistMax;			// morez=How far from this will it spawn?
-		} m_itSpawnItem;
-		// Remember that you can access the same bytes from both m_itSpawnChar and m_itSpawnItem, it doesn't matter if it's IT_SPAWN_ITEM or IT_SPAWN_CHAR.
-
-		// IT_SPAWN_CHAR
-		struct
-		{
-			CResourceID m_CharID;	// more1=CREID_*,  or SPAWNTYPE_*,
-			dword	m_unused;		// more2=used only by IT_SPAWN_ITEM, keeping it only for mantaining the structure of the union.
-			word	m_TimeLoMin;		// morex=Lo time in minutes.
-			word	m_TimeHiMin;		// morey=Hi time in minutes.
-			byte	m_DistMax;			// morez=How far from this will they wander?
-		} m_itSpawnChar;
-
 		// IT_EXPLOSION
 		struct
 		{
@@ -374,7 +353,7 @@ public:
 		{
 			int m_Strength;			// more1 = How many uses til a rune will wear out ?
 			dword m_junk2;
-			CPointMap m_ptMark;		// morep = rune marked to a location or a teleport ?
+            CPointBase m_ptMark;		// morep = rune marked to a location or a teleport ?
 		} m_itRune;
 
 		// IT_TELEPAD
@@ -383,7 +362,7 @@ public:
 		{
 			int m_fPlayerOnly;		// more1 = The gate is player only. (no npcs, xcept pets)
 			int m_fQuiet;			// more2 = The gate/telepad makes no noise.
-			CPointMap m_ptMark;		// morep = marked to a location or a teleport ?
+            CPointBase m_ptMark;		// morep = marked to a location or a teleport ?
 		} m_itTelepad;
 
 		// IT_EQ_MEMORY_OBJ
@@ -393,7 +372,7 @@ public:
 			word m_Action;		// more1l = NPC_MEM_ACT_TYPE What sort of action is this memory about ? (1=training, 2=hire, etc)
 			word m_Skill;		// more1h = SKILL_TYPE = training a skill ?
 			dword m_junk2;		// more2 = When did the fight start or action take place ? (Now Placed inside TIMESTAMP for int64 support)
-            CPointMap m_pt;	    // morep = Location the memory occured.
+            CPointBase m_pt;    // morep = Location the memory occured.
 								// m_uidLink = what is this memory linked to. (must be valid)
 		} m_itEqMemory;
 
@@ -493,10 +472,10 @@ public:
 		struct
 		{
 			ITEMID_TYPE m_AnimID;	// more1 = What does a trap do when triggered. 0=just use the next id.
-			int	m_Damage;			// more2 = Base damage for a trap.
-			word m_wAnimSec;		// morex = How long to animate as a dangerous trap.
-			word m_wResetSec;		// morey = How long to sit idle til reset.
-			byte m_fPeriodic;		// morez = Does the trap just cycle from active to inactive ?
+			int32 m_Damage;			// more2 = Base damage for a trap.
+			word  m_wAnimSec;		// morex = How long to animate as a dangerous trap.
+			word  m_wResetSec;		// morey = How long to sit idle til reset.
+			byte  m_fPeriodic;		// morez = Does the trap just cycle from active to inactive ?
 		} m_itTrap;
 
 		// IT_ANIM_ACTIVE
