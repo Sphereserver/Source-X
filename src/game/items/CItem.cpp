@@ -2922,7 +2922,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			return true;
 
 		case IC_FRUIT:	// m_more2
-			m_itCrop.m_ridFruitOverride.SetObjUID( s.GetArgDWVal() );
+			m_itCrop.m_ridFruitOverride = CResourceID(RES_ITEMDEF, RES_GET_INDEX(s.GetArgDWVal()));
 			return true;
 		case IC_MAXHITS:
 			m_itNormal.m_more1 = MAKEDWORD(LOWORD(m_itNormal.m_more1), s.GetArgVal());
