@@ -92,59 +92,49 @@ enum RES_TYPE	// all the script resource blocks we know how to deal with !
 #define RES_NEWBIE_PROF_NINJA		(10000+10)
 
 
-struct CResourceID : public CUIDBase
+struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variable. Use it to store defnames or UIDs of world objects (items, chars...) or spawns and templates.
 {
     // What is a Resource? Look at the comment made to the RES_TYPE enum.
     // RES_TYPE: Resource Type (look at the RES_TYPE enum entries).
-    // RES_PAGE: Resource Page (used for dialog or book pages, but also to store an additional parameter
-    //		when using other Resource Types, like REGIONTYPE).
     // RES_INDEX: Resource Index
-#define RES_TYPE_SHIFT	25		// leave 6 bits = 64 for RES_TYPE;
-#define RES_TYPE_MASK	63		//  63 = 0x3F = 6 bits.
-#define RES_PAGE_SHIFT	17		// leave 8 bits = 255 pages of space;
-#define RES_PAGE_MASK	255		//  255 = 0xFF = 8 bits.
-#define RES_INDEX_SHIFT	0		// leave 18 bits = 262144 entries;
-#define RES_INDEX_MASK	0x3FFFF	//  0x3FFFF = 18 bits.
-    // Size: 6 + 8 + 18 = 32 --> it's a 32 bits number.
-    // WARNING: when adding new resource types, make sure that the last bit (31) doesn't overlap with UID_F_RESOURCE!
+#define RES_TYPE_SHIFT	20		// leave 8 bits = 255 for RES_TYPE;
+#define RES_TYPE_MASK	0xFF	//  0xFF = 8 bits.
+#define RES_INDEX_SHIFT	0		// leave 20 bits = ?1048575? entries;
+#define RES_INDEX_MASK	0xFFFFF	//  0xFFFFF = 20 bits.
+    // Size: 8 + 20 = 28 --> it's a 28 bits number (reserve the upper 4 bits for UID_F_RESOURCE, UID_F_ITEM, UID_O_EQUIPPED, UID_O_CONTAINED.
 #define RES_GET_TYPE(dw)	( ( (dw) >> RES_TYPE_SHIFT ) & RES_TYPE_MASK )
 #define RES_GET_INDEX(dw)	( (dw) & (dword)RES_INDEX_MASK )
-#define RES_GET_PAGE(dw)    ( ( (dw) >> RES_PAGE_SHIFT ) & RES_PAGE_MASK )
 
-public:
-    CResourceID()
+    CResourceIDBase()
     {
         InitUID();
     }
-    CResourceID(RES_TYPE restype)
+    explicit CResourceIDBase(RES_TYPE restype)
     {
         // single instance type.
         ASSERT(restype < RES_TYPE_MASK);
         m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT);
     }
-    CResourceID(RES_TYPE restype, int iIndex)
+    explicit CResourceIDBase(RES_TYPE restype, int iIndex)
     {
         ASSERT(restype < RES_TYPE_MASK);
         ASSERT(iIndex < RES_INDEX_MASK);
         m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT) | iIndex;
     }
-    CResourceID(RES_TYPE restype, int iIndex, int iPage)
+    explicit CResourceIDBase(dword dwPrivateID)
     {
-        ASSERT(restype < RES_TYPE_MASK);
-        ASSERT(iIndex < RES_INDEX_MASK);
-        ASSERT(iPage < RES_PAGE_MASK);
-        m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT) | (iPage << RES_PAGE_SHIFT) | iIndex;
+        ASSERT(CUID(dwPrivateID).IsValidUID());
+        m_dwInternalVal = UID_F_RESOURCE | dwPrivateID;
     }
 
-    CResourceID(const CResourceID & rid)                // copy constructor
+    CResourceIDBase(const CResourceIDBase & rid) : CUIDBase(rid)// copy constructor
     {
         ASSERT(rid.IsResource());
-        m_dwInternalVal = rid.GetPrivateUID();
     }
-    CResourceID & operator = (const CResourceID & rid)  // assignment operator
+    CResourceIDBase & operator = (const CResourceIDBase & rid)  // assignment operator
     {
         ASSERT(rid.IsResource());
-        m_dwInternalVal = rid.GetPrivateUID();
+        CUIDBase::operator=(rid);
         return *this;
     }
 
@@ -156,15 +146,73 @@ public:
     {
         return RES_GET_INDEX(m_dwInternalVal);
     }
-    int GetResPage() const
-    {
-        return RES_GET_PAGE(m_dwInternalVal);
-    }
-    bool operator == (const CResourceID & rid) const
+    bool operator == (const CResourceIDBase & rid) const
     {
         return (rid.m_dwInternalVal == m_dwInternalVal);
     }
 };
 
+struct CResourceID : public CResourceIDBase     // It has the "page" part. Use it to handle every other resource block.
+{
+    // RES_PAGE: Resource Page (used for dialog or book pages, but also to store an additional parameter
+    //		when using other Resource Types, like REGIONTYPE).
+    word m_wPage;
+    #define RES_PAGE_MAX    UINT16_MAX - 1
 
-#endif // _INC_CRESOURCEDEF_H
+    CResourceID() : CResourceIDBase()
+    {
+        m_wPage = 0;
+    }
+    explicit CResourceID(RES_TYPE restype) : CResourceIDBase(restype)
+    {
+        m_wPage = 0;
+    }
+    explicit CResourceID(RES_TYPE restype, int iIndex) : CResourceIDBase(restype, iIndex)
+    {
+        m_wPage = 0;
+    }
+    explicit CResourceID(RES_TYPE restype, int iIndex, word wPage) : CResourceIDBase(restype, iIndex)
+    {
+        m_wPage = wPage;
+    }
+    explicit CResourceID(dword dwPrivateID, word wPage) : CResourceIDBase(dwPrivateID)
+    {
+        m_wPage = wPage;
+    }
+
+    CResourceID(const CResourceID & rid) : CResourceIDBase(rid)     // copy constructor
+    {
+        m_wPage = rid.m_wPage;
+    }
+    CResourceID(const CResourceIDBase & rid): CResourceIDBase(rid)
+    {
+        m_wPage = 0;
+    }
+    CResourceID & operator = (const CResourceID & rid)              // assignment operator
+    {
+        ASSERT(rid.IsResource());
+        CUIDBase::operator=(rid);
+        m_wPage = rid.m_wPage;
+        return *this;
+    }
+    CResourceID & operator = (const CResourceIDBase & rid)
+    {
+        ASSERT(rid.IsResource());
+        CUIDBase::operator=(rid);
+        m_wPage = 0;
+        return *this;
+    }
+
+    word GetResPage() const
+    {
+        return m_wPage;
+    }
+    bool operator == (const CResourceID & rid) const
+    {
+        return ((rid.m_wPage == m_wPage) && (rid.m_dwInternalVal == m_dwInternalVal));
+    }
+};
+
+
+
+#endif // _INC_CRESOURCEID_H

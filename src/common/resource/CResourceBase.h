@@ -46,9 +46,11 @@ public:
 	CScriptObj * ResourceGetDefByName( RES_TYPE restype, lpctstr pszName )
 	{
 		// resolve a name to the actual resource def.
-		return ResourceGetDef(ResourceGetID(restype, pszName));
+        CResourceID res = ResourceGetID(restype, pszName);
+        res.m_wPage = UINT16_MAX;   // Create a CResourceID with page == UINT16_MAX: search independently from the page
+		return ResourceGetDef(res);
 	}
-	bool ResourceLock( CResourceLock & s, CResourceID rid );
+	bool ResourceLock( CResourceLock & s, const CResourceID& rid );
 	bool ResourceLock( CResourceLock & s, RES_TYPE restype, lpctstr pszName )
 	{
 		return ResourceLock(s, ResourceGetIDType(restype, pszName));
@@ -57,7 +59,7 @@ public:
 	CResourceScript * FindResourceFile( lpctstr pszTitle );
 	CResourceScript * LoadResourcesAdd( lpctstr pszNewName );
 
-	virtual CResourceDef * ResourceGetDef( CResourceID rid ) const;
+	virtual CResourceDef * ResourceGetDef( const CResourceID& rid ) const;
 	virtual bool OpenResourceFind( CScript &s, lpctstr pszFilename, bool bCritical = true );
 	virtual bool LoadResourceSection( CScript * pScript ) = 0;
 

@@ -248,7 +248,7 @@ public:
 		// IT_MEAT_RAW
 		struct
 		{
-			CResourceID m_ridCook;	// more1=Cooks into this. (only if raw)
+            CResourceIDBase m_ridCook;	// more1=Cooks into this. (only if raw)
 			CREID_TYPE m_MeatType;		// more2= Meat from what type of creature ?
 			word m_spell;				// morex=SPELL_TYPE = The magic spell cast on this. ( effect of eating.)
 			word m_spelllevel;			// morey=level of the spell. (0-1000)
@@ -259,7 +259,7 @@ public:
 		// IT_DRINK
 		struct
 		{
-			CResourceID m_ridCook;	// more1=Cooks into this. (only if raw)
+            CResourceIDBase m_ridCook;	// more1=Cooks into this. (only if raw)
 			CREID_TYPE m_MeatType;		// more2= Meat from what type of creature ?
 			word m_spell;				// morex=SPELL_TYPE = The magic spell cast on this. ( effect of eating.)
 			word m_spelllevel;			// morey=level of the spell. (0-1000)
@@ -313,7 +313,7 @@ public:
 		// IT_MESSAGE
 		struct
 		{
-			CResourceID m_ResID;	// more1 = preconfigured book id from RES_BOOK or Time date stamp for the book/message creation. (if |0x80000000)
+            CResourceIDBase m_ResID;	// more1 = preconfigured book id from RES_BOOK or Time date stamp for the book/message creation. (if |0x80000000)
 		} m_itBook;
 
 		// IT_DEED
@@ -328,7 +328,7 @@ public:
 		struct
 		{
 			int m_Respawn_Sec;					// more1 = plant respawn time in seconds. (for faster growth plants)
-			CResourceID m_ridFruitOverride;	// more2 = Override for TDATA2 = What is the fruit of this plant
+            CResourceIDBase m_ridFruitOverride;	// more2 = Override for TDATA2 = What is the fruit of this plant
 		} m_itCrop;
 
 		// IT_TREE
@@ -337,7 +337,7 @@ public:
 		// ? IT_GRASS
 		struct	// Natural resources. tend to be statics.
 		{
-			CResourceID m_ridRes;	// more1 = base resource type. RES_REGIONRESOURCE
+			CResourceIDBase m_ridRes;	// more1 = base resource type. RES_REGIONRESOURCE
 		} m_itResource;
 
 		// IT_FIGURINE
@@ -415,14 +415,14 @@ public:
 		// IT_LOOM
 		struct
 		{
-			CResourceID m_ridCloth;	// more1 = the cloth type currenctly loaded here.
+            CResourceIDBase m_ridCloth;	// more1 = the cloth type currenctly loaded here.
 			int m_ClothQty;				// more2 = IS the loom loaded with cloth ?
 		} m_itLoom;
 
 		// IT_ARCHERY_BUTTE
 		struct
 		{
-			CResourceID m_ridAmmoType;	// more1 = arrow or bolt currently stuck in it.
+            CResourceIDBase m_ridAmmoType;	// more1 = arrow or bolt currently stuck in it.
 			int m_AmmoCount;				// more2 = how many arrows or bolts ?
 		} m_itArcheryButte;
 

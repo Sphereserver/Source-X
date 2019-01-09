@@ -433,29 +433,12 @@ badcmd:
 
 	switch ( index )
 	{
-		case SSC_BETWEEN:
-		case SSC_BETWEEN2:
-			{
-				int64	iMin = Exp_GetLLVal(pszKey);
-				SKIP_ARGSEP(pszKey);
-				int64	iMax = Exp_GetLLVal(pszKey);
-				SKIP_ARGSEP(pszKey);
-				int64 iCurrent = Exp_GetLLVal(pszKey);
-				SKIP_ARGSEP(pszKey);
-				int64 iAbsMax = Exp_GetLLVal(pszKey);
-				SKIP_ARGSEP(pszKey);
-				if ( index == SSC_BETWEEN2 )
-				{
-					iCurrent = iAbsMax - iCurrent;
-				}
-
-				if (( iMin >= iMax ) || ( iAbsMax <= 0 ) || ( iCurrent <= 0 ) )
-					sVal.FormatLLVal(iMin);
-				else if ( iCurrent >= iAbsMax )
-					sVal.FormatLLVal(iMax);
-				else
-					sVal.FormatLLVal((iCurrent * (iMax - iMin))/iAbsMax + iMin);
-			} break;
+        case SSC_RESOURCEINDEX:
+            sVal.FormatVal(RES_GET_INDEX(Exp_GetVal(pszKey)));
+            break;
+        case SSC_RESOURCETYPE:
+            sVal.FormatVal(RES_GET_TYPE(Exp_GetVal(pszKey)));
+            break;
 
 		case SSC_LISTCOL:
 			// Set the alternating color.
@@ -528,15 +511,39 @@ badcmd:
 		case SSC_DEFMSG:
 			sVal = g_Cfg.GetDefaultMsg(pszKey);
 			return true;
+
+        case SSC_BETWEEN:
+        case SSC_BETWEEN2:
+        {
+            int64	iMin = Exp_GetLLVal(pszKey);
+            SKIP_ARGSEP(pszKey);
+            int64	iMax = Exp_GetLLVal(pszKey);
+            SKIP_ARGSEP(pszKey);
+            int64 iCurrent = Exp_GetLLVal(pszKey);
+            SKIP_ARGSEP(pszKey);
+            int64 iAbsMax = Exp_GetLLVal(pszKey);
+            SKIP_ARGSEP(pszKey);
+            if ( index == SSC_BETWEEN2 )
+            {
+                iCurrent = iAbsMax - iCurrent;
+            }
+
+            if (( iMin >= iMax ) || ( iAbsMax <= 0 ) || ( iCurrent <= 0 ) )
+                sVal.FormatLLVal(iMin);
+            else if ( iCurrent >= iAbsMax )
+                sVal.FormatLLVal(iMax);
+            else
+                sVal.FormatLLVal((iCurrent * (iMax - iMin))/iAbsMax + iMin);
+        } break;
 		case SSC_EVAL:
 			sVal.FormatLLVal( Exp_GetLLVal( pszKey ));
 			return true;
 		case SSC_UVAL:
-			sVal.FormatULLVal((ullong)(Exp_GetLLVal(pszKey)));
+			sVal.FormatULLVal(Exp_GetULLVal(pszKey));
 			return true;
 		case SSC_FVAL:
 			{
-				int64 iVal = Exp_GetLLVal(pszKey);
+				int64 iVal = Exp_Get64Val(pszKey);
 				sVal.Format( "%s%" PRId64 ".%" PRId64 , (iVal >= 0) ? "" : "-", llabs(iVal/10), llabs(iVal%10) );
 				return true;
 			}

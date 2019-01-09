@@ -1759,12 +1759,12 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 	}
 
 	CResourceLock s;
-	if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, bFemale ? RES_NEWBIE_FEMALE_DEFAULT : RES_NEWBIE_MALE_DEFAULT, rtRace)) )
+	if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, bFemale ? RES_NEWBIE_FEMALE_DEFAULT : RES_NEWBIE_MALE_DEFAULT, (word)rtRace)) )
 		ReadScript(s);
 	else if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, bFemale ? RES_NEWBIE_FEMALE_DEFAULT : RES_NEWBIE_MALE_DEFAULT)) )
 		ReadScript(s);
 
-	if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, iProfession, rtRace)) )
+	if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, iProfession, (word)rtRace)) )
 		ReadScript(s);
 	else if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, iProfession)) )
 		ReadScript(s);
@@ -1790,7 +1790,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 					break;
 			}
 
-			if ( !g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, iSkill, rtRace)) )
+			if ( !g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, iSkill, (word)rtRace)) )
 			{
 				if ( !g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, iSkill)) )
 					continue;

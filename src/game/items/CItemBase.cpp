@@ -1262,7 +1262,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			}
 			break;
 		case IBC_RESDISPDNID:
-			sVal = g_Cfg.ResourceGetName( CResourceID( RES_TYPEDEF, GetResDispDnId()));
+			sVal = g_Cfg.ResourceGetName( CResourceID(RES_TYPEDEF, (int)GetResDispDnId()) );
 			break;
 		case IBC_RESMAKE:
 			// Print the resources need to make in nice format.

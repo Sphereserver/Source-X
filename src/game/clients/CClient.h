@@ -526,7 +526,7 @@ public:
 	void addSpellbookOpen( CItem * pBook );
 	void addCustomSpellbookOpen( CItem * pBook, dword gumpID );
 	bool addBookOpen( CItem * pBook ) const;
-	void addBookPage( const CItem * pBook, size_t iPage, size_t iCount ) const;
+	void addBookPage( const CItem * pBook, word wPage, word wCount ) const;
 	void addStatusWindow( CObjBase * pObj, bool fRequested = false ); // Opens the status window
 	void addHitsUpdate( CChar * pChar );
 	void addManaUpdate( CChar * pChar );

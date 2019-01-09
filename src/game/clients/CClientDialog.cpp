@@ -91,7 +91,7 @@ void CClient::addGumpDialog( CLIMODE_TYPE mode, const CSString * psControls, siz
 	int	context_mode = mode;
 	if ( mode == CLIMODE_DIALOG && rid != 0 )
 	{
-		context_mode = rid & 0x00FFFFFF;
+		context_mode = RES_GET_INDEX(rid);
 	}
 
 	PacketGumpDialog* cmd = new PacketGumpDialog(x, y, pObj, context_mode);
@@ -100,7 +100,7 @@ void CClient::addGumpDialog( CLIMODE_TYPE mode, const CSString * psControls, siz
 
 	if ( m_pChar )
 	{
-		m_mapOpenedGumps[context_mode]++;
+		++m_mapOpenedGumps[context_mode];
 	}
 }
 
@@ -181,7 +181,7 @@ TRIGRET_TYPE CClient::Dialog_OnButton( CResourceID rid, dword dwButtonID, CObjBa
 bool CClient::Dialog_Close( CObjBase * pObj, dword rid, int buttonID )
 {
 	ADDTOCALLSTACK("CClient::Dialog_Close");
-	int gumpContext = rid & 0x00FFFFFF;
+	int gumpContext = RES_GET_INDEX(rid);
 
 	new PacketGumpChange(this, gumpContext, buttonID);
 

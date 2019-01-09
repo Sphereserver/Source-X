@@ -1622,7 +1622,7 @@ PacketWeather::PacketWeather(const CClient* target, WEATHER_TYPE weather, int se
  *
  *
  ***************************************************************************/
-PacketBookPageContent::PacketBookPageContent(const CClient* target, const CItem* book, size_t startpage, size_t pagecount) : PacketSend(XCMD_BookPage, 8, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
+PacketBookPageContent::PacketBookPageContent(const CClient* target, const CItem* book, word startpage, word pagecount) : PacketSend(XCMD_BookPage, 8, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketBookPageContent::PacketBookPageContent");
 
@@ -1632,17 +1632,17 @@ PacketBookPageContent::PacketBookPageContent(const CClient* target, const CItem*
 	writeInt32(book->GetUID());
 	writeInt16(0);
 
-	for (size_t i = 0; i < pagecount; i++)
+	for (word i = 0; i < pagecount; ++i)
 		addPage(book, startpage + i);
 
 	push(target);
 }
 
-void PacketBookPageContent::addPage(const CItem* book, size_t page)
+void PacketBookPageContent::addPage(const CItem* book, word page)
 {
 	ADDTOCALLSTACK("PacketBookPageContent::addPage");
 
-	writeInt16((word)(page));
+	writeInt16(page);
 
 	// skip line count for now
 	size_t linesPos = getPosition();
@@ -1652,7 +1652,7 @@ void PacketBookPageContent::addPage(const CItem* book, size_t page)
 	if (book->IsBookSystem())
 	{
 		CResourceLock s;
-		if (g_Cfg.ResourceLock(s, CResourceID(RES_BOOK, book->m_itBook.m_ResID.GetResIndex(), (int)(page))) == true)
+		if (g_Cfg.ResourceLock(s, CResourceID(RES_BOOK, book->m_itBook.m_ResID.GetResIndex(), page)) == true)
 		{
 			while (s.ReadKey(false))
 			{
@@ -1678,14 +1678,14 @@ void PacketBookPageContent::addPage(const CItem* book, size_t page)
 						if (ch == '\t')
 						{
 							ch = '\0';
-							lines++;
+							++lines;
 						}
 
 						writeCharASCII(ch);
 					}
 
 					writeCharASCII('\0');
-					lines++;
+					++lines;
 				}
 			}
 		}
@@ -2168,7 +2168,7 @@ PacketBulletinBoard::PacketBulletinBoard(const CClient* target, BBOARDF_TYPE act
 		size_t lines = message->GetPageCount();
 		writeInt16((word)lines);
 
-		for (size_t i = 0; i < lines; i++)
+		for (word i = 0; i < lines; ++i)
 		{
 			lpctstr text = message->GetPageText(i);
 			if (text == nullptr)

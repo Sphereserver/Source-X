@@ -604,8 +604,8 @@ protected:
 	size_t m_pages;
 
 public:
-	PacketBookPageContent(const CClient* target, const CItem* book, size_t startpage, size_t pagecount = 1);
-	void addPage(const CItem* book, size_t page);
+	PacketBookPageContent(const CClient* target, const CItem* book, word startpage, word pagecount = 1);
+	void addPage(const CItem* book, word page);
 };
 
 /***************************************************************************

@@ -46,9 +46,9 @@ public:
     virtual bool r_LoadVal( CScript & s ) override;
     virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute command from script
 
-    size_t GetPageCount() const;
-    lpctstr GetPageText( size_t iPage ) const;
-    void SetPageText( size_t iPage, lpctstr pszText );
+    word GetPageCount() const;
+    lpctstr GetPageText( word wPage ) const;
+    void SetPageText( word wPage, lpctstr pszText );
     void AddPageText( lpctstr pszText );
 
     virtual void DupeCopy( const CItem * pItem ) override;  // overriding CItem::DupeCopy

@@ -1463,3 +1463,13 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 - Added: Packet UseTargetedSkill (0xBF.0x2E) functionality.
 - Added: In debug builds, when an unknown packet is received, its data is dumped to the console and to the log.
 - Fixed: EFFECT with id of 4 caused an exception.
+
+09-01-2019, Nolok
+WARNING: the following change could break some hackish expedient used in scripts! Read carefully!
+- Changed: Defname numeric value has a different byte order now. For example, <hval s_clumsy> returned 0ce000001, so you could retrieve the spell number by doing <hval s_clumsy&(~0ce000000)>,
+	which removed the resource type bits. Now <hval s_clumsy> returns 082700001, so you can't use the previous code anymore. Use RESOURCEINDEX instead.
+	This change was needed because too much informations were stored inside the UID, and its last bytes (used to store the resource type) overlapped with some internal flags.
+- Added: <RESOURCEINDEX defname> to retrieve the resource index from the defname, ignoring the resource type (Chardef, Spell, Itemdef, Template...) bits.
+	As example, <RESOURCEINDEX s_clumsy> returns 1, which is the spell number (id).
+- Added: <RESOURCETYPE defname>, which gets the resource type (RES_ITEMDEF, RES_SPAWN, etc) from the defname. The list of the resource type numbers is in the X scriptpack in core/defs.scp.
+- Changed: REGIONTYPE block could not accept landtile types with index > 255. Extended this limit to 65534.	This also extends the maximum number of pages in a book by the same amount.

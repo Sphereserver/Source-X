@@ -151,13 +151,13 @@ void CClient::Event_Item_Dye( CUID uid, HUE_TYPE wHue ) // Rehue an item
 }
 
 
-void CClient::Event_Tips( word i) // Tip of the day window
+void CClient::Event_Tips(word i) // Tip of the day window
 {
 	ADDTOCALLSTACK("CClient::Event_Tips");
-	if (i==0)
-		i=1;
+	if (i == 0)
+		i = 1;
 	CResourceLock s;
-	if ( g_Cfg.ResourceLock( s, CResourceID( RES_TIP, i )) == false )
+	if ( g_Cfg.ResourceLock( s, CResourceID( RES_TIP, (int)i )) == false )
 	{
 		// requested tip was not found, default to tip 1 if possible
 		if ( i == 1 || ( g_Cfg.ResourceLock( s, CResourceID( RES_TIP, 1 )) == false ))

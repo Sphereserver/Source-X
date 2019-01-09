@@ -3964,6 +3964,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		{
 			m_atCreate.m_Stroke_Count = 1;		//This matches the new strokes amount used on OSI.
 			pArgs.m_VarsLocal.SetNum("CraftItemdef", pResBase.GetPrivateUID());
+            //pArgs.m_VarsLocal.SetStr("CraftItemdef", g_Cfg.ResourceGetName(pResBase), false);
 			pArgs.m_VarsLocal.SetNum("CraftStrokeCnt", m_atCreate.m_Stroke_Count);
 			pArgs.m_VarsLocal.SetNum("CraftAmount", m_atCreate.m_Amount);
 		}
@@ -3994,7 +3995,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		if ( bCraftSkill )
 		{
 			// read crafting parameters
-			pResBase.SetPrivateUID((dword)(pArgs.m_VarsLocal.GetKeyNum("CraftItemdef")));
+			pResBase = CResourceID( (dword)(pArgs.m_VarsLocal.GetKeyNum("CraftItemdef")), 0 );
 			m_atCreate.m_Stroke_Count = (word)pArgs.m_VarsLocal.GetKeyNum("CraftStrokeCnt");
 			m_atCreate.m_Stroke_Count = maximum(1,m_atCreate.m_Stroke_Count);
 			m_atCreate.m_ItemID = (ITEMID_TYPE)(pResBase.GetResIndex());

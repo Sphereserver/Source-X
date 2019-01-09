@@ -345,7 +345,7 @@ CResourceID CResourceBase::ResourceGetIDParse(RES_TYPE restype, lpctstr &ptcName
         return CResourceID(restype, iEvalResIndex);
     }
     // CResourceID always needs to be a valid resource (there's an ASSERT in CResourceID copy constructor).
-    return CResourceID((RES_TYPE)iEvalResType, iEvalResIndex, RES_GET_PAGE(dwEvalPrivateUID));
+    return CResourceID((RES_TYPE)iEvalResType, iEvalResIndex);
 }
 
 CResourceID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr ptcName )
@@ -370,13 +370,13 @@ int CResourceBase::ResourceGetIndexType( RES_TYPE restype, lpctstr pszName )
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetIndexType");
 	// Get a resource of just this index type.
-	CResourceID rid = ResourceGetID( restype, pszName );
+	const CResourceID rid = ResourceGetID( restype, pszName );
 	if ( rid.GetResType() != restype )
 		return -1;
 	return rid.GetResIndex();
 }
 
-CResourceDef * CResourceBase::ResourceGetDef( CResourceID rid ) const
+CResourceDef * CResourceBase::ResourceGetDef(const CResourceID& rid) const
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetDef");
 	if ( ! rid.IsValidUID() )
@@ -390,7 +390,7 @@ CResourceDef * CResourceBase::ResourceGetDef( CResourceID rid ) const
 //*******************************************************
 // Open resource blocks.
 
-bool CResourceBase::ResourceLock( CResourceLock & s, CResourceID rid )
+bool CResourceBase::ResourceLock( CResourceLock & s, const CResourceID& rid )
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceLock");
 	// Lock a referenced resource object.

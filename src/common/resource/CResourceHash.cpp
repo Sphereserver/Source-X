@@ -30,11 +30,23 @@ int CResourceHashArray::CompareKey( CResourceID rid, CResourceDef * pBase, bool 
     UNREFERENCED_PARAMETER(fNoSpaces);
     dword dwID1 = rid.GetPrivateUID();
     ASSERT( pBase );
-    dword dwID2 = pBase->GetResourceID().GetPrivateUID();
-    if (dwID1 > dwID2 )
+    const CResourceID& baseResID = pBase->GetResourceID();
+    dword dwID2 = baseResID.GetPrivateUID();
+    if (dwID1 > dwID2)
         return 1;
-    if (dwID1 == dwID2 )
-        return 0;
+    if (dwID1 == dwID2)
+    {
+        ushort uiPage1 = rid.GetResPage();
+        ushort uiPage2 = baseResID.GetResPage();
+        if (uiPage1 == UINT16_MAX)  //rid page == UINT16_MAX: search independently from the page
+            return 0;
+        if (uiPage1 > uiPage2)
+            return 1;
+        else if (uiPage1 == uiPage2)
+            return 0;
+        else
+            return -1;
+    }
     return -1;
 }
 
