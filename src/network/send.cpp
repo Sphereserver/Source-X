@@ -460,7 +460,11 @@ PacketItemWorld::PacketItemWorld(const CClient* target, const CItem *item) : Pac
 
 	dword uid = item->GetUID();
 	word amount = 0;
-    if (item->CanSendAmount())
+    if (item->GetType() == IT_CORPSE)
+    {
+        amount =item->GetAmount();  // char id of the corpse
+    }
+    else if (item->CanSendAmount())
     {
         word itemAmount = item->GetAmount();
         if (itemAmount > 1)
@@ -473,7 +477,7 @@ PacketItemWorld::PacketItemWorld(const CClient* target, const CItem *item) : Pac
 	byte flags = 0;
 	byte light = 0;
 
-	adjustItemData(target, item, id, hue, amount, p, dir, flags, light);
+	adjustItemData(target, item, id, hue, amount, dir, flags, light);
 
 	// this packet only supports item ids up to 0x3fff, and multis start from 0x4000 (ITEMID_MULTI_LEGACY)
 	// multis need to be adjusted to the lower range, and items between 03fff and 08000 need to be adjusted
@@ -517,10 +521,9 @@ PacketItemWorld::PacketItemWorld(const CClient* target, const CItem *item) : Pac
 	push(target);
 }
 
-void PacketItemWorld::adjustItemData(const CClient* target, const CItem* item, ITEMID_TYPE &id, HUE_TYPE &hue, word &amount, CPointMap &p, DIR_TYPE &dir, byte &flags, byte& light)
+void PacketItemWorld::adjustItemData(const CClient* target, const CItem* item, ITEMID_TYPE &id, HUE_TYPE &hue, word &amount, DIR_TYPE &dir, byte &flags, byte& light)
 {
 	ADDTOCALLSTACK("PacketItemWorld::adjustItemData");
-	UNREFERENCED_PARAMETER(p);
 	const CChar* character = target->GetChar();
 	ASSERT(character);
 
@@ -5074,7 +5077,11 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item)
 	ITEMID_TYPE id = item->GetDispID();
 	DIR_TYPE dir = DIR_N;
     word amount = 0;
-    if (item->CanSendAmount())
+    if (item->GetType() == IT_CORPSE)
+    {
+        amount =item->GetAmount();  // char id of the corpse
+    }
+    else if (item->CanSendAmount())
     {
         word itemAmount = item->GetAmount();
         if (itemAmount > 1)
@@ -5085,7 +5092,7 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item)
 	byte light = 0;
 	byte flags = 0;
 
-	adjustItemData(target, item, id, hue, amount, pt, dir, flags, light);
+	adjustItemData(target, item, id, hue, amount, dir, flags, light);
 
 	if ( id >= ITEMID_MULTI )
 	{
@@ -5235,7 +5242,7 @@ PacketContainer::PacketContainer(const CClient* target, CObjBase** objects, size
 	initLength();
 	writeInt16((word)(objectCount));
 
-	for (size_t i = 0; i < objectCount; i++)
+	for (size_t i = 0; i < objectCount; ++i)
 	{
 		CObjBase* object = objects[i];
 		if (object->IsItem())
@@ -5245,13 +5252,13 @@ PacketContainer::PacketContainer(const CClient* target, CObjBase** objects, size
 			dword uid = item->GetUID();
 			word amount = item->GetAmount();
 			ITEMID_TYPE id = item->GetDispID();
-			CPointMap p = item->GetTopPoint();
+			const CPointMap& p = item->GetTopPoint();
 			DIR_TYPE dir = DIR_N;
 			HUE_TYPE hue = item->GetHue();
 			byte flags = 0;
 			byte light = 0;
 
-			adjustItemData(target, item, id, hue, amount, p, dir, flags, light);
+			adjustItemData(target, item, id, hue, amount, dir, flags, light);
 
 			if (id >= ITEMID_MULTI)
 				id = (ITEMID_TYPE)(id - ITEMID_MULTI);

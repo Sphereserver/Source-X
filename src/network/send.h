@@ -185,7 +185,7 @@ protected:
 public:
 	PacketItemWorld(const CClient* target, const CItem* item);
 
-	void adjustItemData(const CClient* target, const CItem* item, ITEMID_TYPE &id, HUE_TYPE &hue, word &amount, CPointMap &p, DIR_TYPE &dir, byte &flags, byte &light);
+	void adjustItemData(const CClient* target, const CItem* item, ITEMID_TYPE &id, HUE_TYPE &hue, word &amount, DIR_TYPE &dir, byte &flags, byte &light);
 
 	virtual bool onSend(const CClient* client);
 };
