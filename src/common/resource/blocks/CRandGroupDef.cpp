@@ -224,7 +224,7 @@ size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) cons
     {
         iWeight	= Calc_GetRandVal( m_iTotalWeight ) + 1;
 
-        for ( i = 0; iWeight > 0 && i < iCount; i++ )
+        for ( i = 0; iWeight > 0 && i < iCount; ++i )
         {
             iWeight -= (int)(m_Members[i].GetResQty());
         }
@@ -235,11 +235,11 @@ size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) cons
         return( i - 1 );
     }
 
-    CSPtrTypeArray<size_t> members;
+    std::vector<size_t> members;
 
     // calculate weight only of items pCharSrc can get
     int iTotalWeight = 0;
-    for ( i = 0; i < iCount; i++ )
+    for ( i = 0; i < iCount; ++i )
     {
         CRegionResourceDef * pOreDef = dynamic_cast <CRegionResourceDef *>( g_Cfg.ResourceGetDef( m_Members[i].GetResourceID() ) );
         // If no regionresource, return just some random entry!
@@ -263,7 +263,7 @@ size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) cons
     iWeight = Calc_GetRandVal( iTotalWeight ) + 1;
     iCount = members.size();
 
-    for ( i = 0; iWeight > 0 && i < iCount; i++ )
+    for ( i = 0; iWeight > 0 && i < iCount; ++i )
     {
         iWeight -= (int)(m_Members[members[i]].GetResQty());
     }

@@ -146,10 +146,10 @@ void CCChampion::SpawnNPC()
             return;
         }
         --_iSpawnsNextWhite;
+        ASSERT(iSize <= UCHAR_MAX);
         uchar iRand = (uchar)Calc_GetRandVal2(1, (int)iSize - 1);
         pNpc = _idSpawn[_iLevel][iRand];	//Find out the random npc.
-        CResourceID rid = CResourceID(RES_CHARDEF, pNpc);
-        CResourceDef * pDef = g_Cfg.ResourceGetDef(rid);
+        CResourceDef * pDef = g_Cfg.ResourceGetDef(CResourceID(RES_CHARDEF, pNpc));
         if (!pDef)
         {
             return;

@@ -174,7 +174,7 @@ public:
      * @param   dwArg   The argument.
      * @return  An int.
      */
-	int ContentCount( CResourceID rid, dword dwArg = 0 );
+	int ContentCount( CResourceID rid, dword dwArg = 0 ) const;
 
     /**
      * @fn  size_t CContainer::ContentCountAll() const;
@@ -188,12 +188,22 @@ public:
      * @brief   Content consume.
      * @param   rid     The rid.
      * @param   iQty    Zero-based index of the qty.
-     * @param   fTest   true to test.
      * @param   dwArg   The argument.
      *
-     * @return  An int.
+     * @return  0 = all consumed, # = number left to be consumed.
      */
-	int ContentConsume( CResourceID rid, int iQty = 1, bool fTest = false, dword dwArg = 0 );
+	int ContentConsume( const CResourceID& rid, int iQty = 1, dword dwArg = 0 );
+
+    /**
+    * @fn  int CContainer::ContentConsumeTest( RESOURCE_ID_BASE rid, int iQty = 1, dword dwArg = 0 );
+    * @brief   Content consume.
+    * @param   rid     The rid.
+    * @param   iQty    Zero-based index of the qty.
+    * @param   dwArg   The argument.
+    *
+    * @return  0 = all consumed, # = number left to be consumed.
+    */
+    int ContentConsumeTest( const CResourceID& rid, int amount, dword dwArg = 0) const;
 
     /**
      * @fn  int CContainer::ResourceConsume( const CResourceQtyArray * pResources, int iReplicationQty, bool fTest = false, dword dwArg = 0 );

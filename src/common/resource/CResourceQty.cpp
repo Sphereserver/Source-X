@@ -123,44 +123,44 @@ size_t CResourceQtyArray::FindResourceType( RES_TYPE type ) const
     ADDTOCALLSTACK("CResourceQtyArray::FindResourceType");
     // is this RES_TYPE in the array ?
     // BadIndex = fail
-    for ( size_t i = 0; i < size(); i++ )
+    for ( size_t i = 0, iQty = size(); i < iQty; ++i )
     {
-        CResourceID ridtest = at(i).GetResourceID();
+        const CResourceID& ridtest = (*this)[i].GetResourceID();
         if ( type == ridtest.GetResType() )
             return i;
     }
     return BadIndex();
 }
 
-size_t CResourceQtyArray::FindResourceID( CResourceID rid ) const
+size_t CResourceQtyArray::FindResourceID( const CResourceID& rid ) const
 {
     ADDTOCALLSTACK("CResourceQtyArray::FindResourceID");
     // is this RESOURCE_ID in the array ?
     // BadIndex = fail
-    for ( size_t i = 0; i < size(); i++ )
+    for ( size_t i = 0, iQty = size(); i < iQty; ++i )
     {
-        CResourceID ridtest = at(i).GetResourceID();
+        const CResourceID& ridtest = (*this)[i].GetResourceID();
         if ( rid == ridtest )
             return i;
     }
     return BadIndex();
 }
 
-size_t CResourceQtyArray::FindResourceMatch( CObjBase * pObj ) const
+size_t CResourceQtyArray::FindResourceMatch( const CObjBase * pObj ) const
 {
     ADDTOCALLSTACK("CResourceQtyArray::FindResourceMatch");
     // Is there a more vague match in the array ?
     // Use to find intersection with this pOBj raw material and BaseResource creation elements.
-    for ( size_t i = 0; i < size(); i++ )
+    for ( size_t i = 0, iQty = size(); i < iQty; ++i )
     {
-        CResourceID ridtest = at(i).GetResourceID();
+        const CResourceID& ridtest =(*this)[i].GetResourceID();
         if ( pObj->IsResourceMatch( ridtest, 0 ))
             return i;
     }
     return BadIndex();
 }
 
-bool CResourceQtyArray::IsResourceMatchAll( CChar * pChar ) const
+bool CResourceQtyArray::IsResourceMatchAll( const CChar * pChar ) const
 {
     ADDTOCALLSTACK("CResourceQtyArray::IsResourceMatchAll");
     // Check all required skills and non-consumable items.
@@ -168,11 +168,11 @@ bool CResourceQtyArray::IsResourceMatchAll( CChar * pChar ) const
     //  false = failed.
     ASSERT(pChar != nullptr);
 
-    for ( size_t i = 0; i < size(); ++i )
+    for ( size_t i = 0, iQty = size(); i < iQty; ++i )
     {
-        CResourceID ridtest = at(i).GetResourceID();
+        const CResourceID& ridtest = (*this)[i].GetResourceID();
 
-        if ( ! pChar->IsResourceMatch( ridtest, (uint)(at(i).GetResQty()) ))
+        if ( ! pChar->IsResourceMatch( ridtest, (uint)((*this)[i].GetResQty()) ))
             return false;
     }
 
@@ -237,13 +237,13 @@ void CResourceQtyArray::WriteKeys( tchar * pszArgs, size_t index, bool fQtyOnly,
     if ( index > 0 && index < max )
         max = index;
 
-    for ( size_t i = (index > 0 ? index - 1 : 0); i < max; i++ )
+    for ( size_t i = (index > 0 ? index - 1 : 0); i < max; ++i )
     {
         if ( i > 0 && index == 0 )
         {
             pszArgs += sprintf( pszArgs, "," );
         }
-        pszArgs += at(i).WriteKey( pszArgs, fQtyOnly, fKeyOnly );
+        pszArgs += (*this)[i].WriteKey( pszArgs, fQtyOnly, fKeyOnly );
     }
     *pszArgs = '\0';
 }
@@ -256,26 +256,26 @@ void CResourceQtyArray::WriteNames( tchar * pszArgs, size_t index ) const
     if ( index > 0 && index < max )
         max = index;
 
-    for ( size_t i = (index > 0 ? index - 1 : 0); i < max; i++ )
+    for ( size_t i = (index > 0 ? index - 1 : 0); i < max; ++i )
     {
         if ( i > 0 && index == 0 )
         {
             pszArgs += sprintf( pszArgs, ", " );
         }
 
-        int64 iQty = at(i).GetResQty();
+        const CResourceQty& resQty = (*this)[i];
+        const int64 iQty = resQty.GetResQty();
         if ( iQty )
         {
-            if (at(i).GetResType() == RES_SKILL )
+            if (resQty.GetResType() == RES_SKILL )
             {
-                pszArgs += sprintf( pszArgs, "%" PRId64 ".%" PRId64 ,
-                    iQty / 10, iQty % 10 );
+                pszArgs += sprintf( pszArgs, "%" PRId64 ".%" PRId64 , iQty / 10, iQty % 10 );
             }
             else
                 pszArgs += sprintf( pszArgs, "%" PRId64 " ", iQty);
         }
 
-        pszArgs += at(i).WriteNameSingle( pszArgs, (int)iQty );
+        pszArgs += resQty.WriteNameSingle( pszArgs, (int)iQty );
     }
     *pszArgs = '\0';
 }
@@ -286,15 +286,16 @@ bool CResourceQtyArray::operator == ( const CResourceQtyArray & array ) const
     if (size() != array.size())
         return false;
 
-    for ( size_t i = 0; i < size(); i++ )
+    for ( size_t i = 0, iQty = size(); i < iQty; ++i )
     {
-        for ( size_t j = 0; ; j++ )
+        for ( size_t j = 0; ; ++j )
         {
             if ( j >= array.size() )
                 return false;
-            if ( ! (at(i).GetResourceID() == array[j].GetResourceID() ) )
+            const CResourceQty& resQty = (*this)[i];
+            if ( ! (resQty.GetResourceID() == array[j].GetResourceID() ) )
                 continue;
-            if (at(i).GetResQty() != array[j].GetResQty() )
+            if (resQty.GetResQty() != array[j].GetResQty() )
                 continue;
             break;
         }

@@ -11,13 +11,13 @@
 #include "CChar.h"
 #include "CCharNPC.h"
 
-bool CChar::IsResourceMatch( CResourceID rid, dword dwAmount )
+bool CChar::IsResourceMatch( const CResourceID& rid, dword dwAmount ) const
 {
 	ADDTOCALLSTACK("CChar::IsResourceMatch");
 	return IsResourceMatch(rid, dwAmount, 0);
 }
 
-bool CChar::IsResourceMatch( CResourceID rid, dword dwAmount, dword dwArgResearch )
+bool CChar::IsResourceMatch( const CResourceID& rid, dword dwAmount, dword dwArgResearch ) const
 {
 	ADDTOCALLSTACK("CChar::IsResourceMatch (dwArgResearch)");
 	// Is the char a match for this test ?
@@ -30,7 +30,7 @@ bool CChar::IsResourceMatch( CResourceID rid, dword dwAmount, dword dwArgResearc
 
 		case RES_CHARDEF:		// I'm this type of char?
 		{
-			CCharBase *pCharDef = Char_GetDef();
+            const CCharBase *pCharDef = Char_GetDef();
 			ASSERT(pCharDef);
 			if ( pCharDef->GetResourceID() == rid )
 				return true;
@@ -42,7 +42,7 @@ bool CChar::IsResourceMatch( CResourceID rid, dword dwAmount, dword dwArgResearc
 			{
 				if ( m_pNPC->m_Speech.ContainsResourceID(rid) )
 					return true;
-				CCharBase *pCharDef = Char_GetDef();
+                const CCharBase *pCharDef = Char_GetDef();
 				ASSERT(pCharDef);
 				if ( pCharDef->m_Speech.ContainsResourceID(rid) )
 					return true;
@@ -55,7 +55,7 @@ bool CChar::IsResourceMatch( CResourceID rid, dword dwAmount, dword dwArgResearc
 				return true;
 			if ( m_pNPC )
 			{
-				CCharBase *pCharDef = Char_GetDef();
+                const CCharBase *pCharDef = Char_GetDef();
 				ASSERT(pCharDef);
 				if ( pCharDef->m_TEvents.ContainsResourceID(rid) )
 					return true;
@@ -64,12 +64,12 @@ bool CChar::IsResourceMatch( CResourceID rid, dword dwAmount, dword dwArgResearc
 		}
 
 		case RES_TYPEDEF:		// do I have these in my posession?
-			if ( !ContentConsume(rid, dwAmount, true, dwArgResearch) )
+			if ( !ContentConsumeTest(rid, dwAmount, dwArgResearch) )
 				return true;
 			return false;
 
 		case RES_ITEMDEF:		// do I have these in my posession?
-			if ( !ContentConsume(rid, dwAmount, true) )
+			if ( !ContentConsumeTest(rid, dwAmount) )
 				return true;
 			return false;
 		default:
@@ -282,7 +282,7 @@ bool CChar::CanEquipStr( CItem *pItem ) const
 	if ( IsPriv(PRIV_GM) )
 		return true;
 
-	CItemBase *pItemDef = pItem->Item_GetDef();
+    const CItemBase *pItemDef = pItem->Item_GetDef();
 	LAYER_TYPE layer = pItemDef->GetEquipLayer();
 	if ( !pItemDef->IsTypeEquippable() || !CItemBase::IsVisibleLayer(layer) )
 		return true;
@@ -474,7 +474,7 @@ bool CChar::IsSwimming() const
 	// Am i in/over/slightly under the water now ?
 	// NOTE: This is a bit more complex because we need to test if we are slightly under water.
 
-	CPointMap ptTop = GetTopPoint();
+	const CPointMap& ptTop = GetTopPoint();
 
 	CPointMap pt = g_World.FindItemTypeNearby(ptTop, IT_WATER);
 	if ( !pt.IsValidPoint() )
@@ -619,7 +619,7 @@ lpctstr CChar::GetPossessPronoun() const
 byte CChar::GetModeFlag( const CClient *pViewer ) const
 {
 	ADDTOCALLSTACK("CChar::GetModeFlag");
-	CCharBase *pCharDef = Char_GetDef();
+    const CCharBase *pCharDef = Char_GetDef();
 	byte mode = 0;
 
 	if ( IsStatFlag(STATF_FREEZE|STATF_STONE) )
@@ -683,7 +683,7 @@ byte CChar::GetDirFlag(bool fSquelchForwardStep) const
 	if ( IsStatFlag( STATF_FLY ))
 		dir |= 0x80; // running/flying ?
 
-	return( dir );
+	return dir;
 }
 
 dword CChar::GetMoveBlockFlags(bool bIgnoreGM) const
@@ -725,7 +725,8 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 	ADDTOCALLSTACK("CChar::GetSpellbook");
 	// Search for suitable book in hands first
 	CItem *pReturn = LayerFind(LAYER_HAND1);    // Let's do first a direct search for any book in hands.
-	if (pReturn && pReturn->IsTypeSpellbook() ){
+	if (pReturn && pReturn->IsTypeSpellbook() )
+    {
 	    CItemBase *pItemDef = pReturn->Item_GetDef();
 	    SPELL_TYPE min = (SPELL_TYPE)pItemDef->m_ttSpellbook.m_iOffset;
 	    SPELL_TYPE max = (SPELL_TYPE)(pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells);
@@ -839,7 +840,7 @@ ushort CChar::Food_CanEat( CObjBase *pObj ) const
 	// 75 = yummy.
 	// 100 = my favorite (i will drop other things to get this).
 
-	CCharBase *pCharDef = Char_GetDef();
+    const CCharBase *pCharDef = Char_GetDef();
 	ASSERT(pCharDef);
 
 	size_t iRet = pCharDef->m_FoodType.FindResourceMatch(pObj);
@@ -887,7 +888,7 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 		return m_sTitle;
 
 	tchar *pTemp = Str_GetTemp();
-	CCharBase *pCharDef = Char_GetDef();
+    const CCharBase *pCharDef = Char_GetDef();
 	ASSERT(pCharDef);
 
 	// Incognito ?
@@ -1013,7 +1014,7 @@ bool CChar::CanSeeInContainer( const CItemContainer *pContItem ) const
 	// Not normally searchable.
 	// Make some special cases for searchable.
 
-	CChar *pChar = static_cast<CChar*>(pContItem->GetTopLevelObj());
+    const CChar *pChar = static_cast<CChar*>(pContItem->GetTopLevelObj());
 	if ( !pChar )
 		return false;
 
@@ -1022,10 +1023,10 @@ bool CChar::CanSeeInContainer( const CItemContainer *pContItem ) const
 		if ( pChar == this )
 			return true;
 
-		CItem *pItemTrade = pContItem->m_uidLink.ItemFind();
+        const CItem *pItemTrade = pContItem->m_uidLink.ItemFind();
 		if ( pItemTrade )
 		{
-			CChar *pCharTrade = static_cast<CChar*>(pItemTrade->GetTopLevelObj());
+            const CChar *pCharTrade = static_cast<CChar*>(pItemTrade->GetTopLevelObj());
 			if ( pCharTrade == this )
 				return true;
 		}
@@ -1068,26 +1069,26 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 			if (IsSetEF(EF_FixCanSeeInClosedConts))
 			{
                 // the bSkip check is mainly needed when a trade window is created script-side
-                bool bSkip = false;
+                bool fSkip = false;
                 if (const CItemContainer* pItemContainer = dynamic_cast<const CItemContainer*>(pObjCont))
                 {
                     if (pItemContainer->IsType(IT_EQ_TRADE_WINDOW))
                     {
                         // Both of the chars in a trade can see the items being traded
                         if (this == dynamic_cast<const CChar*>(pItemContainer->GetContainer()))
-                            bSkip = true;
+                            fSkip = true;
                         else
                         {
                             if (const CItem* pLinkedTradeWindow = pItemContainer->m_uidLink.ItemFind())
                                 if (const CChar* pSecondClientInTrade = dynamic_cast<const CChar*>(pLinkedTradeWindow->GetContainer()))
                                     if (this == pSecondClientInTrade)
-                                        bSkip = true;
+                                        fSkip = true;
                         }
                     }
                 }
 
 				// A client cannot see the contents of someone else's container, unless they have opened it first
-				if (!bSkip && IsClient() && pObjCont->IsItem() && pObjCont->GetTopLevelObj() != this)
+				if (!fSkip && IsClient() && pObjCont->IsItem() && pObjCont->GetTopLevelObj() != this)
 				{
 					const CClient *pClient = GetClient();
 					if (pClient && (pClient->m_openedContainers.find(pObjCont->GetUID().GetPrivateUID()) == pClient->m_openedContainers.end()))
@@ -1157,7 +1158,7 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 		{
 			if ( pChar->IsStatFlag(STATF_RIDDEN) )
 			{
-				CChar *pCharRider = Horse_GetMountChar();
+				const CChar *pCharRider = Horse_GetMountChar();
 				if ( pCharRider )
 					return CanSee(pCharRider);
 				return false;
@@ -1182,9 +1183,9 @@ bool CChar::CanSeeItem( const CItem * pItem ) const
 	{
 		if (IsPriv(PRIV_GM))
 			return true;
+
 		tchar *uidCheck = Str_GetTemp();
 		sprintf(uidCheck, "SeenBy_0%x", (dword)(GetUID()));
-
 		if (!pItem->m_TagDefs.GetKeyNum(uidCheck))
 			return false;
 	}
@@ -1223,7 +1224,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 		if ( !pItem )
 			return false;
 
-		bool bDeathImmune = IsPriv(PRIV_GM);
+		bool fDeathImmune = IsPriv(PRIV_GM);
 		switch ( pItem->GetType() )
 		{
 		case IT_SIGN_GUMP:	// can be seen from a distance.
@@ -1231,12 +1232,12 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 
 		case IT_SHRINE:		// We can use shrines when dead !!
 		case IT_TELESCOPE:
-			bDeathImmune = true;
+            fDeathImmune = true;
 			break;
 
         case IT_ARCHERY_BUTTE:
         {
-            CItem * pWeapon = m_uidWeapon.ItemFind();
+            const CItem * pWeapon = m_uidWeapon.ItemFind();
             if (pWeapon)
             {
                 IT_TYPE iType = pWeapon->GetType();
@@ -1257,7 +1258,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 			break;
 		}
 
-		if ( !bDeathImmune && IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_FREEZE|STATF_STONE) )
+		if ( !fDeathImmune && IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_FREEZE|STATF_STONE) )
 			return false;
 	}
 
@@ -1278,7 +1279,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 				return false;
 		}
 
-		CObjBase *pObjCont = nullptr;
+        const CObjBase *pObjCont = nullptr;
 		const CObjBase *pObjTest = pObj;
 		for (;;)
 		{
@@ -1302,30 +1303,28 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 
 	if ( !CanSeeLOS(pObjTop) )
 	{
-        const uint uiCanFlags = GetCanFlags();
-		if ( uiCanFlags & CAN_C_DCIGNORELOS )
+		if ( Can(CAN_C_DCIGNORELOS) )
 			return true;
-		else if ( pObj->IsChar() && (pChar != nullptr) && (uiCanFlags & CAN_C_DCIGNORELOS) )
+		else if ( pObj->IsChar() && pObj->Can(CAN_C_DCIGNORELOS) )
 			return true;
-		else if ( pObj->IsItem() && (pItem != nullptr) && (uiCanFlags & CAN_I_DCIGNORELOS) )
+		else if ( pObj->IsItem() && pObj->Can(CAN_I_DCIGNORELOS) )
 			return true;
 		return false;
 	}
 	if ( iDist > 2 )
 	{
-        const uint uiCanFlags = GetCanFlags();
-		if ( uiCanFlags & CAN_C_DCIGNOREDIST )
+		if ( Can(CAN_C_DCIGNOREDIST) )
 			return true;
-		else if ( pObj->IsChar() && (pChar != nullptr) && (uiCanFlags & CAN_C_DCIGNOREDIST) )
+		else if ( pObj->IsChar() && pObj->Can(CAN_C_DCIGNOREDIST) )
 			return true;
-		else if ( pObj->IsItem() && (pItem != nullptr) && (uiCanFlags & CAN_I_DCIGNOREDIST) )
+		else if ( pObj->IsItem() && pObj->Can(CAN_I_DCIGNOREDIST) )
 			return true;
 		return false;
 	}
 	return true;
 }
 
-IT_TYPE CChar::CanTouchStatic( CPointMap &pt, ITEMID_TYPE id, const CItem *pItem )
+IT_TYPE CChar::CanTouchStatic( CPointMap *pPt, ITEMID_TYPE id, const CItem *pItem ) const
 {
 	ADDTOCALLSTACK("CChar::CanTouchStatic");
 	// Might be a dynamic or a static.
@@ -1337,24 +1336,24 @@ IT_TYPE CChar::CanTouchStatic( CPointMap &pt, ITEMID_TYPE id, const CItem *pItem
 	{
 		if ( !CanTouch(pItem) )
 			return IT_JUNK;
-		pt = GetTopLevelObj()->GetTopPoint();
+		*pPt = GetTopLevelObj()->GetTopPoint();
 		return pItem->GetType();
 	}
 
 	// It's a static !
-	CItemBase *pItemDef = CItemBase::FindItemBase(id);
+    const CItemBase *pItemDef = CItemBase::FindItemBase(id);
 	if ( !pItemDef )
 		return IT_NORMAL;
-	if ( !CanTouch(pt) )
+	if ( !CanTouch(*pPt) )
 		return IT_JUNK;
 
 	// Is this static really here ?
-	const CServerMapBlock *pMapBlock = g_World.GetMapBlock(pt);
+	const CServerMapBlock *pMapBlock = g_World.GetMapBlock(*pPt);
 	if ( !pMapBlock )
 		return IT_JUNK;
 
-	int x2 = pMapBlock->GetOffsetX(pt.m_x);
-	int y2 = pMapBlock->GetOffsetY(pt.m_y);
+	int x2 = pMapBlock->GetOffsetX(pPt->m_x);
+	int y2 = pMapBlock->GetOffsetY(pPt->m_y);
 
 	uint iQty = pMapBlock->m_Statics.GetStaticQty();
 	for ( uint i = 0; i < iQty; ++i )
@@ -1381,7 +1380,7 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
 
 	// sound can be blocked if in house.
     pSrc = pSrc->GetTopLevelObj();
-	CRegionWorld *pSrcRegion;
+    const CRegionWorld *pSrcRegion;
 	if ( pSrc->IsChar() )
 	{
 		const CChar *pCharSrc = dynamic_cast<const CChar*>(pSrc);
@@ -1515,7 +1514,7 @@ bool CChar::CanMove( const CItem *pItem, bool fMsg ) const
 		// Can't move items from the trade window (client limitation)
 		if ( pItem->GetContainer()->IsContainer() )
 		{
-			CItemContainer *pItemCont = dynamic_cast<CItemContainer *> (pItem->GetContainer());
+            const CItemContainer *pItemCont = dynamic_cast<CItemContainer *> (pItem->GetContainer());
 			if ( pItemCont && pItemCont->IsItemInTrade() )
 			{
 				SysMessageDefault(DEFMSG_MSG_TRADE_CANTMOVE);
@@ -1542,7 +1541,7 @@ bool CChar::CanMove( const CItem *pItem, bool fMsg ) const
 				const CItemCorpse *pCorpse = dynamic_cast<const CItemCorpse *>(pObjTop);
 				if ( pCorpse )
 				{
-					CChar *pChar = pCorpse->IsCorpseSleeping();
+                    const CChar *pChar = pCorpse->IsCorpseSleeping();
 					if ( pChar && pChar != this )
 						return false;
 				}
@@ -1551,7 +1550,7 @@ bool CChar::CanMove( const CItem *pItem, bool fMsg ) const
 			{
 				if (( pItem->IsAttr(ATTR_NEWBIE) ) && g_Cfg.m_bAllowNewbTransfer )
 				{
-					CChar *pPet = dynamic_cast<CChar*>( pItem->GetTopLevelObj() );
+                    const CChar *pPet = dynamic_cast<CChar*>( pItem->GetTopLevelObj() );
 					if (pPet && (pPet->GetOwner() == this) )
 						return true;
 				}
@@ -1708,12 +1707,12 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
 	//	test diagonal dirs by two others *only* when already having a normal location
 	if ( GetTopPoint().IsValidPoint() && !fPathFinding && (dir % 2) )
 	{
-		CPointMap ptTest;
 		DIR_TYPE dirTest1 = (DIR_TYPE)(dir - 1); // get 1st ortogonal
 		DIR_TYPE dirTest2 = (DIR_TYPE)(dir + 1); // get 2nd ortogonal
 		if ( dirTest2 == DIR_QTY )		// roll over
 			dirTest2 = DIR_N;
 
+        CPointMap ptTest;
 		ptTest = GetTopPoint();
 		ptTest.Move(dirTest1);
 		if ( !CheckValidMove(ptTest, pdwBlockFlags, DIR_QTY, pClimbHeight) )
@@ -1732,7 +1731,7 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
         return nullptr;
     }
 
-	CRegion *pArea = ptDest.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA|REGION_TYPE_ROOM);
+    CRegion *pArea = ptDest.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA|REGION_TYPE_ROOM);
 	if ( !pArea )
 	{
 		//if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
@@ -1848,7 +1847,7 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
 void CChar::FixClimbHeight()
 {
 	ADDTOCALLSTACK("CChar::FixClimbHeight");
-	CPointMap pt = GetTopPoint();
+	const CPointMap& pt = GetTopPoint();
     const height_t iHeightMount = GetHeightMount();
 	CServerMapBlockState block(CAN_I_CLIMB, pt.m_z, pt.m_z + iHeightMount + 3, pt.m_z + 2, iHeightMount);
 	g_World.GetHeightPoint(pt, block, true);

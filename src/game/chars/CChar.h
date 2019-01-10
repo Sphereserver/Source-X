@@ -340,8 +340,8 @@ public:
 	int GetVisualRange() const;
 	void SetVisualRange(byte newSight);
 
-	bool IsResourceMatch( CResourceID rid, dword dwArg );
-	bool IsResourceMatch( CResourceID rid, dword dwArg, dword dwArgResearch );
+	bool IsResourceMatch( const CResourceID& rid, dword dwArg ) const;
+	bool IsResourceMatch( const CResourceID& rid, dword dwArg, dword dwArgResearch ) const;
 
 	bool IsSpeakAsGhost() const;
 	bool CanUnderstandGhost() const;
@@ -393,7 +393,7 @@ public:
 	bool CanSeeItem( const CItem * pItem ) const;
 	bool CanTouch( const CPointMap & pt ) const;
 	bool CanTouch( const CObjBase * pObj ) const;
-	IT_TYPE CanTouchStatic( CPointMap & pt, ITEMID_TYPE id, const CItem * pItem );
+	IT_TYPE CanTouchStatic( CPointMap * pPt, ITEMID_TYPE id, const CItem * pItem ) const;
 	bool CanMove( const CItem * pItem, bool fMsg = true ) const;
 	byte GetLightLevel() const;
 	bool CanUse( CItem * pItem, bool fMoveOrConsume ) const;

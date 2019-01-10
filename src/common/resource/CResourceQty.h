@@ -16,11 +16,11 @@ private:
     CResourceID m_rid;		// A RES_SKILL, RES_ITEMDEF, or RES_TYPEDEF
     int64 m_iQty;			// How much of this ?
 public:
-    inline CResourceID GetResourceID() const
+    inline const CResourceID& GetResourceID() const
     {
         return m_rid;
     }
-    void SetResourceID(CResourceID rid, int iQty)
+    void SetResourceID(const CResourceID& rid, int iQty)
     {
         m_rid = rid;
         m_iQty = iQty;
@@ -70,12 +70,12 @@ public:
     void WriteKeys( tchar * pszArgs, size_t index = 0, bool fQtyOnly = false, bool fKeyOnly = false ) const;
     void WriteNames( tchar * pszArgs, size_t index = 0 ) const;
 
-    size_t FindResourceID( CResourceID rid ) const;
+    size_t FindResourceID( const CResourceID& rid ) const;
     size_t FindResourceType( RES_TYPE type ) const;
-    size_t FindResourceMatch( CObjBase * pObj ) const;
-    bool IsResourceMatchAll( CChar * pChar ) const;
+    size_t FindResourceMatch( const CObjBase * pObj ) const;
+    bool IsResourceMatchAll( const CChar * pChar ) const;
 
-    inline bool ContainsResourceID( CResourceID & rid ) const
+    inline bool ContainsResourceID( const CResourceID & rid ) const
     {
         return FindResourceID(rid) != BadIndex();
     }

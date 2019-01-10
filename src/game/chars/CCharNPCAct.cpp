@@ -1783,9 +1783,9 @@ bool CChar::NPC_Act_Food()
 			}
 		}
 	}
-					// no food around, but maybe i am ok with grass? Or shall I try to pick crops?
 	else
 	{
+        // no food around, but maybe i am ok with grass? Or shall I try to pick crops?
 
 		const NPCBRAIN_TYPE brain = GetNPCBrainGroup();
 		if ( brain == NPCBRAIN_ANIMAL )						// animals eat grass always
@@ -1805,8 +1805,8 @@ bool CChar::NPC_Act_Food()
 	}
 	if ( bSearchGrass )
 	{
-		CCharBase *pCharDef = Char_GetDef();
-		CResourceID	rid = CResourceID(RES_TYPEDEF, IT_GRASS);
+        const CCharBase *pCharDef = Char_GetDef();
+        const CResourceID rid = CResourceID(RES_TYPEDEF, IT_GRASS);
 
 		if ( pCharDef->m_FoodType.ContainsResourceID(rid) ) // do I accept grass as food?
 		{
@@ -2459,13 +2459,13 @@ void CChar::NPC_Food()
 
 	if ( bSearchGrass )
 	{
-		CCharBase			*pCharDef = Char_GetDef();
-		CResourceID	rid = CResourceID(RES_TYPEDEF, IT_GRASS);
+		const CCharBase *pCharDef = Char_GetDef();
+        const CResourceID rid = CResourceID(RES_TYPEDEF, IT_GRASS);
 
 		EXC_SET_BLOCK("searching grass");
 		if ( pCharDef->m_FoodType.ContainsResourceID(rid) ) // do I accept grass as a food?
 		{
-			CItem	*pResBit = g_World.CheckNaturalResource(GetTopPoint(), IT_GRASS, true, this);
+			CItem *pResBit = g_World.CheckNaturalResource(GetTopPoint(), IT_GRASS, true, this);
 			if ( pResBit && pResBit->GetAmount() && ( pResBit->GetTopPoint().m_z == iMyZ ) )
 			{
 				EXC_SET_BLOCK("eating grass");
@@ -2490,8 +2490,7 @@ void CChar::NPC_Food()
 					case NPCACT_FLEE:
 						{
 							EXC_SET_BLOCK("searching grass nearby");
-							CPointMap pt;
-								pt = g_World.FindTypeNear_Top(GetTopPoint(), IT_GRASS, minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
+							CPointMap pt = g_World.FindTypeNear_Top(GetTopPoint(), IT_GRASS, minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
 							if (( pt.m_x >= 1 ) && ( pt.m_y >= 1 ))
 							{
 								// we found grass nearby, but has it already been consumed?

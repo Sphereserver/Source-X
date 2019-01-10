@@ -112,7 +112,7 @@ void CItemMultiCustom::BeginCustomize(CClient * pClientSrc)
 
     // copy the main design to working, ready for editing
     CopyDesign(&m_designMain, &m_designWorking);
-    m_designWorking.m_iRevision++;
+    ++m_designWorking.m_iRevision;
 
     // client will silently close all open dialogs and let the server think they're still open, so we need to update opened gump counts here
     CDialogDef* pDlg = nullptr;

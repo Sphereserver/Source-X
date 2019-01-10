@@ -1216,11 +1216,11 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 		const size_t iToParseLen = (pElementsStart[0][1] - pElementsStart[0][0]);
 		memcpy((void*)pToParse, pElementsStart[0][0], iToParseLen * sizeof(tchar));
 		pToParse[iToParseLen] = '\0';
-		lptstr pToParseCasted = reinterpret_cast<lptstr>(pToParse);
+		lptstr pToParseCasted = static_cast<lptstr>(pToParse);
 		return GetSingle(pToParseCasted);
 	}
 
-	if (iQty == 2) // It's just a simple range....pick one in range at random
+	if (iQty == 2) // It's just a simple range... pick one in range at random
 	{
 		tchar pToParse[THREAD_STRING_LENGTH];
 
@@ -1228,14 +1228,14 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 		size_t iToParseLen = (pElementsStart[0][1] - pElementsStart[0][0]);
 		memcpy((void*)pToParse, pElementsStart[0][0], iToParseLen * sizeof(tchar));
 		pToParse[iToParseLen] = '\0';
-		lptstr pToParseCasted = reinterpret_cast<lptstr>(pToParse);
+		lptstr pToParseCasted = static_cast<lptstr>(pToParse);
 		llong llValFirst = GetSingle(pToParseCasted);
 
 		// Copy the second element in a new string
 		iToParseLen = (pElementsStart[1][1] - pElementsStart[1][0]);
 		memcpy((void*)pToParse, pElementsStart[1][0], iToParseLen * sizeof(tchar));
 		pToParse[iToParseLen] = '\0';
-		pToParseCasted = reinterpret_cast<lptstr>(pToParse);
+		pToParseCasted = static_cast<lptstr>(pToParse);
 		llong llValSecond = GetSingle(pToParseCasted);
 
 		if (llValSecond < llValFirst)	// the first value has to be < than the second before passing it to Calc_GetRandLLVal2

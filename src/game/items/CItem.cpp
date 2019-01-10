@@ -2922,7 +2922,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			return true;
 
 		case IC_FRUIT:	// m_more2
-			m_itCrop.m_ridFruitOverride = CResourceID(RES_ITEMDEF, RES_GET_INDEX(s.GetArgDWVal()));
+			m_itCrop.m_ridFruitOverride = CResourceIDBase(RES_ITEMDEF, RES_GET_INDEX(s.GetArgDWVal()));
 			return true;
 		case IC_MAXHITS:
 			m_itNormal.m_more1 = MAKEDWORD(LOWORD(m_itNormal.m_more1), s.GetArgVal());
@@ -3907,7 +3907,7 @@ void CItem::ConvertBolttoCloth()
 	}
 }
 
-word CItem::ConsumeAmount( word iQty, bool fTest )
+word CItem::ConsumeAmount( word iQty )
 {
 	ADDTOCALLSTACK("CItem::ConsumeAmount");
 	// Eat or drink specific item. delete it when gone.
@@ -3916,17 +3916,13 @@ word CItem::ConsumeAmount( word iQty, bool fTest )
 	word iQtyMax = GetAmount();
 	if ( iQty < iQtyMax )
 	{
-		if ( ! fTest )
-			SetAmountUpdate( iQtyMax - iQty );
+		SetAmountUpdate( iQtyMax - iQty );
 		return iQty;
 	}
 
-	if ( ! fTest )
-	{
-		SetAmount( 0 );	// let there be 0 amount here til decay.
-		if ( ! IsTopLevel() || ! IsAttr( ATTR_INVIS ))	// don't delete resource locators.
-			Delete();
-	}
+	SetAmount( 0 );	// let there be 0 amount here til decay.
+	if ( ! IsTopLevel() || ! IsAttr( ATTR_INVIS ))	// don't delete resource locators.
+		Delete();
 
 	return iQtyMax;
 }
@@ -5511,14 +5507,14 @@ void CItem::OnExplosion()
 	Sound(0x307);
 }
 
-bool CItem::IsResourceMatch( CResourceID rid, dword dwArg )
+bool CItem::IsResourceMatch( const CResourceID& rid, dword dwArg ) const
 {
 	ADDTOCALLSTACK("CItem::IsResourceMatch");
 	// Check for all the matching special cases.
 	// ARGS:
 	//  dwArg = specific key or map (for typedefs)
 
-	CItemBase *pItemDef = Item_GetDef();
+	const CItemBase *pItemDef = Item_GetDef();
 	ASSERT(pItemDef);
 
 	if ( rid == pItemDef->GetResourceID() )
@@ -5555,7 +5551,7 @@ bool CItem::IsResourceMatch( CResourceID rid, dword dwArg )
 	}
 	else if ( restype == RES_TYPEDEF )
 	{
-		IT_TYPE index = static_cast<IT_TYPE>(rid.GetResIndex());
+		IT_TYPE index = (IT_TYPE)(rid.GetResIndex());
 		if ( !IsType(index) )
 			return false;
 

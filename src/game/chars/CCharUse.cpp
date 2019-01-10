@@ -62,10 +62,10 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 	}
 
 	size_t iItems = 0;
-	for ( size_t i = 0; i < pCorpseDef->m_BaseResources.size(); i++ )
+	for ( size_t i = 0; i < pCorpseDef->m_BaseResources.size(); ++i )
 	{
 		llong iQty = pCorpseDef->m_BaseResources[i].GetResQty();
-		CResourceID rid = pCorpseDef->m_BaseResources[i].GetResourceID();
+		const CResourceID& rid = pCorpseDef->m_BaseResources[i].GetResourceID();
 		if ( rid.GetResType() != RES_ITEMDEF )
 			continue;
 
@@ -73,7 +73,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 		if ( id == ITEMID_NOTHING )
 			break;
 
-		iItems++;
+		++ iItems;
 		CItem *pPart = CItem::CreateTemplate(id, nullptr, this);
 		ASSERT(pPart);
 		switch ( pPart->GetType() )
@@ -530,8 +530,8 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 
 		if ( WeaponAmmoID )
 		{
-			pButte->m_itArcheryButte.m_ridAmmoType = CResourceID(RES_ITEMDEF, (int)WeaponAmmoID);
-			++pButte->m_itArcheryButte.m_AmmoCount;
+			pButte->m_itArcheryButte.m_ridAmmoType = CResourceIDBase(RES_ITEMDEF, (int)WeaponAmmoID);
+			++ pButte->m_itArcheryButte.m_AmmoCount;
 		}
 	}
 	else
