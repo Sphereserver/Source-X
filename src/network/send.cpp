@@ -460,7 +460,11 @@ PacketItemWorld::PacketItemWorld(const CClient* target, const CItem *item) : Pac
 
 	dword uid = item->GetUID();
 	word amount = 0;
-    if (item->CanSendAmount())
+    if (item->GetType() == IT_CORPSE)
+    {
+        amount =item->GetAmount();  // char id of the corpse
+    }
+    else if (item->CanSendAmount())
     {
         word itemAmount = item->GetAmount();
         if (itemAmount > 1)
@@ -473,7 +477,7 @@ PacketItemWorld::PacketItemWorld(const CClient* target, const CItem *item) : Pac
 	byte flags = 0;
 	byte light = 0;
 
-	adjustItemData(target, item, id, hue, amount, p, dir, flags, light);
+	adjustItemData(target, item, id, hue, amount, dir, flags, light);
 
 	// this packet only supports item ids up to 0x3fff, and multis start from 0x4000 (ITEMID_MULTI_LEGACY)
 	// multis need to be adjusted to the lower range, and items between 03fff and 08000 need to be adjusted
@@ -517,10 +521,9 @@ PacketItemWorld::PacketItemWorld(const CClient* target, const CItem *item) : Pac
 	push(target);
 }
 
-void PacketItemWorld::adjustItemData(const CClient* target, const CItem* item, ITEMID_TYPE &id, HUE_TYPE &hue, word &amount, CPointMap &p, DIR_TYPE &dir, byte &flags, byte& light)
+void PacketItemWorld::adjustItemData(const CClient* target, const CItem* item, ITEMID_TYPE &id, HUE_TYPE &hue, word &amount, DIR_TYPE &dir, byte &flags, byte& light)
 {
 	ADDTOCALLSTACK("PacketItemWorld::adjustItemData");
-	UNREFERENCED_PARAMETER(p);
 	const CChar* character = target->GetChar();
 	ASSERT(character);
 
@@ -1034,11 +1037,11 @@ PacketDropAccepted::PacketDropAccepted(const CClient* target) : PacketSend(XCMD_
  *
  *
  ***************************************************************************/
-PacketDeathMenu::PacketDeathMenu(const CClient* target, Reason reason) : PacketSend(XCMD_DeathMenu, 2, PRI_NORMAL)
+PacketDeathMenu::PacketDeathMenu(const CClient* target, Mode mode) : PacketSend(XCMD_DeathMenu, 2, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketDeathMenu::PacketDeathMenu");
 
-	writeByte((byte)(reason));
+	writeByte((byte)mode);
 	push(target);
 }
 
@@ -1622,7 +1625,7 @@ PacketWeather::PacketWeather(const CClient* target, WEATHER_TYPE weather, int se
  *
  *
  ***************************************************************************/
-PacketBookPageContent::PacketBookPageContent(const CClient* target, const CItem* book, size_t startpage, size_t pagecount) : PacketSend(XCMD_BookPage, 8, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
+PacketBookPageContent::PacketBookPageContent(const CClient* target, const CItem* book, word startpage, word pagecount) : PacketSend(XCMD_BookPage, 8, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketBookPageContent::PacketBookPageContent");
 
@@ -1632,17 +1635,17 @@ PacketBookPageContent::PacketBookPageContent(const CClient* target, const CItem*
 	writeInt32(book->GetUID());
 	writeInt16(0);
 
-	for (size_t i = 0; i < pagecount; i++)
+	for (word i = 0; i < pagecount; ++i)
 		addPage(book, startpage + i);
 
 	push(target);
 }
 
-void PacketBookPageContent::addPage(const CItem* book, size_t page)
+void PacketBookPageContent::addPage(const CItem* book, word page)
 {
 	ADDTOCALLSTACK("PacketBookPageContent::addPage");
 
-	writeInt16((word)(page));
+	writeInt16(page);
 
 	// skip line count for now
 	size_t linesPos = getPosition();
@@ -1652,7 +1655,7 @@ void PacketBookPageContent::addPage(const CItem* book, size_t page)
 	if (book->IsBookSystem())
 	{
 		CResourceLock s;
-		if (g_Cfg.ResourceLock(s, CResourceID(RES_BOOK, book->m_itBook.m_ResID.GetResIndex(), (int)(page))) == true)
+		if (g_Cfg.ResourceLock(s, CResourceID(RES_BOOK, book->m_itBook.m_ResID.GetResIndex(), page)) == true)
 		{
 			while (s.ReadKey(false))
 			{
@@ -1678,14 +1681,14 @@ void PacketBookPageContent::addPage(const CItem* book, size_t page)
 						if (ch == '\t')
 						{
 							ch = '\0';
-							lines++;
+							++lines;
 						}
 
 						writeCharASCII(ch);
 					}
 
 					writeCharASCII('\0');
-					lines++;
+					++lines;
 				}
 			}
 		}
@@ -2168,7 +2171,7 @@ PacketBulletinBoard::PacketBulletinBoard(const CClient* target, BBOARDF_TYPE act
 		size_t lines = message->GetPageCount();
 		writeInt16((word)lines);
 
-		for (size_t i = 0; i < lines; i++)
+		for (word i = 0; i < lines; ++i)
 		{
 			lpctstr text = message->GetPageText(i);
 			if (text == nullptr)
@@ -4097,12 +4100,13 @@ void PacketDisplayPopup::finalise(void)
  *
  *
  ***************************************************************************/
-PacketCloseUIWindow::PacketCloseUIWindow(const CClient* target, const CChar* character, dword command) : PacketExtended(EXTDATA_CloseUI_Window, 13, PRI_NORMAL)
+PacketCloseUIWindow::PacketCloseUIWindow(const CClient* target, const CObjBase* obj, UIWindow command) : PacketExtended(EXTDATA_CloseUI_Window, 13, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketCloseUIWindow::PacketCloseUIWindow");
 
-	writeInt32(command);
-	writeInt32(character->GetUID());
+    // obj: Character or Container
+	writeInt32((dword)command);
+	writeInt32((dword)obj->GetUID());
 
 	push(target);
 }
@@ -5073,7 +5077,11 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item)
 	ITEMID_TYPE id = item->GetDispID();
 	DIR_TYPE dir = DIR_N;
     word amount = 0;
-    if (item->CanSendAmount())
+    if (item->GetType() == IT_CORPSE)
+    {
+        amount =item->GetAmount();  // char id of the corpse
+    }
+    else if (item->CanSendAmount())
     {
         word itemAmount = item->GetAmount();
         if (itemAmount > 1)
@@ -5084,7 +5092,7 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item)
 	byte light = 0;
 	byte flags = 0;
 
-	adjustItemData(target, item, id, hue, amount, pt, dir, flags, light);
+	adjustItemData(target, item, id, hue, amount, dir, flags, light);
 
 	if ( id >= ITEMID_MULTI )
 	{
@@ -5234,7 +5242,7 @@ PacketContainer::PacketContainer(const CClient* target, CObjBase** objects, size
 	initLength();
 	writeInt16((word)(objectCount));
 
-	for (size_t i = 0; i < objectCount; i++)
+	for (size_t i = 0; i < objectCount; ++i)
 	{
 		CObjBase* object = objects[i];
 		if (object->IsItem())
@@ -5244,13 +5252,13 @@ PacketContainer::PacketContainer(const CClient* target, CObjBase** objects, size
 			dword uid = item->GetUID();
 			word amount = item->GetAmount();
 			ITEMID_TYPE id = item->GetDispID();
-			CPointMap p = item->GetTopPoint();
+			const CPointMap& p = item->GetTopPoint();
 			DIR_TYPE dir = DIR_N;
 			HUE_TYPE hue = item->GetHue();
 			byte flags = 0;
 			byte light = 0;
 
-			adjustItemData(target, item, id, hue, amount, p, dir, flags, light);
+			adjustItemData(target, item, id, hue, amount, dir, flags, light);
 
 			if (id >= ITEMID_MULTI)
 				id = (ITEMID_TYPE)(id - ITEMID_MULTI);

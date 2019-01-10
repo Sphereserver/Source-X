@@ -643,7 +643,7 @@ void CClient::Cmd_EditItem( CObjBase *pObj, int iSelect )
 	addItemMenu(CLIMODE_MENU_EDIT, item, count, pObj);
 }
 
-bool CClient::Cmd_Skill_Menu( CResourceIDBase rid, int iSelect )
+bool CClient::Cmd_Skill_Menu( CResourceID rid, int iSelect )
 {
 	ADDTOCALLSTACK("CClient::Cmd_Skill_Menu");
 	// Build the skill menu for the curent active skill.
@@ -712,7 +712,7 @@ bool CClient::Cmd_Skill_Menu( CResourceIDBase rid, int iSelect )
 	return true;
 }
 
-size_t CClient::Cmd_Skill_Menu_Build( CResourceIDBase rid, int iSelect, CMenuItem *item, size_t iMaxSize, bool &fShowMenu, bool &fLimitReached )
+size_t CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem *item, size_t iMaxSize, bool &fShowMenu, bool &fLimitReached )
 {
 	ADDTOCALLSTACK("CClient::Cmd_Skill_Menu_Build");
 	// Build the skill menu for the curent active skill.

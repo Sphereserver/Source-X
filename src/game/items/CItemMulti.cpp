@@ -196,13 +196,12 @@ bool CItemMulti::MultiRealizeRegion()
 
     if (m_pRegion == nullptr)
     {
-        CResourceID rid;
-        rid.SetPrivateUID(GetUID());
+        const CResourceID rid(GetUID().GetPrivateUID(), 0);
         m_pRegion = new CRegionWorld(rid);
     }
 
     // Get Background region.
-    CPointMap pt = GetTopPoint();
+    const CPointMap& pt = GetTopPoint();
     const CRegionWorld * pRegionBack = dynamic_cast <CRegionWorld*> (pt.GetRegion(REGION_TYPE_AREA));
     ASSERT(pRegionBack);
     ASSERT(pRegionBack != m_pRegion);

@@ -29,7 +29,12 @@ Compatibility changes from 0.56d to X1
 - Removed CHARGESCUR and CHARGESMAX.
 - ADDCLILOC needs to be called on the object, instead of on the player. So in the scripts, in the @ClientTooltip trigger,
   calls to SRC.ADDCLILOC have to be changed to ADDCLILOC; in @ItemClientTooltip and @CharClientTooltip, ACT.ADDCLILOC has to be used instead.
+- Changed: Defname numeric value has a different byte order now. For example, <hval s_clumsy> returned 0ce000001,
+  so you could retrieve the spell number by doing <hval s_clumsy&(~0ce000000)>, which removed the resource type bits.
+  Now <hval s_clumsy> returns 082700001, so you can't use the previous code anymore. Use RESOURCEINDEX instead.
 - CAN property is no more RW, but now it's read-only. Use CANMASK to change it on a per-char basis.
+- Changed how combat skills work: now @SkillStart is called only once, when starting the fight, then the other triggers (@HitTry, @Hit*, @GetHit, etc)
+  are called. Before, @SkillStart was called before each @HitTry call, so at every hit attempt. If you need a trigger firing before @HitTry, try @HitCheck.
 - Added Focus skill functionality. Add to its flags SKF_DISABLED if you aren't interested.
 - SPEECHCOLOR can't be used anymore to override the speech color of NPCS. Use SPEECHCOLOROVERRIDE instead.
 - Added: ModMaxHits, ModMaxMana, ModMaxStam properties. To avoid CONFLICTS, remove or comment the scripted functions

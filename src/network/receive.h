@@ -199,8 +199,14 @@ public:
 class PacketDeathStatus : public Packet
 {
 public:
+    enum Mode
+	{
+		Dead = 0x00,        // Old "server sent"
+        Resurrect = 0x1,    // Sent by the client
+		Alive = 0x02        // Sent by the client
+	};
+
 	PacketDeathStatus();
-	virtual size_t getExpectedLength(NetState* client, Packet* packet);
 	virtual bool onReceive(NetState* net);
 };
 
@@ -966,6 +972,20 @@ class PacketBandageMacro : public Packet
 public:
 	PacketBandageMacro();
 	virtual bool onReceive(NetState* net);
+};
+
+/***************************************************************************
+*
+*
+*	Packet 0xBF.0x2E : PacketTargetedSkill			bandage macro
+*
+*
+***************************************************************************/
+class PacketTargetedSkill : public Packet
+{
+public:
+    PacketTargetedSkill();
+    virtual bool onReceive(NetState* net);
 };
 
 /***************************************************************************

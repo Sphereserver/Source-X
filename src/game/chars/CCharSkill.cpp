@@ -409,7 +409,6 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 
 		if ( difficulty > 0 )
 		{
-//#ifdef _DEBUG
 			if ( IsPriv(PRIV_DETAIL) && (GetPrivLevel() >= PLEVEL_GM) && (g_Cfg.m_iDebugFlags & DEBUGF_ADVANCE_STATS) )
 			{
 				SysMessagef( "%s=%hu.%hu Difficult=%d Gain Chance=%" PRId64 ".%" PRId64 "%% Roll=%d%%",
@@ -417,7 +416,6 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 					uiSkillLevel/10, (uiSkillLevel)%10,
 					difficulty/10, iChance/10, iChance%10, iRoll/10 );
 			}
-//#endif
 
 			if ( iRoll <= iChance )
 			{
@@ -3018,7 +3016,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
     if ( pRock )
 	{
 		lpctstr t_Str = pRock->GetValStr();
-		CResourceIDBase rid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID( RES_ITEMDEF, t_Str ));
+		CResourceID rid = static_cast<CResourceID>(g_Cfg.ResourceGetID( RES_ITEMDEF, t_Str ));
 		id = (ITEMID_TYPE)(rid.GetResIndex());
 		if (!iDamage)
 			iDamage = Stat_GetVal(STAT_DEX)/4 + Calc_GetRandVal( Stat_GetVal(STAT_DEX)/4 );
@@ -3966,6 +3964,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		{
 			m_atCreate.m_Stroke_Count = 1;		//This matches the new strokes amount used on OSI.
 			pArgs.m_VarsLocal.SetNum("CraftItemdef", pResBase.GetPrivateUID());
+            //pArgs.m_VarsLocal.SetStr("CraftItemdef", g_Cfg.ResourceGetName(pResBase), false);
 			pArgs.m_VarsLocal.SetNum("CraftStrokeCnt", m_atCreate.m_Stroke_Count);
 			pArgs.m_VarsLocal.SetNum("CraftAmount", m_atCreate.m_Amount);
 		}
@@ -3996,7 +3995,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		if ( bCraftSkill )
 		{
 			// read crafting parameters
-			pResBase.SetPrivateUID((dword)(pArgs.m_VarsLocal.GetKeyNum("CraftItemdef")));
+			pResBase = CResourceID( (dword)(pArgs.m_VarsLocal.GetKeyNum("CraftItemdef")), 0 );
 			m_atCreate.m_Stroke_Count = (word)pArgs.m_VarsLocal.GetKeyNum("CraftStrokeCnt");
 			m_atCreate.m_Stroke_Count = maximum(1,m_atCreate.m_Stroke_Count);
 			m_atCreate.m_ItemID = (ITEMID_TYPE)(pResBase.GetResIndex());

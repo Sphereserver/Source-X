@@ -1588,7 +1588,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
         if ( pWeapon )
         {
-            CResourceIDBase ridAmmo = pWeapon->Weapon_GetRangedAmmoRes();
+            CResourceID ridAmmo = pWeapon->Weapon_GetRangedAmmoRes();
             if ( ridAmmo )
             {
                 pAmmo = pWeapon->Weapon_FindRangedAmmo(ridAmmo);

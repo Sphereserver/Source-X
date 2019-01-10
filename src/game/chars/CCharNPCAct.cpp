@@ -1806,7 +1806,7 @@ bool CChar::NPC_Act_Food()
 	if ( bSearchGrass )
 	{
 		CCharBase *pCharDef = Char_GetDef();
-		CResourceIDBase	rid = CResourceID(RES_TYPEDEF, IT_GRASS);
+		CResourceID	rid = CResourceID(RES_TYPEDEF, IT_GRASS);
 
 		if ( pCharDef->m_FoodType.ContainsResourceID(rid) ) // do I accept grass as food?
 		{
@@ -2460,7 +2460,7 @@ void CChar::NPC_Food()
 	if ( bSearchGrass )
 	{
 		CCharBase			*pCharDef = Char_GetDef();
-		CResourceIDBase	rid = CResourceID(RES_TYPEDEF, IT_GRASS);
+		CResourceID	rid = CResourceID(RES_TYPEDEF, IT_GRASS);
 
 		EXC_SET_BLOCK("searching grass");
 		if ( pCharDef->m_FoodType.ContainsResourceID(rid) ) // do I accept grass as a food?

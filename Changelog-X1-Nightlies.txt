@@ -1106,10 +1106,13 @@ Multis:
 - Fixed: multi (ships or houses) keys were only added to the bank, without adding a copy on the backpack.
 
 22-08-2018, XuN
+WARNING: The part of this commit regarding TIMERs has been reverted because of the big timers overhaul started with the 28-09-2018 commit.
+[
 - Changed tick periods from 0.1s to 0.25s, read https://github.com/Sphereserver/Source-experimental/issues/125 for more information.
 - DEPRECATED TIMERD, a warning will be shown each time it's used.
 - ADDED TIMERT timing each TICK.
 	WARNING! TIMERD is NOT the same as TIMERT, while TIMERD=10 was meant to tick in one second, TIMERT=10 will tick in 4 seconds, so it should be TIMERT=4 to tick in a second (0.25*4)
+]
 
 - Removing multis now removes all of it's components by default (doors, signs, tiller, etc) but not lockdowns or other personal items.
 
@@ -1151,11 +1154,14 @@ transfer_secured	= 08	// Transfer Secured Containers.
 	This makes the internal timer independent from the ticks per second and also should solve Issue #132.
 	SERV.TIME is still returning the internal time in tenth of seconds, to keep backwards compatibility.
 - Added: SERV.TIMEHIRES, which returns the internal timer in milliseconds.
-- Added: SERV.TICKPERIOD, to show how much server ticks are in a real-world second (right now it's 4, so that the server ticks every 0.25 seconds).
+- Added: SERV.TICKPERIOD, to show how much server ticks are in a real-world second.
 - Fixed: ShipSpeed.period (tenths of second between each ship movement) not working as expected.
 - Fixed: While sailing on the debug build, flashing spots were supposed to be shown where the next movement would move the ship
 	(so, if moving on those tiles would make a valid movement).
 - Changed: Made Read-Only SERV.CREATE, SERV.LASTVALIDDATE, SERV.LASTVALIDTIME, CREATE char and item property.
+
+18-09-2018, XuN
+- Added: TIMERMS to set an object timer to elapse after the given number of milliseconds.
 
 28-09-2018, XuN
 - Updated the whole code to cleanup latest changes regarding timers.
@@ -1163,11 +1169,11 @@ transfer_secured	= 08	// Transfer Secured Containers.
 - Updated some classes (CObjBase, CChar, CItem (and it's childrens)) to inherit from CCTimedObject (still more to come ... CTimedFunction, CMapBlockCache, etc).
 - Updated world's ticking procedure:
     Removed the old world->maps->sectors->items/chars huge loop for ticks
-    CTimedOBject add/deletes the objects into a new listing with msec precission timers which CWorld reads constantly looping only throught what really needs to tick.
+    CTimedObject add/deletes the objects into a new listing with msec precision timers which CWorld reads constantly looping only throught what really needs to tick.
 - Updated some code messing with timers on latest commits and making them behave wrongly.
 - Changed sector's behaviour to be ticked until their SectorSleep period (if any) has passed and pausing/resuming all items/chars timers inside (similar to what it did before).
 - Splitted CChar's ticks into the real ticks (the code relying on SetTimeout) and the periodic tickings (into a new OnTickPeriodic) involving stats regens, death check, steps on items, etc
-- Added a new list on CWorld for chars inserting all npcs by default on their create and players when login, and removing them when procceed, to do constant updates on hits, etc.
+- Added a new list on CWorld for chars inserting all npcs by default on their create and players when login, and removing them when proceed, to do constant updates on hits, etc.
 - Fixed regens ignoring the delay set.
 
 01-10-2018, XuN
@@ -1415,3 +1421,55 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 
 29-12-2018, Nolok
 - Added: f_onaccount_pwchange now has a LOCAL.OLDPASSWORD storing the old password, before the requested change is done.
+
+01-01-2019, Nolok
+- Added: DEFNAME readable property to ROOMDEF (Issue #174).
+
+02-01-2019, xwerswoodx
+- Added: strToken function to tokenize strings. Instead of explode, this function does not override commas so you can get strings with commas without having any problem.
+	Usage:
+		<strToken "<args>", "value", "seperator">
+	Seperator:
+		Character for tokenize array. Usage is same with explode, could be " " for space, "," for comma, or just character for any char.
+	Values:
+		0: Return length of the token.
+		Number: Return specific element of string.
+		startNumber-endNumber: Return specific elements with range.
+	Examples:
+		<strToken "A.B.C", 0, .> RETURNS 3
+		<strToken "A.B.C", 2, .> RETURNS B
+		<strToken "A.B.C", 1-2, .> RETURNS A.B
+		<strToken "A,B.C", 1, .> RETURNS A,B
+
+03-01-2019, Nolok
+- Fixed: ExperienceMode 08 flag (don't go below the current level when losing exp) didn't work (Issue #167).
+
+05-01-2019, Nolok
+- Fixed: Sometimes setting a spawn's SpawnID to a spawn group or a template generated bad spawn point with an invalid SpawnID (Issue #179).
+
+06-01-2019, Nolok
+- Changed: Now the resync won't reload again tiledata.mul and verdata.mul and it won't index again the client files, since those files were already write-locked while Sphere was running.
+- Fixed: The feature of auto-generating a defname for malformed AREADEFs lacking a defname but having a name set wasn't working.
+- Fixed: PacketDeathAnimation caused an invalid packet to be sent (Issue #181).
+- Fixed: Server not sending to client a Season Update packet after resurrection, so it still shown the "desolated" season (Issue #182).
+- Removed: TIMERT keyword, just continue to use TIMER and TIMERD as always (and the new TIMERMS if fits your purpose). The "tick" for world objects isn't a concept since some time,
+	for more infos check in this changelog for the 28-09-2018 commit (Issue #125).
+
+07-01-2019, Nolok
+- Fixed: The death status packet (sent by the client when the server sent the complementary packet, enabled with the PacketDeathAnimation ini setting) was incorrectly parsed,
+	desynchronizing the input packet queue and making Sphere think it was receiving malformed or unknown packets (Issue #181).
+- Fixed: Tooltip info for spawns.
+- Fixed: PacketScreenSize (0xBF.0x05) parsing incorrectly the received data.
+- Added: Packet UseTargetedSkill (0xBF.0x2E) functionality.
+- Added: In debug builds, when an unknown packet is received, its data is dumped to the console and to the log.
+- Fixed: EFFECT with id of 4 caused an exception.
+
+09-01-2019, Nolok
+WARNING: the following change could break some hackish expedient used in scripts! Read carefully!
+- Changed: Defname numeric value has a different byte order now. For example, <hval s_clumsy> returned 0ce000001, so you could retrieve the spell number by doing <hval s_clumsy&(~0ce000000)>,
+	which removed the resource type bits. Now <hval s_clumsy> returns 082700001, so you can't use the previous code anymore. Use RESOURCEINDEX instead.
+	This change was needed because too much informations were stored inside the UID, and its last bytes (used to store the resource type) overlapped with some internal flags.
+- Added: <RESOURCEINDEX defname> to retrieve the resource index from the defname, ignoring the resource type (Chardef, Spell, Itemdef, Template...) bits.
+	As example, <RESOURCEINDEX s_clumsy> returns 1, which is the spell number (id).
+- Added: <RESOURCETYPE defname>, which gets the resource type (RES_ITEMDEF, RES_SPAWN, etc) from the defname. The list of the resource type numbers is in the X scriptpack in core/defs.scp.
+- Changed: REGIONTYPE block could not accept landtile types with index > 255. Extended this limit to 65534.	This also extends the maximum number of pages in a book by the same amount.

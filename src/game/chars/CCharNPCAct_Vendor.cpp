@@ -212,7 +212,7 @@ ushort CChar::NPC_OnTrainCheck( CChar * pCharSrc, SKILL_TYPE Skill )
 
 	// Train npc skill cap
 	ushort uiMaxDecrease = 0;
-	if ( (pCharSrc->GetSkillTotal() + uiTrainVal) > pCharSrc->Skill_GetMax((SKILL_TYPE)(g_Cfg.m_iMaxSkill)) )
+	if ( (pCharSrc->Skill_GetSum() + uiTrainVal) > pCharSrc->Skill_GetSumMax() )
 	{	
 		for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 		{
@@ -304,7 +304,7 @@ bool CChar::NPC_TrainSkill( CChar * pCharSrc, SKILL_TYPE skill, ushort uiAmountT
 	ASSERT(m_pNPC);
 
 	ushort iTrain = uiAmountToTrain;
-	if ( (pCharSrc->GetSkillTotal() + uiAmountToTrain) > pCharSrc->Skill_GetMax((SKILL_TYPE)(g_Cfg.m_iMaxSkill)) )
+	if ( (pCharSrc->Skill_GetSum() + uiAmountToTrain) > pCharSrc->Skill_GetSumMax() )
 	{	
 		for ( uint i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 		{

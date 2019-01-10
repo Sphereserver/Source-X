@@ -340,8 +340,8 @@ public:
 	int GetVisualRange() const;
 	void SetVisualRange(byte newSight);
 
-	bool IsResourceMatch( CResourceIDBase rid, dword dwArg );
-	bool IsResourceMatch( CResourceIDBase rid, dword dwArg, dword dwArgResearch );
+	bool IsResourceMatch( CResourceID rid, dword dwArg );
+	bool IsResourceMatch( CResourceID rid, dword dwArg, dword dwArgResearch );
 
 	bool IsSpeakAsGhost() const;
 	bool CanUnderstandGhost() const;
@@ -829,7 +829,7 @@ public:
 	* @param delta, amount of exp gaining (or losing?)
 	* @param ppCharDead from who we gained the experience.
 	*/
-	void ChangeExperience(int delta = 0, CChar *pCharDead = nullptr);
+	void ChangeExperience(llong delta = 0, CChar *pCharDead = nullptr);
 	uint GetSkillTotal(int what = 0, bool how = true);
 
 	// skills and actions. -------------------------------------------

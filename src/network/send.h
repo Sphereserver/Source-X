@@ -185,7 +185,7 @@ protected:
 public:
 	PacketItemWorld(const CClient* target, const CItem* item);
 
-	void adjustItemData(const CClient* target, const CItem* item, ITEMID_TYPE &id, HUE_TYPE &hue, word &amount, CPointMap &p, DIR_TYPE &dir, byte &flags, byte &light);
+	void adjustItemData(const CClient* target, const CItem* item, ITEMID_TYPE &id, HUE_TYPE &hue, word &amount, DIR_TYPE &dir, byte &flags, byte &light);
 
 	virtual bool onSend(const CClient* client);
 };
@@ -386,14 +386,14 @@ public:
 class PacketDeathMenu : public PacketSend
 {
 public:
-	enum Reason
+	enum Mode
 	{
-		ServerSent = 0x00,
-		Resurrect = 0x01,
-		Ghost = 0x02
+		Dead = 0x00,        // Old "server sent"
+        //Resurrect = 0x1,    // Sent by the client
+		//Alive = 0x02        // Sent by the client
 	};
 
-	PacketDeathMenu(const CClient* target, Reason reason);
+	PacketDeathMenu(const CClient* target, Mode mode);
 };
 
 /***************************************************************************
@@ -604,8 +604,8 @@ protected:
 	size_t m_pages;
 
 public:
-	PacketBookPageContent(const CClient* target, const CItem* book, size_t startpage, size_t pagecount = 1);
-	void addPage(const CItem* book, size_t page);
+	PacketBookPageContent(const CClient* target, const CItem* book, word startpage, word pagecount = 1);
+	void addPage(const CItem* book, word page);
 };
 
 /***************************************************************************
@@ -1481,7 +1481,15 @@ public:
 class PacketCloseUIWindow : public PacketExtended
 {
 public:
-	PacketCloseUIWindow(const CClient* target, const CChar* character, dword command);
+    enum UIWindow
+    {
+        Paperdoll = 1,
+        Status = 2,
+        Profile = 8,
+        Container = 0xC
+    };
+
+	PacketCloseUIWindow(const CClient* target, const CObjBase* obj, UIWindow command);
 };
 
 /***************************************************************************

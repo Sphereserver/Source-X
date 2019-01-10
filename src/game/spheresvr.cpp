@@ -867,6 +867,8 @@ int _cdecl main( int argc, char * argv[] )
 #ifndef _WIN32
     IThread::setThreadName("T_SphereStartup");
     g_UnixTerminal.start();
+    // We need to find out the log files folder... look it up in the .ini file (on Windows it's done in WinMain function.
+    g_Cfg.LoadIni(false);
 #endif
 
     g_Serv.SetServerMode(SERVMODE_Loading);

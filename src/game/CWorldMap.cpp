@@ -185,17 +185,16 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 #define RESOURCE_Z_CHECK 8
 
 	CPointMap ptFound;
-	CItemBase * pItemDef = nullptr;
-	CItem * pItem = nullptr;
-	CItemBaseDupe * pDupeDef = nullptr;
+	const CItemBase * pItemDef = nullptr;
+	const CItemBaseDupe * pDupeDef = nullptr;
+    CItem * pItem = nullptr;
 	height_t Height = 0;
 	byte z = 0;
 	CPointMap ptTest;
 
 	uint iRetElem = 4;
 
-	CPointMap ptElem[5];
-	memset(ptElem, 0, sizeof(ptElem));
+    CPointMap ptElem[5] = {};
 	//for ( iQty = 0; iQty < 4; ++iQty )
 	//	ptElem[iQty].m_z = UO_SIZE_MIN_Z;
 	ptElem[0].m_z = ptElem[1].m_z  = ptElem[2].m_z  = ptElem[3].m_z = UO_SIZE_MIN_Z;
@@ -262,7 +261,7 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 	size_t iRegionQty = pt.GetRegions(REGION_TYPE_MULTI, rlinks);
 	if ( iRegionQty > 0 )
 	{
-		CRegion *pRegion = nullptr;
+        const CRegion *pRegion = nullptr;
 		const CSphereMulti *pMulti = nullptr;				// Multi Def (multi check)
 		const CUOMultiItemRec_HS *pMultiItem = nullptr;	    // Multi item iterator
 		for ( size_t iRegion = 0; iRegion < iRegionQty; pMulti = nullptr, ++iRegion )
@@ -501,7 +500,6 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 	CPointMap ptFound;
 	int iTestDistance;
 
-
 	// Check dynamics first since they are the easiest.
 	CWorldSearch Area( pt, iDistance );
 	for (;;)
@@ -643,7 +641,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 				{
 					for (size_t iRegion = 0; iRegion < iRegionQty; ++iRegion)
 					{
-						CRegion* pRegion = rlinks.at(iRegion);
+						const CRegion* pRegion = rlinks.at(iRegion);
 						CItem* pItem = pRegion->GetResourceID().ItemFind();
 						if (pItem == nullptr)
 							continue;
@@ -758,7 +756,9 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 				}
 			}
 			else if ( pStatic->GetDispID() )
-				CItemBase::GetItemTiledataFlags(dwBlockThis,pStatic->GetDispID());
+            {
+				CItemBase::GetItemTiledataFlags(&dwBlockThis, pStatic->GetDispID());
+            }
 
 			if (block.m_Bottom.m_z < z)
 			{
@@ -793,7 +793,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 	if ( iRegionQty > 0 )
 	{
 		//  ------------ For variables --------------------
-		CRegion * pRegion = nullptr;
+		const CRegion * pRegion = nullptr;
 		const CSphereMulti * pMulti = nullptr;
 		const CUOMultiItemRec_HS * pMultiItem = nullptr;
 		x2 = 0;
@@ -854,7 +854,9 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 							}
 						}
 						else if ( pMultiItem->GetDispID() )
-							CItemBase::GetItemTiledataFlags(dwBlockThis,pMultiItem->GetDispID());
+                        {
+							CItemBase::GetItemTiledataFlags(&dwBlockThis, pMultiItem->GetDispID());
+                        }
 
 						if (block.m_Bottom.m_z < z)
 						{
@@ -940,7 +942,9 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 			}
 		}
 		else if (pItem->GetDispID())
-			CItemBase::GetItemTiledataFlags(dwBlockThis,pItem->GetDispID());
+        {
+			CItemBase::GetItemTiledataFlags(&dwBlockThis, pItem->GetDispID());
+        }
 	}
 
 	dwBlockThis = 0;
@@ -1003,8 +1007,8 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck )
 {
 	ADDTOCALLSTACK("CWorld::GetHeightPoint");
-	CItemBase * pItemDef = nullptr;
-	CItemBaseDupe * pDupeDef = nullptr;
+    const CItemBase * pItemDef = nullptr;
+    const CItemBaseDupe * pDupeDef = nullptr;
 	CItem * pItem = nullptr;
 	dword dwBlockThis = 0;
 	char z = 0;
@@ -1067,7 +1071,9 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 				}
 			}
 			else if ( pStatic->GetDispID() )
-				CItemBase::GetItemTiledataFlags(dwBlockThis,pStatic->GetDispID());
+            {
+				CItemBase::GetItemTiledataFlags(&dwBlockThis, pStatic->GetDispID());
+            }
 
 			block.CheckTile_Item( dwBlockThis, z, zHeight, pStatic->GetDispID() + TERRAIN_QTY );
 		}
@@ -1091,7 +1097,7 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 		if ( iRegionQty > 0 )
 		{
 			//  ------------ For variables --------------------
-			CRegion * pRegion = nullptr;
+            const CRegion * pRegion = nullptr;
 			const CSphereMulti * pMulti = nullptr;
 			const CUOMultiItemRec_HS * pMultiItem = nullptr;
 			x2 = 0;
@@ -1155,7 +1161,9 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 								}
 							}
 							else if ( pMultiItem->GetDispID() )
-								CItemBase::GetItemTiledataFlags(dwBlockThis,pMultiItem->GetDispID());
+                            {
+								CItemBase::GetItemTiledataFlags(&dwBlockThis, pMultiItem->GetDispID());
+                            }
 
 							block.CheckTile_Item( dwBlockThis, z, zHeight, pMultiItem->GetDispID() + TERRAIN_QTY );
 						}
@@ -1215,7 +1223,9 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 			}
 		}
 		else if (pItem->GetDispID())
-			CItemBase::GetItemTiledataFlags(dwBlockThis,pItem->GetDispID());
+        {
+			CItemBase::GetItemTiledataFlags(&dwBlockThis, pItem->GetDispID());
+        }
 
 		block.CheckTile_Item(dwBlockThis, z, zHeight, pItem->GetDispID() + TERRAIN_QTY);
 	}
@@ -1269,9 +1279,8 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 char CWorld::GetHeightPoint( const CPointMap & pt, dword & dwBlockFlags, bool fHouseCheck )
 {
 	ADDTOCALLSTACK_INTENSIVE("CWorld::GetHeightPoint");
-	dword dwCan = dwBlockFlags;
+	const dword dwCan = dwBlockFlags;
 	CServerMapBlockState block( dwBlockFlags, pt.m_z + (PLAYER_HEIGHT / 2), pt.m_z + PLAYER_HEIGHT );
-
 	GetHeightPoint( pt, block, fHouseCheck );
 
 	// Pass along my results.
@@ -1306,7 +1315,6 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 	// Height of statics at/above given coordinates
 	// do gravity here for the z.
 
-	dword dwBlockThis = 0;
 	const CServerMapBlock * pMapBlock = GetMapBlock( pt );
 	if ( !pMapBlock )
 	{
@@ -1314,7 +1322,8 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 		return;
 	}
 
-	uint iStaticQty = pMapBlock->m_Statics.GetStaticQty();
+    dword dwBlockThis = 0;
+	const uint iStaticQty = pMapBlock->m_Statics.GetStaticQty();
 	if ( iStaticQty > 0 )  // no static items here.
 	{
 		int x2 = pMapBlock->GetOffsetX(pt.m_x);
@@ -1331,7 +1340,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 			// This static is at the coordinates in question.
 			// enough room for me to stand here ?
 			dwBlockThis = 0;
-			height_t zHeight = CItemBase::GetItemHeight( pStatic->GetDispID(), dwBlockThis );
+			height_t zHeight = CItemBase::GetItemHeight( pStatic->GetDispID(), &dwBlockThis );
 			block.CheckTile( dwBlockThis, z, zHeight, pStatic->GetDispID() + TERRAIN_QTY );
 	    }
     }
@@ -1345,7 +1354,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 		{
 			for ( size_t i = 0; i < iRegionQty; ++i)
 			{
-				CRegion * pRegion = rlinks.at(i);
+                const CRegion * pRegion = rlinks.at(i);
 				CItem * pItem = pRegion->GetResourceID().ItemFind();
 				if ( pItem != nullptr )
 				{
@@ -1371,7 +1380,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 								continue;
 
 							dwBlockThis = 0;
-							height_t zHeight = CItemBase::GetItemHeight( pMultiItem->GetDispID(), dwBlockThis );
+							height_t zHeight = CItemBase::GetItemHeight( pMultiItem->GetDispID(), &dwBlockThis );
 							block.CheckTile( dwBlockThis, zitem, zHeight, pMultiItem->GetDispID() + TERRAIN_QTY );
 						}
 					}
@@ -1386,7 +1395,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 	CWorldSearch Area( pt );
 	for (;;)
 	{
-		CItem * pItem = Area.GetItem();
+		const CItem * pItem = Area.GetItem();
 		if ( pItem == nullptr )
 			break;
 
@@ -1395,18 +1404,18 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 			continue;
 
 		// Invis items should not block ???
-		CItemBase * pItemDef = pItem->Item_GetDef();
+		const CItemBase * pItemDef = pItem->Item_GetDef();
 		ASSERT(pItemDef);
 
 		// Get Attributes from ItemDef. If they are not set, get them from the static object (DISPID)
 		dwBlockThis = pItemDef->Can(CAN_I_DOOR | CAN_I_WATER | CAN_I_CLIMB | CAN_I_BLOCK | CAN_I_PLATFORM);
 		height_t zHeight = pItemDef->GetHeight();
 
-		dword wStaticBlockThis = 0;
-		height_t zStaticHeight = CItemBase::GetItemHeight(pItem->GetDispID(), wStaticBlockThis);
+		dword dwStaticBlockThis = 0;
+		height_t zStaticHeight = CItemBase::GetItemHeight(pItem->GetDispID(), &dwStaticBlockThis);
 
 		if (dwBlockThis == 0)
-			dwBlockThis = wStaticBlockThis;
+			dwBlockThis = dwStaticBlockThis;
 		if (zHeight == 0)
 			zHeight = zStaticHeight;
 
@@ -1480,9 +1489,8 @@ char CWorld::GetHeightPoint2( const CPointMap & pt, dword & dwBlockFlags, bool f
 
 	// ??? NOTE: some creatures should be taller than others !!!
 
-	dword dwCan = dwBlockFlags;
+	const dword dwCan = dwBlockFlags;
 	CServerMapBlockState block(dwBlockFlags, pt.m_z, PLAYER_HEIGHT);
-
 	GetHeightPoint2( pt, block, fHouseCheck );
 
 	// Pass along my results.

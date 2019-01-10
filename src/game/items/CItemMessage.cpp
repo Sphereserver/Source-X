@@ -31,9 +31,9 @@ void CItemMessage::r_Write(CScript & s)
     // Store the message body lines. MAX_BOOK_PAGES
     TemporaryString tsTemp;
 	tchar* pszTemp = static_cast<tchar *>(tsTemp);
-    for ( size_t i = 0; i < GetPageCount(); ++i )
+    for ( word i = 0; i < GetPageCount(); ++i )
     {
-        sprintf(pszTemp, "BODY.%" PRIuSIZE_T, i);
+        sprintf(pszTemp, "BODY.%" PRIu16, i);
         lpctstr pszText = GetPageText(i);
         s.WriteKey(pszTemp, pszText != nullptr ? pszText : "");
     }
@@ -126,25 +126,25 @@ bool CItemMessage::r_Verb(CScript & s, CTextConsole *pSrc)
         if ( s.IsKey(sm_szVerbKeys[0]) )
         {
             // 1 based pages
-            size_t iPage = (s.GetArgStr()[0] && toupper(s.GetArgStr()[0]) != 'A') ? s.GetArgVal() : 0;
-            if ( iPage <= 0 )
+            word wPage = (s.GetArgStr()[0] && toupper(s.GetArgStr()[0]) != 'A') ? s.GetArgWVal() : 0;
+            if ( wPage <= 0 )
             {
                 m_sBodyLines.clear();
                 return true;
             }
-            else if ( iPage <= m_sBodyLines.size() )
+            else if ( wPage <= m_sBodyLines.size() )
             {
-                m_sBodyLines.erase(iPage - 1);
+                m_sBodyLines.erase(wPage - 1);
                 return true;
             }
         }
         if ( s.IsKeyHead("PAGE", 4) )
         {
-            size_t iPage = ATOI(s.GetKey() + 4);
-            if ( iPage <= 0 )
+            word wPage = (word)ATOI(s.GetKey() + 4);
+            if ( wPage <= 0 )
                 return false;
 
-            SetPageText(iPage - 1, s.GetArgStr());
+            SetPageText(wPage - 1, s.GetArgStr());
             return true;
         }
         return CItemVendable::r_Verb(s, pSrc);
@@ -166,29 +166,31 @@ void CItemMessage::DupeCopy(const CItem *pItem)
         return;
 
     m_sAuthor = pMsgItem->m_sAuthor;
-    for ( size_t i = 0; i < pMsgItem->GetPageCount(); i++ )
+    for ( word i = 0; i < pMsgItem->GetPageCount(); ++i )
         SetPageText(i, pMsgItem->GetPageText(i));
 }
 
-size_t CItemMessage::GetPageCount() const
+word CItemMessage::GetPageCount() const
 {
-    return m_sBodyLines.size();
+    size_t sz = m_sBodyLines.size();
+    ASSERT(sz < RES_PAGE_MAX);
+    return (word)sz;
 }
 
-lpctstr CItemMessage::GetPageText( size_t iPage ) const
+lpctstr CItemMessage::GetPageText( word wPage ) const
 {
-    if ( m_sBodyLines.IsValidIndex(iPage) == false )
+    if ( m_sBodyLines.IsValidIndex(wPage) == false )
         return nullptr;
-    if ( m_sBodyLines[iPage] == nullptr )
+    if ( m_sBodyLines[wPage] == nullptr )
         return nullptr;
-    return m_sBodyLines[iPage]->GetPtr();
+    return m_sBodyLines[wPage]->GetPtr();
 }
 
-void CItemMessage::SetPageText( size_t iPage, lpctstr pszText )
+void CItemMessage::SetPageText( word wPage, lpctstr pszText )
 {
     if ( pszText == nullptr )
         return;
-    m_sBodyLines.assign_at_grow(iPage, new CSString(pszText));
+    m_sBodyLines.assign_at_grow(wPage, new CSString(pszText));
 }
 
 void CItemMessage::AddPageText( lpctstr pszText )

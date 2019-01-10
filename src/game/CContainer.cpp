@@ -108,7 +108,7 @@ void CContainer::r_WriteContent( CScript &s ) const
 	}
 }
 
-CItem *CContainer::ContentFind( CResourceIDBase rid, dword dwArg, int iDecendLevels ) const
+CItem *CContainer::ContentFind( CResourceID rid, dword dwArg, int iDecendLevels ) const
 {
 	ADDTOCALLSTACK("CContainer::ContentFind");
 	// send all the items in the container.
@@ -138,7 +138,7 @@ CItem *CContainer::ContentFind( CResourceIDBase rid, dword dwArg, int iDecendLev
 }
 
 TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs,
-	CSString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, CResourceIDBase rid, dword dwArg, int iDecendLevels )
+	CSString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, CResourceID rid, dword dwArg, int iDecendLevels )
 {
 	ADDTOCALLSTACK("CContainer::OnContTriggerForLoop");
 	if ( rid.GetResIndex() != 0 )
@@ -258,7 +258,7 @@ CItem *CContainer::ContentFindRandom() const
 	return dynamic_cast<CItem *>(GetAt(Calc_GetRandVal((int32)GetCount())));
 }
 
-int CContainer::ContentConsume( CResourceIDBase rid, int amount, bool fTest, dword dwArg )
+int CContainer::ContentConsume( CResourceID rid, int amount, bool fTest, dword dwArg )
 {
 	ADDTOCALLSTACK("CContainer::ContentConsume");
 	// ARGS:
@@ -302,7 +302,7 @@ int CContainer::ContentConsume( CResourceIDBase rid, int amount, bool fTest, dwo
 	return amount;
 }
 
-int CContainer::ContentCount( CResourceIDBase rid, dword dwArg )
+int CContainer::ContentCount( CResourceID rid, dword dwArg )
 {
 	ADDTOCALLSTACK("CContainer::ContentCount");
 	// Calculate total (gold or other items) in this recursed container

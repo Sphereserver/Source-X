@@ -78,7 +78,7 @@ void CResourceLink::ScanSection( RES_TYPE restype )
             m_pScript->ParseKeyLate();
             SetResourceName( m_pScript->GetArgRaw() );
         }
-        if ( m_pScript->IsKeyHead( "ON", 2 ) )
+        else if ( m_pScript->IsKeyHead( "ON", 2 ) )
         {
             int iTrigger;
             if ( iQty )

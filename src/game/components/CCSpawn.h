@@ -29,12 +29,12 @@ class CCSpawn : public CComponent
     bool _fKillingChildren;     // For internal usage, set to true when KillChildren() is in proccess to prevent DelObj() being called from CObjBase when deleteing the objs.
 
     uint16 _iAmount;            // Maximum of objects to spawn.
-    CResourceIDBase _idSpawn;   // ID of the Object to Spawn.
+    CResourceID _idSpawn;       // legacy more1=ID of the Object to Spawn.
 
-    uint16 _iPile;              // more2=The max # of items to spawn per interval, if this is 0 spawn up to the total amount (Only for Item's Spawn).
-    uint16 _iTimeLo;            // morex=Lo time in minutes.
-    uint16 _iTimeHi;            // morey=Hi time in minutes.
-    uint8 _iMaxDist;            // morez=How far from this spawns will be created the items/chars?
+    uint16 _iPile;              // legacy more2=The max # of items to spawn per interval, if this is 0 spawn up to the total amount (Only for Items Spawn).
+    uint16 _iTimeLo;            // legacy morex=Lo time in minutes.
+    uint16 _iTimeHi;            // legacy morey=Hi time in minutes.
+    uint8 _iMaxDist;            // legacy morez=How far from this spawns will be created the items/chars?
 
 public:
     static const char *m_sClassName;
@@ -107,9 +107,9 @@ public:
     /**
     * @brief ID of the object to spawn.
     *
-    * @return *CResourceIDBase
+    * @return CResourceID
     */
-    CResourceIDBase GetSpawnID() const;
+    const CResourceID& GetSpawnID() const;
 
     /**
     * @brief Overrides onTick for this class.
@@ -128,56 +128,38 @@ public:
     /**
     * @brief Setting display ID based on Character's Figurine or the default display ID if this is an IT_SPAWN_ITEM.
     */
-    CCharBase * SetTrackID();
+    const CCharBase * SetTrackID();
 
     /**
     * @brief Generate a *pDef item from this spawn.
-    *
-    * @param pDef resource to create
     */
-    void GenerateItem(CResourceDef * pDef);
+    void GenerateItem();
 
     /**
     * @brief Generate a *pDef char from this spawn.
-    *
-    * @param pDef resource to create
     */
-    void GenerateChar(CResourceDef * pDef);
+    void GenerateChar();
 
     /**
     * @brief Removing one UID in Spawn's m_obj[].
     *
     * @param UID of the obj to remove.
     */
-    void DelObj(CUID uid);
+    void DelObj(const CUID& uid);
 
     /**
     * @brief Storing one UID in Spawn's m_obj[].
     *
     * @param UID of the obj to add.
     */
-    void AddObj(CUID uid);
+    void AddObj(const CUID& uid);
 
     /**
-    * @brief Test if the character from more1 exists.
+    * @brief Get a proper CResourceID from the id provided.
     *
-    * @param ID of the char to check.
+    * @return a valid CResourceDef.
     */
-    inline CCharBase * TryChar(CREID_TYPE id);
-
-    /**
-    * @brief Test if the item from more1 exists.
-    *
-    * @param ID of the item to check.
-    */
-    inline CItemBase * TryItem(ITEMID_TYPE id);
-
-    /**
-    * @brief Get a proper RESOURCE_ID from the id provided.
-    *
-    * @return a valid RESOURCE_ID.
-    */
-    CResourceDef * FixDef();
+    const CResourceDef * FixDef();
 
     /**
     * @brief Gets the name of the resource created (item or char).

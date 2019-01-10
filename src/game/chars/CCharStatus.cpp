@@ -11,13 +11,13 @@
 #include "CChar.h"
 #include "CCharNPC.h"
 
-bool CChar::IsResourceMatch( CResourceIDBase rid, dword dwAmount )
+bool CChar::IsResourceMatch( CResourceID rid, dword dwAmount )
 {
 	ADDTOCALLSTACK("CChar::IsResourceMatch");
 	return IsResourceMatch(rid, dwAmount, 0);
 }
 
-bool CChar::IsResourceMatch( CResourceIDBase rid, dword dwAmount, dword dwArgResearch )
+bool CChar::IsResourceMatch( CResourceID rid, dword dwAmount, dword dwArgResearch )
 {
 	ADDTOCALLSTACK("CChar::IsResourceMatch (dwArgResearch)");
 	// Is the char a match for this test ?

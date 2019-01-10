@@ -593,19 +593,19 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 				pszName = pSpawnCharDef->GetName();
 
 			while (*pszName == '#')
-				pszName++;
+				++pszName;
 		}
 
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060658)); // ~1_val~: ~2_val~
 		t->FormatArgs("Character\t%s", pszName ? pszName : "none");
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061169)); // range ~1_val~
-		t->FormatArgs("%hhu", pItem->m_itSpawnChar.m_DistMax);
+		t->FormatArgs("%hhu", pSpawn->GetMaxDist());
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1074247)); // Live Creatures: ~1_NUM~ / ~2_MAX~
 		t->FormatArgs("%hhu\t%hu", pSpawn->GetCurrentSpawned(), pSpawn->GetAmount());
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060659)); // ~1_val~: ~2_val~
 		t->FormatArgs("Time range\t%hu min / %hu max", pSpawn->GetTimeLo(), pSpawn->GetTimeHi());
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060660)); // ~1_val~: ~2_val~
-		t->FormatArgs("Time until next spawn\t%" PRId64 " sec", pItem->GetTimerAdjusted());
+		t->FormatArgs("Time until next spawn\t%" PRId64 " sec", pItem->GetTimerSAdjusted());
 	} break;
 
 	case IT_SPAWN_ITEM:
@@ -616,15 +616,15 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		CResourceDef * pSpawnItemDef = g_Cfg.ResourceGetDef(pSpawn->GetSpawnID());
 
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060658)); // ~1_val~: ~2_val~
-		t->FormatArgs("Item\t%u %s", maximum(1, pItem->m_itSpawnItem.m_pile), pSpawnItemDef ? pSpawnItemDef->GetName() : "none");
+		t->FormatArgs("Item\t%u %s", pSpawn->GetPile(), pSpawnItemDef ? pSpawnItemDef->GetName() : "none");
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061169)); // range ~1_val~
-		t->FormatArgs("%hhu", pItem->m_itSpawnItem.m_DistMax);
+		t->FormatArgs("%hhu", pSpawn->GetMaxDist());
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1074247)); // Live Creatures: ~1_NUM~ / ~2_MAX~
 		t->FormatArgs("%hhu\t%hu", pSpawn->GetCurrentSpawned(), pSpawn->GetAmount());
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060659)); // ~1_val~: ~2_val~
 		t->FormatArgs("Time range\t%hu min / %hu max", pSpawn->GetTimeLo(), pSpawn->GetTimeHi());
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060660)); // ~1_val~: ~2_val~
-		t->FormatArgs("Time until next spawn\t%" PRId64 " sec", pItem->GetTimerAdjusted());
+		t->FormatArgs("Time until next spawn\t%" PRId64 " sec", pItem->GetTimerSAdjusted());
 	} break;
 
 	case IT_COMM_CRYSTAL:

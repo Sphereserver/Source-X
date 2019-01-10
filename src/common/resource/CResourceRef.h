@@ -83,14 +83,14 @@ public:
     CResourceRefArray(const CResourceRefArray& copy);
     CResourceRefArray& operator=(const CResourceRefArray& other);
     size_t FindResourceType( RES_TYPE type ) const;
-    size_t FindResourceID( CResourceIDBase rid ) const;
+    size_t FindResourceID( CResourceID rid ) const;
     size_t FindResourceName( RES_TYPE restype, lpctstr pszKey ) const;
 
     void WriteResourceRefList( CSString & sVal ) const;
     bool r_LoadVal( CScript & s, RES_TYPE restype );
     void r_Write( CScript & s, lpctstr pszKey ) const;
 
-    inline bool ContainsResourceID( CResourceIDBase & rid ) const
+    inline bool ContainsResourceID( CResourceID & rid ) const
     {
         return FindResourceID(rid) != BadIndex();
     }

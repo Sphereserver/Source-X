@@ -275,19 +275,19 @@ bool CResourceBase::LoadResourceSection( CScript * pScript )
 //*********************************************************
 // Resource Block Definitions
 
-lpctstr CResourceBase::ResourceGetName( CResourceIDBase rid ) const
+lpctstr CResourceBase::ResourceGetName( const CResourceID& rid ) const
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetName");
 	// Get a portable name for the resource id type.
 
-	CResourceDef * pResourceDef = dynamic_cast <CResourceDef *>( ResourceGetDef( rid ) );
+	const CResourceDef * pResourceDef = ResourceGetDef( rid );
 	if ( pResourceDef )
 		return pResourceDef->GetResourceName();
 
 	tchar * pszTmp = Str_GetTemp();
 	ASSERT(pszTmp);
 	if ( !rid.IsValidUID() )
-		sprintf( pszTmp, "%" PRId32, (int)rid.GetPrivateUID() );	// casting to int: it's not an UID, so it's not unsigned
+		sprintf( pszTmp, "%d", (int)rid.GetPrivateUID() );
 	else
 		sprintf( pszTmp, "0%" PRIx32, rid.GetResIndex() );
 	return pszTmp;
@@ -317,8 +317,6 @@ CResourceID CResourceBase::ResourceGetIDParse(RES_TYPE restype, lpctstr &ptcName
     // RETURN:
     //  pszName is now set to be after the expression.
 
-    // We are NOT creating.
-    CResourceID rid;
 
     // Try to handle private name spaces.
     /*
@@ -336,12 +334,18 @@ CResourceID CResourceBase::ResourceGetIDParse(RES_TYPE restype, lpctstr &ptcName
     }
     */
 
-    rid.SetPrivateUID(Exp_GetVal(ptcName));	// May be some complex expression {}
+    dword dwEvalPrivateUID = Exp_GetDWVal(ptcName);    // May be some complex expression {}
+    int iEvalResType  = RES_GET_TYPE(dwEvalPrivateUID);
+    int iEvalResIndex = RES_GET_INDEX(dwEvalPrivateUID);
 
-    if ( restype != RES_UNKNOWN && rid.GetResType() == RES_UNKNOWN )
-        return CResourceID( restype, rid.GetResIndex());	// Label it with the type we want.
-
-    return rid;
+    // We are NOT creating.
+    if ((restype != RES_UNKNOWN) && (iEvalResType == RES_UNKNOWN))
+    {
+        // Label it with the type we want.
+        return CResourceID(restype, iEvalResIndex);
+    }
+    // CResourceID always needs to be a valid resource (there's an ASSERT in CResourceID copy constructor).
+    return CResourceID((RES_TYPE)iEvalResType, iEvalResIndex);
 }
 
 CResourceID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr ptcName )
@@ -366,13 +370,13 @@ int CResourceBase::ResourceGetIndexType( RES_TYPE restype, lpctstr pszName )
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetIndexType");
 	// Get a resource of just this index type.
-	CResourceID rid = ResourceGetID( restype, pszName );
+	const CResourceID rid = ResourceGetID( restype, pszName );
 	if ( rid.GetResType() != restype )
 		return -1;
 	return rid.GetResIndex();
 }
 
-CResourceDef * CResourceBase::ResourceGetDef( CResourceIDBase rid ) const
+CResourceDef * CResourceBase::ResourceGetDef(const CResourceID& rid) const
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetDef");
 	if ( ! rid.IsValidUID() )
@@ -386,7 +390,7 @@ CResourceDef * CResourceBase::ResourceGetDef( CResourceIDBase rid ) const
 //*******************************************************
 // Open resource blocks.
 
-bool CResourceBase::ResourceLock( CResourceLock & s, CResourceIDBase rid )
+bool CResourceBase::ResourceLock( CResourceLock & s, const CResourceID& rid )
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceLock");
 	// Lock a referenced resource object.
@@ -396,91 +400,4 @@ bool CResourceBase::ResourceLock( CResourceLock & s, CResourceIDBase rid )
 	if ( pResourceLink )
 		return pResourceLink->ResourceLock(s);
 	return false;
-}
-
-
-bool CRegion::MakeRegionName()
-{
-	ADDTOCALLSTACK("CRegion::MakeRegionName");
-	if ( m_pDefName )
-		return true;
-
-	tchar ch;
-	lpctstr pszKey = nullptr;	// auxiliary, the key of a similar CVarDef, if any found
-	tchar * pbuf = Str_GetTemp();
-	tchar * pszDef = pbuf + 2;
-	strcpy(pbuf, "a_");
-
-	lpctstr pszName = GetName();
-	GETNONWHITESPACE( pszName );
-
-	if ( !strnicmp( "the ", pszName, 4 ) )
-		pszName	+= 4;
-	else if ( !strnicmp( "a ", pszName, 2 ) )
-		pszName	+= 2;
-	else if ( !strnicmp( "an ", pszName, 3 ) )
-		pszName	+= 3;
-	else if ( !strnicmp( "ye ", pszName, 3 ) )
-		pszName	+= 3;
-
-	for ( ; *pszName; pszName++ )
-	{
-		if ( !strnicmp( " of ", pszName, 4 ) || !strnicmp( " in ", pszName, 4 ) )
-		{	pszName	+= 4;	continue;	}
-		if ( !strnicmp( " the ", pszName, 5 )  )
-		{	pszName	+= 5;	continue;	}
-
-		ch	= *pszName;
-		if ( ch == ' ' || ch == '\t' || ch == '-' )
-			ch	= '_';
-		else if ( !iswalnum( ch ) )
-			continue;
-		// collapse multiple spaces together
-		if ( ch == '_' && *(pszDef-1) == '_' )
-			continue;
-		*pszDef = static_cast<tchar>(tolower(ch));
-		pszDef++;
-	}
-	*pszDef	= '_';
-	*(++pszDef)	= '\0';
-
-
-	size_t iMax = g_Cfg.m_RegionDefs.size();
-	int iVar = 1;
-	size_t iLen = strlen( pbuf );
-
-	for ( size_t i = 0; i < iMax; i++ )
-	{
-		CRegion * pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs.at(i));
-		if ( !pRegion )
-			continue;
-		pszKey = pRegion->GetResourceName();
-		if ( !pszKey )
-			continue;
-
-		// Is this a similar key?
-		if ( strnicmp( pbuf, pszKey, iLen ) != 0 )
-			continue;
-
-		// skip underscores
-		pszKey = pszKey + iLen;
-		while ( *pszKey	== '_' )
-			pszKey++;
-
-		// Is this is subsequent key with a number? Get the highest (plus one)
-		if ( IsStrNumericDec( pszKey ) )
-		{
-			int iVarThis = ATOI( pszKey );
-			if ( iVarThis >= iVar )
-				iVar = iVarThis + 1;
-		}
-		else
-			iVar++;
-	}
-
-	// Only one, no need for the extra "_"
-	sprintf( pszDef, "%i", iVar );
-	SetResourceName( pbuf );
-	// Assign name
-	return true;
 }

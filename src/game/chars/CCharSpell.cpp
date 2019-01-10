@@ -517,6 +517,11 @@ bool CChar::Spell_Resurrection(CItemCorpse * pCorpse, CChar * pCharSrc, bool fNo
 	CSpellDef *pSpellDef = g_Cfg.GetSpellDef(SPELL_Resurrection);
 	Effect(EFFECT_OBJ, pSpellDef->m_idEffect, this, 10, 16);
 	Sound(pSpellDef->m_sound);
+    if (IsClient())
+    {
+        CClient *pClient = GetClient();
+        pClient->addSeason(GetTopSector()->GetSeason());
+    }
 	return true;
 }
 

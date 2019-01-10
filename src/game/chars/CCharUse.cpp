@@ -142,7 +142,11 @@ void CChar::Use_MoonGate( CItem * pItem )
     CObjBase *pLink = pItem->m_uidLink.ObjFind();
     if (pLink && !pLink->IsTopLevel())
         return;
-    CPointMap pt = pLink ? pLink->GetTopPoint() : pItem->m_itTelepad.m_ptMark;
+    CPointMap pt;
+    if (pLink)
+        pt = pLink->GetTopPoint();
+    else
+        pItem->m_itTelepad.m_ptMark;
 
 	if ( pItem->IsType(IT_MOONGATE) )
 	{
@@ -186,9 +190,9 @@ void CChar::Use_MoonGate( CItem * pItem )
 		}
 	}
 
-	bool bCheckAntiMagic = pItem->IsAttr(ATTR_DECAY);
-	bool bDisplayEffect = !pItem->m_itTelepad.m_fQuiet;
-	Spell_Teleport(pt, true, bCheckAntiMagic, bDisplayEffect);
+	bool fCheckAntiMagic = pItem->IsAttr(ATTR_DECAY);
+	bool fDisplayEffect = !pItem->m_itTelepad.m_fQuiet;
+	Spell_Teleport(pt, true, fCheckAntiMagic, fDisplayEffect);
 }
 
 bool CChar::Use_Kindling( CItem * pKindling )
@@ -472,7 +476,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 		return false;
 
 	CItem *pAmmo = nullptr;
-	CResourceIDBase ridAmmo = pWeapon->Weapon_GetRangedAmmoRes();
+	CResourceID ridAmmo = pWeapon->Weapon_GetRangedAmmoRes();
 	if ( ridAmmo )
 	{
 		pAmmo = pWeapon->Weapon_FindRangedAmmo(ridAmmo);

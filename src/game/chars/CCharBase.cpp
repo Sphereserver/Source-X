@@ -265,7 +265,7 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             sVal.FormatVal(GetRangeL());
             break;
 		case CBC_RESDISPDNID:
-			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, GetResDispDnId()));
+			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, (int)GetResDispDnId()) );
 			break;
 		case CBC_SOUND:
 			sVal.FormatHex( m_soundBase );

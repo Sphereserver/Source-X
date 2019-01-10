@@ -2436,9 +2436,9 @@ int64 CWorld::GetNextNewMoon( bool bMoonIndex ) const
 	
 }
 
-uint CWorld::GetMoonPhase (bool bMoonIndex) const
+uint CWorld::GetMoonPhase(bool bMoonIndex) const
 {
-	ADDTOCALLSTACK("CWorld::GetMoonPhase ");
+	ADDTOCALLSTACK("CWorld::GetMoonPhase");
 	// bMoonIndex is FALSE if we are looking for the phase of Trammel,
 	// TRUE if we are looking for the phase of Felucca.
 
@@ -2454,10 +2454,8 @@ uint CWorld::GetMoonPhase (bool bMoonIndex) const
 	int64 dwCurrentTime = GetGameWorldTime();	// game world time in minutes
 
 	if (!bMoonIndex)	// Trammel
-
 		return IMulDiv( dwCurrentTime % TRAMMEL_SYNODIC_PERIOD, 8, TRAMMEL_SYNODIC_PERIOD );
 	else	// Luna2
-
 		return IMulDiv( dwCurrentTime % FELUCCA_SYNODIC_PERIOD, 8, FELUCCA_SYNODIC_PERIOD );
 }
 
@@ -2501,7 +2499,6 @@ void CWorld::OnTick()
             EXC_CATCHSUB("StatusUpdates");
         }
 
-
         // TimerF
         EXC_TRYSUB("Tick::TimerF");
         m_TimedFunctions.OnTick();
@@ -2513,47 +2510,44 @@ void CWorld::OnTick()
     const int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
 
     EXC_SET_BLOCK("WorldObjects selection");
-    ProfileTask timersTask(PROFILE_TIMERS);
-    std::map<int64, std::vector<CCTimedObject*>> tmpMap;
     {
-        // Need here a new, inner scope to get rid of EXC_TRYSUB variables and for the unique_lock
-        EXC_TRYSUB("Tick::WorldObj");
-        std::unique_lock<std::shared_mutex> lock(_mWorldTickList.THREAD_CMUTEX);
-        std::unique_lock<std::shared_mutex> lockLookup(_mWorldTickLookup.THREAD_CMUTEX);
-        std::map<int64, TimedObjectsContainer>::iterator it = _mWorldTickList.begin();
-        const std::map<int64, TimedObjectsContainer>::iterator itEnd = _mWorldTickList.end();
-        int64 iTime;
-        while ( (it != itEnd) && (iCurTime > (iTime = it->first)))
+        ProfileTask timersTask(PROFILE_TIMERS);
+        std::vector<CCTimedObject*> vecTimedObjs;
         {
-            TimedObjectsContainer& cont = it->second;
-            std::shared_lock<std::shared_mutex> lockCont(cont.THREAD_CMUTEX);
-            
-            for (CCTimedObject* pTimedObj : cont)
+            // Need here a new, inner scope to get rid of EXC_TRYSUB variables and for the unique_lock
+            EXC_TRYSUB("Tick::WorldObj");
+            std::unique_lock<std::shared_mutex> lock(_mWorldTickList.THREAD_CMUTEX);
+            std::unique_lock<std::shared_mutex> lockLookup(_mWorldTickLookup.THREAD_CMUTEX);
+            std::map<int64, TimedObjectsContainer>::iterator it = _mWorldTickList.begin();
+            const std::map<int64, TimedObjectsContainer>::iterator itEnd = _mWorldTickList.end();
+            int64 iTime;
+            while ( (it != itEnd) && (iCurTime > (iTime = it->first)))
             {
-                if (_mWorldTickLookup.erase(pTimedObj) == 0)    // Double check: ensure this object exists also in the lookup cont
-                {
-                    it = _mWorldTickList.erase(it);
-                    continue;
-                }
-            }
-            tmpMap[iTime] = cont;
-            it = _mWorldTickList.erase(it);
-        }
-        EXC_CATCHSUB("Reading from _mWorldTickList");
-    }
+                const TimedObjectsContainer& cont = it->second;
+                std::shared_lock<std::shared_mutex> lockCont(cont.THREAD_CMUTEX);
 
-    EXC_SET_BLOCK("WorldObjects loop");
-    for (const auto &pairObj : tmpMap)    // Loop through all msecs stored, unless we passed the timestamp.
-    {
+                for (CCTimedObject* pTimedObj : cont)
+                {
+                    if (_mWorldTickLookup.erase(pTimedObj) != 0)    // Double check: ensure this object exists also in the lookup cont
+                    {
+                        vecTimedObjs.emplace_back(pTimedObj);
+                    }
+                }
+                it = _mWorldTickList.erase(it);
+            }
+            EXC_CATCHSUB("Reading from _mWorldTickList");
+        }
+
+        EXC_SET_BLOCK("WorldObjects loop");
         lpctstr ptcSubDesc = "\0";
-        for (CCTimedObject* pObj : pairObj.second)
+        for (CCTimedObject* pObj : vecTimedObjs)    // Loop through all msecs stored, unless we passed the timestamp.
         {
             EXC_TRYSUB("Tick::WorldObj");
             EXC_SETSUB_BLOCK("Elapsed");
             ptcSubDesc = "Generic";
             const PROFILE_TYPE profile = pObj->GetProfileType();
             ProfileTask profileTask(profile);
-            
+
             /*
             * Doing a SetTimeout() in the object's tick will force CWorld to search for that object's
             * current timeout to remove it from any list, prevent that to happen here since it should
@@ -2652,45 +2646,40 @@ void CWorld::OnTick()
         }
     }
 
-
     /* Periodic, automatic ticking for every char */
 
     EXC_SET_BLOCK("PeriodicChars selection");
-    ProfileTask taskChars(PROFILE_CHARS);
-    std::map<int64, std::vector<CChar*>> tmpCharMap;
     {
-        // Need here a new, inner scope to get rid of EXC_TRYSUB variables, and for the unique_lock
-        EXC_TRYSUB("Tick::PeriodicChar");
-        std::unique_lock<std::shared_mutex> lock(_mCharTickList.THREAD_CMUTEX);
-        std::unique_lock<std::shared_mutex> lockLookup(_mCharTickLookup.THREAD_CMUTEX);
-        std::map<int64, TimedCharsContainer>::iterator charIt = _mCharTickList.begin();
-        const std::map<int64, TimedCharsContainer>::iterator charItEnd = _mCharTickList.end();
-        int64 iTime;
-        while ((charIt != charItEnd) && (iCurTime > (iTime = charIt->first)))
+        ProfileTask taskChars(PROFILE_CHARS);
+        std::vector<CChar*> vecPeriodicChars;
         {
-            TimedCharsContainer& cont = charIt->second;
-            std::shared_lock<std::shared_mutex> lockCont(cont.THREAD_CMUTEX);
-
-            for (CChar* pChar : cont)
+            // Need here a new, inner scope to get rid of EXC_TRYSUB variables, and for the unique_lock
+            EXC_TRYSUB("Tick::PeriodicChar");
+            std::unique_lock<std::shared_mutex> lock(_mCharTickList.THREAD_CMUTEX);
+            std::unique_lock<std::shared_mutex> lockLookup(_mCharTickLookup.THREAD_CMUTEX);
+            std::map<int64, TimedCharsContainer>::iterator charIt = _mCharTickList.begin();
+            const std::map<int64, TimedCharsContainer>::iterator charItEnd = _mCharTickList.end();
+            int64 iTime;
+            while ((charIt != charItEnd) && (iCurTime > (iTime = charIt->first)))
             {
-                if (_mCharTickLookup.erase(pChar) == 0) // Double check: ensure this object exists also in the lookup cont
-                {
-                    charIt = _mCharTickList.erase(charIt);
-                    continue;
-                }
-            }
-            tmpCharMap[iTime] = cont;
-            charIt = _mCharTickList.erase(charIt);
-            
-        }
-        EXC_CATCHSUB("Reading from _mCharTickList");
-    }
+                const TimedCharsContainer& cont = charIt->second;
+                std::shared_lock<std::shared_mutex> lockCont(cont.THREAD_CMUTEX);
 
-    EXC_SET_BLOCK("PeriodicChars loop");
-    for (const auto &pairChar : tmpCharMap)    // Loop through all msecs stored, unless we passed the timestamp.
-    {
+                for (CChar* pChar : cont)
+                {
+                    if (_mCharTickLookup.erase(pChar) != 0) // Double check: ensure this object exists also in the lookup cont
+                    {
+                        vecPeriodicChars.emplace_back(pChar);
+                    }
+                }
+                charIt = _mCharTickList.erase(charIt);
+            }
+            EXC_CATCHSUB("Reading from _mCharTickList");
+        }
+
+        EXC_SET_BLOCK("PeriodicChars loop");
         EXC_TRYSUB("Tick::PeriodicChar::Elapsed");
-        for (CChar* pChar : pairChar.second)
+        for (CChar* pChar : vecPeriodicChars)    // Loop through all msecs stored, unless we passed the timestamp.
         {
             if (pChar->OnTickPeriodic())
             {
@@ -2704,41 +2693,43 @@ void CWorld::OnTick()
         EXC_CATCHSUB("");
     }
 
+
     m_ObjDelete.Clear();	// clean up our delete list (this DOES delete the objects, thanks to the virtual destructors).
 
+    const int64 iCurTimeRaw = GetCurrentTime().GetTimeRaw();
 
     // Save state checks
     // Notifications
-	if ( (m_bSaveNotificationSent == false) && ((m_timeSave - (10 * MSECS_PER_SEC)) <= GetCurrentTime().GetTimeRaw()) )
+	if ( (m_bSaveNotificationSent == false) && ((m_timeSave - (10 * MSECS_PER_SEC)) <= iCurTimeRaw) )
 	{
 		Broadcast( g_Cfg.GetDefaultMsg( DEFMSG_SERVER_WORLDSAVE_NOTIFY ) );
 		m_bSaveNotificationSent = true;
 	}
 
     // Save
-	if ( m_timeSave <= GetCurrentTime().GetTimeRaw())
+	if ( m_timeSave <= iCurTimeRaw)
 	{
 		// Auto save world
-		m_timeSave = GetCurrentTime().GetTimeRaw() + g_Cfg.m_iSavePeriod;
+		m_timeSave = iCurTimeRaw + g_Cfg.m_iSavePeriod;
 		g_Log.Flush();
 		Save( false );
 	}
 
     // Global (ini) stuff.
     // Respawn Dead NPCs
-	if ( m_timeRespawn <= GetCurrentTime().GetTimeRaw())
+	if ( m_timeRespawn <= iCurTimeRaw)
 	{
 		// Time to regen all the dead NPC's in the world.
-		m_timeRespawn = GetCurrentTime().GetTimeRaw() + (20 * 60 * MSECS_PER_SEC);
+		m_timeRespawn = iCurTimeRaw + (20 * 60 * MSECS_PER_SEC);
 		RespawnDeadNPCs();
 	}
 
     // f_onserver_timer function.
-	if ( m_timeCallUserFunc < GetCurrentTime().GetTimeRaw())
+	if ( m_timeCallUserFunc < iCurTimeRaw)
 	{
 		if ( g_Cfg._iTimerCall )
 		{
-			m_timeCallUserFunc = GetCurrentTime().GetTimeRaw() + g_Cfg._iTimerCall;
+			m_timeCallUserFunc = iCurTimeRaw + g_Cfg._iTimerCall;
 			CScriptTriggerArgs args(g_Cfg._iTimerCall/(60 * MSECS_PER_SEC));
 			g_Serv.r_Call("f_onserver_timer", &g_Serv, &args);
 		}

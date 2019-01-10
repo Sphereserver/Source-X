@@ -155,7 +155,7 @@ CServerConfig::CServerConfig()
 	m_iHitsUpdateRate		= MSECS_PER_SEC;
 	m_iSpeedScaleFactor		= 80000;
 	m_iCombatFlags			= 0;
-	m_iCombatArcheryMovementDelay = MSECS_PER_SEC;
+	m_iCombatArcheryMovementDelay = 10;
 	m_iCombatDamageEra		= 0;
 	m_iCombatHitChanceEra	= 0;
 	m_iCombatSpeedEra		= 3;
@@ -316,7 +316,7 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 			return false;
 	}
 
-	char oldChar = *pszSep;
+	tchar oldChar = *pszSep;
 	*pszSep = '\0';
 
 	int iResType = FindTableSorted( pszKey, sm_szResourceBlocks, RES_QTY );
@@ -365,7 +365,7 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	}
 	else if ( iResType == RES_SPELL && *pszKey == '-' )
 	{
-		pszKey++;
+		++pszKey;
 		size_t iOrder = Exp_GetVal( pszKey );
 		if ( !m_SpellDefs_Sorted.IsValidIndex( iOrder ) )
 			pRef = nullptr;
@@ -374,7 +374,7 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	}
 	else
 	{
-		CResourceID	rid	= ResourceGetID(static_cast<RES_TYPE>(iResType), pszKey);
+		CResourceID	rid	= ResourceGetID((RES_TYPE)iResType, pszKey);
 
 		// check the found resource type matches what we searched for
 		if ( rid.GetResType() == iResType )
@@ -384,7 +384,7 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	if ( pszSep != nullptr )
 	{
 		*pszSep = oldChar; //*pszSep = '.';
-		pszKey = pszSep+1;
+		pszKey = pszSep + 1;
 	}
 	else
 	{
@@ -1055,10 +1055,10 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 		case RC_COMBATARCHERYMOVEMENTDELAY:
 		{
-			int iVal = s.GetArgVal();
+			const int iVal = s.GetArgVal();
 			m_iCombatArcheryMovementDelay = maximum(iVal, 0);
+            break;
 		}
-			break;
         case RC_CONTAINERMAXITEMS:
         {
             uint uiVal = s.GetArgUVal();
@@ -2709,7 +2709,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			return false;
 		}
 
-		rid.SetPrivateUID( (uint)pVarNum->GetValNum() );
+		rid = CResourceID( (dword)pVarNum->GetValNum(), 0 );
 		restype	= rid.GetResType();
 
 		CResourceDef *	pRes = nullptr;
@@ -3148,7 +3148,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				// if it's old style but has a defname, it's already set via r_Load,
 				// so this will do nothing, which is good
 				// if ( !fNewStyleDef )
-				//	pRegion->MakeRegionName();
+				//	pRegion->MakeRegionDefname();
 				m_RegionDefs.push_back(pRegion);
 			}
 		}
@@ -3178,7 +3178,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				// if it's old style but has a defname, it's already set via r_Load,
 				// so this will do nothing, which is good
 				// if ( !fNewStyleDef )
-				//	pRegion->MakeRegionName();
+				//	pRegion->MakeRegionDefname();
 				m_RegionDefs.push_back(pRegion);
 			}
 		}
@@ -3558,7 +3558,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 
 	const CResourceID ridinvalid;	// LINUX wants this for some reason.
 	CResourceID rid;
-	int iPage = 0;	// sub page
+	word wPage = 0;	// sub page
 
 	// Some types don't use named indexes at all. (Single instance)
 	switch ( restype )
@@ -3610,18 +3610,19 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 
 			// For dialog resources, we use the page bits to mark if it's the TEXT or BUTTON block
 			if ( !strnicmp( pArg2, "TEXT", 4 ) )
-				iPage = RES_DIALOG_TEXT;
+				wPage = RES_DIALOG_TEXT;
 			else if ( !strnicmp( pArg2, "BUTTON", 6 ) )
-				iPage = RES_DIALOG_BUTTON;
+				wPage = RES_DIALOG_BUTTON;
 			else
 			{
 				// For a book the page is... the page number
 				// For a REGIONTYPE block, the page (pArg2) is the landtile type associated with the REGIONTYPE
-				iPage = RES_GET_INDEX(Exp_GetVal(pArg2));
+                int iPage = RES_GET_INDEX(Exp_GetVal(pArg2));
+                if ( iPage < RES_PAGE_MAX )
+                    wPage = (word)iPage;
+                else
+                    DEBUG_ERR(( "Bad resource index page %d for Resource named %s\n", iPage, pszName ));
 			}
-
-			if ( iPage > RES_PAGE_MASK )
-				DEBUG_ERR(( "Bad resource index page %d for Resource named %s\n", iPage, pszName ));
 		}
 		break;
 	case RES_NEWBIE:	// MALE_DEFAULT, FEMALE_DEFAULT, Skill
@@ -3634,38 +3635,38 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 			tchar * pArg2;
 			Str_Parse( pArg1, &pArg2 );
 			if ( ! strcmpi( pArg2, "ELF" ))
-				iPage = RACETYPE_ELF;
+				wPage = (word)RACETYPE_ELF;
 			else if ( ! strcmpi( pArg2, "GARG" ))
-				iPage = RACETYPE_GARGOYLE;
+                wPage = (word)RACETYPE_GARGOYLE;
 			else if (*pArg2)
 			{
 				g_Log.EventWarn("Unrecognized race for a NEWBIE section. Defaulting to human.\n");
-				iPage = RACETYPE_HUMAN;
+                wPage = (word)RACETYPE_HUMAN;
 			}
 			else
-				iPage = RACETYPE_HUMAN;
+                wPage = (word)RACETYPE_HUMAN;
 
 			if ( ! strcmpi( pszName, "MALE_DEFAULT" ))
-				return CResourceID( RES_NEWBIE, RES_NEWBIE_MALE_DEFAULT, iPage );
+				return CResourceID( RES_NEWBIE, RES_NEWBIE_MALE_DEFAULT, wPage );
 			else if ( ! strcmpi( pszName, "FEMALE_DEFAULT" ))
-				return CResourceID( RES_NEWBIE, RES_NEWBIE_FEMALE_DEFAULT, iPage );
+				return CResourceID( RES_NEWBIE, RES_NEWBIE_FEMALE_DEFAULT, wPage );
 
 			if ( ! strcmpi( pszName, "PROFESSION_ADVANCED" ))
-				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_ADVANCED, iPage );
+				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_ADVANCED, wPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_WARRIOR" ))
-				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_WARRIOR, iPage );
+				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_WARRIOR, wPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_MAGE" ))
-				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_MAGE, iPage );
+				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_MAGE, wPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_BLACKSMITH" ))
-				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_BLACKSMITH, iPage );
+				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_BLACKSMITH, wPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_NECROMANCER" ))
-				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_NECROMANCER, iPage );
+				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_NECROMANCER, wPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_PALADIN" ))
-				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_PALADIN, iPage );
+				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_PALADIN, wPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_SAMURAI" ))
-				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_SAMURAI, iPage );
+				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_SAMURAI, wPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_NINJA" ))
-				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_NINJA, iPage );
+				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_NINJA, wPage );
 		}
 		break;
 	case RES_AREA:
@@ -3690,7 +3691,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 		if ( pszName[0] == '\0' )	// absence of resourceid = index 0
 		{
 			// This might be ok.
-			return CResourceID( restype, 0, iPage );
+			return CResourceID( restype, 0, wPage );
 		}
 		if ( IsDigit(pszName[0]) )	// Its just an index.
 		{
@@ -3706,7 +3707,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 			case RES_BOOK:			// A book or a page from a book.
 			case RES_DIALOG:		// A scriptable gump dialog: text or handler block.
 			case RES_REGIONTYPE:	// Triggers etc. that can be assinged to a RES_AREA
-				rid = CResourceID( restype, index, iPage );
+				rid = CResourceID( restype, index, wPage );
 				break;
 			case RES_SKILLMENU:
 			case RES_MENU:			// General scriptable menus.
@@ -3764,11 +3765,11 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 							return ResourceGetNewID(restype, pVarStr->GetValStr(), ppVarNum, fNewStyleDef);
 					}
 					default:
-						DEBUG_ERR(( "Re-Using DEFNAME='%s' to define a new block\n", static_cast<lpctstr>(pszName) ));
+						DEBUG_ERR(( "Re-Using DEFNAME='%s' to define a new block\n", pszName ));
 						return ridinvalid;
 				}
 			}
-			rid.SetPrivateUID( (uint)pVarNum->GetValNum() );
+			rid = CResourceID( (dword)pVarNum->GetValNum(), 0 );
 			if ( restype != rid.GetResType())
 			{
 				switch ( restype )
@@ -3783,7 +3784,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 						break;
 					default:
 						DEBUG_ERR(( "Redefined resource with DEFNAME='%s' from ResType %s to %s\n",
-							(lpctstr)pszName, (lpctstr)GetResourceBlockName(rid.GetResType()), (lpctstr)GetResourceBlockName(restype)) );
+							pszName, GetResourceBlockName(rid.GetResType()), GetResourceBlockName(restype)) );
 						return ridinvalid;
 				}
 			}
@@ -3791,7 +3792,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 			{
 				DEBUG_ERR(( "WARNING: region redefines DEFNAME='%s' for another region!\n", pszName ));
 			}
-			else if ( iPage == rid.GetResPage() )
+			else if ( ResourceGetDef(CResourceID(rid.GetResType(), rid.GetResIndex(), wPage)) )
 			{
 				// Books and dialogs have pages; if it's not a book or dialog, the if is 0 == 0, so execute it always
 
@@ -3806,7 +3807,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 						g_pLog->EventWarn("Redefinition of resource with DEFNAME='%s'\n", pszName);
 				}
 			}
-			rid = CResourceID( restype, rid.GetResIndex(), iPage );
+			rid = CResourceID( restype, rid.GetResIndex(), wPage );
 			*ppVarNum = pVarNum;
 			return rid;
 		}
@@ -3858,7 +3859,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 
 	case RES_BOOK:			// A book or a page from a book.
 	case RES_DIALOG:			// A scriptable gump dialog: text or handler block.
-		if ( iPage )	// We MUST define the main section FIRST !
+		if ( wPage )	// We MUST define the main section FIRST !
 			return ridinvalid;
 
 	case RES_REGIONTYPE:	// Triggers etc. that can be assinged to a RES_AREA
@@ -3901,8 +3902,8 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 		return ridinvalid;
 	}
 
-	if ( iPage )
-		rid = CResourceID( restype, index, iPage );
+	if ( wPage )
+		rid = CResourceID( restype, index, wPage );
 	else
 		rid = CResourceID( restype, index );
 
@@ -3934,7 +3935,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 	return rid;
 }
 
-CResourceDef * CServerConfig::ResourceGetDef( CResourceIDBase rid ) const
+CResourceDef * CServerConfig::ResourceGetDef( const CResourceID& rid ) const
 {
 	ADDTOCALLSTACK("CServerConfig::ResourceGetDef");
 	// Get a CResourceDef from the RESOURCE_ID.
@@ -4116,8 +4117,8 @@ bool CServerConfig::LoadIni( bool fTest )
 	{
 		if( !fTest )
 		{
-			g_Log.Event(LOGL_FATAL|LOGM_INIT, SPHERE_FILE ".ini has not been found.\n");
-			g_Log.Event(LOGL_FATAL|LOGM_INIT, "Download a sample sphere.ini from https://github.com/Sphereserver/Source-experimental/tree/master/src\n");
+			g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, SPHERE_FILE ".ini has not been found.\n");
+			g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, "Download a sample sphere.ini from https://github.com/Sphereserver/Source-experimental/tree/master/src\n");
 		}
 		return false;
 	}
@@ -4152,9 +4153,11 @@ void CServerConfig::Unload( bool fResync )
 	ADDTOCALLSTACK("CServerConfig::Unload");
 	if ( fResync )
 	{
-		// Unlock all the SCP and MUL files.
-		g_Install.CloseFiles();
-		for ( size_t j = 0; ; j++ )
+		// Unlock all the MUL/UOP files.
+		//g_Install.CloseFiles();   // Don't do this, since now we don't load again those files on resync.
+
+        // Unlock all the SCP files.
+		for ( size_t j = 0; ; ++j )
 		{
 			CResourceScript * pResFile = GetResourceFile(j);
 			if ( pResFile == nullptr )
@@ -4203,48 +4206,48 @@ bool CServerConfig::Load( bool fResync )
 	if ( ! fResync )
 	{
 		g_Install.FindInstall();
+
+        // Open the MUL files I need.
+        g_Log.Event(LOGM_INIT, "\nIndexing the client files...\n");
+        VERFILE_TYPE i = g_Install.OpenFiles(
+            (1ull<<VERFILE_MAP)|
+            (1<<VERFILE_STAIDX)|
+            (1<<VERFILE_STATICS)|
+            (1<<VERFILE_TILEDATA)|
+            (1<<VERFILE_MULTIIDX)|
+            (1<<VERFILE_MULTI)|
+            (1<<VERFILE_VERDATA)
+        );
+        if ( i != VERFILE_QTY )
+        {
+            g_Log.Event( LOGL_FATAL|LOGM_INIT, "File '%s' not found...\n", g_Install.GetBaseFileName(i));
+            return false;
+        }
+
+        // Load the optional verdata cache. (modifies MUL stuff)
+        try
+        {
+            g_VerData.Load( g_Install.m_File[VERFILE_VERDATA] );
+        }
+        catch ( const CSError& e )
+        {
+            g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".ini file is corrupt, missing, or there was an error while loading the settings.\n" );
+            g_Log.CatchEvent( &e, "g_VerData.Load" );
+            CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+            return false;
+        }
+        catch (...)
+        {
+            g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".ini file is corrupt, missing, or there was an error while loading the settings.\n" );
+            g_Log.CatchEvent( nullptr, "g_VerData.Load" );
+            CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+            return false;
+        }
 	}
 	else
 	{
 		m_scpIni.ReSync();
 		m_scpIni.CloseForce();
-	}
-
-	// Open the MUL files I need.
-	g_Log.Event(LOGM_INIT, "\nIndexing the client files...\n");
-	VERFILE_TYPE i = g_Install.OpenFiles(
-		(1<<VERFILE_MAP)|
-		(1<<VERFILE_STAIDX)|
-		(1<<VERFILE_STATICS)|
-		(1<<VERFILE_TILEDATA)|
-		(1<<VERFILE_MULTIIDX)|
-		(1<<VERFILE_MULTI)|
-		(1<<VERFILE_VERDATA)
-		);
-	if ( i != VERFILE_QTY )
-	{
-		g_Log.Event( LOGL_FATAL|LOGM_INIT, "File '%s' not found...\n", g_Install.GetBaseFileName(i));
-		return false;
-	}
-
-	// Load the optional verdata cache. (modifies MUL stuff)
-	try
-	{
-		g_VerData.Load( g_Install.m_File[VERFILE_VERDATA] );
-	}
-	catch ( const CSError& e )
-	{
-		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".ini file is corrupt, missing, or there was an error while loading the settings.\n" );
-		g_Log.CatchEvent( &e, "g_VerData.Load" );
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
-		return false;
-	}
-	catch (...)
-	{
-		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".ini file is corrupt, missing, or there was an error while loading the settings.\n" );
-		g_Log.CatchEvent( nullptr, "g_VerData.Load" );
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
-		return false;
 	}
 
 	// Now load the *TABLES.SCP file.
@@ -4270,8 +4273,8 @@ bool CServerConfig::Load( bool fResync )
 	{
 		g_Log.Printf("\n");
 		g_Log.Event(LOGM_INIT, "Initializing the world...\n");
+        g_World.Init();
 	}
-	g_World.Init();
 
 	// open and index all my script files i'm going to use.
 	AddResourceDir( m_sSCPBaseDir );		// if we want to get *.SCP files from elsewhere.
@@ -4331,16 +4334,14 @@ bool CServerConfig::Load( bool fResync )
 	}
 
 	// Make region DEFNAMEs
-	{
-		size_t iMax = g_Cfg.m_RegionDefs.size();
-		for ( size_t k = 0; k < iMax; ++k )
-		{
-			CRegion * pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs[i]);
-			if ( !pRegion )
-				continue;
-			pRegion->MakeRegionName();
-		}
-	}
+    size_t iRegionMax = g_Cfg.m_RegionDefs.size();
+    for (size_t k = 0; k < iRegionMax; ++k)
+    {
+        CRegion * pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs[k]);
+        if (!pRegion)
+            continue;
+        pRegion->MakeRegionDefname();
+    }
 
 	// parse eventsitem
 	m_iEventsItemLink.clear();

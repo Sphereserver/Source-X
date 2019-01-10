@@ -151,6 +151,92 @@ void CRegion::SetName( lpctstr pszName )
 	}
 }
 
+bool CRegion::MakeRegionDefname()
+{
+    ADDTOCALLSTACK("CRegion::MakeRegionDefname");
+    if ( m_pDefName )
+        return true;
+
+    tchar ch;
+    lpctstr pszKey = nullptr;	// auxiliary, the key of a similar CVarDef, if any found
+    tchar * pbuf = Str_GetTemp();
+    tchar * pszDef = pbuf + 2;
+    strcpy(pbuf, "a_");
+
+    lpctstr pszName = GetName();
+    GETNONWHITESPACE( pszName );
+
+    if ( !strnicmp( "the ", pszName, 4 ) )
+        pszName	+= 4;
+    else if ( !strnicmp( "a ", pszName, 2 ) )
+        pszName	+= 2;
+    else if ( !strnicmp( "an ", pszName, 3 ) )
+        pszName	+= 3;
+    else if ( !strnicmp( "ye ", pszName, 3 ) )
+        pszName	+= 3;
+
+    for ( ; *pszName; ++pszName )
+    {
+        if ( !strnicmp( " of ", pszName, 4 ) || !strnicmp( " in ", pszName, 4 ) )
+        {	pszName	+= 4;	continue;	}
+        if ( !strnicmp( " the ", pszName, 5 )  )
+        {	pszName	+= 5;	continue;	}
+
+        ch	= *pszName;
+        if ( ch == ' ' || ch == '\t' || ch == '-' )
+            ch	= '_';
+        else if ( !iswalnum( ch ) )
+            continue;
+        // collapse multiple spaces together
+        if ( ch == '_' && *(pszDef-1) == '_' )
+            continue;
+        *pszDef = static_cast<tchar>(tolower(ch));
+        ++pszDef;
+    }
+    *pszDef	= '_';
+    *(++pszDef)	= '\0';
+
+
+    size_t iMax = g_Cfg.m_RegionDefs.size();
+    int iVar = 1;
+    size_t iLen = strlen( pbuf );
+
+    for ( size_t i = 0; i < iMax; ++i )
+    {
+        CRegion * pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs[i]);
+        if ( !pRegion )
+            continue;
+        pszKey = pRegion->GetResourceName();
+        if ( !pszKey )
+            continue;
+
+        // Is this a similar key?
+        if ( strnicmp( pbuf, pszKey, iLen ) != 0 )
+            continue;
+
+        // skip underscores
+        pszKey = pszKey + iLen;
+        while ( *pszKey	== '_' )
+            ++pszKey;
+
+        // Is this is subsequent key with a number? Get the highest (plus one)
+        if ( IsStrNumericDec( pszKey ) )
+        {
+            int iVarThis = ATOI( pszKey );
+            if ( iVarThis >= iVar )
+                iVar = iVarThis + 1;
+        }
+        else
+            ++iVar;
+    }
+
+    // Only one, no need for the extra "_"
+    sprintf( pszDef, "%i", iVar );
+    SetResourceName( pbuf );
+    // Assign name
+    return true;
+}
+
 enum RC_TYPE
 {
 	RC_ANNOUNCE,
@@ -158,6 +244,7 @@ enum RC_TYPE
 	RC_BUILDABLE,
 	RC_CLIENTS,
 	RC_COLDCHANCE,
+    RC_DEFNAME,
 	RC_EVENTS,
 	RC_FLAGS,
 	RC_GATE,
@@ -195,6 +282,7 @@ lpctstr const CRegion::sm_szLoadKeys[RC_QTY+1] =	// static (Sorted)
 	"BUILDABLE",
 	"CLIENTS",
 	"COLDCHANCE",
+    "DEFNAME",
 	"EVENTS",
 	"FLAGS",
 	"GATE",
@@ -260,6 +348,9 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 				sVal.FormatVal((int)(iClients));
 				break;
 			}
+        case RC_DEFNAME: // "DEFNAME" = for the speech system.
+            sVal = GetResourceName();
+            break;
 		case RC_EVENTS:
 			m_Events.WriteResourceRefList( sVal );
 			break;
@@ -463,6 +554,8 @@ bool CRegion::r_LoadVal( CScript & s )
 		case RC_COLDCHANCE:
 			SendSectorsVerb( s.GetKey(), s.GetArgStr(), &g_Serv );
 			break;
+        case RC_DEFNAME: // "DEFNAME" = for the speech system.
+            return SetResourceName( s.GetArgStr());
 		case RC_EVENTS:
 			SetModified( REGMOD_EVENTS );
 			return( m_Events.r_LoadVal( s, RES_REGIONTYPE ));
@@ -474,7 +567,7 @@ bool CRegion::r_LoadVal( CScript & s )
 			TogRegionFlags( REGION_ANTIMAGIC_GATE, ! s.GetArgVal());
 			break;
 		case RC_GROUP:
-			m_sGroup	= s.GetArgStr();
+			m_sGroup = s.GetArgStr();
 			SetModified( REGMOD_GROUP );
 			break;
 		case RC_GUARDED:
@@ -780,7 +873,7 @@ bool CRegion::SendSectorsVerb( lpctstr pszVerb, lpctstr pszArgs, CTextConsole * 
 			fRet |= pSector->r_Verb( script, pSrc );
 		}
 	}
-	return fRet ;
+	return fRet;
 }
 
 lpctstr const CRegion::sm_szTrigName[RTRIG_QTY+1] =	// static
@@ -846,7 +939,6 @@ CRegionWorld::~CRegionWorld()
 
 enum RWC_TYPE
 {
-	RWC_DEFNAME,
 	RWC_REGION,
 	RWC_RESOURCES,
 	RWC_QTY
@@ -854,7 +946,6 @@ enum RWC_TYPE
 
 lpctstr const CRegionWorld::sm_szLoadKeys[RWC_QTY+1] =	// static
 {
-	"DEFNAME",
 	"REGION",
 	"RESOURCES",
 	nullptr
@@ -873,9 +964,6 @@ bool CRegionWorld::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 	//bool	fZero	= false;
 	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
-		case RWC_DEFNAME: // "DEFNAME" = for the speech system.
-			sVal = GetResourceName();
-			break;
 		case RWC_RESOURCES:
 			m_Events.WriteResourceRefList( sVal );
 			break;
@@ -921,8 +1009,6 @@ bool CRegionWorld::r_LoadVal( CScript &s )
 	// Load the values for the region from script.
 	switch ( FindTableHeadSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
-		case RWC_DEFNAME: // "DEFNAME" = for the speech system.
-			return SetResourceName( s.GetArgStr());
 		case RWC_RESOURCES:
 			SetModified( REGMOD_EVENTS );
 			return( m_Events.r_LoadVal( s, RES_REGIONTYPE ));

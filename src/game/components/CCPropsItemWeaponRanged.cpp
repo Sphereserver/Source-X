@@ -99,14 +99,12 @@ void CCPropsItemWeaponRanged::SetPropertyStr(int iPropIndex, lpctstr ptcVal, COb
 void CCPropsItemWeaponRanged::DeletePropertyNum(int iPropIndex)
 {
     ADDTOCALLSTACK("CCPropsItemWeaponRanged::DeletePropertyNum");
-    ASSERT(_mPropsNum.count(iPropIndex));
     _mPropsNum.erase(iPropIndex);
 }
 
 void CCPropsItemWeaponRanged::DeletePropertyStr(int iPropIndex)
 {
     ADDTOCALLSTACK("CCPropsItemWeaponRanged::DeletePropertyStr");
-    ASSERT(_mPropsStr.count(iPropIndex));
     _mPropsStr.erase(iPropIndex);
 }
 

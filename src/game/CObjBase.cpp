@@ -397,7 +397,7 @@ void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSour
             const CChar *pChar = static_cast<const CChar *>(this);
             if (pChar->IsClient())
             {
-                pChar->GetClient()->addEffect(motion, id, nullptr, nullptr);
+                pChar->GetClient()->addEffect(motion, id, pChar, nullptr);
             }
         }
         return;
@@ -1364,9 +1364,6 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
         case OC_TIMERMS:
             sVal.FormatLLVal(GetTimerAdjusted());
             break;
-        case OC_TIMERT:
-            sVal.FormatLLVal(GetTimerTAdjusted());
-            break;
 		case OC_TRIGGER:
 			{
 				pszKey += 7;
@@ -1376,12 +1373,12 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				{
 					TRIGRET_TYPE trReturn = TRIGRET_RET_FALSE;
                     _iCallingObjTriggerId = _iRunningTriggerId;
-					bool bTrigReturn = CallPersonalTrigger(const_cast<tchar *>(pszKey), pSrc, trReturn,false);
+					bool fTrigReturn = CallPersonalTrigger(const_cast<tchar *>(pszKey), pSrc, trReturn,false);
 					_iCallingObjTriggerId = -1;
-					if ( bTrigReturn )
+					if ( fTrigReturn )
 						sVal.FormatVal(trReturn);
 
-					return bTrigReturn;
+					return fTrigReturn;
 				}
 			} return false;
 		case OC_TOPOBJ:
@@ -1391,7 +1388,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			break;
 		case OC_UID:
 			if ( pszKey[3] == '.' )
-				return	CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
+				return CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
 		case OC_SERIAL:
 			sVal.FormatHex( GetUID() );
 			break;
@@ -1638,17 +1635,16 @@ bool CObjBase::r_LoadVal( CScript & s )
             return false;
         case OC_CANMASK:
         {
-            dword dwFlags = s.GetArgDWVal();
-            m_CanMask = dwFlags;
+            m_CanMask = s.GetArgDWVal();
             if (IsItem())
             {
                 CItem* pItem = static_cast<CItem*>(this);
                 CCItemDamageable *pItemDmg = static_cast<CCItemDamageable*>(GetComponent(COMP_ITEMDAMAGEABLE));
-                if ((dwFlags & CAN_I_DAMAGEABLE) && !pItemDmg)
+                if (!pItemDmg && CCItemDamageable::CanSubscribe(pItem))
                 {
                     SubscribeComponent(new CCItemDamageable(pItem));
                 }
-                else if (!(dwFlags & CAN_I_DAMAGEABLE) && pItemDmg)
+                else if (pItemDmg && !CCItemDamageable::CanSubscribe(pItem))
                 {
                     UnsubscribeComponent(pItemDmg);
                 }
@@ -1772,10 +1768,6 @@ bool CObjBase::r_LoadVal( CScript & s )
             SetTimeout(s.GetArgLLVal());
             fResendTooltip = true;
             break;
-        case OC_TIMERT:
-            SetTimeoutT(s.GetArgLLVal());
-            fResendTooltip = true;
-            break;
 		case OC_TIMESTAMP:
 			SetTimeStamp(s.GetArgLLVal());
 			break;
@@ -1789,7 +1781,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 		case OC_UID:
 		case OC_SERIAL:
 			// Don't set container flags through this.
-			SetUID( s.GetArgVal(), (dynamic_cast <CItem*>(this)) ? true : false );
+			SetUID( s.GetArgDWVal(), (dynamic_cast <CItem*>(this)) ? true : false );
 			break;
 		default:
 			return false;

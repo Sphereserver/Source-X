@@ -261,7 +261,7 @@ void CClient::addTime( bool fCurrent ) const
 	}
 }
 
-void CClient::addObjectRemoveCantSee( CUID uid, lpctstr pszName ) const
+void CClient::addObjectRemoveCantSee( const CUID& uid, lpctstr pszName ) const
 {
 	ADDTOCALLSTACK("CClient::addObjectRemoveCantSee");
 	// Seems this object got out of sync some how.
@@ -277,13 +277,13 @@ void CClient::closeContainer( const CObjBase * pObj ) const
 	new PacketCloseContainer(this, pObj);
 }
 
-void CClient::closeUIWindow( const CChar* character, dword command ) const
+void CClient::closeUIWindow( const CObjBase* pObj, PacketCloseUIWindow::UIWindow windowType ) const
 {
 	ADDTOCALLSTACK("CClient::closeUIWindow");
-	new PacketCloseUIWindow(this, character, command);
+	new PacketCloseUIWindow(this, pObj, windowType);
 }
 
-void CClient::addObjectRemove( CUID uid ) const
+void CClient::addObjectRemove( const CUID& uid ) const
 {
 	ADDTOCALLSTACK("CClient::addObjectRemove");
 	// Tell the client to remove the item or char
@@ -1410,7 +1410,7 @@ bool CClient::addBookOpen( CItem * pBook ) const
 	if (pBook == nullptr)
 		return false;
 
-	size_t iPagesNow = 0;
+	word wPagesNow = 0;
 	bool bNewPacket = PacketDisplayBookNew::CanSendTo(GetNetState());
 
 	if (pBook->IsBookSystem() == false)
@@ -1421,7 +1421,7 @@ bool CClient::addBookOpen( CItem * pBook ) const
 			return false;
 
 		if (pMsgItem->IsBookWritable())
-			iPagesNow = pMsgItem->GetPageCount(); // for some reason we must send them now
+            wPagesNow = pMsgItem->GetPageCount(); // for some reason we must send them now
 	}
 
 	if (bNewPacket)
@@ -1430,23 +1430,23 @@ bool CClient::addBookOpen( CItem * pBook ) const
 		new PacketDisplayBook(this, pBook);
 
 	// We could just send all the pages now if we want.
-	if (iPagesNow > 0)
-		addBookPage(pBook, 1, iPagesNow);
+	if (wPagesNow > 0)
+		addBookPage(pBook, 1, wPagesNow);
 
 	return true;
 }
 
-void CClient::addBookPage( const CItem * pBook, size_t iPage, size_t iCount ) const
+void CClient::addBookPage( const CItem * pBook, word wPage, word wCount ) const
 {
 	ADDTOCALLSTACK("CClient::addBookPage");
 	// ARGS:
-	//  iPage = 1 based page.
-	if ( iPage <= 0 )
+	//  wPage = 1 based page.
+	if ( wPage <= 0 )
 		return;
-	if ( iCount < 1 )
-		iCount = 1;
+	if ( wCount < 1 )
+		wCount = 1;
 
-	new PacketBookPageContent(this, pBook, iPage, iCount );
+	new PacketBookPageContent(this, pBook, wPage, wCount );
 }
 
 size_t CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
@@ -2873,7 +2873,7 @@ byte CClient::LogIn( CAccount * pAccount, CSString & sMsg )
 	Args.Init(pAccount->GetName());
 	Args.m_iN1 = GetConnectType();
 	Args.m_pO1 = this;
-	enum TRIGRET_TYPE tr;
+	TRIGRET_TYPE tr = TRIGRET_RET_DEFAULT;
 	g_Serv.r_Call("f_onaccount_login", &g_Serv, &Args, nullptr, &tr);
 	if ( tr == TRIGRET_RET_TRUE )
 	{

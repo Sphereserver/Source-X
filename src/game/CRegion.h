@@ -16,7 +16,7 @@ class CRegionLinks : public CSPtrTypeArray<CRegion*>
 {
 	//just named class for this, maybe something here later
 public:
-	CRegionLinks() { };
+	CRegionLinks() = default;
 
 private:
 	CRegionLinks(const CRegionLinks& copy);
@@ -120,15 +120,15 @@ public:
 #define REGMOD_NAME		0x0008
 #define REGMOD_GROUP	0x0010
 
-	void	SetModified( int iModFlag );
+	void SetModified( int iModFlag );
 	void SetName( lpctstr pszName );
 	lpctstr GetName() const
 	{
-		return( m_sName );
+		return m_sName.GetPtr();
 	}
 	const CSString & GetNameStr() const
 	{
-		return( m_sName );
+		return m_sName;
 	}
 
 	void r_WriteBase( CScript & s );
@@ -148,11 +148,11 @@ public:
 	}
 	dword GetRegionFlags() const
 	{
-		return( m_dwFlags );
+		return m_dwFlags;
 	}
 	bool IsFlag( dword dwFlags ) const
 	{
-		return(( m_dwFlags & dwFlags ) ? true : false );
+		return (( m_dwFlags & dwFlags ) ? true : false );
 	}
 	bool IsGuarded() const;
 	void SetRegionFlags( dword dwFlags )
@@ -171,10 +171,10 @@ public:
 	bool CheckAntiMagic( SPELL_TYPE spell ) const;
 	virtual bool IsValid() const
 	{
-		return( m_sName.IsValid());
+		return m_sName.IsValid();
 	}
 
-	bool MakeRegionName();
+	bool MakeRegionDefname();
 
 public:
 	explicit CRegion( CResourceID rid, lpctstr pszName = nullptr );

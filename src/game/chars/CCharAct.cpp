@@ -2810,14 +2810,14 @@ bool CChar::Death()
 			}
 
 			pKiller->Noto_Kill( this, GetAttackersCount() );
-			iKillStrLen += sprintf( pszKillStr+iKillStrLen, "%s%c'%s'", iKillers ? ", " : "", (pKiller->m_pPlayer) ? 'P':'N', pKiller->GetNameWithoutIncognito() );
+			iKillStrLen += sprintf( pszKillStr+iKillStrLen, "%s%c'%s'.", iKillers ? ", " : "", (pKiller->m_pPlayer) ? 'P':'N', pKiller->GetNameWithoutIncognito() );
 			++iKillers;
 		}
 	}
 
 	// Record the kill event for posterity
 	if ( !iKillers )
-		iKillStrLen += sprintf( pszKillStr+iKillStrLen, "accident" );
+		iKillStrLen += sprintf( pszKillStr+iKillStrLen, "accident." );
 	if ( m_pPlayer )
 		g_Log.Event( LOGL_EVENT|LOGM_KILLS, "%s\n", pszKillStr );
 	if ( m_pParty )
@@ -2867,7 +2867,8 @@ bool CChar::Death()
 
 	if ( m_pPlayer )
 	{
-		ChangeExperience(-((int)(m_exp) / 10), pKiller);
+        llong iDelta = m_exp / 10;
+		ChangeExperience(- maximum(1, iDelta), pKiller);
 		if ( !(m_TagDefs.GetKeyNum("DEATHFLAGS") & DEATH_NOFAMECHANGE) )
 			Noto_Fame( -GetFame()/10 );
 
@@ -2893,29 +2894,29 @@ bool CChar::Death()
 			StatFlag_Set(STATF_INSUBSTANTIAL);	// manifest war mode for ghosts
 
 		++m_pPlayer->m_wDeaths;
+
 		SetHue( HUE_DEFAULT );	// get all pale
 		SetID( (CREID_TYPE)(g_Cfg.ResourceGetIndexType( RES_CHARDEF, pszGhostName )) );
 		LayerAdd( CItem::CreateScript( ITEMID_DEATHSHROUD, this ) );
-
-		CClient * pClient = GetClient();
+		
+        CClient * pClient = GetClient();
 		if ( pClient )
 		{
-			// OSI uses PacketDeathMenu to update client screen on death.
-			// If the user disable this packet, it must be updated using addPlayerUpdate()
-			if ( g_Cfg.m_iPacketDeathAnimation )
-			{
-				// Display death animation to client ("You are dead")
-				new PacketDeathMenu(pClient, PacketDeathMenu::ServerSent);
-				new PacketDeathMenu(pClient, PacketDeathMenu::Ghost);
-			}
-			else
-			{
-				pClient->addPlayerUpdate();
-                pClient->addPlayerWarMode();
-			}
+            if (g_Cfg.m_iPacketDeathAnimation)
+            {
+                // OSI uses PacketDeathMenu to update client screen on death.
+                // If the user disable this packet, it must be updated using addPlayerUpdate()
 
-            m_pClient->addSeason(SEASON_Desolate);
-            m_pClient->addMapWaypoint(pCorpse, Corpse);		// add corpse map waypoint on enhanced clients
+                // Display death animation to client ("You are dead")
+                new PacketDeathMenu(pClient, PacketDeathMenu::Dead);
+            }
+            else
+            {
+                pClient->addPlayerUpdate();
+            }
+            pClient->addPlayerWarMode();
+            pClient->addSeason(SEASON_Desolate);
+            pClient->addMapWaypoint(pCorpse, Corpse);		// add corpse map waypoint on enhanced clients
 
             CItem *pPack = LayerFind(LAYER_PACK);
             if ( pPack )
