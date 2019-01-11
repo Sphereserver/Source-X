@@ -1138,6 +1138,10 @@ CItem * CItem::UnStackSplit( word amount, CChar * pCharSrc )
 			pItemNew->Delete();
 		}
 	}
+    else
+    {
+        pItemNew->Update();
+    }
 
 	return pItemNew;
 }
