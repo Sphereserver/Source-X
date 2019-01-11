@@ -1473,3 +1473,6 @@ WARNING: the following change could break some hackish expedient used in scripts
 	As example, <RESOURCEINDEX s_clumsy> returns 1, which is the spell number (id).
 - Added: <RESOURCETYPE defname>, which gets the resource type (RES_ITEMDEF, RES_SPAWN, etc) from the defname. The list of the resource type numbers is in the X scriptpack in core/defs.scp.
 - Changed: REGIONTYPE block could not accept landtile types with index > 255. Extended this limit to 65534.	This also extends the maximum number of pages in a book by the same amount.
+
+11-01-2019, Nolok
+- Fixed: NPC skill training (Issue #176).

@@ -1098,8 +1098,11 @@ int CItem::FixWeirdness()
 		}
 
 		// unreasonably long for a top level item ?
-		if ( GetTimerAdjusted() > 90*24*60*60 )
-			SetTimeout(60*60);
+		if ( GetTimerSAdjusted() > 90ll*24*60*60)
+        {
+            g_Log.EventWarn("FixWeirdness on Item (UID=0%x): timer unreasonably long (> 90 days) on a top level object.\n", (uint)GetUID());
+			SetTimeoutS(60*60);
+        }
 	}
 
 	// is m_BaseDef just set bad ?

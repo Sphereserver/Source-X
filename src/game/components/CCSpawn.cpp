@@ -702,11 +702,12 @@ bool CCSpawn::r_LoadVal(CScript & s)
         case ISPW_MORE:
         case ISPW_MORE1:
         {
-            CResourceID ridArg(s.GetArgDWVal(), 0);
-            if (!ridArg.IsValidUID()) // if no value, we can skip everything else, just return true to allow the keyword to be proccessed.
+            const dword dwPrivateUID = s.GetArgDWVal();
+            if (!CUID(dwPrivateUID).IsValidUID())
             {
                 return true;
             }
+            CResourceIDBase ridArg(dwPrivateUID);    // Not using CResourceID because res_chardef, spawn, itemdef, template do not use the "page" arg
             const int iRidIndex = ridArg.GetResIndex();
             const int iRidType  = ridArg.GetResType();
             switch (pSpawnItem->GetType())

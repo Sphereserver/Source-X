@@ -1214,16 +1214,13 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 	if ( !pObj )
 		return false;
 
-	const CItem *pItem = nullptr;
+    const CItem *pItem = nullptr;
 	const CObjBaseTemplate *pObjTop = pObj->GetTopLevelObj();
 	int iDist = GetTopDist3D(pObjTop);
 
 	if ( pObj->IsItem() )	// some objects can be used anytime. (even by the dead.)
 	{
-		pItem = static_cast<const CItem *>(pObj);
-		if ( !pItem )
-			return false;
-
+        pItem = static_cast<const CItem *>(pObj);
 		bool fDeathImmune = IsPriv(PRIV_GM);
 		switch ( pItem->GetType() )
 		{
@@ -1268,9 +1265,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 	{
 		if ( pObjTop->IsChar() )
 		{
-			pChar = dynamic_cast<const CChar*>(pObjTop);
-			if ( !pChar )
-				return false;
+			pChar = static_cast<const CChar*>(pObjTop);
 			if ( pChar == this )
 				return true;
 			if ( IsPriv(PRIV_GM) )
@@ -1283,7 +1278,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 		const CObjBase *pObjTest = pObj;
 		for (;;)
 		{
-			pItem = static_cast<const CItem *>(pObjTest);
+			pItem = dynamic_cast<const CItem *>(pObjTest);
 			if ( !pItem )
 				break;
 
@@ -1293,7 +1288,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 				break;
 
 			pObjTest = pObjCont;
-			if ( !CanSeeInContainer(static_cast<const CItemContainer *>(pObjTest)) )
+			if ( !CanSeeInContainer(dynamic_cast<const CItemContainer *>(pObjTest)) )
 				return false;
 		}
 	}
@@ -1305,9 +1300,9 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 	{
 		if ( Can(CAN_C_DCIGNORELOS) )
 			return true;
-		else if ( pObj->IsChar() && pObj->Can(CAN_C_DCIGNORELOS) )
+		else if ( pChar && pChar->Can(CAN_C_DCIGNORELOS) )
 			return true;
-		else if ( pObj->IsItem() && pObj->Can(CAN_I_DCIGNORELOS) )
+		else if ( pItem && pItem->Can(CAN_I_DCIGNORELOS) )
 			return true;
 		return false;
 	}
@@ -1315,9 +1310,9 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 	{
 		if ( Can(CAN_C_DCIGNOREDIST) )
 			return true;
-		else if ( pObj->IsChar() && pObj->Can(CAN_C_DCIGNOREDIST) )
+		else if ( pChar && pChar->Can(CAN_C_DCIGNOREDIST) )
 			return true;
-		else if ( pObj->IsItem() && pObj->Can(CAN_I_DCIGNOREDIST) )
+		else if ( pItem && pItem->Can(CAN_I_DCIGNOREDIST) )
 			return true;
 		return false;
 	}

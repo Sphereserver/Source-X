@@ -146,7 +146,7 @@ void CChar::Use_MoonGate( CItem * pItem )
     if (pLink)
         pt = pLink->GetTopPoint();
     else
-        pItem->m_itTelepad.m_ptMark;
+        pt = pItem->m_itTelepad.m_ptMark;
 
 	if ( pItem->IsType(IT_MOONGATE) )
 	{
@@ -154,9 +154,10 @@ void CChar::Use_MoonGate( CItem * pItem )
 		// What gate are we at ?
 		size_t i = 0;
 		size_t iCount = g_Cfg.m_MoonGates.size();
+        const CPointMap& ptTop = GetTopPoint();
 		for ( ; i < iCount; ++i )
 		{
-			if ( GetTopPoint().GetDist(g_Cfg.m_MoonGates[i]) <= UO_MAP_VIEW_SIZE_DEFAULT )
+			if ( ptTop.GetDist(g_Cfg.m_MoonGates[i]) <= UO_MAP_VIEW_SIZE_DEFAULT )
 				break;
 		}
 

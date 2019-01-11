@@ -1964,6 +1964,23 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 			return false;
 	}
 
+    if ( pItem->IsType(IT_GOLD) )
+    {
+        CItemMemory *pMemory = Memory_FindObj(pCharSrc);
+        if ( pMemory )
+        {
+            switch ( pMemory->m_itEqMemory.m_Action )
+            {
+                case NPC_MEM_ACT_SPEAK_TRAIN:
+                    return NPC_OnTrainPay(pCharSrc, pMemory, pItem);
+                case NPC_MEM_ACT_SPEAK_HIRE:
+                    return NPC_OnHirePay(pCharSrc, pMemory, pItem);
+                default:
+                    break;
+            }
+        }
+    }
+
 	// Giving item to own pet
 	if ( NPC_IsOwnedBy(pCharSrc) )
 	{
@@ -1971,18 +1988,21 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 		{
 			if ( pItem->IsType(IT_GOLD) )
 			{
-				Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_MONEY));
-                CCharBase * pCharDef = Char_GetDef();
-                int iWage = pCharDef->GetHireDayWage();
+                int iWage = Char_GetDef()->GetHireDayWage();
                 iWage = pCharSrc->PayGold(this, iWage, nullptr, PAYGOLD_HIRE);
-				NPC_OnHirePayMore(pItem,iWage);
+                if (iWage > 0)
+                {
+                    Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_MONEY));
+                    NPC_OnHirePayMore(pItem, iWage);
+                    return true;
+                }
 			}
 			else
 			{
 				Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_SELL));
 				GetBank(LAYER_VENDOR_STOCK)->ContentAdd(pItem);
+                return true;
 			}
-			return true;
 		}
 
 		if ( Food_CanEat(pItem) )
@@ -2022,20 +2042,6 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 
 	if ( pItem->IsType(IT_GOLD) )
 	{
-		CItemMemory *pMemory = Memory_FindObj(pCharSrc);
-		if ( pMemory )
-		{
-			switch ( pMemory->m_itEqMemory.m_Action )
-			{
-				case NPC_MEM_ACT_SPEAK_TRAIN:
-					return NPC_OnTrainPay(pCharSrc, pMemory, pItem);
-				case NPC_MEM_ACT_SPEAK_HIRE:
-					return NPC_OnHirePay(pCharSrc, pMemory, pItem);
-				default:
-					break;
-			}
-		}
-
 		if ( m_pNPC->m_Brain == NPCBRAIN_BANKER )
 		{
 			CItemContainer *pBankBox = pCharSrc->GetPackSafe();
@@ -2052,6 +2058,7 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 			pBankBox->ContentAdd(pItem);
 			return true;
 		}
+        return false;
 	}
 
 	if ( NPC_IsVendor() && !IsStatFlag(STATF_PET) )

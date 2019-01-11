@@ -725,8 +725,7 @@ bool CChar::NPC_OnHirePay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGol
 	if ( !pCharSrc || !pMemory )
 		return false;
 
-	CCharBase * pCharDef = Char_GetDef();
-    int iWage = pCharDef->GetHireDayWage();
+    int iWage = Char_GetDef()->GetHireDayWage();
 	if ( IsStatFlag( STATF_PET ))
 	{
 		if ( ! pMemory->IsMemoryTypes(MEMORY_IPET|MEMORY_FRIEND))

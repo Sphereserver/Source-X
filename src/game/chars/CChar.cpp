@@ -687,7 +687,11 @@ void CChar::SetVisualRange(byte newSight)
 	// max value is 18 on classic clients prior 7.0.55.27 version and 24 on enhanced clients and latest classic clients
 	m_iVisualRange = minimum(newSight, UO_MAP_VIEW_SIZE_MAX);
 	if ( IsClient() )
-		GetClient()->addVisualRange(m_iVisualRange);
+    {
+        CClient* pClient = GetClient();
+        pClient->addVisualRange(m_iVisualRange);
+        pClient->addReSync();
+    }
 }
 
 // Clean up weird flags.
