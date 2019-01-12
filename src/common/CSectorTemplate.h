@@ -28,7 +28,7 @@ private:
 class CCharsActiveList : public CSObjList
 {
 private:
-	size_t m_iClients; // How many clients in this sector now?
+    int m_iClients; // How many clients in this sector now?
 public:
 	static const char *m_sClassName;
 	int64 m_timeLastClient;	// age the sector based on last client here.
@@ -37,7 +37,7 @@ protected:
 	void OnRemoveObj( CSObjListRec* pObRec );	// Override this = called when removed from list.
 
 public:
-	size_t HasClients() const;
+    int GetClientsNumber() const;
 	void ClientAttach();
 	void ClientDetach();
 	void AddCharToSector( CChar * pChar );
@@ -71,46 +71,51 @@ private:
 	CItemsList& operator=(const CItemsList& other);
 };
 
-class CObjPointSortArray : public CSObjSortArray< CPointSort*, int >
-{
-public:
-	static const char *m_sClassName;
-	// Find a point fast.
-	int CompareKey( int id, CPointSort* pBase, bool fNoSpaces ) const;
-public:
-	CObjPointSortArray();
-private:
-	CObjPointSortArray(const CObjPointSortArray& copy);
-	CObjPointSortArray& operator=(const CObjPointSortArray& other);
-};
 
 class CSectorBase		// world sector
 {
+    class CObjPointSortArray : public CSObjSortArray< CPointSort*, int >
+    {
+    public:
+        static const char *m_sClassName;
+        // Find a point fast.
+        int CompareKey( int id, CPointSort* pBase, bool fNoSpaces ) const;
+    public:
+        CObjPointSortArray() = default;
+    private:
+        CObjPointSortArray(const CObjPointSortArray& copy);
+        CObjPointSortArray& operator=(const CObjPointSortArray& other);
+    };
+
 protected:
 	int	m_index;		// sector index
 	int m_map;			// sector map
+
 private:
 	typedef std::map<int, CServerMapBlock*>	MapBlockCache;
 	MapBlockCache							m_MapBlockCache;
+
 public:
-	static const char *m_sClassName;
+	static const char  *m_sClassName;
 	CObjPointSortArray	m_Teleports;		//	CTeleport array
 	CRegionLinks		m_RegionLinks;		//	CRegion(s) in this CSector
-	dword			m_dwFlags;
-public:
+	dword			    m_dwFlags;
+
 	CCharsActiveList		m_Chars_Active;		// CChar(s) activte in this CSector.
 	CCharsDisconnectList	m_Chars_Disconnect;	// dead NPCs, etc
 	CItemsList m_Items_Timer;				// CItem(s) in this CSector that need timers.
 	CItemsList m_Items_Inert;				// CItem(s) in this CSector. (no timer required)
+
 private:
     std::map<DIR_TYPE, CSector*> _mAdjacentSectors;
+
 public:
     /*
     * @brief Asign it's adjacent's sectors
     */
     void SetAdjacentSectors();
     CSector *GetAdjacentSector(DIR_TYPE dir) const;
-public:
+
 	CSectorBase();
 	virtual ~CSectorBase();
 
@@ -136,7 +141,7 @@ public:
 
 	// CRegion
 	CRegion * GetRegion( const CPointBase & pt, dword dwType ) const;
-	size_t GetRegions( const CPointBase & pt, dword dwType, CRegionLinks & rlist ) const;
+	size_t GetRegions( const CPointBase & pt, dword dwType, CRegionLinks *pRLinks ) const;
 
 	bool UnLinkRegion( CRegion * pRegionOld );
 	bool LinkRegion( CRegion * pRegionNew );

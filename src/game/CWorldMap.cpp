@@ -194,7 +194,7 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 
 	uint iRetElem = 4;
 
-    CPointMap ptElem[5] = {};
+    CPointMap ptElem[5] = {{}};
 	//for ( iQty = 0; iQty < 4; ++iQty )
 	//	ptElem[iQty].m_z = UO_SIZE_MIN_Z;
 	ptElem[0].m_z = ptElem[1].m_z  = ptElem[2].m_z  = ptElem[3].m_z = UO_SIZE_MIN_Z;
@@ -213,7 +213,8 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 		if ( pItem == nullptr )
 			break;
 
-		if ( pt.GetDist( pItem->GetTopPoint() ) > iDistance )
+        const CPointMap& ptItemTop = pItem->GetTopPoint();
+		if ( pt.GetDist( ptItemTop ) > iDistance )
 			continue;
 
 		pItemDef = CItemBase::FindItemBase( pItem->GetDispID() );
@@ -232,7 +233,7 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 			else
 				Height = pDupeDef->GetHeight();
 		}
-		z = Height + pItem->GetTopPoint().m_z;
+		z = Height + ptItemTop.m_z;
 		z = minimum(z , UO_SIZE_Z ); //height + current position = the top point
 
 		if ( ptElem[0].m_z > z ) //if ( ptElem[0].m_z > pItem->GetTopPoint().m_z )
@@ -244,7 +245,7 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 		if (( z < ptElem[0].m_z ) || (( z == ptElem[0].m_z ) && ( fElem[0] )))
 			continue;
 
-		ptElem[0] = pItem->GetTopPoint();
+		ptElem[0] = ptItemTop;
 		ptElem[0].m_z = z;
 		fElem[0] = false;
 
@@ -258,7 +259,7 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 
 	// Parts of multis ?
 	CRegionLinks rlinks;
-	size_t iRegionQty = pt.GetRegions(REGION_TYPE_MULTI, rlinks);
+	size_t iRegionQty = pt.GetRegions(REGION_TYPE_MULTI, &rlinks);
 	if ( iRegionQty > 0 )
 	{
         const CRegion *pRegion = nullptr;
@@ -267,7 +268,7 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 		for ( size_t iRegion = 0; iRegion < iRegionQty; pMulti = nullptr, ++iRegion )
 		{
 			pRegion = rlinks.at(iRegion);
-			pItem = pRegion->GetResourceID().ItemFind();
+			pItem = pRegion->GetResourceID().ItemFindFromResource();
 			if ( !pItem )
 				continue;
 			pMulti = g_Cfg.GetMultiItemDefs(pItem);
@@ -510,14 +511,15 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 
 		if ( ! pItem->IsType( iType ) && ! pItem->Item_GetDef()->IsType(iType) )
 			continue;
-		if ( bLimitZ && ( pItem->GetTopPoint().m_z != pt.m_z ))
+        const CPointMap& ptItemTop = pItem->GetTopPoint();
+		if ( bLimitZ && ( ptItemTop.m_z != pt.m_z ))
 			continue;
 
-		iTestDistance = pt.GetDist(pItem->GetTopPoint());
+		iTestDistance = pt.GetDist(ptItemTop);
 		if ( iTestDistance > iDistance )
 			continue;
 
-		ptFound = pItem->GetTopPoint();
+		ptFound = ptItemTop;
 		iDistance = iTestDistance;	// tighten up the search.
 		if ( ! iDistance )
 			return( ptFound );
@@ -636,13 +638,13 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 				CPointMap ptTest((word)(x), (word)(y), pt.m_z, pt.m_map);
 
 				CRegionLinks rlinks;
-				size_t iRegionQty = ptTest.GetRegions(REGION_TYPE_MULTI, rlinks);
+				size_t iRegionQty = ptTest.GetRegions(REGION_TYPE_MULTI, &rlinks);
 				if ( iRegionQty > 0 )
 				{
 					for (size_t iRegion = 0; iRegion < iRegionQty; ++iRegion)
 					{
-						const CRegion* pRegion = rlinks.at(iRegion);
-						CItem* pItem = pRegion->GetResourceID().ItemFind();
+						const CRegion* pRegion = rlinks[iRegion];
+						CItem* pItem = pRegion->GetResourceID().ItemFindFromResource();
 						if (pItem == nullptr)
 							continue;
 
@@ -650,8 +652,9 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 						if (pMulti == nullptr)
 							continue;
 
-						int x2 = ptTest.m_x - pItem->GetTopPoint().m_x;
-						int y2 = ptTest.m_y - pItem->GetTopPoint().m_y;
+                        const CPointMap& ptTop = pItem->GetTopPoint();
+						int x2 = ptTest.m_x - ptTop.m_x;
+						int y2 = ptTest.m_y - ptTop.m_y;
 
 						size_t iItemQty = pMulti->GetItemCount();
 						for (size_t iItem = 0; iItem < iItemQty; ++iItem)
@@ -789,7 +792,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 	// Any multi items here ?
 	// Check all of them
 	CRegionLinks rlinks;
-	size_t iRegionQty = pt.GetRegions( REGION_TYPE_MULTI, rlinks );
+	size_t iRegionQty = pt.GetRegions( REGION_TYPE_MULTI, &rlinks );
 	if ( iRegionQty > 0 )
 	{
 		//  ------------ For variables --------------------
@@ -802,17 +805,18 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 
 		for ( size_t iRegion = 0; iRegion < iRegionQty; ++iRegion, pRegion = nullptr, pItem = nullptr, pMulti = nullptr, x2 = 0, y2 = 0 )
 		{
-			pRegion = rlinks.at(iRegion);
+			pRegion = rlinks[iRegion];
 			if ( pRegion != nullptr )
-				pItem = pRegion->GetResourceID().ItemFind();
+				pItem = pRegion->GetResourceID().ItemFindFromResource();
 
 			if ( pItem != nullptr )
 			{
 				pMulti = g_Cfg.GetMultiItemDefs(pItem);
 				if ( pMulti )
 				{
-					x2 = pt.m_x - pItem->GetTopPoint().m_x;
-					y2 = pt.m_y - pItem->GetTopPoint().m_y;
+                    const CPointMap& ptItemTop = pItem->GetTopPoint();
+					x2 = pt.m_x - ptItemTop.m_x;
+					y2 = pt.m_y - ptItemTop.m_y;
 					iQty = pMulti->GetItemCount();
 					for ( size_t ii = 0; ii < iQty; ++ii, pMultiItem = nullptr, z = 0 )
 					{
@@ -1093,7 +1097,7 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 	if ( fHouseCheck )
 	{
 		CRegionLinks rlinks;
-		size_t iRegionQty = pt.GetRegions( REGION_TYPE_MULTI, rlinks );
+		size_t iRegionQty = pt.GetRegions( REGION_TYPE_MULTI, &rlinks );
 		if ( iRegionQty > 0 )
 		{
 			//  ------------ For variables --------------------
@@ -1106,17 +1110,18 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 
 			for ( uint iRegion = 0; iRegion < iRegionQty; ++iRegion, pRegion = nullptr, pItem = nullptr, pMulti = nullptr, x2 = 0, y2 = 0 )
 			{
-				pRegion = rlinks.at(iRegion);
+				pRegion = rlinks[iRegion];
 				if ( pRegion != nullptr )
-					pItem = pRegion->GetResourceID().ItemFind();
+					pItem = pRegion->GetResourceID().ItemFindFromResource();
 
 				if ( pItem != nullptr )
 				{
 					pMulti = g_Cfg.GetMultiItemDefs(pItem);
 					if ( pMulti )
 					{
-						x2 = pt.m_x - pItem->GetTopPoint().m_x;
-						y2 = pt.m_y - pItem->GetTopPoint().m_y;
+                        const CPointMap& ptItemTop = pItem->GetTopPoint();
+						x2 = pt.m_x - ptItemTop.m_x;
+						y2 = pt.m_y - ptItemTop.m_y;
 
 						iQty = pMulti->GetItemCount();
 						for ( uint ii = 0; ii < iQty; ++ii, pMultiItem = nullptr, z = 0, zHeight = 0 )
@@ -1149,7 +1154,8 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 									pDupeDef = CItemBaseDupe::GetDupeRef((ITEMID_TYPE)(pMultiItem->GetDispID()));
 									if ( pDupeDef == nullptr )
 									{
-										g_Log.EventDebug("Failed to get non-parent reference (multi) (DispID 0%x) (X: %d Y: %d Z: %d)\n",pMultiItem->GetDispID(),pMultiItem->m_dx+pItem->GetTopPoint().m_x,pMultiItem->m_dy+pItem->GetTopPoint().m_y,pMultiItem->m_dz+pItem->GetTopPoint().m_z);
+										g_Log.EventDebug("Failed to get non-parent reference (multi) (DispID 0%x) (X: %d Y: %d Z: %d)\n",
+                                            pMultiItem->GetDispID(), pMultiItem->m_dx + ptItemTop.m_x, pMultiItem->m_dy + ptItemTop.m_y, pMultiItem->m_dz + ptItemTop.m_z);
 										zHeight = pItemDef->GetHeight();
 										dwBlockThis = ( pItemDef->m_Can & CAN_I_MOVEMASK );
 									}
@@ -1349,20 +1355,21 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 	if ( fHouseCheck )
 	{
 		CRegionLinks rlinks;
-		size_t iRegionQty = pt.GetRegions( REGION_TYPE_MULTI, rlinks );
+		size_t iRegionQty = pt.GetRegions( REGION_TYPE_MULTI, &rlinks );
 		if ( iRegionQty > 0 )
 		{
 			for ( size_t i = 0; i < iRegionQty; ++i)
 			{
-                const CRegion * pRegion = rlinks.at(i);
-				CItem * pItem = pRegion->GetResourceID().ItemFind();
+                const CRegion * pRegion = rlinks[i];
+				CItem * pItem = pRegion->GetResourceID().ItemFindFromResource();
 				if ( pItem != nullptr )
 				{
 					const CSphereMulti * pMulti = g_Cfg.GetMultiItemDefs(pItem);
 					if ( pMulti )
 					{
-						int x2 = pt.m_x - pItem->GetTopPoint().m_x;
-						int y2 = pt.m_y - pItem->GetTopPoint().m_y;
+                        const CPointMap& ptItemTop = pItem->GetTopPoint();
+						int x2 = pt.m_x - ptItemTop.m_x;
+						int y2 = pt.m_y - ptItemTop.m_y;
 
 						size_t iMultiQty = pMulti->GetItemCount();
 						for ( size_t j = 0; j < iMultiQty; ++j )
@@ -1419,9 +1426,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 		if (zHeight == 0)
 			zHeight = zStaticHeight;
 
-		if ( !block.CheckTile(
-			dwBlockThis,
-			zitem, zHeight, pItemDef->GetDispID() + TERRAIN_QTY ) )
+		if ( !block.CheckTile(dwBlockThis, zitem, zHeight, pItemDef->GetDispID() + TERRAIN_QTY ) )
 		{
 		}
 	}
@@ -1574,5 +1579,5 @@ IT_TYPE CWorld::GetTerrainItemType( dword dwTerrainIndex )
 	if ( !pItemTypeDef )
 		return IT_NORMAL;
 
-	return static_cast<IT_TYPE>(pItemTypeDef->GetItemType());
+	return (IT_TYPE)pItemTypeDef->GetItemType();
 }

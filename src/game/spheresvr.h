@@ -13,7 +13,7 @@
 // Text mashers.
 
 extern lpctstr GetTimeMinDesc( int dwMinutes );
-extern size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord );
+
 
 ////////////////////////////////////////////////////////////////////////////////////
 

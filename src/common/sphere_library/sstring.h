@@ -25,6 +25,8 @@ struct KeyTableDesc_s
     int iTableSize;
 };
 
+size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord );
+
 /** @name String utilities: Modifiers
 */
 ///@{

@@ -382,7 +382,7 @@ void CChar::ClientDetach()
 	// If this char is on a IT_SHIP then we need to stop the ship !
 	if ( m_pArea && m_pArea->IsFlag( REGION_FLAG_SHIP ))
 	{
-		CItemShip * pShipItem = dynamic_cast <CItemShip *>( m_pArea->GetResourceID().ItemFind());
+		CItemShip * pShipItem = dynamic_cast <CItemShip *>( m_pArea->GetResourceID().ItemFindFromResource());
 		if ( pShipItem )
 			pShipItem->Stop();
 	}
@@ -4289,7 +4289,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				tchar *z = Str_GetTemp();
 				if ( m_pArea )
 				{
-					if ( m_pArea->GetResourceID().IsItem())
+					if ( m_pArea->GetResourceID().IsUIDItem())  // Inside a multi region
 						sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE_AREA), m_pArea->GetName(), GetTopPoint().WriteUsed());
 					else
 					{

@@ -1460,11 +1460,13 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
 
     auto _RegionBlocksSpeech = [](const CRegion* pRegion) -> bool
     {
+        const CResourceID ridRegion = pRegion->GetResourceID();
+        const bool fRegionFromItem = ridRegion.IsUIDItem();
         bool fCanSpeech = false;
-        const CVarDefCont *pValue = pRegion->GetResourceID().IsItem() ? pRegion->GetResourceID().ItemFind()->GetKey("NOMUTESPEECH", false) : nullptr;
+        const CVarDefCont *pValue = fRegionFromItem ? ridRegion.ItemFindFromResource()->GetKey("NOMUTESPEECH", false) : nullptr;
         if ( pValue && pValue->GetValNum() > 0 )
             fCanSpeech = true;
-        if ( pRegion->GetResourceID().IsItem() && !pRegion->IsFlag(REGION_FLAG_SHIP) && !fCanSpeech )
+        if ( fRegionFromItem && !pRegion->IsFlag(REGION_FLAG_SHIP) && !fCanSpeech )
             return false;
         return true;
     };

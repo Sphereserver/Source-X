@@ -218,43 +218,6 @@ lpctstr GetTimeMinDesc( int minutes )
 	return pTime;
 }
 
-size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord )
-{
-	// Find any of the pszKeyWord in the pTextSearch string.
-	// Make sure we look for starts of words.
-
-	size_t j = 0;
-	for ( size_t i = 0; ; ++i )
-	{
-		if ( pszKeyWord[j] == '\0' || pszKeyWord[j] == ',')
-		{
-			if ( pTextSearch[i]== '\0' || ISWHITESPACE(pTextSearch[i]))
-				return( i );
-			j = 0;
-		}
-		if ( pTextSearch[i] == '\0' )
-		{
-			pszKeyWord = strchr(pszKeyWord, ',');
-			if (pszKeyWord)
-			{
-				++pszKeyWord;
-				i = 0;
-				j = 0;
-			}
-			else
-			return 0;
-		}
-		if ( j == 0 && i > 0 )
-		{
-			if ( IsAlpha( pTextSearch[i-1] ))	// not start of word ?
-				continue;
-		}
-		if ( toupper( pTextSearch[i] ) == toupper( pszKeyWord[j] ))
-			++j;
-		else
-			j = 0;
-	}
-}
 
 //*******************************************************************
 //	Main server loop

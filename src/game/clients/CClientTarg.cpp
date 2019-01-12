@@ -2015,7 +2015,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		if ( pKey == nullptr )
 		{
 			// are we trying to lock it down ?
-			if ( m_pChar->m_pArea->GetResourceID().IsItem())
+			if ( m_pChar->m_pArea->GetResourceID().IsUIDItem())
 			{
 				pKey = pKeyRing->ContentFind( CResourceID(RES_TYPEDEF,IT_KEY), m_pChar->m_pArea->GetResourceID() );
 				if ( pKey )

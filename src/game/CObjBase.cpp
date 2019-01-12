@@ -25,7 +25,7 @@ bool CObjBaseTemplate::IsDeleted() const
 
 int CObjBaseTemplate::IsWeird() const
 {
-	ADDTOCALLSTACK_INTENSIVE("CObjBaseTemplate::IsWeird");
+	ADDTOCALLSTACK("CObjBaseTemplate::IsWeird");
 	if ( !GetParent() )
 		return 0x3101;
 
@@ -110,10 +110,10 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 CObjBase::~CObjBase()
 {
     RemoveSelf();
-    if (GetSpawn())    // If I was created from a Spawn
+    if (CCSpawn *pSpawn = GetSpawn())    // If I was created from a Spawn
     {
-        //pEntity->UnsubscribeComponent(GetSpawn());    // Avoiding recursive calls from CCSpawn::DelObj when forcing the pChar/pItem to Delete();
-        GetSpawn()->DelObj(GetUID());  // Then I should be removed from it's list.
+        //pEntity->UnsubscribeComponent(pSpawn);    // Avoiding recursive calls from CCSpawn::DelObj when forcing the pChar/pItem to Delete();
+        pSpawn->DelObj(GetUID());  // Then I should be removed from it's list.
     }
     g_World.m_ObjStatusUpdates.erase(this);
     g_World.m_TimedFunctions.Erase( GetUID() );
@@ -419,7 +419,7 @@ void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSour
 	}
 }
 
-void CObjBase::EffectXYZ(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptSrc, const CPointMap *ptDest,
+void CObjBase::EffectXYZ(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *pptDest, const CPointMap *pptSrc,
     byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, word explodeid, word explodesound, dword effectuid, byte type) const
 {
 	ADDTOCALLSTACK("CObjBase::EffectXYZ");
@@ -451,7 +451,7 @@ void CObjBase::EffectXYZ(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *pt
 		if (pClient->GetNetState()->isClientEnhanced())
 			bLoopAdjusted *= 3;
 
-		pClient->addEffectXYZ(motion, id, ptDest, ptSrc, bSpeedSeconds, bLoopAdjusted, fExplode, color, render, effectid, explodeid, explodesound, effectuid, type);
+		pClient->addEffectXYZ(motion, id, pptDest, pptSrc, bSpeedSeconds, bLoopAdjusted, fExplode, color, render, effectid, explodeid, explodesound, effectuid, type);
 	}
 }
 
@@ -1667,7 +1667,7 @@ bool CObjBase::r_LoadVal( CScript & s )
         break;
         case OC_COLOR:
         {
-            tchar* ptcArg = s.GetArgStr();
+            const tchar* ptcArg = s.GetArgStr();
             if (!strnicmp(ptcArg, "match_shirt", 11) || !strnicmp(ptcArg, "match_hair", 10))
             {
                 const CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
@@ -1683,7 +1683,8 @@ bool CObjBase::r_LoadVal( CScript & s )
                 m_wHue = HUE_DEFAULT;
                 break;
             }
-            SetHue((HUE_TYPE)(s.GetArgVal()), false, &g_Serv); //@Dye is called from @Create/.xcolor/script command here // since we can not receive pSrc on this r_LoadVal function ARGO/SRC will be null
+            const HUE_TYPE hue = (HUE_TYPE)s.GetArgVal();
+            SetHue(hue, false, &g_Serv); //@Dye is called from @Create/.xcolor/script command here // since we can not receive pSrc on this r_LoadVal function ARGO/SRC will be null
             Update();
         }
         break;

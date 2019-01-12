@@ -94,7 +94,7 @@ public:
 	bool IsCharDisconnectedIn( const CChar * pChar );
 	size_t GetCharComplexity() const;
 	size_t GetInactiveChars() const;
-	size_t HasClients() const;
+	size_t GetClientsNumber() const;
 	int64 GetLastClientTime() const;
 	bool CanSleep(bool fCheckAdjacents) const;
 	void SetSectorWakeStatus();	// Ships may enter a sector before it's riders !

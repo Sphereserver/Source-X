@@ -1676,9 +1676,9 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 		m_pChar->CallGuards();
 
 	// Are we in a region that can hear ?
-	if ( m_pChar->m_pArea->GetResourceID().IsItem() )
+	if ( m_pChar->m_pArea->GetResourceID().IsUIDItem() )
 	{
-		CItemMulti *pItemMulti = dynamic_cast<CItemMulti *>(m_pChar->m_pArea->GetResourceID().ItemFind());
+		CItemMulti *pItemMulti = dynamic_cast<CItemMulti *>(m_pChar->m_pArea->GetResourceID().ItemFindFromResource());
 		if ( pItemMulti )
 			pItemMulti->OnHearRegion(pszText, m_pChar);
 	}

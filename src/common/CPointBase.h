@@ -86,7 +86,7 @@ public:
 #define REGION_TYPE_SHIP  8
 #define REGION_TYPE_MULTI 12
 	CRegion * GetRegion( dword dwType ) const;
-	size_t GetRegions( dword dwType, CRegionLinks & rlinks ) const;
+	size_t GetRegions( dword dwType, CRegionLinks *pRLinks ) const;
 
 	int GetPointSortIndex() const;
 

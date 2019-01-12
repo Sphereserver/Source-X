@@ -39,7 +39,7 @@ void CCharsActiveList::OnRemoveObj( CSObjListRec * pObRec )
 	pChar->SetUIDContainerFlags(UID_O_DISCONNECT);
 }
 
-size_t CCharsActiveList::HasClients() const
+int CCharsActiveList::GetClientsNumber() const
 {
 	return m_iClients;
 }
@@ -107,18 +107,18 @@ CItemsList::CItemsList()
 
 }
 
-int CObjPointSortArray::CompareKey( int id, CPointSort* pBase, bool fNoSpaces ) const
+
+//////////////////////////////////////////////////////////////////
+// -CSectorBase::CObjPointSortArray
+
+
+int CSectorBase::CObjPointSortArray::CompareKey( int id, CPointSort* pBase, bool fNoSpaces ) const
 {
-	UNREFERENCED_PARAMETER(fNoSpaces);
-	ASSERT( pBase );
-	return( id - pBase->GetPointSortIndex());
+    UNREFERENCED_PARAMETER(fNoSpaces);
+    ASSERT( pBase );
+    return( id - pBase->GetPointSortIndex());
 }
 
-
-CObjPointSortArray::CObjPointSortArray()
-{
-
-}
 
 //////////////////////////////////////////////////////////////////
 // -CSectorBase
@@ -331,9 +331,9 @@ CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 
         const CResourceID& ridRegion = pRegion->GetResourceID();
 		ASSERT( ridRegion.IsValidUID());
-		if ( ridRegion.IsItem())
+		if ( ridRegion.IsUIDItem())
 		{
-			const CItemShip * pShipItem = dynamic_cast <CItemShip *>(ridRegion.ItemFind());
+			const CItemShip * pShipItem = dynamic_cast <CItemShip *>(ridRegion.ItemFindFromResource());
 			if (pShipItem)
 			{
 				if (!(dwType & REGION_TYPE_SHIP))
@@ -362,8 +362,8 @@ CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 	return nullptr;
 }
 
-// Balkon: get regions list (to cicle through intercepted house regions)
-size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLinks & rlist ) const
+// Balkon: get regions list (to cycle through intercepted house regions)
+size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLinks *pRLinks ) const
 {
 	ADDTOCALLSTACK("CSectorBase::GetRegions");
 	size_t iQty = m_RegionLinks.size();
@@ -373,9 +373,9 @@ size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLink
 		ASSERT(pRegion);
 
 		ASSERT( pRegion->GetResourceID().IsValidUID());
-		if ( pRegion->GetResourceID().IsItem())
+		if ( pRegion->GetResourceID().IsUIDItem())
 		{
-			CItemShip * pShipItem = dynamic_cast <CItemShip *>(pRegion->GetResourceID().ItemFind());
+			CItemShip * pShipItem = dynamic_cast <CItemShip *>(pRegion->GetResourceID().ItemFindFromResource());
 			if (pShipItem)
 			{
 				if (!(dwType & REGION_TYPE_SHIP))
@@ -399,9 +399,9 @@ size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLink
 			continue;
 		if ( ! pRegion->IsInside2d( pt ))
 			continue;
-		rlist.push_back(pRegion);
+        pRLinks->push_back(pRegion);
 	}
-	return rlist.size();
+	return pRLinks->size();
 }
 
 bool CSectorBase::UnLinkRegion( CRegion * pRegionOld )
@@ -447,7 +447,7 @@ bool CSectorBase::LinkRegion( CRegion * pRegionNew )
 				continue;
 
 			// keep item (multi) regions on top
-			if ( pRegion->GetResourceID().IsItem() && !pRegionNew->GetResourceID().IsItem() )
+			if ( pRegion->GetResourceID().IsUIDItem() && !pRegionNew->GetResourceID().IsUIDItem() )
 				continue;
 
 			// must insert before this.

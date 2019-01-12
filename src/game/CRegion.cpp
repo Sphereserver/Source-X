@@ -337,15 +337,15 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			break;
 		case RC_CLIENTS:
         {
-            size_t uiClients = 0;
-            for (size_t i = 0; ; ++i)
+            int iClients = 0;
+            for (int i = 0; ; ++i)
             {
                 CSector	*pSector = GetSector(i);
                 if (pSector == nullptr)
                     break;
-                uiClients += pSector->m_Chars_Active.HasClients();
+                iClients += pSector->m_Chars_Active.GetClientsNumber();
             }
-            sVal.FormatSTVal(uiClients);
+            sVal.FormatVal(iClients);
             break;
         }
         case RC_DEFNAME: // "DEFNAME" = for the speech system.
@@ -483,7 +483,7 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case RC_TYPEREGION:
 			{
 				const CItemBase * pBase = nullptr;
-				const CItem * pItem = GetResourceID().ItemFind();
+				const CItem * pItem = GetResourceID().ItemFindFromResource();
 				if (pItem != nullptr)
 					pBase = pItem->Item_GetDef();
 
