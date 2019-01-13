@@ -863,7 +863,7 @@ LRESULT WINAPI CNTWindow::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LP
 
 bool CNTWindow::NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
-#define SPHERE_WINDOW_TITLE_BASE     SPHERE_TITLE " V" SPHERE_VERSION
+#define SPHERE_WINDOW_TITLE_BASE     SPHERE_TITLE " " SPHERE_VERSION_PREFIX SPHERE_VERSION
 	theApp.InitInstance(SPHERE_WINDOW_TITLE_BASE, hInstance, lpCmdLine);
 
 	//	read target window name from the arguments

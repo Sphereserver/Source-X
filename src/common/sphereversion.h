@@ -13,21 +13,22 @@
 	#define SPHERE_VER_BUILD			0
 #endif
 
-#define SPHERE_VER_FILEVERSION		0,56,4,SPHERE_VER_BUILD		// version to be set on generated .exe file
-//#define	SPHERE_VER_NUM				0x00005604L				// version for some internal usage, like compiled scripts	//unused
-#define SPHERE_VER_STR				"0.56d"						// share version with all files
+#define SPHERE_VER_FILEVERSION		1,1,0,SPHERE_VER_BUILD		// version to be set on generated .exe file (Windows only)
+#define SPHERE_VER_ID_STR           "110"                       // to be used for script and server VERSION property, which is numerical
+#define SPHERE_VER_NAME				"X1"						// share version with all files
 
+#define SPHERE_VERSION_PREFIX       "Version "
 #if defined(_DEBUG)
-	#define SPHERE_VERSION					SPHERE_VER_STR "-Debug"
+	#define SPHERE_VERSION					SPHERE_VER_NAME "-Debug"
 	#define SPHERE_VER_FILEFLAGS			0x1L	//VS_FF_DEBUG
 #elif defined(_NIGHTLYBUILD)
-	#define SPHERE_VERSION					SPHERE_VER_STR "-Nightly"
+	#define SPHERE_VERSION					SPHERE_VER_NAME "-Nightly"
 	#define SPHERE_VER_FILEFLAGS			0x2L	//VS_FF_PRERELEASE
 #elif defined(_PRIVATEBUILD)
-	#define SPHERE_VERSION					SPHERE_VER_STR "-Private"
+	#define SPHERE_VERSION					SPHERE_VER_NAME "-Private"
 	#define SPHERE_VER_FILEFLAGS			0x8L	//VS_FF_PRIVATEBUILD
 #else
-	#define SPHERE_VERSION					SPHERE_VER_STR "-Release"
+	#define SPHERE_VERSION					SPHERE_VER_NAME "-Release"
 	#define SPHERE_VER_FILEFLAGS			0x0L
 #endif
 
