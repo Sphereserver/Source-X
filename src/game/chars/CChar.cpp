@@ -773,19 +773,6 @@ int CChar::FixWeirdness()
 	if ( ! IsIndividualName() && pCharDef->GetTypeName()[0] == '#' )
 		SetName( pCharDef->GetTypeName());
 
-	// Automatic transition from old to new spawn engine
-	CItemMemory *pMemory = Memory_FindTypes(MEMORY_ISPAWNED);
-	if ( pMemory )
-	{
-        CCSpawn *pSpawn = static_cast<CCSpawn*>(pMemory->m_uidLink.ItemFind()->GetComponent(COMP_SPAWN));
-        _uidSpawn = pMemory->m_uidLink;
-		pMemory->Delete();
-		if ( pSpawn )
-		{
-			pSpawn->AddObj(GetUID());
-		}
-	}
-
 	if ( m_pPlayer )	// Player char.
 	{
 		Memory_ClearTypes( MEMORY_IPET );

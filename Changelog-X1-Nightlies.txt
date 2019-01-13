@@ -1476,3 +1476,8 @@ WARNING: the following change could break some hackish expedient used in scripts
 
 11-01-2019, Nolok
 - Fixed: NPC skill training (Issue #176).
+
+13-01-2019, XuN
+- [Garbage Collect]: Added error code 0x4226 for old spawn memories in NPCs being converted (and removed in the proccess) to the new system. This error should happen once in the first load and never more (if there's a worldsave after).
+- Fixed memories with memory_spawnitem not updating the spawn when loading saves from old builds.
+- Fixed Asserts on spawn items when retrieving more1/spawnid being it an invalid resource id.

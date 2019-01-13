@@ -725,166 +725,190 @@ char CItem::GetFixZ( CPointMap pt, dword dwBlockFlags )
 
 int CItem::FixWeirdness()
 {
-	ADDTOCALLSTACK("CItem::FixWeirdness");
-	// Check for weirdness and fix it if possible.
-	// RETURN: 0 = i can't fix this.
+    ADDTOCALLSTACK("CItem::FixWeirdness");
+    // Check for weirdness and fix it if possible.
+    // RETURN: 0 = i can't fix this.
 
-	if ( IsType(IT_EQ_MEMORY_OBJ) && ! IsValidUID())
-		SetUID( UID_CLEAR, true );	// some cases we don't get our UID because we are created during load.
+    if (IsType(IT_EQ_MEMORY_OBJ) && !IsValidUID())
+    {
+        SetUID(UID_CLEAR, true);	// some cases we don't get our UID because we are created during load.
+    }
 
-	int iResultCode = CObjBase::IsWeird();
-	if ( iResultCode )
-		return iResultCode;
+    int iResultCode = CObjBase::IsWeird();
+    if (iResultCode)
+    {
+        return iResultCode;
+    }
 
-	CItemBase * pItemDef = Item_GetDef();
-	ASSERT(pItemDef);
+    CItemBase * pItemDef = Item_GetDef();
+    ASSERT(pItemDef);
 
-	CChar * pChar;
-	if ( IsItemEquipped())
-	{
-		pChar = dynamic_cast <CChar*>( GetParent());
-		if ( ! pChar )
-		{
-			iResultCode = 0x2202;
-			return iResultCode;
-		}
-	}
-	else
-        pChar = nullptr;
+    CChar * pChar = nullptr;
+    if (IsItemEquipped())
+    {
+        pChar = dynamic_cast <CChar*>(GetParent());
+        if (!pChar)
+        {
+            iResultCode = 0x2202;
+            return iResultCode;
+        }
+    }
 
-	// Make sure the link is valid.
-	if ( m_uidLink.IsValidUID())
-	{
-		// Make sure all my memories are valid !
-		if ( m_uidLink == GetUID() || m_uidLink.ObjFind() == nullptr )
-		{
-			if ( m_type == IT_EQ_MEMORY_OBJ || m_type == IT_SPELL )
-				return 0; // get rid of it.	(this is not an ERROR per se)
-			if ( IsAttr(ATTR_STOLEN))
-				// The item has been laundered.
-				m_uidLink.InitUID();
-			else
-			{
-				DEBUG_ERR(("'%s' Bad Link to 0%x\n", GetName(), (dword)(m_uidLink)));
-				m_uidLink.InitUID();
-				iResultCode = 0x2205;
-				return iResultCode;	// get rid of it.
-			}
-		}
-	}
+    // Make sure the link is valid.
+    if (m_uidLink.IsValidUID())
+    {
+        // Make sure all my memories are valid !
+        if (m_uidLink == GetUID() || m_uidLink.ObjFind() == nullptr)
+        {
+            if (m_type == IT_EQ_MEMORY_OBJ || m_type == IT_SPELL)
+            {
+                return 0; // get rid of it.	(this is not an ERROR per se)
+            }
+            if (IsAttr(ATTR_STOLEN))
+                // The item has been laundered.
+                m_uidLink.InitUID();
+            else
+            {
+                DEBUG_ERR(("'%s' Bad Link to 0%x\n", GetName(), (dword)(m_uidLink)));
+                m_uidLink.InitUID();
+                iResultCode = 0x2205;
+                return iResultCode;	// get rid of it.
+            }
+        }
+    }
 
-	// Check Amount - Only stackable items should set amount ?
+    // Check Amount - Only stackable items should set amount ?
 
-	if ( GetAmount() != 1 &&
-		! IsType( IT_SPAWN_CHAR ) &&
-		! IsType( IT_SPAWN_ITEM ) &&
-		! IsStackableException())
-	{
-		// This should only exist in vendors restock boxes & spawns.
-		if ( ! GetAmount() )
-		{
-			SetAmount( 1 );
-		}
-		// stacks of these should not exist.
-		else if ( ! pItemDef->IsStackableType() &&
-			! IsType( IT_CORPSE ) &&
-			! IsType( IT_EQ_MEMORY_OBJ ))
-		{
-			SetAmount( 1 );
-		}
-	}
+    if (GetAmount() != 1 &&
+        !IsType(IT_SPAWN_CHAR) &&
+        !IsType(IT_SPAWN_ITEM) &&
+        !IsStackableException())
+    {
+        // This should only exist in vendors restock boxes & spawns.
+        if (!GetAmount())
+        {
+            SetAmount(1);
+        }
+        // stacks of these should not exist.
+        else if (!pItemDef->IsStackableType() &&
+            !IsType(IT_CORPSE) &&
+            !IsType(IT_EQ_MEMORY_OBJ))
+        {
+            SetAmount(1);
+        }
+    }
 
-	// Check Attributes
+    // Check Attributes
 
-	//	allow bless/curse for memory items only, and of course deny both blessed+cursed
-	if ( !IsType(IT_EQ_MEMORY_OBJ) )
-		ClrAttr(ATTR_CURSED|ATTR_CURSED2|ATTR_BLESSED|ATTR_BLESSED2);
-	else if ( IsAttr(ATTR_CURSED|ATTR_CURSED2) && IsAttr(ATTR_BLESSED|ATTR_BLESSED2) )
-		ClrAttr( ATTR_CURSED|ATTR_CURSED2|ATTR_BLESSED|ATTR_BLESSED2 );
+    //	allow bless/curse for memory items only, and of course deny both blessed+cursed
+    if (!IsType(IT_EQ_MEMORY_OBJ))
+    {
+        ClrAttr(ATTR_CURSED | ATTR_CURSED2 | ATTR_BLESSED | ATTR_BLESSED2);
+    }
+    else if (IsAttr(ATTR_CURSED | ATTR_CURSED2) && IsAttr(ATTR_BLESSED | ATTR_BLESSED2))
+    {
+        ClrAttr(ATTR_CURSED | ATTR_CURSED2 | ATTR_BLESSED | ATTR_BLESSED2);
+    }
 
-	if ( IsMovableType() )
-	{
-		if ( IsType(IT_WATER) || Can(CAN_I_WATER) )
-			SetAttr(ATTR_MOVE_NEVER);
-	}
+    if (IsMovableType())
+    {
+        if (IsType(IT_WATER) || Can(CAN_I_WATER))
+        {
+            SetAttr(ATTR_MOVE_NEVER);
+        }
+    }
 
-	switch ( GetID())
-	{
-		case ITEMID_SPELLBOOK2:	// weird client bug with these.
-			SetDispID( ITEMID_SPELLBOOK );
-			break;
+    switch (GetID())
+    {
+        case ITEMID_SPELLBOOK2:	// weird client bug with these.
+            SetDispID(ITEMID_SPELLBOOK);
+            break;
 
-		case ITEMID_DEATHSHROUD:	// be on a dead person only.
-		case ITEMID_GM_ROBE:
-			{
-				pChar = dynamic_cast<CChar*>( GetTopLevelObj());
-				if ( pChar == nullptr )
-				{
-					iResultCode = 0x2206;
-					return iResultCode;	// get rid of it.
-				}
-				if ( GetID() == ITEMID_DEATHSHROUD )
-				{
-					if ( IsAttr( ATTR_MAGIC ) && IsAttr( ATTR_NEWBIE ))
-						break;	// special
-					if ( ! pChar->IsStatFlag( STATF_DEAD ))
-					{
-						iResultCode = 0x2207;
-						return iResultCode;	// get rid of it.
-					}
-				}
-				else
-				{
-					// Only GM/counsel can have robe.
-					// Not a GM til read *ACCT.SCP
-					if ( pChar->GetPrivLevel() < PLEVEL_Counsel )
-					{
-						iResultCode = 0x2208;
-						return iResultCode;	// get rid of it.
-					}
-				}
-			}
-			break;
+        case ITEMID_DEATHSHROUD:	// be on a dead person only.
+        case ITEMID_GM_ROBE:
+        {
+            pChar = dynamic_cast<CChar*>(GetTopLevelObj());
+            if (pChar == nullptr)
+            {
+                iResultCode = 0x2206;
+                return iResultCode;	// get rid of it.
+            }
+            if (GetID() == ITEMID_DEATHSHROUD)
+            {
+                if (IsAttr(ATTR_MAGIC) && IsAttr(ATTR_NEWBIE))
+                {
+                    break;	// special
+                }
+                if (!pChar->IsStatFlag(STATF_DEAD))
+                {
+                    iResultCode = 0x2207;
+                    return iResultCode;	// get rid of it.
+                }
+            }
+            else
+            {
+                // Only GM/counsel can have robe.
+                // Not a GM til read *ACCT.SCP
+                if (pChar->GetPrivLevel() < PLEVEL_Counsel)
+                {
+                    iResultCode = 0x2208;
+                    return iResultCode;	// get rid of it.
+                }
+            }
+        }
+        break;
 
-		case ITEMID_VENDOR_BOX:
-			if ( ! IsItemEquipped())
-				SetID(ITEMID_BACKPACK);
-			else if ( GetEquipLayer() == LAYER_BANKBOX )
-				SetID(ITEMID_BANK_BOX);
-			else
-				SetType(IT_EQ_VENDOR_BOX);
-			break;
+        case ITEMID_VENDOR_BOX:
+            if (!IsItemEquipped())
+            {
+                SetID(ITEMID_BACKPACK);
+            }
+            else if (GetEquipLayer() == LAYER_BANKBOX)
+            {
+                SetID(ITEMID_BANK_BOX);
+            }
+            else
+            {
+                SetType(IT_EQ_VENDOR_BOX);
+            }
+            break;
 
-		case ITEMID_BANK_BOX:
-			// These should only be bank boxes and that is it !
-			if ( ! IsItemEquipped())
-				SetID(ITEMID_BACKPACK);
-			else if ( GetEquipLayer() != LAYER_BANKBOX )
-				SetID(ITEMID_VENDOR_BOX);
-			else
-				SetType( IT_EQ_BANK_BOX );
-			break;
+        case ITEMID_BANK_BOX:
+            // These should only be bank boxes and that is it !
+            if (!IsItemEquipped())
+            {
+                SetID(ITEMID_BACKPACK);
+            }
+            else if (GetEquipLayer() != LAYER_BANKBOX)
+            {
+                SetID(ITEMID_VENDOR_BOX);
+            }
+            else
+            {
+                SetType(IT_EQ_BANK_BOX);
+            }
+            break;
 
-		case ITEMID_MEMORY:
-			// Memory or other flag in my head.
-			// Should not exist except equipped.
-			if ( ! IsItemEquipped())
-			{
-				iResultCode = 0x2222;
-				return iResultCode;	// get rid of it.
-			}
-			break;
+        case ITEMID_MEMORY:
+            // Memory or other flag in my head.
+            // Should not exist except equipped.
+            if (!IsItemEquipped())
+            {
+                iResultCode = 0x2222;
+                return iResultCode;	// get rid of it.
+            }
+            break;
 
-		default:
-			break;
-	}
+        default:
+            break;
+    }
 
-	switch ( GetType() )
-	{
-		case IT_EQ_TRADE_WINDOW:
-			// Should not exist except equipped. Commented the check on the layer because, right now, placing it on LAYER_SPECIAL is the only way to create script-side a trade window.
-			if ( !IsItemEquipped() || /*GetEquipLayer() != LAYER_NONE ||*/ !pChar || !pChar->m_pPlayer || !pChar->IsClient() )
-			{
+    switch (GetType())
+    {
+        case IT_EQ_TRADE_WINDOW:
+            // Should not exist except equipped. Commented the check on the layer because, right now, placing it on LAYER_SPECIAL is the only way to create script-side a trade window.
+            if (!IsItemEquipped() || /*GetEquipLayer() != LAYER_NONE ||*/ !pChar || !pChar->m_pPlayer || !pChar->IsClient())
+            {
                 if (IsItemEquipped())
                 {
                     CChar* pCharCont = dynamic_cast<CChar*>(GetContainer());
@@ -892,221 +916,223 @@ int CItem::FixWeirdness()
                     {
                         CItemContainer* pTradeCont = dynamic_cast<CItemContainer*>(this);
                         ASSERT(pTradeCont);
-                        for ( CItem *pItem = pTradeCont->GetContentHead(); pItem != nullptr; pItem =  pItem->GetNext() )
+                        for (CItem *pItem = pTradeCont->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext())
                         {
                             pCharCont->ItemBounce(pItem, false);
                         }
                     }
                 }
-				iResultCode = 0x2220;
-				return iResultCode;	// get rid of it.
-			}
-			break;
+                iResultCode = 0x2220;
+                return iResultCode;	// get rid of it.
+            }
+            break;
 
-		case IT_EQ_CLIENT_LINGER:
-			// Should not exist except equipped.
-			if ( !IsItemEquipped() || GetEquipLayer() != LAYER_FLAG_ClientLinger || !pChar || !pChar->m_pPlayer )
-			{
-				iResultCode = 0x2221;
-				return iResultCode;	// get rid of it.
-			}
-			break;
+        case IT_EQ_CLIENT_LINGER:
+            // Should not exist except equipped.
+            if (!IsItemEquipped() || GetEquipLayer() != LAYER_FLAG_ClientLinger || !pChar || !pChar->m_pPlayer)
+            {
+                iResultCode = 0x2221;
+                return iResultCode;	// get rid of it.
+            }
+            break;
 
-		case IT_EQ_MEMORY_OBJ:
-			{
-				// Should not exist except equipped.
-				CItemMemory * pItemTemp = dynamic_cast <CItemMemory*>(this);
-				if ( pItemTemp == nullptr )
-				{
-					iResultCode = 0x2222;
-					return iResultCode;	// get rid of it.
-				}
-			}
-			break;
+        case IT_EQ_MEMORY_OBJ:
+        {
+            // Should not exist except equipped.
+            CItemMemory * pItemTemp = dynamic_cast <CItemMemory*>(this);
+            if (pItemTemp == nullptr)
+            {
+                iResultCode = 0x2222;
+                return iResultCode;	// get rid of it.
+            }
+        }
+        break;
 
-		case IT_EQ_HORSE:
-			// These should only exist eqipped.
-			if ( !IsItemEquipped() || GetEquipLayer() != LAYER_HORSE )
-			{
-				iResultCode = 0x2226;
-				return iResultCode;	// get rid of it.
-			}
-			break;
+        case IT_EQ_HORSE:
+            // These should only exist eqipped.
+            if (!IsItemEquipped() || GetEquipLayer() != LAYER_HORSE)
+            {
+                iResultCode = 0x2226;
+                return iResultCode;	// get rid of it.
+            }
+            break;
 
-		case IT_HAIR:
-		case IT_BEARD:	// 62 = just for grouping purposes.
-			// Hair should only be on person or equipped. (can get lost in pack)
-			// Hair should only be on person or on corpse.
-			if ( !IsItemEquipped() )
-			{
-				CItemContainer * pCont = dynamic_cast<CItemContainer*>(GetParent());
-				if ( pCont == nullptr || (pCont->GetType() != IT_CORPSE && pCont->GetType() != IT_EQ_VENDOR_BOX) )
-				{
-					iResultCode = 0x2227;
-					return iResultCode;	// get rid of it.
-				}
-			}
-			else
-			{
-				SetAttr( ATTR_MOVE_NEVER );
-				if ( GetEquipLayer() != LAYER_HAIR && GetEquipLayer() != LAYER_BEARD )
-				{
-					iResultCode = 0x2228;
-					return iResultCode;	// get rid of it.
-				}
-			}
-			break;
+        case IT_HAIR:
+        case IT_BEARD:	// 62 = just for grouping purposes.
+            // Hair should only be on person or equipped. (can get lost in pack)
+            // Hair should only be on person or on corpse.
+            if (!IsItemEquipped())
+            {
+                CItemContainer * pCont = dynamic_cast<CItemContainer*>(GetParent());
+                if (pCont == nullptr || (pCont->GetType() != IT_CORPSE && pCont->GetType() != IT_EQ_VENDOR_BOX))
+                {
+                    iResultCode = 0x2227;
+                    return iResultCode;	// get rid of it.
+                }
+            }
+            else
+            {
+                SetAttr(ATTR_MOVE_NEVER);
+                if (GetEquipLayer() != LAYER_HAIR && GetEquipLayer() != LAYER_BEARD)
+                {
+                    iResultCode = 0x2228;
+                    return iResultCode;	// get rid of it.
+                }
+            }
+            break;
 
-		case IT_GAME_PIECE:
-			// This should only be in a game.
-			if ( ! IsItemInContainer())
-			{
-				iResultCode = 0x2229;
-				return iResultCode;	// get rid of it.
-			}
-			break;
+        case IT_GAME_PIECE:
+            // This should only be in a game.
+            if (!IsItemInContainer())
+            {
+                iResultCode = 0x2229;
+                return iResultCode;	// get rid of it.
+            }
+            break;
 
-		case IT_KEY:
-			// blank unlinked keys.
-			if ( m_itKey.m_UIDLock && ! IsValidUID())
-			{
-				DEBUG_ERR(("Key '%s' has bad link to 0%x, blanked out\n", GetName(), (dword)(m_itKey.m_UIDLock)));
-				m_itKey.m_UIDLock.ClearUID();
-			}
-			break;
+        case IT_KEY:
+            // blank unlinked keys.
+            if (m_itKey.m_UIDLock && !IsValidUID())
+            {
+                DEBUG_ERR(("Key '%s' has bad link to 0%x, blanked out\n", GetName(), (dword)(m_itKey.m_UIDLock)));
+                m_itKey.m_UIDLock.ClearUID();
+            }
+            break;
 
-		case IT_SPAWN_CHAR:
-		case IT_SPAWN_ITEM:
-			{
-                CCSpawn *pSpawn = GetSpawn();
-                if (pSpawn)
-				{
-                    pSpawn->FixDef();
-                    pSpawn->SetTrackID();
-				}
-			}
-			break;
+        case IT_SPAWN_CHAR:
+        case IT_SPAWN_ITEM:
+        {
+            CCSpawn *pSpawn = GetSpawn();
+            if (pSpawn)
+            {
+                pSpawn->FixDef();
+                pSpawn->SetTrackID();
+            }
+        }
+        break;
 
-		case IT_CONTAINER_LOCKED:
-		case IT_SHIP_HOLD_LOCK:
-		case IT_DOOR_LOCKED:
-			// Doors and containers must have a lock complexity set.
-			if ( ! m_itContainer.m_lock_complexity )
-			{
-				m_itContainer.m_lock_complexity = 500 + Calc_GetRandVal( 600 );
-			}
-			break;
+        case IT_CONTAINER_LOCKED:
+        case IT_SHIP_HOLD_LOCK:
+        case IT_DOOR_LOCKED:
+            // Doors and containers must have a lock complexity set.
+            if (!m_itContainer.m_lock_complexity)
+            {
+                m_itContainer.m_lock_complexity = 500 + Calc_GetRandVal(600);
+            }
+            break;
 
-		case IT_POTION:
-			if ( m_itPotion.m_skillquality == 0 ) // store bought ?
-			{
-				m_itPotion.m_skillquality = Calc_GetRandVal(950);
-			}
-			break;
-		case IT_MAP_BLANK:
-			if ( m_itNormal.m_more1 || m_itNormal.m_more2 )
-			{
-				SetType( IT_MAP );
-			}
-			break;
+        case IT_POTION:
+            if (m_itPotion.m_skillquality == 0) // store bought ?
+            {
+                m_itPotion.m_skillquality = Calc_GetRandVal(950);
+            }
+            break;
+        case IT_MAP_BLANK:
+            if (m_itNormal.m_more1 || m_itNormal.m_more2)
+            {
+                SetType(IT_MAP);
+            }
+            break;
 
-		default:
-			if ( GetType() > IT_QTY )
-			{
-				if ( GetType() < IT_TRIGGER )
-				{
-					SetType(pItemDef->GetType());
-				}
-			}
-	}
+        default:
+            if (GetType() > IT_QTY)
+            {
+                if (GetType() < IT_TRIGGER)
+                {
+                    SetType(pItemDef->GetType());
+                }
+            }
+    }
 
-	if ( IsItemEquipped())
-	{
-		ASSERT( pChar );
+    if (IsItemEquipped())
+    {
+        ASSERT(pChar);
 
-		switch ( GetEquipLayer())
-		{
-			case LAYER_NONE:
-				// Only Trade windows should be equipped this way..
-				if ( m_type != IT_EQ_TRADE_WINDOW )
-				{
-					iResultCode = 0x2230;
-					return iResultCode;	// get rid of it.
-				}
-				break;
-			case LAYER_SPECIAL:
-				switch ( GetType())
-				{
-					case IT_EQ_MEMORY_OBJ:
-					case IT_EQ_SCRIPT:	// pure script.
-						break;
-					default:
-						iResultCode = 0x2231;
-						return iResultCode;	// get rid of it.
-				}
-				break;
-			case LAYER_VENDOR_STOCK:
-			case LAYER_VENDOR_EXTRA:
-			case LAYER_VENDOR_BUYS:
-				if ( pChar->m_pPlayer != nullptr )	// players never need carry these,
-					return 0;
-				SetAttr(ATTR_MOVE_NEVER);
-				break;
+        switch (GetEquipLayer())
+        {
+            case LAYER_NONE:
+                // Only Trade windows should be equipped this way..
+                if (m_type != IT_EQ_TRADE_WINDOW)
+                {
+                    iResultCode = 0x2230;
+                    return iResultCode;	// get rid of it.
+                }
+                break;
+            case LAYER_SPECIAL:
+                switch (GetType())
+                {
+                    case IT_EQ_MEMORY_OBJ:
+                    case IT_EQ_SCRIPT:	// pure script.
+                        break;
+                    default:
+                        iResultCode = 0x2231;
+                        return iResultCode;	// get rid of it.
+                }
+                break;
+            case LAYER_VENDOR_STOCK:
+            case LAYER_VENDOR_EXTRA:
+            case LAYER_VENDOR_BUYS:
+                if (pChar->m_pPlayer != nullptr)	// players never need carry these,
+                {
+                    return 0;
+                }
+                SetAttr(ATTR_MOVE_NEVER);
+                break;
 
-			case LAYER_PACK:
-			case LAYER_BANKBOX:
-				SetAttr(ATTR_MOVE_NEVER);
-				break;
+            case LAYER_PACK:
+            case LAYER_BANKBOX:
+                SetAttr(ATTR_MOVE_NEVER);
+                break;
 
-			case LAYER_HORSE:
-				if ( m_type != IT_EQ_HORSE )
-				{
-					iResultCode = 0x2233;
-					return iResultCode;	// get rid of it.
-				}
-				SetAttr(ATTR_MOVE_NEVER);
-				pChar->StatFlag_Set( STATF_ONHORSE );
-				break;
-			case LAYER_FLAG_ClientLinger:
-				if ( m_type != IT_EQ_CLIENT_LINGER )
-				{
-					iResultCode = 0x2234;
-					return iResultCode;	// get rid of it.
-				}
-				break;
+            case LAYER_HORSE:
+                if (m_type != IT_EQ_HORSE)
+                {
+                    iResultCode = 0x2233;
+                    return iResultCode;	// get rid of it.
+                }
+                SetAttr(ATTR_MOVE_NEVER);
+                pChar->StatFlag_Set(STATF_ONHORSE);
+                break;
+            case LAYER_FLAG_ClientLinger:
+                if (m_type != IT_EQ_CLIENT_LINGER)
+                {
+                    iResultCode = 0x2234;
+                    return iResultCode;	// get rid of it.
+                }
+                break;
 
-			case LAYER_FLAG_Murders:
-				if ( ! pChar->m_pPlayer ||
-					pChar->m_pPlayer->m_wMurders <= 0 )
-				{
-					iResultCode = 0x2235;
-					return iResultCode;	// get rid of it.
-				}
-				break;
+            case LAYER_FLAG_Murders:
+                if (!pChar->m_pPlayer ||
+                    pChar->m_pPlayer->m_wMurders <= 0)
+                {
+                    iResultCode = 0x2235;
+                    return iResultCode;	// get rid of it.
+                }
+                break;
 
-			default:
-				break;
-		}
-	}
+            default:
+                break;
+        }
+    }
 
-	else if ( IsTopLevel() )
-	{
-		if ( IsAttr(ATTR_DECAY) && ! IsTimerSet())
-		{
-			iResultCode = 0x2236;
-			return iResultCode;	// get rid of it.
-		}
+    else if (IsTopLevel())
+    {
+        if (IsAttr(ATTR_DECAY) && !IsTimerSet())
+        {
+            iResultCode = 0x2236;
+            return iResultCode;	// get rid of it.
+        }
 
-		// unreasonably long for a top level item ?
-		if ( GetTimerSAdjusted() > 90ll*24*60*60)
+        // unreasonably long for a top level item ?
+        if (GetTimerSAdjusted() > 90ll * 24 * 60 * 60)
         {
             g_Log.EventWarn("FixWeirdness on Item (UID=0%x): timer unreasonably long (> 90 days) on a top level object.\n", (uint)GetUID());
-			SetTimeoutS(60*60);
+            SetTimeoutS(60 * 60);
         }
-	}
+    }
 
-	// is m_BaseDef just set bad ?
-	return IsWeird();
+    // is m_BaseDef just set bad ?
+    return IsWeird();
 }
 
 CItem * CItem::UnStackSplit( word amount, CChar * pCharSrc )

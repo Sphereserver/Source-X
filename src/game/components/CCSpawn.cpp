@@ -628,7 +628,14 @@ bool CCSpawn::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole *pSrc)
         case ISPW_MORE:
         case ISPW_MORE1:
         {
-            sVal = g_Cfg.ResourceGetName(_idSpawn);
+            if (_idSpawn.IsValidUID())
+            {
+                sVal = g_Cfg.ResourceGetName(_idSpawn);
+            }
+            else
+            {
+                sVal.FormatVal(0);
+            }
             return true;
         }
         case ISPW_MORE2:
@@ -872,7 +879,10 @@ void CCSpawn::r_Write(CScript & s)
     {
         s.WriteKeyVal("AMOUNT", uiAmount);
     }
-    s.WriteKey("SPAWNID", g_Cfg.ResourceGetName(_idSpawn));
+    if (_idSpawn.IsValidUID())
+    {
+        s.WriteKey("SPAWNID", g_Cfg.ResourceGetName(_idSpawn));
+    }
     uint16 uiPile = GetPile();
     if ((uiPile > 1) && (pItem->GetType() == IT_SPAWN_ITEM))
     {

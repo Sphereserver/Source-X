@@ -193,6 +193,9 @@ lpctstr GetReasonForGarbageCode(int iCode = -1)
 		case 0x4225:
 			pStr = "Stone/Guild memory linked to the wrong stone";
 			break;
+        case 0x4226:
+            pStr = "Old Spawn memory item conversion";
+            break;
 
 		case 0xFFFF:
 			pStr = "Bad memory allocation";
