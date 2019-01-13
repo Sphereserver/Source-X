@@ -2526,15 +2526,19 @@ void CWorld::OnTick()
             int64 iTime;
             while ( (it != itEnd) && (iCurTime > (iTime = it->first)))
             {
-                const TimedObjectsContainer& cont = it->second;
-                std::shared_lock<std::shared_mutex> lockCont(cont.THREAD_CMUTEX);
-
-                for (CCTimedObject* pTimedObj : cont)
                 {
-                    if (_mWorldTickLookup.erase(pTimedObj) != 0)    // Double check: ensure this object exists also in the lookup cont
+                    // Need the inner scope for the lock
+                    const TimedObjectsContainer& cont = it->second;
+                    std::shared_lock<std::shared_mutex> lockCont(cont.THREAD_CMUTEX);
+
+                    for (CCTimedObject* pTimedObj : cont)
                     {
-                        vecTimedObjs.emplace_back(pTimedObj);
+                        if (_mWorldTickLookup.erase(pTimedObj) != 0)    // Double check: ensure this object exists also in the lookup cont
+                        {
+                            vecTimedObjs.emplace_back(pTimedObj);
+                        }
                     }
+                    // Unlock cont's mutex before erasing the element at iterator
                 }
                 it = _mWorldTickList.erase(it);
             }
@@ -2665,15 +2669,19 @@ void CWorld::OnTick()
             int64 iTime;
             while ((charIt != charItEnd) && (iCurTime > (iTime = charIt->first)))
             {
-                const TimedCharsContainer& cont = charIt->second;
-                std::shared_lock<std::shared_mutex> lockCont(cont.THREAD_CMUTEX);
-
-                for (CChar* pChar : cont)
                 {
-                    if (_mCharTickLookup.erase(pChar) != 0) // Double check: ensure this object exists also in the lookup cont
+                    // Need the inner scope for the lock
+                    const TimedCharsContainer& cont = charIt->second;
+                    std::shared_lock<std::shared_mutex> lockCont(cont.THREAD_CMUTEX);
+
+                    for (CChar* pChar : cont)
                     {
-                        vecPeriodicChars.emplace_back(pChar);
+                        if (_mCharTickLookup.erase(pChar) != 0) // Double check: ensure this object exists also in the lookup cont
+                        {
+                            vecPeriodicChars.emplace_back(pChar);
+                        }
                     }
+                    // Unlock cont's mutex before erasing the element at iterator
                 }
                 charIt = _mCharTickList.erase(charIt);
             }

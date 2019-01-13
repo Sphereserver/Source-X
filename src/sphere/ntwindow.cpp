@@ -75,48 +75,9 @@ BOOL CNTWindow::CAboutDlg::DefDialogProc( UINT message, WPARAM wParam, LPARAM lP
 }
 
 //************************************
-// -COptionsDlg
-
-bool CNTWindow::COptionsDlg::OnInitDialog()
-{
-	return false;
-}
-
-bool CNTWindow::COptionsDlg::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl)
-{
-	UNREFERENCED_PARAMETER(wNotifyCode);
-	UNREFERENCED_PARAMETER(hwndCtl);
-
-	// WM_COMMAND
-	switch ( wID )
-	{
-		case IDOK:
-		case IDCANCEL:
-			DestroyWindow();
-			break;
-	}
-	return false;
-}
-
-BOOL CNTWindow::COptionsDlg::DefDialogProc( UINT message, WPARAM wParam, LPARAM lParam )
-{
-	switch ( message )
-	{
-	case WM_INITDIALOG:
-		return OnInitDialog();
-	case WM_COMMAND:
-		return OnCommand(  HIWORD(wParam), LOWORD(wParam), (HWND) lParam );
-	case WM_DESTROY:
-		OnDestroy();
-		return true;
-	}
-	return false;
-}
-
-//************************************
 // -CStatusWnd
 
-void CNTWindow::CStatusWnd::FillClients()
+void CNTWindow::CStatusDlg::FillClients()
 {
 	if ( m_wndListClients.m_hWnd == nullptr )
 		return;
@@ -127,7 +88,7 @@ void CNTWindow::CStatusWnd::FillClients()
 	iCount++;
 }
 
-void CNTWindow::CStatusWnd::FillStats()
+void CNTWindow::CStatusDlg::FillStats()
 {
 	if ( m_wndListStats.m_hWnd == nullptr )
 		return;
@@ -159,7 +120,7 @@ void CNTWindow::CStatusWnd::FillStats()
 	}
 }
 
-bool CNTWindow::CStatusWnd::OnInitDialog()
+bool CNTWindow::CStatusDlg::OnInitDialog()
 {
 	m_wndListClients.m_hWnd = GetDlgItem(IDC_STAT_CLIENTS);
 	FillClients();
@@ -168,7 +129,7 @@ bool CNTWindow::CStatusWnd::OnInitDialog()
 	return false;
 }
 
-bool CNTWindow::CStatusWnd::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl )
+bool CNTWindow::CStatusDlg::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl )
 {
 	UNREFERENCED_PARAMETER(wNotifyCode);
 	UNREFERENCED_PARAMETER(hwndCtl);
@@ -184,7 +145,7 @@ bool CNTWindow::CStatusWnd::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndC
 	return false;
 }
 
-BOOL CNTWindow::CStatusWnd::DefDialogProc( UINT message, WPARAM wParam, LPARAM lParam )
+BOOL CNTWindow::CStatusDlg::DefDialogProc( UINT message, WPARAM wParam, LPARAM lParam )
 {
 	// IDM_STATUS
 	switch ( message )
@@ -529,7 +490,7 @@ bool CNTWindow::OnClose()
 	return true;	// ok to close.
 }
 
-bool CNTWindow::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl )
+bool CNTWindow::OnCommand( WORD wNotifyCode, INT_PTR wID, HWND hwndCtl )
 {
 	// WM_COMMAND
 	UNREFERENCED_PARAMETER(wNotifyCode);
@@ -553,17 +514,18 @@ bool CNTWindow::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl )
 		theApp.m_wndStatus.SetForegroundWindow();
 		break;
 	case IDR_ABOUT_BOX:
-		{
-			CAboutDlg wndAbout;
-			DialogBoxParam(
-				theApp.m_hInstance,  // handle to application instance
-				MAKEINTRESOURCE(IDR_ABOUT_BOX),   // identifies dialog box template
-				m_hWnd,      // handle to owner window
-				CDialogBase::DialogProc,
-				reinterpret_cast<LPARAM>(static_cast <CDialogBase*>(&wndAbout)) );  // pointer to dialog box procedure
-		}
-		break;
-
+        if ( theApp.m_wndAbout.m_hWnd == nullptr )
+        {
+            theApp.m_wndAbout.m_hWnd = ::CreateDialogParam(
+                theApp.m_hInstance,
+                MAKEINTRESOURCE(IDR_ABOUT_BOX),
+                HWND_DESKTOP,
+                CDialogBase::DialogProc,
+                reinterpret_cast<LPARAM>(static_cast <CDialogBase*>(&theApp.m_wndAbout)) );
+        }
+        theApp.m_wndAbout.ShowWindow(SW_NORMAL);
+        theApp.m_wndAbout.SetForegroundWindow();
+        break;
 	case IDM_MINIMIZE:
 		// SC_MINIMIZE
 	    ShowWindow(SW_HIDE);
@@ -730,9 +692,9 @@ LRESULT CNTWindow::OnNotify( int idCtrl, NMHDR * pnmh )
 						{
 							if (( *start == ' ' ) || ( *start == '(' ))
 								break;
-							start--;
+							--start;
 						}
-						start++;
+						++start;
 						*end = '\0';
 
 						if ( *start != '\0' )
@@ -1166,10 +1128,6 @@ bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
 					}
 				}
 			}
-		}
-		if ( theApp.m_dlgOptions.m_hWnd && IsDialogMessage( theApp.m_dlgOptions.m_hWnd, &msg ))
-		{
-			return true;
 		}
 
 		TranslateMessage(&msg);

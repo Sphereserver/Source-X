@@ -50,15 +50,6 @@ extern struct CNTWindow : public AbstractSphereThread, public CSWindow, public C
         virtual BOOL DefDialogProc(UINT message, WPARAM wParam, LPARAM lParam);
     };
 
-    class COptionsDlg : public CDialogBase				//	CNTWindow::COptionsDlg
-    {
-    private:
-        bool OnInitDialog();
-        bool OnCommand(word wNotifyCode, INT_PTR wID, HWND hwndCtl);
-    public:
-        virtual BOOL DefDialogProc(UINT message, WPARAM wParam, LPARAM lParam);
-    };
-
     class CListTextConsole : public CTextConsole		//	CNTWindow::CListTextConsole
     {
         CListbox m_wndList;
@@ -94,14 +85,14 @@ extern struct CNTWindow : public AbstractSphereThread, public CSWindow, public C
         }
     };
 
-    class CStatusWnd : public CDialogBase				//	CNTWindow::CStatusWnd
+    class CStatusDlg : public CDialogBase				//	CNTWindow::CStatusWnd
     {
     public:
         CListbox m_wndListClients;
         CListbox m_wndListStats;
     private:
         bool OnInitDialog();
-        bool OnCommand(word wNotifyCode, INT_PTR wID, HWND hwndCtl);
+        bool OnCommand(WORD wNotifyCode, INT_PTR wID, HWND hwndCtl);
     public:
         void FillClients();
         void FillStats();
@@ -152,8 +143,8 @@ class CNTApp : public CWinApp
 public:
     static const char *m_sClassName;
     CNTWindow m_wndMain;
-    CNTWindow::CStatusWnd	m_wndStatus;
-    CNTWindow::COptionsDlg	m_dlgOptions;
+    CNTWindow::CStatusDlg	m_wndStatus;
+    CNTWindow::CAboutDlg    m_wndAbout;
 };
 
 
