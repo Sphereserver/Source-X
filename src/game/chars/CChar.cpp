@@ -405,7 +405,6 @@ void CChar::ClientAttach( CClient * pClient )
 	m_pPlayer->m_timeLastUsed = g_World.GetCurrentTime().GetTimeRaw();
 
 	m_pClient = pClient;
-	GetTopSector()->ClientAttach( this );
 	FixClimbHeight();
 }
 
@@ -487,9 +486,17 @@ void CChar::GoSleep()
 {
     ADDTOCALLSTACK("CChar::GoSleep");
     ASSERT(!IsSleeping());
-    g_World.DelCharTicking(this);   // do not insert into the mutex' lock, it access back to this char.
+    
+    g_World.DelCharTicking(this);   // do not insert into the mutex lock, it access back to this char.
+
     THREAD_UNIQUE_LOCK_SET;
     CCTimedObject::GoSleep();
+
+    for (CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext())
+    {
+        if (!pItem->IsSleeping())
+            pItem->GoSleep();
+    }
 }
 
 void CChar::GoAwake()
@@ -497,9 +504,16 @@ void CChar::GoAwake()
     ADDTOCALLSTACK("CChar::GoAwake");
     ASSERT(IsSleeping());
     THREAD_UNIQUE_LOCK_SET;
-    CCTimedObject::GoAwake();// Awake it first, otherwise some other things won't work
+
+    CCTimedObject::GoAwake();       // Awake it first, otherwise some other things won't work
     g_World.AddCharTicking(this);
     SetTimeout(Calc_GetRandVal(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
+
+    for (CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext())
+    {
+        if (pItem->IsSleeping())
+            pItem->GoAwake();
+    }
 }
 
 // Is there something wrong with this char?

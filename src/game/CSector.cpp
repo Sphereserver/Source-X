@@ -1224,6 +1224,7 @@ bool CSector::OnTick()
 		return true;
 	}
 
+
 	EXC_SET_BLOCK("sound effects");
 	// random weather noises and effects.
 	SOUND_TYPE sound = 0;

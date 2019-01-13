@@ -594,7 +594,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 				CItemVendable *pItemVend = dynamic_cast<CItemVendable *>(pItem);
 				if ( !pItemVend )
 				{
-					g_Log.Event(LOGL_WARN, "Vendor non-vendable item: %s uid=0%x, vendor: %s uid=0%x\n", pItem->GetResourceName(), pItem->GetUID().GetObjUID(), GetContainer()->GetName(), GetContainer()->GetUID().GetObjUID());
+					g_Log.Event(LOGL_WARN, "Vendor: deleting non-vendable item %s uid=0%x, vendor: %s uid=0%x\n", pItem->GetResourceName(), pItem->GetUID().GetObjUID(), GetContainer()->GetName(), GetContainer()->GetUID().GetObjUID());
 					pItem->Delete();
 					break;
 				}

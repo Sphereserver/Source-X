@@ -1146,15 +1146,20 @@ CItem * CItem::UnStackSplit( word amount, CChar * pCharSrc )
 	// RETURN:
 	//  The newly created item.
 
-	if ( amount >= GetAmount() )
+    const word wAmount = GetAmount();
+	if ( amount >= wAmount )
 		return nullptr;
 
-	ASSERT( amount <= GetAmount());
+	ASSERT( amount <= wAmount );
 	CItem * pItemNew = CreateDupeItem( this );
-	pItemNew->SetAmount( GetAmount() - amount );
+	pItemNew->SetAmount( wAmount - amount );
 	SetAmountUpdate( amount );
 
-	if ( ! pItemNew->MoveNearObj( this ))
+    if (pCharSrc && !IsTopLevel())  // am i unstacking it from an item stored inside a container?
+    {
+        pCharSrc->ItemBounce( pItemNew );
+    }
+	else if ( ! pItemNew->MoveNearObj( this ))
 	{
 		if ( pCharSrc )
 			pCharSrc->ItemBounce( pItemNew );
