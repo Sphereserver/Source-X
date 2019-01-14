@@ -23,6 +23,17 @@ CSVFile::~CSVFile()
 		delete[] _pszColumnNames[i];
 }
 
+int CSVFile::GetColumnCount() const
+{
+    ADDTOCALLSTACK("CSVFile::GetColumnCount");
+    THREAD_SHARED_LOCK_RETURN(_iColumnCount);
+}
+int CSVFile::GetCurrentRow() const
+{
+    ADDTOCALLSTACK("CSVFile::GetCurrentRow");
+    THREAD_SHARED_LOCK_RETURN(_iCurrentRow);
+}
+
 bool CSVFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
 {
 	ADDTOCALLSTACK("CSVFile::_Open");

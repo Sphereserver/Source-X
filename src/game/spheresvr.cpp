@@ -569,12 +569,12 @@ void defragSphere(char *path)
 	CSFile ouf;
 	char z[256], z1[256], buf[1024];
 	size_t i;
-	dword uid(0);
-	char *p(nullptr), *p1(nullptr);
+	dword uid = 0;
+	char *p = nullptr, *p1 = nullptr;
 	size_t dBytesRead;
 	size_t dTotalMb;
-	size_t mb10(10*1024*1024);
-	size_t mb5(5*1024*1024);
+	const size_t mb10 = 10*1024*1024;
+	const size_t mb5 = 5*1024*1024;
 	bool bSpecial;
 	dword dTotalUIDs;
 
@@ -621,13 +621,13 @@ void defragSphere(char *path)
 				p = buf + 7;
 				p1 = p;
 				while ( *p1 && ( *p1 != '\r' ) && ( *p1 != '\n' ) )
-					p1++;
+					++p1;
 				*p1 = 0;
 
 				//	prepare new uid
 				*(p-1) = '0';
 				*p = 'x';
-				p--;
+				--p;
 				uids[uid++] = strtoul(p, &p1, 16);
 			}
 		}
@@ -763,7 +763,7 @@ void defragSphere(char *path)
 				//	since has amount/2 tryes at worst chance to get the item and never scans the whole array
 				//	It should improve speed since defragmenting 150Mb saves takes ~2:30 on 2.0Mhz CPU
 				{
-					dword	dStep = dTotalUIDs/2;
+					dword dStep = dTotalUIDs/2;
 					d = dStep;
 					for (;;)
 					{
@@ -774,8 +774,10 @@ void defragSphere(char *path)
 							uid = d | (uids[d]&0xF0000000);	// do not forget attach item and special flags like 04..
 							break;
 						}
-						else if ( uids[d] < uid ) d += dStep;
-						else d -= dStep;
+						else
+                            if ( uids[d] < uid ) d += dStep;
+						else
+                            d -= dStep;
 
 						if ( dStep == 1 )
 						{

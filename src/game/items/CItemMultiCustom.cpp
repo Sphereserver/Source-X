@@ -1852,40 +1852,51 @@ bool CItemMultiCustom::LoadValidItems()
     };
 
     CSVRowData csvDataRow;
-    bool bMultiFile = false;
+    bool fMultiFile = false;
     int iFileIndex = 0;
     int i = 0;
 
     EXC_TRY("LoadCSVFiles");
 
-    for (i = 0; sm_szItemFiles[i][0] != nullptr || !bMultiFile; ++i, ++iFileIndex)
+    for (i = 0; sm_szItemFiles[i][0] != nullptr || !fMultiFile; ++i, ++iFileIndex)
     {
         if (sm_szItemFiles[i][0] == nullptr)
         {
-            bMultiFile = true;
+            fMultiFile = true;
             --iFileIndex;
             continue;
         }
 
-        if (!g_Install.m_CsvFiles[iFileIndex].IsFileOpen() && !g_Install.OpenFile(g_Install.m_CsvFiles[iFileIndex], sm_szItemFiles[i][0], OF_READ | OF_SHARE_DENY_WRITE))
+        CSVFile& curCSV = g_Install.m_CsvFiles[iFileIndex];
+        if (!curCSV.IsFileOpen() && !g_Install.OpenFile(curCSV, sm_szItemFiles[i][0], OF_READ | OF_SHARE_DENY_WRITE))
             continue;
 
-        while (g_Install.m_CsvFiles[iFileIndex].ReadNextRowContent(csvDataRow))
+        while (curCSV.ReadNextRowContent(csvDataRow))
         {
             for (int ii = 1; sm_szItemFiles[i][ii] != nullptr; ++ii)
             {
-                ITEMID_TYPE itemid = (ITEMID_TYPE)std::stoul(csvDataRow[sm_szItemFiles[i][ii]], nullptr, 10);
+                const std::string& strCurRow = csvDataRow[sm_szItemFiles[i][ii]];
+                if (strCurRow.empty() || !IsDigit(strCurRow[0]))
+                    continue;
+                ITEMID_TYPE itemid = (ITEMID_TYPE)std::stoul(strCurRow, nullptr, 10);
                 if (itemid <= 0 || itemid >= ITEMID_MULTI)
                     continue;
 
-                if (bMultiFile)
+                if (fMultiFile)
                 {
                     itemid = (ITEMID_TYPE)(itemid + ITEMID_MULTI);
                     if (itemid <= ITEMID_MULTI || itemid > ITEMID_MULTI_MAX)
                         continue;
                 }
 
-                sm_mapValidItems[itemid] = (uint)std::stoul(csvDataRow["FeatureMask"], nullptr, 10);
+                const std::string& strFeatureMask = csvDataRow["FeatureMask"];
+                if (strFeatureMask.empty())
+                {
+                    sm_mapValidItems[itemid] = 0;
+                    DEBUG_MSG(("No FeatureMask in file '%s', row=%d.\n", sm_szItemFiles[i][0], curCSV.GetCurrentRow()));
+                    continue;
+                }
+                sm_mapValidItems[itemid] = (uint)std::stoul(strFeatureMask, nullptr, 10);
             }
         }
 
@@ -1898,7 +1909,7 @@ bool CItemMultiCustom::LoadValidItems()
     EXC_CATCH;
 
     EXC_DEBUG_START;
-    g_Log.EventDebug("file index '%d\n", iFileIndex);
+    g_Log.EventDebug("file index=%d\n", iFileIndex);
     g_Log.EventDebug("file name '%s'\n", sm_szItemFiles[i][0]);
 
     tchar* pszRowFull = Str_GetTemp();
@@ -1924,5 +1935,5 @@ void CItemMultiCustom::CSphereMultiCustom::LoadFrom(CItemMultiCustom::DesignDeta
 
     m_pItems = new CUOMultiItemRec_HS[m_iItemQty];
     for (uint i = 0; i < m_iItemQty; ++i)
-        memcpy(&m_pItems[i], &pDesign->m_vectorComponents.at(i)->m_item, sizeof(CUOMultiItemRec_HS));
+        memcpy(&m_pItems[i], &pDesign->m_vectorComponents[i]->m_item, sizeof(CUOMultiItemRec_HS));
 }

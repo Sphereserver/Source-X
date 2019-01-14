@@ -33,11 +33,10 @@ private:
 	CSVFile(const CSVFile& copy);
 	CSVFile& operator=(const CSVFile& other);
 
-/*
-private:
-	int _GetColumnCount() const { return _iColumnCount; }
-	int _GetCurrentRow() const { return _iCurrentRow; }
-*/
+private:    int _GetColumnCount() const { return _iColumnCount; }
+public:     int GetColumnCount() const;
+private:    int _GetCurrentRow() const { return _iCurrentRow; }
+public:     int GetCurrentRow() const;
 
 private:
 	int _ReadRowContent(tchar ** ppOutput, int row, int columns = MAX_COLUMNS);
