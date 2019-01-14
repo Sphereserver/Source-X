@@ -150,6 +150,25 @@ struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variab
     {
         return (rid.m_dwInternalVal == m_dwInternalVal);
     }
+
+    bool IsItem() const = delete;   // Try to warn and block the calls to this CUIDBase method, in most cases it's incorrect and it will lead to bugs
+    bool IsChar() const = delete;   // Try to warn and block the calls to this CUIDBase method, in most cases it's incorrect and it will lead to bugs
+    CObjBase*   ObjFind()  const = delete;   // Same as above
+    CItem*      ItemFind() const = delete;
+    CChar*      CharFind() const = delete;
+    bool IsUIDItem() const //  replacement for CUIDBase::IsItem(), but don't be virtual, since we don't need that and the class size will increase due to the vtable
+    {
+        // If it's both a resource and an item, and if it's the CResourceIDBase of a CRegion, it's a region from a multi
+        if ( (m_dwInternalVal & (UID_F_RESOURCE|UID_F_ITEM)) == (UID_F_RESOURCE|UID_F_ITEM) )
+            return IsValidUID();
+        return false;
+    }
+    CItem* ItemFindFromResource() const   //  replacement for CUIDBase::ItemFind()
+    {
+        // Used by multis: when they are realized, a new CRegionWorld is created with a CResourceID with an internal value = to the internal value of the multi, plus a | UID_F_RESOURCE.
+        //  Remove the reserved UID_* flags (so also UID_F_RESOURCE), and find the item (in our case actually the multi) with that uid.
+        return CUID(m_dwInternalVal & UID_O_INDEX_MASK).ItemFind();
+    }
 };
 
 struct CResourceID : public CResourceIDBase     // It has the "page" part. Use it to handle every other resource block.

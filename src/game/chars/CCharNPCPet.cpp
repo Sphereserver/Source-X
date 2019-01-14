@@ -725,8 +725,7 @@ bool CChar::NPC_OnHirePay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGol
 	if ( !pCharSrc || !pMemory )
 		return false;
 
-	CCharBase * pCharDef = Char_GetDef();
-    int iWage = pCharDef->GetHireDayWage();
+    int iWage = Char_GetDef()->GetHireDayWage();
 	if ( IsStatFlag( STATF_PET ))
 	{
 		if ( ! pMemory->IsMemoryTypes(MEMORY_IPET|MEMORY_FRIEND))
@@ -756,7 +755,7 @@ bool CChar::NPC_OnHirePay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGol
 		}
 
 		// Put all my loot cash away.
-		ContentConsume( CResourceID(RES_TYPEDEF,IT_GOLD), INT32_MAX, false, 0 );
+		ContentConsume( CResourceID(RES_TYPEDEF,IT_GOLD), INT32_MAX, 0 );
 		// Mark all my stuff ATTR_OWNED - i won't give it away.
 		ContentAttrMod( ATTR_OWNED, true );
 

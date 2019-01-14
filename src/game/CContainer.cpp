@@ -258,7 +258,54 @@ CItem *CContainer::ContentFindRandom() const
 	return dynamic_cast<CItem *>(GetAt(Calc_GetRandVal((int32)GetCount())));
 }
 
-int CContainer::ContentConsume( CResourceID rid, int amount, bool fTest, dword dwArg )
+int CContainer::ContentConsumeTest( const CResourceID& rid, int amount, dword dwArg ) const
+{
+    ADDTOCALLSTACK("CContainer::ContentConsumeTest");
+    // ARGS:
+    //  dwArg = a hack for ores.
+    // RETURN:
+    //  0 = all consumed ok.
+    //  # = number left to be consumed. (still required)
+
+    if ( rid.GetResIndex() == 0 )
+        return amount;	// from skills menus.
+
+    const CItem *pItemNext = nullptr;
+    for ( const CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
+    {
+        pItemNext = pItem->GetNext();
+        if ( pItem->IsResourceMatch(rid, dwArg) )
+        {
+            const word wAmountMax = pItem->GetAmount();
+            const word wAmountToConsume = (word)minimum(amount,UINT16_MAX);
+            amount -= (wAmountMax > wAmountToConsume ) ? wAmountToConsume : wAmountMax;
+            if ( amount <= 0 )
+                break;
+        }
+
+        const CItemContainer *pCont = dynamic_cast<const CItemContainer *>(pItem);
+        if ( pCont )	// this is a sub-container.
+        {
+            if ( rid == CResourceID(RES_TYPEDEF, IT_GOLD) )
+            {
+                if ( pCont->IsType(IT_CONTAINER_LOCKED) )
+                    continue;
+            }
+            else
+            {
+                if ( !pCont->IsSearchable() )
+                    continue;
+            }
+            amount = pCont->ContentConsumeTest(rid, amount, dwArg);
+            if ( amount <= 0 )
+                break;
+        }
+    }
+    return amount;
+}
+
+
+int CContainer::ContentConsume( const CResourceID& rid, int amount, dword dwArg )
 {
 	ADDTOCALLSTACK("CContainer::ContentConsume");
 	// ARGS:
@@ -276,7 +323,7 @@ int CContainer::ContentConsume( CResourceID rid, int amount, bool fTest, dword d
 		pItemNext = pItem->GetNext();
 		if ( pItem->IsResourceMatch(rid, dwArg) )
 		{
-			amount -= pItem->ConsumeAmount( (word)minimum(amount,UINT16_MAX), fTest);
+			amount -= pItem->ConsumeAmount( (word)minimum(amount,UINT16_MAX));
 			if ( amount <= 0 )
 				break;
 		}
@@ -294,7 +341,7 @@ int CContainer::ContentConsume( CResourceID rid, int amount, bool fTest, dword d
 				if ( !pCont->IsSearchable() )
 					continue;
 			}
-			amount = pCont->ContentConsume(rid, amount, fTest, dwArg);
+			amount = pCont->ContentConsume(rid, amount, dwArg);
 			if ( amount <= 0 )
 				break;
 		}
@@ -302,11 +349,11 @@ int CContainer::ContentConsume( CResourceID rid, int amount, bool fTest, dword d
 	return amount;
 }
 
-int CContainer::ContentCount( CResourceID rid, dword dwArg )
+int CContainer::ContentCount( CResourceID rid, dword dwArg ) const
 {
 	ADDTOCALLSTACK("CContainer::ContentCount");
 	// Calculate total (gold or other items) in this recursed container
-	return INT32_MAX - ContentConsume(rid, INT32_MAX, true, dwArg);
+	return INT32_MAX - ContentConsumeTest(rid, INT32_MAX, dwArg);
 }
 
 void CContainer::ContentAttrMod( uint64 iAttr, bool fSet )
@@ -410,7 +457,7 @@ size_t CContainer::ResourceConsumePart( const CResourceQtyArray *pResources, int
 			continue;
 
 		CResourceID rid = pResources->at(i).GetResourceID();
-		int iRet = ContentConsume(rid, iQtyTotal, fTest, dwArg);
+		int iRet = fTest ? ContentConsumeTest(rid, iQtyTotal, dwArg) : ContentConsume(rid, iQtyTotal, dwArg);
 		if ( iRet )
 			iMissing = i;
 	}
@@ -466,7 +513,7 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
             }
 		}
 
-		int iQtyCur = iQtyTotal - ContentConsume(rid, iQtyTotal, fTest, dwArg);
+		int iQtyCur = iQtyTotal - (fTest ? ContentConsumeTest(rid, iQtyTotal, dwArg) : ContentConsume(rid, iQtyTotal, dwArg));
 		iQtyCur /= iResQty;
 		if ( iQtyCur < iQtyMin )
 			iQtyMin = iQtyCur;

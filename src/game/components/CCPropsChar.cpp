@@ -62,11 +62,16 @@ bool CCPropsChar::GetPropertyStrPtr(int iPropIndex, CSString* psOutVal, bool fZe
     return BaseCont_GetPropertyStr(&_mPropsStr, iPropIndex, psOutVal, fZero);
 }
 
-void CCPropsChar::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj)
+void CCPropsChar::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsChar::SetPropertyNum");
-
     ASSERT(!IsPropertyStr(iPropIndex));
+
+    if (fDeleteZero && (iVal == 0))
+    {
+        _mPropsNum.erase(iPropIndex);
+        return;
+    }
     _mPropsNum[iPropIndex] = iVal;
 
     if (!pLinkedObj)
@@ -129,14 +134,17 @@ void CCPropsChar::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase
     }
 }
 
-void CCPropsChar::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, bool fZero)
+void CCPropsChar::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsChar::SetPropertyStr");
     ASSERT(ptcVal);
-    if (fZero && (*ptcVal == '\0'))
-        ptcVal = "0";
-
     ASSERT(IsPropertyStr(iPropIndex));
+
+    if (fDeleteZero && (*ptcVal == '\0'))
+    {
+        _mPropsStr.erase(iPropIndex);
+        return;
+    }
     _mPropsStr[iPropIndex] = ptcVal;
 
     if (!pLinkedObj)

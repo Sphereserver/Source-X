@@ -1142,9 +1142,9 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 		}
 		else
 		{
-			int iGold = m_pChar->GetPackSafe()->ContentConsume(CResourceID(RES_TYPEDEF, IT_GOLD), (int)(costtotal), true);
+			int iGold = m_pChar->GetPackSafe()->ContentConsumeTest(CResourceID(RES_TYPEDEF, IT_GOLD), (int)(costtotal));
 			if ( !g_Cfg.m_fPayFromPackOnly && iGold )
-				iGold = m_pChar->ContentConsume(CResourceID(RES_TYPEDEF, IT_GOLD), (int)(costtotal), true);
+				iGold = m_pChar->ContentConsumeTest(CResourceID(RES_TYPEDEF, IT_GOLD), (int)(costtotal));
 
 			if ( iGold )
 			{
@@ -1676,9 +1676,9 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 		m_pChar->CallGuards();
 
 	// Are we in a region that can hear ?
-	if ( m_pChar->m_pArea->GetResourceID().IsItem() )
+	if ( m_pChar->m_pArea->GetResourceID().IsUIDItem() )
 	{
-		CItemMulti *pItemMulti = dynamic_cast<CItemMulti *>(m_pChar->m_pArea->GetResourceID().ItemFind());
+		CItemMulti *pItemMulti = dynamic_cast<CItemMulti *>(m_pChar->m_pArea->GetResourceID().ItemFindFromResource());
 		if ( pItemMulti )
 			pItemMulti->OnHearRegion(pszText, m_pChar);
 	}

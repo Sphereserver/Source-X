@@ -1,6 +1,7 @@
 
 #include "../../common/CUIDExtra.h"
 #include "../chars/CChar.h"
+#include "../components/CCSpawn.h"
 #include "CItemMemory.h"
 #include "CItemStone.h"
 
@@ -103,6 +104,19 @@ int CItemMemory::FixWeirdness()
 		iResultCode = 0x4223;
 		return iResultCode;	// get rid of it.
 	}
+
+    // Automatic transition from old to new spawn engine
+    dword dwFlags = GetHue();
+    if (dwFlags & MEMORY_ISPAWNED)
+    {
+        CCSpawn *pSpawn = static_cast<CCSpawn*>(m_uidLink.ItemFind()->GetComponent(COMP_SPAWN));
+        if (pSpawn && pChar)
+        {
+            pSpawn->AddObj(pChar->GetUID());
+        }
+        iResultCode = 0x4226;
+        return iResultCode;
+    }
 
 	// If it is my guild make sure I am linked to it correctly !
 	if ( IsMemoryTypes(MEMORY_GUILD|MEMORY_TOWN) )

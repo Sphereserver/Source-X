@@ -35,7 +35,7 @@ CSector::CSector() : CCTimedObject(PROFILE_SECTORS)
 
 CSector::~CSector()
 {
-	ASSERT( ! HasClients());
+	ASSERT( ! GetClientsNumber());
 }
 
 enum SC_TYPE
@@ -104,7 +104,7 @@ bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
                 return true;
             }
 		case SC_CLIENTS:
-			sVal.FormatSTVal(m_Chars_Active.HasClients());
+			sVal.FormatSTVal(m_Chars_Active.GetClientsNumber());
 			return true;
 		case SC_COLDCHANCE:
 			sVal.FormatVal( GetColdChance());
@@ -1059,7 +1059,7 @@ bool CSector::CanSleep(bool fCheckAdjacents) const
 	if ( IsFlagSet(SECF_NoSleep) )
 		return false;	// never sleep
 
-    if (m_Chars_Active.HasClients() > 0)
+    if (m_Chars_Active.GetClientsNumber() > 0)
         return false;	// has at least one client, no sleep
 	if ( IsFlagSet(SECF_InstaSleep) )
 	{
@@ -1224,6 +1224,7 @@ bool CSector::OnTick()
 		return true;
 	}
 
+
 	EXC_SET_BLOCK("sound effects");
 	// random weather noises and effects.
 	SOUND_TYPE sound = 0;
@@ -1242,7 +1243,7 @@ bool CSector::OnTick()
 	}
 
 	// Random area noises. Only do if clients about.
-	if ( HasClients() > 0 )
+	if ( GetClientsNumber() > 0 )
 	{
 		iRegionPeriodic = 2;
 
@@ -1460,9 +1461,9 @@ size_t CSector::GetInactiveChars() const
 	return( m_Chars_Disconnect.GetCount());
 }
 
-size_t CSector::HasClients() const
+size_t CSector::GetClientsNumber() const
 {
-	return( m_Chars_Active.HasClients());
+	return( m_Chars_Active.GetClientsNumber());
 }
 
 int64 CSector::GetLastClientTime() const

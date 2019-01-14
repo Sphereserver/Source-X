@@ -619,7 +619,7 @@ public:
 
 	virtual bool IsSameType( const CObjBase * pObj ) const;
 	bool Stack( CItem * pItem );
-	word ConsumeAmount( word iQty = 1, bool fTest = false );
+	word ConsumeAmount( word iQty = 1 );
 
 	virtual void SetAmount( word amount );
 	word GetMaxAmount();
@@ -726,7 +726,7 @@ public:    /**
 	bool IsTypeSpellable() const;
     bool IsTypeEquippable() const;
 
-	bool IsResourceMatch( CResourceID rid, dword dwArg );
+	bool IsResourceMatch( const CResourceID& rid, dword dwArg ) const;
 
 	bool IsValidLockLink( CItem * pItemLock ) const;
 	bool IsValidLockUID() const;

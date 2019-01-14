@@ -193,6 +193,9 @@ lpctstr GetReasonForGarbageCode(int iCode = -1)
 		case 0x4225:
 			pStr = "Stone/Guild memory linked to the wrong stone";
 			break;
+        case 0x4226:
+            pStr = "Old Spawn memory item conversion";
+            break;
 
 		case 0xFFFF:
 			pStr = "Bad memory allocation";
@@ -1874,7 +1877,7 @@ bool CWorld::LoadAll() // Load world from script
 	EXC_CATCHSUB("Garbage collect");
 
 	// Set the current version now.
-	r_SetVal("VERSION", SPHERE_VERSION);	// Set m_iLoadVersion
+	r_SetVal("VERSION", SPHERE_VER_ID_STR);	// Set m_iLoadVersion
 
 	return true;
 }
@@ -1886,7 +1889,7 @@ void CWorld::r_Write( CScript & s )
 	ADDTOCALLSTACK("CWorld::r_Write");
 	// Write out the safe header.
 	s.WriteKey("TITLE", SPHERE_TITLE " World Script");
-	s.WriteKey("VERSION", SPHERE_VERSION);
+	s.WriteKey("VERSION", SPHERE_VER_ID_STR);
 	#ifdef __GITREVISION__
 		s.WriteKeyVal("PREVBUILD", __GITREVISION__);
 	#endif
@@ -2008,7 +2011,7 @@ bool CWorld::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			sVal = (SPHERE_TITLE " World Script");
 			break;
 		case WC_VERSION:    // "VERSION"
-			sVal = SPHERE_VERSION;
+			sVal = SPHERE_VER_ID_STR;
 			break;
 		default:
 			return false;
@@ -2523,15 +2526,19 @@ void CWorld::OnTick()
             int64 iTime;
             while ( (it != itEnd) && (iCurTime > (iTime = it->first)))
             {
-                const TimedObjectsContainer& cont = it->second;
-                std::shared_lock<std::shared_mutex> lockCont(cont.THREAD_CMUTEX);
-
-                for (CCTimedObject* pTimedObj : cont)
                 {
-                    if (_mWorldTickLookup.erase(pTimedObj) != 0)    // Double check: ensure this object exists also in the lookup cont
+                    // Need the inner scope for the lock
+                    const TimedObjectsContainer& cont = it->second;
+                    std::shared_lock<std::shared_mutex> lockCont(cont.THREAD_CMUTEX);
+
+                    for (CCTimedObject* pTimedObj : cont)
                     {
-                        vecTimedObjs.emplace_back(pTimedObj);
+                        if (_mWorldTickLookup.erase(pTimedObj) != 0)    // Double check: ensure this object exists also in the lookup cont
+                        {
+                            vecTimedObjs.emplace_back(pTimedObj);
+                        }
                     }
+                    // Unlock cont's mutex before erasing the element at iterator
                 }
                 it = _mWorldTickList.erase(it);
             }
@@ -2662,15 +2669,19 @@ void CWorld::OnTick()
             int64 iTime;
             while ((charIt != charItEnd) && (iCurTime > (iTime = charIt->first)))
             {
-                const TimedCharsContainer& cont = charIt->second;
-                std::shared_lock<std::shared_mutex> lockCont(cont.THREAD_CMUTEX);
-
-                for (CChar* pChar : cont)
                 {
-                    if (_mCharTickLookup.erase(pChar) != 0) // Double check: ensure this object exists also in the lookup cont
+                    // Need the inner scope for the lock
+                    const TimedCharsContainer& cont = charIt->second;
+                    std::shared_lock<std::shared_mutex> lockCont(cont.THREAD_CMUTEX);
+
+                    for (CChar* pChar : cont)
                     {
-                        vecPeriodicChars.emplace_back(pChar);
+                        if (_mCharTickLookup.erase(pChar) != 0) // Double check: ensure this object exists also in the lookup cont
+                        {
+                            vecPeriodicChars.emplace_back(pChar);
+                        }
                     }
+                    // Unlock cont's mutex before erasing the element at iterator
                 }
                 charIt = _mCharTickList.erase(charIt);
             }

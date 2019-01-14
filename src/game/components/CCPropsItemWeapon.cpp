@@ -111,7 +111,7 @@ bool CCPropsItemWeapon::GetPropertyStrPtr(int iPropIndex, CSString* psOutVal, bo
     }
 }
 
-void CCPropsItemWeapon::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj)
+void CCPropsItemWeapon::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemWeapon::SetPropertyNum");
     
@@ -146,6 +146,12 @@ void CCPropsItemWeapon::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CO
         */
         default:
             ASSERT(!IsPropertyStr(iPropIndex));
+
+            if (fDeleteZero && (iVal == 0))
+            {
+                _mPropsNum.erase(iPropIndex);
+                return;
+            }
             _mPropsNum[iPropIndex] = iVal;
             break;
     }
@@ -157,12 +163,10 @@ void CCPropsItemWeapon::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CO
     pLinkedObj->UpdatePropertyFlag();
 }
 
-void CCPropsItemWeapon::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, bool fZero)
+void CCPropsItemWeapon::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemWeapon::SetPropertyStr");
     ASSERT(ptcVal);
-    if (fZero && (*ptcVal == '\0'))
-        ptcVal = "0";
 
     switch (iPropIndex)
     {
@@ -188,6 +192,12 @@ void CCPropsItemWeapon::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase*
         
         default:
             ASSERT(IsPropertyStr(iPropIndex));
+
+            if (fDeleteZero && (*ptcVal == '\0'))
+            {
+                _mPropsStr.erase(iPropIndex);
+                return;
+            }
             _mPropsStr[iPropIndex] = ptcVal;
             break;
     }

@@ -530,14 +530,14 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 		{
 			if ( !((flags & LOS_NB_LOCAL_MULTI) && (pSrcRegion == pNowRegion)) )
 			{
-				size_t iQtyr = ptNow.GetRegions(REGION_TYPE_MULTI, rlinks);
+				size_t iQtyr = ptNow.GetRegions(REGION_TYPE_MULTI, &rlinks);
 				if ( iQtyr > 0 )
 				{
 					for ( size_t ii = 0; ii < iQtyr; pMulti = nullptr, ++ii, pItem = nullptr, pRegion = nullptr )
 					{
-						pRegion = rlinks.at(ii);
+						pRegion = rlinks[ii];
 						if ( pRegion )
-							pItem = pRegion->GetResourceID().ItemFind();
+							pItem = pRegion->GetResourceID().ItemFindFromResource();
 
 						if ( !pItem )
 							continue;

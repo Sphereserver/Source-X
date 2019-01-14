@@ -73,17 +73,18 @@ public:
     *@param iPropIndex Property index
     *@param iVal The value for the property
     *@param pLinkedObj The CObjBase-child we are setting the prop on. Use nullptr if you are storing the prop in a BaseDef! (CItemBase, CCharBase...)
+    *@param fDeleteZero If true, if iVal == 0 or is empty, delete the prop (if already existing)
     */
-    virtual void SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj) = 0;
+    virtual void SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, bool fDeleteZero = false) = 0;
 
     /*
     *@brief Set the string value for the given property
     *@param iPropIndex Property index
     *@param ptcVal The value for the property
-    *@param fZero If true, if ptcVal == nullptr or is empty, set "0"
     *@param pLinkedObj The CObjBase-child we are setting the prop on. Use nullptr if you are storing the prop in a BaseDef! (CItemBase, CCharBase...)
+    *@param fDeleteZero If true, if ptcVal == nullptr or is empty, delete the prop (if already existing)
     */
-    virtual void SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, bool fZero = false) = 0;
+    virtual void SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, bool fDeleteZero = false) = 0;
 
     /*
     @brief Delete the numerical property at the given index

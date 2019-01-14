@@ -71,7 +71,7 @@ void CRegion::SetModified( int iModFlag )
 {
 	ADDTOCALLSTACK("CRegion::SetModified");
 	if ( !m_iLinkedSectors ) return;
-	m_iModified		= m_iModified | iModFlag;
+	m_iModified	= m_iModified | iModFlag;
 }
 
 void CRegion::UnRealizeRegion()
@@ -80,7 +80,7 @@ void CRegion::UnRealizeRegion()
 	// remove myself from the world.
 	// used in the case of a ship where the region will move.
 
-	for ( int i=0; ; i++ )
+	for ( int i = 0; ; ++i )
 	{
 		CSector * pSector = GetSector(i);
 		if ( pSector == nullptr )
@@ -89,7 +89,7 @@ void CRegion::UnRealizeRegion()
 		if ( ! IsOverlapped( pSector->GetRect()))
 			continue;
 		if ( pSector->UnLinkRegion( this ))
-			m_iLinkedSectors--;
+			--m_iLinkedSectors;
 	}
 
 }
@@ -105,7 +105,7 @@ bool CRegion::RealizeRegion()
 
 	// Attach to all sectors that i overlap.
 	ASSERT( m_iLinkedSectors == 0 );
-	for ( int i = 0; i < g_MapList.GetSectorQty(m_pt.m_map); i++ )
+	for ( int i = 0, iMax = g_MapList.GetSectorQty(m_pt.m_map); i < iMax; ++i )
 	{
 		CSector *pSector = g_World.GetSector(m_pt.m_map, i);
 
@@ -117,7 +117,7 @@ bool CRegion::RealizeRegion()
 				g_Log.EventError("Linking sector #%d for map %d for region %s failed (fatal for this region).\n", i, m_pt.m_map, GetName());
 				return false;
 			}
-			m_iLinkedSectors++;
+			++m_iLinkedSectors;
 		}
 	}
 	return true;
@@ -317,7 +317,7 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CRegion::r_WriteVal");
 	EXC_TRY("WriteVal");
-	bool	fZero	= false;
+	bool fZero = false;
 	RC_TYPE index = (RC_TYPE) FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( index < 0 )
 	{
@@ -336,18 +336,18 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			sVal.FormatVal( ! IsFlag(REGION_FLAG_NOBUILDING));
 			break;
 		case RC_CLIENTS:
-			{
-				int i = 0;
-				size_t iClients = 0;
-				for ( ; ; i++ )
-				{
-					CSector	*pSector = GetSector(i);
-					if ( pSector == nullptr ) break;
-					iClients += pSector->m_Chars_Active.HasClients();
-				}
-				sVal.FormatVal((int)(iClients));
-				break;
-			}
+        {
+            int iClients = 0;
+            for (int i = 0; ; ++i)
+            {
+                CSector	*pSector = GetSector(i);
+                if (pSector == nullptr)
+                    break;
+                iClients += pSector->m_Chars_Active.GetClientsNumber();
+            }
+            sVal.FormatVal(iClients);
+            break;
+        }
         case RC_DEFNAME: // "DEFNAME" = for the speech system.
             sVal = GetResourceName();
             break;
@@ -359,7 +359,7 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 				return false;
 			pszKey += 8;
 			sVal = m_Events.ContainsResourceName(RES_EVENTS, pszKey) ? "1" : "0";
-			return true;
+            break;
 		case RC_FLAGS:
 			sVal.FormatHex( GetRegionFlags() );
 			break;
@@ -440,7 +440,7 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 				if ( *pszKey == '.' ) // do we have an argument?
 				{
 					SKIP_SEPARATORS( pszKey );
-					size_t iQty = (size_t)( Exp_GetVal( pszKey ) );
+					size_t iQty = Exp_GetSTVal( pszKey );
 					if ( iQty >= m_TagDefs.GetCount() )
 						return false; // trying to get non-existant tag
 
@@ -451,12 +451,12 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 					SKIP_SEPARATORS( pszKey );
 					if ( ! *pszKey )
 					{
-						sVal.Format("%s=%s", static_cast<lpctstr>(pTagAt->GetKey()), static_cast<lpctstr>(pTagAt->GetValStr()));
+						sVal.Format("%s=%s", pTagAt->GetKey(), pTagAt->GetValStr());
 						return true;
 					}
 					else if ( !strnicmp( pszKey, "KEY", 3 )) // key?
 					{
-						sVal = static_cast<lpctstr>(pTagAt->GetKey());
+						sVal = pTagAt->GetKey();
 						return true;
 					}
 					else if ( !strnicmp( pszKey, "VAL", 3 )) // val?
@@ -471,7 +471,7 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			break;
 		case RC_TAG0:
 			fZero = true;
-			pszKey++;
+			++pszKey;
 		case RC_TAG:	// "TAG" = get/set a local tag.
 			{
 				if ( pszKey[3] != '.' )
@@ -483,7 +483,7 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case RC_TYPEREGION:
 			{
 				const CItemBase * pBase = nullptr;
-				const CItem * pItem = GetResourceID().ItemFind();
+				const CItem * pItem = GetResourceID().ItemFindFromResource();
 				if (pItem != nullptr)
 					pBase = pItem->Item_GetDef();
 
@@ -614,7 +614,7 @@ bool CRegion::r_LoadVal( CScript & s )
 			{
 				CRectMap rect;
 				rect.Read(s.GetArgStr());
-				return( AddRegionRect( rect ));
+				return AddRegionRect( rect );
 			}
 		case RC_SAFE:
 			TogRegionFlags( REGION_FLAG_SAFE, s.GetArgVal() != 0);
@@ -704,7 +704,7 @@ void CRegion::r_WriteBase( CScript &s )
 		s.WriteKeyVal("MAP", m_pt.m_map);
 
 	size_t iQty = GetRegionRectCount();
-	for ( size_t i = 0; i < iQty; i++ )
+	for ( size_t i = 0; i < iQty; ++i )
 	{
 		s.WriteKey("RECT", GetRegionRect(i).Write() );
 	}
@@ -860,7 +860,7 @@ bool CRegion::SendSectorsVerb( lpctstr pszVerb, lpctstr pszArgs, CTextConsole * 
 	// Send a command to all the CSectors in this region.
 
 	bool fRet = false;
-	for ( int i=0; ; i++ )
+	for ( int i=0; ; ++i )
 	{
 		CSector * pSector = GetSector(i);
 		if ( pSector == nullptr )
@@ -890,7 +890,7 @@ lpctstr const CRegion::sm_szTrigName[RTRIG_QTY+1] =	// static
 TRIGRET_TYPE CRegion::OnRegionTrigger( CTextConsole * pSrc, RTRIG_TYPE iAction )
 {
 	ADDTOCALLSTACK("CRegion::OnRegionTrigger");
-	// RETURN: true = halt prodcessing (don't allow in this region
+	// RETURN: true = halt processing (don't allow in this region)
 
 	TRIGRET_TYPE iRet;
 

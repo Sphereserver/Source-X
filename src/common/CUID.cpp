@@ -19,14 +19,14 @@ bool CUIDBase::IsResource() const
 
 bool CUIDBase::IsItem() const	// Item vs. Char
 {
-	if ( (m_dwInternalVal & (UID_F_RESOURCE|UID_F_ITEM)) == UID_F_ITEM )
+	if ( (m_dwInternalVal & (UID_F_RESOURCE|UID_F_ITEM)) == UID_F_ITEM )    // It's NOT a resource, and it's an item
 		return true;	// might be static in client ?
 	return false;
 }
 
 bool CUIDBase::IsChar() const	// Item vs. Char
 {
-	if ( ( m_dwInternalVal & (UID_F_RESOURCE|UID_F_ITEM)) == 0 )
+	if ( ( m_dwInternalVal & (UID_F_RESOURCE|UID_F_ITEM)) == 0 )    // It's NOT a resource, and it's not an item
 		return IsValidUID();
 	return false;
 }

@@ -1790,7 +1790,6 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 		{
 			// create left over item.
 			CItem * pItemNew = pItem->UnStackSplit(amount, this);
-			pItemNew->SetTimeout( pItem->GetTimerAdjusted() ); //since this was commented in DupeCopy
 
 			if (( IsTrigUsed(TRIGGER_PICKUP_STACK) ) || ( IsTrigUsed(TRIGGER_ITEMPICKUP_STACK) ))
 			{
@@ -3555,7 +3554,7 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fForceFix, bool fAllowReject)
 	if ( !MoveToRoom(pRoomNew, fAllowReject) )
 		return false;
 
-	CPointMap ptOld = GetUnkPoint();
+	const CPointMap ptOld = GetUnkPoint();
     SetTopPoint(pt);
     bool fSectorChanged = pt.GetSector()->MoveCharToSector(this);
 

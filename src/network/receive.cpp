@@ -3139,7 +3139,7 @@ PacketTargetedSkill::PacketTargetedSkill() : Packet(0)
 
 bool PacketTargetedSkill::onReceive(NetState* net)
 {
-    ADDTOCALLSTACK("PacketAntiCheat::onReceive");
+    ADDTOCALLSTACK("PacketTargetedSkill::onReceive");
     
     word  wSkillID    = readInt16();    // if SkillID = 0, it means that is lastskill
     dword dwTargetUID = readInt32();
@@ -3277,7 +3277,7 @@ bool PacketWheelBoatMove::onReceive(NetState* net)
 	CRegionWorld *area = character->m_pArea;
 	if (area && area->IsFlag(REGION_FLAG_SHIP))
 	{
-		CItemShip *pShipItem = dynamic_cast<CItemShip *>(area->GetResourceID().ItemFind());
+		CItemShip *pShipItem = dynamic_cast<CItemShip *>(area->GetResourceID().ItemFindFromResource());
 		if (pShipItem && (pShipItem->m_itShip.m_Pilot == character->GetUID()))
 		{
 			//direction of movement = moving - ship_face

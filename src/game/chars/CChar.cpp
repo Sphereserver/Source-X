@@ -382,7 +382,7 @@ void CChar::ClientDetach()
 	// If this char is on a IT_SHIP then we need to stop the ship !
 	if ( m_pArea && m_pArea->IsFlag( REGION_FLAG_SHIP ))
 	{
-		CItemShip * pShipItem = dynamic_cast <CItemShip *>( m_pArea->GetResourceID().ItemFind());
+		CItemShip * pShipItem = dynamic_cast <CItemShip *>( m_pArea->GetResourceID().ItemFindFromResource());
 		if ( pShipItem )
 			pShipItem->Stop();
 	}
@@ -405,7 +405,6 @@ void CChar::ClientAttach( CClient * pClient )
 	m_pPlayer->m_timeLastUsed = g_World.GetCurrentTime().GetTimeRaw();
 
 	m_pClient = pClient;
-	GetTopSector()->ClientAttach( this );
 	FixClimbHeight();
 }
 
@@ -487,9 +486,17 @@ void CChar::GoSleep()
 {
     ADDTOCALLSTACK("CChar::GoSleep");
     ASSERT(!IsSleeping());
-    g_World.DelCharTicking(this);   // do not insert into the mutex' lock, it access back to this char.
+    
+    g_World.DelCharTicking(this);   // do not insert into the mutex lock, it access back to this char.
+
     THREAD_UNIQUE_LOCK_SET;
     CCTimedObject::GoSleep();
+
+    for (CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext())
+    {
+        if (!pItem->IsSleeping())
+            pItem->GoSleep();
+    }
 }
 
 void CChar::GoAwake()
@@ -497,9 +504,16 @@ void CChar::GoAwake()
     ADDTOCALLSTACK("CChar::GoAwake");
     ASSERT(IsSleeping());
     THREAD_UNIQUE_LOCK_SET;
-    CCTimedObject::GoAwake();// Awake it first, otherwise some other things won't work
+
+    CCTimedObject::GoAwake();       // Awake it first, otherwise some other things won't work
     g_World.AddCharTicking(this);
     SetTimeout(Calc_GetRandVal(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
+
+    for (CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext())
+    {
+        if (pItem->IsSleeping())
+            pItem->GoAwake();
+    }
 }
 
 // Is there something wrong with this char?
@@ -687,7 +701,11 @@ void CChar::SetVisualRange(byte newSight)
 	// max value is 18 on classic clients prior 7.0.55.27 version and 24 on enhanced clients and latest classic clients
 	m_iVisualRange = minimum(newSight, UO_MAP_VIEW_SIZE_MAX);
 	if ( IsClient() )
-		GetClient()->addVisualRange(m_iVisualRange);
+    {
+        CClient* pClient = GetClient();
+        pClient->addVisualRange(m_iVisualRange);
+        pClient->addReSync();
+    }
 }
 
 // Clean up weird flags.
@@ -768,19 +786,6 @@ int CChar::FixWeirdness()
 
 	if ( ! IsIndividualName() && pCharDef->GetTypeName()[0] == '#' )
 		SetName( pCharDef->GetTypeName());
-
-	// Automatic transition from old to new spawn engine
-	CItemMemory *pMemory = Memory_FindTypes(MEMORY_ISPAWNED);
-	if ( pMemory )
-	{
-        CCSpawn *pSpawn = static_cast<CCSpawn*>(pMemory->m_uidLink.ItemFind()->GetComponent(COMP_SPAWN));
-        _uidSpawn = pMemory->m_uidLink;
-		pMemory->Delete();
-		if ( pSpawn )
-		{
-			pSpawn->AddObj(GetUID());
-		}
-	}
 
 	if ( m_pPlayer )	// Player char.
 	{
@@ -4285,7 +4290,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				tchar *z = Str_GetTemp();
 				if ( m_pArea )
 				{
-					if ( m_pArea->GetResourceID().IsItem())
+					if ( m_pArea->GetResourceID().IsUIDItem())  // Inside a multi region
 						sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE_AREA), m_pArea->GetName(), GetTopPoint().WriteUsed());
 					else
 					{

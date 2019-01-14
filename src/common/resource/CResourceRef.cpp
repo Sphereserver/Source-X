@@ -11,7 +11,7 @@
 lpctstr CResourceRefArray::GetResourceName( size_t iIndex ) const
 {
     // look up the name of the fragment given it's index.
-    CResourceLink * pResourceLink = at(iIndex);
+    const CResourceLink * pResourceLink = (*this)[iIndex];
     ASSERT(pResourceLink);
     return pResourceLink->GetResourceName();
 }
@@ -117,7 +117,7 @@ void CResourceRefArray::WriteResourceRefList( CSString & sVal ) const
     TemporaryString tsVal;
     tchar * pszVal = static_cast<tchar *>(tsVal);
     size_t len = 0;
-    for ( size_t j = 0; j < size(); ++j )
+    for ( size_t j = 0, sz = size(); j < sz; ++j )
     {
         if ( j > 0 )
             pszVal[len++] = ',';
@@ -147,21 +147,21 @@ size_t CResourceRefArray::FindResourceType( RES_TYPE restype ) const
     size_t iQty = size();
     for ( size_t i = 0; i < iQty; ++i )
     {
-        CResourceID ridtest = at(i).GetRef()->GetResourceID();
+        const CResourceID& ridtest = (*this)[i].GetRef()->GetResourceID();
         if ( ridtest.GetResType() == restype )
             return( i );
     }
     return BadIndex();
 }
 
-size_t CResourceRefArray::FindResourceID( CResourceID rid ) const
+size_t CResourceRefArray::FindResourceID( const CResourceID & rid ) const
 {
     ADDTOCALLSTACK("CResourceRefArray::FindResourceID");
     // Is this resource already in the list ?
     size_t iQty = size();
-    for ( size_t i = 0; i < iQty; i++ )
+    for ( size_t i = 0; i < iQty; ++i )
     {
-        CResourceID ridtest = at(i).GetRef()->GetResourceID();
+        const CResourceID& ridtest = (*this)[i].GetRef()->GetResourceID();
         if ( ridtest == rid )
             return i;
     }

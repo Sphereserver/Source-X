@@ -290,7 +290,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			for ( uint i = 0; i < uiStaticMaxQty; ++i )
 			{
 				const CUOStaticItemRec * pStatic = pBlock->m_Statics.GetStatic( i );
-				CPointMap ptTest( pStatic->m_x+pBlock->m_x, pStatic->m_y+pBlock->m_y, pStatic->m_z, this->m_map );
+				CPointMap ptTest( pStatic->m_x + pBlock->m_x, pStatic->m_y + pBlock->m_y, pStatic->m_z, this->m_map );
 				if ( this->GetDist( ptTest ) > 0 )
 					continue;
 				++uiStaticQty;
@@ -403,18 +403,18 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 		CItem* pItem = nullptr;
 		const CSphereMulti* pMulti = nullptr;
 		const CUOMultiItemRec_HS* pMultiItem = nullptr;
-		size_t iMultiQty = GetRegions(REGION_TYPE_MULTI, rlinks);
+		size_t iMultiQty = GetRegions(REGION_TYPE_MULTI, &rlinks);
 
 		if ( *pszKey == '\0' )
 		{
 			int iComponentQty = 0;
-			for (size_t i = 0; i < iMultiQty; i++)
+			for (size_t i = 0; i < iMultiQty; ++i)
 			{
-				pRegion = rlinks.at(i);
+				pRegion = rlinks[i];
 				if (pRegion == nullptr)
 					continue;
 
-				pItem = pRegion->GetResourceID().ItemFind();
+				pItem = pRegion->GetResourceID().ItemFindFromResource();
 				if (pItem == nullptr)
 					continue;
 
@@ -424,7 +424,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 					continue;
 
 				size_t iQty = pMulti->GetItemCount();
-				for (size_t ii = 0; ii < iQty; ii++)
+				for (size_t ii = 0; ii < iQty; ++ii)
 				{
 					pMultiItem = pMulti->GetItem(ii);
 					if (pMultiItem == nullptr)
@@ -474,13 +474,13 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 				return false;
 			}
 
-			for (size_t i = 0; i < iMultiQty; i++)
+			for (size_t i = 0; i < iMultiQty; ++i)
 			{
-				pRegion = rlinks.at(i);
+				pRegion = rlinks[i];
 				if (pRegion == nullptr)
 					continue;
 
-				pItem = pRegion->GetResourceID().ItemFind();
+				pItem = pRegion->GetResourceID().ItemFindFromResource();
 				if (pItem == nullptr)
 					continue;
 
@@ -512,13 +512,13 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 		}
 		else
 		{
-			for (size_t i = 0; i < iMultiQty; i++)
+			for (size_t i = 0; i < iMultiQty; ++i)
 			{
-				pRegion = rlinks.at(i);
+				pRegion = rlinks[i];
 				if (pRegion == nullptr)
 					continue;
 
-				pItem = pRegion->GetResourceID().ItemFind();
+				pItem = pRegion->GetResourceID().ItemFindFromResource();
 				if (pItem == nullptr)
 					continue;
 
@@ -528,7 +528,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 					continue;
 
 				size_t iQty = pMulti->GetItemCount();
-				for (size_t ii = 0; ii < iQty; pMultiItem = nullptr, ii++)
+				for (size_t ii = 0; ii < iQty; pMultiItem = nullptr, ++ii)
 				{
 					pMultiItem = pMulti->GetItem(ii);
 					if (pMultiItem == nullptr)
@@ -542,7 +542,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 					if (iComponent == 0)
 						break;
 
-					iComponent--;
+					--iComponent;
 				}
 
 				if (pMultiItem != nullptr)
@@ -894,22 +894,22 @@ CRegion * CPointBase::GetRegion( dword dwType ) const
 	if ( ! IsValidPoint() )
 		return nullptr;
 
-	CSector *pSector = GetSector();
+    const CSector *pSector = GetSector();
 	if ( pSector )
 		return pSector->GetRegion(*this, dwType);
 
 	return nullptr;
 }
 
-size_t CPointBase::GetRegions( dword dwType, CRegionLinks & rlinks ) const
+size_t CPointBase::GetRegions( dword dwType, CRegionLinks *pRLinks ) const
 {
 	ADDTOCALLSTACK("CPointBase::GetRegions");
 	if ( !IsValidPoint() )
 		return 0;
 
-	CSector *pSector = GetSector();
+	const CSector *pSector = GetSector();
 	if ( pSector )
-		return pSector->GetRegions(*this, dwType, rlinks);
+		return pSector->GetRegions(*this, dwType, pRLinks);
 
 	return 0;
 }

@@ -50,7 +50,7 @@ void CComponentProps::BaseProp_LoadPropVal(int iPropIndex, bool fPropStr, CScrip
     if (fPropStr)
         SetPropertyStr(iPropIndex, s.GetArgStr(), pLinkedObj, true);
     else
-        SetPropertyNum(iPropIndex, s.GetArgVal(), pLinkedObj);
+        SetPropertyNum(iPropIndex, s.GetArgVal(), pLinkedObj, true);
 }
 
 bool CComponentProps::BaseProp_WritePropVal(int iPropIndex, bool fPropStr, CSString & sVal) const
@@ -73,8 +73,8 @@ void CComponentProps::BaseCont_Write_ContNum(const BaseContNum_t* container, con
 {
     for (const BaseContNumPair_t& propPair : *container)
     {
-        //if (propPair.second == 0)
-        //    continue;
+        if (propPair.second == 0)
+            continue;
         s.WriteKeyVal(ptcPropsTable[propPair.first], propPair.second);
     }
 }

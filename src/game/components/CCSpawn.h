@@ -29,7 +29,7 @@ class CCSpawn : public CComponent
     bool _fKillingChildren;     // For internal usage, set to true when KillChildren() is in proccess to prevent DelObj() being called from CObjBase when deleteing the objs.
 
     uint16 _iAmount;            // Maximum of objects to spawn.
-    CResourceID _idSpawn;       // legacy more1=ID of the Object to Spawn.
+    CResourceIDBase _idSpawn;   // legacy more1=ID of the Object to Spawn.
 
     uint16 _iPile;              // legacy more2=The max # of items to spawn per interval, if this is 0 spawn up to the total amount (Only for Items Spawn).
     uint16 _iTimeLo;            // legacy morex=Lo time in minutes.
@@ -109,7 +109,7 @@ public:
     *
     * @return CResourceID
     */
-    const CResourceID& GetSpawnID() const;
+    const CResourceIDBase& GetSpawnID() const;
 
     /**
     * @brief Overrides onTick for this class.

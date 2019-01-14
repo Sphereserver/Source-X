@@ -480,7 +480,7 @@ public:
 	void addEffect( EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate * pDst, const CObjBaseTemplate * pSrc,
         byte speed = 5, byte loop = 1, bool explode = false, dword color = 0, dword render = 0, word effectid = 0,
         dword explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0 ) const;
-	void addEffectXYZ(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptSrc, const CPointMap *ptDest,
+	void addEffectXYZ(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *pptDest, const CPointMap *pptSrc,
         byte speed = 5, byte loop = 1, bool explode = false, dword color = 0, dword render = 0, word effectid = 0,
         dword explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
 

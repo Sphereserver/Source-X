@@ -62,10 +62,10 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 	}
 
 	size_t iItems = 0;
-	for ( size_t i = 0; i < pCorpseDef->m_BaseResources.size(); i++ )
+	for ( size_t i = 0; i < pCorpseDef->m_BaseResources.size(); ++i )
 	{
 		llong iQty = pCorpseDef->m_BaseResources[i].GetResQty();
-		CResourceID rid = pCorpseDef->m_BaseResources[i].GetResourceID();
+		const CResourceID& rid = pCorpseDef->m_BaseResources[i].GetResourceID();
 		if ( rid.GetResType() != RES_ITEMDEF )
 			continue;
 
@@ -73,7 +73,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 		if ( id == ITEMID_NOTHING )
 			break;
 
-		iItems++;
+		++ iItems;
 		CItem *pPart = CItem::CreateTemplate(id, nullptr, this);
 		ASSERT(pPart);
 		switch ( pPart->GetType() )
@@ -146,7 +146,7 @@ void CChar::Use_MoonGate( CItem * pItem )
     if (pLink)
         pt = pLink->GetTopPoint();
     else
-        pItem->m_itTelepad.m_ptMark;
+        pt = pItem->m_itTelepad.m_ptMark;
 
 	if ( pItem->IsType(IT_MOONGATE) )
 	{
@@ -154,9 +154,10 @@ void CChar::Use_MoonGate( CItem * pItem )
 		// What gate are we at ?
 		size_t i = 0;
 		size_t iCount = g_Cfg.m_MoonGates.size();
+        const CPointMap& ptTop = GetTopPoint();
 		for ( ; i < iCount; ++i )
 		{
-			if ( GetTopPoint().GetDist(g_Cfg.m_MoonGates[i]) <= UO_MAP_VIEW_SIZE_DEFAULT )
+			if ( ptTop.GetDist(g_Cfg.m_MoonGates[i]) <= UO_MAP_VIEW_SIZE_DEFAULT )
 				break;
 		}
 
@@ -530,8 +531,8 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 
 		if ( WeaponAmmoID )
 		{
-			pButte->m_itArcheryButte.m_ridAmmoType = CResourceID(RES_ITEMDEF, (int)WeaponAmmoID);
-			++pButte->m_itArcheryButte.m_AmmoCount;
+			pButte->m_itArcheryButte.m_ridAmmoType = CResourceIDBase(RES_ITEMDEF, (int)WeaponAmmoID);
+			++ pButte->m_itArcheryButte.m_AmmoCount;
 		}
 	}
 	else

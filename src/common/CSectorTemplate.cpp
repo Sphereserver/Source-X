@@ -39,7 +39,7 @@ void CCharsActiveList::OnRemoveObj( CSObjListRec * pObRec )
 	pChar->SetUIDContainerFlags(UID_O_DISCONNECT);
 }
 
-size_t CCharsActiveList::HasClients() const
+int CCharsActiveList::GetClientsNumber() const
 {
 	return m_iClients;
 }
@@ -107,27 +107,27 @@ CItemsList::CItemsList()
 
 }
 
-int CObjPointSortArray::CompareKey( int id, CPointSort* pBase, bool fNoSpaces ) const
+
+//////////////////////////////////////////////////////////////////
+// -CSectorBase::CObjPointSortArray
+
+
+int CSectorBase::CObjPointSortArray::CompareKey( int id, CPointSort* pBase, bool fNoSpaces ) const
 {
-	UNREFERENCED_PARAMETER(fNoSpaces);
-	ASSERT( pBase );
-	return( id - pBase->GetPointSortIndex());
+    UNREFERENCED_PARAMETER(fNoSpaces);
+    ASSERT( pBase );
+    return( id - pBase->GetPointSortIndex());
 }
 
-
-CObjPointSortArray::CObjPointSortArray()
-{
-
-}
 
 //////////////////////////////////////////////////////////////////
 // -CSectorBase
 
 void CSectorBase::SetAdjacentSectors()
 {
-    int iMaxX = g_MapList.GetSectorCols(m_map);
-    int iMaxY = g_MapList.GetSectorRows(m_map);
-    int iMaxSectors = g_MapList.GetSectorQty(m_map);
+    const int iMaxX = g_MapList.GetSectorCols(m_map);
+    const int iMaxY = g_MapList.GetSectorRows(m_map);
+    const int iMaxSectors = g_MapList.GetSectorQty(m_map);
     int index = 0;
     int iSectorCount = 0;
     for (int i = 0; i < m_map; ++i) // all sectors are stored in the same array, get a tmp count of all of the lower maps
@@ -329,10 +329,11 @@ CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 		CRegion * pRegion = m_RegionLinks[i];
 		ASSERT(pRegion);
 
-		ASSERT( pRegion->GetResourceID().IsValidUID());
-		if ( pRegion->GetResourceID().IsItem())
+        const CResourceID& ridRegion = pRegion->GetResourceID();
+		ASSERT( ridRegion.IsValidUID());
+		if ( ridRegion.IsUIDItem())
 		{
-			CItemShip * pShipItem = dynamic_cast <CItemShip *>(pRegion->GetResourceID().ItemFind());
+			const CItemShip * pShipItem = dynamic_cast <CItemShip *>(ridRegion.ItemFindFromResource());
 			if (pShipItem)
 			{
 				if (!(dwType & REGION_TYPE_SHIP))
@@ -341,7 +342,7 @@ CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 			else if (!(dwType & REGION_TYPE_HOUSE))
 				continue;
 		}
-		else if ( pRegion->GetResourceID().GetResType() == RES_AREA )
+		else if ( ridRegion.GetResType() == RES_AREA )
 		{
 			if ( ! ( dwType & REGION_TYPE_AREA ))
 				continue;
@@ -361,8 +362,8 @@ CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 	return nullptr;
 }
 
-// Balkon: get regions list (to cicle through intercepted house regions)
-size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLinks & rlist ) const
+// Balkon: get regions list (to cycle through intercepted house regions)
+size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLinks *pRLinks ) const
 {
 	ADDTOCALLSTACK("CSectorBase::GetRegions");
 	size_t iQty = m_RegionLinks.size();
@@ -372,9 +373,9 @@ size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLink
 		ASSERT(pRegion);
 
 		ASSERT( pRegion->GetResourceID().IsValidUID());
-		if ( pRegion->GetResourceID().IsItem())
+		if ( pRegion->GetResourceID().IsUIDItem())
 		{
-			CItemShip * pShipItem = dynamic_cast <CItemShip *>(pRegion->GetResourceID().ItemFind());
+			CItemShip * pShipItem = dynamic_cast <CItemShip *>(pRegion->GetResourceID().ItemFindFromResource());
 			if (pShipItem)
 			{
 				if (!(dwType & REGION_TYPE_SHIP))
@@ -398,9 +399,9 @@ size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLink
 			continue;
 		if ( ! pRegion->IsInside2d( pt ))
 			continue;
-		rlist.push_back(pRegion);
+        pRLinks->push_back(pRegion);
 	}
-	return rlist.size();
+	return pRLinks->size();
 }
 
 bool CSectorBase::UnLinkRegion( CRegion * pRegionOld )
@@ -446,7 +447,7 @@ bool CSectorBase::LinkRegion( CRegion * pRegionNew )
 				continue;
 
 			// keep item (multi) regions on top
-			if ( pRegion->GetResourceID().IsItem() && !pRegionNew->GetResourceID().IsItem() )
+			if ( pRegion->GetResourceID().IsUIDItem() && !pRegionNew->GetResourceID().IsUIDItem() )
 				continue;
 
 			// must insert before this.
@@ -503,8 +504,10 @@ CPointMap CSectorBase::GetBasePoint() const
 	ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetBasePoint");
 	// What is the coord base of this sector. upper left point.
 	ASSERT( m_index >= 0 && m_index < g_MapList.GetSectorQty(m_map) );
-	CPointMap pt(( (word)((m_index % g_MapList.GetSectorCols(m_map)) * g_MapList.GetSectorSize(m_map))),
-		(word)((m_index / g_MapList.GetSectorCols(m_map)) * g_MapList.GetSectorSize(m_map)),
+    const int iCols = g_MapList.GetSectorCols(m_map);
+    const int iSize = g_MapList.GetSectorSize(m_map);
+	CPointMap pt(( (word)((m_index % iCols) * iSize)),
+		(word)((m_index / iCols) * iSize),
 		0,
 		(uchar)(m_map));
 	return pt;
@@ -514,12 +517,13 @@ CRectMap CSectorBase::GetRect() const
 {
     ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetRect");
 	// Get a rectangle for the sector.
-	CPointMap pt = GetBasePoint();
+	const CPointMap pt = GetBasePoint();
+    const int iSectorSize = g_MapList.GetSectorSize(pt.m_map);
 	CRectMap rect;
 	rect.m_left = pt.m_x;
 	rect.m_top = pt.m_y;
-	rect.m_right = pt.m_x + g_MapList.GetSectorSize(pt.m_map);	// East
-	rect.m_bottom = pt.m_y + g_MapList.GetSectorSize(pt.m_map);	// South
+	rect.m_right = pt.m_x + iSectorSize;	// East
+	rect.m_bottom = pt.m_y + iSectorSize;	// South
 	rect.m_map = pt.m_map;
 	return rect;
 }
