@@ -226,9 +226,10 @@ enum IT_TYPE		// double click type action.
     IT_SPAWN_CHAMPION = 300,// 300 = t_spawn_champion
     IT_MULTI_ADDON,         // 301 = t_multi_addon
 
-	// Custom types start from 500
-	IT_ARMOR_CHAIN = 500,	// 500 = t_armor_chain
-	IT_ARMOR_RING,			// 501 = t_armor_ring
+	// Custom (scripted) types start from 500
+	// Custom (hardcoded) types start from 600
+	IT_ARMOR_CHAIN = 600,	// 600 = t_armor_chain
+	IT_ARMOR_RING,			// 601 = t_armor_ring
 
 	IT_QTY,
 	IT_TRIGGER = 1000	// custom triggers starts from here
