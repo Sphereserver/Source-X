@@ -2960,11 +2960,17 @@ bool CChar::OnFreezeCheck()
 		if ( m_pPlayer->m_speedMode & 0x04 )	// speed mode '4' prevents movement
 			return true;
 
-		if ( IsSetMagicFlags(MAGICF_FREEZEONCAST) && g_Cfg.IsSkillFlag(m_Act_SkillCurrent, SKF_MAGIC) )		// casting magic spells
+		if ( g_Cfg.IsSkillFlag(m_Act_SkillCurrent, SKF_MAGIC) )		// casting magic spells
 		{
 			CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
-			if ( pSpellDef && !pSpellDef->IsSpellType(SPELLFLAG_NOFREEZEONCAST) )
-				return true;
+			if ( pSpellDef )
+			{
+				if ( IsSetMagicFlags(MAGICF_FREEZEONCAST) && !pSpellDef->IsSpellType(SPELLFLAG_NOFREEZEONCAST) )
+					return true;
+
+				if ( !IsSetMagicFlags(MAGICF_FREEZEONCAST) && pSpellDef->IsSpellType(SPELLFLAG_FREEZEONCAST) )
+					return true;
+			}
 		}
 	}
 
