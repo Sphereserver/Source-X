@@ -221,10 +221,14 @@ enum IT_TYPE		// double click type action.
 	IT_PILOT,				// 197 = ship's pilot (PacketWheelMove)
 	IT_ROPE,				// 198 = t_rope (working like t_ship_plank but without id changes)
     IT_WEAPON_WHIP,			// 199
-    
+
     // New SphereX hardcoded types starting from 300
     IT_SPAWN_CHAMPION = 300,// 300 = t_spawn_champion
     IT_MULTI_ADDON,         // 301 = t_multi_addon
+
+	// Custom types start from 500
+	IT_ARMOR_CHAIN = 500,	// 500 = t_armor_chain
+	IT_ARMOR_RING,			// 501 = t_armor_ring
 
 	IT_QTY,
 	IT_TRIGGER = 1000	// custom triggers starts from here
@@ -264,6 +268,8 @@ public:
 		// IT_WAND
 		// IT_WEAPON_*
 		// IT_ARMOR
+		// IT_ARMOR_CHAIN
+		// IT_ARMOR_RING
 		// IT_ARMOR_LEATHER
 		// IT_SHIELD
 		// IT_CLOTHING

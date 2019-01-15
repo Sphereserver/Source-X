@@ -4462,6 +4462,8 @@ bool CItem::Armor_IsRepairable() const
 			return false;	// Not this way anyhow.
 		case IT_SHIELD:
 		case IT_ARMOR:				// some type of armor. (no real action)
+		case IT_ARMOR_CHAIN:
+		case IT_ARMOR_RING:
 			// ??? Bone armor etc is not !
 			break;
 		case IT_WEAPON_MACE_CROOK:

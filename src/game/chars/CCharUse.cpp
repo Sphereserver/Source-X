@@ -1647,6 +1647,8 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 
 		case IT_CLOTHING:
 		case IT_ARMOR:
+		case IT_ARMOR_CHAIN:
+		case IT_ARMOR_RING:
 		case IT_ARMOR_LEATHER:
 		case IT_SHIELD:
 		case IT_WEAPON_MACE_CROOK:

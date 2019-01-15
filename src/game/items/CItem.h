@@ -175,6 +175,8 @@ public:
 		} m_itWeapon;
 
 		// IT_ARMOR
+		// IT_ARMOR_CHAIN
+		// IT_ARMOR_RING
 		// IT_ARMOR_LEATHER
 		// IT_SHIELD:
 		// IT_CLOTHING

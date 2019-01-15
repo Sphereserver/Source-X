@@ -998,6 +998,8 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 	switch ( pItem->GetType() )
 	{
 		case IT_ARMOR:				// some type of armor. (no real action)
+		case IT_ARMOR_CHAIN:
+		case IT_ARMOR_RING:
 		case IT_SHIELD:
 		case IT_ARMOR_LEATHER:
 		case IT_CLOTHING:
