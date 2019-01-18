@@ -12,9 +12,7 @@ bool CUIDBase::IsValidUID() const
 
 bool CUIDBase::IsResource() const
 {
-	if ( m_dwInternalVal & UID_F_RESOURCE )
-		return IsValidUID();
-	return false ;
+    return (m_dwInternalVal & UID_F_RESOURCE);
 }
 
 bool CUIDBase::IsItem() const	// Item vs. Char

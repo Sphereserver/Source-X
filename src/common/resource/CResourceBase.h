@@ -37,19 +37,13 @@ public:
 	bool LoadResources( CResourceScript * pScript );
 	static lpctstr GetResourceBlockName( RES_TYPE restype );
 	lpctstr GetName() const;
+    lpctstr ResourceGetName( const CResourceID& rid ) const;
 	CResourceScript * GetResourceFile( size_t i );
-    CResourceID ResourceGetIDParse( RES_TYPE restype, lpctstr &pszName );
-	CResourceID ResourceGetID( RES_TYPE restype, lpctstr ptcName );
-	CResourceID ResourceGetIDType( RES_TYPE restype, lpctstr pszName );
-	int ResourceGetIndexType( RES_TYPE restype, lpctstr pszName );
-	lpctstr ResourceGetName( const CResourceID& rid ) const;
-	CScriptObj * ResourceGetDefByName( RES_TYPE restype, lpctstr pszName )
-	{
-		// resolve a name to the actual resource def.
-        CResourceID res = ResourceGetID(restype, pszName);
-        res.m_wPage = UINT16_MAX;   // Create a CResourceID with page == UINT16_MAX: search independently from the page
-		return ResourceGetDef(res);
-	}
+    CResourceID ResourceGetIDParse( RES_TYPE restype, lpctstr &pszName, word wPage = 0 );
+	CResourceID ResourceGetID( RES_TYPE restype, lpctstr ptcName, word wPage = 0 );
+	CResourceID ResourceGetIDType( RES_TYPE restype, lpctstr pszName, word wPage = 0 );
+	int ResourceGetIndexType( RES_TYPE restype, lpctstr pszName, word wPage = 0 );
+	CScriptObj * ResourceGetDefByName( RES_TYPE restype, lpctstr pszName, word wPage = 0 );
 	bool ResourceLock( CResourceLock & s, const CResourceID& rid );
 	bool ResourceLock( CResourceLock & s, RES_TYPE restype, lpctstr pszName )
 	{

@@ -2255,7 +2255,7 @@ const CSphereMulti * CServerConfig::GetMultiItemDefs( ITEMID_TYPE itemid )
 	if ( !CItemBase::IsID_Multi(itemid) )
 		return nullptr;
 
-	MULTI_TYPE id = static_cast<MULTI_TYPE>(itemid - ITEMID_MULTI);
+	MULTI_TYPE id = (MULTI_TYPE)(itemid - ITEMID_MULTI);
 	size_t index = m_MultiDefs.FindKey(id);
 	if ( index == m_MultiDefs.BadIndex() )
 		index = m_MultiDefs.AddSortKey(new CSphereMulti(id), id);

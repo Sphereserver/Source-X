@@ -259,9 +259,9 @@ HUE_TYPE CChar::Noto_GetHue(const CChar * pCharViewer, bool fIncog) const
 		return (HUE_TYPE)(sVal->GetValNum());
 
 	NOTO_TYPE color = Noto_GetFlag(pCharViewer, fIncog, true, true);
-	CChar *pChar = GetOwner();
+	const CChar *pChar = GetOwner();
 	if (!pChar)
-		pChar = const_cast<CChar*>(this);
+		pChar = this;
 	switch (color)
 	{
 	case NOTO_GOOD:			return (HUE_TYPE)(g_Cfg.m_iColorNotoGood);		// Blue
@@ -464,7 +464,7 @@ void CChar::Noto_Fame( int iFameChange )
 		return;
 
 	SetFame((ushort)(iFame + iFameChange));
-    Noto_ChangeDeltaMsg( GetFame() - (short)iFame, g_Cfg.GetDefaultMsg( DEFMSG_NOTO_FAME ) );
+    Noto_ChangeDeltaMsg( (int)GetFame() - iFame, g_Cfg.GetDefaultMsg( DEFMSG_NOTO_FAME ) );
 }
 
 void CChar::Noto_Karma( int iKarmaChange, int iBottom, bool fMessage )
@@ -501,7 +501,7 @@ void CChar::Noto_Karma( int iKarmaChange, int iBottom, bool fMessage )
 		return;
 
     SetKarma((short)(iKarma + iKarmaChange));
-    Noto_ChangeDeltaMsg( GetKarma() - (short)iKarma, g_Cfg.GetDefaultMsg( DEFMSG_NOTO_KARMA ) );
+    Noto_ChangeDeltaMsg( (int)GetKarma() - iKarma, g_Cfg.GetDefaultMsg( DEFMSG_NOTO_KARMA ) );
 	NotoSave_Update();
 	if ( fMessage == true )
 	{

@@ -1229,11 +1229,11 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 
 					if ( pClientToCheck->GetNetState()->isClientKR() )
 					{
-						context = g_Cfg.GetKRDialog( (dword)rid ) & 0x00FFFFFF;
+						context = RES_GET_INDEX(g_Cfg.GetKRDialog(rid.GetPrivateUID()));
 					}
 					else
 					{
-						context = ((dword)rid) & 0x00FFFFFF;
+						context = RES_GET_INDEX(rid.GetPrivateUID());
 					}
 
 					CClient::OpenedGumpsMap_t::iterator itGumpFound = pClientToCheck->m_mapOpenedGumps.find( context );
@@ -2468,11 +2468,11 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( iQty < 1 )
 					return false;
 
-				dword rid = g_Cfg.ResourceGetIDType( RES_DIALOG, Arg_ppCmd[0] );
+				dword dwRid = g_Cfg.ResourceGetIDType( RES_DIALOG, Arg_ppCmd[0] ).GetPrivateUID();
 				if ( pClientSrc->GetNetState()->isClientKR() )
-					rid = g_Cfg.GetKRDialog( rid );
+                    dwRid = g_Cfg.GetKRDialog( dwRid );
 
-				pClientSrc->Dialog_Close( this, rid, iQty > 1 ? Exp_GetVal( Arg_ppCmd[1]) : 0 );
+				pClientSrc->Dialog_Close( this, dwRid, iQty > 1 ? Exp_GetVal( Arg_ppCmd[1]) : 0 );
 			}
 			break;
 		case OV_TRYP:

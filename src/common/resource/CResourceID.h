@@ -115,6 +115,7 @@ struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variab
         ASSERT(restype < RES_TYPE_MASK);
         m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT);
     }
+    explicit CResourceIDBase(RES_TYPE, const CResourceIDBase&) = delete;
     explicit CResourceIDBase(RES_TYPE restype, int iIndex)
     {
         ASSERT(restype < RES_TYPE_MASK);
@@ -177,6 +178,7 @@ struct CResourceID : public CResourceIDBase     // It has the "page" part. Use i
     //		when using other Resource Types, like REGIONTYPE).
     word m_wPage;
     #define RES_PAGE_MAX    UINT16_MAX - 1
+    #define RES_PAGE_ANY    UINT16_MAX      // Pick a CResourceID independently from the page
 
     CResourceID() : CResourceIDBase()
     {
@@ -186,14 +188,17 @@ struct CResourceID : public CResourceIDBase     // It has the "page" part. Use i
     {
         m_wPage = 0;
     }
+    explicit CResourceID(RES_TYPE, const CResourceIDBase&) = delete;
     explicit CResourceID(RES_TYPE restype, int iIndex) : CResourceIDBase(restype, iIndex)
     {
         m_wPage = 0;
     }
+    explicit CResourceID(RES_TYPE, const CResourceIDBase&, word) = delete;
     explicit CResourceID(RES_TYPE restype, int iIndex, word wPage) : CResourceIDBase(restype, iIndex)
     {
         m_wPage = wPage;
     }
+    explicit CResourceID(const CResourceIDBase&, word) = delete;
     explicit CResourceID(dword dwPrivateID, word wPage) : CResourceIDBase(dwPrivateID)
     {
         m_wPage = wPage;
@@ -231,7 +236,6 @@ struct CResourceID : public CResourceIDBase     // It has the "page" part. Use i
         return ((rid.m_wPage == m_wPage) && (rid.m_dwInternalVal == m_dwInternalVal));
     }
 };
-
 
 
 #endif // _INC_CRESOURCEID_H
