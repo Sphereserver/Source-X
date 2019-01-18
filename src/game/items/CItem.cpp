@@ -2125,14 +2125,14 @@ void CItem::r_WriteMore1(CSString & sVal)
         case IT_GRASS:
         case IT_ROCK:
         case IT_WATER:
-            sVal = g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, m_itResource.m_ridRes));
+            sVal = g_Cfg.ResourceGetName(m_itResource.m_ridRes);
             return;
 
         case IT_FRUIT:
         case IT_FOOD:
         case IT_FOOD_RAW:
         case IT_MEAT_RAW:
-            sVal = g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, m_itFood.m_ridCook));
+            sVal = g_Cfg.ResourceGetName(m_itFood.m_ridCook);
             return;
 
         case IT_TRAP:
