@@ -3478,7 +3478,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		{
 			CDialogDef *pDef = dynamic_cast<CDialogDef *>( g_Cfg.ResourceGetDefByName(RES_DIALOG, pScript->GetKey()) );
 			if ( pDef != nullptr )
-				g_Cfg.SetKRDialogMap( (dword)pDef->GetResourceID(), pScript->GetArgVal());
+				g_Cfg.SetKRDialogMap( pDef->GetResourceID().GetPrivateUID(), pScript->GetArgVal());
 			else
 				DEBUG_ERR(("Dialog '%s' not found...\n", pScript->GetKey()));
 		}
@@ -3902,34 +3902,31 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 		return ridinvalid;
 	}
 
-	if ( wPage )
-		rid = CResourceID( restype, index, wPage );
-	else
-		rid = CResourceID( restype, index );
-
+	
 	if ( iHashRange )
 	{
 		// find a new FREE entry starting here
-		rid.SetPrivateUID( rid.GetPrivateUID() + Calc_GetRandVal( iHashRange ) );
+        rid = CResourceID( restype, index + Calc_GetRandVal(iHashRange), wPage );
 		for (;;)
 		{
 			if ( m_ResHash.FindKey(rid) == m_ResHash.BadIndex() )
 				break;
-			rid.SetPrivateUID( rid.GetPrivateUID()+1 );
+            rid = CResourceID( restype, rid.GetResIndex() + 1, wPage );
 		}
 	}
 	else
 	{
 		// find a new FREE entry starting here
-		if ( ! index )
-			rid.SetPrivateUID( rid.GetPrivateUID()+1 );
+        rid = CResourceID( restype, index ? index : 1, wPage );
+        ASSERT(m_ResHash.FindKey(rid) == m_ResHash.BadIndex());
 	}
 
 	if ( pszName )
 	{
 		CVarDefContNum* pVarTemp = g_Exp.m_VarDefs.SetNum( pszName, rid.GetPrivateUID() );
-		if ( pVarTemp )
-			*ppVarNum = pVarTemp;
+        ASSERT(pVarTemp);
+		//if ( pVarTemp )
+		*ppVarNum = pVarTemp;
 	}
 
 	return rid;

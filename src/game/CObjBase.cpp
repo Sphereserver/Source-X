@@ -1015,23 +1015,23 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 						}
 						else
 						{
-							CClient::OpenedGumpsMap_t * ourMap = &(pThisClient->m_mapOpenedGumps);
-							size_t iDialogIndex = (size_t)( Exp_GetVal(pszKey) );
+							CClient::OpenedGumpsMap_t &ourMap = pThisClient->m_mapOpenedGumps;
+							uint uiDialogIndex = Exp_GetUVal(pszKey);
 							SKIP_SEPARATORS(pszKey);
 
-							if ( iDialogIndex <= ourMap->size() )
+							if ( uiDialogIndex <= ourMap.size() )
 							{
-								CClient::OpenedGumpsMap_t::iterator itGumpFound = ourMap->begin();
-								while ( iDialogIndex-- )
+								CClient::OpenedGumpsMap_t::iterator itGumpFound = ourMap.begin();
+								while ( uiDialogIndex-- )
 									++itGumpFound;
 
 								if ( !strnicmp(pszKey, "ID", 2) )
 								{
-									sVal.Format("%s", g_Cfg.ResourceGetName( CResourceID(RES_DIALOG, (*itGumpFound).first )) );
+									sVal.Format("%s", g_Cfg.ResourceGetName( CResourceID(RES_DIALOG, itGumpFound->first )) );
 								}
 								else if ( !strnicmp(pszKey, "COUNT", 5) )
 								{
-									sVal.FormatVal( (*itGumpFound).second );
+									sVal.FormatVal( itGumpFound->second );
 								}
 							}
 						}
@@ -1187,7 +1187,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 
 					if ( fP )
 					{
-						CPointMap pt = ( index == OC_ISNEARTYPETOP ) ? ( g_World.FindTypeNear_Top(GetTopPoint(), static_cast<IT_TYPE>(iType), iDistance ) ) : ( g_World.FindItemTypeNearby(GetTopPoint(), static_cast<IT_TYPE>(iType), iDistance, bCheckMulti ) );
+						CPointMap pt = ( index == OC_ISNEARTYPETOP ) ? ( g_World.FindTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( g_World.FindItemTypeNearby(GetTopPoint(), (IT_TYPE)iType, iDistance, bCheckMulti ) );
 
 						if ( !pt.IsValidPoint() )
 							sVal.FormatVal( 0 );
@@ -1195,7 +1195,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 							sVal = pt.WriteUsed();
 					}
 					else
-						sVal.FormatVal( ( index == OC_ISNEARTYPETOP ) ? ( g_World.IsTypeNear_Top(GetTopPoint(), static_cast<IT_TYPE>(iType), iDistance ) ) : ( g_World.IsItemTypeNear(GetTopPoint(), static_cast<IT_TYPE>(iType), iDistance, bCheckMulti ) ) );
+						sVal.FormatVal( ( index == OC_ISNEARTYPETOP ) ? ( g_World.IsTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( g_World.IsItemTypeNear(GetTopPoint(), (IT_TYPE)iType, iDistance, bCheckMulti ) ) );
 				}
 				return true;
 			}
@@ -1220,7 +1220,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				SKIP_SEPARATORS( pszKey );
 				GETNONWHITESPACE( pszKey );
 				CChar * pCharToCheck = dynamic_cast<CChar*>(this);
-				CClient * pClientToCheck = (pCharToCheck && pCharToCheck->IsClient()) ? (pCharToCheck->GetClient()) : nullptr ;
+				CClient * pClientToCheck = (pCharToCheck && pCharToCheck->IsClient()) ? (pCharToCheck->GetClient()) : nullptr;
 
 				if ( pClientToCheck )
 				{
@@ -1229,11 +1229,11 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 
 					if ( pClientToCheck->GetNetState()->isClientKR() )
 					{
-						context = RES_GET_INDEX(g_Cfg.GetKRDialog(rid.GetPrivateUID()));
+						context = g_Cfg.GetKRDialog(rid.GetPrivateUID());
 					}
 					else
 					{
-						context = RES_GET_INDEX(rid.GetPrivateUID());
+						context = rid.GetPrivateUID();
 					}
 
 					CClient::OpenedGumpsMap_t::iterator itGumpFound = pClientToCheck->m_mapOpenedGumps.find( context );
@@ -1265,7 +1265,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				tchar * pszArg = Str_GetTemp();
                 strncpynull( pszArg, pszKey, strlen( pszKey ) + 1 );
 
-				CUID uid = Exp_GetVal( pszKey );
+				CUID uid(Exp_GetDWVal( pszKey ));
 				pItem = dynamic_cast<CItem*> (uid.ObjFind());
 				if (pItem == nullptr)
 				{
@@ -1277,11 +1277,11 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 						break;
 					}
 				}
-				sVal.FormatVal( (( pItem ) ? ( pItem->IsTypeArmor() ) : ( 0 )) );
+				sVal.FormatVal( pItem ? pItem->IsTypeArmor() : 0 );
 				break;
 			}
 			pItem = dynamic_cast<CItem*> (this);
-			sVal.FormatVal( (( pItem ) ? ( pItem->IsTypeArmor() ) : ( 0 )) );
+			sVal.FormatVal( pItem ? pItem->IsTypeArmor() : 0 );
 			break;
 			}
 		case OC_ISTIMERF:
@@ -2441,11 +2441,11 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 					if ( pClientSrc->GetNetState()->isClientKR() )
 					{
-						context = g_Cfg.GetKRDialog( (dword)rid ) & 0x00FFFFFF;
+						context = g_Cfg.GetKRDialog(rid.GetPrivateUID());
 					}
 					else
 					{
-						context = ((dword)rid) & 0x00FFFFFF;
+						context = rid.GetPrivateUID();
 					}
 
 					CClient::OpenedGumpsMap_t::iterator itGumpFound = pClientSrc->m_mapOpenedGumps.find( context );

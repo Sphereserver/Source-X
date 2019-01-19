@@ -152,6 +152,8 @@ struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variab
         return (rid.m_dwInternalVal == m_dwInternalVal);
     }
 
+    void SetPrivateUID(dword dwVal) = delete;   // Don't do this, you'll end forgetting UID_F_RESOURCE or god knows what else...
+
     bool IsItem() const = delete;   // Try to warn and block the calls to this CUIDBase method, in most cases it's incorrect and it will lead to bugs
     bool IsChar() const = delete;   // Try to warn and block the calls to this CUIDBase method, in most cases it's incorrect and it will lead to bugs
     CObjBase*   ObjFind()  const = delete;   // Same as above

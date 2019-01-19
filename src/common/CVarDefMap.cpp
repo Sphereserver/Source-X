@@ -468,7 +468,7 @@ CVarDefContNum* CVarDefMap::ModNum(lpctstr pszName, int64 iMod, bool fDeleteZero
     return SetNum(pszName, iMod, fDeleteZero);
 }
 
-CVarDefContNum* CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fDeleteZero )
+CVarDefContNum* CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fDeleteZero, bool fWarnOverwrite )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::SetNum");
 	ASSERT(pszName);
@@ -494,11 +494,15 @@ CVarDefContNum* CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fDeleteZer
 
 	CVarDefContNum * pVarNum = dynamic_cast <CVarDefContNum *>( pVarBase );
 	if ( pVarNum )
+    {
+        if ( fWarnOverwrite && g_Serv.IsLoading() )
+            DEBUG_WARN(( "Replacing existing VarNum '%s' with number: 0x%" PRIx64" \n", pVarBase->GetKey(), iVal ));
 		pVarNum->SetValNum( iVal );
+    }
 	else
 	{
-		if ( g_Serv.IsLoading() )
-			DEBUG_WARN(( "Replace existing VarStr '%s' with number: 0x%" PRIx64" \n", pVarBase->GetKey(), iVal ));
+		if ( fWarnOverwrite && g_Serv.IsLoading() )
+			DEBUG_WARN(( "Replacing existing VarStr '%s' with number: 0x%" PRIx64" \n", pVarBase->GetKey(), iVal ));
 		return SetNumOverride( pszName, iVal );
 	}
 
@@ -535,7 +539,7 @@ CVarDefContStr* CVarDefMap::SetStrOverride( lpctstr pszKey, lpctstr pszVal )
 	return SetStrNew(pszKey,pszVal);
 }
 
-CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, bool fDeleteZero )
+CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, bool fDeleteZero, bool fWarnOverwrite )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::SetStr");
 	// ASSUME: This has been clipped of unwanted beginning and trailing spaces.
@@ -566,11 +570,15 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, 
 
 	CVarDefContStr * pVarStr = dynamic_cast <CVarDefContStr *>( pVarBase );
 	if ( pVarStr )
+    {
+        if ( fWarnOverwrite && g_Serv.IsLoading() )
+            DEBUG_WARN(( "Replacing existing VarStr '%s' with string: '%s'\n", pVarBase->GetKey(), pszVal ));
 		pVarStr->SetValStr( pszVal );
+    }
 	else
 	{
-		if ( g_Serv.IsLoading())
-			DEBUG_WARN(( "Replace existing VarNum '%s' with string: '%s^\n", pVarBase->GetKey(), pszVal ));
+		if ( fWarnOverwrite && g_Serv.IsLoading() )
+			DEBUG_WARN(( "Replacing existing VarNum '%s' with string: '%s'\n", pVarBase->GetKey(), pszVal ));
 		return SetStrOverride( pszName, pszVal );
 	}
 	return pVarStr;

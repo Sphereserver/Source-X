@@ -11,7 +11,7 @@
 #include "CClient.h"
 
 
-bool CClient::Dialog_Setup( CLIMODE_TYPE mode, CResourceID rid, int iPage, CObjBase * pObj, lpctstr Arguments )
+bool CClient::Dialog_Setup( CLIMODE_TYPE mode, const CResourceID& rid, int iPage, CObjBase * pObj, lpctstr Arguments )
 {
 	ADDTOCALLSTACK("CClient::Dialog_Setup");
 	if ( pObj == nullptr )
@@ -30,7 +30,7 @@ bool CClient::Dialog_Setup( CLIMODE_TYPE mode, CResourceID rid, int iPage, CObjB
 
 	// Now pack it up to send,
 	// m_tmGumpDialog.m_ResourceID = rid;
-	dword context = (dword)rid;
+	dword context = rid.GetPrivateUID();
 	if ( GetNetState()->isClientKR() )
 	{
 		// translate to KR's equivalent DialogID
@@ -77,7 +77,7 @@ void CClient::addGumpInpVal( bool fCancel, INPVAL_STYLE style,
 	SetTargMode( CLIMODE_INPVAL );
 }
 
-void CClient::addGumpDialog( CLIMODE_TYPE mode, const CSString * psControls, size_t iControls, const CSString * psText, size_t iTexts, int x, int y, CObjBase * pObj, dword rid )
+void CClient::addGumpDialog( CLIMODE_TYPE mode, const CSString * psControls, size_t iControls, const CSString * psText, size_t iTexts, int x, int y, CObjBase * pObj, dword dwRid )
 {
 	ADDTOCALLSTACK("CClient::addGumpDialog");
 	// Add a generic GUMP menu.
@@ -89,9 +89,9 @@ void CClient::addGumpDialog( CLIMODE_TYPE mode, const CSString * psControls, siz
 		pObj = m_pChar;
 
 	int	context_mode = mode;
-	if ( mode == CLIMODE_DIALOG && rid != 0 )
+	if ( mode == CLIMODE_DIALOG && dwRid != 0 )
 	{
-		context_mode = RES_GET_INDEX(rid);
+		context_mode = dwRid;
 	}
 
 	PacketGumpDialog* cmd = new PacketGumpDialog(x, y, pObj, context_mode);
@@ -178,26 +178,25 @@ TRIGRET_TYPE CClient::Dialog_OnButton( CResourceID rid, dword dwButtonID, CObjBa
 	return( TRIGRET_ENDIF );
 }
 
-bool CClient::Dialog_Close( CObjBase * pObj, dword rid, int buttonID )
+bool CClient::Dialog_Close( CObjBase * pObj, dword dwRid, int buttonID )
 {
 	ADDTOCALLSTACK("CClient::Dialog_Close");
-	int gumpContext = RES_GET_INDEX(rid);
 
-	new PacketGumpChange(this, gumpContext, buttonID);
+	new PacketGumpChange(this, dwRid, buttonID);
 
 	if ( GetNetState()->isClientVersion(MINCLIVER_CLOSEDIALOG) )
 	{
 		CChar * pSrc = dynamic_cast<CChar*>( pObj );
 		if ( pSrc )
 		{
-			OpenedGumpsMap_t::iterator itGumpFound = m_mapOpenedGumps.find( gumpContext );
+			OpenedGumpsMap_t::iterator itGumpFound = m_mapOpenedGumps.find( (int)dwRid );
 			if (( itGumpFound != m_mapOpenedGumps.end() ) && ( (*itGumpFound).second > 0 ))
 			{
 				PacketGumpDialogRet packet;
 				packet.writeByte(XCMD_GumpDialogRet);
 				packet.writeInt16(27);
 				packet.writeInt32(pObj->GetUID());
-				packet.writeInt32(gumpContext);
+				packet.writeInt32(dwRid);	// gump context
 				packet.writeInt32(buttonID);
 				packet.writeInt32(0);
 				packet.writeInt32(0);

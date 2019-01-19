@@ -545,7 +545,7 @@ public:
 	void addGumpInpVal( bool fcancel, INPVAL_STYLE style, dword dwmask, lpctstr ptext1, lpctstr ptext2, CObjBase * pObj );
 
 	void addItemMenu( CLIMODE_TYPE mode, const CMenuItem * item, size_t count, CObjBase * pObj = nullptr );
-	void addGumpDialog( CLIMODE_TYPE mode, const CSString * sControls, size_t iControls, const CSString * psText, size_t iTexts, int x, int y, CObjBase * pObj = nullptr, dword rid = 0 );
+	void addGumpDialog( CLIMODE_TYPE mode, const CSString * sControls, size_t iControls, const CSString * psText, size_t iTexts, int x, int y, CObjBase * pObj = nullptr, dword dwRid = 0 );
 
 	bool addGumpDialogProps( CUID uid );
 
@@ -684,8 +684,8 @@ public:
 	bool CanSee( const CObjBaseTemplate * pObj ) const;
 	bool CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const;
 
-	bool Dialog_Setup( CLIMODE_TYPE mode, CResourceID rid, int iPage, CObjBase * pObj, lpctstr Arguments = "" );
-	bool Dialog_Close( CObjBase * pObj, dword rid, int buttonID );
+	bool Dialog_Setup( CLIMODE_TYPE mode, const CResourceID& rid, int iPage, CObjBase * pObj, lpctstr Arguments = "" );
+	bool Dialog_Close( CObjBase * pObj, dword dwRid, int buttonID );
 	void Menu_Setup( CResourceID rid, CObjBase * pObj = nullptr );
 
 	int OnSkill_Info( SKILL_TYPE skill, CUID uid, int iTestLevel, bool fTest );
