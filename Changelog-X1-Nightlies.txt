@@ -1481,3 +1481,9 @@ WARNING: the following change could break some hackish expedient used in scripts
 - [Garbage Collect]: Added error code 0x4226 for old spawn memories in NPCs being converted (and removed in the proccess) to the new system. This error should happen once in the first load and never more (if there's a worldsave after).
 - Fixed memories with memory_spawnitem not updating the spawn when loading saves from old builds.
 - Fixed Asserts on spawn items when retrieving more1/spawnid being it an invalid resource id.
+
+20-01-2019, Nolok
+- Fixed: Teleport spell (and .tele) didn't trigger position-related triggers (like @Enter on regions or @Step on items).
+- Fixed: Multis were added to the radarmap when the distance from its center and the player was < 31, now the check is done against the position of the farthest corner/side the player is facing.
+	This fixes big multis (like	keeps) appearing on the radarmap only when the player was very close.
+	Also, the CanSee checks against multis now use the same mechanic, instead of using the center of the multi.

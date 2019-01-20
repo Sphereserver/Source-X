@@ -123,6 +123,12 @@ public:
     CRegion* GetRegion() const;
 
     /**
+    * @brief Retrieves the distance of a corner/side from the center of the multi
+    * @return the distance
+    */
+    int GetSideDistanceFromCenter(DIR_TYPE dir) const;
+
+    /**
     * @brief Calculates the largest part of the multi.
     * @return the value.
     */

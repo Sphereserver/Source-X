@@ -75,7 +75,7 @@ public:
 
 	DIR_TYPE GetDir( const CPointBase & pt, DIR_TYPE DirDefault = DIR_QTY ) const; // Direction to point pt
 
-																				   // Take a step directly toward the target.
+	// Take a step directly toward the target.
 	int StepLinePath( const CPointBase & ptSrc, int iSteps );
 
 	CSector * GetSector() const;
