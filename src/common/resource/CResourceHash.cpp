@@ -38,7 +38,7 @@ int CResourceHashArray::CompareKey( CResourceID rid, CResourceDef * pBase, bool 
     {
         const ushort uiPage1 = rid.GetResPage();
         const ushort uiPage2 = baseResID.GetResPage();
-        if (uiPage1 == UINT16_MAX)  //rid page == UINT16_MAX: search independently from the page
+        if (uiPage1 == RES_PAGE_ANY)  //rid page == UINT16_MAX: search independently from the page
             return 0;
         if (uiPage1 > uiPage2)
             return 1;

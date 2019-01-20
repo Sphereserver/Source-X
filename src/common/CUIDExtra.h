@@ -12,7 +12,7 @@
 
 inline CObjBase * CUIDBase::ObjFind() const
 {
-	if ( IsResource() )
+	if ( IsResource() || !IsValidUID() )
 		return nullptr;
 	return g_World.FindUID( m_dwInternalVal & UID_O_INDEX_MASK );
 }

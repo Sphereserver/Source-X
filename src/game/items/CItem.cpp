@@ -2115,51 +2115,51 @@ void CItem::WriteUOX( CScript & s, int index )
 	s.Printf( "}\n\n" );
 }
 
-void CItem::r_WriteMore1( CSString & sVal )
+void CItem::r_WriteMore1(CSString & sVal)
 {
-	ADDTOCALLSTACK_INTENSIVE("CItem::r_WriteMore1");
-	// do special processing to represent this.
-	switch ( GetType() )
-	{
-		case IT_TREE:
-		case IT_GRASS:
-		case IT_ROCK:
-		case IT_WATER:
-			sVal = g_Cfg.ResourceGetName( m_itResource.m_ridRes );
-			return;
+    ADDTOCALLSTACK_INTENSIVE("CItem::r_WriteMore1");
+    // do special processing to represent this.
+    switch (GetType())
+    {
+        case IT_TREE:
+        case IT_GRASS:
+        case IT_ROCK:
+        case IT_WATER:
+            sVal = g_Cfg.ResourceGetName(m_itResource.m_ridRes);
+            return;
 
-		case IT_FRUIT:
-		case IT_FOOD:
-		case IT_FOOD_RAW:
-		case IT_MEAT_RAW:
-			sVal = g_Cfg.ResourceGetName( m_itFood.m_ridCook );
-			return;
+        case IT_FRUIT:
+        case IT_FOOD:
+        case IT_FOOD_RAW:
+        case IT_MEAT_RAW:
+            sVal = g_Cfg.ResourceGetName(m_itFood.m_ridCook);
+            return;
 
-		case IT_TRAP:
-		case IT_TRAP_ACTIVE:
-		case IT_TRAP_INACTIVE:
-		case IT_ANIM_ACTIVE:
-		case IT_SWITCH:
-		case IT_DEED:
-		case IT_LOOM:
-		case IT_ARCHERY_BUTTE:
-		case IT_ITEM_STONE:
-			sVal = g_Cfg.ResourceGetName( CResourceID( RES_ITEMDEF, m_itNormal.m_more1 ));
-			return;
+        case IT_TRAP:
+        case IT_TRAP_ACTIVE:
+        case IT_TRAP_INACTIVE:
+        case IT_ANIM_ACTIVE:
+        case IT_SWITCH:
+        case IT_DEED:
+        case IT_LOOM:
+        case IT_ARCHERY_BUTTE:
+        case IT_ITEM_STONE:
+            sVal = g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, m_itNormal.m_more1));
+            return;
 
-		case IT_FIGURINE:
-		case IT_EQ_HORSE:
-			sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, m_itNormal.m_more1));
-			return;
+        case IT_FIGURINE:
+        case IT_EQ_HORSE:
+            sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, m_itNormal.m_more1));
+            return;
 
-		case IT_POTION:
-			sVal = g_Cfg.ResourceGetName( CResourceID( RES_SPELL, m_itPotion.m_Type ));
-			return;
+        case IT_POTION:
+            sVal = g_Cfg.ResourceGetName(CResourceID(RES_SPELL, m_itPotion.m_Type));
+            return;
 
-		default:
-			sVal.FormatHex( m_itNormal.m_more1 );
-			return;
-	}
+        default:
+            sVal.FormatHex(m_itNormal.m_more1);
+            return;
+    }
 }
 
 void CItem::r_WriteMore2( CSString & sVal )

@@ -3436,7 +3436,7 @@ TRIGRET_TYPE CChar::Skill_OnTrigger( SKILL_TYPE skill, SKTRIG_TYPE  stage, CScri
 
 	pArgs->m_iN1 = skill;
 	if ( g_Cfg.IsSkillFlag(skill, SKF_MAGIC) )
-		pArgs->m_VarsLocal.SetNum("spell", m_atMagery.m_Spell, true);
+		pArgs->m_VarsLocal.SetNum("spell", m_atMagery.m_Spell, true, false);
 
 	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
 
@@ -3463,7 +3463,7 @@ TRIGRET_TYPE CChar::Skill_OnCharTrigger( SKILL_TYPE skill, CTRIG_TYPE ctrig, CSc
 
 	pArgs->m_iN1 = skill;
 	if ( g_Cfg.IsSkillFlag(skill, SKF_MAGIC) )
-		pArgs->m_VarsLocal.SetNum("spell", m_atMagery.m_Spell, true);
+		pArgs->m_VarsLocal.SetNum("spell", m_atMagery.m_Spell, true, false);
 
 	return OnTrigger(ctrig, this, pArgs);
 }

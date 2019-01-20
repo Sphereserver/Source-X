@@ -305,7 +305,7 @@ CResourceScript * CResourceBase::GetResourceFile( size_t i )
 	return m_ResourceFiles[i];
 }
 
-CResourceID CResourceBase::ResourceGetIDParse(RES_TYPE restype, lpctstr &ptcName)
+CResourceID CResourceBase::ResourceGetIDParse(RES_TYPE restype, lpctstr &ptcName, word wPage)
 {
     ADDTOCALLSTACK("CResourceBase::ResourceGetIDParse");
     // Find the Resource ID given this name.
@@ -342,22 +342,22 @@ CResourceID CResourceBase::ResourceGetIDParse(RES_TYPE restype, lpctstr &ptcName
     if ((restype != RES_UNKNOWN) && (iEvalResType == RES_UNKNOWN))
     {
         // Label it with the type we want.
-        return CResourceID(restype, iEvalResIndex);
+        return CResourceID(restype, iEvalResIndex, wPage);
     }
     // CResourceID always needs to be a valid resource (there's an ASSERT in CResourceID copy constructor).
-    return CResourceID((RES_TYPE)iEvalResType, iEvalResIndex);
+    return CResourceID((RES_TYPE)iEvalResType, iEvalResIndex, wPage);
 }
 
-CResourceID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr ptcName )
+CResourceID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr ptcName, word wPage )
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetID");
-	return ResourceGetIDParse(restype, ptcName);
+	return ResourceGetIDParse(restype, ptcName, wPage);
 }
 
-CResourceID CResourceBase::ResourceGetIDType( RES_TYPE restype, lpctstr pszName )
+CResourceID CResourceBase::ResourceGetIDType( RES_TYPE restype, lpctstr pszName, word wPage )
 {
 	// Get a resource of just this index type.
-	CResourceID rid = ResourceGetID( restype, pszName );
+	CResourceID rid = ResourceGetID( restype, pszName, wPage );
 	if ( rid.GetResType() != restype )
 	{
 		rid.InitUID();
@@ -366,11 +366,11 @@ CResourceID CResourceBase::ResourceGetIDType( RES_TYPE restype, lpctstr pszName 
 	return rid;
 }
 
-int CResourceBase::ResourceGetIndexType( RES_TYPE restype, lpctstr pszName )
+int CResourceBase::ResourceGetIndexType( RES_TYPE restype, lpctstr pszName, word wPage )
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetIndexType");
 	// Get a resource of just this index type.
-	const CResourceID rid = ResourceGetID( restype, pszName );
+	const CResourceID rid = ResourceGetID( restype, pszName, wPage );
 	if ( rid.GetResType() != restype )
 		return -1;
 	return rid.GetResIndex();
@@ -385,6 +385,15 @@ CResourceDef * CResourceBase::ResourceGetDef(const CResourceID& rid) const
 	if ( index == m_ResHash.BadIndex() )
 		return nullptr;
 	return m_ResHash.GetAt( rid, index );
+}
+
+CScriptObj * CResourceBase::ResourceGetDefByName( RES_TYPE restype, lpctstr pszName, word wPage )
+{
+    ADDTOCALLSTACK("CResourceBase::ResourceGetDefByName");
+    // resolve a name to the actual resource def.
+    CResourceID res = ResourceGetID(restype, pszName);
+    res.m_wPage = wPage ? wPage : RES_PAGE_ANY;   // Create a CResourceID with page == RES_PAGE_ANY: search independently from the page
+    return ResourceGetDef(res);
 }
 
 //*******************************************************

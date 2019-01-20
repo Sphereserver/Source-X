@@ -2741,7 +2741,8 @@ void CChar::SleepStart( bool fFrontFall )
 	}
 
 	// Play death animation (fall on ground)
-	UpdateCanSee(new PacketDeath(this, pCorpse), m_pClient);
+	UpdateCanSee(new PacketDeath(this, pCorpse));
+    pCorpse->Update();
 
 	SetID(m_prev_id);
 	StatFlag_Set(STATF_SLEEPING);
