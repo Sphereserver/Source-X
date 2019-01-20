@@ -2756,13 +2756,12 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 	if ( m_ResourceList.ContainsKey( const_cast<tchar *>(pszSection) ))
 	{
-
 		CListDefCont* pListBase = g_Exp.m_ListInternals.GetKey(pszSection);
-			if ( !pListBase )
-				pListBase = g_Exp.m_ListInternals.AddList(pszSection);
+		if ( !pListBase )
+			pListBase = g_Exp.m_ListInternals.AddList(pszSection);
 
-			if ( pListBase )
-				pListBase->r_LoadVal(pScript->GetArgStr());
+		if ( pListBase )
+			pListBase->r_LoadVal(pScript->GetArgStr());
 	}
 
 	switch ( restype )

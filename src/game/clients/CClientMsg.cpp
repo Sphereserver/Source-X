@@ -1805,16 +1805,18 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 {
 	ADDTOCALLSTACK("CClient::addPlayerSee");
 	// Adjust to my new location, what do I now see here?
-	int iViewDist = m_pChar->GetVisualRange();
+
+    CChar *pCharThis = GetChar();
+	int iViewDist = pCharThis->GetVisualRange();
 	bool bOSIMultiSight = IsSetOF(OF_OSIMultiSight);
-	CRegion *pCurrentCharRegion = m_pChar->GetTopPoint().GetRegion(REGION_TYPE_HOUSE);
+	CRegion *pCurrentCharRegion = pCharThis->GetTopPoint().GetRegion(REGION_TYPE_HOUSE);
 
 	// Nearby items on ground
 	CItem *pItem = nullptr;
 	uint iSeeCurrent = 0;
 	uint iSeeMax = g_Cfg.m_iMaxItemComplexity * 30;
 
-	CWorldSearch AreaItems(m_pChar->GetTopPoint(), UO_MAP_VIEW_RADAR);
+	CWorldSearch AreaItems(pCharThis->GetTopPoint(), UO_MAP_VIEW_RADAR * 2);    // *2 to catch big multis
 	AreaItems.SetSearchSquare(true);
 	for (;;)
 	{
@@ -1823,26 +1825,39 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 			break;
 
         int ptOldDist = ptOld.GetDistSight(pItem->GetTopPoint());
-        if ( pItem->IsTypeMulti() && (ptOldDist > UO_MAP_VIEW_RADAR) )		// incoming multi on radar view
+        if ( pItem->IsTypeMulti() )		// incoming multi on radar view
 		{
-			addItem_OnGround(pItem);
-			continue;
+            const DIR_TYPE dirFace = pCharThis->GetDir(pItem);
+            const CItemMulti *pMulti = static_cast<const CItemMulti*>(pItem);
+            ptOldDist += pMulti->GetSideDistanceFromCenter(dirFace);
+            if (ptOldDist > UO_MAP_VIEW_RADAR)
+            {
+                addItem_OnGround(pItem);
+                continue;
+            }
 		}
+        else 
+        {
+            if (ptOldDist > UO_MAP_VIEW_RADAR)  // too far, don't even bother to do other calculations
+                continue;
+        }
 
-		if ( (iSeeCurrent > iSeeMax) || !m_pChar->CanSee(pItem) )
+		if ( (iSeeCurrent > iSeeMax) || !pCharThis->CanSee(pItem) )
             continue;
 
+        const CPointMap& ptItemTop = pItem->GetTopLevelObj()->GetTopPoint();
+        const CPointMap& ptCharThis = pCharThis->GetTopPoint();
 		if ( bOSIMultiSight )
 		{
             bool bSee = false;
-            if (((ptOld.GetRegion(REGION_TYPE_HOUSE) != pCurrentCharRegion) || (ptOld.GetDistSight(pItem->GetTopPoint()) > iViewDist)) &&
-                (pItem->GetTopLevelObj()->GetTopPoint().GetRegion(REGION_TYPE_HOUSE) == pCurrentCharRegion))
+            if (((ptOld.GetRegion(REGION_TYPE_HOUSE) != pCurrentCharRegion) || (ptOld.GetDistSight(ptItemTop) > iViewDist)) &&
+                (ptItemTop.GetRegion(REGION_TYPE_HOUSE) == pCurrentCharRegion))
             {
                 bSee = true;    // item is in same house as me
             }
-            else if ((ptOld.GetDistSight(pItem->GetTopPoint()) > iViewDist) && (m_pChar->GetTopPoint().GetDistSight(pItem->GetTopPoint()) <= iViewDist))	// item just came into view 
+            else if ((ptOld.GetDistSight(ptItemTop) > iViewDist) && (ptCharThis.GetDistSight(ptItemTop) <= iViewDist))	// item just came into view 
             {
-                if (!pItem->GetTopLevelObj()->GetTopPoint().GetRegion(REGION_TYPE_HOUSE)		// item is not in a house (ships are ok)
+                if (!ptItemTop.GetRegion(REGION_TYPE_HOUSE)		// item is not in a house (ships are ok)
                     || (pItem->m_uidLink.IsValidUID() && pItem->m_uidLink.IsItem() && pItem->m_uidLink.ItemFind()->IsTypeMulti())	// item is linked to a multi
                     || pItem->IsTypeMulti()		        // item is an multi
                     || pItem->GetKeyNum("ALWAYSSEND"))  // item has ALWAYSSEND tag set
@@ -1858,7 +1873,7 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 		}
 		else
 		{
-			if ( (ptOldDist > iViewDist) && (m_pChar->GetTopPoint().GetDistSight(pItem->GetTopPoint()) <= iViewDist) )		// item just came into view
+			if ( (ptOldDist > iViewDist) && (ptCharThis.GetDistSight(ptItemTop) <= iViewDist) )		// item just came into view
 			{
 				++iSeeCurrent;
 				addItem_OnGround(pItem);
@@ -1871,7 +1886,7 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 	iSeeCurrent = 0;
 	iSeeMax = g_Cfg.m_iMaxCharComplexity * 5;
 
-	CWorldSearch AreaChars(m_pChar->GetTopPoint(), iViewDist);
+	CWorldSearch AreaChars(pCharThis->GetTopPoint(), iViewDist);
 	AreaChars.SetAllShow(IsPriv(PRIV_ALLSHOW));
 	AreaChars.SetSearchSquare(true);
 	for (;;)
@@ -1879,7 +1894,7 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 		pChar = AreaChars.GetChar();
 		if ( !pChar || iSeeCurrent > iSeeMax )
 			break;
-		if ( m_pChar == pChar || !CanSee(pChar) )
+		if ( pCharThis == pChar || !CanSee(pChar) )
 			continue;
 
 		if ( ptOld.GetDistSight(pChar->GetTopPoint()) > iViewDist )

@@ -805,7 +805,7 @@ int CPointBase::StepLinePath( const CPointBase & ptSrc, int iSteps )
 
 	m_x = (short)(ptSrc.m_x + IMulDivLL( iSteps, dx, iDist2D ));
 	m_y = (short)(ptSrc.m_y + IMulDivLL( iSteps, dy, iDist2D ));
-	return( iDist2D );
+	return iDist2D;
 }
 
 tchar * CPointBase::WriteUsed( tchar * pszBuffer ) const

@@ -1050,17 +1050,28 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 {
 	ADDTOCALLSTACK("CChar::CanSee");
 	// Can I see this object (char or item)?
-	if ( !pObj || IsDisconnected() || !pObj->GetTopLevelObj()->GetTopPoint().IsValidPoint() )
+	if ( !pObj || IsDisconnected() )
 		return false;
 
+    const CPointMap& ptObjTop = pObj->GetTopLevelObj()->GetTopPoint();
+    if (!ptObjTop.IsValidPoint())
+        return false;
+
+    const CPointMap& ptTop = GetTopPoint();
+    int iDistSight = GetVisualRange();
 	if ( pObj->IsItem() )
 	{
 		const CItem *pItem = static_cast<const CItem*>(pObj);
 		if ( !pItem || !CanSeeItem(pItem) )
 			return false;
 
-		int iDist = pItem->IsTypeMulti() ? UO_MAP_VIEW_RADAR : GetVisualRange();
-		if ( GetTopPoint().GetDistSight(pObj->GetTopLevelObj()->GetTopPoint()) > iDist )
+        if (pItem->IsTypeMulti())
+        {
+            const DIR_TYPE dirFace = GetDir(pObj);
+            const CItemMulti *pMulti = static_cast<const CItemMulti*>(pItem);
+            iDistSight += pMulti->GetSideDistanceFromCenter(dirFace);
+        }
+		if ( ptTop.GetDistSight(ptObjTop) > iDistSight )
 			return false;
 
 		const CObjBase *pObjCont = pItem->GetContainer();
@@ -1121,10 +1132,13 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 			return false;
 		if ( pChar == this )
 			return true;
-		if ( GetTopPoint().GetDistSight(pChar->GetTopPoint()) > GetVisualRange() )
+		if ( ptTop.GetDistSight(pChar->GetTopPoint()) > iDistSight )
 			return false;
+
+        const PLEVEL_TYPE plevelMe = GetPrivLevel();
+        const PLEVEL_TYPE plevelChar = pChar->GetPrivLevel();
 		if ( IsPriv(PRIV_ALLSHOW) )
-			return (GetPrivLevel() < pChar->GetPrivLevel()) ? false : true;
+			return (plevelMe < plevelChar) ? false : true;
 
 		if ( m_pNPC && pChar->IsStatFlag(STATF_DEAD) )
 		{
@@ -1140,14 +1154,14 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 				if ( IsTrigUsed( TRIGGER_SEEHIDDEN ) )
 				{
 					CScriptTriggerArgs Args;
-					Args.m_iN1 = GetPrivLevel() <= pChar->GetPrivLevel();
+					Args.m_iN1 = (plevelMe <= plevelChar);
 					CChar *pChar2 = const_cast< CChar* >( pChar );
 					CChar *this2 = const_cast< CChar* >( this );
 					this2->OnTrigger( CTRIG_SeeHidden, pChar2, &Args );
 					return ( Args.m_iN1 != 1 );
 				}
 			}
-			if ( GetPrivLevel() <= pChar->GetPrivLevel() )
+			if ( plevelMe <= plevelChar )
 				return false;
 		}
 
@@ -1170,7 +1184,7 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 	}
 
 	if ( IsPriv(PRIV_ALLSHOW) && (pObj->IsTopLevel() || pObj->IsDisconnected()) )		// don't exclude for logged out and diff maps
-		return (GetTopPoint().GetDistSightBase(pObj->GetTopPoint()) <= GetVisualRange());
+		return (ptTop.GetDistSightBase(ptObjTop) <= iDistSight);
 
 	return true;
 }

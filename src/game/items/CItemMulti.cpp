@@ -159,6 +159,12 @@ CRegion * CItemMulti::GetRegion() const
     return m_pRegion;
 }
 
+int CItemMulti::GetSideDistanceFromCenter(DIR_TYPE dir) const
+{
+    const CPointMap& ptSide = GetRegion()->GetRegionCorner(dir);
+    return ptSide.GetDist(GetTopPoint());
+}
+
 int CItemMulti::Multi_GetMaxDist() const
 {
     ADDTOCALLSTACK("CItemMulti::Multi_GetMaxDist");

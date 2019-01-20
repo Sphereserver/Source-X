@@ -17,10 +17,12 @@ CResourceDef* CResourceHash::GetAt(const CResourceID& rid, size_t index) const
 }
 size_t CResourceHash::AddSortKey(const CResourceID& rid, CResourceDef* pNew)
 {
+    ASSERT(rid.GetResPage() <= RES_PAGE_MAX);
     return m_Array[GetHashArray(rid)].AddSortKey(pNew, rid);
 }
 void CResourceHash::SetAt(const CResourceID& rid, size_t index, CResourceDef* pNew)
 {
+    ASSERT(rid.GetResPage() <= RES_PAGE_MAX);
     m_Array[GetHashArray(rid)].assign(index, pNew);
 }
 

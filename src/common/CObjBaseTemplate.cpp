@@ -113,7 +113,7 @@ int CObjBaseTemplate::GetTopDist( const CObjBaseTemplate * pObj ) const
 	// Assume both already at top level.
 	ASSERT( pObj );
 	if ( pObj->IsDisconnected())
-		return( INT16_MAX );
+		return INT16_MAX;
 	return GetTopPoint().GetDist( pObj->GetTopPoint());
 }
 
@@ -139,7 +139,7 @@ int CObjBaseTemplate::GetDist( const CObjBaseTemplate * pObj ) const
 		return INT16_MAX ;
 	pObj = pObj->GetTopLevelObj();
 	if ( pObj->IsDisconnected())
-		return INT16_MAX ;
+		return INT16_MAX;
 	return GetTopDist( pObj );
 }
 
@@ -149,7 +149,7 @@ int CObjBaseTemplate::GetTopDist3D( const CObjBaseTemplate * pObj ) const // 3D 
 	// Assume both already at top level.
 	ASSERT( pObj );
 	if ( pObj->IsDisconnected())
-		return INT16_MAX ;
+		return INT16_MAX;
 	return GetTopPoint().GetDist3D( pObj->GetTopPoint());
 }
 
