@@ -1155,11 +1155,7 @@ CItem * CItem::UnStackSplit( word amount, CChar * pCharSrc )
 	pItemNew->SetAmount( wAmount - amount );
 	SetAmountUpdate( amount );
 
-    if (pCharSrc && !IsTopLevel())  // am i unstacking it from an item stored inside a container?
-    {
-        pCharSrc->ItemBounce( pItemNew );
-    }
-	else if ( ! pItemNew->MoveNearObj( this ))
+    if ( ! pItemNew->MoveNearObj( this ))
 	{
 		if ( pCharSrc )
 			pCharSrc->ItemBounce( pItemNew );

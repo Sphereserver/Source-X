@@ -3555,9 +3555,9 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fForceFix, bool fAllowReject)
 	if ( !MoveToRoom(pRoomNew, fAllowReject) )
 		return false;
 
-	const CPointMap ptOld = GetUnkPoint();
-    SetTopPoint(pt);
-    bool fSectorChanged = pt.GetSector()->MoveCharToSector(this);
+	CPointMap ptOld(GetTopPoint());
+    SetUnkPoint(pt);
+    bool fSectorChanged = GetTopPoint().GetSector()->MoveCharToSector(this);
 
 	if ( !m_fClimbUpdated || fForceFix )
 		FixClimbHeight();
