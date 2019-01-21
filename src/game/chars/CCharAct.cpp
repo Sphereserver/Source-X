@@ -1691,14 +1691,20 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	CItemCorpse * pCorpse = dynamic_cast<CItemCorpse *>(pObjTop);
 	if ( pCorpse && pCorpse->m_uidLink == GetUID() )
 	{
+		UINT64 iRevealFlags = STATF_HIDDEN | STATF_SLEEPING;
 		if ( g_Cfg.m_iRevealFlags & REVEALF_LOOTINGSELF )
-			Reveal();
+			iRevealFlags |= STATF_INVISIBLE;
+
+		Reveal(iRevealFlags);
 	}
 	else
 	{
 		CheckCorpseCrime(pCorpse, true, false);
-		if ( g_Cfg.m_iRevealFlags & REVEALF_LOOTINGOTHERS )
-			Reveal();
+		UINT64 iRevealFlags = STATF_HIDDEN | STATF_SLEEPING;
+		if (g_Cfg.m_iRevealFlags & REVEALF_LOOTINGOTHERS)
+			iRevealFlags |= STATF_INVISIBLE;
+
+		Reveal(iRevealFlags);
 	}
 
 	word iAmountMax = pItem->GetAmount();

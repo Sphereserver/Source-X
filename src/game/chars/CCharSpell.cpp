@@ -1912,8 +1912,17 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEff
 		}
 
 		// Check if stats spells can stack
-		if ( layer == LAYER_SPELL_STATS && spell != pSpellPrev->m_itSpell.m_spell && IsSetMagicFlags(MAGICF_STACKSTATS) )
-			continue;
+		if ((layer == LAYER_SPELL_STATS) && (spell != pSpellPrev->m_itSpell.m_spell) && IsSetMagicFlags(MAGICF_STACKSTATS))
+		{
+			if (g_Cfg.GetSpellDef(SPELL_TYPE(pSpellPrev->m_itSpell.m_spell))->IsSpellType(SPELLFLAG_CURSE))
+				if (!g_Cfg.GetSpellDef(spell)->IsSpellType(SPELLFLAG_CURSE))
+					continue;
+
+			if (g_Cfg.GetSpellDef(SPELL_TYPE(pSpellPrev->m_itSpell.m_spell))->IsSpellType(SPELLFLAG_BLESS))
+				if (!g_Cfg.GetSpellDef(spell)->IsSpellType(SPELLFLAG_BLESS))
+					continue;
+		}
+
 
 		pSpellPrev->Delete();
 		break;
@@ -3231,51 +3240,80 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	ushort uiResist = 0;
 	if ( pSpellDef->IsSpellType(SPELLFLAG_RESIST) && pCharSrc && !fPotion )
 	{
-		uiResist = Skill_GetBase(SKILL_MAGICRESISTANCE);
-		ushort uiFirst = uiResist / 50;
-		ushort uiSecond = uiResist - (((pCharSrc->Skill_GetBase(SKILL_MAGERY) - 200) / 50) + (ushort)((1 + (spell / 8)) * 50));
-		uchar uiResistChance = (uchar)(maximum(uiFirst, uiSecond) / 30);
-		uiResist = Skill_UseQuick(SKILL_MAGICRESISTANCE, uiResistChance, true, false) ? 25 : 0;	// If we successfully resist then we have a 25% damage reduction, 0 if we don't.
-
-		if ( IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
+		if ( pCharSrc != this )
 		{
-			CItem *pEvilOmen = LayerFind(LAYER_SPELL_Evil_Omen);
-			if ( pEvilOmen )
-				uiResist /= 2;	// Effect 3: Only 50% of magic resistance used in next resistable spell.
+			uiResist = Skill_GetBase(SKILL_MAGICRESISTANCE);
+			ushort	uiFirst = uiResist / 50;
+			ushort	uiSecond = uiResist - (((pCharSrc->Skill_GetBase(SKILL_MAGERY) - 200) / 50) + (ushort)((1 + (spell / 8)) * 50));
+			uchar	uiResistChance = (uchar)(maximum(uiFirst, uiSecond) / 30);
+			uiResist = Skill_CheckSuccess(SKILL_MAGICRESISTANCE, uiResistChance, false) ? 25 : Calc_GetRandVal(uiResist / 83);	// Success = -25% damage reduction, Fail = -12%.
+
+			if ( IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
+			{	
+				CItem *pEvilOmen = LayerFind(LAYER_SPELL_Evil_Omen);
+				if (pEvilOmen)
+					uiResist /= 2;	// Effect 3: Only 50% of magic resistance used in next resistable spell.
+			}
 		}
 	}
 
-	if ( pSpellDef->IsSpellType(SPELLFLAG_DAMAGE) && IsSetMagicFlags(MAGICF_OSIFORMULAS))
+	// Damage Bonus!
+	// This should keep as a +% to the spell effect
+	// And not added directly to iEffect
+	int iDamageBonus = 0;
+	if (pSpellDef->IsSpellType(SPELLFLAG_DAMAGE) || pSpellDef->IsSpellType(SPELLFLAG_BLESS) || pSpellDef->IsSpellType(SPELLFLAG_CURSE) || pSpellDef->IsSpellType(SPELLFLAG_HEAL))
 	{
-        if (!pCharSrc)
+        if ( !pCharSrc )
         {
             iEffect *= ((iSkillLevel * 3) / 1000) + 1;
         }
         else
         {
-            // Evaluating Intelligence mult
-            iEffect *= ((pCharSrc->Skill_GetBase(SKILL_EVALINT) * 3) / 1000) + 1;
-
-            // Spell Damage Increase bonus
-            int DamageBonus = (int)(pCharSrc->GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASESPELLDAM, true));
-            if (m_pPlayer && pCharSrc->m_pPlayer && DamageBonus > 15)		// Spell Damage Increase is capped at 15% on PvP
-                DamageBonus = 15;
-
-            // INT bonus
-            DamageBonus += pCharSrc->Stat_GetAdjusted(STAT_INT) / 10;
-
-            // Inscription bonus
-            DamageBonus += pCharSrc->Skill_GetBase(SKILL_INSCRIPTION) / 100;
+			// Spell Damage Increase bonus
+			iDamageBonus += (int)(pCharSrc->GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASESPELLDAM, true));
+			if (m_pPlayer && pCharSrc->m_pPlayer && iDamageBonus > 15)		// Spell Damage Increase is capped at 15% on PvP
+				iDamageBonus = 15;
+			
+			// Evaluating Intelligence + Intelligence + Inscription
+            iDamageBonus += ((pCharSrc->Skill_GetBase(SKILL_EVALINT) * 35) / 1000);
+            iDamageBonus += pCharSrc->Stat_GetAdjusted(STAT_INT) / 10;
+			iDamageBonus += pCharSrc->Skill_GetBase(SKILL_INSCRIPTION) / 100;
 
             // Racial Bonus (Berserk), gargoyles gains +3% Spell Damage Increase per each 20 HP lost
             if ((g_Cfg.m_iRacialFlags & RACIALF_GARG_BERSERK) && IsGargoyle())
             {
                 int iInc = 3 * ((Stat_GetMaxAdjusted(STAT_STR) - Stat_GetVal(STAT_STR)) / 20);
-                DamageBonus += minimum(iInc, 12);		// value is capped at 12%
+                iDamageBonus += minimum(iInc, 12);		// value is capped at 12%
             }
-
-            iEffect += ((iEffect * DamageBonus) / 100);
         }
+	}
+
+	if (pSpellDef->IsSpellType(SPELLFLAG_BLESS) || pSpellDef->IsSpellType(SPELLFLAG_CURSE))
+		iEffect = iSkillLevel /= 2;
+	
+	// Check if the spell can be reflected
+	if (pSpellDef->IsSpellType(SPELLFLAG_TARG_CHAR) && pCharSrc && (pCharSrc != this))		// only spells with direct target can be reflected
+	{
+		if (IsStatFlag(STATF_REFLECTION))
+		{
+			Effect(EFFECT_OBJ, ITEMID_FX_GLOW, this, 10, 5);
+			CItem *pMagicReflect = LayerFind(LAYER_SPELL_Magic_Reflect);
+			if (pMagicReflect)
+				pMagicReflect->Delete();
+
+			if (pCharSrc->IsStatFlag(STATF_REFLECTION))		// caster is under reflection effect too, so the spell will reflect back to default target
+			{
+				pCharSrc->Effect(EFFECT_OBJ, ITEMID_FX_GLOW, pCharSrc, 10, 5);
+				pMagicReflect = pCharSrc->LayerFind(LAYER_SPELL_Magic_Reflect);
+				if (pMagicReflect)
+					pMagicReflect->Delete();
+			}
+			else
+			{
+				pCharSrc->OnSpellEffect(spell, pCharSrc, iSkillLevel, pSourceItem);
+				return true;
+			}
+		}
 	}
 
 	CScriptTriggerArgs Args((int)(spell), iSkillLevel, pSourceItem);
@@ -3284,6 +3322,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	Args.m_VarsLocal.SetNum("Explode", fExplode);
 	Args.m_VarsLocal.SetNum("Sound", iSound);
 	Args.m_VarsLocal.SetNum("Effect", iEffect);
+	Args.m_VarsLocal.SetNum("DamageBonus", iDamageBonus);
 	Args.m_VarsLocal.SetNum("Resist", uiResist);
 	Args.m_VarsLocal.SetNum("Duration", iDuration);
 
@@ -3316,10 +3355,14 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	iEffect = (int)(Args.m_VarsLocal.GetKeyNum("Effect"));
 	uiResist = (ushort)(Args.m_VarsLocal.GetKeyNum("Resist"));
 	iDuration = (int)(Args.m_VarsLocal.GetKeyNum("Duration"));
+	iDamageBonus = (int)(Args.m_VarsLocal.GetKeyNum("DamageBonus"));
 
 	HUE_TYPE iColor = (HUE_TYPE)Args.m_VarsLocal.GetKeyNum("EffectColor");
 	dword dwRender = (dword)Args.m_VarsLocal.GetKeyNum("EffectRender");
 
+	if (iDamageBonus != 0)
+		iEffect += (iEffect * iDamageBonus) / 100;
+	
 	if ( iEffectID > ITEMID_QTY )
 		iEffectID = pSpellDef->m_idEffect;
 
@@ -3343,44 +3386,24 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		if ( !OnAttackedBy(pCharSrc, false, !pSpellDef->IsSpellType(SPELLFLAG_FIELD)) && !fReflecting )
 			return false;
 
-		// Check if the spell can be reflected
-		if ( pSpellDef->IsSpellType(SPELLFLAG_TARG_CHAR) && pCharSrc && (pCharSrc != this) )		// only spells with direct target can be reflected
-		{
-			if ( IsStatFlag(STATF_REFLECTION) )
-			{
-				Effect(EFFECT_OBJ, ITEMID_FX_GLOW, this, 10, 5);
-				CItem *pMagicReflect = LayerFind(LAYER_SPELL_Magic_Reflect);
-				if ( pMagicReflect )
-					pMagicReflect->Delete();
-
-				if ( pCharSrc->IsStatFlag(STATF_REFLECTION) )		// caster is under reflection effect too, so the spell will reflect back to default target
-				{
-					pCharSrc->Effect(EFFECT_OBJ, ITEMID_FX_GLOW, pCharSrc, 10, 5);
-					pMagicReflect = pCharSrc->LayerFind(LAYER_SPELL_Magic_Reflect);
-					if ( pMagicReflect )
-						pMagicReflect->Delete();
-				}
-				else
-				{
-					pCharSrc->OnSpellEffect( spell, pCharSrc, iSkillLevel, pSourceItem );
-					return true;
-				}
-			}
-		}
 	}
 
 	if (pSpellDef->IsSpellType(SPELLFLAG_SCRIPTED))
 		return true;
 
-	if ( pSpellDef->IsSpellType( SPELLFLAG_DAMAGE ) )
+	if (pSpellDef->IsSpellType(SPELLFLAG_DAMAGE) || pSpellDef->IsSpellType(SPELLFLAG_CURSE))
 	{
-		if ( uiResist > 0 )
+		if (uiResist > 0)
 		{
-			SysMessageDefault( DEFMSG_RESISTMAGIC );
+			SysMessageDefault(DEFMSG_RESISTMAGIC);
 			iEffect -= iEffect * uiResist / 100;
-			if ( iEffect < 0 )
-				iEffect = 0;	//May not do damage, but aversion should be created from the target.
+			if (iEffect < 0)
+				iEffect = 1;	//May not do damage, but aversion should be created from the target.
 		}
+	}
+
+	if (pSpellDef->IsSpellType(SPELLFLAG_DAMAGE))
+	{
 		if ( !iDmgType )
 		{
 			switch ( spell )

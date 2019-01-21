@@ -1537,9 +1537,6 @@ int CChar::Skill_DetectHidden( SKTRIG_TYPE stage )
 		return -SKTRIG_QTY;
 	}
 
-	if ( !(g_Cfg.m_iRevealFlags & REVEALF_DETECTINGHIDDEN) )	// skill succeeded, but effect is disabled
-		return 0;
-
 	int iSkill = Skill_GetAdjusted(SKILL_DETECTINGHIDDEN);
 	int iRadius = iSkill / 100;
 
@@ -1556,6 +1553,8 @@ int CChar::Skill_DetectHidden( SKTRIG_TYPE stage )
 		if ( pChar == nullptr )
 			break;
 		if ( pChar == this || !pChar->IsStatFlag(STATF_INVISIBLE|STATF_HIDDEN) )
+			continue;
+		if (!(g_Cfg.m_iRevealFlags & REVEALF_DETECTINGHIDDEN) && pChar->IsStatFlag(STATF_INVISIBLE))
 			continue;
 
 		// Check chance to reveal the target
@@ -2363,7 +2362,10 @@ int CChar::Skill_Meditation( SKTRIG_TYPE stage )
 		return Calc_GetRandVal(100);	// How difficult? 1-1000. how hard to get started ?
 	}
 	if ( stage == SKTRIG_STROKE )
+	{
+		Skill_Experience(SKILL_MEDITATION, m_Act_Difficulty);
 		return 0;
+	}
 
 	if ( stage == SKTRIG_SUCCESS )
 	{
@@ -3918,7 +3920,9 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 	}
 
 	if ( !Skill_CanUse(skill) )
+	{
 		return false;
+	}
 
 	if ( Skill_GetActive() != SKILL_NONE )
 		Skill_Fail(true);		// fail previous skill unfinished. (with NO skill gain!)

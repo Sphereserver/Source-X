@@ -246,14 +246,14 @@ CServerConfig::CServerConfig()
 	m_sZeroPoint			= "1323,1624,0";
 	m_bAllowBuySellAgent	= false;
 
-	m_iColorNotoGood			= 0x59;		// blue
-	m_iColorNotoGuildSame		= 0x3f;		// green
-	m_iColorNotoNeutral			= 0x3b2;	// grey (can be attacked)
-	m_iColorNotoCriminal		= 0x3b2;	// grey (criminal)
-	m_iColorNotoGuildWar		= 0x90;		// orange (enemy guild)
-	m_iColorNotoEvil			= 0x22;		// red
+	m_iColorNotoGood			= 0x63;		// blue
+	m_iColorNotoGuildSame		= 0x44;		// green
+	m_iColorNotoNeutral			= 0x388;	// grey (can be attacked)
+	m_iColorNotoCriminal		= 0x387;	// grey (criminal)
+	m_iColorNotoGuildWar		= 0x2b;		// orange (enemy guild)
+	m_iColorNotoEvil			= 0x26;		// red
 	m_iColorNotoInvul			= 0x35;		// yellow
-	m_iColorNotoInvulGameMaster = 0x0b;		// purple
+	m_iColorNotoInvulGameMaster = 0x12;		// purple
 	m_iColorNotoDefault			= 0x3b2;	// grey (if not any other)
 
 	m_iColorInvis		= 0;

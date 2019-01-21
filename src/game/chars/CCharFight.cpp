@@ -650,7 +650,7 @@ effect_bounce:
 
 	CScriptTriggerArgs Args( iDmg, uType, (int64)(0) );
 	Args.m_VarsLocal.SetNum("ItemDamageLayer", sm_ArmorDamageLayers[Calc_GetRandVal(CountOf(sm_ArmorDamageLayers))]);
-	Args.m_VarsLocal.SetNum("ItemDamageChance", 40);
+	Args.m_VarsLocal.SetNum("ItemDamageChance", 2);
 
 	if ( IsTrigUsed(TRIGGER_GETHIT) )
 	{
@@ -1785,7 +1785,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	int	iDmg = Fight_CalcDamage(pWeapon);
 
 	CScriptTriggerArgs Args(iDmg, iDmgType, pWeapon);
-	Args.m_VarsLocal.SetNum("ItemDamageChance", 40);
+	Args.m_VarsLocal.SetNum("ItemDamageChance", 2);
 	if ( pAmmo )
 		Args.m_VarsLocal.SetNum("Arrow", pAmmo->GetUID());
 
@@ -1956,6 +1956,9 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		{
 			Skill_Experience(skill, m_Act_Difficulty);
 			Skill_Experience(SKILL_TACTICS, m_Act_Difficulty);
+			
+			if ( pCharTarg->m_pNPC )
+				Skill_Experience(SKILL_ANATOMY, m_Act_Difficulty);
 		}
 	}
 

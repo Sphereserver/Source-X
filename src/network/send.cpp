@@ -300,7 +300,11 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
         }
         else
         {
-            writeInt64(0);
+			// #UOA#
+			// The status is: Armor, PMagery, PStealth, Luck
+			writeInt16((word)other->GetKeyNum("PENALTY.MAGERY", true));
+			writeInt16((word)other->GetKeyNum("PENALTY.STEALTH", true));
+			writeInt32(0);
         }
         writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_LUCK, pBaseCCPChar));
 
