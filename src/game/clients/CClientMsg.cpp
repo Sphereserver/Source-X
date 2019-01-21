@@ -1808,8 +1808,8 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 
     CChar *pCharThis = GetChar();
 	int iViewDist = pCharThis->GetVisualRange();
-	bool bOSIMultiSight = IsSetOF(OF_OSIMultiSight);
 	CRegion *pCurrentCharRegion = pCharThis->GetTopPoint().GetRegion(REGION_TYPE_HOUSE);
+    bool bOSIMultiSight = IsSetOF(OF_OSIMultiSight);
 
 	// Nearby items on ground
 	CItem *pItem = nullptr;
@@ -1824,23 +1824,17 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 		if ( !pItem )
 			break;
 
-        int ptOldDist = ptOld.GetDistSight(pItem->GetTopPoint());
+        const int iOldDist = ptOld.GetDistSight(pItem->GetTopPoint());  // handles also the case of an invalid point
         if ( pItem->IsTypeMulti() )		// incoming multi on radar view
 		{
             const DIR_TYPE dirFace = pCharThis->GetDir(pItem);
             const CItemMulti *pMulti = static_cast<const CItemMulti*>(pItem);
-            ptOldDist += pMulti->GetSideDistanceFromCenter(dirFace);
-            if (ptOldDist > UO_MAP_VIEW_RADAR)
+            if (iOldDist > (UO_MAP_VIEW_RADAR - pMulti->GetSideDistanceFromCenter(dirFace)))
             {
                 addItem_OnGround(pItem);
                 continue;
             }
 		}
-        else 
-        {
-            if (ptOldDist > UO_MAP_VIEW_RADAR)  // too far, don't even bother to do other calculations
-                continue;
-        }
 
 		if ( (iSeeCurrent > iSeeMax) || !pCharThis->CanSee(pItem) )
             continue;
@@ -1873,7 +1867,7 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 		}
 		else
 		{
-			if ( (ptOldDist > iViewDist) && (ptCharThis.GetDistSight(ptItemTop) <= iViewDist) )		// item just came into view
+			if ( (iOldDist > iViewDist) && (ptCharThis.GetDistSight(ptItemTop) <= iViewDist) )		// item just came into view
 			{
 				++iSeeCurrent;
 				addItem_OnGround(pItem);

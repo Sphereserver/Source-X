@@ -1685,7 +1685,8 @@ bool CObjBase::r_LoadVal( CScript & s )
             }
             const HUE_TYPE hue = (HUE_TYPE)s.GetArgVal();
             SetHue(hue, false, &g_Serv); //@Dye is called from @Create/.xcolor/script command here // since we can not receive pSrc on this r_LoadVal function ARGO/SRC will be null
-            Update();
+            if (!g_Serv.IsLoading())
+                Update();
         }
         break;
 		case OC_EVENTS:

@@ -3542,7 +3542,7 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fForceFix, bool fAllowReject)
 		// We cannot put this char in non-disconnect state.
 		SetDisconnected();
 		pSector->m_Chars_Disconnect.InsertHead(this);
-		SetUnkPoint(pt);
+        SetTopPoint(pt);
 		return true;
 	}
 
@@ -3556,7 +3556,7 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fForceFix, bool fAllowReject)
 		return false;
 
 	CPointMap ptOld(GetTopPoint());
-    SetUnkPoint(pt);
+    SetTopPoint(pt);
     bool fSectorChanged = GetTopPoint().GetSector()->MoveCharToSector(this);
 
 	if ( !m_fClimbUpdated || fForceFix )
