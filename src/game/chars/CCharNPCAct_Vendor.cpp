@@ -289,7 +289,9 @@ bool CChar::NPC_OnTrainPay(CChar *pCharSrc, CItemMemory *pMemory, CItem * pGold)
 		pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_NONE;
 
 		// Give change back.
-		pGold->UnStackSplit( wTrainCost, pCharSrc );
+		CItem *pGoldChange = pGold->UnStackSplit( wTrainCost, pCharSrc );
+        if (pGoldChange)
+            pGoldChange->MoveNearObj(pCharSrc, 1);
 	}
 	GetPackSafe()->ContentAdd( pGold );	// take my cash.
 
