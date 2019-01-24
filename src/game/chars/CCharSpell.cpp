@@ -218,8 +218,8 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool fTakePets, bool fCheckAntiMagi
 	{
 		if ( iEffect != ITEMID_NOTHING )
 		{
-            EffectXYZ(EFFECT_XYZ, iEffect, nullptr, &ptOld, 10, 10);
-            EffectXYZ(EFFECT_XYZ, iEffect, nullptr, &ptNew, 10, 10);  // Entering effect
+            EffectLocation(EFFECT_XYZ, iEffect, nullptr, &ptOld, 10, 10);
+            EffectLocation(EFFECT_XYZ, iEffect, nullptr, &ptNew, 10, 10);  // Entering effect
 		}
 		if ( iSound != SOUND_NONE )
 			Sound(iSound);
@@ -2846,7 +2846,7 @@ bool CChar::Spell_CastDone()
 
 				if (pObj == nullptr)
 				{
-                    EffectXYZ(EFFECT_XYZ, iT1, nullptr, &m_Act_p, 20, 30);
+                    EffectLocation(EFFECT_XYZ, iT1, nullptr, &m_Act_p, 20, 30);
 				}
 				else
 				{

@@ -403,13 +403,13 @@ void CCSpawn::AddObj(const CUID& uid)
     // (not loaded yet) so just proceed without any checks.
 
     uint16 iMax = maximum(GetAmount(), 1);
-    CItem *pItem = static_cast<CItem*>(GetLink());
-    if ((_uidList.size() >= iMax) && !pItem->IsType(IT_SPAWN_CHAMPION))  // char/item spawns have a limit, champions may spawn a lot of npcs
+    CItem *pSpawnItem = static_cast<CItem*>(GetLink());
+    if ((_uidList.size() >= iMax) && !pSpawnItem->IsType(IT_SPAWN_CHAMPION))  // char/item spawns have a limit, champions may spawn a lot of npcs
     {
         return;
     }
 
-    bool fIsSpawnChar = (pItem->IsType(IT_SPAWN_CHAR) || pItem->IsType(IT_SPAWN_CHAMPION));
+    bool fIsSpawnChar = (pSpawnItem->IsType(IT_SPAWN_CHAR) || pSpawnItem->IsType(IT_SPAWN_CHAMPION));
 
     if (!g_Serv.IsLoading())
     {
@@ -426,7 +426,7 @@ void CCSpawn::AddObj(const CUID& uid)
             if (!pChar || !pChar->m_pNPC)
                 return;
         }
-        else if (pItem->IsType(IT_SPAWN_ITEM) && !uid.ItemFind())
+        else if (pSpawnItem->IsType(IT_SPAWN_ITEM) && !uid.ItemFind())
         {
             // IT_SPAWN_ITEM can only spawn items
             return;
@@ -449,10 +449,10 @@ void CCSpawn::AddObj(const CUID& uid)
             CChar *pChar = static_cast<CChar*>(pSpawnedObj);
             ASSERT(pChar->m_pNPC);
             pChar->StatFlag_Set(STATF_SPAWNED);
-            pChar->m_ptHome = pItem->GetTopPoint();
+            pChar->m_ptHome = pSpawnItem->GetTopPoint();
             pChar->m_pNPC->m_Home_Dist_Wander = (word)_iMaxDist;
         }
-        pItem->UpdatePropertyFlag();
+        pSpawnItem->UpdatePropertyFlag();
     }
 
     // Done with checks, let's add this.

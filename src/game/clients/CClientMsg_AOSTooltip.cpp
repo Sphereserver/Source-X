@@ -25,14 +25,14 @@ uint HashString(lpctstr str, size_t length)
 #define PUSH_FRONT_TOOLTIP(pObj, t) pObj->m_TooltipData.emplace(pObj->m_TooltipData.begin(),t)
 #define PUSH_BACK_TOOLTIP(pObj, t) pObj->m_TooltipData.emplace_back(t)
 
-void CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
+bool CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 {
 	ADDTOCALLSTACK("CClient::addAOSTooltip");
 	if (!pObj)
-		return;
+		return false;
 
 	if (PacketPropertyList::CanSendTo(GetNetState()) == false)
-		return;
+		return false;
 
 	// Enhanced and KR clients always need the tooltips (but they can't be enabled without FEATURE_AOS_UPDATE_B, since this has to be sent to the client via the packet 0xB9).
 	// Shop items use tooltips whether they're disabled or not,
@@ -41,7 +41,7 @@ void CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 	if (!IsResClient(RDS_AOS) || !IsAosFlagEnabled(FEATURE_AOS_UPDATE_B))
 	{
 		if (!fShop)
-			return;
+			return false;
 
 		fNameOnly = true;
 	}
@@ -50,7 +50,7 @@ void CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 	//DEBUG_MSG(("(( m_pChar->GetTopPoint().GetDistSight(pObj->GetTopPoint()) (%x) > UO_MAP_VIEW_SIZE_DEFAULT (%x) ) && ( !bShop ) (%x) )", m_pChar->GetTopPoint().GetDistSight(pObj->GetTopPoint()), UO_MAP_VIEW_SIZE_DEFAULT, ( !bShop )));
 	int iDist = GetChar()->GetTopPoint().GetDistSight(pObj->GetTopPoint());
 	if ( (iDist > GetChar()->GetVisualRange()) && (iDist <= UO_MAP_VIEW_RADAR) && !fShop ) //(iDist <= UO_MAP_VIEW_RADAR) fShop is needed because items equipped or in a container have invalid GetTopPoint (and a very high iDist)
-		return;
+		return false;
 
 	// We check here if we are sending a tooltip for a static/non-movable items
 	// (client doesn't expect us to) but only in the world
@@ -61,7 +61,7 @@ void CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 		if (!pItem->GetContainer() && pItem->IsAttr(/*ATTR_MOVE_NEVER|*/ATTR_STATIC))
 		{
 			if ((!GetChar()->IsPriv(PRIV_GM)) && (!GetChar()->IsPriv(PRIV_ALLMOVE)))
-				return;
+				return false;
 		}
 	}
 
@@ -196,6 +196,8 @@ void CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 	// to the object (i.e. wasn't cached)
 	if (propertyList != pObj->GetPropertyList())
 		delete propertyList;
+
+    return true;
 }
 
 void CClient::AOSTooltip_addName(CObjBase* pObj)

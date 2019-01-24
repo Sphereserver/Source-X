@@ -2003,7 +2003,7 @@ void PacketEffect::writeHuedEffect(dword hue, dword render)
 {
     ADDTOCALLSTACK("PacketEffect::writeHuedEffect");
 
-    writeInt32(hue);
+    writeInt32(hue + 1);    // Idx 0: default hue. If idx > 0, then the value picked up in hues.mul has idx + 1.
     writeInt32(render);
 }
 
@@ -2012,7 +2012,7 @@ PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYP
     byte speed, byte loop, bool explode) : PacketSend(XCMD_Effect, 20, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketEffect::PacketEffect(XYZ)");
-    writeBasicEffectXYZ(motion, id, ptDest, ptSrc, speed, loop, explode);
+    writeBasicEffectLocation(motion, id, ptDest, ptSrc, speed, loop, explode);
 	push(target);
 }
 
@@ -2022,7 +2022,7 @@ PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYP
 {
 	ADDTOCALLSTACK("PacketEffect::PacketEffect(XYZ)(hued)");
 
-    writeBasicEffectXYZ(motion, id, ptDest, ptSrc, speed, loop, explode);
+    writeBasicEffectLocation(motion, id, ptDest, ptSrc, speed, loop, explode);
 	writeHuedEffect(hue, render);
 
 	push(target);
@@ -2035,7 +2035,7 @@ PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYP
 {
 	ADDTOCALLSTACK("PacketEffect::PacketEffect(XYZ)(particle)");
 
-    writeBasicEffectXYZ(motion, id, ptDest, ptSrc, speed, loop, explode);
+    writeBasicEffectLocation(motion, id, ptDest, ptSrc, speed, loop, explode);
 	writeHuedEffect(hue, render);
 
 	writeInt16(effectid);
@@ -2047,9 +2047,9 @@ PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYP
 	push(target);
 }
 
-void PacketEffect::writeBasicEffectXYZ(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptSrc, const CPointMap *ptDest, byte speed, byte loop, bool explode)
+void PacketEffect::writeBasicEffectLocation(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptSrc, const CPointMap *ptDest, byte speed, byte loop, bool explode)
 {
-	ADDTOCALLSTACK("PacketEffect::writeBasicEffectXYZ");
+	ADDTOCALLSTACK("PacketEffect::writeBasicEffectLocation");
 
 	bool oneDirection = true;
     const CPointMap* ptSrcToUse = (motion != EFFECT_BOLT) ? ptDest : ptSrc;

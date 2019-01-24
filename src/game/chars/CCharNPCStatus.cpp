@@ -679,7 +679,7 @@ int CChar::NPC_GetWeaponUseScore( CItem * pWeapon )
 	int iDmg = Fight_CalcDamage( pWeapon );
 	int iSkillLevel = Skill_GetAdjusted( skill );
 
-	return( iSkillLevel + iDmg * 50 );
+	return (iSkillLevel + (iDmg * 50));
 }
 
 int CChar::NPC_GetHostilityLevelToward( const CChar * pCharTarg ) const

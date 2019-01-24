@@ -1487,3 +1487,8 @@ WARNING: the following change could break some hackish expedient used in scripts
 - Fixed: Multis were added to the radarmap when the distance from its center and the player was < 31, now the check is done against the position of the farthest corner/side the player is facing.
 	This fixes big multis (like	keeps) appearing on the radarmap only when the player was very close.
 	Also, the CanSee checks against multis now use the same mechanic, instead of using the center of the multi.
+
+24-01-2019, Nolok
+- Fixed: ARGN1 value from @Hit trigger ignored in @GetHit (Issue #211).
+- Fixed: Blood generated after a received hit had the wrong color (Issue #206).
+	This changes also the index of the color shown by EFFECT functions, because actually until now it was showing the hue with index = (index - 1).

@@ -134,8 +134,6 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 	if (IsStatFlag(STATF_DEAD))
 	{
 		iDecayTimer = (m_pPlayer) ? g_Cfg.m_iDecay_CorpsePlayer : g_Cfg.m_iDecay_CorpseNPC;
-        if (iDecayTimer != -1)
-            iDecayTimer *= 60;
 		pCorpse->SetTimeStamp(g_World.GetCurrentTime().GetTimeRaw());	// death time
 		if (Attacker_GetLast())
 			pCorpse->m_itCorpse.m_uidKiller = Attacker_GetLast()->GetUID();

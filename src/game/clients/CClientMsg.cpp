@@ -363,7 +363,7 @@ void CClient::addItem_OnGround( CItem * pItem ) // Send items (on ground)
 	// send item tooltip
 	addAOSTooltip(pItem);
 
-	if ( (pItem->IsType(IT_MULTI_CUSTOM)) && (m_pChar->GetTopPoint().GetDistSight(pItem->GetTopPoint()) <= m_pChar->GetVisualRange()) )
+	if ( (pItem->IsType(IT_MULTI_CUSTOM)) && m_pChar->CanSee(pItem) )
 	{
 		// send house design version
 		const CItemMultiCustom *pItemMulti = static_cast<const CItemMultiCustom *>(pItem);
@@ -892,7 +892,7 @@ void CClient::addObjMessage( lpctstr pMsg, const CObjBaseTemplate * pSrc, HUE_TY
 }
 
 void CClient::addEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate * pDst, const CObjBaseTemplate * pSrc,
-    byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type) const
+    byte bSpeedMsecs, byte bLoop, bool fExplode, dword color, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type) const
 {
 	ADDTOCALLSTACK("CClient::addEffect");
 	// bSpeedSeconds = tenths of second = 0=very fast, 7=slow.
@@ -904,16 +904,16 @@ void CClient::addEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTempla
 		return;
 
 	if (effectid || explodeid)
-		new PacketEffect(this, motion, id, pDst, pSrc, bSpeedSeconds, bLoop, fExplode, color, render, effectid, explodeid, explodesound, effectuid, type);
+		new PacketEffect(this, motion, id, pDst, pSrc, bSpeedMsecs, bLoop, fExplode, color, render, effectid, explodeid, explodesound, effectuid, type);
 	else if (color || render)
-		new PacketEffect(this, motion, id, pDst, pSrc, bSpeedSeconds, bLoop, fExplode, color, render);
+		new PacketEffect(this, motion, id, pDst, pSrc, bSpeedMsecs, bLoop, fExplode, color, render);
 	else
-		new PacketEffect(this, motion, id, pDst, pSrc, bSpeedSeconds, bLoop, fExplode);
+		new PacketEffect(this, motion, id, pDst, pSrc, bSpeedMsecs, bLoop, fExplode);
 }
 
 /* Effect at a Map Point instead of an Object */
-void CClient::addEffectXYZ(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptSrc, const CPointMap *ptDest,
-    byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type) const
+void CClient::addEffectLocation(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptSrc, const CPointMap *ptDest,
+    byte bSpeedMsecs, byte bLoop, bool fExplode, dword color, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type) const
 {
 	ADDTOCALLSTACK("CClient::addEffect");
 	// bSpeedSeconds = tenth of second = 0=very fast, 7=slow.
@@ -923,11 +923,11 @@ void CClient::addEffectXYZ(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *
     const CPointMap *ptSrcToUse = (ptDest && (motion == EFFECT_BOLT)) ? ptSrc : ptDest;
 
 	if (effectid || explodeid)
-		new PacketEffect(this, motion, id, ptDest, ptSrcToUse, bSpeedSeconds, bLoop, fExplode, color, render, effectid, explodeid, explodesound, effectuid, type);
+		new PacketEffect(this, motion, id, ptDest, ptSrcToUse, bSpeedMsecs, bLoop, fExplode, color, render, effectid, explodeid, explodesound, effectuid, type);
 	else if (color || render)
-		new PacketEffect(this, motion, id, ptDest, ptSrcToUse, bSpeedSeconds, bLoop, fExplode, color, render);
+		new PacketEffect(this, motion, id, ptDest, ptSrcToUse, bSpeedMsecs, bLoop, fExplode, color, render);
 	else
-		new PacketEffect(this, motion, id, ptDest, ptSrcToUse, bSpeedSeconds, bLoop, fExplode);
+		new PacketEffect(this, motion, id, ptDest, ptSrcToUse, bSpeedMsecs, bLoop, fExplode);
 }
 
 void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMID_TYPE & id, HUE_TYPE & wHue ) const
@@ -947,7 +947,7 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 		CCharBase * pCharDef = CCharBase::FindCharBase(idHorse);
 		if ( pCharDef && ( GetResDisp() < pCharDef->GetResLevel() ) )
 		{
-			idHorse = static_cast<CREID_TYPE>(pCharDef->GetResDispDnId());
+			idHorse = (CREID_TYPE)(pCharDef->GetResDispDnId());
 			wHue = pCharDef->GetResDispDnHue();
 
 			// adjust the item to display the mount item associated with
@@ -1016,7 +1016,7 @@ void CClient::GetAdjustedCharID( const CChar * pChar, CREID_TYPE &id, HUE_TYPE &
 			pCharDef = nullptr;
 			while ( pCharDef == nullptr )
 			{
-				id = static_cast<CREID_TYPE>(Calc_GetRandVal(CREID_EQUIP_GM_ROBE));
+				id = (CREID_TYPE)(Calc_GetRandVal(CREID_EQUIP_GM_ROBE));
 				if ( id != CREID_SEA_CREATURE )		// skip this chardef, it can crash many clients
 					pCharDef = CCharBase::FindCharBase(id);
 			}
@@ -1047,7 +1047,7 @@ void CClient::GetAdjustedCharID( const CChar * pChar, CREID_TYPE &id, HUE_TYPE &
 
 	if ( pCharDef && (GetResDisp() < pCharDef->GetResLevel()) )
 	{
-		id = static_cast<CREID_TYPE>(pCharDef->GetResDispDnId());
+		id = (CREID_TYPE)(pCharDef->GetResDispDnId());
 		if ( pCharDef->GetResDispDnHue() != HUE_DEFAULT )
 			wHue = pCharDef->GetResDispDnHue();
 	}
@@ -1338,7 +1338,7 @@ void CClient::addPlayerStart( CChar * pChar )
 {
 	ADDTOCALLSTACK("CClient::addPlayerStart");
 
-	if ( m_pChar != pChar )	// death option just usese this as a reload.
+	if ( m_pChar != pChar )	// death option just uses this as a reload.
 	{
 		// This must be a CONTROL command ?
 		CharDisconnect();
@@ -1824,12 +1824,14 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 		if ( !pItem )
 			break;
 
+        // ptOld: the point from where i moved (i can call this method when i'm moving to a new position),
+        //  If ptOld is an invalid point, just send every object i can see.
         const int iOldDist = ptOld.GetDistSight(pItem->GetTopPoint());  // handles also the case of an invalid point
         if ( pItem->IsTypeMulti() )		// incoming multi on radar view
 		{
             const DIR_TYPE dirFace = pCharThis->GetDir(pItem);
             const CItemMulti *pMulti = static_cast<const CItemMulti*>(pItem);
-            if (iOldDist > (UO_MAP_VIEW_RADAR - pMulti->GetSideDistanceFromCenter(dirFace)))
+            if ((iOldDist + pMulti->GetSideDistanceFromCenter(dirFace)) > UO_MAP_VIEW_RADAR)
             {
                 addItem_OnGround(pItem);
                 continue;

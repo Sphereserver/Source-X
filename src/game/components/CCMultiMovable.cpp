@@ -561,7 +561,7 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
 
 #ifdef _DEBUG
      // In debug builds, this flashes some spots over tiles as they are checked for valid movement
-    #define SPAWNSHIPTRACK(a,b)		pMulti->EffectXYZ(EFFECT_XYZ, ITEMID_FRUIT_APPLE, nullptr, &a, 1, 0, false, b)
+    #define SPAWNSHIPTRACK(a,b)		pMulti->EffectLocation(EFFECT_XYZ, ITEMID_FRUIT_APPLE, nullptr, &a, 1, 0, false, b)
 #else
     #define SPAWNSHIPTRACK(a,b)
 #endif
