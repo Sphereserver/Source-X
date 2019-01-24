@@ -1471,16 +1471,21 @@ int64 CSector::GetLastClientTime() const
 	return( m_Chars_Active.m_timeLastClient );
 }
 
+// Unused. The client is attached manually when doing MoveToSector
+/*
 void CSector::ClientAttach( CChar * pChar )
 {
+    ASSERT(pChar->IsClient());
 	if ( IsCharActiveIn( pChar ))
 		return;
 	m_Chars_Active.ClientAttach();
 }
+*/
 
 void CSector::ClientDetach( CChar * pChar )
 {
+    ASSERT(pChar->IsClient());
 	if ( ! IsCharActiveIn( pChar ))
 		return;
-	m_Chars_Active.ClientDetach();
+	pChar->RemoveSelf();
 }

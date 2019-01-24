@@ -119,6 +119,11 @@ struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variab
     explicit CResourceIDBase(RES_TYPE restype, int iIndex)
     {
         ASSERT(restype < RES_TYPE_MASK);
+        if (iIndex < 0)
+        {
+            InitUID();
+            return;
+        }
         ASSERT(iIndex < RES_INDEX_MASK);
         m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT) | iIndex;
     }

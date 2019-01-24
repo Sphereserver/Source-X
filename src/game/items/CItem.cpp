@@ -5686,7 +5686,7 @@ bool CItem::OnTick()
                     }
 					SetID((ITEMID_TYPE)(Calc_GetRandVal2(ITEMID_SKELETON_1, ITEMID_SKELETON_9)));
 					SetHue((HUE_TYPE)(HUE_DEFAULT));
-					SetTimeout((llong)(g_Cfg.m_iDecay_CorpsePlayer));
+					SetTimeout(g_Cfg.m_iDecay_CorpsePlayer);
 					m_itCorpse.m_carved = 1;	// the corpse can't be carved anymore
 					m_uidLink.InitUID();		// and also it's not linked to the char anymore (others players can loot it without get flagged criminal)
 					RemoveFromView();

@@ -689,7 +689,7 @@ public:
         bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
 	
 	/**
-	* @fn  void CObjBase::EffectXYZ(EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap &pt, const CObjBase * pSource = nullptr, byte bspeedseconds = 5, byte bloop = 1, bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
+	* @fn  void CObjBase::EffectLocation(EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap &pt, const CObjBase * pSource = nullptr, byte bspeedseconds = 5, byte bloop = 1, bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
 	*
 	* @brief   Adds an Effect to a map point.
 	* @param   motion          The motion.
@@ -707,7 +707,7 @@ public:
 	* @param   effectuid       The effectuid.
 	* @param   type            The type.
 	*/
-	void EffectXYZ(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptSrc, const CPointMap *ptDest, byte bspeedseconds = 5, byte bloop = 1,
+	void EffectLocation(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptSrc, const CPointMap *ptDest, byte bspeedseconds = 5, byte bloop = 1,
         bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
 
 	void r_WriteSafe( CScript & s );

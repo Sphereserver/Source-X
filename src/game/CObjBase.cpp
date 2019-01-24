@@ -419,10 +419,10 @@ void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSour
 	}
 }
 
-void CObjBase::EffectXYZ(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *pptDest, const CPointMap *pptSrc,
+void CObjBase::EffectLocation(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *pptDest, const CPointMap *pptSrc,
     byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, word explodeid, word explodesound, dword effectuid, byte type) const
 {
-	ADDTOCALLSTACK("CObjBase::EffectXYZ");
+	ADDTOCALLSTACK("CObjBase::EffectLocation");
 	
     if ( motion == EFFECT_FADE_SCREEN )
     {
@@ -451,7 +451,7 @@ void CObjBase::EffectXYZ(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *pp
 		if (pClient->GetNetState()->isClientEnhanced())
 			bLoopAdjusted *= 3;
 
-		pClient->addEffectXYZ(motion, id, pptDest, pptSrc, bSpeedSeconds, bLoopAdjusted, fExplode, color, render, effectid, explodeid, explodesound, effectuid, type);
+		pClient->addEffectLocation(motion, id, pptDest, pptSrc, bSpeedSeconds, bLoopAdjusted, fExplode, color, render, effectid, explodeid, explodesound, effectuid, type);
 	}
 }
 
@@ -2004,7 +2004,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			}
 			//DEBUG_ERR(("this->GetUID() 0%x pThis->GetUID() 0%x pCharSrc->GetUID() 0%x\n",(dword)this->GetUID(),(dword)pThis->GetUID(),(dword)pCharSrc->GetUID()));
             const CPointMap& ptSrc = pCharSrc->GetTopPoint();
-			pThis->EffectXYZ((EFFECT_TYPE)(piCmd[3]), (ITEMID_TYPE)(RES_GET_INDEX(piCmd[4])),
+			pThis->EffectLocation((EFFECT_TYPE)(piCmd[3]), (ITEMID_TYPE)(RES_GET_INDEX(piCmd[4])),
 				&ptSrc,
                 &ptDest,
 				(iArgQty >= 3) ? (uchar)(piCmd[5]) : 5,		// byte bSpeedSeconds = 5,
@@ -2830,9 +2830,7 @@ void CObjBase::OnTickStatusUpdate()
 void CObjBase::ResendTooltip(bool fSendFull, bool fUseCache)
 {
 	ADDTOCALLSTACK("CObjBase::UpdatePropertyFlag");
-
-	// Send tooltip packet to all nearby clients
-	m_fStatusUpdate &= ~SU_UPDATE_TOOLTIP;
+    // Send tooltip packet to all nearby clients
 
     if (g_Serv.IsLoading())
         return;
@@ -2844,19 +2842,23 @@ void CObjBase::ResendTooltip(bool fSendFull, bool fUseCache)
 	if (fUseCache == false)
 		FreePropertyList();
 
-	CChar * pChar = nullptr;
-
+    bool fSentLeastOnce = false;
 	ClientIterator it;
-	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
+	for (CClient *pClient = it.next(); pClient != nullptr; pClient = it.next())
 	{
-		pChar = pClient->GetChar();
+        CChar *pChar = pClient->GetChar();
 		if ( pChar == nullptr )
 			continue;
 		if ( !pChar->CanSee( this ) )
 			continue;
 
-		pClient->addAOSTooltip(this, fSendFull);
+		if (pClient->addAOSTooltip(this, fSendFull))
+            fSentLeastOnce = true;
 	}
+
+    // If i haven't sent it even once, it means also that i don't have stored the updated tooltip in the cache, so we need to check again until there's some client to send it to
+    if (fSentLeastOnce)
+        m_fStatusUpdate &= ~SU_UPDATE_TOOLTIP;
 }
 
 void CObjBase::DeletePrepare()
@@ -2922,7 +2924,7 @@ CSString CObjBase::GetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, bo
     const CComponentProps* pCompProps = GetComponentProps(iCompPropsType);
     if (!pCompProps)
         return sProp;
-    if (!pCompProps->GetPropertyStrPtr(iPropIndex, &sProp, fZero) && !fDef)
+    if (pCompProps->GetPropertyStrPtr(iPropIndex, &sProp, fZero) || !fDef)
         return sProp;
 
     const CBaseBaseDef* pBase = Base_GetDef();
@@ -2949,7 +2951,7 @@ CComponentProps::PropertyValNum_t CObjBase::GetPropNum( COMPPROPS_TYPE iCompProp
     const CComponentProps* pCompProps = GetComponentProps(iCompPropsType);
     if (!pCompProps)
         return iProp;
-    if (!pCompProps->GetPropertyNumPtr(iPropIndex, &iProp) && !fDef)
+    if (pCompProps->GetPropertyNumPtr(iPropIndex, &iProp) || !fDef)
         return iProp;
 
     const CBaseBaseDef* pBase = Base_GetDef();

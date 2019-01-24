@@ -1871,7 +1871,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	// Took my swing. Do Damage !
     const CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
     pCharTarg->OnTakeDamage(
-        Fight_CalcDamage(m_uidWeapon.ItemFind()),
+        iDmg,
         this,
         iDmgType,
         (int)GetPropNum(pCCPChar, PROPCH_DAMPHYSICAL, pBaseCCPChar),

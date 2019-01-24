@@ -478,10 +478,10 @@ public:
 	void addMusic( MIDI_TYPE id ) const;
 	void addArrowQuest( int x, int y, int id ) const;
 	void addEffect( EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate * pDst, const CObjBaseTemplate * pSrc,
-        byte speed = 5, byte loop = 1, bool explode = false, dword color = 0, dword render = 0, word effectid = 0,
+        byte bSpeedMsecs = 5, byte bLoop = 1, bool fExplode = false, dword color = 0, dword render = 0, word effectid = 0,
         dword explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0 ) const;
-	void addEffectXYZ(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *pptDest, const CPointMap *pptSrc,
-        byte speed = 5, byte loop = 1, bool explode = false, dword color = 0, dword render = 0, word effectid = 0,
+	void addEffectLocation(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *pptDest, const CPointMap *pptSrc,
+        byte bSpeedMsecs = 5, byte bLoop = 1, bool fExplode = false, dword color = 0, dword render = 0, word effectid = 0,
         dword explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
 
 	void addSound( SOUND_TYPE id, const CObjBaseTemplate * pBase = nullptr, int iRepeat = 1 ) const;
@@ -554,7 +554,7 @@ public:
 
 	void addCharPaperdoll( CChar * pChar );
 
-	void addAOSTooltip( CObjBase * pObj, bool fRequested = false, bool fShop = false );
+	bool addAOSTooltip( CObjBase * pObj, bool fRequested = false, bool fShop = false );
 private:
 	void AOSTooltip_addName(CObjBase* pObj);
 	void AOSTooltip_addDefaultCharData(CChar * pChar);
