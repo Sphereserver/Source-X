@@ -36,6 +36,7 @@ enum NPCBRAIN_TYPE	// General AI type.
 	NPCBRAIN_MONSTER,	// 8 = not tamable. normally evil.
 	NPCBRAIN_BERSERK,	// 9 = attack closest (blades, vortex)
 	NPCBRAIN_DRAGON,	// 10 = we can breath fire. may be tamable ? hirable ?
+	NPCBRAIN_UNDEAD,	// 11 = we are undead and we hate light
 	NPCBRAIN_QTY
 };
 

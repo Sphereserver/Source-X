@@ -1947,7 +1947,11 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
                 CPointMap pt = pCharTarg->GetTopPoint();
                 pt.m_x += (short)Calc_GetRandVal2(-1, 1);
                 pt.m_y += (short)Calc_GetRandVal2(-1, 1);
-                EffectXYZ(EFFECT_XYZ, iBloodID, nullptr, &pt, 50, 0, false, pCharTarg->m_wBloodHue);
+
+				CItem * pBlood = CItem::CreateBase(iBloodID);
+				ASSERT(pBlood);
+				pBlood->SetHue(pCharTarg->m_wBloodHue);
+				pBlood->MoveToDecay(pt, 3000);
 			}
 		}
 
