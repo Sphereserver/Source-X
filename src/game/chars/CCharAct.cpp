@@ -3571,18 +3571,14 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fForceFix, bool fAllowReject)
 		}
 	}
 
+    CheckLocation(true);
 	return true;
 }
 
 bool CChar::MoveTo(const CPointMap& pt, bool fForceFix)
 {
 	m_fClimbUpdated = false; // update climb height
-    if (MoveToChar(pt, fForceFix))
-    {
-        CheckLocation();
-        return true;
-    }
-    return false;
+    return MoveToChar(pt, fForceFix);
 }
 
 void CChar::SetTopZ( char z )

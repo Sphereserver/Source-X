@@ -343,9 +343,9 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 			{
 				pItem->ClrAttr(ATTR_OWNED);
 
-					// newbie items lose newbie status when transfered to NPC
-					if ( !g_Cfg.m_bAllowNewbTransfer )
-						pItem->ClrAttr(ATTR_NEWBIE);
+				// newbie items lose newbie status when transfered to NPC
+				if ( !g_Cfg.m_bAllowNewbTransfer )
+					pItem->ClrAttr(ATTR_NEWBIE);
 			}
 			if ( pChar->GetBank()->IsItemInside( pContItem ))
 			{

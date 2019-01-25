@@ -67,11 +67,9 @@ void CCPropsItemEquippable::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal
     ASSERT(!IsPropertyStr(iPropIndex));
 
     if (fDeleteZero && (iVal == 0))
-    {
         _mPropsNum.erase(iPropIndex);
-        return;
-    }
-    _mPropsNum[iPropIndex] = iVal;
+    else
+        _mPropsNum[iPropIndex] = iVal;
 
     if (!pLinkedObj)
         return;
@@ -87,11 +85,9 @@ void CCPropsItemEquippable::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjB
     ASSERT(IsPropertyStr(iPropIndex));
 
     if (fDeleteZero && (*ptcVal == '\0'))
-    {
         _mPropsStr.erase(iPropIndex);
-        return;
-    }
-    _mPropsStr[iPropIndex] = ptcVal;
+    else
+        _mPropsStr[iPropIndex] = ptcVal;
 
     if (!pLinkedObj)
         return;

@@ -2003,7 +2003,7 @@ void PacketEffect::writeHuedEffect(dword hue, dword render)
 {
     ADDTOCALLSTACK("PacketEffect::writeHuedEffect");
 
-    writeInt32(hue + 1);    // Idx 0: default hue. If idx > 0, then the value picked up in hues.mul has idx + 1.
+    writeInt32((hue != 0) ? hue - 1 : hue);    // Idx 0: default hue. If idx > 1, then the value picked up in hues.mul has idx - 1.
     writeInt32(render);
 }
 

@@ -148,11 +148,9 @@ void CCPropsItemWeapon::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CO
             ASSERT(!IsPropertyStr(iPropIndex));
 
             if (fDeleteZero && (iVal == 0))
-            {
                 _mPropsNum.erase(iPropIndex);
-                return;
-            }
-            _mPropsNum[iPropIndex] = iVal;
+            else
+                _mPropsNum[iPropIndex] = iVal;
             break;
     }
 
@@ -194,11 +192,9 @@ void CCPropsItemWeapon::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase*
             ASSERT(IsPropertyStr(iPropIndex));
 
             if (fDeleteZero && (*ptcVal == '\0'))
-            {
                 _mPropsStr.erase(iPropIndex);
-                return;
-            }
-            _mPropsStr[iPropIndex] = ptcVal;
+            else
+                _mPropsStr[iPropIndex] = ptcVal;
             break;
     }
 

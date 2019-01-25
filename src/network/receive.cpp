@@ -2167,28 +2167,28 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 
 #ifdef _DEBUG
 	{
-		const CResourceDef* resource = g_Cfg.ResourceGetDef(CResourceID(RES_DIALOG, context));
+		const CResourceDef* resource = g_Cfg.ResourceGetDef(CResourceID(RES_DIALOG, RES_GET_INDEX(context)));
 		if (resource == nullptr)
-			g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, "undef", (dword)serial, button);
+			g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "Gump context: %x (%s), UID: 0x%x, Button: %u.\n", context, "undefined resource", (dword)serial, button);
 		else
 		{
 			const CDialogDef* dialog = dynamic_cast<const CDialogDef*>(resource);
 			if (dialog == nullptr)
-				g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, "undef", (dword)serial, button);
+				g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "Gump context: %x (%s), UID: 0x%x, Button: %u.\n", context, "undefined dialog", (dword)serial, button);
 			else
-				g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, (lpctstr)dialog->GetName(), (dword)serial, button);
+				g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "Gump context: %x (%s), UID: 0x%x, Button: %u.\n", context, (lpctstr)dialog->GetName(), (dword)serial, button);
 		}
 	}
 #endif
 
 	// sanity check
-	CClient::OpenedGumpsMap_t::iterator itGumpFound = client->m_mapOpenedGumps.find((int)(context));
-	if ((itGumpFound == client->m_mapOpenedGumps.end()) || ((*itGumpFound).second <= 0))
+	CClient::OpenedGumpsMap_t::iterator itGumpFound = client->m_mapOpenedGumps.find((int)context);
+	if ((itGumpFound == client->m_mapOpenedGumps.end()) || (itGumpFound->second <= 0))
 		return true;
 
 	// Decrement, if <= 0, delete entry.
-	(*itGumpFound).second--;
-	if ((*itGumpFound).second <= 0)
+	-- itGumpFound->second;
+	if (itGumpFound->second <= 0)
 		client->m_mapOpenedGumps.erase(itGumpFound);
 
 	// package up the gump response info.
@@ -2221,11 +2221,25 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 	if (net->isClientKR())
 		context = g_Cfg.GetKRDialogMap(context);
 
-	CResourceID	rid	= CResourceID(RES_DIALOG, context);
+	CResourceID	ridContext;
+    if ((RES_TYPE)RES_GET_TYPE(context) == RES_DIALOG)
+    {
+        ridContext = CResourceID(context, 0);
+    }
+    else
+    {
+        ridContext = CResourceID(RES_DIALOG, context);
+        DEBUG_MSG(("Gump: Received dialog context (%x) without restype from UID=0%x.\n", (uint)context, (uint)character->GetUID().GetObjUID()));
+    }
+    if (!ridContext.IsValidUID())
+    {
+        g_Log.EventWarn("Gump: Received wrong dialog context (%x) from UID=0%x.\n", (uint)context, (uint)character->GetUID().GetObjUID());
+        return false;
+    }
 	//
 	// Call the scripted response. Lose all the checks and text.
 	//
-	client->Dialog_OnButton( rid, button, object, &resp );
+	client->Dialog_OnButton( ridContext, button, object, &resp );
 	return true;
 }
 
