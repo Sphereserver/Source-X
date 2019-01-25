@@ -1487,5 +1487,5 @@ void CSector::ClientDetach( CChar * pChar )
     ASSERT(pChar->IsClient());
 	if ( ! IsCharActiveIn( pChar ))
 		return;
-	pChar->RemoveSelf();
+    m_Chars_Disconnect.InsertHead(pChar);   // remove from m_Chars_Active and add to m_Chars_Disconnect
 }

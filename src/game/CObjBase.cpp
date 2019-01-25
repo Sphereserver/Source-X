@@ -3005,6 +3005,8 @@ void CObjBase::ModPropNum( CComponentProps* pCompProps, int iPropIndex, CCompone
     {
         pBaseCompProps->GetPropertyNumPtr(iPropIndex, &iVal);
     }
+    if (!iVal && !iMod)
+        return;
     pCompProps->SetPropertyNum(iPropIndex, iMod + iVal, this);
 }
 
@@ -3029,6 +3031,8 @@ void CObjBase::ModPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CCompo
         const CComponentProps* pBaseCompProps = pBase->GetComponentProps(iCompPropsType);
         pBaseCompProps->GetPropertyNumPtr(iPropIndex, &iVal);
     }
+    if (!iVal && !iMod)
+        return;
     pCompProps->SetPropertyNum(iPropIndex, iVal + iMod, this);
 }
 
