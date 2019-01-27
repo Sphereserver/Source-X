@@ -3782,7 +3782,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 						// These are not truly defining a new DEFNAME
 						break;
 					default:
-						DEBUG_ERR(( "Redefined resource with DEFNAME='%s' from ResType %s to %s\n",
+						DEBUG_ERR(( "Redefined resource with DEFNAME='%s' from ResType %s to %s.\n",
 							pszName, GetResourceBlockName(rid.GetResType()), GetResourceBlockName(restype)) );
 						return ridinvalid;
 				}
@@ -3797,13 +3797,13 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 
 				// We are redefining an item we have already read in ?
 				// Why do this unless it's a Resync ?
-				if ( g_Serv.GetServerMode() != SERVMODE_ResyncLoad )
+				if ( !g_Serv.IsResyncing() )
 				{
 					// Ensure it's not a "type", because hardcoded types indexes are defined in sphere_defs.scp,
 					//  which is usually parsed before sphere_types.scp or its TYPEDEF block. So some time after declaring the
 					//	index for a type we'll read its TYPEDEF, it would be normal to find another "declaration" for the type.
 					if ( restype != RES_TYPEDEF )
-						g_pLog->EventWarn("Redefinition of resource with DEFNAME='%s'\n", pszName);
+						g_Log.EventWarn("Redefinition of resource with DEFNAME='%s' (res type=%d, index=0%x, page=%d).\n", pszName, rid.GetResType(), rid.GetResIndex(), wPage);
 				}
 			}
 			rid = CResourceID( restype, rid.GetResIndex(), wPage );

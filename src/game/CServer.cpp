@@ -172,6 +172,11 @@ bool CServer::IsLoading() const
     return ( m_fResyncPause || (GetServerMode() > SERVMODE_Run) );
 }
 
+bool CServer::IsResyncing() const
+{
+    return m_fResyncPause || (GetServerMode() == SERVMODE_ResyncLoad);
+}
+
 void CServer::Shutdown( int64 iMinutes ) // If shutdown is initialized
 {
 	ADDTOCALLSTACK("CServer::Shutdown");

@@ -495,13 +495,13 @@ CVarDefContNum* CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fDeleteZer
 	CVarDefContNum * pVarNum = dynamic_cast <CVarDefContNum *>( pVarBase );
 	if ( pVarNum )
     {
-        if ( fWarnOverwrite && g_Serv.IsLoading() )
+        if ( fWarnOverwrite && !g_Serv.IsResyncing() && g_Serv.IsLoading() )
             DEBUG_WARN(( "Replacing existing VarNum '%s' with number: 0x%" PRIx64" \n", pVarBase->GetKey(), iVal ));
 		pVarNum->SetValNum( iVal );
     }
 	else
 	{
-		if ( fWarnOverwrite && g_Serv.IsLoading() )
+		if ( fWarnOverwrite && !g_Serv.IsResyncing() && g_Serv.IsLoading() )
 			DEBUG_WARN(( "Replacing existing VarStr '%s' with number: 0x%" PRIx64" \n", pVarBase->GetKey(), iVal ));
 		return SetNumOverride( pszName, iVal );
 	}
@@ -571,13 +571,13 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, 
 	CVarDefContStr * pVarStr = dynamic_cast <CVarDefContStr *>( pVarBase );
 	if ( pVarStr )
     {
-        if ( fWarnOverwrite && g_Serv.IsLoading() )
+        if ( fWarnOverwrite && !g_Serv.IsResyncing() && g_Serv.IsLoading() )
             DEBUG_WARN(( "Replacing existing VarStr '%s' with string: '%s'\n", pVarBase->GetKey(), pszVal ));
 		pVarStr->SetValStr( pszVal );
     }
 	else
 	{
-		if ( fWarnOverwrite && g_Serv.IsLoading() )
+		if ( fWarnOverwrite && !g_Serv.IsResyncing() && g_Serv.IsLoading() )
 			DEBUG_WARN(( "Replacing existing VarNum '%s' with string: '%s'\n", pVarBase->GetKey(), pszVal ));
 		return SetStrOverride( pszName, pszVal );
 	}
@@ -661,7 +661,7 @@ bool CVarDefMap::GetParseVal( lpctstr & pszArgs, long long * plVal ) const
 
 void CVarDefMap::DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix ) const
 {
-	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::DumpKeys");
+	ADDTOCALLSTACK("CVarDefMap::DumpKeys");
 	// List out all the keys.
 	ASSERT(pSrc);
 	if ( pszPrefix == nullptr )
@@ -683,7 +683,7 @@ void CVarDefMap::DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix ) const
 
 void CVarDefMap::ClearKeys(lpctstr mask)
 {
-	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::ClearKeys");
+	ADDTOCALLSTACK("CVarDefMap::ClearKeys");
 	if ( mask && *mask )
 	{
 		if ( !m_Container.size() )

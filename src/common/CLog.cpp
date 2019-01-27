@@ -6,6 +6,75 @@
 #include "../game/CServer.h"
 
 
+int CEventLog::VEvent(dword dwMask, lpctstr pszFormat, va_list args)
+{
+    if (pszFormat == nullptr || pszFormat[0] == '\0')
+        return 0;
+
+    TemporaryString tsTemp;
+    tchar* pszTemp = static_cast<tchar *>(tsTemp);
+    size_t len = vsnprintf(pszTemp, (SCRIPT_MAX_LINE_LEN - 1), pszFormat, args);
+    if (! len)
+        strncpy(pszTemp, pszFormat, (SCRIPT_MAX_LINE_LEN - 1));
+
+    // This get rids of exploits done sending 0x0C to the log subsytem.
+    // tchar *	 pFix;
+    // if ( ( pFix = strchr( pszText, 0x0C ) ) )
+    //	*pFix = ' ';
+
+    return EventStr(dwMask, pszTemp);
+}
+
+int CEventLog::Event(dword dwMask, lpctstr pszFormat, ...) __printfargs(3, 4)
+{
+    va_list vargs;
+    va_start(vargs, pszFormat);
+    int iret = VEvent(dwMask, pszFormat, vargs);
+    va_end(vargs);
+    return iret;
+}
+
+int CEventLog::EventDebug(lpctstr pszFormat, ...) __printfargs(2, 3)
+{
+    va_list vargs;
+    va_start(vargs, pszFormat);
+    int iret = VEvent(LOGM_DEBUG|LOGM_NOCONTEXT, pszFormat, vargs);
+    va_end(vargs);
+    return iret;
+}
+
+int CEventLog::EventError(lpctstr pszFormat, ...) __printfargs(2, 3)
+{
+    va_list vargs;
+    va_start(vargs, pszFormat);
+    int iret = VEvent(LOGL_ERROR, pszFormat, vargs);
+    va_end(vargs);
+    return iret;
+}
+
+int CEventLog::EventWarn(lpctstr pszFormat, ...) __printfargs(2, 3)
+{
+    va_list vargs;
+    va_start(vargs, pszFormat);
+    int iret = VEvent(LOGL_WARN, pszFormat, vargs);
+    va_end(vargs);
+    return iret;
+}
+
+#ifdef _DEBUG
+int CEventLog::EventEvent(lpctstr pszFormat, ...) __printfargs(2, 3)
+{
+    va_list vargs;
+    va_start(vargs, pszFormat);
+    int iret = VEvent(LOGL_EVENT, pszFormat, vargs);
+    va_end(vargs);
+    return iret;
+}
+#endif //_DEBUG
+
+
+//-------
+
 CLog::CLog()
 {
 	m_fLockOpen = false;

@@ -3876,7 +3876,7 @@ int CChar::Skill_Focus(STAT_TYPE stat)
 	ADDTOCALLSTACK("CChar::Skill_Focus");
 
 	if (g_Cfg.IsSkillFlag(SKILL_FOCUS, SKF_SCRIPTED))
-		return -SKTRIG_QTY;;
+		return -SKTRIG_QTY;
 
 	ushort uiFocusValue = Skill_GetAdjusted(SKILL_FOCUS);
 	ushort uiGain;

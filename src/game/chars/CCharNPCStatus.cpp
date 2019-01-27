@@ -532,11 +532,10 @@ ushort CChar::NPC_GetTrainMax( const CChar * pStudent, SKILL_TYPE Skill ) const
 	return minimum(uiMax, uiStudentMax);
 }
 
-bool CChar::NPC_CheckWalkHere( const CPointMap & pt, const CRegion * pArea, dword dwBlockFlags ) const
+bool CChar::NPC_CheckWalkHere( const CPointMap & pt, const CRegion * pArea ) const
 {
 	ADDTOCALLSTACK("CChar::NPC_CheckWalkHere");
 	ASSERT(m_pNPC);
-	UNREFERENCED_PARAMETER(dwBlockFlags);
 	// Does the NPC want to walk here ? step on this item ?
 	if ( !pt.IsValidXY() )
 		return true;

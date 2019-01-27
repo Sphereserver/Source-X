@@ -16,17 +16,7 @@ void CChar::Stat_AddMod( STAT_TYPE i, int iVal )
     if (iVal == 0)
         return;
 
-    if (iVal > UINT16_MAX)
-        iVal = UINT16_MAX;
-    else if (iVal < -UINT16_MAX)
-        iVal = -UINT16_MAX;
-	m_Stat[i].m_mod	+= iVal;
-
-	const ushort uiMaxValue = Stat_GetMaxAdjusted(i);		// make sure the current value is not higher than new max value
-	if ( m_Stat[i].m_val > uiMaxValue )
-		m_Stat[i].m_val = uiMaxValue;
-
-	UpdateStatsFlag();
+    Stat_SetMod(i, Stat_GetMod(i) + iVal);
 }
 
 void CChar::Stat_SetMod( STAT_TYPE i, int iVal )

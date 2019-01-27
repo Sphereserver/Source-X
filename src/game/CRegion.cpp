@@ -70,7 +70,8 @@ CRegion::~CRegion()
 void CRegion::SetModified( int iModFlag )
 {
 	ADDTOCALLSTACK("CRegion::SetModified");
-	if ( !m_iLinkedSectors ) return;
+	if ( !m_iLinkedSectors )
+        return;
 	m_iModified	= m_iModified | iModFlag;
 }
 
@@ -558,7 +559,7 @@ bool CRegion::r_LoadVal( CScript & s )
             return SetResourceName( s.GetArgStr());
 		case RC_EVENTS:
 			SetModified( REGMOD_EVENTS );
-			return( m_Events.r_LoadVal( s, RES_REGIONTYPE ));
+			return m_Events.r_LoadVal( s, RES_REGIONTYPE );
 		case RC_FLAGS:
 			m_dwFlags = ( s.GetArgDWVal() &~REGION_FLAG_SHIP ) | ( m_dwFlags & REGION_FLAG_SHIP );
 			SetModified( REGMOD_FLAGS );
@@ -1068,26 +1069,9 @@ void CRegionWorld::r_Write( CScript &s )
 bool CRegionWorld::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from script
 {
 	ADDTOCALLSTACK("CRegionWorld::r_Verb");
+
 	EXC_TRY("Verb");
-/*	lpctstr pszKey = s.GetKey();
-
-	if ( !strnicmp(pszKey, "CLEARTAGS", 9) )
-	{
-		pszKey = s.GetArgStr();
-		SKIP_SEPARATORS(pszKey);
-		m_TagDefs.ClearKeys(pszKey);
-		return true;
-	}
-
-	int index = FindTableSorted( pszKey, sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
-	switch(index)
-	{
-		case RWV_TAGLIST:
-			m_TagDefs.DumpKeys( pSrc, "TAG." );
-			return true;
-	}*/
-
-	return( CRegion::r_Verb( s, pSrc ));
+	return CRegion::r_Verb( s, pSrc );
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
@@ -1103,7 +1087,7 @@ const CRandGroupDef * CRegionWorld::FindNaturalResource(int type) const
 	// Find the natural resources assinged to this region.
 	// ARGS: type = IT_TYPE
 
-	for ( size_t i = 0; i < m_Events.size(); i++ )
+	for ( size_t i = 0; i < m_Events.size(); ++i )
 	{
 		CResourceLink * pLink = m_Events[i];
 		if ( !pLink || ( pLink->GetResType() != RES_REGIONTYPE ))

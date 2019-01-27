@@ -81,6 +81,7 @@ public:
     int GetExitFlag() const;
     void SetExitFlag(int iFlag);
     bool IsLoading() const;
+    bool IsResyncing() const;
 	void Shutdown( int64 iMinutes );
 	void SetSignals( bool fMsg = true );
     bool SetProcessPriority(int iPriorityLevel);
