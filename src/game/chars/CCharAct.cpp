@@ -3036,12 +3036,12 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 	if ( !pArea )
 	{
 		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-			g_pLog->EventWarn("CheckValidMove failed\n");
+            g_Log.EventWarn("CheckValidMove failed\n");
 		return nullptr;
 	}
 
 	EXC_SET_BLOCK("NPC's will");
-	if ( !fCheckOnly && m_pNPC && !NPC_CheckWalkHere(ptDst, pArea, dwBlockFlags) )	// does the NPC want to walk here?
+	if ( !fCheckOnly && m_pNPC && !NPC_CheckWalkHere(ptDst, pArea) )	// does the NPC want to walk here?
 		return nullptr;
 
 	EXC_SET_BLOCK("Creature bumping");

@@ -63,6 +63,15 @@ bool CChar::Noto_IsEvil() const
 	return ( iKarma <= -3000 );
 }
 
+bool CChar::Noto_IsCriminal() const
+{
+    ADDTOCALLSTACK("CChar::Noto_IsCriminal");
+    // do the guards hate me ?
+    if ( IsStatFlag( STATF_CRIMINAL ) )
+        return true;
+    return Noto_IsEvil();
+}
+
 bool CChar::Noto_IsNeutral() const
 {
 	ADDTOCALLSTACK("CChar::Noto_IsNeutral");

@@ -53,93 +53,32 @@ class CScript;
 class CScriptObj;
 
 
-extern class CEventLog
+class CEventLog
 {
 	// Any text event stream. (destination is independant)
 	// May include __LINE__ or __FILE__ macro as well ?
 
 protected:
-	virtual int EventStr(dword dwMask, lpctstr pszMsg)
-	{
-		UNREFERENCED_PARAMETER(dwMask);
-		UNREFERENCED_PARAMETER(pszMsg);
-		return 0;
-	}
-	virtual int VEvent(dword dwMask, lpctstr pszFormat, va_list args);
+	virtual int EventStr(dword dwMask, lpctstr pszMsg) = 0;
+
+    int VEvent(dword dwMask, lpctstr pszFormat, va_list args);
 
 public:
-	int _cdecl Event( dword dwMask, lpctstr pszFormat, ... ) __printfargs(3,4)
-	{
-		va_list vargs;
-		va_start( vargs, pszFormat );
-		int iret = VEvent( dwMask, pszFormat, vargs );
-		va_end( vargs );
-		return iret;
-	}
-
-	int _cdecl EventDebug(lpctstr pszFormat, ...) __printfargs(2,3)
-	{
-		va_list vargs;
-		va_start(vargs, pszFormat);
-		int iret = VEvent(LOGM_DEBUG|LOGM_NOCONTEXT, pszFormat, vargs);
-		va_end(vargs);
-		return iret;
-	}
-
-	int _cdecl EventError(lpctstr pszFormat, ...) __printfargs(2,3)
-	{
-		va_list vargs;
-		va_start(vargs, pszFormat);
-		int iret = VEvent(LOGL_ERROR, pszFormat, vargs);
-		va_end(vargs);
-		return iret;
-	}
-
-	int _cdecl EventWarn(lpctstr pszFormat, ...) __printfargs(2,3)
-	{
-		va_list vargs;
-		va_start(vargs, pszFormat);
-		int iret = VEvent(LOGL_WARN, pszFormat, vargs);
-		va_end(vargs);
-		return iret;
-	}
-
+	int _cdecl Event( dword dwMask, lpctstr pszFormat, ... ) __printfargs(3,4);
+	int _cdecl EventDebug(lpctstr pszFormat, ...) __printfargs(2,3);
+	int _cdecl EventError(lpctstr pszFormat, ...) __printfargs(2,3);
+	int _cdecl EventWarn(lpctstr pszFormat, ...) __printfargs(2,3);
 #ifdef _DEBUG
-	int _cdecl EventEvent( lpctstr pszFormat, ... ) __printfargs(2,3)
-	{
-		va_list vargs;
-		va_start( vargs, pszFormat );
-		int iret = VEvent( LOGL_EVENT, pszFormat, vargs );
-		va_end( vargs );
-		return iret;
-	}
+	int _cdecl EventEvent( lpctstr pszFormat, ... ) __printfargs(2,3);
 #endif //_DEBUG
 
-#define DEBUG_ERR(_x_)	g_pLog->EventError _x_
-
-#ifdef _DEBUG
-	#define DEBUG_WARN(_x_)		g_pLog->EventWarn _x_
-	#define DEBUG_MSG(_x_)		g_pLog->EventDebug _x_
-	#define DEBUG_EVENT(_x_)	g_pLog->EventEvent _x_
-	#define DEBUG_MYFLAG(_x_)	g_pLog->Event _x_
-#else
-	// Better use placeholders than leaving it empty, because unwanted behaviours may occur.
-	//  example: an else clause without brackets will include next line instead of DEBUG_WARN, because the macro is empty.
-	#define DEBUG_WARN(_x_)		(void)0
-	#define DEBUG_MSG(_x_)		(void)0
-	#define DEBUG_EVENT(_x_)	(void)0
-	#define DEBUG_MYFLAG(_x_)	(void)0
-#endif
-
 public:
-	CEventLog()
-	{
-	}
+	CEventLog() = default;
 
 private:
 	CEventLog(const CEventLog& copy);
 	CEventLog& operator=(const CEventLog& other);
-} * g_pLog;
+};
 
 
 extern struct CLog : public CSFileText, public CEventLog
@@ -187,5 +126,21 @@ private:
 	CLog& operator=(const CLog& other);
 } g_Log;		// Log file
 
+
+#define DEBUG_ERR(_x_)	        g_Log.EventError _x_
+
+#ifdef _DEBUG
+    #define DEBUG_WARN(_x_)		g_Log.EventWarn _x_
+    #define DEBUG_MSG(_x_)		g_Log.EventDebug _x_
+    #define DEBUG_EVENT(_x_)	g_Log.EventEvent _x_
+    #define DEBUG_MYFLAG(_x_)	g_Log.Event _x_
+#else
+    // Better use placeholders than leaving it empty, because unwanted behaviours may occur.
+    //  example: an else clause without brackets will include next line instead of DEBUG_WARN, because the macro is empty.
+    #define DEBUG_WARN(_x_)		(void)0
+    #define DEBUG_MSG(_x_)		(void)0
+    #define DEBUG_EVENT(_x_)	(void)0
+    #define DEBUG_MYFLAG(_x_)	(void)0
+#endif
 
 #endif // _INC_CLOG_H

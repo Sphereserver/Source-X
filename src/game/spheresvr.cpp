@@ -71,25 +71,6 @@ bool WritePidFile(int iMode = 0)
 	}
 }
 
-int CEventLog::VEvent( dword dwMask, lpctstr pszFormat, va_list args )
-{
-	if ( pszFormat == nullptr || pszFormat[0] == '\0' )
-		return 0;
-
-	TemporaryString tsTemp;
-	tchar* pszTemp = static_cast<tchar *>(tsTemp);
-	size_t len = vsnprintf(pszTemp, (SCRIPT_MAX_LINE_LEN - 1), pszFormat, args);
-	if ( ! len )
-		strncpy(pszTemp, pszFormat, (SCRIPT_MAX_LINE_LEN - 1));
-
-	// This get rids of exploits done sending 0x0C to the log subsytem.
-	// tchar *	 pFix;
-	// if ( ( pFix = strchr( pszText, 0x0C ) ) )
-	//	*pFix = ' ';
-
-	return EventStr(dwMask, pszTemp);
-}
-
 lpctstr const g_Stat_Name[STAT_QTY] =	// not sorted obviously.
 {
 	"STR",
@@ -127,7 +108,6 @@ CUOInstall		g_Install;
 CVerDataMul		g_VerData;
 CExpression		g_Exp;				// Global script variables.
 CLog			g_Log;
-CEventLog		* g_pLog = &g_Log;
 CAccounts		g_Accounts;			// All the player accounts. name sorted CAccount
 CSStringList	g_AutoComplete;		// auto-complete list
 CScriptProfiler g_profiler;			// script profiler

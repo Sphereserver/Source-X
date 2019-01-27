@@ -685,13 +685,8 @@ public:
 	*
 	* @return true if I am.
 	*/
-	bool Noto_IsCriminal() const
-	{
-		// do the guards hate me ?
-		if ( IsStatFlag( STATF_CRIMINAL ) )
-			return true;
-		return Noto_IsEvil();
-	}
+	bool Noto_IsCriminal() const;
+	
 
 	/**
 	* @brief Notoriety level for this character.
@@ -1218,7 +1213,7 @@ public:
 	bool NPC_TrainSkill( CChar * pCharSrc, SKILL_TYPE skill, ushort uiAmountToTrain );
     int PayGold(CChar * pCharSrc, int iGold, CItem * pGold, ePayGold iReason);
 private:
-	bool NPC_CheckWalkHere( const CPointMap & pt, const CRegion * pArea, dword dwBlockFlags ) const;
+	bool NPC_CheckWalkHere( const CPointMap & pt, const CRegion * pArea ) const;
 	void NPC_OnNoticeSnoop( const CChar * pCharThief, const CChar * pCharMark );
 
 	void NPC_LootMemory( CItem * pItem );

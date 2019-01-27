@@ -1095,11 +1095,11 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	else
 	{
 		// I'm mobile. do basic check if i would move here first.
-		if ( !NPC_CheckWalkHere(GetTopPoint(), m_pArea, 0) )
+		if ( !NPC_CheckWalkHere(GetTopPoint(), m_pArea) )
 		{
 			// I should move. Someone lit a fire under me.
 			m_Act_p = GetTopPoint();
-			m_Act_p.Move(static_cast<DIR_TYPE>(Calc_GetRandVal(DIR_QTY)));
+			m_Act_p.Move((DIR_TYPE)(Calc_GetRandVal(DIR_QTY)));
 			NPC_WalkToPoint(true);
 			SoundChar(CRESND_NOTICE);
 			return true;
