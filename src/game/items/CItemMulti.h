@@ -144,7 +144,7 @@ public:
     * @param pDeed The deed used to create this multi.
     * @return the CItemMulti if the creation succeeded.
     */
-    static CItemMulti *Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPointMap & pt, CItem *pDeed);
+    static CItem *Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPointMap & pt, CItem *pDeed);
 
     /** House Permissions
     */

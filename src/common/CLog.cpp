@@ -1,9 +1,8 @@
 
-#include "CException.h"
-#include "common.h"
 #include "../sphere/ProfileTask.h"
-#include "CLog.h"
 #include "../game/CServer.h"
+#include "CException.h"
+#include "CLog.h"
 
 
 int CEventLog::VEvent(dword dwMask, lpctstr pszFormat, va_list args)
@@ -25,7 +24,7 @@ int CEventLog::VEvent(dword dwMask, lpctstr pszFormat, va_list args)
     return EventStr(dwMask, pszTemp);
 }
 
-int CEventLog::Event(dword dwMask, lpctstr pszFormat, ...) __printfargs(3, 4)
+int CEventLog::Event(dword dwMask, lpctstr pszFormat, ...)
 {
     va_list vargs;
     va_start(vargs, pszFormat);
@@ -34,7 +33,7 @@ int CEventLog::Event(dword dwMask, lpctstr pszFormat, ...) __printfargs(3, 4)
     return iret;
 }
 
-int CEventLog::EventDebug(lpctstr pszFormat, ...) __printfargs(2, 3)
+int CEventLog::EventDebug(lpctstr pszFormat, ...)
 {
     va_list vargs;
     va_start(vargs, pszFormat);
@@ -43,7 +42,7 @@ int CEventLog::EventDebug(lpctstr pszFormat, ...) __printfargs(2, 3)
     return iret;
 }
 
-int CEventLog::EventError(lpctstr pszFormat, ...) __printfargs(2, 3)
+int CEventLog::EventError(lpctstr pszFormat, ...)
 {
     va_list vargs;
     va_start(vargs, pszFormat);
@@ -52,7 +51,7 @@ int CEventLog::EventError(lpctstr pszFormat, ...) __printfargs(2, 3)
     return iret;
 }
 
-int CEventLog::EventWarn(lpctstr pszFormat, ...) __printfargs(2, 3)
+int CEventLog::EventWarn(lpctstr pszFormat, ...)
 {
     va_list vargs;
     va_start(vargs, pszFormat);
@@ -62,7 +61,7 @@ int CEventLog::EventWarn(lpctstr pszFormat, ...) __printfargs(2, 3)
 }
 
 #ifdef _DEBUG
-int CEventLog::EventEvent(lpctstr pszFormat, ...) __printfargs(2, 3)
+int CEventLog::EventEvent(lpctstr pszFormat, ...)
 {
     va_list vargs;
     va_start(vargs, pszFormat);
@@ -122,18 +121,18 @@ lpctstr CLog::GetLogDir() const
 
 dword CLog::GetLogMask() const
 {
-	return ( m_dwMsgMask &~ (LOGL_QTY|LOGF_QTY) );
+	return ( m_dwMsgMask & ~(LOGL_QTY|LOGF_QTY) );
 }
 
 void CLog::SetLogMask( dword dwMask )
 {
-	m_dwMsgMask = GetLogLevel() | ( dwMask &~ (LOGL_QTY|LOGF_QTY) );
+	m_dwMsgMask = GetLogLevel() | ( dwMask & ~(LOGL_QTY|LOGF_QTY) );
 }
 
 bool CLog::IsLoggedMask( dword dwMask ) const
 {
-	return ( ((dwMask &~ (LOGL_QTY | LOGF_QTY | LOGM_NOCONTEXT | LOGM_DEBUG)) == 0) ||	// debug and msgs with no context are not masks to be logged?
-			 (( GetLogMask() & ( dwMask &~ (LOGL_QTY|LOGF_QTY) )) != 0) );
+	return ( ((dwMask & ~(LOGL_QTY | LOGF_QTY | LOGM_NOCONTEXT | LOGM_DEBUG)) == 0) ||	// debug and msgs with no context are not masks to be logged?
+			 (( GetLogMask() & ( dwMask & ~(LOGL_QTY|LOGF_QTY) )) != 0) );
 }
 
 LOG_TYPE CLog::GetLogLevel() const

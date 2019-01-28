@@ -1589,13 +1589,12 @@ bool CClient::OnTarg_Use_Deed( CItem * pDeed, CPointMap & pt )
 	// IT_DEED
 	//
 
-    if (!m_pChar->CanUse(pDeed, true))
+    if (!GetChar()->CanUse(pDeed, true))
     {
         return false;
     }
 
 	const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(pDeed->m_itDeed.m_Type)));
-
     if (!OnTarg_Use_Multi(pItemDef, pt, pDeed))
     {
         return false;

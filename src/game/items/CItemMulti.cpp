@@ -2963,7 +2963,7 @@ void CItemMulti::DupeCopy(const CItem * pItem)
     CItem::DupeCopy(pItem);
 }
 
-CItemMulti *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPointMap & pt, CItem *pDeed)
+CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPointMap & pt, CItem *pDeed)
 {
     if (!pChar)
     {
@@ -3141,12 +3141,12 @@ CItemMulti *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, C
         pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_COLLAPSE);
         return nullptr;
     }
-    CItemMulti * pMultiItem = dynamic_cast <CItemMulti*>(pItemNew);
-
+    
     pItemNew->SetAttr(ATTR_MOVE_NEVER | (pDeed->m_Attr & (ATTR_MAGIC | ATTR_INVIS)));
     pItemNew->SetHue(pDeed->GetHue());
     pItemNew->MoveToUpdate(pt);
 
+    CItemMulti * pMultiItem = dynamic_cast <CItemMulti*>(pItemNew);
     if (pMultiItem)
     {
         pMultiItem->Multi_Setup(pChar, UID_CLEAR);
@@ -3163,7 +3163,7 @@ CItemMulti *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, C
     {
         pItemNew->Sound(Calc_GetRandVal(2) ? 0x12 : 0x13);
     }
-    return pMultiItem;
+    return pItemNew;
 }
 
 void CItemMulti::OnComponentCreate(CItem * pComponent, bool fIsAddon)

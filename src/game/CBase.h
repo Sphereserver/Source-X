@@ -76,7 +76,6 @@ public:
      * @brief   Gets definition number.
      *
      * @param   pszKey  The key.
-     * @param   fZero   true to zero.
      *
      * @return  The definition number.
      */
@@ -90,13 +89,13 @@ public:
      *
      * @brief   Sets definition number.
      *
-     * @param   pszKey  The key.
-     * @param   iVal    Zero-based index of the value.
-     * @param   fZero   true to zero.
+     * @param   pszKey      The key.
+     * @param   iVal        Zero-based index of the value.
+     * @param   fDeleteZero true to zero.
      */
-	void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true, bool fWarnOverwrite = true)
+	void SetDefNum(lpctstr pszKey, int64 iVal, bool fDeleteZero = true, bool fWarnOverwrite = true)
 	{
-		m_BaseDefs.SetNum(pszKey, iVal, fZero, fWarnOverwrite);
+		m_BaseDefs.SetNum(pszKey, iVal, fDeleteZero, fWarnOverwrite);
 	}
 
     /**
@@ -104,14 +103,14 @@ public:
      *
      * @brief   Sets definition string.
      *
-     * @param   pszKey  The key.
-     * @param   pszVal  The value.
-     * @param   fQuoted true if quoted.
-     * @param   fZero   true to zero.
+     * @param   pszKey      The key.
+     * @param   pszVal      The value.
+     * @param   fQuoted     true if quoted.
+     * @param   fDeleteZero true to zero.
      */
-	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true, bool fWarnOverwrite = true)
+	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fDeleteZero = true, bool fWarnOverwrite = true)
 	{
-		m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero, fWarnOverwrite);
+		m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fDeleteZero, fWarnOverwrite);
 	}
 
     /**
