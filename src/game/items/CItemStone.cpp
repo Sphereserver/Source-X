@@ -829,6 +829,7 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				{
 					tchar * pszArgs = s.GetArgRaw();
 					int iFlags = Exp_GetVal(pszArgs);
+					SKIP_ARGSEP(pszArgs);
 
 					if (( iFlags < -1 ) || ( iFlags > STONEPRIV_ACCEPTED ))
 					{
@@ -840,10 +841,7 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 						if ( pszArgs[0] != '\0' )
 						{
 							pMember = static_cast <CStoneMember *>(GetHead());
-							SKIP_ARGSEP(pszArgs);
-							CScript script(s.GetKey(), pszArgs);
-							script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-							script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+							CScript script(pszArgs);
 
 							for (; pMember != nullptr; pMember = pMember->GetNext())
 							{

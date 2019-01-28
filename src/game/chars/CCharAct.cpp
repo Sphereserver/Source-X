@@ -3303,7 +3303,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 				return TRIGRET_RET_DEFAULT;
 			case IT_SHIP_PLANK:
 			case IT_ROPE:
-				if ( !fStanding && !IsStatFlag(STATF_HOVERING) )
+				if ( !fStanding && !IsStatFlag(STATF_HOVERING) && !pItem->IsAttr(ATTR_STATIC) )
 				{
 					// Check if we can go out of the ship (in the same direction of plank)
 					if ( MoveToValidSpot(m_dirFace, g_Cfg.m_iMaxShipPlankTeleport, 1, true) )
