@@ -1534,7 +1534,7 @@ bool CChar::CanMove( const CItem *pItem, bool fMsg ) const
 		}
 
 		// Can't move equipped cursed items
-		if ( pItem->IsAttr(ATTR_CURSED|ATTR_CURSED2) && pItem->IsItemEquipped() )
+		if ( pItem->IsAttr(ATTR_CURSED) && pItem->IsItemEquipped() )
 		{
 			//pItem->SetAttr(ATTR_IDENTIFIED);
 			if ( fMsg )
@@ -1544,7 +1544,7 @@ bool CChar::CanMove( const CItem *pItem, bool fMsg ) const
 		}
 
 		// Can't steal/move newbie items on another cchar. (even if pet)
-		if ( pItem->IsAttr(ATTR_NEWBIE|ATTR_BLESSED2|ATTR_CURSED|ATTR_CURSED2) )
+		if ( pItem->IsAttr(ATTR_NEWBIE|ATTR_CURSED) )
 		{
 			const CObjBaseTemplate *pObjTop = pItem->GetTopLevelObj();
 			if ( pObjTop->IsItem() )	// is this a corpse or sleeping person ?

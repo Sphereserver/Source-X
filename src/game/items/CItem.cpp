@@ -803,11 +803,11 @@ int CItem::FixWeirdness()
     //	allow bless/curse for memory items only, and of course deny both blessed+cursed
     if (!IsType(IT_EQ_MEMORY_OBJ))
     {
-        ClrAttr(ATTR_CURSED | ATTR_CURSED2 | ATTR_BLESSED | ATTR_BLESSED2);
+        ClrAttr(ATTR_CURSED|ATTR_BLESSED);
     }
-    else if (IsAttr(ATTR_CURSED | ATTR_CURSED2) && IsAttr(ATTR_BLESSED | ATTR_BLESSED2))
+    else if (IsAttr(ATTR_CURSED) && IsAttr(ATTR_BLESSED))
     {
-        ClrAttr(ATTR_CURSED | ATTR_CURSED2 | ATTR_BLESSED | ATTR_BLESSED2);
+        ClrAttr(ATTR_CURSED|ATTR_BLESSED);
     }
 
     if (IsMovableType())
@@ -1643,29 +1643,13 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 		len += sprintf( pTemp+len, pszTitle, GetAmount());
 	}
 
-	if ( fIdentified && IsAttr(ATTR_CURSED|ATTR_CURSED2|ATTR_BLESSED|ATTR_BLESSED2|ATTR_MAGIC))
+	if ( fIdentified && IsAttr(ATTR_CURSED|ATTR_BLESSED|ATTR_MAGIC))
 	{
 		bool fTitleSet = false;
-		switch ( m_Attr & ( ATTR_CURSED|ATTR_CURSED2|ATTR_BLESSED|ATTR_BLESSED2))
+		switch ( m_Attr & (ATTR_CURSED|ATTR_BLESSED))
 		{
-			case (ATTR_CURSED|ATTR_CURSED2):
-				pszTitle = g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_UNHOLY );
-				fTitleSet = true;
-				break;
-			case ATTR_CURSED2:
-				pszTitle = g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_DAMNED );
-				fTitleSet = true;
-				break;
 			case ATTR_CURSED:
 				pszTitle = g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_CURSED );
-				fTitleSet = true;
-				break;
-			case (ATTR_BLESSED|ATTR_BLESSED2):
-				pszTitle = g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_HOLY );
-				fTitleSet = true;
-				break;
-			case ATTR_BLESSED2:
-				pszTitle = g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_SACRED );
 				fTitleSet = true;
 				break;
 			case ATTR_BLESSED:
@@ -4447,8 +4431,10 @@ bool CItem::Armor_IsRepairable() const
 	// SKILL_BOWERY (xbows)
 	// SKILL_TAILORING (leather)
 	//
+	if ( IsAttr(ATTR_NOREPAIR) )
+		return false;
 
-	if ( Can( CAN_I_REPAIR ) )
+	if ( Can(CAN_I_REPAIR) )
 		return true;
 
 	switch ( m_type )

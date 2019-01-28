@@ -70,12 +70,9 @@ public:
 #define ATTR_OWNED				0x0040				// This is owned by the town. You need to steal it. NEVER DECAYS !
 #define ATTR_INVIS				0x0080				// Gray hidden item (to GM's or owners?)
 #define ATTR_CURSED				0x0100
-#define ATTR_CURSED2			0x0200				// cursed damned unholy
 #define ATTR_BLESSED			0x0400
-#define ATTR_BLESSED2			0x0800				// blessed sacred holy
 #define ATTR_FORSALE			0x1000				// For sale on a vendor.
 #define ATTR_STOLEN				0x2000				// The item is hot. m_uidLink = previous owner.
-#define ATTR_CAN_DECAY			0x4000				// This item can decay. but it would seem that it would not (ATTR_MOVE_NEVER etc)
 #define ATTR_STATIC				0x8000				// WorldForge merge marker. (used for statics saves)
 
 // Not listed by AxisII
@@ -94,9 +91,9 @@ public:
 #define ATTR_SHARDBOUND			0x10000000
 #define ATTR_ACCOUNTBOUND  		0x20000000
 #define ATTR_CHARACTERBOUND		0x40000000
+#define ATTR_NOREPAIR			0x80000000			// No repair, no fortify
 
 // TODO
-#define ATTR_CANNOTREPAIR		0x400000000000		// No repair, no fortify
 #define ATTR_FACTIONITEM		0x80000000000000	// ? Faction Item (Has cliloc)
 #define ATTR_VVVITEM			0x100000000000000	// ? VvV Item (Has CliLoc)
 

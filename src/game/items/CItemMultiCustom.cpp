@@ -378,7 +378,7 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
         pt.m_z += (char)((*i)->m_item.m_dz);
 
         pItem->m_uidLink = GetUID();
-        pItem->ClrAttr(ATTR_DECAY | ATTR_CAN_DECAY);
+        pItem->ClrAttr(ATTR_DECAY);
         pItem->SetAttr(ATTR_MOVE_NEVER);
         pItem->m_TagDefs.SetNum("FIXTURE", (int64)(GetUID()));
 

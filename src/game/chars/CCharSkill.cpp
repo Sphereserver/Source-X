@@ -1051,7 +1051,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 		Sound( 0x2b );
 
 	UpdateDir( m_Act_p );
-	if ( pItemOre->IsAttr(ATTR_MAGIC|ATTR_BLESSED|ATTR_BLESSED2))	// not magic items
+	if ( pItemOre->IsAttr(ATTR_MAGIC|ATTR_BLESSED))	// not magic items
 	{
 		SysMessageDefault( DEFMSG_MINING_FIRE );
 		return false;
