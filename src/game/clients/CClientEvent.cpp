@@ -300,6 +300,23 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 
 	ClearTargMode();	// done dragging
 
+	if (pItem->IsAttr(ATTR_QUESTITEM))
+	{
+		// These items can be dropped only on player backpack or trash can
+		CItem *pPack = dynamic_cast<CItem *>(pObjOn);
+		if (pPack && pPack->IsType(IT_TRASH_CAN))
+		{
+			addSound(pItem->GetDropSound(pObjOn));
+			pItem->Delete();
+			return;
+		}
+		else if ((pPack != m_pChar->LayerFind(LAYER_PACK)) && !IsPriv(PRIV_GM))
+		{
+			SysMessageDefault(DEFMSG_ITEM_CANTDROPTRADE);
+			return Event_Item_Drop_Fail(pItem);
+		}
+	}
+
 	if ( pObjOn != nullptr )	// Put on or in another object
 	{
 		if ( ! m_pChar->CanTouch( pObjOn ))	// Must also be LOS !
