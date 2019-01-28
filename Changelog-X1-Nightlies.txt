@@ -1492,3 +1492,6 @@ WARNING: the following change could break some hackish expedient used in scripts
 - Fixed: ARGN1 value from @Hit trigger ignored in @GetHit (Issue #211).
 - Fixed: Blood generated after a received hit had the wrong color (Issue #206).
 	This changes also the index of the color shown by EFFECT functions, because actually until now it was showing the hue with index = (index - 1).
+
+29-01-2019, Nolok
+- Fixed: Deeds with non-multi MORE not being removed after the item is placed (Issue #218).
