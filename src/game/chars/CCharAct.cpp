@@ -2481,14 +2481,6 @@ bool CChar::Horse_UnMount()
 		return false;
 	}
 
-	if (pItem->GetDispID() == ITEMID_MEMORY_SHIP_PILOT)
-	{
-		CCMultiMovable *pShip = dynamic_cast<CCMultiMovable*>(pItem->m_uidLink.ItemFind());
-		if (pShip)
-			pShip->SetPilot(NULL);
-		return true;
-	}
-
 	CChar * pPet = pItem->m_itFigurine.m_UID.CharFind();
 	if ( IsTrigUsed(TRIGGER_DISMOUNT) && pPet != nullptr && pPet->IsDisconnected() && !pPet->IsDeleted() ) // valid horse for trigger
 	{
