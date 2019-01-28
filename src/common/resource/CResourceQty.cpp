@@ -68,6 +68,7 @@ bool CResourceQty::Load(lpctstr &pszCmds)
     m_rid = g_Cfg.ResourceGetIDParse(RES_UNKNOWN, pszCmds);
     if ( m_rid.GetResType() == RES_UNKNOWN )
     {
+        m_rid.Init();
         g_Log.EventError("Bad resource list id '%s'\n", orig);
         return false;
     }

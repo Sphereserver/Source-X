@@ -94,9 +94,9 @@ public:
      * @param   iVal    Zero-based index of the value.
      * @param   fZero   true to zero.
      */
-	void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true)
+	void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true, bool fWarnOverwrite = true)
 	{
-		m_BaseDefs.SetNum(pszKey, iVal, fZero);
+		m_BaseDefs.SetNum(pszKey, iVal, fZero, fWarnOverwrite);
 	}
 
     /**
@@ -109,9 +109,9 @@ public:
      * @param   fQuoted true if quoted.
      * @param   fZero   true to zero.
      */
-	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true)
+	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true, bool fWarnOverwrite = true)
 	{
-		m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero);
+		m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero, fWarnOverwrite);
 	}
 
     /**

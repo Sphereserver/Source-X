@@ -393,7 +393,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 		ItemBounce(pRemovedAmmo, false);
 		SysMessageDefault(DEFMSG_ITEMUSE_ARCHBUTTE_GATHER);
 
-		pButte->m_itArcheryButte.m_ridAmmoType.ClearUID();
+		pButte->m_itArcheryButte.m_ridAmmoType.Clear();
 		pButte->m_itArcheryButte.m_AmmoCount = 0;
 		return true;
 	}

@@ -360,7 +360,7 @@ CResourceID CResourceBase::ResourceGetIDType( RES_TYPE restype, lpctstr pszName,
 	CResourceID rid = ResourceGetID( restype, pszName, wPage );
 	if ( rid.GetResType() != restype )
 	{
-		rid.InitUID();
+		rid.Init();
 		return rid;
 	}
 	return rid;

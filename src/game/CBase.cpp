@@ -296,7 +296,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 				bool fQuoted = false;
 				SetDefStr(s.GetKey(), s.GetArgStr( &fQuoted ), fQuoted);
 				if ( !strcmpi(GetDefStr(sm_szLoadKeys[OBC_DESCRIPTION]), "@") )
-					SetDefStr(sm_szLoadKeys[OBC_DESCRIPTION], GetDefStr(sm_szLoadKeys[OBC_SUBSECTION]));
+					SetDefStr(sm_szLoadKeys[OBC_DESCRIPTION], GetDefStr(sm_szLoadKeys[OBC_SUBSECTION]), false);
 			}
 			return true;
 		case OBC_ARMOR:
