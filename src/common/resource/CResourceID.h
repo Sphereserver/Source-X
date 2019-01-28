@@ -105,9 +105,20 @@ struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variab
 #define RES_GET_TYPE(dw)	( ( (dw) >> RES_TYPE_SHIFT ) & RES_TYPE_MASK )
 #define RES_GET_INDEX(dw)	( (dw) & (dword)RES_INDEX_MASK )
 
+    void InitUID() = delete;
+    void ClearUID() = delete;
+    void Init()
+    {
+        m_dwInternalVal = UID_UNUSED;
+    }
+    void Clear()
+    {
+        m_dwInternalVal = UID_CLEAR;
+    }
+
     CResourceIDBase()
     {
-        InitUID();
+        Init();
     }
     explicit CResourceIDBase(RES_TYPE restype)
     {
@@ -121,7 +132,7 @@ struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variab
         ASSERT(restype < RES_TYPE_MASK);
         if (iIndex < 0)
         {
-            InitUID();
+            Init();
             return;
         }
         ASSERT(iIndex < RES_INDEX_MASK);
@@ -186,6 +197,17 @@ struct CResourceID : public CResourceIDBase     // It has the "page" part. Use i
     word m_wPage;
     #define RES_PAGE_MAX    UINT16_MAX - 1
     #define RES_PAGE_ANY    UINT16_MAX      // Pick a CResourceID independently from the page
+
+    void Init()
+    {
+        m_dwInternalVal = UID_UNUSED;
+        m_wPage = 0;
+    }
+    void Clear()
+    {
+        m_dwInternalVal = UID_CLEAR;
+        m_wPage = 0;
+    }
 
     CResourceID() : CResourceIDBase()
     {

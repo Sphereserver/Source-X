@@ -5198,14 +5198,14 @@ PacketDisplayMapNew::PacketDisplayMapNew(const CClient* target, const CItemMap* 
  *
  *
  ***************************************************************************/
-PacketMoveShip::PacketMoveShip(const CClient* target, const CItemShip* ship, CObjBase** objects, size_t objectCount, byte movedirection, byte boatdirection, byte speed) : PacketSend(XCMD_MoveShip, 18, PRI_NORMAL)
+PacketMoveShip::PacketMoveShip(const CClient* target, const CObjBase* movingObj, CObjBase** objects, size_t objectCount, byte movedirection, byte boatdirection, byte speed) : PacketSend(XCMD_MoveShip, 18, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketMoveShip::PacketMoveShip");
 	ASSERT(objectCount > 0);
-	const CPointMap& shipLocation = ship->GetTopPoint();
+	const CPointMap& shipLocation = movingObj->GetTopPoint();
 
 	initLength();
-	writeInt32(ship->GetUID());
+	writeInt32(movingObj->GetUID());
 	writeByte(speed);
 	writeByte(movedirection);
 	writeByte(boatdirection);

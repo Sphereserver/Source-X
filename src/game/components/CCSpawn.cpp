@@ -26,7 +26,7 @@ CCSpawn::CCSpawn(CItem *pLink) : CComponent(COMP_SPAWN)
     _iMaxDist = 15;
     _iTimeLo = 15;
     _iTimeHi = 30;
-    _idSpawn.InitUID();
+    _idSpawn.Init();
     _fKillingChildren = false;
 }
 

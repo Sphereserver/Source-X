@@ -177,24 +177,20 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta)
 
     CItem *pItemThis = dynamic_cast<CItem*>(this);
     ASSERT(pItemThis);
-    CItemMulti *pMulti = static_cast<CItemMulti*>(pItemThis);
-    ASSERT(pMulti->GetRegion()->m_iLinkedSectors);
+    CItemMulti *pMultiThis = static_cast<CItemMulti*>(pItemThis);
+    ASSERT(pMultiThis->GetRegion()->m_iLinkedSectors);
 
-    int znew = pItemThis->GetTopZ() + ptDelta.m_z;
-    if (ptDelta.m_z > 0)
-    {
-        if (znew >= (UO_SIZE_Z - PLAYER_HEIGHT) - 1)
-            return false;
-    }
-    else if (ptDelta.m_z < 0)
-    {
-        if (znew <= (UO_SIZE_MIN_Z + 3))
-            return false;
-    }
-    CPointMap ptTemp = pItemThis->GetTopPoint();
-    CRegionWorld *pRegionOld = dynamic_cast<CRegionWorld*>(ptTemp.GetRegion(REGION_TYPE_AREA));
-    ptTemp += ptDelta;
-    CRegionWorld *pRegionNew = dynamic_cast<CRegionWorld*>(ptTemp.GetRegion(REGION_TYPE_AREA));
+    int zNew = pItemThis->GetTopZ() + ptDelta.m_z;
+    if ( (ptDelta.m_z > 0) && (zNew >= (UO_SIZE_Z - PLAYER_HEIGHT) - 1) )
+        return false;
+    if ( (ptDelta.m_z < 0) && (zNew <= (UO_SIZE_MIN_Z + 3)) )
+        return false;
+
+    CPointMap ptMultiOld = pItemThis->GetTopPoint();
+    CPointMap ptMultiNew(ptMultiOld);
+    ptMultiNew += ptDelta;
+    CRegionWorld *pRegionOld = dynamic_cast<CRegionWorld*>(ptMultiOld.GetRegion(REGION_TYPE_AREA));
+    CRegionWorld *pRegionNew = dynamic_cast<CRegionWorld*>(ptMultiNew.GetRegion(REGION_TYPE_AREA));
     if (!MoveToRegion(pRegionOld, pRegionNew))
     {
         return false;
@@ -203,15 +199,16 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta)
     // Move the ship and everything on the deck
     CObjBase * ppObjs[MAX_MULTI_LIST_OBJS + 1];
     size_t iCount = ListObjs(ppObjs);
+    ASSERT(iCount > 0);
 
     for (size_t i = 0; i < iCount; ++i)
     {
         CObjBase * pObj = ppObjs[i];
         if (!pObj)
             continue;
+
         CPointMap pt = pObj->GetTopPoint();
         pt += ptDelta;
-
         if (!pt.IsValidPoint())  // boat goes out of bounds !
         {
             DEBUG_ERR(("Ship uid=0%x out of bounds\n", (dword)pItemThis->GetUID()));
@@ -223,72 +220,93 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta)
     ClientIterator it;
     for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
     {
-        CChar * tMe = pClient->GetChar();
-        if (tMe == nullptr)
+        CChar * pCharClient = pClient->GetChar();
+        if (pCharClient == nullptr)
             continue;
 
-        byte tViewDist = (uchar)(tMe->GetVisualRange());
+        const NetState* pNetState = pClient->GetNetState();
+        const bool fClientUsesSmoothSailing = !IsSetOF(OF_NoSmoothSailing) && (pNetState->isClientVersion(MINCLIVER_HS) || pNetState->isClientEnhanced());
+
+        const CPointMap& ptMe = pCharClient->GetTopPoint();
+        const int iViewDist = pCharClient->GetVisualRange();
+        
+        // No smooth sailing: update the view for each item inside the multi
         for (size_t i = 0; i < iCount; ++i)
         {
             CObjBase * pObj = ppObjs[i];
-            if (!pObj) continue; //no object anymore? skip!
+            if (!pObj)
+                continue; //no object anymore? skip!
+
             CPointMap pt = pObj->GetTopPoint();
             CPointMap ptOld(pt);
             ptOld -= ptDelta;
 
             //Remove objects that just moved out of sight
-            if ((tMe->GetTopPoint().GetDistSight(pt) >= tViewDist) && (tMe->GetTopPoint().GetDistSight(ptOld) < tViewDist))
+            if ((ptMe.GetDistSight(pt) >= iViewDist) && (ptMe.GetDistSight(ptOld) < iViewDist))
             {
                 pClient->addObjectRemove(pObj);
                 continue; //no need to keep going. skip!
             }
-
+            
             if (pClient->CanSee(pObj))
-            {
-                if (pObj == pItemThis) //This is the ship (usually the first item in the list)
-                {
-                    if (pClient->GetNetState()->isClientVersion(MINCLIVER_HS) || pClient->GetNetState()->isClientEnhanced())
-                    {
-                        if (!IsSetOF(OF_NoSmoothSailing))
-                        {
-                            new PacketMoveShip(pClient, static_cast<CItemShip*>(pMulti), ppObjs, iCount, pItemThis->m_itShip.m_DirMove, pItemThis->m_itShip.m_DirFace, (byte)pMulti->_eSpeedMode);
-
-                            //If client is on Ship
-                            if (tMe->GetRegion()->GetResourceID().GetObjUID() == pItemThis->GetUID())
-                            {
-                                break; //skip to next client
-                            }
-                        }
-                        else if (pClient->GetNetState()->isClientEnhanced())
-                            pClient->addObjectRemove(pObj);	//it will be added again in the if clause below
-                    }
-                }
-                const CPointMap& ptMe = tMe->GetTopPoint();
-                const NetState* pNetState = pClient->GetNetState();
+            {                
+                // Check if me or other clients can see a object they couldn't see before
                 if (pObj->IsItem())
                 {
-                    if ((ptMe.GetDistSight(pt) < tViewDist)
-                        && ((ptMe.GetDistSight(ptOld) >= tViewDist) || !(pNetState->isClientVersion(MINCLIVER_HS) || pNetState->isClientEnhanced()) || IsSetOF(OF_NoSmoothSailing)))
+                    if ((ptMe.GetDistSight(pt) < iViewDist)
+                        && ( (ptMe.GetDistSight(ptOld) >= iViewDist) || !(pNetState->isClientVersion(MINCLIVER_HS) || pNetState->isClientEnhanced()) || IsSetOF(OF_NoSmoothSailing) ))
                     {
-                        CItem *pItem = dynamic_cast <CItem *>(pObj);
+                        CItem *pItem = static_cast<CItem *>(pObj);
                         pClient->addItem(pItem);
                     }
-
                 }
                 else
                 {
-                    CChar *pChar = dynamic_cast <CChar *>(pObj);
+                    CChar *pChar = static_cast<CChar *>(pObj);
                     if (pClient == pChar->GetClient())
-                        pClient->addPlayerView(ptOld);
-                    else if ((ptMe.GetDistSight(pt) <= tViewDist)
-                        && ((ptMe.GetDistSight(ptOld) > tViewDist) || !(pNetState->isClientVersion(MINCLIVER_HS) || pNetState->isClientEnhanced()) || IsSetOF(OF_NoSmoothSailing)))
                     {
-                        if ((pt.GetDist(ptOld) > 1) && (pNetState->isClientLessVersion(MINCLIVER_HS)) && (pChar->GetTopPoint().GetDistSight(ptOld) < tViewDist))
+                        if (!fClientUsesSmoothSailing)
+                            pClient->addPlayerUpdate();     // update my (client) position
+                    }
+                    else if ((ptMe.GetDistSight(pt) <= iViewDist)
+                        && ((ptMe.GetDistSight(ptOld) > iViewDist) || !(pNetState->isClientVersion(MINCLIVER_HS) || pNetState->isClientEnhanced()) || IsSetOF(OF_NoSmoothSailing)))
+                    {
+                        if ((pt.GetDist(ptOld) > 1) && (pNetState->isClientLessVersion(MINCLIVER_HS)) && (pt.GetDistSight(ptOld) < iViewDist))
                             pClient->addCharMove(pChar);
                         else
                         {
                             pClient->addObjectRemove(pChar);
                             pClient->addChar(pChar);
+                        }
+                    }
+                }
+
+                if (pObj == pItemThis) //This is the ship (usually the first item in the list)
+                {
+                    // Ship movement
+                    // Check if i should use smooth sailing, if so, move the ship with that packet.
+                    if (fClientUsesSmoothSailing)
+                    {
+                        //if (pNetState->isClientEnhanced())
+                        //    pClient->addObjectRemove(pItemThis);
+
+                        // Move the ship and its contents. This packet works if the objects were already added to the screen.
+                        new PacketMoveShip(pClient, pItemThis, ppObjs, iCount, pItemThis->m_itShip.m_DirMove, pItemThis->m_itShip.m_DirFace, (byte)pMultiThis->_eSpeedMode);
+                    }
+
+                    // If client is on Ship
+                    if (pCharClient->GetRegion()->GetResourceID().GetObjUID() == pItemThis->GetUID())
+                    {
+                        // Is there any new object (outside of the ship) that i can see?
+                        if (fClientUsesSmoothSailing)
+                        {
+                            CPointMap ptClientOld(pCharClient->GetTopPoint());
+                            ptClientOld -= ptDelta;
+                            pClient->addPlayerSee(ptClientOld);
+                        }
+                        else
+                        {
+                            pClient->addPlayerSee(CPointMap());
                         }
                     }
                 }

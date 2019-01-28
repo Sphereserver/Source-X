@@ -2121,7 +2121,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 			CItem * pItemCloth = CItem::CreateTemplate( ClothID, nullptr, m_pChar );
 			pItemCloth->SetAmount( (word)pItemTarg->m_itLoom.m_ClothQty );
 			pItemTarg->m_itLoom.m_ClothQty = 0;
-			pItemTarg->m_itLoom.m_ridCloth.ClearUID();
+			pItemTarg->m_itLoom.m_ridCloth.Clear();
 			m_pChar->ItemBounce( pItemCloth );
 			return true;
 		}
@@ -2146,7 +2146,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 		{
 			SysMessage( sm_Txt_LoomUse[ CountOf( sm_Txt_LoomUse ) - 1 ] );
 			pItemTarg->m_itLoom.m_ClothQty = 0;
-			pItemTarg->m_itLoom.m_ridCloth.ClearUID();
+			pItemTarg->m_itLoom.m_ridCloth.Clear();
 
 /*
 			CItemBase * pItemDef = pItemTarg->Item_GetDef();
