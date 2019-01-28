@@ -634,7 +634,7 @@ void CChar::UnEquipAllItems( CItemContainer * pDest, bool bLeaveHands )
 					continue;
 				break;
 		}
-		if ( pDest && !pItem->IsAttr(ATTR_NEWBIE|ATTR_MOVE_NEVER|ATTR_BLESSED|ATTR_INSURED|ATTR_NODROP|ATTR_NOTRADE) )
+		if ( pDest && !pItem->IsAttr(ATTR_NEWBIE|ATTR_MOVE_NEVER|ATTR_BLESSED|ATTR_INSURED|ATTR_NODROP|ATTR_NOTRADE|ATTR_QUESTITEM) )
 		{
 			// Move item to dest (corpse usually)
 			pDest->ContentAdd(pItem);
@@ -2479,6 +2479,14 @@ bool CChar::Horse_UnMount()
 	{
 		StatFlag_Clear(STATF_ONHORSE);	// flag got out of sync !
 		return false;
+	}
+
+	if (pItem->GetDispID() == ITEMID_MEMORY_SHIP_PILOT)
+	{
+		CCMultiMovable *pShip = dynamic_cast<CCMultiMovable*>(pItem->m_uidLink.ItemFind());
+		if (pShip)
+			pShip->SetPilot(NULL);
+		return true;
 	}
 
 	CChar * pPet = pItem->m_itFigurine.m_UID.CharFind();
