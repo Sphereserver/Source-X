@@ -132,9 +132,8 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 
 	const NetState * state = target->GetNetState();
 	const CChar *character = target->GetChar();
-	CChar *objectChar = object->IsChar() ? static_cast<CChar *>(object) : nullptr;
+	const CChar *objectChar = dynamic_cast<const CChar *>(object);
 	bool canRename = false;
-
 	byte version = 0;
 
 	initLength();
@@ -166,46 +165,26 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 	}
 	else
 	{
-        word iHitsCurrent = 0;
-        word iHitsMax = 100;
 		if ( objectChar )
 		{
 			canRename = objectChar->IsOwnedBy(character);
-			iHitsCurrent = (word)objectChar->Stat_GetVal(STAT_STR);
-            iHitsMax = (word)objectChar->Stat_GetMaxAdjusted(STAT_STR);
+			writeInt16(static_cast<WORD>((objectChar->Stat_GetVal(STAT_STR) * 100) / maximum(objectChar->Stat_GetMax(STAT_STR), 1)));
 		}
 		else
 		{
-			const CItem *objectItem = object->IsItem() ? static_cast<const CItem *>(object) : nullptr;
-            if (objectItem)
-            {
-                CCItemDamageable *pItem = static_cast<CCItemDamageable*>(object->GetComponent(COMP_ITEMDAMAGEABLE));
-                if (pItem)
-                {
-                    iHitsCurrent = pItem->GetCurHits();
-                    iHitsMax = pItem->GetMaxHits();
-                }
-                else
-                {
-                    iHitsCurrent = iHitsMax;  // Can't get hitpoints, asume 100%
-                }
-            }
-		}
+			const CItem *objectItem = static_cast<const CItem *>(object);
+			writeInt16(static_cast<WORD>((objectItem->m_itArmor.m_Hits_Cur * 100) / maximum(objectItem->m_itArmor.m_Hits_Max, 1)));
+ 		}
 
-		// Send percentual hitpoints
-        writeInt16(iHitsCurrent);		// Max hit points
-		writeInt16(iHitsMax);		// Max hit points
+		writeInt16(100);		// Max hit points
 		writeBool(canRename);
 		writeByte(version);
-		if (target->GetNetState()->isClientEnhanced() && objectChar && objectChar->IsPlayableCharacter())
-			// The Enhanced Client wants the char race and other things when showing paperdolls (otherwise the interface throws an "unnoticeable" internal error)
-			WriteVersionSpecific(target, objectChar, version);
 	}
 
 	push(target);
 }
 
-void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* other, byte version)
+void PacketObjectStatus::WriteVersionSpecific(const CClient* target, const CChar* other, byte version)
 {
     bool fElemental = IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE);
 	const CCharBase * otherDefinition = other->Char_GetDef();
@@ -220,23 +199,15 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
 	writeInt16((word)(other->Stat_GetVal(STAT_INT)));
 	writeInt16((word)(other->Stat_GetMaxAdjusted(STAT_INT)));
 
-    if (g_Cfg.m_iFeatureTOL & FEATURE_TOL_VIRTUALGOLD)
-    {
-        writeInt32((dword)other->m_virtualGold);
-    }
-    else if (g_Cfg.m_fPayFromPackOnly)
-    {
-        writeInt32(other->GetPackSafe()->ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD)));
-    }
+	if (g_Cfg.m_fPayFromPackOnly)
+        writeInt32(const_cast<CChar *>(other)->GetPackSafe()->ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD)));
     else
-    {
         writeInt32(other->ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD)));
-    }
-
+    
 	if (fElemental)
 		writeInt16((word)other->GetPropNum(pCCPChar, PROPCH_RESPHYSICAL, pBaseCCPChar));
 	else
-		writeInt16(other->m_defense + otherDefinition->m_defense);
+		writeInt16(other->CalcArmorDefense());
 
 	writeInt16((word)(other->GetTotalWeight() / WEIGHT_UNITS));
 
@@ -265,28 +236,18 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
 			writeByte(RACETYPE_GARGOYLE);
 			break;
 		default:
-			writeByte(RACETYPE_UNDEFINED);
+			writeByte(RACETYPE_HUMAN);
 			break;
 		}
 	}
 
 	if (version >= 2) // T2A attributes
-	{
 		writeInt16((word) other->Stat_GetSumLimit());
-	}
 
 	if (version >= 3) // Renaissance attributes
 	{
-		if (other->m_pPlayer != nullptr)
-		{
 			writeByte((byte)(other->GetDefNum("CURFOLLOWER", true)));
 			writeByte((byte)(other->GetDefNum("MAXFOLLOWER", true)));
-		}
-		else
-		{
-			writeByte(0);
-			writeByte(0);
-		}
 	}
 
 	if (version >= 4) // AOS attributes
@@ -304,7 +265,8 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
 			// The status is: Armor, PMagery, PStealth, Luck
 			writeInt16((word)other->GetKeyNum("PENALTY.MAGERY", true));
 			writeInt16((word)other->GetKeyNum("PENALTY.STEALTH", true));
-			writeInt32(0);
+			writeInt16(0);
+			writeInt16(0);
         }
         writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_LUCK, pBaseCCPChar));
 
@@ -317,19 +279,11 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
 
 	if (version >= 6)	// SA attributes
 	{
-        if (fElemental)
-        {
-            writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESPHYSICALMAX, pBaseCCPChar));
-            writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESFIREMAX, pBaseCCPChar));
-            writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESCOLDMAX, pBaseCCPChar));
-            writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESPOISONMAX, pBaseCCPChar));
-            writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESENERGYMAX, pBaseCCPChar));
-        }
-        else
-        {
-            writeInt16(0);
-            writeInt64(0);
-        }
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESPHYSICALMAX, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESFIREMAX, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESCOLDMAX, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESPOISONMAX, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESENERGYMAX, pBaseCCPChar));
         writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASEDEFCHANCE, pBaseCCPChar));
         writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASEDEFCHANCEMAX, pBaseCCPChar));
         writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASEHITCHANCE, pBaseCCPChar));
@@ -341,15 +295,16 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
         writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_FASTERCASTING, pBaseCCPChar));
         writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_LOWERMANACOST, pBaseCCPChar));
 	}
+
 	if (target->GetNetState()->isClientKR())
 	{
         writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASEHITCHANCE, pBaseCCPChar));
         writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASESWINGSPEED, pBaseCCPChar));
         writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASEDAM, pBaseCCPChar));
         writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_LOWERREAGENTCOST, pBaseCCPChar));
-		writeInt16((word)(other->Stats_GetRegenRate(STAT_STR)/MSECS_PER_SEC));
-		writeInt16((word)(other->Stats_GetRegenRate(STAT_DEX)/MSECS_PER_SEC));
-		writeInt16((word)(other->Stats_GetRegenRate(STAT_INT)/MSECS_PER_SEC));
+		writeInt16(0); //(word) (other->Stats_GetRegenRate(STAT_STR)/MSECS_PER_SEC));
+		writeInt16(0); //(word) (other->Stats_GetRegenRate(STAT_DEX)/MSECS_PER_SEC));
+		writeInt16(0); //(word) (other->Stats_GetRegenRate(STAT_INT)/MSECS_PER_SEC));
         writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_REFLECTPHYSICALDAM, pBaseCCPChar));
         writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_ENHANCEPOTIONS, pBaseCCPChar));
         writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASEDEFCHANCE, pBaseCCPChar));
@@ -3358,30 +3313,22 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 		}
 	}
 
-    if (tmVer > 1260000)
+    dword flags = g_Cfg.GetPacketFlag(true, (RESDISPLAY_VERSION)(account->GetResDisp()),
+        maximum(account->GetMaxChars(), (byte)(account->m_Chars.GetCharCount())));
+    writeInt32(flags);
+
+    word iLastCharSlot = 0;
+    for ( size_t i = 0; i < count; ++i )
     {
-        dword flags = g_Cfg.GetPacketFlag(true, (RESDISPLAY_VERSION)(account->GetResDisp()),
-            maximum(account->GetMaxChars(), (byte)(account->m_Chars.GetCharCount())));
-        if ( !target->GetNetState()->getClientType() )
-            flags |= 0x400;
-        writeInt32(flags);
+        if ( !account->m_Chars.IsValidIndex(i) )
+            continue;
+        if ( account->m_Chars.GetChar(i) != account->m_uidLastChar )
+            continue;
 
-        if ( target->GetNetState()->isClientEnhanced() )
-        {
-            word iLastCharSlot = 0;
-            for ( size_t i = 0; i < count; ++i )
-            {
-                if ( !account->m_Chars.IsValidIndex(i) )
-                    continue;
-                if ( account->m_Chars.GetChar(i) != account->m_uidLastChar )
-                    continue;
-
-                iLastCharSlot = (word)i;
-                break;
-            }
-            writeInt16(iLastCharSlot);
-        }
+        iLastCharSlot = (word)i;
+        break;
     }
+    writeInt16(iLastCharSlot);
 
 	push(target);
 }

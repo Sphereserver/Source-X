@@ -104,7 +104,7 @@ public:
 	PacketObjectStatus(const CClient* target, CObjBase* object);
 
 private:
-	void WriteVersionSpecific(const CClient* target, CChar* other, byte version);
+	void WriteVersionSpecific(const CClient* target, const CChar* other, byte version);
 };
 
 /***************************************************************************
