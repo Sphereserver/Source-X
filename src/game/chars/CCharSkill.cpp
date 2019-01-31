@@ -2327,7 +2327,7 @@ int CChar::Skill_SpiritSpeak( SKTRIG_TYPE stage )
 			Sound( 0x24a );
 
 		SysMessageDefault( DEFMSG_SPIRITSPEAK_SUCCESS );
-		Spell_Effect_Create( SPELL_NONE, LAYER_FLAG_SpiritSpeak, g_Cfg.GetSpellEffect(SPELL_NONE, 1), 4*60, this );
+		Spell_Effect_Create( SPELL_NONE, LAYER_FLAG_SpiritSpeak, g_Cfg.GetSpellEffect(SPELL_NONE, 1), 4*60*MSECS_PER_TENTH, this );
 		return 0;
 	}
 

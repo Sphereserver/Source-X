@@ -1495,3 +1495,15 @@ WARNING: the following change could break some hackish expedient used in scripts
 
 29-01-2019, Nolok
 - Fixed: Deeds with non-multi MORE not being removed after the item is placed (Issue #218).
+
+31-01-2019, Nolok
+- Fixed: Attacking something gray caused it to go criminal when it attacks back (Issue #199).
+- Changed: Some combat-related memories were not added.
+	- MEMORY_IRRITATEDBY: It was added only when the char received a hit or when it was provoked. Now it's added also when someone attacks the char, but has not started or landed the hit yet, and when its pack was snooped.
+	- MEMORY_AGGREIVED: It was added only when the char was provoked. Now it's added also when someone starts to attack another char.
+- Fixed: Wrong formula used to check if a char did notice someone snooping or stealing.
+- Fixed: The "snoop notice" message was shown even when the char didn't actually notice the snooping and the related code wasn't executed.
+- Fixed: Noticing someone snooping didn't mark the thief as a criminal.
+- Fixed: Trying to attack a char was always noticed as a crime, even if the attack attempt was aborted.
+- Changed: The delay between a guard call and the other changed from 1 to 2.5 seconds, to avoid excessive spamming.
+- Added: Security check when receiving the new movement request packet (0xF0), to ensure invalid data (or the Krrios' client login packet) isn't considered.

@@ -14,7 +14,7 @@
 #define COMBAT_MIN_SWING_ANIMATION_DELAY (int16)10  // in tenths of second
 
 // I noticed a crime.
-void CChar::OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark )
+void CChar::OnNoticeCrime( CChar * pCriminal, CChar * pCharMark )
 {
 	ADDTOCALLSTACK("CChar::OnNoticeCrime");
 	if ( !pCriminal || pCriminal == this || pCriminal == pCharMark || pCriminal->IsPriv(PRIV_GM) ) //This never happens: || (pCriminal->m_pNpc && pCriminal->GetNPCBrain() == NPCBRAIN_GUARD) )
@@ -31,17 +31,20 @@ void CChar::OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark )
 	if ( m_pPlayer )
 	{
 		// I have the option of attacking the criminal. or calling the guards.
-		bool bCriminal = true;
+		bool fCriminal = true;
 		if (IsTrigUsed(TRIGGER_SEECRIME))
 		{
 			CScriptTriggerArgs Args;
-			Args.m_iN1 = bCriminal;
+			Args.m_iN1 = fCriminal;
 			Args.m_pO1 = const_cast<CChar*>(pCharMark);
 			OnTrigger(CTRIG_SeeCrime, pCriminal, &Args);
-			bCriminal = Args.m_iN1 ? true : false;
+            fCriminal = Args.m_iN1 ? true : false;
 		}
-		if (bCriminal)
+		if (fCriminal)
+        {
 			Memory_AddObjTypes( pCriminal, MEMORY_SAWCRIME );
+            pCriminal->Noto_Criminal(pCharMark);
+        }
 		return;
 	}
 
@@ -65,6 +68,8 @@ void CChar::OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark )
 	if ( !NPC_CanSpeak() )
 		return;	// I can't talk anyhow.
 
+    pCriminal->Noto_Criminal(pCharMark);
+
 	if (GetNPCBrainGroup() != NPCBRAIN_HUMAN)
 	{
 		// Good monsters don't call for guards outside guarded areas.
@@ -87,10 +92,8 @@ void CChar::OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark )
 bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObjBase * pItem, lpctstr pAction )
 {
 	ADDTOCALLSTACK("CChar::CheckCrimeSeen");
-
+    // Who notices ?
 	bool fSeen = false;
-
-	// Who notices ?
 
 	if (m_pNPC && m_pNPC->m_Brain == NPCBRAIN_GUARD) // guards only fight for justice, they can't commit a crime!!?
 		return false;
@@ -108,48 +111,52 @@ bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObj
 		if ( ! pChar->CanSeeLOS( this, LOS_NB_WINDOWS )) //what if I was standing behind a window when I saw a crime? :)
 			continue;
 
-		bool fYour = ( pCharMark == pChar );
-
-
-		char *z = Str_GetTemp();
+        bool fYour = ( pCharMark == pChar );
+        if (!g_Cfg.Calc_CrimeSeen(this, pChar, SkillToSee, fYour))
+            continue;
+		
+		tchar *z = Str_GetTemp();
 		if ( pItem && pAction )
 		{
 			if ( pCharMark )
 				snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_YOUNOTICE_2), GetName(), pAction, fYour ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_YOUNOTICE_YOUR) : pCharMark->GetName(), fYour ? "" : g_Cfg.GetDefaultMsg(DEFMSG_MSG_YOUNOTICE_S), pItem->GetName());
 			else
 				snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_YOUNOTICE_1), GetName(), pAction, pItem->GetName());
-			pChar->ObjMessage(z, this);
 		}
-		fSeen = true;
-
+		
 		// They are not a criminal til someone calls the guards !!!
 		if ( SkillToSee == SKILL_SNOOPING )
 		{
 			if (IsTrigUsed(TRIGGER_SEESNOOP))
 			{
 				CScriptTriggerArgs Args(pAction);
-				Args.m_iN1 = SkillToSee ? SkillToSee : pCharMark->Skill_GetActive();;
+				Args.m_iN1 = (SkillToSee != SKILL_NONE) ? SkillToSee : pCharMark->Skill_GetActive();
 				Args.m_iN2 = pItem ? (dword)pItem->GetUID() : 0;    // here i can modify pItem via scripts, so it isn't really const
 				Args.m_pO1 = pCharMark;
 				TRIGRET_TYPE iRet = pChar->OnTrigger(CTRIG_SeeSnoop, this, &Args);
 
 				if (iRet == TRIGRET_RET_TRUE)
 					continue;
-				else if (iRet == TRIGRET_RET_DEFAULT)
-				{
-					if (!g_Cfg.Calc_CrimeSeen(this, pChar, SkillToSee, fYour))
-						continue;
-				}
 			}
+
+            fSeen = true;
+            
 			// Off chance of being a criminal. (hehe)
 			if ( Calc_GetRandVal(100) < g_Cfg.m_iSnoopCriminal )
 				pChar->OnNoticeCrime( this, pCharMark );
-			if ( pChar->m_pNPC )
-				pChar->NPC_OnNoticeSnoop( this, pCharMark );
+
+            if ( pChar->m_pNPC )
+                pChar->NPC_OnNoticeSnoop( this, pCharMark );
+
+            if (fYour)
+                pCharMark->Memory_AddObjTypes(this, MEMORY_IRRITATEDBY);
+            pChar->ObjMessage(z, this);
 		}
 		else
 		{
+            fSeen = true;
 			pChar->OnNoticeCrime( this, pCharMark );
+            pChar->ObjMessage(z, this);
 		}
 	}
 	return fSeen;
@@ -198,7 +205,7 @@ bool CChar::CallGuards( CChar * pCriminal )
 	if (IsStatFlag(STATF_DEAD) || (pCriminal && (pCriminal->IsStatFlag(STATF_DEAD | STATF_INVUL) || pCriminal->IsPriv(PRIV_GM) || !pCriminal->m_pArea->IsGuarded())))
 		return false;
 
-    if (g_World.GetTimeDiff(m_timeLastCallGuards + (1 * MSECS_PER_SEC)) > 0)	// Spam check, not calling this more than once per second
+    if (g_World.GetTimeDiff(m_timeLastCallGuards + (25 * MSECS_PER_TENTH)) > 0)	// Spam check
         return false;
 
     m_timeLastCallGuards = g_World.GetCurrentTime().GetTimeRaw();
@@ -252,7 +259,7 @@ bool CChar::CallGuards( CChar * pCriminal )
 
 		if (pCriminal->m_pArea->m_TagDefs.GetKeyNum("RED"))
 			pGuard->m_TagDefs.SetNum("NAME.HUE", g_Cfg.m_iColorNotoEvil, true);
-		pGuard->Spell_Effect_Create(SPELL_Summon, LAYER_SPELL_Summon, g_Cfg.GetSpellEffect(SPELL_Summon, 1000), int(g_Cfg.m_iGuardLingerTime/1000));
+		pGuard->Spell_Effect_Create(SPELL_Summon, LAYER_SPELL_Summon, g_Cfg.GetSpellEffect(SPELL_Summon, 1000), (g_Cfg.m_iGuardLingerTime/MSECS_PER_TENTH));
 		pGuard->Spell_Teleport(pCriminal->GetTopPoint(), false, false);
 	}
 	pGuard->NPC_LookAtCharGuard(pCriminal, true);
@@ -314,11 +321,18 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, bool fCommandPet, bool fShouldReveal)
 	if ( Fight_IsActive() && (m_Fight_Targ_UID == pCharSrc->GetUID()) )
 		return true;
 
+    bool fAggreived = false;
 	Memory_AddObjTypes(pCharSrc, MEMORY_HARMEDBY | MEMORY_IRRITATEDBY);
+    if (!pCharSrc->Memory_FindObjTypes(this, MEMORY_AGGREIVED))
+    {
+        // I'm the one being attacked first
+        fAggreived = true;
+        Memory_AddObjTypes(pCharSrc, MEMORY_AGGREIVED);
+    }
 	Attacker_Add(pCharSrc);
 
 	// Are they a criminal for it ? Is attacking me a crime ?
-	if (Noto_GetFlag(pCharSrc) == NOTO_GOOD)
+	if ((Noto_GetFlag(pCharSrc) == NOTO_GOOD) && fAggreived)
 	{
 		if (IsClient())	// I decide if this is a crime.
 			OnNoticeCrime(pCharSrc, this);
@@ -1149,7 +1163,7 @@ bool CChar::Fight_Clear(CChar *pChar, bool bForced)
 // This is just my intent.
 // RETURN:
 //  true = new attack is accepted.
-bool CChar::Fight_Attack( CChar *pCharTarg, bool btoldByMaster )
+bool CChar::Fight_Attack( CChar *pCharTarg, bool fToldByMaster )
 {
 	ADDTOCALLSTACK("CChar::Fight_Attack");
 
@@ -1170,20 +1184,13 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool btoldByMaster )
 		Attacker_Delete(pCharTarg, true, ATTACKER_CLEAR_DISTANCE);
 		Skill_Start(SKILL_NONE);
 		return false;
-	}
-
-	CChar *pTarget = pCharTarg;
-
-	if ( g_Cfg.m_fAttackingIsACrime )
-	{
-		if ( pCharTarg->Noto_GetFlag(this) == NOTO_GOOD )
-			CheckCrimeSeen(SKILL_NONE, pTarget, nullptr, nullptr);
-	}
+	}	
 
 	int64 threat = 0;
-	if ( btoldByMaster )
+	if ( fToldByMaster )
 		threat = ATTACKER_THREAT_TOLDBYMASTER + Attacker_GetHighestThreat();
 
+    CChar *pTarget = pCharTarg;
 	if ( ((IsTrigUsed(TRIGGER_ATTACK)) || (IsTrigUsed(TRIGGER_CHARATTACK))) && m_Fight_Targ_UID != pCharTarg->GetUID() )
 	{
 		CScriptTriggerArgs Args;
@@ -1218,12 +1225,16 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool btoldByMaster )
     {
         return true;
     }
-    else if (g_Cfg.IsSkillFlag(skillActive, SKF_MAGIC))	// don't start another fight skill when already casting spells
+    if (g_Cfg.IsSkillFlag(skillActive, SKF_MAGIC))	// don't start another fight skill when already casting spells
     {
         return true;
     }
 
-    if (m_pNPC && !btoldByMaster)		// call FindBestTarget when this CChar is a NPC and was not commanded to attack, otherwise it attack directly
+    pCharTarg->Memory_AddObjTypes(this, MEMORY_IRRITATEDBY);
+    if (g_Cfg.m_fAttackingIsACrime && (pCharTarg->Noto_GetFlag(this) == NOTO_GOOD) && !pCharTarg->Memory_FindObjTypes(this, MEMORY_AGGREIVED))
+        CheckCrimeSeen(SKILL_NONE, pTarget, nullptr, nullptr);
+
+    if (m_pNPC && !fToldByMaster)		// call FindBestTarget when this CChar is a NPC and was not commanded to attack, otherwise it attack directly
     {
         pTarget = NPC_FightFindBestTarget();
     }

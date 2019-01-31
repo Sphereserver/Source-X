@@ -178,6 +178,9 @@ bool IsSimpleNumberString( lpctstr pszTest )
 	// string = 1 2 3, sdf, sdf sdf sdf, 123d, 123 d,
 	// number = 1.0+-\*~|&!%^()2, 0aed, 123
 
+    if (*pszTest == '\0')
+        return false;   // empty string, no number
+
 	bool fMathSep			= true;	// last non whitespace was a math sep.
 	bool fHextDigitStart	= false;
 	bool fWhiteSpace		= false;

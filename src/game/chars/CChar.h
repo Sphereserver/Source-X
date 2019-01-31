@@ -993,7 +993,7 @@ public:
 	void Action_StartSpecial(CREID_TYPE id);
 
 private:
-	void OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark );
+	void OnNoticeCrime( CChar * pCriminal, CChar * pCharMark );
 public:
 	bool CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObjBase * pItem, lpctstr pAction );
 
@@ -1025,8 +1025,8 @@ public:
 	void Memory_Fight_Start( const CChar * pTarg );
 	bool Memory_Fight_OnTick( CItemMemory * pMemory );
 
-	bool Fight_Attack( CChar * pCharTarg, bool toldByMaster = false );
-	bool Fight_Clear( CChar * pCharTarg , bool bForced = false );
+	bool Fight_Attack( CChar * pCharTarg, bool fToldByMaster = false );
+	bool Fight_Clear( CChar * pCharTarg , bool fForced = false );
 	void Fight_ClearAll();
 	void Fight_HitTry();
 	WAR_SWING_TYPE Fight_Hit( CChar * pCharTarg );
@@ -1124,14 +1124,14 @@ public:
 	/**
 	* @Brief I'm calling guards (Player speech)
 	*
-	* Looks for nearby criminals to call guards on
+	* Looks for nearby criminals to call guards on, and marks them to Criminal.
 	* This is called from players only, since NPCs will CallGuards(OnTarget) directly.
 	*/
 	void CallGuards();
 	/**
 	* @Brief I'm calling guards on pCriminal
 	*
-	* @param pCriminal: character who shall be punished by guards
+	* @param pCriminal: character who shall be punished by guards. Should already be marked as Criminal.
     * @return true if the call succeed
 	*/
 	bool CallGuards( CChar * pCriminal );

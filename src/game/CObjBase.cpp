@@ -2962,13 +2962,13 @@ CComponentProps::PropertyValNum_t CObjBase::GetPropNum( COMPPROPS_TYPE iCompProp
     return iProp;
 }
 
-void CObjBase::SetPropStr( CComponentProps* pCompProps, int iPropIndex, lpctstr ptcVal, bool fZero )
+void CObjBase::SetPropStr( CComponentProps* pCompProps, int iPropIndex, lpctstr ptcVal, bool fDeleteZero )
 {
     ASSERT(pCompProps);
-    pCompProps->SetPropertyStr(iPropIndex, ptcVal, this, fZero);
+    pCompProps->SetPropertyStr(iPropIndex, ptcVal, this, fDeleteZero);
 }
 
-void CObjBase::SetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, lpctstr ptcVal, bool fZero )
+void CObjBase::SetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, lpctstr ptcVal, bool fDeleteZero )
 {
     CComponentProps* pCompProps = GetComponentProps(iCompPropsType);
     if (!pCompProps)
@@ -2976,7 +2976,7 @@ void CObjBase::SetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, lpctst
         g_Log.EventDebug("CEntityProps: SetPropStr on unsubscribed CCProps. iCompPropsType %d, iPropIndex %d.\n", iCompPropsType, iPropIndex);
         CreateSubscribeComponentProps(iCompPropsType);
     }
-    pCompProps->SetPropertyStr(iPropIndex, ptcVal, this, fZero);
+    pCompProps->SetPropertyStr(iPropIndex, ptcVal, this, fDeleteZero);
 }
 
 void CObjBase::SetPropNum( CComponentProps* pCompProps, int iPropIndex, CComponentProps::PropertyValNum_t iVal )

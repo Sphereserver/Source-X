@@ -436,6 +436,7 @@ void CChar::SetDisconnected()
 		return;
 	RemoveFromView();	// Remove from views.
 	MoveToRegion(nullptr,false);
+    SetUIDContainerFlags(UID_O_DISCONNECT);
 	GetTopSector()->m_Chars_Disconnect.InsertHead( this );
 }
 

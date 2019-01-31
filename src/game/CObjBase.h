@@ -199,18 +199,18 @@ public:
     *@param pCompProps The CComponentProps which the property belongs
     *@param iPropIndex The index (enum) of the property for that CComponentProps
     *@param ptcVal The property value
-    *@param fZero If the prop val is an empty string, return "0" instead
+    *@param fDeleteZero If the prop val is an empty string, delete the prop
     */
-    void SetPropStr( CComponentProps* pCompProps, int iPropIndex, lpctstr ptcVal, bool fZero = false);
+    void SetPropStr( CComponentProps* pCompProps, int iPropIndex, lpctstr ptcVal, bool fDeleteZero = true);
 
     /**
     *@brief Sets the value of the string-type prop from the CComponentProps.
     *@param iCompPropsType The CComponentProps which the property belongs
     *@param iPropIndex The index (enum) of the property for that CComponentProps
     *@param ptcVal The property value
-    *@param fZero If the prop val is an empty string, return "0" instead
+    *@param fDeleteZero If the prop val is an empty string, delete the prop
     */
-    void SetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, lpctstr ptcVal, bool fZero = false);
+    void SetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, lpctstr ptcVal, bool fDeleteZero = true);
 
     /**
     *@brief Sets the value of the numerical-type prop from the CComponentProps. Faster than the variant accepting a COMPPROPS_TYPE if you need to set multiple props from the same CComponentProps
@@ -1006,22 +1006,22 @@ public:
 enum MEMORY_TYPE
 {
 	MEMORY_NONE = 0,
-	MEMORY_SAWCRIME = 0x0001,	// I saw them commit a crime or i was attacked criminally. I can call the guards on them. the crime may not have been against me.
-	MEMORY_IPET = 0x0002,	// I am a pet. (this link is my master) (never time out)
-	MEMORY_FIGHT = 0x0004,	// Active fight going on now. may not have done any damage. and they may not know they are fighting me.
-	MEMORY_IAGGRESSOR = 0x0008,	// I was the agressor here. (good or evil)
-	MEMORY_HARMEDBY = 0x0010,	// I was harmed by them. (but they may have been retaliating)
-	MEMORY_IRRITATEDBY = 0x0020,	// I saw them snoop from me or someone.
-	MEMORY_SPEAK = 0x0040,	// We spoke about something at some point. (or was tamed) (NPC_MEM_ACT_TYPE)
-	MEMORY_AGGREIVED = 0x0080,	// I was attacked and was the inocent party here !
-	MEMORY_GUARD = 0x0100,	// Guard this item (never time out)
-	MEMORY_ISPAWNED = 0x0200,	// UNUSED (but keep this for backwards compatibility). I am spawned from this item. (never time out)
-	MEMORY_GUILD = 0x0400,	// This is my guild stone. (never time out) only have 1
-	MEMORY_TOWN = 0x0800,	// This is my town stone. (never time out) only have 1
-	MEMORY_UNUSED = 0x1000,	// UNUSED!!!! I am following this Object (never time out)
-	MEMORY_UNUSED2 = 0x2000,	// UNUSED!!!! (MEMORY_WAR_TARG) This is one of my current war targets.
-	MEMORY_FRIEND = 0x4000,	// They can command me but not release me. (not primary blame)
-	MEMORY_UNUSED3 = 0x8000	// UNUSED!!!! Gump record memory (More1 = Context, More2 = Uid)
+	MEMORY_SAWCRIME         = 0x0001,	// I saw them commit a crime or i was attacked criminally. I can call the guards on them. the crime may not have been against me.
+	MEMORY_IPET             = 0x0002,	// I am a pet. (this link is my master) (never time out)
+	MEMORY_FIGHT            = 0x0004,	// Active fight going on now. may not have done any damage. and they may not know they are fighting me.
+	MEMORY_IAGGRESSOR       = 0x0008,	// I was the agressor here. (good or evil)
+	MEMORY_HARMEDBY         = 0x0010,	// I was harmed by them. (but they may have been retaliating)
+	MEMORY_IRRITATEDBY      = 0x0020,	// I saw them snoop from me or someone, or i have been attacked, or someone used Provocation on me.
+	MEMORY_SPEAK            = 0x0040,	// We spoke about something at some point. (or was tamed) (NPC_MEM_ACT_TYPE)
+	MEMORY_AGGREIVED        = 0x0080,	// I was attacked and was the inocent party here !
+	MEMORY_GUARD            = 0x0100,	// Guard this item (never time out)
+	MEMORY_LEGACY_ISPAWNED  = 0x0200,	// UNUSED (but keep this for backwards compatibility). I am spawned from this item. (never time out)
+	MEMORY_GUILD            = 0x0400,	// This is my guild stone. (never time out) only have 1
+	MEMORY_TOWN             = 0x0800,	// This is my town stone. (never time out) only have 1
+	MEMORY_UNUSED           = 0x1000,	// UNUSED!!!! I am following this Object (never time out)
+	MEMORY_UNUSED2          = 0x2000,	// UNUSED!!!! (MEMORY_WAR_TARG) This is one of my current war targets.
+	MEMORY_FRIEND           = 0x4000,	// They can command me but not release me. (not primary blame)
+	MEMORY_UNUSED3          = 0x8000	// UNUSED!!!! Gump record memory (More1 = Context, More2 = Uid)
 };
 
 

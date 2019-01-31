@@ -107,7 +107,7 @@ int CItemMemory::FixWeirdness()
 
     // Automatic transition from old to new spawn engine
     dword dwFlags = GetHue();
-    if (dwFlags & MEMORY_ISPAWNED)
+    if (dwFlags & MEMORY_LEGACY_ISPAWNED)
     {
         CCSpawn *pSpawn = static_cast<CCSpawn*>(m_uidLink.ItemFind()->GetComponent(COMP_SPAWN));
         if (pSpawn && pChar)
