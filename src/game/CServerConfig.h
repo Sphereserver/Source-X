@@ -892,7 +892,7 @@ public:
      *
      * @return  true if it succeeds, false if it fails.
      */
-	bool Calc_CrimeSeen( const CChar * pCharThief, CChar * pCharViewer, SKILL_TYPE SkillToSee, bool fBonus ) const;
+	bool Calc_CrimeSeen( const CChar * pCharThief, const CChar * pCharViewer, SKILL_TYPE SkillToSee, bool fBonus ) const;
 
     /**
      * @fn  ushort CServerConfig::Calc_FameKill( CChar * pKill );

@@ -543,10 +543,12 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, 
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::SetStr");
 	// ASSUME: This has been clipped of unwanted beginning and trailing spaces.
-	if ( !pszName || !pszName[0] )
+    ASSERT(pszName);
+	if ( !pszName[0] )
 		return nullptr;
 
-	if ( fDeleteZero && ((pszVal == nullptr) || (pszVal[0] == '\0')) )	// but not if empty
+    ASSERT(pszVal);
+	if ( pszVal[0] == '\0' )	// if Val is an empty string, remove any previous def (and do not add a new def)
 	{
 		DeleteAtKey(pszName);
 		return nullptr;

@@ -3555,7 +3555,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 		case SPELL_Hallucination:
 		{
-			CItem * pItem = Spell_Effect_Create( spell, LAYER_FLAG_Hallucination, iEffect, 10, pCharSrc );
+			CItem * pItem = Spell_Effect_Create( spell, LAYER_FLAG_Hallucination, iEffect, 100*MSECS_PER_TENTH, pCharSrc );
             ASSERT(pItem);
 			pItem->m_itSpell.m_spellcharges = Calc_GetRandVal(30);
 		}
@@ -3640,7 +3640,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			iDuration /= (2 * TENTHS_PER_SEC); // tenths of second to seconds
 			if ( iDuration <= 0 )
 				iDuration = 1;
-			CItem * pSpell = Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_STATS, iEffect, iDuration*1000, pCharSrc );
+			CItem * pSpell = Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_STATS, iEffect, iDuration*MSECS_PER_TENTH, pCharSrc );
 			ASSERT(pSpell);
 			pSpell->m_itSpell.m_spellcharges = (int)iDuration;
 		}

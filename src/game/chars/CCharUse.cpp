@@ -938,7 +938,7 @@ void CChar::Use_Drink( CItem * pItem )
 		}
 		else
 		{
-			CItem *pSpell = Spell_Effect_Create(SPELL_Liquor, LAYER_FLAG_Drunk, g_Cfg.GetSpellEffect(SPELL_Liquor, iStrength), 150, this);
+			CItem *pSpell = Spell_Effect_Create(SPELL_Liquor, LAYER_FLAG_Drunk, g_Cfg.GetSpellEffect(SPELL_Liquor, iStrength), 150*MSECS_PER_TENTH, this);
 			pSpell->m_itSpell.m_spellcharges = 10;	// how long to last.
 		}
 	}

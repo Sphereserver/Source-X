@@ -379,7 +379,7 @@ bool CChar::Noto_Criminal( CChar * pChar )
 	if ( m_pNPC || IsPriv(PRIV_GM) )
 		return false;
 
-	int64 decay = (int)(g_Cfg.m_iCriminalTimer/ MSECS_PER_SEC);
+	int64 decay = (g_Cfg.m_iCriminalTimer / (60*MSECS_PER_SEC));
 
 	if ( IsTrigUsed(TRIGGER_CRIMINAL) )
 	{
@@ -389,13 +389,13 @@ bool CChar::Noto_Criminal( CChar * pChar )
 		if ( OnTrigger(CTRIG_Criminal, this, &Args) == TRIGRET_RET_TRUE )
 			return false;
 
-		decay = (int)(Args.m_iN1);
+		decay = (Args.m_iN1 * (60*MSECS_PER_SEC));
 	}
 
 	if ( !IsStatFlag(STATF_CRIMINAL) )
 		SysMessageDefault(DEFMSG_MSG_GUARDS);
 
-	Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_Criminal, g_Cfg.GetSpellEffect(SPELL_NONE, 0), decay);
+	Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_Criminal, g_Cfg.GetSpellEffect(SPELL_NONE, 0), decay/MSECS_PER_TENTH);
 	return true;
 }
 

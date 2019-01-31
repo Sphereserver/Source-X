@@ -4350,10 +4350,8 @@ bool PacketMovementReqNew::onReceive(NetState* net)
 	// Anyway, these values are not in use because Sphere already have another fastwalk
 	// detection engine from the old packet 0x02 (PacketMovementReq).
 
-	// PS: On classic clients this packet is used as 'Krrios special client' (?) which
-	// does some useless weird stuff. Also classic clients using Injection 2014 will
-	// strangely send this packet to server when the player press the 'Chat' button,
-	// so it's better leave this packet disabled on classic clients to prevent exploits.
+    // This packet (0xF0) is used by the Krrios client as a special login packet.
+	// Also classic clients using Injection 2014 will strangely send this packet to server when the player press the 'Chat' button.
 
 	if ( !(g_Cfg.m_iFeatureSA & FEATURE_SA_MOVEMENT) )
 		return false;
@@ -4361,7 +4359,10 @@ bool PacketMovementReqNew::onReceive(NetState* net)
 	CClient *client = net->getClient();
 	ASSERT(client);
 
-	skip(2);
+	word packetlen = readInt16();
+    if (getLength() != packetlen)
+        return false;   // It's not a valid PacketMovementReqNew, maybe it's a Krrios or Injection packet?
+
 	byte steps = readByte();
 	while ( steps )
 	{

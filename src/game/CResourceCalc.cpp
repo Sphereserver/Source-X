@@ -25,7 +25,7 @@ int CServerConfig::Calc_MaxCarryWeight( const CChar * pChar ) const
 		iQty = 0;
 	if ( (m_iRacialFlags & RACIALF_HUMAN_STRONGBACK) && pChar->IsHuman())
 		iQty += 60;		//Humans can always carry +60 stones (Strong Back racial trait)
-	return( iQty * WEIGHT_UNITS );
+	return (iQty * WEIGHT_UNITS);
 }
 
 //********************************
@@ -301,7 +301,7 @@ int CServerConfig::Calc_KarmaScale( int iKarma, int iKarmaChange )
 	if ( iKarmaChange > 0 && iKarmaChange < iKarma/64 )
 		return 0;
 
-	return( iKarmaChange );
+	return iKarmaChange;
 }
 
 //********************************
@@ -340,10 +340,10 @@ int CServerConfig::Calc_StealingItem( CChar * pCharThief, CItem * pItem, CChar *
 	
 	// return( iDifficulty );
 	// Melt mod:
-	return( iDifficulty / 2 );
+	return (iDifficulty / 2);
 }
 
-bool CServerConfig::Calc_CrimeSeen( const CChar * pCharThief, CChar * pCharViewer, SKILL_TYPE SkillToSee, bool fBonus ) const
+bool CServerConfig::Calc_CrimeSeen( const CChar * pCharThief, const CChar * pCharViewer, SKILL_TYPE SkillToSee, bool fBonus ) const
 {
 	ADDTOCALLSTACK("CServerConfig::Calc_CrimeSeen");
 	// Chance to steal without being seen by a specific person
@@ -366,11 +366,11 @@ bool CServerConfig::Calc_CrimeSeen( const CChar * pCharThief, CChar * pCharViewe
 			return true;		// always seen.
 	}
 
-	int iChanceToSee = ( pCharViewer->Stat_GetAdjusted(STAT_DEX) + pCharViewer->Stat_GetAdjusted(STAT_INT)) * 50;
-	if ( SkillToSee != SKILL_NONE )
-		iChanceToSee = 1000+(pCharViewer->Skill_GetBase(SkillToSee) - pCharThief->Skill_GetBase(SkillToSee));	// snooping or stealing.
+	int iChanceToSee;
+	if ( (SkillToSee == SKILL_SNOOPING) || (SkillToSee == SKILL_STEALING) )
+		iChanceToSee = 1000 + (pCharViewer->Skill_GetBase(SkillToSee) - pCharThief->Skill_GetBase(SkillToSee));
 	else
-		iChanceToSee += 400;
+		iChanceToSee = 400 + ( pCharViewer->Stat_GetAdjusted(STAT_DEX) + pCharViewer->Stat_GetAdjusted(STAT_INT)) * 50;
 
 	// the targets chance of seeing.
 	if ( fBonus )
@@ -397,7 +397,7 @@ lpctstr CServerConfig::Calc_MaptoSextant( CPointMap pntCoords )
 {
 	ADDTOCALLSTACK("CServerConfig::Calc_MaptoSextant");
 	// Conversion from map square to degrees, minutes
-	char *z = Str_GetTemp();
+	tchar *z = Str_GetTemp();
 	CPointMap zeroPoint;
 	zeroPoint.Read(strcpy(z, g_Cfg.m_sZeroPoint));
 
