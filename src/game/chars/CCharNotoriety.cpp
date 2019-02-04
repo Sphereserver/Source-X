@@ -48,11 +48,12 @@ bool CChar::Noto_IsEvil() const
 	{
 		case NPCBRAIN_MONSTER:
 		case NPCBRAIN_DRAGON:
+		case NPCBRAIN_UNDEAD:
 			return ( iKarma < 0 );
 		case NPCBRAIN_BERSERK:
 			return true;
 		case NPCBRAIN_ANIMAL:
-			return ( iKarma <= -800 );
+			return ( iKarma <= -1500 );
 		default:
 			break;
 	}

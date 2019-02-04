@@ -377,6 +377,8 @@ enum ITEMID_TYPE	// InsideUO or UoFiddler are great for this stuff.
 	ITEMID_BANDAGES2 = 0x0ee9,	// clean
 	ITEMID_COPPER_C1 = 0x0eea,
 	ITEMID_GOLD_C1 = 0x0eed,	// big pile
+	ITEMID_GOLD_C2 = 0x0eee,
+	ITEMID_GOLD_C3 = 0x0eef,
 	ITEMID_SILVER_C1 = 0x0ef0,
 	ITEMID_SILVER_C3 = 0x0ef2,
 

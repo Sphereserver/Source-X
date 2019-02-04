@@ -1076,11 +1076,20 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 				if ( Skill_GetBase(SKILL_ANATOMY) >= 1000 )
 					iDmgBonus += 5;
 
-				if ( pWeapon != nullptr && pWeapon->IsType(IT_WEAPON_AXE) )
+				if (pWeapon != nullptr)
 				{
-					iDmgBonus += Skill_GetBase(SKILL_LUMBERJACKING) / 50;
-					if ( Skill_GetBase(SKILL_LUMBERJACKING) >= 1000 )
-						iDmgBonus += 10;
+					if (pWeapon->IsType(IT_WEAPON_AXE))
+					{
+						iDmgBonus += Skill_GetBase(SKILL_LUMBERJACKING) / 50;
+						if (Skill_GetBase(SKILL_LUMBERJACKING) >= 1000)
+							iDmgBonus += 10;
+					}
+					else if (pWeapon->IsType(IT_WEAPON_BOW))
+					{
+						iDmgBonus += Skill_GetBase(SKILL_BOWCRAFT) / 50;
+						if (Skill_GetBase(SKILL_BOWCRAFT) >= 1000)
+							iDmgBonus += 10;
+					}
 				}
 
 				if ( Stat_GetAdjusted(STAT_STR) >= 100 )
