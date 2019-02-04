@@ -1115,12 +1115,12 @@ bool CChar::Fight_IsAttackable()
 void CChar::Fight_ClearAll()
 {
 	ADDTOCALLSTACK("CChar::Fight_ClearAll");
-	Attacker_Clear();
 	if ( Fight_IsActive() )
 	{
 		Skill_Start(SKILL_NONE);
 		m_Fight_Targ_UID.InitUID();
 	}
+    Attacker_Clear();
 
     m_atFight.m_iRecoilDelay = 0;
     m_atFight.m_iSwingAnimationDelay = 0;
@@ -1459,7 +1459,7 @@ WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc, bool fSwingNoRange)
         }
         word wLOSFlags = (g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_RANGED )) ? LOS_NB_WINDOWS : 0;
         if (!CanSeeLOS(pCharSrc, wLOSFlags, true))
-            return IsSetCombatFlags(COMBAT_ANIM_HIT_SMOOTH) ? WAR_SWING_SWINGING : WAR_SWING_READY;
+            return WAR_SWING_SWINGING;
     }
 
 	// I am on ship. Should be able to combat only inside the ship to avoid free sea and ground characters hunting
