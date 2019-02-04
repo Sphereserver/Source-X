@@ -1468,7 +1468,7 @@ WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc, bool fSwingNoRange)
         }
         word wLOSFlags = (g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_RANGED )) ? LOS_NB_WINDOWS : 0;
         if (!CanSeeLOS(pCharSrc, wLOSFlags, true))
-            return IsSetCombatFlags(COMBAT_ANIM_HIT_SMOOTH) ? WAR_SWING_SWINGING : WAR_SWING_EQUIPPING;
+            return IsSetCombatFlags(COMBAT_ANIM_HIT_SMOOTH) ? WAR_SWING_SWINGING : WAR_SWING_READY;
     }
 
 	// I am on ship. Should be able to combat only inside the ship to avoid free sea and ground characters hunting
