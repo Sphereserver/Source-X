@@ -1,10 +1,11 @@
 
 #include "../../common/CException.h"
 #include "../../common/CUIDExtra.h"
+#include "../../common/CLog.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
-#include "../../common/CLog.h"
+#include "../CWorld.h"
 #include "../triggers.h"
 #include "CItem.h"
 #include "CItemContainer.h"

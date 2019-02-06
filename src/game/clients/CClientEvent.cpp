@@ -11,6 +11,7 @@
 #include "../items/CItemVendable.h"
 #include "../CException.h"
 #include "../CUIDExtra.h"
+#include "../CWorld.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"

@@ -7,6 +7,7 @@
 #include "../sphere/threads.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"
+#include "CWorld.h"
 
 //************************************************************************
 // -CTeleport

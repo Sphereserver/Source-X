@@ -1,8 +1,9 @@
 
 #include <algorithm>
+#include "../common/CLog.h"
 #include "../game/chars/CChar.h"
 #include "../game/items/CItemShip.h"
-#include "../common/CLog.h"
+#include "../game/CWorld.h"
 #include "../sphere/ProfileTask.h"
 #include "CException.h"
 #include "CRect.h"

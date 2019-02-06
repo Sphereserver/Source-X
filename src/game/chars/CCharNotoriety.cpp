@@ -2,6 +2,7 @@
 #include "../../common/CUIDExtra.h"
 #include "../clients/CClient.h"
 #include "../triggers.h"
+#include "../CWorld.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 

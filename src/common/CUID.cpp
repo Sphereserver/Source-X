@@ -1,31 +1,41 @@
 
+#include "../game/CWorld.h"
 #include "CUID.h"
+
 
 // -----------------------------
 //	CUIDBase
 // -----------------------------
 
-bool CUIDBase::IsValidUID() const
+CObjBase * CUIDBase::ObjFind(dword dwPrivateUID)   // static
 {
-	return ( m_dwInternalVal && ( m_dwInternalVal & UID_O_INDEX_MASK ) != UID_O_INDEX_MASK );
+    if ( IsResource(dwPrivateUID) || !IsValidUID(dwPrivateUID) )
+        return nullptr;
+    return g_World.FindUID( dwPrivateUID & UID_O_INDEX_MASK );
+
 }
 
-bool CUIDBase::IsResource() const
+bool CUIDBase::IsValidUID(dword dwPrivateUID) // static
 {
-    return (m_dwInternalVal & UID_F_RESOURCE);
+	return ( dwPrivateUID && ( dwPrivateUID & UID_O_INDEX_MASK ) != UID_O_INDEX_MASK );
 }
 
-bool CUIDBase::IsItem() const	// Item vs. Char
+bool CUIDBase::IsResource(dword dwPrivateUID) // static
 {
-	if ( (m_dwInternalVal & (UID_F_RESOURCE|UID_F_ITEM)) == UID_F_ITEM )    // It's NOT a resource, and it's an item
+    return (dwPrivateUID & UID_F_RESOURCE);
+}
+
+bool CUIDBase::IsItem(dword dwPrivateUID) 	// static
+{
+	if ( (dwPrivateUID & (UID_F_RESOURCE|UID_F_ITEM)) == UID_F_ITEM )    // It's NOT a resource, and it's an item
 		return true;	// might be static in client ?
 	return false;
 }
 
-bool CUIDBase::IsChar() const	// Item vs. Char
+bool CUIDBase::IsChar(dword dwPrivateUID) // static
 {
-	if ( ( m_dwInternalVal & (UID_F_RESOURCE|UID_F_ITEM)) == 0 )    // It's NOT a resource, and it's not an item
-		return IsValidUID();
+	if ( ( dwPrivateUID & (UID_F_RESOURCE|UID_F_ITEM)) == 0 )    // It's NOT a resource, and it's not an item
+		return IsValidUID(dwPrivateUID);
 	return false;
 }
 
@@ -77,6 +87,3 @@ void CUIDBase::SetObjUID( dword dwVal )
 	// can be set to -1 by the client.
 	m_dwInternalVal = ( dwVal & (UID_O_INDEX_MASK|UID_F_ITEM) ) | UID_O_DISCONNECT;
 }
-
-
-

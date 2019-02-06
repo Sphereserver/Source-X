@@ -489,6 +489,9 @@ byte CCharBase::GetRangeH() const
 CCharBase * CCharBase::FindCharBase( CREID_TYPE baseID ) // static
 {
 	ADDTOCALLSTACK("CCharBase::FindCharBase");
+    if (baseID <= CREID_INVALID)
+        return nullptr;
+
 	CResourceID rid = CResourceID( RES_CHARDEF, baseID );
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
 	if ( index == g_Cfg.m_ResHash.BadIndex() )

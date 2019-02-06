@@ -1507,3 +1507,7 @@ WARNING: the following change could break some hackish expedient used in scripts
 - Fixed: Trying to attack a char was always noticed as a crime, even if the attack attempt was aborted.
 - Changed: The delay between a guard call and the other changed from 1 to 2.5 seconds, to avoid excessive spamming.
 - Added: Security check when receiving the new movement request packet (0xF0), to ensure invalid data (or the Krrios' client login packet) isn't considered.
+
+04-02-2019, Nolok
+- Fixed: Character pausing the attack when breaking the line of sight for the target (Issues #217 and #196) (thanks shiryux).
+- Fixed: When AttackerTimeout elapsed not only the attacker list was emptied, but also the whole combat was aborted.

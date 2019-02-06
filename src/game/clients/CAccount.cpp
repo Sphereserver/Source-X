@@ -4,6 +4,7 @@
 #include "../../common/CException.h"
 #include "../../common/CUIDExtra.h"
 #include "../chars/CChar.h"
+#include "../CWorld.h"
 #include "CAccount.h"
 #include "CClient.h"
 

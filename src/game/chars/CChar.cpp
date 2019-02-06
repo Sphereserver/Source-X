@@ -440,6 +440,90 @@ void CChar::SetDisconnected()
 	GetTopSector()->m_Chars_Disconnect.InsertHead( this );
 }
 
+void CChar::ClearPlayer()
+{
+    ADDTOCALLSTACK("CChar::ClearPlayer");
+    if ( m_pPlayer == nullptr )
+        return;
+
+    // unlink me from my account.
+    if ( g_Serv.GetServerMode() != SERVMODE_Exiting )
+    {
+        if ( m_pPlayer->m_pAccount )
+            DEBUG_WARN(("Player delete '%s' name '%s'\n", m_pPlayer->GetAccount()->GetName(), GetName()));
+        else
+            DEBUG_WARN(("Player delete from account name '%s'\n", GetName()));
+    }
+
+    // Is this valid ?
+    m_pPlayer->GetAccount()->DetachChar( this );
+    delete m_pPlayer;
+    m_pPlayer = nullptr;
+}
+
+// Set up the char as a Player.
+bool CChar::SetPlayerAccount(CAccount *pAccount)
+{
+    ADDTOCALLSTACK("CChar::SetPlayerAccount");
+    if ( !pAccount )
+        return false;
+
+    if ( m_pPlayer )
+    {
+        if ( m_pPlayer->GetAccount() == pAccount )
+            return true;
+
+        DEBUG_ERR(("SetPlayerAccount '%s' already set '%s' != '%s'!\n", GetName(), m_pPlayer->GetAccount()->GetName(), pAccount->GetName()));
+        return false;
+    }
+
+    if ( m_pNPC )
+    {
+        // This could happen if the account is set manually through
+        // scripts
+        ClearNPC();
+    }
+
+    m_pPlayer = new CCharPlayer(this, pAccount);
+    pAccount->AttachChar(this);
+    return true;
+}
+
+bool CChar::SetPlayerAccount( lpctstr pszAccName )
+{
+    ADDTOCALLSTACK("CChar::SetPlayerAccount");
+    CAccount * pAccount = g_Accounts.Account_Find( pszAccName );
+    if ( pAccount == nullptr )
+    {
+        DEBUG_ERR(( "Trying to attach Char '%s' to unexistent Account '%s'!\n", GetName(), pszAccName ));
+        return false;
+    }
+    return( SetPlayerAccount( pAccount ));
+}
+
+// Set up the char as an NPC
+bool CChar::SetNPCBrain( NPCBRAIN_TYPE NPCBrain )
+{
+    ADDTOCALLSTACK("CChar::SetNPCBrain");
+    if ( NPCBrain == NPCBRAIN_NONE )
+        return false;
+
+    if ( m_pPlayer != nullptr )
+    {
+        if ( m_pPlayer->GetAccount() != nullptr )
+            DEBUG_ERR(( "SetNPCBrain to Player Account '%s'\n", m_pPlayer->GetAccount()->GetName() ));
+        else
+            DEBUG_ERR(( "SetNPCBrain to Player Name '%s'\n", GetName()));
+        return false;
+    }
+
+    if ( m_pNPC == nullptr )
+        m_pNPC = new CCharNPC( this, NPCBrain );
+    else
+        m_pNPC->m_Brain = NPCBrain;		// just replace existing brain
+    return true;
+}
+
 // Called before Delete()
 // @Destroy can prevent the deletion
 bool CChar::NotifyDelete()
@@ -476,11 +560,6 @@ void CChar::Delete(bool bforce)
 	ClearPlayer();
 
 	CObjBase::Delete();
-}
-
-CMultiStorage *CChar::GetMultiStorage()
-{
-    return _pMultiStorage;
 }
 
 void CChar::GoSleep()
@@ -580,6 +659,11 @@ int CChar::IsWeird() const
 	}
 
 	return 0;
+}
+
+CMultiStorage *CChar::GetMultiStorage()
+{
+    return _pMultiStorage;
 }
 
 // Get the Z we should be at

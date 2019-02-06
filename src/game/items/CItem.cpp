@@ -16,6 +16,7 @@
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../clients/CClient.h"
+#include "../CWorld.h"
 #include "../triggers.h"
 #include "CItem.h"
 #include "CItemCommCrystal.h"

@@ -8,6 +8,7 @@
 #include "../../sphere/ProfileTask.h"
 #include "../chars/CChar.h"
 #include "../components/CCSpawn.h"
+#include "../CWorld.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"

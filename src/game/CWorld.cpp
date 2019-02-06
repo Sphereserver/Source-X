@@ -16,6 +16,7 @@
 #include "CServer.h"
 #include "CServerTime.h"
 #include "CScriptProfiler.h"
+#include "CWorld.h"
 
 #ifndef _WIN32
     #include <sys/statvfs.h>

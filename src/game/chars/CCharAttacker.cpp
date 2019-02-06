@@ -131,7 +131,7 @@ CChar * CChar::Attacker_GetLast() const
         if (dwCurTime <= dwLastTime)
         {
             dwLastTime = dwCurTime;
-            retChar = CUID(refAttacker.charUID).CharFind();
+            retChar = CUID::CharFind(refAttacker.charUID);
         }
     }
     return retChar;
@@ -234,21 +234,19 @@ bool CChar::Attacker_GetIgnore(size_t attackerIndex) const
     return (refAttacker.ignore != 0);
 }
 
-// Clear the whole attacker's list, combat ended.
+// Clear the whole attackers list: forget who attacked me, but if i'm fighting against someone don't stop me.
 void CChar::Attacker_Clear()
 {
     ADDTOCALLSTACK("CChar::Attacker_Clear");
     if (IsTrigUsed(TRIGGER_COMBATEND))
-        OnTrigger(CTRIG_CombatEnd, this, 0);
+    {
+        if (!Fight_IsActive() || !m_Fight_Targ_UID.IsValidUID() || !m_Fight_Targ_UID.CharFind())
+        {
+            OnTrigger(CTRIG_CombatEnd, this, 0);
+        }
+    }
 
     m_lastAttackers.clear();
-    if (m_pNPC)
-        StatFlag_Clear(STATF_WAR);
-    if (Fight_IsActive())
-    {
-        Skill_Start(SKILL_NONE);
-        m_Fight_Targ_UID.InitUID();
-    }
     UpdateModeFlag();
 }
 
@@ -283,7 +281,7 @@ int CChar::Attacker_GetID(const CChar * pChar) const
 int CChar::Attacker_GetID(CUID pChar) const
 {
     ADDTOCALLSTACK("CChar::Attacker_GetID(CUID)");
-    return Attacker_GetID(pChar.CharFind()->GetChar());
+    return Attacker_GetID(pChar.CharFind());
 }
 
 // Get UID value of attacker list from the given pChar
@@ -295,7 +293,7 @@ CChar * CChar::Attacker_GetUID(size_t attackerIndex) const
     if (m_lastAttackers.size() <= attackerIndex)
         return nullptr;
     const LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
-    CChar * pChar = CUID(refAttacker.charUID).CharFind();
+    CChar * pChar = CUID::CharFind(refAttacker.charUID);
     return pChar;
 }
 
@@ -306,7 +304,7 @@ bool CChar::Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bo
     if (m_lastAttackers.empty())
         return false;
 
-    CChar *pChar = CUID(itAttacker->charUID).CharFind();
+    CChar *pChar = CUID::CharFind(itAttacker->charUID);
     if (!pChar)
         return false;
 
@@ -324,9 +322,11 @@ bool CChar::Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bo
 
     if (m_Fight_Targ_UID == pChar->GetUID())
     {
-        m_Fight_Targ_UID.InitUID();
         if (m_pNPC)
+        {
+            m_Fight_Targ_UID.InitUID();
             Fight_Attack(NPC_FightFindBestTarget());
+        }
     }
     if (m_lastAttackers.empty())
         Attacker_Clear();
@@ -362,7 +362,7 @@ void CChar::Attacker_RemoveChar()
         for (auto it = m_lastAttackers.begin(), end = m_lastAttackers.end(); it != end; ++it)
         {
             LastAttackers & refAttacker = *it;
-            CChar * pSrc = CUID(refAttacker.charUID).CharFind();
+            CChar * pSrc = CUID::CharFind(refAttacker.charUID);
             if (!pSrc)
                 continue;
             pSrc->Attacker_Delete(this, false, ATTACKER_CLEAR_REMOVEDCHAR);
@@ -380,7 +380,7 @@ void CChar::Attacker_CheckTimeout()
         for (size_t count = 0; count < m_lastAttackers.size(); )
         {
             LastAttackers & refAttacker = m_lastAttackers[count];
-            CChar *pEnemy = CUID(refAttacker.charUID).CharFind();
+            CChar *pEnemy = CUID::CharFind(refAttacker.charUID);
             if (pEnemy)
             {
                 // always advance refAttacker.elapsed, i might use it in scripts for a different purpose
