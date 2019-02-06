@@ -8,12 +8,13 @@
 #include "../common/CScriptTriggerArgs.h"
 #include "../common/CRect.h"
 #include "../common/CUIDExtra.h"
+#include "../common/CLog.h"
 #include "../sphere/threads.h"
 #include "chars/CChar.h"
 #include "items/CItem.h"
 #include "uo_files/CUOTerrainInfo.h"
-#include "../common/CLog.h"
 #include "triggers.h"
+#include "../game/CWorld.h"
 
 CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, bool fTest, CChar * pCharSrc )
 {

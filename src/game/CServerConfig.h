@@ -779,7 +779,7 @@ public:
      * @brief   Gets the Damage/Healing/etc done by the given params.
      *
      * @param   spell       The spell.
-     * @param   iSkillval   Zero-based index of the skillval.
+     * @param   iSkillval   Skill value (decimal).
      *
      * @return  The spell effect.
      */

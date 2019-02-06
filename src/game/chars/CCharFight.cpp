@@ -6,6 +6,7 @@
 #include "../clients/CClient.h"
 #include "../components/CCPropsChar.h"
 #include "../components/CCPropsItemWeapon.h"
+#include "../CWorld.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
@@ -17,7 +18,7 @@
 void CChar::OnNoticeCrime( CChar * pCriminal, CChar * pCharMark )
 {
 	ADDTOCALLSTACK("CChar::OnNoticeCrime");
-	if ( !pCriminal || pCriminal == this || pCriminal == pCharMark || pCriminal->IsPriv(PRIV_GM) ) //This never happens: || (pCriminal->m_pNpc && pCriminal->GetNPCBrain() == NPCBRAIN_GUARD) )
+	if ( !pCriminal || pCriminal == this || pCriminal == pCharMark || pCriminal->IsPriv(PRIV_GM) || (pCriminal->m_pNPC && pCriminal->GetNPCBrain() == NPCBRAIN_GUARD) )
 		return;
     NOTO_TYPE iNoto = pCharMark->Noto_GetFlag(pCriminal);
     if (iNoto == NOTO_CRIMINAL || iNoto == NOTO_EVIL)
@@ -70,18 +71,13 @@ void CChar::OnNoticeCrime( CChar * pCriminal, CChar * pCharMark )
 
     pCriminal->Noto_Criminal(pCharMark);
 
-	if (GetNPCBrainGroup() != NPCBRAIN_HUMAN)
-	{
-		// Good monsters don't call for guards outside guarded areas.
-		if (!m_pArea || !m_pArea->IsGuarded())
-			return;
-	}
-
-	if (m_pNPC->m_Brain != NPCBRAIN_GUARD)
-		Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_GENERIC_CRIM));
-
-	// Find a guard.
-	CallGuards( pCriminal );
+    ASSERT(m_pArea);
+    if (m_pArea->IsGuarded())
+    {
+        if (m_pNPC->m_Brain != NPCBRAIN_GUARD)
+            Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_GENERIC_CRIM));
+        CallGuards( pCriminal );
+    }
 }
 
 // I am commiting a crime.
@@ -168,7 +164,8 @@ void CChar::CallGuards()
 	if (!m_pArea || !m_pArea->IsGuarded() || IsStatFlag(STATF_DEAD))
 		return;
 
-	if (g_World.GetTimeDiff(m_timeLastCallGuards + (1 * MSECS_PER_SEC)) > 0)	// Spam check, not calling this more than once per second, which will cause an excess of calls and checks on crowded areas because of the 2 CWorldSearch.
+    // Spam check, not calling this more than once per second, which will cause an excess of calls and checks on crowded areas because of the 2 CWorldSearch.
+	if (g_World.GetTimeDiff(m_timeLastCallGuards + (1 * MSECS_PER_SEC)) > 0)
 		return;
 
 	// We don't have any target yet, let's check everyone nearby

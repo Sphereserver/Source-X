@@ -8,6 +8,7 @@
 #include "../game/clients/CAccount.h"
 #include "../game/clients/CClient.h"
 #include "../game/CScriptProfiler.h"
+#include "../game/CWorld.h"
 #include "../sphere/ProfileTask.h"
 #include "crypto/CBCrypt.h"
 #include "crypto/CMD5.h"

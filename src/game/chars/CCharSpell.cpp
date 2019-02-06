@@ -4,6 +4,7 @@
 #include "../components/CCPropsChar.h"
 #include "../components/CCPropsItemEquippable.h"
 #include "../clients/CClient.h"
+#include "../CWorld.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"

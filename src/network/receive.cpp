@@ -10,7 +10,7 @@
 #include "../game/items/CItemMultiCustom.h"
 #include "../game/items/CItemShip.h"
 #include "../game/items/CItemVendable.h"
-#include "../game/CServerTime.h"
+#include "../game/CWorld.h"
 #include "../game/triggers.h"
 #include "network.h"
 #include "receive.h"

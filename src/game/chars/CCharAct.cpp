@@ -13,6 +13,7 @@
 #include "../components/CCPropsItemEquippable.h"
 #include "../components/CCPropsItemWeapon.h"
 #include "../CContainer.h"
+#include "../CWorld.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CChar.h"

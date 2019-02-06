@@ -6,6 +6,7 @@
 #include "../../common/CUIDExtra.h"
 #include "../chars/CChar.h"
 #include "../triggers.h"
+#include "../CWorld.h"
 #include "CItemContainer.h"
 #include "CItemShip.h"
 #include "CItem.h"

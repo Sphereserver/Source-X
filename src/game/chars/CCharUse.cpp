@@ -6,6 +6,7 @@
 #include "../items/CItemCorpse.h"
 #include "../components/CCPropsChar.h"
 #include "../components/CCSpawn.h"
+#include "../CWorld.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"

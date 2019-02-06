@@ -4,6 +4,7 @@
 #include "../../common/CUIDExtra.h"
 #include "../../network/send.h"
 #include "../clients/CClient.h"
+#include "../CWorld.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 

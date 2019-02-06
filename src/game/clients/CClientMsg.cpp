@@ -12,6 +12,7 @@
 #include "../items/CItemMap.h"
 #include "../items/CItemMessage.h"
 #include "../components/CCSpawn.h"
+#include "../CWorld.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"

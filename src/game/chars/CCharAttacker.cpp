@@ -131,7 +131,7 @@ CChar * CChar::Attacker_GetLast() const
         if (dwCurTime <= dwLastTime)
         {
             dwLastTime = dwCurTime;
-            retChar = CUID(refAttacker.charUID).CharFind();
+            retChar = CUID::CharFind(refAttacker.charUID);
         }
     }
     return retChar;
@@ -281,7 +281,7 @@ int CChar::Attacker_GetID(const CChar * pChar) const
 int CChar::Attacker_GetID(CUID pChar) const
 {
     ADDTOCALLSTACK("CChar::Attacker_GetID(CUID)");
-    return Attacker_GetID(pChar.CharFind()->GetChar());
+    return Attacker_GetID(pChar.CharFind());
 }
 
 // Get UID value of attacker list from the given pChar
@@ -293,7 +293,7 @@ CChar * CChar::Attacker_GetUID(size_t attackerIndex) const
     if (m_lastAttackers.size() <= attackerIndex)
         return nullptr;
     const LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
-    CChar * pChar = CUID(refAttacker.charUID).CharFind();
+    CChar * pChar = CUID::CharFind(refAttacker.charUID);
     return pChar;
 }
 
@@ -304,7 +304,7 @@ bool CChar::Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bo
     if (m_lastAttackers.empty())
         return false;
 
-    CChar *pChar = CUID(itAttacker->charUID).CharFind();
+    CChar *pChar = CUID::CharFind(itAttacker->charUID);
     if (!pChar)
         return false;
 
@@ -362,7 +362,7 @@ void CChar::Attacker_RemoveChar()
         for (auto it = m_lastAttackers.begin(), end = m_lastAttackers.end(); it != end; ++it)
         {
             LastAttackers & refAttacker = *it;
-            CChar * pSrc = CUID(refAttacker.charUID).CharFind();
+            CChar * pSrc = CUID::CharFind(refAttacker.charUID);
             if (!pSrc)
                 continue;
             pSrc->Attacker_Delete(this, false, ATTACKER_CLEAR_REMOVEDCHAR);
@@ -380,7 +380,7 @@ void CChar::Attacker_CheckTimeout()
         for (size_t count = 0; count < m_lastAttackers.size(); )
         {
             LastAttackers & refAttacker = m_lastAttackers[count];
-            CChar *pEnemy = CUID(refAttacker.charUID).CharFind();
+            CChar *pEnemy = CUID::CharFind(refAttacker.charUID);
             if (pEnemy)
             {
                 // always advance refAttacker.elapsed, i might use it in scripts for a different purpose

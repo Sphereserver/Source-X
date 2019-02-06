@@ -477,6 +477,7 @@ public:
 	void SetDisconnected();
 	bool SetPlayerAccount( CAccount * pAccount );
 	bool SetPlayerAccount( lpctstr pszAccount );
+    bool IsNPC() const;
 	bool SetNPCBrain( NPCBRAIN_TYPE NPCBrain );
 	NPCBRAIN_TYPE GetNPCBrain() const;
     NPCBRAIN_TYPE GetNPCBrainGroup() const;     // Return NPCBRAIN_ANIMAL for animals, _HUMAN for NPC human and PCs, >= _MONSTER for monsters

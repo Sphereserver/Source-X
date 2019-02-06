@@ -6,6 +6,7 @@
 #include "../components/CCSpawn.h"
 #include "../CUIDExtra.h"
 #include "../CLog.h"
+#include "../CWorld.h"
 #include "../triggers.h"
 #include "CClient.h"
 
@@ -662,7 +663,10 @@ bool CClient::Cmd_Skill_Menu( CResourceID rid, int iSelect )
 
 	ASSERT(m_pChar);
 	if ( rid.GetResType() != RES_SKILLMENU )
+    {
+        DEBUG_ERR(("Invalid RES_SKILLMENU (error type=1).\n"));
 		return false;
+    }
 
 	bool fShowMenu = false;
 	bool fLimitReached = false;
@@ -739,7 +743,10 @@ size_t CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem *i
 	// Find section.
 	CResourceLock s;
 	if ( !g_Cfg.ResourceLock(s, rid) )
+    {
+        DEBUG_ERR(("Invalid RES_SKILLMENU (error type=2).\n"));
 		return 0;
+    }
 
 	// Get title line
 	if ( !s.ReadKey() )
@@ -786,7 +793,7 @@ size_t CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem *i
 
 			// a new option to look at.
 			fSkip = false;
-			iOnCount++;
+			++iOnCount;
 
 			if ( iSelect < 0 )	// building up the list.
 			{
@@ -797,7 +804,7 @@ size_t CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem *i
 				if ( !item[iShowCount].ParseLine(s.GetArgRaw(), nullptr, m_pChar) )
 				{
 					// remove if the item is invalid.
-					iShowCount--;
+					--iShowCount;
 					fSkip = true;
 					continue;
 				}
@@ -828,7 +835,7 @@ size_t CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem *i
 			CResourceQtyArray skills(s.GetArgStr());
 			if ( !skills.IsResourceMatchAll(m_pChar) )
 			{
-				iShowCount--;
+				--iShowCount;
 				fSkip = true;
 			}
 			continue;
@@ -853,7 +860,7 @@ size_t CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem *i
 			if ( tRet != TRIGRET_RET_DEFAULT )
 				return tRet == TRIGRET_RET_TRUE ? 0 : 1;
 
-			iShowCount++;	// we are good. but continue til the end
+			++iShowCount;	// we are good. but continue til the end
 		}
 		else
 		{
@@ -872,9 +879,9 @@ size_t CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem *i
 				{
 					// Test if there is anything in this skillmenu we can do.
 					++sm_iReentrant;
-					if ( !Cmd_Skill_Menu_Build(g_Cfg.ResourceGetIDType(RES_SKILLMENU, s.GetArgStr()), -2, *&item, iMaxSize, fShowMenu, fLimitReached) )
+					if ( !Cmd_Skill_Menu_Build(g_Cfg.ResourceGetIDType(RES_SKILLMENU, s.GetArgStr()), -2, item, iMaxSize, fShowMenu, fLimitReached) )
 					{
-						iShowCount--;
+						--iShowCount;
 						fSkip = true;
 					}
 					else
@@ -891,7 +898,7 @@ size_t CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem *i
 				// There should ALWAYS be a valid id here.
 				if ( !m_pChar->Skill_MakeItem((ITEMID_TYPE)(g_Cfg.ResourceGetIndexType(RES_ITEMDEF, s.GetArgStr())), m_Targ_UID, SKTRIG_SELECT) )
 				{
-					iShowCount--;
+					--iShowCount;
 					fSkip = true;
 				}
 				continue;

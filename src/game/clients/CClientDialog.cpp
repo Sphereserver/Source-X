@@ -8,6 +8,7 @@
 #include "../CException.h"
 #include "../CUIDExtra.h"
 #include "../CLog.h"
+#include "../CWorld.h"
 #include "CClient.h"
 
 
@@ -190,7 +191,7 @@ bool CClient::Dialog_Close( CObjBase * pObj, dword dwRid, int buttonID )
 		if ( pSrc )
 		{
 			OpenedGumpsMap_t::iterator itGumpFound = m_mapOpenedGumps.find( (int)dwRid );
-			if (( itGumpFound != m_mapOpenedGumps.end() ) && ( (*itGumpFound).second > 0 ))
+			if (( itGumpFound != m_mapOpenedGumps.end() ) && ( itGumpFound->second > 0 ))
 			{
 				PacketGumpDialogRet packet;
 				packet.writeByte(XCMD_GumpDialogRet);
@@ -349,6 +350,7 @@ void CClient::Menu_Setup( CResourceID rid, CObjBase * pObj )
 	CResourceLock s;
 	if ( ! g_Cfg.ResourceLock( s, rid ))
 	{
+        DEBUG_ERR(("Invalid RES_MENU.\n"));
 		return;
 	}
 

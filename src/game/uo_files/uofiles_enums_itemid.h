@@ -11,7 +11,7 @@
 
 enum ITEMID_TYPE	// InsideUO or UoFiddler are great for this stuff.
 {
-	ITEMID_NOTHING = 0x0000,	// Used for lightning.
+	ITEMID_NOTHING = 0,	// Used for lightning.
 	ITEMID_NODRAW = 1,
 	ITEMID_ANKH_S,
 	ITEMID_ANKH_N,

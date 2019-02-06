@@ -14,6 +14,7 @@
 #include "components/CCSpawn.h"
 #include "components/CCItemDamageable.h"
 #include "CObjBase.h"
+#include "CWorld.h"
 #include "spheresvr.h"
 #include "triggers.h"
 

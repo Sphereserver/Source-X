@@ -6,6 +6,7 @@
 #include "../components/CCPropsItemWeapon.h"
 #include "../../network/network.h"
 #include "../clients/CClient.h"
+#include "../CWorld.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CChar.h"
@@ -491,6 +492,12 @@ bool CChar::IsSwimming() const
 		return true;
 
 	return false;
+}
+
+bool CChar::IsNPC() const
+{
+    ADDTOCALLSTACK_INTENSIVE("CChar::IsNPC");
+    return (m_pNPC != nullptr);
 }
 
 NPCBRAIN_TYPE CChar::GetNPCBrain() const

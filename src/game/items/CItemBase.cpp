@@ -234,7 +234,7 @@ CREID_TYPE CItemBase::FindCharTrack( ITEMID_TYPE trackID )	// static
 	if ( ! pItemDef->IsType(IT_EQ_HORSE) && ! pItemDef->IsType(IT_FIGURINE) )
 		return CREID_INVALID;
 
-	return static_cast<CREID_TYPE>(pItemDef->m_ttFigurine.m_idChar.GetResIndex());
+	return (CREID_TYPE)(pItemDef->m_ttFigurine.m_idChar.GetResIndex());
 }
 
 bool CItemBase::IsTypeArmor( IT_TYPE type )  // static
@@ -2093,10 +2093,8 @@ bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * 
 CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 {
 	ADDTOCALLSTACK("CItemBase::FindItemBase");
-	// CItemBase
-	// is a like item already loaded.
-
-	if ( id <= 0 )
+	// CItemBase is a like item already loaded.
+	if ( id <= ITEMID_NOTHING )
 		return nullptr;
 
 	CResourceID rid = CResourceID( RES_ITEMDEF, id );

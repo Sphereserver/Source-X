@@ -9,6 +9,7 @@
 #include "../CObjBase.h"
 #include "../CContainer.h"
 #include "../CRegion.h"
+#include "../CWorld.h"
 #include "CCChampion.h"
 #include "CCSpawn.h"
 #include <algorithm>

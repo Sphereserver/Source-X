@@ -32,7 +32,6 @@ protected:
 	dword m_dwInternalVal;
 
 public:
-	bool IsValidUID() const;
 	inline void InitUID() {
 		m_dwInternalVal = UID_UNUSED;
 	}
@@ -40,9 +39,23 @@ public:
 		m_dwInternalVal = UID_CLEAR;
 	}
 
-	bool IsResource() const;
-	bool IsItem() const;
-	bool IsChar() const;
+    static bool IsValidUID(dword dwPrivateUID);
+    static bool IsResource(dword dwPrivateUID);
+    static bool IsItem(dword dwPrivateUID);
+    static bool IsChar(dword dwPrivateUID);
+
+    inline bool IsValidUID() const {
+        return IsValidUID(m_dwInternalVal);
+    }
+    inline bool IsResource() const {
+        return IsResource(m_dwInternalVal);
+    }
+    inline bool IsItem() const {
+        return IsItem(m_dwInternalVal);
+    }
+    inline bool IsChar() const {
+        return IsChar(m_dwInternalVal);
+    }
 
 	bool IsObjDisconnected() const;
 	bool IsObjTopLevel() const;
@@ -72,9 +85,14 @@ public:
 	inline operator dword () const {
 		return GetObjUID();
 	}
-	CObjBase * ObjFind() const;
-	CItem * ItemFind() const;
-	CChar * CharFind() const;
+    
+    static CObjBase * ObjFind(dword dwPrivateUID);
+    static CItem * ItemFind(dword dwPrivateUID);
+    static CChar * CharFind(dword dwPrivateUID);
+    CObjBase * ObjFind() const;
+    CItem * ItemFind() const;
+    CChar * CharFind() const;
+    
 };
 
 class CUID : public CUIDBase
@@ -84,9 +102,9 @@ public:
 	{
 		InitUID();
 	}
-	inline CUID(dword dw)
+	inline CUID(dword dwPrivateUID)
 	{
-		SetPrivateUID( dw );
+		SetPrivateUID(dwPrivateUID);
 	}
 };
 

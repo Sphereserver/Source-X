@@ -7,25 +7,32 @@
 #define _INC_CUIDEXTRA_H
 
 #include "CUID.h"
-#include "../game/CWorld.h"
 #include "../game/chars/CChar.h"
+
+
+inline CItem * CUIDBase::ItemFind(dword dwPrivateUID)    // static
+{
+    // Does item still exist or has it been deleted?
+    // IsItem() may be faster ?
+    return dynamic_cast<CItem *>(ObjFind(dwPrivateUID));
+}
+inline CChar * CUIDBase::CharFind(dword dwPrivateUID)    // static
+{
+    // Does character still exists?
+    return dynamic_cast<CChar *>(ObjFind(dwPrivateUID));
+}
 
 inline CObjBase * CUIDBase::ObjFind() const
 {
-	if ( IsResource() || !IsValidUID() )
-		return nullptr;
-	return g_World.FindUID( m_dwInternalVal & UID_O_INDEX_MASK );
+   return ObjFind(m_dwInternalVal);
 }
-
-inline CItem * CUIDBase::ItemFind() const // Does item still exist or has it been deleted
+inline CItem * CUIDBase::ItemFind() const 
 {
-    // IsItem() may be faster ?
-    return dynamic_cast<CItem *>(ObjFind());
+    return ItemFind(m_dwInternalVal);
 }
-
-inline CChar * CUIDBase::CharFind() const // Does character still exist
+inline CChar * CUIDBase::CharFind() const
 {
-	return dynamic_cast<CChar *>(ObjFind());
+    return CharFind(m_dwInternalVal);
 }
 
 #endif // _INC_CUIDEXTRA_H

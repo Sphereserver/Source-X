@@ -7,6 +7,7 @@
 #include "../items/CItemVendable.h"
 #include "../CLog.h"
 #include "../CUIDExtra.h"
+#include "../CWorld.h"
 #include "../triggers.h"
 #include "CClient.h"
 
