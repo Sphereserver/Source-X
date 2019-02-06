@@ -1105,7 +1105,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 					continue;
 				}
 				pIngotDef = pBaseDef;
-				iIngotQty = (word)(pOreDef->m_BaseResources[i].GetResQty());
+				iIngotQty = (word)((pOreDef->m_BaseResources[i].GetResQty() * 60) / 100);
 			}
 		}
 	}

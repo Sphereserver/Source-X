@@ -1209,6 +1209,7 @@ bool CClient::Cmd_Skill_Smith( CItem *pIngots )
 	if ( IsTrigUsed(TRIGGER_SKILLMENU) )
 	{
 		CScriptTriggerArgs args("sm_blacksmith");
+		args.m_VarsLocal.SetNum("ItemUsed", pIngots->GetID());
 		if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
 			return true;
 	}
