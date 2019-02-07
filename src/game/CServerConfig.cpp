@@ -246,7 +246,7 @@ CServerConfig::CServerConfig()
 	m_sZeroPoint			= "1323,1624,0";
 	m_bAllowBuySellAgent	= false;
 
-	m_iColorNotoGood			= 0x63;		// blue
+	m_iColorNotoGood			= 0x61;		// blue
 	m_iColorNotoGuildSame		= 0x44;		// green
 	m_iColorNotoNeutral			= 0x388;	// grey (can be attacked)
 	m_iColorNotoCriminal		= 0x387;	// grey (criminal)
