@@ -2220,6 +2220,20 @@ int CChar::Skill_Hiding( SKTRIG_TYPE stage )
 		return 0;
 	}
 
+	if (stage == SKTRIG_SELECT)
+	{
+		// If we're in a fight and target can see me, can't hide.
+		if (Fight_IsActive())
+		{
+			CChar * pCharFight = m_Fight_Targ_UID.CharFind();
+			if (pCharFight->CanSeeLOS(this, LOS_NB_WINDOWS))
+			{
+				SysMessageDefault(DEFMSG_HIDING_INFIGHT);
+				return -SKTRIG_QTY;
+			}
+		}
+	}
+
 	if ( stage == SKTRIG_START )
 	{
 		// Make sure I'm not carrying a light ?
@@ -2234,7 +2248,10 @@ int CChar::Skill_Hiding( SKTRIG_TYPE stage )
 			}
 		}
 
-		return Calc_GetRandVal(70);	// How difficult? 1-1000
+		if (Fight_IsActive())
+			return Calc_GetRandVal(95);
+		else
+			return Calc_GetRandVal(65);
 	}
 	ASSERT(0);
 	return -SKTRIG_QTY;

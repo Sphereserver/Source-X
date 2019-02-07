@@ -164,6 +164,7 @@ MSG(HEALING_WITEM,						"Use a bandage")
 MSG(HERDING_LTARG,						"You lost your target!")
 MSG(HERDING_NOCROOK,					"You lost your crook!")
 MSG(HERDING_SUCCESS,					"The animal goes where it is instructed")
+MSG(HIDING_INFIGHT,						"Your opponent can see you!"
 MSG(HIDING_REVEALED,					"You have been revealed")
 MSG(HIDING_STUMBLE,						"You stumble apon %s hidden.")
 MSG(HIDING_SUCCESS,						"You have hidden yourself well")
