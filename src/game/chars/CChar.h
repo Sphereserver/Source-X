@@ -903,6 +903,7 @@ private:
 	int Skill_MakeItem( SKTRIG_TYPE stage );
 	int Skill_Information( SKTRIG_TYPE stage );
 	int Skill_Hiding( SKTRIG_TYPE stage );
+	int Skill_Stealth ( SKTRIG_TYPE stage );
 	int Skill_Enticement( SKTRIG_TYPE stage );
 	int Skill_Snooping( SKTRIG_TYPE stage );
 	int Skill_Stealing( SKTRIG_TYPE stage );

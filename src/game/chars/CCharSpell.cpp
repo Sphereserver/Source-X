@@ -3247,7 +3247,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			ushort	uiFirst = uiResist / 50;
 			ushort	uiSecond = uiResist - (((pCharSrc->Skill_GetBase(SKILL_MAGERY) - 200) / 50) + (ushort)((1 + (spell / 8)) * 50));
 			uchar	uiResistChance = (uchar)(maximum(uiFirst, uiSecond) / 30);
-			uiResist = Skill_CheckSuccess(SKILL_MAGICRESISTANCE, uiResistChance, false) ? 25 : Calc_GetRandVal(uiResist / 83);	// Success = -25% damage reduction, Fail = -12%.
+			uiResist = Skill_CheckSuccess(SKILL_MAGICRESISTANCE, uiResistChance, false) ? 25 : (ushort)Calc_GetRandVal(uiResist / 83);	// Success = -25% damage reduction, Fail = -12%.
 
 			if ( IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
 			{	

@@ -3156,6 +3156,16 @@ void CChar::CheckRevealOnMove()
 	if ( IsTrigUsed(TRIGGER_STEPSTEALTH) )
 		OnTrigger(CTRIG_StepStealth, this);
 
+	if (m_StepStealth > 0)
+	{
+		int iPenaltyStealth = (int)m_TagDefs.GetKeyNum("PENALTY.STEALTH");
+		if (Calc_GetRandVal(100) < iPenaltyStealth)
+		{
+			SysMessageDefault(DEFMSG_STEALTH_PENALTY);
+			Reveal();
+		}
+	}
+
 	m_StepStealth -= IsStatFlag(STATF_FLY|STATF_HOVERING) ? 2 : 1;
 	if ( m_StepStealth <= 0 )
 		Reveal();

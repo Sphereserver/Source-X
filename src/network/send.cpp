@@ -207,7 +207,7 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, const CChar
 	if (fElemental)
 		writeInt16((word)other->GetPropNum(pCCPChar, PROPCH_RESPHYSICAL, pBaseCCPChar));
 	else
-		writeInt16(other->CalcArmorDefense());
+		writeInt16((word)other->CalcArmorDefense());
 
 	writeInt16((word)(other->GetTotalWeight() / WEIGHT_UNITS));
 

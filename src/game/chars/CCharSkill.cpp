@@ -2208,7 +2208,7 @@ int CChar::Skill_Hiding( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_SUCCESS )
 	{
-		ObjMessage(g_Cfg.GetDefaultMsg(DEFMSG_HIDING_SUCCESS), this);
+		SysMessageDefault(DEFMSG_HIDING_SUCCESS);
 		StatFlag_Set(STATF_HIDDEN);
 		Reveal(STATF_INVISIBLE);	// clear previous invisibility spell effect (this will not reveal the char because STATF_HIDDEN still set)
 		UpdateMode();
@@ -2255,6 +2255,48 @@ int CChar::Skill_Hiding( SKTRIG_TYPE stage )
 	}
 	ASSERT(0);
 	return -SKTRIG_QTY;
+}
+
+int CChar::Skill_Stealth(SKTRIG_TYPE stage)
+{
+	ADDTOCALLSTACK("CChar::Skill_Stealth");
+
+	if (stage == SKTRIG_SELECT)
+	{
+		if (m_StepStealth > 0)
+		{
+			SysMessageDefault(DEFMSG_STEALTH_WALKING);
+			return -SKTRIG_QTY;
+		}
+
+		if (!IsStatFlag(STATF_HIDDEN))
+		{
+			SysMessageDefault(DEFMSG_STEALTH_MUSTHIDE);
+			return -SKTRIG_QTY;
+		}
+
+		if (Skill_GetBase(SKILL_HIDING) < 850)
+		{
+			SysMessageDefault(DEFMSG_STEALTH_LOWSKILL);
+			return -SKTRIG_QTY;
+		}
+	
+		int iPenaltyStealth = (int)m_TagDefs.GetKeyNum("PENALTY.STEALTH");
+		if (Calc_GetRandVal(100) < iPenaltyStealth)
+		{
+			SysMessageDefault(DEFMSG_STEALTH_PENALTY);
+			Reveal();
+			return -SKTRIG_QTY;
+		}
+	}
+
+	if (stage == SKTRIG_SUCCESS)
+	{
+		m_StepStealth = Skill_GetAdjusted(SKILL_STEALTH) / 50;
+		SysMessageDefault(DEFMSG_STEALTH_SUCCESS);
+	}
+
+	return 0;
 }
 
 int CChar::Skill_Herding( SKTRIG_TYPE stage )

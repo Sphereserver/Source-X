@@ -164,7 +164,7 @@ MSG(HEALING_WITEM,						"Use a bandage")
 MSG(HERDING_LTARG,						"You lost your target!")
 MSG(HERDING_NOCROOK,					"You lost your crook!")
 MSG(HERDING_SUCCESS,					"The animal goes where it is instructed")
-MSG(HIDING_INFIGHT,						"Your opponent can see you!"
+MSG(HIDING_INFIGHT,						"Your opponent can see you!")
 MSG(HIDING_REVEALED,					"You have been revealed")
 MSG(HIDING_STUMBLE,						"You stumble apon %s hidden.")
 MSG(HIDING_SUCCESS,						"You have hidden yourself well")
@@ -1151,5 +1151,11 @@ MSG(NUDGED_OBJECTS,						"Objects Nudged!")
 MSG(TILE_SAME_POINT,					"Thats the same point")
 MSG(HOUSE_ADD_LIMIT,                    "House redeeded, You already own the maximum number of houses permitable.")
 MSG(DEED_NAME,                          "Deed to a %s")
+MSG(STEALTH_MUSTHIDE,					"Necesitas estar oculto para caminar en las sombras.")
+MSG(STEALTH_LOWSKILL,					"No tienes la habilidad suficiente para realizar esto.")
+MSG(STEALTH_PENALTY,					"Tu equipamiento te impide caminar entre las sombras.")
+MSG(STEALTH_SUCCESS,					"Logras caminar sigilosamente.")
+MSG(STEALTH_WALKING,					"Ya estas caminando sigilosamente!")
+
 
 #undef MSG
