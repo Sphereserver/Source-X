@@ -2220,7 +2220,7 @@ int CChar::Skill_Hiding( SKTRIG_TYPE stage )
 		return 0;
 	}
 
-	if (stage == SKTRIG_SELECT)
+	if ( stage == SKTRIG_START )
 	{
 		// If we're in a fight and target can see me, can't hide.
 		if (Fight_IsActive())
@@ -2232,10 +2232,7 @@ int CChar::Skill_Hiding( SKTRIG_TYPE stage )
 				return -SKTRIG_QTY;
 			}
 		}
-	}
 
-	if ( stage == SKTRIG_START )
-	{
 		// Make sure I'm not carrying a light ?
 		for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 		{
@@ -2261,7 +2258,7 @@ int CChar::Skill_Stealth(SKTRIG_TYPE stage)
 {
 	ADDTOCALLSTACK("CChar::Skill_Stealth");
 
-	if (stage == SKTRIG_SELECT)
+	if (stage == SKTRIG_START)
 	{
 		if (m_StepStealth > 0)
 		{
@@ -3302,7 +3299,6 @@ int CChar::Skill_Stage( SKTRIG_TYPE stage )
 		case SKILL_CAMPING:
 		case SKILL_MAGICRESISTANCE:
 		case SKILL_TACTICS:
-		case SKILL_STEALTH:
 			return 0;
 		case SKILL_ALCHEMY:
 		case SKILL_BOWCRAFT:
@@ -3341,6 +3337,8 @@ int CChar::Skill_Stage( SKTRIG_TYPE stage )
 			return Skill_Herding(stage);
 		case SKILL_HIDING:
 			return Skill_Hiding(stage);
+		case SKILL_STEALTH:
+			return Skill_Stealth(stage);
 		case SKILL_PROVOCATION:
 			return Skill_Provocation(stage);
 		case SKILL_INSCRIPTION:
