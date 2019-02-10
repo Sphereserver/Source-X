@@ -588,6 +588,7 @@ private:
 #define POPUP_PETRELEASE 50
 #define POPUP_STABLESTABLE 51
 #define POPUP_STABLERETRIEVE 52
+#define POPUP_TAME 53
 #define POPUP_TRAINSKILL 100
 
 	PacketDisplayPopup* m_pPopupPacket;

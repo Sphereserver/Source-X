@@ -355,7 +355,7 @@ lpctstr CChar::Noto_GetTitle() const
 
 	tchar * pTemp = Str_GetTemp();
 	snprintf( pTemp, STR_TEMPLENGTH, "%s%s%s%s%s%s",
-		(pTitle[0]) ? ( Char_GetDef()->IsFemale() ? g_Cfg.GetDefaultMsg( DEFMSG_TITLE_ARTICLE_FEMALE ) : g_Cfg.GetDefaultMsg( DEFMSG_TITLE_ARTICLE_MALE ) )  : "",
+		(pTitle[0]) ? (Char_GetDef()->IsFemale() ? g_Cfg.GetDefaultMsg(DEFMSG_TITLE_ARTICLE_FEMALE) : g_Cfg.GetDefaultMsg(DEFMSG_TITLE_ARTICLE_MALE)) : "",
 		pTitle,
 		(pTitle[0]) ? " " : "",
 		pFameTitle,

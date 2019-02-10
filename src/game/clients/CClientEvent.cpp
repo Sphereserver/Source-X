@@ -2375,48 +2375,75 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 
 		if ( pChar->m_pNPC )
 		{
-			if ( pChar->m_pNPC->m_Brain == NPCBRAIN_BANKER )
-				m_pPopupPacket->addOption(POPUP_BANKBOX, 6105, POPUPFLAG_COLOR, 0xFFFF);
-			else if ( pChar->m_pNPC->m_Brain == NPCBRAIN_STABLE )
-			{
-				m_pPopupPacket->addOption(POPUP_STABLESTABLE, 6126, POPUPFLAG_COLOR, 0xFFFF);
-				m_pPopupPacket->addOption(POPUP_STABLERETRIEVE, 6127, POPUPFLAG_COLOR, 0xFFFF);
-			}
-
 			if ( pChar->NPC_IsVendor() )
 			{
+				if ( pChar->m_pNPC->m_Brain == NPCBRAIN_BANKER )
+					m_pPopupPacket->addOption(POPUP_BANKBOX, 6105, POPUPFLAG_COLOR, 0xFFFF);
+
 				m_pPopupPacket->addOption(POPUP_VENDORBUY, 6103, POPUPFLAG_COLOR, 0xFFFF);
 				m_pPopupPacket->addOption(POPUP_VENDORSELL, 6104, POPUPFLAG_COLOR, 0xFFFF);
-			}
 
-			word iEnabled = pChar->IsStatFlag(STATF_DEAD) ? POPUPFLAG_LOCKED : POPUPFLAG_COLOR;
-			if ( pChar->IsOwnedBy(m_pChar, false) )
-			{
-				CREID_TYPE id = pChar->GetID();
-				bool bBackpack = (id == CREID_LLAMA_PACK || id == CREID_HORSE_PACK || id == CREID_GIANT_BEETLE);
-
-				m_pPopupPacket->addOption(POPUP_PETGUARD, 6107, iEnabled, 0xFFFF);
-				m_pPopupPacket->addOption(POPUP_PETFOLLOW, 6108, POPUPFLAG_COLOR, 0xFFFF);
-				if ( bBackpack )
-					m_pPopupPacket->addOption(POPUP_PETDROP, 6109, iEnabled, 0xFFFF);
-				m_pPopupPacket->addOption(POPUP_PETKILL, 6111, iEnabled, 0xFFFF);
-				m_pPopupPacket->addOption(POPUP_PETSTOP, 6112, POPUPFLAG_COLOR, 0xFFFF);
-				m_pPopupPacket->addOption(POPUP_PETSTAY, 6114, POPUPFLAG_COLOR, 0xFFFF);
-				if ( !pChar->IsStatFlag(STATF_CONJURED) )
+				WORD wFlag, wSkillNPC, wSkillPlayer;
+				for (unsigned int i = 0; i < g_Cfg.m_iMaxSkill; ++i)
 				{
-					m_pPopupPacket->addOption(POPUP_PETFRIEND_ADD, 6110, iEnabled, 0xFFFF);
-					m_pPopupPacket->addOption(POPUP_PETFRIEND_REMOVE, 6099, iEnabled, 0xFFFF);
-					m_pPopupPacket->addOption(POPUP_PETTRANSFER, 6113, POPUPFLAG_COLOR, 0xFFFF);
+					if (!g_Cfg.m_SkillIndexDefs.IsValidIndex(i))
+						continue;
+					if (i == SKILL_SPELLWEAVING)
+						continue;
+
+					wSkillNPC = pChar->Skill_GetBase(static_cast<SKILL_TYPE>(i));
+					if ( wSkillNPC < 300 )
+						continue;
+
+					wSkillPlayer = m_pChar->Skill_GetBase(static_cast<SKILL_TYPE>(i));
+					wFlag = ((wSkillPlayer >= g_Cfg.m_iTrainSkillMax) || (wSkillPlayer >= (wSkillNPC * g_Cfg.m_iTrainSkillPercent) / 100)) ? POPUPFLAG_LOCKED : POPUPFLAG_COLOR;
+					m_pPopupPacket->addOption(static_cast<WORD>(POPUP_TRAINSKILL + i), 6000 + i, wFlag, 0xFFFF);
 				}
-				m_pPopupPacket->addOption(POPUP_PETRELEASE, 6118, POPUPFLAG_COLOR, 0xFFFF);
-				if ( bBackpack )
-					m_pPopupPacket->addOption(POPUP_BACKPACK, 6145, iEnabled, 0xFFFF);
+
+				if ( pChar->m_pNPC->m_Brain == NPCBRAIN_STABLE )
+				{
+					m_pPopupPacket->addOption(POPUP_STABLESTABLE, 6126, POPUPFLAG_COLOR, 0xFFFF);
+					m_pPopupPacket->addOption(POPUP_STABLERETRIEVE, 6127, POPUPFLAG_COLOR, 0xFFFF);
+				}
 			}
-			else if ( pChar->Memory_FindObjTypes(m_pChar, MEMORY_FRIEND) )
+			else
 			{
-				m_pPopupPacket->addOption(POPUP_PETFOLLOW, 6108, iEnabled, 0xFFFF);
-				m_pPopupPacket->addOption(POPUP_PETSTOP, 6112, iEnabled, 0xFFFF);
-				m_pPopupPacket->addOption(POPUP_PETSTAY, 6114, iEnabled, 0xFFFF);
+				word iEnabled = pChar->IsStatFlag(STATF_DEAD) ? POPUPFLAG_LOCKED : POPUPFLAG_COLOR;
+				if ( pChar->IsOwnedBy(m_pChar, false) )
+				{
+					CREID_TYPE id = pChar->GetID();
+					
+					m_pPopupPacket->addOption(POPUP_PETGUARD, 6107, iEnabled, 0xFFFF);
+					m_pPopupPacket->addOption(POPUP_PETFOLLOW, 6108, POPUPFLAG_COLOR, 0xFFFF);
+					
+					bool bBackpack = (id == CREID_LLAMA_PACK || id == CREID_HORSE_PACK || id == CREID_GIANT_BEETLE);
+					if ( bBackpack )
+						m_pPopupPacket->addOption(POPUP_PETDROP, 6109, iEnabled, 0xFFFF);
+
+					m_pPopupPacket->addOption(POPUP_PETKILL, 6111, iEnabled, 0xFFFF);
+					m_pPopupPacket->addOption(POPUP_PETSTOP, 6112, POPUPFLAG_COLOR, 0xFFFF);
+					m_pPopupPacket->addOption(POPUP_PETSTAY, 6114, POPUPFLAG_COLOR, 0xFFFF);
+					
+					if ( !pChar->IsStatFlag(STATF_CONJURED) )
+					{
+						m_pPopupPacket->addOption(POPUP_PETFRIEND_ADD, 6110, iEnabled, 0xFFFF);
+						m_pPopupPacket->addOption(POPUP_PETFRIEND_REMOVE, 6099, iEnabled, 0xFFFF);
+						m_pPopupPacket->addOption(POPUP_PETTRANSFER, 6113, POPUPFLAG_COLOR, 0xFFFF);
+					}
+					
+					m_pPopupPacket->addOption(POPUP_PETRELEASE, 6118, POPUPFLAG_COLOR, 0xFFFF);
+					
+					if ( bBackpack )
+						m_pPopupPacket->addOption(POPUP_BACKPACK, 6145, iEnabled, 0xFFFF);
+				}
+				else if (pChar->Memory_FindObjTypes(m_pChar, MEMORY_FRIEND))
+				{
+					m_pPopupPacket->addOption(POPUP_PETFOLLOW, 6108, iEnabled, 0xFFFF);
+					m_pPopupPacket->addOption(POPUP_PETSTOP, 6112, iEnabled, 0xFFFF);
+					m_pPopupPacket->addOption(POPUP_PETSTAY, 6114, iEnabled, 0xFFFF);
+				}
+				else if (!pChar->IsStatFlag(STATF_PET) && (pChar->Skill_GetBase(SKILL_TAMING) > 0))
+					m_pPopupPacket->addOption(POPUP_TAME, 6130, POPUPFLAG_COLOR, 0xFFFF);
 			}
 		}
 		else if ( pChar == m_pChar )
@@ -2520,6 +2547,14 @@ void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something 
 					pChar->NPC_OnHear("sell", m_pChar);
 				break;
 
+			case POPUP_TAME:
+				if (m_pChar->Skill_CanUse(SKILL_TAMING) && !m_pChar->Skill_Wait(SKILL_TAMING))
+				{
+					m_pChar->m_Act_UID = pChar->GetUID();
+					m_pChar->Skill_Start(SKILL_TAMING);
+				}
+				return;
+
 			case POPUP_PETGUARD:
 				pChar->NPC_OnHearPetCmd("guard", m_pChar);
 				break;
@@ -2569,6 +2604,16 @@ void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something 
 				if ( pChar->m_pNPC->m_Brain == NPCBRAIN_STABLE )
 					pChar->NPC_OnHear("retrieve", m_pChar);
 				break;
+		}
+
+
+		if ( (EntryTag >= POPUP_TRAINSKILL) && (EntryTag < POPUP_TRAINSKILL + g_Cfg.m_iMaxSkill) )
+		{
+			TCHAR *pszMsg = Str_GetTemp();
+			SKILL_TYPE iSkill = static_cast<SKILL_TYPE>(EntryTag - POPUP_TRAINSKILL);
+			sprintf(pszMsg, "train %s", g_Cfg.GetSkillKey( iSkill ));
+			pChar->NPC_OnHear(pszMsg, m_pChar);
+			return;
 		}
 	}
 

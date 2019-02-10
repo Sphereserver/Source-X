@@ -62,8 +62,9 @@ lpctstr CCharBase::GetTradeName() const
 		return pName;
 
 	++pSpace;
-	if ( ! strnicmp( pSpace, "the ", 4 ))
-		pSpace += 4;
+	if ( !strnicmp( pSpace, "el ", 3 ) || !strnicmp( pSpace, "la ", 3) || !strnicmp( pSpace, "the ", 4 ) )
+		pSpace += 3;
+
 	return pSpace;
 }
 

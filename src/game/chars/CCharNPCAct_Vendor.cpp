@@ -363,6 +363,8 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 	TemporaryString tsMsg;
 	tchar* pszMsg = static_cast<tchar *>(tsMsg);
 
+	// g_Log.EventError("CChar::NPC_OnTrainHear : %s\n", pszMsg);
+
 	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
 		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) )
