@@ -2072,8 +2072,8 @@ int CChar::Skill_Taming(SKTRIG_TYPE stage)
 	}
 
 	// Low skill to tame it
-	int iTamingRequire = iTameBase + (pChar->GetKeyNum("TAMEOWNERS") * 60);
-	if (iTamingRequire < Skill_GetAdjusted(SKILL_TAMING))
+	int iTamingRequire = iTameBase + ((int)pChar->GetKeyNum("TAMEOWNERS") * 60);
+	if (iTamingRequire > Skill_GetAdjusted(SKILL_TAMING))
 	{
 		SysMessageDefault(DEFMSG_TAMING_CANT);
 		return -SKTRIG_QTY;

@@ -108,8 +108,11 @@ NOTO_TYPE CChar::Noto_GetFlag(const CChar * pCharViewer, bool fAllowIncog, bool 
 	{
 		int id = -1;
 		if (pThis->m_pNPC && pThis->NPC_PetGetOwner() && (g_Cfg.m_iPetsInheritNotoriety != 0))	// If I'm a pet and have owner I redirect noto to him.
-			pThis = pThis->NPC_PetGetOwner();
-
+		{
+			if (m_pNPC->m_Brain != NPCBRAIN_BERSERK)
+				pThis = pThis->NPC_PetGetOwner();
+		}
+			
 		id = pThis->NotoSave_GetID(pTarget);
 
 		if (id != -1)
@@ -166,6 +169,9 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 	{
 		if (m_pNPC)	
 		{
+			if (m_pNPC->m_Brain == NPCBRAIN_BERSERK)
+				return NOTO_EVIL;
+				
 			if (g_Cfg.m_iPetsInheritNotoriety != 0) 
 			{
 				// Do we have a master to inherit notoriety from?
