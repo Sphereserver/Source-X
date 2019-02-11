@@ -2019,7 +2019,7 @@ int CChar::Skill_Cooking( SKTRIG_TYPE stage )
 	return( Skill_MakeItem( stage ));
 }
 
-int CChar::Skill_Taming( SKTRIG_TYPE stage )
+int CChar::Skill_Taming(SKTRIG_TYPE stage)
 {
 	ADDTOCALLSTACK("CChar::Skill_Taming");
 	// m_Act_UID = creature to tame.
@@ -2027,48 +2027,65 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 	// Related to INT ?
 
 	CChar * pChar = m_Act_UID.CharFind();
-	if ( pChar == nullptr )
+	if (pChar == nullptr)
 		return -SKTRIG_QTY;
 
-	if ( pChar == this )
+	// Targetted myself
+	if (pChar == this)
 	{
-		SysMessageDefault( DEFMSG_TAMING_YMASTER );
+		SysMessageDefault(DEFMSG_TAMING_YMASTER);
 		return -SKTRIG_QTY;
 	}
-	if ( pChar->m_pPlayer )
+	// Targetted another player
+	if (pChar->m_pPlayer)
 	{
-		SysMessageDefault( DEFMSG_TAMING_CANT );
+		SysMessageDefault(DEFMSG_TAMING_CANT);
 		return -SKTRIG_QTY;
 	}
-	if ( GetTopDist3D(pChar) > 10 )
+	// Too far away
+	if (GetTopDist3D(pChar) > 3)
 	{
-		SysMessageDefault( DEFMSG_TAMING_REACH );
+		SysMessageDefault(DEFMSG_TAMING_REACH);
 		return -SKTRIG_QTY;
 	}
-	if ( !CanSeeLOS( pChar ) )
+	// Can't see him
+	if (!CanSeeLOS(pChar))
 	{
-		SysMessageDefault( DEFMSG_TAMING_LOS );
+		SysMessageDefault(DEFMSG_TAMING_LOS);
 		return -SKTRIG_QTY;
 	}
-	UpdateDir( pChar );
 
-	ASSERT( pChar->m_pNPC );
+	// Already have owner
+	ASSERT(pChar->m_pNPC);
+	if (pChar->IsStatFlag(STATF_PET))
+	{
+		SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_TAMING_TAME), pChar->GetName());
+		return -SKTRIG_QTY;
+	}
 
+	// No taming defined on char
 	int iTameBase = pChar->Skill_GetBase(SKILL_TAMING);
-	if ( !IsPriv( PRIV_GM )) // if its a gm doing it, just check that its not
+	if (!iTameBase || pChar->Skill_GetBase(SKILL_ANIMALLORE))
 	{
-		if ( pChar->IsStatFlag( STATF_PET ))		// is it tamable ?
-		{
-			SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_TAMING_TAME ), pChar->GetName());
-			return -SKTRIG_QTY;
-		}
-
-		if ( !iTameBase || pChar->Skill_GetBase(SKILL_ANIMALLORE))	// too smart or not an animal
-		{
-			SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_TAMING_TAMED ), pChar->GetName());
-			return -SKTRIG_QTY;
-		}
+		SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_TAMING_TAMED), pChar->GetName());
+		return -SKTRIG_QTY;
 	}
+
+	// Low skill to tame it
+	int iTamingRequire = iTameBase + (pChar->GetKeyNum("TAMEOWNERS") * 60);
+	if (iTamingRequire < Skill_GetAdjusted(SKILL_TAMING))
+	{
+		SysMessageDefault(DEFMSG_TAMING_CANT);
+		return -SKTRIG_QTY;
+	}
+
+	// Too many owners
+	if (pChar->GetKeyNum("TAMEOWNERS") >= 5)
+	{
+		SysMessageDefault(DEFMSG_TAMING_CANT);
+		return -SKTRIG_QTY;
+	}
+
 
 	if ( stage == SKTRIG_START )
 	{
