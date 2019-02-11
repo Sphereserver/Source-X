@@ -2435,7 +2435,6 @@ void CClient::addItemMenu( CLIMODE_TYPE mode, const CMenuItem * item, size_t cou
 	ADDTOCALLSTACK("CClient::addItemMenu");
 	// We must set GetTargMode() to show what mode we are in for menu select.
 	// Will result in PacketMenuChoice::onReceive()
-	// cmd.ItemMenu.
 
 	if (count <= 0)
 		return;

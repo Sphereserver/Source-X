@@ -2141,16 +2141,16 @@ void CItem::r_WriteMore1(CSString & sVal)
         case IT_LOOM:
         case IT_ARCHERY_BUTTE:
         case IT_ITEM_STONE:
-            sVal = g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, m_itNormal.m_more1));
+            sVal = g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, RES_GET_INDEX(m_itNormal.m_more1)));
             return;
 
         case IT_FIGURINE:
         case IT_EQ_HORSE:
-            sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, m_itNormal.m_more1));
+            sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, RES_GET_INDEX(m_itNormal.m_more1)));
             return;
 
         case IT_POTION:
-            sVal = g_Cfg.ResourceGetName(CResourceID(RES_SPELL, m_itPotion.m_Type));
+            sVal = g_Cfg.ResourceGetName(CResourceID(RES_SPELL, RES_GET_INDEX(m_itPotion.m_Type)));
             return;
 
         default:
@@ -2964,7 +2964,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			break;
 		case IC_MORE:
 		case IC_MORE1:
-			m_itNormal.m_more1 = s.GetArgVal();
+			m_itNormal.m_more1 = s.GetArgDWVal();
 			if ( !g_Serv.IsLoading() && ( IsType(IT_SPAWN_CHAR) || IsType(IT_SPAWN_ITEM) ) )
 			{
                 CCSpawn *pSpawn = GetSpawn();

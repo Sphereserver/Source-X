@@ -434,7 +434,7 @@ bool CClient::OnTarg_Item_Link( CObjBase * pObj2 )
 	return true;
 }
 
-int CClient::Cmd_Extract( CScript * pScript, CRectMap &rect, int & zlowest )
+int CClient::Cmd_Extract( CScript * pScript, const CRectMap &rect, int & zlowest )
 {
 	ADDTOCALLSTACK("CClient::Cmd_Extract");
 	// RETURN: Number of statics here.
