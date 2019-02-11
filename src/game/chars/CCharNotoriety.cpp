@@ -554,22 +554,27 @@ void CChar::Noto_Kill(CChar * pKill, int iTotalKillers)
 		if ( !IsPriv(PRIV_GM) )
 		{
 			CScriptTriggerArgs args;
-			args.m_iN1 = m_pPlayer->m_wMurders+1;
+			args.m_iN1 = m_pPlayer->m_wMurders + 1;
 			args.m_iN2 = true;
+			args.m_iN3 = false;
 
 			if ( IsTrigUsed(TRIGGER_MURDERMARK) )
 			{
 				OnTrigger(CTRIG_MurderMark, this, &args);
-				if ( args.m_iN1 < 0 )
+				if (args.m_iN1 < 0)
 					args.m_iN1 = 0;
 			}
 
-			m_pPlayer->m_wMurders = (word)(args.m_iN1);
-			NotoSave_Update();
-			if ( args.m_iN2 )
-				Noto_Criminal();
+			if ( args.m_iN3 < 1 ) 
+			{
+				m_pPlayer->m_wMurders = (word)(args.m_iN1);
+				if (args.m_iN2)
+					Noto_Criminal();
 
-			Noto_Murder();
+				Noto_Murder();
+			}
+
+			NotoSave_Update();
 		}
 	}
 
