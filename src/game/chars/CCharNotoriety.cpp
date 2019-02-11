@@ -566,7 +566,7 @@ void CChar::Noto_Kill(CChar * pKill, int iTotalKillers)
 					args.m_iN1 = 0;
 			}
 
-			if ( args.m_iN3 != true )
+			if ( args.m_iN3 != 1 )
 			{
 				m_pPlayer->m_wMurders = (word)(args.m_iN1);
 				if ( args.m_iN2 )
