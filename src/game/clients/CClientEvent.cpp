@@ -2442,8 +2442,10 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 					m_pPopupPacket->addOption(POPUP_PETSTOP, 6112, iEnabled, 0xFFFF);
 					m_pPopupPacket->addOption(POPUP_PETSTAY, 6114, iEnabled, 0xFFFF);
 				}
+				/* 
 				else if (!pChar->IsStatFlag(STATF_PET) && (pChar->Skill_GetBase(SKILL_TAMING) > 0))
 					m_pPopupPacket->addOption(POPUP_TAME, 6130, POPUPFLAG_COLOR, 0xFFFF);
+				*/
 			}
 		}
 		else if ( pChar == m_pChar )
@@ -2546,7 +2548,7 @@ void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something 
 				if ( pChar->NPC_IsVendor() )
 					pChar->NPC_OnHear("sell", m_pChar);
 				break;
-
+			/*
 			case POPUP_TAME:
 				if (m_pChar->Skill_CanUse(SKILL_TAMING) && !m_pChar->Skill_Wait(SKILL_TAMING))
 				{
@@ -2554,7 +2556,7 @@ void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something 
 					m_pChar->Skill_Start(SKILL_TAMING);
 				}
 				return;
-
+			*/
 			case POPUP_PETGUARD:
 				pChar->NPC_OnHearPetCmd("guard", m_pChar);
 				break;
