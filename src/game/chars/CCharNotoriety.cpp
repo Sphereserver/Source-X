@@ -166,7 +166,7 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 	{
 		if (m_pNPC)	
 		{
-			if (g_Cfg.m_iPetsInheritNotoriety != 0)
+			if (g_Cfg.m_iPetsInheritNotoriety != 0) 
 			{
 				// Do we have a master to inherit notoriety from?
 				CChar* pMaster = NPC_PetGetOwnerRecursive();
@@ -557,6 +557,7 @@ void CChar::Noto_Kill(CChar * pKill, int iTotalKillers)
 			CScriptTriggerArgs args;
 			args.m_iN1 = m_pPlayer->m_wMurders+1;
 			args.m_iN2 = true;
+			args.m_iN3 = false;
 
 			if ( IsTrigUsed(TRIGGER_MURDERMARK) )
 			{
@@ -565,12 +566,16 @@ void CChar::Noto_Kill(CChar * pKill, int iTotalKillers)
 					args.m_iN1 = 0;
 			}
 
-			m_pPlayer->m_wMurders = (word)(args.m_iN1);
-			NotoSave_Update();
-			if ( args.m_iN2 )
-				Noto_Criminal();
+			if ( args.m_iN3 != true )
+			{
+				m_pPlayer->m_wMurders = (word)(args.m_iN1);
+				if ( args.m_iN2 )
+					Noto_Criminal();
 
-			Noto_Murder();
+				Noto_Murder();
+			}
+
+			NotoSave_Update();
 		}
 	}
 
