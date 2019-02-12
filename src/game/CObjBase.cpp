@@ -2474,7 +2474,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( pClientSrc->GetNetState()->isClientKR() )
                     dwRid = g_Cfg.GetKRDialog( dwRid );
 
-				pClientSrc->Dialog_Close( this, dwRid, iQty > 1 ? Exp_GetVal( Arg_ppCmd[1]) : 0 );
+				pClientSrc->Dialog_Close( pClientSrc->GetChar(), dwRid, iQty > 1 ? Exp_GetVal( Arg_ppCmd[1]) : 0 );
 			}
 			break;
 		case OV_TRYP:
