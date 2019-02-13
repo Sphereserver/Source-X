@@ -123,24 +123,24 @@ struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variab
     explicit CResourceIDBase(RES_TYPE restype)
     {
         // single instance type.
-        ASSERT(restype < RES_TYPE_MASK);
+        ASSERT(restype <= RES_TYPE_MASK);
         m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT);
     }
     explicit CResourceIDBase(RES_TYPE, const CResourceIDBase&) = delete;
     explicit CResourceIDBase(RES_TYPE restype, int iIndex)
     {
-        ASSERT(restype < RES_TYPE_MASK);
+        ASSERT(restype <= RES_TYPE_MASK);
         if (iIndex < 0)
         {
             Init();
             return;
         }
-        ASSERT(iIndex < RES_INDEX_MASK);
+        ASSERT(iIndex <= RES_INDEX_MASK);
         m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT) | iIndex;
     }
     explicit CResourceIDBase(dword dwPrivateID)
     {
-        ASSERT(CUID(dwPrivateID).IsValidUID());
+        ASSERT(CUID::IsValidUID(dwPrivateID));
         m_dwInternalVal = UID_F_RESOURCE | dwPrivateID;
     }
 

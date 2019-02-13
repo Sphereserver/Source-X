@@ -65,14 +65,10 @@ bool CChar::IsResourceMatch( const CResourceID& rid, dword dwAmount, dword dwArg
 		}
 
 		case RES_TYPEDEF:		// do I have these in my posession?
-			if ( !ContentConsumeTest(rid, dwAmount, dwArgResearch) )
-				return true;
-			return false;
+			return (ContentConsumeTest(rid, dwAmount, dwArgResearch) == 0);
 
 		case RES_ITEMDEF:		// do I have these in my posession?
-			if ( !ContentConsumeTest(rid, dwAmount) )
-				return true;
-			return false;
+			return (ContentConsumeTest(rid, dwAmount) == 0);
 		default:
 			return false;
 	}

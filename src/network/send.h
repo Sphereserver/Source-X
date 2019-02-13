@@ -18,8 +18,8 @@
 #include <memory>
 
 
+struct CMenuItem;
 class CItemMap;
-class CMenuItem;
 class CObjBaseTemplate;
 class CSpellDef;
 class CItemContainer;

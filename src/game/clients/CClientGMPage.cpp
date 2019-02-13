@@ -332,7 +332,7 @@ void CClient::Cmd_GM_PageCmd( lpctstr pszCmd )
 	}
 }
 
-void CClient::Cmd_GM_PageSelect( size_t iSelect )
+void CClient::Cmd_GM_PageSelect( uint iSelect )
 {
 	ADDTOCALLSTACK("CClient::Cmd_GM_PageSelect");
 	// 0 = cancel.
