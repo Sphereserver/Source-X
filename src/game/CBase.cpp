@@ -279,7 +279,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 			break;
         case OBC_FACTION:
         case OBC_SLAYER:
-            GetFaction().SetFactionID(NPC_FACTION(s.GetArgVal()));
+            GetFaction().SetFactionID( (NPC_FACTION)s.GetArgVal() );
             return true;
 		//Set as number only
 		case OBC_EXPANSION:
@@ -332,9 +332,9 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 
 		case OBC_DEFNAME:
 		case OBC_DEFNAME2:
-			return SetResourceName( s.GetArgStr());
+			return SetResourceName(s.GetArgStr());
 		case OBC_HEIGHT:
-			m_Height = static_cast<height_t>(s.GetArgVal());
+			m_Height = (height_t)s.GetArgVal();
 			return true;
 		case OBC_INSTANCES:
 			return false;
@@ -342,7 +342,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 			SetTypeName( s.GetArgStr());
 			return true;
 		case OBC_RESOURCES:
-			m_BaseResources.Load( s.GetArgStr());
+			m_BaseResources.Load(s.GetArgStr());
 			return true;
 		case OBC_RESLEVEL:
 			return( SetResLevel((uchar)(s.GetArgVal())) );

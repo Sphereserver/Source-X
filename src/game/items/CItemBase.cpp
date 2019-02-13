@@ -1634,6 +1634,15 @@ bool CItemBase::r_LoadVal( CScript &s )
 		case IBC_SKILLMAKE:
 			// Skill required to make this.
 			m_SkillMake.Load( s.GetArgStr() );
+            for (const CResourceQty& res : m_SkillMake)
+            {
+                RES_TYPE type = res.GetResType();
+                if ((type != RES_SKILL) && (type != RES_TYPEDEF))
+                {
+                    g_Log.EventWarn("Invalid requirement in SKILLMAKE (not a skill nor a type).\n");
+                    break;
+                }
+            }
 			break;
 
 		case IBC_TDATA1:

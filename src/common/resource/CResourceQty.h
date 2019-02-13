@@ -79,6 +79,10 @@ public:
     {
         return FindResourceID(rid) != BadIndex();
     }
+    inline bool ContainsResourceType( RES_TYPE type ) const
+    {
+        return FindResourceType(type) != BadIndex();
+    }
     inline bool ContainsResourceMatch( CObjBase * pObj ) const
     {
         return FindResourceMatch(pObj) != BadIndex();

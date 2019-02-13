@@ -83,13 +83,12 @@ private:
 
 //////////////////
 
-class CMenuItem 	// describe a menu item.
+struct CMenuItem 	    // describe a menu item.
 {
-public:
 	word m_id;			// ITEMID_TYPE in base set.
 	word m_color;
 	CSString m_sText;
-public:
+
 	bool ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole * pSrc );
 };
 
@@ -201,7 +200,7 @@ public:
 		{
 			CUIDBase m_UID;
 			CResourceID m_ResourceID;		// What menu is this ?
-			dword m_Item[MAX_MENU_ITEMS];	// This saves the inrange tracking targets or other context
+			dword m_Item[MAX_MENU_ITEMS];	// It's a buffer to save the in-range tracking targets or other data
 		} m_tmMenu;	// the menu that is up.
 
 					// CLIMODE_TARG_PET_CMD
@@ -211,7 +210,7 @@ public:
 			bool m_fAllPets;
 		} m_tmPetCmd;	// which pet command am i targetting ?
 
-						// CLIMODE_TARG_CHAR_BANK
+		// CLIMODE_TARG_CHAR_BANK
 		struct
 		{
 			LAYER_TYPE m_Layer;	// gm command targetting what layer ?
@@ -368,12 +367,12 @@ public:
 									   // translated commands.
 private:
 	void Cmd_GM_PageInfo();
-	int Cmd_Extract( CScript * pScript, CRectMap &rect, int & zlowest );
-	size_t Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem* item, size_t iMaxSize, bool &fShowMenu, bool &fLimitReached );
+	int Cmd_Extract( CScript * pScript, const CRectMap &rect, int & zlowest );
+	uint Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem* item, uint iMaxSize, bool *fShowMenu, bool *fLimitReached );
 public:
 	void Cmd_GM_PageMenu( uint iEntryStart = 0 );
 	void Cmd_GM_PageCmd( lpctstr pCmd );
-	void Cmd_GM_PageSelect( size_t iSelect );
+	void Cmd_GM_PageSelect( uint iSelect );
 	void Cmd_GM_Page( lpctstr pszreason); // Help button (Calls GM Call Menus up)
 
 	bool Cmd_Skill_Menu( CResourceID rid, int iSelect = -1 );

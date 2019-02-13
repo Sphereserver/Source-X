@@ -154,7 +154,7 @@ size_t CResourceQtyArray::FindResourceMatch( const CObjBase * pObj ) const
     // Use to find intersection with this pOBj raw material and BaseResource creation elements.
     for ( size_t i = 0, iQty = size(); i < iQty; ++i )
     {
-        const CResourceID& ridtest =(*this)[i].GetResourceID();
+        const CResourceID& ridtest = (*this)[i].GetResourceID();
         if ( pObj->IsResourceMatch( ridtest, 0 ))
             return i;
     }

@@ -856,8 +856,12 @@ bool CChar::Skill_MakeItem( ITEMID_TYPE id, CUID uidTarg, SKTRIG_TYPE stage, boo
 	CItem *pItemTarg = uidTarg.ItemFind();
 	if ( pItemTarg && (stage == SKTRIG_SELECT) )
 	{
-		if ( !pItemDef->m_SkillMake.ContainsResourceMatch(pItemTarg) && !pItemDef->m_BaseResources.ContainsResourceMatch(pItemTarg) )
-			return false;
+        if (pItemDef->m_SkillMake.ContainsResourceType(RES_TYPEDEF) || pItemDef->m_BaseResources.ContainsResourceType(RES_TYPEDEF))
+        {
+            // Is an item of a specific TYPE needed to craft this item?
+            if ( !pItemDef->m_SkillMake.ContainsResourceMatch(pItemTarg) && !pItemDef->m_BaseResources.ContainsResourceMatch(pItemTarg) )
+                return false;
+        }
 	}
 
 	if ( !SkillResourceTest(&(pItemDef->m_SkillMake)) )
@@ -882,7 +886,7 @@ bool CChar::Skill_MakeItem( ITEMID_TYPE id, CUID uidTarg, SKTRIG_TYPE stage, boo
 		if ( i != pItemDef->m_SkillMake.BadIndex() )
 		{
 			CSkillDef *pSkillDef = g_Cfg.GetSkillDef((SKILL_TYPE)(pItemDef->m_SkillMake[i].GetResIndex()));
-			if ( pSkillDef && pSkillDef->m_Effect.m_aiValues.size() > 0 )
+			if ( pSkillDef && !pSkillDef->m_Effect.m_aiValues.empty() )
 				iConsumePercent = pSkillDef->m_Effect.GetRandom();
 		}
 
@@ -899,7 +903,10 @@ bool CChar::Skill_MakeItem( ITEMID_TYPE id, CUID uidTarg, SKTRIG_TYPE stage, boo
 		// Find the primary skill required.
 		size_t i = pItemDef->m_SkillMake.FindResourceType(RES_SKILL);
 		if ( i == pItemDef->m_SkillMake.BadIndex() )
+        {
+            g_Log.EventError("Trying to make item=%s with invalid SKILLMAKE.\n", pItemDef->GetResourceName());
 			return false;
+        }
 
 		m_Act_UID = uidTarg;	// targetted item to start the make process
 		m_atCreate.m_ItemID = id;
@@ -930,7 +937,7 @@ int CChar::Skill_NaturalResource_Setup( CItem * pResBit )
 	if ( pOreDef == nullptr )
 		return -1;
 
-	return( pOreDef->m_Skill.GetRandom() / 10 );
+	return (pOreDef->m_Skill.GetRandom() / 10);
 }
 
 CItem * CChar::Skill_NaturalResource_Create( CItem * pResBit, SKILL_TYPE skill )

@@ -1361,7 +1361,7 @@ bool PacketMenuChoice::onReceive(NetState* net)
 			if (select >= CountOf(client->m_tmMenu.m_Item))
 				return true;
 
-			client->Cmd_Skill_Menu(client->m_tmMenu.m_ResourceID, (select) ? client->m_tmMenu.m_Item[select] : 0 );
+			client->Cmd_Skill_Menu(client->m_tmMenu.m_ResourceID, (select > 0) ? client->m_tmMenu.m_Item[select] : 0 );
 			return true;
 
 		case CLIMODE_MENU_SKILL_TRACK_SETUP:

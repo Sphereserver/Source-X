@@ -1511,3 +1511,9 @@ WARNING: the following change could break some hackish expedient used in scripts
 04-02-2019, Nolok
 - Fixed: Character pausing the attack when breaking the line of sight for the target (Issues #217 and #196) (thanks shiryux).
 - Fixed: When AttackerTimeout elapsed not only the attacker list was emptied, but also the whole combat was aborted.
+
+13-02-2019, Nolok
+- Fixed: Skillmenus not showing submenus correctly (Issue #200).
+- Fixed: Couldn't make items which didn't have in the SKILLMAKE the typedef for the item needed to craft it.
+- Added: Warning message if adding to SKILLMAKE elements which aren't a skill or a typedef.
+- Added: Warning message when trying to craft an item with an invalid SKILLMAKE (instead of just aborting the crafting process without any notification).
