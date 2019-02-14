@@ -789,6 +789,7 @@ uint CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem * it
 		{
 			if ( *s.GetArgStr() == '@' )
             {
+                ++iShowCount;
                 fSkip = true;
 				continue;
             }
@@ -801,16 +802,15 @@ uint CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem * it
 			{
 				if ( (iSelect < -1) && (iShowCount >= 1) )		// just a test. so we are done.
 					return 1;
-
-				++iShowCount;
+				
                 CMenuItem miTest;
 				if ( !miTest.ParseLine(s.GetArgRaw(), nullptr, m_pChar) )
 				{
 					// remove if the item is invalid.
-					--iShowCount;
                     fSkip = true;
 					continue;
 				}
+                ++iShowCount;
 
 				if ( iSelect == -1 )
                 {
@@ -835,6 +835,7 @@ uint CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem * it
         {
             item[iShowCount] = {};
             m_tmMenu.m_Item[iShowCount] = 0;
+            --iShowCount;
             continue;
         }
 		if ( (iSelect > 0) && (iOnCount != iSelect) )	// only interested in the selected option
@@ -847,7 +848,6 @@ uint CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem * it
 			CResourceQtyArray skills(s.GetArgStr());
 			if ( !skills.IsResourceMatchAll(m_pChar) )
 			{
-				--iShowCount;
                 fSkip = true;
 			}
 			continue;
@@ -858,7 +858,6 @@ uint CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem * it
 			m_pChar->ParseText(s.GetArgRaw(), m_pChar);
 			if ( !s.GetArgVal() )
 			{
-				--iShowCount;
                 fSkip = true;
 			}
 			continue;
@@ -893,7 +892,6 @@ uint CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem * it
 					++sm_iReentrant;
 					if ( !Cmd_Skill_Menu_Build(g_Cfg.ResourceGetIDType(RES_SKILLMENU, s.GetArgStr()), -2, nullptr, iMaxSize, fShowMenu, fLimitReached) )
 					{
-						--iShowCount;
                         fSkip = true;
 					}
 					else
@@ -911,7 +909,6 @@ uint CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem * it
 				// There should ALWAYS be a valid id here.
 				if ( !m_pChar->Skill_MakeItem((ITEMID_TYPE)(g_Cfg.ResourceGetIndexType(RES_ITEMDEF, s.GetArgStr())), m_Targ_UID, SKTRIG_SELECT) )
 				{
-					--iShowCount;
                     fSkip = true;
 				}
 				continue;
