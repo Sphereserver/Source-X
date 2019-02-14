@@ -3268,7 +3268,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
                     continue;
 
                 fSpellHit = OnSpellEffect((SPELL_TYPE)(RES_GET_INDEX(pItem->m_itSpell.m_spell)),
-                    pItem->m_uidLink.CharFind(), (int)(pItem->m_itSpell.m_spelllevel), pItem);
+                    pItem->m_uidLink.CharFind(), pItem->m_itSpell.m_spelllevel, pItem);
                 if (fSpellHit && m_pNPC && fStanding)
                 {
                     m_Act_p.Move((DIR_TYPE)(Calc_GetRandVal(DIR_QTY)));
@@ -3301,6 +3301,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 				if ( !fStanding && !IsStatFlag(STATF_HOVERING) )
 				{
 					// Check if we can go out of the ship (in the same direction of plank)
+                    //bool fFromShip = (nullptr != GetTopSector()->GetRegion(GetTopPoint(), REGION_TYPE_SHIP)); // always true
 					if ( MoveToValidSpot(m_dirFace, g_Cfg.m_iMaxShipPlankTeleport, 1, true) )
 					{
 						//pItem->SetTimeoutS(5);	// autoclose the plank behind us
@@ -3313,8 +3314,10 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 		}
 	}
 
-	if ( fStanding || fStepCancel )
+	if (fStepCancel)
 		return TRIGRET_RET_FALSE;
+    if (fStanding)
+        return TRIGRET_RET_TRUE;
 
 	// Check the map teleporters in this CSector (if any)
 	const CPointMap &pt = GetTopPoint();
@@ -3532,7 +3535,7 @@ bool CChar::MoveToRegionReTest( dword dwType )
 // This could be us just taking a step or being teleported.
 // Low level: DOES NOT UPDATE DISPLAYS or container flags. (may be offline)
 // This does not check for gravity.
-bool CChar::MoveToChar(const CPointMap& pt, bool fForceFix, bool fAllowReject)
+bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocation, bool fForceFix, bool fAllowReject)
 {
 	ADDTOCALLSTACK("CChar::MoveToChar");
 
@@ -3578,14 +3581,18 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fForceFix, bool fAllowReject)
 		}
 	}
 
-    CheckLocation(true);
+    if (fCheckLocation && (CheckLocation(fStanding) == TRIGRET_RET_FALSE) && ptOld.IsValidPoint())
+    {
+        SetTopPoint(ptOld);
+        return false;
+    }
 	return true;
 }
 
 bool CChar::MoveTo(const CPointMap& pt, bool fForceFix)
 {
 	m_fClimbUpdated = false; // update climb height
-    return MoveToChar(pt, fForceFix);
+    return MoveToChar(pt, true, true, fForceFix);
 }
 
 void CChar::SetTopZ( char z )

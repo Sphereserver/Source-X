@@ -1602,7 +1602,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 		}
 
 		case IT_SHIP_SIDE_LOCKED:
-			if (!ContentFindKeyFor(pItem))
+			if (!IsPriv(PRIV_GM) && !ContentFindKeyFor(pItem))
 			{
 				SysMessageDefault(DEFMSG_ITEMUSE_SHIPSIDE);
 				return true;

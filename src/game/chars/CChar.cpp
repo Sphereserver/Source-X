@@ -808,19 +808,19 @@ int CChar::FixWeirdness()
 
 	// NOTE: Stats and skills may go negative temporarily.
 
-	CCharBase * pCharDef = Char_GetDef();
+    const CCharBase * pCharDef = Char_GetDef();
 
 	// Make sure my flags are good.
 
 	if ( IsStatFlag( STATF_HASSHIELD ))
 	{
-		CItem * pShield = LayerFind( LAYER_HAND2 );
+        const CItem * pShield = LayerFind( LAYER_HAND2 );
 		if ( pShield == nullptr )
 			StatFlag_Clear( STATF_HASSHIELD );
 	}
 	if ( IsStatFlag( STATF_ONHORSE ))
 	{
-		CItem * pHorse = LayerFind( LAYER_HORSE );
+        const CItem * pHorse = LayerFind( LAYER_HORSE );
 		if ( pHorse == nullptr )
 			StatFlag_Clear( STATF_ONHORSE );
 	}
@@ -831,7 +831,7 @@ int CChar::FixWeirdness()
 	}
 	if ( IsStatFlag( STATF_PET ))
 	{
-		CItemMemory *pMemory = Memory_FindTypes( MEMORY_IPET );
+        const CItemMemory *pMemory = Memory_FindTypes( MEMORY_IPET );
 		if ( pMemory == nullptr )
 			StatFlag_Clear( STATF_PET );
 	}
@@ -847,23 +847,23 @@ int CChar::FixWeirdness()
 				iResultCode = 0x1203;
 				return iResultCode;
 			}
-			CItem * pFigurine = Horse_GetMountItem();
+			const CItem * pFigurine = Horse_GetMountItem();
 			if ( pFigurine == nullptr )
 			{
 				iResultCode = 0x1204;
 				return iResultCode;
 			}
-			CPointMap pt = pFigurine->GetTopLevelObj()->GetTopPoint();
+			const CPointMap& pt = pFigurine->GetTopLevelObj()->GetTopPoint();
 			if ( pt != GetTopPoint())
 			{
-				MoveToChar( pt );
+				MoveToChar( pt, true, true );
 				SetDisconnected();
 			}
 		}
 	}
 	if ( IsStatFlag( STATF_CRIMINAL ))
 	{
-		CItem * pMemory = LayerFind( LAYER_FLAG_Criminal );
+        const CItem * pMemory = LayerFind( LAYER_FLAG_Criminal );
 		if ( pMemory == nullptr )
 			StatFlag_Clear( STATF_CRIMINAL );
 	}

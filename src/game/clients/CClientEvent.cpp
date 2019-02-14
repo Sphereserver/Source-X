@@ -835,7 +835,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
             return false;
         }
 
-		if ( !m_pChar->MoveToChar(pt) )
+		if ( !m_pChar->MoveToChar(pt, false, false) )
 		{
 			new PacketMovementRej(this, sequence);
 			return false;

@@ -564,20 +564,14 @@ int CChar::NPC_WalkToPoint( bool fRun )
 	StatFlag_Mod(STATF_FLY, fRun);
 
 	EXC_SET_BLOCK("Old Top Point");
-	CPointMap ptOld = GetTopPoint();
+	const CPointMap ptOld = GetTopPoint();
 
 	EXC_SET_BLOCK("Reveal");
 	CheckRevealOnMove();
 
 	EXC_SET_BLOCK("MoveToChar");
-	MoveToChar(pMe);
-
-	EXC_SET_BLOCK("Check Location");
-	if ( CheckLocation(false) == TRIGRET_RET_FALSE )	// check if I stepped on any item/teleport
-	{
-		SetTopPoint(ptOld);		// we already moved, so move back to previous location
-		return 2;
-	}
+	if (!MoveToChar(pMe, false, true))
+        return 2;
 
 	EXC_SET_BLOCK("Move Update");
 	UpdateMove(ptOld);
