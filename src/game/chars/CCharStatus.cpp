@@ -1,6 +1,5 @@
 //  CChar is either an NPC or a Player.
 
-#include "../../common/CUIDExtra.h"
 #include "../../common/CLog.h"
 #include "../components/CCPropsItemEquippable.h"
 #include "../components/CCPropsItemWeapon.h"

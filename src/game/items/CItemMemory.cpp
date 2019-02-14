@@ -1,12 +1,11 @@
 
-#include "../../common/CUIDExtra.h"
 #include "../chars/CChar.h"
 #include "../components/CCSpawn.h"
 #include "CItemMemory.h"
 #include "CItemStone.h"
 
 CItemMemory::CItemMemory( ITEMID_TYPE id, CItemBase * pItemDef ) :
-    CCTimedObject(PROFILE_ITEMS), CItem( ITEMID_MEMORY, pItemDef )
+    CTimedObject(PROFILE_ITEMS), CItem( ITEMID_MEMORY, pItemDef )
 {
 	UNREFERENCED_PARAMETER(id);
 }

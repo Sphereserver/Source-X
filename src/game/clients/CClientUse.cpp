@@ -4,7 +4,6 @@
 #include "../chars/CChar.h"
 #include "../items/CItemMap.h"
 #include "../components/CCSpawn.h"
-#include "../CUIDExtra.h"
 #include "../CLog.h"
 #include "../CWorld.h"
 #include "../triggers.h"
@@ -601,9 +600,10 @@ void CClient::Cmd_EditItem( CObjBase *pObj, int iSelect )
 	if ( iSelect == 0 )		// cancelled
 		return;
 
+    ASSERT(CountOf(m_tmMenu.m_Item) == MAX_MENU_ITEMS);
 	if ( iSelect > 0 )		// we selected an item
 	{
-		if ( iSelect >= CountOf(m_tmMenu.m_Item) )
+		if ( iSelect >= MAX_MENU_ITEMS )
 			return;
 
 		if ( m_Targ_Text.IsEmpty() )
@@ -613,7 +613,6 @@ void CClient::Cmd_EditItem( CObjBase *pObj, int iSelect )
 		return;
 	}
 
-    ASSERT(CountOf(m_tmMenu.m_Item) == MAX_MENU_ITEMS);
 	CMenuItem item[MAX_MENU_ITEMS];	    // Most as we want to display at one time.
 	item[0].m_sText.Format("Contents of %s", pObj->GetName());
 

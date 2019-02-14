@@ -1,11 +1,10 @@
 #include "../resource/CResourceLock.h"
-#include "../CUIDExtra.h"
 #include "../CWorld.h"
 #include "CItemVendable.h"
 #include "CItemCommCrystal.h"
 
 CItemCommCrystal::CItemCommCrystal( ITEMID_TYPE id, CItemBase * pItemDef ) :
-    CCTimedObject(PROFILE_ITEMS), CItemVendable( id, pItemDef )
+    CTimedObject(PROFILE_ITEMS), CItemVendable( id, pItemDef )
 {
 }
 

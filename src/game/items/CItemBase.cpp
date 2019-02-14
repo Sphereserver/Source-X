@@ -1637,9 +1637,9 @@ bool CItemBase::r_LoadVal( CScript &s )
             for (const CResourceQty& res : m_SkillMake)
             {
                 RES_TYPE type = res.GetResType();
-                if ((type != RES_SKILL) && (type != RES_TYPEDEF))
+                if ((type != RES_SKILL) && (type != RES_TYPEDEF) && (type != RES_ITEMDEF))
                 {
-                    g_Log.EventWarn("Invalid requirement in SKILLMAKE (not a skill nor a type).\n");
+                    g_Log.EventWarn("Invalid requirement in SKILLMAKE (allowed: skill, typedef, itemdef).\n");
                     break;
                 }
             }

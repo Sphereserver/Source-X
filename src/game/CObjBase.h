@@ -11,7 +11,7 @@
 #include "../common/CObjBaseTemplate.h"
 #include "../common/CScriptObj.h"
 #include "clients/CClientTooltip.h"
-#include "components/CCTimedObject.h"
+#include "CTimedObject.h"
 #include "CEntity.h"
 #include "CBase.h"
 #include "CServerConfig.h"
@@ -22,7 +22,7 @@ class PacketSend;
 class PacketPropertyList;
 class CCSpawn;
 
-class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, public CEntityProps, public virtual CCTimedObject
+class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, public CEntityProps, public virtual CTimedObject
 {
 	static lpctstr const sm_szLoadKeys[];   // All Instances of CItem or CChar have these base attributes.
 	static lpctstr const sm_szVerbKeys[];   // All Instances of CItem or CChar have these base attributes.

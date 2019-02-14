@@ -10,15 +10,12 @@
 #include <deque>
 #include <list>
 #include "../common/CRect.h"
+#include "uo_files/uofiles_macros.h"
 
-
-class CChar;
-
-using std::deque;
-using std::list;
 
 #define PATH_SIZE (UO_MAP_VIEW_SIGHT*2)	// limit NPC view by one screen (both sides)
 
+class CChar;
 class CPathFinderPointRef;
 
 class CPathFinderPoint : public CPointMap

@@ -1,6 +1,5 @@
 //  CChar is either an NPC or a Player.
 
-#include "../../common/CUIDExtra.h"
 #include "../clients/CClient.h"
 #include "../items/CItem.h"
 #include "../items/CItemCorpse.h"

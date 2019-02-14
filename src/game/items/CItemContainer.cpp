@@ -1,6 +1,5 @@
 
 #include "../../common/CException.h"
-#include "../../common/CUIDExtra.h"
 #include "../../common/CLog.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
@@ -14,7 +13,7 @@
 // -CItemContainer
 
 CItemContainer::CItemContainer( ITEMID_TYPE id, CItemBase *pItemDef ) :
-    CCTimedObject(PROFILE_ITEMS), CItemVendable( id, pItemDef )
+    CTimedObject(PROFILE_ITEMS), CItemVendable( id, pItemDef )
 {
 	// m_fTinkerTrapped = false;
     _uidMultiSecured.InitUID();

@@ -6,7 +6,6 @@
 #include "../common/resource/CResourceLock.h"
 #include "../common/CLog.h"
 #include "../common/CUOInstall.h"
-#include "../common/CUIDExtra.h"
 #include "../common/CObjBaseTemplate.h"
 #include "../game/chars/CChar.h"
 #include "../game/clients/CClient.h"

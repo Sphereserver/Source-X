@@ -11,7 +11,7 @@
 #include "../uo_files/uofiles_enums_itemid.h"
 #include "../uo_files/uofiles_enums_creid.h"
 #include "../CComponent.h"
-#include "CCTimedObject.h"
+#include "../CTimedObject.h"
 
 
 class CCharBase;

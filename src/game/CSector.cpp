@@ -20,7 +20,7 @@
 
 int64 CSectorBase::m_iMapBlockCacheTime = 0;
 
-CSector::CSector() : CCTimedObject(PROFILE_SECTORS)
+CSector::CSector() : CTimedObject(PROFILE_SECTORS)
 {
 	m_ListenItems = 0;
 
@@ -170,7 +170,7 @@ void CSector::GoSleep()
 {
     ADDTOCALLSTACK("CSector::Sleep");
     ProfileTask charactersTask(PROFILE_TIMERS);
-    CCTimedObject::GoSleep();
+    CTimedObject::GoSleep();
 
     CChar * pCharNext = nullptr;
     CChar * pChar = static_cast <CChar*>(m_Chars_Active.GetHead());
@@ -203,7 +203,7 @@ void CSector::GoAwake()
 {
     ADDTOCALLSTACK("CSector::GoAwake");
     ProfileTask charactersTask(PROFILE_TIMERS);
-    CCTimedObject::GoAwake();  // Awake it first, otherwise other things won't work.
+    CTimedObject::GoAwake();  // Awake it first, otherwise other things won't work.
 
     CChar * pCharNext = nullptr;
     CChar * pChar = static_cast <CChar*>(m_Chars_Active.GetHead());

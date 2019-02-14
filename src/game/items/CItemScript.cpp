@@ -7,7 +7,7 @@
 // -CItemScript
 
 CItemScript::CItemScript( ITEMID_TYPE id, CItemBase * pItemDef ) :
-    CCTimedObject(PROFILE_ITEMS),
+    CTimedObject(PROFILE_ITEMS),
     CItemVendable( id, pItemDef )
 {
 }

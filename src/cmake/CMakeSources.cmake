@@ -118,7 +118,6 @@ common/CServerMap.cpp
 common/CServerMap.h
 common/CUID.cpp
 common/CUID.h
-common/CUIDExtra.h
 common/CObjBaseTemplate.cpp
 common/CObjBaseTemplate.h
 common/common.cpp
@@ -289,6 +288,8 @@ game/CServerTime.cpp
 game/CServerTime.h
 game/CTimedFunction.cpp
 game/CTimedFunction.h
+game/CTimedObject.cpp
+game/CTimedObject.h
 game/CWorld.cpp
 game/CWorld.h
 game/CWorldImport.cpp
@@ -421,8 +422,6 @@ game/components/CCPropsItemWeaponRanged.cpp
 game/components/CCPropsItemWeaponRanged.h
 game/components/CCSpawn.cpp
 game/components/CCSpawn.h
-game/components/CCTimedObject.cpp
-game/components/CCTimedObject.h
 )
 SOURCE_GROUP (game\\components FILES ${components_SRCS})
 

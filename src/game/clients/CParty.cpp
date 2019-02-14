@@ -2,7 +2,6 @@
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
 #include "../../common/CScriptObj.h"
-#include "../../common/CUIDExtra.h"
 #include "../../network/send.h"
 #include "../../sphere/ProfileTask.h"
 #include "../chars/CChar.h"

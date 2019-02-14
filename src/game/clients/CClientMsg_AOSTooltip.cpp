@@ -1,4 +1,3 @@
-#include "../../common/CUIDExtra.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../items/CItem.h"

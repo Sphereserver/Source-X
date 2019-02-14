@@ -7,8 +7,6 @@
 #define _INC_CRECT_H
 
 #include "../game/uo_files/uofiles_enums.h"
-#include "../game/uo_files/CUOMapList.h"
-#include "../common/CLog.h"
 #include "CPointBase.h"
 
 class CRegion;

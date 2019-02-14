@@ -1,4 +1,5 @@
 
+#include "../game/chars/CChar.h"
 #include "../game/CWorld.h"
 #include "CUID.h"
 
@@ -12,8 +13,33 @@ CObjBase * CUIDBase::ObjFind(dword dwPrivateUID)   // static
     if ( IsResource(dwPrivateUID) || !IsValidUID(dwPrivateUID) )
         return nullptr;
     return g_World.FindUID( dwPrivateUID & UID_O_INDEX_MASK );
-
 }
+
+CItem * CUIDBase::ItemFind(dword dwPrivateUID)    // static
+{
+    // Does item still exist or has it been deleted?
+    // IsItem() may be faster ?
+    return dynamic_cast<CItem *>(ObjFind(dwPrivateUID));
+}
+CChar * CUIDBase::CharFind(dword dwPrivateUID)    // static
+{
+    // Does character still exists?
+    return dynamic_cast<CChar *>(ObjFind(dwPrivateUID));
+}
+
+CObjBase * CUIDBase::ObjFind() const
+{
+    return ObjFind(m_dwInternalVal);
+}
+CItem * CUIDBase::ItemFind() const 
+{
+    return ItemFind(m_dwInternalVal);
+}
+CChar * CUIDBase::CharFind() const
+{
+    return CharFind(m_dwInternalVal);
+}
+
 
 bool CUIDBase::IsValidUID(dword dwPrivateUID) // static
 {
@@ -38,6 +64,7 @@ bool CUIDBase::IsChar(dword dwPrivateUID) // static
 		return IsValidUID(dwPrivateUID);
 	return false;
 }
+
 
 bool CUIDBase::IsObjDisconnected() const	// Not in the game world for some reason.
 {

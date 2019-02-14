@@ -65,9 +65,12 @@ void CChar::Stat_SetMod( STAT_TYPE i, int iVal )
 		}
 	}
 
-	const ushort uiMaxValue = Stat_GetMaxAdjusted(i);		// make sure the current value is not higher than new max value
-	if ( m_Stat[i].m_val > uiMaxValue )
-		m_Stat[i].m_val = uiMaxValue;
+    if (!IsSetOF(OF_StatAllowValOverMax))
+    {
+        const ushort uiMaxValue = Stat_GetMaxAdjusted(i);		// make sure the current value is not higher than new max value
+        if ( m_Stat[i].m_val > uiMaxValue )
+            m_Stat[i].m_val = uiMaxValue;
+    }
 
 	UpdateStatsFlag();
 }
@@ -110,9 +113,12 @@ void CChar::Stat_SetMaxMod( STAT_TYPE i, int iVal )
 
     m_Stat[i].m_maxMod = iVal;
 
-    const ushort uiMaxValue = Stat_GetMaxAdjusted(i);		// make sure the current value is not higher than new max value
-    if ( m_Stat[i].m_val > uiMaxValue )
-        m_Stat[i].m_val = uiMaxValue;
+    if (!IsSetOF(OF_StatAllowValOverMax))
+    {
+        const ushort uiMaxValue = Stat_GetMaxAdjusted(i);		// make sure the current value is not higher than new max value
+        if ( m_Stat[i].m_val > uiMaxValue )
+            m_Stat[i].m_val = uiMaxValue;
+    }
 
     UpdateStatsFlag();
 }
@@ -130,9 +136,12 @@ void CChar::Stat_AddMaxMod( STAT_TYPE i, int iVal )
         iVal = -UINT16_MAX;
     m_Stat[i].m_maxMod	+= iVal;
 
-    const ushort uiMaxValue = Stat_GetMaxAdjusted(i);		// make sure the current value is not higher than new max value
-    if ( m_Stat[i].m_val > uiMaxValue )
-        m_Stat[i].m_val = uiMaxValue;
+    if (!IsSetOF(OF_StatAllowValOverMax))
+    {
+        const ushort uiMaxValue = Stat_GetMaxAdjusted(i);		// make sure the current value is not higher than new max value
+        if ( m_Stat[i].m_val > uiMaxValue )
+            m_Stat[i].m_val = uiMaxValue;
+    }
 
     UpdateStatsFlag();
 }
@@ -152,8 +161,10 @@ void CChar::Stat_SetVal( STAT_TYPE i, ushort uiVal )
 		Stat_SetBase(i, uiVal);
 		return;
 	}
+
 	ASSERT(i >= 0 && i < STAT_QTY); // allow for food
 	m_Stat[i].m_val = uiVal;
+
     if ((i == STAT_STR) && (uiVal == 0))
     {   // Ensure this char will tick and die
         g_World.AddCharTicking(this, true, false);
@@ -171,9 +182,11 @@ void CChar::Stat_AddVal( STAT_TYPE i, int iVal )
         Stat_AddBase(i, iVal);
         return;
     }
+
     ASSERT(i >= 0 && i < STAT_QTY); // allow for food
     iVal = m_Stat[i].m_val + iVal;
     m_Stat[i].m_val = (ushort)(maximum(0, iVal));
+
     if ((i == STAT_STR) && (iVal <= 0))
     {   // Ensure this char will tick and die
         g_World.AddCharTicking(this, true, false);
@@ -185,6 +198,7 @@ ushort CChar::Stat_GetVal( STAT_TYPE i ) const
 	ADDTOCALLSTACK("CChar::Stat_GetVal");
 	if ( i > STAT_BASE_QTY || i == STAT_FOOD ) // Food must trigger Statchange. Redirect to Base value
 		return Stat_GetBase(i);
+
 	ASSERT(i >= 0 && i < STAT_QTY); // allow for food
 	return m_Stat[i].m_val;
 }
@@ -195,7 +209,9 @@ void CChar::Stat_SetMax( STAT_TYPE i, ushort uiVal )
 	ASSERT(i >= 0 && i < STAT_QTY); // allow for food
 
 	if ( g_Cfg.m_iStatFlag && ((g_Cfg.m_iStatFlag & STAT_FLAG_DENYMAX) || (m_pPlayer && (g_Cfg.m_iStatFlag & STAT_FLAG_DENYMAXP)) || (m_pNPC && (g_Cfg.m_iStatFlag & STAT_FLAG_DENYMAXN))) )
+    {
 		m_Stat[i].m_max = 0;
+    }
 	else
 	{
 		if ( IsTrigUsed(TRIGGER_STATCHANGE) && !IsTriggerActive("CREATE") )
@@ -214,9 +230,12 @@ void CChar::Stat_SetMax( STAT_TYPE i, ushort uiVal )
 		}
 		m_Stat[i].m_max = uiVal;
 
-		const ushort uiMaxValue = Stat_GetMaxAdjusted(i);		// make sure the current value is not higher than new max value
-		if ( m_Stat[i].m_val > uiMaxValue )
-			m_Stat[i].m_val = uiMaxValue;
+        if (!IsSetOF(OF_StatAllowValOverMax))
+        {
+            const ushort uiMaxValue = Stat_GetMaxAdjusted(i);		// make sure the current value is not higher than new max value
+            if ( m_Stat[i].m_val > uiMaxValue )
+                m_Stat[i].m_val = uiMaxValue;
+        }
 
 		if ( i == STAT_STR )
 			UpdateHitsFlag();
@@ -231,6 +250,7 @@ ushort CChar::Stat_GetMax( STAT_TYPE i ) const
 {
 	ADDTOCALLSTACK("CChar::Stat_GetMax");
 	ASSERT(i >= 0 && i < STAT_QTY); // allow for food
+
     ushort uiVal;
 	if ( m_Stat[i].m_max < 1 )
 	{
@@ -250,6 +270,7 @@ ushort CChar::Stat_GetMax( STAT_TYPE i ) const
 		}
 		return uiVal;
 	}
+
     uiVal = m_Stat[i].m_max;
 	return uiVal;
 }
@@ -371,9 +392,12 @@ void CChar::Stat_SetBase( STAT_TYPE i, ushort uiVal )
 		}
 	}
 
-	const ushort uiMaxValue = Stat_GetMaxAdjusted(i);    // make sure the current value is not higher than new max value
-	if ( m_Stat[i].m_val > uiMaxValue )
-		m_Stat[i].m_val = uiMaxValue;
+    if (!IsSetOF(OF_StatAllowValOverMax))
+    {
+        const ushort uiMaxValue = Stat_GetMaxAdjusted(i);		// make sure the current value is not higher than new max value
+        if ( m_Stat[i].m_val > uiMaxValue )
+            m_Stat[i].m_val = uiMaxValue;
+    }
 
 	UpdateStatsFlag();
 }
@@ -391,8 +415,8 @@ ushort CChar::Stat_GetLimit( STAT_TYPE i ) const
 		ASSERT(pSkillClass);
 		ASSERT( i >= 0 && i < STAT_BASE_QTY );
 
+        ushort uiStatMax;
 		sprintf(pszStatName, "OVERRIDE.STATCAP_%d", (int)i);
-		ushort uiStatMax;
 		if ( (pTagStorage = GetKey(pszStatName, true)) != nullptr )
 			uiStatMax = (ushort)(pTagStorage->GetValNum());
 		else
@@ -457,17 +481,24 @@ bool CChar::Stats_Regen()
         m_Stat[i].m_regenLast = iCurTime + iRegenDelay; // in msecs
 
 		int iMod = (int)Stats_GetRegenVal(i);
-		if ((i == STAT_STR) && (g_Cfg.m_iRacialFlags & RACIALF_HUMAN_TOUGH) && IsHuman())
-            iMod += 2;		// Humans always have +2 hitpoint regeneration (Tough racial trait)
-		
-		if (g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B)
-		{
-			int iGain = Skill_Focus(i);
-			if (iGain > 0)
-                iMod += minimum(iGain, USHRT_MAX);
-		}
-		ushort uiStatLimit = Stat_GetMaxAdjusted(i);
+        ushort uiStatLimit = Stat_GetMaxAdjusted(i);
+        if (Stat_GetVal(i) <= uiStatLimit)
+        {
+            if ((i == STAT_STR) && (g_Cfg.m_iRacialFlags & RACIALF_HUMAN_TOUGH) && IsHuman())
+                iMod += 2;		// Humans always have +2 hitpoint regeneration (Tough racial trait)
 
+            if (g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B)
+            {
+                int iGain = Skill_Focus(i);
+                if (iGain > 0)
+                    iMod += minimum(iGain, USHRT_MAX);
+            }
+        }
+        else
+        {
+            iMod = -1;
+        }
+		
 		if (IsTrigUsed(TRIGGER_REGENSTAT))
 		{
 			CScriptTriggerArgs Args;

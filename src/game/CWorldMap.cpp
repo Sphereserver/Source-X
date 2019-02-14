@@ -7,7 +7,6 @@
 #include "../common/CException.h"
 #include "../common/CScriptTriggerArgs.h"
 #include "../common/CRect.h"
-#include "../common/CUIDExtra.h"
 #include "../common/CLog.h"
 #include "../sphere/threads.h"
 #include "chars/CChar.h"

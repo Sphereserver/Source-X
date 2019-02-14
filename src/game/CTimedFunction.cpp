@@ -1,4 +1,4 @@
-
+#include "../common/CLog.h"
 #include "../common/CObjBaseTemplate.h"
 #include "../sphere/ProfileTask.h"
 #include "CObjBase.h"

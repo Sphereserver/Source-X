@@ -1,41 +1,39 @@
-
-#include "CCTimedObject.h"
 #include "../../sphere/ProfileTask.h"
-#include "../CWorld.h"
+#include "CWorld.h"
+#include "CTimedObject.h"
 
 
-
-void CCTimedObject::ClearTimeout()
+void CTimedObject::ClearTimeout()
 {
     _timeout = 0;
 }
 
-CCTimedObject::CCTimedObject(PROFILE_TYPE profile)
+CTimedObject::CTimedObject(PROFILE_TYPE profile)
 {
     _profileType = profile;
     _fIsSleeping = false;
     _timeout = 0;
 }
 
-CCTimedObject::~CCTimedObject()
+CTimedObject::~CTimedObject()
 {
-    ADDTOCALLSTACK("CCTimedObject::~CCTimedObject");
+    ADDTOCALLSTACK("CTimedObject::~CTimedObject");
     //if (_timeout > 0)
     //{
         g_World.DelTimedObject(this);
     //}
 }
 
-void CCTimedObject::Delete()
+void CTimedObject::Delete()
 {
-    ADDTOCALLSTACK("CCTimedObject::Delete");
+    ADDTOCALLSTACK("CTimedObject::Delete");
     //if (_timeout > 0)
     //{
         g_World.DelTimedObject(this);
     //}
 }
 
-void CCTimedObject::GoAwake()
+void CTimedObject::GoAwake()
 {
     /*
     * if the timeout did expire then it got ignored on it's tick and removed from the tick's map so we add it again,
@@ -48,13 +46,13 @@ void CCTimedObject::GoAwake()
     _fIsSleeping = false;
 }
 
-bool CCTimedObject::OnTick()
+bool CTimedObject::OnTick()
 {
     ClearTimeout();
     return true;
 }
 
-void CCTimedObject::SetTimer(int64 iDelayInMsecs)
+void CTimedObject::SetTimer(int64 iDelayInMsecs)
 {
     /*
     * Only called from CObjBase::r_LoadVal when server is loading to set the raw timer
@@ -65,9 +63,9 @@ void CCTimedObject::SetTimer(int64 iDelayInMsecs)
     THREAD_CMUTEX.unlock();
 }
 
-void CCTimedObject::SetTimeout(int64 iDelayInMsecs)
+void CTimedObject::SetTimeout(int64 iDelayInMsecs)
 {
-    ADDTOCALLSTACK("CCTimedObject::SetTimeout");
+    ADDTOCALLSTACK("CTimedObject::SetTimeout");
     ProfileTask timersTask(PROFILE_TIMERS); // profile the settimeout proccess.
     
     /*
@@ -102,23 +100,23 @@ void CCTimedObject::SetTimeout(int64 iDelayInMsecs)
 }
 
 
-void CCTimedObject::SetTimeoutS(int64 iSeconds)
+void CTimedObject::SetTimeoutS(int64 iSeconds)
 {
     SetTimeout(iSeconds * MSECS_PER_SEC);
 }
 
-void CCTimedObject::SetTimeoutD(int64 iTenths)
+void CTimedObject::SetTimeoutD(int64 iTenths)
 {
     SetTimeout(iTenths * MSECS_PER_TENTH);
 }
 
-int64 CCTimedObject::GetTimerDiff() const
+int64 CTimedObject::GetTimerDiff() const
 {
     // How long till this will expire ?
     return g_World.GetTimeDiff(_timeout);
 }
 
-int64 CCTimedObject::GetTimerAdjusted() const
+int64 CTimedObject::GetTimerAdjusted() const
 {
     // RETURN: time in msecs from now.
     if (!IsTimerSet())
@@ -129,7 +127,7 @@ int64 CCTimedObject::GetTimerAdjusted() const
     return (iDiffInMsecs);
 }
 
-int64 CCTimedObject::GetTimerTAdjusted() const
+int64 CTimedObject::GetTimerTAdjusted() const
 {
     // RETURN: time in ticks from now.
     if (!IsTimerSet())
@@ -140,7 +138,7 @@ int64 CCTimedObject::GetTimerTAdjusted() const
     return (iDiffInMsecs / MSECS_PER_TICK);
 }
 
-int64 CCTimedObject::GetTimerDAdjusted() const
+int64 CTimedObject::GetTimerDAdjusted() const
 {
     // RETURN: time in tenths of second from now.
     if (!IsTimerSet())
@@ -151,7 +149,7 @@ int64 CCTimedObject::GetTimerDAdjusted() const
     return (iDiffInMsecs / MSECS_PER_TENTH);
 }
 
-int64 CCTimedObject::GetTimerSAdjusted() const
+int64 CTimedObject::GetTimerSAdjusted() const
 {
     // RETURN: time in seconds from now.
     if (!IsTimerSet())

@@ -1,16 +1,18 @@
 /**
-* @file CCTimedObject.h
+* @file CTimedObject.h
 *
 */
 
-#ifndef _INC_CCTIMEDOBJECT_H
-#define _INC_CCTIMEDOBJECT_H
+#ifndef _INC_CTIMEDOBJECT_H
+#define _INC_CTIMEDOBJECT_H
 
-#include "../CComponent.h"
-#include "../../sphere/ProfileData.h"
+#include "../sphere/ProfileData.h"
 
-class CCTimedObject
+
+class CTimedObject
 {
+    friend class CWorld;
+
 private:
     THREAD_CMUTEX_DEF;
     int64 _timeout;
@@ -18,90 +20,62 @@ private:
     bool _fIsSleeping;
 
     /**
-    * @fn virtual void CCTimedObject::ClearTimeout();
-    *
     * @brief clears the timeout.
-    *
     * Should not be used outside the tick's loop, use SetTimeout(0) instead.
     */
-    friend class CWorld;
     virtual void ClearTimeout();
 
 public:
-    CCTimedObject(PROFILE_TYPE profile);
-    virtual ~CCTimedObject();
+    CTimedObject(PROFILE_TYPE profile);
+    virtual ~CTimedObject();
     void Delete();
     inline bool IsSleeping() const;
     inline virtual void GoSleep();
     virtual void GoAwake();
     /**
-    * @fm PROFILE_TYPE CCTimedObject::GetProfileType();
-    *
     * @brief returns the profiler type.
-    *
     * @return the type.
     */
     inline PROFILE_TYPE GetProfileType() const;
 
     /**
-     * @fn  virtual bool CCTimedObject::OnTick() = 0;
-     *
      * @brief   Executes the tick action.
-     *
      * @return  true if it succeeds, false if it fails.
      */
     virtual bool OnTick();
 
     /*
-    * @fn virtual bool CCTimedObject::IsDeleted() const = 0;
-    *
     * @brief Check if IsDeleted();
-    *
     * @return true if it's deleted.
     */
     virtual bool IsDeleted() const = 0;
 
     /**
-     * @fn  virtual void CCTimedObject::SetTimer( int64 iDelayInMsecs );
-     *
      * @brief   &lt; Raw timer.
-     *
      * @param   iDelayInMsecs   Zero-based index of the delay in milliseconds.
      */
     void SetTimer(int64 iDelayInMsecs);
 
     /**
-     * @fn  virtual void CCTimedObject::SetTimeout( int64 iDelayInMsecs );
-     *
      * @brief   &lt; Timer.
-     *
      * @param   iDelayInMsecs   Zero-based index of the delay in milliseconds.
      */
     virtual void SetTimeout(int64 iDelayInMsecs);
 
     /**
-    * @fn  virtual void CObjBase::SetTimeoutS( int64 iDelayInSecs );
-    *
     * @brief   &lt; Timer.
-    *
     * @param   iDelayInSecs   Zero-based index of the delay in seconds.
     */
     void SetTimeoutS(int64 iSeconds);
 
     /**
-    * @fn  virtual void CObjBase::SetTimeoutD( int64 iDelayInTenths );
-    *
     * @brief   &lt; Timer.
-    *
     * @param   iDelayInTenths   Zero-based index of the delay in tenths of second.
     */
     void SetTimeoutD(int64 iTenths);
 
     /**
-     * @fn  bool CObjBase::IsTimerSet() const;
-     *
      * @brief   Query if this object is timer set.
-     *
      * @return  true if timer set, false if not.
      */
     inline bool IsTimerSet() const;
@@ -116,19 +90,13 @@ public:
     int64 GetTimerDiff() const;
 
     /**
-     * @fn  bool CObjBase::IsTimerExpired() const;
-     *
      * @brief   Query if this object is timer expired.
-     *
      * @return  true if timer expired, false if not.
      */
     inline bool IsTimerExpired() const;
 
     /**
-     * @fn  int64 CObjBase::GetTimerAdjusted() const;
-     *
      * @brief   Gets timer.
-     *
      * @return  The timer adjusted.
      */
     int64 GetTimerAdjusted() const;
@@ -143,47 +111,42 @@ public:
     int64 GetTimerTAdjusted() const;
 
     /**
-    * @fn  int64 CObjBase::GetTimerDAdjusted() const;
-    *
     * @brief    Gets timer in tenths of seconds.
-    *
     * @return  The timer d adjusted.
     */
     int64 GetTimerDAdjusted() const;
 
     /**
-    * @fn  int64 CObjBase::GetTimerSAdjusted() const;
-    *
     * @brief    Gets timer in seconds.
-    *
     * @return   The timer s adjusted.
     */
     int64 GetTimerSAdjusted() const;
 };
 
-bool CCTimedObject::IsSleeping() const
+
+bool CTimedObject::IsSleeping() const
 {
     return _fIsSleeping;
 }
 
-void CCTimedObject::GoSleep()
+void CTimedObject::GoSleep()
 {
     _fIsSleeping = true;
 }
 
-bool CCTimedObject::IsTimerSet() const
+bool CTimedObject::IsTimerSet() const
 {
     return _timeout > 0;
 }
 
-bool CCTimedObject::IsTimerExpired() const
+bool CTimedObject::IsTimerExpired() const
 {
     return (GetTimerDiff() <= 0);
 }
 
-PROFILE_TYPE CCTimedObject::GetProfileType() const
+PROFILE_TYPE CTimedObject::GetProfileType() const
 {
     return _profileType;
 }
 
-#endif //_INC_CCTIMEDOBJECT_H
+#endif //_INC_CTIMEDOBJECT_H

@@ -1,7 +1,6 @@
 
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
-#include "../../common/CUIDExtra.h"
 #include "../../network/network.h"
 #include "../../network/send.h"
 #include "../../sphere/ProfileTask.h"
@@ -742,14 +741,21 @@ void CChar::UpdateStatVal( STAT_TYPE type, int iChange, ushort uiLimit )
 	ADDTOCALLSTACK("CChar::UpdateStatVal");
 	int iValPrev = Stat_GetVal(type);
 	int iVal = iValPrev + iChange;
-	if ( uiLimit == 0 )
-        uiLimit = Stat_GetMaxAdjusted(type);
 
 	if ( iVal < 0 )
 		iVal = 0;
-	else if ( iVal > uiLimit )
-		iVal = uiLimit;
-
+    if (IsSetOF(OF_StatAllowValOverMax))
+    {
+        if ((iVal >= uiLimit) && (uiLimit != 0) && (iChange >= 0))
+            iVal = uiLimit;
+    }
+    else
+    {
+        if (uiLimit == 0)
+            uiLimit = Stat_GetMaxAdjusted(type);
+        if (iVal >= uiLimit)
+            iVal = uiLimit;
+    }
 	if ( iVal == iValPrev )
 		return;
 

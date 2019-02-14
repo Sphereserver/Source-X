@@ -1,7 +1,6 @@
 
 // Fight/Criminal actions/Noto.
 
-#include "../../common/CUIDExtra.h"
 #include "../../network/send.h"
 #include "../clients/CClient.h"
 #include "../components/CCPropsChar.h"

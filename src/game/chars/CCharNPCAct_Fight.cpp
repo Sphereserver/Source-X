@@ -1,7 +1,6 @@
 // Actions specific to an NPC.
-
+#include "../../common/CLog.h"
 #include "../../common/CScriptTriggerArgs.h"
-#include "../../common/CUIDExtra.h"
 #include "../../network/receive.h"
 #include "../components/CCPropsItemWeapon.h"
 #include "../CPathFinder.h"

@@ -3,7 +3,6 @@
 //
 
 #include "../../common/CException.h"
-#include "../../common/CUIDExtra.h"
 #include "../chars/CChar.h"
 #include "../triggers.h"
 #include "../CWorld.h"
@@ -15,7 +14,7 @@
 
 
 CItemShip::CItemShip(ITEMID_TYPE id, CItemBase * pItemDef) :
-    CCTimedObject(PROFILE_SHIPS),
+    CTimedObject(PROFILE_SHIPS),
     CItemMulti(id, pItemDef, true)
 {
 }

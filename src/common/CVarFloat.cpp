@@ -8,6 +8,7 @@
 #include "resource/CResourceLock.h"
 #include "CExpression.h"
 #include "CScriptObj.h"
+#include "CLog.h"
 #include "CVarFloat.h"
 
 #define VARDEF_FLOAT_MAXBUFFERSIZE 82

@@ -1,7 +1,6 @@
 
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
-#include "../../common/CUIDExtra.h"
 #include "../../network/network.h"
 #include "../../network/send.h"
 #include "../../sphere/ProfileTask.h"
@@ -93,7 +92,7 @@ void CItem::SetLockDownOfMulti(CUID uidMulti)
     _uidMultiLockDown = uidMulti;
 }
 
-CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CCTimedObject(PROFILE_ITEMS), CObjBase( true )
+CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEMS), CObjBase( true )
 {
 	ASSERT( pItemDef );
 

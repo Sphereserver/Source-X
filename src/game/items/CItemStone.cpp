@@ -2,7 +2,6 @@
 #include "../../common/CException.h"
 #include "../../common/CLog.h"
 #include "../../common/CScriptTriggerArgs.h"
-#include "../../common/CUIDExtra.h"
 #include "../chars/CChar.h"
 #include "../CWorld.h"
 #include "CItemStone.h"
@@ -11,7 +10,7 @@
 
 
 CItemStone::CItemStone( ITEMID_TYPE id, CItemBase * pItemDef ) :
-    CCTimedObject(PROFILE_ITEMS),
+    CTimedObject(PROFILE_ITEMS),
     CItem( id, pItemDef )
 {
 	m_itStone.m_iAlign = STONEALIGN_STANDARD;

@@ -1,3 +1,4 @@
+#include "../../common/CLog.h"
 #include "../../common/CServerMap.h"
 #include "../../common/CUOInstall.h"
 #include "../CServerConfig.h"

@@ -1,9 +1,7 @@
-
 #include "../../common/resource/blocks/CRandGroupDef.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
 #include "../../common/CObjBaseTemplate.h"
-#include "../../common/CUIDExtra.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../CObjBase.h"
@@ -1055,11 +1053,11 @@ bool CCSpawn::IsDeleted()
 
 void CCSpawn::GoAwake()
 {
-    CCTimedObject::GoAwake();
+    CTimedObject::GoAwake();
 }
 
 void CCSpawn::GoSleep()
 {
-    CCTimedObject::GoSleep();
+    CTimedObject::GoSleep();
 }
 */

@@ -1,6 +1,5 @@
 
 #include "../common/resource/blocks/CDialogDef.h"
-#include "../common/CUIDExtra.h"
 #include "../common/CLog.h"
 #include "../game/chars/CChar.h"
 #include "../game/clients/CClient.h"

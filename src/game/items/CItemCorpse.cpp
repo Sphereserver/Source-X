@@ -1,5 +1,5 @@
+#include "../../common/CLog.h"
 #include "../../common/sphereproto.h"
-#include "../../common/CUIDExtra.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../CWorld.h"
@@ -8,7 +8,7 @@
 
 
 CItemCorpse::CItemCorpse( ITEMID_TYPE id, CItemBase * pItemDef ) :
-    CCTimedObject(PROFILE_ITEMS), CItemContainer( id, pItemDef )
+    CTimedObject(PROFILE_ITEMS), CItemContainer( id, pItemDef )
 {
 	ADDTOCALLSTACK("CItemCorpse::CItemCorpse");
 }

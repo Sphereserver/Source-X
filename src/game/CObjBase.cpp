@@ -1,7 +1,6 @@
 
 #include "../common/resource/CResourceLock.h"
 #include "../common/CException.h"
-#include "../common/CUIDExtra.h"
 #include "../common/sphereversion.h"
 #include "../common/CLog.h"
 #include "../network/network.h"
@@ -69,7 +68,7 @@ bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 // -CObjBase stuff
 // Either a player, npc or item.
 
-CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not a real CCTimedObject, it just needs it's virtual inheritance.
+CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not a real CTimedObject, it just needs it's virtual inheritance.
 {
 	sm_iCount ++;
 	m_iCreatedResScriptIdx = (size_t)-1;
@@ -2473,7 +2472,6 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				dword dwRid = g_Cfg.ResourceGetIDType( RES_DIALOG, Arg_ppCmd[0] ).GetPrivateUID();
 				if ( pClientSrc->GetNetState()->isClientKR() )
                     dwRid = g_Cfg.GetKRDialog( dwRid );
-
 				pClientSrc->Dialog_Close( pClientSrc->GetChar(), dwRid, iQty > 1 ? Exp_GetVal( Arg_ppCmd[1]) : 0 );
 			}
 			break;
@@ -3180,7 +3178,7 @@ void CObjBase::Delete(bool fForce)
 	ADDTOCALLSTACK("CObjBase::Delete");
 	DeletePrepare();
     CEntity::Delete(fForce);
-    CCTimedObject::Delete();
+    CTimedObject::Delete();
     g_World.m_ObjStatusUpdates.erase(this);
     g_World.m_TimedFunctions.Erase( GetUID() );
 
