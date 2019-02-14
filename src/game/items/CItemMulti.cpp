@@ -12,7 +12,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 CItemMulti::CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef, bool fTurnable) :	// CItemBaseMulti
-    CCTimedObject(PROFILE_MULTIS),
+    CTimedObject(PROFILE_MULTIS),
     CItem(id, pItemDef),
     CCMultiMovable(fTurnable)
 {

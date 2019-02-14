@@ -1053,11 +1053,11 @@ bool CCSpawn::IsDeleted()
 
 void CCSpawn::GoAwake()
 {
-    CCTimedObject::GoAwake();
+    CTimedObject::GoAwake();
 }
 
 void CCSpawn::GoSleep()
 {
-    CCTimedObject::GoSleep();
+    CTimedObject::GoSleep();
 }
 */

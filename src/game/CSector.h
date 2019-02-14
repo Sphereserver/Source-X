@@ -8,14 +8,14 @@
 
 #include "../common/CSectorTemplate.h"
 #include "../common/CScriptObj.h"
-#include "components/CCTimedObject.h"
 #include "CSectorEnviron.h"
+#include "CTimedObject.h"
 
 
 class CChar;
 class CItemStone;
 
-class CSector : public CScriptObj, public CSectorBase, public CCTimedObject	// square region of the world.
+class CSector : public CScriptObj, public CSectorBase, public CTimedObject	// square region of the world.
 {
 	// A square region of the world. ex: MAP0.MUL Dungeon Sectors are 256 by 256 meters
 #define SECTOR_TICK_PERIOD (TICKS_PER_SEC / 2) // after how much ticks do we start a pulse.
@@ -103,7 +103,7 @@ public:
 	void ClientDetach( CChar * pChar );
 	bool MoveCharToSector( CChar * pChar );
 
-	// CCTimedObject
+	// CTimedObject
 private:
     virtual void GoSleep() override;
     virtual void GoAwake() override;

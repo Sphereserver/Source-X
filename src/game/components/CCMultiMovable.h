@@ -1,7 +1,6 @@
 #ifndef _INC_CCMULTIMOVABLE_H
 #define _INC_CCMULTIMOVABLE_H
 
-#include "CCTimedObject.h"
 #include "../CRegion.h"
 
 

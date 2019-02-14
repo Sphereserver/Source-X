@@ -1165,8 +1165,8 @@ transfer_secured	= 08	// Transfer Secured Containers.
 
 28-09-2018, XuN
 - Updated the whole code to cleanup latest changes regarding timers.
-- Added new CCTimedObject class to control the whole timer's behaviours from now on.
-- Updated some classes (CObjBase, CChar, CItem (and it's childrens)) to inherit from CCTimedObject (still more to come ... CTimedFunction, CMapBlockCache, etc).
+- Added new CTimedObject class to control the whole timer's behaviours from now on.
+- Updated some classes (CObjBase, CChar, CItem (and it's childrens)) to inherit from CTimedObject (still more to come ... CTimedFunction, CMapBlockCache, etc).
 - Updated world's ticking procedure:
     Removed the old world->maps->sectors->items/chars huge loop for ticks
     CTimedObject add/deletes the objects into a new listing with msec precision timers which CWorld reads constantly looping only throught what really needs to tick.

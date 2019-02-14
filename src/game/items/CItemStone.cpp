@@ -10,7 +10,7 @@
 
 
 CItemStone::CItemStone( ITEMID_TYPE id, CItemBase * pItemDef ) :
-    CCTimedObject(PROFILE_ITEMS),
+    CTimedObject(PROFILE_ITEMS),
     CItem( id, pItemDef )
 {
 	m_itStone.m_iAlign = STONEALIGN_STANDARD;

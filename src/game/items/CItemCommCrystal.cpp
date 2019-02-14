@@ -4,7 +4,7 @@
 #include "CItemCommCrystal.h"
 
 CItemCommCrystal::CItemCommCrystal( ITEMID_TYPE id, CItemBase * pItemDef ) :
-    CCTimedObject(PROFILE_ITEMS), CItemVendable( id, pItemDef )
+    CTimedObject(PROFILE_ITEMS), CItemVendable( id, pItemDef )
 {
 }
 

@@ -92,7 +92,7 @@ void CItem::SetLockDownOfMulti(CUID uidMulti)
     _uidMultiLockDown = uidMulti;
 }
 
-CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CCTimedObject(PROFILE_ITEMS), CObjBase( true )
+CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEMS), CObjBase( true )
 {
 	ASSERT( pItemDef );
 
