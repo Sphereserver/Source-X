@@ -456,7 +456,7 @@ public:
 	bool IsSwimming() const;
 
 	bool MoveToRegionReTest( dword dwType );
-	bool MoveToChar(const CPointMap& pt, bool fForceFix = false, bool fAllowReject = true);
+	bool MoveToChar(const CPointMap& pt, bool fStanding = true, bool fCheckLocation = true, bool fForceFix = false, bool fAllowReject = true);
 	bool MoveTo(const CPointMap& pt, bool fForceFix = false);
 	virtual void SetTopZ( char z );
 	bool MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart = 1, bool fFromShip = false);
@@ -939,7 +939,7 @@ private:
 	int Skill_Act_Training( SKTRIG_TYPE stage );
 
 	void Spell_Dispel( int iskilllevel );
-	CChar * Spell_Summon( CREID_TYPE id, CPointMap pt );
+	CChar * Spell_Summon( CREID_TYPE id, CPointMap ptTarg );
 	bool Spell_Recall(CItem * pRune, bool fGate);
     CItem * Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int64 iDurationInTenths, CObjBase * pSrc = nullptr, bool bEquip = true );
 	SPELL_TYPE Spell_GetIndex(SKILL_TYPE skill = SKILL_NONE);	//gets first spell for the magic skill given.

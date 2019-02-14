@@ -201,7 +201,7 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool fTakePets, bool fCheckAntiMagi
 		}
 	}
 
-	MoveTo(ptNew);		// move character
+	MoveToChar(ptNew, true, true); 	// move character
 
 	CClient *pClient = GetClient();
 	CClient *pClientIgnore = nullptr;
@@ -312,7 +312,7 @@ bool CChar::Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic)
     return true;
 }
 
-CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap pntTarg )
+CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap ptTarg )
 {
 	ADDTOCALLSTACK("CChar::Spell_Summon");
 	// Summon an NPC using summon spells.
@@ -323,7 +323,7 @@ CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap pntTarg )
 		return nullptr;
 
 	if ( !pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ|SPELLFLAG_TARG_XYZ) )
-		pntTarg = GetTopPoint();
+        ptTarg = GetTopPoint();
 
 	CChar *pChar = CChar::CreateBasic(id);
 	if ( pChar == nullptr )
@@ -336,7 +336,7 @@ CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap pntTarg )
 			dword dwCan = pChar->GetCanFlags() & CAN_C_MOVEMASK;
 
 			dword dwBlockFlags = 0;
-			g_World.GetHeightPoint2(pntTarg, dwBlockFlags, true);
+			g_World.GetHeightPoint2(ptTarg, dwBlockFlags, true);
 
 			if ( dwBlockFlags & ~dwCan )
 			{
@@ -367,8 +367,8 @@ CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap pntTarg )
 
 	pChar->StatFlag_Set(STATF_CONJURED);	// conjured creates have no loot
 	pChar->NPC_LoadScript(false);
-	pChar->MoveToChar(pntTarg);
-	pChar->m_ptHome = pntTarg;
+	pChar->MoveToChar(ptTarg);
+	pChar->m_ptHome = ptTarg;
 	pChar->m_pNPC->m_Home_Dist_Wander = 10;
 	pChar->NPC_CreateTrigger();		// removed from NPC_LoadScript() and triggered after char placement
 	pChar->NPC_PetSetOwner(this);

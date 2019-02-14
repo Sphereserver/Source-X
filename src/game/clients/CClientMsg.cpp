@@ -1371,7 +1371,7 @@ void CClient::addPlayerStart( CChar * pChar )
 
 	new PacketPlayerStart(this);
 	addMapDiff();
-	m_pChar->MoveToChar(pt, false, false);	// make sure we are in active list
+	m_pChar->MoveToChar(pt, true, false, false, false); // make sure we are in active list
 	m_pChar->Update();
 	addPlayerWarMode();
 	addLoginComplete();
