@@ -1,6 +1,7 @@
 
 #include "../common/CObjBaseTemplate.h"
 #include "../sphere/ProfileTask.h"
+#include "../CUIDExtra.h"
 #include "CObjBase.h"
 #include "CServer.h"
 #include "CServerConfig.h"

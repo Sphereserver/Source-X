@@ -53,7 +53,8 @@ enum OF_TYPE
 	OF_DrinkIsFood				= 0x0010000,    // Typedef t_drink will increase food level like t_food
 	OF_NoDClickTurn				= 0x0020000,    // Don't turn the player when DClick something
 	OF_NoPaperdollTradeTitle	= 0x0040000,	// Don't show the trade title on the paperdoll
-    OF_NoTargTurn				= 0x0080000     // // Don't turn the player when targetting something
+    OF_NoTargTurn				= 0x0080000,    // Don't turn the player when targetting something
+    OF_StatAllowValOverMax      = 0x0100000     // Allow stats value above their maximum value (i.e. allow hits value > maxhits).
 };
 
 /**

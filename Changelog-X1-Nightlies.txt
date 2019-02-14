@@ -1518,8 +1518,12 @@ WARNING: the following change could break some hackish expedient used in scripts
 - Added: Warning message if adding to SKILLMAKE elements which aren't a skill or a typedef.
 - Added: Warning message when trying to craft an item with an invalid SKILLMAKE (instead of just aborting the crafting process without any notification).
 
+14-02-2019, Nolok
+- Added: .ini Option Flag OF_StatAllowValOverMax: it allows stats value to be set above their maximum value (i.e. allow hits value > maxhits).
+	When this OF is on and the stat value is above the maximum value, each time @RegenStat is called the stat value is decreased -1 at a time.
+
 14-02-2019, Julian
 - Fixed: DIALOGCLOSE not removing the dialog from the internal list of dialogs when src is changed through TRYSRC. (Issue #219)
 - [Port from Source, 29-06-2016, Coruja] Fixed: Attack/Kill command on pets allowing select the pet itself as target, making it attack his owner. (Issue #57)
 - Added: ARGN3 to @MurderMark. If it's set to 1 (or anything but zero), it will skip murder count and criminal flag. (Issue #221)
-		 This will allow users to script their own kill/murder system. Note that Noto_Update() still will be called after the trigger. 
+		 This will allow users to script their own kill/murder system. Note that Noto_Update() still will be called after the trigger.
