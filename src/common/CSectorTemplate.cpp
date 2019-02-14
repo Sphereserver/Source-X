@@ -10,9 +10,14 @@
 #include "CSectorTemplate.h"
 
 
-CCharsDisconnectList::CCharsDisconnectList()
-{
+////////////////////////////////////////////////////////////////////////
+// -CCharsDisconnectList
 
+void CCharsDisconnectList::AddCharDisconnected( CChar * pChar )
+{
+    ADDTOCALLSTACK("CCharsDisconnectList::AddCharDisconnected");
+    pChar->SetUIDContainerFlags(UID_O_DISCONNECT);
+    InsertHead(pChar);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -32,7 +37,7 @@ void CCharsActiveList::OnRemoveObj( CSObjListRec * pObRec )
 	ASSERT( pChar );
 	if ( pChar->IsClient())
 	{
-		ClientDetach();
+        ClientDecrease();
         m_timeLastClient = g_World.GetCurrentTime().GetTimeRaw();	// mark time in case it's the last client
 	}
 	CSObjList::OnRemoveObj(pObRec);
@@ -44,30 +49,30 @@ int CCharsActiveList::GetClientsNumber() const
 	return m_iClients;
 }
 
-void CCharsActiveList::AddCharToSector( CChar * pChar )
+void CCharsActiveList::AddCharActive( CChar * pChar )
 {
-	ADDTOCALLSTACK("CCharsActiveList::AddCharToSector");
+	ADDTOCALLSTACK("CCharsActiveList::AddCharActive");
 	ASSERT( pChar );
 	// ASSERT( pChar->m_pt.IsValid());
 	CSObjList::InsertHead(pChar); // this also removes the Char from the old sector
-    // UID_O_DISCONNECT is removed also by SetTopPoint. But the calls are in this order: SetTopPoint, then AddCharToSector -> CSObjList::InsertHead(pChar) ->-> OnRemoveObj
-    //  (which sets UID_O_DISCONNECT), then we return in AddCharToSector, where we need to manually remove this flag, otherwise we need to call SetTopPoint() here.
+    // UID_O_DISCONNECT is removed also by SetTopPoint. But the calls are in this order: SetTopPoint, then AddCharActive -> CSObjList::InsertHead(pChar) ->-> OnRemoveObj
+    //  (which sets UID_O_DISCONNECT), then we return in AddCharActive, where we need to manually remove this flag, otherwise we need to call SetTopPoint() here.
     pChar->RemoveUIDFlags(UID_O_DISCONNECT);
     if ( pChar->IsClient())
     {
-        ClientAttach();
+        ClientIncrease();
     }
 }
 
-void CCharsActiveList::ClientAttach()
+void CCharsActiveList::ClientIncrease()
 {
-	ADDTOCALLSTACK("CCharsActiveList::ClientAttach");
+	ADDTOCALLSTACK("CCharsActiveList::ClientIncrease");
 	++m_iClients;
 }
 
-void CCharsActiveList::ClientDetach()
+void CCharsActiveList::ClientDecrease()
 {
-	ADDTOCALLSTACK("CCharsActiveList::ClientDetach");
+	ADDTOCALLSTACK("CCharsActiveList::ClientDecrease");
 	--m_iClients;
 }
 
@@ -100,11 +105,6 @@ void CItemsList::AddItemToSector( CItem * pItem )
 	ASSERT( pItem );
 	CSObjList::InsertHead( pItem ); // this also removes the Char from the old sector
     pItem->RemoveUIDFlags(UID_O_DISCONNECT);
-}
-
-CItemsList::CItemsList()
-{
-
 }
 
 

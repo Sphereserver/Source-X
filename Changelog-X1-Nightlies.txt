@@ -1521,6 +1521,8 @@ WARNING: the following change could break some hackish expedient used in scripts
 14-02-2019, Nolok
 - Added: .ini Option Flag OF_StatAllowValOverMax (Issue #185): it allows stats value to be set above their maximum value (i.e. allow hits value > maxhits).
 	When this OF is on and the stat value is above the maximum value, each time @RegenStat is called the stat value is decreased -1 at a time.
+- Fixed: Players not being removed from other client's screen when they logout (Issue #228).
+- Fixed: The time of the last access from a player of a sector wasn't correctly set. This also invalidated the checks on SectorSleepDelay.
 
 14-02-2019, Julian
 - Fixed: DIALOGCLOSE not removing the dialog from the internal list of dialogs when src is changed through TRYSRC. (Issue #219)

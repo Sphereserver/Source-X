@@ -3548,8 +3548,7 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fForceFix, bool fAllowReject)
 
 		// We cannot put this char in non-disconnect state.
 		SetDisconnected();
-		pSector->m_Chars_Disconnect.InsertHead(this);
-        SetTopPoint(pt);
+        pSector->m_Chars_Disconnect.AddCharDisconnected(this);  // the sector may be different now!        SetTopPoint(pt);
 		return true;
 	}
 

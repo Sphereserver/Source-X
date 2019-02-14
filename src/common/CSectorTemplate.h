@@ -19,7 +19,8 @@ class CCharsDisconnectList : public CSObjList
 public:
 	static const char *m_sClassName;
 public:
-	CCharsDisconnectList();
+	CCharsDisconnectList() = default;
+    void AddCharDisconnected( CChar * pChar );
 private:
 	CCharsDisconnectList(const CCharsDisconnectList& copy);
 	CCharsDisconnectList& operator=(const CCharsDisconnectList& other);
@@ -38,9 +39,9 @@ protected:
 
 public:
     int GetClientsNumber() const;
-	void ClientAttach();
-	void ClientDetach();
-	void AddCharToSector( CChar * pChar );
+	void ClientIncrease();
+	void ClientDecrease();
+	void AddCharActive( CChar * pChar );
 
 public:
 	CCharsActiveList();
@@ -64,7 +65,7 @@ public:
 	void AddItemToSector( CItem * pItem );
 
 public:
-	CItemsList();
+	CItemsList() = default;
 
 private:
 	CItemsList(const CItemsList& copy);

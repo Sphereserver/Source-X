@@ -131,7 +131,7 @@ bool CClient::addGumpDialogProps( CUID uid )
 	return true;
 }
 
-TRIGRET_TYPE CClient::Dialog_OnButton( CResourceID rid, dword dwButtonID, CObjBase * pObj, CDialogResponseArgs * pArgs )
+TRIGRET_TYPE CClient::Dialog_OnButton( const CResourceID& rid, dword dwButtonID, CObjBase * pObj, CDialogResponseArgs * pArgs )
 {
 	ADDTOCALLSTACK("CClient::Dialog_OnButton");
 	// one of the gump dialog buttons was pressed.
@@ -211,7 +211,7 @@ bool CClient::Dialog_Close( CObjBase * pObj, dword dwRid, int buttonID )
 	return true;
 }
 
-TRIGRET_TYPE CClient::Menu_OnSelect( CResourceID rid, int iSelect, CObjBase * pObj ) // Menus for general purpose
+TRIGRET_TYPE CClient::Menu_OnSelect( const CResourceID& rid, int iSelect, CObjBase * pObj ) // Menus for general purpose
 {
 	ADDTOCALLSTACK("CClient::Menu_OnSelect");
 	// A select was made. so run the script.

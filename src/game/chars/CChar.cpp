@@ -386,8 +386,6 @@ void CChar::ClientDetach()
 			pShipItem->Stop();
 	}
 
-    CSector * pSector = GetTopSector();
-    pSector->ClientDetach( this );
     m_pClient = nullptr;	
 }
 
@@ -421,22 +419,24 @@ CClient * CChar::GetClient() const
 void CChar::SetDisconnected()
 {
 	ADDTOCALLSTACK("CChar::SetDisconnected");
-	if ( IsClient())
-	{
-		GetClient()->GetNetState()->markReadClosed();
-		return;
-	}
-	if ( m_pParty )
-	{
-		m_pParty->RemoveMember( GetUID(), (dword) GetUID() );
-		m_pParty = nullptr;
-	}
-	if ( IsDisconnected())
-		return;
-	RemoveFromView();	// Remove from views.
-	MoveToRegion(nullptr,false);
-    SetUIDContainerFlags(UID_O_DISCONNECT);
-	GetTopSector()->m_Chars_Disconnect.InsertHead( this );
+    if (IsClient())
+    {
+        GetClient()->GetNetState()->markReadClosed();
+    }
+    if (m_pParty)
+    {
+        m_pParty->RemoveMember( GetUID(), GetUID() );
+        m_pParty = nullptr;
+    }
+    g_World.DelCharTicking(this);
+
+    if ( IsDisconnected() )
+        return;
+
+    RemoveFromView();	// Remove from views.
+    MoveToRegion(nullptr,false);
+
+    GetTopSector()->m_Chars_Disconnect.AddCharDisconnected( this );
 }
 
 void CChar::ClearPlayer()
