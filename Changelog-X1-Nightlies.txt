@@ -1517,3 +1517,7 @@ WARNING: the following change could break some hackish expedient used in scripts
 - Fixed: Couldn't make items which didn't have in the SKILLMAKE the typedef for the item needed to craft it.
 - Added: Warning message if adding to SKILLMAKE elements which aren't a skill or a typedef.
 - Added: Warning message when trying to craft an item with an invalid SKILLMAKE (instead of just aborting the crafting process without any notification).
+
+14-02-2019, Nolok
+- Added: .ini Option Flag OF_StatAllowValOverMax: it allows stats value to be set above their maximum value (i.e. allow hits value > maxhits).
+	When this OF is on and the stat value is above the maximum value, each time @RegenStat is called the stat value is decreased -1 at a time.

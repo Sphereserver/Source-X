@@ -856,7 +856,8 @@ bool CChar::Skill_MakeItem( ITEMID_TYPE id, CUID uidTarg, SKTRIG_TYPE stage, boo
 	CItem *pItemTarg = uidTarg.ItemFind();
 	if ( pItemTarg && (stage == SKTRIG_SELECT) )
 	{
-        if (pItemDef->m_SkillMake.ContainsResourceType(RES_TYPEDEF) || pItemDef->m_BaseResources.ContainsResourceType(RES_TYPEDEF))
+        if (pItemDef->m_SkillMake.ContainsResourceType(RES_TYPEDEF) || pItemDef->m_BaseResources.ContainsResourceType(RES_TYPEDEF)
+            || pItemDef->m_SkillMake.ContainsResourceType(RES_ITEMDEF))
         {
             // Is an item of a specific TYPE needed to craft this item?
             if ( !pItemDef->m_SkillMake.ContainsResourceMatch(pItemTarg) && !pItemDef->m_BaseResources.ContainsResourceMatch(pItemTarg) )
