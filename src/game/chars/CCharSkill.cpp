@@ -518,9 +518,6 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 	// Use a skill instantly. No wait at all.
 	// No interference with other skills.
 
-	if (g_Cfg.IsSkillFlag(skill, SKF_SCRIPTED))
-		return false;
-
 	int64 result = Skill_CheckSuccess( skill, (int)difficulty, bUseBellCurve );
 	CScriptTriggerArgs pArgs( 0 , difficulty, result);
 	TRIGRET_TYPE ret = TRIGRET_RET_DEFAULT;
@@ -1372,7 +1369,7 @@ int CChar::Skill_Fishing( SKTRIG_TYPE stage )
 		g_Log.EventError("Fishing skill doesn't have a value for RANGE, defaulting to 4\n");
 		iMaxRange = 4;
 	}
-	if ( iTargRange < 1 && !g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_NOMINDIST) ) // you cannot fish under your legs
+	if ( iTargRange < 1 && !g_Cfg.IsSkillFlag(SKILL_FISHING, SKF_NOMINDIST) ) // you cannot fish under your legs
 	{
 		SysMessageDefault(DEFMSG_FISHING_CLOSE);
 		return -SKTRIG_QTY;
@@ -1392,13 +1389,8 @@ int CChar::Skill_Fishing( SKTRIG_TYPE stage )
 	}
 
 	// Resource check
-	CItem *pResBit = g_World.CheckNaturalResource(m_Act_p, (IT_TYPE)(m_atResource.m_ridType.GetResIndex()), stage == SKTRIG_START, this);
-	if ( !pResBit )
-	{
-		SysMessageDefault(DEFMSG_FISHING_1);
-		return -SKTRIG_QTY;
-	}
-	if ( pResBit->GetAmount() == 0 )
+	CItem *pResBit = g_World.CheckNaturalResource(m_Act_p, (IT_TYPE)(m_atResource.m_ridType.GetResIndex()), (stage == SKTRIG_START), this);
+	if ( !pResBit || (pResBit->GetAmount() == 0) )
 	{
 		SysMessageDefault(DEFMSG_FISHING_2);
 		return -SKTRIG_QTY;
