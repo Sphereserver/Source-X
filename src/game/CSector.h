@@ -99,8 +99,6 @@ public:
 	int64 GetLastClientTime() const;
 	bool CanSleep(bool fCheckAdjacents) const;
 	void SetSectorWakeStatus();	// Ships may enter a sector before it's riders !
-	//void ClientAttach( CChar * pChar );
-	void ClientDetach( CChar * pChar );
 	bool MoveCharToSector( CChar * pChar );
 
 	// CTimedObject

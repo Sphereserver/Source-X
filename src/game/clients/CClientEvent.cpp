@@ -1544,7 +1544,7 @@ void CClient::Event_ToolTip( CUID uid )
 	addToolTip(uid.ObjFind(), z);
 }
 
-void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dword context2, dword type, bool bNoStrip )
+void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dword context2, dword type, bool fNoStrip )
 {
 	ADDTOCALLSTACK("CClient::Event_PromptResp");
 	if (m_pChar == nullptr)
@@ -1568,7 +1568,7 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 	}
 	else
 	{
-		if ( bNoStrip )	// Str_GetBare will eat unicode characters
+		if ( fNoStrip )	// Str_GetBare will eat unicode characters
 			len = strncpylen( szText, pszText, CountOf(szText) );
 		else if ( promptMode == CLIMODE_PROMPT_SCRIPT_VERB )
 			len = Str_GetBare( szText, pszText, CountOf(szText), "|~=[]{|}~" );
@@ -1795,7 +1795,7 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 }
 
 // PC speech: response to ASCII speech request
-void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bool bNoStrip)
+void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bool fNoStrip)
 {
 	ADDTOCALLSTACK("CClient::Event_Talk");
 
@@ -1820,7 +1820,7 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 	tchar szText[MAX_TALK_BUFFER];
 	size_t len;
 
-	if ( bNoStrip )
+	if ( fNoStrip )
 	{
 		// The characters in Unicode speech don't need to be filtered
 		strncpy( szText, pszText, MAX_TALK_BUFFER - 1 );
@@ -1847,7 +1847,7 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 		tchar	z[MAX_TALK_BUFFER];
 
 		if ( m_pChar->OnTriggerSpeech(false, pszText, m_pChar, mode, wHue) )
-			fCancelSpeech	= true;
+			fCancelSpeech = true;
 
 		if ( g_Log.IsLoggedMask(LOGM_PLAYER_SPEAK) )
 		{

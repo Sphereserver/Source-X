@@ -334,10 +334,10 @@ public:
 	void Event_Item_Pickup( CUID uid, word amount ); // Client grabs an item
 	void Event_MailMsg( CUID uid1, CUID uid2 );
 	void Event_Profile( byte fWriteMode, CUID uid, lpctstr pszProfile, int iProfileLen );
-	void Event_PromptResp( lpctstr pszText, size_t len, dword context1, dword context2, dword type, bool bNoStrip = false );
+	void Event_PromptResp( lpctstr pszText, size_t len, dword context1, dword context2, dword type, bool fNoStrip = false );
 	void Event_SetName( CUID uid, const char * pszCharName );
 	void Event_SingleClick( CUID uid );
-	void Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bool bNoStrip = false ); // PC speech
+	void Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bool fNoStrip = false ); // PC speech
 	void Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, lpctstr pszLang );
 	void Event_Target( dword context, CUID uid, CPointMap pt, byte flags = 0, ITEMID_TYPE id = ITEMID_NOTHING );
 	void Event_Tips( word i ); // Tip of the day window
@@ -351,8 +351,8 @@ public:
 	bool Event_Walk( byte rawdir, byte sequence = 0 ); // Player moves
 	bool Event_CheckWalkBuffer();
 
-	TRIGRET_TYPE Menu_OnSelect( CResourceID rid, int iSelect, CObjBase * pObj );
-	TRIGRET_TYPE Dialog_OnButton( CResourceID rid, dword dwButtonID, CObjBase * pObj, CDialogResponseArgs * pArgs );
+	TRIGRET_TYPE Menu_OnSelect( const CResourceID& rid, int iSelect, CObjBase * pObj );
+	TRIGRET_TYPE Dialog_OnButton( const CResourceID& rid, dword dwButtonID, CObjBase * pObj, CDialogResponseArgs * pArgs );
 
 	bool Login_Relay( uint iServer ); // Relay player to a certain IP
 	byte Login_ServerList( const char * pszAccount, const char * pszPassword ); // Initial login (Login on "loginserver", new format)
@@ -368,14 +368,14 @@ public:
 private:
 	void Cmd_GM_PageInfo();
 	int Cmd_Extract( CScript * pScript, const CRectMap &rect, int & zlowest );
-	uint Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem* item, uint iMaxSize, bool *fShowMenu, bool *fLimitReached );
+	int Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuItem* item, int iMaxSize, bool *fShowMenu, bool *fLimitReached );
 public:
-	void Cmd_GM_PageMenu( uint iEntryStart = 0 );
+	void Cmd_GM_PageMenu( uint uiEntryStart = 0 );
 	void Cmd_GM_PageCmd( lpctstr pCmd );
 	void Cmd_GM_PageSelect( uint iSelect );
-	void Cmd_GM_Page( lpctstr pszreason); // Help button (Calls GM Call Menus up)
+	void Cmd_GM_Page(lpctstr pszreason); // Help button (Calls GM Call Menus up)
 
-	bool Cmd_Skill_Menu( CResourceID rid, int iSelect = -1 );
+	bool Cmd_Skill_Menu( const CResourceID& rid, int iSelect = -1 );
 	bool Cmd_Skill_Smith( CItem * pIngots );
 	bool Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase * pSrc );
 	bool Cmd_Skill_Tracking( uint track_type = UINT32_MAX, bool fExec = false ); // Fill menu with specified creature types

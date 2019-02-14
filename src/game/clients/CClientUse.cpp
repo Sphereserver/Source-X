@@ -644,7 +644,7 @@ void CClient::Cmd_EditItem( CObjBase *pObj, int iSelect )
 	addItemMenu(CLIMODE_MENU_EDIT, item, count, pObj);
 }
 
-bool CClient::Cmd_Skill_Menu( CResourceID rid, int iSelect )
+bool CClient::Cmd_Skill_Menu( const CResourceID& rid, int iSelect )
 {
 	ADDTOCALLSTACK("CClient::Cmd_Skill_Menu");
 	// Build the skill menu for the curent active skill.
@@ -676,7 +676,7 @@ bool CClient::Cmd_Skill_Menu( CResourceID rid, int iSelect )
 
     ASSERT(CountOf(m_tmMenu.m_Item) == MAX_MENU_ITEMS);
 	CMenuItem item[MAX_MENU_ITEMS];
-	uint iShowCount = Cmd_Skill_Menu_Build(rid, iSelect, item, MAX_MENU_ITEMS, &fShowMenu, &fLimitReached);
+	int iShowCount = Cmd_Skill_Menu_Build(rid, iSelect, item, MAX_MENU_ITEMS, &fShowMenu, &fLimitReached);
 
 	if ( iSelect < -1 )		// just a test
 		return iShowCount ? true : false;
@@ -717,7 +717,7 @@ bool CClient::Cmd_Skill_Menu( CResourceID rid, int iSelect )
 	return true;
 }
 
-uint CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem * item, uint iMaxSize, bool *fShowMenu, bool *fLimitReached )
+int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuItem * item, int iMaxSize, bool *fShowMenu, bool *fLimitReached )
 {
 	ADDTOCALLSTACK("CClient::Cmd_Skill_Menu_Build");
 	// Build the skill menu for the curent active skill.
@@ -735,7 +735,8 @@ uint CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem * it
 	//  iMaxSize = maximum number of entries
 	//
 	// RETURN: number of entries in menu
-	//   m_tmMenu.m_Item[shownIndex] = ON= index
+	//  m_tmMenu.m_Item[shownIndex] = ON= index
+    //  Index 0 is a special index, used only to store the top text on the skillmenu.
 
 	ASSERT(m_pChar);
 	if ( rid.GetResType() != RES_SKILLMENU )
@@ -780,7 +781,7 @@ uint CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem * it
 
     bool fSkip = false;		// skip this if we lack resources or skill.
 	int iOnCount = 0;
-	uint iShowCount = 0;
+	int iShowCount = 0;
 	CScriptTriggerArgs Args;
 
 	while ( s.ReadKeyParse())
@@ -789,6 +790,7 @@ uint CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem * it
 		{
 			if ( *s.GetArgStr() == '@' )
             {
+                ++iShowCount;
                 fSkip = true;
 				continue;
             }
@@ -801,23 +803,23 @@ uint CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem * it
 			{
 				if ( (iSelect < -1) && (iShowCount >= 1) )		// just a test. so we are done.
 					return 1;
-
-				++iShowCount;
+				
                 CMenuItem miTest;
 				if ( !miTest.ParseLine(s.GetArgRaw(), nullptr, m_pChar) )
 				{
 					// remove if the item is invalid.
-					--iShowCount;
                     fSkip = true;
 					continue;
 				}
+                ++iShowCount;
 
 				if ( iSelect == -1 )
                 {
                     // If iSelect == -2 "item" is not an array! And we don't even need to set a value, since with -2 it would just be a test!
                     ASSERT(item != nullptr);
                     item[iShowCount] = miTest;
-					m_tmMenu.m_Item[iShowCount] = iOnCount;
+					m_tmMenu.m_Item[iShowCount] = (dword)iOnCount;
+                    ASSERT(m_tmMenu.m_Item[iShowCount] < INT32_MAX);    // iOnCount is int but m_tmMenu.m_Item[x] is uint, don't overflow
                 }
 
 				if ( iShowCount >= (iMaxSize - 1) )
@@ -835,6 +837,7 @@ uint CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem * it
         {
             item[iShowCount] = {};
             m_tmMenu.m_Item[iShowCount] = 0;
+            --iShowCount;
             continue;
         }
 		if ( (iSelect > 0) && (iOnCount != iSelect) )	// only interested in the selected option
@@ -847,7 +850,6 @@ uint CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem * it
 			CResourceQtyArray skills(s.GetArgStr());
 			if ( !skills.IsResourceMatchAll(m_pChar) )
 			{
-				--iShowCount;
                 fSkip = true;
 			}
 			continue;
@@ -858,7 +860,6 @@ uint CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem * it
 			m_pChar->ParseText(s.GetArgRaw(), m_pChar);
 			if ( !s.GetArgVal() )
 			{
-				--iShowCount;
                 fSkip = true;
 			}
 			continue;
@@ -893,7 +894,6 @@ uint CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem * it
 					++sm_iReentrant;
 					if ( !Cmd_Skill_Menu_Build(g_Cfg.ResourceGetIDType(RES_SKILLMENU, s.GetArgStr()), -2, nullptr, iMaxSize, fShowMenu, fLimitReached) )
 					{
-						--iShowCount;
                         fSkip = true;
 					}
 					else
@@ -911,7 +911,6 @@ uint CClient::Cmd_Skill_Menu_Build( CResourceID rid, int iSelect, CMenuItem * it
 				// There should ALWAYS be a valid id here.
 				if ( !m_pChar->Skill_MakeItem((ITEMID_TYPE)(g_Cfg.ResourceGetIndexType(RES_ITEMDEF, s.GetArgStr())), m_Targ_UID, SKTRIG_SELECT) )
 				{
-					--iShowCount;
                     fSkip = true;
 				}
 				continue;

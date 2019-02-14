@@ -1029,7 +1029,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
 		}
 	}
 
-    m_Chars_Active.AddCharToSector(pChar);	// remove from previous spot.
+    m_Chars_Active.AddCharActive(pChar);	// remove from previous spot.
     if (IsSleeping())
     {
         CClient *pClient = pChar->GetClient();
@@ -1471,21 +1471,3 @@ int64 CSector::GetLastClientTime() const
 	return( m_Chars_Active.m_timeLastClient );
 }
 
-// Unused. The client is attached manually when doing MoveToSector
-/*
-void CSector::ClientAttach( CChar * pChar )
-{
-    ASSERT(pChar->IsClient());
-	if ( IsCharActiveIn( pChar ))
-		return;
-	m_Chars_Active.ClientAttach();
-}
-*/
-
-void CSector::ClientDetach( CChar * pChar )
-{
-    ASSERT(pChar->IsClient());
-	if ( ! IsCharActiveIn( pChar ))
-		return;
-    m_Chars_Disconnect.InsertHead(pChar);   // remove from m_Chars_Active and add to m_Chars_Disconnect
-}

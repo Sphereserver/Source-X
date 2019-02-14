@@ -64,49 +64,42 @@ public:
 
     /**
     * @brief Returns how many Items/Chars are currently spawned.
-    *
     * @return count
     */
     uint16 GetCurrentSpawned() const;
 
     /**
     * @brief Returns the pile's size (Only for IT_SPAWN_ITEM).
-    *
     * @return count
     */
     uint16 GetPile() const;
 
     /**
     * @brief Returns how many Items/Chars are currently spawned from me.
-    *
     * @return count
     */
     uint16 GetTimeLo() const;
 
     /**
     * @brief Returns how many Items/Chars are currently spawned from me.
-    *
     * @return count
     */
     uint16 GetTimeHi() const;
 
     /**
     * @brief Returns how many Items/Chars are currently spawned from me.
-    *
     * @return count
     */
     uint8 GetMaxDist() const;
 
     /**
     * @brief CCSpawn's custom alternative of CComponent::GetLink retrieving a direct link for the CItem, without const.
-    *
     * @return *SpawnItem
     */
     //CItem *GetSpawnItem();
 
     /**
     * @brief ID of the object to spawn.
-    *
     * @return CResourceID
     */
     const CResourceIDBase& GetSpawnID() const;
@@ -142,28 +135,24 @@ public:
 
     /**
     * @brief Removing one UID in Spawn's m_obj[].
-    *
     * @param UID of the obj to remove.
     */
     void DelObj(const CUID& uid);
 
     /**
     * @brief Storing one UID in Spawn's m_obj[].
-    *
     * @param UID of the obj to add.
     */
     void AddObj(const CUID& uid);
 
     /**
     * @brief Get a proper CResourceID from the id provided.
-    *
     * @return a valid CResourceDef.
     */
     const CResourceDef * FixDef();
 
     /**
     * @brief Gets the name of the resource created (item or char).
-    *
     * @return the name of the resource.
     */
     uint WriteName(tchar * pszOut) const;

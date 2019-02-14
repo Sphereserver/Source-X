@@ -84,7 +84,7 @@ void CClient::Cmd_GM_PageClear()
 	}
 }
 
-void CClient::Cmd_GM_PageMenu( uint iEntryStart )
+void CClient::Cmd_GM_PageMenu( uint uiEntryStart )
 {
 	ADDTOCALLSTACK("CClient::Cmd_GM_PageMenu");
 	// Just put up the GM page menu.
@@ -101,7 +101,7 @@ void CClient::Cmd_GM_PageMenu( uint iEntryStart )
 	CGMPage * pPage = static_cast <CGMPage*>( g_World.m_GMPages.GetHead());
 	for ( ; pPage!= nullptr; pPage = pPage->GetNext(), entry++ )
 	{
-		if ( entry < iEntryStart )
+		if ( entry < uiEntryStart )
 			continue;
 
 		CClient * pGM = pPage->FindGMHandler();	// being handled ?

@@ -2,6 +2,7 @@
 #include "../game/uo_files/uofiles_macros.h"
 #include "CObjBaseTemplate.h"
 
+
 void CObjBaseTemplate::DupeCopy( const CObjBaseTemplate * pObj )
 {
 	// NOTE: Never copy m_UID
@@ -21,14 +22,6 @@ void CObjBaseTemplate::SetUnkZ( char z )
 	m_pt.m_z = z;
 }
 
-CObjBaseTemplate::CObjBaseTemplate()
-{
-}
-
-CObjBaseTemplate::~CObjBaseTemplate()
-{
-}
-
 CObjBaseTemplate * CObjBaseTemplate::GetNext() const
 {
 	return ( static_cast <CObjBaseTemplate*> ( CSObjListRec::GetNext()) );
@@ -38,11 +31,13 @@ CObjBaseTemplate * CObjBaseTemplate::GetPrev() const
 	return ( static_cast <CObjBaseTemplate*> ( CSObjListRec::GetPrev()) );
 }
 
+
+// Location
+
 CSector * CObjBaseTemplate::GetTopSector() const
 {
 	return GetTopLevelObj()->GetTopPoint().GetSector();
 }
-// Location
 
 void CObjBaseTemplate::SetEquipLayer( LAYER_TYPE layer )
 {
@@ -62,7 +57,7 @@ void CObjBaseTemplate::SetContainedLayer( byte layer )
 
 void CObjBaseTemplate::SetContainedPoint( const CPointMap & pt )
 {
-    SetUIDContainerFlags( UID_O_CONTAINED );
+    SetUIDContainerFlags(UID_O_CONTAINED);
 	m_pt.m_x = pt.m_x;
 	m_pt.m_y = pt.m_y;
 	m_pt.m_z = LAYER_NONE;
@@ -71,8 +66,8 @@ void CObjBaseTemplate::SetContainedPoint( const CPointMap & pt )
 
 void CObjBaseTemplate::SetTopPoint( const CPointMap & pt )
 {
-    SetUIDContainerFlags(0);
-	ASSERT( pt.IsValidPoint() );	// already checked b4.
+    SetUIDContainerFlags(UID_CLEAR);
+	ASSERT(pt.IsValidPoint());	// already checked b4.
 	m_pt = pt;
 }
 
@@ -101,7 +96,9 @@ char CObjBaseTemplate::GetUnkZ() const	// Equal to GetTopZ ?
 	return m_pt.m_z;
 }
 
+
 // Distance and direction
+
 int CObjBaseTemplate::GetTopDist( const CPointMap & pt ) const
 {
 	return GetTopPoint().GetDist( pt );
@@ -166,12 +163,14 @@ DIR_TYPE CObjBaseTemplate::GetDir( const CObjBaseTemplate * pObj, DIR_TYPE DirDe
 	return GetTopDir( pObj, DirDefault );
 }
 
-int CObjBaseTemplate::GetVisualRange() const
+int CObjBaseTemplate::GetVisualRange() const    // virtual
 {
 	return UO_MAP_VIEW_SIZE_DEFAULT;
 }
 
+
 // Names
+
 lpctstr CObjBaseTemplate::GetIndividualName() const
 {
 	return m_sName;
