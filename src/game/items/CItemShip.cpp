@@ -26,7 +26,7 @@ CItemShip::~CItemShip()
 bool CItem::Ship_Plank(bool fOpen)
 {
     ADDTOCALLSTACK("CItem::Plank");
-    // IT_PLANK to IT_SIDE and IT_SIDE_LOCKED
+    // IT_PLANK to IT_SHIP_SIDE and IT_SHIP_SIDE_LOCKED
     // This item is the ships plank.
 
     CItemBase * pItemDef = Item_GetDef();
@@ -57,7 +57,7 @@ bool CItem::Ship_Plank(bool fOpen)
     {
         // Restore the type of the ship side
         if (m_itShipPlank.m_itSideType == IT_SHIP_SIDE || m_itShipPlank.m_itSideType == IT_SHIP_SIDE_LOCKED)
-            SetType(static_cast<IT_TYPE>(m_itShipPlank.m_itSideType));
+            SetType((IT_TYPE)(m_itShipPlank.m_itSideType));
 
         m_itShipPlank.m_itSideType = IT_NORMAL;
     }
