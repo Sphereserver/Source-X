@@ -8,6 +8,7 @@
 
 #include "../common/CSectorTemplate.h"
 #include "../common/CScriptObj.h"
+#include "components/CCTimedObject.h"
 #include "CSectorEnviron.h"
 
 

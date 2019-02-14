@@ -10,6 +10,7 @@
 #include "blocks/CSpellDef.h"
 #include "blocks/CRegionResourceDef.h"
 #include "blocks/CWebPageDef.h"
+#include "../CLog.h"
 #include "CResourceLock.h"
 #include "CResourceLink.h"
 

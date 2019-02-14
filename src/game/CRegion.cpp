@@ -2,7 +2,6 @@
 
 #include "../common/resource/blocks/CRandGroupDef.h"
 #include "../common/resource/CResourceLock.h"
-#include "../common/CUIDExtra.h"
 #include "../common/CScript.h"
 #include "../sphere/threads.h"
 #include "chars/CChar.h"

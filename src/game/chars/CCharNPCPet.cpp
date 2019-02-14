@@ -1,6 +1,5 @@
 // Actions specific to an NPC.
 
-#include "../../common/CUIDExtra.h"
 #include "../clients/CClient.h"
 #include "../components/CCSpawn.h"
 #include "../items/CItemVendable.h"

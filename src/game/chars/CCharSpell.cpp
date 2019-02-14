@@ -1,5 +1,4 @@
 
-#include "../../common/CUIDExtra.h"
 #include "../../network/send.h"
 #include "../components/CCPropsChar.h"
 #include "../components/CCPropsItemEquippable.h"

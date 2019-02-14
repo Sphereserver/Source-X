@@ -1,5 +1,4 @@
 #include "../resource/CResourceLock.h"
-#include "../CUIDExtra.h"
 #include "../CWorld.h"
 #include "CItemVendable.h"
 #include "CItemCommCrystal.h"

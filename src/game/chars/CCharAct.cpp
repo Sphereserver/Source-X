@@ -1,7 +1,6 @@
 
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
-#include "../../common/CUIDExtra.h"
 #include "../../network/network.h"
 #include "../../network/send.h"
 #include "../../sphere/ProfileTask.h"

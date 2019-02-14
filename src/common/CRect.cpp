@@ -1,8 +1,8 @@
-#include "../game/items/CItem.h"
+#include "../game/uo_files/CUOMapList.h"
 #include "../game/CSector.h"
 #include "../game/CServer.h"
 #include "../game/CWorld.h"
-#include "CUIDExtra.h"
+#include "../common/CLog.h"
 #include "CRect.h"
 
 

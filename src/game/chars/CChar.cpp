@@ -3,7 +3,6 @@
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
 #include "../../common/CUID.h"
-#include "../../common/CUIDExtra.h"
 #include "../../common/CObjBaseTemplate.h"
 #include "../../common/CRect.h"
 #include "../../common/CLog.h"

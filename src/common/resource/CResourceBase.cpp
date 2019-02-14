@@ -6,6 +6,7 @@
 #include "../../game/game_enums.h"
 #include "../../game/game_macros.h"
 #include "../sphere_library/CSFileList.h"
+#include "../CLog.h"
 #include "CResourceBase.h"
 #include "CResourceHash.h"
 #include "CResourceScript.h"

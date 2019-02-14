@@ -1,5 +1,4 @@
 
-#include "../../common/CUIDExtra.h"
 #include "../chars/CChar.h"
 #include "../components/CCSpawn.h"
 #include "CItemMemory.h"

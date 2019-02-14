@@ -1,11 +1,10 @@
-
 #include "../common/resource/blocks/CItemTypeDef.h"
+#include "../common/CLog.h"
 #include "../game/items/CItem.h"
 #include "../game/CSector.h"
 #include "../game/CServer.h"
 #include "../game/CWorld.h"
 #include "CRect.h"
-#include "CUIDExtra.h"
 #include "CPointBase.h"
 
 

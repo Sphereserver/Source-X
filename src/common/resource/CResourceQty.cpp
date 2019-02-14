@@ -8,6 +8,7 @@
 #include "../../game/chars/CChar.h"
 #include "../../game/CObjBase.h"
 #include "../../sphere/threads.h"
+#include "../CLog.h"
 #include "CResourceBase.h"
 #include "CResourceQty.h"
 

@@ -118,7 +118,6 @@ common/CServerMap.cpp
 common/CServerMap.h
 common/CUID.cpp
 common/CUID.h
-common/CUIDExtra.h
 common/CObjBaseTemplate.cpp
 common/CObjBaseTemplate.h
 common/common.cpp

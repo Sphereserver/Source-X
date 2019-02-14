@@ -3,7 +3,6 @@
 //
 
 #include "../../common/CException.h"
-#include "../../common/CUIDExtra.h"
 #include "../chars/CChar.h"
 #include "../triggers.h"
 #include "../CWorld.h"

@@ -6,7 +6,6 @@
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../CException.h"
-#include "../CUIDExtra.h"
 #include "../CLog.h"
 #include "../CWorld.h"
 #include "CClient.h"

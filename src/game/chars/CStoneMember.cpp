@@ -1,5 +1,4 @@
 #include "../../common/CException.h"
-#include "../../common/CUIDExtra.h"
 #include "../../common/CLog.h"
 #include "../chars/CChar.h"
 #include "../CServer.h"

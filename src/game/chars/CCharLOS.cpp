@@ -1,5 +1,4 @@
-
-#include "../../common/CUIDExtra.h"
+#include "../../common/CLog.h"
 #include "../uo_files/CUOTerrainInfo.h"
 #include "../CWorld.h"
 #include "CChar.h"

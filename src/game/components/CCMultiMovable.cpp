@@ -1,14 +1,13 @@
-
-#include "CCMultiMovable.h"
+#include "../../network/send.h"
+#include "../clients/CClient.h"
+#include "../chars/CChar.h"
 #include "../items/CItem.h"
 #include "../items/CItemMulti.h"
 #include "../items/CItemShip.h"
-#include "../chars/CChar.h"
-#include "../clients/CClient.h"
-#include "../../network/send.h"
 #include "../CObjBase.h"
 #include "../CWorld.h"
 #include "../triggers.h"
+#include "CCMultiMovable.h"
 
 enum ShipDelay
 {

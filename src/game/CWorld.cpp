@@ -1,6 +1,5 @@
 #include "../common/CDataBase.h"
 #include "../common/CException.h"
-#include "../common/CUIDExtra.h"
 #include "../common/sphereversion.h"
 #include "../network/network.h"
 #include "../network/send.h"

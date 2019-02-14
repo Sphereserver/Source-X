@@ -5,6 +5,7 @@
 	#include <errno.h>	// errno
 #endif
 
+#include "../game/chars/CChar.h"
 #include "../game/clients/CAccount.h"
 #include "../game/clients/CClient.h"
 #include "../game/CScriptProfiler.h"
@@ -15,7 +16,6 @@
 #include "resource/blocks/CResourceNamedDef.h"
 #include "resource/CResourceLock.h"
 #include "CExpression.h"
-#include "CUIDExtra.h"
 #include "CSFileObjContainer.h"
 #include "CScriptTriggerArgs.h"
 
