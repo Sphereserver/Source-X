@@ -230,6 +230,7 @@ enum IT_TYPE		// double click type action.
 	// Custom (hardcoded) types start from 600
 	IT_ARMOR_CHAIN = 600,	// 600 = t_armor_chain
 	IT_ARMOR_RING,			// 601 = t_armor_ring
+	IT_TALISMAN,			// 602 = t_talisman goes to layer_talisman
 
 	IT_QTY,
 	IT_TRIGGER = 1000	// custom triggers starts from here

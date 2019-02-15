@@ -162,7 +162,11 @@ ushort CChar::Skill_GetAdjusted( SKILL_TYPE skill ) const
 		uiAdjSkill = (ushort)IMulDiv( pSkillDef->m_StatPercent, uiPureBonus, 10000 );
 	}
 
-	return ( Skill_GetBase(skill) + uiAdjSkill );
+	tchar *z = Str_GetTemp();
+	sprintf(z, "SkillMod%d", skill);
+	ushort uiBonSkill = (ushort)GetKeyNum(z);
+	
+	return ( Skill_GetBase(skill) + uiAdjSkill + uiBonSkill);
 }
 
 void CChar::Skill_AddBase( SKILL_TYPE skill, int iChange )
@@ -1146,7 +1150,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 
 	pIngots->SetAmount( iIngotQty );
 	pItemOre->ConsumeAmount( pItemOre->GetAmount());
-	ItemBounce( pIngots );
+	ItemBounce( pIngots, false );
 	return true;
 }
 

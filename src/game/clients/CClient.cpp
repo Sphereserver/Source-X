@@ -1372,6 +1372,9 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_SKILLSELECT:
 			Event_Skill_Use( g_Cfg.FindSkillKey( s.GetArgStr() ) );
 			break;
+		case CV_SKILLUPDATE:
+			addSkillWindow( g_Cfg.FindSkillKey( s.GetArgStr() ) );
+			break;
 		case CV_SUMMON:
 		{
 			ASSERT(m_pChar);

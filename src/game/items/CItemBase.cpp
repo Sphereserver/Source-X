@@ -351,6 +351,7 @@ bool CItemBase::IsTypeEquippable(IT_TYPE type, LAYER_TYPE layer)  // static
         case IT_BEARD:
         case IT_JEWELRY:
         case IT_EQ_HORSE:
+		case IT_TALISMAN:
             return true;
         default:
             break;
