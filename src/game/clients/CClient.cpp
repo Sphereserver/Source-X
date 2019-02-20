@@ -936,20 +936,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			{
 				int64 piVal[3];
 				Str_ParseCmds( s.GetArgRaw(), piVal, CountOf(piVal));
-				addArrowQuest( (int)piVal[0], (int)piVal[1], (int)piVal[2] );
-#ifdef _ALPHASPHERE
-				// todo: should use a proper container for these, since the arrows are lost
-				// when the client logs out, and also newer clients support multiple
-				// arrows
-				if ( piVal[0] && piVal[1] && m_pChar )
-				{
-					m_pChar->SetKeyNum("ARROWQUEST_X", piVal[0]);
-					m_pChar->SetKeyNum("ARROWQUEST_Y", piVal[1]);
-				} else {
-					m_pChar->DeleteKey("ARROWQUEST_X");
-					m_pChar->DeleteKey("ARROWQUEST_Y");
-				}
-#endif
+				addArrowQuest((int)piVal[0], (int)piVal[1], (int)piVal[2]);
 			}
 			break;
 		case CV_BADSPAWN:

@@ -396,6 +396,7 @@ public:
 
 	//	color noto flag
 	HUE_TYPE m_iColorNotoGood;          // Blue
+	HUE_TYPE m_iColorNotoGoodNPC;		// Blue but for NPCs
 	HUE_TYPE m_iColorNotoGuildSame;     // Green
 	HUE_TYPE m_iColorNotoNeutral;       // Grey
 	HUE_TYPE m_iColorNotoCriminal;      // Grey

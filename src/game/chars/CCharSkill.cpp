@@ -812,7 +812,7 @@ bool CChar::Skill_MakeItem_Success()
 			ChangeExperience(exp);
 	}
 
-	ItemBounce(pItem);
+	ItemBounce(pItem, false);
 	return true;
 }
 
@@ -1281,7 +1281,7 @@ int CChar::Skill_Mining( SKTRIG_TYPE stage )
 		g_Log.EventError("Mining skill doesn't have a value for RANGE, defaulting to 2\n");
 		iMaxRange = 2;
 	}
-	if ( iTargRange < 1 && !g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_NOMINDIST) )
+	if ( iTargRange < 1 && !g_Cfg.IsSkillFlag(SKILL_MINING, SKF_NOMINDIST) )
 	{
 		SysMessageDefault(DEFMSG_MINING_CLOSE);
 		return -SKTRIG_QTY;
@@ -1313,6 +1313,7 @@ int CChar::Skill_Mining( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_START )
 	{
 		m_atResource.m_Stroke_Count = (word)(Calc_GetRandVal(5) + 2);
+		m_Act_UID = pResBit->GetUID();
 		return Skill_NaturalResource_Setup(pResBit);	// How difficult? 1-1000
 	}
 

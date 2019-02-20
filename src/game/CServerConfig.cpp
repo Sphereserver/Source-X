@@ -246,7 +246,8 @@ CServerConfig::CServerConfig()
 	m_sZeroPoint			= "1323,1624,0";
 	m_bAllowBuySellAgent	= false;
 
-	m_iColorNotoGood			= 0x61;		// blue
+	m_iColorNotoGood			= 0x63;		// blue
+	m_iColorNotoGoodNPC			= 0x59;		// blue for npcs
 	m_iColorNotoGuildSame		= 0x44;		// green
 	m_iColorNotoNeutral			= 0x388;	// grey (can be attacked)
 	m_iColorNotoCriminal		= 0x387;	// grey (criminal)
@@ -432,6 +433,7 @@ enum RC_TYPE
 	RC_COLORNOTODEFAULT,		// m_iColorNotoDefault
 	RC_COLORNOTOEVIL,			// m_iColorNotoEvil
 	RC_COLORNOTOGOOD,			// m_iColorNotoGood
+	RC_COLORNOTOGOODNPC,
 	RC_COLORNOTOGUILDSAME,		// m_iColorNotoGuildSame
 	RC_COLORNOTOGUILDWAR,		// m_iColorNotoGuildWar
 	RC_COLORNOTOINVUL,			// m_iColorNotoInvul
@@ -675,6 +677,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "COLORNOTODEFAULT",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoDefault),	0 }},
 	{ "COLORNOTOEVIL",			{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoEvil),		0 }},
 	{ "COLORNOTOGOOD",			{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoGood),		0 }},
+	{ "COLORNOTOGOODNPC",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoGoodNPC),	0 }},
 	{ "COLORNOTOGUILDSAME",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoGuildSame),	0 }},
 	{ "COLORNOTOGUILDWAR",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoGuildWar),	0 }},
 	{ "COLORNOTOINVUL",			{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoInvul),		0 }},

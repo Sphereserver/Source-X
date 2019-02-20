@@ -359,7 +359,7 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			if ( pszKey[7] != '.' )
 				return false;
 			pszKey += 8;
-			sVal = m_Events.ContainsResourceName(RES_EVENTS, pszKey) ? "1" : "0";
+			sVal = m_Events.ContainsResourceName(RES_REGIONTYPE, pszKey) ? "1" : "0";
             break;
 		case RC_FLAGS:
 			sVal.FormatHex( GetRegionFlags() );

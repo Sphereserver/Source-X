@@ -2644,25 +2644,22 @@ bool PacketArrowClick::onReceive(NetState* net)
 
 	CClient* client = net->getClient();
 	ASSERT(client);
+
 	CChar* character = client->GetChar();
 	if (character == nullptr)
 		return false;
 
 	bool rightClick = readBool();
 
-	client->SysMessageDefault(DEFMSG_MSG_FOLLOW_ARROW);
-
 	if ( IsTrigUsed(TRIGGER_USERQUESTARROWCLICK) )
 	{
 		CScriptTriggerArgs Args;
-		Args.m_iN1 = (rightClick == true? 1 : 0);
-#ifdef _ALPHASPHERE
-		Args.m_iN2 = character->GetKeyNum("ARROWQUEST_X", true);
-		Args.m_iN3 = character->GetKeyNum("ARROWQUEST_Y", true);
-#endif
-
-		character->OnTrigger(CTRIG_UserQuestArrowClick, character, &Args);
+		Args.m_iN1 = (rightClick == true ? 1 : 0);
+		if (character->OnTrigger(CTRIG_UserQuestArrowClick, character, &Args) == TRIGRET_RET_TRUE)
+			return true;	
 	}
+
+	client->SysMessageDefault(DEFMSG_MSG_FOLLOW_ARROW);
 	return true;
 }
 
