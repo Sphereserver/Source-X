@@ -186,7 +186,7 @@ struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variab
     {
         // Used by multis: when they are realized, a new CRegionWorld is created with a CResourceID with an internal value = to the internal value of the multi, plus a | UID_F_RESOURCE.
         //  Remove the reserved UID_* flags (so also UID_F_RESOURCE), and find the item (in our case actually the multi) with that uid.
-        return CUID(m_dwInternalVal & UID_O_INDEX_MASK).ItemFind();
+        return CUID::ItemFind(m_dwInternalVal & UID_O_INDEX_MASK);
     }
 };
 

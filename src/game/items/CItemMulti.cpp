@@ -195,7 +195,7 @@ bool CItemMulti::MultiRealizeRegion()
     const CItemBaseMulti * pMultiDef = Multi_GetDef();
     if (pMultiDef == nullptr)
     {
-        DEBUG_ERR(("Bad Multi type 0%x, uid=0%x\n", GetID(), (dword)GetUID()));
+        g_Log.EventError("Bad Multi type 0%x, uid=0%x.\n", GetID(), (dword)GetUID());
         return false;
     }
 
@@ -208,7 +208,11 @@ bool CItemMulti::MultiRealizeRegion()
     // Get Background region.
     const CPointMap& pt = GetTopPoint();
     const CRegionWorld * pRegionBack = dynamic_cast <CRegionWorld*> (pt.GetRegion(REGION_TYPE_AREA));
-    ASSERT(pRegionBack);
+    if (!pRegionBack)
+    {
+        g_Log.EventError("Can't realize multi region at invalid P=%hd,%hd,%hhd,%hhu. Multi uid=0%x.\n", pt.m_x, pt.m_y, pt.m_z, pt.m_map, (dword)GetUID());
+        return false;
+    }
     ASSERT(pRegionBack != m_pRegion);
 
     // Create the new region rectangle.

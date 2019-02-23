@@ -127,7 +127,6 @@ struct CServerMapDiffBlock
 	int m_map;	// Map this block is from
 
 	CServerMapDiffBlock(dword dwBlockId, int map);
-
 	~CServerMapDiffBlock();
 
 private:
@@ -135,13 +134,11 @@ private:
 	CServerMapDiffBlock& operator=(const CServerMapDiffBlock& other);
 };
 
-class CServerMapDiffBlockArray : public CSObjSortArray< CServerMapDiffBlock*, dword >
+struct CServerMapDiffBlockArray : public CSObjSortArray< CServerMapDiffBlock*, dword >
 {
-public:
+    CServerMapDiffBlockArray() = default;
 	int CompareKey( dword id, CServerMapDiffBlock* pBase, bool fNoSpaces ) const;
 
-public:
-	CServerMapDiffBlockArray() { };
 private:
 	CServerMapDiffBlockArray(const CServerMapDiffBlockArray& copy);
 	CServerMapDiffBlockArray& operator=(const CServerMapDiffBlockArray& other);
@@ -188,7 +185,7 @@ public:
 	CCachedMulItem m_CacheTime;	// keep track of the use time of this item. (client does not care about this)
 private:
 	void Load(int bx, int by);	// NOTE: This will "throw" on failure !
-	void LoadDiffs(dword dwBlockIndex, int map);
+	//void LoadDiffs(dword dwBlockIndex, int map);
 
 public:
 	explicit CServerMapBlock( const CPointMap & pt );

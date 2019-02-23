@@ -640,11 +640,11 @@ bool CChar::NPC_LookAtCharGuard( CChar * pChar, bool bFromTrigger )
 {
 	ADDTOCALLSTACK("CChar::NPC_LookAtCharGuard");
 	ASSERT(m_pNPC);
+
 	// Does the guard hate the target ?
 	//	do not waste time on invul+dead, non-criminal and jailed chars
 	if ( ((pChar->IsStatFlag(STATF_INVUL|STATF_DEAD) || pChar->IsPriv(PRIV_JAILED)) && !bFromTrigger) || !(pChar->Noto_IsCriminal() || pChar->Noto_IsEvil()) )
 		return false;
-
 
 	if ( ! pChar->m_pArea->IsGuarded())
 	{
@@ -747,7 +747,7 @@ bool CChar::NPC_LookAtCharHuman( CChar * pChar )
 	if ( Noto_IsEvil())		// I am evil.
 	{
 		// Attack others if we are evil.
-		return( NPC_LookAtCharMonster( pChar ));
+		return NPC_LookAtCharMonster( pChar );
 	}
 
 	if (( ! pChar->Noto_IsEvil() && g_Cfg.m_fGuardsOnMurderers) && (! pChar->IsStatFlag( STATF_CRIMINAL ))) 	// not interesting.
@@ -757,7 +757,9 @@ bool CChar::NPC_LookAtCharHuman( CChar * pChar )
 	if (m_pArea->IsGuarded())
 	{
 		if (m_pNPC->m_Brain == NPCBRAIN_GUARD)
+        {
 			return NPC_LookAtCharGuard(pChar);
+        }
 		else if (NPC_CanSpeak() && !Calc_GetRandVal(3))
 		{
 			// Find a guard.
@@ -780,7 +782,6 @@ bool CChar::NPC_LookAtCharHuman( CChar * pChar )
 		}
 	}
 	// Attack an evil creature ?
-
 	return false;
 }
 
@@ -1419,8 +1420,8 @@ void CChar::NPC_Act_GoHome()
 		// this goes hand in hand with the change that guards arent
 		// called if the criminal makes it outside guarded territory.
 
-		const CRegion * pArea = m_ptHome.GetRegion( REGION_TYPE_AREA );
-		if ( pArea && pArea->IsGuarded())
+		const CRegion * pAreaHome = m_ptHome.GetRegion( REGION_TYPE_AREA );
+		if ( pAreaHome && pAreaHome->IsGuarded())
 		{
 			if ( !m_pArea || !m_pArea->IsGuarded() )
 			{
@@ -1431,9 +1432,9 @@ void CChar::NPC_Act_GoHome()
 				}
 			}
 		}
-		else
+		else if (!IsSetOF(OF_GuardOutsideGuardedArea))
 		{
-			g_Log.Event( LOGL_WARN, "Guard 0%x '%s' has no guard post (%s)! Removing it.\n", (dword)(GetUID()), GetName(), GetTopPoint().WriteUsed());
+			g_Log.Event( LOGL_WARN, "Guard 0%x '%s' has no guard post (%s)! Removing it.\n", (dword)GetUID(), GetName(), GetTopPoint().WriteUsed());
 
 			// If we arent conjured and still got no valid home
 			// then set our status to conjured and take our life.
@@ -1443,12 +1444,12 @@ void CChar::NPC_Act_GoHome()
 				Stat_SetVal(STAT_STR, 0);
 				return;
 			}
+            // else we are conjured and probably a timer started already.
 		}
-
-		// else we are conjured and probably a timer started already.
 	}
 
-	if ( !m_ptHome.IsValidPoint() || !GetTopPoint().IsValidPoint() || ( GetTopPoint().GetDist(m_ptHome) < m_pNPC->m_Home_Dist_Wander ))
+    const CPointMap ptCurrent = GetTopPoint();
+	if ( !m_ptHome.IsValidPoint() || !ptCurrent.IsValidPoint() || ( ptCurrent.GetDist(m_ptHome) < m_pNPC->m_Home_Dist_Wander ))
 	{
    		Skill_Start(SKILL_NONE);
 		return;
@@ -1456,7 +1457,7 @@ void CChar::NPC_Act_GoHome()
 
 	if ( g_Cfg.m_iLostNPCTeleport )
 	{
-		int	iDistance	= m_ptHome.GetDist( GetTopPoint() );
+		int	iDistance	= m_ptHome.GetDist( ptCurrent );
 		if ( (iDistance > g_Cfg.m_iLostNPCTeleport) && (iDistance > m_pNPC->m_Home_Dist_Wander) )
 		{
 			if ( IsTrigUsed(TRIGGER_NPCLOSTTELEPORT) )

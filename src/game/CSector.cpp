@@ -1056,15 +1056,12 @@ bool CSector::MoveCharToSector( CChar * pChar )
 bool CSector::CanSleep(bool fCheckAdjacents) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CSector::CanSleep");
-	if ( IsFlagSet(SECF_NoSleep) )
+	if ( (g_Cfg._iSectorSleepDelay == 0) || IsFlagSet(SECF_NoSleep) )
 		return false;	// never sleep
-
     if (m_Chars_Active.GetClientsNumber() > 0)
         return false;	// has at least one client, no sleep
 	if ( IsFlagSet(SECF_InstaSleep) )
-	{
 		return true;	// no active client inside, instant sleep
-	}
     
     if (fCheckAdjacents)
     {
@@ -1168,7 +1165,7 @@ void CSector::Restock()
     for (; pItem; pItem = pItemNext)
     {
         pItemNext = pItem->GetNext();
-        if (pItem->IsType(IT_SPAWN_ITEM) || pItem->IsType(IT_SPAWN_CHAR))
+        if (pItem->IsType(IT_SPAWN_ITEM) || pItem->IsType(IT_SPAWN_CHAR) || pItem->IsType(IT_SPAWN_CHAMPION))
         {
             CCSpawn *pSpawn = pItem->GetSpawn();
             if (pSpawn)

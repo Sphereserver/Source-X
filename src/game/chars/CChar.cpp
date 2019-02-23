@@ -3971,18 +3971,18 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			SetDisconnected();
 			break;
 		case CHV_DROP:	// uid
-			return ItemDrop( CUID(s.GetArgVal()).ItemFind(), GetTopPoint() );
+			return ItemDrop( CUID::ItemFind(s.GetArgVal()), GetTopPoint() );
 		case CHV_DUPE:	// = dupe a creature !
 			{
 				CChar * pChar = CreateNPC( GetID() );
 				pChar->MoveTo( GetTopPoint() );
-				pChar->DupeFrom(this,s.GetArgVal() < 1 ? true : false);
+				pChar->DupeFrom(this, s.GetArgVal() < 1 ? true : false);
 				pChar->m_iCreatedResScriptIdx = s.m_iResourceFileIndex;
 				pChar->m_iCreatedResScriptLine = s.m_iLineNum;
 			}
 			break;
 		case CHV_EQUIP:	// uid
-			return ItemEquip( CUID( s.GetArgVal()).ItemFind() );
+			return ItemEquip( CUID::ItemFind(s.GetArgVal()) );
 		case CHV_EQUIPHALO:
 			{
 				// equip a halo light
@@ -4016,7 +4016,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			}
 			else if (IsStrNumeric(pszVerbArg))
 			{
-				CObjBase* pTowards = CUID(s.GetArgVal()).ObjFind();
+				CObjBase* pTowards = CUID::ObjFind(s.GetArgVal());
 				if (pTowards != nullptr)
 				{
 					UpdateDir(pTowards);
@@ -4061,8 +4061,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_GOUID:	// uid
 			if ( s.HasArgs() )
 			{
-				CUID uid( s.GetArgVal());
-				CObjBaseTemplate * pObj = uid.ObjFind();
+				CObjBaseTemplate * pObj = CUID::ObjFind(s.GetArgVal());
 				if ( pObj == nullptr )
 					return false;
 				pObj = pObj->GetTopLevelObj();
@@ -4156,8 +4155,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 
 		case CHV_MOUNT:
 			{
-				CUID uid(s.GetArgVal());
-				CChar *pChar = uid.CharFind();
+				CChar *pChar = CUID::CharFind(s.GetArgVal());
 				if ( pChar )
 					Horse_Mount(pChar);
 			}
@@ -4202,7 +4200,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
             if (!s.HasArgs())   // If there are no args, direct call on NPC_PetSetOwner.
                 return NPC_PetSetOwner(pCharSrc);
             
-			CChar * pChar = static_cast<CChar*>(static_cast<CUID>(s.GetArgDWVal()).CharFind()); // otherwise we try to run it from the CChar with the given UID.
+			CChar * pChar = CUID::CharFind(s.GetArgDWVal()); // otherwise we try to run it from the CChar with the given UID.
             if (pChar)
                 return pChar->NPC_PetSetOwner(this);
             return false;   // Something went wrong, giving a warning of it.
@@ -4218,7 +4216,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		{
 			int iSkill = s.GetArgVal();
 			int iTicks = iSkill / 50;
-			int64		piCmd[2];
+			int64 piCmd[2];
 			if (Str_ParseCmds(s.GetArgRaw(), piCmd, CountOf(piCmd)) > 1)
 				iTicks = (int)(piCmd[1]);
 
@@ -4233,7 +4231,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				return false;
 
 			m_atMagery.m_Spell = SPELL_Polymorph;
-			m_atMagery.m_SummonID = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
+			m_atMagery.m_SummonID = (CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
 			m_Act_UID = GetUID();
 			m_Act_Prv_UID = GetUID();
 
@@ -4293,7 +4291,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_SALUTE:	//	salute to player
 		{
 			if (s.HasArgs())
-				UpdateDir( CUID(s.GetArgVal()).ObjFind() );
+				UpdateDir( CUID::ObjFind(s.GetArgVal()) );
 			UpdateAnimate(ANIM_SALUTE);
 			break;
 		}
@@ -4367,7 +4365,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			UpdateMode();
 			break;
 		case CHV_UNEQUIP:	// uid
-			return ItemBounce( CUID( s.GetArgVal()).ItemFind());
+			return ItemBounce( CUID::ItemFind(s.GetArgVal()) );
 		case CHV_WHERE:
 			if ( pCharSrc )
 			{
@@ -4449,9 +4447,9 @@ lbl_cchar_ontriggerspeech:
 	if ( !m_pPlayer )
 		return false;
 
-	if (m_pPlayer->m_Speech.size() > 0 )
+	if (!m_pPlayer->m_Speech.empty())
 	{
-		for ( size_t i = 0; i < m_pPlayer->m_Speech.size(); i++ )
+		for ( size_t i = 0; i < m_pPlayer->m_Speech.size(); ++i )
 		{
 			CResourceLink * pLinkDSpeech = m_pPlayer->m_Speech[i];
 			if ( !pLinkDSpeech )

@@ -627,7 +627,7 @@ bool CCSpawn::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole *pSrc)
         case ISPW_MORE:
         case ISPW_MORE1:
         {
-            if (_idSpawn.IsValidUID())
+            if (_idSpawn.IsValidResource())
             {
                 sVal = g_Cfg.ResourceGetName(_idSpawn);
             }
@@ -878,7 +878,7 @@ void CCSpawn::r_Write(CScript & s)
     {
         s.WriteKeyVal("AMOUNT", uiAmount);
     }
-    if (_idSpawn.IsValidUID())
+    if (_idSpawn.IsValidResource())
     {
         s.WriteKey("SPAWNID", g_Cfg.ResourceGetName(_idSpawn));
     }

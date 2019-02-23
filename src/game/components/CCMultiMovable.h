@@ -20,7 +20,7 @@ struct ShipSpeed // speed of a ship
 
 class CCMultiMovable
 {
-    CItem *_pLink;
+    //CItem *_pLink;
     static lpctstr const sm_szLoadKeys[];
     static lpctstr const sm_szVerbKeys[];
 
@@ -30,7 +30,7 @@ class CCMultiMovable
 public:
     CCMultiMovable(bool fCanTurn);
     virtual ~CCMultiMovable() = default;
-    CItem *GetLink() const;
+    //CItem *GetLink() const;
 
     bool OnTick();
     bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc);
@@ -45,7 +45,7 @@ protected:
     size_t ListObjs(CObjBase ** ppObjList);
     bool CanMoveTo(const CPointMap & pt) const;
     bool MoveDelta(const CPointMap& ptDelta);
-    bool MoveToRegion(CRegionWorld *pRegionOld, CRegionWorld* pRegionNew) const;
+    bool MoveToRegion(CRegionWorld *pRegionOld, CRegionWorld* pRegionNew);
     bool OnMoveTick();
 
     void SetCaptain(CTextConsole *pSrc);

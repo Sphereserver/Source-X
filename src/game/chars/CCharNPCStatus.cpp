@@ -543,8 +543,21 @@ bool CChar::NPC_CheckWalkHere( const CPointMap & pt, const CRegion * pArea ) con
 	{
 		if ( m_pNPC->m_Brain == NPCBRAIN_GUARD && !IsStatFlag(STATF_WAR) )	// guards will want to stay in guard range
 		{
-			if ( m_pArea->IsGuarded() && !pArea->IsGuarded() )
-				return false;
+            /*
+            if (IsSetOF(OF_GuardOutsideGuardedArea))
+            {
+                // I come from a guarded area, so i don't want to leave it unprotected; otherwise, i don't care if my destination region is guarded or not
+                const CRegion * pAreaHome = m_ptHome.GetRegion( REGION_TYPE_AREA );
+                if (pAreaHome->IsGuarded() && !pArea->IsGuarded())
+                    return false;
+            }
+			else
+            */
+            if (!IsSetOF(OF_GuardOutsideGuardedArea))
+            {
+                if ( m_pArea->IsGuarded() && !pArea->IsGuarded() )
+				    return false;
+            }
 		}
 
 		if ( Noto_IsCriminal() )
@@ -818,7 +831,7 @@ int CChar::NPC_GetHostilityLevelToward( const CChar * pCharTarg ) const
         if (pCharTarg->m_pNPC && (pCharTarg->m_pNPC->m_Brain == NPCBRAIN_BERSERK))
             iHostility += 60;
 	}
-	return( iHostility );
+	return iHostility;
 }
 
 int CChar::NPC_GetAttackContinueMotivation( CChar * pChar, int iMotivation ) const

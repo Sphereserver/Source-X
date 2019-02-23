@@ -380,7 +380,7 @@ int CResourceBase::ResourceGetIndexType( RES_TYPE restype, lpctstr pszName, word
 CResourceDef * CResourceBase::ResourceGetDef(const CResourceID& rid) const
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetDef");
-	if ( ! rid.IsValidUID() )
+	if ( ! rid.IsValidResource() )
 		return nullptr;
 	size_t index = m_ResHash.FindKey( rid );
 	if ( index == m_ResHash.BadIndex() )

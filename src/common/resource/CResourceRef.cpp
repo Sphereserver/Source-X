@@ -4,6 +4,7 @@
 */
 
 #include "../../game/CServerConfig.h"
+#include "../../game/CServer.h"
 #include "../CException.h"
 #include "../CScript.h"
 #include "CResourceRef.h"
@@ -30,12 +31,11 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
     tchar * pszCmd = s.GetArgStr();
 
     tchar * ppBlocks[128];	// max is arbitrary
-    size_t iArgCount = Str_ParseCmds( pszCmd, ppBlocks, CountOf(ppBlocks));
+    int iArgCount = Str_ParseCmds( pszCmd, ppBlocks, CountOf(ppBlocks));
 
-    for ( size_t i = 0; i < iArgCount; ++i )
+    for ( int i = 0; i < iArgCount; ++i )
     {
         pszCmd = ppBlocks[i];
-
         if ( pszCmd[0] == '-' )
         {
             // remove a frag or all frags.
@@ -54,13 +54,11 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
                 continue;
             }
 
-            int iIndex = RemovePtr(pResourceLink);
-            fRet = ( iIndex >= 0 );
+            fRet = RemovePtr(pResourceLink);
         }
         else
         {
             // Add a single knowledge fragment or appropriate group item.
-
             if ( pszCmd[0] == '+' )
                 ++pszCmd;
 

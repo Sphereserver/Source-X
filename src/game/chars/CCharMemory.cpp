@@ -25,7 +25,7 @@ CItemStone * CChar::Guild_Find( MEMORY_TYPE MemType ) const
 		const_cast <CChar*>(this)->Memory_ClearTypes((word)(MemType)); 	// Make them forget they were ever in this guild....again!
 		return nullptr;
 	}
-	return( pMyStone );
+	return pMyStone;
 }
 
 // Get my member record for my guild.
@@ -42,7 +42,7 @@ CStoneMember * CChar::Guild_FindMember( MEMORY_TYPE MemType ) const
 		const_cast <CChar*>(this)->Memory_ClearTypes((word)(MemType)); 	// Make them forget they were ever in this guild....again!
 		return nullptr;
 	}
-	return( pMember );
+	return pMember;
 }
 
 // response to "I resign from my guild" or "town"
@@ -85,7 +85,7 @@ lpctstr CChar::Guild_Abbrev( MEMORY_TYPE MemType ) const
 	if ( pMyStone == nullptr ||
 		! pMyStone->GetAbbrev()[0] )
 		return nullptr;
-	return( pMyStone->GetAbbrev());
+	return pMyStone->GetAbbrev();
 }
 
 // Get my [guild abbrev] if i have chosen to turn it on.
@@ -97,7 +97,7 @@ lpctstr CChar::Guild_AbbrevBracket( MEMORY_TYPE MemType ) const
 		return nullptr;
 	tchar * pszTemp = Str_GetTemp();
 	sprintf( pszTemp, " [%s]", pszAbbrev );
-	return( pszTemp );
+	return pszTemp;
 }
 
 //***************************************************************
@@ -124,6 +124,8 @@ bool CChar::Memory_UpdateFlags(CItemMemory * pMemory)
 		iCheckTime = 30 * MSECS_PER_SEC;
 	else if (wMemTypes & (MEMORY_IPET | MEMORY_GUARD | MEMORY_GUILD | MEMORY_TOWN))
 		iCheckTime = -1;	// never go away.
+    //else if ((wMemTypes & MEMORY_SAWCRIME) && (g_Cfg.m_iCriminalTimer > 0))
+    //    iCheckTime = g_Cfg.m_iCriminalTimer * 60;
 	else if (m_pNPC)	// MEMORY_SPEAK
 		iCheckTime = 5 * 60 * MSECS_PER_SEC;
 	else
@@ -279,7 +281,7 @@ CItemMemory * CChar::Memory_FindObjTypes( const CObjBase * pObj, word MemTypes )
 		return nullptr;
 	if ( ! pMemory->IsMemoryTypes( MemTypes ))
 		return nullptr;
-	return( pMemory );
+	return pMemory;
 }
 
 CItemMemory * CChar::Memory_AddObj( CUID uid, word MemTypes )
@@ -329,7 +331,7 @@ TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, C
 	}
 	else
 		s.SeekContext( EndContext );
-	return( TRIGRET_ENDIF );
+	return TRIGRET_ENDIF;
 }
 
 // Adding a new value for this memory, updating notoriety
@@ -483,7 +485,7 @@ void CChar::Memory_Fight_Start( const CChar * pTarg )
 		else
 			MemTypes = MEMORY_IAGGRESSOR;
 
-		Memory_AddTypes(pMemory, MEMORY_FIGHT | MemTypes);// Update the fight status.
+		Memory_AddTypes(pMemory, MEMORY_FIGHT | MemTypes); // Update the fight status.
 	}
 
 	if ( IsClient() && (m_Fight_Targ_UID == pTarg->GetUID()) && !IsSetCombatFlags(COMBAT_NODIRCHANGE))

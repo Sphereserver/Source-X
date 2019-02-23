@@ -31,19 +31,19 @@ void CChar::OnNoticeCrime( CChar * pCriminal, CChar * pCharMark )
 	if ( m_pPlayer )
 	{
 		// I have the option of attacking the criminal. or calling the guards.
-		bool fCriminal = true;
+		bool fMakeCriminal = true;
 		if (IsTrigUsed(TRIGGER_SEECRIME))
 		{
 			CScriptTriggerArgs Args;
-			Args.m_iN1 = fCriminal;
+			Args.m_iN1 = fMakeCriminal;
 			Args.m_pO1 = const_cast<CChar*>(pCharMark);
 			OnTrigger(CTRIG_SeeCrime, pCriminal, &Args);
-            fCriminal = Args.m_iN1 ? true : false;
+            fMakeCriminal = Args.m_iN1 ? true : false;
 		}
-		if (fCriminal)
+		if (fMakeCriminal)
         {
 			Memory_AddObjTypes( pCriminal, MEMORY_SAWCRIME );
-            pCriminal->Noto_Criminal(pCharMark);
+            pCriminal->Noto_Criminal(pCharMark, true);
         }
 		return;
 	}
@@ -182,8 +182,7 @@ void CChar::CallGuards()
 		// Mark person as criminal if I saw him criming
 		// Only players call guards this way. NPC's flag criminal instantly
 		if (m_pPlayer && Memory_FindObjTypes(pCriminal, MEMORY_SAWCRIME))
-			pCriminal->Noto_Criminal(this);
-
+            pCriminal->Noto_Criminal(this, true);
 		if (!pCriminal->IsStatFlag(STATF_CRIMINAL) && !(pCriminal->Noto_IsEvil() && g_Cfg.m_fGuardsOnMurderers))
 			continue;
 

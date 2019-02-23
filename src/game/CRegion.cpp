@@ -544,13 +544,13 @@ bool CRegion::r_LoadVal( CScript & s )
 	switch ( index )
 	{
 		case RC_ANNOUNCE:
-			TogRegionFlags( REGION_FLAG_ANNOUNCE, ( ! s.HasArgs()) || s.GetArgVal());
+			TogRegionFlags( REGION_FLAG_ANNOUNCE, !s.HasArgs() || s.GetArgVal() );
 			break;
 		case RC_ARENA:
-			TogRegionFlags( REGION_FLAG_ARENA, s.GetArgVal() != 0);
+			TogRegionFlags( REGION_FLAG_ARENA, s.GetArgVal() != 0 );
 			break;
 		case RC_BUILDABLE:
-			TogRegionFlags( REGION_FLAG_NOBUILDING, ! s.GetArgVal());
+			TogRegionFlags( REGION_FLAG_NOBUILDING, !s.GetArgVal() );
 			break;
 		case RC_COLDCHANCE:
 			SendSectorsVerb( s.GetKey(), s.GetArgStr(), &g_Serv );
@@ -561,7 +561,7 @@ bool CRegion::r_LoadVal( CScript & s )
 			SetModified( REGMOD_EVENTS );
 			return m_Events.r_LoadVal( s, RES_REGIONTYPE );
 		case RC_FLAGS:
-			m_dwFlags = ( s.GetArgDWVal() &~REGION_FLAG_SHIP ) | ( m_dwFlags & REGION_FLAG_SHIP );
+			m_dwFlags = ( s.GetArgDWVal() & ~REGION_FLAG_SHIP ) | ( m_dwFlags & REGION_FLAG_SHIP );
 			SetModified( REGMOD_FLAGS );
 			break;
 		case RC_GATE:
@@ -572,10 +572,10 @@ bool CRegion::r_LoadVal( CScript & s )
 			SetModified( REGMOD_GROUP );
 			break;
 		case RC_GUARDED:
-			TogRegionFlags( REGION_FLAG_GUARDED, ( ! s.HasArgs()) || s.GetArgVal());
+			TogRegionFlags( REGION_FLAG_GUARDED, !s.HasArgs() || s.GetArgVal());
 			break;
 		case RC_MAGIC:
-			TogRegionFlags( REGION_ANTIMAGIC_ALL, ! s.GetArgVal());
+			TogRegionFlags( REGION_ANTIMAGIC_ALL, !s.GetArgVal());
 			break;
 		case RC_MAP:
 			m_pt.m_map = s.GetArgUCVal();
@@ -647,7 +647,7 @@ void CRegion::r_WriteBody( CScript & s, lpctstr pszPrefix )
 		s.WriteKeyHex(z, GetRegionFlags());
 	}
 
-	if (m_Events.size() > 0 )
+	if (!m_Events.empty())
 	{
 		CSString sVal;
 		m_Events.WriteResourceRefList( sVal );

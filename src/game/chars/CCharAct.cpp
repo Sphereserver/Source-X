@@ -3338,7 +3338,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 		{
 			// Guards won't gate into unguarded areas.
 			const CRegionWorld *pArea = dynamic_cast<CRegionWorld*>(pTeleport->m_ptDst.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA));
-			if ( !pArea || !pArea->IsGuarded() )
+			if ( !pArea || (!pArea->IsGuarded() && !IsSetOF(OF_GuardOutsideGuardedArea)) )
 				return TRIGRET_RET_FALSE;
 		}
 		if ( Noto_IsCriminal() )
