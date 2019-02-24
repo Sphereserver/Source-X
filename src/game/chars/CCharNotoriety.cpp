@@ -407,9 +407,12 @@ bool CChar::Noto_Criminal( CChar * pCharViewer, bool fFromSawCrime )
     }
 
     // Return != 1: remove the SawCrime memory, since i made him criminal to myself and also i may call the guards
-    CItemMemory *pMemorySawCrime = pCharViewer->Memory_FindObjTypes(this, MEMORY_SAWCRIME);
-    if (pMemorySawCrime)
-        pCharViewer->Memory_ClearTypes(pMemorySawCrime, MEMORY_SAWCRIME);
+    if (pCharViewer)
+    {
+        CItemMemory *pMemorySawCrime = pCharViewer->Memory_FindObjTypes(this, MEMORY_SAWCRIME);
+        if (pMemorySawCrime)
+            pCharViewer->Memory_ClearTypes(pMemorySawCrime, MEMORY_SAWCRIME);
+    }
 
 	return (retCriminal == TRIGRET_RET_FALSE);
 }

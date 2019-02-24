@@ -870,7 +870,7 @@ void CCSpawn::r_Write(CScript & s)
     CItem *pItem = static_cast<CItem*>(GetLink());
     if (!FixDef())
     {
-        g_Log.EventError("Saving a bad spawn point (UID=0%" PRIx32 "). Invalid spawn index 0%x (ResourceID=0%" PRIx32 ").\n", (dword)pItem->GetUID(), _idSpawn.GetResIndex(), _idSpawn.GetPrivateUID());
+        g_Log.EventWarn("Saving a bad spawn point (UID=0%" PRIx32 "). Invalid spawn index 0%x (ResourceID=0%" PRIx32 ").\n", (dword)pItem->GetUID(), _idSpawn.GetResIndex(), _idSpawn.GetPrivateUID());
     }
 
     uint16 uiAmount = GetAmount();

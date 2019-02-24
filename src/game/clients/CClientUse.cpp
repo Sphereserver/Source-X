@@ -712,7 +712,7 @@ bool CClient::Cmd_Skill_Menu( const CResourceID& rid, int iSelect )
 			g_Log.EventDebug("SCRIPT: Too many empty skill menus to continue seeking through menu '%s'\n", g_Cfg.ResourceGetDef(rid)->GetResourceName());
 	}
 
-	ASSERT(iShowCount < CountOf(item));
+	ASSERT(iShowCount < (int)CountOf(item));
 	addItemMenu(CLIMODE_MENU_SKILL, item, iShowCount);
 	return true;
 }
@@ -835,8 +835,12 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 
         if ( fSkip )	// we have decided we cant do the option indicated by the previous conditional (ON, TEST, TESTIF...) line.
         {
-            item[iShowCount] = {};
-            m_tmMenu.m_Item[iShowCount] = 0;
+            if (iSelect != -2)
+            {
+                ASSERT(item != nullptr);
+                item[iShowCount] = {};
+                m_tmMenu.m_Item[iShowCount] = 0;
+            }
             --iShowCount;
             continue;
         }

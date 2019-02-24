@@ -1295,7 +1295,7 @@ void CChar::OnWeightChange( int iChange )
 int CChar::GetWeight(word amount) const
 {
 	UNREFERENCED_PARAMETER(amount);
-	return( CContainer::GetTotalWeight());
+	return CContainer::GetTotalWeight();
 }
 
 bool CChar::SetName( lpctstr pszName )
@@ -2120,7 +2120,7 @@ do_default:
 					if ( !strnicmp(pszKey, "ID", 2 ) )
 					{
 						pszKey += 3;	// ID + whitspace
-						CChar * pChar = static_cast<CChar*>(static_cast<CUID>(Exp_GetSingle(pszKey)).CharFind());
+						CChar * pChar = CUID::CharFind(Exp_GetSingle(pszKey));
 						sVal.FormatVal(Attacker_GetID(pChar));
 						return true;
 					}
@@ -2635,22 +2635,22 @@ do_default:
 		case CHC_MEMORY:
 			// What is our memory flags about this pSrc person.
 			{
-				uint64 iFlags = 0;
+				uint uiFlags = 0;
 				CItemMemory *pMemory;
 				pszKey += 6;
 				if ( *pszKey == '.' )
 				{
 					++pszKey;
-					CUID uid	= Exp_GetVal( pszKey );
+					CUID uid = Exp_GetVal( pszKey );
 					pMemory	= Memory_FindObj( uid );
 				}
 				else
 					pMemory	= Memory_FindObj( pCharSrc );
 				if ( pMemory != nullptr )
 				{
-					iFlags = pMemory->GetMemoryTypes();
+					uiFlags = pMemory->GetMemoryTypes();
 				}
-				sVal.FormatLLHex( iFlags );
+				sVal.FormatLLHex( uiFlags );
 			}
 			return true;
 		case CHC_NAME:
@@ -2787,7 +2787,7 @@ do_default:
 		case CHC_DIR:
 			{
 				pszKey +=3;
-				CChar * pChar = static_cast<CChar*>(CUID(Exp_GetSingle(pszKey)).CharFind());
+				CChar * pChar = CUID::CharFind(Exp_GetSingle(pszKey));
 				if ( pChar )
 					sVal.FormatVal( GetDir(pChar) );
 				else
@@ -3261,7 +3261,7 @@ bool CChar::r_LoadVal( CScript & s )
 						if ( !m_lastAttackers.empty() )
 						{
 							int idx = s.GetArgVal();
-							CChar *pChar = static_cast<CChar *>(CUID(idx).CharFind());
+							CChar *pChar = CUID::CharFind(idx);
 							if (!pChar)
 								return false;
 							Attacker_Delete(idx, false, ATTACKER_CLEAR_SCRIPT);
@@ -3270,7 +3270,7 @@ bool CChar::r_LoadVal( CScript & s )
 					}
 					else if ( !strnicmp(pszKey, "ADD", 3) )
 					{
-						CChar *pChar = CUID(s.GetArgVal()).CharFind();
+						CChar *pChar = CUID::CharFind(s.GetArgVal());
 						if ( !pChar )
 							return false;
 						Fight_Attack(pChar);
@@ -3278,7 +3278,7 @@ bool CChar::r_LoadVal( CScript & s )
 					}
 					else if ( !strnicmp(pszKey, "TARGET", 6) )
 					{
-						CChar *pChar = CUID(s.GetArgVal()).CharFind();
+						CChar *pChar = CUID::CharFind(s.GetArgVal());
 						if ( !pChar || (pChar == this) )	// can't set ourself as target
 						{
 							m_Fight_Targ_UID.InitUID();
@@ -3911,7 +3911,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			}
 			break;
 		case CHV_ATTACK:
-			Fight_Attack(CUID(s.GetArgVal()).CharFind(), true);
+			Fight_Attack(CUID::CharFind(s.GetArgVal()), true);
 			break;
 		case CHV_BANK:
 			// Open the bank box for this person
@@ -3923,10 +3923,10 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			SoundChar(s.HasArgs() ? (CRESND_TYPE)s.GetArgVal() : CRESND_RAND);
 			break;
 		case CHV_BOUNCE: // uid
-			return ItemBounce( CUID( s.GetArgVal()).ItemFind() );
+			return ItemBounce( CUID::ItemFind( s.GetArgVal()) );
 		case CHV_BOW:
 			if (s.HasArgs())
-				UpdateDir( CUID(s.GetArgVal()).ObjFind() );
+				UpdateDir( CUID::ObjFind(s.GetArgVal()) );
 			UpdateAnimate(ANIM_BOW);
 			break;
 
@@ -4026,7 +4026,6 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			else
 			{
                 CPointMap pt;
-				pt.InitPoint();
 				pt.Read(s.GetArgStr());
 				if (pt.IsValidPoint())
 				{
