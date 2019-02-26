@@ -381,7 +381,7 @@ void CChar::Noto_Murder()
 		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_Murders, g_Cfg.GetSpellEffect(SPELL_NONE, 0), (int)(g_Cfg.m_iMurderDecayTime/MSECS_PER_TENTH), nullptr);
 }
 
-bool CChar::Noto_Criminal( CChar * pChar )
+bool CChar::Noto_Criminal( CChar * pCharViewer, bool fFromSawCrime )
 {
 	ADDTOCALLSTACK("CChar::Noto_Criminal");
 	if ( m_pNPC || IsPriv(PRIV_GM) )
@@ -389,22 +389,40 @@ bool CChar::Noto_Criminal( CChar * pChar )
 
 	int64 decay = (g_Cfg.m_iCriminalTimer / (60*MSECS_PER_SEC));
 
+    TRIGRET_TYPE retCriminal = TRIGRET_RET_DEFAULT;
 	if ( IsTrigUsed(TRIGGER_CRIMINAL) )
 	{
 		CScriptTriggerArgs Args;
 		Args.m_iN1 = decay;
-		Args.m_pO1 = pChar;
-		if ( OnTrigger(CTRIG_Criminal, this, &Args) == TRIGRET_RET_TRUE )
-			return false;
-
+        Args.m_iN2 = fFromSawCrime;
+		Args.m_pO1 = pCharViewer;
+        retCriminal = OnTrigger(CTRIG_Criminal, this, &Args);
 		decay = (Args.m_iN1 * (60*MSECS_PER_SEC));
 	}
 
-	if ( !IsStatFlag(STATF_CRIMINAL) )
-		SysMessageDefault(DEFMSG_MSG_GUARDS);
+    if (retCriminal == TRIGRET_RET_TRUE)
+    {
+        // Return 1: prevent the char to be flagged as criminal and do not remove the SawCrime memory
+        return false;
+    }
 
-	Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_Criminal, g_Cfg.GetSpellEffect(SPELL_NONE, 0), decay/MSECS_PER_TENTH);
-	return true;
+    if (retCriminal != TRIGRET_RET_FALSE)
+    {
+        // Return != 0 and 1: flag the char as criminal
+        if (!IsStatFlag(STATF_CRIMINAL))
+            SysMessageDefault(DEFMSG_MSG_GUARDS);
+        Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_Criminal, g_Cfg.GetSpellEffect(SPELL_NONE, 0), decay/MSECS_PER_TENTH);
+    }
+
+    // Return != 1: remove the SawCrime memory, since i made him criminal to myself and also i may call the guards
+    if (pCharViewer)
+    {
+        CItemMemory *pMemorySawCrime = pCharViewer->Memory_FindObjTypes(this, MEMORY_SAWCRIME);
+        if (pMemorySawCrime)
+            pCharViewer->Memory_ClearTypes(pMemorySawCrime, MEMORY_SAWCRIME);
+    }
+
+	return (retCriminal == TRIGRET_RET_FALSE);
 }
 
 void CChar::Noto_ChangeDeltaMsg( int iDelta, lpctstr pszType )

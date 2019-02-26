@@ -370,9 +370,10 @@ public:
 			// m_amount = memory type mask.
 			word m_Action;		// more1l = NPC_MEM_ACT_TYPE What sort of action is this memory about ? (1=training, 2=hire, etc)
 			word m_Skill;		// more1h = SKILL_TYPE = training a skill ?
-			dword m_junk2;		// more2 = When did the fight start or action take place ? (Now Placed inside TIMESTAMP for int64 support)
+			dword m_junk2;		// more2 = It was the start time of the memory, now it's in TIMESTAMP (for int64 support)
             CPointBase m_pt;    // morep = Location the memory occured.
 								// m_uidLink = what is this memory linked to. (must be valid)
+                                // TIMESTAMP = When did the fight start or action take place?
 		} m_itEqMemory;
 
 		// IT_MULTI

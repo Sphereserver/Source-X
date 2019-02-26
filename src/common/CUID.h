@@ -41,6 +41,7 @@ public:
 
     static bool IsValidUID(dword dwPrivateUID);
     static bool IsResource(dword dwPrivateUID);
+    static bool IsValidResource(dword dwPrivateUID);
     static bool IsItem(dword dwPrivateUID);
     static bool IsChar(dword dwPrivateUID);
 
@@ -48,6 +49,9 @@ public:
         return IsValidUID(m_dwInternalVal);
     }
     inline bool IsResource() const {
+        return IsResource(m_dwInternalVal);
+    }
+    inline bool IsValidResource() const {
         return IsResource(m_dwInternalVal);
     }
     inline bool IsItem() const {

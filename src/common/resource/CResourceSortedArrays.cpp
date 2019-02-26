@@ -3,6 +3,7 @@
 *
 */
 
+#include "../sphere_library/CSAssoc.h"
 #include "../CScriptObj.h"
 #include "CResourceSortedArrays.h"
 
@@ -57,4 +58,19 @@ int CObjNameSortArray::CompareKey( lpctstr pszID, CScriptObj* pObj, bool fNoSpac
         }
     }
     return strcmpi( pszID, objStr);
+}
+
+int CSkillKeySortArray::CompareKey(lpctstr pszKey, CValStr * pVal, bool fNoSpaces) const
+{
+    UNREFERENCED_PARAMETER(fNoSpaces);
+    ASSERT(pszKey);
+    ASSERT(pVal->m_pszName);
+    return strcmpi(pszKey, pVal->m_pszName);
+}
+
+int CMultiDefArray::CompareKey(MULTI_TYPE id, CSphereMulti* pBase, bool fNoSpaces) const
+{
+    UNREFERENCED_PARAMETER(fNoSpaces);
+    ASSERT(pBase);
+    return (id - pBase->GetMultiID());
 }

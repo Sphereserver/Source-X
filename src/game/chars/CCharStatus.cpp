@@ -1718,7 +1718,8 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
 	//  pdwBlockFlags = what is blocking me. (can be null = don't care)
 
 	//	test diagonal dirs by two others *only* when already having a normal location
-	if ( GetTopPoint().IsValidPoint() && !fPathFinding && (dir % 2) )
+    const CPointMap ptOld = GetTopPoint();
+	if ( ptOld.IsValidPoint() && !fPathFinding && (dir % 2) )
 	{
 		DIR_TYPE dirTest1 = (DIR_TYPE)(dir - 1); // get 1st ortogonal
 		DIR_TYPE dirTest2 = (DIR_TYPE)(dir + 1); // get 2nd ortogonal
@@ -1726,12 +1727,12 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
 			dirTest2 = DIR_N;
 
         CPointMap ptTest;
-		ptTest = GetTopPoint();
+		ptTest = ptOld;
 		ptTest.Move(dirTest1);
 		if ( !CheckValidMove(ptTest, pdwBlockFlags, DIR_QTY, pClimbHeight) )
 			return nullptr;
 
-		ptTest = GetTopPoint();
+		ptTest = ptOld;
 		ptTest.Move(dirTest2);
 		if ( !CheckValidMove(ptTest, pdwBlockFlags, DIR_QTY, pClimbHeight) )
 			return nullptr;
@@ -1739,8 +1740,8 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
 
     if ( !ptDest.IsValidPoint() )
     {
-        DEBUG_ERR(("Character 0%x on %d,%d,%d wants to move into an invalid location %d,%d,%d.\n",
-            GetUID().GetObjUID(), GetTopPoint().m_x, GetTopPoint().m_y, GetTopPoint().m_z, ptDest.m_x, ptDest.m_y, ptDest.m_z));
+        DEBUG_ERR(("Character with uid=0%x on %d,%d,%d,%d wants to move into an invalid location %d,%d,%d,%d.\n",
+            GetUID().GetObjUID(), ptOld.m_x, ptOld.m_y, ptOld.m_z, ptOld.m_map, ptDest.m_x, ptDest.m_y, ptDest.m_z, ptDest.m_map));
         return nullptr;
     }
 
@@ -1748,7 +1749,8 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
 	if ( !pArea )
 	{
 		//if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-		g_Log.EventWarn("WalkCheck: failed to get the destination region (UID: 0%x, name: %s).\n", GetUID().GetObjUID(), GetName());
+		g_Log.EventWarn("WalkCheck: failed to get the destination region at P=%d,%d,%d,%d (UID: 0%x, name: %s).\n",
+            ptDest.m_x, ptDest.m_y, ptDest.m_z, ptDest.m_map, (dword)GetUID(), GetName());
 		return nullptr;
 	}
 

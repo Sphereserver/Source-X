@@ -139,7 +139,7 @@ void CChar::Use_MoonGate( CItem * pItem )
 
     // If telepad is linked to an obj, use this obj P instead telepad static MOREP
     // This is required on telepads pointing to dynamic dests (like moongates inside moving boats)
-    CObjBase *pLink = pItem->m_uidLink.ObjFind();
+    const CObjBase *pLink = pItem->m_uidLink.ObjFind();
     if (pLink && !pLink->IsTopLevel())
         return;
     CPointMap pt;
@@ -179,13 +179,31 @@ void CChar::Use_MoonGate( CItem * pItem )
 			return;
 		if ( m_pNPC->m_Brain == NPCBRAIN_GUARD )	// guards won't leave the guarded region
 		{
-			CRegion *pArea = pt.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA);
-			if ( !pArea || !pArea->IsGuarded() )
-				return;
+            bool fToGuardedArea = false;
+            const CRegion *pArea = pt.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA);
+            if (!pArea)
+                return;
+            if ( pArea->IsGuarded() )
+                fToGuardedArea = true;
+
+            if (IsSetOF(OF_GuardOutsideGuardedArea))
+            {
+                // I come from a guarded area, so i don't want to leave it unprotected; otherwise, i don't care if my destination region is guarded or not
+                const CRegion * pAreaHome = m_ptHome.GetRegion( REGION_TYPE_AREA );
+                if (!pAreaHome || (pAreaHome->IsGuarded() && !fToGuardedArea))
+                    return;
+            }
+            else
+            {
+                // I can only go in guarded areas
+                if (!fToGuardedArea)
+                    return;
+            }
+			
 		}
 		if ( Noto_IsCriminal() )	// criminals won't enter on guarded regions
 		{
-			CRegion *pArea = pt.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA);
+            const CRegion *pArea = pt.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA);
 			if ( !pArea || pArea->IsGuarded() )
 				return;
 		}

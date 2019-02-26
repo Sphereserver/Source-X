@@ -1529,3 +1529,12 @@ WARNING: the following change could break some hackish expedient used in scripts
 - [Port from Source, 29-06-2016, Coruja] Fixed: Attack/Kill command on pets allowing select the pet itself as target, making it attack his owner. (Issue #57)
 - Added: ARGN3 to @MurderMark. If it's set to 1 (or anything but zero), it will skip murder count and criminal flag. (Issue #221)
 	This will allow users to script their own kill/murder system. Note that Noto_Update() still will be called after the trigger.
+
+23-02-2019, Nolok
+- Fixed: Sometimes a duplicated private UID was assigned to REGIONTYPEs, making Sphere attach to regions wrong REGIONTYPEs (Issue #232). Thanks to Julian, Atilla and the other people on Discord for their intensive testing!
+- Fixed: SectorSleep=0 didn't disable sector sleeping.
+- Changed: When a char is flagged as criminal by a "viewer" char, now the viewer's MEMORY_SAWCRIME linked to the criminal is removed, if any (Issue #226).
+- Added: In @Criminal trigger, RETURN 0 doesn't flag the char as criminal but does remove SRC's MEMORY_SAWCRIME.
+	RETURN 1 still blocks the whole trigger behaviour, so it will not flag as criminal and won't remove the MEMORY_SAWCRIME.
+- Added: In @Criminal trigger ARGN2 now holds 1 if the char is being marked as criminal because he has an active MEMORY_SAWCRIME linked to the SRC (viewer), otherwise it holds 0.
+- Added: .ini Option Flag OF_GuardOutsideGuardedArea (Issue #224) to allow guards to walk in unguarded areas, instead of being teleported back to their home point.

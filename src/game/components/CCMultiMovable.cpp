@@ -32,9 +32,9 @@ CTextConsole * CCMultiMovable::GetCaptain()
 
 int CCMultiMovable::GetFaceOffset() const
 {
-    const CItem* pItem = dynamic_cast<const CItem*>(this);
-    ASSERT(pItem);
-    return (pItem->GetID() & 3);
+    const CItem* pItemThis = dynamic_cast<const CItem*>(this);
+    ASSERT(pItemThis);
+    return (pItemThis->GetID() & 3);
 }
 
 bool CCMultiMovable::SetMoveDir(DIR_TYPE dir, ShipMovementType eMovementType, bool fWheelMove)
@@ -316,12 +316,9 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta)
     return true;
 }
 
-bool CCMultiMovable::MoveToRegion(CRegionWorld * pRegionOld, CRegionWorld *pRegionNew) const
+bool CCMultiMovable::MoveToRegion(CRegionWorld * pRegionOld, CRegionWorld *pRegionNew)
 {
-
-    CItem *pItem = dynamic_cast<CItem*>(const_cast<CCMultiMovable*>(this));
-    ASSERT(pItem);
-    CItemMulti *pMulti = static_cast<CItemMulti*>(pItem);
+    CItemMulti *pMulti = static_cast<CItemMulti*>(this);
     if (pRegionOld == pRegionNew)
     {
         return true;
@@ -378,7 +375,7 @@ bool CCMultiMovable::MoveToRegion(CRegionWorld * pRegionOld, CRegionWorld *pRegi
 bool CCMultiMovable::CanMoveTo(const CPointMap & pt) const
 {
     ADDTOCALLSTACK("CCMultiMovable::CanMoveTo");
-    CItem *pItemThis = dynamic_cast<CItem*>(const_cast<CCMultiMovable*>(this));
+    const CItem *pItemThis = dynamic_cast<const CItem*>(this);
     ASSERT(pItemThis);
     // Can we move to the new location ? all water type ?
     if (pItemThis->IsAttr(ATTR_MAGIC))
@@ -398,10 +395,9 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
     ADDTOCALLSTACK("CCMultiMovable::Face");
     // Change the direction of the ship.
 
-    CItem *pItemThis = dynamic_cast<CItem*>(this);
-    ASSERT(pItemThis);
-    CItemMulti *pMulti = static_cast<CItemMulti*>(pItemThis);
-    if (!pItemThis->IsTopLevel() || !pMulti->GetRegion())
+    CItemMulti *pMultiThis = dynamic_cast<CItemMulti*>(this);
+    ASSERT(pMultiThis);
+    if (!pMultiThis->IsTopLevel() || !pMultiThis->GetRegion())
     {
         return false;
     }
@@ -416,8 +412,8 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
     }
 
     int iFaceOffset = GetFaceOffset();
-    ITEMID_TYPE idnew = (ITEMID_TYPE)(pItemThis->GetID() - iFaceOffset + iDirection);
-    const CItemBaseMulti * pMultiNew = pMulti->Multi_GetDef(idnew);
+    ITEMID_TYPE idnew = (ITEMID_TYPE)(pMultiThis->GetID() - iFaceOffset + iDirection);
+    const CItemBaseMulti * pMultiNew = pMultiThis->Multi_GetDef(idnew);
     if (pMultiNew == nullptr)
     {
         return false;
@@ -426,27 +422,28 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
     int iTurn = dir - sm_FaceDir[iFaceOffset];
 
     // ?? Are there blocking items in the way of the turn ?
+    const CPointMap ptThis(pMultiThis->GetTopPoint());
 
     // Acquire the CRect for the new direction of the ship
     CRectMap rect(pMultiNew->m_rect);
-    rect.m_map = pItemThis->GetTopPoint().m_map;
-    rect.OffsetRect(pItemThis->GetTopPoint().m_x, pItemThis->GetTopPoint().m_y);
+    rect.m_map = ptThis.m_map;
+    rect.OffsetRect(ptThis.m_x, ptThis.m_y);
 
     // Check that we can fit into this space.
     CPointMap ptTmp;
-    ptTmp.m_z = pItemThis->GetTopPoint().m_z;
+    ptTmp.m_z = ptThis.m_z;
     ptTmp.m_map = (uchar)(rect.m_map);
     for (ptTmp.m_x = (short)(rect.m_left); ptTmp.m_x < (short)(rect.m_right); ++ptTmp.m_x)
     {
         for (ptTmp.m_y = (short)(rect.m_top); ptTmp.m_y < (short)(rect.m_bottom); ++ptTmp.m_y)
         {
-            if (pMulti->GetRegion()->IsInside2d(ptTmp))
+            if (pMultiThis->GetRegion()->IsInside2d(ptTmp))
                 continue;
             // If the ship already overlaps a point then we must
             // already be allowed there.
             if ((!ptTmp.IsValidPoint()) || (!CanMoveTo(ptTmp)))
             {
-                CItem *pTiller = pMulti->Multi_GetSign();
+                CItem *pTiller = pMultiThis->Multi_GetSign();
                 ASSERT(pTiller);
                 pTiller->Speak(g_Cfg.GetDefaultMsg(DEFMSG_TILLER_CANT_TURN), HUE_TEXT_DEF, TALKMODE_SAY, FONT_NORMAL);
                 return false;
@@ -454,7 +451,7 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
         }
     }
 
-    const CItemBaseMulti * pMultiOld = pMulti->Multi_GetDef(pItemThis->GetID());
+    const CItemBaseMulti * pMultiOld = pMultiThis->Multi_GetDef(pMultiThis->GetID());
 
     // Reorient everything on the deck
     CObjBase * ppObjs[MAX_MULTI_LIST_OBJS + 1];
@@ -464,8 +461,8 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
         CObjBase *pObj = ppObjs[i];
         CPointMap pt = pObj->GetTopPoint();
 
-        int xdiff = pt.m_x - pItemThis->GetTopPoint().m_x;
-        int ydiff = pt.m_y - pItemThis->GetTopPoint().m_y;
+        int xdiff = pt.m_x - ptThis.m_x;
+        int ydiff = pt.m_y - ptThis.m_y;
         int xd = xdiff;
         int yd = ydiff;
         switch (iTurn)
@@ -485,28 +482,28 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
                 yd = -ydiff;
                 break;
         }
-        pt.m_x = (short)(pItemThis->GetTopPoint().m_x + xd);
-        pt.m_y = (short)(pItemThis->GetTopPoint().m_y + yd);
+        pt.m_x = (short)(ptThis.m_x + xd);
+        pt.m_y = (short)(ptThis.m_y + yd);
         if (pObj->IsItem())
         {
             CItem * pItem = static_cast<CItem*>(pObj);
-            if (pItem == pItemThis)
+            if (pItem == pMultiThis)
             {
-                pMulti->GetRegion()->UnRealizeRegion();
-                pMulti->SetID(idnew);
-                pMulti->MultiRealizeRegion();
+                pMultiThis->GetRegion()->UnRealizeRegion();
+                pMultiThis->SetID(idnew);
+                pMultiThis->MultiRealizeRegion();
             }
-            else if (pMulti->Multi_IsPartOf(pItem))
+            else if (pMultiThis->Multi_IsPartOf(pItem))
             {
                 for (size_t j = 0; j < pMultiOld->m_Components.size(); ++j)
                 {
                     const CItemBaseMulti::CMultiComponentItem & component = pMultiOld->m_Components[j];
-                    if ((xdiff == component.m_dx) && (ydiff == component.m_dy) && ((pItem->GetTopZ() - pItemThis->GetTopZ()) == component.m_dz))
+                    if ((xdiff == component.m_dx) && (ydiff == component.m_dy) && ((pItem->GetTopZ() - pMultiThis->GetTopZ()) == component.m_dz))
                     {
                         const CItemBaseMulti::CMultiComponentItem & componentnew = pMultiNew->m_Components[j];
                         pItem->SetID(componentnew.m_id);
-                        pt.m_x = pItemThis->GetTopPoint().m_x + componentnew.m_dx;
-                        pt.m_y = pItemThis->GetTopPoint().m_y + componentnew.m_dy;
+                        pt.m_x = pMultiThis->GetTopPoint().m_x + componentnew.m_dx;
+                        pt.m_y = pMultiThis->GetTopPoint().m_y + componentnew.m_dy;
                     }
                 }
             }
@@ -532,7 +529,7 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
         pObj->Update();
     }
 
-    pItemThis->m_itShip.m_DirFace = (uchar)(dir);
+    pMultiThis->m_itShip.m_DirFace = (uchar)(dir);
     return true;
 }
 

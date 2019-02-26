@@ -1295,7 +1295,7 @@ void CChar::OnWeightChange( int iChange )
 int CChar::GetWeight(word amount) const
 {
 	UNREFERENCED_PARAMETER(amount);
-	return( CContainer::GetTotalWeight());
+	return CContainer::GetTotalWeight();
 }
 
 bool CChar::SetName( lpctstr pszName )
@@ -2120,7 +2120,7 @@ do_default:
 					if ( !strnicmp(pszKey, "ID", 2 ) )
 					{
 						pszKey += 3;	// ID + whitspace
-						CChar * pChar = static_cast<CChar*>(static_cast<CUID>(Exp_GetSingle(pszKey)).CharFind());
+						CChar * pChar = CUID::CharFind(Exp_GetSingle(pszKey));
 						sVal.FormatVal(Attacker_GetID(pChar));
 						return true;
 					}
@@ -2635,22 +2635,22 @@ do_default:
 		case CHC_MEMORY:
 			// What is our memory flags about this pSrc person.
 			{
-				uint64 iFlags = 0;
+				uint uiFlags = 0;
 				CItemMemory *pMemory;
 				pszKey += 6;
 				if ( *pszKey == '.' )
 				{
 					++pszKey;
-					CUID uid	= Exp_GetVal( pszKey );
+					CUID uid = Exp_GetVal( pszKey );
 					pMemory	= Memory_FindObj( uid );
 				}
 				else
 					pMemory	= Memory_FindObj( pCharSrc );
 				if ( pMemory != nullptr )
 				{
-					iFlags = pMemory->GetMemoryTypes();
+					uiFlags = pMemory->GetMemoryTypes();
 				}
-				sVal.FormatLLHex( iFlags );
+				sVal.FormatLLHex( uiFlags );
 			}
 			return true;
 		case CHC_NAME:
@@ -2787,7 +2787,7 @@ do_default:
 		case CHC_DIR:
 			{
 				pszKey +=3;
-				CChar * pChar = static_cast<CChar*>(CUID(Exp_GetSingle(pszKey)).CharFind());
+				CChar * pChar = CUID::CharFind(Exp_GetSingle(pszKey));
 				if ( pChar )
 					sVal.FormatVal( GetDir(pChar) );
 				else
@@ -3261,7 +3261,7 @@ bool CChar::r_LoadVal( CScript & s )
 						if ( !m_lastAttackers.empty() )
 						{
 							int idx = s.GetArgVal();
-							CChar *pChar = static_cast<CChar *>(CUID(idx).CharFind());
+							CChar *pChar = CUID::CharFind(idx);
 							if (!pChar)
 								return false;
 							Attacker_Delete(idx, false, ATTACKER_CLEAR_SCRIPT);
@@ -3270,7 +3270,7 @@ bool CChar::r_LoadVal( CScript & s )
 					}
 					else if ( !strnicmp(pszKey, "ADD", 3) )
 					{
-						CChar *pChar = CUID(s.GetArgVal()).CharFind();
+						CChar *pChar = CUID::CharFind(s.GetArgVal());
 						if ( !pChar )
 							return false;
 						Fight_Attack(pChar);
@@ -3278,7 +3278,7 @@ bool CChar::r_LoadVal( CScript & s )
 					}
 					else if ( !strnicmp(pszKey, "TARGET", 6) )
 					{
-						CChar *pChar = CUID(s.GetArgVal()).CharFind();
+						CChar *pChar = CUID::CharFind(s.GetArgVal());
 						if ( !pChar || (pChar == this) )	// can't set ourself as target
 						{
 							m_Fight_Targ_UID.InitUID();
@@ -3911,7 +3911,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			}
 			break;
 		case CHV_ATTACK:
-			Fight_Attack(CUID(s.GetArgVal()).CharFind(), true);
+			Fight_Attack(CUID::CharFind(s.GetArgVal()), true);
 			break;
 		case CHV_BANK:
 			// Open the bank box for this person
@@ -3923,10 +3923,10 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			SoundChar(s.HasArgs() ? (CRESND_TYPE)s.GetArgVal() : CRESND_RAND);
 			break;
 		case CHV_BOUNCE: // uid
-			return ItemBounce( CUID( s.GetArgVal()).ItemFind() );
+			return ItemBounce( CUID::ItemFind( s.GetArgVal()) );
 		case CHV_BOW:
 			if (s.HasArgs())
-				UpdateDir( CUID(s.GetArgVal()).ObjFind() );
+				UpdateDir( CUID::ObjFind(s.GetArgVal()) );
 			UpdateAnimate(ANIM_BOW);
 			break;
 
@@ -3971,18 +3971,18 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			SetDisconnected();
 			break;
 		case CHV_DROP:	// uid
-			return ItemDrop( CUID(s.GetArgVal()).ItemFind(), GetTopPoint() );
+			return ItemDrop( CUID::ItemFind(s.GetArgVal()), GetTopPoint() );
 		case CHV_DUPE:	// = dupe a creature !
 			{
 				CChar * pChar = CreateNPC( GetID() );
 				pChar->MoveTo( GetTopPoint() );
-				pChar->DupeFrom(this,s.GetArgVal() < 1 ? true : false);
+				pChar->DupeFrom(this, s.GetArgVal() < 1 ? true : false);
 				pChar->m_iCreatedResScriptIdx = s.m_iResourceFileIndex;
 				pChar->m_iCreatedResScriptLine = s.m_iLineNum;
 			}
 			break;
 		case CHV_EQUIP:	// uid
-			return ItemEquip( CUID( s.GetArgVal()).ItemFind() );
+			return ItemEquip( CUID::ItemFind(s.GetArgVal()) );
 		case CHV_EQUIPHALO:
 			{
 				// equip a halo light
@@ -4016,7 +4016,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			}
 			else if (IsStrNumeric(pszVerbArg))
 			{
-				CObjBase* pTowards = CUID(s.GetArgVal()).ObjFind();
+				CObjBase* pTowards = CUID::ObjFind(s.GetArgVal());
 				if (pTowards != nullptr)
 				{
 					UpdateDir(pTowards);
@@ -4026,7 +4026,6 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			else
 			{
                 CPointMap pt;
-				pt.InitPoint();
 				pt.Read(s.GetArgStr());
 				if (pt.IsValidPoint())
 				{
@@ -4061,8 +4060,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_GOUID:	// uid
 			if ( s.HasArgs() )
 			{
-				CUID uid( s.GetArgVal());
-				CObjBaseTemplate * pObj = uid.ObjFind();
+				CObjBaseTemplate * pObj = CUID::ObjFind(s.GetArgVal());
 				if ( pObj == nullptr )
 					return false;
 				pObj = pObj->GetTopLevelObj();
@@ -4156,8 +4154,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 
 		case CHV_MOUNT:
 			{
-				CUID uid(s.GetArgVal());
-				CChar *pChar = uid.CharFind();
+				CChar *pChar = CUID::CharFind(s.GetArgVal());
 				if ( pChar )
 					Horse_Mount(pChar);
 			}
@@ -4202,7 +4199,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
             if (!s.HasArgs())   // If there are no args, direct call on NPC_PetSetOwner.
                 return NPC_PetSetOwner(pCharSrc);
             
-			CChar * pChar = static_cast<CChar*>(static_cast<CUID>(s.GetArgDWVal()).CharFind()); // otherwise we try to run it from the CChar with the given UID.
+			CChar * pChar = CUID::CharFind(s.GetArgDWVal()); // otherwise we try to run it from the CChar with the given UID.
             if (pChar)
                 return pChar->NPC_PetSetOwner(this);
             return false;   // Something went wrong, giving a warning of it.
@@ -4218,7 +4215,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		{
 			int iSkill = s.GetArgVal();
 			int iTicks = iSkill / 50;
-			int64		piCmd[2];
+			int64 piCmd[2];
 			if (Str_ParseCmds(s.GetArgRaw(), piCmd, CountOf(piCmd)) > 1)
 				iTicks = (int)(piCmd[1]);
 
@@ -4233,7 +4230,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				return false;
 
 			m_atMagery.m_Spell = SPELL_Polymorph;
-			m_atMagery.m_SummonID = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
+			m_atMagery.m_SummonID = (CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
 			m_Act_UID = GetUID();
 			m_Act_Prv_UID = GetUID();
 
@@ -4293,7 +4290,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_SALUTE:	//	salute to player
 		{
 			if (s.HasArgs())
-				UpdateDir( CUID(s.GetArgVal()).ObjFind() );
+				UpdateDir( CUID::ObjFind(s.GetArgVal()) );
 			UpdateAnimate(ANIM_SALUTE);
 			break;
 		}
@@ -4367,7 +4364,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			UpdateMode();
 			break;
 		case CHV_UNEQUIP:	// uid
-			return ItemBounce( CUID( s.GetArgVal()).ItemFind());
+			return ItemBounce( CUID::ItemFind(s.GetArgVal()) );
 		case CHV_WHERE:
 			if ( pCharSrc )
 			{
@@ -4449,9 +4446,9 @@ lbl_cchar_ontriggerspeech:
 	if ( !m_pPlayer )
 		return false;
 
-	if (m_pPlayer->m_Speech.size() > 0 )
+	if (!m_pPlayer->m_Speech.empty())
 	{
-		for ( size_t i = 0; i < m_pPlayer->m_Speech.size(); i++ )
+		for ( size_t i = 0; i < m_pPlayer->m_Speech.size(); ++i )
 		{
 			CResourceLink * pLinkDSpeech = m_pPlayer->m_Speech[i];
 			if ( !pLinkDSpeech )

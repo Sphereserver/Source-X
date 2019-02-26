@@ -6,38 +6,52 @@
 #ifndef _INC_CRESOURCESORTEDARRAYS_H
 #define _INC_CRESOURCESORTEDARRAYS_H
 
-#include "../sphere_library/CSObjSortArray.h"
+#include "../CServerMap.h"
 
-class CSCriptObj;
+struct CValStr;
 
 
 struct CSStringSortArray : public CSObjSortArray< tchar*, tchar* >
 {
-public:
-    CSStringSortArray() { }
-    virtual ~CSStringSortArray() { }
-private:
-    CSStringSortArray(const CSStringSortArray& copy);
-    CSStringSortArray& operator=(const CSStringSortArray& other);
-public:
+    CSStringSortArray() = default;
+    virtual ~CSStringSortArray() = default;
+
+    CSStringSortArray(const CSStringSortArray& copy) = delete;
+    CSStringSortArray& operator=(const CSStringSortArray& other) = delete;
+
     // Sorted array of strings
     int CompareKey( tchar* pszID1, tchar* pszID2, bool fNoSpaces ) const;
     void AddSortString( lpctstr pszText );
 };
 
-class CObjNameSortArray : public CSObjSortArray< CScriptObj*, lpctstr >
+struct CObjNameSortArray : public CSObjSortArray< CScriptObj*, lpctstr >
 {
-public:
     static const char *m_sClassName;
-    CObjNameSortArray() {}
-    virtual ~CObjNameSortArray() { }
-private:
-    CObjNameSortArray(const CObjNameSortArray& copy);
-    CObjNameSortArray& operator=(const CObjNameSortArray& other);
+    CObjNameSortArray() = default;
+    virtual ~CObjNameSortArray() = default;
 
-public:
+    CObjNameSortArray(const CObjNameSortArray& copy) = delete;
+    CObjNameSortArray& operator=(const CObjNameSortArray& other) = delete;
+
     // Array of CScriptObj. name sorted.
     int CompareKey( lpctstr pszID, CScriptObj* pObj, bool fNoSpaces ) const;
+};
+
+class CSkillKeySortArray : public CSObjSortArray< CValStr*, lpctstr >
+{
+    CSkillKeySortArray() = default;
+
+    CSkillKeySortArray(const CSkillKeySortArray& copy) = delete;
+    CSkillKeySortArray& operator=(const CSkillKeySortArray& other) = delete;
+
+    int CompareKey( lpctstr pszKey, CValStr * pVal, bool fNoSpaces ) const;
+};
+
+struct CMultiDefArray : public CSObjSortArray< CSphereMulti*, MULTI_TYPE >
+{
+    // store the static components of a IT_MULTI
+    // Sorted array
+    int CompareKey( MULTI_TYPE id, CSphereMulti* pBase, bool fNoSpaces ) const;
 };
 
 

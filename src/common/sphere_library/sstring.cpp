@@ -278,6 +278,7 @@ int FindTableHead(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, 
 int FindTableHeadSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
 {
     // Do a binary search (un-cased) on a sorted table.
+    // Uses Str_CmpHeadI, which checks if we have reached, during comparison, ppszTable end ('\0'), ignoring if pszFind is longer (maybe has arguments?)
     // RETURN: -1 = not found
     int iHigh = iCount - 1;
     if (iHigh < 0)

@@ -54,7 +54,8 @@ enum OF_TYPE
 	OF_NoDClickTurn				= 0x0020000,    // Don't turn the player when DClick something
 	OF_NoPaperdollTradeTitle	= 0x0040000,	// Don't show the trade title on the paperdoll
     OF_NoTargTurn				= 0x0080000,    // Don't turn the player when targetting something
-    OF_StatAllowValOverMax      = 0x0100000     // Allow stats value above their maximum value (i.e. allow hits value > maxhits).
+    OF_StatAllowValOverMax      = 0x0100000,    // Allow stats value above their maximum value (i.e. allow hits value > maxhits).
+    OF_GuardOutsideGuardedArea  = 0x0200000     // Allow guards to walk in unguarded areas, instead of being teleported back to their home point.
 };
 
 /**
@@ -83,39 +84,6 @@ enum EF_TYPE
 
 ///////////////////////////////////////
 
-
-class CSkillKeySortArray : public CSObjSortArray< CValStr*, lpctstr >
-{
-public:
-	int CompareKey( lpctstr pszKey, CValStr * pVal, bool fNoSpaces ) const
-	{
-		UNREFERENCED_PARAMETER(fNoSpaces);
-		ASSERT( pszKey );
-		ASSERT( pVal->m_pszName );
-		return strcmpi( pszKey, pVal->m_pszName );
-	}
-
-public:
-	CSkillKeySortArray()
-	{
-	}
-
-private:
-	CSkillKeySortArray(const CSkillKeySortArray& copy);
-	CSkillKeySortArray& operator=(const CSkillKeySortArray& other);
-};
-
-struct CMultiDefArray : public CSObjSortArray< CSphereMulti*, MULTI_TYPE >
-{
-	// store the static components of a IT_MULTI
-	// Sorted array
-	int CompareKey( MULTI_TYPE id, CSphereMulti* pBase, bool fNoSpaces ) const
-	{
-		UNREFERENCED_PARAMETER(fNoSpaces);
-		ASSERT( pBase );
-		return ( id - pBase->GetMultiID() );
-	}
-};
 
 /**
  * @class   CServerConfig

@@ -726,10 +726,11 @@ public:
 	* @brief I'm becoming criminal.
 	*
 	* The @Criminal trigger is fired here.
-	* @param pChar: on who I performed criminal actions or saw me commiting a crime and flagged me as criminal.
+	* @param pCharViewer: on who I performed criminal actions or saw me commiting a crime and flagged me as criminal.
+    * @param fFromSawCrime: making it criminal because of MEMORY_SAWCRIME?
 	* @return true if I really became a criminal.
 	*/
-	bool Noto_Criminal( CChar * pChar = nullptr);
+	bool Noto_Criminal( CChar * pCharViewer = nullptr, bool fFromSawCrime = false);
 
 	/**
 	* @brief I am a murderer (it seems) (update my murder decay item).

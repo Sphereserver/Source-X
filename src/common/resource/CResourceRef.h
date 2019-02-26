@@ -77,9 +77,7 @@ private:
     lpctstr GetResourceName( size_t iIndex ) const;
 public:
     static const char *m_sClassName;
-    CResourceRefArray()
-    {
-    }
+    CResourceRefArray() = default;
     CResourceRefArray(const CResourceRefArray& copy);
     CResourceRefArray& operator=(const CResourceRefArray& other);
     size_t FindResourceType( RES_TYPE type ) const;

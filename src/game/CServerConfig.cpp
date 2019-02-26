@@ -3558,7 +3558,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 	ASSERT(pszName);
 	ASSERT(ppVarNum);
 
-	const CResourceID ridinvalid;	// LINUX wants this for some reason.
+	const CResourceID ridInvalid;	// LINUX wants this for some reason.
 	CResourceID rid;
 	word wPage = 0;	// sub page
 
@@ -3566,7 +3566,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 	switch ( restype )
 	{
 	case RES_UNKNOWN:
-		return ridinvalid;
+		return ridInvalid;
 	case RES_ADVANCE:
 	case RES_BLOCKIP:
 	case RES_COMMENT:
@@ -3594,7 +3594,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 		// These must have a resource name but do not use true RESOURCE_ID format.
 		// These are multiple instance but name is not a RESOURCE_ID
 		if ( pszName[0] == '\0' )
-			return ridinvalid;	// invalid
+			return ridInvalid;	// invalid
 		return CResourceID( restype );
 	// Extra args are allowed.
 	case RES_BOOK:		// BOOK BookName page
@@ -3602,7 +3602,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 	case RES_REGIONTYPE:
 		{
 			if ( pszName[0] == '\0' )
-				return ridinvalid;
+				return ridInvalid;
 
 			tchar * pArg1 = Str_GetTemp();
 			strcpy( pArg1, pszName );
@@ -3619,18 +3619,18 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 			{
 				// For a book the page is... the page number
 				// For a REGIONTYPE block, the page (pArg2) is the landtile type associated with the REGIONTYPE
-                int iPage = RES_GET_INDEX(Exp_GetVal(pArg2));
-                if ( iPage < RES_PAGE_MAX )
-                    wPage = (word)iPage;
+                int iArgPage = RES_GET_INDEX(Exp_GetVal(pArg2));
+                if ( iArgPage < RES_PAGE_MAX )
+                    wPage = (word)iArgPage;
                 else
-                    DEBUG_ERR(( "Bad resource index page %d for Resource named %s\n", iPage, pszName ));
+                    DEBUG_ERR(( "Bad resource index page %d for Resource named %s\n", iArgPage, pszName ));
 			}
 		}
 		break;
 	case RES_NEWBIE:	// MALE_DEFAULT, FEMALE_DEFAULT, Skill
 		{
 			if ( pszName[0] == '\0' )
-				return ridinvalid;
+				return ridInvalid;
 			tchar * pArg1 = Str_GetTemp();
 			strcpy( pArg1, pszName );
 			pszName = pArg1;
@@ -3687,7 +3687,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 	}
 
 
-	dword index;
+	int iIndex;
 	if ( pszName )
 	{
 		if ( pszName[0] == '\0' )	// absence of resourceid = index 0
@@ -3697,19 +3697,19 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 		}
 		if ( IsDigit(pszName[0]) )	// Its just an index.
 		{
-			index = Exp_GetVal(pszName);
-            if (index > RES_INDEX_MASK)
+			iIndex = Exp_GetVal(pszName);
+            if (iIndex > RES_INDEX_MASK)
             {
                 g_Log.EventError("Requested resource with invalid ID. Value is too high (> 0%x).\n", RES_INDEX_MASK);
-                return ridinvalid;
+                return ridInvalid;
             }
-			rid = CResourceID( restype, index );
+			rid = CResourceID( restype, iIndex );
 			switch ( restype )
 			{
 			case RES_BOOK:			// A book or a page from a book.
 			case RES_DIALOG:		// A scriptable gump dialog: text or handler block.
 			case RES_REGIONTYPE:	// Triggers etc. that can be assinged to a RES_AREA
-				rid = CResourceID( restype, index, wPage );
+				rid = CResourceID( restype, iIndex, wPage );
 				break;
 			case RES_SKILLMENU:
 			case RES_MENU:			// General scriptable menus.
@@ -3725,7 +3725,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 				break;
 			case RES_ITEMDEF:		// Define an item type
 				if (fNewStyleDef)	// indicates this is a multi and should have an appropriate offset applied
-					rid = CResourceID( restype, index + ITEMID_MULTI);
+					rid = CResourceID(restype, iIndex + ITEMID_MULTI);
 				break;
 			default:
 				return rid;
@@ -3768,7 +3768,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 					}
 					default:
 						DEBUG_ERR(( "Re-Using DEFNAME='%s' to define a new block\n", pszName ));
-						return ridinvalid;
+						return ridInvalid;
 				}
 			}
 			rid = CResourceID( (dword)pVarNum->GetValNum(), 0 );
@@ -3787,7 +3787,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 					default:
 						DEBUG_ERR(( "Redefined resource with DEFNAME='%s' from ResType %s to %s.\n",
 							pszName, GetResourceBlockName(rid.GetResType()), GetResourceBlockName(restype)) );
-						return ridinvalid;
+						return ridInvalid;
 				}
 			}
 			else if ( fNewStyleDef && (dword)pVarNum->GetValNum() != rid.GetPrivateUID() )
@@ -3830,48 +3830,48 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 		// rid = m_SkillDefs.GetCount();
 	case RES_SPELL:			// Define a magic spell. (0-64 are reserved)
 		// rid = m_SpellDefs.GetCount();
-		return ridinvalid;
+		return ridInvalid;
 
 	// These MUST exist !
 
 	case RES_NEWBIE:	// MALE_DEFAULT, FEMALE_DEFAULT, Skill
-		return ridinvalid;
+		return ridInvalid;
 	case RES_PLEVEL:	// 0-7
-		return ridinvalid;
+		return ridInvalid;
 	case RES_WC:
 	case RES_WI:
 	case RES_WORLDCHAR:
 	case RES_WORLDITEM:
-		return ridinvalid;
+		return ridInvalid;
 
 	// Just find a free entry in proper range.
 
 	case RES_CHARDEF:		// Define a char type.
 		iHashRange = 2000;
-		index = NPCID_SCRIPT + 0x2000;	// add another offset to avoid Sphere ranges.
+		iIndex = NPCID_SCRIPT + 0x2000;	// add another offset to avoid Sphere ranges.
 		break;
 	case RES_ITEMDEF:		// Define an item type
 		iHashRange = 2000;
-		index = ITEMID_SCRIPT2 + 0x4000;	// add another offset to avoid Sphere ranges.
+		iIndex = ITEMID_SCRIPT2 + 0x4000;	// add another offset to avoid Sphere ranges.
 		break;
 	case RES_TEMPLATE:		// Define lists of items. (for filling loot etc)
 		iHashRange = 2000;
-		index = ITEMID_TEMPLATE + 100000;
+		iIndex = ITEMID_TEMPLATE + 100000;
 		break;
 
 	case RES_BOOK:			// A book or a page from a book.
 	case RES_DIALOG:			// A scriptable gump dialog: text or handler block.
 		if ( wPage )	// We MUST define the main section FIRST !
-			return ridinvalid;
+			return ridInvalid;
 
 	case RES_REGIONTYPE:	// Triggers etc. that can be assinged to a RES_AREA
 		iHashRange = 100;
-		index = 1000;
+		iIndex = 1000;
 		break;
 
 	case RES_AREA:
 		iHashRange = 1000;
-		index = 10000;
+		iIndex = 10000;
 		break;
 	case RES_ROOM:
 	case RES_SKILLMENU:
@@ -3885,41 +3885,52 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 	case RES_SKILLCLASS:		// Define specifics for a char with this skill class. (ex. skill caps)
 	case RES_REGIONRESOURCE:
 		iHashRange = 1000;
-		index = 10000;
+		iIndex = 10000;
 		break;
 	case RES_SPAWN:			// Define a list of NPC's and how often they may spawn.
 		iHashRange = 1000;
-		index = SPAWNTYPE_START + 100000;
+		iIndex = SPAWNTYPE_START + 100000;
 		break;
     case RES_CHAMPION:
         iHashRange = 100;
-        index = 10000;	// RES_SPAWN +10k, no reason to have 100k [SPAWN ] templates ... but leaving this huge margin.
+        iIndex = 10000;	// RES_SPAWN +10k, no reason to have 100k [SPAWN ] templates ... but leaving this huge margin.
         break;
 	case RES_WEBPAGE:		// Define a web page template.
-		index = (dword) m_WebPages.size() + 1;
+		iIndex = (int)m_WebPages.size() + 1;
 		break;
 
 	default:
 		ASSERT(0);
-		return ridinvalid;
+		return ridInvalid;
 	}
 
 	
 	if ( iHashRange )
 	{
 		// find a new FREE entry starting here
-        rid = CResourceID( restype, index + Calc_GetRandVal(iHashRange), wPage );
-		for (;;)
+        int iRandIndex = iIndex + Calc_GetRandVal(iHashRange);
+        rid = CResourceID(restype, iRandIndex, wPage);
+        
+        bool fCheckPage = (pszName && (g_Exp.m_VarDefs.GetKeyNum(pszName) != 0));
+		while (true)
 		{
-			if ( m_ResHash.FindKey(rid) == m_ResHash.BadIndex() )
-				break;
-            rid = CResourceID( restype, rid.GetResIndex() + 1, wPage );
+            if (fCheckPage)
+            {
+                // Same defname but different page? 
+                if (m_ResHash.FindKey(rid) == m_ResHash.BadIndex())
+                    break;
+            }
+            else if (m_ResHash.FindKey(CResourceID(restype, iRandIndex, RES_PAGE_ANY)) == m_ResHash.BadIndex())
+                break;
+
+            ++iRandIndex;
+            rid = CResourceID(restype, iRandIndex, wPage);
 		}
 	}
 	else
 	{
 		// find a new FREE entry starting here
-        rid = CResourceID( restype, index ? index : 1, wPage );
+        rid = CResourceID(restype, iIndex ? iIndex : 1, wPage);
         ASSERT(m_ResHash.FindKey(rid) == m_ResHash.BadIndex());
 	}
 
@@ -3927,7 +3938,6 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 	{
 		CVarDefContNum* pVarTemp = g_Exp.m_VarDefs.SetNum( pszName, rid.GetPrivateUID() );
         ASSERT(pVarTemp);
-		//if ( pVarTemp )
 		*ppVarNum = pVarTemp;
 	}
 
@@ -3941,7 +3951,7 @@ CResourceDef * CServerConfig::ResourceGetDef( const CResourceID& rid ) const
 	// ARGS:
 	//	restype = id must be this type.
 
-	if ( ! rid.IsValidUID() )
+	if ( ! rid.IsValidResource() )
 		return nullptr;
 
 	size_t index = rid.GetResIndex();

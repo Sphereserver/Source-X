@@ -364,7 +364,8 @@ int Calc_GetBellCurve( int iValDiff, int iVariance )
 
 	if ( iVariance <= 0 )	// this really should not happen but just in case.
 		return 500;
-	if ( iValDiff < 0 ) iValDiff = -iValDiff;
+	if ( iValDiff < 0 )
+        iValDiff = -iValDiff;
 
 	int iChance = 500;
 	while ( iValDiff > iVariance && iChance )

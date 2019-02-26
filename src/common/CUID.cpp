@@ -51,6 +51,11 @@ bool CUIDBase::IsResource(dword dwPrivateUID) // static
     return (dwPrivateUID & UID_F_RESOURCE);
 }
 
+bool CUIDBase::IsValidResource(dword dwPrivateUID) // static
+{
+    return (IsResource(dwPrivateUID) && IsValidUID(dwPrivateUID));
+}
+
 bool CUIDBase::IsItem(dword dwPrivateUID) 	// static
 {
 	if ( (dwPrivateUID & (UID_F_RESOURCE|UID_F_ITEM)) == UID_F_ITEM )    // It's NOT a resource, and it's an item
