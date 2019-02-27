@@ -2387,11 +2387,16 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 	if (!fTest && iManaUse)
 	{
 		// Consume mana.
+        bool fConsumeMana = true;
 		if (m_Act_Difficulty < 0)	// use diff amount of mana if we fail.
 		{
-			iManaUse = iManaUse / 2 + (ushort)(Calc_GetRandVal(iManaUse / 2 + iManaUse / 4));
+            if (g_Cfg.m_fManaLossFail)
+			    iManaUse = iManaUse / 2 + (ushort)(Calc_GetRandVal(iManaUse / 2 + iManaUse / 4));
+            else
+                fConsumeMana = false;
 		}
-		UpdateStatVal(STAT_INT, -iManaUse);
+        if (fConsumeMana)
+		    UpdateStatVal(STAT_INT, -iManaUse);
 	}
 
 	// Check for Tithing

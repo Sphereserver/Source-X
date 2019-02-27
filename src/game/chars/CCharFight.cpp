@@ -57,11 +57,12 @@ void CChar::OnNoticeCrime( CChar * pCriminal, CChar * pCharMark )
 	{
 		if ( fMyMaster )	// I won't rat you out.
 			return;
+        Memory_AddObjTypes( pCriminal, MEMORY_SAWCRIME );
 	}
 	else
 	{
-		// I being the victim can retaliate.
 		Memory_AddObjTypes( pCriminal, MEMORY_SAWCRIME );
+		// I being the victim can retaliate.
 		OnHarmedBy( pCriminal );
 	}
 
@@ -974,7 +975,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 	ADDTOCALLSTACK("CChar::Fight_CalcDamage");
 
 	if ( m_pNPC && m_pNPC->m_Brain == NPCBRAIN_GUARD && g_Cfg.m_fGuardsInstantKill )
-		return( 20000 );	// swing made.
+		return 20000;	// swing made.
 
 	int iDmgMin = 0;
 	int iDmgMax = 0;
@@ -1235,7 +1236,8 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool fToldByMaster )
     }
 
     pCharTarg->Memory_AddObjTypes(this, MEMORY_IRRITATEDBY);
-    if (g_Cfg.m_fAttackingIsACrime && (pCharTarg->Noto_GetFlag(this) == NOTO_GOOD) && !pCharTarg->Memory_FindObjTypes(this, MEMORY_AGGREIVED))
+    // Looking for MEMORY_AGGREIVED|MEMORY_HARMEDBY because in this case it won't be a crime, but most importantly to avoid infinite recursion
+    if (g_Cfg.m_fAttackingIsACrime && (pCharTarg->Noto_GetFlag(this) == NOTO_GOOD) && !pCharTarg->Memory_FindObjTypes(this, MEMORY_AGGREIVED|MEMORY_HARMEDBY))
         CheckCrimeSeen(SKILL_NONE, pTarget, nullptr, nullptr);
 
     if (m_pNPC && !fToldByMaster)		// call FindBestTarget when this CChar is a NPC and was not commanded to attack, otherwise it attack directly
