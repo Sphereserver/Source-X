@@ -3034,7 +3034,8 @@ size_t PacketVendorSellList::fillSellList(CClient* target, const CItemContainer*
 						writeInt16((word)vendItem->GetDispID());
 						writeInt16((word)hue);
 						writeInt16(vendItem->GetAmount());
-						writeInt16((word)vendSell->GetVendorPrice(iConvertFactor));
+                        uint price = vendItem->GetVendorPrice(iConvertFactor);
+						writeInt16((word)( (price > UINT16_MAX) ? UINT16_MAX : price ));
 						writeInt16((word)len);
 						writeStringFixedASCII(name, len);
 

@@ -165,7 +165,8 @@ public:
 	bool m_fWordsOfPowerPlayer; // Words of Power for players.
 	bool m_fWordsOfPowerStaff;  // Words of Power for staff.
 	bool m_fEquippedCast;       // Allow casting while equipped.
-	bool m_fReagentLossFail;    // ??? Lose reags when failed.
+    bool m_fManaLossFail;    // Lose mana when spell casting failed.
+	bool m_fReagentLossFail;    // Lose reagents when spell casting failed.
 	int  m_iMagicUnlockDoor;    // 1 in N chance of magic unlock working on doors -- 0 means never.
 	ITEMID_TYPE m_iSpell_Teleport_Effect_NPC;       // ID of the item shown when a NPC teleports.
 	SOUND_TYPE  m_iSpell_Teleport_Sound_NPC;        // Sound sent when a NPC teleports.

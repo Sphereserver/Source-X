@@ -174,7 +174,7 @@ dword CItemVendable::GetVendorPrice( int iConvertFactor )
 	//    0 = base price
 	// +100 = increase price by 100% (vendor selling to player?)
 
-	ullong llPrice = m_price;
+	llong llPrice = m_price;
 	if ( llPrice <= 0 )		// set on player vendor.
 	{
 		CItemBase *pItemDef;
@@ -191,7 +191,7 @@ dword CItemVendable::GetVendorPrice( int iConvertFactor )
 		llPrice = pItemDef->GetMakeValue(GetQuality());
 	}
 
-	llPrice += (ullong)IMulDivLL(llPrice, maximum(iConvertFactor, -100), 100);
+	llPrice += IMulDivLL(llPrice, maximum(iConvertFactor, -100), 100);
 	if ( llPrice > UINT32_MAX )
 		return UINT32_MAX;
 	else
