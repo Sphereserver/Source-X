@@ -169,6 +169,68 @@ size_t CCMultiMovable::ListObjs(CObjBase ** ppObjList)
     return iCount;
 }
 
+void CCMultiMovable::SetPilot(CChar *pChar)
+{
+	ADDTOCALLSTACK("CCMultiMovable::SetPilot");
+	// Enable boat mouse movement on HS clients >= 7.0.9.0
+
+	CItem *pItemThis = dynamic_cast<CItem*>(this);
+	ASSERT(pItemThis);
+
+	Stop();
+
+	// Remove memory on previous pilot
+	CChar *pCharPrev = pItemThis->m_itShip.m_Pilot.CharFind();
+	if (pCharPrev && (pCharPrev == pChar))
+	{
+		CItem *pMemoryPrev = pCharPrev->ContentFind(CResourceID(RES_ITEMDEF, ITEMID_SHIP_PILOT));
+		if (pMemoryPrev)
+		{
+			pMemoryPrev->Delete();
+			pCharPrev->SysMessageDefault(DEFMSG_SHIP_PILOT_OFF);
+		}
+		pItemThis->m_itShip.m_Pilot.InitUID();
+		return;
+	}
+
+	// Create memory on new pilot
+	if (pChar)
+	{
+		if (pChar->GetRegion()->GetResourceID().GetObjUID() != pItemThis->GetUID())
+		{
+			pChar->SysMessageDefault(DEFMSG_SHIP_PILOT_CANTABOARD);
+			return;
+		}
+		else if (pChar->IsStatFlag(STATF_ONHORSE))
+		{
+			pChar->SysMessageDefault(DEFMSG_ITEMUSE_CANTMOUNTED);
+			return;
+		}
+		else if (pChar->IsStatFlag(STATF_HOVERING))
+		{
+			pChar->SysMessageDefault(DEFMSG_SHIP_PILOT_CANTFLYING);
+			return;
+		}
+		else if (pItemThis->m_itShip.m_fAnchored != 0)
+		{
+			pChar->SysMessageDefault(DEFMSG_SHIP_PILOT_CANTANCHOR);
+			return;
+		}
+
+		CItem *pMemory = CItem::CreateScript(ITEMID_SHIP_PILOT);
+		if (!pMemory)
+			return;
+
+		pMemory->SetType(IT_EQ_HORSE);
+		pMemory->SetName(pItemThis->GetName());
+		pMemory->m_uidLink = pItemThis->GetUID();
+		pChar->LayerAdd(pMemory, LAYER_HORSE);
+		pChar->SysMessageDefault(DEFMSG_SHIP_PILOT_ON);
+		pItemThis->m_itShip.m_Pilot = pChar->GetUID();
+	}
+}
+
+
 bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta)
 {
     ADDTOCALLSTACK("CCMultiMovable::MoveDelta");
@@ -553,25 +615,73 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
     ptDelta.ZeroPoint();
 
     CPointMap ptFore(pMultiRegion->GetRegionCorner(dir));
+	CPointMap ptBack(pMultiRegion->GetRegionCorner(GetDirTurn(dir, 4)));
     CPointMap ptLeft(pMultiRegion->GetRegionCorner(GetDirTurn(dir, -1 - (dir % 2))));	// acquiring the flat edges requires two 'turns' for diagonal movement
     CPointMap ptRight(pMultiRegion->GetRegionCorner(GetDirTurn(dir, 1 + (dir % 2))));
     CPointMap ptTest(ptLeft.m_x, ptLeft.m_y, pItemThis->GetTopZ(), pItemThis->GetTopMap());
 
-    bool fStopped = false, fTurbulent = false;
+	signed short iMapBoundX = (ptBack.m_map <= 1) ? 5119 : static_cast<signed short>(g_MapList.GetX(ptBack.m_map));
+	signed short iMapBoundY = static_cast<signed short>(g_MapList.GetY(ptBack.m_map));
+	bool fStopped = false, fTurbulent = false, fMapBoundary = false;
 
     for (int i = 0; i < distance; ++i)
     {
         // Check that we aren't sailing off the edge of the world
         ptFore.Move(dir);
         ptFore.m_z = pItemThis->GetTopZ();
-        if (!ptFore.IsValidPoint())
-        {
-            // Circle the globe
-            // Fall off edge of world ?
-            fStopped = true;
-            fTurbulent = true;
-            break;
-        }
+		if (IsSetOF(OF_MapBoundarySailing))
+		{
+			if (ptFore.m_x < 0)
+			{
+				signed short iDelta = iMapBoundX - ptBack.m_x;
+				ptDelta.m_x += iDelta;
+				ptFore.m_x += iDelta;
+				ptLeft.m_x += iDelta;
+				ptRight.m_x += iDelta;
+				ptTest.m_x += iDelta;
+				fMapBoundary = true;
+			}
+			else if (ptFore.m_y < 0)
+			{
+				signed short iDelta = iMapBoundY - ptBack.m_y;
+				ptDelta.m_y += iDelta;
+				ptFore.m_y += iDelta;
+				ptLeft.m_y += iDelta;
+				ptRight.m_y += iDelta;
+				ptTest.m_y += iDelta;
+				fMapBoundary = true;
+			}
+			else if (ptFore.m_x >= iMapBoundX)
+			{
+				signed short iDelta = ptBack.m_x + 1;
+				ptDelta.m_x -= iDelta;
+				ptFore.m_x -= iDelta;
+				ptLeft.m_x -= iDelta;
+				ptRight.m_x -= iDelta;
+				ptTest.m_x -= iDelta;
+				fMapBoundary = true;
+			}
+			else if (ptFore.m_y >= iMapBoundY)
+			{
+				signed short iDelta = ptBack.m_y + 1;
+				ptDelta.m_y -= iDelta;
+				ptFore.m_y -= iDelta;
+				ptLeft.m_y -= iDelta;
+				ptRight.m_y -= iDelta;
+				ptTest.m_y -= iDelta;
+				fMapBoundary = true;
+			}
+		}
+		else
+		{
+			if (!ptFore.IsValidPoint())
+			{
+				fStopped = true;
+				fTurbulent = true;
+				break;
+			}
+		}
+
 
 #ifdef _DEBUG
      // In debug builds, this flashes some spots over tiles as they are checked for valid movement
@@ -1188,8 +1298,8 @@ bool CCMultiMovable::r_LoadVal(CScript & s)
     ADDTOCALLSTACK("CItemShip::r_LoadVal");
     lpctstr	pszKey = s.GetKey();
     CML_TYPE index = (CML_TYPE)FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
-    CItem *pItemThis = dynamic_cast<CItem*>(this);
-    ASSERT(pItemThis);
+    // CItem *pItemThis = dynamic_cast<CItem*>(this);
+    // ASSERT(pItemThis);
 
     switch (index)
     {
@@ -1237,15 +1347,8 @@ bool CCMultiMovable::r_LoadVal(CScript & s)
         break;
         case CML_PILOT:
         {
-            CChar * pChar = CUID(s.GetArgDWVal()).CharFind();
-            if (pChar)
-                pItemThis->m_itShip.m_Pilot = pChar->GetUID();
-            else
-            {
-                pItemThis->m_itShip.m_Pilot.InitUID();
-                Stop();
-            }
-            return 1;
+			SetPilot(static_cast<CUID>(s.GetArgVal()).CharFind());
+			return true;
         } 
         break;
         default:

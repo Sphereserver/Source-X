@@ -1538,3 +1538,10 @@ WARNING: the following change could break some hackish expedient used in scripts
 	RETURN 1 still blocks the whole trigger behaviour, so it will not flag as criminal and won't remove the MEMORY_SAWCRIME.
 - Added: In @Criminal trigger ARGN2 now holds 1 if the char is being marked as criminal because he has an active MEMORY_SAWCRIME linked to the SRC (viewer), otherwise it holds 0.
 - Added: .ini Option Flag OF_GuardOutsideGuardedArea (Issue #224) to allow guards to walk in unguarded areas, instead of being teleported back to their home point.
+
+27-02-2019, Julian
+- Modified: PILOT function for Ships. Now you can set an UID to pilot the ship, self dclick will remove pilot memory (after triggering @UnMount), also setting same uid twice as pilot will detach pilot from ship.
+	You can modify spk_ship_cmds and add this:
+		ON=Pilot
+		PILOT <SRC.UID>
+- [Port from Source, 23-02-2019, Coruja] Added: .ini Option Flag OF_MapBoundarySailing (Issue #147) to make boats move to the other side of the map when reach map boundary.
