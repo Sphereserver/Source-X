@@ -46,6 +46,7 @@ enum OF_TYPE
 	OF_NoItemNaming				= 0x0000100,    // Disable the DEFMSG."grandmaster_mark" in crafted items
 	OF_NoHouseMuteSpeech		= 0x0000200,    // Players outside multis won't hear what is told inside
 	OF_NoContextMenuLOS			= 0x0000400,    // Disable LOS check to use context menus on chars
+	OF_MapBoundarySailing		= 0x0000800,    // Boats will move to the other side of the map when reach map boundary
 	OF_Flood_Protection			= 0x0001000,    // Prevent the server send messages to client if its the same message as the last already sent
 	OF_Buffs					= 0x0002000,    // Enable the buff/debuff bar on ML clients >= 5.0.2b
 	OF_NoPrefix					= 0x0004000,    // Don't show "a" and "an" prefix on item names
@@ -56,6 +57,7 @@ enum OF_TYPE
     OF_NoTargTurn				= 0x0080000,    // Don't turn the player when targetting something
     OF_StatAllowValOverMax      = 0x0100000,    // Allow stats value above their maximum value (i.e. allow hits value > maxhits).
     OF_GuardOutsideGuardedArea  = 0x0200000     // Allow guards to walk in unguarded areas, instead of being teleported back to their home point.
+	
 };
 
 /**

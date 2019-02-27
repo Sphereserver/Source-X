@@ -56,6 +56,7 @@ public:
     bool Face(DIR_TYPE dir);
     bool Move(DIR_TYPE dir, int distance);
     void Stop();
+	void SetPilot(CChar *pChar);
 };
 
 #endif  //_INC_CCMULTIMOVABLE_H
