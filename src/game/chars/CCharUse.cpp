@@ -687,28 +687,13 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 		SysMessageDefault(DEFMSG_REPAIR_NOT);
 		return false;
 	}
-
-	if ( pItemArmor->IsItemEquipped() )
+	
+	if ( pItemArmor->GetParent() != GetPack() )
 	{
-		SysMessageDefault(DEFMSG_REPAIR_WORN);
+		SysMessageDefault(DEFMSG_REPAIR_BACKPACK);
 		return false;
 	}
-	if ( !CanUse(pItemArmor, true) )
-	{
-		SysMessageDefault(DEFMSG_REPAIR_REACH);
-		return false;
-	}
-
-	// Quickly use arms lore skill, but don't gain any skill until later on
-	int iArmsLoreDiff = Calc_GetRandVal(30);
-	if ( !Skill_UseQuick(SKILL_ARMSLORE, iArmsLoreDiff, false) )
-	{
-		// apply arms lore skillgain for failure
-		Skill_Experience(SKILL_ARMSLORE, -iArmsLoreDiff);
-		SysMessageDefault(DEFMSG_REPAIR_UNK);
-		return false;
-	}
-
+	
 	if ( pItemArmor->m_itArmor.m_Hits_Cur >= pItemArmor->m_itArmor.m_Hits_Max )
 	{
 		SysMessageDefault(DEFMSG_REPAIR_FULL);
@@ -725,83 +710,60 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	CItemBase *pItemDef = pItemArmor->Item_GetDef();
 	ASSERT(pItemDef);
 
-	// Use up some raw materials to repair.
-	int iTotalHits = pItemArmor->m_itArmor.m_Hits_Max;
-	int iDamageHits = pItemArmor->m_itArmor.m_Hits_Max - pItemArmor->m_itArmor.m_Hits_Cur;
-	int iDamagePercent = IMulDiv(100, iDamageHits, iTotalHits);
+	size_t i = pItemDef->m_SkillMake.FindResourceType(RES_SKILL);
+	if (i == pItemDef->m_SkillMake.BadIndex())
+		return false;
 
-	size_t iMissing = ResourceConsumePart(&(pItemDef->m_BaseResources), 1, iDamagePercent / 2, true);
-	if ( iMissing != pItemDef->m_BaseResources.BadIndex() )
+	SKILL_TYPE skill = static_cast<SKILL_TYPE>(pItemDef->m_SkillMake[i].GetResIndex());
+	WORD wSkillVal = Skill_GetAdjusted(skill);
+	int iDecrease = 0;
+	if (wSkillVal >= 900)
+		iDecrease = 1;
+	else if (wSkillVal >= 700)
+		iDecrease = 2;
+	else
+		iDecrease = 3;
+
+	if (pItemArmor->m_itArmor.m_Hits_Max <= iDecrease)
 	{
-		// Need this to repair.
-		const CResourceDef *pCompDef = g_Cfg.ResourceGetDef(pItemDef->m_BaseResources.at(iMissing).GetResourceID());
-		SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_LACK_1), pCompDef ? pCompDef->GetName() : g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_LACK_2));
+		SysMessageDefault(DEFMSG_REPAIR_BREAK);
 		return false;
 	}
 
+	// Consume some materials
+	int iDamagePercent = 100 - ((pItemArmor->m_itArmor.m_Hits_Cur * 100) / pItemArmor->m_itArmor.m_Hits_Max);
+
+	size_t iMissing = ResourceConsumePart(&pItemDef->m_BaseResources, 1, iDamagePercent, true);
+	if (iMissing != pItemDef->m_BaseResources.BadIndex())
+	{
+		const CResourceDef *pResourceDef = g_Cfg.ResourceGetDef(pItemDef->m_BaseResources.at(iMissing).GetResourceID());
+		SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_LACK_1), pResourceDef ? pResourceDef->GetName() : g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_LACK_2));
+		return false;
+	}
+	ResourceConsumePart(&pItemDef->m_BaseResources, 1, iDamagePercent, false);
+
+	// Repair the item
 	UpdateDir(m_Act_p);
-	UpdateAnimate(ANIM_ATTACK_1H_SLASH);
+	if (!g_Cfg.IsSkillFlag(skill, SKF_NOSFX))
+		Sound(Skill_GetSound(skill));
+	if (!g_Cfg.IsSkillFlag(skill, SKF_NOANIM))
+		UpdateAnimate(Skill_GetAnim(skill));
 
-	// quarter the skill to make it.
-	// + more damaged items should be harder to repair.
-	// higher the percentage damage the closer to the skills to make it.
-
-	size_t iRes = pItemDef->m_SkillMake.FindResourceType(RES_SKILL);
-	if ( iRes == pItemDef->m_SkillMake.BadIndex() )
-		return false;
-
-	CResourceQty RetMainSkill = pItemDef->m_SkillMake[iRes];
-	int iSkillLevel = (int)(RetMainSkill.GetResQty()) / 10;
-	int iDifficulty = IMulDiv(iSkillLevel, iDamagePercent, 100);
-	if ( iDifficulty < iSkillLevel / 4 )
-		iDifficulty = iSkillLevel / 4;
-
-	// apply arms lore skillgain now
-	lpctstr pszText;
-	Skill_Experience(SKILL_ARMSLORE, iArmsLoreDiff);
-	bool fSuccess = Skill_UseQuick((SKILL_TYPE)(RetMainSkill.GetResIndex()), iDifficulty);
-	if ( fSuccess )
+	int iDifficulty = (1000 - ((((pItemArmor->m_itArmor.m_Hits_Max - pItemArmor->m_itArmor.m_Hits_Cur) * 1250) / pItemArmor->m_itArmor.m_Hits_Max) - 250)) / 10;
+	pItemArmor->m_itArmor.m_Hits_Max -= iDecrease;
+	if (Skill_UseQuick(skill, iDifficulty, false))
 	{
-		pItemArmor->m_itArmor.m_Hits_Cur = (word)(iTotalHits);
-		pszText = g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_1);
-	}
-	else
-	{
-		/*****************************
-		// not sure if this is working!
-		******************************/
-		// Failure
-		if ( !Calc_GetRandVal(6) )
-		{
-			pszText = g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_2);
-			pItemArmor->m_itArmor.m_Hits_Max--;
-			pItemArmor->m_itArmor.m_Hits_Cur--;
-		}
-		else if ( !Calc_GetRandVal(3) )
-		{
-			pszText = g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_3);
-			pItemArmor->m_itArmor.m_Hits_Cur--;
-		}
-		else
-			pszText = g_Cfg.GetDefaultMsg( DEFMSG_REPAIR_4 );
-
-		iDamagePercent = Calc_GetRandVal(iDamagePercent);	// some random amount
-	}
-
-	ResourceConsumePart(&(pItemDef->m_BaseResources), 1, iDamagePercent / 2, false);
-	if ( pItemArmor->m_itArmor.m_Hits_Cur <= 0 )
-		pszText = g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_5);
-
-	tchar *pszMsg = Str_GetTemp();
-	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_MSG), pszText, pItemArmor->GetName());
-	Emote(pszMsg);
-
-	if ( pItemArmor->m_itArmor.m_Hits_Cur <= 0 )
-		pItemArmor->Delete();
-	else
+		pItemArmor->m_itArmor.m_Hits_Cur = pItemArmor->m_itArmor.m_Hits_Max;
 		pItemArmor->UpdatePropertyFlag();
-
-	return fSuccess;
+		SysMessageDefault(DEFMSG_REPAIR_SUCCESS);
+		return true;
+	}
+	else
+	{
+		pItemArmor->m_itArmor.m_Hits_Cur = maximum(0, pItemArmor->m_itArmor.m_Hits_Cur - iDecrease);
+		SysMessageDefault(DEFMSG_REPAIR_FAIL);
+		return false;
+	}
 }
 
 void CChar::Use_EatQty( CItem * pFood, ushort uiQty )
