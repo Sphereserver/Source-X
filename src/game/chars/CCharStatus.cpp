@@ -1397,8 +1397,6 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
 		const CChar *pCharSrc = dynamic_cast<const CChar*>(pSrc);
 		ASSERT(pCharSrc);
 		pSrcRegion = pCharSrc->GetRegion();
-		if ( pCharSrc->IsPriv(PRIV_GM) )
-			return true;
 	}
 	else
     {
@@ -1476,7 +1474,7 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
 
     auto _RegionBlocksSpeech = [](const CRegion* pRegion) -> bool
     {
-        const CResourceID ridRegion = pRegion->GetResourceID();
+        const CResourceID& ridRegion = pRegion->GetResourceID();
         const bool fRegionFromItem = ridRegion.IsUIDItem();
         bool fCanSpeech = false;
         const CVarDefCont *pValue = fRegionFromItem ? ridRegion.ItemFindFromResource()->GetKey("NOMUTESPEECH", false) : nullptr;
