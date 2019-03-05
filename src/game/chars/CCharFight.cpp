@@ -1754,7 +1754,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 		SOUND_TYPE iSound = SOUND_NONE;
 		if ( pWeapon )
-			iSound = pWeapon->Weapon_GetSoundMiss();
+			iSound = pWeapon->Weapon_GetSoundMiss(); 
 		if ( iSound == SOUND_NONE)
 		{
 			if ( g_Cfg.IsSkillFlag(skill, SKF_RANGED) )

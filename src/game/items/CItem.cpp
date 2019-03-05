@@ -4576,7 +4576,7 @@ SKILL_TYPE CItem::Weapon_GetSkill() const
 SOUND_TYPE CItem::Weapon_GetSoundHit() const
 {
 	ADDTOCALLSTACK("CItem::Weapon_GetSoundHit");
-	// Get weapon hit sound
+	// Get ranged weapon ammo hit sound if present.
 
 	word wAmmoSoundHit = GetPropNum(COMP_PROPS_ITEMWEAPONRANGED, PROPIWEAPRNG_AMMOSOUNDHIT, true);
 	if (wAmmoSoundHit > 0)
@@ -4587,7 +4587,7 @@ SOUND_TYPE CItem::Weapon_GetSoundHit() const
 SOUND_TYPE CItem::Weapon_GetSoundMiss() const
 {
 	ADDTOCALLSTACK("CItem::Weapon_GetSoundMiss");
-	// Get weapon miss sound
+	// Get ranged weapon ammo miss sound if present.
 
 	word wAmmoSoundMiss = GetPropNum(COMP_PROPS_ITEMWEAPONRANGED, PROPIWEAPRNG_AMMOSOUNDMISS, true);
 	if ( wAmmoSoundMiss > 0 )
@@ -4659,6 +4659,8 @@ CItem *CItem::Weapon_FindRangedAmmo(CResourceID id)
 		}
 		else // Search container using ITEMID_TYPE
 		{
+			//Reassigned the value from sAmmoCont.GetPtr() because it seems that Exp_GetDWal clears it 
+			ptcAmmoCont = sAmmoCont.GetPtr();
 			CResourceID ridCont(g_Cfg.ResourceGetID(RES_ITEMDEF, ptcAmmoCont));
 			pCont = dynamic_cast<CContainer *>(pParent->ContentFind(ridCont));
 			if (pCont)
