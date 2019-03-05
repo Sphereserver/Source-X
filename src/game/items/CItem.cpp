@@ -4651,14 +4651,15 @@ CItem *CItem::Weapon_FindRangedAmmo(CResourceID id)
 	if ( !sAmmoCont.IsEmpty())
 	{
 		// Search container using UID
-		CContainer *pCont = dynamic_cast<CContainer *>(CUID::ItemFind(Exp_GetDWVal(sAmmoCont.GetPtr())));
+		lpctstr  ptcAmmoCont = sAmmoCont.GetPtr();
+		CContainer *pCont = dynamic_cast<CContainer *>(CUID::ItemFind(Exp_GetDWVal(ptcAmmoCont)));
 		if ( pCont )	//If the container exist that means the uid was a valid container uid.
 		{
 			return pCont->ContentFind(id);
 		}
 		else // Search container using ITEMID_TYPE
 		{
-			CResourceID ridCont(g_Cfg.ResourceGetID(RES_ITEMDEF, sAmmoCont.GetPtr()));
+			CResourceID ridCont(g_Cfg.ResourceGetID(RES_ITEMDEF, ptcAmmoCont));
 			pCont = dynamic_cast<CContainer *>(pParent->ContentFind(ridCont));
 			if (pCont)
 				return pCont->ContentFind(id);
