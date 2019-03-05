@@ -39,7 +39,7 @@ private:
     CResourceDef& operator=(const CResourceDef& other);
 
 public:
-    inline CResourceID GetResourceID() const
+    inline const CResourceID& GetResourceID() const
     {
         return m_rid;
     }

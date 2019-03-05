@@ -3170,12 +3170,15 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 					iCount = 1;
 				if ( !GetContainer() && (iCount > g_Cfg.m_iMaxItemComplexity) )	// if top-level, obey the complexity
 					iCount = g_Cfg.m_iMaxItemComplexity;
+                bool fNoCont = IsTopLevel();
 				while ( iCount-- )
 				{
 					CItem* pDupe = CItem::CreateDupeItem(this, dynamic_cast<CChar *>(pSrc), true);
 					pDupe->m_iCreatedResScriptIdx = s.m_iResourceFileIndex;
 					pDupe->m_iCreatedResScriptLine = s.m_iLineNum;
 					pDupe->MoveNearObj(this, 1);
+                    if (fNoCont)
+                        pDupe->Update();
 				}
 			}
 			break;
