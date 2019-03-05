@@ -4578,9 +4578,9 @@ SOUND_TYPE CItem::Weapon_GetSoundHit() const
 	ADDTOCALLSTACK("CItem::Weapon_GetSoundHit");
 	// Get weapon hit sound
 
-	CVarDefCont *pVar = GetDefKey("AMMOSOUNDHIT", true);
-	if ( pVar )
-		return (SOUND_TYPE)pVar->GetValNum();
+	word wAmmoSoundHit = GetPropNum(COMP_PROPS_ITEMWEAPONRANGED, PROPIWEAPRNG_AMMOSOUNDHIT, true);
+	if (wAmmoSoundHit > 0)
+		return (SOUND_TYPE)wAmmoSoundHit;
 	return SOUND_NONE;
 }
 
@@ -4589,9 +4589,9 @@ SOUND_TYPE CItem::Weapon_GetSoundMiss() const
 	ADDTOCALLSTACK("CItem::Weapon_GetSoundMiss");
 	// Get weapon miss sound
 
-	CVarDefCont *pVar = GetDefKey("AMMOSOUNDMISS", true);
-	if ( pVar )
-		return (SOUND_TYPE)pVar->GetValNum();
+	word wAmmoSoundMiss = GetPropNum(COMP_PROPS_ITEMWEAPONRANGED, PROPIWEAPRNG_AMMOSOUNDMISS, true);
+	if ( wAmmoSoundMiss > 0 )
+		return (SOUND_TYPE)wAmmoSoundMiss;
 	return SOUND_NONE;
 }
 
@@ -4600,27 +4600,27 @@ void CItem::Weapon_GetRangedAmmoAnim(ITEMID_TYPE &id, dword &hue, dword &render)
 	ADDTOCALLSTACK("CItem::Weapon_GetRangedAmmoAnim");
 	// Get animation properties of this ranged weapon (archery/throwing)
 
-	CVarDefCont *pVarAnim = GetDefKey("AMMOANIM", true);
-	if ( pVarAnim )
+	CSString sAmmoAnim = GetPropStr(COMP_PROPS_ITEMWEAPONRANGED, PROPIWEAPRNG_AMMOANIM, true, true);
+	if (!sAmmoAnim.IsEmpty())
 	{
-		lpctstr t_Str = pVarAnim->GetValStr();
-		CResourceID rid(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
+		CResourceID rid(g_Cfg.ResourceGetID(RES_ITEMDEF, sAmmoAnim));
 		id = (ITEMID_TYPE)rid.GetResIndex();
 	}
 	else
 	{
 		const CItemBase *pWeaponDef = Item_GetDef();
-		if ( pWeaponDef )
+		if (pWeaponDef)
 			id = (ITEMID_TYPE)(pWeaponDef->m_ttWeaponBow.m_ridAmmoX.GetResIndex());
 	}
 
-	CVarDefCont *pVarAnimHue = GetDefKey("AMMOANIMHUE", true);
-	if ( pVarAnimHue )
-		hue = (dword)pVarAnimHue->GetValNum();
+	dword dwAmmoHue = GetPropNum(COMP_PROPS_ITEMWEAPONRANGED, PROPIWEAPRNG_AMMOANIMHUE, true);
 
-	CVarDefCont *pVarAnimRender = GetDefKey("AMMOANIMRENDER", true);
-	if ( pVarAnimRender )
-		render = (dword)pVarAnimRender->GetValNum();
+	if (dwAmmoHue > 0)
+		hue = dwAmmoHue;
+
+	dword dwAmmoRender = GetPropNum(COMP_PROPS_ITEMWEAPONRANGED, PROPIWEAPRNG_AMMOANIMRENDER, true);
+	if (dwAmmoRender > 0)
+		render = dwAmmoRender;
 }
 
 CResourceID CItem::Weapon_GetRangedAmmoRes()
@@ -4646,27 +4646,47 @@ CItem *CItem::Weapon_FindRangedAmmo(CResourceID id)
 
 	// Get the container to search
 	CContainer *pParent = dynamic_cast<CContainer *>(dynamic_cast<CObjBase *>(GetParent()));
-	CVarDefCont *pVarCont = GetDefKey("AMMOCONT", true);
-	if ( pVarCont )
+	
+	CSString sAmmoCont = GetPropStr(COMP_PROPS_ITEMWEAPONRANGED, PROPIWEAPRNG_AMMOCONT, true,true);
+	if ( !sAmmoCont.IsEmpty())
 	{
 		// Search container using UID
-		CUID uidCont((dword)pVarCont->GetValNum());
+		lpctstr  pszAmmoCont = sAmmoCont.GetPtr();
+		CUID uidCont((dword)pszAmmoCont);
 		CContainer *pCont = dynamic_cast<CContainer *>(uidCont.ItemFind());
-		if ( pCont )
-			return pCont->ContentFind(id);
-
-		// Search container using ITEMID_TYPE
-		if ( pParent )
+		if ( pCont )	//If the container exist that means the uid was a valid container uid.
 		{
-			lpctstr pszContID = pVarCont->GetValStr();
-			CResourceID ridCont(g_Cfg.ResourceGetID(RES_ITEMDEF, pszContID));
+			return pCont->ContentFind(id);
+		}
+		else // Search container using ITEMID_TYPE
+		{
+			CResourceID ridCont(g_Cfg.ResourceGetID(RES_ITEMDEF, sAmmoCont.GetPtr()));
 			pCont = dynamic_cast<CContainer *>(pParent->ContentFind(ridCont));
+			if (pCont)
+				return pCont->ContentFind(id);
+			return nullptr;
+		}
+		//CVarDefCont *pVarCont = GetDefKey("AMMOCONT", true);
+		/*if ( pVarCont )
+		{
+			// Search container using UID
+			CUID uidCont((dword)pVarCont->GetValNum());
+			CContainer *pCont = dynamic_cast<CContainer *>(uidCont.ItemFind());
 			if ( pCont )
 				return pCont->ContentFind(id);
-		}
-		return nullptr;
-	}
 
+			// Search container using ITEMID_TYPE
+			if ( pParent )
+			{
+				lpctstr pszContID = pVarCont->GetValStr();
+				CResourceID ridCont(g_Cfg.ResourceGetID(RES_ITEMDEF, pszContID));
+				pCont = dynamic_cast<CContainer *>(pParent->ContentFind(ridCont));
+				if ( pCont )
+					return pCont->ContentFind(id);
+			}
+			return nullptr;
+		}*/
+	}
 	// Search on parent container if there's no specific container to search
 	if ( pParent )
 		return pParent->ContentFind(id);

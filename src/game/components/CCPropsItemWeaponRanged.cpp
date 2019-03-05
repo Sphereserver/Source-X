@@ -44,8 +44,12 @@ bool CCPropsItemWeaponRanged::IsPropertyStr(int iPropIndex) const
 {
     switch (iPropIndex)
     {
-        case PROPIWEAPRNG_AMMOTYPE:
-            return true;
+		case PROPIWEAPRNG_AMMOANIM:
+			return true;
+		case PROPIWEAPRNG_AMMOCONT:
+			return true;
+		case PROPIWEAPRNG_AMMOTYPE:
+			return true;
         default:
             return false;
     }
