@@ -376,7 +376,7 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	}
 	else
 	{
-		CResourceID	rid	= ResourceGetID((RES_TYPE)iResType, pszKey);
+		CResourceID	rid	= ResourceGetID((RES_TYPE)iResType, pszKey, RES_PAGE_ANY);
 
 		// check the found resource type matches what we searched for
 		if ( rid.GetResType() == iResType )

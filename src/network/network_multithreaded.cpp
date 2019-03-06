@@ -739,7 +739,7 @@ void NetworkInput::receiveData()
 			// todo: if possible, it would be useful to be able to perform that separation here,
 			// but this is made difficult due to the variety of client types and encryptions that
 			// may be connecting
-			size_t length = received;
+			uint length = (uint)received;
 
 			Packet* packet = new Packet(buffer, length);
 			state->m_incoming.rawPackets.push(packet);
@@ -814,7 +814,7 @@ void NetworkInput::processData()
 			else
 			{
 				// append to buffer
-				size_t pos = state->m_incoming.rawBuffer->getPosition();
+				uint pos = state->m_incoming.rawBuffer->getPosition();
 				state->m_incoming.rawBuffer->seek(state->m_incoming.rawBuffer->getLength());
 				state->m_incoming.rawBuffer->writeData(packet->getData(), packet->getLength());
 				state->m_incoming.rawBuffer->seek(pos);
@@ -938,14 +938,14 @@ bool NetworkInput::processGameClientData(NetState* state, Packet* buffer)
 	else
 	{
 		// append to buffer
-		size_t pos = state->m_incoming.buffer->getPosition();
+		uint pos = state->m_incoming.buffer->getPosition();
 		state->m_incoming.buffer->seek(state->m_incoming.buffer->getLength());
 		state->m_incoming.buffer->writeData(m_decryptBuffer, buffer->getRemainingLength());
 		state->m_incoming.buffer->seek(pos);
 	}
 
 	Packet* packet = state->m_incoming.buffer;
-	size_t remainingLength = packet->getRemainingLength();
+	uint remainingLength = packet->getRemainingLength();
 
 	EXC_SET_BLOCK("record message");
 	xRecordPacket(client, packet, "client->server");
@@ -972,7 +972,7 @@ bool NetworkInput::processGameClientData(NetState* state, Packet* buffer)
 
 		if (handler != nullptr)
 		{
-			size_t packetLength = handler->checkLength(state, packet);
+			uint packetLength = handler->checkLength(state, packet);
 			if (packetLength <= 0)
 			{
 				DEBUGNETWORK(("%x:Game packet (0x%x) does not match the expected length, waiting for more data...\n", state->id(), packetId));
@@ -1669,7 +1669,7 @@ bool NetworkOutput::sendPacketData(NetState* state, PacketSend* packet)
 
 	EXC_SET_BLOCK("prepare data");
 	byte* sendBuffer = nullptr;
-	size_t sendBufferLength = 0;
+	uint sendBufferLength = 0;
 
 	if (client->GetConnectType() == CONNECT_GAME)
 	{
@@ -1677,7 +1677,7 @@ bool NetworkOutput::sendPacketData(NetState* state, PacketSend* packet)
 		EXC_SET_BLOCK("compress and encrypt");
 
 		// compress
-		size_t compressLength = client->xCompress(m_encryptBuffer, packet->getData(), MAX_BUFFER, packet->getLength());
+		uint compressLength = client->xCompress(m_encryptBuffer, packet->getData(), MAX_BUFFER, packet->getLength());
         if (compressLength == 0)
         {
             g_Log.EventError("NET-OUT: Trying to compress (Huffman) too much data. Packet will not be sent. (Probably it's a dialog with a lot of data inside).\n");

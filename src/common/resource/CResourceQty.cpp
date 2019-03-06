@@ -21,7 +21,7 @@ size_t CResourceQty::WriteKey( tchar * pszArgs, bool fQtyOnly, bool fKeyOnly ) c
     ADDTOCALLSTACK("CResourceQty::WriteKey");
     size_t i = 0;
     if ( (GetResQty() || fQtyOnly) && !fKeyOnly )
-        i = sprintf( pszArgs, "%" PRId64 , GetResQty());
+        i = sprintf( pszArgs, "%" PRId64 " ", GetResQty());
     if ( !fQtyOnly )
         i += strcpylen( pszArgs+i, g_Cfg.ResourceGetName( m_rid ));
     return i;

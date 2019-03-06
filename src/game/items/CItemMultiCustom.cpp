@@ -119,7 +119,7 @@ void CItemMultiCustom::BeginCustomize(CClient * pClientSrc)
     {
         // the client leaves 'nodispose' dialogs open
         pDlg = dynamic_cast<CDialogDef*>(g_Cfg.ResourceGetDef(CResourceID(RES_DIALOG, it->first)));
-        if (pDlg != nullptr && pDlg->m_bNoDispose == true)
+        if (pDlg != nullptr && pDlg->m_fNoDispose == true)
             continue;
 
         it->second = 0;

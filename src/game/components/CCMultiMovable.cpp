@@ -102,7 +102,7 @@ void CCMultiMovable::SetNextMove()
     pItemThis->SetTimeout(iDelay);
 }
 
-size_t CCMultiMovable::ListObjs(CObjBase ** ppObjList)
+uint CCMultiMovable::ListObjs(CObjBase ** ppObjList)
 {
     ADDTOCALLSTACK("CCMultiMovable::ListObjs");
     // List all the objects in the structure.
@@ -118,13 +118,13 @@ size_t CCMultiMovable::ListObjs(CObjBase ** ppObjList)
     int iShipHeight = pItemThis->GetTopZ() + maximum(3, pItemThis->GetHeight());
 
     // always list myself first. All other items must see my new region !
-    size_t iCount = 0;
-    ppObjList[iCount++] = pItemThis;
+    uint uiCount = 0;
+    ppObjList[uiCount++] = pItemThis;
 
     CWorldSearch AreaChar(pItemThis->GetTopPoint(), iMaxDist);
     AreaChar.SetAllShow(true);
     AreaChar.SetSearchSquare(true);
-    while (iCount < MAX_MULTI_LIST_OBJS)
+    while (uiCount < MAX_MULTI_LIST_OBJS)
     {
         CChar * pChar = AreaChar.GetChar();
         if (pChar == nullptr)
@@ -138,12 +138,12 @@ size_t CCMultiMovable::ListObjs(CObjBase ** ppObjList)
         if ((zdiff < -2) || (zdiff > PLAYER_HEIGHT))
             continue;
 
-        ppObjList[iCount++] = pChar;
+        ppObjList[uiCount++] = pChar;
     }
 
     CWorldSearch AreaItem(pItemThis->GetTopPoint(), iMaxDist);
     AreaItem.SetSearchSquare(true);
-    while (iCount < MAX_MULTI_LIST_OBJS)
+    while (uiCount < MAX_MULTI_LIST_OBJS)
     {
         CItem * pItem = AreaItem.GetItem();
         if (pItem == nullptr)
@@ -164,9 +164,9 @@ size_t CCMultiMovable::ListObjs(CObjBase ** ppObjList)
             if ((zdiff < -2) || (zdiff > PLAYER_HEIGHT))
                 continue;
         }
-        ppObjList[iCount++] = pItem;
+        ppObjList[uiCount++] = pItem;
     }
-    return iCount;
+    return uiCount;
 }
 
 void CCMultiMovable::SetPilot(CChar *pChar)
@@ -181,7 +181,7 @@ void CCMultiMovable::SetPilot(CChar *pChar)
 
 	// Remove memory on previous pilot
 	CChar *pCharPrev = pItemThis->m_itShip.m_Pilot.CharFind();
-	if ( pCharPrev && (pCharPrev == pChar))
+	if (pCharPrev && (pCharPrev == pChar))
 	{
 		CItem *pMemoryPrev = pCharPrev->ContentFind(CResourceID(RES_ITEMDEF, ITEMID_SHIP_PILOT));
 		if (pMemoryPrev)
@@ -259,7 +259,7 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta)
 
     // Move the ship and everything on the deck
     CObjBase * ppObjs[MAX_MULTI_LIST_OBJS + 1];
-    size_t iCount = ListObjs(ppObjs);
+    uint iCount = ListObjs(ppObjs);
     ASSERT(iCount > 0);
 
     for (size_t i = 0; i < iCount; ++i)
@@ -292,13 +292,13 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta)
         const int iViewDist = pCharClient->GetVisualRange();
         
         // No smooth sailing: update the view for each item inside the multi
-        for (size_t i = 0; i < iCount; ++i)
+        for (uint i = 0; i < iCount; ++i)
         {
             CObjBase * pObj = ppObjs[i];
             if (!pObj)
                 continue; //no object anymore? skip!
 
-            CPointMap pt = pObj->GetTopPoint();
+            const CPointMap pt = pObj->GetTopPoint();
             CPointMap ptOld(pt);
             ptOld -= ptDelta;
 
@@ -620,9 +620,9 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
     CPointMap ptRight(pMultiRegion->GetRegionCorner(GetDirTurn(dir, 1 + (dir % 2))));
     CPointMap ptTest(ptLeft.m_x, ptLeft.m_y, pItemThis->GetTopZ(), pItemThis->GetTopMap());
 
-	signed short iMapBoundX = (ptBack.m_map <= 1) ? 5119 : static_cast<signed short>(g_MapList.GetX(ptBack.m_map));
-	signed short iMapBoundY = static_cast<signed short>(g_MapList.GetY(ptBack.m_map));
-    bool fStopped = false, fTurbulent = false, fMapBoundary = false;
+	short iMapBoundX = static_cast<short>(g_MapList.GetX(ptBack.m_map));
+	short iMapBoundY = static_cast<short>(g_MapList.GetY(ptBack.m_map));
+	bool fStopped = false, fTurbulent = false, fMapBoundary = false;
 
     for (int i = 0; i < distance; ++i)
     {
@@ -671,7 +671,7 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
 				ptTest.m_y -= iDelta;
 				fMapBoundary = true;
 			}
-			}
+		}
 		else
 		{
 			if (!ptFore.IsValidPoint())
@@ -1348,7 +1348,7 @@ bool CCMultiMovable::r_LoadVal(CScript & s)
         case CML_PILOT:
         {
 			SetPilot(static_cast<CUID>(s.GetArgVal()).CharFind());
-            return true;
+			return true;
         } 
         break;
         default:

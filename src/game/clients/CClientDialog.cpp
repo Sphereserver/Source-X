@@ -42,7 +42,7 @@ bool CClient::Dialog_Setup( CLIMODE_TYPE mode, const CResourceID& rid, int iPage
 		}
 	}
 
-	addGumpDialog( mode, pDlg->m_sControls, pDlg->m_iControls, pDlg->m_sText, pDlg->m_iTexts, pDlg->m_x, pDlg->m_y, pObj, context );
+	addGumpDialog( mode, pDlg->m_sControls, pDlg->m_uiControls, pDlg->m_sText, pDlg->m_uiTexts, pDlg->m_x, pDlg->m_y, pObj, context );
 	return true;
 }
 
@@ -77,7 +77,7 @@ void CClient::addGumpInpVal( bool fCancel, INPVAL_STYLE style,
 	SetTargMode( CLIMODE_INPVAL );
 }
 
-void CClient::addGumpDialog( CLIMODE_TYPE mode, const CSString * psControls, size_t iControls, const CSString * psText, size_t iTexts, int x, int y, CObjBase * pObj, dword dwRid )
+void CClient::addGumpDialog( CLIMODE_TYPE mode, const CSString * psControls, uint uiControls, const CSString * psText, uint uiTexts, int x, int y, CObjBase * pObj, dword dwRid )
 {
 	ADDTOCALLSTACK("CClient::addGumpDialog");
 	// Add a generic GUMP menu.
@@ -95,7 +95,7 @@ void CClient::addGumpDialog( CLIMODE_TYPE mode, const CSString * psControls, siz
 	}
 
 	PacketGumpDialog* cmd = new PacketGumpDialog(x, y, pObj, context_mode);
-	cmd->writeControls(this, psControls, iControls, psText, iTexts);
+	cmd->writeControls(this, psControls, uiControls, psText, uiTexts);
 	cmd->push(this);
 
 	if ( m_pChar )
@@ -365,15 +365,15 @@ void CClient::Menu_Setup( CResourceID rid, CObjBase * pObj )
 	item[0].m_sText = s.GetKey();
 	// item[0].m_id = rid.m_internalrid;	// general context id
 
-	size_t i = 0;
+	uint i = 0;
 	while (s.ReadKeyParse())
 	{
 		if ( ! s.IsKey( "ON" ))
 			continue;
 
-		i++;
+		++i;
 		if ( ! item[i].ParseLine( s.GetArgRaw(), pObj, m_pChar ))
-			i--;
+			--i;
 
 		if ( i >= (CountOf( item ) - 1))
 			break;

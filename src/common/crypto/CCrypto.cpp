@@ -312,7 +312,7 @@ CCrypto::~CCrypto()
 	delete md5_engine;
 }
 
-bool CCrypto::Init( dword dwIP, byte * pEvent, size_t inLen, bool isclientKr )
+bool CCrypto::Init( dword dwIP, byte * pEvent, uint inLen, bool isclientKr )
 {
 	ADDTOCALLSTACK("CCrypto::Init");
 	bool bReturn = true;
@@ -385,7 +385,7 @@ void CCrypto::InitFast( dword dwIP, CONNECT_TYPE ctInit, bool fRelay)
 /*		Encryption utility methods		*/
 
 
-bool CCrypto::RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen )
+bool CCrypto::RelayGameCryptStart( byte * pOutput, const byte * pInput, uint outLen, uint inLen )
 {
 	/**
 	* When the client switches between login and game server without opening a new connection, the first game packet
@@ -478,7 +478,7 @@ bool CCrypto::RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t o
     return true;
 }
 
-bool CCrypto::Encrypt( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen )
+bool CCrypto::Encrypt( byte * pOutput, const byte * pInput, uint outLen, uint inLen )
 {
 	ADDTOCALLSTACK("CCrypto::Encrypt");
 	if ( ! inLen )
@@ -510,7 +510,7 @@ bool CCrypto::Encrypt( byte * pOutput, const byte * pInput, size_t outLen, size_
     return true;
 }
 
-bool CCrypto::Decrypt( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen )
+bool CCrypto::Decrypt( byte * pOutput, const byte * pInput, uint outLen, uint inLen )
 {
 	ADDTOCALLSTACK("CCrypto::Decrypt");
 	if ( ! inLen )
@@ -581,7 +581,7 @@ bool CCrypto::Decrypt( byte * pOutput, const byte * pInput, size_t outLen, size_
 
 /*		Handle login encryption		*/
 
-bool CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, size_t inLen )
+bool CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, uint inLen )
 {
 	ADDTOCALLSTACK("CCrypto::LoginCryptStart");
 	ASSERT(pEvent != nullptr);
@@ -599,7 +599,7 @@ bool CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, size_t inLen )
 	SetClientVerIndex(0);
 	SetCryptMask(m_tmp_CryptMaskHi, m_tmp_CryptMaskLo);
 
-	for (size_t i = 0, iAccountNameLen = 0;;)
+	for (uint i = 0, iAccountNameLen = 0;;)
 	{
 		if ( i >= client_keys.size() )
 		{
@@ -679,7 +679,7 @@ bool CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, size_t inLen )
     return true;
 }
 
-bool CCrypto::GameCryptStart( dword dwIP, byte * pEvent, size_t inLen )
+bool CCrypto::GameCryptStart( dword dwIP, byte * pEvent, uint inLen )
 {
 	ADDTOCALLSTACK("CCrypto::GameCryptStart");
 	ASSERT( pEvent != nullptr );
@@ -694,7 +694,7 @@ bool CCrypto::GameCryptStart( dword dwIP, byte * pEvent, size_t inLen )
 	bool bOut = false;
 
     // Auto-detect if the encryption is BFISH, BTFISH or TFISH
-	for ( size_t i = ENC_NONE; i <= ENC_TFISH; ++i )
+	for ( uint i = ENC_NONE; i <= ENC_TFISH; ++i )
 	{
 		SetEncryptionType( (ENCRYPTION_TYPE)i );
 		if ( GetEncryptionType() == ENC_TFISH || GetEncryptionType() == ENC_BTFISH )

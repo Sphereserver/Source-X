@@ -584,7 +584,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 	{
 		tchar *pszTemp = Str_GetTemp();
 		sprintf(pszTemp, "HTTP/1.1 304 Not Modified\r\nDate: %s\r\nServer: " SPHERE_TITLE " " SPHERE_VERSION_PREFIX SPHERE_VERSION "\r\nContent-Length: 0\r\n\r\n", sDate);
-		new PacketWeb(pClient, (byte*)pszTemp, strlen(pszTemp));
+		new PacketWeb(pClient, (byte*)pszTemp, (uint)strlen(pszTemp));
 		return 0;
 	}
 
@@ -595,7 +595,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 
 	// Send the header first.
 	tchar szTmp[8*1024];
-	size_t iLen = sprintf(szTmp,
+	int iLen = sprintf(szTmp,
 		"HTTP/1.1 200 OK\r\n" // 100 Continue
 		"Date: %s\r\n"
 		"Server: " SPHERE_TITLE " " SPHERE_VERSION_PREFIX SPHERE_VERSION "\r\n"
@@ -617,7 +617,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 		);
 
 	PacketWeb packet;
-	packet.setData((byte*)szTmp, iLen);
+	packet.setData((byte*)szTmp, (uint)iLen);
 	packet.send(pClient);
 
 	for (;;)
@@ -625,10 +625,10 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 		iLen = FileRead.Read( szTmp, sizeof( szTmp ) );
 		if ( iLen <= 0 )
 			break;
-		packet.setData((byte*)szTmp, iLen);
+		packet.setData((byte*)szTmp, (uint)iLen);
 		packet.send(pClient);
 		//dwSize -= iLen;
-		if ( iLen < sizeof( szTmp ) )
+		if ( iLen < (int)sizeof( szTmp ) )
 		{
 			// memset( szTmp+iLen, 0, sizeof(szTmp)-iLen );
 			break;

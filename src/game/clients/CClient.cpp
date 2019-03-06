@@ -874,7 +874,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				}
 
 				lpctstr Args[7];
-				size_t ArgsCount = 0;
+				uint ArgsCount = 0;
 				for ( int i = 0; i < 7; ++i )
 				{
 					Args[i] = ppArgs[i + 4];

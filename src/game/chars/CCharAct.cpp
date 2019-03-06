@@ -1421,13 +1421,9 @@ void CChar::SoundChar( CRESND_TYPE type )
 		CItem * pWeapon = m_uidWeapon.ItemFind();
 		if ( pWeapon != nullptr )
 		{
-			CVarDefCont * pVar = pWeapon->GetDefKey("AMMOSOUNDHIT", true);
-			if ( pVar )
-			{
-				if ( pVar->GetValNum() )
-					id = (SOUND_TYPE)(pVar->GetValNum());
-			}
-			else
+			//The Weapon_GetSoundHit() method below check if the ranged weapon equipped has the AMMOSOUNDHIT property.
+			id = pWeapon->Weapon_GetSoundHit();
+			if  ( !id )
 			{
 				// weapon type strike noise based on type of weapon and how hard hit.
 				switch ( pWeapon->GetType() )
@@ -1888,7 +1884,10 @@ bool CChar::ItemBounce( CItem * pItem, bool bDisplayMsg )
 		{
             CItem* pPrevCont = dynamic_cast<CItem*>(pItem->GetContainer());
 			CScriptTriggerArgs Args(pItem);
-			if (pPack->OnTrigger(ITRIG_DROPON_SELF, this, &Args) == TRIGRET_RET_TRUE)
+            TRIGRET_TYPE ret = pPack->OnTrigger(ITRIG_DROPON_SELF, this, &Args);
+            if ( pItem->IsDeleted() )	// the trigger had deleted the item
+                return false;
+			if (ret == TRIGRET_RET_TRUE)
             {
 				bCanAddToPack = false;
                 CItem* pCont = dynamic_cast<CItem*>(pItem->GetContainer());

@@ -1018,6 +1018,8 @@ enum ITEMID_TYPE	// InsideUO or UoFiddler are great for this stuff.
 	ITEMID_SHIP_PLANK_N_C = 0x3e8a,
 	ITEMID_SHIP_PILOT = 0x3e96,
 
+	ITEMID_SHIP_PILOT = 0x3e96,
+
 	ITEMID_M_HORSE1 = 0x3E9F,	// horse item when ridden
 	ITEMID_M_HORSE2 = 0x3EA0,
 	ITEMID_M_HORSE3 = 0x3EA1,

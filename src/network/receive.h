@@ -24,7 +24,7 @@
 class PacketUnknown : public Packet
 {
 public:
-	PacketUnknown(size_t size = 0);
+	PacketUnknown(uint size = 0);
 	virtual bool onReceive(NetState* net);
 };
 
@@ -38,7 +38,7 @@ public:
 class PacketCreate : public Packet
 {
 public:
-	PacketCreate(size_t size = 104);
+	PacketCreate(uint size = 104);
 	virtual bool onReceive(NetState* net);
 
 protected:
@@ -58,7 +58,7 @@ protected:
 class PacketMovementReq : public Packet
 {
 public:
-	PacketMovementReq(size_t size = 7);
+	PacketMovementReq(uint size = 7);
 	virtual bool onReceive(NetState* net);
 };
 
@@ -129,7 +129,7 @@ class PacketItemDropReq : public Packet
 {
 public:
 	PacketItemDropReq();
-	virtual size_t getExpectedLength(NetState* client, Packet* packet);
+	virtual uint getExpectedLength(NetState* client, Packet* packet);
 	virtual bool onReceive(NetState* net);
 };
 

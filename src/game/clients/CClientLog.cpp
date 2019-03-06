@@ -18,7 +18,7 @@ CHuffman CClient::m_Comp;
 /////////////////////////////////////////////////////////////////
 // -CClient stuff.
 
-size_t CClient::xCompress( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen ) // static
+uint CClient::xCompress( byte * pOutput, const byte * pInput, uint outLen, uint inLen ) // static
 {
 	ADDTOCALLSTACK("CClient::xCompress");
 	// The game server will compress the outgoing data to the clients.
@@ -340,7 +340,7 @@ bool CClient::OnRxConsoleLoginComplete()
 	return true;
 }
 
-bool CClient::OnRxConsole( const byte * pData, size_t iLen )
+bool CClient::OnRxConsole( const byte * pData, uint iLen )
 {
 	ADDTOCALLSTACK("CClient::OnRxConsole");
 	// A special console version of the client. (Not game protocol)
@@ -413,7 +413,7 @@ bool CClient::OnRxConsole( const byte * pData, size_t iLen )
 	return true;
 }
 
-bool CClient::OnRxAxis( const byte * pData, size_t iLen )
+bool CClient::OnRxAxis( const byte * pData, uint iLen )
 {
 	ADDTOCALLSTACK("CClient::OnRxAxis");
 	if ( !iLen || ( GetConnectType() != CONNECT_AXIS ))
@@ -487,10 +487,10 @@ bool CClient::OnRxAxis( const byte * pData, size_t iLen )
 							PacketWeb packet;
 							for (;;)
 							{
-								size_t iLength = FileRead.Read( szTmp, sizeof( szTmp ) );
+								int iLength = FileRead.Read( szTmp, sizeof( szTmp ) );
 								if ( iLength <= 0 )
 									break;
-								packet.setData((byte*)szTmp, iLength);
+								packet.setData((byte*)szTmp, (uint)iLength);
 								packet.send(this);
 								dwSize -= (dword)iLength;
 								if ( dwSize <= 0 )
@@ -514,7 +514,7 @@ bool CClient::OnRxAxis( const byte * pData, size_t iLen )
 	return true;
 }
 
-bool CClient::OnRxPing( const byte * pData, size_t iLen )
+bool CClient::OnRxPing( const byte * pData, uint iLen )
 {
 	ADDTOCALLSTACK("CClient::OnRxPing");
 	// packet iLen < 5
@@ -657,7 +657,7 @@ bool CClient::OnRxPing( const byte * pData, size_t iLen )
 	return false;
 }
 
-bool CClient::OnRxWebPageRequest( byte * pRequest, size_t iLen )
+bool CClient::OnRxWebPageRequest( byte * pRequest, uint iLen )
 {
 	ADDTOCALLSTACK("CClient::OnRxWebPageRequest");
 	// Seems to be a web browser pointing at us ? typical stuff :
@@ -674,7 +674,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t iLen )
 		return false;
 
 	tchar * ppLines[16];
-	size_t iQtyLines = Str_ParseCmds(reinterpret_cast<char *>(pRequest), ppLines, CountOf(ppLines), "\r\n");
+	int iQtyLines = Str_ParseCmds(reinterpret_cast<char *>(pRequest), ppLines, CountOf(ppLines), "\r\n");
 	if (( iQtyLines < 1 ) || ( iQtyLines >= 15 ))	// too long request
 		return false;
 
@@ -682,8 +682,8 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t iLen )
 	bool fKeepAlive = false;
 	CSTime dateIfModifiedSince;
 	tchar * pszReferer = nullptr;
-	size_t stContentLength = 0;
-	for ( size_t j = 1; j < iQtyLines; j++ )
+	unsigned long stContentLength = 0;
+	for ( int j = 1; j < iQtyLines; ++j )
 	{
 		tchar	*pszArgs = Str_TrimWhitespace(ppLines[j]);
 		if ( !strnicmp(pszArgs, "Connection:", 11 ) )
@@ -712,7 +712,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t iLen )
 	}
 
 	tchar * ppRequest[4];
-	size_t iQtyArgs = Str_ParseCmds(ppLines[0], ppRequest, CountOf(ppRequest), " ");
+	int iQtyArgs = Str_ParseCmds(ppLines[0], ppRequest, CountOf(ppRequest), " ");
 	if (( iQtyArgs < 2 ) || ( strlen(ppRequest[1]) >= _MAX_PATH ))
 		return false;
 
@@ -795,7 +795,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t iLen )
 	return false;
 }
 
-bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
+bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 {
 	ADDTOCALLSTACK("CClient::xProcessClientSetup");
 	// If this is a login then try to process the data and figure out what client it is.
@@ -805,18 +805,18 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 	ASSERT( GetConnectType() == CONNECT_CRYPT );
 	ASSERT( !m_Crypt.IsInit());
 	ASSERT( pEvent != nullptr );
-	ASSERT( iLen > 0 );
+	ASSERT( uiLen > 0 );
 
 	// Try all client versions on the msg.
 	CEvent bincopy;		// in buffer. (from client)
-	ASSERT( iLen <= sizeof(bincopy));
-	memcpy( bincopy.m_Raw, pEvent->m_Raw, iLen );
+	ASSERT( uiLen <= sizeof(bincopy));
+	memcpy( bincopy.m_Raw, pEvent->m_Raw, uiLen );
 
-	if ( !m_Crypt.Init( m_net->m_seed, bincopy.m_Raw, iLen, GetNetState()->isClientKR() ) )
+	if ( !m_Crypt.Init( m_net->m_seed, bincopy.m_Raw, uiLen, GetNetState()->isClientKR() ) )
 	{
-		DEBUG_MSG(( "%x:Odd login message length %" PRIuSIZE_T "?\n", GetSocketID(), iLen ));
+		DEBUG_MSG(( "%x:Odd login message length %" PRIuSIZE_T "?\n", GetSocketID(), uiLen ));
 #ifdef _DEBUG
-		xRecordPacketData(this, (const byte *)pEvent, iLen, "client->server");
+		xRecordPacketData(this, (const byte *)pEvent, uiLen, "client->server");
 #endif
 		addLoginErr( PacketLoginError::BadEncLength );
 		return false;
@@ -838,7 +838,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 	
 	byte lErr = PacketLoginError::EncUnknown;
 	
-	if (!m_Crypt.Decrypt( pEvent->m_Raw, bincopy.m_Raw, MAX_BUFFER, iLen ))
+	if (!m_Crypt.Decrypt( pEvent->m_Raw, bincopy.m_Raw, MAX_BUFFER, uiLen ))
     {
         g_Log.EventError("NET-IN: xProcessClientSetup failed (Decrypt).\n");
         return false;
@@ -850,7 +850,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 	{
 		case XCMD_ServersReq:
 		{
-			if ( iLen < sizeof( pEvent->ServersReq ))
+			if ( uiLen < sizeof( pEvent->ServersReq ))
 				return false;
 
 			lErr = Login_ServerList( pEvent->ServersReq.m_acctname, pEvent->ServersReq.m_acctpass );
@@ -875,7 +875,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 
 		case XCMD_CharListReq:
 		{
-			if ( iLen < sizeof( pEvent->CharListReq ))
+			if ( uiLen < sizeof( pEvent->CharListReq ))
 				return false;
 
 			lErr = Setup_ListReq( pEvent->CharListReq.m_acctname, pEvent->CharListReq.m_acctpass, true );
@@ -946,7 +946,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 #endif
 	}
 	
-	xRecordPacketData(this, (const byte *)pEvent, iLen, "client->server");
+	xRecordPacketData(this, (const byte *)pEvent, uiLen, "client->server");
 
 	if ( lErr != PacketLoginError::Success )	// it never matched any crypt format.
 	{
