@@ -853,11 +853,11 @@ int CChar::NPC_GetAttackContinueMotivation( CChar * pChar, int iMotivation ) con
 		return 0;
 
 	if ( !pChar->Fight_IsAttackable() )
-		return ( -100 );
+		return -100;
 	if ( m_pNPC->m_Brain == NPCBRAIN_GUARD )
-		return ( 100 );
+		return 100;
 	if ( m_pNPC->m_Brain == NPCBRAIN_BERSERK )
-		return ( iMotivation + 80 - GetDist( pChar ));	// less interested the further away they are
+		return (iMotivation + 80 - GetDist( pChar ));	// less interested the further away they are
 
 	// Try to stay on one target.
 	if ( Fight_IsActive() && (m_Fight_Targ_UID == pChar->GetUID()))

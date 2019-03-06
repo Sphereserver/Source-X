@@ -262,10 +262,10 @@ private:
 	bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 
 	bool OnRxConsoleLoginComplete();
-	bool OnRxConsole( const byte * pData, size_t len );
-	bool OnRxAxis( const byte * pData, size_t len );
-	bool OnRxPing( const byte * pData, size_t len );
-	bool OnRxWebPageRequest( byte * pRequest, size_t len );
+	bool OnRxConsole( const byte * pData, uint len );
+	bool OnRxAxis( const byte * pData, uint len );
+	bool OnRxPing( const byte * pData, uint len );
+	bool OnRxWebPageRequest( byte * pRequest, uint len );
 
 	byte LogIn( CAccount * pAccount, CSString & sMsg );
 	byte LogIn( lpctstr pszName, lpctstr pPassword, CSString & sMsg );
@@ -358,7 +358,7 @@ public:
 	byte Login_ServerList( const char * pszAccount, const char * pszPassword ); // Initial login (Login on "loginserver", new format)
 
 	byte Setup_Delete( dword iSlot ); // Deletion of character
-	size_t Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst); // Write character list to packet
+	uint Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst); // Write character list to packet
 	byte Setup_ListReq( const char * pszAccount, const char * pszPassword, bool fTest ); // Gameserver login and character listing
 	byte Setup_Play( uint iSlot ); // After hitting "Play Character" button
 	byte Setup_Start( CChar * pChar ); // Send character startup stuff to player
@@ -409,11 +409,11 @@ public:
 	virtual bool r_LoadVal( CScript & s ) override;
 
 	// Low level message traffic.
-	static size_t xCompress( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
+	static uint xCompress( byte * pOutput, const byte * pInput, uint outLen, uint inLen );
 
-	bool xProcessClientSetup( CEvent * pEvent, size_t iLen );
-	bool xPacketFilter(const byte * pEvent, size_t iLen = 0);
-	bool xOutPacketFilter(const byte * pEvent, size_t iLen = 0);
+	bool xProcessClientSetup( CEvent * pEvent, uint uiLen );
+	bool xPacketFilter(const byte * pEvent, uint uiLen = 0);
+	bool xOutPacketFilter(const byte * pEvent, uint uiLen = 0);
 	bool xCanEncLogin(bool bCheckCliver = false);	// Login crypt check
 													// Low level push world data to the client.
 
@@ -454,7 +454,7 @@ public:
 	void addItem_InContainer( const CItem * pItem );
 	void addItem( CItem * pItem );
 
-	void addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word durationSeconds = 0, lpctstr* pArgs = 0, size_t iArgCount = 0) const;
+	void addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word durationSeconds = 0, lpctstr* pArgs = 0, uint uiArgCount = 0) const;
 	void removeBuff(const BUFF_ICONS IconId) const;
 	void resendBuffs() const;
 
@@ -540,11 +540,12 @@ public:
 	void addDrawMap( CItemMap * pItem );
 	void addMapMode( CItemMap * pItem, MAPCMD_TYPE iType, bool fEdit = false );
 
+#define MAX_DIALOG_CONTROLTYPE_QTY  1000
 	void addGumpTextDisp( const CObjBase * pObj, GUMP_TYPE gump, lpctstr pszName, lpctstr pszText );
 	void addGumpInpVal( bool fcancel, INPVAL_STYLE style, dword dwmask, lpctstr ptext1, lpctstr ptext2, CObjBase * pObj );
 
-	void addItemMenu( CLIMODE_TYPE mode, const CMenuItem * item, size_t count, CObjBase * pObj = nullptr );
-	void addGumpDialog( CLIMODE_TYPE mode, const CSString * sControls, size_t iControls, const CSString * psText, size_t iTexts, int x, int y, CObjBase * pObj = nullptr, dword dwRid = 0 );
+	void addItemMenu( CLIMODE_TYPE mode, const CMenuItem * item, uint count, CObjBase * pObj = nullptr );
+	void addGumpDialog( CLIMODE_TYPE mode, const CSString * sControls, uint iControls, const CSString * psText, uint iTexts, int x, int y, CObjBase * pObj = nullptr, dword dwRid = 0 );
 
 	bool addGumpDialogProps( CUID uid );
 

@@ -45,8 +45,9 @@ CServerConfig::CServerConfig()
 	m_fMd5Passwords			= false;
 
 	//Magic
-	m_fReagentsRequired		= false;
+    m_fManaLossFail		    = false;
 	m_fReagentLossFail		= false;
+    m_fReagentsRequired		= false;
 	m_iWordsOfPowerColor	= HUE_TEXT_DEF;
 	m_iWordsOfPowerFont		= FONT_NORMAL;
 	m_fWordsOfPowerPlayer	= true;
@@ -374,7 +375,7 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	}
 	else
 	{
-		CResourceID	rid	= ResourceGetID((RES_TYPE)iResType, pszKey);
+		CResourceID	rid	= ResourceGetID((RES_TYPE)iResType, pszKey, RES_PAGE_ANY);
 
 		// check the found resource type matches what we searched for
 		if ( rid.GetResType() == iResType )
@@ -514,6 +515,7 @@ enum RC_TYPE
 	RC_LOSTNPCTELEPORT,			// m_fLostNPCTeleport
 	RC_MAGICFLAGS,
 	RC_MAGICUNLOCKDOOR,			// m_iMagicUnlockDoor
+    RC_MANALOSSFAIL,			// m_fManaLossFail
 	RC_MAPCACHETIME,
 	RC_MAXBASESKILL,			// m_iMaxBaseSkill
 	RC_MAXCHARSPERACCOUNT,		//  
@@ -757,6 +759,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "LOSTNPCTELEPORT",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLostNPCTeleport),		0 }},
 	{ "MAGICFLAGS",				{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iMagicFlags),			0 }},
 	{ "MAGICUNLOCKDOOR",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMagicUnlockDoor),		0 }},
+    { "MANALOSSFAIL",		    { ELEM_BOOL,	OFFSETOF(CServerConfig,m_fManaLossFail),		0 }},
 	{ "MAPCACHETIME",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMapCacheTime),		0 }},
 	{ "MAXBASESKILL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxBaseSkill),		0 }},
 	{ "MAXCHARSPERACCOUNT",		{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_iMaxCharsPerAccount),	0 }},

@@ -243,18 +243,19 @@ void CSector::GoAwake()
     * of NPCs being stop until you enter the sector, or all the spawns
     * generating NPCs at once.
     */
-    static CSector *pLast = nullptr;
-    if (pLast && pLast != this)
+    static CSector *pCentral = nullptr;   // do this only for the awaken sector
+    if (!pCentral)
     {
-        pLast = this;  // do this only for the awaken sector
+        pCentral = this;  
         for (int i = 0; i < (int)DIR_QTY; ++i)
         {
             CSector *pSector = GetAdjacentSector((DIR_TYPE)i);
-            if (pSector)
+            if (pSector && !pSector->IsSleeping())
             {
                 pSector->GoAwake();
             }
         }
+        pCentral = nullptr;
     }
     OnTick();   // Unknown time passed, make the sector tick now to reflect any possible environ changes.
 }
@@ -332,13 +333,11 @@ bool CSector::r_Verb( CScript & s, CTextConsole * pSrc )
 			v_AllItems( s, pSrc );
 			break;
         case SEV_AWAKE:
+            if (!IsSleeping())
             {
-                if (!IsSleeping())
-                {
-                    break;
-                }
-                GoAwake();
+                break;
             }
+            GoAwake();
             break;
 		case SEV_DRY:	// "DRY"
 			SetWeather( WEATHER_DRY );
@@ -1067,21 +1066,22 @@ bool CSector::CanSleep(bool fCheckAdjacents) const
     {
         for (int i = 0; i < (int)DIR_QTY; ++i)// Check for adjacent's sectors sleeping allowance.
         {
-            CSector *pAdjacent = GetAdjacentSector((DIR_TYPE)i);    // set this as the last sector to avoid this code in the adjacent one and return if it can sleep or not instead of searching its adjacents.
+            const CSector *pAdjacent = GetAdjacentSector((DIR_TYPE)i);    // set this as the last sector to avoid this code in the adjacent one and return if it can sleep or not instead of searching its adjacents.
             /*
-            * Only check if this sector exist and it's not the last checked (sectors in the hedges of the map doesn't have adjacent on those directions)
+            * Only check if this sector exist and it's not the last checked (sectors in the edges of the map doesn't have adjacent on those directions)
             * && Only check if the sector isn't sleeping (IsSleeping()) and then check if CanSleep().
             */
-            if (!pAdjacent || pAdjacent->IsSleeping())
+            if (!pAdjacent)
             {
                 continue;
             }
-            if (!pAdjacent->CanSleep(false))
+            if (!pAdjacent->IsSleeping() || !pAdjacent->CanSleep(false))
             {
-                return false;   // asume the base sector can't sleep.
+                return false;   // assume the base sector can't sleep.
             }
         }
     }
+
 	//default behaviour;
 	return ((g_World.GetCurrentTime().GetTimeRaw() - GetLastClientTime()) > g_Cfg._iSectorSleepDelay); // Sector Sleep timeout.
 }

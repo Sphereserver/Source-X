@@ -704,9 +704,9 @@ void CItemMulti::DelCoowner(CUID uidCoowner)
             {
                 continue;
             }
+            _lCoowners.erase(_lCoowners.begin() + i);
             pCoowner->GetMultiStorage()->DelMulti(GetUID());
             RemoveKeys(uid);
-            _lCoowners.erase(_lCoowners.begin() + i);
             return;
         }
     }
@@ -770,9 +770,9 @@ void CItemMulti::DelFriend(CUID uidFriend)
             {
                 continue;
             }
+            _lFriends.erase(_lFriends.begin() + i);
             pFriend->GetMultiStorage()->DelMulti(GetUID());
             RemoveKeys(uidFriend);
-            _lFriends.erase(_lFriends.begin() + i);
             return;
         }
     }
@@ -831,9 +831,10 @@ void CItemMulti::DelBan(CUID uidBan)
     {
         if (_lBans[i] == uidBan)
         {
-            CChar *pBan = uidBan.CharFind();
-            pBan->GetMultiStorage()->DelMulti(GetUID());
             _lBans.erase(_lBans.begin() + i);
+            CChar *pBan = uidBan.CharFind();
+            if (pBan)
+                pBan->GetMultiStorage()->DelMulti(GetUID());
             return;
         }
     }
@@ -893,9 +894,10 @@ void CItemMulti::DelAccess(CUID uidAccess)
     {
         if (_lAccesses[i] == uidAccess)
         {
-            CChar *pAccess = uidAccess.CharFind();
-            pAccess->GetMultiStorage()->DelMulti(GetUID());
             _lAccesses.erase(_lAccesses.begin() + i);
+            CChar *pAccess = uidAccess.CharFind();
+            if (pAccess)
+                pAccess->GetMultiStorage()->DelMulti(GetUID());
             return;
         }
     }
@@ -1794,10 +1796,10 @@ void CItemMulti::DelVendor(CUID uidVendor)
     {
         if (_lVendors[i] == uidVendor)
         {
-            CChar *pVendor = uidVendor.CharFind();
-            ASSERT(pVendor);
-            pVendor->GetMultiStorage()->DelMulti(GetUID());
             _lVendors.erase(_lVendors.begin() + i);
+            CChar *pVendor = uidVendor.CharFind();
+            if (pVendor)
+                pVendor->GetMultiStorage()->DelMulti(GetUID());
             break;
         }
     }

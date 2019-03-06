@@ -17,7 +17,7 @@ extern int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const nchar * p
 #undef USE_UNICODE_LIB
 #endif
 
-Packet::Packet(size_t size) : m_buffer(nullptr)
+Packet::Packet(uint size) : m_buffer(nullptr)
 {
 	m_expectedLength = size;
 	clear();
@@ -30,7 +30,7 @@ Packet::Packet(const Packet& other) : m_buffer(nullptr)
 	copy(other);
 }
 
-Packet::Packet(const byte* data, size_t size) : m_buffer(nullptr)
+Packet::Packet(const byte* data, uint size) : m_buffer(nullptr)
 {
 	clear();
 	m_expectedLength = 0;
@@ -48,12 +48,12 @@ bool Packet::isValid(void) const
 	return m_buffer != nullptr && m_length > 0;
 }
 
-size_t Packet::getLength(void) const
+uint Packet::getLength(void) const
 {
 	return m_length;
 }
 
-size_t Packet::getPosition(void) const
+uint Packet::getPosition(void) const
 {
 	return m_position;
 }
@@ -70,7 +70,7 @@ byte* Packet::getRemainingData(void) const
 	return &(m_buffer[m_position]);
 }
 
-size_t Packet::getRemainingLength(void) const
+uint Packet::getRemainingLength(void) const
 {
 	return m_length - m_position;
 }
@@ -95,17 +95,17 @@ void Packet::copy(const Packet& other)
 	seek();
 }
 
-void Packet::expand(size_t size)
+void Packet::expand(uint size)
 {
 	if (size < PACKET_BUFFERGROWTH)
 		size = PACKET_BUFFERGROWTH;
 
-	size_t oldPosition = m_position;
+	uint oldPosition = m_position;
 	resize(maximum(m_bufferSize, m_position) + size);
 	m_position = oldPosition;
 }
 
-void Packet::resize(size_t newsize)
+void Packet::resize(uint newsize)
 {
 	ASSERT(newsize > 0);
 	if ( newsize > m_bufferSize )		// increase buffer, copying the contents
@@ -127,28 +127,28 @@ void Packet::resize(size_t newsize)
 	seek();
 }
 
-void Packet::seek(size_t pos)
+void Packet::seek(uint pos)
 {
 	ASSERT(pos <= m_length);
 	m_position = pos;
 }
 
-void Packet::skip(ssize_t count)
+void Packet::skip(int count)
 {
 	// ensure we can't go lower than 0
-	if (count < 0 && (size_t)SphereAbs(count) > m_position)
+	if (count < 0 && (uint)SphereAbs(count) > m_position)
 		m_position = 0;
 	else
-		m_position += (size_t)count;
+		m_position += (uint)count;
 }
 
-byte &Packet::operator[](size_t index)
+byte &Packet::operator[](uint index)
 {
 	ASSERT(index <= m_length);
 	return m_buffer[index];
 }
 
-const byte &Packet::operator[](size_t index) const
+const byte &Packet::operator[](uint index) const
 {
 	ASSERT(index <= m_length);
 	return m_buffer[index];
@@ -201,7 +201,7 @@ void Packet::writeByte(const byte value)
 	m_buffer[m_position++] = value;
 }
 
-void Packet::writeData(const byte* buffer, size_t size)
+void Packet::writeData(const byte* buffer, uint size)
 {
 	if ((m_position + (sizeof(byte) * size)) > m_bufferSize)
 		expand((sizeof(byte) * size));
@@ -277,16 +277,16 @@ void Packet::writeStringASCII(const char* value, bool terminate)
 		writeCharASCII('\0');
 }
 
-void Packet::writeStringFixedASCII(const char* value, size_t size, bool terminate)
+void Packet::writeStringFixedASCII(const char* value, uint size, bool terminate)
 {
 	if (size <= 0)
 		return;
 
-	size_t valueLength = (value != nullptr) ? strlen(value) : 0;
+	uint valueLength = (value != nullptr) ? (uint)strlen(value) : 0;
 	if (terminate && valueLength >= size)
 		valueLength = size - 1;
 
-	for (size_t i = 0; i < size; ++i)
+	for (uint i = 0; i < size; ++i)
 	{
 		if (i >= valueLength)
 			writeCharASCII('\0');
@@ -319,7 +319,7 @@ void Packet::writeStringASCII(const wchar* value, bool terminate)
 
 	// need to flip byte order to convert UNICODE to ASCII
 	{
-		size_t i;
+		uint i;
 		for (i = 0; value[i]; ++i)
 			reinterpret_cast<wchar *>(buffer)[i] = reinterpret_cast<const nword *>(value)[i];
 		reinterpret_cast<wchar *>(buffer)[i] = '\0';
@@ -331,18 +331,18 @@ void Packet::writeStringASCII(const wchar* value, bool terminate)
 #endif
 }
 
-void Packet::writeStringFixedASCII(const wchar* value, size_t size, bool terminate)
+void Packet::writeStringFixedASCII(const wchar* value, uint size, bool terminate)
 {
 #ifdef USE_UNICODE_LIB
 	if (size <= 0)
 		return;
 
 	char* buffer = new char[MB_CUR_MAX];
-	size_t valueLength = value != nullptr ? wcslen(value) : 0;
+	uint valueLength = value != nullptr ? wcslen(value) : 0;
 	if (terminate && valueLength >= size)
 		valueLength = size - 1;
 
-	for (size_t l = 0; l < size; ++l)
+	for (uint l = 0; l < size; ++l)
 	{
 		if (l >= valueLength)
 			writeCharASCII('\0');
@@ -362,7 +362,7 @@ void Packet::writeStringFixedASCII(const wchar* value, size_t size, bool termina
 
 	// need to flip byte order to convert UNICODE to ASCII
 	{
-		size_t i;
+		uint i;
 		for (i = 0; value[i] != '\0'; ++i)
 			reinterpret_cast<wchar *>(buffer)[i] = reinterpret_cast<const nword *>(value)[i];
 		reinterpret_cast<wchar *>(buffer)[i] = '\0';
@@ -399,18 +399,18 @@ void Packet::writeStringUNICODE(const char* value, bool terminate)
 #endif
 }
 
-void Packet::writeStringFixedUNICODE(const char* value, size_t size, bool terminate)
+void Packet::writeStringFixedUNICODE(const char* value, uint size, bool terminate)
 {
 #ifdef USE_UNICODE_LIB
 	if (size <= 0)
 		return;
 
 	wchar c;
-	size_t valueLength = (value != nullptr) ? strlen(value) : 0;
+	uint valueLength = (value != nullptr) ? strlen(value) : 0;
 	if (terminate && valueLength >= size)
 		valueLength = size - 1;
 
-	for (size_t i = 0; i < size; ++i)
+	for (uint i = 0; i < size; ++i)
 	{
 		if (i >= valueLength)
 			writeCharUNICODE('\0');
@@ -443,17 +443,17 @@ void Packet::writeStringUNICODE(const wchar* value, bool terminate)
 		writeCharUNICODE('\0');
 }
 
-void Packet::writeStringFixedUNICODE(const wchar* value, size_t size, bool terminate)
+void Packet::writeStringFixedUNICODE(const wchar* value, uint size, bool terminate)
 {
 #ifdef USE_UNICODE_LIB
 	if (size <= 0)
 		return;
 
-	size_t valueLength = value != nullptr ? wcslen(value) : 0;
+	uint valueLength = value != nullptr ? wcslen(value) : 0;
 	if (terminate && valueLength >= size)
 		valueLength = size - 1;
 
-	for (size_t i = 0; i < size; ++i)
+	for (uint i = 0; i < size; ++i)
 	{
 		if (i >= valueLength)
 			writeCharUNICODE('\0');
@@ -470,7 +470,7 @@ void Packet::writeStringFixedUNICODE(const wchar* value, size_t size, bool termi
 		--size;
 
 	bool zero = false;
-	for (size_t i = 0; i < size; ++i)
+	for (uint i = 0; i < size; ++i)
 	{
 		if (zero == false)
 		{
@@ -513,18 +513,18 @@ void Packet::writeStringNUNICODE(const char* value, bool terminate)
 #endif
 }
 
-void Packet::writeStringFixedNUNICODE(const char* value, size_t size, bool terminate)
+void Packet::writeStringFixedNUNICODE(const char* value, uint size, bool terminate)
 {
 #ifdef USE_UNICODE_LIB
 	if (size <= 0)
 		return;
 
 	wchar c;
-	size_t valueLength = (value != nullptr) ? strlen(value) : 0;
+	uint valueLength = (value != nullptr) ? strlen(value) : 0;
 	if (terminate && valueLength >= size)
 		valueLength = size - 1;
 
-	for (size_t i = 0; i < size; ++i)
+	for (uint i = 0; i < size; ++i)
 	{
 		if (i >= valueLength)
 			writeCharNUNICODE('\0');
@@ -557,17 +557,17 @@ void Packet::writeStringNUNICODE(const wchar* value, bool terminate)
 		writeCharNUNICODE('\0');
 }
 
-void Packet::writeStringFixedNUNICODE(const wchar* value, size_t size, bool terminate)
+void Packet::writeStringFixedNUNICODE(const wchar* value, uint size, bool terminate)
 {
 #ifdef USE_UNICODE_LIB
 	if (size <= 0)
 		return;
 
-	size_t valueLength = (value != nullptr) ? wcslen(value) : 0;
+	uint valueLength = (value != nullptr) ? wcslen(value) : 0;
 	if (terminate && (valueLength >= size))
 		valueLength = size - 1;
 
-	for (size_t i = 0; i < size; ++i)
+	for (uint i = 0; i < size; ++i)
 	{
 		if (i >= valueLength)
 			writeCharNUNICODE('\0');
@@ -584,7 +584,7 @@ void Packet::writeStringFixedNUNICODE(const wchar* value, size_t size, bool term
 		--size;
 
 	bool zero = false;
-	for (size_t i = 0; i < size; ++i)
+	for (uint i = 0; i < size; ++i)
 	{
 		if (zero == false)
 		{
@@ -608,7 +608,7 @@ void Packet::fill(void)
 		writeByte(0);
 }
 
-size_t Packet::sync(void)
+uint Packet::sync(void)
 {
 	if (m_length < m_position)
 		m_length = m_position;
@@ -707,7 +707,7 @@ int64 Packet::readInt64(void)
 	return qw;
 }
 
-void Packet::readStringASCII(char* buffer, size_t length, bool includeNull)
+void Packet::readStringASCII(char* buffer, uint length, bool includeNull)
 {
 	ASSERT(buffer != nullptr);
 
@@ -717,7 +717,7 @@ void Packet::readStringASCII(char* buffer, size_t length, bool includeNull)
 		return;
 	}
 
-	size_t i;
+	uint i;
 	for (i = 0; i < length; ++i)
 		buffer[i] = readCharASCII();
 
@@ -728,7 +728,7 @@ void Packet::readStringASCII(char* buffer, size_t length, bool includeNull)
 		buffer[i] = '\0';
 }
 
-void Packet::readStringASCII(wchar* buffer, size_t length, bool includeNull)
+void Packet::readStringASCII(wchar* buffer, uint length, bool includeNull)
 {
 	ASSERT(buffer != nullptr);
 
@@ -753,7 +753,7 @@ void Packet::readStringASCII(wchar* buffer, size_t length, bool includeNull)
 
 	// need to flip byte order to convert NUNICODE to UNICODE
 	{
-		size_t i;
+		uint i;
 		for (i = 0; buffer[i]; ++i)
 			buffer[i] = reinterpret_cast<nword *>(buffer)[i];
 		buffer[i] = '\0';
@@ -761,7 +761,7 @@ void Packet::readStringASCII(wchar* buffer, size_t length, bool includeNull)
 #endif
 }
 
-void Packet::readStringUNICODE(wchar* buffer, size_t length, bool includeNull)
+void Packet::readStringUNICODE(wchar* buffer, uint length, bool includeNull)
 {
 	ASSERT(buffer != nullptr);
 
@@ -771,7 +771,7 @@ void Packet::readStringUNICODE(wchar* buffer, size_t length, bool includeNull)
 		return;
 	}
 
-	size_t i;
+	uint i;
 	for (i = 0; i < length; ++i)
 		buffer[i] = readCharUNICODE();
 
@@ -782,7 +782,7 @@ void Packet::readStringUNICODE(wchar* buffer, size_t length, bool includeNull)
 		buffer[i] = '\0';
 }
 
-void Packet::readStringUNICODE(char* buffer, size_t bufferSize, size_t length, bool includeNull)
+void Packet::readStringUNICODE(char* buffer, uint bufferSize, uint length, bool includeNull)
 {
 	ASSERT(buffer != nullptr);
 
@@ -807,7 +807,7 @@ void Packet::readStringUNICODE(char* buffer, size_t bufferSize, size_t length, b
 #endif
 }
 
-void Packet::readStringNUNICODE(wchar* buffer, size_t length, bool includeNull)
+void Packet::readStringNUNICODE(wchar* buffer, uint length, bool includeNull)
 {
 	ASSERT(buffer != nullptr);
 
@@ -817,7 +817,7 @@ void Packet::readStringNUNICODE(wchar* buffer, size_t length, bool includeNull)
 		return;
 	}
 
-	size_t i;
+	uint i;
 	for (i = 0; i < length; ++i)
 		buffer[i] = readCharNUNICODE();
 
@@ -828,7 +828,7 @@ void Packet::readStringNUNICODE(wchar* buffer, size_t length, bool includeNull)
 		buffer[i] = '\0';
 }
 
-void Packet::readStringNUNICODE(char* buffer, size_t bufferSize, size_t length, bool includeNull)
+void Packet::readStringNUNICODE(char* buffer, uint bufferSize, uint length, bool includeNull)
 {
 	ASSERT(buffer != nullptr);
 
@@ -853,11 +853,11 @@ void Packet::readStringNUNICODE(char* buffer, size_t bufferSize, size_t length, 
 #endif
 }
 
-size_t Packet::readStringNullASCII(char* buffer, size_t maxlength)
+uint Packet::readStringNullASCII(char* buffer, uint maxlength)
 {
 	ASSERT(buffer != nullptr);
 
-	size_t i;
+	uint i;
 	for (i = 0; i < maxlength; i++)
 	{
 		buffer[i] = readCharASCII();
@@ -870,7 +870,7 @@ size_t Packet::readStringNullASCII(char* buffer, size_t maxlength)
 	return i;
 }
 
-size_t Packet::readStringNullASCII(wchar* buffer, size_t maxlength)
+uint Packet::readStringNullASCII(wchar* buffer, uint maxlength)
 {
 	ASSERT(buffer != nullptr);
 
@@ -889,7 +889,7 @@ size_t Packet::readStringNullASCII(wchar* buffer, size_t maxlength)
 
 	// need to flip byte order to convert NUNICODE to UNICODE
 	{
-		size_t i;
+		uint i;
 		for (i = 0; buffer[i]; ++i)
 			buffer[i] = reinterpret_cast<nword *>(buffer)[i];
 		buffer[i] = '\0';
@@ -901,11 +901,11 @@ size_t Packet::readStringNullASCII(wchar* buffer, size_t maxlength)
 	return length;
 }
 
-size_t Packet::readStringNullUNICODE(wchar* buffer, size_t maxlength)
+uint Packet::readStringNullUNICODE(wchar* buffer, uint maxlength)
 {
 	ASSERT(buffer != nullptr);
 
-	size_t i;
+	uint i;
 	for (i = 0; i < maxlength; ++i)
 	{
 		buffer[i] = readCharUNICODE();
@@ -918,7 +918,7 @@ size_t Packet::readStringNullUNICODE(wchar* buffer, size_t maxlength)
 	return i;
 }
 
-size_t Packet::readStringNullUNICODE(char* buffer, size_t bufferSize, size_t maxlength)
+uint Packet::readStringNullUNICODE(char* buffer, uint bufferSize, uint maxlength)
 {
 	ASSERT(buffer != nullptr);
 
@@ -941,11 +941,11 @@ size_t Packet::readStringNullUNICODE(char* buffer, size_t bufferSize, size_t max
 	return length;
 }
 
-size_t Packet::readStringNullNUNICODE(wchar* buffer, size_t maxlength)
+uint Packet::readStringNullNUNICODE(wchar* buffer, uint maxlength)
 {
 	ASSERT(buffer != nullptr);
 
-	size_t i;
+	uint i;
 	for (i = 0; i < maxlength; i++)
 	{
 		buffer[i] = readCharNUNICODE();
@@ -958,7 +958,7 @@ size_t Packet::readStringNullNUNICODE(wchar* buffer, size_t maxlength)
 	return i;
 }
 
-size_t Packet::readStringNullNUNICODE(char* buffer, size_t bufferSize, size_t maxlength)
+uint Packet::readStringNullNUNICODE(char* buffer, uint bufferSize, uint maxlength)
 {
 	ASSERT(buffer != nullptr);
 
@@ -994,25 +994,25 @@ void Packet::dump(AbstractString& output) const
 	TemporaryString tsZ;
 	tchar* z = static_cast<tchar *>(tsZ);
 
-	sprintf(z, "Packet len=%" PRIuSIZE_T " id=0x%02x [%s]\n", m_length, m_buffer[0], CSTime::GetCurrentTime().Format(nullptr));
+	sprintf(z, "Packet len=%u id=0x%02x [%s]\n", m_length, m_buffer[0], CSTime::GetCurrentTime().Format(nullptr));
 	output.append(z);
 	output.append("        0  1  2  3  4  5  6  7   8  9  A  B  C  D  E  F\n");
 	output.append("       -- -- -- -- -- -- -- --  -- -- -- -- -- -- -- --\n");
 
 	uint byteIndex = 0;
-	size_t whole = m_length >> 4;
-	size_t rem = m_length & 0x0f;
-	size_t idx = 0;
+	uint whole = m_length >> 4;
+	uint rem = m_length & 0x0f;
+	uint idx = 0;
 
 	tchar bytes[50];
 	tchar chars[17];
 
-	for (size_t i = 0; i < whole; ++i, byteIndex += 16 )
+	for (uint i = 0; i < whole; ++i, byteIndex += 16 )
 	{
 		memset(bytes, 0, sizeof(bytes));
 		memset(chars, 0, sizeof(chars));
 
-		for (size_t j = 0; j < 16; ++j)
+		for (uint j = 0; j < 16; ++j)
 		{
 			byte c = m_buffer[idx++];
 			PROTECT_BYTE(c);
@@ -1044,7 +1044,7 @@ void Packet::dump(AbstractString& output) const
 		memset(bytes, 0, sizeof(bytes));
 		memset(chars, 0, sizeof(chars));
 
-		for (size_t j = 0; j < 16; ++j)
+		for (uint j = 0; j < 16; ++j)
 		{
 			if (j < rem)
 			{
@@ -1078,12 +1078,12 @@ void Packet::dump(AbstractString& output) const
 #undef PROTECT_BYTE
 }
 
-size_t Packet::checkLength(NetState* client, Packet* packet)
+uint Packet::checkLength(NetState* client, Packet* packet)
 {
 	ASSERT(client != nullptr);
 	ASSERT(packet != nullptr);
 
-	size_t packetLength = getExpectedLength(client, packet);
+	uint packetLength = getExpectedLength(client, packet);
 
 	if (packetLength <= 0)
 	{
@@ -1091,7 +1091,7 @@ size_t Packet::checkLength(NetState* client, Packet* packet)
 		if (packet->getLength() < 3)
 			return 0;
 
-		size_t pos = packet->getPosition();
+		uint pos = packet->getPosition();
 		packet->skip(1);
 		packetLength = packet->readInt16();
 		packet->seek(pos);
@@ -1106,7 +1106,7 @@ size_t Packet::checkLength(NetState* client, Packet* packet)
 	return packetLength;
 }
 
-size_t Packet::getExpectedLength(NetState* client, Packet* packet)
+uint Packet::getExpectedLength(NetState* client, Packet* packet)
 {
 	UNREFERENCED_PARAMETER(client);
 	UNREFERENCED_PARAMETER(packet);
@@ -1127,7 +1127,7 @@ bool Packet::onReceive(NetState* client)
  *
  *
  ***************************************************************************/
-PacketSend::PacketSend(byte id, size_t len, Priority priority)
+PacketSend::PacketSend(byte id, uint len, Priority priority)
 	: m_priority(priority), m_target(nullptr), m_lengthPosition(0)
 {
 	if (len > 0)
@@ -1159,7 +1159,7 @@ void PacketSend::fixLength()
 	{
 //		DEBUGNETWORK(("Packet %x closes dynamic data writing %d as length to pos %d.\n", m_buffer[0], m_position, m_lengthPosition));
 
-		size_t oldPosition = m_position;
+		uint oldPosition = m_position;
 		m_position = m_lengthPosition;
 		writeInt16((word)oldPosition);
 		m_position = oldPosition;
@@ -1214,7 +1214,7 @@ void PacketSend::push(const CClient *client, bool appendTransaction)
 	{
 		// since we are pushing this packet, we should clear the memory
 		// instantly if this packet will never be sent
-		DEBUGNETWORK(("Packet deleted due to exceeding maximum packet size (%" PRIuSIZE_T "/%u).\n", m_length, NETWORK_MAXPACKETLEN));
+		DEBUGNETWORK(("Packet deleted due to exceeding maximum packet size (%u/%u).\n", m_length, NETWORK_MAXPACKETLEN));
 		delete this;
 		return;
 	}

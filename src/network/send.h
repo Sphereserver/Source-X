@@ -41,7 +41,7 @@ class CClientTooltip;
 class PacketGeneric : public PacketSend
 {
 public:
-	PacketGeneric(const CClient* target, byte *data, size_t length);
+	PacketGeneric(const CClient* target, byte *data, uint length);
 };
 
 /***************************************************************************
@@ -68,8 +68,8 @@ public:
 class PacketWeb : public PacketSend
 {
 public:
-	PacketWeb(const CClient * target = nullptr, const byte * data = nullptr, size_t length = 0);
-	void setData(const byte * data, size_t length);
+	PacketWeb(const CClient * target = nullptr, const byte * data = nullptr, uint length = 0);
+	void setData(const byte * data, uint length);
 };
 
 /***************************************************************************
@@ -180,7 +180,7 @@ private:
 	CUID m_item;
 
 protected:
-	PacketItemWorld(byte id, size_t size, CUID uid);
+	PacketItemWorld(byte id, uint size, CUID uid);
 
 public:
 	PacketItemWorld(const CClient* target, const CItem* item);
@@ -601,7 +601,7 @@ public:
 class PacketBookPageContent : public PacketSend
 {
 protected:
-	size_t m_pages;
+	uint m_pages;
 
 public:
 	PacketBookPageContent(const CClient* target, const CItem* book, word startpage, word pagecount = 1);
@@ -764,7 +764,7 @@ class PacketVendorBuyList : public PacketSend
 {
 public:
 	PacketVendorBuyList(void);
-	size_t fillBuyData(const CItemContainer* container, int iConvertFactor);
+	uint fillBuyData(const CItemContainer* container, int iConvertFactor);
 };
 
 /***************************************************************************
@@ -821,7 +821,7 @@ public:
 class PacketDisplayMenu : public PacketSend
 {
 public:
-	PacketDisplayMenu(const CClient* target, CLIMODE_TYPE mode, const CMenuItem* items, size_t count, const CObjBase* object);
+	PacketDisplayMenu(const CClient* target, CLIMODE_TYPE mode, const CMenuItem* items, uint count, const CObjBase* object);
 };
 
 /***************************************************************************
@@ -1062,7 +1062,7 @@ class PacketVendorSellList : public PacketSend
 {
 public:
 	PacketVendorSellList(const CChar* vendor);
-	size_t fillSellList(CClient* target, const CItemContainer* container, CItemContainer* stock1, CItemContainer* stock2, int iConvertFactor);
+	uint fillSellList(CClient* target, const CItemContainer* container, CItemContainer* stock1, CItemContainer* stock2, int iConvertFactor);
 };
 
 /***************************************************************************
@@ -1221,11 +1221,11 @@ class PacketGumpDialog : public PacketSend
 {
 public:
 	PacketGumpDialog(int x, int y, CObjBase* object, dword context);
-	void writeControls(const CClient* target, const CSString* controls, size_t controlCount, const CSString* texts, size_t textCount);
+	void writeControls(const CClient* target, const CSString* controls, uint controlCount, const CSString* texts, uint textCount);
 
 protected:
-	void writeCompressedControls(const CSString* controls, size_t controlCount, const CSString* texts, size_t textCount);
-	void writeStandardControls(const CSString* controls, size_t controlCount, const CSString* texts, size_t textCount);
+	void writeCompressedControls(const CSString* controls, uint controlCount, const CSString* texts, uint textCount);
+	void writeStandardControls(const CSString* controls, uint controlCount, const CSString* texts, uint textCount);
 };
 
 /***************************************************************************
@@ -1329,7 +1329,7 @@ public:
 class PacketExtended : public PacketSend
 {
 public:
-	PacketExtended(EXTDATA_TYPE type, size_t len = 0, Priority priority = PRI_NORMAL);
+	PacketExtended(EXTDATA_TYPE type, uint len = 0, Priority priority = PRI_NORMAL);
 };
 
 /***************************************************************************
@@ -1355,7 +1355,7 @@ public:
 class PacketParty : public PacketExtended
 {
 public:
-	PacketParty(PARTYMSG_TYPE type, size_t len = 0, Priority priority = PRI_NORMAL);
+	PacketParty(PARTYMSG_TYPE type, uint len = 0, Priority priority = PRI_NORMAL);
 };
 
 /***************************************************************************
@@ -1843,7 +1843,7 @@ public:
 class PacketBuff : public PacketSend
 {
 public:
-	PacketBuff(const CClient* target, const BUFF_ICONS iconId, const dword clilocOne, const dword clilocTwo, const word durationSeconds, lpctstr* args, size_t argCount); // add buff
+	PacketBuff(const CClient* target, const BUFF_ICONS iconId, const dword clilocOne, const dword clilocTwo, const word durationSeconds, lpctstr* args, uint argCount); // add buff
 	PacketBuff(const CClient* target, const BUFF_ICONS iconId); // remove buff
 
 	virtual bool canSendTo(const NetState* state) const { return CanSendTo(state); }
@@ -1952,7 +1952,7 @@ public:
 class PacketItemWorldNew : public PacketItemWorld
 {
 protected:
-	PacketItemWorldNew(byte id, size_t size, CUID uid);
+	PacketItemWorldNew(byte id, uint size, CUID uid);
 
 public:
 	enum DataSource
@@ -2002,7 +2002,7 @@ public:
 class PacketMoveShip : public PacketSend
 {
 public:
-	PacketMoveShip(const CClient* target, const CObjBase* movingObj, CObjBase** objects, size_t objectCount, byte movedirection, byte boatdirection, byte speed);
+	PacketMoveShip(const CClient* target, const CObjBase* movingObj, CObjBase** objects, uint objectCount, byte movedirection, byte boatdirection, byte speed);
 };
 
 /***************************************************************************
@@ -2016,7 +2016,7 @@ class PacketContainer : public PacketItemWorldNew// public PacketSend
 	//friend PacketItemWorldNew
 {
 public:
-	PacketContainer(const CClient* target, CObjBase** objects, size_t objectCount);
+	PacketContainer(const CClient* target, CObjBase** objects, uint objectCount);
 
 	virtual bool canSendTo(const NetState* state) const { return CanSendTo(state); }
 	static bool CanSendTo(const NetState* state)

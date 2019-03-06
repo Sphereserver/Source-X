@@ -1179,6 +1179,7 @@ struct CEvent	// event buffer from client to server..
 #define MAX_ITEMS_CONT		255		// Max items in a container. (arbitrary)
 #define MAX_MENU_ITEMS		64		// number of items in a menu. (arbitrary)
 #define MAX_CHARS_PER_ACCT	7
+#define MAX_EXTCMD_ARG_LEN  30
 
 	// Some messages are bidirectional.
 

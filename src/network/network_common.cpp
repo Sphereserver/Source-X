@@ -20,7 +20,7 @@
 //
 #if defined(_PACKETDUMP) || defined(_DUMPSUPPORT)
 
-void xRecordPacketData(const CClient* client, const byte* data, size_t length, lpctstr heading)
+void xRecordPacketData(const CClient* client, const byte* data, uint length, lpctstr heading)
 {
 #ifdef _DUMPSUPPORT
 	if (client->GetAccount() != nullptr && strnicmp(client->GetAccount()->GetName(), (lpctstr) g_Cfg.m_sDumpAccPackets, strlen( client->GetAccount()->GetName())))

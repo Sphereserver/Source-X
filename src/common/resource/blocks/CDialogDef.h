@@ -18,7 +18,7 @@ class CDialogDef : public CResourceLink
 public:
     static const char *m_sClassName;
     bool GumpSetup( int iPage, CClient * pClientSrc, CObjBase * pObj, lpctstr Arguments = "" );
-    size_t GumpAddText( lpctstr pszText );		// add text to the text section, return insertion index
+    uint GumpAddText( lpctstr pszText );		// add text to the text section, return insertion index
     virtual bool r_Verb( CScript &s, CTextConsole * pSrc ) override;
     virtual bool r_LoadVal( CScript & s ) override;
     virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc ) override;
@@ -36,16 +36,16 @@ public:
     CObjBase *	m_pObj;
     CSString	m_sControls[1024];
     CSString	m_sText[512];
-    size_t		m_iTexts;
-    size_t		m_iControls;
+    uint		m_uiTexts;
+    uint		m_uiControls;
     int			m_x;
     int			m_y;
 
     int			m_iOriginX;	// keep track of position when parsing
     int			m_iOriginY;
-    word		m_iPage;		// page to open the dialog in
+    word		m_wPage;		// page to open the dialog in
 
-    bool		m_bNoDispose;	// contains 'nodispose' control
+    bool		m_fNoDispose;	// contains 'nodispose' control
 };
 
 #endif // _INC_CDIALOGDEF_H

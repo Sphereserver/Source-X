@@ -56,7 +56,8 @@ enum OF_TYPE
 	OF_NoPaperdollTradeTitle	= 0x0040000,	// Don't show the trade title on the paperdoll
     OF_NoTargTurn				= 0x0080000,    // Don't turn the player when targetting something
     OF_StatAllowValOverMax      = 0x0100000,    // Allow stats value above their maximum value (i.e. allow hits value > maxhits).
-    OF_GuardOutsideGuardedArea  = 0x0200000     // Allow guards to walk in unguarded areas, instead of being teleported back to their home point.
+    OF_GuardOutsideGuardedArea  = 0x0200000,    // Allow guards to walk in unguarded areas, instead of being teleported back to their home point.
+    OF_OWNoDropCarriedItem      = 0x4000000     // When overweighted, don't drop items on ground when moving them (or using BOUNCE) and checking if you can carry them.
 };
 
 /**
@@ -166,7 +167,8 @@ public:
 	bool m_fWordsOfPowerPlayer; // Words of Power for players.
 	bool m_fWordsOfPowerStaff;  // Words of Power for staff.
 	bool m_fEquippedCast;       // Allow casting while equipped.
-	bool m_fReagentLossFail;    // ??? Lose reags when failed.
+    bool m_fManaLossFail;    // Lose mana when spell casting failed.
+	bool m_fReagentLossFail;    // Lose reagents when spell casting failed.
 	int  m_iMagicUnlockDoor;    // 1 in N chance of magic unlock working on doors -- 0 means never.
 	ITEMID_TYPE m_iSpell_Teleport_Effect_NPC;       // ID of the item shown when a NPC teleports.
 	SOUND_TYPE  m_iSpell_Teleport_Sound_NPC;        // Sound sent when a NPC teleports.

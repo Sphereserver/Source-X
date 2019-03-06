@@ -254,14 +254,17 @@ bool CChar::CanCarry( const CItem *pItem ) const
 	if ( IsPriv(PRIV_GM) )
 		return true;
 
-	int iItemWeight = pItem->GetWeight();
-	if ( pItem->GetEquipLayer() == LAYER_DRAGGING )		// if we're dragging the item, its weight is already added on char so don't count it again
-		iItemWeight = 0;
+	int iItemWeight = 0;
+    if (IsSetOF(OF_OWNoDropCarriedItem))
+    {
+        const CObjBaseTemplate * pObjTop = pItem->GetTopLevelObj();
+        if (this != pObjTop)    // Aren't we already carrying it ?
+            iItemWeight = pItem->GetWeight();
+    }
+	else if ( pItem->GetEquipLayer() != LAYER_DRAGGING )		// if we're dragging the item, its weight is already added on char so don't count it again
+		iItemWeight = pItem->GetWeight();
 
-	if ( (GetTotalWeight() + iItemWeight) > g_Cfg.Calc_MaxCarryWeight(this) )
-		return false;
-
-	return true;
+    return (GetTotalWeight() + iItemWeight <= g_Cfg.Calc_MaxCarryWeight(this));
 }
 
 void CChar::ContentAdd( CItem * pItem, bool bForceNoStack )
@@ -1397,8 +1400,6 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
 		const CChar *pCharSrc = dynamic_cast<const CChar*>(pSrc);
 		ASSERT(pCharSrc);
 		pSrcRegion = pCharSrc->GetRegion();
-		if ( pCharSrc->IsPriv(PRIV_GM) )
-			return true;
 	}
 	else
     {
@@ -1476,7 +1477,7 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
 
     auto _RegionBlocksSpeech = [](const CRegion* pRegion) -> bool
     {
-        const CResourceID ridRegion = pRegion->GetResourceID();
+        const CResourceID& ridRegion = pRegion->GetResourceID();
         const bool fRegionFromItem = ridRegion.IsUIDItem();
         bool fCanSpeech = false;
         const CVarDefCont *pValue = fRegionFromItem ? ridRegion.ItemFindFromResource()->GetKey("NOMUTESPEECH", false) : nullptr;

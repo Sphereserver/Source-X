@@ -207,7 +207,7 @@ void CClient::resendBuffs() const
 	}
 }
 
-void CClient::addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word durationSeconds, lpctstr* pArgs, size_t iArgCount) const
+void CClient::addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word durationSeconds, lpctstr* pArgs, uint uiArgCount) const
 {
 	ADDTOCALLSTACK("CClient::addBuff");
 	if ( !IsSetOF(OF_Buffs) )
@@ -215,7 +215,7 @@ void CClient::addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dwo
 	if ( PacketBuff::CanSendTo(GetNetState()) == false )
 		return;
 
-	new PacketBuff(this, IconId, ClilocOne, ClilocTwo, durationSeconds, pArgs, iArgCount);
+	new PacketBuff(this, IconId, ClilocOne, ClilocTwo, durationSeconds, pArgs, uiArgCount);
 }
 
 void CClient::removeBuff(const BUFF_ICONS IconId) const
@@ -1449,7 +1449,7 @@ void CClient::addBookPage( const CItem * pBook, word wPage, word wCount ) const
 	new PacketBookPageContent(this, pBook, wPage, wCount );
 }
 
-size_t CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
+uint CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 {
 	ADDTOCALLSTACK("CClient::Setup_FillCharList");
 	// list available chars for your account that are idle.
@@ -1469,13 +1469,13 @@ size_t CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 	}
 
 	size_t iAcctCharCount = pAccount->m_Chars.GetCharCount(), iAcctMaxChars = pAccount->GetMaxChars();
-	size_t iMax = minimum(maximum(iAcctCharCount,iAcctMaxChars), MAX_CHARS_PER_ACCT);
+	uint iMax = (uint)minimum(maximum(iAcctCharCount,iAcctMaxChars), MAX_CHARS_PER_ACCT);
 
-	size_t iQty = pAccount->m_Chars.GetCharCount();
+	uint iQty = (uint)pAccount->m_Chars.GetCharCount();
 	if (iQty > iMax)
 		iQty = iMax;
 
-	for (size_t i = 0; i < iQty; ++i)
+	for (uint i = 0; i < iQty; ++i)
 	{
 		CUID uid(pAccount->m_Chars.GetChar(i));
 		CChar* pChar = uid.CharFind();
@@ -1496,7 +1496,7 @@ size_t CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 
 	// always show max count for some stupid reason. (client bug)
 	// pad out the rest of the chars.
-	size_t iClientMin = 5;
+	uint iClientMin = 5;
 	if (GetNetState()->isClientVersion(MINCLIVER_PADCHARLIST) || !GetNetState()->getCryptVersion())
 		iClientMin = maximum(iQty, 5);
 
@@ -1506,7 +1506,7 @@ size_t CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 		pPacket->writeStringFixedASCII("", MAX_NAME_SIZE);
 	}
 
-	return count;
+	return (uint)count;
 }
 
 void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeout )
@@ -2429,7 +2429,7 @@ void CClient::addGumpTextDisp( const CObjBase * pObj, GUMP_TYPE gump, lpctstr ps
 	new PacketSignGump(this, pObj, gump, pszName, pszText);
 }
 
-void CClient::addItemMenu( CLIMODE_TYPE mode, const CMenuItem * item, size_t count, CObjBase * pObj )
+void CClient::addItemMenu( CLIMODE_TYPE mode, const CMenuItem * item, uint count, CObjBase * pObj )
 {
 	ADDTOCALLSTACK("CClient::addItemMenu");
 	// We must set GetTargMode() to show what mode we are in for menu select.
