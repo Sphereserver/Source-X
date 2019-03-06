@@ -1549,3 +1549,10 @@ WARNING: the following change could break some hackish expedient used in scripts
 06-03-2019, Nolok
 - Fixed: Cannot access regiontype properties if the regiontype has attached a typedef (Issue #247).
 - Added: .ini Option Flag OF_OWNoDropCarriedItem (When overweighted, don't drop items on ground when moving them (or using BOUNCE) and checking if you can carry them) (Issue #245).
+
+06-03-2019, Julian
+- Modified: PILOT function for Ships. Now you can set an UID to pilot the ship, self dclick will remove pilot memory (after triggering @UnMount), also setting same uid twice as pilot will detach pilot from ship.
+	You can modify spk_ship_cmds and add this:
+		ON=Pilot
+		PILOT <SRC.UID>
+- [Port from Source, 23-02-2019, Coruja] Added: .ini Option Flag OF_MapBoundarySailing (Issue #147) to make boats move to the other side of the map when reach map boundary.

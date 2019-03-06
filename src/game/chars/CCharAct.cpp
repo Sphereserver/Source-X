@@ -2489,8 +2489,19 @@ bool CChar::Horse_UnMount()
 			return false;
 	}
 
-	Use_Figurine(pItem, false);
-	pItem->Delete();
+	if (pItem->GetBaseID() == ITEMID_SHIP_PILOT)
+	{
+		CItem *pShip = pItem->m_uidLink.ItemFind();
+		pShip->m_itShip.m_Pilot.InitUID();
+
+		SysMessageDefault(DEFMSG_SHIP_PILOT_OFF);
+		pItem->Delete();
+	}
+	else
+	{
+		Use_Figurine(pItem, false);
+		pItem->Delete();
+	}
 	return true;
 }
 
