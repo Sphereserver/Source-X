@@ -5,6 +5,9 @@
 #include <cwctype>  // for iswalnum
 #include "../common.h"
 
+static const tchar* TSTRING_NULL = "\0";
+static const char*  STRING_NULL  = "\0";
+
 /**
 * match result defines
 */
