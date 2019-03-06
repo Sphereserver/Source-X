@@ -59,7 +59,7 @@ struct HistoryIP;
 typedef std::deque<HistoryIP> IPHistoryList;
 
 #if defined(_PACKETDUMP) || defined(_DUMPSUPPORT)
-	void xRecordPacketData(const CClient* client, const byte* data, size_t length, lpctstr heading);
+	void xRecordPacketData(const CClient* client, const byte* data, uint length, lpctstr heading);
 	void xRecordPacket(const CClient* client, Packet* packet, lpctstr heading);
 #else
 	#define xRecordPacketData(_client_, _data_, _length, _heading_)

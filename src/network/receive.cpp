@@ -23,7 +23,7 @@
  *
  *
  ***************************************************************************/
-PacketUnknown::PacketUnknown(size_t size) : Packet(size)
+PacketUnknown::PacketUnknown(uint size) : Packet(size)
 {
 }
 
@@ -43,7 +43,7 @@ bool PacketUnknown::onReceive(NetState* net)
  *
  *
  ***************************************************************************/
-PacketCreate::PacketCreate(size_t size) : Packet(size)
+PacketCreate::PacketCreate(uint size) : Packet(size)
 {
 }
 
@@ -174,7 +174,7 @@ bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_
 
 	// make sure they don't already have too many characters
 	byte iMaxChars = account->GetMaxChars();
-	size_t iQtyChars = account->m_Chars.GetCharCount();
+	uint iQtyChars = (uint)account->m_Chars.GetCharCount();
 	if (iQtyChars >= iMaxChars)
 	{
 		client->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_MAXCHARS), (int)(iQtyChars));
@@ -225,7 +225,7 @@ bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_
  *
  *
  ***************************************************************************/
-PacketMovementReq::PacketMovementReq(size_t size) : Packet(size)
+PacketMovementReq::PacketMovementReq(uint size) : Packet(size)
 {
 }
 
@@ -277,8 +277,8 @@ bool PacketSpeakReq::onReceive(NetState* net)
 	if (client->GetChar() == nullptr)
 		return false;
 
-	size_t packetLength = readInt16();
-	TALKMODE_TYPE mode = static_cast<TALKMODE_TYPE>(readByte());
+	uint packetLength = readInt16();
+	TALKMODE_TYPE mode = (TALKMODE_TYPE)(readByte());
 	HUE_TYPE hue = (HUE_TYPE)(readInt16());
 	skip(2); // font
 
@@ -384,7 +384,7 @@ PacketItemDropReq::PacketItemDropReq() : Packet(14)
 {
 }
 
-size_t PacketItemDropReq::getExpectedLength(NetState* net, Packet* packet)
+uint PacketItemDropReq::getExpectedLength(NetState* net, Packet* packet)
 {
 	ADDTOCALLSTACK("PacketItemDropReq::getExpectedLength");
 	UNREFERENCED_PARAMETER(packet);
@@ -473,7 +473,7 @@ bool PacketTextCommand::onReceive(NetState* net)
 	ASSERT(client);
 
 	word packetLength = readInt16();
-	if (packetLength < 5)
+	if ((packetLength < 5) || (packetLength > MAX_EXTCMD_ARG_LEN + 4))
 		return false;
 
 	EXTCMD_TYPE type = static_cast<EXTCMD_TYPE>(readByte());
@@ -652,7 +652,7 @@ bool PacketSkillLockChange::onReceive(NetState* net)
 
 	int len = readInt16();
 	len -= 3;
-	if (len <= 0 || (len % 3) != 0)
+	if ((len <= 0 )|| ((len % 3) != 0) || (len > 100*3))
 		return false;
 
 	while (len > 0)
@@ -717,7 +717,7 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 
 	VendorItem items[MAX_ITEMS_CONT];
 	memset(items, 0, sizeof(items));
-	size_t itemCount = minimum((packetLength - 8u) / 7u, g_Cfg.m_iContainerMaxItems);
+	uint itemCount = minimum((packetLength - 8u) / 7u, g_Cfg.m_iContainerMaxItems);
 
 	// check buying speed
 	const CVarDefCont* vardef = g_Cfg.m_bAllowBuySellAgent ? nullptr : client->m_TagDefs.GetKey("BUYSELLTIME");
@@ -733,7 +733,7 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 
 	// combine goods into one list
 	CItemVendable *item = nullptr;
-	for (size_t i = 0; i < itemCount; ++i)
+	for (uint i = 0; i < itemCount; ++i)
 	{
 		skip(1); // layer
 		CUID serial(readInt32());
@@ -747,7 +747,7 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 		}
 
 		// search for it in the list
-		size_t index;
+		uint index;
 		for (index = 0; index < itemCount; ++index)
 		{
 			if (serial == items[index].m_serial)
@@ -975,7 +975,7 @@ bool PacketBookPageEdit::onReceive(NetState* net)
 
 	skip(-4);
 
-	size_t len = 0;
+	uint len = 0;
 	tchar* content = Str_GetTemp();
 
 	for (int i = 0; i < pageCount; i++)
@@ -1133,7 +1133,9 @@ bool PacketBulletinBoardReq::onReceive(NetState* net)
 	if (character == nullptr)
 		return false;
 
-	skip(2);
+	word packetlen = readInt16();
+    if (packetlen > 300)
+        return false;
 	BBOARDF_TYPE action = static_cast<BBOARDF_TYPE>(readByte());
 	CUID boardSerial(readInt32());
 	CUID messageSerial(readInt32());
@@ -1155,7 +1157,7 @@ bool PacketBulletinBoardReq::onReceive(NetState* net)
 			// request for message header and/or body
 			if (getLength() != 0x0c)
 			{
-				DEBUG_ERR(( "%x:BBoard feed back message bad length %" PRIuSIZE_T "\n", net->id(), getLength()));
+				DEBUG_ERR(( "%x:BBoard feed back message bad length %u\n", net->id(), getLength()));
 				return true;
 			}
 			if (client->addBBoardMessage(board, action, messageSerial) == false)
@@ -1184,7 +1186,7 @@ bool PacketBulletinBoardReq::onReceive(NetState* net)
 				delete board->GetAt(board->GetCount() - 1);
 			}
 
-			size_t lenstr = readByte();
+			uint lenstr = readByte();
 			tchar* str = Str_GetTemp();
 			readStringASCII(str, lenstr, false);
 			if (Str_Check(str))
@@ -1758,7 +1760,7 @@ bool PacketPromptResponse::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketPromptResponse::onReceive");
 
-	size_t packetLength = readInt16();
+	uint packetLength = readInt16();
 	dword context1 = readInt32();
 	dword context2 = readInt32();
 	dword type = readInt32();
@@ -1828,7 +1830,7 @@ bool PacketVendorSellReq::onReceive(NetState* net)
 
 	skip(2); // length
 	CUID vendorSerial(readInt32());
-	size_t itemCount = readInt16();
+	uint itemCount = readInt16();
 
 	CChar* vendor = vendorSerial.CharFind();
 	if (vendor == nullptr || vendor->m_pNPC == nullptr || !vendor->NPC_IsVendor())
@@ -1869,7 +1871,7 @@ bool PacketVendorSellReq::onReceive(NetState* net)
 	VendorItem items[MAX_ITEMS_CONT];
 	memset(items, 0, sizeof(items));
 
-	for (size_t i = 0; i < itemCount; ++i)
+	for (uint i = 0; i < itemCount; ++i)
 	{
 		items[i].m_serial = CUID(readInt32());
 		items[i].m_amount = readInt16();
@@ -2050,7 +2052,7 @@ bool PacketSpeakReqUNICODE::onReceive(NetState* net)
 	if (client->GetChar() == nullptr)
 		return false;
 
-	size_t packetLength = readInt16();
+	uint packetLength = readInt16();
 	TALKMODE_TYPE mode = static_cast<TALKMODE_TYPE>(readByte());
 	HUE_TYPE hue = (HUE_TYPE)(readInt16());
 	FONT_TYPE font = (FONT_TYPE)(readInt16());
@@ -2068,13 +2070,13 @@ bool PacketSpeakReqUNICODE::onReceive(NetState* net)
 	{
 		mode = static_cast<TALKMODE_TYPE>(mode & ~0xc0);
 
-		size_t count = (readInt16() & 0xFFF0) >> 4;
+		uint count = (readInt16() & 0xFFF0) >> 4;
 		if (count > 50) // malformed check
 			return true;
 
 		skip(-2);
 		count = (count + 1) * 12;
-		size_t toskip = count / 8;
+		uint toskip = count / 8;
 		if ((count % 8) > 0)
 			toskip++;
 
@@ -2123,6 +2125,11 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 	dword context = readInt32();
 	dword button = readInt32();
 	dword checkCount = readInt32();
+    if (checkCount > MAX_DIALOG_CONTROLTYPE_QTY)
+    {
+        g_Log.EventError("%x:PacketGumpDialogRet check count too high.\n", net->id());
+        return false;
+    }
 
 	// relying on the context given by the gump might be a security problem, much like
 	// relying on the uid returned.
@@ -2156,6 +2163,11 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 				pFace = CItem::CreateBase((ITEMID_TYPE)button);
 				if (pFace)
 				{
+                    if (pFace->GetEquipLayer() != LAYER_FACE)
+                    {
+                        pFace->Delete();
+                        return false;
+                    }
 					pFace->SetHue(character->GetHue());
 					character->LayerAdd(pFace, LAYER_FACE);
 				}
@@ -2194,13 +2206,19 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 	CDialogResponseArgs resp;
 
 	// store the returned checked boxes' ids for possible later use
-	for (size_t i = 0; i < checkCount; ++i)
+	for (uint i = 0; i < checkCount; ++i)
 		resp.m_CheckArray.push_back(readInt32());
 
 
 	dword textCount = readInt32();
+    if (checkCount > MAX_DIALOG_CONTROLTYPE_QTY)
+    {
+        g_Log.EventError("%x:PacketGumpDialogRet textentry count too high.\n", net->id());
+        return false;
+    }
+
 	tchar* text = Str_GetTemp();
-	for (size_t i = 0; i < textCount; ++i)
+	for (uint i = 0; i < textCount; ++i)
 	{
 		word id = readInt16();
 		word length = readInt16();
@@ -2261,14 +2279,14 @@ bool PacketChatCommand::onReceive(NetState* net)
 	CClient* client = net->getClient();
 	ASSERT(client);
 
-	size_t packetLength = readInt16();
+	uint packetLength = readInt16();
 	tchar language[4];
 	readStringASCII(language, CountOf(language));
 
 	if (packetLength < getPosition())
 		return false;
 
-	size_t textLength = (packetLength - getPosition()) / 2;
+	uint textLength = (packetLength - getPosition()) / 2;
 	if (textLength >= MAX_TALK_BUFFER)
 		textLength = MAX_TALK_BUFFER - 1;
 
@@ -2362,7 +2380,7 @@ bool PacketProfileReq::onReceive(NetState* net)
 
 		textLength = readInt16();
 		text = Str_GetTemp();
-		readStringNUNICODE(text, THREAD_STRING_LENGTH, textLength+1, false);
+		readStringNUNICODE(text, STR_TEMPLENGTH, textLength+1, false);
 	}
 
 	client->Event_Profile(write, serial, text, textLength);
@@ -2472,6 +2490,8 @@ bool PacketExtendedCommand::onReceive(NetState* net)
 		return false;
 
 	word packetLength = readInt16();
+    if (packetLength > 1000)
+        return false;
 	EXTDATA_TYPE type = static_cast<EXTDATA_TYPE>(readInt16());
 	seek();
 
@@ -2790,7 +2810,7 @@ bool PacketAnimationReq::onReceive(NetState* net)
 
 	ANIM_TYPE anim = static_cast<ANIM_TYPE>(readInt32());
 	bool ok = false;
-	for (size_t i = 0; ok == false && i < CountOf(validAnimations); i++)
+	for (uint i = 0; ok == false && i < CountOf(validAnimations); i++)
 		ok = (anim == validAnimations[i]);
 
 	if (ok == false)
@@ -3329,7 +3349,7 @@ bool PacketPromptResponseUnicode::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketPromptResponseUnicode::onReceive");
 
-	size_t length = readInt16();
+	uint length = readInt16();
 	dword context1 = readInt32();
 	dword context2 = readInt32();
 	dword type = readInt32();
@@ -3417,10 +3437,10 @@ bool PacketBookHeaderEditNew::onReceive(NetState* net)
 	tchar title[2 * MAX_NAME_SIZE];
 	tchar author[MAX_NAME_SIZE];
 
-	size_t titleLength = readInt16();
+	uint titleLength = readInt16();
 	readStringASCII(title, minimum(titleLength, CountOf(title)));
 
-	size_t authorLength = readInt16();
+	uint authorLength = readInt16();
 	readStringASCII(author, minimum(authorLength, CountOf(author)));
 
 	net->getClient()->Event_Book_Title(bookSerial, title, author);
@@ -3454,7 +3474,10 @@ bool PacketAOSTooltipReq::onReceive(NetState* net)
 	else if (client->GetResDisp() < RDS_AOS || !IsAosFlagEnabled(FEATURE_AOS_UPDATE_B))
 		return true;
 
-	for (word length = readInt16(); length > sizeof(dword); length -= sizeof(dword))
+    word length = readInt16();
+    if (length > 500 * sizeof(dword))
+        return false;
+	for (; length > sizeof(dword); length -= sizeof(dword))
 	{
 		CObjBase* object = CUID(readInt32()).ObjFind();
 		if (object == nullptr)

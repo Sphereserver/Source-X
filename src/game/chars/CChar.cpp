@@ -1347,7 +1347,7 @@ height_t CChar::GetHeight() const
 
 CREID_TYPE CChar::GetID() const
 {
-	CCharBase * pCharDef = Char_GetDef();
+    const CCharBase * pCharDef = Char_GetDef();
 	ASSERT(pCharDef);
 	return pCharDef->GetID();
 }
@@ -1360,7 +1360,7 @@ word CChar::GetBaseID() const
 
 CREID_TYPE CChar::GetDispID() const
 {
-	CCharBase * pCharDef = Char_GetDef();
+	const CCharBase * pCharDef = Char_GetDef();
 	ASSERT(pCharDef);
 	return pCharDef->GetDispID();
 }

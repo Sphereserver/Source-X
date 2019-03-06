@@ -52,7 +52,7 @@ private:
 public:
 	static const char *m_sClassName;
 	
-	static size_t Compress( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
+	static uint Compress( byte * pOutput, const byte * pInput, uint outLen, uint inLen );
 
 public:
 	CHuffman() { };
@@ -207,14 +207,14 @@ private:
 	CCrypto& operator=(const CCrypto& other);
 
 public:
-	bool Init( dword dwIP, byte * pEvent, size_t inLen, bool isclientKr = false );
+	bool Init( dword dwIP, byte * pEvent, uint inLen, bool isclientKr = false );
 	void InitFast( dword dwIP, CONNECT_TYPE ctInit, bool fRelay = true );
-	bool Decrypt( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
-	bool Encrypt( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
+	bool Decrypt( byte * pOutput, const byte * pInput, uint outLen, uint inLen );
+	bool Encrypt( byte * pOutput, const byte * pInput, uint outLen, uint inLen );
 protected:
-	bool LoginCryptStart( dword dwIP, byte * pEvent, size_t inLen );
-	bool GameCryptStart( dword dwIP, byte * pEvent, size_t inLen );
-	bool RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
+	bool LoginCryptStart( dword dwIP, byte * pEvent, uint inLen );
+	bool GameCryptStart( dword dwIP, byte * pEvent, uint inLen );
+	bool RelayGameCryptStart( byte * pOutput, const byte * pInput, uint outLen, uint inLen );
    
 };
 

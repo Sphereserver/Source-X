@@ -45,16 +45,16 @@ const word CHuffman::sm_xCompress_Base[COMPRESS_TREE_SIZE] =	// static
 	0x00d4 // terminator
 } ;
 
-size_t CHuffman::Compress( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen ) // static
+uint CHuffman::Compress( byte * pOutput, const byte * pInput, uint outLen, uint inLen ) // static
 {
 	ADDTOCALLSTACK("CHuffman::Compress");
 	
-    size_t iLen = 0;
+    uint iLen = 0;
 	int bitidx = 0;	    // Offset in output byte (xOutVal)
 	byte xOutVal = 0;   // Don't bother to init this. It will just roll off all junk anyhow.
 
 
-    for ( size_t i = 0; i <= inLen; ++i )
+    for ( uint i = 0; i <= inLen; ++i )
 	{
         word value = sm_xCompress_Base[ ( i == inLen ) ? (COMPRESS_TREE_SIZE - 1) : pInput[i] ];
 		int nBits = value & 0xF;

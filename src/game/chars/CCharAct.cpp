@@ -1882,7 +1882,10 @@ bool CChar::ItemBounce( CItem * pItem, bool bDisplayMsg )
 		{
             CItem* pPrevCont = dynamic_cast<CItem*>(pItem->GetContainer());
 			CScriptTriggerArgs Args(pItem);
-			if (pPack->OnTrigger(ITRIG_DROPON_SELF, this, &Args) == TRIGRET_RET_TRUE)
+            TRIGRET_TYPE ret = pPack->OnTrigger(ITRIG_DROPON_SELF, this, &Args);
+            if ( pItem->IsDeleted() )	// the trigger had deleted the item
+                return false;
+			if (ret == TRIGRET_RET_TRUE)
             {
 				bCanAddToPack = false;
                 CItem* pCont = dynamic_cast<CItem*>(pItem->GetContainer());

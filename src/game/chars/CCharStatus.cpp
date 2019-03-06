@@ -254,14 +254,17 @@ bool CChar::CanCarry( const CItem *pItem ) const
 	if ( IsPriv(PRIV_GM) )
 		return true;
 
-	int iItemWeight = pItem->GetWeight();
-	if ( pItem->GetEquipLayer() == LAYER_DRAGGING )		// if we're dragging the item, its weight is already added on char so don't count it again
-		iItemWeight = 0;
+	int iItemWeight = 0;
+    if (IsSetOF(OF_OWNoDropCarriedItem))
+    {
+        const CObjBaseTemplate * pObjTop = pItem->GetTopLevelObj();
+        if (this != pObjTop)    // Aren't we already carrying it ?
+            iItemWeight = pItem->GetWeight();
+    }
+	else if ( pItem->GetEquipLayer() != LAYER_DRAGGING )		// if we're dragging the item, its weight is already added on char so don't count it again
+		iItemWeight = pItem->GetWeight();
 
-	if ( (GetTotalWeight() + iItemWeight) > g_Cfg.Calc_MaxCarryWeight(this) )
-		return false;
-
-	return true;
+    return (GetTotalWeight() + iItemWeight <= g_Cfg.Calc_MaxCarryWeight(this));
 }
 
 void CChar::ContentAdd( CItem * pItem, bool bForceNoStack )

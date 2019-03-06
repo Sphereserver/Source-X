@@ -1545,3 +1545,7 @@ WARNING: the following change could break some hackish expedient used in scripts
 - Added: Ini setting ManaLossFail, to make the char lose part of the mana required to cast the spell if the spell casting fails.
 - Fixed: Murderer memory timer increasing at each login-logout cycle (Issue #235).
 - Fixed: Price property not respected by vendors when selling to them (Issue #238).
+
+06-03-2019, Nolok
+- Fixed: Cannot access regiontype properties if the regiontype has attached a typedef (Issue #247).
+- Added: .ini Option Flag OF_OWNoDropCarriedItem (When overweighted, don't drop items on ground when moving them (or using BOUNCE) and checking if you can carry them) (Issue #245).

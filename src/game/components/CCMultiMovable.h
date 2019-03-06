@@ -42,7 +42,7 @@ protected:
     ShipMovementSpeed _eSpeedMode;       // (0x01 = one tile, 0x02 = rowboat, 0x03 = slow, 0x04 = fast)
 
     void SetNextMove();
-    size_t ListObjs(CObjBase ** ppObjList);
+    uint ListObjs(CObjBase ** ppObjList);
     bool CanMoveTo(const CPointMap & pt) const;
     bool MoveDelta(const CPointMap& ptDelta);
     bool MoveToRegion(CRegionWorld *pRegionOld, CRegionWorld* pRegionNew);

@@ -55,7 +55,8 @@ enum OF_TYPE
 	OF_NoPaperdollTradeTitle	= 0x0040000,	// Don't show the trade title on the paperdoll
     OF_NoTargTurn				= 0x0080000,    // Don't turn the player when targetting something
     OF_StatAllowValOverMax      = 0x0100000,    // Allow stats value above their maximum value (i.e. allow hits value > maxhits).
-    OF_GuardOutsideGuardedArea  = 0x0200000     // Allow guards to walk in unguarded areas, instead of being teleported back to their home point.
+    OF_GuardOutsideGuardedArea  = 0x0200000,    // Allow guards to walk in unguarded areas, instead of being teleported back to their home point.
+    OF_OWNoDropCarriedItem      = 0x4000000     // When overweighted, don't drop items on ground when moving them (or using BOUNCE) and checking if you can carry them.
 };
 
 /**

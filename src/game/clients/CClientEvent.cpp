@@ -2650,6 +2650,12 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 	ADDTOCALLSTACK("CClient::Event_ExtCmd");
 	if ( !m_pChar )
 		return;
+    
+    if (strnlen(pszName, MAX_EXTCMD_ARG_LEN) >= MAX_EXTCMD_ARG_LEN)
+    {
+        g_Log.EventWarn("%0x:Event_ExtCmd received too long argument\n", GetSocketID());
+        return;
+    }
 
 	if ( IsTrigUsed(TRIGGER_USEREXTCMD) )
 	{
@@ -2661,7 +2667,14 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 	}
 
 	tchar *ppArgs[2];
-	Str_ParseCmds(pszName, ppArgs, CountOf(ppArgs), " ");
+	if (type != EXTCMD_DOOR_AUTO)
+    {
+        if ((*pszName == '\0') || (0 == Str_ParseCmds(pszName, ppArgs, CountOf(ppArgs), " ")))
+        {
+            g_Log.EventWarn("%0x:Event_ExtCmd received malformed data %d, '%s'\n", GetSocketID(), type, pszName);
+            return;
+        }
+    }
 
 	switch ( type )
 	{
@@ -2687,9 +2700,9 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 
 		case EXTCMD_ANIMATE:
 		{
-			if ( !strcmpi(ppArgs[0], "bow") )
+			if ( !strnicmp(ppArgs[0], "bow", 3) )
 				m_pChar->UpdateAnimate(ANIM_BOW);
-			else if ( !strcmpi(ppArgs[0], "salute") )
+			else if ( !strnicmp(ppArgs[0], "salute", 6) )
 				m_pChar->UpdateAnimate(ANIM_SALUTE);
 			else
 				DEBUG_ERR(("%x:Event_ExtCmd Animate unk '%s'\n", GetSocketID(), ppArgs[0]));
@@ -2704,8 +2717,9 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 
 		case EXTCMD_AUTOTARG:	// bizarre new autotarget mode. "target x y z"
 		{
-			CUID uid = ATOI(ppArgs[0]);
-			CObjBase *pObj = uid.ObjFind();
+			CObjBase *pObj = CUID::ObjFind(ATOI(ppArgs[0]));
+            if (!ppArgs[1])
+                ppArgs[1] = "\0";
 			if ( pObj )
 				DEBUG_ERR(("%x:Event_ExtCmd AutoTarg '%s' '%s'\n", GetSocketID(), pObj->GetName(), ppArgs[1]));
 			else
@@ -2783,7 +2797,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 
 		default:
 		{
-			DEBUG_ERR(("%x:Event_ExtCmd unk %d, '%s'\n", GetSocketID(), type, pszName));
+			g_Log.EventWarn("%x:Event_ExtCmd received unknown event type %d, '%s'\n", GetSocketID(), type, pszName);
 			return;
 		}
 	}
@@ -2791,7 +2805,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 
 // ---------------------------------------------------------------------
 
-bool CClient::xPacketFilter( const byte * pData, size_t iLen )
+bool CClient::xPacketFilter( const byte * pData, uint iLen )
 {
 	ADDTOCALLSTACK("CClient::xPacketFilter");
 
@@ -2806,8 +2820,8 @@ bool CClient::xPacketFilter( const byte * pData, size_t iLen )
 		Args.m_pO1 = this; // Yay for ARGO.SENDPACKET
 		Args.m_VarsLocal.SetNum("CONNECTIONTYPE", GetConnectType());
 
-		size_t bytes = iLen;
-		size_t bytestr = minimum(bytes, SCRIPT_MAX_LINE_LEN);
+        uint bytes = iLen;
+        uint bytestr = minimum(bytes, SCRIPT_MAX_LINE_LEN);
 		tchar *zBuf = Str_GetTemp();
 
 		Args.m_VarsLocal.SetNum("NUM", bytes);
@@ -2824,9 +2838,9 @@ bool CClient::xPacketFilter( const byte * pData, size_t iLen )
 		}
 
 		//	Fill locals [0..X] to the first X bytes of the packet
-		for ( size_t i = 0; i < bytes; ++i )
+		for ( uint i = 0; i < bytes; ++i )
 		{
-			sprintf(idx, "%" PRIuSIZE_T, i);
+			sprintf(idx, "%u", i);
 			Args.m_VarsLocal.SetNum(idx, (int)(pData[i]));
 		}
 
@@ -2840,7 +2854,7 @@ bool CClient::xPacketFilter( const byte * pData, size_t iLen )
 	return false;
 }
 
-bool CClient::xOutPacketFilter( const byte * pData, size_t iLen )
+bool CClient::xOutPacketFilter( const byte * pData, uint iLen )
 {
 	ADDTOCALLSTACK("CClient::xOutPacketFilter");
 
