@@ -683,7 +683,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, uint iLen )
 	CSTime dateIfModifiedSince;
 	tchar * pszReferer = nullptr;
 	unsigned long stContentLength = 0;
-	for ( size_t j = 1; j < iQtyLines; j++ )
+	for ( int j = 1; j < iQtyLines; ++j )
 	{
 		tchar	*pszArgs = Str_TrimWhitespace(ppLines[j]);
 		if ( !strnicmp(pszArgs, "Connection:", 11 ) )

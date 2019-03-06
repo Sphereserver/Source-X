@@ -4578,9 +4578,9 @@ SOUND_TYPE CItem::Weapon_GetSoundHit() const
 	ADDTOCALLSTACK("CItem::Weapon_GetSoundHit");
 	// Get ranged weapon ammo hit sound if present.
 
-	word wAmmoSoundHit = GetPropNum(COMP_PROPS_ITEMWEAPONRANGED, PROPIWEAPRNG_AMMOSOUNDHIT, true);
-	if (wAmmoSoundHit > 0)
-		return (SOUND_TYPE)wAmmoSoundHit;
+	int iAmmoSoundHit = GetPropNum(COMP_PROPS_ITEMWEAPONRANGED, PROPIWEAPRNG_AMMOSOUNDHIT, true);
+	if (iAmmoSoundHit > 0)
+		return (SOUND_TYPE)iAmmoSoundHit;
 	return SOUND_NONE;
 }
 
@@ -4589,9 +4589,9 @@ SOUND_TYPE CItem::Weapon_GetSoundMiss() const
 	ADDTOCALLSTACK("CItem::Weapon_GetSoundMiss");
 	// Get ranged weapon ammo miss sound if present.
 
-	word wAmmoSoundMiss = GetPropNum(COMP_PROPS_ITEMWEAPONRANGED, PROPIWEAPRNG_AMMOSOUNDMISS, true);
-	if ( wAmmoSoundMiss > 0 )
-		return (SOUND_TYPE)wAmmoSoundMiss;
+	int iAmmoSoundMiss = GetPropNum(COMP_PROPS_ITEMWEAPONRANGED, PROPIWEAPRNG_AMMOSOUNDMISS, true);
+	if ( iAmmoSoundMiss > 0 )
+		return (SOUND_TYPE)iAmmoSoundMiss;
 	return SOUND_NONE;
 }
 
