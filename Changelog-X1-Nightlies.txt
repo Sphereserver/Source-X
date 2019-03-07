@@ -1556,3 +1556,21 @@ WARNING: the following change could break some hackish expedient used in scripts
 		ON=Pilot
 		PILOT <SRC.UID>
 - [Port from Source, 23-02-2019, Coruja] Added: .ini Option Flag OF_MapBoundarySailing (Issue #147) to make boats move to the other side of the map when reach map boundary.
+
+07-03-2019, Drk
+- Added: @HitParry trigger for characters:
+	Default Object:  The character that succesfully parried the strike.
+	SRC: The character that did the strike.
+	Argn1: Percent of damage that will be reduced (default 100%).
+	Argn2: Damage type.
+	Argo: The weapon/shield used for parry, if any.
+	Local.ItemParryDamage: The chance that the parrying item will be damaged (default 100%).
+	Return 1: Completely blocks the damage as if the parry damage reduction was set to 100.
+  The trigger is fired when a character succesfully parries an hit, that is the trigger @(Skill)UseQuick for parrying is succesfull.
+  By default a parried hit will reduce the damage by 100% and thus negating the hit and the following triggers (@Hit and so on).
+  There are two for changing the damage reduced:
+	Overwriting the Argn1 value in the @HitParry trigger.
+	By using the EFFECT property in the skill definition of the Parrying Skill, in this case the damage will be reduced by the EFFECT value:
+		If only one values is defined (Example:EFFECT=75) the damage will always be reduced by 75% no matter skills.
+		If one or more values are defined (Example: EFFECT=25,75) the damage will be reduced by 25% when the Parrying skill is near 0.0 and by 75% when the Parrying skill is near 100.0, that is damage reduction will be scaled according to the character parrying skill.
+		If no values are defined, the default value of 100 will be used.
