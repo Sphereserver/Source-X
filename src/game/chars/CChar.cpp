@@ -3077,7 +3077,7 @@ bool CChar::r_LoadVal( CScript & s )
         case CHC_DELHOUSE:
         {
             dword dwUID = s.GetArgDWVal();
-            if (dwUID == UINT32_MAX)
+            if (dwUID == UID_UNUSED)
             {
                 GetMultiStorage()->ClearHouses();
             }
