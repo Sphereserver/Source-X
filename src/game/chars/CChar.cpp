@@ -73,6 +73,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@HitCheck",			// Checking if I can hit my target, overriding also default checks if set to.
 	"@HitIgnore",			// I'm going to avoid a target (attacker.n.ignore=1) , should I un-ignore him?.
 	"@HitMiss",				// I just missed.
+	"@HitParry",			// I succesfully parried an hit.
 	"@HitTry",				// I am trying to hit someone. starting swing.
     "@HouseDesignBegin",    // Starting to customize.
     "@HouseDesignCommit",	// I committed a new house design.
