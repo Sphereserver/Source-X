@@ -1818,7 +1818,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	// Calculate base damage and apply parry reduction if any.
 	int	iDmg = Fight_CalcDamage(pWeapon);
 	if (iParryReduction > 0)
-		iDmg -= MulDiv(iDmg, iParryReduction, 100);
+		iDmg -= IMulDiv(iDmg, iParryReduction, 100);
 
 	CScriptTriggerArgs Args(iDmg, iDmgType, pWeapon);
 	Args.m_VarsLocal.SetNum("ItemDamageChance", 40);
