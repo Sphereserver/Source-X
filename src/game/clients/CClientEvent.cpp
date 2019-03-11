@@ -2783,9 +2783,9 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 		{
 			CObjBase *pObj = CUID::ObjFind(ATOI(ppArgs[0]));
 			if ( pObj )
-				DEBUG_ERR(("%x:Event_ExtCmd AutoTarg '%s' '%s'\n", GetSocketID(), pObj->GetName(), !ppArgs[1] ? '\0' : ppArgs[1]));
+				DEBUG_ERR(("%x:Event_ExtCmd AutoTarg '%s' '%s'\n", GetSocketID(), pObj->GetName(), !ppArgs[1] ? TSTRING_NULL : ppArgs[1]));
 			else
-				DEBUG_ERR(("%x:Event_ExtCmd AutoTarg unk '%s' '%s'\n", GetSocketID(), ppArgs[0], !ppArgs[1] ? '\0' : ppArgs[1]));
+				DEBUG_ERR(("%x:Event_ExtCmd AutoTarg unk '%s' '%s'\n", GetSocketID(), ppArgs[0], !ppArgs[1] ? TSTRING_NULL : ppArgs[1]));
 			return;
 		}
 

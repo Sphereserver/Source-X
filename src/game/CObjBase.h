@@ -1143,9 +1143,10 @@ enum CTRIG_TYPE
 	CTRIG_HitCheck,         // A check made before anything else in the Hit proccess, meant to completelly override combat system.
 	CTRIG_HitIgnore,        // I should ignore this target, just giving a record to scripts.
 	CTRIG_HitMiss,          // I just missed.
+	CTRIG_HitParry,			// I succesfully parried an hit.
 	CTRIG_HitTry,           // I am trying to hit someone. starting swing.
     CTRIG_HouseDesignBegin, // Starting to customize.
-    CTRIG_HouseDesignCommit,// I committed a new house design
+    CTRIG_HouseDesignCommit, // I committed a new house design
     CTRIG_HouseDesignCommitItem,// I committed an Item to the house design.
 	CTRIG_HouseDesignExit,  // I exited house design mode
 

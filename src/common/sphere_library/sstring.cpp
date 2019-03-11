@@ -14,6 +14,7 @@
     #pragma GCC diagnostic pop
 #endif
 
+
 // String utilities: Modifiers
 
 size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord )

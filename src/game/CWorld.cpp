@@ -2546,7 +2546,7 @@ void CWorld::OnTick()
         }
 
         EXC_SET_BLOCK("WorldObjects loop");
-        lpctstr ptcSubDesc = "\0";
+        lpctstr ptcSubDesc = TSTRING_NULL;
         for (CTimedObject* pObj : vecTimedObjs)    // Loop through all msecs stored, unless we passed the timestamp.
         {
             EXC_TRYSUB("Tick::WorldObj");

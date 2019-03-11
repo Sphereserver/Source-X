@@ -314,8 +314,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
                 // add empty arguments if they are provided
                 if ( (*s == ',') && !fQuotes)
                 {
-                    lpctstr pszZero = "\0";
-                    m_v.emplace_back( pszZero );
+                    m_v.emplace_back( TSTRING_NULL );
                     ++s;
                     continue;
                 }

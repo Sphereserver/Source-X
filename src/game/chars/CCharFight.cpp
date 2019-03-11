@@ -1783,23 +1783,51 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	}
 
 	// We hit
+	int iParryReduction = 0;
 	if ( !(iDmgType & DAMAGE_GOD) )
 	{
 		CItem * pItemHit = nullptr;
 		if (pCharTarg->Fight_Parry(pItemHit))
 		{
+			const CSkillDef * pSkillDef = g_Cfg.GetSkillDef(SKILL_PARRYING);
+			
 			if ( IsPriv(PRIV_DETAIL) )
 				SysMessageDefault(DEFMSG_COMBAT_PARRY);
-			if ( pItemHit )
+
+			//If Effect property is defined on the Parrying skill use it instead of the hardcoded value of 100.
+			iParryReduction = 100;
+			if (!pSkillDef->m_Effect.m_aiValues.empty())
+				iParryReduction = pSkillDef->m_Effect.GetLinear(pCharTarg->Skill_GetAdjusted(SKILL_PARRYING));
+
+			/*
+			Argn1: Percent of damage that will be reduced.
+			Argn2: Damage type.
+			Argo: The weapon/shield used for parry, if any.
+			Local.ItemParryDamage: The chance that the parrying item will be damaged.
+			*/
+			CScriptTriggerArgs Args(iParryReduction, iDmgType, pItemHit);
+			Args.m_VarsLocal.SetNum("ItemParryDamageChance", 100);
+			if (IsTrigUsed(TRIGGER_HITPARRY))
+			{
+				if (pCharTarg->OnTrigger(CTRIG_HitParry, this, &Args) == TRIGRET_RET_TRUE)
+					return WAR_SWING_EQUIPPING_NOWAIT;
+				iParryReduction = (int)(Args.m_iN1);
+				iDmgType = (DAMAGE_TYPE)(Args.m_iN2);
+			}
+			int iParryDamageChance = (int)(Args.m_VarsLocal.GetKeyNum("ItemParryDamageChance"));
+			if ( pItemHit &&  iParryDamageChance > Calc_GetRandVal(100))
 				pItemHit->OnTakeDamage(1, this, iDmgType);
 
 			//Effect(EFFECT_OBJ, ITEMID_FX_GLOW, this, 10, 16);		// moved to scripts (@UseQuick on Parrying skill)
-			return WAR_SWING_EQUIPPING_NOWAIT;
+			if (iParryReduction >= 100)
+				return WAR_SWING_EQUIPPING_NOWAIT;
 		}
 	}
 
-	// Calculate base damage
+	// Calculate base damage and apply parry reduction if any.
 	int	iDmg = Fight_CalcDamage(pWeapon);
+	if (iParryReduction > 0)
+		iDmg -= IMulDiv(iDmg, iParryReduction, 100);
 
 	CScriptTriggerArgs Args(iDmg, iDmgType, pWeapon);
 	Args.m_VarsLocal.SetNum("ItemDamageChance", 2);
