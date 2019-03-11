@@ -671,7 +671,7 @@ effect_bounce:
 	}
 
 	int iItemDamageChance = (int)(Args.m_VarsLocal.GetKeyNum("ItemDamageChance"));
-	if ( (iItemDamageChance > Calc_GetRandVal(100)) && !Can(CAN_C_NONHUMANOID) )
+	if ( (iItemDamageChance > Calc_GetRandVal(100)) && Can(CAN_C_EQUIP) )
 	{
 		LAYER_TYPE iHitLayer = (LAYER_TYPE)(Args.m_VarsLocal.GetKeyNum("ItemDamageLayer"));
 		CItem *pItemHit = LayerFind(iHitLayer);
@@ -787,7 +787,15 @@ effect_bounce:
 		}
 
 		if ( iDisturbChance > Calc_GetRandVal(1000) )
-			Skill_Fail();
+		{
+			if ( IsTrigUsed(TRIGGER_SPELLINTERRUPT) )
+			{
+				CScriptTriggerArgs ArgsInterrupt(m_atMagery.m_Spell);
+				if ( pSrc->OnTrigger(CTRIG_SpellInterrupt, this, &ArgsInterrupt) != TRIGRET_RET_TRUE )
+					Skill_Fail();
+			}
+
+		}
 	}
 
 	if ( pSrc && (pSrc != this) )

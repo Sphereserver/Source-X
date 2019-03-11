@@ -750,7 +750,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 		UpdateAnimate(Skill_GetAnim(skill));
 
 	int iDifficulty = (1000 - ((((pItemArmor->m_itArmor.m_Hits_Max - pItemArmor->m_itArmor.m_Hits_Cur) * 1250) / pItemArmor->m_itArmor.m_Hits_Max) - 250)) / 10;
-	pItemArmor->m_itArmor.m_Hits_Max -= iDecrease;
+	pItemArmor->m_itArmor.m_Hits_Max -= (word)iDecrease;
 	if (Skill_UseQuick(skill, iDifficulty, false))
 	{
 		pItemArmor->m_itArmor.m_Hits_Cur = pItemArmor->m_itArmor.m_Hits_Max;
@@ -760,7 +760,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	}
 	else
 	{
-		pItemArmor->m_itArmor.m_Hits_Cur = maximum(0, pItemArmor->m_itArmor.m_Hits_Cur - iDecrease);
+		pItemArmor->m_itArmor.m_Hits_Cur = maximum(0, pItemArmor->m_itArmor.m_Hits_Cur - (word)iDecrease);
 		SysMessageDefault(DEFMSG_REPAIR_FAIL);
 		return false;
 	}

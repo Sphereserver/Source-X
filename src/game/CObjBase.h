@@ -1256,6 +1256,7 @@ enum CTRIG_TYPE
 	CTRIG_SpellCast,        // Char is casting a spell.
 	CTRIG_SpellEffect,      // A spell just hit me.
 	CTRIG_SpellFail,        // The spell failed.
+	CTRIG_SpellInterrupt,	// The spell has been interrupted.
 	CTRIG_SpellSelect,      // selected a spell.
 	CTRIG_SpellSuccess,     // The spell succeeded.
 	CTRIG_SpellTargetCancel,// Cancelled spell target.

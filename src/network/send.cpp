@@ -1703,12 +1703,17 @@ PacketAddTarget::PacketAddTarget(const CClient* target, PacketAddTarget::TargetT
 	if ( !pItemDef )
 		return;
 
-	word y = 0;
+	word x, y = 0;
 	CItemBaseMulti *pMultiDef = static_cast<CItemBaseMulti *>(pItemDef);
 	//if ( pMultiDef && pMultiDef->m_rect.m_bottom > 0 && (pMultiDef->IsType(IT_MULTI) || pMultiDef->IsType(IT_MULTI_CUSTOM)) )
-	if ( pMultiDef && CItemBase::IsID_Multi(id) )
-		y = (word)(pMultiDef->m_rect.m_bottom - 1);
+	if (pMultiDef && CItemBase::IsID_Multi(id))
+	{
+		g_Log.EventError("We got this: %d %d %d %d\n", pMultiDef->m_rect.GetWidth(), pMultiDef->m_rect.m_left, pMultiDef->m_rect.m_right, pMultiDef->m_rect.GetCenter());
+		x = (word)(pMultiDef->m_rect.m_right / 2);
+		y = (word)(pMultiDef->m_rect.m_bottom);
 
+	}
+		
 	writeByte((byte)type);
 	writeInt32(context);
 	writeByte((byte)flags);
@@ -1720,7 +1725,7 @@ PacketAddTarget::PacketAddTarget(const CClient* target, PacketAddTarget::TargetT
 
 	writeInt16((word)(id - ITEMID_MULTI));
 
-	writeInt16(0);	// x
+	writeInt16(x);	// x
 	writeInt16(y);	// y
 	writeInt16(0);	// z
 
@@ -3313,34 +3318,30 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 		}
 	}
 
-    dword flags = g_Cfg.GetPacketFlag(true, (RESDISPLAY_VERSION)(account->GetResDisp()),
-        maximum(account->GetMaxChars(), (byte)(account->m_Chars.GetCharCount())));
-    writeInt32(flags);
+	if (tmVer > 1260000)
+	{
+		dword flags = g_Cfg.GetPacketFlag(true, (RESDISPLAY_VERSION)(account->GetResDisp()),
+			maximum(account->GetMaxChars(), (byte)(account->m_Chars.GetCharCount())));
+		if (!target->GetNetState()->getClientType())
+			flags |= 0x400;
+		writeInt32(flags);
 
-    word iLastCharSlot = 0;
-    for ( size_t i = 0; i < count; ++i )
-    {
-        if ( !account->m_Chars.IsValidIndex(i) )
-            continue;
-        if ( account->m_Chars.GetChar(i) != account->m_uidLastChar )
-            continue;
+		if (target->GetNetState()->isClientEnhanced())
+		{
+			word iLastCharSlot = 0;
+			for (ushort i = 0; i < count; ++i)
+			{
+				if (!account->m_Chars.IsValidIndex(i))
+					continue;
+				if (account->m_Chars.GetChar(i) != account->m_uidLastChar)
+					continue;
 
-        if ( target->GetNetState()->isClientEnhanced() )
-        {
-            word iLastCharSlot = 0;
-            for ( ushort i = 0; i < count; ++i )
-            {
-                if ( !account->m_Chars.IsValidIndex(i) )
-                    continue;
-                if ( account->m_Chars.GetChar(i) != account->m_uidLastChar )
-                    continue;
-
-                iLastCharSlot = (word)i;
-                break;
-            }
-            writeInt16(iLastCharSlot);
-        }
-    }
+				iLastCharSlot = (word)i;
+				break;
+			}
+			writeInt16(iLastCharSlot);
+		}
+	}
 
 	push(target);
 }

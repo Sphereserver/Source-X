@@ -186,6 +186,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@SpellCast",			//+Char is casting a spell.
 	"@SpellEffect",			//+A spell just hit me.
 	"@SpellFail",			// The spell failed
+	"@SpellInterrupt",
 	"@SpellSelect",			// Selected a spell
 	"@SpellSuccess",		// The spell succeeded
 	"@SpellTargetCancel",	// cancelled spell target
