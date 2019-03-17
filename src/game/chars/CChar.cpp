@@ -1029,12 +1029,12 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 
 	g_World.m_uidLastNewChar = GetUID();	// for script access.
 
-	for ( size_t i = 0; i < STAT_QTY; ++i )
+	for ( uint i = 0; i < STAT_QTY; ++i )
 	{
         m_Stat[i] = pChar->m_Stat[i];
 	}
 
-	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
+	for ( uint i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
 		m_Skill[i] = pChar->m_Skill[i];
 	}
@@ -1071,19 +1071,19 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 
     CEntity::Copy(static_cast<CEntity*>(pChar));
 	// Begin copying items.
-	LAYER_TYPE layer;
 	for ( int i = 0 ; i < LAYER_QTY; ++i)
 	{
-		layer = (LAYER_TYPE)i;
+        LAYER_TYPE layer = (LAYER_TYPE)i;
 		CItem * myLayer = LayerFind(layer);
 		if ( myLayer )
 			myLayer->Delete();
 
-		if ( !pChar->LayerFind( layer ) )
+        CItem * fromLayer = pChar->LayerFind( layer );
+		if ( !fromLayer )
 			continue;
 
-		CItem * pItem = CItem::CreateDupeItem(pChar->LayerFind( (LAYER_TYPE)i ), this, true);
-		pItem->LoadSetContainer(GetUID(), (LAYER_TYPE)i);
+		CItem * pItem = CItem::CreateDupeItem(fromLayer, this, true);
+		pItem->LoadSetContainer(GetUID(), layer);
 		if ( fNewbieItems )
 		{
 			pItem->SetAttr(ATTR_NEWBIE);
@@ -1093,28 +1093,28 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 				{
 					pItemCont->SetAttr(ATTR_NEWBIE);
 
-					CChar *pTest = CUID(pItemCont->m_itNormal.m_more1).CharFind();
+					CChar *pTest = CUID::CharFind(pItemCont->m_itNormal.m_more1);
 					if ( pTest && pTest == pChar )
 						pItemCont->m_itNormal.m_more1 = this->GetUID();
 
-					CChar *pTest2 = CUID(pItemCont->m_itNormal.m_more2).CharFind();
+					CChar *pTest2 = CUID::CharFind(pItemCont->m_itNormal.m_more2);
 					if ( pTest2 && pTest2 == pChar )
 						pItemCont->m_itNormal.m_more2 = this->GetUID();
 
-					CChar *pTest3 = CUID(pItemCont->m_uidLink).CharFind();
+					CChar *pTest3 = CUID::CharFind(pItemCont->m_uidLink);
 					if ( pTest3 && pTest3 == pChar )
 						pItemCont->m_uidLink = this->GetUID();
 				}
 			}
 		}
-		CChar * pTest = CUID(pItem->m_itNormal.m_more1).CharFind();
+		CChar * pTest = CUID::CharFind(pItem->m_itNormal.m_more1);
 		if ( pTest && pTest == pChar)
 			pItem->m_itNormal.m_more1 = this->GetUID();
 
-		CChar * pTest2 = CUID(pItem->m_itNormal.m_more2).CharFind();
-		if ( pTest2)
+		CChar * pTest2 = CUID::CharFind(pItem->m_itNormal.m_more2);
+		if (pTest2)
 		{
-			if ( pTest2 == pChar)
+			if (pTest2 == pChar)
 				pItem->m_itNormal.m_more2 = this->GetUID();
 			else if ( pTest2->NPC_IsOwnedBy(pChar, true) )	// Mount's fix
 			{
@@ -1133,7 +1133,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 			}
 		}
 
-		CChar * pTest3 = CUID(pItem->m_uidLink).CharFind();
+		CChar * pTest3 = CUID::CharFind(pItem->m_uidLink);
 		if ( pTest3 && pTest3 == pChar)
 			pItem->m_uidLink = this->GetUID();
 
@@ -3460,10 +3460,10 @@ bool CChar::r_LoadVal( CScript & s )
 				if ( iArgQty < 2 )
 					return false;
 
-				CUID	uid		= (uint)piCmd[0];
-				dword	dwFlags	= (uint)piCmd[1];
+				CUID	uid		= (dword)piCmd[0];
+				word	wFlags	= (word)piCmd[1];
 
-				Memory_AddObjTypes( uid, (word)dwFlags );
+				Memory_AddObjTypes( uid, wFlags );
 			}
 			break;
 		case CHC_NPC:
@@ -3995,7 +3995,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 					if ( iTimer > 0 )
 						pItem->SetTimeout(iTimer);
 
-					pItem->Item_GetDef()->m_ttNormal.m_tData4 = 0;
+					//pItem->Item_GetDef()->m_ttNormal.m_tData4 = 0; // why would we alter the itemdef data?
 				}
 				pItem->SetAttr(ATTR_MOVE_NEVER);
 				LayerAdd( pItem, LAYER_HAND2 );

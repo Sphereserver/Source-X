@@ -585,16 +585,17 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 			SetKeyRing();
 			break;
 		case IT_EQ_VENDOR_BOX:
-			if ( !IsItemEquipped() )	// vendor boxes should ALWAYS be equipped !
+			/*
+            if ( !IsItemEquipped() )	// vendor boxes should ALWAYS be equipped! Unless we're duping the container, in this case first we dupe (and so the items inside), then we equip it
 			{
 				DEBUG_ERR(("Un-equipped vendor box uid=0%x is bad\n", (dword)GetUID()));
 				break;
-			}
+			}*/
 			{
 				CItemVendable *pItemVend = dynamic_cast<CItemVendable *>(pItem);
 				if ( !pItemVend )
 				{
-					g_Log.Event(LOGL_WARN, "Vendor: deleting non-vendable item %s uid=0%x, vendor: %s uid=0%x\n", pItem->GetResourceName(), pItem->GetUID().GetObjUID(), GetContainer()->GetName(), GetContainer()->GetUID().GetObjUID());
+					g_Log.Event(LOGL_WARN, "Vendor: deleting non-vendable item %s uid=0%x, vendor: %s, uid=0%x\n", pItem->GetResourceName(), pItem->GetUID().GetObjUID(), GetContainer()->GetName(), GetContainer()->GetUID().GetObjUID());
 					pItem->Delete();
 					break;
 				}

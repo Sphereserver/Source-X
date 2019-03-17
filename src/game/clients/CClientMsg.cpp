@@ -2635,7 +2635,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 			int iDistNew = iDist + 20;
 			for ( int iDir = DIR_NE; iDir <= DIR_NW; iDir += 2 )	// try diagonal in all directions
 			{
-				if ( m_pChar->MoveToValidSpot(static_cast<DIR_TYPE>(iDir), iDistNew, iDist) )
+				if ( m_pChar->MoveToValidSpot((DIR_TYPE)(iDir), iDistNew, iDist) )
 				{
 					i = 100;
 					break;

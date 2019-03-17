@@ -231,7 +231,7 @@ void CCMultiMovable::SetPilot(CChar *pChar)
 }
 
 
-bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta)
+bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta, bool fUpdateViewFull)
 {
     ADDTOCALLSTACK("CCMultiMovable::MoveDelta");
     // Move the ship one space in some direction.
@@ -241,7 +241,7 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta)
     CItemMulti *pMultiThis = static_cast<CItemMulti*>(pItemThis);
     ASSERT(pMultiThis->GetRegion()->m_iLinkedSectors);
 
-    int zNew = pItemThis->GetTopZ() + ptDelta.m_z;
+    const int zNew = pItemThis->GetTopZ() + ptDelta.m_z;
     if ( (ptDelta.m_z > 0) && (zNew >= (UO_SIZE_Z - PLAYER_HEIGHT) - 1) )
         return false;
     if ( (ptDelta.m_z < 0) && (zNew <= (UO_SIZE_MIN_Z + 3)) )
@@ -262,7 +262,7 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta)
     uint iCount = ListObjs(ppObjs);
     ASSERT(iCount > 0);
 
-    for (size_t i = 0; i < iCount; ++i)
+    for (uint i = 0; i < iCount; ++i)
     {
         CObjBase * pObj = ppObjs[i];
         if (!pObj)
@@ -359,14 +359,16 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta)
                     if (pCharClient->GetRegion()->GetResourceID().GetObjUID() == pItemThis->GetUID())
                     {
                         // Is there any new object (outside of the ship) that i can see?
-                        if (fClientUsesSmoothSailing)
+                        if (fClientUsesSmoothSailing && !fUpdateViewFull)
                         {
+                            // Update only for new objs
                             CPointMap ptClientOld(pCharClient->GetTopPoint());
                             ptClientOld -= ptDelta;
                             pClient->addPlayerSee(ptClientOld);
                         }
                         else
                         {
+                            // Update whole view (so, also the newposition of the dynamic multi components of the ship)
                             pClient->addPlayerSee(CPointMap());
                         }
                     }
@@ -620,8 +622,8 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
     CPointMap ptRight(pMultiRegion->GetRegionCorner(GetDirTurn(dir, 1 + (dir % 2))));
     CPointMap ptTest(ptLeft.m_x, ptLeft.m_y, pItemThis->GetTopZ(), pItemThis->GetTopMap());
 
-	short iMapBoundX = static_cast<short>(g_MapList.GetX(ptBack.m_map));
-	short iMapBoundY = static_cast<short>(g_MapList.GetY(ptBack.m_map));
+	short iMapBoundX = (short)(g_MapList.GetX(ptBack.m_map));
+	short iMapBoundY = (short)(g_MapList.GetY(ptBack.m_map));
 	bool fStopped = false, fTurbulent = false, fMapBoundary = false;
 
     for (int i = 0; i < distance; ++i)
@@ -633,7 +635,7 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
 		{
 			if (ptFore.m_x < 0)
 			{
-				signed short iDelta = iMapBoundX - ptBack.m_x;
+				short iDelta = iMapBoundX - ptBack.m_x;
 				ptDelta.m_x += iDelta;
 				ptFore.m_x += iDelta;
 				ptLeft.m_x += iDelta;
@@ -643,7 +645,7 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
 			}
 			else if (ptFore.m_y < 0)
 			{
-				signed short iDelta = iMapBoundY - ptBack.m_y;
+				short iDelta = iMapBoundY - ptBack.m_y;
 				ptDelta.m_y += iDelta;
 				ptFore.m_y += iDelta;
 				ptLeft.m_y += iDelta;
@@ -653,7 +655,7 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
 			}
 			else if (ptFore.m_x >= iMapBoundX)
 			{
-				signed short iDelta = ptBack.m_x + 1;
+				short iDelta = ptBack.m_x + 1;
 				ptDelta.m_x -= iDelta;
 				ptFore.m_x -= iDelta;
 				ptLeft.m_x -= iDelta;
@@ -663,7 +665,7 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
 			}
 			else if (ptFore.m_y >= iMapBoundY)
 			{
-				signed short iDelta = ptBack.m_y + 1;
+				short iDelta = ptBack.m_y + 1;
 				ptDelta.m_y -= iDelta;
 				ptFore.m_y -= iDelta;
 				ptLeft.m_y -= iDelta;
@@ -702,9 +704,9 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
             case DIR_NE:
             case DIR_NW:
                 ptTest.m_y = ptFore.m_y; // align y coordinate
-                for (int x = ptLeft.m_x; x <= ptRight.m_x; ++x)
+                for (short x = ptLeft.m_x; x <= ptRight.m_x; ++x)
                 {
-                    ptTest.m_x = (short)(x);
+                    ptTest.m_x = x;
                     SPAWNSHIPTRACK(ptTest, 0x40);
                     if (CanMoveTo(ptTest) == false)
                     {
@@ -718,9 +720,9 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
             case DIR_SE:
             case DIR_SW:
                 ptTest.m_y = ptFore.m_y;
-                for (int x = ptRight.m_x; x <= ptLeft.m_x; x++)
+                for (short x = ptRight.m_x; x <= ptLeft.m_x; ++x)
                 {
-                    ptTest.m_x = (short)(x);
+                    ptTest.m_x = x;
                     SPAWNSHIPTRACK(ptTest, 0x40);
                     if (CanMoveTo(ptTest) == false)
                     {
@@ -741,9 +743,9 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
             case DIR_NE:
             case DIR_SE:
                 ptTest.m_x = ptFore.m_x; // align x coordinate
-                for (int y = ptLeft.m_y; y <= ptRight.m_y; ++y)
+                for (short y = ptLeft.m_y; y <= ptRight.m_y; ++y)
                 {
-                    ptTest.m_y = (short)(y);
+                    ptTest.m_y = y;
                     SPAWNSHIPTRACK(ptTest, 0xe0);
                     if (CanMoveTo(ptTest) == false)
                     {
@@ -757,9 +759,9 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
             case DIR_NW:
             case DIR_SW:
                 ptTest.m_x = ptFore.m_x;
-                for (int y = ptRight.m_y; y <= ptLeft.m_y; ++y)
+                for (short y = ptRight.m_y; y <= ptLeft.m_y; ++y)
                 {
-                    ptTest.m_y = (short)(y);
+                    ptTest.m_y = y;
                     SPAWNSHIPTRACK(ptTest, 0xe0);
                     if (CanMoveTo(ptTest) == false)
                     {
@@ -785,7 +787,7 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
 
     if (ptDelta.m_x != 0 || ptDelta.m_y != 0 || ptDelta.m_z != 0)
     {
-        MoveDelta(ptDelta);
+        MoveDelta(ptDelta, fMapBoundary);
 
         // Move again
         pItemThis->GetTopSector()->SetSectorWakeStatus();	// may get here b4 my client does.
@@ -974,7 +976,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
             if (!ptdelta.IsValidPoint())
                 return false;
             ptdelta -= pItemThis->GetTopPoint();
-            return MoveDelta(ptdelta);
+            return MoveDelta(ptdelta, true);
         }
 
         case CMV_SHIPTURNLEFT:
@@ -1118,7 +1120,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
 
             CPointMap pt;
             pt.m_z = PLAYER_HEIGHT;
-            if (MoveDelta(pt))
+            if (MoveDelta(pt, false))
             {
                 pszSpeak = g_Cfg.GetDefaultMsg(DEFMSG_TILLER_CONFIRM);
             }
@@ -1135,7 +1137,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
                 return false;
             CPointMap pt;
             pt.m_z = -PLAYER_HEIGHT;
-            if (MoveDelta(pt))
+            if (MoveDelta(pt, false))
                 pszSpeak = g_Cfg.GetDefaultMsg(DEFMSG_TILLER_CONFIRM);
             else
                 pszSpeak = g_Cfg.GetDefaultMsg(DEFMSG_TILLER_DENY);
@@ -1157,7 +1159,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
             pt.m_z = z - zold;
             if (pt.m_z)
             {
-                MoveDelta(pt);
+                MoveDelta(pt, false);
                 pszSpeak = g_Cfg.GetDefaultMsg(DEFMSG_TILLER_CONFIRM);
             }
             else
@@ -1192,7 +1194,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
         }
 
         tchar szText[MAX_TALK_BUFFER];
-        strcpy(szText, pszSpeak);
+        strncpy(szText, pszSpeak, MAX_TALK_BUFFER);
         pChar->ParseText(szText, &g_Serv);
         pTiller->Speak(szText, HUE_TEXT_DEF, TALKMODE_SAY, FONT_NORMAL);
     }

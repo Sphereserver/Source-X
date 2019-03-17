@@ -765,7 +765,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 
 			if (block.m_Bottom.m_z < z)
 			{
-				if ((z < pt.m_z+PLAYER_HEIGHT) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)))
+				if ((z < pt.m_z) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)))
 				{
 					block.m_Bottom.m_dwBlockFlags = dwBlockThis;
 					block.m_Bottom.m_dwTile = pStatic->GetDispID() + TERRAIN_QTY;
@@ -864,7 +864,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 
 						if (block.m_Bottom.m_z < z)
 						{
-							if ((z < pt.m_z+PLAYER_HEIGHT) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)))
+							if ((z < pt.m_z) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)))
 							{
 								block.m_Bottom.m_dwBlockFlags = dwBlockThis;
 								block.m_Bottom.m_dwTile = pMultiItem->GetDispID() + TERRAIN_QTY;
@@ -931,7 +931,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 
 			if ( block.m_Bottom.m_z < z )
 			{
-				if ( (z < pt.m_z + PLAYER_HEIGHT) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)) )
+				if ( (z < pt.m_z) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)) )
 				{
 					block.m_Bottom.m_dwBlockFlags = dwBlockThis;
 					block.m_Bottom.m_dwTile = pItemDef->GetDispID() + TERRAIN_QTY;
@@ -981,7 +981,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 
 	if (block.m_Bottom.m_z < pMeter->m_z)
 	{
-		if (((pMeter->m_z < pt.m_z+PLAYER_HEIGHT) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER))) || (block.m_Bottom.m_z == UO_SIZE_MIN_Z))
+		if (((pMeter->m_z < pt.m_z) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER))) || (block.m_Bottom.m_z == UO_SIZE_MIN_Z))
 		{
 			block.m_Bottom.m_dwBlockFlags = dwBlockThis;
 			block.m_Bottom.m_dwTile = pMeter->m_wTerrainIndex;
@@ -1042,13 +1042,6 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 
 			z = pStatic->m_z;
 
-			//DEBUG_ERR(("z (%d)  block.m_zHeight (%d) block.m_Bottom.m_z (%d)\n",z,block.m_zHeight,block.m_Bottom.m_z));
-			if ( ! block.IsUsableZ( z, block.m_zHeight ))
-				continue;
-
-			// This static is at the coordinates in question.
-			// enough room for me to stand here ?
-
 			pItemDef = CItemBase::FindItemBase( pStatic->GetDispID() );
 			if ( pItemDef )
 			{
@@ -1079,6 +1072,12 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 				CItemBase::GetItemTiledataFlags(&dwBlockThis, pStatic->GetDispID());
             }
 
+            //DEBUG_ERR(("z (%d)  block.m_iHeight (%d) block.m_Bottom.m_z (%d)\n",z,block.m_iHeight,block.m_Bottom.m_z));
+            if ( ! block.IsUsableZ( z, zHeight, block.m_zHeight ))
+                continue;
+
+            // This static is at the coordinates in question.
+            // enough room for me to stand here ?
 			block.CheckTile_Item( dwBlockThis, z, zHeight, pStatic->GetDispID() + TERRAIN_QTY );
 		}
 	}
@@ -1138,8 +1137,6 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 								continue;
 
 							z = (char)( pItem->GetTopZ() + pMultiItem->m_dz );
-							if ( ! block.IsUsableZ(z,block.m_zHeight))
-								continue;
 
 							pItemDef = CItemBase::FindItemBase( pMultiItem->GetDispID() );
 							if ( pItemDef != nullptr )
@@ -1171,6 +1168,9 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 								CItemBase::GetItemTiledataFlags(&dwBlockThis, pMultiItem->GetDispID());
                             }
 
+                            if ( ! block.IsUsableZ( z, zHeight, block.m_zHeight ))
+                                continue;
+
 							block.CheckTile_Item( dwBlockThis, z, zHeight, pMultiItem->GetDispID() + TERRAIN_QTY );
 						}
 					}
@@ -1199,8 +1199,6 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 			break;
 
 		z = pItem->GetTopZ();
-		if ( !block.IsUsableZ( z, block.m_zHeight ) )
-			continue;
 
 		// Invis items should not block ???
 		pItemDef = CItemBase::FindItemBase( pItem->GetDispID() );
@@ -1233,6 +1231,9 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 			CItemBase::GetItemTiledataFlags(&dwBlockThis, pItem->GetDispID());
         }
 
+        if ( ! block.IsUsableZ( z, zHeight, block.m_zHeight ))
+            continue;
+
 		block.CheckTile_Item(dwBlockThis, z, zHeight, pItem->GetDispID() + TERRAIN_QTY);
 	}
 
@@ -1242,33 +1243,34 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 	if ( ! pMeter )
 		return;
 
-	if ( block.IsUsableZ( pMeter->m_z,block.m_zHeight ) )
-	{
-		//DEBUG_ERR(("pMeter->m_wTerrainIndex 0%x dwBlockThis (0%x)\n",pMeter->m_wTerrainIndex,dwBlockThis));
-		if ( pMeter->m_wTerrainIndex == TERRAIN_HOLE )
-		{
-			dwBlockThis = 0;
-		}
-		else if ( CUOMapMeter::IsTerrainNull( pMeter->m_wTerrainIndex ) )	// inter dungeon type.
-		{
-			dwBlockThis = CAN_I_BLOCK;
-		}
-		else
-		{
-			CUOTerrainInfo land( pMeter->m_wTerrainIndex );
-			//DEBUG_ERR(("Terrain flags - land.m_flags 0%x dwBlockThis (0%x)\n",land.m_flags,dwBlockThis));
-			if ( land.m_flags & UFLAG1_WATER )
-				dwBlockThis |= CAN_I_WATER;
-			if ( land.m_flags & UFLAG1_DAMAGE )
-				dwBlockThis |= CAN_I_FIRE;
-			if ( land.m_flags & UFLAG1_BLOCK )
-				dwBlockThis |= CAN_I_BLOCK;
-			if (( ! dwBlockThis ) || ( land.m_flags & UFLAG2_PLATFORM )) // Platform items should take precendence over non-platforms.
-				dwBlockThis = CAN_I_PLATFORM;
-		}
-		//DEBUG_ERR(("TERRAIN dwBlockThis (0%x)\n",dwBlockThis));
-		block.CheckTile_Terrain( dwBlockThis, pMeter->m_z, pMeter->m_wTerrainIndex );
-	}
+    if (block.IsUsableZ(pMeter->m_z, 0, block.m_zHeight))
+    {
+        //DEBUG_ERR(("pMeter->m_wTerrainIndex 0%x dwBlockThis (0%x)\n",pMeter->m_wTerrainIndex,dwBlockThis));
+        if (pMeter->m_wTerrainIndex == TERRAIN_HOLE)
+        {
+            dwBlockThis = 0;
+        }
+        else if (CUOMapMeter::IsTerrainNull(pMeter->m_wTerrainIndex))	// inter dungeon type.
+        {
+            dwBlockThis = CAN_I_BLOCK;
+        }
+        else
+        {
+            const CUOTerrainInfo land(pMeter->m_wTerrainIndex);
+            //DEBUG_ERR(("Terrain flags - land.m_flags 0%x dwBlockThis (0%x)\n",land.m_flags,dwBlockThis));
+            if (land.m_flags & UFLAG1_WATER)
+                dwBlockThis |= CAN_I_WATER;
+            if (land.m_flags & UFLAG1_DAMAGE)
+                dwBlockThis |= CAN_I_FIRE;
+            if (land.m_flags & UFLAG1_BLOCK)
+                dwBlockThis |= CAN_I_BLOCK;
+            if ((! dwBlockThis) || (land.m_flags & UFLAG2_PLATFORM)) // Platform items should take precendence over non-platforms.
+                dwBlockThis = CAN_I_PLATFORM;
+        }
+        //DEBUG_ERR(("TERRAIN dwBlockThis (0%x)\n",dwBlockThis));
+
+        block.CheckTile_Terrain(dwBlockThis, pMeter->m_z, pMeter->m_wTerrainIndex);
+    }
 
 	if ( block.m_Bottom.m_z == UO_SIZE_MIN_Z )
 	{
@@ -1339,14 +1341,15 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 			if ( ! pMapBlock->m_Statics.IsStaticPoint( i, x2, y2 ))
 				continue;
 			const CUOStaticItemRec * pStatic = pMapBlock->m_Statics.GetStatic( i );
+
 			char z = pStatic->m_z;
-			if ( ! block.IsUsableZ(z,PLAYER_HEIGHT))
+            dwBlockThis = 0;
+            height_t zHeight = CItemBase::GetItemHeight( pStatic->GetDispID(), &dwBlockThis );
+			if ( ! block.IsUsableZ(z, zHeight, block.m_zHeight))
 				continue;
 
 			// This static is at the coordinates in question.
 			// enough room for me to stand here ?
-			dwBlockThis = 0;
-			height_t zHeight = CItemBase::GetItemHeight( pStatic->GetDispID(), &dwBlockThis );
 			block.CheckTile( dwBlockThis, z, zHeight, pStatic->GetDispID() + TERRAIN_QTY );
 	    }
     }
@@ -1383,11 +1386,11 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 								continue;
 
 							char zitem = (char)( pItem->GetTopZ() + pMultiItem->m_dz );
-							if ( ! block.IsUsableZ(zitem,PLAYER_HEIGHT))
+                            dwBlockThis = 0;
+                            height_t zHeight = CItemBase::GetItemHeight( pMultiItem->GetDispID(), &dwBlockThis );
+							if ( ! block.IsUsableZ(zitem, zHeight, block.m_zHeight))
 								continue;
 
-							dwBlockThis = 0;
-							height_t zHeight = CItemBase::GetItemHeight( pMultiItem->GetDispID(), &dwBlockThis );
 							block.CheckTile( dwBlockThis, zitem, zHeight, pMultiItem->GetDispID() + TERRAIN_QTY );
 						}
 					}
@@ -1407,10 +1410,8 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 			break;
 
 		char zitem = pItem->GetTopZ();
-		if ( ! block.IsUsableZ(zitem,PLAYER_HEIGHT))
-			continue;
 
-		// Invis items should not block ???
+        // Invis items should not block ???
 		const CItemBase * pItemDef = pItem->Item_GetDef();
 		ASSERT(pItemDef);
 
@@ -1426,6 +1427,9 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 		if (zHeight == 0)
 			zHeight = zStaticHeight;
 
+        if ( ! block.IsUsableZ(zitem, zHeight, block.m_zHeight))
+            continue;
+
 		if ( !block.CheckTile(dwBlockThis, zitem, zHeight, pItemDef->GetDispID() + TERRAIN_QTY ) )
 		{
 		}
@@ -1439,7 +1443,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 	const CUOMapMeter * pMeter = pMapBlock->GetTerrain( UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y));
 	ASSERT(pMeter);
 
-	if ( block.IsUsableZ(pMeter->m_z,0))
+	if ( block.IsUsableZ(pMeter->m_z, 0, block.m_zHeight))
 	{
 		if ( pMeter->m_wTerrainIndex == TERRAIN_HOLE )
 			dwBlockThis = 0;
@@ -1447,7 +1451,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 			dwBlockThis = CAN_I_BLOCK;
 		else
 		{
-			CUOTerrainInfo land( pMeter->m_wTerrainIndex );
+			const CUOTerrainInfo land( pMeter->m_wTerrainIndex );
 			if ( land.m_flags & UFLAG2_PLATFORM ) // Platform items should take precendence over non-platforms.
 				dwBlockThis = CAN_I_PLATFORM;
 			else if ( land.m_flags & UFLAG1_WATER )
