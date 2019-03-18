@@ -1578,3 +1578,6 @@ WARNING: the following change could break some hackish expedient used in scripts
 17-03-2019, Nolok
 - Fixed: Criminal status not expiring (Issue #239).
 - Fixed: Chars with MT_SWIM Can flag couldn't walk on static water tiles (Issue #253), and chars without MT_SWIM could walk over dynamic water tiles.
+
+18-03-2019, Julian
+- Modified: @HitParry to include local.Damage, which contains the raw amount of damage before any parrying modification.

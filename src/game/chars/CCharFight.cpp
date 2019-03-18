@@ -1775,7 +1775,10 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	}
 
 	// We hit
+	// Calculate the damage and check for parrying
+	int	iDmg = Fight_CalcDamage(pWeapon);
 	int iParryReduction = 0;
+
 	if ( !(iDmgType & DAMAGE_GOD) )
 	{
 		CItem * pItemHit = nullptr;
@@ -1786,25 +1789,29 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			if ( IsPriv(PRIV_DETAIL) )
 				SysMessageDefault(DEFMSG_COMBAT_PARRY);
 
-			//If Effect property is defined on the Parrying skill use it instead of the hardcoded value of 100.
+			// If Effect property is defined on the Parrying skill use it instead of the hardcoded value of 100.
 			iParryReduction = 100;
 			if (!pSkillDef->m_Effect.m_aiValues.empty())
 				iParryReduction = pSkillDef->m_Effect.GetLinear(pCharTarg->Skill_GetAdjusted(SKILL_PARRYING));
 
 			/*
-			Argn1: Percent of damage that will be reduced.
-			Argn2: Damage type.
-			Argo: The weapon/shield used for parry, if any.
-			Local.ItemParryDamage: The chance that the parrying item will be damaged.
+			ARGN1 = Percent of damage that will be reduced.
+			ARGN2 =  Damage type.
+			ARGO  = The weapon/shield used for parry, if any.
+			local.ItemParryDamage = The chance that the parrying item will be damaged.
+			local.Damage = The amount of damage (raw) before parrying reduction.
 			*/
 			CScriptTriggerArgs Args(iParryReduction, iDmgType, pItemHit);
 			Args.m_VarsLocal.SetNum("ItemParryDamageChance", 100);
+			Args.m_VarsLocal.SetNum("Damage", iDmg);
 			if (IsTrigUsed(TRIGGER_HITPARRY))
 			{
 				if (pCharTarg->OnTrigger(CTRIG_HitParry, this, &Args) == TRIGRET_RET_TRUE)
 					return WAR_SWING_EQUIPPING_NOWAIT;
-				iParryReduction = (int)(Args.m_iN1);
+
+				iParryReduction  = (int)(Args.m_iN1);
 				iDmgType = (DAMAGE_TYPE)(Args.m_iN2);
+				iDmg = Args.m_VarsLocal.GetKeyNum("Damage");
 			}
 			int iParryDamageChance = (int)(Args.m_VarsLocal.GetKeyNum("ItemParryDamageChance"));
 			if ( pItemHit &&  iParryDamageChance > Calc_GetRandVal(100))
@@ -1816,8 +1823,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		}
 	}
 
-	// Calculate base damage and apply parry reduction if any.
-	int	iDmg = Fight_CalcDamage(pWeapon);
+	// Apply parrying reduction (if there's any)
 	if (iParryReduction > 0)
 		iDmg -= IMulDiv(iDmg, iParryReduction, 100);
 
