@@ -1135,6 +1135,7 @@ void CChar::Fight_ClearAll()
 	}
     Attacker_Clear();
 
+    m_atFight.m_War_Swing_State = WAR_SWING_EQUIPPING;
     m_atFight.m_iRecoilDelay = 0;
     m_atFight.m_iSwingAnimationDelay = 0;
     m_atFight.m_iSwingAnimation = 0;
@@ -1150,6 +1151,7 @@ bool CChar::Fight_Clear(CChar *pChar, bool bForced)
 	if ( !pChar || !Attacker_Delete(pChar, bForced, ATTACKER_CLEAR_FORCED) )
 		return false;
 
+    m_atFight.m_War_Swing_State = WAR_SWING_EQUIPPING;
     m_atFight.m_iRecoilDelay = 0;
     m_atFight.m_iSwingAnimationDelay = 0;
     m_atFight.m_iSwingAnimation = 0;
@@ -1284,13 +1286,13 @@ void CChar::Fight_HitTry()
 		return;
 	}
 
-    bool fPreHit_HadInstaHit = false, fPreHit_LastHitTag_Newer = false;
+    bool fPreHit_ShouldInstaHit = false, fPreHit_LastHitTag_Newer = false;
     int64 iPreHit_LastHitTag_FullHit = 0;  // Time required to perform a normal hit, without the PreHit delay reduction.
     if (m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING)
     {
         if (IsSetCombatFlags(COMBAT_PREHIT))
         {
-            fPreHit_HadInstaHit = (!m_atFight.m_iRecoilDelay && !m_atFight.m_iSwingAnimationDelay);
+            fPreHit_ShouldInstaHit = (!m_atFight.m_iRecoilDelay && !m_atFight.m_iSwingAnimationDelay);
             Fight_SetDefaultSwingDelays();
             const int64 iTimeCur = g_World.GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH;
             // Time required to perform the previous normal hit, without the PreHit delay reduction.
@@ -1301,7 +1303,7 @@ void CChar::Fight_HitTry()
             if (iPreHit_LastHitTag_PreHit > iPreHit_LastHitTag_FullHit_Prev)
             {
                 fPreHit_LastHitTag_Newer = true;
-                if (fPreHit_HadInstaHit)
+                if (fPreHit_ShouldInstaHit)
                 {
                     // First hit with PreHit -> no recoil, only the minimum swing animation delay
                     m_atFight.m_iSwingIgnoreLastHitTag = 1;
@@ -1328,7 +1330,7 @@ void CChar::Fight_HitTry()
                 // This protects against allowing shortened hits every time a char stops and starts attacking again, independently of this being the first, second, third or whatever hit.
                 SetKeyNum("LastHit", iPreHit_LastHitTag_FullHit);
             }
-            if (!fPreHit_HadInstaHit)
+            if (!fPreHit_ShouldInstaHit)
             {
                 // This workaround is needed because, without it, if the player exits and enters war mode after having landed the first but not the second hit,
                 //  resets the old delays and there's nothing to check if he can do again a PreHit, so he again hits near-instantly.
@@ -1365,7 +1367,6 @@ void CChar::Fight_HitTry()
                 }
                 else
                 {
-                
                     // Wait a bit, then check again if i can hit. If i don't wait, the condition that leaded to this point will always be the same,
                     //  and the combat code and this function will be called recursively.
                     SetTimeoutD(1);

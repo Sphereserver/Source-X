@@ -1574,3 +1574,7 @@ WARNING: the following change could break some hackish expedient used in scripts
 		If only one values is defined (Example:EFFECT=75) the damage will always be reduced by 75% no matter skills.
 		If one or more values are defined (Example: EFFECT=25,75) the damage will be reduced by 25% when the Parrying skill is near 0.0 and by 75% when the Parrying skill is near 100.0, that is damage reduction will be scaled according to the character parrying skill.
 		If no values are defined, the default value of 100 will be used.
+
+17-03-2019, Nolok
+- Fixed: Criminal status not expiring (Issue #239).
+- Fixed: Chars with MT_SWIM Can flag couldn't walk on static water tiles (Issue #253), and chars without MT_SWIM could walk over dynamic water tiles.

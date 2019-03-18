@@ -44,7 +44,7 @@ protected:
     void SetNextMove();
     uint ListObjs(CObjBase ** ppObjList);
     bool CanMoveTo(const CPointMap & pt) const;
-    bool MoveDelta(const CPointMap& ptDelta);
+    bool MoveDelta(const CPointMap& ptDelta, bool fUpdateViewFull);
     bool MoveToRegion(CRegionWorld *pRegionOld, CRegionWorld* pRegionNew);
     bool OnMoveTick();
 

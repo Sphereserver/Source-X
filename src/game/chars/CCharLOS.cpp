@@ -48,7 +48,7 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 			ptTest.Move(dirTest1);
 			dwBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
 			char z = g_World.GetHeightPoint2(ptTest, dwBlockFlags, true);
-			char zDiff = (char)(abs(z - ptTest.m_z));
+			short zDiff = (short)(abs(z - ptTest.m_z));
 
 			if ( (zDiff > PLAYER_HEIGHT) || (dwBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR)) )		// blocked
 			{
@@ -57,7 +57,7 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 				{
 					dwBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
 					z = g_World.GetHeightPoint2(ptTest, dwBlockFlags, true);
-					zDiff = (char)(abs(z - ptTest.m_z));
+					zDiff = (short)(abs(z - ptTest.m_z));
 					if ( zDiff > PLAYER_HEIGHT )
 						goto blocked;
 
@@ -76,7 +76,7 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 			ptSrc.Move(dir);	// NOTE: The dir is very coarse and can change slightly.
 			dwBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
 			char z = g_World.GetHeightPoint2(ptSrc, dwBlockFlags, true);
-			char zDiff = (char)(abs(z - ptSrc.m_z));
+            short zDiff = (short)(abs(z - ptSrc.m_z));
 
 			if ( (zDiff > PLAYER_HEIGHT) || (dwBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR)) || (iDistTry > iMaxDist) )
 				goto blocked;
@@ -222,9 +222,9 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 	CRegion *pNowRegion = nullptr;
 
 	int lp_x = 0, lp_y = 0;
-	char min_z = 0, max_z = 0;
+	short min_z = 0, max_z = 0;
 
-	for (size_t i = 0; i < path.size(); lp_x = ptNow.m_x, lp_y = ptNow.m_y, pItemDef = nullptr, pStatic = nullptr, pMulti = nullptr, pMultiItem = nullptr, min_z = 0, max_z = 0, ++i )
+	for (uint i = 0, pathSize = uint(path.size()); i < pathSize; lp_x = ptNow.m_x, lp_y = ptNow.m_y, pItemDef = nullptr, pStatic = nullptr, pMulti = nullptr, pMultiItem = nullptr, min_z = 0, max_z = 0, ++i )
 	{
 		ptNow = path[i];
 		WARNLOS(("---------------------------------------------\n"));
@@ -545,8 +545,8 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 						if ( !pMulti )
 							continue;
 
-						size_t iQty = pMulti->GetItemCount();
-						for ( size_t iii = 0; iii < iQty; pItemDef = nullptr, pMultiItem = nullptr, ++iii )
+						uint iQty = pMulti->GetItemCount();
+						for ( uint iii = 0; iii < iQty; pItemDef = nullptr, pMultiItem = nullptr, ++iii )
 						{
 							pMultiItem = pMulti->GetItem(iii);
 							if ( !pMultiItem )

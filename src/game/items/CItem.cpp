@@ -2274,7 +2274,7 @@ bool CItem::LoadSetContainer( CUID uid, LAYER_TYPE layer )
 
 	if ( IsTypeSpellbook() && pObjCont->GetTopLevelObj()->IsChar())	// Intercepting the spell's addition here for NPCs, they store the spells on vector <Spells>m_spells for better access from their AI.
 	{
-		CChar * pChar = dynamic_cast <CObjBase*>(pObjCont->GetTopLevelObj())->GetUID().CharFind();// ? dynamic_cast <CObjBase*>(GetTopLevelObj())->GetUID().CharFind()->m_pNPC : nullptr;
+		CChar * pChar = static_cast <CChar*>(pObjCont->GetTopLevelObj());
 		if (pChar->m_pNPC)
 			pChar->NPC_AddSpellsFromBook(this);
 	}

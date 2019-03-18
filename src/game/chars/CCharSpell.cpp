@@ -2266,7 +2266,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 	iManaUse = (ushort)(Args.m_iN2);
 	iTithingUse = (ushort)(Args.m_VarsLocal.GetKeyNum("TithingUse"));
 
-	if ( pSrc != this )
+	if ( !pSrc->IsChar() )// Looking for non-character sources
 	{
 		// Cast spell using magic items (wand/scroll)
 		CItem * pItem = dynamic_cast <CItem*> (pSrc);
@@ -2579,7 +2579,7 @@ bool CChar::Spell_CastDone()
 		return false;
 
 	int iSkillLevel;
-	if (pObjSrc != this)
+	if (pObjSrc && !pObjSrc->IsChar())
 	{
 		// Get the strength of the item. IT_SCROLL or IT_WAND
 		CItem * pItem = dynamic_cast <CItem*>(pObjSrc);
@@ -3473,7 +3473,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 		case SPELL_Heal:
 		case SPELL_Great_Heal:
-			UpdateStatVal( STAT_STR, iEffect );
+			UpdateStatVal( STAT_STR, iEffect, Stat_GetMaxAdjusted(STAT_STR) );
 			break;
 
 		case SPELL_Night_Sight:

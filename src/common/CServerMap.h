@@ -88,12 +88,11 @@ struct CServerMapBlockState
 	//		CAN_C_FIRE_IMMUNE = i can walk into lava etc. - CAN_I_FIRE = UFLAG1_DAMAGE
 	//		CAN_C_HOVER = i can follow hover routes. - CAN_I_HOVER = UFLAG4_HOVEROVER
 
-	const dword m_dwBlockFlags;	// The block flags we can overcome.	
-	const char m_z;	// the z we start at. (stay at if we are flying)
+	const dword m_dwBlockFlags;	// The block flags we (the specific char who requested this class instance) can overcome.	
+	const char m_z;	            // the z we start at. (stay at if we are flying)
 	const int m_iHeight;		// The height we need to stand here.
-	const char m_zClimb; // We can climb at this height
-	const height_t m_zHeight; //our height
-	
+	const char m_zClimb;        // We can climb at this height
+    const height_t m_zHeight;   // our height
 	height_t m_zClimbHeight;	// return item climb height here
 	
 	CServerMapBlocker m_Top;
@@ -109,10 +108,10 @@ private:
 	CServerMapBlockState& operator=(const CServerMapBlockState& other);
 
 public:
-	bool IsUsableZ( char zBottom, height_t zHeightEstimate ) const;
+	bool IsUsableZ( char zTile, height_t zTileHeight, height_t zHeightEstimate ) const;
 	bool CheckTile( dword dwItemBlockFlags, char zBottom, height_t zheight, dword wID );
 	bool CheckTile_Item( dword dwItemBlockFlags, char zBottom, height_t zheight, dword wID );
-	inline void SetTop( dword &dwItemBlockFlags, char &z, dword &dwID );
+	void SetTop( dword dwItemBlockFlags, char z, dword dwID );
 	bool CheckTile_Terrain( dword dwItemBlockFlags, char z, dword dwID );
 	static lpctstr GetTileName( dword dwID );
 };

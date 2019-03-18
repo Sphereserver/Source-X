@@ -108,7 +108,7 @@ Then install these additional packages via yum (CentOS or RH) or dnf (Fedora): `
 #### Compiling on Linux
 Just run the `make` command inside the `build` folder. You can pass the -jX argument (`make -jX`, where X is a number) to speed up the compilation and split the work between X threads.
  
-#### Extra: compiling with Clang
+#### Extra: compiling with Clang (if you wish to try)
 At the moment, Clang was tested only on Windows and in combination with Visual Studio 2017.<br>
 
 ##### On Windows

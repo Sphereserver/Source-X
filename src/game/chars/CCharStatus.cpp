@@ -1755,7 +1755,7 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
 		return nullptr;
 	}
 
-	dword dwCan = GetMoveBlockFlags();
+	dword dwCan = GetMoveBlockFlags();  // actions i can perform to step on a tile (some tiles require a specific ability, like to swim for the water)
 	if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
 		g_Log.EventWarn("GetMoveBlockFlags() (0x%" PRIx32 ").\n", dwCan);
 	if ( !(dwCan & (CAN_C_SWIM| CAN_C_WALK|CAN_C_FLY|CAN_C_RUN|CAN_C_HOVER)) )

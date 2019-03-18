@@ -391,17 +391,17 @@ bool CChar::Noto_Criminal( CChar * pCharViewer, bool fFromSawCrime )
 	if ( m_pNPC || IsPriv(PRIV_GM) )
 		return false;
 
-	int64 decay = (g_Cfg.m_iCriminalTimer / (60*MSECS_PER_SEC));
+	int64 decay = g_Cfg.m_iCriminalTimer; // in the ini is in minutes, but it's stored internally in msecs
 
     TRIGRET_TYPE retCriminal = TRIGRET_RET_DEFAULT;
 	if ( IsTrigUsed(TRIGGER_CRIMINAL) )
 	{
 		CScriptTriggerArgs Args;
-		Args.m_iN1 = decay;
+		Args.m_iN1 = decay / (60*MSECS_PER_SEC);   // convert in minutes
         Args.m_iN2 = fFromSawCrime;
 		Args.m_pO1 = pCharViewer;
         retCriminal = OnTrigger(CTRIG_Criminal, this, &Args);
-		decay = (Args.m_iN1 * (60*MSECS_PER_SEC));
+		decay = (Args.m_iN1 * (60*MSECS_PER_SEC)); // back in ms
 	}
 
     if (retCriminal == TRIGRET_RET_TRUE)
@@ -415,7 +415,8 @@ bool CChar::Noto_Criminal( CChar * pCharViewer, bool fFromSawCrime )
         // Return != 0 and 1: flag the char as criminal
         if (!IsStatFlag(STATF_CRIMINAL))
             SysMessageDefault(DEFMSG_MSG_GUARDS);
-        Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_Criminal, g_Cfg.GetSpellEffect(SPELL_NONE, 0), decay/MSECS_PER_TENTH);
+        if (decay)
+            Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_Criminal, g_Cfg.GetSpellEffect(SPELL_NONE, 0), decay/MSECS_PER_TENTH);
     }
 
     // Return != 1: remove the SawCrime memory, since i made him criminal to myself and also i may call the guards
