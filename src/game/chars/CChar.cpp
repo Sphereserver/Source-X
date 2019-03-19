@@ -3430,13 +3430,17 @@ bool CChar::r_LoadVal( CScript & s )
 			}
 			break;
         case CHC_OFAME:
+			Noto_Fame(s.GetArgVal());
+			break;
 		case CHC_FAME:
-            SetFame(s.GetArgUSVal());
+			SetFame(s.GetArgUSVal());
             break;
         case CHC_OKARMA:
+			Noto_Karma(s.GetArgVal());
+			break;
 		case CHC_KARMA:
 			SetKarma(s.GetArgSVal());
-            break;
+			break;
 		case CHC_SKILLUSEQUICK:
 			{
 				if ( s.GetArgStr() )
