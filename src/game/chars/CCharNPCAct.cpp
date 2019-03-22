@@ -744,7 +744,7 @@ bool CChar::NPC_LookAtCharHuman( CChar * pChar )
 	if ( IsStatFlag(STATF_DEAD) || pChar->IsStatFlag(STATF_DEAD) )
 		return false;
 
-	if ( Noto_IsEvil())		// I am evil.
+	if ( Noto_IsEvil() && !GetKeyNum("MurdererNPC") )		// I am evil.
 	{
 		// Attack others if we are evil.
 		return NPC_LookAtCharMonster( pChar );

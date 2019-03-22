@@ -40,11 +40,13 @@ bool CChar::Noto_IsEvil() const
 
 		return false;
 	}
-
-	// animals and humans given more leeway.
+	
 	if ( Noto_IsMurderer() )
 		return true;
-	
+
+	if (!m_pPlayer && GetKeyNum("MurdererNPC") == 1)
+		return true;
+
 	switch ( GetNPCBrainGroup() )
 	{
 		case NPCBRAIN_MONSTER:
@@ -61,9 +63,6 @@ bool CChar::Noto_IsEvil() const
 
 	if ( m_pPlayer )
 		return ( iKarma < g_Cfg.m_iPlayerKarmaEvil );
-	
-	if ( GetKeyNum("MurdererNPC") == 1 )
-		return true;
 
 	return ( iKarma <= -3000 );
 }
