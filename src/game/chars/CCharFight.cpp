@@ -1828,7 +1828,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 				iParryReduction  = (int)(Args.m_iN1);
 				iDmgType = (DAMAGE_TYPE)(Args.m_iN2);
-				iDmg = Args.m_VarsLocal.GetKeyNum("Damage");
+				iDmg = (int)(Args.m_VarsLocal.GetKeyNum("Damage"));
 			}
 			int iParryDamageChance = (int)(Args.m_VarsLocal.GetKeyNum("ItemParryDamageChance"));
 			if ( pItemHit &&  iParryDamageChance > Calc_GetRandVal(100))
