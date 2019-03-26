@@ -774,6 +774,9 @@ effect_bounce:
 		if ( pSpellDef && pSpellDef->GetPrimarySkill(&iSpellSkill) )
 			iDisturbChance = pSpellDef->m_Interrupt.GetLinear(Skill_GetBase((SKILL_TYPE)iSpellSkill));
 
+		if ( pSrc->GetPropNum(COMP_PROPS_CHAR, PROPCH_CASTINGFOCUS) != 0 )
+			iDisturbChance -= GetPropNum(COMP_PROPS_CHAR, PROPCH_CASTINGFOCUS) * 10;
+
 		if ( iDisturbChance && IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 		{
 			// Protection spell can cancel the disturb
@@ -2107,6 +2110,9 @@ bool CChar::Fight_Parry(CItem * &pItemParry)
         if ((iParryChance > 0) && (iParrying >= 1000))
             iParryChance += 5;
     }
+
+	if ( GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASEPARRYCHANCE) )
+		iParryChance += GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASEPARRYCHANCE);
 
     if (iParryChance <= 0)
         return false;

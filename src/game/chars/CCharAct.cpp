@@ -513,10 +513,12 @@ void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when r
         ModPropNum(pCCPChar, PROPCH_RESPOISON,    - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESPOISON, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_RESENERGY,    - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESENERGY, pItemBaseCCPItemEquippable));
 
+		ModPropNum(pCCPChar, PROPCH_CASTINGFOCUS,		  - pItem->GetPropNum(pItemCCPItemEquippable, PROPCH_CASTINGFOCUS, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_INCREASEDAM,          - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASEDAM, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_INCREASEDEFCHANCE,    - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASEDEFCHANCE, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_FASTERCASTING,        - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_FASTERCASTING, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_INCREASEHITCHANCE,    - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASEHITCHANCE, pItemBaseCCPItemEquippable));
+		ModPropNum(pCCPChar, PROPCH_INCREASEPARRYCHANCE,  - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASEPARRYCHANCE, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_INCREASESPELLDAM,     - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASESPELLDAM, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_INCREASESWINGSPEED,   - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASESWINGSPEED, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_ENHANCEPOTIONS,       - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_ENHANCEPOTIONS, pItemBaseCCPItemEquippable));
@@ -2090,10 +2092,12 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
         ModPropNum(pCCPChar, PROPCH_RESPOISON,    + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESPOISON, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_RESENERGY,    + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESENERGY, pItemBaseCCPItemEquippable));
 
+		ModPropNum(pCCPChar, PROPCH_CASTINGFOCUS,		  + pItem->GetPropNum(pItemCCPItemEquippable, PROPCH_CASTINGFOCUS, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_INCREASEDAM,          + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASEDAM, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_INCREASEDEFCHANCE,    + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASEDEFCHANCE, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_FASTERCASTING,        + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_FASTERCASTING, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_INCREASEHITCHANCE,    + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASEHITCHANCE, pItemBaseCCPItemEquippable));
+		ModPropNum(pCCPChar, PROPCH_INCREASEPARRYCHANCE,  + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASEPARRYCHANCE, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_INCREASESPELLDAM,     + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASESPELLDAM, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_INCREASESWINGSPEED,   + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASESWINGSPEED, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_ENHANCEPOTIONS,       + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_ENHANCEPOTIONS, pItemBaseCCPItemEquippable));
