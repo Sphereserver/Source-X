@@ -261,11 +261,10 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, const CChar
         else
         {
 			// #UOA#
-			// The status is: Armor, PMagery, PStealth, Luck
 			writeInt16((word)other->GetKeyNum("PENALTY.MAGERY", true));
 			writeInt16((word)other->GetKeyNum("PENALTY.STEALTH", true));
-			writeInt16(0);
-			writeInt16(0);
+			writeInt16((word)other->GetKeyNum("POISON.CHANCE", true));
+			writeInt16((word)other->GetKeyNum("EVADE.CHANCE", true));
         }
         writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_LUCK, pBaseCCPChar));
 
@@ -278,21 +277,21 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, const CChar
 
 	if (version >= 6)	// SA attributes
 	{
-        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESPHYSICALMAX, pBaseCCPChar));
-        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESFIREMAX, pBaseCCPChar));
-        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESCOLDMAX, pBaseCCPChar));
-        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESPOISONMAX, pBaseCCPChar));
-        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESENERGYMAX, pBaseCCPChar));
+        writeInt16((word)150);
+        writeInt16((word)100);
+        writeInt16((word)100);
+        writeInt16((word)100);
+        writeInt16((word)100);
         writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASEDEFCHANCE, pBaseCCPChar));
-        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASEDEFCHANCEMAX, pBaseCCPChar));
+        writeInt16((word)25);
         writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASEHITCHANCE, pBaseCCPChar));
-        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASESWINGSPEED, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASEBARDCHANCE, pBaseCCPChar));		// ISP
         writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASEDAM, pBaseCCPChar));
-        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_LOWERREAGENTCOST, pBaseCCPChar));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_CASTINGFOCUS, pBaseCCPChar));			// LRC
         writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASESPELLDAM, pBaseCCPChar));
-        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_FASTERCASTRECOVERY, pBaseCCPChar));
-        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_FASTERCASTING, pBaseCCPChar));
-        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_LOWERMANACOST, pBaseCCPChar));
+        writeInt16((word)other->GetKeyNum("TREASUREHUNTING"));
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASEGOLD, pBaseCCPChar));			// FC
+        writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_INCREASEPARRYCHANCE, pBaseCCPChar));	// LMC
 	}
 
 	if (target->GetNetState()->isClientKR())
