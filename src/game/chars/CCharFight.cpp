@@ -1811,10 +1811,10 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 				iParryReduction  = (int)(Args.m_iN1);
 				iDmgType = (DAMAGE_TYPE)(Args.m_iN2);
-				iDmg = Args.m_VarsLocal.GetKeyNum("Damage");
+				iDmg = (int)Args.m_VarsLocal.GetKeyNum("Damage");
 			}
 			int iParryDamageChance = (int)(Args.m_VarsLocal.GetKeyNum("ItemParryDamageChance"));
-			if ( pItemHit &&  iParryDamageChance > Calc_GetRandVal(100))
+			if ( pItemHit && (iParryDamageChance > Calc_GetRandVal(100)) )
 				pItemHit->OnTakeDamage(1, this, iDmgType);
 
 			//Effect(EFFECT_OBJ, ITEMID_FX_GLOW, this, 10, 16);		// moved to scripts (@UseQuick on Parrying skill)

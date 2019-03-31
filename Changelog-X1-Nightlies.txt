@@ -1581,3 +1581,11 @@ WARNING: the following change could break some hackish expedient used in scripts
 
 24-03-2019, Julian
 - Modified: @HitParry to include local.Damage, which contains the raw amount of damage before any parrying modification.
+
+31-03-2018, Nolok
+- Fixed: Swimming NPCs could pass under items even if their z wasn't high enough.
+- Fixed: MT_INDOORS not working: NPCs could always walk inside places with a ceiling too low for them to fit below.
+- Fixed: The absence of MT_WALK didn't stop NPCs from walking on land.
+- Fixed: Ghosts cannot pass through doors (Issue #263) and FIX setting incorrect Z (Issue #262).
+- Fixed: BTFish encryption not working (Issue #256).
+- Fixed: During character creation, invalid professions sent by the client will now be ignored.

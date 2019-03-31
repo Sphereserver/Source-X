@@ -671,7 +671,7 @@ char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
 {
 	if ( !dwBlockFlags )
 		dwBlockFlags = GetMoveBlockFlags();
-	dword dwCan = GetMoveBlockFlags();
+	const dword dwCan = GetMoveBlockFlags();
 	if ( dwCan & CAN_C_WALK )
 		dwBlockFlags |= CAN_I_CLIMB; // If we can walk than we can climb. Ignore CAN_C_FLY at all here
 
@@ -1457,7 +1457,7 @@ lpctstr CChar::GetName( bool fAllowAlt ) const
 }
 
 // Create a brand new Player char. Called directly from the packet.
-void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale, RACE_TYPE rtRace, ushort wStr, ushort wDex, ushort wInt,
+void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale, RACE_TYPE rtRace, ushort wStr, ushort wDex, ushort wInt,
 	PROFESSION_TYPE prProf, SKILL_TYPE skSkill1, ushort uiSkillVal1, SKILL_TYPE skSkill2, ushort uiSkillVal2, SKILL_TYPE skSkill3, ushort uiSkillVal3, SKILL_TYPE skSkill4, ushort uiSkillVal4,
 	HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, ITEMID_TYPE idFace, int iStartLoc )
 {
@@ -1472,41 +1472,43 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 	switch ( rtRace )
 	{
 		default:
+            g_Log.EventWarn("Character creation: invalid race. Defaulting to human.\n");
+            rtRace = RACETYPE_HUMAN;
 		case RACETYPE_HUMAN:
-			SetID(bFemale ? CREID_WOMAN : CREID_MAN);
+			SetID(fFemale ? CREID_WOMAN : CREID_MAN);
 			break;
 		case RACETYPE_ELF:
-			SetID(bFemale ? CREID_ELFWOMAN : CREID_ELFMAN);
+			SetID(fFemale ? CREID_ELFWOMAN : CREID_ELFMAN);
 			break;
 		case RACETYPE_GARGOYLE:
-			SetID(bFemale ? CREID_GARGWOMAN : CREID_GARGMAN);
+			SetID(fFemale ? CREID_GARGWOMAN : CREID_GARGMAN);
 			break;
 	}
 
 	// Set name
-	bool bNameIsAccepted = true;
+	bool fNameIsAccepted = true;
 	tchar *zCharName = Str_GetTemp();
     strncpynull(zCharName, pszCharname, MAX_NAME_SIZE);
 
 	if ( !strlen(zCharName) || g_Cfg.IsObscene(zCharName) || Str_CheckName(zCharName) ||!strnicmp(zCharName, "lord ", 5) || !strnicmp(zCharName, "lady ", 5) ||
 		!strnicmp(zCharName, "seer ", 5) || !strnicmp(zCharName, "gm ", 3) || !strnicmp(zCharName, "admin ", 6) || !strnicmp(zCharName, "counselor ", 10) )
 	{
-		bNameIsAccepted = false;
+		fNameIsAccepted = false;
 	}
 
-	if ( bNameIsAccepted && IsTrigUsed(TRIGGER_RENAME) )
+	if ( fNameIsAccepted && IsTrigUsed(TRIGGER_RENAME) )
 	{
 		CScriptTriggerArgs args;
 		args.m_s1 = zCharName;
 		args.m_pO1 = this;
 		if ( OnTrigger(CTRIG_Rename, this, &args) == TRIGRET_RET_TRUE )
-			bNameIsAccepted = false;
+			fNameIsAccepted = false;
 	}
 
-	if ( bNameIsAccepted )
+	if ( fNameIsAccepted )
 		SetName(zCharName);
 	else
-		SetNamePool(bFemale ? "#NAMES_HUMANFEMALE" : "#NAMES_HUMANMALE");
+		SetNamePool(fFemale ? "#NAMES_HUMANFEMALE" : "#NAMES_HUMANMALE");
 
 	if ( g_Cfg.m_StartDefs.IsValidIndex(iStartLoc) )
 		m_ptHome = g_Cfg.m_StartDefs[iStartLoc]->m_pt;
@@ -1519,7 +1521,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 	SetUnkPoint(m_ptHome);	// don't actually put me in the world yet.
 
 	// randomize the skills first.
-	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
+	for ( uint i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
 		if ( g_Cfg.m_SkillIndexDefs.IsValidIndex(i) )
 			Skill_SetBase((SKILL_TYPE)i, (ushort)Calc_GetRandVal(g_Cfg.m_iMaxBaseSkill));
@@ -1592,9 +1594,9 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 				0x0BF, 0x24D, 0x24E, 0x24F, 0x353, 0x361, 0x367, 0x374, 0x375, 0x376, 0x381, 0x382, 0x383, 0x384, 0x385, 0x389,
 				0x3DE, 0x3E5, 0x3E6, 0x3E8, 0x3E9, 0x430, 0x4A7, 0x4DE, 0x51D, 0x53F, 0x579, 0x76B, 0x76C, 0x76D, 0x835, 0x903
 			};
-			int iMax = CountOf(sm_ElfSkinHues);
+			constexpr uint iMax = CountOf(sm_ElfSkinHues);
 			bool isValid = 0;
-			for ( int i = 0; i < iMax; ++i )
+			for ( uint i = 0; i < iMax; ++i )
 			{
 				if ( sm_ElfSkinHues[i] == wSkinHue )
 				{
@@ -1623,19 +1625,19 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 		case RACETYPE_HUMAN:
 			if ( !(((idHair >= ITEMID_HAIR_SHORT) && (idHair <= ITEMID_HAIR_PONYTAIL)) || ((idHair >= ITEMID_HAIR_MOHAWK) && (idHair <= ITEMID_HAIR_TOPKNOT))) )
 				idHair = ITEMID_NOTHING;	// human can use only a restricted subset of hairs
-			if ( (bFemale && idHair == ITEMID_HAIR_RECEDING) || (!bFemale && idHair == ITEMID_HAIR_BUNS) )
+			if ( (fFemale && idHair == ITEMID_HAIR_RECEDING) || (!fFemale && idHair == ITEMID_HAIR_BUNS) )
 				idHair = ITEMID_NOTHING;
 			break;
 
 		case RACETYPE_ELF:
 			if ( !(((idHair >= ITEMID_HAIR_ML_ELF) && (idHair <= ITEMID_HAIR_ML_MULLET)) || ((idHair >= ITEMID_HAIR_ML_FLOWER) && (idHair <= ITEMID_HAIR_ML_SPYKE))) )
 				idHair = ITEMID_NOTHING;	// elf can use only a restricted subset of hairs
-			if ( (bFemale && (idHair == ITEMID_HAIR_ML_LONG2 || idHair == ITEMID_HAIR_ML_ELF)) || (!bFemale && (idHair == ITEMID_HAIR_ML_FLOWER || idHair == ITEMID_HAIR_ML_LONG4)) )
+			if ( (fFemale && (idHair == ITEMID_HAIR_ML_LONG2 || idHair == ITEMID_HAIR_ML_ELF)) || (!fFemale && (idHair == ITEMID_HAIR_ML_FLOWER || idHair == ITEMID_HAIR_ML_LONG4)) )
 				idHair = ITEMID_NOTHING;
 			break;
 
 		case RACETYPE_GARGOYLE:
-			if ( bFemale )
+			if ( fFemale )
 			{
 				if ( !((idHair == ITEMID_GARG_HORN_FEMALE_1) || (idHair == ITEMID_GARG_HORN_FEMALE_2) || ((idHair >= ITEMID_GARG_HORN_FEMALE_3) && (idHair <= ITEMID_GARG_HORN_FEMALE_5)) || (idHair == ITEMID_GARG_HORN_FEMALE_6) || (idHair == ITEMID_GARG_HORN_FEMALE_7) || (idHair == ITEMID_GARG_HORN_FEMALE_8)) )
 					idHair = ITEMID_NOTHING;
@@ -1676,9 +1678,9 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 						0x322, 0x323, 0x324, 0x325, 0x326, 0x369, 0x386, 0x387, 0x388, 0x389, 0x38A, 0x59D,
 						0x6B8, 0x725, 0x853
 					};
-					int iMax = CountOf(sm_ElfHairHues);
+					constexpr uint iMax = CountOf(sm_ElfHairHues);
 					bool isValid = 0;
-					for ( int i = 0; i < iMax; ++i )
+					for ( uint i = 0; i < iMax; ++i )
 					{
 						if ( sm_ElfHairHues[i] == wHairHue )
 						{
@@ -1698,9 +1700,9 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 						0x709, 0x70B, 0x70D, 0x70F, 0x711, 0x763, 0x765, 0x768, 0x76B,
 						0x6F3, 0x6F1, 0x6EF, 0x6E4, 0x6E2, 0x6E0, 0x709, 0x70B, 0x70D
 					};
-					int iMax = CountOf(sm_GargoyleHornHues);
+					constexpr uint iMax = CountOf(sm_GargoyleHornHues);
 					bool isValid = 0;
-					for ( int i = 0; i < iMax; ++i )
+					for ( uint i = 0; i < iMax; ++i )
 					{
 						if ( sm_GargoyleHornHues[i] == wHairHue )
 						{
@@ -1720,7 +1722,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 	}
 
 	// Create beard
-	if (bFemale)
+	if (fFemale)
 		idBeard = ITEMID_NOTHING;
 	else
 	{
@@ -1815,9 +1817,11 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 
 	// Get starting items for the profession / skills.
 	int iProfession = INT32_MAX;
-	bool bCreateSkillItems = true;
+	bool fCreateSkillItems = true;
 	switch ( prProf )
 	{
+        //default: // not good for custom stuff
+        //    g_Log.EventWarn("Character creation: invalid profession. Defaulting to advanced.\n");
 		case PROFESSION_ADVANCED:
 			iProfession = RES_NEWBIE_PROF_ADVANCED;
 			break;
@@ -1832,34 +1836,37 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 			break;
 		case PROFESSION_NECROMANCER:
 			iProfession = RES_NEWBIE_PROF_NECROMANCER;
-			bCreateSkillItems = false;
+			fCreateSkillItems = false;
 			break;
 		case PROFESSION_PALADIN:
 			iProfession = RES_NEWBIE_PROF_PALADIN;
-			bCreateSkillItems = false;
+			fCreateSkillItems = false;
 			break;
 		case PROFESSION_SAMURAI:
 			iProfession = RES_NEWBIE_PROF_SAMURAI;
-			bCreateSkillItems = false;
+			fCreateSkillItems = false;
 			break;
 		case PROFESSION_NINJA:
 			iProfession = RES_NEWBIE_PROF_NINJA;
-			bCreateSkillItems = false;
+			fCreateSkillItems = false;
 			break;
 	}
 
 	CResourceLock s;
-	if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, bFemale ? RES_NEWBIE_FEMALE_DEFAULT : RES_NEWBIE_MALE_DEFAULT, (word)rtRace)) )
+	if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, fFemale ? RES_NEWBIE_FEMALE_DEFAULT : RES_NEWBIE_MALE_DEFAULT, (word)rtRace)) )
 		ReadScript(s);
-	else if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, bFemale ? RES_NEWBIE_FEMALE_DEFAULT : RES_NEWBIE_MALE_DEFAULT)) )
-		ReadScript(s);
-
-	if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, iProfession, (word)rtRace)) )
-		ReadScript(s);
-	else if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, iProfession)) )
+	else if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, fFemale ? RES_NEWBIE_FEMALE_DEFAULT : RES_NEWBIE_MALE_DEFAULT)) )
 		ReadScript(s);
 
-	if ( bCreateSkillItems )
+    if (iProfession != INT32_MAX)
+    {
+        if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, iProfession, (word)rtRace)) )
+            ReadScript(s);
+        else if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, iProfession)) )
+            ReadScript(s);
+    }
+
+	if ( fCreateSkillItems )
 	{
 		for ( int i = 1; i < 5; ++i )
 		{

@@ -97,7 +97,7 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 //#define CALCITEMHEIGHT(num) num + ((pItemDef->GetTFlags() & 0x400)? pItemDef->GetHeight() / 2 : pItemDef->GetHeight())
 #define WARNLOS(_x_)		if ( g_Cfg.m_iDebugFlags & DEBUGF_LOS ) { g_Log.EventWarn _x_; }
 
-bool CChar::CanSeeLOS_New_Failed( CPointMap *pptBlock, CPointMap &ptNow ) const
+bool CChar::CanSeeLOS_New_Failed( CPointMap *pptBlock, const CPointMap &ptNow ) const
 {
 	ADDTOCALLSTACK("CChar::CanSeeLOS_New_Failed");
 	if ( pptBlock )
@@ -125,8 +125,8 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 	if ( ptSrc == ptDst )	// Same point ^^
 		return true;
 
-	char iTotalZ = ptSrc.m_z + GetHeightMount(true);
-	ptSrc.m_z = minimum(iTotalZ, UO_SIZE_Z);	//true - substract one from the height because of eyes height
+	short iTotalZ = ptSrc.m_z + GetHeightMount(true);
+	ptSrc.m_z = (char)minimum(iTotalZ, UO_SIZE_Z);	//true - substract one from the height because of eyes height
 	WARNLOS(("Total Z: %d\n", ptSrc.m_z));
 
 	int dx, dy, dz;
@@ -672,8 +672,8 @@ bool CChar::CanSeeLOS( const CObjBaseTemplate *pObj, word wFlags, bool bCombatCh
 		const CChar *pChar = dynamic_cast<const CChar*>(pObj);
 		if ( pChar )
 		{
-			char iTotalZ = pt.m_z + pChar->GetHeightMount(true);
-			pt.m_z = minimum(iTotalZ, UO_SIZE_Z);
+			short iTotalZ = pt.m_z + pChar->GetHeightMount(true);
+			pt.m_z = (char)minimum(iTotalZ, UO_SIZE_Z);
 		}
 		return CanSeeLOS_New(pt, nullptr, pObj->GetVisualRange(), wFlags, bCombatCheck);
 	}

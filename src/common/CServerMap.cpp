@@ -209,7 +209,7 @@ bool CServerMapBlockState::CheckTile_Item( dword dwItemBlockFlags, char zBottom,
 	if ( ! dwItemBlockFlags )	// no effect.
 		return true;
 
-	char zTop = zBottom;
+	short zTop = zBottom;
 
 	if ( (dwItemBlockFlags & CAN_I_CLIMB) && (dwItemBlockFlags & CAN_I_PLATFORM) )
 		zTop = minimum(zTop + ( zHeight / 2 ), UO_SIZE_Z);	// standing position is half way up climbable items (except platforms).
@@ -226,7 +226,7 @@ bool CServerMapBlockState::CheckTile_Item( dword dwItemBlockFlags, char zBottom,
 	{
 		m_Lowest.m_dwBlockFlags = dwItemBlockFlags;
 		m_Lowest.m_dwTile = dwID;
-		m_Lowest.m_z = zTop;
+		m_Lowest.m_z = (char)zTop;
 	}
 
     // Why was this block of code added? By returning, it blocks the m_Bottom state to be updated
@@ -249,11 +249,11 @@ bool CServerMapBlockState::CheckTile_Item( dword dwItemBlockFlags, char zBottom,
 			{
 				if ( ! ( dwItemBlockFlags & CAN_I_CLIMB ) ) // climbable items have the highest priority
 					if ( m_Bottom.m_dwBlockFlags & CAN_I_PLATFORM ) //than items with CAN_I_PLATFORM
-						return ( true );
+						return true;
 			}
 			m_Bottom.m_dwBlockFlags = dwItemBlockFlags;
 			m_Bottom.m_dwTile = dwID;
-			m_Bottom.m_z = zTop;
+			m_Bottom.m_z = (char)zTop;
 
 			if ( dwItemBlockFlags & CAN_I_CLIMB ) // return climb height
 				m_zClimbHeight = (( zHeight + 1 )/2); //if height is an odd number, then we need to add 1; if it isn't, this does nothing

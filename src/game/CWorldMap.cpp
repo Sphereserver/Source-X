@@ -765,7 +765,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 
 			if (block.m_Bottom.m_z < z)
 			{
-				if ((z < pt.m_z) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)))
+				if ((z < pt.m_z + PLAYER_HEIGHT) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)))
 				{
 					block.m_Bottom.m_dwBlockFlags = dwBlockThis;
 					block.m_Bottom.m_dwTile = pStatic->GetDispID() + TERRAIN_QTY;
@@ -864,7 +864,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 
 						if (block.m_Bottom.m_z < z)
 						{
-							if ((z < pt.m_z) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)))
+							if ((z < pt.m_z + PLAYER_HEIGHT) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)))
 							{
 								block.m_Bottom.m_dwBlockFlags = dwBlockThis;
 								block.m_Bottom.m_dwTile = pMultiItem->GetDispID() + TERRAIN_QTY;
@@ -931,7 +931,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 
 			if ( block.m_Bottom.m_z < z )
 			{
-				if ( (z < pt.m_z) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)) )
+				if ( (z < pt.m_z + PLAYER_HEIGHT) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)) )
 				{
 					block.m_Bottom.m_dwBlockFlags = dwBlockThis;
 					block.m_Bottom.m_dwTile = pItemDef->GetDispID() + TERRAIN_QTY;
@@ -981,7 +981,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 
 	if (block.m_Bottom.m_z < pMeter->m_z)
 	{
-		if (((pMeter->m_z < pt.m_z) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER))) || (block.m_Bottom.m_z == UO_SIZE_MIN_Z))
+		if (((pMeter->m_z < pt.m_z + PLAYER_HEIGHT) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER))) || (block.m_Bottom.m_z == UO_SIZE_MIN_Z))
 		{
 			block.m_Bottom.m_dwBlockFlags = dwBlockThis;
 			block.m_Bottom.m_dwTile = pMeter->m_wTerrainIndex;
@@ -1374,7 +1374,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 						int x2 = pt.m_x - ptItemTop.m_x;
 						int y2 = pt.m_y - ptItemTop.m_y;
 
-						size_t iMultiQty = pMulti->GetItemCount();
+						uint iMultiQty = pMulti->GetItemCount();
 						for ( size_t j = 0; j < iMultiQty; ++j )
 						{
 							const CUOMultiItemRec_HS * pMultiItem = pMulti->GetItem(j);
@@ -1512,7 +1512,7 @@ char CWorld::GetHeightPoint2( const CPointMap & pt, dword & dwBlockFlags, bool f
 		if (block.m_Top.m_dwTile > TERRAIN_QTY)
 		{
 			// If this tile possibly blocks me, roof cannot block me
-			if (block.m_Top.m_dwBlockFlags &~(CAN_I_ROOF))
+			if (block.m_Top.m_dwBlockFlags & (~CAN_I_ROOF))
 			{
 				if (block.m_Top.m_z < block.m_Bottom.m_z + PLAYER_HEIGHT)
 					dwBlockFlags |= CAN_I_BLOCK; // we can't fit under this!
@@ -1554,15 +1554,14 @@ CItemTypeDef * CWorld::GetTerrainItemTypeDef( dword dwTerrainIndex )
 
 	if ( !pRes )
 	{
-		CResourceID	rid( RES_TYPEDEF, 0 );
-		pRes = g_Cfg.ResourceGetDef( rid );
+		pRes = g_Cfg.ResourceGetDef( CResourceID( RES_TYPEDEF, 0 ) );
 	}
 	ASSERT( pRes );
 
 	CItemTypeDef * pItemTypeDef = dynamic_cast <CItemTypeDef*> (pRes);
 	ASSERT( pItemTypeDef );
 
-	return( pItemTypeDef );
+	return pItemTypeDef;
 }
 
 
