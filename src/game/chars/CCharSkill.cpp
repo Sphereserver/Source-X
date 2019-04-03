@@ -4117,8 +4117,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 
 		if ( m_Act_Difficulty > 0 )
 		{
-			bool bFightSkill = g_Cfg.IsSkillFlag(skill, SKF_FIGHT);
-			if ( !Skill_CheckSuccess(skill, m_Act_Difficulty, !bFightSkill) )
+			if ( !Skill_CheckSuccess(skill, m_Act_Difficulty) )
 				m_Act_Difficulty = -m_Act_Difficulty;	// will result in failure
 		}
 	}
