@@ -3293,9 +3293,6 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
         }
 	}
 
-	if (pSpellDef->IsSpellType(SPELLFLAG_BLESS) || pSpellDef->IsSpellType(SPELLFLAG_CURSE))
-		iEffect = iSkillLevel /= 2;
-	
 	// Check if the spell can be reflected
 	if (pSpellDef->IsSpellType(SPELLFLAG_TARG_CHAR) && pCharSrc && (pCharSrc != this))		// only spells with direct target can be reflected
 	{
