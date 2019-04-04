@@ -349,7 +349,7 @@ CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap ptTarg )
 		if ( IsSetOF(OF_PetSlots) )
 		{
 			short iFollowerSlots = (short)pChar->GetDefNum("FOLLOWERSLOTS", true);
-			if ( !FollowersUpdate(pChar, maximum(1, iFollowerSlots), true ) )
+			if ( !FollowersUpdate(pChar, (maximum(1, iFollowerSlots)), true ) )
 			{
 				SysMessageDefault(DEFMSG_PETSLOTS_TRY_SUMMON);
 				pChar->Delete();

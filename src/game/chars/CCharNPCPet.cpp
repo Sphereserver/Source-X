@@ -590,7 +590,7 @@ void CChar::NPC_PetClearOwners()
 	if ( pOwner && IsSetOF(OF_PetSlots) )
 	{
 		short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true);
-		pOwner->FollowersUpdate(this, (-maximum(1, iFollowerSlots)));
+		pOwner->FollowersUpdate(this, -(maximum(1, iFollowerSlots)));
 	}
 }
 
