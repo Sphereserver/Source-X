@@ -2017,16 +2017,6 @@ void CItem::SetAmount(word amount )
 		SetDispID( ( GetAmount() >= CountOf(sm_Item_Ore)) ? ITEMID_ORE_4 : sm_Item_Ore[GetAmount()] );
 	}
 	
-	if (IsType(IT_GOLD))
-	{
-		if (GetAmount() == 1)
-			SetDispID(ITEMID_GOLD_C1);
-		else if (GetAmount() <= 5)
-			SetDispID(ITEMID_GOLD_C2);
-		else
-			SetDispID(ITEMID_GOLD_C3);
-	}
-
 	CContainer * pParentCont = dynamic_cast <CContainer*> (GetParent());
 	if (pParentCont)
 	{
