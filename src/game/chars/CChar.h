@@ -1147,7 +1147,9 @@ public:
 	virtual void SpeakUTF8( lpctstr pText, HUE_TYPE wHue= HUE_TEXT_DEF, TALKMODE_TYPE mode= TALKMODE_SAY, FONT_TYPE font= FONT_NORMAL, CLanguageID lang = 0 );
 	virtual void SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
 
-	bool OnFreezeCheck();
+	bool OnFreezeCheck() const;
+    bool IsStuck(bool fFreezeCheck);
+
 	void DropAll( CItemContainer * pCorpse = nullptr, uint64 dwAttr = 0 );
 	void UnEquipAllItems( CItemContainer * pCorpse = nullptr, bool bLeaveHands = false );
 	void Wake();

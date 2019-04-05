@@ -15,6 +15,7 @@
 
 extern struct CNTWindow : public AbstractSphereThread, public CSWindow, public ConsoleInterface
 {
+    static const char *m_sClassName;
     struct
     {
         HINSTANCE hInstance;
@@ -27,10 +28,6 @@ extern struct CNTWindow : public AbstractSphereThread, public CSWindow, public C
     virtual bool shouldExit();
     virtual void tick();
 
-    std::string _strWindowTitle;
-    bool _fNewWindowTitle;
-    std::shared_mutex _mutexWindowTitle;
-
     void SetWindowTitle(LPCTSTR pText = nullptr);
 
     bool NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLinel, int nCmdShow);
@@ -40,7 +37,14 @@ extern struct CNTWindow : public AbstractSphereThread, public CSWindow, public C
     void NTWindow_CheckUpdateWindowTitle();
     bool NTWindow_CanScroll();
 
-    static const char *m_sClassName;
+private:
+    std::string _strWindowTitle;
+    bool _fNewWindowTitle;
+    std::shared_mutex _mutexWindowTitle;
+
+    void exitActions();
+    
+public:
     class CAboutDlg : public CDialogBase				//	CNTWindow::CAboutDlg
     {
     private:

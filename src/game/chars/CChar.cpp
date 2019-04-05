@@ -52,6 +52,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@ContextMenuRequest",
 	"@ContextMenuSelect",
 	"@Create",				// Newly created (not in the world yet)
+    "@CreateLoot",
 	"@Criminal",			// Called before somebody becomes "gray" for someone
 	"@DClick",				// Someone has dclicked on me.
 	"@Death",				//+I just got killed.
@@ -2610,13 +2611,7 @@ do_default:
 			return true;
 		case CHC_ISSTUCK:
 			{
-				CPointMap pt = GetTopPoint();
-				if ( OnFreezeCheck() )
-					sVal.FormatVal(1);
-				else if ( CanMoveWalkTo(pt, true, true, DIR_N) || CanMoveWalkTo(pt, true, true, DIR_E) || CanMoveWalkTo(pt, true, true, DIR_S) || CanMoveWalkTo(pt, true, true, DIR_W) )
-					sVal.FormatVal(0);
-				else
-					sVal.FormatVal(1);
+                sVal.FormatVal(IsStuck(true));
 				return true;
 			}
 		case CHC_ISVENDOR:
@@ -4190,6 +4185,9 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 						g_World.m_uidNew = (dword)0;
 					else
 					{
+                        pItem->m_iCreatedResScriptIdx = s.m_iResourceFileIndex;
+                        pItem->m_iCreatedResScriptLine = s.m_iLineNum;
+
 						ItemEquip(pItem);
 						g_World.m_uidNew = pItem->GetUID();
 					}

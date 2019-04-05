@@ -327,8 +327,14 @@ void CCSpawn::GenerateChar()
     pChar->NPC_LoadScript(true);
     pChar->StatFlag_Set(STATF_SPAWNED);
     // Try placing this char near the spawn
-    if (!pChar->MoveNear(pt, _iMaxDist ? (word)(Calc_GetRandVal(_iMaxDist) + 1) : 1))
+
+    ushort iPlacingTries = 0;
+    while (!pChar->MoveNear(pt, _iMaxDist ? (word)(Calc_GetRandVal(_iMaxDist) + 1) : 1) || pChar->IsStuck(false))
     {
+        ++iPlacingTries;
+        if (iPlacingTries <= 3)
+            continue;
+
         // If this fails, try placing the char ON the spawn
         if (!pChar->MoveTo(pt))
         {
@@ -401,9 +407,10 @@ void CCSpawn::AddObj(const CUID& uid)
     // on server startup. In this case, some objs UID still invalid
     // (not loaded yet) so just proceed without any checks.
 
-    uint16 iMax = maximum(GetAmount(), 1);
+    const uint16 uiAmount = GetAmount();
+    const uint16 uiMax = maximum(uiAmount, 1);
     CItem *pSpawnItem = static_cast<CItem*>(GetLink());
-    if ((_uidList.size() >= iMax) && !pSpawnItem->IsType(IT_SPAWN_CHAMPION))  // char/item spawns have a limit, champions may spawn a lot of npcs
+    if ((_uidList.size() >= uiMax) && !pSpawnItem->IsType(IT_SPAWN_CHAMPION))  // char/item spawns have a limit, champions may spawn a lot of npcs
     {
         return;
     }

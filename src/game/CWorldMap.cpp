@@ -373,9 +373,6 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 			if ( pt.GetDist( ptTest ) > iDistance )
 				continue;
 
-			if ( pt.GetDist( ptTest ) > iDistance )
-				continue;
-
 			//if ( ptElem[2].m_z > pStatic->m_z )
 			if ( ptElem[2].m_z > ptTest.m_z )
 				continue;
@@ -466,14 +463,14 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 		iRetElem = 4;*/
 
 	ASSERT(iRetElem < CountOf(ptElem));
-	if ( 0 != iRetElem && ptElem[0].m_z > ptElem[iRetElem].m_z )
-			 iRetElem = 4;
-	else if ( 1 != iRetElem && ptElem[1].m_z > ptElem[iRetElem].m_z )
-		     iRetElem = 4;
-	else if ( 2 != iRetElem && ptElem[2].m_z > ptElem[iRetElem].m_z )
-		     iRetElem = 4;
-	else if ( 3 != iRetElem && ptElem[3].m_z > ptElem[iRetElem].m_z )
-		     iRetElem = 4;
+    if (0 != iRetElem && ptElem[0].m_z > ptElem[iRetElem].m_z)
+        iRetElem = 4;
+    else if (1 != iRetElem && ptElem[1].m_z > ptElem[iRetElem].m_z)
+        iRetElem = 4;
+    else if (2 != iRetElem && ptElem[2].m_z > ptElem[iRetElem].m_z)
+        iRetElem = 4;
+    else if (3 != iRetElem && ptElem[3].m_z > ptElem[iRetElem].m_z)
+        iRetElem = 4;
 
 	//DEBUG_ERR(("iRetElem %d; %d %d %d %d; %d %d %d ISVALID: %d\n",iRetElem,ptElem[1].m_z,ptElem[2].m_z,ptElem[3].m_z,ptElem[4].m_z,pt.m_x,pt.m_y,pt.m_z,ptElem[iRetElem].IsValidPoint()));
 	//DEBUG_ERR(("X: %d  Y: %d  Z: %d\n",ptElem[iRetElem].m_x,ptElem[iRetElem].m_y,ptElem[iRetElem].m_z));
@@ -487,7 +484,7 @@ bool CWorld::IsItemTypeNear( const CPointMap & pt, IT_TYPE iType, int iDistance,
 	if ( !pt.IsValidPoint() )
 		return false;
 	CPointMap ptn = FindItemTypeNearby( pt, iType, iDistance, bCheckMulti );
-	return( ptn.IsValidPoint());
+	return ptn.IsValidPoint();
 }
 
 CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iDistance, bool bCheckMulti, bool bLimitZ)
@@ -522,7 +519,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 		ptFound = ptItemTop;
 		iDistance = iTestDistance;	// tighten up the search.
 		if ( ! iDistance )
-			return( ptFound );
+			return ptFound;
 	}
 
 	// Check for appropriate terrain type
@@ -556,7 +553,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 			ptFound = ptTest;
 			iDistance = iTestDistance;	// tighten up the search.
 			if ( ! iDistance )
-				return( ptFound );
+				return ptFound;
 
 			rect.SetRect( pt.m_x - iDistance, pt.m_y - iDistance,
 				pt.m_x + iDistance + 1, pt.m_y + iDistance + 1,
@@ -615,7 +612,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 				ptFound = ptStatic;
 				iDistance = iTestDistance;
 				if ( ! iDistance )
-					return( ptFound );
+					return ptFound;
 
 				rect.SetRect( pt.m_x - iDistance, pt.m_y - iDistance,
 					pt.m_x + iDistance + 1, pt.m_y + iDistance + 1,
@@ -683,7 +680,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 							ptFound = ptTest;
 							iDistance = iTestDistance;
 							if ( !iDistance )
-								return( ptFound );
+								return ptFound;
 
 							rect.SetRect( pt.m_x - iDistance, pt.m_y - iDistance,
 										  pt.m_x + iDistance + 1, pt.m_y + iDistance + 1,

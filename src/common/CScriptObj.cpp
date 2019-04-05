@@ -2023,15 +2023,15 @@ jump_in:
 			case SK_CONTINUE:
 				return TRIGRET_CONTINUE;
 
-			case SK_FORITEM:		EXC_SET_BLOCK("foritem");		iRet = OnTriggerForLoop( s, 1, pSrc, pArgs, pResult );			break;
-			case SK_FORCHAR:		EXC_SET_BLOCK("forchar");		iRet = OnTriggerForLoop( s, 2, pSrc, pArgs, pResult );			break;
-			case SK_FORCLIENTS:		EXC_SET_BLOCK("forclients");	iRet = OnTriggerForLoop( s, 0x12, pSrc, pArgs, pResult );		break;
-			case SK_FOROBJ:			EXC_SET_BLOCK("forobjs");		iRet = OnTriggerForLoop( s, 3, pSrc, pArgs, pResult );			break;
-			case SK_FORPLAYERS:		EXC_SET_BLOCK("forplayers");	iRet = OnTriggerForLoop( s, 0x22, pSrc, pArgs, pResult );		break;
-			case SK_FOR:			EXC_SET_BLOCK("for");			iRet = OnTriggerForLoop( s, 4, pSrc, pArgs, pResult );			break;
-			case SK_WHILE:			EXC_SET_BLOCK("while");		iRet = OnTriggerForLoop( s, 8, pSrc, pArgs, pResult );			break;
-			case SK_FORINSTANCE:	EXC_SET_BLOCK("forinstance");	iRet = OnTriggerForLoop( s, 0x40, pSrc, pArgs, pResult );		break;
-			case SK_FORTIMERF:		EXC_SET_BLOCK("fortimerf");	iRet = OnTriggerForLoop(s, 0x100, pSrc, pArgs, pResult);		break;
+			case SK_FORITEM:		EXC_SET_BLOCK("foritem");		iRet = OnTriggerForLoop(s, 1,    pSrc, pArgs, pResult); break;
+			case SK_FORCHAR:		EXC_SET_BLOCK("forchar");		iRet = OnTriggerForLoop(s, 2,    pSrc, pArgs, pResult);	break;
+			case SK_FORCLIENTS:		EXC_SET_BLOCK("forclients");	iRet = OnTriggerForLoop(s, 0x12, pSrc, pArgs, pResult);	break;
+			case SK_FOROBJ:			EXC_SET_BLOCK("forobjs");		iRet = OnTriggerForLoop(s, 3,    pSrc, pArgs, pResult);	break;
+			case SK_FORPLAYERS:		EXC_SET_BLOCK("forplayers");	iRet = OnTriggerForLoop(s, 0x22, pSrc, pArgs, pResult);	break;
+			case SK_FOR:			EXC_SET_BLOCK("for");			iRet = OnTriggerForLoop(s, 4,    pSrc, pArgs, pResult);	break;
+			case SK_WHILE:			EXC_SET_BLOCK("while");		    iRet = OnTriggerForLoop(s, 8,    pSrc, pArgs, pResult);	break;
+			case SK_FORINSTANCE:	EXC_SET_BLOCK("forinstance");	iRet = OnTriggerForLoop(s, 0x40, pSrc, pArgs, pResult);	break;
+			case SK_FORTIMERF:		EXC_SET_BLOCK("fortimerf");	    iRet = OnTriggerForLoop(s, 0x100,pSrc, pArgs, pResult);	break;
 			case SK_FORCHARLAYER:
 			case SK_FORCHARMEMORYTYPE:
 				{

@@ -2815,7 +2815,7 @@ bool CChar::Death()
 	int iKillStrLen = sprintf( pszKillStr, g_Cfg.GetDefaultMsg(DEFMSG_MSG_KILLED_BY), (m_pPlayer)? 'P':'N', GetNameWithoutIncognito() );
 	for ( size_t count = 0; count < m_lastAttackers.size(); ++count )
 	{
-		pKiller = CUID(m_lastAttackers[count].charUID).CharFind();
+		pKiller = CUID::CharFind(m_lastAttackers[count].charUID);
 		if ( pKiller && (m_lastAttackers[count].amountDone > 0) )
 		{
 			if ( IsTrigUsed(TRIGGER_KILL) )
@@ -2850,6 +2850,12 @@ bool CChar::Death()
 
 	if ( m_pPlayer )		// if I'm NPC then my mount goes with me
 		Horse_UnMount();
+
+    if ( IsTrigUsed(TRIGGER_CREATELOOT) )
+    {
+        //OnTrigger(CTRIG_CreateLoot, this);
+        ReadScriptTrig(Char_GetDef(), CTRIG_CreateLoot, false);
+    }
 
 	// Create the corpse item
 	CItemCorpse * pCorpse = MakeCorpse(Calc_GetRandVal(2) ? true : false);
@@ -2890,19 +2896,20 @@ bool CChar::Death()
 			Noto_Fame( -GetFame()/10 );
 
 		lpctstr pszGhostName = nullptr;
-		CCharBase *pCharDefPrev = CCharBase::FindCharBase( m_prev_id );
+		const CCharBase *pCharDefPrev = CCharBase::FindCharBase( m_prev_id );
+        const bool fFemale = pCharDefPrev && pCharDefPrev->IsFemale();
 		switch ( m_prev_id )
 		{
 			case CREID_GARGMAN:
 			case CREID_GARGWOMAN:
-				pszGhostName = ( pCharDefPrev && pCharDefPrev->IsFemale() ? "c_garg_ghost_woman" : "c_garg_ghost_man" );
+				pszGhostName = ( fFemale ? "c_garg_ghost_woman" : "c_garg_ghost_man" );
 				break;
 			case CREID_ELFMAN:
 			case CREID_ELFWOMAN:
-				pszGhostName = ( pCharDefPrev && pCharDefPrev->IsFemale() ? "c_elf_ghost_woman" : "c_elf_ghost_man" );
+				pszGhostName = ( fFemale ? "c_elf_ghost_woman" : "c_elf_ghost_man" );
 				break;
 			default:
-				pszGhostName = ( pCharDefPrev && pCharDefPrev->IsFemale() ? "c_ghost_woman" : "c_ghost_man" );
+				pszGhostName = ( fFemale ? "c_ghost_woman" : "c_ghost_man" );
 				break;
 		}
 		ASSERT(pszGhostName != nullptr);
@@ -2964,7 +2971,7 @@ bool CChar::Death()
 
 // Check if we are held in place.
 // RETURN: true = held in place.
-bool CChar::OnFreezeCheck()
+bool CChar::OnFreezeCheck() const
 {
 	ADDTOCALLSTACK("CChar::OnFreezeCheck");
 
@@ -2980,13 +2987,21 @@ bool CChar::OnFreezeCheck()
 
 		if ( IsSetMagicFlags(MAGICF_FREEZEONCAST) && g_Cfg.IsSkillFlag(m_Act_SkillCurrent, SKF_MAGIC) )		// casting magic spells
 		{
-			CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
+			const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
 			if ( pSpellDef && !pSpellDef->IsSpellType(SPELLFLAG_NOFREEZEONCAST) )
 				return true;
 		}
 	}
 
 	return false;
+}
+
+bool CChar::IsStuck(bool fFreezeCheck)
+{
+    CPointMap pt = GetTopPoint();
+    if ( fFreezeCheck && OnFreezeCheck() )
+        return true;
+    return !( CanMoveWalkTo(pt, true, true, DIR_N) || CanMoveWalkTo(pt, true, true, DIR_E) || CanMoveWalkTo(pt, true, true, DIR_S) || CanMoveWalkTo(pt, true, true, DIR_W) );
 }
 
 // Flip around
