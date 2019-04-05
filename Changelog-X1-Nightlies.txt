@@ -1581,3 +1581,20 @@ WARNING: the following change could break some hackish expedient used in scripts
 
 24-03-2019, Julian
 - Modified: @HitParry to include local.Damage, which contains the raw amount of damage before any parrying modification.
+
+31-03-2018, Nolok
+- Fixed: Swimming NPCs could pass under items even if their z wasn't high enough.
+- Fixed: MT_INDOORS not working: NPCs could always walk inside places with a ceiling too low for them to fit below.
+- Fixed: The absence of MT_WALK didn't stop NPCs from walking on land.
+- Fixed: Ghosts couldn't pass through doors (Issue #263) and FIX/teleport setting incorrect Z (Issue #262).
+- Fixed: BTFish encryption not working (Issue #256).
+- Fixed: During character creation, invalid professions sent by the client will now be ignored.
+
+05-04-2018, Nolok
+- Added: trigger @CreateLoot. It fires when the NPC dies, if it is allowed to have a loot (not a player, not conjured, no DEATHF_NOLOOT).
+	The main advantage of using this trigger in place of @NPCRestock and @Create is that items will be created only when they are required,
+	so that a big number "useless" items won't be stored in the save files (= smaller save files), also GMs wouldn't be able to see what a monster is going to drop before it dies.
+- Fixed: Followers property being increased even when a summoning spell fails and when a conjured creature is dispelled (Issue #264).
+- Fixed: GMs couldn't ADD or drop items on the same tile of a t_wall item.
+- Fixed: Items created with NEWLOOT didn't store the script file and line number where they were created, so that info wasn't eventually shown by garbage collection.
+- Fixed: NPCs able to spawn to a P they cannot move at/from (Issue #255).

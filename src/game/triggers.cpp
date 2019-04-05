@@ -22,7 +22,7 @@ bool IsTrigUsed(E_TRIGGERS id)
 {
     if ( g_Serv.IsLoading() == true)
         return false;
-    return (( (size_t)id < g_triggers.size() ) && g_triggers[id].m_used );
+    return (( (uint)id < g_triggers.size() ) && g_triggers[id].m_used );
 }
 
 bool IsTrigUsed(const char *name)
@@ -44,7 +44,7 @@ void TriglistInit()
 
 #define ADD(_a_)	strcpy(trig.m_name, "@"); strcat(trig.m_name, #_a_); trig.m_used = 0; g_triggers.emplace_back(trig);
 #include "../tables/triggers.tbl"
-
+#undef ADD
 }
 
 void TriglistClear()

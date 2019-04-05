@@ -371,7 +371,7 @@ public:
 	bool CanSeeAsDead( const CChar * pChar = nullptr ) const;
 	bool CanSeeInContainer( const CItemContainer * pContItem ) const;
 	bool CanSee( const CObjBaseTemplate * pObj ) const;
-	bool CanSeeLOS_New_Failed( CPointMap * pptBlock, CPointMap &ptNow ) const;
+	bool CanSeeLOS_New_Failed( CPointMap * pptBlock, const CPointMap &ptNow ) const;
 	bool CanSeeLOS_New( const CPointMap & pd, CPointMap * pBlock = nullptr, int iMaxDist = UO_MAP_VIEW_SIGHT, word wFlags = 0, bool bCombatCheck = false ) const;
 	bool CanSeeLOS( const CPointMap & pd, CPointMap * pBlock = nullptr, int iMaxDist = UO_MAP_VIEW_SIGHT, word wFlags = 0, bool bCombatCheck = false ) const;
 	bool CanSeeLOS( const CObjBaseTemplate * pObj, word wFlags = 0, bool bCombatCheck = false) const;
@@ -1083,7 +1083,7 @@ public:
 
 	//
 	bool Player_OnVerb( CScript &s, CTextConsole * pSrc );
-	void InitPlayer( CClient * pClient, const char * pszCharname, bool bFemale, RACE_TYPE rtRace, ushort wStr, ushort wDex, ushort wInt,
+	void InitPlayer( CClient * pClient, const char * pszCharname, bool fFemale, RACE_TYPE rtRace, ushort wStr, ushort wDex, ushort wInt,
 		PROFESSION_TYPE iProf, SKILL_TYPE skSkill1, ushort uiSkillVal1, SKILL_TYPE skSkill2, ushort uiSkillVal2, SKILL_TYPE skSkill3, ushort uiSkillVal3, SKILL_TYPE skSkill4, ushort uiSkillVal4,
 		HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, ITEMID_TYPE idFace, int iStartLoc );
 	bool ReadScriptTrig(CCharBase * pCharDef, CTRIG_TYPE trig, bool bVendor = false);
@@ -1149,7 +1149,9 @@ public:
 	virtual void SpeakUTF8( lpctstr pText, HUE_TYPE wHue= HUE_TEXT_DEF, TALKMODE_TYPE mode= TALKMODE_SAY, FONT_TYPE font= FONT_NORMAL, CLanguageID lang = 0 );
 	virtual void SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
 
-	bool OnFreezeCheck();
+	bool OnFreezeCheck() const;
+    bool IsStuck(bool fFreezeCheck);
+
 	void DropAll( CItemContainer * pCorpse = nullptr, uint64 dwAttr = 0 );
 	void UnEquipAllItems( CItemContainer * pCorpse = nullptr, bool bLeaveHands = false );
 	void Wake();

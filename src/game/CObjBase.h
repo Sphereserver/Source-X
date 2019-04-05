@@ -1122,6 +1122,7 @@ enum CTRIG_TYPE
 	CTRIG_ContextMenuRequest,// Context menu requested on me.
 	CTRIG_ContextMenuSelect,// An option was selected on the Context Menu.
 	CTRIG_Create,           // Newly created (not in the world yet).
+    CTRIG_CreateLoot,       // Create the loot (called on death)
 	CTRIG_Criminal,         // Called before someone becomes 'gray' for someone.
 	CTRIG_DClick,           // Someone has dclicked on me.
 	CTRIG_Death,            // I just got killed.
@@ -1301,16 +1302,6 @@ enum CTRIG_TYPE
  * @return  The dir string.
  */
 DIR_TYPE GetDirStr( lpctstr pszDir );
-
-/**
- * @fn  extern void DeleteKey(lpctstr pszKey);
- *
- * @brief   Deletes the key described by pszKey.
- *
- * @param   pszKey  The key.
- */
-
-extern void DeleteKey(lpctstr pszKey);
 
 
 /* Inline Methods Definitions */

@@ -393,9 +393,9 @@ CItem * CItem::GenerateScript( CChar * pSrc)
 
 	if (( pSrc && pSrc->IsClient() ) && ( IsTrigUsed(TRIGGER_ITEMCREATE) ))
 	{
-		CScriptTriggerArgs	args;
+		CScriptTriggerArgs args;
 		args.m_pO1 = this;
-		pSrc->OnTrigger("@ItemCreate", pSrc, &args);
+		pSrc->OnTrigger(CTRIG_itemCreate, pSrc, &args);
 	}
 
 	return this;
@@ -1487,8 +1487,11 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	// Make noise and try to pile it and such.
 
 	CPointMap ptNewPlace;
-	if ( pt.IsValidPoint() && !g_World.IsItemTypeNear(pt, IT_WALL, 0, true) )
+	if ( pt.IsValidPoint() && 
+        ((pCharMover && pCharMover->IsPriv(PRIV_GM)) || !g_World.IsItemTypeNear(pt, IT_WALL, 0, true)) )
+    {
 		ptNewPlace = pt;
+    }
 	else if ( pCharMover )
 	{
 		pCharMover->ItemBounce(this);
@@ -1540,6 +1543,20 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 				break;
 			}
 		}
+
+        /*  // From 56b
+        if ( iItemCount > g_Cfg.m_iMaxItemComplexity )
+        {
+            Speak("Too many items here!");
+            if ( iItemCount > g_Cfg.m_iMaxItemComplexity + g_Cfg.m_iMaxItemComplexity/2 )
+            {
+                Speak("The ground collapses!");
+                Delete();
+            }
+            // attempt to reject the move.
+            return false;
+        }
+        */
 
 		SetDecayTime(iDecayTime);
 		Sound(GetDropSound(nullptr));

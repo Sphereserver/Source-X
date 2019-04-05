@@ -178,9 +178,14 @@ CNTWindow::CNTWindow() : AbstractSphereThread("T_ConsoleWindow", IThread::Highes
 
 CNTWindow::~CNTWindow()
 {
+    DestroyWindow();
+    exitActions();
+}
+
+void CNTWindow::exitActions()
+{
     g_Serv.SetExitFlag(5);
     NTWindow_DeleteIcon();
-    DestroyWindow();
     _thread_selfTerminateAfterThisTick = true;
 }
 
@@ -235,7 +240,7 @@ void CNTWindow::tick()
 
     if (!NTWindow_OnTick(0))
     {
-        _thread_selfTerminateAfterThisTick = true;
+        exitActions();
     }
 }
 
@@ -392,6 +397,7 @@ void CNTWindow::OnDestroy()
 	m_wndLog.OnDestroy();	// these are automatic.
 	m_wndInput.OnDestroy();
 	CSWindow::OnDestroy();
+    exitActions();
 }
 
 void CNTWindow::OnSetFocus( HWND hWndLoss )
@@ -486,7 +492,7 @@ bool CNTWindow::OnClose()
 			return false;
 	}
 
-	PostQuitMessage(0);
+	PostQuitMessage(0); // posts WM_QUIT
 	return true;	// ok to close.
 }
 
@@ -784,7 +790,7 @@ LRESULT WINAPI CNTWindow::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LP
 				return 0;
 			break;
 		case WM_CLOSE:
-			if ( ! theApp.m_wndMain.OnClose())
+			if ( ! theApp.m_wndMain.OnClose())  // this method doesn't appear to be called (something is terminating this process in the meanwhile)
 				return false;
 			break;
 		case WM_ERASEBKGND:	// don't bother with this.
@@ -967,14 +973,11 @@ bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
 
 		MSG msg;
 
-		// any windows messages ? (blocks until a message arrives)
+		// any windows messages?
 		if ( iWaitmSec )
 		{
-			if ( ! GetMessage( &msg, nullptr, 0, 0 ))
-			{
-				g_Serv.SetExitFlag( 5 );
+			if ( ! GetMessage( &msg, nullptr, 0, 0 )) // (blocks until a message arrives)
 				return false;
-			}
 
 			if ( (msg.hwnd == theApp.m_wndMain.m_hWnd) && (msg.message == WM_TIMER) && (msg.wParam == IDT_ONTICK) )
 			{
@@ -985,16 +988,11 @@ bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
 		}
 		else
 		{
-			if (! PeekMessage( &msg, nullptr, 0, 0, PM_REMOVE ))
-			{
+			if (! PeekMessage( &msg, nullptr, 0, 0, PM_REMOVE )) // not blocking
 				return true;
-			}
 
 			if ( msg.message == WM_QUIT )
-			{
-				g_Serv.SetExitFlag( 5 );
 				return false;
-			}
 		}
 
 		//	Got char in edit box

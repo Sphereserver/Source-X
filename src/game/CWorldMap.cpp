@@ -373,9 +373,6 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 			if ( pt.GetDist( ptTest ) > iDistance )
 				continue;
 
-			if ( pt.GetDist( ptTest ) > iDistance )
-				continue;
-
 			//if ( ptElem[2].m_z > pStatic->m_z )
 			if ( ptElem[2].m_z > ptTest.m_z )
 				continue;
@@ -466,14 +463,14 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 		iRetElem = 4;*/
 
 	ASSERT(iRetElem < CountOf(ptElem));
-	if ( 0 != iRetElem && ptElem[0].m_z > ptElem[iRetElem].m_z )
-			 iRetElem = 4;
-	else if ( 1 != iRetElem && ptElem[1].m_z > ptElem[iRetElem].m_z )
-		     iRetElem = 4;
-	else if ( 2 != iRetElem && ptElem[2].m_z > ptElem[iRetElem].m_z )
-		     iRetElem = 4;
-	else if ( 3 != iRetElem && ptElem[3].m_z > ptElem[iRetElem].m_z )
-		     iRetElem = 4;
+    if (0 != iRetElem && ptElem[0].m_z > ptElem[iRetElem].m_z)
+        iRetElem = 4;
+    else if (1 != iRetElem && ptElem[1].m_z > ptElem[iRetElem].m_z)
+        iRetElem = 4;
+    else if (2 != iRetElem && ptElem[2].m_z > ptElem[iRetElem].m_z)
+        iRetElem = 4;
+    else if (3 != iRetElem && ptElem[3].m_z > ptElem[iRetElem].m_z)
+        iRetElem = 4;
 
 	//DEBUG_ERR(("iRetElem %d; %d %d %d %d; %d %d %d ISVALID: %d\n",iRetElem,ptElem[1].m_z,ptElem[2].m_z,ptElem[3].m_z,ptElem[4].m_z,pt.m_x,pt.m_y,pt.m_z,ptElem[iRetElem].IsValidPoint()));
 	//DEBUG_ERR(("X: %d  Y: %d  Z: %d\n",ptElem[iRetElem].m_x,ptElem[iRetElem].m_y,ptElem[iRetElem].m_z));
@@ -487,7 +484,7 @@ bool CWorld::IsItemTypeNear( const CPointMap & pt, IT_TYPE iType, int iDistance,
 	if ( !pt.IsValidPoint() )
 		return false;
 	CPointMap ptn = FindItemTypeNearby( pt, iType, iDistance, bCheckMulti );
-	return( ptn.IsValidPoint());
+	return ptn.IsValidPoint();
 }
 
 CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iDistance, bool bCheckMulti, bool bLimitZ)
@@ -522,7 +519,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 		ptFound = ptItemTop;
 		iDistance = iTestDistance;	// tighten up the search.
 		if ( ! iDistance )
-			return( ptFound );
+			return ptFound;
 	}
 
 	// Check for appropriate terrain type
@@ -556,7 +553,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 			ptFound = ptTest;
 			iDistance = iTestDistance;	// tighten up the search.
 			if ( ! iDistance )
-				return( ptFound );
+				return ptFound;
 
 			rect.SetRect( pt.m_x - iDistance, pt.m_y - iDistance,
 				pt.m_x + iDistance + 1, pt.m_y + iDistance + 1,
@@ -615,7 +612,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 				ptFound = ptStatic;
 				iDistance = iTestDistance;
 				if ( ! iDistance )
-					return( ptFound );
+					return ptFound;
 
 				rect.SetRect( pt.m_x - iDistance, pt.m_y - iDistance,
 					pt.m_x + iDistance + 1, pt.m_y + iDistance + 1,
@@ -683,7 +680,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 							ptFound = ptTest;
 							iDistance = iTestDistance;
 							if ( !iDistance )
-								return( ptFound );
+								return ptFound;
 
 							rect.SetRect( pt.m_x - iDistance, pt.m_y - iDistance,
 										  pt.m_x + iDistance + 1, pt.m_y + iDistance + 1,
@@ -765,7 +762,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 
 			if (block.m_Bottom.m_z < z)
 			{
-				if ((z < pt.m_z) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)))
+				if ((z < pt.m_z + PLAYER_HEIGHT) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)))
 				{
 					block.m_Bottom.m_dwBlockFlags = dwBlockThis;
 					block.m_Bottom.m_dwTile = pStatic->GetDispID() + TERRAIN_QTY;
@@ -864,7 +861,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 
 						if (block.m_Bottom.m_z < z)
 						{
-							if ((z < pt.m_z) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)))
+							if ((z < pt.m_z + PLAYER_HEIGHT) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)))
 							{
 								block.m_Bottom.m_dwBlockFlags = dwBlockThis;
 								block.m_Bottom.m_dwTile = pMultiItem->GetDispID() + TERRAIN_QTY;
@@ -931,7 +928,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 
 			if ( block.m_Bottom.m_z < z )
 			{
-				if ( (z < pt.m_z) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)) )
+				if ( (z < pt.m_z + PLAYER_HEIGHT) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)) )
 				{
 					block.m_Bottom.m_dwBlockFlags = dwBlockThis;
 					block.m_Bottom.m_dwTile = pItemDef->GetDispID() + TERRAIN_QTY;
@@ -981,7 +978,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 
 	if (block.m_Bottom.m_z < pMeter->m_z)
 	{
-		if (((pMeter->m_z < pt.m_z) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER))) || (block.m_Bottom.m_z == UO_SIZE_MIN_Z))
+		if (((pMeter->m_z < pt.m_z + PLAYER_HEIGHT) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER))) || (block.m_Bottom.m_z == UO_SIZE_MIN_Z))
 		{
 			block.m_Bottom.m_dwBlockFlags = dwBlockThis;
 			block.m_Bottom.m_dwTile = pMeter->m_wTerrainIndex;
@@ -1374,7 +1371,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 						int x2 = pt.m_x - ptItemTop.m_x;
 						int y2 = pt.m_y - ptItemTop.m_y;
 
-						size_t iMultiQty = pMulti->GetItemCount();
+						uint iMultiQty = pMulti->GetItemCount();
 						for ( size_t j = 0; j < iMultiQty; ++j )
 						{
 							const CUOMultiItemRec_HS * pMultiItem = pMulti->GetItem(j);
@@ -1512,7 +1509,7 @@ char CWorld::GetHeightPoint2( const CPointMap & pt, dword & dwBlockFlags, bool f
 		if (block.m_Top.m_dwTile > TERRAIN_QTY)
 		{
 			// If this tile possibly blocks me, roof cannot block me
-			if (block.m_Top.m_dwBlockFlags &~(CAN_I_ROOF))
+			if (block.m_Top.m_dwBlockFlags & (~CAN_I_ROOF))
 			{
 				if (block.m_Top.m_z < block.m_Bottom.m_z + PLAYER_HEIGHT)
 					dwBlockFlags |= CAN_I_BLOCK; // we can't fit under this!
@@ -1554,15 +1551,14 @@ CItemTypeDef * CWorld::GetTerrainItemTypeDef( dword dwTerrainIndex )
 
 	if ( !pRes )
 	{
-		CResourceID	rid( RES_TYPEDEF, 0 );
-		pRes = g_Cfg.ResourceGetDef( rid );
+		pRes = g_Cfg.ResourceGetDef( CResourceID( RES_TYPEDEF, 0 ) );
 	}
 	ASSERT( pRes );
 
 	CItemTypeDef * pItemTypeDef = dynamic_cast <CItemTypeDef*> (pRes);
 	ASSERT( pItemTypeDef );
 
-	return( pItemTypeDef );
+	return pItemTypeDef;
 }
 
 

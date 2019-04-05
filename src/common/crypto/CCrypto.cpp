@@ -389,7 +389,7 @@ bool CCrypto::RelayGameCryptStart( byte * pOutput, const byte * pInput, uint out
 {
 	/**
 	* When the client switches between login and game server without opening a new connection, the first game packet
-	* is encrypted with both login and game server encryptions. This method attempts to initialse the game encryption
+	* is encrypted with both login and game server encryptions. This method attempts to initialize the game encryption
 	* from this initial game packet.
 	*
 	* If this wasn't inconvenient enough, it seems that not all client versions behave like this and some earlier ones
@@ -519,8 +519,7 @@ bool CCrypto::Decrypt( byte * pOutput, const byte * pInput, uint outLen, uint in
     ENCRYPTION_TYPE enc = GetEncryptionType();
 	if ( (m_ConnectType == CONNECT_LOGIN) || ( enc == ENC_LOGIN ) )
 	{
-        bool fRes = DecryptLogin( pOutput, pInput, outLen, inLen );
-        if (!fRes)
+        if (!DecryptLogin( pOutput, pInput, outLen, inLen ))
         {
             g_Log.EventError("NET-IN: Trying to decrypt (Login) too much data. Packet will not be parsed further.\n");
             return false;
@@ -549,7 +548,7 @@ bool CCrypto::Decrypt( byte * pOutput, const byte * pInput, uint outLen, uint in
 		return true;
 	}
 
-    if ( enc == ENC_TFISH || enc == ENC_BTFISH)
+    if ( enc == ENC_TFISH || enc == ENC_BTFISH )
     {
         if (!DecryptTwoFish( pOutput, pInput, outLen, inLen ))
         {
@@ -560,14 +559,21 @@ bool CCrypto::Decrypt( byte * pOutput, const byte * pInput, uint outLen, uint in
 
 	if ( enc == ENC_BFISH || enc == ENC_BTFISH )
 	{
-        bool fRes = DecryptBlowFish( pOutput, pInput, outLen, inLen );
-        if (!fRes)
+        if ( enc == ENC_BTFISH )
         {
-            if ( enc == ENC_BTFISH )
+            if (!DecryptBlowFish( pOutput, pOutput, outLen, inLen ))
+            {
                 g_Log.EventError("NET-IN: Trying to decrypt (BTFISH) too much data. Packet will not be parsed further.\n");
-            else
+                return false;
+            }
+        }
+        else
+        {
+            if (!DecryptBlowFish( pOutput, pInput, outLen, inLen ))
+            {
                 g_Log.EventError("NET-IN: Trying to decrypt (BFISH) too much data. Packet will not be parsed further.\n");
-            return false;
+                return false;
+            }
         }
 	}
 

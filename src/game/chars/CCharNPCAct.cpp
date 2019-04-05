@@ -2107,11 +2107,15 @@ void CChar::NPC_OnTickAction()
 
     if (!m_pArea)
     {
-        DEBUG_WARN(("Trying to Tick Action on unplaced NPC. UID=0% " PRIx32 ", defname=%s.", GetUID().GetObjUID(), GetResourceName()));
+        const CPointMap& pt = GetUnkPoint();
+        if (pt.IsValidPoint())
+            DEBUG_WARN(("Trying to Tick Action on an NPC placed in an invalid area (P=%s). UID=0% " PRIx32 ", defname=%s.\n", pt.WriteUsed(), GetUID().GetObjUID(), GetResourceName()));
+        else
+            DEBUG_WARN(("Trying to Tick Action on unplaced NPC. UID=0% " PRIx32 ", defname=%s.\n", GetUID().GetObjUID(), GetResourceName()));
         return;
     }
 
-	SKILL_TYPE iSkillActive = Skill_GetActive();
+	const SKILL_TYPE iSkillActive = Skill_GetActive();
     bool fSkillFight = false;
 	if ( g_Cfg.IsSkillFlag( iSkillActive, SKF_SCRIPTED ) )
 	{
