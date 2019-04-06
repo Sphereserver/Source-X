@@ -704,12 +704,6 @@ dword CChar::GetMoveBlockFlags(bool bIgnoreGM) const
 	if ( IsStatFlag(STATF_HOVERING) )
 		dwCan |= CAN_C_HOVER;
 
-	// Inversion of MT_INDOORS, so MT_INDOORS should be named MT_NOINDOORS now.
-	if (dwCan & CAN_C_INDOORS)
-		dwCan &= ~CAN_C_INDOORS;
-	else
-		dwCan |= CAN_C_INDOORS;
-
 	return ( dwCan & CAN_C_MOVEMASK );
 }
 
@@ -1781,26 +1775,29 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
 	dwBlockFlags = block.m_Bottom.m_dwBlockFlags;
 
     uint uiBlockedBy = 0;
+    // need to check also for UFLAG1_FLOOR?
 	if ( block.m_Top.m_dwBlockFlags )
 	{
         const bool fTopLandTile = (block.m_Top.m_dwTile <= TERRAIN_QTY);
+        if (!fTopLandTile && ((dwBlockFlags & CAN_I_ROOF) || (dwBlockFlags & CAN_I_PLATFORM) || (dwBlockFlags & CAN_I_BLOCK)) && Can(CAN_C_NOINDOORS))
+            return nullptr;
+
+        const short iHeightDiff = (block.m_Top.m_z - block.m_Bottom.m_z);
+        const height_t uiHeightReq = (!fTopLandTile ? iHeightMount : iHeightMount / 2);
 		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
         {
-			g_Log.EventWarn("block.m_Top.m_z (%hhd) > ptDest.m_z (%hhd) + m_zClimbHeight (%hhu) + (block.m_Top.m_dwTile (0x%" PRIx32 ") > TERRAIN_QTY ? PLAYER_HEIGHT : PLAYER_HEIGHT/2 )(%hhu).\n",
-				block.m_Top.m_z, ptDest.m_z, m_zClimbHeight, block.m_Top.m_dwTile, (height_t)(ptDest.m_z - (m_zClimbHeight + (!fTopLandTile ? PLAYER_HEIGHT : PLAYER_HEIGHT / 2))) );
+			g_Log.EventWarn("block.m_Top.m_z (%hhd) - block.m_Bottom.m_z (%hhd) < m_zClimbHeight (%hhu) + (block.m_Top.m_dwTile (0x%" PRIx32 ") > TERRAIN_QTY ? iHeightMount : iHeightMount/2 )(%hhu).\n",
+				block.m_Top.m_z, block.m_Bottom.m_z, m_zClimbHeight, block.m_Top.m_dwTile, (height_t)(m_zClimbHeight + uiHeightReq) );
         }
-		if ((block.m_Top.m_z - block.m_Bottom.m_z) < iHeightMount)
+		if ((iHeightDiff < uiHeightReq) && !Can(CAN_C_NOBLOCKHEIGHT))
         {
             // Two cases possible:
             // 1) On the dest P we would be covered by something and we wouldn't fit under this!
             // 2) On the dest P there's an item but we can pass through it (this special case will be handled with fPassTrough late
-            if (!Can(CAN_C_INDOORS))
-            {
-                dwBlockFlags |= CAN_I_BLOCK;
-                uiBlockedBy |= CAN_I_ROOF;
-            }
+            dwBlockFlags |= CAN_I_BLOCK;
+            uiBlockedBy |= CAN_I_ROOF;
         }
-        else if ((block.m_Top.m_z - block.m_Bottom.m_z) < (m_zClimbHeight + ( !fTopLandTile ? iHeightMount : iHeightMount / 2)))
+        else if (iHeightDiff < (m_zClimbHeight + uiHeightReq) )
         {
             // i'm trying to walk on a point over my head, it's possible to climb it but there isn't enough room for me to fit between Top and Bottom tile
             // (i'd bang my head against the ceiling!)

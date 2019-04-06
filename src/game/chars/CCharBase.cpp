@@ -466,7 +466,7 @@ bool CCharBase::r_Load( CScript & s )
  		g_Log.Event(LOGL_WARN, "Char script '%s' has bad DISPID 0%x. Defaulting to 0%x.\n", GetResourceName(), GetDispID(), (int)(CREID_MAN));
 		m_dwDispIndex = CREID_MAN;
 	}
-	if ( m_Can == CAN_C_INDOORS )
+	if ( m_Can == 0 )
 		g_Log.Event(LOGL_WARN, "Char script '%s' has no CAN flags specified!\n", GetResourceName());
 
 	return true;

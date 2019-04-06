@@ -37,7 +37,7 @@ CBaseBaseDef::CBaseBaseDef( CResourceID id ) :
 	m_defenseBase			= 0;
 	m_defenseRange			= 0;
 	m_Height				= 0;
-	m_Can					= CAN_C_INDOORS;	// most things can cover us from the weather.
+	m_Can					= 0;
 	m_ResLevel				= RDS_T2A;
 	m_ResDispDnHue			= HUE_DEFAULT;
 	m_ResDispDnId			= 0;
