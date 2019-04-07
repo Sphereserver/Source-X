@@ -750,7 +750,7 @@ bool CChar::IsPriv( word flag ) const
 {	// PRIV_GM flags
 	if ( m_pPlayer == nullptr )
 		return false;	// NPC's have no privs.
-	return( m_pPlayer->GetAccount()->IsPriv( flag ));
+	return m_pPlayer->GetAccount()->IsPriv( flag );
 }
 
 PLEVEL_TYPE CChar::GetPrivLevel() const

@@ -47,7 +47,6 @@
 #define STDFUNC_UNLINK			_unlink
 
 /*	threading definitions  */
-#define THREAD_ENTRY_RET		void
 #define STDFUNC_GETPID			_getpid
 
 // since the only way to make windows not to buffer file is to remove buffer, we

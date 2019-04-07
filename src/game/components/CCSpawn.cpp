@@ -342,10 +342,11 @@ void CCSpawn::GenerateChar()
             pChar->Delete();
             return;
         }
+        break;
     }
 
     // Check if the NPC can spawn in this region
-    CRegion *pRegion = pt.GetRegion(REGION_TYPE_AREA);
+    const CRegion *pRegion = pt.GetRegion(REGION_TYPE_AREA);
     if (!pRegion || (pRegion->IsGuarded() && pChar->Noto_IsEvil()))
     {
         g_Log.EventWarn("Spawner UID=0%" PRIx32 " is trying to spawn an evil NPC into a guarded area. Deleting the NPC.\n", (dword)pSpawnItem->GetUID());
@@ -388,7 +389,8 @@ void CCSpawn::DelObj(const CUID& uid)
         if (pSpawnedObj && !pSpawnedObj->IsDeleted())
         {
             pSpawnedObj->SetSpawn(nullptr);
-            if ((pSpawnItem->GetType() == IT_SPAWN_CHAR) || (pSpawnItem->GetType() == IT_SPAWN_CHAMPION))
+            const IT_TYPE iSpawnType = pSpawnItem->GetType();
+            if ((iSpawnType == IT_SPAWN_CHAR) || (iSpawnType == IT_SPAWN_CHAMPION))
             {
                 CChar *pSpawnedChar = dynamic_cast<CChar*>(pSpawnedObj);
                 if (pSpawnedChar)
@@ -716,7 +718,7 @@ bool CCSpawn::r_LoadVal(CScript & s)
         case ISPW_MORE1:
         {
             const dword dwPrivateUID = s.GetArgDWVal();
-            if (!CUID(dwPrivateUID).IsValidUID())
+            if (!CUID::IsValidUID(dwPrivateUID))
             {
                 return true;
             }

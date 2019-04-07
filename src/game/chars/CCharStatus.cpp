@@ -475,11 +475,11 @@ bool CChar::IsSwimming() const
 
 	const CPointMap& ptTop = GetTopPoint();
 
-	CPointMap pt = g_World.FindItemTypeNearby(ptTop, IT_WATER);
+	const CPointMap pt = g_World.FindItemTypeNearby(ptTop, IT_WATER);
 	if ( !pt.IsValidPoint() )
 		return false;
 
-	char iDistZ = ptTop.m_z - pt.m_z;
+	short iDistZ = ptTop.m_z - pt.m_z;
 	if ( iDistZ < -PLAYER_HEIGHT )	// far under the water somehow
 		return false;
 
@@ -1789,7 +1789,7 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
 			g_Log.EventWarn("block.m_Top.m_z (%hhd) - block.m_Bottom.m_z (%hhd) < m_zClimbHeight (%hhu) + (block.m_Top.m_dwTile (0x%" PRIx32 ") > TERRAIN_QTY ? iHeightMount : iHeightMount/2 )(%hhu).\n",
 				block.m_Top.m_z, block.m_Bottom.m_z, m_zClimbHeight, block.m_Top.m_dwTile, (height_t)(m_zClimbHeight + uiHeightReq) );
         }
-		if ((iHeightDiff < uiHeightReq) && !Can(CAN_C_NOBLOCKHEIGHT))
+		if ((iHeightDiff < uiHeightReq) && !Can(CAN_C_NOBLOCKHEIGHT) && !pArea->IsFlag(REGION_FLAG_WALK_NOBLOCKHEIGHT))
         {
             // Two cases possible:
             // 1) On the dest P we would be covered by something and we wouldn't fit under this!

@@ -24,18 +24,18 @@
 #define UO_MAP_VIEW_RADAR			31  // Visibility for castles, keeps and boats
 
 // Map definitions
-#define UO_BLOCK_SIZE		8  // Base width/height size of a block.
-#define UO_BLOCK_ALIGN(i)	((i) &~ 7 )
-#define UO_BLOCK_OFFSET(i)	((i) & 7 )  // i%UO_BLOCK_SIZE
+#define UO_BLOCK_SIZE		8               // Base width/height size of a block.
+#define UO_BLOCK_ALIGN(i)	((i) & ~7 )
+#define UO_BLOCK_OFFSET(i)	((i) &  7 )     // i%UO_BLOCK_SIZE
 #define UO_SIZE_Z			127
 #define UO_SIZE_MIN_Z		-127
 
 #define UO_SIZE_X_REAL		0x1400  // 640*UO_BLOCK_SIZE = 5120 = The actual world is only this big
 
-#define UOTILE_BLOCK_QTY	32  // Come in blocks of 32.
+#define UOTILE_BLOCK_QTY	32      // Come in blocks of 32.
 
 // This should depend on height of players char.
-#define PLAYER_HEIGHT		15  // We need x units of room to walk under something. (human) ??? this should vary based on creature type.
+#define PLAYER_HEIGHT		16  // We need x units of room to walk under something. (human) ??? this should vary based on creature type.
 
 // Tiledata flags
 #define UFLAG1_FLOOR		0x00000001  // 0= floor (Walkable at base position)
