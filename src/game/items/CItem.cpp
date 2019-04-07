@@ -2170,7 +2170,10 @@ void CItem::r_WriteMore1(CSString & sVal)
             return;
 
         default:
-            sVal = g_Cfg.ResourceGetName(CResourceID(m_itNormal.m_more1, 0));
+            if (CResourceIDBase::IsResource(m_itNormal.m_more1))
+                sVal = g_Cfg.ResourceGetName(CResourceID(m_itNormal.m_more1, 0));
+            else
+                sVal.FormatHex(m_itNormal.m_more1);
             return;
     }
 }
