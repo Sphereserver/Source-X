@@ -1584,7 +1584,7 @@ WARNING: the following change could break some hackish expedient used in scripts
 
 31-03-2018, Nolok
 - Fixed: Swimming NPCs could pass under items even if their z wasn't high enough.
-- Fixed: MT_INDOORS not working: NPCs could always walk inside places with a ceiling too low for them to fit below.
+- Fixed: NPCs could always walk inside places with a ceiling too low for them to fit below.
 - Fixed: The absence of MT_WALK didn't stop NPCs from walking on land.
 - Fixed: Ghosts couldn't pass through doors (Issue #263) and FIX/teleport setting incorrect Z (Issue #262).
 - Fixed: BTFish encryption not working (Issue #256).
@@ -1598,3 +1598,7 @@ WARNING: the following change could break some hackish expedient used in scripts
 - Fixed: GMs couldn't ADD or drop items on the same tile of a t_wall item.
 - Fixed: Items created with NEWLOOT didn't store the script file and line number where they were created, so that info wasn't eventually shown by garbage collection.
 - Fixed: NPCs able to spawn to a P they cannot move at/from (Issue #255).
+
+06-04-2018, Nolok
+- Fixed: MT_NOINDOORS CAN flag didn't prevent a char to walk under a roof (or items acting as such, like ones with the "platform" or "blocking" tiledata flag).
+- Added: MT_NOBLOCKHEIGHT CAN flag (020000) to ignore char's height when checking if it can move to a point (otherwise, if the ceiling is too low for it to fit below, the movement is blocked).

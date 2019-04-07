@@ -132,7 +132,7 @@ public:
 #define CAN_C_PASSWALLS     0x0008	// Walk thru walls.
 #define CAN_C_FLY           0x0010	// Mongbat etc.
 #define CAN_C_FIRE_IMMUNE   0x0020	// Has some immunity to fire ? (will walk into it (lava)).
-#define CAN_C_INDOORS       0x0040	// Can go under roof.
+#define CAN_C_NOINDOORS     0x0040	// Can't go under roof.
 #define CAN_C_HOVER         0x0080	// Can hover.
 
 #define CAN_I_DOOR          0x0001	// Is a door UFLAG4_DOOR.
@@ -143,10 +143,6 @@ public:
 #define CAN_I_FIRE          0x0020  // Is a fire. Usually blocks as well. UFLAG1_DAMAGE.
 #define CAN_I_ROOF          0x0040  // We are under a roof. can't rain on us. UFLAG4_ROOF.
 #define CAN_I_HOVER         0x0080  // We are hovering. UFLAG4_HOVEROVER.
-
-// masks for movement-affecting flags
-#define CAN_C_MOVEMASK      (CAN_C_GHOST|CAN_C_SWIM|CAN_C_WALK|CAN_C_PASSWALLS|CAN_C_FLY|CAN_C_FIRE_IMMUNE|CAN_C_INDOORS|CAN_C_HOVER)
-#define CAN_I_MOVEMASK      (CAN_I_DOOR|CAN_I_WATER|CAN_I_PLATFORM|CAN_I_BLOCK|CAN_I_CLIMB|CAN_I_FIRE|CAN_I_ROOF|CAN_I_HOVER)
 
 // CItemBase specific defs.
 #define CAN_I_PILE              0x0100      // Can item be piled UFLAG2_STACKABLE (*.mul).
@@ -169,6 +165,7 @@ public:
 #define CAN_I_DAMAGEABLE	    0x2000000	// Display item health bar on HS clients >= 7.0.30.0 (MORE1L = cur hitpoints / MORE1H = max hitpoints)
 #define CAN_I_BLOCKLOS_HEIGHT   0x4000000   // blocks LOS without blocking walkchecks, but only if the item is too high for the viewer.
 
+// (CItemBase) CanEquip specific defs.
 #define CAN_U_ALL           0x000       // Can be used by everyone.
 #define CAN_U_MALE          0x001       // Can be used by males.
 #define CAN_U_FEMALE        0x002       // Can be used by females.
@@ -187,6 +184,12 @@ public:
 #define CAN_C_DCIGNORELOS   0x04000	// when dclicking sth., ignore LOS checks.
 #define CAN_C_DCIGNOREDIST  0x08000	// when dclicking sth., ignore distance checks.
 #define CAN_C_NONMOVER      0x10000 // Just stay in place, avoid movement actions.
+#define CAN_C_NOBLOCKHEIGHT 0x20000 // Do not consider char's height when checking if it can move to a point
+
+// masks for movement-affecting flags
+#define CAN_C_MOVEMASK      (CAN_C_GHOST|CAN_C_SWIM|CAN_C_WALK|CAN_C_PASSWALLS|CAN_C_FLY|CAN_C_FIRE_IMMUNE|CAN_C_NOINDOORS|CAN_C_HOVER|CAN_C_NOBLOCKHEIGHT)
+#define CAN_I_MOVEMASK      (CAN_I_DOOR|CAN_I_WATER|CAN_I_PLATFORM|CAN_I_BLOCK|CAN_I_CLIMB|CAN_I_FIRE|CAN_I_ROOF|CAN_I_HOVER)
+
 
 public:
 	CBaseBaseDef( CResourceID id );
