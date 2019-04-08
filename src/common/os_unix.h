@@ -58,7 +58,6 @@ void STRREV(char* string);
 #define FILE_FLUSH(_x_)			fflush(_x_)
 
 /*	thread-specific definitions  */
-#define THREAD_ENTRY_RET		void *
 #define STDFUNC_GETPID			getpid
 #define CRITICAL_SECTION		pthread_mutex_t
 #define Sleep(mSec)				usleep(mSec*1000)	// arg is microseconds = 1/1000000

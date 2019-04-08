@@ -26,11 +26,19 @@
 #ifndef _WIN32
 	#include "os_unix.h"
 #endif
-typedef THREAD_ENTRY_RET(_cdecl * PTHREAD_ENTRY_PROC)(void *);
-typedef uint	ERROR_CODE;
+
 
 #define CountOf(a)			(sizeof(a)/sizeof((a)[0]))
 
+#if __cplusplus >= 201703L  // is C++17 enabled?
+    #define FALLTHROUGH [[fallthrough]]
+#else
+    #define FALLTHROUGH // fall through
+    /* yep, the comment appears to silence the warning with GCC, dunno for clang */
+#endif
+
+
+/* Start of arithmetic code */
 
 // MAKEWORD:  defined in minwindef.h (loaded my windows.h), so it's missing only on Linux.
 // MAKEDWORD: undefined even on Windows, it isn't in windows.h.
@@ -71,12 +79,16 @@ inline llong IMulDivDownLL(llong a, llong b, llong c)
 //#define sign(n) (((n) < 0) ? -1 : (((n) > 0) ? 1 : 0))
 template<typename T> inline T sign(T n)
 {
+    static_assert(std::is_arithmetic<T>::value, "Invalid data type.");
 	return ( (n < 0) ? -1 : ((n > 0) ? 1 : 0) );
 }
 
 #define minimum(x,y)		((x)<(y)?(x):(y))		// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
 #define maximum(x,y)		((x)>(y)?(x):(y))		// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
 #define medium(x,y,z)		((x)>(y)?(x):((z)<(y)?(z):(y)))	// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
+
+
+/* End of arithmetic code */
 
 
 // use to indicate that a function uses printf-style arguments, allowing GCC

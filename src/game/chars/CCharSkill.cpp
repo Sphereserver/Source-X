@@ -1238,7 +1238,7 @@ int CChar::Skill_Tracking( SKTRIG_TYPE stage )
 		if ( !Skill_Tracking( m_Act_UID, m_atTracking.m_PrvDir, m_atTracking.m_DistMax))
 			return -SKTRIG_ABORT;
 		Skill_SetTimeout();			// next update.
-		return( -SKTRIG_STROKE );	// keep it active.
+		return -SKTRIG_STROKE;	    // keep it active.
 	}
 
 	return -SKTRIG_ABORT;
@@ -1272,9 +1272,16 @@ int CChar::Skill_Mining( SKTRIG_TYPE stage )
 		return -SKTRIG_QTY;
 	}
 
+    const CRegion *pArea = GetRegion();
+    if (pArea->IsFlag(REGION_FLAG_NOMINING))
+    {
+        SysMessageDefault(DEFMSG_MINING_2);
+        return -SKTRIG_QTY;
+    }
+
 	// 3D distance check and LOS
-	CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_MINING);
-	int iTargRange = GetTopPoint().GetDist(m_Act_p);
+	const CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_MINING);
+	const int iTargRange = GetTopPoint().GetDist(m_Act_p);
 	int iMaxRange = pSkillDef->m_Range;
 	if ( !iMaxRange )
 	{

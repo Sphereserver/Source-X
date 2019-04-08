@@ -2154,7 +2154,10 @@ void CItem::r_WriteMore1(CSString & sVal)
             return;
 
         default:
-            sVal.FormatHex(m_itNormal.m_more1);
+            if (CResourceIDBase::IsResource(m_itNormal.m_more1))
+                sVal = g_Cfg.ResourceGetName(CResourceID(m_itNormal.m_more1, 0));
+            else
+                sVal.FormatHex(m_itNormal.m_more1);
             return;
     }
 }
@@ -2607,8 +2610,6 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			sVal.FormatVal(HIWORD(m_itNormal.m_more1));
 			break;
 		case IC_MORE:
-			sVal.FormatVal( m_itNormal.m_more1 );
-			break;
 		case IC_MORE1:
 			r_WriteMore1(sVal);
 			break;
@@ -2618,8 +2619,11 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case IC_MORE1l:
 			sVal.FormatVal( LOWORD( m_itNormal.m_more1 ));
 			break;
+        case IC_FRUIT:
+            if (!IsType(IT_FRUIT))
+                return false;
+            FALLTHROUGH;
 		case IC_MORE2:
-		case IC_FRUIT:
 			r_WriteMore2(sVal);
 			break;
 		case IC_MORE2h:
@@ -2965,7 +2969,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		case IC_MORE:
 		case IC_MORE1:
 			m_itNormal.m_more1 = s.GetArgDWVal();
-			if ( !g_Serv.IsLoading() && ( IsType(IT_SPAWN_CHAR) || IsType(IT_SPAWN_ITEM) ) )
+			if ( !g_Serv.IsLoading() && (IsType(IT_SPAWN_CHAR) || IsType(IT_SPAWN_ITEM) || IsType(IT_SPAWN_CHAMPION)) )
 			{
                 CCSpawn *pSpawn = GetSpawn();
                 if (pSpawn)

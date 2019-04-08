@@ -116,7 +116,7 @@ int CSectorBase::CObjPointSortArray::CompareKey( int id, CPointSort* pBase, bool
 {
     UNREFERENCED_PARAMETER(fNoSpaces);
     ASSERT( pBase );
-    return( id - pBase->GetPointSortIndex());
+    return (id - pBase->GetPointSortIndex());
 }
 
 
@@ -299,7 +299,7 @@ const CServerMapBlock * CSectorBase::GetMapBlock( const CPointMap & pt )
 
 	// Add it to the cache.
 	m_MapBlockCache[iBlock] = pMapBlock;
-	return( pMapBlock );
+	return pMapBlock;
 }
 
 bool CSectorBase::IsInDungeon() const
@@ -307,8 +307,7 @@ bool CSectorBase::IsInDungeon() const
 	ADDTOCALLSTACK("CSectorBase::IsInDungeon");
 	// What part of the maps are filled with dungeons.
 	// Used for light / weather calcs.
-	CPointMap pt = GetBasePoint();
-	CRegion *pRegion = GetRegion(pt, REGION_TYPE_AREA);
+	CRegion *pRegion = GetRegion(GetBasePoint(), REGION_TYPE_AREA);
 
 	return ( pRegion && pRegion->IsFlag(REGION_FLAG_UNDERGROUND) );
 }
@@ -506,7 +505,8 @@ CPointMap CSectorBase::GetBasePoint() const
 	ASSERT( m_index >= 0 && m_index < g_MapList.GetSectorQty(m_map) );
     const int iCols = g_MapList.GetSectorCols(m_map);
     const int iSize = g_MapList.GetSectorSize(m_map);
-	CPointMap pt(( (word)((m_index % iCols) * iSize)),
+	CPointMap pt(
+        (word)((m_index % iCols) * iSize),
 		(word)((m_index / iCols) * iSize),
 		0,
 		(uchar)(m_map));

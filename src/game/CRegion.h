@@ -63,6 +63,9 @@ private:
 #define REGION_FLAG_NO_PVP			0x008000	// Players cannot directly harm each other here.
 #define REGION_FLAG_ARENA			0x010000	// Anything goes. no murder counts or crimes.
 
+#define REGION_FLAG_NOMINING            0x020000// Can't use mining in this region.
+#define REGION_FLAG_WALK_NOBLOCKHEIGHT  0x040000// Ignore char height for walkchecks inside this area.
+
 	dword m_dwFlags;
 
 public:
