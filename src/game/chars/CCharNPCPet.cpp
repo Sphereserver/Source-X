@@ -306,13 +306,13 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 			CItemContainer *pBank = GetBank();
 			if ( pBank )
 			{
-				uint iWage = pCharDef->GetHireDayWage();
+				const uint uiWage = pCharDef->GetHireDayWage();
 				tchar *pszMsg = Str_GetTemp();
-				if ( pBank->m_itEqBankBox.m_Check_Amount > iWage )
+				if ( pBank->m_itEqBankBox.m_Check_Amount > uiWage )
 				{
-					sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_GETGOLD_1), pBank->m_itEqBankBox.m_Check_Amount - iWage);
-					pSrc->AddGoldToPack(pBank->m_itEqBankBox.m_Check_Amount - iWage);
-					pBank->m_itEqBankBox.m_Check_Amount = iWage;
+					sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_GETGOLD_1), pBank->m_itEqBankBox.m_Check_Amount - uiWage);
+					pSrc->AddGoldToPack(pBank->m_itEqBankBox.m_Check_Amount - uiWage);
+					pBank->m_itEqBankBox.m_Check_Amount = uiWage;
 				}
 				else
 					sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_GETGOLD_2), pBank->m_itEqBankBox.m_Check_Amount);

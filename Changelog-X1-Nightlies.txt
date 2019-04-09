@@ -1608,3 +1608,8 @@ WARNING: the following change could break some hackish expedient used in scripts
 - Added: REGION_FLAG_WALK_NOBLOCKHEIGHT (040000) to ignore char height for walkchecks inside the region (see MT_NOBLOCKHEIGHT). Use with caution!
 - Fixed: MORE value wasn't saved correctly if the value was a defname.
 - Fixed: When retrieving MORE value, the numeric value was always returned even if it should have been a defname. Retrieving MORE1 didn't have this problem.
+
+08-04-2018, Nolok
+- Changed: NEWGOLD now accepts a second argument: if it's 1, the new gold is stacked on the existing pile in the pack, otherwise it's stacked in a new pile like it has always been (Issue #246).
+	Usage: NEWGOLD amount, pile(1/0)
+- Fixed: MORE2 value wasn't saved correctly if the value was a defname. Also, retrieving its value always returned a number even if it should have been a defname.

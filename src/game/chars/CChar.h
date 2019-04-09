@@ -543,7 +543,7 @@ public:
 	CItemContainer * GetBank( LAYER_TYPE layer = LAYER_BANKBOX );
 	CItemContainer * GetPackSafe();
 	CItem * GetBackpackItem(ITEMID_TYPE item);
-	void AddGoldToPack( int iAmount, CItemContainer * pPack=nullptr );
+	void AddGoldToPack( int iAmount, CItemContainer * pPack = nullptr, bool fForceNoStack = true );
 
 public:
     /**

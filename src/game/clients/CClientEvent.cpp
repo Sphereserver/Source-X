@@ -1080,14 +1080,14 @@ void CClient::Event_VendorBuy_Cheater( int iCode )
 	SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CANTBUY));
 }
 
-void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t itemCount)
+void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiItemCount)
 {
 	ADDTOCALLSTACK("CClient::Event_VendorBuy");
-	if (m_pChar == nullptr || pVendor == nullptr || items == nullptr || itemCount <= 0)
+	if (m_pChar == nullptr || pVendor == nullptr || items == nullptr || uiItemCount <= 0)
 		return;
 
-#define MAX_COST (INT32_MAX / 2)
-	bool bPlayerVendor = pVendor->IsStatFlag(STATF_PET);
+    static constexpr uint kuiMaxCost = (INT32_MAX / 2);
+	const bool fPlayerVendor = pVendor->IsStatFlag(STATF_PET);
 	pVendor->GetBank(LAYER_VENDOR_STOCK);
 	CItemContainer* pPack = m_pChar->GetPackSafe();
 
@@ -1095,7 +1095,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 	int64 costtotal = 0;
 
 	//	Check if the vendor really has so much items
-	for (size_t i = 0; i < itemCount; ++i)
+	for (uint i = 0; i < uiItemCount; ++i)
 	{
 		if ( items[i].m_serial.IsValidUID() == false )
 			continue;
@@ -1112,7 +1112,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 		}
 
 		costtotal += (items[i].m_amount * items[i].m_price);
-		if ( costtotal > MAX_COST )
+		if ( costtotal > kuiMaxCost )
 		{
 			pVendor->Speak("Your order cannot be fulfilled, please try again.");
 			Event_VendorBuy_Cheater( 0x4 );
@@ -1172,7 +1172,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 	}
 
 	//	Move the items bought into your pack.
-	for ( size_t i = 0; i < itemCount; ++i )
+	for ( uint i = 0; i < uiItemCount; ++i )
 	{
 		if ( items[i].m_serial.IsValidUID() == false )
 			break;
@@ -1191,7 +1191,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 				continue;
 		}
 
-		if ( !bPlayerVendor )									//	NPC vendors
+		if ( !fPlayerVendor )									//	NPC vendors
 		{
 			pItem->SetAmount(pItem->GetAmount() - amount);
 
@@ -1199,7 +1199,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 			{
 				case IT_FIGURINE:
 					{
-						for ( int f = 0; f < amount; f++ )
+						for ( int f = 0; f < amount; ++f )
 							m_pChar->Use_Figurine(pItem);
 					}
 					goto do_consume;
@@ -1333,12 +1333,12 @@ void CClient::Event_VendorSell_Cheater( int iCode )
 	SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CANTSELL));
 }
 
-void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, size_t itemCount)
+void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiItemCount)
 {
 	ADDTOCALLSTACK("CClient::Event_VendorSell");
 	// Player Selling items to the vendor.
 	// Done with the selling action.
-	if (m_pChar == nullptr || pVendor == nullptr || items == nullptr || itemCount <= 0)
+	if (m_pChar == nullptr || pVendor == nullptr || items == nullptr || uiItemCount <= 0)
 		return;
 
 	CItemContainer	*pBank = pVendor->GetBank();
@@ -1357,7 +1357,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, size_t i
 	int iGold = 0;
 	bool fShortfall = false;
 
-	for (size_t i = 0; i < itemCount; i++)
+	for (uint i = 0; i < uiItemCount; i)
 	{
 		CItemVendable * pItem = dynamic_cast <CItemVendable *> (items[i].m_serial.ItemFind());
 		if ( pItem == nullptr || pItem->IsValidSaleItem(true) == false )

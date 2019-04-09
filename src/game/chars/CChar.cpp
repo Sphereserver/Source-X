@@ -3572,11 +3572,15 @@ bool CChar::r_LoadVal( CScript & s )
         {
             if (!(g_Cfg.m_iFeatureTOL & FEATURE_TOL_VIRTUALGOLD))
             {
-                int currentGold = ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD));
                 int newGold = s.GetArgVal();
+                if (newGold <= 0)
+                    return false;
 
+                int currentGold = ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD));
                 if (newGold < currentGold)
+                {
                     ContentConsume(CResourceID(RES_TYPEDEF, IT_GOLD), currentGold - newGold);
+                }
                 else if (newGold > currentGold)
                 {
                     CItemContainer *pBank = GetBank();
@@ -4178,7 +4182,22 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			break;
 
 		case CHV_NEWGOLD:
-			AddGoldToPack(s.GetArgVal(), GetPackSafe());
+        {
+            // Usage: NEWGOLD amount, pile(1: the new gold is stacked on the existing pile in the pack; 0: stacked in a new pile)
+            int64 piCmd[2];
+            int iQty = Str_ParseCmds(s.GetArgRaw(), piCmd, CountOf(piCmd));
+            if (iQty < 1)
+                return false;
+
+            int64 iGold = piCmd[0];
+            if (iGold <= 0)
+                return false;
+            if (iGold > INT32_MAX)
+                iGold = INT32_MAX;
+
+            const bool fStackNewPile = (iQty >= 2) ? !((bool)piCmd[1]) : true;
+			AddGoldToPack((int)iGold, GetPackSafe(), fStackNewPile);
+        }
 			break;
 
 		case CHV_NEWLOOT:
@@ -4187,7 +4206,9 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				{
 					CItem *pItem = CItem::CreateHeader(s.GetArgStr(), nullptr, false, this);
 					if ( !pItem )
+                    {
 						g_World.m_uidNew = (dword)0;
+                    }
 					else
 					{
                         pItem->m_iCreatedResScriptIdx = s.m_iResourceFileIndex;

@@ -343,9 +343,9 @@ public:
 	void Event_Tips( word i ); // Tip of the day window
 	void Event_ToolTip( CUID uid );
 	void Event_UseToolbar(byte bType, dword dwArg);
-	void Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t itemCount);
+	void Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiItemCount);
 	void Event_VendorBuy_Cheater( int iCode = 0 );
-	void Event_VendorSell(CChar* pVendor, const VendorItem* items, size_t itemCount);
+	void Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiItemCount);
 	void Event_VendorSell_Cheater( int iCode = 0 );
     void Event_VirtueSelect(dword dwVirtue, CChar *pCharTarg);
 	bool Event_Walk( byte rawdir, byte sequence = 0 ); // Player moves

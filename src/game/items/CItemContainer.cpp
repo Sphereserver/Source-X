@@ -486,9 +486,10 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 
             case IT_CONTAINER:
             case IT_CONTAINER_LOCKED:
-            {
                 pItem->GoSleep();
-            }
+                break;
+            default:
+                break;
         }
 
 		switch ( pItem->GetType() )
@@ -506,8 +507,8 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 				pCont->Clear();
 				break;
 			}
-			default:
-				break;
+            default:
+                break;
 		}
 	}
 
@@ -515,10 +516,10 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 	CItemBase *pContDef = Item_GetDef();
 	if (pContDef->m_ttContainer.m_dwMinXY || pContDef->m_ttContainer.m_dwMaxXY)
 	{
-		short tmp_MinX = (short)( (pContDef->m_ttContainer.m_dwMinXY & 0xFFFF0000) >> 16 );
-		short tmp_MinY = (short)( (pContDef->m_ttContainer.m_dwMinXY & 0x0000FFFF) );
-		short tmp_MaxX = (short)( (pContDef->m_ttContainer.m_dwMaxXY & 0xFFFF0000) >> 16 );
-		short tmp_MaxY = (short)( (pContDef->m_ttContainer.m_dwMaxXY & 0x0000FFFF) );
+		const short tmp_MinX = (short)( (pContDef->m_ttContainer.m_dwMinXY & 0xFFFF0000) >> 16 );
+        const short tmp_MinY = (short)( (pContDef->m_ttContainer.m_dwMinXY & 0x0000FFFF) );
+        const short tmp_MaxX = (short)( (pContDef->m_ttContainer.m_dwMaxXY & 0xFFFF0000) >> 16 );
+        const short tmp_MaxY = (short)( (pContDef->m_ttContainer.m_dwMaxXY & 0x0000FFFF) );
 		if (pt.m_x < tmp_MinX)
 			pt.m_x = tmp_MinX;
 		if (pt.m_x > tmp_MaxX)

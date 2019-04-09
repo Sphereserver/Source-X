@@ -206,9 +206,10 @@ void CChar::Jail( CTextConsole * pSrc, bool fSet, int iCell )
 }
 
 // A vendor is giving me gold. put it in my pack or other place.
-void CChar::AddGoldToPack( int iAmount, CItemContainer * pPack )
+void CChar::AddGoldToPack( int iAmount, CItemContainer * pPack, bool fForceNoStack )
 {
 	ADDTOCALLSTACK("CChar::AddGoldToPack");
+    ASSERT(iAmount > 0);
 
 	if ( pPack == nullptr )
 		pPack = GetPackSafe();
@@ -229,7 +230,7 @@ void CChar::AddGoldToPack( int iAmount, CItemContainer * pPack )
 		word iGoldStack = (word)minimum(iAmount, iMax);
 		pGold->SetAmount( iGoldStack );
 
-		pPack->ContentAdd( pGold, true );
+		pPack->ContentAdd( pGold, fForceNoStack );
 		iAmount -= iGoldStack;
 	}
 	if (pGold)
