@@ -773,6 +773,7 @@ public:
 #endif
 	friend class PacketCreate;
 	friend class PacketServerRelay;
+	bool Skill_Menu(SKILL_TYPE skill, ITEMID_TYPE itemused = ITEMID_NOTHING);
 };
 
 

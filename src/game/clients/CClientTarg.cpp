@@ -1853,25 +1853,11 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			}
 			if ( pItemUse->IsType(IT_CARPENTRY_CHOP) )
 			{
-				if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-				{
-					CScriptTriggerArgs args("sm_carpentry");
-					if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-						return true;
-				}
-				return Cmd_Skill_Menu( g_Cfg.ResourceGetIDType( RES_SKILLMENU, "sm_carpentry" ));
+				return Skill_Menu(SKILL_CARPENTRY);
 			}
 			if ( pItemUse->IsSameDispID( ITEMID_DAGGER ))
 			{
-				// set the target item
-				m_Targ_UID = pItemTarg->GetUID();
-				if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-				{
-					CScriptTriggerArgs args("sm_bowcraft");
-					if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-						return true;
-				}
-				return Cmd_Skill_Menu( g_Cfg.ResourceGetIDType( RES_SKILLMENU, "sm_bowcraft" ) );
+				return Skill_Menu(SKILL_BOWCRAFT);
 			}
 			SysMessageDefault( DEFMSG_ITEMUSE_LOG_USE );
 			return false;
@@ -2292,25 +2278,9 @@ static lpctstr const sm_Txt_LoomUse[] =
 		{
 			case IT_LEATHER:
 			case IT_HIDE:
-			{
-				if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-				{
-					CScriptTriggerArgs args("sm_tailor_leather");
-					if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-						return true;
-				}
-				return Cmd_Skill_Menu( g_Cfg.ResourceGetIDType( RES_SKILLMENU, "sm_tailor_leather" ) );
-			}
 			case IT_CLOTH:
-			{
-				if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-				{
-					CScriptTriggerArgs args("sm_tailor_cloth");
-					if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-						return true;
-				}
-				return Cmd_Skill_Menu( g_Cfg.ResourceGetIDType( RES_SKILLMENU, "sm_tailor_cloth" ) );
-			}
+				return Skill_Menu(SKILL_TAILORING);
+	
 			default:
 				break;
 		}

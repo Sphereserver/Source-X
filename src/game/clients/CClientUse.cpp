@@ -146,15 +146,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 
 		case IT_SHAFT:
 		case IT_FEATHER:
-		{
-			if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-			{
-				CScriptTriggerArgs args("sm_bolts");
-				if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-					return true;
-			}
-			return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_bolts"));
-		}
+			return Skill_Menu(SKILL_BOWCRAFT);
 
 		case IT_FISH_POLE:	// Just be near water ?
 			addTarget(CLIMODE_TARG_USE_ITEM, g_Cfg.GetDefaultMsg(DEFMSG_FISHING_PROMT), true);
@@ -346,18 +338,9 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		}
 
 		case IT_CARPENTRY:
-		{
-			if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-			{
-				CScriptTriggerArgs args("sm_carpentry");
-				if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-					return true;
-			}
-			return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_carpentry"));
-		}
+			return Skill_Menu(SKILL_CARPENTRY);
 
 		case IT_FORGE:
-			// Solve for the combination of this item with another.
 			addTarget(CLIMODE_TARG_USE_ITEM, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_FORGE));
 			return true;
 
@@ -512,49 +495,14 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			return true;
 
 		case IT_MORTAR:
-		{
-			if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-			{
-				CScriptTriggerArgs args("sm_alchemy");
-				if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-					return true;
-			}
-			return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_alchemy"));
-		}
-
+			return Skill_Menu(SKILL_ALCHEMY);
 		case IT_CARTOGRAPHY:
-		{
-			if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-			{
-				CScriptTriggerArgs args("sm_cartography");
-				if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-					return true;
-			}
-			return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_cartography"));
-		}
-
+			return Skill_Menu(SKILL_CARTOGRAPHY);
 		case IT_COOKING:
-		{
-			if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-			{
-				CScriptTriggerArgs args("sm_cooking");
-				if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-					return true;
-			}
-			return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_cooking"));
-		}
-
+			return Skill_Menu(SKILL_COOKING);
 		case IT_TINKER_TOOLS:
-		{
-			if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-			{
-				CScriptTriggerArgs args("sm_tinker");
-				if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-					return true;
-			}
-			return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_tinker"));
-		}
-
+			return Skill_Menu(SKILL_TINKERING);
+	
 		case IT_SEWING_KIT:
 		{
 			tchar *pszTemp = Str_GetTemp();
@@ -1228,16 +1176,7 @@ bool CClient::Cmd_Skill_Smith( CItem *pIngots )
 		return false;
 	}
 
-	// Select the blacksmith item type.
-	// repair items or make type of items.
-	if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-	{
-		CScriptTriggerArgs args("sm_blacksmith");
-		args.m_VarsLocal.SetNum("ItemUsed", pIngots->GetID());
-		if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-			return true;
-	}
-	return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_blacksmith"));
+	return Skill_Menu(SKILL_BLACKSMITHING, pIngots->GetID());
 }
 
 bool CClient::Cmd_Skill_Inscription()
@@ -1258,13 +1197,7 @@ bool CClient::Cmd_Skill_Inscription()
 		return false;
 	}
 
-	if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-	{
-		CScriptTriggerArgs args("sm_inscription");
-		if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-			return true;
-	}
-	return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_inscription"));
+	return Skill_Menu(SKILL_INSCRIPTION);
 }
 
 bool CClient::Cmd_SecureTrade( CChar *pChar, CItem *pItem )
