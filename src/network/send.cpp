@@ -3354,7 +3354,7 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 		}
 	}
 
-    if (tmVer > 1260000)
+    if (tmVerReported > 1260000)
     {
         dword flags = g_Cfg.GetPacketFlag(true, (RESDISPLAY_VERSION)(account->GetResDisp()),
             maximum(account->GetMaxChars(), (byte)(account->m_Chars.GetCharCount())));
