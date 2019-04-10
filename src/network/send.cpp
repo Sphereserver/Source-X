@@ -1702,16 +1702,11 @@ PacketAddTarget::PacketAddTarget(const CClient* target, PacketAddTarget::TargetT
 	if ( !pItemDef )
 		return;
 
-	word x, y = 0;
+	word y = 0;
 	CItemBaseMulti *pMultiDef = static_cast<CItemBaseMulti *>(pItemDef);
-	//if ( pMultiDef && pMultiDef->m_rect.m_bottom > 0 && (pMultiDef->IsType(IT_MULTI) || pMultiDef->IsType(IT_MULTI_CUSTOM)) )
-	if (pMultiDef && CItemBase::IsID_Multi(id))
-	{
-		g_Log.EventError("We got this: %d %d %d %d\n", pMultiDef->m_rect.GetWidth(), pMultiDef->m_rect.m_left, pMultiDef->m_rect.m_right, pMultiDef->m_rect.GetCenter());
-		x = (word)(pMultiDef->m_rect.m_right / 2);
-		y = (word)(pMultiDef->m_rect.m_bottom);
+	if (pMultiDef && CItemBase::IsID_House(id))
+		y = (word)(pMultiDef->m_rect.m_bottom) - 1;
 
-	}
 		
 	writeByte((byte)type);
 	writeInt32(context);
@@ -1724,7 +1719,7 @@ PacketAddTarget::PacketAddTarget(const CClient* target, PacketAddTarget::TargetT
 
 	writeInt16((word)(id - ITEMID_MULTI));
 
-	writeInt16(x);	// x
+	writeInt16(0);	// x
 	writeInt16(y);	// y
 	writeInt16(0);	// z
 
@@ -3317,7 +3312,7 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 		}
 	}
 
-	if (tmVer > 1260000)
+	if (tmVerReported > 1260000)
 	{
 		dword flags = g_Cfg.GetPacketFlag(true, (RESDISPLAY_VERSION)(account->GetResDisp()),
 			maximum(account->GetMaxChars(), (byte)(account->m_Chars.GetCharCount())));
