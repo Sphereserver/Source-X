@@ -1340,7 +1340,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 	int iGold = 0;
 	bool fShortfall = false;
 
-	for (uint i = 0; i < uiItemCount; i)
+	for (uint i = 0; i < uiItemCount; i++)
 	{
 		CItemVendable * pItem = dynamic_cast <CItemVendable *> (items[i].m_serial.ItemFind());
 		if ( pItem == nullptr || pItem->IsValidSaleItem(true) == false )
@@ -2365,7 +2365,6 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 				m_pPopupPacket->addOption(POPUP_VENDORBUY, 6103, POPUPFLAG_COLOR, 0xFFFF);
 				m_pPopupPacket->addOption(POPUP_VENDORSELL, 6104, POPUPFLAG_COLOR, 0xFFFF);
 
-				WORD wFlag, wSkillNPC, wSkillPlayer;
 				for (unsigned int i = 0; i < g_Cfg.m_iMaxSkill; ++i)
 				{
 					if (!g_Cfg.m_SkillIndexDefs.IsValidIndex(i))
@@ -2373,13 +2372,13 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 					if (i == SKILL_SPELLWEAVING)
 						continue;
 
-					wSkillNPC = pChar->Skill_GetBase(static_cast<SKILL_TYPE>(i));
+					ushort wSkillNPC = pChar->Skill_GetBase( (SKILL_TYPE)i );
 					if (wSkillNPC < 300)
 						continue;
 
-					wSkillPlayer = m_pChar->Skill_GetBase(static_cast<SKILL_TYPE>(i));
-					wFlag = ((wSkillPlayer >= g_Cfg.m_iTrainSkillMax) || (wSkillPlayer >= (wSkillNPC * g_Cfg.m_iTrainSkillPercent) / 100)) ? POPUPFLAG_LOCKED : POPUPFLAG_COLOR;
-					m_pPopupPacket->addOption(static_cast<WORD>(POPUP_TRAINSKILL + i), 6000 + i, wFlag, 0xFFFF);
+					ushort wSkillPlayer = m_pChar->Skill_GetBase( (SKILL_TYPE)i );
+					word wFlag = ((wSkillPlayer >= g_Cfg.m_iTrainSkillMax) || (wSkillPlayer >= (wSkillNPC * g_Cfg.m_iTrainSkillPercent) / 100)) ? POPUPFLAG_LOCKED : POPUPFLAG_COLOR;
+					m_pPopupPacket->addOption( (word)(POPUP_TRAINSKILL + i), 6000 + i, wFlag, 0xFFFF);
 				}
 
 				if (pChar->m_pNPC->m_Brain == NPCBRAIN_STABLE)
@@ -2591,8 +2590,8 @@ void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something 
 
 		if ((EntryTag >= POPUP_TRAINSKILL) && (EntryTag < POPUP_TRAINSKILL + g_Cfg.m_iMaxSkill))
 		{
-			TCHAR *pszMsg = Str_GetTemp();
-			SKILL_TYPE iSkill = static_cast<SKILL_TYPE>(EntryTag - POPUP_TRAINSKILL);
+			tchar * pszMsg = Str_GetTemp();
+			SKILL_TYPE iSkill = (SKILL_TYPE)(EntryTag - POPUP_TRAINSKILL);
 			sprintf(pszMsg, "train %s", g_Cfg.GetSkillKey(iSkill));
 			pChar->NPC_OnHear(pszMsg, m_pChar);
 			return;
