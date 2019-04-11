@@ -276,7 +276,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
                 if ( *pszArgs == '.' )			pszArgs++;
 
             uint iText = GumpAddText( *pszArgs ? pszArgs : "" );
-            m_sControls[m_uiControls].Format( "text %d %d %d %d", x, y, hue, iText );
+            m_sControls[m_uiControls].Format( "text %d %d %d %u", x, y, hue, iText );
             ++m_uiControls;
             return true;
         }
@@ -295,8 +295,8 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             SKIP_ALL( pszArgs )
                 if ( *pszArgs == '.' )			pszArgs++;
 
-            uint iText = GumpAddText( *pszArgs ? pszArgs : "" );
-            m_sControls[m_uiControls].Format( "croppedtext %d %d %d %d %d %d", x, y, w, h, hue, iText );
+			uint iText = GumpAddText( *pszArgs ? pszArgs : "" );
+            m_sControls[m_uiControls].Format( "croppedtext %d %d %d %d %d %u", x, y, w, h, hue, iText );
             ++m_uiControls;
             return true;
         }
@@ -316,7 +316,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             SKIP_ALL( pszArgs )
 
             uint iText = GumpAddText( *pszArgs ? pszArgs : "" );
-            m_sControls[m_uiControls].Format( "htmlgump %d %d %d %d %d %d %d", x, y, w, h, iText, bck, options );
+            m_sControls[m_uiControls].Format( "htmlgump %d %d %d %d %u %d %d", x, y, w, h, iText, bck, options );
             ++m_uiControls;
             return true;
         }
@@ -336,7 +336,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             SKIP_ALL( pszArgs )
 
             uint iText = GumpAddText( *pszArgs ? pszArgs : "" );
-            m_sControls[m_uiControls].Format( "textentry %d %d %d %d %d %d %d", x, y, w, h, hue, id, iText );
+            m_sControls[m_uiControls].Format( "textentry %d %d %d %d %d %d %u", x, y, w, h, hue, id, iText );
             ++m_uiControls;
             return true;
         }
@@ -357,7 +357,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             SKIP_ALL( pszArgs )
 
             uint iText = GumpAddText( *pszArgs ? pszArgs : "" );
-            m_sControls[m_uiControls].Format( "textentrylimited %d %d %d %d %d %d %d %d", x, y, w, h, hue, id, iText, charLimit );
+            m_sControls[m_uiControls].Format( "textentrylimited %d %d %d %d %d %d %u %d", x, y, w, h, hue, id, iText, charLimit );
             ++m_uiControls;
             return true;
         }
