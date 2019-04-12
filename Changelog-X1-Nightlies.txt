@@ -1614,7 +1614,7 @@ WARNING: the following change could break some hackish expedient used in scripts
 	Usage: NEWGOLD amount, pile(1/0)
 - Fixed: MORE2 value wasn't saved correctly if the value was a defname. Also, retrieving its value always returned a number even if it should have been a defname.
 
-10-04-2019, Julian
+12-04-2019, Julian
 - Fixed: Feature sending to unencrypted clients (mostly with Razor) using ReportedCliver as reference instead of CliVer.
 - Fixed: Text index for dynamic dialog lines, such as dhtmlgump, they were starting at random ranges instead of starting at 0.
 - Modified: Hardcoded the train and tame function for Context Menu (or Popup Menu), this way you can remove e_Trainer from every NPC.
