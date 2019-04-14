@@ -5306,6 +5306,12 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 				}
 			}
 
+			if (GetAmount() > 1)
+			{
+				CItem * pRuneNew = this->UnStackSplit(1);
+				pCharSrc->ItemBounce(pRuneNew, false);
+			}
+
 			m_itRune.m_ptMark = pCharSrc->GetTopPoint();
 			if ( IsType(IT_RUNE) )
 			{
