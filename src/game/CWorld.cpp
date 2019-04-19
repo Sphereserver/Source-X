@@ -2594,6 +2594,7 @@ void CWorld::OnTick()
                     }
                 }
                 break;
+
                 case PROFILE_CHARS:
                 {
                     ptcSubDesc = "Char";
@@ -2608,6 +2609,7 @@ void CWorld::OnTick()
                     }
                 }
                 break;
+
                 case PROFILE_SECTORS:
                 {
                     ptcSubDesc = "Sector";
@@ -2615,6 +2617,7 @@ void CWorld::OnTick()
                     pObj->OnTick();
                 }
                 break;
+
                 case PROFILE_MULTIS:
                 {
                     ptcSubDesc = "Multi";
@@ -2624,6 +2627,7 @@ void CWorld::OnTick()
                     fRemove = !pMulti->OnTick();
                 }
                 break;
+
                 case PROFILE_SHIPS:
                 {
                     ptcSubDesc = "Ship";
@@ -2635,6 +2639,7 @@ void CWorld::OnTick()
                     fRemove = !pObj->OnTick();
                 }
                 break;
+
                 default:
                 {
                     ptcSubDesc = "Default";

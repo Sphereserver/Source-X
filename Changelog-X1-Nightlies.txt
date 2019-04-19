@@ -1618,3 +1618,7 @@ WARNING: the following change could break some hackish expedient used in scripts
 - Fixed: Feature sending to unencrypted clients (mostly with Razor) using ReportedCliver as reference instead of CliVer.
 - Fixed: Text index for dynamic dialog lines, such as dhtmlgump, they were starting at random ranges instead of starting at 0.
 - Modified: Hardcoded the train and tame function for Context Menu (or Popup Menu), this way you can remove e_Trainer from every NPC.
+
+19-04-2019, Nolok
+- Fixed: DECAY treating the given value as msecs instead of tenths of second.
+- Fixed: BLOODCOLOR creating black blood pools when the hue id was >= 1000 (Issue #254).

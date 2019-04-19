@@ -8,6 +8,7 @@
 
 #include "../resource/CResourceBase.h"
 #include "../components/CCFaction.h"
+#include "../CServerTime.h"
 #include "../CTimedObject.h"
 #include "../CBase.h"
 #include "../CRect.h"
@@ -605,6 +606,14 @@ public:
 	height_t GetHeight() const;
 	int64  GetDecayTime() const;
 	void SetDecayTime( int64 iMsecsTimeout = 0 );
+    void SetDecayTimeD(int64 iTenthsTimeout = 0)
+    {
+        SetDecayTime(iTenthsTimeout * MSECS_PER_TENTH);
+    }
+    void SetDecayTimeS(int64 iSecondsTimeout = 0)
+    {
+        SetDecayTime(iSecondsTimeout * MSECS_PER_SEC);
+    }
 	SOUND_TYPE GetDropSound( const CObjBase * pObjOn ) const;
 	bool IsTopLevelMultiLocked() const;
 	bool IsMovableType() const;

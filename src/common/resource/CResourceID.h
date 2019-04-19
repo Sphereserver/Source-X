@@ -140,7 +140,11 @@ struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variab
     }
     explicit CResourceIDBase(dword dwPrivateID)
     {
-        ASSERT(CUID::IsValidUID(dwPrivateID));
+        if (!CUID::IsValidUID(dwPrivateID))
+        {
+            Init();
+            return;
+        }
         m_dwInternalVal = UID_F_RESOURCE | dwPrivateID;
     }
 

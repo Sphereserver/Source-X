@@ -2170,7 +2170,7 @@ void CItem::r_WriteMore1(CSString & sVal)
             return;
 
         default:
-            if (CResourceIDBase::IsResource(m_itNormal.m_more1))
+            if (CResourceIDBase::IsValidResource(m_itNormal.m_more1))
                 sVal = g_Cfg.ResourceGetName(CResourceID(m_itNormal.m_more1, 0));
             else
                 sVal.FormatHex(m_itNormal.m_more1);
@@ -2211,7 +2211,7 @@ void CItem::r_WriteMore2( CSString & sVal )
 			return;
 
 		default:
-            if (CResourceIDBase::IsResource(m_itNormal.m_more2))
+            if (CResourceIDBase::IsValidResource(m_itNormal.m_more2))
                 sVal = g_Cfg.ResourceGetName(CResourceID(m_itNormal.m_more2, 0));
             else
                 sVal.FormatHex(m_itNormal.m_more2);
@@ -3178,7 +3178,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 			}
 			break;
 		case CIV_DECAY:
-			SetDecayTime( s.GetArgVal());
+			SetDecayTimeD( s.GetArgVal());
 			break;
 		case CIV_DESTROY:	// remove this object now.
 		{

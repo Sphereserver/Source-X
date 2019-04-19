@@ -1980,17 +1980,27 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		// Make blood effects
 		if ( pCharTarg->m_wBloodHue != (HUE_TYPE)(-1) )
 		{
-			static const ITEMID_TYPE sm_Blood[] = { ITEMID_BLOOD1, ITEMID_BLOOD2, ITEMID_BLOOD3, ITEMID_BLOOD4, ITEMID_BLOOD5, ITEMID_BLOOD6, ITEMID_BLOOD_SPLAT };
-			int iBloodQty = (g_Cfg.m_iFeatureSE & FEATURE_SE_UPDATE) ? Calc_GetRandVal2(4, 5) : Calc_GetRandVal2(1, 2);
+			static constexpr ITEMID_TYPE sm_Blood[] = { ITEMID_BLOOD1, ITEMID_BLOOD2, ITEMID_BLOOD3, ITEMID_BLOOD4, ITEMID_BLOOD5, ITEMID_BLOOD6, ITEMID_BLOOD_SPLAT };
+			const int iBloodQty = (g_Cfg.m_iFeatureSE & FEATURE_SE_UPDATE) ? Calc_GetRandVal2(4, 5) : Calc_GetRandVal2(1, 2);
 
 			for ( int i = 0; i < iBloodQty; ++i )
 			{
-                ITEMID_TYPE iBloodID = sm_Blood[Calc_GetRandVal(CountOf(sm_Blood))];
+                const ITEMID_TYPE iBloodID = sm_Blood[Calc_GetRandVal(CountOf(sm_Blood))];
 
+                CItem *pBlood = CItem::CreateBase(iBloodID);
+                ASSERT(pBlood);
+                pBlood->SetHue(pCharTarg->m_wBloodHue);
+                pBlood->MoveNear(pCharTarg->GetTopPoint(), 1);
+                pBlood->Update();
+                pBlood->SetDecayTimeS(5);
+
+                // Looks like the hues with index >= 1000 cause the blood to be black, instead of the right color
+                /*
                 CPointMap pt = pCharTarg->GetTopPoint();
                 pt.m_x += (short)Calc_GetRandVal2(-1, 1);
                 pt.m_y += (short)Calc_GetRandVal2(-1, 1);
                 EffectLocation(EFFECT_XYZ, iBloodID, nullptr, &pt, 50, 0, false, pCharTarg->m_wBloodHue);
+                */
 			}
 		}
 
