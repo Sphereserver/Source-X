@@ -161,7 +161,7 @@ bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObj
 void CChar::CallGuards()
 {
 	ADDTOCALLSTACK("CChar::CallGuards");
-	if (!m_pArea || !m_pArea->IsGuarded() || IsStatFlag(STATF_DEAD))
+	if (!m_pArea || !m_pArea->IsGuarded() || IsStatFlag(STATF_DEAD|STATF_STONE))
 		return;
 
     // Spam check, not calling this more than once per second, which will cause an excess of calls and checks on crowded areas because of the 2 CWorldSearch.
@@ -198,8 +198,11 @@ bool CChar::CallGuards( CChar * pCriminal )
 	ADDTOCALLSTACK("CChar::CallGuards2");
 	if ( !m_pArea || (pCriminal == this) )
 		return false;
-	if (IsStatFlag(STATF_DEAD) || (pCriminal && (pCriminal->IsStatFlag(STATF_DEAD | STATF_INVUL) || pCriminal->IsPriv(PRIV_GM) || !pCriminal->m_pArea->IsGuarded())))
+	if (IsStatFlag(STATF_DEAD) ||
+        (pCriminal && (pCriminal->IsStatFlag(STATF_DEAD) || pCriminal->Can(CAN_C_STATUE|CAN_C_NONSELECTABLE) || pCriminal->IsPriv(PRIV_GM) || !pCriminal->m_pArea->IsGuarded())))
+    {
 		return false;
+    }
 
     if (g_World.GetTimeDiff(m_timeLastCallGuards + (25 * MSECS_PER_TENTH)) > 0)	// Spam check
         return false;
@@ -307,7 +310,7 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, bool fCommandPet, bool fShouldReveal)
 		return true;	// field spell ?
 	if (pCharSrc == this)
 		return true;	// self induced
-	if (IsStatFlag(STATF_DEAD))
+	if (IsStatFlag(STATF_DEAD|STATF_STONE))
 		return false;
 
 	if (fShouldReveal)
@@ -1185,7 +1188,7 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool fToldByMaster )
 {
 	ADDTOCALLSTACK("CChar::Fight_Attack");
 
-	if ( !pCharTarg || pCharTarg == this || pCharTarg->IsStatFlag(STATF_DEAD) || IsStatFlag(STATF_DEAD) )
+	if ( !pCharTarg || pCharTarg == this || pCharTarg->IsStatFlag(STATF_DEAD|STATF_INVUL|STATF_STONE) || IsStatFlag(STATF_DEAD) )
 	{
 		// Not a valid target.
 		Fight_Clear(pCharTarg, true);
@@ -2000,13 +2003,22 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		// Make blood effects
 		if ( pCharTarg->m_wBloodHue != (HUE_TYPE)(-1) )
 		{
-			static const ITEMID_TYPE sm_Blood[] = { ITEMID_BLOOD1, ITEMID_BLOOD2, ITEMID_BLOOD3, ITEMID_BLOOD4, ITEMID_BLOOD5, ITEMID_BLOOD6, ITEMID_BLOOD_SPLAT };
-			int iBloodQty = (g_Cfg.m_iFeatureSE & FEATURE_SE_UPDATE) ? Calc_GetRandVal2(4, 5) : Calc_GetRandVal2(1, 2);
+			static constexpr ITEMID_TYPE sm_Blood[] = { ITEMID_BLOOD1, ITEMID_BLOOD2, ITEMID_BLOOD3, ITEMID_BLOOD4, ITEMID_BLOOD5, ITEMID_BLOOD6, ITEMID_BLOOD_SPLAT };
+			const int iBloodQty = (g_Cfg.m_iFeatureSE & FEATURE_SE_UPDATE) ? Calc_GetRandVal2(4, 5) : Calc_GetRandVal2(1, 2);
 
 			for ( int i = 0; i < iBloodQty; ++i )
 			{
-                ITEMID_TYPE iBloodID = sm_Blood[Calc_GetRandVal(CountOf(sm_Blood))];
+                const ITEMID_TYPE iBloodID = sm_Blood[Calc_GetRandVal(CountOf(sm_Blood))];
 
+                CItem *pBlood = CItem::CreateBase(iBloodID);
+                ASSERT(pBlood);
+                pBlood->SetHue(pCharTarg->m_wBloodHue);
+                pBlood->MoveNear(pCharTarg->GetTopPoint(), 1);
+                pBlood->Update();
+                pBlood->SetDecayTimeS(5);
+
+                // Looks like the hues with index >= 1000 cause the blood to be black, instead of the right color
+                /*
                 CPointMap pt = pCharTarg->GetTopPoint();
                 pt.m_x += (short)Calc_GetRandVal2(-1, 1);
                 pt.m_y += (short)Calc_GetRandVal2(-1, 1);
@@ -2015,6 +2027,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 				ASSERT(pBlood);
 				pBlood->SetHue(pCharTarg->m_wBloodHue);
 				pBlood->MoveToDecay(pt, 3000);
+                */
 			}
 		}
 

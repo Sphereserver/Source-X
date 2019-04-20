@@ -81,6 +81,26 @@ void CBaseBaseDef::UnLink()
 	CResourceLink::UnLink();
 }
 
+/*
+bool CBaseBaseDef::r_Verb(CScript &s, CTextConsole * pSrc) // Execute command from script
+{
+    ADDTOCALLSTACK("CBaseBaseDef::r_Verb");
+    EXC_TRY("Verb");
+    lpctstr	pszKey = s.GetKey();
+    ASSERT(pSrc);
+
+    //
+
+    return false;
+    EXC_CATCH;
+
+	EXC_DEBUG_START;
+	EXC_ADD_SCRIPTSRC;
+	EXC_DEBUG_END;
+	return false;
+}
+*/
+
 bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
 	UNREFERENCED_PARAMETER(pSrc);
@@ -109,10 +129,12 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 		case OBC_DEFNAME:
 			sVal = GetResourceName();
 			break;
+
         case OBC_FACTION:
         case OBC_SLAYER:
             sVal.FormatHex((dword)GetFaction().GetFactionID());
             break;
+
 		case OBC_ARMOR:
 			{
 				pszKey += strlen(sm_szLoadKeys[index]); // 9;
@@ -164,13 +186,23 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
         case OBC_CANUSE:
             sVal.FormatHex(m_CanUse);
             break;
+
+        case OBC_HASCOMPONENTPROPS:
+        {
+            pszKey += 17;
+            SKIP_SEPARATORS(pszKey);
+            GETNONWHITESPACE(pszKey);
+
+            COMPPROPS_TYPE id = (COMPPROPS_TYPE)Exp_GetVal(pszKey);
+            bool fRes = (id >= 0) && (id < COMP_PROPS_QTY) && (nullptr != CEntityProps::GetComponentProps(id));
+            sVal.FormatVal(int(fRes));
+            break;
+        }
+
 		case OBC_HEIGHT:
-			{
-				//CBaseBaseDef * pBaseBaseDef = dynamic_cast<CBaseBaseDef*>(this);
-				//DEBUG_ERR(("OBC_HEIGHT  -  m_dwDispIndex %d  GetHeight() %d  pBaseBaseDef->GetHeight() %d  pBaseBaseDef 0x%x\n",m_wDispIndex,GetHeight(),pBaseBaseDef->GetHeight(),pBaseBaseDef));
-				sVal.FormatVal( GetHeight() );
-			}
+			sVal.FormatVal( GetHeight() );
 			break;
+
 		case OBC_INSTANCES:
 			sVal.FormatVal( GetRefInstances());
 			break;

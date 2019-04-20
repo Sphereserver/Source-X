@@ -2177,7 +2177,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 
     if ( m_pPlayer && !IsPriv(PRIV_GM) )
     {
-        if (IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_STONE))
+        if (IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_STONE) || Can(CAN_C_STATUE))
         {
             if ( fFailMsg )
                 SysMessageDefault( DEFMSG_SPELL_TRY_DEAD );
@@ -3227,7 +3227,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	if ( spell == SPELL_Poison_Field && IsStatFlag(STATF_POISONED) )
 		return false;
 
-	iSkillLevel = iSkillLevel / 2 + Calc_GetRandVal(iSkillLevel / 2);	// randomize the potency
+	iSkillLevel = (iSkillLevel / 2) + Calc_GetRandVal(iSkillLevel / 2);	// randomize the potency
 	int iEffect = g_Cfg.GetSpellEffect(spell, iSkillLevel);
 	int64 iDuration = pSpellDef->m_idLayer ? GetSpellDuration(spell, iSkillLevel, pCharSrc) : 0;    // tenths of second
 	SOUND_TYPE iSound = pSpellDef->m_sound;

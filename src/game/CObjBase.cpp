@@ -1015,13 +1015,13 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 						}
 						else
 						{
-							CClient::OpenedGumpsMap_t &ourMap = pThisClient->m_mapOpenedGumps;
+							const CClient::OpenedGumpsMap_t &ourMap = pThisClient->m_mapOpenedGumps;
 							uint uiDialogIndex = Exp_GetUVal(pszKey);
 							SKIP_SEPARATORS(pszKey);
 
 							if ( uiDialogIndex <= ourMap.size() )
 							{
-								CClient::OpenedGumpsMap_t::iterator itGumpFound = ourMap.begin();
+								CClient::OpenedGumpsMap_t::const_iterator itGumpFound = ourMap.begin();
 								while ( uiDialogIndex-- )
 									++itGumpFound;
 
@@ -1129,6 +1129,17 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				sVal.FormatVal(pThis->GetDir(pObj));
 				break;
 			}
+        case OC_HASCOMPONENTPROPS:
+        {
+            pszKey += 17;
+            SKIP_SEPARATORS(pszKey);
+            GETNONWHITESPACE(pszKey);
+
+            COMPPROPS_TYPE id = (COMPPROPS_TYPE)Exp_GetVal(pszKey);
+            bool fRes = (id >= 0) && (id < COMP_PROPS_QTY) && (nullptr != CEntityProps::GetComponentProps(id));
+            sVal.FormatVal(int(fRes));
+            break;
+        }
 		case OC_ISCHAR:
 			sVal.FormatVal( IsChar());
 			break;
@@ -1870,6 +1881,12 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		index = FindTableSorted( pszKey, sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
     if (index < 0)
     {
+        /*
+        CBaseBaseDef *pBase = Base_GetDef();
+        ASSERT(pBase);
+        if (pBase->r_Verb(s, pSrc))
+            return true;
+        */
         return CScriptObj::r_Verb(s, pSrc);
     }
 
@@ -1950,7 +1967,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd) );
 				if ( iArgQty < 2 )
 					return false;
-				CObjBase *	pThis	= this;
+				const CObjBase * pThis = this;
 				//DEBUG_ERR(("this->GetUID() 0%x \n", (dword)this->GetUID()));
 				if ( piCmd[0] == -1 )
 				{
@@ -1960,7 +1977,6 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 						pThis		= pCharSrc;
 						pCharSrc	= dynamic_cast <CChar*>(this);
 					}
-
 				}
 				//DEBUG_ERR(("this->GetUID() 0%x pThis->GetUID() 0%x pCharSrc->GetUID() 0%x\n",(dword)this->GetUID(),(dword)pThis->GetUID(),(dword)pCharSrc->GetUID()));
 				pThis->Effect( (EFFECT_TYPE)(piCmd[0]), (ITEMID_TYPE)(RES_GET_INDEX(piCmd[1]) ),
@@ -1983,11 +1999,11 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			EXC_SET_BLOCK("EFFECTLOCATION");
 			int64 piCmd[15];
 			int iArgQty = Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
-			if (iArgQty < 2)
+			if (iArgQty < 5)
 				return false;
-			CObjBase *pThis = this;
+			const CObjBase *pThis = this;
 
-            CPointMap ptDest((short)piCmd[0], (short)piCmd[1], (char)piCmd[2]);
+            const CPointMap ptDest((short)piCmd[0], (short)piCmd[1], (char)piCmd[2]);
 			if (!ptDest.IsValidPoint())
 				return false;
 

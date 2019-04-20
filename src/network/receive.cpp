@@ -556,7 +556,7 @@ bool PacketResynchronize::onReceive(NetState* net)
 	if ( !pChar )
 		return false;
 
-	new PacketCharacter(client, pChar);
+	client->addChar(pChar);
 	client->addPlayerUpdate();
 	client->addPlayerSee(CPointMap());
 	net->m_sequence = 0;

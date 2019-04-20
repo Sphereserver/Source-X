@@ -1251,13 +1251,7 @@ void CChar::UpdateMode( CClient * pExcludeClient, bool fFull )
 			continue;
 		}
 
-		if ( fFull )
-			pClient->addChar(this);
-		else
-		{
-			pClient->addCharMove(this);
-			pClient->addHealthBarUpdate(this);
-		}
+        pClient->addChar(this, fFull);
 	}
 }
 
@@ -3043,7 +3037,7 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 {
 	ADDTOCALLSTACK("CChar::CanMoveWalkTo");
 
-	if ( Can(CAN_C_NONMOVER) )
+	if ( Can(CAN_C_NONMOVER|CAN_C_STATUE) || IsStatFlag(STATF_FREEZE|STATF_STONE) )
 		return nullptr;
 	int iWeightLoadPercent = GetWeightLoadPercent(GetTotalWeight());
 	if ( !fCheckOnly )
@@ -3107,8 +3101,10 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 		for (;;)
 		{
 			CChar *pChar = AreaChars.GetChar();
-			if (!pChar )
+			if (!pChar)
 				break;
+            if (pChar->Can(CAN_C_STATUE))
+                return nullptr; // can't walk over a statue
 			if ( (pChar == this) || (abs(pChar->GetTopZ() - ptDst.m_z) > 5) || (pChar->IsStatFlag(STATF_INSUBSTANTIAL)) )
 				continue;
 			if ( m_pNPC && pChar->m_pNPC )	// NPCs can't walk over another NPC
@@ -3461,8 +3457,8 @@ bool CChar::MoveToRegion( CRegionWorld * pNewArea, bool fAllowReject )
 			// Is it guarded / safe / non-pvp?
 			else if ( m_pArea && !IsStatFlag(STATF_DEAD) )
 			{
-				bool redNew = ( pNewArea->m_TagDefs.GetKeyNum("RED") != 0 );
-				bool redOld = ( m_pArea->m_TagDefs.GetKeyNum("RED") != 0 );
+				const bool fRedNew = ( pNewArea->m_TagDefs.GetKeyNum("RED") != 0 );
+				const bool fRedOld = ( m_pArea->m_TagDefs.GetKeyNum("RED") != 0 );
 				if ( pNewArea->IsGuarded() != m_pArea->IsGuarded() )
 				{
 					if ( pNewArea->IsGuarded() )	// now under the protection
@@ -3476,9 +3472,9 @@ bool CChar::MoveToRegion( CRegionWorld * pNewArea, bool fAllowReject )
 						SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_GUARDS_2), (pVarStr != nullptr) ? pVarStr->GetValStr() : g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_GUARD_ART));
 					}
 				}
-				if ( redNew != redOld )
-					SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_REDDEF), g_Cfg.GetDefaultMsg(redNew ? DEFMSG_MSG_REGION_REDENTER : DEFMSG_MSG_REGION_REDLEFT));
-				/*else if ( redNew && ( redNew == redOld ))
+				if ( fRedNew != fRedOld )
+					SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_REDDEF), g_Cfg.GetDefaultMsg(fRedNew ? DEFMSG_MSG_REGION_REDENTER : DEFMSG_MSG_REGION_REDLEFT));
+				/*else if ( fRedNew && ( fRedNew == fRedOld ))
 				{
 					SysMessage("You are still in the red region.");
 				}*/
@@ -3992,7 +3988,9 @@ void CChar::OnTickStatusUpdate()
 void CChar::OnTickFood(ushort uiVal, int HitsHungerLoss)
 {
 	ADDTOCALLSTACK("CChar::OnTickFood");
-	if ( IsStatFlag(STATF_DEAD|STATF_CONJURED|STATF_SPAWNED) || !Stat_GetMaxAdjusted(STAT_FOOD) )
+    if (Can(CAN_C_STATUE))
+        return;
+	if ( IsStatFlag(STATF_DEAD|STATF_CONJURED|STATF_SPAWNED|STATF_STONE) || !Stat_GetMaxAdjusted(STAT_FOOD) )
 		return;
 	if ( IsStatFlag(STATF_PET) && !NPC_CheckHirelingStatus() )		// this may be money instead of food
 		return;
@@ -4009,11 +4007,11 @@ void CChar::OnTickFood(ushort uiVal, int HitsHungerLoss)
 	short iFoodLevel = Food_GetLevelPercent();
 	if ( iFoodLevel > 40 )
 		return;
-	if ( HitsHungerLoss <= 0 || IsStatFlag(STATF_SLEEPING|STATF_STONE) )
+	if ( HitsHungerLoss <= 0 || IsStatFlag(STATF_SLEEPING) )
 		return;
 
-	bool bPet = IsStatFlag(STATF_PET);
-	lpctstr pszMsgLevel = Food_GetLevelMessage(bPet, false);
+	bool fPet = IsStatFlag(STATF_PET);
+	lpctstr pszMsgLevel = Food_GetLevelMessage(fPet, false);
 	SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_HUNGER), pszMsgLevel);
 
 	char *pszMsg = Str_GetTemp();
@@ -4029,7 +4027,7 @@ void CChar::OnTickFood(ushort uiVal, int HitsHungerLoss)
 	{
 		OnTakeDamage(HitsHungerLoss, this, DAMAGE_FIXED);
 		SoundChar(CRESND_RAND);
-		if ( bPet )
+		if ( fPet )
 			NPC_PetDesert();
 	}
 }
@@ -4104,7 +4102,7 @@ bool CChar::OnTick()
     {
         ProfileTask aiTask(PROFILE_NPC_AI);
         EXC_SET_BLOCK("NPC action");
-        if (!IsStatFlag(STATF_FREEZE))
+        if (!IsStatFlag(STATF_FREEZE) && !Can(CAN_C_STATUE))
         {
             NPC_OnTickAction();
 
@@ -4182,7 +4180,7 @@ bool CChar::OnTickPeriodic()
         // Check location periodically for standing in fire fields, traps, etc.
         EXC_SET_BLOCK("check location");
         CheckLocation(true);
-        if (!IsStatFlag(STATF_DEAD))
+        if (!IsStatFlag(STATF_DEAD|STATF_STONE) && !Can(CAN_C_STATUE))
             Stats_Regen();
     }
 

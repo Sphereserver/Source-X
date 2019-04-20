@@ -489,7 +489,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 		{
 			bool fClearedWay = false;
 			// Some object in my way that i could move ? Try to move it.
-			if ( !Can(CAN_C_USEHANDS) || IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_FREEZE|STATF_STONE) )
+			if ( !Can(CAN_C_USEHANDS) || Can(CAN_C_STATUE) || IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_FREEZE|STATF_STONE) )
                 ;   // i cannot use hands or i am frozen, so cannot move objects
 			else if ( (NPC_GetAiFlags() & NPC_AI_MOVEOBSTACLES) && (iInt > iRand) )
 			{
@@ -643,7 +643,7 @@ bool CChar::NPC_LookAtCharGuard( CChar * pChar, bool bFromTrigger )
 
 	// Does the guard hate the target ?
 	//	do not waste time on invul+dead, non-criminal and jailed chars
-	if ( ((pChar->IsStatFlag(STATF_INVUL|STATF_DEAD) || pChar->IsPriv(PRIV_JAILED)) && !bFromTrigger) || !(pChar->Noto_IsCriminal() || pChar->Noto_IsEvil()) )
+	if ( ((pChar->IsStatFlag(STATF_INVUL|STATF_DEAD) || pChar->Can(CAN_C_STATUE) || pChar->IsPriv(PRIV_JAILED)) && !bFromTrigger) || !(pChar->Noto_IsCriminal() || pChar->Noto_IsEvil()) )
 		return false;
 
 	if ( ! pChar->m_pArea->IsGuarded())
@@ -741,7 +741,7 @@ bool CChar::NPC_LookAtCharHuman( CChar * pChar )
 	ADDTOCALLSTACK("CChar::NPC_LookAtCharHuman");
 	ASSERT(m_pNPC);
 
-	if ( IsStatFlag(STATF_DEAD) || pChar->IsStatFlag(STATF_DEAD) )
+	if ( IsStatFlag(STATF_DEAD) || pChar->IsStatFlag(STATF_DEAD) || pChar->Can(CAN_C_STATUE) )
 		return false;
 
 	if ( Noto_IsEvil() && !GetKeyNum("MurdererNPC") )		// I am evil.
@@ -790,7 +790,7 @@ bool CChar::NPC_LookAtCharHealer( CChar * pChar )
 	ADDTOCALLSTACK("CChar::NPC_LookAtCharHealer");
 	ASSERT(m_pNPC);
 
-	if ( !pChar->IsStatFlag(STATF_DEAD) || (pChar->m_pNPC && pChar->m_pNPC->m_bonded) )
+	if ( !pChar->IsStatFlag(STATF_DEAD) || pChar->IsStatFlag(STATF_STONE) || pChar->Can(CAN_C_STATUE) || (pChar->m_pNPC && pChar->m_pNPC->m_bonded) )
 		return false;
 
 	static lpctstr const sm_szHealerRefuseEvils[] =

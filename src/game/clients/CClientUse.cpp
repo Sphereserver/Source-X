@@ -1068,7 +1068,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 			if ( GetPrivLevel() < pChar->GetPrivLevel() && pChar->IsStatFlag(STATF_INSUBSTANTIAL) )
 				continue;
 
-			CCharBase *pCharDef = pChar->Char_GetDef();
+			const CCharBase *pCharDef = pChar->Char_GetDef();
 			NPCBRAIN_TYPE basic_type = pChar->GetNPCBrainGroup();
 			if ( basic_type == NPCBRAIN_DRAGON || basic_type == NPCBRAIN_BERSERK )
 				basic_type = NPCBRAIN_MONSTER;
@@ -1102,7 +1102,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 					continue;
 			}
 
-			count++;
+			++count;
 			item[count].m_id = (word)(pCharDef->m_trackID);
 			item[count].m_color = 0;
 			item[count].m_sText = pChar->GetName();

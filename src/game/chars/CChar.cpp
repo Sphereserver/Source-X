@@ -625,7 +625,7 @@ int CChar::IsWeird() const
 				}
 
 				// Make sure we are still linked back to the world.
-				CItem * pItem = Horse_GetMountItem();
+				const CItem * pItem = Horse_GetMountItem();
 				if ( pItem == nullptr )
 				{
 					iResultCode = 0x1104;

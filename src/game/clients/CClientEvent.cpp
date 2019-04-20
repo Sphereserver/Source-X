@@ -1057,7 +1057,11 @@ void CClient::Event_Attack( CUID uid )
 	if ( pChar == nullptr )
 		return;
 
-	new PacketAttack(this, (m_pChar->Fight_Attack(pChar) ? (dword)pChar->GetUID() : 0));
+    bool fFail = pChar->Can(CAN_C_NONSELECTABLE);
+    if (!fFail)
+        fFail = !m_pChar->Fight_Attack(pChar);
+
+	new PacketAttack(this, (fFail ? 0 : (dword)pChar->GetUID()));
 }
 
 // Client/Player buying items from the Vendor
@@ -1357,7 +1361,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 	int iGold = 0;
 	bool fShortfall = false;
 
-	for (uint i = 0; i < uiItemCount; i)
+	for (uint i = 0; i < uiItemCount; i++)
 	{
 		CItemVendable * pItem = dynamic_cast <CItemVendable *> (items[i].m_serial.ItemFind());
 		if ( pItem == nullptr || pItem->IsValidSaleItem(true) == false )
@@ -2254,6 +2258,11 @@ void CClient::Event_Target(dword context, CUID uid, CPointMap pt, byte flags, IT
 	{
 		if (uid.IsValidUID())
 		{
+            if (CChar *pTargetChar = dynamic_cast<CChar*>(pTarget))
+            {
+                if (pTargetChar->Can(CAN_C_NONSELECTABLE))
+                    return;
+            }
 			if (m_pChar->CanSee(pTarget) == false)
 			{
 				addObjectRemoveCantSee(uid, "the target");
@@ -2369,20 +2378,19 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 	if ( pChar && !fPreparePacket )
 	{
 
-		if ( pChar->IsPlayableCharacter() )
+		if (pChar->IsPlayableCharacter())
 			m_pPopupPacket->addOption(POPUP_PAPERDOLL, 6123, POPUPFLAG_COLOR, 0xFFFF);
 
-		if ( pChar->m_pNPC )
+		if (pChar->m_pNPC)
 		{
-			if ( pChar->NPC_IsVendor() )
+			if (pChar->NPC_IsVendor())
 			{
-				if ( pChar->m_pNPC->m_Brain == NPCBRAIN_BANKER )
+				if (pChar->m_pNPC->m_Brain == NPCBRAIN_BANKER)
 					m_pPopupPacket->addOption(POPUP_BANKBOX, 6105, POPUPFLAG_COLOR, 0xFFFF);
 
 				m_pPopupPacket->addOption(POPUP_VENDORBUY, 6103, POPUPFLAG_COLOR, 0xFFFF);
 				m_pPopupPacket->addOption(POPUP_VENDORSELL, 6104, POPUPFLAG_COLOR, 0xFFFF);
 
-				WORD wFlag, wSkillNPC, wSkillPlayer;
 				for (unsigned int i = 0; i < g_Cfg.m_iMaxSkill; ++i)
 				{
 					if (!g_Cfg.m_SkillIndexDefs.IsValidIndex(i))
@@ -2390,16 +2398,16 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 					if (i == SKILL_SPELLWEAVING)
 						continue;
 
-					wSkillNPC = pChar->Skill_GetBase(static_cast<SKILL_TYPE>(i));
-					if ( wSkillNPC < 300 )
+					ushort wSkillNPC = pChar->Skill_GetBase( (SKILL_TYPE)i );
+					if (wSkillNPC < 300)
 						continue;
 
-					wSkillPlayer = m_pChar->Skill_GetBase(static_cast<SKILL_TYPE>(i));
-					wFlag = ((wSkillPlayer >= g_Cfg.m_iTrainSkillMax) || (wSkillPlayer >= (wSkillNPC * g_Cfg.m_iTrainSkillPercent) / 100)) ? POPUPFLAG_LOCKED : POPUPFLAG_COLOR;
-					m_pPopupPacket->addOption(static_cast<WORD>(POPUP_TRAINSKILL + i), 6000 + i, wFlag, 0xFFFF);
+					ushort wSkillPlayer = m_pChar->Skill_GetBase( (SKILL_TYPE)i );
+					word wFlag = ((wSkillPlayer >= g_Cfg.m_iTrainSkillMax) || (wSkillPlayer >= (wSkillNPC * g_Cfg.m_iTrainSkillPercent) / 100)) ? POPUPFLAG_LOCKED : POPUPFLAG_COLOR;
+					m_pPopupPacket->addOption( (word)(POPUP_TRAINSKILL + i), 6000 + i, wFlag, 0xFFFF);
 				}
 
-				if ( pChar->m_pNPC->m_Brain == NPCBRAIN_STABLE )
+				if (pChar->m_pNPC->m_Brain == NPCBRAIN_STABLE)
 				{
 					m_pPopupPacket->addOption(POPUP_STABLESTABLE, 6126, POPUPFLAG_COLOR, 0xFFFF);
 					m_pPopupPacket->addOption(POPUP_STABLERETRIEVE, 6127, POPUPFLAG_COLOR, 0xFFFF);
@@ -2408,31 +2416,31 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 			else
 			{
 				word iEnabled = pChar->IsStatFlag(STATF_DEAD) ? POPUPFLAG_LOCKED : POPUPFLAG_COLOR;
-				if ( (pChar->IsOwnedBy(m_pChar, false)) && (pChar->m_pNPC->m_Brain != NPCBRAIN_BERSERK) )
+				if ((pChar->IsOwnedBy(m_pChar, false)) && (pChar->m_pNPC->m_Brain != NPCBRAIN_BERSERK))
 				{
 					CREID_TYPE id = pChar->GetID();
-					
+
 					m_pPopupPacket->addOption(POPUP_PETGUARD, 6107, iEnabled, 0xFFFF);
 					m_pPopupPacket->addOption(POPUP_PETFOLLOW, 6108, POPUPFLAG_COLOR, 0xFFFF);
-					
+
 					bool bBackpack = (id == CREID_LLAMA_PACK || id == CREID_HORSE_PACK || id == CREID_GIANT_BEETLE);
-					if ( bBackpack )
+					if (bBackpack)
 						m_pPopupPacket->addOption(POPUP_PETDROP, 6109, iEnabled, 0xFFFF);
 
 					m_pPopupPacket->addOption(POPUP_PETKILL, 6111, iEnabled, 0xFFFF);
 					m_pPopupPacket->addOption(POPUP_PETSTOP, 6112, POPUPFLAG_COLOR, 0xFFFF);
 					m_pPopupPacket->addOption(POPUP_PETSTAY, 6114, POPUPFLAG_COLOR, 0xFFFF);
-					
-					if ( !pChar->IsStatFlag(STATF_CONJURED) )
+
+					if (!pChar->IsStatFlag(STATF_CONJURED))
 					{
 						m_pPopupPacket->addOption(POPUP_PETFRIEND_ADD, 6110, iEnabled, 0xFFFF);
 						m_pPopupPacket->addOption(POPUP_PETFRIEND_REMOVE, 6099, iEnabled, 0xFFFF);
 						m_pPopupPacket->addOption(POPUP_PETTRANSFER, 6113, POPUPFLAG_COLOR, 0xFFFF);
 					}
-					
+
 					m_pPopupPacket->addOption(POPUP_PETRELEASE, 6118, POPUPFLAG_COLOR, 0xFFFF);
-					
-					if ( bBackpack )
+
+					if (bBackpack)
 						m_pPopupPacket->addOption(POPUP_BACKPACK, 6145, iEnabled, 0xFFFF);
 				}
 				else if (pChar->Memory_FindObjTypes(m_pChar, MEMORY_FRIEND))
@@ -2441,18 +2449,16 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 					m_pPopupPacket->addOption(POPUP_PETSTOP, 6112, iEnabled, 0xFFFF);
 					m_pPopupPacket->addOption(POPUP_PETSTAY, 6114, iEnabled, 0xFFFF);
 				}
-				/* 
 				else if (!pChar->IsStatFlag(STATF_PET) && (pChar->Skill_GetBase(SKILL_TAMING) > 0))
 					m_pPopupPacket->addOption(POPUP_TAME, 6130, POPUPFLAG_COLOR, 0xFFFF);
-				*/
 			}
 		}
-		else if ( pChar == m_pChar )
+		else if (pChar == m_pChar)
 		{
 			m_pPopupPacket->addOption(POPUP_BACKPACK, 6145, POPUPFLAG_COLOR, 0xFFFF);
-			if ( GetNetState()->isClientVersion(MINCLIVER_STATUS_V6) )
+			if (GetNetState()->isClientVersion(MINCLIVER_STATUS_V6))
 			{
-				if ( pChar->GetDefNum("REFUSETRADES", true) )
+				if (pChar->GetDefNum("REFUSETRADES", true))
 					m_pPopupPacket->addOption(POPUP_TRADE_ALLOW, 1154112, POPUPFLAG_COLOR, 0xFFFF);
 				else
 					m_pPopupPacket->addOption(POPUP_TRADE_REFUSE, 1154113, POPUPFLAG_COLOR, 0xFFFF);
@@ -2460,17 +2466,17 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 		}
 		else
 		{
-			if ( m_pChar->m_pParty == nullptr && pChar->m_pParty == nullptr )
+			if (m_pChar->m_pParty == nullptr && pChar->m_pParty == nullptr)
 				m_pPopupPacket->addOption(POPUP_PARTY_ADD, 197, POPUPFLAG_COLOR, 0xFFFF);
-			else if ( m_pChar->m_pParty != nullptr && m_pChar->m_pParty->IsPartyMaster(m_pChar) )
+			else if (m_pChar->m_pParty != nullptr && m_pChar->m_pParty->IsPartyMaster(m_pChar))
 			{
-				if ( m_pChar->m_pParty == nullptr )
+				if (m_pChar->m_pParty == nullptr)
 					m_pPopupPacket->addOption(POPUP_PARTY_ADD, 197, POPUPFLAG_COLOR, 0xFFFF);
-				else if ( pChar->m_pParty == m_pChar->m_pParty )
+				else if (pChar->m_pParty == m_pChar->m_pParty)
 					m_pPopupPacket->addOption(POPUP_PARTY_REMOVE, 198, POPUPFLAG_COLOR, 0xFFFF);
 			}
 
-			if ( GetNetState()->isClientVersion(MINCLIVER_TOL) && m_pChar->GetDist(pChar) <= 2 )
+			if (GetNetState()->isClientVersion(MINCLIVER_TOL) && m_pChar->GetDist(pChar) <= 2)
 				m_pPopupPacket->addOption(POPUP_TRADE_OPEN, 1077728, POPUPFLAG_COLOR, 0xFFFF);
 		}
 
@@ -2605,14 +2611,22 @@ void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something 
 				if ( pChar->m_pNPC->m_Brain == NPCBRAIN_STABLE )
 					pChar->NPC_OnHear("retrieve", m_pChar);
 				break;
+
+			case POPUP_TAME:
+				if (m_pChar->Skill_CanUse(SKILL_TAMING) && !m_pChar->Skill_Wait(SKILL_TAMING))
+				{
+					m_pChar->m_Act_UID = pChar->GetUID();
+					m_pChar->Skill_Start(SKILL_TAMING);
+				}
+				return;
+
 		}
 
-
-		if ( (EntryTag >= POPUP_TRAINSKILL) && (EntryTag < POPUP_TRAINSKILL + g_Cfg.m_iMaxSkill) )
+		if ((EntryTag >= POPUP_TRAINSKILL) && (EntryTag < POPUP_TRAINSKILL + g_Cfg.m_iMaxSkill))
 		{
-			TCHAR *pszMsg = Str_GetTemp();
-			SKILL_TYPE iSkill = static_cast<SKILL_TYPE>(EntryTag - POPUP_TRAINSKILL);
-			sprintf(pszMsg, "train %s", g_Cfg.GetSkillKey( iSkill ));
+			tchar * pszMsg = Str_GetTemp();
+			SKILL_TYPE iSkill = (SKILL_TYPE)(EntryTag - POPUP_TRAINSKILL);
+			sprintf(pszMsg, "train %s", g_Cfg.GetSkillKey(iSkill));
 			pChar->NPC_OnHear(pszMsg, m_pChar);
 			return;
 		}

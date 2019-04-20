@@ -210,7 +210,7 @@ bool CPointBase::IsValidXY() const
 
 bool CPointBase::IsValidPoint() const
 {
-	return( IsValidXY() && IsValidZ());
+	return ( IsValidXY() && IsValidZ() );
 }
 
 bool CPointBase::IsCharValid() const
@@ -239,7 +239,7 @@ void CPointBase::ValidatePoint()
 
 bool CPointBase::IsSame2D( const CPointBase & pt ) const
 {
-	return( m_x == pt.m_x && m_y == pt.m_y );
+	return ( m_x == pt.m_x && m_y == pt.m_y );
 }
 
 void CPointBase::Set( const CPointBase & pt )

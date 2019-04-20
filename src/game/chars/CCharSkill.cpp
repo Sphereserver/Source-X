@@ -503,6 +503,8 @@ bool CChar::Skill_CheckSuccess( SKILL_TYPE skill, int difficulty, bool bUseBellC
 		return false;
 
 	difficulty *= 10;
+
+#define SKILL_VARIANCE 100		// Difficulty modifier for determining success. 10.0 %
 	int iSuccessChance = difficulty;
 	if ( bUseBellCurve )
 		iSuccessChance = Calc_GetSCurve( Skill_GetAdjusted(skill) - difficulty, SKILL_VARIANCE );
@@ -2520,10 +2522,16 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 		SysMessageDefault( DEFMSG_HEALING_REACH );
 		return -SKTRIG_QTY;
 	}
+	
+	CChar * pChar = dynamic_cast<CChar*>(pObj);
+    if (pChar && pChar->Can(CAN_C_NONSELECTABLE))
+    {
+        SysMessageDefault( DEFMSG_HEALING_NONCHAR );
+        return -SKTRIG_QTY;
+    }
 
-	CItemCorpse * pCorpse = nullptr;	// resurrect by corpse
-	CChar * pChar = m_Act_UID.CharFind();
-	if ( pObj->IsItem())
+    CItemCorpse * pCorpse = nullptr;	// resurrect by corpse
+	if (pObj->IsItem())
 	{
 		pCorpse = dynamic_cast<CItemCorpse *>(pObj);
 		if ( pCorpse == nullptr )
@@ -3649,7 +3657,7 @@ bool CChar::Skill_Wait( SKILL_TYPE skilltry )
 		}
 	}
 
-	if ( IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_FREEZE|STATF_STONE) )
+	if ( IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_FREEZE|STATF_STONE) || Can(CAN_C_STATUE) )
 	{
 		SysMessageDefault(DEFMSG_SKILLWAIT_1);
 		return true;

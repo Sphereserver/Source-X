@@ -185,6 +185,8 @@ public:
 #define CAN_C_DCIGNOREDIST  0x08000	// when dclicking sth., ignore distance checks.
 #define CAN_C_NONMOVER      0x10000 // Just stay in place, avoid movement actions.
 #define CAN_C_NOBLOCKHEIGHT 0x20000 // Do not consider char's height when checking if it can move to a point
+#define CAN_C_STATUE        0x40000 // Statue: do not move, PacketStatueAnimation with tag.statue_animation and tag.statue_frame
+#define CAN_C_NONSELECTABLE 0x80000 // Can't be selected/targeted (useful for chars with mt_statue which need to act as an item)
 
 // masks for movement-affecting flags
 #define CAN_C_MOVEMASK      (CAN_C_GHOST|CAN_C_SWIM|CAN_C_WALK|CAN_C_PASSWALLS|CAN_C_FLY|CAN_C_FIRE_IMMUNE|CAN_C_NOINDOORS|CAN_C_HOVER|CAN_C_NOBLOCKHEIGHT)
@@ -256,6 +258,7 @@ public:
      */
 	virtual void UnLink() override;
 
+    //virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
 	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr ) override;
 	virtual bool r_LoadVal( CScript & s ) override;
 

@@ -1582,7 +1582,7 @@ WARNING: the following change could break some hackish expedient used in scripts
 24-03-2019, Julian
 - Modified: @HitParry to include local.Damage, which contains the raw amount of damage before any parrying modification.
 
-31-03-2018, Nolok
+31-03-2019, Nolok
 - Fixed: Swimming NPCs could pass under items even if their z wasn't high enough.
 - Fixed: NPCs could always walk inside places with a ceiling too low for them to fit below.
 - Fixed: The absence of MT_WALK didn't stop NPCs from walking on land.
@@ -1590,7 +1590,7 @@ WARNING: the following change could break some hackish expedient used in scripts
 - Fixed: BTFish encryption not working (Issue #256).
 - Fixed: During character creation, invalid professions sent by the client will now be ignored.
 
-05-04-2018, Nolok
+05-04-2019, Nolok
 - Added: trigger @CreateLoot. It fires when the NPC dies, if it is allowed to have a loot (not a player, not conjured, no DEATHF_NOLOOT).
 	The main advantage of using this trigger in place of @NPCRestock and @Create is that items will be created only when they are required,
 	so that a big number "useless" items won't be stored in the save files (= smaller save files), also GMs wouldn't be able to see what a monster is going to drop before it dies.
@@ -1599,17 +1599,36 @@ WARNING: the following change could break some hackish expedient used in scripts
 - Fixed: Items created with NEWLOOT didn't store the script file and line number where they were created, so that info wasn't eventually shown by garbage collection.
 - Fixed: NPCs able to spawn to a P they cannot move at/from (Issue #255).
 
-06-04-2018, Nolok
+06-04-2019, Nolok
 - Fixed: MT_NOINDOORS CAN flag didn't prevent a char to walk under a roof (or items acting as such, like ones with the "platform" or "blocking" tiledata flag).
 - Added: MT_NOBLOCKHEIGHT CAN flag (020000) to ignore char's height when checking if it can move to a point (otherwise, if the ceiling is too low for it to fit below, the movement is blocked).
 
-07-04-2018, Nolok
+07-04-2019, Nolok
 - Added: REGION_FLAG_NOMINING (020000) to prevent mining in a region.
 - Added: REGION_FLAG_WALK_NOBLOCKHEIGHT (040000) to ignore char height for walkchecks inside the region (see MT_NOBLOCKHEIGHT). Use with caution!
 - Fixed: MORE value wasn't saved correctly if the value was a defname.
 - Fixed: When retrieving MORE value, the numeric value was always returned even if it should have been a defname. Retrieving MORE1 didn't have this problem.
 
-08-04-2018, Nolok
+08-04-2019, Nolok
 - Changed: NEWGOLD now accepts a second argument: if it's 1, the new gold is stacked on the existing pile in the pack, otherwise it's stacked in a new pile like it has always been (Issue #246).
 	Usage: NEWGOLD amount, pile(1/0)
 - Fixed: MORE2 value wasn't saved correctly if the value was a defname. Also, retrieving its value always returned a number even if it should have been a defname.
+
+12-04-2019, Julian
+- Fixed: Feature sending to unencrypted clients (mostly with Razor) using ReportedCliver as reference instead of CliVer.
+- Fixed: Text index for dynamic dialog lines, such as dhtmlgump, they were starting at random ranges instead of starting at 0.
+- Modified: Hardcoded the train and tame function for Context Menu (or Popup Menu), this way you can remove e_Trainer from every NPC.
+
+19-04-2019, Nolok
+- Fixed: DECAY treating the given value as msecs instead of tenths of second.
+- Fixed: BLOODCOLOR creating black blood pools when the hue id was >= 1000 (Issue #254).
+
+20-04-2019, Nolok
+- Added: Can flag MT_STATUE (040000). When active, the char can't take any action (it's still "mortal" though, you need to add also STATF_INVUL) and acts like a statue:
+	it stands still in an animation frame, specified by TAG.STATUE_ANIM and TAG.STATUE_FRAME (Issue #233). It doesn't attack or make any action (it has an empty AI), still has hitpoints, stats, skills, etc.
+- Added: Can flag MT_NONSELECTABLE (080000). This char can't be selected/targeted. Use it for NPC statues which need to behave like items as much as possible.
+- Added: "HASCOMPPROPS propid" to check whether the object has the given ComponentProps (see 23-12-2018 changelog entry). Defnames for the ComponentProps IDs are added in the
+	new script file core/defs_component_props.scp.
+- Fixed: The server sent an Attack Accepted packet instead of an Attack Refused one when a player tried to attack a char with flags STATF_INVUL or STATF_STONE.
+	That resulted in the target being considered under attack (red colored) even if the attack didn't start.
+- Fixed: Food periodically decreasing and stats regenerating on chars with STATF_STONE.

@@ -1382,7 +1382,7 @@ bool CClient::OnTarg_Skill_Poison( CObjBase * pObj )
 		return false;
 	m_pChar->m_Act_Prv_UID = m_Targ_UID;	// poison this
 	m_pChar->m_Act_UID = pObj->GetUID();				// with this poison
-	return( m_pChar->Skill_Start( SKILL_POISONING ));
+	return m_pChar->Skill_Start( SKILL_POISONING );
 }
 
 bool CClient::OnTarg_Skill_Herd_Dest( CObjBase * pObj, const CPointMap & pt )
@@ -1395,7 +1395,7 @@ bool CClient::OnTarg_Skill_Herd_Dest( CObjBase * pObj, const CPointMap & pt )
 	m_pChar->m_Act_UID = m_Targ_UID;	// Who to herd?
 	m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID; // crook ?
 
-	return( m_pChar->Skill_Start( SKILL_HERDING ));
+	return m_pChar->Skill_Start( SKILL_HERDING );
 }
 
 bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
@@ -1404,7 +1404,11 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 	// The client player has targeted a spell.
 	// CLIMODE_TARG_SKILL_MAGERY
 
-	const CSpellDef * pSpell	= g_Cfg.GetSpellDef( m_tmSkillMagery.m_Spell );
+    const CChar *pTargChar = dynamic_cast<CChar*>(pObj);
+    if (pObj && pTargChar->Can(CAN_C_NONSELECTABLE))
+        return false;
+
+	const CSpellDef * pSpell = g_Cfg.GetSpellDef( m_tmSkillMagery.m_Spell );
 	if ( ! pSpell )	
 		return false;
 
@@ -1465,14 +1469,14 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 			return false;
 		}
 
-		return( m_pChar->Spell_CastDone() );
+		return m_pChar->Spell_CastDone();
 	}
 
 	int skill;
 	if (!pSpell->GetPrimarySkill(&skill, nullptr))
 		return false;
 
-	return( m_pChar->Skill_Start((SKILL_TYPE)skill));
+	return m_pChar->Skill_Start((SKILL_TYPE)skill);
 }
 
 bool CClient::OnTarg_Pet_Command( CObjBase * pObj, const CPointMap & pt )

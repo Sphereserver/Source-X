@@ -2335,6 +2335,7 @@ PacketCharacter::PacketCharacter(CClient* target, const CChar* character) : Pack
 	HUE_TYPE hue;
 	target->GetAdjustedCharID(character, id, hue);
 	const CPointMap &pos = character->GetTopPoint();
+    const NetState *ns = target->GetNetState();
 
 	initLength();
 	writeInt32(character->GetUID());
@@ -2345,14 +2346,13 @@ PacketCharacter::PacketCharacter(CClient* target, const CChar* character) : Pack
 	writeByte(character->GetDirFlag());
 	writeInt16(hue);
 	writeByte(character->GetModeFlag(target));
-	writeByte((byte)(character->Noto_GetFlag(target->GetChar(), true, target->GetNetState()->isClientVersion(MINCLIVER_NOTOINVUL), true)));
+	writeByte((byte)(character->Noto_GetFlag(target->GetChar(), true, ns->isClientVersion(MINCLIVER_NOTOINVUL), true)));
 
-	bool isNewMobilePacket = target->GetNetState()->isClientVersion(MINCLIVER_NEWMOBINCOMING);
+	bool isNewMobilePacket = ns->isClientVersion(MINCLIVER_NEWMOBINCOMING);
 
 	if (character->IsStatFlag(STATF_SLEEPING) == false)
 	{
-		bool isLayerSent[LAYER_HORSE + 1];
-		memset(isLayerSent, 0, sizeof(isLayerSent));
+        bool isLayerSent[LAYER_HORSE + 1] = {false};
 
 		for (CItem* item = character->GetContentHead(); item != nullptr; item = item->GetNext())
 		{
@@ -3312,13 +3312,13 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 		}
 	}
 
-	if (tmVerReported > 1260000)
-	{
-		dword flags = g_Cfg.GetPacketFlag(true, (RESDISPLAY_VERSION)(account->GetResDisp()),
-			maximum(account->GetMaxChars(), (byte)(account->m_Chars.GetCharCount())));
-		if (!target->GetNetState()->getClientType())
-			flags |= 0x400;
-		writeInt32(flags);
+    if (tmVerReported > 1260000)
+    {
+        dword flags = g_Cfg.GetPacketFlag(true, (RESDISPLAY_VERSION)(account->GetResDisp()),
+            maximum(account->GetMaxChars(), (byte)(account->m_Chars.GetCharCount())));
+        if ( !target->GetNetState()->getClientType() )
+            flags |= 0x400;
+        writeInt32(flags);
 
 		if (target->GetNetState()->isClientEnhanced())
 		{
@@ -3352,6 +3352,7 @@ PacketAttack::PacketAttack(const CClient* target, CUID serial) : PacketSend(XCMD
 {
 	ADDTOCALLSTACK("PacketAttack::PacketAttack");
 
+    // UID = 00 00 00 00 means attack request refused
 	writeInt32(serial);
 
 	push(target);
@@ -4157,40 +4158,12 @@ PacketEnableMapDiffs::PacketEnableMapDiffs(const CClient* target) : PacketExtend
 /***************************************************************************
 *
 *
-*	Packet 0xBF.0x19.0x02 : PacketStatLocks		update lock status of stats (NORMAL)
-*
-*
-***************************************************************************/
-PacketStatLocks::PacketStatLocks(const CClient* target, const CChar* character) : PacketExtended(EXTDATA_Stats_Enable, 12, PRI_NORMAL)
-{
-	ADDTOCALLSTACK("PacketStatLocks::PacketStatLocks");
-
-	byte status(0);
-	if (character->m_pPlayer != nullptr)
-	{
-		status |= (byte)character->m_pPlayer->Stat_GetLock(STAT_INT);
-		status |= (byte)character->m_pPlayer->Stat_GetLock(STAT_DEX) << 2;
-		status |= (byte)character->m_pPlayer->Stat_GetLock(STAT_STR) << 4;
-	}
-
-	writeByte(0x02);
-	writeInt32(character->GetUID());
-	writeByte(0);
-	writeByte(status);
-
-	push(target);
-}
-
-
-/***************************************************************************
-*
-*
-*	Packet 0xBF.0x19 : BondedStatuss			set bonded status (NORMAL)
+*	Packet 0xBF.0x19.0x00 : BondedStatus			    set bonded status (NORMAL)
 *
 *
 ***************************************************************************/
 
-PacketBondedStatus::PacketBondedStatus(const CClient * target, const CChar * pChar, bool IsGhost) : PacketExtended(EXTDATA_Stats_Enable, 11, PRI_NORMAL)
+PacketBondedStatus::PacketBondedStatus(const CClient * target, const CChar * pChar, bool IsGhost) : PacketExtended(EXTDATA_BondedStatus, 11, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketBondedStatus::PacketBondedStatus");
 
@@ -4201,6 +4174,63 @@ PacketBondedStatus::PacketBondedStatus(const CClient * target, const CChar * pCh
 	push(target);
 }
 
+
+/***************************************************************************
+*
+*
+*	Packet 0xBF.0x19.0x02 : PacketStatLocks		update lock status of stats (NORMAL)
+*
+*
+***************************************************************************/
+PacketStatLocks::PacketStatLocks(const CClient* target, const CChar* character) : PacketExtended(EXTDATA_Stats_Enable, 12, PRI_NORMAL)
+{
+    ADDTOCALLSTACK("PacketStatLocks::PacketStatLocks");
+
+    byte status = 0;
+    if (character->m_pPlayer != nullptr)
+    {
+        status |= (byte)character->m_pPlayer->Stat_GetLock(STAT_INT);
+        status |= (byte)character->m_pPlayer->Stat_GetLock(STAT_DEX) << 2;
+        status |= (byte)character->m_pPlayer->Stat_GetLock(STAT_STR) << 4;
+    }
+
+    /*
+    // Packet guides report this difference, but it would be better to test this before uncommenting
+    const NetState* ns = target->GetNetState();
+    if (ns->isClient3D() || ns->isClientKR())
+        writeByte(0x05);
+    else
+    */
+        writeByte(0x02);
+    writeInt32(character->GetUID());
+    writeByte(0);
+    writeByte(status);
+
+    push(target);
+}
+
+
+/***************************************************************************
+*
+*
+*	Packet 0xBF.0x19.0x05 : PacketStatueAnimation	update character animation frame (NORMAL)
+*
+*
+***************************************************************************/
+PacketStatueAnimation::PacketStatueAnimation(const CClient * target, const CChar * pChar, int iAnimation, int iFrame) : PacketExtended(EXTDATA_StatueAnimation, 17, PRI_NORMAL)
+{
+    ADDTOCALLSTACK("PacketStatue::PacketStatue");
+
+    writeByte(0x05);
+    writeInt32(pChar->GetUID());
+    writeByte(0x00);
+    writeByte(0xFF);
+    writeByte(0x01);
+    writeInt16(word(iAnimation));
+    writeInt16(word(iFrame));
+
+    push(target);
+}
 
 /***************************************************************************
  *
