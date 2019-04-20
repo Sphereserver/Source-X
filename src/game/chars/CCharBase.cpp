@@ -228,7 +228,7 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 		case CBC_FOODTYPE:
 			{
 				tchar *pszTmp = Str_GetTemp();
-				m_FoodType.WriteKeys(pszTmp);
+				m_FoodType.WriteKeys(pszTmp, 0, false, true);
 				sVal = pszTmp;
 			}
 			break;

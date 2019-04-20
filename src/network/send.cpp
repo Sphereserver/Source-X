@@ -4019,8 +4019,6 @@ void PacketDisplayPopup::addOption(word entryTag, dword textId, word flags, word
 	{
 		if ( textId <= 32767 )
 			textId += 3000000;
-		if (flags & POPUPFLAG_COLOR)
-			flags &= ~POPUPFLAG_COLOR;
 
 		writeInt32(textId);
 		writeInt16(entryTag);
