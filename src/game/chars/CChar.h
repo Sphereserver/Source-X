@@ -81,7 +81,6 @@ private:
 
 	uint64 m_iStatFlag;		// Flags above
 
-#define SKILL_VARIANCE 100		// Difficulty modifier for determining success. 10.0 %
 	ushort m_Skill[SKILL_QTY];	// List of skills ( skill * 10 )
 
 	CClient * m_pClient;	// is the char a logged in m_pPlayer ?

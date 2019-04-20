@@ -116,6 +116,7 @@ bool CEntityProps::IsSubscribedComponentProps(CComponentProps *pComponent) const
 CComponentProps * CEntityProps::GetComponentProps(COMPPROPS_TYPE type)
 {
     ADDTOCALLSTACK("CEntityProps::GetComponentProps");
+    ASSERT((type >= 0) && (type < COMP_PROPS_QTY));
     if (!_List.empty() && _List.count(type))
     {
         return _List.at(type);

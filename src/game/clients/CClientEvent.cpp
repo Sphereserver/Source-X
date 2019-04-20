@@ -1040,7 +1040,11 @@ void CClient::Event_Attack( CUID uid )
 	if ( pChar == nullptr )
 		return;
 
-	new PacketAttack(this, (m_pChar->Fight_Attack(pChar) ? (dword)pChar->GetUID() : 0));
+    bool fFail = pChar->Can(CAN_C_NONSELECTABLE);
+    if (!fFail)
+        fFail = !m_pChar->Fight_Attack(pChar);
+
+	new PacketAttack(this, (fFail ? 0 : (dword)pChar->GetUID()));
 }
 
 // Client/Player buying items from the Vendor
@@ -2237,6 +2241,11 @@ void CClient::Event_Target(dword context, CUID uid, CPointMap pt, byte flags, IT
 	{
 		if (uid.IsValidUID())
 		{
+            if (CChar *pTargetChar = dynamic_cast<CChar*>(pTarget))
+            {
+                if (pTargetChar->Can(CAN_C_NONSELECTABLE))
+                    return;
+            }
 			if (m_pChar->CanSee(pTarget) == false)
 			{
 				addObjectRemoveCantSee(uid, "the target");

@@ -1070,12 +1070,24 @@ void CClient::addCharMove( const CChar * pChar, byte iCharDirFlag ) const
 	new PacketCharacterMove(this, pChar, iCharDirFlag);
 }
 
-void CClient::addChar( CChar * pChar )
+void CClient::addChar( CChar * pChar, bool fFull )
 {
 	ADDTOCALLSTACK("CClient::addChar");
 	// Full update about a char.
 	EXC_TRY("addChar");
-	new PacketCharacter( this, pChar );
+    
+    if (fFull)
+	    new PacketCharacter(this, pChar);
+    else
+        addCharMove(pChar);
+
+    const bool fStatue = pChar->Can(CAN_C_STATUE);
+    if (fStatue)
+    {
+        const int iAnim = (int)pChar->GetKeyNum("STATUE_ANIM", true);
+        const int iFrame = (int)pChar->GetKeyNum("STATUE_FRAME", true);
+        new PacketStatueAnimation(this, pChar, iAnim, iFrame);
+    }
 
 	EXC_SET_BLOCK("Wake sector");
 	pChar->GetTopPoint().GetSector()->SetSectorWakeStatus();	// if it can be seen then wake it.
@@ -1083,14 +1095,17 @@ void CClient::addChar( CChar * pChar )
 	EXC_SET_BLOCK("Health bar color");
 	addHealthBarUpdate( pChar );
 
-	if ( pChar->m_pNPC && pChar->m_pNPC->m_bonded && pChar->IsStatFlag(STATF_DEAD) )
-	{
-		EXC_SET_BLOCK("Bonded status");
-		addBondedStatus(pChar, true);
-	}
+    if (fFull && !fStatue)
+    {
+        if ( pChar->m_pNPC && pChar->m_pNPC->m_bonded && pChar->IsStatFlag(STATF_DEAD) )
+        {
+            EXC_SET_BLOCK("Bonded status");
+            addBondedStatus(pChar, true);
+        }
 
-	EXC_SET_BLOCK("AOSToolTip adding (end)");
-	addAOSTooltip( pChar );
+        EXC_SET_BLOCK("AOSToolTip adding (end)");
+        addAOSTooltip( pChar );
+    }
 
 	EXC_CATCH;
 

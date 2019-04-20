@@ -366,7 +366,10 @@ enum EXTDATA_TYPE
 	EXTDATA_CloseUI_Window	= 0x16,	// client message
 	EXTDATA_Codex_Wisdom	= 0x17,	// server message
 	EXTDATA_Map_Diff		= 0x18,	// enable mapdiff files
-	EXTDATA_Stats_Enable	= 0x19,	// extended stats
+    EXTDATA_BondedStatus    = 0x19, // 0x19.0x0: update bonded status
+	EXTDATA_Stats_Enable	= 0x19,	// 0x19.0x2: extended stats
+    //EXTDATA_NewBondedStatus    = 0x19, // 0x19.0x5.0xff specialization: update bonded status (does it actually exist?)
+    EXTDATA_StatueAnimation = 0x19, // 0x19.0x5.0xff: update character current animation frame
 	EXTDATA_Stats_Change	= 0x1a,	// extended stats
 	EXTDATA_NewSpellbook	= 0x1b,
 	EXTDATA_NewSpellSelect	= 0x1c,
@@ -849,7 +852,7 @@ enum RACE_TYPE		// character race, used in new character creation (0x8D) and sta
 
 struct CEvent	// event buffer from client to server..
 {
-#define MAX_EXTCMD_ARG_LEN  30  // Arbitrary, to prevent exploits
+#define MAX_EXTCMD_ARG_LEN  30  // Arbitrary, used to prevent exploits
 
     union
     {
@@ -885,10 +888,10 @@ struct CEvent	// event buffer from client to server..
 
         struct // XCMD_EncryptionReply
         {
-            byte m_Cmd;			// 0 = 0xE4
-            nword m_len;		// 1 - 2 = length
-            ndword m_lenUnk1;				// 3 - 6 = length of m_unk1
-            byte m_unk1[1];					// 7 - ? = ?
+            byte m_Cmd;		    // 0 = 0xE4
+            nword m_len;	    // 1 - 2 = length
+            ndword m_lenUnk1;	// 3 - 6 = length of m_unk1
+            byte m_unk1[1];		// 7 - ? = ?
         } EncryptionReply;
     };
 };

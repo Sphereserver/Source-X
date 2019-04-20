@@ -469,7 +469,7 @@ public:
 
 	void addCharMove( const CChar * pChar ) const;
 	void addCharMove( const CChar * pChar, byte iCharDirFlag ) const;
-	void addChar( CChar * pChar );
+	void addChar( CChar * pChar, bool fFull = true );
 	void addCharName( const CChar * pChar ); // Singleclick text for a character
 	void addItemName( const CItem * pItem );
 

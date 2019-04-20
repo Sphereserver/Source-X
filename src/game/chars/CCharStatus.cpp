@@ -1283,7 +1283,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 				return true;
 			if ( IsPriv(PRIV_GM) )
 				return (GetPrivLevel() >= pChar->GetPrivLevel());
-			if ( pChar->IsStatFlag(STATF_DEAD|STATF_STONE) )
+			if ( pChar->IsStatFlag(STATF_DEAD|STATF_STONE) || Can(CAN_C_STATUE) )
 				return false;
 		}
 
@@ -1500,7 +1500,7 @@ bool CChar::CanMove( const CItem *pItem, bool fMsg ) const
 	if ( pItem->IsAttr(ATTR_MOVE_NEVER|ATTR_LOCKEDDOWN) && !pItem->IsAttr(ATTR_MOVE_ALWAYS) )
 		return false;
 
-	if ( IsStatFlag(STATF_STONE|STATF_FREEZE|STATF_INSUBSTANTIAL|STATF_DEAD|STATF_SLEEPING) )
+	if ( IsStatFlag(STATF_STONE|STATF_FREEZE|STATF_INSUBSTANTIAL|STATF_DEAD|STATF_SLEEPING) || Can(CAN_C_STATUE) )
 	{
 		if ( fMsg )
 			SysMessageDefault(DEFMSG_CANTMOVE_DEAD);

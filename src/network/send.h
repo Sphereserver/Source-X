@@ -1532,28 +1532,9 @@ public:
 };
 
 /***************************************************************************
- *
- *
- *	Packet 0xBF.0x19.0x02 : PacketStatLocks		update lock status of stats (NORMAL)
- *
- *
- ***************************************************************************/
-class PacketStatLocks : public PacketExtended
-{
-public:
-	PacketStatLocks(const CClient* target, const CChar* character);
-
-	virtual bool canSendTo(const NetState* state) const { return CanSendTo(state); }
-	static bool CanSendTo(const NetState* state)
-	{
-		return state->isClientVersion(MINCLIVER_STATLOCKS);
-	}
-};
-
-/***************************************************************************
 *
 *
-*	Packet 0xBF.0x19 : BondedStatus			set bonded status (NORMAL)
+*	Packet 0xBF.0x19.0x00 : PacketBondedStatus		set bonded status (NORMAL)
 *
 *
 ***************************************************************************/
@@ -1561,6 +1542,38 @@ class PacketBondedStatus : public PacketExtended
 {
 public:
 	PacketBondedStatus(const CClient * target, const CChar * pChar, bool IsGhost);
+};
+
+/***************************************************************************
+*
+*
+*	Packet 0xBF.0x19.0x02 : PacketStatLocks		update lock status of stats (NORMAL)
+*
+*
+***************************************************************************/
+class PacketStatLocks : public PacketExtended
+{
+public:
+    PacketStatLocks(const CClient* target, const CChar* character);
+
+    virtual bool canSendTo(const NetState* state) const { return CanSendTo(state); }
+    static bool CanSendTo(const NetState* state)
+    {
+        return state->isClientVersion(MINCLIVER_STATLOCKS);
+    }
+};
+
+/***************************************************************************
+*
+*
+*	Packet 0xBF.0x19.0x05 : PacketStatueAnimation	update character animation frame (NORMAL)
+*
+*
+***************************************************************************/
+class PacketStatueAnimation : public PacketExtended
+{
+public:
+    PacketStatueAnimation(const CClient * target, const CChar * pChar, int iAnimation, int iFrame);
 };
 
 /***************************************************************************
