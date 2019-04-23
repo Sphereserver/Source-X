@@ -286,7 +286,7 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 	{
 		case '{':
 		//	++pArgs;
-		//	return( GetRange( pArgs ));
+		//	return( GetRangeNumber( pArgs ));
 		case '[':
 		case '(': // Parse out a sub expression.
 			++pArgs;
@@ -731,7 +731,7 @@ realtype CVarFloat::GetRandVal2( realtype dMin, realtype dMax )
 }
 
 //Does not work as it should, would be too slow, and nobody needs that
-/*realtype CVarFloat::GetRange( lpctstr & pExpr )
+/*realtype CVarFloat::GetRangeNumber( lpctstr & pExpr )
 {
 	realtype dVals[256];		// Maximum elements in a list
 

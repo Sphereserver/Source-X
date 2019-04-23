@@ -61,6 +61,8 @@ enum INTRINSIC_TYPE
 	INTRINSIC_ISNUMBER,
 	INTRINSIC_ISOBSCENE,
 	INTRINSIC_LOGARITHM,
+    INTRINSIC_MAX,
+    INTRINSIC_MIN,
 	INTRINSIC_NAPIERPOW,
 	INTRINSIC_QVAL,
 	INTRINSIC_RAND,
@@ -89,6 +91,8 @@ static lpctstr const sm_IntrinsicFunctions[INTRINSIC_QTY+1] =
 	"ISNUMBER",		// ISNUMBER(var)
 	"ISOBSCENE",	// test for non-allowed strings
 	"LOGARITHM",	// log()/log10()
+    "MAX",
+    "MIN",
 	"NAPIERPOW",	// exp()
 	"QVAL",		// QVAL(test1,test2,ret1,ret2,ret3) - test1 ? test2 (< ret1, = ret2, > ret3)
 	"RAND",		// RAND(x) = flat random
@@ -122,12 +126,12 @@ public:
 
 public:
 	// Evaluate using the stuff we know.
-	llong GetSingle(lpctstr & pArgs);
+	llong GetSingle(lpctstr & pExpr);
 	int GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty, bool bNoWarn = false);
-	int GetRangeArgsPos(lpctstr & pExpr, lpctstr (&pArgPos)[128][2], int iMaxQty);
-	int64 GetRange(lpctstr & pArgs);
+	int64 GetRangeNumber(lpctstr & pExpr);
+    CSString GetRangeString(lpctstr & pExpr);
 	llong GetValMath(llong llVal, lpctstr & pExpr);
-	llong GetVal(lpctstr & pArgs);
+	llong GetVal(lpctstr & pExpr);
 
 	// Strict G++ Prototyping produces an error when not casting char*& to const char*&
 	// So this is a rather lazy workaround
@@ -137,11 +141,8 @@ public:
 	inline int GetRangeVals(lptstr &pExpr, int64 * piVals, int iMaxQty, bool bNoWarn = false) {
 		return GetRangeVals(const_cast<lpctstr &>(pExpr), piVals, iMaxQty, bNoWarn);
 	}
-	inline int GetRangeArgsPos(lptstr &pExpr, lpctstr (&pArgPos)[128][2], int iMaxQty) {
-		return GetRangeArgsPos(const_cast<lpctstr &>(pExpr), pArgPos, iMaxQty);
-	}
-	inline int64 GetRange(lptstr &pArgs) {
-		return GetRange(const_cast<lpctstr &>(pArgs));
+	inline int64 GetRangeNumber(lptstr &pArgs) {
+		return GetRangeNumber(const_cast<lpctstr &>(pArgs));
 	}
 	inline llong GetVal(lptstr &pArgs) {
 		return GetVal(const_cast<lpctstr &>(pArgs));
@@ -165,9 +166,11 @@ bool IsStrNumeric( lpctstr pszTest );
 bool IsStrEmpty( lpctstr pszTest );
 bool IsCharNumeric( char & Test );
 
+
 // Numeric formulas
 template<typename T> inline const T SphereAbs(T const & x)
-{	// TODO: we can do some specialization
+{	
+    static_assert(std::is_arithmetic<T>::value, "Invalid data type.");
 	return (x<0) ? -x : x;
 }
 int64 Calc_GetRandLLVal( int64 iqty );					// Get a random value between 0 and iQty - 1
@@ -184,8 +187,8 @@ int64 ahextoi64( lpctstr pArgs );	// Convert hex string to int64
 #define Exp_GetSingle( pa )		(int)	g_Exp.GetSingle( pa )
 #define Exp_GetLLSingle( pa )			g_Exp.GetSingle( pa )
 
-#define Exp_GetRange( pa )		(int)	g_Exp.GetRange( pa )
-#define Exp_GetLLRange( pa )			g_Exp.GetRange( pa )
+#define Exp_GetRange( pa )		(int)	g_Exp.GetRangeNumber( pa )
+#define Exp_GetLLRange( pa )			g_Exp.GetRangeNumber( pa )
 
 #define Exp_GetCVal( pa )		(char)	    g_Exp.GetVal( pa )
 #define Exp_GetUCVal( pa )		(uchar)	    g_Exp.GetVal( pa )
@@ -208,9 +211,9 @@ int64 ahextoi64( lpctstr pArgs );	// Convert hex string to int64
 #define Exp_GetU64Val( pa )		(uint64)	g_Exp.GetVal( pa )
 
 #ifdef _32BITS
-	#define Exp_GetSTVal		Exp_GetUVal
+	#define Exp_GetSTVal		Exp_GetU32Val
 #else
-	#define Exp_GetSTVal		Exp_GetULLVal
+	#define Exp_GetSTVal		Exp_GetU64Val
 #endif
 
 #endif	// _INC_CEXPRSSION_H

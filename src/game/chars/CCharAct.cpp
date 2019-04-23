@@ -784,7 +784,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 	if ( action < 0 || action >= ANIM_QTY )
 		return (ANIM_TYPE)-1;
 
-	CCharBase* pCharDef = Char_GetDef();
+	const CCharBase* pCharDef = Char_GetDef();
 
 	//Begin old client animation behaviour
 
@@ -800,34 +800,33 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 			LAYER_TYPE layer = pWeapon->Item_GetDef()->GetEquipLayer();
 			switch (pWeapon->GetType())
 			{
-			case IT_WEAPON_MACE_CROOK:	// sheperds crook
-			case IT_WEAPON_MACE_SMITH:	// smith/sledge hammer
-			case IT_WEAPON_MACE_STAFF:
-			case IT_WEAPON_MACE_SHARP:	// war axe can be used to cut/chop trees.
-				action = (layer == LAYER_HAND2) ? ANIM_ATTACK_2H_BASH : ANIM_ATTACK_1H_BASH;
-				break;
-			case IT_WEAPON_SWORD:
-			case IT_WEAPON_AXE:
-			case IT_WEAPON_MACE_PICK:	// pickaxe
-				action = (layer == LAYER_HAND2) ? ANIM_ATTACK_2H_SLASH : ANIM_ATTACK_1H_SLASH;
-				break;
-			case IT_WEAPON_FENCE:
-				action = (layer == LAYER_HAND2) ? ANIM_ATTACK_2H_PIERCE : ANIM_ATTACK_1H_PIERCE;
-				break;
-			case IT_WEAPON_THROWING:
-				action = ANIM_ATTACK_1H_SLASH;
-				break;
-			case IT_WEAPON_BOW:
-				action = ANIM_ATTACK_BOW;
-				break;
-			case IT_WEAPON_XBOW:
-				action = ANIM_ATTACK_XBOW;
-				break;
-            case IT_WEAPON_WHIP:
-                action = ANIM_ATTACK_1H_BASH;
-                break;
-			default:
-				break;
+                default:
+			    case IT_WEAPON_MACE_CROOK:	// sheperds crook
+			    case IT_WEAPON_MACE_SMITH:	// smith/sledge hammer
+			    case IT_WEAPON_MACE_STAFF:
+			    case IT_WEAPON_MACE_SHARP:	// war axe can be used to cut/chop trees.
+				    action = (layer == LAYER_HAND2) ? ANIM_ATTACK_2H_BASH : ANIM_ATTACK_1H_BASH;
+				    break;
+			    case IT_WEAPON_SWORD:
+			    case IT_WEAPON_AXE:
+			    case IT_WEAPON_MACE_PICK:	// pickaxe
+				    action = (layer == LAYER_HAND2) ? ANIM_ATTACK_2H_SLASH : ANIM_ATTACK_1H_SLASH;
+				    break;
+			    case IT_WEAPON_FENCE:
+				    action = (layer == LAYER_HAND2) ? ANIM_ATTACK_2H_PIERCE : ANIM_ATTACK_1H_PIERCE;
+				    break;
+			    case IT_WEAPON_THROWING:
+				    action = ANIM_ATTACK_1H_SLASH;
+				    break;
+			    case IT_WEAPON_BOW:
+				    action = ANIM_ATTACK_BOW;
+				    break;
+			    case IT_WEAPON_XBOW:
+				    action = ANIM_ATTACK_XBOW;
+				    break;
+                case IT_WEAPON_WHIP:
+                    action = ANIM_ATTACK_1H_BASH;
+                    break;
 			}
 			// Temporary disabled - it's causing weird animations on some weapons
 			/*if ((Calc_GetRandVal(2)) && (pWeapon->GetType() != IT_WEAPON_BOW) && (pWeapon->GetType() != IT_WEAPON_XBOW) && (pWeapon->GetType() != IT_WEAPON_THROWING))

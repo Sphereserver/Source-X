@@ -407,16 +407,8 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 	// Just read info on a single item carryed by a CChar.
 	// ITEM=#id,#amount,R#chance
 
-	CResourceID rid = g_Cfg.ResourceGetID( RES_ITEMDEF, pArg);
-	if ( ! rid.IsValidUID())
-		return nullptr;
-	if ( rid.GetResType() != RES_ITEMDEF && rid.GetResType() != RES_TEMPLATE )
-		return nullptr;
-	if ( rid.GetResIndex() == 0 )
-		return nullptr;
-
 	word amount = 1;
-	if ( Str_Parse( pArg, &pArg ))
+	if (Str_Parse( pArg, &pArg ))
 	{
 		if ( pArg[0] != 'R' )
 		{
@@ -434,9 +426,19 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 	if ( amount == 0 )
 		return nullptr;
 
-	ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
+    CResourceID rid = g_Cfg.ResourceGetID( RES_ITEMDEF, pArg);
+    if ( ! rid.IsValidUID())
+        return nullptr;
+    const RES_TYPE iResType = rid.GetResType();
+    if ( (iResType != RES_ITEMDEF) && (iResType != RES_TEMPLATE) )
+        return nullptr;
+    const int iResIndex = rid.GetResIndex();
+    if ( iResIndex == 0 )
+        return nullptr;
 
-	if ( fDupeCheck && rid.GetResType() == RES_ITEMDEF && pCont )
+	const ITEMID_TYPE id = (ITEMID_TYPE)iResIndex;
+
+	if ( fDupeCheck && (iResType == RES_ITEMDEF) && pCont )
 	{
 		// Check if they already have the item ? In the case of a regen.
 		// This is just to keep NEWBIE items from being duped.
@@ -449,7 +451,7 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 		}
 	}
 
-	CItem * pItem = CItem::CreateTemplate( id, (rid.GetResType() == RES_ITEMDEF? nullptr:pCont), pSrc );
+	CItem * pItem = CItem::CreateTemplate( id, ((iResType == RES_ITEMDEF) ? nullptr : pCont), pSrc );
 	if ( pItem != nullptr )
 	{
 		// Is the item movable ?
@@ -465,7 +467,7 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 
 		// Items should have their container set after their amount to
 		// avoid stacking issues.
-		if ( pCont && rid.GetResType() == RES_ITEMDEF )
+		if ( pCont && (iResType == RES_ITEMDEF) )
 		{
 			CContainer * pContBase = dynamic_cast <CContainer *> ( pCont );
 			ASSERT(pContBase);

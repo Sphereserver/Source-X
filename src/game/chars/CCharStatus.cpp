@@ -379,14 +379,14 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 			if ( layer == LAYER_HAND2 )
 			{
 				// If it's a 2 handed weapon, unequip the other hand
-				if ( pItem->IsTypeWeapon() || pItem->IsType(IT_FISH_POLE) )
+				if ( CCPropsItemWeapon::CanSubscribe(pItem) )
 					pItemPrev = LayerFind(LAYER_HAND1);
 			}
 			else
 			{
 				// Unequip 2 handed weapons if we must use the other hand
 				pItemPrev = LayerFind(LAYER_HAND2);
-				if ( pItemPrev && !pItemPrev->IsTypeWeapon() && !pItemPrev->IsType(IT_FISH_POLE) )
+				if ( pItemPrev && !CCPropsItemWeapon::CanSubscribe(pItem) )
 					pItemPrev = nullptr;
 			}
 			break;

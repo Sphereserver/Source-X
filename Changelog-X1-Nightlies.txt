@@ -1627,8 +1627,14 @@ WARNING: the following change could break some hackish expedient used in scripts
 - Added: Can flag MT_STATUE (040000). When active, the char can't take any action (it's still "mortal" though, you need to add also STATF_INVUL) and acts like a statue:
 	it stands still in an animation frame, specified by TAG.STATUE_ANIM and TAG.STATUE_FRAME (Issue #233). It doesn't attack or make any action (it has an empty AI), still has hitpoints, stats, skills, etc.
 - Added: Can flag MT_NONSELECTABLE (080000). This char can't be selected/targeted. Use it for NPC statues which need to behave like items as much as possible.
-- Added: "HASCOMPPROPS propid" to check whether the object has the given ComponentProps (see 23-12-2018 changelog entry). Defnames for the ComponentProps IDs are added in the
+- Added: "HasComponentProps propid" to check whether the object has the given ComponentProps (see 23-12-2018 changelog entry). Defnames for the ComponentProps IDs are added in the
 	new script file core/defs_component_props.scp.
 - Fixed: The server sent an Attack Accepted packet instead of an Attack Refused one when a player tried to attack a char with flags STATF_INVUL or STATF_STONE.
 	That resulted in the target being considered under attack (red colored) even if the attack didn't start.
 - Fixed: Food periodically decreasing and stats regenerating on chars with STATF_STONE.
+
+23-04-2019, Nolok
+- Changed: "ITEM=#id, #amount, R#chance" will now evaluate the id field only if amount != 0 and the rand check succeeded.
+- Added: STRRANDRANGE function. It works like a random { } range, but for strings. E.g.: <STRRANDRANGE "boots" 1 "shoes" 1 "watermelons" 1>. Remember the quotes!
+- Added: MIN and MAX intrinsic functions, which return the smaller/greater of the two numberic arguments.
+- Fixed: ISNUMBER working only with decimal numbers.

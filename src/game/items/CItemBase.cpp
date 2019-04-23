@@ -1294,7 +1294,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			if ( ! IsTypeEquippable() )
 				return false;
 
-			if ( ! IsTypeWeapon(GetType()) && ! IsType(IT_FISH_POLE))
+			if ( !CCPropsItemWeapon::CanSubscribe(this))
 				sVal.FormatVal(0);
 			else
 				sVal.FormatVal( m_layer == LAYER_HAND2 );

@@ -49,17 +49,29 @@ public:
 #endif
 		Empty(true);
 	}
-	/**
-	* @brief Copy constructor.
-	*
-	* @see Copy()
-	* @param pStr string to copy.
-	*/
-	CSString(lpctstr pStr)
-	{
-		Init();
-		Copy(pStr);
-	}
+    /**
+    * @brief Copy constructor.
+    *
+    * @see Copy()
+    * @param pStr string to copy.
+    */
+    CSString(lpctstr pStr)
+    {
+        Init();
+        Copy(pStr);
+    }
+    /**
+    * @brief Copy constructor.
+    *
+    * @see CopyLen()
+    * @param pStr string to copy.
+    * #param iLen max number of chars (single-byte) to copy.
+    */
+    CSString(lpctstr pStr, int iLen)
+    {
+        Init();
+        CopyLen(pStr, iLen);
+    }
 	/**
 	* @brief Copy constructor.
 	*
@@ -244,6 +256,7 @@ public:
     * @see SetLength()
     * @see strcpylen()
     * @param pStr string to copy.
+    * @param iLen max number of chars (single-byte) to copy.
     */
     void CopyLen(lpctstr pStr, int iLen);
 	/**

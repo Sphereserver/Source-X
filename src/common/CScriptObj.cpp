@@ -597,9 +597,14 @@ badcmd:
 		case SSC_ISNUM:
 			GETNONWHITESPACE( pszKey );
 			if (*pszKey == '-')
-				pszKey++;
+				++pszKey;
 			sVal.FormatVal( IsStrNumeric( pszKey ) );
 			return true;
+
+        case SSC_STRRANDRANGE:
+            sVal = g_Exp.GetRangeString(pszKey);
+        return true;
+
 		case SSC_StrPos:
 			{
 				GETNONWHITESPACE( pszKey );

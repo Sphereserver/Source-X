@@ -475,7 +475,7 @@ try_dec:
 		{
 		case '{':
 			++pszArgs;
-			return GetRange( pszArgs );
+			return GetRangeNumber( pszArgs );
 		case '[':
 		case '(': // Parse out a sub expression.
 			++pszArgs;
@@ -530,7 +530,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = RES_GET_INDEX( GetVal(pszArgs) ); // RES_GET_INDEX
+							iResult = RES_GET_INDEX( GetVal(pszArgs) );
 						}
 						else
 						{
@@ -539,6 +539,30 @@ try_dec:
 						}
 
 					} break;
+
+                    case INTRINSIC_MAX:
+                    {
+                        iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 2, "," );
+                        if ( iCount < 2 )
+                            iResult = 0;
+                        else
+                        {
+                            const int64 iVal1 = GetVal(ppCmd[0]), iVal2 = GetVal(ppCmd[1]);
+                            iResult = maximum(iVal1, iVal2);
+                        }
+                    } break;
+
+                    case INTRINSIC_MIN:
+                    {
+                        iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 2, "," );
+                        if ( iCount < 2 )
+                            iResult = 0;
+                        else
+                        {
+                            const int64 iVal1 = GetVal(ppCmd[0]), iVal2 = GetVal(ppCmd[1]);
+                            iResult = minimum(iVal1, iVal2);
+                        }
+                    } break;
 
 					case INTRINSIC_LOGARITHM:
 					{
@@ -820,9 +844,10 @@ try_dec:
 					{
 						iCount = 1;
 						{
-							char z[64];
-							LTOA(atol(pszArgs), z, 10);
-							iResult = strcmp(pszArgs, z) ? 0 : 1;
+                            GETNONWHITESPACE( pszArgs );
+                            if (*pszArgs == '-')
+                                ++pszArgs;
+							iResult = IsStrNumeric( pszArgs );
 						}
 					} break;
 
@@ -1115,7 +1140,7 @@ int CExpression::GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty, bool
 }
 
 
-int CExpression::GetRangeArgsPos(lpctstr & pExpr, lpctstr (&pArgPos)[128][2], int iMaxQty)
+static int GetRangeArgsPos(lpctstr & pExpr, lpctstr (&pArgPos)[128][2], int iMaxQty, bool fIgnoreMissingEndBracket)
 {
 	ADDTOCALLSTACK("CExpression::GetRangeArgsPos");
 	// Get the start and end pointers for each argument in the range
@@ -1161,7 +1186,10 @@ int CExpression::GetRangeArgsPos(lpctstr & pExpr, lpctstr (&pArgPos)[128][2], in
 				if (pExpr[0] == '\0')
 				{
 					pArgPos[iQty - 1][1] = pExpr;	// Position of the char ('\0') after of the last character of the argument
-					goto end_w_error;
+                    if (fIgnoreMissingEndBracket)
+                        goto end_of_range;
+                    else
+					    goto end_w_error;
 				}
 
 				if (ISWHITESPACE(pExpr[0]) || (pExpr[0] == ','))
@@ -1195,9 +1223,9 @@ end_w_error:
 	return iQty;
 }
 
-int64 CExpression::GetRange(lpctstr & pExpr)
+int64 CExpression::GetRangeNumber(lpctstr & pExpr)
 {
-	ADDTOCALLSTACK("CExpression::GetRange");
+	ADDTOCALLSTACK("CExpression::GetRangeNumber");
 
 	// Parse the arguments in the range and get the start and end position of every of them.
 	// When parsing and resolving the value of each argument, we create a substring for the argument
@@ -1207,7 +1235,7 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 	//	of the elements and then only the element which was randomly chosen.
 
 	lpctstr pElementsStart[128][2];
-	int iQty = GetRangeArgsPos( pExpr, pElementsStart, CountOf(pElementsStart) );	// number of arguments (not of value-weight couples)
+	int iQty = GetRangeArgsPos( pExpr, pElementsStart, CountOf(pElementsStart), false );	// number of arguments (not of value-weight couples)
 
 	if (iQty == 0)
 		return 0;
@@ -1259,7 +1287,6 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 	}
 
 	// First get the total of the weights
-
 	llong llTotalWeight = 0;
 	llong llWeights[128];
 	tchar pToParse[THREAD_STRING_LENGTH];
@@ -1273,7 +1300,7 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 		llWeights[i] = GetSingle(pToParseCasted);	// GetSingle changes the pointer value, so i need to work with a copy
 
 		if ( ! llWeights[i] )	// having a weight of 0 is very strange !
-			DEBUG_ERR(( "Weight of 0 in random set: invalid. Value-weight couple number %d\n", i ));	// the whole table should really just be invalid here !
+			DEBUG_ERR(( "Weight of 0 in random range: invalid. Value-weight couple number %d\n", i ));	// the whole table should really just be invalid here !
 		llTotalWeight += llWeights[i];
 	}
 
@@ -1298,4 +1325,72 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 	lptstr pToParseCasted = reinterpret_cast<lptstr>(pToParse);
 
 	return GetSingle(pToParseCasted);
+}
+
+CSString CExpression::GetRangeString(lpctstr & pExpr)
+{
+    ADDTOCALLSTACK("CExpression::GetRangeString");
+
+    // Parse the arguments in the range and get the start and end position of every of them.
+    // When parsing and resolving the value of each argument, we create a substring for the argument
+    //	and use GetSingle to parse and resolve it.
+    // If iQty (number of arguments) is > 2, it's a weighted range; in this case, parse only the weights
+    //	of the elements and then only the element which was randomly chosen.
+
+    lpctstr pElementsStart[128][2];
+    int iQty = GetRangeArgsPos( pExpr, pElementsStart, CountOf(pElementsStart), true );	// number of arguments (not of value-weight couples)
+    if (iQty <= 0)
+        return {};
+
+    if (iQty == 1) // It's just a simple value
+    {
+        const int iToParseLen = int(pElementsStart[0][1] - pElementsStart[0][0]);
+        return CSString(pElementsStart[0][0], iToParseLen - 1);
+    }
+
+    // I guess weighted values
+    if ( (iQty % 2) == 1 )
+    {
+        g_Log.EventError("Even number of elements in the random string range: invalid. Forgot to write an element?\n");
+        return {};
+    }
+
+    // First get the total of the weights
+    llong llTotalWeight = 0;
+    llong llWeights[128];
+    tchar pToParse[THREAD_STRING_LENGTH];
+    for ( int i = 1; i+1 <= iQty; i += 2 )
+    {
+        // Copy the weight element in a new string
+        const size_t iToParseLen = (pElementsStart[i][1] - pElementsStart[i][0]);
+        memcpy((void*)pToParse, pElementsStart[i][0], iToParseLen * sizeof(tchar));
+        pToParse[iToParseLen] = '\0';
+        lptstr pToParseCasted = reinterpret_cast<lptstr>(pToParse);
+        if (!IsSimpleNumberString(pToParseCasted))
+        {
+            DEBUG_ERR(( "Non-numeric weight in random string range: invalid. Value-weight couple number %d\n", i ));
+            return {};
+        }
+        llWeights[i] = GetSingle(pToParseCasted);	// GetSingle changes the pointer value, so i need to work with a copy
+
+        if ( ! llWeights[i] )	// having a weight of 0 is very strange !
+            DEBUG_ERR(( "Weight of 0 in random string range: invalid. Value-weight couple number %d\n", i ));	// the whole table should really just be invalid here !
+        llTotalWeight += llWeights[i];
+    }
+
+    // Now roll the dice to see what value to pick
+    llTotalWeight = Calc_GetRandLLVal(llTotalWeight) + 1;
+
+    // Now loop to that value
+    int i = 1;
+    for ( ; i+1 <= iQty; i += 2 )
+    {
+        llTotalWeight -= llWeights[i];
+        if ( llTotalWeight <= 0 )
+            break;
+    }
+
+    --i;	// pick the value instead of the weight
+    const int iToParseLen = int(pElementsStart[i][1] - pElementsStart[i][0]);
+    return CSString(pElementsStart[i][0], iToParseLen);
 }
