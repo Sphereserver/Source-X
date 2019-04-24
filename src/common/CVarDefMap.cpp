@@ -640,13 +640,11 @@ CVarDefCont * CVarDefMap::GetParseKey_Advance( lpctstr & pszArgs ) const
 
 	tchar szTag[ EXPRESSION_MAX_KEY_LEN ];
 	size_t i = GetIdentifierString( szTag, pszArgs );
+    pszArgs += i;
+
 	CVarDefCont * pVar = GetKey(szTag);
 	if ( pVar )
-	{
-		pszArgs += i;
 		return pVar;
-	}
-
 	return nullptr;
 }
 

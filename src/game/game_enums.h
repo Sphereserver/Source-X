@@ -83,19 +83,21 @@ enum BODYPART_TYPE
 
 enum COMBATFLAGS_TYPE
 {
-    COMBAT_NODIRCHANGE          = 0x1,	    // not rotate player when fighting
-    COMBAT_FACECOMBAT           = 0x2,	    // allow faced combat only
-    COMBAT_PREHIT               = 0x4,	    // allow prehit for close combat. first hit is instant (delay 0.1sec)
-    COMBAT_ELEMENTAL_ENGINE     = 0x8,	    // use DAM*/RES* to split damage/resist into Physical/Fire/Cold/Poison/Energy (AOS) instead use old AR (pre-AOS)
-    COMBAT_DCLICKSELF_UNMOUNTS  = 0x20,	    // unmount horse when dclicking self while in warmode
-    COMBAT_ALLOWHITFROMSHIP     = 0x40,     // allow attacking opponents from ships
-    COMBAT_ARCHERYCANMOVE       = 0x100,    // allow firing bow while moving
-    COMBAT_STAYINRANGE          = 0x200,    // must be in range at the end of the swing or the hit will miss
-    COMBAT_STACKARMOR           = 0x1000,   // if a region is covered by more than one armor part, all AR will count
+    COMBAT_NODIRCHANGE          = 0x1,	    // Not rotate player when fighting
+    COMBAT_FACECOMBAT           = 0x2,	    // Allow faced combat only
+    COMBAT_PREHIT               = 0x4,	    // Deal the damage in the same moment as the swing animation starts (OSI like) (use an AnimDelay = 0 instead of = 10 tenths of second)
+    COMBAT_ELEMENTAL_ENGINE     = 0x8,	    // Use DAM*/RES* to split damage/resist into Physical/Fire/Cold/Poison/Energy (AOS) instead use old AR (pre-AOS)
+    COMBAT_DCLICKSELF_UNMOUNTS  = 0x20,	    // Unmount horse when dclicking self while in warmode
+    COMBAT_ALLOWHITFROMSHIP     = 0x40,     // Allow attacking opponents from ships
+    COMBAT_ARCHERYCANMOVE       = 0x100,    // Allow firing bow while moving
+    COMBAT_STAYINRANGE          = 0x200,    // Must be in range at the end of the swing or the hit will miss
+    COMBAT_STACKARMOR           = 0x1000,   // If a region is covered by more than one armor part, all AR will count
     COMBAT_NOPOISONHIT          = 0x2000,   // Disables old (55i like) poisoning style: Poisoning > 30.0 && (RAND(100.0)> Poisoning) for monsters OR weapon.morez && (RAND(100) < weapon.morez ) for poisoned weapons.
-    COMBAT_SLAYER               = 0x4000,    // Enables Slayer damage on PVM combat.
-    COMBAT_SWING_NORANGE        = 0x8000,
-    COMBAT_ANIM_HIT_SMOOTH      = 0x10000
+    COMBAT_SLAYER               = 0x4000,   // Enables Slayer damage on PVM combat.
+    COMBAT_SWING_NORANGE        = 0x8000,   // The hit can be started at any distance and regardless of the Line of Sight, then the damage will be dealt when in range and LoS
+    COMBAT_ANIM_HIT_SMOOTH      = 0x10000,  // The hit animation has the same duration as the swing delay, instead of having a fixed fast duration and being idle until the delay has expired.
+								            //  WARNING: doesn't work with Gargoyles due to the new animation packet not accepting a custom animation duration!
+    COMBAT_FIRSTHIT_INSTANT     = 0x20000   // The first hit in a fight doesn't wait for the recoil time (OSI like)
 };
 
 //////////////////////////////////////////////////////////////////////////

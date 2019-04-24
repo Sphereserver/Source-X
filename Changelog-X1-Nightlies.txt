@@ -1651,3 +1651,9 @@ WARNING: the following change could break compatibility with previous scripts! R
 	You're safe (even if the underlying code is a bit slower) if you just used ID=i_dagger instead of ID=<DEF.i_dagger>.
 	If you know that a keyword is a DEF or a RESDEF, the best thing would be to use the right prefix. When Sphere enconunters a keyword without a prefix, it searches in the keyword lists in this order:
 		functions, VARs, RESDEFs, DEFs, so using the prefix will skip useless lookups in the wrong tables and will make Sphere search directly in the right one.
+
+25-04-2019, Nolok
+- Changed: Moved out some functionality from COMBAT_PREHIT CombatFlag: now it makes the hit animation start after the damage has been dealt (it should be the other way around, but it's how OSI does that...).
+- Added: COMBAT_FIRSTHIT_INSTANT CombatFlag to mimic another OSI feature: it makes the first hit in a combat instant (0 delay) (Issue #250).
+So, to mimic OSI combat you should enable both COMBAT_PREHIT and COMBAT_FIRSTHIT_INSTANT.
+- Changed: LOCAL.ItemDamageChance in @Hit and @GetHit default value from 40 to 25.

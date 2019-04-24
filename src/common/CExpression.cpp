@@ -108,19 +108,6 @@ llong power(llong base, llong level)
 	return (llong)rc;
 }
 
-bool IsCharNumeric( char & Test )
-{
-	if ( !Test )
-		return false;
-
-	if ( IsDigit( Test ) )
-		return true;
-	if ( tolower(Test) >= 'a' && tolower(Test) <= 'f' )
-		return true;
-
-	return false;
-}
-
 bool IsStrEmpty( lpctstr pszTest )
 {
 	if ( !pszTest || !*pszTest )
@@ -891,12 +878,13 @@ try_dec:
 		}
 
 		// Must be a symbol of some sort ?
+        lpctstr ptcArgsOriginal = pszArgs;
 		llong llVal;
-		if ( m_VarGlobals.GetParseVal( pszArgs, &llVal ) )  // VAR.
+		if ( m_VarGlobals.GetParseVal_Advance( pszArgs, &llVal ) )  // VAR.
 			return llVal;
-        if ( m_VarResDefs.GetParseVal( pszArgs, &llVal ) )  // RESDEF.
+        if ( m_VarResDefs.GetParseVal( ptcArgsOriginal, &llVal ) )  // RESDEF.
             return llVal;
-		if ( m_VarDefs.GetParseVal( pszArgs, &llVal ) )     // DEF.
+		if ( m_VarDefs.GetParseVal( ptcArgsOriginal, &llVal ) )     // DEF.
 			return llVal;
 	}
 #pragma endregion intrinsics

@@ -410,7 +410,7 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
     tchar * pptcCmd[3];
     int iQty = Str_ParseCmds(pArg, pptcCmd, CountOf(pptcCmd), ",");
     if (iQty < 1)
-        return false;
+        return nullptr;
 
 	word amount = 1;
     for (int i = 1; i <= (iQty - 1); ++i)
@@ -430,7 +430,7 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 	if ( amount == 0 )
 		return nullptr;
 
-    CResourceID rid = g_Cfg.ResourceGetID(RES_ITEMDEF, pptcCmd[0]);
+    const CResourceID rid = g_Cfg.ResourceGetID(RES_ITEMDEF, pptcCmd[0]);
     if ( ! rid.IsValidUID() )
         return nullptr;
     const RES_TYPE iResType = rid.GetResType();
@@ -1885,32 +1885,37 @@ height_t CItem::GetHeight() const
 {
 	ADDTOCALLSTACK("CItem::GetHeight");
 
-	height_t tmpHeight;
+    height_t tmpHeight;
+
+    const ITEMID_TYPE iDispID = GetDispID();
+    const CItemBase * pItemDef = CItemBase::FindItemBase(iDispID);
+    ASSERT(pItemDef);
+    tmpHeight = pItemDef->GetHeight();
+    if (tmpHeight)
+        return tmpHeight;
+
+    const CItemBaseDupe * pDupeDef = CItemBaseDupe::GetDupeRef(iDispID);
+    if (pDupeDef)
+    {
+        tmpHeight = pDupeDef->GetHeight();
+        if (tmpHeight)
+            return tmpHeight;
+    }
 
 	char * heightDef = Str_GetTemp();
 
-	sprintf(heightDef, "itemheight_0%x", (uint)(GetDispID()));
+	sprintf(heightDef, "itemheight_0%x", (uint)iDispID);
 	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
 	//DEBUG_ERR(("2 tmpHeight %d\n",tmpHeight));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_0a)
 		return tmpHeight;
 
-	sprintf(heightDef, "itemheight_%u", (uint)(GetDispID()));
+	sprintf(heightDef, "itemheight_%u", (uint)iDispID);
 	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
 	//DEBUG_ERR(("3 tmpHeight %d\n",tmpHeight));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_10)
 		return tmpHeight;
 
-	const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(GetDispID()));
-	const CItemBaseDupe * pDupeDef = CItemBaseDupe::GetDupeRef((ITEMID_TYPE)(GetDispID()));
-	if (pItemDef != nullptr)
-	{
-		tmpHeight = (pDupeDef ? pDupeDef->GetHeight() : pItemDef->GetHeight());
-		if (tmpHeight)
-			return tmpHeight;
-	}
-
-	//DEBUG_ERR(("PLAYER_HEIGHT %d\n",PLAYER_HEIGHT));
 	return 0; //if everything fails
 }
 

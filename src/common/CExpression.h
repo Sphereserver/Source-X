@@ -165,16 +165,16 @@ bool IsSimpleNumberString( lpctstr pszTest );
 bool IsStrNumericDec( lpctstr pszTest );
 bool IsStrNumeric( lpctstr pszTest );
 bool IsStrEmpty( lpctstr pszTest );
-bool IsCharNumeric( char & Test );
 
 
 // Numeric formulas
-template<typename T> inline const T SphereAbs(T const & x)
+template<typename T> inline const T SphereAbs(T x)
 {	
     static_assert(std::is_arithmetic<T>::value, "Invalid data type.");
+    static_assert(std::is_signed<T>::value, "Trying to get the absolute value of an unsigned number?");
 	return (x<0) ? -x : x;
 }
-int64 Calc_GetRandLLVal( int64 iqty );					// Get a random value between 0 and iQty - 1
+int64 Calc_GetRandLLVal( int64 iQty );					// Get a random value between 0 and iQty - 1
 int64 Calc_GetRandLLVal2( int64 iMin, int64 iMax );
 int32 Calc_GetRandVal( int32 iQty );					// Get a random value between 0 and iQty - 1
 int32 Calc_GetRandVal2( int32 iMin, int32 iMax );
@@ -182,8 +182,8 @@ int Calc_GetLog2( uint iVal );
 int Calc_GetSCurve( int iValDiff, int iVariance );
 int Calc_GetBellCurve( int iValDiff, int iVariance );
 
-dword ahextoi( lpctstr pArgs );		// Convert hex string to integer
-int64 ahextoi64( lpctstr pArgs );	// Convert hex string to int64
+dword ahextoi( lpctstr pArgs );		// Convert decimal or (Sphere) hex string (staring with 0, not 0x) to integer
+int64 ahextoi64( lpctstr pArgs );	// Convert decimal or (Sphere) hex string (staring with 0, not 0x) to int64
 
 #define Exp_GetSingle( pa )		(int)	g_Exp.GetSingle( pa )
 #define Exp_GetLLSingle( pa )			g_Exp.GetSingle( pa )

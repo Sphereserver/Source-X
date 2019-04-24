@@ -1947,8 +1947,8 @@ bool CChar::ItemDrop( CItem * pItem, const CPointMap & pt )
 			if ( pStack->GetTopZ() < pt.m_z || pStack->GetTopZ() > iStackMaxZ )
 				continue;
 
-			char iStackHeight = pStack->GetHeight();
-			ptStack.m_z += maximum(iStackHeight, 1);
+			const short iStackHeight = ptStack.m_z + pStack->GetHeight();
+			ptStack.m_z = (char)maximum(iStackHeight, 1);
 			//DEBUG_ERR(("(%d > %d) || (%d > %d)\n", ptStack.m_z, iStackMaxZ, ptStack.m_z + maximum(iItemHeight, 1), iStackMaxZ + 3));
 			if ( (ptStack.m_z > iStackMaxZ) || (ptStack.m_z + maximum(iItemHeight, 1) > iStackMaxZ + 3) )
 			{
@@ -1964,7 +1964,7 @@ bool CChar::ItemDrop( CItem * pItem, const CPointMap & pt )
 	if (( g_Cfg.m_fFlipDroppedItems || pItem->Can(CAN_I_FLIP)) && pItem->IsMovableType() && !pItemDef->IsStackableType())
 		pItem->SetDispID( pItemDef->GetNextFlipID( pItem->GetDispID()));
 
-	return( pItem->MoveToCheck( pt, this ));
+	return pItem->MoveToCheck( pt, this );
 }
 
 // Equip visible stuff. else throw into our pack.
