@@ -42,27 +42,31 @@ size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord );
 * @return length of the string copied.
 */
 size_t strcpylen(tchar * pDst, lpctstr pSrc);
+
 /**
 * @brief Wrapper to cstring strncpy, but returns the length of string copied.
 * @param pDst dest memory space.
 * @param pSrc source data.
-* @param iMaxSize max length to be copied.
+* @param uiMaxlen max length to be copied.
 * @return length of the string copied.
 */
-size_t strncpylen(tchar * pDst, lpctstr pSrc, size_t uimaxlen);
+size_t strncpylen(tchar * pDst, lpctstr pSrc, size_t uiMaxlen);
+
 /**
 * @brief Wrapper to cstring strncpy, but sets the last char of the string to '\0'.
 * @param pDst dest memory space.
 * @param pSrc source data.
-* @param iMaxSize max length to be copied.
+* @param uiMaxlen max length to be copied.
 */
-void strncpynull(tchar * pDst, lpctstr pSrc, size_t uimaxlen);
+void strncpynull(tchar * pDst, lpctstr pSrc, size_t uiMaxlen);
+
 /**
 * @brief Give the article and space to a word. For example, for "boot" will return "a ".
 * @param pszWords word to add the article.
 * @return string with the article and a space.
 */
 lpctstr Str_GetArticleAndSpace(lpctstr pszWords);
+
 /**
 * @brief Filter specific characters from a string.
 * @param pszOut output string.
@@ -72,6 +76,7 @@ lpctstr Str_GetArticleAndSpace(lpctstr pszWords);
 * @return size of the filtered string.
 */
 int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxSize, lpctstr pszStrip = nullptr);
+
 /**
 * @brief replace string representation of special characters by special characters.
 *
@@ -85,6 +90,7 @@ int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxSize, lpctstr pszStrip =
 * @return string with replaces in (same as pStr).
 */
 tchar * Str_MakeFiltered(tchar * pStr);
+
 /**
 * @brief replace special characters by string representation.
 *
@@ -99,6 +105,7 @@ tchar * Str_MakeFiltered(tchar * pStr);
 * @param iSizeMax length of the input string.
 */
 void Str_MakeUnFiltered(tchar * pStrOut, lpctstr pStrIn, int iSizeMax);
+
 /**
 * @brief remove trailing white spaces from a string.
 * @param pStr string where remove trailing spaces.
@@ -106,12 +113,14 @@ void Str_MakeUnFiltered(tchar * pStrOut, lpctstr pStrIn, int iSizeMax);
 * @return new lenght of the string.
 */
 int Str_TrimEndWhitespace(tchar * pStr, int len);
+
 /**
 * @brief Removes heading and trailing white spaces of a string.
 * @param pStr string where remove the white spaces.
 * @return string with the heading and trailing spaces removed.
 */
 tchar * Str_TrimWhitespace(tchar * pStr);
+
 ///@}
 /** @name String utilities: String operations
 */
@@ -125,6 +134,7 @@ tchar * Str_TrimWhitespace(tchar * pStr);
 * @return the index of string if success, -1 otherwise.
 */
 int FindTable(const lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));
+
 /**
 * @brief Look for a string in a table (binary search).
 * @param pFind string we are looking for.
@@ -134,6 +144,7 @@ int FindTable(const lpctstr pFind, lpctstr const * ppTable, int iCount, int iEle
 * @return the index of string if success, -1 otherwise.
 */
 int FindTableSorted(const lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));
+
 /**
 * @brief Look for a string header in a table (uses Str_CmpHeadI to compare instead of strcmpi).
 * @param pFind string we are looking for.
@@ -143,6 +154,7 @@ int FindTableSorted(const lpctstr pFind, lpctstr const * ppTable, int iCount, in
 * @return the index of string if success, -1 otherwise.
 */
 int FindTableHead(const lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));
+
 /**
 * @brief Look for a string header in a table (binary search, uses Str_CmpHeadI to compare instead of strcmpi).
 * @param pFind string we are looking for.
@@ -152,16 +164,19 @@ int FindTableHead(const lpctstr pFind, lpctstr const * ppTable, int iCount, int 
 * @return the index of string if success, -1 otherwise.
 */
 int FindTableHeadSorted(const lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));
+
 /**
 * @param pszIn string to check.
 * @return true if string is empty or has '\c' or '\n' characters, false otherwise.
 */
 bool Str_Check(lpctstr pszIn);
+
 /**
 * @param pszIn string to check.
 * @return false if string match "[a-zA-Z0-9_- \'\.]+", true otherwise.
 */
 bool Str_CheckName(lpctstr pszIn);
+
 /**
 * @brief find a substring in a string from an offset.
 * @param pStr1 string where find the substring.
@@ -170,6 +185,7 @@ bool Str_CheckName(lpctstr pszIn);
 * @return -1 for a bad offset or if string if not found, otherwise the position of the substring in string.
 */
 int Str_IndexOf(tchar * pStr1, tchar * pStr2, int offset = 0);
+
 /**
 * @brief check if a string matches a pattern.
 * @see MATCH_TYPE
@@ -178,6 +194,7 @@ int Str_IndexOf(tchar * pStr1, tchar * pStr2, int offset = 0);
 * @return a MATCH_TYPE
 */
 MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText);
+
 /**
 * @brief Parse a simple argument from a list of arguments.
 *
@@ -189,6 +206,7 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText);
 * @return false if there are no more args to parse, true otherwise.
 */
 bool Str_Parse(tchar * pLine, tchar ** ppArg = nullptr, lpctstr pSep = nullptr);
+
 /**
 * @brief Parse a list of arguments.
 * @param pCmdLine list of arguments to parse.
@@ -198,6 +216,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg = nullptr, lpctstr pSep = nullptr);
 * @return count of arguments parsed.
 */
 int Str_ParseCmds(tchar * pCmdLine, tchar ** ppCmd, int iMax, lpctstr pSep = nullptr);
+
 /**
 * @brief Parse a list of arguments (integer version).
 * @param pCmdLine list of arguments to parse.
@@ -207,6 +226,7 @@ int Str_ParseCmds(tchar * pCmdLine, tchar ** ppCmd, int iMax, lpctstr pSep = nul
 * @return count of arguments parsed.
 */
 int Str_ParseCmds(tchar * pCmdLine, int64 * piCmd, int iMax, lpctstr pSep = nullptr);
+
 /**
 * @brief check if a string matches a regex.
 * @param pPattern regex to match.

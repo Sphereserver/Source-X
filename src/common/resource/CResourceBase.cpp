@@ -306,9 +306,9 @@ CResourceScript * CResourceBase::GetResourceFile( size_t i )
 	return m_ResourceFiles[i];
 }
 
-CResourceID CResourceBase::ResourceGetIDParse(RES_TYPE restype, lpctstr &ptcName, word wPage)
+CResourceID CResourceBase::ResourceGetID_Advance(RES_TYPE restype, lpctstr &ptcName, word wPage)
 {
-    ADDTOCALLSTACK("CResourceBase::ResourceGetIDParse");
+    ADDTOCALLSTACK("CResourceBase::ResourceGetID_Advance");
     // Find the Resource ID given this name.
     // We are NOT creating a new resource. just looking up an existing one
     // NOTE: Do not enforce the restype.
@@ -352,7 +352,7 @@ CResourceID CResourceBase::ResourceGetIDParse(RES_TYPE restype, lpctstr &ptcName
 CResourceID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr ptcName, word wPage )
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetID");
-	return ResourceGetIDParse(restype, ptcName, wPage);
+	return ResourceGetID_Advance(restype, ptcName, wPage);
 }
 
 CResourceID CResourceBase::ResourceGetIDType( RES_TYPE restype, lpctstr pszName, word wPage )

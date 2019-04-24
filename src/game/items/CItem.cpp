@@ -407,27 +407,31 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 	// Just read info on a single item carryed by a CChar.
 	// ITEM=#id,#amount,R#chance
 
+    tchar * pptcCmd[3];
+    int iQty = Str_ParseCmds(pArg, pptcCmd, CountOf(pptcCmd), ",");
+    if (iQty < 1)
+        return false;
+
 	word amount = 1;
-	if (Str_Parse( pArg, &pArg ))
-	{
-		if ( pArg[0] != 'R' )
-		{
-			amount = Exp_GetWVal( pArg );
-			Str_Parse( pArg, &pArg );
-		}
-		if ( pArg[0] == 'R' )
-		{
-			// 1 in x chance of creating this.
-			if ( Calc_GetRandVal( ATOI( pArg+1 )))
-				return nullptr;	// don't create it
-		}
-	}
+    for (int i = 1; i <= (iQty - 1); ++i)
+    {
+        if ( pptcCmd[i][0] != 'R' )
+        {
+            amount = Exp_GetWVal( pptcCmd[i] );
+        }
+        else if ( pptcCmd[i][0] == 'R' )
+        {
+            // 1 in x chance of creating this.
+            if ( Calc_GetRandVal( ATOI(pptcCmd[i] + 1) ))
+                return nullptr;	// don't create it
+        }
+    }
 
 	if ( amount == 0 )
 		return nullptr;
 
-    CResourceID rid = g_Cfg.ResourceGetID( RES_ITEMDEF, pArg);
-    if ( ! rid.IsValidUID())
+    CResourceID rid = g_Cfg.ResourceGetID(RES_ITEMDEF, pptcCmd[0]);
+    if ( ! rid.IsValidUID() )
         return nullptr;
     const RES_TYPE iResType = rid.GetResType();
     if ( (iResType != RES_ITEMDEF) && (iResType != RES_TEMPLATE) )

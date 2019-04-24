@@ -266,7 +266,7 @@ static void StringFunction( int iFunc, lpctstr pszKey, CSString &sVal )
 		++pszKey;
 
 	tchar * ppCmd[4];
-	size_t iCount = Str_ParseCmds( const_cast<tchar *>(pszKey), ppCmd, CountOf(ppCmd), ")" );
+	int iCount = Str_ParseCmds( const_cast<tchar *>(pszKey), ppCmd, CountOf(ppCmd), ")" );
 	if ( iCount <= 0 )
 	{
 		DEBUG_ERR(( "Bad string function usage. missing )\n" ));
@@ -637,7 +637,7 @@ badcmd:
 		case SSC_StrSub:
 			{
 				tchar * ppArgs[3];
-				size_t iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs));
+				int iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs));
 				if ( iQty < 3 )
 					return false;
 
@@ -719,7 +719,7 @@ badcmd:
 		case SSC_ASCPAD:
 			{
 				tchar * ppArgs[2];
-				size_t iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs));
+				int iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs));
 				if ( iQty < 2 )
 					return false;
 
@@ -757,7 +757,7 @@ badcmd:
 				tchar	*buf = Str_GetTemp();
 				tchar	*Arg_ppCmd[10];		// limit to 9 arguments
 				strcpy(buf, pszKey);
-				size_t iQty = Str_ParseCmds(buf, Arg_ppCmd, CountOf(Arg_ppCmd));
+				int iQty = Str_ParseCmds(buf, Arg_ppCmd, CountOf(Arg_ppCmd));
 				if ( iQty < 1 )
 					return false;
 
@@ -808,7 +808,7 @@ badcmd:
 		case SSC_StrToken:
 			{
 				tchar *ppArgs[3];
-				size_t iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs), ",");
+				int iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs), ",");
 				if ( iQty < 3 )
 					return false;
 				
@@ -901,11 +901,11 @@ badcmd:
 					tchar *ppCmd[255];
 					tchar * z = Str_GetTemp();
 					strcpy(z, p);
-					size_t count = Str_ParseCmds(z, ppCmd, CountOf(ppCmd), separators);
+					int count = Str_ParseCmds(z, ppCmd, CountOf(ppCmd), separators);
 					if (count > 0)
 					{
 						sVal.Add(ppCmd[0]);
-						for (size_t i = 1; i < count; ++i)
+						for (int i = 1; i < count; ++i)
 						{
 							sVal.Add(',');
 							sVal.Add(ppCmd[i]);
@@ -927,7 +927,7 @@ badcmd:
         case SSC_BCRYPTHASH:
         {
             tchar * ppCmd[3];
-            size_t iQty = Str_ParseCmds(const_cast<tchar*>(pszKey), ppCmd, CountOf(ppCmd), ", ");
+            int iQty = Str_ParseCmds(const_cast<tchar*>(pszKey), ppCmd, CountOf(ppCmd), ", ");
             if ( iQty < 3 )
                 return false;
             int iPrefixCode = ATOI(ppCmd[0]);
@@ -939,7 +939,7 @@ badcmd:
         case SSC_BCRYPTVALIDATE:
         {
             tchar * ppCmd[2];
-            size_t iQty = Str_ParseCmds(const_cast<tchar*>(pszKey), ppCmd, CountOf(ppCmd), ", ");
+            int iQty = Str_ParseCmds(const_cast<tchar*>(pszKey), ppCmd, CountOf(ppCmd), ", ");
             if ( iQty < 2 )
                 return false;
             bool fValidated = CBCrypt::ValidateBCrypt(ppCmd[0], ppCmd[1]);
@@ -1118,7 +1118,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 		case SSV_NEWITEM:	// just add an item but don't put it anyplace yet..
 			{
 				tchar * ppCmd[4];
-				size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppCmd, CountOf(ppCmd), ",");
+				int iQty = Str_ParseCmds(s.GetArgRaw(), ppCmd, CountOf(ppCmd), ",");
 				if ( iQty <= 0 )
 					return false;
 
@@ -1201,7 +1201,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
         case SSV_NEWSUMMON:
 	        {
 	            tchar * ppCmd[2];
-	            size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppCmd, CountOf(ppCmd), ",");
+	            int iQty = Str_ParseCmds(s.GetArgRaw(), ppCmd, CountOf(ppCmd), ",");
 	            if (iQty <= 0)
 	                return false;
 
@@ -1295,7 +1295,7 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 	static bool sm_fBrackets = false;	// allowed to span multi lines.
 
 	//***Qval Fix***
-	bool bQvalCondition = false;
+	bool fQvalCondition = false;
 	tchar chQval = '?';
 
 	if ((iFlags & 2) == 0)
@@ -1352,12 +1352,12 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 		if ( ch == chQval )
 		{
 			if ( !strnicmp( static_cast<lpctstr>(pszResponse) + iBegin + 1, "QVAL", 4 ) )
-				bQvalCondition = true;
+                fQvalCondition = true;
 		}
 
 		if ( ch == chEnd )
 		{
-			if ( !strnicmp( static_cast<lpctstr>(pszResponse) + iBegin + 1, "QVAL", 4 ) && !bQvalCondition)
+			if ( !strnicmp( static_cast<lpctstr>(pszResponse) + iBegin + 1, "QVAL", 4 ) && !fQvalCondition)
 				continue;
 			//***Qval Fix End***
 			sm_fBrackets = false;
@@ -1471,7 +1471,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 		int iMax = 0;
 		int i;
 		tchar * ppArgs[3];
-		size_t iQty = Str_ParseCmds( s.GetArgStr(), ppArgs, CountOf(ppArgs), ", " );
+		int iQty = Str_ParseCmds( s.GetArgStr(), ppArgs, CountOf(ppArgs), ", " );
 		CSString sLoopVar = "_FOR";
 
 		switch( iQty )

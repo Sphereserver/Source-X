@@ -554,7 +554,7 @@ bool CContainer::r_GetRefContainer( lpctstr &pszKey, CScriptObj *&pRef )
 		{
 			pszKey += 2;
 			SKIP_SEPARATORS(pszKey);
-			pRef = ContentFind(g_Cfg.ResourceGetIDParse(RES_ITEMDEF, pszKey));
+			pRef = ContentFind(g_Cfg.ResourceGetID_Advance(RES_ITEMDEF, pszKey));
 			SKIP_SEPARATORS(pszKey);
 			return true;
 		}
@@ -570,7 +570,7 @@ bool CContainer::r_GetRefContainer( lpctstr &pszKey, CScriptObj *&pRef )
 		{
 			pszKey += 4;
 			SKIP_SEPARATORS(pszKey);
-			pRef = ContentFind(g_Cfg.ResourceGetIDParse(RES_TYPEDEF, pszKey));
+			pRef = ContentFind(g_Cfg.ResourceGetID_Advance(RES_TYPEDEF, pszKey));
 			SKIP_SEPARATORS(pszKey);
 			return true;
 		}

@@ -66,7 +66,7 @@ bool CResourceQty::Load(lpctstr &pszCmds)
         return false;
     }
 
-    m_rid = g_Cfg.ResourceGetIDParse(RES_UNKNOWN, pszCmds);
+    m_rid = g_Cfg.ResourceGetID_Advance(RES_UNKNOWN, pszCmds);
     if ( m_rid.GetResType() == RES_UNKNOWN )
     {
         m_rid.Init();

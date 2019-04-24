@@ -579,24 +579,24 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
 
     tchar ch;
     // variables used to track opened/closed quotes and brackets
-    bool bQuotes = false;
+    bool fQuotes = false;
     int iCurly, iSquare, iRound, iAngle;
     iCurly = iSquare = iRound = iAngle = 0;
 
     // ignore opened/closed brackets if that type of bracket is also a separator
-    bool bSepHasCurly, bSepHasSquare, bSepHasRound, bSepHasAngle;
-    bSepHasCurly = bSepHasSquare = bSepHasRound = bSepHasAngle = false;
+    bool fSepHasCurly, fSepHasSquare, fSepHasRound, fSepHasAngle;
+    fSepHasCurly = fSepHasSquare = fSepHasRound = fSepHasAngle = false;
     for (uint j = 0; pszSep[j + 1] != '\0'; ++j)		// loop through each separator
     {
         const tchar & sep = pszSep[j];
         if (sep == '{' || sep == '}')
-            bSepHasCurly = true;
+            fSepHasCurly = true;
         else if (sep == '[' || sep == ']')
-            bSepHasSquare = true;
+            fSepHasSquare = true;
         else if (sep == '(' || sep == ')')
-            bSepHasRound = true;
+            fSepHasRound = true;
         else if (sep == '<' || sep == '>')
-            bSepHasAngle = true;
+            fSepHasAngle = true;
     }
 
     for (; ; ++pLine)
@@ -604,7 +604,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
         ch = *pLine;
         if (ch == '"')	// quoted argument
         {
-            bQuotes = !bQuotes;
+            fQuotes = !fQuotes;
             continue;
         }
         if (ch == '\0')	// no more args i guess.
@@ -614,56 +614,56 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
             return false;
         }
 
-        if (!bQuotes)
+        if (!fQuotes)
         {
             // We are not inside a quote, so let's check if the char is a bracket or a separator
 
             // Here we track opened and closed brackets.
             //	we'll ignore items inside brackets, if the bracket isn't a separator in the list
             if (ch == '{') {
-                if (!bSepHasCurly) {
+                if (!fSepHasCurly) {
                     if (!iSquare && !iRound && !iAngle)
                         ++iCurly;
                 }
             }
             else if (ch == '[') {
-                if (!bSepHasSquare) {
+                if (!fSepHasSquare) {
                     if (!iCurly && !iRound && !iAngle)
                         ++iSquare;
                 }
             }
             else if (ch == '(') {
-                if (!bSepHasRound) {
+                if (!fSepHasRound) {
                     if (!iCurly && !iSquare && !iAngle)
                         ++iRound;
                 }
             }
             else if (ch == '<') {
-                if (!bSepHasAngle) {
+                if (!fSepHasAngle) {
                     if (!iCurly && !iSquare && !iRound)
                         ++iAngle;
                 }
             }
             else if (ch == '}') {
-                if (!bSepHasCurly) {
+                if (!fSepHasCurly) {
                     if (iCurly)
                         --iCurly;
                 }
             }
             else if (ch == ']') {
-                if (!bSepHasSquare) {
+                if (!fSepHasSquare) {
                     if (iSquare)
                         --iSquare;
                 }
             }
             else if (ch == ')') {
-                if (!bSepHasRound) {
+                if (!fSepHasRound) {
                     if (iRound)
                         --iRound;
                 }
             }
             else if (ch == '>') {
-                if (!bSepHasAngle) {
+                if (!fSepHasAngle) {
                     if (iAngle)
                         --iAngle;
                 }
@@ -700,7 +700,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
     if (ppArg != nullptr)
         *ppArg = Str_TrimWhitespace(pLine);
 
-    if (iCurly || iSquare || iRound || bQuotes)
+    if (iCurly || iSquare || iRound || fQuotes)
     {
         //g_Log.EventError("Not every bracket or quote was closed.\n");
         return false;
