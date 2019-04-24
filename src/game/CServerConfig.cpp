@@ -2701,8 +2701,8 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 	if (( restype == RES_WORLDSCRIPT ) || ( restype == RES_WS ))
 	{
-		lpctstr	pszDef = pScript->GetArgStr();
-		CVarDefCont * pVarBase = g_Exp.m_VarDefs.GetKey( pszDef );
+		const lpctstr pszDef = pScript->GetArgStr();
+		CVarDefCont * pVarBase = g_Exp.m_VarResDefs.GetKey( pszDef );
 		pVarNum = nullptr;
 		if ( pVarBase )
 			pVarNum = dynamic_cast <CVarDefContNum*>( pVarBase );
@@ -2817,7 +2817,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		// just get a block of defs.
 		while ( pScript->ReadKeyParse() )
 		{
-			lpctstr	pszKey = pScript->GetKey();
+			const lpctstr pszKey = pScript->GetKey();
 			if ( fNewStyleDef )
 			{
 				//	search for this.
@@ -2844,7 +2844,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		{
 			while ( pScript->ReadKey() )
 			{
-				lpctstr pName = pScript->GetKeyBuffer();
+				const lpctstr pName = pScript->GetKeyBuffer();
 				m_ResourceList.AddSortString( pName );
 			}
 		}
@@ -3432,11 +3432,12 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		while ( pScript->ReadKeyParse() )
 		{
 			bool fQuoted = false;
-			lpctstr pszKey = pScript->GetKey();
-			if ( strstr(pszKey, "VAR.") )  // This is for backward compatibility from Rcs
-				pszKey = pszKey + 4;
+			lpctstr ptcKey = pScript->GetKey();
+			if ( strstr(ptcKey, "VAR.") )  // This is for backward compatibility from Rcs
+				ptcKey = ptcKey + 4;
 
-			g_Exp.m_VarGlobals.SetStr( pszKey, fQuoted, pScript->GetArgStr( &fQuoted ) );
+            lpctstr ptcArg = pScript->GetArgStr( &fQuoted );
+			g_Exp.m_VarGlobals.SetStr( ptcKey, fQuoted, ptcArg );
 		}
 		return true;
 	case RES_WORLDLISTS:
@@ -3461,7 +3462,8 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		while ( pScript->ReadKeyParse() )
 		{
 			bool fQuoted = false;
-			g_World.m_TimedFunctions.Load( pScript->GetKey(), fQuoted, pScript->GetArgStr( &fQuoted ) );
+            lpctstr ptcArg = pScript->GetArgStr( &fQuoted );
+			g_World.m_TimedFunctions.Load( pScript->GetKey(), fQuoted, ptcArg );
 		}
 		return true;
 	case RES_TELEPORTERS:
@@ -3743,7 +3745,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 		}
 
 
-		CVarDefCont * pVarBase = g_Exp.m_VarDefs.GetKey( pszName );
+		CVarDefCont * pVarBase = g_Exp.m_VarResDefs.GetKey( pszName );
 		if ( pVarBase )
 		{
 			// An existing VarDef with the same name ?
@@ -3911,7 +3913,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
         int iRandIndex = iIndex + Calc_GetRandVal(iHashRange);
         rid = CResourceID(restype, iRandIndex, wPage);
         
-        bool fCheckPage = (pszName && (g_Exp.m_VarDefs.GetKeyNum(pszName) != 0));
+        const bool fCheckPage = (pszName && (g_Exp.m_VarResDefs.GetKeyNum(pszName) != 0));
 		while (true)
 		{
             if (fCheckPage)
@@ -3936,7 +3938,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 
 	if ( pszName )
 	{
-		CVarDefContNum* pVarTemp = g_Exp.m_VarDefs.SetNum( pszName, rid.GetPrivateUID() );
+		CVarDefContNum* pVarTemp = g_Exp.m_VarResDefs.SetNum( pszName, rid.GetPrivateUID() );
         ASSERT(pVarTemp);
 		*ppVarNum = pVarTemp;
 	}
@@ -4446,12 +4448,12 @@ bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpc
 	if (pPrefix)
 	{
 		// write prefix
-		for (size_t i = 0; pPrefix[i] != '\0'; i++)
+		for (size_t i = 0; pPrefix[i] != '\0'; ++i)
 			pOutput[iOut++] = pPrefix[i];
 	}
 
 	// write object name
-	for (size_t i = 0; i < iInputLength; i++)
+	for (size_t i = 0; i < iInputLength; ++i)
 	{
 		if (pObjectName[i] == '\0')
 			break;
@@ -4470,7 +4472,7 @@ bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpc
 
 	// remove trailing _
 	while (iOut > 0 && pOutput[iOut - 1] == '_')
-		iOut--;
+		--iOut;
 
 	pOutput[iOut] = '\0';
 	if (iOut == 0)
@@ -4485,7 +4487,7 @@ bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpc
 		for (;;)
 		{
 			bool isValid = true;
-			if (g_Exp.m_VarDefs.GetKey(pOutput) != nullptr)
+			if (g_Exp.m_VarResDefs.GetKey(pOutput) != nullptr)
 			{
 				// check loaded defnames
 				isValid = false;

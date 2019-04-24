@@ -1332,7 +1332,7 @@ height_t CChar::GetHeight() const
 
     // This is SLOW (since this method is called very frequently)! Move those defs value to CharDef!
 	char * heightDef = Str_GetTemp();
-    uint uiDispID = (uint)pCharDef->GetDispID();
+    const uint uiDispID = (uint)pCharDef->GetDispID();
 
 	sprintf(heightDef, "height_0%x", uiDispID);
 	tmpHeight = (height_t)(g_Exp.m_VarDefs.GetKeyNum(heightDef));

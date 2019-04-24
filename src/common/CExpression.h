@@ -114,8 +114,9 @@ extern class CExpression
 {
 public:
 	static const char *m_sClassName;
-	CVarDefMap		m_VarDefs;			// Defined variables in sorted order.
-	CVarDefMap		m_VarGlobals;		// Global variables
+    CVarDefMap		m_VarResDefs;		// Defined variables in sorted order (RESDEF/RESDEF0).
+	CVarDefMap		m_VarDefs;			// Defined variables in sorted order (DEF/DEF0).
+	CVarDefMap		m_VarGlobals;		// Global variables (VAR/VAR0)
 	CListDefMap		m_ListGlobals;		// Global lists
 	CListDefMap		m_ListInternals;	// Internal lists
 	CSString		m_sTmp;

@@ -210,9 +210,8 @@ CVarDefMap::~CVarDefMap()
 lpctstr CVarDefMap::FindValStr( lpctstr pVal ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::FindValStr");
-	for ( DefSet::const_iterator i = m_Container.begin(); i != m_Container.end(); ++i )
+	for ( const CVarDefCont * pVarBase : m_Container )
 	{
-		const CVarDefCont * pVarBase = (*i);
 		ASSERT( pVarBase );
 		
 		const CVarDefContStr * pVarStr = dynamic_cast <const CVarDefContStr *>( pVarBase );
@@ -220,7 +219,7 @@ lpctstr CVarDefMap::FindValStr( lpctstr pVal ) const
 			continue;
 		
 		if ( ! strcmpi( pVal, pVarStr->GetValStr()))
-			return( pVarBase->GetKey() );
+			return pVarBase->GetKey();
 	}
 
 	return nullptr;
@@ -237,7 +236,7 @@ lpctstr CVarDefMap::FindValNum( int64 iVal ) const
 			continue;
 
 		if ( pVarNum->GetValNum() == iVal )
-			return( pVarBase->GetKey() );
+			return pVarBase->GetKey();
 	}
 
 	return nullptr;
@@ -249,9 +248,9 @@ CVarDefCont * CVarDefMap::GetAt( size_t at ) const
 	if ( at > m_Container.size() )
 		return nullptr;
 
-	DefSet::const_iterator i = std::next(m_Container.begin(), at);
-	if ( i != m_Container.end() )
-		return (*i);
+	const_iterator it = std::next(m_Container.begin(), at);
+	if ( it != m_Container.end() )
+		return (*it);
 	else
 		return nullptr;
 }
@@ -260,10 +259,10 @@ CVarDefCont * CVarDefMap::GetAtKey( lpctstr at ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetAtKey");
 	CVarDefContTest pVarBase(at);
-	DefSet::const_iterator i = m_Container.find(&pVarBase);
+	const_iterator it = m_Container.find(&pVarBase);
 
-	if ( i != m_Container.end() )
-		return (*i);
+	if ( it != m_Container.end() )
+		return (*it);
 	else
 		return nullptr;
 }
@@ -281,12 +280,12 @@ void CVarDefMap::DeleteAtKey( lpctstr at )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::DeleteAtKey");
 	CVarDefContStr pVarBased(at);
-	DefSet::iterator i = m_Container.find(&pVarBased);
+	iterator it = m_Container.find(&pVarBased);
 
-	DeleteAtIterator(i);
+	DeleteAtIterator(it);
 }
 
-void CVarDefMap::DeleteAtIterator( DefSet::iterator it )
+void CVarDefMap::DeleteAtIterator( iterator it )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::DeleteAtIterator");
 	if ( it != m_Container.end() )
@@ -323,13 +322,13 @@ void CVarDefMap::DeleteKey( lpctstr key )
 void CVarDefMap::Empty()
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::Empty");
-	DefSet::iterator i = m_Container.begin();
+	iterator it = m_Container.begin();
 
-	while ( i != m_Container.end() )
+	while ( it != m_Container.end() )
 	{
-		delete (*i);	// This calls the appropriate destructors, from derived to base class, because the destructors are virtual.
-		m_Container.erase(i);
-		i = m_Container.begin();
+		delete (*it);	// This calls the appropriate destructors, from derived to base class, because the destructors are virtual.
+		m_Container.erase(it);
+		it = m_Container.begin();
 	}
 
 	m_Container.clear();
@@ -456,7 +455,7 @@ CVarDefContNum* CVarDefMap::ModNum(lpctstr pszName, int64 iMod, bool fDeleteZero
             const int64 iNewVal = pVarDefNum->GetValNum() + iMod;
             if ((iNewVal == 0) && fDeleteZero)
             {
-                DefSet::iterator it = m_Container.find(pVarDef);
+                iterator it = m_Container.find(pVarDef);
                 ASSERT (it != m_Container.end());
                 DeleteAtIterator(it);
                 return nullptr;
@@ -483,7 +482,7 @@ CVarDefContNum* CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fDeleteZer
 	}
 
 	CVarDefContTest pVarSearch(pszName);
-	DefSet::iterator iResult = m_Container.find(&pVarSearch);
+	iterator iResult = m_Container.find(&pVarSearch);
 
 	CVarDefCont * pVarBase = nullptr;
 	if ( iResult != m_Container.end() )
@@ -561,7 +560,7 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, 
 	}
 
 	CVarDefContTest pVarSearch(pszName);
-	DefSet::iterator iResult = m_Container.find(&pVarSearch);
+	iterator iResult = m_Container.find(&pVarSearch);
 
 	CVarDefCont * pVarBase = nullptr;
 	if ( iResult != m_Container.end() )
@@ -594,10 +593,10 @@ CVarDefCont * CVarDefMap::GetKey( lpctstr pszKey ) const
 	if ( pszKey )
 	{
 		CVarDefContTest pVarBase(pszKey);
-		DefSet::const_iterator i = m_Container.find(&pVarBase);
+		const_iterator it = m_Container.find(&pVarBase);
 		
-		if ( i != m_Container.end() )
-			pReturn = (*i);
+		if ( it != m_Container.end() )
+			pReturn = (*it);
 	}
 
 	return pReturn;
@@ -621,7 +620,7 @@ lpctstr CVarDefMap::GetKeyStr( lpctstr pszKey, bool fZero ) const
 	return pVar->GetValStr();
 }
 
-CVarDefCont * CVarDefMap::CheckParseKey( lpctstr & pszArgs ) const
+CVarDefCont * CVarDefMap::CheckParseKey( lpctstr pszArgs ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::CheckParseKey");
 	tchar szTag[ EXPRESSION_MAX_KEY_LEN ];
@@ -633,9 +632,9 @@ CVarDefCont * CVarDefMap::CheckParseKey( lpctstr & pszArgs ) const
 	return nullptr;
 }
 
-CVarDefCont * CVarDefMap::GetParseKey( lpctstr & pszArgs ) const
+CVarDefCont * CVarDefMap::GetParseKey_Advance( lpctstr & pszArgs ) const
 {
-	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetParseKey");
+	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetParseKey_Advance");
 	// Skip to the end of the expression name.
 	// The name can only be valid.
 
@@ -651,13 +650,13 @@ CVarDefCont * CVarDefMap::GetParseKey( lpctstr & pszArgs ) const
 	return nullptr;
 }
 
-bool CVarDefMap::GetParseVal( lpctstr & pszArgs, long long * plVal ) const
+bool CVarDefMap::GetParseVal_Advance( lpctstr & pszArgs, llong * pllVal ) const
 {
-	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetParseVal");
-	CVarDefCont * pVarBase = GetParseKey( pszArgs );
+	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetParseVal_Advance");
+	CVarDefCont * pVarBase = GetParseKey_Advance( pszArgs );
 	if ( pVarBase == nullptr )
 		return false;
-	*plVal = pVarBase->GetValNum();
+	*pllVal = pVarBase->GetValNum();
 	return true;
 }
 
@@ -694,21 +693,21 @@ void CVarDefMap::ClearKeys(lpctstr mask)
 		CSString sMask(mask);
 		sMask.MakeLower();
 
-		DefSet::iterator i = m_Container.begin();
+		iterator it = m_Container.begin();
 		CVarDefCont * pVarBase = nullptr;
 
-		while ( i != m_Container.end() )
+		while ( it != m_Container.end() )
 		{
-			pVarBase = (*i);
+			pVarBase = (*it);
 
 			if ( pVarBase && ( strstr(pVarBase->GetKey(), sMask.GetPtr()) ) )
 			{
-				DeleteAtIterator(i);
-				i = m_Container.begin();
+				DeleteAtIterator(it);
+				it = m_Container.begin();
 			}
 			else
 			{
-				++i;
+				++it;
 			}
 		}
 	}
@@ -718,12 +717,15 @@ void CVarDefMap::ClearKeys(lpctstr mask)
 	}
 }
 
+/*
 bool CVarDefMap::r_LoadVal( CScript & s )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::r_LoadVal");
 	bool fQuoted = false;
-	return ( SetStr( s.GetKey(), fQuoted, s.GetArgStr( &fQuoted )) ? true : false );
+    lpctstr ptcVal = s.GetArgStr( &fQuoted );
+	return ( SetStr( s.GetKey(), fQuoted, ptcVal) ? true : false );
 }
+*/
 
 void CVarDefMap::r_WritePrefix( CScript & s, lpctstr pszPrefix, lpctstr pszKeyExclude )
 {

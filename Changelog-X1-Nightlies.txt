@@ -1638,3 +1638,16 @@ WARNING: the following change could break some hackish expedient used in scripts
 - Added: STRRANDRANGE function. It works like a random { } range, but for strings. E.g.: <STRRANDRANGE "boots" 1 "shoes" 1 "watermelons" 1>. Remember the quotes!
 - Added: MIN and MAX intrinsic functions, which return the smaller/greater of the two numberic arguments.
 - Fixed: ISNUMBER working only with decimal numbers.
+
+24-04-2019, Nolok
+- Changed: Item HEIGHT value is now first searched in the ITEMDEF (if not manually specified, the one from tiledata.mul is loaded), if absent, it's searched the DEF itemheight_0#HexID, then itemheight_#DecID.
+	Before it worked the opposite way, which was slower, also now this behavior is consistent with the one of Char HEIGHT (first search the CHARDEF, then the DEF).
+- Fixed: Incorrect parsing of quoted arguments of VAR and TIMERF.
+
+WARNING: the following change could break compatibility with previous scripts! Read carefully!
+- Added: RESDEF keyword, similar to DEF, but retrieves only the numeric identifier of Resource DEFNAMEs. Example of usage: <RESDEF.i_dagger>.
+- Changed: The DEF keyword doesn't find the numeric identifier of Resource (ITEMDEF/CHARDEF...) DEFNAMEs anymore. Use RESDEF. DEF is used to retrieve values from [DEFNAME] blocks. Example of usage: <DEF.mt_walk>.
+	This can break compatibility with previous scripts, if you used DEF to retrieve items/chars defname numeric value. You have to use RESDEF now.
+	You're safe (even if the underlying code is a bit slower) if you just used ID=i_dagger instead of ID=<DEF.i_dagger>.
+	If you know that a keyword is a DEF or a RESDEF, the best thing would be to use the right prefix. When Sphere enconunters a keyword without a prefix, it searches in the keyword lists in this order:
+		functions, VARs, RESDEFs, DEFs, so using the prefix will skip useless lookups in the wrong tables and will make Sphere search directly in the right one.

@@ -30,6 +30,15 @@ struct KeyTableDesc_s
     int iTableSize;
 };
 
+/** @name String utilities: Modifiers
+*/
+
+// If you want to use base = 16 to convert an hexadecimal string, it has to be in the format: 0x***
+int    Str_ToI  (lpctstr ptcStr, int base = 10) noexcept;
+uint   Str_ToUI (lpctstr ptcStr, int base = 10) noexcept;
+llong  Str_ToLL (lpctstr ptcStr, int base = 10) noexcept;
+ullong Str_ToULL(lpctstr ptcStr, int base = 10) noexcept;
+
 size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord );
 
 /** @name String utilities: Modifiers

@@ -27,6 +27,7 @@ Compatibility changes from 0.56d to X1
 - Change the whole sphere.ini file and tweak its settings (updating it doesn't usually work, people misses a lot of settings and flags).
 - Renamed CLIENTISSA command to CLIENTISENHANCED.
 - Removed CHARGESCUR and CHARGESMAX.
+- TAG.SlayerGroup isn't used anymore. Use FACTION.
 - ADDCLILOC needs to be called on the object, instead of on the player. So in the scripts, in the @ClientTooltip trigger,
   calls to SRC.ADDCLILOC have to be changed to ADDCLILOC; in @ItemClientTooltip and @CharClientTooltip, ACT.ADDCLILOC has to be used instead.
 - Changed: Defname numeric value has a different byte order now. For example, <hval s_clumsy> returned 0ce000001,
@@ -39,6 +40,9 @@ Compatibility changes from 0.56d to X1
 - SPEECHCOLOR can't be used anymore to override the speech color of NPCS. Use SPEECHCOLOROVERRIDE instead.
 - Added: ModMaxHits, ModMaxMana, ModMaxStam properties. To avoid CONFLICTS, remove or comment the scripted functions
   with the same name in the sphere_events_npcs.scp of the default scriptpack.
+- DEF keyword doesn't find the numeric identifier of Resource (ITEMDEF/CHARDEF...) DEFNAMEs anymore. Use RESDEF. DEF is used to retrieve values from [DEFNAME] blocks.
+  This can break compatibility with previous scripts, if you used DEF to retrieve items/chars defname numeric value. You have to use RESDEF now.
+  You're safe (even if the underlying code is a bit slower) if you just used ID=i_dagger instead of ID=<DEF.i_dagger>.
 - Added/changed some keywords for spawns (read the changelog for more). This causes a SAVE FILES INCOMPATIBILITY between x and 56d, because new x-only
   keywords will be saved, and those won't be recognized by 56d. If you want to port back the saves, you have to replace in sphereworld.scp the
   keyword SPAWNID with MORE1 in t_spawn_char and t_spawn_item items.

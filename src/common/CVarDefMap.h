@@ -105,8 +105,8 @@ private:
 		bool operator()(const CVarDefCont * s1, const CVarDefCont * s2) const;
 	};
 
-	typedef std::set<CVarDefCont *, ltstr> DefSet;
-	typedef std::pair<DefSet::iterator, bool> DefPairResult;
+	using DefSet        = std::set<CVarDefCont *, ltstr>;
+	using DefPairResult = std::pair<DefSet::iterator, bool>;
 
 	class CVarDefContTest : public CVarDefCont // This is to alloc CVarDefCont without allocing any other things
 	{
@@ -131,12 +131,14 @@ private:
 
 public:
 	static const char *m_sClassName;
+    using iterator          = DefSet::iterator;
+    using const_iterator    = DefSet::const_iterator;
 
 private:
 	CVarDefCont * GetAtKey( lpctstr at ) const;
 	void DeleteAt( size_t at );
 	void DeleteAtKey( lpctstr at );
-	void DeleteAtIterator( DefSet::iterator it );
+	void DeleteAtIterator( iterator it );
 
     CVarDefContNum* SetNumOverride( lpctstr pszKey, int64 iVal );
     CVarDefContStr* SetStrOverride( lpctstr pszKey, lpctstr pszVal );
@@ -172,16 +174,24 @@ public:
 	int64 GetKeyNum( lpctstr pszKey ) const;
     inline CVarDefContStr * GetKeyDefStr( lpctstr pszKey ) const;
 	lpctstr GetKeyStr( lpctstr pszKey, bool fZero = false ) const;
-	CVarDefCont * GetParseKey( lpctstr & pArgs ) const;
-	CVarDefCont * CheckParseKey( lpctstr & pszArgs ) const;
-	bool GetParseVal( lpctstr & pArgs, llong * plVal ) const;
+    CVarDefCont * CheckParseKey( lpctstr pszArgs ) const;
+	CVarDefCont * GetParseKey_Advance( lpctstr & pArgs ) const;
+    inline CVarDefCont * GetParseKey( lpctstr pArgs ) const;
+    bool GetParseVal_Advance( lpctstr & pArgs, llong * pllVal ) const;
+    inline bool GetParseVal( lpctstr pArgs, llong * plVal ) const;
 
 	void DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix = nullptr ) const;
 	void ClearKeys(lpctstr mask = nullptr);
 	void DeleteKey( lpctstr key );
 
-	bool r_LoadVal( CScript & s );
+	//bool r_LoadVal( CScript & s );
 	void r_WritePrefix( CScript & s, lpctstr pszPrefix = nullptr, lpctstr pszKeyExclude = nullptr );
+
+    // Iterators
+    inline iterator begin();
+    inline iterator end();
+    inline const_iterator begin() const;
+    inline const_iterator end() const;
 };
 
 
@@ -196,5 +206,20 @@ CVarDefContStr * CVarDefMap::GetKeyDefStr(lpctstr pszKey) const
 {
     return dynamic_cast<CVarDefContStr*>(GetKey(pszKey));
 }
+
+CVarDefCont * CVarDefMap::GetParseKey(lpctstr pArgs) const
+{
+    return GetParseKey_Advance(pArgs);
+}
+
+bool CVarDefMap::GetParseVal(lpctstr pArgs, llong * pllVal) const
+{
+    return GetParseVal_Advance(pArgs, pllVal);
+}
+
+CVarDefMap::iterator CVarDefMap::begin()                { return m_Container.begin();   }
+CVarDefMap::iterator CVarDefMap::end()                  { return m_Container.end();     }
+CVarDefMap::const_iterator CVarDefMap::begin() const    { return m_Container.cbegin();  }
+CVarDefMap::const_iterator CVarDefMap::end() const      { return m_Container.cend();    }
 
 #endif // _INC_CVARDEFMAP_H

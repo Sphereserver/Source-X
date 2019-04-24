@@ -2407,11 +2407,11 @@ bool CChar::Horse_Mount(CChar *pHorse)
 		return false;
 	}
 
-	tchar * sMountID = Str_GetTemp();
-	sprintf(sMountID, "mount_0x%x", pHorse->GetDispID());
-	lpctstr sMemoryID = g_Exp.m_VarDefs.GetKeyStr(sMountID);			// get the mount item defname from the mount_0x** defname
+	tchar * ptcMountID = Str_GetTemp();
+	sprintf(ptcMountID, "mount_0x%x", pHorse->GetDispID());
+	lpctstr ptcMemoryID = g_Exp.m_VarDefs.GetKeyStr(ptcMountID);			// get the mount item defname from the mount_0x** defname
 
-	CResourceID memoryRid = g_Cfg.ResourceGetID(RES_ITEMDEF, sMemoryID);
+	CResourceID memoryRid = g_Cfg.ResourceGetID(RES_ITEMDEF, ptcMemoryID);
 	ITEMID_TYPE memoryId = (ITEMID_TYPE)(memoryRid.GetResIndex());	// get the ID of the memory (mount item)
 	if ( memoryId <= ITEMID_NOTHING )
 		return false;

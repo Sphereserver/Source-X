@@ -249,7 +249,7 @@ static size_t GetIdentifierString( tchar * szTag, lpctstr pszArgs )
 
 bool IsValidDef( lpctstr pszTest )
 {
-	CVarDefCont * pVarBase = g_Exp.m_VarDefs.CheckParseKey( pszTest );
+	const CVarDefCont * pVarBase = g_Exp.m_VarResDefs.CheckParseKey( pszTest );
 	if ( pVarBase == nullptr )
 	{
 		//check VAR.X also
@@ -264,15 +264,15 @@ bool IsValidGameObjDef( lpctstr pszTest )
 {
 	if (!IsSimpleNumberString(pszTest))
 	{
-		CVarDefCont * pVarBase = g_Exp.m_VarDefs.CheckParseKey( pszTest );
+		const CVarDefCont * pVarBase = g_Exp.m_VarResDefs.CheckParseKey( pszTest );
 		if ( pVarBase == nullptr )
 			return false;
-		tchar ch = *pVarBase->GetValStr();
+		const tchar ch = *pVarBase->GetValStr();
 		if (( ! ch ) || ( ch == '<'))
 			return false;
 
-		CResourceID rid = g_Cfg.ResourceGetID( RES_QTY, pszTest);
-        RES_TYPE resType = rid.GetResType();
+		const CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, pszTest);
+        const RES_TYPE resType = rid.GetResType();
 		if ((resType != RES_CHARDEF) && (resType != RES_ITEMDEF) && (resType != RES_SPAWN) && (resType != RES_TEMPLATE) && (resType != RES_CHAMPION))
 			return false;
 	}
@@ -892,9 +892,11 @@ try_dec:
 
 		// Must be a symbol of some sort ?
 		llong llVal;
-		if ( m_VarGlobals.GetParseVal( pszArgs, &llVal ) )
+		if ( m_VarGlobals.GetParseVal( pszArgs, &llVal ) )  // VAR.
 			return llVal;
-		if ( m_VarDefs.GetParseVal( pszArgs, &llVal ) )
+        if ( m_VarResDefs.GetParseVal( pszArgs, &llVal ) )  // RESDEF.
+            return llVal;
+		if ( m_VarDefs.GetParseVal( pszArgs, &llVal ) )     // DEF.
 			return llVal;
 	}
 #pragma endregion intrinsics

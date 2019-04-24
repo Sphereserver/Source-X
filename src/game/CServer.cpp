@@ -1924,21 +1924,37 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 			case 'D':
 				// dump all the defines to a file.
 				{
-					CSFileText File;
-					if ( ! File.Open( "defs.txt", OF_WRITE|OF_TEXT ))
+					CSFileText FileDefs;
+					if ( ! FileDefs.Open( "defs.txt", OF_WRITE|OF_TEXT ))
 						return false;
 
-					for ( size_t i = 0; i < g_Exp.m_VarDefs.GetCount(); i++ )
+                    ssize_t count = ssize_t(g_Exp.m_VarDefs.GetCount());
+                    ssize_t i = 0;
+					for ( const CVarDefCont * pCont : g_Exp.m_VarDefs )
 					{
 						if ( ( i % 0x1ff ) == 0 )
-							PrintPercent( (ssize_t)i, (ssize_t)g_Exp.m_VarDefs.GetCount() );
+							PrintPercent( i, count );
 
-						CVarDefCont * pCont = g_Exp.m_VarDefs.GetAt(i);
 						if ( pCont != nullptr )
-						{
-							File.Printf( "%s=%s\n", pCont->GetKey(), pCont->GetValStr());
-						}
+                            FileDefs.Printf( "%s=%s\n", pCont->GetKey(), pCont->GetValStr());
+                        ++i;
 					}
+
+                    CSFileText FileResDefs;
+                    if ( ! FileResDefs.Open( "resdefs.txt", OF_WRITE|OF_TEXT ))
+                        return false;
+
+                    count = ssize_t(g_Exp.m_VarResDefs.GetCount());
+                    i = 0;
+                    for ( const CVarDefCont * pCont : g_Exp.m_VarResDefs )
+                    {
+                        if ( ( i % 0x1ff ) == 0 )
+                            PrintPercent( i, count );
+
+                        if ( pCont != nullptr )
+                            FileResDefs.Printf( "%s=%s\n", pCont->GetKey(), pCont->GetValStr());
+                        ++i;
+            }
 				}
 				continue;
 #if defined(_WIN32) && !defined(_DEBUG) && !defined(_NO_CRASHDUMP)

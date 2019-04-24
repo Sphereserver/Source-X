@@ -15,6 +15,41 @@
 #endif
 
 
+// String utilities: Converters
+
+int Str_ToI (lpctstr ptcStr, int base) noexcept
+{
+    const auto e = errno;
+    const auto ret = int(std::strtol(ptcStr, nullptr, base));
+    errno = e;
+    return ret;
+}
+
+uint Str_ToUI(lpctstr ptcStr, int base) noexcept
+{
+    const auto e = errno;
+    const auto ret = uint(std::strtoul(ptcStr, nullptr, base));
+    errno = e;
+    return ret;
+}
+
+llong Str_ToLL(lpctstr ptcStr, int base) noexcept
+{
+    const auto e = errno;
+    const auto ret = std::strtoll(ptcStr, nullptr, base);
+    errno = e;
+    return ret;
+}
+
+ullong Str_ToULL(lpctstr ptcStr, int base) noexcept
+{
+    const auto e = errno;
+    const auto ret = std::strtoull(ptcStr, nullptr, base);
+    errno = e;
+    return ret;
+}
+
+
 // String utilities: Modifiers
 
 size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord )

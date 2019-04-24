@@ -215,13 +215,15 @@ bool CScriptObj::r_LoadVal( CScript & s )
 		case SSC_VAR:
 			{
 				bool fQuoted = false;
-				g_Exp.m_VarGlobals.SetStr( pszKey+4, fQuoted, s.GetArgStr( &fQuoted ), false );
+                lpctstr ptcArg = s.GetArgStr( &fQuoted );
+				g_Exp.m_VarGlobals.SetStr( pszKey+4, fQuoted, ptcArg, false );
 				return true;
 			}
 		case SSC_VAR0:
 			{
 				bool fQuoted = false;
-				g_Exp.m_VarGlobals.SetStr( pszKey+5, fQuoted, s.GetArgStr( &fQuoted ), true );
+                lpctstr ptcArg = s.GetArgStr( &fQuoted );
+				g_Exp.m_VarGlobals.SetStr( pszKey+5, fQuoted, ptcArg, true );
 				return true;
 			}
 
@@ -481,7 +483,7 @@ badcmd:
 		case SSC_VAR:
 			// "VAR." = get/set a system wide variable.
 			{
-				CVarDefCont * pVar = g_Exp.m_VarGlobals.GetKey(pszKey);
+				const CVarDefCont * pVar = g_Exp.m_VarGlobals.GetKey(pszKey);
 				if ( pVar )
 					sVal	= pVar->GetValStr();
 				else if ( fZero )
@@ -502,13 +504,24 @@ badcmd:
 			fZero	= true;
 		case SSC_DEF:
 			{
-				CVarDefCont * pVar = g_Exp.m_VarDefs.GetKey(pszKey);
+				const CVarDefCont * pVar = g_Exp.m_VarDefs.GetKey(pszKey);
 				if ( pVar )
 					sVal	= pVar->GetValStr();
 				else if ( fZero )
 					sVal	= "0";
 			}
 			return true;
+        case SSC_RESDEF0:
+            fZero	= true;
+        case SSC_RESDEF:
+        {
+            const CVarDefCont * pVar = g_Exp.m_VarResDefs.GetKey(pszKey);
+            if ( pVar )
+                sVal	= pVar->GetValStr();
+            else if ( fZero )
+                sVal	= "0";
+        }
+        return true;
 		case SSC_DEFMSG:
 			sVal = g_Cfg.GetDefaultMsg(pszKey);
 			return true;

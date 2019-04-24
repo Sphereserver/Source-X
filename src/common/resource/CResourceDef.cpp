@@ -28,7 +28,7 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
         }
     }
 
-    const CVarDefCont * pVarKey = g_Exp.m_VarDefs.GetKey( pszName );
+    const CVarDefCont * pVarKey = g_Exp.m_VarResDefs.GetKey( pszName );
 	CVarDefContNum* pVarKeyNum = nullptr;
     if ( pVarKey )
     {
@@ -46,11 +46,11 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
         else
             DEBUG_WARN(( "DEFNAME=%s: redefinition (0%" PRIx32 "!=0%" PRIx32 ")\n", pszName, RES_GET_INDEX(keyVal), GetResourceID().GetResIndex() ));
 
-        pVarKeyNum = g_Exp.m_VarDefs.SetNum( pszName, GetResourceID().GetPrivateUID() );
+        pVarKeyNum = g_Exp.m_VarResDefs.SetNum( pszName, GetResourceID().GetPrivateUID() );
     }
     else
     {
-        pVarKeyNum = g_Exp.m_VarDefs.SetNumNew( pszName, GetResourceID().GetPrivateUID() );
+        pVarKeyNum = g_Exp.m_VarResDefs.SetNumNew( pszName, GetResourceID().GetPrivateUID() );
     }
 
     if ( pVarKeyNum == nullptr )
@@ -114,35 +114,34 @@ bool CResourceDef::MakeResourceName()
     *(++pszDef)	= '\0';
 
 
-    size_t iMax = g_Exp.m_VarDefs.GetCount();
-    int iVar = 1;
-    size_t iLen = strlen( pbuf );
+    size_t uiVar = 1;
+    size_t uiLen = strlen( pbuf );
 
-    for ( size_t i = 0; i < iMax; i++ )
+    for ( const CVarDefCont *pVarDef : g_Exp.m_VarResDefs )
     {
         // Is this a similar key?
-        pszKey	= g_Exp.m_VarDefs.GetAt(i)->GetKey();
-        if ( strnicmp( pbuf, pszKey, iLen ) != 0 )
+        pszKey	= pVarDef->GetKey();
+        if ( strnicmp( pbuf, pszKey, uiLen ) != 0 )
             continue;
 
         // skip underscores
-        pszKey = pszKey + iLen;
+        pszKey = pszKey + uiLen;
         while ( *pszKey	== '_' )
             pszKey++;
 
         // Is this is subsequent key with a number? Get the highest (plus one)
         if ( IsStrNumericDec( pszKey ) )
         {
-            int iVarThis = ATOI( pszKey );
-            if ( iVarThis >= iVar )
-                iVar = iVarThis + 1;
+            size_t uiVarThis = Str_ToULL( pszKey );
+            if ( uiVarThis >= uiVar )
+                uiVar = uiVarThis + 1;
         }
         else
-            iVar++;
+            ++uiVar;
     }
 
     // add an extra _, hopefully won't conflict with named areas
-    sprintf( pszDef, "_%i", iVar );
+    sprintf( pszDef, "_%" PRIuSIZE_T, uiVar );
     SetResourceName( pbuf );
     // Assign name
     return true;

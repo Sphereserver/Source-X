@@ -660,11 +660,11 @@ bool CPartyDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc )
 			if ( *pszKey == '.' )	// do we have an argument?
 			{
 				SKIP_SEPARATORS(pszKey);
-				size_t iQty = (size_t)(Exp_GetVal(pszKey));
+				size_t iQty = Exp_GetSTVal(pszKey);
 				if ( iQty >= m_TagDefs.GetCount() )
 					return false;	// trying to get non-existant tag
 
-				CVarDefCont *pTagAt = m_TagDefs.GetAt(iQty);
+				const CVarDefCont *pTagAt = m_TagDefs.GetAt(iQty);
 				if ( !pTagAt )
 					return false;	// trying to get non-existant tag
 
