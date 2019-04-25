@@ -209,9 +209,6 @@ CServerConfig::CServerConfig()
 	m_iNpcAi			= 0;
 	m_iMaxLoopTimes		= 100000;
 
-	m_bAutoResDisp		= true;
-	m_iAutoPrivFlags	= 0;
-
 	// Third Party Tools
 	m_fCUOStatus		= true;
 	m_fUOGStatus		= true;
@@ -230,6 +227,11 @@ CServerConfig::CServerConfig()
 	m_bMySqlTicks			= false;
 
     m_bAutoResDisp          = true;
+	m_iAutoPrivFlags = 0;
+
+	_iEraLimitGear = RESDISPLAY_VERSION(RDS_QTY - 1); // Always latest by default
+	_iEraLimitLoot = RESDISPLAY_VERSION(RDS_QTY - 1); // Always latest by default
+	_iEraLimitProps = RESDISPLAY_VERSION(RDS_QTY - 1); // Always latest by default
 
 	m_cCommandPrefix		= '.';
 
@@ -413,6 +415,9 @@ enum RC_TYPE
 	RC_AUTOPRIVFLAGS,			// m_iAutoPrivFlags
     RC_AUTOPROCESSPRIORITY,     // m_iAutoProcessPriority
 	RC_AUTORESDISP,				// m_bAutoResDisp
+	RC_ERALIMITGEAR,			// _iEraLimitGear
+	RC_ERALIMITLOOT,			// _iEraLimitLoot
+	RC_ERALIMITPROPS,			// _iEraLimitProps
     RC_AUTOSHIPKEYS,            // _fAutoShipKeys
 	RC_BACKUPLEVELS,			// m_iSaveBackupLevels
 	RC_BANKMAXITEMS,
@@ -712,6 +717,9 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 #endif
 	{ "DUNGEONLIGHT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLightDungeon),		0 }},
 	{ "EQUIPPEDCAST",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fEquippedCast),		0 }},
+	{ "ERALIMITGEAR",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iEraLimitGear),			0 }},
+	{ "ERALIMITLOOT",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iEraLimitLoot),			0 }},
+	{ "ERALIMITPROPS",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iEraLimitProps),		0 }},
 	{ "EVENTSITEM",				{ ELEM_CSTRING, OFFSETOF(CServerConfig,m_sEventsItem),			0 }},
 	{ "EVENTSPET",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sEventsPet),			0 }},
 	{ "EVENTSPLAYER",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sEventsPlayer),		0 }},
@@ -899,7 +907,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			int index = ATOI(s.GetKey()+5);
 			if (index < 0 || index > STAT_FOOD)
 				return false;
-			g_Cfg.m_iRegenRate[index] = (s.GetArgVal() * MSECS_PER_SEC);
+			g_Cfg.m_iRegenRate[index] = (s.GetArgLLVal() * MSECS_PER_SEC);
 			return true;
 		}
 		else if ( s.IsKeyHead("MAP", 3) )		//	MAPx=settings
@@ -1028,7 +1036,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			m_iBankWMax = s.GetArgVal() * WEIGHT_UNITS;
 			break;
 		case RC_CLIENTLINGER:
-			m_iClientLingerTime = s.GetArgVal() * MSECS_PER_SEC;
+			m_iClientLingerTime = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 		case RC_CLIENTLOGINMAXTRIES:
 			{
@@ -1037,7 +1045,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 					m_iClientLoginMaxTries = 0;
 			} break;
 		case RC_CLIENTLOGINTEMPBAN:
-			m_iClientLoginTempBan = s.GetArgVal() * 60 * MSECS_PER_SEC;
+			m_iClientLoginTempBan = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
 			break;
 		case RC_CLIENTMAX:
 		case RC_CLIENTS:
@@ -1069,37 +1077,37 @@ bool CServerConfig::r_LoadVal( CScript &s )
                 m_iContainerMaxItems = uiVal;
         }
 		case RC_CORPSENPCDECAY:
-			m_iDecay_CorpseNPC = s.GetArgVal()*60*MSECS_PER_SEC;
+			m_iDecay_CorpseNPC = s.GetArgLLVal()*60*MSECS_PER_SEC;
 			break;
 		case RC_CORPSEPLAYERDECAY:
-			m_iDecay_CorpsePlayer = s.GetArgVal()*60*MSECS_PER_SEC;
+			m_iDecay_CorpsePlayer = s.GetArgLLVal()*60*MSECS_PER_SEC;
 			break;
 		case RC_CRIMINALTIMER:
-			m_iCriminalTimer = s.GetArgVal() * 60 * MSECS_PER_SEC;
+			m_iCriminalTimer = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
 			break;
 		case RC_STRIPPATH:	// Put TNG or Axis stripped files here.
 			m_sStripPath = CSFile::GetMergedFileName( s.GetArgStr(), "" );
 			break;
 		case RC_DEADSOCKETTIME:
-			m_iDeadSocketTime = s.GetArgVal()*60*MSECS_PER_SEC;
+			m_iDeadSocketTime = s.GetArgLLVal()*60*MSECS_PER_SEC;
 			break;
 		case RC_DECAYTIMER:
-			m_iDecay_Item = s.GetArgVal() * 60 * MSECS_PER_SEC;
+			m_iDecay_Item = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
 			break;
 		case RC_FREEZERESTARTTIME:
-			m_iFreezeRestartTime = s.GetArgVal() * MSECS_PER_SEC;
+			m_iFreezeRestartTime = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 		case RC_GAMEMINUTELENGTH:
-			m_iGameMinuteLength = s.GetArgVal() * MSECS_PER_SEC;
+			m_iGameMinuteLength = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 		case RC_GUARDLINGER:
-			m_iGuardLingerTime = s.GetArgVal() * 60 * MSECS_PER_SEC;
+			m_iGuardLingerTime = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
 			break;
 		case RC_HEARALL:
 			g_Log.SetLogMask( s.GetArgFlag( g_Log.GetLogMask(), LOGM_PLAYER_SPEAK ));
 			break;
 		case RC_HITSUPDATERATE:
-			m_iHitsUpdateRate = s.GetArgVal() * MSECS_PER_SEC;
+			m_iHitsUpdateRate = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 		case RC_ITEMSMAXAMOUNT:
 		{
@@ -1117,7 +1125,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			g_Install.SetPreferPath( CSFile::GetMergedFileName( s.GetArgStr(), "" ));
 			break;
 		case RC_MAPCACHETIME:
-			m_iMapCacheTime = s.GetArgVal() * MSECS_PER_SEC;
+			m_iMapCacheTime = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 		case RC_MAXCHARSPERACCOUNT:
 			m_iMaxCharsPerAccount = (uchar)(s.GetArgVal());
@@ -1147,7 +1155,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
             break;
         }
 		case RC_MINCHARDELETETIME:
-			m_iMinCharDeleteTime = s.GetArgVal() * MSECS_PER_SEC;
+			m_iMinCharDeleteTime = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 		case RC_MINKARMA:
 			m_iMinKarma = s.GetArgVal();
@@ -1155,16 +1163,16 @@ bool CServerConfig::r_LoadVal( CScript &s )
 				m_iMinKarma = m_iMaxKarma;
 			break;
 		case RC_MURDERDECAYTIME:
-			m_iMurderDecayTime = s.GetArgVal() * MSECS_PER_SEC;
+			m_iMurderDecayTime = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 		case RC_NOTOTIMEOUT:
-			m_iNotoTimeout = s.GetArgVal() * MSECS_PER_SEC;
+			m_iNotoTimeout = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 		case RC_WOOLGROWTHTIME:
-			m_iWoolGrowthTime = s.GetArgVal() * 60 * MSECS_PER_SEC;
+			m_iWoolGrowthTime = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
 			break;
         case RC_ITEMHITPOINTSUPDATE:
-            _iItemHitpointsUpdate = s.GetArgVal() * MSECS_PER_SEC;
+            _iItemHitpointsUpdate = s.GetArgLLVal() * MSECS_PER_SEC;
             break;
 		case RC_PROFILE:
 			{
@@ -1222,11 +1230,11 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 
 		case RC_SAVEPERIOD:
-			m_iSavePeriod = s.GetArgVal()*60*MSECS_PER_SEC;
+			m_iSavePeriod = s.GetArgLLVal()*60*MSECS_PER_SEC;
 			break;
 
 		case RC_SPELLTIMEOUT:
-			m_iSpellTimeout = s.GetArgVal() * MSECS_PER_SEC;
+			m_iSpellTimeout = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 
 		case RC_SECTORSLEEP:
@@ -1236,7 +1244,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 
 		case RC_SAVEBACKGROUND:
-			m_iSaveBackgroundTime = s.GetArgVal() * 60 * MSECS_PER_SEC;
+			m_iSaveBackgroundTime = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
 			break;
 
         case RC_SAVESECTORSPERTICK:
@@ -1268,11 +1276,11 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 
 		case RC_TIMERCALL:
-			_iTimerCall = s.GetArgVal() * 60 * MSECS_PER_SEC;
+			_iTimerCall = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
 			break;
 
 		case RC_TOOLTIPCACHE:
-			g_Cfg.m_iTooltipCache = s.GetArgVal() * MSECS_PER_SEC;
+			g_Cfg.m_iTooltipCache = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 
 #ifdef _MTNETWORK
@@ -2379,7 +2387,7 @@ CPointMap CServerConfig::GetRegionPoint( lpctstr pCmd ) const // Decode a telepo
 	GETNONWHITESPACE( pCmd );
 	if ( pCmd[0] == '-' && !strchr( pCmd, ',' ) )	// Get location from start list.
 	{
-		size_t i = ( - ATOI(pCmd)) - 1;
+		size_t i = (size_t)SphereAbs(ATOI(pCmd)) - 1;
 		if ( ! m_StartDefs.IsValidIndex( i ))
 		{
 			if (m_StartDefs.empty())

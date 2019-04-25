@@ -339,7 +339,7 @@ bool CCrypto::Init( dword dwIP, byte * pEvent, uint inLen, bool isclientKr )
 		else
 		{
 #ifdef DEBUG_CRYPT_MSGS
-			DEBUG_MSG(("Odd login message length %" PRIuSIZE_T "? [CCrypto::Init()]\n", iLen));
+			DEBUG_MSG(("Odd login message length %" PRIuSIZE_T "? [CCrypto::Init()]\n", inLen));
 #endif
 			bReturn = false;
 		}

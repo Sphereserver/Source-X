@@ -39,6 +39,10 @@ public:
 	ushort m_Dex;
 	ushort m_Int;
 
+	RESDISPLAY_VERSION _iEraLimitGear;	// Don't allow to create gear newer than the given era (softcoded).
+	RESDISPLAY_VERSION _iEraLimitLoot;	// Don't allow to create loot newer than the given era (softcoded).
+	RESDISPLAY_VERSION _iEraLimitProps;	// Don't allow to have properties newer than the given era.
+
     int _iRange;
 
 	short m_iMoveRate;	// move rate percent

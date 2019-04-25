@@ -29,6 +29,10 @@ CCharBase::CCharBase( CREID_TYPE id ) :
 	m_Int = 0;
     _iRange = 0;
 
+	_iEraLimitGear = g_Cfg._iEraLimitGear;		// Always latest by default
+	_iEraLimitLoot = g_Cfg._iEraLimitLoot;		// Always latest by default
+	_iEraLimitProps = g_Cfg._iEraLimitProps;	// Always latest by default
+
 	m_iMoveRate = (short)(g_Cfg.m_iMoveRate);
 
 	if ( IsValidDispID(id))
@@ -221,6 +225,15 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 		case CBC_DISPID:
 			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, GetDispID()));
 			break;
+		case CBC_ERALIMITGEAR:
+			sVal.FormatVal(_iEraLimitGear);
+			break;
+		case CBC_ERALIMITLOOT:
+			sVal.FormatVal(_iEraLimitLoot);
+			break;
+		case CBC_ERALIMITPROPS:
+			sVal.FormatVal(_iEraLimitProps);
+			break;
 		case CBC_ID:
 			sVal.FormatHex( GetDispID() );
 			break;
@@ -362,6 +375,15 @@ bool CCharBase::r_LoadVal( CScript & s )
 			break;
 		case CBC_DISPID:
 			return false;
+		case CBC_ERALIMITGEAR:
+			_iEraLimitGear = (RESDISPLAY_VERSION)s.GetArgVal();
+			break;
+		case CBC_ERALIMITLOOT:
+			_iEraLimitLoot = (RESDISPLAY_VERSION)s.GetArgVal();
+			break;
+		case CBC_ERALIMITPROPS:
+			_iEraLimitProps = (RESDISPLAY_VERSION)s.GetArgVal();
+			break;
 		case CBC_FOODTYPE:
 			SetFoodType( s.GetArgStr());
 			break;

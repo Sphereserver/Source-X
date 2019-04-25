@@ -121,27 +121,45 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 	double iSkillSum = iSkillTaming + iSkillAnimalLore + iSkillVeterinary;
 
 	int iPetMax;
-	if ( iSkillSum >= 240.0 )
-		iPetMax = 5;
-	else if ( iSkillSum >= 200.0 )
-		iPetMax = 4;
-	else if ( iSkillSum >= 160.0 )
-		iPetMax = 3;
-	else
-		iPetMax = 2;
-
-	if ( iSkillTaming >= 100.0 )
-		iPetMax += (int)((iSkillTaming - 90.0) / 10);
-
-	if ( iSkillAnimalLore >= 100.0 )
-		iPetMax += (int)((iSkillAnimalLore - 90.0) / 10);
-
-	if ( iSkillVeterinary >= 100.0 )
-		iPetMax += (int)((iSkillVeterinary - 90.0) / 10);
-
 	int iMaxPlayerPets = (int)m_TagDefs.GetKeyNum("MAXPLAYERPETS");
-	if ( iMaxPlayerPets )
+	if (iMaxPlayerPets)
+	{
 		iPetMax = iMaxPlayerPets;
+	}
+	else
+	{
+		if (iSkillSum >= 240.0)
+		{
+			iPetMax = 5;
+		}
+		else if (iSkillSum >= 200.0)
+		{
+			iPetMax = 4;
+		}
+		else if (iSkillSum >= 160.0)
+		{
+			iPetMax = 3;
+		}
+		else
+		{
+			iPetMax = 2;
+		}
+
+		if (iSkillTaming >= 100.0)
+		{
+			iPetMax += (int)((iSkillTaming - 90.0) / 10);
+		}
+
+		if (iSkillAnimalLore >= 100.0)
+		{
+			iPetMax += (int)((iSkillAnimalLore - 90.0) / 10);
+		}
+
+		if (iSkillVeterinary >= 100.0)
+		{
+			iPetMax += (int)((iSkillVeterinary - 90.0) / 10);
+		}
+	}
 
 	for ( CItem *pItem = pBank->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 	{
