@@ -15,7 +15,7 @@ enum ePayGold
 
 enum RESDISPLAY_VERSION
 {
-	RDS_CLASSIC,
+	RDS_PRET2A,
 	RDS_T2A,
 	RDS_LBR,
 	RDS_AOS,

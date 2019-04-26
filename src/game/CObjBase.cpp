@@ -819,12 +819,6 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 		//return as decimal number or 0 if not set
 		//On these ones, check BaseDef if not found on dynamic
 		
-		case OC_EXPANSION:	
-			{
-				CVarDefCont * pVar = GetDefKey(pszKey, true);
-				sVal.FormatLLVal(pVar ? pVar->GetValNum() : 0);
-			}
-			break;
         case OC_RECIPEALCHEMY:
         case OC_RECIPEBLACKSMITH:
         case OC_RECIPEBOWCRAFT:
@@ -1586,14 +1580,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 			}
 			break;
 		//Set as number only
-		case OC_EXPANSION:
 		case OC_NAMELOC:
-        {
-            SetDefNum(s.GetKey(), s.GetArgVal(), false);
-            fResendTooltip = true;
-            break;
-        }
-
         case OC_RECIPEALCHEMY:
         case OC_RECIPEBLACKSMITH:
         case OC_RECIPEBOWCRAFT:
@@ -2980,7 +2967,8 @@ CComponentProps::PropertyValNum_t CObjBase::GetPropNum( COMPPROPS_TYPE iCompProp
 void CObjBase::SetPropStr( CComponentProps* pCompProps, int iPropIndex, lpctstr ptcVal, bool fDeleteZero )
 {
     ASSERT(pCompProps);
-    pCompProps->SetPropertyStr(iPropIndex, ptcVal, this, fDeleteZero);
+    const RESDISPLAY_VERSION iLimitToEra = !IsChar() ? RDS_PRET2A : static_cast<const CCharBase*>(Base_GetDef())->_iEraLimitProps;
+    pCompProps->SetPropertyStr(iPropIndex, ptcVal, this, iLimitToEra, fDeleteZero);
 }
 
 void CObjBase::SetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, lpctstr ptcVal, bool fDeleteZero )
@@ -2991,13 +2979,15 @@ void CObjBase::SetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, lpctst
         g_Log.EventDebug("CEntityProps: SetPropStr on unsubscribed CCProps. iCompPropsType %d, iPropIndex %d.\n", iCompPropsType, iPropIndex);
         CreateSubscribeComponentProps(iCompPropsType);
     }
-    pCompProps->SetPropertyStr(iPropIndex, ptcVal, this, fDeleteZero);
+    const RESDISPLAY_VERSION iLimitToEra = !IsChar() ? RDS_PRET2A : static_cast<const CCharBase*>(Base_GetDef())->_iEraLimitProps;
+    pCompProps->SetPropertyStr(iPropIndex, ptcVal, this, iLimitToEra, fDeleteZero);
 }
 
 void CObjBase::SetPropNum( CComponentProps* pCompProps, int iPropIndex, CComponentProps::PropertyValNum_t iVal )
 {
     ASSERT(pCompProps);
-    pCompProps->SetPropertyNum(iPropIndex, iVal, this);
+    const RESDISPLAY_VERSION iLimitToEra = !IsChar() ? RDS_PRET2A : static_cast<const CCharBase*>(Base_GetDef())->_iEraLimitProps;
+    pCompProps->SetPropertyNum(iPropIndex, iVal, this, iLimitToEra);
 }
 
 void CObjBase::SetPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CComponentProps::PropertyValNum_t iVal )
@@ -3008,7 +2998,8 @@ void CObjBase::SetPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CCompo
         g_Log.EventDebug("CEntityProps: SetPropNum on unsubscribed CCProps. iCompPropsType %d, iPropIndex %d.\n", iCompPropsType, iPropIndex);
         CreateSubscribeComponentProps(iCompPropsType);
     }
-    pCompProps->SetPropertyNum(iPropIndex, iVal, this);
+    const RESDISPLAY_VERSION iLimitToEra = !IsChar() ? RDS_PRET2A : static_cast<const CCharBase*>(Base_GetDef())->_iEraLimitProps;
+    pCompProps->SetPropertyNum(iPropIndex, iVal, this, iLimitToEra);
 }
 
 void CObjBase::ModPropNum( CComponentProps* pCompProps, int iPropIndex, CComponentProps::PropertyValNum_t iMod, const CComponentProps* pBaseCompProps )
@@ -3022,7 +3013,8 @@ void CObjBase::ModPropNum( CComponentProps* pCompProps, int iPropIndex, CCompone
     }
     if (!iVal && !iMod)
         return;
-    pCompProps->SetPropertyNum(iPropIndex, iMod + iVal, this);
+    const RESDISPLAY_VERSION iLimitToEra = !IsChar() ? RDS_PRET2A : static_cast<const CCharBase*>(Base_GetDef())->_iEraLimitProps;
+    pCompProps->SetPropertyNum(iPropIndex, iMod + iVal, this, iLimitToEra);
 }
 
 void CObjBase::ModPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CComponentProps::PropertyValNum_t iMod, bool fBaseDef )
@@ -3048,7 +3040,8 @@ void CObjBase::ModPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CCompo
     }
     if (!iVal && !iMod)
         return;
-    pCompProps->SetPropertyNum(iPropIndex, iVal + iMod, this);
+    const RESDISPLAY_VERSION iLimitToEra = !IsChar() ? RDS_PRET2A : static_cast<const CCharBase*>(Base_GetDef())->_iEraLimitProps;
+    pCompProps->SetPropertyNum(iPropIndex, iVal + iMod, this, iLimitToEra);
 }
 
 lpctstr CObjBase::GetDefStr( lpctstr pszKey, bool fZero, bool fDef ) const

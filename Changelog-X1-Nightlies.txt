@@ -1655,5 +1655,26 @@ WARNING: the following change could break compatibility with previous scripts! R
 25-04-2019, Nolok
 - Changed: Moved out some functionality from COMBAT_PREHIT CombatFlag: now it makes the hit animation start after the damage has been dealt (it should be the other way around, but it's how OSI does that...).
 - Added: COMBAT_FIRSTHIT_INSTANT CombatFlag to mimic another OSI feature: it makes the first hit in a combat instant (0 delay) (Issue #250).
-So, to mimic OSI combat you should enable both COMBAT_PREHIT and COMBAT_FIRSTHIT_INSTANT.
+	So, to mimic OSI combat you should enable both COMBAT_PREHIT and COMBAT_FIRSTHIT_INSTANT.
 - Changed: LOCAL.ItemDamageChance in @Hit and @GetHit default value from 40 to 25.
+
+26-04-2019, Nolok
+WARNING: Important change!
+- Added (by XuN) the following ini settings and base char properties (to override the ini setting):
+	- EraLimitGear: Don't allow to NPCs to create gear newer than the items from the expansion in the given value (Clothes, weapons, hairs ...).
+	- EraLimitLoot: Don't allow to NPCs to create loot newer than the items from the expansion in the given value.
+	- EraLimitProps: Don't allow to chars (players and NPCs) to have properties newer than the ones from the expansion in the given value (Clothes, weapons, hairs ...).
+	These keywords will allow the creation of a "universal" scriptpack, which loads only the desired items and properties.
+	There's another advantage, which requires a little more attention by the scripter though: an assignment of a property that belongs to an expansion greater than your EraLimitProps will now be IGNORED,
+	so the save files will be smaller (and the save times a little shorter too), because the ignored properties won't be loaded nor saved.
+	This also means that if you create characters with a low EraLimitProps (valid also for EraLimitGear and Loot) like 1 (T2A) and then change idea and set it to 4 (Samurai Empire), you will have to recreate the chars
+	to make them load the Props/Gear/Loots matching your new era limit. This means that you may need to RESPAWN THE WORLD.
+	The elemental damages and resistances aren't treated like expansion-restricted properties, so to enable them you have to use COMBAT_ELEMENTAL_ENGINE, like always.
+
+- Changed: Made EXPANSION a Base property only.
+- Added "elf/gargoyle only" tooltips.
+- Added tooltips for: Altered, Antique, AssassinHoned, Bane, Battlelust, Blodddrinker, BoneBreaker, Brittle, CastingFocus, EaterCold/Energy/Fire/Kinetic/Poison, Ephemeral, HitFatigue, HitManaDrain, HitSpell, Imbued,
+	IncreaseGold, LavaInfused, LowerAmmoCost, Massive, Prized, ReactiveParalyze, Searing, Splintering, ShipwreckItem, SoulCharge, SoulChargeCold/Energy/Fire/Kinetic/Poison, Unlucky, Unwieldly, UseBestWeaponSkill.
+- Added keywords and tooltips for: BonusBerserk, DurabilityBonus, HitSparks, HitSwarm, MysticWeapon. Functionality is missing yet.
+- Removed redundant property DecreaseHitChance. Just use a negative IncreaseHitChance (also, there is a tooltip entry only for IncreaseHitChance, not for a DecreaseHitChance).
+- Removed properties: DAMMODIFIER, MANAPHASE, MANABURST(Frequency/Karma/Evil/Good).

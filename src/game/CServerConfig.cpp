@@ -415,9 +415,6 @@ enum RC_TYPE
 	RC_AUTOPRIVFLAGS,			// m_iAutoPrivFlags
     RC_AUTOPROCESSPRIORITY,     // m_iAutoProcessPriority
 	RC_AUTORESDISP,				// m_bAutoResDisp
-	RC_ERALIMITGEAR,			// _iEraLimitGear
-	RC_ERALIMITLOOT,			// _iEraLimitLoot
-	RC_ERALIMITPROPS,			// _iEraLimitProps
     RC_AUTOSHIPKEYS,            // _fAutoShipKeys
 	RC_BACKUPLEVELS,			// m_iSaveBackupLevels
 	RC_BANKMAXITEMS,
@@ -473,6 +470,9 @@ enum RC_TYPE
 #endif
 	RC_DUNGEONLIGHT,
 	RC_EQUIPPEDCAST,			// m_fEquippedCast
+    RC_ERALIMITGEAR,			// _iEraLimitGear
+    RC_ERALIMITLOOT,			// _iEraLimitLoot
+    RC_ERALIMITPROPS,			// _iEraLimitProps
 	RC_EVENTSITEM,				// m_sEventsItem
 	RC_EVENTSPET,				// m_sEventsPet
 	RC_EVENTSPLAYER,			// m_sEventsPlayer
@@ -1050,10 +1050,10 @@ bool CServerConfig::r_LoadVal( CScript &s )
 		case RC_CLIENTMAX:
 		case RC_CLIENTS:
 			m_iClientsMax = s.GetArgVal();
-			if ( m_iClientsMax > FD_SETSIZE-1 )	// Max number we can deal with. compile time thing.
-			{
+			if (m_iClientsMax > FD_SETSIZE-1)	// Max number we can deal with. compile time thing.
 				m_iClientsMax = FD_SETSIZE-1;
-			}
+            else if (m_iClientsMax < 0)
+                m_iClientsMax = 0;
 			break;
 		case RC_COLORHIDDEN:
 			m_iColorHidden = (HUE_TYPE)(s.GetArgVal());

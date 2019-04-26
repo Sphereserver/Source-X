@@ -346,6 +346,11 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
     if (pItem->IsAttr(ATTR_NOTRADE))
         PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1076255)); // NO-TRADE
 
+    if (!pItem->IsCanUse(CAN_U_GARGOYLE|CAN_U_ELF) && pItem->IsCanUse(CAN_U_ELF))
+        PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1111709)); // Elves Only
+    else if (!pItem->IsCanUse(CAN_U_HUMAN|CAN_U_ELF) && pItem->IsCanUse(CAN_U_GARGOYLE))
+        PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1111709)); // Gargoyles Only
+
 	if (g_Cfg.m_iFeatureML & FEATURE_ML_UPDATE)
 	{
 		if (pItem->IsMovable())

@@ -28,6 +28,7 @@ protected:
 private:
 	height_t    m_Height;       // Height of the object.
 	// -------------- ResLevel -------------
+    byte        m_Expansion;
 	byte        m_ResLevel;     // ResLevel required for players to see me
 	HUE_TYPE    m_ResDispDnHue; // Hue shown to players who don't have my ResLevel
 	word        m_ResDispDnId;  // ID shown to players who don't have my ResLevel
@@ -56,13 +57,9 @@ public:
     CFactionDef GetFaction();
 
     /**
-     * @fn  lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const
-     *
      * @brief   Gets definition string.
-     *
      * @param   pszKey  The key.
      * @param   fZero   true to zero.
-     *
      * @return  The definition string.
      */
 	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const
@@ -71,12 +68,8 @@ public:
 	}
 
     /**
-     * @fn  int64 GetDefNum( lpctstr pszKey, bool fZero = false ) const
-     *
      * @brief   Gets definition number.
-     *
      * @param   pszKey  The key.
-     *
      * @return  The definition number.
      */
 	int64 GetDefNum( lpctstr pszKey ) const
@@ -85,10 +78,7 @@ public:
 	}
 
     /**
-     * @fn  void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true)
-     *
      * @brief   Sets definition number.
-     *
      * @param   pszKey      The key.
      * @param   iVal        Zero-based index of the value.
      * @param   fDeleteZero true to zero.
@@ -99,10 +89,7 @@ public:
 	}
 
     /**
-     * @fn  void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true)
-     *
      * @brief   Sets definition string.
-     *
      * @param   pszKey      The key.
      * @param   pszVal      The value.
      * @param   fQuoted     true if quoted.
@@ -114,10 +101,7 @@ public:
 	}
 
     /**
-     * @fn  void DeleteDef(lpctstr pszKey)
-     *
      * @brief   Deletes the definition described by pszKey.
-     *
      * @param   pszKey  The key.
      */
 	void DeleteDef(lpctstr pszKey)
@@ -204,57 +188,38 @@ private:
 public:
 
     /**
-     * @fn  lpctstr GetTypeName() const;
-     *
      * @brief   Gets type name.
-     *
      * @return  The type name.
      */
 	lpctstr GetTypeName() const;
 
     /**
-     * @fn  virtual lpctstr GetName() const;
-     *
      * @brief   Gets the name.
-     *
      * @return  The name.
      */
 	virtual lpctstr GetName() const;
 
     /**
-     * @fn  bool HasTypeName() const;
-     *
      * @brief   Query if this object has type name.
-     *
      * @return  true if type name, false if not.
      */
 	bool HasTypeName() const;
 
     /**
-     * @fn  virtual void SetTypeName( lpctstr pszName );
-     *
      * @brief   Sets type name.
-     *
      * @param   pszName The name.
      */
 	virtual void SetTypeName( lpctstr pszName );
 
     /**
-     * @fn  bool Can( dword dwCan ) const;
-     *
      * @brief   Has the given Can flag.
-     *
      * @param   dwCan    The can flags.
-     *
      * @return  true if it succeeds, false if it fails.
      */
 	bool Can( dword dwCan ) const;
 
     /**
-     * @fn  virtual void UnLink();
-     *
      * @brief   Un link.
-     *
      */
 	virtual void UnLink() override;
 
@@ -263,29 +228,20 @@ public:
 	virtual bool r_LoadVal( CScript & s ) override;
 
     /**
-     * @fn  bool IsValid() const;
-     *
      * @brief   Query if this object is valid.
-     *
      * @return  true if valid, false if not.
      */
 
 	bool IsValid() const;
 
     /**
-     * @fn  height_t GetHeight() const;
-     *
      * @brief   Gets the height.
-     *
      * @return  The height.
      */
 	height_t GetHeight() const;
 
     /**
-     * @fn  void SetHeight( height_t Height );
-     *
      * @brief   Sets a height.
-     *
      * @param   Height  The height.
      */
 	void SetHeight( height_t Height );
@@ -293,77 +249,52 @@ public:
 	// -------------- ResLevel -------------
 
     /**
-     * @fn  byte GetResLevel() const;
-     *
      * @brief   Gets ResLevel.
-     *
      * @return  The ResLevel.
      */
 	byte GetResLevel() const;
 
     /**
-     * @fn  bool SetResLevel( byte ResLevel );
-     *
      * @brief   Sets ResLevel.
-     *
      * @param   ResLevel    The ResLevel.
-     *
      * @return  true if it succeeds, false if it fails.
      */
 	bool SetResLevel( byte ResLevel );
 
     /**
-     * @fn  HUE_TYPE GetResDispDnHue() const;
-     *
      * @brief   Gets ResDispDNHue.
-     *
      * @return  The ResDispDNHue.
      */
 	HUE_TYPE GetResDispDnHue() const;
 
     /**
-     * @fn  void SetResDispDnHue( HUE_TYPE ResDispDnHue );
-     *
      * @brief   Sets ResDispDNHue.
-     *
      * @param   ResDispDnHue    The ResDispDNHue.
      */
 	void SetResDispDnHue( HUE_TYPE ResDispDnHue );
 
     /**
-     * @fn  word GetResDispDnId() const;
-     *
      * @brief   Gets ResDispDnId.
-     *
      * @return  The ResDispDnId.
      */
 	word GetResDispDnId() const;
 
     /**
-     * @fn  void SetResDispDnId( word ResDispDnId );
-     *
      * @brief   Sets ResDispDnId.
-     *
      * @param   ResDispDnId Identifier for ResDispDnId.
      */
 	void SetResDispDnId( word ResDispDnId );
 	// -------------------------------------
 
     /**
-     * @fn  void CopyBasic( const CBaseBaseDef * pSrc );
-     *
      * @brief   Copies the basic described by pSrc.
-     *
      * @param   pSrc    Source for the.
      */
 	void CopyBasic( const CBaseBaseDef * pSrc );
 
     /**
-     * @fn  void CopyTransfer( CBaseBaseDef * pSrc );
-     *
      * @brief   Copies and transfer what is described by pSrc.
-     *
-     * @param [in,out]  pSrc    If non-null, source for the.
+     * @param   pSrc    If non-null, source for the.
      */
 	void CopyTransfer( CBaseBaseDef * pSrc );
 };

@@ -38,6 +38,7 @@ CBaseBaseDef::CBaseBaseDef( CResourceID id ) :
 	m_defenseRange			= 0;
 	m_Height				= 0;
 	m_Can					= 0;
+    m_Expansion             = RDS_T2A;
 	m_ResLevel				= RDS_T2A;
 	m_ResDispDnHue			= HUE_DEFAULT;
 	m_ResDispDnId			= 0;
@@ -334,7 +335,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 		case OBC_ARMOR:
 			{
 				int64 piVal[2];
-				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, CountOf(piVal));
+                int iQty = Str_ParseCmds( s.GetArgStr(), piVal, CountOf(piVal));
 				m_defenseBase = (uchar)(piVal[0]);
 				if ( iQty > 1 )
 					m_defenseRange = (uchar)(piVal[1]) - m_defenseBase;
@@ -345,7 +346,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 		case OBC_DAM:
 			{
 				int64 piVal[2];
-				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, CountOf(piVal));
+				int iQty = Str_ParseCmds( s.GetArgStr(), piVal, CountOf(piVal));
 				m_attackBase = (uchar)(piVal[0]);
 				if ( iQty > 1 )
 					m_attackRange = (uchar)(piVal[1]) - m_attackBase;
@@ -405,6 +406,7 @@ void CBaseBaseDef::CopyBasic( const CBaseBaseDef * pBase )
 
 	m_Height = pBase->m_Height;
 	// -------------- ResLevel -------------
+    m_Expansion = pBase->m_Expansion;
 	m_ResLevel = pBase->m_ResLevel;
 	m_ResDispDnHue = pBase->m_ResDispDnHue;
 	m_ResDispDnId = pBase->m_ResDispDnId;

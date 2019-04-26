@@ -79,7 +79,7 @@ public:
     /** @name Index Validation:
     */
     ///@{
-    size_t BadIndex() const;
+    inline constexpr size_t BadIndex() const;
     /**
     * @brief Check if index is valid for this array.
     * @param i index to check.
@@ -155,7 +155,7 @@ void CSTypedArray<TYPE>::assign_at_grow(size_t nIndex, TYPE newElement)
 // CSTypedArray:: Operations.
 
 template<class TYPE>
-inline size_t CSTypedArray<TYPE>::BadIndex() const
+constexpr size_t CSTypedArray<TYPE>::BadIndex() const
 {
     return INTPTR_MAX;
 }

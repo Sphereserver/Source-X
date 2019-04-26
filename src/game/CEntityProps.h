@@ -108,7 +108,7 @@ public:
     *
     * @param s the container with the keys and values to set.
     * @param pObjEntityProps The CObjBase holding the dynamic properties. nullptr if this method is called from a CBaseBaseDef.
-    * @param pBaseEntityProps The CBaseBaseDef holding the base properties.
+    * @param pBaseEntityProps The CBaseBaseDef holding the base properties. Can't be nullptr.
     *
     * @return true if the prop was stored in a Component
     */

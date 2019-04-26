@@ -579,8 +579,8 @@ class NetworkManager
 {
 private:
 	NetState** m_states;			// client state pool
-	size_t m_stateCount;			// client state count
-	size_t m_lastGivenSlot;			// last slot index assigned
+	int  m_stateCount;				// client state count
+	int  m_lastGivenSlot;			// last slot index assigned
 	bool m_isThreaded;
 
     IPHistoryManager m_ips;			// ip history
@@ -611,9 +611,9 @@ public:
 	void flushAllClients(void);					// force each thread to flush output
 
 public:
-	const PacketManager& getPacketManager(void) const { return m_packets; }		// get packet manager
-	IPHistoryManager& getIPHistoryManager(void) { return m_ips; }	// get ip history manager
-	bool isThreaded(void) const { return m_isThreaded; } // are threads active
+    inline const PacketManager& getPacketManager(void) const { return m_packets; }		// get packet manager
+    inline IPHistoryManager& getIPHistoryManager(void) { return m_ips; }	// get ip history manager
+    inline bool isThreaded(void) const { return m_isThreaded; } // are threads active
 	inline bool isInputThreaded(void) const // is network input handled by thread
 	{
 #ifdef MTNETWORK_INPUT
@@ -636,7 +636,7 @@ private:
 	void createNetworkThreads(size_t count);	// create n threads to handle client i/o
 	NetworkThread* selectBestThread(void);		// select the most suitable thread for handling a new client
 	void assignNetworkState(NetState* state);	// assign a state to a thread
-	NetState* findFreeSlot(size_t start = INTPTR_MAX);	// find an unused slot for new client
+	NetState* findFreeSlot(int start = -1);	// find an unused slot for new client
 		
 	friend class ClientIterator;
 	friend class NetworkThreadStateIterator;

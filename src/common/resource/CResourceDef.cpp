@@ -28,29 +28,31 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
         }
     }
 
-    const CVarDefCont * pVarKey = g_Exp.m_VarResDefs.GetKey( pszName );
+    const CVarDefCont * pExistingVarKey = g_Exp.m_VarResDefs.GetKey( pszName );
+    const dword dwResPrivateUID = GetResourceID().GetPrivateUID();
+    const int iResIndex = GetResourceID().GetResIndex();
 	CVarDefContNum* pVarKeyNum = nullptr;
-    if ( pVarKey )
+    if ( pExistingVarKey )
     {
-        dword keyVal = (dword)pVarKey->GetValNum();
-        if ( keyVal == GetResourceID().GetPrivateUID() )
+        const dword dwKeyVal = (dword)pExistingVarKey->GetValNum();
+        if ( dwKeyVal == dwResPrivateUID )
         {
             // DEBUG_WARN(("DEFNAME=%s: redefinition (new value same as previous)\n", pszName));
             // It happens tipically for types pre-defined in sphere_defs.scp and other things. Wanted behaviour.
             return true;
         }
 
-
-        if ( RES_GET_INDEX(keyVal) == (dword)GetResourceID().GetResIndex())
-            DEBUG_WARN(( "DEFNAME=%s: redefinition with a strange type mismatch? (0%" PRIx32 "!=0%" PRIx32 ")\n", pszName, keyVal, GetResourceID().GetPrivateUID() ));
+        const int iKeyIndex = (int)RES_GET_INDEX(dwKeyVal);
+        if ( iKeyIndex == iResIndex)
+            DEBUG_WARN(( "DEFNAME=%s: redefinition with a strange type mismatch? (0%" PRIx32 "!=0%" PRIx32 ")\n", pszName, dwKeyVal, dwResPrivateUID ));
         else
-            DEBUG_WARN(( "DEFNAME=%s: redefinition (0%" PRIx32 "!=0%" PRIx32 ")\n", pszName, RES_GET_INDEX(keyVal), GetResourceID().GetResIndex() ));
+            DEBUG_WARN(( "DEFNAME=%s: redefinition (0%x!=0%x)\n", pszName, iKeyIndex, iResIndex ));
 
-        pVarKeyNum = g_Exp.m_VarResDefs.SetNum( pszName, GetResourceID().GetPrivateUID() );
+        pVarKeyNum = g_Exp.m_VarResDefs.SetNum( pszName, dwResPrivateUID );
     }
     else
     {
-        pVarKeyNum = g_Exp.m_VarResDefs.SetNumNew( pszName, GetResourceID().GetPrivateUID() );
+        pVarKeyNum = g_Exp.m_VarResDefs.SetNumNew( pszName, dwResPrivateUID );
     }
 
     if ( pVarKeyNum == nullptr )

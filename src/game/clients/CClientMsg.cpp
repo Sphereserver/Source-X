@@ -2885,7 +2885,7 @@ byte CClient::LogIn( CAccount * pAccount, CSString & sMsg )
 		}
 	}
 	if ( pAccount->GetPrivLevel() < PLEVEL_GM &&
-		g_Serv.StatGet(SERV_STAT_CLIENTS) > g_Cfg.m_iClientsMax  )
+		g_Serv.StatGet(SERV_STAT_CLIENTS) > g_Cfg.m_iClientsMax )
 	{
 		// Give them a polite goodbye.
 		g_Log.Event(LOGM_CLIENTS_LOG, "%x: Account '%s', maximum clients reached.\n", GetSocketID(), pAccount->GetName());

@@ -155,10 +155,17 @@ bool CEntityProps::r_LoadPropVal(CScript & s, CObjBase* pObjEntityProps, CBaseBa
     // return false: invalid property for any of the subscribed components
     // return true: valid property, whether it has a defined value or not
 
+    ASSERT(pBaseEntityProps);
+    RESDISPLAY_VERSION iLimitToExpansion = RDS_PRET2A;
+    if (const CCharBase *pCharBase = dynamic_cast<CCharBase*>(pBaseEntityProps))
+    {
+        iLimitToExpansion = pCharBase->_iEraLimitProps;
+    }
+
     int iPropIndex = -1;
     bool fPropStr = false;
     COMPPROPS_TYPE iCCPType = (COMPPROPS_TYPE)-1;
-    auto _CEPLoopLoad = [&s, &iPropIndex, &fPropStr, &iCCPType](CEntityProps *pEP, CObjBase* pLinkedObj) -> bool
+    auto _CEPLoopLoad = [&s, &iPropIndex, &fPropStr, &iCCPType, iLimitToExpansion](CEntityProps *pEP, CObjBase* pLinkedObj) -> bool
     {
         if (pEP->_List.empty())
             return false;
@@ -176,7 +183,7 @@ bool CEntityProps::r_LoadPropVal(CScript & s, CObjBase* pObjEntityProps, CBaseBa
                     continue;
                 }
                 fPropStr = pComponent->IsPropertyStr(iPropIndex);
-                if (pComponent->FindLoadPropVal(s, pLinkedObj, iPropIndex, fPropStr))
+                if (pComponent->FindLoadPropVal(s, pLinkedObj, iLimitToExpansion, iPropIndex, fPropStr))
                 {
                     // The property belongs to this CCP and it is set.
                     return true;
@@ -191,7 +198,6 @@ bool CEntityProps::r_LoadPropVal(CScript & s, CObjBase* pObjEntityProps, CBaseBa
 
     if (pObjEntityProps == nullptr)    // I'm calling it from a base CEntityProps
     {
-        ASSERT(pBaseEntityProps);
         return _CEPLoopLoad(pBaseEntityProps, nullptr);  // pEntityProps is already a base cep
     }
 
@@ -207,19 +213,16 @@ bool CEntityProps::r_LoadPropVal(CScript & s, CObjBase* pObjEntityProps, CBaseBa
         else
         {
             // But the prop isn't set. Let's check the base. We already have iPropIndex and fPropStr.
-            ASSERT(pBaseEntityProps);
             CComponentProps *pComp = pBaseEntityProps->GetComponentProps(iCCPType);
             if (!pComp)
                 return true;    // The base doesn't have this component, but the obj did -> return true
             ASSERT(iPropIndex != -1);
-            pComp->FindLoadPropVal(s, nullptr, iPropIndex, fPropStr);
+            pComp->FindLoadPropVal(s, nullptr, iLimitToExpansion, iPropIndex, fPropStr);
             return true;        // return true regardlessly of the value being set or not (it's still a valid property)
         }
     }
 
-    if (pBaseEntityProps)
-        return _CEPLoopLoad(pBaseEntityProps, nullptr);
-    return false;
+    return _CEPLoopLoad(pBaseEntityProps, nullptr);
 }
 
 bool CEntityProps::r_WritePropVal(lpctstr pszKey, CSString & sVal, const CObjBase *pObjEntityProps, const CBaseBaseDef *pBaseEntityProps) // static

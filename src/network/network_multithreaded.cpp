@@ -105,7 +105,7 @@ NetworkManager::NetworkManager(void)
 {
 	m_states = nullptr;
 	m_stateCount = 0;
-	m_lastGivenSlot = INTPTR_MAX;
+	m_lastGivenSlot = -1;
 	m_isThreaded = false;
 }
 
@@ -287,18 +287,18 @@ void NetworkManager::acceptNewConnection(void)
 	EXC_CATCH;
 }
 
-NetState* NetworkManager::findFreeSlot(size_t start)
+NetState* NetworkManager::findFreeSlot(int start)
 {
 	// find slot for new client
 	ADDTOCALLSTACK("NetworkManager::findFreeSlot");
 
 	// start searching from the last given slot to try and give incremental
 	// ids to clients
-	if (start == INTPTR_MAX)
+	if (start == -1)
 		start = m_lastGivenSlot + 1;
 
 	// find unused slot
-	for (size_t i = start; i < m_stateCount; ++i)
+	for (int i = start; i < m_stateCount; ++i)
 	{
 		if (m_states[i]->isInUse())
 			continue;
@@ -323,8 +323,8 @@ void NetworkManager::start(void)
 	ASSERT(m_states == nullptr);
 	ASSERT(m_stateCount == 0);
 	m_states = new NetState*[g_Cfg.m_iClientsMax];
-	for (size_t l = 0; l < g_Cfg.m_iClientsMax; ++l)
-		m_states[l] = new NetState((int)l);
+	for (int l = 0; l < g_Cfg.m_iClientsMax; ++l)
+		m_states[l] = new NetState(l);
 	m_stateCount = g_Cfg.m_iClientsMax;
 
 	DEBUGNETWORK(("Created %" PRIuSIZE_T " network slots (system limit of %d clients)\n", m_stateCount, FD_SETSIZE));
@@ -378,7 +378,7 @@ void NetworkManager::tick(void)
 	ADDTOCALLSTACK("NetworkManager::tick");
 
 	EXC_TRY("Tick");
-	for (size_t i = 0; i < m_stateCount; ++i)
+	for (int i = 0; i < m_stateCount; ++i)
 	{
 		NetState* state = m_states[i];
 		if (state->isInUse() == false)

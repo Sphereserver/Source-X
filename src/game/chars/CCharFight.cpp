@@ -979,7 +979,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 	ADDTOCALLSTACK("CChar::Fight_CalcDamage");
 
 	if ( m_pNPC && m_pNPC->m_Brain == NPCBRAIN_GUARD && g_Cfg.m_fGuardsInstantKill )
-		return 20000;	// swing made.
+		return UINT16_MAX;	// swing made.
 
 	int iDmgMin = 0;
 	int iDmgMax = 0;

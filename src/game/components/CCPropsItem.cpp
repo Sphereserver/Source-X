@@ -5,14 +5,22 @@
 
 lpctstr const CCPropsItem::_ptcPropertyKeys[PROPIT_QTY + 1] =
 {
-    #define ADD(a,b) b,
+    #define ADDPROP(a,b,c) b,
     #include "../../tables/CCPropsItem_props.tbl"
-    #undef ADD
+    #undef ADDPROP
     nullptr
 };
 KeyTableDesc_s CCPropsItem::GetPropertyKeysData() const {
     return {_ptcPropertyKeys, (int)CountOf(_ptcPropertyKeys)};
 }
+
+RESDISPLAY_VERSION CCPropsItem::_iPropertyExpansion[PROPIT_QTY + 1] =
+{
+    #define ADDPROP(a,b,c) c,
+    #include "../../tables/CCPropsItem_props.tbl"
+    #undef ADDPROP
+    RDS_QTY
+};
 
 CCPropsItem::CCPropsItem() : CComponentProps(COMP_PROPS_ITEM)
 {
@@ -63,13 +71,17 @@ bool CCPropsItem::GetPropertyStrPtr(int iPropIndex, CSString* psOutVal, bool fZe
     return BaseCont_GetPropertyStr(&_mPropsStr, iPropIndex, psOutVal, fZero);
 }
 
-void CCPropsItem::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, bool fDeleteZero)
+void CCPropsItem::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItem::SetPropertyNum");
     ASSERT(!IsPropertyStr(iPropIndex));
+    ASSERT((iLimitToExpansion >= RDS_PRET2A) && (iLimitToExpansion < RDS_QTY));
 
-    if (fDeleteZero && (iVal == 0))
-        _mPropsNum.erase(iPropIndex);
+    if ((fDeleteZero && (iVal == 0)) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion))
+    {
+        if (0 == _mPropsNum.erase(iPropIndex))
+            return; // I didn't have this property, so avoid further processing.
+    }
     else
         _mPropsNum[iPropIndex] = iVal;
 
@@ -80,14 +92,18 @@ void CCPropsItem::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase
     pLinkedObj->UpdatePropertyFlag();
 }
 
-void CCPropsItem::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, bool fDeleteZero)
+void CCPropsItem::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItem::SetPropertyStr");
     ASSERT(ptcVal);
     ASSERT(IsPropertyStr(iPropIndex));
+    ASSERT((iLimitToExpansion >= RDS_PRET2A) && (iLimitToExpansion < RDS_QTY));
 
-    if (fDeleteZero && (*ptcVal == '\0'))
-        _mPropsStr.erase(iPropIndex);
+    if ((fDeleteZero && (*ptcVal == '\0')) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion))
+    {
+        if (0 == _mPropsNum.erase(iPropIndex))
+            return; // I didn't have this property, so avoid further processing.
+    }
     else
         _mPropsStr[iPropIndex] = ptcVal;
 
@@ -110,7 +126,7 @@ void CCPropsItem::DeletePropertyStr(int iPropIndex)
     _mPropsStr.erase(iPropIndex);
 }
 
-bool CCPropsItem::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, int iPropIndex, bool fPropStr)
+bool CCPropsItem::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, int iPropIndex, bool fPropStr)
 {
     ADDTOCALLSTACK("CCPropsItem::FindLoadPropVal");
     if (!fPropStr && (*s.GetArgRaw() == '\0'))
@@ -119,7 +135,7 @@ bool CCPropsItem::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, int iPropIn
         return true;
     }
 
-    BaseProp_LoadPropVal(iPropIndex, fPropStr, s, pLinkedObj);
+    BaseProp_LoadPropVal(iPropIndex, fPropStr, s, pLinkedObj, iLimitToExpansion);
     return true;
 }
 
@@ -173,19 +189,13 @@ void CCPropsItem::AddPropsTooltipData(CObjBase* pLinkedObj)
             switch (prop)
             {
                 case PROPIT_LAVAINFUSED: // Unimplemented
-                    // Missing cliloc id
-                    break;
-                case PROPIT_PRIZED: // Unimplemented
-                    // Missing cliloc id
+                    ADDTNUM(1151318); // lava infused ~1_token~
                     break;
                 case PROPIT_SHIPWRECKITEM: // Unimplemented
-                    // Missing cliloc id
+                    ADDT(1041645); // recovered from a shipwrecklist
                     break;
                 case PROPIT_UNLUCKY: // Unimplemented
-                    // Missing cliloc id
-                    break;
-                case PROPIT_UNWIELDLY: // Unimplemented
-                    // Missing cliloc id
+                    ADDT(1151821); // Luck -100
                     break;
             }
             // End of Item-only tooltips

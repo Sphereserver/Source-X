@@ -142,7 +142,7 @@ public:
 	// Account
 	int64 m_iDeadSocketTime;    // Disconnect inactive socket in x min.
 	int	 m_iArriveDepartMsg;    // General switch to turn on/off arrival/depart messages.
-	uint m_iClientsMax;         // Maximum (FD_SETSIZE) open connections to server
+	int  m_iClientsMax;         // Maximum (FD_SETSIZE) open connections to server
 	int  m_iClientsMaxIP;       // Maximum (FD_SETSIZE) open connections to server per IP
 	int  m_iConnectingMax;      // max clients connecting
 	int  m_iConnectingMaxIP;    // max clients connecting

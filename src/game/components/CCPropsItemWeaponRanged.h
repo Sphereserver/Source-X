@@ -13,15 +13,16 @@ class CObjBase;
 
 enum PROPIWEAPRNG_TYPE
 {
-    #define ADD(a,b) PROPIWEAPRNG_##a,
+    #define ADDPROP(a,b,c) PROPIWEAPRNG_##a,
     #include "../../tables/CCPropsItemWeaponRanged_props.tbl"
-    #undef ADD
+    #undef ADDPROP
     PROPIWEAPRNG_QTY
 };
 
 class CCPropsItemWeaponRanged : public CComponentProps
 {
-    static lpctstr const _ptcPropertyKeys[];
+    static lpctstr const        _ptcPropertyKeys[];
+    static RESDISPLAY_VERSION   _iPropertyExpansion[];
 
 public:
     CCPropsItemWeaponRanged();
@@ -42,12 +43,12 @@ public:
     virtual bool IsPropertyStr(int iPropIndex) const override;
     virtual bool GetPropertyNumPtr(int iPropIndex, PropertyValNum_t* piOutVal) const override;
     virtual bool GetPropertyStrPtr(int iPropIndex, CSString *psOutVal, bool fZero = false) const override;
-    virtual void SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, bool fDeleteZero = false) override;
-    virtual void SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, bool fDeleteZero = false) override;
+    virtual void SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion = RDS_QTY, bool fDeleteZero = false) override;
+    virtual void SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion = RDS_QTY, bool fDeleteZero = false) override;
     virtual void DeletePropertyNum(int iPropIndex) override;
     virtual void DeletePropertyStr(int iPropIndex) override;
 
-    virtual bool FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, int iPropIndex, bool fPropStr) override; // Use pLinkedObj = nullptr if calling this from CItemBase or CCharBase
+    virtual bool FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, int iPropIndex, bool fPropStr) override; // Use pLinkedObj = nullptr if calling this from CItemBase or CCharBase
     virtual bool FindWritePropVal(CSString & sVal, int iPropIndex, bool fPropStr) const override;
     virtual void r_Write(CScript & s) override;
     virtual void Copy(const CComponentProps *target) override;
