@@ -10,7 +10,7 @@
 #include "CUOTiledata.h"
 
 
-ITEMID_TYPE CUOTiledata::GetMaxTileDataItem() // static
+static ITEMID_TYPE GetMaxTiledataItem()
 {
     ADDTOCALLSTACK("CUOTiledata::GetMaxTileDataItem");
 
@@ -121,7 +121,7 @@ void CUOTiledata::Load()
 
     // Cache the Tiledata Item entries
 
-    idMax = (uint)GetMaxTileDataItem();
+    idMax = (uint)GetMaxTiledataItem();
     _tiledataItemEntries.clear();
     _tiledataItemEntries.resize(idMax);
     for (uint id = 0; id < idMax; ++id)

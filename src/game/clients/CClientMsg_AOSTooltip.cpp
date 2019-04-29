@@ -346,10 +346,16 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
     if (pItem->IsAttr(ATTR_NOTRADE))
         PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1076255)); // NO-TRADE
 
-    if (!pItem->IsCanUse(CAN_U_GARGOYLE|CAN_U_ELF) && pItem->IsCanUse(CAN_U_ELF))
-        PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1111709)); // Elves Only
-    else if (!pItem->IsCanUse(CAN_U_HUMAN|CAN_U_ELF) && pItem->IsCanUse(CAN_U_GARGOYLE))
+    if (pItem->IsCanUse(CAN_U_ELF) && !pItem->IsCanUse(CAN_U_HUMAN|CAN_U_GARGOYLE))
+        PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1154650)); // Elves Only
+    else if (pItem->IsCanUse(CAN_U_GARGOYLE) && !pItem->IsCanUse(CAN_U_HUMAN|CAN_U_ELF))
         PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1111709)); // Gargoyles Only
+    /* // Not used by OSI?
+    else if (pItem->IsCanUse(CAN_U_HUMAN) && pItem->IsCanUse(CAN_U_GARGOYLE) && !pItem->IsCanUse(CAN_U_ELF))
+        PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1154651)); // Exclude Elves Only
+    else if (pItem->IsCanUse(CAN_U_HUMAN) && pItem->IsCanUse(CAN_U_ELF) && !pItem->IsCanUse(CAN_U_GARGOYLE))
+        PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1154649)); // Exclude Gargoyles Only
+    */
 
 	if (g_Cfg.m_iFeatureML & FEATURE_ML_UPDATE)
 	{
@@ -361,8 +367,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		}
 	}
 
-	CUID uidCraftsman((dword)(pItem->GetDefNum("CRAFTEDBY")));
-	const CChar *pCraftsman = uidCraftsman.CharFind();
+	const CChar *pCraftsman = CUID::CharFind(dword(pItem->GetDefNum("CRAFTEDBY")));
 	if (pCraftsman)
 	{
         PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1050043)); // crafted by ~1_NAME~
@@ -434,14 +439,17 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 	case IT_CLOTHING:
 	case IT_SHIELD:
 	{
-		int ArmorRating = pItem->Armor_GetDefense();
-		if (ArmorRating != 0)
-		{
-			// Obsolete AR was replaced by physical/fire/cold/poison/energy resist since AOS
-			// and doesn't even have proper tooltips. It's just there for backward compatibility
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060658)); // ~1_val~: ~2_val~
-			t->FormatArgs("%s\t%d", g_Cfg.GetDefaultMsg(DEFMSG_TOOLTIP_TAG_ARMOR), ArmorRating);
-		}
+        if (!IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+        {
+            const int ArmorRating = pItem->Armor_GetDefense();
+            if (ArmorRating != 0)
+            {
+                // Obsolete AR was replaced by physical/fire/cold/poison/energy resist since AOS
+                // and doesn't even have proper tooltips. It's just there for backward compatibility
+                PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060658)); // ~1_val~: ~2_val~
+                t->FormatArgs("%s\t%d", g_Cfg.GetDefaultMsg(DEFMSG_TOOLTIP_TAG_ARMOR), ArmorRating);
+            }
+        }
 
 		int64 StrengthRequirement = pItem->Item_GetDef()->m_ttEquippable.m_iStrReq;
         if (pCCPItemEquip || pBaseCCPItemEquip)

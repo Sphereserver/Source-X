@@ -447,7 +447,7 @@ public:
 	bool SetMaxAmount(word amount);
 
 	static CItemBase * FindItemBase( ITEMID_TYPE id );
-	static bool IsValidDispID( ITEMID_TYPE id );
+	inline static bool IsValidDispID( ITEMID_TYPE id );
 
 	// NOTE: ??? All this stuff should be moved to scripts !
 	// Classify item by ID
@@ -462,7 +462,7 @@ public:
     static bool IsID_WaterWash( ITEMID_TYPE id );
     static bool IsID_Chair( ITEMID_TYPE id );
 
-	static bool IsVisibleLayer( LAYER_TYPE layer );
+	inline static bool IsVisibleLayer( LAYER_TYPE layer );
 
 	static tchar * GetNamePluralize( lpctstr pszNameBase, bool fPluralize );
 	static bool GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * ptile );
@@ -677,12 +677,12 @@ public:
 
 /* Inline Methods Definitions */
 
-inline bool CItemBase::IsVisibleLayer( LAYER_TYPE layer ) // static
+bool CItemBase::IsVisibleLayer( LAYER_TYPE layer ) // static
 {
 	return ((layer > LAYER_NONE) && (layer <= LAYER_HORSE) );
 }
 
-inline bool CItemBase::IsValidDispID( ITEMID_TYPE id ) // static
+bool CItemBase::IsValidDispID( ITEMID_TYPE id ) // static
 {
 	// Is this id in the base artwork set ? tile or multi.
 	return ( id > ITEMID_NOTHING && id < ITEMID_MULTI_MAX );

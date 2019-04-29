@@ -1672,9 +1672,16 @@ WARNING: Important change!
 	The elemental damages and resistances aren't treated like expansion-restricted properties, so to enable them you have to use COMBAT_ELEMENTAL_ENGINE, like always.
 
 - Changed: Made EXPANSION a Base property only.
-- Added "elf/gargoyle only" tooltips.
+- Added: "Elves/Gargoyles only" tooltips.
 - Added tooltips for: Altered, Antique, AssassinHoned, Bane, Battlelust, Blodddrinker, BoneBreaker, Brittle, CastingFocus, EaterCold/Energy/Fire/Kinetic/Poison, Ephemeral, HitFatigue, HitManaDrain, HitSpell, Imbued,
 	IncreaseGold, LavaInfused, LowerAmmoCost, Massive, Prized, ReactiveParalyze, Searing, Splintering, ShipwreckItem, SoulCharge, SoulChargeCold/Energy/Fire/Kinetic/Poison, Unlucky, Unwieldly, UseBestWeaponSkill.
 - Added keywords and tooltips for: BonusBerserk, DurabilityBonus, HitSparks, HitSwarm, MysticWeapon. Functionality is missing yet.
 - Removed redundant property DecreaseHitChance. Just use a negative IncreaseHitChance (also, there is a tooltip entry only for IncreaseHitChance, not for a DecreaseHitChance).
 - Removed properties: DAMMODIFIER, MANAPHASE, MANABURST(Frequency/Karma/Evil/Good).
+
+30-04-2019, Nolok
+- Added: AR and AC keywords also for items, which return the total protection given by an armor piece. This value is internally used when COMBAT_ELEMENTAL_ENGINE is off and its value depends on
+	ARMOR, MODAR, ATTR_MAGIC and OF_ScaleDamageByDurability.
+- Fixed: ARMOR tooltip showing also with COMBAT_ELEMENTAL_ENGINE on.
+- Fixed: Item ID could be overridden only with a defname and not using a plain number.
+- Added: Error if trying to use as base an item ID greater than the maximum tiledata entry index.

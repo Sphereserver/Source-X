@@ -1382,7 +1382,7 @@ void CChar::Fight_HitTry()
                 // This happens (only with both PreHit and Swing_NoRange on) if i can't land the hit right now, otherwise retHit
                 //  should be WAR_SWING_EQUIPPING. If this isn't the case, there's something wrong (asserts are placed to intercept this situations).
                 SetTimeoutD(1);
-                ASSERT(IsSetCombatFlags(COMBAT_FIRSTHIT_INSTANT|COMBAT_SWING_NORANGE));
+                ASSERT(IsSetCombatFlags(COMBAT_FIRSTHIT_INSTANT) && IsSetCombatFlags(COMBAT_SWING_NORANGE));
             }
 			return;
 		default:
@@ -1415,7 +1415,7 @@ void CChar::Fight_SetDefaultSwingDelays()
     if (IsSetCombatFlags(COMBAT_ANIM_HIT_SMOOTH))
     {
         m_atFight.m_iRecoilDelay = 0;    // We don't have an actual recoil: the hit animation has the duration of the delay between hits, so the char is always doing a smooth, slow attack animation
-        m_atFight.m_iSwingAnimationDelay = iAttackSpeed,kiMinSwingAnimationDelay;
+        m_atFight.m_iSwingAnimationDelay = iAttackSpeed;
     }
     else 
     {

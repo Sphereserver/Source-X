@@ -897,7 +897,8 @@ bool CServerConfig::r_LoadVal( CScript &s )
 	EXC_TRY("LoadVal");
 
 #define DEBUG_MSG_NOINIT(x) if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) DEBUG_MSG(x)
-#define DEBUG_ERR_NOINIT(x) if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) DEBUG_ERR(x)
+#define LOG_WARN_NOINIT(x)  if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) g_Log.EventWarn(x)
+#define LOG_ERR_NOINIT(x)   if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) g_Log.EventError(x)
 
 	int i = FindTableHeadSorted( s.GetKey(), reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf( sm_szLoadKeys )-1, sizeof(sm_szLoadKeys[0]));
 	if ( i < 0 )
@@ -978,7 +979,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 					}
 				}
 			}
-			DEBUG_ERR_NOINIT(("Bad usage of MAPx. Check your sphere.ini or scripts (SERV.MAP is a read only property)\n"));
+			LOG_ERR_NOINIT(("Bad usage of MAPx. Check your sphere.ini or scripts (SERV.MAP is a read only property)\n"));
 			return false;
 		}
 		else if ( s.IsKeyHead("PACKET", 6) )	//	PACKETx=<function name to execute upon packet>
@@ -1070,6 +1071,16 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			m_iCombatArcheryMovementDelay = maximum(iVal, 0);
             break;
 		}
+        case RC_COMBATFLAGS:
+        {
+            uint uiVal = s.GetArgUVal();
+            if ((uiVal & (COMBAT_PREHIT|COMBAT_SWING_NORANGE)) == (COMBAT_PREHIT|COMBAT_SWING_NORANGE))
+            {
+                uiVal ^= COMBAT_SWING_NORANGE;
+                LOG_WARN_NOINIT("CombatFlags COMBAT_PREHIT and COMBAT_SWING_NORANGE cannot coexist. Turning off COMBAT_SWING_NORANGE.\n");
+            }
+            m_iCombatFlags = uiVal;
+        }
         case RC_CONTAINERMAXITEMS:
         {
             uint uiVal = s.GetArgUVal();
@@ -1329,7 +1340,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 	return false;
 
 #undef DEBUG_MSG_NOINIT
-#undef DEBUG_ERR_NOINIT
+#undef LOG_ERR_NOINIT
 }
 
 const CSpellDef * CServerConfig::GetSpellDef( SPELL_TYPE index ) const
@@ -2070,6 +2081,14 @@ int CServerConfig::GetSpellEffect( SPELL_TYPE spell, int iSkillVal ) const
 	return pSpellDef->m_Effect.GetLinear( iSkillVal );
 }
 
+lpctstr CServerConfig::GetRune( tchar ch ) const
+{
+    uint index = (uint)(toupper(ch) - 'A');
+    if ( ! m_Runes.IsValidIndex(index))
+        return "?";
+    return m_Runes[index]->GetPtr();
+}
+
 lpctstr CServerConfig::GetNotoTitle( int iLevel, bool bFemale ) const
 {
 	ADDTOCALLSTACK("CServerConfig::GetNotoTitle");
@@ -2155,7 +2174,7 @@ CWebPageDef * CServerConfig::FindWebPage( lpctstr pszPath ) const
 		return static_cast <CWebPageDef*>( m_WebPages[0] );
 	}
 
-	for ( size_t i = 0; i < m_WebPages.size(); i++ )
+	for ( size_t i = 0; i < m_WebPages.size(); ++i )
 	{
 		if ( m_WebPages[i] == nullptr )	// not sure why this would happen
 			continue;
@@ -2174,7 +2193,7 @@ bool CServerConfig::IsObscene( lpctstr pszText ) const
 	// does this text contain obscene content?
 	// NOTE: allow partial match syntax *fuck* or ass (alone)
 
-	for ( size_t i = 0; i < m_Obscene.size(); i++ )
+	for ( size_t i = 0; i < m_Obscene.size(); ++i )
 	{
 		tchar* match = new tchar[ strlen(m_Obscene[i])+3 ];
 		sprintf(match,"%s%s%s","*",m_Obscene[i],"*");
@@ -3507,18 +3526,18 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 	case RES_WORLDCHAR:	// saved in world file.
 		if ( ! rid.IsValidUID())
 		{
-			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined char type '%s'\n", static_cast<lpctstr>(pScript->GetArgStr()));
+			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined char type '%s'\n", pScript->GetArgStr());
 			return false;
 		}
-		return CChar::CreateBasic(static_cast<CREID_TYPE>(rid.GetResIndex()))->r_Load(*pScript);
+		return CChar::CreateBasic(CREID_TYPE(rid.GetResIndex()))->r_Load(*pScript);
 	case RES_WI:
 	case RES_WORLDITEM:	// saved in world file.
 		if ( ! rid.IsValidUID())
 		{
-			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined item type '%s'\n", static_cast<lpctstr>(pScript->GetArgStr()));
+			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined item type '%s'\n", pScript->GetArgStr());
 			return false;
 		}
-		return CItem::CreateBase((ITEMID_TYPE)(rid.GetResIndex()))->r_Load(*pScript);
+		return CItem::CreateBase(ITEMID_TYPE(rid.GetResIndex()))->r_Load(*pScript);
 
 	default:
 		break;
@@ -4088,6 +4107,9 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 		if ( IsSetOF(OF_DrinkIsFood) )				catresname(zOptionFlags, "DrinkIsFood");
 		if ( IsSetOF(OF_NoDClickTurn) )				catresname(zOptionFlags, "NoDClickTurn");
         if ( IsSetOF(OF_NoTargTurn) )				catresname(zOptionFlags, "NoTargTurn");
+        if ( IsSetOF(OF_StatAllowValOverMax) )		catresname(zOptionFlags, "StatAllowValOverMax");
+        if ( IsSetOF(OF_GuardOutsideGuardedArea) )	catresname(zOptionFlags, "GuardOutsideGuardedArea");
+        if ( IsSetOF(OF_OWNoDropCarriedItem) )		catresname(zOptionFlags, "OWNoDropCarriedItem");
 
 		if ( zOptionFlags[0] != '\0' )
 		{
@@ -4545,11 +4567,11 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 
 	s.Printf("// Unscripted items, generated by " SPHERE_TITLE " at %s\n", CSTime::GetCurrentTime().Format(nullptr));
 
-	ITEMID_TYPE idMaxItem = CUOTiledata::GetMaxTileDataItem();
+	ITEMID_TYPE idMaxItem = ITEMID_TYPE(g_Install.m_tiledata.GetItemMaxIndex());
 	if (idMaxItem > ITEMID_MULTI)
 		idMaxItem = ITEMID_MULTI;
 
-	for (int i = 0; i < idMaxItem; i++)
+	for (int i = 0; i < idMaxItem; ++i)
 	{
 		if ( !( i % 0xff ))
 			g_Serv.PrintPercent(i, idMaxItem);
@@ -4560,7 +4582,7 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 
 		// check item in tiledata
 		CUOItemTypeRec_HS tiledata;
-		if (CItemBase::GetItemData((ITEMID_TYPE)(i), &tiledata) == false)
+		if (CItemBase::GetItemData((ITEMID_TYPE)i, &tiledata) == false)
 			continue;
 
 		// ensure there is actually some data here, treat "MissingName" as blank since some tiledata.muls

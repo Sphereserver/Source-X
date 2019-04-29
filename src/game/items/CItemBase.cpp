@@ -9,6 +9,7 @@
 #include "../components/CCPropsItemWeaponRanged.h"
 #include "../resource/CResourceLock.h"
 #include "../uo_files/CUOItemInfo.h"
+#include "../CUOInstall.h"
 #include "../CLog.h"
 #include "../CException.h"
 #include "CItemBase.h"
@@ -69,7 +70,7 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	// Get rid of the strange leading spaces in some of the names.
 	tchar szName[ sizeof(tiledata.m_name)+1 ];
 	size_t j = 0;
-	for ( size_t i = 0; i < sizeof(tiledata.m_name) && tiledata.m_name[i]; i++ )
+	for ( size_t i = 0; i < sizeof(tiledata.m_name) && tiledata.m_name[i]; ++i )
 	{
 		if ( j == 0 && ISWHITESPACE(tiledata.m_name[i]))
 			continue;
@@ -622,13 +623,24 @@ bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * pData ) // stat
 	// Invalid object id ?
 	// NOTE: This data should already be read into the m_ItemBase table ???
 
-	if ( ! IsValidDispID(id))
+    if (id >= g_Install.m_tiledata.GetItemMaxIndex())
+    {
+        g_Log.EventError("ITEMDEF has invalid ID=%d (0%x) (value is greater than the tiledata maximum index).\n", id, id);
+        return false;
+    }
+    if (!IsValidDispID(id))
 		return false;
 
 	try
 	{
 		*pData = CUOItemInfo(id);
 	}
+    catch (const std::exception& e)
+    {
+        g_Log.CatchStdException(&e, "GetItemData");
+        CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+        return false;
+    }
 	catch ( const CSError& e )
 	{
 		g_Log.CatchEvent( &e, "GetItemData" );
@@ -1583,21 +1595,24 @@ bool CItemBase::r_LoadVal( CScript &s )
 			{
 				if ( GetID() < ITEMID_MULTI )
 				{
-					DEBUG_ERR(( "Setting new id for base type %s not allowed\n", GetResourceName()));
+                    g_Log.EventError( "Setting new ID for base type %s not allowed\n", GetResourceName());
 					return false;
 				}
 
 				ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
 				if ( ! IsValidDispID(id))
 				{
-					DEBUG_ERR(( "Setting invalid id=%s for base type %s\n", s.GetArgStr(), GetResourceName()));
+                    if (id >= g_Install.m_tiledata.GetItemMaxIndex())
+                        g_Log.EventError("Setting invalid ID=%s for base type %s (value is greater than the tiledata maximum index).\n", s.GetArgStr(), GetResourceName());
+                    else
+                        g_Log.EventError( "Setting invalid ID=%s for base type %s\n", s.GetArgStr(), GetResourceName());
 					return false;
 				}
 
 				CItemBase * pItemDef = FindItemBase( id );	// make sure the base is loaded.
 				if ( ! pItemDef )
 				{
-					DEBUG_ERR(( "Setting unknown base id=0%x for %s\n", id, GetResourceName()));
+                    g_Log.EventError( "Setting unknown base ID=0%x for base type %s\n", id, GetResourceName());
 					return false;
 				}
 

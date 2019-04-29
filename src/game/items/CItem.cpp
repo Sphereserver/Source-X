@@ -2521,6 +2521,12 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 				sVal.FormatLLVal(GetSpellcountInBook());
 			}
 			break;
+
+        case IC_AC:
+        case IC_AR:
+            sVal.FormatVal(Armor_GetDefense());
+            break;
+
 		case IC_ADDSPELL:
 			pszKey	+= 8;
 			SKIP_SEPARATORS( pszKey );
@@ -2953,7 +2959,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		case IC_ID:
 		{
 			lpctstr idstr = s.GetArgStr();
-			CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, idstr);
+			const CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, idstr);
 			if (rid.GetResType() == RES_TEMPLATE)
 			{
 				// here we don't have to check if we are setting the ID in the script's header, because that is handled
@@ -2963,11 +2969,11 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				if (!pItemTemp)
 					return false;
 
-				bool bCont = pItemTemp->IsContainer();
-				ITEMID_TYPE id = pItemTemp->GetID();
+				const bool fCont = pItemTemp->IsContainer();
+				const ITEMID_TYPE id = pItemTemp->GetID();
 				pItemTemp->Delete();
 
-				if (bCont)
+				if (fCont)
 				{
 					g_Log.EventError("The template should not return a container-type item!\n");
 					return false;	// not the kind of template we want...
@@ -2975,10 +2981,13 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				else
 					return SetID(id);
 			}
-			else if (rid.GetResType() == RES_ITEMDEF)
-				return SetID((ITEMID_TYPE)rid.GetResIndex());
 			else
-				return false;
+            {
+                const RES_TYPE resType = rid.GetResType();
+                if (resType == RES_ITEMDEF || resType == RES_QTY)
+                    return SetID((ITEMID_TYPE)rid.GetResIndex());
+            }
+            return false;
 		}
 		case IC_LAYER:
 			// used only during load (i'm reading the save files and placing again the items in the world in the right place).

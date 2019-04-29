@@ -1716,10 +1716,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 					pChar->m_defense = (word)(pChar->CalcArmorDefense());
 					pChar->UpdateStatsFlag();
 				}
-                else
-                {
-                    fResendTooltip = true;
-                }
+                fResendTooltip = true;
 			}
 			break;
 		case OC_NAME:
@@ -1735,7 +1732,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 			CItem * pItem = static_cast<CItem*>(this);
 			pItem->m_speed = s.GetArgBVal();
 			fResendTooltip = true;
-			return true;
+			break;
 		}
 		case OC_TIMER:
         {
@@ -2797,7 +2794,7 @@ dword CObjBase::UpdatePropertyRevision(dword hash)
 void CObjBase::UpdatePropertyFlag()
 {
 	ADDTOCALLSTACK("CObjBase::UpdatePropertyFlag");
-	if ( g_Serv.IsLoading() )
+	if ( !(g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B) || g_Serv.IsLoading() )
 		return;
 
 	m_fStatusUpdate |= SU_UPDATE_TOOLTIP;
