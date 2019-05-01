@@ -87,6 +87,13 @@ lpctstr Str_GetArticleAndSpace(lpctstr pszWords);
 int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxSize, lpctstr pszStrip = nullptr);
 
 /**
+* @brief Removes heading and trailing double quotes in a string.
+* @param pStr string where remove the quotes.
+* @return string with the heading and trailing quotes removed.
+*/
+tchar * Str_GetUnQuoted(tchar * pStr);
+
+/**
 * @brief replace string representation of special characters by special characters.
 *
 * Strings replaced:
@@ -99,6 +106,7 @@ int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxSize, lpctstr pszStrip =
 * @return string with replaces in (same as pStr).
 */
 tchar * Str_MakeFiltered(tchar * pStr);
+
 
 /**
 * @brief replace special characters by string representation.
@@ -119,7 +127,7 @@ void Str_MakeUnFiltered(tchar * pStrOut, lpctstr pStrIn, int iSizeMax);
 * @brief remove trailing white spaces from a string.
 * @param pStr string where remove trailing spaces.
 * @param len length of the string.
-* @return new lenght of the string.
+* @return new length of the string.
 */
 int Str_TrimEndWhitespace(tchar * pStr, int len);
 
@@ -129,6 +137,7 @@ int Str_TrimEndWhitespace(tchar * pStr, int len);
 * @return string with the heading and trailing spaces removed.
 */
 tchar * Str_TrimWhitespace(tchar * pStr);
+
 
 ///@}
 /** @name String utilities: String operations

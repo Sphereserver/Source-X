@@ -1685,3 +1685,9 @@ WARNING: Important change!
 - Fixed: ARMOR tooltip showing also with COMBAT_ELEMENTAL_ENGINE on.
 - Fixed: Item ID could be overridden only with a defname and not using a plain number.
 - Added: Error if trying to use as base an item ID greater than the maximum tiledata entry index.
+
+01-05-2019, Nolok
+- Fixed ISNUMBER also for float values.
+- Changed: Now intrinsic function arguments are recognized even if separated by a whitespace from the function, other than being enclosed by ().
+- Fixed: "Last logged" sysmessage shown also to a new player.
+- Fixed: FILE object functions couldn't accept quoted arguments.

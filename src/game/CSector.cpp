@@ -85,7 +85,7 @@ bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 	ADDTOCALLSTACK("CSector::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-	static const CValStr sm_ComplexityTitles[] =
+	static constexpr CValStr sm_ComplexityTitles[] =
 	{
 		{ "HIGH", INT32_MIN },	// speech can be very complex if low char count
 		{ "MEDIUM", 5 },
@@ -93,13 +93,13 @@ bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		{ nullptr, INT32_MAX }
 	};
 
-    SC_TYPE key = (SC_TYPE)FindTableHead(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    SC_TYPE key = (SC_TYPE)FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
 	switch ( key )
 	{
         case SC_CANSLEEP:
             {
                 pszKey += 8;
-                bool fCheckAdjacents = Exp_GetVal(pszKey);
+                const bool fCheckAdjacents = Exp_GetVal(pszKey);
                 sVal.FormatBVal(CanSleep(fCheckAdjacents));
                 return true;
             }
@@ -113,7 +113,7 @@ bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			if ( pszKey[10] == '.' )
 			{
 				pszKey += 11;
-				sVal = ( ! strcmpi( pszKey, sm_ComplexityTitles->FindName( (int)GetCharComplexity() )) ) ? "1" : "0";
+				sVal = !strcmpi( pszKey, sm_ComplexityTitles->FindName((int)GetCharComplexity()) ) ? "1" : "0";
 				return true;
 			}
 			sVal.FormatSTVal( GetCharComplexity() );
@@ -138,7 +138,7 @@ bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			return true;
 		case SC_ISNIGHTTIME:
 			{
-				int iMinutes = GetLocalTime();
+				const int iMinutes = GetLocalTime();
 				sVal = ( iMinutes < 7*60 || iMinutes > (9+12)*60 ) ? "1" : "0";
 			}
 			return true;

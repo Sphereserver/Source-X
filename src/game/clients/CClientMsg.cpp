@@ -2615,8 +2615,12 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 				g_Serv.StatGet(SERV_STAT_CLIENTS)-1 );
 			addSysMessage(z);
 
-			sprintf(z, g_Cfg.GetDefaultMsg( DEFMSG_LOGIN_LASTLOGGED ), GetAccount()->m_TagDefs.GetKeyStr("LastLogged"));
-			addSysMessage(z);
+            const lpctstr ptcLastLogged = GetAccount()->m_TagDefs.GetKeyStr("LastLogged");
+            if (!IsStrEmpty(ptcLastLogged))
+            {
+                sprintf(z, g_Cfg.GetDefaultMsg( DEFMSG_LOGIN_LASTLOGGED ), ptcLastLogged);
+                addSysMessage(z);
+            }
 		}
 		if ( m_pChar->m_pArea && m_pChar->m_pArea->IsGuarded() && !m_pChar->m_pArea->IsFlag(REGION_FLAG_ANNOUNCE) )
 		{

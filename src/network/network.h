@@ -749,7 +749,7 @@ class NetworkThreadStateIterator
 {
 protected:
 	const NetworkThread* m_thread;	// network thread to iterate
-	size_t m_nextIndex;				// next index to check
+	int  m_nextIndex;				// next index to check
 	bool m_safeAccess;				// whether to use safe access
 
 public:

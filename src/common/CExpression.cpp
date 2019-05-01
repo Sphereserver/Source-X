@@ -500,7 +500,7 @@ try_dec:
 		if ( iIntrinsic >= 0 )
 		{
 			size_t iLen = strlen(sm_IntrinsicFunctions[iIntrinsic]);
-			if ( pszArgs[iLen] == '(' )
+			if ( strchr("( ", pszArgs[iLen]) )
 			{
 				pszArgs += (iLen + 1);
 				tchar * pszArgsNext;
@@ -508,7 +508,7 @@ try_dec:
 
 				tchar * ppCmd[5];
 				llong iResult;
-				size_t iCount = 0;
+				int iCount = 0;
 
 				switch ( iIntrinsic )
 				{
@@ -827,15 +827,12 @@ try_dec:
 						iCount = 1;
 						iResult = g_Cfg.IsObscene( pszArgs );
 					} break;
+
 					case INTRINSIC_ISNUMBER:
 					{
 						iCount = 1;
-						{
-                            GETNONWHITESPACE( pszArgs );
-                            if (*pszArgs == '-')
-                                ++pszArgs;
-							iResult = IsStrNumeric( pszArgs );
-						}
+                        SKIP_NONNUM( pszArgs );
+						iResult = IsStrNumeric( pszArgs );
 					} break;
 
 					case INTRINSIC_QVAL:

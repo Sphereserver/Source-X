@@ -564,6 +564,7 @@ badcmd:
 		case SSC_HVAL:
 			sVal.FormatLLHex(Exp_GetLLVal(pszKey));
 			return true;
+
 //FLOAT STUFF BEGINS HERE
 		case SSC_FEVAL: //Float EVAL
 			sVal.FormatVal( ATOI( pszKey ) );
@@ -577,6 +578,7 @@ badcmd:
 				break;
 			}
 //FLOAT STUFF ENDS HERE
+
 		case SSC_QVAL:
 			{	// Do a switch ? type statement <QVAL conditional ? option1 : option2>
 				tchar * ppCmds[3];
@@ -588,6 +590,7 @@ badcmd:
 					sVal = "";
 			}
 			return true;
+
 		case SSC_ISBIT:
 		case SSC_SETBIT:
 		case SSC_CLRBIT:
@@ -597,16 +600,18 @@ badcmd:
 				int64 bit = Exp_GetLLVal(pszKey);
 
 				if ( index == SSC_ISBIT )
-					sVal.FormatLLVal(val & ( (int64)(1) << bit ));
+					sVal.FormatLLVal(val & (1LL << bit));
 				else if ( index == SSC_SETBIT )
-					sVal.FormatLLVal(val | ( (int64)(1) << bit ));
+					sVal.FormatLLVal(val | (1LL << bit));
 				else
-					sVal.FormatLLVal(val & (~ ( (int64)(1) << bit )));
+					sVal.FormatLLVal(val & (~ (1LL << bit)));
 				break;
 			}
+
 		case SSC_ISEMPTY:
 			sVal.FormatVal( IsStrEmpty( pszKey ) );
 			return true;
+
 		case SSC_ISNUM:
 			GETNONWHITESPACE( pszKey );
 			if (*pszKey == '-')
@@ -623,7 +628,7 @@ badcmd:
 				GETNONWHITESPACE( pszKey );
 				int64 iPos = Exp_GetVal( pszKey );
 				tchar ch;
-				if ( IsDigit( *pszKey) && IsDigit( *(pszKey+1) ) )
+				if ( IsDigit(*pszKey) && IsDigit( *(pszKey+1) ) )
 					ch = static_cast<tchar>(Exp_GetVal(pszKey));
 				else
 				{

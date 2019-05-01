@@ -148,7 +148,7 @@ bool CSFileObj::r_LoadVal( CScript & s )
         }
         else
         {
-            g_Log.Event(LOGL_ERROR, "FILE (%s): Cannot set mode after file opening\n", static_cast<lpctstr>(_pFile->GetFilePath()));
+            g_Log.Event(LOGL_ERROR, "FILE (%s): Cannot set mode after file opening\n", _pFile->GetFilePath());
         }
         return false;
     }
@@ -161,8 +161,8 @@ bool CSFileObj::r_LoadVal( CScript & s )
         case FO_WRITECHR:
         case FO_WRITELINE:
         {
-            bool fLine = (index == FO_WRITELINE);
-            bool fChr = (index == FO_WRITECHR);
+            const bool fLine = (index == FO_WRITELINE);
+            const bool fChr = (index == FO_WRITECHR);
 
             if ( !_pFile->IsFileOpen() )
             {
@@ -206,7 +206,7 @@ bool CSFileObj::r_LoadVal( CScript & s )
 
             if ( !fSuccess )
             {
-                g_Log.Event(LOGL_ERROR, "FILE: Failed writing to \"%s\".\n", static_cast<lpctstr>(_pFile->GetFilePath()));
+                g_Log.Event(LOGL_ERROR, "FILE: Failed writing to \"%s\".\n", _pFile->GetFilePath());
                 return false;
             }
         } break;
@@ -255,14 +255,12 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
         case FO_FILEEXIST:
         {
             pszKey += 9;
-            GETNONWHITESPACE( pszKey );
-
-            tchar * ppCmd = Str_TrimWhitespace(const_cast<tchar *>(pszKey));
-            if ( !( ppCmd && strlen(ppCmd) ))
+            pszKey = Str_GetUnQuoted(const_cast<tchar *>(pszKey));
+            if ( !pszKey || !strlen(pszKey) )
                 return false;
 
             CSFile * pFileTest = new CSFile();
-            sVal.FormatVal(pFileTest->Open(ppCmd));
+            sVal.FormatVal(pFileTest->Open(pszKey));
 
             delete pFileTest;
         } break;
@@ -270,14 +268,12 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
         case FO_FILELINES:
         {
             pszKey += 9;
-            GETNONWHITESPACE( pszKey );
-
-            tchar * ppCmd = Str_TrimWhitespace(const_cast<tchar *>(pszKey));
-            if ( !( ppCmd && strlen(ppCmd) ))
+            pszKey = Str_GetUnQuoted(const_cast<tchar *>(pszKey));
+            if ( !pszKey || !strlen(pszKey) )
                 return false;
 
             CSFileText * sFileLine = new CSFileText();
-            if ( !sFileLine->Open(ppCmd, OF_READ|OF_TEXT) )
+            if ( !sFileLine->Open(pszKey, OF_READ|OF_TEXT) )
             {
                 delete sFileLine;
                 return false;
@@ -299,7 +295,7 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
         } break;
 
         case FO_FILEPATH:
-            sVal.Format("%s", _pFile->IsFileOpen() ? static_cast<lpctstr>(_pFile->GetFilePath()) : "" );
+            sVal.Copy(_pFile->IsFileOpen() ? _pFile->GetFilePath() : "" );
             break;
 
         case FO_INUSE:
@@ -311,25 +307,23 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
             break;
 
         case FO_LENGTH:
-            sVal.FormatSTVal( _pFile->IsFileOpen() ? _pFile->GetLength() : -1 );
+            sVal.FormatVal( _pFile->IsFileOpen() ? _pFile->GetLength() : -1 );
             break;
 
         case FO_OPEN:
         {
             pszKey += strlen(sm_szLoadKeys[index]);
-            GETNONWHITESPACE( pszKey );
-
-            tchar * ppCmd = Str_TrimWhitespace(const_cast<tchar *>(pszKey));
-            if ( !( ppCmd && strlen(ppCmd) ))
+            pszKey = Str_GetUnQuoted(const_cast<tchar *>(pszKey));
+            if ( !pszKey || !strlen(pszKey) )
                 return false;
 
             if ( _pFile->IsFileOpen() )
             {
-                g_Log.Event(LOGL_ERROR, "FILE: Cannot open file (%s). First close \"%s\".\n", ppCmd, static_cast<lpctstr>(_pFile->GetFilePath()));
+                g_Log.Event(LOGL_ERROR, "FILE: Cannot open file (%s). First close \"%s\".\n", pszKey, _pFile->GetFilePath());
                 return false;
             }
 
-            sVal.FormatVal( FileOpen(ppCmd) );
+            sVal.FormatVal( FileOpen(pszKey) );
         } break;
 
         case FO_POSITION:
@@ -339,10 +333,10 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
         case FO_READBYTE:
         case FO_READCHAR:
         {
-            bool bChr = ( index == FO_READCHAR );
+            bool fChr = ( index == FO_READCHAR );
             int iRead = 1;
 
-            if ( !bChr )
+            if ( !fChr )
             {
                 pszKey += strlen(sm_szLoadKeys[index]);
                 GETNONWHITESPACE( pszKey );
@@ -352,9 +346,9 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
                     return false;
             }
 
-            if ( ( ( _pFile->GetPosition() + iRead ) > _pFile->GetLength() ) || ( _pFile->IsEOF() ) )
+            if ( ( (_pFile->GetPosition() + iRead) > _pFile->GetLength() ) || _pFile->IsEOF() )
             {
-                g_Log.Event(LOGL_ERROR, "FILE: Failed reading %" PRIuSIZE_T " byte from \"%s\". Too near to EOF.\n", iRead, static_cast<lpctstr>(_pFile->GetFilePath()));
+                g_Log.Event(LOGL_ERROR, "FILE: Failed reading %d bytes from \"%s\". Too near to EOF.\n", iRead, _pFile->GetFilePath());
                 return false;
             }
 
@@ -362,14 +356,14 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
 
             if ( iRead != _pFile->Read(psReadBuf, iRead) )
             {
-                g_Log.Event(LOGL_ERROR, "FILE: Failed reading %" PRIuSIZE_T " byte from \"%s\".\n", iRead, static_cast<lpctstr>(_pFile->GetFilePath()));
+                g_Log.Event(LOGL_ERROR, "FILE: Failed reading %d bytes from \"%s\".\n", iRead, _pFile->GetFilePath());
                 return false;
             }
 
-            if ( bChr )
+            if ( fChr )
                 sVal.FormatVal( *psReadBuf );
             else
-                sVal.Format( "%s", psReadBuf );
+                sVal.Copy(psReadBuf);
         } break;
 
         case FO_READLINE:
@@ -380,7 +374,7 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
             tchar * psReadBuf = this->GetReadBuffer();
             ASSERT(psReadBuf != nullptr);
 
-            int64 iLines = Exp_GetVal(pszKey);
+            int iLines = Exp_GetVal(pszKey);
             if ( iLines < 0 )
                 return false;
 
@@ -396,7 +390,7 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
             }
             else
             {
-                for ( int64 x = 1; x <= iLines; ++x )
+                for ( int x = 1; x <= iLines; ++x )
                 {
                     if ( _pFile->IsEOF() )
                         break;
@@ -488,7 +482,7 @@ bool CSFileObj::r_Verb( CScript & s, CTextConsole * pSrc )
             if ( !s.GetArgStr() )
                 return false;
 
-            if ( _pFile->IsFileOpen() && !strcmp(s.GetArgStr(),_pFile->GetFileTitle()) )
+            if ( _pFile->IsFileOpen() && !strcmp(s.GetArgStr(), _pFile->GetFileTitle()) )
                 return false;
 
             STDFUNC_UNLINK(s.GetArgRaw());

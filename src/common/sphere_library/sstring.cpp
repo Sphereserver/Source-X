@@ -124,7 +124,7 @@ lpctstr Str_GetArticleAndSpace(lpctstr pszWord)
 
     if (pszWord)
     {
-        static const tchar sm_Vowels[] = { 'A', 'E', 'I', 'O', 'U' };
+        static constexpr tchar sm_Vowels[] = { 'A', 'E', 'I', 'O', 'U' };
         tchar chName = static_cast<tchar>(toupper(pszWord[0]));
         for (uint x = 0; x < CountOf(sm_Vowels); ++x)
         {
@@ -143,7 +143,7 @@ int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxOutSize, lpctstr pszStri
     if (!pszStrip)
         pszStrip = "{|}~";	// client cant print these.
 
-                            //GETNONWHITESPACE( pszInp );	// kill leading white space.
+    //GETNONWHITESPACE( pszInp );	// kill leading white space.
 
     int j = 0;
     for (int i = 0; ; ++i)
@@ -218,6 +218,32 @@ void Str_MakeUnFiltered(tchar * pStrOut, lpctstr pStrIn, int iSizeMax)
     }
 }
 
+tchar * Str_GetUnQuoted(tchar * pStr)
+{
+    // TODO: WARNING! Possible Memory Leak here!
+    GETNONWHITESPACE(pStr);
+    if (*pStr != '"')
+    {
+        Str_TrimEndWhitespace(pStr, int(strlen(pStr)));
+        return pStr;
+    }   
+
+    ++pStr;
+    // search for last quote symbol starting from the end
+    tchar * pEnd = pStr + strlen(pStr) - 1;
+    for (; pEnd >= pStr; --pEnd )
+    {
+        if ( *pEnd == '"' )
+        {
+            *pEnd = '\0';
+            break;
+        }
+    }
+
+    Str_TrimEndWhitespace(pStr, int(pEnd - pStr));
+    return pStr;
+}
+
 int Str_TrimEndWhitespace(tchar * pStr, int len)
 {
     while (len > 0)
@@ -240,6 +266,7 @@ tchar * Str_TrimWhitespace(tchar * pStr)
     Str_TrimEndWhitespace(pStr, (int)strlen(pStr));
     return pStr;
 }
+
 
 // String utilities: String operations
 
@@ -621,7 +648,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
     // ignore opened/closed brackets if that type of bracket is also a separator
     bool fSepHasCurly, fSepHasSquare, fSepHasRound, fSepHasAngle;
     fSepHasCurly = fSepHasSquare = fSepHasRound = fSepHasAngle = false;
-    for (uint j = 0; pszSep[j + 1] != '\0'; ++j)		// loop through each separator
+    for (uint j = 0; pszSep[j] != '\0'; ++j)		// loop through each separator
     {
         const tchar & sep = pszSep[j];
         if (sep == '{' || sep == '}')

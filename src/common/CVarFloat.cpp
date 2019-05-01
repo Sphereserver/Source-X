@@ -87,7 +87,6 @@ CSString CVarFloat::FloatMath( lpctstr & Expr )
 realtype CVarFloat::MakeFloatMath( lpctstr & Expr )
 {
 	ADDTOCALLSTACK("CVarFloat::MakeFloatMath");
-	//DEBUG_ERR(("MakeFloatMath\n"));
 	if ( ! Expr )
 		return 0;
 
@@ -318,15 +317,15 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 	if ( iIntrinsic >= 0 )
 	{
 		size_t iLen = strlen(sm_IntrinsicFunctions[iIntrinsic]);
-		if ( pArgs[iLen] == '(' )
+        if ( strchr("( ", pArgs[iLen]) )
 		{
 			pArgs += (iLen + 1);
 			tchar * pArgsNext;
 			Str_Parse( const_cast<tchar*>(pArgs), &(pArgsNext), ")" );
 
 			tchar * ppCmd[5];
-			realtype dResult;
-			size_t iCount;
+			realtype rResult;
+			int iCount;
 			const char * cparg1 = nullptr; //some functions need a const char instead of a char and GCC cannot bear it :)
 			const char * cparg2 = nullptr; //some functions need a const char instead of a char and GCC cannot bear it :)
 
@@ -337,22 +336,54 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 					if ( pArgs && *pArgs )
 					{
 						iCount = 1;
-						dResult = RES_GET_INDEX((int)(MakeFloatMath(pArgs))); // RES_GET_INDEX
+						rResult = RES_GET_INDEX(int(MakeFloatMath(pArgs))); // RES_GET_INDEX
 					}
 					else
 					{
 						iCount = 0;
-						dResult = 0;
+						rResult = 0;
 					}
 
 				} break;
+
+                case INTRINSIC_MAX:
+                {
+                    iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
+                    if ( iCount < 2 )
+                        rResult = 0;
+                    else
+                    {
+                        realtype rVal1, rVal2;
+                        lpctstr ptcTemp = ppCmd[0];
+                        rVal1 = MakeFloatMath(ptcTemp);
+                        ptcTemp = ppCmd[1];
+                        rVal2 = MakeFloatMath(ptcTemp);
+                        rResult = maximum(rVal1, rVal2);
+                    }
+                } break;
+
+                case INTRINSIC_MIN:
+                {
+                    iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
+                    if ( iCount < 2 )
+                        rResult = 0;
+                    else
+                    {
+                        realtype rVal1, rVal2;
+                        lpctstr ptcTemp = ppCmd[0];
+                        rVal1 = MakeFloatMath(ptcTemp);
+                        ptcTemp = ppCmd[1];
+                        rVal2 = MakeFloatMath(ptcTemp);
+                        rResult = minimum(rVal1, rVal2);
+                    }
+                } break;
 
 				case INTRINSIC_LOGARITHM:
 				{
 					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 3, "," );
 					if ( iCount < 1 )
 					{
-						dResult = 0;
+						rResult = 0;
 						break;
 					} 
 
@@ -361,17 +392,17 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 
 					if ( iCount < 2 )
 					{
-						dResult = log10(dArgument);
+						rResult = log10(dArgument);
 					}
 					else
 					{
 						if ( !strcmpi(ppCmd[1], "e") )
 						{
-							dResult = log(dArgument);
+							rResult = log(dArgument);
 						}
 						else if ( !strcmpi(ppCmd[1], "pi") )
 						{
-							dResult = log(dArgument) / log(M_PI);
+							rResult = log(dArgument) / log(M_PI);
 						}
 						else
 						{
@@ -381,11 +412,11 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 							{
 								DEBUG_ERR(( "Float_MakeFloatMath: (%f)Log(%f) is %s\n", dBase, dArgument, (!dBase) ? "infinite" : "undefined" ));
 								iCount = 0;
-								dResult = 0;
+								rResult = 0;
 							}
 							else
 							{
-								dResult = (log(dArgument)/log(dBase));
+								rResult = (log(dArgument)/log(dBase));
 							}
 						}
 					}
@@ -396,12 +427,12 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 					if ( pArgs && *pArgs )
 					{
 						iCount = 1;
-						dResult = exp(MakeFloatMath(pArgs));
+						rResult = exp(MakeFloatMath(pArgs));
 					}
 					else
 					{
 						iCount = 0;
-						dResult = 0;
+						rResult = 0;
 					}
 
 				} break;
@@ -417,17 +448,17 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 						if (dTosquare >= 0)
 						{
 							++iCount;
-							dResult = sqrt(dTosquare);
+							rResult = sqrt(dTosquare);
 						}
 						else
 						{
 							DEBUG_ERR(( "Float_MakeFloatMath: Sqrt of negative number (%f) is impossible\n", dTosquare ));
-							dResult = 0;
+							rResult = 0;
 						}
 					}
 					else
 					{
-						dResult = 0;
+						rResult = 0;
 					}
 
 				} break;
@@ -438,12 +469,12 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 					{
 						iCount = 1;
 						realtype dArgument = MakeFloatMath(pArgs);
-						dResult = sin(dArgument * M_PI / 180);
+						rResult = sin(dArgument * M_PI / 180);
 					}
 					else
 					{
 						iCount = 0;
-						dResult = 0;
+						rResult = 0;
 					}
 
 				} break;
@@ -454,12 +485,12 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 					{
 						iCount = 1;
 						realtype dArgument = MakeFloatMath(pArgs);
-						dResult = asin(dArgument) * 180 / M_PI;
+						rResult = asin(dArgument) * 180 / M_PI;
 					}
 					else
 					{
 						iCount = 0;
-						dResult = 0;
+						rResult = 0;
 					}
 
 				} break;
@@ -470,12 +501,12 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 					{
 						iCount = 1;
 						realtype dArgument = MakeFloatMath(pArgs);
-						dResult = cos(dArgument * M_PI / 180);
+						rResult = cos(dArgument * M_PI / 180);
 					}
 					else
 					{
 						iCount = 0;
-						dResult = 0;
+						rResult = 0;
 					}
 
 				} break;
@@ -486,12 +517,12 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 					{
 						iCount = 1;
 						realtype dArgument = MakeFloatMath(pArgs);
-						dResult = acos(dArgument) * 180 / M_PI;
+						rResult = acos(dArgument) * 180 / M_PI;
 					}
 					else
 					{
 						iCount = 0;
-						dResult = 0;
+						rResult = 0;
 					}
 
 				} break;
@@ -502,12 +533,12 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 					{
 						iCount = 1;
 						realtype dArgument = MakeFloatMath(pArgs);
-						dResult = tan(dArgument * M_PI / 180);
+						rResult = tan(dArgument * M_PI / 180);
 					}
 					else
 					{
 						iCount = 0;
-						dResult = 0;
+						rResult = 0;
 					}
 
 				} break;
@@ -518,12 +549,12 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 					{
 						iCount = 1;
 						realtype dArgument = MakeFloatMath(pArgs);
-						dResult = atan(dArgument) * 180 / M_PI;
+						rResult = atan(dArgument) * 180 / M_PI;
 					}
 					else
 					{
 						iCount = 0;
-						dResult = 0;
+						rResult = 0;
 					}
 
 				} break;
@@ -533,11 +564,11 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 				{
 					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 3, "," );
 					if ( iCount < 2 )
-						dResult = -1;
+						rResult = -1;
 					else
 					{
 						cparg1 = ppCmd[2];
-						dResult = Str_IndexOf(ppCmd[0], ppCmd[1], (iCount == 3)? (int)(MakeFloatMath(cparg1)) : 0);
+						rResult = Str_IndexOf(ppCmd[0], ppCmd[1], (iCount == 3)? (int)(MakeFloatMath(cparg1)) : 0);
 					}
 				} break;
 
@@ -545,21 +576,21 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 				{
 					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
 					if ( iCount < 2 )
-						dResult = 0;
+						rResult = 0;
 					else
-						dResult = (Str_Match( ppCmd[0], ppCmd[1] ) == MATCH_VALID ) ? 1 : 0;
+						rResult = (Str_Match( ppCmd[0], ppCmd[1] ) == MATCH_VALID ) ? 1 : 0;
 				} break;
 
 				case INTRINSIC_STRREGEX:
 				{
 					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
 					if ( iCount < 2 )
-						dResult = 0;
+						rResult = 0;
 					else
 					{
 						tchar * tLastError = Str_GetTemp();
-						dResult = Str_RegExMatch( ppCmd[0], ppCmd[1], tLastError );
-						if ( dResult < 0 )
+						rResult = Str_RegExMatch( ppCmd[0], ppCmd[1], tLastError );
+						if ( rResult < 0 )
 						{
 							DEBUG_ERR(( "STRREGEX bad function usage. Error: %s\n", tLastError ));
 						}
@@ -570,12 +601,12 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 				{
 					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
 					if ( iCount < 2 )
-						dResult = 0;
+						rResult = 0;
 					else
 					{
 						cparg1 = ppCmd[0];
 						cparg2 = ppCmd[1];
-						dResult = Calc_GetBellCurve((int)(MakeFloatMath(cparg1)), (int)(MakeFloatMath(cparg2)));
+						rResult = Calc_GetBellCurve((int)(MakeFloatMath(cparg1)), (int)(MakeFloatMath(cparg2)));
 					}
 				} break;
 
@@ -584,12 +615,12 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 					if ( pArgs && *pArgs )
 					{
 						iCount = 1;
-						dResult = pArgs[0];
+						rResult = pArgs[0];
 					}
 					else
 					{
 						iCount = 0;
-						dResult = 0;
+						rResult = 0;
 					}
 				} break;
 
@@ -597,7 +628,7 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 				{
 					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
 					if ( iCount <= 0 )
-						dResult = 0;
+						rResult = 0;
 					else
 					{
 						cparg1 = ppCmd[0];
@@ -606,10 +637,10 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 						{
 							cparg2 = ppCmd[1];
 							realtype val2 = MakeFloatMath( cparg2 );
-							dResult = GetRandVal2( val1, val2 );
+							rResult = GetRandVal2( val1, val2 );
 						}
 						else
-							dResult = GetRandVal(val1);
+							rResult = GetRandVal(val1);
 					}
 				} break;
 
@@ -617,46 +648,44 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 				{
 					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
 					if ( iCount < 2 )
-						dResult = 1;
+						rResult = 1;
 					else
-						dResult = strcmp(ppCmd[0], ppCmd[1]);
+						rResult = strcmp(ppCmd[0], ppCmd[1]);
 				} break;
 
 				case INTRINSIC_STRCMPI:
 				{
 					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
 					if ( iCount < 2 )
-						dResult = 1;
+						rResult = 1;
 					else
-						dResult = strcmpi(ppCmd[0], ppCmd[1]);
+						rResult = strcmpi(ppCmd[0], ppCmd[1]);
 				} break;
 
 				case INTRINSIC_STRLEN:
 				{
 					iCount = 1;
-					dResult = (realtype)strlen(pArgs);
+					rResult = (realtype)strlen(pArgs);
 				} break;
 
 				case INTRINSIC_ISOBSCENE:
 				{
 					iCount = 1;
-					dResult = g_Cfg.IsObscene( pArgs );
+					rResult = g_Cfg.IsObscene( pArgs );
 				} break;
+
 				case INTRINSIC_ISNUMBER:
 				{
 					iCount = 1;
-					{
-						char z[64];
-						LTOA(atol(pArgs), z, 10);
-						dResult = strcmp(pArgs, z) ? 0 : 1;
-					}
+                    SKIP_NONNUM( pArgs );
+                    rResult = IsStrNumeric( pArgs );
 				} break;
 
 				case INTRINSIC_QVAL:
 				{
 					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 5, "," );
 					if ( iCount < 3 )
-						dResult = 0;
+						rResult = 0;
 					else
 					{
 						cparg1 = ppCmd[0];
@@ -666,24 +695,24 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 						if ( a1 < a2 )
 						{
 							cparg1 = ppCmd[2];
-							dResult = GetSingle(cparg1);
+							rResult = GetSingle(cparg1);
 						}
 						else if ( a1 == a2 )
 						{
 							cparg1 = ppCmd[3];
-							dResult = ( iCount < 4 ) ? 0 : GetSingle(cparg1);
+							rResult = ( iCount < 4 ) ? 0 : GetSingle(cparg1);
 						}
 						else
 						{
 							cparg1 = ppCmd[4];
-							dResult = ( iCount < 5 ) ? 0 : GetSingle(cparg1);
+							rResult = ( iCount < 5 ) ? 0 : GetSingle(cparg1);
 						}
 					}
 				} break;
 
 				default:
 					iCount = 0;
-					dResult = 0;
+					rResult = 0;
 					break;
 			}
 
@@ -696,7 +725,7 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 			}
 			else
 			{
-				return dResult;
+				return rResult;
 			}
 		}
 	}

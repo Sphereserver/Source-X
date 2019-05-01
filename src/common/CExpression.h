@@ -18,11 +18,13 @@
 #define ISWHITESPACE(ch)	(IsSpace(ch) || ((uchar)(ch)==0xa0))// IsSpace
 #define _IS_SWITCH(ch)		((ch) == '-' || (ch) == '/')	    // command line switch.
 #define _ISCSYMF(ch)        (IsAlpha(ch) || (ch)=='_')	        // __iscsym or __iscsymf
-#define _ISCSYM(ch)         (isalnum(ch) || (ch)=='_')		    // __iscsym or __iscsymf
+#define _ISCSYM(ch)         (isalnum(ch) || (ch)=='_')	        // __iscsym or __iscsymf
 
 #define SKIP_SEPARATORS(pStr)		while (*(pStr)=='.') { ++(pStr); }	// || ISWHITESPACE(*(pStr))
 #define SKIP_ARGSEP(pStr)		    while ((*(pStr)==',' || IsSpace(*(pStr)))) { ++(pStr); }
 #define SKIP_IDENTIFIERSTRING(pStr) while (_ISCSYM(*(pStr))) { ++(pStr); }
+#define SKIP_NONNUM(pStr)           while (*(pStr) && !isdigit(*(pStr))) { ++(pStr); }
+#define SKIP_NONALPHA(pStr)         while (*(pStr) && !IsAlpha(*(pStr))) { ++(pStr); }
 
 #define GETNONWHITESPACE(pStr)	    while (ISWHITESPACE(*(pStr))) { ++(pStr); }
 
@@ -82,31 +84,31 @@ enum INTRINSIC_TYPE
 
 static lpctstr const sm_IntrinsicFunctions[INTRINSIC_QTY+1] =
 {
-	"ABS",		// absolute
+	"ABS",		    // absolute
 	"ARCCOS",
 	"ARCSIN",
 	"ARCTAN",
-	"COS",		// cosinus
-	"ID",		// ID(x) = truncate the type portion of an Id
-	"ISNUMBER",		// ISNUMBER(var)
-	"ISOBSCENE",	// test for non-allowed strings
-	"LOGARITHM",	// log()/log10()
+	"COS",		    // cosinus
+	"ID",		    // ID(x) = truncate the type portion of an Id
+	"ISNUMBER",	    // ISNUMBER(var)
+	"ISOBSCENE",    // test for non-allowed strings
+	"LOGARITHM",    // log()/log10()
     "MAX",
     "MIN",
-	"NAPIERPOW",	// exp()
-	"QVAL",		// QVAL(test1,test2,ret1,ret2,ret3) - test1 ? test2 (< ret1, = ret2, > ret3)
-	"RAND",		// RAND(x) = flat random
-	"RANDBELL",	// RANDBELL(center,variance25)
+	"NAPIERPOW",    // exp()
+	"QVAL",	        // QVAL(test1,test2,ret1,ret2,ret3) - test1 ? test2 (< ret1, = ret2, > ret3)
+	"RAND",         // RAND(x) = flat random
+	"RANDBELL",     // RANDBELL(center,variance25)
 	"SIN",
-	"SQRT",		// sqrt()
+	"SQRT",         // sqrt()
 	"StrAscii",
-	"STRCMP",	// STRCMP(str1,str2)
-	"STRCMPI",	// STRCMPI(str1,str2)
-	"StrIndexOf", // StrIndexOf(string,searchVal,[index]) = find the index of this, -1 = not here.
-	"STRLEN",	// STRLEN(str)
-	"STRMATCH",	// STRMATCH(str,*?pattern)
+	"STRCMP",       // STRCMP(str1,str2)
+	"STRCMPI",      // STRCMPI(str1,str2)
+	"StrIndexOf",   // StrIndexOf(string,searchVal,[index]) = find the index of this, -1 = not here.
+	"STRLEN",       // STRLEN(str)
+	"STRMATCH",     // STRMATCH(str,*?pattern)
 	"STRREGEX",
-	"TAN",		// tan()
+	"TAN",          // tan()
 	nullptr
 };
 

@@ -69,8 +69,8 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	// Some items (like hair) have no names !
 	// Get rid of the strange leading spaces in some of the names.
 	tchar szName[ sizeof(tiledata.m_name)+1 ];
-	size_t j = 0;
-	for ( size_t i = 0; i < sizeof(tiledata.m_name) && tiledata.m_name[i]; ++i )
+	ushort j = 0;
+	for ( ushort i = 0; i < sizeof(tiledata.m_name) && tiledata.m_name[i]; ++i )
 	{
 		if ( j == 0 && ISWHITESPACE(tiledata.m_name[i]))
 			continue;
@@ -187,10 +187,10 @@ tchar * CItemBase::GetNamePluralize( lpctstr pszNameBase, bool fPluralize )	// s
 {
 	ADDTOCALLSTACK("CItemBase::GetNamePluralize");
 	tchar * pszName = Str_GetTemp();
-	size_t j = 0;
+	ushort j = 0;
 	bool fInside = false;
 	bool fPlural = false;
-	for ( size_t i = 0; pszNameBase[i]; ++i )
+	for ( ushort i = 0; pszNameBase[i]; ++i )
 	{
 		if ( pszNameBase[i] == '%' )
 		{
@@ -457,7 +457,7 @@ int CItemBase::IsID_Door( ITEMID_TYPE id ) // static
 		return 2;
 	}
 
-	for ( size_t i = 0; i < CountOf(sm_Item_DoorBase); ++i)
+	for ( uint i = 0; i < CountOf(sm_Item_DoorBase); ++i)
 	{
 		int did = id - sm_Item_DoorBase[i];
 		if ( did >= 0 && did <= 15 )
@@ -847,7 +847,7 @@ IT_TYPE CItemBase::GetTypeBase( ITEMID_TYPE id, const CUOItemTypeRec_HS &tiledat
 ITEMID_TYPE CItemBase::GetNextFlipID( ITEMID_TYPE id ) const
 {
 	ADDTOCALLSTACK("CItemBase::GetNextFlipID");
-	if (m_flip_id.size() > 0 )
+	if (!m_flip_id.empty())
 	{
 		ITEMID_TYPE idprev = GetDispID();
 		for ( size_t i = 0; i < m_flip_id.size(); ++i )
@@ -1104,7 +1104,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 
 			if (*pszKey == '.')
 			{
-				pszKey++;
+				++pszKey;
 				if (!strnicmp(pszKey, "TILES", 5))
 				{
 					sVal.FormatVal(pItemMulti->m_shipSpeed.tiles);
@@ -1137,7 +1137,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 				tchar *pszTemp = Str_GetTemp();
 				size_t iLen = 0;
 				*pszTemp = '\0';
-				for ( size_t i = 0; i < m_flip_id.size(); i++ )
+				for ( size_t i = 0; i < m_flip_id.size(); ++i )
 				{
 					if ( i > 0 )
 						iLen += strcpylen( pszTemp+iLen, "," );
@@ -1333,7 +1333,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			break;
 		default:
         {
-            return(CBaseBaseDef::r_WriteVal(pszKey, sVal));
+            return CBaseBaseDef::r_WriteVal(pszKey, sVal);
         }
 	}
 	return true;

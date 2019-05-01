@@ -1341,6 +1341,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 
 #undef DEBUG_MSG_NOINIT
 #undef LOG_ERR_NOINIT
+#undef LOG_WARN_NOINIT
 }
 
 const CSpellDef * CServerConfig::GetSpellDef( SPELL_TYPE index ) const
@@ -2406,14 +2407,19 @@ CPointMap CServerConfig::GetRegionPoint( lpctstr pCmd ) const // Decode a telepo
 	GETNONWHITESPACE( pCmd );
 	if ( pCmd[0] == '-' && !strchr( pCmd, ',' ) )	// Get location from start list.
 	{
-		size_t i = (size_t)SphereAbs(ATOI(pCmd)) - 1;
-		if ( ! m_StartDefs.IsValidIndex( i ))
-		{
-			if (m_StartDefs.empty())
-				return CPointMap();
+        if (m_StartDefs.empty())
+            return CPointMap();
 
-			i = 0;
-		}
+        SKIP_NONNUM(pCmd);
+		size_t i = Str_ToUI(pCmd);
+        if (i > 0)
+        {
+            i -= 1;
+            if ( ! m_StartDefs.IsValidIndex(i) )
+            {
+                i = 0;
+            }
+        }
 		return m_StartDefs[i]->m_pt;
 	}
 
