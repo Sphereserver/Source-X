@@ -268,6 +268,12 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 		case OBC_TEVENTS:
 			m_TEvents.WriteResourceRefList( sVal );
 			break;
+        case OBC_ISTEVENT:
+            if ( pszKey[8] != '.' )
+                return false;
+            pszKey += 9;
+            sVal = m_TEvents.ContainsResourceName(RES_EVENTS, pszKey) ? "1" : "0";
+            break;
 		default:
 			return false;
 	}

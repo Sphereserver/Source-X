@@ -59,9 +59,10 @@ public:
 	char	m_PacketFilter[255][32];	// list of packet filtering functions
 	char	m_OutPacketFilter[255][32];	// list of outgoing packet filtering functions
 
-	CSFileObj	fhFile;			//	file script object
-	CDataBase	m_hdb;			//	SQL data base
-	CSQLite		m_hldb;			//	Local database
+	CSFileObj	_hFile;			// File script object
+	CDataBase	_hDb;			// Online database (MySQL)
+	CSQLite		_hLdb;			// Local (file) database (SQLite)
+    CSQLite     _hMdb;         // In-memory database (SQLite)
 
 private:
 	void ProfileDump( CTextConsole * pSrc, bool bDump = false );

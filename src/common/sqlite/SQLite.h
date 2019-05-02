@@ -6,7 +6,6 @@
 #ifndef _INC_SQLITE_H
 #define _INC_SQLITE_H
 
-#include "sqlite3.h"
 #include "../CScriptObj.h"
 #include <vector>
 
@@ -24,8 +23,10 @@ typedef vstrlist row;
 // Classes
 //////////////////////////////////////////////////////////////////////////
 
-class Table; // Forward declaration
-class TablePtr; // Forward declaration
+// Forward declarations
+struct sqlite3;
+class Table; 
+class TablePtr;
 
 // Main wrapper
 class CSQLite : public CScriptObj
@@ -43,7 +44,7 @@ public:
 
 	sqlite3 * GetPtr(){ return m_sqlite3; };
 	int GetLastError(){ return m_iLastError; };
-	void ClearError() { m_iLastError=SQLITE_OK; };
+	void ClearError() { m_iLastError=0; };  // SQLITE_OK = 0
 
 	TablePtr QuerySQLPtr( lpctstr strSQL );
 	Table QuerySQL( lpctstr strSQL );
@@ -51,8 +52,11 @@ public:
 	int ExecuteSQL( lpctstr strSQL );
 	int IsSQLComplete( lpctstr strSQL );
 
+    int ImportDB(lpctstr strInFileName);
+    int ExportDB(lpctstr strOutFileName);
+
 	int GetLastChangesCount();
-	sqlite_int64 GetLastInsertRowID();
+    llong GetLastInsertRowID();
 
 
 	bool BeginTransaction();
@@ -77,6 +81,9 @@ public:
 private:
 	sqlite3 * m_sqlite3;
 	int m_iLastError;
+
+    CSString _sFileName;
+    bool _fInMemory;
 
 	void ConvertUTF8ToString( char * strInUTF8MB, stdvstring & strOut );
 };

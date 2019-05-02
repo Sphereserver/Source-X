@@ -1,4 +1,5 @@
 #include "SQLite.h"
+#include "sqlite3.h"
 #include "../../common/CLog.h"
 #include "../CExpression.h"
 #include "../CException.h"
@@ -7,8 +8,9 @@
 
 CSQLite::CSQLite()
 {
-	m_sqlite3=0;
+	m_sqlite3=nullptr;
 	m_iLastError=SQLITE_OK;
+    _fInMemory = false;
 }
 
 CSQLite::~CSQLite()
@@ -22,32 +24,45 @@ int CSQLite::Open( lpctstr strFileName )
 
 	int iErr=sqlite3_open(UTF8MBSTR(strFileName), &m_sqlite3);
 
-	if (iErr!=SQLITE_OK) m_iLastError=iErr;
+	if (iErr!=SQLITE_OK)
+    {
+        m_iLastError=iErr;
+    }
+    else
+    {
+        if (!strcmp(":memory:", strFileName))
+            _fInMemory = true;
+        else
+            _sFileName = strFileName;
+    }
 
 	return iErr;
 }
 
 void CSQLite::Close()
 {
+    _sFileName.Empty();
+    _fInMemory = false;
 	if (m_sqlite3)
 	{
 		sqlite3_close(m_sqlite3);
-		m_sqlite3=0;
+		m_sqlite3=nullptr;
 	}
 }
 
 bool CSQLite::IsOpen()
 {
-	return m_sqlite3!=0;
+	return (m_sqlite3 != nullptr);
 }
 
 int CSQLite::QuerySQL( lpctstr strSQL,  CVarDefMap & mapQueryResult )
 {
-
 	mapQueryResult.Empty();
 	mapQueryResult.SetNumNew("NUMROWS", 0);
 
 	TablePtr retTable = QuerySQLPtr(strSQL);
+    if (retTable.m_pTable == nullptr)
+        goto err_and_ret;
 
 	if (retTable.m_pTable->GetRowCount())
 	{
@@ -56,33 +71,35 @@ int CSQLite::QuerySQL( lpctstr strSQL,  CVarDefMap & mapQueryResult )
 		mapQueryResult.SetNum("NUMROWS", iRows);
 		mapQueryResult.SetNum("NUMCOLS", iCols);
 
-		char	*zStore = Str_GetTemp();
-		for (int iRow=0; iRow<iRows; iRow++)
+		char *pcStore = Str_GetTemp();
+		for (int iRow=0; iRow<iRows; ++iRow)
 		{
 			retTable.m_pTable->GoRow(iRow);
-			for (int iCol=0; iCol<iCols; iCol++)
+			for (int iCol=0; iCol<iCols; ++iCol)
 			{
-				sprintf(zStore, "%d.%d", iRow, iCol);
-				mapQueryResult.SetStr(zStore, true, retTable.m_pTable->GetValue(iCol));
-				sprintf(zStore, "%d.%s", iRow, retTable.m_pTable->GetColName(iCol));
-				mapQueryResult.SetStr(zStore, true, retTable.m_pTable->GetValue(iCol));
+                snprintf(pcStore, STR_TEMPLENGTH, "%d.%d", iRow, iCol);
+				mapQueryResult.SetStr(pcStore, true, retTable.m_pTable->GetValue(iCol));
+                snprintf(pcStore, STR_TEMPLENGTH, "%d.%s", iRow, retTable.m_pTable->GetColName(iCol));
+				mapQueryResult.SetStr(pcStore, true, retTable.m_pTable->GetValue(iCol));
 			}
 		}
 	}
 
-	return GetLastError();
+err_and_ret:
+    if (m_iLastError!=SQLITE_OK)
+        g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "SQLite query \"%s\" failed. Error: %d\n", strSQL, m_iLastError);
+	return m_iLastError;
 }
 
-Table CSQLite::QuerySQL( lpctstr strSQL)
+Table CSQLite::QuerySQL( lpctstr strSQL )
 {
-
 	if (!IsOpen()) {
 		m_iLastError=SQLITE_ERROR;
 		return Table();
 	}
 
-	char ** retStrings = 0;
-	char * errmsg = 0;
+	char ** retStrings = nullptr;
+	char * errmsg = nullptr;
 	int iRows=0, iCols=0;
 
 	int iErr=sqlite3_get_table(m_sqlite3, UTF8MBSTR(strSQL), &retStrings,
@@ -91,7 +108,7 @@ Table CSQLite::QuerySQL( lpctstr strSQL)
 	if (iErr!=SQLITE_OK)
 	{
 		m_iLastError=iErr;
-		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "SQLite query \"%s\" failed. Error:%d \n", strSQL, iErr);
+		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "SQLite query \"%s\" failed. Error: %d\n", strSQL, iErr);
 	}
 
 	sqlite3_free(errmsg);
@@ -140,11 +157,11 @@ TablePtr CSQLite::QuerySQLPtr( lpctstr strSQL )
 {
 	if (!IsOpen()) {
 		m_iLastError=SQLITE_ERROR;
-		return 0;
+		return nullptr;
 	}
 
-	char ** retStrings = 0;
-	char * errmsg = 0;
+	char ** retStrings = nullptr;
+	char * errmsg = nullptr;
 	int iRows=0, iCols=0;
 
 	int iErr=sqlite3_get_table(m_sqlite3, UTF8MBSTR(strSQL), &retStrings,
@@ -153,14 +170,15 @@ TablePtr CSQLite::QuerySQLPtr( lpctstr strSQL )
 	if (iErr!=SQLITE_OK)
 	{
 		m_iLastError=iErr;
-		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "SQLite query \"%s\" failed. Error:%d \n", strSQL, iErr);
+		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "SQLite query \"%s\" failed. Error: %d\n", strSQL, iErr);
 	}
 
 	sqlite3_free(errmsg);
 
 	Table * retTable = new Table();
 
-	if (iRows>0) retTable->m_iPos=0;
+	if (iRows>0)
+        retTable->m_iPos=0;
 
 	retTable->m_iCols=iCols;
 	retTable->m_iRows=iRows;
@@ -168,13 +186,14 @@ TablePtr CSQLite::QuerySQLPtr( lpctstr strSQL )
 
 	int iPos=0;
 
-	for (; iPos<iCols; iPos++)
+	for (; iPos<iCols; ++iPos)
 	{
 		retTable->m_strlstCols.push_back(stdvstring());
 
 		if (retStrings[iPos])
 			ConvertUTF8ToString( retStrings[iPos], retTable->m_strlstCols.back() );
-		else retTable->m_strlstCols.back().push_back('\0');
+		else
+            retTable->m_strlstCols.back().push_back('\0');
 	}
 
 	retTable->m_lstRows.resize(iRows);
@@ -187,9 +206,10 @@ TablePtr CSQLite::QuerySQLPtr( lpctstr strSQL )
 
 			if (retStrings[iPos])
 				ConvertUTF8ToString( retStrings[iPos], retTable->m_lstRows[iRow].back() );
-			else retTable->m_lstRows[iRow].back().push_back('\0');
+			else
+                retTable->m_lstRows[iRow].back().push_back('\0');
 
-			iPos++;
+			++iPos;
 		}
 	}
 	sqlite3_free_table(retStrings);
@@ -215,14 +235,14 @@ int CSQLite::ExecuteSQL( lpctstr strSQL )
 		return SQLITE_ERROR;
 	}
 
-	char * errmsg = 0;
+	char * errmsg = nullptr;
 
-	int iErr = sqlite3_exec( m_sqlite3, UTF8MBSTR(strSQL), 0, 0, &errmsg );
+	int iErr = sqlite3_exec( m_sqlite3, UTF8MBSTR(strSQL), nullptr, nullptr, &errmsg );
 
 	if (iErr!=SQLITE_OK)
 	{
 		m_iLastError=iErr;
-		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "SQLite query \"%s\" failed. Error:%d \n", strSQL, iErr);
+		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "SQLite query \"%s\" failed. Error: %d\n", strSQL, iErr);
 	}
 
 	sqlite3_free(errmsg);
@@ -235,16 +255,115 @@ int CSQLite::IsSQLComplete( lpctstr strSQL )
 	return sqlite3_complete( UTF8MBSTR(strSQL) );
 }
 
+int CSQLite::ImportDB(lpctstr strInFileName)
+{
+    if (!CSFile::FileExists(strInFileName))
+        return SQLITE_CANTOPEN;
+    //if (IsStrEmpty(strTable))
+    //    return SQLITE_ERROR;
+
+    int iErr;
+
+    sqlite3 *in_db;
+    iErr = sqlite3_open(strInFileName, &in_db);
+    if (iErr != SQLITE_OK)
+        goto clean_and_ret;
+
+    /*
+    char pcQuery[100];
+    char *pcErrMsg = nullptr;
+
+    // Does the table exist in the loaded db?
+    sqlite3_snprintf(int(sizeof(pcQuery)), pcQuery, "SELECT sql FROM sqlite_master WHERE type='table' AND name='%s'", strTable);
+    iErr = sqlite3_exec( in_db, UTF8MBSTR(pcQuery), nullptr, nullptr, &pcErrMsg );
+    if (iErr != SQLITE_OK)
+        goto clean_and_ret;
+    
+    // Copy the table schema: how?
+
+    // End
+    clean_and_ret:
+        sqlite3_free(pcErrMsg);
+        sqlite3_close(in_db);
+        if (iErr != SQLITE_OK)
+        {
+            m_iLastError=iErr;
+            g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "SQLite ImportDB failed. Error: %d\n", iErr);
+        }
+        return iErr;
+    */
+
+    sqlite3_backup *in_backup;
+    in_backup = sqlite3_backup_init(m_sqlite3, "main", in_db, "main");
+    if (in_backup == nullptr)
+    {
+        iErr = sqlite3_errcode(m_sqlite3);
+        goto clean_and_ret;
+    }
+
+    iErr = sqlite3_backup_step(in_backup, -1);
+    if (iErr != SQLITE_DONE)
+        goto clean_and_ret;
+
+    iErr = sqlite3_backup_finish(in_backup);
+    //if (iErr != SQLITE_OK)
+    //    goto clean_and_ret;
+
+clean_and_ret:
+    sqlite3_close(in_db);
+    if (iErr != SQLITE_OK)
+    {
+        m_iLastError=iErr;
+        g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "SQLite ImportDB failed. Error: %d\n", iErr);
+    }
+    return iErr;
+}
+
+int CSQLite::ExportDB(lpctstr strOutFileName)
+{
+    int iErr;
+
+    sqlite3 *out_db;
+    iErr = sqlite3_open(strOutFileName, &out_db);
+    if (iErr != SQLITE_OK)
+        goto clean_and_ret;
+
+    sqlite3_backup *out_backup;
+    out_backup = sqlite3_backup_init(out_db, "main", m_sqlite3, "main");
+    if (out_backup == nullptr)
+    {
+        iErr = sqlite3_errcode(out_db);
+        goto clean_and_ret;
+    }
+
+    iErr = sqlite3_backup_step(out_backup, -1);
+    if (iErr != SQLITE_DONE)
+        goto clean_and_ret;
+
+    iErr = sqlite3_backup_finish(out_backup);
+    //if (iErr != SQLITE_OK)
+    //    goto clean_and_ret;
+
+clean_and_ret:
+    sqlite3_close(out_db);
+    if (iErr != SQLITE_OK)
+    {
+        m_iLastError=iErr;
+        g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "SQLite ExportDB failed. Error: %d\n", iErr);
+    }
+    return iErr;
+}
+
 int CSQLite::GetLastChangesCount()
 {
 	return sqlite3_changes(m_sqlite3);
 }
 
-sqlite_int64 CSQLite::GetLastInsertRowID()
+llong CSQLite::GetLastInsertRowID()
 {
-	if (m_sqlite3==0) return 0; // RowID's starts with 1...
+	if (m_sqlite3==nullptr) return 0; // RowID's starts with 1...
 
-	return sqlite3_last_insert_rowid(m_sqlite3);
+	return llong(sqlite3_last_insert_rowid(m_sqlite3));
 }
 
 bool CSQLite::BeginTransaction()
@@ -285,6 +404,7 @@ bool CSQLite::RollbackTransaction()
 enum LDBO_TYPE
 {
 	LDBO_CONNECTED,
+    LDBO_FILENAME,
 	LDBO_ROW,
 	LDBO_QTY
 };
@@ -292,6 +412,7 @@ enum LDBO_TYPE
 lpctstr const CSQLite::sm_szLoadKeys[LDBO_QTY+1] =
 {
 	"CONNECTED",
+    "FILENAME",
 	"ROW",
 	nullptr
 };
@@ -301,6 +422,8 @@ enum LDBOV_TYPE
 	LDBOV_CLOSE,
 	LDBOV_CONNECT,
 	LDBOV_EXECUTE,
+    LDBOV_EXPORTDB,
+    LDBOV_IMPORTDB,
 	LDBOV_QUERY,
 	LDBOV_QTY
 };
@@ -310,6 +433,8 @@ lpctstr const CSQLite::sm_szVerbKeys[LDBOV_QTY+1] =
 	"CLOSE",
 	"CONNECT",
 	"EXECUTE",
+    "EXPORTDB",
+    "IMPORTDB",
 	"QUERY",
 	nullptr
 };
@@ -341,6 +466,11 @@ bool CSQLite::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc)
 			sVal.FormatVal(IsOpen());
 			break;
 
+        case LDBO_FILENAME:
+            if (!_fInMemory)
+                sVal = _sFileName;
+            break;
+
 		case LDBO_ROW:
 		{
 			pszKey += strlen(sm_szLoadKeys[index]);
@@ -370,19 +500,28 @@ bool CSQLite::r_Verb(CScript & s, CTextConsole * pSrc)
 	switch ( index )
 	{
 		case LDBOV_CLOSE:
-			if ( IsOpen() )
-				Close();
+            if ( _fInMemory )
+                return false; 
+			Close();
 			break;
 
 		case LDBOV_CONNECT:
-			if ( IsOpen() )
-				Close();
-			Open(s.GetArgRaw());
-			break;
+            if ( _fInMemory )
+                return false; 
+            Open(s.GetArgStr());
+            break;
 
 		case LDBOV_EXECUTE:
 			ExecuteSQL(s.GetArgRaw());
 			break;
+
+        case LDBOV_EXPORTDB:
+            ExportDB(s.GetArgStr());
+            break;
+
+        case LDBOV_IMPORTDB:
+            ImportDB(s.GetArgStr());
+            break;
 
 		case LDBOV_QUERY:
 			QuerySQL(s.GetArgRaw(), m_QueryResult);
@@ -527,7 +666,7 @@ void Table::JoinTable(Table & tblJoin)
 
 TablePtr::TablePtr( )
 {
-	m_pTable=0;
+	m_pTable=nullptr;
 }
 
 TablePtr::TablePtr( Table * pTable )
@@ -538,7 +677,7 @@ TablePtr::TablePtr( Table * pTable )
 TablePtr::TablePtr( const TablePtr& cTablePtr )
 {
 	m_pTable=cTablePtr.m_pTable;
-	((TablePtr *)&cTablePtr)->m_pTable=0;
+	((TablePtr *)&cTablePtr)->m_pTable=nullptr;
 }
 
 TablePtr::~TablePtr()
@@ -550,13 +689,13 @@ void TablePtr::operator =( const TablePtr& cTablePtr )
 {
 	if (m_pTable) delete m_pTable;
 	m_pTable=cTablePtr.m_pTable;
-	((TablePtr *)&cTablePtr)->m_pTable=0;
+	((TablePtr *)&cTablePtr)->m_pTable=nullptr;
 }
 
 Table * TablePtr::Detach()
 {
 	Table * pTable=m_pTable;
-	m_pTable=0;
+	m_pTable=nullptr;
 	return pTable;
 }
 
@@ -569,7 +708,7 @@ void TablePtr::Attach( Table * pTable )
 void TablePtr::Destroy()
 {
 	if (m_pTable) delete m_pTable;
-		m_pTable=0;
+		m_pTable=nullptr;
 }
 
 UTF8MBSTR::UTF8MBSTR()

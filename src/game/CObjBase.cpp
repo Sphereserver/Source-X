@@ -1142,13 +1142,13 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				return false;
 			pszKey += 8;
 			sVal = m_OEvents.ContainsResourceName(RES_EVENTS, pszKey) ? "1" : "0";
-			return true;
+            break;
 		case OC_ISTEVENT:
 			if ( pszKey[8] != '.' )
 				return false;
 			pszKey += 9;
 			sVal = Base_GetDef()->m_TEvents.ContainsResourceName(RES_EVENTS, pszKey) ? "1" : "0";
-			return true;
+            break;
 		case OC_ISITEM:
 			sVal.FormatVal( IsItem());
 			break;
@@ -1202,7 +1202,6 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 					else
 						sVal.FormatVal( ( index == OC_ISNEARTYPETOP ) ? ( g_World.IsTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( g_World.IsItemTypeNear(GetTopPoint(), (IT_TYPE)iType, iDistance, bCheckMulti ) ) );
 				}
-				return true;
 			}
 			break;
 		case OC_ISPLAYER:
@@ -1212,12 +1211,12 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 					sVal.FormatVal( (pChar->m_pPlayer == nullptr) ? 0 : 1 );
 				else
 					sVal.FormatVal( 0 );
-				return true;
+                break;
 			}
         case OC_ISSLEEPING:
         {
             sVal.FormatVal(IsSleeping());
-            return true;
+            break;
         }
 		case OC_ISDIALOGOPEN:
 			{
@@ -1257,7 +1256,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 					sVal.FormatVal( 0 );
 				}
 
-				return true;
+                break;
 			}
 		case OC_ISARMOR:
 			{
@@ -1296,7 +1295,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				pszKey += 9;
 				//sVal.FormatVal( (g_World.m_TimedFunctions.IsTimer(GetUID(),pszKey)) ? 1 : 0 );
 				sVal.FormatVal( g_World.m_TimedFunctions.IsTimer(GetUID(),pszKey) );
-				return true;
+                break;
 			}
 			break;
 		case OC_ISWEAPON:
@@ -1359,7 +1358,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				else
 					sVal = pVarKey->GetValStr();
 			}
-			return true;
+            break;
 		case OC_TIMER:
 			sVal.FormatLLVal( GetTimerSAdjusted() );
 			break;
@@ -1463,20 +1462,21 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
  					if ( ! *pszKey )
  					{
  						sVal.Format("%s=%s", pTagAt->GetKey(), pTagAt->GetValStr());
- 						return true;
  					}
  					else if ( !strnicmp( pszKey, "KEY", 3 )) // key?
  					{
  						sVal = pTagAt->GetKey();
- 						return true;
  					}
  					else if ( !strnicmp( pszKey, "VAL", 3 )) // val?
  					{
  						sVal = pTagAt->GetValStr();
- 						return true;
  					}
+                    else
+                    {
+                        return false;
+                    }
+                    break;
  				}
-
 			return false;
 			}
 			break;
@@ -1501,18 +1501,20 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
  					if ( ! *pszKey )
  					{
  						sVal.Format("%s=%s", pTagAt->GetKey(), pTagAt->GetValStr());
- 						return true;
  					}
  					else if ( !strnicmp( pszKey, "KEY", 3 )) // key?
  					{
  						sVal = pTagAt->GetKey();
- 						return true;
  					}
  					else if ( !strnicmp( pszKey, "VAL", 3 )) // val?
  					{
  						sVal = pTagAt->GetValStr();
- 						return true;
  					}
+                    else
+                    {
+                        return false;
+                    }
+                    break;
  				}
 
 			return false;
@@ -2188,11 +2190,11 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_REMOVE:	//remove this object now.
 			EXC_SET_BLOCK("REMOVE");
 			Delete();
-			return true;
+            break;
 		case OV_REMOVEFROMVIEW:
 			EXC_SET_BLOCK("REMOVEFROMVIEW");
 			RemoveFromView( nullptr, false );	// remove this item from all clients.
-			return true;
+            break;
 		case OV_RESENDTOOLTIP:
 			{
 				EXC_SET_BLOCK("RESENDTOOLTIP");
@@ -2209,7 +2211,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					fUseCache = (piCmd[1] != 0);
 
 				ResendTooltip(fSendFull, fUseCache);
-				return true;
+                break;
 			}
 		case OV_SAY: //speak so everyone can here
 			EXC_SET_BLOCK("SAY");
@@ -2516,7 +2518,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					return false;
 				}
 			}
-			return true;
+            break;
 		case OV_TRYSRC:
 		case OV_TRYSRV:
 			{
@@ -2556,7 +2558,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					return false;
 				}
 			}
-			return true;
+            break;
 
 		case OV_UID:
 			EXC_SET_BLOCK("UID");
@@ -2596,7 +2598,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			}
 			else
 				pCharSrc->GetClient()->Event_SingleClick(this->GetUID());
-			return true;
+            break;
 
 		case OV_DCLICK:
 			EXC_SET_BLOCK("DCLICK");

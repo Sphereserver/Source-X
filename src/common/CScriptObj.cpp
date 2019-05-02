@@ -61,21 +61,27 @@ bool CScriptObj::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	else if ( IsSetOF( OF_FileCommands ) && !strnicmp(pszKey, "FILE.", 5) )
 	{
 		pszKey += 5;
-		pRef = &(g_Serv.fhFile);
+		pRef = &(g_Serv._hFile);
 		return true;
 	}
 	else if ( !strnicmp(pszKey, "DB.", 3) )
 	{
 		pszKey += 3;
-		pRef = &(g_Serv.m_hdb);
+		pRef = &(g_Serv._hDb);
 		return true;
 	}
 	else if ( !strnicmp(pszKey, "LDB.", 4) )
 	{
 		pszKey += 4;
-		pRef = &(g_Serv.m_hldb);
+		pRef = &(g_Serv._hLdb);
 		return true;
 	}
+    else if ( !strnicmp(pszKey, "MDB.", 4) )
+    {
+        pszKey += 4;
+        pRef = &(g_Serv._hMdb);
+        return true;
+    }
 	return false;
 }
 
@@ -313,9 +319,9 @@ bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 
 		if ( pTmpRef == &g_Serv )
 			sVal.FormatHex( 0x01 );
-		else if ( pTmpRef == &(g_Serv.fhFile) )
+		else if ( pTmpRef == &(g_Serv._hFile) )
 			sVal.FormatHex( 0x02 );
-		else if (( pTmpRef == &(g_Serv.m_hdb) ) || dynamic_cast<CDataBase*>(pTmpRef) )
+		else if (( pTmpRef == &(g_Serv._hDb) ) || dynamic_cast<CDataBase*>(pTmpRef) )
 			sVal.FormatHex( 0x00008 );
 		else if ( dynamic_cast<CResourceDef*>(pTmpRef) )
 			sVal.FormatHex( 0x00010 );
@@ -331,7 +337,7 @@ bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 			sVal.FormatHex( 0x00200 );
 		//else if ( dynamic_cast<CPartyDef*>(pTmpRef) )
 		//	sVal.FormatHex( 0x00400 );
-		else if (( pTmpRef == &(g_Serv.m_hldb) ) || dynamic_cast<CSQLite*>(pTmpRef) )
+		else if ( pTmpRef == &(g_Serv._hLdb) )
 			sVal.FormatHex( 0x00400 );
 		else if ( dynamic_cast<CStoneMember*>(pTmpRef) )
 			sVal.FormatHex( 0x00800 );
@@ -354,6 +360,10 @@ bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 			else
 				sVal.FormatHex( 0x20000 );
 		}
+        else if ( pTmpRef == &(g_Serv._hMdb) )
+            sVal.FormatHex( 0x100000 );
+        else if (dynamic_cast<CSQLite*>(pTmpRef))
+            sVal.FormatHex( 0x200000 );
 		else
 			sVal.FormatHex( 0x01 );
 		return true;

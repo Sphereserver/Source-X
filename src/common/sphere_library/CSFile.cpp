@@ -1,5 +1,6 @@
-
-#ifndef _WIN32
+#ifdef _WIN32
+    #include <io.h> 	// findfirst
+#else
 	#include <errno.h>	// errno
 	#include <sys/types.h>
 	#include <sys/stat.h>
@@ -469,4 +470,23 @@ bool CSFile::_IsWriteMode() const
 bool CSFile::IsWriteMode() const
 {
     THREAD_SHARED_LOCK_RETURN(_uiMode & OF_WRITE);
+}
+
+
+// static methods
+
+bool CSFile::FileExists(lpctstr ptcFilePath) // static
+{
+#ifdef _WIN32
+    // WINDOWS
+    struct _finddata_t fileinfo;
+    fileinfo.attrib = _A_NORMAL;
+    intptr_t lFind = _findfirst( ptcFilePath, &fileinfo );
+
+    return ( lFind != -1 );
+#else
+    // LINUX
+    struct stat fileStat;
+    return ( stat( ptcFilePath, &fileStat) != -1 );
+#endif
 }

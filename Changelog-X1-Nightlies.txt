@@ -1691,3 +1691,12 @@ WARNING: Important change!
 - Changed: Now intrinsic function arguments are recognized even if separated by a whitespace from the function, other than being enclosed by ().
 - Fixed: "Last logged" sysmessage shown also to a new player.
 - Fixed: FILE object functions couldn't accept quoted arguments.
+
+02-05-2019, Nolok
+- Added: MDB object. It's an SQLite database instance working like LDB, with the fundamental difference that MDB works with a temporary, in-memory database (this means that all the data is lost when you close the server).
+	Use it if you have small databases where you query from very frequently, since accessing a table from a db file is much slower than doing that from an in-memory db.
+	OPEN and CLOSE methods doesn't work with MDB.
+- Added: LDB/MDB functions IMPORTDB and EXPORTDB "database.db". The first loads into the database object a database file, the second saves the database object to a database file.
+- Added: LDB.FILENAME property to get the filename of the database connected to. Returns an empty string if there isn't an open connection.
+- Fixed: Crash when trying to execute a QUERY on a closed/never opened LDB.
+- Added: ISTEVENT for SERV.CHARDEF and SERV.ITEMDEF.

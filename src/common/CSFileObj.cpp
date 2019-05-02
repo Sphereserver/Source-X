@@ -327,7 +327,7 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
         } break;
 
         case FO_POSITION:
-            sVal.FormatSTVal( _pFile->GetPosition() );
+            sVal.FormatVal( _pFile->GetPosition() );
             break;
 
         case FO_READBYTE:

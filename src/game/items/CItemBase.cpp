@@ -1600,21 +1600,22 @@ bool CItemBase::r_LoadVal( CScript &s )
 				}
 
 				ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
-				if ( ! IsValidDispID(id))
-				{
-                    if (id >= g_Install.m_tiledata.GetItemMaxIndex())
-                        g_Log.EventError("Setting invalid ID=%s for base type %s (value is greater than the tiledata maximum index).\n", s.GetArgStr(), GetResourceName());
-                    else
-                        g_Log.EventError( "Setting invalid ID=%s for base type %s\n", s.GetArgStr(), GetResourceName());
-					return false;
-				}
-
 				CItemBase * pItemDef = FindItemBase( id );	// make sure the base is loaded.
 				if ( ! pItemDef )
 				{
                     g_Log.EventError( "Setting unknown base ID=0%x for base type %s\n", id, GetResourceName());
 					return false;
 				}
+
+                id = ITEMID_TYPE(pItemDef->m_dwDispIndex);
+                if ( ! IsValidDispID(id) )
+                {
+                    if (id >= g_Install.m_tiledata.GetItemMaxIndex())
+                        g_Log.EventError("Setting invalid ID=%s for base type %s (value is greater than the tiledata maximum index).\n", s.GetArgStr(), GetResourceName());
+                    else
+                        g_Log.EventError( "Setting invalid ID=%s for base type %s\n", s.GetArgStr(), GetResourceName());
+                    return false;
+                }
 
 				CopyBasic( pItemDef );
 				m_dwDispIndex = id;	// Might not be the default of a DUPEITEM

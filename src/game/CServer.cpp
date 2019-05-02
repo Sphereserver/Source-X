@@ -2173,7 +2173,7 @@ void CServer::OnTick()
 
 	EXC_SET_BLOCK("generic");
 	g_Cfg.OnTick(false);
-	m_hdb.OnTick();
+	_hDb.OnTick();
 	EXC_CATCH;
 }
 
@@ -2246,7 +2246,7 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 	if (g_Cfg.m_bMySql && g_Cfg.m_bMySqlTicks)
 	{
 		EXC_SET_BLOCK( "Connecting to MySQL server" );
-		if (m_hdb.Connect())
+		if (_hDb.Connect())
 			g_Log.Event( LOGM_NOCONTEXT, "MySQL connected to server: '%s'.\n", g_Cfg.m_sMySqlHost.GetPtr() );
 		else
 		{
@@ -2254,6 +2254,9 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 			return false;
 		}
 	}
+
+    EXC_SET_BLOCK( "Initializing in-memory SQLite database" );
+    _hMdb.Open(":memory:");
 
 	EXC_SET_BLOCK("setting signals");
 	SetSignals();

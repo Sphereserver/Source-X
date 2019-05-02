@@ -1940,7 +1940,7 @@ NetState* NetworkThreadStateIterator::next(void)
 	{
 		// current thread, we can use the thread's state list directly
 		// find next non-null state
-        const size_t sz = m_thread->m_states.size();
+        const int sz = int(m_thread->m_states.size());
 		while (m_nextIndex < sz)
 		{
 			NetState* state = m_thread->m_states[m_nextIndex];
