@@ -207,9 +207,10 @@ bool CNTWindow::shouldExit()
 
 void CNTWindow::tick()
 {
-    ConsoleInterface::_ciQueueMutex.lock();
     if (!_qOutput.empty())
     {
+        ConsoleInterface::_ciQueueMutex.lock();
+
         std::vector<ConsoleOutput*> outMessages;
         outMessages.reserve(_qOutput.size());
         while (!_qOutput.empty())
@@ -217,23 +218,26 @@ void CNTWindow::tick()
             outMessages.emplace_back(_qOutput.front());
             _qOutput.pop();
         }
-        ConsoleInterface::_ciQueueMutex.unlock();
 
         // No idea of the reason, but it seems that if we have some mutex locked while doing List_Add, sometimes we'll have a deadlock.
         //  In any case, it's best to keep the mutex locked for the least time possible.
+        ConsoleInterface::_ciQueueMutex.unlock();
+
+        //theApp.m_wndMain.m_wndLog.SetCaretHide(TRUE);
+
         for (ConsoleOutput* co : outMessages)
         {
             theApp.m_wndMain.List_Add((COLORREF)CTColToRGB(co->GetTextColor()), co->GetTextString().GetPtr());
             delete co;
         }
 
+        /*
         // Just scroll once, after we have printed all the output
         if (NTWindow_CanScroll())
             theApp.m_wndMain.m_wndLog.ScrollBottomRight();
-    }
-    else
-    {
-        ConsoleInterface::_ciQueueMutex.unlock();
+        */
+        
+        //theApp.m_wndMain.m_wndLog.SetCaretHide(FALSE);
     }
 
     NTWindow_CheckUpdateWindowTitle();
@@ -247,7 +251,7 @@ void CNTWindow::tick()
 bool CNTWindow::NTWindow_CanScroll()
 {
     // If the select is on screen then keep scrolling.
-    if ( ! m_fLogScrollLock && ! GetCapture() )
+    if ( ! m_fLogScrollLock /*&& (GetActiveWindow() == m_hWnd)*/ && ! GetCapture() )
     {
         if ( Sphere_GetOSInfo()->dwPlatformId == VER_PLATFORM_WIN32_NT )
         {
@@ -272,11 +276,16 @@ void CNTWindow::List_Add( COLORREF color, LPCTSTR pszText )
 
 	if ( iNewLen > iMaxTextLen )
 	{
-		int iCut = iNewLen - iMaxTextLen;
+		const int iCut = iNewLen - iMaxTextLen;
+
+        m_wndLog.SetRedraw(FALSE);
 		m_wndLog.SetSel( 0, iCut );
 		m_wndLog.ReplaceSel( "" );
+
 		m_iLogTextLen = iMaxTextLen;
 	}
+    else if (NTWindow_CanScroll())
+        theApp.m_wndMain.m_wndLog.ScrollLine();
 
 	m_wndLog.SetSel( m_iLogTextLen, m_iLogTextLen );
 
@@ -288,6 +297,7 @@ void CNTWindow::List_Add( COLORREF color, LPCTSTR pszText )
 	cf.crTextColor = color;
 	m_wndLog.SetSelectionCharFormat( cf );
 
+    m_wndLog.SetRedraw(TRUE);
 	m_wndLog.ReplaceSel( pszText );
 
 	m_iLogTextLen += iTextLen;
@@ -297,12 +307,6 @@ void CNTWindow::List_Add( COLORREF color, LPCTSTR pszText )
 	int iSelEnd;
 	m_wndLog.GetSel( iSelBegin, iSelEnd );
 	m_iLogTextLen = iSelBegin;	// make sure it's correct.
-
-    /*
-    // Scroll down a line each time we print a message
-    if (NTWindow_CanScroll())
-        theApp.m_wndMain.m_wndLog.ScrollLine();
-    */
 }
 
 void CNTWindow::SetWindowTitle(LPCTSTR pText)
@@ -345,7 +349,7 @@ int CNTWindow::OnCreate( HWND hWnd, LPCREATESTRUCT lParam )
 	CSWindow::OnCreate(hWnd);
 
 	m_wndLog.m_hWnd = ::CreateWindow( RICHEDIT_CLASS, nullptr,
-		ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | /* ES_OEMCONVERT | */
+		ES_LEFT | ES_MULTILINE | ES_READONLY | /* ES_OEMCONVERT | */
 		WS_CHILD | WS_VISIBLE | WS_VSCROLL,
 		0, 0, 10, 10,
 		m_hWnd,
@@ -453,6 +457,10 @@ void CNTWindow::OnUserPostMessage( COLORREF color, CSString * psMsg )
 	{
 		List_Add(color, *psMsg);
 		delete psMsg;
+
+        // Scroll down a line each time we print a message
+        if (NTWindow_CanScroll())
+            theApp.m_wndMain.m_wndLog.ScrollLine();
 	}
 }
 

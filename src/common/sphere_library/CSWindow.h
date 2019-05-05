@@ -134,8 +134,11 @@ struct CRichEditCtrl : public CEdit
 	static const char *m_sClassName;
 	COLORREF SetBackgroundColor( BOOL bSysColor, COLORREF cr );
 
-	void SetSel( int nStartChar, int nEndChar, BOOL bNoScroll = FALSE );
+	void SetSel( int nStartChar, int nEndChar );
 	void GetSel( int& nStartChar, int& nEndChar ) const;
+
+    void SetRedraw(BOOL val);
+    void SetCaretHide(BOOL val);
 
 	DWORD ScrollLine();
     DWORD ScrollPageDown();

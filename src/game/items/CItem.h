@@ -70,9 +70,11 @@ public:
 #define ATTR_MAGIC				0x0020				// DON'T SET THIS WHILE WORN! This item is magic as apposed to marked or markable.
 #define ATTR_OWNED				0x0040				// This is owned by the town. You need to steal it. NEVER DECAYS !
 #define ATTR_INVIS				0x0080				// Gray hidden item (to GM's or owners?)
-#define ATTR_CURSED				0x0100
+#define ATTR_CURSED				0x0100              // Can not be insured. Will always fall to the corpse, even if somehow blessed or insured.
+                                                    //  OSI: Cannot be blessed (with an Item Bless Deed, Personal Bless Deed, or Clothing Bless Deed and can't be sent to the bank with a Bag of Sending)
 #define ATTR_CURSED2			0x0200				// cursed damned unholy
-#define ATTR_BLESSED			0x0400
+#define ATTR_BLESSED			0x0400              // Stay in your backpack when you die, Be placed into character's backpack upon resurrection if equipped before death,
+                                                    //  Cannot be stolen by using the stealing skill, Cannot be insured
 #define ATTR_BLESSED2			0x0800				// blessed sacred holy
 #define ATTR_FORSALE			0x1000				// For sale on a vendor.
 #define ATTR_STOLEN				0x2000				// The item is hot. m_uidLink = previous owner.
@@ -99,7 +101,7 @@ public:
 // TODO
 #define ATTR_CANNOTREPAIR		0x400000000000		// No repair, no fortify
 #define ATTR_FACTIONITEM		0x80000000000000	// ? Faction Item (Has cliloc)
-#define ATTR_VVVITEM			0x100000000000000	// ? VvV Item (Has CliLoc)
+#define ATTR_VVVITEM			0x100000000000000	// ? Vice vs Virtue Item (Has CliLoc)
 
 	uint64	m_Attr;
 
@@ -538,11 +540,11 @@ private:
 
 protected:
 	bool SetBase( CItemBase * pItemDef );
-	virtual int FixWeirdness();
+	virtual int FixWeirdness() override;
 
 public:
-    CCFaction *GetSlayer();
-	virtual bool OnTick();
+    CCFaction *GetSlayer() const;
+	virtual bool OnTick() override;
 	virtual void OnHear( lpctstr pszCmd, CChar * pSrc );
 	CItemBase * Item_GetDef() const;
 	ITEMID_TYPE GetID() const;
@@ -578,29 +580,29 @@ public:
     */
     byte GetRangeH() const;
 
-	void SetAttr(uint64 iAttr)
+	void SetAttr(uint64 uiAttr)
 	{
-		m_Attr |= iAttr;
+		m_Attr |= uiAttr;
 	}
-	void ClrAttr(uint64 iAttr)
+	void ClrAttr(uint64 uiAttr)
 	{
-		m_Attr &= ~iAttr;
+		m_Attr &= ~uiAttr;
 	}
-	bool IsAttr(uint64 iAttr) const	// ATTR_DECAY
+	bool IsAttr(uint64 uiAttr) const	// ATTR_DECAY
 	{
-		return((m_Attr & iAttr) ? true : false);
+		return((m_Attr & uiAttr) ? true : false);
 	}
-	void SetCanUse(uint64 iCanUse)
+	void SetCanUse(uint64 uiCanUse)
 	{
-		m_CanUse |= iCanUse;
+		m_CanUse |= uiCanUse;
 	}
-	void ClrCanUse(uint64 iCanUse)
+	void ClrCanUse(uint64 uiCanUse)
 	{
-		m_CanUse &= ~iCanUse;
+		m_CanUse &= ~uiCanUse;
 	}
-	bool IsCanUse(uint64 iCanUse) const	// CanUse_None
+	bool IsCanUse(uint64 uiCanUse) const	// CanUse_None
 	{
-		return ((m_CanUse & iCanUse) ? true : false);
+		return ((m_CanUse & uiCanUse) ? true : false);
 	}
 
 	height_t GetHeight() const;

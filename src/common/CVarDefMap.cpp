@@ -9,23 +9,6 @@
 #include "CVarDefMap.h"
 
 
-static size_t GetIdentifierString( tchar * szTag, lpctstr pszArgs )
-{
-	// Copy the identifier (valid char set) out to this buffer.
-	size_t i = 0;
-	for ( ;pszArgs[i]; ++i )
-	{
-		if ( ! _ISCSYM(pszArgs[i]))
-			break;
-		if ( i >= EXPRESSION_MAX_KEY_LEN )
-			return 0;
-		szTag[i] = pszArgs[i];
-	}
-
-	szTag[i] = '\0';
-	return i;
-}
-
 /***************************************************************************
 *
 *
@@ -115,7 +98,7 @@ CVarDefContStr::CVarDefContStr( lpctstr pszKey ) : CVarDefCont( pszKey )
 inline int64 CVarDefContStr::GetValNum() const
 {
 	lpctstr pszStr = m_sVal;
-	return( Exp_GetVal(pszStr) );
+	return( Exp_Get64Val(pszStr) );
 }
 
 void CVarDefContStr::SetValStr( lpctstr pszVal ) 
@@ -639,7 +622,7 @@ CVarDefCont * CVarDefMap::GetParseKey_Advance( lpctstr & pszArgs ) const
 	// The name can only be valid.
 
 	tchar szTag[ EXPRESSION_MAX_KEY_LEN ];
-	size_t i = GetIdentifierString( szTag, pszArgs );
+    uint i = GetIdentifierString( szTag, pszArgs );
     pszArgs += i;
 
 	CVarDefCont * pVar = GetKey(szTag);

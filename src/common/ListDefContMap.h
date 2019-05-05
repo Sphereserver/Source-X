@@ -6,7 +6,7 @@
 #ifndef _INC_LISTDEFCONTMAP_H
 #define _INC_LISTDEFCONTMAP_H
 
-#include <list>
+#include <deque>
 #include <set>
 #include "common.h"
 #include "sphere_library/CSString.h"
@@ -109,14 +109,12 @@ class CListDefCont
 private:
 	CSString m_Key;	// reference to map key
 
-	typedef std::list<CListDefContElem *> DefList;
+	typedef std::deque<CListDefContElem *> DefList;
 
 protected:
 	DefList	m_listElements;
 
-	inline CListDefContElem* ElementAt(size_t nIndex) const;
-	inline void DeleteAtIterator(DefList::iterator it);
-	inline DefList::iterator _GetAt(size_t nIndex);
+	void DeleteAtIterator(DefList::iterator it);
 
 public:
 	static const char *m_sClassName;
@@ -137,7 +135,9 @@ public:
 	CListDefContElem* GetAt(size_t nIndex) const;
 	bool SetNumAt(size_t nIndex, int64 iVal);
 	bool SetStrAt(size_t nIndex, lpctstr pszVal);
-	size_t GetCount() const;
+    inline size_t GetCount() const {
+        return m_listElements.size();
+    }
 
 	lpctstr GetValStr(size_t nIndex) const;
 	int64 GetValNum(size_t nIndex) const;
@@ -158,7 +158,7 @@ public:
 	CListDefCont * CopySelf();
 	void PrintElements(CSString& strElements) const;
 	void DumpElements( CTextConsole * pSrc, lpctstr pszPrefix = nullptr ) const;
-	void r_WriteSave( CScript& s );
+	void r_WriteSave( CScript& s ) const;
 	bool r_LoadVal( CScript& s );
 	bool r_LoadVal( lpctstr pszArg );
 };
@@ -169,7 +169,7 @@ class CListDefMap
 private:
 	struct ltstr
 	{
-		bool operator()(CListDefCont * s1, CListDefCont * s2) const;
+		bool operator()(const CListDefCont * s1, const CListDefCont * s2) const;
 	};
 
 	typedef std::set<CListDefCont *, ltstr> DefSet;
@@ -189,14 +189,16 @@ private:
 
 private:
 	CListDefCont * GetAtKey( lpctstr at );
-	inline void DeleteAt( size_t at );
-	inline void DeleteAtKey( lpctstr at );
-	inline void DeleteAtIterator( DefSet::iterator it );
+	void DeleteAt( size_t at );
+	void DeleteAtKey( lpctstr at );
+	void DeleteAtIterator( DefSet::iterator it );
 
 public:
 	void Copy( const CListDefMap * pArray );
 	void Empty();
-	size_t GetCount() const;
+    inline size_t GetCount() const {
+        return m_Container.size();
+    }
 
 	lpctstr FindValNum( int64 iVal ) const;
 	lpctstr FindValStr( lpctstr pVal ) const;

@@ -160,6 +160,8 @@ private:
 	CExpression& operator=(const CExpression& other);
 } g_Exp;
 
+uint GetIdentifierString( tchar * szTag, lpctstr pszArgs );
+
 bool IsValidDef( lpctstr pszTest );
 bool IsValidGameObjDef( lpctstr pszTest );
 

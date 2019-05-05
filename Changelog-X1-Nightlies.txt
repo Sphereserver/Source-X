@@ -1700,3 +1700,7 @@ WARNING: Important change!
 - Added: LDB.FILENAME property to get the filename of the database connected to. Returns an empty string if there isn't an open connection.
 - Fixed: Crash when trying to execute a QUERY on a closed/never opened LDB.
 - Added: ISTEVENT for SERV.CHARDEF and SERV.ITEMDEF.
+
+05-05-2019, Nolok
+- Fixed: List element values could only store 32 bits number, instead of 64 bits ones (like TAG).
+- Improved: Windows console window log speed and removed rubberband effect when too much text was appended in a short amount of time.

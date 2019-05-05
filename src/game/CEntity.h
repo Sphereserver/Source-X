@@ -66,7 +66,7 @@ public:
     * @param type the type of the CComponent to retrieve.
     * @return a pointer to the CComponent, if it is suscribed.
     */
-    CComponent *GetComponent(COMP_TYPE type);
+    CComponent *GetComponent(COMP_TYPE type) const;
 
     /**
     * @brief Wrapper of base method.

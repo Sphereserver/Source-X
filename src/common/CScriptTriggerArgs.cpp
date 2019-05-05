@@ -7,7 +7,7 @@
 
 void CScriptTriggerArgs::Init( lpctstr pszStr )
 {
-    ADDTOCALLSTACK("CScriptTriggerArgs::Init");
+    ADDTOCALLSTACK_INTENSIVE("CScriptTriggerArgs::Init");
     m_pO1 = nullptr;
 
     if ( pszStr == nullptr )
@@ -21,7 +21,7 @@ void CScriptTriggerArgs::Init( lpctstr pszStr )
         ++pszStr;
     }
 
-    m_s1 = pszStr ;
+    m_s1 = pszStr;
 
     // take quote if present.
     if (fQuote)
@@ -87,7 +87,7 @@ bool CScriptTriggerArgs::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
                 if (( !*pszTemp ) || ( *pszTemp == '.' ))
                 {
                     if ( *pszTemp == '.' )
-                        pszTemp++;
+                        ++pszTemp;
 
                     pRef = m_VarObjs.Get( number );
                     pszKey = pszTemp;
@@ -327,7 +327,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
                     fInerQuotes = false;
                 }
 
-                pszArg	= s;	// arg starts here
+                pszArg = s;	// arg starts here
                 ++s;
 
                 while (*s)

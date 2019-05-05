@@ -97,13 +97,13 @@ bool CEntity::IsComponentSubscribed(CComponent *pComponent) const
     return (!_List.empty() && _List.count(pComponent->GetType()));
 }
 
-CComponent * CEntity::GetComponent(COMP_TYPE type)
+CComponent * CEntity::GetComponent(COMP_TYPE type) const
 {
     ADDTOCALLSTACK_INTENSIVE("CEntity::GetComponent");
     ASSERT((type >= 0) && (type < COMP_QTY));
     if (!_List.empty() && _List.count(type))
     {
-        return _List[type];
+        return _List.at(type);
     }
     return nullptr;
 }

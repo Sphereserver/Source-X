@@ -5413,9 +5413,13 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 	int64 iSelfRepair = GetDefNum("SELFREPAIR", true);
 	if ( iSelfRepair > Calc_GetRandVal(10) )
 	{
+        const ushort uiOldHits = m_itArmor.m_Hits_Cur;
 		m_itArmor.m_Hits_Cur += 2;
 		if ( m_itArmor.m_Hits_Cur > m_itArmor.m_Hits_Max )
 			m_itArmor.m_Hits_Cur = m_itArmor.m_Hits_Max;
+
+        if (uiOldHits != m_itArmor.m_Hits_Cur)
+            UpdatePropertyFlag();
 
 		return 0;
 	}
@@ -5683,7 +5687,7 @@ bool CItem::IsResourceMatch( const CResourceID& rid, dword dwArg ) const
 	return false;
 }
 
-CCFaction * CItem::GetSlayer()
+CCFaction * CItem::GetSlayer() const
 {
     ADDTOCALLSTACK("CItem::GetSlayer");
     return static_cast<CCFaction*>(GetComponent(COMP_FACTION));

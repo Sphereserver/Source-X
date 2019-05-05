@@ -713,9 +713,9 @@ effect_bounce:
 			}
 		}
         int iDmgBonus = 1;
-        CCFaction *pSlayer = nullptr;
+        const CCFaction *pSlayer = nullptr;
         const CCFaction *pFaction = GetFaction();
-        const CCFaction *pSrCCFaction = pSrc->GetFaction();
+        const CCFaction *pSrcFaction = pSrc->GetFaction();
         if (pWeapon)
         {
             pSlayer = pWeapon->GetFaction();
@@ -730,16 +730,16 @@ effect_bounce:
                 }
                 else if (m_pPlayer && pSrc->m_pNPC) // Wielding a slayer type against its opposite will cause the attacker to take more damage
                 {
-                    if (pSrCCFaction->GetFactionID() != FACTION_NONE)
+                    if (pSrcFaction->GetFactionID() != FACTION_NONE)
                     {
-                        iDmgBonus = pSlayer->GetSlayerDamagePenalty(pSrCCFaction);
+                        iDmgBonus = pSlayer->GetSlayerDamagePenalty(pSrcFaction);
                     }
                 }
             }
         }
         if (iDmgBonus == 1) // Couldn't find a weapon, a Slayer flag or a suitable flag for the target...
         {
-            CItem *pTalisman = pSrc->LayerFind(LAYER_TALISMAN); // then lets try with a Talisman
+            const CItem *pTalisman = pSrc->LayerFind(LAYER_TALISMAN); // then lets try with a Talisman
             if (pTalisman)
             {
                 pSlayer = pTalisman->GetSlayer();
@@ -754,9 +754,9 @@ effect_bounce:
                     }
                     else if (m_pPlayer && pSrc->m_pNPC) // Wielding a slayer type against its opposite will cause the attacker to take more damage
                     {
-                        if (pSrCCFaction->GetFactionID() != FACTION_NONE)
+                        if (pSrcFaction->GetFactionID() != FACTION_NONE)
                         {
-                            iDmgBonus = pFaction->GetSlayerDamagePenalty(pSrCCFaction);
+                            iDmgBonus = pFaction->GetSlayerDamagePenalty(pSrcFaction);
                         }
                     }
                 }
@@ -1010,7 +1010,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 	if ( m_pPlayer )	// only players can have damage bonus
 	{
 		int iIncreaseDam = (int)GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASEDAM, true);
-		int iDmgBonus = minimum(iIncreaseDam, 100);		// Damage Increase is capped at 100%
+		int iDmgBonus = maximum(-100, minimum(iIncreaseDam, 100));		// Damage Increase is capped at +-100%
 
 		// Racial Bonus (Berserk), gargoyles gains +15% Damage Increase per each 20 HP lost
 		if ((g_Cfg.m_iRacialFlags & RACIALF_GARG_BERSERK) && IsGargoyle())
