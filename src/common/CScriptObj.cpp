@@ -1549,7 +1549,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 					break;
 				}
 				if (( iRet != TRIGRET_ENDIF ) && ( iRet != TRIGRET_CONTINUE ))
-					return( iRet );
+					return iRet;
 
 				if ( iRet == TRIGRET_CONTINUE )
 					EndContext = StartContext;
@@ -1572,7 +1572,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 					break;
 				}
 				if (( iRet != TRIGRET_ENDIF ) && ( iRet != TRIGRET_CONTINUE ))
-					return( iRet );
+					return iRet;
 
 				if ( iRet == TRIGRET_CONTINUE )
 					EndContext = StartContext;
@@ -2278,7 +2278,7 @@ jump_in:
 			case SK_IF:
 				{
 					EXC_SET_BLOCK("if statement");
-					bool fTrigger = s.GetArgVal() ? true : false;
+					bool fTrigger = s.GetArgLLVal() ? true : false;
 					bool fBeenTrue = false;
 					for (;;)
 					{
@@ -2295,7 +2295,7 @@ jump_in:
 						else if ( iRet == TRIGRET_ELSEIF )
 						{
 							ParseText( s.GetArgStr(), pSrc, 0, pArgs );
-							fTrigger = s.GetArgVal() ? true : false;
+							fTrigger = s.GetArgLLVal() ? true : false;
 						}
 					}
 				}
@@ -2383,9 +2383,9 @@ jump_in:
 						CScriptObj *pRef = this;
 						if ( iArgQty == 2 )
 						{
-							CUID uid( ATOI(piCmd[1]) );
-							if ( uid.ObjFind() )
-								pRef = uid.ObjFind();
+                            CChar *pCharFound = CUID::CharFind(ATOI(piCmd[1]));
+							if ( pCharFound )
+								pRef = pCharFound;
 						}
 
 						// Parse object references, src.* is not parsed
