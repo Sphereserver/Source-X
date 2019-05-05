@@ -1704,3 +1704,4 @@ WARNING: Important change!
 05-05-2019, Nolok
 - Fixed: List element values could only store 32 bits number, instead of 64 bits ones (like TAG).
 - Improved: Windows console window log speed and removed rubberband effect when too much text was appended in a short amount of time.
+- Fixed: TAGs couldn't be set to a 64 bits number (was still limited to 32 bits).

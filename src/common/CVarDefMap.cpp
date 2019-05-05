@@ -62,7 +62,7 @@ lpctstr CVarDefContNum::GetValStr() const
 
 bool CVarDefContNum::r_LoadVal( CScript & s )
 {
-	SetValNum( s.GetArgVal());
+	SetValNum( s.GetArg64Val());
 	return true;
 }
 
@@ -70,7 +70,7 @@ bool CVarDefContNum::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * p
 {
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
-	sVal.FormatLLVal( GetValNum() );
+	sVal.Format64Val( GetValNum() );
 	return true;
 }
 
@@ -95,7 +95,7 @@ CVarDefContStr::CVarDefContStr( lpctstr pszKey ) : CVarDefCont( pszKey )
 {
 }
 
-inline int64 CVarDefContStr::GetValNum() const
+int64 CVarDefContStr::GetValNum() const
 {
 	lpctstr pszStr = m_sVal;
 	return( Exp_Get64Val(pszStr) );
@@ -539,7 +539,7 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, 
 	if ( !fQuoted && IsSimpleNumberString(pszVal))
 	{
 		// Just store the number and not the string.
-		return SetNum( pszName, Exp_GetLLVal( pszVal ), fDeleteZero);
+		return SetNum( pszName, Exp_Get64Val( pszVal ), fDeleteZero);
 	}
 
 	CVarDefContTest pVarSearch(pszName);

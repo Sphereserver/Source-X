@@ -51,15 +51,15 @@ lpctstr CListDefContNum::GetValStr() const
 
 bool CListDefContNum::r_LoadVal( CScript & s )
 {
-	SetValNum( s.GetArgVal() );
+	SetValNum( s.GetArg64Val() );
 	return true;
 }
 
-bool CListDefContNum::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr )
+bool CListDefContNum::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc )
 {
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
-	sVal.FormatLLVal( GetValNum() );
+	sVal.Format64Val( GetValNum() );
 	return true;
 }
 
@@ -83,7 +83,7 @@ CListDefContStr::CListDefContStr( lpctstr pszKey ) : CListDefContElem( pszKey )
 {
 }
 
-inline int64 CListDefContStr::GetValNum() const
+int64 CListDefContStr::GetValNum() const
 {
 	lpctstr pszStr = m_sVal;
 	return( Exp_Get64Val(pszStr) );
@@ -134,7 +134,7 @@ void CListDefCont::SetKey( lpctstr pszKey )
 
 CListDefContElem* CListDefCont::GetAt(size_t nIndex) const
 {
-    ADDTOCALLSTACK("CListDefCont::GetAt");
+    ADDTOCALLSTACK_INTENSIVE("CListDefCont::GetAt");
     if ( nIndex >= m_listElements.size() )
         return nullptr;
     return m_listElements[nIndex];
@@ -151,6 +151,7 @@ CListDefContElem* CListDefCont::GetAt(size_t nIndex) const
 
 bool CListDefCont::SetNumAt(size_t nIndex, int64 iVal)
 {
+    ADDTOCALLSTACK_INTENSIVE("CListDefCont::SetNumAt");
 	CListDefContElem* pListElem = GetAt(nIndex);
 
 	if ( !pListElem )
@@ -168,6 +169,7 @@ bool CListDefCont::SetNumAt(size_t nIndex, int64 iVal)
 
 bool CListDefCont::SetStrAt(size_t nIndex, lpctstr pszVal)
 {
+    ADDTOCALLSTACK_INTENSIVE("CListDefCont::SetStrAt");
 	CListDefContElem* pListElem = GetAt(nIndex);
 
 	if ( !pListElem )
@@ -185,7 +187,7 @@ bool CListDefCont::SetStrAt(size_t nIndex, lpctstr pszVal)
 
 lpctstr CListDefCont::GetValStr(size_t nIndex) const
 {
-	ADDTOCALLSTACK("CListDefCont::GetValStr");
+	ADDTOCALLSTACK_INTENSIVE("CListDefCont::GetValStr");
 	CListDefContElem* pElem = GetAt(nIndex);
 
 	if ( !pElem )
@@ -196,7 +198,7 @@ lpctstr CListDefCont::GetValStr(size_t nIndex) const
 
 int64 CListDefCont::GetValNum(size_t nIndex) const
 {
-	ADDTOCALLSTACK("CListDefCont::GetValNum");
+    ADDTOCALLSTACK_INTENSIVE("CListDefCont::GetValNum");
 	CListDefContElem* pElem = GetAt(nIndex);
 
 	if ( !pElem )
@@ -207,7 +209,7 @@ int64 CListDefCont::GetValNum(size_t nIndex) const
 
 int CListDefCont::FindValStr( lpctstr pVal, size_t nStartIndex /* = 0 */ ) const
 {
-	ADDTOCALLSTACK("CListDefCont::FindValStr");
+    ADDTOCALLSTACK_INTENSIVE("CListDefCont::FindValStr");
 
 	if ( !pVal || !(*pVal) )
 		return -1;
@@ -234,7 +236,7 @@ int CListDefCont::FindValStr( lpctstr pVal, size_t nStartIndex /* = 0 */ ) const
 
 int CListDefCont::FindValNum( int64 iVal, size_t nStartIndex /* = 0 */ ) const
 {
-	ADDTOCALLSTACK("CListDefCont::FindValNum");
+    ADDTOCALLSTACK_INTENSIVE("CListDefCont::FindValNum");
 
     DefList::const_iterator it = m_listElements.begin(), itEnd = m_listElements.end();
     if (nStartIndex)
@@ -258,7 +260,7 @@ int CListDefCont::FindValNum( int64 iVal, size_t nStartIndex /* = 0 */ ) const
 
 bool CListDefCont::AddElementNum(int64 iVal)
 {
-	ADDTOCALLSTACK("CListDefCont::AddElementNum");
+    ADDTOCALLSTACK_INTENSIVE("CListDefCont::AddElementNum");
 	if ( (m_listElements.size() + 1) >= INTPTR_MAX )	// overflow? is it even useful?
 		return false;
 
@@ -269,7 +271,7 @@ bool CListDefCont::AddElementNum(int64 iVal)
 
 bool CListDefCont::AddElementStr(lpctstr pszKey)
 {
-	ADDTOCALLSTACK("CListDefCont::AddElementStr");
+    ADDTOCALLSTACK_INTENSIVE("CListDefCont::AddElementStr");
 	if ( (m_listElements.size() + 1) >= INTPTR_MAX )	// overflow? is it even useful?
 		return false;
 
@@ -282,7 +284,7 @@ bool CListDefCont::AddElementStr(lpctstr pszKey)
 
 void CListDefCont::DeleteAtIterator(DefList::iterator it)
 {
-	ADDTOCALLSTACK("CListDefCont::DeleteAtIterator");
+    ADDTOCALLSTACK_INTENSIVE("CListDefCont::DeleteAtIterator");
 
 	if ( it != m_listElements.end() )
 	{
@@ -306,7 +308,7 @@ void CListDefCont::DeleteAtIterator(DefList::iterator it)
 
 bool CListDefCont::RemoveElement(size_t nIndex)
 {
-	ADDTOCALLSTACK("CListDefCont::RemoveElement");
+    ADDTOCALLSTACK_INTENSIVE("CListDefCont::RemoveElement");
 	if ( nIndex >= m_listElements.size() )
 		return false;
 
@@ -322,7 +324,7 @@ bool CListDefCont::RemoveElement(size_t nIndex)
 
 void CListDefCont::RemoveAll()
 {
-	ADDTOCALLSTACK("CListDefCont::RemoveAll");
+    ADDTOCALLSTACK_INTENSIVE("CListDefCont::RemoveAll");
 	if ( m_listElements.empty() )
 		return;
 
@@ -409,7 +411,7 @@ void CListDefCont::Sort(bool bDesc, bool bCase)
 
 bool CListDefCont::InsertElementNum(size_t nIndex, int64 iVal)
 {
-	ADDTOCALLSTACK("CListDefCont::InsertElementNum");
+    ADDTOCALLSTACK_INTENSIVE("CListDefCont::InsertElementNum");
 	if ( nIndex >= m_listElements.size() )
 		return false;
 
@@ -426,7 +428,7 @@ bool CListDefCont::InsertElementNum(size_t nIndex, int64 iVal)
 
 bool CListDefCont::InsertElementStr(size_t nIndex, lpctstr pszKey)
 {
-	ADDTOCALLSTACK("CListDefCont::InsertElementStr");
+    ADDTOCALLSTACK_INTENSIVE("CListDefCont::InsertElementStr");
 	if ( nIndex >= m_listElements.size() )
 		return false;
 
@@ -507,7 +509,7 @@ void CListDefCont::DumpElements( CTextConsole * pSrc, lpctstr pszPrefix /* = nul
 
 void CListDefCont::r_WriteSave( CScript& s ) const
 {
-	ADDTOCALLSTACK("CListDefCont::r_WriteSave");
+    ADDTOCALLSTACK_INTENSIVE("CListDefCont::r_WriteSave");
 	if ( m_listElements.empty() )
 		return;
 
@@ -532,7 +534,7 @@ void CListDefCont::r_WriteSave( CScript& s ) const
 
 bool CListDefCont::r_LoadVal( CScript& s )
 {
-	ADDTOCALLSTACK("CListDefCont::r_LoadVal");
+    ADDTOCALLSTACK_INTENSIVE("CListDefCont::r_LoadVal");
 	bool fQuoted = false;
 	lpctstr pszArg = s.GetArgStr(&fQuoted);
 
@@ -544,7 +546,7 @@ bool CListDefCont::r_LoadVal( CScript& s )
 
 bool CListDefCont::r_LoadVal( lpctstr pszArg )
 {
-	ADDTOCALLSTACK("CListDefCont::r_LoadVal");
+    ADDTOCALLSTACK_INTENSIVE("CListDefCont::r_LoadVal");
 
 	if (!IsSimpleNumberString(pszArg) )
 		return AddElementStr(pszArg);
@@ -586,7 +588,7 @@ CListDefMap::~CListDefMap()
 
 CListDefCont * CListDefMap::GetAt( size_t at )
 {
-	ADDTOCALLSTACK("CListDefMap::GetAt");
+    ADDTOCALLSTACK_INTENSIVE("CListDefMap::GetAt");
 
 	if ( at > m_Container.size() )
 		return nullptr;
@@ -602,7 +604,7 @@ CListDefCont * CListDefMap::GetAt( size_t at )
 
 CListDefCont * CListDefMap::GetAtKey( lpctstr at )
 {
-	ADDTOCALLSTACK("CListDefMap::GetAtKey");
+    ADDTOCALLSTACK_INTENSIVE("CListDefMap::GetAtKey");
 
 	CListDefCont pListBase(at);
 	DefSet::const_iterator i = m_Container.find(&pListBase);
@@ -615,7 +617,7 @@ CListDefCont * CListDefMap::GetAtKey( lpctstr at )
 
 void CListDefMap::DeleteAt( size_t at )
 {
-	ADDTOCALLSTACK("CListDefMap::DeleteAt");
+    ADDTOCALLSTACK_INTENSIVE("CListDefMap::DeleteAt");
 
 	if ( at > m_Container.size() )
 		return;
@@ -627,7 +629,7 @@ void CListDefMap::DeleteAt( size_t at )
 
 void CListDefMap::DeleteAtKey( lpctstr at )
 {
-	ADDTOCALLSTACK("CListDefMap::DeleteAtKey");
+    ADDTOCALLSTACK_INTENSIVE("CListDefMap::DeleteAtKey");
 
 	CListDefCont pListBase(at);
 	DefSet::iterator i = m_Container.find(&pListBase);
@@ -637,7 +639,7 @@ void CListDefMap::DeleteAtKey( lpctstr at )
 
 void CListDefMap::DeleteAtIterator( DefSet::iterator it )
 {
-	ADDTOCALLSTACK("CListDefMap::DeleteAtIterator");
+    ADDTOCALLSTACK_INTENSIVE("CListDefMap::DeleteAtIterator");
 
 	if ( it != m_Container.end() )
 	{
@@ -650,7 +652,7 @@ void CListDefMap::DeleteAtIterator( DefSet::iterator it )
 
 void CListDefMap::DeleteKey( lpctstr key )
 {
-	ADDTOCALLSTACK("CListDefMap::DeleteKey");
+    ADDTOCALLSTACK_INTENSIVE("CListDefMap::DeleteKey");
 
 	if ( key && *key)
 	{
@@ -697,7 +699,7 @@ void CListDefMap::Copy( const CListDefMap * pArray )
 
 CListDefCont* CListDefMap::GetKey( lpctstr pszKey ) const
 {
-	ADDTOCALLSTACK("CListDefMap::GetKey");
+    ADDTOCALLSTACK_INTENSIVE("CListDefMap::GetKey");
 
 	CListDefCont * pReturn = nullptr;
 
@@ -780,7 +782,7 @@ void CListDefMap::ClearKeys(lpctstr mask)
 
 bool CListDefMap::r_LoadVal( lpctstr pszKey, CScript & s )
 {
-	ADDTOCALLSTACK("CListDefMap::r_LoadVal");
+    ADDTOCALLSTACK_INTENSIVE("CListDefMap::r_LoadVal");
 	tchar* ppCmds[3];
 	ppCmds[0] = const_cast<tchar*>(pszKey);
 	Str_Parse(ppCmds[0], &(ppCmds[1]), "." );
@@ -959,7 +961,7 @@ bool CListDefMap::r_LoadVal( lpctstr pszKey, CScript & s )
 
 bool CListDefMap::r_Write( CTextConsole *pSrc, lpctstr pszString, CSString& strVal )
 {
-	ADDTOCALLSTACK("CListDefMap::r_Write");
+    ADDTOCALLSTACK_INTENSIVE("CListDefMap::r_Write");
 	UNREFERENCED_PARAMETER(pSrc);
 	tchar * ppCmds[3];
 	ppCmds[0] = const_cast<tchar*>(pszString);
@@ -1031,7 +1033,7 @@ bool CListDefMap::r_Write( CTextConsole *pSrc, lpctstr pszString, CSString& strV
 
 void CListDefMap::r_WriteSave( CScript& s )
 {
-	ADDTOCALLSTACK("CListDefMap::r_WriteSave");
+    ADDTOCALLSTACK_INTENSIVE("CListDefMap::r_WriteSave");
 
     for (const CListDefCont *pCont : m_Container)
 	{

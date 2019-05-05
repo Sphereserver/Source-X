@@ -68,7 +68,7 @@ public:
 	lpctstr GetValStr() const;
 
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr);
 
 	virtual CListDefContElem * CopySelf() const;
 };
