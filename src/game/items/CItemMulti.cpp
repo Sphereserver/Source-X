@@ -11,7 +11,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-CItemMulti::CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef, bool fTurnable) :	// CItemBaseMulti
+CItemMulti::CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef, bool fTurnable) :    // CItemBaseMulti
     CTimedObject(PROFILE_MULTIS),
     CItem(id, pItemDef),
     CCMultiMovable(fTurnable)
@@ -33,6 +33,7 @@ CItemMulti::CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef, bool fTurnable) :	/
     _iBaseVendors = pItemBase->_iBaseVendors;
     _iLockdownsPercent = pItemBase->_iLockdownsPercent;
     _iIncreasedStorage = 0;
+    _fIsAddon = false;
 }
 
 CItemMulti::~CItemMulti()
@@ -133,8 +134,8 @@ CItemMulti::~CItemMulti()
     {
         SetMovingCrate(UID_UNUSED);
     }
-    MultiUnRealizeRegion();	// unrealize before removed from ground.
-    DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
+    MultiUnRealizeRegion();    // unrealize before removed from ground.
+    DeletePrepare();    // Must remove early because virtuals will fail in child destructor.
                         // NOTE: ??? This is dangerous to iterators. The "next" item may no longer be valid !
 
                         // Attempt to remove all the accessory junk.
@@ -285,11 +286,11 @@ bool CItemMulti::Multi_CreateComponent(ITEMID_TYPE id, short dx, short dy, char 
 
     switch (pItem->GetType())
     {
-        case IT_KEY:	// it will get locked down with the house ?
+        case IT_KEY:    // it will get locked down with the house ?
         case IT_SIGN_GUMP:
         case IT_SHIP_TILLER:
         {
-            pItem->m_itKey.m_UIDLock.SetPrivateUID(dwKeyCode);	// Set the key id for the key/sign.
+            pItem->m_itKey.m_UIDLock.SetPrivateUID(dwKeyCode);    // Set the key id for the key/sign.
             m_uidLink.SetPrivateUID(pItem->GetUID());
             // Do not break, those need fNeedKey set to true.
         }
@@ -302,12 +303,12 @@ bool CItemMulti::Multi_CreateComponent(ITEMID_TYPE id, short dx, short dy, char 
     }
 
     pItem->SetAttr(ATTR_MOVE_NEVER | (m_Attr&(ATTR_MAGIC | ATTR_INVIS)));
-    pItem->m_uidLink = GetUID();	// lock it down with the structure.
+    pItem->m_uidLink = GetUID();    // lock it down with the structure.
 
     if (pItem->IsTypeLockable() || pItem->IsTypeLocked())
     {
-        pItem->m_itContainer.m_UIDLock.SetPrivateUID(dwKeyCode);	// Set the key id for the door/key/sign.
-        pItem->m_itContainer.m_lock_complexity = 10000;	// never pickable.
+        pItem->m_itContainer.m_UIDLock.SetPrivateUID(dwKeyCode);    // Set the key id for the door/key/sign.
+        pItem->m_itContainer.m_lock_complexity = 10000;    // never pickable.
     }
 
     CScript event("events +t_house_component");
@@ -353,7 +354,7 @@ void CItemMulti::Multi_Setup(CChar *pChar, dword dwKeyCode)
         return;
     }
 
-    Multi_GetSign();	// set the m_uidLink
+    Multi_GetSign();    // set the m_uidLink
 
     if (pChar)
     {
@@ -548,7 +549,7 @@ void CItemMulti::OnHearRegion(lpctstr pszCmd, CChar * pSrc)
     const CItemBaseMulti * pMultiDef = Multi_GetDef();
     if (pMultiDef == nullptr)
         return;
-    TALKMODE_TYPE		mode = TALKMODE_SAY;
+    TALKMODE_TYPE mode = TALKMODE_SAY;
 
     for (size_t i = 0; i < pMultiDef->m_Speech.size(); i++)
     {
@@ -991,30 +992,13 @@ CItem *CItemMulti::GenerateKey(CUID uidTarget, bool fDupeOnBank)
         // Put in your bankbox
         CItem* pKeyDupe = CItem::CreateDupeItem(pKey);
         CItemContainer* pContBank = pTarget->GetBank();
-        if (pContBank)
-        {
-            pContBank->ContentAdd(pKeyDupe);
-            pTarget->SysMessageDefault(DEFMSG_MSG_KEY_DUPEBANK);
-        }
-        else	// it should never happen...
-        {
-            delete pKeyDupe;
-            g_Log.EventWarn("Can't add multi key to char '%s' (UID 0x" PRIx32 "): no bank box!", pTarget->GetName(), (dword)pTarget->GetUID());
-        }
+        pContBank->ContentAdd(pKeyDupe);
+        pTarget->SysMessageDefault(DEFMSG_MSG_KEY_DUPEBANK);
     }
 
     // Put in your pack
     CItemContainer* pContPack = pTarget->GetPackSafe();
-    if (pContPack)
-    {
-        pContPack->ContentAdd(pKey);
-    }
-    else	// it should never happen...
-    {
-        delete pKey;
-        g_Log.EventWarn("Can't add multi key to char '%s' (UID 0x" PRIx32 "): no backpack!", pTarget->GetName(), (dword)pTarget->GetUID());
-    }
-
+    pContPack->ContentAdd(pKey);
     return pKey;
 }
 
@@ -1234,7 +1218,7 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
     {
         ptArea = m_pRegion->m_pt;
     }
-    CWorldSearch Area(ptArea, Multi_GetMaxDist());	// largest area.
+    CWorldSearch Area(ptArea, Multi_GetMaxDist());    // largest area.
     Area.SetSearchSquare(true);
     for (;;)
     {
@@ -1274,7 +1258,7 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
                 if (fTransferAddons)    // Shall be transfered, but addons needs an special transfer code by redeeding.
                 {
                     static_cast<CItemMulti*>(pItem)->Redeed(false, false);
-                    Area.RestartSearch();	// we removed an item and this will mess the search loop, so restart to fix it.
+                    Area.RestartSearch();    // we removed an item and this will mess the search loop, so restart to fix it.
                     continue;
                 }
                 else
@@ -2217,7 +2201,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         case SHV_MULTICREATE:
         {
             CUID uidChar = s.GetArgDWVal();
-            CChar *	pCharSrc = uidChar.CharFind();
+            CChar *pCharSrc = uidChar.CharFind();
             Multi_Setup(pCharSrc, 0);
             break;
         }
@@ -2763,8 +2747,8 @@ bool CItemMulti::r_LoadVal(CScript & s)
             }
             ASSERT(m_pRegion);
             CScript script(s.GetKey() + 7, s.GetArgStr());
-            script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-            script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+            script.m_iResourceFileIndex = s.m_iResourceFileIndex;    // Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+            script.m_iLineNum = s.m_iLineNum;                        // Line in the script file where Key/Arg were read
             return m_pRegion->r_LoadVal(script);
         }
         // misc
@@ -2976,7 +2960,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
     }
 
     const CItemBaseMulti * pMultiDef = dynamic_cast <const CItemBaseMulti *> (pItemDef);
-    bool fShip = pItemDef->IsType(IT_SHIP);	// must be in water.
+    bool fShip = pItemDef->IsType(IT_SHIP);    // must be in water.
 
     /*
     * First thing to do is to check if the character creating the multi is allowed to have it
@@ -3221,6 +3205,8 @@ void CItemMulti::OnComponentCreate(CItem * pComponent, bool fIsAddon)
 CMultiStorage::CMultiStorage(CUID uidSrc)
 {
     _uidSrc = uidSrc;
+    _iShipsTotal = 0;
+    _iHousesTotal = 0;
 }
 
 CMultiStorage::~CMultiStorage()

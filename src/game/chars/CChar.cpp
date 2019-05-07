@@ -2706,6 +2706,11 @@ do_default:
             sVal.Format16Val(GetMultiStorage()->GetHousePos((CUID)Exp_GetDWVal(pszKey)));
             return true;
         }
+		case CHC_MAXSHIPS:
+		{
+			sVal.FormatU8Val(_iMaxShips);
+			return true;
+		}
         case CHC_SHIPS:
         {
             sVal.Format16Val(GetMultiStorage()->GetShipCountReal());
@@ -3211,8 +3216,11 @@ bool CChar::r_LoadVal( CScript & s )
 		case CHC_ACCOUNT:
 			return SetPlayerAccount( s.GetArgStr() );
         case CHC_MAXHOUSES:
-            _iMaxHouses = s.GetArgUCVal();
+            _iMaxHouses = s.GetArgU8Val();
             break;
+		case CHC_MAXSHIPS:
+			_iMaxShips = s.GetArgU8Val();;
+			break;
 		case CHC_ACT:
 			m_Act_UID = s.GetArgVal();
 			break;
