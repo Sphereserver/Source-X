@@ -1705,3 +1705,7 @@ WARNING: Important change!
 - Fixed: List element values could only store 32 bits number, instead of 64 bits ones (like TAG).
 - Improved: Windows console window log speed and removed rubberband effect when too much text was appended in a short amount of time.
 - Fixed: TAGs couldn't be set to a 64 bits number (was still limited to 32 bits).
+
+07-05-2019, Nolok
+- Changed: t_house_component to ei_house_component, t_house_lockdown to ei_house_lockdown, t_house_secure to ei_house_secure, according to the new X scriptpack naming convention for TYPEDEFs
+	(if a TYPEDEF is meant to be used as a TEVENT or an EVENT, use the prefix "ei_"; if the TYPEDEF is meant to be used as a base TYPE, use the classic prefix "t_", as always.)

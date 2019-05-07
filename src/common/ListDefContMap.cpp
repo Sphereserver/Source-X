@@ -6,6 +6,7 @@
 #include "CScript.h"
 #include "CTextConsole.h"
 #include "ListDefContMap.h"
+#include <algorithm>
 
 /***************************************************************************
 *

@@ -311,7 +311,7 @@ bool CItemMulti::Multi_CreateComponent(ITEMID_TYPE id, short dx, short dy, char 
         pItem->m_itContainer.m_lock_complexity = 10000;    // never pickable.
     }
 
-    CScript event("events +t_house_component");
+    CScript event("events +ei_house_component");
     pItem->r_LoadVal(event);
     pItem->MoveToUpdate(pt);
     OnComponentCreate(pItem);
@@ -1297,7 +1297,7 @@ void CItemMulti::TransferLockdownsToMovingCrate()
         CItem *pItem = _lLockDowns[i].ItemFind();
         if (pItem)  // Move all valid items.
         {
-            CScript event("events -t_house_lockdown");
+            CScript event("events -ei_house_lockdown");
             pItem->r_LoadVal(event);
             pCrate->ContentAdd(pItem);
             pItem->ClrAttr(ATTR_LOCKEDDOWN);
@@ -1324,7 +1324,7 @@ void CItemMulti::TransferSecuredToMovingCrate()
         CItemContainer *pItem = static_cast<CItemContainer*>(_lSecureContainers[i].ItemFind());
         if (pItem)  // Move all valid items.
         {
-            CScript event("events -t_house_secure");
+            CScript event("events -ei_house_secure");
             pItem->r_LoadVal(event);
             pCrate->ContentAdd(pItem);
             pItem->ClrAttr(ATTR_SECURE);
@@ -1532,9 +1532,9 @@ void CItemMulti::GenerateBaseComponents(bool & fNeedKey, dword &dwKeyCode)
     ADDTOCALLSTACK("CItemMulti::GenerateBaseComponents");
     const CItemBaseMulti * pMultiDef = Multi_GetDef();
     ASSERT(pMultiDef);
-    for (size_t i = 0; i < pMultiDef->m_Components.size(); i++)
+    for (size_t i = 0; i < pMultiDef->m_Components.size(); ++i)
     {
-        const CItemBaseMulti::CMultiComponentItem &component = pMultiDef->m_Components.at(i);
+        const CItemBaseMulti::CMultiComponentItem &component = pMultiDef->m_Components[i];
         fNeedKey |= Multi_CreateComponent(component.m_id, component.m_dx, component.m_dy, component.m_dz, dwKeyCode);
     }
 }
@@ -1616,7 +1616,7 @@ void CItemMulti::LockItem(CUID uidItem)
         }
         pItem->SetAttr(ATTR_LOCKEDDOWN);
         pItem->m_uidLink = GetUID();
-        CScript event("events +t_house_lockdown");
+        CScript event("events +ei_house_lockdown");
         pItem->r_LoadVal(event);
     }
     pItem->SetLockDownOfMulti(uidItem);
@@ -1641,7 +1641,7 @@ void CItemMulti::UnlockItem(CUID uidItem)
     }
     pItem->ClrAttr(ATTR_LOCKEDDOWN);
     pItem->m_uidLink.InitUID();
-    CScript event("events -t_house_lockdown");
+    CScript event("events -ei_house_lockdown");
     pItem->r_LoadVal(event);
     pItem->SetLockDownOfMulti(UID_UNUSED);
 }
@@ -1710,7 +1710,7 @@ void CItemMulti::Release(CUID uidContainer)
     }
     pContainer->ClrAttr(ATTR_SECURE);
     pContainer->m_uidLink.InitUID();
-    CScript event("events -t_house_secure");
+    CScript event("events -ei_house_secure");
     pContainer->r_LoadVal(event);
     pContainer->SetSecuredOfMulti(UID_UNUSED);
 }
