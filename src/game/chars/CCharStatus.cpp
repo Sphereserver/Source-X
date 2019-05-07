@@ -386,7 +386,7 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 			{
 				// Unequip 2 handed weapons if we must use the other hand
 				pItemPrev = LayerFind(LAYER_HAND2);
-				if ( pItemPrev && !CCPropsItemWeapon::CanSubscribe(pItem) )
+				if ( pItemPrev && !CCPropsItemWeapon::CanSubscribe(pItemPrev) ) //If the item in Layer 2 is not a weapon, don't unequip it.
 					pItemPrev = nullptr;
 			}
 			break;
