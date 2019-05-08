@@ -88,7 +88,7 @@ bool CRegionResourceDef::r_LoadVal( CScript & s )
     return false;
 }
 
-bool CRegionResourceDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CRegionResourceDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
     ADDTOCALLSTACK("CRegionResourceDef::r_WriteVal");
     EXC_TRY("r_WriteVal");
@@ -118,7 +118,7 @@ bool CRegionResourceDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConso
             sVal = m_Skill.Write();
             break;
         default:
-            return( CResourceDef::r_WriteVal( pszKey, sVal, pSrc ));
+            return ( fNoCallParent ? false : CResourceDef::r_WriteVal( pszKey, sVal, pSrc ) );
     }
     return true;
     EXC_CATCH;

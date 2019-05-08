@@ -2042,12 +2042,12 @@ lpctstr const CChar::sm_szLoadKeys[CHC_QTY+1] =
 	nullptr
 };
 
-bool CChar::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CChar::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
 	ADDTOCALLSTACK("CChar::r_WriteVal");
     EXC_TRY("WriteVal");
 
-	if ( IsClient() && GetClient()->r_WriteVal(pszKey, sVal, pSrc) )
+	if ( IsClient() && GetClient()->r_WriteVal(pszKey, sVal, pSrc, true) )
 		return true;
 
     // Checking Props CComponents first (first check CChar props, if not found then check CCharBase)
@@ -2088,16 +2088,16 @@ do_default:
 			return true;
 
 		// special write values
-		int i = g_Cfg.FindSkillKey( pszKey );
-		if ( IsSkillBase((SKILL_TYPE)i))
+		const SKILL_TYPE iSkill = (SKILL_TYPE)g_Cfg.FindSkillKey( pszKey );
+		if ( IsSkillBase(iSkill) )
 		{
 			// Check some skill name.
-			ushort uiVal = Skill_GetBase( (SKILL_TYPE)i );
+			ushort uiVal = Skill_GetBase( iSkill );
 			sVal.Format( "%u.%u", uiVal/10, uiVal%10 );
 			return true;
 		}
 
-		return CObjBase::r_WriteVal( pszKey, sVal, pSrc );
+		return (fNoCallParent ? false : CObjBase::r_WriteVal( pszKey, sVal, pSrc, false ));
 	}
 
 	switch ( iKeyNum )

@@ -592,9 +592,10 @@ bool CPartyDef::r_LoadVal( CScript &s )
 	return false;
 }
 
-bool CPartyDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc )
+bool CPartyDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent )
 {
 	ADDTOCALLSTACK("CPartyDef::r_WriteVal");
+    UNREFERENCED_PARAMETER(fNoCallParent);
 	EXC_TRY("WriteVal");
 
 	CScriptObj *pRef;
@@ -626,10 +627,8 @@ bool CPartyDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc )
 			GETNONWHITESPACE(pszKey);
 			if ( pszKey[0] != '\0' )
 			{
-				CUID charToCheck(Exp_GetDWVal(pszKey));
-				CChar *pCharToCheck = charToCheck.CharFind();
-
-				sVal.FormatVal(pCharToCheck && pCharToCheck->m_pParty == this);
+				CChar *pCharToCheck = CUID::CharFind(Exp_GetDWVal(pszKey));
+				sVal.FormatVal(pCharToCheck && (pCharToCheck->m_pParty == this));
 			}
 			else
 				return false;
@@ -645,7 +644,7 @@ bool CPartyDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc )
 
 		case PDC_TAG0:
 			fZero = true;
-			pszKey++;
+			++pszKey;
 		case PDC_TAG:
 		{
 			if ( pszKey[3] != '.' )

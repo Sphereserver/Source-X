@@ -454,10 +454,11 @@ bool CSQLite::r_LoadVal(CScript & s)
 	return false;
 }
 
-bool CSQLite::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc)
+bool CSQLite::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent)
 {
 	ADDTOCALLSTACK("CSQLite::r_WriteVal");
 	EXC_TRY("WriteVal");
+    UNREFERENCED_PARAMETER(fNoCallParent);
 
 	int index = FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
 	switch ( index )

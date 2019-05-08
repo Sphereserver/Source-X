@@ -1425,8 +1425,9 @@ const CSkillDef * CServerConfig::SkillLookup( lpctstr pszKey )
 }
 
 
-bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
+    UNREFERENCED_PARAMETER(fNoCallParent);
 	ADDTOCALLSTACK("CServerConfig::r_WriteVal");
 	EXC_TRY("WriteVal");
 	// Just do stats values for now.
@@ -1679,11 +1680,11 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 					CChar * pChar = pClient->GetChar();
 
 					if ( *pszKey == '\0' ) // checking reference
-						sVal.FormatVal( pChar != nullptr? 1 : 0 );
+						sVal.FormatVal( pChar != nullptr ? 1 : 0 );
 					else if ( pChar != nullptr )
-						return pChar->r_WriteVal(pszKey, sVal, pSrc);
+						return pChar->r_WriteVal(pszKey, sVal, pSrc, false); // it calls also CClient::r_WriteVal
 					else
-						return pClient->r_WriteVal(pszKey, sVal, pSrc);
+						return pClient->r_WriteVal(pszKey, sVal, pSrc, false);
 				}
 				++i;
 			}
@@ -1694,16 +1695,15 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 		{
 			pszKey += 9;
 
-			bool bTerrain = false;
+			bool fTerrain = false;
 			if (!strnicmp(pszKey, "TERRAIN(", 8))
 			{
 				pszKey += 8;
-				bTerrain = true;
+				fTerrain = true;
 			}
 			else if (!strnicmp(pszKey, "ITEM(", 5))
 			{
 				pszKey += 5;
-				//SKIP_SEPARATORS(pszKey); // già fatto da str_parse?
 			}
 			else
 				return false;
@@ -1717,8 +1717,8 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			if ( !Str_ParseCmds(const_cast<tchar*>(pszKey), &pVal, 1, ")") )
 				return false;
 
-			int id = Exp_GetVal(pVal);
-			if ( bTerrain && (id >= TERRAIN_QTY) )
+			uint id = Exp_GetUVal(pVal);
+			if ( fTerrain && (id >= TERRAIN_QTY) )
 			{
 				// Invalid id
 				return false;
@@ -1728,7 +1728,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			if (pszKey[0] != '.')
 				return false;
 			SKIP_SEPARATORS(pszKey);
-			if (bTerrain)
+			if (fTerrain)
 			{
 				enum {ITATTR_FLAGS, ITATTR_UNK, ITATTR_IDX, ITATTR_NAME};
 				int iAttr = 0;
@@ -1793,7 +1793,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 	switch (index)
 	{
 		case RC_ATTACKERTIMEOUT:
-			sVal.FormatVal(m_iAttackerTimeout);
+			sVal.FormatUVal(m_iAttackerTimeout);
 			break;
 		case RC_BANKMAXWEIGHT:
 			sVal.FormatVal( m_iBankWMax / WEIGHT_UNITS );

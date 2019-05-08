@@ -1646,7 +1646,7 @@ lpctstr const CItemMultiCustom::sm_szLoadKeys[IMCC_QTY + 1] = // static
     nullptr
 };
 
-bool CItemMultiCustom::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
+bool CItemMultiCustom::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent)
 {
     ADDTOCALLSTACK("CItemMultiCustom::r_WriteVal");
     EXC_TRY("WriteVal");
@@ -1723,7 +1723,7 @@ bool CItemMultiCustom::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole 
             break;
 
         default:
-            return CItemMulti::r_WriteVal(pszKey, sVal, pSrc);
+            return (fNoCallParent ? false : CItemMulti::r_WriteVal(pszKey, sVal, pSrc));
     }
 
     return true;

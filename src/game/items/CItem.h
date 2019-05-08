@@ -689,7 +689,7 @@ public:
 
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
 	virtual void r_Write( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc ) override;
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc = nullptr, bool fNoCallParent = false ) override;
 	virtual bool r_LoadVal( CScript & s ) override;
 	virtual bool r_Load( CScript & s ) override; // Load an item from script
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute command from script

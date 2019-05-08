@@ -1999,7 +1999,7 @@ lpctstr CDialogResponseArgs::GetName() const
 	return "ARGD";
 }
 
-bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
+bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
 	ADDTOCALLSTACK("CDialogResponseArgs::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -2027,11 +2027,11 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConso
 			return true;
 		}
 
-		int iNum = Exp_GetSingle( pszKey );
+		dword dwNum = Exp_GetDWSingle( pszKey );
 		SKIP_SEPARATORS(pszKey);
-		for ( size_t i = 0; i < iQty; i++ )
+		for ( uint i = 0; i < iQty; ++i )
 		{
-			if ( (dword)iNum == m_CheckArray[i] )
+			if ( dwNum == m_CheckArray[i] )
 			{
 				sVal = "1";
 				return true;
@@ -2052,12 +2052,12 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConso
 			return true;
 		}
 
-		int iNum = Exp_GetSingle( pszKey );
+		dword dwNum = Exp_GetDWSingle( pszKey );
 		SKIP_SEPARATORS(pszKey);
 
-		for ( size_t i = 0; i < iQty; i++ )
+		for ( uint i = 0; i < iQty; ++i )
 		{
-			if ( iNum == m_TextArray[i]->m_ID )
+			if ( dwNum == m_TextArray[i]->m_ID )
 			{
 				sVal = m_TextArray[i]->m_sText;
 				return true;
@@ -2066,7 +2066,7 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConso
 		sVal.Empty();
 		return false;
 	}
-	return CScriptTriggerArgs::r_WriteVal( pszKey, sVal, pSrc);
+	return (fNoCallParent ? false : CScriptTriggerArgs::r_WriteVal( pszKey, sVal, pSrc, false ));
 	EXC_CATCH;
 
 	EXC_DEBUG_START;

@@ -84,7 +84,7 @@ CSpellDef::CSpellDef( SPELL_TYPE id ) :
     m_Interrupt.m_aiValues[0] = 1000;
 }
 
-bool CSpellDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CSpellDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
     ADDTOCALLSTACK("CSpellDef::r_WriteVal");
     EXC_TRY("WriteVal");
@@ -191,7 +191,7 @@ bool CSpellDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             sVal.FormatVal(m_wTithingUse);
             break;
         default:
-            return( CResourceDef::r_WriteVal( pszKey, sVal, pSrc ));
+            return ( fNoCallParent ? false : CResourceDef::r_WriteVal( pszKey, sVal, pSrc ) );
     }
     return true;
     EXC_CATCH;

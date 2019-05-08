@@ -129,7 +129,7 @@ lpctstr const CItemShip::sm_szLoadKeys[IMCS_QTY + 1] = // static
     nullptr
 };
 
-bool CItemShip::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
+bool CItemShip::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent)
 {
     ADDTOCALLSTACK("CItemShip::r_WriteVal");
     EXC_TRY("WriteVal");
@@ -157,7 +157,7 @@ bool CItemShip::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
         case IMCS_TILLER:
         {
             pszKey += 6;
-            CItem * pTiller = Multi_GetSign();
+            const CItem * pTiller = Multi_GetSign();
             if (pTiller)
                 sVal.FormatHex(pTiller->GetUID());
             else
@@ -165,7 +165,7 @@ bool CItemShip::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
         } break;
 
         default:
-            return(CItemMulti::r_WriteVal(pszKey, sVal, pSrc));
+            return (fNoCallParent ? false : CItemMulti::r_WriteVal(pszKey, sVal, pSrc));
     }
 
     return true;

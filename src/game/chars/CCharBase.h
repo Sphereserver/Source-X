@@ -116,9 +116,9 @@ public:
 
 	lpctstr GetTradeName() const;
 
-	bool r_LoadVal( CScript & s ) override;
-	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr ) override;
-	bool r_Load( CScript & s ) override;
+	virtual bool r_LoadVal( CScript & s ) override;
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false ) override;
+	virtual bool r_Load( CScript & s ) override;
 };
 
 

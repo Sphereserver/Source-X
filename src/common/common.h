@@ -107,16 +107,18 @@ template<typename T> inline T sign(T n)
 	#endif
 #endif
 
+#define IntCharacter(c)     int((c) & 0xFF)
+
 #ifdef UNICODE
-	#define IsDigit(c)			iswdigit((wint_t)c)
-	#define IsSpace(c)			iswspace((wint_t)c)
-	#define IsAlpha(c)			iswalpha((wint_t)c)
-	#define IsAlnum(c)			iswalnum((wint_t)c)
+	#define IsDigit(c)		iswdigit((wint_t)c)
+	#define IsSpace(c)		iswspace((wint_t)c)
+	#define IsAlpha(c)		iswalpha((wint_t)c)
+	#define IsAlnum(c)		iswalnum((wint_t)c)
 #else
-	#define IsDigit(c)			isdigit((int)(c & 0xFF))
-	#define IsSpace(c)			isspace((int)(c & 0xFF))
-	#define IsAlpha(c)			isalpha((int)(c & 0xFF))
-	#define IsAlnum(c)			isalnum((int)(c & 0xFF))
+	#define IsDigit(c)		isdigit(IntCharacter(c))
+	#define IsSpace(c)		isspace(IntCharacter(c))
+	#define IsAlpha(c)		isalpha(IntCharacter(c))
+	#define IsAlnum(c)		isalnum(IntCharacter(c))
 #endif
 
 #endif	// _INC_COMMON_H

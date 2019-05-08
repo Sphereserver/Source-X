@@ -435,7 +435,7 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 	return false;
 }
 
-bool CItemStone::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CItemStone::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
 	ADDTOCALLSTACK("CItemStone::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -741,7 +741,7 @@ bool CItemStone::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSr
 			return true;
 			
 		default:
-			return( CItem::r_WriteVal( pszKey, sVal, pSrc ));
+			return (fNoCallParent ? false : CItem::r_WriteVal( pszKey, sVal, pSrc ));
 	}
 
 	EXC_CATCH;

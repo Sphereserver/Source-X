@@ -758,7 +758,7 @@ lpctstr const CObjBase::sm_szLoadKeys[OC_QTY+1] =
 	nullptr
 };
 
-bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
+bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
 	ADDTOCALLSTACK("CObjBase::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -766,19 +766,23 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
     int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
     if ( index < 0 )
     {
-        // RES_FUNCTION call
-        // Is it a function returning a value ? Parse args ?
-        lpctstr pszArgs = strchr(pszKey, ' ');
-        if ( pszArgs != nullptr )
+        const size_t uiFunctionIndex = r_GetFunctionIndex(pszKey);
+        if (r_CanCall(uiFunctionIndex))
         {
-            ++pszArgs;
-            SKIP_SEPARATORS(pszArgs);
-        }
+            // RES_FUNCTION call
+            // Is it a function returning a value ? Parse args ?
+            lpctstr pszArgs = strchr(pszKey, ' ');
+            if ( pszArgs != nullptr )
+            {
+                ++pszArgs;
+                SKIP_SEPARATORS(pszArgs);
+            }
 
-        CScriptTriggerArgs Args( pszArgs != nullptr ? pszArgs : "" );
-        if (r_Call(pszKey, pSrc, &Args, &sVal))
-        {
-            return true;
+            CScriptTriggerArgs Args( pszArgs != nullptr ? pszArgs : "" );
+            if (r_Call(uiFunctionIndex, pSrc, &Args, &sVal))
+            {
+                return true;
+            }
         }
 
         // Just try to default to something reasonable ?
@@ -790,13 +794,18 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
             return true;
         }
 
-
         // TYPEDEF. ?
         if (Base_GetDef()->r_WriteVal(pszKey, sVal, pSrc))
         {
             return true;
         }
-		return CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
+
+		if (!fNoCallParent && CScriptObj::r_WriteVal( pszKey, sVal, pSrc, false ))
+        {
+            return true;
+        }
+
+        return false;
 	}
 
 	bool fZero = false;
@@ -812,7 +821,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 		case OC_ABILITYPRIMARY:
 		case OC_ABILITYSECONDARY:
 			{
-				CVarDefCont * pVar = GetDefKey(pszKey, true);
+				const CVarDefCont * pVar = GetDefKey(pszKey, true);
 				sVal = pVar ? pVar->GetValStr() : "";
 			}
 			break;
@@ -831,7 +840,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
         case OC_RECIPETAILORING:
         case OC_RECIPETINKERING:
         {
-            CVarDefCont * pVar = GetDefKey(pszKey, true);
+            const CVarDefCont * pVar = GetDefKey(pszKey, true);
             sVal.FormatLLHex(pVar ? pVar->GetValNum() : 0);
         }
         break;
@@ -840,7 +849,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			{
 				if ( IsChar() )
 				{
-					CChar * pChar = static_cast<CChar*>(this);
+					const CChar * pChar = static_cast<const CChar*>(this);
 					sVal.FormatVal( pChar->m_defense );
 					break;
 				}
@@ -1856,24 +1865,32 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		return true;
 	}
 
-	CSString sVal;
-	CScriptTriggerArgs Args( s.GetArgRaw() );
-	if ( r_Call( pszKey, pSrc, &Args, &sVal ) )
-		return true;
-
 	if ( !strnicmp( pszKey, "TARGET", 6 ) )
 		index = OV_TARGET;
 	else
 		index = FindTableSorted( pszKey, sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
     if (index < 0)
     {
+        const size_t uiFunctionIndex = r_GetFunctionIndex(pszKey);
+        if (r_CanCall(uiFunctionIndex))
+        {
+            // RES_FUNCTION call
+            CSString sVal;
+            CScriptTriggerArgs Args( s.GetArgRaw() );
+            if ( r_Call( uiFunctionIndex, pSrc, &Args, &sVal ) )
+                return true;
+        }
+
         /*
         CBaseBaseDef *pBase = Base_GetDef();
         ASSERT(pBase);
         if (pBase->r_Verb(s, pSrc))
             return true;
         */
-        return CScriptObj::r_Verb(s, pSrc);
+        if (CScriptObj::r_Verb(s, pSrc))
+            return true;
+
+        return false;
     }
 
 	CChar * pCharSrc = pSrc->GetChar();

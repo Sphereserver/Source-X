@@ -8,24 +8,6 @@
 #include "ListDefContMap.h"
 #include <algorithm>
 
-/***************************************************************************
-*
-*
-*	class CListDefContElem		Interface for list element
-*
-*
-***************************************************************************/
-CListDefContElem::CListDefContElem( lpctstr pszKey )
-: m_Key(pszKey)
-{
-	m_Key.MakeLower();
-}
-
-void CListDefContElem::SetKey( lpctstr pszKey )
-{
-	m_Key = pszKey;
-	m_Key.MakeLower(); 
-}
 
 /***************************************************************************
 *
@@ -102,7 +84,7 @@ bool CListDefContStr::r_LoadVal( CScript & s )
 	return true;
 }
 
-bool CListDefContStr::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr )
+bool CListDefContStr::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc )
 {
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
@@ -124,13 +106,11 @@ CListDefContElem * CListDefContStr::CopySelf() const
 ***************************************************************************/
 CListDefCont::CListDefCont( lpctstr pszKey ) : m_Key( pszKey ) 
 { 
-	m_Key.MakeLower(); 
 }
 
 void CListDefCont::SetKey( lpctstr pszKey )
 { 
 	m_Key = pszKey;
-	m_Key.MakeLower(); 
 }
 
 CListDefContElem* CListDefCont::GetAt(size_t nIndex) const
@@ -553,19 +533,6 @@ bool CListDefCont::r_LoadVal( lpctstr pszArg )
 		return AddElementStr(pszArg);
 
 	return AddElementNum(Exp_Get64Val(pszArg));
-}
-
-/***************************************************************************
-*
-*
-*	class CListDefMap::ltstr			KEY part sorting wrapper over std::set
-*
-*
-***************************************************************************/
-
-bool CListDefMap::ltstr::operator()(const CListDefCont * s1, const CListDefCont * s2) const
-{
-	return( strcmpi(s1->GetKey(), s2->GetKey()) < 0 );
 }
 
 /***************************************************************************

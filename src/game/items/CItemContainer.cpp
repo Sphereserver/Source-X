@@ -90,13 +90,13 @@ bool CItemContainer::r_GetRef( lpctstr &pszKey, CScriptObj *&pRef )
 	return CItemVendable::r_GetRef(pszKey, pRef);
 }
 
-bool CItemContainer::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc )
+bool CItemContainer::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent )
 {
 	ADDTOCALLSTACK("CItemContainer::r_WriteVal");
 	EXC_TRY("WriteVal");
 	if ( r_WriteValContainer(pszKey, sVal, pSrc) )
 		return true;
-	return CItemVendable::r_WriteVal(pszKey, sVal, pSrc);
+	return (fNoCallParent ? false : CItemVendable::r_WriteVal(pszKey, sVal, pSrc));
 	EXC_CATCH;
 
 	EXC_DEBUG_START;

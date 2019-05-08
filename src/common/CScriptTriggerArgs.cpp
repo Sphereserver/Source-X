@@ -258,7 +258,7 @@ bool CScriptTriggerArgs::r_LoadVal( CScript & s )
     return false;
 }
 
-bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
+bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
     ADDTOCALLSTACK("CScriptTriggerArgs::r_WriteVal");
     EXC_TRY("WriteVal");
@@ -373,14 +373,14 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
             return true;
         }
 
-        size_t iNum = (size_t)(Exp_GetSingle(pszKey));
+        uint uiNum = (uint)(Exp_GetLLSingle(pszKey));
         SKIP_SEPARATORS(pszKey);
-        if ( iNum >= m_v.size() )
+        if ( uiNum >= m_v.size() )
         {
             sVal = "";
             return true;
         }
-        sVal = m_v[iNum];
+        sVal = m_v[uiNum];
         return true;
     }
 
@@ -411,7 +411,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
             sVal = m_s1;
             break;
         default:
-            return CScriptObj::r_WriteVal(pszKey, sVal, pSrc);
+            return (fNoCallParent ? false : CScriptObj::r_WriteVal(pszKey, sVal, pSrc));
     }
     return true;
     EXC_CATCH;

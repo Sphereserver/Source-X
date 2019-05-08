@@ -80,7 +80,7 @@ void CItemCommCrystal::r_Write(CScript & s)
     m_Speech.r_Write(s, "SPEECH");
 }
 
-bool CItemCommCrystal::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole *pSrc)
+bool CItemCommCrystal::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole *pSrc, bool fNoCallParent)
 {
     ADDTOCALLSTACK("CItemCommCrystal::r_WriteVal");
     switch ( FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1) )
@@ -89,7 +89,7 @@ bool CItemCommCrystal::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole 
             m_Speech.WriteResourceRefList(sVal);
             break;
         default:
-            return CItemVendable::r_WriteVal(pszKey, sVal, pSrc);
+            return (fNoCallParent ? false : CItemVendable::r_WriteVal(pszKey, sVal, pSrc));
     }
     return true;
 }

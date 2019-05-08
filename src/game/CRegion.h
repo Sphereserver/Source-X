@@ -137,7 +137,7 @@ public:
 	void r_WriteBase( CScript & s );
 
 	virtual bool r_LoadVal( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc ) override;
+	virtual bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false ) override;
 	virtual void r_WriteBody( CScript & s, lpctstr pszPrefix );
 	virtual void r_WriteModified( CScript & s );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute command from script
@@ -205,7 +205,7 @@ public:
 public:
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
 	virtual bool r_LoadVal( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc ) override;
+	virtual bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false) override;
 	virtual void r_WriteBody( CScript &s, lpctstr pszPrefix ) override;
 	virtual void r_WriteModified( CScript &s ) override;
 	virtual void r_Write( CScript & s ) override;

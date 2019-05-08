@@ -139,10 +139,15 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
     int index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
     if ( index < 0 )
     {
-        CSString sVal;
-        CScriptTriggerArgs Args(s.GetArgRaw());
-        if ( r_Call(s.GetKey(), pSrc, &Args, &sVal) )
-            return true;
+        const size_t uiFunctionIndex = r_GetFunctionIndex(pszKey);
+        if (r_CanCall(uiFunctionIndex))
+        {
+            // RES_FUNCTION call
+            CSString sVal;
+            CScriptTriggerArgs Args(s.GetArgRaw());
+            if ( r_Call(uiFunctionIndex, pSrc, &Args, &sVal) )
+                return true;
+        }
         if (!m_pObj)
             return CResourceLink::r_Verb(s, pSrc);
         return m_pObj->r_Verb(s, pSrc);
@@ -508,16 +513,16 @@ CDialogDef::CDialogDef( CResourceID rid ) :
 }
 
 
-bool	CDialogDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
+bool CDialogDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
     ADDTOCALLSTACK("CDialogDef::r_WriteVal");
     if ( !m_pObj )
         return false;
-    return m_pObj->r_WriteVal( pszKey, sVal, pSrc );
+    return fNoCallParent ? false : m_pObj->r_WriteVal( pszKey, sVal, pSrc );
 }
 
 
-bool		CDialogDef::r_LoadVal( CScript & s )
+bool CDialogDef::r_LoadVal( CScript & s )
 {
     ADDTOCALLSTACK("CDialogDef::r_LoadVal");
     if ( !m_pObj )

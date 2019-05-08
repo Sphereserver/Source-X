@@ -23,7 +23,7 @@ private:
 public:
 	static const char *m_sClassName;
 
-	explicit CListDefContElem(lpctstr pszKey);
+    explicit CListDefContElem(lpctstr pszKey) : m_Key(pszKey) {};
 	virtual ~CListDefContElem() = default;
 
 private:
@@ -34,7 +34,9 @@ public:
     inline lpctstr GetKey() const {
         return m_Key.GetPtr();
     }
-	void SetKey( lpctstr pszKey );
+    inline void SetKey(lpctstr pszKey) {
+        m_Key = pszKey;
+    }
 
 	virtual lpctstr GetValStr() const = 0;
 	virtual int64 GetValNum() const = 0;
@@ -98,7 +100,7 @@ public:
 	int64 GetValNum() const;
 
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr );
 
 	virtual CListDefContElem * CopySelf() const;
 };
@@ -169,7 +171,10 @@ class CListDefMap
 private:
 	struct ltstr
 	{
-		bool operator()(const CListDefCont * s1, const CListDefCont * s2) const;
+        inline bool operator()(const CListDefCont * s1, const CListDefCont * s2) const
+        {
+            return( strcmpi(s1->GetKey(), s2->GetKey()) < 0 );
+        }
 	};
 
 	typedef std::set<CListDefCont *, ltstr> DefSet;

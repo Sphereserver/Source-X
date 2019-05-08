@@ -89,7 +89,7 @@ int64 ahextoi64( lpctstr pszStr ) // Convert hex string to int64
 		}
 		else if ( !bHex && ( ch == '.' ) )
 		{
-			pszStr++;
+			++pszStr;
 			continue;
 		}
 		else

@@ -31,7 +31,7 @@ public:
 
     virtual void OnHear( lpctstr pszCmd, CChar * pSrc );
     virtual void  r_Write( CScript & s );
-    virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
+    virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false );
     virtual bool  r_LoadVal( CScript & s  );
     virtual void DupeCopy( const CItem * pItem ) override;  // overriding CItem::DupeCopy
 };

@@ -102,9 +102,10 @@ bool CBaseBaseDef::r_Verb(CScript &s, CTextConsole * pSrc) // Execute command fr
 }
 */
 
-bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
 	UNREFERENCED_PARAMETER(pSrc);
+    UNREFERENCED_PARAMETER(fNoCallParent);
 	ADDTOCALLSTACK("CBaseBaseDef::r_WriteVal");
 	EXC_TRY("WriteVal");
 

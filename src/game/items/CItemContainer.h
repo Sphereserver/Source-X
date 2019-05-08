@@ -44,7 +44,7 @@ public:
 
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 	virtual void r_Write( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false );
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 
 	virtual int GetWeight(word amount = 0) const;

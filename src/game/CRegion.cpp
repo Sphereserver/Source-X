@@ -314,7 +314,7 @@ lpctstr const CRegion::sm_szLoadKeys[RC_QTY+1] =	// static (Sorted)
 	nullptr
 };
 
-bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
 	ADDTOCALLSTACK("CRegion::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -322,7 +322,7 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 	RC_TYPE index = (RC_TYPE) FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( index < 0 )
 	{
-		return( CScriptObj::r_WriteVal( pszKey, sVal, pSrc ));
+		return (fNoCallParent ? false : CScriptObj::r_WriteVal( pszKey, sVal, pSrc ));
 	}
 
 	switch ( index )
@@ -433,7 +433,7 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			sVal.FormatVal( IsFlag(REGION_FLAG_SAFE));
 			break;
 		case RC_TAGCOUNT:
-			sVal.FormatVal( (int)(m_TagDefs.GetCount()) );
+			sVal.FormatSTVal( m_TagDefs.GetCount() );
 			break;
 		case RC_TAGAT:
 			{
@@ -441,11 +441,11 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 				if ( *pszKey == '.' ) // do we have an argument?
 				{
 					SKIP_SEPARATORS( pszKey );
-					size_t iQty = Exp_GetSTVal( pszKey );
-					if ( iQty >= m_TagDefs.GetCount() )
+					size_t uiQty = Exp_GetSTVal( pszKey );
+					if ( uiQty >= m_TagDefs.GetCount() )
 						return false; // trying to get non-existant tag
 
-					CVarDefCont * pTagAt = m_TagDefs.GetAt( iQty );
+					const CVarDefCont * pTagAt = m_TagDefs.GetAt(uiQty);
 					if ( !pTagAt )
 						return false; // trying to get non-existant tag
 
@@ -958,7 +958,7 @@ bool CRegionWorld::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	return( CRegion::r_GetRef( pszKey, pRef ));
 }
 
-bool CRegionWorld::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CRegionWorld::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
 	ADDTOCALLSTACK("CRegionWorld::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -991,7 +991,7 @@ bool CRegionWorld::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 				return( this->r_WriteVal( pszKey, sVal, pSrc ));
 			}
 		default:
-			return( CRegion::r_WriteVal( pszKey, sVal, pSrc ));
+			return (fNoCallParent ? false : CRegion::r_WriteVal( pszKey, sVal, pSrc ));
 	}
 	return true;
 	EXC_CATCH;

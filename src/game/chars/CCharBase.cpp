@@ -164,9 +164,8 @@ lpctstr const CCharBase::sm_szLoadKeys[CBC_QTY+1] =
 	nullptr
 };
 
-bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
-	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CCharBase::r_WriteVal");
     EXC_TRY("WriteVal");
 
@@ -306,7 +305,7 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			break;
 		default:
         {
-            return(CBaseBaseDef::r_WriteVal(pszKey, sVal));
+            return (fNoCallParent ? false : CBaseBaseDef::r_WriteVal(pszKey, sVal), pSrc, false);
         }
 	}
 	return true;

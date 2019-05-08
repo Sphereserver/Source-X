@@ -224,9 +224,10 @@ bool CSFileObj::r_LoadVal( CScript & s )
     return false;
 }
 
-bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
+bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
     UNREFERENCED_PARAMETER(pSrc);
+    UNREFERENCED_PARAMETER(fNoCallParent);
     ADDTOCALLSTACK("CSFileObj::r_WriteVal");
     EXC_TRY("WriteVal");
     ASSERT(pszKey != nullptr);

@@ -574,7 +574,7 @@ public:
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
 	virtual bool r_LoadVal( CScript & s ) override;
 	virtual bool r_Load( CScript & s ) override;  // Load a character from Script
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc = nullptr ) override;
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc = nullptr, bool fNoCallParent = false ) override;
 	virtual void r_Write( CScript & s ) override;
 
 	void r_WriteParity( CScript & s );

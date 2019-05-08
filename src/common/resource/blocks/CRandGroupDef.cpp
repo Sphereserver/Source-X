@@ -110,7 +110,7 @@ bool CRandGroupDef::r_LoadVal( CScript &s )
     return false;
 }
 
-bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
+bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
     ADDTOCALLSTACK("CRandGroupDef::r_WriteVal");
     EXC_TRY("WriteVal");
@@ -198,7 +198,7 @@ bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * p
         } break;
 
         default:
-            return( CResourceDef::r_WriteVal( pszKey, sVal, pSrc ));
+            return ( fNoCallParent ? false : CResourceDef::r_WriteVal( pszKey, sVal, pSrc ) );
     }
 
     return true;

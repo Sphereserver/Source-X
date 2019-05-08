@@ -1021,7 +1021,7 @@ lpctstr const CItemBase::sm_szLoadKeys[IBC_QTY+1] =
 	nullptr
 };
 
-bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
 	ADDTOCALLSTACK("CItemBase::r_WriteVal");
     EXC_TRY("WriteVal");
@@ -1333,7 +1333,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			break;
 		default:
         {
-            return CBaseBaseDef::r_WriteVal(pszKey, sVal);
+            return ( fNoCallParent ? false : CBaseBaseDef::r_WriteVal(pszKey, sVal) );
         }
 	}
 	return true;
@@ -1993,7 +1993,7 @@ bool CItemBaseMulti::r_LoadVal(CScript &s)
     return false;
 }
 
-bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pChar)
+bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pChar, bool fNoCallParent)
 {
     ADDTOCALLSTACK("CItemBaseMulti::r_WriteVal");
     EXC_TRY("WriteVal");
@@ -2084,7 +2084,7 @@ bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * 
             pszKey += 9;
             if (*pszKey == '.')
             {
-                pszKey++;
+                ++pszKey;
                 if (!strnicmp(pszKey, "TILES", 5))
                 {
                     sVal.FormatVal(m_shipSpeed.tiles);
@@ -2102,7 +2102,7 @@ bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * 
             break;
         }
         default:
-            return CItemBase::r_WriteVal(pszKey, sVal, pChar);
+            return (fNoCallParent ? false : CItemBase::r_WriteVal(pszKey, sVal, pChar));
     }
     return true;
     EXC_CATCH;

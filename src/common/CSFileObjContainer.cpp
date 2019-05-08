@@ -216,7 +216,7 @@ bool CSFileObjContainer::r_LoadVal( CScript & s )
     return false;
 }
 
-bool CSFileObjContainer::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
+bool CSFileObjContainer::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
     ADDTOCALLSTACK("CSFileObjContainer::r_WriteVal");
     EXC_TRY("WriteVal");
@@ -247,21 +247,23 @@ bool CSFileObjContainer::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 
     if ( iIndex < 0 )
     {
-        size_t nNumber = (size_t)( Exp_GetVal(pszKey) );
-        SKIP_SEPARATORS(pszKey);
-
-        if ( nNumber >= sFileList.size() )
-            return false;
-
-        CSFileObj * pFile = sFileList.at(nNumber);
-
-        if ( pFile != nullptr )
+        if (!fNoCallParent)
         {
-            CScriptObj * pObj = dynamic_cast<CScriptObj*>( pFile );
-            if (pObj != nullptr)
-                return pObj->r_WriteVal(pszKey, sVal, pSrc);
-        }
+            uint nNumber = Exp_GetUVal(pszKey);
+            SKIP_SEPARATORS(pszKey);
 
+            if ( nNumber >= sFileList.size() )
+                return false;
+
+            CSFileObj * pFile = sFileList.at(nNumber);
+            if ( pFile != nullptr )
+            {
+                CScriptObj * pObj = dynamic_cast<CScriptObj*>( pFile );
+                if (pObj != nullptr)
+                    return pObj->r_WriteVal(pszKey, sVal, pSrc);
+            }
+        }
+        
         return false;
     }
 

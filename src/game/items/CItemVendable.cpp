@@ -44,7 +44,7 @@ lpctstr const CItemVendable::sm_szLoadKeys[IVC_QTY+1] =
 	nullptr
 };
 
-bool CItemVendable::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc)
+bool CItemVendable::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent)
 {
 	ADDTOCALLSTACK("CItemVendable::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -57,7 +57,7 @@ bool CItemVendable::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSr
 		sVal.FormatVal( GetQuality());
 		return true;
 	default:
-		return CItem::r_WriteVal( pszKey, sVal, pSrc );
+		return (fNoCallParent ? false : CItem::r_WriteVal( pszKey, sVal, pSrc ));
 	}
 	EXC_CATCH;
 

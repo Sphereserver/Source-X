@@ -1119,14 +1119,14 @@ bool CAccount::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	return( CScriptObj::r_GetRef( pszKey, pRef ));
 }
 
-bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
+bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
 	ADDTOCALLSTACK("CAccount::r_WriteVal");
 	EXC_TRY("WriteVal");
 	if ( !pSrc )
 		return false;
 
-	bool	fZero	= false;
+	bool fZero = false;
 
 	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
@@ -1209,22 +1209,22 @@ bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			sVal.FormatVal( m_ResDisp );
 			break;
 		case AC_TAG0:
-			fZero	= true;
-			pszKey++;
+			fZero = true;
+			++pszKey;
 		case AC_TAG:			// "TAG" = get/set a local tag.
 			{
 				if ( pszKey[3] != '.' )
 					return false;
 				pszKey += 4;
 				sVal = m_TagDefs.GetKeyStr(pszKey, fZero );
-				return true;
+				break;
 			}
 		case AC_TOTALCONNECTTIME:
 			sVal.FormatLLVal( m_Total_Connect_Time );
 			break;
 
 		default:
-			return( CScriptObj::r_WriteVal( pszKey, sVal, pSrc ));
+			return ( fNoCallParent ? false : CScriptObj::r_WriteVal( pszKey, sVal, pSrc, false ) );
 	}
 	return true;
 	EXC_CATCH;
@@ -1520,14 +1520,15 @@ bool CAccount::r_Verb( CScript &s, CTextConsole * pSrc )
 	int i = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 	if ( i < 0 )
 	{
-		bool bLoad = CScriptObj::r_Verb( s, pSrc );
-		if ( !bLoad ) //try calling custom functions
+		bool fLoad = CScriptObj::r_Verb( s, pSrc );
+		if ( !fLoad ) //try calling custom functions
 		{
+            // RES_FUNCTION call
 			CSString sVal;
 			CScriptTriggerArgs Args( s.GetArgRaw() );
-			bLoad = r_Call( pszKey, pSrc, &Args, &sVal );
+			fLoad = r_Call( pszKey, pSrc, &Args, &sVal );
 		}
-		return bLoad;
+		return fLoad;
 	}
 
 	switch ( i )

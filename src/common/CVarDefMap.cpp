@@ -8,33 +8,22 @@
 #include "CTextConsole.h"
 #include "CVarDefMap.h"
 
-
-/***************************************************************************
-*
-*
-*	class CVarDefCont		Interface for variables
-*
-*
-***************************************************************************/
-CVarDefCont::CVarDefCont( lpctstr pszKey ) : m_Key( pszKey ) 
-{ 
-	m_Key.MakeLower(); 
-}
-
-CVarDefCont::~CVarDefCont()
+// Would be a performant and elegant solution, if only MS STL implementation wasn't SO bad with iterators...
+/*
+#include <algorithm>
+static inline bool VarDefKeyComparator(const CVarDefCont *pCont, const lpctstr ptcKey)
 {
+    return ( strcmpi(pCont->GetKey(), ptcKey) < 0 );
 }
-
-lpctstr CVarDefCont::GetKey() const 
-{ 
-	return( m_Key.GetPtr() ); 
+static inline CVarDefMap::iterator VarDef_BinarySearchKey(CVarDefMap::iterator itBegin, CVarDefMap::const_iterator itEnd, lpctstr ptcKey)
+{
+    CVarDefMap::iterator it = std::lower_bound(itBegin, itEnd, ptcKey, VarDefKeyComparator);
+    if ((it != itEnd) && !strcmpi((*it)->GetKey(), ptcKey))
+        return it; // found
+    else
+        return itEnd; // not found
 }
-
-void CVarDefCont::SetKey( lpctstr pszKey )
-{ 
-	m_Key = pszKey;
-	m_Key.MakeLower(); 
-}
+*/
 
 /***************************************************************************
 *
@@ -44,11 +33,11 @@ void CVarDefCont::SetKey( lpctstr pszKey )
 *
 ***************************************************************************/
 
-CVarDefContNum::CVarDefContNum( lpctstr pszKey, int64 iVal ) : CVarDefCont( pszKey ), m_iVal( iVal )
+CVarDefContNum::CVarDefContNum( lpctstr pszKey, int64 iVal ) : m_sKey( pszKey ), m_iVal( iVal )
 {
 }
 
-CVarDefContNum::CVarDefContNum( lpctstr pszKey ) : CVarDefCont( pszKey ), m_iVal( 0 )
+CVarDefContNum::CVarDefContNum( lpctstr pszKey ) : m_sKey( pszKey ), m_iVal( 0 )
 {
 }
 
@@ -62,11 +51,11 @@ lpctstr CVarDefContNum::GetValStr() const
 
 bool CVarDefContNum::r_LoadVal( CScript & s )
 {
-	SetValNum( s.GetArg64Val());
+	SetValNum( s.GetArg64Val() );
 	return true;
 }
 
-bool CVarDefContNum::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr )
+bool CVarDefContNum::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc )
 {
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
@@ -87,11 +76,11 @@ CVarDefCont * CVarDefContNum::CopySelf() const
 *
 ***************************************************************************/
 
-CVarDefContStr::CVarDefContStr( lpctstr pszKey, lpctstr pszVal ) : CVarDefCont( pszKey ), m_sVal( pszVal ) 
+CVarDefContStr::CVarDefContStr( lpctstr pszKey, lpctstr pszVal ) : m_sKey( pszKey ), m_sVal( pszVal ) 
 {
 }
 
-CVarDefContStr::CVarDefContStr( lpctstr pszKey ) : CVarDefCont( pszKey )
+CVarDefContStr::CVarDefContStr( lpctstr pszKey ) : m_sKey( pszKey )
 {
 }
 
@@ -110,14 +99,13 @@ void CVarDefContStr::SetValStr( lpctstr pszVal )
 		g_Log.EventWarn("Setting max length of %d was exceeded on (VAR,TAG,LOCAL).%s \r", SCRIPT_MAX_LINE_LEN/2, GetKey() );
 }
 
-
 bool CVarDefContStr::r_LoadVal( CScript & s )
 {
 	SetValStr( s.GetArgStr());
 	return true;
 }
 
-bool CVarDefContStr::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr )
+bool CVarDefContStr::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc )
 {
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
@@ -153,23 +141,6 @@ CVarDefCont * CVarDefMap::CVarDefContTest::CopySelf() const
 	return new CVarDefContTest( GetKey() ); 
 }
 
-/***************************************************************************
-*
-*
-*	class CVarDefMap::ltstr			KEY part sorting wrapper over std::set
-*
-*
-***************************************************************************/
-
-bool CVarDefMap::ltstr::operator()(const CVarDefCont * s1, const CVarDefCont * s2) const
-{
-	//ADDTOCALLSTACK_INTENSIVE("CVarDefMap::ltstr::operator()");
-	if (!s1)
-		throw CSError(LOGL_ERROR, 0, "s1 empty!");
-	else if (!s2)
-		throw CSError(LOGL_ERROR, 0, "s2 empty!");
-	return ( strcmpi(s1->GetKey(), s2->GetKey()) < 0 );
-}
 
 /***************************************************************************
 *
@@ -262,7 +233,7 @@ void CVarDefMap::DeleteAt( size_t at )
 void CVarDefMap::DeleteAtKey( lpctstr at )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::DeleteAtKey");
-	CVarDefContStr pVarBased(at);
+	CVarDefContTest pVarBased(at);
 	iterator it = m_Container.find(&pVarBased);
 
 	DeleteAtIterator(it);

@@ -101,91 +101,115 @@ lpctstr const CScriptObj::sm_szLoadKeys[SSC_QTY+1] =
 	nullptr
 };
 
+size_t CScriptObj::r_GetFunctionIndex(lpctstr pszFunction) // static
+{
+    ADDTOCALLSTACK_INTENSIVE("CScriptObj::r_GetFunctionIndex");
+    GETNONWHITESPACE( pszFunction );
+    size_t index;
+    int iCompareRes	= -1;
+    index = g_Cfg.m_Functions.FindKeyNear( pszFunction, iCompareRes, true );
+    if ( iCompareRes != 0 )
+        index = g_Cfg.m_Functions.BadIndex();
+    return index;
+}
+
+bool CScriptObj::r_CanCall(size_t uiFunctionIndex) // static
+{
+    ADDTOCALLSTACK_INTENSIVE("CScriptObj::r_CanCall");
+    if (uiFunctionIndex != g_Cfg.m_Functions.BadIndex())
+    {
+        ASSERT(uiFunctionIndex < g_Cfg.m_Functions.size());
+        return true;
+    }
+    return false;
+}
+
 bool CScriptObj::r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * psVal, TRIGRET_TYPE * piRet )
 {
-	ADDTOCALLSTACK("CScriptObj::r_Call");
-	GETNONWHITESPACE( pszFunction );
-	size_t index;
-	{
-		int	iCompareRes	= -1;
-		index = g_Cfg.m_Functions.FindKeyNear( pszFunction, iCompareRes, true );
-		if ( iCompareRes != 0 )
-			index = g_Cfg.m_Functions.BadIndex();
-	}
+    ADDTOCALLSTACK("CScriptObj::r_Call (FunctionName)");
 
-	if ( index == g_Cfg.m_Functions.BadIndex() )
-		return false;
+    size_t index = r_GetFunctionIndex(pszFunction);
+    if ( !r_CanCall(index) )
+        return false;
 
-	CResourceNamedDef * pFunction = static_cast <CResourceNamedDef *>( g_Cfg.m_Functions[index] );
-	ASSERT(pFunction);
-	CResourceLock sFunction;
-	if ( pFunction->ResourceLock(sFunction) )
-	{
-		CScriptProfiler::CScriptProfilerFunction *pFun = nullptr;
-		TIME_PROFILE_INIT;
+    return r_Call(index, pSrc, pArgs, psVal, piRet);
+}
 
-		//	If functions profiler is on, search this function record and get pointer to it
-		//	if not, create the corresponding record
-		if ( IsSetEF(EF_Script_Profiler) )
-		{
-			char	*pName = Str_GetTemp();
-			char	*pSpace;
+bool CScriptObj::r_Call( size_t uiFunctionIndex, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * psVal, TRIGRET_TYPE * piRet )
+{
+    ADDTOCALLSTACK("CScriptObj::r_Call (FunctionIndex)");
+    ASSERT(r_CanCall(uiFunctionIndex));
 
-			//	lowercase for speed, and strip arguments
-			strcpy(pName, pszFunction);
-			if ( (pSpace = strchr(pName, ' ')) != nullptr )
+    CResourceNamedDef * pFunction = static_cast <CResourceNamedDef *>( g_Cfg.m_Functions[uiFunctionIndex] );
+    ASSERT(pFunction);
+    CResourceLock sFunction;
+    if ( pFunction->ResourceLock(sFunction) )
+    {
+        CScriptProfiler::CScriptProfilerFunction *pFun = nullptr;
+        TIME_PROFILE_INIT;
+
+        //	If functions profiler is on, search this function record and get pointer to it
+        //	if not, create the corresponding record
+        if ( IsSetEF(EF_Script_Profiler) )
+        {
+            char	*pName = Str_GetTemp();
+            char	*pSpace;
+
+            //	lowercase for speed, and strip arguments
+            strncpy(pName, pFunction->GetName(), STR_TEMPLENGTH);
+            if ( (pSpace = strchr(pName, ' ')) != nullptr )
                 *pSpace = 0;
-			_strlwr(pName);
+            _strlwr(pName);
 
-			if ( g_profiler.initstate != 0xf1 )	// it is not initalised
-			{
-				memset(&g_profiler, 0, sizeof(g_profiler));
-				g_profiler.initstate = (uchar)(0xf1); // ''
-			}
-			for ( pFun = g_profiler.FunctionsHead; pFun != nullptr; pFun = pFun->next )
-			{
-				if ( !strcmp(pFun->name, pName) ) break;
-			}
+            if ( g_profiler.initstate != 0xf1 )	// it is not initalised
+            {
+                memset(&g_profiler, 0, sizeof(g_profiler));
+                g_profiler.initstate = (uchar)(0xf1); // ''
+            }
+            for ( pFun = g_profiler.FunctionsHead; pFun != nullptr; pFun = pFun->next )
+            {
+                if ( !strcmp(pFun->name, pName) ) break;
+            }
 
-			// first time function called. so create a record for it
-			if ( pFun == nullptr )
-			{
-				pFun = new CScriptProfiler::CScriptProfilerFunction;
-				memset(pFun, 0, sizeof(CScriptProfiler::CScriptProfilerFunction));
-				strcpy(pFun->name, pName);
-				if ( g_profiler.FunctionsTail )
-					g_profiler.FunctionsTail->next = pFun;
-				else
-					g_profiler.FunctionsHead = pFun;
-				g_profiler.FunctionsTail = pFun;
-			}
+            // first time function called. so create a record for it
+            if ( pFun == nullptr )
+            {
+                pFun = new CScriptProfiler::CScriptProfilerFunction;
+                memset(pFun, 0, sizeof(CScriptProfiler::CScriptProfilerFunction));
+                strcpy(pFun->name, pName);
+                if ( g_profiler.FunctionsTail )
+                    g_profiler.FunctionsTail->next = pFun;
+                else
+                    g_profiler.FunctionsHead = pFun;
+                g_profiler.FunctionsTail = pFun;
+            }
 
-			//	prepare the informational block
-			pFun->called++;
-			g_profiler.called++;
-			TIME_PROFILE_START;
-		}
+            //	prepare the informational block
+            ++pFun->called;
+            ++g_profiler.called;
+            TIME_PROFILE_START;
+        }
 
-		TRIGRET_TYPE iRet = OnTriggerRun(sFunction, TRIGRUN_SECTION_TRUE, pSrc, pArgs, psVal);
+        TRIGRET_TYPE iRet = OnTriggerRun(sFunction, TRIGRUN_SECTION_TRUE, pSrc, pArgs, psVal);
 
-		if ( IsSetEF(EF_Script_Profiler) )
-		{
-			//	update the time call information
-			TIME_PROFILE_END;
-			llTicksStart = llTicksEnd - llTicksStart;
-			pFun->total += llTicksStart;
-			pFun->average = (pFun->total / pFun->called);
-			if ( pFun->max < llTicksStart )
-				pFun->max = llTicksStart;
-			if (( pFun->min > llTicksStart ) || ( !pFun->min ))
-				pFun->min = llTicksStart;
-			g_profiler.total += llTicksStart;
-		}
+        if ( IsSetEF(EF_Script_Profiler) )
+        {
+            //	update the time call information
+            TIME_PROFILE_END;
+            llTicksStart = llTicksEnd - llTicksStart;
+            pFun->total += llTicksStart;
+            pFun->average = (pFun->total / pFun->called);
+            if ( pFun->max < llTicksStart )
+                pFun->max = llTicksStart;
+            if (( pFun->min > llTicksStart ) || ( !pFun->min ))
+                pFun->min = llTicksStart;
+            g_profiler.total += llTicksStart;
+        }
 
-		if ( piRet )
-			*piRet	= iRet;
-	}
-	return true;
+        if ( piRet )
+            *piRet	= iRet;
+    }
+    return true;
 }
 
 bool CScriptObj::r_SetVal( lpctstr pszKey, lpctstr pszVal )
@@ -301,10 +325,11 @@ static void StringFunction( int iFunc, lpctstr pszKey, CSString &sVal )
 	}
 }
 
-bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
+bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
 	ADDTOCALLSTACK("CScriptObj::r_WriteVal");
 	EXC_TRY("WriteVal");
+    UNREFERENCED_PARAMETER(fNoCallParent);
 	CObjBase * pObj;
 	CScriptObj * pRef = nullptr;
 	bool fGetRef = r_GetRef( pszKey, pRef );
@@ -414,12 +439,12 @@ bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 
 			if ( *pszKey )
 			{
-				min = Exp_GetVal(pszKey);
+				min = Exp_Get64Val(pszKey);
 				SKIP_ARGSEP(pszKey);
 			}
 			if ( *pszKey )
 			{
-				max = Exp_GetVal(pszKey);
+				max = Exp_Get64Val(pszKey);
 				SKIP_ARGSEP(pszKey);
 			}
 
@@ -442,7 +467,7 @@ badcmd:
 
 	pszKey += strlen( sm_szLoadKeys[index] );
 	SKIP_SEPARATORS(pszKey);
-	bool	fZero	= false;
+	bool fZero = false;
 
 	switch ( index )
 	{
@@ -1964,9 +1989,12 @@ TRIGRET_TYPE CScriptObj::OnTriggerRun( CScript &s, TRIGRUN_TYPE trigrun, CTextCo
 	// DEBUGCHECK( this == g_Log.m_pObjectContext );
 
 	//	all scripts should have args for locals to work.
-	CScriptTriggerArgs argsEmpty;
+	std::unique_ptr<CScriptTriggerArgs> argsEmpty;
 	if ( !pArgs )
-		pArgs = &argsEmpty;
+    {
+        argsEmpty = std::make_unique<CScriptTriggerArgs>();
+		pArgs = argsEmpty.get();
+    }
 
 	//	Script execution is always not threaded action
 	EXC_TRY("TriggerRun");

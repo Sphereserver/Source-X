@@ -37,7 +37,7 @@ void CSkillClassDef::Init()
     }
 }
 
-bool CSkillClassDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CSkillClassDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
     ADDTOCALLSTACK("CSkillClassDef::r_WriteVal");
     EXC_TRY("WriteVal");
@@ -69,7 +69,7 @@ bool CSkillClassDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole *
                 break;
             }
         }
-        return( CResourceDef::r_WriteVal( pszKey, sVal, pSrc ));
+        return ( fNoCallParent ? false : CResourceDef::r_WriteVal( pszKey, sVal, pSrc ) );
     }
     return true;
     EXC_CATCH;

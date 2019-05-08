@@ -16,32 +16,30 @@ class CScript;
 
 class CVarDefCont
 {
-private:
-	CSString m_Key;	// reference to map key
-
 public:
 	static const char *m_sClassName;
 
-	CVarDefCont( lpctstr pszKey );
-	virtual ~CVarDefCont();
+	CVarDefCont()           = default;
+	virtual ~CVarDefCont()  = default;
 
 private:
 	CVarDefCont(const CVarDefCont& copy);
 	CVarDefCont& operator=(const CVarDefCont& other);
 
 public:
-	lpctstr GetKey() const;
-	void SetKey( lpctstr pszKey );
+    virtual lpctstr GetKey() const          = 0;
+    virtual void SetKey( lpctstr pszKey )   = 0;
 
-	virtual lpctstr GetValStr() const = 0;
-	virtual int64 GetValNum() const = 0;
-	virtual CVarDefCont * CopySelf() const = 0;
+	virtual lpctstr GetValStr() const       = 0;
+	virtual int64 GetValNum() const         = 0;
+	virtual CVarDefCont * CopySelf() const  = 0;
 };
 
 class CVarDefContNum : public CVarDefCont
 {
 private:
-	int64 m_iVal;
+    CSString m_sKey;    // reference to map key
+	int64 m_iVal;       // the assigned value
 
 public:
 	static const char *m_sClassName;
@@ -55,6 +53,13 @@ private:
 	CVarDefContNum& operator=(const CVarDefContNum& other);
 
 public:
+    inline virtual lpctstr GetKey() const override {
+        return m_sKey.GetPtr();
+    }
+    inline virtual void SetKey(lpctstr ptcKey) override {
+        m_sKey = ptcKey;
+    }
+
     inline void SetValNum(int64 iVal) {
         m_iVal = iVal;
     }
@@ -71,7 +76,8 @@ public:
 class CVarDefContStr : public CVarDefCont
 {
 private:
-	CSString m_sVal;	// the assigned value. (What if numeric?)
+    CSString m_sKey;	    // reference to map key
+	CSString m_sVal;	// the assigned value
 
 public:
 	static const char *m_sClassName;
@@ -85,6 +91,13 @@ private:
 	CVarDefContStr& operator=(const CVarDefContStr& other);
 
 public:
+    inline virtual lpctstr GetKey() const override {
+        return m_sKey.GetPtr();
+    }
+    inline virtual void SetKey(lpctstr ptcKey) override {
+        m_sKey = ptcKey;
+    }
+
     void SetValStr( lpctstr pszVal );
     inline virtual lpctstr GetValStr() const override {
         return m_sVal.GetPtr(); 
@@ -102,7 +115,10 @@ class CVarDefMap
 private:
 	struct ltstr
 	{
-		bool operator()(const CVarDefCont * s1, const CVarDefCont * s2) const;
+		inline bool operator()(const CVarDefCont * s1, const CVarDefCont * s2) const
+        {
+            return ( strcmpi(s1->GetKey(), s2->GetKey()) < 0 );
+        }
 	};
 
 	using DefSet        = std::set<CVarDefCont *, ltstr>;
@@ -110,10 +126,13 @@ private:
 
 	class CVarDefContTest : public CVarDefCont // This is to alloc CVarDefCont without allocing any other things
 	{
+        private:
+            lpctstr m_ptcKey;
+
 		public:
 			static const char *m_sClassName;
 
-            inline CVarDefContTest( lpctstr pszKey ) : CVarDefCont( pszKey ) {}
+            inline CVarDefContTest( lpctstr ptcKey ) : m_ptcKey( ptcKey ) {}
 			virtual ~CVarDefContTest() = default;
 
 		private:
@@ -121,6 +140,13 @@ private:
 			CVarDefContTest& operator=(const CVarDefContTest& other);
 
 		public:
+            inline virtual lpctstr GetKey() const override {
+                return m_ptcKey;
+            }
+            inline virtual void SetKey(lpctstr ptcKey) override {
+                m_ptcKey = ptcKey;
+            }
+
 			virtual lpctstr GetValStr() const override;
 			virtual int64 GetValNum() const override;
 			virtual CVarDefCont * CopySelf() const override;
@@ -135,13 +161,13 @@ public:
     using const_iterator    = DefSet::const_iterator;
 
 private:
-	CVarDefCont * GetAtKey( lpctstr at ) const;
+	CVarDefCont * GetAtKey( lpctstr ptcKey ) const;
 	void DeleteAt( size_t at );
-	void DeleteAtKey( lpctstr at );
+	void DeleteAtKey( lpctstr ptcKey );
 	void DeleteAtIterator( iterator it );
 
-    CVarDefContNum* SetNumOverride( lpctstr pszKey, int64 iVal );
-    CVarDefContStr* SetStrOverride( lpctstr pszKey, lpctstr pszVal );
+    CVarDefContNum* SetNumOverride( lpctstr ptcKey, int64 iVal );
+    CVarDefContStr* SetStrOverride( lpctstr ptcKey, lpctstr pszVal );
 
 public:
 	void Copy( const CVarDefMap * pArray );

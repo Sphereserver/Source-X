@@ -59,7 +59,7 @@ bool CItemMap::r_LoadVal(CScript & s)	// load an item script
     return false;
 }
 
-bool CItemMap::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc)
+bool CItemMap::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent)
 {
     ADDTOCALLSTACK("CItemMap::r_WriteVal");
     EXC_TRY("WriteVal");
@@ -71,18 +71,18 @@ bool CItemMap::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc)
         if ( !strnicmp(pszKey, "PIN.", 4) )
         {
             pszKey += 4;
-            size_t i = Exp_GetVal(pszKey) - 1;
+            uint i = Exp_GetUVal(pszKey) - 1;
             if ( m_Pins.IsValidIndex(i) )
             {
                 sVal.Format("%i,%i", m_Pins[i].m_x, m_Pins[i].m_y);
                 return true;
             }
         }
-        return CItemVendable::r_WriteVal(pszKey, sVal, pSrc);
+        return (fNoCallParent ? false : CItemVendable::r_WriteVal(pszKey, sVal, pSrc));
     EXC_CATCH;
 
     EXC_DEBUG_START;
-            EXC_ADD_KEYRET(pSrc);
+    EXC_ADD_KEYRET(pSrc);
     EXC_DEBUG_END;
     return false;
 }

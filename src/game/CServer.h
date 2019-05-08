@@ -102,7 +102,7 @@ public:
 	ssize_t PrintPercent( ssize_t iCount, ssize_t iTotal );
 
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr ) override;
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false ) override;
 	virtual bool r_LoadVal( CScript & s ) override;
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
 

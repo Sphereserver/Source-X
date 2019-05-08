@@ -353,7 +353,7 @@ bool CServerDef::r_LoadVal( CScript & s )
 	return false;
 }
 
-bool CServerDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
+bool CServerDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
 	ADDTOCALLSTACK("CServerDef::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -441,17 +441,21 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 		sVal = SPHERE_VERSION;
 		break;
 	default:
-		{
-			lpctstr pszArgs = strchr(pszKey, ' ');
-			if (pszArgs != nullptr)
-				GETNONWHITESPACE(pszArgs);
+	    {
+            const size_t uiFunctionIndex = r_GetFunctionIndex(pszKey);
+            if (r_CanCall(uiFunctionIndex))
+            {
+                // RES_FUNCTION call
+			    lpctstr pszArgs = strchr(pszKey, ' ');
+			    if (pszArgs != nullptr)
+				    GETNONWHITESPACE(pszArgs);
 
-			CScriptTriggerArgs Args( pszArgs ? pszArgs : "" );
-			if ( r_Call( pszKey, pSrc, &Args, &sVal ) )
-				return true;
-
-			return CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
-		}
+			    CScriptTriggerArgs Args( pszArgs ? pszArgs : "" );
+			    if ( r_Call( uiFunctionIndex, pSrc, &Args, &sVal ) )
+				    return true;
+		    }
+            return (fNoCallParent ? false : CScriptObj::r_WriteVal( pszKey, sVal, pSrc, false ));
+        }
 	}
 	return true;
 	EXC_CATCH;

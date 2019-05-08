@@ -459,26 +459,25 @@ bool CClient::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 			case CLIR_PARTY:
 				if (!strnicmp(pszKey, "CREATE", 7))
 				{
-					if (this->m_pChar->m_pParty)
+					if (m_pChar->m_pParty)
 						return false;
 
 					lpctstr oldKey = pszKey;
 					pszKey += 7;
 
 					// Do i want to send the "joined" message to the party members?
-					int iSendMsgs = Exp_GetSingle(pszKey);
-					bool bSendMsgs = (iSendMsgs != 0) ? true : false;
+					bool fSendMsgs = (Exp_GetSingle(pszKey) != 0) ? true : false;
 
 					// Add all the UIDs to the party
-					for (int ip = 0; ip < 10; ip++)
+					for (int ip = 0; ip < 10; ++ip)
 					{
 						SKIP_ARGSEP(pszKey);
-						CChar * pChar = (static_cast<CUID>(Exp_GetSingle(pszKey))).CharFind();
+						CChar * pChar = CUID::CharFind(Exp_GetDWSingle(pszKey));
 						if (!pChar)
 							continue;
 						if (!pChar->IsClient())
 							continue;
-						CPartyDef::AcceptEvent(pChar, this->GetChar()->GetUID(), true, bSendMsgs);
+						CPartyDef::AcceptEvent(pChar, m_pChar->GetUID(), true, fSendMsgs);
 
 						if (*pszKey == '\0')
 							break;
@@ -519,32 +518,28 @@ lpctstr const CClient::sm_szVerbKeys[CV_QTY+1] =	// static
 	nullptr,
 };
 
-bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
 	ADDTOCALLSTACK("CClient::r_WriteVal");
 	EXC_TRY("WriteVal");
-	int index;
-
+	
 	if ( !strnicmp("CTAG.", pszKey, 5) )		//	CTAG.xxx - client tag
 	{
-		if ( pszKey[4] != '.' )
-			return false;
 		pszKey += 5;
-		CVarDefCont *vardef = m_TagDefs.GetKey(pszKey);
+		const CVarDefCont *vardef = m_TagDefs.GetKey(pszKey);
 		sVal = vardef ? vardef->GetValStr() : "";
 		return true;
 	}
 
 	if ( !strnicmp("CTAG0.", pszKey, 6) )		//	CTAG0.xxx - client tag
 	{
-		if ( pszKey[5] != '.' )
-			return false;
 		pszKey += 6;
-		CVarDefCont *vardef = m_TagDefs.GetKey(pszKey);
+		const CVarDefCont *vardef = m_TagDefs.GetKey(pszKey);
 		sVal = vardef ? vardef->GetValStr() : "0";
 		return true;
 	}
 
+    int index;
 	if ( !strnicmp( "TARGP", pszKey, 5 ) && ( pszKey[5] == '\0' || pszKey[5] == '.' ) )
 		index = CC_TARGP;
 	else if ( !strnicmp( "SCREENSIZE", pszKey, 10 ) && ( pszKey[10] == '\0' || pszKey[10] == '.' ) )
@@ -655,7 +650,7 @@ bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			sVal = m_Targ_Text;
 			break;
 		default:
-			return( CScriptObj::r_WriteVal( pszKey, sVal, pSrc ));
+			return ( fNoCallParent ? false : CScriptObj::r_WriteVal( pszKey, sVal, pSrc, false ) );
 	}
 	return true;
 	EXC_CATCH;

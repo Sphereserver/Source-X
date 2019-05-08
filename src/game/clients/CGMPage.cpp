@@ -102,7 +102,7 @@ lpctstr const CGMPage::sm_szLoadKeys[GC_QTY+1] =
 	nullptr
 };
 
-bool CGMPage::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
+bool CGMPage::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
 	ADDTOCALLSTACK("CGMPage::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -124,7 +124,7 @@ bool CGMPage::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 		sVal.FormatLLHex( GetAge() );
 		break;
 	default:
-		return( CScriptObj::r_WriteVal( pszKey, sVal, pSrc ));
+		return (fNoCallParent ? false : CScriptObj::r_WriteVal( pszKey, sVal, pSrc, false ));
 	}
 	return true;
 	EXC_CATCH;

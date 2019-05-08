@@ -109,7 +109,7 @@ private:
     // General.
 public:
 	virtual bool r_LoadVal( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc ) override;
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false ) override;
 	virtual void r_Write();
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
 

@@ -82,7 +82,7 @@ CSkillDef::CSkillDef( SKILL_TYPE skill ) :
     m_AdvRate.Init();
 }
 
-bool CSkillDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CSkillDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
     ADDTOCALLSTACK("CSkillDef::r_WriteVal");
     EXC_TRY("WriteVal");
@@ -147,7 +147,7 @@ bool CSkillDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             sVal.FormatVal( m_GainRadius );
             break;
         default:
-            return( CResourceDef::r_WriteVal( pszKey, sVal, pSrc ));
+            return ( fNoCallParent ? false : CResourceDef::r_WriteVal( pszKey, sVal, pSrc ) );
     }
     return true;
     EXC_CATCH;

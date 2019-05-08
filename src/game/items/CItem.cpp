@@ -2417,7 +2417,7 @@ lpctstr const CItem::sm_szLoadKeys[IC_QTY+1] =
 };
 
 
-bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
 	ADDTOCALLSTACK("CItem::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -2479,7 +2479,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case IC_REMOVALTYPE:
 		case IC_SUMMONING:
 			{
-				CVarDefCont * pVar = GetDefKey(pszKey, true);
+				const CVarDefCont * pVar = GetDefKey(pszKey, true);
 				sVal = pVar ? pVar->GetValStr() : "";
 			}
 			break;
@@ -2507,7 +2507,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case IC_NPCKILLERAMT:
 		case IC_NPCPROTECTIONAMT:
 			{
-				CVarDefCont * pVar = GetDefKey(pszKey, true);
+				const CVarDefCont * pVar = GetDefKey(pszKey, true);
 				sVal.FormatLLVal(pVar ? pVar->GetValNum() : 0);
 			}
 			break;
@@ -2566,9 +2566,9 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case IC_CONT:
 			{
 				if ( pszKey[4] == '.' )
-					return CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
+					return CScriptObj::r_WriteVal( pszKey, sVal, pSrc, false );
 
-				CObjBase * pCont = GetContainer();
+				const CObjBase * pCont = GetContainer();
 				sVal.FormatHex( pCont ? ((dword) pCont->GetUID() ) : 0 );
 			}
 			break;
@@ -2579,7 +2579,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			break;
 		case IC_CONTP:
 			{
-				CObjBase * pContainer = GetContainer();
+				const CObjBase * pContainer = GetContainer();
 				if ( IsItem() && IsItemInContainer() && pContainer->IsValidUID() && pContainer->IsContainer() && pContainer->IsItem() )
 					sVal = GetContainedPoint().WriteUsed();
 				else
@@ -2591,28 +2591,34 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			break;
 		case IC_DISPIDDEC:
 			{
-				int iVal = GetDispID();
+				int iVal;
 	 			if ( IsType(IT_COIN)) // Fix money piles
 				{
-					CItemBase * pItemDef = Item_GetDef();
+					const CItemBase * pItemDef = Item_GetDef();
 					ASSERT(pItemDef);
 
 					iVal = pItemDef->GetDispID();
-					if ( GetAmount() >= 2 )
+                    const ushort uiAmount = GetAmount();
+					if ( uiAmount >= 2 )
 					{
-						if ( GetAmount() < 6)
+						if ( uiAmount < 6)
 							iVal = iVal + 1;
 						else
 							iVal = iVal + 2;
 					}
 				}
+                else
+                {
+                    iVal = GetDispID();
+                }
 				sVal.FormatVal( iVal );
 			}
 			break;
 		case IC_DUPEITEM:
 			{
-				if ( GetID() != GetDispID() )
-					sVal.FormatHex( GetID() );
+                const ITEMID_TYPE id = GetID();
+				if ( id != GetDispID() )
+					sVal.FormatHex( id );
 				else
 					sVal.FormatVal(0);
 			}
@@ -2639,7 +2645,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			break;
 		case IC_LINK:
 			if ( pszKey[4] == '.' )
-				return CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
+				return CScriptObj::r_WriteVal( pszKey, sVal, pSrc, false );
 			sVal.FormatHex( m_uidLink );
 			break;
 		case IC_MAXHITS:
@@ -2690,11 +2696,14 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			sVal = g_Cfg.ResourceGetName( CResourceID(RES_TYPEDEF, m_type) );
 			break;
 		default:
-			fDoDefault = true;
+            if (!fNoCallParent)
+            {
+			    fDoDefault = true;
+            }
 	}
     if (fDoDefault)
     {
-        return CObjBase::r_WriteVal(pszKey, sVal, pSrc);
+        return CObjBase::r_WriteVal(pszKey, sVal, pSrc, false);
     }
 	return true;
 	EXC_CATCH;

@@ -44,7 +44,7 @@ private:
 
 public:
     virtual bool r_LoadVal( CScript & s ) override;
-    virtual bool r_WriteVal( lpctstr pKey, CSString &sVal, CTextConsole * pSrc = nullptr ) override;
+    virtual bool r_WriteVal( lpctstr pKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false ) override;
     size_t GetRandMemberIndex( CChar * pCharSrc = nullptr, bool bTrigger = true ) const;
     CResourceQty GetMember( size_t i ) const
     {

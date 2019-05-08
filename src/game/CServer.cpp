@@ -1283,7 +1283,7 @@ bool CServer::r_LoadVal( CScript &s )
 	return CServerDef::r_LoadVal(s);
 }
 
-bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
 	ADDTOCALLSTACK("CServer::r_WriteVal");
 	if ( !strnicmp(pszKey, "ACCOUNT.", 8) )
@@ -1295,7 +1295,7 @@ bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		tchar * pszTemp = Str_GetTemp();
 		tchar * pszTempStart = pszTemp;
 
-		strcpy(pszTemp, pszKey);
+		strncpy(pszTemp, pszKey, STR_TEMPLENGTH);
 		tchar * split = strchr(pszTemp, '.');
 		if ( split != nullptr )
 			*split = '\0';
@@ -1306,7 +1306,7 @@ bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		//	try to fetch using indexes
 		if (( *pszTemp >= '0' ) && ( *pszTemp <= '9' ))
 		{
-			size_t num = Exp_GetVal(pszTemp);
+			uint num = Exp_GetUVal(pszTemp);
 			if (*pszTemp == '\0' && num < g_Accounts.Account_GetCount())
 				pAccount = g_Accounts.Account_Get(num);
 		}
@@ -1320,7 +1320,7 @@ bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 
 		if ( !*pszKey) // we're just checking if the account exists
 		{
-			sVal.FormatVal( (pAccount? 1 : 0) );
+			sVal.FormatVal( (pAccount ? 1 : 0) );
 			return true;
 		}
 		else if ( pAccount ) // we're retrieving a property from the account
@@ -1337,7 +1337,7 @@ bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		return true;
 	if ( g_World.r_WriteVal(pszKey, sVal, pSrc) )
 		return true;
-	return CServerDef::r_WriteVal(pszKey, sVal, pSrc);
+	return (fNoCallParent ? false : CServerDef::r_WriteVal(pszKey, sVal, pSrc));
 }
 
 enum SV_TYPE
@@ -1430,10 +1430,15 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 
 	if ( index < 0 )
 	{
-		CSString sVal;
-		CScriptTriggerArgs Args( s.GetArgRaw() );
-		if ( r_Call( pszKey, pSrc, &Args, &sVal ) )
-			return true;
+        const size_t uiFunctionIndex = r_GetFunctionIndex(pszKey);
+        if (r_CanCall(uiFunctionIndex))
+        {
+            // RES_FUNCTION call
+            CSString sVal;
+            CScriptTriggerArgs Args( s.GetArgRaw() );
+            if ( r_Call( uiFunctionIndex, pSrc, &Args, &sVal ) )
+                return true;
+        }
 
 		if ( !strnicmp(pszKey, "ACCOUNT.", 8) )
 		{

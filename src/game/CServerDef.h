@@ -117,7 +117,7 @@ public:
 	int64 GetTimeSinceLastValid() const;
 
 	virtual bool r_LoadVal( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pKey, CSString &sVal, CTextConsole * pSrc = nullptr ) override;
+	virtual bool r_WriteVal( lpctstr pKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false ) override;
 
 	bool IsConnected() const {
 		return m_timeLastValid > 0;

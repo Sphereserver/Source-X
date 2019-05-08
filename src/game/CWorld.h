@@ -317,7 +317,7 @@ public:
 	static bool OpenScriptBackup( CScript & s, lpctstr pszBaseDir, lpctstr pszBaseName, int savecount );
 
 	void r_Write( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc ) override;
+	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false ) override;
     virtual bool r_LoadVal( CScript & s ) override;
     virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
 

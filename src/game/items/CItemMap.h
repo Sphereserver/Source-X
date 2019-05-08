@@ -46,7 +46,7 @@ private:
 public:
     virtual bool IsSameType( const CObjBase * pObj ) const override;
     virtual void r_Write( CScript & s ) override;
-    virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr ) override;
+    virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false ) override;
     virtual bool r_LoadVal( CScript & s ) override;
     virtual void DupeCopy( const CItem * pItem ) override;  // overriding CItem::DupeCopy
 };

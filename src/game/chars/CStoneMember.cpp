@@ -271,7 +271,7 @@ bool CStoneMember::r_LoadVal( CScript & s ) // Load an item Script
 }
 
 
-bool CStoneMember::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CStoneMember::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
 	ADDTOCALLSTACK("CStoneMember::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -310,10 +310,11 @@ bool CStoneMember::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 				sVal.FormatVal(IsAbbrevOn());
 				break;
 			default:
-			{
-				CScriptObj *pRef = GetLinkUID().CharFind();
-				return pRef->r_WriteVal(pszKey,sVal,pSrc);
-			}
+                if (!fNoCallParent)
+			    {
+				    CScriptObj *pRef = GetLinkUID().CharFind();
+				    return pRef->r_WriteVal(pszKey,sVal,pSrc);
+			    }
 		}
 	}
 	else if ( GetLinkUID().IsItem() )
@@ -339,10 +340,11 @@ bool CStoneMember::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 				sVal.FormatVal(GetWeDeclaredWar());
 				break;
 			default:
-			{
-				CScriptObj *pRef = GetLinkUID().ItemFind();
-				return pRef->r_WriteVal(pszKey,sVal,pSrc);
-			}
+                if (!fNoCallParent)
+			    {
+				    CScriptObj *pRef = GetLinkUID().ItemFind();
+				    return pRef->r_WriteVal(pszKey,sVal,pSrc);
+			    }
 		}
 	}
 

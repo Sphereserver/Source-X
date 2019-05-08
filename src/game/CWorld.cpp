@@ -1244,7 +1244,7 @@ bool CWorld::CheckAvailableSpaceForSave(bool fStatics)
 #endif
     uiFreeSpace /= 1024;    // from bytes to kilobytes (or to be more precise, kibibytes)
 
-                            // Calculate the previous save file size
+    // Calculate the previous save file size
     bool fSizeErr = false;
     ullong uiPreviousSaveSize = 0;
     auto CalcPrevSavesSize = [=,&fSizeErr, &uiPreviousSaveSize](lpctstr ptcSaveName) -> void
@@ -1288,7 +1288,7 @@ bool CWorld::CheckAvailableSpaceForSave(bool fStatics)
     if (uiFreeSpace < uiPreviousSaveSize)
     {
         g_Log.Event(LOGL_CRIT, "-----------------------------");
-        g_Log.Event(LOGL_CRIT, "Save ABORTED! Disk space low!");
+        g_Log.Event(LOGL_CRIT, "Save ABORTED! Low disk space!");
         g_Log.Event(LOGL_CRIT, "-----------------------------");
         Broadcast("Save ABORTED! Warn the administrator!");
         return false;
@@ -1300,8 +1300,8 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 {
 	ADDTOCALLSTACK("CWorld::Save");
 
-    //if (!CheckAvailableSpaceForSave(false))
-    //    return false;
+    if (!CheckAvailableSpaceForSave(false))
+        return false;
 
     //-- Ok we can start the save process, in which we eventually remove the previous saves and create the other.
 
@@ -1314,7 +1314,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 		if ( g_Serv.r_Call("f_onserver_save", &g_Serv, &Args, nullptr, &tr) )
 			if ( tr == TRIGRET_RET_TRUE )
 				return false;
-		//Fushing before the server should fix #2306
+		//Flushing before the server should fix #2306
 		//The scripts fills the clients buffer and the server flush
 		//the data during the save.
 		//Should we flush only non threaded output or force it
@@ -1364,7 +1364,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 	}
 
 	CScriptTriggerArgs Args(fForceImmediate, m_iSaveStage);
-	g_Serv.r_Call((bSaved?"f_onserver_save_ok":"f_onserver_save_fail"), &g_Serv, &Args);
+	g_Serv.r_Call((bSaved ? "f_onserver_save_ok" : "f_onserver_save_fail"), &g_Serv, &Args);
 	return bSaved;
 }
 
@@ -1945,8 +1945,9 @@ lpctstr const CWorld::sm_szLoadKeys[WC_QTY+1] =	// static
 	nullptr
 };
 
-bool CWorld::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
+bool CWorld::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
+    UNREFERENCED_PARAMETER(fNoCallParent);
 	ADDTOCALLSTACK("CWorld::r_WriteVal");
 	EXC_TRY("WriteVal");
 

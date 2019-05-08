@@ -15,16 +15,16 @@
 #include "ListDefContMap.h"
 
 
-#define ISWHITESPACE(ch)	(IsSpace(ch) || ((uchar)(ch)==0xa0))// IsSpace
-#define _IS_SWITCH(ch)		((ch) == '-' || (ch) == '/')	    // command line switch.
-#define _ISCSYMF(ch)        (IsAlpha(ch) || (ch)=='_')	        // __iscsym or __iscsymf
-#define _ISCSYM(ch)         (isalnum(ch) || (ch)=='_')	        // __iscsym or __iscsymf
+#define ISWHITESPACE(ch)	(IsSpace(ch) || ((ch)==0xa0))     // IsSpace
+#define _IS_SWITCH(ch)		((ch) == '-' || (ch) == '/')	// command line switch.
+#define _ISCSYMF(ch)        (IsAlpha(ch) || (ch)=='_')	    // __iscsymf
+#define _ISCSYM(ch)         (isalnum(IntCharacter(ch)) || (ch)=='_')    // __iscsym
 
 #define SKIP_SEPARATORS(pStr)		while (*(pStr)=='.') { ++(pStr); }	// || ISWHITESPACE(*(pStr))
-#define SKIP_ARGSEP(pStr)		    while ((*(pStr)==',' || IsSpace(*(pStr)))) { ++(pStr); }
+#define SKIP_ARGSEP(pStr)		    while ((*(pStr)==',' || IsSpace( *(pStr)) )) { ++(pStr); }
 #define SKIP_IDENTIFIERSTRING(pStr) while (_ISCSYM(*(pStr))) { ++(pStr); }
-#define SKIP_NONNUM(pStr)           while (*(pStr) && !isdigit(*(pStr))) { ++(pStr); }
-#define SKIP_NONALPHA(pStr)         while (*(pStr) && !IsAlpha(*(pStr))) { ++(pStr); }
+#define SKIP_NONNUM(pStr)           while (*(pStr) && !isdigit( IntCharacter(*(pStr))) ) { ++(pStr); }
+#define SKIP_NONALPHA(pStr)         while (*(pStr) && !IsAlpha( *(pStr)) ) { ++(pStr); }
 
 #define GETNONWHITESPACE(pStr)	    while (ISWHITESPACE(*(pStr))) { ++(pStr); }
 
@@ -190,7 +190,9 @@ dword ahextoi( lpctstr pArgs );		// Convert decimal or (Sphere) hex string (star
 int64 ahextoi64( lpctstr pArgs );	// Convert decimal or (Sphere) hex string (staring with 0, not 0x) to int64
 
 #define Exp_GetSingle( pa )		(int)	g_Exp.GetSingle( pa )
+#define Exp_GetUSingle( pa )	(uint)	g_Exp.GetSingle( pa )
 #define Exp_GetLLSingle( pa )			g_Exp.GetSingle( pa )
+#define Exp_GetDWSingle( pa )	(dword)	g_Exp.GetSingle( pa )
 
 #define Exp_GetRange( pa )		(int)	g_Exp.GetRangeNumber( pa )
 #define Exp_GetLLRange( pa )			g_Exp.GetRangeNumber( pa )

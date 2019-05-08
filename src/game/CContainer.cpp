@@ -612,11 +612,13 @@ bool CContainer::r_WriteValContainer( lpctstr pszKey, CSString &sVal, CTextConso
 	{
 		case 0:			//	count
 		{
-			int iTotal = 0;
+			size_t uiTotal = 0;
 			for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
-				iTotal++;
+            {
+				++uiTotal;
+            }
 
-			sVal.FormatVal(iTotal);
+			sVal.FormatSTVal(uiTotal);
 			break;
 		}
 

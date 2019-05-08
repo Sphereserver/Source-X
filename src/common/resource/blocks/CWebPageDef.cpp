@@ -109,7 +109,7 @@ lpctstr const CWebPageDef::sm_szLoadKeys[WC_QTY+1] =
 	nullptr
 };
 
-bool CWebPageDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CWebPageDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
 {
 	ADDTOCALLSTACK("CWebPageDef::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -131,7 +131,7 @@ bool CWebPageDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pS
 			sVal.FormatVal( m_iUpdatePeriod );
 			break;
 		default:
-			return( g_Serv.r_WriteVal( pszKey, sVal, pSrc ));
+			return ( fNoCallParent ? false : g_Serv.r_WriteVal( pszKey, sVal, pSrc ) );
 	}
 	return true;
 	EXC_CATCH;
