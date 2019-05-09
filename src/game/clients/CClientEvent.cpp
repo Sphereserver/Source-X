@@ -1999,8 +1999,9 @@ lpctstr CDialogResponseArgs::GetName() const
 	return "ARGD";
 }
 
-bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent )
+bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CDialogResponseArgs::r_WriteVal");
 	EXC_TRY("WriteVal");
 	if ( ! strnicmp( pszKey, "ARGCHK", 6 ))

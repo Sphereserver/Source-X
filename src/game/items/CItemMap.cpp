@@ -59,8 +59,9 @@ bool CItemMap::r_LoadVal(CScript & s)	// load an item script
     return false;
 }
 
-bool CItemMap::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent)
+bool CItemMap::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CItemMap::r_WriteVal");
     EXC_TRY("WriteVal");
         if ( !strnicmp(pszKey, "PINS", 4) )

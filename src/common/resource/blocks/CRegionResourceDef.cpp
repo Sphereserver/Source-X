@@ -88,8 +88,9 @@ bool CRegionResourceDef::r_LoadVal( CScript & s )
     return false;
 }
 
-bool CRegionResourceDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
+bool CRegionResourceDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CRegionResourceDef::r_WriteVal");
     EXC_TRY("r_WriteVal");
     // RES_REGIONRESOURCE

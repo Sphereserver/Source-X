@@ -1425,9 +1425,10 @@ const CSkillDef * CServerConfig::SkillLookup( lpctstr pszKey )
 }
 
 
-bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
+bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
     UNREFERENCED_PARAMETER(fNoCallParent);
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CServerConfig::r_WriteVal");
 	EXC_TRY("WriteVal");
 	// Just do stats values for now.

@@ -518,8 +518,9 @@ lpctstr const CClient::sm_szVerbKeys[CV_QTY+1] =	// static
 	nullptr,
 };
 
-bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
+bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CClient::r_WriteVal");
 	EXC_TRY("WriteVal");
 	

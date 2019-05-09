@@ -172,8 +172,7 @@ bool CEntityProps::r_LoadPropVal(CScript & s, CObjBase* pObjEntityProps, CBaseBa
         const lpctstr ptcKey = s.GetKey();
         for (decltype(_List)::const_iterator it = pEP->_List.begin(), itEnd = pEP->_List.end(); it != itEnd; ++it)
         {
-            CComponentProps *pComponent = it->second;
-            if (pComponent)
+            if ( CComponentProps *pComponent = it->second )
             {
                 const KeyTableDesc_s ktd = pComponent->GetPropertyKeysData();
                 iPropIndex = FindTableSorted(ptcKey, ktd.pptcTable, ktd.iTableSize - 1);

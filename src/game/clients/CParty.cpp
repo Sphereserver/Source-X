@@ -592,10 +592,11 @@ bool CPartyDef::r_LoadVal( CScript &s )
 	return false;
 }
 
-bool CPartyDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent )
+bool CPartyDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
-	ADDTOCALLSTACK("CPartyDef::r_WriteVal");
     UNREFERENCED_PARAMETER(fNoCallParent);
+    UNREFERENCED_PARAMETER(fNoCallChildren);
+	ADDTOCALLSTACK("CPartyDef::r_WriteVal");
 	EXC_TRY("WriteVal");
 
 	CScriptObj *pRef;

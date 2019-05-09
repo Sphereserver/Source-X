@@ -1283,7 +1283,7 @@ bool CServer::r_LoadVal( CScript &s )
 	return CServerDef::r_LoadVal(s);
 }
 
-bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
+bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
 	ADDTOCALLSTACK("CServer::r_WriteVal");
 	if ( !strnicmp(pszKey, "ACCOUNT.", 8) )
@@ -1333,10 +1333,13 @@ bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, 
 	}
 
 	// Just do stats values for now.
-	if ( g_Cfg.r_WriteVal(pszKey, sVal, pSrc) )
-		return true;
-	if ( g_World.r_WriteVal(pszKey, sVal, pSrc) )
-		return true;
+    if (!fNoCallChildren)
+    {
+	    if ( g_Cfg.r_WriteVal(pszKey, sVal, pSrc) )
+		    return true;
+	    if ( g_World.r_WriteVal(pszKey, sVal, pSrc) )
+		    return true;
+    }
 	return (fNoCallParent ? false : CServerDef::r_WriteVal(pszKey, sVal, pSrc));
 }
 

@@ -169,20 +169,21 @@ size_t CSObjSortArray<TYPE, KEY_TYPE>::FindKeyNear( KEY_TYPE key, int & iCompare
 	//		-1 = key should be less than index.
 	//		+1 = key should be greater than index
 	//
-	if (this->size() <= 0 )
+    const size_t sz = this->size();
+	if (sz <= 0 )
 	{
 		iCompareRes = -1;
 		return 0;
 	}
 
-	size_t iHigh = this->size() - 1;
+	size_t iHigh = sz - 1;
 	size_t iLow = 0;
 	size_t i = 0;
 
 	while ( iLow <= iHigh )
 	{
 		i = (iHigh + iLow) >> 1;
-		iCompareRes = CompareKey( key, this->at(i), fNoSpaces );
+		iCompareRes = CompareKey( key, this->operator[](i), fNoSpaces );
 		if ( iCompareRes == 0 )
 			break;
 		if ( iCompareRes > 0 )

@@ -1021,14 +1021,14 @@ lpctstr const CItemBase::sm_szLoadKeys[IBC_QTY+1] =
 	nullptr
 };
 
-bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
+bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
 	ADDTOCALLSTACK("CItemBase::r_WriteVal");
     EXC_TRY("WriteVal");
 
     // Checking Props CComponents first
     EXC_SET_BLOCK("EntityProps");
-    if (CEntityProps::r_WritePropVal(pszKey, sVal, nullptr, this))
+    if (!fNoCallChildren && CEntityProps::r_WritePropVal(pszKey, sVal, nullptr, this))
     {
         return true;
     }
@@ -1126,7 +1126,8 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             {
                 return false;
             }
-            CItemBaseMulti * pItemMulti = dynamic_cast<CItemBaseMulti*>(this);
+            const CItemBaseMulti * pItemMulti = dynamic_cast<const CItemBaseMulti*>(this);
+            ASSERT(pItemMulti);
             sVal.FormatU8Val(pItemMulti->_iMultiCount);
         }break;
 		case IBC_DISPID:
@@ -1993,8 +1994,9 @@ bool CItemBaseMulti::r_LoadVal(CScript &s)
     return false;
 }
 
-bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pChar, bool fNoCallParent)
+bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pChar, bool fNoCallParent, bool fNoCallChildren)
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CItemBaseMulti::r_WriteVal");
     EXC_TRY("WriteVal");
     switch (FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1))
@@ -2138,6 +2140,7 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 	if ( pBaseDupe )
 		return( pBaseDupe->GetItemDef() );	// this is just a dupeitem
 
+    // The rid was added to the ResourceHash, but it's not linked yet to a CItemBase (we do it on the first request).
 	CResourceLink * pBaseLink = dynamic_cast <CResourceLink *>(pBaseStub);
 	ASSERT(pBaseLink);
 

@@ -513,12 +513,13 @@ CDialogDef::CDialogDef( CResourceID rid ) :
 }
 
 
-bool CDialogDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent )
+bool CDialogDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CDialogDef::r_WriteVal");
     if ( !m_pObj )
         return false;
-    return fNoCallParent ? false : m_pObj->r_WriteVal( pszKey, sVal, pSrc );
+    return (fNoCallParent ? false : m_pObj->r_WriteVal( pszKey, sVal, pSrc ));
 }
 
 

@@ -382,11 +382,12 @@ bool CDataBase::r_LoadVal(CScript & s)
 */
 }
 
-bool CDataBase::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent)
+bool CDataBase::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
+    UNREFERENCED_PARAMETER(fNoCallParent);
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CDataBase::r_WriteVal");
 	EXC_TRY("WriteVal");
-    UNREFERENCED_PARAMETER(fNoCallParent);
 
 	// Just return 0 if MySQL is disabled
 	if (!g_Cfg.m_bMySql)

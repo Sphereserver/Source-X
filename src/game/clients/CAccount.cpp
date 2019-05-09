@@ -1119,8 +1119,9 @@ bool CAccount::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	return( CScriptObj::r_GetRef( pszKey, pRef ));
 }
 
-bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent )
+bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CAccount::r_WriteVal");
 	EXC_TRY("WriteVal");
 	if ( !pSrc )

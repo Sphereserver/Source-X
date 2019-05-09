@@ -92,7 +92,7 @@ private:
 public:
     lpctstr GetName() const { return( m_sName ); }
     virtual bool r_LoadVal( CScript & s ) override;
-    virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false ) override;
+    virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 
     bool GetPrimarySkill( int * piSkill = nullptr, int * piQty = nullptr ) const;
 };

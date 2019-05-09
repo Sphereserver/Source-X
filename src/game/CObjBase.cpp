@@ -650,10 +650,7 @@ TRIGRET_TYPE CObjBase::OnHearTrigger( CResourceLock & s, lpctstr pszCmd, CChar *
 	// RETURN:
 	//  TRIGRET_ENDIF = no match.
 	//  TRIGRET_DEFAULT = found match but it had no RETURN
-	CScriptTriggerArgs Args( pszCmd );
-	Args.m_iN1 = mode;
-	Args.m_iN2 = wHue;
-
+    std::unique_ptr<CScriptTriggerArgs> Args;
 	bool fMatch = false;
 
 	while ( s.ReadKeyParse())
@@ -661,8 +658,9 @@ TRIGRET_TYPE CObjBase::OnHearTrigger( CResourceLock & s, lpctstr pszCmd, CChar *
 		if ( s.IsKeyHead("ON",2))
 		{
 			// Look for some key word.
-			_strupr( s.GetArgStr());
-			if ( Str_Match( s.GetArgStr(), pszCmd ) == MATCH_VALID )
+            tchar* ptcOn = s.GetArgStr();
+			//_strupr(ptcOn); // Str_Match is already case insensitive
+			if ( Str_Match( ptcOn, pszCmd ) == MATCH_VALID )
 				fMatch = true;
 			continue;
 		}
@@ -670,15 +668,23 @@ TRIGRET_TYPE CObjBase::OnHearTrigger( CResourceLock & s, lpctstr pszCmd, CChar *
 		if ( ! fMatch )
 			continue;	// look for the next "ON" section.
 
-		TRIGRET_TYPE iRet = CObjBase::OnTriggerRunVal( s, TRIGRUN_SECTION_EXEC, pSrc, &Args );
+        if (!Args)
+        {
+            // Allocate when needed
+            Args = std::make_unique<CScriptTriggerArgs>(pszCmd);
+            Args->m_iN1 = mode;
+            Args->m_iN2 = wHue;
+        }
+		TRIGRET_TYPE iRet = CObjBase::OnTriggerRunVal( s, TRIGRUN_SECTION_EXEC, pSrc, Args.get() );
 		if ( iRet != TRIGRET_RET_FALSE )
-			return( iRet );
+			return iRet;
 
 		fMatch = false;
 	}
 
-	mode = static_cast<TALKMODE_TYPE>(Args.m_iN1);
-	return( TRIGRET_ENDIF );	// continue looking.
+    if (Args)
+	    mode = TALKMODE_TYPE(Args->m_iN1);
+	return TRIGRET_ENDIF;	// continue looking.
 }
 
 enum OBR_TYPE
@@ -758,13 +764,13 @@ lpctstr const CObjBase::sm_szLoadKeys[OC_QTY+1] =
 	nullptr
 };
 
-bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent )
+bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
 	ADDTOCALLSTACK("CObjBase::r_WriteVal");
 	EXC_TRY("WriteVal");
 
     int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
-    if ( index < 0 )
+    if ( !fNoCallChildren && (index < 0) )
     {
         const size_t uiFunctionIndex = r_GetFunctionIndex(pszKey);
         if (r_CanCall(uiFunctionIndex))
@@ -789,13 +795,13 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
         // Even though we have not really specified it correctly !
 
         // WORLD. ?
-        if (g_World.r_WriteVal(pszKey, sVal, pSrc))
-        {
-            return true;
-        }
+        //if (g_World.r_WriteVal(pszKey, sVal, pSrc))
+        //{
+        //    return true;
+        //}
 
         // TYPEDEF. ?
-        if (Base_GetDef()->r_WriteVal(pszKey, sVal, pSrc))
+        if (Base_GetDef()->r_WriteVal(pszKey, sVal, pSrc, false, true)) // do not call CEntityProps on the base (already done that on CItem/CChar::r_WriteVal
         {
             return true;
         }

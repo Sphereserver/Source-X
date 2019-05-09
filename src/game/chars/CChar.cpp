@@ -2042,26 +2042,29 @@ lpctstr const CChar::sm_szLoadKeys[CHC_QTY+1] =
 	nullptr
 };
 
-bool CChar::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
+bool CChar::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
 	ADDTOCALLSTACK("CChar::r_WriteVal");
     EXC_TRY("WriteVal");
 
-	if ( IsClient() && GetClient()->r_WriteVal(pszKey, sVal, pSrc, true) )
+	if ( IsClient() && GetClient()->r_WriteVal(pszKey, sVal, pSrc, true, true) ) // Call CClient::r_WriteVal
 		return true;
 
-    // Checking Props CComponents first (first check CChar props, if not found then check CCharBase)
-    EXC_SET_BLOCK("EntityProp");
-    if (CEntityProps::r_WritePropVal(pszKey, sVal, this, Base_GetDef()))
+    if (!fNoCallChildren)
     {
-        return true;
-    }
+        // Checking Props CComponents first (first check CChar props, if not found then check CCharBase)
+        EXC_SET_BLOCK("EntityProp");
+        if (CEntityProps::r_WritePropVal(pszKey, sVal, this, Base_GetDef()))
+        {
+            return true;
+        }
 
-    // Now check regular CComponents
-    EXC_SET_BLOCK("Entity");
-    if (CEntity::r_WriteVal(pszKey, sVal, pSrc))
-    {
-        return true;
+        // Now check regular CComponents
+        EXC_SET_BLOCK("Entity");
+        if (CEntity::r_WriteVal(pszKey, sVal, pSrc))
+        {
+            return true;
+        }
     }
 
     EXC_SET_BLOCK("Keyword");

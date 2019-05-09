@@ -435,8 +435,9 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 	return false;
 }
 
-bool CItemStone::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
+bool CItemStone::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CItemStone::r_WriteVal");
 	EXC_TRY("WriteVal");
 	CChar * pCharSrc = pSrc->GetChar();
@@ -455,7 +456,7 @@ bool CItemStone::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSr
 			if ( *pszCmd )
 			{
 				SKIP_ARGSEP(pszCmd);
-				STONEPRIV_TYPE iPriv = static_cast<STONEPRIV_TYPE>(Exp_GetVal(pszCmd));
+				STONEPRIV_TYPE iPriv = STONEPRIV_TYPE(Exp_GetVal(pszCmd));
 
 				for (; pMember != nullptr; pMember = pMember->GetNext())
 				{
@@ -465,7 +466,7 @@ bool CItemStone::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSr
 					if ( pMember->GetPriv() != iPriv )
 						continue;
 
-					i++;
+					++i;
 				}
 			}
 			else
@@ -475,7 +476,7 @@ bool CItemStone::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSr
 					if (!pMember->GetLinkUID().IsChar()) 
 						continue;
 
-					i++;
+					++i;
 				}
 			}
 

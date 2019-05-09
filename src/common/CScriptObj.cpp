@@ -22,67 +22,84 @@
 class CStoneMember;
 
 
+enum SREF_TYPE
+{
+    SREF_DB,
+    SREF_FILE,
+    SREF_I,
+    SREF_LDB,
+    SREF_MDB,
+    SREF_NEW,
+    SREF_OBJ,
+    SREF_SERV,
+    SREF_UID,
+    SREF_QTY
+};
+
+lpctstr const _ptcSRefKeys[SREF_QTY+1] =
+{
+    "DB",
+    "FILE",
+    "I",
+    "LDB",
+    "MDB",
+    "NEW",
+    "OBJ",
+    "SERV",
+    "UID",
+    nullptr
+};
+
 bool CScriptObj::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CScriptObj::r_GetRef");
 	// A key name that just links to another object.
-	if ( !strnicmp(pszKey, "SERV.", 5) )
-	{
-		pszKey += 5;
-		pRef = &g_Serv;
-		return true;
-	}
-	else if ( !strnicmp(pszKey, "UID.", 4) )
-	{
-		pszKey += 4;
-		CUID uid = Exp_GetDWVal(pszKey);
-		SKIP_SEPARATORS(pszKey);
-		pRef = uid.ObjFind();
-		return true;
-	}
-	else if ( ! strnicmp( pszKey, "OBJ.", 4 ))
-	{
-		pszKey += 4;
-		pRef = ( (dword)g_World.m_uidObj ) ? g_World.m_uidObj.ObjFind() : nullptr;
-		return true;
-	}
-	else if ( !strnicmp(pszKey, "NEW.", 4) )
-	{
-		pszKey += 4;
-		pRef = ( (dword)g_World.m_uidNew ) ? g_World.m_uidNew.ObjFind() : nullptr;
-		return true;
-	}
-	else if ( !strnicmp(pszKey, "I.", 2) )
-	{
-		pszKey += 2;
-		pRef = this;
-		return true;
-	}
-	else if ( IsSetOF( OF_FileCommands ) && !strnicmp(pszKey, "FILE.", 5) )
-	{
-		pszKey += 5;
-		pRef = &(g_Serv._hFile);
-		return true;
-	}
-	else if ( !strnicmp(pszKey, "DB.", 3) )
-	{
-		pszKey += 3;
-		pRef = &(g_Serv._hDb);
-		return true;
-	}
-	else if ( !strnicmp(pszKey, "LDB.", 4) )
-	{
-		pszKey += 4;
-		pRef = &(g_Serv._hLdb);
-		return true;
-	}
-    else if ( !strnicmp(pszKey, "MDB.", 4) )
+
+    int index = FindTableHeadSorted(pszKey, _ptcSRefKeys, CountOf(_ptcSRefKeys)-1);
+    switch (index)
     {
-        pszKey += 4;
-        pRef = &(g_Serv._hMdb);
-        return true;
+        case SREF_SERV:
+            pszKey += 5;
+            pRef = &g_Serv;
+            return true;
+        case SREF_UID:
+            pszKey += 4;
+            pRef = CUID::ObjFind(Exp_GetDWVal(pszKey));
+            SKIP_SEPARATORS(pszKey);
+            return true;
+        case SREF_OBJ:
+            pszKey += 4;
+            pRef = ( (dword)g_World.m_uidObj ) ? g_World.m_uidObj.ObjFind() : nullptr;
+            return true;
+        case SREF_NEW:
+            pszKey += 4;
+            pRef = ( (dword)g_World.m_uidNew ) ? g_World.m_uidNew.ObjFind() : nullptr;
+            return true;
+        case SREF_I:
+            pszKey += 2;
+            pRef = this;
+            return true;
+        case SREF_FILE:
+            if ( !IsSetOF(OF_FileCommands) )
+                return false;
+            pszKey += 5;
+            pRef = &(g_Serv._hFile);
+            return true;
+        case SREF_DB:
+            pszKey += 3;
+            pRef = &(g_Serv._hDb);
+            return true;
+        case SREF_LDB:
+            pszKey += 4;
+            pRef = &(g_Serv._hLdb);
+            return true;
+        case SREF_MDB:
+            pszKey += 4;
+            pRef = &(g_Serv._hMdb);
+            return true;
+        default:
+            return false;
     }
-	return false;
 }
 
 enum SSC_TYPE
@@ -325,11 +342,12 @@ static void StringFunction( int iFunc, lpctstr pszKey, CSString &sVal )
 	}
 }
 
-bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent )
+bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallParent);
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CScriptObj::r_WriteVal");
 	EXC_TRY("WriteVal");
-    UNREFERENCED_PARAMETER(fNoCallParent);
 	CObjBase * pObj;
 	CScriptObj * pRef = nullptr;
 	bool fGetRef = r_GetRef( pszKey, pRef );
@@ -741,7 +759,7 @@ badcmd:
 				while ( *pszKey && !IsSpace( *pszKey ) && *pszKey != ',' )
 					++pszKey;
 				SKIP_ARGSEP( pszKey );
-				sVal	= pszKey;
+				sVal = pszKey;
 			}
 			return true;
 		case SSC_StrTrim:

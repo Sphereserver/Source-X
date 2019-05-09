@@ -164,14 +164,14 @@ lpctstr const CCharBase::sm_szLoadKeys[CBC_QTY+1] =
 	nullptr
 };
 
-bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
+bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
 	ADDTOCALLSTACK("CCharBase::r_WriteVal");
     EXC_TRY("WriteVal");
 
     // Checking Props CComponents first
     EXC_SET_BLOCK("EntityProps");
-    if (CEntityProps::r_WritePropVal(pszKey, sVal, nullptr, this))
+    if (!fNoCallChildren && CEntityProps::r_WritePropVal(pszKey, sVal, nullptr, this))
     {
         return true;
     }
@@ -305,7 +305,7 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			break;
 		default:
         {
-            return (fNoCallParent ? false : CBaseBaseDef::r_WriteVal(pszKey, sVal), pSrc, false);
+            return (fNoCallParent ? false : CBaseBaseDef::r_WriteVal(pszKey, sVal, pSrc, false));
         }
 	}
 	return true;

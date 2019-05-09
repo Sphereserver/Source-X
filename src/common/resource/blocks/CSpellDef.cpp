@@ -84,8 +84,9 @@ CSpellDef::CSpellDef( SPELL_TYPE id ) :
     m_Interrupt.m_aiValues[0] = 1000;
 }
 
-bool CSpellDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
+bool CSpellDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CSpellDef::r_WriteVal");
     EXC_TRY("WriteVal");
     int index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
@@ -130,7 +131,7 @@ bool CSpellDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             sVal = m_sName;
             break;
         case SPC_PROMPT_MSG:
-            sVal	= m_sTargetPrompt;
+            sVal = m_sTargetPrompt;
             break;
         case SPC_RESOURCES:
         {

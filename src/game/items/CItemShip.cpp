@@ -129,8 +129,9 @@ lpctstr const CItemShip::sm_szLoadKeys[IMCS_QTY + 1] = // static
     nullptr
 };
 
-bool CItemShip::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent)
+bool CItemShip::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CItemShip::r_WriteVal");
     EXC_TRY("WriteVal");
 

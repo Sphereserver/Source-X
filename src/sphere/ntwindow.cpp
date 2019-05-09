@@ -270,13 +270,14 @@ void CNTWindow::List_Clear()
 
 void CNTWindow::List_Add( COLORREF color, LPCTSTR pszText )
 {
-	const int iMaxTextLen = (64 * 1024);	// It was: (32*1024)
+	int iMaxTextLen = (64 * 1024);
 	int iTextLen = (int)strlen( pszText );
 	int iNewLen = m_iLogTextLen + iTextLen;
 
 	if ( iNewLen > iMaxTextLen )
 	{
-		const int iCut = iNewLen - iMaxTextLen;
+        iMaxTextLen -= 256; // Remove more than we need, so that we have to remove text less often
+		const int iCut = iNewLen - iMaxTextLen; 
 
         m_wndLog.SetRedraw(FALSE);
 		m_wndLog.SetSel( 0, iCut );

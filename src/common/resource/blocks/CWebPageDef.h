@@ -132,7 +132,7 @@ public:
     bool ServPagePost(CClient * pClient, lpctstr pszURLArgs, tchar * pPostData, size_t stContentLength);
 
     virtual bool r_LoadVal(CScript & s) override;
-    virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false) override;
+    virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;	// some command on this object as a target
 
     /**

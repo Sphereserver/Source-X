@@ -258,15 +258,15 @@ bool CScriptTriggerArgs::r_LoadVal( CScript & s )
     return false;
 }
 
-bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent )
+bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CScriptTriggerArgs::r_WriteVal");
     EXC_TRY("WriteVal");
     if ( IsSetEF( EF_Intrinsic_Locals ) )
     {
         EXC_SET_BLOCK("intrinsic");
         CVarDefCont * pVar = m_VarsLocal.GetKey( pszKey );
-
         if ( pVar )
         {
             sVal = pVar->GetValStr();
@@ -294,8 +294,8 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
         pszKey += 4;
         SKIP_SEPARATORS(pszKey);
 
-        size_t iQty = m_v.size();
-        if ( iQty <= 0 )
+        size_t uiQty = m_v.size();
+        if ( uiQty <= 0 )
         {
             // PARSE IT HERE
             tchar * pszArg = const_cast<tchar *>(m_s1_raw.GetPtr());
@@ -364,16 +364,16 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
                 }
                 m_v.emplace_back( pszArg );
             }
-            iQty = m_v.size();
+            uiQty = m_v.size();
         }
 
         if ( *pszKey == '\0' )
         {
-            sVal.FormatVal((int)iQty);
+            sVal.FormatUVal((uint)uiQty);
             return true;
         }
 
-        uint uiNum = (uint)(Exp_GetLLSingle(pszKey));
+        uint uiNum = Exp_GetUSingle(pszKey);
         SKIP_SEPARATORS(pszKey);
         if ( uiNum >= m_v.size() )
         {

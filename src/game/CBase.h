@@ -224,7 +224,7 @@ public:
 	virtual void UnLink() override;
 
     //virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false ) override;
+	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_LoadVal( CScript & s ) override;
 
     /**

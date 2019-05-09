@@ -82,8 +82,9 @@ CSkillDef::CSkillDef( SKILL_TYPE skill ) :
     m_AdvRate.Init();
 }
 
-bool CSkillDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
+bool CSkillDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CSkillDef::r_WriteVal");
     EXC_TRY("WriteVal");
     switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))

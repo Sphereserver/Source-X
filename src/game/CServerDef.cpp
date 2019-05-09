@@ -353,7 +353,7 @@ bool CServerDef::r_LoadVal( CScript & s )
 	return false;
 }
 
-bool CServerDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent )
+bool CServerDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
 	ADDTOCALLSTACK("CServerDef::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -441,6 +441,7 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 		sVal = SPHERE_VERSION;
 		break;
 	default:
+        if (!fNoCallChildren)
 	    {
             const size_t uiFunctionIndex = r_GetFunctionIndex(pszKey);
             if (r_CanCall(uiFunctionIndex))

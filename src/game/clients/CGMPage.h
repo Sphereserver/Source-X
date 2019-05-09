@@ -48,7 +48,7 @@ public:
 	void SetGMHandler( CClient * pClient );
 	int64 GetAge() const;
 
-	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false ) override;
+	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	void r_Write( CScript & s ) const;
 	virtual bool r_LoadVal( CScript & s ) override;
 

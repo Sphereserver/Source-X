@@ -69,7 +69,7 @@ public:
 public:
 	void AddText( word id, lpctstr pszText );
 	lpctstr GetName() const;
-	bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false );
+	bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false );
 
 public:
 	CDialogResponseArgs()
@@ -405,7 +405,7 @@ public:
 	}
 
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute script type command on me
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc = nullptr, bool fNoCallParent = false ) override;
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_LoadVal( CScript & s ) override;
 
 	// Low level message traffic.

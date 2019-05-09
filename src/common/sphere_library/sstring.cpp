@@ -294,7 +294,7 @@ int FindTableSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount
     while (iLow <= iHigh)
     {
         int i = (iHigh + iLow) / 2;
-        lpctstr pszName = *((lpctstr const *)((const byte *)ppszTable + (i*iElemSize)));
+        lpctstr pszName = *(reinterpret_cast<lpctstr const *>(reinterpret_cast<const byte *>(ppszTable) + (i*iElemSize)));
         int iCompare = strcmpi(pszFind, pszName);
         if (iCompare == 0)
             return i;

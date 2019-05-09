@@ -2452,8 +2452,9 @@ void CItemMulti::r_Write(CScript & s)
     }
 }
 
-bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent)
+bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CItemMulti::r_WriteVal");
     if (CCMultiMovable::r_WriteVal(pszKey, sVal, pSrc))
     {

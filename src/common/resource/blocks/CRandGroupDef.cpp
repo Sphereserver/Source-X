@@ -110,8 +110,9 @@ bool CRandGroupDef::r_LoadVal( CScript &s )
     return false;
 }
 
-bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent )
+bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CRandGroupDef::r_WriteVal");
     EXC_TRY("WriteVal");
 
@@ -210,7 +211,7 @@ bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * p
     return false;
 }
 
-size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) const
+size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool fTrigger ) const
 {
     ADDTOCALLSTACK("CRandGroupDef::GetRandMemberIndex");
     int rid;
@@ -252,7 +253,7 @@ size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) cons
                     continue;
                 if (IsTrigUsed(TRIGGER_RESOURCETEST))
                 {
-                    if (bTrigger && pOreDef->OnTrigger("@ResourceTest", pCharSrc, nullptr) == TRIGRET_RET_TRUE)
+                    if (fTrigger && pOreDef->OnTrigger("@ResourceTest", pCharSrc, nullptr) == TRIGRET_RET_TRUE)
                         continue;
                 }
             }

@@ -881,11 +881,12 @@ CCChampionDef::~CCChampionDef()
 {
 }
 
-bool CCChampionDef::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent)
+bool CCChampionDef::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
-    ADDTOCALLSTACK("CCChampionDef::r_WriteVal");
     UNREFERENCED_PARAMETER(pSrc);
     UNREFERENCED_PARAMETER(fNoCallParent);
+    UNREFERENCED_PARAMETER(fNoCallChildren);
+    ADDTOCALLSTACK("CCChampionDef::r_WriteVal");
     CHAMPIONDEF_TYPE iCmd = (CHAMPIONDEF_TYPE)FindTableSorted(pszKey, sm_szLoadKeys, CHAMPIONDEF_QTY);
 
     switch (iCmd)

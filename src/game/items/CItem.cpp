@@ -2417,23 +2417,26 @@ lpctstr const CItem::sm_szLoadKeys[IC_QTY+1] =
 };
 
 
-bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent )
+bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
 	ADDTOCALLSTACK("CItem::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-    // Checking Props CComponents first (first check CItem props, if not found then check CItemBase)
-    EXC_SET_BLOCK("EntityProp");
-    if (CEntityProps::r_WritePropVal(pszKey, sVal, this, Base_GetDef()))
+    if (!fNoCallChildren)
     {
-        return true;
-    }
+        // Checking Props CComponents first (first check CItem props, if not found then check CItemBase)
+        EXC_SET_BLOCK("EntityProp");
+        if (CEntityProps::r_WritePropVal(pszKey, sVal, this, Base_GetDef()))
+        {
+            return true;
+        }
 
-    // Now check regular CComponents
-    EXC_SET_BLOCK("Entity");
-    if (CEntity::r_WriteVal(pszKey, sVal, pSrc))
-    {
-        return true;
+        // Now check regular CComponents
+        EXC_SET_BLOCK("Entity");
+        if (CEntity::r_WriteVal(pszKey, sVal, pSrc))
+        {
+            return true;
+        }
     }
 
     EXC_SET_BLOCK("Keyword");
