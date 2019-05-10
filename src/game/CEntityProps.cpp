@@ -25,13 +25,11 @@ void CEntityProps::ClearPropComponents()
     ADDTOCALLSTACK("CEntityProps::ClearPropComponents");
     if (_List.empty())
         return;
-    for (auto it = _List.begin(); it != _List.end(); ++it)
+    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
     {
         CComponentProps *pComponent = it->second;
-        if (pComponent)
-        {
-            delete _List[pComponent->GetType()];
-        }
+        ASSERT(pComponent);
+        delete pComponent;
     }
     _List.clear();
 }
@@ -40,7 +38,7 @@ void CEntityProps::SubscribeComponentProps(CComponentProps * pComponent)
 {
     ADDTOCALLSTACK("CEntityProps::SubscribeComponentProps");
     COMPPROPS_TYPE compType = pComponent->GetType();
-    if (_List.count(compType))
+    if (_List.end() != _List.find(compType))
     {
         delete pComponent;
         PERSISTANT_ASSERT(0);  // This should never happen
@@ -68,7 +66,7 @@ void CEntityProps::UnsubscribeComponentProps(CComponentProps *pComponent)
         return;
     }
     COMPPROPS_TYPE compType = pComponent->GetType();
-    if (!_List.count(compType))
+    if (_List.end() == _List.find(compType))
     {
         g_Log.EventError("Trying to unsuscribe not suscribed prop component (%d)\n", (int)pComponent->GetType());    // Should never happen?
         delete pComponent;
@@ -110,24 +108,25 @@ void CEntityProps::CreateSubscribeComponentProps(COMPPROPS_TYPE iComponentPropsT
 bool CEntityProps::IsSubscribedComponentProps(CComponentProps *pComponent) const
 {
     ADDTOCALLSTACK("CEntityProps::IsSubscribedComponentProps");
-    return (!_List.empty() && _List.count(pComponent->GetType()));
+    return ( !_List.empty() && (_List.end() != _List.find(pComponent->GetType())) );
 }
 
 CComponentProps * CEntityProps::GetComponentProps(COMPPROPS_TYPE type)
 {
     ADDTOCALLSTACK("CEntityProps::GetComponentProps");
     ASSERT((type >= 0) && (type < COMP_PROPS_QTY));
-    if (!_List.empty() && _List.count(type))
+    if (_List.empty())
     {
-        return _List.at(type);
+        return nullptr;
     }
-    return nullptr;
+    auto it = _List.find(type);
+    return (it != _List.end()) ? it->second : nullptr;
 }
 
 const CComponentProps * CEntityProps::GetComponentProps(COMPPROPS_TYPE type) const
 {
     ADDTOCALLSTACK("CEntityProps::GetComponentProps(const)");
-    if (!_List.empty() && _List.count(type))
+    if ( !_List.empty() && (_List.end() != _List.find(type)) )
     {
         return _List.at(type);
     }
@@ -139,13 +138,11 @@ void CEntityProps::r_Write(CScript & s) // Storing data in the worldsave.
     ADDTOCALLSTACK("CEntityProps::r_Write");
     if (_List.empty() && !s.IsWriteMode())
         return;
-    for (auto it = _List.begin(); it != _List.end(); ++it)
+    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
     {
         CComponentProps *pComponent = it->second;
-        if (pComponent)
-        {
-            pComponent->r_Write(s);
-        }
+        ASSERT(pComponent);
+        pComponent->r_Write(s);
     }
 }
 
@@ -301,13 +298,11 @@ void CEntityProps::AddPropsTooltipData(CObjBase* pObj)
     ADDTOCALLSTACK("CEntityProps::AddPropsTooltipData");
     if (_List.empty())
         return;
-    for (auto it = _List.begin(); it != _List.end(); ++it)
+    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
     {
         CComponentProps *pComponent = it->second;
-        if (pComponent)
-        {
-            pComponent->AddPropsTooltipData(pObj);
-        }
+        ASSERT(pComponent);
+        pComponent->AddPropsTooltipData(pObj);
     }
     return;
 }
@@ -317,16 +312,14 @@ void CEntityProps::Copy(const CEntityProps *target)
     ADDTOCALLSTACK("CEntityProps::Copy");
     if (_List.empty())
         return;
-    for (auto it = target->_List.begin(); it != target->_List.end(); ++it)
+    for (auto it = target->_List.begin(), itEnd = target->_List.end(); it != itEnd; ++it)
     {
         CComponentProps *pTarget = it->second;    // the CComponent to copy from
-        if (pTarget)
+        ASSERT(pTarget);
+        CComponentProps *pCopy = GetComponentProps(pTarget->GetType());    // the CComponent to copy to.
+        if (pCopy)
         {
-            CComponentProps *pCopy = GetComponentProps(pTarget->GetType());    // the CComponent to copy to.
-            if (pCopy)
-            {
-                pCopy->Copy(pTarget);
-            }
+            pCopy->Copy(pTarget);
         }
     }
 }
