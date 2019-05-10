@@ -2342,7 +2342,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 					const CResourceQtyArray * pRegs = &(pSpellDef->m_Reags);
 					CItemContainer * pPack = GetPack();
 					size_t iMissing = pPack->ResourceConsumePart( pRegs, 1, 100, fTest );
-					if ( iMissing != pRegs->BadIndex() )
+					if ( iMissing != SCONT_BADINDEX )
 					{
 						if ( fFailMsg )
 						{

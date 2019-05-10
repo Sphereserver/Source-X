@@ -843,7 +843,7 @@ ushort CChar::Food_CanEat( CObjBase *pObj ) const
 	ASSERT(pCharDef);
 
 	size_t iRet = pCharDef->m_FoodType.FindResourceMatch(pObj);
-	if ( iRet != pCharDef->m_FoodType.BadIndex() )
+	if ( iRet != SCONT_BADINDEX )
 		return (ushort)(pCharDef->m_FoodType[iRet].GetResQty());	// how bad do i want it?
 
 	return 0;

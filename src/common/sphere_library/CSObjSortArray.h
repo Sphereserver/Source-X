@@ -96,17 +96,7 @@ public:
 };
 
 
-
 /* Template methods (inlined or not) are defined here */
-
-// CSObjArray:: Modifiers.
-
-template<class TYPE>
-inline bool CSObjArray<TYPE>::DeleteObj( TYPE pData )
-{
-	return this->RemovePtr(pData);
-}
-
 
 // CSObjSortArray:: Modifiers.
 
@@ -146,7 +136,7 @@ inline void CSObjSortArray<TYPE,KEY_TYPE>::DeleteKey( KEY_TYPE key )
 template<class TYPE,class KEY_TYPE>
 inline bool CSObjSortArray<TYPE,KEY_TYPE>::ContainsKey( KEY_TYPE key ) const
 {
-	return FindKey(key) != this->BadIndex();
+	return FindKey(key) != SCONT_BADINDEX;
 }
 
 template<class TYPE,class KEY_TYPE>
@@ -155,13 +145,12 @@ size_t CSObjSortArray<TYPE,KEY_TYPE>::FindKey( KEY_TYPE key ) const
 	// Find exact key
 	int iCompareRes;
 	size_t index = FindKeyNear(key, iCompareRes, false);
-	return (iCompareRes != 0 ? this->BadIndex() : index);
+	return (iCompareRes != 0 ? SCONT_BADINDEX : index);
 }
 
 template<class TYPE, class KEY_TYPE>
 size_t CSObjSortArray<TYPE, KEY_TYPE>::FindKeyNear( KEY_TYPE key, int & iCompareRes, bool fNoSpaces ) const
 {
-
 	// Do a binary search for the key.
 	// RETURN: index
 	//  iCompareRes =
@@ -178,18 +167,17 @@ size_t CSObjSortArray<TYPE, KEY_TYPE>::FindKeyNear( KEY_TYPE key, int & iCompare
 
 	size_t iHigh = sz - 1;
 	size_t iLow = 0;
-	size_t i = 0;
-
+    size_t i = 0;
 	while ( iLow <= iHigh )
 	{
 		i = (iHigh + iLow) >> 1;
 		iCompareRes = CompareKey( key, this->operator[](i), fNoSpaces );
 		if ( iCompareRes == 0 )
-			break;
+            return i;
 		if ( iCompareRes > 0 )
 			iLow = i + 1;
 		else if ( i == 0 )
-			break;
+            return 0;
 		else
 			iHigh = i - 1;
 	}

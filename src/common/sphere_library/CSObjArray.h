@@ -41,9 +41,19 @@ public:
     * @param pData data to remove.
     * @return true if data is removed, false otherwise.
     */
-    bool DeleteObj( TYPE pData );
+    inline bool DeleteObj( TYPE pData );
     ///@}
 };
 
+
+/* Template methods (inlined or not) are defined here */
+
+// CSObjArray:: Modifiers.
+
+template<class TYPE>
+bool CSObjArray<TYPE>::DeleteObj( TYPE pData )
+{
+    return this->RemovePtr(pData);
+}
 
 #endif //_INC_CSOBJARRAY_H

@@ -54,10 +54,6 @@ public:
     {
         return m_Members[i].GetResourceID();
     }
-    inline constexpr size_t BadMemberIndex() const
-    {
-        return m_Members.BadIndex();
-    }
 };
 
 

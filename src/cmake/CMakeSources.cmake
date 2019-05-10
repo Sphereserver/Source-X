@@ -225,6 +225,7 @@ common/sphere_library/CSObjList.h
 common/sphere_library/CSObjListRec.h
 common/sphere_library/CSObjSortArray.h
 common/sphere_library/CSPtrTypeArray.h
+common/sphere_library/CSSortedVector.h
 common/sphere_library/CSTypedArray.h
 common/sphere_library/CSQueue.cpp
 common/sphere_library/CSQueue.h

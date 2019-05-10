@@ -171,7 +171,7 @@ CAccount * CAccounts::Account_Find( lpctstr pszName )
 		return nullptr;
 
 	size_t i = m_Accounts.FindKey(szName);
-	if ( i != m_Accounts.BadIndex() )
+	if ( i != SCONT_BADINDEX )
 		return Account_Get(i);
 
 	return nullptr;
@@ -657,7 +657,7 @@ size_t CAccount::AttachChar( CChar * pChar )
 
 	// is it already linked ?
 	size_t i = m_Chars.AttachChar( pChar );
-	if ( i != m_Chars.BadIndex() )
+	if ( i != SCONT_BADINDEX )
 	{
 		size_t iQty = m_Chars.GetCharCount();
 		if ( iQty > MAX_CHARS_PER_ACCT )

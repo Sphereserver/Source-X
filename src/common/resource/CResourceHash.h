@@ -44,10 +44,6 @@ private:
         return (rid.GetResIndex() & 0x0F);
     }
 public:
-    inline size_t BadIndex() const
-    {
-        return m_Array[0].BadIndex();
-    }
     size_t FindKey(const CResourceID& rid) const;
     CResourceDef* GetAt(const CResourceID& rid, size_t index) const;
     size_t AddSortKey(const CResourceID& rid, CResourceDef* pNew);

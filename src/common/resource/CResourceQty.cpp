@@ -131,7 +131,7 @@ size_t CResourceQtyArray::FindResourceType( RES_TYPE type ) const
         if ( type == ridtest.GetResType() )
             return i;
     }
-    return BadIndex();
+    return SCONT_BADINDEX;
 }
 
 size_t CResourceQtyArray::FindResourceID( const CResourceID& rid ) const
@@ -145,7 +145,7 @@ size_t CResourceQtyArray::FindResourceID( const CResourceID& rid ) const
         if ( rid == ridtest )
             return i;
     }
-    return BadIndex();
+    return SCONT_BADINDEX;
 }
 
 size_t CResourceQtyArray::FindResourceMatch( const CObjBase * pObj ) const
@@ -159,7 +159,7 @@ size_t CResourceQtyArray::FindResourceMatch( const CObjBase * pObj ) const
         if ( pObj->IsResourceMatch( ridtest, 0 ))
             return i;
     }
-    return BadIndex();
+    return SCONT_BADINDEX;
 }
 
 bool CResourceQtyArray::IsResourceMatchAll( const CChar * pChar ) const
@@ -211,7 +211,7 @@ size_t CResourceQtyArray::Load(lpctstr pszCmds)
             {
                 // Replace any previous refs to this same entry ?
                 size_t i = FindResourceID( res.GetResourceID() );
-                if ( i != BadIndex() )
+                if ( i != SCONT_BADINDEX )
                 {
                     assign(i, res);
                 }

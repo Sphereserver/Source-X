@@ -439,11 +439,11 @@ size_t CContainer::ResourceConsumePart( const CResourceQtyArray *pResources, int
 	// index of the item we did not have.
 
 	if ( iDamagePercent <= 0 )
-		return pResources->BadIndex();
+		return SCONT_BADINDEX;
 
-	size_t iMissing = pResources->BadIndex();
+	size_t iMissing = SCONT_BADINDEX;
 	size_t iQtyRes = pResources->size();
-	for ( size_t i = 0; i < iQtyRes; i++ )
+	for ( size_t i = 0; i < iQtyRes; ++i )
 	{
 		int iResQty = (int)(pResources->at(i).GetResQty());
 		if ( iResQty <= 0 ) // not sure why this would be true

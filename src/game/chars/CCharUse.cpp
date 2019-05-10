@@ -731,7 +731,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	int iDamagePercent = IMulDiv(100, iDamageHits, iTotalHits);
 
 	size_t iMissing = ResourceConsumePart(&(pItemDef->m_BaseResources), 1, iDamagePercent / 2, true);
-	if ( iMissing != pItemDef->m_BaseResources.BadIndex() )
+	if ( iMissing != SCONT_BADINDEX )
 	{
 		// Need this to repair.
 		const CResourceDef *pCompDef = g_Cfg.ResourceGetDef(pItemDef->m_BaseResources.at(iMissing).GetResourceID());
@@ -747,7 +747,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	// higher the percentage damage the closer to the skills to make it.
 
 	size_t iRes = pItemDef->m_SkillMake.FindResourceType(RES_SKILL);
-	if ( iRes == pItemDef->m_SkillMake.BadIndex() )
+	if ( iRes == SCONT_BADINDEX )
 		return false;
 
 	CResourceQty RetMainSkill = pItemDef->m_SkillMake[iRes];

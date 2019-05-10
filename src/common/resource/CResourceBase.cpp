@@ -383,7 +383,7 @@ CResourceDef * CResourceBase::ResourceGetDef(const CResourceID& rid) const
 	if ( ! rid.IsValidResource() )
 		return nullptr;
 	size_t index = m_ResHash.FindKey( rid );
-	if ( index == m_ResHash.BadIndex() )
+	if ( index == SCONT_BADINDEX )
 		return nullptr;
 	return m_ResHash.GetAt( rid, index );
 }

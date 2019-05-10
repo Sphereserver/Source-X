@@ -90,11 +90,11 @@ public:
 
     inline bool ContainsResourceID( const CResourceID & rid ) const
     {
-        return FindResourceID(rid) != BadIndex();
+        return FindResourceID(rid) != SCONT_BADINDEX;
     }
     inline bool ContainsResourceName( RES_TYPE restype, lpctstr & pszKey ) const
     {
-        return FindResourceName(restype, pszKey) != BadIndex();
+        return FindResourceName(restype, pszKey) != SCONT_BADINDEX;
     }
 };
 

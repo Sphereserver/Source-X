@@ -131,7 +131,7 @@ bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * p
         case RGC_CONTAINER:
         {
             size_t i = GetRandMemberIndex();
-            if ( i != BadMemberIndex() )
+            if ( i != SCONT_BADINDEX )
                 sVal.FormatHex(GetMemberID(i) & 0xFFFFFF);
             break;
         }
@@ -217,7 +217,7 @@ size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool fTrigger ) cons
     int rid;
     size_t iCount = m_Members.size();
     if ( iCount <= 0 )
-        return m_Members.BadIndex();
+        return SCONT_BADINDEX;
 
     int iWeight = 0;
     size_t i;
@@ -230,7 +230,7 @@ size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool fTrigger ) cons
             iWeight -= (int)(m_Members[i].GetResQty());
         }
         if ( i >= iCount && iWeight > 0 )
-            return m_Members.BadIndex();
+            return SCONT_BADINDEX;
 
         ASSERT(i > 0);
         return( i - 1 );
@@ -269,7 +269,7 @@ size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool fTrigger ) cons
         iWeight -= (int)(m_Members[members[i]].GetResQty());
     }
     if ( i >= iCount && iWeight > 0 )
-        return m_Members.BadIndex();
+        return SCONT_BADINDEX;
     ASSERT(i > 0);
     return members[i - 1];
 }

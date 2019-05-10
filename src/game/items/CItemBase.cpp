@@ -776,7 +776,7 @@ height_t CItemBase::GetItemHeight( ITEMID_TYPE id, dword *pdwBlockFlags ) // sta
 
 	const CResourceID rid( RES_ITEMDEF, id );
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
-	if ( index != g_Cfg.m_ResHash.BadIndex() ) // already loaded ?
+	if ( index != SCONT_BADINDEX ) // already loaded ?
 	{
 		CResourceDef * pBaseStub = g_Cfg.m_ResHash.GetAt( rid, index );
 		ASSERT(pBaseStub);
@@ -1722,7 +1722,7 @@ void CItemBase::ReplaceItemBase( CItemBase * pOld, CResourceDef * pNew ) // stat
 	ASSERT(pOld->GetRefInstances() == 0);
 	CResourceID rid = pOld->GetResourceID();
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
-	ASSERT( index != g_Cfg.m_ResHash.BadIndex() );
+	ASSERT( index != SCONT_BADINDEX );
 	g_Cfg.m_ResHash.SetAt( rid, index, pNew );
 }
 
@@ -2126,7 +2126,7 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 
 	CResourceID rid = CResourceID( RES_ITEMDEF, id );
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
-	if ( index == g_Cfg.m_ResHash.BadIndex() )
+	if ( index == SCONT_BADINDEX )
 		return nullptr;
 
 	CResourceDef * pBaseStub = g_Cfg.m_ResHash.GetAt( rid, index );
@@ -2204,7 +2204,7 @@ CItemBaseDupe * CItemBaseDupe::GetDupeRef( ITEMID_TYPE id ) // static
 
 	CResourceID rid = CResourceID( RES_ITEMDEF, id );
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
-	if ( index == g_Cfg.m_ResHash.BadIndex() )
+	if ( index == SCONT_BADINDEX )
 		return nullptr;
 
 	CResourceDef * pBaseStub = g_Cfg.m_ResHash.GetAt( rid, index );

@@ -306,7 +306,7 @@ void CCSpawn::GenerateChar()
         const CRandGroupDef *pSpawnGroup = static_cast<const CRandGroupDef *>(pDef);
         ASSERT(pSpawnGroup);
         size_t i = pSpawnGroup->GetRandMemberIndex();
-        if (i != pSpawnGroup->BadMemberIndex())
+        if (i != SCONT_BADINDEX)
         {
             rid = pSpawnGroup->GetMemberID(i);
             iRidType = rid.GetResType();

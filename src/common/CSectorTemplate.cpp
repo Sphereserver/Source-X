@@ -465,7 +465,7 @@ CTeleport * CSectorBase::GetTeleport( const CPointMap & pt ) const
 	// Any teleports here at this point ?
 
 	size_t i = m_Teleports.FindKey(pt.GetPointSortIndex());
-	if ( i == m_Teleports.BadIndex() )
+	if ( i == SCONT_BADINDEX )
 		return nullptr;
 
 	CTeleport *pTeleport = static_cast<CTeleport *>(m_Teleports[i]);
@@ -484,7 +484,7 @@ bool CSectorBase::AddTeleport( CTeleport * pTeleport )
 	// ASSERT( Teleport is actually in this sector !
 
 	size_t i = m_Teleports.FindKey( pTeleport->GetPointSortIndex());
-	if ( i != m_Teleports.BadIndex() )
+	if ( i != SCONT_BADINDEX )
 	{
 		DEBUG_ERR(( "Conflicting teleport %s!\n", pTeleport->WriteUsed() ));
 		return false;

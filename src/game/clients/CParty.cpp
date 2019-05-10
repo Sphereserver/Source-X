@@ -47,7 +47,7 @@ size_t CPartyDef::DetachChar( CChar *pChar )
 	// RETURN:
 	//  index of the char in the group. BadIndex = not in group.
 	size_t i = m_Chars.DetachChar(pChar);
-	if ( i != m_Chars.BadIndex() )
+	if ( i != SCONT_BADINDEX )
 	{
         UpdateWaypointAll(pChar, Remove);
 		pChar->m_pParty = nullptr;
@@ -154,7 +154,7 @@ bool CPartyDef::SendMemberMsg( CChar *pCharDest, PacketSend *pPacket )
 	// Weirdness check.
 	if ( pCharDest->m_pParty != this )
 	{
-		if ( DetachChar(pCharDest) != m_Chars.BadIndex() )	// this is bad!
+		if ( DetachChar(pCharDest) != SCONT_BADINDEX )	// this is bad!
 			return false;
 		return true;
 	}

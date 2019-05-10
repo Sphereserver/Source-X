@@ -1402,7 +1402,7 @@ const CSkillDef* CServerConfig::FindSkillDef( lpctstr pszKey ) const
     // Find the skill name in the alpha sorted list.
     // RETURN: SKILL_NONE = error.
     size_t i = m_SkillNameDefs.FindKey( pszKey );
-    if ( i == m_SkillNameDefs.BadIndex() )
+    if ( i == SCONT_BADINDEX )
         return nullptr;
     return static_cast <const CSkillDef*>(m_SkillNameDefs[i]);
 }
@@ -2289,7 +2289,7 @@ const CSphereMulti * CServerConfig::GetMultiItemDefs( ITEMID_TYPE itemid )
 
 	MULTI_TYPE id = (MULTI_TYPE)(itemid - ITEMID_MULTI);
 	size_t index = m_MultiDefs.FindKey(id);
-	if ( index == m_MultiDefs.BadIndex() )
+	if ( index == SCONT_BADINDEX )
 		index = m_MultiDefs.AddSortKey(new CSphereMulti(id), id);
 	else
 		m_MultiDefs[index]->HitCacheTime();
@@ -2751,7 +2751,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 		CResourceDef *	pRes = nullptr;
 		size_t index = m_ResHash.FindKey( rid );
-		if ( index != m_ResHash.BadIndex() )
+		if ( index != SCONT_BADINDEX )
 			pRes = dynamic_cast <CResourceDef*> (m_ResHash.GetAt( rid, index ) );
 
 		if ( pRes == nullptr )
@@ -3374,7 +3374,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				bool fAddNew = false;
 				CServerRef pServ;
 				size_t i = m_Servers.FindKey( pScript->GetKey());
-				if ( i == m_Servers.BadIndex() )
+				if ( i == SCONT_BADINDEX )
 				{
 					pServ = new CServerDef( pScript->GetKey(), CSocketAddressIP( SOCKET_LOCAL_ADDRESS ));
 					fAddNew = true;
@@ -3771,7 +3771,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 			{
 				// Warn of duplicates.
 				size_t duplicateIndex = m_ResHash.FindKey( rid );
-				if ( duplicateIndex != m_ResHash.BadIndex() )	// i found it. So i have to find something else.
+				if ( duplicateIndex != SCONT_BADINDEX )	// i found it. So i have to find something else.
 					ASSERT(m_ResHash.GetAt(rid, duplicateIndex));
 			}
 #endif
@@ -3953,10 +3953,10 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
             if (fCheckPage)
             {
                 // Same defname but different page? 
-                if (m_ResHash.FindKey(rid) == m_ResHash.BadIndex())
+                if (m_ResHash.FindKey(rid) == SCONT_BADINDEX)
                     break;
             }
-            else if (m_ResHash.FindKey(CResourceID(restype, iRandIndex, RES_PAGE_ANY)) == m_ResHash.BadIndex())
+            else if (m_ResHash.FindKey(CResourceID(restype, iRandIndex, RES_PAGE_ANY)) == SCONT_BADINDEX)
                 break;
 
             ++iRandIndex;
@@ -3967,7 +3967,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 	{
 		// find a new FREE entry starting here
         rid = CResourceID(restype, iIndex ? iIndex : 1, wPage);
-        ASSERT(m_ResHash.FindKey(rid) == m_ResHash.BadIndex());
+        ASSERT(m_ResHash.FindKey(rid) == SCONT_BADINDEX);
 	}
 
 	if ( pszName )
@@ -4584,7 +4584,7 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 			g_Serv.PrintPercent(i, idMaxItem);
 
 		CResourceID rid = CResourceID(RES_ITEMDEF, i);
-		if (g_Cfg.m_ResHash.FindKey(rid) != g_Cfg.m_ResHash.BadIndex())
+		if (g_Cfg.m_ResHash.FindKey(rid) != SCONT_BADINDEX)
 			continue;
 
 		// check item in tiledata

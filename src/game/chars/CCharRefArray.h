@@ -40,10 +40,6 @@ public:
 	{
 		return m_uidCharArray.IsValidIndex(i);
 	}
-	inline size_t BadIndex() const
-	{
-		return m_uidCharArray.BadIndex();
-	}
 	void WritePartyChars( CScript & s );
 
 public:

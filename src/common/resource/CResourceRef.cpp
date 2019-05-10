@@ -149,7 +149,7 @@ size_t CResourceRefArray::FindResourceType( RES_TYPE restype ) const
         if ( ridtest.GetResType() == restype )
             return( i );
     }
-    return BadIndex();
+    return SCONT_BADINDEX;
 }
 
 size_t CResourceRefArray::FindResourceID( const CResourceID & rid ) const
@@ -163,7 +163,7 @@ size_t CResourceRefArray::FindResourceID( const CResourceID & rid ) const
         if ( ridtest == rid )
             return i;
     }
-    return BadIndex();
+    return SCONT_BADINDEX;
 }
 
 size_t CResourceRefArray::FindResourceName( RES_TYPE restype, lpctstr pszKey ) const
@@ -172,7 +172,7 @@ size_t CResourceRefArray::FindResourceName( RES_TYPE restype, lpctstr pszKey ) c
     // Is this resource already in the list ?
     CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, pszKey ));
     if ( pResourceLink == nullptr )
-        return BadIndex();
+        return SCONT_BADINDEX;
     return FindPtr(pResourceLink);
 }
 

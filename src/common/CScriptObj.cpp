@@ -126,14 +126,14 @@ size_t CScriptObj::r_GetFunctionIndex(lpctstr pszFunction) // static
     int iCompareRes	= -1;
     index = g_Cfg.m_Functions.FindKeyNear( pszFunction, iCompareRes, true );
     if ( iCompareRes != 0 )
-        index = g_Cfg.m_Functions.BadIndex();
+        index = SCONT_BADINDEX;
     return index;
 }
 
 bool CScriptObj::r_CanCall(size_t uiFunctionIndex) // static
 {
     ADDTOCALLSTACK_INTENSIVE("CScriptObj::r_CanCall");
-    if (uiFunctionIndex != g_Cfg.m_Functions.BadIndex())
+    if (uiFunctionIndex != SCONT_BADINDEX)
     {
         ASSERT(uiFunctionIndex < g_Cfg.m_Functions.size());
         return true;
