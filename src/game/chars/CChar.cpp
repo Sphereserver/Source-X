@@ -2068,10 +2068,6 @@ bool CChar::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bo
     }
 
     EXC_SET_BLOCK("Keyword");
-	CCharBase * pCharDef = Char_GetDef();
-	ASSERT(pCharDef);
-	CChar * pCharSrc = pSrc->GetChar();
-
 	CHC_TYPE iKeyNum = (CHC_TYPE) FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( iKeyNum < 0 )
 	{
@@ -2103,6 +2099,9 @@ do_default:
 		return (fNoCallParent ? false : CObjBase::r_WriteVal( pszKey, sVal, pSrc, false ));
 	}
 
+    CCharBase * pCharDef = Char_GetDef();
+    ASSERT(pCharDef);
+    CChar * pCharSrc = pSrc->GetChar();
 	switch ( iKeyNum )
 	{
 		//return as decimal number or 0 if not set

@@ -26,10 +26,7 @@ CListDefContNum::CListDefContNum( lpctstr pszKey ) : CListDefContElem( pszKey ),
 
 lpctstr CListDefContNum::GetValStr() const
 {
-	TemporaryString tsTemp;
-	tchar* pszTemp = static_cast<tchar *>(tsTemp);
-	sprintf(pszTemp, "0%" PRIx64 , m_iVal);
-	return pszTemp;
+    return Str_FromLL(Str_GetTemp(), m_iVal, 16);
 }
 
 bool CListDefContNum::r_LoadVal( CScript & s )

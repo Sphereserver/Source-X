@@ -31,16 +31,17 @@ int CObjNameSortArray::CompareKey( lpctstr pszID, CScriptObj* pObj, bool fNoSpac
     ASSERT( pszID );
     ASSERT( pObj );
 
-    lpctstr objStr = pObj->GetName();
+    const lpctstr objStr = pObj->GetName();
     if ( fNoSpaces )
     {
-        const char * p = strchr( pszID, ' ' );
+        const char * const p = strchr( pszID, ' ' );
         if (p != nullptr)
         {
-            size_t iLen = p - pszID;
-            // return( strnicmp( pszID, pObj->GetName(), iLen ) );
+            const size_t iLen = p - pszID;
+            return strnicmp( pszID, objStr, iLen );
 
-            size_t objStrLen = strlen( objStr );
+			/*
+			size_t objStrLen = strlen( objStr );
             int retval = strnicmp( pszID, objStr, iLen );
             if ( retval == 0 )
             {
@@ -55,7 +56,8 @@ int CObjNameSortArray::CompareKey( lpctstr pszID, CScriptObj* pObj, bool fNoSpac
             {
                 return retval;
             }
-        }
+			*/
+		}
     }
     return strcmpi( pszID, objStr);
 }

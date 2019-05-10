@@ -41,7 +41,7 @@ public:
     * @param pData data to remove.
     * @return true if data is removed, false otherwise.
     */
-    inline bool DeleteObj( TYPE pData );
+    bool DeleteObj( TYPE pData );
     ///@}
 };
 
@@ -51,7 +51,7 @@ public:
 // CSObjArray:: Modifiers.
 
 template<class TYPE>
-bool CSObjArray<TYPE>::DeleteObj( TYPE pData )
+inline bool CSObjArray<TYPE>::DeleteObj( TYPE pData )
 {
     return this->RemovePtr(pData);
 }

@@ -49,6 +49,100 @@ ullong Str_ToULL(lpctstr ptcStr, int base) noexcept
     return ret;
 }
 
+tchar* Str_FromI(tchar *buf, int val, int base) noexcept
+{
+    if (val == 0)
+    {
+        buf[0] = '0';
+        buf[1] = '\0';
+        return buf;
+    }
+    static constexpr char chars[] = "0123456789abcdef";
+
+    const bool sign = (val < 0);
+    if (sign) {
+        val = -val;
+    }
+
+    int i = 30;
+    buf[--i] = '\0';
+    div_t qr;
+    qr.quot = val;
+    do
+    {
+        qr = div(qr.quot, base);
+        buf[--i] = chars[SphereAbs(qr.rem)];
+    } while (qr.quot);
+
+    if (base == 16) {
+        buf[--i] = '0';
+    }
+    else if (sign) {
+        buf[--i] = '-';
+    }
+    return &buf[i];
+}
+
+tchar* Str_FromUI (tchar *buf, uint val, int base) noexcept
+{
+    if (val == 0)
+    {
+        buf[0] = '0';
+        buf[1] = '\0';
+        return buf;
+    }
+    static constexpr char chars[] = "0123456789abcdef";
+
+    int i = 30;
+    buf[--i] = '\0';
+    lldiv_t qr;
+    qr.quot = val;
+    do
+    {
+        qr = lldiv(qr.quot, base);
+        buf[--i] = chars[SphereAbs(qr.rem)];
+    } while (qr.quot);
+
+    if (base == 16) {
+        buf[--i] = '0';
+    }
+    return &buf[i];
+}
+
+tchar* Str_FromLL (tchar *buf, llong val, int base) noexcept
+{
+    if (val == 0)
+    {
+        buf[0] = '0';
+        buf[1] = '\0';
+        return buf;
+    }
+    static constexpr char chars[] = "0123456789abcdef";
+
+    const bool sign = (val < 0);
+    if (sign) {
+        val = -val;
+    }
+
+    int i = 62;
+    buf[--i] = '\0';
+    lldiv_t qr;
+    qr.quot = val;
+    do
+    {
+        qr = lldiv(qr.quot, base);
+        buf[--i] = chars[SphereAbs(qr.rem)];
+    } while (qr.quot);
+
+    if (base == 16) {
+        buf[--i] = '0';
+    }
+    else if (sign) {
+        buf[--i] = '-';
+    }
+    return &buf[i];
+}
+
 
 // String utilities: Modifiers
 
@@ -226,7 +320,7 @@ tchar * Str_GetUnQuoted(tchar * pStr)
     {
         Str_TrimEndWhitespace(pStr, int(strlen(pStr)));
         return pStr;
-    }   
+    }
 
     ++pStr;
     // search for last quote symbol starting from the end
@@ -293,9 +387,9 @@ int FindTableSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount
 
     while (iLow <= iHigh)
     {
-        int i = (iHigh + iLow) / 2;
-        lpctstr pszName = *(reinterpret_cast<lpctstr const *>(reinterpret_cast<const byte *>(ppszTable) + (i*iElemSize)));
-        int iCompare = strcmpi(pszFind, pszName);
+        const int i = (iHigh + iLow) / 2;
+        const lpctstr pszName = *(reinterpret_cast<lpctstr const *>(reinterpret_cast<const byte *>(ppszTable) + (i*iElemSize)));
+        const int iCompare = strcmpi(pszFind, pszName);
         if (iCompare == 0)
             return i;
         if (iCompare > 0)
@@ -306,15 +400,15 @@ int FindTableSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount
     return -1;
 }
 
-static int Str_CmpHeadI(const lpctstr pszFind, lpctstr pszTable)
+inline static int Str_CmpHeadI(const lpctstr pszFind, lpctstr pszTable)
 {
     tchar ch0 = '_';
     for (int i = 0; ; ++i)
     {
         //	we should always use same case as in other places. since strcmpi lowers,
         //	we should lower here as well. fucking shit!
-        tchar ch1 = static_cast<tchar>(tolower(pszFind[i]));
-        tchar ch2 = static_cast<tchar>(tolower(pszTable[i]));
+        const tchar ch1 = static_cast<tchar>(tolower(pszFind[i]));
+        const tchar ch2 = static_cast<tchar>(tolower(pszTable[i]));
         if (ch2 == 0)
         {
             if ( (!iswalnum(ch1)) && (ch1 != ch0) )
@@ -330,10 +424,10 @@ int FindTableHead(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, 
 {
     for (int i = 0; i < iCount; ++i)
     {
-        int iCompare = Str_CmpHeadI(pszFind, *ppszTable);
+        const int iCompare = Str_CmpHeadI(pszFind, *ppszTable);
         if (!iCompare)
             return i;
-        ppszTable = (lpctstr const *)((const byte *)ppszTable + iElemSize);
+        ppszTable = reinterpret_cast<lpctstr const *>(reinterpret_cast<const byte *>(ppszTable) + iElemSize);
     }
     return -1;
 }
@@ -350,9 +444,9 @@ int FindTableHeadSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iC
 
     while (iLow <= iHigh)
     {
-        int i = (iHigh + iLow) / 2;
-        lpctstr pszName = *((lpctstr const *)((const byte *)ppszTable + (i*iElemSize)));
-        int iCompare = Str_CmpHeadI(pszFind, pszName);
+        const int i = (iHigh + iLow) >> 1;
+        const lpctstr pszName = *(reinterpret_cast<lpctstr const *>(reinterpret_cast<const byte *>(ppszTable) + (i*iElemSize)));
+        const int iCompare = Str_CmpHeadI(pszFind, pszName);
         if (iCompare == 0)
             return i;
         if (iCompare > 0)

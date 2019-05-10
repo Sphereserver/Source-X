@@ -77,7 +77,6 @@ ADD(CVarDefCont,			"CVarDefCont");
 ADD(CVarDefContNum,			"CVarDefContNum");
 ADD(CVarDefContStr,			"CVarDefContStr");
 ADD(CVarDefMap,				"CVarDefMap");
-ADD(CVarDefMap::CVarDefContTest, "CVarDefContTest");
 #ifndef _MTNETWORK
 	ADD(NetworkIn,				"NetworkIn");
 	ADD(NetworkOut,				"NetworkOut");

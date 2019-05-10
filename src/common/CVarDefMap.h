@@ -6,8 +6,8 @@
 #ifndef _INC_CVARDEFMAP_H
 #define _INC_CVARDEFMAP_H
 
-#include <set>
 #include "sphere_library/CSString.h"
+#include "sphere_library/CSSortedVector.h"
 #include "common.h"
 
 
@@ -66,7 +66,7 @@ public:
     inline virtual int64 GetValNum() const override {
         return m_iVal;
     }
-	virtual lpctstr GetValStr() const override;
+    virtual lpctstr GetValStr() const override;
     virtual CVarDefCont * CopySelf() const override;
 
 	bool r_LoadVal( CScript & s );
@@ -121,50 +121,20 @@ private:
         }
 	};
 
-	using DefSet        = std::set<CVarDefCont *, ltstr>;
-	using DefPairResult = std::pair<DefSet::iterator, bool>;
-
-	class CVarDefContTest : public CVarDefCont // This is to alloc CVarDefCont without allocing any other things
-	{
-        private:
-            lpctstr m_ptcKey;
-
-		public:
-			static const char *m_sClassName;
-
-            inline CVarDefContTest( lpctstr ptcKey ) : m_ptcKey( ptcKey ) {}
-			virtual ~CVarDefContTest() = default;
-
-		private:
-			CVarDefContTest(const CVarDefContTest& copy);
-			CVarDefContTest& operator=(const CVarDefContTest& other);
-
-		public:
-            inline virtual lpctstr GetKey() const override {
-                return m_ptcKey;
-            }
-            inline virtual void SetKey(lpctstr ptcKey) override {
-                m_ptcKey = ptcKey;
-            }
-
-			virtual lpctstr GetValStr() const override;
-			virtual int64 GetValNum() const override;
-			virtual CVarDefCont * CopySelf() const override;
-	};
+	using DefCont = CSSortedVector<CVarDefCont *, ltstr>;
 
 private:
-	DefSet m_Container;
+	DefCont m_Container;
 
 public:
 	static const char *m_sClassName;
-    using iterator          = DefSet::iterator;
-    using const_iterator    = DefSet::const_iterator;
+    using iterator          = DefCont::iterator;
+    using const_iterator    = DefCont::const_iterator;
 
 private:
 	CVarDefCont * GetAtKey( lpctstr ptcKey ) const;
 	void DeleteAt( size_t at );
 	void DeleteAtKey( lpctstr ptcKey );
-	void DeleteAtIterator( iterator it );
 
     CVarDefContNum* SetNumOverride( lpctstr ptcKey, int64 iVal );
     CVarDefContStr* SetStrOverride( lpctstr ptcKey, lpctstr pszVal );

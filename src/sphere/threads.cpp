@@ -537,7 +537,7 @@ char *AbstractSphereThread::allocateBuffer()
 	SimpleThreadLock stlBuffer(g_tmpStringMutex);
 
 	char * buffer = nullptr;
-	g_tmpStringIndex++;
+	++g_tmpStringIndex;
 
 	if( g_tmpStringIndex >= THREAD_TSTRING_STORAGE )
 	{

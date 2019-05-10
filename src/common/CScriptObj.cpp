@@ -133,12 +133,10 @@ size_t CScriptObj::r_GetFunctionIndex(lpctstr pszFunction) // static
 bool CScriptObj::r_CanCall(size_t uiFunctionIndex) // static
 {
     ADDTOCALLSTACK_INTENSIVE("CScriptObj::r_CanCall");
-    if (uiFunctionIndex != SCONT_BADINDEX)
-    {
-        ASSERT(uiFunctionIndex < g_Cfg.m_Functions.size());
-        return true;
-    }
-    return false;
+    if (uiFunctionIndex == SCONT_BADINDEX)
+        return false;
+    ASSERT(uiFunctionIndex < g_Cfg.m_Functions.size());
+    return true;
 }
 
 bool CScriptObj::r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * psVal, TRIGRET_TYPE * piRet )
@@ -348,7 +346,6 @@ bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
     UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CScriptObj::r_WriteVal");
 	EXC_TRY("WriteVal");
-	CObjBase * pObj;
 	CScriptObj * pRef = nullptr;
 	bool fGetRef = r_GetRef( pszKey, pRef );
 
@@ -394,7 +391,7 @@ bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 			sVal.FormatHex( 0x08000 );
 		else if ( dynamic_cast<CClient*>(pTmpRef) )
 			sVal.FormatHex( 0x10000 );
-		else if ( (pObj = dynamic_cast<CObjBase*>(pTmpRef)) != nullptr )
+		else if ( CObjBase *pObj = dynamic_cast<CObjBase*>(pTmpRef) )
 		{
 			if ( dynamic_cast<CChar*>(pObj) )
 				sVal.FormatHex( 0x40000 );
@@ -421,7 +418,7 @@ bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 		}
 		if ( pszKey[0] == '\0' )	// we where just testing the ref.
 		{
-			pObj = dynamic_cast<CObjBase*>(pRef);
+            CObjBase *pObj = dynamic_cast<CObjBase*>(pRef);
 			if ( pObj )
 				sVal.FormatHex( (dword) pObj->GetUID() );
 			else
@@ -526,7 +523,7 @@ badcmd:
 			}
 			if ( !*pszKey )
 			{
-				pObj = dynamic_cast <CObjBase*> (pRef);	// if it can be converted .
+                CObjBase *pObj = dynamic_cast <CObjBase*> (pRef);	// if it can be converted .
 				sVal.FormatHex( pObj ? (dword) pObj->GetUID() : 0 );
 				return true;
 			}

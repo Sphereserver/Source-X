@@ -369,11 +369,11 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	else if ( iResType == RES_SPELL && *pszKey == '-' )
 	{
 		++pszKey;
-		size_t iOrder = Exp_GetVal( pszKey );
-		if ( !m_SpellDefs_Sorted.IsValidIndex( iOrder ) )
+		size_t uiOrder = Exp_GetUVal( pszKey );
+		if ( !m_SpellDefs_Sorted.IsValidIndex( uiOrder ) )
 			pRef = nullptr;
 		else
-			pRef = m_SpellDefs_Sorted[iOrder];
+			pRef = m_SpellDefs_Sorted[uiOrder];
 	}
 	else
 	{

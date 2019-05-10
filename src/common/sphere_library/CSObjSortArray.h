@@ -158,30 +158,71 @@ size_t CSObjSortArray<TYPE, KEY_TYPE>::FindKeyNear( KEY_TYPE key, int & iCompare
 	//		-1 = key should be less than index.
 	//		+1 = key should be greater than index
 	//
-    const size_t sz = this->size();
-	if (sz <= 0 )
+
+    size_t iHigh = this->size();
+    if (iHigh == 0)
+    {
+        iCompareRes = -1;
+        return 0;
+    }
+
+    --iHigh;
+    int iLocalCompareRes = -1;
+    //const TYPE *pData = this->data();
+    size_t iLow = 0;
+    size_t i = 0;
+    while ( iLow <= iHigh )
+    {
+        i = (iHigh + iLow) >> 1;
+        iLocalCompareRes = CompareKey( key, this->operator[](i), fNoSpaces );
+        //iLocalCompareRes = CompareKey( key, pData[i], fNoSpaces );
+        if ( iLocalCompareRes == 0 ) {
+            iCompareRes = iLocalCompareRes;
+            return i;
+        }
+        if ( iLocalCompareRes > 0 ) {
+            iLow = i + 1;
+        }
+        else if ( i == 0 ) {
+            iCompareRes = iLocalCompareRes;
+            return 0;
+        }
+        else {
+            iHigh = i - 1;
+        }
+    }
+    iCompareRes = iLocalCompareRes;
+    return i;
+
+    // This doesn't work... Requires further investigation. I wonder if it would even be more efficient then the algorithm above
+    /*
+    size_t iHigh = this->size();
+	if (iHigh <= 0 )
 	{
 		iCompareRes = -1;
 		return 0;
 	}
 
-	size_t iHigh = sz - 1;
+    int iLocalCompareRes;
 	size_t iLow = 0;
-    size_t i = 0;
-	while ( iLow <= iHigh )
+	while ( iLow < iHigh )
 	{
-		i = (iHigh + iLow) >> 1;
-		iCompareRes = CompareKey( key, this->operator[](i), fNoSpaces );
-		if ( iCompareRes == 0 )
+		const size_t i = iLow + ((iHigh - iLow) >> 1);
+		iLocalCompareRes = CompareKey( key, this->operator[](i), fNoSpaces );
+        //iLocalCompareRes = CompareKey( key, pData[i], fNoSpaces );
+		if ( iLocalCompareRes == 0 )
+        {
+            iCompareRes = iLocalCompareRes;
             return i;
-		if ( iCompareRes > 0 )
-			iLow = i + 1;
-		else if ( i == 0 )
-            return 0;
+        }
+		if ( iLocalCompareRes > 0 )
+            iHigh = i;
 		else
-			iHigh = i - 1;
+            iLow = i + 1;
 	}
-	return i;
+    iCompareRes = iLocalCompareRes;
+	return iHigh;
+    */
 }
 
 

@@ -129,7 +129,7 @@ bool CResourceDef::MakeResourceName()
         // skip underscores
         pszKey = pszKey + uiLen;
         while ( *pszKey	== '_' )
-            pszKey++;
+            ++pszKey;
 
         // Is this is subsequent key with a number? Get the highest (plus one)
         if ( IsStrNumericDec( pszKey ) )

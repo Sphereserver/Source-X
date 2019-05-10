@@ -39,6 +39,11 @@ uint   Str_ToUI (lpctstr ptcStr, int base = 10) noexcept;
 llong  Str_ToLL (lpctstr ptcStr, int base = 10) noexcept;
 ullong Str_ToULL(lpctstr ptcStr, int base = 10) noexcept;
 
+tchar* Str_FromI  (tchar *buf, int val,    int base = 10) noexcept;
+tchar* Str_FromUI (tchar *buf, uint val,   int base = 10) noexcept;
+tchar* Str_FromLL (tchar *buf, llong val,  int base = 10) noexcept;
+
+
 size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord );
 
 /** @name String utilities: Modifiers

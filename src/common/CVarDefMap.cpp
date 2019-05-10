@@ -1,5 +1,4 @@
 
-#include "../common/sphere_library/sstringobjs.h"
 #include "../common/CLog.h"
 #include "../game/CServer.h"
 #include "CException.h"
@@ -8,22 +7,11 @@
 #include "CTextConsole.h"
 #include "CVarDefMap.h"
 
-// Would be a performant and elegant solution, if only MS STL implementation wasn't SO bad with iterators...
-/*
-#include <algorithm>
-static inline bool VarDefKeyComparator(const CVarDefCont *pCont, const lpctstr ptcKey)
+
+inline static int VarDefComparator(const CVarDefCont* pVar, lpctstr ptcKey)
 {
-    return ( strcmpi(pCont->GetKey(), ptcKey) < 0 );
+    return strcmpi(pVar->GetKey(), ptcKey);
 }
-static inline CVarDefMap::iterator VarDef_BinarySearchKey(CVarDefMap::iterator itBegin, CVarDefMap::const_iterator itEnd, lpctstr ptcKey)
-{
-    CVarDefMap::iterator it = std::lower_bound(itBegin, itEnd, ptcKey, VarDefKeyComparator);
-    if ((it != itEnd) && !strcmpi((*it)->GetKey(), ptcKey))
-        return it; // found
-    else
-        return itEnd; // not found
-}
-*/
 
 /***************************************************************************
 *
@@ -41,12 +29,8 @@ CVarDefContNum::CVarDefContNum( lpctstr pszKey ) : m_sKey( pszKey ), m_iVal( 0 )
 {
 }
 
-lpctstr CVarDefContNum::GetValStr() const
-{
-	TemporaryString tsTemp;
-	tchar* pszTemp = static_cast<tchar *>(tsTemp);
-	sprintf(pszTemp, "0%" PRIx64 , m_iVal);
-	return pszTemp;
+lpctstr CVarDefContNum::GetValStr() const {
+    return Str_FromLL(Str_GetTemp(), m_iVal, 16);
 }
 
 bool CVarDefContNum::r_LoadVal( CScript & s )
@@ -118,29 +102,6 @@ CVarDefCont * CVarDefContStr::CopySelf() const
 	return new CVarDefContStr( GetKey(), m_sVal ); 
 }
 
-/***************************************************************************
-*
-*
-*	class CVarDefMap::CVarDefContTest	Variable implementation (search-only internal useage)
-*
-*
-***************************************************************************/
-
-lpctstr CVarDefMap::CVarDefContTest::GetValStr() const 
-{ 
-	return nullptr; 
-}
-	
-int64 CVarDefMap::CVarDefContTest::GetValNum() const 
-{ 
-	return -1; 
-}
-
-CVarDefCont * CVarDefMap::CVarDefContTest::CopySelf() const 
-{ 
-	return new CVarDefContTest( GetKey() ); 
-}
-
 
 /***************************************************************************
 *
@@ -201,24 +162,17 @@ CVarDefCont * CVarDefMap::GetAt( size_t at ) const
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetAt");
 	if ( at > m_Container.size() )
 		return nullptr;
-
-	const_iterator it = std::next(m_Container.begin(), at);
-	if ( it != m_Container.end() )
-		return (*it);
-	else
-		return nullptr;
+    return m_Container[at];
 }
 
-CVarDefCont * CVarDefMap::GetAtKey( lpctstr at ) const
+CVarDefCont * CVarDefMap::GetAtKey( lpctstr ptcKey ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetAtKey");
-	CVarDefContTest pVarBase(at);
-	const_iterator it = m_Container.find(&pVarBase);
+    size_t idx = m_Container.find_predicate(ptcKey, VarDefComparator);
 
-	if ( it != m_Container.end() )
-		return (*it);
-	else
-		return nullptr;
+	if ( idx != SCONT_BADINDEX )
+		return m_Container[idx];
+	return nullptr;
 }
 
 void CVarDefMap::DeleteAt( size_t at )
@@ -227,43 +181,31 @@ void CVarDefMap::DeleteAt( size_t at )
 	if ( at > m_Container.size() )
 		return;
 
-	DeleteAtIterator(std::next(m_Container.begin(), at));
+    CVarDefCont *pVarBase = m_Container[at];
+    m_Container.erase(m_Container.begin() + at);
+
+    if ( pVarBase )
+    {
+        CVarDefContNum *pVarNum = dynamic_cast<CVarDefContNum *>(pVarBase);
+        if ( pVarNum )
+        {
+            delete pVarNum;
+        }
+        else
+        {
+            CVarDefContStr *pVarStr = dynamic_cast<CVarDefContStr *>(pVarBase);
+            if ( pVarStr )
+                delete pVarStr;
+        }
+    }
 }
 
-void CVarDefMap::DeleteAtKey( lpctstr at )
+void CVarDefMap::DeleteAtKey( lpctstr ptcKey )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::DeleteAtKey");
-	CVarDefContTest pVarBased(at);
-	iterator it = m_Container.find(&pVarBased);
-
-	DeleteAtIterator(it);
-}
-
-void CVarDefMap::DeleteAtIterator( iterator it )
-{
-	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::DeleteAtIterator");
-	if ( it != m_Container.end() )
-	{
-		CVarDefCont *pVarBase = (*it);
-		m_Container.erase(it);
-
-		if ( pVarBase )
-		{
-			CVarDefContNum *pVarNum = dynamic_cast<CVarDefContNum *>(pVarBase);
-			if ( pVarNum )
-			{
-				delete pVarNum;
-			}
-			else
-			{
-				CVarDefContStr *pVarStr = dynamic_cast<CVarDefContStr *>(pVarBase);
-				if ( pVarStr )
-					delete pVarStr;
-			}
-		}
-		else
-			delete *it;
-	}
+    size_t idx = m_Container.find_predicate(ptcKey, VarDefComparator);
+    if (idx != SCONT_BADINDEX)
+        DeleteAt(idx);
 }
 
 void CVarDefMap::DeleteKey( lpctstr key )
@@ -277,7 +219,6 @@ void CVarDefMap::Empty()
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::Empty");
 	iterator it = m_Container.begin();
-
 	while ( it != m_Container.end() )
 	{
 		delete (*it);	// This calls the appropriate destructors, from derived to base class, because the destructors are virtual.
@@ -373,8 +314,8 @@ CVarDefContNum* CVarDefMap::SetNumNew( lpctstr pszName, int64 iVal )
 	if ( !pVarNum )
 		return nullptr;
 
-	DefPairResult res = m_Container.insert(static_cast<CVarDefCont*>(pVarNum));
-	if ( res.second )
+	iterator res = m_Container.emplace(static_cast<CVarDefCont*>(pVarNum));
+	if ( res != m_Container.end() )
 		return pVarNum;
 	else
     {
@@ -409,9 +350,9 @@ CVarDefContNum* CVarDefMap::ModNum(lpctstr pszName, int64 iMod, bool fDeleteZero
             const int64 iNewVal = pVarDefNum->GetValNum() + iMod;
             if ((iNewVal == 0) && fDeleteZero)
             {
-                iterator it = m_Container.find(pVarDef);
-                ASSERT (it != m_Container.end());
-                DeleteAtIterator(it);
+                size_t idx = m_Container.find(pVarDef);
+                ASSERT (idx != SCONT_BADINDEX);
+                DeleteAt(idx);
                 return nullptr;
             }
             pVarDefNum->SetValNum(iNewVal);
@@ -435,12 +376,11 @@ CVarDefContNum* CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fDeleteZer
 		return nullptr;
 	}
 
-	CVarDefContTest pVarSearch(pszName);
-	iterator iResult = m_Container.find(&pVarSearch);
+    size_t idx = m_Container.find_predicate(pszName, VarDefComparator);
 
 	CVarDefCont * pVarBase = nullptr;
-	if ( iResult != m_Container.end() )
-		pVarBase = (*iResult);
+	if ( idx != SCONT_BADINDEX )
+		pVarBase = m_Container[idx];
 
 	if ( !pVarBase )
 		return SetNumNew( pszName, iVal );
@@ -469,8 +409,8 @@ CVarDefContStr* CVarDefMap::SetStrNew( lpctstr pszName, lpctstr pszVal )
 	if ( !pVarStr )
 		return nullptr;
 
-	DefPairResult res = m_Container.insert(pVarStr);
-	if ( res.second )
+    iterator res = m_Container.emplace(static_cast<CVarDefCont*>(pVarStr));
+    if ( res != m_Container.end() )
 		return pVarStr;
 	else
     {
@@ -513,12 +453,11 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, 
 		return SetNum( pszName, Exp_Get64Val( pszVal ), fDeleteZero);
 	}
 
-	CVarDefContTest pVarSearch(pszName);
-	iterator iResult = m_Container.find(&pVarSearch);
+    size_t idx = m_Container.find_predicate(pszName, VarDefComparator);
 
 	CVarDefCont * pVarBase = nullptr;
-	if ( iResult != m_Container.end() )
-		pVarBase = (*iResult);
+	if ( idx != SCONT_BADINDEX )
+		pVarBase = m_Container[idx];
 
 	if ( !pVarBase )
 		return SetStrNew( pszName, pszVal );
@@ -546,11 +485,10 @@ CVarDefCont * CVarDefMap::GetKey( lpctstr pszKey ) const
 
 	if ( pszKey )
 	{
-		CVarDefContTest pVarBase(pszKey);
-		const_iterator it = m_Container.find(&pVarBase);
+        size_t idx = m_Container.find_predicate(pszKey, VarDefComparator);
 		
-		if ( it != m_Container.end() )
-			pReturn = (*it);
+		if ( idx != SCONT_BADINDEX )
+			pReturn = m_Container[idx];
 	}
 
 	return pReturn;
@@ -645,6 +583,7 @@ void CVarDefMap::ClearKeys(lpctstr mask)
 		CSString sMask(mask);
 		sMask.MakeLower();
 
+        size_t i = 0;
 		iterator it = m_Container.begin();
 		CVarDefCont * pVarBase = nullptr;
 
@@ -654,12 +593,13 @@ void CVarDefMap::ClearKeys(lpctstr mask)
 
 			if ( pVarBase && ( strstr(pVarBase->GetKey(), sMask.GetPtr()) ) )
 			{
-				DeleteAtIterator(it);
+				DeleteAt(i);
 				it = m_Container.begin();
 			}
 			else
 			{
 				++it;
+                ++i;
 			}
 		}
 	}
