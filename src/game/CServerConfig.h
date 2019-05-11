@@ -537,7 +537,7 @@ public:
 
 	CMultiDefArray m_MultiDefs;		// read from the MUL files. Cached here on demand.
 
-	CObjNameSortArray            m_SkillNameDefs;		// const CSkillDef* Name sorted.
+	CObjNameSortVector           m_SkillNameDefs;		// const CSkillDef* Name sorted.
 	CSPtrTypeArray< CSkillDef* > m_SkillIndexDefs;		// Defined Skills indexed by number.
 	CSObjArray< CSpellDef* >     m_SpellDefs;			// Defined Spells.
 	CSPtrTypeArray< CSpellDef* > m_SpellDefs_Sorted;	// Defined Spells, in skill order.

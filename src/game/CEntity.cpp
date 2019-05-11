@@ -22,7 +22,7 @@ void CEntity::Delete(bool fForce)
     ADDTOCALLSTACK_INTENSIVE("CEntity::Delete");
     if (_List.empty())
         return;
-    for (std::map<COMP_TYPE, CComponent*>::const_iterator it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
+    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
     {
         CComponent *pComponent = it->second;
         ASSERT(pComponent);
@@ -36,7 +36,7 @@ void CEntity::ClearComponents()
     ADDTOCALLSTACK_INTENSIVE("CEntity::ClearComponents");
     if (_List.empty())
         return;
-    for (std::map<COMP_TYPE, CComponent*>::const_iterator it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
+    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
     {
         CComponent *pComponent = it->second;
         ASSERT(pComponent);
@@ -109,7 +109,7 @@ bool CEntity::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
     ADDTOCALLSTACK_INTENSIVE("CEntity::r_GetRef");
     if (_List.empty())
         return false;
-    for (std::map<COMP_TYPE, CComponent*>::const_iterator it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
+    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
     {
         CComponent *pComponent = it->second;
         ASSERT(pComponent);
@@ -126,7 +126,7 @@ void CEntity::r_Write(CScript & s) // Storing data in the worldsave.
     ADDTOCALLSTACK_INTENSIVE("CEntity::r_Write");
     if (_List.empty() && !s.IsWriteMode())
         return;
-    for (std::map<COMP_TYPE, CComponent*>::const_iterator it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
+    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
     {
         CComponent *pComponent = it->second;
         ASSERT(pComponent);
@@ -139,7 +139,7 @@ bool CEntity::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
     ADDTOCALLSTACK_INTENSIVE("CEntity::r_WriteVal");
     if (_List.empty())
         return false;
-    for (std::map<COMP_TYPE, CComponent*>::const_iterator it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
+    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
     {
         CComponent *pComponent = it->second;
         ASSERT(pComponent);
@@ -156,7 +156,7 @@ bool CEntity::r_LoadVal(CScript & s)
     ADDTOCALLSTACK_INTENSIVE("CEntity::r_LoadVal");
     if (_List.empty())
         return false;
-    for (std::map<COMP_TYPE, CComponent*>::const_iterator it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
+    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
     {
         CComponent *pComponent = it->second;
         ASSERT(pComponent);
@@ -173,7 +173,7 @@ bool CEntity::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from s
     ADDTOCALLSTACK_INTENSIVE("CEntity::r_Verb");
     if (_List.empty())
         return false;
-    for (std::map<COMP_TYPE, CComponent*>::const_iterator it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
+    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
     {
         CComponent *pComponent = it->second;
         ASSERT(pComponent);
@@ -190,7 +190,7 @@ void CEntity::Copy(const CEntity *target)
     ADDTOCALLSTACK_INTENSIVE("CEntity::Copy");
     if (_List.empty())
         return;
-    for (std::map<COMP_TYPE, CComponent*>::const_iterator it = target->_List.begin(), itEnd = target->_List.end(); it != itEnd; ++it)
+    for (auto it = target->_List.begin(), itEnd = target->_List.end(); it != itEnd; ++it)
     {
         CComponent *pTarget = it->second;    // the CComponent to copy from
         ASSERT(pTarget);
@@ -208,7 +208,7 @@ CCRET_TYPE CEntity::OnTick()
     if (_List.empty())
         return CCRET_CONTINUE;
 
-    for (std::map<COMP_TYPE, CComponent*>::const_iterator it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
+    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
     {
         CComponent *pComponent = it->second;
         ASSERT(pComponent);

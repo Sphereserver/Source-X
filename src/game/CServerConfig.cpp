@@ -1401,7 +1401,7 @@ const CSkillDef* CServerConfig::FindSkillDef( lpctstr pszKey ) const
 {
     // Find the skill name in the alpha sorted list.
     // RETURN: SKILL_NONE = error.
-    size_t i = m_SkillNameDefs.FindKey( pszKey );
+    size_t i = m_SkillNameDefs.find_sorted(pszKey);
     if ( i == SCONT_BADINDEX )
         return nullptr;
     return static_cast <const CSkillDef*>(m_SkillNameDefs[i]);
@@ -3044,7 +3044,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			if ( !pPrvDef )
 			{
 				// build a name sorted list.
-				m_SkillNameDefs.AddSortKey( pSkill, pSkill->GetKey());
+				m_SkillNameDefs.emplace(pSkill);
 				// Hard coded value for skill index.
 				m_SkillIndexDefs.assign_at_grow(rid.GetResIndex(), pSkill);
 			}
@@ -3340,7 +3340,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		{
 			pNewLink = new CWebPageDef( rid );
 			ASSERT(pNewLink);
-			m_WebPages.AddSortKey( pNewLink, rid );
+			m_WebPages.emplace(pNewLink);
 		}
 		{
 			CScriptLineContext LineContext = pScript->GetContext();
@@ -3990,14 +3990,16 @@ CResourceDef * CServerConfig::ResourceGetDef( const CResourceID& rid ) const
 	if ( ! rid.IsValidResource() )
 		return nullptr;
 
-	size_t index = rid.GetResIndex();
+	int index = rid.GetResIndex();
 	switch ( rid.GetResType() )
 	{
 		case RES_WEBPAGE:
-			index = m_WebPages.FindKey( rid );
-			if ( ! m_WebPages.IsValidIndex(index) )
+        {
+			size_t i = m_WebPages.find_sorted( rid );
+			if ( i == SCONT_BADINDEX )
 				return nullptr;
-			return m_WebPages.at(index);
+            return m_WebPages[i];
+        }
 
 		case RES_SKILL:
 			if ( ! m_SkillIndexDefs.IsValidIndex(index) )

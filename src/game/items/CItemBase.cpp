@@ -1720,7 +1720,7 @@ void CItemBase::ReplaceItemBase( CItemBase * pOld, CResourceDef * pNew ) // stat
 	ADDTOCALLSTACK("CItemBase::ReplaceItemBase");
 	ASSERT(pOld);
 	ASSERT(pOld->GetRefInstances() == 0);
-	CResourceID rid = pOld->GetResourceID();
+	CResourceID const& rid = pOld->GetResourceID();
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
 	ASSERT( index != SCONT_BADINDEX );
 	g_Cfg.m_ResHash.SetAt( rid, index, pNew );
