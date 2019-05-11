@@ -59,41 +59,59 @@ bool CScriptObj::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
     switch (index)
     {
         case SREF_SERV:
+            if (pszKey[4] != '.')
+                return false;
             pszKey += 5;
             pRef = &g_Serv;
             return true;
         case SREF_UID:
+            if (pszKey[3] != '.')
+                return false;
             pszKey += 4;
             pRef = CUID::ObjFind(Exp_GetDWVal(pszKey));
             SKIP_SEPARATORS(pszKey);
             return true;
         case SREF_OBJ:
+            if (pszKey[3] != '.')
+                return false;
             pszKey += 4;
             pRef = ( (dword)g_World.m_uidObj ) ? g_World.m_uidObj.ObjFind() : nullptr;
             return true;
         case SREF_NEW:
+            if (pszKey[3] != '.')
+                return false;
             pszKey += 4;
             pRef = ( (dword)g_World.m_uidNew ) ? g_World.m_uidNew.ObjFind() : nullptr;
             return true;
         case SREF_I:
+            if (pszKey[1] != '.')
+                return false;
             pszKey += 2;
             pRef = this;
             return true;
         case SREF_FILE:
             if ( !IsSetOF(OF_FileCommands) )
                 return false;
+            if (pszKey[4] != '.')
+                return false;
             pszKey += 5;
             pRef = &(g_Serv._hFile);
             return true;
         case SREF_DB:
+            if (pszKey[2] != '.')
+                return false;
             pszKey += 3;
             pRef = &(g_Serv._hDb);
             return true;
         case SREF_LDB:
+            if (pszKey[3] != '.')
+                return false;
             pszKey += 4;
             pRef = &(g_Serv._hLdb);
             return true;
         case SREF_MDB:
+            if (pszKey[3] != '.')
+                return false;
             pszKey += 4;
             pRef = &(g_Serv._hMdb);
             return true;
@@ -122,12 +140,7 @@ size_t CScriptObj::r_GetFunctionIndex(lpctstr pszFunction) // static
 {
     ADDTOCALLSTACK_INTENSIVE("CScriptObj::r_GetFunctionIndex");
     GETNONWHITESPACE( pszFunction );
-    size_t index;
-    int iCompareRes	= -1;
-    index = g_Cfg.m_Functions.FindKeyNear( pszFunction, iCompareRes, true );
-    if ( iCompareRes != 0 )
-        index = SCONT_BADINDEX;
-    return index;
+    return g_Cfg.m_Functions.find_sorted(pszFunction);
 }
 
 bool CScriptObj::r_CanCall(size_t uiFunctionIndex) // static

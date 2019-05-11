@@ -60,8 +60,13 @@ tchar* Str_FromI(tchar *buf, int val, int base) noexcept
     static constexpr char chars[] = "0123456789abcdef";
 
     const bool sign = (val < 0);
-    if (sign) {
-        val = -val;
+    const bool hex = (base == 16);
+    if (sign)
+    {
+        if (hex)
+            val = INT_MAX - val;
+        else
+            val = -val;
     }
 
     int i = 30;
@@ -74,7 +79,7 @@ tchar* Str_FromI(tchar *buf, int val, int base) noexcept
         buf[--i] = chars[SphereAbs(qr.rem)];
     } while (qr.quot);
 
-    if (base == 16) {
+    if (hex) {
         buf[--i] = '0';
     }
     else if (sign) {
@@ -120,8 +125,13 @@ tchar* Str_FromLL (tchar *buf, llong val, int base) noexcept
     static constexpr char chars[] = "0123456789abcdef";
 
     const bool sign = (val < 0);
-    if (sign) {
-        val = -val;
+    const bool hex = (base == 16);
+    if (sign)
+    {
+        if (hex)
+            val = LLONG_MAX - val;
+        else
+            val = -val;
     }
 
     int i = 62;
@@ -134,7 +144,7 @@ tchar* Str_FromLL (tchar *buf, llong val, int base) noexcept
         buf[--i] = chars[SphereAbs(qr.rem)];
     } while (qr.quot);
 
-    if (base == 16) {
+    if (hex) {
         buf[--i] = '0';
     }
     else if (sign) {

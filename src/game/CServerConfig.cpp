@@ -1600,12 +1600,12 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 
 			if ( *pszCmd == '\0')
 			{
-				sVal = m_Functions.at(iNumber)->GetName();
+				sVal = m_Functions[iNumber]->GetName();
 				return true;
 			}
 			else if ( !strnicmp( pszCmd, "PLEVEL", 5 ))
 			{
-				sVal.FormatVal((int)(GetPrivCommandLevel(m_Functions.at(iNumber)->GetName())));
+				sVal.FormatVal((int)(GetPrivCommandLevel(m_Functions[iNumber]->GetName())));
 				return true;
 			}
 		}
@@ -3360,7 +3360,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			if (pLinkResScript != nullptr)
 				pNewLink->SetLink(pLinkResScript);
 
-			m_Functions.AddSortKey(pNewLink, pNewLink->GetName());
+			m_Functions.emplace(pNewLink);
 		}
 		break;
 

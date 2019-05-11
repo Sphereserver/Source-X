@@ -55,4 +55,19 @@ struct CMultiDefArray : public CSObjSortArray< CSphereMulti*, MULTI_TYPE >
 };
 
 
+struct CObjNameSorter
+{
+    bool operator()(const CScriptObj * s1, const CScriptObj * s2) const;
+};
+class CObjNameSortVector : public CSSortedVector< CScriptObj*, CObjNameSorter >
+{
+    static int _compare(const CScriptObj* pObj, lpctstr ptcKey);
+
+public:
+    //static const char *m_sClassName;  
+
+    inline size_t find_sorted(lpctstr ptcKey) const { return this->find_predicate(ptcKey, _compare);        }
+    inline bool   ContainsKey(lpctstr ptcKey) const { return (SCONT_BADINDEX != this->find_sorted(ptcKey)); }
+};
+
 #endif // _INC_CRESOURCESORTEDARRAYS_H

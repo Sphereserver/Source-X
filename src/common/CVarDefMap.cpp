@@ -8,7 +8,7 @@
 #include "CVarDefMap.h"
 
 
-inline static int VarDefComparator(const CVarDefCont* pVar, lpctstr ptcKey)
+inline static int VarDefCompare(const CVarDefCont* pVar, lpctstr ptcKey)
 {
     return strcmpi(pVar->GetKey(), ptcKey);
 }
@@ -29,7 +29,8 @@ CVarDefContNum::CVarDefContNum( lpctstr pszKey ) : m_sKey( pszKey ), m_iVal( 0 )
 {
 }
 
-lpctstr CVarDefContNum::GetValStr() const {
+lpctstr CVarDefContNum::GetValStr() const
+{
     return Str_FromLL(Str_GetTemp(), m_iVal, 16);
 }
 
@@ -168,7 +169,7 @@ CVarDefCont * CVarDefMap::GetAt( size_t at ) const
 CVarDefCont * CVarDefMap::GetAtKey( lpctstr ptcKey ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetAtKey");
-    size_t idx = m_Container.find_predicate(ptcKey, VarDefComparator);
+    size_t idx = m_Container.find_predicate(ptcKey, VarDefCompare);
 
 	if ( idx != SCONT_BADINDEX )
 		return m_Container[idx];
@@ -203,7 +204,7 @@ void CVarDefMap::DeleteAt( size_t at )
 void CVarDefMap::DeleteAtKey( lpctstr ptcKey )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::DeleteAtKey");
-    size_t idx = m_Container.find_predicate(ptcKey, VarDefComparator);
+    size_t idx = m_Container.find_predicate(ptcKey, VarDefCompare);
     if (idx != SCONT_BADINDEX)
         DeleteAt(idx);
 }
@@ -376,7 +377,7 @@ CVarDefContNum* CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fDeleteZer
 		return nullptr;
 	}
 
-    size_t idx = m_Container.find_predicate(pszName, VarDefComparator);
+    size_t idx = m_Container.find_predicate(pszName, VarDefCompare);
 
 	CVarDefCont * pVarBase = nullptr;
 	if ( idx != SCONT_BADINDEX )
@@ -453,7 +454,7 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, 
 		return SetNum( pszName, Exp_Get64Val( pszVal ), fDeleteZero);
 	}
 
-    size_t idx = m_Container.find_predicate(pszName, VarDefComparator);
+    size_t idx = m_Container.find_predicate(pszName, VarDefCompare);
 
 	CVarDefCont * pVarBase = nullptr;
 	if ( idx != SCONT_BADINDEX )
@@ -485,7 +486,7 @@ CVarDefCont * CVarDefMap::GetKey( lpctstr pszKey ) const
 
 	if ( pszKey )
 	{
-        size_t idx = m_Container.find_predicate(pszKey, VarDefComparator);
+        size_t idx = m_Container.find_predicate(pszKey, VarDefCompare);
 		
 		if ( idx != SCONT_BADINDEX )
 			pReturn = m_Container[idx];
@@ -585,16 +586,15 @@ void CVarDefMap::ClearKeys(lpctstr mask)
 
         size_t i = 0;
 		iterator it = m_Container.begin();
-		CVarDefCont * pVarBase = nullptr;
-
 		while ( it != m_Container.end() )
 		{
-			pVarBase = (*it);
+            CVarDefCont *pVarBase = (*it);
 
 			if ( pVarBase && ( strstr(pVarBase->GetKey(), sMask.GetPtr()) ) )
 			{
 				DeleteAt(i);
 				it = m_Container.begin();
+                i = 0;
 			}
 			else
 			{

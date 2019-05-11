@@ -546,7 +546,7 @@ public:
 
 public:
 	CObjNameSortArray m_Servers;	// Servers list. we act like the login server with this.
-	CObjNameSortArray m_Functions;	// Subroutines that can be used in scripts.
+    CObjNameSortVector m_Functions;	// Subroutines that can be used in scripts.
 	CRegionLinks m_RegionDefs;		// All [REGION ] stored inside.
 
 	// static definition stuff from *TABLE.SCP mostly.

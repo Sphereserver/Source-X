@@ -76,3 +76,39 @@ int CMultiDefArray::CompareKey(MULTI_TYPE id, CSphereMulti* pBase, bool fNoSpace
     ASSERT(pBase);
     return (id - pBase->GetMultiID());
 }
+
+
+bool CObjNameSorter::operator()(const CScriptObj * s1, const CScriptObj * s2) const
+{
+    ASSERT( s1 );
+    ASSERT( s2 );
+
+    const lpctstr ptc1 = s1->GetName();
+    const lpctstr ptc2 = s2->GetName();
+    /*
+    const char * const p = strchr( ptc1, ' ' );
+    if (p != nullptr)
+    {
+        const size_t iLen = p - ptc1;
+        return (strnicmp(ptc1, ptc2, iLen) < 0);
+    }
+    */
+    return (strcmpi(ptc1, ptc2) < 0);
+};
+
+int CObjNameSortVector::_compare(const CScriptObj* pObj, lpctstr ptcKey) // static
+{
+    ASSERT( pObj );
+    ASSERT( ptcKey );
+
+    const lpctstr ptcObjStr = pObj->GetName();
+    /*
+    const char * const p = strchr( ptcKey, ' ' );
+    if (p != nullptr)
+    {
+        const size_t iLen = p - ptcKey;
+        return strnicmp(ptcObjStr, ptcKey, iLen);
+    }
+    */
+    return strcmpi(ptcObjStr, ptcKey);
+};

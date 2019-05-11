@@ -1,7 +1,7 @@
 #ifndef _INC_CSSORTEDVECTOR_H
 #define _INC_CSSORTEDVECTOR_H
 
-#include <functional>   // for std::less and std::function
+#include <functional>   // for std::less
 #include <vector>
 
 #define SCONT_BADINDEX size_t(-1)
@@ -16,14 +16,14 @@ public:
     using size_type         = typename std::vector<_Type>::size_type;
 
 private:
-    const _Comp _comparator;
+    const _Comp _comparatorObj;
 
     inline size_t lower_element(size_t mySize, _Type const& value) const;
     template <class _ValType, class _Pred>
     inline size_t binary_search_predicate(size_t mySize, _ValType const& value, _Pred const& predicate) const;
 
 public:
-    CSSortedVector() : _comparator() {}
+    CSSortedVector() : _comparatorObj() {}
     ~CSSortedVector() = default;
 
 
@@ -47,8 +47,8 @@ public:
     iterator insert(const_iterator itWhere, const size_t _Count, _Type const& value) = delete;
 
     template<class... _ValType>
-    inline iterator emplace(_ValType&&... value) {
-
+    inline iterator emplace(_ValType&&... value)
+    {
         //_Type * _obj = new _Type(std::forward<_ValType>(value)...);
         _Type _obj(std::forward<_ValType>(value)...);
         const size_t _mySize = this->size();
@@ -63,6 +63,7 @@ public:
         return emplace(std::move(value));
     }
     //iterator insert(const size_Typepe _Count, const _Typepe& value) = delete;
+
 
     size_t find(_Type const& value) const;
 
@@ -86,7 +87,7 @@ size_t CSSortedVector<_Type, _Comp>::lower_element(size_t _hi, _Type const& valu
     while (_lo < _hi)
     {
         const size_t _mid = _lo + ((_hi - _lo) >> 1);
-        if (this->_comparator(this->operator[](_mid), value))
+        if (this->_comparatorObj(this->operator[](_mid), value))
         {	// <
             _lo = _mid + 1;
         }
@@ -138,7 +139,7 @@ size_t CSSortedVector<_Type, _Comp>::find(_Type const& value) const
     const size_t _idx = this->lower_element(_sz, value);
     if (_idx >= _sz)
         return SCONT_BADINDEX;
-    return (!this->_comparator(value, this->operator[](_idx))) ? _idx : SCONT_BADINDEX;
+    return (!this->_comparatorObj(value, this->operator[](_idx))) ? _idx : SCONT_BADINDEX;
 }
 
 template <class _Type, class _Comp>

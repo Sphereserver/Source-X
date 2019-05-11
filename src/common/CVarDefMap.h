@@ -112,7 +112,6 @@ public:
 
 class CVarDefMap
 {
-private:
 	struct ltstr
 	{
 		inline bool operator()(const CVarDefCont * s1, const CVarDefCont * s2) const
@@ -120,10 +119,8 @@ private:
             return ( strcmpi(s1->GetKey(), s2->GetKey()) < 0 );
         }
 	};
-
 	using DefCont = CSSortedVector<CVarDefCont *, ltstr>;
 
-private:
 	DefCont m_Container;
 
 public:
