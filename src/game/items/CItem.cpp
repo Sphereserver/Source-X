@@ -2552,10 +2552,10 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bo
 			sVal.FormatVal(m_weight);
 			break;
 		case IC_ATTR:
-			sVal.FormatLLHex( m_Attr );
+			sVal.FormatULLHex( m_Attr );
 			break;
 		case IC_CANUSE:
-			sVal.FormatLLHex( m_CanUse );
+			sVal.FormatULLHex( m_CanUse );
 			break;
 		case IC_NODROP:
 			sVal.FormatLLVal( m_Attr & ATTR_NODROP );

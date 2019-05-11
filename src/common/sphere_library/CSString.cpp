@@ -41,9 +41,9 @@
 
 // CSString:: Capacity
 
-void CSString::Empty(bool bTotal)
+void CSString::Empty(bool fTotal)
 {
-	if (bTotal)
+	if (fTotal)
 	{
 		if (m_iMaxLength && m_pchData)
 		{
@@ -160,6 +160,136 @@ void CSString::FormatV(lpctstr pszFormat, va_list args)
 	Copy(pszTemp);
 }
 
+#define FORMATNUM_WRAPPER(function, arg, base) \
+    TemporaryString buf; \
+    Copy(function(static_cast<tchar*>(buf), arg, base))
+
+void CSString::FormatLLHex(llong iVal)
+{
+    //Format("0%" PRIx64, iVal);
+    FORMATNUM_WRAPPER(Str_FromLL, iVal, 16);
+}
+void CSString::FormatULLHex(ullong uiVal)
+{
+    //Format("0%" PRIx64, uiVal);
+    FORMATNUM_WRAPPER(Str_FromULL, uiVal, 16);
+}
+void CSString::FormatHex(dword dwVal)
+{
+    // In principle, all values in sphere logic are signed...
+    // dwVal may contain a (signed) number "big" as the numeric representation of an unsigned ( +(INT_MAX*2) ),
+    // but in this case its bit representation would be considered as negative, yet we know it's a positive number.
+    // So if it's negative we MUST hexformat it as 64 bit int or reinterpreting it in a
+    // script WILL completely mess up
+    if (dwVal > (dword)INT32_MIN)			// if negative (remember two's complement)
+        return FormatULLHex(dwVal);
+    //Format("0%" PRIx32, dwVal);
+    FORMATNUM_WRAPPER(Str_FromUI, dwVal, 16);
+}
+void CSString::FormatCVal(char iVal)
+{
+    //Format("%hhd", iVal);
+    FORMATNUM_WRAPPER(Str_FromI, iVal, 10);
+}
+void CSString::FormatUCVal(uchar uiVal)
+{
+    //Format("%hhu", uiVal);
+    FORMATNUM_WRAPPER(Str_FromUI, uiVal, 10);
+}
+void CSString::FormatSVal(short iVal)
+{
+    //Format("%hd", iVal);
+    FORMATNUM_WRAPPER(Str_FromI, iVal, 10);
+}
+void CSString::FormatUSVal(ushort uiVal)
+{
+    //Format("%hu", uiVal);
+    FORMATNUM_WRAPPER(Str_FromUI, uiVal, 10);
+}
+void CSString::FormatVal(int iVal)
+{
+    //Format("%d", iVal);
+    FORMATNUM_WRAPPER(Str_FromI, iVal, 10);
+}
+void CSString::FormatUVal(uint uiVal)
+{
+    //Format("%u", uiVal);
+    FORMATNUM_WRAPPER(Str_FromUI, uiVal, 10);
+}
+void CSString::FormatLLVal(llong iVal)
+{
+    //Format("%lld", iVal);
+    FORMATNUM_WRAPPER(Str_FromLL, iVal, 10);
+}
+void CSString::FormatULLVal(ullong uiVal)
+{
+    //Format("%llu", uiVal);
+    FORMATNUM_WRAPPER(Str_FromULL, uiVal, 10);
+}
+void CSString::FormatSTVal(size_t uiVal)
+{
+    static_assert(sizeof(size_t) == sizeof(llong), "You can't use StrFromULL with a size_t argument on this architecture. Use the old call to Format instead.");
+    //Format("%" PRIuSIZE_T, iVal);
+    FORMATNUM_WRAPPER(Str_FromULL, uiVal, 10);
+}
+void CSString::FormatBVal(byte uiVal)
+{
+    //Format("0%" PRIx8, uiVal);
+    FORMATNUM_WRAPPER(Str_FromUI, uiVal, 16);
+}
+void CSString::FormatWVal(word uiVal)
+{
+    //Format("0%" PRIx16, uiVal);
+    FORMATNUM_WRAPPER(Str_FromUI, uiVal, 16);
+}
+void CSString::FormatDWVal(dword uiVal)
+{
+    //Format("0%" PRIx32, uiVal);
+    FORMATNUM_WRAPPER(Str_FromUI, uiVal, 16);
+}
+void CSString::Format8Val(int8 iVal)
+{
+    //Format("%" PRId8, iVal);
+    FORMATNUM_WRAPPER(Str_FromI, iVal, 10);
+}
+void CSString::FormatU8Val(uint8 uiVal)
+{
+    //Format("%" PRIu8, uiVal);
+    FORMATNUM_WRAPPER(Str_FromUI, uiVal, 10);
+}
+void CSString::Format16Val(int16 iVal)
+{
+    //Format("%" PRId16, iVal);
+    FORMATNUM_WRAPPER(Str_FromI, iVal, 10);
+}
+void CSString::FormatU16Val(uint16 uiVal)
+{
+    //Format("%" PRIu16, uiVal);
+    FORMATNUM_WRAPPER(Str_FromUI, uiVal, 10);
+}
+void CSString::Format32Val(int32 iVal)
+{
+    //Format("%" PRId32, iVal);
+    FORMATNUM_WRAPPER(Str_FromI, iVal, 10);
+}
+void CSString::FormatU32Val(uint32 uiVal)
+{
+    //Format("%" PRIu32, uiVal);
+    FORMATNUM_WRAPPER(Str_FromUI, uiVal, 10);
+}
+void CSString::Format64Val(int64 iVal)
+{
+    //Format("%" PRId64, iVal);
+    FORMATNUM_WRAPPER(Str_FromLL, iVal, 10);
+}
+void CSString::FormatU64Val(uint64 uiVal)
+{
+    //Format("%" PRIu64, uiVal);
+    FORMATNUM_WRAPPER(Str_FromULL, uiVal, 10);
+}
+
+#undef FORMATNUM_WRAPPER
+
 // CSString:: String operations
 
 int CSString::indexOf(tchar c, int offset)
@@ -259,12 +389,11 @@ int CSString::lastIndexOf(CSString str, int from)
 	if (slen > len)
 		return -1;
 
-	tchar * str_value = new tchar[slen + 1];
-	strcpy(str_value, str.GetPtr());
-	tchar firstChar = str_value[0];
+	lpctstr str_value = str.GetPtr();
+	const tchar firstChar = str_value[0];
 	for (int i = (len - 1); i >= from; --i)
 	{
-		tchar c = m_pchData[i];
+        const tchar c = m_pchData[i];
 		if (c == firstChar)
 		{
 			int rem = i;
@@ -284,14 +413,12 @@ int CSString::lastIndexOf(CSString str, int from)
 				}
 				if (found)
 				{
-					delete[] str_value;
 					return i;
 				}
 			}
 		}
 	}
 
-	delete[] str_value;
 	return -1;
 }
 

@@ -2655,7 +2655,7 @@ do_default:
 				{
 					uiFlags = pMemory->GetMemoryTypes();
 				}
-				sVal.FormatLLHex( uiFlags );
+				sVal.FormatHex( uiFlags );
 			}
 			return true;
 		case CHC_NAME:
@@ -2807,7 +2807,7 @@ do_default:
 			sVal.FormatVal( IsStatFlag(STATF_EMOTEACTION) );
 			break;
 		case CHC_FLAGS:
-			sVal.FormatLLHex(m_iStatFlag);
+			sVal.FormatULLHex(m_iStatFlag);
 			break;
 		case CHC_FONT:
 			sVal.FormatVal( m_fonttype );

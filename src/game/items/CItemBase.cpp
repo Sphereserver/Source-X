@@ -2076,7 +2076,7 @@ bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * 
             sVal.Format("%d,%d,%d,%d", m_rect.m_left, m_rect.m_top, m_rect.m_right - 1, m_rect.m_bottom - 1);
             return true;
         case MLC_REGIONFLAGS:
-            sVal.FormatLLHex(m_dwRegionFlags);
+            sVal.FormatHex(m_dwRegionFlags);
             return true;
         case MLC_SHIPSPEED:
         {

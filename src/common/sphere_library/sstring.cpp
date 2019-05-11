@@ -49,24 +49,31 @@ ullong Str_ToULL(lpctstr ptcStr, int base) noexcept
     return ret;
 }
 
+static_assert (THREAD_STRING_LENGTH > 100, "THREAD_STRING_LENGTH is too small and the Str_From* functions would write past the buffer");
+#define STR_FROM_SET_ZEROSTR \
+    if (hex)    { buf[0] = '0'; buf[1] = '0'; buf[2] = '\0'; } \
+    else        { buf[0] = '0'; buf[1] = '\0'; }
+
 tchar* Str_FromI(tchar *buf, int val, int base) noexcept
 {
+    const bool hex = (base == 16);
     if (val == 0)
     {
-        buf[0] = '0';
-        buf[1] = '\0';
+        STR_FROM_SET_ZEROSTR;
         return buf;
     }
     static constexpr char chars[] = "0123456789abcdef";
 
     const bool sign = (val < 0);
-    const bool hex = (base == 16);
-    if (sign)
-    {
+    /*if (sign && !hex) {
         if (hex)
             val = INT_MAX - val;
         else
             val = -val;
+    }
+    */
+    if (sign && !hex) {
+        val = -val;
     }
 
     int i = 30;
@@ -90,10 +97,10 @@ tchar* Str_FromI(tchar *buf, int val, int base) noexcept
 
 tchar* Str_FromUI (tchar *buf, uint val, int base) noexcept
 {
+    const bool hex = (base == 16);
     if (val == 0)
     {
-        buf[0] = '0';
-        buf[1] = '\0';
+        STR_FROM_SET_ZEROSTR;
         return buf;
     }
     static constexpr char chars[] = "0123456789abcdef";
@@ -105,33 +112,34 @@ tchar* Str_FromUI (tchar *buf, uint val, int base) noexcept
     do
     {
         qr = lldiv(qr.quot, base);
-        buf[--i] = chars[SphereAbs(qr.rem)];
+        buf[--i] = chars[qr.rem];
     } while (qr.quot);
 
     if (base == 16) {
         buf[--i] = '0';
-    }
-    return &buf[i];
+    }    return &buf[i];
 }
 
 tchar* Str_FromLL (tchar *buf, llong val, int base) noexcept
 {
+    const bool hex = (base == 16);
     if (val == 0)
     {
-        buf[0] = '0';
-        buf[1] = '\0';
+        STR_FROM_SET_ZEROSTR;
         return buf;
     }
     static constexpr char chars[] = "0123456789abcdef";
 
     const bool sign = (val < 0);
-    const bool hex = (base == 16);
-    if (sign)
-    {
+    /*if (sign && !hex) {
         if (hex)
             val = LLONG_MAX - val;
         else
             val = -val;
+    }
+    */
+    if (sign && !hex) {
+        val = -val;
     }
 
     int i = 62;
@@ -153,6 +161,31 @@ tchar* Str_FromLL (tchar *buf, llong val, int base) noexcept
     return &buf[i];
 }
 
+tchar* Str_FromULL (tchar *buf, ullong val, int base) noexcept
+{
+    const bool hex = (base == 16);
+    if (val == 0)
+    {
+        STR_FROM_SET_ZEROSTR;
+        return buf;
+    }
+    static constexpr char chars[] = "0123456789abcdef";
+
+    int i = 62;
+    buf[--i] = '\0';
+    do
+    {
+        buf[--i] = chars[val % base];
+        val /= base;
+    } while (val);
+
+    if (hex) {
+        buf[--i] = '0';
+    }
+    return &buf[i];
+}
+
+#undef STR_FROM_SET_ZEROSTR
 
 size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord )
 {
