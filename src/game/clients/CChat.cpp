@@ -298,7 +298,7 @@ void CChat::QuitChat(CChatChanMember * pClient)
 void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 {
 	ADDTOCALLSTACK("CChat::DoCommand");
-	static lpctstr const sm_szCmd_Chat[] =
+	static lpctstr constexpr sm_szCmd_Chat[] =
 	{
 		"ALLKICK",
 		"BC",

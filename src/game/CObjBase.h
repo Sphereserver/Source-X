@@ -559,12 +559,12 @@ public:
      * @brief   Sets Hue given.
      *
      * @param   wHue                The hue.
-     * @param   bAvoidTrigger       true to avoid trigger.
+     * @param   fAvoidTrigger       true to avoid trigger.
      * @param [in,out]  pSrc        (Optional) If non-null, source for the.
      * @param [in,out]  SourceObj   (Optional) If non-null, source object.
      * @param   sound               The sound.
      */
-	void SetHue( HUE_TYPE wHue, bool bAvoidTrigger = true, CTextConsole *pSrc = nullptr, CObjBase *SourceObj = nullptr, llong sound = 0 );
+	void SetHue( HUE_TYPE wHue, bool fAvoidTrigger = true, CTextConsole *pSrc = nullptr, CObjBase *SourceObj = nullptr, llong sound = 0 );
 
     /**
      * @fn  HUE_TYPE CObjBase::GetHue() const;
@@ -1063,7 +1063,7 @@ enum ITRIG_TYPE
 	ITRIG_DROPON_ITEM,          // An item has been.
 	ITRIG_DROPON_SELF,          // An item has been dropped upon me.
 	ITRIG_DROPON_TRADE,         // Droping an item in a trade window.
-	//ITRIG_DYE,
+	ITRIG_DYE,
 	ITRIG_EQUIP,                // I have been equipped.
 	ITRIG_EQUIPTEST,            // I'm not yet equiped, but checking if I can.
 	ITRIG_MemoryEquip,          // I'm a memory and I'm being equiped.
@@ -1129,7 +1129,7 @@ enum CTRIG_TYPE
 	CTRIG_DeathCorpse,      // A Corpse is being created from my body.
 	CTRIG_Destroy,          // I am nearly destroyed.
 	CTRIG_Dismount,         // I'm dismounting.
-	//CTRIG_DYE,
+	CTRIG_DYE,
 	CTRIG_Eat,              // I'm eating something.
 	CTRIG_EffectAdd,        // A spell effected me, i'm getting bonus/penalties from it.
 	CTRIG_EffectRemove,		// Removing spell item from character.

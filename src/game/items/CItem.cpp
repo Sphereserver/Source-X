@@ -54,7 +54,7 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	"@DropOn_Item",			// I have been dropped on this item
 	"@DropOn_Self",			// An item has been dropped here
 	"@DropOn_Trade",
-	//"@Dye",					// My color has been changed
+	"@Dye",					// My color has been changed
 	"@EQUIP",		// I have been unequipped
     "@EQUIPTEST",
 	"@MemoryEquip",

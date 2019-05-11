@@ -2310,8 +2310,8 @@ PLEVEL_TYPE CServerConfig::GetPrivCommandLevel( lpctstr pszCmd ) const
 	{
 		--ilevel;
 		lpctstr const * pszTable = m_PrivCommands[ilevel].data();
-		size_t iCount = m_PrivCommands[ilevel].size();
-		if ( FindTableHeadSorted( pszCmd, pszTable, (int)iCount ) >= 0 )
+		int iCount = (int)m_PrivCommands[ilevel].size();
+		if ( FindTableHeadSorted( pszCmd, pszTable, iCount ) >= 0 )
 			return( static_cast<PLEVEL_TYPE>(ilevel) );
 	}
 
@@ -2972,7 +2972,9 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				return false;
 			while ( pScript->ReadKey() )
 			{
-				lpctstr	key = pScript->GetKey();
+                // It's mandatory to convert to UPPERCASE the function name, because we perform a case-sensitive search
+				tchar* key = const_cast<tchar*>(pScript->GetKey());
+                _strupr(key);
 				m_PrivCommands[index].AddSortString(key);
 			}
 		}

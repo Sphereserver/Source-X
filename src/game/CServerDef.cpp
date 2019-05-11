@@ -257,16 +257,21 @@ bool CServerDef::r_LoadVal( CScript & s )
 	{
 		case SC_ACCAPP:
 		case SC_ACCAPPS:
+        {
+            lpctstr ptcArg = s.GetArgStr();
 			// Treat it as a value or a string.
-			if ( IsDigit( s.GetArgStr()[0] ))
-				m_eAccApp = static_cast<ACCAPP_TYPE>(s.GetArgVal() );
+			if ( IsDigit( ptcArg[0] ))
+            {
+				m_eAccApp = ACCAPP_TYPE(s.GetArgVal() );
+            }
 			else
 			{
 				// Treat it as a string. "Manual","Automatic","Guest"
-				m_eAccApp = static_cast<ACCAPP_TYPE>(FindTable(s.GetArgStr(), sm_AccAppTable, CountOf(sm_AccAppTable)));
+				m_eAccApp = ACCAPP_TYPE(FindTable(ptcArg, sm_AccAppTable, CountOf(sm_AccAppTable)));
 			}
 			if ( m_eAccApp < 0 || m_eAccApp >= ACCAPP_QTY )
 				m_eAccApp = ACCAPP_Unspecified;
+        }
 			break;
 		case SC_AGE:
 			break;
@@ -275,13 +280,16 @@ bool CServerDef::r_LoadVal( CScript & s )
 			// m_ClientVersion.SetClientVer( s.GetArgRaw());
 			break;
 		case SC_ADMINEMAIL:
-			if ( this != &g_Serv && !g_Serv.m_sEMail.IsEmpty() && strstr(s.GetArgStr(), g_Serv.m_sEMail) )
+        {
+            lpctstr ptcArg = s.GetArgStr();
+			if ( this != &g_Serv && !g_Serv.m_sEMail.IsEmpty() && strstr(ptcArg, g_Serv.m_sEMail) )
 				return false;
-			if ( !g_Cfg.IsValidEmailAddressFormat(s.GetArgStr()) )
+			if ( !g_Cfg.IsValidEmailAddressFormat(ptcArg) )
 				return false;
-			if ( g_Cfg.IsObscene(s.GetArgStr()) )
+			if ( g_Cfg.IsObscene(ptcArg) )
 				return false;
-			m_sEMail = s.GetArgStr();
+			m_sEMail = ptcArg;
+        }
 			break;
 		case SC_LANG:
 			{

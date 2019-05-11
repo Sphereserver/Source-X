@@ -711,11 +711,12 @@ bool CScript::ReadKeyParse() // Read line from script
 	//if ( !m_pszArg[0] || m_pszArg[1] != '=' || !strchr( ".*+-/%|&!^", m_pszArg[0] ) )
 	if ( !m_pszArg[0] || ( m_pszArg[1] != '=' && m_pszArg[1] != '+' && m_pszArg[1] != '-' ) || !strchr( ".*+-/%|&!^", m_pszArg[0] ) )
 		return true;
+    //_strupr(m_pszKey);  // make the KEY uppercase
 
-	static lpctstr const sm_szEvalTypes[] =
+	static lpctstr constexpr sm_szEvalTypes[] =
 	{
-		"eval",
-		"floatval"
+		"EVAL",
+		"FLOATVAL"
 	};
 
 	EXC_SET_BLOCK("parse");
@@ -744,13 +745,13 @@ bool CScript::ReadKeyParse() // Read line from script
 	{
 		if ( m_pszArg[2] != '\0' )
 			return true;
-		sprintf(pszBuf, "<eval (<%s> +1)>", m_pszKey);
+		sprintf(pszBuf, "<EVAL (<%s> +1)>", m_pszKey);
 	}
 	else if ( m_pszArg[0] == m_pszArg[1] && m_pszArg[1] == '-' )
 	{
 		if ( m_pszArg[2] != '\0' )
 			return true;
-		sprintf(pszBuf, "<eval (<%s> -1)>", m_pszKey);
+		sprintf(pszBuf, "<EVAL (<%s> -1)>", m_pszKey);
 	}
 	else
 	{

@@ -58,45 +58,45 @@ enum GUMPCTL_TYPE // controls we can put in a gump.
 
 lpctstr const CDialogDef::sm_szLoadKeys[GUMPCTL_QTY+1] =
 {
-    "button",
-    "buttontileart",
-    "checkbox",
+    "BUTTON",
+    "BUTTONTILEART",
+    "CHECKBOX",
 
-    "checkertrans",
-    "croppedtext",
+    "CHECKERTRANS",
+    "CROPPEDTEXT",
 
-    "dcroppedtext",
-    "dhtmlgump",
-    "dorigin",
-    "dtext",
-    "dtextentry",
-    "dtextentrylimited",
+    "DCROPPEDTEXT",
+    "DHTMLGUMP",
+    "DORIGIN",
+    "DTEXT",
+    "DTEXTENTRY",
+    "DTEXTENTRYLIMITED",
 
-    "group",
+    "GROUP",
 
-    "gumppic",
-    "gumppictiled",
-    "htmlgump",
+    "GUMPPIC",
+    "GUMPPICTILED",
+    "HTMLGUMP",
 
-    "noclose",
-    "nodispose",
-    "nomove",
+    "NOCLOSE",
+    "NODISPOSE",
+    "NOMOVE",
 
-    "page",
+    "PAGE",
 
-    "radio",
-    "resizepic",
-    "text",
-    "textentry",
-    "textentrylimited",
-    "tilepic",
-    "tilepichue",
+    "RADIO",
+    "RESIZEPIC",
+    "TEXT",
+    "TEXTENTRY",
+    "TEXTENTRYLIMITED",
+    "TILEPIC",
+    "TILEPICHUE",
 
-    "tooltip",
+    "TOOLTIP",
 
-    "xmfhtmlgump",
-    "xmfhtmlgumpcolor",
-    "xmfhtmltok",
+    "XMFHTMLGUMP",
+    "XMFHTMLGUMPCOLOR",
+    "XMFHTMLTOK",
 
     nullptr
 };

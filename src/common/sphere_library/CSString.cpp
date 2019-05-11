@@ -228,7 +228,7 @@ void CSString::FormatULLVal(ullong uiVal)
 }
 void CSString::FormatSTVal(size_t uiVal)
 {
-    static_assert(sizeof(size_t) == sizeof(llong), "You can't use StrFromULL with a size_t argument on this architecture. Use the old call to Format instead.");
+    static_assert(sizeof(size_t) <= sizeof(ullong), "You can't use StrFromULL with a size_t argument on this architecture. Use the old call to Format instead.");
     //Format("%" PRIuSIZE_T, iVal);
     FORMATNUM_WRAPPER(Str_FromULL, uiVal, 10);
 }

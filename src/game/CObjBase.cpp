@@ -134,7 +134,7 @@ bool CObjBase::IsContainer() const
 	return( dynamic_cast <const CContainer*>(this) != nullptr );
 }
 
-void CObjBase::SetHue( HUE_TYPE wHue, bool bAvoidTrigger, CTextConsole *pSrc, CObjBase *SourceObj, llong sound )
+void CObjBase::SetHue( HUE_TYPE wHue, bool fAvoidTrigger, CTextConsole *pSrc, CObjBase *SourceObj, llong sound )
 {
 	if (g_Serv.IsLoading()) //We do not want tons of @Dye being called during world load, just set the hue then continue...
 	{
@@ -148,27 +148,16 @@ void CObjBase::SetHue( HUE_TYPE wHue, bool bAvoidTrigger, CTextConsole *pSrc, CO
 
 	/*	@Dye is now more universal, it is called on EVERY CObjBase color change.
 		Sanity checks are recommended and if possible, avoid using it on universal events. */
-
-	/*	Trigger info to be added to intenal
-		lpctstr const CItem::sm_szTrigName	//CItem.cpp
-		lpctstr const CChar::sm_szTrigName	//CChar.cpp
-		enum ITRIG_TYPE						//CObjBase.h
-		enum CTRIG_TYPE						//CObjBase.h
-		ADD(DYE,					"@Dye")	//triggers.tbl
-	*/
-
-	if (!bAvoidTrigger)
+	if (!fAvoidTrigger)
 	{
-		if (IsTrigUsed("@Dye"))
+        lpctstr ptcTrig = (IsChar() ? CChar::sm_szTrigName[CTRIG_DYE] : CItem::sm_szTrigName[ITRIG_DYE]);
+		if (IsTrigUsed(ptcTrig))
 		{
 			TRIGRET_TYPE iRet;
-
 			if (SourceObj)
 				args.m_pO1 = SourceObj;
 
-			//lpctstr sTrig = (IsChar() ? CChar::sm_szTrigName[CTRIG_DYE] : CItem::sm_szTrigName[ITRIG_DYE]);
-
-			iRet = OnTrigger("@Dye", pSrc, &args);
+			iRet = OnTrigger(ptcTrig, pSrc, &args);
 
 			if (iRet == TRIGRET_RET_TRUE)
 				return;
@@ -697,7 +686,7 @@ enum OBR_TYPE
 	OBR_QTY
 };
 
-lpctstr const CObjBase::sm_szRefKeys[OBR_QTY+1] =
+lpctstr constexpr CObjBase::sm_szRefKeys[OBR_QTY+1] =
 {
 	"ROOM",
 	"SECTOR",

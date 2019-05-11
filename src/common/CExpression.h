@@ -101,10 +101,10 @@ static lpctstr const sm_IntrinsicFunctions[INTRINSIC_QTY+1] =
 	"RANDBELL",     // RANDBELL(center,variance25)
 	"SIN",
 	"SQRT",         // sqrt()
-	"StrAscii",
+	"STRASCII",
 	"STRCMP",       // STRCMP(str1,str2)
 	"STRCMPI",      // STRCMPI(str1,str2)
-	"StrIndexOf",   // StrIndexOf(string,searchVal,[index]) = find the index of this, -1 = not here.
+	"STRINDEXOF",   // StrIndexOf(string,searchVal,[index]) = find the index of this, -1 = not here.
 	"STRLEN",       // STRLEN(str)
 	"STRMATCH",     // STRMATCH(str,*?pattern)
 	"STRREGEX",

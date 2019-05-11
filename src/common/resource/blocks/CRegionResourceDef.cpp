@@ -30,9 +30,9 @@ lpctstr const CRegionResourceDef::sm_szLoadKeys[RMC_QTY+1] =
 lpctstr const CRegionResourceDef::sm_szTrigName[RRTRIG_QTY+1] =	// static
 {
     "@AAAUNUSED",
-    "@ResourceFound",
-    "@ResourceGather",
-    "@ResourceTest",
+    "@RESOURCEFOUND",
+    "@RESOURCEGATHER",
+    "@RESOURCETEST",
     nullptr,
 };
 

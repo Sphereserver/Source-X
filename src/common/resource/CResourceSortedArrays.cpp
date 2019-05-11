@@ -77,41 +77,36 @@ int CMultiDefArray::CompareKey(MULTI_TYPE id, CSphereMulti* pBase, bool fNoSpace
     return (id - pBase->GetMultiID());
 }
 
-
-bool CObjNameSorter::operator()(const CScriptObj * s1, const CScriptObj * s2) const
-{
-    ASSERT( s1 );
-    ASSERT( s2 );
-
-    /*
-    const lpctstr ptc1 = s1->GetName();
-    const lpctstr ptc2 = s2->GetName();
-    const char * const p = strchr( ptc1, ' ' );
-    if (p != nullptr)
-    {
-        const size_t iLen = p - ptc1;
-        return (strnicmp(ptc1, ptc2, iLen) < 0);
-    }
-    return (strcmpi(ptc1, ptc2) < 0);
-    */
-    //return (Str_CmpHeadI(s1->GetName(), s2->GetName()) < 0); // not needed, since the compared strings don't contain whitespaces (arguments or whatsoever)
-    return (strcmpi(s1->GetName(), s2->GetName()) < 0);
-};
-
+/*
 int CObjNameSortVector::_compare(const CScriptObj* pObj, lpctstr ptcKey) // static
 {
     ASSERT( pObj );
     ASSERT( ptcKey );
   
-    /*
+    // We can use Str_CmpHeadI to ignore whitespaces (args to the function or whatever) in ptcKey, but i'm not totally sure if this is faster than the code below
+    //return -Str_CmpHeadI(ptcKey, pObj->GetName());
+
     const lpctstr ptcObjStr = pObj->GetName();
     const char * const p = strchr( ptcKey, ' ' );
     if (p != nullptr)
     {
-        const size_t iLen = p - ptcKey;
-        return strnicmp(ptcObjStr, ptcKey, iLen);
+        const size_t uiLen = p - ptcKey;
+        const size_t uiObjStrLen = strlen(ptcObjStr);
+        int retval = strnicmp(ptcKey, ptcObjStr, uiLen);
+        if (retval == 0)
+        {
+            if (uiObjStrLen == uiLen)
+                return 0;
+            else if (uiLen < uiObjStrLen)
+                return -1;
+            else
+                return 1;
+        }
+        else
+        {
+            return retval;
+        }
     }
     return strcmpi(ptcObjStr, ptcKey);
-    */
-    return -Str_CmpHeadI(ptcKey, pObj->GetName());  // use Str_CmpHeadI to ignore whitespaces (args to the function or whatever) in ptcKey
 };
+*/

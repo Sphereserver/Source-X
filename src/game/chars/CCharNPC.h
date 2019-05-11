@@ -31,8 +31,7 @@ public:
 	byte m_Act_Motivation;		// 0-100 (100=very greatly) how bad do i want to do the current action.
 	bool m_bonded;				// Bonded pet
 
-								// We respond to what we here with this.
-	CResourceRefArray m_Speech;	// Speech fragment list (other stuff we know)
+	CResourceRefArray m_Speech;	// Speech fragment list (other stuff we know): We respond to what we hear with this.
 
 	CResourceQty m_Need;	// What items might i need/Desire ? (coded as resource scripts) ex "10 gold,20 logs" etc.
 

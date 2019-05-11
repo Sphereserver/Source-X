@@ -57,11 +57,23 @@ struct CMultiDefArray : public CSObjSortArray< CSphereMulti*, MULTI_TYPE >
 
 struct CObjNameSorter
 {
-    bool operator()(const CScriptObj * s1, const CScriptObj * s2) const;
+    inline bool operator()(const CScriptObj * s1, const CScriptObj * s2) const
+    {
+        ASSERT( s1 );
+        ASSERT( s2 );
+        //return (Str_CmpHeadI(s1->GetName(), s2->GetName()) < 0); // not needed, since the compared strings don't contain whitespaces (arguments or whatsoever)
+        // Current strcmpi implementation internally converts to lowerCASE the strings, so this will work until Str_CmpHeadI checks with tolower, instead of toupper
+        return (strcmpi(s1->GetName(), s2->GetName()) < 0);
+    }
 };
 class CObjNameSortVector : public CSSortedVector< CScriptObj*, CObjNameSorter >
 {
-    static int _compare(const CScriptObj* pObj, lpctstr ptcKey);
+    inline static int _compare(const CScriptObj* pObj, lpctstr ptcKey)
+    {
+        ASSERT( pObj );
+        ASSERT( ptcKey );
+        return -Str_CmpHeadI(ptcKey, pObj->GetName());  // We use Str_CmpHeadI to ignore whitespaces (args to the function or whatever) in ptcKey
+    }
 
 public:
     //static const char *m_sClassName;  

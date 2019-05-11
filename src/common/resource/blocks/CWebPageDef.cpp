@@ -406,14 +406,14 @@ void CWebPageDef::WebPageLog()
 
 lpctstr const CWebPageDef::sm_szPageExt[] =
 {
-	".bmp",
-	".gif",
-	".htm",
-	".html",
-	".jpeg",
-	".jpg",
-	".js",
-	".txt",
+	".BMP",
+	".GIF",
+	".HTM",
+	".HTML",
+	".JPEG",
+	".JPG",
+	".JS",
+	".TXT",
 };
 
 bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient )
@@ -504,13 +504,13 @@ lpctstr const CWebPageDef::sm_szPageType[WEBPAGE_QTY+1] =
 	"image/x-xbitmap",	// WEBPAGE_BMP,
 	"image/gif",		// WEBPAGE_GIF,
 	"image/jpeg",		// WEBPAGE_JPG,
-	nullptr,				// WEBPAGE_QTY
+	nullptr				// WEBPAGE_QTY
 };
 
 lpctstr const CWebPageDef::sm_szTrigName[WTRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
-	"@Load",
+	"@LOAD",
 	nullptr,
 };
 

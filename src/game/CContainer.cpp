@@ -594,12 +594,12 @@ bool CContainer::r_WriteValContainer( lpctstr pszKey, CSString &sVal, CTextConso
 	ADDTOCALLSTACK("CContainer::r_WriteValContainer");
 	EXC_TRY("WriteVal");
 
-	static lpctstr const sm_szParams[] =
+	static lpctstr constexpr sm_szParams[] =
 	{
-		"count",
-		"fcount",
-		"rescount",
-		"restest"
+		"COUNT",
+		"FCOUNT",
+		"RESCOUNT",
+		"RESTEST"
 	};
 
 	int i = FindTableHeadSorted(pszKey, sm_szParams, CountOf(sm_szParams));

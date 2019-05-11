@@ -13,9 +13,9 @@ lpctstr const CSkillDef::sm_szTrigName[SKTRIG_QTY+1] =
     "@START",	// params for skill are done.
     "@STROKE",
     "@SUCCESS",
-    "@TargetCancel",
-    "@UseQuick",
-    "@Wait",
+    "@TARGETCANCEL",
+    "@USEQUICK",
+    "@WAIT",
     nullptr,
 };
 

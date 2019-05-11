@@ -59,7 +59,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@DeathCorpse",
 	"@Destroy",				//+I am nearly destroyed
 	"@Dismount",			// I am trying to get rid of my ride right now
-	//"@Dye",					// My color has been changed
+	"@Dye",					// My color has been changed
 	"@Eat",
 	"@EffectAdd",
 	"@EffectRemove",
@@ -216,7 +216,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@UserVirtueInvoke",
 	"@UserWarmode",	        // War mode ?
 	
-        nullptr
+    nullptr
 };
 
 
