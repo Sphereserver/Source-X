@@ -59,7 +59,7 @@ void CEntity::SubscribeComponent(CComponent * pComponent)
     _List[compType] = pComponent;
 }
 
-void CEntity::UnsubscribeComponent(std::map<COMP_TYPE, CComponent*>::iterator& it, bool fEraseFromMap)
+void CEntity::UnsubscribeComponent(iterator& it, bool fEraseFromMap)
 {
     ADDTOCALLSTACK_INTENSIVE("CEntity::UnsubscribeComponent(it)");
     delete it->second;

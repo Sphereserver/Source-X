@@ -14,6 +14,8 @@ class CEntity
 {
     //tsdynamicmap<COMP_TYPE, CComponent*> _List;
     std::map<COMP_TYPE, CComponent*> _List;
+    using iterator          = decltype(_List)::iterator;
+    using const_iterator    = decltype(_List)::const_iterator;
 
 public:
     CEntity();
@@ -43,7 +45,7 @@ public:
     * @param it Iterator to the component to unsubscribe.
     * @param fEraseFromMap Should i erase this component from the internal map? Use false if you're going to erase it manually later
     */
-    void UnsubscribeComponent(std::map<COMP_TYPE, CComponent*>::iterator& it, bool fEraseFromMap = true);
+    void UnsubscribeComponent(iterator& it, bool fEraseFromMap = true);
 
     /**
     * @brief Unsuscribes a CComponent.

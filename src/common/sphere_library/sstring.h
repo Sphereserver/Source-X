@@ -45,6 +45,7 @@ tchar* Str_FromLL (tchar *buf, llong val,  int base = 10) noexcept;
 
 
 size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord );
+int Str_CmpHeadI(const lpctstr pszFind, lpctstr pszTable);
 
 /** @name String utilities: Modifiers
 */

@@ -154,8 +154,6 @@ tchar* Str_FromLL (tchar *buf, llong val, int base) noexcept
 }
 
 
-// String utilities: Modifiers
-
 size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord )
 {
     // Find any of the pszKeyWord in the pTextSearch string.
@@ -193,6 +191,27 @@ size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord )
             j = 0;
     }
 }
+
+inline int Str_CmpHeadI(const lpctstr pszFind, lpctstr pszTable)
+{
+    for (uint i = 0; ; ++i)
+    {
+        //	we should always use same case as in other places. since strcmpi lowers,
+        //	we should lower here as well. fucking shit!
+        const tchar ch1 = static_cast<tchar>(tolower(pszFind[i]));
+        const tchar ch2 = static_cast<tchar>(tolower(pszTable[i]));
+        if (ch2 == 0)
+        {
+            if ( (!iswalnum(ch1)) && (ch1 != '_') )
+                return 0;
+            return (ch1 - ch2);
+        }
+        if (ch1 != ch2)
+            return (ch1 - ch2);
+    }
+}
+
+// String utilities: Modifiers
 
 size_t strcpylen(tchar * pDst, lpctstr pSrc)
 {
@@ -408,26 +427,6 @@ int FindTableSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount
             iHigh = i - 1;
     }
     return -1;
-}
-
-inline static int Str_CmpHeadI(const lpctstr pszFind, lpctstr pszTable)
-{
-    tchar ch0 = '_';
-    for (int i = 0; ; ++i)
-    {
-        //	we should always use same case as in other places. since strcmpi lowers,
-        //	we should lower here as well. fucking shit!
-        const tchar ch1 = static_cast<tchar>(tolower(pszFind[i]));
-        const tchar ch2 = static_cast<tchar>(tolower(pszTable[i]));
-        if (ch2 == 0)
-        {
-            if ( (!iswalnum(ch1)) && (ch1 != ch0) )
-                return 0;
-            return (ch1 - ch2);
-        }
-        if (ch1 != ch2)
-            return (ch1 - ch2);
-    }
 }
 
 int FindTableHead(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)

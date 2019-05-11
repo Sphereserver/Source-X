@@ -25,6 +25,8 @@ class CEntityProps
 {
     //tsdynamicmap<COMPPROPS_TYPE, CComponentProps*> _List;
     std::map<COMPPROPS_TYPE, CComponentProps*> _List;
+    using iterator          = decltype(_List)::iterator;
+    using const_iterator    = decltype(_List)::const_iterator;
 
 public:
     CEntityProps();
@@ -48,7 +50,7 @@ public:
     * @param it Iterator to the component to unsubscribe.
     * @param fEraseFromMap Should i erase this component from the internal map? Use false if you're going to erase it manually later
     */
-    void UnsubscribeComponentProps(std::map<COMPPROPS_TYPE, CComponentProps*>::iterator& it, bool fEraseFromMap = true);
+    void UnsubscribeComponentProps(iterator& it, bool fEraseFromMap = true);
 
     /**
     * @brief Unsubscribes a CComponentProps.

@@ -1,6 +1,5 @@
 #include "../CLog.h"
 #include "chars/CChar.h"
-#include "items/CItem.h"
 #include "components/CCPropsChar.h"
 #include "components/CCPropsItem.h"
 #include "components/CCPropsItemChar.h"
@@ -48,7 +47,7 @@ void CEntityProps::SubscribeComponentProps(CComponentProps * pComponent)
     _List[compType] = pComponent;
 }
 
-void CEntityProps::UnsubscribeComponentProps(std::map<COMPPROPS_TYPE, CComponentProps*>::iterator& it, bool fEraseFromMap)
+void CEntityProps::UnsubscribeComponentProps(iterator& it, bool fEraseFromMap)
 {
     ADDTOCALLSTACK("CEntityProps::UnsubscribeComponentProps(it)");
     delete it->second;
@@ -167,7 +166,7 @@ bool CEntityProps::r_LoadPropVal(CScript & s, CObjBase* pObjEntityProps, CBaseBa
         if (pEP->_List.empty())
             return false;
         const lpctstr ptcKey = s.GetKey();
-        for (decltype(_List)::const_iterator it = pEP->_List.begin(), itEnd = pEP->_List.end(); it != itEnd; ++it)
+        for (const_iterator it = pEP->_List.begin(), itEnd = pEP->_List.end(); it != itEnd; ++it)
         {
             if ( CComponentProps *pComponent = it->second )
             {
@@ -234,7 +233,7 @@ bool CEntityProps::r_WritePropVal(lpctstr pszKey, CSString & sVal, const CObjBas
     {
         if (pEP->_List.empty())
             return false;
-        for (decltype(_List)::const_iterator it = pEP->_List.begin(), itEnd = pEP->_List.end(); it != itEnd; ++it)
+        for (const_iterator it = pEP->_List.begin(), itEnd = pEP->_List.end(); it != itEnd; ++it)
         {
             const CComponentProps *pComponent = it->second;
             if (pComponent)
