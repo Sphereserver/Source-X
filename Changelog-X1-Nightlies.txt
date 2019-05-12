@@ -1709,3 +1709,6 @@ WARNING: Important change!
 07-05-2019, Nolok
 - Changed: t_house_component to ei_house_component, t_house_lockdown to ei_house_lockdown, t_house_secure to ei_house_secure, according to the new X scriptpack naming convention for TYPEDEFs
 	(if a TYPEDEF is meant to be used as a TEVENT or an EVENT, use the prefix "ei_"; if the TYPEDEF is meant to be used as a base TYPE, use the classic prefix "t_", as always.)
+
+12-05-2019, Nolok
+- Fixed: SQLite last error code wasn't cleared after a successiful query, generating log errors even if the new query didn't return any error.

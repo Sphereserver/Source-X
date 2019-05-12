@@ -2793,6 +2793,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 	if ( m_ResourceList.ContainsKey( const_cast<tchar *>(pszSection) ))
 	{
+        // Add to DEFLIST
 		CListDefCont* pListBase = g_Exp.m_ListInternals.GetKey(pszSection);
 		if ( !pListBase )
 			pListBase = g_Exp.m_ListInternals.AddList(pszSection);

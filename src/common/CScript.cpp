@@ -726,7 +726,7 @@ bool CScript::ReadKeyParse() // Read line from script
 	TemporaryString tsBuf;
 	tchar* pszBuf = static_cast<tchar *>(tsBuf);
 
-	int iKeyIndex = (strnicmp(m_pszKey, "float.", 6) == 0) ? 1 : 0;
+	int iKeyIndex = (strnicmp(m_pszKey, "FLOAT.", 6) == 0) ? 1 : 0;
 
 	if ( m_pszArg[0] == '.' )
 	{

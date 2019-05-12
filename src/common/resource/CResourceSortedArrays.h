@@ -72,7 +72,7 @@ class CObjNameSortVector : public CSSortedVector< CScriptObj*, CObjNameSorter >
     {
         ASSERT( pObj );
         ASSERT( ptcKey );
-        return -Str_CmpHeadI(ptcKey, pObj->GetName());  // We use Str_CmpHeadI to ignore whitespaces (args to the function or whatever) in ptcKey
+        return -Str_CmpHeadI(ptcKey, pObj->GetName());  // We use Str_CmpHeadI to ignore '_' and whitespaces (args to the function or whatever) in ptcKey
     }
 
 public:

@@ -144,11 +144,12 @@ Table CSQLite::QuerySQL( lpctstr strSQL )
 				ConvertUTF8ToString( retStrings[iPos], retTable.m_lstRows[iRow].back() );
 			else retTable.m_lstRows[iRow].back().push_back('\0');
 
-			iPos++;
+			++iPos;
 		}
 	}
 
 	sqlite3_free_table(retStrings);
+    m_iLastError=SQLITE_OK;
 
 	return retTable;
 }
@@ -213,6 +214,7 @@ TablePtr CSQLite::QuerySQLPtr( lpctstr strSQL )
 		}
 	}
 	sqlite3_free_table(retStrings);
+    m_iLastError=SQLITE_OK;
 
 	return TablePtr(retTable);
 }

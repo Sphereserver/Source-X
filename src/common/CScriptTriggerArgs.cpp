@@ -373,8 +373,8 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
             return true;
         }
 
-        uint uiNum = Exp_GetUSingle(pszKey);
         SKIP_SEPARATORS(pszKey);
+        uint uiNum = Exp_GetUSingle(pszKey);
         if ( uiNum >= m_v.size() )
         {
             sVal = "";
