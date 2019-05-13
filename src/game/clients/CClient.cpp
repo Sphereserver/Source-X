@@ -524,20 +524,22 @@ bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, 
 	ADDTOCALLSTACK("CClient::r_WriteVal");
 	EXC_TRY("WriteVal");
 	
-	if ( !strnicmp("CTAG.", pszKey, 5) )		//	CTAG.xxx - client tag
+	if ( !strnicmp("CTAG", pszKey, 4) )
 	{
-		pszKey += 5;
-		const CVarDefCont *vardef = m_TagDefs.GetKey(pszKey);
-		sVal = vardef ? vardef->GetValStr() : "";
-		return true;
-	}
-
-	if ( !strnicmp("CTAG0.", pszKey, 6) )		//	CTAG0.xxx - client tag
-	{
-		pszKey += 6;
-		const CVarDefCont *vardef = m_TagDefs.GetKey(pszKey);
-		sVal = vardef ? vardef->GetValStr() : "0";
-		return true;
+        if (pszKey[4] == '.')   //	CTAG.xxx - client tag
+        {
+            pszKey += 5;
+            const CVarDefCont *vardef = m_TagDefs.GetKey(pszKey);
+            sVal = vardef ? vardef->GetValStr() : "";
+            return true;
+        }
+        else if ((pszKey[4] == '0') && (pszKey[5] == '.'))  //	CTAG0.xxx - client tag
+        {
+            pszKey += 6;
+            const CVarDefCont *vardef = m_TagDefs.GetKey(pszKey);
+            sVal = vardef ? vardef->GetValStr() : "0";
+            return true;
+        }
 	}
 
     int index;
@@ -651,7 +653,8 @@ bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, 
 			sVal = m_Targ_Text;
 			break;
 		default:
-			return ( fNoCallParent ? false : CScriptObj::r_WriteVal( pszKey, sVal, pSrc, false ) );
+            //Special case: if fNoCallParent = true, call CScriptObj::r_WriteVal with fNoCallChildren = true, to check only for the ref
+			return CScriptObj::r_WriteVal( pszKey, sVal, pSrc, false, fNoCallParent );
 	}
 	return true;
 	EXC_CATCH;

@@ -356,7 +356,6 @@ static void StringFunction( int iFunc, lpctstr pszKey, CSString &sVal )
 bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
     UNREFERENCED_PARAMETER(fNoCallParent);
-    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CScriptObj::r_WriteVal");
 	EXC_TRY("WriteVal");
 	CScriptObj * pRef = nullptr;
@@ -440,6 +439,13 @@ bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 		}
 		return pRef->r_WriteVal( pszKey, sVal, pSrc );
 	}
+
+    if (fNoCallChildren)
+    {
+        // Special case. We pass fNoCallChildren = true if we are called from CClient::r_WriteVal and we want to check only for the ref.
+        //  Executing the code below is only a waste of resources.
+        return false;
+    }
 
 	int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( index < 0 )
