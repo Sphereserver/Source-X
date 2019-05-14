@@ -371,33 +371,22 @@ CItem * CItem::GenerateScript( CChar * pSrc)
 	CItemBase * pItemDef = Item_GetDef();
 	ASSERT( pItemDef );
 
-	if ( pItemDef->HasTrigger(ITRIG_Create) )
+	CResourceLock s;
+	if ( pItemDef->ResourceLock(s))
 	{
-		CResourceLock s;
-		if ( pItemDef->ResourceLock(s))
+		if ( pSrc )
 		{
-			if ( pSrc )
-			{
-				//pItem->OnTriggerScript( s, sm_szTrigName[ITRIG_Create], pSrc );
-				//pItem->OnTrigger( ITRIG_Create, pSrc,0);
-				OnTriggerCreate(pSrc,0);
-			}
-			else
-			{
-				//pItem->OnTriggerScript( s, sm_szTrigName[ITRIG_Create], &g_Serv );
-				//pItem->OnTrigger( ITRIG_Create, &g_Serv,0);
-				OnTriggerCreate(&g_Serv,0);
-			}
+			//pItem->OnTriggerScript( s, sm_szTrigName[ITRIG_Create], pSrc );
+			//pItem->OnTrigger( ITRIG_Create, pSrc,0);
+			OnTriggerCreate(pSrc,0);
+		}
+		else
+		{
+			//pItem->OnTriggerScript( s, sm_szTrigName[ITRIG_Create], &g_Serv );
+			//pItem->OnTrigger( ITRIG_Create, &g_Serv,0);
+			OnTriggerCreate(&g_Serv,0);
 		}
 	}
-
-	if (( pSrc && pSrc->IsClient() ) && ( IsTrigUsed(TRIGGER_ITEMCREATE) ))
-	{
-		CScriptTriggerArgs args;
-		args.m_pO1 = this;
-		pSrc->OnTrigger(CTRIG_itemCreate, pSrc, &args);
-	}
-
 	return this;
 }
 
@@ -3259,6 +3248,13 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 				return false;
 			pCharSrc->Use_Obj( this, s.HasArgs() ? (s.GetArgVal() != 0) : true, true );
 			break;
+        case CIV_USEDOOR:   // bypasses key checks.
+            if (!(IsType(IT_DOOR) || IsType(IT_DOOR_LOCKED)))
+            {
+                return false;
+            }
+            Use_DoorNew(false);
+            break;
 		case CIV_REPAIR:
 			if (!pCharSrc)
 				return false;

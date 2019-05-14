@@ -1160,7 +1160,7 @@ void CItemMulti::SetMovingCrate(CUID uidCrate)
     }
     _pMovingCrate = uidCrate;
     pNewCrate->m_uidLink = GetUID();
-    CScript event("events +t_moving_crate");
+    CScript event("events +ei_moving_crate");
     pNewCrate->r_LoadVal(event);
     pNewCrate->SetCrateOfMulti(GetUID());
 }
@@ -1684,7 +1684,7 @@ void CItemMulti::Secure(CUID uidContainer)
         }
         pContainer->SetAttr(ATTR_SECURE);
         pContainer->m_uidLink = GetUID();
-        CScript event("events +t_house_secure");
+        CScript event("events +ei_house_secure");
         pContainer->r_LoadVal(event);
 
     }
@@ -3166,14 +3166,14 @@ void CItemMulti::OnComponentCreate(CItem * pComponent, bool fIsAddon)
     {
         case IT_DOOR:
         {
-            CScript event("events +t_house_door");
+            CScript event("events +ei_house_door");
             pComponent->r_LoadVal(event);
             pComponent->SetType(IT_DOOR_LOCKED);
             break;
         }
         case IT_CONTAINER:
         {
-            CScript event("events +t_house_container");
+            CScript event("events +ei_house_container");
             pComponent->r_LoadVal(event);
             pComponent->SetType(IT_CONTAINER_LOCKED);
             break;
@@ -3190,7 +3190,7 @@ void CItemMulti::OnComponentCreate(CItem * pComponent, bool fIsAddon)
         }
         case IT_TELEPAD:
         {
-            CScript event("events +t_house_telepad");
+            CScript event("events +ei_house_telepad");
             pComponent->r_LoadVal(event);
         }
         default:
