@@ -1712,3 +1712,9 @@ WARNING: Important change!
 
 12-05-2019, Nolok
 - Fixed: SQLite last error code wasn't cleared after a successiful query, generating log errors even if the new query didn't return any error.
+
+14-05-2019, XuN
+Fixed ON=@Create trigger not firing on [TYPEDEF x] when the base item didn't have the trigger itself.
+Removed duplicated call to @ItemCreate
+Added UseDoor function for t_door and t_door_locked ignoring default key checks.
+Updated multi's typedef events to the new 'ei_name' standard
