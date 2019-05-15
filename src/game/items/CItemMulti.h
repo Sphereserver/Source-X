@@ -310,6 +310,10 @@ public:
     * @param pTarget the char.
     */
     void RemoveKeys(CUID uidTarget);
+    /**
+    * @brief Calls RemoveKeys(player_uid) on all players with access to this house.
+    */
+    void RemoveAllKeys();
     // Misc
     /**
     * @brief Returns the multi count.

@@ -71,6 +71,7 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
     CPointBase GetCenter() const;
     CPointBase GetRectCorner( DIR_TYPE dir ) const;
     CSector * GetSector( int i ) const;	// ge all the sectors that make up this rect.
+    const CRect operator += (const CRect& rect);
 
 	void SetRect( int left, int top, int right, int bottom, int map );
 

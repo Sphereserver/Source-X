@@ -300,6 +300,16 @@ CSector * CRect::GetSector( int i ) const	// ge all the sectors that make up thi
 	return g_World.GetSector(m_map, iBase+indexoffset);
 }
 
+
+const CRect CRect::operator += (const CRect& rect)
+{
+    m_top += rect.m_top;
+    m_bottom += rect.m_bottom;
+    m_right += rect.m_right;
+    m_left += rect.m_left;
+    return *this;
+}
+
 //*************************************************************************
 // -CRectMap
 

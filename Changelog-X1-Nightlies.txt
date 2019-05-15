@@ -1718,3 +1718,19 @@ Fixed ON=@Create trigger not firing on [TYPEDEF x] when the base item didn't hav
 Removed duplicated call to @ItemCreate
 Added UseDoor function for t_door and t_door_locked ignoring default key checks.
 Updated multi's typedef events to the new 'ei_name' standard
+
+
+15-05-2019, XuN
+Added RemoveAllKeys to the source executing RemoveKeys(uid) to owner, coowner(s), friend(s) and players in the access list.
+Changed: Now all multis call RemoveAllKeys when being removed if AutoHouseKeys is enabled in the .ini
+Fixed Redeed crashing sphere when no real char was given as src (for example via @Timer).
+Added f_house_onplacement_check function called from CItemMulti::Multi_Create (where the multis do their checks to be placed) with this params:
+	return 0 // Use default checks (wich values may be modified with the bellow locals)
+	return 1 // Prevents the multi from being placed.
+	return 6 // Allows the multi to be placed without default placement checks.
+
+	local.check_BlockRadius=-1, 1, -1, 1	// Default: an area of +1 in each direction
+	local.check_MultiRadius=0, -5, 0, -5	// Default: 5 tiles in both North and South
+	// Values are: West, North, East, South
+	local.id=m_xxx		// Read Only
+	local.p=position	// Read Only

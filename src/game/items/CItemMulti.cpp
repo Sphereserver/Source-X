@@ -51,6 +51,7 @@ CItemMulti::~CItemMulti()
     {
         SetOwner(UID_UNUSED);
     }
+    RemoveAllKeys();
     if (!_lCoowners.empty())
     {
         for (const CUID& charUID : _lCoowners)
@@ -1009,13 +1010,13 @@ void CItemMulti::RemoveKeys(CUID uidTarget)
     {
         return;
     }
-    CChar *pTarget = uidTarget.CharFind();
+    CChar* pTarget = uidTarget.CharFind();
     if (!pTarget)
     {
         return;
     }
     CUID uidHouse = GetUID();
-    CItem *pItemNext = nullptr;
+    CItem* pItemNext = nullptr;
     for (CItem* pItemKey = pTarget->GetPack()->GetContentHead(); pItemKey != nullptr; pItemKey = pItemNext)
     {
         pItemNext = pItemKey->GetNext();
@@ -1031,6 +1032,37 @@ void CItemMulti::RemoveKeys(CUID uidTarget)
         if (pItemKey->m_uidLink == uidHouse)
         {
             pItemKey->Delete();
+        }
+    }
+}
+
+void CItemMulti::RemoveAllKeys()
+{
+    ADDTOCALLSTACK("CItemMulti::RemoveAllKeys");
+    if (g_Cfg._fAutoHouseKeys == 0) // Only when AutoHouseKeys != 0
+    {
+        return;
+    }
+    RemoveKeys(GetOwner().GetObjUID());
+    if (_lCoowners.size() > 0)
+    {
+        for (auto itCoowner : _lCoowners)
+        {
+            RemoveKeys(itCoowner.GetPrivateUID());
+        }
+    }
+    if (_lFriends.size() > 0)
+    {
+        for (auto itFriend : _lFriends)
+        {
+            RemoveKeys(itFriend.GetPrivateUID());
+        }
+    }
+    if (_lAccesses.size() > 0)
+    {
+        for (auto itAccess : _lAccesses)
+        {
+            RemoveKeys(itAccess.GetPrivateUID());
         }
     }
 }
@@ -2211,7 +2243,22 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
             Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
             bool fShowMsg = piCmd[0] ? true : false;
             bool fMoveToBank = piCmd[1] ? true : false;
-            Redeed(fShowMsg, fMoveToBank, pSrc->GetChar()->GetUID());
+            CUID charUID(UID_UNUSED);
+            if (pSrc && pSrc->GetChar())
+            {
+                charUID.SetPrivateUID(pSrc->GetChar()->GetUID());
+            }
+            else if (GetOwner().CharFind())
+            {
+                charUID.SetPrivateUID(GetOwner());
+            }
+            else
+            {
+                g_Log.EventError("Trying to redeed %s (0x#08) with no redeed target, removing it instead.\n", GetName(), GetUID());
+                Delete();
+                return true;
+            }
+            Redeed(fShowMsg, fMoveToBank, charUID);
             break;
         }
         case SHV_RELEASE:
@@ -2980,6 +3027,17 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
             return nullptr;
         }
     }
+    CScriptTriggerArgs args;
+    args.m_VarsLocal.SetStrNew("check_blockradius", "-1, -1, 1, 1");    // Values are West, Norht, East, South
+    args.m_VarsLocal.SetStrNew("check_multiradius", "0, -5, 0, 5");
+    args.m_VarsLocal.SetStrNew("id", g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, pMultiDef->GetID())));
+    args.m_VarsLocal.SetStrNew("p", pt.WriteUsed());
+    TRIGRET_TYPE tRet;
+    pChar->r_Call("f_house_onplacement_check", pChar, &args, nullptr, &tRet);
+    if (tRet == TRIGRET_RET_TRUE)
+    {
+        return nullptr;
+    }
 
     /*
     * There is a small difference in the coordinates where the mouse is in the screen and the ones received,
@@ -2992,21 +3050,29 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
         pt.m_y -= (short)(pMultiDef->m_rect.m_bottom - 1);
     }
 
-    if (!pChar->IsPriv(PRIV_GM))
+    if (!pChar->IsPriv(PRIV_GM) && tRet != TRIGRET_RET_HALFBAKED)
     {
+        CRect rectBlockRadius;
+        rectBlockRadius.Read(args.m_VarsLocal.GetKeyStr("check_blockradius"));
+
+        CRect rectMultiRadius;
+        rectMultiRadius.Read(args.m_VarsLocal.GetKeyStr("check_multiradius"));
+
         if ((pMultiDef != nullptr) && !(pDeed->IsAttr(ATTR_MAGIC)))
         {
             CRect rect;
+            CRect baseRect;
             if (pMultiDef)
             {
-                rect = pMultiDef->m_rect; // Create a rect equal to the multi's one.
+                baseRect = pMultiDef->m_rect; // Create a rect equal to the multi's one.
             }
             else
             {
-                rect.OffsetRect(1, 1);  // Guildstones pass through here, also other non multi items placed from deeds.
+                baseRect.OffsetRect(1, 1);  // Guildstones pass through here, also other non multi items placed from deeds.
             }
-            rect.m_map = pt.m_map;          // set it's map to the current map.
-            rect.OffsetRect(pt.m_x, pt.m_y);// fill the rect.
+            baseRect.m_map = pt.m_map;          // set it's map to the current map.
+            baseRect.OffsetRect(pt.m_x, pt.m_y);// fill the rect.
+            rect = baseRect;
             CPointMap ptn = pt;             // A copy to work on.
 
             // Check for chars in the way, just search for any char in the house area, no extra tiles, it's enough for them to do not be inside the house.
@@ -3034,13 +3100,12 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
 
             /* Char's check passed.
             * Intensive checks are done now:
-            *   - The area of search gets increased by 1 tile: There must be no blocking items from a 1x1 gap outside the house.
+            *   - The area of search gets increased by 1* tile: There must be no blocking items from a 1x1* gap outside the house.
             *   - All coord points inside that rect must be valid and have, as much, a Z difference of +-4.
+            *
+            * *1 tile by default, values can be overriden with local.check_BlockRadius in the f_house_onplacement_check function.
             */
-            rect.m_top -= 1;    // 1 tile at each side to leave a gap between houses, checking also that this gap doesn't have any blocking object
-            rect.m_right += 1;
-            rect.m_left -= 1;
-            rect.m_bottom += 1;
+            rect += rectBlockRadius;
             int x = rect.m_left;
 
             /*
@@ -3092,12 +3157,14 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
 
             /*
             * The above loop did not find any blocking item/char, now another loop is done to check for another multis with extended limitations:
-            * You can't place your house within a range of 5 tiles bottom of the stairs of any house.
-            * Additionally your house can't have it's bottom blocked by another multi in a 5 tiles margin.
-            * Simplifying it: the Rect must have an additional +5 tiles of radious on both TOP and BOTTOM points.
+            * You can't place your house within a range of 5* tiles bottom of the stairs of any house.
+            * Additionally your house can't have it's bottom blocked by another multi in a 5* tiles margin.
+            * Simplifying it: the Rect must have an additional +5* tiles of radius on both TOP and BOTTOM points.
+            *
+            * *5 North & South tiles by default, values can be overriden with local.check_MultiRadius in the f_house_onplacement_check function.
             */
-            rect.m_top -= 4; // 1 was already added before, so a +4 now is enough.
-            rect.m_bottom += 4;
+            rect = baseRect;
+            rect += rectMultiRadius;
 
             x = rect.m_left;
             for (; x < rect.m_right; ++x)
