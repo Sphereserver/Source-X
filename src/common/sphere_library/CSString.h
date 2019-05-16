@@ -218,14 +218,14 @@ public:
 	/**
 	* @brief Copy a string into the CSString.
 	* @see SetLength()
-	* @see strcpylen()
+	* @see strcpy()
 	* @param pStr string to copy.
 	*/
 	void Copy(lpctstr pStr);
     /**
     * @brief Copy a string of known length into the CSString.
     * @see SetLength()
-    * @see strcpylen()
+    * @see Str_CopyLimitNull()
     * @param pStr string to copy.
     * @param iLen max number of chars (single-byte) to copy.
     */

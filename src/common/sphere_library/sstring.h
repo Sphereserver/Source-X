@@ -52,29 +52,39 @@ int Str_CmpHeadI(lpctstr ptcFind, lpctstr ptcHere);
 */
 ///@{
 /**
+* @brief Like strncpy, but doesn't zero all the exceeding buffer length
+* @param pDst dest memory space.
+* @param pSrc source data.
+* @param uiMaxSize max bytes to be copied.
+* @return bytes copied (CAN count the string terminator)
+*/
+size_t Str_CopyLimit(tchar * pDst, lpctstr pSrc, size_t uiMaxSize);
+
+/**
+* @brief Like strncpy, but always zero-terminates the copied string (eventually truncating the text) and doesn't zero all the exceeding buffer length
+* @param pDst dest memory space.
+* @param pSrc source data.
+
+* @return bytes copied (not counting the string terminator)
+*/
+size_t Str_CopyLimitNull(tchar * pDst, lpctstr pSrc, size_t uiMaxSize);
+
+/**
 * @brief Wrapper to cstring strcpy, but returns the length of the string copied.
 * @param pDst dest memory space.
 * @param pSrc source data.
-* @return length of the string copied.
+* @return length of the string copied (number of characters).
 */
 size_t strcpylen(tchar * pDst, lpctstr pSrc);
 
 /**
-* @brief Wrapper to cstring strncpy, but returns the length of string copied.
+* @brief Appends pSrc to string pDst of maximum size uiMaxSize. Always '\0' terminates (unless uiMaxSize <= strlen(pDst)).
 * @param pDst dest memory space.
 * @param pSrc source data.
-* @param uiMaxlen max length to be copied.
-* @return length of the string copied.
+* @param uiMaxSize max bytes that pDst can hold.
+* @return strlen(src) + MIN(uiMaxSize, strlen(initial dst)).
 */
-size_t strncpylen(tchar * pDst, lpctstr pSrc, size_t uiMaxlen);
-
-/**
-* @brief Wrapper to cstring strncpy, but sets the last char of the string to '\0'.
-* @param pDst dest memory space.
-* @param pSrc source data.
-* @param uiMaxlen max length to be copied.
-*/
-void strncpynull(tchar * pDst, lpctstr pSrc, size_t uiMaxlen);
+size_t Str_ConcatLimitNull(tchar *pDst, const tchar *pSrc, size_t uiMaxSize);
 
 /**
 * @brief Give the article and space to a word. For example, for "boot" will return "a ".

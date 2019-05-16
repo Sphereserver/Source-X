@@ -19,7 +19,7 @@
 /////////////////////////////////
 // Events from the Client.
 
-lpctstr const CClient::sm_szCmd_Redirect[13] =
+lpctstr constexpr CClient::sm_szCmd_Redirect[13] =
 {
 	"BANK",
 	"CONTROL",
@@ -1054,7 +1054,7 @@ void CClient::Event_VendorBuy_Cheater( int iCode )
 	ADDTOCALLSTACK("CClient::Event_VendorBuy_Cheater");
 
 	// iCode descriptions
-	static lpctstr const sm_BuyPacketCheats[] =
+	static lpctstr constexpr sm_BuyPacketCheats[] =
 	{
 		"Other",
 		"Bad vendor UID",
@@ -1306,7 +1306,7 @@ void CClient::Event_VendorSell_Cheater( int iCode )
 	ADDTOCALLSTACK("CClient::Event_VendorSell_Cheater");
 
 	// iCode descriptions
-	static lpctstr const sm_SellPacketCheats[] =
+	static lpctstr constexpr sm_SellPacketCheats[] =
 	{
 		"Other",
 		"Bad vendor UID",
@@ -1556,7 +1556,7 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 	else
 	{
 		if ( fNoStrip )	// Str_GetBare will eat unicode characters
-			len = strncpylen( szText, pszText, CountOf(szText) );
+			len = Str_CopyLimitNull( szText, pszText, CountOf(szText) );
 		else if ( promptMode == CLIMODE_PROMPT_SCRIPT_VERB )
 			len = Str_GetBare( szText, pszText, CountOf(szText), "|~=[]{|}~" );
 		else
@@ -1810,15 +1810,13 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 	if ( fNoStrip )
 	{
 		// The characters in Unicode speech don't need to be filtered
-		strncpy( szText, pszText, MAX_TALK_BUFFER - 1 );
-		szText[MAX_TALK_BUFFER - 1] = '\0';
+		Str_CopyLimitNull( szText, pszText, MAX_TALK_BUFFER );
 		len = strlen( szText );
 	}
 	else
 	{
 		tchar szTextG[MAX_TALK_BUFFER];
-		strncpy( szTextG, pszText, MAX_TALK_BUFFER - 1 );
-		szTextG[MAX_TALK_BUFFER - 1] = '\0';
+		Str_CopyLimitNull( szTextG, pszText, MAX_TALK_BUFFER );
 		len = Str_GetBare( szText, szTextG, sizeof(szText)-1 );
 	}
 
@@ -1830,8 +1828,8 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 
 	if ( !Event_Command(pszText,mode) )
 	{
-		bool	fCancelSpeech	= false;
-		tchar	z[MAX_TALK_BUFFER];
+		bool fCancelSpeech = false;
+		tchar z[MAX_TALK_BUFFER];
 
 		if ( m_pChar->OnTriggerSpeech(false, pszText, m_pChar, mode, wHue) )
 			fCancelSpeech = true;

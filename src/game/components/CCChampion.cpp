@@ -562,7 +562,7 @@ enum ICHMPL_TYPE
     ICHMPL_QTY
 };
 
-lpctstr const CCChampion::sm_szLoadKeys[ICHMPL_QTY + 1] =
+lpctstr constexpr CCChampion::sm_szLoadKeys[ICHMPL_QTY + 1] =
 {
     "DEATHCOUNT",
     "LASTACTIVATIONTIME",
@@ -592,7 +592,7 @@ enum ICHMPV_TYPE
 };
 
 
-lpctstr const CCChampion::sm_szVerbKeys[ICHMPV_QTY + 1] =
+lpctstr constexpr CCChampion::sm_szVerbKeys[ICHMPV_QTY + 1] =
 {
     "ADDOBJ",
     "ADDREDCANDLE",
@@ -857,7 +857,7 @@ enum CHAMPIONDEF_TYPE
     CHAMPIONDEF_QTY
 };
 
-lpctstr const CCChampionDef::sm_szLoadKeys[] =
+lpctstr constexpr CCChampionDef::sm_szLoadKeys[] =
 {
     "CHAMPION",
     "DEFNAME",

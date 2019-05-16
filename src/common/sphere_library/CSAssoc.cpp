@@ -22,7 +22,7 @@ lpctstr CValStr::FindName( int iVal ) const
 // -CElementDef
 // Describe the elements of a structure/class
 
-const int CElementDef::sm_Lengths[ELEM_QTY] =
+constexpr int CElementDef::sm_Lengths[ELEM_QTY] =
 {
 	0,	// ELEM_VOID:
 	-1,	// ELEM_CSTRING,
@@ -49,7 +49,7 @@ bool CElementDef::SetValStr( void * pBase, lpctstr pszVal ) const
 		case ELEM_VOID:
 			return false;
 		case ELEM_STRING:
-			strncpynull(static_cast<tchar *>(pValPtr), pszVal, GetValLength() - 1);
+			Str_CopyLimitNull(static_cast<tchar *>(pValPtr), pszVal, GetValLength() - 1);
 			return true;
 		case ELEM_CSTRING:
 			*static_cast<CSString *>(pValPtr) = pszVal;

@@ -1124,8 +1124,8 @@ void CClient::addItemName( const CItem * pItem )
 	bool fIdentified = ( IsPriv(PRIV_GM) || pItem->IsAttr( ATTR_IDENTIFIED ));
 	lpctstr pszNameFull = pItem->GetNameFull( fIdentified );
 
-	tchar szName[ MAX_ITEM_NAME_SIZE + 256 ];
-	size_t len = strncpylen( szName, pszNameFull, CountOf(szName) );
+	tchar szName[ MAX_ITEM_NAME_SIZE * 2 ];
+	size_t len = Str_CopyLimitNull( szName, pszNameFull, CountOf(szName) );
 
 	const CContainer* pCont = dynamic_cast<const CContainer*>(pItem);
 	if ( pCont != nullptr )
@@ -1221,7 +1221,7 @@ void CClient::addItemName( const CItem * pItem )
 		lpctstr pNewStr = Args.m_VarsLocal.GetKeyStr("ClickMsgText");
 
 		if ( pNewStr != nullptr )
-			strncpynull(szName, pNewStr, CountOf(szName));
+			Str_CopyLimitNull(szName, pNewStr, CountOf(szName));
 
 		wHue = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("ClickMsgHue"));
 	}
@@ -1235,16 +1235,16 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 	// Karma wHue codes ?
 	ASSERT( pChar );
 
-	HUE_TYPE wHue	= pChar->Noto_GetHue( m_pChar, true );
+	HUE_TYPE wHue = pChar->Noto_GetHue( m_pChar, true );
 
 	tchar *pszTemp = Str_GetTemp();
 	lpctstr prefix = pChar->GetKeyStr( "NAME.PREFIX" );
 	if ( ! *prefix )
 		prefix = pChar->Noto_GetFameTitle();
 
-	strcpy( pszTemp, prefix );
-	strcat( pszTemp, pChar->GetName() );
-	strcat( pszTemp, pChar->GetKeyStr( "NAME.SUFFIX" ) );
+    Str_CopyLimitNull( pszTemp, prefix, STR_TEMPLENGTH );
+    Str_ConcatLimitNull( pszTemp, pChar->GetName(), STR_TEMPLENGTH );
+    Str_ConcatLimitNull( pszTemp, pChar->GetKeyStr( "NAME.SUFFIX" ), STR_TEMPLENGTH );
 
 	if ( !pChar->IsStatFlag(STATF_INCOGNITO) || ( GetPrivLevel() > pChar->GetPrivLevel() ))
 	{
@@ -1252,16 +1252,16 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 		lpctstr pAbbrev = pChar->Guild_AbbrevBracket(MEMORY_TOWN);
 		if ( pAbbrev )
 		{
-			strcat( pszTemp, pAbbrev );
+            Str_ConcatLimitNull( pszTemp, pAbbrev, STR_TEMPLENGTH );
 		}
 		pAbbrev = pChar->Guild_AbbrevBracket(MEMORY_GUILD);
 		if ( pAbbrev )
 		{
-			strcat( pszTemp, pAbbrev );
+            Str_ConcatLimitNull( pszTemp, pAbbrev, STR_TEMPLENGTH );
 		}
 	}
 	else
-		strcpy( pszTemp, pChar->GetName() );
+        Str_CopyLimitNull( pszTemp, pChar->GetName(), STR_TEMPLENGTH );
 
 	if ( pChar->m_pNPC && g_Cfg.m_fVendorTradeTitle )
 	{
@@ -1270,8 +1270,8 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 			lpctstr title = pChar->GetTradeTitle();
 			if ( *title )
 			{
-				strcat( pszTemp, " " );
-				strcat( pszTemp, title );
+                Str_ConcatLimitNull( pszTemp, " ", STR_TEMPLENGTH );
+                Str_ConcatLimitNull( pszTemp, title, STR_TEMPLENGTH );
 			}
 		}
 	}
@@ -1283,24 +1283,24 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 		if ( pChar->m_pNPC )
 		{
 			if ( pChar->IsPlayableCharacter())
-				strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_NPC) );
+                Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_NPC), STR_TEMPLENGTH );
 			if ( pChar->IsStatFlag( STATF_CONJURED ))
-				strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_SUMMONED) );
+                Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_SUMMONED), STR_TEMPLENGTH );
 			else if ( pChar->IsStatFlag( STATF_PET ))
-				strcat( pszTemp, (pChar->m_pNPC->m_bonded) ? g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_BONDED) : g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_TAME) );
+                Str_ConcatLimitNull( pszTemp, (pChar->m_pNPC->m_bonded) ? g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_BONDED) : g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_TAME), STR_TEMPLENGTH );
 		}
 		if ( pChar->IsStatFlag( STATF_INVUL ) && ! pChar->IsStatFlag( STATF_INCOGNITO ) && ! pChar->IsPriv( PRIV_PRIV_NOSHOW ))
-			strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_INVUL) );
+            Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_INVUL), STR_TEMPLENGTH );
 		if ( pChar->IsStatFlag( STATF_STONE ))
-			strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_STONE) );
+            Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_STONE), STR_TEMPLENGTH );
 		if ( pChar->IsStatFlag( STATF_FREEZE ))
-			strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_FROZEN) );
+            Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_FROZEN), STR_TEMPLENGTH );
 		if ( pChar->IsStatFlag( STATF_INSUBSTANTIAL | STATF_INVISIBLE | STATF_HIDDEN ))
-			strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_HIDDEN) );
+            Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_HIDDEN), STR_TEMPLENGTH );
 		if ( pChar->IsStatFlag( STATF_SLEEPING ))
-			strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_SLEEPING) );
+            Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_SLEEPING), STR_TEMPLENGTH );
 		if ( pChar->IsStatFlag( STATF_HALLUCINATING ))
-			strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_HALLU) );
+            Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_HALLU), STR_TEMPLENGTH );
 
 		if ( fAllShow )
 		{
@@ -1311,20 +1311,20 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 		}
 	}
 	if ( ! fAllShow && pChar->Skill_GetActive() == NPCACT_NAPPING )
-		strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_AFK) );
+        Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_AFK), STR_TEMPLENGTH );
 	if ( pChar->GetPrivLevel() <= PLEVEL_Guest )
-		strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_GUEST) );
+        Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_GUEST), STR_TEMPLENGTH );
 	if ( pChar->IsPriv( PRIV_JAILED ))
-		strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_JAILED) );
+        Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_JAILED), STR_TEMPLENGTH );
 	if ( pChar->IsDisconnected())
-		strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_LOGOUT) );
+        Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_LOGOUT), STR_TEMPLENGTH );
 	if (( fAllShow || pChar == m_pChar ) && pChar->IsStatFlag( STATF_CRIMINAL ))
-		strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_CRIMINAL) );
+        Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_CRIMINAL), STR_TEMPLENGTH );
 	if ( fAllShow || ( IsPriv(PRIV_GM) && ( g_Cfg.m_iDebugFlags & DEBUGF_NPC_EMOTE )))
 	{
-		strcat( pszTemp, " [" );
-		strcat( pszTemp, pChar->Skill_GetName());
-		strcat( pszTemp, "]" );
+        Str_ConcatLimitNull( pszTemp, " [", STR_TEMPLENGTH );
+        Str_ConcatLimitNull( pszTemp, pChar->Skill_GetName(), STR_TEMPLENGTH);
+        Str_ConcatLimitNull( pszTemp, "]", STR_TEMPLENGTH );
 	}
 
 	if ( IsTrigUsed(TRIGGER_AFTERCLICK) )

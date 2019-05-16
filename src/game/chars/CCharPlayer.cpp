@@ -11,7 +11,7 @@
 #include "CCharPlayer.h"
 
 
-lpctstr const CCharPlayer::sm_szLoadKeys[CPC_QTY+1] =
+lpctstr constexpr CCharPlayer::sm_szLoadKeys[CPC_QTY+1] =
 {
 #define ADD(a,b) b,
 #include "../../tables/CCharPlayer_props.tbl"
@@ -92,7 +92,7 @@ SKILL_TYPE CCharPlayer::Skill_GetLockType( lpctstr pszKey ) const
 	ADDTOCALLSTACK("CCharPlayer::Skill_GetLockType");
 
 	tchar szTmpKey[128];
-    strncpynull( szTmpKey, pszKey, CountOf(szTmpKey) );
+    Str_CopyLimitNull( szTmpKey, pszKey, CountOf(szTmpKey) );
 
 	tchar * ppArgs[3];
 	size_t i = Str_ParseCmds( szTmpKey, ppArgs, CountOf(ppArgs), ".[]" );
@@ -127,7 +127,7 @@ STAT_TYPE CCharPlayer::Stat_GetLockType( lpctstr pszKey ) const
 	ADDTOCALLSTACK("CCharPlayer::Stat_GetLockType");
 
 	tchar szTmpKey[128];
-    strncpynull( szTmpKey, pszKey, CountOf(szTmpKey) );
+    Str_CopyLimitNull( szTmpKey, pszKey, CountOf(szTmpKey) );
 
 	tchar * ppArgs[3];
 	size_t i = Str_ParseCmds( szTmpKey, ppArgs, CountOf(ppArgs), ".[]" );
@@ -490,7 +490,7 @@ enum CPV_TYPE	// Player char.
 	CPV_QTY
 };
 
-lpctstr const CCharPlayer::sm_szVerbKeys[CPV_QTY+1] =
+lpctstr constexpr CCharPlayer::sm_szVerbKeys[CPV_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CCharPlayer_functions.tbl"

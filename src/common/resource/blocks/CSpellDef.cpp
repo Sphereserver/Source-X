@@ -6,7 +6,7 @@
 #include "CSpellDef.h"
 
 
-lpctstr const CSpellDef::sm_szTrigName[SPTRIG_QTY+1] =
+lpctstr constexpr CSpellDef::sm_szTrigName[SPTRIG_QTY+1] =
 {
     "@AAAUNUSED",
     "@EFFECT",
@@ -15,7 +15,7 @@ lpctstr const CSpellDef::sm_szTrigName[SPTRIG_QTY+1] =
     "@START",
     "@SUCCESS",
     "@TARGETCANCEL",
-    nullptr,
+    nullptr
 };
 
 enum SPC_TYPE

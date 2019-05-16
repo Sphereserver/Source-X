@@ -112,7 +112,7 @@ void CUOTiledata::Load()
                 cachedEntry->m_flags = record.m_flags;
                 cachedEntry->m_unknown = 0;
                 cachedEntry->m_index = record.m_index;
-                strncpynull(cachedEntry->m_name, record.m_name, CountOf(cachedEntry->m_name));
+                Str_CopyLimitNull(cachedEntry->m_name, record.m_name, CountOf(cachedEntry->m_name));
                 break;
             }
         }
@@ -178,7 +178,7 @@ void CUOTiledata::Load()
                 cachedEntry->m_wUnk19 = record.m_wUnk14;
                 cachedEntry->m_dwUnk11 = record.m_dwUnk6;
                 cachedEntry->m_dwUnk5 = 0;
-                strncpynull(cachedEntry->m_name, record.m_name, CountOf(cachedEntry->m_name));
+                Str_CopyLimitNull(cachedEntry->m_name, record.m_name, CountOf(cachedEntry->m_name));
                 break;
             }
         }

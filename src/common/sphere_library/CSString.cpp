@@ -82,15 +82,15 @@ int CSString::SetLength(int iNewLength)
 
 		int iMinLength = minimum(iNewLength, m_iLength);
         ASSERT(m_pchData);
-		strncpy(pNewData, m_pchData, iMinLength);
-		pNewData[m_iLength] = 0;
+		Str_CopyLimitNull(pNewData, m_pchData, iMinLength);
+		pNewData[m_iLength] = '\0';
 
 		if (m_pchData)
 			delete[] m_pchData;
 		m_pchData = pNewData;
 	}
 	m_iLength = iNewLength;
-	m_pchData[m_iLength] = 0;
+	m_pchData[m_iLength] = '\0';
 	return m_iLength;
 }
 
@@ -119,8 +119,7 @@ void CSString::Add(lpctstr pszStr)
 	if (iLenCat)
 	{
 		SetLength(iLenCat + m_iLength);
-		strncat(m_pchData, pszStr, m_iLength);
-		m_iLength = (int)strlen(m_pchData);
+        m_iLength = (int)Str_ConcatLimitNull(m_pchData, pszStr, m_iLength);
 	}
 }
 
@@ -129,7 +128,7 @@ void CSString::Copy(lpctstr pszStr)
 	if ((pszStr != m_pchData) && pszStr)
 	{
 		SetLength((int)strlen(pszStr));
-		strncpy(m_pchData, pszStr, m_iLength);
+		strcpy(m_pchData, pszStr);
 	}
 }
 
@@ -138,7 +137,7 @@ void CSString::CopyLen(lpctstr pszStr, int iLen)
     if ((pszStr != m_pchData) && pszStr)
     {
         SetLength(iLen);
-        strncpy(m_pchData, pszStr, m_iLength);
+        Str_CopyLimitNull(m_pchData, pszStr, iLen + 1);
     }
 }
 
@@ -323,7 +322,7 @@ int CSString::indexOf(CSString str, int offset)
 		return -1;
 
 	tchar * str_value = new tchar[slen + 1];
-	strncpy(str_value, str.GetPtr(), slen+1);
+	Str_CopyLimitNull(str_value, str.GetPtr(), slen+1);
 	tchar firstChar = str_value[0];
 
 	for (int i = offset; i < len; ++i)

@@ -209,7 +209,7 @@ enum SC_TYPE
 	SC_QTY
 };
 
-lpctstr const CServerDef::sm_szLoadKeys[SC_QTY+1] =	// static
+lpctstr constexpr CServerDef::sm_szLoadKeys[SC_QTY+1] =	// static
 {
 	"ACCAPP",
 	"ACCAPPS",
@@ -236,17 +236,17 @@ lpctstr const CServerDef::sm_szLoadKeys[SC_QTY+1] =	// static
 	nullptr
 };
 
-static lpctstr const sm_AccAppTable[ ACCAPP_QTY ] =
+static lpctstr constexpr sm_AccAppTable[ ACCAPP_QTY ] =
 {
-	"Closed",		// Closed. Not accepting more.
-	"Unused",
-	"Free",			// Anyone can just log in and create a full account.
-	"GuestAuto",	// You get to be a guest and are automatically sent email with u're new password.
-	"GuestTrial",	// You get to be a guest til u're accepted for full by an Admin.
-	"Unused",
-	"Unspecified",	// Not specified.
-	"Unused",
-	"Unused"
+	"CLOSED",		// Closed. Not accepting more.
+	"UNUSED",
+	"FREE",			// Anyone can just log in and create a full account.
+	"GUESTAUTO",	// You get to be a guest and are automatically sent email with u're new password.
+	"GUESTTRIAL",	// You get to be a guest til u're accepted for full by an Admin.
+	"UNUSED",
+	"UNSPECIFIED",	// Not specified.
+	"UNUSED",
+	"UNUSED"
 };
 
 bool CServerDef::r_LoadVal( CScript & s )

@@ -371,7 +371,7 @@ void CServer::ListClients( CTextConsole *pConsole ) const
 	ClientIterator it;
 	for ( const CClient *pClient = it.next(); pClient != nullptr; pClient = it.next() )
 	{
-		numClients++;
+		++numClients;
 		pChar = pClient->GetChar();
 		pAcc = pClient->GetAccount();
 		chRank = (pAcc && pAcc->GetPrivLevel() > PLEVEL_Player) ? '+' : '=';
@@ -411,7 +411,7 @@ void CServer::ListClients( CTextConsole *pConsole ) const
 			pszMsg[0] = '\0';
 		}
 		ASSERT((strlen(pszMsg) + strlen(tmpMsg)) < SCRIPT_MAX_LINE_LEN);
-		strcat(pszMsg, tmpMsg);
+        Str_ConcatLimitNull(pszMsg, tmpMsg, SCRIPT_MAX_LINE_LEN);
 	}
 
 	if ( numClients <= 0 )
@@ -1295,7 +1295,7 @@ bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, 
 		tchar * pszTemp = Str_GetTemp();
 		tchar * pszTempStart = pszTemp;
 
-		strncpy(pszTemp, pszKey, STR_TEMPLENGTH);
+		Str_CopyLimitNull(pszTemp, pszKey, STR_TEMPLENGTH);
 		tchar * split = strchr(pszTemp, '.');
 		if ( split != nullptr )
 			*split = '\0';
@@ -1381,7 +1381,7 @@ enum SV_TYPE
 	SV_QTY
 };
 
-lpctstr const CServer::sm_szVerbKeys[SV_QTY+1] =
+lpctstr constexpr CServer::sm_szVerbKeys[SV_QTY+1] =
 {
 	"ACCOUNT",
 	"ACCOUNTS", // read only

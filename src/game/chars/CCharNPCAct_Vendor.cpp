@@ -413,7 +413,7 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 	lpctstr pPrvSkill = nullptr;
 
 	size_t iCount = 0;
-	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; i++ )
+	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
 		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) )
 			continue;
@@ -437,7 +437,7 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 		}
 
 		pPrvSkill = g_Cfg.GetSkillKey((SKILL_TYPE)i);
-		iCount++;
+		++iCount;
 	}
 
 	if ( iCount == 0 )

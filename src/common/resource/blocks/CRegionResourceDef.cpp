@@ -16,7 +16,7 @@ enum RMC_TYPE
     RMC_QTY
 };
 
-lpctstr const CRegionResourceDef::sm_szLoadKeys[RMC_QTY+1] =
+lpctstr constexpr CRegionResourceDef::sm_szLoadKeys[RMC_QTY+1] =
 {
     "AMOUNT",
     "DEFNAME",
@@ -27,13 +27,13 @@ lpctstr const CRegionResourceDef::sm_szLoadKeys[RMC_QTY+1] =
     nullptr
 };
 
-lpctstr const CRegionResourceDef::sm_szTrigName[RRTRIG_QTY+1] =	// static
+lpctstr constexpr CRegionResourceDef::sm_szTrigName[RRTRIG_QTY+1] =	// static
 {
     "@AAAUNUSED",
     "@RESOURCEFOUND",
     "@RESOURCEGATHER",
     "@RESOURCETEST",
-    nullptr,
+    nullptr
 };
 
 

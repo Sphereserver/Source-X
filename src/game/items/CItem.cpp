@@ -36,7 +36,7 @@
 	character trigger (even if it does not make sense)! CTRIG_item* will be automatically
 	called when one of these triggers fired, depending on their index. So NEVER unalign the two lists!
 */
-lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
+lpctstr constexpr CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
 	"@AfterClick",
@@ -470,7 +470,7 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 	return pItem;
 }
 
-lpctstr const CItem::sm_szTemplateTable[ITC_QTY+1] =
+lpctstr constexpr CItem::sm_szTemplateTable[ITC_QTY+1] =
 {
 	"BREAK",
 	"BUY",
@@ -2346,7 +2346,7 @@ enum ICR_TYPE
 	ICR_QTY
 };
 
-lpctstr const CItem::sm_szRefKeys[ICR_QTY+1] =
+lpctstr constexpr CItem::sm_szRefKeys[ICR_QTY+1] =
 {
 	"CONT",
 	"LINK",
@@ -2397,7 +2397,7 @@ enum IC_TYPE
 	IC_QTY
 };
 
-lpctstr const CItem::sm_szLoadKeys[IC_QTY+1] =
+lpctstr constexpr CItem::sm_szLoadKeys[IC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CItem_props.tbl"
@@ -3150,7 +3150,7 @@ enum CIV_TYPE
 	CIV_QTY
 };
 
-lpctstr const CItem::sm_szVerbKeys[CIV_QTY+1] =
+lpctstr constexpr CItem::sm_szVerbKeys[CIV_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CItem_functions.tbl"
@@ -4873,7 +4873,7 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 		}
 		else
 		{
-			iItemSighted ++; // Keep a tally of how much we see
+			++ iItemSighted; // Keep a tally of how much we see
 			if (!pItemSighted || iDist < ptCoords.GetDist(pItemSighted->GetTopPoint())) // Only find the closest item to us, give boats a preference
 			{
 				pItemSighted = pItem;

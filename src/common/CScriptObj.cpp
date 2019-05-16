@@ -36,7 +36,7 @@ enum SREF_TYPE
     SREF_QTY
 };
 
-lpctstr const _ptcSRefKeys[SREF_QTY+1] =
+lpctstr constexpr _ptcSRefKeys[SREF_QTY+1] =
 {
     "DB",
     "FILE",
@@ -128,7 +128,7 @@ enum SSC_TYPE
 	SSC_QTY
 };
 
-lpctstr const CScriptObj::sm_szLoadKeys[SSC_QTY+1] =
+lpctstr constexpr CScriptObj::sm_szLoadKeys[SSC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CScriptObj_functions.tbl"
@@ -184,7 +184,7 @@ bool CScriptObj::r_Call( size_t uiFunctionIndex, CTextConsole * pSrc, CScriptTri
             char	*pSpace;
 
             //	lowercase for speed, and strip arguments
-            strncpy(pName, pFunction->GetName(), STR_TEMPLENGTH);
+            Str_CopyLimitNull(pName, pFunction->GetName(), STR_TEMPLENGTH);
             if ( (pSpace = strchr(pName, ' ')) != nullptr )
                 *pSpace = 0;
             _strlwr(pName);
@@ -741,7 +741,7 @@ badcmd:
 					iCnt = iLen - iPos;
 
 				tchar *buf = Str_GetTemp();
-				strncpy( buf, ppArgs[2] + iPos, (size_t)(iCnt) );
+				Str_CopyLimitNull( buf, ppArgs[2] + iPos, (size_t)(iCnt) );
 				buf[iCnt] = '\0';
 
 				if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
@@ -792,15 +792,16 @@ badcmd:
 				tchar	*buf = Str_GetTemp();
 				REMOVE_QUOTES( pszKey );
 				sVal.FormatLLHex( *pszKey );
-				strcpy( buf, sVal );
+                Str_CopyLimitNull( buf, sVal, STR_TEMPLENGTH );
 				while ( *(++pszKey) )
 				{
-					if ( *pszKey == '"' ) break;
+					if ( *pszKey == '"' )
+                        break;
 					sVal.FormatLLHex(*pszKey);
-					strcat( buf, " " );
-					strcat( buf, sVal );
+                    Str_ConcatLimitNull( buf, " ", STR_TEMPLENGTH );
+                    Str_ConcatLimitNull( buf, sVal, STR_TEMPLENGTH );
 				}
-				sVal	= buf;
+				sVal = buf;
 			}
 			return true;
 		case SSC_ASCPAD:
@@ -816,10 +817,11 @@ badcmd:
 				tchar	*buf = Str_GetTemp();
 				REMOVE_QUOTES( ppArgs[1] );
 				sVal.FormatLLHex(*ppArgs[1]);
-				strcpy( buf, sVal );
+                Str_CopyLimitNull( buf, sVal, STR_TEMPLENGTH );
 				while ( --iPad )
 				{
-					if ( *ppArgs[1] == '"' ) continue;
+					if ( *ppArgs[1] == '"' )
+                        continue;
 					if ( *(ppArgs[1]) )
 					{
 						++ppArgs[1];
@@ -828,8 +830,8 @@ badcmd:
 					else
 						sVal.FormatLLHex('\0');
 
-					strcat( buf, " " );
-					strcat( buf, sVal );
+                    Str_ConcatLimitNull( buf, " ", STR_TEMPLENGTH );
+                    Str_ConcatLimitNull( buf, sVal, STR_TEMPLENGTH );
 				}
 				sVal	= buf;
 			}
@@ -973,7 +975,7 @@ badcmd:
 				char separators[16];
 
 				GETNONWHITESPACE(pszKey);
-				strncpynull(separators, pszKey, 16);
+				Str_CopyLimitNull(separators, pszKey, sizeof(separators));
 				{
 					char *p = separators;
 					while ( *p && *p != ',' )
@@ -1061,7 +1063,7 @@ badcmd:
 				if ( iLenString > 0 )
 				{
 					SKIP_ARGSEP(pszKey);
-					strncpynull(sToMatch, pszKey, iLenString + 1);
+					Str_CopyLimitNull(sToMatch, pszKey, iLenString + 1);
 					pszKey += iLenString;
 				}
 
@@ -1101,7 +1103,7 @@ enum SSV_TYPE
 	SSV_QTY
 };
 
-lpctstr const CScriptObj::sm_szVerbKeys[SSV_QTY+1] =
+lpctstr constexpr CScriptObj::sm_szVerbKeys[SSV_QTY+1] =
 {
 	"NEW",
 	"NEWDUPE",
@@ -1808,7 +1810,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 		if (Str_ParseCmds(s.GetArgStr(), ppArgs, CountOf(ppArgs), " \t,") >= 1)
 		{
 			char funcname[1024];
-			strncpy(funcname, ppArgs[0], sizeof(funcname));
+			Str_CopyLimitNull(funcname, ppArgs[0], sizeof(funcname));
 
 			TRIGRET_TYPE iRet = g_World.m_TimedFunctions.Loop(funcname, LoopsMade, StartContext, EndContext, s, pSrc, pArgs, pResult);
 			if ((iRet != TRIGRET_ENDIF) && (iRet != TRIGRET_CONTINUE))
@@ -1972,7 +1974,7 @@ enum SK_TYPE
 
 
 
-lpctstr const CScriptObj::sm_szScriptKeys[SK_QTY+1] =
+lpctstr constexpr CScriptObj::sm_szScriptKeys[SK_QTY+1] =
 {
 	"BEGIN",
 	"BREAK",
@@ -2278,9 +2280,10 @@ jump_in:
 						EXC_SET_BLOCK("parsing <> in a key");
 						TemporaryString tsBuf;
 						tchar* pszBuf = static_cast<tchar *>(tsBuf);
-						strcpy(pszBuf, s.GetKey());
-						strcat(pszBuf, " ");
-						strcat(pszBuf, s.GetArgRaw());
+                        const size_t lenBuf = tsBuf.realLength();
+                        Str_CopyLimitNull(pszBuf, s.GetKey(), lenBuf);
+                        Str_ConcatLimitNull(pszBuf, " ", lenBuf);
+                        Str_ConcatLimitNull(pszBuf, s.GetArgRaw(), lenBuf);
 						ParseText(pszBuf, pSrc, 0, pArgs);
 
 						s.ParseKey(pszBuf);

@@ -31,5 +31,5 @@ CUOItemInfo::CUOItemInfo( ITEMID_TYPE id )
     m_dwAnim = cachedEntry->m_dwAnim;
     m_wUnk19 = cachedEntry->m_wUnk19;
     m_height = cachedEntry->m_height;
-    strncpynull(m_name, cachedEntry->m_name, CountOf(m_name));
+    Str_CopyLimitNull(m_name, cachedEntry->m_name, CountOf(m_name));
 }

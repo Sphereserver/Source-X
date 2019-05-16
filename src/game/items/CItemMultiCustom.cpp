@@ -1419,7 +1419,7 @@ enum
     IMCV_QTY
 };
 
-lpctstr const CItemMultiCustom::sm_szVerbKeys[IMCV_QTY + 1] =
+lpctstr constexpr CItemMultiCustom::sm_szVerbKeys[IMCV_QTY + 1] =
 {
     "ADDITEM",
     "ADDMULTI",
@@ -1635,7 +1635,7 @@ enum IMCC_TYPE
     IMCC_QTY
 };
 
-lpctstr const CItemMultiCustom::sm_szLoadKeys[IMCC_QTY + 1] = // static
+lpctstr constexpr CItemMultiCustom::sm_szLoadKeys[IMCC_QTY + 1] = // static
 {
     "COMPONENTS",
     "DESIGN",
@@ -1914,14 +1914,33 @@ bool CItemMultiCustom::LoadValidItems()
 
     tchar* pszRowFull = Str_GetTemp();
     tchar* pszHeaderFull = Str_GetTemp();
+    int iErrCode = 0;
     for (CSVRowData::iterator itCsv = csvDataRow.begin(), end = csvDataRow.end(); itCsv != end; ++itCsv)
     {
-        strcat(pszHeaderFull, "\t");
-        strcat(pszHeaderFull, itCsv->first.c_str());
+        if (STR_TEMPLENGTH < Str_ConcatLimitNull(pszHeaderFull, "\t", STR_TEMPLENGTH))
+        {
+            iErrCode = 1;
+            break;
+        }
+        if (STR_TEMPLENGTH < Str_ConcatLimitNull(pszHeaderFull, itCsv->first.c_str(), STR_TEMPLENGTH))
+        {
+            iErrCode = 2;
+            break;
+        }
 
-        strcat(pszRowFull, "\t");
-        strcat(pszRowFull, itCsv->second.c_str());
+        if (STR_TEMPLENGTH < Str_ConcatLimitNull(pszRowFull, "\t", STR_TEMPLENGTH))
+        {
+            iErrCode = 3;
+            break;
+        }
+        if (STR_TEMPLENGTH < Str_ConcatLimitNull(pszRowFull, itCsv->second.c_str(), STR_TEMPLENGTH))
+        {
+            iErrCode = 4;
+            break;
+        }
     }
+    if (iErrCode)
+        g_Log.EventDebug("Dump of csvData aborted. ErrCode: %d.\n", iErrCode);
 
     g_Log.EventDebug("header count '%" PRIuSIZE_T "', header text '%s'\n", csvDataRow.size(), pszRowFull);
     g_Log.EventDebug("column count '%" PRIuSIZE_T "', row text '%s'\n", csvDataRow.size(), pszHeaderFull);

@@ -14,12 +14,13 @@ CItemMessage::~CItemMessage()
     UnLoadSystemPages();
 }
 
-lpctstr const CItemMessage::sm_szLoadKeys[CIC_QTY+1] = {
+lpctstr constexpr CItemMessage::sm_szLoadKeys[CIC_QTY+1] =
+{
     "AUTHOR",
     "BODY",
     "PAGES",	// (W)
     "TITLE",	// same as name
-    nullptr,
+    nullptr
 };
 
 void CItemMessage::r_Write(CScript & s)
@@ -112,7 +113,7 @@ bool CItemMessage::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc
     return false;
 }
 
-lpctstr const CItemMessage::sm_szVerbKeys[] =
+lpctstr constexpr CItemMessage::sm_szVerbKeys[] =
 {
     "ERASE",
     "PAGE",

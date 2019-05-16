@@ -20,7 +20,7 @@ enum WV_TYPE
 	WV_QTY
 };
 
-lpctstr const CWebPageDef::sm_szVerbKeys[WV_QTY+1] =
+lpctstr constexpr CWebPageDef::sm_szVerbKeys[WV_QTY+1] =
 {
 	"CLIENTLIST",	// make a table of all the clients.
 	"GMPAGELIST",	// make a table of the gm pages.
@@ -99,7 +99,7 @@ enum WC_TYPE
 	WC_QTY
 };
 
-lpctstr const CWebPageDef::sm_szLoadKeys[WC_QTY+1] =
+lpctstr constexpr CWebPageDef::sm_szLoadKeys[WC_QTY+1] =
 {
 	"PLEVEL",				// What priv level does one need to be to view this page.
 	"WEBPAGEFILE",			// For periodic generated pages.
@@ -497,7 +497,7 @@ bool CWebPageDef::IsMatch( lpctstr pszMatch ) const
 	return( ! strcmpi( pszTry, pszMatch ));
 }
 
-lpctstr const CWebPageDef::sm_szPageType[WEBPAGE_QTY+1] =
+lpctstr constexpr CWebPageDef::sm_szPageType[WEBPAGE_QTY+1] =
 {
 	"text/html",		// WEBPAGE_TEMPLATE
 	"text/html",		// WEBPAGE_TEXT
@@ -507,11 +507,11 @@ lpctstr const CWebPageDef::sm_szPageType[WEBPAGE_QTY+1] =
 	nullptr				// WEBPAGE_QTY
 };
 
-lpctstr const CWebPageDef::sm_szTrigName[WTRIG_QTY+1] =	// static
+lpctstr constexpr CWebPageDef::sm_szTrigName[WTRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
 	"@LOAD",
-	nullptr,
+	nullptr
 };
 
 int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime * pdateIfModifiedSince )

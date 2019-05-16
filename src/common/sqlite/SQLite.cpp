@@ -411,7 +411,7 @@ enum LDBO_TYPE
 	LDBO_QTY
 };
 
-lpctstr const CSQLite::sm_szLoadKeys[LDBO_QTY+1] =
+lpctstr constexpr CSQLite::sm_szLoadKeys[LDBO_QTY+1] =
 {
 	"CONNECTED",
     "FILENAME",
@@ -430,7 +430,7 @@ enum LDBOV_TYPE
 	LDBOV_QTY
 };
 
-lpctstr const CSQLite::sm_szVerbKeys[LDBOV_QTY+1] =
+lpctstr constexpr CSQLite::sm_szVerbKeys[LDBOV_QTY+1] =
 {
 	"CLOSE",
 	"CONNECT",
@@ -718,7 +718,7 @@ void TablePtr::Destroy()
 UTF8MBSTR::UTF8MBSTR()
 {
 	m_strUTF8_MultiByte=new char[1];
-	m_strUTF8_MultiByte[0]=0;
+	m_strUTF8_MultiByte[0]='\0';
 	m_iLen=0;
 }
 
@@ -729,7 +729,7 @@ UTF8MBSTR::UTF8MBSTR( lpctstr lpStr )
 	else
 	{
 		m_strUTF8_MultiByte=new char[1];
-		m_strUTF8_MultiByte[0]=0;
+		m_strUTF8_MultiByte[0]='\0';
 		m_iLen=0;
 	}
 }
@@ -738,7 +738,7 @@ UTF8MBSTR::UTF8MBSTR( UTF8MBSTR& lpStr )
 {
 	m_iLen=lpStr.m_iLen;
 	m_strUTF8_MultiByte=new char[m_iLen+1];
-	strncpy(m_strUTF8_MultiByte, lpStr.m_strUTF8_MultiByte, m_iLen+1);
+	Str_CopyLimitNull(m_strUTF8_MultiByte, lpStr.m_strUTF8_MultiByte, m_iLen+1);
 }
 
 UTF8MBSTR::~UTF8MBSTR()
@@ -757,7 +757,7 @@ void UTF8MBSTR::operator =( lpctstr lpStr )
 	else
 	{
 		m_strUTF8_MultiByte=new char[1];
-		m_strUTF8_MultiByte[0]=0;
+		m_strUTF8_MultiByte[0]='\0';
 		m_iLen=0;
 	}
 }
@@ -769,7 +769,7 @@ void UTF8MBSTR::operator =( UTF8MBSTR& lpStr )
 
 	m_iLen=lpStr.m_iLen;
 	m_strUTF8_MultiByte=new char[m_iLen+1];
-	strncpy(m_strUTF8_MultiByte, lpStr.m_strUTF8_MultiByte, m_iLen+1);
+	Str_CopyLimitNull(m_strUTF8_MultiByte, lpStr.m_strUTF8_MultiByte, m_iLen+1);
 }
 
 UTF8MBSTR::operator char* ()

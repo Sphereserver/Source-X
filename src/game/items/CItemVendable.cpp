@@ -37,7 +37,7 @@ enum IVC_TYPE
 	IVC_QTY
 };
 
-lpctstr const CItemVendable::sm_szLoadKeys[IVC_QTY+1] =
+lpctstr constexpr CItemVendable::sm_szLoadKeys[IVC_QTY+1] =
 {
 	"PRICE",
 	"QUALITY",

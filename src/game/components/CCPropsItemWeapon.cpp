@@ -3,7 +3,7 @@
 #include "CCPropsItemWeapon.h"
 
 
-lpctstr const CCPropsItemWeapon::_ptcPropertyKeys[PROPIWEAP_QTY + 1] =
+lpctstr constexpr CCPropsItemWeapon::_ptcPropertyKeys[PROPIWEAP_QTY + 1] =
 {
     #define ADDPROP(a,b,c) b,
     #include "../../tables/CCPropsItemWeapon_props.tbl"
@@ -185,7 +185,7 @@ void CCPropsItemWeapon::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase*
         {
             int64 piVal[2];
             tchar *ptcTmp = Str_GetTemp();
-            strncpy(ptcTmp, ptcVal, STR_TEMPLENGTH);
+            Str_CopyLimitNull(ptcTmp, ptcVal, STR_TEMPLENGTH);
             int iQty = Str_ParseCmds( ptcTmp, piVal, CountOf(piVal));
             int iRange;
             if ( iQty > 1 )

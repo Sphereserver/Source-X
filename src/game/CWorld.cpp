@@ -1100,10 +1100,10 @@ bool CWorld::SaveForce() // Save world state
 #endif
 
 	g_Serv.SetServerMode(SERVMODE_Saving);	// Forced save freezes the system.
-	bool bSave = true;
-	bool bSuccess = true;
+	bool fSave = true;
+	bool fSuccess = true;
 
-	static lpctstr const msgs[] =
+	static lpctstr constexpr save_msgs[] =
 	{
 		"garbage collection",
 		"sectors",
@@ -1112,35 +1112,35 @@ bool CWorld::SaveForce() // Save world state
 		"accounts",
 		""
 	};
-	const char *pCurBlock = msgs[0];
+	const char *pCurBlock = save_msgs[0];
 
-	while ( bSave )
+	while ( fSave )
 	{
 		try
 		{
 			if (( m_iSaveStage >= 0 ) && ( m_iSaveStage < (int)(m_SectorsQty) ))
-				pCurBlock = msgs[1];
+				pCurBlock = save_msgs[1];
 			else if ( m_iSaveStage == (int)(m_SectorsQty) )
-				pCurBlock = msgs[2];
+				pCurBlock = save_msgs[2];
 			else if ( m_iSaveStage == (int)(m_SectorsQty)+1 )
-				pCurBlock = msgs[3];
+				pCurBlock = save_msgs[3];
 			else if ( m_iSaveStage == (int)(m_SectorsQty)+2 )
-				pCurBlock = msgs[4];
+				pCurBlock = save_msgs[4];
 			else
-				pCurBlock = msgs[5];
+				pCurBlock = save_msgs[5];
 
-			bSave = SaveStage();
+			fSave = SaveStage();
 			if (! ( m_iSaveStage & 0x1FF ))
 			{
 				g_Serv.PrintPercent( m_iSaveStage, m_SectorsQty+3 );
 			}
-			if ( !bSave && ( pCurBlock != msgs[5] ))
+			if ( !fSave && ( pCurBlock != save_msgs[5] ))
 				goto failedstage;
 		}
 		catch ( const CSError& e )
 		{
 			g_Log.CatchEvent(&e, "Save FAILED for stage %u (%s).", m_iSaveStage, pCurBlock);
-			bSuccess = false;
+			fSuccess = false;
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		}
 		catch (...)
@@ -1151,11 +1151,11 @@ bool CWorld::SaveForce() // Save world state
 		continue;
 failedstage:
 		g_Log.CatchEvent( nullptr, "Save FAILED for stage %u (%s).", m_iSaveStage, pCurBlock);
-		bSuccess = false;
+		fSuccess = false;
 	}
 
 	g_Serv.SetServerMode(SERVMODE_Run);			// Game is up and running
-	return bSuccess;
+	return fSuccess;
 }
 
 bool CWorld::SaveTry( bool fForceImmediate ) // Save world state
@@ -1933,7 +1933,7 @@ enum WC_TYPE
 	WC_QTY
 };
 
-lpctstr const CWorld::sm_szLoadKeys[WC_QTY+1] =	// static
+lpctstr constexpr CWorld::sm_szLoadKeys[WC_QTY+1] =	// static
 {
     "CURTICK",
 	"PREVBUILD",

@@ -59,7 +59,7 @@ enum SC_TYPE
 	SC_QTY
 };
 
-lpctstr const CSector::sm_szLoadKeys[SC_QTY+1] =
+lpctstr constexpr CSector::sm_szLoadKeys[SC_QTY+1] =
 {
     "CANSLEEP",
 	"CLIENTS",
@@ -306,7 +306,7 @@ enum SEV_TYPE
 	SEV_QTY
 };
 
-lpctstr const CSector::sm_szVerbKeys[SEV_QTY+1] =
+lpctstr constexpr CSector::sm_szVerbKeys[SEV_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CSector_functions.tbl"

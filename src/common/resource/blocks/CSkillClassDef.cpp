@@ -12,7 +12,7 @@ enum SCC_TYPE
     SCC_QTY
 };
 
-lpctstr const CSkillClassDef::sm_szLoadKeys[SCC_QTY+1] =
+lpctstr constexpr CSkillClassDef::sm_szLoadKeys[SCC_QTY+1] =
 {
     "DEFNAME",
     "NAME",

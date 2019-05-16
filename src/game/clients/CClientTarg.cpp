@@ -588,7 +588,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 	case CV_NUDGE:
 		{
 			tchar szTmp[512];
-			strncpynull( szTmp, m_Targ_Text, CountOf(szTmp));
+			Str_CopyLimitNull( szTmp, m_Targ_Text, CountOf(szTmp));
 
 			int64 piArgs[3];		// Maximum parameters in one line
 			Str_ParseCmds( szTmp, piArgs, CountOf( piArgs ));
@@ -693,7 +693,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 	case CV_TILE:
 		{
 			tchar szTmp[256];
-			strncpynull( szTmp, m_Targ_Text, CountOf(szTmp));
+			Str_CopyLimitNull( szTmp, m_Targ_Text, CountOf(szTmp));
 
 			int64 piArgs[16];		// Maximum parameters in one line
 			int iArgQty = Str_ParseCmds( szTmp, piArgs, CountOf( piArgs ));

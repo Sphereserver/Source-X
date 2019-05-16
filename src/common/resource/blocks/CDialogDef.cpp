@@ -56,7 +56,7 @@ enum GUMPCTL_TYPE // controls we can put in a gump.
     GUMPCTL_QTY
 };
 
-lpctstr const CDialogDef::sm_szLoadKeys[GUMPCTL_QTY+1] =
+lpctstr constexpr CDialogDef::sm_szLoadKeys[GUMPCTL_QTY+1] =
 {
     "BUTTON",
     "BUTTONTILEART",

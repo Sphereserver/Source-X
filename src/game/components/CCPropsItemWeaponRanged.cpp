@@ -3,7 +3,7 @@
 #include "CCPropsItemWeaponRanged.h"
 
 
-lpctstr const CCPropsItemWeaponRanged::_ptcPropertyKeys[PROPIWEAPRNG_QTY + 1] =
+lpctstr constexpr CCPropsItemWeaponRanged::_ptcPropertyKeys[PROPIWEAPRNG_QTY + 1] =
 {
     #define ADDPROP(a,b,c) b,
     #include "../../tables/CCPropsItemWeaponRanged_props.tbl"

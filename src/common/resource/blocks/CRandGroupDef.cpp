@@ -20,7 +20,7 @@ enum RGC_TYPE
     RGC_QTY
 };
 
-lpctstr const CRandGroupDef::sm_szLoadKeys[RGC_QTY+1] =
+lpctstr constexpr CRandGroupDef::sm_szLoadKeys[RGC_QTY+1] =
 {
     "CALCMEMBERINDEX",
     "CATEGORY",
@@ -39,7 +39,7 @@ int CRandGroupDef::CalcTotalWeight()
     ADDTOCALLSTACK("CRandGroupDef::CalcTotalWeight");
     int iTotal = 0;
     size_t iQty = m_Members.size();
-    for ( size_t i = 0; i < iQty; i++ )
+    for ( size_t i = 0; i < iQty; ++i )
     {
         iTotal += (int)(m_Members[i].GetResQty());
     }

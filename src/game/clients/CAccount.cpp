@@ -295,7 +295,7 @@ enum VACS_TYPE
 	VACS_QTY // TODOC.
 };
 
-lpctstr const CAccounts::sm_szVerbKeys[] =	// CAccounts:: // account group verbs.
+lpctstr constexpr CAccounts::sm_szVerbKeys[] =	// CAccounts:: // account group verbs.
 {
 	"ADD",
 	"ADDMD5",
@@ -304,7 +304,7 @@ lpctstr const CAccounts::sm_szVerbKeys[] =	// CAccounts:: // account group verbs
 	"JAILED",
 	"UNUSED",
 	"UPDATE",
-	nullptr,
+	nullptr
 };
 
 bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, lpctstr pszDays, lpctstr pszVerb, lpctstr pszArgs, dword dwMask)
@@ -512,7 +512,7 @@ bool CAccount::NameStrip( tchar * pszNameOut, lpctstr pszNameInp )
 	return true;
 }
 
-static lpctstr const sm_szPrivLevels[ PLEVEL_QTY+1 ] =
+static lpctstr constexpr sm_szPrivLevels[ PLEVEL_QTY+1 ] =
 {
 	"Guest",		// 0 = This is just a guest account. (cannot PK)
 	"Player",		// 1 = Player or NPC.
@@ -944,7 +944,7 @@ bool CAccount::SetPassword( lpctstr pszPassword, bool isMD5Hash )
 
 	size_t actualPasswordBufferSize = minimum(MAX_ACCOUNT_PASSWORD_ENTER, enteredPasswordLength) + 1;
 	char * actualPassword = new char[actualPasswordBufferSize];
-	strncpynull(actualPassword, pszPassword, actualPasswordBufferSize);
+	Str_CopyLimitNull(actualPassword, pszPassword, actualPasswordBufferSize);
 
 	if ( useMD5 )
 	{
@@ -1068,7 +1068,7 @@ enum AC_TYPE
 	AC_QTY
 };
 
-lpctstr const CAccount::sm_szLoadKeys[AC_QTY+1] = // static
+lpctstr constexpr CAccount::sm_szLoadKeys[AC_QTY+1] = // static
 {
 	"ACCOUNT",
 	"BLOCK",
@@ -1098,7 +1098,7 @@ lpctstr const CAccount::sm_szLoadKeys[AC_QTY+1] = // static
 	"TAG0",
 	"TAGCOUNT",
 	"TOTALCONNECTTIME",
-	nullptr,
+	nullptr
 };
 
 bool CAccount::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )

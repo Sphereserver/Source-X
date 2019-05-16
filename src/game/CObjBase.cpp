@@ -296,7 +296,7 @@ bool CObjBase::SetNamePool( lpctstr pszName )
 		tchar szTmp[ MAX_ITEM_NAME_SIZE + 1 ];
 		if ( strlen( pszName ) >= MAX_ITEM_NAME_SIZE )
 		{
-			strncpynull( szTmp, pszName, MAX_ITEM_NAME_SIZE );
+			Str_CopyLimitNull( szTmp, pszName, MAX_ITEM_NAME_SIZE );
 			pszTmp = szTmp;
 		}
 
@@ -745,7 +745,7 @@ enum OBC_TYPE
 	OC_QTY
 };
 
-lpctstr const CObjBase::sm_szLoadKeys[OC_QTY+1] =
+lpctstr constexpr CObjBase::sm_szLoadKeys[OC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CObjBase_props.tbl"
@@ -1271,7 +1271,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 			if ( *pszKey )
 			{
 				tchar * pszArg = Str_GetTemp();
-                strncpynull( pszArg, pszKey, strlen( pszKey ) + 1 );
+                Str_CopyLimitNull( pszArg, pszKey, strlen( pszKey ) + 1 );
 
 				CUID uid(Exp_GetDWVal( pszKey ));
 				pItem = dynamic_cast<CItem*> (uid.ObjFind());
@@ -1311,7 +1311,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 			if ( *pszKey )
 			{
 				tchar * pszArg = Str_GetTemp();
-				strncpynull( pszArg, pszKey, strlen( pszKey ) + 1 );
+				Str_CopyLimitNull( pszArg, pszKey, strlen( pszKey ) + 1 );
 
 				CUID uid = Exp_GetVal( pszKey );
 				pItem = dynamic_cast<CItem*> (uid.ObjFind());
@@ -1836,7 +1836,7 @@ enum OV_TYPE
 	OV_QTY
 };
 
-lpctstr const CObjBase::sm_szVerbKeys[OV_QTY+1] =
+lpctstr constexpr CObjBase::sm_szVerbKeys[OV_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CObjBase_functions.tbl"

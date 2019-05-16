@@ -9,7 +9,7 @@
 #include "CCharNPC.h"
 
 
-lpctstr const CCharNPC::sm_szLoadKeys[CNC_QTY+1] =
+lpctstr constexpr CCharNPC::sm_szLoadKeys[CNC_QTY+1] =
 {
 #define ADD(a,b) b,
 #include "../../tables/CCharNpc_props.tbl"

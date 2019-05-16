@@ -877,7 +877,7 @@ enum
     CMV_QTY
 };
 
-lpctstr const CCMultiMovable::sm_szVerbKeys[CMV_QTY + 1] =
+lpctstr constexpr CCMultiMovable::sm_szVerbKeys[CMV_QTY + 1] =
 {
     "SHIPANCHORDROP",
     "SHIPANCHORRAISE",
@@ -1194,7 +1194,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
         }
 
         tchar szText[MAX_TALK_BUFFER];
-        strncpy(szText, pszSpeak, MAX_TALK_BUFFER);
+        Str_CopyLimitNull(szText, pszSpeak, MAX_TALK_BUFFER);
         pChar->ParseText(szText, &g_Serv);
         pTiller->Speak(szText, HUE_TEXT_DEF, TALKMODE_SAY, FONT_NORMAL);
     }
@@ -1203,14 +1203,13 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
 
 enum CML_TYPE
 {
-
     CML_PILOT,
     CML_SHIPSPEED,
     CML_SPEEDMODE,
     CML_QTY
 };
 
-lpctstr const CCMultiMovable::sm_szLoadKeys[CML_QTY + 1] =
+lpctstr constexpr CCMultiMovable::sm_szLoadKeys[CML_QTY + 1] =
 {
     "PILOT",
     "SHIPSPEED",

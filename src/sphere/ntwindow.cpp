@@ -388,7 +388,7 @@ int CNTWindow::OnCreate( HWND hWnd, LPCREATESTRUCT lParam )
 		pnid.uFlags = NIF_TIP | NIF_ICON | NIF_MESSAGE;
 		pnid.uCallbackMessage = WM_USER_TRAY_NOTIFY;
 		pnid.hIcon  = theApp.LoadIcon( IDR_MAINFRAME );
-        strncpynull(pnid.szTip, theApp.m_pszAppName, CountOf(pnid.szTip)-1);
+        Str_CopyLimitNull(pnid.szTip, theApp.m_pszAppName, CountOf(pnid.szTip)-1);
 		Shell_NotifyIcon(NIM_ADD, &pnid);
 	}
 
@@ -957,7 +957,7 @@ void CNTWindow::NTWindow_CheckUpdateWindowTitle()
 	if ( Sphere_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
 	{
 		theApp.m_wndMain.pnid.uFlags = NIF_TIP;
-        strncpynull(theApp.m_wndMain.pnid.szTip, psTitle, CountOf(theApp.m_wndMain.pnid.szTip)-1);
+        Str_CopyLimitNull(theApp.m_wndMain.pnid.szTip, psTitle, CountOf(theApp.m_wndMain.pnid.szTip)-1);
 		Shell_NotifyIcon(NIM_MODIFY, &theApp.m_wndMain.pnid);
 	}
 }
@@ -1048,8 +1048,11 @@ bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
 						// there IS a selection, so extract it
 						if ( selStart != selEnd )
 						{
-							strncpy(pszCurSel, pszTemp + selStart, selEnd - selStart);
-							pszCurSel[selEnd - selStart] = '\0';
+                            size_t iSizeSel = selEnd - selStart + 1; // +1 for the terminator
+                            if (iSizeSel > STR_TEMPLENGTH)
+                                iSizeSel = STR_TEMPLENGTH;
+							Str_CopyLimit(pszCurSel, pszTemp + selStart, iSizeSel);
+							pszCurSel[iSizeSel] = '\0';
 						}
 						else
 						{

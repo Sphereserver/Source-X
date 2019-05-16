@@ -91,7 +91,7 @@ tchar * CScriptKey::GetArgStr( bool * fQuoted )	// this could be a quoted string
 		}
 	}
 
-	return pStr ;
+	return pStr;
 }
 
 dword CScriptKey::GetArgFlag( dword dwStart, dword dwMask )
@@ -358,9 +358,8 @@ bool CScriptKeyAlloc::ParseKey( lpctstr pszKey )
 	tchar * pBuffer = _GetKeyBufferRaw( strlen( pszKey ));
 	ASSERT(pBuffer);
 
-	size_t iLen = m_Mem.GetDataLength() - 1;
-	strncpy( pBuffer, pszKey, iLen );
-	pBuffer[iLen] = '\0';
+	size_t iLen = m_Mem.GetDataLength();
+	Str_CopyLimitNull( pBuffer, pszKey, iLen );
 
 	Str_Parse( pBuffer, &m_pszArg );
 	return true;
@@ -389,8 +388,8 @@ bool CScriptKeyAlloc::ParseKey( lpctstr pszKey, lpctstr pszVal )
 	if ( pszVal )
 	{
 		++m_pszArg;
-		lenval = m_Mem.GetDataLength() - 2;
-		strncpynull( m_pszArg, pszVal, lenval - lenkey + 1 );
+		lenval = m_Mem.GetDataLength();
+		Str_CopyLimitNull( m_pszArg, pszVal, lenval - lenkey );
 	}
 
 	return true;
@@ -490,7 +489,7 @@ bool CScript::_Open( lpctstr ptcFilename, uint uiFlags )
 	if ( !ptcExt )
 	{
 		tchar ptcTemp[_MAX_PATH];
-		strncpy(ptcTemp, ptcFilename, _MAX_PATH-4); // -4 beause of SPHERE_SCRIPT, which is = ".scp"
+		Str_CopyLimit(ptcTemp, ptcFilename, _MAX_PATH-4); // -4 beause of SPHERE_SCRIPT, which is = ".scp"
 		strcat(ptcTemp, SPHERE_SCRIPT);
 		_SetFilePath(ptcTemp);
 		uiFlags |= OF_TEXT;

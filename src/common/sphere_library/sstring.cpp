@@ -117,7 +117,8 @@ tchar* Str_FromUI (tchar *buf, uint val, int base) noexcept
 
     if (base == 16) {
         buf[--i] = '0';
-    }    return &buf[i];
+    }
+    return &buf[i];
 }
 
 tchar* Str_FromLL (tchar *buf, llong val, int base) noexcept
@@ -264,29 +265,132 @@ static inline int Str_CmpHeadI_Table(lpctstr ptcFind, lpctstr ptcTable)
 
 // String utilities: Modifiers
 
+// strcpy doesn't have an argument to truncate the copy to the buffer length;
+// strncpy doesn't null-terminate if it truncates the copy, and if uiMaxlen is > than the source string length, the remaining space is filled with '\0'
+size_t Str_CopyLimit(tchar * pDst, lpctstr pSrc, size_t uiMaxSize)
+{
+    if (uiMaxSize == 0)
+    {
+        return 0;
+    }
+    if (pSrc[0] == '\0')
+    {
+        pDst[0] = '\0';
+        return 0;
+    }
+
+    size_t qty = 0; // how much bytes do i have to copy? (1 based)
+    do
+    {
+        if (pSrc[qty++] == '\0')
+        {
+            break;
+        }
+    } while (qty < uiMaxSize);
+    memcpy(pDst, pSrc, qty);
+    return qty; // bytes copied in pDst string (CAN count the string terminator)
+}
+size_t Str_CopyLimitNull(tchar * pDst, lpctstr pSrc, size_t uiMaxSize)
+{
+    if (uiMaxSize == 0)
+    {
+        return 0;
+    }
+    if (pSrc[0] == '\0')
+    {
+        pDst[0] = '\0';
+        return 0;
+    }
+    
+    size_t qty = 0; // how much bytes do i have to copy? (1 based)
+    do
+    {
+        if (pSrc[qty++] == '\0')
+        {
+            break;
+        }
+    } while (qty < uiMaxSize);
+    memcpy(pDst, pSrc, qty);
+    pDst[qty - 1] = '\0'; // null terminate the string
+    return qty; // bytes copied in pDst string (not counting the string terminator)
+}
+
 size_t strcpylen(tchar * pDst, lpctstr pSrc)
 {
     strcpy(pDst, pSrc);
+    // Remember: strlen returns the number of bytes before the terminator (if the string contains utf-8 characters,
+    //  strlen will return a value != than the actual number of characters, because some of them are codified with more than a byte).
     return strlen(pDst);
 }
 
-size_t strncpylen(tchar * pDst, lpctstr pSrc, size_t uiMaxSize)
+// the number of characters in a multibyte string is the sum of mblen()'s
+// note: the simpler approach is std::mbstowcs(NULL, s.c_str(), s.size())
+/*
+size_t strlen_mb(const char* ptr)  
 {
-    // it does NOT include the iMaxSize element! (just like memcpy)
-    // so iMaxSize=sizeof() is ok !
-    ASSERT(uiMaxSize);
-    strncpy(pDst, pSrc, uiMaxSize - 1);
-    pDst[uiMaxSize - 1] = '\0';	// always terminate.
-    return strlen(pDst);
-}
+    // From: https://en.cppreference.com/w/c/string/multibyte/mblen
 
-void strncpynull(tchar * pDst, lpctstr pSrc, size_t uiMaxSize)
+    // ensure that at some point we have called setlocale:
+    //--    // allow mblen() to work with UTF-8 multibyte encoding
+    //--    std::setlocale(LC_ALL, "en_US.utf8");
+    
+    size_t result = 0;
+    const char* end = ptr + strlen(ptr);
+    mblen(nullptr, 0); // reset the conversion state
+    while(ptr < end) {
+        int next = mblen(ptr, end - ptr);
+        if(next == -1) {
+            throw std::runtime_error("strlen_mb(): conversion error");
+            break;
+        }
+        ptr += next;
+        ++result;
+    }
+    return result;
+}
+*/
+
+/*
+* Appends src to string dst of size siz (unlike strncat, siz is the
+* full size of dst, not space left). At most siz-1 characters
+* will be copied. Always NUL terminates (unless siz <= strlen(dst)).
+* Returns strlen(src) + MIN(siz, strlen(initial dst)).
+* If retval >= siz, truncation occurred.
+*/
+// Adapted from: OpenBSD: strlcpy.c,v 1.11 2006/05/05 15:27:38
+size_t Str_ConcatLimitNull(tchar *dst, const tchar *src, size_t siz)
 {
-    // it does NOT include the iMaxSize element! (just like memcpy)
-    // so iMaxSize=sizeof() is ok !
-    ASSERT(uiMaxSize);
-    strncpy(pDst, pSrc, uiMaxSize - 1);
-    pDst[uiMaxSize - 1] = '\0';	// always terminate.
+    tchar *d = dst;
+    size_t n = siz;
+    size_t dlen;
+
+    /* Find the end of dst and adjust bytes left but don't go past end */
+    while ((n-- != 0) && (*d != '\0'))
+    {
+        ++d;
+    }
+    dlen = d - dst;
+    n = siz - dlen;
+
+    if (n == 0)
+    {
+        return (dlen + strlen(src));
+    }
+
+    const tchar *s = src;
+    while (*s != '\0')
+    {
+        if (n != 1)
+        {
+            *d++ = *s;
+            --n;
+
+        }
+        ++s;
+    }
+    *d = '\0';
+
+    return (dlen + (s - src));	/* count does not include NUL */
 }
 
 lpctstr Str_GetArticleAndSpace(lpctstr pszWord)
@@ -977,13 +1081,13 @@ int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError)
     }
     catch (const std::bad_alloc &e)
     {
-        strncpynull(lastError, e.what(), SCRIPT_MAX_LINE_LEN);
+        Str_CopyLimitNull(lastError, e.what(), SCRIPT_MAX_LINE_LEN);
         CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
         return -1;
     }
     catch (...)
     {
-        strncpynull(lastError, "Unknown", SCRIPT_MAX_LINE_LEN);
+        Str_CopyLimitNull(lastError, "Unknown", SCRIPT_MAX_LINE_LEN);
         CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
         return -1;
     }

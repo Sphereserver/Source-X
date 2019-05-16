@@ -2113,7 +2113,7 @@ lpctstr CServerConfig::GetNotoTitle( int iLevel, bool bFemale ) const
 
 		// copy string so that it can be null-terminated without modifying m_NotoTitles
 		tchar* pTitle = Str_GetTemp();
-        strncpynull(pTitle, m_NotoTitles[iLevel]->GetPtr(), (int)(m_NotoTitles[iLevel]->GetLength() - strlen(pFemaleTitle)));
+        Str_CopyLimitNull(pTitle, m_NotoTitles[iLevel]->GetPtr(), (int)(m_NotoTitles[iLevel]->GetLength() - strlen(pFemaleTitle)));
 		return pTitle;
 	}
 }
@@ -2376,7 +2376,7 @@ bool CServerConfig::CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd,
 	tchar *myCmd = Str_GetTemp();
 
 	size_t pOs = strcspn(pszCmd," "); //position of space :)
-	strncpy ( myCmd, pszCmd, pOs );
+	Str_CopyLimit( myCmd, pszCmd, pOs );
 	myCmd[pOs] = '\0';
 
 	tchar * pOd; //position of dot :)
@@ -4605,7 +4605,7 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 			 continue;
 
 		s.WriteSection("ITEMDEF 0%04x", i);
-        strncpynull(sItemName, tiledata.m_name, CountOf(sItemName));
+        Str_CopyLimitNull(sItemName, tiledata.m_name, CountOf(sItemName));
 
 		// generate a suitable defname
 		if (GenerateDefname(sItemName, CountOf(sItemName), "i_", pDefnameBuffer, true, &defnames))

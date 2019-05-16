@@ -66,7 +66,7 @@ enum PT_TYPE
 };
 
 
-lpctstr const CPointBase::sm_szLoadKeys[PT_QTY+1] =
+lpctstr constexpr CPointBase::sm_szLoadKeys[PT_QTY+1] =
 {
 	"ISNEARTYPE",
 	"M",

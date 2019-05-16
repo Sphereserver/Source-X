@@ -156,7 +156,7 @@ enum CBC_TYPE
 	CBC_QTY
 };
 
-lpctstr const CCharBase::sm_szLoadKeys[CBC_QTY+1] =
+lpctstr constexpr CCharBase::sm_szLoadKeys[CBC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CCharBase_props.tbl"
@@ -412,7 +412,7 @@ bool CCharBase::r_LoadVal( CScript & s )
         {
             int64 piVal[2];
             tchar *ptcTmp = Str_GetTemp();
-            strncpy(ptcTmp, s.GetArgStr(), STR_TEMPLENGTH);
+            Str_CopyLimitNull(ptcTmp, s.GetArgStr(), STR_TEMPLENGTH);
             int iQty = Str_ParseCmds( ptcTmp, piVal, CountOf(piVal));
             int iRange;
             if ( iQty > 1 )

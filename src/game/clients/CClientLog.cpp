@@ -90,7 +90,7 @@ bool CClient::addLoginErr(byte code)
 		return true;
 
 	// console message to display for each login error code
-	static lpctstr const sm_Login_ErrMsg[] =
+	static lpctstr constexpr sm_Login_ErrMsg[] =
 	{
 		"Account does not exist",
 		"The account entered is already being used",

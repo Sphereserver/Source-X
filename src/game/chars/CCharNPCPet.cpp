@@ -81,7 +81,7 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 	if ( (m_pNPC->m_Brain == NPCBRAIN_BERSERK) && !pSrc->IsPriv(PRIV_GM) )
 		return false;	// Berserk npcs do not listen to any command (except if src is a GM)
 
-	static lpctstr const sm_Pet_table[] =
+	static lpctstr constexpr sm_Pet_table[] =
 	{
 		"ATTACK",
 		"BOUGHT",

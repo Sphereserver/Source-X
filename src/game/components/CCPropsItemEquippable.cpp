@@ -4,7 +4,7 @@
 #include "../chars/CChar.h"
 
 
-lpctstr const CCPropsItemEquippable::_ptcPropertyKeys[PROPIEQUIP_QTY + 1] =
+lpctstr constexpr CCPropsItemEquippable::_ptcPropertyKeys[PROPIEQUIP_QTY + 1] =
 {
     #define ADDPROP(a,b,c) b,
     #include "../../tables/CCPropsItemEquippable_props.tbl"

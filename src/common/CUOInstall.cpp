@@ -136,7 +136,7 @@ bool CUOInstall::OpenFile( CSFile & file, lpctstr pszName, word wFlags )
 lpctstr CUOInstall::GetBaseFileName( VERFILE_TYPE i ) // static
 {
 	ADDTOCALLSTACK("CUOInstall::GetBaseFileName");
-	static lpctstr const sm_szFileNames[VERFILE_QTY] =
+	static lpctstr constexpr sm_szFileNames[VERFILE_QTY] =
 	{
 		"artidx.mul",	// Index to ART
 		"art.mul",		// Artwork such as ground, objects, etc.

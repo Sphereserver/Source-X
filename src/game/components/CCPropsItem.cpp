@@ -3,7 +3,7 @@
 #include "../items/CItem.h"
 
 
-lpctstr const CCPropsItem::_ptcPropertyKeys[PROPIT_QTY + 1] =
+lpctstr constexpr CCPropsItem::_ptcPropertyKeys[PROPIT_QTY + 1] =
 {
     #define ADDPROP(a,b,c) b,
     #include "../../tables/CCPropsItem_props.tbl"

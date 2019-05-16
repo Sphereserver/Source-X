@@ -82,7 +82,7 @@ enum INTRINSIC_TYPE
 	INTRINSIC_QTY
 };
 
-static lpctstr const sm_IntrinsicFunctions[INTRINSIC_QTY+1] =
+static lpctstr constexpr sm_IntrinsicFunctions[INTRINSIC_QTY+1] =
 {
 	"ABS",		    // absolute
 	"ARCCOS",
@@ -124,6 +124,7 @@ public:
 	CSString		m_sTmp;
 
 	//	defined default messages
+#define DEFMSG_MAX_LEN 128
 	static tchar sm_szMessages[DEFMSG_QTY][128];		// like: "You put %s to %s"
 	static lpctstr const sm_szMsgNames[DEFMSG_QTY];		// like: "put_it"
 

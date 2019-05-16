@@ -2,7 +2,7 @@
 #include "../../CException.h"
 #include "CSkillDef.h"
 
-lpctstr const CSkillDef::sm_szTrigName[SKTRIG_QTY+1] =
+lpctstr constexpr CSkillDef::sm_szTrigName[SKTRIG_QTY+1] =
 {
     "@AAAUNUSED",
     "@ABORT",
@@ -16,7 +16,7 @@ lpctstr const CSkillDef::sm_szTrigName[SKTRIG_QTY+1] =
     "@TARGETCANCEL",
     "@USEQUICK",
     "@WAIT",
-    nullptr,
+    nullptr
 };
 
 enum SKC_TYPE
@@ -44,7 +44,7 @@ enum SKC_TYPE
     SKC_QTY
 };
 
-lpctstr const CSkillDef::sm_szLoadKeys[SKC_QTY+1] =
+lpctstr constexpr CSkillDef::sm_szLoadKeys[SKC_QTY+1] =
 {
     "ADV_RATE",
     "BONUS_DEX",

@@ -92,7 +92,7 @@ enum GC_TYPE
 	GC_QTY
 };
 
-lpctstr const CGMPage::sm_szLoadKeys[GC_QTY+1] =
+lpctstr constexpr CGMPage::sm_szLoadKeys[GC_QTY+1] =
 {
 	"ACCOUNT",
 	"P",

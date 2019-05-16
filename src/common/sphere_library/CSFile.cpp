@@ -421,9 +421,8 @@ CSString CSFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
     size_t len = 0;
 	if ( pszBase && pszBase[0] )
 	{
-		strncpy( ptcFilePath, pszBase, sizeof(ptcFilePath) );
-		len = strlen(ptcFilePath);
-		if (len && ptcFilePath[len - 1] != '\\' && ptcFilePath[len - 1] != '/')
+        len = Str_CopyLimitNull( ptcFilePath, pszBase, sizeof(ptcFilePath) - 1); // eventually, leave space for the (back)slash
+		if (len && ptcFilePath[len - 2] != '\\' && ptcFilePath[len - 2] != '/')
 		{
 #ifdef _WIN32
 			strcat(ptcFilePath, "\\");
@@ -438,7 +437,7 @@ CSString CSFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
 	}
 	if ( pszName )
 	{
-		strncat(ptcFilePath, pszName, sizeof(ptcFilePath)-len);
+        Str_ConcatLimitNull(ptcFilePath, pszName, sizeof(ptcFilePath)-len);
 	}
 	return CSString(ptcFilePath);
 }

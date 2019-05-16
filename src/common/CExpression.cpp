@@ -7,13 +7,13 @@
 #include "CException.h"
 #include "CExpression.h"
 
-tchar CExpression::sm_szMessages[DEFMSG_QTY][128] =
+tchar CExpression::sm_szMessages[DEFMSG_QTY][DEFMSG_MAX_LEN] =
 {
 	#define MSG(a,b) b,
 	#include "../tables/defmessages.tbl"
 };
 
-lpctstr const CExpression::sm_szMsgNames[DEFMSG_QTY] =
+lpctstr constexpr CExpression::sm_szMsgNames[DEFMSG_QTY] =
 {
 	#define MSG(a,b) #a,
 	#include "../tables/defmessages.tbl"

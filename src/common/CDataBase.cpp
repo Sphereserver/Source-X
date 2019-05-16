@@ -319,7 +319,7 @@ enum DBO_TYPE
 	DBO_QTY
 };
 
-lpctstr const CDataBase::sm_szLoadKeys[DBO_QTY+1] =
+lpctstr constexpr CDataBase::sm_szLoadKeys[DBO_QTY+1] =
 {
 	"AEXECUTE",
 	"AQUERY",
@@ -338,7 +338,7 @@ enum DBOV_TYPE
 	DBOV_QTY
 };
 
-lpctstr const CDataBase::sm_szVerbKeys[DBOV_QTY+1] =
+lpctstr constexpr CDataBase::sm_szVerbKeys[DBOV_QTY+1] =
 {
 	"CLOSE",
 	"CONNECT",

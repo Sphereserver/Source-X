@@ -28,7 +28,7 @@
 #include "CCharNPC.h"
 
 
-lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
+lpctstr constexpr CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
 	"@AfterClick",
@@ -1489,7 +1489,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 	// Set name
 	bool fNameIsAccepted = true;
 	tchar *zCharName = Str_GetTemp();
-    strncpynull(zCharName, pszCharname, MAX_NAME_SIZE);
+    Str_CopyLimitNull(zCharName, pszCharname, MAX_NAME_SIZE);
 
 	if ( !strlen(zCharName) || g_Cfg.IsObscene(zCharName) || Str_CheckName(zCharName) ||!strnicmp(zCharName, "lord ", 5) || !strnicmp(zCharName, "lady ", 5) ||
 		!strnicmp(zCharName, "seer ", 5) || !strnicmp(zCharName, "gm ", 3) || !strnicmp(zCharName, "admin ", 6) || !strnicmp(zCharName, "counselor ", 10) )
@@ -1933,7 +1933,7 @@ enum CHR_TYPE
 	CHR_QTY
 };
 
-lpctstr const CChar::sm_szRefKeys[CHR_QTY+1] =
+lpctstr constexpr CChar::sm_szRefKeys[CHR_QTY+1] =
 {
 	"ACCOUNT",
 	"ACT",
@@ -2034,7 +2034,7 @@ enum CHC_TYPE
 	CHC_QTY
 };
 
-lpctstr const CChar::sm_szLoadKeys[CHC_QTY+1] =
+lpctstr constexpr CChar::sm_szLoadKeys[CHC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CChar_props.tbl"
@@ -3508,7 +3508,7 @@ bool CChar::r_LoadVal( CScript & s )
         {
             int64 piVal[2];
             tchar *ptcTmp = Str_GetTemp();
-            strncpy(ptcTmp, s.GetArgStr(), STR_TEMPLENGTH);
+            Str_CopyLimitNull(ptcTmp, s.GetArgStr(), STR_TEMPLENGTH);
             int iQty = Str_ParseCmds( ptcTmp, piVal, CountOf(piVal));
             int iRange;
             if ( iQty > 1 )
@@ -3843,7 +3843,7 @@ enum CHV_TYPE
 	CHV_QTY
 };
 
-lpctstr const CChar::sm_szVerbKeys[CHV_QTY+1] =
+lpctstr constexpr CChar::sm_szVerbKeys[CHV_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CChar_functions.tbl"

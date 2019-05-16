@@ -491,7 +491,7 @@ enum PDV_TYPE
 	PDV_QTY
 };
 
-lpctstr const CPartyDef::sm_szVerbKeys[PDV_QTY+1] =
+lpctstr constexpr CPartyDef::sm_szVerbKeys[PDV_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CParty_functions.tbl"
@@ -507,7 +507,7 @@ enum PDC_TYPE
 	PDC_QTY
 };
 
-lpctstr const CPartyDef::sm_szLoadKeys[PDC_QTY+1] =
+lpctstr constexpr CPartyDef::sm_szLoadKeys[PDC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CParty_props.tbl"
@@ -823,7 +823,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 						pszArg++;
 						x++;
 					}
-                    strncpynull(pUid, __pszArg, ++x);
+                    Str_CopyLimitNull(pUid, __pszArg, ++x);
 
 					int nMember = Exp_GetVal(pUid);
 					if ( !m_Chars.IsValidIndex(nMember) )
@@ -840,7 +840,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 					++pszArg;
 					++x;
 				}
-                strncpynull(pUid, __pszArg, ++x);
+                Str_CopyLimitNull(pUid, __pszArg, ++x);
 
 				toSysmessage = Exp_GetDWVal(pUid);
 			}
