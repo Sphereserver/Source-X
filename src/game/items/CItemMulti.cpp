@@ -3033,7 +3033,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
     args.m_VarsLocal.SetStrNew("id", g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, pMultiDef->GetID())));
     args.m_VarsLocal.SetStrNew("p", pt.WriteUsed());
     TRIGRET_TYPE tRet;
-    pChar->r_Call("f_house_onplacement_check", pChar, &args, nullptr, &tRet);
+    pChar->r_Call("f_multi_onplacement_check", pChar, &args, nullptr, &tRet);
     if (tRet == TRIGRET_RET_TRUE)
     {
         return nullptr;
