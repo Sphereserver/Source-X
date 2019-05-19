@@ -692,8 +692,9 @@ void CRegion::r_WriteModified( CScript &s )
 void CRegion::r_WriteBase( CScript &s )
 {
 	ADDTOCALLSTACK("CRegion::r_WriteBase");
-	if ( GetName() && GetName()[0] )
-		s.WriteKey("NAME", GetName());
+    lpctstr ptcName = GetName();
+	if ( ptcName && ptcName[0] )
+		s.WriteKey("NAME", ptcName);
 
 	if ( ! m_sGroup.IsEmpty() )
 		s.WriteKey("GROUP", static_cast<lpctstr>(m_sGroup));

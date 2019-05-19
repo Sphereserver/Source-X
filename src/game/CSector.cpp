@@ -1036,7 +1036,8 @@ bool CSector::MoveCharToSector( CChar * pChar )
         CClient *pClient = pChar->GetClient();
         if (pClient)    // A client just entered
         {
-            GoAwake();    // Awake the sector
+            GoAwake();    // Awake the sector and the chars inside (so, also pChar)
+            ASSERT(!pChar->IsSleeping());
         }
         else if (!pChar->IsSleeping())    // An NPC entered, but the sector is sleeping
         {
@@ -1045,7 +1046,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
     }
     else
     {
-        if (pChar->m_pNPC && pChar->IsSleeping())
+        if (pChar->IsSleeping())
         {
             pChar->GoAwake();
         }

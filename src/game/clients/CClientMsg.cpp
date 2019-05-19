@@ -1365,9 +1365,6 @@ void CClient::addPlayerStart( CChar * pChar )
 	ASSERT(m_pChar->m_pPlayer);
 	ASSERT(m_pAccount);
 
-	CPointMap pt = m_pChar->GetTopPoint();
-	CSector *pSector = pt.GetSector();
-
 	CItem * pItemChange = m_pChar->LayerFind(LAYER_FLAG_ClientLinger);
 	if ( pItemChange != nullptr )
 		pItemChange->Delete();
@@ -1376,6 +1373,8 @@ void CClient::addPlayerStart( CChar * pChar )
 		m_pAccount->SetAutoResDisp(this);
 
 	ClearTargMode();	// clear death menu mode. etc. ready to walk about. cancel any previous modes
+
+    const CPointMap pt = m_pChar->GetTopPoint();
 	m_Env.SetInvalid();
 
 /*
@@ -1391,7 +1390,7 @@ void CClient::addPlayerStart( CChar * pChar )
 	addPlayerWarMode();
 	addLoginComplete();
 	addTime(true);
-	if ( pSector != nullptr )
+	if ( CSector *pSector = pt.GetSector() )
 		addSeason(pSector->GetSeason());
 	if (pChar->m_pParty)
 		pChar->m_pParty->SendAddList(nullptr);

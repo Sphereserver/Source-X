@@ -1464,7 +1464,6 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 {
 	ADDTOCALLSTACK("CChar::InitPlayer");
 	ASSERT(pClient);
-	UNREFERENCED_PARAMETER(prProf);
 
 	CAccount *pAccount = pClient->GetAccount();
 	if ( pAccount )
@@ -1590,7 +1589,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 
 		case RACETYPE_ELF:
 		{
-			static const int sm_ElfSkinHues[] =
+			static constexpr int sm_ElfSkinHues[] =
 			{
 				0x0BF, 0x24D, 0x24E, 0x24F, 0x353, 0x361, 0x367, 0x374, 0x375, 0x376, 0x381, 0x382, 0x383, 0x384, 0x385, 0x389,
 				0x3DE, 0x3E5, 0x3E6, 0x3E8, 0x3E9, 0x430, 0x4A7, 0x4DE, 0x51D, 0x53F, 0x579, 0x76B, 0x76C, 0x76D, 0x835, 0x903
@@ -1671,7 +1670,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 
 				case RACETYPE_ELF:
 				{
-					static const int sm_ElfHairHues[] =
+					static constexpr int sm_ElfHairHues[] =
 					{
 						0x034, 0x035, 0x036, 0x037, 0x038, 0x039, 0x058, 0x08E, 0x08F, 0x090, 0x091, 0x092,
 						0x101, 0x159, 0x15A, 0x15B, 0x15C, 0x15D, 0x15E, 0x128, 0x12F, 0x1BD, 0x1E4, 0x1F3,
@@ -1696,7 +1695,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 
 				case RACETYPE_GARGOYLE:
 				{
-					static const int sm_GargoyleHornHues[] =
+					static constexpr int sm_GargoyleHornHues[] =
 					{
 						0x709, 0x70B, 0x70D, 0x70F, 0x711, 0x763, 0x765, 0x768, 0x76B,
 						0x6F3, 0x6F1, 0x6EF, 0x6E4, 0x6E2, 0x6E0, 0x709, 0x70B, 0x70D
@@ -1764,7 +1763,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 
 				case RACETYPE_GARGOYLE:
 				{
-					static const int sm_GargoyleBeardHues[] =
+					static constexpr int sm_GargoyleBeardHues[] =
 					{
 						0x709, 0x70B, 0x70D, 0x70F, 0x711, 0x763, 0x765, 0x768, 0x76B,
 						0x6F3, 0x6F1, 0x6EF, 0x6E4, 0x6E2, 0x6E0, 0x709, 0x70B, 0x70D
@@ -3670,8 +3669,9 @@ void CChar::r_Write( CScript & s )
 		s.WriteKeyFormat("DAM", "%" PRIu16 ",%" PRIu16, m_attackBase, m_attackBase + m_attackRange);
 	if ( m_defense )
 		s.WriteKeyVal("ARMOR", m_defense);
-	if ( (m_Act_UID.GetObjUID() & UID_UNUSED) != UID_UNUSED )
-		s.WriteKeyHex("ACT", m_Act_UID.GetObjUID());
+    const uint uiActUID = m_Act_UID.GetObjUID();
+	if ( (uiActUID & UID_UNUSED) != UID_UNUSED )
+		s.WriteKeyHex("ACT", uiActUID);
 	if ( m_Act_p.IsValidPoint() )
 		s.WriteKey("ACTP", m_Act_p.WriteUsed());
     if (_iMaxHouses != g_Cfg._iMaxHousesPlayer)
@@ -3691,10 +3691,7 @@ void CChar::r_Write( CScript & s )
 		if (pSkillDef != nullptr)
 			pszActionTemp = const_cast<tchar*>(pSkillDef->GetKey());
 		else
-		{
-			pszActionTemp = Str_GetTemp();
-			sprintf(pszActionTemp, "%d", action);
-		}
+			pszActionTemp = Str_FromI(Str_GetTemp(), action);
 		s.WriteKey("ACTION", pszActionTemp);
 		/* We save ACTARG1/ACTARG2/ACTARG3 only if the following conditions are satisfied:
 		ACTARG1/ACTARG2/ACTARG3 is different from 0 AND
@@ -3739,19 +3736,29 @@ void CChar::r_Write( CScript & s )
         s.WriteKeyVal("OFOOD", iVal );
     s.WriteKeyVal("FOOD", Stat_GetVal(STAT_FOOD));
 
+    static constexpr lpctstr _ptcKeyModStat[STAT_BASE_QTY] =
+    {
+        "MODSTR",
+        "MODINT",
+        "MODDEX"
+    };
+    static constexpr lpctstr _ptcKeyOStat[STAT_BASE_QTY] =
+    {
+        "OSTR",
+        "OINT",
+        "ODEX"
+    };
+
 	for ( int j = 0; j < STAT_BASE_QTY; ++j )
 	{
-        tchar szTmp[100];
 		// this is VERY important, saving the MOD first
 		if ( (iVal = Stat_GetMod((STAT_TYPE)j)) != 0 )
 		{
-			sprintf(szTmp, "MOD%s", g_Stat_Name[j]);
-			s.WriteKeyVal(szTmp, iVal);
+            s.WriteKeyVal(_ptcKeyModStat[j], iVal);
 		}
 		if ( (iVal = Stat_GetBase((STAT_TYPE)j)) != 0 )
 		{
-			sprintf(szTmp, "O%s", g_Stat_Name[j]);
-			s.WriteKeyVal(szTmp, iVal );
+            s.WriteKeyVal(_ptcKeyOStat[j], iVal);
 		}
 	}
 

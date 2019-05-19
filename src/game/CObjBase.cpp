@@ -1876,12 +1876,6 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
                 return true;
         }
 
-        /*
-        CBaseBaseDef *pBase = Base_GetDef();
-        ASSERT(pBase);
-        if (pBase->r_Verb(s, pSrc))
-            return true;
-        */
         if (CScriptObj::r_Verb(s, pSrc))
             return true;
 

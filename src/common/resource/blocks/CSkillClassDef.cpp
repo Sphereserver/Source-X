@@ -55,17 +55,17 @@ bool CSkillClassDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole *
             break;
         default:
         {
-            int i = g_Cfg.FindSkillKey( pszKey);
+            int i = g_Cfg.FindSkillKey(pszKey);
             if ( i != SKILL_NONE )
             {
-                ASSERT( i >= 0 && (size_t)(i) < CountOf(m_SkillLevelMax));
+                ASSERT( (i >= 0) && (uint(i) < CountOf(m_SkillLevelMax)) );
                 sVal.FormatUSVal( m_SkillLevelMax[i] );
                 break;
             }
             i = g_Cfg.FindStatKey( pszKey);
             if ( i >= 0 )
             {
-                ASSERT( (size_t)(i) < CountOf(m_StatMax));
+                ASSERT( uint(i) < CountOf(m_StatMax));
                 sVal.FormatUSVal( m_StatMax[i] );
                 break;
             }
@@ -101,22 +101,23 @@ bool CSkillClassDef::r_LoadVal( CScript &s )
             break;
         default:
         {
-            int i = g_Cfg.FindSkillKey( s.GetKey());
+            lpctstr ptcKey = s.GetKey();
+            int i = g_Cfg.FindSkillKey(ptcKey);
             if ( i != SKILL_NONE )
             {
-                ASSERT( i >= 0 && (size_t)i < CountOf(m_SkillLevelMax));
+                ASSERT( (i >= 0) && (uint(i) < CountOf(m_SkillLevelMax)) );
                 m_SkillLevelMax[i] = s.GetArgUSVal();
                 break;
             }
-            i = g_Cfg.FindStatKey( s.GetKey());
+            i = g_Cfg.FindStatKey(ptcKey);
             if ( i >= 0 )
             {
-                ASSERT( (size_t)i < CountOf(m_StatMax));
+                ASSERT( (uint)i < CountOf(m_StatMax));
                 m_StatMax[i] = s.GetArgUSVal();
                 break;
             }
         }
-        return( CResourceDef::r_LoadVal( s ));
+        return CResourceDef::r_LoadVal( s );
     }
     return true;
     EXC_CATCH;

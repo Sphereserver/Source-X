@@ -117,7 +117,7 @@ SKILLLOCK_TYPE CCharPlayer::Skill_GetLock( SKILL_TYPE skill ) const
 
 void CCharPlayer::Skill_SetLock( SKILL_TYPE skill, SKILLLOCK_TYPE state )
 {
-	ASSERT( (skill >= 0) && ((size_t)skill < CountOf(m_SkillLock)));
+	ASSERT( (skill >= 0) && ((uint)skill < CountOf(m_SkillLock)));
 	m_SkillLock[skill] = (uchar)(state);
 }
 
@@ -146,13 +146,13 @@ STAT_TYPE CCharPlayer::Stat_GetLockType( lpctstr pszKey ) const
 
 SKILLLOCK_TYPE CCharPlayer::Stat_GetLock( STAT_TYPE stat ) const
 {
-	ASSERT( (stat >= 0) && ((size_t)stat < CountOf(m_StatLock)));
+	ASSERT( (stat >= 0) && ((uint)stat < CountOf(m_StatLock)));
 	return (SKILLLOCK_TYPE)m_StatLock[stat];
 }
 
 void CCharPlayer::Stat_SetLock( STAT_TYPE stat, SKILLLOCK_TYPE state )
 {
-	ASSERT( (stat >= 0) && ((size_t)stat < CountOf(m_StatLock)));
+	ASSERT( (stat >= 0) && ((uint)stat < CountOf(m_StatLock)));
 	m_StatLock[stat] = (uchar)state;
 }
 
@@ -175,15 +175,18 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
 		if ( *pszKey == 0 )
 		{
 			CItemStone *pMyGuild = pChar->Guild_Find(bIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
-			if ( pMyGuild ) sVal.FormatHex((dword)pMyGuild->GetUID());
-			else sVal.FormatVal(0);
+			if ( pMyGuild )
+                sVal.FormatHex((dword)pMyGuild->GetUID());
+			else
+                sVal.FormatVal(0);
 			return true;
 		}
 		else if ( *pszKey == '.' )
 		{
 			pszKey += 1;
 			CItemStone *pMyGuild = pChar->Guild_Find(bIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
-			if ( pMyGuild ) return pMyGuild->r_WriteVal(pszKey, sVal, pChar);
+			if ( pMyGuild )
+                return pMyGuild->r_WriteVal(pszKey, sVal, pChar);
 		}
 		return false;
 	}

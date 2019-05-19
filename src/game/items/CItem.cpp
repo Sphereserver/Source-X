@@ -2222,7 +2222,7 @@ void CItem::r_WriteMore2( CSString & sVal )
 void CItem::r_Write( CScript & s )
 {
 	ADDTOCALLSTACK_INTENSIVE("CItem::r_Write");
-	CItemBase *pItemDef = Item_GetDef();
+	const CItemBase *pItemDef = Item_GetDef();
 	if ( !pItemDef )
 		return;
 
@@ -2230,8 +2230,9 @@ void CItem::r_Write( CScript & s )
 
 	CObjBase::r_Write(s);
 
-	if ( GetDispID() != GetID() )	// the item is flipped.
-		s.WriteKey("DISPID", g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, GetDispID())));
+    const ITEMID_TYPE iDispID = GetDispID();
+	if ( iDispID != GetID() )	// the item is flipped.
+		s.WriteKey("DISPID", g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, iDispID)));
     int iAmount = GetAmount();
 	if ( iAmount != 1 )
 		s.WriteKeyVal("AMOUNT", iAmount);
@@ -2268,15 +2269,17 @@ void CItem::r_Write( CScript & s )
 	{
 		if ( pCont->IsChar() )
 		{
-			if ( GetEquipLayer() >= LAYER_HORSE )
-				s.WriteKeyVal("LAYER", GetEquipLayer());
+            const LAYER_TYPE iEqLayer = GetEquipLayer();
+			if ( iEqLayer >= LAYER_HORSE )
+				s.WriteKeyVal("LAYER", iEqLayer);
 		}
 		s.WriteKeyHex("CONT", pCont->GetUID());
 		if ( pCont->IsItem() )
 		{
 			s.WriteKey("P", GetContainedPoint().WriteUsed());
-			if ( GetContainedGridIndex() )
-				s.WriteKeyVal("CONTGRID", GetContainedGridIndex());
+            const uchar uiGridIdx = GetContainedGridIndex();
+			if ( uiGridIdx )
+				s.WriteKeyVal("CONTGRID", uiGridIdx);
 		}
 	}
 	else

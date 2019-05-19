@@ -31,7 +31,7 @@ CRectMap & CRegionBase::GetRegionRect(size_t i)
 	size_t iQty = m_Rects.size();
 	if ( iQty <= 0 )
 		return m_rectUnion;
-	return(m_Rects.at(i));
+	return(m_Rects[i]);
 }
 
 const CRectMap & CRegionBase::GetRegionRect(size_t i) const
@@ -40,7 +40,7 @@ const CRectMap & CRegionBase::GetRegionRect(size_t i) const
 	size_t iQty = m_Rects.size();
 	if ( iQty <= 0 )
 		return m_rectUnion;
-	return(m_Rects.at(i));
+	return(m_Rects[i]);
 }
 
 CPointMap CRegionBase::GetRegionCorner( DIR_TYPE dir ) const
@@ -184,9 +184,9 @@ bool CRegionBase::IsOverlapped( const CRegionBase * pRegionTest ) const
 	{
 		return( IsOverlapped(pRegionTest->m_rectUnion));
 	}
-	for ( size_t j = 0; j < iQty; j++ )
+	for ( size_t j = 0; j < iQty; ++j )
 	{
-		for ( size_t i = 0; i < iQtyTest; i++ )
+		for ( size_t i = 0; i < iQtyTest; ++i )
 		{
 			if ( m_Rects[j].IsOverlapped( pRegionTest->m_Rects[i] ))
 				return true;

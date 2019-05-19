@@ -622,6 +622,9 @@ bool CVarDefMap::r_LoadVal( CScript & s )
 void CVarDefMap::r_WritePrefix( CScript & s, lpctstr pszPrefix, lpctstr pszKeyExclude )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::r_WritePrefix");
+    if (m_Container.empty())
+        return;
+
 	TemporaryString tsZ;
 	tchar* z = static_cast<tchar *>(tsZ);
 	lpctstr	pszVal;
