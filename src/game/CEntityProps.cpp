@@ -152,11 +152,7 @@ bool CEntityProps::r_LoadPropVal(CScript & s, CObjBase* pObjEntityProps, CBaseBa
     // return true: valid property, whether it has a defined value or not
 
     ASSERT(pBaseEntityProps);
-    RESDISPLAY_VERSION iLimitToExpansion = RDS_PRET2A;
-    if (const CCharBase *pCharBase = dynamic_cast<CCharBase*>(pBaseEntityProps))
-    {
-        iLimitToExpansion = pCharBase->_iEraLimitProps;
-    }
+    const RESDISPLAY_VERSION iLimitToExpansion = pBaseEntityProps->_iEraLimitProps;
 
     int iPropIndex = -1;
     bool fPropStr = false;
