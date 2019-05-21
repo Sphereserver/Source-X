@@ -49,11 +49,12 @@ public:
 	word    m_defenseRange; // variable range of defense.
 
 	dword   m_Can;          // Base attribute flags. CAN_C_GHOST, etc
-    dword	m_CanUse;		// Base attribute flags. can_u_all/male/female..
+    RESDISPLAY_VERSION _iEraLimitProps;	// Don't allow to have properties newer than the given era.
+
     CFactionDef _pFaction;
 
-public:
 
+public:
     CFactionDef GetFaction();
 
     /**

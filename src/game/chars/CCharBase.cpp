@@ -31,7 +31,6 @@ CCharBase::CCharBase( CREID_TYPE id ) :
 
 	_iEraLimitGear = g_Cfg._iEraLimitGear;		// Always latest by default
 	_iEraLimitLoot = g_Cfg._iEraLimitLoot;		// Always latest by default
-	_iEraLimitProps = g_Cfg._iEraLimitProps;	// Always latest by default
 
 	m_iMoveRate = (short)(g_Cfg.m_iMoveRate);
 
