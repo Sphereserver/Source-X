@@ -27,7 +27,7 @@ lpctstr constexpr CRegionResourceDef::sm_szLoadKeys[RMC_QTY+1] =
     nullptr
 };
 
-lpctstr constexpr CRegionResourceDef::sm_szTrigName[RRTRIG_QTY+1] =	// static
+lpctstr const CRegionResourceDef::sm_szTrigName[RRTRIG_QTY+1] =	// static
 {
     "@AAAUNUSED",
     "@RESOURCEFOUND",

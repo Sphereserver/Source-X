@@ -13,7 +13,7 @@ tchar CExpression::sm_szMessages[DEFMSG_QTY][DEFMSG_MAX_LEN] =
 	#include "../tables/defmessages.tbl"
 };
 
-lpctstr constexpr CExpression::sm_szMsgNames[DEFMSG_QTY] =
+lpctstr const CExpression::sm_szMsgNames[DEFMSG_QTY] =
 {
 	#define MSG(a,b) #a,
 	#include "../tables/defmessages.tbl"

@@ -507,7 +507,7 @@ lpctstr constexpr CWebPageDef::sm_szPageType[WEBPAGE_QTY+1] =
 	nullptr				// WEBPAGE_QTY
 };
 
-lpctstr constexpr CWebPageDef::sm_szTrigName[WTRIG_QTY+1] =	// static
+lpctstr const CWebPageDef::sm_szTrigName[WTRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
 	"@LOAD",

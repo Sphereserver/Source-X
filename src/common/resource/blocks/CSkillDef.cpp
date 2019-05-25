@@ -2,7 +2,7 @@
 #include "../../CException.h"
 #include "CSkillDef.h"
 
-lpctstr constexpr CSkillDef::sm_szTrigName[SKTRIG_QTY+1] =
+lpctstr const CSkillDef::sm_szTrigName[SKTRIG_QTY+1] =
 {
     "@AAAUNUSED",
     "@ABORT",
