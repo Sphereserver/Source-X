@@ -4106,14 +4106,20 @@ bool CChar::OnTickPeriodic()
     EXC_TRY("OnTickPeriodic");
     ++_iRegenTickCount;
     _timeNextRegen = g_World.GetCurrentTime().GetTimeRaw() + MSECS_PER_TICK;
-    bool fRegen = (_iRegenTickCount == TICKS_PER_SEC);
+    bool fRegen = (_iRegenTickCount == MSECS_PER_TENTH);
 
     if (fRegen)
     {
-        _iRegenTickCount = 0;
-        EXC_SET_BLOCK("last attackers");
-        Attacker_CheckTimeout();
+        _iRegenTickCount = 0; // Reset the regen counter
 
+        // Periodic checks of attackers for this character.
+        EXC_SET_BLOCK("last attackers");
+        if (g_Cfg.m_iAttackerTimeout > 0)
+        {
+            Attacker_CheckTimeout();
+        }
+
+        // Periodic checks of notoriety for this character.
         EXC_SET_BLOCK("NOTO timeout");
         if (g_Cfg.m_iNotoTimeout > 0)
         {
@@ -4121,14 +4127,28 @@ bool CChar::OnTickPeriodic()
         }
     }
 
-    if (IsDisconnected())		// mounted horses can still get a tick.
-        return true;
-
-    // NOTE: Summon flags can kill our hp here. check again.
-    if (!IsStatFlag(STATF_DEAD) && (Stat_GetVal(STAT_STR) <= 0))	// We can only die on our own tick.
+    /*  We can only die on our own tick.
+    *   Since death is not done instantly, but letting you continue the tick (preventing further checks and issues)
+    *   it should also be called before stat regen, since death happen in the last tick and regen belongs to the new tick
+    *   and it makes no sense to regen some hits after death.
+    */
+    if (!IsStatFlag(STATF_DEAD) && (Stat_GetVal(STAT_STR) <= 0))
     {
         EXC_SET_BLOCK("death");
         return Death();
+    }
+
+    // Stats regeneration
+    uchar fStatusUpdate = m_fStatusUpdate;  // Keeping track of stat changes in case the status bar must be updated.
+    if (!IsStatFlag(STATF_DEAD | STATF_STONE) && !Can(CAN_C_STATUE))
+    {
+        Stats_Regen();
+    }
+
+    // mounted horses can still die and regenerate stats, but nothing more from here.
+    if (IsDisconnected())
+    {
+        return true;
     }
 
     if (IsClient())
@@ -4136,11 +4156,15 @@ bool CChar::OnTickPeriodic()
         CClient* pClient = GetClient();
         // Players have a silly "always run" flag that gets stuck on.
         if (-(g_World.GetTimeDiff(pClient->m_timeLastEventWalk)) > 2 * MSECS_PER_TENTH)
+        {
             StatFlag_Clear(STATF_FLY);
+        }
 
         // Check targeting timeout, if set
         if ((pClient->m_Targ_Timeout > 0) && (g_World.GetTimeDiff(pClient->m_Targ_Timeout) <= 0))
+        {
             pClient->addTargetCancel();
+        }
     }
 
     if (fRegen)
@@ -4148,8 +4172,6 @@ bool CChar::OnTickPeriodic()
         // Check location periodically for standing in fire fields, traps, etc.
         EXC_SET_BLOCK("check location");
         CheckLocation(true);
-        if (!IsStatFlag(STATF_DEAD|STATF_STONE) && !Can(CAN_C_STATUE))
-            Stats_Regen();
     }
 
     EXC_SET_BLOCK("update stats");

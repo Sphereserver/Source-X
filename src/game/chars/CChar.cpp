@@ -2895,16 +2895,28 @@ do_default:
             sVal.FormatVal( Stat_GetMaxMod(STAT_DEX) );
             break;
         case CHC_REGENFOOD:
-            sVal.FormatLLVal( Stats_GetRegenRate(STAT_FOOD) / MSECS_PER_SEC );
+            sVal.FormatLLVal(Stats_GetRegenRate(STAT_FOOD) / MSECS_PER_SEC);
+            break;
+        case CHC_REGENFOODD:
+            sVal.FormatLLVal(Stats_GetRegenRate(STAT_FOOD) / MSECS_PER_TENTH);
             break;
         case CHC_REGENHITS:
-            sVal.FormatLLVal( Stats_GetRegenRate(STAT_STR) / MSECS_PER_SEC );
+            sVal.FormatLLVal(Stats_GetRegenRate(STAT_STR) / MSECS_PER_SEC);
+            break;
+        case CHC_REGENHITSD:
+            sVal.FormatLLVal(Stats_GetRegenRate(STAT_STR) / MSECS_PER_TENTH);
             break;
         case CHC_REGENSTAM:
-            sVal.FormatLLVal( Stats_GetRegenRate(STAT_DEX) / MSECS_PER_SEC );
+            sVal.FormatLLVal(Stats_GetRegenRate(STAT_DEX) / MSECS_PER_SEC);
+            break;
+        case CHC_REGENSTAMD:
+            sVal.FormatLLVal(Stats_GetRegenRate(STAT_DEX) / MSECS_PER_TENTH);
             break;
         case CHC_REGENMANA:
-            sVal.FormatLLVal( Stats_GetRegenRate(STAT_INT) / MSECS_PER_SEC );
+            sVal.FormatLLVal(Stats_GetRegenRate(STAT_INT) / MSECS_PER_SEC);
+            break;
+        case CHC_REGENMANAD:
+            sVal.FormatLLVal(Stats_GetRegenRate(STAT_INT) / MSECS_PER_TENTH);
             break;
         case CHC_REGENVALFOOD:
             sVal.FormatUSVal( Stats_GetRegenVal(STAT_FOOD) );
@@ -3127,17 +3139,29 @@ bool CChar::r_LoadVal( CScript & s )
         }
 
 		//Status Update Variables
-		case CHC_REGENHITS:
-			Stats_SetRegenRate(STAT_STR, s.GetArg64Val()*MSECS_PER_SEC);
-			break;
-		case CHC_REGENSTAM:
-            Stats_SetRegenRate(STAT_DEX, s.GetArg64Val()*MSECS_PER_SEC);
-			break;
-		case CHC_REGENMANA:
-            Stats_SetRegenRate(STAT_INT, s.GetArg64Val()*MSECS_PER_SEC);
-			break;
+        case CHC_REGENHITS:
+            Stats_SetRegenRate(STAT_STR, s.GetArg64Val()* MSECS_PER_SEC);
+            break;
+        case CHC_REGENHITSD:
+            Stats_SetRegenRate(STAT_STR, s.GetArg64Val()* MSECS_PER_TENTH);
+            break;
+        case CHC_REGENSTAM:
+            Stats_SetRegenRate(STAT_DEX, s.GetArg64Val()* MSECS_PER_SEC);
+            break;
+        case CHC_REGENSTAMD:
+            Stats_SetRegenRate(STAT_DEX, s.GetArg64Val()* MSECS_PER_TENTH);
+            break;
+        case CHC_REGENMANA:
+            Stats_SetRegenRate(STAT_INT, s.GetArg64Val()* MSECS_PER_SEC);
+            break;
+        case CHC_REGENMANAD:
+            Stats_SetRegenRate(STAT_INT, s.GetArg64Val()* MSECS_PER_TENTH);
+            break;
         case CHC_REGENFOOD:
-            Stats_SetRegenRate(STAT_FOOD, s.GetArg64Val()*MSECS_PER_SEC);
+            Stats_SetRegenRate(STAT_FOOD, s.GetArg64Val()* MSECS_PER_SEC);
+            break;
+        case CHC_REGENFOODD:
+            Stats_SetRegenRate(STAT_FOOD, s.GetArg64Val()* MSECS_PER_TENTH);
             break;
         case CHC_REGENVALHITS:
             Stats_SetRegenVal(STAT_STR, s.GetArgUSVal());

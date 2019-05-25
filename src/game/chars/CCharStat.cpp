@@ -474,11 +474,11 @@ bool CChar::Stats_Regen()
         {
             continue;
         }
-        if (m_Stat[i].m_regenLast > iCurTime) // Check if enough time elapsed till the next regen.
+        if (m_Stat[i].m_regenLast + iRegenDelay > iCurTime) // Check if enough time elapsed till the next regen.
         {
             continue;
         }
-        m_Stat[i].m_regenLast = iCurTime + iRegenDelay; // in msecs
+        m_Stat[i].m_regenLast = iCurTime; // in msecs
 
 		int iMod = (int)Stats_GetRegenVal(i);
         ushort uiStatLimit = Stat_GetMaxAdjusted(i);

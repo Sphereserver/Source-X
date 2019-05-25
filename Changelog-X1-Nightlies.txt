@@ -1736,3 +1736,9 @@ WARNING: Important change!
 
 19-05-2019, Nolok
 - Fixed: Players logging in an already active sector weren't marked as active, making them unable to fire their TIMER and every related event (like skills).
+
+25-05-2019, XuN
+- Fixed: Regen[Stat] not working, same for Regen[Stat]Val.
+- Fixed: AttackerTimeout=0 in the ini not working as intended.
+- Fixed: Death checks being done each second instead of in each tick.
+- Changed: Mounted characters now get stats regens, if you want the avoiding stats to regen add an event with ON=@RegenStat return 1 when mounting them.
