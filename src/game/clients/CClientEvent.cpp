@@ -232,7 +232,7 @@ void CClient::Event_Item_Pickup(CUID uid, word amount) // Client grabs an item
 	if ( tempamount < 0 )
 	{
 		EXC_SET_BLOCK("ItemPickup - addItemDragCancel(0)");
-		new PacketDragCancel(this, PacketDragCancel::CannotLift);
+		new PacketDragCancel(this, PacketDragCancel::Other);
         if (pItem->GetType() == IT_CORPSE)
         {
             // This Update() fixes a client-side bug: if a char with GM on sees a new corpse, then turns GM off and tries to drag it, the dragging is cancelled but
