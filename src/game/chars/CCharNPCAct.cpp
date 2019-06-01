@@ -1078,11 +1078,12 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	if ( !m_pNPC || !pSector )
 		return false;
 
+    const CPointMap& ptTop = GetTopPoint();
 	int iRange = GetVisualRange();
 	int iRangeBlur = UO_MAP_VIEW_SIGHT;
 
 	// If I can't move don't look too far.
-	if ( !Can(CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY|CAN_C_HOVER|CAN_C_RUN) || IsStatFlag(STATF_FREEZE|STATF_STONE) )
+	if ( Can(CAN_C_NONMOVER) || !Can(CAN_C_MOVEMENTCAPABLEMASK) || IsStatFlag(STATF_FREEZE|STATF_STONE) )
 	{
 		if ( !NPC_FightMayCast() )	// And i have no distance attack.
 			iRange = iRangeBlur = 2;
@@ -1090,10 +1091,10 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	else
 	{
 		// I'm mobile. do basic check if i would move here first.
-		if ( !NPC_CheckWalkHere(GetTopPoint(), m_pArea) )
+		if ( !NPC_CheckWalkHere(ptTop, m_pArea) )
 		{
 			// I should move. Someone lit a fire under me.
-			m_Act_p = GetTopPoint();
+			m_Act_p = ptTop;
 			m_Act_p.Move((DIR_TYPE)(Calc_GetRandVal(DIR_QTY)));
 			NPC_WalkToPoint(true);
 			SoundChar(CRESND_NOTICE);
@@ -1111,7 +1112,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	// Any interesting chars here ?
 	int iDist = 0;
 	CChar *pChar = nullptr;
-	CWorldSearch AreaChars(GetTopPoint(), iRange);
+	CWorldSearch AreaChars(ptTop, iRange);
 	for (;;)
 	{
 		pChar = AreaChars.GetChar();
@@ -1140,7 +1141,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	if ( fForceCheckItems )
 	{
 		CItem *pItem = nullptr;
-		CWorldSearch AreaItems(GetTopPoint(), iRange);
+		CWorldSearch AreaItems(ptTop, iRange);
 		for (;;)
 		{
 			pItem = AreaItems.GetItem();

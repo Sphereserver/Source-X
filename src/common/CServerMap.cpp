@@ -1,4 +1,4 @@
-//
+﻿//
 // CServerMap.cpp
 //
 
@@ -57,14 +57,17 @@ CServerMapBlockState::CServerMapBlockState( dword dwBlockFlags, char z, int iHei
 	m_Top.m_dwBlockFlags = 0;
 	m_Top.m_dwTile = 0;
 	m_Top.m_z = UO_SIZE_Z;	// the z of the item that would be over our head.
+    m_Top.m_height = 0;
 
 	m_Bottom.m_dwBlockFlags = CAN_I_BLOCK; // The bottom item has these blocking flags.
 	m_Bottom.m_dwTile = 0;
 	m_Bottom.m_z = UO_SIZE_MIN_Z;	// the z we would stand on,
+    m_Bottom.m_height = 0;
 
 	m_Lowest.m_dwBlockFlags = CAN_I_BLOCK;
 	m_Lowest.m_dwTile = 0;
 	m_Lowest.m_z = UO_SIZE_Z;
+    m_Lowest.m_height = 0;
 
 	m_zClimbHeight = 0;
 }
@@ -75,14 +78,17 @@ CServerMapBlockState::CServerMapBlockState( dword dwBlockFlags, char z, int iHei
 	m_Top.m_dwBlockFlags = 0;
 	m_Top.m_dwTile = 0;
 	m_Top.m_z = UO_SIZE_Z;	// the z of the item that would be over our head.
+    m_Top.m_height = 0;
 
 	m_Bottom.m_dwBlockFlags = CAN_I_BLOCK; // The bottom item has these blocking flags.
 	m_Bottom.m_dwTile = 0;
 	m_Bottom.m_z = UO_SIZE_MIN_Z;	// the z we would stand on,
+    m_Bottom.m_height = 0;
 
 	m_Lowest.m_dwBlockFlags = CAN_I_BLOCK;
 	m_Lowest.m_dwTile = 0;
 	m_Lowest.m_z = UO_SIZE_Z;
+    m_Lowest.m_height = 0;
 
 	m_zClimbHeight = 0;
 }
@@ -140,9 +146,7 @@ bool CServerMapBlockState::CheckTile( dword dwItemBlockFlags, char zBottom, heig
 
 	if ( zTop < m_Lowest.m_z )
 	{
-		m_Lowest.m_dwBlockFlags = dwItemBlockFlags;
-		m_Lowest.m_dwTile = dwID;
-		m_Lowest.m_z = zTop;
+        m_Lowest = {dwItemBlockFlags, dwID, zTop, zHeight};
 	}
 
 	// if i can't fit under this anyhow. it is something below me. (potentially)
@@ -161,9 +165,7 @@ bool CServerMapBlockState::CheckTile( dword dwItemBlockFlags, char zBottom, heig
 				else if ( (m_Bottom.m_dwBlockFlags & CAN_I_WATER) && !(dwItemBlockFlags & CAN_I_PLATFORM))
 					return true;
 			}
-			m_Bottom.m_dwBlockFlags = dwItemBlockFlags;
-			m_Bottom.m_dwTile = dwID;
-			m_Bottom.m_z = zTop;
+            m_Bottom = {dwItemBlockFlags, dwID, zTop, zHeight};
 		}
 	}
 	else
@@ -171,29 +173,11 @@ bool CServerMapBlockState::CheckTile( dword dwItemBlockFlags, char zBottom, heig
 		// I could potentially fit under this. ( it would be above me )
 		if ( zBottom <= m_Top.m_z )
 		{
-			m_Top.m_dwBlockFlags = dwItemBlockFlags;
-			m_Top.m_dwTile = dwID;
-			m_Top.m_z = zBottom;
+            m_Top = {dwItemBlockFlags, dwID, zTop, zHeight};
 		}
 	}
 
 	return true;
-}
-
-bool CServerMapBlockState::IsUsableZ( char zTile, height_t zTileHeight, height_t zHeightEstimate ) const
-{
-    short zTileTotal = zTile + zTileHeight;
-    if (zTileTotal > UO_SIZE_Z)
-        zTileTotal = UO_SIZE_Z;
-
-    // CServerMapBlocker::m_z = Top of a solid object. or bottom of non blocking one.
-    if ( zTileTotal > m_Top.m_z )	// above something that is already over my head.
-        return false;
-    // NOTE: Assume multi overlapping items are not normal. so estimates are safe
-    if ( zTileTotal + zHeightEstimate < m_Bottom.m_z )	// way below my feet
-        return false;
-
-    return true;
 }
 
 bool CServerMapBlockState::CheckTile_Item( dword dwItemBlockFlags, char zBottom, height_t zHeight, dword dwID )
@@ -224,9 +208,7 @@ bool CServerMapBlockState::CheckTile_Item( dword dwItemBlockFlags, char zBottom,
 
 	if ( zTop < m_Lowest.m_z )
 	{
-		m_Lowest.m_dwBlockFlags = dwItemBlockFlags;
-		m_Lowest.m_dwTile = dwID;
-		m_Lowest.m_z = (char)zTop;
+        m_Lowest = {dwItemBlockFlags, dwID, (char)zTop, zHeight};
 	}
 
     // Why was this block of code added? By returning, it blocks the m_Bottom state to be updated
@@ -247,13 +229,14 @@ bool CServerMapBlockState::CheckTile_Item( dword dwItemBlockFlags, char zBottom,
 		{
 			if ( zTop == m_Bottom.m_z )
 			{
-				if ( ! ( dwItemBlockFlags & CAN_I_CLIMB ) ) // climbable items have the highest priority
-					if ( m_Bottom.m_dwBlockFlags & CAN_I_PLATFORM ) //than items with CAN_I_PLATFORM
-						return true;
+                if ((dwItemBlockFlags & CAN_I_PLATFORM) && (m_Bottom.m_height != 0))
+                    ; // this platform (floor?) tile is on the top of a solid item (which has a height != 0), so i should consider as if i'm actually walking on the platform
+                else if ( dwItemBlockFlags & CAN_I_CLIMB ) // climbable items have the highest priority
+                    ;
+                else if ( m_Bottom.m_dwBlockFlags & CAN_I_PLATFORM ) //than items with CAN_I_PLATFORM
+				    return true;
 			}
-			m_Bottom.m_dwBlockFlags = dwItemBlockFlags;
-			m_Bottom.m_dwTile = dwID;
-			m_Bottom.m_z = (char)zTop;
+            m_Bottom = {dwItemBlockFlags, dwID, (char)zTop, zHeight};
 
 			if ( dwItemBlockFlags & CAN_I_CLIMB ) // return climb height
 				m_zClimbHeight = (( zHeight + 1 )/2); //if height is an odd number, then we need to add 1; if it isn't, this does nothing
@@ -277,24 +260,11 @@ bool CServerMapBlockState::CheckTile_Item( dword dwItemBlockFlags, char zBottom,
 		}*/
 		if ( zBottom < m_Top.m_z )
 		{
-			m_Top.m_dwBlockFlags = dwItemBlockFlags;
-			m_Top.m_dwTile = dwID;
-			m_Top.m_z = zBottom;
+            m_Top = {dwItemBlockFlags, dwID, zBottom, zHeight};
 		}
 	}
 	return true;
 
-}
-
-void CServerMapBlockState::SetTop( dword dwItemBlockFlags, char z, dword dwID )
-{
-	ADDTOCALLSTACK("CServerMapBlockState::SetTop");
-	if ( z < m_Top.m_z )
-	{
-		m_Top.m_dwBlockFlags = dwItemBlockFlags;
-		m_Top.m_dwTile = dwID;
-		m_Top.m_z = z;
-	}
 }
 
 bool CServerMapBlockState::CheckTile_Terrain( dword dwItemBlockFlags, char z, dword dwID )
@@ -307,20 +277,16 @@ bool CServerMapBlockState::CheckTile_Terrain( dword dwItemBlockFlags, char z, dw
 		return true;
 
 	if ( z < m_Bottom.m_z )	// below something i can already step on.
-	{
 		return true;
-	}
 
 	if ( z < m_Lowest.m_z )
 	{
-		m_Lowest.m_dwBlockFlags = dwItemBlockFlags;
-		m_Lowest.m_dwTile = dwID;
-		m_Lowest.m_z = z;
+        m_Lowest = {dwItemBlockFlags, dwID, z, 0};
 	}
 
 	if	( z <= m_iHeight )
 	{
-		if ( z > m_Bottom.m_z )
+		if ( z >= m_Bottom.m_z )
 		{
 			if ( (m_Bottom.m_dwBlockFlags & (CAN_I_PLATFORM|CAN_I_CLIMB)) && (z - m_Bottom.m_z <= 4) )
 					return true;
@@ -328,25 +294,26 @@ bool CServerMapBlockState::CheckTile_Terrain( dword dwItemBlockFlags, char z, dw
 			{
 				if ( (m_Bottom.m_dwBlockFlags & (CAN_I_PLATFORM|CAN_I_CLIMB)) && (z >= m_Bottom.m_z + PLAYER_HEIGHT/2) ) // we can walk under it
 				{
-					SetTop( dwItemBlockFlags, z, dwID );
+                    m_Top = {dwItemBlockFlags, dwID, z, 0};
 					return true;
 				}
 			}
 			else if ( z == m_z )
 			{
-				if ( (m_Bottom.m_dwBlockFlags & (CAN_I_PLATFORM|CAN_I_CLIMB)) && (z - m_Bottom.m_z <= 4) )
+                if (m_Bottom.m_height != 0)
+                    ; // this land tile is on the top of a solid item (which has a height != 0), so i should consider as if i'm actually walking on the landtile
+                else if ( (m_Bottom.m_dwBlockFlags & (CAN_I_PLATFORM|CAN_I_CLIMB)) && (z - m_Bottom.m_z <= 4) )
 					return true;
 			}
 			//DEBUG_ERR(("wItemBlockFlags 0x%x\n",wItemBlockFlags));
-			m_Bottom.m_dwBlockFlags = dwItemBlockFlags;
-			m_Bottom.m_dwTile = dwID;
-			m_Bottom.m_z = z;
+            m_Bottom = {dwItemBlockFlags, dwID, z, 0};
 			m_zClimbHeight = 0;
 		}
 	}
-	else
+	else if ( z < m_Top.m_z )
 	{
-		SetTop( dwItemBlockFlags, z, dwID ); // I could potentially fit under this. ( it would be above me )
+        // I could potentially fit under this. ( it would be above me )
+        m_Top = {dwItemBlockFlags, dwID, z, 0};
 	}
 	return true;
 }

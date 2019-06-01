@@ -73,7 +73,8 @@ struct CServerMapBlocker
 {
 	dword m_dwBlockFlags;	// How does this item block ? CAN_I_PLATFORM
 	dword m_dwTile;			// TERRAIN_QTY + id.
-	char m_z;				// Top of a solid object. or bottom of non blocking one.
+	char m_z;				// Top (z + ((climbable item) ? height/2 : height)) of a solid object, or bottom (z) of non blocking one.
+    height_t m_height;      // The actual height of the item (0 if terrain)
 };
 
 struct CServerMapBlockState
@@ -108,10 +109,8 @@ private:
 	CServerMapBlockState& operator=(const CServerMapBlockState& other);
 
 public:
-	bool IsUsableZ( char zTile, height_t zTileHeight, height_t zHeightEstimate ) const;
 	bool CheckTile( dword dwItemBlockFlags, char zBottom, height_t zheight, dword wID );
 	bool CheckTile_Item( dword dwItemBlockFlags, char zBottom, height_t zheight, dword wID );
-	void SetTop( dword dwItemBlockFlags, char z, dword dwID );
 	bool CheckTile_Terrain( dword dwItemBlockFlags, char z, dword dwID );
 	static lpctstr GetTileName( dword dwID );
 };

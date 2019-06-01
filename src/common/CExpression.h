@@ -121,11 +121,10 @@ public:
 	CVarDefMap		m_VarGlobals;		// Global variables (VAR/VAR0)
 	CListDefMap		m_ListGlobals;		// Global lists
 	CListDefMap		m_ListInternals;	// Internal lists
-	CSString		m_sTmp;
 
 	//	defined default messages
 #define DEFMSG_MAX_LEN 128
-	static tchar sm_szMessages[DEFMSG_QTY][128];		// like: "You put %s to %s"
+	static tchar sm_szMessages[DEFMSG_QTY][DEFMSG_MAX_LEN];		// like: "You put %s to %s"
 	static lpctstr const sm_szMsgNames[DEFMSG_QTY];		// like: "put_it"
 
 public:

@@ -4146,6 +4146,7 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 		if ( IsSetEF(EF_DamageTools) )				catresname(zExperimentalFlags, "DamageTools");
 		if ( IsSetEF(EF_UsePingServer) )			catresname(zExperimentalFlags, "UsePingServer");
 		if ( IsSetEF(EF_FixCanSeeInClosedConts) )	catresname(zExperimentalFlags, "FixCanSeeInClosedConts");
+        if ( IsSetEF(EF_WalkCheckHeightMounted) )	catresname(zExperimentalFlags, "WalkCheckHeightMounted");
 #ifndef _MTNETWORK
 		if ( IsSetEF(EF_NetworkOutThread) ) catresname(zExperimentalFlags, "NetworkOutThread");
 #endif

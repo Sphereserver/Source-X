@@ -2208,14 +2208,13 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         }
         case SHV_UNLOCKITEM:
         {
-            CUID uidItem = (CUID)s.GetArgDWVal();
+            CUID uidItem(s.GetArgDWVal());
             if (!uidItem.IsValidUID())
             {
                 _lLockDowns.clear();
             }
             else
             {
-                ;
                 UnlockItem(uidItem);
             }
             break;
@@ -2263,7 +2262,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         }
         case SHV_RELEASE:
         {
-            CUID uidRelease = s.GetArgDWVal();
+            CUID uidRelease(s.GetArgDWVal());
             if (!uidRelease.IsValidUID())
             {
                 _lAccesses.clear();

@@ -174,6 +174,7 @@ public:
 #define CAN_C_NONSELECTABLE 0x80000 // Can't be selected/targeted (useful for chars with mt_statue which need to act as an item)
 
 // masks for movement-affecting flags
+#define CAN_C_MOVEMENTCAPABLEMASK (CAN_C_SWIM| CAN_C_WALK|CAN_C_FLY|CAN_C_RUN|CAN_C_HOVER)
 #define CAN_C_MOVEMASK      (CAN_C_GHOST|CAN_C_SWIM|CAN_C_WALK|CAN_C_PASSWALLS|CAN_C_FLY|CAN_C_FIRE_IMMUNE|CAN_C_NOINDOORS|CAN_C_HOVER|CAN_C_NOBLOCKHEIGHT)
 #define CAN_I_MOVEMASK      (CAN_I_DOOR|CAN_I_WATER|CAN_I_PLATFORM|CAN_I_BLOCK|CAN_I_CLIMB|CAN_I_FIRE|CAN_I_ROOF|CAN_I_HOVER)
 

@@ -1745,3 +1745,9 @@ WARNING: Important change!
 - Changed: Mounted characters now get stats regens, if you want the avoiding stats to regen add an event with ON=@RegenStat return 1 when mounting them.
 - Added: RegenHitsD, RegenManaD, RegenStamD, RegenFoodD accepting tenths instead of seconds, eg: RegenHits=3 will regen hits each 3 seconds; RegenHitsD=3 will do it each 0.3 seconds.
 - Changed: Now Regen[Stat] will store the time of the last update check instead of the time in which the next update will be done, so if you change RegenHits the new value will take effect inmediatelly instead of on the next update.
+
+01-06-2019, Nolok
+- Fixed: Non-GM chars couldn't walk below roofs/floors/platforms placed just a couple of z points above their head (Issue #273).
+- Added: .ini experimental flag EF_WalkCheckHeightMounted. When this is on, assume during walkchecks that a mounted character is taller by 4 z points. Since the client walkcheck considers the height of a mounted char to be
+	the same as the height of the unmounted char, enabling this might prevent mounted characters to walk under places they could before.
+- Fixed: NPCs with MT_FLY could fly over a wall and then drop through the roof, falling inside a building they shouldn't be able to enter in that way.
