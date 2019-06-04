@@ -1751,3 +1751,6 @@ WARNING: Important change!
 - Added: .ini experimental flag EF_WalkCheckHeightMounted. When this is on, assume during walkchecks that a mounted character is taller by 4 z points. Since the client walkcheck considers the height of a mounted char to be
 	the same as the height of the unmounted char, enabling this might prevent mounted characters to walk under places they could before.
 - Fixed: NPCs with MT_FLY could fly over a wall and then drop through the roof, falling inside a building they shouldn't be able to enter in that way.
+
+04-06-2019, Drk84
+- Fixed: Arrow not being consumed in @Hitmiss.
