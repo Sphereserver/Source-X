@@ -1769,10 +1769,15 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 				pAmmo = nullptr;
 		}
 
-		if ( pAmmo && m_pPlayer && (40 >= Calc_GetRandVal(100)) )
+		if ( pAmmo && m_pPlayer  )
 		{
-			pAmmo->UnStackSplit(1);
-			pAmmo->MoveToDecay(pCharTarg->GetTopPoint(), g_Cfg.m_iDecay_Item);
+			if (40 >= Calc_GetRandVal(100))
+			{
+				pAmmo->UnStackSplit(1);
+				pAmmo->MoveToDecay(pCharTarg->GetTopPoint(), g_Cfg.m_iDecay_Item);
+			}
+			else
+				pAmmo->ConsumeAmount(1);
 		}
 
 		if ( IsPriv(PRIV_DETAIL) )
