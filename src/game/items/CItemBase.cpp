@@ -58,7 +58,7 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 		tiledata.m_weight = 0xFF;
 	}
 
-	m_dwFlags = tiledata.m_flags;
+	m_qwFlags = tiledata.m_flags;
 
     SubscribeComponentProps(new CCPropsItem());
     SubscribeComponentProps(new CCPropsItemChar());
@@ -87,7 +87,7 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	GetItemSpecificFlags( tiledata, &m_Can, m_type, id );
 
 	if ( (tiledata.m_weight == 0xFF) ||			// not movable.
-		( m_dwFlags & UFLAG1_WATER ) )	// water can't be picked up.
+		( m_qwFlags & UFLAG1_WATER ) )	// water can't be picked up.
 	{
 		m_weight = UINT16_MAX;
 	}
@@ -96,7 +96,7 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 		m_weight = tiledata.m_weight * WEIGHT_UNITS;
 	}
 
-	if ( m_dwFlags & ( UFLAG1_EQUIP | UFLAG3_EQUIP2 ))
+	if ( m_qwFlags & ( UFLAG1_EQUIP | UFLAG3_EQUIP2 ))
 	{
 		m_layer = tiledata.m_layer;
 		if ( m_layer && ! IsMovableType())
@@ -122,7 +122,7 @@ void CItemBase::SetTypeName( lpctstr pszName )
 	ASSERT(pszName);
 	if ( ! strcmp( pszName, GetTypeName()) )
 		return;
-	m_dwFlags |= UFLAG2_ZERO1;	// we override the name
+	m_qwFlags |= UFLAG2_ZERO1;	// we override the name
 	CBaseBaseDef::SetTypeName( pszName );
 }
 
@@ -131,11 +131,11 @@ lpctstr CItemBase::GetArticleAndSpace() const
 	ADDTOCALLSTACK("CItemBase::GetArticleAndSpace");
 	if ( IsSetOF(OF_NoPrefix) )
 		return "";
-	if ( m_dwFlags & UFLAG2_ZERO1 )	// Name has been changed from TILEDATA.MUL
+	if ( m_qwFlags & UFLAG2_ZERO1 )	// Name has been changed from TILEDATA.MUL
 		return Str_GetArticleAndSpace( GetTypeName() );
-	if ( m_dwFlags & UFLAG2_AN )
+	if ( m_qwFlags & UFLAG2_AN )
 		return "an ";
-	if ( m_dwFlags & UFLAG2_A )
+	if ( m_qwFlags & UFLAG2_A )
 		return "a ";
 	return "";
 }
@@ -659,8 +659,9 @@ bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * pData ) // stat
 		! pData->m_weight &&
 		! pData->m_layer &&
 		! pData->m_dwUnk11 &&
-		! pData->m_dwAnim &&
-		! pData->m_wUnk19 &&
+		! pData->m_wAnim &&
+		! pData->m_wHue &&
+        ! pData->m_wLightIndex &&
 		! pData->m_height &&
 		! pData->m_name[0]
 		)
@@ -1301,7 +1302,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			sVal.FormatHex( m_ttNormal.m_tData4 );
 			break;
 		case IBC_TFLAGS:
-			sVal.FormatHex( GetTFlags() );
+			sVal.FormatULLHex( GetTFlags() );
 			break;
 		case IBC_TWOHANDS:
 			if ( ! IsTypeEquippable() )

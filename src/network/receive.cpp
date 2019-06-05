@@ -4473,10 +4473,23 @@ bool PacketCrashReport::onReceive(NetState* net)
 	skip(1); // zero
 	dword errorOffset = readInt32();
 
-	g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN|LOGM_NOCONTEXT, "%x:Client crashed at %d,%d,%d,%d: 0x%08X %s @ 0x%08X (%s, %d.%d.%d.%d)\n", net->id(),
-					x, y, z, map,
-					errorCode, description, errorOffset, executable,
-					versionMaj, versionMin, versionRev, versionPat);
+    lpctstr ptcAcctName = "none";
+    const CClient *pClient = net->getClient();
+    if (pClient)
+        if (const CAccount *pAccount = pClient->GetAccount())
+            ptcAcctName = pAccount->GetName();
+	g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN|LOGM_NOCONTEXT, "%x:Client crashed. Account: '%s'. Data from Crash Report packet:\n", ptcAcctName);
+    g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN|LOGM_NOCONTEXT, "P=%d,%d,%d,%d, ErrorCode=0x%08X, Description='%s', Offset=0x%08X, ClientExe='%s', ClientVer=%d.%d.%d.%d\n",
+        net->id(), x, y, z, map, errorCode, description, errorOffset, executable, versionMaj, versionMin, versionRev, versionPat);
+    if (pClient)
+    {
+        if (const CChar *pChar = pClient->GetChar())
+        {
+            CPointMap const& ptChar = pChar->GetTopPoint();
+            g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN|LOGM_NOCONTEXT, "Char attached. Last server P=%d,%d,%d,%d\n", ptChar.m_x, ptChar.m_y, ptChar.m_z, ptChar.m_map);
+        }
+    }
+    
 	return true;
 }
 

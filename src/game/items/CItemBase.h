@@ -241,7 +241,7 @@ private:
 	IT_TYPE	m_type;				// default double click action type. (if any)
 	CValueRangeDef m_values;	// range of values given a quality skill
 	byte    m_layer;			// Is this item equippable on paperdoll? LAYER=LAYER_TYPE defaults from the .MUL file.
-	dword   m_dwFlags;			//  UFLAG4_DOOR from CUOItemTypeRec/CUOItemTypeRec_HS
+	uint64  m_qwFlags;			//  UFLAG4_DOOR from CUOItemTypeRec/CUOItemTypeRec_HS
 	byte	m_speed;
 public:
 	static const char *m_sClassName;
@@ -502,9 +502,9 @@ public:
 	{
 		return (ITEMID_TYPE)(m_dwDispIndex);
 	}
-	dword GetTFlags() const
+	uint64 GetTFlags() const
 	{
-		return m_dwFlags;
+		return m_qwFlags;
 	}
 	bool IsSameDispID( ITEMID_TYPE id ) const;
 	ITEMID_TYPE GetNextFlipID( ITEMID_TYPE id ) const;
@@ -567,7 +567,7 @@ class CItemBaseDupe : public CResourceDef
 public:
 	CResourceRef m_MasterItem;	// What is the "master" item ?
 private:
-	dword		m_dwFlags;		//  UFLAG4_DOOR from CUOItemTypeRec/CUOItemTypeRec_HS
+	uint64		m_qwFlags;		//  UFLAG4_DOOR from CUOItemTypeRec/CUOItemTypeRec_HS
 	height_t	m_Height;
 public:
 	dword		m_Can;
@@ -575,7 +575,7 @@ public:
 	CItemBaseDupe( ITEMID_TYPE id, CItemBase * pMasterItem ) :
 		CResourceDef( CResourceID( RES_ITEMDEF, id ) ),
 		m_MasterItem( pMasterItem ),
-		m_dwFlags(0), m_Height(0), m_Can(0)
+		m_qwFlags(0), m_Height(0), m_Can(0)
 	{
 		ASSERT(pMasterItem);
 		ASSERT( pMasterItem->GetResourceID().GetResIndex() != id );
@@ -602,17 +602,17 @@ public:
 		m_MasterItem.SetRef(nullptr);
 		CResourceDef::UnLink();
 	}
-	dword GetTFlags() const
+	inline uint64 GetTFlags() const
 	{
-		return( m_dwFlags );
+		return( m_qwFlags );
 	}
 	height_t GetHeight() const
 	{
 		return( m_Height );
 	}
-	void SetTFlags( dword Flags )
+	void SetTFlags( uint64 Flags )
 	{
-		m_dwFlags = Flags;
+		m_qwFlags = Flags;
 	}
 	void SetHeight( height_t Height)
 	{

@@ -118,7 +118,7 @@ void CSString::Add(lpctstr pszStr)
 	int iLenCat = (int)strlen(pszStr);
 	if (iLenCat)
 	{
-		SetLength(iLenCat + m_iLength);
+		SetLength(iLenCat + 1 + m_iLength); // add +1 for \0
         m_iLength = (int)Str_ConcatLimitNull(m_pchData, pszStr, m_iLength);
 	}
 }

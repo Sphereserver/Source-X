@@ -1403,7 +1403,7 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 	// CLIMODE_TARG_SKILL_MAGERY
 
     const CChar *pTargChar = dynamic_cast<CChar*>(pObj);
-    if (pObj && pTargChar->Can(CAN_C_NONSELECTABLE))
+    if (pTargChar && pTargChar->Can(CAN_C_NONSELECTABLE))
         return false;
 
 	const CSpellDef * pSpell = g_Cfg.GetSpellDef( m_tmSkillMagery.m_Spell );

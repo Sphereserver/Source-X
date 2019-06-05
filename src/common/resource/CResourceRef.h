@@ -49,7 +49,7 @@ public:
     }
 
 public:
-    CResourceLink* GetRef() const
+    inline CResourceLink* GetRef() const
     {
         return m_pLink;
     }
@@ -63,7 +63,7 @@ public:
         if (pLink != nullptr)
             pLink->AddRefInstance();
     }
-    operator CResourceLink*() const
+    inline operator CResourceLink*() const
     {
         return GetRef();
     }

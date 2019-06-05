@@ -1899,7 +1899,11 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
                 {
                     if ( sLocArgs.GetLength() )
                         sLocArgs += "\t";
-                    sLocArgs += ( !strncmp(ppLocArgs[y], "nullptr", 4) ? " " : ppLocArgs[y] );
+
+                    if ((*ppLocArgs[y] == '\0') || !strncmp(ppLocArgs[y], "NULL", 4))
+                        sLocArgs += " ";
+                    else
+                        sLocArgs += ppLocArgs[y];
                 }
 
                 if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )

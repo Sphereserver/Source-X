@@ -1817,6 +1817,20 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
 		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
 			g_Log.EventWarn("BOTTOMitemID (0%" PRIx32 ") TOPitemID (0%" PRIx32 ").\n", (block.m_Bottom.m_dwTile - TERRAIN_QTY), (block.m_Top.m_dwTile - TERRAIN_QTY));
         
+        if (dwBlockFlags & CAN_I_WATER)
+        {
+            if (Can(CAN_C_SWIM))
+            {
+                // I can swim, and water tiles have the impassable flag, so let's remove it
+                dwBlockFlags &= ~CAN_I_BLOCK;
+            }
+            else
+            {
+                // Item is water and i can't swim
+                dwBlockFlags |= CAN_I_BLOCK; // it should be already added in the tiledata, but we better make that sure
+                uiBlockedBy |= CAN_I_WATER;
+            }
+        }
         if ( (dwBlockFlags & CAN_I_PLATFORM) && !Can(CAN_C_WALK) )
         {
             // Item is walkable (land, not water) and i can't walk
@@ -1835,12 +1849,6 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
                 dwBlockFlags |= CAN_I_BLOCK;
                 uiBlockedBy |= CAN_I_DOOR;
             }
-        }
-		if ( (dwBlockFlags & CAN_I_WATER) && !Can(CAN_C_SWIM) )
-        {
-            // Item is water and i can't swim
-			dwBlockFlags |= CAN_I_BLOCK;
-            uiBlockedBy |= CAN_I_WATER;
         }
 		if ( (dwBlockFlags & CAN_I_HOVER) )
         {

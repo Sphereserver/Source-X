@@ -1754,15 +1754,15 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			}
 			else
 			{
-				enum {TTATTR_FLAGS, TTATTR_UNK5, TTATTR_WEIGHT, TTATTR_LAYER, TTATTR_UNK11, TTATTR_ANIM, TTATTR_UNK19, TTATTR_HEIGHT, TTATTR_NAME};
+				enum {TTATTR_FLAGS, TTATTR_WEIGHT, TTATTR_LAYER, TTATTR_UNK11, TTATTR_ANIM, TTATTR_HUE, TTATTR_LIGHT, TTATTR_HEIGHT, TTATTR_NAME};
 				int iAttr = 0;
 				if (!strnicmp(pszKey, "FLAGS", 5))			iAttr = TTATTR_FLAGS;
-				else if (!strnicmp(pszKey, "UNK5", 4))		iAttr = TTATTR_UNK5;
 				else if (!strnicmp(pszKey, "WEIGHT", 6))	iAttr = TTATTR_WEIGHT;
 				else if (!strnicmp(pszKey, "LAYER", 5))		iAttr = TTATTR_LAYER;
 				else if (!strnicmp(pszKey, "UNK11", 5))		iAttr = TTATTR_UNK11;
 				else if (!strnicmp(pszKey, "ANIM", 4))		iAttr = TTATTR_ANIM;
-				else if (!strnicmp(pszKey, "UNK19", 5))		iAttr = TTATTR_UNK19;
+				else if (!strnicmp(pszKey, "HUE", 5))		iAttr = TTATTR_HUE;
+                else if (!strnicmp(pszKey, "LIGHT", 5))		iAttr = TTATTR_LIGHT;
 				else if (!strnicmp(pszKey, "HEIGHT", 6))	iAttr = TTATTR_HEIGHT;
 				else if (!strnicmp(pszKey, "NAME", 4))		iAttr = TTATTR_NAME;
 				else
@@ -1773,15 +1773,15 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 				CUOItemInfo itemInfo((ITEMID_TYPE)id);
 				switch (iAttr)
 				{
-					case TTATTR_FLAGS:	sVal.FormatDWVal(itemInfo.m_flags);		break;
-					case TTATTR_UNK5:	sVal.FormatDWVal(itemInfo.m_dwUnk5);	break;
-					case TTATTR_WEIGHT:	sVal.FormatBVal(itemInfo.m_weight);		break;
-					case TTATTR_LAYER:	sVal.FormatBVal(itemInfo.m_layer);		break;
-					case TTATTR_UNK11:	sVal.FormatDWVal(itemInfo.m_dwUnk11);	break;
-					case TTATTR_ANIM:	sVal.FormatDWVal(itemInfo.m_dwAnim);	break;
-					case TTATTR_UNK19:	sVal.FormatWVal(itemInfo.m_wUnk19);		break;
-					case TTATTR_HEIGHT:	sVal.FormatBVal(itemInfo.m_height);		break;
-					case TTATTR_NAME:	sVal = itemInfo.m_name;					break;
+					case TTATTR_FLAGS:	sVal.FormatU64Val(itemInfo.m_flags);    break;
+					case TTATTR_WEIGHT:	sVal.FormatBVal(itemInfo.m_weight);	    break;
+					case TTATTR_LAYER:	sVal.FormatBVal(itemInfo.m_layer);	    break;
+					case TTATTR_UNK11:	sVal.FormatDWVal(itemInfo.m_dwUnk11);   break;
+					case TTATTR_ANIM:	sVal.FormatWVal(itemInfo.m_wAnim);	    break;
+					case TTATTR_HUE:	sVal.FormatWVal(itemInfo.m_wHue);	    break;
+                    case TTATTR_LIGHT:	sVal.FormatWVal(itemInfo.m_wLightIndex);break;
+					case TTATTR_HEIGHT:	sVal.FormatBVal(itemInfo.m_height);	    break;
+					case TTATTR_NAME:	sVal = itemInfo.m_name;				    break;
 					default: return false;
 				}
 			}
@@ -4601,7 +4601,7 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 		// ensure there is actually some data here, treat "MissingName" as blank since some tiledata.muls
 		// have this name set in blank slots
 		if ( !tiledata.m_flags && !tiledata.m_weight && !tiledata.m_layer &&
-			 !tiledata.m_dwUnk11 && !tiledata.m_dwAnim && !tiledata.m_wUnk19 && !tiledata.m_height &&
+			 !tiledata.m_dwUnk11 && !tiledata.m_wAnim && !tiledata.m_wHue && !tiledata.m_wLightIndex && !tiledata.m_height &&
 			 (!tiledata.m_name[0] || strcmp(tiledata.m_name, "MissingName") == 0))
 			 continue;
 

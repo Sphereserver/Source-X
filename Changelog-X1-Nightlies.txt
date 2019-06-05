@@ -1754,3 +1754,10 @@ WARNING: Important change!
 
 04-06-2019, Drk84
 - Fixed: Arrow not being consumed in @Hitmiss.
+
+05-06-2019, Nolok
+- Fixed: Casting recall spell on a non-rune item caused an exception (Issue #271).
+- Fixed: Clilocs didn't parse correctly empty and NULL arguments and the cliloc for the item name wasn't forcefully sent first (Issue #272).
+- Updated: Added more informations to the log message reporting a client crash.
+- Fixed: High Seas tiledata terrain data wasn't read correctly, also FLAGS was considered a 32 bits number instead of a 64 bits one, as now it is.
+- Changed: Renamed SERV.TILEDATA.id.UNK19 to LIGHT and added HUE. ANIM was considered to be a 4 bit field, but it looks like it's actually a 2 bit number (and the following 2 bits hold another value, now stored into HUE).

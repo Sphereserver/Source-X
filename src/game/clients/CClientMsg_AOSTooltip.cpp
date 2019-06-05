@@ -81,10 +81,10 @@ bool CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 			dword ClilocName = (dword)(pObj->GetDefNum("NAMELOC", false));
 
 			if (ClilocName)
-                PUSH_BACK_TOOLTIP(pObj, new CClientTooltip(ClilocName));
+                PUSH_FRONT_TOOLTIP(pObj, new CClientTooltip(ClilocName));
 			else
 			{
-                PUSH_BACK_TOOLTIP(pObj, t = new CClientTooltip(1042971)); // ~1_NOTHING~
+                PUSH_FRONT_TOOLTIP(pObj, t = new CClientTooltip(1042971)); // ~1_NOTHING~
 				t->FormatArgs("%s", pObj->GetName());
 			}
 		}
@@ -211,16 +211,16 @@ void CClient::AOSTooltip_addName(CObjBase* pObj)
 	{
 		if ( dwClilocName )
 		{
-            PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(dwClilocName));
+            PUSH_FRONT_TOOLTIP(pItem, new CClientTooltip(dwClilocName));
 		}
 		else if ( (pItem->GetAmount() > 1) && (pItem->GetType() != IT_CORPSE) )
 		{
-            PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1050039)); // ~1_NUMBER~ ~2_ITEMNAME~
+            PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1050039)); // ~1_NUMBER~ ~2_ITEMNAME~
 			t->FormatArgs("%" PRIu16 "\t%s", pItem->GetAmount(), pObj->GetName());
 		}
 		else
 		{
-            PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1042971)); // ~1_NOTHING~
+            PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1042971)); // ~1_NOTHING~
             t->FormatArgs("%s", pObj->GetName());
 		}
 	}
