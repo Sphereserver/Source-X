@@ -1292,9 +1292,10 @@ bool CSector::OnTick()
 	{
 		EXC_TRYSUB("TickChar");
 
+        ASSERT(pChar);
 		pCharNext = pChar->GetNext();
 
-		if (( fEnvironChange ) && ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) ))
+		if (fEnvironChange && ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) ))
 			pChar->OnTrigger(CTRIG_EnvironChange, pChar);
 
 		if ( pChar->IsClient())

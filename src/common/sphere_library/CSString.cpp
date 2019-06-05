@@ -80,7 +80,7 @@ int CSString::SetLength(int iNewLength)
 		tchar *pNewData = new tchar[m_iMaxLength + 1];
 		ASSERT(pNewData);
 
-		int iMinLength = minimum(iNewLength, m_iLength);
+		int iMinLength = minimum(iNewLength, m_iLength + 1);
         ASSERT(m_pchData);
 		Str_CopyLimitNull(pNewData, m_pchData, iMinLength);
 		pNewData[m_iLength] = '\0';
@@ -118,8 +118,8 @@ void CSString::Add(lpctstr pszStr)
 	int iLenCat = (int)strlen(pszStr);
 	if (iLenCat)
 	{
-		SetLength(iLenCat + 1 + m_iLength); // add +1 for \0
-        m_iLength = (int)Str_ConcatLimitNull(m_pchData, pszStr, m_iLength);
+		SetLength(iLenCat + m_iLength);
+        m_iLength = (int)Str_ConcatLimitNull(m_pchData, pszStr, m_iLength + 1);
 	}
 }
 

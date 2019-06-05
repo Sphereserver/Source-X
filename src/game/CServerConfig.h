@@ -499,7 +499,7 @@ public:
 	bool m_fUsePacketPriorities;    // true to prioritise sending packets
 	bool m_fUseExtraBuffer;         // true to queue packet data in an extra buffer
 
-	int64 m_iTooltipCache;            // time in seconds to cache tooltip for.
+	int64 m_iTooltipCache;          // time in seconds to cache tooltip for.
 	int	m_iTooltipMode;             // tooltip mode (TOOLTIP_TYPE)
 	int	m_iContextMenuLimit;        // max amount of options per context menu
 
