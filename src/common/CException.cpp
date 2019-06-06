@@ -1,15 +1,16 @@
 
 #include "CException.h"
 
-#if !defined(_WIN32) && defined(_DEBUG)
-#include <sys/stat.h>
+#ifndef _WIN32 
 #include <sys/wait.h>
-#include <fcntl.h>
+#include <csignal>
 #include <cstring>
 
 #include "../game/CServer.h"
 #include "../game/CWorld.h"
 
+#ifdef _DEBUG
+#include <fcntl.h>
 int IsDebuggerPresent(void)
 {
 	char buf[1024];
@@ -34,7 +35,9 @@ int IsDebuggerPresent(void)
 
 	return debugger_present;
 }
-#endif
+#endif // _DEBUG
+
+#endif // !_WIN32
 
 #ifdef _WIN32
 int CSError::GetSystemErrorMessage(dword dwError, lptstr lpszError, uint nMaxError) // static
