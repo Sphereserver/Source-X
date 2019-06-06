@@ -32,7 +32,6 @@ void CPathFinder::GetChildren(CPathFinderPointRef& Point, std::list<CPathFinderP
 					continue;
 			}
 
-
 			ChildrenRefList.emplace_back( m_Points[RealX][RealY] );
 		}
 	}

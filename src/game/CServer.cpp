@@ -65,8 +65,8 @@ void CServer::SetSignals( bool fMsg )
 	// set_terminate(  &Exception_Terminate );
 	// set_unexpected( &Exception_Unexpected );
 
-	SetUnixSignals(g_Cfg.m_fSecure);
 #ifndef _WIN32
+	SetUnixSignals(g_Cfg.m_fSecure);
 	if ( g_Cfg.m_fSecure )
 	{
 		g_Log.Event( (IsLoading() ? 0 : LOGL_EVENT) | LOGM_INIT, "Signal handlers installed.\n" );
@@ -80,8 +80,8 @@ void CServer::SetSignals( bool fMsg )
 	if ( fMsg && !IsLoading() )
 	{
 		g_World.Broadcast( g_Cfg.m_fSecure ?
-			"The world is now running in SECURE MODE" :
-			"WARNING: The world is NOT running in SECURE MODE" );
+			"The world is now running in SECURE MODE." :
+			"WARNING: The world is NOT running in SECURE MODE." );
 	}
 }
 
@@ -722,7 +722,7 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 		case '$':	// call stack integrity
 			{
 	#ifdef _EXCEPTIONS_DEBUG
-				{ // test without PAUSECALLSTACK
+				{ // test without freezing the call stack
 					ADDTOCALLSTACK("CServer::TestException1");
 					EXC_TRY("Test1");
 					throw CSError( LOGM_DEBUG, 0, "Test Exception #1");
@@ -736,17 +736,17 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 					}
 				}
 
-				{ // test with PAUSECALLSTACK
+				{ // test pausing the call stack
 					ADDTOCALLSTACK("CServer::TestException2");
 					EXC_TRY("Test2");
 					throw CSError( LOGM_DEBUG, 0, "Test Exception #2");
 					}
 					catch (const CSError& e)
 					{
-						PAUSECALLSTACK;
-						// with pausecallstack, the following call won't be recorded
+                        StackDebugInformation::freezeCallStack(true);
+						// with freezeCallStack, the following call won't be recorded
 						g_Log.Event( LOGM_DEBUG, "Caught exception\n" );
-						UNPAUSECALLSTACK;
+                        StackDebugInformation::freezeCallStack(false);
                         EXC_CATCH_EXCEPTION_SPHERE(&e);
 					}
 				}

@@ -1030,13 +1030,13 @@ int CItem::FixWeirdness()
             break;
 
         default:
-            if (GetType() > IT_QTY)
+        {
+            const IT_TYPE iType = GetType();
+            if ((iType > IT_QTY) && (iType < IT_TRIGGER))
             {
-                if (GetType() < IT_TRIGGER)
-                {
-                    SetType(pItemDef->GetType());
-                }
+                SetType(pItemDef->GetType());
             }
+        }
     }
 
     if (IsItemEquipped())
@@ -3103,7 +3103,9 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			}
 			return true;
 		case IC_TYPE:
-			SetType( (IT_TYPE)(g_Cfg.ResourceGetIndexType( RES_TYPEDEF, s.GetArgStr() )) );
+			if (! SetType( (IT_TYPE)(g_Cfg.ResourceGetIndexType( RES_TYPEDEF, s.GetArgStr() )) ))
+                return false;
+            // Need to UpdatePropertyFlag()
 			break;
 		default:
         {
@@ -3596,11 +3598,24 @@ TRIGRET_TYPE CItem::OnTrigger( ITRIG_TYPE trigger, CTextConsole * pSrc, CScriptT
 }
 
 // Item type specific stuff.
-CItem * CItem::SetType(IT_TYPE type)
+bool CItem::SetType(IT_TYPE type, bool fPreCheck)
 {
 	ADDTOCALLSTACK("CItem::SetType");
+
+    if (fPreCheck)
+    {
+        // Pre-assignment checks
+        if (type == IT_MULTI_CUSTOM)
+        {
+            g_Log.EventError("Can't dynamically assign type 't_multi_custom' to an item. This type can only be specified in the TYPEDEF.\n");
+            return false;
+        }
+    }
+
+    // Assign type
 	m_type = type;
 
+    // Post-assignment checks
     // CComponents sanity check.
     CComponent* pComp;
     CComponentProps* pCompProps;
@@ -3690,7 +3705,7 @@ CItem * CItem::SetType(IT_TYPE type)
         SubscribeComponent(new CCFaction(this));
     }
 
-	return this;
+	return true;
 }
 
 bool CItem::IsTypeLit() const

@@ -725,7 +725,7 @@ public:    /**
     inline IT_TYPE GetType() const {
         return m_type;
     }
-	CItem * SetType( IT_TYPE type );
+	bool SetType( IT_TYPE type, bool fPreCheck = true );
 	bool IsTypeLit() const;
 	bool IsTypeBook() const;
 	bool IsTypeSpellbook() const;

@@ -123,9 +123,7 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 	pCorpse->m_itCorpse.m_BaseID = m_prev_id;	// id the corpse type here !
 	pCorpse->m_itCorpse.m_facing_dir = m_dirFace;
 	pCorpse->m_uidLink = GetUID();
-    pCorpse->m_ModMaxWeight = g_Cfg.Calc_MaxCarryWeight(this);		// set corpse maxweight to prevent weird exploits like when someone place many items on an player corpse just to make this player get stuck on resurrect
-
-	// TO-DO: Fix corpses always turning to the same dir (DIR_N) after resend it to clients
+    pCorpse->m_ModMaxWeight = g_Cfg.Calc_MaxCarryWeight(this); // set corpse maxweight to prevent weird exploits like when someone place many items on an player corpse just to make this player get stuck on resurrect
 
 	if (fFrontFall)
 		pCorpse->m_itCorpse.m_facing_dir = (DIR_TYPE)(m_dirFace|0x80);

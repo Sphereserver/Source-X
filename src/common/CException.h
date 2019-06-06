@@ -7,10 +7,6 @@
 #define _INC_CEXCEPTION_H
 
 #include "../common/CLog.h"
-#include <csignal>
-#ifndef _WIN32
-	#include <sys/wait.h>
-#endif
 
 // -------------------------------------------------------------------
 // -------------------------------------------------------------------
@@ -25,10 +21,12 @@ extern "C"
 
 void SetPurecallHandler();
 void SetExceptionTranslator();
-void SetUnixSignals( bool );
 
-#if !defined(_WIN32) && defined(_DEBUG)
+#ifndef _WIN32
+    void SetUnixSignals( bool );
+    #ifndef _DEBUG
 	int IsDebuggerPresent();	// Windows already has this function
+    #endif
 #endif
 
 // -------------------------------------------------------------------
@@ -75,24 +73,24 @@ private:
 	CAssert& operator=(const CAssert& other);
 
 public:
-	virtual bool GetErrorMessage(lptstr lpszError, uint uiMaxError ) const;
+	virtual bool GetErrorMessage(lptstr lpszError, uint uiMaxError ) const override;
 };
 
 #ifdef _WIN32
 	// Catch and get details on the system exceptions.
-	class CException : public CSError
+	class CWinException : public CSError
 	{
 	public:
 		static const char *m_sClassName;
 		const size_t m_pAddress;
 
-		CException(uint uCode, size_t pAddress);
-		virtual ~CException();
+        CWinException(uint uCode, size_t pAddress);
+		virtual ~CWinException();
 	private:
-		CException& operator=(const CException& other);
+        CWinException& operator=(const CWinException& other);
 
 	public:
-		virtual bool GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelpContext = nullptr ) const;
+		virtual bool GetErrorMessage(lptstr lpszError, uint nMaxError) const override;
 	};
 #endif
 
@@ -123,12 +121,8 @@ public:
 	#endif
 #endif
 
-// EXC_PRINT_STACK_TRACE
-#ifdef THREAD_TRACK_CALLSTACK
-    #define EXC_PRINT_STACK_TRACE StackDebugInformation::printStackTrace()
-#else
-    #define EXC_PRINT_STACK_TRACE (void)0
-#endif
+// _EXC_CAUGHT
+#define _EXC_CAUGHT static_cast<AbstractSphereThread *>(ThreadHolder::current())->exceptionCaught()
 
 /*--- Main (non SUB) macros ---*/
 
@@ -147,47 +141,47 @@ public:
 	inLocalBlock = a; \
 	++inLocalBlockCnt
 
-// EXC_CATCH_EXCEPTION_SPHERE (used inside other macros! don't use it manually!)
-#define EXC_CATCH_EXCEPTION_GENERIC(a,excType) \
+// _EXC_CATCH_EXCEPTION_GENERIC (used inside other macros! don't use it manually!)
+#define _EXC_CATCH_EXCEPTION_GENERIC(a,excType) \
     bCATCHExcept = true; \
 	if ( inLocalBlock != nullptr && inLocalBlockCnt > 0 ) \
-		g_Log.CatchEvent(a, "ExcType=%s in %s::%s() #%u \"%s\"", excType, m_sClassName, inLocalArgs, inLocalBlockCnt, inLocalBlock); \
+		g_Log.CatchEvent(a, "ExcType=%s catched in %s::%s() #%u \"%s\"", excType, m_sClassName, inLocalArgs, inLocalBlockCnt, inLocalBlock); \
 	else \
-		g_Log.CatchEvent(a, "ExcType=%s in %s::%s()", excType, m_sClassName, inLocalArgs); \
-	EXC_PRINT_STACK_TRACE
+		g_Log.CatchEvent(a, "ExcType=%s catched in %s::%s()", excType, m_sClassName, inLocalArgs); \
+	_EXC_CAUGHT
 
-// EXC_CATCH_EXCEPTION_STD (used inside other macros! don't use it manually!)
-#define EXC_CATCH_EXCEPTION_STD(a) \
+// _EXC_CATCH_EXCEPTION_STD (used inside other macros! don't use it manually!)
+#define _EXC_CATCH_EXCEPTION_STD(a) \
     bCATCHExcept = true; \
 	if ( inLocalBlock != nullptr && inLocalBlockCnt > 0 ) \
-		g_Log.CatchStdException(a, "ExcType=std::exception in %s::%s() #%u \"%s\"", m_sClassName, inLocalArgs, inLocalBlockCnt, inLocalBlock); \
+		g_Log.CatchStdException(a, "ExcType=std::exception catched in %s::%s() #%u \"%s\"", m_sClassName, inLocalArgs, inLocalBlockCnt, inLocalBlock); \
 	else \
-		g_Log.CatchStdException(a, "ExcType=std::exception in %s::%s()", m_sClassName, inLocalArgs); \
-	EXC_PRINT_STACK_TRACE
+		g_Log.CatchStdException(a, "ExcType=std::exception catched in %s::%s()", m_sClassName, inLocalArgs); \
+	_EXC_CAUGHT
 
 // EXC_CATCH
 #define EXC_CATCH \
 	} \
 	catch ( const CAssert& e ) \
 	{ \
-		EXC_CATCH_EXCEPTION_GENERIC(&e, "CAssert"); \
+		_EXC_CATCH_EXCEPTION_GENERIC(&e, "CAssert"); \
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
 	} \
 	catch ( const CSError& e ) \
 	{ \
-		EXC_CATCH_EXCEPTION_GENERIC(&e, "CSError"); \
+		_EXC_CATCH_EXCEPTION_GENERIC(&e, "CSError"); \
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
 		EXC_NOTIFY_DEBUGGER; \
 	} \
     catch ( const std::exception& e ) \
 	{ \
-		EXC_CATCH_EXCEPTION_STD(&e); \
+		_EXC_CATCH_EXCEPTION_STD(&e); \
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
 		EXC_NOTIFY_DEBUGGER; \
 	} \
 	catch (...) \
 	{ \
-		EXC_CATCH_EXCEPTION_GENERIC(nullptr, "pure"); \
+		_EXC_CATCH_EXCEPTION_GENERIC(nullptr, "pure"); \
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
 		EXC_NOTIFY_DEBUGGER; \
 	}
@@ -200,7 +194,6 @@ public:
 		{
 
 #define EXC_DEBUG_END \
-			/*EXC_PRINT_STACK_TRACE;*/ \
 		} \
 		catch ( ... ) \
 		{ \
@@ -226,49 +219,49 @@ public:
 	inLocalSubBlock = a; \
 	++inLocalSubBlockCnt
 
-// EXC_CATCH_SUB_EXCEPTION_GENERIC(a,b, "ExceptionType") (used inside other macros! don't use it manually!)
-#define EXC_CATCH_SUB_EXCEPTION_GENERIC(a,b,excType) \
+// _EXC_CATCH_SUB_EXCEPTION_GENERIC(a,b, "ExceptionType") (used inside other macros! don't use it manually!)
+#define _EXC_CATCH_SUB_EXCEPTION_GENERIC(a,b,excType) \
     bCATCHExceptSub = true; \
     if ( inLocalSubBlock != nullptr && inLocalSubBlockCnt > 0 ) \
-        g_Log.CatchEvent(a, "ExcType=%s in SUB: %s::%s() #%u \"%s\" (\"%s\")", excType, m_sClassName, inLocalSubArgs, \
+        g_Log.CatchEvent(a, "ExcType=%s catched in SUB: %s::%s() #%u \"%s\" (\"%s\")", excType, m_sClassName, inLocalSubArgs, \
 											                inLocalSubBlockCnt, inLocalSubBlock, b); \
     else \
-        g_Log.CatchEvent(a, "ExcType=%s in SUB: %s::%s() (\"%s\")", excType, m_sClassName, inLocalSubArgs, b); \
-    EXC_PRINT_STACK_TRACE
+        g_Log.CatchEvent(a, "ExcType=%s catched in SUB: %s::%s() (\"%s\")", excType, m_sClassName, inLocalSubArgs, b); \
+    _EXC_CAUGHT
 
-// EXC_CATCH_SUB_EXCEPTION_STD(a,b) (used inside other macros! don't use it manually!)
-#define EXC_CATCH_SUB_EXCEPTION_STD(a,b) \
+// _EXC_CATCH_SUB_EXCEPTION_STD(a,b) (used inside other macros! don't use it manually!)
+#define _EXC_CATCH_SUB_EXCEPTION_STD(a,b) \
     bCATCHExceptSub = true; \
     if ( inLocalSubBlock != nullptr && inLocalSubBlockCnt > 0 ) \
-        g_Log.CatchStdException(a, "ExcType=std::exception in SUB: %s::%s() #%u \"%s\" (\"%s\")", m_sClassName, inLocalSubArgs, \
+        g_Log.CatchStdException(a, "ExcType=std::exception catched in SUB: %s::%s() #%u \"%s\" (\"%s\")", m_sClassName, inLocalSubArgs, \
 											                inLocalSubBlockCnt, inLocalSubBlock, b); \
     else \
-        g_Log.CatchStdException(a, "ExcType=std::exception in SUB: %s::%s() (\"%s\")", m_sClassName, inLocalSubArgs, b); \
-    EXC_PRINT_STACK_TRACE
+        g_Log.CatchStdException(a, "ExcType=std::exception catched in SUB: %s::%s() (\"%s\")", m_sClassName, inLocalSubArgs, b); \
+    _EXC_CAUGHT
 
 // EXC_CATCHSUB(a)
 #define EXC_CATCHSUB(a)	\
 	} \
     catch ( const CAssert& e ) \
 	{ \
-		EXC_CATCH_SUB_EXCEPTION_GENERIC(&e, a, "CAssert"); \
+		_EXC_CATCH_SUB_EXCEPTION_GENERIC(&e, a, "CAssert"); \
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
 	} \
 	catch ( const CSError& e )	\
 	{ \
-		EXC_CATCH_SUB_EXCEPTION_GENERIC(&e, a, "CSError"); \
+		_EXC_CATCH_SUB_EXCEPTION_GENERIC(&e, a, "CSError"); \
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
         EXC_NOTIFY_DEBUGGER; \
 	} \
     catch ( const std::exception& e ) \
 	{ \
-		EXC_CATCH_SUB_EXCEPTION_STD(&e, a); \
+		_EXC_CATCH_SUB_EXCEPTION_STD(&e, a); \
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
 		EXC_NOTIFY_DEBUGGER; \
 	} \
 	catch (...) \
 	{ \
-		EXC_CATCH_SUB_EXCEPTION_GENERIC(nullptr, a, "pure"); \
+		_EXC_CATCH_SUB_EXCEPTION_GENERIC(nullptr, a, "pure"); \
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
         EXC_NOTIFY_DEBUGGER; \
 	}
@@ -282,14 +275,14 @@ public:
 
 // EXC_DEBUGSUB_END
 #define EXC_DEBUGSUB_END \
-			/*EXC_PRINT_STACK_TRACE;*/ \
 		} \
 		catch ( ... ) \
 		{ \
-			g_Log.EventError("Exception adding debug message on the exception.\n"); \
+			g_Log.EventError("Exception adding debug message on the exception (sub).\n"); \
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
 		} \
 	}
+
 
 /*--- Keywords debugging ---*/
 

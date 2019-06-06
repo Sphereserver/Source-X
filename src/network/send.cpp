@@ -5101,7 +5101,8 @@ PacketItemWorldNew::PacketItemWorldNew(byte id, uint size, CUID uid) : PacketIte
 PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item) : PacketItemWorld(XCMD_PutNew, 26, item->GetUID())
 {
 	ADDTOCALLSTACK("PacketItemWorldNew::PacketItemWorldNew");
-
+    
+    const NetState *ns = target->GetNetState();
 	DataSource source;		// 0=Tiledata, 1=Character, 2=Multi
 	dword uid = item->GetUID();
 	ITEMID_TYPE id = item->GetDispID();
@@ -5131,7 +5132,7 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item)
 	}
 	else
 	{
-		source = (item->Can(CAN_I_DAMAGEABLE) && (target->GetNetState()->isClientVersion(MINCLIVER_STATUS_V6))) ? Damageable : TileData;
+		source = (item->Can(CAN_I_DAMAGEABLE) && ns->isClientVersion(MINCLIVER_STATUS_V6)) ? Damageable : TileData;
 		id = (ITEMID_TYPE)(id & 0xFFFF);
 	}
 
@@ -5149,7 +5150,7 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item)
 	writeInt16(hue);
 	writeByte(flags);
 
-	if ( target->GetNetState()->isClientVersion(MINCLIVER_HS) )
+	if ( ns->isClientVersion(MINCLIVER_HS) )
 		writeInt16(0);		// 0 = World Item, 1 = Player Item (why should a item on the ground be defined as player item? and what is the difference?)
 
 	trim();

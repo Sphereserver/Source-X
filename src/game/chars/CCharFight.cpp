@@ -322,13 +322,14 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, bool fCommandPet, bool fShouldReveal)
 		return true;
 
     bool fAggreived = false;
-	Memory_AddObjTypes(pCharSrc, MEMORY_HARMEDBY | MEMORY_IRRITATEDBY);
+    word wMemTypes = MEMORY_HARMEDBY | MEMORY_IRRITATEDBY;
     if (!pCharSrc->Memory_FindObjTypes(this, MEMORY_AGGREIVED))
     {
         // I'm the one being attacked first
         fAggreived = true;
-        Memory_AddObjTypes(pCharSrc, MEMORY_AGGREIVED);
+        wMemTypes |= MEMORY_AGGREIVED;
     }
+    Memory_AddObjTypes(pCharSrc, wMemTypes);
 	Attacker_Add(pCharSrc);
 
 	// Are they a criminal for it ? Is attacking me a crime ?

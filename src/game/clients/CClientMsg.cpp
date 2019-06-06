@@ -336,7 +336,9 @@ void CClient::addItem_OnGround( CItem * pItem ) // Send items (on ground)
 	if ( !pItem )
 		return;
 
-	if ( PacketItemWorldNew::CanSendTo(GetNetState()) )
+    const bool fCorpse = (pItem->GetDispID() == ITEMID_CORPSE);
+    // The new packet doesn't show the right direction for corpses. Use the old one (which still works with old clients, for items with item graphics <= 0x3FFF).
+	if ( !fCorpse && PacketItemWorldNew::CanSendTo(GetNetState()) )
 		new PacketItemWorldNew(this, pItem);
 	else
 		new PacketItemWorld(this, pItem);
@@ -350,7 +352,7 @@ void CClient::addItem_OnGround( CItem * pItem ) // Send items (on ground)
 		addSound((SOUND_TYPE)(pItem->m_itSound.m_Sound), pItem, pItem->m_itSound.m_Repeat );
 
 	// send corpse clothing
-	if ( !IsPriv(PRIV_DEBUG) && ((pItem->GetDispID() == ITEMID_CORPSE) && CCharBase::IsPlayableID(pItem->GetCorpseType())) )	// cloths on corpse
+	if ( !IsPriv(PRIV_DEBUG) && (fCorpse && CCharBase::IsPlayableID(pItem->GetCorpseType())) )	// cloths on corpse
 	{
 		const CItemCorpse *pCorpse = static_cast<const CItemCorpse *>(pItem);
 		if ( pCorpse )
@@ -366,9 +368,9 @@ void CClient::addItem_OnGround( CItem * pItem ) // Send items (on ground)
 	if ( (pItem->IsType(IT_MULTI_CUSTOM)) && m_pChar->CanSee(pItem) )
 	{
 		// send house design version
-		const CItemMultiCustom *pItemMulti = static_cast<const CItemMultiCustom *>(pItem);
-		if (pItemMulti != nullptr)
-			pItemMulti->SendVersionTo(this);
+		const CItemMultiCustom *pItemMulti = dynamic_cast<const CItemMultiCustom *>(pItem);
+        ASSERT(pItemMulti);
+        pItemMulti->SendVersionTo(this);
 	}
 }
 

@@ -1761,3 +1761,7 @@ WARNING: Important change!
 - Updated: Added more informations to the log message reporting a client crash.
 - Fixed: High Seas tiledata terrain data wasn't read correctly, also FLAGS was considered a 32 bits number instead of a 64 bits one, as now it is.
 - Changed: Renamed SERV.TILEDATA.id.UNK19 to LIGHT and added HUE. ANIM was considered to be a 4 bit field, but it looks like it's actually a 2 bit number (and the following 2 bits hold another value, now stored into HUE).
+
+06-06-2019, Nolok
+- Changed: Improved a lot the precision of the stack trace, now it should point exactly (in most cases) to the function where the exception was generated.
+- Fixed: UPDATE caused Stygian Abyss or later clients to show corpses changing their laying direction (even if it actually was a visual artifact, direction wasn't changing server-side) (Issue #274).
