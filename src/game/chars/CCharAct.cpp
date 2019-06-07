@@ -4139,7 +4139,6 @@ bool CChar::OnTickPeriodic()
     }
 
     // Stats regeneration
-    uchar fStatusUpdate = m_fStatusUpdate;  // Keeping track of stat changes in case the status bar must be updated.
     if (!IsStatFlag(STATF_DEAD | STATF_STONE) && !Can(CAN_C_STATUE))
     {
         Stats_Regen();

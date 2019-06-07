@@ -280,7 +280,9 @@ CSector * CRect::GetSector( int i ) const	// ge all the sectors that make up thi
 	rect.NormalizeRectMax();
 
     const int iSectorCols = g_MapList.GetSectorCols(m_map);
+#ifdef _DEBUG
     const int iSectorRows = g_MapList.GetSectorRows(m_map);
+#endif
 	int width = (rect.GetWidth()) / iSectorSize;
 	ASSERT(width <= iSectorCols);
 	int height = (rect.GetHeight()) / iSectorSize;

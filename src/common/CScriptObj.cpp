@@ -2,6 +2,7 @@
 #ifdef _WIN32
 	#include <process.h>
 #else
+    #include <sys/wait.h>
 	#include <errno.h>	// errno
 #endif
 
