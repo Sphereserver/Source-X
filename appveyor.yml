@@ -66,3 +66,9 @@ after_build:
   - 7z a SphereSvrX-win32-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_32%\bin\Nightly\SphereSvrX32_nightly.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\dlls\32\*.dll"
   - 7z a SphereSvrX-win32-debug.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_32%\bin\Debug\SphereSvrX32_debug.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\dlls\32\*.dll"
   - curl -sST "{SphereSvrX-win64-nightly.zip,SphereSvrX-win64-debug.zip,SphereSvrX-win32-nightly.zip,SphereSvrX-win32-debug.zip}" -u %FTP_USER%:%FTP_PASSWORD% %FTP_SERVER%
+
+artifacts:
+  - path: SphereSvrX-win64-nightly.zip
+  - path: SphereSvrX-win64-debug.zip
+  - path: SphereSvrX-win32-nightly.zip
+  - path: SphereSvrX-win32-debug.zip
