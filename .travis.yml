@@ -30,7 +30,7 @@ addons:
       description: "Game server for Ultima Online"
     notification_email: null@null
     branch_pattern: master
-    build_command_prepend: cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" ./src
+    build_command_prepend: cmake -G '$CMAKE_GEN' -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE='$CMAKE_TCH_64' ./src
     build_command: make -j4
       
 script:
