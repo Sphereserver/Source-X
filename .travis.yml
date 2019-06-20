@@ -10,7 +10,7 @@ branches:
 
 env:
   - CMAKE_GEN="Unix Makefiles"
-  - CMAKE_TCH_64="../src/cmake/toolchains/Linux-GNU-64.cmake"
+    CMAKE_TCH_64="../src/cmake/toolchains/Linux-GNU-64.cmake"
 
 install:
   - export CC="gcc-7" && export CXX="g++-7"

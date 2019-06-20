@@ -101,6 +101,7 @@ for:
 
     install:
       - echo && echo "** Setting up GCC compiler" && echo
+      - sudo apt-get -qq update
       - sudo apt install -yqq --no-install-recommends gcc-7 gcc-7-multilib g++-7 g++-7-multilib
       - export CC="gcc-7" && export CXX="g++-7"
 
