@@ -112,7 +112,7 @@ for:
     # Use our custom script
     build_script:
       - echo && echo "** Setting up MySQL development packages for 64 bits" && echo
-      - sudo apt install -yqq --no-install-recommends curl libmysql++3 libmysqlclient-dev
+      - sudo apt install -yqq --no-install-recommends curl libmysql++-dev
 
       - mkdir "$BUILD_DIR_32" "$BUILD_DIR_64"
       - cd "$BUILD_DIR_64"
@@ -137,8 +137,8 @@ for:
 
       - echo && echo "** Setting up MySQL development packages for 32 bits" && echo
       - sudo apt-mark hold oracle-java8-installer oracle-java9-installer
-      - sudo apt remove -yqq libmysql++3 libmysqlclient-dev
-      - sudo apt install -yqq --no-install-recommends libmysql++3:i386 libmysqlclient-dev:i386
+      - sudo apt remove -yqq libmysql++-dev
+      - sudo apt install -yqq --no-install-recommends libmysql++-dev:i386
       - export CC="gcc-7" && export CXX="g++-7"
 
       - cd "$BUILD_DIR_32"
