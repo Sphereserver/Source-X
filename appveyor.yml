@@ -118,7 +118,8 @@ for:
       - mkdir "$BUILD_DIR_32" "$BUILD_DIR_64"
       - cd "$BUILD_DIR_64"
 
-      - if [ -n "${APPVEYOR_PULL_REQUEST_NUMBER}" ]; then
+      - |-
+        if [ -n "${APPVEYOR_PULL_REQUEST_NUMBER}" ]; then
           echo && echo "** Starting to build 64 bits Nightly version to test the Pull Request" && echo
         else
           echo && echo "** Starting to build 64 bits Nightly version" && echo
@@ -128,7 +129,8 @@ for:
       - echo && echo "** End of the compilation of the 64 bits Nightly version" && echo
 
       # if we are testing a pull request, building only a version will be sufficient, so stop this script
-      - if [ -n "${APPVEYOR_PULL_REQUEST_NUMBER}" ]; then
+      - |-
+        if [ -n "${APPVEYOR_PULL_REQUEST_NUMBER}" ]; then
           exit 0
         fi
 
@@ -150,7 +152,8 @@ for:
 
     after_build:
       # if we are testing a pull request, we don't want to upload the build to the host
-      - if [ -n "${APPVEYOR_PULL_REQUEST_NUMBER}" ]; then
+      - |-
+        if [ -n "${APPVEYOR_PULL_REQUEST_NUMBER}" ]; then
           exit 0
         fi
       - echo && echo "** Compilation done. Packing the files and uploading to SphereCommunity" && echo
