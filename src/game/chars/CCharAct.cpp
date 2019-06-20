@@ -2646,7 +2646,7 @@ bool CChar::SetPoison( int iSkill, int iHits, CChar * pCharSrc )
 	}
 	else
 	{
-		pPoison = Spell_Effect_Create(SPELL_Poison, LAYER_FLAG_Poison, iSkill, (1 + Calc_GetRandVal(2)), pCharSrc, false);
+		pPoison = Spell_Effect_Create(SPELL_Poison, LAYER_FLAG_Poison, iSkill, (1 + Calc_GetRandLLVal(2)), pCharSrc, false);
 		if ( !pPoison )
 			return false;
 		LayerAdd(pPoison, LAYER_FLAG_Poison);

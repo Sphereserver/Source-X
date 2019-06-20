@@ -129,7 +129,7 @@ enum SSC_TYPE
 	SSC_QTY
 };
 
-lpctstr constexpr CScriptObj::sm_szLoadKeys[SSC_QTY+1] =
+lpctstr const CScriptObj::sm_szLoadKeys[SSC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CScriptObj_functions.tbl"
@@ -1059,13 +1059,13 @@ badcmd:
 
 		case SSC_StrRegexNew:
 			{
-				int iLenString = Exp_GetVal( pszKey );
+				size_t uiLenString = Exp_GetUVal( pszKey );
 				tchar * sToMatch = Str_GetTemp();
-				if ( iLenString > 0 )
+				if ( uiLenString > 0 )
 				{
 					SKIP_ARGSEP(pszKey);
-					Str_CopyLimitNull(sToMatch, pszKey, iLenString + 1);
-					pszKey += iLenString;
+					Str_CopyLimitNull(sToMatch, pszKey, uiLenString + 1);
+					pszKey += uiLenString;
 				}
 
 				SKIP_ARGSEP(pszKey);
@@ -1322,12 +1322,12 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 
 	            pChar->OnSpellEffect(SPELL_Summon, pCharSrc, pChar->Skill_GetAdjusted(SKILL_MAGERY), nullptr, false);
 	            g_World.m_uidNew = pChar->GetUID();
-	            int iDuration = Exp_GetVal(ppCmd[1]);
+	            llong iDuration = Exp_GetVal(ppCmd[1]);
 	            if (iDuration)
 	            {
 	                CItem * pItemRune = pChar->LayerFind(LAYER_SPELL_Summon);
 	                if (pItemRune)
-	                    pItemRune->SetTimeout(iDuration * 1000);
+	                    pItemRune->SetTimeout(iDuration * MSECS_PER_SEC);
 	            }
 	        }
 			break;

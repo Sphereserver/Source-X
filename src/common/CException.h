@@ -24,7 +24,7 @@ void SetExceptionTranslator();
 
 #ifndef _WIN32
     void SetUnixSignals( bool );
-    #ifndef _DEBUG
+    #ifdef _DEBUG
 	    int IsDebuggerPresent();	// Windows already has this function
     #endif
 #endif

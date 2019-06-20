@@ -76,7 +76,7 @@ lpctstr const CResourceBase::sm_szResourceBlocks[RES_QTY] =	// static
 	"WORLDLISTS",		// Define instance of list in the world. (SAVED in World)
 	"WORLDSCRIPT",		// Define instance of resource in the world. (SAVED in World)
 	"WORLDVARS",		// block of global variables
-	"WS",				// =WORLDSCRIPT
+	"WS"				// =WORLDSCRIPT
 };
 
 

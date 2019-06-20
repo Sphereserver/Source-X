@@ -449,7 +449,7 @@ try_dec:
 			if ( ! IsDigit(*pszArgs) )
 				break;
 			iVal *= 10;
-			iVal += *pszArgs - '0';
+			iVal += (llong)(*pszArgs) - '0';
 		}
 		return iVal;
 	}
