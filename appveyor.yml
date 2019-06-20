@@ -136,7 +136,6 @@ for:
       - cd ..
 
       - echo && echo "** Setting up MySQL development packages for 32 bits" && echo
-      - sudo apt-mark hold oracle-java8-installer oracle-java9-installer
       - sudo apt remove -yqq libmysql++-dev
       - sudo apt install -yqq --no-install-recommends libmysql++-dev:i386
       - export CC="gcc-7" && export CXX="g++-7"

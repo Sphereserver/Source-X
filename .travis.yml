@@ -9,8 +9,8 @@ branches:
     - master
 
 env:
-  CMAKE_GEN="Unix Makefiles"
-  CMAKE_TCH_64="../src/cmake/toolchains/Linux-GNU-64.cmake"
+  - CMAKE_GEN="Unix Makefiles"
+  - CMAKE_TCH_64="../src/cmake/toolchains/Linux-GNU-64.cmake"
 
 install:
   - export CC="gcc-7" && export CXX="g++-7"
@@ -23,7 +23,6 @@ addons:
       - gcc-7
       - g++-7
       - libmysql++3
-      - libmysqlclient-dev
       
   coverity_scan:
     project:
