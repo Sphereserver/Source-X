@@ -6,7 +6,7 @@ notifications:
   email: false
 branches:
   only:
-    - master
+    - coverity_scan
 
 env:
   - CMAKE_GEN="Unix Makefiles"
@@ -30,7 +30,7 @@ addons:
       name: "Sphereserver/Source-experimental"
       description: "Game server for Ultima Online"
     notification_email: null@null
-    branch_pattern: master
+    branch_pattern: coverity_scan
     build_command_prepend: cmake -G '$CMAKE_GEN' -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE='$CMAKE_TCH_64' ./src
     build_command: make -j4
       

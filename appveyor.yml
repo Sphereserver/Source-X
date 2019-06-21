@@ -12,14 +12,15 @@ branches:
 
 # Version format
 version: 1.1.0.{build}
-    
+
+# Set up two building environments (two first class elements in the build matrix)
 image:
   - Visual Studio 2017
   - Ubuntu
 
 # Environmental variables
 environment:
-  # Common
+  # Common to all the builds of the matrix
   BUILD_DIR_32: build-32
   BUILD_DIR_64: build-64
   FTP_USER:
@@ -102,7 +103,7 @@ for:
     install:
       - echo && echo "** Setting up GCC compiler" && echo
       - sudo apt-get -qq update
-      - sudo apt install -yqq --no-install-recommends gcc-7 gcc-7-multilib g++-7 g++-7-multilib
+      - sudo apt install -yqq --no-install-recommends gcc-7 gcc-7-multilib g++-7 g++-7-multilib > /dev/null
       - export CC="gcc-7" && export CXX="g++-7"
 
       # Report our building tools
@@ -113,7 +114,7 @@ for:
     # Use our custom script
     build_script:
       - echo && echo "** Setting up MySQL development packages for 64 bits" && echo
-      - sudo apt install -yqq --no-install-recommends curl libmysql++-dev
+      - sudo apt install -yqq --no-install-recommends curl libmysql++-dev > /dev/null
 
       - mkdir "$BUILD_DIR_32" "$BUILD_DIR_64"
       - cd "$BUILD_DIR_64"
@@ -137,8 +138,8 @@ for:
       - cd ..
 
       - echo && echo "** Setting up MySQL development packages for 32 bits" && echo
-      - sudo apt remove -yqq libmysql++-dev
-      - sudo apt install -yqq --no-install-recommends libmysql++-dev:i386
+      - sudo apt remove -yqq libmysql++-dev > /dev/null
+      - sudo apt install -yqq --no-install-recommends libmysql++-dev:i386 > /dev/null
       - export CC="gcc-7" && export CXX="g++-7"
 
       - cd "$BUILD_DIR_32"
@@ -160,9 +161,8 @@ for:
       - mkdir accounts logs save scripts
       - tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_64}/bin64/SphereSvrX64_nightly" -C src/ sphere.ini sphereCrypt.ini
       - tar -czf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_32}/bin/SphereSvrX32_nightly" -C src/ sphere.ini sphereCrypt.ini
-      - curl -sST SphereSvrX-linux64-nightly.tar.gz -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
-      - curl -sST SphereSvrX-linux32-nightly.tar.gz -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
+      - curl -sST "{SphereSvrX-linux64-nightly.tar.gz,SphereSvrX-linux32-nightly.tar.gz}" -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
 
     artifacts:
-      - path: SphereSvrX-linux64-nightly.zip
-      - path: SphereSvrX-linux32-nightly.zip
+      - path: SphereSvrX-linux64-nightly.tar.gz
+      - path: SphereSvrX-linux32-nightly.tar.gz
