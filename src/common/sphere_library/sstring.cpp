@@ -19,6 +19,7 @@
 
 int Str_ToI (lpctstr ptcStr, int base) noexcept
 {
+    ASSERT(base > 0);
     const auto e = errno;
     const auto ret = int(std::strtol(ptcStr, nullptr, base));
     errno = e;
@@ -27,6 +28,7 @@ int Str_ToI (lpctstr ptcStr, int base) noexcept
 
 uint Str_ToUI(lpctstr ptcStr, int base) noexcept
 {
+    ASSERT(base > 0);
     const auto e = errno;
     const auto ret = uint(std::strtoul(ptcStr, nullptr, base));
     errno = e;
@@ -35,6 +37,7 @@ uint Str_ToUI(lpctstr ptcStr, int base) noexcept
 
 llong Str_ToLL(lpctstr ptcStr, int base) noexcept
 {
+    ASSERT(base > 0);
     const auto e = errno;
     const auto ret = std::strtoll(ptcStr, nullptr, base);
     errno = e;
@@ -43,6 +46,7 @@ llong Str_ToLL(lpctstr ptcStr, int base) noexcept
 
 ullong Str_ToULL(lpctstr ptcStr, int base) noexcept
 {
+    ASSERT(base > 0);
     const auto e = errno;
     const auto ret = std::strtoull(ptcStr, nullptr, base);
     errno = e;
@@ -56,13 +60,14 @@ static_assert (THREAD_STRING_LENGTH > 100, "THREAD_STRING_LENGTH is too small an
 
 tchar* Str_FromI(tchar *buf, int val, int base) noexcept
 {
+    ASSERT(base > 0);
     const bool hex = (base == 16);
     if (val == 0)
     {
         STR_FROM_SET_ZEROSTR;
         return buf;
     }
-    static constexpr char chars[] = "0123456789abcdef";
+    static constexpr tchar chars[] = "0123456789abcdef";
 
     const bool sign = (val < 0);
     /*if (sign && !hex) {
@@ -76,15 +81,13 @@ tchar* Str_FromI(tchar *buf, int val, int base) noexcept
         val = -val;
     }
 
-    short i = 30;
+    unsigned short i = 30;
     buf[--i] = '\0';
-    div_t qr;
-    qr.quot = val;
     do
     {
-        qr = div(qr.quot, base);
-        buf[--i] = chars[SphereAbs(qr.rem)];
-    } while (qr.quot);
+        buf[--i] = chars[val % base];
+        val /= base;
+    } while (val);
 
     if (hex) {
         buf[--i] = '0';
@@ -95,25 +98,24 @@ tchar* Str_FromI(tchar *buf, int val, int base) noexcept
     return &buf[i];
 }
 
-tchar* Str_FromUI (tchar *buf, uint val, int base) noexcept
+tchar* Str_FromUI(tchar *buf, uint val, int base) noexcept
 {
+    ASSERT(base > 0);
     const bool hex = (base == 16);
     if (val == 0)
     {
         STR_FROM_SET_ZEROSTR;
         return buf;
     }
-    static constexpr char chars[] = "0123456789abcdef";
+    static constexpr tchar chars[] = "0123456789abcdef";
 
-    short i = 30;
+    unsigned short i = 30;
     buf[--i] = '\0';
-    lldiv_t qr;
-    qr.quot = val;
     do
     {
-        qr = lldiv(qr.quot, base);
-        buf[--i] = chars[qr.rem];
-    } while (qr.quot);
+        buf[--i] = chars[val % base];
+        val /= base;
+    } while (val);
 
     if (base == 16) {
         buf[--i] = '0';
@@ -123,13 +125,14 @@ tchar* Str_FromUI (tchar *buf, uint val, int base) noexcept
 
 tchar* Str_FromLL (tchar *buf, llong val, int base) noexcept
 {
+    ASSERT(base > 0);
     const bool hex = (base == 16);
     if (val == 0)
     {
         STR_FROM_SET_ZEROSTR;
         return buf;
     }
-    static constexpr char chars[] = "0123456789abcdef";
+    static constexpr tchar chars[] = "0123456789abcdef";
 
     const bool sign = (val < 0);
     /*if (sign && !hex) {
@@ -143,15 +146,13 @@ tchar* Str_FromLL (tchar *buf, llong val, int base) noexcept
         val = -val;
     }
 
-    short i = 62;
+    unsigned short i = 62;
     buf[--i] = '\0';
-    lldiv_t qr;
-    qr.quot = val;
     do
     {
-        qr = lldiv(qr.quot, base);
-        buf[--i] = chars[SphereAbs(qr.rem)];
-    } while (qr.quot);
+        buf[--i] = chars[val % base];
+        val /= base;
+    } while (val);
 
     if (hex) {
         buf[--i] = '0';
@@ -164,15 +165,16 @@ tchar* Str_FromLL (tchar *buf, llong val, int base) noexcept
 
 tchar* Str_FromULL (tchar *buf, ullong val, int base) noexcept
 {
+    ASSERT(base > 0);
     const bool hex = (base == 16);
     if (val == 0)
     {
         STR_FROM_SET_ZEROSTR;
         return buf;
     }
-    static constexpr char chars[] = "0123456789abcdef";
+    static constexpr tchar chars[] = "0123456789abcdef";
 
-    short i = 62;
+    unsigned short i = 62;
     buf[--i] = '\0';
     do
     {
@@ -548,19 +550,19 @@ tchar * Str_TrimWhitespace(tchar * pStr)
 
 // String utilities: String operations
 
-int FindTable(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
+int FindTable(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, size_t uiElemSize)
 {
     // A non-sorted table.
     for (int i = 0; i < iCount; ++i)
     {
         if (!strcmpi(*ppszTable, pszFind))
             return i;
-        ppszTable = (lpctstr const *)((const byte *)ppszTable + iElemSize);
+        ppszTable = (reinterpret_cast<lpctstr const*>(reinterpret_cast<const byte*>(ppszTable) + (i * uiElemSize)));
     }
     return -1;
 }
 
-int FindTableSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
+int FindTableSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, size_t uiElemSize)
 {
     // Do a binary search (un-cased) on a sorted table.
     // RETURN: -1 = not found
@@ -572,7 +574,7 @@ int FindTableSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount
     while (iLow <= iHigh)
     {
         const int i = (iHigh + iLow) >> 1;
-        const lpctstr pszName = *(reinterpret_cast<lpctstr const *>(reinterpret_cast<const byte *>(ppszTable) + (i*iElemSize)));
+        const lpctstr pszName = *(reinterpret_cast<lpctstr const *>(reinterpret_cast<const byte *>(ppszTable) + (i*uiElemSize)));
         const int iCompare = strcmpi(pszFind, pszName);
         if (iCompare == 0)
             return i;
@@ -584,19 +586,19 @@ int FindTableSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount
     return -1;
 }
 
-int FindTableHead(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize) // REQUIRES the table to be UPPERCASE
+int FindTableHead(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, size_t uiElemSize) // REQUIRES the table to be UPPERCASE
 {
     for (int i = 0; i < iCount; ++i)
     {
         const int iCompare = Str_CmpHeadI_Table(pszFind, *ppszTable);
         if (!iCompare)
             return i;
-        ppszTable = reinterpret_cast<lpctstr const *>(reinterpret_cast<const byte *>(ppszTable) + iElemSize);
+        ppszTable = reinterpret_cast<lpctstr const *>(reinterpret_cast<const byte *>(ppszTable) + uiElemSize);
     }
     return -1;
 }
 
-int FindTableHeadSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize) // REQUIRES the table to be UPPERCASE, and sorted
+int FindTableHeadSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, size_t uiElemSize) // REQUIRES the table to be UPPERCASE, and sorted
 {
     // Do a binary search (un-cased) on a sorted table.
     // Uses Str_CmpHeadI, which checks if we have reached, during comparison, ppszTable end ('\0'), ignoring if pszFind is longer (maybe has arguments?)
@@ -609,7 +611,7 @@ int FindTableHeadSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iC
     while (iLow <= iHigh)
     {
         const int i = (iHigh + iLow) >> 1;
-        const lpctstr pszName = *(reinterpret_cast<lpctstr const *>(reinterpret_cast<const byte *>(ppszTable) + (i*iElemSize)));
+        const lpctstr pszName = *(reinterpret_cast<lpctstr const *>(reinterpret_cast<const byte *>(ppszTable) + (i*uiElemSize)));
         const int iCompare = Str_CmpHeadI_Table(pszFind, pszName);
         if (iCompare == 0)
             return i;

@@ -82,6 +82,8 @@ bool CResourceDef::HasResourceName()
     return false;
 }
 
+// Unused
+/*
 bool CResourceDef::MakeResourceName()
 {
     ADDTOCALLSTACK("CResourceDef::MakeResourceName");
@@ -94,7 +96,7 @@ bool CResourceDef::MakeResourceName()
     tchar ch;
     tchar * pszDef;
 
-    strcpy(pbuf, "a_");
+    strcpy(pbuf, "auto_");
 
     lpctstr pszKey = nullptr;	// auxiliary, the key of a similar CVarDef, if any found
     pszDef = pbuf + 2;
@@ -104,7 +106,7 @@ bool CResourceDef::MakeResourceName()
         ch	= *pszName;
         if ( ch == ' ' || ch == '\t' || ch == '-' )
             ch	= '_';
-        else if ( !iswalnum( ch ) )
+        else if ( !IsAlnum( ch ) )
             continue;
         // collapse multiple spaces together
         if ( ch == '_' && *(pszDef-1) == '_' )
@@ -148,4 +150,4 @@ bool CResourceDef::MakeResourceName()
     // Assign name
     return true;
 }
-
+*/

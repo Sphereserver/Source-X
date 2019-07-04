@@ -21,20 +21,21 @@ CTeleport::CTeleport( tchar * pszArgs )
 	if ( iArgs < 2 )
 	{
 		DEBUG_ERR(( "Bad CTeleport Def\n" ));
+        _fNpc = false;
 		return;
 	}
 	Read( ppCmds[0] );
-	m_ptDst.Read( ppCmds[1] );
+	_ptDst.Read( ppCmds[1] );
 	if ( ppCmds[3] )
-		bNpc = (ATOI(ppCmds[3]) != 0);
+		_fNpc = (Str_ToI(ppCmds[3]) != 0);
 	else
-		bNpc = false;
+		_fNpc = false;
 }
 
 bool CTeleport::RealizeTeleport()
 {
 	ADDTOCALLSTACK("CTeleport::RealizeTeleport");
-	if ( ! IsCharValid() || ! m_ptDst.IsCharValid())
+	if ( ! IsCharValid() || ! _ptDst.IsCharValid())
 	{
 		DEBUG_ERR(( "CTeleport bad coords %s\n", WriteUsed() ));
 		return false;
@@ -166,6 +167,7 @@ bool CRegion::MakeRegionDefname()
 
     lpctstr pszName = GetName();
     GETNONWHITESPACE( pszName );
+    g_Log.EventWarn("Missing DEFNAME for Region named '%s'. Auto-generating one.\n", pszName);
 
     if ( !strnicmp( "the ", pszName, 4 ) )
         pszName	+= 4;
@@ -186,7 +188,7 @@ bool CRegion::MakeRegionDefname()
         ch	= *pszName;
         if ( ch == ' ' || ch == '\t' || ch == '-' )
             ch	= '_';
-        else if ( !iswalnum( ch ) )
+        else if ( !IsAlnum( ch ) )
             continue;
         // collapse multiple spaces together
         if ( ch == '_' && *(pszDef-1) == '_' )
@@ -223,7 +225,7 @@ bool CRegion::MakeRegionDefname()
         // Is this is subsequent key with a number? Get the highest (plus one)
         if ( IsStrNumericDec( pszKey ) )
         {
-            int iVarThis = ATOI( pszKey );
+            int iVarThis = Str_ToI( pszKey );
             if ( iVarThis >= iVar )
                 iVar = iVarThis + 1;
         }
@@ -232,7 +234,7 @@ bool CRegion::MakeRegionDefname()
     }
 
     // Only one, no need for the extra "_"
-    sprintf( pszDef, "%i", iVar );
+    pszDef = Str_FromI(pszDef, iVar);
     SetResourceName( pbuf );
     // Assign name
     return true;

@@ -1386,7 +1386,7 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 
 	//***Qval Fix***
 	bool fQvalCondition = false;
-	tchar chQval = '?';
+	const tchar chQval = '?';
 
 	if ((iFlags & 2) == 0)
 		sm_fBrackets = false;
@@ -1395,7 +1395,7 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 	tchar chBegin = '<';
 	tchar chEnd = '>';
 
-	bool fHTML = (iFlags & 1) != 0;
+	const bool fHTML = (iFlags & 1) != 0;
 	if ( fHTML )
 	{
 		chBegin = '%';
@@ -1406,13 +1406,13 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 	EXC_TRY("ParseText");
 	for ( i = 0; pszResponse[i]; ++i )
 	{
-		tchar ch = pszResponse[i];
+		const tchar ch = pszResponse[i];
 
 		if ( ! sm_fBrackets )	// not in brackets
 		{
 			if ( ch == chBegin )	// found the start !
 			{
-				 if ( !( iswalnum( pszResponse[i + 1] ) || pszResponse[i + 1] == '<' ) ) // ignore this.
+				 if ( !( IsAlnum( pszResponse[i + 1] ) || pszResponse[i + 1] == '<' ) ) // ignore this.
 					continue;
 				iBegin = i;
 				sm_fBrackets = true;
@@ -1422,7 +1422,7 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 
 		if ( ch == '<' )	// recursive brackets
 		{
-			if ( !( iswalnum( pszResponse[i + 1] ) || pszResponse[i + 1] == '<' ) ) // ignore this.
+			if ( !( IsAlnum( pszResponse[i + 1] ) || pszResponse[i + 1] == '<' ) ) // ignore this.
 				continue;
 
 			if (sm_iReentrant > 32 )

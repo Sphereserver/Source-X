@@ -2,13 +2,28 @@
 #define _INC_SSTRING_H
 
 #include <cstring>
-#include <cwctype>  // for iswalnum
 #include "../common.h"
 
 #define STRING_NULL     "\0"
 #define TSTRING_NULL    static_cast<const tchar*>("\0")
 //const tchar * const TSTRING_NULL = "\0";
 //const char  * const STRING_NULL  = "\0";
+
+#define IntCharacter(c)     int((c) & 0xFF)
+
+#ifdef UNICODE
+    #include <cwctype>  // for iswalnum
+	#define IsDigit(c)		iswdigit((wint_t)c)
+	#define IsSpace(c)		iswspace((wint_t)c)
+	#define IsAlpha(c)		iswalpha((wint_t)c)
+	#define IsAlnum(c)		iswalnum((wint_t)c)
+#else
+	#define IsDigit(c)		isdigit(IntCharacter(c))
+	#define IsSpace(c)		isspace(IntCharacter(c))
+	#define IsAlpha(c)		isalpha(IntCharacter(c))
+	#define IsAlnum(c)		isalnum(IntCharacter(c))
+#endif
+
 
 /**
 * match result defines
@@ -165,40 +180,40 @@ tchar * Str_TrimWhitespace(tchar * pStr);
 * @param pFind string we are looking for.
 * @param ppTable table where we are looking for the string.
 * @param iCount max iterations.
-* @param iElemSize size of elements of the table.
+* @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTable(const lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));
+int FindTable(const lpctstr pFind, lpctstr const * ppTable, int iCount, size_t uiElemSize = sizeof(lpctstr));
 
 /**
 * @brief Look for a string in a table (binary search).
 * @param pFind string we are looking for.
 * @param ppTable table where we are looking for the string.
 * @param iCount max iterations.
-* @param iElemSize size of elements of the table.
+* @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTableSorted(const lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));
+int FindTableSorted(const lpctstr pFind, lpctstr const * ppTable, int iCount, size_t uiElemSize = sizeof(lpctstr));
 
 /**
 * @brief Look for a string header in a table (uses Str_CmpHeadI to compare instead of strcmpi).
 * @param pFind string we are looking for.
 * @param ppTable table where we are looking for the string.
 * @param iCount max iterations.
-* @param iElemSize size of elements of the table.
+* @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTableHead(const lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));
+int FindTableHead(const lpctstr pFind, lpctstr const * ppTable, int iCount, size_t uiElemSize = sizeof(lpctstr));
 
 /**
 * @brief Look for a string header in a table (binary search, uses Str_CmpHeadI to compare instead of strcmpi).
 * @param pFind string we are looking for.
 * @param ppTable table where we are looking for the string.
 * @param iCount max iterations.
-* @param iElemSize size of elements of the table.
+* @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTableHeadSorted(const lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));
+int FindTableHeadSorted(const lpctstr pFind, lpctstr const * ppTable, int iCount, size_t uiElemSize = sizeof(lpctstr));
 
 /**
 * @param pszIn string to check.
