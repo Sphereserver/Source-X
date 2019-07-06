@@ -1765,3 +1765,6 @@ WARNING: Important change!
 06-06-2019, Nolok
 - Changed: Improved a lot the precision of the stack trace, now it should point exactly (in most cases) to the function where the exception was generated.
 - Fixed: UPDATE caused Stygian Abyss or later clients to show corpses changing their laying direction (even if it actually was a visual artifact, direction wasn't changing server-side) (Issue #274).
+
+06-07-2019, Nolok
+- Fixed: SERV.CLEARVARS, CLEARTAGS, CLEARCTAGS not working with the given mask (Issue #281).

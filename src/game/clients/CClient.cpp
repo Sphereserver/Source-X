@@ -526,18 +526,22 @@ bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, 
 	
 	if ( !strnicmp("CTAG", pszKey, 4) )
 	{
+        bool fCtag = false;
+        bool fZero = false;
         if (pszKey[4] == '.')   //	CTAG.xxx - client tag
         {
+            fCtag = true;
             pszKey += 5;
-            const CVarDefCont *vardef = m_TagDefs.GetKey(pszKey);
-            sVal = vardef ? vardef->GetValStr() : "";
-            return true;
         }
         else if ((pszKey[4] == '0') && (pszKey[5] == '.'))  //	CTAG0.xxx - client tag
         {
+            fCtag = true;
+            fZero = true;
             pszKey += 6;
-            const CVarDefCont *vardef = m_TagDefs.GetKey(pszKey);
-            sVal = vardef ? vardef->GetValStr() : "0";
+        }
+        if (fCtag)
+        {
+            sVal = m_TagDefs.GetKeyStr(pszKey, fZero);
             return true;
         }
 	}
@@ -673,7 +677,7 @@ bool CClient::r_LoadVal( CScript & s )
 		return false;
 
 	lpctstr ptcKey = s.GetKey();
-    if (strnicmp("CTAG", ptcKey, 4))
+    if (!strnicmp("CTAG", ptcKey, 4))
     {
         if ((ptcKey[4] == '.') || (ptcKey[4] == '0'))
         {

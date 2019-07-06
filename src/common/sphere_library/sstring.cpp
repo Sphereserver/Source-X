@@ -574,7 +574,7 @@ int FindTable(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, size
     {
         if (!strcmpi(*ppszTable, pszFind))
             return i;
-        ppszTable = (reinterpret_cast<lpctstr const*>(reinterpret_cast<const byte*>(ppszTable) + (i * uiElemSize)));
+        ppszTable = (reinterpret_cast<lpctstr const*>(reinterpret_cast<const byte*>(ppszTable) + uiElemSize));
     }
     return -1;
 }

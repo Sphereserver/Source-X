@@ -590,7 +590,9 @@ void CVarDefMap::ClearKeys(lpctstr mask)
 		{
             CVarDefCont *pVarBase = (*it);
 
-			if ( pVarBase && ( strstr(pVarBase->GetKey(), sMask.GetPtr()) ) )
+            CSString sKey(pVarBase->GetKey());
+            sKey.MakeLower();
+			if ( pVarBase && ( strstr(sKey.GetPtr(), sMask.GetPtr()) ) )
 			{
 				DeleteAt(i);
 				it = m_Container.begin();
