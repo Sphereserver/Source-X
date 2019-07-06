@@ -271,20 +271,15 @@ bool CScriptObj::r_LoadVal( CScript & s )
 
 	switch ( index )
 	{
-		case SSC_VAR:
-			{
-				bool fQuoted = false;
-                lpctstr ptcArg = s.GetArgStr( &fQuoted );
-				g_Exp.m_VarGlobals.SetStr( pszKey+4, fQuoted, ptcArg, false );
-				return true;
-			}
-		case SSC_VAR0:
-			{
-				bool fQuoted = false;
-                lpctstr ptcArg = s.GetArgStr( &fQuoted );
-				g_Exp.m_VarGlobals.SetStr( pszKey+5, fQuoted, ptcArg, true );
-				return true;
-			}
+        case SSC_VAR0:
+        case SSC_VAR:
+        {
+            const bool fZero = (index == SSC_VAR0);
+            bool fQuoted = false;
+            lpctstr ptcArg = s.GetArgStr(&fQuoted);
+            g_Exp.m_VarGlobals.SetStr(pszKey + (fZero ? 5 : 4), fQuoted, ptcArg, true);
+            return true;
+        }
 
 		case SSC_LIST:
 			{
@@ -637,10 +632,10 @@ badcmd:
 
 //FLOAT STUFF BEGINS HERE
 		case SSC_FEVAL: //Float EVAL
-			sVal.FormatVal( ATOI( pszKey ) );
+			sVal.FormatVal( atoi( pszKey ) );
 			break;
 		case SSC_FHVAL: //Float HVAL
-			sVal.FormatHex( ATOI( pszKey ) );
+			sVal.FormatHex( atoi( pszKey ) );
 			break;
 		case SSC_FLOATVAL: //Float math
 			{
@@ -1020,8 +1015,8 @@ badcmd:
             int iQty = Str_ParseCmds(const_cast<tchar*>(pszKey), ppCmd, CountOf(ppCmd), ", ");
             if ( iQty < 3 )
                 return false;
-            int iPrefixCode = ATOI(ppCmd[0]);
-            int iCost = ATOI(ppCmd[1]);
+            int iPrefixCode = atoi(ppCmd[0]);
+            int iCost = atoi(ppCmd[1]);
             CSString sHash = CBCrypt::HashBCrypt(ppCmd[2], iPrefixCode, maximum(4,minimum(31,iCost)));
             sVal.Format("%s", sHash.GetPtr());
         } return true;
@@ -2449,7 +2444,7 @@ jump_in:
 						CScriptObj *pRef = this;
 						if ( iArgQty == 2 )
 						{
-                            CChar *pCharFound = CUID::CharFind(ATOI(piCmd[1]));
+                            CChar *pCharFound = CUID::CharFind(atoi(piCmd[1]));
 							if ( pCharFound )
 								pRef = pCharFound;
 						}

@@ -40,7 +40,7 @@ CBaseBaseDef::CBaseBaseDef( CResourceID id ) :
 	m_Can					= 0;
     m_Expansion             = RDS_T2A;
 	m_ResLevel				= RDS_T2A;
-    _iEraLimitProps         = g_Cfg._iEraLimitProps;	// Always latest by default;
+    _iEraLimitProps         = g_Cfg._iEraLimitProps;
 	m_ResDispDnHue			= HUE_DEFAULT;
 	m_ResDispDnId			= 0;
 	m_BaseResources.setNoMergeOnLoad();
@@ -290,22 +290,21 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 {
 	ADDTOCALLSTACK("CBaseBaseDef::r_LoadVal");
 	EXC_TRY("LoadVal");
-	if ( s.IsKeyHead( "TAG.", 4 ))
-	{
-		bool fQuoted = false;
-        tchar* ptcArg = s.GetArgStr( &fQuoted );
-		m_TagDefs.SetStr( s.GetKey()+4, fQuoted, ptcArg, false );
-		return true;
-	}
-	if ( s.IsKeyHead( "TAG0.", 5 ))
-	{
-		bool fQuoted = false;
-        tchar* ptcArg = s.GetArgStr( &fQuoted );
-		m_TagDefs.SetStr( s.GetKey()+5, fQuoted, ptcArg, true );
-		return true;
-	}
+    lpctstr ptcKey = s.GetKey();
+    if (strnicmp("TAG", ptcKey, 3))
+    {
+        if ((ptcKey[3] == '.') || (ptcKey[3] == '0'))
+        {
+            const bool fZero = ptcKey[3] == '0';
+            ptcKey = ptcKey + (fZero ? 5 : 4);
+            bool fQuoted = false;
+            lpctstr ptcArg = s.GetArgStr(&fQuoted);
+            m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, true);
+            return true;
+        }
+    }
 
-    int i = FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+    int i = FindTableSorted(ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	switch (i)
 	{
 		//Set as Strings

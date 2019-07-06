@@ -161,7 +161,7 @@ void CSString::FormatV(lpctstr pszFormat, va_list args)
 
 #define FORMATNUM_WRAPPER(function, arg, base) \
     TemporaryString buf; \
-    Copy(function(static_cast<tchar*>(buf), arg, base))
+    Copy(function(arg, static_cast<tchar*>(buf), base))
 
 void CSString::FormatLLHex(llong iVal)
 {

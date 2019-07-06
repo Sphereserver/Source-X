@@ -398,12 +398,12 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 			new CStoneMember(
 				this,
 				ahextoi(Arg_ppCmd[0]),													// Member's UID
-				Arg_Qty > 2 ? (STONEPRIV_TYPE)(ATOI(Arg_ppCmd[2])) : STONEPRIV_CANDIDATE,// Members priv level (use as a type)
+				Arg_Qty > 2 ? (STONEPRIV_TYPE)(atoi(Arg_ppCmd[2])) : STONEPRIV_CANDIDATE,// Members priv level (use as a type)
 				Arg_Qty > 1 ? Arg_ppCmd[1] : "",										// Title
 				ahextoi(Arg_ppCmd[3]),													// Member is loyal to this
-				Arg_Qty > 4 ? (ATOI( Arg_ppCmd[4] ) != 0) : 0,							// Paperdoll stone abbreviation (also if they declared war)
-				Arg_Qty > 5 ? (ATOI( Arg_ppCmd[5] ) != 0) : 0,							// If we declared war
-				Arg_Qty > 6 ? ATOI( Arg_ppCmd[6] ) : 0);								// AccountGold
+				Arg_Qty > 4 ? (atoi( Arg_ppCmd[4] ) != 0) : 0,							// Paperdoll stone abbreviation (also if they declared war)
+				Arg_Qty > 5 ? (atoi( Arg_ppCmd[5] ) != 0) : 0,							// If we declared war
+				Arg_Qty > 6 ? atoi( Arg_ppCmd[6] ) : 0);								// AccountGold
 			}
 			return true;
 		case STC_WEBPAGE: // "WEBPAGE"
@@ -419,7 +419,7 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 
 	if ( s.IsKeyHead( sm_szLoadKeys[STC_CHARTER], 7 ))
 	{
-		uint i = ATOI(s.GetKey() + 7);
+		uint i = atoi(s.GetKey() + 7);
 		if ( i >= CountOf(m_sCharter))
 			return false;
 		m_sCharter[i] = s.GetArgStr();
@@ -621,7 +621,7 @@ bool CItemStone::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSr
 	else if ( !strnicmp(sm_szLoadKeys[STC_CHARTER], pszKey, 7) )
 	{
 		lpctstr pszCmd = pszKey + 7;
-		uint i = ATOI(pszCmd);
+		uint i = atoi(pszCmd);
 		if ( i >= CountOf(m_sCharter))
 			sVal = "";
 		else

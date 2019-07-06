@@ -102,43 +102,10 @@ public:
 	{
 		return ( m_codes[0] != 0 );
 	}
-	void GetStrDef( tchar * pszLang )
-	{
-		if ( ! IsDef())
-		{
-			strcpy( pszLang, "enu" );
-		}
-		else
-		{
-			memcpy( pszLang, m_codes, 3 );
-			pszLang[3] = '\0';
-		}
-	}
-	void GetStr( tchar * pszLang ) const
-	{
-		memcpy( pszLang, m_codes, 3 );
-		pszLang[3] = '\0';
-	}
-	lpctstr GetStr() const
-	{
-		tchar * pszTmp = Str_GetTemp();
-		GetStr( pszTmp );
-		return pszTmp;
-	}
-	bool Set( lpctstr pszLang )
-	{
-		// needs not be terminated!
-		if ( pszLang != nullptr )
-		{
-			memcpy( m_codes, pszLang, 3 );
-			m_codes[3] = 0;
-			if ( iswalnum(m_codes[0]))
-				return true;
-			// not valid !
-		}
-		m_codes[0] = 0;
-		return false;
-	}
+    void GetStrDef(tchar* pszLang);
+    void GetStr(tchar* pszLang) const;
+    lpctstr GetStr() const;
+    bool Set(lpctstr pszLang);
 };
 
 enum XCMD_TYPE	// XCMD_* messages are unique in both directions.
@@ -852,7 +819,7 @@ enum RACE_TYPE		// character race, used in new character creation (0x8D) and sta
 
 struct CEvent	// event buffer from client to server..
 {
-#define MAX_EXTCMD_ARG_LEN  30  // Arbitrary, used to prevent exploits
+#define MAX_EXTCMD_ARG_LEN  40  // Arbitrary, used to prevent exploits
 
     union
     {

@@ -197,10 +197,11 @@ void CChar::CallGuards()
 bool CChar::CallGuards( CChar * pCriminal )
 {
 	ADDTOCALLSTACK("CChar::CallGuards2");
+    ASSERT(pCriminal);
 	if ( !m_pArea || (pCriminal == this) )
 		return false;
 	if (IsStatFlag(STATF_DEAD) ||
-        (pCriminal && (pCriminal->IsStatFlag(STATF_DEAD) || pCriminal->Can(CAN_C_STATUE|CAN_C_NONSELECTABLE) || pCriminal->IsPriv(PRIV_GM) || !pCriminal->m_pArea->IsGuarded())))
+        (pCriminal->IsStatFlag(STATF_DEAD) || pCriminal->Can(CAN_C_STATUE|CAN_C_NONSELECTABLE) || pCriminal->IsPriv(PRIV_GM) || !pCriminal->m_pArea->IsGuarded()))
     {
 		return false;
     }

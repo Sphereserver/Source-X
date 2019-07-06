@@ -179,7 +179,7 @@ int CCrypto::GetVerFromString( lpctstr pszVersion )
 	if ( !piVer[0] || !piVer[1] || !piVer[2] || (iLetter > 26) )
 		return 0;
 
-	return (ATOI(piVer[0]) * 1000000) + (ATOI(piVer[1]) * 10000) + (ATOI(piVer[2]) * 100) + iLetter;
+	return (atoi(piVer[0]) * 1000000) + (atoi(piVer[1]) * 10000) + (atoi(piVer[2]) * 100) + iLetter;
 }
 
 int CCrypto::GetVerFromNumber( dword maj, dword min, dword rev, dword pat )

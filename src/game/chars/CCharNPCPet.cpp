@@ -530,7 +530,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 			if ( !pItemTarg || !NPC_IsVendor() || !pSrc->IsClient() )
 				break;
 			if ( IsDigit(pszArgs[0]) )	// did they name a price
-				return NPC_SetVendorPrice(pItemTarg, ATOI(pszArgs));
+				return NPC_SetVendorPrice(pItemTarg, atoi(pszArgs));
 			if ( !NPC_SetVendorPrice(pItemTarg, -1) )	// test if it can be priced
 				return false;
 			pSrc->m_pClient->addPromptConsole(CLIMODE_PROMPT_VENDOR_PRICE, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_SETPRICE_2), pItemTarg->GetUID(), GetUID());

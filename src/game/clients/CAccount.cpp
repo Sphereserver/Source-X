@@ -1356,18 +1356,18 @@ bool CAccount::r_LoadVal( CScript & s )
 		case AC_RESDISP:
 			SetResDisp(s.GetArgBVal());
 			break;
+
 		case AC_TAG0:
-			{
-				bool fQuoted = false;
-				m_TagDefs.SetStr( s.GetKey()+ 5, fQuoted, s.GetArgStr( &fQuoted ), true );
-			}
-			return true;
-		case AC_TAG:
-			{
-				bool fQuoted = false;
-				m_TagDefs.SetStr( s.GetKey()+ 4, fQuoted, s.GetArgStr( &fQuoted ));
-			}
-			return true;
+        case AC_TAG:
+        {
+            const bool fZero = (i == AC_TAG0);
+            lpctstr ptcKey = s.GetKey();
+            ptcKey += (fZero ? 5 : 4);
+            bool fQuoted = false;
+            lpctstr ptcArg = s.GetArgStr(&fQuoted);
+            m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, true);
+        }
+        return true;
 
 		case AC_TOTALCONNECTTIME:
 			// Previous total amount of time in game

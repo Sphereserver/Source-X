@@ -22,7 +22,12 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
 	int m_bottom;	// South ( NON INCLUSIVE !)
 	int m_map;
 
-    CRect() = default;
+    void SetRectEmpty();
+
+    CRect()
+    {
+        SetRectEmpty();
+    }
     virtual ~CRect() = default;
 
     inline int GetWidth() const
@@ -34,7 +39,6 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
         return( m_bottom - m_top );
     }
 
-	void SetRectEmpty();
     inline bool IsRectEmpty() const
     {
         return( m_left >= m_right || m_top >= m_bottom );

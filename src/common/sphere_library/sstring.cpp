@@ -17,6 +17,23 @@
 
 // String utilities: Converters
 
+#ifndef _WIN32
+void Str_Reverse(char* string)
+{
+    char* pEnd = string;
+    char temp;
+    while (*pEnd)
+        ++pEnd;
+    --pEnd;
+    while (string < pEnd)
+    {
+        temp = *pEnd;
+        *pEnd-- = *string;
+        *string++ = temp;
+    }
+}
+#endif
+
 int Str_ToI (lpctstr ptcStr, int base) noexcept
 {
     ASSERT(base > 0);
@@ -58,7 +75,7 @@ static_assert (THREAD_STRING_LENGTH > 100, "THREAD_STRING_LENGTH is too small an
     if (hex)    { buf[0] = '0'; buf[1] = '0'; buf[2] = '\0'; } \
     else        { buf[0] = '0'; buf[1] = '\0'; }
 
-tchar* Str_FromI(tchar *buf, int val, int base) noexcept
+tchar* Str_FromI(int val, tchar* buf, int base) noexcept
 {
     ASSERT(base > 0);
     const bool hex = (base == 16);
@@ -98,7 +115,7 @@ tchar* Str_FromI(tchar *buf, int val, int base) noexcept
     return &buf[i];
 }
 
-tchar* Str_FromUI(tchar *buf, uint val, int base) noexcept
+tchar* Str_FromUI(uint val, tchar* buf, int base) noexcept
 {
     ASSERT(base > 0);
     const bool hex = (base == 16);
@@ -123,7 +140,7 @@ tchar* Str_FromUI(tchar *buf, uint val, int base) noexcept
     return &buf[i];
 }
 
-tchar* Str_FromLL (tchar *buf, llong val, int base) noexcept
+tchar* Str_FromLL (llong val, tchar* buf, int base) noexcept
 {
     ASSERT(base > 0);
     const bool hex = (base == 16);
@@ -163,7 +180,7 @@ tchar* Str_FromLL (tchar *buf, llong val, int base) noexcept
     return &buf[i];
 }
 
-tchar* Str_FromULL (tchar *buf, ullong val, int base) noexcept
+tchar* Str_FromULL (ullong val, tchar* buf, int base) noexcept
 {
     ASSERT(base > 0);
     const bool hex = (base == 16);

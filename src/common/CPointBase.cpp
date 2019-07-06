@@ -841,7 +841,7 @@ size_t CPointBase::Read( tchar * pszVal )
 		case 4:	// m_map
 			if ( IsDigit(ppVal[3][0]))
 			{
-                ptTest.m_map = (uchar)(ATOI(ppVal[3]));
+                ptTest.m_map = (uchar)(atoi(ppVal[3]));
 				if ( !g_MapList.m_maps[ptTest.m_map] )
 				{
 					g_Log.EventError("Unsupported map #%d specified. Auto-fixing that to 0.\n", ptTest.m_map);
@@ -850,13 +850,13 @@ size_t CPointBase::Read( tchar * pszVal )
 			}
 		case 3: // m_z
 			if ( IsDigit(ppVal[2][0]) || ppVal[2][0] == '-' )
-                ptTest.m_z = (char)(ATOI(ppVal[2]));
+                ptTest.m_z = (char)(atoi(ppVal[2]));
 		case 2:
 			if (IsDigit(ppVal[1][0]))
-                ptTest.m_y = (short)(ATOI(ppVal[1]));
+                ptTest.m_y = (short)(atoi(ppVal[1]));
 		case 1:
 			if (IsDigit(ppVal[0][0]))
-                ptTest.m_x = (short)(ATOI(ppVal[0]));
+                ptTest.m_x = (short)(atoi(ppVal[0]));
 		case 0:
 			break;
 	}

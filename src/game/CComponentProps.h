@@ -77,7 +77,7 @@ public:
     *@param iLimitToExpansion This EntityProps accepts/stores/uses properties only up to this expansion.
     *@param fDeleteZero If true, if iVal == 0 or is empty, delete the prop (if already existing)
     */
-    virtual void SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero = false) = 0;
+    virtual void SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero = true) = 0;
 
     /*
     *@brief Set the string value for the given property
@@ -87,7 +87,7 @@ public:
     *@param iLimitToExpansion This EntityProps accepts/stores/uses properties only up to this expansion.
     *@param fDeleteZero If true, if ptcVal == nullptr or is empty, delete the prop (if already existing)
     */
-    virtual void SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero = false) = 0;
+    virtual void SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero = true) = 0;
 
     /*
     @brief Delete the numerical property at the given index

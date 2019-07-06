@@ -1209,7 +1209,7 @@ bool CChar::CanSeeItem( const CItem * pItem ) const
 
 bool CChar::CanTouch( const CPointMap &pt ) const
 {
-	ADDTOCALLSTACK("CChar::CanTouch");
+	ADDTOCALLSTACK("CChar::CanTouch(pt)");
 	// Can I reach this from where i am.
 	// swords, spears, arms length = x units.
 	// Use or Grab.

@@ -100,7 +100,7 @@ SKILL_TYPE CCharPlayer::Skill_GetLockType( lpctstr pszKey ) const
 		return SKILL_NONE;
 
 	if ( IsDigit( ppArgs[1][0] ))
-		i = ATOI( ppArgs[1] );
+		i = atoi( ppArgs[1] );
 	else
 		i = g_Cfg.FindSkillKey( ppArgs[1] );
 	
@@ -135,7 +135,7 @@ STAT_TYPE CCharPlayer::Stat_GetLockType( lpctstr pszKey ) const
 		return STAT_NONE;
 
 	if ( IsDigit( ppArgs[1][0] ))
-		i = ATOI( ppArgs[1] );
+		i = atoi( ppArgs[1] );
 	else
 		i = g_Cfg.FindStatKey( ppArgs[1] );
 

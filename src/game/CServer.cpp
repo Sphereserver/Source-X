@@ -1255,7 +1255,7 @@ bool CServer::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 
 		if ( pszKey[i] == '.' )
 		{
-			size_t index = ATOI( pszKey );	// must use this to stop at .
+			size_t index = atoi( pszKey );	// must use this to stop at .
 			pRef = g_Cfg.Server_GetDef(index);
 			pszKey += i + 1;
 			return true;
@@ -1583,8 +1583,8 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 					break;
 				// IMPFLAGS_ITEMS
 				if ( ! g_World.Export( Arg_ppCmd[0], pSrc->GetChar(),
-					(Arg_Qty >= 2) ? (word)ATOI(Arg_ppCmd[1]) : (word)IMPFLAGS_ITEMS,
-					(Arg_Qty >= 3)? ATOI(Arg_ppCmd[2]) : INT16_MAX ))
+					(Arg_Qty >= 2) ? (word)atoi(Arg_ppCmd[1]) : (word)IMPFLAGS_ITEMS,
+					(Arg_Qty >= 3)? atoi(Arg_ppCmd[2]) : INT16_MAX ))
 				{
                     if (pSrc != this)
                     {
@@ -1663,8 +1663,8 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 				}
 				// IMPFLAGS_ITEMS
                 if (!g_World.Import(Arg_ppCmd[0], pSrc->GetChar(),
-                    (Arg_Qty >= 2) ? (word)(ATOI(Arg_ppCmd[1])) : (word)IMPFLAGS_BOTH,
-                    (Arg_Qty >= 3) ? ATOI(Arg_ppCmd[2]) : INT16_MAX))
+                    (Arg_Qty >= 2) ? (word)(atoi(Arg_ppCmd[1])) : (word)IMPFLAGS_BOTH,
+                    (Arg_Qty >= 3) ? atoi(Arg_ppCmd[2]) : INT16_MAX))
                 {
                     if (pSrc != this)
                     {
@@ -1923,7 +1923,7 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 				continue;
 #endif
 			case 'P':
-				m_ip.SetPort((word)(ATOI(pArg + 1)));
+				m_ip.SetPort((word)(atoi(pArg + 1)));
 				continue;
 			case 'N':
 				// Set the system name.

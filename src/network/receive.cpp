@@ -476,7 +476,7 @@ bool PacketTextCommand::onReceive(NetState* net)
 	if ((packetLength < 5) || (packetLength > MAX_EXTCMD_ARG_LEN + 4))
 		return false;
 
-	EXTCMD_TYPE type = static_cast<EXTCMD_TYPE>(readByte());
+	EXTCMD_TYPE type = EXTCMD_TYPE(readByte());
 	tchar name[MAX_TALK_BUFFER];
 	readStringNullASCII(name, MAX_TALK_BUFFER-1);
 

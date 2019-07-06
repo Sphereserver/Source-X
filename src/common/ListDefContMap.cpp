@@ -26,7 +26,7 @@ CListDefContNum::CListDefContNum( lpctstr pszKey ) : CListDefContElem( pszKey ),
 
 lpctstr CListDefContNum::GetValStr() const
 {
-    return Str_FromLL(Str_GetTemp(), m_iVal, 16);
+    return Str_FromLL(m_iVal, Str_GetTemp(), 16);
 }
 
 bool CListDefContNum::r_LoadVal( CScript & s )

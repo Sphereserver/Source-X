@@ -1581,7 +1581,7 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 				CChar * pCharVendor = CUID(context2).CharFind();
 				if ( pCharVendor )
 				{
-					pCharVendor->NPC_SetVendorPrice( m_Prompt_Uid.ItemFind(), ATOI(szText) );
+					pCharVendor->NPC_SetVendorPrice( m_Prompt_Uid.ItemFind(), atoi(szText) );
 				}
 			}
 			return;
@@ -2733,7 +2733,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 		case EXTCMD_OPEN_SPELLBOOK:	// open spell book if we have one.
 		{
 			CItem *pBook = nullptr;
-			switch ( ATOI(ppArgs[0]) )
+			switch ( atoi(ppArgs[0]) )
 			{
 				default:
 				case 1:	pBook = m_pChar->GetSpellbook(SPELL_Clumsy);				break;	// magery
@@ -2763,13 +2763,13 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 
 		case EXTCMD_SKILL:
 		{
-			Event_Skill_Use((SKILL_TYPE)(ATOI(ppArgs[0])));
+			Event_Skill_Use((SKILL_TYPE)(atoi(ppArgs[0])));
 			return;
 		}
 
 		case EXTCMD_AUTOTARG:	// bizarre new autotarget mode. "target x y z"
 		{
-			CObjBase *pObj = CUID::ObjFind(ATOI(ppArgs[0]));
+			CObjBase *pObj = CUID::ObjFind(atoi(ppArgs[0]));
 			if ( pObj )
 				DEBUG_ERR(("%x:Event_ExtCmd AutoTarg '%s' '%s'\n", GetSocketID(), pObj->GetName(), !ppArgs[1] ? TSTRING_NULL : ppArgs[1]));
 			else
@@ -2780,7 +2780,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 		case EXTCMD_CAST_BOOK:	// cast spell from book.
 		case EXTCMD_CAST_MACRO:	// macro spell.
 		{
-			SPELL_TYPE spell = (SPELL_TYPE)(ATOI(ppArgs[0]));
+			SPELL_TYPE spell = (SPELL_TYPE)(atoi(ppArgs[0]));
 			CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
 			if ( !pSpellDef )
 				return;
@@ -2845,11 +2845,12 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 			return;
 		}
 
+        /*
 		default:
-		{
+            // It can be a custom ext event
 			g_Log.EventWarn("%x:Event_ExtCmd received unknown event type %d, '%s'\n", GetSocketID(), type, pszName);
 			return;
-		}
+        */
 	}
 }
 

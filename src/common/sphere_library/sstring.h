@@ -24,6 +24,18 @@
 	#define IsAlnum(c)		isalnum(IntCharacter(c))
 #endif
 
+/*  cross-platform functions macros  */
+#ifdef _WIN32
+    #include <Shlwapi.h> // for StrStrIA
+    #define strcmpi		    _strcmpi
+    #define strnicmp	    _strnicmp
+    #define Str_Reverse	    _strrev
+#else
+    #include <cctype>   // toupper/tolower
+    #define strcmpi			strcasecmp
+    #define strnicmp		strncasecmp
+    void Str_Reverse(char* string);
+#endif
 
 /**
 * match result defines
@@ -54,10 +66,10 @@ uint   Str_ToUI (lpctstr ptcStr, int base = 10) noexcept;
 llong  Str_ToLL (lpctstr ptcStr, int base = 10) noexcept;
 ullong Str_ToULL(lpctstr ptcStr, int base = 10) noexcept;
 
-tchar* Str_FromI   (tchar *buf, int val,    int base = 10) noexcept;
-tchar* Str_FromUI  (tchar *buf, uint val,   int base = 10) noexcept;
-tchar* Str_FromLL  (tchar *buf, llong val,  int base = 10) noexcept;
-tchar* Str_FromULL (tchar *buf, ullong val, int base = 10) noexcept;
+tchar* Str_FromI   (int val,    tchar* buf, int base = 10) noexcept;
+tchar* Str_FromUI  (uint val,   tchar* buf, int base = 10) noexcept;
+tchar* Str_FromLL  (llong val,  tchar* buf, int base = 10) noexcept;
+tchar* Str_FromULL (ullong val, tchar* buf, int base = 10) noexcept;
 
 
 size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord );

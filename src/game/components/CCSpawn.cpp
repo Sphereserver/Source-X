@@ -851,11 +851,11 @@ bool CCSpawn::r_LoadVal(CScript & s)
                 switch (iArgs)
                 {
                     case 3: // m_z
-                        _iMaxDist = (uint8)(ATOI(ppVal[2]));
+                        _iMaxDist = (uint8)(atoi(ppVal[2]));
                     case 2: // m_y
-                        _iTimeHi = (uint16)(ATOI(ppVal[1]));
+                        _iTimeHi = (uint16)(atoi(ppVal[1]));
                     case 1: // m_x
-                        _iTimeLo = (uint16)(ATOI(ppVal[0]));
+                        _iTimeLo = (uint16)(atoi(ppVal[0]));
                         break;
                     default:
                     case 0:

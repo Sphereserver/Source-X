@@ -411,7 +411,7 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
         else if ( pptcCmd[i][0] == 'R' )
         {
             // 1 in x chance of creating this.
-            if ( Calc_GetRandVal( ATOI(pptcCmd[i] + 1) ))
+            if ( Calc_GetRandVal( atoi(pptcCmd[i] + 1) ))
                 return nullptr;	// don't create it
         }
     }
@@ -2841,9 +2841,9 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				if ( amount <= 0 )
 					return false;
 				else if (amount > 1)
-					includeLower = (ATOI(ppVal[1]) != 0);
+					includeLower = (atoi(ppVal[1]) != 0);
 
-				for ( addCircle = ATOI(ppVal[0]); addCircle; --addCircle )
+				for ( addCircle = atoi(ppVal[0]); addCircle; --addCircle )
 				{
 					for ( int i = 1; i < 9; ++i )
 						AddSpellbookSpell((SPELL_TYPE)(RES_GET_INDEX(((addCircle - 1) * 8) + i)), false);
@@ -2920,9 +2920,9 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 					{
 						default:
 						case 2:
-							pt.m_y = (short)(ATOI(ppVal[1]));
+							pt.m_y = (short)(atoi(ppVal[1]));
 						case 1:
-							pt.m_x = (short)(ATOI(ppVal[0]));
+							pt.m_x = (short)(atoi(ppVal[0]));
 						case 0:
 							break;
 					}
@@ -3059,14 +3059,14 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 						default:
 						case 4:	// m_map
 							if ( IsDigit(ppVal[3][0]))
-								pt.m_map = (uchar)(ATOI(ppVal[3]));
+								pt.m_map = (uchar)(atoi(ppVal[3]));
 						case 3: // m_z
 							if ( IsDigit(ppVal[2][0]) || ppVal[2][0] == '-' )
-								pt.m_z = (char)(ATOI(ppVal[2]));
+								pt.m_z = (char)(atoi(ppVal[2]));
 						case 2:
-							pt.m_y = (short)(ATOI(ppVal[1]));
+							pt.m_y = (short)(atoi(ppVal[1]));
 						case 1:
-							pt.m_x = (short)(ATOI(ppVal[0]));
+							pt.m_x = (short)(atoi(ppVal[0]));
 						case 0:
 							break;
 					}
@@ -5882,7 +5882,7 @@ bool CItem::OnTick()
 						tchar *pszMsg = Str_GetTemp();
 						CObjBase* pObj = static_cast<CObjBase*>(GetTopLevelObj());
 						ASSERT(pObj);
-						pObj->Speak(ITOA(m_itPotion.m_tick, pszMsg, 10), HUE_RED);
+						pObj->Speak(Str_FromI(m_itPotion.m_tick, pszMsg, 10), HUE_RED);
 						SetTimeoutS(1);
 					}
 					return true;

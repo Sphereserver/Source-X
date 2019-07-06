@@ -283,7 +283,7 @@ bool CClient::OnTarg_UnExtract( CObjBase * pObj, const CPointMap & pt )
 	if ( ! s.ReadKeyParse())
 		return false; // this has the item count
 
-	int iItemCount = ATOI(s.GetKey()); // item count
+	int iItemCount = atoi(s.GetKey()); // item count
 	while (iItemCount > 0)
 	{
 		if ( ! s.ReadKeyParse())
@@ -292,7 +292,7 @@ bool CClient::OnTarg_UnExtract( CObjBase * pObj, const CPointMap & pt )
 		int64 piCmd[4];		// Maximum parameters in one line
 		Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
 
-		CItem * pItem = CItem::CreateTemplate((ITEMID_TYPE)(ATOI(s.GetKey())), nullptr, m_pChar);
+		CItem * pItem = CItem::CreateTemplate((ITEMID_TYPE)(atoi(s.GetKey())), nullptr, m_pChar);
 		if ( pItem == nullptr )
 			return false;
 

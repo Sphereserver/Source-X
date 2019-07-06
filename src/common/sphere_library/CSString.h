@@ -249,7 +249,7 @@ public:
 	*/
 	inline void Reverse()
 	{
-		STRREV(m_pchData);
+		Str_Reverse(m_pchData);
 	}
 	///@}
 

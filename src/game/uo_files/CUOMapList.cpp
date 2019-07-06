@@ -61,11 +61,11 @@ bool CUOMapList::Load(int map, char *args)
         else
         {
             int	maxx = 0, maxy = 0, sectorsize = 0, realmapnum = 0, mapid = -1;
-            if ( ppCmd[0] ) maxx = ATOI(ppCmd[0]);
-            if ( ppCmd[1] ) maxy = ATOI(ppCmd[1]);
-            if ( ppCmd[2] ) sectorsize = ATOI(ppCmd[2]);
-            if ( ppCmd[3] ) realmapnum = ATOI(ppCmd[3]);
-            if ( ppCmd[4] ) mapid = ATOI(ppCmd[4]);
+            if ( ppCmd[0] ) maxx = atoi(ppCmd[0]);
+            if ( ppCmd[1] ) maxy = atoi(ppCmd[1]);
+            if ( ppCmd[2] ) sectorsize = atoi(ppCmd[2]);
+            if ( ppCmd[3] ) realmapnum = atoi(ppCmd[3]);
+            if ( ppCmd[4] ) mapid = atoi(ppCmd[4]);
 
             // zero settings of anything except the real map num means
             if ( maxx )					// skipping the argument

@@ -2333,7 +2333,7 @@ do_default:
 					{
 						DEBUG_ERR(("'%s' is not a valid fame value.\n", ppLevel_sep[i]));
 					}
-					else if ( iFame >= ATOI(ppLevel_sep[ i ]) )
+					else if ( iFame >= atoi(ppLevel_sep[ i ]) )
 					{
 						sVal = ( !g_Cfg.m_Fame.at(i + 1)->CompareNoCase( pszKey + 5 )) ? "1" : "0";
 						delete[] pszFameAt0;
@@ -2429,7 +2429,7 @@ do_default:
 					{
 						DEBUG_ERR(("'%s' is not a valid karma value.\n", ppLevel_sep[i]));
 					}
-					else if ( iKarma >= ATOI(ppLevel_sep[ i ]) )
+					else if ( iKarma >= atoi(ppLevel_sep[ i ]) )
 					{
 						sVal = ( !g_Cfg.m_Karma.at(i + 1)->CompareNoCase( pszKey + 6 )) ? "1" : "0";
 						delete[] pszKarmaAt0;
@@ -3715,7 +3715,7 @@ void CChar::r_Write( CScript & s )
 		if (pSkillDef != nullptr)
 			pszActionTemp = const_cast<tchar*>(pSkillDef->GetKey());
 		else
-			pszActionTemp = Str_FromI(Str_GetTemp(), action);
+			pszActionTemp = Str_FromI(action, Str_GetTemp());
 		s.WriteKey("ACTION", pszActionTemp);
 		/* We save ACTARG1/ACTARG2/ACTARG3 only if the following conditions are satisfied:
 		ACTARG1/ACTARG2/ACTARG3 is different from 0 AND
@@ -4188,7 +4188,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			if ( iArg == 2 )
 			{
 				if ( IsDigit( ttVal[1][0] ) )
-					iTmp = ATOI( ttVal[1] );
+					iTmp = atoi( ttVal[1] );
 			}
 			//DEBUG_ERR(( "CHV_MAKEITEM iTmp is %d, arg was %s\n",iTmp,psTmp ));
 

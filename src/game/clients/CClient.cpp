@@ -672,19 +672,21 @@ bool CClient::r_LoadVal( CScript & s )
 	if ( GetAccount() == nullptr )
 		return false;
 
-	lpctstr pszKey = s.GetKey();
+	lpctstr ptcKey = s.GetKey();
+    if (strnicmp("CTAG", ptcKey, 4))
+    {
+        if ((ptcKey[4] == '.') || (ptcKey[4] == '0'))
+        {
+            const bool fZero = ptcKey[4] == '0';
+            ptcKey = ptcKey + (fZero ? 6 : 5);
+            bool fQuoted = false;
+            lpctstr ptcArg = s.GetArgStr(&fQuoted);
+            m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, true);
+            return true;
+        }
+    }
 
-	if ( s.IsKeyHead( "CTAG.", 5 ) || s.IsKeyHead( "CTAG0.", 6 ) )
-	{
-		bool fZero = s.IsKeyHead( "CTAG0.", 6 );
-		bool fQuoted = false;
-
-		pszKey = pszKey + (fZero ? 6 : 5);
-		m_TagDefs.SetStr( pszKey, fQuoted, s.GetArgStr( &fQuoted ), fZero );
-		return true;
-	}
-
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 ))
+	switch ( FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 ))
 	{
 		case CC_ALLMOVE:
 			addRemoveAll(true, false);
@@ -828,7 +830,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				m_tmAdd.m_id = rid.GetResIndex();
 				if (iQty > 1)
 				{
-					m_tmAdd.m_amount = (word)ATOI(ppszArgs[1]);
+					m_tmAdd.m_amount = (word)atoi(ppszArgs[1]);
 					m_tmAdd.m_amount = maximum(m_tmAdd.m_amount, 1);
 				}
 				else
@@ -1472,7 +1474,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				if ( iArgQty > 1 )
 				{
 					int hue = -1;
-					if ( ATOI(ppArgs[0]) > 0 )
+					if ( atoi(ppArgs[0]) > 0 )
 						hue = Exp_GetVal( ppArgs[0] );
 					int iClilocId = Exp_GetVal( ppArgs[1] );
 
@@ -1500,7 +1502,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				{
 					int hue = -1;
 					int affix = 0;
-					if ( ATOI(ppArgs[0]) > 0 )
+					if ( atoi(ppArgs[0]) > 0 )
 						hue = Exp_GetVal( ppArgs[0] );
 					int iClilocId = Exp_GetVal( ppArgs[1] );
 					if ( ppArgs[2] )

@@ -76,8 +76,8 @@ public:
 class CVarDefContStr : public CVarDefCont
 {
 private:
-    CSString m_sKey;	    // reference to map key
-	CSString m_sVal;	// the assigned value
+    CSString m_sKey;    // map key
+	CSString m_sVal;    // the assigned value
 
 public:
 	static const char *m_sClassName;
@@ -156,10 +156,10 @@ public:
 	lpctstr FindValStr( lpctstr pVal ) const;
 
     CVarDefContNum* SetNumNew( lpctstr pszKey, int64 iVal );
-    CVarDefContNum* SetNum( lpctstr pszKey, int64 iVal, bool fDeleteZero = false, bool fWarnOverwrite = true );
-    CVarDefContNum* ModNum( lpctstr pszKey, int64 iMod, bool fDeleteZero = false );
+    CVarDefContNum* SetNum( lpctstr pszKey, int64 iVal, bool fDeleteZero = true, bool fWarnOverwrite = true );
+    CVarDefContNum* ModNum( lpctstr pszKey, int64 iMod, bool fDeleteZero = true);
     CVarDefContStr* SetStrNew( lpctstr pszKey, lpctstr pszVal );
-    CVarDefCont* SetStr( lpctstr pszKey, bool fQuoted, lpctstr pszVal, bool fDeleteZero = false, bool fWarnOverwrite = true );
+    CVarDefCont* SetStr( lpctstr pszKey, bool fQuoted, lpctstr pszVal, bool fDeleteZero = true, bool fWarnOverwrite = true );
 
 	CVarDefCont * GetAt( size_t at ) const;
 	CVarDefCont * GetKey( lpctstr pszKey ) const;

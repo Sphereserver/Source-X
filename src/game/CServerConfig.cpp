@@ -905,7 +905,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 	{
 		if ( s.IsKeyHead( "REGEN", 5 ))			//	REGENx=<stat regeneration rate>
 		{
-			int index = ATOI(s.GetKey()+5);
+			int index = atoi(s.GetKey()+5);
 			if (index < 0 || index > STAT_FOOD)
 				return false;
 			g_Cfg.m_iRegenRate[index] = (s.GetArgLLVal() * MSECS_PER_SEC);
@@ -924,7 +924,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 				break;
 			}
 			if ( ok && str.size() > 0 )
-				return g_MapList.Load(ATOI(str.c_str()), s.GetArgRaw());
+				return g_MapList.Load(atoi(str.c_str()), s.GetArgRaw());
 
 			size_t length = str.size();
 
@@ -984,7 +984,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 		}
 		else if ( s.IsKeyHead("PACKET", 6) )	//	PACKETx=<function name to execute upon packet>
 		{
-			int index = ATOI(s.GetKey() + 6);
+			int index = atoi(s.GetKey() + 6);
 			if (( index >= 0 ) && ( index < 255 )) // why XCMD_QTY? let them hook every possible custom packet
 			{
 				char *args = s.GetArgRaw();
@@ -1002,7 +1002,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 		}
 		else if ( s.IsKeyHead("OUTPACKET", 9) )	//	OUTPACKETx=<function name to execute upon packet>
 		{
-			int index = ATOI(s.GetKey() + 9);
+			int index = atoi(s.GetKey() + 9);
 			if (( index >= 0 ) && ( index < 255 ))
 			{
 				char *args = s.GetArgRaw();
@@ -1437,7 +1437,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 	{
 		if ( !strnicmp( pszKey, "REGEN", 5 ))
 		{
-			index = ATOI(pszKey+5);
+			index = atoi(pszKey+5);
 			if (( index < 0 ) || ( index >= STAT_QTY ))
 				return false;
 			sVal.FormatLLVal(g_Cfg.m_iRegenRate[index] / MSECS_PER_SEC);
@@ -1483,18 +1483,18 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 					default:
 					case 4:
 						if ( IsDigit(ppVal[3][0]) )
-							pt.m_map = (byte)(ATOI(ppVal[3]));
+							pt.m_map = (byte)(atoi(ppVal[3]));
 					case 3:
 						if ( IsDigit(ppVal[2][0]) || (( iArgs == 4 ) && ( ppVal[2][0] == '-' )) )
 						{
-							pt.m_z = (char)(( iArgs == 4 ) ? ATOI(ppVal[2]) : 0);
+							pt.m_z = (char)(( iArgs == 4 ) ? atoi(ppVal[2]) : 0);
 							if ( iArgs == 3 )
-								pt.m_map = (byte)(ATOI(ppVal[2]));
+								pt.m_map = (byte)(atoi(ppVal[2]));
 						}
 					case 2:
-						pt.m_y = (short)(ATOI(ppVal[1]));
+						pt.m_y = (short)(atoi(ppVal[1]));
 					case 1:
-						pt.m_x = (short)(ATOI(ppVal[0]));
+						pt.m_x = (short)(atoi(ppVal[0]));
 					case 0:
 						break;
 				}
@@ -3449,7 +3449,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 					if (iStartVersion == 2)
 					{
 						if ( pScript->ReadKey())
-							pStart->iClilocDescription = ATOI(pScript->GetKey());
+							pStart->iClilocDescription = atoi(pScript->GetKey());
 					}
 				}
 				m_StartDefs.push_back(pStart);
@@ -4546,7 +4546,7 @@ bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpc
 			// attach suffix
 			iOut = iEnd;
 			pOutput[iOut++] = '_';
-			ITOA(++iAttempts, &pOutput[iOut], 10);
+            Str_FromI(++iAttempts, &pOutput[iOut], 10);
 		}
 	}
 

@@ -142,7 +142,7 @@ bool CItemMessage::r_Verb(CScript & s, CTextConsole *pSrc)
         }
         if ( s.IsKeyHead("PAGE", 4) )
         {
-            word wPage = (word)ATOI(s.GetKey() + 4);
+            word wPage = (word)atoi(s.GetKey() + 4);
             if ( wPage <= 0 )
                 return false;
 

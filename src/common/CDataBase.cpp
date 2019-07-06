@@ -49,7 +49,7 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 		char *pszTemp = Str_GetTemp();
 		strcpy(pszTemp, host);
 		*(strchr(pszTemp, ':')) = 0;
-		portnum = ATOI(port+1);
+		portnum = atoi(port+1);
 		host = pszTemp;
 	}
 
@@ -137,7 +137,7 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
 				char *z = trow[i];
 				if ( !rownum )
 				{
-					mapQueryResult.SetStr(ITOA(i, key, 10), true, z);
+					mapQueryResult.SetStr(Str_FromI(i, key, 10), true, z);
 					mapQueryResult.SetStr(fields[i].name, true, z);
 				}
 

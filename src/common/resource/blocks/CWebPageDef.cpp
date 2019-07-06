@@ -715,7 +715,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 		while ( IsAlpha(*pszNum) )
 			pszNum++;
 
-		int iNum = ATOI(pszNum);
+		int iNum = atoi(pszNum);
 		while ( *pszNum )
 		{
 			if ( *pszNum == '=' )
@@ -733,7 +733,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 			case 'C':
 				if ( !iNum )
 					continue;
-				if ( ATOI(pszNum) )
+				if ( atoi(pszNum) )
 				{
                     resp.m_CheckArray.push_back(iNum);
 				}

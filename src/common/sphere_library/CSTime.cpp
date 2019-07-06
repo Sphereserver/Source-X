@@ -174,12 +174,12 @@ bool CSTime::Read(tchar *pszVal)
 	atm.tm_isdst = 0;   // daylight savings time flag
 
 	// Saves: "1999/8/1 14:30:18"
-	atm.tm_year = ATOI(ppCmds[0]) - 1900;
-	atm.tm_mon = ATOI(ppCmds[1]) - 1;
-	atm.tm_mday = ATOI(ppCmds[2]);
-	atm.tm_hour = ATOI(ppCmds[3]);
-	atm.tm_min = ATOI(ppCmds[4]);
-	atm.tm_sec = ATOI(ppCmds[5]);
+	atm.tm_year = atoi(ppCmds[0]) - 1900;
+	atm.tm_mon = atoi(ppCmds[1]) - 1;
+	atm.tm_mday = atoi(ppCmds[2]);
+	atm.tm_hour = atoi(ppCmds[3]);
+	atm.tm_min = atoi(ppCmds[4]);
+	atm.tm_sec = atoi(ppCmds[5]);
 	m_time = mktime(&atm);
 
 	return true;

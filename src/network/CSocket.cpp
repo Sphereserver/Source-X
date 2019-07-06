@@ -174,7 +174,7 @@ void CSocketAddress::SetPort( word wPort )
 
 void CSocketAddress::SetPortStr( lpctstr pszPort )
 {
-	m_port = (word)(ATOI(pszPort));
+	m_port = (word)(atoi(pszPort));
 }
 
 bool CSocketAddress::SetPortExtStr( tchar * pszIP )

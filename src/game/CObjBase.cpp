@@ -274,7 +274,7 @@ bool CObjBase::SetNamePool( lpctstr pszName )
 			SetNamePool_Fail( ppTitles[0] );
 			return false;
 		}
-		int iCount = Calc_GetRandVal2( 1, ATOI( s.GetKey()) );
+		int iCount = Calc_GetRandVal2( 1, atoi( s.GetKey()) );
 		while ( iCount > 0 )
 		{
 			if ( ! s.ReadKey())
@@ -2015,9 +2015,8 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 			}
 			//DEBUG_ERR(("this->GetUID() 0%x pThis->GetUID() 0%x pCharSrc->GetUID() 0%x\n",(dword)this->GetUID(),(dword)pThis->GetUID(),(dword)pCharSrc->GetUID()));
-            const CPointMap& ptSrc = pCharSrc->GetTopPoint();
 			pThis->EffectLocation((EFFECT_TYPE)(piCmd[3]), (ITEMID_TYPE)(RES_GET_INDEX(piCmd[4])),
-				&ptSrc,
+                pCharSrc ? &pCharSrc->GetTopPoint() : nullptr,
                 &ptDest,
 				(iArgQty >= 3) ? (uchar)(piCmd[5]) : 5,		// byte bSpeedSeconds = 5,
 				(iArgQty >= 4) ? (uchar)(piCmd[6]) : 1,		// byte bLoop = 1,
@@ -2057,7 +2056,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 				pClientSrc->m_Targ_Text = Arg_ppCmd[0];	// The attribute we want to edit.
 
-				int iMaxLength = iQty > 1 ? ATOI(Arg_ppCmd[1]) : 1;
+				int iMaxLength = iQty > 1 ? atoi(Arg_ppCmd[1]) : 1;
 
 				CSString sPrompt;
 				sPrompt.Format("%s (# = default)", (lpctstr)(Arg_ppCmd[0]));
@@ -3236,7 +3235,7 @@ bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_T
 
 		if ( iResultArgs == 3 )
 		{
-			int iTriggerArgType = ATOI(ppCmdTrigger[1]);
+			int iTriggerArgType = atoi(ppCmdTrigger[1]);
 
 			if ( iTriggerArgType == 1 ) // 3 ARGNs
 			{

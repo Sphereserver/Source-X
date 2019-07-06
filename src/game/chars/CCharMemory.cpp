@@ -238,7 +238,7 @@ void CChar::Memory_ClearTypes( word MemTypes )
 // Do I have a memory / link for this object ?
 CItemMemory * CChar::Memory_FindObj( CUID uid ) const
 {
-	ADDTOCALLSTACK("CChar::Memory_FindObj");
+	ADDTOCALLSTACK("CChar::Memory_FindObj(UID)");
 	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 	{
 		if ( !pItem->IsType(IT_EQ_MEMORY_OBJ) )
@@ -252,6 +252,7 @@ CItemMemory * CChar::Memory_FindObj( CUID uid ) const
 
 CItemMemory * CChar::Memory_FindObj( const CObjBase * pObj ) const
 {
+    ADDTOCALLSTACK("CChar::Memory_FindObj");
 	if ( pObj == nullptr )
 		return nullptr;
 	return Memory_FindObj( pObj->GetUID());
@@ -276,6 +277,7 @@ CItemMemory * CChar::Memory_FindTypes( word MemTypes ) const
 
 CItemMemory * CChar::Memory_FindObjTypes( const CObjBase * pObj, word MemTypes ) const
 {
+    ADDTOCALLSTACK("CChar::Memory_FindObjTypes");
 	CItemMemory * pMemory = Memory_FindObj(pObj);
 	if ( pMemory == nullptr )
 		return nullptr;

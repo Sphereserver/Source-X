@@ -120,7 +120,7 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 						{
 							head += 7;
 							GETNONWHITESPACE(head)
-							d = ATOI(head) * 1000;
+							d = atoi(head) * 1000;
 							break;
 						}
 					}

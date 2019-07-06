@@ -1751,11 +1751,11 @@ bool CItemMultiCustom::r_LoadVal(CScript & s)
                 return false;
 
             AddItem(nullptr,
-                (ITEMID_TYPE)(ATOI(ppArgs[0])),
-                (short)(ATOI(ppArgs[1])),
-                (short)(ATOI(ppArgs[2])),
-                (char)(ATOI(ppArgs[3])),
-                (short)(ATOI(ppArgs[4])));
+                (ITEMID_TYPE)(atoi(ppArgs[0])),
+                (short)(atoi(ppArgs[1])),
+                (short)(atoi(ppArgs[2])),
+                (char)(atoi(ppArgs[3])),
+                (short)(atoi(ppArgs[4])));
             return true;
         }
         else if (s.IsKey("REVISION"))
