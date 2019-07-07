@@ -291,7 +291,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 	ADDTOCALLSTACK("CBaseBaseDef::r_LoadVal");
 	EXC_TRY("LoadVal");
     lpctstr ptcKey = s.GetKey();
-    if (strnicmp("TAG", ptcKey, 3))
+    if (!strnicmp("TAG", ptcKey, 3))
     {
         if ((ptcKey[3] == '.') || (ptcKey[3] == '0'))
         {
