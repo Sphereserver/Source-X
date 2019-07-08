@@ -247,7 +247,7 @@ CAccount * CAccounts::Account_Get( size_t index )
 	return static_cast <CAccount *>( m_Accounts[index] );
 }
 
-bool CAccounts::Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr pszArg, bool md5 )
+bool CAccounts::Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr ptcArg, bool md5 )
 {
 	ADDTOCALLSTACK("CAccounts::Cmd_AddNew");
 	if (pszName == nullptr || pszName[0] == '\0')
@@ -275,7 +275,7 @@ bool CAccounts::Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr pszArg
 	ASSERT(pAccount);
 	pAccount->m_dateFirstConnect = pAccount->m_dateLastConnect = CSTime::GetCurrentTime();
 
-	pAccount->SetPassword(pszArg, md5);
+	pAccount->SetPassword(ptcArg, md5);
 	return true;
 }
 
@@ -1101,25 +1101,25 @@ lpctstr constexpr CAccount::sm_szLoadKeys[AC_QTY+1] = // static
 	nullptr
 };
 
-bool CAccount::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CAccount::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CAccount::r_GetRef");
-	if ( ! strnicmp( pszKey, "CHAR.", 5 ))
+	if ( ! strnicmp( ptcKey, "CHAR.", 5 ))
 	{
 		// How many chars.
-		pszKey += 5;
-		size_t i = Exp_GetVal(pszKey);
+		ptcKey += 5;
+		size_t i = Exp_GetVal(ptcKey);
 		if ( m_Chars.IsValidIndex(i) )
 		{
 			pRef = m_Chars.GetChar(i).CharFind();
 		}
-		SKIP_SEPARATORS(pszKey);
+		SKIP_SEPARATORS(ptcKey);
 		return true;
 	}
-	return( CScriptObj::r_GetRef( pszKey, pRef ));
+	return( CScriptObj::r_GetRef( ptcKey, pRef ));
 }
 
-bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CAccount::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
     UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CAccount::r_WriteVal");
@@ -1129,7 +1129,7 @@ bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 
 	bool fZero = false;
 
-	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+	switch ( FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		case AC_NAME:
 		case AC_ACCOUNT:
@@ -1211,13 +1211,13 @@ bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 			break;
 		case AC_TAG0:
 			fZero = true;
-			++pszKey;
+			++ptcKey;
 		case AC_TAG:			// "TAG" = get/set a local tag.
 			{
-				if ( pszKey[3] != '.' )
+				if ( ptcKey[3] != '.' )
 					return false;
-				pszKey += 4;
-				sVal = m_TagDefs.GetKeyStr(pszKey, fZero );
+				ptcKey += 4;
+				sVal = m_TagDefs.GetKeyStr(ptcKey, fZero );
 				break;
 			}
 		case AC_TOTALCONNECTTIME:
@@ -1225,7 +1225,7 @@ bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 			break;
 
 		default:
-			return ( fNoCallParent ? false : CScriptObj::r_WriteVal( pszKey, sVal, pSrc, false ) );
+			return ( fNoCallParent ? false : CScriptObj::r_WriteVal( ptcKey, sVal, pSrc, false ) );
 	}
 	return true;
 	EXC_CATCH;
@@ -1367,7 +1367,7 @@ bool CAccount::r_LoadVal( CScript & s )
             lpctstr ptcArg = s.GetArgStr(&fQuoted);
             m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, true);
         }
-        return true;
+        break;
 
 		case AC_TOTALCONNECTTIME:
 			// Previous total amount of time in game
@@ -1504,17 +1504,17 @@ bool CAccount::r_Verb( CScript &s, CTextConsole * pSrc )
 	EXC_TRY("Verb");
 	ASSERT(pSrc);
 
-	lpctstr pszKey = s.GetKey();
+	lpctstr ptcKey = s.GetKey();
 
 	// can't change accounts higher than you in any way
 	if (( pSrc->GetPrivLevel() < GetPrivLevel() ) &&  ( pSrc->GetPrivLevel() < PLEVEL_Admin ))
 		return false;
 
-	if ( !strnicmp(pszKey, "CLEARTAGS", 9) )
+	if ( !strnicmp(ptcKey, "CLEARTAGS", 9) )
 	{
-		pszKey = s.GetArgStr();
-		SKIP_SEPARATORS(pszKey);
-		m_TagDefs.ClearKeys(pszKey);
+		ptcKey = s.GetArgStr();
+		SKIP_SEPARATORS(ptcKey);
+		m_TagDefs.ClearKeys(ptcKey);
 		return true;
 	}
 
@@ -1527,7 +1527,7 @@ bool CAccount::r_Verb( CScript &s, CTextConsole * pSrc )
             // RES_FUNCTION call
 			CSString sVal;
 			CScriptTriggerArgs Args( s.GetArgRaw() );
-			fLoad = r_Call( pszKey, pSrc, &Args, &sVal );
+			fLoad = r_Call( ptcKey, pSrc, &Args, &sVal );
 		}
 		return fLoad;
 	}

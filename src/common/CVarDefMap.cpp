@@ -21,11 +21,11 @@ inline static int VarDefCompare(const CVarDefCont* pVar, lpctstr ptcKey)
 *
 ***************************************************************************/
 
-CVarDefContNum::CVarDefContNum( lpctstr pszKey, int64 iVal ) : m_sKey( pszKey ), m_iVal( iVal )
+CVarDefContNum::CVarDefContNum( lpctstr ptcKey, int64 iVal ) : m_sKey( ptcKey ), m_iVal( iVal )
 {
 }
 
-CVarDefContNum::CVarDefContNum( lpctstr pszKey ) : m_sKey( pszKey ), m_iVal( 0 )
+CVarDefContNum::CVarDefContNum( lpctstr ptcKey ) : m_sKey( ptcKey ), m_iVal( 0 )
 {
 }
 
@@ -61,11 +61,11 @@ CVarDefCont * CVarDefContNum::CopySelf() const
 *
 ***************************************************************************/
 
-CVarDefContStr::CVarDefContStr( lpctstr pszKey, lpctstr pszVal ) : m_sKey( pszKey ), m_sVal( pszVal ) 
+CVarDefContStr::CVarDefContStr( lpctstr ptcKey, lpctstr pszVal ) : m_sKey( ptcKey ), m_sVal( pszVal ) 
 {
 }
 
-CVarDefContStr::CVarDefContStr( lpctstr pszKey ) : m_sKey( pszKey )
+CVarDefContStr::CVarDefContStr( lpctstr ptcKey ) : m_sKey( ptcKey )
 {
 }
 
@@ -325,17 +325,17 @@ CVarDefContNum* CVarDefMap::SetNumNew( lpctstr pszName, int64 iVal )
     }
 }
 
-CVarDefContNum* CVarDefMap::SetNumOverride( lpctstr pszKey, int64 iVal )
+CVarDefContNum* CVarDefMap::SetNumOverride( lpctstr ptcKey, int64 iVal )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::SetNumOverride");
-    CVarDefContNum* pKeyNum = dynamic_cast<CVarDefContNum*>(GetKey(pszKey));
+    CVarDefContNum* pKeyNum = dynamic_cast<CVarDefContNum*>(GetKey(ptcKey));
     if (pKeyNum)
     {
         pKeyNum->SetValNum(iVal);
         return pKeyNum;
     }
-	DeleteAtKey(pszKey);
-	return SetNumNew(pszKey,iVal);
+	DeleteAtKey(ptcKey);
+	return SetNumNew(ptcKey,iVal);
 }
 
 CVarDefContNum* CVarDefMap::ModNum(lpctstr pszName, int64 iMod, bool fDeleteZero)
@@ -420,17 +420,17 @@ CVarDefContStr* CVarDefMap::SetStrNew( lpctstr pszName, lpctstr pszVal )
     }
 }
 
-CVarDefContStr* CVarDefMap::SetStrOverride( lpctstr pszKey, lpctstr pszVal )
+CVarDefContStr* CVarDefMap::SetStrOverride( lpctstr ptcKey, lpctstr pszVal )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::SetStrOverride");
-    CVarDefContStr* pKeyStr = dynamic_cast<CVarDefContStr*>(GetKey(pszKey));
+    CVarDefContStr* pKeyStr = dynamic_cast<CVarDefContStr*>(GetKey(ptcKey));
     if (pKeyStr)
     {
         pKeyStr->SetValStr(pszVal);
         return pKeyStr;
     }
-	DeleteAtKey(pszKey);
-	return SetStrNew(pszKey,pszVal);
+	DeleteAtKey(ptcKey);
+	return SetStrNew(ptcKey,pszVal);
 }
 
 CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, bool fDeleteZero, bool fWarnOverwrite )
@@ -451,7 +451,7 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, 
 	if ( !fQuoted && IsSimpleNumberString(pszVal))
 	{
 		// Just store the number and not the string.
-		return SetNum( pszName, Exp_Get64Val( pszVal ), fDeleteZero);
+		return SetNum( pszName, Exp_Get64Val( pszVal ), fDeleteZero, fWarnOverwrite);
 	}
 
     size_t idx = m_Container.find_predicate(pszName, VarDefCompare);
@@ -479,14 +479,14 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, 
 	return pVarStr;
 }
 
-CVarDefCont * CVarDefMap::GetKey( lpctstr pszKey ) const
+CVarDefCont * CVarDefMap::GetKey( lpctstr ptcKey ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetKey");
 	CVarDefCont * pReturn = nullptr;
 
-	if ( pszKey )
+	if ( ptcKey )
 	{
-        size_t idx = m_Container.find_predicate(pszKey, VarDefCompare);
+        size_t idx = m_Container.find_predicate(ptcKey, VarDefCompare);
 		
 		if ( idx != SCONT_BADINDEX )
 			pReturn = m_Container[idx];
@@ -495,19 +495,19 @@ CVarDefCont * CVarDefMap::GetKey( lpctstr pszKey ) const
 	return pReturn;
 }
 
-int64 CVarDefMap::GetKeyNum( lpctstr pszKey ) const
+int64 CVarDefMap::GetKeyNum( lpctstr ptcKey ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetKeyNum");
-	const CVarDefCont * pVar = GetKey(pszKey);
+	const CVarDefCont * pVar = GetKey(ptcKey);
 	if ( pVar == nullptr )
 		return 0;
 	return pVar->GetValNum();
 }
 
-lpctstr CVarDefMap::GetKeyStr( lpctstr pszKey, bool fZero ) const
+lpctstr CVarDefMap::GetKeyStr( lpctstr ptcKey, bool fZero ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetKeyStr");
-	const CVarDefCont * pVar = GetKey(pszKey);
+	const CVarDefCont * pVar = GetKey(ptcKey);
 	if ( pVar == nullptr )
 		return (fZero ? "0" : "");
 	return pVar->GetValStr();

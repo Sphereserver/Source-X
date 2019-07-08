@@ -696,14 +696,14 @@ lpctstr constexpr CObjBase::sm_szRefKeys[OBR_QTY+1] =
 	nullptr
 };
 
-bool CObjBase::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CObjBase::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CObjBase::r_GetRef");
-	int i = FindTableHeadSorted( pszKey, sm_szRefKeys, CountOf(sm_szRefKeys)-1 );
+	int i = FindTableHeadSorted( ptcKey, sm_szRefKeys, CountOf(sm_szRefKeys)-1 );
 	if ( i >= 0 )
 	{
-		pszKey += strlen( sm_szRefKeys[i] );
-		SKIP_SEPARATORS(pszKey);
+		ptcKey += strlen( sm_szRefKeys[i] );
+		SKIP_SEPARATORS(ptcKey);
 		switch (i)
 		{
 			case OBR_ROOM:
@@ -714,7 +714,7 @@ bool CObjBase::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				return true;
 			case OBR_SPAWNITEM:
             {
-                if (_uidSpawn != UID_UNUSED && pszKey[-1] != '.')
+                if (_uidSpawn != UID_UNUSED && ptcKey[-1] != '.')
                     break;
                 CItem *pItem = _uidSpawn.ItemFind();
                 if (pItem)
@@ -724,7 +724,7 @@ bool CObjBase::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
             }
 				return true;
 			case OBR_TOPOBJ:
-				if ( pszKey[-1] != '.' )	// only used as a ref !
+				if ( ptcKey[-1] != '.' )	// only used as a ref !
 					break;
 				pRef = dynamic_cast <CObjBase*>(GetTopLevelObj());
 				return true;
@@ -734,7 +734,7 @@ bool CObjBase::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 		}
 
 	}
-	return CScriptObj::r_GetRef(pszKey, pRef);
+	return CScriptObj::r_GetRef(ptcKey, pRef);
 }
 
 enum OBC_TYPE
@@ -753,20 +753,20 @@ lpctstr constexpr CObjBase::sm_szLoadKeys[OC_QTY+1] =
 	nullptr
 };
 
-bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
 	ADDTOCALLSTACK("CObjBase::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-    int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+    int index = FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
     if ( !fNoCallChildren && (index < 0) )
     {
-        const size_t uiFunctionIndex = r_GetFunctionIndex(pszKey);
+        const size_t uiFunctionIndex = r_GetFunctionIndex(ptcKey);
         if (r_CanCall(uiFunctionIndex))
         {
             // RES_FUNCTION call
             // Is it a function returning a value ? Parse args ?
-            lpctstr pszArgs = strchr(pszKey, ' ');
+            lpctstr pszArgs = strchr(ptcKey, ' ');
             if ( pszArgs != nullptr )
             {
                 ++pszArgs;
@@ -784,18 +784,18 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
         // Even though we have not really specified it correctly !
 
         // WORLD. ?
-        //if (g_World.r_WriteVal(pszKey, sVal, pSrc))
+        //if (g_World.r_WriteVal(ptcKey, sVal, pSrc))
         //{
         //    return true;
         //}
 
         // TYPEDEF. ?
-        if (Base_GetDef()->r_WriteVal(pszKey, sVal, pSrc, false, true)) // do not call CEntityProps on the base (already done that on CItem/CChar::r_WriteVal
+        if (Base_GetDef()->r_WriteVal(ptcKey, sVal, pSrc, false, true)) // do not call CEntityProps on the base (already done that on CItem/CChar::r_WriteVal
         {
             return true;
         }
 
-		if (!fNoCallParent && CScriptObj::r_WriteVal( pszKey, sVal, pSrc, false ))
+		if (!fNoCallParent && CScriptObj::r_WriteVal( ptcKey, sVal, pSrc, false ))
         {
             return true;
         }
@@ -816,7 +816,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 		case OC_ABILITYPRIMARY:
 		case OC_ABILITYSECONDARY:
 			{
-				const CVarDefCont * pVar = GetDefKey(pszKey, true);
+				const CVarDefCont * pVar = GetDefKey(ptcKey, true);
 				sVal = pVar ? pVar->GetValStr() : "";
 			}
 			break;
@@ -835,7 +835,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
         case OC_RECIPETAILORING:
         case OC_RECIPETINKERING:
         {
-            const CVarDefCont * pVar = GetDefKey(pszKey, true);
+            const CVarDefCont * pVar = GetDefKey(ptcKey, true);
             sVal.FormatLLHex(pVar ? pVar->GetValNum() : 0);
         }
         break;
@@ -850,16 +850,16 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 				}
                 else
                 {
-					pszKey += strlen(sm_szLoadKeys[index]); // 9;
-					if ( *pszKey == '.' )
+					ptcKey += strlen(sm_szLoadKeys[index]); // 9;
+					if ( *ptcKey == '.' )
 					{
-						SKIP_SEPARATORS( pszKey );
+						SKIP_SEPARATORS( ptcKey );
 
-						if ( !strnicmp( pszKey, "LO", 2 ) )
+						if ( !strnicmp( ptcKey, "LO", 2 ) )
 						{
 							sVal.Format( "%d", m_defenseBase );
 						}
-						else if ( !strnicmp( pszKey, "HI", 2 ) )
+						else if ( !strnicmp( ptcKey, "HI", 2 ) )
 						{
 							sVal.Format( "%d", m_defenseBase+m_defenseRange );
 						}
@@ -872,14 +872,14 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 			}
 		case OC_DAM:
 			{
-				pszKey += strlen(sm_szLoadKeys[index]); // 9;
-				if ( *pszKey == '.' )
+				ptcKey += strlen(sm_szLoadKeys[index]); // 9;
+				if ( *ptcKey == '.' )
 				{
-					SKIP_SEPARATORS( pszKey );
+					SKIP_SEPARATORS( ptcKey );
 
-					if ( !strnicmp( pszKey, "LO", 2 ) )
+					if ( !strnicmp( ptcKey, "LO", 2 ) )
 						sVal.Format( "%d", m_attackBase );
-					else if ( !strnicmp( pszKey, "HI", 2 ) )
+					else if ( !strnicmp( ptcKey, "HI", 2 ) )
 						sVal.Format( "%d", m_attackBase+m_attackRange );
 				}
 				else
@@ -905,27 +905,27 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 				CChar *pChar = pSrc->GetChar();
 				word flags = 0;
 
-				pszKey += ( bCanSee ? 6 : (bFlags ? 13 : 9) );
-				SKIP_SEPARATORS(pszKey);
-				GETNONWHITESPACE(pszKey);
+				ptcKey += ( bCanSee ? 6 : (bFlags ? 13 : 9) );
+				SKIP_SEPARATORS(ptcKey);
+				GETNONWHITESPACE(ptcKey);
 
-				if ( bFlags && *pszKey )
+				if ( bFlags && *ptcKey )
 				{
-					flags = Exp_GetWVal(pszKey);
-					SKIP_ARGSEP(pszKey);
+					flags = Exp_GetWVal(ptcKey);
+					SKIP_ARGSEP(ptcKey);
 				}
-				if ( *pszKey )		// has an argument - UID to see(los) or POS to los only
+				if ( *ptcKey )		// has an argument - UID to see(los) or POS to los only
 				{
 					CPointMap pt;
 					CUID uid;
 					CObjBase *pObj = nullptr;
 
 					if ( !bCanSee )
-						pt = g_Cfg.GetRegionPoint(pszKey);
+						pt = g_Cfg.GetRegionPoint(ptcKey);
 
 					if ( bCanSee || !pt.IsValidPoint() )
 					{
-						uid = Exp_GetDWVal( pszKey );
+						uid = Exp_GetDWVal( ptcKey );
 						pObj = uid.ObjFind();
 						if ( !bCanSee && pObj )
 							pt = pObj->GetTopPoint();
@@ -951,7 +951,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 			{
 				if ( IsDisconnected() || !GetTopLevelObj()->GetTopPoint().IsValidPoint() )
 					return false;
-				return GetTopLevelObj()->GetTopSector()->r_WriteVal( pszKey, sVal, pSrc );
+				return GetTopLevelObj()->GetTopSector()->r_WriteVal( ptcKey, sVal, pSrc );
 			}
 		case OC_CTAGCOUNT:
 			{
@@ -964,10 +964,10 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 			break;
 		case OC_TEXTF:
 			{
-				tchar * key = const_cast<tchar*>(pszKey);
+				tchar * key = const_cast<tchar*>(ptcKey);
 				key += 5;
-				tchar * pszArg[4];
-				int iArgQty = Str_ParseCmds(key, pszArg, CountOf(pszArg));
+				tchar * ptcArg[4];
+				int iArgQty = Str_ParseCmds(key, ptcArg, CountOf(ptcArg));
 				if (iArgQty < 2)
 				{
 					g_Log.EventError("SysMessagef with less than 1 args for the given text\n");
@@ -979,10 +979,10 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 					return false;
 				}
 				//strip quotes if any
-				if (*pszArg[0] == '"')
-					++pszArg[0];
+				if (*ptcArg[0] == '"')
+					++ptcArg[0];
 				byte count = 0;
-				for (tchar * pEnd = pszArg[0] + strlen(pszArg[0]) - 1; pEnd >= pszArg[0]; --pEnd)
+				for (tchar * pEnd = ptcArg[0] + strlen(ptcArg[0]) - 1; pEnd >= ptcArg[0]; --pEnd)
 				{
 					if (*pEnd == '"')
 					{
@@ -991,31 +991,31 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 					}
 					++count;
 				}
-				sVal.Format(pszArg[0], pszArg[1], pszArg[2] ? pszArg[2] : 0, pszArg[3] ? pszArg[3] : 0);
+				sVal.Format(ptcArg[0], ptcArg[1], ptcArg[2] ? ptcArg[2] : 0, ptcArg[3] ? ptcArg[3] : 0);
 				return true;
 			}break;
 		case OC_DIALOGLIST:
 			{
-				pszKey += 10;
-				if ( *pszKey == '.' )
+				ptcKey += 10;
+				if ( *ptcKey == '.' )
 				{
-					SKIP_SEPARATORS( pszKey );
-					GETNONWHITESPACE( pszKey );
+					SKIP_SEPARATORS( ptcKey );
+					GETNONWHITESPACE( ptcKey );
 
 					CClient * pThisClient = pSrc->GetChar() ? ( pSrc->GetChar()->IsClient() ? pSrc->GetChar()->GetClient() : nullptr ) : nullptr;
 					sVal.FormatVal(0);
 
 					if ( pThisClient )
 					{
-						if( !strnicmp(pszKey, "COUNT", 5) )
+						if( !strnicmp(ptcKey, "COUNT", 5) )
 						{
 							sVal.FormatSTVal( pThisClient->m_mapOpenedGumps.size() );
 						}
 						else
 						{
 							const CClient::OpenedGumpsMap_t &ourMap = pThisClient->m_mapOpenedGumps;
-							uint uiDialogIndex = Exp_GetUVal(pszKey);
-							SKIP_SEPARATORS(pszKey);
+							uint uiDialogIndex = Exp_GetUVal(ptcKey);
+							SKIP_SEPARATORS(ptcKey);
 
 							if ( uiDialogIndex <= ourMap.size() )
 							{
@@ -1023,11 +1023,11 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 								while ( uiDialogIndex-- )
 									++itGumpFound;
 
-								if ( !strnicmp(pszKey, "ID", 2) )
+								if ( !strnicmp(ptcKey, "ID", 2) )
 								{
 									sVal.Format("%s", g_Cfg.ResourceGetName( CResourceID(RES_DIALOG, itGumpFound->first )) );
 								}
-								else if ( !strnicmp(pszKey, "COUNT", 5) )
+								else if ( !strnicmp(ptcKey, "COUNT", 5) )
 								{
 									sVal.FormatVal( itGumpFound->second );
 								}
@@ -1047,9 +1047,9 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 			break;
 		case OC_DISTANCE:
 			{
-				pszKey += 8;
-				SKIP_SEPARATORS( pszKey );
-				GETNONWHITESPACE( pszKey );
+				ptcKey += 8;
+				SKIP_SEPARATORS( ptcKey );
+				GETNONWHITESPACE( ptcKey );
 				CObjBase * pObj = pSrc->GetChar();
 
 				CObjBase * pThis = this;
@@ -1058,9 +1058,9 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 				if ( !pThis )
 					return false;
 
-				if ( *pszKey )
+				if ( *ptcKey )
 				{
-					CPointMap pt = g_Cfg.GetRegionPoint( pszKey );
+					CPointMap pt = g_Cfg.GetRegionPoint( ptcKey );
 
 					if ( pt.IsValidPoint() )
 					{
@@ -1070,9 +1070,9 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 						return true;
 					}
 
-					CUID uid = Exp_GetVal( pszKey );
-					SKIP_SEPARATORS( pszKey );
-                    GETNONWHITESPACE( pszKey );
+					CUID uid = Exp_GetVal( ptcKey );
+					SKIP_SEPARATORS( ptcKey );
+                    GETNONWHITESPACE( ptcKey );
 					pObj = uid.ObjFind();
 				}
 
@@ -1088,9 +1088,9 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 			break;
 		case OC_FACING:
 			{
-				pszKey += 6;
-				SKIP_SEPARATORS(pszKey);
-				GETNONWHITESPACE(pszKey);
+				ptcKey += 6;
+				SKIP_SEPARATORS(ptcKey);
+				GETNONWHITESPACE(ptcKey);
 
 				CObjBase * pObj = pSrc->GetChar();
 
@@ -1100,9 +1100,9 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 				if (!pThis)
 					return false;
 
-				if (*pszKey)
+				if (*ptcKey)
 				{
-					CPointMap pt = g_Cfg.GetRegionPoint(pszKey);
+					CPointMap pt = g_Cfg.GetRegionPoint(ptcKey);
 
 					if (pt.IsValidPoint())
 					{
@@ -1113,9 +1113,9 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 						return true;
 					}
 
-					CUID uid = Exp_GetVal(pszKey);
-					SKIP_SEPARATORS(pszKey);
-                    GETNONWHITESPACE(pszKey);
+					CUID uid = Exp_GetVal(ptcKey);
+					SKIP_SEPARATORS(ptcKey);
+                    GETNONWHITESPACE(ptcKey);
 					pObj = uid.ObjFind();
 				}
 
@@ -1129,11 +1129,11 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 			}
         case OC_HASCOMPONENTPROPS:
         {
-            pszKey += 17;
-            SKIP_SEPARATORS(pszKey);
-            GETNONWHITESPACE(pszKey);
+            ptcKey += 17;
+            SKIP_SEPARATORS(ptcKey);
+            GETNONWHITESPACE(ptcKey);
 
-            COMPPROPS_TYPE id = (COMPPROPS_TYPE)Exp_GetVal(pszKey);
+            COMPPROPS_TYPE id = (COMPPROPS_TYPE)Exp_GetVal(ptcKey);
             bool fRes = (id >= 0) && (id < COMP_PROPS_QTY) && (nullptr != CEntityProps::GetComponentProps(id));
             sVal.FormatVal(int(fRes));
             break;
@@ -1142,16 +1142,16 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 			sVal.FormatVal( IsChar());
 			break;
 		case OC_ISEVENT:
-			if ( pszKey[7] != '.' )
+			if ( ptcKey[7] != '.' )
 				return false;
-			pszKey += 8;
-			sVal = m_OEvents.ContainsResourceName(RES_EVENTS, pszKey) ? "1" : "0";
+			ptcKey += 8;
+			sVal = m_OEvents.ContainsResourceName(RES_EVENTS, ptcKey) ? "1" : "0";
             break;
 		case OC_ISTEVENT:
-			if ( pszKey[8] != '.' )
+			if ( ptcKey[8] != '.' )
 				return false;
-			pszKey += 9;
-			sVal = Base_GetDef()->m_TEvents.ContainsResourceName(RES_EVENTS, pszKey) ? "1" : "0";
+			ptcKey += 9;
+			sVal = Base_GetDef()->m_TEvents.ContainsResourceName(RES_EVENTS, ptcKey) ? "1" : "0";
             break;
 		case OC_ISITEM:
 			sVal.FormatVal( IsItem());
@@ -1163,36 +1163,36 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 		case OC_ISNEARTYPE:
 			{
 				bool fP = false;
-				pszKey	+= ( index == OC_ISNEARTYPETOP ) ? 13 : 10;
-				if ( !strnicmp( pszKey, ".P", 2 ) )
+				ptcKey	+= ( index == OC_ISNEARTYPETOP ) ? 13 : 10;
+				if ( !strnicmp( ptcKey, ".P", 2 ) )
 				{
 					fP	= true;
-					pszKey	+= 2;
+					ptcKey	+= 2;
 				}
-				SKIP_SEPARATORS( pszKey );
-				SKIP_ARGSEP( pszKey );
+				SKIP_SEPARATORS( ptcKey );
+				SKIP_ARGSEP( ptcKey );
 
 				if ( !GetTopPoint().IsValidPoint() )
 					sVal.FormatVal( 0 );
 				else
 				{
-					int iType = g_Cfg.ResourceGetIndexType( RES_TYPEDEF, pszKey );
+					int iType = g_Cfg.ResourceGetIndexType( RES_TYPEDEF, ptcKey );
 					int iDistance;
 					bool bCheckMulti;
 
-					SKIP_IDENTIFIERSTRING( pszKey );
-					SKIP_SEPARATORS( pszKey );
-					SKIP_ARGSEP( pszKey );
+					SKIP_IDENTIFIERSTRING( ptcKey );
+					SKIP_SEPARATORS( ptcKey );
+					SKIP_ARGSEP( ptcKey );
 
-					if ( !*pszKey )
+					if ( !*ptcKey )
 						iDistance	= 0;
 					else
-						iDistance	= Exp_GetVal( pszKey );
+						iDistance	= Exp_GetVal( ptcKey );
 
-					if ( !*pszKey )
+					if ( !*ptcKey )
 						bCheckMulti = false;
 					else
-						bCheckMulti = Exp_GetVal( pszKey ) != 0;
+						bCheckMulti = Exp_GetVal( ptcKey ) != 0;
 
 					if ( fP )
 					{
@@ -1224,15 +1224,15 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
         }
 		case OC_ISDIALOGOPEN:
 			{
-				pszKey += 12;
-				SKIP_SEPARATORS( pszKey );
-				GETNONWHITESPACE( pszKey );
+				ptcKey += 12;
+				SKIP_SEPARATORS( ptcKey );
+				GETNONWHITESPACE( ptcKey );
 				CChar * pCharToCheck = dynamic_cast<CChar*>(this);
 				CClient * pClientToCheck = (pCharToCheck && pCharToCheck->IsClient()) ? (pCharToCheck->GetClient()) : nullptr;
 
 				if ( pClientToCheck )
 				{
-					CResourceID rid = g_Cfg.ResourceGetIDType( RES_DIALOG, pszKey );
+					CResourceID rid = g_Cfg.ResourceGetIDType( RES_DIALOG, ptcKey );
 					int context;
 
 					if ( pClientToCheck->GetNetState()->isClientKR() )
@@ -1264,20 +1264,20 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 			}
 		case OC_ISARMOR:
 			{
-			pszKey += 7;
-			SKIP_SEPARATORS( pszKey );
-			GETNONWHITESPACE( pszKey );
+			ptcKey += 7;
+			SKIP_SEPARATORS( ptcKey );
+			GETNONWHITESPACE( ptcKey );
 			CItem * pItem = nullptr;
-			if ( *pszKey )
+			if ( *ptcKey )
 			{
-				tchar * pszArg = Str_GetTemp();
-                Str_CopyLimitNull( pszArg, pszKey, strlen( pszKey ) + 1 );
+				tchar * ptcArg = Str_GetTemp();
+                Str_CopyLimitNull( ptcArg, ptcKey, strlen( ptcKey ) + 1 );
 
-				CUID uid(Exp_GetDWVal( pszKey ));
+				CUID uid(Exp_GetDWVal( ptcKey ));
 				pItem = dynamic_cast<CItem*> (uid.ObjFind());
 				if (pItem == nullptr)
 				{
-					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetID(RES_ITEMDEF, pszArg).GetResIndex());
+					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetID(RES_ITEMDEF, ptcArg).GetResIndex());
 					const CItemBase * pItemDef = CItemBase::FindItemBase( id );
 					if ( pItemDef != nullptr )
 					{
@@ -1294,30 +1294,30 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 			}
 		case OC_ISTIMERF:
 			{
-				if ( pszKey[8] != '.' )
+				if ( ptcKey[8] != '.' )
 					return false;
-				pszKey += 9;
-				//sVal.FormatVal( (g_World.m_TimedFunctions.IsTimer(GetUID(),pszKey)) ? 1 : 0 );
-				sVal.FormatVal( g_World.m_TimedFunctions.IsTimer(GetUID(),pszKey) );
+				ptcKey += 9;
+				//sVal.FormatVal( (g_World.m_TimedFunctions.IsTimer(GetUID(),ptcKey)) ? 1 : 0 );
+				sVal.FormatVal( g_World.m_TimedFunctions.IsTimer(GetUID(),ptcKey) );
                 break;
 			}
 			break;
 		case OC_ISWEAPON:
 			{
-			pszKey += 8;
-			SKIP_SEPARATORS( pszKey );
-			GETNONWHITESPACE( pszKey );
+			ptcKey += 8;
+			SKIP_SEPARATORS( ptcKey );
+			GETNONWHITESPACE( ptcKey );
 			CItem * pItem = nullptr;
-			if ( *pszKey )
+			if ( *ptcKey )
 			{
-				tchar * pszArg = Str_GetTemp();
-				Str_CopyLimitNull( pszArg, pszKey, strlen( pszKey ) + 1 );
+				tchar * ptcArg = Str_GetTemp();
+				Str_CopyLimitNull( ptcArg, ptcKey, strlen( ptcKey ) + 1 );
 
-				CUID uid = Exp_GetVal( pszKey );
+				CUID uid = Exp_GetVal( ptcKey );
 				pItem = dynamic_cast<CItem*> (uid.ObjFind());
 				if ( pItem == nullptr )
 				{
-					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetID(RES_ITEMDEF, pszArg).GetResIndex());
+					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetID(RES_ITEMDEF, ptcArg).GetResIndex());
 					const CItemBase * pItemDef = CItemBase::FindItemBase( id );
 					if (pItemDef != nullptr)
 					{
@@ -1343,22 +1343,22 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 			sVal = GetName();
 			break;
 		case OC_P:
-			if ( pszKey[1] == '.' )
-				return GetUnkPoint().r_WriteVal( pszKey+2, sVal );
+			if ( ptcKey[1] == '.' )
+				return GetUnkPoint().r_WriteVal( ptcKey+2, sVal );
 			sVal = GetUnkPoint().WriteUsed();
 			break;
 		case OC_TAG0:
 			fZero = true;
-			++pszKey;
+			++ptcKey;
 		case OC_TAG:			// "TAG" = get/set a local tag.
 			{
-				if ( pszKey[3] != '.' )
+				if ( ptcKey[3] != '.' )
 					return false;
-				pszKey += 4;
+				ptcKey += 4;
 
-				CVarDefCont * pVarKey = m_TagDefs.GetKey( pszKey );
+				CVarDefCont * pVarKey = m_TagDefs.GetKey( ptcKey );
 				if ( !pVarKey )
-					sVal = Base_GetDef()->m_TagDefs.GetKeyStr( pszKey, fZero );
+					sVal = Base_GetDef()->m_TagDefs.GetKeyStr( ptcKey, fZero );
 				else
 					sVal = pVarKey->GetValStr();
 			}
@@ -1374,14 +1374,14 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
             break;
 		case OC_TRIGGER:
 			{
-				pszKey += 7;
-				GETNONWHITESPACE( pszKey );
+				ptcKey += 7;
+				GETNONWHITESPACE( ptcKey );
 
-				if ( *pszKey )
+				if ( *ptcKey )
 				{
 					TRIGRET_TYPE trReturn = TRIGRET_RET_FALSE;
                     _iCallingObjTriggerId = _iRunningTriggerId;
-					bool fTrigReturn = CallPersonalTrigger(const_cast<tchar *>(pszKey), pSrc, trReturn,false);
+					bool fTrigReturn = CallPersonalTrigger(const_cast<tchar *>(ptcKey), pSrc, trReturn,false);
 					_iCallingObjTriggerId = -1;
 					if ( fTrigReturn )
 						sVal.FormatVal(trReturn);
@@ -1390,21 +1390,21 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 				}
 			} return false;
 		case OC_TOPOBJ:
-			if ( pszKey[6] == '.' )
-				return CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
+			if ( ptcKey[6] == '.' )
+				return CScriptObj::r_WriteVal( ptcKey, sVal, pSrc );
 			sVal.FormatHex(GetTopLevelObj()->GetUID());
 			break;
 		case OC_UID:
-			if ( pszKey[3] == '.' )
-				return CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
+			if ( ptcKey[3] == '.' )
+				return CScriptObj::r_WriteVal( ptcKey, sVal, pSrc );
 		case OC_SERIAL:
 			sVal.FormatHex( GetUID() );
 			break;
 		case OC_SPAWNITEM:
             if (GetSpawn())
             {
-                if (pszKey[9] == '.')
-                    return CScriptObj::r_WriteVal(pszKey, sVal, pSrc);
+                if (ptcKey[9] == '.')
+                    return CScriptObj::r_WriteVal(ptcKey, sVal, pSrc);
                 sVal.FormatHex(GetSpawn()->GetLink()->GetUID());
             }
             else
@@ -1414,13 +1414,13 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 			break;
 		case OC_SEXTANTP:
 			{
-				pszKey += 8;
-				SKIP_SEPARATORS( pszKey );
-                GETNONWHITESPACE( pszKey );
+				ptcKey += 8;
+				SKIP_SEPARATORS( ptcKey );
+                GETNONWHITESPACE( ptcKey );
 
 				CPointMap pt;
-				if ( *pszKey )
-					pt = g_Cfg.GetRegionPoint( pszKey );
+				if ( *ptcKey )
+					pt = g_Cfg.GetRegionPoint( ptcKey );
 				else
 					pt = this->GetUnkPoint();
 
@@ -1450,11 +1450,11 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 			break;
 		case OC_TAGAT:
 			{
- 				pszKey += 5;	// eat the 'TAGAT'
- 				if ( *pszKey == '.' )	// do we have an argument?
+ 				ptcKey += 5;	// eat the 'TAGAT'
+ 				if ( *ptcKey == '.' )	// do we have an argument?
  				{
- 					SKIP_SEPARATORS( pszKey );
- 					size_t iQty = Exp_GetSTVal( pszKey );
+ 					SKIP_SEPARATORS( ptcKey );
+ 					size_t iQty = Exp_GetSTVal( ptcKey );
 					if ( iQty >= m_TagDefs.GetCount() )
  						return false; // trying to get non-existant tag
 
@@ -1462,16 +1462,16 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
  					if ( !pTagAt )
  						return false; // trying to get non-existant tag
 
- 					SKIP_SEPARATORS( pszKey );
- 					if ( ! *pszKey )
+ 					SKIP_SEPARATORS( ptcKey );
+ 					if ( ! *ptcKey )
  					{
  						sVal.Format("%s=%s", pTagAt->GetKey(), pTagAt->GetValStr());
  					}
- 					else if ( !strnicmp( pszKey, "KEY", 3 )) // key?
+ 					else if ( !strnicmp( ptcKey, "KEY", 3 )) // key?
  					{
  						sVal = pTagAt->GetKey();
  					}
- 					else if ( !strnicmp( pszKey, "VAL", 3 )) // val?
+ 					else if ( !strnicmp( ptcKey, "VAL", 3 )) // val?
  					{
  						sVal = pTagAt->GetValStr();
  					}
@@ -1489,11 +1489,11 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
 			break;
 		case OC_PROPSAT:
 			{
- 				pszKey += 7;	// eat the 'TAGAT'
- 				if ( *pszKey == '.' )	// do we have an argument?
+ 				ptcKey += 7;	// eat the 'TAGAT'
+ 				if ( *ptcKey == '.' )	// do we have an argument?
  				{
- 					SKIP_SEPARATORS( pszKey );
- 					size_t iQty = Exp_GetSTVal( pszKey );
+ 					SKIP_SEPARATORS( ptcKey );
+ 					size_t iQty = Exp_GetSTVal( ptcKey );
 					if ( iQty >= m_BaseDefs.GetCount() )
  						return false; // trying to get non-existant tag
 
@@ -1501,16 +1501,16 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, 
  					if ( !pTagAt )
  						return false; // trying to get non-existant tag
 
- 					SKIP_SEPARATORS( pszKey );
- 					if ( ! *pszKey )
+ 					SKIP_SEPARATORS( ptcKey );
+ 					if ( ! *ptcKey )
  					{
  						sVal.Format("%s=%s", pTagAt->GetKey(), pTagAt->GetValStr());
  					}
- 					else if ( !strnicmp( pszKey, "KEY", 3 )) // key?
+ 					else if ( !strnicmp( ptcKey, "KEY", 3 )) // key?
  					{
  						sVal = pTagAt->GetKey();
  					}
- 					else if ( !strnicmp( pszKey, "VAL", 3 )) // val?
+ 					else if ( !strnicmp( ptcKey, "VAL", 3 )) // val?
  					{
  						sVal = pTagAt->GetValStr();
  					}
@@ -1548,22 +1548,21 @@ bool CObjBase::r_LoadVal( CScript & s )
 	// Using FindTableHeadSorted instead would result in keywords
 	// starting with "P" not working, for instance :)
 
-	if ( s.IsKeyHead("TAG.", 4) )
-	{
-		bool fQuoted = false;
-        tchar* ptcArg = s.GetArgStr( &fQuoted );
-		m_TagDefs.SetStr(s.GetKey()+4, fQuoted, ptcArg, false);
-		return true;
-	}
-	else if ( s.IsKeyHead("TAG0.", 5) )
-	{
-		bool fQuoted = false;
-        tchar* ptcArg = s.GetArgStr( &fQuoted );
-		m_TagDefs.SetStr(s.GetKey()+5, fQuoted, ptcArg, true);
-		return true;
-	}
+    lpctstr ptcKey = s.GetKey();
+    if (!strnicmp("TAG", ptcKey, 3))
+    {
+        if ((ptcKey[3] == '.') || (ptcKey[3] == '0'))
+        {
+            const bool fZero = (ptcKey[3] == '0');
+            ptcKey = ptcKey + (fZero ? 5 : 4);
+            bool fQuoted = false;
+            lpctstr ptcArg = s.GetArgStr(&fQuoted);
+            m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, false); // don't change fZero to true! it would break some scripts!
+            return true;
+        }
+    }
 
-	int index = FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+	int index = FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( index < 0 )
 	{
         return CScriptObj::r_LoadVal(s);
@@ -1848,25 +1847,25 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 {
 	ADDTOCALLSTACK("CObjBase::r_Verb");
 	EXC_TRY("Verb");
-	lpctstr	pszKey = s.GetKey();
+	lpctstr	ptcKey = s.GetKey();
 	ASSERT(pSrc);
 	int	index;
 
-	if ( !strnicmp(pszKey, "CLEARTAGS", 9) )
+	if ( !strnicmp(ptcKey, "CLEARTAGS", 9) )
 	{
-		pszKey = s.GetArgStr();
-		SKIP_SEPARATORS(pszKey);
-		m_TagDefs.ClearKeys(pszKey);
+		ptcKey = s.GetArgStr();
+		SKIP_SEPARATORS(ptcKey);
+		m_TagDefs.ClearKeys(ptcKey);
 		return true;
 	}
 
-	if ( !strnicmp( pszKey, "TARGET", 6 ) )
+	if ( !strnicmp( ptcKey, "TARGET", 6 ) )
 		index = OV_TARGET;
 	else
-		index = FindTableSorted( pszKey, sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
+		index = FindTableSorted( ptcKey, sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
     if (index < 0)
     {
-        const size_t uiFunctionIndex = r_GetFunctionIndex(pszKey);
+        const size_t uiFunctionIndex = r_GetFunctionIndex(ptcKey);
         if (r_CanCall(uiFunctionIndex))
         {
             // RES_FUNCTION call
@@ -2329,12 +2328,12 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				EXC_SET_BLOCK("TARGET");
 				if ( !pClientSrc )
 					return false;
-				pszKey	+= 6;
+				ptcKey	+= 6;
 				bool fAllowGround = false;
 				bool fCheckCrime = false;
 				bool fFunction = false;
 				bool fMulti	= false;
-				tchar low = (tchar)(tolower(*pszKey));
+				tchar low = (tchar)(tolower(*ptcKey));
 
 				while (( low >= 'a' ) && ( low <= 'z' ))
 				{
@@ -2347,7 +2346,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					else if ( low == 'm' )
 						fMulti = true;
 
-					low = (tchar)(tolower(*(++pszKey)));
+					low = (tchar)(tolower(*(++ptcKey)));
 				}
 
 				pClientSrc->m_Targ_UID = GetUID();
@@ -3052,129 +3051,129 @@ void CObjBase::ModPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CCompo
     pCompProps->SetPropertyNum(iPropIndex, iVal + iMod, this, iLimitToEra);
 }
 
-lpctstr CObjBase::GetDefStr( lpctstr pszKey, bool fZero, bool fDef ) const
+lpctstr CObjBase::GetDefStr( lpctstr ptcKey, bool fZero, bool fDef ) const
 {
-    const CVarDefCont * pVar = GetDefKey( pszKey, fDef );
+    const CVarDefCont * pVar = GetDefKey( ptcKey, fDef );
 	if ( pVar == nullptr )
 		return (fZero ? "0" : "");
 	return pVar->GetValStr();
 }
 
-int64 CObjBase::GetDefNum( lpctstr pszKey, bool fDef ) const
+int64 CObjBase::GetDefNum( lpctstr ptcKey, bool fDef ) const
 {
-	const CVarDefCont * pVar = GetDefKey( pszKey, fDef );
+	const CVarDefCont * pVar = GetDefKey( ptcKey, fDef );
 	if ( pVar == nullptr )
 		return 0;
 	return pVar->GetValNum();
 }
 
-void CObjBase::SetDefNum(lpctstr pszKey, int64 iVal, bool fZero )
+void CObjBase::SetDefNum(lpctstr ptcKey, int64 iVal, bool fZero )
 {
-	m_BaseDefs.SetNum(pszKey, iVal, fZero);
+	m_BaseDefs.SetNum(ptcKey, iVal, fZero);
 }
 
-void CObjBase::ModDefNum(lpctstr pszKey, int64 iMod, bool fBaseDef, bool fZero )
+void CObjBase::ModDefNum(lpctstr ptcKey, int64 iMod, bool fBaseDef, bool fZero )
 {
     bool fVarFromBase = false;
-    CVarDefCont	* pVar	= m_BaseDefs.GetKey( pszKey );
+    CVarDefCont	* pVar	= m_BaseDefs.GetKey( ptcKey );
     if (fBaseDef && !pVar)
     {
         const CBaseBaseDef* pBase = Base_GetDef();
         ASSERT (pBase);
-        pVar = pBase->m_BaseDefs.GetKey( pszKey );
+        pVar = pBase->m_BaseDefs.GetKey( ptcKey );
         fVarFromBase = true;
     }
 
     if (!pVar)
     {
         // It doesn't exist yet, so create a new def
-        m_BaseDefs.SetNum(pszKey, iMod, fZero);
+        m_BaseDefs.SetNum(ptcKey, iMod, fZero);
         return;
     }
     CVarDefContNum* pVarNum = dynamic_cast<CVarDefContNum*>(pVar);
     if (!pVarNum)
     {
         // Actually there's a def with that name, but it's a CVarDefContStr, so we need to clear that and create a new CVarDefContNum
-        m_BaseDefs.SetNum(pszKey, iMod, fZero);
+        m_BaseDefs.SetNum(ptcKey, iMod, fZero);
         return;
     }
     const int64 iNewVal = pVarNum->GetValNum() + iMod;
     if ((iNewVal == 0) && fZero && !fVarFromBase)   // Shouldn't delete a CBaseBaseDef VarDef
     {
         // If fZero and the new value of the def is 0, just delete the def
-        m_BaseDefs.DeleteKey(pszKey);
+        m_BaseDefs.DeleteKey(ptcKey);
         return;
     }
     if (fVarFromBase)
     {
         // Shouldn't change the value of a CBaseBaseDef VarDef, so get the value from that, add the iMod and set
         //  this value to a new CObjBase VarDef.
-        m_BaseDefs.SetNum(pszKey, iNewVal, fZero);
+        m_BaseDefs.SetNum(ptcKey, iNewVal, fZero);
         return;
     }
     // Update the CObjBase VarDef value.
     pVarNum->SetValNum(iNewVal);
 }
 
-void CObjBase::SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted, bool fZero )
+void CObjBase::SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted, bool fZero )
 {
-	m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero);
+	m_BaseDefs.SetStr(ptcKey, fQuoted, pszVal, fZero);
 }
 
-void CObjBase::DeleteDef(lpctstr pszKey)
+void CObjBase::DeleteDef(lpctstr ptcKey)
 {
-	m_BaseDefs.DeleteKey(pszKey);
+	m_BaseDefs.DeleteKey(ptcKey);
 }
 
-CVarDefCont * CObjBase::GetDefKey( lpctstr pszKey, bool fDef ) const
+CVarDefCont * CObjBase::GetDefKey( lpctstr ptcKey, bool fDef ) const
 {
-	CVarDefCont	* pVar	= m_BaseDefs.GetKey( pszKey );
+	CVarDefCont	* pVar	= m_BaseDefs.GetKey( ptcKey );
 	if ( !fDef || pVar )
 		return pVar;
     const CBaseBaseDef* pBase = Base_GetDef();
     ASSERT (pBase);
-    return pBase->m_BaseDefs.GetKey( pszKey );
+    return pBase->m_BaseDefs.GetKey( ptcKey );
 }
 
-lpctstr CObjBase::GetKeyStr( lpctstr pszKey, bool fZero, bool fDef ) const
+lpctstr CObjBase::GetKeyStr( lpctstr ptcKey, bool fZero, bool fDef ) const
 {
-    const CVarDefCont * pVar = GetKey( pszKey, fDef );
+    const CVarDefCont * pVar = GetKey( ptcKey, fDef );
 	if ( pVar == nullptr )
 		return (fZero ? "0" : "");
 	return pVar->GetValStr();
 }
 
-int64 CObjBase::GetKeyNum( lpctstr pszKey, bool fDef ) const
+int64 CObjBase::GetKeyNum( lpctstr ptcKey, bool fDef ) const
 {
-    const CVarDefCont * pVar = GetKey( pszKey, fDef );
+    const CVarDefCont * pVar = GetKey( ptcKey, fDef );
 	if ( pVar == nullptr )
 		return 0;
 	return pVar->GetValNum();
 }
 
-CVarDefCont * CObjBase::GetKey( lpctstr pszKey, bool fDef ) const
+CVarDefCont * CObjBase::GetKey( lpctstr ptcKey, bool fDef ) const
 {
-	CVarDefCont	* pVar	= m_TagDefs.GetKey( pszKey );
+	CVarDefCont	* pVar	= m_TagDefs.GetKey( ptcKey );
 	if ( !fDef || pVar )
 		return pVar;
     const CBaseBaseDef* pBase = Base_GetDef();
     ASSERT(pBase);
-    return pBase->m_TagDefs.GetKey( pszKey );
+    return pBase->m_TagDefs.GetKey( ptcKey );
 }
 
-void CObjBase::SetKeyNum(lpctstr pszKey, int64 iVal)
+void CObjBase::SetKeyNum(lpctstr ptcKey, int64 iVal)
 {
-	m_TagDefs.SetNum(pszKey, iVal);
+	m_TagDefs.SetNum(ptcKey, iVal);
 }
 
-void CObjBase::SetKeyStr(lpctstr pszKey, lpctstr pszVal)
+void CObjBase::SetKeyStr(lpctstr ptcKey, lpctstr pszVal)
 {
-	m_TagDefs.SetStr(pszKey, false, pszVal);
+	m_TagDefs.SetStr(ptcKey, false, pszVal);
 }
 
-void CObjBase::DeleteKey(lpctstr pszKey)
+void CObjBase::DeleteKey(lpctstr ptcKey)
 {
-	m_TagDefs.DeleteKey(pszKey);
+	m_TagDefs.DeleteKey(ptcKey);
 }
 
 void CObjBase::DupeCopy( const CObjBase * pObj )

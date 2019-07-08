@@ -515,12 +515,12 @@ lpctstr constexpr CPartyDef::sm_szLoadKeys[PDC_QTY+1] =
 	nullptr
 };
 
-bool CPartyDef::r_GetRef( lpctstr &pszKey, CScriptObj *&pRef )
+bool CPartyDef::r_GetRef( lpctstr &ptcKey, CScriptObj *&pRef )
 {
 	ADDTOCALLSTACK("CPartyDef::r_GetRef");
-	if ( !strnicmp("MASTER.", pszKey, 7) )
+	if ( !strnicmp("MASTER.", ptcKey, 7) )
 	{
-		pszKey += 7;
+		ptcKey += 7;
 		CChar *pMaster = GetMaster().CharFind();
 		if ( pMaster )
 		{
@@ -528,11 +528,11 @@ bool CPartyDef::r_GetRef( lpctstr &pszKey, CScriptObj *&pRef )
 			return true;
 		}
 	}
-	else if ( !strnicmp("MEMBER.", pszKey, 7) )
+	else if ( !strnicmp("MEMBER.", ptcKey, 7) )
 	{
-		pszKey += 7;
-		size_t nNumber = Exp_GetVal(pszKey);
-		SKIP_SEPARATORS(pszKey);
+		ptcKey += 7;
+		size_t nNumber = Exp_GetVal(ptcKey);
+		SKIP_SEPARATORS(ptcKey);
 		if ( !m_Chars.IsValidIndex(nNumber) )
 			return false;
 
@@ -550,9 +550,9 @@ bool CPartyDef::r_LoadVal( CScript &s )
 { 
 	ADDTOCALLSTACK("CPartyDef::r_LoadVal");
 	EXC_TRY("LoadVal");
-	lpctstr pszKey = s.GetKey();
+	lpctstr ptcKey = s.GetKey();
 
-	int index = FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+	int index = FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
 	switch ( index )
 	{
 		case PDC_SPEECHFILTER:
@@ -561,23 +561,25 @@ bool CPartyDef::r_LoadVal( CScript &s )
 				this->m_pSpeechFunction.Empty();
 			else
 			{
-				lpctstr pszArg = s.GetArgStr();
-				CResourceLink *m_pTestEvent = dynamic_cast<CResourceLink *>(g_Cfg.ResourceGetDefByName(RES_FUNCTION, pszArg));
+				lpctstr ptcArg = s.GetArgStr();
+				CResourceLink *m_pTestEvent = dynamic_cast<CResourceLink *>(g_Cfg.ResourceGetDefByName(RES_FUNCTION, ptcArg));
 
 				if ( !m_pTestEvent )
 					return false;
 
-				this->m_pSpeechFunction.Format("%s", pszArg);
+				this->m_pSpeechFunction.Format("%s", ptcArg);
 			}
 
 		} break;
 
 		case PDC_TAG0:
 		case PDC_TAG:
-		{
-			bool fQuoted = false;
-			pszKey = pszKey + ((index == PDC_TAG0) ? 5 : 4);
-			m_TagDefs.SetStr(pszKey, fQuoted, s.GetArgStr(&fQuoted), (index == PDC_TAG0));
+		    {
+            const bool fZero = (index == PDC_TAG0);
+            ptcKey += (fZero ? 5 : 4);
+            bool fQuoted = false;
+            lpctstr ptcArg = s.GetArgStr(&fQuoted);
+            m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, false);
 		} break;
 		
 		default:
@@ -592,7 +594,7 @@ bool CPartyDef::r_LoadVal( CScript &s )
 	return false;
 }
 
-bool CPartyDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CPartyDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
     UNREFERENCED_PARAMETER(fNoCallParent);
     UNREFERENCED_PARAMETER(fNoCallChildren);
@@ -600,14 +602,14 @@ bool CPartyDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, 
 	EXC_TRY("WriteVal");
 
 	CScriptObj *pRef;
-	if ( r_GetRef(pszKey, pRef) )
+	if ( r_GetRef(ptcKey, pRef) )
 	{
 		if ( pRef == nullptr )		// good command but bad link.
 		{
 			sVal = "0";
 			return true;
 		}
-		if ( pszKey[0] == '\0' )	// we where just testing the ref.
+		if ( ptcKey[0] == '\0' )	// we where just testing the ref.
 		{
 			CObjBase *pObj = dynamic_cast<CObjBase*>(pRef);
 			if ( pObj )
@@ -616,19 +618,19 @@ bool CPartyDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, 
 				sVal.FormatVal(1);
 			return true;
 		}
-		return pRef->r_WriteVal(pszKey, sVal, pSrc);
+		return pRef->r_WriteVal(ptcKey, sVal, pSrc);
 	}
 
 	bool fZero = false;
-	switch ( FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1) )
+	switch ( FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1) )
 	{
 		case PDC_ISSAMEPARTYOF:
 		{
-			pszKey += 13;
-			GETNONWHITESPACE(pszKey);
-			if ( pszKey[0] != '\0' )
+			ptcKey += 13;
+			GETNONWHITESPACE(ptcKey);
+			if ( ptcKey[0] != '\0' )
 			{
-				CChar *pCharToCheck = CUID::CharFind(Exp_GetDWVal(pszKey));
+				CChar *pCharToCheck = CUID::CharFind(Exp_GetDWVal(ptcKey));
 				sVal.FormatVal(pCharToCheck && (pCharToCheck->m_pParty == this));
 			}
 			else
@@ -645,22 +647,22 @@ bool CPartyDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, 
 
 		case PDC_TAG0:
 			fZero = true;
-			++pszKey;
+			++ptcKey;
 		case PDC_TAG:
 		{
-			if ( pszKey[3] != '.' )
+			if ( ptcKey[3] != '.' )
 				return false;
-			pszKey += 4;
-			sVal = m_TagDefs.GetKeyStr(pszKey, fZero);
+			ptcKey += 4;
+			sVal = m_TagDefs.GetKeyStr(ptcKey, fZero);
 		} break;
 
 		case PDC_TAGAT:
 		{
-			pszKey += 5;	// eat the 'TAGAT'
-			if ( *pszKey == '.' )	// do we have an argument?
+			ptcKey += 5;	// eat the 'TAGAT'
+			if ( *ptcKey == '.' )	// do we have an argument?
 			{
-				SKIP_SEPARATORS(pszKey);
-				size_t iQty = Exp_GetSTVal(pszKey);
+				SKIP_SEPARATORS(ptcKey);
+				size_t iQty = Exp_GetSTVal(ptcKey);
 				if ( iQty >= m_TagDefs.GetCount() )
 					return false;	// trying to get non-existant tag
 
@@ -668,18 +670,18 @@ bool CPartyDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, 
 				if ( !pTagAt )
 					return false;	// trying to get non-existant tag
 
-				SKIP_SEPARATORS(pszKey);
-				if ( !*pszKey )
+				SKIP_SEPARATORS(ptcKey);
+				if ( !*ptcKey )
 				{
 					sVal.Format("%s=%s", pTagAt->GetKey(), pTagAt->GetValStr());
 					return true;
 				}
-				else if ( !strnicmp(pszKey, "KEY", 3) )
+				else if ( !strnicmp(ptcKey, "KEY", 3) )
 				{
 					sVal = pTagAt->GetKey();
 					return true;
 				}
-				else if ( !strnicmp(pszKey, "VAL", 3) )
+				else if ( !strnicmp(ptcKey, "VAL", 3) )
 				{
 					sVal = pTagAt->GetValStr();
 					return true;
@@ -711,22 +713,22 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 	EXC_TRY("Verb");
 	ASSERT(pSrc);
 
-	lpctstr pszKey = s.GetKey();
+	lpctstr ptcKey = s.GetKey();
 	CScriptObj *pRef;
-	if ( r_GetRef(pszKey, pRef) )
+	if ( r_GetRef(ptcKey, pRef) )
 	{
-		if ( pszKey[0] )
+		if ( ptcKey[0] )
 		{
 			if ( !pRef )
 				return true;
-			CScript script(pszKey, s.GetArgStr());
+			CScript script(ptcKey, s.GetArgStr());
 			script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
 			script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
 			return pRef->r_Verb(script, pSrc);
 		}
 	}
 
-	int iIndex = FindTableSorted(pszKey, sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1);
+	int iIndex = FindTableSorted(ptcKey, sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1);
 	switch ( iIndex )
 	{
 		case PDV_ADDMEMBER:
@@ -747,9 +749,9 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 
 		case PDV_CLEARTAGS:
 		{
-			lpctstr pszArg = s.GetArgStr();
-			SKIP_SEPARATORS(pszArg);
-			m_TagDefs.ClearKeys(pszArg);
+			lpctstr ptcArg = s.GetArgStr();
+			SKIP_SEPARATORS(ptcArg);
+			m_TagDefs.ClearKeys(ptcArg);
 		} break;
 
 		case PDV_CREATE:
@@ -764,11 +766,11 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 		case PDV_REMOVEMEMBER:
 		{
 			CUID toRemove;
-			lpctstr pszArg = s.GetArgStr();
-			if ( *pszArg == '@' )
+			lpctstr ptcArg = s.GetArgStr();
+			if ( *ptcArg == '@' )
 			{
-				pszArg++;
-				size_t nMember = Exp_GetVal(pszArg);
+				ptcArg++;
+				size_t nMember = Exp_GetVal(ptcArg);
 				if ( !m_Chars.IsValidIndex(nMember) )
 					return false;
 
@@ -786,11 +788,11 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 		case PDV_SETMASTER:
 		{
 			CUID newMaster;
-			lpctstr pszArg = s.GetArgStr();
-			if ( *pszArg == '@' )
+			lpctstr ptcArg = s.GetArgStr();
+			if ( *ptcArg == '@' )
 			{
-				pszArg++;
-				size_t nMember = Exp_GetVal(pszArg);
+				ptcArg++;
+				size_t nMember = Exp_GetVal(ptcArg);
 				if ( nMember == 0 || !m_Chars.IsValidIndex(nMember) )
 					return false;
 
@@ -808,19 +810,19 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 		case PDV_SYSMESSAGE:
 		{
 			CUID toSysmessage;
-			lpctstr pszArg = s.GetArgStr();
+			lpctstr ptcArg = s.GetArgStr();
 			tchar *pUid = Str_GetTemp();
 			int x = 0;
 
-			if ( *pszArg == '@' )
+			if ( *ptcArg == '@' )
 			{
-				pszArg++;
-				if ( *pszArg != '@' )
+				ptcArg++;
+				if ( *ptcArg != '@' )
 				{
-					lpctstr __pszArg = pszArg;
-					while ( *pszArg != ' ' )
+					lpctstr __pszArg = ptcArg;
+					while ( *ptcArg != ' ' )
 					{
-						pszArg++;
+						ptcArg++;
 						x++;
 					}
                     Str_CopyLimitNull(pUid, __pszArg, ++x);
@@ -834,10 +836,10 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 			}
 			else
 			{
-				lpctstr __pszArg = pszArg;
-				while ( *pszArg != ' ' )
+				lpctstr __pszArg = ptcArg;
+				while ( *ptcArg != ' ' )
 				{
-					++pszArg;
+					++ptcArg;
 					++x;
 				}
                 Str_CopyLimitNull(pUid, __pszArg, ++x);
@@ -845,15 +847,15 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 				toSysmessage = Exp_GetDWVal(pUid);
 			}
 
-			SKIP_SEPARATORS(pszArg);
+			SKIP_SEPARATORS(ptcArg);
 
 			if ( toSysmessage != (dword)0 )
 			{
 				CChar *pSend = toSysmessage.CharFind();
-				pSend->SysMessage(pszArg);
+				pSend->SysMessage(ptcArg);
 			}
 			else
-				SysMessageAll(pszArg);
+				SysMessageAll(ptcArg);
 		} break;
 
 		case PDV_TAGLIST:
@@ -879,29 +881,29 @@ bool CPartyDef::r_Load( CScript &s )
 	return false; 
 }
 
-lpctstr CPartyDef::GetDefStr( lpctstr pszKey, bool fZero ) const
+lpctstr CPartyDef::GetDefStr( lpctstr ptcKey, bool fZero ) const
 {
-	return m_BaseDefs.GetKeyStr( pszKey, fZero );
+	return m_BaseDefs.GetKeyStr( ptcKey, fZero );
 }
 
-int64 CPartyDef::GetDefNum( lpctstr pszKey ) const
+int64 CPartyDef::GetDefNum( lpctstr ptcKey ) const
 {
-	return m_BaseDefs.GetKeyNum( pszKey );
+	return m_BaseDefs.GetKeyNum( ptcKey );
 }
 
-void CPartyDef::SetDefNum(lpctstr pszKey, int64 iVal, bool fZero )
+void CPartyDef::SetDefNum(lpctstr ptcKey, int64 iVal, bool fZero )
 {
-	m_BaseDefs.SetNum(pszKey, iVal, fZero);
+	m_BaseDefs.SetNum(ptcKey, iVal, fZero);
 }
 
-void CPartyDef::SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted, bool fZero )
+void CPartyDef::SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted, bool fZero )
 {
-	m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero);
+	m_BaseDefs.SetStr(ptcKey, fQuoted, pszVal, fZero);
 }
 
-void CPartyDef::DeleteDef(lpctstr pszKey)
+void CPartyDef::DeleteDef(lpctstr ptcKey)
 {
-	m_BaseDefs.DeleteKey(pszKey);
+	m_BaseDefs.DeleteKey(ptcKey);
 }
 
 bool CPartyDef::IsPartyFull() const

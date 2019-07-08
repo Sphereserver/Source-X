@@ -308,13 +308,13 @@ CServerConfig::~CServerConfig()
 
 
 // SKILL ITEMDEF, etc
-bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CServerConfig::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CServerConfig::r_GetRef");
-	tchar * pszSep = const_cast<tchar*>(strchr( pszKey, '(' ));	// acts like const_cast
+	tchar * pszSep = const_cast<tchar*>(strchr( ptcKey, '(' ));	// acts like const_cast
 	if ( pszSep == nullptr )
 	{
-		pszSep = const_cast<tchar*>(strchr( pszKey, '.' ));
+		pszSep = const_cast<tchar*>(strchr( ptcKey, '.' ));
 		if ( pszSep == nullptr )
 			return false;
 	}
@@ -322,12 +322,12 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	tchar oldChar = *pszSep;
 	*pszSep = '\0';
 
-	int iResType = FindTableSorted( pszKey, sm_szResourceBlocks, RES_QTY );
+	int iResType = FindTableSorted( ptcKey, sm_szResourceBlocks, RES_QTY );
 	bool fNewStyleDef = false;
 
 	if ( iResType < 0 )
 	{
-		if ( !strnicmp(pszKey, "MULTIDEF", 8) )
+		if ( !strnicmp(ptcKey, "MULTIDEF", 8) )
 		{
 			iResType = RES_ITEMDEF;
 			fNewStyleDef = true;
@@ -342,11 +342,11 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	*pszSep = '.';
 
 	// Now get the index.
-	pszKey = pszSep + 1;
-	if ( pszKey[0] == '\0' )
+	ptcKey = pszSep + 1;
+	if ( ptcKey[0] == '\0' )
 		return false;
 
-	pszSep = const_cast<tchar*>(strchr( pszKey, '.' ));
+	pszSep = const_cast<tchar*>(strchr( ptcKey, '.' ));
 	if ( pszSep != nullptr )
 		*pszSep = '\0';
 
@@ -356,20 +356,20 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	}
 	else if ( iResType == RES_CHARDEF )
 	{
-		//pRef = CCharBase::FindCharBase(static_cast<CREID_TYPE>(Exp_GetVal(pszKey)));
-		pRef = CCharBase::FindCharBase((CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, pszKey)));
+		//pRef = CCharBase::FindCharBase(static_cast<CREID_TYPE>(Exp_GetVal(ptcKey)));
+		pRef = CCharBase::FindCharBase((CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, ptcKey)));
 	}
 	else if ( iResType == RES_ITEMDEF )
 	{
-		if (fNewStyleDef && IsDigit(pszKey[0]))
-			pRef = CItemBase::FindItemBase((ITEMID_TYPE)(Exp_GetVal(pszKey) + ITEMID_MULTI));
+		if (fNewStyleDef && IsDigit(ptcKey[0]))
+			pRef = CItemBase::FindItemBase((ITEMID_TYPE)(Exp_GetVal(ptcKey) + ITEMID_MULTI));
 		else
-			pRef = CItemBase::FindItemBase((ITEMID_TYPE)(g_Cfg.ResourceGetIndexType(RES_ITEMDEF, pszKey)));
+			pRef = CItemBase::FindItemBase((ITEMID_TYPE)(g_Cfg.ResourceGetIndexType(RES_ITEMDEF, ptcKey)));
 	}
-	else if ( iResType == RES_SPELL && *pszKey == '-' )
+	else if ( iResType == RES_SPELL && *ptcKey == '-' )
 	{
-		++pszKey;
-		size_t uiOrder = Exp_GetUVal( pszKey );
+		++ptcKey;
+		size_t uiOrder = Exp_GetUVal( ptcKey );
 		if ( !m_SpellDefs_Sorted.IsValidIndex( uiOrder ) )
 			pRef = nullptr;
 		else
@@ -377,7 +377,7 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	}
 	else
 	{
-		CResourceID	rid	= ResourceGetID((RES_TYPE)iResType, pszKey, RES_PAGE_ANY);
+		CResourceID	rid	= ResourceGetID((RES_TYPE)iResType, ptcKey, RES_PAGE_ANY);
 
 		// check the found resource type matches what we searched for
 		if ( rid.GetResType() == iResType )
@@ -387,11 +387,11 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	if ( pszSep != nullptr )
 	{
 		*pszSep = oldChar; //*pszSep = '.';
-		pszKey = pszSep + 1;
+		ptcKey = pszSep + 1;
 	}
 	else
 	{
-		pszKey += strlen(pszKey);
+		ptcKey += strlen(ptcKey);
 	}
 	return true;
 }
@@ -1397,60 +1397,60 @@ CSkillDef* CServerConfig::GetSkillDef( SKILL_TYPE index )
     return m_SkillIndexDefs[uiIndex];
 }
 
-const CSkillDef* CServerConfig::FindSkillDef( lpctstr pszKey ) const
+const CSkillDef* CServerConfig::FindSkillDef( lpctstr ptcKey ) const
 {
     // Find the skill name in the alpha sorted list.
     // RETURN: SKILL_NONE = error.
-    size_t i = m_SkillNameDefs.find_sorted(pszKey);
+    size_t i = m_SkillNameDefs.find_sorted(ptcKey);
     if ( i == SCONT_BADINDEX )
         return nullptr;
     return static_cast <const CSkillDef*>(m_SkillNameDefs[i]);
 }
 
-const CSkillDef * CServerConfig::SkillLookup( lpctstr pszKey )
+const CSkillDef * CServerConfig::SkillLookup( lpctstr ptcKey )
 {
 	ADDTOCALLSTACK("CServerConfig::SkillLookup");
 
-	size_t iLen = strlen( pszKey );
+	size_t iLen = strlen( ptcKey );
     const CSkillDef * pDef;
 	for ( size_t i = 0; i < m_SkillIndexDefs.size(); ++i )
 	{
 		pDef = static_cast<const CSkillDef *>(m_SkillIndexDefs[i]);
 		if ( pDef->m_sName.IsEmpty() ?
-				!strnicmp( pszKey, pDef->GetKey(), iLen )
-			:	!strnicmp( pszKey, pDef->m_sName, iLen ) )
+				!strnicmp( ptcKey, pDef->GetKey(), iLen )
+			:	!strnicmp( ptcKey, pDef->m_sName, iLen ) )
 			return pDef;
 	}
 	return nullptr;
 }
 
 
-bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
     UNREFERENCED_PARAMETER(fNoCallParent);
     UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CServerConfig::r_WriteVal");
 	EXC_TRY("WriteVal");
 	// Just do stats values for now.
-	int index = FindTableHeadSorted( pszKey, reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf(sm_szLoadKeys) - 1, sizeof(sm_szLoadKeys[0]) );
+	int index = FindTableHeadSorted( ptcKey, reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf(sm_szLoadKeys) - 1, sizeof(sm_szLoadKeys[0]) );
 	if ( index < 0 )
 	{
-		if ( !strnicmp( pszKey, "REGEN", 5 ))
+		if ( !strnicmp( ptcKey, "REGEN", 5 ))
 		{
-			index = atoi(pszKey+5);
+			index = atoi(ptcKey+5);
 			if (( index < 0 ) || ( index >= STAT_QTY ))
 				return false;
 			sVal.FormatLLVal(g_Cfg.m_iRegenRate[index] / MSECS_PER_SEC);
 			return true;
 		}
 
-		if ( !strnicmp( pszKey, "LOOKUPSKILL", 11 ) )
+		if ( !strnicmp( ptcKey, "LOOKUPSKILL", 11 ) )
 		{
-			pszKey	+= 12;
-			SKIP_SEPARATORS( pszKey );
-			GETNONWHITESPACE( pszKey );
+			ptcKey	+= 12;
+			SKIP_SEPARATORS( ptcKey );
+			GETNONWHITESPACE( ptcKey );
 
-			const CSkillDef * pSkillDef = SkillLookup( pszKey );
+			const CSkillDef * pSkillDef = SkillLookup( ptcKey );
 			if ( !pSkillDef )
 				sVal.FormatVal( -1 );
 			else
@@ -1458,17 +1458,17 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			return true;
 		}
 
-		if ( !strnicmp(pszKey, "MAP(", 4) )
+		if ( !strnicmp(ptcKey, "MAP(", 4) )
 		{
-			pszKey += 4;
+			ptcKey += 4;
 			sVal.FormatVal(0);
 
 			// Parse the arguments after the round brackets
 			tchar * pszArgsNext;
-			Str_Parse( const_cast<tchar*>(pszKey), &pszArgsNext, ")" );
+			Str_Parse( const_cast<tchar*>(ptcKey), &pszArgsNext, ")" );
 
 			CPointMap pt;
-			if ( IsDigit( pszKey[0] ) || pszKey[0] == '-' )
+			if ( IsDigit( ptcKey[0] ) || ptcKey[0] == '-' )
 			{
 				// Set the default values
 				pt.m_map = 0;
@@ -1476,7 +1476,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 
 				// Parse the arguments inside the round brackets
 				tchar * ppVal[4];
-				int iArgs = Str_ParseCmds( const_cast<tchar*>(pszKey), ppVal, CountOf( ppVal ), "," );
+				int iArgs = Str_ParseCmds( const_cast<tchar*>(ptcKey), ppVal, CountOf( ppVal ), "," );
 
 				switch ( iArgs )
 				{
@@ -1500,14 +1500,14 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 				}
 			}
 
-			pszKey = pszArgsNext;
-			SKIP_SEPARATORS(pszKey);
-			return pt.r_WriteVal(pszKey, sVal);
+			ptcKey = pszArgsNext;
+			SKIP_SEPARATORS(ptcKey);
+			return pt.r_WriteVal(ptcKey, sVal);
 		}
 
-		if ( !strnicmp( pszKey, "MAPLIST.", 8) )
+		if ( !strnicmp( ptcKey, "MAPLIST.", 8) )
 		{
-			lpctstr pszCmd = pszKey + 8;
+			lpctstr pszCmd = ptcKey + 8;
 			int iNumber = Exp_GetVal(pszCmd);
 			SKIP_SEPARATORS(pszCmd);
 			sVal.FormatVal(0);
@@ -1544,24 +1544,24 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			return true;
 		}
 
-		if ( !strnicmp( pszKey, "MAP", 3 ))
+		if ( !strnicmp( ptcKey, "MAP", 3 ))
 		{
-			pszKey = pszKey + 3;
-			int iMapNumber = Exp_GetVal(pszKey);
-			SKIP_SEPARATORS(pszKey);
+			ptcKey = ptcKey + 3;
+			int iMapNumber = Exp_GetVal(ptcKey);
+			SKIP_SEPARATORS(ptcKey);
 			sVal.FormatVal(0);
 
 			if ( g_MapList.IsMapSupported(iMapNumber) )
 			{
-				if ( !strnicmp( pszKey, "SECTOR", 6 ))
+				if ( !strnicmp( ptcKey, "SECTOR", 6 ))
 				{
-					pszKey = pszKey + 6;
-					int iSecNumber = Exp_GetVal(pszKey);
-					SKIP_SEPARATORS(pszKey);
+					ptcKey = ptcKey + 6;
+					int iSecNumber = Exp_GetVal(ptcKey);
+					SKIP_SEPARATORS(ptcKey);
 					int nSectors = g_MapList.GetSectorQty(iMapNumber);
 
 					if ((iSecNumber > 0) && (iSecNumber <=  nSectors))
-						return( g_World.GetSector(iMapNumber, iSecNumber-1)->r_WriteVal(pszKey, sVal, pSrc) );
+						return( g_World.GetSector(iMapNumber, iSecNumber-1)->r_WriteVal(ptcKey, sVal, pSrc) );
 					else
 					{
 						g_Log.EventError("Invalid Sector #%d for Map %d\n", iSecNumber, iMapNumber);
@@ -1573,9 +1573,9 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			return false;
 		}
 
-		if (!strnicmp( pszKey, "FUNCTIONS.", 10))
+		if (!strnicmp( ptcKey, "FUNCTIONS.", 10))
 		{
-			lpctstr pszCmd = pszKey + 10;
+			lpctstr pszCmd = ptcKey + 10;
 
 			if ( !strnicmp( pszCmd, "COUNT", 5 ))
 			{
@@ -1610,10 +1610,10 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			}
 		}
 
-		if ( ( !strnicmp( pszKey, "GUILDSTONES.", 12) ) || ( !strnicmp( pszKey, "TOWNSTONES.", 11) ) )
+		if ( ( !strnicmp( ptcKey, "GUILDSTONES.", 12) ) || ( !strnicmp( ptcKey, "TOWNSTONES.", 11) ) )
 		{
-			bool bGuild = !strnicmp( pszKey, "GUILDSTONES.",12);
-			lpctstr pszCmd = pszKey + 11 + ( (bGuild) ? 1 : 0 );
+			bool bGuild = !strnicmp( ptcKey, "GUILDSTONES.",12);
+			lpctstr pszCmd = ptcKey + 11 + ( (bGuild) ? 1 : 0 );
 			CItemStone * pStone = nullptr;
 			size_t x = 0;
 
@@ -1662,12 +1662,12 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			return true;
 		}
 
-		if ( !strnicmp( pszKey, "CLIENT.",7))
+		if ( !strnicmp( ptcKey, "CLIENT.",7))
 		{
-			pszKey += 7;
-			uint cli_num = (Exp_GetUVal(pszKey));
+			ptcKey += 7;
+			uint cli_num = (Exp_GetUVal(ptcKey));
 			uint i = 0;
-			SKIP_SEPARATORS(pszKey);
+			SKIP_SEPARATORS(ptcKey);
 
 			if (cli_num >= g_Serv.StatGet( SERV_STAT_CLIENTS ))
 				return false;
@@ -1680,42 +1680,42 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 				{
 					CChar * pChar = pClient->GetChar();
 
-					if ( *pszKey == '\0' ) // checking reference
+					if ( *ptcKey == '\0' ) // checking reference
 						sVal.FormatVal( pChar != nullptr ? 1 : 0 );
 					else if ( pChar != nullptr )
-						return pChar->r_WriteVal(pszKey, sVal, pSrc, false); // it calls also CClient::r_WriteVal
+						return pChar->r_WriteVal(ptcKey, sVal, pSrc, false); // it calls also CClient::r_WriteVal
 					else
-						return pClient->r_WriteVal(pszKey, sVal, pSrc, false);
+						return pClient->r_WriteVal(ptcKey, sVal, pSrc, false);
 				}
 				++i;
 			}
 			return true;
 		}
 
-		if ( !strnicmp(pszKey, "TILEDATA.", 9) )
+		if ( !strnicmp(ptcKey, "TILEDATA.", 9) )
 		{
-			pszKey += 9;
+			ptcKey += 9;
 
 			bool fTerrain = false;
-			if (!strnicmp(pszKey, "TERRAIN(", 8))
+			if (!strnicmp(ptcKey, "TERRAIN(", 8))
 			{
-				pszKey += 8;
+				ptcKey += 8;
 				fTerrain = true;
 			}
-			else if (!strnicmp(pszKey, "ITEM(", 5))
+			else if (!strnicmp(ptcKey, "ITEM(", 5))
 			{
-				pszKey += 5;
+				ptcKey += 5;
 			}
 			else
 				return false;
 
 			// Get the position of the arguments after the round brackets
 			tchar * pszArgsNext;
-			if (! Str_Parse(const_cast<tchar*>(pszKey), &pszArgsNext, ")") )
+			if (! Str_Parse(const_cast<tchar*>(ptcKey), &pszArgsNext, ")") )
 				return false;
 			// Get the argument inside the round brackets
 			tchar * pVal;
-			if ( !Str_ParseCmds(const_cast<tchar*>(pszKey), &pVal, 1, ")") )
+			if ( !Str_ParseCmds(const_cast<tchar*>(ptcKey), &pVal, 1, ")") )
 				return false;
 
 			uint id = Exp_GetUVal(pVal);
@@ -1725,18 +1725,18 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 				return false;
 			}
 
-			pszKey = pszArgsNext;
-			if (pszKey[0] != '.')
+			ptcKey = pszArgsNext;
+			if (ptcKey[0] != '.')
 				return false;
-			SKIP_SEPARATORS(pszKey);
+			SKIP_SEPARATORS(ptcKey);
 			if (fTerrain)
 			{
 				enum {ITATTR_FLAGS, ITATTR_UNK, ITATTR_IDX, ITATTR_NAME};
 				int iAttr = 0;
-				if (!strnicmp(pszKey, "FLAGS", 5))			iAttr = ITATTR_FLAGS;
-				else if (!strnicmp(pszKey, "UNK", 7))		iAttr = ITATTR_UNK;
-				else if (!strnicmp(pszKey, "INDEX", 5))		iAttr = ITATTR_IDX;
-				else if (!strnicmp(pszKey, "NAME", 4))		iAttr = ITATTR_NAME;
+				if (!strnicmp(ptcKey, "FLAGS", 5))			iAttr = ITATTR_FLAGS;
+				else if (!strnicmp(ptcKey, "UNK", 7))		iAttr = ITATTR_UNK;
+				else if (!strnicmp(ptcKey, "INDEX", 5))		iAttr = ITATTR_IDX;
+				else if (!strnicmp(ptcKey, "NAME", 4))		iAttr = ITATTR_NAME;
 				else
 				{
 					// Invalid attr
@@ -1756,15 +1756,15 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			{
 				enum {TTATTR_FLAGS, TTATTR_WEIGHT, TTATTR_LAYER, TTATTR_UNK11, TTATTR_ANIM, TTATTR_HUE, TTATTR_LIGHT, TTATTR_HEIGHT, TTATTR_NAME};
 				int iAttr = 0;
-				if (!strnicmp(pszKey, "FLAGS", 5))			iAttr = TTATTR_FLAGS;
-				else if (!strnicmp(pszKey, "WEIGHT", 6))	iAttr = TTATTR_WEIGHT;
-				else if (!strnicmp(pszKey, "LAYER", 5))		iAttr = TTATTR_LAYER;
-				else if (!strnicmp(pszKey, "UNK11", 5))		iAttr = TTATTR_UNK11;
-				else if (!strnicmp(pszKey, "ANIM", 4))		iAttr = TTATTR_ANIM;
-				else if (!strnicmp(pszKey, "HUE", 5))		iAttr = TTATTR_HUE;
-                else if (!strnicmp(pszKey, "LIGHT", 5))		iAttr = TTATTR_LIGHT;
-				else if (!strnicmp(pszKey, "HEIGHT", 6))	iAttr = TTATTR_HEIGHT;
-				else if (!strnicmp(pszKey, "NAME", 4))		iAttr = TTATTR_NAME;
+				if (!strnicmp(ptcKey, "FLAGS", 5))			iAttr = TTATTR_FLAGS;
+				else if (!strnicmp(ptcKey, "WEIGHT", 6))	iAttr = TTATTR_WEIGHT;
+				else if (!strnicmp(ptcKey, "LAYER", 5))		iAttr = TTATTR_LAYER;
+				else if (!strnicmp(ptcKey, "UNK11", 5))		iAttr = TTATTR_UNK11;
+				else if (!strnicmp(ptcKey, "ANIM", 4))		iAttr = TTATTR_ANIM;
+				else if (!strnicmp(ptcKey, "HUE", 5))		iAttr = TTATTR_HUE;
+                else if (!strnicmp(ptcKey, "LIGHT", 5))		iAttr = TTATTR_LIGHT;
+				else if (!strnicmp(ptcKey, "HEIGHT", 6))	iAttr = TTATTR_HEIGHT;
+				else if (!strnicmp(ptcKey, "NAME", 4))		iAttr = TTATTR_NAME;
 				else
 				{
 					// Invalid attr
@@ -1895,20 +1895,20 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			break;
 		case RC_RTICKS:
 			{
-				if ( pszKey[6] != '.' )
+				if ( ptcKey[6] != '.' )
 					sVal.FormatLLVal((llong)(CSTime::GetCurrentTime().GetTime()));
 				else
 				{
-					pszKey += 6;
-					SKIP_SEPARATORS(pszKey);
-					if ( !strnicmp("FROMTIME", pszKey, 8) )
+					ptcKey += 6;
+					SKIP_SEPARATORS(ptcKey);
+					if ( !strnicmp("FROMTIME", ptcKey, 8) )
 					{
-						pszKey += 8;
-						GETNONWHITESPACE(pszKey);
+						ptcKey += 8;
+						GETNONWHITESPACE(ptcKey);
 						int64 piVal[6];
 
 						// year, month, day, hour, minute, second
-						size_t iQty = Str_ParseCmds(const_cast<tchar*>(pszKey), piVal, CountOf(piVal));
+						size_t iQty = Str_ParseCmds(const_cast<tchar*>(ptcKey), piVal, CountOf(piVal));
 						if ( iQty != 6 )
 							return false;
 
@@ -1918,14 +1918,14 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 						else
 							sVal.FormatLLVal((llong)(datetime.GetTime()));
 					}
-					else if ( !strnicmp("FORMAT", pszKey, 6) )
+					else if ( !strnicmp("FORMAT", ptcKey, 6) )
 					{
-						pszKey += 6;
-						GETNONWHITESPACE( pszKey );
+						ptcKey += 6;
+						GETNONWHITESPACE( ptcKey );
 						tchar *ppVal[2];
 
 						// timestamp, formatstr
-						size_t iQty = Str_ParseCmds(const_cast<tchar*>(pszKey), ppVal, CountOf(ppVal));
+						size_t iQty = Str_ParseCmds(const_cast<tchar*>(ptcKey), ppVal, CountOf(ppVal));
 						if ( iQty < 1 )
 							return false;
 
@@ -1939,23 +1939,23 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			break;
 		case RC_RTIME:
 			{
-				if ( pszKey[5] != '.' )
+				if ( ptcKey[5] != '.' )
 					sVal = CSTime::GetCurrentTime().Format(nullptr);
 				else
 				{
-					pszKey += 5;
-					SKIP_SEPARATORS(pszKey);
-					if (!strnicmp("GMTFORMAT",pszKey,9))
+					ptcKey += 5;
+					SKIP_SEPARATORS(ptcKey);
+					if (!strnicmp("GMTFORMAT",ptcKey,9))
 					{
-						pszKey += 9;
-						GETNONWHITESPACE( pszKey );
-						sVal = CSTime::GetCurrentTime().FormatGmt(pszKey);
+						ptcKey += 9;
+						GETNONWHITESPACE( ptcKey );
+						sVal = CSTime::GetCurrentTime().FormatGmt(ptcKey);
 					}
-					if (!strnicmp("FORMAT",pszKey,6))
+					if (!strnicmp("FORMAT",ptcKey,6))
 					{
-						pszKey += 6;
-						GETNONWHITESPACE( pszKey );
-						sVal = CSTime::GetCurrentTime().Format(pszKey);
+						ptcKey += 6;
+						GETNONWHITESPACE( ptcKey );
+						sVal = CSTime::GetCurrentTime().Format(ptcKey);
 					}
 				}
 			} break;
@@ -2044,30 +2044,30 @@ bool CServerConfig::IsConsoleCmd( tchar ch ) const
 	return (ch == '.' || ch == '/' );
 }
 
-SKILL_TYPE CServerConfig::FindSkillKey( lpctstr pszKey ) const
+SKILL_TYPE CServerConfig::FindSkillKey( lpctstr ptcKey ) const
 {
 	ADDTOCALLSTACK("CServerConfig::FindSkillKey");
 	// Find the skill name in the alpha sorted list.
 	// RETURN: SKILL_NONE = error.
 
-	if ( IsDigit( pszKey[0] ) )
+	if ( IsDigit( ptcKey[0] ) )
 	{
-		SKILL_TYPE skill = (SKILL_TYPE)(Exp_GetVal(pszKey));
+		SKILL_TYPE skill = (SKILL_TYPE)(Exp_GetVal(ptcKey));
 		if ( ( !CChar::IsSkillBase(skill) || !g_Cfg.m_SkillIndexDefs.IsValidIndex(skill) ) && !CChar::IsSkillNPC(skill) )
 			return SKILL_NONE;
 		return skill;
 	}
 
-	const CSkillDef * pSkillDef = FindSkillDef( pszKey );
+	const CSkillDef * pSkillDef = FindSkillDef( ptcKey );
 	if ( pSkillDef == nullptr )
 		return SKILL_NONE;
 	return (SKILL_TYPE)(pSkillDef->GetResourceID().GetResIndex());
 }
 
-STAT_TYPE CServerConfig::FindStatKey( lpctstr pszKey ) // static
+STAT_TYPE CServerConfig::FindStatKey( lpctstr ptcKey ) // static
 {
 	ADDTOCALLSTACK("CServerConfig::FindStatKey");
-	return (STAT_TYPE) FindTable( pszKey, g_Stat_Name, CountOf( g_Stat_Name ));
+	return (STAT_TYPE) FindTable( ptcKey, g_Stat_Name, CountOf( g_Stat_Name ));
 }
 
 int CServerConfig::GetSpellEffect( SPELL_TYPE spell, int iSkillVal ) const
@@ -2852,26 +2852,26 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		// just get a block of defs.
 		while ( pScript->ReadKeyParse() )
 		{
-			const lpctstr pszKey = pScript->GetKey();
+			const lpctstr ptcKey = pScript->GetKey();
 			if ( fNewStyleDef )
 			{
 				//	search for this.
 				size_t l;
 				for ( l = 0; l < DEFMSG_QTY; ++l )
 				{
-					if ( !strcmpi(pszKey, g_Exp.sm_szMsgNames[l]) )
+					if ( !strcmpi(ptcKey, g_Exp.sm_szMsgNames[l]) )
 					{
 						strcpy(g_Exp.sm_szMessages[l], pScript->GetArgStr());
 						break;
 					}
 				}
 				if ( l == DEFMSG_QTY )
-					g_Log.Event(LOGM_INIT|LOGL_ERROR, "Setting not used message override named '%s'\n", pszKey);
+					g_Log.Event(LOGM_INIT|LOGL_ERROR, "Setting not used message override named '%s'\n", ptcKey);
 				continue;
 			}
 			else
 			{
-				g_Exp.m_VarDefs.SetStr(pszKey, false, pScript->GetArgStr());
+				g_Exp.m_VarDefs.SetStr(ptcKey, false, pScript->GetArgStr(), false);
 			}
 		}
 		return true;
@@ -4461,16 +4461,16 @@ lpctstr CServerConfig::GetDefaultMsg(int lKeyNum)
 	return g_Exp.sm_szMessages[lKeyNum];
 }
 
-lpctstr CServerConfig::GetDefaultMsg(lpctstr pszKey)
+lpctstr CServerConfig::GetDefaultMsg(lpctstr ptcKey)
 {
 	ADDTOCALLSTACK("CServerConfig::GetDefaultMsg");
 	for (int i = 0; i < DEFMSG_QTY; ++i )
 	{
-		if ( !strcmpi(pszKey, g_Exp.sm_szMsgNames[i]) )
+		if ( !strcmpi(ptcKey, g_Exp.sm_szMsgNames[i]) )
 			return g_Exp.sm_szMessages[i];
 
 	}
-	g_Log.EventError("Defmessage \"%s\" non existent\n", pszKey);
+	g_Log.EventError("Defmessage \"%s\" non existent\n", ptcKey);
 	return "";
 }
 
