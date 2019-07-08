@@ -102,12 +102,12 @@ lpctstr constexpr CGMPage::sm_szLoadKeys[GC_QTY+1] =
 	nullptr
 };
 
-bool CGMPage::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CGMPage::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
     UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CGMPage::r_WriteVal");
 	EXC_TRY("WriteVal");
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 ))
+	switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 ))
 	{
 	case GC_ACCOUNT:
 		sVal = GetName();
@@ -125,7 +125,7 @@ bool CGMPage::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, b
 		sVal.FormatLLHex( GetAge() );
 		break;
 	default:
-		return (fNoCallParent ? false : CScriptObj::r_WriteVal( pszKey, sVal, pSrc, false ));
+		return (fNoCallParent ? false : CScriptObj::r_WriteVal( ptcKey, sVal, pSrc, false ));
 	}
 	return true;
 	EXC_CATCH;

@@ -203,17 +203,17 @@ lpctstr constexpr CItemStone::sm_szVerbKeys[ISV_QTY+1] =
 	nullptr
 };
 
-bool CItemStone::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CItemStone::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CItemStone::r_GetRef");
-	if ( !strnicmp("member.", pszKey, 7) )
+	if ( !strnicmp("member.", ptcKey, 7) )
 	{
-		pszKey = pszKey + 7;
-		if ( !pszKey[0] )
+		ptcKey = ptcKey + 7;
+		if ( !ptcKey[0] )
 			return false;
 
-		int nNumber = Exp_GetVal(pszKey);
-		SKIP_SEPARATORS(pszKey);
+		int nNumber = Exp_GetVal(ptcKey);
+		SKIP_SEPARATORS(ptcKey);
 
 		CStoneMember * pMember = static_cast <CStoneMember *>(GetHead());
 
@@ -231,14 +231,14 @@ bool CItemStone::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 			++i;
 		}
 	}
-	else if ( !strnicmp("memberfromuid.", pszKey, 14) )
+	else if ( !strnicmp("memberfromuid.", ptcKey, 14) )
 	{
-		pszKey = pszKey + 14;
-		if ( !pszKey[0] )
+		ptcKey = ptcKey + 14;
+		if ( !ptcKey[0] )
 			return false;
 
-		CUID pMemberUid = Exp_GetDWVal(pszKey);
-		SKIP_SEPARATORS(pszKey);
+		CUID pMemberUid = Exp_GetDWVal(ptcKey);
+		SKIP_SEPARATORS(ptcKey);
 
 		CChar * pMemberChar = pMemberUid.CharFind();
 		if ( pMemberChar )
@@ -251,14 +251,14 @@ bool CItemStone::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 			}
 		}
 	}
-	else if ( !strnicmp("guild.", pszKey, 6) )
+	else if ( !strnicmp("guild.", ptcKey, 6) )
 	{
-		pszKey = pszKey + 6;
-		if ( !pszKey[0] )
+		ptcKey = ptcKey + 6;
+		if ( !ptcKey[0] )
 			return false;
 
-		int nNumber = Exp_GetVal(pszKey);
-		SKIP_SEPARATORS(pszKey);
+		int nNumber = Exp_GetVal(ptcKey);
+		SKIP_SEPARATORS(ptcKey);
 
 		CStoneMember * pMember = static_cast <CStoneMember *>(GetHead());
 
@@ -276,14 +276,14 @@ bool CItemStone::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 			i++;
 		}
 	}
-	else if ( !strnicmp("guildfromuid.", pszKey, 13) )
+	else if ( !strnicmp("guildfromuid.", ptcKey, 13) )
 	{
-		pszKey = pszKey + 13;
-		if ( !pszKey[0] )
+		ptcKey = ptcKey + 13;
+		if ( !ptcKey[0] )
 			return false;
 
-		CUID pGuildUid = Exp_GetDWVal(pszKey);
-		SKIP_SEPARATORS(pszKey);
+		CUID pGuildUid = Exp_GetDWVal(ptcKey);
+		SKIP_SEPARATORS(ptcKey);
 
 		CItem * pMemberGuild = pGuildUid.ItemFind();
 		if ( pMemberGuild )
@@ -296,14 +296,14 @@ bool CItemStone::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 			}
 		}
 	}
-    else if (!strnicmp("house.", pszKey, 6))
+    else if (!strnicmp("house.", ptcKey, 6))
     {
-        pszKey = pszKey + 6;
-        if (!pszKey[0])
+        ptcKey = ptcKey + 6;
+        if (!ptcKey[0])
             return false;
 
-        int16 nNumber = (int16)Exp_GetVal(pszKey);
-        SKIP_SEPARATORS(pszKey);
+        int16 nNumber = (int16)Exp_GetVal(ptcKey);
+        SKIP_SEPARATORS(ptcKey);
 
         if (nNumber < GetMultiStorage()->GetHouseCountReal())
         {
@@ -311,14 +311,14 @@ bool CItemStone::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
             return true;
         }
     }
-    else if (!strnicmp("ship.", pszKey, 5))
+    else if (!strnicmp("ship.", ptcKey, 5))
     {
-        pszKey = pszKey + 5;
-        if (!pszKey[0])
+        ptcKey = ptcKey + 5;
+        if (!ptcKey[0])
             return false;
 
-        int16 nNumber = (int16)Exp_GetVal(pszKey);
-        SKIP_SEPARATORS(pszKey);
+        int16 nNumber = (int16)Exp_GetVal(ptcKey);
+        SKIP_SEPARATORS(ptcKey);
 
         if (nNumber < GetMultiStorage()->GetShipCountReal())
         {
@@ -327,7 +327,7 @@ bool CItemStone::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
         }
     }
 
-	return CItem::r_GetRef( pszKey, pRef );
+	return CItem::r_GetRef( ptcKey, pRef );
 }
 
 bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
@@ -435,16 +435,16 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 	return false;
 }
 
-bool CItemStone::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
     UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CItemStone::r_WriteVal");
 	EXC_TRY("WriteVal");
 	CChar * pCharSrc = pSrc->GetChar();
 
-	if ( !strnicmp("member.",pszKey,7) )
+	if ( !strnicmp("member.",ptcKey,7) )
 	{
-		lpctstr pszCmd = pszKey + 7;
+		lpctstr pszCmd = ptcKey + 7;
 
 		if ( !strnicmp("COUNT",pszCmd,5) )
 		{
@@ -507,9 +507,9 @@ bool CItemStone::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSr
 
 		return true;
 	}
-	else if ( !strnicmp("memberfromuid.", pszKey, 14) )
+	else if ( !strnicmp("memberfromuid.", ptcKey, 14) )
 	{
-		lpctstr pszCmd = pszKey + 14;
+		lpctstr pszCmd = ptcKey + 14;
 		sVal.FormatVal(0);
 
 		if ( !pszCmd[0] )
@@ -528,9 +528,9 @@ bool CItemStone::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSr
 
 		return true;
 	}
-	else if ( !strnicmp("guild.",pszKey,6) )
+	else if ( !strnicmp("guild.",ptcKey,6) )
 	{
-		lpctstr pszCmd = pszKey + 6;
+		lpctstr pszCmd = ptcKey + 6;
 
 		if ( !strnicmp("COUNT",pszCmd,5) )
 		{
@@ -595,9 +595,9 @@ bool CItemStone::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSr
 
 		return true;
 	}
-	else if ( !strnicmp("guildfromuid.", pszKey, 13) )
+	else if ( !strnicmp("guildfromuid.", ptcKey, 13) )
 	{
-		lpctstr pszCmd = pszKey + 13;
+		lpctstr pszCmd = ptcKey + 13;
 		sVal.FormatVal(0);
 
 		if ( !pszCmd[0] )
@@ -618,9 +618,9 @@ bool CItemStone::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSr
 
 		return true;
 	}
-	else if ( !strnicmp(sm_szLoadKeys[STC_CHARTER], pszKey, 7) )
+	else if ( !strnicmp(sm_szLoadKeys[STC_CHARTER], ptcKey, 7) )
 	{
-		lpctstr pszCmd = pszKey + 7;
+		lpctstr pszCmd = ptcKey + 7;
 		uint i = atoi(pszCmd);
 		if ( i >= CountOf(m_sCharter))
 			sVal = "";
@@ -631,7 +631,7 @@ bool CItemStone::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSr
 	}
 
 
-	STC_TYPE iIndex = (STC_TYPE) FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+	STC_TYPE iIndex = (STC_TYPE) FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 
 	switch ( iIndex )
 	{
@@ -742,7 +742,7 @@ bool CItemStone::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSr
 			return true;
 			
 		default:
-			return (fNoCallParent ? false : CItem::r_WriteVal( pszKey, sVal, pSrc ));
+			return (fNoCallParent ? false : CItem::r_WriteVal( ptcKey, sVal, pSrc ));
 	}
 
 	EXC_CATCH;

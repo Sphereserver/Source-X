@@ -1435,17 +1435,17 @@ lpctstr constexpr CItemMultiCustom::sm_szVerbKeys[IMCV_QTY + 1] =
     nullptr
 };
 
-bool CItemMultiCustom::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
+bool CItemMultiCustom::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
 {
     ADDTOCALLSTACK("CItemMultiCustom::r_GetRef");
-    if (!strnicmp("DESIGNER.", pszKey, 9))
+    if (!strnicmp("DESIGNER.", ptcKey, 9))
     {
-        pszKey += 9;
+        ptcKey += 9;
         pRef = (m_pArchitect ? m_pArchitect->GetChar() : nullptr);
         return true;
     }
 
-    return CItemMulti::r_GetRef(pszKey, pRef);
+    return CItemMulti::r_GetRef(ptcKey, pRef);
 }
 
 bool CItemMultiCustom::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from script
@@ -1646,48 +1646,48 @@ lpctstr constexpr CItemMultiCustom::sm_szLoadKeys[IMCC_QTY + 1] = // static
     nullptr
 };
 
-bool CItemMultiCustom::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren)
+bool CItemMultiCustom::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
     UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CItemMultiCustom::r_WriteVal");
     EXC_TRY("WriteVal");
 
-    int index = FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int index = FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     if (index == -1)
     {
-        if (!strnicmp(pszKey, "DESIGN.", 5))
+        if (!strnicmp(ptcKey, "DESIGN.", 5))
             index = IMCC_DESIGN;
     }
 
     switch (index)
     {
         case IMCC_COMPONENTS:
-            pszKey += 10;
+            ptcKey += 10;
             sVal.FormatSTVal(m_designMain.m_vectorComponents.size());
             break;
 
         case IMCC_DESIGN:
         {
-            pszKey += 6;
-            if (!*pszKey)
+            ptcKey += 6;
+            if (!*ptcKey)
                 sVal.FormatSTVal(m_designMain.m_vectorComponents.size());
-            else if (*pszKey == '.')
+            else if (*ptcKey == '.')
             {
-                SKIP_SEPARATORS(pszKey);
-                size_t iQty = Exp_GetSTVal(pszKey);
+                SKIP_SEPARATORS(ptcKey);
+                size_t iQty = Exp_GetSTVal(ptcKey);
                 if (iQty >= m_designMain.m_vectorComponents.size())
                     return false;
 
-                SKIP_SEPARATORS(pszKey);
+                SKIP_SEPARATORS(ptcKey);
                 CUOMultiItemRec_HS item = m_designMain.m_vectorComponents.at(iQty)->m_item;
 
-                if (!strnicmp(pszKey, "ID", 2))		sVal.FormatVal(item.GetDispID());
-                else if (!strnicmp(pszKey, "DX", 2))	sVal.FormatVal(item.m_dx);
-                else if (!strnicmp(pszKey, "DY", 2))	sVal.FormatVal(item.m_dy);
-                else if (!strnicmp(pszKey, "DZ", 2))	sVal.FormatVal(item.m_dz);
-                else if (!strnicmp(pszKey, "D", 1))	sVal.Format("%i,%i,%i", item.m_dx, item.m_dy, item.m_dz);
-                else if (!strnicmp(pszKey, "FIXTURE", 7))		sVal.FormatVal(item.m_visible ? 0 : 1);
-                else if (!*pszKey)				sVal.Format("%u,%i,%i,%i", item.GetDispID(), item.m_dx, item.m_dy, item.m_dz);
+                if (!strnicmp(ptcKey, "ID", 2))		sVal.FormatVal(item.GetDispID());
+                else if (!strnicmp(ptcKey, "DX", 2))	sVal.FormatVal(item.m_dx);
+                else if (!strnicmp(ptcKey, "DY", 2))	sVal.FormatVal(item.m_dy);
+                else if (!strnicmp(ptcKey, "DZ", 2))	sVal.FormatVal(item.m_dz);
+                else if (!strnicmp(ptcKey, "D", 1))	sVal.Format("%i,%i,%i", item.m_dx, item.m_dy, item.m_dz);
+                else if (!strnicmp(ptcKey, "FIXTURE", 7))		sVal.FormatVal(item.m_visible ? 0 : 1);
+                else if (!*ptcKey)				sVal.Format("%u,%i,%i,%i", item.GetDispID(), item.m_dx, item.m_dy, item.m_dz);
                 else								return false;
             }
             else
@@ -1697,7 +1697,7 @@ bool CItemMultiCustom::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole 
 
         case IMCC_DESIGNER:
         {
-            pszKey += 8;
+            ptcKey += 8;
             CChar * pDesigner = m_pArchitect ? m_pArchitect->GetChar() : nullptr;
             if (pDesigner != nullptr)
                 sVal.FormatHex(pDesigner->GetUID());
@@ -1708,23 +1708,23 @@ bool CItemMultiCustom::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole 
 
         case IMCC_EDITAREA:
         {
-            pszKey += 8;
+            ptcKey += 8;
             CRect rectDesign = GetDesignArea();
             sVal.Format("%d,%d,%d,%d", rectDesign.m_left, rectDesign.m_top, rectDesign.m_right, rectDesign.m_bottom);
         } break;
 
         case IMCC_FIXTURES:
-            pszKey += 8;
+            ptcKey += 8;
             sVal.FormatSTVal(GetFixtureCount());
             break;
 
         case IMCC_REVISION:
-            pszKey += 8;
+            ptcKey += 8;
             sVal.FormatVal(m_designMain.m_iRevision);
             break;
 
         default:
-            return (fNoCallParent ? false : CItemMulti::r_WriteVal(pszKey, sVal, pSrc));
+            return (fNoCallParent ? false : CItemMulti::r_WriteVal(ptcKey, sVal, pSrc));
     }
 
     return true;

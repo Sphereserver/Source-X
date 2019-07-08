@@ -347,10 +347,10 @@ lpctstr constexpr CDataBase::sm_szVerbKeys[DBOV_QTY+1] =
 	nullptr
 };
 
-bool CDataBase::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
+bool CDataBase::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
 {
 	ADDTOCALLSTACK("CDataBase::r_GetRef");
-	UNREFERENCED_PARAMETER(pszKey);
+	UNREFERENCED_PARAMETER(ptcKey);
 	UNREFERENCED_PARAMETER(pRef);
 	return false;
 }
@@ -361,10 +361,10 @@ bool CDataBase::r_LoadVal(CScript & s)
 	UNREFERENCED_PARAMETER(s);
 	return false;
 /*
-	lpctstr pszKey = s.GetKey();
+	lpctstr ptcKey = s.GetKey();
 	EXC_TRY("LoadVal");
 
-	int index = FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
+	int index = FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
 
 	switch ( index )
 	{
@@ -382,7 +382,7 @@ bool CDataBase::r_LoadVal(CScript & s)
 */
 }
 
-bool CDataBase::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
+bool CDataBase::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
     UNREFERENCED_PARAMETER(fNoCallParent);
     UNREFERENCED_PARAMETER(fNoCallChildren);
@@ -396,20 +396,20 @@ bool CDataBase::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, b
 		return true;
 	}
 
-	int index = FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
+	int index = FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
 	switch ( index )
 	{
 		case DBO_AEXECUTE:
 		case DBO_AQUERY:
 			{
-				pszKey += strlen(sm_szLoadKeys[index]);
-				GETNONWHITESPACE(pszKey);
+				ptcKey += strlen(sm_szLoadKeys[index]);
+				GETNONWHITESPACE(ptcKey);
 				sVal.FormatVal(0);
 
-				if ( pszKey[0] != '\0' )
+				if ( ptcKey[0] != '\0' )
 				{
 					tchar * ppArgs[2];
-					if ( Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf( ppArgs )) != 2)
+					if ( Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, CountOf( ppArgs )) != 2)
 					{
 						DEBUG_ERR(("Not enough arguments for %s\n", CDataBase::sm_szLoadKeys[index]));
 					}
@@ -430,16 +430,16 @@ bool CDataBase::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, b
 
 		case DBO_ESCAPEDATA:
 		{
-			pszKey += strlen(sm_szLoadKeys[index]);
-			GETNONWHITESPACE(pszKey);
+			ptcKey += strlen(sm_szLoadKeys[index]);
+			GETNONWHITESPACE(ptcKey);
 			sVal = "";
 
-			if ( pszKey[0] != '\0' )
+			if ( ptcKey[0] != '\0' )
 			{
 				tchar * escapedString = Str_GetTemp();
 
 				SimpleThreadLock lock(m_connectionMutex);
-				if ( isConnected() && mysql_real_escape_string(_myData, escapedString, pszKey, (uint)(strlen(pszKey))) )
+				if ( isConnected() && mysql_real_escape_string(_myData, escapedString, ptcKey, (uint)(strlen(ptcKey))) )
 				{
 					sVal = escapedString;
 				}
@@ -448,9 +448,9 @@ bool CDataBase::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, b
 
 		case DBO_ROW:
 		{
-			pszKey += strlen(sm_szLoadKeys[index]);
-			SKIP_SEPARATORS(pszKey);
-			sVal = m_QueryResult.GetKeyStr(pszKey);
+			ptcKey += strlen(sm_szLoadKeys[index]);
+			SKIP_SEPARATORS(ptcKey);
+			sVal = m_QueryResult.GetKeyStr(ptcKey);
 		} break;
 
 		default:
@@ -461,7 +461,7 @@ bool CDataBase::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, b
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("command '%s' [%p]\n", pszKey, static_cast<void *>(pSrc));
+	g_Log.EventDebug("command '%s' [%p]\n", ptcKey, static_cast<void *>(pSrc));
 	EXC_DEBUG_END;
 	return false;
 }

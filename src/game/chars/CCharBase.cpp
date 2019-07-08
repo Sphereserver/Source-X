@@ -163,33 +163,33 @@ lpctstr constexpr CCharBase::sm_szLoadKeys[CBC_QTY+1] =
 	nullptr
 };
 
-bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CCharBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
 	ADDTOCALLSTACK("CCharBase::r_WriteVal");
     EXC_TRY("WriteVal");
 
     // Checking Props CComponents first
     EXC_SET_BLOCK("EntityProps");
-    if (!fNoCallChildren && CEntityProps::r_WritePropVal(pszKey, sVal, nullptr, this))
+    if (!fNoCallChildren && CEntityProps::r_WritePropVal(ptcKey, sVal, nullptr, this))
     {
         return true;
     }
 
     EXC_SET_BLOCK("Keyword");
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		//return as string or hex number or nullptr if not set
 		case CBC_THROWDAM:
 		case CBC_THROWOBJ:
 		case CBC_THROWRANGE:
-			sVal = GetDefStr(pszKey, false);
+			sVal = GetDefStr(ptcKey, false);
 			break;
 		//return as decimal number or 0 if not set
 		case CBC_FOLLOWERSLOTS:
 		case CBC_MAXFOLLOWER:
 		case CBC_BONDED:
 		case CBC_TITHING:
-			sVal.FormatLLVal(GetDefNum(pszKey));
+			sVal.FormatLLVal(GetDefNum(ptcKey));
 			break;
 		case CBC_ANIM:
 			sVal.FormatHex( m_Anims );
@@ -304,7 +304,7 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			break;
 		default:
         {
-            return (fNoCallParent ? false : CBaseBaseDef::r_WriteVal(pszKey, sVal, pSrc, false));
+            return (fNoCallParent ? false : CBaseBaseDef::r_WriteVal(ptcKey, sVal, pSrc, false));
         }
 	}
 	return true;

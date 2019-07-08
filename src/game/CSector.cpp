@@ -80,7 +80,7 @@ lpctstr constexpr CSector::sm_szLoadKeys[SC_QTY+1] =
 	nullptr
 };
 
-bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CSector::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
     UNREFERENCED_PARAMETER(fNoCallParent);
     UNREFERENCED_PARAMETER(fNoCallChildren);
@@ -95,13 +95,13 @@ bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, 
 		{ nullptr, INT32_MAX }
 	};
 
-    SC_TYPE key = (SC_TYPE)FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    SC_TYPE key = (SC_TYPE)FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
 	switch ( key )
 	{
         case SC_CANSLEEP:
             {
-                pszKey += 8;
-                const bool fCheckAdjacents = Exp_GetVal(pszKey);
+                ptcKey += 8;
+                const bool fCheckAdjacents = Exp_GetVal(ptcKey);
                 sVal.FormatBVal(CanSleep(fCheckAdjacents));
                 return true;
             }
@@ -112,10 +112,10 @@ bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, 
 			sVal.FormatVal( GetColdChance());
 			return true;
 		case SC_COMPLEXITY:
-			if ( pszKey[10] == '.' )
+			if ( ptcKey[10] == '.' )
 			{
-				pszKey += 11;
-				sVal = !strcmpi( pszKey, sm_ComplexityTitles->FindName((int)GetCharComplexity()) ) ? "1" : "0";
+				ptcKey += 11;
+				sVal = !strcmpi( ptcKey, sm_ComplexityTitles->FindName((int)GetCharComplexity()) ) ? "1" : "0";
 				return true;
 			}
 			sVal.FormatSTVal( GetCharComplexity() );

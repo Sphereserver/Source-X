@@ -570,8 +570,8 @@ private:
 
 public:
 	virtual bool r_LoadVal( CScript &s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
+	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 
     /**
      * @fn  bool CServerConfig::LoadIni( bool fTest );
@@ -677,15 +677,15 @@ public:
 	PLEVEL_TYPE GetPrivCommandLevel( lpctstr pszCmd ) const;
 
     /**
-     * @fn  static STAT_TYPE CServerConfig::FindStatKey( lpctstr pszKey );
+     * @fn  static STAT_TYPE CServerConfig::FindStatKey( lpctstr ptcKey );
      *
      * @brief   Returns the Stat key from the given string( STR = STAT_STR... ).
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      *
      * @return  The found stat key.
      */
-	static STAT_TYPE FindStatKey( lpctstr pszKey );
+	static STAT_TYPE FindStatKey( lpctstr ptcKey );
 
     /**
      * @fn  static bool CServerConfig::IsValidEmailAddressFormat( lpctstr pszText );
@@ -803,37 +803,37 @@ public:
 	CSkillDef* GetSkillDef( SKILL_TYPE index );
 
     /**
-     * @fn  const CSkillDef* CServerConfig::FindSkillDef( lpctstr pszKey ) const
+     * @fn  const CSkillDef* CServerConfig::FindSkillDef( lpctstr ptcKey ) const
      *
      * @brief   Find the skill name in the alpha sorted list.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      *
      * @return  null if it fails, else the found skill definition.
      */
-	const CSkillDef* FindSkillDef( lpctstr pszKey ) const;
+	const CSkillDef* FindSkillDef( lpctstr ptcKey ) const;
 
     /**
-     * @fn  const CSkillDef* CServerConfig::SkillLookup( lpctstr pszKey );
+     * @fn  const CSkillDef* CServerConfig::SkillLookup( lpctstr ptcKey );
      *
-     * @brief   Search for the skill which NAME=pszKey.
+     * @brief   Search for the skill which NAME=ptcKey.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      *
      * @return  null if it fails, else a pointer to a const CSkillDef.
      */
-	const CSkillDef* SkillLookup( lpctstr pszKey );
+	const CSkillDef* SkillLookup( lpctstr ptcKey );
 
     /**
-     * @fn  SKILL_TYPE CServerConfig::FindSkillKey( lpctstr pszKey ) const;
+     * @fn  SKILL_TYPE CServerConfig::FindSkillKey( lpctstr ptcKey ) const;
      *
-     * @brief   Search for the skill which KEY=pszKey.
+     * @brief   Search for the skill which KEY=ptcKey.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      *
      * @return  The found skill key.
      */
-	SKILL_TYPE FindSkillKey( lpctstr pszKey ) const;
+	SKILL_TYPE FindSkillKey( lpctstr ptcKey ) const;
 
     /**
      * @fn  int CServerConfig::GetSpellEffect( SPELL_TYPE spell, int iSkillval ) const;
@@ -1002,22 +1002,22 @@ public:
 #define SysMessageDefault( msg )	SysMessage( g_Cfg.GetDefaultMsg( msg ) )
 
     /**
-     * @fn  lpctstr CServerConfig::GetDefaultMsg(lpctstr pszKey);
+     * @fn  lpctstr CServerConfig::GetDefaultMsg(lpctstr ptcKey);
      *
      * @brief   Gets default message (sphere_msgs.scp).
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      *
      * @return  The default message.
      */
-	lpctstr GetDefaultMsg(lpctstr pszKey);
+	lpctstr GetDefaultMsg(lpctstr ptcKey);
 
     /**
-    * @fn  lpctstr CServerConfig::GetDefaultMsg(lpctstr pszKey);
+    * @fn  lpctstr CServerConfig::GetDefaultMsg(lpctstr ptcKey);
     *
     * @brief   Gets default message (sphere_msgs.scp).
     *
-    * @param   pszKey  The key.
+    * @param   ptcKey  The key.
     *
     * @return  The default message.
     */

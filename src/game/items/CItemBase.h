@@ -510,7 +510,7 @@ public:
 	ITEMID_TYPE GetNextFlipID( ITEMID_TYPE id ) const;
 
 	virtual bool r_LoadVal( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 
 	bool IsMovableType() const
 	{
@@ -669,7 +669,7 @@ public:
 	bool AddComponent( tchar * pArgs );
 	void SetMultiRegion( tchar * pArgs );
 	virtual bool r_LoadVal( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pChar = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pChar = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 
 	static CItemBase * MakeMultiRegion( CItemBase * pBase, CScript & s );
 };

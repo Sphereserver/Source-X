@@ -96,14 +96,14 @@ public:
     /**
      * @brief Try to retrieve the property in one of the Prop Components subscribed to this Entity.
     *
-    * @param pszKey the property's key to search for (eg: name, ResCold, etc).
+    * @param ptcKey the property's key to search for (eg: name, ResCold, etc).
     * @param sVal the storage that will contain property's value.
     * @param pObjEntityProps The CObjBase holding the dynamic properties. nullptr if this method is called from a CBaseBaseDef.
     * @param pBaseEntityProps The CBaseBaseDef holding the base properties.
     *
     * @return true if there was a key to retrieve.
     */
-    static bool r_WritePropVal(lpctstr pszKey, CSString & sVal, const CObjBase *pObjEntityProps, const CBaseBaseDef *pBaseEntityProps);
+    static bool r_WritePropVal(lpctstr ptcKey, CSString & sVal, const CObjBase *pObjEntityProps, const CBaseBaseDef *pBaseEntityProps);
 
     /**
     * @brief Try to store the property in one of the Prop Components subscribed to this Entity.

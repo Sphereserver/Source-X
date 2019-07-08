@@ -46,9 +46,9 @@ public:
 	bool isConnected();
 	bool OnTick();
 
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 	virtual bool r_LoadVal( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
 
 	lpctstr GetName() const

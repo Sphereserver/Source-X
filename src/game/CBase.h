@@ -59,55 +59,55 @@ public:
 
     /**
      * @brief   Gets definition string.
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      * @param   fZero   true to zero.
      * @return  The definition string.
      */
-	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const
+	lpctstr GetDefStr( lpctstr ptcKey, bool fZero = false ) const
 	{
-		return m_BaseDefs.GetKeyStr( pszKey, fZero );
+		return m_BaseDefs.GetKeyStr( ptcKey, fZero );
 	}
 
     /**
      * @brief   Gets definition number.
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      * @return  The definition number.
      */
-	int64 GetDefNum( lpctstr pszKey ) const
+	int64 GetDefNum( lpctstr ptcKey ) const
 	{
-		return m_BaseDefs.GetKeyNum( pszKey );
+		return m_BaseDefs.GetKeyNum( ptcKey );
 	}
 
     /**
      * @brief   Sets definition number.
-     * @param   pszKey      The key.
+     * @param   ptcKey      The key.
      * @param   iVal        Zero-based index of the value.
      * @param   fDeleteZero true to zero.
      */
-	void SetDefNum(lpctstr pszKey, int64 iVal, bool fDeleteZero = true, bool fWarnOverwrite = true)
+	void SetDefNum(lpctstr ptcKey, int64 iVal, bool fDeleteZero = true, bool fWarnOverwrite = true)
 	{
-		m_BaseDefs.SetNum(pszKey, iVal, fDeleteZero, fWarnOverwrite);
+		m_BaseDefs.SetNum(ptcKey, iVal, fDeleteZero, fWarnOverwrite);
 	}
 
     /**
      * @brief   Sets definition string.
-     * @param   pszKey      The key.
+     * @param   ptcKey      The key.
      * @param   pszVal      The value.
      * @param   fQuoted     true if quoted.
      * @param   fDeleteZero true to zero.
      */
-	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fDeleteZero = true, bool fWarnOverwrite = true)
+	void SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted = false, bool fDeleteZero = true, bool fWarnOverwrite = true)
 	{
-		m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fDeleteZero, fWarnOverwrite);
+		m_BaseDefs.SetStr(ptcKey, fQuoted, pszVal, fDeleteZero, fWarnOverwrite);
 	}
 
     /**
-     * @brief   Deletes the definition described by pszKey.
-     * @param   pszKey  The key.
+     * @brief   Deletes the definition described by ptcKey.
+     * @param   ptcKey  The key.
      */
-	void DeleteDef(lpctstr pszKey)
+	void DeleteDef(lpctstr ptcKey)
 	{
-		m_BaseDefs.DeleteKey(pszKey);
+		m_BaseDefs.DeleteKey(ptcKey);
 	}
 
 // Map Movement flags.
@@ -226,7 +226,7 @@ public:
 	virtual void UnLink() override;
 
     //virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_LoadVal( CScript & s ) override;
 
     /**

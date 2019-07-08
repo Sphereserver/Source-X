@@ -1997,26 +1997,26 @@ lpctstr CDialogResponseArgs::GetName() const
 	return "ARGD";
 }
 
-bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CDialogResponseArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
     UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CDialogResponseArgs::r_WriteVal");
 	EXC_TRY("WriteVal");
-	if ( ! strnicmp( pszKey, "ARGCHK", 6 ))
+	if ( ! strnicmp( ptcKey, "ARGCHK", 6 ))
 	{
 		// CSTypedArray <dword,dword> m_CheckArray;
-		pszKey += 6;
-		SKIP_SEPARATORS(pszKey);
+		ptcKey += 6;
+		SKIP_SEPARATORS(ptcKey);
 
 		size_t iQty = m_CheckArray.size();
-		if ( pszKey[0] == '\0' )
+		if ( ptcKey[0] == '\0' )
 		{
 			sVal.FormatSTVal(iQty);
 			return true;
 		}
-		else if ( ! strnicmp( pszKey, "ID", 2) )
+		else if ( ! strnicmp( ptcKey, "ID", 2) )
 		{
-			pszKey += 2;
+			ptcKey += 2;
 
 			if ( iQty > 0 && m_CheckArray[0] )
 				sVal.FormatVal( m_CheckArray[0] );
@@ -2026,8 +2026,8 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConso
 			return true;
 		}
 
-		dword dwNum = Exp_GetDWSingle( pszKey );
-		SKIP_SEPARATORS(pszKey);
+		dword dwNum = Exp_GetDWSingle( ptcKey );
+		SKIP_SEPARATORS(ptcKey);
 		for ( uint i = 0; i < iQty; ++i )
 		{
 			if ( dwNum == m_CheckArray[i] )
@@ -2039,20 +2039,20 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConso
 		sVal = "0";
 		return true;
 	}
-	if ( ! strnicmp( pszKey, "ARGTXT", 6 ))
+	if ( ! strnicmp( ptcKey, "ARGTXT", 6 ))
 	{
-		pszKey += 6;
-		SKIP_SEPARATORS(pszKey);
+		ptcKey += 6;
+		SKIP_SEPARATORS(ptcKey);
 
 		size_t iQty = m_TextArray.size();
-		if ( pszKey[0] == '\0' )
+		if ( ptcKey[0] == '\0' )
 		{
 			sVal.FormatSTVal(iQty);
 			return true;
 		}
 
-		dword dwNum = Exp_GetDWSingle( pszKey );
-		SKIP_SEPARATORS(pszKey);
+		dword dwNum = Exp_GetDWSingle( ptcKey );
+		SKIP_SEPARATORS(ptcKey);
 
 		for ( uint i = 0; i < iQty; ++i )
 		{
@@ -2065,7 +2065,7 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConso
 		sVal.Empty();
 		return false;
 	}
-	return (fNoCallParent ? false : CScriptTriggerArgs::r_WriteVal( pszKey, sVal, pSrc, false ));
+	return (fNoCallParent ? false : CScriptTriggerArgs::r_WriteVal( ptcKey, sVal, pSrc, false ));
 	EXC_CATCH;
 
 	EXC_DEBUG_START;

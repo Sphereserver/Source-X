@@ -44,12 +44,12 @@ lpctstr constexpr CItemVendable::sm_szLoadKeys[IVC_QTY+1] =
 	nullptr
 };
 
-bool CItemVendable::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
+bool CItemVendable::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
     UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CItemVendable::r_WriteVal");
 	EXC_TRY("WriteVal");
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 	case IVC_PRICE:	// PRICE
 		sVal.FormatVal( m_price );
@@ -58,7 +58,7 @@ bool CItemVendable::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSr
 		sVal.FormatVal( GetQuality());
 		return true;
 	default:
-		return (fNoCallParent ? false : CItem::r_WriteVal( pszKey, sVal, pSrc ));
+		return (fNoCallParent ? false : CItem::r_WriteVal( ptcKey, sVal, pSrc ));
 	}
 	EXC_CATCH;
 

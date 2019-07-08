@@ -86,29 +86,29 @@ public:
 	TRIGRET_TYPE OnRegionTrigger( CTextConsole * pChar, RTRIG_TYPE trig );
 
 public:
-	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const
+	lpctstr GetDefStr( lpctstr ptcKey, bool fZero = false ) const
 	{
-		return m_BaseDefs.GetKeyStr( pszKey, fZero );
+		return m_BaseDefs.GetKeyStr( ptcKey, fZero );
 	}
 
-	int64 GetDefNum( lpctstr pszKey ) const
+	int64 GetDefNum( lpctstr ptcKey ) const
 	{
-		return m_BaseDefs.GetKeyNum( pszKey );
+		return m_BaseDefs.GetKeyNum( ptcKey );
 	}
 
-	void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true)
+	void SetDefNum(lpctstr ptcKey, int64 iVal, bool fZero = true)
 	{
-		m_BaseDefs.SetNum(pszKey, iVal, fZero);
+		m_BaseDefs.SetNum(ptcKey, iVal, fZero);
 	}
 
-	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true)
+	void SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true)
 	{
-		m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero);
+		m_BaseDefs.SetStr(ptcKey, fQuoted, pszVal, fZero);
 	}
 
-	void DeleteDef(lpctstr pszKey)
+	void DeleteDef(lpctstr ptcKey)
 	{
-		m_BaseDefs.DeleteKey(pszKey);
+		m_BaseDefs.DeleteKey(ptcKey);
 	}
 
 private:
@@ -203,7 +203,7 @@ public:
 	const CRandGroupDef * FindNaturalResource( int /* IT_TYPE */ type ) const;
 
 public:
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 	virtual bool r_LoadVal( CScript & s ) override;
 	virtual bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false) override;
 	virtual void r_WriteBody( CScript &s, lpctstr pszPrefix ) override;

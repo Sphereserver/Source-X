@@ -81,25 +81,25 @@ void CItemContainer::r_Write( CScript &s )
 	r_WriteContent(s);
 }
 
-bool CItemContainer::r_GetRef( lpctstr &pszKey, CScriptObj *&pRef )
+bool CItemContainer::r_GetRef( lpctstr &ptcKey, CScriptObj *&pRef )
 {
 	ADDTOCALLSTACK("CItemContainer::r_GetRef");
-	if ( r_GetRefContainer(pszKey, pRef) )
+	if ( r_GetRefContainer(ptcKey, pRef) )
 		return true;
 
-	return CItemVendable::r_GetRef(pszKey, pRef);
+	return CItemVendable::r_GetRef(ptcKey, pRef);
 }
 
-bool CItemContainer::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CItemContainer::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
     UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CItemContainer::r_WriteVal");
 
 	EXC_TRY("WriteVal");
 
-	if ( r_WriteValContainer(pszKey, sVal, pSrc) )
+	if ( r_WriteValContainer(ptcKey, sVal, pSrc) )
 		return true;
-	return (fNoCallParent ? false : CItemVendable::r_WriteVal(pszKey, sVal, pSrc));
+	return (fNoCallParent ? false : CItemVendable::r_WriteVal(ptcKey, sVal, pSrc));
 
 	EXC_CATCH;
 

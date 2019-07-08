@@ -35,11 +35,11 @@ private:
 	CSString m_pSpeechFunction;
 
 public:
-	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const;
-	int64 GetDefNum( lpctstr pszKey ) const;
-	void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true);
-	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true);
-	void DeleteDef(lpctstr pszKey);
+	lpctstr GetDefStr( lpctstr ptcKey, bool fZero = false ) const;
+	int64 GetDefNum( lpctstr ptcKey ) const;
+	void SetDefNum(lpctstr ptcKey, int64 iVal, bool fZero = true);
+	void SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true);
+	void DeleteDef(lpctstr ptcKey);
 
 private:
 	bool SendMemberMsg( CChar * pCharDest, PacketSend * pPacket );
@@ -88,8 +88,8 @@ public:
 	// -------------------------------
 
 	lpctstr GetName() const { return static_cast<lpctstr>(m_sName); }
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
-    virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
+	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
+    virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
     virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute command from script
     virtual bool r_LoadVal( CScript & s ) override;
     virtual bool r_Load( CScript & s ) override;

@@ -570,11 +570,11 @@ public:
 public:
 	// Load/Save----------------------------------
 
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
 	virtual bool r_LoadVal( CScript & s ) override;
 	virtual bool r_Load( CScript & s ) override;  // Load a character from Script
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString & s, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual void r_Write( CScript & s ) override;
 
 	void r_WriteParity( CScript & s );

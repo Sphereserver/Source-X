@@ -82,12 +82,12 @@ CSkillDef::CSkillDef( SKILL_TYPE skill ) :
     m_AdvRate.Init();
 }
 
-bool CSkillDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CSkillDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
     UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CSkillDef::r_WriteVal");
     EXC_TRY("WriteVal");
-    switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+    switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
     {
         case SKC_ADV_RATE:	// ADV_RATE=Chance at 100, Chance at 50, chance at 0
             sVal = m_AdvRate.Write();
@@ -148,7 +148,7 @@ bool CSkillDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             sVal.FormatVal( m_GainRadius );
             break;
         default:
-            return ( fNoCallParent ? false : CResourceDef::r_WriteVal( pszKey, sVal, pSrc ) );
+            return ( fNoCallParent ? false : CResourceDef::r_WriteVal( ptcKey, sVal, pSrc ) );
     }
     return true;
     EXC_CATCH;

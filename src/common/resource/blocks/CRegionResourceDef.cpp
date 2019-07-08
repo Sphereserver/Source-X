@@ -88,13 +88,13 @@ bool CRegionResourceDef::r_LoadVal( CScript & s )
     return false;
 }
 
-bool CRegionResourceDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CRegionResourceDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
     UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CRegionResourceDef::r_WriteVal");
     EXC_TRY("r_WriteVal");
     // RES_REGIONRESOURCE
-    switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+    switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
     {
         case RMC_AMOUNT:
             sVal = m_Amount.Write();
@@ -119,7 +119,7 @@ bool CRegionResourceDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConso
             sVal = m_Skill.Write();
             break;
         default:
-            return ( fNoCallParent ? false : CResourceDef::r_WriteVal( pszKey, sVal, pSrc ) );
+            return ( fNoCallParent ? false : CResourceDef::r_WriteVal( ptcKey, sVal, pSrc ) );
     }
     return true;
     EXC_CATCH;

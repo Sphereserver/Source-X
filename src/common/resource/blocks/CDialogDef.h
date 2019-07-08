@@ -21,7 +21,7 @@ public:
     uint GumpAddText( lpctstr pszText );		// add text to the text section, return insertion index
     virtual bool r_Verb( CScript &s, CTextConsole * pSrc ) override;
     virtual bool r_LoadVal( CScript & s ) override;
-    virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false) override;
+    virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false) override;
 
 public:
     explicit CDialogDef( CResourceID rid );

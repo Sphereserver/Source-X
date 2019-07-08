@@ -104,7 +104,7 @@ CComponent * CEntity::GetComponent(COMP_TYPE type) const
     return (it != _List.end()) ? it->second : nullptr;
 }
 
-bool CEntity::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
+bool CEntity::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
 {
     ADDTOCALLSTACK_INTENSIVE("CEntity::r_GetRef");
     if (_List.empty())
@@ -113,7 +113,7 @@ bool CEntity::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
     {
         CComponent *pComponent = it->second;
         ASSERT(pComponent);
-        if (pComponent->r_GetRef(pszKey, pRef))   // Returns true if there is a match.
+        if (pComponent->r_GetRef(ptcKey, pRef))   // Returns true if there is a match.
         {
             return true;
         }
@@ -134,7 +134,7 @@ void CEntity::r_Write(CScript & s) // Storing data in the worldsave.
     }
 }
 
-bool CEntity::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
+bool CEntity::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc)
 {
     ADDTOCALLSTACK_INTENSIVE("CEntity::r_WriteVal");
     if (_List.empty())
@@ -143,7 +143,7 @@ bool CEntity::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
     {
         CComponent *pComponent = it->second;
         ASSERT(pComponent);
-        if (pComponent->r_WriteVal(pszKey, sVal, pSrc))   // Returns true if there is a match.
+        if (pComponent->r_WriteVal(ptcKey, sVal, pSrc))   // Returns true if there is a match.
         {
             return true;
         }

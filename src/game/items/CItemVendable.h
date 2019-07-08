@@ -42,7 +42,7 @@ public:
 
 	void Restock( bool fSellToPlayers );
 	virtual void r_Write( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_LoadVal( CScript & s ) override;
 };
 

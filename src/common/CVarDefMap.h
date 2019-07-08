@@ -28,7 +28,7 @@ private:
 
 public:
     virtual lpctstr GetKey() const          = 0;
-    virtual void SetKey( lpctstr pszKey )   = 0;
+    virtual void SetKey( lpctstr ptcKey )   = 0;
 
 	virtual lpctstr GetValStr() const       = 0;
 	virtual int64 GetValNum() const         = 0;
@@ -44,8 +44,8 @@ private:
 public:
 	static const char *m_sClassName;
 
-	CVarDefContNum( lpctstr pszKey, int64 iVal );
-	CVarDefContNum( lpctstr pszKey );
+	CVarDefContNum( lpctstr ptcKey, int64 iVal );
+	CVarDefContNum( lpctstr ptcKey );
 	virtual ~CVarDefContNum() = default;
 
 private:
@@ -82,8 +82,8 @@ private:
 public:
 	static const char *m_sClassName;
 
-	CVarDefContStr( lpctstr pszKey, lpctstr pszVal );
-	explicit CVarDefContStr( lpctstr pszKey );
+	CVarDefContStr( lpctstr ptcKey, lpctstr pszVal );
+	explicit CVarDefContStr( lpctstr ptcKey );
 	virtual ~CVarDefContStr() = default;
 
 private:
@@ -155,18 +155,18 @@ public:
 	lpctstr FindValNum( int64 iVal ) const;
 	lpctstr FindValStr( lpctstr pVal ) const;
 
-    CVarDefContNum* SetNumNew( lpctstr pszKey, int64 iVal );
-    CVarDefContNum* SetNum( lpctstr pszKey, int64 iVal, bool fDeleteZero = true, bool fWarnOverwrite = true );
-    CVarDefContNum* ModNum( lpctstr pszKey, int64 iMod, bool fDeleteZero = true);
-    CVarDefContStr* SetStrNew( lpctstr pszKey, lpctstr pszVal );
-    CVarDefCont* SetStr( lpctstr pszKey, bool fQuoted, lpctstr pszVal, bool fDeleteZero = true, bool fWarnOverwrite = true );
+    CVarDefContNum* SetNumNew( lpctstr ptcKey, int64 iVal );
+    CVarDefContNum* SetNum( lpctstr ptcKey, int64 iVal, bool fDeleteZero = true, bool fWarnOverwrite = true );
+    CVarDefContNum* ModNum( lpctstr ptcKey, int64 iMod, bool fDeleteZero = true);
+    CVarDefContStr* SetStrNew( lpctstr ptcKey, lpctstr pszVal );
+    CVarDefCont* SetStr( lpctstr ptcKey, bool fQuoted, lpctstr pszVal, bool fDeleteZero = true, bool fWarnOverwrite = true );
 
 	CVarDefCont * GetAt( size_t at ) const;
-	CVarDefCont * GetKey( lpctstr pszKey ) const;
-    inline CVarDefContNum * GetKeyDefNum( lpctstr pszKey ) const;
-	int64 GetKeyNum( lpctstr pszKey ) const;
-    inline CVarDefContStr * GetKeyDefStr( lpctstr pszKey ) const;
-	lpctstr GetKeyStr( lpctstr pszKey, bool fZero = false ) const;
+	CVarDefCont * GetKey( lpctstr ptcKey ) const;
+    inline CVarDefContNum * GetKeyDefNum( lpctstr ptcKey ) const;
+	int64 GetKeyNum( lpctstr ptcKey ) const;
+    inline CVarDefContStr * GetKeyDefStr( lpctstr ptcKey ) const;
+	lpctstr GetKeyStr( lpctstr ptcKey, bool fZero = false ) const;
     CVarDefCont * CheckParseKey( lpctstr pszArgs ) const;
 	CVarDefCont * GetParseKey_Advance( lpctstr & pArgs ) const;
     inline CVarDefCont * GetParseKey( lpctstr pArgs ) const;
@@ -190,14 +190,14 @@ public:
 
 /* Inline methods definitions */
 
-CVarDefContNum * CVarDefMap::GetKeyDefNum(lpctstr pszKey) const
+CVarDefContNum * CVarDefMap::GetKeyDefNum(lpctstr ptcKey) const
 {
-    return dynamic_cast<CVarDefContNum*>(GetKey(pszKey));
+    return dynamic_cast<CVarDefContNum*>(GetKey(ptcKey));
 }
 
-CVarDefContStr * CVarDefMap::GetKeyDefStr(lpctstr pszKey) const
+CVarDefContStr * CVarDefMap::GetKeyDefStr(lpctstr ptcKey) const
 {
-    return dynamic_cast<CVarDefContStr*>(GetKey(pszKey));
+    return dynamic_cast<CVarDefContStr*>(GetKey(ptcKey));
 }
 
 CVarDefCont * CVarDefMap::GetParseKey(lpctstr pArgs) const

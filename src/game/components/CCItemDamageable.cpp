@@ -141,11 +141,11 @@ bool CCItemDamageable::r_LoadVal(CScript & s)
     return false;
 }
 
-bool CCItemDamageable::r_WriteVal(lpctstr pszKey, CSString & s, CTextConsole * pSrc)
+bool CCItemDamageable::r_WriteVal(lpctstr ptcKey, CSString & s, CTextConsole * pSrc)
 {
     ADDTOCALLSTACK("CCItemDamageable::r_WriteVal");
     UNREFERENCED_PARAMETER(pSrc);
-    int iKeyNum = FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int iKeyNum = FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     if (iKeyNum < 0)
     {
         return false;
@@ -183,9 +183,9 @@ void CCItemDamageable::r_Write(CScript & s)
     }
 }
 
-bool CCItemDamageable::r_GetRef(lpctstr & pszKey, CScriptObj *& pRef)
+bool CCItemDamageable::r_GetRef(lpctstr & ptcKey, CScriptObj *& pRef)
 {
-    UNREFERENCED_PARAMETER(pszKey);
+    UNREFERENCED_PARAMETER(ptcKey);
     UNREFERENCED_PARAMETER(pRef);
     return false;
 }

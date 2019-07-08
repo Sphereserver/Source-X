@@ -301,7 +301,7 @@ CScriptKey::CScriptKey() : m_pszKey(nullptr), m_pszArg(nullptr)
 {
 }
 
-CScriptKey::CScriptKey( tchar * pszKey, tchar * pszArg ) : m_pszKey( pszKey ), m_pszArg( pszArg )
+CScriptKey::CScriptKey( tchar * ptcKey, tchar * ptcArg ) : m_pszKey( ptcKey ), m_pszArg( ptcArg )
 {
 }
 
@@ -343,34 +343,34 @@ tchar * CScriptKeyAlloc::GetKeyBuffer()
 	return reinterpret_cast<tchar *>(m_Mem.GetData());
 }
 
-bool CScriptKeyAlloc::ParseKey( lpctstr pszKey )
+bool CScriptKeyAlloc::ParseKey( lpctstr ptcKey )
 {
 	ADDTOCALLSTACK("CScriptKeyAlloc::ParseKey");
 	// Skip leading white space
-	if ( ! pszKey )
+	if ( ! ptcKey )
 	{
 		_GetKeyBufferRaw(0);
 		return false;
 	}
 
-	GETNONWHITESPACE( pszKey );
+	GETNONWHITESPACE( ptcKey );
 
-	tchar * pBuffer = _GetKeyBufferRaw( strlen( pszKey ));
+	tchar * pBuffer = _GetKeyBufferRaw( strlen( ptcKey ));
 	ASSERT(pBuffer);
 
 	size_t iLen = m_Mem.GetDataLength();
-	Str_CopyLimitNull( pBuffer, pszKey, iLen );
+	Str_CopyLimitNull( pBuffer, ptcKey, iLen );
 
 	Str_Parse( pBuffer, &m_pszArg );
 	return true;
 }
 
-bool CScriptKeyAlloc::ParseKey( lpctstr pszKey, lpctstr pszVal )
+bool CScriptKeyAlloc::ParseKey( lpctstr ptcKey, lpctstr pszVal )
 {
 	ADDTOCALLSTACK("CScriptKeyAlloc::ParseKey");
-	ASSERT(pszKey);
+	ASSERT(ptcKey);
 
-	size_t lenkey = strlen( pszKey );
+	size_t lenkey = strlen( ptcKey );
 	if ( ! lenkey )
 		return ParseKey(pszVal);
 
@@ -382,7 +382,7 @@ bool CScriptKeyAlloc::ParseKey( lpctstr pszKey, lpctstr pszVal )
 
 	m_pszKey = _GetKeyBufferRaw( lenkey + lenval + 1 );
 
-	strcpy( m_pszKey, pszKey );
+	strcpy( m_pszKey, ptcKey );
 	m_pszArg = m_pszKey + lenkey;
 
 	if ( pszVal )
@@ -442,16 +442,16 @@ CScript::CScript()
 	_InitBase();
 }
 
-CScript::CScript( lpctstr pszKey )
+CScript::CScript( lpctstr ptcKey )
 {
 	_InitBase();
-	ParseKey(pszKey);
+	ParseKey(ptcKey);
 }
 
-CScript::CScript( lpctstr pszKey, lpctstr pszVal )
+CScript::CScript( lpctstr ptcKey, lpctstr pszVal )
 {
 	_InitBase();
-	ParseKey( pszKey, pszVal );
+	ParseKey( ptcKey, pszVal );
 }
 
 void CScript::_InitBase()
@@ -845,10 +845,10 @@ bool _cdecl CScript::WriteSection( lpctstr pszSection, ... )
 	return true;
 }
 
-bool CScript::WriteKey( lpctstr pszKey, lpctstr pszVal )
+bool CScript::WriteKey( lpctstr ptcKey, lpctstr pszVal )
 {
 	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKey");
-	if ( pszKey == nullptr || pszKey[0] == '\0' )
+	if ( ptcKey == nullptr || ptcKey[0] == '\0' )
 	{
 		return false;
 	}
@@ -857,9 +857,9 @@ bool CScript::WriteKey( lpctstr pszKey, lpctstr pszVal )
 	tchar * pszSep;
 	if ( pszVal == nullptr || pszVal[0] == '\0' )
 	{
-		pszSep = const_cast<tchar*>(strchr( pszKey, '\n' ));
+		pszSep = const_cast<tchar*>(strchr( ptcKey, '\n' ));
 		if ( pszSep == nullptr )
-			pszSep = const_cast<tchar*>(strchr( pszKey, '\r' )); // acts like const_cast
+			pszSep = const_cast<tchar*>(strchr( ptcKey, '\r' )); // acts like const_cast
 
 		if ( pszSep != nullptr )
 		{
@@ -869,7 +869,7 @@ bool CScript::WriteKey( lpctstr pszKey, lpctstr pszVal )
 		}
 
 		// Books are like this. No real keys.
-		Printf( "%s\n", pszKey );
+		Printf( "%s\n", ptcKey );
 
 		if ( pszSep != nullptr )
 			*pszSep	= ch;
@@ -887,7 +887,7 @@ bool CScript::WriteKey( lpctstr pszKey, lpctstr pszVal )
 			*pszSep	= '\0';
 		}
 
-		Printf( "%s=%s\n", pszKey, pszVal );
+		Printf( "%s=%s\n", ptcKey, pszVal );
 
 		if ( pszSep != nullptr )
 			*pszSep	= ch;
@@ -896,18 +896,18 @@ bool CScript::WriteKey( lpctstr pszKey, lpctstr pszVal )
 	return true;
 }
 
-//void _cdecl CScript::WriteKeyFormat( lpctstr pszKey, lpctstr pszVal, ... )
+//void _cdecl CScript::WriteKeyFormat( lpctstr ptcKey, lpctstr pszVal, ... )
 //{
 //	ADDTOCALLSTACK("CScript::WriteKeyFormat");
 //	tchar	*pszTemp = Str_GetTemp();
 //	va_list vargs;
 //	va_start( vargs, pszVal );
 //	vsprintf(pszTemp, pszVal, vargs);
-//	WriteKey(pszKey, pszTemp);
+//	WriteKey(ptcKey, pszTemp);
 //	va_end( vargs );
 //}
 
-void _cdecl CScript::WriteKeyFormat( lpctstr pszKey, lpctstr pszVal, ... )
+void _cdecl CScript::WriteKeyFormat( lpctstr ptcKey, lpctstr pszVal, ... )
 {
 	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKeyFormat");
 	TemporaryString tsTemp;
@@ -915,18 +915,18 @@ void _cdecl CScript::WriteKeyFormat( lpctstr pszKey, lpctstr pszVal, ... )
 	va_list vargs;
 	va_start( vargs, pszVal );
 	vsnprintf(pszTemp, tsTemp.realLength(), pszVal, vargs);
-	WriteKey(pszKey, pszTemp);
+	WriteKey(ptcKey, pszTemp);
 	va_end( vargs );
 }
 
-void CScript::WriteKeyVal( lpctstr pszKey, int64 dwVal )
+void CScript::WriteKeyVal( lpctstr ptcKey, int64 dwVal )
 {
-	WriteKeyFormat( pszKey, "%" PRId64 , dwVal );
+	WriteKeyFormat( ptcKey, "%" PRId64 , dwVal );
 }
 
-void CScript::WriteKeyHex( lpctstr pszKey, int64 dwVal )
+void CScript::WriteKeyHex( lpctstr ptcKey, int64 dwVal )
 {
-	WriteKeyFormat( pszKey, "0%" PRIx64 , dwVal );
+	WriteKeyFormat( ptcKey, "0%" PRIx64 , dwVal );
 }
 
 CScript::~CScript()

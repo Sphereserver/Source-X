@@ -90,8 +90,8 @@ public:
 
 	int GetPointSortIndex() const;
 
-	bool r_WriteVal( lpctstr pszKey, CSString & sVal ) const;
-	bool r_LoadVal( lpctstr pszKey, lpctstr pszArgs );
+	bool r_WriteVal( lpctstr ptcKey, CSString & sVal ) const;
+	bool r_LoadVal( lpctstr ptcKey, lpctstr pszArgs );
 };
 
 struct CPointMap : public CPointBase

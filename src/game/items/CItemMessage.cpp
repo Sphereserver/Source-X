@@ -74,23 +74,23 @@ bool CItemMessage::r_LoadVal(CScript &s)
     return false;
 }
 
-bool CItemMessage::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
+bool CItemMessage::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
     UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CItemMessage::r_WriteVal");
     EXC_TRY("WriteVal");
     // Load the message body for a book or a bboard message.
-    if (!strnicmp(pszKey, "BODY", 4))
+    if (!strnicmp(ptcKey, "BODY", 4))
     {
-        pszKey += 4;
-        uint uiPage = Exp_GetUVal(pszKey);
+        ptcKey += 4;
+        uint uiPage = Exp_GetUVal(ptcKey);
         if (m_sBodyLines.IsValidIndex(uiPage) == false)
             return false;
         sVal = *m_sBodyLines[uiPage];
         return true;
     }
 
-    switch (FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1))
+    switch (FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1))
     {
         case CIC_AUTHOR:
             sVal = m_sAuthor;
@@ -104,7 +104,7 @@ bool CItemMessage::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc
             sVal = GetName();
             return true;
     }
-    return (fNoCallParent ? false : CItemVendable::r_WriteVal(pszKey, sVal, pSrc));
+    return (fNoCallParent ? false : CItemVendable::r_WriteVal(ptcKey, sVal, pSrc));
     EXC_CATCH;
 
     EXC_DEBUG_START;

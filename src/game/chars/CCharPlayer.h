@@ -52,16 +52,16 @@ public:
 	CResourceRefArray m_Speech;	// Speech fragment list (other stuff we know)
 
 public:
-	SKILL_TYPE Skill_GetLockType( lpctstr pszKey ) const;
+	SKILL_TYPE Skill_GetLockType( lpctstr ptcKey ) const;
 	SKILLLOCK_TYPE Skill_GetLock( SKILL_TYPE skill ) const;
 	void Skill_SetLock( SKILL_TYPE skill, SKILLLOCK_TYPE state );
 
-	STAT_TYPE Stat_GetLockType( lpctstr pszKey ) const;
+	STAT_TYPE Stat_GetLockType( lpctstr ptcKey ) const;
 	SKILLLOCK_TYPE Stat_GetLock( STAT_TYPE stat ) const;
 	void Stat_SetLock( STAT_TYPE stat, SKILLLOCK_TYPE state );
 
 	void r_WriteChar( CChar * pChar, CScript & s );
-	bool r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & s );
+	bool r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & s );
 	bool r_LoadVal( CChar * pChar, CScript & s );
 
 	bool SetSkillClass( CChar * pChar, CResourceID rid );

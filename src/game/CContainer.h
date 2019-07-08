@@ -35,8 +35,8 @@ public:
 
 	void r_WriteContent( CScript & s ) const;
 
-	bool r_WriteValContainer(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc);
-	bool r_GetRefContainer( lpctstr & pszKey, CScriptObj * & pRef );
+	bool r_WriteValContainer(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc);
+	bool r_GetRefContainer( lpctstr & ptcKey, CScriptObj * & pRef );
 
 public:
 	static const char *m_sClassName;

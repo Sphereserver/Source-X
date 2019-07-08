@@ -77,10 +77,10 @@ public:
     * (eg: uid.04001.name, will set the game object with uid '04001' as
     * reference, the rest of the code will be executed on it.
     *
-    * @param pszKey the key applied on the search.
+    * @param ptcKey the key applied on the search.
     * @param pRef a pointer to the object found.
     */
-    bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef);
+    bool r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef);
 
     /**
     * @brief Wrapper of base method.
@@ -96,13 +96,13 @@ public:
     *
     * Returns a value to a script '<name>' or ingame '.show/.xshow name'
     *
-    * @param pszKey the key to search for (eg: name, ResCold, etc).
+    * @param ptcKey the key to search for (eg: name, ResCold, etc).
     * @param sVal the storage that will return the value.
     * @param pSrc is this requested by someone?.
     *
     * @return true if there was a key to retrieve.
     */
-    bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc);
+    bool r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc);
     /**
     * @brief Wrapper of base method.
     *

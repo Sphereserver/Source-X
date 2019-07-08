@@ -134,12 +134,12 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
     ADDTOCALLSTACK("CDialogDef::r_Verb");
     EXC_TRY("Verb");
     // The first part of the key is GUMPCTL_TYPE
-    lpctstr pszKey = s.GetKey();
+    lpctstr ptcKey = s.GetKey();
 
-    int index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
+    int index = FindTableSorted( ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
     if ( index < 0 )
     {
-        const size_t uiFunctionIndex = r_GetFunctionIndex(pszKey);
+        const size_t uiFunctionIndex = r_GetFunctionIndex(ptcKey);
         if (r_CanCall(uiFunctionIndex))
         {
             // RES_FUNCTION call
@@ -486,7 +486,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
     if ( m_uiControls >= (CountOf(m_sControls) - 1) )
         return false;
 
-    m_sControls[m_uiControls].Format("%s %s", pszKey, pszArgs);
+    m_sControls[m_uiControls].Format("%s %s", ptcKey, pszArgs);
     ++m_uiControls;
     return true;
     EXC_CATCH;
@@ -513,13 +513,13 @@ CDialogDef::CDialogDef( CResourceID rid ) :
 }
 
 
-bool CDialogDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CDialogDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
     UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CDialogDef::r_WriteVal");
     if ( !m_pObj )
         return false;
-    return (fNoCallParent ? false : m_pObj->r_WriteVal( pszKey, sVal, pSrc ));
+    return (fNoCallParent ? false : m_pObj->r_WriteVal( ptcKey, sVal, pSrc ));
 }
 
 

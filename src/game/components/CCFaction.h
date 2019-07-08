@@ -147,9 +147,9 @@ public:
     static bool CanSubscribe(const CItem* pItem);
     virtual void Delete(bool fForced = false) override;
     virtual bool r_LoadVal(CScript & s) override;
-    virtual bool r_WriteVal(lpctstr pszKey, CSString & s, CTextConsole * pSrc = nullptr) override;
+    virtual bool r_WriteVal(lpctstr ptcKey, CSString & s, CTextConsole * pSrc = nullptr) override;
     virtual void r_Write(CScript & s) override;
-    virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef) override;
+    virtual bool r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;
     virtual void Copy(const CComponent *target) override;
     bool r_Load(CScript & s);  // Load a character from Script

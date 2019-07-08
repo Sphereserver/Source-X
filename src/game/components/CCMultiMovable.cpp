@@ -1218,14 +1218,14 @@ lpctstr constexpr CCMultiMovable::sm_szLoadKeys[CML_QTY + 1] =
 };
 
 
-bool CCMultiMovable::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
+bool CCMultiMovable::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc)
 {
     ADDTOCALLSTACK("CItemShip::r_WriteVal");
     UNREFERENCED_PARAMETER(pSrc);
-    int index = FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int index = FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     if (index == -1)
     {
-        if (!strnicmp(pszKey, "SHIPSPEED.", 10))
+        if (!strnicmp(ptcKey, "SHIPSPEED.", 10))
             index = CML_SHIPSPEED;
     }
     CItem *pItemThis = dynamic_cast<CItem*>(this);
@@ -1260,17 +1260,17 @@ bool CCMultiMovable::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * 
             *
             * 'walking' in piloting mode has a 1s interval, speed 0x2
             */
-            pszKey += 9;
+            ptcKey += 9;
 
-            if (*pszKey == '.')
+            if (*ptcKey == '.')
             {
-                ++pszKey;
-                if (!strnicmp(pszKey, "TILES", 5))
+                ++ptcKey;
+                if (!strnicmp(ptcKey, "TILES", 5))
                 {
                     sVal.FormatVal(m_shipSpeed.tiles);
                     break;
                 }
-                else if (!strnicmp(pszKey, "PERIOD", 6))
+                else if (!strnicmp(ptcKey, "PERIOD", 6))
                 {
                     sVal.FormatVal(m_shipSpeed.period);
                     break;
@@ -1297,8 +1297,8 @@ bool CCMultiMovable::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * 
 bool CCMultiMovable::r_LoadVal(CScript & s)
 {
     ADDTOCALLSTACK("CItemShip::r_LoadVal");
-    lpctstr	pszKey = s.GetKey();
-    CML_TYPE index = (CML_TYPE)FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    lpctstr	ptcKey = s.GetKey();
+    CML_TYPE index = (CML_TYPE)FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     // CItem *pItemThis = dynamic_cast<CItem*>(this);
     // ASSERT(pItemThis);
 
@@ -1317,16 +1317,16 @@ bool CCMultiMovable::r_LoadVal(CScript & s)
 
         case CML_SHIPSPEED:
         {
-            pszKey += 9;
-            if (*pszKey == '.')
+            ptcKey += 9;
+            if (*ptcKey == '.')
             {
-                ++pszKey;
-                if (!strnicmp(pszKey, "TILES", 5))
+                ++ptcKey;
+                if (!strnicmp(ptcKey, "TILES", 5))
                 {
                     m_shipSpeed.tiles = s.GetArgUCVal();
                     return true;
                 }
-                else if (!strnicmp(pszKey, "PERIOD", 6))
+                else if (!strnicmp(ptcKey, "PERIOD", 6))
                 {
                     m_shipSpeed.period = (s.GetArgUSVal() * (IsSetOF(OF_NoSmoothSailing) ? MSECS_PER_TENTH : 1)); // get tenths from script, convert to msecs.
                     return true;

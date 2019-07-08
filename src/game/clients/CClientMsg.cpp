@@ -2519,13 +2519,13 @@ void CClient::addKRToolbar( bool bEnable )
 
 
 // --------------------------------------------------------------------
-void CClient::SendPacket( tchar * pszKey )
+void CClient::SendPacket( tchar * ptcKey )
 {
 	ADDTOCALLSTACK("CClient::SendPacket");
 	PacketSend* packet = new PacketSend(0, 0, PacketSend::PRI_NORMAL);
 	packet->seek();
 
-	while ( *pszKey )
+	while ( *ptcKey )
 	{
 		if ( packet->getLength() > SCRIPT_MAX_LINE_LEN - 4 )
 		{	// we won't get here because this lenght is enforced in all scripts
@@ -2535,27 +2535,27 @@ void CClient::SendPacket( tchar * pszKey )
 			return;
 		}
 
-		GETNONWHITESPACE( pszKey );
+		GETNONWHITESPACE( ptcKey );
 
-		if ( toupper(*pszKey) == 'D' )
+		if ( toupper(*ptcKey) == 'D' )
 		{
-			++pszKey;
-			dword iVal = Exp_GetVal(pszKey);
+			++ptcKey;
+			dword iVal = Exp_GetVal(ptcKey);
 
 			packet->writeInt32(iVal);
 		}
-		else if ( toupper(*pszKey) == 'W' )
+		else if ( toupper(*ptcKey) == 'W' )
 		{
-			++pszKey;
-			word iVal = (Exp_GetWVal(pszKey));
+			++ptcKey;
+			word iVal = (Exp_GetWVal(ptcKey));
 
 			packet->writeInt16(iVal);
 		}
 		else
 		{
-			if ( toupper(*pszKey) == 'B' )
-				pszKey++;
-			byte iVal = (Exp_GetBVal(pszKey));
+			if ( toupper(*ptcKey) == 'B' )
+				ptcKey++;
+			byte iVal = (Exp_GetBVal(ptcKey));
 
 			packet->writeByte(iVal);
 		}

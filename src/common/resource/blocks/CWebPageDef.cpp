@@ -109,12 +109,12 @@ lpctstr constexpr CWebPageDef::sm_szLoadKeys[WC_QTY+1] =
 	nullptr
 };
 
-bool CWebPageDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CWebPageDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
     UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CWebPageDef::r_WriteVal");
 	EXC_TRY("WriteVal");
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		case WC_PLEVEL:
 			sVal.FormatVal( m_privlevel );
@@ -132,7 +132,7 @@ bool CWebPageDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pS
 			sVal.FormatVal( m_iUpdatePeriod );
 			break;
 		default:
-			return ( fNoCallParent ? false : g_Serv.r_WriteVal( pszKey, sVal, pSrc ) );
+			return ( fNoCallParent ? false : g_Serv.r_WriteVal( ptcKey, sVal, pSrc ) );
 	}
 	return true;
 	EXC_CATCH;

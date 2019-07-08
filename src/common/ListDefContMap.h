@@ -23,7 +23,7 @@ private:
 public:
 	static const char *m_sClassName;
 
-    explicit CListDefContElem(lpctstr pszKey) : m_Key(pszKey) {};
+    explicit CListDefContElem(lpctstr ptcKey) : m_Key(ptcKey) {};
 	virtual ~CListDefContElem() = default;
 
 private:
@@ -34,8 +34,8 @@ public:
     inline lpctstr GetKey() const {
         return m_Key.GetPtr();
     }
-    inline void SetKey(lpctstr pszKey) {
-        m_Key = pszKey;
+    inline void SetKey(lpctstr ptcKey) {
+        m_Key = ptcKey;
     }
 
 	virtual lpctstr GetValStr() const = 0;
@@ -52,8 +52,8 @@ private:
 public:
 	static const char *m_sClassName;
 
-	explicit CListDefContNum(lpctstr pszKey);
-	CListDefContNum(lpctstr pszKey, int64 iVal);
+	explicit CListDefContNum(lpctstr ptcKey);
+	CListDefContNum(lpctstr ptcKey, int64 iVal);
 	~CListDefContNum() = default;
 
 private:
@@ -84,8 +84,8 @@ private:
 public:
 	static const char *m_sClassName;
 
-	CListDefContStr(lpctstr pszKey, lpctstr pszVal);
-	explicit CListDefContStr(lpctstr pszKey);
+	CListDefContStr(lpctstr ptcKey, lpctstr pszVal);
+	explicit CListDefContStr(lpctstr ptcKey);
 	~CListDefContStr() = default;
 
 private:
@@ -121,7 +121,7 @@ protected:
 public:
 	static const char *m_sClassName;
 
-	explicit CListDefCont(lpctstr pszKey);
+	explicit CListDefCont(lpctstr ptcKey);
 	~CListDefCont() = default;
 
 private:
@@ -132,7 +132,7 @@ public:
     inline lpctstr GetKey() const {
         return m_Key.GetPtr();
     }
-	void SetKey( lpctstr pszKey );
+	void SetKey( lpctstr ptcKey );
 
 	CListDefContElem* GetAt(size_t nIndex) const;
 	bool SetNumAt(size_t nIndex, int64 iVal);
@@ -148,21 +148,21 @@ public:
 	int FindValStr( lpctstr pVal, size_t nStartIndex = 0 ) const;
 
 	bool AddElementNum(int64 iVal);
-	bool AddElementStr(lpctstr pszKey);
+	bool AddElementStr(lpctstr ptcKey);
 
 	bool RemoveElement(size_t nIndex);
 	void RemoveAll();
 	void Sort(bool bDesc = false, bool bCase = false);
 
 	bool InsertElementNum(size_t nIndex, int64 iVal);
-	bool InsertElementStr(size_t nIndex, lpctstr pszKey);
+	bool InsertElementStr(size_t nIndex, lpctstr ptcKey);
 
 	CListDefCont * CopySelf();
 	void PrintElements(CSString& strElements) const;
 	void DumpElements( CTextConsole * pSrc, lpctstr pszPrefix = nullptr ) const;
 	void r_WriteSave( CScript& s ) const;
 	bool r_LoadVal( CScript& s );
-	bool r_LoadVal( lpctstr pszArg );
+	bool r_LoadVal( lpctstr ptcArg );
 };
 
 
@@ -209,15 +209,15 @@ public:
 	lpctstr FindValStr( lpctstr pVal ) const;
 
 	CListDefCont * GetAt( size_t at );
-	CListDefCont * GetKey( lpctstr pszKey ) const;
+	CListDefCont * GetKey( lpctstr ptcKey ) const;
 
-	CListDefCont* AddList(lpctstr pszKey);
+	CListDefCont* AddList(lpctstr ptcKey);
 
 	void DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix = nullptr );
 	void ClearKeys(lpctstr mask = nullptr);
 	void DeleteKey( lpctstr key );
 
-	bool r_LoadVal( lpctstr pszKey, CScript & s );
+	bool r_LoadVal( lpctstr ptcKey, CScript & s );
 	bool r_Write( CTextConsole *pSrc, lpctstr pszString, CSString& strVal );
 	void r_WriteSave( CScript& s );
 };

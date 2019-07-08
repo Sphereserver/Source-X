@@ -85,7 +85,7 @@ public:
     void Init( lpctstr pszStr );
     bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
     bool r_LoadVal( CScript & s ) override;
-    bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+    bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
     bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
     bool r_Copy( CTextConsole * pSrc );
     lpctstr GetName() const

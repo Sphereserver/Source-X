@@ -51,69 +51,69 @@ lpctstr constexpr _ptcSRefKeys[SREF_QTY+1] =
     nullptr
 };
 
-bool CScriptObj::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CScriptObj::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CScriptObj::r_GetRef");
 	// A key name that just links to another object.
 
-    int index = FindTableHeadSorted(pszKey, _ptcSRefKeys, CountOf(_ptcSRefKeys)-1);
+    int index = FindTableHeadSorted(ptcKey, _ptcSRefKeys, CountOf(_ptcSRefKeys)-1);
     switch (index)
     {
         case SREF_SERV:
-            if (pszKey[4] != '.')
+            if (ptcKey[4] != '.')
                 return false;
-            pszKey += 5;
+            ptcKey += 5;
             pRef = &g_Serv;
             return true;
         case SREF_UID:
-            if (pszKey[3] != '.')
+            if (ptcKey[3] != '.')
                 return false;
-            pszKey += 4;
-            pRef = CUID::ObjFind(Exp_GetDWVal(pszKey));
-            SKIP_SEPARATORS(pszKey);
+            ptcKey += 4;
+            pRef = CUID::ObjFind(Exp_GetDWVal(ptcKey));
+            SKIP_SEPARATORS(ptcKey);
             return true;
         case SREF_OBJ:
-            if (pszKey[3] != '.')
+            if (ptcKey[3] != '.')
                 return false;
-            pszKey += 4;
+            ptcKey += 4;
             pRef = ( (dword)g_World.m_uidObj ) ? g_World.m_uidObj.ObjFind() : nullptr;
             return true;
         case SREF_NEW:
-            if (pszKey[3] != '.')
+            if (ptcKey[3] != '.')
                 return false;
-            pszKey += 4;
+            ptcKey += 4;
             pRef = ( (dword)g_World.m_uidNew ) ? g_World.m_uidNew.ObjFind() : nullptr;
             return true;
         case SREF_I:
-            if (pszKey[1] != '.')
+            if (ptcKey[1] != '.')
                 return false;
-            pszKey += 2;
+            ptcKey += 2;
             pRef = this;
             return true;
         case SREF_FILE:
             if ( !IsSetOF(OF_FileCommands) )
                 return false;
-            if (pszKey[4] != '.')
+            if (ptcKey[4] != '.')
                 return false;
-            pszKey += 5;
+            ptcKey += 5;
             pRef = &(g_Serv._hFile);
             return true;
         case SREF_DB:
-            if (pszKey[2] != '.')
+            if (ptcKey[2] != '.')
                 return false;
-            pszKey += 3;
+            ptcKey += 3;
             pRef = &(g_Serv._hDb);
             return true;
         case SREF_LDB:
-            if (pszKey[3] != '.')
+            if (ptcKey[3] != '.')
                 return false;
-            pszKey += 4;
+            ptcKey += 4;
             pRef = &(g_Serv._hLdb);
             return true;
         case SREF_MDB:
-            if (pszKey[3] != '.')
+            if (ptcKey[3] != '.')
                 return false;
-            pszKey += 4;
+            ptcKey += 4;
             pRef = &(g_Serv._hMdb);
             return true;
         default:
@@ -241,9 +241,9 @@ bool CScriptObj::r_Call( size_t uiFunctionIndex, CTextConsole * pSrc, CScriptTri
     return true;
 }
 
-bool CScriptObj::r_SetVal( lpctstr pszKey, lpctstr pszVal )
+bool CScriptObj::r_SetVal( lpctstr ptcKey, lpctstr pszVal )
 {
-	CScript s( pszKey, pszVal );
+	CScript s( ptcKey, pszVal );
 	return r_LoadVal( s );
 }
 
@@ -251,18 +251,18 @@ bool CScriptObj::r_LoadVal( CScript & s )
 {
 	ADDTOCALLSTACK("CScriptObj::r_LoadVal");
 	EXC_TRY("LoadVal");
-	lpctstr pszKey = s.GetKey();
+	lpctstr ptcKey = s.GetKey();
 
-	if ( !strnicmp(pszKey, "CLEARVARS", 9) )
+	if ( !strnicmp(ptcKey, "CLEARVARS", 9) )
 	{
-		pszKey = s.GetArgStr();
-		SKIP_SEPARATORS(pszKey);
-		g_Exp.m_VarGlobals.ClearKeys(pszKey);
+		ptcKey = s.GetArgStr();
+		SKIP_SEPARATORS(ptcKey);
+		g_Exp.m_VarGlobals.ClearKeys(ptcKey);
 		return true;
 	}
 
 	// ignore these.
-	int index = FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
+	int index = FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
 	if ( index < 0 )
 	{
 		DEBUG_ERR(("Undefined keyword '%s'\n", s.GetKey()));
@@ -277,24 +277,24 @@ bool CScriptObj::r_LoadVal( CScript & s )
             const bool fZero = (index == SSC_VAR0);
             bool fQuoted = false;
             lpctstr ptcArg = s.GetArgStr(&fQuoted);
-            g_Exp.m_VarGlobals.SetStr(pszKey + (fZero ? 5 : 4), fQuoted, ptcArg, true);
+            g_Exp.m_VarGlobals.SetStr(ptcKey + (fZero ? 5 : 4), fQuoted, ptcArg, true);
             return true;
         }
 
 		case SSC_LIST:
 			{
-				if ( !g_Exp.m_ListGlobals.r_LoadVal(pszKey + 5, s) )
-					DEBUG_ERR(("Unable to process command '%s %s'\n", pszKey, s.GetArgRaw()));
+				if ( !g_Exp.m_ListGlobals.r_LoadVal(ptcKey + 5, s) )
+					DEBUG_ERR(("Unable to process command '%s %s'\n", ptcKey, s.GetArgRaw()));
 
 				return true;
 			}
 
 		case SSC_DEFMSG:
 			{
-				pszKey += 7;
+				ptcKey += 7;
 				for ( long l = 0; l < DEFMSG_QTY; ++l )
 				{
-					if ( !strcmpi(pszKey, g_Exp.sm_szMsgNames[l]) )
+					if ( !strcmpi(ptcKey, g_Exp.sm_szMsgNames[l]) )
 					{
 						bool fQuoted = false;
 						tchar * args = s.GetArgStr(&fQuoted);
@@ -302,7 +302,7 @@ bool CScriptObj::r_LoadVal( CScript & s )
 						return true;
 					}
 				}
-				g_Log.Event(LOGM_INIT|LOGL_ERROR, "Setting not used message override named '%s'\n", pszKey);
+				g_Log.Event(LOGM_INIT|LOGL_ERROR, "Setting not used message override named '%s'\n", ptcKey);
 				return false;
 			}
 	}
@@ -315,14 +315,14 @@ bool CScriptObj::r_LoadVal( CScript & s )
 	return false;
 }
 
-static void StringFunction( int iFunc, lpctstr pszKey, CSString &sVal )
+static void StringFunction( int iFunc, lpctstr ptcKey, CSString &sVal )
 {
-	GETNONWHITESPACE(pszKey);
-	if ( *pszKey == '(' )
-		++pszKey;
+	GETNONWHITESPACE(ptcKey);
+	if ( *ptcKey == '(' )
+		++ptcKey;
 
 	tchar * ppCmd[4];
-	int iCount = Str_ParseCmds( const_cast<tchar *>(pszKey), ppCmd, CountOf(ppCmd), ")" );
+	int iCount = Str_ParseCmds( const_cast<tchar *>(ptcKey), ppCmd, CountOf(ppCmd), ")" );
 	if ( iCount <= 0 )
 	{
 		DEBUG_ERR(( "Bad string function usage. missing )\n" ));
@@ -349,15 +349,15 @@ static void StringFunction( int iFunc, lpctstr pszKey, CSString &sVal )
 	}
 }
 
-bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CScriptObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
     UNREFERENCED_PARAMETER(fNoCallParent);
 	ADDTOCALLSTACK("CScriptObj::r_WriteVal");
 	EXC_TRY("WriteVal");
 	CScriptObj * pRef = nullptr;
-	bool fGetRef = r_GetRef( pszKey, pRef );
+	bool fGetRef = r_GetRef( ptcKey, pRef );
 
-	if ( !strnicmp(pszKey, "GetRefType", 10) )
+	if ( !strnicmp(ptcKey, "GetRefType", 10) )
 	{
 		CScriptObj * pTmpRef;
 		if ( pRef )
@@ -424,7 +424,7 @@ bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 			sVal = "0";
 			return true;
 		}
-		if ( pszKey[0] == '\0' )	// we where just testing the ref.
+		if ( ptcKey[0] == '\0' )	// we where just testing the ref.
 		{
             CObjBase *pObj = dynamic_cast<CObjBase*>(pRef);
 			if ( pObj )
@@ -433,7 +433,7 @@ bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 				sVal.FormatVal( 1 );
 			return true;
 		}
-		return pRef->r_WriteVal( pszKey, sVal, pSrc );
+		return pRef->r_WriteVal( ptcKey, sVal, pSrc );
 	}
 
     if (fNoCallChildren)
@@ -443,13 +443,13 @@ bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
         return false;
     }
 
-	int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+	int index = FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( index < 0 )
 	{
 		// <dSOMEVAL> same as <eval <SOMEVAL>> to get dec from the val
-		if (( *pszKey == 'd' ) || ( *pszKey == 'D' ))
+		if (( *ptcKey == 'd' ) || ( *ptcKey == 'D' ))
 		{
-			lpctstr arg = pszKey + 1;
+			lpctstr arg = ptcKey + 1;
 			if ( r_WriteVal(arg, sVal, pSrc) )
 			{
 				if ( *sVal != '-' )
@@ -459,23 +459,23 @@ bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 			}
 		}
 		// <r>, <r15>, <r3,15> are shortcuts to rand(), rand(15) and rand(3,15)
-		else if (( *pszKey == 'r' ) || ( *pszKey == 'R' ))
+		else if (( *ptcKey == 'r' ) || ( *ptcKey == 'R' ))
 		{
-			pszKey += 1;
-			if ( *pszKey && (( *pszKey < '0' ) || ( *pszKey > '9' )) && *pszKey != '-' )
+			ptcKey += 1;
+			if ( *ptcKey && (( *ptcKey < '0' ) || ( *ptcKey > '9' )) && *ptcKey != '-' )
 				goto badcmd;
 
 			int64 min = 1000, max = INT64_MIN;
 
-			if ( *pszKey )
+			if ( *ptcKey )
 			{
-				min = Exp_Get64Val(pszKey);
-				SKIP_ARGSEP(pszKey);
+				min = Exp_Get64Val(ptcKey);
+				SKIP_ARGSEP(ptcKey);
 			}
-			if ( *pszKey )
+			if ( *ptcKey )
 			{
-				max = Exp_Get64Val(pszKey);
-				SKIP_ARGSEP(pszKey);
+				max = Exp_Get64Val(ptcKey);
+				SKIP_ARGSEP(ptcKey);
 			}
 
 			if ( max == INT64_MIN )
@@ -495,17 +495,17 @@ badcmd:
 		return false;	// Bad command.
 	}
 
-	pszKey += strlen( sm_szLoadKeys[index] );
-	SKIP_SEPARATORS(pszKey);
+	ptcKey += strlen( sm_szLoadKeys[index] );
+	SKIP_SEPARATORS(ptcKey);
 	bool fZero = false;
 
 	switch ( index )
 	{
         case SSC_RESOURCEINDEX:
-            sVal.FormatVal(RES_GET_INDEX(Exp_GetVal(pszKey)));
+            sVal.FormatVal(RES_GET_INDEX(Exp_GetVal(ptcKey)));
             break;
         case SSC_RESOURCETYPE:
-            sVal.FormatVal(RES_GET_TYPE(Exp_GetVal(pszKey)));
+            sVal.FormatVal(RES_GET_TYPE(Exp_GetVal(ptcKey)));
             break;
 
 		case SSC_LISTCOL:
@@ -536,19 +536,19 @@ badcmd:
 				sVal.FormatVal( 0 );
 				return true;
 			}
-			if ( !*pszKey )
+			if ( !*ptcKey )
 			{
                 CObjBase *pObj = dynamic_cast <CObjBase*> (pRef);	// if it can be converted .
 				sVal.FormatHex( pObj ? (dword) pObj->GetUID() : 0 );
 				return true;
 			}
-			return pRef->r_WriteVal( pszKey, sVal, pSrc );
+			return pRef->r_WriteVal( ptcKey, sVal, pSrc );
 		case SSC_VAR0:
 			fZero	= true;
 		case SSC_VAR:
 			// "VAR." = get/set a system wide variable.
 			{
-				const CVarDefCont * pVar = g_Exp.m_VarGlobals.GetKey(pszKey);
+				const CVarDefCont * pVar = g_Exp.m_VarGlobals.GetKey(ptcKey);
 				if ( pVar )
 					sVal	= pVar->GetValStr();
 				else if ( fZero )
@@ -557,19 +557,19 @@ badcmd:
 			return true;
 		case SSC_DEFLIST:
 			{
-				g_Exp.m_ListInternals.r_Write(pSrc, pszKey, sVal);
+				g_Exp.m_ListInternals.r_Write(pSrc, ptcKey, sVal);
 			}
 			return true;
 		case SSC_LIST:
 			{
-				g_Exp.m_ListGlobals.r_Write(pSrc, pszKey, sVal);
+				g_Exp.m_ListGlobals.r_Write(pSrc, ptcKey, sVal);
 			}
 			return true;
 		case SSC_DEF0:
 			fZero	= true;
 		case SSC_DEF:
 			{
-				const CVarDefCont * pVar = g_Exp.m_VarDefs.GetKey(pszKey);
+				const CVarDefCont * pVar = g_Exp.m_VarDefs.GetKey(ptcKey);
 				if ( pVar )
 					sVal	= pVar->GetValStr();
 				else if ( fZero )
@@ -580,7 +580,7 @@ badcmd:
             fZero	= true;
         case SSC_RESDEF:
         {
-            const CVarDefCont * pVar = g_Exp.m_VarResDefs.GetKey(pszKey);
+            const CVarDefCont * pVar = g_Exp.m_VarResDefs.GetKey(ptcKey);
             if ( pVar )
                 sVal	= pVar->GetValStr();
             else if ( fZero )
@@ -588,20 +588,20 @@ badcmd:
         }
         return true;
 		case SSC_DEFMSG:
-			sVal = g_Cfg.GetDefaultMsg(pszKey);
+			sVal = g_Cfg.GetDefaultMsg(ptcKey);
 			return true;
 
         case SSC_BETWEEN:
         case SSC_BETWEEN2:
         {
-            int64	iMin = Exp_GetLLVal(pszKey);
-            SKIP_ARGSEP(pszKey);
-            int64	iMax = Exp_GetLLVal(pszKey);
-            SKIP_ARGSEP(pszKey);
-            int64 iCurrent = Exp_GetLLVal(pszKey);
-            SKIP_ARGSEP(pszKey);
-            int64 iAbsMax = Exp_GetLLVal(pszKey);
-            SKIP_ARGSEP(pszKey);
+            int64	iMin = Exp_GetLLVal(ptcKey);
+            SKIP_ARGSEP(ptcKey);
+            int64	iMax = Exp_GetLLVal(ptcKey);
+            SKIP_ARGSEP(ptcKey);
+            int64 iCurrent = Exp_GetLLVal(ptcKey);
+            SKIP_ARGSEP(ptcKey);
+            int64 iAbsMax = Exp_GetLLVal(ptcKey);
+            SKIP_ARGSEP(ptcKey);
             if ( index == SSC_BETWEEN2 )
             {
                 iCurrent = iAbsMax - iCurrent;
@@ -615,31 +615,31 @@ badcmd:
                 sVal.FormatLLVal((iCurrent * (iMax - iMin))/iAbsMax + iMin);
         } break;
 		case SSC_EVAL:
-			sVal.FormatLLVal( Exp_GetLLVal( pszKey ));
+			sVal.FormatLLVal( Exp_GetLLVal( ptcKey ));
 			return true;
 		case SSC_UVAL:
-			sVal.FormatULLVal(Exp_GetULLVal(pszKey));
+			sVal.FormatULLVal(Exp_GetULLVal(ptcKey));
 			return true;
 		case SSC_FVAL:
 			{
-				int64 iVal = Exp_Get64Val(pszKey);
+				int64 iVal = Exp_Get64Val(ptcKey);
 				sVal.Format( "%s%" PRId64 ".%" PRId64 , (iVal >= 0) ? "" : "-", llabs(iVal/10), llabs(iVal%10) );
 				return true;
 			}
 		case SSC_HVAL:
-			sVal.FormatLLHex(Exp_GetLLVal(pszKey));
+			sVal.FormatLLHex(Exp_GetLLVal(ptcKey));
 			return true;
 
 //FLOAT STUFF BEGINS HERE
 		case SSC_FEVAL: //Float EVAL
-			sVal.FormatVal( atoi( pszKey ) );
+			sVal.FormatVal( atoi( ptcKey ) );
 			break;
 		case SSC_FHVAL: //Float HVAL
-			sVal.FormatHex( atoi( pszKey ) );
+			sVal.FormatHex( atoi( ptcKey ) );
 			break;
 		case SSC_FLOATVAL: //Float math
 			{
-				sVal = CVarFloat::FloatMath( pszKey );
+				sVal = CVarFloat::FloatMath( ptcKey );
 				break;
 			}
 //FLOAT STUFF ENDS HERE
@@ -647,7 +647,7 @@ badcmd:
 		case SSC_QVAL:
 			{	// Do a switch ? type statement <QVAL conditional ? option1 : option2>
 				tchar * ppCmds[3];
-				ppCmds[0] = const_cast<tchar*>(pszKey);
+				ppCmds[0] = const_cast<tchar*>(ptcKey);
 				Str_Parse( ppCmds[0], &(ppCmds[1]), "?" );
 				Str_Parse( ppCmds[1], &(ppCmds[2]), ":" );
 				sVal = ppCmds[ Exp_GetVal( ppCmds[0] ) ? 1 : 2 ];
@@ -660,9 +660,9 @@ badcmd:
 		case SSC_SETBIT:
 		case SSC_CLRBIT:
 			{
-				int64 val = Exp_GetLLVal(pszKey);
-				SKIP_ARGSEP(pszKey);
-				int64 bit = Exp_GetLLVal(pszKey);
+				int64 val = Exp_GetLLVal(ptcKey);
+				SKIP_ARGSEP(ptcKey);
+				int64 bit = Exp_GetLLVal(ptcKey);
 
 				if ( index == SSC_ISBIT )
 					sVal.FormatLLVal(val & (1LL << bit));
@@ -674,35 +674,35 @@ badcmd:
 			}
 
 		case SSC_ISEMPTY:
-			sVal.FormatVal( IsStrEmpty( pszKey ) );
+			sVal.FormatVal( IsStrEmpty( ptcKey ) );
 			return true;
 
 		case SSC_ISNUM:
-			GETNONWHITESPACE( pszKey );
-			if (*pszKey == '-')
-				++pszKey;
-			sVal.FormatVal( IsStrNumeric( pszKey ) );
+			GETNONWHITESPACE( ptcKey );
+			if (*ptcKey == '-')
+				++ptcKey;
+			sVal.FormatVal( IsStrNumeric( ptcKey ) );
 			return true;
 
         case SSC_STRRANDRANGE:
-            sVal = g_Exp.GetRangeString(pszKey);
+            sVal = g_Exp.GetRangeString(ptcKey);
         return true;
 
 		case SSC_StrPos:
 			{
-				GETNONWHITESPACE( pszKey );
-				int64 iPos = Exp_GetVal( pszKey );
+				GETNONWHITESPACE( ptcKey );
+				int64 iPos = Exp_GetVal( ptcKey );
 				tchar ch;
-				if ( IsDigit(*pszKey) && IsDigit( *(pszKey+1) ) )
-					ch = static_cast<tchar>(Exp_GetVal(pszKey));
+				if ( IsDigit(*ptcKey) && IsDigit( *(ptcKey+1) ) )
+					ch = static_cast<tchar>(Exp_GetVal(ptcKey));
 				else
 				{
-					ch = *pszKey;
-					++pszKey;
+					ch = *ptcKey;
+					++ptcKey;
 				}
 
-				GETNONWHITESPACE( pszKey );
-				int64 iLen	= strlen( pszKey );
+				GETNONWHITESPACE( ptcKey );
+				int64 iLen	= strlen( ptcKey );
 				if ( iPos < 0 )
 					iPos	= iLen + iPos;
 				if ( iPos < 0 )
@@ -710,17 +710,17 @@ badcmd:
 				else if ( iPos > iLen )
 					iPos	= iLen;
 
-				tchar *	pszPos	= const_cast<tchar*>(strchr( pszKey + iPos, ch ));
+				tchar *	pszPos	= const_cast<tchar*>(strchr( ptcKey + iPos, ch ));
 				if ( !pszPos )
 					sVal.FormatVal( -1 );
 				else
-					sVal.FormatVal((int)( pszPos - pszKey ) );
+					sVal.FormatVal((int)( pszPos - ptcKey ) );
 			}
 			return true;
 		case SSC_StrSub:
 			{
 				tchar * ppArgs[3];
-				int iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs));
+				int iQty = Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, CountOf(ppArgs));
 				if ( iQty < 3 )
 					return false;
 
@@ -749,15 +749,15 @@ badcmd:
 		case SSC_StrArg:
 			{
 				tchar * buf = Str_GetTemp();
-				GETNONWHITESPACE( pszKey );
-				if ( *pszKey == '"' )
-					++pszKey;
+				GETNONWHITESPACE( ptcKey );
+				if ( *ptcKey == '"' )
+					++ptcKey;
 
 				size_t len = 0;
-				while ( *pszKey && !IsSpace( *pszKey ) && *pszKey != ',' )
+				while ( *ptcKey && !IsSpace( *ptcKey ) && *ptcKey != ',' )
 				{
-					buf[len] = *pszKey;
-					++pszKey;
+					buf[len] = *ptcKey;
+					++ptcKey;
 					++len;
 				}
 				buf[len]= '\0';
@@ -767,17 +767,17 @@ badcmd:
 		case SSC_StrEat:
 			{
 
-				GETNONWHITESPACE( pszKey );
-				while ( *pszKey && !IsSpace( *pszKey ) && *pszKey != ',' )
-					++pszKey;
-				SKIP_ARGSEP( pszKey );
-				sVal = pszKey;
+				GETNONWHITESPACE( ptcKey );
+				while ( *ptcKey && !IsSpace( *ptcKey ) && *ptcKey != ',' )
+					++ptcKey;
+				SKIP_ARGSEP( ptcKey );
+				sVal = ptcKey;
 			}
 			return true;
 		case SSC_StrTrim:
 			{
-				if ( *pszKey )
-					sVal = Str_TrimWhitespace(const_cast<tchar*>(pszKey));
+				if ( *ptcKey )
+					sVal = Str_TrimWhitespace(const_cast<tchar*>(ptcKey));
 				else
 					sVal = "";
 
@@ -786,14 +786,14 @@ badcmd:
 		case SSC_ASC:
 			{
 				tchar	*buf = Str_GetTemp();
-				REMOVE_QUOTES( pszKey );
-				sVal.FormatLLHex( *pszKey );
+				REMOVE_QUOTES( ptcKey );
+				sVal.FormatLLHex( *ptcKey );
                 Str_CopyLimitNull( buf, sVal, STR_TEMPLENGTH );
-				while ( *(++pszKey) )
+				while ( *(++ptcKey) )
 				{
-					if ( *pszKey == '"' )
+					if ( *ptcKey == '"' )
                         break;
-					sVal.FormatLLHex(*pszKey);
+					sVal.FormatLLHex(*ptcKey);
                     Str_ConcatLimitNull( buf, " ", STR_TEMPLENGTH );
                     Str_ConcatLimitNull( buf, sVal, STR_TEMPLENGTH );
 				}
@@ -803,7 +803,7 @@ badcmd:
 		case SSC_ASCPAD:
 			{
 				tchar * ppArgs[2];
-				int iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs));
+				int iQty = Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, CountOf(ppArgs));
 				if ( iQty < 2 )
 					return false;
 
@@ -838,10 +838,10 @@ badcmd:
 				if ( !IsSetOF(OF_FileCommands) )
 					return false;
 
-				GETNONWHITESPACE(pszKey);
+				GETNONWHITESPACE(ptcKey);
 				tchar	*buf = Str_GetTemp();
 				tchar	*Arg_ppCmd[10];		// limit to 9 arguments
-				strcpy(buf, pszKey);
+				strcpy(buf, ptcKey);
 				int iQty = Str_ParseCmds(buf, Arg_ppCmd, CountOf(Arg_ppCmd));
 				if ( iQty < 1 )
 					return false;
@@ -859,7 +859,7 @@ badcmd:
 				int child_pid = vfork();
 				if ( child_pid < 0 )
 				{
-                    g_Log.EventError("%s failed when executing '%s'\n", sm_szLoadKeys[index], pszKey);
+                    g_Log.EventError("%s failed when executing '%s'\n", sm_szLoadKeys[index], ptcKey);
 					return false;
 				}
 				else if ( child_pid == 0 )
@@ -869,7 +869,7 @@ badcmd:
 										Arg_ppCmd[3], Arg_ppCmd[4], Arg_ppCmd[5], Arg_ppCmd[6],
 										Arg_ppCmd[7], Arg_ppCmd[8], Arg_ppCmd[9], nullptr );
 
-                    g_Log.EventError("%s failed with error %d (\"%s\") when executing '%s'\n", sm_szLoadKeys[index], errno, strerror(errno), pszKey);
+                    g_Log.EventError("%s failed with error %d (\"%s\") when executing '%s'\n", sm_szLoadKeys[index], errno, strerror(errno), ptcKey);
                     raise(SIGKILL);
                     g_Log.EventError("%s failed to handle error. Server is UNSTABLE\n", sm_szLoadKeys[index]);
 					while(true) {} // do NOT leave here until the process receives SIGKILL otherwise it will free up resources
@@ -893,7 +893,7 @@ badcmd:
 		case SSC_StrToken:
 			{
 				tchar *ppArgs[3];
-				int iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs), ",");
+				int iQty = Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, CountOf(ppArgs), ",");
 				if ( iQty < 3 )
 					return false;
 				
@@ -970,8 +970,8 @@ badcmd:
 			{
 				char separators[16];
 
-				GETNONWHITESPACE(pszKey);
-				Str_CopyLimitNull(separators, pszKey, sizeof(separators));
+				GETNONWHITESPACE(ptcKey);
+				Str_CopyLimitNull(separators, ptcKey, sizeof(separators));
 				{
 					char *p = separators;
 					while ( *p && *p != ',' )
@@ -979,9 +979,9 @@ badcmd:
 					*p = 0;
 				}
 
-				const char *p = pszKey + strlen(separators) + 1;
+				const char *p = ptcKey + strlen(separators) + 1;
 				sVal = "";
-				if (( p > pszKey ) && *p )		//	we have list of accessible separators
+				if (( p > ptcKey ) && *p )		//	we have list of accessible separators
 				{
 					tchar *ppCmd[255];
 					tchar * z = Str_GetTemp();
@@ -1003,16 +1003,16 @@ badcmd:
 		case SSC_MD5HASH:
 			{
 				char digest[33];
-				GETNONWHITESPACE(pszKey);
+				GETNONWHITESPACE(ptcKey);
 
-				CMD5::fastDigest( digest, pszKey );
+				CMD5::fastDigest( digest, ptcKey );
 				sVal.Format("%s", digest);
 			} return true;
 
         case SSC_BCRYPTHASH:
         {
             tchar * ppCmd[3];
-            int iQty = Str_ParseCmds(const_cast<tchar*>(pszKey), ppCmd, CountOf(ppCmd), ", ");
+            int iQty = Str_ParseCmds(const_cast<tchar*>(ptcKey), ppCmd, CountOf(ppCmd), ", ");
             if ( iQty < 3 )
                 return false;
             int iPrefixCode = atoi(ppCmd[0]);
@@ -1024,7 +1024,7 @@ badcmd:
         case SSC_BCRYPTVALIDATE:
         {
             tchar * ppCmd[2];
-            int iQty = Str_ParseCmds(const_cast<tchar*>(pszKey), ppCmd, CountOf(ppCmd), ", ");
+            int iQty = Str_ParseCmds(const_cast<tchar*>(ptcKey), ppCmd, CountOf(ppCmd), ", ");
             if ( iQty < 2 )
                 return false;
             bool fValidated = CBCrypt::ValidateBCrypt(ppCmd[0], ppCmd[1]);
@@ -1033,11 +1033,11 @@ badcmd:
 
 		case SSC_MULDIV:
 			{
-				int64 iNum = Exp_GetLLVal( pszKey );
-				SKIP_ARGSEP(pszKey);
-				int64 iMul = Exp_GetLLVal( pszKey );
-				SKIP_ARGSEP(pszKey);
-				int64 iDiv = Exp_GetLLVal( pszKey );
+				int64 iNum = Exp_GetLLVal( ptcKey );
+				SKIP_ARGSEP(ptcKey);
+				int64 iMul = Exp_GetLLVal( ptcKey );
+				SKIP_ARGSEP(ptcKey);
+				int64 iDiv = Exp_GetLLVal( ptcKey );
 				int64 iRes = 0;
 
 				if ( iDiv == 0 )
@@ -1054,18 +1054,18 @@ badcmd:
 
 		case SSC_StrRegexNew:
 			{
-				size_t uiLenString = Exp_GetUVal( pszKey );
+				size_t uiLenString = Exp_GetUVal( ptcKey );
 				tchar * sToMatch = Str_GetTemp();
 				if ( uiLenString > 0 )
 				{
-					SKIP_ARGSEP(pszKey);
-					Str_CopyLimitNull(sToMatch, pszKey, uiLenString + 1);
-					pszKey += uiLenString;
+					SKIP_ARGSEP(ptcKey);
+					Str_CopyLimitNull(sToMatch, ptcKey, uiLenString + 1);
+					ptcKey += uiLenString;
 				}
 
-				SKIP_ARGSEP(pszKey);
+				SKIP_ARGSEP(ptcKey);
 				tchar * tLastError = Str_GetTemp();
-				int iDataResult = Str_RegExMatch( pszKey, sToMatch, tLastError );
+				int iDataResult = Str_RegExMatch( ptcKey, sToMatch, tLastError );
 				sVal.FormatVal(iDataResult);
 
 				if ( iDataResult == -1 )
@@ -1075,7 +1075,7 @@ badcmd:
 			} return true;
 
 		default:
-			StringFunction( index, pszKey, sVal );
+			StringFunction( index, ptcKey, sVal );
 			return true;
 	}
 	return true;
@@ -1117,18 +1117,18 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	ADDTOCALLSTACK("CScriptObj::r_Verb");
 	EXC_TRY("Verb");
 	int	index;
-	lpctstr pszKey = s.GetKey();
+	lpctstr ptcKey = s.GetKey();
 
 	ASSERT( pSrc );
 	CScriptObj * pRef = nullptr;
-	if ( r_GetRef( pszKey, pRef ))
+	if ( r_GetRef( ptcKey, pRef ))
 	{
-		if ( pszKey[0] )
+		if ( ptcKey[0] )
 		{
 			if ( !pRef )
 				return true;
 
-			CScript script(pszKey, s.GetArgStr());
+			CScript script(ptcKey, s.GetArgStr());
 			script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
 			script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
 			return pRef->r_Verb( script, pSrc );
@@ -1138,7 +1138,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 
 	if ( s.IsKeyHead("SRC.", 4 ))
 	{
-		pszKey += 4;
+		ptcKey += 4;
 		pRef = dynamic_cast <CScriptObj*> (pSrc->GetChar());	// if it can be converted .
 		if ( ! pRef )
 		{
@@ -1147,7 +1147,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				return false;
 		}
 
-		CScript script(pszKey, s.GetArgStr());
+		CScript script(ptcKey, s.GetArgStr());
 		script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
 		script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
 		return pRef->r_Verb(script, pSrc);
@@ -1373,7 +1373,7 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 	//  New length of the string.
 	//
 	// Parsing flags
-	lpctstr pszKey; // temporary, set below
+	lpctstr ptcKey; // temporary, set below
 	bool fRes;
 
 	static int sm_iReentrant = 0;
@@ -1449,21 +1449,21 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 			pszResponse[i] = '\0';
 
 			CSString sVal;
-			pszKey = static_cast<lpctstr>(pszResponse) + iBegin + 1;
+			ptcKey = static_cast<lpctstr>(pszResponse) + iBegin + 1;
 
 			EXC_SET_BLOCK("writeval");
-			fRes = r_WriteVal( pszKey, sVal, pSrc );
+			fRes = r_WriteVal( ptcKey, sVal, pSrc );
 			if ( fRes == false )
 			{
 				EXC_SET_BLOCK("writeval");
 				// write the value of functions or triggers variables/objects like ARGO, ARGN1/2/3, LOCALs...
-				if ( pArgs != nullptr && pArgs->r_WriteVal( pszKey, sVal, pSrc ) )
+				if ( pArgs != nullptr && pArgs->r_WriteVal( ptcKey, sVal, pSrc ) )
 					fRes = true;
 			}
 
 			if ( fRes == false )
 			{
-				DEBUG_ERR(( "Can't resolve <%s>\n", pszKey ));
+				DEBUG_ERR(( "Can't resolve <%s>\n", ptcKey ));
 				// Just in case this really is a <= operator ?
 				pszResponse[i] = chEnd;
 			}
@@ -2213,12 +2213,12 @@ jump_in:
 					{
 						if ( s.HasArgs() )
 						{
-							lpctstr pszKey = s.GetArgRaw();
-							SKIP_SEPARATORS(pszKey);
+							lpctstr ptcKey = s.GetArgRaw();
+							SKIP_SEPARATORS(ptcKey);
 
 							tchar * ppArgs[2];
 
-							if ( Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs), " \t," ) >= 1 )
+							if ( Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, CountOf(ppArgs), " \t," ) >= 1 )
 							{
 								TemporaryString tsParsedArg0;
 								tchar* pszParsedArg0 = static_cast<tchar *>(tsParsedArg0);

@@ -95,23 +95,23 @@ private:
 	CAccount& operator=(const CAccount& other);
 public:
 
-	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const
+	lpctstr GetDefStr( lpctstr ptcKey, bool fZero = false ) const
     {
-        return m_BaseDefs.GetKeyStr( pszKey, fZero );
+        return m_BaseDefs.GetKeyStr( ptcKey, fZero );
     }
-	int64 GetDefNum( lpctstr pszKey ) const
+	int64 GetDefNum( lpctstr ptcKey ) const
     {
-        return m_BaseDefs.GetKeyNum( pszKey );
+        return m_BaseDefs.GetKeyNum( ptcKey );
     }
-	void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true)
+	void SetDefNum(lpctstr ptcKey, int64 iVal, bool fZero = true)
 	{
-		m_BaseDefs.SetNum(pszKey, iVal, fZero);
+		m_BaseDefs.SetNum(ptcKey, iVal, fZero);
 	}
-	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true)
+	void SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true)
 	{
-		m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero);
+		m_BaseDefs.SetStr(ptcKey, fQuoted, pszVal, fZero);
 	}
-	void DeleteDef(lpctstr pszKey) { m_BaseDefs.DeleteKey(pszKey); }
+	void DeleteDef(lpctstr ptcKey) { m_BaseDefs.DeleteKey(ptcKey); }
 
 
 	/**
@@ -126,9 +126,9 @@ public:
 	************************************************************************/
 
 	virtual bool r_LoadVal( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_Verb( CScript &s, CTextConsole * pSrc ) override;
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 	void r_Write(CScript & s);
 
 	/************************************************************************
@@ -390,11 +390,11 @@ private:
 	* Check if extist a CAccount with the same name, and validate the name. If not exists and name is valid, create the CAccount.
 	* @param pSrc command shell interface.
 	* @param pszName new CAccount name.
-	* @param pszArg new CAccount password.
+	* @param ptcArg new CAccount password.
 	* @param md5 true if we need md5 to store the password.
 	* @return true if CAccount creation is success, false otherwise.
 	*/
-	bool Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr pszArg, bool md5=false );
+	bool Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr ptcArg, bool md5=false );
 	/**
 	* @brief Do something to all the unused accounts.
 	* First check for accounts with an inactivity of greater or equal to pszDays. Then perform the action to that accounts.

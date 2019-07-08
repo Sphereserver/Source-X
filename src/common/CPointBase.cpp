@@ -274,16 +274,16 @@ void CPointBase::MoveN( DIR_TYPE dir, int amount )
 	m_y += (short)(sm_Moves[dir][1] * amount);
 }
 
-bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
+bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 {
 	ADDTOCALLSTACK("CPointBase::r_WriteVal");
-	if ( !strnicmp( pszKey, "STATICS", 7 ) )
+	if ( !strnicmp( ptcKey, "STATICS", 7 ) )
 	{
-		pszKey	+= 7;
+		ptcKey	+= 7;
 		const CServerMapBlock * pBlock = g_World.GetMapBlock( *(this) );
 		if ( !pBlock ) return false;
 
-		if ( *pszKey == '\0' )
+		if ( *ptcKey == '\0' )
 		{
 			uint uiStaticQty = 0, uiStaticMaxQty = pBlock->m_Statics.GetStaticQty();
 			for ( uint i = 0; i < uiStaticMaxQty; ++i )
@@ -299,25 +299,25 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			return true;
 		}
 
-		SKIP_SEPARATORS( pszKey );
+		SKIP_SEPARATORS( ptcKey );
 
 		const CUOStaticItemRec * pStatic = nullptr;
 		int iStatic = 0;
 		int type = 0;
 
-		if ( !strnicmp( pszKey, "FINDID", 6 ) )
+		if ( !strnicmp( ptcKey, "FINDID", 6 ) )
 		{
-			pszKey += 6;
-			SKIP_SEPARATORS( pszKey );
-			iStatic = Exp_GetVal( pszKey );
+			ptcKey += 6;
+			SKIP_SEPARATORS( ptcKey );
+			iStatic = Exp_GetVal( ptcKey );
 			type = RES_GET_TYPE( iStatic );
 			if ( type == 0 )
 				type = RES_ITEMDEF;
-			SKIP_SEPARATORS( pszKey );
+			SKIP_SEPARATORS( ptcKey );
 		}
 		else
 		{
-			iStatic = Exp_GetVal( pszKey );
+			iStatic = Exp_GetVal( ptcKey );
 			type = RES_GET_TYPE( iStatic );
 		}
 
@@ -361,23 +361,23 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			return true;
 		}
 
-		SKIP_SEPARATORS( pszKey );
-		if ( !*pszKey )
-			pszKey	= "ID";
+		SKIP_SEPARATORS( ptcKey );
+		if ( !*ptcKey )
+			ptcKey	= "ID";
 
 		ITEMID_TYPE idTile = pStatic->GetDispID();
 
-		if ( !strnicmp( pszKey, "COLOR", 5 ) )
+		if ( !strnicmp( ptcKey, "COLOR", 5 ) )
 		{
 			sVal.FormatHex( pStatic->m_wHue );
 			return true;
 		}
-		else if ( !strnicmp( pszKey, "ID", 2 ) )
+		else if ( !strnicmp( ptcKey, "ID", 2 ) )
 		{
 			sVal.FormatHex( idTile );
 			return true;
 		}
-		else if ( !strnicmp( pszKey, "Z", 1 ) )
+		else if ( !strnicmp( ptcKey, "Z", 1 ) )
 		{
 			sVal.FormatVal( pStatic->m_z );
 			return true;
@@ -391,11 +391,11 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			return false;
 		}
 
-		return pItemDef->r_WriteVal( pszKey, sVal, &g_Serv );
+		return pItemDef->r_WriteVal( ptcKey, sVal, &g_Serv );
 	}
-	else if ( !strnicmp( pszKey, "COMPONENTS", 10) )
+	else if ( !strnicmp( ptcKey, "COMPONENTS", 10) )
 	{
-		pszKey += 10;
+		ptcKey += 10;
 
 		CRegionLinks rlinks;
 		const CRegion* pRegion = nullptr;
@@ -404,7 +404,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 		const CUOMultiItemRec_HS* pMultiItem = nullptr;
 		size_t iMultiQty = GetRegions(REGION_TYPE_MULTI, &rlinks);
 
-		if ( *pszKey == '\0' )
+		if ( *ptcKey == '\0' )
 		{
 			int iComponentQty = 0;
 			for (size_t i = 0; i < iMultiQty; ++i)
@@ -443,24 +443,24 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			return true;
 		}
 
-		SKIP_SEPARATORS( pszKey );
+		SKIP_SEPARATORS( ptcKey );
 
 		int iComponent = 0;
 		int type = 0;
 
-		if ( strnicmp( pszKey, "FINDID", 6 ) == 0 )
+		if ( strnicmp( ptcKey, "FINDID", 6 ) == 0 )
 		{
-			pszKey += 6;
-			SKIP_SEPARATORS( pszKey );
-			iComponent = Exp_GetVal( pszKey );
+			ptcKey += 6;
+			SKIP_SEPARATORS( ptcKey );
+			iComponent = Exp_GetVal( ptcKey );
 			type = RES_GET_TYPE( iComponent );
 			if ( type == 0 )
 				type = RES_ITEMDEF;
-			SKIP_SEPARATORS( pszKey );
+			SKIP_SEPARATORS( ptcKey );
 		}
 		else
 		{
-			iComponent = Exp_GetVal( pszKey );
+			iComponent = Exp_GetVal( ptcKey );
 			type = RES_GET_TYPE( iComponent );
 		}
 
@@ -555,30 +555,30 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			return true;
 		}
 
-		SKIP_SEPARATORS( pszKey );
-		if ( !*pszKey )
-			pszKey	= "ID";
+		SKIP_SEPARATORS( ptcKey );
+		if ( !*ptcKey )
+			ptcKey	= "ID";
 
 		ITEMID_TYPE idTile = pMultiItem->GetDispID();
 
-		if ( strnicmp( pszKey, "ID", 2 ) == 0 )
+		if ( strnicmp( ptcKey, "ID", 2 ) == 0 )
 		{
 			sVal.FormatHex( idTile );
 			return true;
 		}
-		else if ( strnicmp( pszKey, "MULTI", 5 ) == 0 )
+		else if ( strnicmp( ptcKey, "MULTI", 5 ) == 0 )
 		{
-			pszKey += 5;
-			if (*pszKey != '\0')
+			ptcKey += 5;
+			if (*ptcKey != '\0')
 			{
-				SKIP_SEPARATORS(pszKey);
-				return pItem->r_WriteVal( pszKey, sVal, &g_Serv );
+				SKIP_SEPARATORS(ptcKey);
+				return pItem->r_WriteVal( ptcKey, sVal, &g_Serv );
 			}
 
 			sVal.FormatHex( pItem->GetUID() );
 			return true;
 		}
-		else if ( strnicmp( pszKey, "Z", 1 ) == 0 )
+		else if ( strnicmp( ptcKey, "Z", 1 ) == 0 )
 		{
 			sVal.FormatVal( pItem->GetTopZ() + pMultiItem->m_dz );
 			return true;
@@ -592,10 +592,10 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			return false;
 		}
 
-		return pItemDef->r_WriteVal( pszKey, sVal, &g_Serv );
+		return pItemDef->r_WriteVal( ptcKey, sVal, &g_Serv );
 	}
 
-	int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
+	int index = FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
 	if ( index < 0 )
 		return false;
 
@@ -616,32 +616,32 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			break;
 		case PT_ISNEARTYPE:
 		{
-			pszKey += 10;
-			SKIP_SEPARATORS( pszKey );
-			SKIP_ARGSEP( pszKey );
+			ptcKey += 10;
+			SKIP_SEPARATORS( ptcKey );
+			SKIP_ARGSEP( ptcKey );
 
-			int iType = g_Cfg.ResourceGetIndexType( RES_TYPEDEF, pszKey );
+			int iType = g_Cfg.ResourceGetIndexType( RES_TYPEDEF, ptcKey );
 			int iDistance = 0;
 			bool bCheckMulti = false;
 
-			SKIP_IDENTIFIERSTRING( pszKey );
-			SKIP_SEPARATORS( pszKey );
-			SKIP_ARGSEP( pszKey );
+			SKIP_IDENTIFIERSTRING( ptcKey );
+			SKIP_SEPARATORS( ptcKey );
+			SKIP_ARGSEP( ptcKey );
 
-			if ( *pszKey ) iDistance = Exp_GetVal(pszKey);
-			if ( *pszKey ) bCheckMulti = Exp_GetVal(pszKey) != 0;
+			if ( *ptcKey ) iDistance = Exp_GetVal(ptcKey);
+			if ( *ptcKey ) bCheckMulti = Exp_GetVal(ptcKey) != 0;
 			sVal.FormatVal( g_World.IsItemTypeNear(*this, static_cast<IT_TYPE>(iType), iDistance, bCheckMulti));
 			break;
 		}
 		case PT_REGION:
 		{
 			// Check that the syntax is correct.
-			if ( pszKey[6] && pszKey[6] != '.' )
+			if ( ptcKey[6] && ptcKey[6] != '.' )
 				return false;
 
 			CRegionWorld * pRegionTemp = dynamic_cast <CRegionWorld*>(this->GetRegion(REGION_TYPE_AREA | REGION_TYPE_MULTI));
 
-			if ( !pszKey[6] )
+			if ( !ptcKey[6] )
 			{
 				// We're just checking if the reference is valid.
 				sVal.FormatVal( pRegionTemp? 1:0 );
@@ -649,39 +649,39 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			}
 
 			// We're trying to retrieve a property from the region.
-			pszKey += 7;
+			ptcKey += 7;
 			if ( pRegionTemp )
-				return pRegionTemp->r_WriteVal( pszKey, sVal, &g_Serv );
+				return pRegionTemp->r_WriteVal( ptcKey, sVal, &g_Serv );
 
 			return false;
 		}
 		case PT_ROOM:
 		{
-			if ( pszKey[4] && pszKey[4] != '.' )
+			if ( ptcKey[4] && ptcKey[4] != '.' )
 				return false;
 
 			CRegion * pRegionTemp = this->GetRegion( REGION_TYPE_ROOM );
 
-			if ( !pszKey[4] )
+			if ( !ptcKey[4] )
 			{
 				sVal.FormatVal( pRegionTemp? 1:0 );
 				return true;
 			}
 
-			pszKey += 5;
+			ptcKey += 5;
 			if ( pRegionTemp )
-				return pRegionTemp->r_WriteVal( pszKey, sVal, &g_Serv );
+				return pRegionTemp->r_WriteVal( ptcKey, sVal, &g_Serv );
 
 			return false;
 		}
 		case PT_SECTOR:
 		{
-			if ( pszKey[6] == '.' )
+			if ( ptcKey[6] == '.' )
 			{
-				pszKey += 7;
+				ptcKey += 7;
 				CSector * pSectorTemp = this->GetSector();
 				if (pSectorTemp)
-					return pSectorTemp->r_WriteVal(pszKey, sVal, &g_Serv);
+					return pSectorTemp->r_WriteVal(ptcKey, sVal, &g_Serv);
 			}
 			return false;
 		}
@@ -702,11 +702,11 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 					} return true;	
 					case PT_TERRAIN:
 					{
-						pszKey += 7;
-						if ( *pszKey == '.' )	// do we have an argument?
+						ptcKey += 7;
+						if ( *ptcKey == '.' )	// do we have an argument?
 						{
-							SKIP_SEPARATORS( pszKey );
-							if ( !strnicmp( pszKey, "Z", 1 ))
+							SKIP_SEPARATORS( ptcKey );
+							if ( !strnicmp( ptcKey, "Z", 1 ))
 							{
 								sVal.FormatVal( pMeter->m_z );
 								return true;
@@ -728,10 +728,10 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 	return true;
 }
 
-bool CPointBase::r_LoadVal( lpctstr pszKey, lpctstr pszArgs )
+bool CPointBase::r_LoadVal( lpctstr ptcKey, lpctstr pszArgs )
 {
 	ADDTOCALLSTACK("CPointBase::r_LoadVal");
-	int index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
+	int index = FindTableSorted( ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
 	if ( index <= 0 )
 	{
 		return false;

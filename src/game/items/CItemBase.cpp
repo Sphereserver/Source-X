@@ -1022,20 +1022,20 @@ lpctstr constexpr CItemBase::sm_szLoadKeys[IBC_QTY+1] =
 	nullptr
 };
 
-bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CItemBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
 	ADDTOCALLSTACK("CItemBase::r_WriteVal");
     EXC_TRY("WriteVal");
 
     // Checking Props CComponents first
     EXC_SET_BLOCK("EntityProps");
-    if (!fNoCallChildren && CEntityProps::r_WritePropVal(pszKey, sVal, nullptr, this))
+    if (!fNoCallChildren && CEntityProps::r_WritePropVal(ptcKey, sVal, nullptr, this))
     {
         return true;
     }
 
     EXC_SET_BLOCK("Keyword");
-	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+	switch ( FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		//return as string or hex number or nullptr if not set
 		case IBC_ALTERITEM:
@@ -1057,7 +1057,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 		case IBC_NPCKILLER:
 		case IBC_NPCPROTECTION:
 		case IBC_SUMMONING:
-			sVal = GetDefStr(pszKey);
+			sVal = GetDefStr(ptcKey);
 			break;
 		//return as decimal number or 0 if not set
 		case IBC_BONUSSKILL1AMT:
@@ -1081,7 +1081,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 		case IBC_BONUSCRAFTINGEXCEPAMT:
 		case IBC_NPCKILLERAMT:
 		case IBC_NPCPROTECTIONAMT:
-			sVal.FormatLLVal(GetDefNum(pszKey));
+			sVal.FormatLLVal(GetDefNum(ptcKey));
 			break;
 
 
@@ -1100,18 +1100,18 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 		{
 			if (!IsType(IT_SHIP))
 				return false;
-			pszKey += 9;
+			ptcKey += 9;
 			CItemBaseMulti * pItemMulti = dynamic_cast<CItemBaseMulti*>(this);
 
-			if (*pszKey == '.')
+			if (*ptcKey == '.')
 			{
-				++pszKey;
-				if (!strnicmp(pszKey, "TILES", 5))
+				++ptcKey;
+				if (!strnicmp(ptcKey, "TILES", 5))
 				{
 					sVal.FormatVal(pItemMulti->m_shipSpeed.tiles);
 					break;
 				}
-				else if (!strnicmp(pszKey, "PERIOD", 6))
+				else if (!strnicmp(ptcKey, "PERIOD", 6))
 				{
 					sVal.FormatVal(pItemMulti->m_shipSpeed.period);
 					break;
@@ -1244,18 +1244,18 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			break;
 		case IBC_SKILLMAKE:		// Print the resources need to make in nice format.
 			{
-				pszKey	+= 9;
-				if ( *pszKey == '.' )
+				ptcKey	+= 9;
+				if ( *ptcKey == '.' )
 				{
 					bool	fQtyOnly	= false;
 					bool	fKeyOnly	= false;
-					SKIP_SEPARATORS( pszKey );
-					int		index	= Exp_GetVal( pszKey );
-					SKIP_SEPARATORS( pszKey );
+					SKIP_SEPARATORS( ptcKey );
+					int		index	= Exp_GetVal( ptcKey );
+					SKIP_SEPARATORS( ptcKey );
 
-					if ( !strnicmp( pszKey, "KEY", 3 ))
+					if ( !strnicmp( ptcKey, "KEY", 3 ))
 						fKeyOnly	= true;
-					else if ( !strnicmp( pszKey, "VAL", 3 ))
+					else if ( !strnicmp( ptcKey, "VAL", 3 ))
 						fQtyOnly	= true;
 
 					tchar *pszTmp = Str_GetTemp();
@@ -1335,7 +1335,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			break;
 		default:
         {
-            return ( fNoCallParent ? false : CBaseBaseDef::r_WriteVal(pszKey, sVal) );
+            return ( fNoCallParent ? false : CBaseBaseDef::r_WriteVal(ptcKey, sVal) );
         }
 	}
 	return true;
@@ -1360,7 +1360,7 @@ bool CItemBase::r_LoadVal( CScript &s )
     }
 
     EXC_SET_BLOCK("Keyword");
-	lpctstr	pszKey = s.GetKey();
+	lpctstr	ptcKey = s.GetKey();
 	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ) )
 	{
 		//Set as Strings
@@ -1430,17 +1430,17 @@ bool CItemBase::r_LoadVal( CScript &s )
 		}break;
 		case IBC_SHIPSPEED:
 		{
-			pszKey += 9;
-			if (*pszKey == '.')
+			ptcKey += 9;
+			if (*ptcKey == '.')
 			{
-				++pszKey;
+				++ptcKey;
 				CItemBaseMulti *pItemMulti = dynamic_cast<CItemBaseMulti*>(dynamic_cast<CItemBase*>(this));
-				if (!strnicmp(pszKey, "TILES", 5))
+				if (!strnicmp(ptcKey, "TILES", 5))
 				{
 					pItemMulti->m_shipSpeed.tiles = (uchar)(s.GetArgVal());
 					return true;
 				}
-				else if (!strnicmp(pszKey, "PERIOD", 6))
+				else if (!strnicmp(ptcKey, "PERIOD", 6))
 				{
 					pItemMulti->m_shipSpeed.tiles = (uchar)(s.GetArgVal());
 					return true;
@@ -1995,12 +1995,12 @@ bool CItemBaseMulti::r_LoadVal(CScript &s)
     return false;
 }
 
-bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pChar, bool fNoCallParent, bool fNoCallChildren)
+bool CItemBaseMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pChar, bool fNoCallParent, bool fNoCallChildren)
 {
     UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CItemBaseMulti::r_WriteVal");
     EXC_TRY("WriteVal");
-    switch (FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1))
+    switch (FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1))
     {
         case MLC_BASESTORAGE:
             sVal.FormatU16Val(_iBaseStorage);
@@ -2013,31 +2013,31 @@ bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * 
             break;
         case MLC_BASECOMPONENT:
         {
-            pszKey += 13;
+            ptcKey += 13;
             const CSphereMulti* pMulti = g_Cfg.GetMultiItemDefs(GetDispID());
             if (pMulti == nullptr)
                 return false;
 
-            if (*pszKey == '\0')
+            if (*ptcKey == '\0')
             {
                 sVal.FormatSTVal(pMulti->GetItemCount());
             }
-            else if (*pszKey == '.')
+            else if (*ptcKey == '.')
             {
-                SKIP_SEPARATORS(pszKey);
-                size_t index = Exp_GetVal(pszKey);
+                SKIP_SEPARATORS(ptcKey);
+                size_t index = Exp_GetVal(ptcKey);
                 if (index >= pMulti->GetItemCount())
                     return false;
-                SKIP_SEPARATORS(pszKey);
+                SKIP_SEPARATORS(ptcKey);
                 const CUOMultiItemRec_HS* item = pMulti->GetItem(index);
 
-                if (*pszKey == '\0') { sVal.Format("%u,%i,%i,%i", item->m_wTileID, item->m_dx, item->m_dy, item->m_dz); return true; }
-                else if (!strnicmp(pszKey, "ID", 2)) { sVal.FormatVal(item->m_wTileID); return true; }
-                else if (!strnicmp(pszKey, "DX", 2)) { sVal.FormatVal(item->m_dx); return true; }
-                else if (!strnicmp(pszKey, "DY", 2)) { sVal.FormatVal(item->m_dy); return true; }
-                else if (!strnicmp(pszKey, "DZ", 2)) { sVal.FormatVal(item->m_dz); return true; }
-                else if (!strnicmp(pszKey, "D", 1)) { sVal.Format("%i,%i,%i", item->m_dx, item->m_dy, item->m_dz); return true; }
-                else if (!strnicmp(pszKey, "VISIBLE", 7)) { sVal.FormatVal(item->m_visible); return true; }
+                if (*ptcKey == '\0') { sVal.Format("%u,%i,%i,%i", item->m_wTileID, item->m_dx, item->m_dy, item->m_dz); return true; }
+                else if (!strnicmp(ptcKey, "ID", 2)) { sVal.FormatVal(item->m_wTileID); return true; }
+                else if (!strnicmp(ptcKey, "DX", 2)) { sVal.FormatVal(item->m_dx); return true; }
+                else if (!strnicmp(ptcKey, "DY", 2)) { sVal.FormatVal(item->m_dy); return true; }
+                else if (!strnicmp(ptcKey, "DZ", 2)) { sVal.FormatVal(item->m_dz); return true; }
+                else if (!strnicmp(ptcKey, "D", 1)) { sVal.Format("%i,%i,%i", item->m_dx, item->m_dy, item->m_dz); return true; }
+                else if (!strnicmp(ptcKey, "VISIBLE", 7)) { sVal.FormatVal(item->m_visible); return true; }
                 else return false;
             }
             else
@@ -2047,26 +2047,26 @@ bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * 
         }
         case MLC_COMPONENT:
         {
-            pszKey += 9;
-            if (*pszKey == '\0')
+            ptcKey += 9;
+            if (*ptcKey == '\0')
             {
                 sVal.FormatSTVal(m_Components.size());
             }
-            else if (*pszKey == '.')
+            else if (*ptcKey == '.')
             {
-                SKIP_SEPARATORS(pszKey);
-                size_t index = Exp_GetVal(pszKey);
+                SKIP_SEPARATORS(ptcKey);
+                size_t index = Exp_GetVal(ptcKey);
                 if (m_Components.IsValidIndex(index) == false)
                     return false;
 
-                SKIP_SEPARATORS(pszKey);
+                SKIP_SEPARATORS(ptcKey);
                 CMultiComponentItem item = m_Components.at(index);
 
-                if (!strnicmp(pszKey, "ID", 2)) sVal.FormatVal(item.m_id);
-                else if (!strnicmp(pszKey, "DX", 2)) sVal.FormatVal(item.m_dx);
-                else if (!strnicmp(pszKey, "DY", 2)) sVal.FormatVal(item.m_dy);
-                else if (!strnicmp(pszKey, "DZ", 2)) sVal.FormatVal(item.m_dz);
-                else if (!strnicmp(pszKey, "D", 1)) sVal.Format("%i,%i,%i", item.m_dx, item.m_dy, item.m_dz);
+                if (!strnicmp(ptcKey, "ID", 2)) sVal.FormatVal(item.m_id);
+                else if (!strnicmp(ptcKey, "DX", 2)) sVal.FormatVal(item.m_dx);
+                else if (!strnicmp(ptcKey, "DY", 2)) sVal.FormatVal(item.m_dy);
+                else if (!strnicmp(ptcKey, "DZ", 2)) sVal.FormatVal(item.m_dz);
+                else if (!strnicmp(ptcKey, "D", 1)) sVal.Format("%i,%i,%i", item.m_dx, item.m_dy, item.m_dz);
                 else sVal.Format("%u,%i,%i,%i", item.m_id, item.m_dx, item.m_dy, item.m_dz);
             }
             else
@@ -2084,16 +2084,16 @@ bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * 
             if (!IsType(IT_SHIP))
                 return false;
 
-            pszKey += 9;
-            if (*pszKey == '.')
+            ptcKey += 9;
+            if (*ptcKey == '.')
             {
-                ++pszKey;
-                if (!strnicmp(pszKey, "TILES", 5))
+                ++ptcKey;
+                if (!strnicmp(ptcKey, "TILES", 5))
                 {
                     sVal.FormatVal(m_shipSpeed.tiles);
                     break;
                 }
-                else if (!strnicmp(pszKey, "PERIOD", 6))
+                else if (!strnicmp(ptcKey, "PERIOD", 6))
                 {
                     sVal.FormatVal(m_shipSpeed.period);
                     break;
@@ -2105,7 +2105,7 @@ bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * 
             break;
         }
         default:
-            return (fNoCallParent ? false : CItemBase::r_WriteVal(pszKey, sVal, pChar));
+            return (fNoCallParent ? false : CItemBase::r_WriteVal(ptcKey, sVal, pChar));
     }
     return true;
     EXC_CATCH;

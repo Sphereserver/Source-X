@@ -2357,29 +2357,29 @@ lpctstr constexpr CItem::sm_szRefKeys[ICR_QTY+1] =
 	nullptr
 };
 
-bool CItem::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CItem::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CItem::r_GetRef");
 
-    if (CEntity::r_GetRef(pszKey, pRef))
+    if (CEntity::r_GetRef(ptcKey, pRef))
     {
         return true;
     }
 
-	int i = FindTableHeadSorted( pszKey, sm_szRefKeys, CountOf(sm_szRefKeys)-1 );
+	int i = FindTableHeadSorted( ptcKey, sm_szRefKeys, CountOf(sm_szRefKeys)-1 );
 	if ( i >= 0 )
 	{
-		pszKey += strlen( sm_szRefKeys[i] );
-		SKIP_SEPARATORS(pszKey);
+		ptcKey += strlen( sm_szRefKeys[i] );
+		SKIP_SEPARATORS(ptcKey);
 		switch (i)
 		{
 			case ICR_CONT:
-				if ( pszKey[-1] != '.' )
+				if ( ptcKey[-1] != '.' )
 					break;
 				pRef = GetContainer();
 				return true;
 			case ICR_LINK:
-				if ( pszKey[-1] != '.' )
+				if ( ptcKey[-1] != '.' )
 					break;
 				pRef = m_uidLink.ObjFind();
 				return true;
@@ -2389,7 +2389,7 @@ bool CItem::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 		}
 	}
 
-	return CObjBase::r_GetRef( pszKey, pRef );
+	return CObjBase::r_GetRef( ptcKey, pRef );
 }
 
 enum IC_TYPE
@@ -2409,7 +2409,7 @@ lpctstr constexpr CItem::sm_szLoadKeys[IC_QTY+1] =
 };
 
 
-bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
 	ADDTOCALLSTACK("CItem::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -2418,14 +2418,14 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bo
     {
         // Checking Props CComponents first (first check CItem props, if not found then check CItemBase)
         EXC_SET_BLOCK("EntityProp");
-        if (CEntityProps::r_WritePropVal(pszKey, sVal, this, Base_GetDef()))
+        if (CEntityProps::r_WritePropVal(ptcKey, sVal, this, Base_GetDef()))
         {
             return true;
         }
 
         // Now check regular CComponents
         EXC_SET_BLOCK("Entity");
-        if (CEntity::r_WriteVal(pszKey, sVal, pSrc))
+        if (CEntity::r_WriteVal(ptcKey, sVal, pSrc))
         {
             return true;
         }
@@ -2433,10 +2433,10 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bo
 
     EXC_SET_BLOCK("Keyword");
 	int index;
-	if ( !strnicmp( CItem::sm_szLoadKeys[IC_ADDSPELL], pszKey, 8 ) )
+	if ( !strnicmp( CItem::sm_szLoadKeys[IC_ADDSPELL], ptcKey, 8 ) )
 		index = IC_ADDSPELL;
 	else
-		index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+		index = FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 
 	bool fDoDefault = false;
 
@@ -2447,13 +2447,13 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bo
 		case IC_DOOROPENSOUND:
 		case IC_PORTCULISSOUND:
 		case IC_DOOROPENID:
-			GetDefStr(pszKey, true);
+			GetDefStr(ptcKey, true);
 			break;
 		//return as string or hex number or nullptr if not set
 		case IC_CRAFTEDBY:
 		case IC_MAKERSNAME:
 		case IC_OWNEDBY:
-			sVal = GetDefStr(pszKey);
+			sVal = GetDefStr(ptcKey);
 			break;
 		//On these ones, check BaseDef if not found on dynamic
 		case IC_DROPSOUND:
@@ -2474,7 +2474,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bo
 		case IC_REMOVALTYPE:
 		case IC_SUMMONING:
 			{
-				const CVarDefCont * pVar = GetDefKey(pszKey, true);
+				const CVarDefCont * pVar = GetDefKey(ptcKey, true);
 				sVal = pVar ? pVar->GetValStr() : "";
 			}
 			break;
@@ -2502,7 +2502,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bo
 		case IC_NPCKILLERAMT:
 		case IC_NPCPROTECTIONAMT:
 			{
-				const CVarDefCont * pVar = GetDefKey(pszKey, true);
+				const CVarDefCont * pVar = GetDefKey(ptcKey, true);
 				sVal.FormatLLVal(pVar ? pVar->GetValNum() : 0);
 			}
 			break;
@@ -2523,9 +2523,9 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bo
             break;
 
 		case IC_ADDSPELL:
-			pszKey	+= 8;
-			SKIP_SEPARATORS( pszKey );
-			sVal.FormatVal( IsSpellInBook((SPELL_TYPE)(g_Cfg.ResourceGetIndexType( RES_SPELL, pszKey ))));
+			ptcKey	+= 8;
+			SKIP_SEPARATORS( ptcKey );
+			sVal.FormatVal( IsSpellInBook((SPELL_TYPE)(g_Cfg.ResourceGetIndexType( RES_SPELL, ptcKey ))));
 			break;
 		case IC_AMOUNT:
         {
@@ -2560,8 +2560,8 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bo
 			break;
 		case IC_CONT:
 			{
-				if ( pszKey[4] == '.' )
-					return CScriptObj::r_WriteVal( pszKey, sVal, pSrc, false );
+				if ( ptcKey[4] == '.' )
+					return CScriptObj::r_WriteVal( ptcKey, sVal, pSrc, false );
 
 				const CObjBase * pCont = GetContainer();
 				sVal.FormatHex( pCont ? ((dword) pCont->GetUID() ) : 0 );
@@ -2639,8 +2639,8 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bo
 			fDoDefault = true;
 			break;
 		case IC_LINK:
-			if ( pszKey[4] == '.' )
-				return CScriptObj::r_WriteVal( pszKey, sVal, pSrc, false );
+			if ( ptcKey[4] == '.' )
+				return CScriptObj::r_WriteVal( ptcKey, sVal, pSrc, false );
 			sVal.FormatHex( m_uidLink );
 			break;
 		case IC_MAXHITS:
@@ -2698,7 +2698,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bo
 	}
     if (fDoDefault)
     {
-        return CObjBase::r_WriteVal(pszKey, sVal, pSrc, false);
+        return CObjBase::r_WriteVal(ptcKey, sVal, pSrc, false);
     }
 	return true;
 	EXC_CATCH;

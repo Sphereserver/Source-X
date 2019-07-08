@@ -64,7 +64,7 @@ public:
 	// Flags = 1 = html
 	size_t ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFlags = 0, CScriptTriggerArgs * pArgs = nullptr );
 
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
+	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef );
 	virtual bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 
@@ -73,7 +73,7 @@ public:
 	bool r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * psVal = nullptr, TRIGRET_TYPE * piRet = nullptr ); // Try to execute function
     bool r_Call( size_t uiFunctionIndex, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * psVal = nullptr, TRIGRET_TYPE * piRet = nullptr ); // Try to execute function
 
-	bool r_SetVal( lpctstr pszKey, lpctstr pszVal );
+	bool r_SetVal( lpctstr ptcKey, lpctstr pszVal );
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_Load( CScript & s );
 

@@ -216,7 +216,7 @@ bool CEntityProps::r_LoadPropVal(CScript & s, CObjBase* pObjEntityProps, CBaseBa
     return _CEPLoopLoad(pBaseEntityProps, nullptr);
 }
 
-bool CEntityProps::r_WritePropVal(lpctstr pszKey, CSString & sVal, const CObjBase *pObjEntityProps, const CBaseBaseDef *pBaseEntityProps) // static
+bool CEntityProps::r_WritePropVal(lpctstr ptcKey, CSString & sVal, const CObjBase *pObjEntityProps, const CBaseBaseDef *pBaseEntityProps) // static
 {
     ADDTOCALLSTACK("CEntityProps::r_WritePropVal");
     // return false: invalid property for any of the subscribed components
@@ -225,7 +225,7 @@ bool CEntityProps::r_WritePropVal(lpctstr pszKey, CSString & sVal, const CObjBas
     int iPropIndex = -1;
     bool fPropStr = false;
     COMPPROPS_TYPE iCCPType = (COMPPROPS_TYPE)-1;
-    auto _CEPLoopWrite = [pszKey, &sVal, &iPropIndex, &fPropStr, &iCCPType](const CEntityProps *pEP) -> bool
+    auto _CEPLoopWrite = [ptcKey, &sVal, &iPropIndex, &fPropStr, &iCCPType](const CEntityProps *pEP) -> bool
     {
         if (pEP->_List.empty())
             return false;
@@ -235,7 +235,7 @@ bool CEntityProps::r_WritePropVal(lpctstr pszKey, CSString & sVal, const CObjBas
             if (pComponent)
             {
                 const KeyTableDesc_s ktd = pComponent->GetPropertyKeysData();
-                iPropIndex = FindTableSorted(pszKey, ktd.pptcTable, ktd.iTableSize - 1);
+                iPropIndex = FindTableSorted(ptcKey, ktd.pptcTable, ktd.iTableSize - 1);
                 if (iPropIndex == -1)
                 {
                     // The key doesn't belong to this CComponentProps.

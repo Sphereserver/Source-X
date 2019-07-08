@@ -77,7 +77,7 @@ public:
 
 public:
 	CScriptKey();
-	CScriptKey( tchar * pszKey, tchar * pszArg );
+	CScriptKey( tchar * ptcKey, tchar * ptcArg );
 	virtual ~CScriptKey();
 private:
 	CScriptKey(const CScriptKey& copy);
@@ -98,8 +98,8 @@ protected:
 public:
 	static const char *m_sClassName;
 	tchar * GetKeyBuffer();
-	bool ParseKey(lpctstr pszKey, lpctstr pszArgs);
-	bool ParseKey(lpctstr pszKey);
+	bool ParseKey(lpctstr ptcKey, lpctstr pszArgs);
+	bool ParseKey(lpctstr ptcKey);
 	void ParseKeyLate();
 
 public:
@@ -161,15 +161,15 @@ public:
 
 	// Write stuff out to a script file.
 	bool _cdecl WriteSection( lpctstr pszSection, ... ) __printfargs(2,3);
-	bool WriteKey( lpctstr pszKey, lpctstr pszVal );
-	void _cdecl WriteKeyFormat( lpctstr pszKey, lpctstr pszFormat, ... ) __printfargs(3,4);
+	bool WriteKey( lpctstr ptcKey, lpctstr pszVal );
+	void _cdecl WriteKeyFormat( lpctstr ptcKey, lpctstr pszFormat, ... ) __printfargs(3,4);
 
-	void WriteKeyVal( lpctstr pszKey, int64 dwVal );
-	void WriteKeyHex( lpctstr pszKey, int64 dwVal );
+	void WriteKeyVal( lpctstr ptcKey, int64 dwVal );
+	void WriteKeyHex( lpctstr ptcKey, int64 dwVal );
 
 	CScript();
-	CScript( lpctstr pszKey );
-	CScript( lpctstr pszKey, lpctstr pszVal );
+	CScript( lpctstr ptcKey );
+	CScript( lpctstr ptcKey, lpctstr pszVal );
 	virtual ~CScript();
 };
 

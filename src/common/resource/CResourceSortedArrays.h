@@ -44,7 +44,7 @@ class CSkillKeySortArray : public CSObjSortArray< CValStr*, lpctstr >
     CSkillKeySortArray(const CSkillKeySortArray& copy) = delete;
     CSkillKeySortArray& operator=(const CSkillKeySortArray& other) = delete;
 
-    int CompareKey( lpctstr pszKey, CValStr * pVal, bool fNoSpaces ) const;
+    int CompareKey( lpctstr ptcKey, CValStr * pVal, bool fNoSpaces ) const;
 };
 
 struct CMultiDefArray : public CSObjSortArray< CSphereMulti*, MULTI_TYPE >

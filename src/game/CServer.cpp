@@ -381,7 +381,7 @@ void CServer::ListClients( CTextConsole *pConsole ) const
 			if ( pCharCmd && !pCharCmd->CanDisturb(pChar) )
 				continue;
 
-			sprintf(tmpMsg, "%" PRIx32 ":Acc%c'%s', Char='%s' (IP: %s)\n", pClient->GetSocketID(), chRank, pAcc->GetName(), pChar->GetName(), pClient->GetPeerStr());
+			sprintf(tmpMsg, "%" PRIx32 ":Acc%c'%s', Char='%s' (IP: %s)\n", pClient->GetSocketID(), chRank, !pAcc ? "null" : pAcc->GetName(), pChar->GetName(), pClient->GetPeerStr());
 		}
 		else
 		{
@@ -495,13 +495,13 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 			} break;
 		case 'd': // dump
 			{
-				lpctstr pszKey = sText + 1;
-				GETNONWHITESPACE( pszKey );
-				switch ( tolower(*pszKey) )
+				lpctstr ptcKey = sText + 1;
+				GETNONWHITESPACE( ptcKey );
+				switch ( tolower(*ptcKey) )
 				{
 					case 'a': // areas
-						pszKey++;	GETNONWHITESPACE( pszKey );
-						if ( !g_World.DumpAreas( pSrc, pszKey ) )
+						ptcKey++;	GETNONWHITESPACE( ptcKey );
+						if ( !g_World.DumpAreas( pSrc, ptcKey ) )
 						{
                             if (pSrc != this)
                             {
@@ -527,14 +527,14 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 						break;
 
 					case 'u': // unscripted
-						pszKey++;
+						ptcKey++;
 
-						switch ( tolower(*pszKey) )
+						switch ( tolower(*ptcKey) )
 						{
 							case 'i': // items
 							{
-								pszKey++;	GETNONWHITESPACE( pszKey );
-								if ( !g_Cfg.DumpUnscriptedItems( pSrc, pszKey ) )
+								ptcKey++;	GETNONWHITESPACE( ptcKey );
+								if ( !g_Cfg.DumpUnscriptedItems( pSrc, ptcKey ) )
 								{
                                     if (pSrc != this)
                                     {
@@ -1244,32 +1244,32 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 
 // ---------------------------------------------------------------------
 
-bool CServer::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CServer::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CServer::r_GetRef");
-	if ( IsDigit( pszKey[0] ))
+	if ( IsDigit( ptcKey[0] ))
 	{
 		size_t i = 1;
-		while ( IsDigit( pszKey[i] ))
+		while ( IsDigit( ptcKey[i] ))
 			i++;
 
-		if ( pszKey[i] == '.' )
+		if ( ptcKey[i] == '.' )
 		{
-			size_t index = atoi( pszKey );	// must use this to stop at .
+			size_t index = atoi( ptcKey );	// must use this to stop at .
 			pRef = g_Cfg.Server_GetDef(index);
-			pszKey += i + 1;
+			ptcKey += i + 1;
 			return true;
 		}
 	}
-	if ( g_Cfg.r_GetRef( pszKey, pRef ))
+	if ( g_Cfg.r_GetRef( ptcKey, pRef ))
 	{
 		return true;
 	}
-	if ( g_World.r_GetRef( pszKey, pRef ))
+	if ( g_World.r_GetRef( ptcKey, pRef ))
 	{
 		return true;
 	}
-	return( CScriptObj::r_GetRef( pszKey, pRef ));
+	return( CScriptObj::r_GetRef( ptcKey, pRef ));
 }
 
 bool CServer::r_LoadVal( CScript &s )
@@ -1283,25 +1283,25 @@ bool CServer::r_LoadVal( CScript &s )
 	return CServerDef::r_LoadVal(s);
 }
 
-bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CServer::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
 	ADDTOCALLSTACK("CServer::r_WriteVal");
-	if ( !strnicmp(pszKey, "ACCOUNT.", 8) )
+	if ( !strnicmp(ptcKey, "ACCOUNT.", 8) )
 	{
-		pszKey += 8;
+		ptcKey += 8;
 		CAccount * pAccount = nullptr;
 
 		// extract account name/index to a temporary buffer
 		tchar * pszTemp = Str_GetTemp();
 		tchar * pszTempStart = pszTemp;
 
-		Str_CopyLimitNull(pszTemp, pszKey, STR_TEMPLENGTH);
+		Str_CopyLimitNull(pszTemp, ptcKey, STR_TEMPLENGTH);
 		tchar * split = strchr(pszTemp, '.');
 		if ( split != nullptr )
 			*split = '\0';
 
-		// adjust pszKey to point to end of account name/index
-		pszKey += strlen(pszTemp);
+		// adjust ptcKey to point to end of account name/index
+		ptcKey += strlen(pszTemp);
 
 		//	try to fetch using indexes
 		if (( *pszTemp >= '0' ) && ( *pszTemp <= '9' ))
@@ -1318,15 +1318,15 @@ bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, 
 			pAccount = g_Accounts.Account_Find(pszTemp);
 		}
 
-		if ( !*pszKey) // we're just checking if the account exists
+		if ( !*ptcKey) // we're just checking if the account exists
 		{
 			sVal.FormatVal( (pAccount ? 1 : 0) );
 			return true;
 		}
 		else if ( pAccount ) // we're retrieving a property from the account
 		{
-			SKIP_SEPARATORS(pszKey);
-			return pAccount->r_WriteVal(pszKey, sVal, pSrc);
+			SKIP_SEPARATORS(ptcKey);
+			return pAccount->r_WriteVal(ptcKey, sVal, pSrc);
 		}
 		// we're trying to retrieve a property from an invalid account
 		return false;
@@ -1335,12 +1335,12 @@ bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, 
 	// Just do stats values for now.
     if (!fNoCallChildren)
     {
-	    if ( g_Cfg.r_WriteVal(pszKey, sVal, pSrc) )
+	    if ( g_Cfg.r_WriteVal(ptcKey, sVal, pSrc) )
 		    return true;
-	    if ( g_World.r_WriteVal(pszKey, sVal, pSrc) )
+	    if ( g_World.r_WriteVal(ptcKey, sVal, pSrc) )
 		    return true;
     }
-	return (fNoCallParent ? false : CServerDef::r_WriteVal(pszKey, sVal, pSrc));
+	return (fNoCallParent ? false : CServerDef::r_WriteVal(ptcKey, sVal, pSrc));
 }
 
 enum SV_TYPE
@@ -1426,14 +1426,14 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 		return false;
 
 	EXC_TRY("Verb");
-	lpctstr pszKey = s.GetKey();
+	lpctstr ptcKey = s.GetKey();
 	tchar *pszMsg = nullptr;
 
 	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 
 	if ( index < 0 )
 	{
-        const size_t uiFunctionIndex = r_GetFunctionIndex(pszKey);
+        const size_t uiFunctionIndex = r_GetFunctionIndex(ptcKey);
         if (r_CanCall(uiFunctionIndex))
         {
             // RES_FUNCTION call
@@ -1443,27 +1443,27 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
                 return true;
         }
 
-		if ( !strnicmp(pszKey, "ACCOUNT.", 8) )
+		if ( !strnicmp(ptcKey, "ACCOUNT.", 8) )
 		{
 			index = SV_ACCOUNT;
-			pszKey += 8;
+			ptcKey += 8;
 
 			CAccount * pAccount = nullptr;
 			char *pszTemp = Str_GetTemp();
 
-			strcpy(pszTemp, pszKey);
+			strcpy(pszTemp, ptcKey);
 			char *split = strchr(pszTemp, '.');
 			if ( split )
 			{
 				*split = 0;
 				pAccount = g_Accounts.Account_Find(pszTemp);
-				pszKey += strlen(pszTemp);
+				ptcKey += strlen(pszTemp);
 			}
 
-			SKIP_SEPARATORS(pszKey);
-			if ( pAccount && *pszKey )
+			SKIP_SEPARATORS(ptcKey);
+			if ( pAccount && *ptcKey )
 			{
-				CScript script(pszKey, s.GetArgStr());
+				CScript script(ptcKey, s.GetArgStr());
 				script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
 				script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
 				return pAccount->r_LoadVal(script);
@@ -1471,11 +1471,11 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			return false;
 		}
 
-		if ( !strnicmp(pszKey, "CLEARVARS", 9) )
+		if ( !strnicmp(ptcKey, "CLEARVARS", 9) )
 		{
-			pszKey = s.GetArgStr();
-			SKIP_SEPARATORS(pszKey);
-			g_Exp.m_VarGlobals.ClearKeys(pszKey);
+			ptcKey = s.GetArgStr();
+			SKIP_SEPARATORS(ptcKey);
+			g_Exp.m_VarGlobals.ClearKeys(ptcKey);
 			return true;
 		}
 	}

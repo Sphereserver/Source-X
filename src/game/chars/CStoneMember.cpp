@@ -157,9 +157,9 @@ void CStoneMember::SetAccountGold( int iGold )
 	m_Member.m_iAccountGold = iGold;
 }
 
-bool CStoneMember::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CStoneMember::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
-	UNREFERENCED_PARAMETER(pszKey);
+	UNREFERENCED_PARAMETER(ptcKey);
 	UNREFERENCED_PARAMETER(pRef);
 	return false;
 }
@@ -171,8 +171,8 @@ bool CStoneMember::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command
 
 	ASSERT(pSrc);
 
-	lpctstr pszKey = s.GetKey();
-	int index = FindTableSorted( pszKey, sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
+	lpctstr ptcKey = s.GetKey();
+	int index = FindTableSorted( ptcKey, sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
 	if ( index < 0 )
 	{
 		if ( r_LoadVal(s) ) // if it's successful all ok, else go on verb.
@@ -271,13 +271,13 @@ bool CStoneMember::r_LoadVal( CScript & s ) // Load an item Script
 }
 
 
-bool CStoneMember::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CStoneMember::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
     UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CStoneMember::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-	STMM_TYPE iIndex = (STMM_TYPE) FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+	STMM_TYPE iIndex = (STMM_TYPE) FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 
 	if ( GetLinkUID().IsChar() )
 	{
@@ -314,7 +314,7 @@ bool CStoneMember::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
                 if (!fNoCallParent)
 			    {
 				    CScriptObj *pRef = GetLinkUID().CharFind();
-				    return pRef->r_WriteVal(pszKey,sVal,pSrc);
+				    return pRef->r_WriteVal(ptcKey,sVal,pSrc);
 			    }
 		}
 	}
@@ -344,7 +344,7 @@ bool CStoneMember::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
                 if (!fNoCallParent)
 			    {
 				    CScriptObj *pRef = GetLinkUID().ItemFind();
-				    return pRef->r_WriteVal(pszKey,sVal,pSrc);
+				    return pRef->r_WriteVal(ptcKey,sVal,pSrc);
 			    }
 		}
 	}

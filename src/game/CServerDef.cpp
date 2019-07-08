@@ -361,11 +361,11 @@ bool CServerDef::r_LoadVal( CScript & s )
 	return false;
 }
 
-bool CServerDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CServerDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
 	ADDTOCALLSTACK("CServerDef::r_WriteVal");
 	EXC_TRY("WriteVal");
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ) )
+	switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ) )
 	{
 	case SC_ACCAPP:
 		sVal.FormatVal( m_eAccApp );
@@ -451,11 +451,11 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 	default:
         if (!fNoCallChildren)
 	    {
-            const size_t uiFunctionIndex = r_GetFunctionIndex(pszKey);
+            const size_t uiFunctionIndex = r_GetFunctionIndex(ptcKey);
             if (r_CanCall(uiFunctionIndex))
             {
                 // RES_FUNCTION call
-			    lpctstr pszArgs = strchr(pszKey, ' ');
+			    lpctstr pszArgs = strchr(ptcKey, ' ');
 			    if (pszArgs != nullptr)
 				    GETNONWHITESPACE(pszArgs);
 
@@ -463,7 +463,7 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 			    if ( r_Call( uiFunctionIndex, pSrc, &Args, &sVal ) )
 				    return true;
 		    }
-            return (fNoCallParent ? false : CScriptObj::r_WriteVal( pszKey, sVal, pSrc, false ));
+            return (fNoCallParent ? false : CScriptObj::r_WriteVal( ptcKey, sVal, pSrc, false ));
         }
 	}
 	return true;

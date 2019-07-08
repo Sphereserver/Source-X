@@ -288,7 +288,7 @@ public:
 
 #define EXC_ADD_SCRIPT		g_Log.EventDebug("command '%s' args '%s'\n", s.GetKey(), s.GetArgRaw());
 #define EXC_ADD_SCRIPTSRC	g_Log.EventDebug("command '%s' args '%s' [%p]\n", s.GetKey(), s.GetArgRaw(), static_cast<void *>(pSrc));
-#define EXC_ADD_KEYRET(src)	g_Log.EventDebug("command '%s' ret '%s' [%p]\n", pszKey, static_cast<lpctstr>(sVal), static_cast<void *>(src));
+#define EXC_ADD_KEYRET(src)	g_Log.EventDebug("command '%s' ret '%s' [%p]\n", ptcKey, static_cast<lpctstr>(sVal), static_cast<void *>(src));
 
 
 #else //!_EXCEPTIONS_DEBUG

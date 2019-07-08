@@ -224,10 +224,10 @@ CCRET_TYPE CCFaction::OnTickComponent()
     return CCRET_CONTINUE;
 }
 
-bool CCFaction::r_WriteVal(lpctstr pszKey, CSString & s, CTextConsole * pSrc)
+bool CCFaction::r_WriteVal(lpctstr ptcKey, CSString & s, CTextConsole * pSrc)
 {
     ADDTOCALLSTACK("CCFaction::CCFaction");
-    CHF_TYPE iKeyNum = (CHF_TYPE)FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    CHF_TYPE iKeyNum = (CHF_TYPE)FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     UNREFERENCED_PARAMETER(pSrc);
     switch (iKeyNum)
     {
@@ -257,9 +257,9 @@ void CCFaction::r_Write(CScript & s)
     }
 }
 
-bool CCFaction::r_GetRef(lpctstr & pszKey, CScriptObj *& pRef)
+bool CCFaction::r_GetRef(lpctstr & ptcKey, CScriptObj *& pRef)
 {
-    UNREFERENCED_PARAMETER(pszKey);
+    UNREFERENCED_PARAMETER(ptcKey);
     UNREFERENCED_PARAMETER(pRef);
     return false;
 }

@@ -1898,22 +1898,22 @@ void CWorld::r_Write( CScript & s )
 	s.Flush();	// Force this out to the file now.
 }
 
-bool CWorld::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CWorld::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CWorld::r_GetRef");
-	if ( ! strnicmp( pszKey, "LASTNEW", 7 ))
+	if ( ! strnicmp( ptcKey, "LASTNEW", 7 ))
 	{
-		if ( ! strnicmp( pszKey+7, "ITEM", 4 ) )
+		if ( ! strnicmp( ptcKey+7, "ITEM", 4 ) )
 		{
-			pszKey += 11;
-			SKIP_SEPARATORS(pszKey);
+			ptcKey += 11;
+			SKIP_SEPARATORS(ptcKey);
 			pRef = m_uidLastNewItem.ItemFind();
 			return true;
 		}
-		else if ( ! strnicmp( pszKey+7, "CHAR", 4 ) )
+		else if ( ! strnicmp( ptcKey+7, "CHAR", 4 ) )
 		{
-			pszKey += 11;
-			SKIP_SEPARATORS(pszKey);
+			ptcKey += 11;
+			SKIP_SEPARATORS(ptcKey);
 			pRef = m_uidLastNewChar.CharFind();
 			return true;
 		}
@@ -1945,37 +1945,37 @@ lpctstr constexpr CWorld::sm_szLoadKeys[WC_QTY+1] =	// static
 	nullptr
 };
 
-bool CWorld::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
+bool CWorld::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
     UNREFERENCED_PARAMETER(fNoCallParent);
     UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CWorld::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-	if ( !strnicmp(pszKey, "GMPAGE", 6) )		//	GM pages
+	if ( !strnicmp(ptcKey, "GMPAGE", 6) )		//	GM pages
 	{
-		pszKey += 6;
-		if (( *pszKey == 'S' ) || ( *pszKey == 's' ))	//	SERV.GMPAGES
+		ptcKey += 6;
+		if (( *ptcKey == 'S' ) || ( *ptcKey == 's' ))	//	SERV.GMPAGES
 		{
-			pszKey++;
-			if ( *pszKey != '\0' )
+			ptcKey++;
+			if ( *ptcKey != '\0' )
 				return false;
 
 			sVal.FormatSTVal(m_GMPages.GetCount());
 		}
-		else if ( *pszKey == '.' )						//	SERV.GMPAGE.*
+		else if ( *ptcKey == '.' )						//	SERV.GMPAGE.*
 		{
-			SKIP_SEPARATORS(pszKey);
-			size_t index = Exp_GetVal(pszKey);
+			SKIP_SEPARATORS(ptcKey);
+			size_t index = Exp_GetVal(ptcKey);
 			if ( index >= m_GMPages.GetCount() )
 				return false;
 
-			SKIP_SEPARATORS(pszKey);
+			SKIP_SEPARATORS(ptcKey);
 			CGMPage* pPage = static_cast <CGMPage*> (m_GMPages.GetAt(index));
 			if ( pPage == nullptr )
 				return false;
 
-			if ( !strnicmp(pszKey, "HANDLED", 7) )
+			if ( !strnicmp(ptcKey, "HANDLED", 7) )
 			{
 				CClient *pClient = pPage->FindGMHandler();
 				if ( pClient != nullptr && pClient->GetChar() != nullptr )
@@ -1985,14 +1985,14 @@ bool CWorld::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc, bo
 				return true;
 			}
 			else
-				return pPage->r_WriteVal(pszKey, sVal, pSrc);
+				return pPage->r_WriteVal(ptcKey, sVal, pSrc);
 		}
 		else
 			sVal.FormatVal(0);
 		return true;
 	}
 
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 ))
+	switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 ))
 	{
         case WC_CURTICK:
             sVal.Format64Val(GetCurrentTick());
@@ -2032,8 +2032,8 @@ bool CWorld::r_LoadVal( CScript &s )
 	ADDTOCALLSTACK("CWorld::r_LoadVal");
 	EXC_TRY("LoadVal");
 
-	lpctstr	pszKey = s.GetKey();
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 ))
+	lpctstr	ptcKey = s.GetKey();
+	switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 ))
 	{
 		case WC_PREVBUILD:
 			m_iPrevBuild = s.GetArgVal();

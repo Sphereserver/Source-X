@@ -16,11 +16,11 @@
 *
 *
 ***************************************************************************/
-CListDefContNum::CListDefContNum( lpctstr pszKey, int64 iVal ) : CListDefContElem( pszKey ), m_iVal( iVal )
+CListDefContNum::CListDefContNum( lpctstr ptcKey, int64 iVal ) : CListDefContElem( ptcKey ), m_iVal( iVal )
 {
 }
 
-CListDefContNum::CListDefContNum( lpctstr pszKey ) : CListDefContElem( pszKey ), m_iVal( 0 )
+CListDefContNum::CListDefContNum( lpctstr ptcKey ) : CListDefContElem( ptcKey ), m_iVal( 0 )
 {
 }
 
@@ -55,11 +55,11 @@ CListDefContElem * CListDefContNum::CopySelf() const
 *
 *
 ***************************************************************************/
-CListDefContStr::CListDefContStr( lpctstr pszKey, lpctstr pszVal ) : CListDefContElem( pszKey ), m_sVal( pszVal ) 
+CListDefContStr::CListDefContStr( lpctstr ptcKey, lpctstr pszVal ) : CListDefContElem( ptcKey ), m_sVal( pszVal ) 
 {
 }
 
-CListDefContStr::CListDefContStr( lpctstr pszKey ) : CListDefContElem( pszKey )
+CListDefContStr::CListDefContStr( lpctstr ptcKey ) : CListDefContElem( ptcKey )
 {
 }
 
@@ -101,13 +101,13 @@ CListDefContElem * CListDefContStr::CopySelf() const
 *
 *
 ***************************************************************************/
-CListDefCont::CListDefCont( lpctstr pszKey ) : m_Key( pszKey ) 
+CListDefCont::CListDefCont( lpctstr ptcKey ) : m_Key( ptcKey ) 
 { 
 }
 
-void CListDefCont::SetKey( lpctstr pszKey )
+void CListDefCont::SetKey( lpctstr ptcKey )
 { 
-	m_Key = pszKey;
+	m_Key = ptcKey;
 }
 
 CListDefContElem* CListDefCont::GetAt(size_t nIndex) const
@@ -247,15 +247,15 @@ bool CListDefCont::AddElementNum(int64 iVal)
 	return true;
 }
 
-bool CListDefCont::AddElementStr(lpctstr pszKey)
+bool CListDefCont::AddElementStr(lpctstr ptcKey)
 {
     ADDTOCALLSTACK_INTENSIVE("CListDefCont::AddElementStr");
 	if ( (m_listElements.size() + 1) >= INTPTR_MAX )	// overflow? is it even useful?
 		return false;
 
-	REMOVE_QUOTES( pszKey );
+	REMOVE_QUOTES( ptcKey );
 
-	m_listElements.emplace_back( new CListDefContStr(m_Key.GetPtr(), pszKey) );
+	m_listElements.emplace_back( new CListDefContStr(m_Key.GetPtr(), ptcKey) );
 
 	return true;
 }
@@ -404,7 +404,7 @@ bool CListDefCont::InsertElementNum(size_t nIndex, int64 iVal)
 	return false;
 }
 
-bool CListDefCont::InsertElementStr(size_t nIndex, lpctstr pszKey)
+bool CListDefCont::InsertElementStr(size_t nIndex, lpctstr ptcKey)
 {
     ADDTOCALLSTACK_INTENSIVE("CListDefCont::InsertElementStr");
 	if ( nIndex >= m_listElements.size() )
@@ -415,7 +415,7 @@ bool CListDefCont::InsertElementStr(size_t nIndex, lpctstr pszKey)
     if (it == m_listElements.end())
         return false;
 
-    m_listElements.insert(it, new CListDefContStr(m_Key.GetPtr(), pszKey));
+    m_listElements.insert(it, new CListDefContStr(m_Key.GetPtr(), ptcKey));
     return true;
 }
 
@@ -514,22 +514,22 @@ bool CListDefCont::r_LoadVal( CScript& s )
 {
     ADDTOCALLSTACK_INTENSIVE("CListDefCont::r_LoadVal");
 	bool fQuoted = false;
-	lpctstr pszArg = s.GetArgStr(&fQuoted);
+	lpctstr ptcArg = s.GetArgStr(&fQuoted);
 
-	if ( fQuoted || !IsSimpleNumberString(pszArg) )
-		return AddElementStr(pszArg);
+	if ( fQuoted || !IsSimpleNumberString(ptcArg) )
+		return AddElementStr(ptcArg);
 
-	return AddElementNum(Exp_Get64Val(pszArg));
+	return AddElementNum(Exp_Get64Val(ptcArg));
 }
 
-bool CListDefCont::r_LoadVal( lpctstr pszArg )
+bool CListDefCont::r_LoadVal( lpctstr ptcArg )
 {
     ADDTOCALLSTACK_INTENSIVE("CListDefCont::r_LoadVal");
 
-	if (!IsSimpleNumberString(pszArg) )
-		return AddElementStr(pszArg);
+	if (!IsSimpleNumberString(ptcArg) )
+		return AddElementStr(ptcArg);
 
-	return AddElementNum(Exp_Get64Val(pszArg));
+	return AddElementNum(Exp_Get64Val(ptcArg));
 }
 
 /***************************************************************************
@@ -662,15 +662,15 @@ void CListDefMap::Copy( const CListDefMap * pArray )
 	}
 }
 
-CListDefCont* CListDefMap::GetKey( lpctstr pszKey ) const
+CListDefCont* CListDefMap::GetKey( lpctstr ptcKey ) const
 {
     ADDTOCALLSTACK_INTENSIVE("CListDefMap::GetKey");
 
 	CListDefCont * pReturn = nullptr;
 
-	if ( pszKey && *pszKey )
+	if ( ptcKey && *ptcKey )
 	{
-		CListDefCont pListBase(pszKey);
+		CListDefCont pListBase(ptcKey);
 		DefSet::const_iterator i = m_Container.find(&pListBase);
 
 		if ( i != m_Container.end() )
@@ -680,14 +680,14 @@ CListDefCont* CListDefMap::GetKey( lpctstr pszKey ) const
 	return pReturn;
 }
 
-CListDefCont* CListDefMap::AddList(lpctstr pszKey)
+CListDefCont* CListDefMap::AddList(lpctstr ptcKey)
 {
 	ADDTOCALLSTACK("CListDefMap::AddList");
-	CListDefCont* pListBase = GetKey(pszKey);
+	CListDefCont* pListBase = GetKey(ptcKey);
 	
-	if ( !pListBase && pszKey && *pszKey )
+	if ( !pListBase && ptcKey && *ptcKey )
 	{
-		pListBase = new CListDefCont(pszKey);
+		pListBase = new CListDefCont(ptcKey);
 		m_Container.insert(pListBase);
 	}
 
@@ -745,15 +745,15 @@ void CListDefMap::ClearKeys(lpctstr mask)
 	}
 }
 
-bool CListDefMap::r_LoadVal( lpctstr pszKey, CScript & s )
+bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 {
     ADDTOCALLSTACK_INTENSIVE("CListDefMap::r_LoadVal");
 	tchar* ppCmds[3];
-	ppCmds[0] = const_cast<tchar*>(pszKey);
+	ppCmds[0] = const_cast<tchar*>(ptcKey);
 	Str_Parse(ppCmds[0], &(ppCmds[1]), "." );
 
 	CListDefCont* pListBase = GetKey(ppCmds[0]);
-	lpctstr pszArg = s.GetArgRaw();
+	lpctstr ptcArg = s.GetArgRaw();
 
 	if ( ppCmds[1] && (*(ppCmds[1])) ) // LIST.<list_name>.<something...>
 	{
@@ -770,7 +770,7 @@ bool CListDefMap::r_LoadVal( lpctstr pszKey, CScript & s )
 			}
 			else if ( !strnicmp(ppCmds[1], "add", 3) )
 			{
-				if ( !pszArg || !(*pszArg) )
+				if ( !ptcArg || !(*ptcArg) )
 					return false;
 
 				if ( !pListBase )
@@ -779,14 +779,14 @@ bool CListDefMap::r_LoadVal( lpctstr pszKey, CScript & s )
 					m_Container.insert(pListBase);
 				}
 
-				if ( IsSimpleNumberString(pszArg) )
-					return pListBase->AddElementNum(Exp_Get64Val(pszArg));
+				if ( IsSimpleNumberString(ptcArg) )
+					return pListBase->AddElementNum(Exp_Get64Val(ptcArg));
 				else
-					return pListBase->AddElementStr(pszArg);
+					return pListBase->AddElementStr(ptcArg);
 			}
 			else if ( (!strnicmp(ppCmds[1], "set", 3)) || (!strnicmp(ppCmds[1], "append", 6)) )
 			{
-				if ( !pszArg || !(*pszArg) )
+				if ( !ptcArg || !(*ptcArg) )
 					return false;
 
 				if (( pListBase ) && ( !strnicmp(ppCmds[1], "set", 3) ))
@@ -802,7 +802,7 @@ bool CListDefMap::r_LoadVal( lpctstr pszKey, CScript & s )
 				}
 
 				tchar* ppCmd[2];
-				ppCmd[0] = const_cast<tchar*>(pszArg);
+				ppCmd[0] = const_cast<tchar*>(ptcArg);
 				while ( Str_Parse( ppCmd[0], &(ppCmd[1]), "," ))
 				{
 					if ( IsSimpleNumberString(ppCmd[0]) )
@@ -822,15 +822,15 @@ bool CListDefMap::r_LoadVal( lpctstr pszKey, CScript & s )
 				if ( !pListBase )
 					return false;
 
-				if ( pszArg && *pszArg )
+				if ( ptcArg && *ptcArg )
 				{
-					if ( !strnicmp(pszArg, "asc", 3) )
+					if ( !strnicmp(ptcArg, "asc", 3) )
 						pListBase->Sort();
-					else if ( (!strnicmp(pszArg, "i", 1) ) || (!strnicmp(pszArg, "iasc", 4)) )
+					else if ( (!strnicmp(ptcArg, "i", 1) ) || (!strnicmp(ptcArg, "iasc", 4)) )
 						pListBase->Sort(false, true);
-					else if ( !strnicmp(pszArg, "desc", 4) )
+					else if ( !strnicmp(ptcArg, "desc", 4) )
 						pListBase->Sort(true);
-					else if ( !strnicmp(pszArg, "idesc", 5) )
+					else if ( !strnicmp(ptcArg, "idesc", 5) )
 						pListBase->Sort(true, true);
 					else
 						return false;
@@ -849,16 +849,16 @@ bool CListDefMap::r_LoadVal( lpctstr pszKey, CScript & s )
 			{
 				if ( !strnicmp(ppCmds[2], "remove", 6) )
 					return pListBase->RemoveElement(nIndex);
-				else if ( !strnicmp(ppCmds[2], "insert", 6) && pszArg && *pszArg )
+				else if ( !strnicmp(ppCmds[2], "insert", 6) && ptcArg && *ptcArg )
 				{
-					bool bIsNum = ( IsSimpleNumberString(pszArg) );
+					bool bIsNum = ( IsSimpleNumberString(ptcArg) );
 
 					if ( nIndex >= pListBase->GetCount() )
 					{
 						if ( bIsNum )
-							return pListBase->AddElementNum(Exp_Get64Val(pszArg));
+							return pListBase->AddElementNum(Exp_Get64Val(ptcArg));
 						else
-							return pListBase->AddElementStr(pszArg);
+							return pListBase->AddElementStr(ptcArg);
 					}
 
 					CListDefContElem* pListElem = pListBase->GetAt(nIndex);
@@ -867,39 +867,39 @@ bool CListDefMap::r_LoadVal( lpctstr pszKey, CScript & s )
 						return false;
 
 					if ( bIsNum )
-						return pListBase->InsertElementNum(nIndex, Exp_Get64Val(pszArg));
+						return pListBase->InsertElementNum(nIndex, Exp_Get64Val(ptcArg));
 					else
-						return pListBase->InsertElementStr(nIndex, pszArg);
+						return pListBase->InsertElementStr(nIndex, ptcArg);
 				}
 			}
-			else if ( pszArg && *pszArg )
+			else if ( ptcArg && *ptcArg )
 			{
 				CListDefContElem* pListElem = pListBase->GetAt(nIndex);
 
 				if ( !pListElem )
 					return false;
 
-				if ( IsSimpleNumberString(pszArg) )
-					return pListBase->SetNumAt(nIndex, Exp_Get64Val(pszArg));
+				if ( IsSimpleNumberString(ptcArg) )
+					return pListBase->SetNumAt(nIndex, Exp_Get64Val(ptcArg));
 				else
-					return pListBase->SetStrAt(nIndex, pszArg);
+					return pListBase->SetStrAt(nIndex, ptcArg);
 			}
 		}
 		else
 		{
 			if ( ppCmds[2] && *(ppCmds[2]) )
 			{
-				if ( !strnicmp(ppCmds[2], "insert", 6) && pszArg && *pszArg )
+				if ( !strnicmp(ppCmds[2], "insert", 6) && ptcArg && *ptcArg )
 				{
-					if ( IsSimpleNumberString(pszArg) )
-						return pListBase->AddElementNum(Exp_Get64Val(pszArg));
+					if ( IsSimpleNumberString(ptcArg) )
+						return pListBase->AddElementNum(Exp_Get64Val(ptcArg));
 					else
-						return pListBase->AddElementStr(pszArg);
+						return pListBase->AddElementStr(ptcArg);
 				}
 			}
 		}
 	}
-	else if ( pszArg && *pszArg )
+	else if ( ptcArg && *ptcArg )
 	{
 		if ( pListBase )
 			pListBase->RemoveAll();
@@ -909,10 +909,10 @@ bool CListDefMap::r_LoadVal( lpctstr pszKey, CScript & s )
 			m_Container.insert(pListBase);
 		}
 
-		if ( IsSimpleNumberString(pszArg) )
-			return pListBase->AddElementNum(Exp_Get64Val(pszArg));
+		if ( IsSimpleNumberString(ptcArg) )
+			return pListBase->AddElementNum(Exp_Get64Val(ptcArg));
 		else
-			return pListBase->AddElementStr(pszArg);
+			return pListBase->AddElementStr(ptcArg);
 	}
 	else if ( pListBase )
 	{
@@ -982,12 +982,12 @@ bool CListDefMap::r_Write( CTextConsole *pSrc, lpctstr pszString, CSString& strV
 	if ( !strnicmp(s.GetKey(), "findelem", 8) )
 	{
 		bool fQuoted = false;
-		lpctstr pszArg = s.GetArgStr(&fQuoted);
+		lpctstr ptcArg = s.GetArgStr(&fQuoted);
 
-		if (( fQuoted ) || (! IsSimpleNumberString(pszArg) ))
-			strVal.Format("%d", pListBase->FindValStr(pszArg, nStartIndex));
+		if (( fQuoted ) || (! IsSimpleNumberString(ptcArg) ))
+			strVal.Format("%d", pListBase->FindValStr(ptcArg, nStartIndex));
 		else
-			strVal.Format("%d", pListBase->FindValNum(Exp_Get64Val(pszArg), nStartIndex));
+			strVal.Format("%d", pListBase->FindValNum(Exp_Get64Val(ptcArg), nStartIndex));
 
 		return true;
 	}

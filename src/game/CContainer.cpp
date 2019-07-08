@@ -544,34 +544,34 @@ size_t CContainer::ContentCountAll() const
 	return iTotal;
 }
 
-bool CContainer::r_GetRefContainer( lpctstr &pszKey, CScriptObj *&pRef )
+bool CContainer::r_GetRefContainer( lpctstr &ptcKey, CScriptObj *&pRef )
 {
 	ADDTOCALLSTACK("CContainer::r_GetRefContainer");
-	if ( !strnicmp(pszKey, "FIND", 4) )				// find*
+	if ( !strnicmp(ptcKey, "FIND", 4) )				// find*
 	{
-		pszKey += 4;
-		if ( !strnicmp(pszKey, "ID", 2) )			// findid
+		ptcKey += 4;
+		if ( !strnicmp(ptcKey, "ID", 2) )			// findid
 		{
-			pszKey += 2;
-			SKIP_SEPARATORS(pszKey);
-			pRef = ContentFind(g_Cfg.ResourceGetID_Advance(RES_ITEMDEF, pszKey));
-			SKIP_SEPARATORS(pszKey);
+			ptcKey += 2;
+			SKIP_SEPARATORS(ptcKey);
+			pRef = ContentFind(g_Cfg.ResourceGetID_Advance(RES_ITEMDEF, ptcKey));
+			SKIP_SEPARATORS(ptcKey);
 			return true;
 		}
-		else if ( !strnicmp(pszKey, "CONT", 4) )	// findcont
+		else if ( !strnicmp(ptcKey, "CONT", 4) )	// findcont
 		{
-			pszKey += 4;
-			SKIP_SEPARATORS(pszKey);
-			pRef = dynamic_cast<CItem*>(GetAt(Exp_GetSingle(pszKey)));
-			SKIP_SEPARATORS(pszKey);
+			ptcKey += 4;
+			SKIP_SEPARATORS(ptcKey);
+			pRef = dynamic_cast<CItem*>(GetAt(Exp_GetSingle(ptcKey)));
+			SKIP_SEPARATORS(ptcKey);
 			return true;
 		}
-		else if ( !strnicmp(pszKey, "TYPE", 4) )	// findtype
+		else if ( !strnicmp(ptcKey, "TYPE", 4) )	// findtype
 		{
-			pszKey += 4;
-			SKIP_SEPARATORS(pszKey);
-			pRef = ContentFind(g_Cfg.ResourceGetID_Advance(RES_TYPEDEF, pszKey));
-			SKIP_SEPARATORS(pszKey);
+			ptcKey += 4;
+			SKIP_SEPARATORS(ptcKey);
+			pRef = ContentFind(g_Cfg.ResourceGetID_Advance(RES_TYPEDEF, ptcKey));
+			SKIP_SEPARATORS(ptcKey);
 			return true;
 		}
 	}
@@ -588,7 +588,7 @@ CContainer::~CContainer()
 	Clear(); // call this early so the virtuals will work.
 }
 
-bool CContainer::r_WriteValContainer( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc )
+bool CContainer::r_WriteValContainer( lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc )
 {
 	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CContainer::r_WriteValContainer");
@@ -602,11 +602,11 @@ bool CContainer::r_WriteValContainer( lpctstr pszKey, CSString &sVal, CTextConso
 		"RESTEST"
 	};
 
-	int i = FindTableHeadSorted(pszKey, sm_szParams, CountOf(sm_szParams));
+	int i = FindTableHeadSorted(ptcKey, sm_szParams, CountOf(sm_szParams));
 	if ( i < 0 )
 		return false;
 
-	lpctstr	pKey = pszKey + strlen(sm_szParams[i]);
+	lpctstr	pKey = ptcKey + strlen(sm_szParams[i]);
 	SKIP_SEPARATORS(pKey);
 	switch ( i )
 	{

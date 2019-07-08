@@ -441,10 +441,10 @@ lpctstr constexpr CSQLite::sm_szVerbKeys[LDBOV_QTY+1] =
 	nullptr
 };
 
-bool CSQLite::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
+bool CSQLite::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
 {
 	ADDTOCALLSTACK("CSQLite::r_GetRef");
-	UNREFERENCED_PARAMETER(pszKey);
+	UNREFERENCED_PARAMETER(ptcKey);
 	UNREFERENCED_PARAMETER(pRef);
 	return false;
 }
@@ -456,14 +456,14 @@ bool CSQLite::r_LoadVal(CScript & s)
 	return false;
 }
 
-bool CSQLite::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
+bool CSQLite::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
     UNREFERENCED_PARAMETER(fNoCallParent);
     UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CSQLite::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-	int index = FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
+	int index = FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
 	switch ( index )
 	{
 		case LDBO_CONNECTED:
@@ -477,9 +477,9 @@ bool CSQLite::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, boo
 
 		case LDBO_ROW:
 		{
-			pszKey += strlen(sm_szLoadKeys[index]);
-			SKIP_SEPARATORS(pszKey);
-			sVal = m_QueryResult.GetKeyStr(pszKey);
+			ptcKey += strlen(sm_szLoadKeys[index]);
+			SKIP_SEPARATORS(ptcKey);
+			sVal = m_QueryResult.GetKeyStr(ptcKey);
 		} break;
 
 		default:
@@ -490,7 +490,7 @@ bool CSQLite::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, boo
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("command '%s' [%p]\n", pszKey, static_cast<void *>(pSrc));
+	g_Log.EventDebug("command '%s' [%p]\n", ptcKey, static_cast<void *>(pSrc));
 	EXC_DEBUG_END;
 	return false;
 }

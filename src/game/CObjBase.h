@@ -248,186 +248,186 @@ public:
     void ModPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CComponentProps::PropertyValNum_t iMod, bool fBaseDef = false);
 
     /**
-     * @fn  lpctstr CObjBase::GetDefStr( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
+     * @fn  lpctstr CObjBase::GetDefStr( lpctstr ptcKey, bool fZero = false, bool fDef = false ) const;
      *
      * @brief   Gets definition string from m_BaseDefs.
      *
-     * @param   pszKey      The key.
+     * @param   ptcKey      The key.
      * @param   fZero       true to zero.
      * @param   fBaseDef    if the def doesn't exist, then check for a base def.
      *
      * @return  The definition string.
      */
-	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false, bool fBaseDef = false ) const;
+	lpctstr GetDefStr( lpctstr ptcKey, bool fZero = false, bool fBaseDef = false ) const;
 
     /**
-     * @fn  int64 CObjBase::GetDefNum( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
+     * @fn  int64 CObjBase::GetDefNum( lpctstr ptcKey, bool fZero = false, bool fDef = false ) const;
      *
      * @brief   Gets definition number from m_BaseDefs.
      *
-     * @param   pszKey      The key.
+     * @param   ptcKey      The key.
      * @param   fZero       true to zero.
      * @param   fBaseDef    if the def doesn't exist, then check for a base def.
      *
      * @return  The definition number.
      */
 
-	int64 GetDefNum( lpctstr pszKey, bool fBaseDef = false ) const;
+	int64 GetDefNum( lpctstr ptcKey, bool fBaseDef = false ) const;
 
     /**
-     * @fn  void CObjBase::SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true);
+     * @fn  void CObjBase::SetDefNum(lpctstr ptcKey, int64 iVal, bool fZero = true);
      *
      * @brief   Sets definition number from m_BaseDefs.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      * @param   iVal    Value.
      * @param   fZero   If iVal == 0, delete the def.
      */
 
-	void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true);
+	void SetDefNum(lpctstr ptcKey, int64 iVal, bool fZero = true);
 
     /**
-    * @fn  void CObjBase::ModDefNum(lpctstr pszKey, int64 iMod, bool fZero = true);
+    * @fn  void CObjBase::ModDefNum(lpctstr ptcKey, int64 iMod, bool fZero = true);
     *
     * @brief   Add iVal to the numeric definition from m_BaseDefs.
     *
-    * @param   pszKey   The key.
+    * @param   ptcKey   The key.
     * @param   iMod     Value to sum to the current value of the def.
     * @param   fBaseDef if the def doesn't exist, then check for a base def and use that value to create a new def.
     * @param   fZero    If new def value == 0, delete the def.
     */
 
-    void ModDefNum(lpctstr pszKey, int64 iMod, bool fBaseDef = false, bool fZero = false);
+    void ModDefNum(lpctstr ptcKey, int64 iMod, bool fBaseDef = false, bool fZero = false);
 
     /**
-     * @fn  void CObjBase::SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true);
+     * @fn  void CObjBase::SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true);
      *
      * @brief   Sets definition string to m_BaseDefs.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      * @param   pszVal  The value.
      * @param   fQuoted true if quoted.
      * @param   fZero   true to zero.
      */
 
-	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true);
+	void SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true);
 
     /**
-     * @fn  void CObjBase::DeleteDef(lpctstr pszKey);
+     * @fn  void CObjBase::DeleteDef(lpctstr ptcKey);
      *
      * @brief   Deletes the definition from m_BaseDefs.
      *
-     * @param   pszKey  The key to delete.
+     * @param   ptcKey  The key to delete.
      */
-	void DeleteDef(lpctstr pszKey);
+	void DeleteDef(lpctstr ptcKey);
 
     /**
-     * @fn  CVarDefCont * CObjBase::GetDefKey( lpctstr pszKey, bool fDef ) const;
+     * @fn  CVarDefCont * CObjBase::GetDefKey( lpctstr ptcKey, bool fDef ) const;
      *
      * @brief   Gets definition key from m_BaseDefs.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      * @param   fDef    true to definition.
      *
      * @return  nullptr if it fails to find the def, else the pointer to the def.
      */
-	CVarDefCont * GetDefKey( lpctstr pszKey, bool fDef ) const;
+	CVarDefCont * GetDefKey( lpctstr ptcKey, bool fDef ) const;
 
     /**
-    * @fn  CVarDefContNum * CObjBase::GetDefKeyNum( lpctstr pszKey, bool fDef ) const;
+    * @fn  CVarDefContNum * CObjBase::GetDefKeyNum( lpctstr ptcKey, bool fDef ) const;
     *
     * @brief   Gets definition key from m_BaseDefs.
     *
-    * @param   pszKey  The key.
+    * @param   ptcKey  The key.
     * @param   fDef    true to definition.
     *
     * @return  nullptr if it doesn't find a numeric def, else the pointer to the def.
     */
-    inline CVarDefContNum * GetDefKeyNum(lpctstr pszKey, bool fDef) const
+    inline CVarDefContNum * GetDefKeyNum(lpctstr ptcKey, bool fDef) const
     {
-        return dynamic_cast<CVarDefContNum*>(GetDefKey(pszKey, fDef));
+        return dynamic_cast<CVarDefContNum*>(GetDefKey(ptcKey, fDef));
     }
 
     /**
-    * @fn  CVarDefContStr * CObjBase::GetDefKeyStr( lpctstr pszKey, bool fDef ) const;
+    * @fn  CVarDefContStr * CObjBase::GetDefKeyStr( lpctstr ptcKey, bool fDef ) const;
     *
     * @brief   Gets definition key from m_BaseDefs.
     *
-    * @param   pszKey  The key.
+    * @param   ptcKey  The key.
     * @param   fDef    true to definition.
     *
     * @return  nullptr if it doesn't find a string def, else the pointer to the def.
     */
-    inline CVarDefContStr * GetDefKeyStr(lpctstr pszKey, bool fDef) const
+    inline CVarDefContStr * GetDefKeyStr(lpctstr ptcKey, bool fDef) const
     {
-        return dynamic_cast<CVarDefContStr*>(GetDefKey(pszKey, fDef));
+        return dynamic_cast<CVarDefContStr*>(GetDefKey(ptcKey, fDef));
     }
 
     /**
-     * @fn  lpctstr CObjBase::GetKeyStr( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
+     * @fn  lpctstr CObjBase::GetKeyStr( lpctstr ptcKey, bool fZero = false, bool fDef = false ) const;
      *
      * @brief   Gets key string from m_TagDefs.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      * @param   fZero   true to zero.
      * @param   fDef    true to definition.
      *
      * @return  The key string.
      */
-	lpctstr GetKeyStr( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
+	lpctstr GetKeyStr( lpctstr ptcKey, bool fZero = false, bool fDef = false ) const;
 
     /**
-     * @fn  int64 CObjBase::GetKeyNum( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
+     * @fn  int64 CObjBase::GetKeyNum( lpctstr ptcKey, bool fZero = false, bool fDef = false ) const;
      *
      * @brief   Gets key number from m_TagDefs.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      * @param   fDef    true to definition.
      *
      * @return  The key number.
      */
-	int64 GetKeyNum( lpctstr pszKey, bool fDef = false ) const;
+	int64 GetKeyNum( lpctstr ptcKey, bool fDef = false ) const;
 
     /**
-     * @fn  CVarDefCont * CObjBase::GetKey( lpctstr pszKey, bool fDef ) const;
+     * @fn  CVarDefCont * CObjBase::GetKey( lpctstr ptcKey, bool fDef ) const;
      *
      * @brief   Gets a key from m_TagDefs.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      * @param   fDef    Check also for base TagDefs (CHARDEF, ITEMDEF, etc).
      *
      * @return  null if it fails, else the key.
      */
-	CVarDefCont * GetKey( lpctstr pszKey, bool fDef ) const;
+	CVarDefCont * GetKey( lpctstr ptcKey, bool fDef ) const;
 
     /**
-     * @fn  void CObjBase::SetKeyNum(lpctstr pszKey, int64 iVal);
+     * @fn  void CObjBase::SetKeyNum(lpctstr ptcKey, int64 iVal);
      *
      * @brief   Sets key number from m_TagDefs.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      * @param   iVal    Zero-based index of the value.
      */
-	void SetKeyNum(lpctstr pszKey, int64 iVal);
+	void SetKeyNum(lpctstr ptcKey, int64 iVal);
 
     /**
-     * @fn  void CObjBase::SetKeyStr(lpctstr pszKey, lpctstr pszVal);
+     * @fn  void CObjBase::SetKeyStr(lpctstr ptcKey, lpctstr pszVal);
      *
      * @brief   Sets key string from m_TagDefs.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      * @param   pszVal  The value.
      */
-	void SetKeyStr(lpctstr pszKey, lpctstr pszVal);
+	void SetKeyStr(lpctstr ptcKey, lpctstr pszVal);
 
     /**
-     * @fn  void CObjBase::DeleteKey( lpctstr pszKey );
+     * @fn  void CObjBase::DeleteKey( lpctstr ptcKey );
      *
-     * @brief   Deletes the key described by pszKey from m_TagDefs.
+     * @brief   Deletes the key described by ptcKey from m_TagDefs.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      */
-	void DeleteKey( lpctstr pszKey );
+	void DeleteKey( lpctstr ptcKey );
 
 protected:
 
@@ -712,10 +712,10 @@ public:
 
 	void r_WriteSafe( CScript & s );
 
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 	virtual void r_Write( CScript & s );
 	virtual bool r_LoadVal( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;	// some command on this object as a target
     inline virtual bool IsDeleted() const override
     {

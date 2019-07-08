@@ -98,7 +98,7 @@ bool CResourceDef::MakeResourceName()
 
     strcpy(pbuf, "auto_");
 
-    lpctstr pszKey = nullptr;	// auxiliary, the key of a similar CVarDef, if any found
+    lpctstr ptcKey = nullptr;	// auxiliary, the key of a similar CVarDef, if any found
     pszDef = pbuf + 2;
 
     for ( ; *pszName; ++pszName )
@@ -124,19 +124,19 @@ bool CResourceDef::MakeResourceName()
     for ( const CVarDefCont *pVarDef : g_Exp.m_VarResDefs )
     {
         // Is this a similar key?
-        pszKey	= pVarDef->GetKey();
-        if ( strnicmp( pbuf, pszKey, uiLen ) != 0 )
+        ptcKey	= pVarDef->GetKey();
+        if ( strnicmp( pbuf, ptcKey, uiLen ) != 0 )
             continue;
 
         // skip underscores
-        pszKey = pszKey + uiLen;
-        while ( *pszKey	== '_' )
-            ++pszKey;
+        ptcKey = ptcKey + uiLen;
+        while ( *ptcKey	== '_' )
+            ++ptcKey;
 
         // Is this is subsequent key with a number? Get the highest (plus one)
-        if ( IsStrNumericDec( pszKey ) )
+        if ( IsStrNumericDec( ptcKey ) )
         {
-            size_t uiVarThis = Str_ToUI( pszKey );
+            size_t uiVarThis = Str_ToUI( ptcKey );
             if ( uiVarThis >= uiVar )
                 uiVar = uiVarThis + 1;
         }

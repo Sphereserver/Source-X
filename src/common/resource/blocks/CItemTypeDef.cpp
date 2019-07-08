@@ -14,10 +14,10 @@ bool CItemTypeDef::r_LoadVal( CScript & s )
 {
     ADDTOCALLSTACK("CItemTypeDef::r_LoadVal");
     EXC_TRY("LoadVal");
-    lpctstr		pszKey	= s.GetKey();
+    lpctstr		ptcKey	= s.GetKey();
     lpctstr		pszArgs	= s.GetArgStr();
 
-    if ( !strnicmp( pszKey, "TERRAIN", 7 ) )
+    if ( !strnicmp( ptcKey, "TERRAIN", 7 ) )
     {
         size_t iLo = Exp_GetVal( pszArgs );
         GETNONWHITESPACE( pszArgs );

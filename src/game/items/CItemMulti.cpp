@@ -1879,22 +1879,22 @@ lpctstr constexpr CItemMulti::sm_szRefKeys[SHR_QTY + 1] =
     nullptr
 };
 
-bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
+bool CItemMulti::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
 {
     ADDTOCALLSTACK("CItemMulti::r_GetRef");
-    int iCmd = FindTableHeadSorted(pszKey, sm_szRefKeys, CountOf(sm_szRefKeys) - 1);
+    int iCmd = FindTableHeadSorted(ptcKey, sm_szRefKeys, CountOf(sm_szRefKeys) - 1);
 
     if (iCmd >= 0)
     {
-        pszKey += strlen(sm_szRefKeys[iCmd]);
+        ptcKey += strlen(sm_szRefKeys[iCmd]);
     }
 
     switch (iCmd)
     {
         case SHR_ACCESS:
         {
-            int i = Exp_GetVal(pszKey);
-            SKIP_SEPARATORS(pszKey);
+            int i = Exp_GetVal(ptcKey);
+            SKIP_SEPARATORS(ptcKey);
             if ((int)_lAccesses.size() > i)
             {
                 CChar *pAccess = _lAccesses[i].CharFind();
@@ -1908,8 +1908,8 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
         }
         case SHR_ADDON:
         {
-            int i = Exp_GetVal(pszKey);
-            SKIP_SEPARATORS(pszKey);
+            int i = Exp_GetVal(ptcKey);
+            SKIP_SEPARATORS(ptcKey);
             if ((int)_lAddons.size() > i)
             {
                 CItemMulti *pAddon = static_cast<CItemMulti*>(_lAddons[i].ItemFind());
@@ -1923,8 +1923,8 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
         }
         case SHR_BAN:
         {
-            int i = Exp_GetVal(pszKey);
-            SKIP_SEPARATORS(pszKey);
+            int i = Exp_GetVal(ptcKey);
+            SKIP_SEPARATORS(ptcKey);
             if ((int)_lBans.size() > i)
             {
                 CChar *pBan = _lBans[i].CharFind();
@@ -1938,8 +1938,8 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
         }
         case SHR_COMP:
         {
-            int i = Exp_GetVal(pszKey);
-            SKIP_SEPARATORS(pszKey);
+            int i = Exp_GetVal(ptcKey);
+            SKIP_SEPARATORS(ptcKey);
             CItem *pComp = Multi_FindItemComponent(i);
             if (pComp)
             {
@@ -1950,8 +1950,8 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
         }
         case SHR_COOWNER:
         {
-            int i = Exp_GetVal(pszKey);
-            SKIP_SEPARATORS(pszKey);
+            int i = Exp_GetVal(ptcKey);
+            SKIP_SEPARATORS(ptcKey);
             if ((int)_lCoowners.size() > i)
             {
                 CChar *pCoowner = _lCoowners[i].CharFind();
@@ -1965,8 +1965,8 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
         }
         case SHR_FRIEND:
         {
-            int i = Exp_GetVal(pszKey);
-            SKIP_SEPARATORS(pszKey);
+            int i = Exp_GetVal(ptcKey);
+            SKIP_SEPARATORS(ptcKey);
             if ((int)_lFriends.size() > i)
             {
                 CChar *pFriend = _lFriends[i].CharFind();
@@ -1980,8 +1980,8 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
         }
         case SHR_LOCKDOWN:
         {
-            int i = Exp_GetVal(pszKey);
-            SKIP_SEPARATORS(pszKey);
+            int i = Exp_GetVal(ptcKey);
+            SKIP_SEPARATORS(ptcKey);
             if ((int)_lLockDowns.size() > i)
             {
                 CItem *plockdown = _lLockDowns[i].ItemFind();
@@ -1995,25 +1995,25 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
         }
         case SHR_MOVINGCRATE:
         {
-            SKIP_SEPARATORS(pszKey);
+            SKIP_SEPARATORS(ptcKey);
             pRef = static_cast<CItemContainer*>(GetMovingCrate(false).ItemFind());
             return true;
         }
         case SHR_OWNER:
         {
-            SKIP_SEPARATORS(pszKey);
+            SKIP_SEPARATORS(ptcKey);
             pRef = _uidOwner.CharFind();
             return true;
         }
         case SHR_GUILD:
         {
-            SKIP_SEPARATORS(pszKey);
+            SKIP_SEPARATORS(ptcKey);
             pRef = static_cast<CItemStone*>(_uidGuild.ItemFind());
             return true;
         }
         case SHR_REGION:
         {
-            SKIP_SEPARATORS(pszKey);
+            SKIP_SEPARATORS(ptcKey);
             if (m_pRegion != nullptr)
             {
                 pRef = m_pRegion; // Addons do not have region so return it only when not nullptr.
@@ -2023,8 +2023,8 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
         }
         case SHR_SECURED:
         {
-            int i = Exp_GetVal(pszKey);
-            SKIP_SEPARATORS(pszKey);
+            int i = Exp_GetVal(ptcKey);
+            SKIP_SEPARATORS(ptcKey);
             if ((int)_lSecureContainers.size() > i)
             {
                 CItem *pItem = _lSecureContainers[i].ItemFind();
@@ -2039,8 +2039,8 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
         }
         case SHR_VENDOR:
         {
-            int i = Exp_GetVal(pszKey);
-            SKIP_SEPARATORS(pszKey);
+            int i = Exp_GetVal(ptcKey);
+            SKIP_SEPARATORS(ptcKey);
             if ((int)_lVendors.size() > i)
             {
                 CChar *pVendor = _lVendors[i].CharFind();
@@ -2056,7 +2056,7 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
             break;
     }
 
-    return(CItem::r_GetRef(pszKey, pRef));
+    return(CItem::r_GetRef(ptcKey, pRef));
 }
 
 enum
@@ -2498,20 +2498,20 @@ void CItemMulti::r_Write(CScript & s)
     }
 }
 
-bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren)
+bool CItemMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
     UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CItemMulti::r_WriteVal");
-    if (CCMultiMovable::r_WriteVal(pszKey, sVal, pSrc))
+    if (CCMultiMovable::r_WriteVal(ptcKey, sVal, pSrc))
     {
         return true;
     }
-    int iCmd = FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int iCmd = FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     if (iCmd >= 0)
     {
-        pszKey += strlen(sm_szLoadKeys[iCmd]);
+        ptcKey += strlen(sm_szLoadKeys[iCmd]);
     }
-    SKIP_SEPARATORS(pszKey);
+    SKIP_SEPARATORS(ptcKey);
     switch (iCmd)
     {
         // House Permissions
@@ -2521,11 +2521,11 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
         case SHL_OWNER:
         {
             CChar *pOwner = GetOwner().CharFind();
-            if (!IsStrEmpty(pszKey))
+            if (!IsStrEmpty(ptcKey))
             {
                 if (pOwner)
                 {
-                    return pOwner->r_WriteVal(pszKey, sVal, pSrc);
+                    return pOwner->r_WriteVal(ptcKey, sVal, pSrc);
                 }
             }
             if (pOwner)
@@ -2541,11 +2541,11 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
         case SHL_GUILD:
         {
             CItemStone *pGuild = static_cast<CItemStone*>(GetGuild().ItemFind());
-            if (!IsStrEmpty(pszKey))
+            if (!IsStrEmpty(ptcKey))
             {
                 if (pGuild)
                 {
-                    return pGuild->r_WriteVal(pszKey, sVal, pSrc);
+                    return pGuild->r_WriteVal(ptcKey, sVal, pSrc);
                 }
             }
             if (pGuild)
@@ -2560,13 +2560,13 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_ISOWNER:
         {
-            CUID uidOwner = static_cast<CUID>(Exp_GetVal(pszKey));
+            CUID uidOwner = static_cast<CUID>(Exp_GetVal(ptcKey));
             sVal.FormatBVal(IsOwner(uidOwner));
             break;
         }
         case SHL_GETCOOWNERPOS:
         {
-            CUID uidCoowner = static_cast<CUID>(Exp_GetVal(pszKey));
+            CUID uidCoowner = static_cast<CUID>(Exp_GetVal(ptcKey));
             sVal.FormatVal(GetCoownerPos(uidCoowner));
             break;
         }
@@ -2577,7 +2577,7 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_GETFRIENDPOS:
         {
-            CUID uidFriend = static_cast<CUID>(Exp_GetVal(pszKey));
+            CUID uidFriend = static_cast<CUID>(Exp_GetVal(ptcKey));
             sVal.FormatVal(GetFriendPos(uidFriend));
             break;
         }
@@ -2593,7 +2593,7 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_GETACCESSPOS:
         {
-            CUID uidAccess = static_cast<CUID>(Exp_GetVal(pszKey));
+            CUID uidAccess = static_cast<CUID>(Exp_GetVal(ptcKey));
             sVal.FormatVal(GetAccessPos(uidAccess));
             break;
         }
@@ -2604,7 +2604,7 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_GETADDONPOS:
         {
-            CUID uidAddon = static_cast<CUID>(Exp_GetVal(pszKey));
+            CUID uidAddon = static_cast<CUID>(Exp_GetVal(ptcKey));
             sVal.FormatVal(GetAddonPos(uidAddon));
             break;
         }
@@ -2615,7 +2615,7 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_GETBANPOS:
         {
-            CUID uidBan = static_cast<CUID>(Exp_GetVal(pszKey));
+            CUID uidBan = static_cast<CUID>(Exp_GetVal(ptcKey));
             sVal.FormatVal(GetBanPos(uidBan));
             break;
         }
@@ -2628,7 +2628,7 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_GETCOMPPOS:
         {
-            CUID uidComp = static_cast<CUID>(Exp_GetVal(pszKey));
+            CUID uidComp = static_cast<CUID>(Exp_GetVal(ptcKey));
             sVal.FormatVal(GetCompPos(uidComp));
             break;
         }
@@ -2636,15 +2636,15 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
         {
             bool fCreate = false;
 
-            if (strlen(pszKey) <= 2) // check for <MovingCrate 0/1> (whitespace + number = 2 len)
+            if (strlen(ptcKey) <= 2) // check for <MovingCrate 0/1> (whitespace + number = 2 len)
             {
-                fCreate = Exp_GetVal(pszKey);
+                fCreate = Exp_GetVal(ptcKey);
             }
-            else if (!IsStrEmpty(pszKey) && _pMovingCrate.IsValidUID())    // If there's an already existing Moving Crate and args len is greater than 1, it should have a keyword to send to the crate.
+            else if (!IsStrEmpty(ptcKey) && _pMovingCrate.IsValidUID())    // If there's an already existing Moving Crate and args len is greater than 1, it should have a keyword to send to the crate.
             {
                 CItemContainer *pCrate = static_cast<CItemContainer*>(_pMovingCrate.ItemFind());
                 ASSERT(pCrate); // Removed crates should init _pMovingCrate's uid?
-                return pCrate->r_WriteVal(pszKey, sVal, pSrc);
+                return pCrate->r_WriteVal(ptcKey, sVal, pSrc);
             }
             if (fCreate)
             {
@@ -2662,9 +2662,9 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_ADDKEY:
         {
-            pszKey += 6;
-            CUID uidOwner = static_cast<CUID>(Exp_GetVal(pszKey));
-            bool fDupeOnBank = Exp_GetVal(pszKey) ? 1 : 0;
+            ptcKey += 6;
+            CUID uidOwner = static_cast<CUID>(Exp_GetVal(ptcKey));
+            bool fDupeOnBank = Exp_GetVal(ptcKey) ? 1 : 0;
             CChar *pCharOwner = uidOwner.CharFind();
             CItem *pKey = nullptr;
             if (pCharOwner)
@@ -2693,7 +2693,7 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_GETSECUREDCONTAINERPOS:
         {
-            CUID uidCont = (CUID)Exp_GetDWVal(pszKey);
+            CUID uidCont = (CUID)Exp_GetDWVal(ptcKey);
             if (uidCont.IsValidUID())
             {
                 sVal.FormatVal(GetSecuredContainerPos(uidCont));
@@ -2738,12 +2738,12 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_GETHOUSEVENDORPOS:
         {
-            sVal.FormatVal(GetHouseVendorPos((CUID)Exp_GetVal(pszKey)));
+            sVal.FormatVal(GetHouseVendorPos((CUID)Exp_GetVal(ptcKey)));
             break;
         }
         case SHL_GETLOCKEDITEMPOS:
         {
-            sVal.FormatVal(GetLockedItemPos((CUID)Exp_GetVal(pszKey)));
+            sVal.FormatVal(GetLockedItemPos((CUID)Exp_GetVal(ptcKey)));
             break;
         }
         case SHL_LOCKDOWNSPERCENT:
@@ -2767,7 +2767,7 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             break;
         }
         default:
-            return (fNoCallParent ? false : CItem::r_WriteVal(pszKey, sVal, pSrc));
+            return (fNoCallParent ? false : CItem::r_WriteVal(ptcKey, sVal, pSrc));
     }
     return true;
 }
@@ -2845,9 +2845,9 @@ bool CItemMulti::r_LoadVal(CScript & s)
         // House Permissions.
         case SHL_OWNER:
         {
-            lpctstr pszKey = s.GetKey();
-            pszKey += 5;
-            if (*pszKey == '.')
+            lpctstr ptcKey = s.GetKey();
+            ptcKey += 5;
+            if (*ptcKey == '.')
             {
                 CChar *pOwner = GetOwner().CharFind();
                 if (pOwner)
@@ -2869,9 +2869,9 @@ bool CItemMulti::r_LoadVal(CScript & s)
         }
         case SHL_GUILD:
         {
-            lpctstr pszKey = s.GetKey();
-            pszKey += 5;
-            if (*pszKey == '.')
+            lpctstr ptcKey = s.GetKey();
+            ptcKey += 5;
+            if (*ptcKey == '.')
             {
                 CItemStone *pGuild = static_cast<CItemStone*>(GetGuild().ItemFind());
                 if (pGuild)
