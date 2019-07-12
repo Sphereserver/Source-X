@@ -295,7 +295,7 @@ CItem * CItem::CreateBase( ITEMID_TYPE id, IT_TYPE type )	// static
     * from here and the first switch can be removed, and so this comment.
     */
     ASSERT(pItem);
-    pItem->SetType(type);
+    pItem->SetType(type, false);
 
 	if (idErrorMsg && idErrorMsg != -1)
 		DEBUG_ERR(("CreateBase invalid item ID=0%" PRIx32 ", defaulting to ID=0%" PRIx32 ". Created UID=0%" PRIx32 "\n", idErrorMsg, id, (dword)pItem->GetUID()));

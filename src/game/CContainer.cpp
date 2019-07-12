@@ -465,7 +465,7 @@ size_t CContainer::ResourceConsumePart( const CResourceQtyArray *pResources, int
 	return iMissing;
 }
 
-int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iReplicationQty, bool fTest, dword dwArg )
+int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iReplicationQty, bool fTest )
 {
 	ADDTOCALLSTACK("CContainer::ResourceConsume");
 	// Consume or test all the required resources.
@@ -480,7 +480,7 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
 	{
 		// Test what the max number we can really make is first !
 		// All resources must be consumed with the same number.
-		iReplicationQty = ResourceConsume(pResources, iReplicationQty, true, dwArg);
+		iReplicationQty = ResourceConsume(pResources, iReplicationQty, true);
 	}
 
 	CChar *pChar = dynamic_cast<CChar *>(this);
@@ -513,7 +513,7 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
             }
 		}
 
-		int iQtyCur = iQtyTotal - (fTest ? ContentConsumeTest(rid, iQtyTotal, dwArg) : ContentConsume(rid, iQtyTotal, dwArg));
+		int iQtyCur = iQtyTotal - (fTest ? ContentConsumeTest(rid, iQtyTotal) : ContentConsume(rid, iQtyTotal));
 		iQtyCur /= iResQty;
 		if ( iQtyCur < iQtyMin )
 			iQtyMin = iQtyCur;

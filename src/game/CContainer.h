@@ -211,11 +211,10 @@ public:
      * @param   pResources      The resources.
      * @param   iReplicationQty Zero-based index of the replication qty.
      * @param   fTest           true to test.
-     * @param   dwArg           The argument.
      *
      * @return  An int.
      */
-	int ResourceConsume( const CResourceQtyArray * pResources, int iReplicationQty, bool fTest = false, dword dwArg = 0 );
+	int ResourceConsume( const CResourceQtyArray * pResources, int iReplicationQty, bool fTest = false );
 
     /**
      * @fn  size_t CContainer::ResourceConsumePart( const CResourceQtyArray * pResources, int iReplicationQty, int iFailPercent, bool fTest = false, dword dwArg = 0 );

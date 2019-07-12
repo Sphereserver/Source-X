@@ -3804,7 +3804,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 
 	//	2) EVENTS
 	//
-	// Go thru the event blocks for the NPC/PC to do events.
+	// Go through the event blocks for the NPC/PC to do events.
 	//
 	if ( IsTrigUsed(pszTrigName) )
 	{

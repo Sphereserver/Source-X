@@ -724,21 +724,23 @@ badcmd:
 				if ( iQty < 3 )
 					return false;
 
-				int64	iPos = Exp_GetVal( ppArgs[0] );
-				int64	iCnt = Exp_GetVal( ppArgs[1] );
+				int64 iPos = Exp_GetVal( ppArgs[0] );
+				int64 iCnt = Exp_GetVal( ppArgs[1] );
 				if ( iCnt < 0 )
 					return false;
 
-				int64	iLen = strlen( ppArgs[2] );
-				if ( iPos < 0 ) iPos += iLen;
-				if ( iPos > iLen || iPos < 0 ) iPos = 0;
+				int64 iLen = strlen( ppArgs[2] );
+                const bool fBackwards = (iPos < 0);
+				if ( fBackwards )
+                    iPos = iLen - iCnt;
+				if ( (iPos > iLen) || (iPos < 0) )
+                    iPos = 0;
 
-				if ( iPos + iCnt > iLen || iCnt == 0 )
+				if ( (iPos + iCnt > iLen) || (iCnt == 0) )
 					iCnt = iLen - iPos;
 
 				tchar *buf = Str_GetTemp();
-				Str_CopyLimitNull( buf, ppArgs[2] + iPos, (size_t)(iCnt) );
-				buf[iCnt] = '\0';
+				Str_CopyLimitNull( buf, ppArgs[2] + iPos, (size_t)(iCnt + 1) );
 
 				if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
 					g_Log.EventDebug("SCRIPT: strsub(%" PRId64 ",%" PRId64 ",'%s') -> '%s'\n", iPos, iCnt, ppArgs[2], buf);

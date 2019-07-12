@@ -168,7 +168,7 @@ bool CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
             // If a full tooltip was requested (fRequested), or this object is in a shop window (fNameOnly), we need to
             // send the full tooltip and not the version. In the fRequested case, we may have been asked for the full tooltip via scripts,
             // or forcing in the source the full tooltip or because the client asked it because we sent him a newer tooltip version.
-            // In the shop window case, if we send the property version instead of the list, sometimes the wrong names are shown. This
+            // In the shop window case, if we send the property version instead of the list, sometimes wrong names are shown. This
             // happens especially when using a client localization other than english.
 			if (!fRequested && !fNameOnly)
 			{

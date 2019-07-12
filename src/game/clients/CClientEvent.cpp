@@ -1129,7 +1129,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
 		pVendor->Speak("Thou hast bought nothing!");
 		return;
 	}
-    costtotal = m_pChar->PayGold(pVendor,(int)costtotal, nullptr, PAYGOLD_BUY);
+    costtotal = m_pChar->PayGold(pVendor, (int)costtotal, nullptr, PAYGOLD_BUY);
 	//	Check for gold being enough to buy this
 	bool fBoss = pVendor->NPC_IsOwnedBy(m_pChar);
 	if ( !fBoss )
@@ -1178,7 +1178,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
 				continue;
 		}
 
-		if ( !fPlayerVendor )									//	NPC vendors
+		if ( !fPlayerVendor )   // NPC vendors
 		{
 			pItem->SetAmount(pItem->GetAmount() - amount);
 
@@ -1241,9 +1241,9 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
 					pPack->ContentAdd( pItemNew );
 			}
 		}
-		else													// Player vendors
+		else    //  Player vendors
 		{
-			if ( pItem->GetAmount() <= amount )		// buy the whole item
+			if ( pItem->GetAmount() <= amount ) // buy the whole item
 			{
 				if ( !pPack->CanContainerHold( pItem, m_pChar ) || !m_pChar->CanCarry( pItem ) )
 					m_pChar->ItemDrop( pItem, m_pChar->GetTopPoint() );
@@ -1344,7 +1344,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 	int iGold = 0;
 	bool fShortfall = false;
 
-	for (uint i = 0; i < uiItemCount; i++)
+	for (uint i = 0; i < uiItemCount; ++i)
 	{
 		CItemVendable * pItem = dynamic_cast <CItemVendable *> (items[i].m_serial.ItemFind());
 		if ( pItem == nullptr || pItem->IsValidSaleItem(true) == false )
@@ -1370,25 +1370,25 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 			amount = pItem->GetAmount();
 		}
 
-		dword lPrice = pItemSell->GetVendorPrice(iConvertFactor) * amount;
+		dword dwPrice = pItemSell->GetVendorPrice(iConvertFactor) * amount;
 
 		if (( IsTrigUsed(TRIGGER_SELL) ) || ( IsTrigUsed(TRIGGER_ITEMSELL) ))
 		{
-			CScriptTriggerArgs Args( amount, lPrice, pVendor );
+			CScriptTriggerArgs Args( amount, dwPrice, pVendor );
 			if ( pItem->OnTrigger( ITRIG_Sell, this->GetChar(), &Args ) == TRIGRET_RET_TRUE )
 				continue;
 		}
 
 		// Can vendor afford this ?
-		if ( lPrice > pBank->m_itEqBankBox.m_Check_Amount )
+		if (dwPrice > pBank->m_itEqBankBox.m_Check_Amount )
 		{
 			fShortfall = true;
 			break;
 		}
-		pBank->m_itEqBankBox.m_Check_Amount -= lPrice;
+		pBank->m_itEqBankBox.m_Check_Amount -= dwPrice;
 
 		// give them the appropriate amount of gold.
-		iGold += (int)(lPrice);
+		iGold += (int)(dwPrice);
 
 		// Take the items from player.
 		// Put items in vendor inventory.
@@ -1428,7 +1428,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 			m_pChar->UpdateStatsFlag();
 		}
 		else
-			m_pChar->AddGoldToPack(iGold);
+			m_pChar->AddGoldToPack(iGold, nullptr, false);
 
 		addVendorClose(pVendor);
 	}

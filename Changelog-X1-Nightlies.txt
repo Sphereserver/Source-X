@@ -1768,3 +1768,9 @@ WARNING: Important change!
 
 06-07-2019, Nolok
 - Fixed: SERV.CLEARVARS, CLEARTAGS, CLEARCTAGS not working with the given mask (Issue #281).
+
+12-07-2019, Nolok
+- Fixed: STRSUB always cutting away last letter (Issue #287).
+- Fixed: "Can't dynamically assign type 't_multi_custom' to an item." error showing also when setting the type from the base def (Issue #285).
+- Fixed: Craft menus showing every possible item, even if the required materials are not available (Issue #286).
+- Fixed: Selling an item to a vendor caused a new pile of gold to appear in the pack each time, instead of going to an existing pile of gold (Issue #278).

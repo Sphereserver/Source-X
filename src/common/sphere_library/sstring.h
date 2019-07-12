@@ -91,7 +91,7 @@ size_t Str_CopyLimit(tchar * pDst, lpctstr pSrc, size_t uiMaxSize);
 * @brief Like strncpy, but always zero-terminates the copied string (eventually truncating the text) and doesn't zero all the exceeding buffer length
 * @param pDst dest memory space.
 * @param pSrc source data.
-
+* @param uiMaxSize max bytes to be copied (including string terminator!).
 * @return bytes copied (not counting the string terminator)
 */
 size_t Str_CopyLimitNull(tchar * pDst, lpctstr pSrc, size_t uiMaxSize);
