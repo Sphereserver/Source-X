@@ -617,7 +617,7 @@ void AbstractSphereThread::pushStackCall(const char *name)
     if (m_freezeCallStack == false)
     {
         m_stackInfo[m_stackPos].functionName = name;
-        m_stackInfo[m_stackPos].startTime = GetPreciseSysTime();
+        m_stackInfo[m_stackPos].startTime = GetPreciseSysTimeNano();
         ++m_stackPos;
         m_stackInfo[m_stackPos].startTime = 0;
     }

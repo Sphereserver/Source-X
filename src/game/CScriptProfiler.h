@@ -41,14 +41,14 @@ extern llong g_llTimeProfileFrequency;
 #define	TIME_PROFILE_INIT			llong llTicksStart = 0, llTicksEnd = 0
 
 #ifdef _WIN32
-	#define	TIME_PROFILE_START		llTicksStart = GetPreciseSysTime();
-	#define TIME_PROFILE_END		llTicksEnd = GetPreciseSysTime();
+	#define	TIME_PROFILE_START		llTicksStart = GetPreciseSysTimeMilli();
+	#define TIME_PROFILE_END		llTicksEnd = GetPreciseSysTimeMilli();
 
 	#define TIME_PROFILE_GET_HI		((llTicksEnd - llTicksStart) / (g_llTimeProfileFrequency / 1000))
 	#define	TIME_PROFILE_GET_LO		((((llTicksEnd - llTicksStart) * 10000) / (g_llTimeProfileFrequency / 1000)) % 10000)
 #else
-	#define	TIME_PROFILE_START		llTicksStart = GetSupportedTickCount()
-	#define TIME_PROFILE_END		llTicksEnd = GetSupportedTickCount()
+	#define	TIME_PROFILE_START		llTicksStart = GetPreciseSysTimeMilli()
+	#define TIME_PROFILE_END		llTicksEnd = GetPreciseSysTimeMilli()
 
 	#define TIME_PROFILE_GET_HI		(llTicksEnd - llTicksStart)
 	#define	TIME_PROFILE_GET_LO		(((llTicksEnd - llTicksStart) * 10) % 10000)

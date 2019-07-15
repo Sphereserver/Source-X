@@ -181,8 +181,8 @@ bool CScriptObj::r_Call( size_t uiFunctionIndex, CTextConsole * pSrc, CScriptTri
         //	if not, create the corresponding record
         if ( IsSetEF(EF_Script_Profiler) )
         {
-            char	*pName = Str_GetTemp();
-            char	*pSpace;
+            char *pName = Str_GetTemp();
+            char *pSpace;
 
             //	lowercase for speed, and strip arguments
             Str_CopyLimitNull(pName, pFunction->GetName(), STR_TEMPLENGTH);
@@ -197,7 +197,8 @@ bool CScriptObj::r_Call( size_t uiFunctionIndex, CTextConsole * pSrc, CScriptTri
             }
             for ( pFun = g_profiler.FunctionsHead; pFun != nullptr; pFun = pFun->next )
             {
-                if ( !strcmp(pFun->name, pName) ) break;
+                if ( !strcmp(pFun->name, pName) )
+                    break;
             }
 
             // first time function called. so create a record for it

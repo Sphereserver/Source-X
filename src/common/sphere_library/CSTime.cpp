@@ -4,13 +4,44 @@
 // Replace the MFC CTime function. Must be usable with file system.
 //
 
+#include <cmath>
 #include "CSTime.h"
 #include "CSString.h"
 #include "../../common/CLog.h"
 #include "../../sphere/threads.h"
 
 
-llong GetPreciseSysTime()	// 64 bits tick count
+#ifdef _WIN32
+    #if (defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0600))
+	    // We don't have GetSupportedTickCount on Windows versions previous to Vista. We need to check for overflows
+	    //  (which occurs every 49.7 days of continuous running of the server, if measured with GetTickCount, every 7 years
+	    //	with GetSupportedTickCount) manually every time we compare two values.
+
+        // Precision is in the order of 10-16 ms.
+	    static inline llong GetSupportedTickCount() { return (llong)GetTickCount(); }
+    #else
+	    static inline llong GetSupportedTickCount() { return (llong)GetTickCount64(); }
+    #endif
+#endif
+
+llong GetPreciseSysTimeNano()
+{
+#ifdef _WIN32
+    // From Windows documentation:
+    //	On systems that run Windows XP or later, the function will always succeed and will thus never return zero.
+    // Since i think no one will run Sphere on a pre XP os, we can avoid checking for overflows, in case QueryPerformanceCounter fails.
+    LARGE_INTEGER liQPCStart;
+    if (!QueryPerformanceCounter(&liQPCStart))
+        return GetSupportedTickCount() * 1000; // GetSupportedTickCount has only millisecond precision
+    return liQPCStart.QuadPart;
+#else
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (llong)((ts.tv_sec * (llong)1.0e9) + ts.tv_nsec); // nanoseconds
+#endif
+}
+
+llong GetPreciseSysTimeMilli()
 {
 #ifdef _WIN32
     // From Windows documentation:
@@ -19,12 +50,11 @@ llong GetPreciseSysTime()	// 64 bits tick count
     LARGE_INTEGER liQPCStart;
     if (!QueryPerformanceCounter(&liQPCStart))
         return GetSupportedTickCount();
-    return liQPCStart.QuadPart;
+    return (llong)round(liQPCStart.QuadPart / 1.0e3);
 #else
-	struct timespec ts;
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-	// return (llong)((ts.tv_sec * (llong)1.0e6) + (llong)round(ts.tv_nsec / 1.0e6)); // milliseconds
-    return (llong)((ts.tv_sec * (llong)1.0e9) + ts.tv_nsec); // nanoseconds
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (llong)((ts.tv_sec * (llong)1.0e6) + (llong)round(ts.tv_nsec / 1.0e6)); // milliseconds
 #endif
 }
 
