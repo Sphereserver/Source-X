@@ -8,18 +8,25 @@
 #include "CSString.h"
 #include "../../common/CLog.h"
 #include "../../sphere/threads.h"
-#include "../common.h"
 
-#ifndef _WIN32
-#include <sys/time.h>
 
-llong GetSupportedTickCount()	// 64 bits tick count
+llong GetPreciseSysTime()	// 64 bits tick count
 {
+#ifdef _WIN32
+    // From Windows documentation:
+    //	On systems that run Windows XP or later, the function will always succeed and will thus never return zero.
+    // Since i think no one will run Sphere on a pre XP os, we can avoid checking for overflows, in case QueryPerformanceCounter fails.
+    LARGE_INTEGER liQPCStart;
+    if (!QueryPerformanceCounter(&liQPCStart))
+        return GetSupportedTickCount();
+    return liQPCStart.QuadPart;
+#else
 	struct timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
-	return (llong)(((ts.tv_sec * 10000) + (ts.tv_nsec / 100000)) / 10);
-}
+	// return (llong)((ts.tv_sec * (llong)1.0e6) + (llong)round(ts.tv_nsec / 1.0e6)); // milliseconds
+    return (llong)((ts.tv_sec * (llong)1.0e9) + ts.tv_nsec); // nanoseconds
 #endif
+}
 
 
 //**************************************************************

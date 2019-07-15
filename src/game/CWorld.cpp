@@ -809,6 +809,7 @@ bool CWorldClock::Advance()
 
 CWorld::CWorld()
 {
+    _iLastTick = 0;
 	m_ticksWithoutMySQL = 0;
 	m_savetimer = 0;
 	m_iSaveCountID = 0;
@@ -1247,7 +1248,7 @@ bool CWorld::CheckAvailableSpaceForSave(bool fStatics)
     // Calculate the previous save file size
     bool fSizeErr = false;
     ullong uiPreviousSaveSize = 0;
-    auto CalcPrevSavesSize = [=,&fSizeErr, &uiPreviousSaveSize](lpctstr ptcSaveName) -> void
+    auto CalcPrevSavesSize = [=, &fSizeErr, &uiPreviousSaveSize](lpctstr ptcSaveName) -> void
     {
         struct stat st;
         CSString strSaveFile = g_Cfg.m_sWorldBaseDir + SPHERE_FILE + ptcSaveName + SPHERE_SCRIPT;

@@ -44,7 +44,7 @@ CClient::CClient(NetState* state)
 
 	m_iWalkStepCount = 0;
 	m_iWalkTimeAvg	= 100;
-	m_timeWalkStep = GetSupportedTickCount();
+	m_timeWalkStep = GetPreciseSysTime();
 
 	m_Targ_Timeout = 0;
 	m_Targ_Mode = CLIMODE_SETUP_CONNECTING;

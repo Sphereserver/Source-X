@@ -31,7 +31,7 @@ CVarDefContNum::CVarDefContNum( lpctstr ptcKey ) : m_sKey( ptcKey ), m_iVal( 0 )
 
 lpctstr CVarDefContNum::GetValStr() const
 {
-    return Str_FromLL(m_iVal, Str_GetTemp(), 16);
+    return Str_FromLL(m_iVal, Str_GetTemp(), 10);
 }
 
 bool CVarDefContNum::r_LoadVal( CScript & s )

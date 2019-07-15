@@ -193,7 +193,7 @@ int CvtSystemToNUNICODE( nchar * pOut, int iSizeOutChars, lpctstr pInp, int iSiz
 		return 0;
 	}
 
-	iSizeOutChars--;
+	--iSizeOutChars;
 
 	int iOut=0;
 
@@ -283,7 +283,7 @@ int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const nchar * pInp, in
 		return 0;
 	}
 
-	iSizeOutBytes--;
+	--iSizeOutBytes;
 
 	int iOut=0;
 	int iInp=0;
@@ -295,7 +295,7 @@ int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const nchar * pInp, in
 		// Windows 98, 2000 or NT
 
 		// Flip all from network order.
-		wchar szBuffer[ 1024*8 ];
+		wchar szBuffer[ 1024*6 ];
 		for ( ; iInp < (int)CountOf(szBuffer) - 1 && iInp < iSizeInChars && pInp[iInp]; ++iInp )
 		{
 			szBuffer[iInp] = pInp[iInp];

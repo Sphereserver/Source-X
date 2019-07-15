@@ -212,7 +212,7 @@ public:
 	uint m_iDebugFlags;         // DEBUG In game effects to turn on and off.
 
 	// Decay
-	int64  m_iDecay_Item;         // Base decay time in minutes.
+	int64  m_iDecay_Item;         // Base decay time in minutes (but stored as milliseconds).
 	int64  m_iDecay_CorpsePlayer; // Time in minutes for a playercorpse to decay.
 	int64  m_iDecay_CorpseNPC;    // Time in minutes for a NPC corpse to decay.
 

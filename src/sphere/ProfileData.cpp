@@ -57,7 +57,7 @@ void ProfileData::Start(PROFILE_TYPE id)
 	EnableProfile(id);
 
 	// Stop prev task.
-	if ( m_TimeTotal >= (llTimeProfileFrequency * m_iActiveWindowSeconds) )
+	if ( m_TimeTotal >= (g_llTimeProfileFrequency * m_iActiveWindowSeconds) )
 	{
 		for ( int i = 0; i < PROFILE_DATA_QTY; ++i )
 		{
@@ -68,8 +68,8 @@ void ProfileData::Start(PROFILE_TYPE id)
 			}
 			else
 			{
-				if ( m_PreviousTimes[i].m_Time > llTimeProfileFrequency )
-					m_PreviousTimes[i].m_Time = llTimeProfileFrequency;
+				if ( m_PreviousTimes[i].m_Time > g_llTimeProfileFrequency )
+					m_PreviousTimes[i].m_Time = g_llTimeProfileFrequency;
 
 				m_AverageTimes[i].m_Time	= (((m_AverageTimes[i].m_Time * 90) + (m_PreviousTimes[i].m_Time * 10)) / 100);
 				m_AverageTimes[i].m_iCount	= (((m_AverageTimes[i].m_iCount * 95) + (m_PreviousTimes[i].m_iCount * 10)) / 100);
@@ -189,10 +189,10 @@ lpctstr ProfileData::GetDescription(PROFILE_TYPE id) const
 	else
 	{
 		sprintf( pszTmp, "%3i.%04is  avg: %3i.%04is  [samples:%6i  avg:%6i ]  runtime: %is",
-			(int)(		m_PreviousTimes[id].m_Time /			( llTimeProfileFrequency )),
-			(int)(((	m_PreviousTimes[id].m_Time * 10000 ) /	( llTimeProfileFrequency )) % 10000 ),
-			(int)(		m_AverageTimes[id].m_Time /				( llTimeProfileFrequency )),
-			(int)(((	m_AverageTimes[id].m_Time * 10000 ) /	( llTimeProfileFrequency )) % 10000 ),
+			(int)(		m_PreviousTimes[id].m_Time /			( g_llTimeProfileFrequency )),
+			(int)(((	m_PreviousTimes[id].m_Time * 10000 ) /	( g_llTimeProfileFrequency )) % 10000 ),
+			(int)(		m_AverageTimes[id].m_Time /				( g_llTimeProfileFrequency )),
+			(int)(((	m_AverageTimes[id].m_Time * 10000 ) /	( g_llTimeProfileFrequency )) % 10000 ),
 			iCount,
 			m_AverageTimes[id].m_iCount,
 			m_iAverageCount );

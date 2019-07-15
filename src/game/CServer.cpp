@@ -1130,7 +1130,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 			llong average = g_profiler.total / g_profiler.called;
 			CScriptProfiler::CScriptProfilerFunction * pFun;
 			CScriptProfiler::CScriptProfilerTrigger * pTrig;
-			llong divby = llTimeProfileFrequency / 1000;
+			llong divby = g_llTimeProfileFrequency / 1000;
 
             char tmpstring[255];
             sprintf(tmpstring, "Scripts: called %u times and took %i.%04i msec (%i.%04i msec average). Reporting with highest average.\n",

@@ -81,7 +81,7 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 	if ( (m_pNPC->m_Brain == NPCBRAIN_BERSERK) && !pSrc->IsPriv(PRIV_GM) )
 		return false;	// Berserk npcs do not listen to any command (except if src is a GM)
 
-	static lpctstr constexpr sm_Pet_table[] =
+	static lpctstr constexpr sm_Pet_table[PC_QTY+1] =
 	{
 		"ATTACK",
 		"BOUGHT",
@@ -106,7 +106,8 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 		"STOCK",
 		"STOP",
 		"TRANSFER",
-		"UNFRIEND"
+		"UNFRIEND",
+        nullptr
 	};
 
 	PC_TYPE iCmd = static_cast<PC_TYPE>(FindTableSorted(pszCmd, sm_Pet_table, CountOf(sm_Pet_table)));

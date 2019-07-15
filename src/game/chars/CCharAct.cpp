@@ -2396,6 +2396,7 @@ CChar * CChar::Horse_GetMountChar() const
 bool CChar::Horse_Mount(CChar *pHorse)
 {
 	ADDTOCALLSTACK("CChar::Horse_Mount");
+    ASSERT(pHorse);
 	ASSERT(pHorse->m_pNPC);
 
 	if ( !CanTouch(pHorse) )

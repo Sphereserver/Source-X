@@ -84,7 +84,7 @@ lpctstr g_szServerDescription =	SPHERE_TITLE " Version " SPHERE_VERSION " " SPHE
 int g_szServerBuild = 0;
 
 dword CObjBase::sm_iCount = 0;			// UID table.
-llong llTimeProfileFrequency = 1000;	// time profiler
+llong g_llTimeProfileFrequency = 1000;	// time profiler (default value, will be changed in Sphere_InitServer.
 
 // Game servers stuff.
 CWorld			g_World;			// the world. (we save this stuff)
@@ -257,7 +257,7 @@ extern CDataBaseAsyncHelper g_asyncHdb;
 
 int Sphere_InitServer( int argc, char *argv[] )
 {
-	const char *m_sClassName = "Sphere";
+	constexpr char *m_sClassName = "Sphere";
 	EXC_TRY("Init");
 	ASSERT(MAX_BUFFER >= sizeof(CCommand));
 	ASSERT(MAX_BUFFER >= sizeof(CEvent));
@@ -270,8 +270,11 @@ int Sphere_InitServer( int argc, char *argv[] )
 	ASSERT(sizeof(CUOItemTypeRec) == 37 );	// is byte packing working ?
 
 #ifdef _WIN32
-	if ( ! QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER *>(&llTimeProfileFrequency)) )
-		llTimeProfileFrequency = 1000;
+    LARGE_INTEGER liProfFreq;
+    if (!QueryPerformanceFrequency(&liProfFreq))
+        g_llTimeProfileFrequency = 1000;
+    else
+        g_llTimeProfileFrequency = liProfFreq.QuadPart;
 
 #if defined(_MSC_VER) && !defined(_NIGHTLYBUILD)
 	// We don't need an exception translator for the Debug build, since that build would, generally, be used with a debugger.
@@ -803,18 +806,21 @@ void defragSphere(char *path)
 	g_Log.Event(LOGM_INIT,	"Defragmentation complete.\n");
 }
 
+
 #ifdef _WIN32
 int Sphere_MainEntryPoint( int argc, char *argv[] )
 #else
 int _cdecl main( int argc, char * argv[] )
 #endif
 {
+
 #ifndef _WIN32
     IThread::setThreadName("T_SphereStartup");
     g_UnixTerminal.start();
-    // We need to find out the log files folder... look it up in the .ini file (on Windows it's done in WinMain function.
+    // We need to find out the log files folder... look it up in the .ini file (on Windows it's done in WinMain function).
     g_Cfg.LoadIni(false);
 #endif
+
 
     g_Serv.SetServerMode(SERVMODE_Loading);
 	g_Serv.SetExitFlag( Sphere_InitServer( argc, argv ));
@@ -840,7 +846,7 @@ int _cdecl main( int argc, char * argv[] )
 									//  an instance of NetworkInput nad NetworkOutput, which support working in a multi threaded way (declarations and definitions in network_multithreaded.h/.cpp)
 #endif
 
-		bool shouldRunInThread = ( g_Cfg.m_iFreezeRestartTime > 0 );
+		const bool shouldRunInThread = ( g_Cfg.m_iFreezeRestartTime > 0 );
 		if (shouldRunInThread)
 		{
 			g_Main.start();				// Starts another thread to do all the work (it does Sphere_OnTick())
@@ -864,7 +870,7 @@ int _cdecl main( int argc, char * argv[] )
         Sleep (100);
     }
 #endif
-	return( g_Serv.GetExitFlag() );
+	return g_Serv.GetExitFlag();
 }
 
 #include "../tables/classnames.tbl"

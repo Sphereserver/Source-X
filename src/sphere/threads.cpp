@@ -617,7 +617,7 @@ void AbstractSphereThread::pushStackCall(const char *name)
     if (m_freezeCallStack == false)
     {
         m_stackInfo[m_stackPos].functionName = name;
-        m_stackInfo[m_stackPos].startTime = GetSupportedTickCount();
+        m_stackInfo[m_stackPos].startTime = GetPreciseSysTime();
         ++m_stackPos;
         m_stackInfo[m_stackPos].startTime = 0;
     }
@@ -643,7 +643,8 @@ void AbstractSphereThread::printStackTrace()
     llong startTime = m_stackInfo[0].startTime;
 
 	g_Log.EventDebug("Printing STACK TRACE for debugging purposes.\n");
-	g_Log.EventDebug(" __ thread (id) name __ |  # | _____________ function _____________ | ticks passed from previous function start\n");
+    // On Windows versions prior to XP, startTime is the number of ticks, not nanoseconds
+	g_Log.EventDebug(" __ thread (id) name __ |  # | _____________ function _____________ | nanoseconds passed from previous function start\n");
 	for ( size_t i = 0; i < sizeof(m_stackInfo); ++i )
 	{
 		if( m_stackInfo[i].startTime == 0 )

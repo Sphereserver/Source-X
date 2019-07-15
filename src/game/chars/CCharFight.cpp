@@ -1383,8 +1383,9 @@ void CChar::Fight_HitTry()
             {
                 // This happens (only with both PreHit and Swing_NoRange on) if i can't land the hit right now, otherwise retHit
                 //  should be WAR_SWING_EQUIPPING. If this isn't the case, there's something wrong (asserts are placed to intercept this situations).
+                // Though, consider the case of custom combat systems, in that case the asserts may be invalid.
                 SetTimeoutD(1);
-                ASSERT(IsSetCombatFlags(COMBAT_FIRSTHIT_INSTANT) && IsSetCombatFlags(COMBAT_SWING_NORANGE|COMBAT_PREHIT));
+                //ASSERT(IsSetCombatFlags(COMBAT_FIRSTHIT_INSTANT) && IsSetCombatFlags(COMBAT_SWING_NORANGE|COMBAT_PREHIT));
             }
 			return;
 		default:

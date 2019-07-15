@@ -6,19 +6,26 @@
 #ifndef _INC_CSTIME_H
 #define _INC_CSTIME_H
 
-#include <time.h>
+#ifdef _WIN32
+    #include <time.h>
+#else
+    #include <sys/time.h>
+#endif
 #include "../common.h"
 
-#if !defined(_WIN32)
-	llong GetSupportedTickCount();
-#elif (defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0600))
-	// We don't have GetSupportedTickCount on Windows versions previous to Vista. We need to check for overflows
-	//  (which occurs every 49.7 days of continuous running of the server, if measured with GetTickCount, every 7 years
-	//	with GetSupportedTickCount) manually every time we compare two values.
-	inline llong GetSupportedTickCount() { return (llong)GetTickCount(); }
-#else
-	inline llong GetSupportedTickCount() { return (llong)GetTickCount64(); }
+
+#ifdef _WIN32
+    #if (defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0600))
+	    // We don't have GetSupportedTickCount on Windows versions previous to Vista. We need to check for overflows
+	    //  (which occurs every 49.7 days of continuous running of the server, if measured with GetTickCount, every 7 years
+	    //	with GetSupportedTickCount) manually every time we compare two values.
+	    inline llong GetSupportedTickCount() { return (llong)GetTickCount(); }
+    #else
+	    inline llong GetSupportedTickCount() { return (llong)GetTickCount64(); }
+    #endif
 #endif
+
+llong GetPreciseSysTime();
 
 
 class CSTime	// similar to the MFC CTime and CTimeSpan or COleDateTime
