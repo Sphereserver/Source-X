@@ -625,7 +625,7 @@ void AbstractSphereThread::pushStackCall(const char *name)
 
 void AbstractSphereThread::exceptionNotifyStackUnwinding(void)
 {
-    ASSERT(isCurrentThread());
+    //ASSERT(isCurrentThread());
     if (m_exceptionStackUnwinding == false)
     {
         m_exceptionStackUnwinding = true;

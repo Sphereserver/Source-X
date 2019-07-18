@@ -215,7 +215,6 @@ lpctstr constexpr CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@UserVirtue",
 	"@UserVirtueInvoke",
 	"@UserWarmode",	        // War mode ?
-	
     nullptr
 };
 
@@ -248,7 +247,6 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 
 	if ( g_World.m_fSaveParity )
 		StatFlag_Set(STATF_SAVEPARITY);	// It will get saved next time.
-	m_UIDLastNewItem.InitUID();
 	m_dirFace = DIR_SE;
 	m_fonttype = FONT_NORMAL;
 	m_SpeechHueOverride = 0;

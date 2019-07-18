@@ -76,7 +76,7 @@ lpctstr constexpr CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	"@TIMER",		// My timer has expired.
 	"@ToolTip",
 	"@UNEQUIP",		// i have been unequipped (or try to unequip)
-	nullptr,
+	nullptr
 };
 
 /////////////////////////////////////////////////////////////////
@@ -1297,9 +1297,12 @@ int64 CItem::GetDecayTime() const
 		case IT_FOLIAGE:
 		case IT_CROPS:		// crops "decay" as they grow
         {
-            int64 timeNextNewMoon = g_World.GetNextNewMoon((GetTopPoint().m_map == 1) ? false : true);
-            int64 iMinutesDelay = Calc_GetRandLLVal(20) * g_Cfg.m_iGameMinuteLength;
-			return ( g_World.GetTimeDiff( timeNextNewMoon + iMinutesDelay ) * MSECS_PER_SEC );
+            if (m_itCrop.m_Respawn_Sec > 0) // MORE1 override
+                return (m_itCrop.m_Respawn_Sec * MSECS_PER_SEC);
+
+            const int64 iTimeNextNewMoon = g_World.GetNextNewMoon((GetTopPoint().m_map == 1) ? false : true);
+            const int64 iMinutesDelay = Calc_GetRandLLVal(20) * g_Cfg.m_iGameMinuteLength;
+			return g_World.GetTimeDiff(iTimeNextNewMoon) + iMinutesDelay;
         }
 		case IT_MULTI:
 		case IT_SHIP:
@@ -1368,13 +1371,13 @@ bool CItem::MoveToUpdate(const CPointMap& pt, bool fForceFix)
 	return fReturn;
 }
 
-bool CItem::MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool bForceFix)
+bool CItem::MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool fForceFix)
 {
 	SetDecayTime(iMsecsTimeout);
-	return MoveToUpdate( pt, bForceFix);
+	return MoveToUpdate(pt, fForceFix);
 }
 
-void CItem::SetDecayTime( int64 iMsecsTimeout)
+void CItem::SetDecayTime(int64 iMsecsTimeout)
 {
 	ADDTOCALLSTACK("CItem::SetDecayTime");
 	// 0 = default (decay on the next tick)

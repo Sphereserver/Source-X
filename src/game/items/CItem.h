@@ -658,9 +658,9 @@ public:
     virtual void SetTimeoutD(int64 iTenths);
 
 	virtual void OnMoveFrom();
-	virtual bool MoveTo(const CPointMap& pt, bool bForceFix = false); // Put item on the ground here.
-	bool MoveToUpdate(const CPointMap& pt, bool bForceFix = false);
-	bool MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool bForceFix = false);
+	virtual bool MoveTo(const CPointMap& pt, bool fForceFix = false); // Put item on the ground here.
+	bool MoveToUpdate(const CPointMap& pt, bool fForceFix = false);
+	bool MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool fForceFix = false);
 	bool MoveToCheck(const CPointMap & pt, CChar * pCharMover = nullptr );
 	virtual bool MoveNearObj( const CObjBaseTemplate *pItem, ushort uiSteps = 0 ) override;
 

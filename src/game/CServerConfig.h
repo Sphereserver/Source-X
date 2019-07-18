@@ -268,7 +268,7 @@ public:
 	int	 m_iLightDungeon;			// InDungeon light level.
 	int  m_iLightDay;				// Outdoor light level.
 	int  m_iLightNight;				// Outdoor light level.
-	int64  m_iGameMinuteLength;		// Length of the game world minute in (real world) seconds.
+	int64  m_iGameMinuteLength;		// Length of the game world minute in (real world) seconds, stored as msecs.
 	bool m_fNoWeather;				// Turn off all weather.
 	bool m_fCharTags;				// Show [NPC] tags over chars.
 	bool m_fVendorTradeTitle;		// Show job title on vendor names.

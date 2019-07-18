@@ -110,7 +110,7 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
         nullptr
 	};
 
-	PC_TYPE iCmd = static_cast<PC_TYPE>(FindTableSorted(pszCmd, sm_Pet_table, CountOf(sm_Pet_table)));
+	PC_TYPE iCmd = static_cast<PC_TYPE>(FindTableSorted(pszCmd, sm_Pet_table, CountOf(sm_Pet_table) - 1));
 	if ( iCmd < 0 )
 	{
 		if ( !strnicmp(pszCmd, sm_Pet_table[PC_PRICE], 5) )

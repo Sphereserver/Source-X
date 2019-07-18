@@ -234,7 +234,8 @@ bool CChar::Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic)
     // Create moongate between current pt and destination pt
     // RETURN: true = it worked.
 
-    if ( !m_pArea || !ptDest.IsValidPoint() )
+    CRegion *pArea = GetRegion();
+    if ( !pArea || !ptDest.IsValidPoint() )
         return false;
 
     CRegion *pAreaDest = ptDest.GetRegion(REGION_TYPE_AREA|REGION_TYPE_ROOM|REGION_TYPE_MULTI);
@@ -280,14 +281,19 @@ bool CChar::Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic)
 
     const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(SPELL_Gate_Travel);
     ASSERT(pSpellDef);
+    const int64 iDuration = pSpellDef->m_Duration.GetLinear(0) * MSECS_PER_SEC;
 
     ptDest.m_z = GetFixZ(ptDest);
-    ITEMID_TYPE id = pSpellDef->m_idEffect;
-    if (id == ITEMID_NOTHING)
-        id = pAreaDest->IsFlag(REGION_FLAG_SAFE|REGION_FLAG_GUARDED|REGION_FLAG_NO_PVP) ? ITEMID_MOONGATE_BLUE : ITEMID_MOONGATE_RED;
-    int64 iDuration = pSpellDef->m_Duration.GetLinear(0) * MSECS_PER_SEC;
+    ITEMID_TYPE idOrig, idDest;
+    idOrig = idDest = pSpellDef->m_idEffect;
+    if (idOrig == ITEMID_NOTHING)
+    {
+        const dword dwSafeFlags = REGION_FLAG_SAFE | REGION_FLAG_GUARDED | REGION_FLAG_NO_PVP;
+        idOrig = pAreaDest->IsFlag(dwSafeFlags) ? ITEMID_MOONGATE_BLUE : ITEMID_MOONGATE_RED;
+        idDest = pArea->IsFlag    (dwSafeFlags) ? ITEMID_MOONGATE_BLUE : ITEMID_MOONGATE_RED;
+    }
 
-    CItem *pGateOrig = CItem::CreateBase(id);
+    CItem *pGateOrig = CItem::CreateBase(idOrig);
     ASSERT(pGateOrig);
     pGateOrig->SetType(IT_TELEPAD);
     pGateOrig->SetAttr(ATTR_MOVE_NEVER);
@@ -296,7 +302,7 @@ bool CChar::Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic)
     pGateOrig->MoveToDecay(ptMe, iDuration, true);
     pGateOrig->Sound(pSpellDef->m_sound);
 
-    CItem *pGateDest = CItem::CreateBase(id);
+    CItem *pGateDest = CItem::CreateBase(idDest);
     ASSERT(pGateDest);
     pGateDest->SetType(IT_TELEPAD);
     pGateDest->SetAttr(ATTR_MOVE_NEVER);

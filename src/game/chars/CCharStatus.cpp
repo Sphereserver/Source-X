@@ -267,10 +267,10 @@ bool CChar::CanCarry( const CItem *pItem ) const
     return (GetTotalWeight() + iItemWeight <= g_Cfg.Calc_MaxCarryWeight(this));
 }
 
-void CChar::ContentAdd( CItem * pItem, bool bForceNoStack )
+void CChar::ContentAdd( CItem * pItem, bool fForceNoStack )
 {
 	ADDTOCALLSTACK("CChar::ContentAdd");
-	UNREFERENCED_PARAMETER(bForceNoStack);
+	UNREFERENCED_PARAMETER(fForceNoStack);
 	ItemEquip(pItem);
 	//LayerAdd( pItem, LAYER_QTY );
 }
