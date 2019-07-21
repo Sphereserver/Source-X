@@ -999,8 +999,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					m_atMagery.m_SummonID = CREID_LICH;
 					Stats_AddRegenVal(STAT_INT, + pSpell->m_itSpell.m_PolyStr);	// RegenManaVal
                     Stats_AddRegenVal(STAT_STR, - pSpell->m_itSpell.m_PolyDex);	// RegenHitsVal
-                    ModPropNum(pCCPChar, PROPCH_RESFIRE,   - pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
-                    ModPropNum(pCCPChar, PROPCH_RESPOISON, + pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
+                    ModPropNum(pCCPChar, PROPCH_RESFIRE,    - pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
+                    ModPropNum(pCCPChar, PROPCH_RESPOISON,  + pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
                     ModPropNum(pCCPChar, PROPCH_RESCOLD,    + pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
 					iBuffIcon = BI_LICHFORM;
 					break;

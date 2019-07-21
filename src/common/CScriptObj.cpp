@@ -244,6 +244,7 @@ bool CScriptObj::r_Call( size_t uiFunctionIndex, CTextConsole * pSrc, CScriptTri
 
 bool CScriptObj::r_SetVal( lpctstr ptcKey, lpctstr pszVal )
 {
+    ADDTOCALLSTACK("CScriptObj::r_SetVal");
 	CScript s( ptcKey, pszVal );
 	return r_LoadVal( s );
 }
@@ -283,29 +284,24 @@ bool CScriptObj::r_LoadVal( CScript & s )
         }
 
 		case SSC_LIST:
-			{
-				if ( !g_Exp.m_ListGlobals.r_LoadVal(ptcKey + 5, s) )
-					DEBUG_ERR(("Unable to process command '%s %s'\n", ptcKey, s.GetArgRaw()));
-
-				return true;
-			}
+			if ( !g_Exp.m_ListGlobals.r_LoadVal(ptcKey + 5, s) )
+				DEBUG_ERR(("Unable to process command '%s %s'\n", ptcKey, s.GetArgRaw()));
+			return true;
 
 		case SSC_DEFMSG:
+			ptcKey += 7;
+			for ( long l = 0; l < DEFMSG_QTY; ++l )
 			{
-				ptcKey += 7;
-				for ( long l = 0; l < DEFMSG_QTY; ++l )
+				if ( !strcmpi(ptcKey, g_Exp.sm_szMsgNames[l]) )
 				{
-					if ( !strcmpi(ptcKey, g_Exp.sm_szMsgNames[l]) )
-					{
-						bool fQuoted = false;
-						tchar * args = s.GetArgStr(&fQuoted);
-						strcpy(g_Exp.sm_szMessages[l], args);
-						return true;
-					}
+					bool fQuoted = false;
+					tchar * args = s.GetArgStr(&fQuoted);
+					strcpy(g_Exp.sm_szMessages[l], args);
+					return true;
 				}
-				g_Log.Event(LOGM_INIT|LOGL_ERROR, "Setting not used message override named '%s'\n", ptcKey);
-				return false;
 			}
+			g_Log.Event(LOGM_INIT|LOGL_ERROR, "Setting not used message override named '%s'\n", ptcKey);
+			return false;
 	}
 	return true;
 	EXC_CATCH;
@@ -557,15 +553,12 @@ badcmd:
 			}
 			return true;
 		case SSC_DEFLIST:
-			{
-				g_Exp.m_ListInternals.r_Write(pSrc, ptcKey, sVal);
-			}
-			return true;
+            g_Exp.m_ListInternals.r_Write(pSrc, ptcKey, sVal);
+            return true;
 		case SSC_LIST:
-			{
-				g_Exp.m_ListGlobals.r_Write(pSrc, ptcKey, sVal);
-			}
-			return true;
+            if (!g_Exp.m_ListGlobals.r_Write(pSrc, ptcKey, sVal))
+                sVal = "-1";
+            return true;
 		case SSC_DEF0:
 			fZero	= true;
 		case SSC_DEF:

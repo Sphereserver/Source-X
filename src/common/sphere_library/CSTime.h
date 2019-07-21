@@ -14,7 +14,13 @@
 #include "../common.h"
 
 
-llong GetPreciseSysTimeNano();
+#ifdef _WIN32
+    // Set once at server startup; used for Windows high-resolution timer
+    extern llong g_llTimeProfileFrequency;
+#endif
+
+
+llong GetPreciseSysTimeMicro();
 llong GetPreciseSysTimeMilli();
 
 

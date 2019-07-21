@@ -1863,7 +1863,7 @@ bool CItem::SetName( lpctstr pszName )
 int CItem::GetWeight(word amount) const
 {
 	int iWeight = m_weight * (amount ? amount : GetAmount());
-    int64 iReduction = GetPropNum(COMP_PROPS_ITEMCHAR, PROPITCH_WEIGHTREDUCTION, true);
+    int iReduction = GetPropNum(COMP_PROPS_ITEMCHAR, PROPITCH_WEIGHTREDUCTION, true);
 	if (iReduction)
 	{
 		iWeight -= (int)IMulDivLL( iWeight, iReduction, 100 );

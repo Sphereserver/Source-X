@@ -116,7 +116,7 @@ private:
 protected:
 	DefList	m_listElements;
 
-	void DeleteAtIterator(DefList::iterator it);
+	void DeleteAtIterator(DefList::iterator it, bool fEraseFromDefList = true);
 
 public:
 	static const char *m_sClassName;

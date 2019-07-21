@@ -47,7 +47,7 @@ public:
     {
     private:
         bool OnInitDialog();
-        bool OnCommand(word wNotifyCode, INT_PTR wID, HWND hwndCtl);
+        bool OnCommand(WORD wNotifyCode, INT_PTR wID, HWND hwndCtl);
     public:
         virtual BOOL DefDialogProc(UINT message, WPARAM wParam, LPARAM lParam);
     };

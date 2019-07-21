@@ -99,11 +99,10 @@ public:
 	* @param [in,out]  pArgs       If non-null, the arguments.
 	* @param [in,out]  pSrc        If non-null, source for the.
 	* @param [in,out]  trResult    The tr result.
-	* @param   bFull               true to full.
 	*
 	* @return  true if it succeeds, false if it fails.
 	*/
-	bool CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull);
+	bool CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult);
 
     /**
      * @fn  virtual void CObjBase::DeletePrepare();

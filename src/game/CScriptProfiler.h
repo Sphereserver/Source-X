@@ -35,24 +35,15 @@ extern struct CScriptProfiler
     }		*TriggersHead, *TriggersTail;
 } g_profiler;
 
+
 //	Time measurement macros for the profiler (use them only for the profiler!)
-extern llong g_llTimeProfileFrequency;
+#define	TIME_PROFILE_INIT	    llong llTicksStart = 0, llTicksEnd = 0
 
-#define	TIME_PROFILE_INIT			llong llTicksStart = 0, llTicksEnd = 0
+#define	TIME_PROFILE_START	    llTicksStart = GetPreciseSysTimeMilli();
+#define TIME_PROFILE_END	    llTicksEnd = GetPreciseSysTimeMilli();
 
-#ifdef _WIN32
-	#define	TIME_PROFILE_START		llTicksStart = GetPreciseSysTimeMilli();
-	#define TIME_PROFILE_END		llTicksEnd = GetPreciseSysTimeMilli();
-
-	#define TIME_PROFILE_GET_HI		((llTicksEnd - llTicksStart) / (g_llTimeProfileFrequency / 1000))
-	#define	TIME_PROFILE_GET_LO		((((llTicksEnd - llTicksStart) * 10000) / (g_llTimeProfileFrequency / 1000)) % 10000)
-#else
-	#define	TIME_PROFILE_START		llTicksStart = GetPreciseSysTimeMilli()
-	#define TIME_PROFILE_END		llTicksEnd = GetPreciseSysTimeMilli()
-
-	#define TIME_PROFILE_GET_HI		(llTicksEnd - llTicksStart)
-	#define	TIME_PROFILE_GET_LO		(((llTicksEnd - llTicksStart) * 10) % 10000)
-#endif
+#define TIME_PROFILE_GET_HI	    ((llTicksEnd - llTicksStart) / 1000)            // Get only the seconds
+#define	TIME_PROFILE_GET_LO	    (((llTicksEnd - llTicksStart) * 10) % 10000)    // Get milliseconds only, without the seconds part
 
 
 #endif //_INC_CSCRIPTPROFILER_H

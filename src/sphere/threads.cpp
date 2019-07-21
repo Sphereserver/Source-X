@@ -49,7 +49,7 @@ typedef struct tagTHREADNAME_INFO
 } THREADNAME_INFO;
 #pragma pack(pop)
 
-const dword MS_VC_EXCEPTION = 0x406D1388;
+constexpr DWORD MS_VC_EXCEPTION = 0x406D1388;
 #endif
 
 void IThread::setThreadName(const char* name)
@@ -62,7 +62,7 @@ void IThread::setThreadName(const char* name)
     Str_CopyLimitNull(name_trimmed, name, m_nameMaxLength);
 
 #if defined(_WIN32)
-#if defined(_MSC_VER)	// TODO: support thread naming when compiling with compilers other than Microsoft
+#if defined(_MSC_VER)	// TODO: support thread naming when compiling with compilers other than Microsoft's
 	// Windows uses THREADNAME_INFO structure to set thread name
 	THREADNAME_INFO info;
 	info.dwType = 0x1000;
@@ -98,8 +98,6 @@ size_t ThreadHolder::m_threadCount = 0;
 bool ThreadHolder::m_inited = false;
 SimpleMutex ThreadHolder::m_mutex;
 TlsValue<IThread *> ThreadHolder::m_currentThread;
-
-extern CLog g_Log;
 
 IThread *ThreadHolder::current()
 {
@@ -617,7 +615,7 @@ void AbstractSphereThread::pushStackCall(const char *name)
     if (m_freezeCallStack == false)
     {
         m_stackInfo[m_stackPos].functionName = name;
-        m_stackInfo[m_stackPos].startTime = GetPreciseSysTimeNano();
+        m_stackInfo[m_stackPos].startTime = GetPreciseSysTimeMicro();
         ++m_stackPos;
         m_stackInfo[m_stackPos].startTime = 0;
     }
@@ -643,8 +641,8 @@ void AbstractSphereThread::printStackTrace()
     llong startTime = m_stackInfo[0].startTime;
 
 	g_Log.EventDebug("Printing STACK TRACE for debugging purposes.\n");
-    // On Windows versions prior to XP, startTime is the number of ticks, not nanoseconds
-	g_Log.EventDebug(" __ thread (id) name __ |  # | _____________ function _____________ | nanoseconds passed from previous function start\n");
+    // On Windows versions prior to XP, startTime is the number of ticks, not microseconds
+	g_Log.EventDebug(" __ thread (id) name __ |  # | _____________ function _____________ | microseconds passed from previous function start\n");
 	for ( size_t i = 0; i < sizeof(m_stackInfo); ++i )
 	{
 		if( m_stackInfo[i].startTime == 0 )

@@ -1041,7 +1041,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		m_FilePlayers.WriteSection("EOF");
 		m_FileMultis.WriteSection("EOF");
 
-		m_iSaveCountID++;	// Save only counts if we get to the end winout trapping.
+		++m_iSaveCountID;	// Save only counts if we get to the end winout trapping.
 		m_timeSave = g_World.GetCurrentTime().GetTimeRaw() + g_Cfg.m_iSavePeriod;	// next save time.
 
 		g_Log.Event(LOGM_SAVE, "World data saved   (%s).\n", m_FileWorld.GetFilePath());
@@ -1054,7 +1054,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		TIME_PROFILE_END;
 
 		tchar * time = Str_GetTemp();
-		sprintf(time, "%" PRId64 ".%04lld", (int64)(TIME_PROFILE_GET_HI / MSECS_PER_SEC), (int64)(TIME_PROFILE_GET_LO));
+		sprintf(time, "%" PRId64 ".%04lld", (int64)(TIME_PROFILE_GET_HI), (int64)(TIME_PROFILE_GET_LO));
 
 		g_Log.Event(LOGM_SAVE, "World save completed, took %s seconds.\n", time);
 

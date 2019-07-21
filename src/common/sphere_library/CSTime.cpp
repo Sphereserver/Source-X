@@ -24,7 +24,7 @@
     #endif
 #endif
 
-llong GetPreciseSysTimeNano()
+llong GetPreciseSysTimeMicro()
 {
 #ifdef _WIN32
     // From Windows documentation:
@@ -33,28 +33,25 @@ llong GetPreciseSysTimeNano()
     LARGE_INTEGER liQPCStart;
     if (!QueryPerformanceCounter(&liQPCStart))
         return GetSupportedTickCount() * 1000; // GetSupportedTickCount has only millisecond precision
-    return liQPCStart.QuadPart;
+    return (llong)((liQPCStart.QuadPart * 1.0e6) / g_llTimeProfileFrequency);
 #else
 	struct timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (llong)((ts.tv_sec * (llong)1.0e9) + ts.tv_nsec); // nanoseconds
+    return (llong)((ts.tv_sec * (llong)1.0e6) + (llong)round(ts.tv_nsec / 1.0e3)); // microseconds
 #endif
 }
 
 llong GetPreciseSysTimeMilli()
 {
 #ifdef _WIN32
-    // From Windows documentation:
-    //	On systems that run Windows XP or later, the function will always succeed and will thus never return zero.
-    // Since i think no one will run Sphere on a pre XP os, we can avoid checking for overflows, in case QueryPerformanceCounter fails.
     LARGE_INTEGER liQPCStart;
     if (!QueryPerformanceCounter(&liQPCStart))
         return GetSupportedTickCount();
-    return (llong)round(liQPCStart.QuadPart / 1.0e3);
+    return (llong)((liQPCStart.QuadPart * 1.0e3) / g_llTimeProfileFrequency);
 #else
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (llong)((ts.tv_sec * (llong)1.0e6) + (llong)round(ts.tv_nsec / 1.0e6)); // milliseconds
+    return (llong)((ts.tv_sec * (llong)1.0e3) + (llong)round(ts.tv_nsec / 1.0e6)); // milliseconds
 #endif
 }
 

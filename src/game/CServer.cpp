@@ -360,34 +360,46 @@ void CServer::ListClients( CTextConsole *pConsole ) const
 		return;
 
 	const CChar *pCharCmd = pConsole->GetChar();
-	const CChar *pChar = nullptr;
-	const CAccount *pAcc = nullptr;
-	tchar *pszMsg = Str_GetTemp();
-	tchar *tmpMsg = Str_GetTemp();
-	tchar chRank = 0;
-	lpcstr pszState = nullptr;
-	size_t numClients = 0;
+	tchar *ptcMsg = Str_GetTemp();
+
+    // Count clients
+    size_t numClients = 0;
+    {
+        ClientIterator it;
+        for (const CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
+            ++numClients;
+    }
+
+    if (numClients <= 0)
+        sprintf(ptcMsg, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_NO_CLIENT));
+    else if (numClients == 1)
+        sprintf(ptcMsg, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_ONE_CLIENT));
+    else
+        sprintf(ptcMsg, "%s %" PRIuSIZE_T "\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_MANY_CLIENTS), numClients);
+
+    pConsole->SysMessage(ptcMsg);
+
 
 	ClientIterator it;
 	for ( const CClient *pClient = it.next(); pClient != nullptr; pClient = it.next() )
 	{
-		++numClients;
-		pChar = pClient->GetChar();
-		pAcc = pClient->GetAccount();
-		chRank = (pAcc && pAcc->GetPrivLevel() > PLEVEL_Player) ? '+' : '=';
+        const CChar* pChar = pClient->GetChar();
+        const CAccount* pAcc = pClient->GetAccount();
+        const tchar chRank = (pAcc && pAcc->GetPrivLevel() > PLEVEL_Player) ? '+' : '=';
 
 		if ( pChar )
 		{
 			if ( pCharCmd && !pCharCmd->CanDisturb(pChar) )
 				continue;
 
-			sprintf(tmpMsg, "%" PRIx32 ":Acc%c'%s', Char='%s' (IP: %s)\n", pClient->GetSocketID(), chRank, !pAcc ? "null" : pAcc->GetName(), pChar->GetName(), pClient->GetPeerStr());
+			sprintf(ptcMsg, "%" PRIx32 ":Acc%c'%s', Char='%s' (IP: %s)\n", pClient->GetSocketID(), chRank, !pAcc ? "null" : pAcc->GetName(), pChar->GetName(), pClient->GetPeerStr());
 		}
 		else
 		{
 			if ( pConsole->GetPrivLevel() < pClient->GetPrivLevel() )
 				continue;
 
+            lpcstr pszState;
 			switch ( pClient->GetConnectType() )
 			{
 				case CONNECT_HTTP:
@@ -401,28 +413,11 @@ void CServer::ListClients( CTextConsole *pConsole ) const
 					break;
 			}
 
-			sprintf(tmpMsg, "%" PRIx32 ":Acc%c'%s' (IP: %s) %s\n", pClient->GetSocketID(), chRank, pAcc ? pAcc->GetName() : "<NA>", pClient->GetPeerStr(), pszState);
+			sprintf(ptcMsg, "%" PRIx32 ":Acc%c'%s' (IP: %s) %s\n", pClient->GetSocketID(), chRank, pAcc ? pAcc->GetName() : "<NA>", pClient->GetPeerStr(), pszState);
 		}
 
-		// If we have many clients, SCRIPT_MAX_LINE_LEN may be too short ;) (matex)
-		if ( strlen(pszMsg) + strlen(tmpMsg) >= SCRIPT_MAX_LINE_LEN )
-		{
-			pConsole->SysMessage(pszMsg);
-			pszMsg[0] = '\0';
-		}
-		ASSERT((strlen(pszMsg) + strlen(tmpMsg)) < SCRIPT_MAX_LINE_LEN);
-        Str_ConcatLimitNull(pszMsg, tmpMsg, SCRIPT_MAX_LINE_LEN);
+        pConsole->SysMessage(ptcMsg);
 	}
-
-	if ( numClients <= 0 )
-		sprintf(tmpMsg, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_NO_CLIENT));
-	else if ( numClients == 1 )
-		sprintf(tmpMsg, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_ONE_CLIENT));
-	else
-		sprintf(tmpMsg, "%s %" PRIuSIZE_T "\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_MANY_CLIENTS), numClients);
-
-	pConsole->SysMessage(pszMsg);
-	pConsole->SysMessage(tmpMsg);
 }
 
 bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
@@ -1083,21 +1078,24 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 		if (ftDump != nullptr)
 			ftDump->Printf("Thread %u, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
 
-		for (int i = 0; i < PROFILE_QTY; i++)
+		for (int i = 0; i < PROFILE_QTY; ++i)
 		{
-			if (profile.IsEnabled(static_cast<PROFILE_TYPE>(i)) == false)
+            const PROFILE_TYPE iProfile = (PROFILE_TYPE)i;
+			if (profile.IsEnabled(iProfile) == false)
 				continue;
 
             if (pSrc != this)
             {
-                pSrc->SysMessagef("%-10s = %s\n", profile.GetName(static_cast<PROFILE_TYPE>(i)), profile.GetDescription(static_cast<PROFILE_TYPE>(i)));
+                pSrc->SysMessagef("%-14s = %s\n", profile.GetName(iProfile), profile.GetDescription(iProfile));
             }
             else
             {
-                g_Log.Event(LOGL_EVENT, "%-10s = %s\n", profile.GetName(static_cast<PROFILE_TYPE>(i)), profile.GetDescription(static_cast<PROFILE_TYPE>(i)));
+                g_Log.Event(LOGL_EVENT, "%-14s = %s\n", profile.GetName(iProfile), profile.GetDescription(iProfile));
             }
-			if (ftDump != nullptr)
-				ftDump->Printf( "%-10s = %s\n", profile.GetName(static_cast<PROFILE_TYPE>(i)), profile.GetDescription(static_cast<PROFILE_TYPE>(i)) );
+            if (ftDump != nullptr)
+            {
+                ftDump->Printf("%-14s = %s\n", profile.GetName(iProfile), profile.GetDescription(iProfile));
+            }
 		}
 	}
 
@@ -1129,16 +1127,13 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 		{
 			CScriptProfiler::CScriptProfilerFunction * pFun;
 			CScriptProfiler::CScriptProfilerTrigger * pTrig;
-            const llong average = g_profiler.total / g_profiler.called;
-			const llong divby = g_llTimeProfileFrequency / 1000;
+            const long double average = (long double)g_profiler.total / g_profiler.called;
 
             char tmpstring[255];
-            sprintf(tmpstring, "Scripts: called %u times and took %i.%04i msec (%i.%04i msec average). Reporting with highest average.\n",
+            sprintf(tmpstring, "Scripts: called %u times and took a total of %.4f seconds (%.4Lfs average). Reporting with highest average.\n",
                 g_profiler.called,
-                (int)(g_profiler.total / divby),
-                (int)(((g_profiler.total * 10000) / (divby)) % 10000),
-                (int)(average / divby),
-                (int)(((average * 10000) / (divby)) % 10000));
+                (g_profiler.total   / 1000.0),
+                (average            / 1000.0));
             if (pSrc != this)
             {
                 pSrc->SysMessage(tmpstring);
@@ -1156,17 +1151,13 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 			{
 				if ( pFun->average > average )
 				{
-                    sprintf(tmpstring, "FUNCTION '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
+                    sprintf(tmpstring, "FUNCTION '%s' called %u times, took %.4f seconds average (%.4f min, %.4f max), total: %.4f s.\n",
                         pFun->name,
                         pFun->called,
-                        (int)(pFun->average / divby),
-                        (int)(((pFun->average * 10000) / (divby)) % 10000),
-                        (int)(pFun->min / divby),
-                        (int)(((pFun->min * 10000) / (divby)) % 10000),
-                        (int)(pFun->max / divby),
-                        (int)(((pFun->max * 10000) / (divby)) % 10000),
-                        (int)(pFun->total / divby),
-                        (int)(((pFun->total * 10000) / (divby)) % 10000));
+                        (pFun->average / 1000.0),
+                        (pFun->min     / 1000.0),
+                        (pFun->max     / 1000.0),
+                        (pFun->total   / 1000.0));
 
                     if (pSrc != this)
                     {
@@ -1186,18 +1177,13 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 			{
 				if ( pTrig->average > average )
 				{
-					sprintf(tmpstring, "TRIGGER '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
+					sprintf(tmpstring, "TRIGGER '%s' called %u times, took %.4f seconds average (%.4f min, %.4f max), total: %.f4 s.\n",
 						pTrig->name,
 						pTrig->called,
-						(int)(pTrig->average / divby),
-						(int)(((pTrig->average * 10000) / (divby)) % 10000),
-						(int)(pTrig->min / divby),
-						(int)(((pTrig->min * 10000) / (divby)) % 10000),
-						(int)(pTrig->max / divby),
-						(int)(((pTrig->max * 10000) / (divby)) % 10000),
-						(int)(pTrig->total / divby),
-						(int)(((pTrig->total * 10000) / (divby)) % 10000)
-					);
+						(pTrig->average / 1000.0),
+						(pTrig->min     / 1000.0),
+						(pTrig->max     / 1000.0),
+						(pTrig->total   / 1000.0));
                     if (pSrc != this)
                     {
                         pSrc->SysMessage(tmpstring);

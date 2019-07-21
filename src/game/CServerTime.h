@@ -16,14 +16,17 @@
 struct CServerTime
 {
 	#define TICKS_PER_SEC   (int64)10      // Amount of ticks to advance in a second.
+
     #define TENTHS_PER_SEC  (int64)10      // Tenths in a second (backwards).
     #define MSECS_PER_SEC   (int64)1000    // Milliseconds in a second (to avoid magic numbers).
 
     #define MSECS_PER_TENTH (int64)100
-    #define MSECS_PER_TICK  (int64)(MSECS_PER_SEC / TICKS_PER_SEC) // Milliseconds lapse between one tick and another.
+    #define MSECS_PER_TICK  (int64)(MSECS_PER_SEC / TICKS_PER_SEC) // Milliseconds lapse between one server tick and another.
+
 
 	static const char *m_sClassName;
 	int64 m_llPrivateTime;
+
 
     inline CServerTime();
     inline CServerTime(int64 iTimeInMilliseconds);
@@ -47,6 +50,8 @@ struct CServerTime
 
     #undef GetCurrentTime
 	static CServerTime GetCurrentTime();
+
+    static lpctstr GetTimeMinDesc(int iMinutes);
 };
 
 

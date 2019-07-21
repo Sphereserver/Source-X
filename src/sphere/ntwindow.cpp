@@ -43,7 +43,7 @@ bool CNTWindow::CAboutDlg::OnInitDialog()
 	return false;
 }
 
-bool CNTWindow::CAboutDlg::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl )
+bool CNTWindow::CAboutDlg::OnCommand( WORD wNotifyCode, INT_PTR wID, HWND hwndCtl )
 {
 	UNREFERENCED_PARAMETER(wNotifyCode);
 	UNREFERENCED_PARAMETER(hwndCtl);
@@ -115,7 +115,7 @@ void CNTWindow::CStatusDlg::FillStats()
 			if (profile.IsEnabled( (PROFILE_TYPE)i ) == false)
 				continue;
 
-			capture.SysMessagef("'%-10s' = %s\n", profile.GetName((PROFILE_TYPE)i), profile.GetDescription((PROFILE_TYPE)i));
+			capture.SysMessagef("'%-14s' = %s\n", profile.GetName((PROFILE_TYPE)i), profile.GetDescription((PROFILE_TYPE)i));
 		}
 	}
 }

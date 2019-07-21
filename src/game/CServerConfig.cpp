@@ -2067,7 +2067,15 @@ SKILL_TYPE CServerConfig::FindSkillKey( lpctstr ptcKey ) const
 STAT_TYPE CServerConfig::FindStatKey( lpctstr ptcKey ) // static
 {
 	ADDTOCALLSTACK("CServerConfig::FindStatKey");
-	return (STAT_TYPE) FindTable( ptcKey, g_Stat_Name, CountOf( g_Stat_Name ));
+
+    static constexpr lpctstr _ptcStatName[STAT_QTY] = // not sorted obviously.
+    {
+        "STR",
+        "INT",
+        "DEX",
+        "FOOD"
+    };
+	return (STAT_TYPE) FindTable( ptcKey, _ptcStatName, CountOf(_ptcStatName));
 }
 
 int CServerConfig::GetSpellEffect( SPELL_TYPE spell, int iSkillVal ) const

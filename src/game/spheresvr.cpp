@@ -30,6 +30,8 @@
 #include "CWorld.h"
 #include "spheresvr.h"
 
+lpctstr g_szServerDescription = SPHERE_TITLE " Version " SPHERE_VERSION " " SPHERE_VER_FILEOS_STR	" by www.spherecommunity.net";
+
 
 bool WritePidFile(int iMode = 0)
 {
@@ -71,20 +73,51 @@ bool WritePidFile(int iMode = 0)
 	}
 }
 
-lpctstr const g_Stat_Name[STAT_QTY] =	// not sorted obviously.
-{
-	"STR",
-	"INT",
-	"DEX",
-	"FOOD"
-};
 
-lpctstr g_szServerDescription =	SPHERE_TITLE " Version " SPHERE_VERSION " " SPHERE_VER_FILEOS_STR	" by www.spherecommunity.net";
-
-int g_szServerBuild = 0;
+// Dynamic initialization of some global stuff
 
 dword CObjBase::sm_iCount = 0;			// UID table.
 llong g_llTimeProfileFrequency = 1000;	// time profiler (default value, will be changed in Sphere_InitServer.
+
+
+GlobalInitializer::GlobalInitializer()
+{
+    constexpr char* m_sClassName = "GlobalInitializer";
+    EXC_TRY("Pre-startup Init");
+    ASSERT(MAX_BUFFER >= sizeof(CCommand));
+    ASSERT(MAX_BUFFER >= sizeof(CEvent));
+    ASSERT(sizeof(int) == sizeof(dword));	// make this assumption often.
+    ASSERT(sizeof(ITEMID_TYPE) == sizeof(dword));
+    ASSERT(sizeof(word) == 2);
+    ASSERT(sizeof(dword) == 4);
+    ASSERT(sizeof(nword) == 2);
+    ASSERT(sizeof(ndword) == 4);
+    ASSERT(sizeof(CUOItemTypeRec) == 37);	// is byte packing working ?
+
+#ifdef _WIN32
+    LARGE_INTEGER liProfFreq;
+    if (QueryPerformanceFrequency(&liProfFreq))
+        g_llTimeProfileFrequency = liProfFreq.QuadPart;
+
+#if defined(_MSC_VER) && !defined(_NIGHTLYBUILD)
+    // We don't need an exception translator for the Debug build, since that build would, generally, be used with a debugger.
+    // We don't want that for Release build either because, in order to call _set_se_translator, we should set the /EHa
+    //	compiler flag, which slows down code a bit.
+    EXC_SET_BLOCK("setting exception catcher");
+    SetExceptionTranslator();
+#endif
+#endif // _WIN32
+
+#ifndef _DEBUG
+    // Same as for SetExceptionTranslator, Debug build doesn't need a purecall handler.
+    EXC_SET_BLOCK("setting purecall handler");
+    SetPurecallHandler();
+#endif
+    EXC_CATCH;
+}
+
+GlobalInitializer g_GlobalInitializer;
+
 
 // Game servers stuff.
 CWorld			g_World;			// the world. (we save this stuff)
@@ -113,90 +146,10 @@ CSStringList	g_AutoComplete;		// auto-complete list
 CScriptProfiler g_profiler;			// script profiler
 CUOMapList		g_MapList;			// global maps information
 
+MainThread g_Main;
+extern PingServer g_PingServer;
+extern CDataBaseAsyncHelper g_asyncHdb;
 
-lpctstr GetTimeMinDesc( int minutes )
-{
-	tchar *pTime = Str_GetTemp();
-
-	int minute = minutes % 60;
-	int hour = ( minutes / 60 ) % 24;
-
-	lpctstr pMinDif;
-	if ( minute <= 14 )
-//		pMinDif = "";
-		pMinDif = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_QUARTER_FIRST);
-	else if ( ( minute >= 15 ) && ( minute <= 30 ) )
-//		pMinDif = "a quarter past";
-		pMinDif = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_QUARTER_SECOND);
-	else if ( ( minute >= 30 ) && ( minute <= 45 ) )
-		//pMinDif = "half past";
-		pMinDif = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_QUARTER_THIRD);
-	else
-	{
-//		pMinDif = "a quarter till";
-		pMinDif = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_QUARTER_FOURTH);
-		hour = ( hour + 1 ) % 24;
-	}
-/*
-	static lpctstr constexpr sm_ClockHour[] =
-	{
-		"midnight",
-		"one",
-		"two",
-		"three",
-		"four",
-		"five",
-		"six",
-		"seven",
-		"eight",
-		"nine",
-		"ten",
-		"eleven",
-		"noon"
-	};
-*/
-	lpctstr sm_ClockHour[] =
-	{
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_ZERO),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_ONE),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_TWO),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_THREE),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_FOUR),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_FIVE),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_SIX),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_SEVEN),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_EIGHT),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_NINE),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_TEN),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_ELEVEN),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_TWELVE),
-	};
-
-	lpctstr pTail;
-	if ( hour == 0 || hour==12 )
-		pTail = "";
-	else if ( hour > 12 )
-	{
-		hour -= 12;
-		if ((hour>=1)&&(hour<6))
-			pTail = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_13_TO_18);
-//			pTail = " o'clock in the afternoon";
-		else if ((hour>=6)&&(hour<9))
-			pTail = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_18_TO_21);
-//			pTail = " o'clock in the evening.";
-		else
-			pTail = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_21_TO_24);
-//			pTail = " o'clock at night";
-	}
-	else
-	{
-		pTail = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_24_TO_12);
-//		pTail = " o'clock in the morning";
-	}
-
-	sprintf( pTime, "%s %s %s", pMinDif, sm_ClockHour[hour], pTail );
-	return pTime;
-}
 
 
 //*******************************************************************
@@ -248,49 +201,13 @@ bool MainThread::shouldExit()
 	return AbstractSphereThread::shouldExit();
 }
 
-MainThread g_Main;
-extern PingServer g_PingServer;
-extern CDataBaseAsyncHelper g_asyncHdb;
-
 
 //*******************************************************************
 
 int Sphere_InitServer( int argc, char *argv[] )
 {
 	constexpr char *m_sClassName = "Sphere";
-	EXC_TRY("Init");
-	ASSERT(MAX_BUFFER >= sizeof(CCommand));
-	ASSERT(MAX_BUFFER >= sizeof(CEvent));
-	ASSERT(sizeof(int) == sizeof(dword));	// make this assumption often.
-	ASSERT(sizeof(ITEMID_TYPE) == sizeof(dword));
-	ASSERT(sizeof(word) == 2 );
-	ASSERT(sizeof(dword) == 4 );
-	ASSERT(sizeof(nword) == 2 );
-	ASSERT(sizeof(ndword) == 4 );
-	ASSERT(sizeof(CUOItemTypeRec) == 37 );	// is byte packing working ?
-
-#ifdef _WIN32
-    LARGE_INTEGER liProfFreq;
-    if (!QueryPerformanceFrequency(&liProfFreq))
-        g_llTimeProfileFrequency = 1000;
-    else
-        g_llTimeProfileFrequency = liProfFreq.QuadPart;
-
-#if defined(_MSC_VER) && !defined(_NIGHTLYBUILD)
-	// We don't need an exception translator for the Debug build, since that build would, generally, be used with a debugger.
-	// We don't want that for Release build either because, in order to call _set_se_translator, we should set the /EHa
-	//	compiler flag, which slows down code a bit.
-	EXC_SET_BLOCK("setting exception catcher");
-	SetExceptionTranslator();
-#endif
-#endif // _WIN32
-
-#ifndef _DEBUG
-	// Same as for SetExceptionTranslator, Debug build doesn't need a purecall handler.
-	EXC_SET_BLOCK("setting purecall handler");
-	SetPurecallHandler();
-#endif
-
+	EXC_TRY("Init Server");
 	EXC_SET_BLOCK("loading");
 	if ( !g_Serv.Load() )
 		return -3;
@@ -334,7 +251,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 
 					if ( *pszTemp != '\0' )
 					{
-						count++;
+						++count;
 						g_AutoComplete.AddTail(pszTemp);
 					}
 				}
@@ -368,6 +285,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 	EXC_DEBUG_END;
 	return -10;
 }
+
 
 void Sphere_ExitServer()
 {
@@ -425,6 +343,7 @@ void Sphere_ExitServer()
 #endif
 }
 
+
 int Sphere_OnTick()
 {
 	// Give the world (CMainTask) a single tick. RETURN: 0 = everything is fine.
@@ -470,6 +389,8 @@ int Sphere_OnTick()
 	EXC_CATCH;
 	return g_Serv.GetExitFlag();
 }
+
+
 //*****************************************************
 
 static void Sphere_MainMonitorLoop()
@@ -513,8 +434,10 @@ static void Sphere_MainMonitorLoop()
 
 }
 
+
 //******************************************************
-void dword_q_sort(dword numbers[], dword left, dword right)
+
+static void dword_q_sort(dword numbers[], dword left, dword right)
 {
 	dword	pivot, l_hold, r_hold;
 

@@ -646,7 +646,7 @@ int CSector::GetLocalTime() const
 lpctstr CSector::GetLocalGameTime() const
 {
 	ADDTOCALLSTACK("CSector::GetLocalGameTime");
-	return( GetTimeMinDesc( GetLocalTime()));
+	return CServerTime::GetTimeMinDesc(GetLocalTime());
 }
 
 bool CSector::IsMoonVisible(uint iPhase, int iLocalTime) const

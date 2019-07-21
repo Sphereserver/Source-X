@@ -619,7 +619,7 @@ bool PacketObjStatusReq::onReceive(NetState* net)
 		return false;
 	skip(4);	// 0xedededed
 	byte requestType = readByte();
-	CUID targetSerial = static_cast<CUID>(readInt32());
+	CUID targetSerial(readInt32());
 
 	if ( requestType == 4 )
 		client->addStatusWindow(targetSerial.ObjFind(), true);

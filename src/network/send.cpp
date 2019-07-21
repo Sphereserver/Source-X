@@ -132,7 +132,7 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 	const NetState * state = target->GetNetState();
 	const CChar *character = target->GetChar();
 	CChar *objectChar = object->IsChar() ? static_cast<CChar *>(object) : nullptr;
-	bool canRename = false;
+	bool fCanRename = false;
 
 	byte version = 0;
 
@@ -159,7 +159,7 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 		// Send real (not percentual) hitpoints if these infos regard myself
 		writeInt16((word)(objectChar->Stat_GetVal(STAT_STR)));
 		writeInt16((word)(objectChar->Stat_GetMaxAdjusted(STAT_STR)));
-		writeBool(canRename);
+		writeBool(fCanRename);
 		writeByte(version);
 		WriteVersionSpecific(target, objectChar, version);
 	}
@@ -169,7 +169,7 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
         word iHitsMax = 100;
 		if ( objectChar )
 		{
-			canRename = objectChar->IsOwnedBy(character);
+            fCanRename = objectChar->IsOwnedBy(character);
 			iHitsCurrent = (word)objectChar->Stat_GetVal(STAT_STR);
             iHitsMax = (word)objectChar->Stat_GetMaxAdjusted(STAT_STR);
 		}
@@ -194,9 +194,9 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 		// Send percentual hitpoints
         writeInt16(iHitsCurrent);		// Max hit points
 		writeInt16(iHitsMax);		// Max hit points
-		writeBool(canRename);
+		writeBool(fCanRename);
 		writeByte(version);
-		if (target->GetNetState()->isClientEnhanced() && objectChar && objectChar->IsPlayableCharacter())
+		if (state->isClientEnhanced() && objectChar && objectChar->IsPlayableCharacter())
 			// The Enhanced Client wants the char race and other things when showing paperdolls (otherwise the interface throws an "unnoticeable" internal error)
 			WriteVersionSpecific(target, objectChar, version);
 	}
@@ -1189,7 +1189,7 @@ PacketCloseVendor::PacketCloseVendor(const CClient* target, const CChar* vendor)
 *
 *
 ***************************************************************************/
-PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* container, bool boIsShop, bool boFilterLayers) : PacketSend(XCMD_Content, 5, PRI_NORMAL),
+PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* container, bool fIsShop, bool fFilterLayers) : PacketSend(XCMD_Content, 5, PRI_NORMAL),
 	m_container(container->GetUID()), m_count(0)
 {
 	ADDTOCALLSTACK("PacketItemContents::PacketItemContents");
@@ -1197,9 +1197,11 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 	initLength();
 	skip(2);
 
-	bool fIncludeGrid = ( target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced() );
-	bool fIsLayerSent[LAYER_HORSE];
-	memset( fIsLayerSent, 0, sizeof(fIsLayerSent) );
+    const NetState* ns = target->GetNetState();
+    ASSERT(ns);
+    const bool fClientEnhanced = ns->isClientEnhanced();
+	const bool fIncludeGrid = (ns->isClientVersion(MINCLIVER_ITEMGRID) || ns->isClientKR() || fClientEnhanced);
+    bool fIsLayerSent[LAYER_HORSE] = {};
 
 	const CChar* viewer = target->GetChar();
 	std::vector<CItem*> items;
@@ -1207,16 +1209,16 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 
 	// Classic Client wants the container items sent with order a->z, Enhanced Client with order z->a;
 	// Classic client wants the prices sent (in PacketVendorBuyList::fillBuyData) with order a->z, Enhanced Client with order a->z.
-	for ( CItem* item = ( target->GetNetState()->isClientEnhanced() ? container->GetContentTail() : container->GetContentHead() );
-		item != nullptr && m_count < g_Cfg.m_iContainerMaxItems;
-		item = (target->GetNetState()->isClientEnhanced() ? item->GetPrev() : item->GetNext()) )
+	for ( CItem* item = (fClientEnhanced ? container->GetContentTail() : container->GetContentHead());
+		(item != nullptr) && (m_count < g_Cfg.m_iContainerMaxItems);
+		item = (fClientEnhanced ? item->GetPrev() : item->GetNext()) )
 	{
 		word wAmount = item->GetAmount();
 		CPointMap pos = item->GetContainedPoint();
 
-		if ( boIsShop )
+		if ( fIsShop )
 		{
-			const CItemVendable* vendorItem = static_cast<const CItemVendable *>(item);
+			const CItemVendable* vendorItem = dynamic_cast<const CItemVendable *>(item);
 			if ( vendorItem == nullptr || vendorItem->GetAmount() == 0 || vendorItem->IsType(IT_GOLD) )
 				continue;
 
@@ -1234,9 +1236,9 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 		ITEMID_TYPE id = item->GetDispID();
 		HUE_TYPE hue = item->GetHue() & HUE_MASK_HI;
 
-		if ( boFilterLayers )
+		if ( fFilterLayers )
 		{
-			LAYER_TYPE layer = static_cast<LAYER_TYPE>(item->GetContainedLayer());
+			const LAYER_TYPE layer = (LAYER_TYPE)(item->GetContainedLayer());
 			ASSERT(layer < LAYER_HORSE);
 			switch ( layer )	// don't put these on a corpse.
 			{
@@ -1253,7 +1255,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 			}
 		}
 
-		if ( itemDefinition != nullptr && target->GetResDisp() < itemDefinition->GetResLevel() )
+		if ( (itemDefinition != nullptr) && (target->GetResDisp() < itemDefinition->GetResLevel()) )
 		{
 			id = (ITEMID_TYPE)(itemDefinition->GetResDispDnId());
 
@@ -1293,8 +1295,8 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 	if (m_count > 0)
 	{
 		// send tooltips
-		for (auto it = items.begin(), end = items.end(); it != end; ++it)
-			target->addAOSTooltip(*it, false, boIsShop);
+        for (CItem *pItem : items)
+			target->addAOSTooltip(pItem, false, fIsShop);
 	}	
 }
 
@@ -1303,7 +1305,9 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItem* spell
 {
 	ADDTOCALLSTACK("PacketItemContents::PacketItemContents(2)");
 
-	bool fIncludeGrid = ( target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced()) ;
+    const NetState* ns = target->GetNetState();
+    ASSERT(ns);
+    const bool fIncludeGrid = (ns->isClientVersion(MINCLIVER_ITEMGRID) || ns->isClientKR() || ns->isClientEnhanced());
 
 	initLength();
 	skip(2);
@@ -1341,7 +1345,9 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItemContain
 {
 	ADDTOCALLSTACK("PacketItemContents::PacketItemContents(3)");
 
-	bool fIncludeGrid = ( target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced() );
+    const NetState* ns = target->GetNetState();
+    ASSERT(ns);
+    const bool fIncludeGrid = (ns->isClientVersion(MINCLIVER_ITEMGRID) || ns->isClientKR() || ns->isClientEnhanced());
 	const CSpellDef* spellDefinition;
 
 	initLength();
@@ -1424,7 +1430,7 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
 			writeByte(0x01);
 			writeByte(0);
 
-			for (int i = 0; i < 2; ++i)
+			for (uchar i = 0; i < 2; ++i)
 			{
 				writeByte((byte)i);
 				writeInt16((word)(g_MapList.GetX(i)));
@@ -1459,14 +1465,15 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
 		case 0xFF:
 		{
 			//Query Client Command
-			byte bMap = target->GetChar()->GetTopMap();
-			CPointMap pt = target->GetChar()->GetTopPoint();
+            const CChar* pChar = target->GetChar();
+			byte bMap = pChar->GetTopMap();
+			CPointMap pt = pChar->GetTopPoint();
 			dword dwBlockId = (pt.m_x * (g_MapList.GetY( bMap ) / UO_BLOCK_SIZE)) + pt.m_y;
 			writeInt32(dwBlockId);
 			writeInt32(0);
 			writeInt16(0);
 			writeByte(0xFF);
-			writeByte(target->GetChar()->GetTopMap());
+			writeByte(bMap);
 		}
 	}
 

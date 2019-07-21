@@ -1070,10 +1070,9 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 						return true;
 					}
 
-					CUID uid = Exp_GetVal( ptcKey );
-					SKIP_SEPARATORS( ptcKey );
-                    GETNONWHITESPACE( ptcKey );
-					pObj = uid.ObjFind();
+					pObj = CUID::ObjFind(Exp_GetVal(ptcKey));
+                    SKIP_SEPARATORS(ptcKey);
+                    GETNONWHITESPACE(ptcKey);
 				}
 
 				if ( pObj && !pObj->IsTopLevel() )
@@ -1178,7 +1177,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 				{
 					int iType = g_Cfg.ResourceGetIndexType( RES_TYPEDEF, ptcKey );
 					int iDistance;
-					bool bCheckMulti;
+					bool fCheckMulti;
 
 					SKIP_IDENTIFIERSTRING( ptcKey );
 					SKIP_SEPARATORS( ptcKey );
@@ -1190,13 +1189,13 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 						iDistance	= Exp_GetVal( ptcKey );
 
 					if ( !*ptcKey )
-						bCheckMulti = false;
+						fCheckMulti = false;
 					else
-						bCheckMulti = Exp_GetVal( ptcKey ) != 0;
+						fCheckMulti = Exp_GetVal( ptcKey ) != 0;
 
 					if ( fP )
 					{
-						CPointMap pt = ( index == OC_ISNEARTYPETOP ) ? ( g_World.FindTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( g_World.FindItemTypeNearby(GetTopPoint(), (IT_TYPE)iType, iDistance, bCheckMulti ) );
+						CPointMap pt = ( index == OC_ISNEARTYPETOP ) ? ( g_World.FindTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( g_World.FindItemTypeNearby(GetTopPoint(), (IT_TYPE)iType, iDistance, fCheckMulti ) );
 
 						if ( !pt.IsValidPoint() )
 							sVal.FormatVal( 0 );
@@ -1204,7 +1203,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 							sVal = pt.WriteUsed();
 					}
 					else
-						sVal.FormatVal( ( index == OC_ISNEARTYPETOP ) ? ( g_World.IsTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( g_World.IsItemTypeNear(GetTopPoint(), (IT_TYPE)iType, iDistance, bCheckMulti ) ) );
+						sVal.FormatVal( ( index == OC_ISNEARTYPETOP ) ? ( g_World.IsTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( g_World.IsItemTypeNear(GetTopPoint(), (IT_TYPE)iType, iDistance, fCheckMulti ) ) );
 				}
 			}
 			break;
@@ -1273,8 +1272,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 				tchar * ptcArg = Str_GetTemp();
                 Str_CopyLimitNull( ptcArg, ptcKey, strlen( ptcKey ) + 1 );
 
-				CUID uid(Exp_GetDWVal( ptcKey ));
-				pItem = dynamic_cast<CItem*> (uid.ObjFind());
+                pItem = dynamic_cast<CItem*> (CUID::ObjFind(Exp_GetDWVal(ptcKey)));
 				if (pItem == nullptr)
 				{
 					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetID(RES_ITEMDEF, ptcArg).GetResIndex());
@@ -1313,8 +1311,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 				tchar * ptcArg = Str_GetTemp();
 				Str_CopyLimitNull( ptcArg, ptcKey, strlen( ptcKey ) + 1 );
 
-				CUID uid = Exp_GetVal( ptcKey );
-				pItem = dynamic_cast<CItem*> (uid.ObjFind());
+				pItem = dynamic_cast<CItem*> (CUID::ObjFind(Exp_GetDWVal(ptcKey)));
 				if ( pItem == nullptr )
 				{
 					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetID(RES_ITEMDEF, ptcArg).GetResIndex());
@@ -1325,11 +1322,11 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 						break;
 					}
 				}
-				sVal.FormatVal( (( pItem ) ? ( pItem->IsTypeWeapon() ) : ( 0 )) );
+				sVal.FormatVal( pItem ? pItem->IsTypeWeapon() : 0 );
 				break;
 			}
 			pItem = dynamic_cast<CItem*> (this);
-			sVal.FormatVal( (( pItem ) ? ( pItem->IsTypeWeapon() ) : ( 0 )) );
+			sVal.FormatVal( pItem ? pItem->IsTypeWeapon() : 0 );
 			break;
 			}
 		case OC_MAP:
@@ -1381,7 +1378,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 				{
 					TRIGRET_TYPE trReturn = TRIGRET_RET_FALSE;
                     _iCallingObjTriggerId = _iRunningTriggerId;
-					bool fTrigReturn = CallPersonalTrigger(const_cast<tchar *>(ptcKey), pSrc, trReturn,false);
+					const bool fTrigReturn = CallPersonalTrigger(const_cast<tchar *>(ptcKey), pSrc, trReturn);
 					_iCallingObjTriggerId = -1;
 					if ( fTrigReturn )
 						sVal.FormatVal(trReturn);
@@ -2429,7 +2426,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				{
 					TRIGRET_TYPE tResult;
 					_iCallingObjTriggerId = _iRunningTriggerId;
-					CallPersonalTrigger(s.GetArgRaw(), pSrc, tResult,false);
+					CallPersonalTrigger(s.GetArgRaw(), pSrc, tResult);
 					_iCallingObjTriggerId = -1;
 				}
 			} break;
@@ -3013,7 +3010,7 @@ void CObjBase::ModPropNum( CComponentProps* pCompProps, int iPropIndex, CCompone
 {
     ASSERT(pCompProps);
     CComponentProps::PropertyValNum_t iVal = 0;
-    bool fPropExists = pCompProps->GetPropertyNumPtr(iPropIndex, &iVal);
+    const bool fPropExists = pCompProps->GetPropertyNumPtr(iPropIndex, &iVal);
     if (!fPropExists && pBaseCompProps)
     {
         pBaseCompProps->GetPropertyNumPtr(iPropIndex, &iVal);
@@ -3220,10 +3217,9 @@ TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CCh
 	return TRIGRET_RET_DEFAULT;
 }
 
-bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull)
+bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult)
 {
 	ADDTOCALLSTACK("CObjBase::CallPersonalTrigger");
-	UNREFERENCED_PARAMETER(bFull);
 	tchar * ppCmdTrigger[3];
 	size_t iResultArgs = Str_ParseCmds(pArgs, ppCmdTrigger, CountOf(ppCmdTrigger), ",");
 
@@ -3283,8 +3279,7 @@ bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_T
 				// ARGO
 				if ( iResultArgs >= 1 )
 				{
-					CUID guTriggerArg(Exp_GetVal(Arg_ppCmd[0]));
-					CObjBase * pTriggerArgObj = guTriggerArg.ObjFind();
+					CObjBase * pTriggerArgObj = CUID::ObjFind(Exp_GetVal(Arg_ppCmd[0]));
 					if ( pTriggerArgObj )
 						csTriggerArgs.m_pO1 = pTriggerArgObj;
 				}

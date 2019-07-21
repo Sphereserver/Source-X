@@ -58,7 +58,7 @@ protected:
 
 	// Store the last time start time.
 	PROFILE_TYPE  m_CurrentTask;	// What task are we currently processing ?
-	llong m_CurrentTime;			// QueryPerformanceCount()
+	llong m_CurrentTime;			// in milliseconds
 
 public:
 	ProfileData();

@@ -329,7 +329,7 @@ void CItemContainer::OnWeightChange( int iChange )
 	if ( iChange == 0 )
 		return;	// no change
 
-				// some containers do not add weight to you.
+	// some containers do not add weight to you.
 	if ( !IsWeighed() )
 		return;
 

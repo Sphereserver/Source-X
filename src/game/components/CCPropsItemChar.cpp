@@ -79,6 +79,18 @@ void CCPropsItemChar::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObj
     ASSERT(!IsPropertyStr(iPropIndex));
     ASSERT((iLimitToExpansion >= RDS_PRET2A) && (iLimitToExpansion < RDS_QTY));
 
+    auto itOldVal = _mPropsNum.find(iPropIndex);
+
+    const bool fOldValExistant = itOldVal != _mPropsNum.end();
+    PropertyValNum_t iOldVal = 0;
+    if (iPropIndex == PROPITCH_WEIGHTREDUCTION)
+    {
+        if (CItem * pItemLink = static_cast<CItem*>(pLinkedObj))
+            iOldVal = pLinkedObj->GetWeight();
+    }
+    else if (fOldValExistant)
+        iOldVal = itOldVal->second;
+
     if ((fDeleteZero && (iVal == 0)) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion))
     {
         if (0 == _mPropsNum.erase(iPropIndex))
@@ -95,13 +107,15 @@ void CCPropsItemChar::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObj
     {
         case PROPITCH_WEIGHTREDUCTION:
         {
-            CItem *pItemLink = static_cast<CItem*>(pLinkedObj);
-            int oldweight = pItemLink->GetWeight();
-            CContainer * pCont = dynamic_cast <CContainer*> (pItemLink->GetParent());
-            if (pCont)
+            if (iVal != iOldVal)
             {
-                ASSERT(pItemLink->IsItemEquipped() || pItemLink->IsItemInContainer());
-                pCont->OnWeightChange(pItemLink->GetWeight() - oldweight);
+                CItem* pItemLink = static_cast<CItem*>(pLinkedObj);
+                CContainer* pCont = dynamic_cast <CContainer*> (pItemLink->GetParent());
+                if (pCont)
+                {
+                    ASSERT(pItemLink->IsItemEquipped() || pItemLink->IsItemInContainer());
+                    pCont->OnWeightChange(pItemLink->GetWeight() - iOldVal);
+                }
                 pLinkedObj->UpdatePropertyFlag();
             }
             break;
@@ -210,7 +224,7 @@ void CCPropsItemChar::AddPropsTooltipData(CObjBase* pLinkedObj)
             switch (prop)
             {
                 case PROPITCH_WEIGHTREDUCTION:
-                    ADDT(1072210); // Weight reduction: ~1_PERCENTAGE~%
+                    ADDTNUM(1072210); // Weight reduction: ~1_PERCENTAGE~%
                     break;
             }
             // End of Item-only tooltips

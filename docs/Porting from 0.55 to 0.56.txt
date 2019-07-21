@@ -1,0 +1,38 @@
+Lots of scripts got updated or reorganized (sphere_serv_Triggers.scp, stones/* all files and folders,
+ sphere_skills/spells...)
+
+55r2:
+  - FixAction functions are no longer needed.
+  - added INTERRUPT to spells file. (Script Pack)
+
+55r3:
+  - Changed TRY to make no plevel or touch/distance checks. Use TRYP if you want those checks (TRYP 0 only checks for touch/distance, not plevel).
+  - Added RANGE=min,max or RANGE=max (min defaults to 0) for ITEMDEF and CHARDEF. (Script Pack)
+  - Changed [AREA to [AREADEF, same for rooms.
+  - Added spheredata.scp to the Save/ folder, create it empty and your vars, regions/sectors/room changes, and some more global things will be stored there in your future saves.
+
+55r3rc2
+  - Added DEFMESSAGE (look for sphere_msgs.scp and add it).
+  - Changed SPELLFLAG_TARG_* in spells. (Script Pack: sphere_spells and sphere_defs for the flags)
+  - When loading a world with VERSION below "0.55 R3", convert spells that affect stats, by
+      removing its effect from base stats (old method) then putting the effect into modstats
+      (new method). This ensures compatibility with spells and cursed items.
+      Notice that this only works for worlds saved on versions earlier than R3, seeing as worlds
+      saved on the test versions of R3 made no conversion and thus had items with both formats
+      which cannot be distinguished.
+      If for some reason you want to bypass this conversion on an old world, change the version
+      of the save files to "0.55 R3". If you want to force this conversion on a world saved with
+      R3 test versions, change its version to "0.55".
+
+55r403
+  - Added spherestatics.scp, same as spheredata but for attr_static items. So they are not being saved in each worldsave, hence saving time. To save them use serv.servstatics
+  - Code cleanups, removed some useless (not enabled keywords), same keywords grouped
+      to one variant for usage for faster work lookups:
+      1. *WEIGHT[MAX]->*[MAX]WEIGHT, BRAIN->NPC, KNOWLEDGE->SPEECH, COMMENT->TAG.COMMENT
+      CLI*VER*->CLIENTVERSION, DEF->ARMOR, LISTEN->HEARALL, *PRICE->PRICE, VER->VERSION
+      WEBPAGEDST->WEPAGEFILE (LoadKeys)
+      2. CLIENTS->ALLCLIENTS, PARDON->FORGIVE, INVISIBLE->INVIS, INVULNERABLE->INVUL,
+      R->RUN, W->WALK, CLIENTS->ADMIN, MIDI/MUSIC->MIDILIST, [RE]SYNC->RESEND, ADDITEM->ADD
+      FOLLOWED->FOLLOW, M->MOVE, PROPS/TWEAK->INFO, SPEAK[U[A]]->SAY[U[A]], SFX->SOUND
+      SAFE->SECURE (VerbKeys)
+  - Removed ADDNPC since it is already integrated with ADD command for both items and npc (You should have sphere_backwards.scp for compat with old functions/defs).
