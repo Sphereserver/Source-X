@@ -857,7 +857,7 @@ public:
 
 	void Skill_SetBase( SKILL_TYPE skill, ushort uiValue );
     void Skill_AddBase( SKILL_TYPE skill, int iChange );
-	bool Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain = true, bool bUseBellCurve = true );
+	bool Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain = true, bool bUseBellCurve = true, bool bForceCheck = false);
 
 	bool Skill_CheckSuccess( SKILL_TYPE skill, int difficulty, bool bUseBellCurve = true ) const;
 	bool Skill_Wait( SKILL_TYPE skilltry );

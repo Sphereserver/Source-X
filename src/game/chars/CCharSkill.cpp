@@ -508,7 +508,7 @@ bool CChar::Skill_CheckSuccess( SKILL_TYPE skill, int difficulty, bool bUseBellC
 	return ( iSuccessChance >= Calc_GetRandVal(1000) );
 }
 
-bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain, bool bUseBellCurve )
+bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain, bool bUseBellCurve, bool bForceCheck )
 {
 	ADDTOCALLSTACK("CChar::Skill_UseQuick");
 	// ARGS:
@@ -519,7 +519,7 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 	// Use a skill instantly. No wait at all.
 	// No interference with other skills.
 
-	if (g_Cfg.IsSkillFlag(skill, SKF_SCRIPTED))
+	if (g_Cfg.IsSkillFlag(skill, SKF_SCRIPTED) && !bForceCheck)
 		return false;
 
 	int64 result = Skill_CheckSuccess( skill, (int)difficulty, bUseBellCurve );

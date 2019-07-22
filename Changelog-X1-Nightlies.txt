@@ -1788,3 +1788,36 @@ WARNING: Important change!
 - Fixed: Profiler and worldsave message showing incorrect times (Issue #296).
 - Fixed: Client listing showing the number of the online clients at the end of the list, instead of the top.
 - Added: Doc file "Porting from 0.55 to 0.56.txt" (the content was posted years ago by XuN on the forum).
+
+22-07-2019, Drk84
+- Added: Two optional parameters "linearcheck" and "forcecheck" to the SKILLUSEQUICK character command:
+	SKILLUSEQUICK "skillId", "difficulty", "linearcheck", "forcecheck"
+	
+	Linearcheck:
+	This optional parameter when set to 1 will make Sphere performs a linear check instead of using the default Bell Curve formula.
+	The linear check is usually used for combat checks (hitting, parrying, resisting spells) while the Bell curve check is usually used by almost all of the other skills.
+	Take note that when using the linear check, the highest is the difficulty value the easier is to pass the test, while the opposite is true for a Bell curve check. 
+	
+	Forcecheck:
+	This optional paramter allows the execution of the Skill_UseQuick method by a skill with SKF_SCRIPTED flag.
+	By default Sphere does not allow a skill with SKF_SCRIPTED flag to execute the Skill_UseQuick method, setting the value to 1 will allow the execution
+	of the Skill_UseQuick method.
+		
+	Examples:
+	skillusequick skill_appraise,75			//Make a quick check with item id skill with a difficulty of 75 and using the bell formula.
+	skillusequick skill_appraise,<itemid>/10,1		//Make a quick check with the item id skill with a difficulty equal to the character itemid value and using the linear check formula.
+	skillusequick skill_parrying,50,0,1		//Assuming that the parrying skill has the SKF_SCRIPTED flag, make a quick check with parrying skill,  using the Bell curve formula with a difficulty of 50 and forcing the execution of  the Skill_UseQuick method.
+	
+	Special Cases
+	Sphere internally uses a quick check when certain actions are performed:
+	
+	Camping: Camping skill uses a quick check for activating up campfires.
+	Mining:  Lingot smelting is handled by a quick check.
+	Musicianship: Playing an instrument is handled by a quick check.
+	Parrying: The success check for Parrying is handled by a quick check, remember that by adding the SKF_SCRIPTED flags to the Parrying skill will made you lose access to the @HitParry trigger.
+	Repairing Items: Two quick checks are made, one uses the crafting skill from which the item is created by, the second uses the Arms Lore skill.
+	Resisting Spells: A quick check is made when resisting a spell with SPELLFLAG_RESIST.
+	Tinkering: Copying a key is performed by a Tinkering quick check.
+	Training Dummies: All the Melee, Ranged and Pickpocket dummies uses a quick check.
+	Tracking: Tracking uses a quick check when STARTING to track (the tracking menu is displayed and the quarry category is selected).
+	
