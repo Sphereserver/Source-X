@@ -77,7 +77,7 @@ bool WritePidFile(int iMode = 0)
 // Dynamic initialization of some global stuff
 
 dword CObjBase::sm_iCount = 0;			// UID table.
-llong g_llTimeProfileFrequency = 1000;	// time profiler (default value, will be changed in Sphere_InitServer.
+llong g_llTimeProfileFrequency = 1;	    // time profiler (default value, will be changed in GlobalInitializer).
 
 
 GlobalInitializer::GlobalInitializer()
@@ -231,7 +231,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 	//	load auto-complete dictionary
 	EXC_SET_BLOCK("auto-complete");
 	{
-		CSFileText	dict;
+		CSFileText dict;
 		if ( dict.Open(SPHERE_FILE ".dic", OF_READ|OF_TEXT|OF_DEFAULTMODE) )
 		{
 			tchar * pszTemp = Str_GetTemp();
@@ -333,10 +333,10 @@ void Sphere_ExitServer()
 
 	g_Log.Event(LOGM_INIT|LOGL_FATAL, "Server terminated: %s (code %d)\n", ptcReason, iExitFlag);
 #ifdef _WIN32
-    g_Log.Event(LOGM_INIT|LOGF_CONSOLE_ONLY, "You can now close this window.\n");
+    if (!g_Serv._fCloseNTWindowOnTerminate)
+        g_Log.Event(LOGM_INIT | LOGF_CONSOLE_ONLY, "You can now close this window.\n");
 #endif
-	g_Log.Close();
-
+    g_Log.Close();
 #ifdef _WIN32
     if (iExitFlag != 5)
         g_NTWindow.NTWindow_ExitServer();
@@ -787,12 +787,17 @@ int _cdecl main( int argc, char * argv[] )
 
 	Sphere_ExitServer();
 	WritePidFile(1);
+
 #ifdef _WIN32
-    while (g_NTWindow.isActive())
+    if (!g_Serv._fCloseNTWindowOnTerminate)
     {
-        Sleep (100);
+        while (g_NTWindow.isActive())
+        {
+            Sleep (100);
+        }
     }
 #endif
+
 	return g_Serv.GetExitFlag();
 }
 

@@ -1788,3 +1788,8 @@ WARNING: Important change!
 - Fixed: Profiler and worldsave message showing incorrect times (Issue #296).
 - Fixed: Client listing showing the number of the online clients at the end of the list, instead of the top.
 - Added: Doc file "Porting from 0.55 to 0.56.txt" (the content was posted years ago by XuN on the forum).
+
+23-07-2019, Nolok
+- Added: -J command line switch (Windows specific) to automatically close the console window after server termination.
+- Fixed: -c and -k (on Windows) command line switches were considered only if lowercase.
+- Fixed: Invalid "Reject Move Item Request" packet sent when trying to drag an item with attr_move_never (Issue #300).

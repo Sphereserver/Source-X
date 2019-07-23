@@ -107,11 +107,11 @@ struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variab
 
     void InitUID() = delete;
     void ClearUID() = delete;
-    void Init()
+    inline void Init()
     {
         m_dwInternalVal = UID_UNUSED;
     }
-    void Clear()
+    inline void Clear()
     {
         m_dwInternalVal = UID_CLEAR;
     }
@@ -120,44 +120,13 @@ struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variab
     {
         Init();
     }
-    explicit CResourceIDBase(RES_TYPE restype)
-    {
-        // single instance type.
-        ASSERT(restype <= RES_TYPE_MASK);
-        m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT);
-    }
+    explicit CResourceIDBase(RES_TYPE restype);
     explicit CResourceIDBase(RES_TYPE, const CResourceIDBase&) = delete;
-    explicit CResourceIDBase(RES_TYPE restype, int iIndex)
-    {
-        ASSERT(restype <= RES_TYPE_MASK);
-        if (iIndex < 0)
-        {
-            Init();
-            return;
-        }
-        ASSERT(iIndex <= RES_INDEX_MASK);
-        m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT) | iIndex;
-    }
-    explicit CResourceIDBase(dword dwPrivateID)
-    {
-        if (!CUID::IsValidUID(dwPrivateID))
-        {
-            Init();
-            return;
-        }
-        m_dwInternalVal = UID_F_RESOURCE | dwPrivateID;
-    }
+    explicit CResourceIDBase(RES_TYPE restype, int iIndex);
+    explicit CResourceIDBase(dword dwPrivateID);
 
-    CResourceIDBase(const CResourceIDBase & rid) : CUIDBase(rid)// copy constructor
-    {
-        ASSERT(rid.IsResource());
-    }
-    CResourceIDBase & operator = (const CResourceIDBase & rid)  // assignment operator
-    {
-        ASSERT(rid.IsResource());
-        CUIDBase::operator=(rid);
-        return *this;
-    }
+    CResourceIDBase(const CResourceIDBase& rid);                // copy constructor
+    CResourceIDBase& operator = (const CResourceIDBase& rid);   // assignment operator
 
     RES_TYPE GetResType() const
     {
@@ -179,19 +148,8 @@ struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variab
     CObjBase*   ObjFind()  const = delete;   // Same as above
     CItem*      ItemFind() const = delete;
     CChar*      CharFind() const = delete;
-    bool IsUIDItem() const //  replacement for CUIDBase::IsItem(), but don't be virtual, since we don't need that and the class size will increase due to the vtable
-    {
-        // If it's both a resource and an item, and if it's the CResourceIDBase of a CRegion, it's a region from a multi
-        if ( (m_dwInternalVal & (UID_F_RESOURCE|UID_F_ITEM)) == (UID_F_RESOURCE|UID_F_ITEM) )
-            return IsValidUID();
-        return false;
-    }
-    CItem* ItemFindFromResource() const   //  replacement for CUIDBase::ItemFind()
-    {
-        // Used by multis: when they are realized, a new CRegionWorld is created with a CResourceID with an internal value = to the internal value of the multi, plus a | UID_F_RESOURCE.
-        //  Remove the reserved UID_* flags (so also UID_F_RESOURCE), and find the item (in our case actually the multi) with that uid.
-        return CUID::ItemFind(m_dwInternalVal & UID_O_INDEX_MASK);
-    }
+    bool IsUIDItem() const; //  replacement for CUIDBase::IsItem(), but don't be virtual, since we don't need that and the class size will increase due to the vtable
+    CItem* ItemFindFromResource() const;   //  replacement for CUIDBase::ItemFind()
 };
 
 struct CResourceID : public CResourceIDBase     // It has the "page" part. Use it to handle every other resource block.
@@ -245,20 +203,9 @@ struct CResourceID : public CResourceIDBase     // It has the "page" part. Use i
     {
         m_wPage = 0;
     }
-    CResourceID & operator = (const CResourceID & rid)              // assignment operator
-    {
-        ASSERT(rid.IsResource());
-        CUIDBase::operator=(rid);
-        m_wPage = rid.m_wPage;
-        return *this;
-    }
-    CResourceID & operator = (const CResourceIDBase & rid)
-    {
-        ASSERT(rid.IsResource());
-        CUIDBase::operator=(rid);
-        m_wPage = 0;
-        return *this;
-    }
+
+    CResourceID& operator = (const CResourceID& rid);              // assignment operator
+    CResourceID& operator = (const CResourceIDBase& rid);
 
     word GetResPage() const
     {

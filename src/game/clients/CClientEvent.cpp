@@ -224,7 +224,7 @@ void CClient::Event_Item_Pickup(CUID uid, word amount) // Client grabs an item
 	EXC_SET_BLOCK("Origin");
 	// Where is the item coming from ? (just in case we have to toss it back)
 	CObjBase * pObjParent = dynamic_cast <CObjBase *>(pItem->GetParent());
-	m_Targ_Prv_UID = pObjParent ? pObjParent->GetUID() : CUID(UID_CLEAR);
+	m_Targ_Prv_UID = pObjParent ? pObjParent->GetUID() : CUID();
 	m_Targ_p = pItem->GetUnkPoint();
 
 	EXC_SET_BLOCK("ItemPickup");
@@ -232,13 +232,18 @@ void CClient::Event_Item_Pickup(CUID uid, word amount) // Client grabs an item
 	if ( tempamount < 0 )
 	{
 		EXC_SET_BLOCK("ItemPickup - addItemDragCancel(0)");
-		new PacketDragCancel(this, PacketDragCancel::Other);
         if (pItem->GetType() == IT_CORPSE)
         {
+            // You shouldn't even be able to pick it up if you aren't a GM, but some 7.x client versions do send nonetheless a pickup
+            //  request packet: in this case, we have to prevent it from picking up the corpse.
+            new PacketDragCancel(this, PacketDragCancel::Other);
+
             // This Update() fixes a client-side bug: if a char with GM on sees a new corpse, then turns GM off and tries to drag it, the dragging is cancelled but
             //  the corpse will take the appearance of an ogre until a new Update()
             pItem->Update();
         }
+        else
+            new PacketDragCancel(this, PacketDragCancel::CannotLift);
 		return;
 	}
 	else if ( tempamount > 1 )

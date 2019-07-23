@@ -2133,7 +2133,7 @@ void CItem::WriteUOX( CScript & s, int index )
 
 void CItem::r_WriteMore1(CSString & sVal)
 {
-    ADDTOCALLSTACK_INTENSIVE("CItem::r_WriteMore1");
+    ADDTOCALLSTACK("CItem::r_WriteMore1");
     // do special processing to represent this.
     switch (GetType())
     {
@@ -2236,7 +2236,7 @@ void CItem::r_Write( CScript & s )
     const ITEMID_TYPE iDispID = GetDispID();
 	if ( iDispID != GetID() )	// the item is flipped.
 		s.WriteKey("DISPID", g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, iDispID)));
-    int iAmount = GetAmount();
+    const int iAmount = GetAmount();
 	if ( iAmount != 1 )
 		s.WriteKeyVal("AMOUNT", iAmount);
 	if ( !pItemDef->IsType(m_type) )

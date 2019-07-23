@@ -271,17 +271,21 @@ void CNTWindow::List_Clear()
 void CNTWindow::List_Add( COLORREF color, LPCTSTR pszText )
 {
 	int iMaxTextLen = (64 * 1024);
-	int iTextLen = (int)strlen( pszText );
-	int iNewLen = m_iLogTextLen + iTextLen;
+
+	const int iTextLen = (int)strlen( pszText );
+	const int iNewLen = m_iLogTextLen + iTextLen;
 
 	if ( iNewLen > iMaxTextLen )
 	{
         iMaxTextLen -= 256; // Remove more than we need, so that we have to remove text less often
 		const int iCut = iNewLen - iMaxTextLen; 
 
-        m_wndLog.SetRedraw(FALSE);
 		m_wndLog.SetSel( 0, iCut );
 		m_wndLog.ReplaceSel( "" );
+
+        // These SetRedraw FALSE/TRUE calls will make the log panel scroll much faster when spamming text, but
+        //  it will generate some drawing artifact
+        m_wndLog.SetRedraw(FALSE);
 
 		m_iLogTextLen = iMaxTextLen;
 	}
@@ -844,13 +848,13 @@ bool CNTWindow::NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLine, int nCmdSho
 	theApp.InitInstance(SPHERE_WINDOW_TITLE_BASE, hInstance, lpCmdLine);
 
 	//	read target window name from the arguments
-	char	className[32] = SPHERE_TITLE "Svr";
+	char	className[32] = SPHERE_TITLE;
 	TCHAR	*argv[32];
 	argv[0] = nullptr;
 	size_t argc = Str_ParseCmds(lpCmdLine, &argv[1], CountOf(argv)-1, " \t") + 1;
 	if (( argc > 1 ) && _IS_SWITCH(*argv[1]) )
 	{
-		if ( argv[1][1] == 'c' )
+		if ( toupper(argv[1][1]) == 'C' )
 		{
 			if ( argv[1][2] )
 				strcpy(className, &argv[1][2]);
