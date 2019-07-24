@@ -82,7 +82,7 @@ llong g_llTimeProfileFrequency = 1;	    // time profiler (default value, will be
 
 GlobalInitializer::GlobalInitializer()
 {
-    constexpr char* m_sClassName = "GlobalInitializer";
+    constexpr const char* m_sClassName = "GlobalInitializer";
     EXC_TRY("Pre-startup Init");
     ASSERT(MAX_BUFFER >= sizeof(CCommand));
     ASSERT(MAX_BUFFER >= sizeof(CEvent));
@@ -206,7 +206,7 @@ bool MainThread::shouldExit()
 
 int Sphere_InitServer( int argc, char *argv[] )
 {
-	constexpr char *m_sClassName = "Sphere";
+	constexpr const char *m_sClassName = "Sphere";
 	EXC_TRY("Init Server");
 	EXC_SET_BLOCK("loading");
 	if ( !g_Serv.Load() )

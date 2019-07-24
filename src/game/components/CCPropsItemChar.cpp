@@ -85,7 +85,7 @@ void CCPropsItemChar::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObj
     PropertyValNum_t iOldVal = 0;
     if (iPropIndex == PROPITCH_WEIGHTREDUCTION)
     {
-        if (CItem * pItemLink = static_cast<CItem*>(pLinkedObj))
+        if (pLinkedObj)
             iOldVal = pLinkedObj->GetWeight();
     }
     else if (fOldValExistant)

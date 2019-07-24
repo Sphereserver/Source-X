@@ -129,8 +129,6 @@ void CSectorBase::SetAdjacentSectors()
     ASSERT(iMaxX > 0);
     const int iMaxY = g_MapList.GetSectorRows(m_map);
     ASSERT(iMaxY > 0);
-    const int iMaxSectors = g_MapList.GetSectorQty(m_map);
-    ASSERT(iMaxSectors > 0);
     
     int iSectorCount = 0;
     for (int i = 0; i < m_map; ++i) // all sectors are stored in the same array, get a tmp count of all of the lower maps
@@ -159,20 +157,17 @@ void CSectorBase::SetAdjacentSectors()
       SW        S        SE
     */
 
-    struct _xyDir_s
-    {
-        int x, y;
-    };
+    struct _xyDir_s { int x, y; };
     static constexpr _xyDir_s _xyDir[DIR_QTY]
     {
-        {0, -1},
-        {+1,-1},
-        {+1, 0},
-        {+1, +1},
-        {0, +1},
-        {-1, +1},
-        {-1, 0},
-        {-1, -1}
+        {0, -1},    // N
+        {+1,-1},    // NE
+        {+1, 0},    // E
+        {+1, +1},   // SE
+        {0, +1},    // S
+        {-1, +1},   // SW
+        {-1, 0},    // W
+        {-1, -1}    // NW
     };
 
     int tmpIndex[DIR_QTY] =
@@ -201,8 +196,9 @@ void CSectorBase::SetAdjacentSectors()
         // This should not happen, because i did the checks above
         //if ((index < 0) || (index > iMaxSectors))
         //    continue;
-        ASSERT((index >= 0) && (index <= iMaxSectors));
+        ASSERT((index >= 0) && (index <= g_MapList.GetSectorQty(m_map)));
 
+        ASSERT(uint(iSectorCount + index) < g_World.m_SectorsQty);
         _ppAdjacentSectors[(DIR_TYPE)i] = g_World.m_Sectors[iSectorCount + index];
     }
 }
