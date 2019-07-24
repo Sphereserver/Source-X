@@ -581,8 +581,11 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 	// if an item needs OnTickStatusUpdate called on the next tick, it needs
 	// to be added to a separate list since it won't receive ticks whilst in
 	// this container
-	if ( pItem->m_fStatusUpdate != 0 )
+    if (pItem->m_fStatusUpdate != 0)
+    {
+        std::shared_lock<std::shared_mutex> lock_su(g_World.m_ObjStatusUpdates.THREAD_CMUTEX);
         g_World.m_ObjStatusUpdates.emplace(pItem);
+    }
 
 	switch ( GetType() )
 	{

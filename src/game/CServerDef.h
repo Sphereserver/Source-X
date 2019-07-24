@@ -45,7 +45,7 @@ class CServerDef : public CScriptObj
 private:
 	CSString m_sName;	// What the name should be. Fill in from ping.
 	int64  m_timeLastValid;	// Last valid poll time
-	CSTime	m_dateLastValid;
+	CSTime m_dateLastValid;
 
 	int64  m_timeCreate;	// When added to the list ? 0 = at start up.
 
@@ -62,11 +62,11 @@ public:
 	CCrypto m_ClientVersion;
 
 	// Breakdown the string. or filled in locally.
-	char m_TimeZone;	// Hours from GMT. +5=EST
-	CSString m_sEMail;		// Admin email address.
-	CSString m_sURL;			// URL for the server.
+	char m_TimeZone;    // Hours from GMT. +5=EST
+	CSString m_sEMail;  // Admin email address.
+	CSString m_sURL;    // URL for the server.
 	CSString m_sLang;
-	ACCAPP_TYPE m_eAccApp;	// types of new account applications.
+	ACCAPP_TYPE m_eAccApp;  // types of new account applications.
 
 public:
 	CServerDef( lpctstr pszName, CSocketAddressIP dwIP );
@@ -106,12 +106,6 @@ public:
 	void SetName( lpctstr pszName );
 
 	virtual int64 GetAgeHours() const;
-
-	bool IsSame( const CServerDef * pServNew ) const
-	{
-		UNREFERENCED_PARAMETER(pServNew);
-		return true;
-	}
 
 	void SetValidTime();
 	int64 GetTimeSinceLastValid() const;

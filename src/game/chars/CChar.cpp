@@ -2065,7 +2065,7 @@ bool CChar::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
     }
 
     EXC_SET_BLOCK("Keyword");
-	CHC_TYPE iKeyNum = (CHC_TYPE) FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+	const CHC_TYPE iKeyNum = (CHC_TYPE) FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( iKeyNum < 0 )
 	{
 do_default:
@@ -2088,7 +2088,7 @@ do_default:
 		if ( IsSkillBase(iSkill) )
 		{
 			// Check some skill name.
-			ushort uiVal = Skill_GetBase( iSkill );
+			const ushort uiVal = Skill_GetBase( iSkill );
 			sVal.Format( "%u.%u", uiVal/10, uiVal%10 );
 			return true;
 		}
@@ -2096,7 +2096,7 @@ do_default:
 		return (fNoCallParent ? false : CObjBase::r_WriteVal( ptcKey, sVal, pSrc, false ));
 	}
 
-    CCharBase * pCharDef = Char_GetDef();
+    const CCharBase * pCharDef = Char_GetDef();
     ASSERT(pCharDef);
     CChar * pCharSrc = pSrc->GetChar();
 	switch ( iKeyNum )
@@ -2162,14 +2162,14 @@ do_default:
 						else if( !strnicmp(ptcKey, "LAST", 4) )
 						{
 							ptcKey += 4;
-							int64 dwLastTime = INT32_MAX, dwCurTime = 0;
+							int64 iLastTime = INT64_MAX, iCurTime = 0;
 
 							for ( size_t iAttacker = 0; iAttacker < m_lastAttackers.size(); ++iAttacker )
 							{
-								dwCurTime = m_lastAttackers[iAttacker].elapsed;
-								if ( dwCurTime <= dwLastTime )
+								iCurTime = m_lastAttackers[iAttacker].elapsed;
+								if ( iCurTime <= iLastTime )
 								{
-									dwLastTime = dwCurTime;
+									iLastTime = iCurTime;
 									attackerIndex = (int)iAttacker;
 								}
 							}

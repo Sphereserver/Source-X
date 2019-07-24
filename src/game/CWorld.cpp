@@ -746,7 +746,7 @@ int64 CWorldClock::GetSystemClock() // static
 {
 	ADDTOCALLSTACK("CWorldClock::GetSystemClock");
 	// Return system wall-clock using high resolution value (milliseconds)
-    auto timeMaxResolution = std::chrono::high_resolution_clock::now().time_since_epoch();
+    const auto timeMaxResolution = std::chrono::high_resolution_clock::now().time_since_epoch();
     return std::chrono::duration_cast<std::chrono::milliseconds>(timeMaxResolution).count();
 }
 
@@ -773,7 +773,7 @@ bool CWorldClock::Advance()
 	const int64 iTimeDiff = Clock_Sys - m_Clock_SysPrev;
 	if ( iTimeDiff == 0 )
 		return false;
-	else if ( iTimeDiff < 0 )
+	if ( iTimeDiff < 0 )
 	{
 		// System clock has changed forward
 		// Just wait until next cycle and it should be ok
@@ -796,9 +796,10 @@ bool CWorldClock::Advance()
 
 	m_timeClock = Clock_New;
     // Maths here are done with MSECs precision, if proceed we advance a server's TICK.
-    if (m_nextTickTime <= GetCurrentTime())
+    const CServerTime curTime = GetCurrentTime();
+    if (m_nextTickTime <= curTime)
     {
-        m_nextTickTime = GetCurrentTime() + MSECS_PER_TICK;	// Next hit time.
+        m_nextTickTime = curTime + MSECS_PER_TICK;	// Next hit time.
         ++_iCurTick;
     }
 	return true;
@@ -837,13 +838,13 @@ void CWorld::Init()
 		g_MapList.m_pMapDiffCollection->Init();
 
 	//	initialize all sectors
-	int	sectors = 0;
-	int m = 0;
+	uint sectors = 0;
+	int  m = 0;
 	for ( m = 0; m < 256; ++m )
 	{
 		if ( !g_MapList.m_maps[m] )
 			continue;
-		sectors += g_MapList.GetSectorQty(m);
+		sectors += (uint)g_MapList.GetSectorQty(m);
 	}
 
 	m_Sectors = new CSector*[sectors];
@@ -859,14 +860,24 @@ void CWorld::Init()
 
 		sprintf(z1, " map%d=%d", m, g_MapList.GetSectorQty(m));
 		strcat(z, z1);
-		for ( int s = 0; s < g_MapList.GetSectorQty(m); ++s )
+        const int iMaxX = g_MapList.GetSectorCols(m);
+        //const int iMaxY = g_MapList.GetSectorRows(m);
+		for ( int s = 0, x = 0, y = 0; s < g_MapList.GetSectorQty(m); ++s )
 		{
+            if (x >= iMaxX)
+            {
+                x = 0;
+                ++y;
+            }
 			CSector	*pSector = new CSector;
 			ASSERT(pSector);
-			pSector->Init(s, m);
+			pSector->Init(s, m, x, y);
 			m_Sectors[m_SectorsQty++] = pSector;
+            ++x;
 		}
 	}
+    ASSERT(sectors == m_SectorsQty);
+
     for (uint s = 0; s < m_SectorsQty; ++s)
     {
         CSector *pSector = m_Sectors[s];
@@ -875,6 +886,7 @@ void CWorld::Init()
             pSector->SetAdjacentSectors();
         }
     }
+
     g_Log.Event(LOGM_INIT, "Allocated map sectors:%s\n", static_cast<lpctstr>(z));
 	ASSERT(m_SectorsQty);
 
@@ -1054,7 +1066,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		TIME_PROFILE_END;
 
 		tchar * time = Str_GetTemp();
-		sprintf(time, "%" PRId64 ".%04lld", (int64)(TIME_PROFILE_GET_HI), (int64)(TIME_PROFILE_GET_LO));
+		sprintf(time, "%lld.%04lld", TIME_PROFILE_GET_HI, TIME_PROFILE_GET_LO);
 
 		g_Log.Event(LOGM_SAVE, "World save completed, took %s seconds.\n", time);
 
@@ -1563,13 +1575,11 @@ void CWorld::DelTimedObject(CTimedObject * pTimedObject)
 
 void CWorld::_InsertCharTicking(int64 iTickNext, CChar* pChar)
 {
-    _mWorldTickList.THREAD_CMUTEX.lock();
+    std::shared_lock<std::shared_mutex> shared_lock(_mWorldTickList.THREAD_CMUTEX);
     TimedCharsContainer& timedObjCont = _mCharTickList[iTickNext];
-    _mWorldTickList.THREAD_CMUTEX.unlock();
 
-    timedObjCont.THREAD_CMUTEX.lock();
+    std::shared_lock<std::shared_mutex> shared_lock_cont(timedObjCont.THREAD_CMUTEX);
     timedObjCont.emplace_back(pChar);
-    timedObjCont.THREAD_CMUTEX.unlock();
 }
 
 void CWorld::_RemoveCharTicking(const int64 iOldTimeout, const CChar* pChar)
@@ -1783,7 +1793,10 @@ bool CWorld::LoadWorld() // Load world from script
             break;
 
 		// Reset everything that has been loaded
-		m_ObjStatusUpdates.clear();
+        {
+            std::shared_lock<std::shared_mutex> lock_su(m_ObjStatusUpdates.THREAD_CMUTEX);
+            m_ObjStatusUpdates.clear();
+        }
         m_Stones.clear();
 		m_TimedFunctions.Clear();
 		m_Parties.Clear();
@@ -2130,7 +2143,12 @@ void CWorld::Close()
 		Save(true);
 
 	m_Stones.clear();
-	m_ObjStatusUpdates.clear();
+
+    {
+        std::shared_lock<std::shared_mutex> lock_su(g_World.m_ObjStatusUpdates.THREAD_CMUTEX);
+        m_ObjStatusUpdates.clear();
+    }
+
 	m_Parties.Clear();
 	m_GMPages.Clear();
 
@@ -2426,12 +2444,12 @@ int64 CWorld::GetGameWorldTime( int64 basetime ) const
 	return( basetime / g_Cfg.m_iGameMinuteLength );
 }
 
-int64 CWorld::GetNextNewMoon( bool bMoonIndex ) const
+int64 CWorld::GetNextNewMoon( bool fMoonIndex ) const
 {
 	ADDTOCALLSTACK("CWorld::GetNextNewMoon");
 	// "Predict" the next new moon for this moon
 	// Get the period
-	int64 iSynodic = bMoonIndex ? FELUCCA_SYNODIC_PERIOD : TRAMMEL_SYNODIC_PERIOD;
+	int64 iSynodic = fMoonIndex ? FELUCCA_SYNODIC_PERIOD : TRAMMEL_SYNODIC_PERIOD;
 
 	// Add a "month" to the current game time
 	int64 iNextMonth = GetGameWorldTime() + iSynodic;
@@ -2442,7 +2460,7 @@ int64 CWorld::GetNextNewMoon( bool bMoonIndex ) const
 	
 }
 
-uint CWorld::GetMoonPhase(bool bMoonIndex) const
+uint CWorld::GetMoonPhase(bool fMoonIndex) const
 {
 	ADDTOCALLSTACK("CWorld::GetMoonPhase");
 	// bMoonIndex is FALSE if we are looking for the phase of Trammel,
@@ -2457,12 +2475,12 @@ uint CWorld::GetMoonPhase(bool bMoonIndex) const
 	//			              SynodicPeriod
 	//
 
-	int64 dwCurrentTime = GetGameWorldTime();	// game world time in minutes
+	int64 iCurrentTime = GetGameWorldTime();	// game world time in minutes
 
-	if (!bMoonIndex)	// Trammel
-		return IMulDiv( dwCurrentTime % TRAMMEL_SYNODIC_PERIOD, 8, TRAMMEL_SYNODIC_PERIOD );
+	if (!fMoonIndex)	// Trammel
+		return IMulDiv( iCurrentTime % TRAMMEL_SYNODIC_PERIOD, 8, TRAMMEL_SYNODIC_PERIOD );
 	else	// Luna2
-		return IMulDiv( dwCurrentTime % FELUCCA_SYNODIC_PERIOD, 8, FELUCCA_SYNODIC_PERIOD );
+		return IMulDiv( iCurrentTime % FELUCCA_SYNODIC_PERIOD, 8, FELUCCA_SYNODIC_PERIOD );
 }
 
 void CWorld::OnTick()
@@ -2489,20 +2507,23 @@ void CWorld::OnTick()
         * note: ideally, a better solution to accomplish this should be found if possible
         * TODO: implement a new class inheriting from CTimedObject to get rid of this code.
         */
-        if (!m_ObjStatusUpdates.empty())
         {
-            EXC_TRYSUB("Tick::StatusUpdates");
-
-            // loop backwards to avoid possible infinite loop if a status update is triggered
-            // as part of the status update (e.g. property changed under tooltip trigger)
-            for (CObjBase * pObj : m_ObjStatusUpdates)
+            std::shared_lock<std::shared_mutex> lock_su(g_World.m_ObjStatusUpdates.THREAD_CMUTEX);
+            if (!m_ObjStatusUpdates.empty())
             {
-                if (pObj != nullptr)
-                    pObj->OnTickStatusUpdate();
-            }
-            m_ObjStatusUpdates.clear();
+                EXC_TRYSUB("Tick::StatusUpdates");
 
-            EXC_CATCHSUB("StatusUpdates");
+                // loop backwards to avoid possible infinite loop if a status update is triggered
+                // as part of the status update (e.g. property changed under tooltip trigger)
+                for (CObjBase* pObj : m_ObjStatusUpdates)
+                {
+                    if (pObj != nullptr)
+                        pObj->OnTickStatusUpdate();
+                }
+                m_ObjStatusUpdates.clear();
+
+                EXC_CATCHSUB("StatusUpdates");
+            }
         }
 
         // TimerF

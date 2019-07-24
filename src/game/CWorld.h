@@ -13,7 +13,6 @@
 #include "CSector.h"
 #include "CTimedFunction.h"
 #include "CTimedObject.h"
-#include <unordered_map>
 #include <unordered_set>
 
 class CObjBase;
@@ -139,7 +138,7 @@ struct WorldTickList : public std::map<int64, TimedObjectsContainer>
 {
     THREAD_CMUTEX_DEF;
 };
-struct TimedObjectLookupList : public std::unordered_map<CTimedObject*, int64>
+struct TimedObjectLookupList : public std::map<CTimedObject*, int64>
 {
     THREAD_CMUTEX_DEF;
 };
@@ -152,10 +151,16 @@ struct CharTickList : public std::map<int64, TimedCharsContainer>
 {
     THREAD_CMUTEX_DEF;
 };
-struct CharTickLookupList : public std::unordered_map<CChar*, int64>
+struct CharTickLookupList : public std::map<CChar*, int64>
 {
     THREAD_CMUTEX_DEF;
 };
+
+struct StatusUpdatesList : public std::unordered_set<CObjBase*>
+{
+    THREAD_CMUTEX_DEF;
+};
+
 
 extern class CWorld : public CScriptObj, public CWorldThread
 {
@@ -179,6 +184,10 @@ private:
     TimedObjectLookupList _mWorldTickLookup;
     CharTickList _mCharTickList;
     CharTickLookupList _mCharTickLookup;
+
+public:
+    StatusUpdatesList m_ObjStatusUpdates;   // objects that need OnTickStatusUpdate called
+    CTimedFunctionHandler m_TimedFunctions; // TimedFunction Container/Wrapper
 
 public:
     void AddTimedObject(int64 iTimeout, CTimedObject *pTimedObject);
@@ -217,9 +226,6 @@ public:
 	static lpctstr const sm_szLoadKeys[];
 	CSPtrTypeArray <CItemTypeDef *> m_TileTypes;
 
-	// TimedFunction Container/Wrapper
-	CTimedFunctionHandler m_TimedFunctions;
-	std::unordered_set<CObjBase*> m_ObjStatusUpdates; // objects that need OnTickStatusUpdate called
 
 private:
 	bool LoadFile( lpctstr pszName, bool fError = true );
@@ -274,8 +280,8 @@ public:
 #define FELUCCA_SYNODIC_PERIOD 840 // in game world minutes
 #define TRAMMEL_FULL_BRIGHTNESS 2 // light units LIGHT_BRIGHT
 #define FELUCCA_FULL_BRIGHTNESS 6 // light units LIGHT_BRIGHT
-	uint GetMoonPhase( bool bMoonIndex = false ) const;
-	int64 GetNextNewMoon( bool bMoonIndex ) const;
+	uint GetMoonPhase( bool fMoonIndex = false ) const;
+	int64 GetNextNewMoon( bool fMoonIndex ) const;
 
 	int64 GetGameWorldTime( int64 basetime ) const;
     int64 GetGameWorldTime() const	// return game world minutes

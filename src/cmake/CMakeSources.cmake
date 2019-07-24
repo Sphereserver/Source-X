@@ -166,6 +166,7 @@ common/resource/CResourceBase.cpp
 common/resource/CResourceBase.h
 common/resource/CResourceDef.cpp
 common/resource/CResourceDef.h
+common/resource/CResourceID.cpp
 common/resource/CResourceID.h
 common/resource/CResourceHash.cpp
 common/resource/CResourceHash.h

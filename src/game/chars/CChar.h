@@ -174,9 +174,9 @@ public:
     short m_iKarma;
     ushort m_uiFame;
 
-	int64 _timeNextRegen;	// When did i get my last regen tick ?
-    int16 _iRegenTickCount; // ticks until next regen.
-	int64 m_timeCreate;		// When was i created ?
+	int64  _timeNextRegen;	    // When did i get my last regen tick ?
+    ushort _iRegenTickCount;    // ticks until next regen.
+	int64  m_timeCreate;	    // When was i created ?
 
 	int64 m_timeLastHitsUpdate;
 	int64 m_timeLastCallGuards;

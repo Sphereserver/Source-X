@@ -165,7 +165,9 @@ bool CCacheableScriptFile::IsEOF() const
 
 tchar * CCacheableScriptFile::_ReadString(tchar *pBuffer, int sizemax) 
 {
-    ADDTOCALLSTACK("CCacheableScriptFile::_ReadString");
+    // This function is called for each script line which is being parsed (so VERY frequently), and ADDTOCALLSTACK is expensive if called
+    // this much often, so here it's to be preferred ADDTOCALLSTACK_INTENSIVE, even if we'll lose stack trace precision.
+    ADDTOCALLSTACK_INTENSIVE("CCacheableScriptFile::_ReadString");
 
     if ( _useDefaultFile() ) 
         return CSFileText::_ReadString(pBuffer, sizemax);
@@ -174,7 +176,8 @@ tchar * CCacheableScriptFile::_ReadString(tchar *pBuffer, int sizemax)
 
     if ( !_fileContent->empty() && ((uint)_iCurrentLine < _fileContent->size()) )
     {
-        strcpy(pBuffer, (*_fileContent)[_iCurrentLine].c_str() );
+        //strcpy(pBuffer, (*_fileContent)[_iCurrentLine].c_str() );
+        strcpy(pBuffer, _fileContent->data()[_iCurrentLine].c_str()); // may be faster with MS compiler
         ++_iCurrentLine;
     }
     else
@@ -187,7 +190,7 @@ tchar * CCacheableScriptFile::_ReadString(tchar *pBuffer, int sizemax)
 
 tchar * CCacheableScriptFile::ReadString(tchar *pBuffer, int sizemax) 
 {
-    ADDTOCALLSTACK("CCacheableScriptFile::ReadString");
+    ADDTOCALLSTACK_INTENSIVE("CCacheableScriptFile::ReadString");
     THREAD_UNIQUE_LOCK_RETURN(_ReadString(pBuffer, sizemax));
 }
 

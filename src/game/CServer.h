@@ -39,30 +39,34 @@ extern class CServer : public CServerDef, public CTextConsole
 	static lpctstr const sm_szVerbKeys[];
 
 public:
-	static const char *m_sClassName;
-	std::atomic<SERVMODE_TYPE> m_iModeCode;	// Just some error code to return to system.
-	std::atomic_int m_iExitFlag;			// identifies who caused the exit. <0 = error
-	bool m_fResyncPause;		// Server is temporarily halted so files can be updated.
-	CTextConsole * m_fResyncRequested;		// A resync pause has been requested by this source.
+    static const char* m_sClassName;
+    std::atomic<SERVMODE_TYPE> m_iModeCode;	// Just some error code to return to system.
+    std::atomic_int m_iExitFlag;			// identifies who caused the exit. <0 = error
+    bool m_fResyncPause;		            // Server is temporarily halted so files can be updated.
+    CTextConsole* m_fResyncRequested;		// A resync pause has been requested by this source.
+    
+#ifdef _WIN32
+    bool _fCloseNTWindowOnTerminate;
+#endif
 
-	CSocket m_SocketMain;	// This is the incoming monitor socket.(might be multiple ports?)
-	CSocket m_SocketGod;	// This is for god clients.
+    CSocket m_SocketMain;	// This is the incoming monitor socket.(might be multiple ports?)
+    CSocket m_SocketGod;	// This is for god clients.
 
-							// admin console.
-	int m_iAdminClients;		// how many of my clients are admin consoles ?
-	CSString m_sConsoleText;
-	bool m_fConsoleTextReadyFlag;	// interlocking flag for moving between tasks.
+    // admin console.
+    int m_iAdminClients;		    // how many of my clients are admin consoles ?
+    CSString m_sConsoleText;
+    bool m_fConsoleTextReadyFlag;	// interlocking flag for moving between tasks.
 
-	int64 m_timeShutdown;	// When to perform the shutdowm (g_World.clock)
-	CChat m_Chats;	// keep all the active chats
+    int64 m_timeShutdown;	// When to perform the shutdowm (g_World.clock)
+    CChat m_Chats;	        // keep all the active chats
 
-	char	m_PacketFilter[255][32];	// list of packet filtering functions
-	char	m_OutPacketFilter[255][32];	// list of outgoing packet filtering functions
+    char m_PacketFilter[255][32];       // list of packet filtering functions
+    char m_OutPacketFilter[255][32];    // list of outgoing packet filtering functions
 
-	CSFileObj	_hFile;			// File script object
-	CDataBase	_hDb;			// Online database (MySQL)
-	CSQLite		_hLdb;			// Local (file) database (SQLite)
-    CSQLite     _hMdb;         // In-memory database (SQLite)
+    CSFileObj   _hFile;     // File script object
+    CDataBase   _hDb;		// Online database (MySQL)
+    CSQLite	    _hLdb;		// Local (file) database (SQLite)
+    CSQLite     _hMdb;      // In-memory database (SQLite)
 
 private:
 	void ProfileDump( CTextConsole * pSrc, bool bDump = false );
@@ -99,7 +103,7 @@ public:
     void PrintStr(lpctstr pMsg) const;
     void PrintStr(ConsoleTextColor iColor, lpctstr pMsg) const;
     void PrintOutput(ConsoleOutput *pOutput) const;
-	ssize_t PrintPercent( ssize_t iCount, ssize_t iTotal );
+	ssize_t PrintPercent( ssize_t iCount, ssize_t iTotal ) const;
 
 	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 	virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
@@ -107,7 +111,7 @@ public:
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
 
 	lpctstr GetStatusString( byte iIndex = 0 ) const;
-	int64 GetAgeHours() const;
+	virtual int64 GetAgeHours() const override;
 
 	bool OnConsoleCmd( CSString & sText, CTextConsole * pSrc );
 
@@ -118,7 +122,7 @@ public:
 	void SetResyncPause( bool fPause, CTextConsole * pSrc, bool bMessage = false );
 	bool CommandLine( int argc, tchar * argv[] );
 
-	lpctstr GetName() const { return( CServerDef::GetName()); }
+	lpctstr GetName() const { return CServerDef::GetName(); }
 	PLEVEL_TYPE GetPrivLevel() const;
 } g_Serv;	// current state stuff not saved.
 

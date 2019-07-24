@@ -517,7 +517,9 @@ bool CScript::Open( lpctstr ptcFilename, uint uiFlags )
 
 bool CScript::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
 {
-	ADDTOCALLSTACK("CScript::_ReadTextLine");
+    // Same caveat as for ReadTextLine when using ADDTOCALLSTACK, it would be better for performance to use ADDTOCALLSTACK_INTENSIVE,
+    //  but it's safer to have at least one trace of a _ReadString call, so we'll use ADDTOCALLSTACK here.
+    ADDTOCALLSTACK("CScript::_ReadString");
 	// ARGS:
 	// fRemoveBlanks = Don't report any blank lines, (just keep reading)
 
@@ -538,7 +540,9 @@ bool CScript::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened
 }
 bool CScript::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
 {
-    ADDTOCALLSTACK("CScript::ReadTextLine");
+    // This function is called for each script line which is being parsed (so VERY frequently), and ADDTOCALLSTACK is expensive if called
+    // this much often, so here it's to be preferred ADDTOCALLSTACK_INTENSIVE, even if we'll lose stack trace precision.
+    ADDTOCALLSTACK_INTENSIVE("CScript::ReadTextLine");
     THREAD_UNIQUE_LOCK_RETURN(_ReadTextLine(fRemoveBlanks));
 }
 

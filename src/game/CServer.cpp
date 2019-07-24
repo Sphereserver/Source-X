@@ -41,6 +41,10 @@ CServer::CServer() : CServerDef( SPHERE_TITLE, CSocketAddressIP( SOCKET_LOCAL_AD
 	m_fResyncPause = false;
 	m_fResyncRequested = nullptr;
 
+#ifdef _WIN32
+    _fCloseNTWindowOnTerminate = false;
+#endif
+
 	m_iAdminClients = 0;
 
 	m_timeShutdown = 0;
@@ -262,7 +266,7 @@ void CServer::PrintOutput(ConsoleOutput * pOutput) const
     SysMessage(pOutput);
 }
 
-ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal )
+ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal ) const
 {
 	ADDTOCALLSTACK("CServer::PrintPercent");
 	if ( iTotal <= 0 )
@@ -1177,7 +1181,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 			{
 				if ( pTrig->average > average )
 				{
-					sprintf(tmpstring, "TRIGGER '%s' called %u times, took %.4f seconds average (%.4f min, %.4f max), total: %.f4 s.\n",
+					sprintf(tmpstring, "TRIGGER '%s' called %u times, took %.4f seconds average (%.4f min, %.4f max), total: %.4f s.\n",
 						pTrig->name,
 						pTrig->called,
 						(pTrig->average / 1000.0),
@@ -1866,31 +1870,33 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 	// RETURN:
 	//  true = keep running after this.
 
-	for ( int argn = 1; argn < argc; argn++ )
+	for ( int argn = 1; argn < argc; ++argn )
 	{
 		tchar * pArg = argv[argn];
 		if ( ! _IS_SWITCH(pArg[0]))
 			continue;
 
-		pArg++;
+		++pArg;
 
 		switch ( toupper(pArg[0]) )
 		{
+            case 'H':
 			case '?':
 				PrintStr( SPHERE_TITLE " \n"
 					"Command Line Switches:\n"
 #ifdef _WIN32
-					"-cClassName Setup custom window class name for sphere (default: " SPHERE_TITLE "Svr)\n"
+					"-Cclassname Setup custom window class name for sphere (default: " SPHERE_TITLE ").\n"
 #else
-					"-c do not use colored console output (default: on)\n"
+					"-C do not use colored console output (default: on).\n"
 #endif
-					"-D Dump global variable DEFNAMEs to defs.txt\n"
+					"-D Dump global variable DEFNAMEs to defs.txt.\n"
 #if defined(_WIN32) && !defined(_DEBUG)
-					"-E Enable the CrashDumper\n"
+					"-E Enable the CrashDumper.\n"
 #endif
-					"-Gpath/to/saves/ Defrags sphere saves\n"
+					"-Gpath/to/saves/ Defrags sphere saves.\n"
 #ifdef _WIN32
-					"-k install/remove Installs or removes NT Service\n"
+					"-K install/remove Installs or removes NT Service.\n"
+                    "-J automatically close the console window at server termination.\n"
 #endif
 					"-Nstring Set the sphere name.\n"
 					"-P# Set the port number.\n"
@@ -1903,6 +1909,9 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 			case 'K':
 				//	these are parsed in other places - nt service, nt window part, etc
 				continue;
+            case 'J':
+                g_Serv._fCloseNTWindowOnTerminate = true;
+                continue;
 #else
 			case 'C':
 				g_UnixTerminal.setColorEnabled(false);
@@ -1970,7 +1979,7 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 			case 'Q':
 				return false;
 			default:
-				g_Log.Event(LOGM_INIT|LOGL_CRIT, "Don't recognize command line data '%s'\n", static_cast<lpctstr>(argv[argn]));
+				g_Log.Event(LOGM_INIT|LOGL_CRIT, "Can't recognize command line data '%s'\n", static_cast<lpctstr>(argv[argn]));
 				break;
 		}
 	}
