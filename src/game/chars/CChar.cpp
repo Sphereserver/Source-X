@@ -2498,15 +2498,15 @@ do_default:
 
 				if ( *ptcKey )
 				{
-					tchar * ppArgs[2];
+					tchar * ppArgs[4];
 					int iQty = Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, CountOf( ppArgs ));
-					if ( iQty == 2 )
+					if ( iQty >= 2 )
 					{
 						SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
 						if ( iSkill == SKILL_NONE )
 							return false;
-
-						sVal.FormatVal( Skill_UseQuick( iSkill, Exp_GetVal( ppArgs[1] )));
+						
+						sVal.FormatVal( Skill_UseQuick( iSkill, Exp_GetVal( ppArgs[1] ), true ,(Exp_GetVal(ppArgs[2]) != 0 ? false : true), (Exp_GetVal(ppArgs[3]) != 0 ? true : false)));
 						return true;
 					}
 				}
@@ -3473,15 +3473,15 @@ bool CChar::r_LoadVal( CScript & s )
 			{
 				if ( s.GetArgStr() )
 				{
-					tchar * ppArgs[2];
+					tchar * ppArgs[4];
 					int iQty = Str_ParseCmds(const_cast<tchar *>(s.GetArgStr()), ppArgs, CountOf( ppArgs ));
-					if ( iQty == 2 )
+					if ( iQty >= 2 )
 					{
 						SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
 						if ( iSkill == SKILL_NONE )
 							return false;
 
-						 Skill_UseQuick( iSkill, Exp_GetVal( ppArgs[1] ));
+						Skill_UseQuick( iSkill, Exp_GetVal( ppArgs[1] ), true, (Exp_GetVal(ppArgs[2]) != 0 ? false : true), (Exp_GetVal(ppArgs[3]) != 0 ? true : false));
 						return true;
 					}
 				}

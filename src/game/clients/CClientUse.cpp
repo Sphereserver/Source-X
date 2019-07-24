@@ -1055,7 +1055,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 	ASSERT(m_pChar);
 	if ( track_sel == UINT32_MAX )
 	{
-		// Tacking (unlike other skills) is used during menu setup.
+		// Tracking (unlike other skills) is used during menu setup.
 		m_pChar->Skill_Cleanup();	// clean up current skill.
 
 		CMenuItem item[6];
