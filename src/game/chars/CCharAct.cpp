@@ -1603,55 +1603,63 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 
 	if ( !pItem )
 		return -1;
-	if ( pItem->GetParent() == this && pItem->GetEquipLayer() == LAYER_HORSE )
+
+    CSObjList* pItemParent = pItem->GetParent();
+    const LAYER_TYPE iItemLayer = pItem->GetEquipLayer();
+	if (pItemParent == this && iItemLayer == LAYER_HORSE )
 		return -1;
-	if (( pItem->GetParent() == this ) && ( pItem->GetEquipLayer() == LAYER_DRAGGING ))
+	if ((pItemParent == this ) && (iItemLayer == LAYER_DRAGGING ))
 		return pItem->GetAmount();
 	if ( !CanTouch(pItem) || !CanMove(pItem, true) )
 		return -1;
 
 	CObjBaseTemplate * pObjTop = pItem->GetTopLevelObj();
+    CChar* pCharTop = dynamic_cast<CChar*>(pObjTop);
 
 	if( IsClient() )
 	{
-		CClient * client = GetClient();
-		CItem * pItemCont	= dynamic_cast <CItem*> (pItem->GetParent());
+		CClient *client    = GetClient();
+		CItem   *pItemCont = dynamic_cast <CItem*> (pItemParent);
 
 		if ( pItemCont != nullptr )
 		{
+            const CPointMap& ptTop = GetTopPoint();
 			// Don't allow taking items from the bank unless we opened it here
-			if ( pItemCont->IsType( IT_EQ_BANK_BOX ) && ( pItemCont->m_itEqBankBox.m_pntOpen != GetTopPoint() ) )
+			if ( pItemCont->IsType( IT_EQ_BANK_BOX ) && ( pItemCont->m_itEqBankBox.m_pntOpen != ptTop) )
 				return -1;
 
 			// Check sub containers too
-			CChar * pCharTop = dynamic_cast<CChar *>(pObjTop);
 			if ( pCharTop != nullptr )
 			{
-				bool bItemContIsInsideBankBox = pCharTop->GetBank()->IsItemInside( pItemCont );
-				if ( bItemContIsInsideBankBox && ( pCharTop->GetBank()->m_itEqBankBox.m_pntOpen != GetTopPoint() ))
+                CItemContainer* pBank = pCharTop->GetBank();
+				bool fItemContIsInsideBankBox = pBank->IsItemInside( pItemCont );
+				if ( fItemContIsInsideBankBox && (pBank->m_itEqBankBox.m_pntOpen != ptTop))
 					return -1;
 			}
 
-			// protect from ,snoop - disallow picking from not opened containers
-			bool isInOpenedContainer = false;
+			// protect from snoop - disallow picking from not opened containers
+			bool fIsInOpenedContainer = false;
 			CClient::OpenedContainerMap_t::iterator itContainerFound = client->m_openedContainers.find( pItemCont->GetUID().GetPrivateUID() );
 			if ( itContainerFound != client->m_openedContainers.end() )
 			{
-				dword dwTopContainerUID = itContainerFound->second.first.first;
-				dword dwTopMostContainerUID = itContainerFound->second.first.second;
-				CPointMap ptOpenedContainerPosition = itContainerFound->second.second;
+				const dword dwTopContainerUID = itContainerFound->second.first.first;
+				const dword dwTopMostContainerUID = itContainerFound->second.first.second;
+				const CPointMap& ptOpenedContainerPosition = itContainerFound->second.second;
 
 				dword dwTopContainerUID_ToCheck = 0;
-				if ( pItemCont->GetContainer() )
-					dwTopContainerUID_ToCheck = pItemCont->GetContainer()->GetUID().GetPrivateUID();
-				else
-					dwTopContainerUID_ToCheck = pObjTop->GetUID().GetPrivateUID();
 
-				if ( ( dwTopMostContainerUID == pObjTop->GetUID().GetPrivateUID() ) && ( dwTopContainerUID == dwTopContainerUID_ToCheck ) )
+                const CObjBase* pCont = pItemCont->GetContainer();
+                const CUID& UIDTop = pObjTop->GetUID();
+				if (pCont)
+					dwTopContainerUID_ToCheck = pCont->GetUID().GetPrivateUID();
+				else
+					dwTopContainerUID_ToCheck = UIDTop.GetPrivateUID();
+
+				if ( ( dwTopMostContainerUID == UIDTop.GetPrivateUID() ) && ( dwTopContainerUID == dwTopContainerUID_ToCheck ) )
 				{
 					if ( pCharTop != nullptr )
 					{
-						isInOpenedContainer = true;
+                        fIsInOpenedContainer = true;
 						// probably a pickup check from pack if pCharTop != this?
 					}
 					else
@@ -1659,24 +1667,22 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 						CItem * pItemTop = dynamic_cast<CItem *>(pObjTop);
 						if ( pItemTop && (pItemTop->IsType(IT_SHIP_HOLD) || pItemTop->IsType(IT_SHIP_HOLD_LOCK)) && (pItemTop->GetTopPoint().GetRegion(REGION_TYPE_MULTI) == GetTopPoint().GetRegion(REGION_TYPE_MULTI)) )
 						{
-							isInOpenedContainer = true;
+                            fIsInOpenedContainer = true;
 						}
 						else if ( ptOpenedContainerPosition.GetDist( pObjTop->GetTopPoint() ) <= 3 )
 						{
-							isInOpenedContainer = true;
+                            fIsInOpenedContainer = true;
 						}
 					}
 				}
 			}
 
-			if (!isInOpenedContainer)
+			if (!fIsInOpenedContainer)
 				return -1;
 		}
 	}
 
-	const CChar * pChar = dynamic_cast <const CChar*> (pObjTop);
-
-	if ( pChar != this &&
+	if ( pCharTop != this &&
 		pItem->IsAttr(ATTR_OWNED) &&
 		pItem->m_uidLink != GetUID() &&
 		!IsPriv(PRIV_ALLMOVE|PRIV_GM))
@@ -1715,30 +1721,30 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	if ( GetWeightLoadPercent(GetTotalWeight() + iItemWeight) > 300 )
 	{
 		SysMessageDefault(DEFMSG_MSG_HEAVY);
-		if (( pChar == this ) && ( pItem->GetParent() == GetPack() ))
-		{
-			fDrop = true;	// we can always drop it out of own pack !
-		}
+        if ((pCharTop == this) && (pItem->GetParent() == GetPack()))
+            fDrop = true;	// we can always drop it out of own pack !
+        else
+            return -1;
 	}
 
 	ITRIG_TYPE trigger;
-	if ( pChar != nullptr )
+	if (pCharTop != nullptr )
 	{
-		bool bCanTake = false;
+		bool fCanTake = false;
         if (IsPriv(PRIV_GM))// higher priv players can take items and undress us
         {
-            bCanTake = (pChar == this) || (GetPrivLevel() > pChar->GetPrivLevel());
+            fCanTake = (pCharTop == this) || (GetPrivLevel() > pCharTop->GetPrivLevel());
         }
-        else if (pChar == this) // we can always take our own items
+        else if (pCharTop == this) // we can always take our own items
         {
-            bCanTake = true;
+            fCanTake = true;
         }
-        else if ((pItem->GetContainer() != pChar) || (g_Cfg.m_fCanUndressPets == true)) // our owners can take items from us (with CanUndressPets=true, they can undress us too)
+        else if ((pItem->GetContainer() != pCharTop) || (g_Cfg.m_fCanUndressPets == true)) // our owners can take items from us (with CanUndressPets=true, they can undress us too)
         {
-            bCanTake = pChar->IsOwnedBy(this);
+            fCanTake = pCharTop->IsOwnedBy(this);
         }
 
-		if (bCanTake == false)
+		if (fCanTake == false)
 		{
 			SysMessageDefault(DEFMSG_MSG_STEAL);
 			return -1;
@@ -4107,7 +4113,7 @@ bool CChar::OnTickPeriodic()
     EXC_TRY("OnTickPeriodic");
     ++_iRegenTickCount;
     _timeNextRegen = g_World.GetCurrentTime().GetTimeRaw() + MSECS_PER_TICK;
-    bool fRegen = (_iRegenTickCount == MSECS_PER_TENTH);
+    const bool fRegen = (_iRegenTickCount == MSECS_PER_TENTH);
 
     if (fRegen)
     {

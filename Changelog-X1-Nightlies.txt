@@ -1793,3 +1793,9 @@ WARNING: Important change!
 - Added: -J command line switch (Windows specific) to automatically close the console window after server termination.
 - Fixed: -c and -k (on Windows) command line switches were considered only if lowercase.
 - Fixed: Invalid "Reject Move Item Request" packet sent when trying to drag an item with attr_move_never (Issue #300).
+
+24-07-2019, Nolok
+- Fixed: Could pick up and move items or item stacks too heavy to be carried (Issue #303).
+- Fixed: Adjacent sectors not waking up from sleep. Those sectors awakened only when a player entered inside them, this meant that corpses were removed and NPCs respawned only when a player
+	entered in that sector: this looks ugly (Issue #297).
+- Updated: Speed improvements in the NPC Pathfinder algorithm and script line reading.

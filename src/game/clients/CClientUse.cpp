@@ -98,13 +98,13 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 	bool bIsEquipped = pItem->IsItemEquipped();
 	if ( pItemDef->IsTypeEquippable() && !bIsEquipped && pItemDef->GetEquipLayer() )
 	{
-		bool bMustEquip = true;
+		bool fMustEquip = true;
 		if ( pItem->IsTypeSpellbook() )
-			bMustEquip = false;
+			fMustEquip = false;
 		else if ( (pItem->IsType(IT_LIGHT_OUT) || pItem->IsType(IT_LIGHT_LIT)) && !pItem->IsItemInContainer() )
-			bMustEquip = false;
+			fMustEquip = false;
 
-		if ( bMustEquip )
+		if ( fMustEquip )
 		{
 			if ( !m_pChar->CanMove(pItem) )
 				return false;

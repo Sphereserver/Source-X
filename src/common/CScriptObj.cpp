@@ -1881,7 +1881,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, lpctstr pszTrigName, CTex
 				break;
 		}
 
-		// first time function called. so create a record for it
+		// first time this trigger is called. so create a record for it
 		if ( pTrig == nullptr )
 		{
 			pTrig = new CScriptProfiler::CScriptProfilerTrigger;

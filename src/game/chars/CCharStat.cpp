@@ -510,7 +510,9 @@ bool CChar::Stats_Regen()
 
 			if (OnTrigger(CTRIG_RegenStat, this, &Args) == TRIGRET_RET_TRUE)
 			{
-				m_Stat[i].m_regenLast = 0;
+                // Setting the last regen time to 0 will make this trigger be called over and over and over, without a delay, which
+                //  can suck quite a bit cpu.
+				//m_Stat[i].m_regenLast = 0;
 				continue;
 			}
 
@@ -626,6 +628,7 @@ void CChar::SetFame(ushort uiNewFame)
 
 bool CChar::Stat_Decrease(STAT_TYPE stat, SKILL_TYPE skill)
 {
+    ADDTOCALLSTACK("CChar::Stat_Decrease");
 	// Stat to decrease
 	// Skill = is this being called from Skill_Gain? if so we check this skill's bonuses.
 	if ( !m_pPlayer )

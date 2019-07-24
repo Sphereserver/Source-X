@@ -115,7 +115,12 @@ CObjBase::~CObjBase()
         //pEntity->UnsubscribeComponent(pSpawn);    // Avoiding recursive calls from CCSpawn::DelObj when forcing the pChar/pItem to Delete();
         pSpawn->DelObj(GetUID());  // Then I should be removed from it's list.
     }
-    g_World.m_ObjStatusUpdates.erase(this);
+
+    {
+        std::shared_lock<std::shared_mutex> lock_su(g_World.m_ObjStatusUpdates.THREAD_CMUTEX);
+        g_World.m_ObjStatusUpdates.erase(this);
+    }
+
     g_World.m_TimedFunctions.Erase( GetUID() );
 
 	FreePropertyList();
@@ -2807,8 +2812,11 @@ void CObjBase::UpdatePropertyFlag()
 	m_fStatusUpdate |= SU_UPDATE_TOOLTIP;
 
     // Items equipped, inside containers or with timer expired doesn't receive ticks and need to be added to a list of items to be processed separately
-    if ( !IsTopLevel() || IsTimerExpired() )
+    if (!IsTopLevel() || IsTimerExpired())
+    {
+        std::shared_lock<std::shared_mutex> lock_su(g_World.m_ObjStatusUpdates.THREAD_CMUTEX);
         g_World.m_ObjStatusUpdates.emplace(this);
+    }
 }
 
 dword CObjBase::GetPropertyHash() const
@@ -3192,9 +3200,13 @@ void CObjBase::Delete(bool fForce)
 	DeletePrepare();
     CEntity::Delete(fForce);
     CTimedObject::Delete();
-    g_World.m_ObjStatusUpdates.erase(this);
-    g_World.m_TimedFunctions.Erase( GetUID() );
 
+    {
+        std::shared_lock<std::shared_mutex> lock_su(g_World.m_ObjStatusUpdates.THREAD_CMUTEX);
+        g_World.m_ObjStatusUpdates.erase(this);
+    }
+
+    g_World.m_TimedFunctions.Erase( GetUID() );
     g_World.m_ObjDelete.InsertHead(this);
 }
 

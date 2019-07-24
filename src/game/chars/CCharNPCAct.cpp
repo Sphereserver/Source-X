@@ -2277,9 +2277,9 @@ void CChar::NPC_Pathfinding()
 	EXC_SET_BLOCK("pre-checking");
 
 	// If NPC_AI_ALWAYSINT is set, just make it as smart as possible.
-	int			iInt = ( NPC_GetAiFlags() & NPC_AI_ALWAYSINT ) ? 300 : Stat_GetAdjusted(STAT_INT);
-	CPointMap	pTarg = m_Act_p;
-	int			dist = local.GetDist(pTarg);
+	int			        iInt = ( NPC_GetAiFlags() & NPC_AI_ALWAYSINT ) ? 300 : Stat_GetAdjusted(STAT_INT);
+	const CPointMap&    pTarg = m_Act_p;
+	int			        dist = local.GetDist(pTarg);
 
 	//	do we really need to find the path?
 	if ( iInt < 75 ) return;					// too dumb
@@ -2323,11 +2323,10 @@ void CChar::NPC_Pathfinding()
 	//	save the found path
 	EXC_SET_BLOCK("saving found path");
 
-	CPointMap Next;
 	// Don't read the first step, it's the same as the current position, so i = 1
-	for ( size_t i = 1; (i != path.LastPathSize()) && (i < MAX_NPC_PATH_STORAGE_SIZE /* Don't overflow*/ ); ++i )
+	for ( size_t i = 1, sz = path.LastPathSize(); (i != sz) && (i < MAX_NPC_PATH_STORAGE_SIZE /* Don't overflow*/ ); ++i )
 	{
-		Next = path.ReadStep(i);
+        const CPointMap& Next = path.ReadStep(i);
 		m_pNPC->m_nextX[i - 1] = Next.m_x;
 		m_pNPC->m_nextY[i - 1] = Next.m_y;
 	}

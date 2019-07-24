@@ -103,7 +103,7 @@ public:
     void PrintStr(lpctstr pMsg) const;
     void PrintStr(ConsoleTextColor iColor, lpctstr pMsg) const;
     void PrintOutput(ConsoleOutput *pOutput) const;
-	ssize_t PrintPercent( ssize_t iCount, ssize_t iTotal );
+	ssize_t PrintPercent( ssize_t iCount, ssize_t iTotal ) const;
 
 	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 	virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
@@ -111,7 +111,7 @@ public:
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
 
 	lpctstr GetStatusString( byte iIndex = 0 ) const;
-	int64 GetAgeHours() const;
+	virtual int64 GetAgeHours() const override;
 
 	bool OnConsoleCmd( CSString & sText, CTextConsole * pSrc );
 
@@ -122,7 +122,7 @@ public:
 	void SetResyncPause( bool fPause, CTextConsole * pSrc, bool bMessage = false );
 	bool CommandLine( int argc, tchar * argv[] );
 
-	lpctstr GetName() const { return( CServerDef::GetName()); }
+	lpctstr GetName() const { return CServerDef::GetName(); }
 	PLEVEL_TYPE GetPrivLevel() const;
 } g_Serv;	// current state stuff not saved.
 

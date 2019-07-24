@@ -252,7 +252,7 @@ void CSector::GoAwake()
         for (int i = 0; i < (int)DIR_QTY; ++i)
         {
             CSector *pSector = GetAdjacentSector((DIR_TYPE)i);
-            if (pSector && !pSector->IsSleeping())
+            if (pSector && pSector->IsSleeping())
             {
                 pSector->GoAwake();
             }

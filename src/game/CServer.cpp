@@ -266,7 +266,7 @@ void CServer::PrintOutput(ConsoleOutput * pOutput) const
     SysMessage(pOutput);
 }
 
-ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal )
+ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal ) const
 {
 	ADDTOCALLSTACK("CServer::PrintPercent");
 	if ( iTotal <= 0 )

@@ -4,6 +4,7 @@
 #include "../CWorld.h"
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
+#include <algorithm>
 
 CCItemDamageable::CCItemDamageable(CItem * pLink) : CComponent(COMP_ITEMDAMAGEABLE)
 {
@@ -16,6 +17,7 @@ CCItemDamageable::CCItemDamageable(CItem * pLink) : CComponent(COMP_ITEMDAMAGEAB
 
 CCItemDamageable::~CCItemDamageable()
 {
+    std::shared_lock<std::shared_mutex> lock_su(g_World.m_ObjStatusUpdates.THREAD_CMUTEX);
     g_World.m_ObjStatusUpdates.erase(GetLink());
 }
 

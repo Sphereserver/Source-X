@@ -228,7 +228,7 @@ void CClient::Event_Item_Pickup(CUID uid, word amount) // Client grabs an item
 	m_Targ_p = pItem->GetUnkPoint();
 
 	EXC_SET_BLOCK("ItemPickup");
-	int tempamount = m_pChar->ItemPickup(pItem, amount);
+	const int tempamount = m_pChar->ItemPickup(pItem, amount);
 	if ( tempamount < 0 )
 	{
 		EXC_SET_BLOCK("ItemPickup - addItemDragCancel(0)");
