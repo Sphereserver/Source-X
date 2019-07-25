@@ -2277,20 +2277,27 @@ void CChar::NPC_Pathfinding()
 	EXC_SET_BLOCK("pre-checking");
 
 	// If NPC_AI_ALWAYSINT is set, just make it as smart as possible.
-	int			        iInt = ( NPC_GetAiFlags() & NPC_AI_ALWAYSINT ) ? 300 : Stat_GetAdjusted(STAT_INT);
-	const CPointMap&    pTarg = m_Act_p;
-	int			        dist = local.GetDist(pTarg);
+	int			iInt = ( NPC_GetAiFlags() & NPC_AI_ALWAYSINT ) ? 300 : Stat_GetAdjusted(STAT_INT);
+	CPointMap   ptTarg = m_Act_p;
+	int			dist = local.GetDist(ptTarg);
 
 	//	do we really need to find the path?
-	if ( iInt < 75 ) return;					// too dumb
-	if ( m_pNPC->m_nextPt == pTarg ) return;			// we have path to that position already saved in m_NextX/Y
-	if ( !pTarg.IsValidPoint() ) return;		// invalid point
-	if (( pTarg.m_x == local.m_x ) && ( pTarg.m_y == local.m_y )) return; // same spot
-	if ( pTarg.m_map != local.m_map ) return;	// cannot just move to another map
-	if ( dist >= PATH_SIZE/2 ) return;			// skip too far locations which should be too slow
-	if ( dist < 2 ) return;						// skip too low distance (1 step) - good in default
-												// pathfinding is buggy near the edges of the map,
-												// so do not use it there
+	if ( iInt < 75 ) // too dumb
+        return;					
+	if ( m_pNPC->m_nextPt == ptTarg ) // we have path to that position already saved in m_NextX/Y
+        return;			
+	if ( !ptTarg.IsValidPoint() ) // invalid point
+        return;
+	if (( ptTarg.m_x == local.m_x ) && ( ptTarg.m_y == local.m_y )) // same spot
+        return; 
+	if ( ptTarg.m_map != local.m_map ) // cannot just move to another map
+        return;
+	if ( dist >= PATH_SIZE/2 ) // skip too far locations which should be too slow
+        return;
+	if ( dist < 2 ) // skip too low distance (1 step) - good in default
+        return;
+	// pathfinding is buggy near the edges of the map,
+	// so do not use it there
 	if (( local.m_x <= PATH_SIZE/2 ) || ( local.m_y <= PATH_SIZE/2 ) ||
 		( local.m_x >= ( g_MapList.GetX(local.m_map) - PATH_SIZE/2) ) ||
 		( local.m_y >= ( g_MapList.GetY(local.m_map) - PATH_SIZE/2) ))
@@ -2301,37 +2308,30 @@ void CChar::NPC_Pathfinding()
 
 	//	clear saved steps list
 	EXC_SET_BLOCK("clearing last steps");
-#ifndef _WIN32
-	for (int i_tmpN=0;i_tmpN < MAX_NPC_PATH_STORAGE_SIZE;i_tmpN++)
-	{
-		m_pNPC->m_nextX[i_tmpN] = 0;
-		m_pNPC->m_nextY[i_tmpN] = 0;
-	}
-#else
 	memset(m_pNPC->m_nextX, 0, sizeof(m_pNPC->m_nextX));
 	memset(m_pNPC->m_nextY, 0, sizeof(m_pNPC->m_nextY));
-#endif
 
 	//	proceed with the pathfinding
 	EXC_SET_BLOCK("filling the map");
-	CPathFinder	path(this, pTarg);
+    // The pathfinder class is big, it's better to store that on the heap, instead of on the stack.
+    std::unique_ptr<CPathFinder> path = std::make_unique<CPathFinder>(this, ptTarg);
 
 	EXC_SET_BLOCK("searching the path");
-	if ( path.FindPath() == PATH_NONEXISTENT )
+	if ( path->FindPath() == PATH_NONEXISTENT )
 		return;
 
 	//	save the found path
 	EXC_SET_BLOCK("saving found path");
 
 	// Don't read the first step, it's the same as the current position, so i = 1
-	for ( size_t i = 1, sz = path.LastPathSize(); (i != sz) && (i < MAX_NPC_PATH_STORAGE_SIZE /* Don't overflow*/ ); ++i )
+	for ( size_t i = 1, sz = path->LastPathSize(); (i != sz) && (i < MAX_NPC_PATH_STORAGE_SIZE /* Don't overflow*/ ); ++i )
 	{
-        const CPointMap& Next = path.ReadStep(i);
-		m_pNPC->m_nextX[i - 1] = Next.m_x;
-		m_pNPC->m_nextY[i - 1] = Next.m_y;
+        const CPointMap& ptNext = path->ReadStep(i);
+		m_pNPC->m_nextX[i - 1] = ptNext.m_x;
+		m_pNPC->m_nextY[i - 1] = ptNext.m_y;
 	}
-	m_pNPC->m_nextPt = pTarg;
-	path.ClearLastPath(); // !! Use explicitly when using one CPathFinder object for more NPCs
+	m_pNPC->m_nextPt = ptTarg;
+	path->ClearLastPath(); // !! Use explicitly when using one CPathFinder object for more NPCs
 
 	EXC_CATCH;
 

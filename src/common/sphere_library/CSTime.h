@@ -20,8 +20,8 @@
 #endif
 
 
-llong GetPreciseSysTimeMicro();
-llong GetPreciseSysTimeMilli();
+llong GetPreciseSysTimeMicro() noexcept;
+llong GetPreciseSysTimeMilli() noexcept;
 
 
 class CSTime	// similar to the MFC CTime and CTimeSpan or COleDateTime

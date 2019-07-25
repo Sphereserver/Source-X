@@ -707,7 +707,7 @@ void NetworkInput::receiveData()
 			continue;
 
 		EXC_SET_BLOCK("start network profile");
-		ProfileTask networkTask(PROFILE_NETWORK_RX);
+		const ProfileTask networkTask(PROFILE_NETWORK_RX);
 		if ( ! FD_ISSET(state->m_socket.GetSocket(), &fds))
 		{
 			state->m_incoming.rawPackets.clean();
@@ -770,7 +770,7 @@ void NetworkInput::processData()
 			continue;
 
 		EXC_SET_BLOCK("start network profile");
-		ProfileTask networkTask(PROFILE_NETWORK_RX);
+		const ProfileTask networkTask(PROFILE_NETWORK_RX);
 
 		const CClient* client = state->getClient();
 		ASSERT(client != nullptr);
@@ -826,7 +826,7 @@ void NetworkInput::processData()
 		if (g_Serv.IsLoading() == false)
 		{
 			EXC_SET_BLOCK("start client profile");
-			ProfileTask clientTask(PROFILE_CLIENTS);
+			const ProfileTask clientTask(PROFILE_CLIENTS);
 
 			EXC_SET_BLOCK("packets - process");
 			Packet* buffer = state->m_incoming.rawBuffer;
@@ -1314,7 +1314,7 @@ bool NetworkOutput::processOutput()
 	ASSERT(!m_thread->isActive() || m_thread->isCurrentThread());
 #endif
 
-	ProfileTask networkTask(PROFILE_NETWORK_TX);
+	const ProfileTask networkTask(PROFILE_NETWORK_TX);
 
 	static uchar tick = 0;
 	EXC_TRY("NetworkOutput");

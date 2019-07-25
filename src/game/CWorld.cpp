@@ -271,7 +271,7 @@ bool CWorldSearch::GetNextSector()
 
 CItem * CWorldSearch::GetItem()
 {
-	ADDTOCALLSTACK("CWorldSearch::GetItem");
+	ADDTOCALLSTACK_INTENSIVE("CWorldSearch::GetItem");
 	for (;;)
 	{
 		if ( m_pObj == nullptr )
@@ -1318,7 +1318,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 
     //-- Ok we can start the save process, in which we eventually remove the previous saves and create the other.
 
-	bool bSaved = false;
+	bool fSaved = false;
 	try
 	{
 		CScriptTriggerArgs Args(fForceImmediate, m_iSaveStage);
@@ -1353,7 +1353,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 		}
 
 		fForceImmediate = (Args.m_iN1 != 0);
-		bSaved = SaveTry(fForceImmediate);
+		fSaved = SaveTry(fForceImmediate);
 	}
 	catch ( const CSError& e )
 	{
@@ -1377,8 +1377,8 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 	}
 
 	CScriptTriggerArgs Args(fForceImmediate, m_iSaveStage);
-	g_Serv.r_Call((bSaved ? "f_onserver_save_ok" : "f_onserver_save_fail"), &g_Serv, &Args);
-	return bSaved;
+	g_Serv.r_Call((fSaved ? "f_onserver_save_ok" : "f_onserver_save_fail"), &g_Serv, &Args);
+	return fSaved;
 }
 
 void CWorld::SaveStatics()
@@ -1526,7 +1526,7 @@ void CWorld::AddTimedObject(int64 iTimeout, CTimedObject * pTimedObject)
     EXC_TRY("AddTimedObject");
     EXC_SET_BLOCK("Lookup");
 
-    ProfileTask timersTask(PROFILE_TIMERS);
+    const ProfileTask timersTask(PROFILE_TIMERS);
     std::unique_lock<std::shared_mutex> lookupLock(_mWorldTickLookup.THREAD_CMUTEX);
 
     auto itLookup = _mWorldTickLookup.find(pTimedObject);
@@ -1541,7 +1541,7 @@ void CWorld::AddTimedObject(int64 iTimeout, CTimedObject * pTimedObject)
     else
     {
         EXC_SET_BLOCK("LookupInsert");
-        _mWorldTickLookup.insert(std::make_pair(pTimedObject, iTimeout));
+        _mWorldTickLookup.emplace(pTimedObject, iTimeout);
     }
     
     EXC_SET_BLOCK("InsertTimedObject");
@@ -1556,10 +1556,10 @@ void CWorld::DelTimedObject(CTimedObject * pTimedObject)
     EXC_TRY("AddTimedObject");
     EXC_SET_BLOCK("Lookup");
 
-    ProfileTask timersTask(PROFILE_TIMERS);
+    const ProfileTask timersTask(PROFILE_TIMERS);
     std::unique_lock<std::shared_mutex> lookupLock(_mWorldTickLookup.THREAD_CMUTEX);
 
-    auto lookupIt = _mWorldTickLookup.find(pTimedObject);
+    const auto lookupIt = _mWorldTickLookup.find(pTimedObject);
     if (lookupIt == _mWorldTickLookup.end())
         return;
 
@@ -1634,7 +1634,7 @@ void CWorld::AddCharTicking(CChar * pChar, bool fIgnoreSleep, bool fOverwrite)
     }
 
     EXC_SET_BLOCK("Lookup");
-    ProfileTask timersTask(PROFILE_TIMERS);
+    const ProfileTask timersTask(PROFILE_TIMERS);
     std::unique_lock<std::shared_mutex> lookupLock(_mCharTickLookup.THREAD_CMUTEX);
     
     const int64 iTickNext = pChar->_timeNextRegen;
@@ -1642,7 +1642,7 @@ void CWorld::AddCharTicking(CChar * pChar, bool fIgnoreSleep, bool fOverwrite)
     //    return;
 
     bool fDoNotInsert = false;
-    auto itLookup = _mCharTickLookup.find(pChar);
+    const auto itLookup = _mCharTickLookup.find(pChar);
     if (itLookup != _mCharTickLookup.end())
     {
         // Adding an object already on the list? Am i setting a new timeout without deleting the previous one?
@@ -1661,7 +1661,7 @@ void CWorld::AddCharTicking(CChar * pChar, bool fIgnoreSleep, bool fOverwrite)
     else
     {
         EXC_SET_BLOCK("LookupInsert");
-        _mCharTickLookup.insert(std::make_pair(pChar, iTickNext));
+        _mCharTickLookup.emplace(pChar, iTickNext);
     }
 
     if (!fDoNotInsert)
@@ -1679,7 +1679,7 @@ void CWorld::DelCharTicking(CChar * pChar)
     EXC_TRY("DelCharTicking");
     EXC_SET_BLOCK("Lookup");
 
-    ProfileTask timersTask(PROFILE_TIMERS);
+    const ProfileTask timersTask(PROFILE_TIMERS);
     std::unique_lock<std::shared_mutex> lookupLock(_mCharTickLookup.THREAD_CMUTEX);
 
     auto lookupIt = _mCharTickLookup.find(pChar);
@@ -2538,7 +2538,7 @@ void CWorld::OnTick()
 
     EXC_SET_BLOCK("WorldObjects selection");
     {
-        ProfileTask timersTask(PROFILE_TIMERS);
+        const ProfileTask timersTask(PROFILE_TIMERS);
         std::vector<CTimedObject*> vecTimedObjs;
         {
             // Need here a new, inner scope to get rid of EXC_TRYSUB variables and for the unique_lock
@@ -2577,7 +2577,7 @@ void CWorld::OnTick()
             EXC_SETSUB_BLOCK("Elapsed");
             ptcSubDesc = "Generic";
             const PROFILE_TYPE profile = pObj->GetProfileType();
-            ProfileTask profileTask(profile);
+            const ProfileTask  profileTask(profile);
 
             /*
             * Doing a SetTimeout() in the object's tick will force CWorld to search for that object's
@@ -2686,7 +2686,7 @@ void CWorld::OnTick()
 
     EXC_SET_BLOCK("PeriodicChars selection");
     {
-        ProfileTask taskChars(PROFILE_CHARS);
+        const ProfileTask taskChars(PROFILE_CHARS);
         std::vector<CChar*> vecPeriodicChars;
         {
             // Need here a new, inner scope to get rid of EXC_TRYSUB variables, and for the unique_lock

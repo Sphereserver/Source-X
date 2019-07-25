@@ -13,6 +13,7 @@
 #include "CSector.h"
 #include "CTimedFunction.h"
 #include "CTimedObject.h"
+#include <unordered_map>
 #include <unordered_set>
 
 class CObjBase;
@@ -138,7 +139,7 @@ struct WorldTickList : public std::map<int64, TimedObjectsContainer>
 {
     THREAD_CMUTEX_DEF;
 };
-struct TimedObjectLookupList : public std::map<CTimedObject*, int64>
+struct TimedObjectLookupList : public std::unordered_map<CTimedObject*, int64>
 {
     THREAD_CMUTEX_DEF;
 };
@@ -151,7 +152,7 @@ struct CharTickList : public std::map<int64, TimedCharsContainer>
 {
     THREAD_CMUTEX_DEF;
 };
-struct CharTickLookupList : public std::map<CChar*, int64>
+struct CharTickLookupList : public std::unordered_map<CChar*, int64>
 {
     THREAD_CMUTEX_DEF;
 };

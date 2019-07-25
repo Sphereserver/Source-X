@@ -18,13 +18,13 @@
 	    //	with GetSupportedTickCount) manually every time we compare two values.
 
         // Precision is in the order of 10-16 ms.
-	    static inline llong GetSupportedTickCount() { return (llong)GetTickCount(); }
+	    static inline llong GetSupportedTickCount() noexcept { return (llong)GetTickCount(); }
     #else
-	    static inline llong GetSupportedTickCount() { return (llong)GetTickCount64(); }
+	    static inline llong GetSupportedTickCount() noexcept { return (llong)GetTickCount64(); }
     #endif
 #endif
 
-llong GetPreciseSysTimeMicro()
+llong GetPreciseSysTimeMicro() noexcept
 {
 #ifdef _WIN32
     // From Windows documentation:
@@ -41,7 +41,7 @@ llong GetPreciseSysTimeMicro()
 #endif
 }
 
-llong GetPreciseSysTimeMilli()
+llong GetPreciseSysTimeMilli() noexcept
 {
 #ifdef _WIN32
     LARGE_INTEGER liQPCStart;

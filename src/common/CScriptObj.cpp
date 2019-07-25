@@ -1854,7 +1854,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, lpctstr pszTrigName, CTex
 	if ( !OnTriggerFind(s, pszTrigName) )
 		return TRIGRET_RET_DEFAULT;
 
-	ProfileTask scriptsTask(PROFILE_SCRIPTS);
+	const ProfileTask scriptsTask(PROFILE_SCRIPTS);
 
 	CScriptProfiler::CScriptProfilerTrigger	*pTrig = nullptr;
 	TIME_PROFILE_INIT;

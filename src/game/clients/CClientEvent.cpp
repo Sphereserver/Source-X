@@ -3,7 +3,6 @@
 #include "../../network/network.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
-#include "../../sphere/ProfileTask.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../items/CItemMessage.h"

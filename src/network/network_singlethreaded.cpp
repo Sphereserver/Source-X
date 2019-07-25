@@ -164,7 +164,7 @@ void NetworkIn::tick(void)
 	for (int i = 0; i < m_stateCount; i++)
 	{
 		EXC_SET_BLOCK("start network profile");
-		ProfileTask networkTask(PROFILE_NETWORK_RX);
+		const ProfileTask networkTask(PROFILE_NETWORK_RX);
 
 		EXC_SET_BLOCK("messages - next client");
 		NetState* client = m_states[i];
@@ -202,7 +202,7 @@ void NetworkIn::tick(void)
 
 		EXC_SET_BLOCK("start client profile");
 		CurrentProfileData.Count(PROFILE_DATA_RX, received);
-		ProfileTask clientTask(PROFILE_CLIENTS);
+		const ProfileTask clientTask(PROFILE_CLIENTS);
 
 		EXC_SET_BLOCK("messages - process");
 		if (client->m_client->GetConnectType() == CONNECT_UNK)
@@ -908,7 +908,7 @@ NetworkOut::~NetworkOut(void)
 void NetworkOut::tick(void)
 {
 	ADDTOCALLSTACK("NetworkOut::tick");
-	ProfileTask networkTask(PROFILE_NETWORK_TX);
+	const ProfileTask networkTask(PROFILE_NETWORK_TX);
 
 	if (g_Serv.GetExitFlag() || (g_Serv.GetServerMode() == SERVMODE_Exiting))
 	{

@@ -18,9 +18,8 @@ class CChar;
 
 class CPathFinderPoint : public CPointMap
 {
-protected:
-	CPathFinderPoint* m_Parent;
 public:
+	CPathFinderPoint* m_Parent;
 	bool m_Walkable;
 	int FValue;
 	int GValue;
@@ -35,10 +34,7 @@ private:
 	CPathFinderPoint& operator=(const CPathFinderPoint& other);
 
 public:
-	CPathFinderPoint* GetParent() const;
-	void SetParent(CPathFinderPoint* pt);
-
-    inline bool operator < (const CPathFinderPoint& pt) const
+    inline bool operator < (const CPathFinderPoint& pt) const noexcept
     {
         return (FValue < pt.FValue);
     }
@@ -65,10 +61,16 @@ private:
 	CPathFinder& operator=(const CPathFinder& other);
 
 public:
-	size_t LastPathSize();
-	void ClearLastPath();
     int FindPath();
-    inline const CPointMap& ReadStep(size_t Step = 0)
+    size_t LastPathSize() const noexcept
+    {
+        return m_LastPath.size();
+    }
+    void ClearLastPath() noexcept
+    {
+        m_LastPath.clear();
+    }
+    inline const CPointMap& ReadStep(size_t Step = 0) const
     {
         return m_LastPath[Step];
     }
@@ -87,7 +89,7 @@ protected:
 	CPointMap m_Target;
 
 protected:
-    static uint Heuristic(const CPathFinderPoint* Pt1, const CPathFinderPoint* Pt2);
+    static uint Heuristic(const CPathFinderPoint* Pt1, const CPathFinderPoint* Pt2) noexcept;
 
 	void Clear();
 	void GetChildren(const CPathFinderPoint* Point, std::deque<CPathFinderPoint*>& ChildrenRefList );

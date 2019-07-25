@@ -2165,7 +2165,7 @@ void CServer::OnTick()
 	EXC_SET_BLOCK("SetTime");
 	SetValidTime();	// we are a valid game server.
 
-	ProfileTask overheadTask(PROFILE_OVERHEAD);
+	const ProfileTask overheadTask(PROFILE_OVERHEAD);
 
 	if ( m_timeShutdown > 0 )
 	{

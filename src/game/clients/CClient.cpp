@@ -4,7 +4,6 @@
 #include "../../network/network.h"
 #include "../../network/send.h"
 #include "../../network/packet.h"
-#include "../../sphere/ProfileTask.h"
 #include "../chars/CChar.h"
 #include "../components/CCSpawn.h"
 #include "../CWorld.h"

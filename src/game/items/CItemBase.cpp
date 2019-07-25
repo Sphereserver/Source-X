@@ -2120,7 +2120,7 @@ bool CItemBaseMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * 
 
 CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 {
-	ADDTOCALLSTACK("CItemBase::FindItemBase");
+    ADDTOCALLSTACK_INTENSIVE("CItemBase::FindItemBase");
 	// CItemBase is a like item already loaded.
 	if ( id <= ITEMID_NOTHING )
 		return nullptr;

@@ -69,7 +69,7 @@ public:
 	virtual void setPriority(Priority) = 0;
 	virtual Priority getPriority() const = 0;
 
-	static inline threadid_t getCurrentThreadId()
+	static inline threadid_t getCurrentThreadId() noexcept
 	{
 #ifdef _WIN32
 		return ::GetCurrentThreadId();
@@ -77,7 +77,7 @@ public:
 		return pthread_self();
 #endif
 	}
-	static inline bool isSameThreadId(threadid_t firstId, threadid_t secondId)
+	static inline bool isSameThreadId(threadid_t firstId, threadid_t secondId) noexcept
 	{
 #ifdef _WIN32
 		return (firstId == secondId);
@@ -86,7 +86,7 @@ public:
 #endif
 	}
 
-	inline bool isSameThread(threadid_t otherThreadId)
+	inline bool isSameThread(threadid_t otherThreadId) const noexcept
 	{
 		return isSameThreadId(getCurrentThreadId(), otherThreadId);
 	}
@@ -382,7 +382,7 @@ public:
 };
 
 // Remember, call stack is disabled on Release builds!
-#define ADDTOCALLSTACK(_function_)	StackDebugInformation debugStack(_function_)
+#define ADDTOCALLSTACK(_function_)	const StackDebugInformation debugStack(_function_)
 
 // Add to the call stack these functions only in debug mode, to have the most precise call stack
 //  even if these functions are thought to be very safe and (nearly) exception-free.

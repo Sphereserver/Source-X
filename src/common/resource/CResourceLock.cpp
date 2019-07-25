@@ -66,7 +66,7 @@ bool CResourceLock::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the 
 {
     // This function is called for each script line which is being parsed (so VERY frequently), and ADDTOCALLSTACK is expensive if called
     // this much often, so here it's to be preferred ADDTOCALLSTACK_INTENSIVE, even if we'll lose stack trace precision.
-    ADDTOCALLSTACK_INTENSIVE("CResourceLock::_ReadTextLine");
+    ADDTOCALLSTACK("CResourceLock::_ReadTextLine");
     // ARGS:
     // fRemoveBlanks = Don't report any blank lines, (just keep reading)
 
@@ -90,7 +90,7 @@ bool CResourceLock::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the 
 }
 bool CResourceLock::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
 {
-    ADDTOCALLSTACK("CResourceLock::ReadTextLine");
+    ADDTOCALLSTACK_INTENSIVE("CResourceLock::ReadTextLine");
     THREAD_UNIQUE_LOCK_RETURN(_ReadTextLine(fRemoveBlanks));
 }
 

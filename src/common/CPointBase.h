@@ -46,22 +46,22 @@ public:
 	const CPointBase operator -= ( const CPointBase & pt );
 
 	
-	int GetDistZ( const CPointBase & pt ) const;
-	int GetDistZAdj( const CPointBase & pt ) const;
-	int GetDistBase( const CPointBase & pt ) const;			// Distance between points
-	int GetDist( const CPointBase & pt ) const;				// Distance between points
-	int GetDistSightBase( const CPointBase & pt ) const;	// Distance between points based on UO sight
-	int GetDistSight( const CPointBase & pt ) const;		// Distance between points based on UO sight
-	int GetDist3D( const CPointBase & pt ) const;			// 3D Distance between points
+	int GetDistZ( const CPointBase & pt ) const noexcept;
+	int GetDistZAdj( const CPointBase & pt ) const noexcept;
+	int GetDistBase( const CPointBase & pt ) const noexcept;	    // Distance between points
+	int GetDist( const CPointBase & pt ) const noexcept;			// Distance between points
+	int GetDistSightBase( const CPointBase & pt ) const noexcept;	// Distance between points based on UO sight
+	int GetDistSight( const CPointBase & pt ) const noexcept;		// Distance between points based on UO sight
+	int GetDist3D( const CPointBase & pt ) const noexcept;			// 3D Distance between points
 
-	bool IsValidZ() const;
-	bool IsValidXY() const;
-	bool IsValidPoint() const;
-	bool IsCharValid() const;
+	bool IsValidZ() const noexcept;
+	bool IsValidXY() const noexcept;
+	bool IsValidPoint() const noexcept;
+	bool IsCharValid() const noexcept;
 
 	void ValidatePoint();
 
-	bool IsSame2D( const CPointBase & pt ) const;
+	bool IsSame2D( const CPointBase & pt ) const noexcept;
 
 	void Set( const CPointBase & pt );
 	void Set( word x, word y, char z = 0, uchar map = 0 );
@@ -125,7 +125,7 @@ struct CPointSort : public CPointMap
     {
         Set( pt );
     }
-    virtual ~CPointSort() {}; // just to make this dynamic
+    virtual ~CPointSort() = default; // just to make this dynamic
 };
 
 

@@ -4075,7 +4075,7 @@ bool CChar::OnTick()
 
     if (m_pNPC)
     {
-        ProfileTask aiTask(PROFILE_NPC_AI);
+        const ProfileTask aiTask(PROFILE_NPC_AI);
         EXC_SET_BLOCK("NPC action");
         if (!IsStatFlag(STATF_FREEZE) && !Can(CAN_C_STATUE))
         {

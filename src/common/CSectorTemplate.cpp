@@ -305,7 +305,7 @@ const CServerMapBlock * CSectorBase::GetMapBlock( const CPointMap & pt )
 	CPointMap pntBlock( UO_BLOCK_ALIGN(pt.m_x), UO_BLOCK_ALIGN(pt.m_y), 0, pt.m_map);
 	ASSERT( m_MapBlockCache.size() <= (UO_BLOCK_SIZE * UO_BLOCK_SIZE));
 
-	ProfileTask mapTask(PROFILE_MAP);
+	const ProfileTask mapTask(PROFILE_MAP);
 
 	if ( !pt.IsValidXY() )
 	{

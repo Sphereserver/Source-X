@@ -6,7 +6,7 @@
 #include <algorithm>
 
 
-uint CPathFinder::Heuristic(const CPathFinderPoint* Pt1, const CPathFinderPoint* Pt2) // static
+uint CPathFinder::Heuristic(const CPathFinderPoint* Pt1, const CPathFinderPoint* Pt2) noexcept // static
 {
 	return 10*(abs(Pt1->m_x - Pt2->m_x) + abs(Pt1->m_y - Pt2->m_y));
 }
@@ -55,19 +55,6 @@ CPathFinderPoint::CPathFinderPoint(const CPointMap& pt) : m_Parent(0), m_Walkabl
 	m_map = pt.m_map;
 }
 
-
-CPathFinderPoint* CPathFinderPoint::GetParent() const
-{
-    ADDTOCALLSTACK("CPathFinderPoint::GetParent");
-	return m_Parent;
-}
-
-void CPathFinderPoint::SetParent(CPathFinderPoint* pt)
-{
-	ADDTOCALLSTACK("CPathFinderPoint::SetParent");
-	m_Parent = pt;
-}
-
 CPathFinder::CPathFinder(CChar *pChar, CPointMap ptTarget)
 {
 	ADDTOCALLSTACK("CPathFinder::CPathFinder");
@@ -95,9 +82,9 @@ int CPathFinder::FindPath() //A* algorithm
 	ADDTOCALLSTACK("CPathFinder::FindPath");
 	ASSERT(m_pChar != nullptr);
 
-    const CPointMap& ptTop = m_pChar->GetTopPoint();
-	int X = ptTop.m_x - m_RealX;
-	int Y = ptTop.m_y - m_RealY;
+    const CPointMap ptTop = m_pChar->GetTopPoint();
+	const int X = ptTop.m_x - m_RealX;
+	const int Y = ptTop.m_y - m_RealY;
 
 	if ( X < 0 || Y < 0 || X > 23 || Y > 23 )
 	{
@@ -132,9 +119,9 @@ int CPathFinder::FindPath() //A* algorithm
 		if ( Current == End )
 		{
 			CPathFinderPoint *PathRef = Current;
-			while ( PathRef->GetParent() ) //Rebuild path + save
+			while ( PathRef->m_Parent ) //Rebuild path + save
 			{
-				PathRef = PathRef->GetParent();
+				PathRef = PathRef->m_Parent;
 				m_LastPath.emplace_front(CPointMap((word)(PathRef->m_x + m_RealX), (word)(PathRef->m_y + m_RealY), 0, PathRef->m_map));
 			}
 			Clear();
@@ -157,7 +144,7 @@ int CPathFinder::FindPath() //A* algorithm
                 InOpened = std::find(m_Opened.begin(), m_Opened.end(), Child);
 				if ( InOpened == m_Opened.end() )
 				{
-					Child->SetParent( Current );
+					Child->m_Parent = Current;
 					Child->GValue = Current->GValue;
 
 					if ( Child->m_x == Current->m_x || Child->m_y == Current->m_y )
@@ -174,7 +161,7 @@ int CPathFinder::FindPath() //A* algorithm
 				{
 					if ( Child->GValue < Current->GValue )
 					{
-						Child->SetParent( Current );
+						Child->m_Parent = Current;
 						if ( Child->m_x == Current->m_x || Child->m_y == Current->m_y )
 							Child->GValue += 10;
 						else
@@ -235,17 +222,5 @@ void CPathFinder::FillMap()
 	}
 
 	EXC_CATCH;
-}
-
-size_t CPathFinder::LastPathSize()
-{
-	ADDTOCALLSTACK("CPathFinder::LastPathSize");
-	return m_LastPath.size();
-}
-
-void CPathFinder::ClearLastPath()
-{
-	ADDTOCALLSTACK("CPathFinder::ClearLastPath");
-	m_LastPath.clear();
 }
 

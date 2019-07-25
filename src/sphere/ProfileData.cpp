@@ -24,6 +24,11 @@ ProfileData::ProfileData()
 	m_TimeTotal = 0;
 }
 
+int ProfileData::GetActiveWindow() const noexcept
+{
+    return m_iActiveWindowSeconds / 1000;
+}
+
 void ProfileData::SetActive(int iSampleSec)
 {
 	ADDTOCALLSTACK("ProfileData::SetActive");
@@ -121,7 +126,7 @@ bool ProfileData::IsEnabled(PROFILE_TYPE id) const
 		return m_EnabledProfiles[id];
 
 	// check all profiles
-	for (int i = PROFILE_OVERHEAD; i < PROFILE_QTY; i++)
+	for (int i = PROFILE_OVERHEAD; i < PROFILE_QTY; ++i)
 	{
 		if (IsEnabled(static_cast<PROFILE_TYPE>(i)))
 			return true;
@@ -186,7 +191,7 @@ lpctstr ProfileData::GetDescription(PROFILE_TYPE id) const
 	}
 	else
 	{
-		sprintf( pszTmp, "%.4fs  avg: %.4fs  [samples:%6i  avg:%6i ]  adjusted runtime: %is",
+		sprintf( pszTmp, "%.4fs  avg: %.4fs  [samples:%8i  avg:%7i]  adjusted runtime: %is",
 			(m_PreviousTimes[id].m_Time    / 1000.0),
 			(m_AverageTimes[id].m_Time     / 1000.0),
 			iCount,

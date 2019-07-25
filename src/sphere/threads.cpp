@@ -108,7 +108,8 @@ IThread *ThreadHolder::current()
 	if (thread == nullptr)
 		return DummySphereThread::getInstance();
 
-	ASSERT( thread->isSameThread(thread->getId()) );
+    // Uncomment it only for testing purposes, since this method is called very often and we don't need the additional overhead
+	//ASSERT( thread->isSameThread(thread->getId()) );
 
 	return thread;
 }

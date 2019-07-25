@@ -66,7 +66,7 @@ void CTimedObject::SetTimer(int64 iDelayInMsecs)
 void CTimedObject::SetTimeout(int64 iDelayInMsecs)
 {
     ADDTOCALLSTACK("CTimedObject::SetTimeout");
-    ProfileTask timersTask(PROFILE_TIMERS); // profile the settimeout proccess.
+    const ProfileTask timersTask(PROFILE_TIMERS); // profile the settimeout proccess.
     
     /*
     * Setting the new timer must remove any entry from the current world tick's map

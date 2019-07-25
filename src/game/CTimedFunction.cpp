@@ -24,7 +24,7 @@ void CTimedFunctionHandler::OnTick()
 		m_curTick = 0;
 
 	int tick = m_curTick;
-	ProfileTask scriptsTask(PROFILE_TIMEDFUNCTIONS);
+	const ProfileTask scriptsTask(PROFILE_TIMEDFUNCTIONS);
 
 
 	if ( !m_timedFunctions[tick].empty() )

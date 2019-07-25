@@ -68,12 +68,10 @@ private:
 	ProfileData& operator=(const ProfileData& other);
 
 public:
-	bool IsActive() const {
+	bool IsActive() const noexcept {
 		return ( m_iActiveWindowSeconds > 0 ? true : false );
 	}
-	int GetActiveWindow() const {
-		return m_iActiveWindowSeconds;
-	}
+    int GetActiveWindow() const noexcept;
 
 	void SetActive(int iSampleSec);
 	void Start(PROFILE_TYPE id);

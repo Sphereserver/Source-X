@@ -5,7 +5,6 @@
 #include "../../common/CException.h"
 #include "../../network/network.h"
 #include "../../network/send.h"
-#include "../../sphere/ProfileTask.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../items/CItemMap.h"

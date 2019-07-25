@@ -171,7 +171,7 @@ bool CSector::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 void CSector::GoSleep()
 {
     ADDTOCALLSTACK("CSector::Sleep");
-    ProfileTask charactersTask(PROFILE_TIMERS);
+    const ProfileTask charactersTask(PROFILE_TIMERS);
     CTimedObject::GoSleep();
 
     CChar * pCharNext = nullptr;
@@ -204,7 +204,7 @@ void CSector::GoSleep()
 void CSector::GoAwake()
 {
     ADDTOCALLSTACK("CSector::GoAwake");
-    ProfileTask charactersTask(PROFILE_TIMERS);
+    const ProfileTask charactersTask(PROFILE_TIMERS);
     CTimedObject::GoAwake();  // Awake it first, otherwise other things won't work.
 
     CChar * pCharNext = nullptr;
@@ -1284,7 +1284,7 @@ bool CSector::OnTick()
 	}
 
     // Check environ changes and inform clients of it.
-	ProfileTask charactersTask(PROFILE_CHARS);
+	const ProfileTask charactersTask(PROFILE_CHARS);
 
 	CChar * pCharNext = nullptr;
 	CChar * pChar = static_cast <CChar*>( m_Chars_Active.GetHead());
@@ -1332,7 +1332,7 @@ bool CSector::OnTick()
 		EXC_DEBUGSUB_END;
 	}
 
-	ProfileTask overheadTask(PROFILE_OVERHEAD);
+	const ProfileTask overheadTask(PROFILE_OVERHEAD);
 
 	EXC_SET_BLOCK("check map cache");
 	if (fCanSleep && m_iMapBlockCacheTime < iCurTime)     // Only if the sector can sleep.

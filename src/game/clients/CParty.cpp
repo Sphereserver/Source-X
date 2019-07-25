@@ -3,7 +3,6 @@
 #include "../../common/CException.h"
 #include "../../common/CScriptObj.h"
 #include "../../network/send.h"
-#include "../../sphere/ProfileTask.h"
 #include "../chars/CChar.h"
 #include "../CServer.h"
 #include "../CWorld.h"

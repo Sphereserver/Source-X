@@ -1018,7 +1018,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 
 void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck )
 {
-	ADDTOCALLSTACK("CWorld::GetHeightPoint");
+	ADDTOCALLSTACK_INTENSIVE("CWorld::GetHeightPoint");
     const CItemBase * pItemDef = nullptr;
     const CItemBaseDupe * pDupeDef = nullptr;
 	CItem * pItem = nullptr;
@@ -1467,7 +1467,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 
 char CWorld::GetHeightPoint2( const CPointMap & pt, dword & dwBlockFlags, bool fHouseCheck ) // Height of player who walked to X/Y/OLDZ
 {
-	ADDTOCALLSTACK("CWorld::GetHeightPoint2");
+    ADDTOCALLSTACK_INTENSIVE("CWorld::GetHeightPoint2");
 	// Given our coords at pt including pt.m_z
 	// What is the height that gravity would put me at should i step here ?
 	// Assume my head height is PLAYER_HEIGHT/2
