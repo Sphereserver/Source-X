@@ -317,7 +317,7 @@ const CServerMapBlock * CSectorBase::GetMapBlock( const CPointMap & pt )
 
 	// Find it in cache.
 	int iBlock = pntBlock.GetPointSortIndex();
-	MapBlockCache::iterator it = m_MapBlockCache.find(iBlock);
+	MapBlockCache::const_iterator it = m_MapBlockCache.find(iBlock);
 	if ( it != m_MapBlockCache.end() )
 	{
 		it->second->m_CacheTime.HitCacheTime();
@@ -454,7 +454,11 @@ bool CSectorBase::UnLinkRegion( CRegion * pRegionOld )
 	ADDTOCALLSTACK("CSectorBase::UnLinkRegion");
 	if ( !pRegionOld )
 		return false;
-	return m_RegionLinks.RemovePtr(pRegionOld);
+    auto it = std::find(m_RegionLinks.begin(), m_RegionLinks.end(), pRegionOld);
+    if (it == m_RegionLinks.end())
+        return false;
+    m_RegionLinks.erase(it);
+    return true;
 }
 
 bool CSectorBase::LinkRegion( CRegion * pRegionNew )
@@ -496,7 +500,7 @@ bool CSectorBase::LinkRegion( CRegion * pRegionNew )
 				continue;
 
 			// must insert before this.
-			m_RegionLinks.insert(i, pRegionNew);
+			m_RegionLinks.emplace(m_RegionLinks.begin() + i, pRegionNew);
 			return true;
 		}
 	}

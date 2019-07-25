@@ -4,7 +4,7 @@
 #include "../CWorld.h"
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
-#include <algorithm>
+
 
 CCItemDamageable::CCItemDamageable(CItem * pLink) : CComponent(COMP_ITEMDAMAGEABLE)
 {

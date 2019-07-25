@@ -10,7 +10,6 @@
 #include "CPointBase.h"
 
 class CRegion;
-class CRegionLinks;
 class CSector;
 
 

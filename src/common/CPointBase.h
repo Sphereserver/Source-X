@@ -8,11 +8,13 @@
 
 #include "../game/uo_files/uofiles_enums.h"
 #include "../game/uo_files/CUOMapList.h"
+#include <vector>
 
 class CSString;
 class CSector;
 class CRegion;
-class CRegionLinks;
+
+using CRegionLinks = std::vector<CRegion*>;
 
 
 DIR_TYPE GetDirTurn( DIR_TYPE dir, int offset );
@@ -22,7 +24,7 @@ struct CPointBase	// Non initialized 3d point.
 {
 public:
 	static lpctstr const sm_szLoadKeys[];
-	static const int sm_Moves[DIR_QTY+1][2];
+	static const short sm_Moves[DIR_QTY+1][2];
 	static lpctstr sm_szDirs[DIR_QTY+1];
 public:
 	// Do NOT change these datatypes: they seem to not have much sense, but are stored this way inside the mul files.
@@ -64,7 +66,7 @@ public:
 	bool IsSame2D( const CPointBase & pt ) const noexcept;
 
 	void Set( const CPointBase & pt );
-	void Set( word x, word y, char z = 0, uchar map = 0 );
+	void Set( short x, short y, char z = 0, uchar map = 0 );
 	size_t Read( tchar * pVal );
 
 	tchar * WriteUsed( tchar * pszBuffer ) const;
@@ -97,7 +99,7 @@ public:
 struct CPointMap : public CPointBase
 {
 	// A point in the world (or in a container) (initialized)
-	CPointMap() {};
+    CPointMap() = default;
 	CPointMap( short x, short y, char z = 0, uchar map = 0 );
     inline CPointMap & operator = (const CPointBase & pt)
     {
@@ -116,11 +118,8 @@ struct CPointMap : public CPointBase
 
 struct CPointSort : public CPointMap
 {
-    inline CPointSort()
-    {
-        InitPoint();
-    }
-	CPointSort( word x, word y, char z = 0, uchar map = 0 );
+    CPointSort() = default; // InitPoint() already called by CPointBase constructor
+	CPointSort( short x, short y, char z = 0, uchar map = 0 );
     inline CPointSort(const CPointBase & pt)
     {
         Set( pt );

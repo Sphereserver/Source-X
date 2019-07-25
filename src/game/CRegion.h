@@ -12,17 +12,6 @@
 
 class CItemMulti;
 
-class CRegionLinks : public CSPtrTypeArray<CRegion*>
-{
-	//just named class for this, maybe something here later
-public:
-	CRegionLinks() = default;
-
-private:
-	CRegionLinks(const CRegionLinks& copy);
-	CRegionLinks& operator=(const CRegionLinks& other);
-};
-
 enum RTRIG_TYPE
 {
 	// XTRIG_UNKNOWN	= some named trigger not on this list.

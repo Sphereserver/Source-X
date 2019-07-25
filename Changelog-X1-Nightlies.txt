@@ -1832,3 +1832,5 @@ WARNING: Important change!
 	Training Dummies: All the Melee, Ranged and Pickpocket dummies uses a quick check.
 	Tracking: Tracking uses a quick check when STARTING to track (the tracking menu is displayed and the quarry category is selected).
   
+25-07-2019, Nolok
+- Changed: The "too dumb to be able to use NPC Advanced Pathfinding" INT value from 70 to 30 (to ignore this check enable NPC_AI_ALWAYSINT in the ini).

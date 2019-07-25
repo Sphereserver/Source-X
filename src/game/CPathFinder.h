@@ -8,26 +8,31 @@
 #define _INC_PATHFINDER_H
 
 #include <deque>
+#include <vector>
 #include "../common/CPointBase.h"
 #include "uo_files/uofiles_macros.h"
 
+//	number of steps to remember for pathfinding, default to 28 steps (one screen, both sides), will have 28*4 extra bytes per char
+#define MAX_NPC_PATH_STORAGE_SIZE	(UO_MAP_VIEW_SIGHT*2)
 
-#define PATH_SIZE (UO_MAP_VIEW_SIGHT*2)	// limit NPC view by one screen (both sides)
 
 class CChar;
 
 class CPathFinderPoint : public CPointMap
 {
 public:
-	CPathFinderPoint* m_Parent;
-	bool m_Walkable;
-	int FValue;
-	int GValue;
-	int HValue;
+	CPathFinderPoint* _Parent;
+	bool _Walkable;
+	int _FValue;
+	int _GValue;
+	int _HValue;
 
 public:
 	CPathFinderPoint();
-	explicit CPathFinderPoint(const CPointMap& pt);
+
+    // We shouldn't be using these
+	explicit CPathFinderPoint(const CPointMap& pt) = delete;
+    void operator = (const CPointMap& copy) = delete;
 
 private:
 	CPathFinderPoint(const CPathFinderPoint& copy);
@@ -36,7 +41,7 @@ private:
 public:
     inline bool operator < (const CPathFinderPoint& pt) const noexcept
     {
-        return (FValue < pt.FValue);
+        return (_FValue < pt._FValue);
     }
 };
 
@@ -46,14 +51,7 @@ class CPathFinder
 public:
 	static const char *m_sClassName;
 
-	#define PATH_NONEXISTENT 0
-	#define PATH_FOUND 1
-
-
-	#define PATH_WALKABLE 1
-	#define PATH_UNWALKABLE 0
-
-	CPathFinder(CChar *pChar, CPointMap ptTarget);
+	CPathFinder(CChar *pChar, const CPointMap& ptTarget);
 	~CPathFinder() = default;
 
 private:
@@ -61,7 +59,7 @@ private:
 	CPathFinder& operator=(const CPathFinder& other);
 
 public:
-    int FindPath();
+    bool FindPath();
     size_t LastPathSize() const noexcept
     {
         return m_LastPath.size();
@@ -76,23 +74,23 @@ public:
     }
 
 protected:
-	CPathFinderPoint m_Points[PATH_SIZE][PATH_SIZE];
-	std::deque<CPathFinderPoint*> m_Opened;
-	std::deque<CPathFinderPoint*> m_Closed;
+	CPathFinderPoint m_Points[MAX_NPC_PATH_STORAGE_SIZE][MAX_NPC_PATH_STORAGE_SIZE];
+	std::deque <CPathFinderPoint*> m_Opened; // push/pop front/back
+	std::vector<CPathFinderPoint*> m_Closed; // i'm only searching and pushing_back here
 
 	std::deque<CPointMap> m_LastPath;
 
-	int m_RealX;
-	int m_RealY;
+	short m_RealX;
+	short m_RealY;
 
 	CChar *m_pChar;
 	CPointMap m_Target;
 
 protected:
-    static uint Heuristic(const CPathFinderPoint* Pt1, const CPathFinderPoint* Pt2) noexcept;
+    static int Heuristic(const CPathFinderPoint* Pt1, const CPathFinderPoint* Pt2) noexcept;
 
 	void Clear();
-	void GetChildren(const CPathFinderPoint* Point, std::deque<CPathFinderPoint*>& ChildrenRefList );
+	void GetAdjacentCells(const CPathFinderPoint* Point, std::deque<CPathFinderPoint*>& ChildrenRefList );
 	void FillMap();	// prepares map with walkable statuses
 };
 

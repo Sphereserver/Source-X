@@ -1023,10 +1023,6 @@ enum MEMORY_TYPE
 	MEMORY_UNUSED3          = 0x8000	// UNUSED!!!! Gump record memory (More1 = Context, More2 = Uid)
 };
 
-
-//	number of steps to remember for pathfinding, default to 24 steps, will have 24*4 extra bytes per char
-#define MAX_NPC_PATH_STORAGE_SIZE	UO_MAP_VIEW_SIGHT*2
-
 enum NPC_MEM_ACT_TYPE	// A simgle primary memory about the object.
 {
 	NPC_MEM_ACT_NONE = 0,       // we spoke about something non-specific,

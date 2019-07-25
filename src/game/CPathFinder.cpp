@@ -6,38 +6,42 @@
 #include <algorithm>
 
 
-uint CPathFinder::Heuristic(const CPathFinderPoint* Pt1, const CPathFinderPoint* Pt2) noexcept // static
+int CPathFinder::Heuristic(const CPathFinderPoint* Pt1, const CPathFinderPoint* Pt2) noexcept // static
 {
+    // Hexagonal heuristic (thought for a hexagonal grid, but in our case, by using this, the movements are more natural and the rotation angles more wide)
 	return 10*(abs(Pt1->m_x - Pt2->m_x) + abs(Pt1->m_y - Pt2->m_y));
+
+    // Diagonal heuristic, thought for a square grid which allows movement in 8 directions from a cell (our case)
+    //return std::max(abs(Pt1->m_x - Pt2->m_x), abs(Pt1->m_y - Pt2->m_y));
 }
 
-void CPathFinder::GetChildren(const CPathFinderPoint* Point, std::deque<CPathFinderPoint*>& ChildrenRefList )
+void CPathFinder::GetAdjacentCells(const CPathFinderPoint* Point, std::deque<CPathFinderPoint*>& AdjacentCellsRefList )
 {
-	short RealX = 0, RealY = 0;
 	for (short x = -1; x != 2; ++x )
 	{
 		for (short y = -1; y != 2; ++y )
 		{
 			if ( x == 0 && y == 0 )
 				continue;
-			RealX = x + Point->m_x;
-			RealY = y + Point->m_y;
-			if ( RealX < 0 || RealY < 0 || RealX > 23 || RealY > 23 )
+            const short RealX = x + Point->m_x;
+            const short RealY = y + Point->m_y;
+			if ( RealX < 0 || RealY < 0 || RealX >= MAX_NPC_PATH_STORAGE_SIZE || RealY >= MAX_NPC_PATH_STORAGE_SIZE)
 				continue;
-			if ( m_Points[RealX][RealY].m_Walkable == false )
+			if ( m_Points[RealX][RealY]._Walkable == false )
 				continue;
 			if ( x != 0 && y != 0 ) // Diagonal
 			{
-				if ( m_Points[RealX - x][RealY].m_Walkable == false || m_Points[RealX][RealY - y].m_Walkable == false )
+				if ( m_Points[RealX - x][RealY]._Walkable == false || m_Points[RealX][RealY - y]._Walkable == false )
 					continue;
 			}
 
-			ChildrenRefList.emplace_back( &m_Points[RealX][RealY] );
+			AdjacentCellsRefList.emplace_back( &m_Points[RealX][RealY] );
 		}
 	}
 }
 
-CPathFinderPoint::CPathFinderPoint() : m_Parent(0), m_Walkable(false), FValue(0), GValue(0), HValue(0)
+CPathFinderPoint::CPathFinderPoint() :
+    _Parent(nullptr), _Walkable(false), _FValue(0), _GValue(0), _HValue(0)
 {
 	//ADDTOCALLSTACK("CPathFinderPoint::CPathFinderPoint");
 	m_x = 0;
@@ -46,7 +50,9 @@ CPathFinderPoint::CPathFinderPoint() : m_Parent(0), m_Walkable(false), FValue(0)
 	m_map = 0;
 }
 
-CPathFinderPoint::CPathFinderPoint(const CPointMap& pt) : m_Parent(0), m_Walkable(false), FValue(0), GValue(0), HValue(0)
+/*
+CPathFinderPoint::CPathFinderPoint(const CPointMap& pt) : 
+    _Parent(nullptr), _Walkable(false), _FValue(0), _GValue(0), _HValue(0)
 {
 	//ADDTOCALLSTACK("CPathFinderPoint::CPathFinderPoint");
 	m_x = pt.m_x;
@@ -55,42 +61,50 @@ CPathFinderPoint::CPathFinderPoint(const CPointMap& pt) : m_Parent(0), m_Walkabl
 	m_map = pt.m_map;
 }
 
-CPathFinder::CPathFinder(CChar *pChar, CPointMap ptTarget)
+void CPathFinderPoint::operator = (const CPointMap& copy)
+{
+    //ADDTOCALLSTACK("CPathFinderPoint::operator=");
+    _Parent = nullptr;
+    _Walkable = false;
+    _FValue = _GValue = _HValue = 0;
+    CPointMap::operator=(copy);
+}
+*/
+
+CPathFinder::CPathFinder(CChar *pChar, const CPointMap& ptTarget)
 {
 	ADDTOCALLSTACK("CPathFinder::CPathFinder");
 	EXC_TRY("CPathFinder Constructor");
 
 	m_pChar = pChar;
-	m_Target = ptTarget;
+    m_Target = ptTarget;
 
-	const CPointMap& pt = m_pChar->GetTopPoint();
-	m_RealX = pt.m_x - (PATH_SIZE / 2);
-	m_RealY = pt.m_y - (PATH_SIZE / 2);
-	m_Target.m_x -= (short)(m_RealX);
-	m_Target.m_y -= (short)(m_RealY);
+    const CPointMap& pt = m_pChar->GetTopPoint();
+    m_RealX = pt.m_x - (MAX_NPC_PATH_STORAGE_SIZE / 2);
+    m_RealY = pt.m_y - (MAX_NPC_PATH_STORAGE_SIZE / 2);
 
-	EXC_SET_BLOCK("FillMap");
+	m_Target.m_x -= m_RealX;
+	m_Target.m_y -= m_RealY;
 
 	FillMap();
-
 	EXC_CATCH;
 }
 
 
-int CPathFinder::FindPath() //A* algorithm
+bool CPathFinder::FindPath() //A* algorithm
 {
 	ADDTOCALLSTACK("CPathFinder::FindPath");
 	ASSERT(m_pChar != nullptr);
 
-    const CPointMap ptTop = m_pChar->GetTopPoint();
-	const int X = ptTop.m_x - m_RealX;
-	const int Y = ptTop.m_y - m_RealY;
+    const CPointMap& ptTop = m_pChar->GetTopPoint();
+	const short X = ptTop.m_x - m_RealX;
+	const short Y = ptTop.m_y - m_RealY;
 
-	if ( X < 0 || Y < 0 || X > 23 || Y > 23 )
+	if ( X < 0 || Y < 0 || X >= MAX_NPC_PATH_STORAGE_SIZE || Y >= MAX_NPC_PATH_STORAGE_SIZE)
 	{
 		//Too far away
 		Clear();
-		return PATH_NONEXISTENT;
+		return false; // path not existent
 	}
 
 	CPathFinderPoint* Start = &m_Points[X][Y]; //Start point
@@ -99,84 +113,84 @@ int CPathFinder::FindPath() //A* algorithm
 	ASSERT(Start);
 	ASSERT(End);
 
-	Start->GValue = 0;
-	Start->HValue = Heuristic(Start, End);
-	Start->FValue = Start->HValue;
+	Start->_GValue = 0;
+    Start->_HValue = Heuristic(Start, End);
+    Start->_FValue = Start->_HValue;
 
+    std::deque<CPathFinderPoint*> AdjacentCells;
 	m_Opened.emplace_back( Start );
-
-	std::deque<CPathFinderPoint*> Children;
-	std::deque<CPathFinderPoint*>::const_iterator InOpened, InClosed;
-
 	while ( !m_Opened.empty() )
 	{
-		std::sort(m_Opened.begin(), m_Opened.end());
+        std::sort(m_Opened.begin(), m_Opened.end(),
+            [](const CPathFinderPoint* Pt1, const CPathFinderPoint* Pt2) -> bool
+            {
+                return *Pt1 < *Pt2;
+            }
+        );
+
+        // Take the point with the lowest FValue
         CPathFinderPoint *Current = *m_Opened.begin();
-
-		m_Opened.pop_front();
-		m_Closed.emplace_back( Current );
-
+		
 		if ( Current == End )
 		{
-			CPathFinderPoint *PathRef = Current;
-			while ( PathRef->m_Parent ) //Rebuild path + save
+            // Arrived to destination: reconstruct path and save it
+			while (Current->_Parent)
 			{
-				PathRef = PathRef->m_Parent;
-				m_LastPath.emplace_front(CPointMap((word)(PathRef->m_x + m_RealX), (word)(PathRef->m_y + m_RealY), 0, PathRef->m_map));
+                Current = Current->_Parent;
+                m_LastPath.emplace_front(CPointMap((Current->m_x + m_RealX), (Current->m_y + m_RealY), 0, Current->m_map));
 			}
 			Clear();
-			return PATH_FOUND;
+			return true; // path found
 		}
-		else
-		{
-			Children.clear();
-			GetChildren( Current, Children );
 
-			while ( !Children.empty() )
-			{
-                CPathFinderPoint *Child = Children.front();
-				Children.pop_front();
+        m_Opened.pop_front();
+        m_Closed.emplace_back(Current);
 
-				InClosed = std::find( m_Closed.begin(), m_Closed.end(), Child );
-				if ( InClosed != m_Closed.end() )
-					continue;
+        AdjacentCells.clear();
+        GetAdjacentCells(Current, AdjacentCells);
 
-                InOpened = std::find(m_Opened.begin(), m_Opened.end(), Child);
-				if ( InOpened == m_Opened.end() )
-				{
-					Child->m_Parent = Current;
-					Child->GValue = Current->GValue;
+        while (!AdjacentCells.empty())
+        {
+            CPathFinderPoint* Cell = AdjacentCells.front();
+            AdjacentCells.pop_front();
 
-					if ( Child->m_x == Current->m_x || Child->m_y == Current->m_y )
-						Child->GValue += 10; //Not diagonal
-					else
-						Child->GValue += 14; //Diagonal
+            const auto InClosed = std::find(m_Closed.begin(), m_Closed.end(), Cell);
+            if (InClosed != m_Closed.end())
+                continue;
 
-					Child->HValue = Heuristic( Child, End );
-					Child->FValue = Child->GValue + Child->HValue;
-					m_Opened.emplace_back( Child );
-					//sort ( m_Opened.begin(), m_Opened.end() );
-				}
-				else
-				{
-					if ( Child->GValue < Current->GValue )
-					{
-						Child->m_Parent = Current;
-						if ( Child->m_x == Current->m_x || Child->m_y == Current->m_y )
-							Child->GValue += 10;
-						else
-							Child->GValue += 14;
-						Child->FValue = Child->GValue + Child->HValue;
-						//sort ( m_Opened.begin(), m_Opened.end() );
-					}
-				}
-			}
+            ASSERT(Cell->_Walkable);
+            const auto InOpened = std::find(m_Opened.begin(), m_Opened.end(), Cell);
+            if (InOpened == m_Opened.end())
+            {
+                Cell->_Parent = Current;
+                Cell->_GValue = Current->_GValue;
+
+                if (Cell->m_x == Current->m_x || Cell->m_y == Current->m_y)
+                    Cell->_GValue += 10; //Not diagonal
+                else
+                    Cell->_GValue += 14; //Diagonal
+
+                Cell->_HValue = Heuristic(Cell, End);
+                Cell->_FValue = Cell->_GValue + Cell->_HValue;
+                m_Opened.emplace_back(Cell);
+            }
+            else
+            {
+                if (Cell->_GValue < Current->_GValue)
+                {
+                    Cell->_Parent = Current;
+                    if (Cell->m_x == Current->m_x || Cell->m_y == Current->m_y)
+                        Cell->_GValue += 10;
+                    else
+                        Cell->_GValue += 14;
+                    Cell->_FValue = Cell->_GValue + Cell->_HValue;
+                }
+            }
 		}
 	}
 
-
 	Clear();
-	return PATH_NONEXISTENT;
+	return false;
 }
 
 void CPathFinder::Clear()
@@ -193,31 +207,28 @@ void CPathFinder::Clear()
 void CPathFinder::FillMap()
 {
 	ADDTOCALLSTACK("CPathFinder::FillMap");
-	CRegion	*pArea;
-	CPointMap	pt, ptChar;
+    EXC_TRY("FillMap");
 
-	EXC_TRY("FillMap");
-	pt = ptChar = m_pChar->GetTopPoint();
-
-	for ( int x = 0 ; x != PATH_SIZE; ++x )
+    CPointMap pt = m_pChar->GetTopPoint();
+	for ( short x = 0 ; x != MAX_NPC_PATH_STORAGE_SIZE; ++x )
 	{
-		for ( int y = 0; y != PATH_SIZE; ++y )
+		for ( short y = 0; y != MAX_NPC_PATH_STORAGE_SIZE; ++y )
 		{
 			if (x == m_Target.m_x && y == m_Target.m_y)
 			{
 				// always assume that our target position is walkable
-				m_Points[x][y].m_Walkable = PATH_WALKABLE;
+				m_Points[x][y]._Walkable = true;
 			}
 			else
 			{
-				pt.m_x = (short)(x + (short)(m_RealX));
-				pt.m_y = (short)(y + m_RealY);
-					pArea = m_pChar->CanMoveWalkTo(pt, true, true, DIR_QTY, true);
+				pt.m_x = (x + m_RealX);
+				pt.m_y = (y + m_RealY);
+				const CRegion *pArea = m_pChar->CanMoveWalkTo(pt, true, true, DIR_QTY, true);
 
-				m_Points[x][y].m_Walkable = pArea ? PATH_WALKABLE : PATH_UNWALKABLE;
+				m_Points[x][y]._Walkable = pArea ? true : false;
 			}
 
-			m_Points[x][y].Set((word)(x), (word)(y), pt.m_z, pt.m_map);
+			m_Points[x][y].Set(x, y, pt.m_z, pt.m_map);
 		}
 	}
 

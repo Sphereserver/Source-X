@@ -35,17 +35,17 @@ lpctstr CPointBase::sm_szDirs[DIR_QTY+1] =
 	g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_8),
 };
 
-const int CPointBase::sm_Moves[DIR_QTY+1][2] =
+const short CPointBase::sm_Moves[DIR_QTY+1][2] =
 {
 	{  0, -1 }, // DIR_N
-{  1, -1 }, // DIR_NE
-{  1,  0 }, // DIR_E
-{  1,  1 }, // DIR_SE
-{  0,  1 }, // DIR_S
-{ -1,  1 }, // DIR_SW
-{ -1,  0 }, // DIR_W
-{ -1, -1 }, // DIR_NW
-{  0,  0 },	// DIR_QTY = here.
+    {  1, -1 }, // DIR_NE
+    {  1,  0 }, // DIR_E
+    {  1,  1 }, // DIR_SE
+    {  0,  1 }, // DIR_S
+    { -1,  1 }, // DIR_SW
+    { -1,  0 }, // DIR_W
+    { -1, -1 }, // DIR_NW
+    {  0,  0 },	// DIR_QTY = here.
 };
 
 
@@ -252,7 +252,7 @@ void CPointBase::Set( const CPointBase & pt )
 	m_map = pt.m_map;
 }
 
-void CPointBase::Set( word x, word y, char z, uchar map )
+void CPointBase::Set( short x, short y, char z, uchar map )
 {
 	m_x = x;
 	m_y = y;
@@ -935,10 +935,7 @@ CPointMap::CPointMap( short x, short y, char z, uchar map )
 //*************************************************************************
 // -CPointSort
 
-CPointSort::CPointSort( word x, word y, char z, uchar map )
+CPointSort::CPointSort(short x, short y, char z, uchar map ) :
+    CPointMap(x, y, z, map)
 {
-    m_x = x;
-    m_y = y;
-    m_z = z;
-    m_map = map;
 }

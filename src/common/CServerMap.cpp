@@ -536,15 +536,15 @@ void CServerMapBlock::Load( int bx, int by )
 CServerMapBlock::CServerMapBlock( const CPointMap & pt ) :
 		CPointSort( pt )	// The upper left corner.
 {
-	sm_iCount++;
+	++sm_iCount;
 	m_map = pt.m_map;
 	Load(pt.m_x/UO_BLOCK_SIZE, pt.m_y/UO_BLOCK_SIZE);
 }
 
 CServerMapBlock::CServerMapBlock(int bx, int by, int map) :
-		CPointSort((word)(bx)* UO_BLOCK_SIZE, (word)(by) * UO_BLOCK_SIZE)
+		CPointSort((short)(bx)* UO_BLOCK_SIZE, (short)(by) * UO_BLOCK_SIZE)
 {
-	sm_iCount++;
+	++sm_iCount;
 	m_map = map;
 	Load( bx, by );
 }

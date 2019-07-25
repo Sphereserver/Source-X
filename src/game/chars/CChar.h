@@ -829,11 +829,11 @@ public:
 	uint GetSkillTotal(int what = 0, bool how = true);
 
 	// skills and actions. -------------------------------------------
-	static bool IsSkillBase( SKILL_TYPE skill );
-	static bool IsSkillNPC( SKILL_TYPE skill );
+	static bool IsSkillBase( SKILL_TYPE skill ) noexcept;
+	static bool IsSkillNPC( SKILL_TYPE skill ) noexcept;
 
 	SKILL_TYPE Skill_GetBest( uint iRank = 0 ) const; // Which skill is the highest for character p
-	SKILL_TYPE Skill_GetActive() const
+	SKILL_TYPE Skill_GetActive() const noexcept
 	{
 		return m_Act_SkillCurrent;
 	}
@@ -1298,13 +1298,13 @@ public:
 	static CChar * CreateNPC( CREID_TYPE id );
 };
 
-inline bool CChar::IsSkillBase( SKILL_TYPE skill ) // static
+inline bool CChar::IsSkillBase( SKILL_TYPE skill ) noexcept // static
 {
 	// Is this in the base set of skills.
 	return (skill > SKILL_NONE && skill < (SKILL_TYPE)(g_Cfg.m_iMaxSkill));
 }
 
-inline bool CChar::IsSkillNPC( SKILL_TYPE skill )  // static
+inline bool CChar::IsSkillNPC( SKILL_TYPE skill ) noexcept  // static
 {
 	// Is this in the NPC set of skills.
 	return (skill >= NPCACT_FOLLOW_TARG && skill < NPCACT_QTY);
