@@ -90,6 +90,10 @@ CPathFinder::CPathFinder(CChar *pChar, const CPointMap& ptTarget)
 	EXC_CATCH;
 }
 
+inline static bool CPathFinderPointPtrCompLess(const CPathFinderPoint* Pt1, const CPathFinderPoint* Pt2) noexcept
+{
+    return *Pt1 < *Pt2;
+}
 
 bool CPathFinder::FindPath() //A* algorithm
 {
@@ -121,12 +125,8 @@ bool CPathFinder::FindPath() //A* algorithm
 	m_Opened.emplace_back( Start );
 	while ( !m_Opened.empty() )
 	{
-        std::sort(m_Opened.begin(), m_Opened.end(),
-            [](const CPathFinderPoint* Pt1, const CPathFinderPoint* Pt2) -> bool
-            {
-                return *Pt1 < *Pt2;
-            }
-        );
+        // Sort open (explorable) points by FValue
+        std::sort(m_Opened.begin(), m_Opened.end(), CPathFinderPointPtrCompLess);
 
         // Take the point with the lowest FValue
         CPathFinderPoint *Current = *m_Opened.begin();
@@ -144,7 +144,10 @@ bool CPathFinder::FindPath() //A* algorithm
 		}
 
         m_Opened.pop_front();
-        m_Closed.emplace_back(Current);
+
+        // Closed points are stored automatically in a sorted order, for faster search
+        m_Closed.emplace(Current);
+        //m_Closed.emplace_back(Current);
 
         AdjacentCells.clear();
         GetAdjacentCells(Current, AdjacentCells);
@@ -154,13 +157,22 @@ bool CPathFinder::FindPath() //A* algorithm
             CPathFinderPoint* Cell = AdjacentCells.front();
             AdjacentCells.pop_front();
 
-            const auto InClosed = std::find(m_Closed.begin(), m_Closed.end(), Cell);
-            if (InClosed != m_Closed.end())
+            // Linear search
+            /*
+            const auto InClosed = std::find(m_Closed.cbegin(), m_Closed.cend(), Cell);
+            if (InClosed != m_Closed.cend())
                 continue;
+             */
+            // Binary (pre-sorted) search in our CSSortedVector
+            if (m_Closed.find(Cell) != SCONT_BADINDEX)
+                continue;            
 
             ASSERT(Cell->_Walkable);
-            const auto InOpened = std::find(m_Opened.begin(), m_Opened.end(), Cell);
-            if (InOpened == m_Opened.end())
+            // Linear search
+            //const auto InOpened = std::find(m_Opened.cbegin(), m_Opened.cend(), Cell);
+            //if (InOpened == m_Opened.cend())
+            // Binary search (m_Opened were pre-sorted by our call to std::sort at the beginning of the cycle)
+            if (!std::binary_search(m_Opened.cbegin(), m_Opened.cend(), Cell, CPathFinderPointPtrCompLess))
             {
                 Cell->_Parent = Current;
                 Cell->_GValue = Current->_GValue;

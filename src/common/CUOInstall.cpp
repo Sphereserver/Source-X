@@ -454,13 +454,13 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 		if ( j == 5 )	// ML just added some changes on maps 0/1 instead a new map
 			continue;
 
-		bool bSup = false;
+		bool fSup = false;
 		if ( j > 5 )	// SA+
-			bSup = ( g_MapList.m_maps[j - 1] );
+			fSup = ( g_MapList.IsMapSupported(j - 1) );
 		else
-			bSup = ( g_MapList.m_maps[j] );
+			fSup = ( g_MapList.IsMapSupported(j) );
 
-		if ( bSup )
+		if ( fSup )
 		{
 			switch ( j )
 			{

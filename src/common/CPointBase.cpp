@@ -844,7 +844,7 @@ size_t CPointBase::Read( tchar * pszVal )
 			if ( IsDigit(ppVal[3][0]))
 			{
                 ptTest.m_map = (uchar)(atoi(ppVal[3]));
-				if ( !g_MapList.m_maps[ptTest.m_map] )
+				if ( !g_MapList.IsMapSupported(ptTest.m_map) )
 				{
 					g_Log.EventError("Unsupported map #%d specified. Auto-fixing that to 0.\n", ptTest.m_map);
                     ptTest.m_map = 0;
@@ -875,7 +875,7 @@ size_t CPointBase::Read( tchar * pszVal )
 
 CSector * CPointBase::GetSector() const
 {
-	ADDTOCALLSTACK("CPointBase::GetSector");
+	ADDTOCALLSTACK_INTENSIVE("CPointBase::GetSector");
 	if ( !IsValidXY() )
 	{
 		g_Log.Event(LOGL_ERROR, "Point(%d,%d): trying to get a sector for point on map #%d out of bounds for this map(%d,%d). Defaulting to sector 0 of the map.\n",
@@ -883,7 +883,8 @@ CSector * CPointBase::GetSector() const
 		return g_World.GetSector(m_map, 0);
 	}
 	// Get the world Sector we are in.
-	return g_World.GetSector(m_map, ((m_y / g_MapList.GetSectorSize(m_map) * g_MapList.GetSectorCols(m_map)) + ( m_x / g_MapList.GetSectorSize(m_map) )));
+    const int iSectorSize = g_MapList.GetSectorSize(m_map);
+	return g_World.GetSector(m_map, ((m_y / iSectorSize * g_MapList.GetSectorCols(m_map)) + ( m_x / iSectorSize)));
 }
 
 CRegion * CPointBase::GetRegion( dword dwType ) const

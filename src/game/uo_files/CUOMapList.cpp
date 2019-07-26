@@ -8,43 +8,66 @@
 
 CUOMapList::CUOMapList()
 {
-    memset(m_mapsinitalized, 0, sizeof(m_mapsinitalized));
-    memset(m_sizex, 0, sizeof(m_sizex));
-    memset(m_sizey, 0, sizeof(m_sizey));
-    memset(m_maps, true, sizeof(m_maps));
-    memset(m_mapnum, -1, sizeof(m_mapnum));
-    memset(m_mapid, -1, sizeof(m_mapid));
-    memset(m_sectorsize, 0, sizeof(m_sectorsize));
-
-    for (int i = 0; i < 6; i++)
-        Load(i, 0, 0, 0, i, i);
-
-    m_pMapDiffCollection = nullptr;
+    Clear();
 }
 
 // CUOMapList:: Modifiers.
 
+void CUOMapList::Clear()
+{
+    m_pMapDiffCollection = nullptr;
+
+    memset(m_mapsinitalized,    false, sizeof(m_mapsinitalized));
+    memset(m_sizex,             -1, sizeof(m_sizex));
+    memset(m_sizey,             -1, sizeof(m_sizey));
+    memset(m_maps,              true, sizeof(m_maps));
+    memset(m_mapnum,            -1, sizeof(m_mapnum));
+    memset(m_mapid,             -1, sizeof(m_mapid));
+    memset(m_sectorsize,        -1, sizeof(m_sectorsize));
+
+    memset(_sectorcolumns,      -1, sizeof(_sectorcolumns));
+    memset(_sectorrows,         -1, sizeof(_sectorrows));
+    memset(_sectorqty,          -1, sizeof(_sectorqty));
+
+    constexpr int iMaxMapFileIdx = 6;
+    for (int i = 0; i < iMaxMapFileIdx; ++i)
+        ResetMap(i, -1, -1, -1, i, i);
+}
+
+bool CUOMapList::ResetMap(int map, int maxx, int maxy, int sectorsize, int realmapnum, int mapid)
+{
+    m_sizex[map] = maxx;
+    m_sizey[map] = maxy;
+    m_sectorsize[map] = sectorsize;
+    m_mapnum[map] = realmapnum;
+    m_mapid[map] = mapid;
+    return true;
+}
+
 void CUOMapList::Init()
 {
-    for ( int i = 0; i < 256; i++ )
+    if (g_Cfg.m_fUseMapDiffs && !m_pMapDiffCollection)
+    {
+        m_pMapDiffCollection = new CServerMapDiffCollection();
+        m_pMapDiffCollection->Init();
+    }
+
+    for ( int i = 0; i < MAP_SUPPORTED_QTY; ++i )
     {
         if ( m_maps[i] )	// map marked as available. check whatever it's possible
         {
             //	check coordinates first
             if ( m_mapnum[i] == -1 )
                 m_maps[i] = false;
-            else if ( m_sizex[i] == 0 || m_sizey[i] == 0 || m_sectorsize[i] == 0 )
+            else if ( m_sizex[i] <= 0 || m_sizey[i] <= 0 || m_sectorsize[i] <= 0 )
                 m_maps[i] = DetectMapSize(i);
         }
     }
-
-    if ( g_Cfg.m_fUseMapDiffs && !m_pMapDiffCollection )
-        m_pMapDiffCollection = new CServerMapDiffCollection();
 }
 
 bool CUOMapList::Load(int map, char *args)
 {
-    if (( map < 0 ) || ( map > 255 ))
+    if (( map < 0 ) || ( map >= MAP_SUPPORTED_QTY))
     {
         g_Log.EventError("Invalid map #%d couldn't be initialized.\n", map);
         return false;
@@ -108,19 +131,10 @@ bool CUOMapList::Load(int map, char *args)
     return true;
 }
 
-bool CUOMapList::Load(int map, int maxx, int maxy, int sectorsize, int realmapnum, int mapid)
-{
-    m_sizex[map] = maxx;
-    m_sizey[map] = maxy;
-    m_sectorsize[map] = sectorsize;
-    m_mapnum[map] = realmapnum;
-    m_mapid[map] = mapid;
-    return true;
-}
 
 // CUOMapList:: Operations.
 
-bool CUOMapList::DetectMapSize(int map)
+bool CUOMapList::DetectMapSize(int map) // it sets also the default sector size, if not specified in the ini (<= 0)
 {
     if ( m_maps[map] == false )
         return false;
@@ -193,68 +207,102 @@ bool CUOMapList::DetectMapSize(int map)
     return (m_sizex[map] > 0 && m_sizey[map] > 0 && m_sectorsize[map] > 0);
 }
 
-bool CUOMapList::IsMapSupported(int map) const
+bool CUOMapList::IsMapSupported(int map) const noexcept
 {
-    if (( map < 0 ) || ( map > 255 ))
+    if (( map < 0 ) || ( map >= MAP_SUPPORTED_QTY))
         return false;
-    return( m_maps[map] );
-}
-
-int CUOMapList::GetCenterX(int map) const
-{
-    if (( map < 0 ) || ( map > 255 ))
-        return 0;
-    return (m_sizex[map]/2);
-}
-
-int CUOMapList::GetCenterY(int map) const
-{
-    if (( map < 0 ) || ( map > 255 ))
-        return 0;
-    return (m_sizey[map]/2);
-}
-
-int CUOMapList::GetSectorCols(int map) const
-{
-    if (( map < 0 ) || ( map > 255 ))
-        return 0;
-    return (m_sizex[map] / GetSectorSize(map));
-}
-
-int CUOMapList::GetSectorQty(int map) const
-{
-    return ( GetSectorCols(map) * GetSectorRows(map) );
-}
-
-int CUOMapList::GetX(int map) const
-{
-    if (( map < 0 ) || ( map > 255 ))
-        return 0;
-    return m_sizex[map];
-}
-
-int CUOMapList::GetSectorRows(int map) const
-{
-    if (( map < 0 ) || ( map > 255 ))
-        return 0;
-    return (m_sizey[map] / GetSectorSize(map));
-}
-
-int CUOMapList::GetSectorSize(int map) const
-{
-    if (( map < 0 ) || ( map > 255 ))
-        return 0;
-    return m_sectorsize[map];
-}
-
-int CUOMapList::GetY(int map) const
-{
-    if (( map < 0 ) || ( map > 255 ))
-        return 0;
-    return m_sizey[map];
+    return m_maps[map];
 }
 
 bool CUOMapList::IsInitialized(int map) const
 {
+    ASSERT(IsMapSupported(map));
     return (m_mapsinitalized[map]);
+}
+
+int CUOMapList::GetSectorSize(int map) const
+{
+    ASSERT(IsMapSupported(map));
+    ASSERT(m_sectorsize[map] > 0);
+    return m_sectorsize[map];
+}
+
+int CUOMapList::CalcSectorQty(int map) const
+{
+    return (CalcSectorCols(map) * CalcSectorRows(map));
+}
+
+int CUOMapList::GetSectorQty(int map) const
+{
+    ASSERT(IsInitialized(map));
+    ASSERT(_sectorqty[map] != -1);
+    return _sectorqty[map];
+}
+
+int CUOMapList::CalcSectorCols(int map) const
+{
+    ASSERT(IsMapSupported(map));
+    return (m_sizex[map] / GetSectorSize(map));
+}
+
+int CUOMapList::CalcSectorRows(int map) const
+{
+    ASSERT(IsMapSupported(map));
+    return (m_sizey[map] / GetSectorSize(map));
+}
+
+int CUOMapList::GetSectorCols(int map) const
+{
+    ASSERT(IsMapSupported(map));
+    ASSERT(_sectorcolumns[map] != -1);
+    return _sectorcolumns[map];
+}
+
+int CUOMapList::GetSectorRows(int map) const
+{
+    ASSERT(IsMapSupported(map));
+    ASSERT(_sectorrows[map] != -1);
+    return _sectorrows[map];
+}
+
+int CUOMapList::GetX(int map) const
+{
+    ASSERT(IsMapSupported(map));
+    ASSERT(m_sizex[map] != -1);
+    return m_sizex[map];
+}
+
+int CUOMapList::GetY(int map) const 
+{
+    ASSERT(IsMapSupported(map));
+    ASSERT(m_sizey[map] != -1);
+    return m_sizey[map];
+}
+
+int CUOMapList::GetCenterX(int map) const
+{
+    ASSERT(IsMapSupported(map));
+    ASSERT(m_sizex[map] != -1);
+    return (m_sizex[map] / 2);
+}
+
+int CUOMapList::GetCenterY(int map) const
+{
+    ASSERT(IsMapSupported(map));
+    ASSERT(m_sizey[map] != -1);
+    return (m_sizey[map] / 2);
+}
+
+int CUOMapList::GetMapFileNum(int map) const
+{
+    ASSERT(IsMapSupported(map));
+    ASSERT(m_mapnum[map] != -1);
+    return m_mapnum[map];
+}
+
+int CUOMapList::GetMapID(int map) const
+{
+    ASSERT(IsMapSupported(map));
+    ASSERT(m_mapid[map] != -1);
+    return m_mapid[map];
 }

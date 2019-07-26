@@ -8,7 +8,7 @@
 #define _INC_PATHFINDER_H
 
 #include <deque>
-#include <vector>
+#include "../common/sphere_library/CSSortedVector.h"
 #include "../common/CPointBase.h"
 #include "uo_files/uofiles_macros.h"
 
@@ -75,8 +75,8 @@ public:
 
 protected:
 	CPathFinderPoint m_Points[MAX_NPC_PATH_STORAGE_SIZE][MAX_NPC_PATH_STORAGE_SIZE];
-	std::deque <CPathFinderPoint*> m_Opened; // push/pop front/back
-	std::vector<CPathFinderPoint*> m_Closed; // i'm only searching and pushing_back here
+	std::deque <CPathFinderPoint*>    m_Opened; // push/pop front/back
+	CSSortedVector<CPathFinderPoint*> m_Closed; // i'm only searching (a lot) and pushing_back here
 
 	std::deque<CPointMap> m_LastPath;
 

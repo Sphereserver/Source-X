@@ -362,7 +362,7 @@ void CServerStaticsBlock::LoadStatics( dword ulBlockIndex, int map )
 	ASSERT( m_iStatics == 0 );
 
 	CUOIndexRec index;
-	if ( g_Install.ReadMulIndex(g_Install.m_Staidx[g_MapList.m_mapnum[map]], ulBlockIndex, index) )
+	if ( g_Install.ReadMulIndex(g_Install.m_Staidx[g_MapList.GetMapFileNum(map)], ulBlockIndex, index) )
 	{
 		// make sure that the statics block length is valid
 		if ((index.GetBlockLength() % sizeof(CUOStaticItemRec)) != 0)
@@ -375,7 +375,7 @@ void CServerStaticsBlock::LoadStatics( dword ulBlockIndex, int map )
 		ASSERT(m_iStatics);
 		m_pStatics = new CUOStaticItemRec[m_iStatics];
 		ASSERT(m_pStatics);
-		if ( ! g_Install.ReadMulData(g_Install.m_Statics[g_MapList.m_mapnum[map]], index, m_pStatics) )
+		if ( ! g_Install.ReadMulData(g_Install.m_Statics[g_MapList.GetMapFileNum(map)], index, m_pStatics) )
 		{
 			throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CServerMapBlock: Read Statics");
 		}
@@ -426,7 +426,7 @@ void CServerMapBlock::Load( int bx, int by )
 	ASSERT( bx < (g_MapList.GetX(m_map)/UO_BLOCK_SIZE) );
 	ASSERT( by < (g_MapList.GetY(m_map)/UO_BLOCK_SIZE) );
 
-	if (( m_map < 0 ) || ( m_map >= 255 ))
+	if (( m_map < 0 ) || ( m_map >= MAP_SUPPORTED_QTY ))
 	{
 		g_Log.EventError("Unsupported map #%d specified. Auto-fixing that to 0.\n", m_map);
 		m_map = 0;
@@ -434,39 +434,40 @@ void CServerMapBlock::Load( int bx, int by )
 
 	uint ulBlockIndex = (bx*(g_MapList.GetY(m_map)/UO_BLOCK_SIZE) + by);
 
-	if ( !g_MapList.m_maps[m_map] )
+	if ( !g_MapList.IsMapSupported(m_map) )
 	{
 		memset( &m_Terrain, 0, sizeof( m_Terrain ));
 		throw CSError(LOGL_CRIT, 0, "CServerMapBlock: Map is not supported since MUL files for it not available.");
 	}
 
-	bool bPatchedTerrain = false, bPatchedStatics = false;
+    bool fPatchedTerrain = false;
+    bool fPatchedStatics = false;
 
 	if ( g_Cfg.m_fUseMapDiffs && g_MapList.m_pMapDiffCollection )
 	{
 		// Check to see if the terrain or statics in this block is patched
-		CServerMapDiffBlock * pDiffBlock = g_MapList.m_pMapDiffCollection->GetAtBlock( ulBlockIndex, g_MapList.m_mapid[m_map] );
+		CServerMapDiffBlock * pDiffBlock = g_MapList.m_pMapDiffCollection->GetAtBlock( ulBlockIndex, g_MapList.GetMapFileNum(m_map));
 		if ( pDiffBlock )
 		{
 			if ( pDiffBlock->m_pTerrainBlock )
 			{
 				memcpy( &m_Terrain, pDiffBlock->m_pTerrainBlock, sizeof(CUOMapBlock) );
-				bPatchedTerrain = true;
+				fPatchedTerrain = true;
 			}
 
 			if ( pDiffBlock->m_iStaticsCount >= 0 )
 			{
 				m_Statics.LoadStatics( pDiffBlock->m_iStaticsCount, pDiffBlock->m_pStaticsBlock );
-				bPatchedStatics = true;
+				fPatchedStatics = true;
 			}
 		}
 	}
 
 	// Only load terrain if it wasn't patched
-	if ( ! bPatchedTerrain )
+	if ( ! fPatchedTerrain )
 	{
-		int mapNumber = g_MapList.m_mapnum[m_map];
-		CSFile * pFile = &(g_Install.m_Maps[mapNumber]);
+		const int iMapNumber = g_MapList.GetMapFileNum(m_map);
+		CSFile * pFile = &(g_Install.m_Maps[iMapNumber]);
 		ASSERT(pFile != nullptr);
 		ASSERT(pFile->IsFileOpen());
 
@@ -475,11 +476,11 @@ void CServerMapBlock::Load( int bx, int by )
 		index.SetupIndex( ulBlockIndex * sizeof(CUOMapBlock), sizeof(CUOMapBlock));
 
 		dword fileOffset = index.GetFileOffset();
-		if (g_Install.m_IsMapUopFormat[mapNumber])
+		if (g_Install.m_IsMapUopFormat[iMapNumber])
 		{
-			for ( int i = 0; i < 256; i++ )
+			for ( int i = 0; i < MAP_SUPPORTED_QTY; ++i )
 			{
-				MapAddress pMapAddress = g_Install.m_UopMapAddress[mapNumber][i];
+				MapAddress pMapAddress = g_Install.m_UopMapAddress[iMapNumber][i];
 				if (( ulBlockIndex <= pMapAddress.dwLastBlock ) && ( ulBlockIndex >= pMapAddress.dwFirstBlock ))
 				{
 					fileOffset = (dword)(pMapAddress.qwAdress + ((ulBlockIndex - pMapAddress.dwFirstBlock)*196));
@@ -525,7 +526,7 @@ void CServerMapBlock::Load( int bx, int by )
 	}
 
 	// Only load statics if they weren't patched
-	if ( ! bPatchedStatics )
+	if ( ! fPatchedStatics )
 	{
 		m_Statics.LoadStatics( ulBlockIndex, m_map );
 	}
@@ -660,9 +661,9 @@ CServerMapDiffCollection::CServerMapDiffCollection()
 CServerMapDiffCollection::~CServerMapDiffCollection()
 {
 	// Remove all of the loaded dif data
-	for ( uint m = 0; m < 256; ++m )
+	for ( uint m = 0; m < MAP_SUPPORTED_QTY; ++m )
 	{
-		while (m_pMapDiffBlocks[m].size() > 0 )
+		while ( !m_pMapDiffBlocks[m].empty() )
 		{
 			m_pMapDiffBlocks[m].erase(0);
 		}
@@ -680,12 +681,12 @@ void CServerMapDiffCollection::LoadMapDiffs()
 	dword dwOffset = 0, dwRead = 0;
 	CServerMapDiffBlock * pMapDiffBlock = nullptr;
 
-	for ( int m = 0; m < 256; ++m )
+	for ( int m = 0; m < MAP_SUPPORTED_QTY; ++m )
 	{
 		if ( !g_MapList.IsMapSupported( m ) )
 			continue;
 
-		int map = g_MapList.m_mapid[m];
+		const int map = g_MapList.GetMapID(m);
 
 		// Load Mapdif Files
 		{

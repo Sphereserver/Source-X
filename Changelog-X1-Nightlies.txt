@@ -1834,3 +1834,6 @@ WARNING: Important change!
   
 25-07-2019, Nolok
 - Changed: The "too dumb to be able to use NPC Advanced Pathfinding" INT value from 70 to 30 (to ignore this check enable NPC_AI_ALWAYSINT in the ini).
+
+26-07-2019, Nolok
+- Improved: map checks (and, again, pathfinding) are significantly faster now, this means that the server can handle more alive/awake NPCs than before (without causing any lag).

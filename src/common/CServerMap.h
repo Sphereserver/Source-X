@@ -148,7 +148,7 @@ class CServerMapDiffCollection
 private:
 	bool m_bLoaded;
 
-	CServerMapDiffBlockArray m_pMapDiffBlocks[256];
+	CServerMapDiffBlockArray m_pMapDiffBlocks[MAP_SUPPORTED_QTY];
 	CServerMapDiffBlock * GetNewBlock( dword dwBlockId, int map );
 	void LoadMapDiffs();
 

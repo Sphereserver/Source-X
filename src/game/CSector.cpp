@@ -1118,7 +1118,7 @@ void CSector::RespawnDeadNPCs()
 {
 	ADDTOCALLSTACK("CSector::RespawnDeadNPCs");
 	// skip sectors in unsupported maps
-	if ( !g_MapList.m_maps[m_map] )
+	if ( !g_MapList.IsMapSupported(m_map) )
         return;
 
 	// Respawn dead NPC's
@@ -1192,7 +1192,7 @@ bool CSector::OnTick()
 	EXC_TRY("Tick");
 
 	//	do not tick sectors on maps not supported by server
-	if ( !g_MapList.m_maps[m_map] )
+	if ( !g_MapList.IsMapSupported(m_map) )
 		return true;
 
     EXC_SET_BLOCK("light change");

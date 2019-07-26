@@ -960,9 +960,9 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			{
 				//	Loop the world searching for bad spawns
 				bool fFound = false;
-				for ( int m = 0; m < 256 && !fFound; ++m )
+				for ( int m = 0; m < MAP_SUPPORTED_QTY && !fFound; ++m )
 				{
-					if ( !g_MapList.m_maps[m] )
+					if ( !g_MapList.IsMapSupported(m) )
 						continue;
 
 					for ( int d = 0; d < g_MapList.GetSectorQty(m) && !fFound; ++d )

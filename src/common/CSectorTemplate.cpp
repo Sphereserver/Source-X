@@ -225,7 +225,7 @@ CSectorBase::~CSectorBase()
 void CSectorBase::Init(int index, int map, int x, int y)
 {
 	ADDTOCALLSTACK("CSectorBase::Init");
-	if ((map < 0 ) || (map >= 256 ) || !g_MapList.m_maps[map] )
+	if (!g_MapList.IsMapSupported(map) || !g_MapList.IsInitialized(map))
 	{
 		g_Log.EventError("Trying to initalize a sector %d in unsupported map #%d. Defaulting to 0,0.\n", index, map);
 	}
@@ -299,7 +299,7 @@ void CSectorBase::CheckMapBlockCache()
 
 const CServerMapBlock * CSectorBase::GetMapBlock( const CPointMap & pt )
 {
-	ADDTOCALLSTACK("CSectorBase::GetMapBlock");
+	ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetMapBlock");
 	// Get a map block from the cache. load it if not.
 	ASSERT( pt.IsValidXY());
 	CPointMap pntBlock( UO_BLOCK_ALIGN(pt.m_x), UO_BLOCK_ALIGN(pt.m_y), 0, pt.m_map);

@@ -833,18 +833,17 @@ void CWorld::Init()
 	if ( m_Sectors )	//	disable changes on-a-fly
 		return;
 
+    // Initialize map planes
 	g_MapList.Init();
-	if ( g_MapList.m_pMapDiffCollection )
-		g_MapList.m_pMapDiffCollection->Init();
 
-	//	initialize all sectors
+	// Initialize all sectors
 	uint sectors = 0;
-	int  m = 0;
-	for ( m = 0; m < 256; ++m )
+	int m = 0;
+	for ( m = 0; m < MAP_SUPPORTED_QTY; ++m )
 	{
-		if ( !g_MapList.m_maps[m] )
+		if ( !g_MapList.IsMapSupported(m) )
 			continue;
-		sectors += (uint)g_MapList.GetSectorQty(m);
+		sectors += (uint)g_MapList.CalcSectorQty(m);
 	}
 
 	m_Sectors = new CSector*[sectors];
@@ -853,16 +852,22 @@ void CWorld::Init()
 	tchar* z = static_cast<tchar *>(tsZ);
 	tchar* z1 = static_cast<tchar *>(tsZ1);
 
-	for ( m = 0; m < 256; ++m )
+	for ( m = 0; m < MAP_SUPPORTED_QTY; ++m )
 	{
-		if ( !g_MapList.m_maps[m] )
+		if ( !g_MapList.IsMapSupported(m) )
 			continue;
 
-		sprintf(z1, " map%d=%d", m, g_MapList.GetSectorQty(m));
+        const int iSectorQty = g_MapList.CalcSectorQty(m);
+		sprintf(z1, " map%d=%d", m, iSectorQty);
 		strcat(z, z1);
-        const int iMaxX = g_MapList.GetSectorCols(m);
-        //const int iMaxY = g_MapList.GetSectorRows(m);
-		for ( int s = 0, x = 0, y = 0; s < g_MapList.GetSectorQty(m); ++s )
+
+        const int iMaxX = g_MapList.CalcSectorCols(m);
+        const int iMaxY = g_MapList.CalcSectorRows(m);
+        g_MapList._sectorcolumns[m] = iMaxX;
+        g_MapList._sectorrows[m] = iMaxY;
+        g_MapList._sectorqty[m] = g_MapList.CalcSectorQty(m);
+
+		for ( int s = 0, x = 0, y = 0; s < iSectorQty; ++s )
 		{
             if (x >= iMaxX)
             {
@@ -1408,9 +1413,9 @@ void CWorld::SaveStatics()
 #endif
 
 		//	loop through all sectors and save static items
-		for ( int m = 0; m < 256; ++m )
+		for ( int m = 0; m < MAP_SUPPORTED_QTY; ++m )
 		{
-			if ( !g_MapList.m_maps[m] )
+			if ( !g_MapList.IsMapSupported(m) )
                 continue;
 
 			for ( int d = 0; d < g_MapList.GetSectorQty(m); ++d )
@@ -2083,9 +2088,10 @@ void CWorld::RespawnDeadNPCs()
 	ADDTOCALLSTACK("CWorld::RespawnDeadNPCs");
 	// Respawn dead story NPC's
 	g_Serv.SetServerMode(SERVMODE_RestockAll);
-	for ( int m = 0; m < 256; ++m )
+	for ( int m = 0; m < MAP_SUPPORTED_QTY; ++m )
 	{
-		if ( !g_MapList.m_maps[m] ) continue;
+		if ( !g_MapList.IsMapSupported(m) )
+            continue;
 
 		for ( int s = 0; s < g_MapList.GetSectorQty(m); ++s )
 		{
@@ -2119,9 +2125,9 @@ void CWorld::Restock()
 		}
 	}
 
-	for ( int m = 0; m < 256; ++m )
+	for ( int m = 0; m < MAP_SUPPORTED_QTY; ++m )
 	{
-		if ( !g_MapList.m_maps[m] )
+		if ( !g_MapList.IsMapSupported(m) )
 			continue;
 
 		for ( int s = 0; s < g_MapList.GetSectorQty(m); ++s )
@@ -2780,27 +2786,27 @@ void CWorld::OnTick()
 
 CSector *CWorld::GetSector(int map, int i) const	// gets sector # from one map
 {
-	ADDTOCALLSTACK_INTENSIVE("CWorld::GetSector");
+	//ADDTOCALLSTACK_INTENSIVE("CWorld::GetSector");
 
 	// if the map is not supported, return empty sector
-	if (( map < 0 ) || ( map >= 256 ) || !g_MapList.m_maps[map] )
+	if (( map < 0 ) || ( map >= MAP_SUPPORTED_QTY ) || !g_MapList.m_maps[map] )
 		return nullptr;
 
-	if ( i >= g_MapList.GetSectorQty(map) )
+    const int iMapSectorQty = g_MapList.GetSectorQty(map);
+	if ( i >= iMapSectorQty)
 	{
 		g_Log.EventError("Unsupported sector #%d for map #%d specified.\n", i, map);
 		return nullptr;
 	}
 
-	int base = 0;
-	for ( int m = 0; m < 256; ++m )
+	for ( int base = 0, m = 0; m < MAP_SUPPORTED_QTY; ++m )
 	{
-		if ( !g_MapList.m_maps[m] )
+		if ( !g_MapList.IsMapSupported(m) )
 			continue;
 
 		if ( m == map )
 		{
-			if ( g_MapList.GetSectorQty(map) < i )
+			if (iMapSectorQty < i )
 				return nullptr;
 
 			return m_Sectors[base + i];

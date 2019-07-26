@@ -4169,9 +4169,9 @@ PacketEnableMapDiffs::PacketEnableMapDiffs(const CClient* target) : PacketExtend
 	int map;
 
 	// find map count
-	for (map = 255; map >= 0; map--)
+	for (map = MAP_SUPPORTED_QTY - 1; map >= 0; --map)
 	{
-		if (g_MapList.m_maps[map] == false)
+		if (g_MapList.IsMapSupported(map) == false)
 			continue;
 
 		mapCount = map;
@@ -4182,7 +4182,7 @@ PacketEnableMapDiffs::PacketEnableMapDiffs(const CClient* target) : PacketExtend
 
 	for (map = 0; map < mapCount; map++)
 	{
-		if (g_Cfg.m_fUseMapDiffs && g_MapList.m_maps[map])
+		if (g_Cfg.m_fUseMapDiffs && g_MapList.IsMapSupported(map))
 		{
 			if (g_Install.m_Mapdifl[map].IsFileOpen())
 				writeInt32((dword)g_Install.m_Mapdifl[map].GetLength() / 4);

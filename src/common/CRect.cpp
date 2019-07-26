@@ -100,18 +100,18 @@ void CRect::NormalizeRect()
 {
     if ( m_bottom < m_top )
     {
-        int wtmp = m_bottom;
+        const int wtmp = m_bottom;
         m_bottom = m_top;
         m_top = wtmp;
     }
     if ( m_right < m_left )
     {
-        int wtmp = m_right;
+        const int wtmp = m_right;
         m_right = m_left;
         m_left = wtmp;
     }
-    if (( m_map < 0 ) || ( m_map >= 256 )) m_map = 0;
-    if ( !g_MapList.m_maps[m_map] ) m_map = 0;
+    if ( !g_MapList.IsMapSupported(m_map) )
+        m_map = 0;
 }
 
 void CRect::SetRect( int left, int top, int right, int bottom, int map )
@@ -148,7 +148,7 @@ size_t CRect::Read( lpctstr pszVal )
 	{
 		case 5:
 			m_map = atoi(ppVal[4]);
-			if (( m_map < 0 ) || ( m_map >= 256 ) || !g_MapList.m_maps[m_map] )
+			if (( m_map < 0 ) || ( m_map >= MAP_SUPPORTED_QTY) || !g_MapList.IsMapSupported(m_map) )
 			{
 				g_Log.EventError("Unsupported map #%d specified. Auto-fixing that to 0.\n", m_map);
 				m_map = 0;
@@ -317,10 +317,10 @@ const CRect CRect::operator += (const CRect& rect)
 
 bool CRectMap::IsValid() const
 {
-    int iSizeX = GetWidth();
+    const int iSizeX = GetWidth();
     if ( iSizeX < 0 || iSizeX > g_MapList.GetX(m_map) )
         return false;
-    int iSizeY = GetHeight();
+    const int iSizeY = GetHeight();
     if ( iSizeY < 0 || iSizeY > g_MapList.GetY(m_map) )
         return false;
     return true;
@@ -328,13 +328,13 @@ bool CRectMap::IsValid() const
 
 void CRectMap::NormalizeRect()
 {
-	ADDTOCALLSTACK("CRectMap::NormalizeRect");
+	//ADDTOCALLSTACK_INTENSIVE("CRectMap::NormalizeRect");
 	CRect::NormalizeRect();
 	NormalizeRectMax();
 }
 
 void CRectMap::NormalizeRectMax()
 {
-	ADDTOCALLSTACK("CRectMap::NormalizeRectMax");
+    //ADDTOCALLSTACK_INTENSIVE("CRectMap::NormalizeRectMax");
 	CRect::NormalizeRectMax( g_MapList.GetX(m_map), g_MapList.GetY(m_map));
 }

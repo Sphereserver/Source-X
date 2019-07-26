@@ -1955,7 +1955,7 @@ void CClient::addMap() const
 		return;
 
 	CPointMap pt = m_pChar->GetTopPoint();
-	new PacketMapChange(this, g_MapList.m_mapid[pt.m_map]);
+	new PacketMapChange(this, g_MapList.GetMapID(pt.m_map));
 }
 
 void CClient::addMapDiff() const
@@ -2349,7 +2349,7 @@ blank_map:
 		pMap->m_itMap.m_top,
 		pMap->m_itMap.m_right,
 		pMap->m_itMap.m_bottom,
-		g_MapList.m_mapid[pMap->m_itMap.m_map]);
+		g_MapList.GetMapID(pMap->m_itMap.m_map));
 
 	if ( !rect.IsValid() )
 		goto blank_map;
