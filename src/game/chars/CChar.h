@@ -737,13 +737,6 @@ public:
 	void Noto_Murder();
 
 	/**
-	* @brief How much notoriety values do I have stored?
-	*
-	* @return amount of characters stored.
-	*/
-	int NotoSave();
-
-	/**
 	* @brief Adding someone to my notoriety list.
 	*
 	* @param pChar is retrieving my notoriety, I'm going to store what I have to send him on my list.
@@ -782,9 +775,9 @@ public:
 	/**
 	* @brief Deleting myself and sending data again for given char.
 	*
-	* @param id, entry of the viewer.
+	* @param pChar, the CChar* of the char of which we want to resend the noto.
 	*/
-	void NotoSave_Resend( int id );
+	void NotoSave_Resend( CChar *pChar );
 
 	/**
 	* @brief Gets the entry list of the given CChar.
@@ -792,7 +785,7 @@ public:
 	* @param pChar, CChar to retrieve the entry number for.
 	* @return the entry number.
 	*/
-	int NotoSave_GetID( CChar * pChar );
+	int NotoSave_GetID( CChar * pChar ) const;
 
 	/**
 	* @brief Removing stored data for pChar.
@@ -969,23 +962,23 @@ public:
 	// Memories about objects in the world. -------------------
 	bool Memory_OnTick( CItemMemory * pMemory );
 	bool Memory_UpdateFlags( CItemMemory * pMemory );
-	bool Memory_UpdateClearTypes( CItemMemory * pMemory, word MemTypes );
-	void Memory_AddTypes( CItemMemory * pMemory, word MemTypes );
-	bool Memory_ClearTypes( CItemMemory * pMemory, word MemTypes );
-	CItemMemory * Memory_CreateObj( CUID uid, word MemTypes );
-	CItemMemory * Memory_CreateObj( const CObjBase * pObj, word MemTypes );
+	bool Memory_UpdateClearTypes( CItemMemory * pMemory, word wMemTypes );
+	void Memory_AddTypes( CItemMemory * pMemory, word wMemTypes );
+	bool Memory_ClearTypes( CItemMemory * pMemory, word wMemTypes );
+	CItemMemory * Memory_CreateObj( const CUID& uid, word wMemTypes );
+	CItemMemory * Memory_CreateObj( const CObjBase * pObj, word wMemTypes );
 
 public:
-	void Memory_ClearTypes( word MemTypes );
-	CItemMemory * Memory_FindObj( CUID uid ) const;
+	void Memory_ClearTypes( word wMemTypes );
+	CItemMemory * Memory_FindObj(const CUID& uid ) const;
 	CItemMemory * Memory_FindObj( const CObjBase * pObj ) const;
-	CItemMemory * Memory_AddObjTypes( CUID uid, word MemTypes );
-	CItemMemory * Memory_AddObjTypes( const CObjBase * pObj, word MemTypes );
-	CItemMemory * Memory_FindTypes( word MemTypes ) const;
-	CItemMemory * Memory_FindObjTypes( const CObjBase * pObj, word MemTypes ) const;
+	CItemMemory * Memory_AddObjTypes(const CUID& uid, word wMemTypes );
+	CItemMemory * Memory_AddObjTypes( const CObjBase * pObj, word wMemTypes );
+	CItemMemory * Memory_FindTypes( word wMemTypes ) const;
+	CItemMemory * Memory_FindObjTypes( const CObjBase * pObj, word wMemTypes ) const;
 	// -------- Public alias for MemoryCreateObj ------------------
-	CItemMemory * Memory_AddObj( CUID uid, word MemTypes );
-	CItemMemory * Memory_AddObj( const CObjBase * pObj, word MemTypes );
+	CItemMemory * Memory_AddObj( const CUID& uid, word wMemTypes );
+	CItemMemory * Memory_AddObj( const CObjBase * pObj, word wMemTypes );
 	// ------------------------------------------------------------
 
 public:
@@ -1076,7 +1069,7 @@ public:
 	void	Attacker_SetIgnore(const CChar * pChar, bool fIgnore);
 	int64	Attacker_GetHighestThreat() const;
 	int		Attacker_GetID(const CChar * pChar) const;
-	int		Attacker_GetID(CUID pChar) const;
+	int		Attacker_GetID(const CUID& pChar) const;
 
 	//
 	bool Player_OnVerb( CScript &s, CTextConsole * pSrc );

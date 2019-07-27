@@ -1838,6 +1838,8 @@ WARNING: Important change!
 26-07-2019, Nolok
 - Improved: map checks (and, again, pathfinding) are significantly faster now, this means that the server can handle more alive/awake NPCs than before (without causing any lag).
 
-27-07-2019, Nolok
-- Fixed: When a derived ITEMDEF (like [ITEMDEF i_something], not [ITEMDEF 01234]) was created and neither a type and a valid id was set in the script, the item base was considered having
+28-07-2019, Nolok
+- Fixed: When a derived ITEMDEF (like [ITEMDEF i_something], not [ITEMDEF 01234]) was created and neither a type and a valid id were set in the script, the item base was considered having
 	random type, layer, weight, tiledata flags and CAN flags.
+- Fixed: NotoSaves weren't always cleared right when they timed out. 
+- Fixed: Attacker elapsed time value wasn't increased exactly every second (but after a greater delay) (Issue #304).

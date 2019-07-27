@@ -207,13 +207,13 @@ private:
 	CCrypto& operator=(const CCrypto& other);
 
 public:
-	bool Init( dword dwIP, byte * pEvent, uint inLen, bool isclientKr = false );
+	bool Init( dword dwIP, const byte * pEvent, uint inLen, bool isclientKr = false );
 	void InitFast( dword dwIP, CONNECT_TYPE ctInit, bool fRelay = true );
 	bool Decrypt( byte * pOutput, const byte * pInput, uint outLen, uint inLen );
 	bool Encrypt( byte * pOutput, const byte * pInput, uint outLen, uint inLen );
 protected:
-	bool LoginCryptStart( dword dwIP, byte * pEvent, uint inLen );
-	bool GameCryptStart( dword dwIP, byte * pEvent, uint inLen );
+	bool LoginCryptStart( dword dwIP, const  byte * pEvent, uint inLen );
+	bool GameCryptStart( dword dwIP, const byte * pEvent, uint inLen );
 	bool RelayGameCryptStart( byte * pOutput, const byte * pInput, uint outLen, uint inLen );
    
 };

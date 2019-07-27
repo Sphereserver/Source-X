@@ -1076,37 +1076,39 @@ bool NetworkInput::processOtherClientData(NetState* state, Packet* buffer)
 	switch (client->GetConnectType())
 	{
 	case CONNECT_CRYPT:
-		if (buffer->getRemainingLength() < 5)
-		{
-			// not enough data to be a real client
-			EXC_SET_BLOCK("ping #3");
-			client->SetConnectType(CONNECT_UNK);
-			if (client->OnRxPing(buffer->getRemainingData(), buffer->getRemainingLength()) == false)
-				return false;
-			break;
-		}
+    {
+        if (buffer->getRemainingLength() < 5)
+        {
+            // not enough data to be a real client
+            EXC_SET_BLOCK("ping #3");
+            client->SetConnectType(CONNECT_UNK);
+            if (client->OnRxPing(buffer->getRemainingData(), buffer->getRemainingLength()) == false)
+                return false;
+            break;
+        }
 
-		// first real data from client which we can use to log in
-		EXC_SET_BLOCK("encryption setup");
-		ASSERT(buffer->getRemainingLength() <= sizeof(CEvent));
+        // first real data from client which we can use to log in
+        EXC_SET_BLOCK("encryption setup");
+        ASSERT(buffer->getRemainingLength() <= sizeof(CEvent));
 
-		CEvent evt;
-		memcpy(&evt, buffer->getRemainingData(), buffer->getRemainingLength());
+        std::unique_ptr<CEvent> evt = std::make_unique<CEvent>();
+        memcpy(evt.get(), buffer->getRemainingData(), buffer->getRemainingLength());
 
-		if (evt.Default.m_Cmd == XCMD_EncryptionReply && state->isClientKR())
-		{
-			EXC_SET_BLOCK("encryption reply");
+        if (evt->Default.m_Cmd == XCMD_EncryptionReply && state->isClientKR())
+        {
+            EXC_SET_BLOCK("encryption reply");
 
-			// receiving response to 0xE3 packet
-			size_t iEncKrLen = evt.EncryptionReply.m_len;
-			if (buffer->getRemainingLength() < iEncKrLen)
-				return false; // need more data
+            // receiving response to 0xE3 packet
+            uint iEncKrLen = evt->EncryptionReply.m_len;
+            if (buffer->getRemainingLength() < iEncKrLen)
+                return false; // need more data
 
-			buffer->skip((int)(iEncKrLen));
-			return true;
-		}
+            buffer->skip(iEncKrLen);
+            return true;
+        }
 
-		client->xProcessClientSetup(&evt, buffer->getRemainingLength());
+        client->xProcessClientSetup(evt.get(), buffer->getRemainingLength());
+    }
 		break;
 
 	case CONNECT_HTTP:

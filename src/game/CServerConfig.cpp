@@ -1177,7 +1177,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			m_iMurderDecayTime = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 		case RC_NOTOTIMEOUT:
-			m_iNotoTimeout = s.GetArgLLVal() * MSECS_PER_SEC;
+			m_iNotoTimeout = s.GetArgVal();
 			break;
 		case RC_WOOLGROWTHTIME:
 			m_iWoolGrowthTime = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
@@ -1794,7 +1794,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 	switch (index)
 	{
 		case RC_ATTACKERTIMEOUT:
-			sVal.FormatUVal(m_iAttackerTimeout);
+			sVal.FormatVal(m_iAttackerTimeout);
 			break;
 		case RC_BANKMAXWEIGHT:
 			sVal.FormatVal( m_iBankWMax / WEIGHT_UNITS );
@@ -1861,7 +1861,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			sVal.FormatLLVal( m_iMapCacheTime / MSECS_PER_SEC );
 			break;
 		case RC_NOTOTIMEOUT:
-			sVal.FormatLLVal(m_iNotoTimeout / MSECS_PER_SEC);
+			sVal.FormatVal(m_iNotoTimeout);
 			break;
         case RC_MAXHOUSESACCOUNT:
             sVal.FormatUCVal(_iMaxHousesAccount);

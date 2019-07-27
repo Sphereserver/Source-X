@@ -2128,7 +2128,7 @@ do_default:
 					if ( !strnicmp(ptcKey, "ID", 2 ) )
 					{
 						ptcKey += 3;	// ID + whitspace
-						CChar * pChar = CUID::CharFind(Exp_GetSingle(ptcKey));
+						const CChar * pChar = CUID::CharFind(Exp_GetSingle(ptcKey));
 						sVal.FormatVal(Attacker_GetID(pChar));
 						return true;
 					}
@@ -2141,7 +2141,7 @@ do_default:
 							sVal.FormatVal(-1);
 						return true;
 					}
-					if ( m_lastAttackers.size() )
+					if ( !m_lastAttackers.empty() )
 					{
 						int attackerIndex = (int)m_lastAttackers.size();
 						if( !strnicmp(ptcKey, "MAX", 3) )
@@ -2182,7 +2182,7 @@ do_default:
 						SKIP_SEPARATORS(ptcKey);
 						if ( attackerIndex < (int)m_lastAttackers.size() )
 						{
-							LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
+							const LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
 
 							if( !strnicmp(ptcKey, "DAM", 3) )
 							{
@@ -2196,16 +2196,16 @@ do_default:
 							}
 							else if (( !strnicmp(ptcKey, "UID", 3) ) || ( *ptcKey == '\0' ))
 							{
-								CUID uid = refAttacker.charUID;
+                                const CUID& uid = refAttacker.charUID;
 								sVal.FormatHex( uid.CharFind() ? refAttacker.charUID : 0 );
 								return true;
 							}
-							else if ((!strnicmp(ptcKey, "THREAT", 6)))
+							else if (!strnicmp(ptcKey, "THREAT", 6))
 							{
 								sVal.FormatLLVal(refAttacker.threat);
 								return true;
 							}
-							else if ((!strnicmp(ptcKey, "IGNORE", 6)))
+							else if (!strnicmp(ptcKey, "IGNORE", 6))
 							{
 								sVal.FormatVal(refAttacker.ignore ? 1:0);
 								return true;
@@ -2271,12 +2271,12 @@ do_default:
 							}
 							else if ( !strnicmp(ptcKey, "ELAPSED", 7) )
 							{
-								sVal.FormatVal((int)(refnoto.time));
+								sVal.FormatLLVal(refnoto.time);
 								return true;
 							}
 							else if (( !strnicmp(ptcKey, "UID", 3) ) || ( *ptcKey == '\0' ))
 							{
-								CUID uid = refnoto.charUID;
+								const CUID& uid = refnoto.charUID;
 								sVal.FormatHex( uid.CharFind() ? refnoto.charUID : 0 );
 								return true;
 							}

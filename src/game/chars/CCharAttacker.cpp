@@ -260,8 +260,8 @@ int CChar::Attacker_GetID(const CChar * pChar) const
     int count = 0;
     for (std::vector<LastAttackers>::const_iterator it = m_lastAttackers.begin(), end = m_lastAttackers.end(); it != end; ++it)
     {
-        CUID uid = it->charUID;
-        if (!uid)
+        const CUID& uid = it->charUID;
+        if (!uid.IsValidUID())
             continue;
 
         const CChar* pUIDChar = uid.CharFind();
@@ -276,14 +276,14 @@ int CChar::Attacker_GetID(const CChar * pChar) const
     return -1;
 }
 
-// Get nID value of attacker list from the given pChar
-int CChar::Attacker_GetID(CUID pChar) const
+// Get nID value of attacker list from the given uidChar
+int CChar::Attacker_GetID(const CUID& uidChar) const
 {
     ADDTOCALLSTACK("CChar::Attacker_GetID(CUID)");
-    return Attacker_GetID(pChar.CharFind());
+    return Attacker_GetID(uidChar.CharFind());
 }
 
-// Get UID value of attacker list from the given pChar
+// Get CChar* from attacker list at the given attackerIndex
 CChar * CChar::Attacker_GetUID(size_t attackerIndex) const
 {
     ADDTOCALLSTACK("CChar::Attacker_GetUID");
@@ -304,22 +304,22 @@ bool CChar::Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bo
         return false;
 
     CChar *pChar = CUID::CharFind(itAttacker->charUID);
-    if (!pChar)
-        return false;
-
-    if (IsTrigUsed(TRIGGER_COMBATDELETE))
+    if (pChar)
     {
-        CScriptTriggerArgs Args;
-        Args.m_iN1 = bForced;
-        Args.m_iN2 = (int)type;
-        TRIGRET_TYPE tRet = OnTrigger(CTRIG_CombatDelete, pChar, &Args);
-        if (tRet == TRIGRET_RET_TRUE)
-            return false;
-    }
+        if (IsTrigUsed(TRIGGER_COMBATDELETE))
+        {
+            CScriptTriggerArgs Args;
+            Args.m_iN1 = bForced;
+            Args.m_iN2 = (int)type;
+            TRIGRET_TYPE tRet = OnTrigger(CTRIG_CombatDelete, pChar, &Args);
+            if ((tRet == TRIGRET_RET_TRUE) && !bForced)
+                return false;
+        }
+    }   
 
     itAttacker = m_lastAttackers.erase(itAttacker);		// update the iterator to prevent invalidation and crashes!
 
-    if (m_Fight_Targ_UID == pChar->GetUID())
+    if (pChar && (m_Fight_Targ_UID == pChar->GetUID()))
     {
         if (m_pNPC)
         {
@@ -379,20 +379,27 @@ void CChar::Attacker_CheckTimeout()
         for (size_t count = 0; count < m_lastAttackers.size(); )
         {
             LastAttackers & refAttacker = m_lastAttackers[count];
-            CChar *pEnemy = CUID::CharFind(refAttacker.charUID);
+            const CChar *pEnemy = CUID::CharFind(refAttacker.charUID);
             if (pEnemy)
             {
                 // always advance refAttacker.elapsed, i might use it in scripts for a different purpose
-                if ( (++(refAttacker.elapsed) > g_Cfg.m_iAttackerTimeout) && (g_Cfg.m_iAttackerTimeout > 0))
+                ++refAttacker.elapsed;
+                if ( (refAttacker.elapsed > g_Cfg.m_iAttackerTimeout) && (g_Cfg.m_iAttackerTimeout > 0))
                 {
-                    if (!Attacker_Delete(count, true, ATTACKER_CLEAR_ELAPSED))
-                    {
+                    if (!Attacker_Delete(count, false, ATTACKER_CLEAR_ELAPSED))
                         ++count;
-                        continue;
-                    }
+                    continue;
                 }
+                ++count;
             }
-            ++count;
+            else
+            {
+                const bool fCleanupSuccess = Attacker_Delete(count, true, ATTACKER_CLEAR_FORCED);
+                ASSERT(fCleanupSuccess);
+                UNREFERENCED_PARAMETER(fCleanupSuccess);
+                //if (!fCleanupSuccess)
+                //    ++count;
+            } 
         }
     }
 }

@@ -808,15 +808,11 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 	ASSERT( uiLen > 0 );
 
 	// Try all client versions on the msg.
-	CEvent bincopy;		// in buffer. (from client)
-	ASSERT( uiLen <= sizeof(bincopy));
-	memcpy( bincopy.m_Raw, pEvent->m_Raw, uiLen );
-
-	if ( !m_Crypt.Init( m_net->m_seed, bincopy.m_Raw, uiLen, GetNetState()->isClientKR() ) )
+	if ( !m_Crypt.Init( m_net->m_seed, pEvent->m_Raw, uiLen, GetNetState()->isClientKR() ) )
 	{
 		DEBUG_MSG(( "%x:Odd login message length %" PRIuSIZE_T "?\n", GetSocketID(), uiLen ));
 #ifdef _DEBUG
-		xRecordPacketData(this, (const byte *)pEvent, uiLen, "client->server");
+		xRecordPacketData(this, pEvent->m_Raw, uiLen, "client->server");
 #endif
 		addLoginErr( PacketLoginError::BadEncLength );
 		return false;
@@ -836,14 +832,16 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 		return false;
 	}
 	
-	byte lErr = PacketLoginError::EncUnknown;
-	
-	if (!m_Crypt.Decrypt( pEvent->m_Raw, bincopy.m_Raw, MAX_BUFFER, uiLen ))
+    ASSERT(uiLen <= sizeof(CEvent));
+    std::unique_ptr<CEvent> bincopy = std::make_unique<CEvent>();		// in buffer. (from client)
+    memcpy(bincopy->m_Raw, pEvent->m_Raw, uiLen);
+	if (!m_Crypt.Decrypt( pEvent->m_Raw, bincopy->m_Raw, MAX_BUFFER, uiLen ))
     {
         g_Log.EventError("NET-IN: xProcessClientSetup failed (Decrypt).\n");
         return false;
     }
 	
+    byte lErr = PacketLoginError::EncUnknown;
 	tchar szAccount[MAX_ACCOUNT_NAME_SIZE+3];
 
 	switch ( pEvent->Default.m_Cmd )
@@ -946,7 +944,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 #endif
 	}
 	
-	xRecordPacketData(this, (const byte *)pEvent, uiLen, "client->server");
+	xRecordPacketData(this, pEvent->m_Raw, uiLen, "client->server");
 
 	if ( lErr != PacketLoginError::Success )	// it never matched any crypt format.
 	{
@@ -972,7 +970,7 @@ bool CClient::xCanEncLogin(bool bCheckCliver)
 			return true;
 		
 		if ( m_Crypt.GetEncryptionType() != ENC_NONE )
-			return( m_Crypt.GetClientVer() == g_Serv.m_ClientVersion.GetClientVer() );
+			return ( m_Crypt.GetClientVer() == g_Serv.m_ClientVersion.GetClientVer() );
 		else
 			return true;	// if unencrypted we check that later
 	}

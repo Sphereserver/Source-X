@@ -194,7 +194,7 @@ bool CChar::Memory_ClearTypes( CItemMemory * pMemory, word MemTypes )
 // Create a memory about this object.
 // NOTE: Does not check if object already has a memory.!!!
 //  Assume it does not !
-CItemMemory * CChar::Memory_CreateObj( CUID uid, word MemTypes )
+CItemMemory * CChar::Memory_CreateObj(const CUID& uid, word MemTypes )
 {
 	ADDTOCALLSTACK("CChar::Memory_CreateObj");
 
@@ -236,7 +236,7 @@ void CChar::Memory_ClearTypes( word MemTypes )
 }
 
 // Do I have a memory / link for this object ?
-CItemMemory * CChar::Memory_FindObj( CUID uid ) const
+CItemMemory * CChar::Memory_FindObj( const CUID& uid ) const
 {
 	ADDTOCALLSTACK("CChar::Memory_FindObj(UID)");
 	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
@@ -286,7 +286,7 @@ CItemMemory * CChar::Memory_FindObjTypes( const CObjBase * pObj, word MemTypes )
 	return pMemory;
 }
 
-CItemMemory * CChar::Memory_AddObj( CUID uid, word MemTypes )
+CItemMemory * CChar::Memory_AddObj(const CUID& uid, word MemTypes )
 {
 	return Memory_CreateObj( uid, MemTypes );
 }
@@ -337,20 +337,21 @@ TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, C
 }
 
 // Adding a new value for this memory, updating notoriety
-CItemMemory * CChar::Memory_AddObjTypes( CUID uid, word MemTypes )
+CItemMemory * CChar::Memory_AddObjTypes(const CUID& uid, word MemTypes )
 {
-	ADDTOCALLSTACK("CChar::Memory_AddObjTypes");
+	ADDTOCALLSTACK("CChar::Memory_AddObjTypes(UID)");
 	CItemMemory * pMemory = Memory_FindObj( uid );
 	if ( pMemory == nullptr )
 		return Memory_CreateObj( uid, MemTypes );
 
 	Memory_AddTypes( pMemory, MemTypes );
 	NotoSave_Delete( uid.CharFind() );
-	return pMemory ;
+	return pMemory;
 }
 
 CItemMemory * CChar::Memory_AddObjTypes( const CObjBase * pObj, word MemTypes )
 {
+    ADDTOCALLSTACK("CChar::Memory_AddObjTypes");
 	ASSERT(pObj);
 	return Memory_AddObjTypes( pObj->GetUID(), MemTypes );
 }

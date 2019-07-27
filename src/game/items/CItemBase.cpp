@@ -87,10 +87,9 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	szName[j] = '\0';
 	m_sName = szName;	// default type name.
 
-	// Do some special processing for certain items.
-
 	SetHeight( GetItemHeightFlags( tiledata, &m_Can ));
 
+    // Do some special processing for certain items.
 	GetItemSpecificFlags( tiledata, &m_Can, m_type, id );
 
 	if ( (tiledata.m_weight == 0xFF) ||	// not movable.

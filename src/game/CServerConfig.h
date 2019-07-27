@@ -344,9 +344,9 @@ public:
 	uint m_iOptionFlags;		// Option Flags.
     bool m_fNoResRobe;          // Adding resurrection robe to resurrected players or not.
     int	 m_iLostNPCTeleport;    // if Distance from HOME is greater than this, NPC will teleport to it instead of walking.
-	int64 m_iWoolGrowthTime;     // how long till wool grows back on sheared sheep, in minutes.
-	uint m_iAttackerTimeout;    // Timeout for attacker.
-	int64 m_iNotoTimeout;       // Timeout for NOTOriety checks.
+	int64 m_iWoolGrowthTime;    // how long till wool grows back on sheared sheep, in minutes (stored as milliseconds).
+	int  m_iAttackerTimeout;    // Timeout for an attacker  (stored in seconds, not in milliseconds).
+	int  m_iNotoTimeout;        // Timeout for NOTOriety checks (stored in seconds, not in milliseconds).
 	uint m_iMaxSkill;           // Records the higher [SKILL ] index.
 
 	int	m_iDistanceYell;        // Max distance at which Yells can be readed.

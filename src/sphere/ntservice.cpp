@@ -449,14 +449,14 @@ void CNTService::CmdMainStart()
 //	FUNCTION: main()
 //
 /////////////////////////////////////////////////////////////////////////////////////
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nCmdShow)
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
     IThread::setThreadName("T_SphereStartup");
 
 	TCHAR	*argv[32];
 	argv[0] = nullptr;
-	int argc = Str_ParseCmds(lpCmdLine, &argv[1], CountOf(argv)-1, " \t") + 1;
+	int argc = Str_ParseCmds(pCmdLine, &argv[1], CountOf(argv)-1, " \t") + 1;
 
 	// We need to find out what the server name is and the log files folder... look it up in the .ini file
     g_Cfg.LoadIni(false);
@@ -464,7 +464,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     if (!g_Cfg.m_fUseNTService ||	// since there is no way to detect how did we start, use config for that
         Sphere_GetOSInfo()->dwPlatformId != VER_PLATFORM_WIN32_NT) // We are running Win9x - So we are not an NT service.
     {
-        g_NTWindow._NTWInitParams = {hInstance, lpCmdLine, nCmdShow};
+        g_NTWindow._NTWInitParams = {hInstance, pCmdLine, nCmdShow};
         g_NTWindow.start();
 
         int iRet = Sphere_MainEntryPoint(argc, argv);

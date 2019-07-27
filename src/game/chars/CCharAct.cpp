@@ -4114,7 +4114,7 @@ bool CChar::OnTickPeriodic()
     EXC_TRY("OnTickPeriodic");
     ++_iRegenTickCount;
     _timeNextRegen = g_World.GetCurrentTime().GetTimeRaw() + MSECS_PER_TICK;
-    const bool fRegen = (_iRegenTickCount == MSECS_PER_TENTH);
+    const bool fRegen = (_iRegenTickCount >= TICKS_PER_SEC);
 
     if (fRegen)
     {
@@ -4122,17 +4122,11 @@ bool CChar::OnTickPeriodic()
 
         // Periodic checks of attackers for this character.
         EXC_SET_BLOCK("last attackers");
-        if (g_Cfg.m_iAttackerTimeout > 0)
-        {
-            Attacker_CheckTimeout();
-        }
+        Attacker_CheckTimeout();    // Do this even if g_Cfg.m_iAttackerTimeout <= 0, because i may want to use the elapsed value in scripts.
 
         // Periodic checks of notoriety for this character.
         EXC_SET_BLOCK("NOTO timeout");
-        if (g_Cfg.m_iNotoTimeout > 0)
-        {
-            NotoSave_CheckTimeout();
-        }
+        NotoSave_CheckTimeout();    // Do this even if g_Cfg.m_iNotoTimeout <= 0, because i may want to use the elapsed value in scripts.
     }
 
     /*  We can only die on our own tick.

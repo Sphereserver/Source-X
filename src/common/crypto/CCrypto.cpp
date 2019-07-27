@@ -312,7 +312,7 @@ CCrypto::~CCrypto()
 	delete md5_engine;
 }
 
-bool CCrypto::Init( dword dwIP, byte * pEvent, uint inLen, bool isclientKr )
+bool CCrypto::Init( dword dwIP, const byte * pEvent, uint inLen, bool isclientKr )
 {
 	ADDTOCALLSTACK("CCrypto::Init");
 	bool bReturn = true;
@@ -587,23 +587,23 @@ bool CCrypto::Decrypt( byte * pOutput, const byte * pInput, uint outLen, uint in
 
 /*		Handle login encryption		*/
 
-bool CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, uint inLen )
+bool CCrypto::LoginCryptStart( dword dwIP, const byte * pEvent, uint inLen )
 {
 	ADDTOCALLSTACK("CCrypto::LoginCryptStart");
 	ASSERT(pEvent != nullptr);
-	byte m_Raw[ MAX_BUFFER ];
-	char pszAccountNameCheck[ MAX_ACCOUNT_NAME_SIZE ];
 
-	ASSERT( inLen <= sizeof(m_Raw) );
-	memcpy( m_Raw, pEvent, inLen );
+    ASSERT(inLen <= MAX_BUFFER);
+    std::unique_ptr<byte[]> pRaw = std::make_unique<byte[]>(MAX_BUFFER);
+    memcpy(pRaw.get(), pEvent, inLen);
+	
 	m_seed = dwIP;
 	SetConnectType( CONNECT_LOGIN );
 
-	dword m_tmp_CryptMaskLo = (((~m_seed) ^ 0x00001357) << 16) | ((( m_seed) ^ 0xffffaaaa) & 0x0000ffff);
-	dword m_tmp_CryptMaskHi = ((( m_seed) ^ 0x43210000) >> 16) | (((~m_seed) ^ 0xabcdffff) & 0xffff0000);
+	dword tmp_CryptMaskLo = (((~m_seed) ^ 0x00001357) << 16) | ((( m_seed) ^ 0xffffaaaa) & 0x0000ffff);
+	dword tmp_CryptMaskHi = ((( m_seed) ^ 0x43210000) >> 16) | (((~m_seed) ^ 0xabcdffff) & 0xffff0000);
 
 	SetClientVerIndex(0);
-	SetCryptMask(m_tmp_CryptMaskHi, m_tmp_CryptMaskLo);
+	SetCryptMask(tmp_CryptMaskHi, tmp_CryptMaskLo);
 
 	for (uint i = 0, iAccountNameLen = 0;;)
 	{
@@ -614,16 +614,16 @@ bool CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, uint inLen )
 			DEBUG_ERR(("Unknown client, i = %" PRIuSIZE_T "\n", i));
 #endif
 			SetClientVerIndex(0);
-			SetCryptMask(m_tmp_CryptMaskHi, m_tmp_CryptMaskLo); // Hi - Lo
+			SetCryptMask(tmp_CryptMaskHi, tmp_CryptMaskLo); // Hi - Lo
 			break;
 		}
 
-		SetCryptMask(m_tmp_CryptMaskHi, m_tmp_CryptMaskLo);
+		SetCryptMask(tmp_CryptMaskHi, tmp_CryptMaskLo);
 		// Set client version properties
 		SetClientVerIndex(i);
 
 		// Test Decrypt
-		if (!Decrypt( m_Raw, pEvent, MAX_BUFFER, inLen ))
+		if (!Decrypt(pRaw.get(), pEvent, MAX_BUFFER, inLen ))
         {
             g_Log.EventError("NET-IN: LoginCryptStart failed (decrypt).\n");
             return false;
@@ -632,7 +632,7 @@ bool CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, uint inLen )
 #ifdef DEBUG_CRYPT_MSGS
 		DEBUG_MSG(("LoginCrypt %" PRIuSIZE_T " (%" PRIu32 ") type %" PRIx8 "-%" PRIx8 "\n", i, GetClientVer(), m_Raw[0], pEvent[0]));
 #endif
-		bool isValid = ( m_Raw[0] == 0x80 && m_Raw[30] == 0x00 && m_Raw[60] == 0x00 );
+		bool isValid = (pRaw[0] == 0x80 && pRaw[30] == 0x00 && pRaw[60] == 0x00 );
 		if ( isValid )
 		{
 			// -----------------------------------------------------
@@ -647,7 +647,7 @@ bool CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, uint inLen )
 				// always be 0x00 (some unofficial clients may allow the user
 				// to enter more, but as they generally don't use encryption
 				// it shouldn't be a problem)
-				if (m_Raw[toCheck] == 0x00 && m_Raw[toCheck+30] == 0x00)
+				if (pRaw[toCheck] == 0x00 && pRaw[toCheck+30] == 0x00)
 					continue;
 
 				isValid = false;
@@ -656,8 +656,9 @@ bool CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, uint inLen )
 
 			if ( isValid == true )
 			{
-				lpctstr sRawAccountName = reinterpret_cast<lpctstr>( m_Raw + 1 );
-				iAccountNameLen = (size_t)Str_GetBare(pszAccountNameCheck, sRawAccountName, MAX_ACCOUNT_NAME_SIZE, ACCOUNT_NAME_VALID_CHAR);
+                char pszAccountNameCheck[MAX_ACCOUNT_NAME_SIZE];
+				lpctstr sRawAccountName = reinterpret_cast<lpctstr>(pRaw.get() + 1 );
+				iAccountNameLen = (uint)Str_GetBare(pszAccountNameCheck, sRawAccountName, MAX_ACCOUNT_NAME_SIZE, ACCOUNT_NAME_VALID_CHAR);
 
 				// (matex) TODO: What for? We do not really need pszAccountNameCheck here do we?!
 				if (iAccountNameLen > 0)
@@ -672,7 +673,7 @@ bool CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, uint inLen )
 
 				// set seed, clientversion, cryptmask
 				SetClientVerIndex(i);
-				SetCryptMask(m_tmp_CryptMaskHi, m_tmp_CryptMaskLo);
+				SetCryptMask(tmp_CryptMaskHi, tmp_CryptMaskLo);
 				break;
 			}
 		}
@@ -685,14 +686,14 @@ bool CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, uint inLen )
     return true;
 }
 
-bool CCrypto::GameCryptStart( dword dwIP, byte * pEvent, uint inLen )
+bool CCrypto::GameCryptStart( dword dwIP, const byte * pEvent, uint inLen )
 {
 	ADDTOCALLSTACK("CCrypto::GameCryptStart");
 	ASSERT( pEvent != nullptr );
 
-	byte m_Raw[ MAX_BUFFER ];
-	ASSERT( inLen <= sizeof(m_Raw) );
-	memcpy( m_Raw, pEvent, inLen );
+    ASSERT(inLen <= MAX_BUFFER);
+    std::unique_ptr<byte[]> pRaw = std::make_unique<byte[]>(MAX_BUFFER);
+	memcpy( pRaw.get(), pEvent, inLen );
 
 	m_seed = dwIP;
 	SetConnectType( CONNECT_GAME );
@@ -708,7 +709,7 @@ bool CCrypto::GameCryptStart( dword dwIP, byte * pEvent, uint inLen )
 		if ( GetEncryptionType() == ENC_BFISH || GetEncryptionType() == ENC_BTFISH )
 			InitBlowFish();
 
-		if (!Decrypt( m_Raw, pEvent, MAX_BUFFER, inLen ))
+		if (!Decrypt( pRaw.get(), pEvent, MAX_BUFFER, inLen ))
         {
             g_Log.EventError("NET-IN: GameCryptStart failed (decrypt).\n");
             return false;
@@ -718,9 +719,9 @@ bool CCrypto::GameCryptStart( dword dwIP, byte * pEvent, uint inLen )
 		DEBUG_MSG(("GameCrypt %" PRIuSIZE_T " (%" PRIu32 ") type %" PRIx8 "-%" PRIx8 "\n", i, GetClientVer(), m_Raw[0], pEvent[0]));
 #endif
 
-		if ( m_Raw[0] == 0x91 )
+		if ( pRaw[0] == 0x91 )
 		{
-            if (m_Raw[34] == 0x00 && m_Raw[64] == 0x00)
+            if ( pRaw[34] == 0x00 && pRaw[64] == 0x00)
             {
                 bOut = true;    // Ok the new detected encryption is ok (legit post-login packet: 0x91)
                 break;
@@ -731,8 +732,8 @@ bool CCrypto::GameCryptStart( dword dwIP, byte * pEvent, uint inLen )
     // Auto-detect if the encryption is LOGIN (clients < 1.26.0 use as game encryption/decryption the same algorithm used for the login encryption)
     if (!bOut)
     {
-        const dword m_tmp_CryptMaskLo = (((~m_seed) ^ 0x00001357) << 16) | ((( m_seed) ^ 0xffffaaaa) & 0x0000ffff);
-        const dword m_tmp_CryptMaskHi = ((( m_seed) ^ 0x43210000) >> 16) | (((~m_seed) ^ 0xabcdffff) & 0xffff0000);
+        const dword tmp_CryptMaskLo = (((~m_seed) ^ 0x00001357) << 16) | ((( m_seed) ^ 0xffffaaaa) & 0x0000ffff);
+        const dword tmp_CryptMaskHi = ((( m_seed) ^ 0x43210000) >> 16) | (((~m_seed) ^ 0xabcdffff) & 0xffff0000);
         SetClientVerIndex(0);
 
         for (size_t i = 0;;)
@@ -744,12 +745,12 @@ bool CCrypto::GameCryptStart( dword dwIP, byte * pEvent, uint inLen )
                 DEBUG_ERR(("Unknown client, i = %" PRIuSIZE_T "\n", i));
 #endif
                 SetClientVerIndex(0);
-				SetCryptMask(m_tmp_CryptMaskHi, m_tmp_CryptMaskLo); // Hi - Lo
+				SetCryptMask(tmp_CryptMaskHi, tmp_CryptMaskLo); // Hi - Lo
                 break;
             }
 
             // Set client version properties
-			SetCryptMask(m_tmp_CryptMaskHi, m_tmp_CryptMaskLo); // Hi - Lo
+			SetCryptMask(tmp_CryptMaskHi, tmp_CryptMaskLo); // Hi - Lo
             SetClientVerIndex(i);
             if (GetEncryptionType() != ENC_LOGIN)
             {
@@ -758,20 +759,20 @@ bool CCrypto::GameCryptStart( dword dwIP, byte * pEvent, uint inLen )
             }
 
             // Test Decrypt
-            if (!Decrypt( m_Raw, pEvent, MAX_BUFFER, inLen ))
+            if (!Decrypt( pRaw.get(), pEvent, MAX_BUFFER, inLen ))
             {
                 g_Log.EventError("NET-IN: LoginCryptStart failed (decrypt).\n");
-				SetCryptMask(m_tmp_CryptMaskHi, m_tmp_CryptMaskLo); // Hi - Lo
+				SetCryptMask( tmp_CryptMaskHi, tmp_CryptMaskLo); // Hi - Lo
                 SetClientVerIndex(0);
                 return false;
             }
 
-            if ( m_Raw[0] == 0x91 )
+            if ( pRaw[0] == 0x91 )
             {
-                if (m_Raw[34] == 0x00 && m_Raw[64] == 0x00)
+                if ( pRaw[34] == 0x00 && pRaw[64] == 0x00)
                 {
                     bOut = true;    // Ok the new detected encryption is ok (legit post-login packet: 0x91)
-                    SetCryptMask(m_tmp_CryptMaskHi, m_tmp_CryptMaskLo); 
+                    SetCryptMask(tmp_CryptMaskHi, tmp_CryptMaskLo); 
                     break;
                 }
             }
