@@ -54,11 +54,11 @@ private:
 	dword	m_CanUse;		// Base attribute flags. can_u_all/male/female..
 	word	m_weight;
 
-    CUID _uidMultiComponent;   ///< I'm a Component of a CMulti
-    CUID _uidMultiLockDown;    ///< I'm locked down in a CMulti
+    CUID _uidMultiComponent;   // I'm a Component of a CMulti
+    CUID _uidMultiLockDown;    // I'm locked down in a CMulti
 public:
-    void SetComponentOfMulti(CUID uidMulti);
-    void SetLockDownOfMulti(CUID uidMulti);
+    void SetComponentOfMulti(const CUID& uidMulti);
+    void SetLockDownOfMulti(const CUID& uidMulti);
 	byte	m_speed;
 
 // Attribute flags.
@@ -715,7 +715,6 @@ public:    /**
     void SetTriggerActive(lpctstr trig = nullptr);
 
 	TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
-	TRIGRET_TYPE OnTriggerCreate(CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
 	TRIGRET_TYPE OnTrigger( ITRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = nullptr );
 
 	// Item type specific stuff.

@@ -36,6 +36,13 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	{
 		// There should be an ID= in the scripts later.
 		m_dwDispIndex = ITEMID_GOLD_C1; // until i hear otherwise from the script file.
+
+        m_type = IT_NORMAL;
+        m_qwFlags = 0;
+        m_Can = 0;
+        m_layer = 0;
+        m_weight = 0;
+
 		return;
 	}
 
@@ -50,7 +57,7 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	{
 		if ( ! CItemBase::GetItemData( id, &tiledata ) )	// some valid items don't show up here !
 		{
-			// return nullptr;
+			// warn? ignore? // return nullptr;
 		}
 	}
 	else
@@ -86,8 +93,8 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 
 	GetItemSpecificFlags( tiledata, &m_Can, m_type, id );
 
-	if ( (tiledata.m_weight == 0xFF) ||			// not movable.
-		( m_qwFlags & UFLAG1_WATER ) )	// water can't be picked up.
+	if ( (tiledata.m_weight == 0xFF) ||	// not movable.
+		( m_qwFlags & UFLAG1_WATER ) )  // water can't be picked up.
 	{
 		m_weight = UINT16_MAX;
 	}

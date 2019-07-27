@@ -778,11 +778,12 @@ void NetworkInput::processData()
 		EXC_SET_BLOCK("check message");
 		if (state->m_incoming.rawPackets.empty())
 		{
-			if ((client->GetConnectType() != CONNECT_TELNET) && (client->GetConnectType() != CONNECT_AXIS))
+            const CONNECT_TYPE connecttype = client->GetConnectType();
+			if ((connecttype != CONNECT_TELNET) && (connecttype != CONNECT_AXIS))
 			{
 				// check for timeout
 				EXC_SET_BLOCK("check frozen");
-				int64 iLastEventDiff = -g_World.GetTimeDiff( client->m_timeLastEvent );
+				const int64 iLastEventDiff = -g_World.GetTimeDiff( client->m_timeLastEvent );
 				if ( g_Cfg.m_iDeadSocketTime > 0 && iLastEventDiff > g_Cfg.m_iDeadSocketTime )
 				{
 					g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Frozen client disconnected (DeadSocketTime reached).\n", state->id());

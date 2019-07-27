@@ -82,12 +82,12 @@ lpctstr constexpr CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 /////////////////////////////////////////////////////////////////
 // -CItem
 
-void CItem::SetComponentOfMulti(CUID uidMulti)
+void CItem::SetComponentOfMulti(const CUID& uidMulti)
 {
     _uidMultiComponent = uidMulti;
 }
 
-void CItem::SetLockDownOfMulti(CUID uidMulti)
+void CItem::SetLockDownOfMulti(const CUID& uidMulti)
 {
     _uidMultiLockDown = uidMulti;
 }
@@ -114,8 +114,6 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEM
 	g_World.m_uidLastNewItem = GetUID();	// for script access.
 	ASSERT( IsDisconnected() );
 
-    _uidMultiComponent.InitUID();
-    _uidMultiLockDown.InitUID();
 
     // Manual CComponents addition
 
@@ -216,7 +214,6 @@ CItem * CItem::CreateBase( ITEMID_TYPE id, IT_TYPE type )	// static
 		idErrorMsg = id;
 		id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, "DEFAULTITEM" ));
 		if ( id <= 0 )
-
 			id = ITEMID_GOLD_C1;
 
 		pItemDef = CItemBase::FindItemBase( id );
@@ -374,18 +371,7 @@ CItem * CItem::GenerateScript( CChar * pSrc)
 	CResourceLock s;
 	if ( pItemDef->ResourceLock(s))
 	{
-		if ( pSrc )
-		{
-			//pItem->OnTriggerScript( s, sm_szTrigName[ITRIG_Create], pSrc );
-			//pItem->OnTrigger( ITRIG_Create, pSrc,0);
-			OnTriggerCreate(pSrc,0);
-		}
-		else
-		{
-			//pItem->OnTriggerScript( s, sm_szTrigName[ITRIG_Create], &g_Serv );
-			//pItem->OnTrigger( ITRIG_Create, &g_Serv,0);
-			OnTriggerCreate(&g_Serv,0);
-		}
+        OnTrigger(ITRIG_Create, pSrc ? static_cast<CTextConsole*>(pSrc) : static_cast<CTextConsole*>(&g_Serv), nullptr);
 	}
 	return this;
 }
@@ -3333,36 +3319,42 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
     CItemBase * pItemDef = Item_GetDef();
     ASSERT(pItemDef);
 
-	// Is there trigger code in the script file ?
-	// RETURN:
-	//   false = continue default process normally.
-	//   true = don't allow this.  (halt further processing)
-    TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
     SetTriggerActive( pszTrigName );
-    CTRIG_TYPE iAction = (CTRIG_TYPE)_iRunningTriggerId;
+    const ITRIG_TYPE iAction = (ITRIG_TYPE)_iRunningTriggerId;
+    // Is there trigger code in the script file ?
+    // RETURN:
+    //   false = continue default process normally.
+    //   true = don't allow this.  (halt further processing)
+    TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
 
 	EXC_TRY("Trigger");
-	CChar * pChar = pSrc->GetChar();
-	TemporaryString tsCharTrigName;
-	tchar* pszCharTrigName = static_cast<tchar *>(tsCharTrigName);
-	sprintf(pszCharTrigName, "@item%s", pszTrigName + 1);
 
-	int iCharAction = (CTRIG_TYPE) FindTableSorted( pszCharTrigName, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName)-1 );
+    // If i'm running the @Create trigger, i want first to run the trigger from the itemdef (normally ran for last), then from the other sources
+    if (iAction == ITRIG_Create)
+        goto from_itemdef_first;
 
+standard_order:
 	// 1) Triggers installed on character, sensitive to actions on all items
-	if ( IsTrigUsed(pszCharTrigName) && (iCharAction > XTRIG_UNKNOWN) )
-	{
-		if ( pChar != nullptr )
-		{
-			EXC_SET_BLOCK("chardef");
-			CUID uidOldAct = pChar->m_Act_UID;
-			pChar->m_Act_UID = GetUID();
-			iRet = pChar->OnTrigger(pszCharTrigName,  pSrc, pArgs );
-			pChar->m_Act_UID = uidOldAct;
-			if ( iRet == TRIGRET_RET_TRUE )
-				goto stopandret;//return iRet;	// Block further action.
-		}
-	}
+    {
+        TemporaryString tsCharTrigName;
+        tchar* pszCharTrigName = static_cast<tchar*>(tsCharTrigName);
+        sprintf(pszCharTrigName, "@ITEM%s", pszTrigName + 1);
+        const CTRIG_TYPE iCharAction = (CTRIG_TYPE)FindTableSorted(pszCharTrigName, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName) - 1);
+        if ((iCharAction > XTRIG_UNKNOWN) && IsTrigUsed(pszCharTrigName))
+        {
+            CChar* pChar = pSrc->GetChar();
+            if (pChar != nullptr)
+            {
+                EXC_SET_BLOCK("chardef");
+                const CUID uidOldAct = pChar->m_Act_UID;
+                pChar->m_Act_UID = GetUID();
+                iRet = pChar->OnTrigger(pszCharTrigName, pSrc, pArgs);
+                pChar->m_Act_UID = uidOldAct;
+                if (iRet == TRIGRET_RET_TRUE)
+                    goto stopandret; // Block further action.
+            }
+        }
+    }
 
 	if ( IsTrigUsed(pszTrigName) )
 	{
@@ -3381,7 +3373,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 
 			iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
 			if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
-				goto stopandret;//return iRet;
+				goto stopandret;
 
 			curEvents = m_OEvents.size();
 			if ( curEvents < origEvents ) // the event has been deleted, modify the counter for other trigs to work
@@ -3404,7 +3396,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 				continue;
 			iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
 			if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
-				goto stopandret;//return iRet;
+				goto stopandret;
 		}
 
 		// 4) EVENTSITEM triggers
@@ -3419,7 +3411,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 				continue;
 			iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
 			if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
-				goto stopandret;//return iRet;
+				goto stopandret;
 		}
 
 		// 5) TYPEDEF
@@ -3429,13 +3421,14 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 			CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.ResourceGetDef( CResourceID( RES_TYPEDEF, GetType() )));
 			if ( pResourceLink == nullptr )
 			{
+                const CChar* pChar = pSrc->GetChar();
 				if ( pChar )
-					DEBUG_ERR(( "0%x '%s' has unhandled [TYPEDEF %d] for 0%x '%s'\n", (dword) GetUID(), GetName(), GetType(), (dword) pChar->GetUID(), pChar->GetName()));
+					g_Log.EventError( "0%x '%s' has unhandled [TYPEDEF %d] for 0%x '%s'\n", (dword) GetUID(), GetName(), GetType(), (dword) pChar->GetUID(), pChar->GetName());
 				else
-					DEBUG_ERR(( "0%x '%s' has unhandled [TYPEDEF %d]\n", (dword) GetUID(), GetName(), GetType() ));
+					g_Log.EventError( "0%x '%s' has unhandled [TYPEDEF %d]\n", (dword) GetUID(), GetName(), GetType() );
 				SetType(Item_GetDef()->GetType());
 				iRet = TRIGRET_RET_DEFAULT;
-				goto stopandret;//return( TRIGRET_RET_DEFAULT );
+				goto stopandret;
 			}
 
 			if ( pResourceLink->HasTrigger( iAction ))
@@ -3445,147 +3438,34 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 				{
 					iRet = CScriptObj::OnTriggerScript( s, pszTrigName, pSrc, pArgs );
 					if ( iRet == TRIGRET_RET_TRUE )
-						goto stopandret;// return(iRet);	// Block further action.
+						goto stopandret;
 				}
 			}
 		}
 
+        if (iAction != ITRIG_Create)
+        {
+from_itemdef_first:
+            // 6) Look up the trigger in the RES_ITEMDEF. (default)
+            EXC_SET_BLOCK("itemdef");
+            CBaseBaseDef* pResourceLink = Base_GetDef();
+            ASSERT(pResourceLink);
+            if (pResourceLink->HasTrigger(iAction))
+            {
+                CResourceLock s;
+                if (pResourceLink->ResourceLock(s))
+                    iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+            }
 
-		// 6) Look up the trigger in the RES_ITEMDEF. (default)
-		EXC_SET_BLOCK("itemdef");
-		CBaseBaseDef * pResourceLink = Base_GetDef();
-		ASSERT(pResourceLink);
-		if ( pResourceLink->HasTrigger( iAction ))
-		{
-			CResourceLock s;
-			if ( pResourceLink->ResourceLock(s))
-				iRet = CScriptObj::OnTriggerScript( s, pszTrigName, pSrc, pArgs );
-		}
+            // If i'm running the @Create trigger, i jumped here first, but i need to go back and try to run the trigger from the other sources
+            if (iAction == ITRIG_Create) // This happens if i came here via the goto, so that the previous if was skipped
+                goto standard_order;
+        }
 	}
+
 stopandret:
-	{
-		SetTriggerActive((lpctstr)0);
-		return iRet;
-	}
-	EXC_CATCH;
-
-	EXC_DEBUG_START;
-	g_Log.EventDebug("trigger '%s' action '%d' char '0%x' [0%x]\n", pszTrigName, iAction, (pSrc && pSrc->GetChar()) ? (dword)pSrc->GetChar()->GetUID() : 0, (dword)GetUID());
-	EXC_DEBUG_END;
-	return iRet;
-}
-
-TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
-{
-	ADDTOCALLSTACK("CItem::OnTrigger");
-	if ( !pSrc )
-		pSrc = &g_Serv;
-
-    CItemBase * pItemDef = Item_GetDef();
-    ASSERT(pItemDef);
-
-    lpctstr pszTrigName = "@create";
-    SetTriggerActive( pszTrigName );
-    CTRIG_TYPE iAction = (CTRIG_TYPE)_iRunningTriggerId;
-
-	// Is there trigger code in the script file ?
-	// RETURN:
-	//   false = continue default process normally.
-	//   true = don't allow this.  (halt further processing)
-    TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
-
-	EXC_TRY("Trigger");
-	CChar * pChar = pSrc->GetChar();
-    lpctstr pszCharTrigName = "@itemcreate";
-	int iCharAction = (CTRIG_TYPE) FindTableSorted( pszCharTrigName, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName)-1 );
-
-	// 1) Look up the trigger in the RES_ITEMDEF. (default)
-	EXC_SET_BLOCK("itemdef");
-	CBaseBaseDef * pResourceBase = Base_GetDef();
-	ASSERT(pResourceBase);
-	if ( pResourceBase->HasTrigger( iAction ))
-	{
-		CResourceLock s;
-		if ( pResourceBase->ResourceLock(s))
-			iRet = CScriptObj::OnTriggerScript( s, pszTrigName, pSrc, pArgs );
-	}
-
-	// 2) Triggers installed on character, sensitive to actions on all items
-	if ( IsTrigUsed(pszCharTrigName) && ( iCharAction > XTRIG_UNKNOWN ))
-	{
-		EXC_SET_BLOCK("chardef");
-		if ( pChar != nullptr )
-		{
-			CUID uidOldAct = pChar->m_Act_UID;
-			pChar->m_Act_UID = GetUID();
-			iRet = pChar->OnTrigger(pszCharTrigName,  pSrc, pArgs );
-			pChar->m_Act_UID = uidOldAct;
-			if ( iRet == TRIGRET_RET_TRUE )
-				return iRet;	// Block further action.
-		}
-	}
-
-	if ( IsTrigUsed(pszTrigName) )
-	{
-		// 3) TEVENTS on the item
-		EXC_SET_BLOCK("tevents");
-		for ( size_t i = 0; i < pItemDef->m_TEvents.size(); ++i )
-		{
-			CResourceLink * pLink = pItemDef->m_TEvents[i];
-			ASSERT(pLink);
-			if ( !pLink->HasTrigger(iAction) )
-				continue;
-			CResourceLock s;
-			if ( !pLink->ResourceLock(s) )
-				continue;
-			iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
-			if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
-				return iRet;
-		}
-
-		// 4) EVENTSITEM triggers
-		EXC_SET_BLOCK("Item triggers - EVENTSITEM"); // EVENTSITEM (constant events of Items set from sphere.ini)
-		for ( size_t i = 0; i < g_Cfg.m_iEventsItemLink.size(); ++i )
-		{
-			CResourceLink * pLink = g_Cfg.m_iEventsItemLink[i];
-			if ( !pLink || !pLink->HasTrigger(iAction) )
-				continue;
-			CResourceLock s;
-			if ( !pLink->ResourceLock(s) )
-				continue;
-			iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
-			if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
-				return iRet;
-		}
-
-		// 5) TYPEDEF
-		EXC_SET_BLOCK("typedef");
-		{
-			// It has an assigned trigger type.
-			CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.ResourceGetDef( CResourceID( RES_TYPEDEF, GetType() )));
-			if ( pResourceLink == nullptr )
-			{
-				if ( pChar )
-					DEBUG_ERR(( "0%x '%s' has unhandled [TYPEDEF %d] for 0%x '%s'\n", (dword) GetUID(), GetName(), GetType(), (dword) pChar->GetUID(), pChar->GetName()));
-				else
-					DEBUG_ERR(( "0%x '%s' has unhandled [TYPEDEF %d]\n", (dword) GetUID(), GetName(), GetType() ));
-				SetType(Item_GetDef()->GetType());
-				return TRIGRET_RET_DEFAULT;
-			}
-
-			if ( pResourceLink->HasTrigger( iAction ))
-			{
-				CResourceLock s;
-				if ( pResourceLink->ResourceLock(s))
-				{
-					iRet = CScriptObj::OnTriggerScript( s, pszTrigName, pSrc, pArgs );
-					if ( iRet == TRIGRET_RET_TRUE )
-						return iRet;	// Block further action.
-				}
-			}
-		}
-	}
-
+    SetTriggerActive(nullptr);
+    return iRet;
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
