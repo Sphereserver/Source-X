@@ -3817,29 +3817,31 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 	//
 	if ( IsTrigUsed(pszTrigName) )
 	{
-		EXC_SET_BLOCK("events");
-		size_t origEvents = m_OEvents.size();
-		size_t curEvents = origEvents;
-		for ( size_t i = 0; i < curEvents; ++i ) // EVENTS (could be modifyed ingame!)
-		{
-			CResourceLink * pLink = m_OEvents[i];
-			if ( !pLink || !pLink->HasTrigger(iAction) )
-				continue;
-			CResourceLock s;
-			if ( !pLink->ResourceLock(s) )
-				continue;
+        {
+            EXC_SET_BLOCK("events");
+            size_t origEvents = m_OEvents.size();
+            size_t curEvents = origEvents;
+            for (size_t i = 0; i < curEvents; ++i) // EVENTS (could be modifyed ingame!)
+            {
+                CResourceLink* pLink = m_OEvents[i];
+                if (!pLink || !pLink->HasTrigger(iAction))
+                    continue;
+                CResourceLock s;
+                if (!pLink->ResourceLock(s))
+                    continue;
 
-			iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
-			if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
-				goto stopandret;
+                iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
+                    goto stopandret;
 
-			curEvents = m_OEvents.size();
-			if ( curEvents < origEvents ) // the event has been deleted, modify the counter for other trigs to work
-			{
-				--i;
-				origEvents = curEvents;
-			}
-		}
+                curEvents = m_OEvents.size();
+                if (curEvents < origEvents) // the event has been deleted, modify the counter for other trigs to work
+                {
+                    --i;
+                    origEvents = curEvents;
+                }
+            }
+        }
 
 		if ( m_pNPC != nullptr )
 		{

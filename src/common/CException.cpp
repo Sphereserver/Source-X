@@ -1,7 +1,7 @@
 
 #include "CException.h"
 
-#ifndef _WIN32 
+#ifndef _WIN32
 #include <sys/wait.h>
 #include <csignal>
 #include <cstring>
@@ -213,7 +213,7 @@ void _cdecl Sphere_Exception_Windows( unsigned int id, struct _EXCEPTION_POINTER
 
 void SetExceptionTranslator()
 {
-#if defined(_WIN32) && !defined(_DEBUG)
+#if defined(_MSC_VER) && !defined(_DEBUG)
 	_set_se_translator( Sphere_Exception_Windows );
 #endif
 }

@@ -3358,30 +3358,33 @@ standard_order:
 
 	if ( IsTrigUsed(pszTrigName) )
 	{
-		//	2) EVENTS
-		EXC_SET_BLOCK("events");
-		size_t origEvents = m_OEvents.size();
-		size_t curEvents = origEvents;
-		for ( size_t i = 0; i < curEvents; ++i )			//	2) EVENTS (could be modified ingame!)
-		{
-			CResourceLink * pLink = m_OEvents[i];
-			if ( !pLink || !pLink->HasTrigger(iAction) )
-				continue;
-			CResourceLock s;
-			if ( !pLink->ResourceLock(s) )
-				continue;
+		//	2) EVENTS (could be modified ingame!)
+        {
+            // Need this internal scope to prevent the goto jumps cross the initialization of origEvents and curEvents
+            EXC_SET_BLOCK("events");
+            size_t origEvents = m_OEvents.size();
+            size_t curEvents = origEvents;
+            for (size_t i = 0; i < curEvents; ++i)
+            {
+                CResourceLink* pLink = m_OEvents[i];
+                if (!pLink || !pLink->HasTrigger(iAction))
+                    continue;
+                CResourceLock s;
+                if (!pLink->ResourceLock(s))
+                    continue;
 
-			iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
-			if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
-				goto stopandret;
+                iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
+                    goto stopandret;
 
-			curEvents = m_OEvents.size();
-			if ( curEvents < origEvents ) // the event has been deleted, modify the counter for other trigs to work
-			{
-				--i;
-				origEvents = curEvents;
-			}
-		}
+                curEvents = m_OEvents.size();
+                if (curEvents < origEvents) // the event has been deleted, modify the counter for other trigs to work
+                {
+                    --i;
+                    origEvents = curEvents;
+                }
+            }
+        }
 
 		// 3) TEVENTS on the item
 		EXC_SET_BLOCK("tevents");
@@ -3399,8 +3402,8 @@ standard_order:
 				goto stopandret;
 		}
 
-		// 4) EVENTSITEM triggers
-		EXC_SET_BLOCK("Item triggers - EVENTSITEM"); // EVENTSITEM (constant events of Items set from sphere.ini)
+		// 4) EVENTSITEM triggers (constant events of Items set from sphere.ini)
+		EXC_SET_BLOCK("Item triggers - EVENTSITEM");
 		for ( size_t i = 0; i < g_Cfg.m_iEventsItemLink.size(); ++i )
 		{
 			CResourceLink * pLink = g_Cfg.m_iEventsItemLink[i];
