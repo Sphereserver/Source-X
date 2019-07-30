@@ -3,7 +3,7 @@
 
 
 static constexpr lpctstr _ptcWarnInvalidResource = "Expected a valid ResourceID, found invalid: 0x%x.\n";
-#define LOG_WARN_RES_INVALID    printf(_ptcWarnInvalidResource, rid.GetPrivateUID())
+#define LOG_WARN_RES_INVALID    g_Log.EventError(_ptcWarnInvalidResource, rid.GetPrivateUID())
 
 // CResourceIDBase
 

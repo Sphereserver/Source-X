@@ -769,7 +769,6 @@ int CChar::NPC_GetHostilityLevelToward( const CChar * pCharTarg ) const
 	else
 	{
 		// base hostillity on karma diff.
-
 		int iKarmaTarg = pCharTarg->GetKarma();
 
 		if ( Noto_IsEvil())
@@ -791,7 +790,6 @@ int CChar::NPC_GetHostilityLevelToward( const CChar * pCharTarg ) const
 	}
 
 	// Based on just creature type.
-
 	if ( ! fDoMemBase )
 	{
 		if ( pCharTarg->m_pNPC )
@@ -905,11 +903,11 @@ int CChar::NPC_GetAttackMotivation( CChar * pChar, int iMotivation ) const
 	if ( pChar->m_pArea->IsFlag(REGION_FLAG_SAFE) )
 		return 0;
 
-    if (m_Fight_Targ_UID == pChar->GetUID())    // Am i attacking the same target as before?
+    if (Fight_IsActive() && (m_Fight_Targ_UID == pChar->GetUID()))    // Am i attacking the same target as before?
     {
         // Was i told to attack by my master? This is the only hardcoded case in which we have such an high threat value.
         // In this case, i want that my pet attacks the target without doing any other consideration.
-        int iCharID = Attacker_GetID(pChar);
+        const int iCharID = Attacker_GetID(pChar);
         ASSERT(iCharID != -1);
         if (Attacker_GetThreat(iCharID) >= ATTACKER_THREAT_TOLDBYMASTER)
             return 100;

@@ -534,9 +534,9 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 			pt.m_y = tmp_MaxY;
 	}
 
+    bool fStackInsert = false;
 	if ( pt.m_x <= 0 || pt.m_y <= 0 || pt.m_x > 512 || pt.m_y > 512 )	// invalid container location ?
 	{
-		bool fInsert = false;
 		// Try to stack it.
 		if ( !g_Serv.IsLoading() && pItem->Item_GetDef()->IsStackableType() && !bForceNoStack )
 		{
@@ -545,12 +545,12 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 				pt = pTry->GetContainedPoint();
 				if ( pItem->Stack(pTry) )
 				{
-					fInsert = true;
+                    fStackInsert = true;
 					break;
 				}
 			}
 		}
-		if ( !fInsert )
+		if ( !fStackInsert)
 			pt = GetRandContainerLoc();
 	}
 
@@ -577,15 +577,6 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 	CContainer::ContentAddPrivate(pItem);
 	pItem->SetContainedPoint(pt);
 	pItem->SetContainedGridIndex(gridIndex);
-
-	// if an item needs OnTickStatusUpdate called on the next tick, it needs
-	// to be added to a separate list since it won't receive ticks whilst in
-	// this container
-    if (pItem->m_fStatusUpdate != 0)
-    {
-        std::shared_lock<std::shared_mutex> lock_su(g_World.m_ObjStatusUpdates.THREAD_CMUTEX);
-        g_World.m_ObjStatusUpdates.emplace(pItem);
-    }
 
 	switch ( GetType() )
 	{
@@ -635,7 +626,9 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 	}
 
 	pItem->Update();
-    UpdatePropertyFlag();
+    if (!fStackInsert)
+        pItem->UpdatePropertyFlag();
+    // UpdatePropertyFlag for this item is called by CContainer::ContentAddPrivate -> CItemContainer::OnWeightChange
 }
 
 void CItemContainer::ContentAdd( CItem *pItem, bool bForceNoStack )

@@ -16,8 +16,8 @@
 
 //	grabbed from platform SDK, psapi.h
 	typedef struct _PROCESS_MEMORY_COUNTERS {
-		dword cb;
-		dword PageFaultCount;
+		DWORD cb;
+		DWORD PageFaultCount;
 		SIZE_T PeakWorkingSetSize;
 		SIZE_T WorkingSetSize;
 		SIZE_T QuotaPeakPagedPoolUsage;
@@ -29,9 +29,9 @@
 	} PROCESS_MEMORY_COUNTERS, *PPROCESS_MEMORY_COUNTERS;
 
 	//	PSAPI external definitions
-	typedef	BOOL (WINAPI *pGetProcessMemoryInfo)(HANDLE, PPROCESS_MEMORY_COUNTERS, dword);
+	typedef	BOOL (WINAPI *pfnGetProcessMemoryInfo)(HANDLE, PPROCESS_MEMORY_COUNTERS, DWORD);
 	HMODULE	m_hmPsapiDll = nullptr;
-	pGetProcessMemoryInfo m_GetProcessMemoryInfo = nullptr;
+	pfnGetProcessMemoryInfo m_GetProcessMemoryInfo = nullptr;
 	PROCESS_MEMORY_COUNTERS	pcnt;
 #else			// (Unix)
 	#include <sys/resource.h>
@@ -78,7 +78,7 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 					g_Log.EventError(("Unable to load process information PSAPI.DLL library. Memory information will be not available.\n"));
 				}
 				else
-					m_GetProcessMemoryInfo = reinterpret_cast<pGetProcessMemoryInfo>(::GetProcAddress(m_hmPsapiDll,"GetProcessMemoryInfo"));
+					m_GetProcessMemoryInfo = reinterpret_cast<pfnGetProcessMemoryInfo>(::GetProcAddress(m_hmPsapiDll,"GetProcessMemoryInfo"));
 			}
 
 			if ( m_GetProcessMemoryInfo )

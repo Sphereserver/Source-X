@@ -37,13 +37,13 @@ class CSError
 	// we can throw this structure to produce an error.
 	// similar to CFileException and CException
 public:
-	LOG_TYPE m_eSeverity;	// const
-	dword m_hError;	// HRESULT S_OK, "winerror.h" code. 0x20000000 = start of custom codes.
-	lpctstr m_pszDescription;
+	const LOG_TYPE m_eSeverity;	// const
+	const dword m_hError;	    // HRESULT S_OK, "winerror.h" code. 0x20000000 = start of custom codes.
+	const lpctstr m_pszDescription;
 public:
 	CSError( LOG_TYPE eSev, dword hErr, lpctstr pszDescription );
 	CSError( const CSError& e );	// copy contstructor needed.
-	virtual ~CSError() {}
+    virtual ~CSError() = default;
 public:
 	CSError& operator=(const CSError& other);
 public:
@@ -131,8 +131,8 @@ public:
 	lpctstr inLocalBlock = ""; \
 	lpctstr inLocalArgs = a; \
 	uint inLocalBlockCnt = 0; \
-	bool bCATCHExcept = false; \
-	UNREFERENCED_PARAMETER(bCATCHExcept); \
+	bool fCATCHExcept = false; \
+	UNREFERENCED_PARAMETER(fCATCHExcept); \
 	try \
 	{
 
@@ -143,7 +143,7 @@ public:
 
 // _EXC_CATCH_EXCEPTION_GENERIC (used inside other macros! don't use it manually!)
 #define _EXC_CATCH_EXCEPTION_GENERIC(a,excType) \
-    bCATCHExcept = true; \
+    fCATCHExcept = true; \
 	if ( inLocalBlock != nullptr && inLocalBlockCnt > 0 ) \
 		g_Log.CatchEvent(a, "ExcType=%s catched in %s::%s() #%u \"%s\"", excType, m_sClassName, inLocalArgs, inLocalBlockCnt, inLocalBlock); \
 	else \
@@ -152,7 +152,7 @@ public:
 
 // _EXC_CATCH_EXCEPTION_STD (used inside other macros! don't use it manually!)
 #define _EXC_CATCH_EXCEPTION_STD(a) \
-    bCATCHExcept = true; \
+    fCATCHExcept = true; \
 	if ( inLocalBlock != nullptr && inLocalBlockCnt > 0 ) \
 		g_Log.CatchStdException(a, "ExcType=std::exception catched in %s::%s() #%u \"%s\"", m_sClassName, inLocalArgs, inLocalBlockCnt, inLocalBlock); \
 	else \
@@ -188,7 +188,7 @@ public:
 
 // EXC_DEBUG_START
 #define EXC_DEBUG_START \
-	if ( bCATCHExcept ) \
+	if ( fCATCHExcept ) \
 	{ \
 		try \
 		{
@@ -209,8 +209,8 @@ public:
 	lpctstr inLocalSubBlock = ""; \
 	lpctstr inLocalSubArgs = a; \
 	uint inLocalSubBlockCnt = 0; \
-	bool bCATCHExceptSub = false; \
-	UNREFERENCED_PARAMETER(bCATCHExceptSub); \
+	bool fCATCHExceptSub = false; \
+	UNREFERENCED_PARAMETER(fCATCHExceptSub); \
 	try \
 	{
 
@@ -221,7 +221,7 @@ public:
 
 // _EXC_CATCH_SUB_EXCEPTION_GENERIC(a,b, "ExceptionType") (used inside other macros! don't use it manually!)
 #define _EXC_CATCH_SUB_EXCEPTION_GENERIC(a,b,excType) \
-    bCATCHExceptSub = true; \
+    fCATCHExceptSub = true; \
     if ( inLocalSubBlock != nullptr && inLocalSubBlockCnt > 0 ) \
         g_Log.CatchEvent(a, "ExcType=%s catched in SUB: %s::%s() #%u \"%s\" (\"%s\")", excType, m_sClassName, inLocalSubArgs, \
 											                inLocalSubBlockCnt, inLocalSubBlock, b); \
@@ -231,7 +231,7 @@ public:
 
 // _EXC_CATCH_SUB_EXCEPTION_STD(a,b) (used inside other macros! don't use it manually!)
 #define _EXC_CATCH_SUB_EXCEPTION_STD(a,b) \
-    bCATCHExceptSub = true; \
+    fCATCHExceptSub = true; \
     if ( inLocalSubBlock != nullptr && inLocalSubBlockCnt > 0 ) \
         g_Log.CatchStdException(a, "ExcType=std::exception catched in SUB: %s::%s() #%u \"%s\" (\"%s\")", m_sClassName, inLocalSubArgs, \
 											                inLocalSubBlockCnt, inLocalSubBlock, b); \
@@ -268,7 +268,7 @@ public:
 
 // EXC_DEBUGSUB_START
 #define EXC_DEBUGSUB_START \
-	if ( bCATCHExceptSub ) \
+	if ( fCATCHExceptSub ) \
 	{ \
 		try \
 		{
@@ -294,26 +294,26 @@ public:
 #else //!_EXCEPTIONS_DEBUG
 
 
-	#define EXC_TRY(a) {
-	#define EXC_SET_BLOCK(a)
-	#define EXC_SETSUB_BLOCK(a)
-	#define EXC_CATCH }
-	#define EXC_TRYSUB(a) {
-	#define EXC_CATCHSUB(a) }
+	#define EXC_TRY(a)          { UNREFERENCED_PARAMETER(a)
+	#define EXC_SET_BLOCK(a)      UNREFERENCED_PARAMETER(a)
+	#define EXC_SETSUB_BLOCK(a)   UNREFERENCED_PARAMETER(a)
+	#define EXC_CATCH           }
+	#define EXC_TRYSUB(a)       { UNREFERENCED_PARAMETER(a)
+	#define EXC_CATCHSUB(a)       UNREFERENCED_PARAMETER(a); }
 
-	#define EXC_DEBUG_START if (false) \
-	{
-	#define EXC_DEBUG_END }
+	#define EXC_DEBUG_START     if (false) \
+	                            {
+	#define EXC_DEBUG_END       }
 
-	#define EXC_DEBUGSUB_START	if (false) \
-	{
-	#define EXC_DEBUGSUB_END }
+	#define EXC_DEBUGSUB_START  if (false) \
+	                            {
+	#define EXC_DEBUGSUB_END    }
 
-    #define EXC_NOTIFY_DEBUGGER (void)0
-	#define EXC_ADD_SCRIPT		(void)0
-	#define EXC_ADD_SCRIPTSRC	(void)0
-	#define EXC_ADD_KEYRET(a)	(void)0
-	#define EXC_CATCH_EXCEPTION(a)
+    #define EXC_NOTIFY_DEBUGGER     (void)0
+	#define EXC_ADD_SCRIPT          (void)0
+	#define EXC_ADD_SCRIPTSRC       (void)0
+	#define EXC_ADD_KEYRET(a)       UNREFERENCED_PARAMETER(a)
+	#define EXC_CATCH_EXCEPTION(a)  UNREFERENCED_PARAMETER(a)
 
 
 #endif //_EXCEPTIONS_DEBUG

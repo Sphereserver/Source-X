@@ -714,13 +714,10 @@ bool CChar::NPC_LookAtCharMonster( CChar * pChar )
 	if ( ! Noto_IsCriminal() && (iFoodLevel > 40) )	// Am I not evil ?
 		return NPC_LookAtCharHuman( pChar );
 
-	// Attack if i am stronger.
-	// or i'm just stupid.
-	int iActMotivation = NPC_GetAttackMotivation( pChar );
-	if ( iActMotivation <= 0 )
-		return false;
-	if ( Fight_IsActive() && (m_Fight_Targ_UID == pChar->GetUID()))	// same targ.
-		return false;
+    // Attack if i am stronger, if it's the same target i was attacking, or i'm just stupid.
+    int iActMotivation = NPC_GetAttackMotivation(pChar);
+    if (iActMotivation <= 0)
+        return false;
 	if ( iActMotivation < m_pNPC->m_Act_Motivation )
 		return false;
 
@@ -1257,7 +1254,7 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 	if (Can(CAN_C_NONMOVER))
 		return false;
 
-	EXC_TRY("NPC_Act_Follow")
+	EXC_TRY("NPC_Act_Follow");
 	CChar * pChar = Fight_IsActive() ? m_Fight_Targ_UID.CharFind() : m_Act_UID.CharFind();
 	if (pChar == nullptr)
 	{

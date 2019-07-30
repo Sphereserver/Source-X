@@ -99,7 +99,7 @@ int64 CChar::Attacker_GetThreat(size_t attackerIndex) const
     if (m_lastAttackers.size() <= attackerIndex)
         return -1;
     const LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
-    return refAttacker.threat ? refAttacker.threat : 0;
+    return (refAttacker.threat > 0) ? refAttacker.threat : 0;
 }
 
 // Retrieves the character with most Threat
@@ -122,14 +122,14 @@ int64 CChar::Attacker_GetHighestThreat() const
 CChar * CChar::Attacker_GetLast() const
 {
     ADDTOCALLSTACK("CChar::Attacker_GetLast");
-    int64 dwLastTime = INT32_MAX, dwCurTime = 0;
+    int64 iLastTime = INT64_MAX, iCurTime = 0;
     CChar * retChar = nullptr;
     for (const LastAttackers & refAttacker : m_lastAttackers)
     {
-        dwCurTime = refAttacker.elapsed;
-        if (dwCurTime <= dwLastTime)
+        iCurTime = refAttacker.elapsed;
+        if (iCurTime <= iLastTime)
         {
-            dwLastTime = dwCurTime;
+            iLastTime = iCurTime;
             retChar = CUID::CharFind(refAttacker.charUID);
         }
     }

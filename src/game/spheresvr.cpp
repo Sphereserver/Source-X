@@ -206,7 +206,7 @@ bool MainThread::shouldExit()
 
 int Sphere_InitServer( int argc, char *argv[] )
 {
-	constexpr const char *m_sClassName = "Sphere";
+	constexpr const char *m_sClassName = "SphereInit";
 	EXC_TRY("Init Server");
 	EXC_SET_BLOCK("loading");
 	if ( !g_Serv.Load() )
@@ -347,7 +347,7 @@ void Sphere_ExitServer()
 int Sphere_OnTick()
 {
 	// Give the world (CMainTask) a single tick. RETURN: 0 = everything is fine.
-	const char *m_sClassName = "Sphere";
+	constexpr const char *m_sClassName = "SphereTick";
 	EXC_TRY("Tick");
 #ifdef _WIN32
 	EXC_SET_BLOCK("service");
@@ -395,7 +395,7 @@ int Sphere_OnTick()
 
 static void Sphere_MainMonitorLoop()
 {
-	const char *m_sClassName = "Sphere";
+	constexpr const char *m_sClassName = "SphereMonitor";
 	// Just make sure the main loop is alive every so often.
 	// This should be the parent thread. try to restart it if it is not.
 	while ( !g_Serv.GetExitFlag() )

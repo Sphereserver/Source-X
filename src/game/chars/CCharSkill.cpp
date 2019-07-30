@@ -2953,7 +2953,7 @@ int CChar::Skill_Act_Breath( SKTRIG_TYPE stage )
 	if ( !CanSeeLOS(pChar) )
 		return -SKTRIG_QTY;
 
-	CPointMap pntMe = GetTopPoint();
+	const CPointMap& pntMe = GetTopPoint();
 	if ( pntMe.GetDist( m_Act_p ) > UO_MAP_VIEW_SIGHT )
 		m_Act_p.StepLinePath( pntMe, UO_MAP_VIEW_SIGHT );
 

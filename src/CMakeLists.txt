@@ -69,7 +69,7 @@ IF (SINGLE_TARGET)
 	MESSAGE (STATUS "Single-target build system (Makefile) detected: generating multiple projects!")
 	IF (NOT ${CMAKE_BUILD_TYPE} STREQUAL "")
 		IF ((NOT ${CMAKE_BUILD_TYPE} STREQUAL "Release") AND (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Debug") AND (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Nightly"))
-			MESSAGE (STATUS "Invalid parameter -DCMAKE_BUILD_TYPE, defaulting to Release.")
+			MESSAGE (WARNING "Invalid parameter -DCMAKE_BUILD_TYPE, defaulting to Release.")
 			# -> needed only for MAKEFILE-STYLE generators, which can't switch between different configs
 			set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
 		ELSE ((NOT ${CMAKE_BUILD_TYPE} STREQUAL "Release") AND (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Debug") AND (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Nightly"))
