@@ -657,20 +657,29 @@ bool CClient::OnRxPing( const byte * pData, uint iLen )
 	return false;
 }
 
-bool CClient::OnRxWebPageRequest( byte * pRequest, uint iLen )
+bool CClient::OnRxWebPageRequest( byte * pRequest, size_t uiLen )
 {
 	ADDTOCALLSTACK("CClient::OnRxWebPageRequest");
-	// Seems to be a web browser pointing at us ? typical stuff :
+	
+    // Seems to be a web browser pointing at us ? typical stuff :
 	if ( GetConnectType() != CONNECT_HTTP )
 		return false;
 
+    if (uiLen > HTTPREQ_MAX_SIZE)    // request too long
+        goto httpreq_err_long;
+
 	// ensure request is null-terminated (if the request is well-formed, we are overwriting a trailing \n here)
-	pRequest[iLen - 1] = '\0';
+	pRequest[uiLen - 1] = '\0';
 
-	if ( strlen(reinterpret_cast<char *>(pRequest)) > 1024 )			// too long request
-		return false;
+    uiLen = strlen(reinterpret_cast<char*>(pRequest));
+    if (uiLen > HTTPREQ_MAX_SIZE)     // too long request
+    {
+    httpreq_err_long:
+        g_Log.EventWarn("%x:Client sent HTTP request of length %" PRIuSIZE_T" exceeding max length limit of %d, ignoring.\n", GetNetState()->id(), uiLen, HTTPREQ_MAX_SIZE);
+        return false;
+    }
 
-	if ( !strpbrk( reinterpret_cast<char *>(pRequest), " \t\012\015" ) )	// malformed request
+	if ( !strpbrk( reinterpret_cast<char *>(pRequest), " \t\012\015" ) )    // malformed request
 		return false;
 
 	tchar * ppLines[16];
@@ -682,10 +691,10 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, uint iLen )
 	bool fKeepAlive = false;
 	CSTime dateIfModifiedSince;
 	tchar * pszReferer = nullptr;
-	unsigned long stContentLength = 0;
+	uint uiContentLength = 0;
 	for ( int j = 1; j < iQtyLines; ++j )
 	{
-		tchar	*pszArgs = Str_TrimWhitespace(ppLines[j]);
+		tchar *pszArgs = Str_TrimWhitespace(ppLines[j]);
 		if ( !strnicmp(pszArgs, "Connection:", 11 ) )
 		{
 			pszArgs += 11;
@@ -701,7 +710,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, uint iLen )
 		{
 			pszArgs += 15;
 			GETNONWHITESPACE(pszArgs);
-			stContentLength = strtoul(pszArgs, nullptr, 10);
+            uiContentLength = Str_ToUI(pszArgs, 10);
 		}
 		else if ( ! strnicmp( pszArgs, "If-Modified-Since:", 18 ))
 		{
@@ -745,7 +754,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, uint iLen )
 	
 	if ( memcmp(ppLines[0], "POST", 4) == 0 )
 	{
-		if ( stContentLength > strlen(ppLines[iQtyLines-1]) )
+		if (uiContentLength > strlen(ppLines[iQtyLines-1]) )
 			return false;
 
 		// POST /--WEBBOT-SELF-- HTTP/1.1
@@ -762,7 +771,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, uint iLen )
 			pWebPage = g_Cfg.FindWebPage(pszReferer);
 		if ( pWebPage )
 		{
-			if ( pWebPage->ServPagePost(this, ppRequest[1], ppLines[iQtyLines-1], stContentLength) )
+			if ( pWebPage->ServPagePost(this, ppRequest[1], ppLines[iQtyLines-1], uiContentLength) )
 			{
 				if ( fKeepAlive )
 					return true;
@@ -783,12 +792,13 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, uint iLen )
 			return false;
 
 		g_Log.Event(LOGM_HTTP|LOGL_EVENT, "%x:HTTP Page Request '%s', alive=%d\n", GetSocketID(), static_cast<lpctstr>(szPageName), fKeepAlive);
-		if ( CWebPageDef::ServPage(this, szPageName, &dateIfModifiedSince) )
+        CWebPageDef::ServPage(this, szPageName, &dateIfModifiedSince);
+		/*if ( CWebPageDef::ServPage(this, szPageName, &dateIfModifiedSince) )
 		{
 			if ( fKeepAlive )
 				return true;
 			return false;
-		}
+		}*/
 	}
 
 

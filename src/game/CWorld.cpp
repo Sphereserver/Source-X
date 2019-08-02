@@ -2262,7 +2262,7 @@ void CWorld::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE wHu
 				if ( sTextGhost.IsEmpty() )
 				{
 					sTextGhost = pszText;
-					for ( int i = 0; i < sTextGhost.GetLength(); i++ )
+					for ( int i = 0; i < sTextGhost.GetLength(); ++i )
 					{
 						if ( sTextGhost[i] != ' ' &&  sTextGhost[i] != '\t' )
 							sTextGhost[i] = Calc_GetRandVal(2) ? 'O' : 'o';

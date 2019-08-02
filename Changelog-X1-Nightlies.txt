@@ -1846,3 +1846,6 @@ WARNING: Important change!
 
 30-07-2019, Nolok
 - Fixed: Tooltip data not being sent right after an item was added to a container, in that case a random tooltip was shown for the item.
+
+02-07-2019, Nolok
+- Fixed: Connections to the HTTP server were always blocked, even if legit.

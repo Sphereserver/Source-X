@@ -800,15 +800,15 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		case 3:	// Extended localized message (with affixed ASCII text)
 		{
             tchar * ppArgs[256];
-			size_t iQty = Str_ParseCmds(const_cast<tchar *>(sBarkBuffer.GetPtr()), ppArgs, CountOf(ppArgs), "," );
+			int iQty = Str_ParseCmds(const_cast<tchar *>(sBarkBuffer.GetPtr()), ppArgs, CountOf(ppArgs), "," );
 			int iClilocId = Exp_GetVal( ppArgs[0] );
 			int iAffixType = Exp_GetVal( ppArgs[1] );
 			CSString CArgs;
-			for ( size_t i = 3; i < iQty; ++i )
+			for (int i = 3; i < iQty; ++i )
 			{
 				if ( CArgs.GetLength() )
 					CArgs += "\t";
-				CArgs += ( !strcmp(ppArgs[i], "nullptr") ? " " : ppArgs[i] );
+				CArgs += ( !strcmp(ppArgs[i], "NULL") ? " " : ppArgs[i] );
 			}
 
 			addBarkLocalizedEx( iClilocId, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), (AFFIX_TYPE)(iAffixType), ppArgs[2], CArgs.GetPtr());
@@ -818,14 +818,14 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		case 2:	// Localized
 		{
             tchar * ppArgs[256];
-			size_t iQty = Str_ParseCmds(const_cast<tchar *>(sBarkBuffer.GetPtr()), ppArgs, CountOf(ppArgs), "," );
+			int iQty = Str_ParseCmds(const_cast<tchar *>(sBarkBuffer.GetPtr()), ppArgs, CountOf(ppArgs), "," );
 			int iClilocId = Exp_GetVal( ppArgs[0] );
 			CSString CArgs;
-			for ( size_t i = 1; i < iQty; ++i )
+			for ( int i = 1; i < iQty; ++i )
 			{
 				if ( CArgs.GetLength() )
 					CArgs += "\t";
-				CArgs += ( !strcmp(ppArgs[i], "nullptr") ? " " : ppArgs[i] );
+				CArgs += ( !strcmp(ppArgs[i], "NULL") ? " " : ppArgs[i] );
 			}
 
 			addBarkLocalized( iClilocId, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), CArgs.GetPtr());

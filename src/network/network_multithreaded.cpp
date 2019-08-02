@@ -1149,32 +1149,38 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 	CClient* client = state->getClient();
 	ASSERT(client != nullptr);
 
-	if (buffer->getRemainingLength() > INT8_MAX)
+    bool fHTTPReq = false;
+    const uint uiOrigRemainingLength = buffer->getRemainingLength();
+    const byte* const pOrigRemainingData = buffer->getRemainingData();
+    if (state->m_seeded == false)
+    {
+        fHTTPReq =  (uiOrigRemainingLength >= 5 && memcmp(pOrigRemainingData, "GET /", 5) == 0) ||
+                    (uiOrigRemainingLength >= 6 && memcmp(pOrigRemainingData, "POST /", 6) == 0);
+    }
+	if (!fHTTPReq && (uiOrigRemainingLength > INT8_MAX))
 	{
-		g_Log.EventWarn("%x:Client connected with a seed length of %" PRIuSIZE_T " exceeding max length limit of %d, disconneting.\n", state->id(), buffer->getRemainingLength(), INT8_MAX);
+		g_Log.EventWarn("%x:Client connected with a seed length of %u exceeding max length limit of %d, disconnecting.\n", state->id(), uiOrigRemainingLength, INT8_MAX);
 		return false;
 	}
 
 	if (state->m_seeded == false)
 	{
 		// check for HTTP connection
-		if ((buffer->getRemainingLength() >= 5 && memcmp(buffer->getRemainingData(), "GET /", 5) == 0) ||
-			(buffer->getRemainingLength() >= 6 && memcmp(buffer->getRemainingData(), "POST /", 6) == 0))
+		if (fHTTPReq)
 		{
 			EXC_SET_BLOCK("http request");
 			if (g_Cfg.m_fUseHTTP != 2)
 				return false;
 
 			client->SetConnectType(CONNECT_HTTP);
-			if (client->OnRxWebPageRequest(buffer->getRemainingData(), buffer->getRemainingLength()) == false)
-				return false;
+            client->OnRxWebPageRequest(buffer->getRemainingData(), uiOrigRemainingLength);
 
 			buffer->seek(buffer->getLength());
 			return true;
 		}
 
 		// check for new seed (sometimes it's received on its own)
-		else if (buffer->getRemainingLength() == 1 && buffer->getRemainingData()[0] == XCMD_NewSeed)
+		else if (uiOrigRemainingLength == 1 && pOrigRemainingData[0] == XCMD_NewSeed)
 		{
 			state->m_newseed = true;
 			buffer->skip(1);
@@ -1182,10 +1188,10 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 		}
 
 		// check for ping data
-		else if (buffer->getRemainingLength() < 4)
+		else if (uiOrigRemainingLength < 4)
 		{
 			EXC_SET_BLOCK("ping #1");
-			if (client->OnRxPing(buffer->getRemainingData(), buffer->getRemainingLength()) == false)
+			if (client->OnRxPing(pOrigRemainingData, uiOrigRemainingLength) == false)
 				state->markReadClosed();
 
 			buffer->seek(buffer->getLength());
@@ -1197,8 +1203,8 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 		EXC_SET_BLOCK("game client seed");
 		dword seed = 0;
 
-		DEBUGNETWORK(("%x:Client connected with a seed length of %" PRIuSIZE_T " ([0]=0x%x)\n", state->id(), buffer->getRemainingLength(), (int)(buffer->getRemainingData()[0])));
-		if (state->m_newseed || (buffer->getRemainingData()[0] == XCMD_NewSeed && buffer->getRemainingLength() >= NETWORK_SEEDLEN_NEW))
+		DEBUGNETWORK(("%x:Client connected with a seed length of %u ([0]=0x%x)\n", state->id(), uiOrigRemainingLength, (int)(pOrigRemainingData[0])));
+		if (state->m_newseed || (pOrigRemainingData[0] == XCMD_NewSeed && uiOrigRemainingLength >= NETWORK_SEEDLEN_NEW))
 		{
 			DEBUGNETWORK(("%x:Receiving new client login handshake.\n", state->id()));
 
@@ -1225,7 +1231,7 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 				DEBUGNETWORK(("%x:Not enough data received to be a valid handshake (%" PRIuSIZE_T ").\n", state->id(), buffer->getRemainingLength()));
 			}
 		}
-		else if(buffer->getRemainingData()[0] == XCMD_UOGRequest && buffer->getRemainingLength() == 8)
+		else if(pOrigRemainingData[0] == XCMD_UOGRequest && uiOrigRemainingLength == 8)
 		{
 			DEBUGNETWORK(("%x:Receiving new UOG status request.\n", state->id()));
 			buffer->skip(7);
@@ -1266,13 +1272,13 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 		return true;
 	}
 
-	if (buffer->getRemainingLength() < 5)
+	if (uiOrigRemainingLength < 5)
 	{
 		// client has a seed assigned but hasn't send enough data to be anything useful,
 		// some programs (ConnectUO) send a fake seed when really they're just sending
 		// ping data
 		EXC_SET_BLOCK("ping #2");
-		if (client->OnRxPing(buffer->getRemainingData(), buffer->getRemainingLength()) == false)
+		if (client->OnRxPing(pOrigRemainingData, uiOrigRemainingLength) == false)
 			return false;
 
 		buffer->seek(buffer->getLength());
@@ -1282,7 +1288,7 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 	// process login packet for client
 	EXC_SET_BLOCK("messages  - setup");
 	client->SetConnectType(CONNECT_CRYPT);
-	client->xProcessClientSetup(reinterpret_cast<CEvent*>(buffer->getRemainingData()), buffer->getRemainingLength());
+	client->xProcessClientSetup(reinterpret_cast<CEvent*>(buffer->getRemainingData()), uiOrigRemainingLength);
 	buffer->seek(buffer->getLength());
 	return true;
 

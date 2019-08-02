@@ -172,7 +172,7 @@ public:
 	CPointMap  m_Targ_p;		// For script targeting,
 	int64 m_Targ_Timeout;       // timeout time for targeting
 
-								// Context of the targetting setup. depends on CLIMODE_TYPE m_Targ_Mode
+	// Context of the targetting setup. depends on CLIMODE_TYPE m_Targ_Mode
 	union
 	{
 		// CLIMODE_SETUP_CONNECTING
@@ -265,7 +265,7 @@ private:
 	bool OnRxConsole( const byte * pData, uint len );
 	bool OnRxAxis( const byte * pData, uint len );
 	bool OnRxPing( const byte * pData, uint len );
-	bool OnRxWebPageRequest( byte * pRequest, uint len );
+	bool OnRxWebPageRequest( byte * pRequest, size_t len );
 
 	byte LogIn( CAccount * pAccount, CSString & sMsg );
 	byte LogIn( lpctstr pszName, lpctstr pPassword, CSString & sMsg );
@@ -364,7 +364,7 @@ public:
 	byte Setup_Start( CChar * pChar ); // Send character startup stuff to player
 
 
-									   // translated commands.
+    // translated commands.
 private:
 	void Cmd_GM_PageInfo();
 	int Cmd_Extract( CScript * pScript, const CRectMap &rect, int & zlowest );
@@ -454,7 +454,7 @@ public:
 	void addItem_InContainer( const CItem * pItem );
 	void addItem( CItem * pItem );
 
-	void addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word durationSeconds = 0, lpctstr* pArgs = 0, uint uiArgCount = 0) const;
+	void addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word durationSeconds = 0, lpctstr* pArgs = nullptr, uint uiArgCount = 0) const;
 	void removeBuff(const BUFF_ICONS IconId) const;
 	void resendBuffs() const;
 

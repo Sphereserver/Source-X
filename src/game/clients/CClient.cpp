@@ -28,8 +28,8 @@ CClient::CClient(NetState* state)
 #else
 	HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(GetPeer());
 #endif
-	history.m_connecting++;
-	history.m_connected++;
+	++ history.m_connecting;
+	++ history.m_connected;
 
 	m_Crypt.SetClientVer( g_Serv.m_ClientVersion );
 	m_pAccount = nullptr;
@@ -62,8 +62,8 @@ CClient::CClient(NetState* state)
 	m_zLastObjMessage[0] = 0;
 	m_tNextPickup = 0;
 
-	m_BfAntiCheat.lastvalue = m_BfAntiCheat.count = 0x0;
-	m_ScreenSize.x = m_ScreenSize.y = 0x0;
+    m_BfAntiCheat = { 0 };
+    m_ScreenSize = { 0 };
 	m_pPopupPacket = nullptr;
 	m_pHouseDesign = nullptr;
 	m_fUpdateStats = 0;
@@ -1485,11 +1485,11 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 						hue = HUE_TEXT_DEF;
 
 					CSString CArgs;
-					for (int i = 2; i < iArgQty; i++ )
+					for (int i = 2; i < iArgQty; ++i )
 					{
 						if ( CArgs.GetLength() )
 							CArgs += "\t";
-						CArgs += ( !strncmp(ppArgs[i], "nullptr", 4) ? " " : ppArgs[i] );
+						CArgs += ( !strncmp(ppArgs[i], "NULL", 4) ? " " : ppArgs[i] );
 					}
 
 					addBarkLocalized(iClilocId, nullptr, (HUE_TYPE)(hue), TALKMODE_SAY, FONT_NORMAL, CArgs.GetPtr());
@@ -1519,7 +1519,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					{
 						if ( CArgs.GetLength() )
 							CArgs += "\t";
-						CArgs += ( !strncmp(ppArgs[i], "nullptr", 4) ? " " : ppArgs[i] );
+						CArgs += ( !strncmp(ppArgs[i], "NULL", 4) ? " " : ppArgs[i] );
 					}
 
 					addBarkLocalizedEx( iClilocId, nullptr, (HUE_TYPE)(hue), TALKMODE_SAY, FONT_NORMAL, (AFFIX_TYPE)(affix), ppArgs[3], CArgs.GetPtr() );

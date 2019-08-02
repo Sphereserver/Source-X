@@ -232,7 +232,7 @@ ushort CChar::NPC_OnTrainCheck( CChar * pCharSrc, SKILL_TYPE Skill )
 	ushort uiMaxDecrease = 0;
 	if ( (pCharSrc->Skill_GetSum() + uiTrainVal) > pCharSrc->Skill_GetSumMax() )
 	{	
-		for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
+		for ( uint i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 		{
 			if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) )
 				continue;
@@ -290,13 +290,14 @@ bool CChar::NPC_OnTrainPay(CChar *pCharSrc, CItemMemory *pMemory, CItem * pGold)
 	// Can't ask for more gold than the maximum amount of the gold stack i am giving to the npc
 
 	// Consume as much money as we can train for.
-	if ( pGold->GetAmount() < wTrainCost )
+    const word wGoldAmount = pGold->GetAmount();
+	if (wGoldAmount < wTrainCost )
 	{
 		int iDiffPercent = IMulDiv(wTrainCost, 100, pGold->GetAmount());
 		uiTrainVal = (ushort)IMulDiv(uiTrainVal,100,iDiffPercent);
         wTrainCost = (word)pCharSrc->PayGold(this, (word)minimum(UINT16_MAX, uiTrainVal * uiTrainMult), pGold, PAYGOLD_TRAIN);
 	}
-	else if ( pGold->GetAmount() == wTrainCost)
+	else if (wGoldAmount == wTrainCost)
 	{
 		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_THATSALL_1 ) );
 		pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_NONE;
@@ -411,9 +412,8 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 	strcpy( pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_PRICE_1 ) );
 
 	lpctstr pPrvSkill = nullptr;
-
-	size_t iCount = 0;
-	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
+	uint iCount = 0;
+	for ( uint i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
 		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) )
 			continue;
@@ -450,8 +450,9 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 		strcat( pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_THATSALL_4 ) );
 	}
 
-	strcat( pszMsg, pPrvSkill );
-	strcat( pszMsg, "." );
+    if (pPrvSkill)
+        strcat(pszMsg, pPrvSkill);
+    strcat(pszMsg, ".");
 	Speak( pszMsg );
 	return true;
 }

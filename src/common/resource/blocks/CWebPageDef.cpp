@@ -196,7 +196,9 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 				CClient * pClient = dynamic_cast <CClient *>(pSrc);
 				if ( pClient == nullptr )
 					return false;
-				return ServPage( pClient, s.GetArgStr(), nullptr );
+				//return ServPage( pClient, s.GetArgStr(), nullptr );
+                ServPage(pClient, s.GetArgStr(), nullptr);
+                break;
 			}
 
 		case WV_CLIENTLIST:
@@ -210,7 +212,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 					if (( pChar->IsStatFlag(STATF_INSUBSTANTIAL) ) && (!pChar->IsStatFlag(STATF_DEAD)))
 						continue;
 
-					sm_iListIndex++;
+					++sm_iListIndex;
 
 					lpctstr pszArgs = s.GetArgStr();
 					if ( pszArgs[0] == '\0' )
@@ -230,13 +232,13 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 
 				IT_TYPE	needtype = ( iHeadKey == WV_GUILDLIST ) ? IT_STONE_GUILD : IT_STONE_TOWN;
 
-				for ( size_t i = 0; i < g_World.m_Stones.size(); i++ )
+				for ( size_t i = 0; i < g_World.m_Stones.size(); ++i )
 				{
 					CItemStone * pStone = g_World.m_Stones[i];
 					if ( !pStone || !pStone->IsType(needtype) )
 						continue;
 
-					sm_iListIndex++;
+					++sm_iListIndex;
 
 					strcpy(pszTmp2, s.GetArgStr());
 					pStone->ParseText(Str_MakeFiltered(pszTmp2), &g_Serv, 1);
@@ -252,7 +254,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 				CGMPage * pPage = static_cast <CGMPage*>( g_World.m_GMPages.GetHead());
 				for ( ; pPage!=nullptr; pPage = pPage->GetNext())
 				{
-					sm_iListIndex++;
+					++sm_iListIndex;
 					strcpy( pszTmp2, s.GetArgStr() );
 					pPage->ParseText( Str_MakeFiltered( pszTmp2 ), &g_Serv, 1 );
 					pSrc->SysMessage( pszTmp2 );
@@ -522,7 +524,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 	// ARGS:
 	//  pszURLArgs = args on the URL line ex. http://www.hostname.com/dir?args
 	// RETURN:
-	//  HTTP error code = 0=200 page was served.
+	//  HTTP error code = 0-200 page was served.
 
 	ASSERT(pClient);
 
@@ -683,7 +685,7 @@ static int HtmlDeCode( tchar * pszDst, lpctstr pszSrc )
 	return( i );
 }
 
-bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * pContentData, size_t stContentLength )
+bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * pContentData, size_t uiContentLength )
 {
 	ADDTOCALLSTACK("CWebPageDef::ServPagePost");
 	UNREFERENCED_PARAMETER(pszURLArgs);
@@ -691,15 +693,15 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 
 	ASSERT(pClient);
 
-	if ( pContentData == nullptr || stContentLength <= 0 )
+	if ( pContentData == nullptr || uiContentLength <= 0 )
 		return false;
 	if ( ! HasTrigger(XTRIG_UNKNOWN))	// this form has no triggers.
 		return false;
 
 	// Parse the data.
-	pContentData[stContentLength] = 0;
+	pContentData[uiContentLength] = 0;
 	tchar * ppArgs[64];
-	size_t iArgs = Str_ParseCmds(pContentData, ppArgs, CountOf(ppArgs), "&");
+	int iArgs = Str_ParseCmds(pContentData, ppArgs, CountOf(ppArgs), "&");
 	if (( iArgs <= 0 ) || ( iArgs >= 63 ))
 		return false;
 
@@ -709,21 +711,21 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 
 	CDialogResponseArgs resp;
 	dword dwButtonID = UINT32_MAX;
-	for ( size_t i = 0; i < iArgs; i++ )
+	for ( int i = 0; i < iArgs; ++i )
 	{
 		tchar * pszNum = ppArgs[i];
 		while ( IsAlpha(*pszNum) )
-			pszNum++;
+			++pszNum;
 
 		int iNum = atoi(pszNum);
 		while ( *pszNum )
 		{
 			if ( *pszNum == '=' )
 			{
-				pszNum++;
+				++pszNum;
 				break;
 			}
-			pszNum++;
+			++pszNum;
 		}
 		switch ( toupper(ppArgs[i][0]) )
 		{
@@ -768,7 +770,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 	return false;
 }
 
-bool CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateIfModifiedSince )	// static
+void CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateIfModifiedSince )	// static
 {
 	ADDTOCALLSTACK("CWebPageDef::ServPage");
 	// make sure this is a valid format for the request.
@@ -782,7 +784,7 @@ bool CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateIf
 	{
 		iError = pWebPage->ServPageRequest(pClient, szPageName, pdateIfModifiedSince);
 		if ( ! iError )
-			return true;
+			return;
 	}
 
 	// Is it a file in the Script directory ?
@@ -793,7 +795,7 @@ bool CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateIf
 		if ( tmppage.SetSourceFile( szPageName, pClient ))
 		{
 			if ( !tmppage.ServPageRequest(pClient, szPageName, pdateIfModifiedSince) )
-				return true;
+				return;
 		}
 	}
 
@@ -802,13 +804,13 @@ bool CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateIf
 
 	pClient->m_Targ_Text = pszPage;
 
-	tchar	*pszTemp = Str_GetTemp();
+	tchar *pszTemp = Str_GetTemp();
 	sprintf(pszTemp, SPHERE_FILE "%d.htm", iError);
 	pWebPage = g_Cfg.FindWebPage(pszTemp);
 	if ( pWebPage )
 	{
 		if ( ! pWebPage->ServPageRequest( pClient, pszPage, nullptr ))
-			return true;
+			return;
 	}
 
 	// Hmm we should do something !!!?
@@ -830,6 +832,7 @@ bool CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateIf
 	CSString sText;
 
 	sText.Format(
+        "<meta charset = \"UTF-8\">"
 		"<html><head><title>Error %d</title>"
 		"<meta name=robots content=noindex>"
 		"</head><body>"
@@ -856,6 +859,5 @@ bool CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateIf
 		static_cast<lpctstr>(sText));
 
 	new PacketWeb(pClient, reinterpret_cast<const byte *>(sMsgHead.GetPtr()), sMsgHead.GetLength());
-	return false;
 }
 
