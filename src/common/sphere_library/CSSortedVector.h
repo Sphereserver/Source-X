@@ -47,7 +47,7 @@ public:
     iterator insert(const_iterator itWhere, const size_t _Count, _Type const& value) = delete;
 
     template<class... _ValType>
-    inline iterator emplace(_ValType&&... value)
+    iterator emplace(_ValType&&... value)
     {
         //_Type * _obj = new _Type(std::forward<_ValType>(value)...);
         _Type _obj(std::forward<_ValType>(value)...);

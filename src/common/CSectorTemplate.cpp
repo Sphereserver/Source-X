@@ -302,7 +302,7 @@ const CServerMapBlock * CSectorBase::GetMapBlock( const CPointMap & pt )
 	ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetMapBlock");
 	// Get a map block from the cache. load it if not.
 	ASSERT( pt.IsValidXY());
-	CPointMap pntBlock( UO_BLOCK_ALIGN(pt.m_x), UO_BLOCK_ALIGN(pt.m_y), 0, pt.m_map);
+	const CPointMap pntBlock( UO_BLOCK_ALIGN(pt.m_x), UO_BLOCK_ALIGN(pt.m_y), 0, pt.m_map);
 	ASSERT( m_MapBlockCache.size() <= (UO_BLOCK_SIZE * UO_BLOCK_SIZE));
 
 	const ProfileTask mapTask(PROFILE_MAP);
@@ -556,8 +556,8 @@ CPointMap CSectorBase::GetBasePoint() const
     const int iCols = g_MapList.GetSectorCols(m_map);
     const int iSize = g_MapList.GetSectorSize(m_map);
 	CPointMap pt(
-        (word)((m_index % iCols) * iSize),
-		(word)((m_index / iCols) * iSize),
+        (short)((m_index % iCols) * iSize),
+		(short)((m_index / iCols) * iSize),
 		0,
 		(uchar)(m_map));
 	return pt;
@@ -567,7 +567,7 @@ CRectMap CSectorBase::GetRect() const
 {
     ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetRect");
 	// Get a rectangle for the sector.
-	const CPointMap pt = GetBasePoint();
+	const CPointMap& pt = GetBasePoint();
     const int iSectorSize = g_MapList.GetSectorSize(pt.m_map);
 	CRectMap rect;
 	rect.m_left = pt.m_x;

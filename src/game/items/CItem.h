@@ -686,6 +686,8 @@ public:
 
 	void r_WriteMore1( CSString & sVal );
 	void r_WriteMore2( CSString & sVal );
+    void r_LoadMore1(dword dwVal);
+    void r_LoadMore2(dword dwVal);
 
 	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 	virtual void r_Write( CScript & s ) override;

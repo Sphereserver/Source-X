@@ -232,7 +232,7 @@ bool CChar::Use_Kindling( CItem * pKindling )
 
 	pKindling->SetID(ITEMID_CAMPFIRE);
 	pKindling->SetAttr(ATTR_MOVE_NEVER|ATTR_CAN_DECAY);
-	pKindling->SetTimeoutS((4 + pKindling->GetAmount()) * 60);
+	pKindling->SetTimeoutS((4 + (int64)pKindling->GetAmount()) * 60);
 	pKindling->SetAmount(1);	// all kindling is set to one fire
 	pKindling->m_itLight.m_pattern = LIGHT_LARGE;
 	pKindling->Update();

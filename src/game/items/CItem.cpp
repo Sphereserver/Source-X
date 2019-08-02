@@ -2698,6 +2698,94 @@ bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 	return false;
 }
 
+void CItem::r_LoadMore1(dword dwVal)
+{
+    ADDTOCALLSTACK_INTENSIVE("CItem::r_LoadMore1");
+    // Ensure that (when needed) the dwVal is stored as a CResourceIDBase,
+    //  plus, do some extra checks for spawns
+
+    const int iIndex = RES_GET_INDEX(dwVal);
+    switch (GetType())
+    {
+    case IT_TREE:
+    case IT_GRASS:
+    case IT_ROCK:
+    case IT_WATER:
+        m_itResource.m_ridRes = CResourceIDBase(RES_REGIONRESOURCE, iIndex);
+        return;
+
+    case IT_FRUIT:
+    case IT_FOOD:
+    case IT_FOOD_RAW:
+    case IT_MEAT_RAW:
+    case IT_TRAP:
+    case IT_TRAP_ACTIVE:
+    case IT_TRAP_INACTIVE:
+    case IT_ANIM_ACTIVE:
+    case IT_SWITCH:
+    case IT_DEED:
+    case IT_LOOM:
+    case IT_ARCHERY_BUTTE:
+    case IT_ITEM_STONE:
+        m_itNormal.m_more1 = CResourceIDBase(RES_ITEMDEF, iIndex);
+        return;
+
+    case IT_FIGURINE:
+    case IT_EQ_HORSE:
+        m_itNormal.m_more1 = CResourceIDBase(RES_CHARDEF, iIndex);
+        return;
+
+    case IT_SPAWN_CHAR:
+    case IT_SPAWN_ITEM:
+    case IT_SPAWN_CHAMPION:
+        if (!g_Serv.IsLoading())
+        {
+            CCSpawn* pSpawn = GetSpawn();
+            if (pSpawn)
+            {
+                pSpawn->FixDef();
+                pSpawn->SetTrackID();
+                RemoveFromView();
+                Update();
+            }
+        }
+        return;
+
+    default:
+        m_itNormal.m_more1 = dwVal;
+        return;
+    }
+}
+
+void CItem::r_LoadMore2(dword dwVal)
+{
+    ADDTOCALLSTACK_INTENSIVE("CItem::r_LoadMore2");
+    // Ensure that (when needed) the dwVal is stored as a CResourceIDBase
+
+    const int iIndex = RES_GET_INDEX(dwVal);
+    switch (GetType())
+    {
+    case IT_CROPS:
+    case IT_FOLIAGE:
+        m_itCrop.m_ridFruitOverride = CResourceIDBase(RES_ITEMDEF, iIndex);
+        return;
+
+    case IT_LEATHER:
+    case IT_HIDE:
+    case IT_FEATHER:
+    case IT_FUR:
+    case IT_WOOL:
+    case IT_BLOOD:
+    case IT_BONE:
+        m_itNormal.m_more2 = CResourceIDBase(RES_CHARDEF, iIndex);
+        return;
+
+    default:
+        m_itNormal.m_more2 = dwVal;
+        return;
+    }
+}
+
 bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 {
 	ADDTOCALLSTACK("CItem::r_LoadVal");
@@ -2834,13 +2922,13 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 
 				for ( addCircle = atoi(ppVal[0]); addCircle; --addCircle )
 				{
-					for ( int i = 1; i < 9; ++i )
+					for ( short i = 1; i < 9; ++i )
 						AddSpellbookSpell((SPELL_TYPE)(RES_GET_INDEX(((addCircle - 1) * 8) + i)), false);
 
 					if ( includeLower == false )
 						break;
 				}
-				return true;
+                break;
 			}
 		case IC_ADDSPELL:
 			// Add this spell to the i_spellbook.
@@ -2848,7 +2936,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(s.GetArgVal()));
 				if (AddSpellbookSpell(spell, false))
 					return false;
-				return true;
+                break;
 			}
 		case IC_AMOUNT:
         {
@@ -2868,10 +2956,10 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			break;
 		case IC_BASEWEIGHT:
 			m_weight = s.GetArgWVal();
-			return true;
+            break;
 		case IC_CANUSE:
 			m_CanUse = s.GetArgVal();
-			return true;
+            break;
 		case IC_CONT:	// needs special processing.
 			{
 				bool normcont = LoadSetContainer(s.GetArgVal(), (LAYER_TYPE)GetUnkZ());
@@ -2947,8 +3035,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				return false;
 			}
 			m_itArmor.m_Hits_Cur = m_itArmor.m_Hits_Max = (word)(s.GetArgVal());
-			UpdatePropertyFlag();
-			return true;
+            break;
 		case IC_ID:
 		{
 			lpctstr idstr = s.GetArgStr();
@@ -2987,32 +3074,21 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			if ( ! IsDisconnected() && ! IsItemInContainer() && ! IsItemEquipped())
 				return false;
 			SetUnkZ( s.GetArgCVal() ); // GetEquipLayer()
-			return true;
+            break;
 		case IC_LINK:
 			m_uidLink = s.GetArgVal();
-			return true;
+            break;
 
 		case IC_FRUIT:	// m_more2
 			m_itCrop.m_ridFruitOverride = CResourceIDBase(RES_ITEMDEF, RES_GET_INDEX(s.GetArgDWVal()));
-			return true;
+            break;
 		case IC_MAXHITS:
 			m_itNormal.m_more1 = MAKEDWORD(LOWORD(m_itNormal.m_more1), s.GetArgVal());
 			break;
 		case IC_MORE:
 		case IC_MORE1:
-			m_itNormal.m_more1 = s.GetArgDWVal();
-			if ( !g_Serv.IsLoading() && (IsType(IT_SPAWN_CHAR) || IsType(IT_SPAWN_ITEM) || IsType(IT_SPAWN_CHAMPION)) )
-			{
-                CCSpawn *pSpawn = GetSpawn();
-                if (pSpawn)
-				{
-                    pSpawn->FixDef();
-                    pSpawn->SetTrackID();
-					RemoveFromView();
-					Update();
-				}
-			}
-			return true;
+            r_LoadMore1(s.GetArgDWVal());
+            break;
 		case IC_MORE1h:
 			m_itNormal.m_more1 = MAKEDWORD( LOWORD(m_itNormal.m_more1), s.GetArgVal());
 			break;
@@ -3020,8 +3096,8 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			m_itNormal.m_more1 = MAKEDWORD( s.GetArgVal(), HIWORD(m_itNormal.m_more1));
 			break;
 		case IC_MORE2:
-			m_itNormal.m_more2 = s.GetArgVal();
-			return true;
+            r_LoadMore2(s.GetArgDWVal());
+            break;
 		case IC_MORE2h:
 			m_itNormal.m_more2 = MAKEDWORD( LOWORD(m_itNormal.m_more2), s.GetArgVal());
 			break;
@@ -3037,7 +3113,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				tchar *pszTemp = Str_GetTemp();
 				strcpy( pszTemp, s.GetArgStr() );
 				GETNONWHITESPACE( pszTemp );
-				size_t iArgs = 0;
+				int iArgs = 0;
 				if ( IsDigit( pszTemp[0] ) || pszTemp[0] == '-' )
 				{
 					pt.m_map = 0; pt.m_z = 0;
@@ -3090,7 +3166,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
                 else
                     return false;
 			}
-			return true;
+            break;
 		case IC_TYPE:
 			if (! SetType( (IT_TYPE)(g_Cfg.ResourceGetIndexType( RES_TYPEDEF, s.GetArgStr() )) ))
                 return false;

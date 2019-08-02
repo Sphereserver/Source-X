@@ -314,7 +314,7 @@ CScriptKey::~CScriptKey()
 
 tchar * CScriptKeyAlloc::_GetKeyBufferRaw( size_t iLen )
 {
-	ADDTOCALLSTACK("CScriptKeyAlloc::_GetKeyBufferRaw");
+	ADDTOCALLSTACK_INTENSIVE("CScriptKeyAlloc::_GetKeyBufferRaw");
 	// iLen = length of the string we want to hold.
 	if ( iLen > SCRIPT_MAX_LINE_LEN )
 		iLen = SCRIPT_MAX_LINE_LEN;

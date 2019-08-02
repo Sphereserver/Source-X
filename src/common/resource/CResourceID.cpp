@@ -2,8 +2,8 @@
 #include "../CLog.h"
 
 
-static constexpr lpctstr _ptcWarnInvalidResource = "Expected a valid ResourceID, found invalid: 0x%x.\n";
-#define LOG_WARN_RES_INVALID    g_Log.EventError(_ptcWarnInvalidResource, rid.GetPrivateUID())
+static constexpr lpctstr _ptcWarnInvalidResource = "Expected a valid ResourceID, found invalid: 0%x.\n";
+#define LOG_WARN_RES_INVALID    g_Log.EventWarn(_ptcWarnInvalidResource, rid.GetPrivateUID())
 
 // CResourceIDBase
 
