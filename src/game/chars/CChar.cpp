@@ -3696,6 +3696,7 @@ void CChar::r_Write( CScript & s )
 		s.WriteKeyHex("ACT", uiActUID);
 	if ( m_Act_p.IsValidPoint() )
 		s.WriteKey("ACTP", m_Act_p.WriteUsed());
+
     if (_iMaxHouses != g_Cfg._iMaxHousesPlayer)
     {
         s.WriteKeyVal("MaxHouses", _iMaxHouses);
@@ -3705,7 +3706,8 @@ void CChar::r_Write( CScript & s )
         s.WriteKeyVal("MaxShips", _iMaxShips);
     }
     GetMultiStorage()->r_Write(s);
-    SKILL_TYPE action = Skill_GetActive();
+
+    const SKILL_TYPE action = Skill_GetActive();
 	if ( action != SKILL_NONE )
 	{
 		const CSkillDef* pSkillDef = g_Cfg.GetSkillDef(action);
@@ -3715,6 +3717,7 @@ void CChar::r_Write( CScript & s )
 		else
 			pszActionTemp = Str_FromI(action, Str_GetTemp());
 		s.WriteKey("ACTION", pszActionTemp);
+
 		/* We save ACTARG1/ACTARG2/ACTARG3 only if the following conditions are satisfied:
 		ACTARG1/ACTARG2/ACTARG3 is different from 0 AND
 		The character action is one of the valid skill OR
@@ -3802,11 +3805,25 @@ void CChar::r_Write( CScript & s )
         s.WriteKeyVal("MAXMANA", iVal);     // should be OMAXMANA, but we keep it like this for backwards compatibility
     s.WriteKeyVal("MANA", Stat_GetVal(STAT_INT));
 
+    static constexpr lpctstr _ptcKeyRegenVal[STAT_QTY] =
+    {
+        "REGENVALHITS",
+        "REGENVALSTAM",
+        "REGENVALMANA",
+        "REGENVALFOOD"
+    };
+    for (ushort j = 0; j < STAT_QTY; ++j)
+    {
+        const ushort uiRegenVal = Stats_GetRegenVal((STAT_TYPE)j);
+        if (uiRegenVal != 0)
+            s.WriteKeyVal(_ptcKeyRegenVal[j], uiRegenVal);
+    }
+
 	for ( uint j = 0; j < g_Cfg.m_iMaxSkill; ++j )
 	{
 		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)j) )
 			continue;
-        ushort uiSkillVal = Skill_GetBase((SKILL_TYPE)j);
+        const ushort uiSkillVal = Skill_GetBase((SKILL_TYPE)j);
         if (uiSkillVal == 0)
             continue;
 		s.WriteKeyVal(g_Cfg.GetSkillDef((SKILL_TYPE)j)->GetKey(), uiSkillVal );

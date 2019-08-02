@@ -574,8 +574,6 @@ public:
 	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 
     /**
-     * @fn  bool CServerConfig::LoadIni( bool fTest );
-     *
      * @brief   Loads sphere.ini.
      *
      * @param   fTest   true to test.
@@ -585,8 +583,6 @@ public:
 	bool LoadIni( bool fTest );
 
     /**
-     * @fn  bool CServerConfig::LoadCryptIni( void );
-     *
      * @brief   Loads sphereCrypt.ini.
      *
      * @author  Javier
@@ -597,8 +593,6 @@ public:
 	bool LoadCryptIni( void );
 
     /**
-     * @fn  bool CServerConfig::Load( bool fResync );
-     *
      * @brief   Loads or resync scripts..
      *
      * @param   fResync Resync or normal load?.
@@ -608,8 +602,6 @@ public:
 	bool Load( bool fResync );
 
     /**
-     * @fn  void CServerConfig::Unload( bool fResync );
-     *
      * @brief   Unloads scripts and resources.
      *
      * @param   fResync true to resync.
@@ -618,8 +610,6 @@ public:
 	void OnTick( bool fNow );
 
     /**
-     * @fn  bool CServerConfig::LoadResourceSection( CScript * pScript );
-     *
      * @brief   Loads resource section ([SKILL ], [SPELL ], [CHARDEF ]...).
      *
      * @param [in,out]  pScript If non-null, the script.
@@ -629,15 +619,11 @@ public:
 	bool LoadResourceSection( CScript * pScript );
 
     /**
-     * @fn  void CServerConfig::LoadSortSpells();
-     *
      * @brief   Sort all spells in order.
      */
 	void LoadSortSpells();
 
     /**
-     * @fn  CResourceDef * CServerConfig::ResourceGetDef( RESOURCE_ID_BASE rid ) const;
-     *
      * @brief   Get a CResourceDef from the RESOURCE_ID.
      *
      * @param   rid The rid.
@@ -653,8 +639,6 @@ public:
 	uint GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res = RDS_T2A, uchar chars = 5 );
 
     /**
-     * @fn  bool CServerConfig::CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd, CTextConsole * pSrc ) const;
-     *
      * @brief   Can i use this verb on this object ?
      *
      * @param   pObjTarg        The object targ.
@@ -666,8 +650,6 @@ public:
 	bool CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd, CTextConsole * pSrc ) const;
 
     /**
-     * @fn  PLEVEL_TYPE CServerConfig::GetPrivCommandLevel( lpctstr pszCmd ) const;
-     *
      * @brief   Gets this command's priv level.
      *
      * @param   pszCmd  The command.
@@ -677,19 +659,24 @@ public:
 	PLEVEL_TYPE GetPrivCommandLevel( lpctstr pszCmd ) const;
 
     /**
-     * @fn  static STAT_TYPE CServerConfig::FindStatKey( lpctstr ptcKey );
+     * @brief   Returns the Stat key from the given string(STR = STAT_STR, ...).
      *
-     * @brief   Returns the Stat key from the given string( STR = STAT_STR... ).
-     *
-     * @param   ptcKey  The key.
+     * @param   ptcKey  The stat name.
      *
      * @return  The found stat key.
      */
 	static STAT_TYPE FindStatKey( lpctstr ptcKey );
 
     /**
-     * @fn  static bool CServerConfig::IsValidEmailAddressFormat( lpctstr pszText );
+     * @brief   Returns the Stat name for the given stat key (STAT_STR = "STR", ...).
      *
+     * @param   iKey  The key.
+     *
+     * @return  The found stat name.
+     */
+    static lpctstr GetStatName(STAT_TYPE iKey);
+
+    /**
      * @brief   Query if 'pszText' is valid email address format.
      *
      * @param   pszText The text.
@@ -699,8 +686,6 @@ public:
 	static bool IsValidEmailAddressFormat( lpctstr pszText );
 
     /**
-     * @fn  bool CServerConfig::IsObscene( lpctstr pszText ) const;
-     *
      * @brief   Query if 'pszText' is obscene.
      *
      * @param   pszText The text.
@@ -710,8 +695,6 @@ public:
 	bool IsObscene( lpctstr pszText ) const;
 
     /**
-     * @fn  CWebPageDef * CServerConfig::FindWebPage( lpctstr pszPath ) const;
-     *
      * @brief   Searches for the requested web page.
      *
      * @param   pszPath Full pathname of the file.
@@ -721,8 +704,6 @@ public:
 	CWebPageDef * FindWebPage( lpctstr pszPath ) const;
 
 	/**
-	* @fn  CServerRef CServerConfig::Server_GetDef( size_t index );
-	*
 	* @brief   Get the def for the server in position 'index' in servers list.
 	*
 	* @param   pszText The server index.
@@ -732,8 +713,6 @@ public:
 	CServerRef Server_GetDef( size_t index );
 
     /**
-     * @fn  const CSpellDef * CServerConfig::GetSpellDef( SPELL_TYPE index ) const
-     *
      * @brief   Gets spell definition.
      *
      * @param   index   Zero-based index of the.
@@ -743,8 +722,6 @@ public:
 	const CSpellDef * GetSpellDef( SPELL_TYPE index ) const;
 
     /**
-    * @fn  const CSpellDef * CServerConfig::GetSpellDef( SPELL_TYPE index ) const
-    *
     * @brief   Gets spell definition.
     *
     * @param   index   Zero-based index of the.
@@ -754,8 +731,6 @@ public:
 	CSpellDef * GetSpellDef( SPELL_TYPE index );
 
     /**
-     * @fn  lpctstr CServerConfig::GetSkillKey( SKILL_TYPE index ) const
-     *
      * @brief   Gets skill key.
      *
      * @param   index   Zero-based index of the.
@@ -765,8 +740,6 @@ public:
 	lpctstr GetSkillKey( SKILL_TYPE index ) const;
 
     /**
-     * @fn  bool CServerConfig::IsSkillFlag( SKILL_TYPE index, SKF_TYPE skf ) const
-     *
      * @brief   Query if 'index' has 'skf' skill flag.
      *
      * @param   index   Zero-based index of the.
@@ -781,8 +754,6 @@ public:
 	}
 
     /**
-     * @fn  const CSkillDef* CServerConfig::GetSkillDef( SKILL_TYPE index ) const
-     *
      * @brief   Gets skill definition.
      *
      * @param   index   Zero-based index of the.
@@ -792,8 +763,6 @@ public:
 	const CSkillDef* GetSkillDef( SKILL_TYPE index ) const;
 
     /**
-    * @fn  const CSkillDef* CServerConfig::GetSkillDef( SKILL_TYPE index ) const
-    *
     * @brief   Gets skill definition.
     *
     * @param   index   Zero-based index of the.
@@ -803,8 +772,6 @@ public:
 	CSkillDef* GetSkillDef( SKILL_TYPE index );
 
     /**
-     * @fn  const CSkillDef* CServerConfig::FindSkillDef( lpctstr ptcKey ) const
-     *
      * @brief   Find the skill name in the alpha sorted list.
      *
      * @param   ptcKey  The key.
@@ -814,8 +781,6 @@ public:
 	const CSkillDef* FindSkillDef( lpctstr ptcKey ) const;
 
     /**
-     * @fn  const CSkillDef* CServerConfig::SkillLookup( lpctstr ptcKey );
-     *
      * @brief   Search for the skill which NAME=ptcKey.
      *
      * @param   ptcKey  The key.
@@ -825,8 +790,6 @@ public:
 	const CSkillDef* SkillLookup( lpctstr ptcKey );
 
     /**
-     * @fn  SKILL_TYPE CServerConfig::FindSkillKey( lpctstr ptcKey ) const;
-     *
      * @brief   Search for the skill which KEY=ptcKey.
      *
      * @param   ptcKey  The key.
@@ -836,8 +799,6 @@ public:
 	SKILL_TYPE FindSkillKey( lpctstr ptcKey ) const;
 
     /**
-     * @fn  int CServerConfig::GetSpellEffect( SPELL_TYPE spell, int iSkillval ) const;
-     *
      * @brief   Gets the Damage/Healing/etc done by the given params.
      *
      * @param   spell       The spell.
@@ -848,8 +809,6 @@ public:
 	int GetSpellEffect( SPELL_TYPE spell, int iSkillval ) const;
 
     /**
-     * @fn  lpctstr CServerConfig::GetRune( tchar ch ) const
-     *
      * @brief   Retrieves a Spell's rune (WOP).
      *
      * @param   ch  The ch.
@@ -859,8 +818,6 @@ public:
 	lpctstr GetRune( tchar ch ) const;
 
     /**
-     * @fn  lpctstr CServerConfig::GetNotoTitle( int iLevel, bool bFemale ) const;
-     *
      * @brief   Gets noto title.
      *
      * @param   iLevel  Zero-based index of the level.
@@ -874,8 +831,6 @@ public:
 	const CSphereMulti * GetMultiItemDefs( ITEMID_TYPE itemid );
 
     /**
-     * @fn  bool CServerConfig::IsConsoleCmd( tchar ch ) const;
-     *
      * @brief   Query if 'ch' is a console command or ingame one.
      *
      * @param   ch  The ch.
@@ -888,8 +843,6 @@ public:
 	CRegion * GetRegion( lpctstr pKey ) const; // Find a region with the given name/defname
 
     /**
-     * @fn  int CServerConfig::Calc_MaxCarryWeight( const CChar * pChar ) const;
-     *
      * @brief   Calculates the maximum carry weight.
      *
      * @param   pChar   The character.
@@ -899,8 +852,6 @@ public:
 	int Calc_MaxCarryWeight( const CChar * pChar ) const;
 
     /**
-     * @fn  int CServerConfig::Calc_CombatAttackSpeed( CChar * pChar, CItem * pWeapon );
-     *
      * @brief   Calculates the combat attack speed.
      *
      * @param [in,out]  pChar   If non-null, the character.
@@ -911,8 +862,6 @@ public:
 	int Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pWeapon ) const;
 
     /**
-     * @fn  int CServerConfig::Calc_CombatChanceToHit( CChar * pChar, CChar * pCharTarg, SKILL_TYPE skill );
-     *
      * @brief   Calculates the combat chance to hit.
      *
      * @param [in,out]  pChar       If non-null, the character.
@@ -924,8 +873,6 @@ public:
 	int Calc_CombatChanceToHit( CChar * pChar, CChar * pCharTarg);
 
     /**
-     * @fn  int CServerConfig::Calc_StealingItem( CChar * pCharThief, CItem * pItem, CChar * pCharMark );
-     *
      * @brief   Chance to steal and retrieve the item successfully
      *
      * @param [in,out]  pCharThief  If non-null, the character thief.
@@ -937,8 +884,6 @@ public:
 	int  Calc_StealingItem( CChar * pCharThief, CItem * pItem, CChar * pCharMark );
 
     /**
-     * @fn  bool CServerConfig::Calc_CrimeSeen( CChar * pCharThief, CChar * pCharViewer, SKILL_TYPE SkillToSee, bool fBonus );
-     *
      * @brief   Chance to steal without being seen by a specific person.
      *
      * @param [in,out]  pCharThief  If non-null, the character thief.
@@ -951,8 +896,6 @@ public:
 	bool Calc_CrimeSeen( const CChar * pCharThief, const CChar * pCharViewer, SKILL_TYPE SkillToSee, bool fBonus ) const;
 
     /**
-     * @fn  ushort CServerConfig::Calc_FameKill( CChar * pKill );
-     *
      * @brief   Calculates the fame given by the kill.
      *
      * @param [in,out]  pKill   If non-null, the kill.
@@ -962,8 +905,6 @@ public:
 	int Calc_FameKill( CChar * pKill );
 
     /**
-     * @fn  int CServerConfig::Calc_KarmaKill( CChar * pKill, NOTO_TYPE NotoThem );
-     *
      * @brief   Calculates the karma given or lost by the kill.
      *
      * @param [in,out]  pKill   If non-null, the kill.
@@ -974,8 +915,6 @@ public:
 	int Calc_KarmaKill( CChar * pKill, NOTO_TYPE NotoThem );
 
     /**
-     * @fn  int CServerConfig::Calc_KarmaScale( int iKarma, int iKarmaChange );
-     *
      * @brief   Scale the karma based on the current level, Should be harder to gain karma than to loose it.
      *
      * @param   iKarma          Zero-based index of the karma.
@@ -986,8 +925,6 @@ public:
 	int Calc_KarmaScale( int iKarma, int iKarmaChange );
 
     /**
-     * @fn  lpctstr CServerConfig::Calc_MaptoSextant( CPointMap pntCoords );
-     *
      * @brief   Translates map coords to sextant coords.
      *
      * @author  Javier
@@ -1002,8 +939,6 @@ public:
 #define SysMessageDefault( msg )	SysMessage( g_Cfg.GetDefaultMsg( msg ) )
 
     /**
-     * @fn  lpctstr CServerConfig::GetDefaultMsg(lpctstr ptcKey);
-     *
      * @brief   Gets default message (sphere_msgs.scp).
      *
      * @param   ptcKey  The key.
@@ -1013,8 +948,6 @@ public:
 	lpctstr GetDefaultMsg(lpctstr ptcKey);
 
     /**
-    * @fn  lpctstr CServerConfig::GetDefaultMsg(lpctstr ptcKey);
-    *
     * @brief   Gets default message (sphere_msgs.scp).
     *
     * @param   ptcKey  The key.

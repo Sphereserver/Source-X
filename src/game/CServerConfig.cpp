@@ -2064,19 +2064,28 @@ SKILL_TYPE CServerConfig::FindSkillKey( lpctstr ptcKey ) const
 	return (SKILL_TYPE)(pSkillDef->GetResourceID().GetResIndex());
 }
 
+
+static constexpr lpctstr _ptcStatName[STAT_QTY] = // not alphabetically sorted obviously.
+{
+    "STR",
+    "INT",
+    "DEX",
+    "FOOD"
+};
+
 STAT_TYPE CServerConfig::FindStatKey( lpctstr ptcKey ) // static
 {
-	ADDTOCALLSTACK("CServerConfig::FindStatKey");
-
-    static constexpr lpctstr _ptcStatName[STAT_QTY] = // not sorted obviously.
-    {
-        "STR",
-        "INT",
-        "DEX",
-        "FOOD"
-    };
+	//ADDTOCALLSTACK_INTENSIVE("CServerConfig::FindStatKey");
 	return (STAT_TYPE) FindTable( ptcKey, _ptcStatName, CountOf(_ptcStatName));
 }
+
+lpctstr CServerConfig::GetStatName(STAT_TYPE iKey) // static
+{
+    //ADDTOCALLSTACK_INTENSIVE("CServerConfig::GetStatName");
+    ASSERT(iKey >= STAT_STR && iKey < STAT_QTY);
+    return _ptcStatName[iKey];
+}
+
 
 int CServerConfig::GetSpellEffect( SPELL_TYPE spell, int iSkillVal ) const
 {
