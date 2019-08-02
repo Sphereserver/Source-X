@@ -3815,7 +3815,7 @@ void CChar::r_Write( CScript & s )
     for (ushort j = 0; j < STAT_QTY; ++j)
     {
         const ushort uiRegenVal = Stats_GetRegenVal((STAT_TYPE)j);
-        if (uiRegenVal != 0)
+        if (uiRegenVal > 1)
             s.WriteKeyVal(_ptcKeyRegenVal[j], uiRegenVal);
     }
 
