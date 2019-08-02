@@ -1849,3 +1849,4 @@ WARNING: Important change!
 
 02-07-2019, Nolok
 - Fixed: Connections to the HTTP server were always blocked, even if legit.
+- Fixed: NPCs could train a skill without any upper limit if the difference between teacher and scholar skill was high enough (Issue #307).

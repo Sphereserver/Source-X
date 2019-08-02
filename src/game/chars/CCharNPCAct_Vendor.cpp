@@ -224,29 +224,37 @@ ushort CChar::NPC_OnTrainCheck( CChar * pCharSrc, SKILL_TYPE Skill )
 		return 0;
 	}
 
-	ushort uiSkillSrcVal = pCharSrc->Skill_GetBase(Skill);
-	ushort uiSkillVal = Skill_GetBase(Skill);
-	ushort uiTrainVal = NPC_GetTrainMax(pCharSrc, Skill) - uiSkillSrcVal;
+	const ushort uiSkillSrcVal = pCharSrc->Skill_GetBase(Skill);
+	int iTrainVal = (int)NPC_GetTrainMax(pCharSrc, Skill) - uiSkillSrcVal;
+    if (iTrainVal < 0)
+        iTrainVal = 0;
+    else if (iTrainVal > USHRT_MAX)
+        iTrainVal = USHRT_MAX;
+    const ushort uiTrainVal = (ushort)iTrainVal;
 
 	// Train npc skill cap
-	ushort uiMaxDecrease = 0;
-	if ( (pCharSrc->Skill_GetSum() + uiTrainVal) > pCharSrc->Skill_GetSumMax() )
-	{	
-		for ( uint i = 0; i < g_Cfg.m_iMaxSkill; ++i )
-		{
-			if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) )
-				continue;
+	uint uiMaxDecrease = 0; // using uint instead of ushort to avoid overflows in the for loop
+    if (uiTrainVal != 0)
+    {
+        if ((pCharSrc->Skill_GetSum() + uiTrainVal) > pCharSrc->Skill_GetSumMax())
+        {
+            for (uint i = 0; i < g_Cfg.m_iMaxSkill; ++i)
+            {
+                if (!g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i))
+                    continue;
 
-			if ( pCharSrc->Skill_GetLock((SKILL_TYPE)i) == SKILLLOCK_DOWN )
-				uiMaxDecrease += pCharSrc->Skill_GetBase((SKILL_TYPE)i);
-		}
-		uiMaxDecrease = minimum(uiTrainVal, uiMaxDecrease);
-	}
-	else
-	{
-		uiMaxDecrease = uiTrainVal;
-	}
+                if (pCharSrc->Skill_GetLock((SKILL_TYPE)i) == SKILLLOCK_DOWN)
+                    uiMaxDecrease += pCharSrc->Skill_GetBase((SKILL_TYPE)i);
+            }
+            uiMaxDecrease = minimum(uiTrainVal, uiMaxDecrease);
+        }
+        else
+        {
+            uiMaxDecrease = uiTrainVal;
+        }
+    }
 
+    const ushort uiSkillVal = Skill_GetBase(Skill);
 	lpctstr pszMsg;
 	if ( uiSkillVal <= 0 )
 		pszMsg = g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_DUNNO_2 );
@@ -255,9 +263,9 @@ ushort CChar::NPC_OnTrainCheck( CChar * pCharSrc, SKILL_TYPE Skill )
 	else if ( uiMaxDecrease <= 0 )
 		pszMsg = g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_DUNNO_4 );
 	else
-		return uiMaxDecrease;
+		return (ushort)uiMaxDecrease;
 
-	char *z = Str_GetTemp();
+	tchar *z = Str_GetTemp();
 	sprintf(z, pszMsg, g_Cfg.GetSkillKey(Skill));
 	Speak(z);
 	return 0;
