@@ -1028,8 +1028,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					}
 					else
 					{
-						m_Targ_UID.ClearUID();
-						m_Targ_Prv_UID.ClearUID();
+						m_Targ_UID.InitUID();
+						m_Targ_Prv_UID.InitUID();
 					}
 					m_pChar->Skill_Start((SKILL_TYPE)skill);
 					break;

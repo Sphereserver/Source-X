@@ -29,6 +29,10 @@ void SetExceptionTranslator();
     #endif
 #endif
 
+#ifdef _DEBUG
+    void NotifyDebugger();
+#endif
+
 // -------------------------------------------------------------------
 // -------------------------------------------------------------------
 
@@ -108,17 +112,10 @@ public:
 
 // EXC_NOTIFY_DEBUGGER
 #ifndef _DEBUG
-	#define EXC_NOTIFY_DEBUGGER (void)0
-#else	// we want the debugger to notice of this exception
-	#ifdef _WIN32
-		#ifdef _MSC_VER
-			#define EXC_NOTIFY_DEBUGGER if (IsDebuggerPresent()) __debugbreak()
-		#else
-			#define EXC_NOTIFY_DEBUGGER if (IsDebuggerPresent()) abort()
-		#endif
-	#else
-		#define EXC_NOTIFY_DEBUGGER if (IsDebuggerPresent()) std::raise(SIGINT)
-	#endif
+	#define EXC_NOTIFY_DEBUGGER     (void)0
+#else
+    // we want the debugger to notice of this exception
+    #define EXC_NOTIFY_DEBUGGER     NotifyDebugger()
 #endif
 
 // _EXC_CAUGHT

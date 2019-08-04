@@ -1664,7 +1664,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
     else
     {
         trigtype = ITRIG_TARGON_GROUND;
-        m_Targ_UID.ClearUID();
+        m_Targ_UID.InitUID();
         if ( !IsSetOF(OF_NoTargTurn) && pt.IsValidPoint() )
             m_pChar->UpdateDir(pt);
     }
@@ -1837,6 +1837,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		case IT_JUNK:
 			SysMessageDefault( DEFMSG_ITEMUSE_JUNK_REACH );
 			return false;
+
 		case IT_FOLIAGE:
 		case IT_TREE:
 			// Just targetted a tree type
@@ -1858,7 +1859,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 				if ( IsTrigUsed(TRIGGER_SKILLMENU) )
 				{
 					CScriptTriggerArgs args("sm_carpentry");
-					if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
+					if ( m_pChar->OnTrigger(CTRIG_SkillMenu, m_pChar, &args) == TRIGRET_RET_TRUE )
 						return true;
 				}
 				return Cmd_Skill_Menu( g_Cfg.ResourceGetIDType( RES_SKILLMENU, "sm_carpentry" ));
@@ -1866,11 +1867,15 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			if ( pItemUse->IsSameDispID( ITEMID_DAGGER ))
 			{
 				// set the target item
-				m_Targ_UID = pItemTarg->GetUID();
+                if (pItemTarg)
+                    m_Targ_UID = pItemTarg->GetUID();
+                else
+                    m_Targ_UID.InitUID();
+
 				if ( IsTrigUsed(TRIGGER_SKILLMENU) )
 				{
 					CScriptTriggerArgs args("sm_bowcraft");
-					if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
+					if ( m_pChar->OnTrigger(CTRIG_SkillMenu, m_pChar, &args) == TRIGRET_RET_TRUE )
 						return true;
 				}
 				return Cmd_Skill_Menu( g_Cfg.ResourceGetIDType( RES_SKILLMENU, "sm_bowcraft" ) );
@@ -2130,7 +2135,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 		pItemTarg->m_itLoom.m_ridCloth = CResourceIDBase(RES_ITEMDEF, pItemUse->GetDispID());
 
 		int iUsed = 0;
-		int iNeed = CountOf( sm_Txt_LoomUse ) - 1;
+		int iNeed = int(CountOf( sm_Txt_LoomUse ) - 1);
 		int iHave = pItemTarg->m_itLoom.m_ClothQty;
 		if ( iHave < iNeed )
 		{
@@ -2138,7 +2143,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 			iUsed = pItemUse->ConsumeAmount( (word)iNeed );
 		}
 
-		if ( (uint)(iHave  + iUsed) < (CountOf( sm_Txt_LoomUse ) - 1) )
+		if ( (iHave + iUsed) < int(CountOf( sm_Txt_LoomUse ) - 1) )
 		{
 			pItemTarg->m_itLoom.m_ClothQty += iUsed;
 			SysMessage( sm_Txt_LoomUse[ pItemTarg->m_itLoom.m_ClothQty ] );

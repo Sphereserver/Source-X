@@ -161,7 +161,7 @@ public:
 		// IT_GAME_BOARD
 		struct
 		{
-			int m_GameType;				// more1=0=chess, 1=checkers, 2=backgammon, 3=no pieces.
+			int32 m_GameType;           // more1=0=chess, 1=checkers, 2=backgammon, 3=no pieces.
 		} m_itGameBoard;
 
 		// IT_WAND
@@ -170,7 +170,7 @@ public:
 		{
 			word m_Hits_Cur;		// more1l=eqiv to quality of the item (armor/weapon).
 			word m_Hits_Max;		// more1h=can only be repaired up to this level.
-			int  m_spellcharges;	// more2=for a wand etc.
+			int32 m_spellcharges;	// more2=for a wand etc.
 			word m_spell;			// morex=SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
 			word m_spelllevel;		// morey=level of the spell. (0-1000)
 			byte m_poison_skill;	// morez=0-100 = Is the weapon poisoned ?
@@ -186,7 +186,7 @@ public:
 		{
 			word m_Hits_Cur;		// more1l= eqiv to quality of the item (armor/weapon).
 			word m_Hits_Max;		// more1h= can only be repaired up to this level.
-			int  m_spellcharges;	// more2 = ? spell charges ? not sure how used here..
+			int32 m_spellcharges;	// more2 = ? spell charges ? not sure how used here..
 			word m_spell;			// morex = SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
 			word m_spelllevel;		// morey=level of the spell. (0-1000)
 		} m_itArmor;
@@ -199,9 +199,9 @@ public:
 		// IT_LAVA
 		struct
 		{
-			short m_PolyStr;	// more1l=polymorph effect (stat modifier) of this on strength.
-			short m_PolyDex;	// more1h=polymorph effect (stat modifier) of this on dex.
-			int  m_spellcharges;// more2=not sure how used here..
+			int16 m_PolyStr;	// more1l=polymorph effect (stat modifier) of this on strength.
+			int16 m_PolyDex;	// more1h=polymorph effect (stat modifier) of this on dex.
+			int32 m_spellcharges;// more2=not sure how used here..
 			word m_spell;		// morex=SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
 			word m_spelllevel;	// morey=0-1000=level of the spell.
 			byte m_pattern;		// morez = light pattern - CAN_I_LIGHT LIGHT_QTY
@@ -330,7 +330,7 @@ public:
 		// IT_FOLIAGE - the leaves of a tree normally.
 		struct
 		{
-			int m_Respawn_Sec;					// more1 = plant respawn time in seconds. (for faster growth plants)
+			int32 m_Respawn_Sec;				// more1 = plant respawn time in seconds. (for faster growth plants)
             CResourceIDBase m_ridFruitOverride;	// more2 = Override for TDATA2 = What is the fruit of this plant
 		} m_itCrop;
 

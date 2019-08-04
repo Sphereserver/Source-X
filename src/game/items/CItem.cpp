@@ -975,7 +975,7 @@ int CItem::FixWeirdness()
             // blank unlinked keys.
             if (m_itKey.m_UIDLock && !IsValidUID())
             {
-                DEBUG_ERR(("Key '%s' has bad link to 0%x, blanked out\n", GetName(), (dword)(m_itKey.m_UIDLock)));
+                g_Log.EventError("Key '%s' (UID=0%x) has bad link to 0%x: blanked out.\n", GetName(), (dword)GetUID(), (dword)(m_itKey.m_UIDLock));
                 m_itKey.m_UIDLock.ClearUID();
             }
             break;
@@ -2730,10 +2730,10 @@ void CItem::r_LoadMore1(dword dwVal)
         m_itNormal.m_more1 = CResourceIDBase(RES_ITEMDEF, iIndex);
         return;
 
-    case IT_FIGURINE:
-    case IT_EQ_HORSE:
-        m_itNormal.m_more1 = CResourceIDBase(RES_CHARDEF, iIndex);
-        return;
+    //case: IT_SHIP_TILLER
+    //case: IT_KEY
+    //case: IT_SIGN_GUMP
+        // Allow arbitrary values, not necessarily valid UIDs (for backwards compatibility)
 
     case IT_SPAWN_CHAR:
     case IT_SPAWN_ITEM:
@@ -2778,6 +2778,21 @@ void CItem::r_LoadMore2(dword dwVal)
     case IT_BLOOD:
     case IT_BONE:
         m_itNormal.m_more2 = CResourceIDBase(RES_CHARDEF, iIndex);
+        return;
+
+    //case IT_CORPSE:
+        // Be tolerant if a t_corpse has as MORE2 an invalid UID, does it really matter? People may use a custom value,
+        //  and there's no hardcoded check for this MORE2 (if we add one, we have to ensure that MORE2 holds a valid UID).
+    case IT_FIGURINE:
+    case IT_EQ_HORSE:
+        if (!CUID::IsValidUID(dwVal))
+        {
+            g_Log.EventWarn("Setting MORE2 (item type '%s') to invalid UID 0%x, defaulting to 0.\n",
+                g_Cfg.ResourceGetName(CResourceID(RES_TYPEDEF, GetType())), dwVal);
+            m_itFigurine.m_UID.ClearUID();
+            return;
+        }
+        m_itNormal.m_more2 = dwVal;
         return;
 
     default:

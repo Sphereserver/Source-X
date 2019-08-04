@@ -39,6 +39,28 @@ int IsDebuggerPresent(void)
 
 #endif // !_WIN32
 
+
+#ifdef _DEBUG
+void NotifyDebugger()
+{
+    if (IsDebuggerPresent())
+    {
+
+#ifdef _WIN32
+    #ifdef _MSC_VER
+        __debugbreak();
+    #else
+        std::abort();
+    #endif
+#else
+        std::raise(SIGINT);
+#endif
+
+    }
+}
+#endif // _DEBUG
+
+
 #ifdef _WIN32
 int CSError::GetSystemErrorMessage(dword dwError, lptstr lpszError, uint nMaxError) // static
 {

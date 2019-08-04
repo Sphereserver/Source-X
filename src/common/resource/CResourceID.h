@@ -97,11 +97,15 @@ struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variab
     // What is a Resource? Look at the comment made to the RES_TYPE enum.
     // RES_TYPE: Resource Type (look at the RES_TYPE enum entries).
     // RES_INDEX: Resource Index
-#define RES_TYPE_SHIFT	20		// leave 8 bits = 255 for RES_TYPE;
+
+    // m_dwInternalVal:
+    // - Uppper 4 bits: RESERVED for flags UID_F_RESOURCE, UID_F_ITEM, UID_O_EQUIPPED, UID_O_CONTAINED.
+    // - Usable size: 8 + 20 = 28 --> it's a 28 bits number.
+#define RES_TYPE_SHIFT	20		// leave 8 bits = 0xFFFF = 65535 possible unique RES_TYPEs;
 #define RES_TYPE_MASK	0xFF	//  0xFF = 8 bits.
-#define RES_INDEX_SHIFT	0		// leave 20 bits = ?1048575? entries;
+#define RES_INDEX_SHIFT	0		// leave 20 bits = 0xFFFFF = 1048575 possible unique indexes.
 #define RES_INDEX_MASK	0xFFFFF	//  0xFFFFF = 20 bits.
-    // Size: 8 + 20 = 28 --> it's a 28 bits number (reserve the upper 4 bits for UID_F_RESOURCE, UID_F_ITEM, UID_O_EQUIPPED, UID_O_CONTAINED.
+    
 #define RES_GET_TYPE(dw)	( ( (dw) >> RES_TYPE_SHIFT ) & RES_TYPE_MASK )
 #define RES_GET_INDEX(dw)	( (dw) & (dword)RES_INDEX_MASK )
 
