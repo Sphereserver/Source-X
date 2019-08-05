@@ -626,6 +626,9 @@ bool CChar::Use_Item_Web( CItem * pItemWeb )
 		pFlag->SetType(IT_EQ_STUCK);
 		pFlag->m_uidLink = pItemWeb->GetUID();
 		pFlag->SetTimeout(pItemWeb->GetTimerTAdjusted());
+		if (!pFlag->IsTimerSet())
+			pFlag->SetTimeout(6000);
+
 		LayerAdd(pFlag, LAYER_FLAG_Stuck);
 	}
 	else
