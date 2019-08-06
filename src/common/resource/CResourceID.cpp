@@ -2,8 +2,9 @@
 #include "../CLog.h"
 
 
-static constexpr lpctstr _ptcWarnInvalidResource = "Expected a valid ResourceID, found invalid: 0%x.\n";
-#define LOG_WARN_RES_INVALID    g_Log.EventWarn(_ptcWarnInvalidResource, rid.GetPrivateUID())
+static constexpr lpctstr _ptcWarnInvalidResource = "Expected a valid ResourceID, found invalid with index: 0%x (internal val: 0%x, warning code: %d).\n";
+#define LOG_WARN_RES_INVALID(code)    g_Log.EventWarn(_ptcWarnInvalidResource, rid.GetResIndex(), rid.GetPrivateUID(), code);
+
 
 // CResourceIDBase
 
@@ -28,7 +29,7 @@ CResourceIDBase::CResourceIDBase(RES_TYPE restype, int iIndex) // explicit
 
 CResourceIDBase::CResourceIDBase(dword dwPrivateID) // explicit
 {
-    if (!CUID::IsValidUID(dwPrivateID))
+    if (!CUIDBase::IsValidUID(dwPrivateID))
     {
         DEBUG_MSG(("Trying to set invalid dwPrivateID (0x%x) to CResourceIDBase. Resetting it.\n", dwPrivateID));
         Init();
@@ -39,18 +40,17 @@ CResourceIDBase::CResourceIDBase(dword dwPrivateID) // explicit
 
 CResourceIDBase::CResourceIDBase(const CResourceIDBase& rid) : CUIDBase(rid) // copy constructor
 {
-    //ASSERT(rid.IsResource());
-    if (!rid.IsResource())
-        LOG_WARN_RES_INVALID;
+    ASSERT(rid.IsResource());
+    m_dwInternalVal |= UID_F_RESOURCE;
+    ASSERT(IsResource());
 }
 
 CResourceIDBase& CResourceIDBase::operator = (const CResourceIDBase& rid)  // assignment operator
 {
-    //ASSERT(rid.IsResource());
-    if (!rid.IsResource())
-        LOG_WARN_RES_INVALID;
-
+    ASSERT(rid.IsResource());
     CUIDBase::operator=(rid);
+    m_dwInternalVal |= UID_F_RESOURCE;
+    ASSERT(IsResource());
     return *this;
 }
 
@@ -68,7 +68,7 @@ CItem* CResourceIDBase::ItemFindFromResource() const   // replacement for CUIDBa
 {
     // Used by multis: when they are realized, a new CRegionWorld is created with a CResourceID with an internal value = to the internal value of the multi, plus a | UID_F_RESOURCE.
     //  Remove the reserved UID_* flags (so also UID_F_RESOURCE), and find the item (in our case actually the multi) with that uid.
-    return CUID::ItemFind(m_dwInternalVal & UID_O_INDEX_MASK);
+    return CUIDBase::ItemFind(m_dwInternalVal & UID_O_INDEX_MASK);
 }
 
 
@@ -76,22 +76,22 @@ CItem* CResourceIDBase::ItemFindFromResource() const   // replacement for CUIDBa
 
 CResourceID& CResourceID::operator = (const CResourceID& rid)   // assignment operator
 {
-    //ASSERT(rid.IsResource());
     if (!rid.IsResource())
-        LOG_WARN_RES_INVALID;
+        LOG_WARN_RES_INVALID(1);
 
     CUIDBase::operator=(rid);
+    ASSERT(IsResource());
     m_wPage = rid.m_wPage;
     return *this;
 }
 
 CResourceID& CResourceID::operator = (const CResourceIDBase& rid)
 {
-    //ASSERT(rid.IsResource());
     if (!rid.IsResource())
-        LOG_WARN_RES_INVALID;
+        LOG_WARN_RES_INVALID(2);
 
     CUIDBase::operator=(rid);
+    ASSERT(IsResource());
     m_wPage = 0;
     return *this;
 }
