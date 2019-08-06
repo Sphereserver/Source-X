@@ -3263,7 +3263,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 				if ( fStanding )
 					continue;
 				if ( Use_Item_Web(pItem) )	// we got stuck in a spider web
-					return TRIGRET_RET_FALSE;
+					return TRIGRET_RET_TRUE;
 				continue;
 			case IT_FIRE:
 				{

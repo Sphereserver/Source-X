@@ -100,10 +100,10 @@ struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variab
 
     // m_dwInternalVal:
     // - Uppper 4 bits: RESERVED for flags UID_F_RESOURCE, UID_F_ITEM, UID_O_EQUIPPED, UID_O_CONTAINED.
-    // - Usable size: 8 + 20 = 28 --> it's a 28 bits number.
-#define RES_TYPE_SHIFT	20		// leave 8 bits = 0xFFFF = 65535 possible unique RES_TYPEs;
+    // - Usable size: 8 bits (res_type) + 20 bits (index) = 28 --> it's a 28 bits number.
+#define RES_TYPE_SHIFT	20		// skip first 20 bits, use next 8 bits = 0xFFFF = 65535 possible unique RES_TYPEs;
 #define RES_TYPE_MASK	0xFF	//  0xFF = 8 bits.
-#define RES_INDEX_SHIFT	0		// leave 20 bits = 0xFFFFF = 1048575 possible unique indexes.
+#define RES_INDEX_SHIFT	0		// use first 20 bits = 0xFFFFF = 1048575 possible unique indexes.
 #define RES_INDEX_MASK	0xFFFFF	//  0xFFFFF = 20 bits.
     
 #define RES_GET_TYPE(dw)	( ( (dw) >> RES_TYPE_SHIFT ) & RES_TYPE_MASK )
