@@ -2539,6 +2539,13 @@ void CChar::NPC_ExtraAI()
 			return;
 	}
 
+    if (!Can(CAN_C_EQUIP) && !Can(CAN_C_USEHANDS))
+    {
+        // These are checked when trying to equip the item, so avoid further processing if we know from the start
+        //  that we won't be able to use those items.
+        return;
+    }
+
 	// Equip weapons if possible
 	EXC_SET_BLOCK("weapon/shield");
 	if ( IsStatFlag(STATF_WAR) )
@@ -2550,7 +2557,7 @@ void CChar::NPC_ExtraAI()
 		CItem *pShield = LayerFind(LAYER_HAND2);
 		if ( !pShield || !pShield->IsTypeArmor() )
 		{
-			CItemContainer * pPack = GetPack();
+			const CItemContainer * pPack = GetPack();
 			if (pPack)
 			{
 				pShield = pPack->ContentFind(CResourceID(RES_TYPEDEF, IT_SHIELD));
@@ -2563,11 +2570,11 @@ void CChar::NPC_ExtraAI()
 
 	// Equip lightsource at night time
 	EXC_SET_BLOCK("light source");
-	CPointMap pt = GetTopPoint();
-	CSector *pSector = pt.GetSector();
+	const CPointMap& pt = GetTopPoint();
+	const CSector *pSector = pt.GetSector();
 	if ( pSector && pSector->IsDark() )
 	{
-		CItem *pLightSourceCheck = LayerFind(LAYER_HAND2);
+		const CItem *pLightSourceCheck = LayerFind(LAYER_HAND2);
 		if ( !(pLightSourceCheck && (pLightSourceCheck->IsType(IT_LIGHT_OUT) || pLightSourceCheck->IsType(IT_LIGHT_LIT))) )
 		{
 			CItem *pLightSource = ContentFind(CResourceID(RES_TYPEDEF, IT_LIGHT_OUT));

@@ -1851,3 +1851,6 @@ WARNING: Important change!
 - Fixed: Connections to the HTTP server were always blocked, even if legit.
 - Fixed: NPCs could train a skill without any upper limit if the difference between teacher and scholar skill was high enough (Issue #307).
 - Fixed: REGENVALHITS/STAM/MANA/FOOD not being saved during worldsave (Issue #308).
+
+06-07-2019, Nolok
+- Fixed: When a char walked on a spiderweb and got stuck its last step was reverted, so it wasn't standing in the same tile as the web.
