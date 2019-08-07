@@ -1852,9 +1852,10 @@ WARNING: Important change!
 - Fixed: NPCs could train a skill without any upper limit if the difference between teacher and scholar skill was high enough (Issue #307).
 - Fixed: REGENVALHITS/STAM/MANA/FOOD not being saved during worldsave (Issue #308).
 
-03-07-2019, Drk84
--Fixed (i think): Being stuck on a web indefinitely, unless the web was created by a spider. Default stuck value is now around 6 seconds.
-	Now, after the STUCK memory item expires if the character continues to move towards the web it will get stuck again, while if  it moves
-	in another direction it will be free from the web. 
+06-07-2019, Nolok
+- Fixed: When a char walked on a spiderweb and got stuck its last step was reverted, so it wasn't standing in the same tile as the web.
 
+07-07-2019
 - Fixed: Purple potions MoreX (countdown to explosion) always ignored when set, default countdown value is 4 seconds.
+- Added: Spider webs stuck timer is now based on this formula: 2s + (( 100 - (min(100,str))) * spiderWebHitPoints  / 100)
+		 Mininum stuck timer value is 2 seconds while maximum stuck timer value is 10 seconds.

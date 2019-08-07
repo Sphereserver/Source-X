@@ -29,9 +29,12 @@ public:
     CTimedObject(PROFILE_TYPE profile);
     virtual ~CTimedObject();
     void Delete();
+
     inline bool IsSleeping() const;
     inline virtual void GoSleep();
+
     virtual void GoAwake();
+
     /**
     * @brief returns the profiler type.
     * @return the type.
@@ -81,10 +84,7 @@ public:
     inline bool IsTimerSet() const;
 
     /**
-     * @fn  int64 CObjBase::GetTimerDiff() const;
-     *
      * @brief   Gets timer difference between current time and stored time.
-     *
      * @return  The timer difference.
      */
     int64 GetTimerDiff() const;
@@ -96,33 +96,32 @@ public:
     inline bool IsTimerExpired() const;
 
     /**
-     * @brief   Gets timer.
-     * @return  The timer adjusted.
+     * @brief   Gets timer (in milliseconds).
+     * @return  The adjusted timer.
      */
     int64 GetTimerAdjusted() const;
 
     /**
-     * @fn  int64 CObjBase::GetTimerTAdjusted() const;
-     *
      * @brief   Gets timer in ticks.
-     *
-     * @return  The timer t adjusted.
+     * @return  The adjusted timer.
      */
-    int64 GetTimerTAdjusted() const;
+    //int64 GetTimerTAdjusted() const;
 
     /**
-    * @brief    Gets timer in tenths of seconds.
-    * @return  The timer d adjusted.
+    * @brief   Gets timer in tenths of seconds.
+    * @return  The adjusted timer.
     */
     int64 GetTimerDAdjusted() const;
 
     /**
     * @brief    Gets timer in seconds.
-    * @return   The timer s adjusted.
+    * @return   The adjusted timer.
     */
     int64 GetTimerSAdjusted() const;
 };
 
+
+/* Inlined methods are defined here */
 
 bool CTimedObject::IsSleeping() const
 {

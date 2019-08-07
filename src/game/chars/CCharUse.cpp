@@ -578,7 +578,7 @@ bool CChar::Use_Item_Web( CItem * pItemWeb )
 		return false;	// just walk through it
 
 	// Try to break it.
-	int iStr = pItemWeb->m_itWeb.m_Hits_Cur;
+	int iStr = (int)pItemWeb->m_itWeb.m_Hits_Cur;
 	if ( iStr == 0 )
 		iStr = pItemWeb->m_itWeb.m_Hits_Cur = 60 + Calc_GetRandVal(250);
 
@@ -625,10 +625,7 @@ bool CChar::Use_Item_Web( CItem * pItemWeb )
 		pFlag->SetAttr(ATTR_DECAY);
 		pFlag->SetType(IT_EQ_STUCK);
 		pFlag->m_uidLink = pItemWeb->GetUID();
-		pFlag->SetTimeout(pItemWeb->GetTimerTAdjusted());
-		if (!pFlag->IsTimerSet())
-			pFlag->SetTimeout(6000);
-
+		pFlag->SetTimeout(minimum(10000,2000 + ((100 - minimum(100, Stat_GetAdjusted(STAT_STR))) * iStr / 10))); // Divided by 10 because we want the results in milliseconds without any further multiplication
 		LayerAdd(pFlag, LAYER_FLAG_Stuck);
 	}
 	else
