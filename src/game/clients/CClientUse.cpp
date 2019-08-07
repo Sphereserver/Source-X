@@ -263,7 +263,8 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 				if ( m_pChar->ItemPickup(pItem, 1) == -1 )	// put the potion in our hand
 					return false;
 
-				pItem->m_itPotion.m_tick = 4;		// countdown to explode
+				if (pItem->m_itPotion.m_tick <= 0) //Set default countdown for explosion if morex is not  set.
+					pItem->m_itPotion.m_tick = 4;
 				pItem->m_itPotion.m_ignited = 1;	// ignite it
 				pItem->m_uidLink = m_pChar->GetUID();
 				pItem->SetTimeoutS(1);

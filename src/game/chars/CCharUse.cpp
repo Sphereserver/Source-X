@@ -578,9 +578,12 @@ bool CChar::Use_Item_Web( CItem * pItemWeb )
 		return false;	// just walk through it
 
 	// Try to break it.
-	int iStr = (int)pItemWeb->m_itWeb.m_Hits_Cur;
-	if ( iStr == 0 )
-		iStr = pItemWeb->m_itWeb.m_Hits_Cur = 60 + Calc_GetRandVal(250);
+	int iWebStr = (int)pItemWeb->m_itWeb.m_Hits_Cur;
+	ushort iCharStr = Stat_GetAdjusted(STAT_STR);
+	ushort iStuckTimer = 2 * MSECS_PER_SEC; // Mininum stuck timer value is 2 seconds.
+
+	if (iWebStr == 0 )
+		iWebStr = pItemWeb->m_itWeb.m_Hits_Cur = 60 + Calc_GetRandVal(250);
 
 	// Since broken webs become spider silk, we should get out of here now if we aren't in a web.
 	CItem *pFlag = LayerFind(LAYER_FLAG_Stuck);
@@ -597,7 +600,7 @@ bool CChar::Use_Item_Web( CItem * pItemWeb )
 			return true;
 	}
 
-	int iDmg = pItemWeb->OnTakeDamage(Stat_GetAdjusted(STAT_STR), this);
+	int iDmg = pItemWeb->OnTakeDamage(iCharStr, this);
 	switch ( iDmg )
 	{
 		case 0:			// damage blocked
@@ -625,7 +628,11 @@ bool CChar::Use_Item_Web( CItem * pItemWeb )
 		pFlag->SetAttr(ATTR_DECAY);
 		pFlag->SetType(IT_EQ_STUCK);
 		pFlag->m_uidLink = pItemWeb->GetUID();
-		pFlag->SetTimeout(pItemWeb->GetTimerAdjusted());
+
+		iCharStr = (100 - minimum(100, iCharStr)) * iWebStr / 10;
+		iStuckTimer = minimum( 10 * MSECS_PER_SEC ,  iStuckTimer + iCharStr * MSECS_PER_SEC); //Maximum stuck timer value is 10 seconds
+
+		pFlag->SetTimeout(iStuckTimer); 
 		LayerAdd(pFlag, LAYER_FLAG_Stuck);
 	}
 	else
