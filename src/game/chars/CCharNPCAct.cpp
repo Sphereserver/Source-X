@@ -1654,22 +1654,23 @@ bool CChar::NPC_Act_Food()
 	ADDTOCALLSTACK("CChar::NPC_Act_Food");
 	ASSERT(m_pNPC);
 
-	int		iFood = Stat_GetVal(STAT_FOOD);
-	int		iFoodLevel = Food_GetLevelPercent();
+	const int iFood = Stat_GetVal(STAT_FOOD);
+	const int iFoodLevel = Food_GetLevelPercent();
 	if ( iFood >= 10 )
 		return false;							//	search for food is starving or very hungry
 	if ( iFoodLevel > 40 )
 		return false;							// and it is at least 60% hungry
 
-	m_pNPC->m_Act_Motivation = (uchar)(50 - (iFoodLevel / 2));
+	m_pNPC->m_Act_Motivation = (byte)(50 - (iFoodLevel / 2));
 
-	ushort	uiEatAmount = 1;
-	int		iSearchDistance = 2;
-	CItem	*pClosestFood = nullptr;
-	int		iClosestFood = 100;
-	int		iMyZ = GetTopPoint().m_z;
-	bool	bSearchGrass = false;
-	CItem	* pCropItem = nullptr;
+    const int   iMyZ = GetTopPoint().m_z;
+	ushort  uiEatAmount = 1;
+	int     iSearchDistance = 2;
+	CItem   *pClosestFood = nullptr;
+	int     iClosestFood = 100;
+	
+	bool    fSearchGrass = false;
+	CItem   *pCropItem = nullptr;
 
 	CItemContainer	*pPack = GetPack();
 	if ( pPack )
@@ -1702,7 +1703,7 @@ bool CChar::NPC_Act_Food()
 		if ( pItem->IsType(IT_CROPS) || pItem->IsType(IT_FOLIAGE) )
 		{
 			// is it ripe?
-			CItemBase * checkItemBase = pItem->Item_GetDef();
+			const CItemBase * checkItemBase = pItem->Item_GetDef();
 			if ( checkItemBase->m_ttNormal.m_tData3 )
 			{
 				// remember this, just in case we do not find any suitable food
@@ -1711,14 +1712,15 @@ bool CChar::NPC_Act_Food()
 			}
 		}
 
-		if ( pItem->GetTopPoint().m_z > (iMyZ + 10) || pItem->GetTopPoint().m_z < (iMyZ - 1) )
+        const CPointMap& ptItem = pItem->GetTopPoint();
+		if (ptItem.m_z > (iMyZ + 10) || ptItem.m_z < (iMyZ - 1) )
 			continue;
 		if ( pItem->IsAttr(ATTR_MOVE_NEVER|ATTR_STATIC|ATTR_LOCKEDDOWN|ATTR_SECURE) )
 			continue;
 
 		if ( (uiEatAmount = Food_CanEat(pItem)) > 0 )
 		{
-			int iDist = GetDist(pItem);
+			const int iDist = GetDist(pItem);
 			if ( pClosestFood )
 			{
 				if ( iDist < iClosestFood )
@@ -1781,9 +1783,9 @@ bool CChar::NPC_Act_Food()
 
 		const NPCBRAIN_TYPE brain = GetNPCBrainGroup();
 		if ( brain == NPCBRAIN_ANIMAL )						// animals eat grass always
-			bSearchGrass = true;
+			fSearchGrass = true;
 		//else if (( brain == NPCBRAIN_HUMAN ) && !iFood )	// human eat grass if starving nearly to death
-		//	bSearchGrass = true;
+		//	fSearchGrass = true;
 
 		// found any crops or foliage at least (nearby, of course)?
 		if ( pCropItem )
@@ -1791,11 +1793,11 @@ bool CChar::NPC_Act_Food()
 			if ( GetDist(pCropItem) < 5 )
 			{
 				Use_Item(pCropItem);
-				bSearchGrass = false;	// no need to eat grass if at next tick we can eat better stuff
+				fSearchGrass = false;	// no need to eat grass if at next tick we can eat better stuff
 			}
 		}
 	}
-	if ( bSearchGrass )
+	if ( fSearchGrass )
 	{
         const CCharBase *pCharDef = Char_GetDef();
         const CResourceID rid = CResourceID(RES_TYPEDEF, IT_GRASS);
@@ -2352,7 +2354,7 @@ void CChar::NPC_Food()
 	CItem	*pClosestFood = nullptr;
 	int		iClosestFood = 100;
 	int		iMyZ = GetTopPoint().m_z;
-	bool	bSearchGrass = false;
+	bool	fSearchGrass = false;
 
 	if ( iFood >= 10 )
         return;						//	search for food is starving or very hungry
@@ -2457,12 +2459,12 @@ void CChar::NPC_Food()
 	{
 		NPCBRAIN_TYPE brain = GetNPCBrainGroup();
 		if ( brain == NPCBRAIN_ANIMAL )						// animals eat grass always
-			bSearchGrass = true;
+			fSearchGrass = true;
 		else if (( brain == NPCBRAIN_HUMAN ) && !iFood )	// human eat grass if starving nearly dead
-			bSearchGrass = true;
+			fSearchGrass = true;
 	}
 
-	if ( bSearchGrass )
+	if ( fSearchGrass )
 	{
 		const CCharBase *pCharDef = Char_GetDef();
         const CResourceID rid = CResourceID(RES_TYPEDEF, IT_GRASS);

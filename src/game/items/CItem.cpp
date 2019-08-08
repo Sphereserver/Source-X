@@ -5413,21 +5413,25 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 	if ( iDmg <= 0 )
 		return 0;
 
-	int64 iSelfRepair = GetDefNum("SELFREPAIR", true);
-	if ( iSelfRepair > Calc_GetRandVal(10) )
-	{
-        const ushort uiOldHits = m_itArmor.m_Hits_Cur;
-		m_itArmor.m_Hits_Cur += 2;
-		if ( m_itArmor.m_Hits_Cur > m_itArmor.m_Hits_Max )
-			m_itArmor.m_Hits_Cur = m_itArmor.m_Hits_Max;
+    const bool fHasMaxHits = IsTypeArmorWeapon();
+    if (fHasMaxHits && (m_itArmor.m_Hits_Max > 0))
+    {
+        const int64 iSelfRepair = GetDefNum("SELFREPAIR", true);
+        if (iSelfRepair > Calc_GetRandVal(10))
+        {
+            const ushort uiOldHits = m_itArmor.m_Hits_Cur;
+            m_itArmor.m_Hits_Cur += 2;
+            if (m_itArmor.m_Hits_Cur > m_itArmor.m_Hits_Max)
+                m_itArmor.m_Hits_Cur = m_itArmor.m_Hits_Max;
 
-        if (uiOldHits != m_itArmor.m_Hits_Cur)
-            UpdatePropertyFlag();
+            if (uiOldHits != m_itArmor.m_Hits_Cur)
+                UpdatePropertyFlag();
 
-		return 0;
-	}
+            return 0;
+        }
+    }
 
-	if (( IsTrigUsed(TRIGGER_DAMAGE) ) || ( IsTrigUsed(TRIGGER_ITEMDAMAGE) ))
+	if ( IsTrigUsed(TRIGGER_DAMAGE) || IsTrigUsed(TRIGGER_ITEMDAMAGE) )
 	{
 		CScriptTriggerArgs Args(iDmg, (int)(uType));
 		if ( OnTrigger( ITRIG_DAMAGE, pSrc, &Args ) == TRIGRET_RET_TRUE )
@@ -5509,7 +5513,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 	}
 
 	// Break armor etc..
-	if ( IsTypeArmorWeapon())
+	if (fHasMaxHits)
 	{
 forcedamage:
 		CChar * pChar = dynamic_cast <CChar*> ( GetTopLevelObj());
@@ -5522,23 +5526,28 @@ forcedamage:
 			return( INT32_MAX );
 		}
 
-		int previousDefense = Armor_GetDefense();
-		int previousDamage = Weapon_GetAttack();
+		const int previousDefense = Armor_GetDefense();
+		const int previousDamage = Weapon_GetAttack();
 
 		--m_itArmor.m_Hits_Cur;
 		UpdatePropertyFlag();
 
 		if (pChar != nullptr && IsItemEquipped() )
 		{
+            bool fUpdateStatsFlag = false;
+
 			if ( previousDefense != Armor_GetDefense() )
 			{
 				pChar->m_defense = (word)(pChar->CalcArmorDefense());
-				pChar->UpdateStatsFlag();
+                fUpdateStatsFlag = true;
 			}
 			else if ( previousDamage != Weapon_GetAttack() )
 			{
-				pChar->UpdateStatsFlag();
+                fUpdateStatsFlag = true;
 			}
+
+            if (fUpdateStatsFlag)
+                pChar->UpdateStatsFlag();
 		}
 
 		tchar *pszMsg = Str_GetTemp();

@@ -600,16 +600,16 @@ bool CChar::NPC_PetSetOwner( CChar * pChar )
 	ADDTOCALLSTACK("CChar::NPC_PetSetOwner");
 	//ASSERT(m_pNPC); // m_pNPC may not be set yet if this is a conjured creature.
 
-	if ( m_pPlayer || !pChar|| (pChar == this) )
+	if ( m_pPlayer || !pChar || (pChar == this) )
 		return false;
 
-	CChar * pOwner = NPC_PetGetOwner();
+	const CChar * pOwner = NPC_PetGetOwner();
 	if ( pOwner == pChar )
 		return false;
 
-	NPC_PetClearOwners();	// clear previous owner before set the new owner
 	m_ptHome.InitPoint();	// no longer homed
-	CCSpawn * pSpawn = static_cast<CCSpawn*>( GetComponent(COMP_SPAWN));
+    NPC_PetClearOwners();	// clear previous owner before set the new owner
+    CCSpawn* pSpawn = GetSpawn();
 	if ( pSpawn )
 		pSpawn->DelObj( GetUID() );
 	Memory_AddObjTypes(pChar, MEMORY_IPET);
@@ -624,7 +624,7 @@ bool CChar::NPC_PetSetOwner( CChar * pChar )
 
 	if ( IsSetOF(OF_PetSlots) )
 	{
-		short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true);
+		const short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true);
 		pChar->FollowersUpdate(this, maximum(1, iFollowerSlots));
 	}
 

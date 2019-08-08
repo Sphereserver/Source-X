@@ -2126,25 +2126,26 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 	ASSERT( stage == SKTRIG_SUCCESS );
 
 	// Check if I tamed it before
+    bool fTamedPrev = false;
 	CItemMemory * pMemory = pChar->Memory_FindObjTypes( this, MEMORY_SPEAK );
 	if ( pMemory && pMemory->m_itEqMemory.m_Action == NPC_MEM_ACT_TAMED)
 	{
 		// I did, no skill to tame it again
+        fTamedPrev = true;
+
 		tchar * pszMsg = Str_GetTemp();
 		sprintf(pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_TAMING_REMEMBER ), pChar->GetName());
 		ObjMessage(pszMsg, pChar );
-
-		pChar->NPC_PetSetOwner( this );
-		pChar->Stat_SetVal(STAT_FOOD, 50);	// this is good for something.
-		pChar->m_Act_UID = GetUID();
-		pChar->Skill_Start( NPCACT_FOLLOW_TARG );
-		return -SKTRIG_QTY;	// no credit for this.
 	}
 
-	pChar->NPC_PetSetOwner( this );
-	pChar->Stat_SetVal(STAT_FOOD, 50);	// this is good for something.
-	pChar->m_Act_UID = GetUID();
-	pChar->Skill_Start( NPCACT_FOLLOW_TARG );
+    pChar->NPC_PetSetOwner(this);
+    pChar->Stat_SetVal(STAT_FOOD, 50);	// this is good for something.
+    pChar->m_Act_UID = GetUID();
+    pChar->Skill_Start(NPCACT_FOLLOW_TARG);
+
+    if (fTamedPrev)
+        return -SKTRIG_QTY;	// no credit for this.
+
 	SysMessageDefault( DEFMSG_TAMING_SUCCESS );
 
 	// Create the memory of being tamed to prevent lame macroers
@@ -2459,7 +2460,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
     }
 
     CItemCorpse * pCorpse = nullptr;	// resurrect by corpse
-	if (pObj->IsItem())
+	if (pObj && pObj->IsItem())
 	{
 		pCorpse = dynamic_cast<CItemCorpse *>(pObj);
 		if ( pCorpse == nullptr )

@@ -1858,6 +1858,8 @@ WARNING: Important change!
 07-08-2019, Drk84
 - Fixed: Purple potions MoreX (countdown to explosion) always ignored when set, default countdown value is 4 seconds.
 - Added: Spider webs stuck timer is now based on this formula: 2s + ((100 - (min(100,str))) * spiderWebHitPoints / 100)
-Mininum stuck timer value is 2 seconds while maximum stuck timer value is 10 seconds.
+	Mininum stuck timer value is 2 seconds while maximum stuck timer value is 10 seconds.
 
-
+08-08-2019, Nolok
+- Fixed: Spawned chars weren't unlinked from the spawnitem when tamed (Issue #312).
+- Fixed: SELFREPAIR property having effect also on items which do not have valid MAXHITS.

@@ -719,7 +719,7 @@ bool CObjBase::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 				return true;
 			case OBR_SPAWNITEM:
             {
-                if (_uidSpawn != UID_UNUSED && ptcKey[-1] != '.')
+                if (_uidSpawn.IsValidUID() && ptcKey[-1] != '.')
                     break;
                 CItem *pItem = _uidSpawn.ItemFind();
                 if (pItem)
@@ -1403,11 +1403,11 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 			sVal.FormatHex( GetUID() );
 			break;
 		case OC_SPAWNITEM:
-            if (GetSpawn())
+            if (const CCSpawn* pSpawn = GetSpawn())
             {
                 if (ptcKey[9] == '.')
                     return CScriptObj::r_WriteVal(ptcKey, sVal, pSrc);
-                sVal.FormatHex(GetSpawn()->GetLink()->GetUID());
+                sVal.FormatHex(pSpawn->GetLink()->GetUID());
             }
             else
             {
@@ -1776,16 +1776,14 @@ bool CObjBase::r_LoadVal( CScript & s )
 			SetTimeStamp(s.GetArgLLVal());
 			break;
 		case OC_SPAWNITEM:
-        {
             if ( !g_Serv.IsLoading() )	// SPAWNITEM is read-only
                 return false;
             _uidSpawn = s.GetArgDWVal();
             break;
-        }
 		case OC_UID:
 		case OC_SERIAL:
 			// Don't set container flags through this.
-			SetUID( s.GetArgDWVal(), (dynamic_cast <CItem*>(this)) ? true : false );
+			SetUID( s.GetArgDWVal(), (dynamic_cast <const CItem*>(this)) ? true : false );
 			break;
 		default:
 			return false;
@@ -2885,7 +2883,7 @@ void CObjBase::DeletePrepare()
 
 CCSpawn * CObjBase::GetSpawn()
 {
-    if (_uidSpawn != UID_UNUSED)
+    if (_uidSpawn.IsValidUID())
     {
         CItem *pItem = _uidSpawn.ItemFind();
         if (pItem)
