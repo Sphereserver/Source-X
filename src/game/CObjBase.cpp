@@ -1024,13 +1024,11 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 
 							if ( uiDialogIndex <= ourMap.size() )
 							{
-								CClient::OpenedGumpsMap_t::const_iterator itGumpFound = ourMap.begin();
-								while ( uiDialogIndex-- )
-									++itGumpFound;
+								CClient::OpenedGumpsMap_t::const_iterator itGumpFound = std::next(ourMap.begin(), uiDialogIndex);
 
 								if ( !strnicmp(ptcKey, "ID", 2) )
 								{
-									sVal.Format("%s", g_Cfg.ResourceGetName( CResourceID(RES_DIALOG, itGumpFound->first )) );
+									sVal.Format("%s", g_Cfg.ResourceGetName( CResourceID(RES_DIALOG, RES_GET_INDEX(itGumpFound->first), RES_PAGE_ANY)) );
 								}
 								else if ( !strnicmp(ptcKey, "COUNT", 5) )
 								{
@@ -1237,8 +1235,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 				if ( pClientToCheck )
 				{
 					CResourceID rid = g_Cfg.ResourceGetIDType( RES_DIALOG, ptcKey );
-					int context;
-
+					uint context;
 					if ( pClientToCheck->GetNetState()->isClientKR() )
 					{
 						context = g_Cfg.GetKRDialog(rid.GetPrivateUID());
@@ -1248,8 +1245,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 						context = rid.GetPrivateUID();
 					}
 
-					CClient::OpenedGumpsMap_t::iterator itGumpFound = pClientToCheck->m_mapOpenedGumps.find( context );
-
+					CClient::OpenedGumpsMap_t::const_iterator itGumpFound = pClientToCheck->m_mapOpenedGumps.find( context );
 					if ( itGumpFound != pClientToCheck->m_mapOpenedGumps.end() )
 					{
 						sVal.FormatVal( itGumpFound->second );
@@ -2448,8 +2444,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( index == OV_SDIALOG )
 				{
 					CResourceID rid = g_Cfg.ResourceGetIDType( RES_DIALOG, Arg_ppCmd[0] );
-					int context;
-
+					uint context;
 					if ( pClientSrc->GetNetState()->isClientKR() )
 					{
 						context = g_Cfg.GetKRDialog(rid.GetPrivateUID());
@@ -2459,8 +2454,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 						context = rid.GetPrivateUID();
 					}
 
-					CClient::OpenedGumpsMap_t::iterator itGumpFound = pClientSrc->m_mapOpenedGumps.find( context );
-
+					CClient::OpenedGumpsMap_t::const_iterator itGumpFound = pClientSrc->m_mapOpenedGumps.find( context );
 					if ( pCharSrc && (( itGumpFound != pClientSrc->m_mapOpenedGumps.end() ) && ( (*itGumpFound).second > 0 )) )
 						break;
 				}

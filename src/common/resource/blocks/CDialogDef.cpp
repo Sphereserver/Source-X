@@ -558,7 +558,7 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, lp
                 break;
             m_pObj->ParseText( s.GetKeyBuffer(), pClient->GetChar() );
             m_sText[m_uiTexts] = s.GetKey();
-            m_uiTexts++;
+            ++m_uiTexts;
         }
     }
     else

@@ -151,7 +151,9 @@ public:
 	CUID m_Prop_UID;		// The object of /props (used for skills list as well!)
 
 	// Gump stuff
-	typedef std::map<int,int> OpenedGumpsMap_t;
+    //  first uint: dialog's CResourceID.GetPrivateUID(), or special dialog code
+    //  second int: count (how much of that dialogs are currently open)
+	typedef std::map<uint,int> OpenedGumpsMap_t;
 	OpenedGumpsMap_t m_mapOpenedGumps;
 
 	// Throwing weapons stuff (this is used to play weapon returning anim after throw it)
@@ -534,7 +536,7 @@ public:
 	void addBondedStatus( const CChar * pChar, bool fIsDead ) const;
 	void addSkillWindow(SKILL_TYPE skill, bool fFromInfo = false) const; // Opens the skills list
 	void addBulletinBoard( const CItemContainer * pBoard );
-	bool addBBoardMessage( const CItemContainer * pBoard, BBOARDF_TYPE flag, CUID uidMsg );
+	bool addBBoardMessage( const CItemContainer * pBoard, BBOARDF_TYPE flag, const CUID& uidMsg );
 
 	void addToolTip( const CObjBase * pObj, lpctstr psztext ) const;
 	void addDrawMap( CItemMap * pItem );
@@ -547,7 +549,7 @@ public:
 	void addItemMenu( CLIMODE_TYPE mode, const CMenuItem * item, uint count, CObjBase * pObj = nullptr );
 	void addGumpDialog( CLIMODE_TYPE mode, const CSString * sControls, uint iControls, const CSString * psText, uint iTexts, int x, int y, CObjBase * pObj = nullptr, dword dwRid = 0 );
 
-	bool addGumpDialogProps( CUID uid );
+	bool addGumpDialogProps( const CUID& uid );
 
 	void addLoginComplete();
 	void addChatSystemMessage(CHATMSG_TYPE iType, lpctstr pszName1 = nullptr, lpctstr pszName2 = nullptr, CLanguageID lang = 0 );

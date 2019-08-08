@@ -18,13 +18,7 @@ CResourceIDBase::CResourceIDBase(RES_TYPE restype) // explicit
 CResourceIDBase::CResourceIDBase(RES_TYPE restype, int iIndex) // explicit
 {
     ASSERT(restype <= RES_TYPE_MASK);
-    if (iIndex < 0)
-    {
-        Init();
-        return;
-    }
-    ASSERT(iIndex <= RES_INDEX_MASK);
-    m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT) | iIndex;
+    m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT) | (iIndex & RES_INDEX_MASK);
 }
 
 CResourceIDBase::CResourceIDBase(dword dwPrivateID) // explicit

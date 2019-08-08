@@ -2193,7 +2193,7 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 #endif
 
 	// sanity check
-	CClient::OpenedGumpsMap_t::iterator itGumpFound = client->m_mapOpenedGumps.find((int)context);
+	CClient::OpenedGumpsMap_t::iterator itGumpFound = client->m_mapOpenedGumps.find(context);
 	if ((itGumpFound == client->m_mapOpenedGumps.end()) || (itGumpFound->second <= 0))
 		return true;
 

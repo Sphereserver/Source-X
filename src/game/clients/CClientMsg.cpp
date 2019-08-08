@@ -2402,7 +2402,7 @@ void CClient::addBulletinBoard( const CItemContainer * pBoard )
 	// The client will now ask for the headers it wants.
 }
 
-bool CClient::addBBoardMessage( const CItemContainer * pBoard, BBOARDF_TYPE flag, CUID uidMsg )
+bool CClient::addBBoardMessage( const CItemContainer * pBoard, BBOARDF_TYPE flag, const CUID& uidMsg )
 {
 	ADDTOCALLSTACK("CClient::addBBoardMessage");
 	ASSERT(pBoard);
