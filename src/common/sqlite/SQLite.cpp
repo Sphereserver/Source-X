@@ -115,7 +115,8 @@ Table CSQLite::QuerySQL( lpctstr strSQL )
 
 	Table retTable;
 
-	if (iRows>0) retTable.m_iPos=0;
+	if (iRows>0)
+        retTable.m_iPos=0;
 
 	retTable.m_iCols=iCols;
 	retTable.m_iRows=iRows;
@@ -123,26 +124,28 @@ Table CSQLite::QuerySQL( lpctstr strSQL )
 
 	int iPos=0;
 
-	for (; iPos<iCols; iPos++)
+	for (; iPos<iCols; ++iPos)
 	{
 		retTable.m_strlstCols.push_back(stdvstring());
 
 		if (retStrings[iPos])
 			ConvertUTF8ToString( retStrings[iPos], retTable.m_strlstCols.back() );
-		else retTable.m_strlstCols.back().push_back('\0');
+		else
+            retTable.m_strlstCols.back().push_back('\0');
 	}
 
 	retTable.m_lstRows.resize(iRows);
-	for (int iRow=0; iRow<iRows; iRow++)
+	for (int iRow=0; iRow<iRows; ++iRow)
 	{
 		retTable.m_lstRows[iRow].reserve(iCols);
-		for (int iCol=0; iCol<iCols; iCol++)
+		for (int iCol=0; iCol<iCols; ++iCol)
 		{
 			retTable.m_lstRows[iRow].push_back(stdvstring());
 
 			if (retStrings[iPos])
 				ConvertUTF8ToString( retStrings[iPos], retTable.m_lstRows[iRow].back() );
-			else retTable.m_lstRows[iRow].back().push_back('\0');
+			else
+                retTable.m_lstRows[iRow].back().push_back('\0');
 
 			++iPos;
 		}
@@ -198,10 +201,10 @@ TablePtr CSQLite::QuerySQLPtr( lpctstr strSQL )
 	}
 
 	retTable->m_lstRows.resize(iRows);
-	for (int iRow=0; iRow<iRows; iRow++)
+	for (int iRow=0; iRow<iRows; ++iRow)
 	{
 		retTable->m_lstRows[iRow].reserve(iCols);
-		for (int iCol=0; iCol<iCols; iCol++)
+		for (int iCol=0; iCol<iCols; ++iCol)
 		{
 			retTable->m_lstRows[iRow].push_back(stdvstring());
 
@@ -223,8 +226,8 @@ void CSQLite::ConvertUTF8ToString( char * strInUTF8MB, stdvstring & strOut )
 {
 	int len=(int)strlen(strInUTF8MB)+1;
 	strOut.resize(len, 0);
-	wchar_t * wChar=new wchar_t[len];
-	wChar[0]=0;
+	wchar_t * wChar = new wchar_t[len];
+	wChar[0] = '\0';
 	mbstowcs(wChar,strInUTF8MB,len);
 	wcstombs(&strOut[0],wChar,len);
 	delete [] wChar;
@@ -581,7 +584,7 @@ bool Table::GoNext()
 {
 	if (m_iPos+1<(int)m_lstRows.size())
 	{
-		m_iPos++;
+		++m_iPos;
 		return true;
 	}
 	return false;
@@ -591,7 +594,7 @@ bool Table::GoPrev()
 {
 	if (m_iPos>0)
 	{
-		m_iPos--;
+		--m_iPos;
 		return true;
 	}
 	return false;
@@ -609,9 +612,11 @@ bool Table::GoRow(uint iRow)
 
 lpctstr Table::GetValue(lpctstr lpColName)
 {
-	if (!lpColName) return 0;
-	if (m_iPos<0) return 0;
-	for (int i=0; i<m_iCols; i++)
+	if (!lpColName)
+        return 0;
+	if (m_iPos<0)
+        return 0;
+	for (int i=0; i<m_iCols; ++i)
 	{
 		if (!strcmpi(&m_strlstCols[i][0],lpColName))
 		{
@@ -630,9 +635,11 @@ lpctstr Table::GetValue(int iColIndex)
 
 lpctstr Table::operator [] (lpctstr lpColName)
 {
-	if (!lpColName) return 0;
-	if (m_iPos<0) return 0;
-	for (int i=0; i<m_iCols; i++)
+	if (!lpColName)
+        return 0;
+	if (m_iPos<0)
+        return 0;
+	for (int i=0; i<m_iCols; ++i)
 	{
 		if (!strcmpi(&m_strlstCols[i][0],lpColName))
 		{
@@ -644,8 +651,10 @@ lpctstr Table::operator [] (lpctstr lpColName)
 
 lpctstr Table::operator [] (int iColIndex)
 {
-	if (iColIndex<0 || iColIndex>=m_iCols) return 0;
-	if (m_iPos<0) return 0;
+	if (iColIndex<0 || iColIndex>=m_iCols)
+        return 0;
+	if (m_iPos<0)
+        return 0;
 	return &m_lstRows[m_iPos][iColIndex][0];
 }
 
@@ -661,9 +670,9 @@ void Table::JoinTable(Table & tblJoin)
 	{
 		m_iRows+=tblJoin.m_iRows;
 
-		for (std::vector<row>::iterator it = tblJoin.m_lstRows.begin(); it != tblJoin.m_lstRows.end(); ++it)
+		for (std::vector<row>::const_iterator it = tblJoin.m_lstRows.begin(), end = tblJoin.m_lstRows.end(); it != end; ++it)
 		{
-			m_lstRows.push_back(*it);
+			m_lstRows.emplace_back(*it);
 		}
 	}
 }
@@ -686,12 +695,14 @@ TablePtr::TablePtr( const TablePtr& cTablePtr )
 
 TablePtr::~TablePtr()
 {
-	if (m_pTable) delete m_pTable;
+	if (m_pTable)
+        delete m_pTable;
 }
 
 void TablePtr::operator =( const TablePtr& cTablePtr )
 {
-	if (m_pTable) delete m_pTable;
+	if (m_pTable)
+        delete m_pTable;
 	m_pTable=cTablePtr.m_pTable;
 	((TablePtr *)&cTablePtr)->m_pTable=nullptr;
 }
@@ -705,14 +716,16 @@ Table * TablePtr::Detach()
 
 void TablePtr::Attach( Table * pTable )
 {
-	if (m_pTable) delete m_pTable;
-		m_pTable=pTable;
+	if (m_pTable)
+        delete m_pTable;
+	m_pTable=pTable;
 }
 
 void TablePtr::Destroy()
 {
-	if (m_pTable) delete m_pTable;
-		m_pTable=nullptr;
+	if (m_pTable)
+        delete m_pTable;
+	m_pTable=nullptr;
 }
 
 UTF8MBSTR::UTF8MBSTR()
@@ -780,7 +793,7 @@ UTF8MBSTR::operator char* ()
 UTF8MBSTR::operator stdstring ()
 {
 	tchar * strRet;
-	ConvertUTF8ToString(m_strUTF8_MultiByte, m_iLen+1, strRet);
+	ConvertUTF8ToString(m_strUTF8_MultiByte, m_iLen + 1, strRet);
 	stdstring cstrRet(strRet);
 	delete [] strRet;
 
@@ -789,26 +802,26 @@ UTF8MBSTR::operator stdstring ()
 
 size_t UTF8MBSTR::ConvertStringToUTF8( lpctstr strIn, char *& strOutUTF8MB )
 {
-	size_t len=strlen(strIn);
-	wchar_t * wChar=new wchar_t[len+1];
-	wChar[0]=0;
-	mbstowcs(wChar,strIn,len+1);
-	int iRequiredSize = (int)(wcstombs(nullptr,wChar,len+1));
-	strOutUTF8MB=new char[iRequiredSize+1];
-	strOutUTF8MB[0]=0;
-	wcstombs(strOutUTF8MB,wChar,iRequiredSize+1);
+	size_t len = strlen(strIn);
+	wchar_t * wChar = new wchar_t[len + 1];
+	wChar[0] = '\0';
+	mbstowcs(wChar, strIn, len + 1);
+	int iRequiredSize = (int)(wcstombs(nullptr, wChar, len + 1));
+	strOutUTF8MB = new char[(size_t)iRequiredSize + 1];
+	strOutUTF8MB[0] = '\0';
+	wcstombs(strOutUTF8MB,wChar, (size_t)iRequiredSize + 1);
 	delete [] wChar;
 	return len;
 }
 
 void UTF8MBSTR::ConvertUTF8ToString( char * strInUTF8MB, size_t len, lptstr & strOut )
 {
-	strOut=new tchar[len];
-	strOut[0]=0;
-	wchar_t * wChar=new wchar_t[len];
-	wChar[0]=0;
-	mbstowcs(wChar,strInUTF8MB,len);
-	wcstombs(strOut,wChar,len);
+	strOut = new tchar[len];
+	strOut[0] = '\0';
+	wchar_t * wChar = new wchar_t[len];
+	wChar[0] = '\0';
+	mbstowcs(wChar, strInUTF8MB, len);
+	wcstombs(strOut, wChar, len);
 	delete [] wChar;
 }
 

@@ -3007,7 +3007,8 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
     }
 
     const CItemBaseMulti * pMultiDef = dynamic_cast <const CItemBaseMulti *> (pItemDef);
-    bool fShip = pItemDef->IsType(IT_SHIP);    // must be in water.
+    ASSERT(pMultiDef);
+    const bool fShip = pItemDef->IsType(IT_SHIP);    // must be in water.
 
     /*
     * First thing to do is to check if the character creating the multi is allowed to have it

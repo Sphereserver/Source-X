@@ -570,7 +570,7 @@ void CChar::Noto_Kill(CChar * pKill, int iTotalKillers)
 		if ( !IsPriv(PRIV_GM) )
 		{
 			CScriptTriggerArgs args;
-			args.m_iN1 = m_pPlayer->m_wMurders + 1;
+			args.m_iN1 = m_pPlayer->m_wMurders + 1LL;
 			args.m_iN2 = true;
 			args.m_iN3 = false;
 

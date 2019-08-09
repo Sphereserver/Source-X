@@ -713,17 +713,15 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 		return true;
 	}
 
-	int iConvertFactor = vendor->NPC_GetVendorMarkup();
-
-	VendorItem items[MAX_ITEMS_CONT];
-	memset(items, 0, sizeof(items));
-	uint itemCount = minimum((packetLength - 8u) / 7u, g_Cfg.m_iContainerMaxItems);
+    VendorItem items[MAX_ITEMS_CONT] = {};
+    const uint uiCountFromPacket = (packetLength - 8u) / 7u;
+	uint itemCount = minimum(uiCountFromPacket, g_Cfg.m_iContainerMaxItems);
 
 	// check buying speed
 	const CVarDefCont* vardef = g_Cfg.m_bAllowBuySellAgent ? nullptr : client->m_TagDefs.GetKey("BUYSELLTIME");
 	if (vardef != nullptr)
 	{
-		int64 allowsell = vardef->GetValNum() + (itemCount * 3);
+		const int64 allowsell = vardef->GetValNum() + (itemCount * 3u);
 		if (g_World.GetCurrentTime().GetTimeRaw() < allowsell)
 		{
 			client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_BUYFAST));
@@ -732,12 +730,13 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 	}
 
 	// combine goods into one list
+    const int iConvertFactor = vendor->NPC_GetVendorMarkup();
 	CItemVendable *item = nullptr;
 	for (uint i = 0; i < itemCount; ++i)
 	{
 		skip(1); // layer
-		CUID serial(readInt32());
-		word amount = readInt16();
+        const CUID serial(readInt32());
+        const word amount = readInt16();
 
 		item = dynamic_cast<CItemVendable*>(serial.ItemFind());
 		if (item == nullptr || item->IsValidSaleItem(true) == false)
@@ -1829,8 +1828,8 @@ bool PacketVendorSellReq::onReceive(NetState* net)
 		return false;
 
 	skip(2); // length
-	CUID vendorSerial(readInt32());
-	uint itemCount = readInt16();
+	const CUID vendorSerial(readInt32());
+	const int64 itemCount = readInt16();
 
 	CChar* vendor = vendorSerial.CharFind();
 	if (vendor == nullptr || vendor->m_pNPC == nullptr || !vendor->NPC_IsVendor())

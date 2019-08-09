@@ -2320,7 +2320,7 @@ do_default:
 				tchar * ppLevel_sep[100];
 				const CSString* pFameAt0 = g_Cfg.m_Fame.at(0);
 
-				tchar * pszFameAt0 = new tchar[pFameAt0->GetLength() + 1];
+				tchar * pszFameAt0 = new tchar[(size_t)pFameAt0->GetLength() + 1];
 				strcpylen(pszFameAt0, pFameAt0->GetPtr());
 
 				int iFame = GetFame();
@@ -2333,7 +2333,7 @@ do_default:
 					}
 					else if ( iFame >= atoi(ppLevel_sep[ i ]) )
 					{
-						sVal = ( !g_Cfg.m_Fame.at(i + 1)->CompareNoCase( ptcKey + 5 )) ? "1" : "0";
+						sVal = ( !g_Cfg.m_Fame.at((size_t)i + 1)->CompareNoCase( ptcKey + 5 )) ? "1" : "0";
 						delete[] pszFameAt0;
 						return true;
 					}
@@ -2415,7 +2415,7 @@ do_default:
 				tchar * ppLevel_sep[100];
 				const CSString* pKarmaAt0 = g_Cfg.m_Karma.at(0);
 
-				tchar * pszKarmaAt0 = new tchar[pKarmaAt0->GetLength() + 1];
+				tchar * pszKarmaAt0 = new tchar[(size_t)pKarmaAt0->GetLength() + 1];
 				strcpylen(pszKarmaAt0, pKarmaAt0->GetPtr());
 
 				short iKarma = GetKarma();
@@ -2429,7 +2429,7 @@ do_default:
 					}
 					else if ( iKarma >= atoi(ppLevel_sep[ i ]) )
 					{
-						sVal = ( !g_Cfg.m_Karma.at(i + 1)->CompareNoCase( ptcKey + 6 )) ? "1" : "0";
+						sVal = ( !g_Cfg.m_Karma.at((size_t)i + 1)->CompareNoCase( ptcKey + 6 )) ? "1" : "0";
 						delete[] pszKarmaAt0;
 						return true;
 					}

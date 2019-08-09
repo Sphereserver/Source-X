@@ -208,7 +208,7 @@ bool CClient::addRelay( const CServerDef * pServ )
 
 	if ( ipAddr.IsLocalAddr())	// local server address not yet filled in.
 	{
-		ipAddr = m_net->m_socket.GetSockName();
+		ipAddr.SetAddrIP(m_net->m_socket.GetSockName().GetAddrIP());
 		DEBUG_MSG(( "%x:Login_Relay to %s\n", GetSocketID(), ipAddr.GetAddrStr() ));
 	}
 

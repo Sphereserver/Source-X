@@ -2896,8 +2896,9 @@ byte CClient::LogIn( CAccount * pAccount, CSString & sMsg )
 		sMsg = g_Cfg.GetDefaultMsg( DEFMSG_MSG_SERV_FULL );
 		return( PacketLoginError::MaxClients );
 	}
+
 	//	Do the scripts allow to login this account?
-	pAccount->m_Last_IP = GetPeer();
+	pAccount->m_Last_IP.SetAddrIP(GetPeer().GetAddrIP());
 	CScriptTriggerArgs Args;
 	Args.Init(pAccount->GetName());
 	Args.m_iN1 = GetConnectType();

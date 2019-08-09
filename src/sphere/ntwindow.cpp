@@ -386,14 +386,14 @@ int CNTWindow::OnCreate( HWND hWnd, LPCREATESTRUCT lParam )
 
 	if ( Sphere_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
 	{
-		memset(&pnid,0,sizeof(pnid));
-		pnid.cbSize = sizeof(NOTIFYICONDATA);
-		pnid.hWnd   = m_hWnd;
-		pnid.uFlags = NIF_TIP | NIF_ICON | NIF_MESSAGE;
-		pnid.uCallbackMessage = WM_USER_TRAY_NOTIFY;
-		pnid.hIcon  = theApp.LoadIcon( IDR_MAINFRAME );
-        Str_CopyLimitNull(pnid.szTip, theApp.m_pszAppName, CountOf(pnid.szTip)-1);
-		Shell_NotifyIcon(NIM_ADD, &pnid);
+		memset(&m_pnid,0,sizeof(m_pnid));
+        m_pnid.cbSize = sizeof(NOTIFYICONDATA);
+        m_pnid.hWnd   = m_hWnd;
+        m_pnid.uFlags = NIF_TIP | NIF_ICON | NIF_MESSAGE;
+        m_pnid.uCallbackMessage = WM_USER_TRAY_NOTIFY;
+        m_pnid.hIcon  = theApp.LoadIcon( IDR_MAINFRAME );
+        Str_CopyLimitNull(m_pnid.szTip, theApp.m_pszAppName, CountOf(m_pnid.szTip)-1);
+		Shell_NotifyIcon(NIM_ADD, &m_pnid);
 	}
 
 	SetWindowTitle();
@@ -851,7 +851,7 @@ bool CNTWindow::NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLine, int nCmdSho
 	char	className[32] = SPHERE_TITLE;
 	TCHAR	*argv[32];
 	argv[0] = nullptr;
-	size_t argc = Str_ParseCmds(lpCmdLine, &argv[1], CountOf(argv)-1, " \t") + 1;
+	int argc = Str_ParseCmds(lpCmdLine, &argv[1], CountOf(argv)-1, " \t") + 1;
 	if (( argc > 1 ) && _IS_SWITCH(*argv[1]) )
 	{
 		if ( toupper(argv[1][1]) == 'C' )
@@ -884,8 +884,8 @@ void CNTWindow::NTWindow_DeleteIcon()
 {
 	if ( Sphere_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
 	{
-		theApp.m_wndMain.pnid.uFlags = 0;
-		Shell_NotifyIcon(NIM_DELETE, &theApp.m_wndMain.pnid);
+		theApp.m_wndMain.m_pnid.uFlags = 0;
+		Shell_NotifyIcon(NIM_DELETE, &theApp.m_wndMain.m_pnid);
 	}
 }
 
@@ -960,9 +960,9 @@ void CNTWindow::NTWindow_CheckUpdateWindowTitle()
 
 	if ( Sphere_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
 	{
-		theApp.m_wndMain.pnid.uFlags = NIF_TIP;
-        Str_CopyLimitNull(theApp.m_wndMain.pnid.szTip, psTitle, CountOf(theApp.m_wndMain.pnid.szTip)-1);
-		Shell_NotifyIcon(NIM_MODIFY, &theApp.m_wndMain.pnid);
+		theApp.m_wndMain.m_pnid.uFlags = NIF_TIP;
+        Str_CopyLimitNull(theApp.m_wndMain.m_pnid.szTip, psTitle, CountOf(theApp.m_wndMain.m_pnid.szTip)-1);
+		Shell_NotifyIcon(NIM_MODIFY, &theApp.m_wndMain.m_pnid);
 	}
 }
 

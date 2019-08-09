@@ -1848,7 +1848,6 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			return( m_pChar->Skill_Start( SKILL_LUMBERJACKING ));
 
 		case IT_LOG:
-
 			if ( ! m_pChar->CanUse( pItemTarg, true ))
 			{
 				SysMessageDefault( DEFMSG_ITEMUSE_LOG_UNABLE );

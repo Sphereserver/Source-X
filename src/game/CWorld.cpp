@@ -1150,7 +1150,7 @@ bool CWorld::SaveForce() // Save world state
 			fSave = SaveStage();
 			if (! ( m_iSaveStage & 0x1FF ))
 			{
-				g_Serv.PrintPercent( m_iSaveStage, m_SectorsQty+3 );
+				g_Serv.PrintPercent( m_iSaveStage, (ssize_t)m_SectorsQty + 3 );
 			}
 			if ( !fSave && ( pCurBlock != save_msgs[5] ))
 				goto failedstage;

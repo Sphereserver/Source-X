@@ -34,7 +34,7 @@ void CChar::Stat_SetMod( STAT_TYPE i, int iVal )
 		if ( i >= STAT_STR && i <= STAT_DEX )
 		{
 			CScriptTriggerArgs args;
-			args.m_iN1 = i+8;	// shift by 8 to indicate modSTR, modINT, modDEX
+			args.m_iN1 = i + 8LL;	// shift by 8 to indicate modSTR, modINT, modDEX
 			args.m_iN2 = iStatVal;
 			args.m_iN3 = iVal;
 			if ( OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE )
@@ -97,7 +97,7 @@ void CChar::Stat_SetMaxMod( STAT_TYPE i, int iVal )
         if ( i >= STAT_STR && i <= STAT_DEX )
         {
             CScriptTriggerArgs args;
-            args.m_iN1 = i+12;	// shift by 12 to indicate modMaxHits, modMaxMana, modMaxStam
+            args.m_iN1 = i + 12LL;	// shift by 12 to indicate modMaxHits, modMaxMana, modMaxStam
             args.m_iN2 = iStatVal;
             args.m_iN3 = iVal;
             if ( OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE )
@@ -219,7 +219,7 @@ void CChar::Stat_SetMax( STAT_TYPE i, ushort uiVal )
 			if ( i >= STAT_STR && i <= STAT_FOOD )		// only STR, DEX, INT, FOOD fire MaxHits, MaxMana, MaxStam, MaxFood for @StatChange
 			{
 				CScriptTriggerArgs args;
-				args.m_iN1 = i + 4;		// shift by 4 to indicate MaxHits, etc..
+				args.m_iN1 = i + 4LL;		// shift by 4 to indicate MaxHits, etc..
 				args.m_iN2 = Stat_GetMax(i);
 				args.m_iN3 = uiVal;
 				if ( OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE )
@@ -336,7 +336,7 @@ void CChar::Stat_SetBase( STAT_TYPE i, ushort uiVal )
 
 			if (i != STAT_FOOD && m_Stat[i].m_max < 1) // MaxFood cannot depend on something, otherwise if the Stat depends on STR, INT, DEX, fire MaxHits, MaxMana, MaxStam
 			{
-				args.m_iN1 = i+4; // Shift by 4 to indicate MaxHits, MaxMana, MaxStam
+				args.m_iN1 = i + 4LL; // Shift by 4 to indicate MaxHits, MaxMana, MaxStam
 				args.m_iN2 = uiStatVal;
 				args.m_iN3 = uiVal;
 				if (OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE)

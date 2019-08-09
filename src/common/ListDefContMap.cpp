@@ -318,14 +318,14 @@ void CListDefCont::RemoveAll()
 
 static bool compare_insensitive (const CListDefContElem * firstelem, const CListDefContElem * secondelem)
 {
-    //ASSERT(firstelem);
-    //ASSERT(secondelem);
+    ASSERT(firstelem);
+    ASSERT(secondelem);
     const CListDefContNum *pFirst = dynamic_cast<const CListDefContNum*>(firstelem);
     const CListDefContNum *pSecond = dynamic_cast<const CListDefContNum*>(secondelem);
 	if (pFirst && pSecond)
 	{
-		int64 iFirst = pFirst->GetValNum();
-		int64 iSecond = pSecond->GetValNum();
+		const int64 iFirst = pFirst->GetValNum();
+        const int64 iSecond = pSecond->GetValNum();
 		return ( iFirst < iSecond );
 	}
 	else
@@ -349,14 +349,14 @@ static bool compare_insensitive (const CListDefContElem * firstelem, const CList
 
 static bool compare_sensitive (const CListDefContElem * firstelem, const CListDefContElem * secondelem)
 {
-    //ASSERT(firstelem);
-    //ASSERT(secondelem);
+    ASSERT(firstelem);
+    ASSERT(secondelem);
     const CListDefContNum *pFirst = dynamic_cast<const CListDefContNum*>(firstelem);
     const CListDefContNum *pSecond = dynamic_cast<const CListDefContNum*>(secondelem);
     if (pFirst && pSecond)
     {
-        int64 iFirst = pFirst->GetValNum();
-        int64 iSecond = pSecond->GetValNum();
+        const int64 iFirst = pFirst->GetValNum();
+        const int64 iSecond = pSecond->GetValNum();
         return ( iFirst < iSecond );
     }
 	else

@@ -128,6 +128,7 @@ PacketCombatDamage::PacketCombatDamage(const CClient* target, word damage, CUID 
 PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) : PacketSend(XCMD_Status, 7, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketObjectStatus::PacketObjectStatus");
+    ASSERT(object);
 
 	const NetState * state = target->GetNetState();
 	const CChar *character = target->GetChar();

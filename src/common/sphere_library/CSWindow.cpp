@@ -14,7 +14,7 @@ CSWindow::operator HWND () const       // cast as a HWND
 {
     return m_hWnd;
 }
-CSWindow::CSWindow()
+CSWindow::CSWindow() : m_pnid{}
 {
     m_hWnd = nullptr;
 }

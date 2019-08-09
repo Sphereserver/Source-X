@@ -94,7 +94,10 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 						EXC_SET_BLOCK("read memory info");
 						d = pcnt.WorkingSetSize;
 					}
-					CloseHandle(hProcess);
+                    if (hProcess != nullptr)
+                    {
+                        CloseHandle(hProcess);
+                    }
 				}
 			}
 #else

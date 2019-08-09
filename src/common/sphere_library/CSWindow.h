@@ -17,7 +17,7 @@ struct CSWindow    // similar to Std MFC class CWnd
 {
 	static const char *m_sClassName;
 	HWND m_hWnd;
-	NOTIFYICONDATA pnid;
+	NOTIFYICONDATA m_pnid;
 
 	operator HWND () const;       // cast as a HWND
 

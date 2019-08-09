@@ -93,7 +93,7 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 
 // a - gradient < x < b + gradient
 #define BETWEENPOINT(coord, coordt, coords) ( (coord > ((float)minimum(coordt, coords) - 0.5)) && (coord < ((float)maximum(coordt, coords) + 0.5)) )
-#define APPROX(num) ((float)((num - floor(num)) > 0.5)? ceil(num) : floor(num))
+#define APPROX(num) ( (float)((num - floor(num)) > 0.5) ? ceil(num) : floor(num) )
 //#define CALCITEMHEIGHT(num) num + ((pItemDef->GetTFlags() & 0x400)? pItemDef->GetHeight() / 2 : pItemDef->GetHeight())
 #define WARNLOS(_x_)		if ( g_Cfg.m_iDebugFlags & DEBUGF_LOS ) { g_Log.EventWarn _x_; }
 

@@ -154,7 +154,8 @@ bool CChar::NPC_FightMagery(CChar * pChar)
     CObjBase * pTarg = pChar;
     if (pWand)
     {
-        if (pWand->GetType() != IT_WAND || pWand->m_itWeapon.m_spellcharges <= 0)// If the item is really a wand and have it charges it's a valid wand, if not ... we get rid of it.
+        // If the item is really a wand and have it charges it's a valid wand, if not ... we get rid of it.
+        if (pWand->GetType() != IT_WAND || pWand->m_itWeapon.m_spellcharges <= 0)
             pWand = nullptr;
     }
     if ((iSpellCount < 1) && !pWand)
@@ -196,6 +197,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 
     if (iRandSpell > iSpellCount)	// if iRandSpell > iSpellCount then we've got the roll pointing to use the wand's spell.
     {
+        ASSERT(pWand);
         SPELL_TYPE spell = (SPELL_TYPE)(pWand->m_itWeapon.m_spell);
         const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
         if (!pSpellDef)	// wand check failed ... we go on melee, next cast try might select another type of spell :)

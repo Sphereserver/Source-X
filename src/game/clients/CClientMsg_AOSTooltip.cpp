@@ -497,11 +497,10 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 			t->FormatArgs("%d", Range);
 		}
 
-		int64 StrengthRequirement = pItem->Item_GetDef()->m_ttEquippable.m_iStrReq - pItem->GetPropNum(pCCPItemEquip, PROPIEQUIP_LOWERREQ, pBaseCCPItemEquip);
+		int64 StrengthRequirement = (int64)(pItem->Item_GetDef()->m_ttEquippable.m_iStrReq) - pItem->GetPropNum(pCCPItemEquip, PROPIEQUIP_LOWERREQ, pBaseCCPItemEquip);
 		if (StrengthRequirement > 0)
 		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061170)); // strength requirement ~1_val~
-			t->FormatArgs("%" PRId64, StrengthRequirement);
+			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061170, StrengthRequirement)); // strength requirement ~1_val~
 		}
 
 		if (pItem->Item_GetDef()->GetEquipLayer() == LAYER_HAND2)

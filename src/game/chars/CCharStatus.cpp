@@ -1636,7 +1636,7 @@ bool CChar::IsTakeCrime( const CItem *pItem, CChar ** ppCharMark ) const
 	return true;
 }
 
-bool CChar::CanUse( CItem *pItem, bool fMoveOrConsume ) const
+bool CChar::CanUse( const CItem *pItem, bool fMoveOrConsume ) const
 {
 	ADDTOCALLSTACK("CChar::CanUse");
 	// Can the Char use ( CONSUME )  the item where it is ?

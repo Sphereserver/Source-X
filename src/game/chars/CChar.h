@@ -395,7 +395,7 @@ public:
 	IT_TYPE CanTouchStatic( CPointMap * pPt, ITEMID_TYPE id, const CItem * pItem ) const;
 	bool CanMove( const CItem * pItem, bool fMsg = true ) const;
 	byte GetLightLevel() const;
-	bool CanUse( CItem * pItem, bool fMoveOrConsume ) const;
+	bool CanUse( const CItem * pItem, bool fMoveOrConsume ) const;
 	bool IsMountCapable() const;
 
 	ushort  Food_CanEat( CObjBase * pObj ) const;

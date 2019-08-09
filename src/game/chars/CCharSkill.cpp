@@ -25,9 +25,8 @@ SKILL_TYPE CChar::Skill_GetBest( uint iRank ) const
 	if ( iRank >= g_Cfg.m_iMaxSkill )
 		iRank = 0;
 
-	dword * pdwSkills = new dword [iRank + 1];
+	dword * pdwSkills = new dword [(size_t)iRank + 1]();
 	ASSERT(pdwSkills);
-	memset(pdwSkills, 0, (iRank + 1) * sizeof(dword));
 
 	dword dwSkillTmp;
 	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
@@ -400,7 +399,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 	if ( iChance <= 0 )
 		return;
 
-	int iRoll = Calc_GetRandVal(1000);
+	int64 iRoll = Calc_GetRandVal(1000);
 	if ( uiSkillLevelFixed < (ushort)iSkillMax )	// are we in position to gain skill ?
 	{
 		// slightly more chance of decay than gain
@@ -685,7 +684,7 @@ bool CChar::Skill_MakeItem_Success()
 		// minimum quality is 1, maximum quality is 200.  100 is average.
 
 		// How much variance? This is the difference in quality levels from what I can normally make.
-		int variance = 2 - (int)(log10(static_cast<double>(Calc_GetRandVal(250) + 1)));	// this should result in a value between 0 and 2
+		int variance = 2 - (int)(log10( 1.0 + double(Calc_GetRandVal(250)) ));	// this should result in a value between 0 and 2
 
 		// Determine if lower or higher quality
 		if ( !Calc_GetRandVal(2) )

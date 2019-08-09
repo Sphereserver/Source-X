@@ -35,8 +35,7 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
 
     if ( !ptcFilename )
     {
-        if ( _IsFileOpen() )
-            return true;
+        return _IsFileOpen();
     }
     else
     {

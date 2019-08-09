@@ -2397,7 +2397,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 
 	// Check for Tithing
     CVarDefContNum* pVarTithing = GetDefKeyNum("Tithing", false);
-    int iValTithing = pVarTithing ? (int)pVarTithing->GetValNum() : 0;
+    int64 iValTithing = pVarTithing ? pVarTithing->GetValNum() : 0;
 	if (iValTithing < iTithingUse)
 	{
 		if (fFailMsg)
@@ -3105,7 +3105,7 @@ int CChar::Spell_CastStart()
     int64 iWaitTime = IsPriv(PRIV_GM) ? 1 : pSpellDef->m_CastTime.GetLinear(Skill_GetBase((SKILL_TYPE)iSkill)); // in tenths of second
 
     // For every point in faster casting, the casting time is shortened by 0.25 or 1/4 of a second. (Keeping 0,2 and not 0,25 for backwards compatibility).
-	iWaitTime -= 2 * GetPropNum(COMP_PROPS_CHAR, PROPCH_FASTERCASTING, true);
+	iWaitTime -= 2 * (int64)GetPropNum(COMP_PROPS_CHAR, PROPCH_FASTERCASTING, true);
 
 	if ( iWaitTime < 1 )
 		iWaitTime = 1;
@@ -3731,17 +3731,15 @@ int64 CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharS
 			case SPELL_Strength:
 			case SPELL_Bless:
 			case SPELL_Curse:
-				iDuration = 1 + ((6 * pCharSrc->Skill_GetBase(SKILL_EVALINT)) / 50);
+				iDuration = 1 + (((int64)pCharSrc->Skill_GetBase(SKILL_EVALINT) * 6) / 50);
 				break;
 
 			case SPELL_Protection:
-				{
-					iDuration = (2 * pCharSrc->Skill_GetBase(SKILL_MAGERY)) / 10;
-					if ( iDuration < 15 )
-						iDuration = 15;
-					else if ( iDuration > 240 )
-						iDuration = 240;
-				}
+				iDuration = ((int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) * 2) / 10;
+				if ( iDuration < 15 )
+					iDuration = 15;
+				else if ( iDuration > 240 )
+					iDuration = 240;
 				break;
 
 			case SPELL_Wall_of_Stone:
@@ -3749,11 +3747,9 @@ int64 CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharS
 				break;
 
 			case SPELL_Arch_Prot:
-				{
-					iDuration = pCharSrc->Skill_GetBase(SKILL_MAGERY) * 12 / 100;
-					if ( iDuration > 144 )
-						iDuration = 144;
-				}
+				iDuration = (int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) * 12 / 100;
+				if ( iDuration > 144 )
+					iDuration = 144;
 				break;
 
 			case SPELL_Fire_Field:
@@ -3769,13 +3765,13 @@ int64 CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharS
 				break;
 
 			case SPELL_Incognito:
-				iDuration = 1 + ((6 * pCharSrc->Skill_GetBase(SKILL_MAGERY)) / 50);
+				iDuration = 1 + (((int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) * 6) / 50);
 				if (iDuration > 144)
 					iDuration = 144;
 				break;
 
 			case SPELL_Paralyze:
-				iDuration = 7 + (pCharSrc->Skill_GetBase(SKILL_MAGERY) / 50);	// pre-AOS formula
+				iDuration = 7 + ((int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) / 50);	// pre-AOS formula
 				break;
 
 				// AOS formula (it only works well on servers with skillcap)
@@ -3786,15 +3782,15 @@ int64 CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharS
 					iDuration = 0;*/
 
 			case SPELL_Poison_Field:
-				iDuration = 3 + (pCharSrc->Skill_GetBase(SKILL_MAGERY) / 25);
+				iDuration = 3 + ((int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) / 25);
 				break;
 
 			case SPELL_Invis:
-				iDuration = pCharSrc->Skill_GetBase(SKILL_MAGERY) * 12 / 100;
+				iDuration = (int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) * 12 / 100;
 				break;
 
 			case SPELL_Paralyze_Field:
-				iDuration = 3 + (pCharSrc->Skill_GetBase(SKILL_MAGERY) / 30);
+				iDuration = 3 + ((int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) / 30);
 				break;
 
 			case SPELL_Energy_Field:
@@ -3823,20 +3819,20 @@ int64 CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharS
 			case SPELL_Earth_Elem:
 			case SPELL_Fire_Elem:
 			case SPELL_Water_Elem:
-				iDuration = (2 * pCharSrc->Skill_GetBase(SKILL_MAGERY)) / 5;
+				iDuration = ((int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) * 2) / 5;
 				break;
 
 			case SPELL_Blood_Oath:
-				iDuration = 8 + ((pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 80);
+				iDuration = 8 + (((int64)pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 80);
 				break;
 			case SPELL_Corpse_Skin:
-				iDuration = 40 + ((pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 25);
+				iDuration = 40 + (((int64)pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 25);
 				break;
 			case SPELL_Curse_Weapon:
-				iDuration = 1 + (pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) / 34);
+				iDuration = 1 + ((int64)pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) / 34);
 				break;
 			case SPELL_Mind_Rot:
-				iDuration = 20 + ((pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 50);
+				iDuration = 20 + (((int64)pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 50);
 				break;
 			case SPELL_Pain_Spike:
 				iDuration = 1;		// timer is 1, but using 10 charges

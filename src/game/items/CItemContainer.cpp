@@ -219,8 +219,8 @@ void CItemContainer::Trade_Status( bool bCheck )
 			pChar1->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_TRADE_RECEIVED_GOLD), pPartner->m_itEqTradeWindow.m_iGold, pChar2->GetName());
 		}
 
-		int64 iGold1 = m_itEqTradeWindow.m_iGold + (m_itEqTradeWindow.m_iPlatinum * 1000000000);
-		int64 iGold2 = pPartner->m_itEqTradeWindow.m_iGold + (pPartner->m_itEqTradeWindow.m_iPlatinum * 1000000000);
+		const int64 iGold1 = m_itEqTradeWindow.m_iGold           + (          m_itEqTradeWindow.m_iPlatinum * 1000000000LL);
+		const int64 iGold2 = pPartner->m_itEqTradeWindow.m_iGold + (pPartner->m_itEqTradeWindow.m_iPlatinum * 1000000000LL);
 		pChar1->m_virtualGold += iGold2 - iGold1;
 		pChar2->m_virtualGold += iGold1 - iGold2;
 		pChar1->UpdateStatsFlag();
@@ -249,8 +249,8 @@ void CItemContainer::Trade_UpdateGold( dword platinum, dword gold )
 	bool bUpdateChar2 = pChar2->GetClient()->GetNetState()->isClientVersion(MINCLIVER_NEWSECURETRADE);
 
 	// To prevent cheating, check if the char really have these gold/platinum values
-	int64 iMaxValue = pChar1->m_virtualGold;
-	if ( gold + (platinum * 1000000000) > iMaxValue )
+	const int64 iMaxValue = pChar1->m_virtualGold;
+	if ( gold + (platinum * 1000000000LL) > iMaxValue )
 	{
 		gold = (dword)(iMaxValue % 1000000000);
 		platinum = (dword)(iMaxValue / 1000000000);

@@ -1102,7 +1102,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
 			return;
 		}
 
-		costtotal += (items[i].m_amount * items[i].m_price);
+		costtotal += ((int64)(items[i].m_amount) * items[i].m_price);
 		if ( costtotal > kuiMaxCost )
 		{
 			pVendor->Speak("Your order cannot be fulfilled, please try again.");
