@@ -189,24 +189,37 @@ bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_
 	CChar* pChar = CChar::CreateBasic(CREID_MAN);
 	ASSERT(pChar != nullptr);
 
-	TRIGRET_TYPE tr;
+	TRIGRET_TYPE tr = TRIGRET_RET_DEFAULT;
 	CScriptTriggerArgs createArgs;
+    // RW
 	createArgs.m_iN1 = iFlags;
 	createArgs.m_iN2 = prProf;
 	createArgs.m_iN3 = rtRace;
+    // R
 	createArgs.m_s1 = account->GetName();
 	createArgs.m_pO1 = client;
 
-	//Creating the pChar
+    client->r_Call("f_onchar_create_init", nullptr, &createArgs, nullptr, &tr);
+    if (tr == TRIGRET_RET_TRUE)
+        goto block_creation;
+
+    iFlags = (int)createArgs.m_iN1;
+    prProf = (PROFESSION_TYPE)createArgs.m_iN2;
+    rtRace = (RACE_TYPE)createArgs.m_iN3;
+
+	// Creating the pChar
 	pChar->InitPlayer(client, charname, bFemale, rtRace, wStr, wDex, wInt,
 		prProf, skSkill1, uiSkillVal1, skSkill2, uiSkillVal2, skSkill3, uiSkillVal3, skSkill4, uiSkillVal4,
 		wSkinHue, idHair, wHairHue, idBeard, wBeardHue, wShirtHue, wPantsHue, idFace, iStartLoc);
 
-	//Calling the function after the char creation, it can't be done before or the function won't have SRC
+	// Calling the function after the char creation, it can't be done before or the function won't have SRC.
+    // The createArgs are Read-Only for this function.
+    tr = TRIGRET_RET_DEFAULT;
 	client->r_Call("f_onchar_create", pChar, &createArgs, nullptr, &tr);
 
 	if ( tr == TRIGRET_RET_TRUE )
 	{
+block_creation:
 		client->addLoginErr(PacketLoginError::CreationBlocked);
 		pChar->Delete();	//Delete it if function is returning 1 or the char will remain created
 		return false;
@@ -522,11 +535,11 @@ bool PacketItemEquipReq::onReceive(NetState* net)
 	client->ClearTargMode(); // done dragging.
 
 	CChar* target = targetSerial.CharFind();
-	bool bCanCarry = target->CanCarry(item);
-	if ( (target == nullptr) || (itemLayer >= LAYER_HORSE) || !target->IsOwnedBy(source) || !bCanCarry || !target->ItemEquip(item, source) )
+	const bool fCanCarry = target->CanCarry(item);
+	if ( (target == nullptr) || (itemLayer >= LAYER_HORSE) || !target->IsOwnedBy(source) || !fCanCarry || !target->ItemEquip(item, source) )
 	{
 		client->Event_Item_Drop_Fail(item);		//cannot equip
-		if ( !bCanCarry )
+		if ( !fCanCarry )
 			client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_HEAVY));
 	}
 
@@ -718,10 +731,10 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 	uint itemCount = minimum(uiCountFromPacket, g_Cfg.m_iContainerMaxItems);
 
 	// check buying speed
-	const CVarDefCont* vardef = g_Cfg.m_bAllowBuySellAgent ? nullptr : client->m_TagDefs.GetKey("BUYSELLTIME");
+	const CVarDefCont* vardef = g_Cfg.m_fAllowBuySellAgent ? nullptr : client->m_TagDefs.GetKey("BUYSELLTIME");
 	if (vardef != nullptr)
 	{
-		const int64 allowsell = vardef->GetValNum() + (itemCount * 3u);
+		const int64 allowsell = vardef->GetValNum() + (itemCount * 3LL);
 		if (g_World.GetCurrentTime().GetTimeRaw() < allowsell)
 		{
 			client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_BUYFAST));
@@ -1829,7 +1842,7 @@ bool PacketVendorSellReq::onReceive(NetState* net)
 
 	skip(2); // length
 	const CUID vendorSerial(readInt32());
-	const int64 itemCount = readInt16();
+	const uint itemCount = readInt16();
 
 	CChar* vendor = vendorSerial.CharFind();
 	if (vendor == nullptr || vendor->m_pNPC == nullptr || !vendor->NPC_IsVendor())
@@ -1856,10 +1869,10 @@ bool PacketVendorSellReq::onReceive(NetState* net)
 	}
 
 	// check selling speed
-	const CVarDefCont* vardef = g_Cfg.m_bAllowBuySellAgent ? nullptr : client->m_TagDefs.GetKey("BUYSELLTIME");
+	const CVarDefCont* vardef = g_Cfg.m_fAllowBuySellAgent ? nullptr : client->m_TagDefs.GetKey("BUYSELLTIME");
 	if (vardef != nullptr)
 	{
-		int64 allowsell = vardef->GetValNum() + ((itemCount * 3) * MSECS_PER_TENTH);
+		int64 allowsell = vardef->GetValNum() + ((itemCount * 3LL) * MSECS_PER_TENTH);
 		if (g_World.GetCurrentTime() < allowsell)
 		{
 			client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_SELLFAST));
@@ -1867,9 +1880,7 @@ bool PacketVendorSellReq::onReceive(NetState* net)
 		}
 	}
 
-	VendorItem items[MAX_ITEMS_CONT];
-	memset(items, 0, sizeof(items));
-
+    VendorItem items[MAX_ITEMS_CONT] = {};
 	for (uint i = 0; i < itemCount; ++i)
 	{
 		items[i].m_serial = CUID(readInt32());

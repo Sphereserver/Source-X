@@ -51,6 +51,8 @@ Compatibility changes from 0.56d to X1
   keywords will be saved, and those won't be recognized by 56d. If you want to port back the saves, you have to replace in sphereworld.scp the
   keyword SPAWNID with MORE1 in t_spawn_char and t_spawn_item items.
 - Changed: RANGEL returns the lowest range value, while RANGEH returns the highest range value (as it should have been, but it looks like it got changed in 56c or 56d).
+- @(Item)DropOn_Ground now fires BEFORE the new P is set! The new P is stored in the ARGS of the trigger. Prior to this change,
+  the triggers were called after the new P was set.
 - Now t_multi objects will be saved too in spheremultis.scp, along with t_multi_custom. This causes a SAVE FILES INCOMPATIBILITY between x and 56d.
   If you want to port back the saves, you'll need to manually move saved multis from spheremultis.scp to sphereworld.scp.
 - Reworked and added MULTIDEF properties.

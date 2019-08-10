@@ -1864,3 +1864,24 @@ WARNING: Important change!
 - Fixed: Spawned chars weren't unlinked from the spawnitem when tamed (Issue #312).
 - Fixed: SELFREPAIR property having effect also on items which do not have valid MAXHITS.
 - Fixed: DIALOGLIST not working (Issue #314).
+
+10-08-2019, Nolok
+- Added: f_onchar_create_init function in core/serv_triggers.scp; it's called after the client sent the character creation data, but before
+	the character is created server-side (f_onchar_create is called after the creation, so the function arguments are read-only).
+	Function parameters:
+	 Variables:
+	   Read-Write:
+		 ARGN1 --> Feature flags sent by client
+		 ARGN2 --> Character profession (0=Advanced, 1=Warrior, 2=Mage, 3=Blacksmith, 4=Necromancer, 5=Paladin, 6=Samurai, 7=Ninja)
+		 ARGN3 --> Character race (1=Human, 2=Elf, 3=Gargoyle)
+	   Read-Only:
+		 ARGS  --> Account name
+		 ARGO  --> Client creating the character
+	 Return:
+		0 --> Allow character creation (default action)
+		1 --> Deny character creation
+- Fixed: @(Item)DropOn_Ground ARGS not being used, as indicated in the wiki.
+- Changed: @(Item)DropOn_Ground now fires BEFORE the new P is set! The new P is stored in the ARGS of the trigger. Prior to this change,
+	the triggers were called after the new P was set.
+- Added: In @(Item)DropOn_Ground, ARGN2 value is now == 1 if the trigger is called during a BOUNCE check (the char is overloaded and the item is being dropped on ground).
+- Fixed: @(Item)DropOn_Ground not firing when, during a BOUNCE check, the char was overloaded and the item was being dropped on ground (Issue #295).

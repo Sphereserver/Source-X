@@ -2959,7 +2959,7 @@ bool CChar::Spell_CastDone()
 						break;
 					CItem *pItem = CItem::CreateScript(sm_Item_Bone[i], this);
 					pItem->MoveToCheck(m_Act_p, this);
-					iGet++;
+					++ iGet;
 				}
 				if (!iGet)
 				{

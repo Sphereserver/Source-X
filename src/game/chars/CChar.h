@@ -1100,14 +1100,14 @@ public:
 	bool ItemEquip( CItem * pItem, CChar * pCharMsg = nullptr, bool fFromDClick = false );
 	bool ItemEquipWeapon( bool fForce );
 	bool ItemEquipArmor( bool fForce );
-	bool ItemBounce( CItem * pItem, bool bDisplayMsg = true );
+	bool ItemBounce( CItem * pItem, bool fDisplayMsg = true );
 	bool ItemDrop( CItem * pItem, const CPointMap & pt );
 
 	void Flip();
 	bool SetPoison( int iSkill, int iHits, CChar * pCharSrc );
 	bool SetPoisonCure( int iLevel, bool fExtra );
 	bool CheckCorpseCrime( CItemCorpse *pCorpse, bool fLooting, bool fTest );
-	CItemCorpse * FindMyCorpse( bool ignoreLOS = false, int iRadius = 2) const;
+	CItemCorpse * FindMyCorpse( bool fIgnoreLOS = false, int iRadius = 2) const;
 	CItemCorpse * MakeCorpse( bool fFrontFall );
 	bool RaiseCorpse( CItemCorpse * pCorpse );
 	bool Death();

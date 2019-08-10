@@ -261,8 +261,11 @@ bool CChar::CanCarry( const CItem *pItem ) const
         if (this != pObjTop)    // Aren't we already carrying it ?
             iItemWeight = pItem->GetWeight();
     }
-	else if ( pItem->GetEquipLayer() != LAYER_DRAGGING )		// if we're dragging the item, its weight is already added on char so don't count it again
-		iItemWeight = pItem->GetWeight();
+    else if (pItem->GetEquipLayer() != LAYER_DRAGGING)
+    {
+        // if we're dragging the item, its weight is already added on char so don't count it again
+        iItemWeight = pItem->GetWeight();
+    }
 
     return (GetTotalWeight() + iItemWeight <= g_Cfg.Calc_MaxCarryWeight(this));
 }

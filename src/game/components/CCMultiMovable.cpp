@@ -247,7 +247,7 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta, bool fUpdateViewFull)
     if ( (ptDelta.m_z < 0) && (zNew <= (UO_SIZE_MIN_Z + 3)) )
         return false;
 
-    CPointMap ptMultiOld = pItemThis->GetTopPoint();
+    const CPointMap& ptMultiOld = pItemThis->GetTopPoint();
     CPointMap ptMultiNew(ptMultiOld);
     ptMultiNew += ptDelta;
     CRegionWorld *pRegionOld = dynamic_cast<CRegionWorld*>(ptMultiOld.GetRegion(REGION_TYPE_AREA));

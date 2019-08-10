@@ -92,7 +92,7 @@ bool CPointBase::operator!= ( const CPointBase & pt ) const
 	return ( ! ( *this == pt ));
 }
 
-const CPointBase CPointBase::operator+= ( const CPointBase & pt )
+const CPointBase& CPointBase::operator+= ( const CPointBase & pt )
 {
 	m_x += pt.m_x;
 	m_y += pt.m_y;
@@ -100,7 +100,7 @@ const CPointBase CPointBase::operator+= ( const CPointBase & pt )
 	return( * this );
 }
 
-const CPointBase CPointBase::operator-= ( const CPointBase & pt )
+const CPointBase& CPointBase::operator-= ( const CPointBase & pt )
 {
 	m_x -= pt.m_x;
 	m_y -= pt.m_y;
@@ -198,7 +198,7 @@ int CPointBase::GetDist3D( const CPointBase & pt ) const noexcept // Distance be
 
 bool CPointBase::IsValidZ() const noexcept
 {
-	return( m_z > -UO_SIZE_Z && m_z < UO_SIZE_Z );
+	return ( m_z > -UO_SIZE_Z && m_z < UO_SIZE_Z );
 }
 
 bool CPointBase::IsValidXY() const noexcept
@@ -230,13 +230,15 @@ void CPointBase::ValidatePoint()
 {
 	if ( m_x < 0 )
 		m_x = 0;
-	if (m_x >= (short)(g_MapList.GetX(m_map)))
-		m_x = (short)(g_MapList.GetX(m_map) - 1);
+    const short iMaxX = (short)g_MapList.GetX(m_map);
+	if (m_x >= iMaxX)
+		m_x = iMaxX - 1;
 
 	if ( m_y < 0 )
 		m_y = 0;
-	if (m_y >= (short)(g_MapList.GetY(m_map)))
-		m_y = (short)(g_MapList.GetY(m_map) - 1);
+    const short iMaxY = (short)g_MapList.GetY(m_map);
+	if (m_y >= iMaxY)
+		m_y = iMaxY - 1;
 }
 
 bool CPointBase::IsSame2D( const CPointBase & pt ) const noexcept
@@ -826,7 +828,7 @@ lpctstr CPointBase::WriteUsed() const
 	return WriteUsed( Str_GetTemp() );
 }
 
-size_t CPointBase::Read( tchar * pszVal )
+int CPointBase::Read( tchar * pszVal )
 {
 	ADDTOCALLSTACK("CPointBase::Read");
 	// parse reading the point
@@ -836,7 +838,7 @@ size_t CPointBase::Read( tchar * pszVal )
     ptTest.m_map = 0;
 
 	tchar * ppVal[4];
-	size_t iArgs = Str_ParseCmds( pszVal, ppVal, CountOf( ppVal ), " ,\t" );
+	int iArgs = Str_ParseCmds( pszVal, ppVal, CountOf( ppVal ), " ,\t" );
 	switch ( iArgs )
 	{
 		default:

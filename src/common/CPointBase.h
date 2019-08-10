@@ -44,8 +44,8 @@ public:
 
 	bool operator == ( const CPointBase & pt ) const;
 	bool operator != ( const CPointBase & pt ) const;
-	const CPointBase operator += ( const CPointBase & pt );
-	const CPointBase operator -= ( const CPointBase & pt );
+	const CPointBase& operator += ( const CPointBase & pt );
+	const CPointBase& operator -= ( const CPointBase & pt );
 
 	
 	int GetDistZ( const CPointBase & pt ) const noexcept;
@@ -67,7 +67,7 @@ public:
 
 	void Set( const CPointBase & pt );
 	void Set( short x, short y, char z = 0, uchar map = 0 );
-	size_t Read( tchar * pVal );
+	int Read( tchar * pVal );
 
 	tchar * WriteUsed( tchar * pszBuffer ) const;
 	lpctstr WriteUsed() const;

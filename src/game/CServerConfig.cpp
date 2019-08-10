@@ -247,7 +247,7 @@ CServerConfig::CServerConfig()
 	m_bAllowLightOverride	= true;
 	m_bAllowNewbTransfer	= false;
 	m_sZeroPoint			= "1323,1624,0";
-	m_bAllowBuySellAgent	= false;
+	m_fAllowBuySellAgent	= false;
 
 	m_iColorNotoGood			= 0x59;		// blue
 	m_iColorNotoGuildSame		= 0x3f;		// green
@@ -402,7 +402,7 @@ enum RC_TYPE
 	RC_ACCTFILES,				// m_sAcctBaseDir
 	RC_ADVANCEDLOS,				// m_iAdvancedLos
 	RC_AGREE,
-	RC_ALLOWBUYSELLAGENT,		// m_bAllowBuySellAgent
+	RC_ALLOWBUYSELLAGENT,		// m_fAllowBuySellAgent
 	RC_ALLOWLIGHTOVERRIDE,		// m_bAllowLightOverride
 	RC_ALLOWNEWBTRANSFER,		// m_bAllowNewbTransfer
 	RC_ARCHERYMAXDIST,			// m_iArcheryMaxDist
@@ -649,7 +649,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "ACCTFILES",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sAcctBaseDir),			0 }},
 	{ "ADVANCEDLOS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAdvancedLos),			0 }},
 	{ "AGREE",					{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAgree),				0 }},
-	{ "ALLOWBUYSELLAGENT",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAllowBuySellAgent),	0 }},
+	{ "ALLOWBUYSELLAGENT",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fAllowBuySellAgent),	0 }},
 	{ "ALLOWLIGHTOVERRIDE",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAllowLightOverride),	0 }},
 	{ "ALLOWNEWBTRANSFER",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAllowNewbTransfer),	0 }},
 	{ "ARCHERYMAXDIST",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iArcheryMaxDist),		0 }},

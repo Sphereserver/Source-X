@@ -1369,19 +1369,19 @@ void CItem::SetDecayTime(int64 iMsecsTimeout)
 	// 0 = default (decay on the next tick)
 	// -1 = set none. (clear it)
 
-	if ( IsTimerSet() && ! IsAttr(ATTR_DECAY))
+	if (IsTimerSet() && ! IsAttr(ATTR_DECAY))
 	{
 		return;	// already a timer here. let it expire on it's own
 	}
-	if ( !iMsecsTimeout)
+	if (iMsecsTimeout == 0)
 	{
-		if ( IsTopLevel())
+		if (IsTopLevel())
             iMsecsTimeout = GetDecayTime();
 		else
             iMsecsTimeout = -1;
 	}
 	SetTimeout(iMsecsTimeout);
-	if (iMsecsTimeout != -1 )
+	if (iMsecsTimeout >= 0)
 		SetAttr(ATTR_DECAY);
 	else
 		ClrAttr(ATTR_DECAY);
@@ -1484,14 +1484,12 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	else
 		ptNewPlace.ValidatePoint();
 
-	MoveTo(ptNewPlace);
-
 	llong iDecayTime = GetDecayTime();
 	if ( iDecayTime > 0 )
 	{
 		const CRegion * pRegion = ptNewPlace.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA|REGION_TYPE_ROOM);
 		if ( pRegion != nullptr && pRegion->IsFlag(REGION_FLAG_NODECAY) )
-			iDecayTime = -1;
+			iDecayTime = -1 * MSECS_PER_SEC;
 	}
 
 	TRIGRET_TYPE ttResult = TRIGRET_RET_DEFAULT;
@@ -1499,13 +1497,24 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	{
 		CScriptTriggerArgs args;
 		args.m_iN1 = iDecayTime / MSECS_PER_TENTH;  // ARGN1 = Decay time for the dropped item (in tenths of second)
+        //args.m_iN2 = 0;
+        args.m_s1 = ptNewPlace.WriteUsed();
 		ttResult = OnTrigger(ITRIG_DROPON_GROUND, pCharMover, &args);
 
 		if ( IsDeleted() )
 			return false;
 
 		iDecayTime = args.m_iN1 * MSECS_PER_TENTH;
+
+        CPointMap ptChanged;
+        ptChanged.Read(const_cast<lpstr>(args.m_s1.GetPtr()));
+        if (!ptChanged.IsValidPoint())
+            g_Log.EventError("Trying to override item drop P with an invalid P. Using the original one.\n");
+        else
+            ptNewPlace = ptChanged;
 	}
+
+    MoveTo(ptNewPlace);
 
 	if ( ttResult != TRIGRET_RET_TRUE )
 	{

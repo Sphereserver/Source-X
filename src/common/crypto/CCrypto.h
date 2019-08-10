@@ -47,15 +47,15 @@ enum ENCRYPTION_TYPE
 
 class CHuffman
 {
-private:
-	static const word sm_xCompress_Base[COMPRESS_TREE_SIZE];
 public:
-	static const char *m_sClassName;
-	
-	static uint Compress( byte * pOutput, const byte * pInput, uint outLen, uint inLen );
+    static const char* m_sClassName;
+    CHuffman() = default;
 
-public:
-	CHuffman() { };
+    static uint Compress(byte* pOutput, const byte* pInput, uint outLen, uint inLen);
+
+private:
+	static const word sm_xCompress_Base[COMPRESS_TREE_SIZE];	
+
 private:
 	CHuffman(const CHuffman& copy);
 	CHuffman& operator=(const CHuffman& other);

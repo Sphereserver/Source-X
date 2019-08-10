@@ -35,6 +35,7 @@ Packet::Packet(const byte* data, uint size) : m_buffer(nullptr)
 	clear();
 	m_expectedLength = 0;
 	resize(size);
+    ASSERT(m_buffer);
 	memcpy(m_buffer, data, size);
 }
 

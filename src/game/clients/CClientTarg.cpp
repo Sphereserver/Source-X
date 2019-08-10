@@ -608,7 +608,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 				CPointMap ptMove = pItem->GetTopPoint();
 				ptMove += ptNudge;
 				pItem->MoveToCheck( ptMove );
-				iCount++;
+				++iCount;
 			}
 
 			CWorldSearch AreaChar( ptCtr, iRadius );

@@ -1857,7 +1857,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 // We can't put this where we want to
 // So put in my pack if i can. else drop.
 // don't check where this came from !
-bool CChar::ItemBounce( CItem * pItem, bool bDisplayMsg )
+bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
 {
 	ADDTOCALLSTACK("CChar::ItemBounce");
 	if ( pItem == nullptr )
@@ -1914,15 +1914,47 @@ bool CChar::ItemBounce( CItem * pItem, bool bDisplayMsg )
 			pItem->Delete();
 			return false;
 		}
+        
+        int64 iDecayTime = pItem->GetDecayTime();
+        CPointMap ptDrop(GetTopPoint());
+        TRIGRET_TYPE ttResult = TRIGRET_RET_DEFAULT;
+        if (IsTrigUsed(TRIGGER_DROPON_GROUND) || IsTrigUsed(TRIGGER_ITEMDROPON_GROUND))
+        {
+            CScriptTriggerArgs args;
+            args.m_iN1 = iDecayTime / MSECS_PER_TENTH;  // ARGN1 = Decay time for the dropped item (in tenths of second)
+            args.m_iN2 = 1;
+            args.m_s1 = ptDrop.WriteUsed();
+            ttResult = pItem->OnTrigger(ITRIG_DROPON_GROUND, this, &args);
 
-		pszWhere = g_Cfg.GetDefaultMsg(DEFMSG_MSG_FEET);
-        bDisplayMsg = true;
-		pItem->RemoveFromView();
-	    pItem->MoveToDecay(GetTopPoint(), pItem->GetDecayTime());	// drop it on ground
+            if (IsDeleted())
+                return false;
+
+            iDecayTime = args.m_iN1 * MSECS_PER_TENTH;
+
+            CPointMap ptDropNew;
+            ptDropNew.Read(const_cast<lpstr>(args.m_s1.GetPtr()));
+            if (!ptDropNew.IsValidPoint())
+                g_Log.EventError("Trying to override item drop P with an invalid P. Using the original one.\n");
+            else
+                ptDrop = ptDropNew;
+        }
+
+        if (ttResult == TRIGRET_RET_TRUE)
+        {
+            if (pItem->IsTopLevel())
+                g_Log.EventError("Can't prevent BOUNCEing to ground an item which hasn't a previous container.\n");
+            else
+                return false;
+        }
+
+        pszWhere = g_Cfg.GetDefaultMsg(DEFMSG_MSG_FEET);
+        fDisplayMsg = true;
+        pItem->RemoveFromView();
+	    pItem->MoveToDecay(GetTopPoint(), iDecayTime);	// drop it on ground
 	}
 
 	Sound(pItem->GetDropSound(pPack));
-	if ( bDisplayMsg )
+	if (fDisplayMsg)
 		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ITEMPLACE ), pItem->GetName(), pszWhere );
 	return true;
 }
@@ -1962,7 +1994,7 @@ bool CChar::ItemDrop( CItem * pItem, const CPointMap & pt )
 				return false;
 			}
 		}
-		return( pItem->MoveToCheck( ptStack, this ));	// don't flip the item if it got stacked
+		return pItem->MoveToCheck( ptStack, this );	// don't flip the item if it got stacked
 	}
 
 	// Does this item have a flipped version?
@@ -2181,13 +2213,14 @@ bool CChar::Reveal( uint64 iFlags )
 	if ( !IsStatFlag(iFlags) )
 		return false;
 
-	if ( IsClient() && GetClient()->m_pHouseDesign )
+    CClient* pClient = IsClient() ? GetClient() : nullptr;
+	if (pClient && pClient->m_pHouseDesign)
 	{
 		// No reveal whilst in house design (unless they somehow got out)
-		if ( GetClient()->m_pHouseDesign->GetDesignArea().IsInside2d(GetTopPoint()) )
+		if (pClient->m_pHouseDesign->GetDesignArea().IsInside2d(GetTopPoint()) )
 			return false;
 
-		GetClient()->m_pHouseDesign->EndCustomize(true);
+        pClient->m_pHouseDesign->EndCustomize(true);
 	}
 
 	if ( (iFlags & STATF_SLEEPING) && IsStatFlag(STATF_SLEEPING) )
@@ -2210,7 +2243,6 @@ bool CChar::Reveal( uint64 iFlags )
 	}
 
 	StatFlag_Clear(iFlags);
-	CClient *pClient = GetClient();
 	if ( pClient )
 	{
 		if ( !IsStatFlag(STATF_HIDDEN|STATF_INSUBSTANTIAL) )

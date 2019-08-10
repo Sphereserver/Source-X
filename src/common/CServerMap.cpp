@@ -483,7 +483,7 @@ void CServerMapBlock::Load( int bx, int by )
 				MapAddress pMapAddress = g_Install.m_UopMapAddress[iMapNumber][i];
 				if (( ulBlockIndex <= pMapAddress.dwLastBlock ) && ( ulBlockIndex >= pMapAddress.dwFirstBlock ))
 				{
-					fileOffset = (dword)(pMapAddress.qwAdress + ((ulBlockIndex - pMapAddress.dwFirstBlock)*196));
+					fileOffset = (dword)(pMapAddress.qwAdress + ((ulBlockIndex - pMapAddress.dwFirstBlock)*196LL));
 					break;
 				}
 			}

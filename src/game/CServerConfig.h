@@ -508,7 +508,7 @@ public:
 	int64   _iTimerCall;            // Amount of minutes (converted to milliseconds internally) to call f_onserver_timer (0 disables this, default).
 	bool    m_bAllowLightOverride;  // Allow manual sector light override?
 	CSString m_sZeroPoint;          // Zero point for sextant coordinates counting. Comment this line out if you are not using ML-sized maps.
-	bool    m_bAllowBuySellAgent;   // Allow rapid Buy/Sell through Buy/Sell agent.
+	bool    m_fAllowBuySellAgent;   // Allow rapid Buy/Sell through Buy/Sell agent.
 
 	bool    m_bAllowNewbTransfer;   // Set to 1 for items to keep their attr_newbie flag when item is transfered to an NPC.
 
