@@ -726,7 +726,7 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 		return true;
 	}
 
-    VendorItem items[MAX_ITEMS_CONT] = {0};
+    VendorItem items[MAX_ITEMS_CONT] = {};
     const uint uiCountFromPacket = (packetLength - 8u) / 7u;
 	uint itemCount = minimum(uiCountFromPacket, g_Cfg.m_iContainerMaxItems);
 
@@ -762,9 +762,9 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 		uint index;
 		for (index = 0; index < itemCount; ++index)
 		{
-			if (serial == items[index].m_serial)
+			if (serial == items[index].m_serial) //If the serials are the same, that means the items come from the same stack.
 				break;
-			else if (items[index].m_serial.GetPrivateUID() == 0)
+			else if (!items[index].m_serial.IsValidUID())
 			{
 				items[index].m_serial = serial;
 				items[index].m_price = item->GetVendorPrice(iConvertFactor);
