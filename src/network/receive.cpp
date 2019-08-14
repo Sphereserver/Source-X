@@ -726,7 +726,7 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 		return true;
 	}
 
-    VendorItem items[MAX_ITEMS_CONT] = {};
+    VendorItem items[MAX_ITEMS_CONT] = {0};
     const uint uiCountFromPacket = (packetLength - 8u) / 7u;
 	uint itemCount = minimum(uiCountFromPacket, g_Cfg.m_iContainerMaxItems);
 
