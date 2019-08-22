@@ -105,7 +105,7 @@ NetworkManager::NetworkManager(void)
 {
 	m_states = nullptr;
 	m_stateCount = 0;
-	m_lastGivenSlot = INTPTR_MAX;
+	m_lastGivenSlot = -1;
 	m_isThreaded = false;
 }
 
@@ -287,18 +287,18 @@ void NetworkManager::acceptNewConnection(void)
 	EXC_CATCH;
 }
 
-NetState* NetworkManager::findFreeSlot(size_t start)
+NetState* NetworkManager::findFreeSlot(int start)
 {
 	// find slot for new client
 	ADDTOCALLSTACK("NetworkManager::findFreeSlot");
 
 	// start searching from the last given slot to try and give incremental
 	// ids to clients
-	if (start == INTPTR_MAX)
+	if (start == -1)
 		start = m_lastGivenSlot + 1;
 
 	// find unused slot
-	for (size_t i = start; i < m_stateCount; ++i)
+	for (int i = start; i < m_stateCount; ++i)
 	{
 		if (m_states[i]->isInUse())
 			continue;
@@ -323,8 +323,8 @@ void NetworkManager::start(void)
 	ASSERT(m_states == nullptr);
 	ASSERT(m_stateCount == 0);
 	m_states = new NetState*[g_Cfg.m_iClientsMax];
-	for (size_t l = 0; l < g_Cfg.m_iClientsMax; ++l)
-		m_states[l] = new NetState((int)l);
+	for (int l = 0; l < g_Cfg.m_iClientsMax; ++l)
+		m_states[l] = new NetState(l);
 	m_stateCount = g_Cfg.m_iClientsMax;
 
 	DEBUGNETWORK(("Created %" PRIuSIZE_T " network slots (system limit of %d clients)\n", m_stateCount, FD_SETSIZE));
@@ -378,7 +378,7 @@ void NetworkManager::tick(void)
 	ADDTOCALLSTACK("NetworkManager::tick");
 
 	EXC_TRY("Tick");
-	for (size_t i = 0; i < m_stateCount; ++i)
+	for (int i = 0; i < m_stateCount; ++i)
 	{
 		NetState* state = m_states[i];
 		if (state->isInUse() == false)
@@ -707,7 +707,7 @@ void NetworkInput::receiveData()
 			continue;
 
 		EXC_SET_BLOCK("start network profile");
-		ProfileTask networkTask(PROFILE_NETWORK_RX);
+		const ProfileTask networkTask(PROFILE_NETWORK_RX);
 		if ( ! FD_ISSET(state->m_socket.GetSocket(), &fds))
 		{
 			state->m_incoming.rawPackets.clean();
@@ -770,7 +770,7 @@ void NetworkInput::processData()
 			continue;
 
 		EXC_SET_BLOCK("start network profile");
-		ProfileTask networkTask(PROFILE_NETWORK_RX);
+		const ProfileTask networkTask(PROFILE_NETWORK_RX);
 
 		const CClient* client = state->getClient();
 		ASSERT(client != nullptr);
@@ -778,11 +778,12 @@ void NetworkInput::processData()
 		EXC_SET_BLOCK("check message");
 		if (state->m_incoming.rawPackets.empty())
 		{
-			if ((client->GetConnectType() != CONNECT_TELNET) && (client->GetConnectType() != CONNECT_AXIS))
+            const CONNECT_TYPE connecttype = client->GetConnectType();
+			if ((connecttype != CONNECT_TELNET) && (connecttype != CONNECT_AXIS))
 			{
 				// check for timeout
 				EXC_SET_BLOCK("check frozen");
-				int64 iLastEventDiff = -g_World.GetTimeDiff( client->m_timeLastEvent );
+				const int64 iLastEventDiff = -g_World.GetTimeDiff( client->m_timeLastEvent );
 				if ( g_Cfg.m_iDeadSocketTime > 0 && iLastEventDiff > g_Cfg.m_iDeadSocketTime )
 				{
 					g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Frozen client disconnected (DeadSocketTime reached).\n", state->id());
@@ -826,7 +827,7 @@ void NetworkInput::processData()
 		if (g_Serv.IsLoading() == false)
 		{
 			EXC_SET_BLOCK("start client profile");
-			ProfileTask clientTask(PROFILE_CLIENTS);
+			const ProfileTask clientTask(PROFILE_CLIENTS);
 
 			EXC_SET_BLOCK("packets - process");
 			Packet* buffer = state->m_incoming.rawBuffer;
@@ -1075,37 +1076,39 @@ bool NetworkInput::processOtherClientData(NetState* state, Packet* buffer)
 	switch (client->GetConnectType())
 	{
 	case CONNECT_CRYPT:
-		if (buffer->getRemainingLength() < 5)
-		{
-			// not enough data to be a real client
-			EXC_SET_BLOCK("ping #3");
-			client->SetConnectType(CONNECT_UNK);
-			if (client->OnRxPing(buffer->getRemainingData(), buffer->getRemainingLength()) == false)
-				return false;
-			break;
-		}
+    {
+        if (buffer->getRemainingLength() < 5)
+        {
+            // not enough data to be a real client
+            EXC_SET_BLOCK("ping #3");
+            client->SetConnectType(CONNECT_UNK);
+            if (client->OnRxPing(buffer->getRemainingData(), buffer->getRemainingLength()) == false)
+                return false;
+            break;
+        }
 
-		// first real data from client which we can use to log in
-		EXC_SET_BLOCK("encryption setup");
-		ASSERT(buffer->getRemainingLength() <= sizeof(CEvent));
+        // first real data from client which we can use to log in
+        EXC_SET_BLOCK("encryption setup");
+        ASSERT(buffer->getRemainingLength() <= sizeof(CEvent));
 
-		CEvent evt;
-		memcpy(&evt, buffer->getRemainingData(), buffer->getRemainingLength());
+        std::unique_ptr<CEvent> evt = std::make_unique<CEvent>();
+        memcpy(evt.get(), buffer->getRemainingData(), buffer->getRemainingLength());
 
-		if (evt.Default.m_Cmd == XCMD_EncryptionReply && state->isClientKR())
-		{
-			EXC_SET_BLOCK("encryption reply");
+        if (evt->Default.m_Cmd == XCMD_EncryptionReply && state->isClientKR())
+        {
+            EXC_SET_BLOCK("encryption reply");
 
-			// receiving response to 0xE3 packet
-			size_t iEncKrLen = evt.EncryptionReply.m_len;
-			if (buffer->getRemainingLength() < iEncKrLen)
-				return false; // need more data
+            // receiving response to 0xE3 packet
+            uint iEncKrLen = evt->EncryptionReply.m_len;
+            if (buffer->getRemainingLength() < iEncKrLen)
+                return false; // need more data
 
-			buffer->skip((int)(iEncKrLen));
-			return true;
-		}
+            buffer->skip(iEncKrLen);
+            return true;
+        }
 
-		client->xProcessClientSetup(&evt, buffer->getRemainingLength());
+        client->xProcessClientSetup(evt.get(), buffer->getRemainingLength());
+    }
 		break;
 
 	case CONNECT_HTTP:
@@ -1146,32 +1149,38 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 	CClient* client = state->getClient();
 	ASSERT(client != nullptr);
 
-	if (buffer->getRemainingLength() > INT8_MAX)
+    bool fHTTPReq = false;
+    const uint uiOrigRemainingLength = buffer->getRemainingLength();
+    const byte* const pOrigRemainingData = buffer->getRemainingData();
+    if (state->m_seeded == false)
+    {
+        fHTTPReq =  (uiOrigRemainingLength >= 5 && memcmp(pOrigRemainingData, "GET /", 5) == 0) ||
+                    (uiOrigRemainingLength >= 6 && memcmp(pOrigRemainingData, "POST /", 6) == 0);
+    }
+	if (!fHTTPReq && (uiOrigRemainingLength > INT8_MAX))
 	{
-		g_Log.EventWarn("%x:Client connected with a seed length of %" PRIuSIZE_T " exceeding max length limit of %d, disconneting.\n", state->id(), buffer->getRemainingLength(), INT8_MAX);
+		g_Log.EventWarn("%x:Client connected with a seed length of %u exceeding max length limit of %d, disconnecting.\n", state->id(), uiOrigRemainingLength, INT8_MAX);
 		return false;
 	}
 
 	if (state->m_seeded == false)
 	{
 		// check for HTTP connection
-		if ((buffer->getRemainingLength() >= 5 && memcmp(buffer->getRemainingData(), "GET /", 5) == 0) ||
-			(buffer->getRemainingLength() >= 6 && memcmp(buffer->getRemainingData(), "POST /", 6) == 0))
+		if (fHTTPReq)
 		{
 			EXC_SET_BLOCK("http request");
 			if (g_Cfg.m_fUseHTTP != 2)
 				return false;
 
 			client->SetConnectType(CONNECT_HTTP);
-			if (client->OnRxWebPageRequest(buffer->getRemainingData(), buffer->getRemainingLength()) == false)
-				return false;
+            client->OnRxWebPageRequest(buffer->getRemainingData(), uiOrigRemainingLength);
 
 			buffer->seek(buffer->getLength());
 			return true;
 		}
 
 		// check for new seed (sometimes it's received on its own)
-		else if (buffer->getRemainingLength() == 1 && buffer->getRemainingData()[0] == XCMD_NewSeed)
+		else if (uiOrigRemainingLength == 1 && pOrigRemainingData[0] == XCMD_NewSeed)
 		{
 			state->m_newseed = true;
 			buffer->skip(1);
@@ -1179,10 +1188,10 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 		}
 
 		// check for ping data
-		else if (buffer->getRemainingLength() < 4)
+		else if (uiOrigRemainingLength < 4)
 		{
 			EXC_SET_BLOCK("ping #1");
-			if (client->OnRxPing(buffer->getRemainingData(), buffer->getRemainingLength()) == false)
+			if (client->OnRxPing(pOrigRemainingData, uiOrigRemainingLength) == false)
 				state->markReadClosed();
 
 			buffer->seek(buffer->getLength());
@@ -1194,8 +1203,8 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 		EXC_SET_BLOCK("game client seed");
 		dword seed = 0;
 
-		DEBUGNETWORK(("%x:Client connected with a seed length of %" PRIuSIZE_T " ([0]=0x%x)\n", state->id(), buffer->getRemainingLength(), (int)(buffer->getRemainingData()[0])));
-		if (state->m_newseed || (buffer->getRemainingData()[0] == XCMD_NewSeed && buffer->getRemainingLength() >= NETWORK_SEEDLEN_NEW))
+		DEBUGNETWORK(("%x:Client connected with a seed length of %u ([0]=0x%x)\n", state->id(), uiOrigRemainingLength, (int)(pOrigRemainingData[0])));
+		if (state->m_newseed || (pOrigRemainingData[0] == XCMD_NewSeed && uiOrigRemainingLength >= NETWORK_SEEDLEN_NEW))
 		{
 			DEBUGNETWORK(("%x:Receiving new client login handshake.\n", state->id()));
 
@@ -1222,7 +1231,7 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 				DEBUGNETWORK(("%x:Not enough data received to be a valid handshake (%" PRIuSIZE_T ").\n", state->id(), buffer->getRemainingLength()));
 			}
 		}
-		else if(buffer->getRemainingData()[0] == XCMD_UOGRequest && buffer->getRemainingLength() == 8)
+		else if(pOrigRemainingData[0] == XCMD_UOGRequest && uiOrigRemainingLength == 8)
 		{
 			DEBUGNETWORK(("%x:Receiving new UOG status request.\n", state->id()));
 			buffer->skip(7);
@@ -1263,13 +1272,13 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 		return true;
 	}
 
-	if (buffer->getRemainingLength() < 5)
+	if (uiOrigRemainingLength < 5)
 	{
 		// client has a seed assigned but hasn't send enough data to be anything useful,
 		// some programs (ConnectUO) send a fake seed when really they're just sending
 		// ping data
 		EXC_SET_BLOCK("ping #2");
-		if (client->OnRxPing(buffer->getRemainingData(), buffer->getRemainingLength()) == false)
+		if (client->OnRxPing(pOrigRemainingData, uiOrigRemainingLength) == false)
 			return false;
 
 		buffer->seek(buffer->getLength());
@@ -1279,7 +1288,7 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 	// process login packet for client
 	EXC_SET_BLOCK("messages  - setup");
 	client->SetConnectType(CONNECT_CRYPT);
-	client->xProcessClientSetup(reinterpret_cast<CEvent*>(buffer->getRemainingData()), buffer->getRemainingLength());
+	client->xProcessClientSetup(reinterpret_cast<CEvent*>(buffer->getRemainingData()), uiOrigRemainingLength);
 	buffer->seek(buffer->getLength());
 	return true;
 
@@ -1314,7 +1323,7 @@ bool NetworkOutput::processOutput()
 	ASSERT(!m_thread->isActive() || m_thread->isCurrentThread());
 #endif
 
-	ProfileTask networkTask(PROFILE_NETWORK_TX);
+	const ProfileTask networkTask(PROFILE_NETWORK_TX);
 
 	static uchar tick = 0;
 	EXC_TRY("NetworkOutput");
@@ -1940,9 +1949,10 @@ NetState* NetworkThreadStateIterator::next(void)
 	{
 		// current thread, we can use the thread's state list directly
 		// find next non-null state
-		while (m_nextIndex < m_thread->m_states.size())
+        const int sz = int(m_thread->m_states.size());
+		while (m_nextIndex < sz)
 		{
-			NetState* state = m_thread->m_states.at(m_nextIndex);
+			NetState* state = m_thread->m_states[m_nextIndex];
 			++m_nextIndex;
 
 			if (state != nullptr)

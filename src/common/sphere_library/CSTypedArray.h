@@ -6,12 +6,8 @@
 #ifndef _INC_CSTYPEDARRAY_H
 #define _INC_CSTYPEDARRAY_H
 
-#include <cstring>
-#include <cstdint>
-
-#include <vector>
-
 #include "../assertion.h"
+#include "CSSortedVector.h"
 
 /**
 * @brief Typed Array:
@@ -79,13 +75,12 @@ public:
     /** @name Index Validation:
     */
     ///@{
-    size_t BadIndex() const;
     /**
     * @brief Check if index is valid for this array.
     * @param i index to check.
     * @return true if index is valid, false otherwise.
     */
-    bool IsValidIndex( size_t i ) const;
+    inline bool IsValidIndex( size_t i ) const;
     ///@}
 };
 
@@ -105,8 +100,6 @@ CSTypedArray<TYPE> & CSTypedArray<TYPE>::operator=( const CSTypedArray<TYPE> & a
     return *this;
 }
 
-// CSTypedArray:: Element access.
-
 // CSTypedArray:: Modifiers.
 
 template<class TYPE>
@@ -119,7 +112,7 @@ size_t CSTypedArray<TYPE>::push_back(TYPE newElement)
 template<class TYPE>
 void CSTypedArray<TYPE>::insert(size_t nIndex, TYPE newElement)
 {	// Bump the existing entry here forward.
-    ASSERT(nIndex != this->BadIndex());
+    ASSERT(nIndex != SCONT_BADINDEX);
     std::vector<TYPE>::emplace(std::vector<TYPE>::begin() + nIndex, newElement);
 }
 
@@ -144,7 +137,7 @@ void CSTypedArray<TYPE>::assign(size_t nIndex, TYPE newElement)
 template<class TYPE>
 void CSTypedArray<TYPE>::assign_at_grow(size_t nIndex, TYPE newElement)
 {
-    ASSERT(nIndex != this->BadIndex());
+    ASSERT(nIndex != SCONT_BADINDEX);
 
     if ( ! IsValidIndex(nIndex))
         std::vector<TYPE>::resize(nIndex + 1);
@@ -153,13 +146,6 @@ void CSTypedArray<TYPE>::assign_at_grow(size_t nIndex, TYPE newElement)
 
 
 // CSTypedArray:: Operations.
-
-template<class TYPE>
-inline size_t CSTypedArray<TYPE>::BadIndex() const
-{
-    return INTPTR_MAX;
-}
-
 
 template<class TYPE>
 bool CSTypedArray<TYPE>::IsValidIndex( size_t i ) const

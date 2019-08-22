@@ -14,12 +14,13 @@ CItemMessage::~CItemMessage()
     UnLoadSystemPages();
 }
 
-lpctstr const CItemMessage::sm_szLoadKeys[CIC_QTY+1] = {
+lpctstr constexpr CItemMessage::sm_szLoadKeys[CIC_QTY+1] =
+{
     "AUTHOR",
     "BODY",
     "PAGES",	// (W)
     "TITLE",	// same as name
-    nullptr,
+    nullptr
 };
 
 void CItemMessage::r_Write(CScript & s)
@@ -73,50 +74,51 @@ bool CItemMessage::r_LoadVal(CScript &s)
     return false;
 }
 
-bool CItemMessage::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc)
+bool CItemMessage::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CItemMessage::r_WriteVal");
     EXC_TRY("WriteVal");
-        // Load the message body for a book or a bboard message.
-        if ( !strnicmp(pszKey, "BODY", 4) )
-        {
-            pszKey += 4;
-            size_t iPage = Exp_GetVal(pszKey);
-            if ( m_sBodyLines.IsValidIndex(iPage) == false )
-                return false;
-            sVal = *m_sBodyLines[iPage];
-            return true;
-        }
+    // Load the message body for a book or a bboard message.
+    if (!strnicmp(ptcKey, "BODY", 4))
+    {
+        ptcKey += 4;
+        uint uiPage = Exp_GetUVal(ptcKey);
+        if (m_sBodyLines.IsValidIndex(uiPage) == false)
+            return false;
+        sVal = *m_sBodyLines[uiPage];
+        return true;
+    }
 
-        switch ( FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1) )
-        {
-            case CIC_AUTHOR:
-                sVal = m_sAuthor;
-                return true;
-            case CIC_BODY:		// handled above
-                return false;
-            case CIC_PAGES:		// not settable (used for resource stuff)
-                sVal.FormatSTVal(m_sBodyLines.size());
-                return true;
-            case CIC_TITLE:
-                sVal = GetName();
-                return true;
-        }
-        return CItemVendable::r_WriteVal(pszKey, sVal, pSrc);
+    switch (FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1))
+    {
+        case CIC_AUTHOR:
+            sVal = m_sAuthor;
+            return true;
+        case CIC_BODY:		// handled above
+            return false;
+        case CIC_PAGES:		// not settable (used for resource stuff)
+            sVal.FormatSTVal(m_sBodyLines.size());
+            return true;
+        case CIC_TITLE:
+            sVal = GetName();
+            return true;
+    }
+    return (fNoCallParent ? false : CItemVendable::r_WriteVal(ptcKey, sVal, pSrc));
     EXC_CATCH;
 
     EXC_DEBUG_START;
-            EXC_ADD_KEYRET(pSrc);
+    EXC_ADD_KEYRET(pSrc);
     EXC_DEBUG_END;
     return false;
 }
 
-lpctstr const CItemMessage::sm_szVerbKeys[] =
-        {
-                "ERASE",
-                "PAGE",
-                nullptr,
-        };
+lpctstr constexpr CItemMessage::sm_szVerbKeys[] =
+{
+    "ERASE",
+    "PAGE",
+    nullptr
+};
 
 bool CItemMessage::r_Verb(CScript & s, CTextConsole *pSrc)
 {
@@ -140,7 +142,7 @@ bool CItemMessage::r_Verb(CScript & s, CTextConsole *pSrc)
         }
         if ( s.IsKeyHead("PAGE", 4) )
         {
-            word wPage = (word)ATOI(s.GetKey() + 4);
+            word wPage = (word)atoi(s.GetKey() + 4);
             if ( wPage <= 0 )
                 return false;
 

@@ -14,7 +14,7 @@ int CEventLog::VEvent(dword dwMask, lpctstr pszFormat, va_list args)
     tchar* pszTemp = static_cast<tchar *>(tsTemp);
     size_t len = vsnprintf(pszTemp, (SCRIPT_MAX_LINE_LEN - 1), pszFormat, args);
     if (! len)
-        strncpy(pszTemp, pszFormat, (SCRIPT_MAX_LINE_LEN - 1));
+        Str_CopyLimitNull(pszTemp, pszFormat, (SCRIPT_MAX_LINE_LEN - 1));
 
     // This get rids of exploits done sending 0x0C to the log subsytem.
     // tchar *	 pFix;
@@ -387,7 +387,7 @@ void _cdecl CLog::CatchStdException(const std::exception * pExc, lpctstr pszCatc
     va_list vargs;
     va_start(vargs, pszCatchContext);
     size_t iLen = vsnprintf(szMsg, sizeof(szMsg), pszCatchContext, vargs);
-    strncat(szMsg, "\n", sizeof(szMsg)-iLen);
+    Str_ConcatLimitNull(szMsg, "\n", sizeof(szMsg)-iLen);
     va_end(vargs);
     EventStr(LOGL_CRIT, szMsg);
 

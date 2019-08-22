@@ -28,7 +28,7 @@
 #include "CCharNPC.h"
 
 
-lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
+lpctstr constexpr CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
 	"@AfterClick",
@@ -59,7 +59,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@DeathCorpse",
 	"@Destroy",				//+I am nearly destroyed
 	"@Dismount",			// I am trying to get rid of my ride right now
-	//"@Dye",					// My color has been changed
+	"@Dye",					// My color has been changed
 	"@Eat",
 	"@EffectAdd",
 	"@EffectRemove",
@@ -216,8 +216,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@UserVirtue",
 	"@UserVirtueInvoke",
 	"@UserWarmode",	        // War mode ?
-	
-        nullptr
+    nullptr
 };
 
 
@@ -249,7 +248,6 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 
 	if ( g_World.m_fSaveParity )
 		StatFlag_Set(STATF_SAVEPARITY);	// It will get saved next time.
-	m_UIDLastNewItem.InitUID();
 	m_dirFace = DIR_SE;
 	m_fonttype = FONT_NORMAL;
 	m_SpeechHueOverride = 0;
@@ -1333,7 +1331,7 @@ height_t CChar::GetHeight() const
 
     // This is SLOW (since this method is called very frequently)! Move those defs value to CharDef!
 	char * heightDef = Str_GetTemp();
-    uint uiDispID = (uint)pCharDef->GetDispID();
+    const uint uiDispID = (uint)pCharDef->GetDispID();
 
 	sprintf(heightDef, "height_0%x", uiDispID);
 	tmpHeight = (height_t)(g_Exp.m_VarDefs.GetKeyNum(heightDef));
@@ -1465,7 +1463,6 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 {
 	ADDTOCALLSTACK("CChar::InitPlayer");
 	ASSERT(pClient);
-	UNREFERENCED_PARAMETER(prProf);
 
 	CAccount *pAccount = pClient->GetAccount();
 	if ( pAccount )
@@ -1490,7 +1487,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 	// Set name
 	bool fNameIsAccepted = true;
 	tchar *zCharName = Str_GetTemp();
-    strncpynull(zCharName, pszCharname, MAX_NAME_SIZE);
+    Str_CopyLimitNull(zCharName, pszCharname, MAX_NAME_SIZE);
 
 	if ( !strlen(zCharName) || g_Cfg.IsObscene(zCharName) || Str_CheckName(zCharName) ||!strnicmp(zCharName, "lord ", 5) || !strnicmp(zCharName, "lady ", 5) ||
 		!strnicmp(zCharName, "seer ", 5) || !strnicmp(zCharName, "gm ", 3) || !strnicmp(zCharName, "admin ", 6) || !strnicmp(zCharName, "counselor ", 10) )
@@ -1591,7 +1588,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 
 		case RACETYPE_ELF:
 		{
-			static const int sm_ElfSkinHues[] =
+			static constexpr int sm_ElfSkinHues[] =
 			{
 				0x0BF, 0x24D, 0x24E, 0x24F, 0x353, 0x361, 0x367, 0x374, 0x375, 0x376, 0x381, 0x382, 0x383, 0x384, 0x385, 0x389,
 				0x3DE, 0x3E5, 0x3E6, 0x3E8, 0x3E9, 0x430, 0x4A7, 0x4DE, 0x51D, 0x53F, 0x579, 0x76B, 0x76C, 0x76D, 0x835, 0x903
@@ -1672,7 +1669,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 
 				case RACETYPE_ELF:
 				{
-					static const int sm_ElfHairHues[] =
+					static constexpr int sm_ElfHairHues[] =
 					{
 						0x034, 0x035, 0x036, 0x037, 0x038, 0x039, 0x058, 0x08E, 0x08F, 0x090, 0x091, 0x092,
 						0x101, 0x159, 0x15A, 0x15B, 0x15C, 0x15D, 0x15E, 0x128, 0x12F, 0x1BD, 0x1E4, 0x1F3,
@@ -1697,7 +1694,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 
 				case RACETYPE_GARGOYLE:
 				{
-					static const int sm_GargoyleHornHues[] =
+					static constexpr int sm_GargoyleHornHues[] =
 					{
 						0x709, 0x70B, 0x70D, 0x70F, 0x711, 0x763, 0x765, 0x768, 0x76B,
 						0x6F3, 0x6F1, 0x6EF, 0x6E4, 0x6E2, 0x6E0, 0x709, 0x70B, 0x70D
@@ -1765,7 +1762,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 
 				case RACETYPE_GARGOYLE:
 				{
-					static const int sm_GargoyleBeardHues[] =
+					static constexpr int sm_GargoyleBeardHues[] =
 					{
 						0x709, 0x70B, 0x70D, 0x70F, 0x711, 0x763, 0x765, 0x768, 0x76B,
 						0x6F3, 0x6F1, 0x6EF, 0x6E4, 0x6E2, 0x6E0, 0x709, 0x70B, 0x70D
@@ -1934,7 +1931,7 @@ enum CHR_TYPE
 	CHR_QTY
 };
 
-lpctstr const CChar::sm_szRefKeys[CHR_QTY+1] =
+lpctstr constexpr CChar::sm_szRefKeys[CHR_QTY+1] =
 {
 	"ACCOUNT",
 	"ACT",
@@ -1949,65 +1946,65 @@ lpctstr const CChar::sm_szRefKeys[CHR_QTY+1] =
 	nullptr
 };
 
-bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CChar::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CChar::r_GetRef");
 
-    if (CEntity::r_GetRef(pszKey, pRef))
+    if (CEntity::r_GetRef(ptcKey, pRef))
     {
         return true;
     }
 
-	int i = FindTableHeadSorted( pszKey, sm_szRefKeys, CountOf(sm_szRefKeys)-1 );
+	int i = FindTableHeadSorted( ptcKey, sm_szRefKeys, CountOf(sm_szRefKeys)-1 );
 	if ( i >= 0 )
 	{
-		pszKey += strlen( sm_szRefKeys[i] );
-		SKIP_SEPARATORS(pszKey);
+		ptcKey += strlen( sm_szRefKeys[i] );
+		SKIP_SEPARATORS(ptcKey);
 		switch (i)
 		{
 			case CHR_ACCOUNT:
-				if ( pszKey[-1] != '.' )	// only used as a ref !
+				if ( ptcKey[-1] != '.' )	// only used as a ref !
 					break;
 				pRef = m_pPlayer ? m_pPlayer->GetAccount() : nullptr;
 				return true;
 			case CHR_ACT:
-				if ( pszKey[-1] != '.' )	// only used as a ref !
+				if ( ptcKey[-1] != '.' )	// only used as a ref !
 					break;
 				pRef = m_Act_UID.ObjFind();
 				return true;
 			case CHR_FINDLAYER:	// Find equipped layers.
-				pRef = LayerFind( (LAYER_TYPE) Exp_GetSingle( pszKey ));
-				SKIP_SEPARATORS(pszKey);
+				pRef = LayerFind( (LAYER_TYPE) Exp_GetSingle( ptcKey ));
+				SKIP_SEPARATORS(ptcKey);
 				return true;
             case CHR_HOUSE:
             {
-                int16 iPos = (int16)Exp_GetSingle(pszKey);
+                int16 iPos = (int16)Exp_GetSingle(ptcKey);
                 if (GetMultiStorage()->GetHouseCountReal() <= iPos)
                 {
                     return false;
                 }
                 pRef = static_cast<CItemMulti*>(GetMultiStorage()->GetHouseAt(iPos).ItemFind());
-                SKIP_SEPARATORS(pszKey);
+                SKIP_SEPARATORS(ptcKey);
                 return true;
             }
             case CHR_SHIP:
             {
-                int16 iPos = (int16)Exp_GetSingle(pszKey);
+                int16 iPos = (int16)Exp_GetSingle(ptcKey);
                 if (GetMultiStorage()->GetShipCountReal() <= iPos)
                 {
                     return false;
                 }
                 pRef = static_cast<CItemShip*>(GetMultiStorage()->GetShipAt(iPos).ItemFind());
-                SKIP_SEPARATORS(pszKey);
+                SKIP_SEPARATORS(ptcKey);
                 return true;
             }
 			case CHR_MEMORYFINDTYPE:	// FInd a type of memory.
-				pRef = Memory_FindTypes((word)(Exp_GetSingle(pszKey)));
-				SKIP_SEPARATORS(pszKey);
+				pRef = Memory_FindTypes((word)(Exp_GetSingle(ptcKey)));
+				SKIP_SEPARATORS(ptcKey);
 				return true;
 			case CHR_MEMORYFIND:	// Find a memory of a UID
-				pRef = Memory_FindObj( (CUID) Exp_GetSingle( pszKey ));
-				SKIP_SEPARATORS(pszKey);
+				pRef = Memory_FindObj( (CUID) Exp_GetSingle( ptcKey ));
+				SKIP_SEPARATORS(ptcKey);
 				return true;
 			case CHR_OWNER:
 				pRef = GetOwner();
@@ -2021,10 +2018,10 @@ bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 		}
 	}
 
-	if ( r_GetRefContainer( pszKey, pRef ))
+	if ( r_GetRefContainer( ptcKey, pRef ))
 		return true;
 
-	return ( CObjBase::r_GetRef( pszKey, pRef ));
+	return ( CObjBase::r_GetRef( ptcKey, pRef ));
 }
 
 enum CHC_TYPE
@@ -2035,7 +2032,7 @@ enum CHC_TYPE
 	CHC_QTY
 };
 
-lpctstr const CChar::sm_szLoadKeys[CHC_QTY+1] =
+lpctstr constexpr CChar::sm_szLoadKeys[CHC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CChar_props.tbl"
@@ -2043,112 +2040,114 @@ lpctstr const CChar::sm_szLoadKeys[CHC_QTY+1] =
 	nullptr
 };
 
-bool CChar::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CChar::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
 	ADDTOCALLSTACK("CChar::r_WriteVal");
     EXC_TRY("WriteVal");
 
-	if ( IsClient() && GetClient()->r_WriteVal(pszKey, sVal, pSrc) )
+	if ( IsClient() && GetClient()->r_WriteVal(ptcKey, sVal, pSrc, true, true) ) // Call CClient::r_WriteVal
 		return true;
 
-    // Checking Props CComponents first (first check CChar props, if not found then check CCharBase)
-    EXC_SET_BLOCK("EntityProp");
-    if (CEntityProps::r_WritePropVal(pszKey, sVal, this, Base_GetDef()))
+    if (!fNoCallChildren)
     {
-        return true;
-    }
+        // Checking Props CComponents first (first check CChar props, if not found then check CCharBase)
+        EXC_SET_BLOCK("EntityProp");
+        if (CEntityProps::r_WritePropVal(ptcKey, sVal, this, Base_GetDef()))
+        {
+            return true;
+        }
 
-    // Now check regular CComponents
-    EXC_SET_BLOCK("Entity");
-    if (CEntity::r_WriteVal(pszKey, sVal, pSrc))
-    {
-        return true;
+        // Now check regular CComponents
+        EXC_SET_BLOCK("Entity");
+        if (CEntity::r_WriteVal(ptcKey, sVal, pSrc))
+        {
+            return true;
+        }
     }
 
     EXC_SET_BLOCK("Keyword");
-	CCharBase * pCharDef = Char_GetDef();
-	ASSERT(pCharDef);
-	CChar * pCharSrc = pSrc->GetChar();
-
-	CHC_TYPE iKeyNum = (CHC_TYPE) FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+	const CHC_TYPE iKeyNum = (CHC_TYPE) FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( iKeyNum < 0 )
 	{
 do_default:
 		if ( m_pPlayer )
 		{
-			if ( m_pPlayer->r_WriteVal( this, pszKey, sVal ))
+			if ( m_pPlayer->r_WriteVal( this, ptcKey, sVal ))
 				return true;
 		}
 		if ( m_pNPC )
 		{
-			if ( m_pNPC->r_WriteVal( this, pszKey, sVal ))
+			if ( m_pNPC->r_WriteVal( this, ptcKey, sVal ))
 				return true;
 		}
 
-		if ( r_WriteValContainer(pszKey, sVal, pSrc))
+		if ( r_WriteValContainer(ptcKey, sVal, pSrc))
 			return true;
 
 		// special write values
-		int i = g_Cfg.FindSkillKey( pszKey );
-		if ( IsSkillBase((SKILL_TYPE)i))
+		const SKILL_TYPE iSkill = (SKILL_TYPE)g_Cfg.FindSkillKey( ptcKey );
+		if ( IsSkillBase(iSkill) )
 		{
 			// Check some skill name.
-			ushort uiVal = Skill_GetBase( (SKILL_TYPE)i );
+			const ushort uiVal = Skill_GetBase( iSkill );
 			sVal.Format( "%u.%u", uiVal/10, uiVal%10 );
 			return true;
 		}
 
-		return CObjBase::r_WriteVal( pszKey, sVal, pSrc );
+		return (fNoCallParent ? false : CObjBase::r_WriteVal( ptcKey, sVal, pSrc, false ));
 	}
 
+    const CCharBase * pCharDef = Char_GetDef();
+    ASSERT(pCharDef);
+    CChar * pCharSrc = pSrc->GetChar();
 	switch ( iKeyNum )
 	{
 		//return as decimal number or 0 if not set
 		case CHC_CURFOLLOWER:
-			sVal.FormatLLVal(GetDefNum(pszKey,false));
+			sVal.FormatLLVal(GetDefNum(ptcKey,false));
 			break;
 		//On these ones, check BaseDef if not found on dynamic
 		case CHC_MAXFOLLOWER:
 		case CHC_SPELLTIMEOUT:
 		case CHC_TITHING:
-			sVal.FormatLLVal(GetDefNum(pszKey, true));
+			sVal.FormatLLVal(GetDefNum(ptcKey, true));
 			break;
 		case CHC_ATTACKER:
 			{
-				if ( strlen( pszKey ) == 8 )
+				if ( strlen( ptcKey ) == 8 )
 				{
 					sVal.FormatSTVal(m_lastAttackers.size());
 					return true;
 				}
 
 				sVal.FormatVal(0);
-				pszKey += 8;
+				ptcKey += 8;
 
-				if ( *pszKey == '.' )
+				if ( *ptcKey == '.' )
 				{
-					++pszKey;
-					if ( !strnicmp(pszKey, "ID", 2 ) )
+					++ptcKey;
+					if ( !strnicmp(ptcKey, "ID", 2 ) )
 					{
-						pszKey += 3;	// ID + whitspace
-						CChar * pChar = CUID::CharFind(Exp_GetSingle(pszKey));
+						ptcKey += 3;	// ID + whitspace
+						const CChar * pChar = CUID::CharFind(Exp_GetSingle(ptcKey));
 						sVal.FormatVal(Attacker_GetID(pChar));
 						return true;
 					}
-					else if ( !strnicmp(pszKey, "TARGET", 6 ) )
+					else if ( !strnicmp(ptcKey, "TARGET", 6 ) )
 					{
-						pszKey += 6;
+						ptcKey += 6;
 						if ( m_Act_UID )
 							sVal.FormatHex((dword)(m_Fight_Targ_UID));
 						else
 							sVal.FormatVal(-1);
 						return true;
 					}
-					if ( m_lastAttackers.size() )
+					if ( !m_lastAttackers.empty() )
 					{
 						int attackerIndex = (int)m_lastAttackers.size();
-						if( !strnicmp(pszKey, "MAX", 3) )
+						if( !strnicmp(ptcKey, "MAX", 3) )
 						{
-							pszKey += 3;
+							ptcKey += 3;
 							int64 iMaxDmg = -1, iCurDmg = 0;
 
 							for ( size_t iAttacker = 0; iAttacker < m_lastAttackers.size(); ++iAttacker )
@@ -2161,53 +2160,53 @@ do_default:
 								}
 							}
 						}
-						else if( !strnicmp(pszKey, "LAST", 4) )
+						else if( !strnicmp(ptcKey, "LAST", 4) )
 						{
-							pszKey += 4;
-							int64 dwLastTime = INT32_MAX, dwCurTime = 0;
+							ptcKey += 4;
+							int64 iLastTime = INT64_MAX, iCurTime = 0;
 
 							for ( size_t iAttacker = 0; iAttacker < m_lastAttackers.size(); ++iAttacker )
 							{
-								dwCurTime = m_lastAttackers[iAttacker].elapsed;
-								if ( dwCurTime <= dwLastTime )
+								iCurTime = m_lastAttackers[iAttacker].elapsed;
+								if ( iCurTime <= iLastTime )
 								{
-									dwLastTime = dwCurTime;
+									iLastTime = iCurTime;
 									attackerIndex = (int)iAttacker;
 								}
 							}
 						}
 						else
 						{
-							attackerIndex = Exp_GetVal(pszKey);
+							attackerIndex = Exp_GetVal(ptcKey);
 						}
 
-						SKIP_SEPARATORS(pszKey);
+						SKIP_SEPARATORS(ptcKey);
 						if ( attackerIndex < (int)m_lastAttackers.size() )
 						{
-							LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
+							const LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
 
-							if( !strnicmp(pszKey, "DAM", 3) )
+							if( !strnicmp(ptcKey, "DAM", 3) )
 							{
 								sVal.FormatLLVal(refAttacker.amountDone);
 								return true;
 							}
-							else if( !strnicmp(pszKey, "ELAPSED", 7) )
+							else if( !strnicmp(ptcKey, "ELAPSED", 7) )
 							{
 								sVal.FormatLLVal(refAttacker.elapsed);
 								return true;
 							}
-							else if (( !strnicmp(pszKey, "UID", 3) ) || ( *pszKey == '\0' ))
+							else if (( !strnicmp(ptcKey, "UID", 3) ) || ( *ptcKey == '\0' ))
 							{
-								CUID uid = refAttacker.charUID;
+                                const CUID& uid = refAttacker.charUID;
 								sVal.FormatHex( uid.CharFind() ? refAttacker.charUID : 0 );
 								return true;
 							}
-							else if ((!strnicmp(pszKey, "THREAT", 6)))
+							else if (!strnicmp(ptcKey, "THREAT", 6))
 							{
 								sVal.FormatLLVal(refAttacker.threat);
 								return true;
 							}
-							else if ((!strnicmp(pszKey, "IGNORE", 6)))
+							else if (!strnicmp(ptcKey, "IGNORE", 6))
 							{
 								sVal.FormatVal(refAttacker.ignore ? 1:0);
 								return true;
@@ -2220,15 +2219,15 @@ do_default:
 			}
 		case CHC_BREATH:
 			{
-				if( !strnicmp(pszKey, "BREATH.DAM", 10) )
+				if( !strnicmp(ptcKey, "BREATH.DAM", 10) )
 				{
-					CVarDefCont * pVar = GetDefKey(pszKey, true);
+					CVarDefCont * pVar = GetDefKey(ptcKey, true);
 					sVal.FormatLLVal(pVar ? pVar->GetValNum() : 0);
 					return true;
 				}
-				else if ( !strnicmp(pszKey, "BREATH.HUE", 10) || !strnicmp(pszKey, "BREATH.ANIM", 11) || !strnicmp(pszKey, "BREATH.TYPE", 11))
+				else if ( !strnicmp(ptcKey, "BREATH.HUE", 10) || !strnicmp(ptcKey, "BREATH.ANIM", 11) || !strnicmp(ptcKey, "BREATH.TYPE", 11))
 				{
-					CVarDefCont * pVar = GetDefKey(pszKey, true);
+					CVarDefCont * pVar = GetDefKey(ptcKey, true);
 					sVal.FormatHex(pVar ? (dword)(pVar->GetValNum()) : 0);
 					return true;
 				}
@@ -2236,22 +2235,22 @@ do_default:
 			}
 		case CHC_NOTOSAVE:
 			{
-				if ( strlen( pszKey ) == 8 )
+				if ( strlen( ptcKey ) == 8 )
 				{
 					sVal.FormatSTVal(m_notoSaves.size());
 					return true;
 				}
 
 				sVal.FormatVal(0);
-				pszKey += 8;
+				ptcKey += 8;
 
-				if ( *pszKey == '.' )
+				if ( *ptcKey == '.' )
 				{
-					++pszKey;
-					if ( !strnicmp(pszKey, "ID", 2 ) )
+					++ptcKey;
+					if ( !strnicmp(ptcKey, "ID", 2 ) )
 					{
-						pszKey += 2;	// ID + whitspace
-						CChar * pChar = static_cast<CChar*>( CUID(Exp_GetSingle(pszKey)).CharFind() );
+						ptcKey += 2;	// ID + whitspace
+						CChar * pChar = static_cast<CChar*>( CUID(Exp_GetSingle(ptcKey)).CharFind() );
 						if ( !NotoSave_GetID(pChar) )
 							sVal.FormatVal( -1 );
 						else
@@ -2260,29 +2259,29 @@ do_default:
 					}
 					if ( m_notoSaves.size() )
 					{
-						size_t notoIndex = Exp_GetVal(pszKey);
-						SKIP_SEPARATORS(pszKey);
+						size_t notoIndex = Exp_GetVal(ptcKey);
+						SKIP_SEPARATORS(ptcKey);
 						if ( notoIndex < m_notoSaves.size() )
 						{
 							NotoSaves & refnoto = m_notoSaves[notoIndex];
 
-							if ( !strnicmp(pszKey, "VALUE", 5) )
+							if ( !strnicmp(ptcKey, "VALUE", 5) )
 							{
 								sVal.FormatVal(refnoto.value);
 								return true;
 							}
-							else if ( !strnicmp(pszKey, "ELAPSED", 7) )
+							else if ( !strnicmp(ptcKey, "ELAPSED", 7) )
 							{
-								sVal.FormatVal((int)(refnoto.time));
+								sVal.FormatLLVal(refnoto.time);
 								return true;
 							}
-							else if (( !strnicmp(pszKey, "UID", 3) ) || ( *pszKey == '\0' ))
+							else if (( !strnicmp(ptcKey, "UID", 3) ) || ( *ptcKey == '\0' ))
 							{
-								CUID uid = refnoto.charUID;
+								const CUID& uid = refnoto.charUID;
 								sVal.FormatHex( uid.CharFind() ? refnoto.charUID : 0 );
 								return true;
 							}
-							else if (!strnicmp(pszKey, "COLOR", 5))
+							else if (!strnicmp(ptcKey, "COLOR", 5))
 							{
 								sVal.FormatVal(refnoto.color);
 								return true;
@@ -2306,7 +2305,7 @@ do_default:
 			// How much respect do i give this person ?
 			// Fame is never negative !
 			{
-                if (pszKey[4] != '.')
+                if (ptcKey[4] != '.')
                 {
                     sVal.FormatUSVal(GetFame());
                     break;
@@ -2322,7 +2321,7 @@ do_default:
 				tchar * ppLevel_sep[100];
 				const CSString* pFameAt0 = g_Cfg.m_Fame.at(0);
 
-				tchar * pszFameAt0 = new tchar[pFameAt0->GetLength() + 1];
+				tchar * pszFameAt0 = new tchar[(size_t)pFameAt0->GetLength() + 1];
 				strcpylen(pszFameAt0, pFameAt0->GetPtr());
 
 				int iFame = GetFame();
@@ -2333,9 +2332,9 @@ do_default:
 					{
 						DEBUG_ERR(("'%s' is not a valid fame value.\n", ppLevel_sep[i]));
 					}
-					else if ( iFame >= ATOI(ppLevel_sep[ i ]) )
+					else if ( iFame >= atoi(ppLevel_sep[ i ]) )
 					{
-						sVal = ( !g_Cfg.m_Fame.at(i + 1)->CompareNoCase( pszKey + 5 )) ? "1" : "0";
+						sVal = ( !g_Cfg.m_Fame.at((size_t)i + 1)->CompareNoCase( ptcKey + 5 )) ? "1" : "0";
 						delete[] pszFameAt0;
 						return true;
 					}
@@ -2351,11 +2350,11 @@ do_default:
 				return true;
 			}
 		case CHC_SKILLCHECK:	// odd way to get skills checking into the triggers.
-			pszKey += 10;
-			SKIP_SEPARATORS(pszKey);
+			ptcKey += 10;
+			SKIP_SEPARATORS(ptcKey);
 			{
 				tchar * ppArgs[2];
-				if ( !Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs)) )
+				if ( !Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, CountOf(ppArgs)) )
 					return false;
 				SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
 				if ( iSkill == SKILL_NONE )
@@ -2364,10 +2363,10 @@ do_default:
 			}
 			return true;
 		case CHC_SKILLADJUSTED:
-			pszKey += 13;
-			SKIP_SEPARATORS(pszKey);
+			ptcKey += 13;
+			SKIP_SEPARATORS(ptcKey);
 			{
-				SKILL_TYPE iSkill = g_Cfg.FindSkillKey(pszKey);
+				SKILL_TYPE iSkill = g_Cfg.FindSkillKey(ptcKey);
 				if (iSkill == SKILL_NONE)
 					return false;
 				ushort iValAdjusted = Skill_GetAdjusted(iSkill);
@@ -2376,23 +2375,23 @@ do_default:
 			return true;
 		case CHC_SKILLBEST:
 			// Get the top skill.
-			pszKey += 9;
+			ptcKey += 9;
 			{
 				uint iRank = 0;
-				if ( *pszKey == '.' )
+				if ( *ptcKey == '.' )
 				{
-					SKIP_SEPARATORS(pszKey);
-					iRank = Exp_GetSingle(pszKey);
+					SKIP_SEPARATORS(ptcKey);
+					iRank = Exp_GetSingle(ptcKey);
 				}
 				sVal.FormatVal(Skill_GetBest(iRank));
 			}
 			return true;
 		case CHC_SEX:	// <SEX milord/milady>	sep chars are :,/
-			pszKey += 3;
-			SKIP_SEPARATORS(pszKey);
+			ptcKey += 3;
+			SKIP_SEPARATORS(ptcKey);
 			{
 				tchar * ppArgs[2];
-				if ( !Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs), ":,/" ) )
+				if ( !Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, CountOf(ppArgs), ":,/" ) )
 					return false;
 				sVal = ( pCharDef->IsFemale()) ? ppArgs[1] : ppArgs[0];
 			}
@@ -2401,7 +2400,7 @@ do_default:
 		case CHC_KARMA:
 			// What do i think of this person.
 			{
-                if (pszKey[5] != '.')
+                if (ptcKey[5] != '.')
                 {
                     sVal.FormatSVal(GetKarma());
                     break;
@@ -2417,7 +2416,7 @@ do_default:
 				tchar * ppLevel_sep[100];
 				const CSString* pKarmaAt0 = g_Cfg.m_Karma.at(0);
 
-				tchar * pszKarmaAt0 = new tchar[pKarmaAt0->GetLength() + 1];
+				tchar * pszKarmaAt0 = new tchar[(size_t)pKarmaAt0->GetLength() + 1];
 				strcpylen(pszKarmaAt0, pKarmaAt0->GetPtr());
 
 				short iKarma = GetKarma();
@@ -2429,9 +2428,9 @@ do_default:
 					{
 						DEBUG_ERR(("'%s' is not a valid karma value.\n", ppLevel_sep[i]));
 					}
-					else if ( iKarma >= ATOI(ppLevel_sep[ i ]) )
+					else if ( iKarma >= atoi(ppLevel_sep[ i ]) )
 					{
-						sVal = ( !g_Cfg.m_Karma.at(i + 1)->CompareNoCase( pszKey + 6 )) ? "1" : "0";
+						sVal = ( !g_Cfg.m_Karma.at((size_t)i + 1)->CompareNoCase( ptcKey + 6 )) ? "1" : "0";
 						delete[] pszKarmaAt0;
 						return true;
 					}
@@ -2457,11 +2456,11 @@ do_default:
 			return true;
 		case CHC_CANCAST:
 			{
-				pszKey += 7;
-				GETNONWHITESPACE(pszKey);
+				ptcKey += 7;
+				GETNONWHITESPACE(ptcKey);
 
 				tchar * ppArgs[2];
-				int iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf( ppArgs ));
+				int iQty = Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, CountOf( ppArgs ));
 
 				// Check that we have at least the first argument
 				if ( iQty <= 0 )
@@ -2481,46 +2480,46 @@ do_default:
 		case CHC_CANMAKE:
 			{
 				// use m_Act_UID ?
-				pszKey += 7;
-				ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, pszKey ));
+				ptcKey += 7;
+				ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, ptcKey ));
 				sVal.FormatVal( Skill_MakeItem( id,	UID_CLEAR, SKTRIG_SELECT ) );
 			}
 			return true;
 		case CHC_CANMAKESKILL:
 			{
-				pszKey += 12;
-				ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, pszKey ));
+				ptcKey += 12;
+				ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, ptcKey ));
 				sVal.FormatVal( Skill_MakeItem( id,	UID_CLEAR, SKTRIG_SELECT, true ) );
 			}
 			return true;
 		case CHC_SKILLUSEQUICK:
 			{
-				pszKey += 13;
-				GETNONWHITESPACE( pszKey );
+				ptcKey += 13;
+				GETNONWHITESPACE( ptcKey );
 
-				if ( *pszKey )
+				if ( *ptcKey )
 				{
-					tchar * ppArgs[2];
-					int iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf( ppArgs ));
-					if ( iQty == 2 )
+					tchar * ppArgs[4];
+					int iQty = Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, CountOf( ppArgs ));
+					if ( iQty >= 2 )
 					{
 						SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
 						if ( iSkill == SKILL_NONE )
 							return false;
-
-						sVal.FormatVal( Skill_UseQuick( iSkill, Exp_GetVal( ppArgs[1] )));
+						
+						sVal.FormatVal( Skill_UseQuick( iSkill, Exp_GetVal( ppArgs[1] ), true ,(Exp_GetVal(ppArgs[2]) != 0 ? false : true), (Exp_GetVal(ppArgs[3]) != 0 ? true : false)));
 						return true;
 					}
 				}
 			} return false;
 		case CHC_SKILLTEST:
 			{
-				pszKey += 9;
+				ptcKey += 9;
 
-				if ( *pszKey )
+				if ( *ptcKey )
 				{
 					CResourceQtyArray Resources;
-					if ( Resources.Load(pszKey) > 0 && SkillResourceTest( &Resources ) )
+					if ( Resources.Load(ptcKey) > 0 && SkillResourceTest( &Resources ) )
 					{
 						sVal.FormatVal(1);
 						return true;
@@ -2531,11 +2530,11 @@ do_default:
 			return true;
 		case CHC_CANMOVE:
 			{
-				pszKey += 7;
-				GETNONWHITESPACE(pszKey);
+				ptcKey += 7;
+				GETNONWHITESPACE(ptcKey);
 
 				CPointMap	ptDst = GetTopPoint();
-				DIR_TYPE	dir   = GetDirStr(pszKey);
+				DIR_TYPE	dir   = GetDirStr(ptcKey);
 				ptDst.Move( dir );
 				dword		dwBlockFlags = 0;
 				CRegion	*	pArea;
@@ -2555,11 +2554,11 @@ do_default:
 			}
 		case CHC_MOVE:
 			{
-				pszKey += 4;
-				GETNONWHITESPACE(pszKey);
+				ptcKey += 4;
+				GETNONWHITESPACE(ptcKey);
 
                 CPointMap ptDst = GetTopPoint();
-				ptDst.Move( GetDirStr( pszKey ) );
+				ptDst.Move( GetDirStr( ptcKey ) );
 				CRegion * pArea = ptDst.GetRegion( REGION_TYPE_MULTI | REGION_TYPE_AREA );
 				if ( !pArea )
 					sVal.FormatHex( UINT32_MAX );
@@ -2620,11 +2619,11 @@ do_default:
 			return true;
 		case CHC_ISVERTICALSPACE:
 			{
-			pszKey += 15;
+			ptcKey += 15;
 			CPointMap pt;
-			if ( strlen( pszKey ) )
+			if ( strlen( ptcKey ) )
 			{
-				pt = g_Cfg.GetRegionPoint(pszKey);
+				pt = g_Cfg.GetRegionPoint(ptcKey);
 				if ( ! pt.IsValidPoint() )
 				{
 					DEBUG_ERR(("An invalid point passed as an argument to the function IsVerticalSpace.\n"));
@@ -2641,11 +2640,11 @@ do_default:
 			{
 				uint uiFlags = 0;
 				CItemMemory *pMemory;
-				pszKey += 6;
-				if ( *pszKey == '.' )
+				ptcKey += 6;
+				if ( *ptcKey == '.' )
 				{
-					++pszKey;
-					CUID uid = Exp_GetVal( pszKey );
+					++ptcKey;
+					CUID uid = Exp_GetVal( ptcKey );
 					pMemory	= Memory_FindObj( uid );
 				}
 				else
@@ -2654,7 +2653,7 @@ do_default:
 				{
 					uiFlags = pMemory->GetMemoryTypes();
 				}
-				sVal.FormatLLHex( uiFlags );
+				sVal.FormatHex( uiFlags );
 			}
 			return true;
 		case CHC_NAME:
@@ -2662,21 +2661,21 @@ do_default:
 			break;
 		case CHC_SKILLTOTAL:
 			{
-				pszKey += 10;
-				SKIP_SEPARATORS(pszKey);
-				GETNONWHITESPACE(pszKey);
+				ptcKey += 10;
+				SKIP_SEPARATORS(ptcKey);
+				GETNONWHITESPACE(ptcKey);
 
 				int		iVal	= 0;
 				bool	fComp	= true;
-				if ( *pszKey == '\0' )
+				if ( *ptcKey == '\0' )
 					;
-				else if ( *pszKey == '+' )
-					iVal	= Exp_GetVal( ++pszKey );
-				else if ( *pszKey == '-' )
-					iVal	= - Exp_GetVal( ++pszKey );
+				else if ( *ptcKey == '+' )
+					iVal	= Exp_GetVal( ++ptcKey );
+				else if ( *ptcKey == '-' )
+					iVal	= - Exp_GetVal( ++ptcKey );
 				else
 				{
-					iVal	= Exp_GetVal( pszKey );
+					iVal	= Exp_GetVal( ptcKey );
 					fComp	= false;
 				}
 
@@ -2703,10 +2702,15 @@ do_default:
             return true;
         case CHC_GETHOUSEPOS:
         {
-            pszKey += 11;
-            sVal.Format16Val(GetMultiStorage()->GetHousePos((CUID)Exp_GetDWVal(pszKey)));
+            ptcKey += 11;
+            sVal.Format16Val(GetMultiStorage()->GetHousePos((CUID)Exp_GetDWVal(ptcKey)));
             return true;
         }
+		case CHC_MAXSHIPS:
+		{
+			sVal.FormatU8Val(_iMaxShips);
+			return true;
+		}
         case CHC_SHIPS:
         {
             sVal.Format16Val(GetMultiStorage()->GetShipCountReal());
@@ -2714,22 +2718,22 @@ do_default:
         }
         case CHC_GETSHIPPOS:
         {
-            pszKey += 11;
-            sVal.Format16Val(GetMultiStorage()->GetShipPos((CUID)Exp_GetDWVal(pszKey)));
+            ptcKey += 11;
+            sVal.Format16Val(GetMultiStorage()->GetShipPos((CUID)Exp_GetDWVal(ptcKey)));
             return true;
         }
 		case CHC_ACCOUNT:
-			if ( pszKey[7] == '.' )	// used as a ref ?
+			if ( ptcKey[7] == '.' )	// used as a ref ?
 			{
 				if ( m_pPlayer != nullptr )
 				{
-					pszKey += 7;
-					SKIP_SEPARATORS(pszKey);
+					ptcKey += 7;
+					SKIP_SEPARATORS(ptcKey);
 
 					CScriptObj * pRef = m_pPlayer->GetAccount();
 					if ( pRef )
 					{
-						if ( pRef->r_WriteVal( pszKey, sVal, pSrc ) )
+						if ( pRef->r_WriteVal( ptcKey, sVal, pSrc ) )
 							break;
 						return ( false );
 					}
@@ -2741,16 +2745,16 @@ do_default:
 				sVal = m_pPlayer->GetAccount()->GetName();
 			break;
 		case CHC_ACT:
-			if ( pszKey[3] == '.' )	// used as a ref ?
+			if ( ptcKey[3] == '.' )	// used as a ref ?
 				goto do_default;
 			sVal.FormatHex( m_Act_UID.GetObjUID() );	// uid
 			break;
 		case CHC_ACTP:
-			if (pszKey[4] == '.')
+			if (ptcKey[4] == '.')
 			{
-				pszKey += 4;
-				SKIP_SEPARATORS(pszKey);
-				return m_Act_p.r_WriteVal(pszKey, sVal);
+				ptcKey += 4;
+				SKIP_SEPARATORS(ptcKey);
+				return m_Act_p.r_WriteVal(ptcKey, sVal);
 			}
 			sVal = m_Act_p.WriteUsed();
 			break;
@@ -2790,8 +2794,8 @@ do_default:
 			break;
 		case CHC_DIR:
 			{
-				pszKey +=3;
-				CChar * pChar = CUID::CharFind(Exp_GetSingle(pszKey));
+				ptcKey +=3;
+				CChar * pChar = CUID::CharFind(Exp_GetSingle(ptcKey));
 				if ( pChar )
 					sVal.FormatVal( GetDir(pChar) );
 				else
@@ -2801,7 +2805,7 @@ do_default:
 			sVal.FormatVal( IsStatFlag(STATF_EMOTEACTION) );
 			break;
 		case CHC_FLAGS:
-			sVal.FormatLLHex(m_iStatFlag);
+			sVal.FormatULLHex(m_iStatFlag);
 			break;
 		case CHC_FONT:
 			sVal.FormatVal( m_fonttype );
@@ -2890,16 +2894,28 @@ do_default:
             sVal.FormatVal( Stat_GetMaxMod(STAT_DEX) );
             break;
         case CHC_REGENFOOD:
-            sVal.FormatLLVal( Stats_GetRegenRate(STAT_FOOD) / MSECS_PER_SEC );
+            sVal.FormatLLVal(Stats_GetRegenRate(STAT_FOOD) / MSECS_PER_SEC);
+            break;
+        case CHC_REGENFOODD:
+            sVal.FormatLLVal(Stats_GetRegenRate(STAT_FOOD) / MSECS_PER_TENTH);
             break;
         case CHC_REGENHITS:
-            sVal.FormatLLVal( Stats_GetRegenRate(STAT_STR) / MSECS_PER_SEC );
+            sVal.FormatLLVal(Stats_GetRegenRate(STAT_STR) / MSECS_PER_SEC);
+            break;
+        case CHC_REGENHITSD:
+            sVal.FormatLLVal(Stats_GetRegenRate(STAT_STR) / MSECS_PER_TENTH);
             break;
         case CHC_REGENSTAM:
-            sVal.FormatLLVal( Stats_GetRegenRate(STAT_DEX) / MSECS_PER_SEC );
+            sVal.FormatLLVal(Stats_GetRegenRate(STAT_DEX) / MSECS_PER_SEC);
+            break;
+        case CHC_REGENSTAMD:
+            sVal.FormatLLVal(Stats_GetRegenRate(STAT_DEX) / MSECS_PER_TENTH);
             break;
         case CHC_REGENMANA:
-            sVal.FormatLLVal( Stats_GetRegenRate(STAT_INT) / MSECS_PER_SEC );
+            sVal.FormatLLVal(Stats_GetRegenRate(STAT_INT) / MSECS_PER_SEC);
+            break;
+        case CHC_REGENMANAD:
+            sVal.FormatLLVal(Stats_GetRegenRate(STAT_INT) / MSECS_PER_TENTH);
             break;
         case CHC_REGENVALFOOD:
             sVal.FormatUSVal( Stats_GetRegenVal(STAT_FOOD) );
@@ -2918,14 +2934,14 @@ do_default:
 			break;
 		case CHC_NOTOGETFLAG:
 			{
-				pszKey += 11;
-				GETNONWHITESPACE(pszKey);
+				ptcKey += 11;
+				GETNONWHITESPACE(ptcKey);
 
-				CUID uid = Exp_GetVal( pszKey );
-				SKIP_ARGSEP( pszKey );
-				bool fAllowIncog = ( Exp_GetVal( pszKey ) >= 1 );
-				SKIP_ARGSEP( pszKey );
-				bool fAllowInvul = ( Exp_GetVal( pszKey ) >= 1 );
+				CUID uid = Exp_GetVal( ptcKey );
+				SKIP_ARGSEP( ptcKey );
+				bool fAllowIncog = ( Exp_GetVal( ptcKey ) >= 1 );
+				SKIP_ARGSEP( ptcKey );
+				bool fAllowInvul = ( Exp_GetVal( ptcKey ) >= 1 );
 				CChar * pChar;
 
 				if ( ! uid.IsValidUID() )
@@ -2971,7 +2987,7 @@ do_default:
 			break;
 		case CHC_TITLE:
 			{
-				if (strlen(pszKey) == 5)
+				if (strlen(ptcKey) == 5)
 					sVal = m_sTitle; //GetTradeTitle
 				else
 					sVal = GetTradeTitle();
@@ -3033,8 +3049,8 @@ bool CChar::r_LoadVal( CScript & s )
     }
 
     EXC_SET_BLOCK("Keyword");
-	lpctstr	pszKey = s.GetKey();
-	CHC_TYPE iKeyNum = (CHC_TYPE) FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+	lpctstr	ptcKey = s.GetKey();
+	CHC_TYPE iKeyNum = (CHC_TYPE) FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( iKeyNum < 0 )
 	{
 		if ( m_pPlayer )
@@ -3049,7 +3065,7 @@ bool CChar::r_LoadVal( CScript & s )
 		}
 
         // special load values
-		int i = g_Cfg.FindSkillKey( pszKey );
+		int i = g_Cfg.FindSkillKey( ptcKey );
 		if ( i != SKILL_NONE )
 		{
 			// Check some skill name.
@@ -3122,17 +3138,29 @@ bool CChar::r_LoadVal( CScript & s )
         }
 
 		//Status Update Variables
-		case CHC_REGENHITS:
-			Stats_SetRegenRate(STAT_STR, s.GetArg64Val()*MSECS_PER_SEC);
-			break;
-		case CHC_REGENSTAM:
-            Stats_SetRegenRate(STAT_DEX, s.GetArg64Val()*MSECS_PER_SEC);
-			break;
-		case CHC_REGENMANA:
-            Stats_SetRegenRate(STAT_INT, s.GetArg64Val()*MSECS_PER_SEC);
-			break;
+        case CHC_REGENHITS:
+            Stats_SetRegenRate(STAT_STR, s.GetArg64Val()* MSECS_PER_SEC);
+            break;
+        case CHC_REGENHITSD:
+            Stats_SetRegenRate(STAT_STR, s.GetArg64Val()* MSECS_PER_TENTH);
+            break;
+        case CHC_REGENSTAM:
+            Stats_SetRegenRate(STAT_DEX, s.GetArg64Val()* MSECS_PER_SEC);
+            break;
+        case CHC_REGENSTAMD:
+            Stats_SetRegenRate(STAT_DEX, s.GetArg64Val()* MSECS_PER_TENTH);
+            break;
+        case CHC_REGENMANA:
+            Stats_SetRegenRate(STAT_INT, s.GetArg64Val()* MSECS_PER_SEC);
+            break;
+        case CHC_REGENMANAD:
+            Stats_SetRegenRate(STAT_INT, s.GetArg64Val()* MSECS_PER_TENTH);
+            break;
         case CHC_REGENFOOD:
-            Stats_SetRegenRate(STAT_FOOD, s.GetArg64Val()*MSECS_PER_SEC);
+            Stats_SetRegenRate(STAT_FOOD, s.GetArg64Val()* MSECS_PER_SEC);
+            break;
+        case CHC_REGENFOODD:
+            Stats_SetRegenRate(STAT_FOOD, s.GetArg64Val()* MSECS_PER_TENTH);
             break;
         case CHC_REGENVALHITS:
             Stats_SetRegenVal(STAT_STR, s.GetArgUSVal());
@@ -3212,8 +3240,11 @@ bool CChar::r_LoadVal( CScript & s )
 		case CHC_ACCOUNT:
 			return SetPlayerAccount( s.GetArgStr() );
         case CHC_MAXHOUSES:
-            _iMaxHouses = s.GetArgUCVal();
+            _iMaxHouses = s.GetArgU8Val();
             break;
+		case CHC_MAXSHIPS:
+			_iMaxShips = s.GetArgU8Val();;
+			break;
 		case CHC_ACT:
 			m_Act_UID = s.GetArgVal();
 			break;
@@ -3248,19 +3279,19 @@ bool CChar::r_LoadVal( CScript & s )
 		}
 		case CHC_ATTACKER:
 		{
-			if ( strlen(pszKey) > 8 )
+			if ( strlen(ptcKey) > 8 )
 			{
-				pszKey += 8;
-				if ( *pszKey == '.' )
+				ptcKey += 8;
+				if ( *ptcKey == '.' )
 				{
-					++pszKey;
-					if ( !strnicmp(pszKey, "CLEAR", 5) )
+					++ptcKey;
+					if ( !strnicmp(ptcKey, "CLEAR", 5) )
 					{
 						if ( !m_lastAttackers.empty() )
 							Fight_ClearAll();
 						return true;
 					}
-					else if ( !strnicmp(pszKey, "DELETE", 6) )
+					else if ( !strnicmp(ptcKey, "DELETE", 6) )
 					{
 						if ( !m_lastAttackers.empty() )
 						{
@@ -3272,7 +3303,7 @@ bool CChar::r_LoadVal( CScript & s )
 						}
 						return true;
 					}
-					else if ( !strnicmp(pszKey, "ADD", 3) )
+					else if ( !strnicmp(ptcKey, "ADD", 3) )
 					{
 						CChar *pChar = CUID::CharFind(s.GetArgVal());
 						if ( !pChar )
@@ -3280,7 +3311,7 @@ bool CChar::r_LoadVal( CScript & s )
 						Fight_Attack(pChar);
 						return true;
 					}
-					else if ( !strnicmp(pszKey, "TARGET", 6) )
+					else if ( !strnicmp(ptcKey, "TARGET", 6) )
 					{
 						CChar *pChar = CUID::CharFind(s.GetArgVal());
 						if ( !pChar || (pChar == this) )	// can't set ourself as target
@@ -3292,34 +3323,34 @@ bool CChar::r_LoadVal( CScript & s )
 						return true;
 					}
 
-					if (! IsStrNumeric(pszKey) )
+					if (! IsStrNumeric(ptcKey) )
 						return false;
-					int attackerIndex = Exp_GetVal(pszKey);
+					int attackerIndex = Exp_GetVal(ptcKey);
 
-					SKIP_SEPARATORS(pszKey);
+					SKIP_SEPARATORS(ptcKey);
 					if ( attackerIndex < GetAttackersCount() )
 					{
-						if ( !strnicmp(pszKey, "DAM", 3) )
+						if ( !strnicmp(ptcKey, "DAM", 3) )
 						{
 							Attacker_SetDam(attackerIndex, s.GetArgVal());
 							return true;
 						}
-						else if ( !strnicmp(pszKey, "ELAPSED", 7) )
+						else if ( !strnicmp(ptcKey, "ELAPSED", 7) )
 						{
 							Attacker_SetElapsed(attackerIndex, s.GetArgVal());
 							return true;
 						}
-						else if ( !strnicmp(pszKey, "THREAT", 6) )
+						else if ( !strnicmp(ptcKey, "THREAT", 6) )
 						{
 							Attacker_SetThreat(attackerIndex, s.GetArgVal());
 							return true;
 						}
-						else if ( !strnicmp(pszKey, "DELETE", 6) )
+						else if ( !strnicmp(ptcKey, "DELETE", 6) )
 						{
 							Attacker_Delete(attackerIndex, false, ATTACKER_CLEAR_SCRIPT);
 							return true;
 						}
-						else if ( !strnicmp(pszKey, "IGNORE", 6) )
+						else if ( !strnicmp(ptcKey, "IGNORE", 6) )
 						{
 							bool fIgnore = s.GetArgVal() < 1 ? 0 : 1;
 							Attacker_SetIgnore(attackerIndex, fIgnore);
@@ -3335,7 +3366,7 @@ bool CChar::r_LoadVal( CScript & s )
 			break;
 		case CHC_BREATH:
 			{
-				if ( !strnicmp(pszKey, "BREATH.DAM", 10) || !strnicmp(pszKey, "BREATH.HUE", 10) || !strnicmp(pszKey, "BREATH.ANIM", 11) || !strnicmp(pszKey, "BREATH.TYPE", 11) )
+				if ( !strnicmp(ptcKey, "BREATH.DAM", 10) || !strnicmp(ptcKey, "BREATH.HUE", 10) || !strnicmp(ptcKey, "BREATH.ANIM", 11) || !strnicmp(ptcKey, "BREATH.TYPE", 11) )
 				{
 					SetDefNum(s.GetKey(), s.GetArgLLVal());
 					return true;
@@ -3447,15 +3478,15 @@ bool CChar::r_LoadVal( CScript & s )
 			{
 				if ( s.GetArgStr() )
 				{
-					tchar * ppArgs[2];
+					tchar * ppArgs[4];
 					int iQty = Str_ParseCmds(const_cast<tchar *>(s.GetArgStr()), ppArgs, CountOf( ppArgs ));
-					if ( iQty == 2 )
+					if ( iQty >= 2 )
 					{
 						SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
 						if ( iSkill == SKILL_NONE )
 							return false;
 
-						 Skill_UseQuick( iSkill, Exp_GetVal( ppArgs[1] ));
+						Skill_UseQuick( iSkill, Exp_GetVal( ppArgs[1] ), true, (Exp_GetVal(ppArgs[2]) != 0 ? false : true), (Exp_GetVal(ppArgs[3]) != 0 ? true : false));
 						return true;
 					}
 				}
@@ -3503,7 +3534,7 @@ bool CChar::r_LoadVal( CScript & s )
         {
             int64 piVal[2];
             tchar *ptcTmp = Str_GetTemp();
-            strncpy(ptcTmp, s.GetArgStr(), STR_TEMPLENGTH);
+            Str_CopyLimitNull(ptcTmp, s.GetArgStr(), STR_TEMPLENGTH);
             int iQty = Str_ParseCmds( ptcTmp, piVal, CountOf(piVal));
             int iRange;
             if ( iQty > 1 )
@@ -3665,10 +3696,12 @@ void CChar::r_Write( CScript & s )
 		s.WriteKeyFormat("DAM", "%" PRIu16 ",%" PRIu16, m_attackBase, m_attackBase + m_attackRange);
 	if ( m_defense )
 		s.WriteKeyVal("ARMOR", m_defense);
-	if ( (m_Act_UID.GetObjUID() & UID_UNUSED) != UID_UNUSED )
-		s.WriteKeyHex("ACT", m_Act_UID.GetObjUID());
+    const uint uiActUID = m_Act_UID.GetObjUID();
+	if ( (uiActUID & UID_UNUSED) != UID_UNUSED )
+		s.WriteKeyHex("ACT", uiActUID);
 	if ( m_Act_p.IsValidPoint() )
 		s.WriteKey("ACTP", m_Act_p.WriteUsed());
+
     if (_iMaxHouses != g_Cfg._iMaxHousesPlayer)
     {
         s.WriteKeyVal("MaxHouses", _iMaxHouses);
@@ -3678,7 +3711,8 @@ void CChar::r_Write( CScript & s )
         s.WriteKeyVal("MaxShips", _iMaxShips);
     }
     GetMultiStorage()->r_Write(s);
-    SKILL_TYPE action = Skill_GetActive();
+
+    const SKILL_TYPE action = Skill_GetActive();
 	if ( action != SKILL_NONE )
 	{
 		const CSkillDef* pSkillDef = g_Cfg.GetSkillDef(action);
@@ -3686,11 +3720,9 @@ void CChar::r_Write( CScript & s )
 		if (pSkillDef != nullptr)
 			pszActionTemp = const_cast<tchar*>(pSkillDef->GetKey());
 		else
-		{
-			pszActionTemp = Str_GetTemp();
-			sprintf(pszActionTemp, "%d", action);
-		}
+			pszActionTemp = Str_FromI(action, Str_GetTemp());
 		s.WriteKey("ACTION", pszActionTemp);
+
 		/* We save ACTARG1/ACTARG2/ACTARG3 only if the following conditions are satisfied:
 		ACTARG1/ACTARG2/ACTARG3 is different from 0 AND
 		The character action is one of the valid skill OR
@@ -3734,19 +3766,29 @@ void CChar::r_Write( CScript & s )
         s.WriteKeyVal("OFOOD", iVal );
     s.WriteKeyVal("FOOD", Stat_GetVal(STAT_FOOD));
 
+    static constexpr lpctstr _ptcKeyModStat[STAT_BASE_QTY] =
+    {
+        "MODSTR",
+        "MODINT",
+        "MODDEX"
+    };
+    static constexpr lpctstr _ptcKeyOStat[STAT_BASE_QTY] =
+    {
+        "OSTR",
+        "OINT",
+        "ODEX"
+    };
+
 	for ( int j = 0; j < STAT_BASE_QTY; ++j )
 	{
-        tchar szTmp[100];
 		// this is VERY important, saving the MOD first
 		if ( (iVal = Stat_GetMod((STAT_TYPE)j)) != 0 )
 		{
-			sprintf(szTmp, "MOD%s", g_Stat_Name[j]);
-			s.WriteKeyVal(szTmp, iVal);
+            s.WriteKeyVal(_ptcKeyModStat[j], iVal);
 		}
 		if ( (iVal = Stat_GetBase((STAT_TYPE)j)) != 0 )
 		{
-			sprintf(szTmp, "O%s", g_Stat_Name[j]);
-			s.WriteKeyVal(szTmp, iVal );
+            s.WriteKeyVal(_ptcKeyOStat[j], iVal);
 		}
 	}
 
@@ -3768,11 +3810,25 @@ void CChar::r_Write( CScript & s )
         s.WriteKeyVal("MAXMANA", iVal);     // should be OMAXMANA, but we keep it like this for backwards compatibility
     s.WriteKeyVal("MANA", Stat_GetVal(STAT_INT));
 
+    static constexpr lpctstr _ptcKeyRegenVal[STAT_QTY] =
+    {
+        "REGENVALHITS",
+        "REGENVALSTAM",
+        "REGENVALMANA",
+        "REGENVALFOOD"
+    };
+    for (ushort j = 0; j < STAT_QTY; ++j)
+    {
+        const ushort uiRegenVal = Stats_GetRegenVal((STAT_TYPE)j);
+        if (uiRegenVal > 1)
+            s.WriteKeyVal(_ptcKeyRegenVal[j], uiRegenVal);
+    }
+
 	for ( uint j = 0; j < g_Cfg.m_iMaxSkill; ++j )
 	{
 		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)j) )
 			continue;
-        ushort uiSkillVal = Skill_GetBase((SKILL_TYPE)j);
+        const ushort uiSkillVal = Skill_GetBase((SKILL_TYPE)j);
         if (uiSkillVal == 0)
             continue;
 		s.WriteKeyVal(g_Cfg.GetSkillDef((SKILL_TYPE)j)->GetKey(), uiSkillVal );
@@ -3838,7 +3894,7 @@ enum CHV_TYPE
 	CHV_QTY
 };
 
-lpctstr const CChar::sm_szVerbKeys[CHV_QTY+1] =
+lpctstr constexpr CChar::sm_szVerbKeys[CHV_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CChar_functions.tbl"
@@ -4152,7 +4208,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			if ( iArg == 2 )
 			{
 				if ( IsDigit( ttVal[1][0] ) )
-					iTmp = ATOI( ttVal[1] );
+					iTmp = atoi( ttVal[1] );
 			}
 			//DEBUG_ERR(( "CHV_MAKEITEM iTmp is %d, arg was %s\n",iTmp,psTmp ));
 
@@ -4585,7 +4641,7 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 			}
 		}
 
-		if (g_Cfg.m_iDebugFlags&DEBUGF_EXP)
+		if ((g_Cfg.m_iDebugFlags & DEBUGF_EXP) && (delta != 0))
 		{
 			g_Log.EventDebug("%s %s experience change (was %u, delta %d, now %u)\n",
 				(m_pNPC ? "NPC" : "Player"), GetName(), m_exp, delta, m_exp + delta);
@@ -4659,7 +4715,7 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 			// Prevent integer underflow due to negative level change
 			if( delta < 0 && abs(delta) > m_level )
 				level = 0;
-			if (g_Cfg.m_iDebugFlags&DEBUGF_LEVEL)
+			if (g_Cfg.m_iDebugFlags & DEBUGF_LEVEL)
 			{
 				g_Log.EventDebug("%s %s level change (was %u, delta %d, now %u)\n",
 					(m_pNPC ? "NPC" : "Player"), GetName(), m_level, delta, level);

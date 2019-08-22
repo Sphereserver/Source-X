@@ -35,6 +35,9 @@ public:
 	inline void InitUID() {
 		m_dwInternalVal = UID_UNUSED;
 	}
+
+    // Use ClearUID only if the CUID/CUIDBase is not used as a pure UID, but it can assume other kind of values.
+    //  Example: m_itFigurine.m_UID, m_itKey.m_UIDLock -> a MORE1/MORE2 == 0 is considered legit, also for many many item types MORE* isn't a UID.
 	inline void ClearUID() {
 		m_dwInternalVal = UID_CLEAR;
 	}

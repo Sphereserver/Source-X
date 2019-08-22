@@ -234,7 +234,8 @@ bool CChar::Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic)
     // Create moongate between current pt and destination pt
     // RETURN: true = it worked.
 
-    if ( !m_pArea || !ptDest.IsValidPoint() )
+    CRegion *pArea = GetRegion();
+    if ( !pArea || !ptDest.IsValidPoint() )
         return false;
 
     CRegion *pAreaDest = ptDest.GetRegion(REGION_TYPE_AREA|REGION_TYPE_ROOM|REGION_TYPE_MULTI);
@@ -280,14 +281,19 @@ bool CChar::Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic)
 
     const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(SPELL_Gate_Travel);
     ASSERT(pSpellDef);
+    const int64 iDuration = pSpellDef->m_Duration.GetLinear(0) * MSECS_PER_SEC;
 
     ptDest.m_z = GetFixZ(ptDest);
-    ITEMID_TYPE id = pSpellDef->m_idEffect;
-    if (id == ITEMID_NOTHING)
-        id = pAreaDest->IsFlag(REGION_FLAG_SAFE|REGION_FLAG_GUARDED|REGION_FLAG_NO_PVP) ? ITEMID_MOONGATE_BLUE : ITEMID_MOONGATE_RED;
-    int64 iDuration = pSpellDef->m_Duration.GetLinear(0) * MSECS_PER_SEC;
+    ITEMID_TYPE idOrig, idDest;
+    idOrig = idDest = pSpellDef->m_idEffect;
+    if (idOrig == ITEMID_NOTHING)
+    {
+        const dword dwSafeFlags = REGION_FLAG_SAFE | REGION_FLAG_GUARDED | REGION_FLAG_NO_PVP;
+        idOrig = pAreaDest->IsFlag(dwSafeFlags) ? ITEMID_MOONGATE_BLUE : ITEMID_MOONGATE_RED;
+        idDest = pArea->IsFlag    (dwSafeFlags) ? ITEMID_MOONGATE_BLUE : ITEMID_MOONGATE_RED;
+    }
 
-    CItem *pGateOrig = CItem::CreateBase(id);
+    CItem *pGateOrig = CItem::CreateBase(idOrig);
     ASSERT(pGateOrig);
     pGateOrig->SetType(IT_TELEPAD);
     pGateOrig->SetAttr(ATTR_MOVE_NEVER);
@@ -296,7 +302,7 @@ bool CChar::Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic)
     pGateOrig->MoveToDecay(ptMe, iDuration, true);
     pGateOrig->Sound(pSpellDef->m_sound);
 
-    CItem *pGateDest = CItem::CreateBase(id);
+    CItem *pGateDest = CItem::CreateBase(idDest);
     ASSERT(pGateDest);
     pGateDest->SetType(IT_TELEPAD);
     pGateDest->SetAttr(ATTR_MOVE_NEVER);
@@ -993,8 +999,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					m_atMagery.m_SummonID = CREID_LICH;
 					Stats_AddRegenVal(STAT_INT, + pSpell->m_itSpell.m_PolyStr);	// RegenManaVal
                     Stats_AddRegenVal(STAT_STR, - pSpell->m_itSpell.m_PolyDex);	// RegenHitsVal
-                    ModPropNum(pCCPChar, PROPCH_RESFIRE,   - pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
-                    ModPropNum(pCCPChar, PROPCH_RESPOISON, + pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
+                    ModPropNum(pCCPChar, PROPCH_RESFIRE,    - pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
+                    ModPropNum(pCCPChar, PROPCH_RESPOISON,  + pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
                     ModPropNum(pCCPChar, PROPCH_RESCOLD,    + pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
 					iBuffIcon = BI_LICHFORM;
 					break;
@@ -1186,7 +1192,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case LAYER_SPELL_Gift_Of_Renewal:
 			if (pClient && IsSetOF(OF_Buffs))
 			{
-				ITOA(pSpell->m_itSpell.m_spelllevel,NumBuff[0], 10);
+				Str_FromI(pSpell->m_itSpell.m_spelllevel,NumBuff[0], 10);
 				pClient->removeBuff(BI_GIFTOFRENEWAL);
 				pClient->addBuff(BI_GIFTOFRENEWAL, 1075796, 1075797, wTimerEffect, pNumBuff, 1);
 			}
@@ -1194,7 +1200,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case LAYER_SPELL_Attunement:
 			if (pClient && IsSetOF(OF_Buffs))
 			{
-				ITOA(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
+				Str_FromI(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
 				pClient->removeBuff(BI_ATTUNEWEAPON);
 				pClient->addBuff(BI_ATTUNEWEAPON, 1075798, 1075799, wTimerEffect, pNumBuff, 1);
 			}
@@ -1202,7 +1208,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case LAYER_SPELL_Thunderstorm:
 			if (pClient && IsSetOF(OF_Buffs))
 			{
-				ITOA(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
+				Str_FromI(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
 				pClient->removeBuff(BI_THUNDERSTORM);
 				pClient->addBuff(BI_THUNDERSTORM, 1075800, 1075801, wTimerEffect, pNumBuff, 1);
 			}
@@ -1210,7 +1216,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case LAYER_SPELL_Essence_Of_Wind:
 			if (pClient && IsSetOF(OF_Buffs))
 			{
-				ITOA(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
+				Str_FromI(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
 				pClient->removeBuff(BI_ESSENCEOFWIND);
 				pClient->addBuff(BI_ESSENCEOFWIND, 1075802, 1075803, wTimerEffect, pNumBuff, 1);
 			}
@@ -1232,8 +1238,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case LAYER_SPELL_Arcane_Empowerment:
 			if (pClient && IsSetOF(OF_Buffs))
 			{
-				ITOA(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
-				ITOA(pSpell->m_itSpell.m_spellcharges,NumBuff[1], 10);
+				Str_FromI(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
+				Str_FromI(pSpell->m_itSpell.m_spellcharges,NumBuff[1], 10);
 				pClient->removeBuff(BI_ARCANEEMPOWERMENT);
 				pClient->addBuff(BI_ARCANEEMPOWERMENT, 1075805, 1075804, wTimerEffect, pNumBuff, 1);
 			}
@@ -1362,9 +1368,9 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				pClient->removeBuff(BI_REACTIVEARMOR);
 				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 				{
-					ITOA(wStatEffectRef, NumBuff[0], 10);
+					Str_FromI(wStatEffectRef, NumBuff[0], 10);
 					for ( int idx = 1; idx < 5; ++idx )
-						ITOA(5, NumBuff[idx], 10);
+						Str_FromI(5, NumBuff[idx], 10);
 
 					pClient->addBuff(BI_REACTIVEARMOR, 1075812, 1075813, wTimerEffect, pNumBuff, 5);
 				}
@@ -1385,7 +1391,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				Stat_AddMod( STAT_DEX, -wStatEffectRef );
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					ITOA(wStatEffectRef, NumBuff[0], 10);
+					Str_FromI(wStatEffectRef, NumBuff[0], 10);
 					pClient->removeBuff(BI_CLUMSY);
 					pClient->addBuff(BI_CLUMSY, 1075831, 1075832, wTimerEffect, pNumBuff, 1);
 				}
@@ -1416,7 +1422,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				Stat_AddMod( STAT_INT, -wStatEffectRef );
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					ITOA(wStatEffectRef, NumBuff[0], 10);
+					Str_FromI(wStatEffectRef, NumBuff[0], 10);
 					pClient->removeBuff(BI_FEEBLEMIND);
 					pClient->addBuff(BI_FEEBLEMIND, 1075833, 1075834, wTimerEffect, pNumBuff, 1);
 				}
@@ -1433,7 +1439,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				Stat_AddMod( STAT_STR, -wStatEffectRef );
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					ITOA(wStatEffectRef, NumBuff[0], 10);
+					Str_FromI(wStatEffectRef, NumBuff[0], 10);
 					pClient->removeBuff(BI_WEAKEN);
 					pClient->addBuff(BI_WEAKEN, 1075837, 1075838, wTimerEffect, pNumBuff, 1);
 				}
@@ -1466,11 +1472,11 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				{
 					pClient->removeBuff(BI_CURSE);
 					for ( int idx = STAT_STR; idx < STAT_BASE_QTY; ++idx )
-						ITOA(wStatEffectRef, NumBuff[idx], 10);
+						Str_FromI(wStatEffectRef, NumBuff[idx], 10);
 					if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 					{
 						for ( int idx = 3; idx < 7; ++idx )
-							ITOA(10, NumBuff[idx], 10);
+							Str_FromI(10, NumBuff[idx], 10);
 
 						pClient->addBuff(BI_CURSE, 1075835, 1075836, wTimerEffect, pNumBuff, 7);
 					}
@@ -1492,7 +1498,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					ITOA(wStatEffectRef, NumBuff[0], 10);
+					Str_FromI(wStatEffectRef, NumBuff[0], 10);
 					pClient->removeBuff(BI_AGILITY);
 					pClient->addBuff(BI_AGILITY, 1075841, 1075842, wTimerEffect, pNumBuff, 1);
 				}
@@ -1507,7 +1513,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				Stat_AddMod( STAT_INT, +wStatEffectRef );
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					ITOA(wStatEffectRef, NumBuff[0], 10);
+					Str_FromI(wStatEffectRef, NumBuff[0], 10);
 					pClient->removeBuff(BI_CUNNING);
 					pClient->addBuff(BI_CUNNING, 1075843, 1075844, wTimerEffect, pNumBuff, 1);
 				}
@@ -1522,7 +1528,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				Stat_AddMod( STAT_STR, +wStatEffectRef );
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					ITOA(wStatEffectRef, NumBuff[0], 10);
+					Str_FromI(wStatEffectRef, NumBuff[0], 10);
 					pClient->removeBuff(BI_STRENGTH);
 					pClient->addBuff(BI_STRENGTH, 1075845, 1075846, wTimerEffect, pNumBuff, 1);
 				}
@@ -1540,7 +1546,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				if (pClient && IsSetOF(OF_Buffs))
 				{
 					for ( int idx = STAT_STR; idx < STAT_BASE_QTY; ++idx)
-						ITOA(wStatEffectRef, NumBuff[idx], 10);
+						Str_FromI(wStatEffectRef, NumBuff[idx], 10);
 
 					pClient->removeBuff(BI_BLESS);
 					pClient->addBuff(BI_BLESS, 1075847, 1075848, wTimerEffect, pNumBuff, STAT_BASE_QTY);
@@ -1576,9 +1582,9 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				pClient->removeBuff(BI_MAGICREFLECTION);
 				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 				{
-					ITOA(-wStatEffectRef, NumBuff[0], 10);
+					Str_FromI(-wStatEffectRef, NumBuff[0], 10);
 					for ( int idx = 1; idx < 5; ++idx )
-						ITOA(10, NumBuff[idx], 10);
+						Str_FromI(10, NumBuff[idx], 10);
 
 					pClient->addBuff(BI_MAGICREFLECTION, 1075817, 1075818, wTimerEffect, pNumBuff, 5);
 				}
@@ -1630,8 +1636,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					pClient->removeBuff(BuffIcon);
 					if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 					{
-						ITOA(-uiPhysicalResist, NumBuff[0], 10);
-						ITOA(-uiMagicResist/10, NumBuff[1], 10);
+						Str_FromI(-uiPhysicalResist, NumBuff[0], 10);
+						Str_FromI(-uiMagicResist/10, NumBuff[1], 10);
 						pClient->addBuff(BuffIcon, BuffCliloc, 1075815, wTimerEffect, pNumBuff, 2);
 					}
 					else
@@ -2351,7 +2357,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 					const CResourceQtyArray * pRegs = &(pSpellDef->m_Reags);
 					CItemContainer * pPack = GetPack();
 					size_t iMissing = pPack->ResourceConsumePart( pRegs, 1, 100, fTest );
-					if ( iMissing != pRegs->BadIndex() )
+					if ( iMissing != SCONT_BADINDEX )
 					{
 						if ( fFailMsg )
 						{
@@ -2400,7 +2406,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 
 	// Check for Tithing
     CVarDefContNum* pVarTithing = GetDefKeyNum("Tithing", false);
-    int iValTithing = pVarTithing ? (int)pVarTithing->GetValNum() : 0;
+    int64 iValTithing = pVarTithing ? pVarTithing->GetValNum() : 0;
 	if (iValTithing < iTithingUse)
 	{
 		if (fFailMsg)
@@ -2962,7 +2968,7 @@ bool CChar::Spell_CastDone()
 						break;
 					CItem *pItem = CItem::CreateScript(sm_Item_Bone[i], this);
 					pItem->MoveToCheck(m_Act_p, this);
-					iGet++;
+					++ iGet;
 				}
 				if (!iGet)
 				{
@@ -3108,7 +3114,7 @@ int CChar::Spell_CastStart()
     int64 iWaitTime = IsPriv(PRIV_GM) ? 1 : pSpellDef->m_CastTime.GetLinear(Skill_GetBase((SKILL_TYPE)iSkill)); // in tenths of second
 
     // For every point in faster casting, the casting time is shortened by 0.25 or 1/4 of a second. (Keeping 0,2 and not 0,25 for backwards compatibility).
-	iWaitTime -= 2 * GetPropNum(COMP_PROPS_CHAR, PROPCH_FASTERCASTING, true);
+	iWaitTime -= 2 * (int64)GetPropNum(COMP_PROPS_CHAR, PROPCH_FASTERCASTING, true);
 
 	if ( iWaitTime < 1 )
 		iWaitTime = 1;
@@ -3745,17 +3751,15 @@ int64 CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharS
 			case SPELL_Strength:
 			case SPELL_Bless:
 			case SPELL_Curse:
-				iDuration = 1 + ((6 * pCharSrc->Skill_GetBase(SKILL_EVALINT)) / 50);
+				iDuration = 1 + (((int64)pCharSrc->Skill_GetBase(SKILL_EVALINT) * 6) / 50);
 				break;
 
 			case SPELL_Protection:
-				{
-					iDuration = (2 * pCharSrc->Skill_GetBase(SKILL_MAGERY)) / 10;
-					if ( iDuration < 15 )
-						iDuration = 15;
-					else if ( iDuration > 240 )
-						iDuration = 240;
-				}
+				iDuration = ((int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) * 2) / 10;
+				if ( iDuration < 15 )
+					iDuration = 15;
+				else if ( iDuration > 240 )
+					iDuration = 240;
 				break;
 
 			case SPELL_Wall_of_Stone:
@@ -3763,11 +3767,9 @@ int64 CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharS
 				break;
 
 			case SPELL_Arch_Prot:
-				{
-					iDuration = pCharSrc->Skill_GetBase(SKILL_MAGERY) * 12 / 100;
-					if ( iDuration > 144 )
-						iDuration = 144;
-				}
+				iDuration = (int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) * 12 / 100;
+				if ( iDuration > 144 )
+					iDuration = 144;
 				break;
 
 			case SPELL_Fire_Field:
@@ -3783,13 +3785,13 @@ int64 CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharS
 				break;
 
 			case SPELL_Incognito:
-				iDuration = 1 + ((6 * pCharSrc->Skill_GetBase(SKILL_MAGERY)) / 50);
+				iDuration = 1 + (((int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) * 6) / 50);
 				if (iDuration > 144)
 					iDuration = 144;
 				break;
 
 			case SPELL_Paralyze:
-				iDuration = 7 + (pCharSrc->Skill_GetBase(SKILL_MAGERY) / 50);	// pre-AOS formula
+				iDuration = 7 + ((int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) / 50);	// pre-AOS formula
 				break;
 
 				// AOS formula (it only works well on servers with skillcap)
@@ -3800,15 +3802,15 @@ int64 CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharS
 					iDuration = 0;*/
 
 			case SPELL_Poison_Field:
-				iDuration = 3 + (pCharSrc->Skill_GetBase(SKILL_MAGERY) / 25);
+				iDuration = 3 + ((int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) / 25);
 				break;
 
 			case SPELL_Invis:
-				iDuration = pCharSrc->Skill_GetBase(SKILL_MAGERY) * 12 / 100;
+				iDuration = (int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) * 12 / 100;
 				break;
 
 			case SPELL_Paralyze_Field:
-				iDuration = 3 + (pCharSrc->Skill_GetBase(SKILL_MAGERY) / 30);
+				iDuration = 3 + ((int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) / 30);
 				break;
 
 			case SPELL_Energy_Field:
@@ -3837,20 +3839,20 @@ int64 CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharS
 			case SPELL_Earth_Elem:
 			case SPELL_Fire_Elem:
 			case SPELL_Water_Elem:
-				iDuration = (2 * pCharSrc->Skill_GetBase(SKILL_MAGERY)) / 5;
+				iDuration = ((int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) * 2) / 5;
 				break;
 
 			case SPELL_Blood_Oath:
-				iDuration = 8 + ((pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 80);
+				iDuration = 8 + (((int64)pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 80);
 				break;
 			case SPELL_Corpse_Skin:
-				iDuration = 40 + ((pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 25);
+				iDuration = 40 + (((int64)pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 25);
 				break;
 			case SPELL_Curse_Weapon:
-				iDuration = 1 + (pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) / 34);
+				iDuration = 1 + ((int64)pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) / 34);
 				break;
 			case SPELL_Mind_Rot:
-				iDuration = 20 + ((pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 50);
+				iDuration = 20 + (((int64)pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 50);
 				break;
 			case SPELL_Pain_Spike:
 				iDuration = 1;		// timer is 1, but using 10 charges

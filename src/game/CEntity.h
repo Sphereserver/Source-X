@@ -14,6 +14,8 @@ class CEntity
 {
     //tsdynamicmap<COMP_TYPE, CComponent*> _List;
     std::map<COMP_TYPE, CComponent*> _List;
+    using iterator          = decltype(_List)::iterator;
+    using const_iterator    = decltype(_List)::const_iterator;
 
 public:
     CEntity();
@@ -43,7 +45,7 @@ public:
     * @param it Iterator to the component to unsubscribe.
     * @param fEraseFromMap Should i erase this component from the internal map? Use false if you're going to erase it manually later
     */
-    void UnsubscribeComponent(std::map<COMP_TYPE, CComponent*>::iterator& it, bool fEraseFromMap = true);
+    void UnsubscribeComponent(iterator& it, bool fEraseFromMap = true);
 
     /**
     * @brief Unsuscribes a CComponent.
@@ -66,7 +68,7 @@ public:
     * @param type the type of the CComponent to retrieve.
     * @return a pointer to the CComponent, if it is suscribed.
     */
-    CComponent *GetComponent(COMP_TYPE type);
+    CComponent *GetComponent(COMP_TYPE type) const;
 
     /**
     * @brief Wrapper of base method.
@@ -75,10 +77,10 @@ public:
     * (eg: uid.04001.name, will set the game object with uid '04001' as
     * reference, the rest of the code will be executed on it.
     *
-    * @param pszKey the key applied on the search.
+    * @param ptcKey the key applied on the search.
     * @param pRef a pointer to the object found.
     */
-    bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef);
+    bool r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef);
 
     /**
     * @brief Wrapper of base method.
@@ -94,13 +96,13 @@ public:
     *
     * Returns a value to a script '<name>' or ingame '.show/.xshow name'
     *
-    * @param pszKey the key to search for (eg: name, ResCold, etc).
+    * @param ptcKey the key to search for (eg: name, ResCold, etc).
     * @param sVal the storage that will return the value.
     * @param pSrc is this requested by someone?.
     *
     * @return true if there was a key to retrieve.
     */
-    bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc);
+    bool r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc);
     /**
     * @brief Wrapper of base method.
     *

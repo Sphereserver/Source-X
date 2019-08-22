@@ -1,8 +1,8 @@
 #include "CSocket.h"
-#include <cstring>
 #ifndef _WIN32
 	#include <errno.h>
 #endif
+#include "../common/sphere_library/sstring.h"
 
 
 //		***		***			***
@@ -70,7 +70,7 @@ bool CSocketAddressIP::IsMatchIP( const CSocketAddressIP & ip ) const
 	memcpy( ip1, (void*) &ip.s_addr,	4 );
 	memcpy( ip2, (void*) &s_addr,		4 );
 
-	for ( int i = 0; i < 4; i++ )
+	for ( int i = 0; i < 4; ++i )
 	{
 		if ( ip1[i] == 255 || ip2[i] == 255 || ip1[i] == ip2[i] )
 			continue;
@@ -174,7 +174,7 @@ void CSocketAddress::SetPort( word wPort )
 
 void CSocketAddress::SetPortStr( lpctstr pszPort )
 {
-	m_port = (word)(ATOI(pszPort));
+	m_port = (word)(atoi(pszPort));
 }
 
 bool CSocketAddress::SetPortExtStr( tchar * pszIP )
@@ -198,7 +198,7 @@ bool CSocketAddress::SetHostPortStr( lpctstr pszIP )
 {
 	// NOTE: This is a blocking call !!!!
 	tchar szIP[256];
-	strncpy( szIP, pszIP, sizeof(szIP));
+	Str_CopyLimitNull( szIP, pszIP, sizeof(szIP));
 	SetPortExtStr( szIP );
 	return SetHostStr( szIP );
 }

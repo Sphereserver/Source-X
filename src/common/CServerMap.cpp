@@ -1,4 +1,4 @@
-//
+﻿//
 // CServerMap.cpp
 //
 
@@ -57,14 +57,17 @@ CServerMapBlockState::CServerMapBlockState( dword dwBlockFlags, char z, int iHei
 	m_Top.m_dwBlockFlags = 0;
 	m_Top.m_dwTile = 0;
 	m_Top.m_z = UO_SIZE_Z;	// the z of the item that would be over our head.
+    m_Top.m_height = 0;
 
 	m_Bottom.m_dwBlockFlags = CAN_I_BLOCK; // The bottom item has these blocking flags.
 	m_Bottom.m_dwTile = 0;
 	m_Bottom.m_z = UO_SIZE_MIN_Z;	// the z we would stand on,
+    m_Bottom.m_height = 0;
 
 	m_Lowest.m_dwBlockFlags = CAN_I_BLOCK;
 	m_Lowest.m_dwTile = 0;
 	m_Lowest.m_z = UO_SIZE_Z;
+    m_Lowest.m_height = 0;
 
 	m_zClimbHeight = 0;
 }
@@ -75,14 +78,17 @@ CServerMapBlockState::CServerMapBlockState( dword dwBlockFlags, char z, int iHei
 	m_Top.m_dwBlockFlags = 0;
 	m_Top.m_dwTile = 0;
 	m_Top.m_z = UO_SIZE_Z;	// the z of the item that would be over our head.
+    m_Top.m_height = 0;
 
 	m_Bottom.m_dwBlockFlags = CAN_I_BLOCK; // The bottom item has these blocking flags.
 	m_Bottom.m_dwTile = 0;
 	m_Bottom.m_z = UO_SIZE_MIN_Z;	// the z we would stand on,
+    m_Bottom.m_height = 0;
 
 	m_Lowest.m_dwBlockFlags = CAN_I_BLOCK;
 	m_Lowest.m_dwTile = 0;
 	m_Lowest.m_z = UO_SIZE_Z;
+    m_Lowest.m_height = 0;
 
 	m_zClimbHeight = 0;
 }
@@ -140,9 +146,7 @@ bool CServerMapBlockState::CheckTile( dword dwItemBlockFlags, char zBottom, heig
 
 	if ( zTop < m_Lowest.m_z )
 	{
-		m_Lowest.m_dwBlockFlags = dwItemBlockFlags;
-		m_Lowest.m_dwTile = dwID;
-		m_Lowest.m_z = zTop;
+        m_Lowest = {dwItemBlockFlags, dwID, zTop, zHeight};
 	}
 
 	// if i can't fit under this anyhow. it is something below me. (potentially)
@@ -161,9 +165,7 @@ bool CServerMapBlockState::CheckTile( dword dwItemBlockFlags, char zBottom, heig
 				else if ( (m_Bottom.m_dwBlockFlags & CAN_I_WATER) && !(dwItemBlockFlags & CAN_I_PLATFORM))
 					return true;
 			}
-			m_Bottom.m_dwBlockFlags = dwItemBlockFlags;
-			m_Bottom.m_dwTile = dwID;
-			m_Bottom.m_z = zTop;
+            m_Bottom = {dwItemBlockFlags, dwID, zTop, zHeight};
 		}
 	}
 	else
@@ -171,29 +173,11 @@ bool CServerMapBlockState::CheckTile( dword dwItemBlockFlags, char zBottom, heig
 		// I could potentially fit under this. ( it would be above me )
 		if ( zBottom <= m_Top.m_z )
 		{
-			m_Top.m_dwBlockFlags = dwItemBlockFlags;
-			m_Top.m_dwTile = dwID;
-			m_Top.m_z = zBottom;
+            m_Top = {dwItemBlockFlags, dwID, zTop, zHeight};
 		}
 	}
 
 	return true;
-}
-
-bool CServerMapBlockState::IsUsableZ( char zTile, height_t zTileHeight, height_t zHeightEstimate ) const
-{
-    short zTileTotal = zTile + zTileHeight;
-    if (zTileTotal > UO_SIZE_Z)
-        zTileTotal = UO_SIZE_Z;
-
-    // CServerMapBlocker::m_z = Top of a solid object. or bottom of non blocking one.
-    if ( zTileTotal > m_Top.m_z )	// above something that is already over my head.
-        return false;
-    // NOTE: Assume multi overlapping items are not normal. so estimates are safe
-    if ( zTileTotal + zHeightEstimate < m_Bottom.m_z )	// way below my feet
-        return false;
-
-    return true;
 }
 
 bool CServerMapBlockState::CheckTile_Item( dword dwItemBlockFlags, char zBottom, height_t zHeight, dword dwID )
@@ -224,9 +208,7 @@ bool CServerMapBlockState::CheckTile_Item( dword dwItemBlockFlags, char zBottom,
 
 	if ( zTop < m_Lowest.m_z )
 	{
-		m_Lowest.m_dwBlockFlags = dwItemBlockFlags;
-		m_Lowest.m_dwTile = dwID;
-		m_Lowest.m_z = (char)zTop;
+        m_Lowest = {dwItemBlockFlags, dwID, (char)zTop, zHeight};
 	}
 
     // Why was this block of code added? By returning, it blocks the m_Bottom state to be updated
@@ -247,13 +229,14 @@ bool CServerMapBlockState::CheckTile_Item( dword dwItemBlockFlags, char zBottom,
 		{
 			if ( zTop == m_Bottom.m_z )
 			{
-				if ( ! ( dwItemBlockFlags & CAN_I_CLIMB ) ) // climbable items have the highest priority
-					if ( m_Bottom.m_dwBlockFlags & CAN_I_PLATFORM ) //than items with CAN_I_PLATFORM
-						return true;
+                if ((dwItemBlockFlags & CAN_I_PLATFORM) && (m_Bottom.m_height != 0))
+                    ; // this platform (floor?) tile is on the top of a solid item (which has a height != 0), so i should consider as if i'm actually walking on the platform
+                else if ( dwItemBlockFlags & CAN_I_CLIMB ) // climbable items have the highest priority
+                    ;
+                else if ( m_Bottom.m_dwBlockFlags & CAN_I_PLATFORM ) //than items with CAN_I_PLATFORM
+				    return true;
 			}
-			m_Bottom.m_dwBlockFlags = dwItemBlockFlags;
-			m_Bottom.m_dwTile = dwID;
-			m_Bottom.m_z = (char)zTop;
+            m_Bottom = {dwItemBlockFlags, dwID, (char)zTop, zHeight};
 
 			if ( dwItemBlockFlags & CAN_I_CLIMB ) // return climb height
 				m_zClimbHeight = (( zHeight + 1 )/2); //if height is an odd number, then we need to add 1; if it isn't, this does nothing
@@ -277,24 +260,11 @@ bool CServerMapBlockState::CheckTile_Item( dword dwItemBlockFlags, char zBottom,
 		}*/
 		if ( zBottom < m_Top.m_z )
 		{
-			m_Top.m_dwBlockFlags = dwItemBlockFlags;
-			m_Top.m_dwTile = dwID;
-			m_Top.m_z = zBottom;
+            m_Top = {dwItemBlockFlags, dwID, zBottom, zHeight};
 		}
 	}
 	return true;
 
-}
-
-void CServerMapBlockState::SetTop( dword dwItemBlockFlags, char z, dword dwID )
-{
-	ADDTOCALLSTACK("CServerMapBlockState::SetTop");
-	if ( z < m_Top.m_z )
-	{
-		m_Top.m_dwBlockFlags = dwItemBlockFlags;
-		m_Top.m_dwTile = dwID;
-		m_Top.m_z = z;
-	}
 }
 
 bool CServerMapBlockState::CheckTile_Terrain( dword dwItemBlockFlags, char z, dword dwID )
@@ -307,20 +277,16 @@ bool CServerMapBlockState::CheckTile_Terrain( dword dwItemBlockFlags, char z, dw
 		return true;
 
 	if ( z < m_Bottom.m_z )	// below something i can already step on.
-	{
 		return true;
-	}
 
 	if ( z < m_Lowest.m_z )
 	{
-		m_Lowest.m_dwBlockFlags = dwItemBlockFlags;
-		m_Lowest.m_dwTile = dwID;
-		m_Lowest.m_z = z;
+        m_Lowest = {dwItemBlockFlags, dwID, z, 0};
 	}
 
 	if	( z <= m_iHeight )
 	{
-		if ( z > m_Bottom.m_z )
+		if ( z >= m_Bottom.m_z )
 		{
 			if ( (m_Bottom.m_dwBlockFlags & (CAN_I_PLATFORM|CAN_I_CLIMB)) && (z - m_Bottom.m_z <= 4) )
 					return true;
@@ -328,25 +294,26 @@ bool CServerMapBlockState::CheckTile_Terrain( dword dwItemBlockFlags, char z, dw
 			{
 				if ( (m_Bottom.m_dwBlockFlags & (CAN_I_PLATFORM|CAN_I_CLIMB)) && (z >= m_Bottom.m_z + PLAYER_HEIGHT/2) ) // we can walk under it
 				{
-					SetTop( dwItemBlockFlags, z, dwID );
+                    m_Top = {dwItemBlockFlags, dwID, z, 0};
 					return true;
 				}
 			}
 			else if ( z == m_z )
 			{
-				if ( (m_Bottom.m_dwBlockFlags & (CAN_I_PLATFORM|CAN_I_CLIMB)) && (z - m_Bottom.m_z <= 4) )
+                if (m_Bottom.m_height != 0)
+                    ; // this land tile is on the top of a solid item (which has a height != 0), so i should consider as if i'm actually walking on the landtile
+                else if ( (m_Bottom.m_dwBlockFlags & (CAN_I_PLATFORM|CAN_I_CLIMB)) && (z - m_Bottom.m_z <= 4) )
 					return true;
 			}
 			//DEBUG_ERR(("wItemBlockFlags 0x%x\n",wItemBlockFlags));
-			m_Bottom.m_dwBlockFlags = dwItemBlockFlags;
-			m_Bottom.m_dwTile = dwID;
-			m_Bottom.m_z = z;
+            m_Bottom = {dwItemBlockFlags, dwID, z, 0};
 			m_zClimbHeight = 0;
 		}
 	}
-	else
+	else if ( z < m_Top.m_z )
 	{
-		SetTop( dwItemBlockFlags, z, dwID ); // I could potentially fit under this. ( it would be above me )
+        // I could potentially fit under this. ( it would be above me )
+        m_Top = {dwItemBlockFlags, dwID, z, 0};
 	}
 	return true;
 }
@@ -395,7 +362,7 @@ void CServerStaticsBlock::LoadStatics( dword ulBlockIndex, int map )
 	ASSERT( m_iStatics == 0 );
 
 	CUOIndexRec index;
-	if ( g_Install.ReadMulIndex(g_Install.m_Staidx[g_MapList.m_mapnum[map]], ulBlockIndex, index) )
+	if ( g_Install.ReadMulIndex(g_Install.m_Staidx[g_MapList.GetMapFileNum(map)], ulBlockIndex, index) )
 	{
 		// make sure that the statics block length is valid
 		if ((index.GetBlockLength() % sizeof(CUOStaticItemRec)) != 0)
@@ -408,7 +375,7 @@ void CServerStaticsBlock::LoadStatics( dword ulBlockIndex, int map )
 		ASSERT(m_iStatics);
 		m_pStatics = new CUOStaticItemRec[m_iStatics];
 		ASSERT(m_pStatics);
-		if ( ! g_Install.ReadMulData(g_Install.m_Statics[g_MapList.m_mapnum[map]], index, m_pStatics) )
+		if ( ! g_Install.ReadMulData(g_Install.m_Statics[g_MapList.GetMapFileNum(map)], index, m_pStatics) )
 		{
 			throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CServerMapBlock: Read Statics");
 		}
@@ -459,7 +426,7 @@ void CServerMapBlock::Load( int bx, int by )
 	ASSERT( bx < (g_MapList.GetX(m_map)/UO_BLOCK_SIZE) );
 	ASSERT( by < (g_MapList.GetY(m_map)/UO_BLOCK_SIZE) );
 
-	if (( m_map < 0 ) || ( m_map >= 255 ))
+	if (( m_map < 0 ) || ( m_map >= MAP_SUPPORTED_QTY ))
 	{
 		g_Log.EventError("Unsupported map #%d specified. Auto-fixing that to 0.\n", m_map);
 		m_map = 0;
@@ -467,39 +434,40 @@ void CServerMapBlock::Load( int bx, int by )
 
 	uint ulBlockIndex = (bx*(g_MapList.GetY(m_map)/UO_BLOCK_SIZE) + by);
 
-	if ( !g_MapList.m_maps[m_map] )
+	if ( !g_MapList.IsMapSupported(m_map) )
 	{
 		memset( &m_Terrain, 0, sizeof( m_Terrain ));
 		throw CSError(LOGL_CRIT, 0, "CServerMapBlock: Map is not supported since MUL files for it not available.");
 	}
 
-	bool bPatchedTerrain = false, bPatchedStatics = false;
+    bool fPatchedTerrain = false;
+    bool fPatchedStatics = false;
 
 	if ( g_Cfg.m_fUseMapDiffs && g_MapList.m_pMapDiffCollection )
 	{
 		// Check to see if the terrain or statics in this block is patched
-		CServerMapDiffBlock * pDiffBlock = g_MapList.m_pMapDiffCollection->GetAtBlock( ulBlockIndex, g_MapList.m_mapid[m_map] );
+		CServerMapDiffBlock * pDiffBlock = g_MapList.m_pMapDiffCollection->GetAtBlock( ulBlockIndex, g_MapList.GetMapFileNum(m_map));
 		if ( pDiffBlock )
 		{
 			if ( pDiffBlock->m_pTerrainBlock )
 			{
 				memcpy( &m_Terrain, pDiffBlock->m_pTerrainBlock, sizeof(CUOMapBlock) );
-				bPatchedTerrain = true;
+				fPatchedTerrain = true;
 			}
 
 			if ( pDiffBlock->m_iStaticsCount >= 0 )
 			{
 				m_Statics.LoadStatics( pDiffBlock->m_iStaticsCount, pDiffBlock->m_pStaticsBlock );
-				bPatchedStatics = true;
+				fPatchedStatics = true;
 			}
 		}
 	}
 
 	// Only load terrain if it wasn't patched
-	if ( ! bPatchedTerrain )
+	if ( ! fPatchedTerrain )
 	{
-		int mapNumber = g_MapList.m_mapnum[m_map];
-		CSFile * pFile = &(g_Install.m_Maps[mapNumber]);
+		const int iMapNumber = g_MapList.GetMapFileNum(m_map);
+		CSFile * pFile = &(g_Install.m_Maps[iMapNumber]);
 		ASSERT(pFile != nullptr);
 		ASSERT(pFile->IsFileOpen());
 
@@ -508,14 +476,14 @@ void CServerMapBlock::Load( int bx, int by )
 		index.SetupIndex( ulBlockIndex * sizeof(CUOMapBlock), sizeof(CUOMapBlock));
 
 		dword fileOffset = index.GetFileOffset();
-		if (g_Install.m_IsMapUopFormat[mapNumber])
+		if (g_Install.m_IsMapUopFormat[iMapNumber])
 		{
-			for ( int i = 0; i < 256; i++ )
+			for ( int i = 0; i < MAP_SUPPORTED_QTY; ++i )
 			{
-				MapAddress pMapAddress = g_Install.m_UopMapAddress[mapNumber][i];
+				MapAddress pMapAddress = g_Install.m_UopMapAddress[iMapNumber][i];
 				if (( ulBlockIndex <= pMapAddress.dwLastBlock ) && ( ulBlockIndex >= pMapAddress.dwFirstBlock ))
 				{
-					fileOffset = (dword)(pMapAddress.qwAdress + ((ulBlockIndex - pMapAddress.dwFirstBlock)*196));
+					fileOffset = (dword)(pMapAddress.qwAdress + ((ulBlockIndex - pMapAddress.dwFirstBlock)*196LL));
 					break;
 				}
 			}
@@ -558,7 +526,7 @@ void CServerMapBlock::Load( int bx, int by )
 	}
 
 	// Only load statics if they weren't patched
-	if ( ! bPatchedStatics )
+	if ( ! fPatchedStatics )
 	{
 		m_Statics.LoadStatics( ulBlockIndex, m_map );
 	}
@@ -569,15 +537,15 @@ void CServerMapBlock::Load( int bx, int by )
 CServerMapBlock::CServerMapBlock( const CPointMap & pt ) :
 		CPointSort( pt )	// The upper left corner.
 {
-	sm_iCount++;
+	++sm_iCount;
 	m_map = pt.m_map;
 	Load(pt.m_x/UO_BLOCK_SIZE, pt.m_y/UO_BLOCK_SIZE);
 }
 
 CServerMapBlock::CServerMapBlock(int bx, int by, int map) :
-		CPointSort((word)(bx)* UO_BLOCK_SIZE, (word)(by) * UO_BLOCK_SIZE)
+		CPointSort((short)(bx)* UO_BLOCK_SIZE, (short)(by) * UO_BLOCK_SIZE)
 {
-	sm_iCount++;
+	++sm_iCount;
 	m_map = map;
 	Load( bx, by );
 }
@@ -693,9 +661,9 @@ CServerMapDiffCollection::CServerMapDiffCollection()
 CServerMapDiffCollection::~CServerMapDiffCollection()
 {
 	// Remove all of the loaded dif data
-	for ( uint m = 0; m < 256; ++m )
+	for ( uint m = 0; m < MAP_SUPPORTED_QTY; ++m )
 	{
-		while (m_pMapDiffBlocks[m].size() > 0 )
+		while ( !m_pMapDiffBlocks[m].empty() )
 		{
 			m_pMapDiffBlocks[m].erase(0);
 		}
@@ -713,12 +681,12 @@ void CServerMapDiffCollection::LoadMapDiffs()
 	dword dwOffset = 0, dwRead = 0;
 	CServerMapDiffBlock * pMapDiffBlock = nullptr;
 
-	for ( int m = 0; m < 256; ++m )
+	for ( int m = 0; m < MAP_SUPPORTED_QTY; ++m )
 	{
 		if ( !g_MapList.IsMapSupported( m ) )
 			continue;
 
-		int map = g_MapList.m_mapid[m];
+		const int map = g_MapList.GetMapID(m);
 
 		// Load Mapdif Files
 		{
@@ -870,7 +838,7 @@ CServerMapDiffBlock * CServerMapDiffCollection::GetAtBlock(dword dwBlockId, int 
 
 	// Locate the requested block
 	size_t index = m_pMapDiffBlocks[map].FindKey( dwBlockId );
-	if ( index == m_pMapDiffBlocks[map].BadIndex() )
+	if ( index == SCONT_BADINDEX )
 		return nullptr;
 
 	return m_pMapDiffBlocks[map].at(index);

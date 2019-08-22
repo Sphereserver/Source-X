@@ -126,9 +126,10 @@ int CSectorBase::CObjPointSortArray::CompareKey( int id, CPointSort* pBase, bool
 void CSectorBase::SetAdjacentSectors()
 {
     const int iMaxX = g_MapList.GetSectorCols(m_map);
+    ASSERT(iMaxX > 0);
     const int iMaxY = g_MapList.GetSectorRows(m_map);
-    const int iMaxSectors = g_MapList.GetSectorQty(m_map);
-    int index = 0;
+    ASSERT(iMaxY > 0);
+    
     int iSectorCount = 0;
     for (int i = 0; i < m_map; ++i) // all sectors are stored in the same array, get a tmp count of all of the lower maps
     {
@@ -138,36 +139,78 @@ void CSectorBase::SetAdjacentSectors()
         }
         iSectorCount += g_MapList.GetSectorQty(i);
     }
+
+    // Sectors are layed out in the array horizontally: when the row is complete (X), the subsequent sector is placed in
+    //  the column below (Y).
+    // Between each X coordinate there's a single sector index difference;
+    //  between each Y coordinate there's a number of sectors equal to the sectors in a row.
+    /*
+      NW        N        NE
+         y-1 | y-1 | y-1
+         x-1 |     | x+1
+        -----|-----|-----
+             | my  |
+      W  x-1 | pos | x+1  E
+        -----|-----|-----
+         y+1 | y+1 | y+1
+         x-1 |     | x+1
+      SW        S        SE
+    */
+
+    struct _xyDir_s { int x, y; };
+    static constexpr _xyDir_s _xyDir[DIR_QTY]
+    {
+        {0, -1},    // N
+        {+1,-1},    // NE
+        {+1, 0},    // E
+        {+1, +1},   // SE
+        {0, +1},    // S
+        {-1, +1},   // SW
+        {-1, 0},    // W
+        {-1, -1}    // NW
+    };
+
     int tmpIndex[DIR_QTY] =
     {
-        tmpIndex[DIR_N] = -iMaxX,       // North -iMaxX (an entire row)
-        tmpIndex[DIR_NE] = -(iMaxX - 1),// North East ( -iMaxX  + 1 = -(iMaxX - 1))
-        tmpIndex[DIR_E] = 1,            // East = +1
-        tmpIndex[DIR_SE] = iMaxX + 1,   // SouthEast = iMaxX + 1
-        tmpIndex[DIR_S] = iMaxX,        // South = iMaxX
-        tmpIndex[DIR_SW] = iMaxX - 1,   // SouthWest = iMaxX - 1
-        tmpIndex[DIR_W] = -1,           // West = -1
-        tmpIndex[DIR_NW] = -(iMaxX + 1) // NorthWest = ( -iMaxX - 1 = -(iMaxX + 1))
+        tmpIndex[DIR_N]  = -iMaxX,
+        tmpIndex[DIR_NE] = -iMaxX + 1,
+        tmpIndex[DIR_E]  = 1,
+        tmpIndex[DIR_SE] = iMaxX + 1,
+        tmpIndex[DIR_S]  = iMaxX,
+        tmpIndex[DIR_SW] = iMaxX - 1,
+        tmpIndex[DIR_W]  = -1,
+        tmpIndex[DIR_NW] = -iMaxX - 1
     };
+
+    int index = 0;
     for (int i = 0; i < (int)DIR_QTY; ++i)
     {
-        index = iSectorCount + m_index + tmpIndex[i];
-        if ((index <= 0) || (index >= iMaxSectors) || (index % iMaxX == 0) || index % iMaxY == 0) //out out bounds X || Y, first Col or first Row.
-        {
-            _mAdjacentSectors[(DIR_TYPE)i] = nullptr;
+        // out of bounds checks
+        if ((_x + _xyDir[i].x < 0) || (_x + _xyDir[i].x >= iMaxX))
             continue;
-        }
-        _mAdjacentSectors[(DIR_TYPE)i] = g_World.m_Sectors[index];
+        if ((_y + _xyDir[i].y < 0) || (_y + _xyDir[i].y >= iMaxY))
+            continue;
+
+        index = m_index + tmpIndex[i];
+        
+        // This should not happen, because i did the checks above
+        //if ((index < 0) || (index > iMaxSectors))
+        //    continue;
+        ASSERT((index >= 0) && (index <= g_MapList.GetSectorQty(m_map)));
+
+        ASSERT(uint(iSectorCount + index) < g_World.m_SectorsQty);
+        _ppAdjacentSectors[(DIR_TYPE)i] = g_World.m_Sectors[iSectorCount + index];
     }
 }
 
 CSector *CSectorBase::GetAdjacentSector(DIR_TYPE dir) const
 {
     ASSERT(dir >= DIR_N && dir < DIR_QTY);
-    return _mAdjacentSectors.at(dir);
+    return _ppAdjacentSectors[dir];
 }
 
-CSectorBase::CSectorBase()
+CSectorBase::CSectorBase() :
+    _ppAdjacentSectors{nullptr}
 {
 	m_map = 0;
 	m_index = 0;
@@ -179,22 +222,25 @@ CSectorBase::~CSectorBase()
 	ClearMapBlockCache();
 }
 
-void CSectorBase::Init(int index, int newmap)
+void CSectorBase::Init(int index, int map, int x, int y)
 {
 	ADDTOCALLSTACK("CSectorBase::Init");
-	if (( newmap < 0 ) || ( newmap >= 256 ) || !g_MapList.m_maps[newmap] )
+	if (!g_MapList.IsMapSupported(map) || !g_MapList.IsInitialized(map))
 	{
-		g_Log.EventError("Trying to initalize a sector %d in unsupported map #%d. Defaulting to 0,0.\n", index, newmap);
+		g_Log.EventError("Trying to initalize a sector %d in unsupported map #%d. Defaulting to 0,0.\n", index, map);
 	}
-	else if (( index < 0 ) || ( index >= g_MapList.GetSectorQty(newmap) ))
+	else if (( index < 0 ) || ( index >= g_MapList.GetSectorQty(map) ))
 	{
-		m_map = newmap;
-		g_Log.EventError("Trying to initalize a sector by sector number %d out-of-range for map #%d. Defaulting to 0,%d.\n", index, newmap, newmap);
+		m_map = map;
+		g_Log.EventError("Trying to initalize a sector by sector number %d out-of-range for map #%d. Defaulting to 0,%d.\n", index, map, map);
 	}
 	else
 	{
+        ASSERT(x >= 0 && y >= 0);
 		m_index = index;
-		m_map = newmap;
+		m_map = map;
+        _x = x;
+        _y = y;
 	}
 }
 
@@ -253,13 +299,13 @@ void CSectorBase::CheckMapBlockCache()
 
 const CServerMapBlock * CSectorBase::GetMapBlock( const CPointMap & pt )
 {
-	ADDTOCALLSTACK("CSectorBase::GetMapBlock");
+	ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetMapBlock");
 	// Get a map block from the cache. load it if not.
 	ASSERT( pt.IsValidXY());
-	CPointMap pntBlock( UO_BLOCK_ALIGN(pt.m_x), UO_BLOCK_ALIGN(pt.m_y), 0, pt.m_map);
+	const CPointMap pntBlock( UO_BLOCK_ALIGN(pt.m_x), UO_BLOCK_ALIGN(pt.m_y), 0, pt.m_map);
 	ASSERT( m_MapBlockCache.size() <= (UO_BLOCK_SIZE * UO_BLOCK_SIZE));
 
-	ProfileTask mapTask(PROFILE_MAP);
+	const ProfileTask mapTask(PROFILE_MAP);
 
 	if ( !pt.IsValidXY() )
 	{
@@ -271,7 +317,7 @@ const CServerMapBlock * CSectorBase::GetMapBlock( const CPointMap & pt )
 
 	// Find it in cache.
 	int iBlock = pntBlock.GetPointSortIndex();
-	MapBlockCache::iterator it = m_MapBlockCache.find(iBlock);
+	MapBlockCache::const_iterator it = m_MapBlockCache.find(iBlock);
 	if ( it != m_MapBlockCache.end() )
 	{
 		it->second->m_CacheTime.HitCacheTime();
@@ -408,7 +454,11 @@ bool CSectorBase::UnLinkRegion( CRegion * pRegionOld )
 	ADDTOCALLSTACK("CSectorBase::UnLinkRegion");
 	if ( !pRegionOld )
 		return false;
-	return m_RegionLinks.RemovePtr(pRegionOld);
+    auto it = std::find(m_RegionLinks.begin(), m_RegionLinks.end(), pRegionOld);
+    if (it == m_RegionLinks.end())
+        return false;
+    m_RegionLinks.erase(it);
+    return true;
 }
 
 bool CSectorBase::LinkRegion( CRegion * pRegionNew )
@@ -450,7 +500,7 @@ bool CSectorBase::LinkRegion( CRegion * pRegionNew )
 				continue;
 
 			// must insert before this.
-			m_RegionLinks.insert(i, pRegionNew);
+			m_RegionLinks.emplace(m_RegionLinks.begin() + i, pRegionNew);
 			return true;
 		}
 	}
@@ -465,7 +515,7 @@ CTeleport * CSectorBase::GetTeleport( const CPointMap & pt ) const
 	// Any teleports here at this point ?
 
 	size_t i = m_Teleports.FindKey(pt.GetPointSortIndex());
-	if ( i == m_Teleports.BadIndex() )
+	if ( i == SCONT_BADINDEX )
 		return nullptr;
 
 	CTeleport *pTeleport = static_cast<CTeleport *>(m_Teleports[i]);
@@ -484,7 +534,7 @@ bool CSectorBase::AddTeleport( CTeleport * pTeleport )
 	// ASSERT( Teleport is actually in this sector !
 
 	size_t i = m_Teleports.FindKey( pTeleport->GetPointSortIndex());
-	if ( i != m_Teleports.BadIndex() )
+	if ( i != SCONT_BADINDEX )
 	{
 		DEBUG_ERR(( "Conflicting teleport %s!\n", pTeleport->WriteUsed() ));
 		return false;
@@ -506,8 +556,8 @@ CPointMap CSectorBase::GetBasePoint() const
     const int iCols = g_MapList.GetSectorCols(m_map);
     const int iSize = g_MapList.GetSectorSize(m_map);
 	CPointMap pt(
-        (word)((m_index % iCols) * iSize),
-		(word)((m_index / iCols) * iSize),
+        (short)((m_index % iCols) * iSize),
+		(short)((m_index / iCols) * iSize),
 		0,
 		(uchar)(m_map));
 	return pt;
@@ -517,7 +567,7 @@ CRectMap CSectorBase::GetRect() const
 {
     ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetRect");
 	// Get a rectangle for the sector.
-	const CPointMap pt = GetBasePoint();
+	const CPointMap& pt = GetBasePoint();
     const int iSectorSize = g_MapList.GetSectorSize(pt.m_map);
 	CRectMap rect;
 	rect.m_left = pt.m_x;

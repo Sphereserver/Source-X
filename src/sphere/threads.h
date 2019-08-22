@@ -12,6 +12,7 @@
 #include "../common/sphere_library/sstringobjs.h"
 #include "../sphere/ProfileData.h"
 #include "../sphere_library/CSTime.h"
+#include <exception>
 #include <list>
 
 #ifndef _WIN32
@@ -68,7 +69,7 @@ public:
 	virtual void setPriority(Priority) = 0;
 	virtual Priority getPriority() const = 0;
 
-	static inline threadid_t getCurrentThreadId()
+	static inline threadid_t getCurrentThreadId() noexcept
 	{
 #ifdef _WIN32
 		return ::GetCurrentThreadId();
@@ -76,7 +77,7 @@ public:
 		return pthread_self();
 #endif
 	}
-	static inline bool isSameThreadId(threadid_t firstId, threadid_t secondId)
+	static inline bool isSameThreadId(threadid_t firstId, threadid_t secondId) noexcept
 	{
 #ifdef _WIN32
 		return (firstId == secondId);
@@ -84,7 +85,8 @@ public:
 		return pthread_equal(firstId,secondId);
 #endif
 	}
-	inline bool isSameThread(threadid_t otherThreadId)
+
+	inline bool isSameThread(threadid_t otherThreadId) const noexcept
 	{
 		return isSameThreadId(getCurrentThreadId(), otherThreadId);
 	}
@@ -203,12 +205,13 @@ private:
 	struct STACK_INFO_REC
 	{
 		const char *functionName;
-		llong	startTime;
+		llong startTime;
 	};
 
 	STACK_INFO_REC m_stackInfo[0x1000];
 	size_t m_stackPos;
 	bool m_freezeCallStack;
+    bool m_exceptionStackUnwinding;
 #endif
 
 public:
@@ -227,30 +230,23 @@ public:
 	// allocates a manageable String from the thread local storage
 	void allocateString(TemporaryString &string);
 
+    void exceptionCaught();
+
 #ifdef THREAD_TRACK_CALLSTACK
 	inline void freezeCallStack(bool freeze)
 	{
 		m_freezeCallStack = freeze;
 	}
 
-	inline void pushStackCall(const char *name)
-	{
-		if (m_freezeCallStack == false)
-		{
-			m_stackInfo[m_stackPos].functionName = name;
-			m_stackInfo[m_stackPos].startTime = GetSupportedTickCount();
-			++m_stackPos;
-			m_stackInfo[m_stackPos].startTime = 0;
-		}
-	}
-
+	void pushStackCall(const char *name);
 	inline void popStackCall(void)
 	{
 		if (m_freezeCallStack == false)
 			--m_stackPos;
 	}
 
-	void printStackTrace(void);
+    void exceptionNotifyStackUnwinding(void);
+	void printStackTrace();
 #endif
 
 	ProfileData m_profile;	// the current active statistical profile.
@@ -367,35 +363,26 @@ private:
 	AbstractSphereThread* m_context;
 
 public:
-	inline StackDebugInformation(const char *name)
-	{
-		m_context = static_cast<AbstractSphereThread *>(ThreadHolder::current());
-		if (m_context != nullptr)
-			m_context->pushStackCall(name);
-	}
-
-	inline ~StackDebugInformation()
-	{
-		if (m_context != nullptr)
-			m_context->popStackCall();
-	}
+	StackDebugInformation(const char *name);
+	~StackDebugInformation();
 
 private:
 	StackDebugInformation(const StackDebugInformation& copy);
 	StackDebugInformation& operator=(const StackDebugInformation& other);
 
 public:
-	inline static void printStackTrace()
+	static void printStackTrace()
 	{
 		static_cast<AbstractSphereThread *>(ThreadHolder::current())->printStackTrace();
 	}
+    static void freezeCallStack(bool freeze)
+    {
+        static_cast<AbstractSphereThread *>(ThreadHolder::current())->freezeCallStack(freeze);
+    }
 };
 
-#define PAUSECALLSTACK static_cast<AbstractSphereThread *>(ThreadHolder::current())->freezeCallStack(true)
-#define UNPAUSECALLSTACK static_cast<AbstractSphereThread *>(ThreadHolder::current())->freezeCallStack(false)
-
 // Remember, call stack is disabled on Release builds!
-#define ADDTOCALLSTACK(_function_)	StackDebugInformation debugStack(_function_)
+#define ADDTOCALLSTACK(_function_)	const StackDebugInformation debugStack(_function_)
 
 // Add to the call stack these functions only in debug mode, to have the most precise call stack
 //  even if these functions are thought to be very safe and (nearly) exception-free.
@@ -410,8 +397,6 @@ public:
 
 #define ADDTOCALLSTACK(_function_)                  (void)0
 #define ADDTOCALLSTACK_INTENSIVE(_function_)        (void)0
-#define PAUSECALLSTACK                              (void)0
-#define UNPAUSECALLSTACK                            (void)0
 
 #endif // THREAD_TRACK_CALLSTACK
 

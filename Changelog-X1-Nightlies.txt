@@ -1627,8 +1627,261 @@ WARNING: the following change could break some hackish expedient used in scripts
 - Added: Can flag MT_STATUE (040000). When active, the char can't take any action (it's still "mortal" though, you need to add also STATF_INVUL) and acts like a statue:
 	it stands still in an animation frame, specified by TAG.STATUE_ANIM and TAG.STATUE_FRAME (Issue #233). It doesn't attack or make any action (it has an empty AI), still has hitpoints, stats, skills, etc.
 - Added: Can flag MT_NONSELECTABLE (080000). This char can't be selected/targeted. Use it for NPC statues which need to behave like items as much as possible.
-- Added: "HASCOMPPROPS propid" to check whether the object has the given ComponentProps (see 23-12-2018 changelog entry). Defnames for the ComponentProps IDs are added in the
+- Added: "HasComponentProps propid" to check whether the object has the given ComponentProps (see 23-12-2018 changelog entry). Defnames for the ComponentProps IDs are added in the
 	new script file core/defs_component_props.scp.
 - Fixed: The server sent an Attack Accepted packet instead of an Attack Refused one when a player tried to attack a char with flags STATF_INVUL or STATF_STONE.
 	That resulted in the target being considered under attack (red colored) even if the attack didn't start.
 - Fixed: Food periodically decreasing and stats regenerating on chars with STATF_STONE.
+
+23-04-2019, Nolok
+- Changed: "ITEM=#id, #amount, R#chance" will now evaluate the id field only if amount != 0 and the rand check succeeded.
+- Added: STRRANDRANGE function. It works like a random { } range, but for strings. E.g.: <STRRANDRANGE "boots" 1 "shoes" 1 "watermelons" 1>. Remember the quotes!
+- Added: MIN and MAX intrinsic functions, which return the smaller/greater of the two numberic arguments.
+- Fixed: ISNUMBER working only with decimal numbers.
+
+24-04-2019, Nolok
+- Changed: Item HEIGHT value is now first searched in the ITEMDEF (if not manually specified, the one from tiledata.mul is loaded), if absent, it's searched the DEF itemheight_0#HexID, then itemheight_#DecID.
+	Before it worked the opposite way, which was slower, also now this behavior is consistent with the one of Char HEIGHT (first search the CHARDEF, then the DEF).
+- Fixed: Incorrect parsing of quoted arguments of VAR and TIMERF.
+
+WARNING: the following change could break compatibility with previous scripts! Read carefully!
+- Added: RESDEF keyword, similar to DEF, but retrieves only the numeric identifier of Resource DEFNAMEs. Example of usage: <RESDEF.i_dagger>.
+- Changed: The DEF keyword doesn't find the numeric identifier of Resource (ITEMDEF/CHARDEF...) DEFNAMEs anymore. Use RESDEF. DEF is used to retrieve values from [DEFNAME] blocks. Example of usage: <DEF.mt_walk>.
+	This can break compatibility with previous scripts, if you used DEF to retrieve items/chars defname numeric value. You have to use RESDEF now.
+	You're safe (even if the underlying code is a bit slower) if you just used ID=i_dagger instead of ID=<DEF.i_dagger>.
+	If you know that a keyword is a DEF or a RESDEF, the best thing would be to use the right prefix. When Sphere enconunters a keyword without a prefix, it searches in the keyword lists in this order:
+		functions, VARs, RESDEFs, DEFs, so using the prefix will skip useless lookups in the wrong tables and will make Sphere search directly in the right one.
+
+25-04-2019, Nolok
+- Changed: Moved out some functionality from COMBAT_PREHIT CombatFlag: now it makes the hit animation start after the damage has been dealt (it should be the other way around, but it's how OSI does that...).
+- Added: COMBAT_FIRSTHIT_INSTANT CombatFlag to mimic another OSI feature: it makes the first hit in a combat instant (0 delay) (Issue #250).
+	So, to mimic OSI combat you should enable both COMBAT_PREHIT and COMBAT_FIRSTHIT_INSTANT.
+- Changed: LOCAL.ItemDamageChance in @Hit and @GetHit default value from 40 to 25.
+
+26-04-2019, Nolok
+WARNING: Important change!
+- Added (by XuN) the following ini settings and base char properties (to override the ini setting):
+	- EraLimitGear: Don't allow to NPCs to create gear newer than the items from the expansion in the given value (Clothes, weapons, hairs ...).
+	- EraLimitLoot: Don't allow to NPCs to create loot newer than the items from the expansion in the given value.
+	- EraLimitProps: Don't allow to chars (players and NPCs) to have properties newer than the ones from the expansion in the given value (Clothes, weapons, hairs ...).
+	These keywords will allow the creation of a "universal" scriptpack, which loads only the desired items and properties.
+	There's another advantage, which requires a little more attention by the scripter though: an assignment of a property that belongs to an expansion greater than your EraLimitProps will now be IGNORED,
+	so the save files will be smaller (and the save times a little shorter too), because the ignored properties won't be loaded nor saved.
+	This also means that if you create characters with a low EraLimitProps (valid also for EraLimitGear and Loot) like 1 (T2A) and then change idea and set it to 4 (Samurai Empire), you will have to recreate the chars
+	to make them load the Props/Gear/Loots matching your new era limit. This means that you may need to RESPAWN THE WORLD.
+	The elemental damages and resistances aren't treated like expansion-restricted properties, so to enable them you have to use COMBAT_ELEMENTAL_ENGINE, like always.
+
+- Changed: Made EXPANSION a Base property only.
+- Added: "Elves/Gargoyles only" tooltips.
+- Added tooltips for: Altered, Antique, AssassinHoned, Bane, Battlelust, Blodddrinker, BoneBreaker, Brittle, CastingFocus, EaterCold/Energy/Fire/Kinetic/Poison, Ephemeral, HitFatigue, HitManaDrain, HitSpell, Imbued,
+	IncreaseGold, LavaInfused, LowerAmmoCost, Massive, Prized, ReactiveParalyze, Searing, Splintering, ShipwreckItem, SoulCharge, SoulChargeCold/Energy/Fire/Kinetic/Poison, Unlucky, Unwieldly, UseBestWeaponSkill.
+- Added keywords and tooltips for: BonusBerserk, DurabilityBonus, HitSparks, HitSwarm, MysticWeapon. Functionality is missing yet.
+- Removed redundant property DecreaseHitChance. Just use a negative IncreaseHitChance (also, there is a tooltip entry only for IncreaseHitChance, not for a DecreaseHitChance).
+- Removed properties: DAMMODIFIER, MANAPHASE, MANABURST(Frequency/Karma/Evil/Good).
+
+30-04-2019, Nolok
+- Added: AR and AC keywords also for items, which return the total protection given by an armor piece. This value is internally used when COMBAT_ELEMENTAL_ENGINE is off and its value depends on
+	ARMOR, MODAR, ATTR_MAGIC and OF_ScaleDamageByDurability.
+- Fixed: ARMOR tooltip showing also with COMBAT_ELEMENTAL_ENGINE on.
+- Fixed: Item ID could be overridden only with a defname and not using a plain number.
+- Added: Error if trying to use as base an item ID greater than the maximum tiledata entry index.
+
+01-05-2019, Nolok
+- Fixed ISNUMBER also for float values.
+- Changed: Now intrinsic function arguments are recognized even if separated by a whitespace from the function, other than being enclosed by ().
+- Fixed: "Last logged" sysmessage shown also to a new player.
+- Fixed: FILE object functions couldn't accept quoted arguments.
+
+02-05-2019, Nolok
+- Added: MDB object. It's an SQLite database instance working like LDB, with the fundamental difference that MDB works with a temporary, in-memory database (this means that all the data is lost when you close the server).
+	Use it if you have small databases where you query from very frequently, since accessing a table from a db file is much slower than doing that from an in-memory db.
+	OPEN and CLOSE methods doesn't work with MDB.
+- Added: LDB/MDB functions IMPORTDB and EXPORTDB "database.db". The first loads into the database object a database file, the second saves the database object to a database file.
+- Added: LDB.FILENAME property to get the filename of the database connected to. Returns an empty string if there isn't an open connection.
+- Fixed: Crash when trying to execute a QUERY on a closed/never opened LDB.
+- Added: ISTEVENT for SERV.CHARDEF and SERV.ITEMDEF.
+
+05-05-2019, Nolok
+- Fixed: List element values could only store 32 bits number, instead of 64 bits ones (like TAG).
+- Improved: Windows console window log speed and removed rubberband effect when too much text was appended in a short amount of time.
+- Fixed: TAGs couldn't be set to a 64 bits number (was still limited to 32 bits).
+
+07-05-2019, Nolok
+- Changed: t_house_component to ei_house_component, t_house_lockdown to ei_house_lockdown, t_house_secure to ei_house_secure, according to the new X scriptpack naming convention for TYPEDEFs
+	(if a TYPEDEF is meant to be used as a TEVENT or an EVENT, use the prefix "ei_"; if the TYPEDEF is meant to be used as a base TYPE, use the classic prefix "t_", as always.)
+
+12-05-2019, Nolok
+- Fixed: SQLite last error code wasn't cleared after a successiful query, generating log errors even if the new query didn't return any error.
+
+14-05-2019, XuN
+- Fixed: ON=@Create trigger not firing on [TYPEDEF x] when the base item didn't have the trigger itself.
+- Removed: duplicated call to @ItemCreate
+- Added: UseDoor function for t_door and t_door_locked ignoring default key checks.
+- Updated: multi's typedef events to the new 'ei_name' standard
+
+15-05-2019, XuN
+- Added: RemoveAllKeys to the source executing RemoveKeys(uid) to owner, coowner(s), friend(s) and players in the access list.
+- Changed: Now all multis call RemoveAllKeys when being removed if AutoHouseKeys is enabled in the .ini
+- Fixed: Redeed crashing sphere when no real char was given as src (for example via @Timer).
+- Added: f_house_onplacement_check function called from CItemMulti::Multi_Create (where the multis do their checks to be placed) with this params:
+	return 0 // Use default checks (wich values may be modified with the bellow locals)
+	return 1 // Prevents the multi from being placed.
+	return 6 // Allows the multi to be placed without default placement checks.
+
+	local.check_BlockRadius=-1, 1, -1, 1	// Default: an area of +1 in each direction
+	local.check_MultiRadius=0, -5, 0, -5	// Default: 5 tiles in both North and South
+	// Values are: West, North, East, South
+	local.id=m_xxx		// Read Only
+	local.p=position	// Read Only
+
+19-05-2019, Nolok
+- Fixed: Players logging in an already active sector weren't marked as active, making them unable to fire their TIMER and every related event (like skills).
+
+25-05-2019, XuN
+- Fixed: Regen[Stat] not working, same for Regen[Stat]Val.
+- Fixed: AttackerTimeout=0 in the ini not working as intended.
+- Changed stat's regens checks and OnTickPeriodic to work in a tenth basis instead of second.
+- Fixed: Death checks being done each second instead of in each tick.
+- Changed: Mounted characters now get stats regens, if you want the avoiding stats to regen add an event with ON=@RegenStat return 1 when mounting them.
+- Added: RegenHitsD, RegenManaD, RegenStamD, RegenFoodD accepting tenths instead of seconds, eg: RegenHits=3 will regen hits each 3 seconds; RegenHitsD=3 will do it each 0.3 seconds.
+- Changed: Now Regen[Stat] will store the time of the last update check instead of the time in which the next update will be done, so if you change RegenHits the new value will take effect inmediatelly instead of on the next update.
+
+01-06-2019, Nolok
+- Fixed: Non-GM chars couldn't walk below roofs/floors/platforms placed just a couple of z points above their head (Issue #273).
+- Added: .ini experimental flag EF_WalkCheckHeightMounted. When this is on, assume during walkchecks that a mounted character is taller by 4 z points. Since the client walkcheck considers the height of a mounted char to be
+	the same as the height of the unmounted char, enabling this might prevent mounted characters to walk under places they could before.
+- Fixed: NPCs with MT_FLY could fly over a wall and then drop through the roof, falling inside a building they shouldn't be able to enter in that way.
+
+04-06-2019, Drk84
+- Fixed: Arrow not being consumed in @Hitmiss.
+
+05-06-2019, Nolok
+- Fixed: Casting recall spell on a non-rune item caused an exception (Issue #271).
+- Fixed: Clilocs didn't parse correctly empty and NULL arguments and the cliloc for the item name wasn't forcefully sent first (Issue #272).
+- Updated: Added more informations to the log message reporting a client crash.
+- Fixed: High Seas tiledata terrain data wasn't read correctly, also FLAGS was considered a 32 bits number instead of a 64 bits one, as now it is.
+- Changed: Renamed SERV.TILEDATA.id.UNK19 to LIGHT and added HUE. ANIM was considered to be a 4 bit field, but it looks like it's actually a 2 bit number (and the following 2 bits hold another value, now stored into HUE).
+
+06-06-2019, Nolok
+- Changed: Improved a lot the precision of the stack trace, now it should point exactly (in most cases) to the function where the exception was generated.
+- Fixed: UPDATE caused Stygian Abyss or later clients to show corpses changing their laying direction (even if it actually was a visual artifact, direction wasn't changing server-side) (Issue #274).
+
+06-07-2019, Nolok
+- Fixed: SERV.CLEARVARS, CLEARTAGS, CLEARCTAGS not working with the given mask (Issue #281).
+
+12-07-2019, Nolok
+- Fixed: STRSUB always cutting away last letter (Issue #287) and not working with index = -1.
+- Fixed: "Can't dynamically assign type 't_multi_custom' to an item." error showing also when setting the type from the base def (Issue #285).
+- Fixed: Craft menus showing every possible item, even if the required materials are not available (Issue #286).
+- Fixed: Selling an item to a vendor caused a new pile of gold to appear in the pack each time, instead of going to an existing pile of gold (Issue #278).
+
+15-07-2019, Nolok
+- Changed: Improved timing precision in the stack trace: changed the time unit from ticks/milliseconds to microseconds.
+
+18-07-2019, Nolok
+- Fixed: MORE1 not working as a timer for plant growth for t_crops items (Issue #288).
+- Fixed: The moongate generated by the Gate Travel spell at the destination P had a color which didn't match the destination region safe/unsafeness (Issue #283).
+
+21-07-2019, Nolok
+- Fixed: WEIGHTREDUCTION not working correctly for items inside a container (Issue #289).
+- Fixed: Retrieving a value from an unexistant LIST did not return -1; overwriting a LIST element generated an exception (Issue #290).
+- Fixed: Profiler and worldsave message showing incorrect times (Issue #296).
+- Fixed: Client listing showing the number of the online clients at the end of the list, instead of the top.
+- Added: Doc file "Porting from 0.55 to 0.56.txt" (the content was posted years ago by XuN on the forum).
+
+23-07-2019, Nolok
+- Added: -J command line switch (Windows specific) to automatically close the console window after server termination.
+- Fixed: -c and -k (on Windows) command line switches were considered only if lowercase.
+- Fixed: Invalid "Reject Move Item Request" packet sent when trying to drag an item with attr_move_never (Issue #300).
+
+24-07-2019, Nolok
+- Fixed: Could pick up and move items or item stacks too heavy to be carried (Issue #303).
+- Fixed: Adjacent sectors not waking up from sleep. Those sectors awakened only when a player entered inside them, this meant that corpses were removed and NPCs respawned only when a player
+	entered in that sector: this looks ugly (Issue #297).
+- Updated: Speed improvements in the NPC Pathfinder algorithm and script line reading.
+
+24-07-2019, Drk84
+- Added: Two optional parameters "linearcheck" and "forcecheck" to the SKILLUSEQUICK character command:
+	SKILLUSEQUICK "skillId", "difficulty", "linearcheck", "forcecheck"
+	
+	Linearcheck:
+	This optional parameter when set to 1 will make Sphere performs a linear check instead of using the default Bell Curve formula.
+	The linear check is usually used for combat checks (hitting, parrying, resisting spells) while the Bell curve check is usually used by almost all of the other skills.
+	Take note that when using the linear check, the highest is the difficulty value the easier is to pass the test, while the opposite is true for a Bell curve check. 
+	
+	Forcecheck:
+	This optional paramter allows the execution of the Skill_UseQuick method by a skill with SKF_SCRIPTED flag.
+	By default Sphere does not allow a skill with SKF_SCRIPTED flag to execute the Skill_UseQuick method, setting the value to 1 will allow the execution
+	of the Skill_UseQuick method.
+		
+	Examples:
+	skillusequick skill_appraise,75			//Make a quick check with item id skill with a difficulty of 75 and using the bell formula.
+	skillusequick skill_appraise,<itemid>/10,1		//Make a quick check with the item id skill with a difficulty equal to the character itemid value and using the linear check formula.
+	skillusequick skill_parrying,50,0,1		//Assuming that the parrying skill has the SKF_SCRIPTED flag, make a quick check with parrying skill,  using the Bell curve formula with a difficulty of 50 and forcing the execution of  the Skill_UseQuick method.
+	
+	Special Cases
+	Sphere internally uses a quick check when certain actions are performed:
+	
+	Camping: Camping skill uses a quick check for activating up campfires.
+	Mining:  Lingot smelting is handled by a quick check.
+	Musicianship: Playing an instrument is handled by a quick check.
+	Parrying: The success check for Parrying is handled by a quick check, remember that by adding the SKF_SCRIPTED flags to the Parrying skill will made you lose access to the @HitParry trigger.
+	Repairing Items: Two quick checks are made, one uses the crafting skill from which the item is created by, the second uses the Arms Lore skill.
+	Resisting Spells: A quick check is made when resisting a spell with SPELLFLAG_RESIST.
+	Tinkering: Copying a key is performed by a Tinkering quick check.
+	Training Dummies: All the Melee, Ranged and Pickpocket dummies uses a quick check.
+	Tracking: Tracking uses a quick check when STARTING to track (the tracking menu is displayed and the quarry category is selected).
+  
+25-07-2019, Nolok
+- Changed: The "too dumb to be able to use NPC Advanced Pathfinding" INT value from 70 to 30 (to ignore this check enable NPC_AI_ALWAYSINT in the ini).
+
+26-07-2019, Nolok
+- Improved: map checks (and, again, pathfinding) are significantly faster now, this means that the server can handle more alive/awake NPCs than before (without causing any lag).
+
+28-07-2019, Nolok
+- Fixed: When a derived ITEMDEF (like [ITEMDEF i_something], not [ITEMDEF 01234]) was created and neither a type and a valid id were set in the script, the item base was considered having
+	random type, layer, weight, tiledata flags and CAN flags.
+- Fixed: NotoSaves weren't always cleared right when they timed out. 
+- Fixed: Attacker elapsed time value wasn't increased exactly every second (but after a greater delay) (Issue #304).
+
+30-07-2019, Nolok
+- Fixed: Tooltip data not being sent right after an item was added to a container, in that case a random tooltip was shown for the item.
+
+02-08-2019, Nolok
+- Fixed: Connections to the HTTP server were always blocked, even if legit.
+- Fixed: NPCs could train a skill without any upper limit if the difference between teacher and scholar skill was high enough (Issue #307).
+- Fixed: REGENVALHITS/STAM/MANA/FOOD not being saved during worldsave (Issue #308).
+
+06-08-2019, Nolok
+- Fixed: When a char walked on a spiderweb and got stuck its last step was reverted, so it wasn't standing in the same tile as the web.
+
+07-08-2019, Drk84
+- Fixed: Purple potions MoreX (countdown to explosion) always ignored when set, default countdown value is 4 seconds.
+- Added: Spider webs stuck timer is now based on this formula: 2s + ((100 - (min(100,str))) * spiderWebHitPoints / 100)
+	Mininum stuck timer value is 2 seconds while maximum stuck timer value is 10 seconds.
+
+08-08-2019, Nolok
+- Fixed: Spawned chars weren't unlinked from the spawnitem when tamed (Issue #312).
+- Fixed: SELFREPAIR property having effect also on items which do not have valid MAXHITS.
+- Fixed: DIALOGLIST not working (Issue #314).
+
+10-08-2019, Nolok
+- Added: f_onchar_create_init function in core/serv_triggers.scp; it's called after the client sent the character creation data, but before
+	the character is created server-side (f_onchar_create is called after the creation, so the function arguments are read-only).
+	Function parameters:
+	 Variables:
+	   Read-Write:
+		 ARGN1 --> Feature flags sent by client
+		 ARGN2 --> Character profession (0=Advanced, 1=Warrior, 2=Mage, 3=Blacksmith, 4=Necromancer, 5=Paladin, 6=Samurai, 7=Ninja)
+		 ARGN3 --> Character race (1=Human, 2=Elf, 3=Gargoyle)
+	   Read-Only:
+		 ARGS  --> Account name
+		 ARGO  --> Client creating the character
+	 Return:
+		0 --> Allow character creation (default action)
+		1 --> Deny character creation
+- Fixed: @(Item)DropOn_Ground ARGS not being used, as indicated in the wiki.
+- Changed: @(Item)DropOn_Ground now fires BEFORE the new P is set! The new P is stored in the ARGS of the trigger. Prior to this change,
+	the triggers were called after the new P was set.
+- Added: In @(Item)DropOn_Ground, ARGN2 value is now == 1 if the trigger is called during a BOUNCE check (the char is overloaded and the item is being dropped on ground).
+- Fixed: @(Item)DropOn_Ground not firing when, during a BOUNCE check, the char was overloaded and the item was being dropped on ground (Issue #295).

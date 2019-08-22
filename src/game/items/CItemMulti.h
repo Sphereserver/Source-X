@@ -310,6 +310,10 @@ public:
     * @param pTarget the char.
     */
     void RemoveKeys(CUID uidTarget);
+    /**
+    * @brief Calls RemoveKeys(player_uid) on all players with access to this house.
+    */
+    void RemoveAllKeys();
     // Misc
     /**
     * @brief Returns the multi count.
@@ -617,11 +621,11 @@ public:
 
     // Scripts virtuals.
 
-    virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef) override;
+    virtual bool r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;
 
     virtual void r_Write(CScript & s) override;
-    virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc) override;
+    virtual bool r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false) override;
     virtual bool r_LoadVal(CScript & s) override;
     virtual void DupeCopy(const CItem * pItem) override;  // overriding CItem::DupeCopy
     virtual void Delete(bool fForce = false) override;

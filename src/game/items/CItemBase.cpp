@@ -9,6 +9,7 @@
 #include "../components/CCPropsItemWeaponRanged.h"
 #include "../resource/CResourceLock.h"
 #include "../uo_files/CUOItemInfo.h"
+#include "../CUOInstall.h"
 #include "../CLog.h"
 #include "../CException.h"
 #include "CItemBase.h"
@@ -35,6 +36,13 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	{
 		// There should be an ID= in the scripts later.
 		m_dwDispIndex = ITEMID_GOLD_C1; // until i hear otherwise from the script file.
+
+        m_type = IT_NORMAL;
+        m_qwFlags = 0;
+        m_Can = 0;
+        m_layer = 0;
+        m_weight = 0;
+
 		return;
 	}
 
@@ -49,7 +57,7 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	{
 		if ( ! CItemBase::GetItemData( id, &tiledata ) )	// some valid items don't show up here !
 		{
-			// return nullptr;
+			// warn? ignore? // return nullptr;
 		}
 	}
 	else
@@ -57,7 +65,7 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 		tiledata.m_weight = 0xFF;
 	}
 
-	m_dwFlags = tiledata.m_flags;
+	m_qwFlags = tiledata.m_flags;
 
     SubscribeComponentProps(new CCPropsItem());
     SubscribeComponentProps(new CCPropsItemChar());
@@ -68,8 +76,8 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	// Some items (like hair) have no names !
 	// Get rid of the strange leading spaces in some of the names.
 	tchar szName[ sizeof(tiledata.m_name)+1 ];
-	size_t j = 0;
-	for ( size_t i = 0; i < sizeof(tiledata.m_name) && tiledata.m_name[i]; i++ )
+	ushort j = 0;
+	for ( ushort i = 0; i < sizeof(tiledata.m_name) && tiledata.m_name[i]; ++i )
 	{
 		if ( j == 0 && ISWHITESPACE(tiledata.m_name[i]))
 			continue;
@@ -79,14 +87,13 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	szName[j] = '\0';
 	m_sName = szName;	// default type name.
 
-	// Do some special processing for certain items.
-
 	SetHeight( GetItemHeightFlags( tiledata, &m_Can ));
 
+    // Do some special processing for certain items.
 	GetItemSpecificFlags( tiledata, &m_Can, m_type, id );
 
-	if ( (tiledata.m_weight == 0xFF) ||			// not movable.
-		( m_dwFlags & UFLAG1_WATER ) )	// water can't be picked up.
+	if ( (tiledata.m_weight == 0xFF) ||	// not movable.
+		( m_qwFlags & UFLAG1_WATER ) )  // water can't be picked up.
 	{
 		m_weight = UINT16_MAX;
 	}
@@ -95,7 +102,7 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 		m_weight = tiledata.m_weight * WEIGHT_UNITS;
 	}
 
-	if ( m_dwFlags & ( UFLAG1_EQUIP | UFLAG3_EQUIP2 ))
+	if ( m_qwFlags & ( UFLAG1_EQUIP | UFLAG3_EQUIP2 ))
 	{
 		m_layer = tiledata.m_layer;
 		if ( m_layer && ! IsMovableType())
@@ -121,7 +128,7 @@ void CItemBase::SetTypeName( lpctstr pszName )
 	ASSERT(pszName);
 	if ( ! strcmp( pszName, GetTypeName()) )
 		return;
-	m_dwFlags |= UFLAG2_ZERO1;	// we override the name
+	m_qwFlags |= UFLAG2_ZERO1;	// we override the name
 	CBaseBaseDef::SetTypeName( pszName );
 }
 
@@ -130,11 +137,11 @@ lpctstr CItemBase::GetArticleAndSpace() const
 	ADDTOCALLSTACK("CItemBase::GetArticleAndSpace");
 	if ( IsSetOF(OF_NoPrefix) )
 		return "";
-	if ( m_dwFlags & UFLAG2_ZERO1 )	// Name has been changed from TILEDATA.MUL
+	if ( m_qwFlags & UFLAG2_ZERO1 )	// Name has been changed from TILEDATA.MUL
 		return Str_GetArticleAndSpace( GetTypeName() );
-	if ( m_dwFlags & UFLAG2_AN )
+	if ( m_qwFlags & UFLAG2_AN )
 		return "an ";
-	if ( m_dwFlags & UFLAG2_A )
+	if ( m_qwFlags & UFLAG2_A )
 		return "a ";
 	return "";
 }
@@ -186,10 +193,10 @@ tchar * CItemBase::GetNamePluralize( lpctstr pszNameBase, bool fPluralize )	// s
 {
 	ADDTOCALLSTACK("CItemBase::GetNamePluralize");
 	tchar * pszName = Str_GetTemp();
-	size_t j = 0;
+	ushort j = 0;
 	bool fInside = false;
 	bool fPlural = false;
-	for ( size_t i = 0; pszNameBase[i]; ++i )
+	for ( ushort i = 0; pszNameBase[i]; ++i )
 	{
 		if ( pszNameBase[i] == '%' )
 		{
@@ -459,7 +466,7 @@ int CItemBase::IsID_Door( ITEMID_TYPE id ) // static
 		return 2;
 	}
 
-	for ( size_t i = 0; i < CountOf(sm_Item_DoorBase); ++i)
+	for ( uint i = 0; i < CountOf(sm_Item_DoorBase); ++i)
 	{
 		int did = id - sm_Item_DoorBase[i];
 		if ( did >= 0 && did <= 15 )
@@ -625,13 +632,24 @@ bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * pData ) // stat
 	// Invalid object id ?
 	// NOTE: This data should already be read into the m_ItemBase table ???
 
-	if ( ! IsValidDispID(id))
+    if (id >= g_Install.m_tiledata.GetItemMaxIndex())
+    {
+        g_Log.EventError("ITEMDEF has invalid ID=%d (0%x) (value is greater than the tiledata maximum index).\n", id, id);
+        return false;
+    }
+    if (!IsValidDispID(id))
 		return false;
 
 	try
 	{
 		*pData = CUOItemInfo(id);
 	}
+    catch (const std::exception& e)
+    {
+        g_Log.CatchStdException(&e, "GetItemData");
+        CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+        return false;
+    }
 	catch ( const CSError& e )
 	{
 		g_Log.CatchEvent( &e, "GetItemData" );
@@ -650,8 +668,9 @@ bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * pData ) // stat
 		! pData->m_weight &&
 		! pData->m_layer &&
 		! pData->m_dwUnk11 &&
-		! pData->m_dwAnim &&
-		! pData->m_wUnk19 &&
+		! pData->m_wAnim &&
+		! pData->m_wHue &&
+        ! pData->m_wLightIndex &&
 		! pData->m_height &&
 		! pData->m_name[0]
 		)
@@ -767,7 +786,7 @@ height_t CItemBase::GetItemHeight( ITEMID_TYPE id, dword *pdwBlockFlags ) // sta
 
 	const CResourceID rid( RES_ITEMDEF, id );
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
-	if ( index != g_Cfg.m_ResHash.BadIndex() ) // already loaded ?
+	if ( index != SCONT_BADINDEX ) // already loaded ?
 	{
 		CResourceDef * pBaseStub = g_Cfg.m_ResHash.GetAt( rid, index );
 		ASSERT(pBaseStub);
@@ -838,7 +857,7 @@ IT_TYPE CItemBase::GetTypeBase( ITEMID_TYPE id, const CUOItemTypeRec_HS &tiledat
 ITEMID_TYPE CItemBase::GetNextFlipID( ITEMID_TYPE id ) const
 {
 	ADDTOCALLSTACK("CItemBase::GetNextFlipID");
-	if (m_flip_id.size() > 0 )
+	if (!m_flip_id.empty())
 	{
 		ITEMID_TYPE idprev = GetDispID();
 		for ( size_t i = 0; i < m_flip_id.size(); ++i )
@@ -1004,7 +1023,7 @@ enum IBC_TYPE
 	IBC_QTY
 };
 
-lpctstr const CItemBase::sm_szLoadKeys[IBC_QTY+1] =
+lpctstr constexpr CItemBase::sm_szLoadKeys[IBC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CItemBase_props.tbl"
@@ -1012,20 +1031,20 @@ lpctstr const CItemBase::sm_szLoadKeys[IBC_QTY+1] =
 	nullptr
 };
 
-bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CItemBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
 	ADDTOCALLSTACK("CItemBase::r_WriteVal");
     EXC_TRY("WriteVal");
 
     // Checking Props CComponents first
     EXC_SET_BLOCK("EntityProps");
-    if (CEntityProps::r_WritePropVal(pszKey, sVal, nullptr, this))
+    if (!fNoCallChildren && CEntityProps::r_WritePropVal(ptcKey, sVal, nullptr, this))
     {
         return true;
     }
 
     EXC_SET_BLOCK("Keyword");
-	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+	switch ( FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		//return as string or hex number or nullptr if not set
 		case IBC_ALTERITEM:
@@ -1047,7 +1066,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 		case IBC_NPCKILLER:
 		case IBC_NPCPROTECTION:
 		case IBC_SUMMONING:
-			sVal = GetDefStr(pszKey);
+			sVal = GetDefStr(ptcKey);
 			break;
 		//return as decimal number or 0 if not set
 		case IBC_BONUSSKILL1AMT:
@@ -1071,7 +1090,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 		case IBC_BONUSCRAFTINGEXCEPAMT:
 		case IBC_NPCKILLERAMT:
 		case IBC_NPCPROTECTIONAMT:
-			sVal.FormatLLVal(GetDefNum(pszKey));
+			sVal.FormatLLVal(GetDefNum(ptcKey));
 			break;
 
 
@@ -1090,18 +1109,18 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 		{
 			if (!IsType(IT_SHIP))
 				return false;
-			pszKey += 9;
+			ptcKey += 9;
 			CItemBaseMulti * pItemMulti = dynamic_cast<CItemBaseMulti*>(this);
 
-			if (*pszKey == '.')
+			if (*ptcKey == '.')
 			{
-				pszKey++;
-				if (!strnicmp(pszKey, "TILES", 5))
+				++ptcKey;
+				if (!strnicmp(ptcKey, "TILES", 5))
 				{
 					sVal.FormatVal(pItemMulti->m_shipSpeed.tiles);
 					break;
 				}
-				else if (!strnicmp(pszKey, "PERIOD", 6))
+				else if (!strnicmp(ptcKey, "PERIOD", 6))
 				{
 					sVal.FormatVal(pItemMulti->m_shipSpeed.period);
 					break;
@@ -1117,7 +1136,8 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             {
                 return false;
             }
-            CItemBaseMulti * pItemMulti = dynamic_cast<CItemBaseMulti*>(this);
+            const CItemBaseMulti * pItemMulti = dynamic_cast<const CItemBaseMulti*>(this);
+            ASSERT(pItemMulti);
             sVal.FormatU8Val(pItemMulti->_iMultiCount);
         }break;
 		case IBC_DISPID:
@@ -1128,7 +1148,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 				tchar *pszTemp = Str_GetTemp();
 				size_t iLen = 0;
 				*pszTemp = '\0';
-				for ( size_t i = 0; i < m_flip_id.size(); i++ )
+				for ( size_t i = 0; i < m_flip_id.size(); ++i )
 				{
 					if ( i > 0 )
 						iLen += strcpylen( pszTemp+iLen, "," );
@@ -1233,18 +1253,18 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			break;
 		case IBC_SKILLMAKE:		// Print the resources need to make in nice format.
 			{
-				pszKey	+= 9;
-				if ( *pszKey == '.' )
+				ptcKey	+= 9;
+				if ( *ptcKey == '.' )
 				{
 					bool	fQtyOnly	= false;
 					bool	fKeyOnly	= false;
-					SKIP_SEPARATORS( pszKey );
-					int		index	= Exp_GetVal( pszKey );
-					SKIP_SEPARATORS( pszKey );
+					SKIP_SEPARATORS( ptcKey );
+					int		index	= Exp_GetVal( ptcKey );
+					SKIP_SEPARATORS( ptcKey );
 
-					if ( !strnicmp( pszKey, "KEY", 3 ))
+					if ( !strnicmp( ptcKey, "KEY", 3 ))
 						fKeyOnly	= true;
-					else if ( !strnicmp( pszKey, "VAL", 3 ))
+					else if ( !strnicmp( ptcKey, "VAL", 3 ))
 						fQtyOnly	= true;
 
 					tchar *pszTmp = Str_GetTemp();
@@ -1291,13 +1311,13 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			sVal.FormatHex( m_ttNormal.m_tData4 );
 			break;
 		case IBC_TFLAGS:
-			sVal.FormatHex( GetTFlags() );
+			sVal.FormatULLHex( GetTFlags() );
 			break;
 		case IBC_TWOHANDS:
 			if ( ! IsTypeEquippable() )
 				return false;
 
-			if ( ! IsTypeWeapon(GetType()) && ! IsType(IT_FISH_POLE))
+			if ( !CCPropsItemWeapon::CanSubscribe(this))
 				sVal.FormatVal(0);
 			else
 				sVal.FormatVal( m_layer == LAYER_HAND2 );
@@ -1324,7 +1344,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			break;
 		default:
         {
-            return(CBaseBaseDef::r_WriteVal(pszKey, sVal));
+            return ( fNoCallParent ? false : CBaseBaseDef::r_WriteVal(ptcKey, sVal) );
         }
 	}
 	return true;
@@ -1349,7 +1369,7 @@ bool CItemBase::r_LoadVal( CScript &s )
     }
 
     EXC_SET_BLOCK("Keyword");
-	lpctstr	pszKey = s.GetKey();
+	lpctstr	ptcKey = s.GetKey();
 	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ) )
 	{
 		//Set as Strings
@@ -1419,17 +1439,17 @@ bool CItemBase::r_LoadVal( CScript &s )
 		}break;
 		case IBC_SHIPSPEED:
 		{
-			pszKey += 9;
-			if (*pszKey == '.')
+			ptcKey += 9;
+			if (*ptcKey == '.')
 			{
-				++pszKey;
+				++ptcKey;
 				CItemBaseMulti *pItemMulti = dynamic_cast<CItemBaseMulti*>(dynamic_cast<CItemBase*>(this));
-				if (!strnicmp(pszKey, "TILES", 5))
+				if (!strnicmp(ptcKey, "TILES", 5))
 				{
 					pItemMulti->m_shipSpeed.tiles = (uchar)(s.GetArgVal());
 					return true;
 				}
-				else if (!strnicmp(pszKey, "PERIOD", 6))
+				else if (!strnicmp(ptcKey, "PERIOD", 6))
 				{
 					pItemMulti->m_shipSpeed.tiles = (uchar)(s.GetArgVal());
 					return true;
@@ -1586,23 +1606,27 @@ bool CItemBase::r_LoadVal( CScript &s )
 			{
 				if ( GetID() < ITEMID_MULTI )
 				{
-					DEBUG_ERR(( "Setting new id for base type %s not allowed\n", GetResourceName()));
+                    g_Log.EventError( "Setting new ID for base type %s not allowed\n", GetResourceName());
 					return false;
 				}
 
 				ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
-				if ( ! IsValidDispID(id))
-				{
-					DEBUG_ERR(( "Setting invalid id=%s for base type %s\n", s.GetArgStr(), GetResourceName()));
-					return false;
-				}
-
 				CItemBase * pItemDef = FindItemBase( id );	// make sure the base is loaded.
 				if ( ! pItemDef )
 				{
-					DEBUG_ERR(( "Setting unknown base id=0%x for %s\n", id, GetResourceName()));
+                    g_Log.EventError( "Setting unknown base ID=0%x for base type %s\n", id, GetResourceName());
 					return false;
 				}
+
+                id = ITEMID_TYPE(pItemDef->m_dwDispIndex);
+                if ( ! IsValidDispID(id) )
+                {
+                    if (id >= g_Install.m_tiledata.GetItemMaxIndex())
+                        g_Log.EventError("Setting invalid ID=%s for base type %s (value is greater than the tiledata maximum index).\n", s.GetArgStr(), GetResourceName());
+                    else
+                        g_Log.EventError( "Setting invalid ID=%s for base type %s\n", s.GetArgStr(), GetResourceName());
+                    return false;
+                }
 
 				CopyBasic( pItemDef );
 				m_dwDispIndex = id;	// Might not be the default of a DUPEITEM
@@ -1706,9 +1730,9 @@ void CItemBase::ReplaceItemBase( CItemBase * pOld, CResourceDef * pNew ) // stat
 	ADDTOCALLSTACK("CItemBase::ReplaceItemBase");
 	ASSERT(pOld);
 	ASSERT(pOld->GetRefInstances() == 0);
-	CResourceID rid = pOld->GetResourceID();
+	CResourceID const& rid = pOld->GetResourceID();
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
-	ASSERT( index != g_Cfg.m_ResHash.BadIndex() );
+	ASSERT( index != SCONT_BADINDEX );
 	g_Cfg.m_ResHash.SetAt( rid, index, pNew );
 }
 
@@ -1912,7 +1936,7 @@ enum MLC_TYPE
 	MLC_QTY
 };
 
-lpctstr const CItemBaseMulti::sm_szLoadKeys[] =
+lpctstr constexpr CItemBaseMulti::sm_szLoadKeys[] =
 {
 	"BASECOMPONENT",
     "BASESTORAGE",
@@ -1980,11 +2004,12 @@ bool CItemBaseMulti::r_LoadVal(CScript &s)
     return false;
 }
 
-bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pChar)
+bool CItemBaseMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pChar, bool fNoCallParent, bool fNoCallChildren)
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CItemBaseMulti::r_WriteVal");
     EXC_TRY("WriteVal");
-    switch (FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1))
+    switch (FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1))
     {
         case MLC_BASESTORAGE:
             sVal.FormatU16Val(_iBaseStorage);
@@ -1997,31 +2022,31 @@ bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * 
             break;
         case MLC_BASECOMPONENT:
         {
-            pszKey += 13;
+            ptcKey += 13;
             const CSphereMulti* pMulti = g_Cfg.GetMultiItemDefs(GetDispID());
             if (pMulti == nullptr)
                 return false;
 
-            if (*pszKey == '\0')
+            if (*ptcKey == '\0')
             {
                 sVal.FormatSTVal(pMulti->GetItemCount());
             }
-            else if (*pszKey == '.')
+            else if (*ptcKey == '.')
             {
-                SKIP_SEPARATORS(pszKey);
-                size_t index = Exp_GetVal(pszKey);
+                SKIP_SEPARATORS(ptcKey);
+                size_t index = Exp_GetVal(ptcKey);
                 if (index >= pMulti->GetItemCount())
                     return false;
-                SKIP_SEPARATORS(pszKey);
+                SKIP_SEPARATORS(ptcKey);
                 const CUOMultiItemRec_HS* item = pMulti->GetItem(index);
 
-                if (*pszKey == '\0') { sVal.Format("%u,%i,%i,%i", item->m_wTileID, item->m_dx, item->m_dy, item->m_dz); return true; }
-                else if (!strnicmp(pszKey, "ID", 2)) { sVal.FormatVal(item->m_wTileID); return true; }
-                else if (!strnicmp(pszKey, "DX", 2)) { sVal.FormatVal(item->m_dx); return true; }
-                else if (!strnicmp(pszKey, "DY", 2)) { sVal.FormatVal(item->m_dy); return true; }
-                else if (!strnicmp(pszKey, "DZ", 2)) { sVal.FormatVal(item->m_dz); return true; }
-                else if (!strnicmp(pszKey, "D", 1)) { sVal.Format("%i,%i,%i", item->m_dx, item->m_dy, item->m_dz); return true; }
-                else if (!strnicmp(pszKey, "VISIBLE", 7)) { sVal.FormatVal(item->m_visible); return true; }
+                if (*ptcKey == '\0') { sVal.Format("%u,%i,%i,%i", item->m_wTileID, item->m_dx, item->m_dy, item->m_dz); return true; }
+                else if (!strnicmp(ptcKey, "ID", 2)) { sVal.FormatVal(item->m_wTileID); return true; }
+                else if (!strnicmp(ptcKey, "DX", 2)) { sVal.FormatVal(item->m_dx); return true; }
+                else if (!strnicmp(ptcKey, "DY", 2)) { sVal.FormatVal(item->m_dy); return true; }
+                else if (!strnicmp(ptcKey, "DZ", 2)) { sVal.FormatVal(item->m_dz); return true; }
+                else if (!strnicmp(ptcKey, "D", 1)) { sVal.Format("%i,%i,%i", item->m_dx, item->m_dy, item->m_dz); return true; }
+                else if (!strnicmp(ptcKey, "VISIBLE", 7)) { sVal.FormatVal(item->m_visible); return true; }
                 else return false;
             }
             else
@@ -2031,26 +2056,26 @@ bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * 
         }
         case MLC_COMPONENT:
         {
-            pszKey += 9;
-            if (*pszKey == '\0')
+            ptcKey += 9;
+            if (*ptcKey == '\0')
             {
                 sVal.FormatSTVal(m_Components.size());
             }
-            else if (*pszKey == '.')
+            else if (*ptcKey == '.')
             {
-                SKIP_SEPARATORS(pszKey);
-                size_t index = Exp_GetVal(pszKey);
+                SKIP_SEPARATORS(ptcKey);
+                size_t index = Exp_GetVal(ptcKey);
                 if (m_Components.IsValidIndex(index) == false)
                     return false;
 
-                SKIP_SEPARATORS(pszKey);
+                SKIP_SEPARATORS(ptcKey);
                 CMultiComponentItem item = m_Components.at(index);
 
-                if (!strnicmp(pszKey, "ID", 2)) sVal.FormatVal(item.m_id);
-                else if (!strnicmp(pszKey, "DX", 2)) sVal.FormatVal(item.m_dx);
-                else if (!strnicmp(pszKey, "DY", 2)) sVal.FormatVal(item.m_dy);
-                else if (!strnicmp(pszKey, "DZ", 2)) sVal.FormatVal(item.m_dz);
-                else if (!strnicmp(pszKey, "D", 1)) sVal.Format("%i,%i,%i", item.m_dx, item.m_dy, item.m_dz);
+                if (!strnicmp(ptcKey, "ID", 2)) sVal.FormatVal(item.m_id);
+                else if (!strnicmp(ptcKey, "DX", 2)) sVal.FormatVal(item.m_dx);
+                else if (!strnicmp(ptcKey, "DY", 2)) sVal.FormatVal(item.m_dy);
+                else if (!strnicmp(ptcKey, "DZ", 2)) sVal.FormatVal(item.m_dz);
+                else if (!strnicmp(ptcKey, "D", 1)) sVal.Format("%i,%i,%i", item.m_dx, item.m_dy, item.m_dz);
                 else sVal.Format("%u,%i,%i,%i", item.m_id, item.m_dx, item.m_dy, item.m_dz);
             }
             else
@@ -2061,23 +2086,23 @@ bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * 
             sVal.Format("%d,%d,%d,%d", m_rect.m_left, m_rect.m_top, m_rect.m_right - 1, m_rect.m_bottom - 1);
             return true;
         case MLC_REGIONFLAGS:
-            sVal.FormatLLHex(m_dwRegionFlags);
+            sVal.FormatHex(m_dwRegionFlags);
             return true;
         case MLC_SHIPSPEED:
         {
             if (!IsType(IT_SHIP))
                 return false;
 
-            pszKey += 9;
-            if (*pszKey == '.')
+            ptcKey += 9;
+            if (*ptcKey == '.')
             {
-                pszKey++;
-                if (!strnicmp(pszKey, "TILES", 5))
+                ++ptcKey;
+                if (!strnicmp(ptcKey, "TILES", 5))
                 {
                     sVal.FormatVal(m_shipSpeed.tiles);
                     break;
                 }
-                else if (!strnicmp(pszKey, "PERIOD", 6))
+                else if (!strnicmp(ptcKey, "PERIOD", 6))
                 {
                     sVal.FormatVal(m_shipSpeed.period);
                     break;
@@ -2089,7 +2114,7 @@ bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * 
             break;
         }
         default:
-            return CItemBase::r_WriteVal(pszKey, sVal, pChar);
+            return (fNoCallParent ? false : CItemBase::r_WriteVal(ptcKey, sVal, pChar));
     }
     return true;
     EXC_CATCH;
@@ -2104,14 +2129,14 @@ bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * 
 
 CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 {
-	ADDTOCALLSTACK("CItemBase::FindItemBase");
+    ADDTOCALLSTACK_INTENSIVE("CItemBase::FindItemBase");
 	// CItemBase is a like item already loaded.
 	if ( id <= ITEMID_NOTHING )
 		return nullptr;
 
 	CResourceID rid = CResourceID( RES_ITEMDEF, id );
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
-	if ( index == g_Cfg.m_ResHash.BadIndex() )
+	if ( index == SCONT_BADINDEX )
 		return nullptr;
 
 	CResourceDef * pBaseStub = g_Cfg.m_ResHash.GetAt( rid, index );
@@ -2125,6 +2150,7 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 	if ( pBaseDupe )
 		return( pBaseDupe->GetItemDef() );	// this is just a dupeitem
 
+    // The rid was added to the ResourceHash, but it's not linked yet to a CItemBase (we do it on the first request).
 	CResourceLink * pBaseLink = dynamic_cast <CResourceLink *>(pBaseStub);
 	ASSERT(pBaseLink);
 
@@ -2188,7 +2214,7 @@ CItemBaseDupe * CItemBaseDupe::GetDupeRef( ITEMID_TYPE id ) // static
 
 	CResourceID rid = CResourceID( RES_ITEMDEF, id );
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
-	if ( index == g_Cfg.m_ResHash.BadIndex() )
+	if ( index == SCONT_BADINDEX )
 		return nullptr;
 
 	CResourceDef * pBaseStub = g_Cfg.m_ResHash.GetAt( rid, index );

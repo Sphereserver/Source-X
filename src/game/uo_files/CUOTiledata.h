@@ -18,8 +18,11 @@ class CUOTiledata
     std::vector<CUOTerrainTypeRec_HS> _tiledataTerrainEntries;
 
 public:
-    static ITEMID_TYPE GetMaxTileDataItem();
     void Load();
+    inline int GetItemMaxIndex() const {
+        ASSERT(!_tiledataItemEntries.empty());
+        return int(_tiledataItemEntries.size() - 1);
+    }
     inline const CUOItemTypeRec_HS* GetItemEntry(ITEMID_TYPE id) const {
         return &(_tiledataItemEntries[id]);
     }

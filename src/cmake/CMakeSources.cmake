@@ -166,6 +166,7 @@ common/resource/CResourceBase.cpp
 common/resource/CResourceBase.h
 common/resource/CResourceDef.cpp
 common/resource/CResourceDef.h
+common/resource/CResourceID.cpp
 common/resource/CResourceID.h
 common/resource/CResourceHash.cpp
 common/resource/CResourceHash.h
@@ -225,6 +226,7 @@ common/sphere_library/CSObjList.h
 common/sphere_library/CSObjListRec.h
 common/sphere_library/CSObjSortArray.h
 common/sphere_library/CSPtrTypeArray.h
+common/sphere_library/CSSortedVector.h
 common/sphere_library/CSTypedArray.h
 common/sphere_library/CSQueue.cpp
 common/sphere_library/CSQueue.h

@@ -121,27 +121,45 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 	double iSkillSum = iSkillTaming + iSkillAnimalLore + iSkillVeterinary;
 
 	int iPetMax;
-	if ( iSkillSum >= 240.0 )
-		iPetMax = 5;
-	else if ( iSkillSum >= 200.0 )
-		iPetMax = 4;
-	else if ( iSkillSum >= 160.0 )
-		iPetMax = 3;
-	else
-		iPetMax = 2;
-
-	if ( iSkillTaming >= 100.0 )
-		iPetMax += (int)((iSkillTaming - 90.0) / 10);
-
-	if ( iSkillAnimalLore >= 100.0 )
-		iPetMax += (int)((iSkillAnimalLore - 90.0) / 10);
-
-	if ( iSkillVeterinary >= 100.0 )
-		iPetMax += (int)((iSkillVeterinary - 90.0) / 10);
-
 	int iMaxPlayerPets = (int)m_TagDefs.GetKeyNum("MAXPLAYERPETS");
-	if ( iMaxPlayerPets )
+	if (iMaxPlayerPets)
+	{
 		iPetMax = iMaxPlayerPets;
+	}
+	else
+	{
+		if (iSkillSum >= 240.0)
+		{
+			iPetMax = 5;
+		}
+		else if (iSkillSum >= 200.0)
+		{
+			iPetMax = 4;
+		}
+		else if (iSkillSum >= 160.0)
+		{
+			iPetMax = 3;
+		}
+		else
+		{
+			iPetMax = 2;
+		}
+
+		if (iSkillTaming >= 100.0)
+		{
+			iPetMax += (int)((iSkillTaming - 90.0) / 10);
+		}
+
+		if (iSkillAnimalLore >= 100.0)
+		{
+			iPetMax += (int)((iSkillAnimalLore - 90.0) / 10);
+		}
+
+		if (iSkillVeterinary >= 100.0)
+		{
+			iPetMax += (int)((iSkillVeterinary - 90.0) / 10);
+		}
+	}
 
 	for ( CItem *pItem = pBank->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
 	{
@@ -206,29 +224,37 @@ ushort CChar::NPC_OnTrainCheck( CChar * pCharSrc, SKILL_TYPE Skill )
 		return 0;
 	}
 
-	ushort uiSkillSrcVal = pCharSrc->Skill_GetBase(Skill);
-	ushort uiSkillVal = Skill_GetBase(Skill);
-	ushort uiTrainVal = NPC_GetTrainMax(pCharSrc, Skill) - uiSkillSrcVal;
+	const ushort uiSkillSrcVal = pCharSrc->Skill_GetBase(Skill);
+	int iTrainVal = (int)NPC_GetTrainMax(pCharSrc, Skill) - uiSkillSrcVal;
+    if (iTrainVal < 0)
+        iTrainVal = 0;
+    else if (iTrainVal > USHRT_MAX)
+        iTrainVal = USHRT_MAX;
+    const ushort uiTrainVal = (ushort)iTrainVal;
 
 	// Train npc skill cap
-	ushort uiMaxDecrease = 0;
-	if ( (pCharSrc->Skill_GetSum() + uiTrainVal) > pCharSrc->Skill_GetSumMax() )
-	{	
-		for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
-		{
-			if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) )
-				continue;
+	uint uiMaxDecrease = 0; // using uint instead of ushort to avoid overflows in the for loop
+    if (uiTrainVal != 0)
+    {
+        if ((pCharSrc->Skill_GetSum() + uiTrainVal) > pCharSrc->Skill_GetSumMax())
+        {
+            for (uint i = 0; i < g_Cfg.m_iMaxSkill; ++i)
+            {
+                if (!g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i))
+                    continue;
 
-			if ( pCharSrc->Skill_GetLock((SKILL_TYPE)i) == SKILLLOCK_DOWN )
-				uiMaxDecrease += pCharSrc->Skill_GetBase((SKILL_TYPE)i);
-		}
-		uiMaxDecrease = minimum(uiTrainVal, uiMaxDecrease);
-	}
-	else
-	{
-		uiMaxDecrease = uiTrainVal;
-	}
+                if (pCharSrc->Skill_GetLock((SKILL_TYPE)i) == SKILLLOCK_DOWN)
+                    uiMaxDecrease += pCharSrc->Skill_GetBase((SKILL_TYPE)i);
+            }
+            uiMaxDecrease = minimum(uiTrainVal, uiMaxDecrease);
+        }
+        else
+        {
+            uiMaxDecrease = uiTrainVal;
+        }
+    }
 
+    const ushort uiSkillVal = Skill_GetBase(Skill);
 	lpctstr pszMsg;
 	if ( uiSkillVal <= 0 )
 		pszMsg = g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_DUNNO_2 );
@@ -237,9 +263,9 @@ ushort CChar::NPC_OnTrainCheck( CChar * pCharSrc, SKILL_TYPE Skill )
 	else if ( uiMaxDecrease <= 0 )
 		pszMsg = g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_DUNNO_4 );
 	else
-		return uiMaxDecrease;
+		return (ushort)uiMaxDecrease;
 
-	char *z = Str_GetTemp();
+	tchar *z = Str_GetTemp();
 	sprintf(z, pszMsg, g_Cfg.GetSkillKey(Skill));
 	Speak(z);
 	return 0;
@@ -272,13 +298,14 @@ bool CChar::NPC_OnTrainPay(CChar *pCharSrc, CItemMemory *pMemory, CItem * pGold)
 	// Can't ask for more gold than the maximum amount of the gold stack i am giving to the npc
 
 	// Consume as much money as we can train for.
-	if ( pGold->GetAmount() < wTrainCost )
+    const word wGoldAmount = pGold->GetAmount();
+	if (wGoldAmount < wTrainCost )
 	{
 		int iDiffPercent = IMulDiv(wTrainCost, 100, pGold->GetAmount());
 		uiTrainVal = (ushort)IMulDiv(uiTrainVal,100,iDiffPercent);
         wTrainCost = (word)pCharSrc->PayGold(this, (word)minimum(UINT16_MAX, uiTrainVal * uiTrainMult), pGold, PAYGOLD_TRAIN);
 	}
-	else if ( pGold->GetAmount() == wTrainCost)
+	else if (wGoldAmount == wTrainCost)
 	{
 		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_THATSALL_1 ) );
 		pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_NONE;
@@ -395,9 +422,8 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 	strcpy( pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_PRICE_1 ) );
 
 	lpctstr pPrvSkill = nullptr;
-
-	size_t iCount = 0;
-	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; i++ )
+	uint iCount = 0;
+	for ( uint i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
 		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) )
 			continue;
@@ -421,7 +447,7 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 		}
 
 		pPrvSkill = g_Cfg.GetSkillKey((SKILL_TYPE)i);
-		iCount++;
+		++iCount;
 	}
 
 	if ( iCount == 0 )
@@ -434,8 +460,9 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 		strcat( pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_THATSALL_4 ) );
 	}
 
-	strcat( pszMsg, pPrvSkill );
-	strcat( pszMsg, "." );
+    if (pPrvSkill)
+        strcat(pszMsg, pPrvSkill);
+    strcat(pszMsg, ".");
 	Speak( pszMsg );
 	return true;
 }

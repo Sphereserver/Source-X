@@ -46,4 +46,14 @@ public:
 };
 
 
+/* Template methods (inlined or not) are defined here */
+
+// CSObjArray:: Modifiers.
+
+template<class TYPE>
+inline bool CSObjArray<TYPE>::DeleteObj( TYPE pData )
+{
+    return this->RemovePtr(pData);
+}
+
 #endif //_INC_CSOBJARRAY_H

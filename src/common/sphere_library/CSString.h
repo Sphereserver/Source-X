@@ -30,78 +30,59 @@ public:
 	* Initializes string. If DEBUG_STRINGS setted, update statistical information (total CSString instantiated).
 	* @see Init()
 	*/
-	inline CSString()
-	{
-#ifdef DEBUG_STRINGS
-		++gAmount;
-#endif
-		Init();
-	}
+	inline CSString();
 	/**
 	* @brief CSString destructor.
 	*
 	* If DEBUG_STRINGS setted, updates statistical information (total CSString instantiated).
 	*/
-	inline ~CSString()
-	{
-#ifdef DEBUG_STRINGS
-		--gAmount;
-#endif
-		Empty(true);
-	}
+	inline ~CSString();
+    /**
+    * @brief Copy constructor.
+    *
+    * @see Copy()
+    * @param pStr string to copy.
+    */
+    inline CSString(lpctstr pStr);
+    /**
+    * @brief Copy constructor.
+    *
+    * @see CopyLen()
+    * @param pStr string to copy.
+    * #param iLen max number of chars (single-byte) to copy.
+    */
+    inline CSString(lpctstr pStr, int iLen);
 	/**
 	* @brief Copy constructor.
 	*
 	* @see Copy()
 	* @param pStr string to copy.
 	*/
-	CSString(lpctstr pStr)
-	{
-		Init();
-		Copy(pStr);
-	}
-	/**
-	* @brief Copy constructor.
-	*
-	* @see Copy()
-	* @param pStr string to copy.
-	*/
-	CSString(const CSString &s)
-	{
-        Init();
-		Copy(s.GetPtr());
-	}
+    inline CSString(const CSString &s);
 	/**
 	* @brief Copy supplied string into the CSString.
 	* @param pStr string to copy.
 	* @return the CSString.
 	*/
-	inline const CSString& operator=(lpctstr pStr)
-	{
-		Copy(pStr);
-		return *this;
-	}
+	inline const CSString& operator=(lpctstr pStr);
 	/**
 	* @brief Copy supplied CSString into the CSString.
 	* @param s CSString to copy.
 	* @return the CSString.
 	*/
-	inline const CSString& operator=(const CSString &s)
-	{
-		Copy(s.GetPtr());
-		return *this;
-	}
+	inline const CSString& operator=(const CSString &s);
 	///@}
+
 	/** @name Capacity:
 	 */
 	///@{
 	/**
 	* @brief Sets length to zero.
 	*
-	* If bTotal is true, then free the memory allocated. If DEBUG_STRINGS setted, update statistical information (total memory allocated).
-	* @param bTotal true for free the allocated memory.
+	* If fTotal is true, then free the memory allocated. If DEBUG_STRINGS setted, update statistical information (total memory allocated).
+	* @param fTotal true for free the allocated memory.
 	*/
-	void Empty(bool bTotal = false);
+	void Empty(bool fTotal = false);
 	/**
 	* @brief Check the length of the CSString.
 	* @return true if length is 0, false otherwise.
@@ -134,6 +115,7 @@ public:
 		return m_iLength;
 	}
 	///@}
+
 	/** @name Element access:
 	 */
 	///@{
@@ -188,6 +170,7 @@ public:
 	*/
 	void SetAt(int nIndex, tchar ch);
 	///@}
+
 	/** @name Modifiers:
 	 */
 	///@{
@@ -235,15 +218,16 @@ public:
 	/**
 	* @brief Copy a string into the CSString.
 	* @see SetLength()
-	* @see strcpylen()
+	* @see strcpy()
 	* @param pStr string to copy.
 	*/
 	void Copy(lpctstr pStr);
     /**
     * @brief Copy a string of known length into the CSString.
     * @see SetLength()
-    * @see strcpylen()
+    * @see Str_CopyLimitNull()
     * @param pStr string to copy.
+    * @param iLen max number of chars (single-byte) to copy.
     */
     void CopyLen(lpctstr pStr, int iLen);
 	/**
@@ -265,231 +249,168 @@ public:
 	*/
 	inline void Reverse()
 	{
-		STRREV(m_pchData);
+		Str_Reverse(m_pchData);
 	}
 	///@}
+
 	/** @name String formatting:
 	*/
 	///@{
 	/**
 	* @brief Join a formated string (printf like) with values and copy into this.
 	* @see FormatV()
-	* @param pStr formated string.
+	* @param pStr formatted string.
 	* @param ... list of values.
 	*/
 	void _cdecl Format(lpctstr pStr, ...) __printfargs(2, 3);
-	/**
-	* @brief Print a dword value into the string (hex format).
-	* @see Format()
-	* @param iVal value to print.
-	*/
-	inline void FormatHex(dword dwVal)
-	{
-		// In principle, all values in sphere logic are signed...
-		// dwVal may contain a (signed) number "big" as the numeric representation of an unsigned ( +(INT_MAX*2) ),
-		// but in this case its bit representation would be considered as negative, yet we know it's a positive number.
-		// So if it's negative we MUST hexformat it as 64 bit int or reinterpreting it in a
-		// script WILL completely mess up
-		if (dwVal > (dword)INT32_MIN)			// if negative (remember two's complement)
-			return FormatLLHex(dwVal);
-		Format("0%" PRIx32, dwVal);
-	}
+    /**
+    * @brief Join a formated string (printf like) with values and copy into this.
+    * @param pStr formated string.
+    * @param args list of values.
+    */
+    void FormatV(lpctstr pStr, va_list args);
+
+    /**
+    * @brief Print a llong value into the string (hex format).
+    * @see Format()
+    * @param iVal value to print.
+    */
+    void FormatLLHex(llong iVal);
 	/**
 	* @brief Print a ullong value into the string (hex format).
 	* @see Format()
-	* @param iVal value to print.
+	* @param uiVal value to print.
 	*/
-	inline void FormatLLHex(ullong dwVal)
-	{
-		Format("0%" PRIx64, dwVal);
-	}
-	/**
-	* @brief Join a formated string (printf like) with values and copy into this.
-	* @param pStr formated string.
-	* @param args list of values.
-	*/
-	inline void FormatV(lpctstr pStr, va_list args);
+    void FormatULLHex(ullong uiVal);
+    /**
+    * @brief Print a dword value into the string (hex format).
+    * @see Format()
+    * @param dwVal value to print.
+    */
+    void FormatHex(dword dwVal);
+	
 	/**
 	* @brief Print a char value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	inline void FormatCVal(char iVal)
-	{
-		Format("%hhd", iVal);
-	}
+    void FormatCVal(char iVal);
 	/**
 	* @brief Print a unsigned char value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	inline void FormatUCVal(uchar uiVal)
-	{
-		Format("%hhu", uiVal);
-	}
+    void FormatUCVal(uchar uiVal);
 	/**
 	* @brief Print a short value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	inline void FormatSVal(short iVal)
-	{
-		Format("%hd", iVal);
-	}
+    void FormatSVal(short iVal);
 	/**
 	* @brief Print a unsigned short value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	inline void FormatUSVal(ushort uiVal)
-	{
-		Format("%hu", uiVal);
-	}
+    void FormatUSVal(ushort uiVal);
 	/**
 	* @brief Print a long value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	inline void FormatVal(int iVal)
-	{
-		Format("%d", iVal);
-	}
+    void FormatVal(int iVal);
 	/**
 	* @brief Print a unsigned int value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	inline void FormatUVal(uint uiVal)
-	{
-		Format("%u", uiVal);
-	}
+    void FormatUVal(uint uiVal);
 	/**
 	* @brief Print a llong value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	inline void FormatLLVal(llong iVal)
-	{
-		Format("%lld", iVal);
-	}
+    void FormatLLVal(llong iVal);
 	/**
 	* @brief Print a ullong value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	inline void FormatULLVal(ullong uiVal)
-	{
-		Format("%llu", uiVal);
-	}
+    void FormatULLVal(ullong uiVal);
 	/**
 	* @brief Print a size_t (unsigned) value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	inline void FormatSTVal(size_t iVal)
-	{
-		Format("%" PRIuSIZE_T, iVal);
-	}
+    void FormatSTVal(size_t uiVal);
 	/**
 	* @brief Print a byte value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	inline void FormatBVal(byte iVal)
-	{
-		Format("0%" PRIx8, iVal);
-	}
+    void FormatBVal(byte uiVal);
 	/**
 	* @brief Print a word value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	inline void FormatWVal(word iVal)
-	{
-		Format("0%" PRIx16, iVal);
-	}
+    void FormatWVal(word uiVal);
 	/**
 	* @brief Print a dword value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	inline void FormatDWVal(dword iVal)
-	{
-		Format("0%" PRIx32, iVal);
-	}
+    void FormatDWVal(dword uiVal);
     /**
     * @brief Print a char value into the string.
     * @see Format()
     * @param iVal value to print.
     */
-    inline void Format8Val(int8 iVal)
-    {
-        Format("%" PRId8, iVal);
-    }
+    void Format8Val(int8 iVal);
     /**
     * @brief Print a unsigned char value into the string.
     * @see Format()
     * @param iVal value to print.
     */
-    inline void FormatU8Val(uint8 uiVal)
-    {
-        Format("%" PRIu8, uiVal);
-    }
+    void FormatU8Val(uint8 uiVal);
     /**
     * @brief Print a short value into the string.
     * @see Format()
     * @param iVal value to print.
     */
-    inline void Format16Val(int16 iVal)
-    {
-        Format("%" PRId16, iVal);
-    }
+    void Format16Val(int16 iVal);
     /**
     * @brief Print a unsigned short value into the string.
     * @see Format()
     * @param iVal value to print.
     */
-    inline void FormatU16Val(uint16 uiVal)
-    {
-        Format("%" PRIu16, uiVal);
-    }
+    void FormatU16Val(uint16 uiVal);
     /**
     * @brief Print a long value into the string.
     * @see Format()
     * @param iVal value to print.
     */
-    inline void Format32Val(int32 iVal)
-    {
-        Format("%" PRId32, iVal);
-    }
+    void Format32Val(int32 iVal);
     /**
     * @brief Print a unsigned int value into the string.
     * @see Format()
     * @param iVal value to print.
     */
-    inline void FormatU32Val(uint32 uiVal)
-    {
-        Format("%" PRIu32, uiVal);
-    }
+    void FormatU32Val(uint32 uiVal);
     /**
     * @brief Print a llong value into the string.
     * @see Format()
     * @param iVal value to print.
     */
-    inline void Format64Val(int64 iVal)
-    {
-        Format("%" PRId64, iVal);
-    }
+    void Format64Val(int64 iVal);
     /**
     * @brief Print a ullong value into the string.
     * @see Format()
     * @param iVal value to print.
     */
-    inline void FormatU64Val(uint64 uiVal)
-    {
-        Format("%" PRIu64, uiVal);
-    }
+    void FormatU64Val(uint64 uiVal);
 	///@}
+
 	/** @name String operations:
 	 */
 	///@{
@@ -616,6 +537,54 @@ private:
 	int	m_iMaxLength;	// Size of memory allocated pointed by m_pchData.
 };
 
+
+/* Inlined methods are defined here */
+
+CSString::CSString()
+{
+#ifdef DEBUG_STRINGS
+    ++gAmount;
+#endif
+    Init();
+}
+
+CSString::~CSString()
+{
+#ifdef DEBUG_STRINGS
+    --gAmount;
+#endif
+    Empty(true);
+}
+
+CSString::CSString(lpctstr pStr)
+{
+    Init();
+    Copy(pStr);
+}
+
+CSString::CSString(lpctstr pStr, int iLen)
+{
+    Init();
+    CopyLen(pStr, iLen);
+}
+
+CSString::CSString(const CSString &s)
+{
+    Init();
+    Copy(s.GetPtr());
+}
+
+const CSString& CSString::operator=(lpctstr pStr)
+{
+    Copy(pStr);
+    return *this;
+}
+
+const CSString& CSString::operator=(const CSString &s)
+{
+    Copy(s.GetPtr());
+    return *this;
+}
 
 
 #endif // _INC_CSSTRING_H

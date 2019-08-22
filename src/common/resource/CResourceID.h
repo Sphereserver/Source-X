@@ -97,21 +97,25 @@ struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variab
     // What is a Resource? Look at the comment made to the RES_TYPE enum.
     // RES_TYPE: Resource Type (look at the RES_TYPE enum entries).
     // RES_INDEX: Resource Index
-#define RES_TYPE_SHIFT	20		// leave 8 bits = 255 for RES_TYPE;
+
+    // m_dwInternalVal:
+    // - Uppper 4 bits: RESERVED for flags UID_F_RESOURCE, UID_F_ITEM, UID_O_EQUIPPED, UID_O_CONTAINED.
+    // - Usable size: 8 bits (res_type) + 20 bits (index) = 28 --> it's a 28 bits number.
+#define RES_TYPE_SHIFT	20		// skip first 20 bits, use next 8 bits = 0xFFFF = 65535 possible unique RES_TYPEs;
 #define RES_TYPE_MASK	0xFF	//  0xFF = 8 bits.
-#define RES_INDEX_SHIFT	0		// leave 20 bits = ?1048575? entries;
+#define RES_INDEX_SHIFT	0		// use first 20 bits = 0xFFFFF = 1048575 possible unique indexes.
 #define RES_INDEX_MASK	0xFFFFF	//  0xFFFFF = 20 bits.
-    // Size: 8 + 20 = 28 --> it's a 28 bits number (reserve the upper 4 bits for UID_F_RESOURCE, UID_F_ITEM, UID_O_EQUIPPED, UID_O_CONTAINED.
+    
 #define RES_GET_TYPE(dw)	( ( (dw) >> RES_TYPE_SHIFT ) & RES_TYPE_MASK )
 #define RES_GET_INDEX(dw)	( (dw) & (dword)RES_INDEX_MASK )
 
     void InitUID() = delete;
     void ClearUID() = delete;
-    void Init()
+    inline void Init()
     {
         m_dwInternalVal = UID_UNUSED;
     }
-    void Clear()
+    inline void Clear()
     {
         m_dwInternalVal = UID_CLEAR;
     }
@@ -120,44 +124,13 @@ struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variab
     {
         Init();
     }
-    explicit CResourceIDBase(RES_TYPE restype)
-    {
-        // single instance type.
-        ASSERT(restype <= RES_TYPE_MASK);
-        m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT);
-    }
+    explicit CResourceIDBase(RES_TYPE restype);
     explicit CResourceIDBase(RES_TYPE, const CResourceIDBase&) = delete;
-    explicit CResourceIDBase(RES_TYPE restype, int iIndex)
-    {
-        ASSERT(restype <= RES_TYPE_MASK);
-        if (iIndex < 0)
-        {
-            Init();
-            return;
-        }
-        ASSERT(iIndex <= RES_INDEX_MASK);
-        m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT) | iIndex;
-    }
-    explicit CResourceIDBase(dword dwPrivateID)
-    {
-        if (!CUID::IsValidUID(dwPrivateID))
-        {
-            Init();
-            return;
-        }
-        m_dwInternalVal = UID_F_RESOURCE | dwPrivateID;
-    }
+    explicit CResourceIDBase(RES_TYPE restype, int iIndex);
+    explicit CResourceIDBase(dword dwPrivateID);
 
-    CResourceIDBase(const CResourceIDBase & rid) : CUIDBase(rid)// copy constructor
-    {
-        ASSERT(rid.IsResource());
-    }
-    CResourceIDBase & operator = (const CResourceIDBase & rid)  // assignment operator
-    {
-        ASSERT(rid.IsResource());
-        CUIDBase::operator=(rid);
-        return *this;
-    }
+    CResourceIDBase(const CResourceIDBase& rid);                // copy constructor
+    CResourceIDBase& operator = (const CResourceIDBase& rid);   // assignment operator
 
     RES_TYPE GetResType() const
     {
@@ -179,19 +152,8 @@ struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variab
     CObjBase*   ObjFind()  const = delete;   // Same as above
     CItem*      ItemFind() const = delete;
     CChar*      CharFind() const = delete;
-    bool IsUIDItem() const //  replacement for CUIDBase::IsItem(), but don't be virtual, since we don't need that and the class size will increase due to the vtable
-    {
-        // If it's both a resource and an item, and if it's the CResourceIDBase of a CRegion, it's a region from a multi
-        if ( (m_dwInternalVal & (UID_F_RESOURCE|UID_F_ITEM)) == (UID_F_RESOURCE|UID_F_ITEM) )
-            return IsValidUID();
-        return false;
-    }
-    CItem* ItemFindFromResource() const   //  replacement for CUIDBase::ItemFind()
-    {
-        // Used by multis: when they are realized, a new CRegionWorld is created with a CResourceID with an internal value = to the internal value of the multi, plus a | UID_F_RESOURCE.
-        //  Remove the reserved UID_* flags (so also UID_F_RESOURCE), and find the item (in our case actually the multi) with that uid.
-        return CUID::ItemFind(m_dwInternalVal & UID_O_INDEX_MASK);
-    }
+    bool IsUIDItem() const; //  replacement for CUIDBase::IsItem(), but don't be virtual, since we don't need that and the class size will increase due to the vtable
+    CItem* ItemFindFromResource() const;   //  replacement for CUIDBase::ItemFind()
 };
 
 struct CResourceID : public CResourceIDBase     // It has the "page" part. Use it to handle every other resource block.
@@ -245,20 +207,9 @@ struct CResourceID : public CResourceIDBase     // It has the "page" part. Use i
     {
         m_wPage = 0;
     }
-    CResourceID & operator = (const CResourceID & rid)              // assignment operator
-    {
-        ASSERT(rid.IsResource());
-        CUIDBase::operator=(rid);
-        m_wPage = rid.m_wPage;
-        return *this;
-    }
-    CResourceID & operator = (const CResourceIDBase & rid)
-    {
-        ASSERT(rid.IsResource());
-        CUIDBase::operator=(rid);
-        m_wPage = 0;
-        return *this;
-    }
+
+    CResourceID& operator = (const CResourceID& rid);              // assignment operator
+    CResourceID& operator = (const CResourceIDBase& rid);
 
     word GetResPage() const
     {

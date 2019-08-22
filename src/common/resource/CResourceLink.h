@@ -24,7 +24,7 @@ private:
     CResourceScript * m_pScript;	// we already found the script.
     CScriptLineContext m_Context;
 
-    dword m_lRefInstances;	// How many CResourceRef objects refer to this ?
+    dword m_dwRefInstances;	// How many CResourceRef objects refer to this ?
 public:
     static const char *m_sClassName;
     dword m_dwOnTriggers[MAX_TRIGGERS_ARRAY];
@@ -34,18 +34,18 @@ public:
 public:
     inline void AddRefInstance()
     {
-        ++m_lRefInstances;
+        ++m_dwRefInstances;
     }
     inline void DelRefInstance()
     {
 #ifdef _DEBUG
-        ASSERT(m_lRefInstances != (word)-1);    // catching underflows
+        ASSERT(m_dwRefInstances != (dword)-1);    // catching underflows
 #endif
-        --m_lRefInstances;
+        --m_dwRefInstances;
     }
     inline dword GetRefInstances() const
     {
-        return m_lRefInstances;
+        return m_dwRefInstances;
     }
 
     bool IsLinked() const;	// been loaded from the scripts ?

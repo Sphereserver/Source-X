@@ -44,7 +44,7 @@ class CSkillKeySortArray : public CSObjSortArray< CValStr*, lpctstr >
     CSkillKeySortArray(const CSkillKeySortArray& copy) = delete;
     CSkillKeySortArray& operator=(const CSkillKeySortArray& other) = delete;
 
-    int CompareKey( lpctstr pszKey, CValStr * pVal, bool fNoSpaces ) const;
+    int CompareKey( lpctstr ptcKey, CValStr * pVal, bool fNoSpaces ) const;
 };
 
 struct CMultiDefArray : public CSObjSortArray< CSphereMulti*, MULTI_TYPE >
@@ -54,5 +54,32 @@ struct CMultiDefArray : public CSObjSortArray< CSphereMulti*, MULTI_TYPE >
     int CompareKey( MULTI_TYPE id, CSphereMulti* pBase, bool fNoSpaces ) const;
 };
 
+
+struct CObjNameSorter
+{
+    inline bool operator()(const CScriptObj * s1, const CScriptObj * s2) const
+    {
+        ASSERT( s1 );
+        ASSERT( s2 );
+        //return (Str_CmpHeadI(s1->GetName(), s2->GetName()) < 0); // not needed, since the compared strings don't contain whitespaces (arguments or whatsoever)
+        // Current strcmpi implementation internally converts to lowerCASE the strings, so this will work until Str_CmpHeadI checks with tolower, instead of toupper
+        return (strcmpi(s1->GetName(), s2->GetName()) < 0);
+    }
+};
+class CObjNameSortVector : public CSSortedVector< CScriptObj*, CObjNameSorter >
+{
+    inline static int _compare(const CScriptObj* pObj, lpctstr ptcKey)
+    {
+        ASSERT( pObj );
+        ASSERT( ptcKey );
+        return -Str_CmpHeadI(ptcKey, pObj->GetName());  // We use Str_CmpHeadI to ignore '_' and whitespaces (args to the function or whatever) in ptcKey
+    }
+
+public:
+    //static const char *m_sClassName;  
+
+    inline size_t find_sorted(lpctstr ptcKey) const { return this->find_predicate(ptcKey, _compare);        }
+    inline bool   ContainsKey(lpctstr ptcKey) const { return (SCONT_BADINDEX != this->find_sorted(ptcKey)); }
+};
 
 #endif // _INC_CRESOURCESORTEDARRAYS_H

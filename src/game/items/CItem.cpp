@@ -36,7 +36,7 @@
 	character trigger (even if it does not make sense)! CTRIG_item* will be automatically
 	called when one of these triggers fired, depending on their index. So NEVER unalign the two lists!
 */
-lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
+lpctstr constexpr CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
 	"@AfterClick",
@@ -54,7 +54,7 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	"@DropOn_Item",			// I have been dropped on this item
 	"@DropOn_Self",			// An item has been dropped here
 	"@DropOn_Trade",
-	//"@Dye",					// My color has been changed
+	"@Dye",					// My color has been changed
 	"@EQUIP",		// I have been unequipped
     "@EQUIPTEST",
 	"@MemoryEquip",
@@ -76,18 +76,18 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	"@TIMER",		// My timer has expired.
 	"@ToolTip",
 	"@UNEQUIP",		// i have been unequipped (or try to unequip)
-	nullptr,
+	nullptr
 };
 
 /////////////////////////////////////////////////////////////////
 // -CItem
 
-void CItem::SetComponentOfMulti(CUID uidMulti)
+void CItem::SetComponentOfMulti(const CUID& uidMulti)
 {
     _uidMultiComponent = uidMulti;
 }
 
-void CItem::SetLockDownOfMulti(CUID uidMulti)
+void CItem::SetLockDownOfMulti(const CUID& uidMulti)
 {
     _uidMultiLockDown = uidMulti;
 }
@@ -114,8 +114,6 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEM
 	g_World.m_uidLastNewItem = GetUID();	// for script access.
 	ASSERT( IsDisconnected() );
 
-    _uidMultiComponent.InitUID();
-    _uidMultiLockDown.InitUID();
 
     // Manual CComponents addition
 
@@ -216,7 +214,6 @@ CItem * CItem::CreateBase( ITEMID_TYPE id, IT_TYPE type )	// static
 		idErrorMsg = id;
 		id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, "DEFAULTITEM" ));
 		if ( id <= 0 )
-
 			id = ITEMID_GOLD_C1;
 
 		pItemDef = CItemBase::FindItemBase( id );
@@ -295,7 +292,7 @@ CItem * CItem::CreateBase( ITEMID_TYPE id, IT_TYPE type )	// static
     * from here and the first switch can be removed, and so this comment.
     */
     ASSERT(pItem);
-    pItem->SetType(type);
+    pItem->SetType(type, false);
 
 	if (idErrorMsg && idErrorMsg != -1)
 		DEBUG_ERR(("CreateBase invalid item ID=0%" PRIx32 ", defaulting to ID=0%" PRIx32 ". Created UID=0%" PRIx32 "\n", idErrorMsg, id, (dword)pItem->GetUID()));
@@ -371,33 +368,11 @@ CItem * CItem::GenerateScript( CChar * pSrc)
 	CItemBase * pItemDef = Item_GetDef();
 	ASSERT( pItemDef );
 
-	if ( pItemDef->HasTrigger(ITRIG_Create) )
+	CResourceLock s;
+	if ( pItemDef->ResourceLock(s))
 	{
-		CResourceLock s;
-		if ( pItemDef->ResourceLock(s))
-		{
-			if ( pSrc )
-			{
-				//pItem->OnTriggerScript( s, sm_szTrigName[ITRIG_Create], pSrc );
-				//pItem->OnTrigger( ITRIG_Create, pSrc,0);
-				OnTriggerCreate(pSrc,0);
-			}
-			else
-			{
-				//pItem->OnTriggerScript( s, sm_szTrigName[ITRIG_Create], &g_Serv );
-				//pItem->OnTrigger( ITRIG_Create, &g_Serv,0);
-				OnTriggerCreate(&g_Serv,0);
-			}
-		}
+        OnTrigger(ITRIG_Create, pSrc ? static_cast<CTextConsole*>(pSrc) : static_cast<CTextConsole*>(&g_Serv), nullptr);
 	}
-
-	if (( pSrc && pSrc->IsClient() ) && ( IsTrigUsed(TRIGGER_ITEMCREATE) ))
-	{
-		CScriptTriggerArgs args;
-		args.m_pO1 = this;
-		pSrc->OnTrigger(CTRIG_itemCreate, pSrc, &args);
-	}
-
 	return this;
 }
 
@@ -407,36 +382,42 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 	// Just read info on a single item carryed by a CChar.
 	// ITEM=#id,#amount,R#chance
 
-	CResourceID rid = g_Cfg.ResourceGetID( RES_ITEMDEF, pArg);
-	if ( ! rid.IsValidUID())
-		return nullptr;
-	if ( rid.GetResType() != RES_ITEMDEF && rid.GetResType() != RES_TEMPLATE )
-		return nullptr;
-	if ( rid.GetResIndex() == 0 )
-		return nullptr;
+    tchar * pptcCmd[3];
+    int iQty = Str_ParseCmds(pArg, pptcCmd, CountOf(pptcCmd), ",");
+    if (iQty < 1)
+        return nullptr;
 
 	word amount = 1;
-	if ( Str_Parse( pArg, &pArg ))
-	{
-		if ( pArg[0] != 'R' )
-		{
-			amount = Exp_GetWVal( pArg );
-			Str_Parse( pArg, &pArg );
-		}
-		if ( pArg[0] == 'R' )
-		{
-			// 1 in x chance of creating this.
-			if ( Calc_GetRandVal( ATOI( pArg+1 )))
-				return nullptr;	// don't create it
-		}
-	}
+    for (int i = 1; i <= (iQty - 1); ++i)
+    {
+        if ( pptcCmd[i][0] != 'R' )
+        {
+            amount = Exp_GetWVal( pptcCmd[i] );
+        }
+        else if ( pptcCmd[i][0] == 'R' )
+        {
+            // 1 in x chance of creating this.
+            if ( Calc_GetRandVal( atoi(pptcCmd[i] + 1) ))
+                return nullptr;	// don't create it
+        }
+    }
 
 	if ( amount == 0 )
 		return nullptr;
 
-	ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
+    const CResourceID rid = g_Cfg.ResourceGetID(RES_ITEMDEF, pptcCmd[0]);
+    if ( ! rid.IsValidUID() )
+        return nullptr;
+    const RES_TYPE iResType = rid.GetResType();
+    if ( (iResType != RES_ITEMDEF) && (iResType != RES_TEMPLATE) )
+        return nullptr;
+    const int iResIndex = rid.GetResIndex();
+    if ( iResIndex == 0 )
+        return nullptr;
 
-	if ( fDupeCheck && rid.GetResType() == RES_ITEMDEF && pCont )
+	const ITEMID_TYPE id = (ITEMID_TYPE)iResIndex;
+
+	if ( fDupeCheck && (iResType == RES_ITEMDEF) && pCont )
 	{
 		// Check if they already have the item ? In the case of a regen.
 		// This is just to keep NEWBIE items from being duped.
@@ -449,7 +430,7 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 		}
 	}
 
-	CItem * pItem = CItem::CreateTemplate( id, (rid.GetResType() == RES_ITEMDEF? nullptr:pCont), pSrc );
+	CItem * pItem = CItem::CreateTemplate( id, ((iResType == RES_ITEMDEF) ? nullptr : pCont), pSrc );
 	if ( pItem != nullptr )
 	{
 		// Is the item movable ?
@@ -465,7 +446,7 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 
 		// Items should have their container set after their amount to
 		// avoid stacking issues.
-		if ( pCont && rid.GetResType() == RES_ITEMDEF )
+		if ( pCont && (iResType == RES_ITEMDEF) )
 		{
 			CContainer * pContBase = dynamic_cast <CContainer *> ( pCont );
 			ASSERT(pContBase);
@@ -475,7 +456,7 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 	return pItem;
 }
 
-lpctstr const CItem::sm_szTemplateTable[ITC_QTY+1] =
+lpctstr constexpr CItem::sm_szTemplateTable[ITC_QTY+1] =
 {
 	"BREAK",
 	"BUY",
@@ -994,7 +975,7 @@ int CItem::FixWeirdness()
             // blank unlinked keys.
             if (m_itKey.m_UIDLock && !IsValidUID())
             {
-                DEBUG_ERR(("Key '%s' has bad link to 0%x, blanked out\n", GetName(), (dword)(m_itKey.m_UIDLock)));
+                g_Log.EventError("Key '%s' (UID=0%x) has bad link to 0%x: blanked out.\n", GetName(), (dword)GetUID(), (dword)(m_itKey.m_UIDLock));
                 m_itKey.m_UIDLock.ClearUID();
             }
             break;
@@ -1035,13 +1016,13 @@ int CItem::FixWeirdness()
             break;
 
         default:
-            if (GetType() > IT_QTY)
+        {
+            const IT_TYPE iType = GetType();
+            if ((iType > IT_QTY) && (iType < IT_TRIGGER))
             {
-                if (GetType() < IT_TRIGGER)
-                {
-                    SetType(pItemDef->GetType());
-                }
+                SetType(pItemDef->GetType());
             }
+        }
     }
 
     if (IsItemEquipped())
@@ -1302,9 +1283,12 @@ int64 CItem::GetDecayTime() const
 		case IT_FOLIAGE:
 		case IT_CROPS:		// crops "decay" as they grow
         {
-            int64 timeNextNewMoon = g_World.GetNextNewMoon((GetTopPoint().m_map == 1) ? false : true);
-            int64 iMinutesDelay = Calc_GetRandLLVal(20) * g_Cfg.m_iGameMinuteLength;
-			return ( g_World.GetTimeDiff( timeNextNewMoon + iMinutesDelay ) * MSECS_PER_SEC );
+            if (m_itCrop.m_Respawn_Sec > 0) // MORE1 override
+                return (m_itCrop.m_Respawn_Sec * MSECS_PER_SEC);
+
+            const int64 iTimeNextNewMoon = g_World.GetNextNewMoon((GetTopPoint().m_map == 1) ? false : true);
+            const int64 iMinutesDelay = Calc_GetRandLLVal(20) * g_Cfg.m_iGameMinuteLength;
+			return g_World.GetTimeDiff(iTimeNextNewMoon) + iMinutesDelay;
         }
 		case IT_MULTI:
 		case IT_SHIP:
@@ -1373,31 +1357,31 @@ bool CItem::MoveToUpdate(const CPointMap& pt, bool fForceFix)
 	return fReturn;
 }
 
-bool CItem::MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool bForceFix)
+bool CItem::MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool fForceFix)
 {
 	SetDecayTime(iMsecsTimeout);
-	return MoveToUpdate( pt, bForceFix);
+	return MoveToUpdate(pt, fForceFix);
 }
 
-void CItem::SetDecayTime( int64 iMsecsTimeout)
+void CItem::SetDecayTime(int64 iMsecsTimeout)
 {
 	ADDTOCALLSTACK("CItem::SetDecayTime");
 	// 0 = default (decay on the next tick)
 	// -1 = set none. (clear it)
 
-	if ( IsTimerSet() && ! IsAttr(ATTR_DECAY))
+	if (IsTimerSet() && ! IsAttr(ATTR_DECAY))
 	{
 		return;	// already a timer here. let it expire on it's own
 	}
-	if ( !iMsecsTimeout)
+	if (iMsecsTimeout == 0)
 	{
-		if ( IsTopLevel())
+		if (IsTopLevel())
             iMsecsTimeout = GetDecayTime();
 		else
             iMsecsTimeout = -1;
 	}
 	SetTimeout(iMsecsTimeout);
-	if (iMsecsTimeout != -1 )
+	if (iMsecsTimeout >= 0)
 		SetAttr(ATTR_DECAY);
 	else
 		ClrAttr(ATTR_DECAY);
@@ -1500,14 +1484,12 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	else
 		ptNewPlace.ValidatePoint();
 
-	MoveTo(ptNewPlace);
-
 	llong iDecayTime = GetDecayTime();
 	if ( iDecayTime > 0 )
 	{
 		const CRegion * pRegion = ptNewPlace.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA|REGION_TYPE_ROOM);
 		if ( pRegion != nullptr && pRegion->IsFlag(REGION_FLAG_NODECAY) )
-			iDecayTime = -1;
+			iDecayTime = -1 * MSECS_PER_SEC;
 	}
 
 	TRIGRET_TYPE ttResult = TRIGRET_RET_DEFAULT;
@@ -1515,13 +1497,24 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	{
 		CScriptTriggerArgs args;
 		args.m_iN1 = iDecayTime / MSECS_PER_TENTH;  // ARGN1 = Decay time for the dropped item (in tenths of second)
+        //args.m_iN2 = 0;
+        args.m_s1 = ptNewPlace.WriteUsed();
 		ttResult = OnTrigger(ITRIG_DROPON_GROUND, pCharMover, &args);
 
 		if ( IsDeleted() )
 			return false;
 
 		iDecayTime = args.m_iN1 * MSECS_PER_TENTH;
+
+        CPointMap ptChanged;
+        ptChanged.Read(const_cast<lpstr>(args.m_s1.GetPtr()));
+        if (!ptChanged.IsValidPoint())
+            g_Log.EventError("Trying to override item drop P with an invalid P. Using the original one.\n");
+        else
+            ptNewPlace = ptChanged;
 	}
+
+    MoveTo(ptNewPlace);
 
 	if ( ttResult != TRIGRET_RET_TRUE )
 	{
@@ -1849,7 +1842,7 @@ bool CItem::SetName( lpctstr pszName )
 int CItem::GetWeight(word amount) const
 {
 	int iWeight = m_weight * (amount ? amount : GetAmount());
-    int64 iReduction = GetPropNum(COMP_PROPS_ITEMCHAR, PROPITCH_WEIGHTREDUCTION, true);
+    int iReduction = GetPropNum(COMP_PROPS_ITEMCHAR, PROPITCH_WEIGHTREDUCTION, true);
 	if (iReduction)
 	{
 		iWeight -= (int)IMulDivLL( iWeight, iReduction, 100 );
@@ -1863,32 +1856,37 @@ height_t CItem::GetHeight() const
 {
 	ADDTOCALLSTACK("CItem::GetHeight");
 
-	height_t tmpHeight;
+    height_t tmpHeight;
+
+    const ITEMID_TYPE iDispID = GetDispID();
+    const CItemBase * pItemDef = CItemBase::FindItemBase(iDispID);
+    ASSERT(pItemDef);
+    tmpHeight = pItemDef->GetHeight();
+    if (tmpHeight)
+        return tmpHeight;
+
+    const CItemBaseDupe * pDupeDef = CItemBaseDupe::GetDupeRef(iDispID);
+    if (pDupeDef)
+    {
+        tmpHeight = pDupeDef->GetHeight();
+        if (tmpHeight)
+            return tmpHeight;
+    }
 
 	char * heightDef = Str_GetTemp();
 
-	sprintf(heightDef, "itemheight_0%x", (uint)(GetDispID()));
+	sprintf(heightDef, "itemheight_0%x", (uint)iDispID);
 	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
 	//DEBUG_ERR(("2 tmpHeight %d\n",tmpHeight));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_0a)
 		return tmpHeight;
 
-	sprintf(heightDef, "itemheight_%u", (uint)(GetDispID()));
+	sprintf(heightDef, "itemheight_%u", (uint)iDispID);
 	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
 	//DEBUG_ERR(("3 tmpHeight %d\n",tmpHeight));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_10)
 		return tmpHeight;
 
-	const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(GetDispID()));
-	const CItemBaseDupe * pDupeDef = CItemBaseDupe::GetDupeRef((ITEMID_TYPE)(GetDispID()));
-	if (pItemDef != nullptr)
-	{
-		tmpHeight = (pDupeDef ? pDupeDef->GetHeight() : pItemDef->GetHeight());
-		if (tmpHeight)
-			return tmpHeight;
-	}
-
-	//DEBUG_ERR(("PLAYER_HEIGHT %d\n",PLAYER_HEIGHT));
 	return 0; //if everything fails
 }
 
@@ -2114,7 +2112,7 @@ void CItem::WriteUOX( CScript & s, int index )
 
 void CItem::r_WriteMore1(CSString & sVal)
 {
-    ADDTOCALLSTACK_INTENSIVE("CItem::r_WriteMore1");
+    ADDTOCALLSTACK("CItem::r_WriteMore1");
     // do special processing to represent this.
     switch (GetType())
     {
@@ -2206,7 +2204,7 @@ void CItem::r_WriteMore2( CSString & sVal )
 void CItem::r_Write( CScript & s )
 {
 	ADDTOCALLSTACK_INTENSIVE("CItem::r_Write");
-	CItemBase *pItemDef = Item_GetDef();
+	const CItemBase *pItemDef = Item_GetDef();
 	if ( !pItemDef )
 		return;
 
@@ -2214,9 +2212,10 @@ void CItem::r_Write( CScript & s )
 
 	CObjBase::r_Write(s);
 
-	if ( GetDispID() != GetID() )	// the item is flipped.
-		s.WriteKey("DISPID", g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, GetDispID())));
-    int iAmount = GetAmount();
+    const ITEMID_TYPE iDispID = GetDispID();
+	if ( iDispID != GetID() )	// the item is flipped.
+		s.WriteKey("DISPID", g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, iDispID)));
+    const int iAmount = GetAmount();
 	if ( iAmount != 1 )
 		s.WriteKeyVal("AMOUNT", iAmount);
 	if ( !pItemDef->IsType(m_type) )
@@ -2252,15 +2251,17 @@ void CItem::r_Write( CScript & s )
 	{
 		if ( pCont->IsChar() )
 		{
-			if ( GetEquipLayer() >= LAYER_HORSE )
-				s.WriteKeyVal("LAYER", GetEquipLayer());
+            const LAYER_TYPE iEqLayer = GetEquipLayer();
+			if ( iEqLayer >= LAYER_HORSE )
+				s.WriteKeyVal("LAYER", iEqLayer);
 		}
 		s.WriteKeyHex("CONT", pCont->GetUID());
 		if ( pCont->IsItem() )
 		{
 			s.WriteKey("P", GetContainedPoint().WriteUsed());
-			if ( GetContainedGridIndex() )
-				s.WriteKeyVal("CONTGRID", GetContainedGridIndex());
+            const uchar uiGridIdx = GetContainedGridIndex();
+			if ( uiGridIdx )
+				s.WriteKeyVal("CONTGRID", uiGridIdx);
 		}
 	}
 	else
@@ -2330,7 +2331,7 @@ enum ICR_TYPE
 	ICR_QTY
 };
 
-lpctstr const CItem::sm_szRefKeys[ICR_QTY+1] =
+lpctstr constexpr CItem::sm_szRefKeys[ICR_QTY+1] =
 {
 	"CONT",
 	"LINK",
@@ -2338,29 +2339,29 @@ lpctstr const CItem::sm_szRefKeys[ICR_QTY+1] =
 	nullptr
 };
 
-bool CItem::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CItem::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CItem::r_GetRef");
 
-    if (CEntity::r_GetRef(pszKey, pRef))
+    if (CEntity::r_GetRef(ptcKey, pRef))
     {
         return true;
     }
 
-	int i = FindTableHeadSorted( pszKey, sm_szRefKeys, CountOf(sm_szRefKeys)-1 );
+	int i = FindTableHeadSorted( ptcKey, sm_szRefKeys, CountOf(sm_szRefKeys)-1 );
 	if ( i >= 0 )
 	{
-		pszKey += strlen( sm_szRefKeys[i] );
-		SKIP_SEPARATORS(pszKey);
+		ptcKey += strlen( sm_szRefKeys[i] );
+		SKIP_SEPARATORS(ptcKey);
 		switch (i)
 		{
 			case ICR_CONT:
-				if ( pszKey[-1] != '.' )
+				if ( ptcKey[-1] != '.' )
 					break;
 				pRef = GetContainer();
 				return true;
 			case ICR_LINK:
-				if ( pszKey[-1] != '.' )
+				if ( ptcKey[-1] != '.' )
 					break;
 				pRef = m_uidLink.ObjFind();
 				return true;
@@ -2370,7 +2371,7 @@ bool CItem::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 		}
 	}
 
-	return CObjBase::r_GetRef( pszKey, pRef );
+	return CObjBase::r_GetRef( ptcKey, pRef );
 }
 
 enum IC_TYPE
@@ -2381,7 +2382,7 @@ enum IC_TYPE
 	IC_QTY
 };
 
-lpctstr const CItem::sm_szLoadKeys[IC_QTY+1] =
+lpctstr constexpr CItem::sm_szLoadKeys[IC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CItem_props.tbl"
@@ -2390,31 +2391,34 @@ lpctstr const CItem::sm_szLoadKeys[IC_QTY+1] =
 };
 
 
-bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
 	ADDTOCALLSTACK("CItem::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-    // Checking Props CComponents first (first check CItem props, if not found then check CItemBase)
-    EXC_SET_BLOCK("EntityProp");
-    if (CEntityProps::r_WritePropVal(pszKey, sVal, this, Base_GetDef()))
+    if (!fNoCallChildren)
     {
-        return true;
-    }
+        // Checking Props CComponents first (first check CItem props, if not found then check CItemBase)
+        EXC_SET_BLOCK("EntityProp");
+        if (CEntityProps::r_WritePropVal(ptcKey, sVal, this, Base_GetDef()))
+        {
+            return true;
+        }
 
-    // Now check regular CComponents
-    EXC_SET_BLOCK("Entity");
-    if (CEntity::r_WriteVal(pszKey, sVal, pSrc))
-    {
-        return true;
+        // Now check regular CComponents
+        EXC_SET_BLOCK("Entity");
+        if (CEntity::r_WriteVal(ptcKey, sVal, pSrc))
+        {
+            return true;
+        }
     }
 
     EXC_SET_BLOCK("Keyword");
 	int index;
-	if ( !strnicmp( CItem::sm_szLoadKeys[IC_ADDSPELL], pszKey, 8 ) )
+	if ( !strnicmp( CItem::sm_szLoadKeys[IC_ADDSPELL], ptcKey, 8 ) )
 		index = IC_ADDSPELL;
 	else
-		index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+		index = FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 
 	bool fDoDefault = false;
 
@@ -2425,13 +2429,13 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case IC_DOOROPENSOUND:
 		case IC_PORTCULISSOUND:
 		case IC_DOOROPENID:
-			GetDefStr(pszKey, true);
+			GetDefStr(ptcKey, true);
 			break;
 		//return as string or hex number or nullptr if not set
 		case IC_CRAFTEDBY:
 		case IC_MAKERSNAME:
 		case IC_OWNEDBY:
-			sVal = GetDefStr(pszKey);
+			sVal = GetDefStr(ptcKey);
 			break;
 		//On these ones, check BaseDef if not found on dynamic
 		case IC_DROPSOUND:
@@ -2452,7 +2456,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case IC_REMOVALTYPE:
 		case IC_SUMMONING:
 			{
-				CVarDefCont * pVar = GetDefKey(pszKey, true);
+				const CVarDefCont * pVar = GetDefKey(ptcKey, true);
 				sVal = pVar ? pVar->GetValStr() : "";
 			}
 			break;
@@ -2480,7 +2484,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case IC_NPCKILLERAMT:
 		case IC_NPCPROTECTIONAMT:
 			{
-				CVarDefCont * pVar = GetDefKey(pszKey, true);
+				const CVarDefCont * pVar = GetDefKey(ptcKey, true);
 				sVal.FormatLLVal(pVar ? pVar->GetValNum() : 0);
 			}
 			break;
@@ -2494,10 +2498,16 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 				sVal.FormatLLVal(GetSpellcountInBook());
 			}
 			break;
+
+        case IC_AC:
+        case IC_AR:
+            sVal.FormatVal(Armor_GetDefense());
+            break;
+
 		case IC_ADDSPELL:
-			pszKey	+= 8;
-			SKIP_SEPARATORS( pszKey );
-			sVal.FormatVal( IsSpellInBook((SPELL_TYPE)(g_Cfg.ResourceGetIndexType( RES_SPELL, pszKey ))));
+			ptcKey	+= 8;
+			SKIP_SEPARATORS( ptcKey );
+			sVal.FormatVal( IsSpellInBook((SPELL_TYPE)(g_Cfg.ResourceGetIndexType( RES_SPELL, ptcKey ))));
 			break;
 		case IC_AMOUNT:
         {
@@ -2516,10 +2526,10 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			sVal.FormatVal(m_weight);
 			break;
 		case IC_ATTR:
-			sVal.FormatLLHex( m_Attr );
+			sVal.FormatULLHex( m_Attr );
 			break;
 		case IC_CANUSE:
-			sVal.FormatLLHex( m_CanUse );
+			sVal.FormatULLHex( m_CanUse );
 			break;
 		case IC_NODROP:
 			sVal.FormatLLVal( m_Attr & ATTR_NODROP );
@@ -2532,10 +2542,10 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			break;
 		case IC_CONT:
 			{
-				if ( pszKey[4] == '.' )
-					return CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
+				if ( ptcKey[4] == '.' )
+					return CScriptObj::r_WriteVal( ptcKey, sVal, pSrc, false );
 
-				CObjBase * pCont = GetContainer();
+				const CObjBase * pCont = GetContainer();
 				sVal.FormatHex( pCont ? ((dword) pCont->GetUID() ) : 0 );
 			}
 			break;
@@ -2546,7 +2556,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			break;
 		case IC_CONTP:
 			{
-				CObjBase * pContainer = GetContainer();
+				const CObjBase * pContainer = GetContainer();
 				if ( IsItem() && IsItemInContainer() && pContainer->IsValidUID() && pContainer->IsContainer() && pContainer->IsItem() )
 					sVal = GetContainedPoint().WriteUsed();
 				else
@@ -2558,28 +2568,34 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			break;
 		case IC_DISPIDDEC:
 			{
-				int iVal = GetDispID();
+				int iVal;
 	 			if ( IsType(IT_COIN)) // Fix money piles
 				{
-					CItemBase * pItemDef = Item_GetDef();
+					const CItemBase * pItemDef = Item_GetDef();
 					ASSERT(pItemDef);
 
 					iVal = pItemDef->GetDispID();
-					if ( GetAmount() >= 2 )
+                    const ushort uiAmount = GetAmount();
+					if ( uiAmount >= 2 )
 					{
-						if ( GetAmount() < 6)
+						if ( uiAmount < 6)
 							iVal = iVal + 1;
 						else
 							iVal = iVal + 2;
 					}
 				}
+                else
+                {
+                    iVal = GetDispID();
+                }
 				sVal.FormatVal( iVal );
 			}
 			break;
 		case IC_DUPEITEM:
 			{
-				if ( GetID() != GetDispID() )
-					sVal.FormatHex( GetID() );
+                const ITEMID_TYPE id = GetID();
+				if ( id != GetDispID() )
+					sVal.FormatHex( id );
 				else
 					sVal.FormatVal(0);
 			}
@@ -2605,8 +2621,8 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			fDoDefault = true;
 			break;
 		case IC_LINK:
-			if ( pszKey[4] == '.' )
-				return CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
+			if ( ptcKey[4] == '.' )
+				return CScriptObj::r_WriteVal( ptcKey, sVal, pSrc, false );
 			sVal.FormatHex( m_uidLink );
 			break;
 		case IC_MAXHITS:
@@ -2657,11 +2673,14 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			sVal = g_Cfg.ResourceGetName( CResourceID(RES_TYPEDEF, m_type) );
 			break;
 		default:
-			fDoDefault = true;
+            if (!fNoCallParent)
+            {
+			    fDoDefault = true;
+            }
 	}
     if (fDoDefault)
     {
-        return CObjBase::r_WriteVal(pszKey, sVal, pSrc);
+        return CObjBase::r_WriteVal(ptcKey, sVal, pSrc, false);
     }
 	return true;
 	EXC_CATCH;
@@ -2670,6 +2689,109 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 	EXC_ADD_KEYRET(pSrc);
 	EXC_DEBUG_END;
 	return false;
+}
+
+void CItem::r_LoadMore1(dword dwVal)
+{
+    ADDTOCALLSTACK_INTENSIVE("CItem::r_LoadMore1");
+    // Ensure that (when needed) the dwVal is stored as a CResourceIDBase,
+    //  plus, do some extra checks for spawns
+
+    const int iIndex = RES_GET_INDEX(dwVal);
+    switch (GetType())
+    {
+    case IT_TREE:
+    case IT_GRASS:
+    case IT_ROCK:
+    case IT_WATER:
+        m_itResource.m_ridRes = CResourceIDBase(RES_REGIONRESOURCE, iIndex);
+        return;
+
+    case IT_FRUIT:
+    case IT_FOOD:
+    case IT_FOOD_RAW:
+    case IT_MEAT_RAW:
+    case IT_TRAP:
+    case IT_TRAP_ACTIVE:
+    case IT_TRAP_INACTIVE:
+    case IT_ANIM_ACTIVE:
+    case IT_SWITCH:
+    case IT_DEED:
+    case IT_LOOM:
+    case IT_ARCHERY_BUTTE:
+    case IT_ITEM_STONE:
+        m_itNormal.m_more1 = CResourceIDBase(RES_ITEMDEF, iIndex);
+        return;
+
+    //case: IT_SHIP_TILLER
+    //case: IT_KEY
+    //case: IT_SIGN_GUMP
+        // Allow arbitrary values, not necessarily valid UIDs (for backwards compatibility)
+
+    case IT_SPAWN_CHAR:
+    case IT_SPAWN_ITEM:
+    case IT_SPAWN_CHAMPION:
+        if (!g_Serv.IsLoading())
+        {
+            CCSpawn* pSpawn = GetSpawn();
+            if (pSpawn)
+            {
+                pSpawn->FixDef();
+                pSpawn->SetTrackID();
+                RemoveFromView();
+                Update();
+            }
+        }
+        return;
+
+    default:
+        m_itNormal.m_more1 = dwVal;
+        return;
+    }
+}
+
+void CItem::r_LoadMore2(dword dwVal)
+{
+    ADDTOCALLSTACK_INTENSIVE("CItem::r_LoadMore2");
+    // Ensure that (when needed) the dwVal is stored as a CResourceIDBase
+
+    const int iIndex = RES_GET_INDEX(dwVal);
+    switch (GetType())
+    {
+    case IT_CROPS:
+    case IT_FOLIAGE:
+        m_itCrop.m_ridFruitOverride = CResourceIDBase(RES_ITEMDEF, iIndex);
+        return;
+
+    case IT_LEATHER:
+    case IT_HIDE:
+    case IT_FEATHER:
+    case IT_FUR:
+    case IT_WOOL:
+    case IT_BLOOD:
+    case IT_BONE:
+        m_itNormal.m_more2 = CResourceIDBase(RES_CHARDEF, iIndex);
+        return;
+
+    //case IT_CORPSE:
+        // Be tolerant if a t_corpse has as MORE2 an invalid UID, does it really matter? People may use a custom value,
+        //  and there's no hardcoded check for this MORE2 (if we add one, we have to ensure that MORE2 holds a valid UID).
+    case IT_FIGURINE:
+    case IT_EQ_HORSE:
+        if (!CUID::IsValidUID(dwVal))
+        {
+            g_Log.EventWarn("Setting MORE2 (item type '%s') to invalid UID 0%x, defaulting to 0.\n",
+                g_Cfg.ResourceGetName(CResourceID(RES_TYPEDEF, GetType())), dwVal);
+            m_itFigurine.m_UID.ClearUID();
+            return;
+        }
+        m_itNormal.m_more2 = dwVal;
+        return;
+
+    default:
+        m_itNormal.m_more2 = dwVal;
+        return;
+    }
 }
 
 bool CItem::r_LoadVal( CScript & s ) // Load an item Script
@@ -2804,17 +2926,17 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				if ( amount <= 0 )
 					return false;
 				else if (amount > 1)
-					includeLower = (ATOI(ppVal[1]) != 0);
+					includeLower = (atoi(ppVal[1]) != 0);
 
-				for ( addCircle = ATOI(ppVal[0]); addCircle; --addCircle )
+				for ( addCircle = atoi(ppVal[0]); addCircle; --addCircle )
 				{
-					for ( int i = 1; i < 9; ++i )
+					for ( short i = 1; i < 9; ++i )
 						AddSpellbookSpell((SPELL_TYPE)(RES_GET_INDEX(((addCircle - 1) * 8) + i)), false);
 
 					if ( includeLower == false )
 						break;
 				}
-				return true;
+                break;
 			}
 		case IC_ADDSPELL:
 			// Add this spell to the i_spellbook.
@@ -2822,7 +2944,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(s.GetArgVal()));
 				if (AddSpellbookSpell(spell, false))
 					return false;
-				return true;
+                break;
 			}
 		case IC_AMOUNT:
         {
@@ -2842,10 +2964,10 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			break;
 		case IC_BASEWEIGHT:
 			m_weight = s.GetArgWVal();
-			return true;
+            break;
 		case IC_CANUSE:
 			m_CanUse = s.GetArgVal();
-			return true;
+            break;
 		case IC_CONT:	// needs special processing.
 			{
 				bool normcont = LoadSetContainer(s.GetArgVal(), (LAYER_TYPE)GetUnkZ());
@@ -2883,9 +3005,9 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 					{
 						default:
 						case 2:
-							pt.m_y = (short)(ATOI(ppVal[1]));
+							pt.m_y = (short)(atoi(ppVal[1]));
 						case 1:
-							pt.m_x = (short)(ATOI(ppVal[0]));
+							pt.m_x = (short)(atoi(ppVal[0]));
 						case 0:
 							break;
 					}
@@ -2921,12 +3043,11 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				return false;
 			}
 			m_itArmor.m_Hits_Cur = m_itArmor.m_Hits_Max = (word)(s.GetArgVal());
-			UpdatePropertyFlag();
-			return true;
+            break;
 		case IC_ID:
 		{
 			lpctstr idstr = s.GetArgStr();
-			CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, idstr);
+			const CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, idstr);
 			if (rid.GetResType() == RES_TEMPLATE)
 			{
 				// here we don't have to check if we are setting the ID in the script's header, because that is handled
@@ -2936,11 +3057,11 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				if (!pItemTemp)
 					return false;
 
-				bool bCont = pItemTemp->IsContainer();
-				ITEMID_TYPE id = pItemTemp->GetID();
+				const bool fCont = pItemTemp->IsContainer();
+				const ITEMID_TYPE id = pItemTemp->GetID();
 				pItemTemp->Delete();
 
-				if (bCont)
+				if (fCont)
 				{
 					g_Log.EventError("The template should not return a container-type item!\n");
 					return false;	// not the kind of template we want...
@@ -2948,42 +3069,34 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				else
 					return SetID(id);
 			}
-			else if (rid.GetResType() == RES_ITEMDEF)
-				return SetID((ITEMID_TYPE)rid.GetResIndex());
 			else
-				return false;
+            {
+                const RES_TYPE resType = rid.GetResType();
+                if (resType == RES_ITEMDEF || resType == RES_QTY)
+                    return SetID((ITEMID_TYPE)rid.GetResIndex());
+            }
+            return false;
 		}
 		case IC_LAYER:
 			// used only during load (i'm reading the save files and placing again the items in the world in the right place).
 			if ( ! IsDisconnected() && ! IsItemInContainer() && ! IsItemEquipped())
 				return false;
 			SetUnkZ( s.GetArgCVal() ); // GetEquipLayer()
-			return true;
+            break;
 		case IC_LINK:
 			m_uidLink = s.GetArgVal();
-			return true;
+            break;
 
 		case IC_FRUIT:	// m_more2
 			m_itCrop.m_ridFruitOverride = CResourceIDBase(RES_ITEMDEF, RES_GET_INDEX(s.GetArgDWVal()));
-			return true;
+            break;
 		case IC_MAXHITS:
 			m_itNormal.m_more1 = MAKEDWORD(LOWORD(m_itNormal.m_more1), s.GetArgVal());
 			break;
 		case IC_MORE:
 		case IC_MORE1:
-			m_itNormal.m_more1 = s.GetArgDWVal();
-			if ( !g_Serv.IsLoading() && (IsType(IT_SPAWN_CHAR) || IsType(IT_SPAWN_ITEM) || IsType(IT_SPAWN_CHAMPION)) )
-			{
-                CCSpawn *pSpawn = GetSpawn();
-                if (pSpawn)
-				{
-                    pSpawn->FixDef();
-                    pSpawn->SetTrackID();
-					RemoveFromView();
-					Update();
-				}
-			}
-			return true;
+            r_LoadMore1(s.GetArgDWVal());
+            break;
 		case IC_MORE1h:
 			m_itNormal.m_more1 = MAKEDWORD( LOWORD(m_itNormal.m_more1), s.GetArgVal());
 			break;
@@ -2991,8 +3104,8 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			m_itNormal.m_more1 = MAKEDWORD( s.GetArgVal(), HIWORD(m_itNormal.m_more1));
 			break;
 		case IC_MORE2:
-			m_itNormal.m_more2 = s.GetArgVal();
-			return true;
+            r_LoadMore2(s.GetArgDWVal());
+            break;
 		case IC_MORE2h:
 			m_itNormal.m_more2 = MAKEDWORD( LOWORD(m_itNormal.m_more2), s.GetArgVal());
 			break;
@@ -3008,7 +3121,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				tchar *pszTemp = Str_GetTemp();
 				strcpy( pszTemp, s.GetArgStr() );
 				GETNONWHITESPACE( pszTemp );
-				size_t iArgs = 0;
+				int iArgs = 0;
 				if ( IsDigit( pszTemp[0] ) || pszTemp[0] == '-' )
 				{
 					pt.m_map = 0; pt.m_z = 0;
@@ -3019,14 +3132,14 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 						default:
 						case 4:	// m_map
 							if ( IsDigit(ppVal[3][0]))
-								pt.m_map = (uchar)(ATOI(ppVal[3]));
+								pt.m_map = (uchar)(atoi(ppVal[3]));
 						case 3: // m_z
 							if ( IsDigit(ppVal[2][0]) || ppVal[2][0] == '-' )
-								pt.m_z = (char)(ATOI(ppVal[2]));
+								pt.m_z = (char)(atoi(ppVal[2]));
 						case 2:
-							pt.m_y = (short)(ATOI(ppVal[1]));
+							pt.m_y = (short)(atoi(ppVal[1]));
 						case 1:
-							pt.m_x = (short)(ATOI(ppVal[0]));
+							pt.m_x = (short)(atoi(ppVal[0]));
 						case 0:
 							break;
 					}
@@ -3061,9 +3174,11 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
                 else
                     return false;
 			}
-			return true;
+            break;
 		case IC_TYPE:
-			SetType( (IT_TYPE)(g_Cfg.ResourceGetIndexType( RES_TYPEDEF, s.GetArgStr() )) );
+			if (! SetType( (IT_TYPE)(g_Cfg.ResourceGetIndexType( RES_TYPEDEF, s.GetArgStr() )) ))
+                return false;
+            // Need to UpdatePropertyFlag()
 			break;
 		default:
         {
@@ -3113,7 +3228,7 @@ enum CIV_TYPE
 	CIV_QTY
 };
 
-lpctstr const CItem::sm_szVerbKeys[CIV_QTY+1] =
+lpctstr constexpr CItem::sm_szVerbKeys[CIV_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CItem_functions.tbl"
@@ -3211,6 +3326,13 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 				return false;
 			pCharSrc->Use_Obj( this, s.HasArgs() ? (s.GetArgVal() != 0) : true, true );
 			break;
+        case CIV_USEDOOR:   // bypasses key checks.
+            if (!(IsType(IT_DOOR) || IsType(IT_DOOR_LOCKED)))
+            {
+                return false;
+            }
+            Use_DoorNew(false);
+            break;
 		case CIV_REPAIR:
 			if (!pCharSrc)
 				return false;
@@ -3281,63 +3403,72 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
     CItemBase * pItemDef = Item_GetDef();
     ASSERT(pItemDef);
 
-	// Is there trigger code in the script file ?
-	// RETURN:
-	//   false = continue default process normally.
-	//   true = don't allow this.  (halt further processing)
-    TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
     SetTriggerActive( pszTrigName );
-    CTRIG_TYPE iAction = (CTRIG_TYPE)_iRunningTriggerId;
+    const ITRIG_TYPE iAction = (ITRIG_TYPE)_iRunningTriggerId;
+    // Is there trigger code in the script file ?
+    // RETURN:
+    //   false = continue default process normally.
+    //   true = don't allow this.  (halt further processing)
+    TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
 
 	EXC_TRY("Trigger");
-	CChar * pChar = pSrc->GetChar();
-	TemporaryString tsCharTrigName;
-	tchar* pszCharTrigName = static_cast<tchar *>(tsCharTrigName);
-	sprintf(pszCharTrigName, "@item%s", pszTrigName + 1);
 
-	int iCharAction = (CTRIG_TYPE) FindTableSorted( pszCharTrigName, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName)-1 );
+    // If i'm running the @Create trigger, i want first to run the trigger from the itemdef (normally ran for last), then from the other sources
+    if (iAction == ITRIG_Create)
+        goto from_itemdef_first;
 
+standard_order:
 	// 1) Triggers installed on character, sensitive to actions on all items
-	if ( IsTrigUsed(pszCharTrigName) && (iCharAction > XTRIG_UNKNOWN) )
-	{
-		if ( pChar != nullptr )
-		{
-			EXC_SET_BLOCK("chardef");
-			CUID uidOldAct = pChar->m_Act_UID;
-			pChar->m_Act_UID = GetUID();
-			iRet = pChar->OnTrigger(pszCharTrigName,  pSrc, pArgs );
-			pChar->m_Act_UID = uidOldAct;
-			if ( iRet == TRIGRET_RET_TRUE )
-				goto stopandret;//return iRet;	// Block further action.
-		}
-	}
+    {
+        TemporaryString tsCharTrigName;
+        tchar* pszCharTrigName = static_cast<tchar*>(tsCharTrigName);
+        sprintf(pszCharTrigName, "@ITEM%s", pszTrigName + 1);
+        const CTRIG_TYPE iCharAction = (CTRIG_TYPE)FindTableSorted(pszCharTrigName, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName) - 1);
+        if ((iCharAction > XTRIG_UNKNOWN) && IsTrigUsed(pszCharTrigName))
+        {
+            CChar* pChar = pSrc->GetChar();
+            if (pChar != nullptr)
+            {
+                EXC_SET_BLOCK("chardef");
+                const CUID uidOldAct = pChar->m_Act_UID;
+                pChar->m_Act_UID = GetUID();
+                iRet = pChar->OnTrigger(pszCharTrigName, pSrc, pArgs);
+                pChar->m_Act_UID = uidOldAct;
+                if (iRet == TRIGRET_RET_TRUE)
+                    goto stopandret; // Block further action.
+            }
+        }
+    }
 
 	if ( IsTrigUsed(pszTrigName) )
 	{
-		//	2) EVENTS
-		EXC_SET_BLOCK("events");
-		size_t origEvents = m_OEvents.size();
-		size_t curEvents = origEvents;
-		for ( size_t i = 0; i < curEvents; ++i )			//	2) EVENTS (could be modified ingame!)
-		{
-			CResourceLink * pLink = m_OEvents[i];
-			if ( !pLink || !pLink->HasTrigger(iAction) )
-				continue;
-			CResourceLock s;
-			if ( !pLink->ResourceLock(s) )
-				continue;
+		//	2) EVENTS (could be modified ingame!)
+        {
+            // Need this internal scope to prevent the goto jumps cross the initialization of origEvents and curEvents
+            EXC_SET_BLOCK("events");
+            size_t origEvents = m_OEvents.size();
+            size_t curEvents = origEvents;
+            for (size_t i = 0; i < curEvents; ++i)
+            {
+                CResourceLink* pLink = m_OEvents[i];
+                if (!pLink || !pLink->HasTrigger(iAction))
+                    continue;
+                CResourceLock s;
+                if (!pLink->ResourceLock(s))
+                    continue;
 
-			iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
-			if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
-				goto stopandret;//return iRet;
+                iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
+                    goto stopandret;
 
-			curEvents = m_OEvents.size();
-			if ( curEvents < origEvents ) // the event has been deleted, modify the counter for other trigs to work
-			{
-				--i;
-				origEvents = curEvents;
-			}
-		}
+                curEvents = m_OEvents.size();
+                if (curEvents < origEvents) // the event has been deleted, modify the counter for other trigs to work
+                {
+                    --i;
+                    origEvents = curEvents;
+                }
+            }
+        }
 
 		// 3) TEVENTS on the item
 		EXC_SET_BLOCK("tevents");
@@ -3352,11 +3483,11 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 				continue;
 			iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
 			if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
-				goto stopandret;//return iRet;
+				goto stopandret;
 		}
 
-		// 4) EVENTSITEM triggers
-		EXC_SET_BLOCK("Item triggers - EVENTSITEM"); // EVENTSITEM (constant events of Items set from sphere.ini)
+		// 4) EVENTSITEM triggers (constant events of Items set from sphere.ini)
+		EXC_SET_BLOCK("Item triggers - EVENTSITEM");
 		for ( size_t i = 0; i < g_Cfg.m_iEventsItemLink.size(); ++i )
 		{
 			CResourceLink * pLink = g_Cfg.m_iEventsItemLink[i];
@@ -3367,7 +3498,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 				continue;
 			iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
 			if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
-				goto stopandret;//return iRet;
+				goto stopandret;
 		}
 
 		// 5) TYPEDEF
@@ -3377,13 +3508,14 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 			CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.ResourceGetDef( CResourceID( RES_TYPEDEF, GetType() )));
 			if ( pResourceLink == nullptr )
 			{
+                const CChar* pChar = pSrc->GetChar();
 				if ( pChar )
-					DEBUG_ERR(( "0%x '%s' has unhandled [TYPEDEF %d] for 0%x '%s'\n", (dword) GetUID(), GetName(), GetType(), (dword) pChar->GetUID(), pChar->GetName()));
+					g_Log.EventError( "0%x '%s' has unhandled [TYPEDEF %d] for 0%x '%s'\n", (dword) GetUID(), GetName(), GetType(), (dword) pChar->GetUID(), pChar->GetName());
 				else
-					DEBUG_ERR(( "0%x '%s' has unhandled [TYPEDEF %d]\n", (dword) GetUID(), GetName(), GetType() ));
+					g_Log.EventError( "0%x '%s' has unhandled [TYPEDEF %d]\n", (dword) GetUID(), GetName(), GetType() );
 				SetType(Item_GetDef()->GetType());
 				iRet = TRIGRET_RET_DEFAULT;
-				goto stopandret;//return( TRIGRET_RET_DEFAULT );
+				goto stopandret;
 			}
 
 			if ( pResourceLink->HasTrigger( iAction ))
@@ -3393,147 +3525,34 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 				{
 					iRet = CScriptObj::OnTriggerScript( s, pszTrigName, pSrc, pArgs );
 					if ( iRet == TRIGRET_RET_TRUE )
-						goto stopandret;// return(iRet);	// Block further action.
+						goto stopandret;
 				}
 			}
 		}
 
+        if (iAction != ITRIG_Create)
+        {
+from_itemdef_first:
+            // 6) Look up the trigger in the RES_ITEMDEF. (default)
+            EXC_SET_BLOCK("itemdef");
+            CBaseBaseDef* pResourceLink = Base_GetDef();
+            ASSERT(pResourceLink);
+            if (pResourceLink->HasTrigger(iAction))
+            {
+                CResourceLock s;
+                if (pResourceLink->ResourceLock(s))
+                    iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+            }
 
-		// 6) Look up the trigger in the RES_ITEMDEF. (default)
-		EXC_SET_BLOCK("itemdef");
-		CBaseBaseDef * pResourceLink = Base_GetDef();
-		ASSERT(pResourceLink);
-		if ( pResourceLink->HasTrigger( iAction ))
-		{
-			CResourceLock s;
-			if ( pResourceLink->ResourceLock(s))
-				iRet = CScriptObj::OnTriggerScript( s, pszTrigName, pSrc, pArgs );
-		}
+            // If i'm running the @Create trigger, i jumped here first, but i need to go back and try to run the trigger from the other sources
+            if (iAction == ITRIG_Create) // This happens if i came here via the goto, so that the previous if was skipped
+                goto standard_order;
+        }
 	}
+
 stopandret:
-	{
-		SetTriggerActive((lpctstr)0);
-		return iRet;
-	}
-	EXC_CATCH;
-
-	EXC_DEBUG_START;
-	g_Log.EventDebug("trigger '%s' action '%d' char '0%x' [0%x]\n", pszTrigName, iAction, (pSrc && pSrc->GetChar()) ? (dword)pSrc->GetChar()->GetUID() : 0, (dword)GetUID());
-	EXC_DEBUG_END;
-	return iRet;
-}
-
-TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
-{
-	ADDTOCALLSTACK("CItem::OnTrigger");
-	if ( !pSrc )
-		pSrc = &g_Serv;
-
-    CItemBase * pItemDef = Item_GetDef();
-    ASSERT(pItemDef);
-
-    lpctstr pszTrigName = "@create";
-    SetTriggerActive( pszTrigName );
-    CTRIG_TYPE iAction = (CTRIG_TYPE)_iRunningTriggerId;
-
-	// Is there trigger code in the script file ?
-	// RETURN:
-	//   false = continue default process normally.
-	//   true = don't allow this.  (halt further processing)
-    TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
-
-	EXC_TRY("Trigger");
-	CChar * pChar = pSrc->GetChar();
-    lpctstr pszCharTrigName = "@itemcreate";
-	int iCharAction = (CTRIG_TYPE) FindTableSorted( pszCharTrigName, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName)-1 );
-
-	// 1) Look up the trigger in the RES_ITEMDEF. (default)
-	EXC_SET_BLOCK("itemdef");
-	CBaseBaseDef * pResourceBase = Base_GetDef();
-	ASSERT(pResourceBase);
-	if ( pResourceBase->HasTrigger( iAction ))
-	{
-		CResourceLock s;
-		if ( pResourceBase->ResourceLock(s))
-			iRet = CScriptObj::OnTriggerScript( s, pszTrigName, pSrc, pArgs );
-	}
-
-	// 2) Triggers installed on character, sensitive to actions on all items
-	if ( IsTrigUsed(pszCharTrigName) && ( iCharAction > XTRIG_UNKNOWN ))
-	{
-		EXC_SET_BLOCK("chardef");
-		if ( pChar != nullptr )
-		{
-			CUID uidOldAct = pChar->m_Act_UID;
-			pChar->m_Act_UID = GetUID();
-			iRet = pChar->OnTrigger(pszCharTrigName,  pSrc, pArgs );
-			pChar->m_Act_UID = uidOldAct;
-			if ( iRet == TRIGRET_RET_TRUE )
-				return iRet;	// Block further action.
-		}
-	}
-
-	if ( IsTrigUsed(pszTrigName) )
-	{
-		// 3) TEVENTS on the item
-		EXC_SET_BLOCK("tevents");
-		for ( size_t i = 0; i < pItemDef->m_TEvents.size(); ++i )
-		{
-			CResourceLink * pLink = pItemDef->m_TEvents[i];
-			ASSERT(pLink);
-			if ( !pLink->HasTrigger(iAction) )
-				continue;
-			CResourceLock s;
-			if ( !pLink->ResourceLock(s) )
-				continue;
-			iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
-			if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
-				return iRet;
-		}
-
-		// 4) EVENTSITEM triggers
-		EXC_SET_BLOCK("Item triggers - EVENTSITEM"); // EVENTSITEM (constant events of Items set from sphere.ini)
-		for ( size_t i = 0; i < g_Cfg.m_iEventsItemLink.size(); ++i )
-		{
-			CResourceLink * pLink = g_Cfg.m_iEventsItemLink[i];
-			if ( !pLink || !pLink->HasTrigger(iAction) )
-				continue;
-			CResourceLock s;
-			if ( !pLink->ResourceLock(s) )
-				continue;
-			iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
-			if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
-				return iRet;
-		}
-
-		// 5) TYPEDEF
-		EXC_SET_BLOCK("typedef");
-		{
-			// It has an assigned trigger type.
-			CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.ResourceGetDef( CResourceID( RES_TYPEDEF, GetType() )));
-			if ( pResourceLink == nullptr )
-			{
-				if ( pChar )
-					DEBUG_ERR(( "0%x '%s' has unhandled [TYPEDEF %d] for 0%x '%s'\n", (dword) GetUID(), GetName(), GetType(), (dword) pChar->GetUID(), pChar->GetName()));
-				else
-					DEBUG_ERR(( "0%x '%s' has unhandled [TYPEDEF %d]\n", (dword) GetUID(), GetName(), GetType() ));
-				SetType(Item_GetDef()->GetType());
-				return TRIGRET_RET_DEFAULT;
-			}
-
-			if ( pResourceLink->HasTrigger( iAction ))
-			{
-				CResourceLock s;
-				if ( pResourceLink->ResourceLock(s))
-				{
-					iRet = CScriptObj::OnTriggerScript( s, pszTrigName, pSrc, pArgs );
-					if ( iRet == TRIGRET_RET_TRUE )
-						return iRet;	// Block further action.
-				}
-			}
-		}
-	}
-
+    SetTriggerActive(nullptr);
+    return iRet;
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
@@ -3549,11 +3568,24 @@ TRIGRET_TYPE CItem::OnTrigger( ITRIG_TYPE trigger, CTextConsole * pSrc, CScriptT
 }
 
 // Item type specific stuff.
-CItem * CItem::SetType(IT_TYPE type)
+bool CItem::SetType(IT_TYPE type, bool fPreCheck)
 {
 	ADDTOCALLSTACK("CItem::SetType");
+
+    if (fPreCheck)
+    {
+        // Pre-assignment checks
+        if (type == IT_MULTI_CUSTOM)
+        {
+            g_Log.EventError("Can't dynamically assign type 't_multi_custom' to an item. This type can only be specified in the TYPEDEF.\n");
+            return false;
+        }
+    }
+
+    // Assign type
 	m_type = type;
 
+    // Post-assignment checks
     // CComponents sanity check.
     CComponent* pComp;
     CComponentProps* pCompProps;
@@ -3643,7 +3675,7 @@ CItem * CItem::SetType(IT_TYPE type)
         SubscribeComponent(new CCFaction(this));
     }
 
-	return this;
+	return true;
 }
 
 bool CItem::IsTypeLit() const
@@ -4833,7 +4865,7 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 		}
 		else
 		{
-			iItemSighted ++; // Keep a tally of how much we see
+			++ iItemSighted; // Keep a tally of how much we see
 			if (!pItemSighted || iDist < ptCoords.GetDist(pItemSighted->GetTopPoint())) // Only find the closest item to us, give boats a preference
 			{
 				pItemSighted = pItem;
@@ -5384,17 +5416,25 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 	if ( iDmg <= 0 )
 		return 0;
 
-	int64 iSelfRepair = GetDefNum("SELFREPAIR", true);
-	if ( iSelfRepair > Calc_GetRandVal(10) )
-	{
-		m_itArmor.m_Hits_Cur += 2;
-		if ( m_itArmor.m_Hits_Cur > m_itArmor.m_Hits_Max )
-			m_itArmor.m_Hits_Cur = m_itArmor.m_Hits_Max;
+    const bool fHasMaxHits = IsTypeArmorWeapon();
+    if (fHasMaxHits && (m_itArmor.m_Hits_Max > 0))
+    {
+        const int64 iSelfRepair = GetDefNum("SELFREPAIR", true);
+        if (iSelfRepair > Calc_GetRandVal(10))
+        {
+            const ushort uiOldHits = m_itArmor.m_Hits_Cur;
+            m_itArmor.m_Hits_Cur += 2;
+            if (m_itArmor.m_Hits_Cur > m_itArmor.m_Hits_Max)
+                m_itArmor.m_Hits_Cur = m_itArmor.m_Hits_Max;
 
-		return 0;
-	}
+            if (uiOldHits != m_itArmor.m_Hits_Cur)
+                UpdatePropertyFlag();
 
-	if (( IsTrigUsed(TRIGGER_DAMAGE) ) || ( IsTrigUsed(TRIGGER_ITEMDAMAGE) ))
+            return 0;
+        }
+    }
+
+	if ( IsTrigUsed(TRIGGER_DAMAGE) || IsTrigUsed(TRIGGER_ITEMDAMAGE) )
 	{
 		CScriptTriggerArgs Args(iDmg, (int)(uType));
 		if ( OnTrigger( ITRIG_DAMAGE, pSrc, &Args ) == TRIGRET_RET_TRUE )
@@ -5476,7 +5516,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 	}
 
 	// Break armor etc..
-	if ( IsTypeArmorWeapon())
+	if (fHasMaxHits)
 	{
 forcedamage:
 		CChar * pChar = dynamic_cast <CChar*> ( GetTopLevelObj());
@@ -5489,23 +5529,28 @@ forcedamage:
 			return( INT32_MAX );
 		}
 
-		int previousDefense = Armor_GetDefense();
-		int previousDamage = Weapon_GetAttack();
+		const int previousDefense = Armor_GetDefense();
+		const int previousDamage = Weapon_GetAttack();
 
 		--m_itArmor.m_Hits_Cur;
 		UpdatePropertyFlag();
 
 		if (pChar != nullptr && IsItemEquipped() )
 		{
+            bool fUpdateStatsFlag = false;
+
 			if ( previousDefense != Armor_GetDefense() )
 			{
 				pChar->m_defense = (word)(pChar->CalcArmorDefense());
-				pChar->UpdateStatsFlag();
+                fUpdateStatsFlag = true;
 			}
 			else if ( previousDamage != Weapon_GetAttack() )
 			{
-				pChar->UpdateStatsFlag();
+                fUpdateStatsFlag = true;
 			}
+
+            if (fUpdateStatsFlag)
+                pChar->UpdateStatsFlag();
 		}
 
 		tchar *pszMsg = Str_GetTemp();
@@ -5657,7 +5702,7 @@ bool CItem::IsResourceMatch( const CResourceID& rid, dword dwArg ) const
 	return false;
 }
 
-CCFaction * CItem::GetSlayer()
+CCFaction * CItem::GetSlayer() const
 {
     ADDTOCALLSTACK("CItem::GetSlayer");
     return static_cast<CCFaction*>(GetComponent(COMP_FACTION));
@@ -5826,7 +5871,7 @@ bool CItem::OnTick()
 						tchar *pszMsg = Str_GetTemp();
 						CObjBase* pObj = static_cast<CObjBase*>(GetTopLevelObj());
 						ASSERT(pObj);
-						pObj->Speak(ITOA(m_itPotion.m_tick, pszMsg, 10), HUE_RED);
+						pObj->Speak(Str_FromI(m_itPotion.m_tick, pszMsg, 10), HUE_RED);
 						SetTimeoutS(1);
 					}
 					return true;

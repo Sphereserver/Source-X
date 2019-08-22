@@ -189,24 +189,37 @@ bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_
 	CChar* pChar = CChar::CreateBasic(CREID_MAN);
 	ASSERT(pChar != nullptr);
 
-	TRIGRET_TYPE tr;
+	TRIGRET_TYPE tr = TRIGRET_RET_DEFAULT;
 	CScriptTriggerArgs createArgs;
+    // RW
 	createArgs.m_iN1 = iFlags;
 	createArgs.m_iN2 = prProf;
 	createArgs.m_iN3 = rtRace;
+    // R
 	createArgs.m_s1 = account->GetName();
 	createArgs.m_pO1 = client;
 
-	//Creating the pChar
+    client->r_Call("f_onchar_create_init", nullptr, &createArgs, nullptr, &tr);
+    if (tr == TRIGRET_RET_TRUE)
+        goto block_creation;
+
+    iFlags = (int)createArgs.m_iN1;
+    prProf = (PROFESSION_TYPE)createArgs.m_iN2;
+    rtRace = (RACE_TYPE)createArgs.m_iN3;
+
+	// Creating the pChar
 	pChar->InitPlayer(client, charname, bFemale, rtRace, wStr, wDex, wInt,
 		prProf, skSkill1, uiSkillVal1, skSkill2, uiSkillVal2, skSkill3, uiSkillVal3, skSkill4, uiSkillVal4,
 		wSkinHue, idHair, wHairHue, idBeard, wBeardHue, wShirtHue, wPantsHue, idFace, iStartLoc);
 
-	//Calling the function after the char creation, it can't be done before or the function won't have SRC
+	// Calling the function after the char creation, it can't be done before or the function won't have SRC.
+    // The createArgs are Read-Only for this function.
+    tr = TRIGRET_RET_DEFAULT;
 	client->r_Call("f_onchar_create", pChar, &createArgs, nullptr, &tr);
 
 	if ( tr == TRIGRET_RET_TRUE )
 	{
+block_creation:
 		client->addLoginErr(PacketLoginError::CreationBlocked);
 		pChar->Delete();	//Delete it if function is returning 1 or the char will remain created
 		return false;
@@ -476,7 +489,7 @@ bool PacketTextCommand::onReceive(NetState* net)
 	if ((packetLength < 5) || (packetLength > MAX_EXTCMD_ARG_LEN + 4))
 		return false;
 
-	EXTCMD_TYPE type = static_cast<EXTCMD_TYPE>(readByte());
+	EXTCMD_TYPE type = EXTCMD_TYPE(readByte());
 	tchar name[MAX_TALK_BUFFER];
 	readStringNullASCII(name, MAX_TALK_BUFFER-1);
 
@@ -522,11 +535,11 @@ bool PacketItemEquipReq::onReceive(NetState* net)
 	client->ClearTargMode(); // done dragging.
 
 	CChar* target = targetSerial.CharFind();
-	bool bCanCarry = target->CanCarry(item);
-	if ( (target == nullptr) || (itemLayer >= LAYER_HORSE) || !target->IsOwnedBy(source) || !bCanCarry || !target->ItemEquip(item, source) )
+	const bool fCanCarry = target->CanCarry(item);
+	if ( (target == nullptr) || (itemLayer >= LAYER_HORSE) || !target->IsOwnedBy(source) || !fCanCarry || !target->ItemEquip(item, source) )
 	{
 		client->Event_Item_Drop_Fail(item);		//cannot equip
-		if ( !bCanCarry )
+		if ( !fCanCarry )
 			client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_HEAVY));
 	}
 
@@ -619,7 +632,7 @@ bool PacketObjStatusReq::onReceive(NetState* net)
 		return false;
 	skip(4);	// 0xedededed
 	byte requestType = readByte();
-	CUID targetSerial = static_cast<CUID>(readInt32());
+	CUID targetSerial(readInt32());
 
 	if ( requestType == 4 )
 		client->addStatusWindow(targetSerial.ObjFind(), true);
@@ -713,17 +726,15 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 		return true;
 	}
 
-	int iConvertFactor = vendor->NPC_GetVendorMarkup();
-
-	VendorItem items[MAX_ITEMS_CONT];
-	memset(items, 0, sizeof(items));
-	uint itemCount = minimum((packetLength - 8u) / 7u, g_Cfg.m_iContainerMaxItems);
+    VendorItem items[MAX_ITEMS_CONT] = {};
+    const uint uiCountFromPacket = (packetLength - 8u) / 7u;
+	uint itemCount = minimum(uiCountFromPacket, g_Cfg.m_iContainerMaxItems);
 
 	// check buying speed
-	const CVarDefCont* vardef = g_Cfg.m_bAllowBuySellAgent ? nullptr : client->m_TagDefs.GetKey("BUYSELLTIME");
+	const CVarDefCont* vardef = g_Cfg.m_fAllowBuySellAgent ? nullptr : client->m_TagDefs.GetKey("BUYSELLTIME");
 	if (vardef != nullptr)
 	{
-		int64 allowsell = vardef->GetValNum() + (itemCount * 3);
+		const int64 allowsell = vardef->GetValNum() + (itemCount * 3LL);
 		if (g_World.GetCurrentTime().GetTimeRaw() < allowsell)
 		{
 			client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_BUYFAST));
@@ -732,12 +743,13 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 	}
 
 	// combine goods into one list
+    const int iConvertFactor = vendor->NPC_GetVendorMarkup();
 	CItemVendable *item = nullptr;
 	for (uint i = 0; i < itemCount; ++i)
 	{
 		skip(1); // layer
-		CUID serial(readInt32());
-		word amount = readInt16();
+        const CUID serial(readInt32());
+        const word amount = readInt16();
 
 		item = dynamic_cast<CItemVendable*>(serial.ItemFind());
 		if (item == nullptr || item->IsValidSaleItem(true) == false)
@@ -750,9 +762,9 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 		uint index;
 		for (index = 0; index < itemCount; ++index)
 		{
-			if (serial == items[index].m_serial)
+			if (serial == items[index].m_serial) //If the serials are the same, that means the items come from the same stack.
 				break;
-			else if (items[index].m_serial.GetPrivateUID() == 0)
+			else if (!items[index].m_serial.IsValidUID())
 			{
 				items[index].m_serial = serial;
 				items[index].m_price = item->GetVendorPrice(iConvertFactor);
@@ -1829,8 +1841,8 @@ bool PacketVendorSellReq::onReceive(NetState* net)
 		return false;
 
 	skip(2); // length
-	CUID vendorSerial(readInt32());
-	uint itemCount = readInt16();
+	const CUID vendorSerial(readInt32());
+	const uint itemCount = readInt16();
 
 	CChar* vendor = vendorSerial.CharFind();
 	if (vendor == nullptr || vendor->m_pNPC == nullptr || !vendor->NPC_IsVendor())
@@ -1857,10 +1869,10 @@ bool PacketVendorSellReq::onReceive(NetState* net)
 	}
 
 	// check selling speed
-	const CVarDefCont* vardef = g_Cfg.m_bAllowBuySellAgent ? nullptr : client->m_TagDefs.GetKey("BUYSELLTIME");
+	const CVarDefCont* vardef = g_Cfg.m_fAllowBuySellAgent ? nullptr : client->m_TagDefs.GetKey("BUYSELLTIME");
 	if (vardef != nullptr)
 	{
-		int64 allowsell = vardef->GetValNum() + ((itemCount * 3) * MSECS_PER_TENTH);
+		int64 allowsell = vardef->GetValNum() + ((itemCount * 3LL) * MSECS_PER_TENTH);
 		if (g_World.GetCurrentTime() < allowsell)
 		{
 			client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_SELLFAST));
@@ -1868,9 +1880,7 @@ bool PacketVendorSellReq::onReceive(NetState* net)
 		}
 	}
 
-	VendorItem items[MAX_ITEMS_CONT];
-	memset(items, 0, sizeof(items));
-
+    VendorItem items[MAX_ITEMS_CONT] = {};
 	for (uint i = 0; i < itemCount; ++i)
 	{
 		items[i].m_serial = CUID(readInt32());
@@ -2193,7 +2203,7 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 #endif
 
 	// sanity check
-	CClient::OpenedGumpsMap_t::iterator itGumpFound = client->m_mapOpenedGumps.find((int)context);
+	CClient::OpenedGumpsMap_t::iterator itGumpFound = client->m_mapOpenedGumps.find(context);
 	if ((itGumpFound == client->m_mapOpenedGumps.end()) || (itGumpFound->second <= 0))
 		return true;
 
@@ -4470,10 +4480,25 @@ bool PacketCrashReport::onReceive(NetState* net)
 	skip(1); // zero
 	dword errorOffset = readInt32();
 
-	g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN|LOGM_NOCONTEXT, "%x:Client crashed at %d,%d,%d,%d: 0x%08X %s @ 0x%08X (%s, %d.%d.%d.%d)\n", net->id(),
-					x, y, z, map,
-					errorCode, description, errorOffset, executable,
-					versionMaj, versionMin, versionRev, versionPat);
+    lpctstr ptcAcctName = "none";
+    const CClient *pClient = net->getClient();
+    if (pClient)
+    {
+        if (const CAccount * pAccount = pClient->GetAccount())
+            ptcAcctName = pAccount->GetName();
+    }
+	g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN|LOGM_NOCONTEXT, "%x:Client crashed. Account: '%s'. Data from Crash Report packet:\n", net->id(), ptcAcctName);
+    g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN|LOGM_NOCONTEXT, "P=%d,%d,%d,%d, ErrorCode=0x%08X, Description='%s', Offset=0x%08X, ClientExe='%s', ClientVer=%d.%d.%d.%d\n",
+        x, y, z, map, errorCode, description, errorOffset, executable, versionMaj, versionMin, versionRev, versionPat);
+    if (pClient)
+    {
+        if (const CChar *pChar = pClient->GetChar())
+        {
+            CPointMap const& ptChar = pChar->GetTopPoint();
+            g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN|LOGM_NOCONTEXT, "Char attached. Last server P=%d,%d,%d,%d\n", ptChar.m_x, ptChar.m_y, ptChar.m_z, ptChar.m_map);
+        }
+    }
+    
 	return true;
 }
 

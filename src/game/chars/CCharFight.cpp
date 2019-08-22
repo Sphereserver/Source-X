@@ -10,8 +10,9 @@
 #include "CChar.h"
 #include "CCharNPC.h"
 
+
 // 1.0 seconds is the minimum animation duration ("delay")
-#define COMBAT_MIN_SWING_ANIMATION_DELAY (int16)10  // in tenths of second
+static constexpr int16 kiMinSwingAnimationDelay = 10; // in tenths of second
 
 // I noticed a crime.
 void CChar::OnNoticeCrime( CChar * pCriminal, CChar * pCharMark )
@@ -196,10 +197,11 @@ void CChar::CallGuards()
 bool CChar::CallGuards( CChar * pCriminal )
 {
 	ADDTOCALLSTACK("CChar::CallGuards2");
+    ASSERT(pCriminal);
 	if ( !m_pArea || (pCriminal == this) )
 		return false;
 	if (IsStatFlag(STATF_DEAD) ||
-        (pCriminal && (pCriminal->IsStatFlag(STATF_DEAD) || pCriminal->Can(CAN_C_STATUE|CAN_C_NONSELECTABLE) || pCriminal->IsPriv(PRIV_GM) || !pCriminal->m_pArea->IsGuarded())))
+        (pCriminal->IsStatFlag(STATF_DEAD) || pCriminal->Can(CAN_C_STATUE|CAN_C_NONSELECTABLE) || pCriminal->IsPriv(PRIV_GM) || !pCriminal->m_pArea->IsGuarded()))
     {
 		return false;
     }
@@ -321,13 +323,14 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, bool fCommandPet, bool fShouldReveal)
 		return true;
 
     bool fAggreived = false;
-	Memory_AddObjTypes(pCharSrc, MEMORY_HARMEDBY | MEMORY_IRRITATEDBY);
+    word wMemTypes = MEMORY_HARMEDBY | MEMORY_IRRITATEDBY;
     if (!pCharSrc->Memory_FindObjTypes(this, MEMORY_AGGREIVED))
     {
         // I'm the one being attacked first
         fAggreived = true;
-        Memory_AddObjTypes(pCharSrc, MEMORY_AGGREIVED);
+        wMemTypes |= MEMORY_AGGREIVED;
     }
+    Memory_AddObjTypes(pCharSrc, wMemTypes);
 	Attacker_Add(pCharSrc);
 
 	// Are they a criminal for it ? Is attacking me a crime ?
@@ -663,7 +666,7 @@ effect_bounce:
 
 	CScriptTriggerArgs Args( iDmg, uType, (int64)(0) );
 	Args.m_VarsLocal.SetNum("ItemDamageLayer", sm_ArmorDamageLayers[Calc_GetRandVal(CountOf(sm_ArmorDamageLayers))]);
-	Args.m_VarsLocal.SetNum("ItemDamageChance", 2);
+	Args.m_VarsLocal.SetNum("ItemDamageChance", 25);
 
 	if ( IsTrigUsed(TRIGGER_GETHIT) )
 	{
@@ -712,9 +715,9 @@ effect_bounce:
 			}
 		}
         int iDmgBonus = 1;
-        CCFaction *pSlayer = nullptr;
+        const CCFaction *pSlayer = nullptr;
         const CCFaction *pFaction = GetFaction();
-        const CCFaction *pSrCCFaction = pSrc->GetFaction();
+        const CCFaction *pSrcFaction = pSrc->GetFaction();
         if (pWeapon)
         {
             pSlayer = pWeapon->GetFaction();
@@ -729,16 +732,16 @@ effect_bounce:
                 }
                 else if (m_pPlayer && pSrc->m_pNPC) // Wielding a slayer type against its opposite will cause the attacker to take more damage
                 {
-                    if (pSrCCFaction->GetFactionID() != FACTION_NONE)
+                    if (pSrcFaction->GetFactionID() != FACTION_NONE)
                     {
-                        iDmgBonus = pSlayer->GetSlayerDamagePenalty(pSrCCFaction);
+                        iDmgBonus = pSlayer->GetSlayerDamagePenalty(pSrcFaction);
                     }
                 }
             }
         }
         if (iDmgBonus == 1) // Couldn't find a weapon, a Slayer flag or a suitable flag for the target...
         {
-            CItem *pTalisman = pSrc->LayerFind(LAYER_TALISMAN); // then lets try with a Talisman
+            const CItem *pTalisman = pSrc->LayerFind(LAYER_TALISMAN); // then lets try with a Talisman
             if (pTalisman)
             {
                 pSlayer = pTalisman->GetSlayer();
@@ -753,9 +756,9 @@ effect_bounce:
                     }
                     else if (m_pPlayer && pSrc->m_pNPC) // Wielding a slayer type against its opposite will cause the attacker to take more damage
                     {
-                        if (pSrCCFaction->GetFactionID() != FACTION_NONE)
+                        if (pSrcFaction->GetFactionID() != FACTION_NONE)
                         {
-                            iDmgBonus = pFaction->GetSlayerDamagePenalty(pSrCCFaction);
+                            iDmgBonus = pFaction->GetSlayerDamagePenalty(pSrcFaction);
                         }
                     }
                 }
@@ -989,7 +992,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 	ADDTOCALLSTACK("CChar::Fight_CalcDamage");
 
 	if ( m_pNPC && m_pNPC->m_Brain == NPCBRAIN_GUARD && g_Cfg.m_fGuardsInstantKill )
-		return 20000;	// swing made.
+		return UINT16_MAX;	// swing made.
 
 	int iDmgMin = 0;
 	int iDmgMax = 0;
@@ -1020,7 +1023,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 	if ( m_pPlayer )	// only players can have damage bonus
 	{
 		int iIncreaseDam = (int)GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASEDAM, true);
-		int iDmgBonus = minimum(iIncreaseDam, 100);		// Damage Increase is capped at 100%
+		int iDmgBonus = maximum(-100, minimum(iIncreaseDam, 100));		// Damage Increase is capped at +-100%
 
 		// Racial Bonus (Berserk), gargoyles gains +15% Damage Increase per each 20 HP lost
 		if ((g_Cfg.m_iRacialFlags & RACIALF_GARG_BERSERK) && IsGargoyle())
@@ -1292,29 +1295,30 @@ void CChar::Fight_HitTry()
 		return;
 	}
 
-    bool fPreHit_ShouldInstaHit = false, fPreHit_LastHitTag_Newer = false;
-    int64 iPreHit_LastHitTag_FullHit = 0;  // Time required to perform a normal hit, without the PreHit delay reduction.
+    bool fIH_ShouldInstaHit = false, fIH_LastHitTag_Newer = false;
+    int64 iIH_LastHitTag_FullHit = 0;  // Time required to perform a normal hit, without the PreHit delay reduction.
     if (m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING)
     {
-        if (IsSetCombatFlags(COMBAT_PREHIT))
+        if (IsSetCombatFlags(COMBAT_FIRSTHIT_INSTANT))
         {
-            fPreHit_ShouldInstaHit = (!m_atFight.m_iRecoilDelay && !m_atFight.m_iSwingAnimationDelay);
+            fIH_ShouldInstaHit = (!m_atFight.m_iRecoilDelay && !m_atFight.m_iSwingAnimationDelay);
             Fight_SetDefaultSwingDelays();
             const int64 iTimeCur = g_World.GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH;
-            // Time required to perform the previous normal hit, without the PreHit delay reduction.
-            const int64 iPreHit_LastHitTag_FullHit_Prev = GetKeyNum("LastHit");   // TAG.LastHit is in tenths of second
-            // Time required to perform the shortened hit with PreHit.
-            const int64 iPreHit_LastHitTag_PreHit = iTimeCur + COMBAT_MIN_SWING_ANIMATION_DELAY;   // it's the new m_iRecoilDelay (0) + the new m_iSwingAnimationDelay (COMBAT_MIN_SWING_ANIMATION_DELAY)
-            iPreHit_LastHitTag_FullHit = iTimeCur + m_atFight.m_iRecoilDelay + m_atFight.m_iSwingAnimationDelay;
-            if (iPreHit_LastHitTag_PreHit > iPreHit_LastHitTag_FullHit_Prev)
+            // Time required to perform the previous normal hit, without the InstaHit delay reduction.
+            const int64 iIH_LastHitTag_FullHit_Prev = GetKeyNum("LastHit");   // TAG.LastHit is in tenths of second
+            // Time required to perform the shortened hit with InstaHit.
+            const int64 iIH_LastHitTag_InstaHit = iTimeCur + m_atFight.m_iSwingAnimationDelay;   // it's the new m_iRecoilDelay (0) + the new m_iSwingAnimationDelay (COMBAT_MIN_SWING_ANIMATION_DELAY)
+            iIH_LastHitTag_FullHit = iTimeCur + m_atFight.m_iRecoilDelay + m_atFight.m_iSwingAnimationDelay;
+            if (iIH_LastHitTag_InstaHit > iIH_LastHitTag_FullHit_Prev)
             {
-                fPreHit_LastHitTag_Newer = true;
-                if (fPreHit_ShouldInstaHit)
+                fIH_LastHitTag_Newer = true;
+                if (fIH_ShouldInstaHit)
                 {
-                    // First hit with PreHit -> no recoil, only the minimum swing animation delay
+                    // First hit with FirstHit_Instant -> no recoil, only the minimum swing animation delay
                     m_atFight.m_iSwingIgnoreLastHitTag = 1;
                     m_atFight.m_iRecoilDelay = 0;
-                    m_atFight.m_iSwingAnimationDelay = COMBAT_MIN_SWING_ANIMATION_DELAY;
+                    if (IsSetCombatFlags(COMBAT_PREHIT))
+                        m_atFight.m_iSwingAnimationDelay = 1;
                 }
             }
         }
@@ -1326,17 +1330,17 @@ void CChar::Fight_HitTry()
 
     WAR_SWING_TYPE retHit = Fight_Hit(pCharTarg);
 
-    if (IsSetCombatFlags(COMBAT_PREHIT))
+    if (IsSetCombatFlags(COMBAT_FIRSTHIT_INSTANT))
     {
         // This needs to be set after the @HitTry call, because we may want to change the default iRecoilDelay and iSwingAnimationDelay in that trigger.
         if ((m_atFight.m_War_Swing_State == WAR_SWING_READY) && (retHit == WAR_SWING_READY))
         {
-            if (fPreHit_LastHitTag_Newer)
+            if (fIH_LastHitTag_Newer)
             {
                 // This protects against allowing shortened hits every time a char stops and starts attacking again, independently of this being the first, second, third or whatever hit.
-                SetKeyNum("LastHit", iPreHit_LastHitTag_FullHit);
+                SetKeyNum("LastHit", iIH_LastHitTag_FullHit);
             }
-            if (!fPreHit_ShouldInstaHit)
+            if (!fIH_ShouldInstaHit)
             {
                 // This workaround is needed because, without it, if the player exits and enters war mode after having landed the first but not the second hit,
                 //  resets the old delays and there's nothing to check if he can do again a PreHit, so he again hits near-instantly.
@@ -1399,8 +1403,9 @@ void CChar::Fight_HitTry()
             {
                 // This happens (only with both PreHit and Swing_NoRange on) if i can't land the hit right now, otherwise retHit
                 //  should be WAR_SWING_EQUIPPING. If this isn't the case, there's something wrong (asserts are placed to intercept this situations).
+                // Though, consider the case of custom combat systems, in that case the asserts may be invalid.
                 SetTimeoutD(1);
-                ASSERT(IsSetCombatFlags(COMBAT_PREHIT|COMBAT_SWING_NORANGE));
+                //ASSERT(IsSetCombatFlags(COMBAT_FIRSTHIT_INSTANT) && IsSetCombatFlags(COMBAT_SWING_NORANGE|COMBAT_PREHIT));
             }
 			return;
 		default:
@@ -1424,18 +1429,26 @@ int CChar::Fight_CalcRange( CItem * pWeapon ) const
 void CChar::Fight_SetDefaultSwingDelays()
 {
     ADDTOCALLSTACK("CChar::Fight_SetDefaultSwingDelays");
-    // Be wary that with the new animation packet the anim delay ("speed") is always 1.0 s, no matter the value we send, and then the char will keep waiting the remaining time
+    // Be wary that with the new animation packet the anim delay ("speed") is always 1.0 s, no matter the value we send, and then the char will keep waiting the remaining time.
+    // With the old packet, the minimum anim delay is 1.0s, it doesn't matter if you send 0.
 
-    int iAttackSpeed = g_Cfg.Calc_CombatAttackSpeed(this, m_uidWeapon.ItemFind());
+    int16 iAttackSpeed = int16(g_Cfg.Calc_CombatAttackSpeed(this, m_uidWeapon.ItemFind()));
+    if (iAttackSpeed < kiMinSwingAnimationDelay)
+        iAttackSpeed = kiMinSwingAnimationDelay;
     if (IsSetCombatFlags(COMBAT_ANIM_HIT_SMOOTH))
     {
         m_atFight.m_iRecoilDelay = 0;    // We don't have an actual recoil: the hit animation has the duration of the delay between hits, so the char is always doing a smooth, slow attack animation
-        m_atFight.m_iSwingAnimationDelay = (int16)(maximum(iAttackSpeed,COMBAT_MIN_SWING_ANIMATION_DELAY) - COMBAT_MIN_SWING_ANIMATION_DELAY);
+        m_atFight.m_iSwingAnimationDelay = iAttackSpeed;
     }
     else 
     {
-        m_atFight.m_iRecoilDelay = (int16)(iAttackSpeed - COMBAT_MIN_SWING_ANIMATION_DELAY);
-        m_atFight.m_iSwingAnimationDelay = COMBAT_MIN_SWING_ANIMATION_DELAY;
+        m_atFight.m_iRecoilDelay = (iAttackSpeed - kiMinSwingAnimationDelay);
+        m_atFight.m_iSwingAnimationDelay = kiMinSwingAnimationDelay;
+    }
+    if (IsSetCombatFlags(COMBAT_PREHIT))
+    {
+        m_atFight.m_iRecoilDelay += m_atFight.m_iSwingAnimationDelay;
+        m_atFight.m_iSwingAnimationDelay = 0;
     }
 }
 
@@ -1589,21 +1602,23 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
             return WAR_SWING_READY;
     }
 
-    if ( IsSetCombatFlags(COMBAT_PREHIT) && (m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING) && (!m_atFight.m_iSwingIgnoreLastHitTag) )
+    const WAR_SWING_TYPE iStageToSuspend = (IsSetCombatFlags(COMBAT_PREHIT) ? WAR_SWING_SWINGING : WAR_SWING_EQUIPPING);
+    if ( IsSetCombatFlags(COMBAT_FIRSTHIT_INSTANT) && (!m_atFight.m_iSwingIgnoreLastHitTag) 
+        && (m_atFight.m_War_Swing_State == iStageToSuspend) )
     {
-        int64 iTimeDiff = ((g_World.GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH) - GetKeyNum("LastHit"));
+        const int64 iTimeDiff = ((g_World.GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH) - GetKeyNum("LastHit"));
         if (iTimeDiff < 0)
         {
-            return WAR_SWING_EQUIPPING;
+            return iStageToSuspend;
         }
     }    
 	
 	CItem *pAmmo = nullptr;
 	const SKILL_TYPE skill = Skill_GetActive();
 	const int dist = GetTopDist3D(pCharTarg);
-	const bool bSkillRanged = g_Cfg.IsSkillFlag(skill, SKF_RANGED);
+	const bool fSkillRanged = g_Cfg.IsSkillFlag(skill, SKF_RANGED);
 
-	if (bSkillRanged)
+	if (fSkillRanged)
 	{
 		if ( IsStatFlag(STATF_HASSHIELD) )		// this should never happen
 		{
@@ -1696,7 +1711,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
             m_atFight.m_iSwingAnimation = (int16)(Args.m_VarsLocal.GetKeyNum("Anim"));
             iARGN1Var = (int16)(Args.m_iN1);
             iAnimDelayVar = (int16)(Args.m_VarsLocal.GetKeyNum("AnimDelay"));
-            //if (m_atFight.m_iSwingAnimation < (ANIM_TYPE)-1)
+            //if (m_atFight.m_iSwingAnimation < (ANIM_TYPE)-1)  // -1 is a valid value
             //    m_atFight.m_iSwingAnimation = (int16)animSwingDefault;
             if ( m_atFight.m_iRecoilDelay < 1 )
                 m_atFight.m_iRecoilDelay = 1;
@@ -1719,9 +1734,21 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
         {
 			UpdateDir(pCharTarg);
         }
-        byte iSwingAnimationDelayInSeconds = (byte)(m_atFight.m_iSwingAnimationDelay / 10);
-        //if ((m_atFight.m_iSwingAnimationDelay % 10) >= 5)
-        //    iSwingAnimationDelayInSeconds += 1; // round up
+        byte iSwingAnimationDelayInSeconds;
+        if (IsSetCombatFlags(COMBAT_PREHIT) && !IsSetCombatFlags(COMBAT_ANIM_HIT_SMOOTH))
+            iSwingAnimationDelayInSeconds = 1;
+        else
+        {
+            if (IsSetCombatFlags(COMBAT_PREHIT))
+                iSwingAnimationDelayInSeconds = (byte)(m_atFight.m_iRecoilDelay / 10);
+            else
+                iSwingAnimationDelayInSeconds = (byte)(m_atFight.m_iSwingAnimationDelay / 10);
+            if (iSwingAnimationDelayInSeconds <= 0)
+                iSwingAnimationDelayInSeconds = 1;
+            //if ((m_atFight.m_iSwingAnimationDelay % 10) >= 5)
+            //    iSwingAnimationDelayInSeconds += 1; // round up
+
+        }
 		UpdateAnimate((ANIM_TYPE)m_atFight.m_iSwingAnimation, false, false, maximum(0,iSwingAnimationDelayInSeconds) );
 
         // Now that i have waited the recoil time, start the hit animation and wait for it to end
@@ -1729,7 +1756,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		return WAR_SWING_SWINGING;
 	}
 
-	if ( bSkillRanged && pWeapon )
+	if ( fSkillRanged && pWeapon )
 	{
 		// Post-swing behavior
 		ITEMID_TYPE AnimID = ITEMID_NOTHING;
@@ -1765,10 +1792,15 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 				pAmmo = nullptr;
 		}
 
-		if ( pAmmo && m_pPlayer && (40 >= Calc_GetRandVal(100)) )
+		if ( pAmmo && m_pPlayer  )
 		{
-			pAmmo->UnStackSplit(1);
-			pAmmo->MoveToDecay(pCharTarg->GetTopPoint(), g_Cfg.m_iDecay_Item);
+			if (40 >= Calc_GetRandVal(100))
+			{
+				pAmmo->UnStackSplit(1);
+				pAmmo->MoveToDecay(pCharTarg->GetTopPoint(), g_Cfg.m_iDecay_Item);
+			}
+			else
+				pAmmo->ConsumeAmount(1);
 		}
 
 		if ( IsPriv(PRIV_DETAIL) )
@@ -1783,12 +1815,12 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		{
 			if ( g_Cfg.IsSkillFlag(skill, SKF_RANGED) )
 			{
-				static const SOUND_TYPE sm_Snd_Miss_Ranged[] = { 0x233, 0x238 };
+				static constexpr SOUND_TYPE sm_Snd_Miss_Ranged[] = { 0x233, 0x238 };
 				iSound = sm_Snd_Miss_Ranged[Calc_GetRandVal(CountOf(sm_Snd_Miss_Ranged))];
 			}
 			else
 			{
-				static const SOUND_TYPE sm_Snd_Miss[] = { 0x238, 0x239, 0x23a };
+				static constexpr SOUND_TYPE sm_Snd_Miss[] = { 0x238, 0x239, 0x23a };
 				iSound = sm_Snd_Miss[Calc_GetRandVal(CountOf(sm_Snd_Miss))];
 			}
 		}
@@ -1851,7 +1883,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		iDmg -= IMulDiv(iDmg, iParryReduction, 100);
 
 	CScriptTriggerArgs Args(iDmg, iDmgType, pWeapon);
-	Args.m_VarsLocal.SetNum("ItemDamageChance", 2);
+	Args.m_VarsLocal.SetNum("ItemDamageChance", 25);
 	if ( pAmmo )
 		Args.m_VarsLocal.SetNum("Arrow", pAmmo->GetUID());
 
@@ -1954,12 +1986,12 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		if ( pWeapon && pCurseWeapon )
 			uiHitLifeLeech += pCurseWeapon->m_itSpell.m_spelllevel;
 
-		bool bMakeLeechSound = false;
+		bool fMakeLeechSound = false;
 		if ( uiHitLifeLeech )
 		{
 			uiHitLifeLeech = (ushort)(Calc_GetRandVal2(0, (iDmg * uiHitLifeLeech * 30) / 10000));	// leech 0% ~ 30% of damage value
 			UpdateStatVal(STAT_STR, uiHitLifeLeech);
-			bMakeLeechSound = true;
+            fMakeLeechSound = true;
 		}
 
 		ushort uiHitManaLeech = (ushort)GetPropNum(pCCPChar, PROPCH_HITLEECHMANA, pBaseCCPChar);
@@ -1967,13 +1999,13 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		{
 			uiHitManaLeech = (ushort)(Calc_GetRandVal2(0, (iDmg * uiHitManaLeech * 40) / 10000));	// leech 0% ~ 40% of damage value
 			UpdateStatVal(STAT_INT, uiHitManaLeech);
-			bMakeLeechSound = true;
+            fMakeLeechSound = true;
 		}
 
 		if ( GetPropNum(pCCPChar, PROPCH_HITLEECHSTAM, pBaseCCPChar) > Calc_GetRandLLVal(100) )
 		{
 			UpdateStatVal(STAT_DEX, (ushort)iDmg);	// leech 100% of damage value
-			bMakeLeechSound = true;
+            fMakeLeechSound = true;
 		}
 
 		ushort uiManaDrain = 0;
@@ -1994,10 +2026,10 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		{
 			pCharTarg->UpdateStatVal(STAT_INT, uiTargMana - uiManaDrain);
 			UpdateStatVal(STAT_INT, uiManaDrain);
-			bMakeLeechSound = true;
+            fMakeLeechSound = true;
 		}
 
-		if ( bMakeLeechSound )
+		if ( fMakeLeechSound )
 			Sound(0x44d);
 
 		// Make blood effects
@@ -2049,18 +2081,18 @@ bool CChar::Fight_Parry(CItem * &pItemParry)
 {
 	// Check if target will block the hit
 	// Legacy pre-SE formula
-    bool bCanShield = g_Cfg.m_iCombatParryingEra & PARRYERA_SHIELDBLOCK;
-    bool bCanOneHanded = g_Cfg.m_iCombatParryingEra & PARRYERA_ONEHANDBLOCK;
-    bool bCanTwoHanded = g_Cfg.m_iCombatParryingEra & PARRYERA_TWOHANDBLOCK;
+    const bool fCanShield = g_Cfg.m_iCombatParryingEra & PARRYERA_SHIELDBLOCK;
+    const bool fCanOneHanded = g_Cfg.m_iCombatParryingEra & PARRYERA_ONEHANDBLOCK;
+    const bool fCanTwoHanded = g_Cfg.m_iCombatParryingEra & PARRYERA_TWOHANDBLOCK;
 
-    int iParrying = Skill_GetBase(SKILL_PARRYING);
+    const int iParrying = Skill_GetBase(SKILL_PARRYING);
     int iParryChance = 0;   // 0-100 difficulty! without the decimal!
     if (g_Cfg.m_iCombatParryingEra & PARRYERA_SEFORMULA)   // Samurai Empire formula
     {
-        int iBushido = Skill_GetBase(SKILL_BUSHIDO);
+        const int iBushido = Skill_GetBase(SKILL_BUSHIDO);
         int iChanceSE = 0, iChanceLegacy = 0;
 
-        if (bCanShield && IsStatFlag(STATF_HASSHIELD))	// parry using shield
+        if (fCanShield && IsStatFlag(STATF_HASSHIELD))	// parry using shield
         {
             pItemParry = LayerFind(LAYER_HAND2);
             iParryChance = (iParrying - iBushido) / 40;
@@ -2072,7 +2104,7 @@ bool CChar::Fight_Parry(CItem * &pItemParry)
         else if (m_uidWeapon.IsItem())		// parry using weapon
         {
             CItem* pTempItemParry = m_uidWeapon.ItemFind();
-            if (bCanOneHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND1))
+            if (fCanOneHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND1))
             {
                 pItemParry = pTempItemParry;
 
@@ -2086,7 +2118,7 @@ bool CChar::Fight_Parry(CItem * &pItemParry)
 
                 iParryChance = maximum(iChanceSE, iChanceLegacy);
             }
-            else if (bCanTwoHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND2))
+            else if (fCanTwoHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND2))
             {
                 pItemParry = pTempItemParry;
 
@@ -2104,7 +2136,7 @@ bool CChar::Fight_Parry(CItem * &pItemParry)
     }
     else    // Legacy formula (pre Samurai Empire)
     {
-        if (bCanShield && IsStatFlag(STATF_HASSHIELD))	// parry using shield
+        if (fCanShield && IsStatFlag(STATF_HASSHIELD))	// parry using shield
         {
             pItemParry = LayerFind(LAYER_HAND2);
             iParryChance = iParrying / 40;
@@ -2112,8 +2144,8 @@ bool CChar::Fight_Parry(CItem * &pItemParry)
         else if (m_uidWeapon.IsItem())		// parry using weapon
         {
             CItem* pTempItemParry =  m_uidWeapon.ItemFind();
-            if ( (bCanOneHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND1)) ||
-                 (bCanTwoHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND2)) )
+            if ( (fCanOneHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND1)) ||
+                 (fCanTwoHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND2)) )
             {
                 pItemParry = pTempItemParry;
                 iParryChance = iParrying / 80;

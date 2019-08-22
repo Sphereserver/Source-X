@@ -1096,9 +1096,10 @@ enum ITEMID_TYPE	// InsideUO or UoFiddler are great for this stuff.
 	ITEMID_DOOR_SHADOWGUARD = 0x9B3C,
 
 	// Large composite objects here.
-	ITEMID_MULTI_LEGACY = 0x4000, // ITEMID_MULTI for old clients (<7.0.0.0)
-	ITEMID_MULTI_SA = 0x8000, // ITEMID_MULTI for sa clients (<7.0.8.44)
-	ITEMID_MULTI = 0x10000,
+	ITEMID_MULTI_LEGACY = 0x4000,   // ITEMID_MULTI starts here for old clients (<7.0.0.0) because their tiledata has 0x4000 entries
+	ITEMID_MULTI_SA = 0x8000,       // ITEMID_MULTI for sa clients (<7.0.8.44) because their tiledata has 0x8000 entries
+	ITEMID_MULTI = 0x10000,         // Current ITEMID_MULTI value because now (starting from from HS clients maybe?) the tiledata has 0x10000 entries
+    // Values from now on are used by Sphere as Multi IDs
 	
     ITEMID_SHIP_SMALL_N			= ITEMID_MULTI + 0x0,
 	ITEMID_SHIP_SMALL_DRAG_N	= ITEMID_MULTI + 0x4,

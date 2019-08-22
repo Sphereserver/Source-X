@@ -171,7 +171,7 @@ CAccount * CAccounts::Account_Find( lpctstr pszName )
 		return nullptr;
 
 	size_t i = m_Accounts.FindKey(szName);
-	if ( i != m_Accounts.BadIndex() )
+	if ( i != SCONT_BADINDEX )
 		return Account_Get(i);
 
 	return nullptr;
@@ -247,7 +247,7 @@ CAccount * CAccounts::Account_Get( size_t index )
 	return static_cast <CAccount *>( m_Accounts[index] );
 }
 
-bool CAccounts::Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr pszArg, bool md5 )
+bool CAccounts::Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr ptcArg, bool md5 )
 {
 	ADDTOCALLSTACK("CAccounts::Cmd_AddNew");
 	if (pszName == nullptr || pszName[0] == '\0')
@@ -275,7 +275,7 @@ bool CAccounts::Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr pszArg
 	ASSERT(pAccount);
 	pAccount->m_dateFirstConnect = pAccount->m_dateLastConnect = CSTime::GetCurrentTime();
 
-	pAccount->SetPassword(pszArg, md5);
+	pAccount->SetPassword(ptcArg, md5);
 	return true;
 }
 
@@ -295,7 +295,7 @@ enum VACS_TYPE
 	VACS_QTY // TODOC.
 };
 
-lpctstr const CAccounts::sm_szVerbKeys[] =	// CAccounts:: // account group verbs.
+lpctstr constexpr CAccounts::sm_szVerbKeys[] =	// CAccounts:: // account group verbs.
 {
 	"ADD",
 	"ADDMD5",
@@ -304,7 +304,7 @@ lpctstr const CAccounts::sm_szVerbKeys[] =	// CAccounts:: // account group verbs
 	"JAILED",
 	"UNUSED",
 	"UPDATE",
-	nullptr,
+	nullptr
 };
 
 bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, lpctstr pszDays, lpctstr pszVerb, lpctstr pszArgs, dword dwMask)
@@ -512,7 +512,7 @@ bool CAccount::NameStrip( tchar * pszNameOut, lpctstr pszNameInp )
 	return true;
 }
 
-static lpctstr const sm_szPrivLevels[ PLEVEL_QTY+1 ] =
+static lpctstr constexpr sm_szPrivLevels[ PLEVEL_QTY+1 ] =
 {
 	"Guest",		// 0 = This is just a guest account. (cannot PK)
 	"Player",		// 1 = Player or NPC.
@@ -657,7 +657,7 @@ size_t CAccount::AttachChar( CChar * pChar )
 
 	// is it already linked ?
 	size_t i = m_Chars.AttachChar( pChar );
-	if ( i != m_Chars.BadIndex() )
+	if ( i != SCONT_BADINDEX )
 	{
 		size_t iQty = m_Chars.GetCharCount();
 		if ( iQty > MAX_CHARS_PER_ACCT )
@@ -944,7 +944,7 @@ bool CAccount::SetPassword( lpctstr pszPassword, bool isMD5Hash )
 
 	size_t actualPasswordBufferSize = minimum(MAX_ACCOUNT_PASSWORD_ENTER, enteredPasswordLength) + 1;
 	char * actualPassword = new char[actualPasswordBufferSize];
-	strncpynull(actualPassword, pszPassword, actualPasswordBufferSize);
+	Str_CopyLimitNull(actualPassword, pszPassword, actualPasswordBufferSize);
 
 	if ( useMD5 )
 	{
@@ -1053,6 +1053,7 @@ enum AC_TYPE
 	AC_LASTIP,
 	AC_MAXCHARS,
     AC_MAXHOUSES,
+	AC_MAXSHIPS,
 	AC_MD5PASSWORD,
 	AC_NAME,
 	AC_NEWPASSWORD,
@@ -1067,7 +1068,7 @@ enum AC_TYPE
 	AC_QTY
 };
 
-lpctstr const CAccount::sm_szLoadKeys[AC_QTY+1] = // static
+lpctstr constexpr CAccount::sm_szLoadKeys[AC_QTY+1] = // static
 {
 	"ACCOUNT",
 	"BLOCK",
@@ -1085,6 +1086,7 @@ lpctstr const CAccount::sm_szLoadKeys[AC_QTY+1] = // static
 	"LASTIP",
 	"MAXCHARS",
     "MAXHOUSES",
+	"MAXSHIPS",
 	"MD5PASSWORD",
 	"NAME",
 	"NEWPASSWORD",
@@ -1096,37 +1098,38 @@ lpctstr const CAccount::sm_szLoadKeys[AC_QTY+1] = // static
 	"TAG0",
 	"TAGCOUNT",
 	"TOTALCONNECTTIME",
-	nullptr,
+	nullptr
 };
 
-bool CAccount::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CAccount::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CAccount::r_GetRef");
-	if ( ! strnicmp( pszKey, "CHAR.", 5 ))
+	if ( ! strnicmp( ptcKey, "CHAR.", 5 ))
 	{
 		// How many chars.
-		pszKey += 5;
-		size_t i = Exp_GetVal(pszKey);
+		ptcKey += 5;
+		size_t i = Exp_GetVal(ptcKey);
 		if ( m_Chars.IsValidIndex(i) )
 		{
 			pRef = m_Chars.GetChar(i).CharFind();
 		}
-		SKIP_SEPARATORS(pszKey);
+		SKIP_SEPARATORS(ptcKey);
 		return true;
 	}
-	return( CScriptObj::r_GetRef( pszKey, pRef ));
+	return( CScriptObj::r_GetRef( ptcKey, pRef ));
 }
 
-bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
+bool CAccount::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CAccount::r_WriteVal");
 	EXC_TRY("WriteVal");
 	if ( !pSrc )
 		return false;
 
-	bool	fZero	= false;
+	bool fZero = false;
 
-	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+	switch ( FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		case AC_NAME:
 		case AC_ACCOUNT:
@@ -1175,8 +1178,11 @@ bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			sVal.FormatVal( GetMaxChars() );
 			break;
         case AC_MAXHOUSES:
-            sVal.FormatUCVal(_iMaxHouses);
+            sVal.FormatU8Val(_iMaxHouses);
             break;
+		case AC_MAXSHIPS:
+			sVal.FormatU8Val(_iMaxShips);
+			break;
 		case AC_PLEVEL:
 			sVal.FormatVal( m_PrivLevel );
 			break;
@@ -1204,22 +1210,22 @@ bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			sVal.FormatVal( m_ResDisp );
 			break;
 		case AC_TAG0:
-			fZero	= true;
-			pszKey++;
+			fZero = true;
+			++ptcKey;
 		case AC_TAG:			// "TAG" = get/set a local tag.
 			{
-				if ( pszKey[3] != '.' )
+				if ( ptcKey[3] != '.' )
 					return false;
-				pszKey += 4;
-				sVal = m_TagDefs.GetKeyStr(pszKey, fZero );
-				return true;
+				ptcKey += 4;
+				sVal = m_TagDefs.GetKeyStr(ptcKey, fZero );
+				break;
 			}
 		case AC_TOTALCONNECTTIME:
 			sVal.FormatLLVal( m_Total_Connect_Time );
 			break;
 
 		default:
-			return( CScriptObj::r_WriteVal( pszKey, sVal, pSrc ));
+			return ( fNoCallParent ? false : CScriptObj::r_WriteVal( ptcKey, sVal, pSrc, false ) );
 	}
 	return true;
 	EXC_CATCH;
@@ -1324,6 +1330,9 @@ bool CAccount::r_LoadVal( CScript & s )
         case AC_MAXHOUSES:
             _iMaxHouses = s.GetArgUCVal();
             break;
+		case AC_MAXSHIPS:
+			_iMaxHouses = s.GetArgUCVal();
+			break;
 		case AC_MD5PASSWORD:
 			SetPassword( s.GetArgStr(), true);
 			break;
@@ -1347,18 +1356,18 @@ bool CAccount::r_LoadVal( CScript & s )
 		case AC_RESDISP:
 			SetResDisp(s.GetArgBVal());
 			break;
+
 		case AC_TAG0:
-			{
-				bool fQuoted = false;
-				m_TagDefs.SetStr( s.GetKey()+ 5, fQuoted, s.GetArgStr( &fQuoted ), true );
-			}
-			return true;
-		case AC_TAG:
-			{
-				bool fQuoted = false;
-				m_TagDefs.SetStr( s.GetKey()+ 4, fQuoted, s.GetArgStr( &fQuoted ));
-			}
-			return true;
+        case AC_TAG:
+        {
+            const bool fZero = (i == AC_TAG0);
+            lpctstr ptcKey = s.GetKey();
+            ptcKey += (fZero ? 5 : 4);
+            bool fQuoted = false;
+            lpctstr ptcArg = s.GetArgStr(&fQuoted);
+            m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, true);
+        }
+        break;
 
 		case AC_TOTALCONNECTTIME:
 			// Previous total amount of time in game
@@ -1495,31 +1504,32 @@ bool CAccount::r_Verb( CScript &s, CTextConsole * pSrc )
 	EXC_TRY("Verb");
 	ASSERT(pSrc);
 
-	lpctstr pszKey = s.GetKey();
+	lpctstr ptcKey = s.GetKey();
 
 	// can't change accounts higher than you in any way
 	if (( pSrc->GetPrivLevel() < GetPrivLevel() ) &&  ( pSrc->GetPrivLevel() < PLEVEL_Admin ))
 		return false;
 
-	if ( !strnicmp(pszKey, "CLEARTAGS", 9) )
+	if ( !strnicmp(ptcKey, "CLEARTAGS", 9) )
 	{
-		pszKey = s.GetArgStr();
-		SKIP_SEPARATORS(pszKey);
-		m_TagDefs.ClearKeys(pszKey);
+		ptcKey = s.GetArgStr();
+		SKIP_SEPARATORS(ptcKey);
+		m_TagDefs.ClearKeys(ptcKey);
 		return true;
 	}
 
 	int i = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 	if ( i < 0 )
 	{
-		bool bLoad = CScriptObj::r_Verb( s, pSrc );
-		if ( !bLoad ) //try calling custom functions
+		bool fLoad = CScriptObj::r_Verb( s, pSrc );
+		if ( !fLoad ) //try calling custom functions
 		{
+            // RES_FUNCTION call
 			CSString sVal;
 			CScriptTriggerArgs Args( s.GetArgRaw() );
-			bLoad = r_Call( pszKey, pSrc, &Args, &sVal );
+			fLoad = r_Call( ptcKey, pSrc, &Args, &sVal );
 		}
-		return bLoad;
+		return fLoad;
 	}
 
 	switch ( i )

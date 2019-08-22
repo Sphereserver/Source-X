@@ -562,7 +562,7 @@ enum ICHMPL_TYPE
     ICHMPL_QTY
 };
 
-lpctstr const CCChampion::sm_szLoadKeys[ICHMPL_QTY + 1] =
+lpctstr constexpr CCChampion::sm_szLoadKeys[ICHMPL_QTY + 1] =
 {
     "DEATHCOUNT",
     "LASTACTIVATIONTIME",
@@ -592,7 +592,7 @@ enum ICHMPV_TYPE
 };
 
 
-lpctstr const CCChampion::sm_szVerbKeys[ICHMPV_QTY + 1] =
+lpctstr constexpr CCChampion::sm_szVerbKeys[ICHMPV_QTY + 1] =
 {
     "ADDOBJ",
     "ADDREDCANDLE",
@@ -633,12 +633,12 @@ void CCChampion::r_Write(CScript & s)
     return;
 }
 
-bool CCChampion::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
+bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc)
 {
     UNREFERENCED_PARAMETER(pSrc);
     ADDTOCALLSTACK("CCChampion::r_WriteVal");
 
-    int iCmd = FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int iCmd = FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     switch (iCmd)
     {
         case ICHMPL_LASTACTIVATIONTIME:
@@ -661,14 +661,14 @@ bool CCChampion::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             return true;
         case ICHMPL_NPCGROUP:
         {
-            pszKey += 8;
-            uchar uiGroup = (uchar)Exp_GetSingle(pszKey);
+            ptcKey += 8;
+            uchar uiGroup = (uchar)Exp_GetSingle(ptcKey);
             if (_idSpawn[uiGroup].empty() || uiGroup > UCHAR_MAX)
             {
                 return false;
             }
-            ++pszKey;
-            uchar uiNpc = (uchar)Exp_GetSingle(pszKey);
+            ++ptcKey;
+            uchar uiNpc = (uchar)Exp_GetSingle(ptcKey);
             size_t uiGroupSize = _idSpawn[uiGroup].size();
             if (uiNpc && (uiNpc >= uiGroupSize))
                 return false;
@@ -731,14 +731,14 @@ void CCChampion::Delete(bool fForce)
     ClearRedCandles();
 }
 
-bool CCChampion::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
+bool CCChampion::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
 {
     ADDTOCALLSTACK("CCChampion::r_GetRef");
-    if (!strnicmp(pszKey, "WHITECANDLE", 11))
+    if (!strnicmp(ptcKey, "WHITECANDLE", 11))
     {
-        pszKey += 11;
-        int iCandle = Exp_GetVal(pszKey);
-        SKIP_SEPARATORS(pszKey);
+        ptcKey += 11;
+        int iCandle = Exp_GetVal(ptcKey);
+        SKIP_SEPARATORS(ptcKey);
         CItem * pCandle = _pWhiteCandles[iCandle].ItemFind();
         if (pCandle)
         {
@@ -746,11 +746,11 @@ bool CCChampion::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
             return true;
         }
     }
-    if (!strnicmp(pszKey, "REDCANDLE", 9))
+    if (!strnicmp(ptcKey, "REDCANDLE", 9))
     {
-        pszKey += 9;
-        int iCandle = Exp_GetVal(pszKey);
-        SKIP_SEPARATORS(pszKey);
+        ptcKey += 9;
+        int iCandle = Exp_GetVal(ptcKey);
+        SKIP_SEPARATORS(ptcKey);
         CItem * pCandle = _pRedCandles[iCandle].ItemFind();
         if (pCandle)
         {
@@ -758,11 +758,11 @@ bool CCChampion::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
             return true;
         }
     }
-    if (!strnicmp(pszKey, "SPAWN", 5))
+    if (!strnicmp(ptcKey, "SPAWN", 5))
     {
-        pszKey += 5;
-        lpctstr i = pszKey;
-        SKIP_SEPARATORS(pszKey);
+        ptcKey += 5;
+        lpctstr i = ptcKey;
+        SKIP_SEPARATORS(ptcKey);
         CCSpawn * pSpawn = static_cast<CCSpawn*>(GetLink()->GetComponent(COMP_SPAWN));
         if (pSpawn)
         {
@@ -857,7 +857,7 @@ enum CHAMPIONDEF_TYPE
     CHAMPIONDEF_QTY
 };
 
-lpctstr const CCChampionDef::sm_szLoadKeys[] =
+lpctstr constexpr CCChampionDef::sm_szLoadKeys[] =
 {
     "CHAMPION",
     "DEFNAME",
@@ -881,11 +881,13 @@ CCChampionDef::~CCChampionDef()
 {
 }
 
-bool CCChampionDef::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
+bool CCChampionDef::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
-    ADDTOCALLSTACK("CCChampionDef::r_WriteVal");
     UNREFERENCED_PARAMETER(pSrc);
-    CHAMPIONDEF_TYPE iCmd = (CHAMPIONDEF_TYPE)FindTableSorted(pszKey, sm_szLoadKeys, CHAMPIONDEF_QTY);
+    UNREFERENCED_PARAMETER(fNoCallParent);
+    UNREFERENCED_PARAMETER(fNoCallChildren);
+    ADDTOCALLSTACK("CCChampionDef::r_WriteVal");
+    CHAMPIONDEF_TYPE iCmd = (CHAMPIONDEF_TYPE)FindTableSorted(ptcKey, sm_szLoadKeys, CHAMPIONDEF_QTY);
 
     switch (iCmd)
     {
@@ -904,10 +906,10 @@ bool CCChampionDef::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * p
             {
                 return false;
             }
-            pszKey += 8;
-            uchar uiGroup = (uchar)Exp_GetSingle(pszKey);
-            ++pszKey;
-            uchar uiNPC = (uchar)Exp_GetSingle(pszKey);
+            ptcKey += 8;
+            uchar uiGroup = (uchar)Exp_GetSingle(ptcKey);
+            ++ptcKey;
+            uchar uiNPC = (uchar)Exp_GetSingle(ptcKey);
             if (uiNPC && (uiGroup >= _idSpawn.size()))
                 return false;
             if (_idSpawn[uiGroup].size() >= uiNPC)
@@ -929,7 +931,6 @@ bool CCChampionDef::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * p
             return true;
         default:
             return true;
-            break;
     }
     return false;
 }
@@ -937,8 +938,8 @@ bool CCChampionDef::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * p
 bool CCChampionDef::r_LoadVal(CScript & s)
 {
     ADDTOCALLSTACK("CCChampionDef::r_LoadVal");
-    lpctstr pszKey = s.GetKey();
-    CHAMPIONDEF_TYPE iCmd = (CHAMPIONDEF_TYPE)FindTableSorted(pszKey, sm_szLoadKeys, (int)CountOf(sm_szLoadKeys) - 1);
+    lpctstr ptcKey = s.GetKey();
+    CHAMPIONDEF_TYPE iCmd = (CHAMPIONDEF_TYPE)FindTableSorted(ptcKey, sm_szLoadKeys, (int)CountOf(sm_szLoadKeys) - 1);
 
     switch (iCmd)
     {
@@ -952,8 +953,8 @@ bool CCChampionDef::r_LoadVal(CScript & s)
             return true;
         case CHAMPIONDEF_NPCGROUP:
         {
-            pszKey += 8;
-            uchar iGroup = Exp_GetUCVal(pszKey);
+            ptcKey += 8;
+            uchar iGroup = Exp_GetUCVal(ptcKey);
             tchar * piCmd[4];
             size_t iArgQty = Str_ParseCmds(s.GetArgRaw(), piCmd, (int)CountOf(piCmd), ",");
             _idSpawn[iGroup].clear();

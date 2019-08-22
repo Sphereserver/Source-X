@@ -41,8 +41,8 @@ class CWorldThread
 	// as well as those just created here. (but may not be here anymore)
 
 protected:
-	CSObjArray<CObjBase*> m_UIDs;	// all the UID's in the World. CChar and CItem.
-	int m_iUIDIndexLast;		// remeber the last index allocated so we have more even usage.
+	std::vector<CObjBase*> m_UIDs;  // all the UID's in the World. CChar and CItem.
+	int m_iUIDIndexLast;            // remeber the last index allocated so we have more even usage.
 
 	dword	*m_FreeUIDs;		//	list of free uids available
 	dword	m_FreeOffset;		//	offset of the first free element
@@ -157,6 +157,12 @@ struct CharTickLookupList : public std::unordered_map<CChar*, int64>
     THREAD_CMUTEX_DEF;
 };
 
+struct StatusUpdatesList : public std::unordered_set<CObjBase*>
+{
+    THREAD_CMUTEX_DEF;
+};
+
+
 extern class CWorld : public CScriptObj, public CWorldThread
 {
 	// the world. Stuff saved in *World.SCP
@@ -179,6 +185,10 @@ private:
     TimedObjectLookupList _mWorldTickLookup;
     CharTickList _mCharTickList;
     CharTickLookupList _mCharTickLookup;
+
+public:
+    StatusUpdatesList m_ObjStatusUpdates;   // objects that need OnTickStatusUpdate called
+    CTimedFunctionHandler m_TimedFunctions; // TimedFunction Container/Wrapper
 
 public:
     void AddTimedObject(int64 iTimeout, CTimedObject *pTimedObject);
@@ -217,9 +227,6 @@ public:
 	static lpctstr const sm_szLoadKeys[];
 	CSPtrTypeArray <CItemTypeDef *> m_TileTypes;
 
-	// TimedFunction Container/Wrapper
-	CTimedFunctionHandler m_TimedFunctions;
-	std::unordered_set<CObjBase*> m_ObjStatusUpdates; // objects that need OnTickStatusUpdate called
 
 private:
 	bool LoadFile( lpctstr pszName, bool fError = true );
@@ -274,8 +281,8 @@ public:
 #define FELUCCA_SYNODIC_PERIOD 840 // in game world minutes
 #define TRAMMEL_FULL_BRIGHTNESS 2 // light units LIGHT_BRIGHT
 #define FELUCCA_FULL_BRIGHTNESS 6 // light units LIGHT_BRIGHT
-	uint GetMoonPhase( bool bMoonIndex = false ) const;
-	int64 GetNextNewMoon( bool bMoonIndex ) const;
+	uint GetMoonPhase( bool fMoonIndex = false ) const;
+	int64 GetNextNewMoon( bool fMoonIndex ) const;
 
 	int64 GetGameWorldTime( int64 basetime ) const;
     int64 GetGameWorldTime() const	// return game world minutes
@@ -317,9 +324,9 @@ public:
 	static bool OpenScriptBackup( CScript & s, lpctstr pszBaseDir, lpctstr pszBaseName, int savecount );
 
 	void r_Write( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
     virtual bool r_LoadVal( CScript & s ) override;
-    virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+    virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 
 	void OnTick();
 

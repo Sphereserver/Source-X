@@ -20,7 +20,7 @@ CResourceLink::CResourceLink( CResourceID rid, const CVarDefContNum * pDef ) :
 {
     m_pScript = nullptr;
     m_Context.Init(); // not yet tested.
-    m_lRefInstances = 0;
+    m_dwRefInstances = 0;
     ClearTriggers();
 }
 
@@ -143,8 +143,8 @@ void CResourceLink::CopyTransfer(CResourceLink *pLink)
     m_pScript = pLink->m_pScript;
     m_Context = pLink->m_Context;
     memcpy(m_dwOnTriggers, pLink->m_dwOnTriggers, sizeof(m_dwOnTriggers));
-    m_lRefInstances = pLink->m_lRefInstances;
-    pLink->m_lRefInstances = 0;	// instance has been transfered.
+    m_dwRefInstances = pLink->m_dwRefInstances;
+    pLink->m_dwRefInstances = 0;	// instance has been transfered.
 }
 
 void CResourceLink::ClearTriggers()

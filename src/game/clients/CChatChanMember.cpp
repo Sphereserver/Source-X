@@ -79,7 +79,7 @@ size_t CChatChanMember::FindIgnoringIndex(lpctstr pszName) const
         if (m_IgnoredMembers[i]->Compare(pszName) == 0)
             return i;
     }
-    return m_IgnoredMembers.BadIndex();
+    return SCONT_BADINDEX;
 }
 
 void CChatChanMember::Ignore(lpctstr pszName)
@@ -104,7 +104,7 @@ void CChatChanMember::ToggleIgnore(lpctstr pszName)
 {
     ADDTOCALLSTACK("CChatChanMember::ToggleIgnore");
     size_t i = FindIgnoringIndex( pszName );
-    if ( i != m_IgnoredMembers.BadIndex() )
+    if ( i != SCONT_BADINDEX )
     {
         ASSERT( m_IgnoredMembers.IsValidIndex(i) );
         m_IgnoredMembers.erase(i);
@@ -207,5 +207,5 @@ lpctstr CChatChanMember::GetChatName() const
 
 bool CChatChanMember::IsIgnoring(lpctstr pszName) const
 {
-    return( FindIgnoringIndex( pszName ) != m_IgnoredMembers.BadIndex() );
+    return( FindIgnoringIndex( pszName ) != SCONT_BADINDEX );
 }

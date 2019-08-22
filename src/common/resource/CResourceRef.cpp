@@ -149,7 +149,7 @@ size_t CResourceRefArray::FindResourceType( RES_TYPE restype ) const
         if ( ridtest.GetResType() == restype )
             return( i );
     }
-    return BadIndex();
+    return SCONT_BADINDEX;
 }
 
 size_t CResourceRefArray::FindResourceID( const CResourceID & rid ) const
@@ -163,24 +163,24 @@ size_t CResourceRefArray::FindResourceID( const CResourceID & rid ) const
         if ( ridtest == rid )
             return i;
     }
-    return BadIndex();
+    return SCONT_BADINDEX;
 }
 
-size_t CResourceRefArray::FindResourceName( RES_TYPE restype, lpctstr pszKey ) const
+size_t CResourceRefArray::FindResourceName( RES_TYPE restype, lpctstr ptcKey ) const
 {
     ADDTOCALLSTACK("CResourceRefArray::FindResourceName");
     // Is this resource already in the list ?
-    CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, pszKey ));
+    CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, ptcKey ));
     if ( pResourceLink == nullptr )
-        return BadIndex();
+        return SCONT_BADINDEX;
     return FindPtr(pResourceLink);
 }
 
-void CResourceRefArray::r_Write( CScript & s, lpctstr pszKey ) const
+void CResourceRefArray::r_Write( CScript & s, lpctstr ptcKey ) const
 {
     ADDTOCALLSTACK_INTENSIVE("CResourceRefArray::r_Write");
     for ( size_t j = 0, sz = size(); j < sz; ++j )
     {
-        s.WriteKey( pszKey, GetResourceName( j ));
+        s.WriteKey( ptcKey, GetResourceName( j ));
     }
 }

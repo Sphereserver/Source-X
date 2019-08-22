@@ -35,6 +35,7 @@ Packet::Packet(const byte* data, uint size) : m_buffer(nullptr)
 	clear();
 	m_expectedLength = 0;
 	resize(size);
+    ASSERT(m_buffer);
 	memcpy(m_buffer, data, size);
 }
 
@@ -740,13 +741,13 @@ void Packet::readStringASCII(wchar* buffer, uint length, bool includeNull)
 
 #ifdef USE_UNICODE_LIB
 
-	char* bufferReal = new char[length + 1];
+	char* bufferReal = new char[(size_t)length + 1];
 	readStringASCII(bufferReal, length, includeNull);
 	mbstowcs(buffer, bufferReal, length + 1);
 	delete[] bufferReal;
 #else
 	
-	char* bufferReal = new char[length + 1];
+	char* bufferReal = new char[(size_t)length + 1];
 	readStringASCII(bufferReal, length, includeNull);
 	CvtSystemToNUNICODE(reinterpret_cast<nword *>(buffer), (int)(length), bufferReal, (int)(length) + 1);
 	delete[] bufferReal;
@@ -800,7 +801,7 @@ void Packet::readStringUNICODE(char* buffer, uint bufferSize, uint length, bool 
 	delete[] bufferReal;
 #else
 
-	wchar* bufferReal = new wchar[length + 1];
+	wchar* bufferReal = new wchar[(size_t)length + 1];
 	readStringNUNICODE(bufferReal, length, includeNull);
 	CvtNUNICODEToSystem(buffer, (int)(bufferSize), reinterpret_cast<nword *>(bufferReal), (int)(length) + 1);
 	delete[] bufferReal;
@@ -840,13 +841,13 @@ void Packet::readStringNUNICODE(char* buffer, uint bufferSize, uint length, bool
 
 #ifdef USE_UNICODE_LIB
 
-	wchar* bufferReal = new wchar[length + 1];
+	wchar* bufferReal = new wchar[(size_t)length + 1];
 	readStringNUNICODE(bufferReal, length, includeNull);
 	wcstombs(buffer, bufferReal, bufferSize);
 	delete[] bufferReal;
 #else
 
-	wchar* bufferReal = new wchar[length + 1];
+	wchar* bufferReal = new wchar[(size_t)length + 1];
 	readStringUNICODE(bufferReal, length, includeNull);
 	CvtNUNICODEToSystem(buffer, (int)(bufferSize), reinterpret_cast<nword *>(bufferReal), (int)(length) + 1);
 	delete[] bufferReal;
@@ -876,13 +877,13 @@ uint Packet::readStringNullASCII(wchar* buffer, uint maxlength)
 
 #ifdef USE_UNICODE_LIB
 
-	char* bufferReal = new char[maxlength + 1];
+	char* bufferReal = new char[(size_t)maxlength + 1];
 	readStringNullASCII(bufferReal, maxlength);
 	int length = mbstowcs(buffer, bufferReal, maxlength + 1);
 	delete[] bufferReal;
 #else
 
-	char* bufferReal = new char[maxlength + 1];
+	char* bufferReal = new char[(size_t)maxlength + 1];
 	readStringNullASCII(bufferReal, maxlength);
 	int length = CvtSystemToNUNICODE(reinterpret_cast<nword *>(buffer), (int)(maxlength), bufferReal, (int)(maxlength) + 1);
 	delete[] bufferReal;
@@ -924,13 +925,13 @@ uint Packet::readStringNullUNICODE(char* buffer, uint bufferSize, uint maxlength
 
 #ifdef USE_UNICODE_LIB
 
-	wchar* bufferReal = new wchar[maxlength + 1];
+	wchar* bufferReal = new wchar[(size_t)maxlength + 1];
 	readStringNullUNICODE(bufferReal, maxlength);
 	int length = wcstombs(buffer, bufferReal, bufferSize);
 	delete[] bufferReal;
 #else
 
-	wchar* bufferReal = new wchar[maxlength + 1];
+	wchar* bufferReal = new wchar[(size_t)maxlength + 1];
 	readStringNullNUNICODE(bufferReal, maxlength);
 	int length = CvtNUNICODEToSystem(buffer, (int)(bufferSize), reinterpret_cast<nword *>(bufferReal), (int)(maxlength) + 1);
 	delete[] bufferReal;
@@ -964,13 +965,13 @@ uint Packet::readStringNullNUNICODE(char* buffer, uint bufferSize, uint maxlengt
 
 #ifdef USE_UNICODE_LIB
 
-	wchar* bufferReal = new wchar[maxlength + 1];
+	wchar* bufferReal = new wchar[(size_t)maxlength + 1];
 	readStringNullNUNICODE(bufferReal, maxlength);
 	int length = wcstombs(buffer, bufferReal, bufferSize);
 	delete[] bufferReal;
 #else
 
-	wchar* bufferReal = new wchar[maxlength + 1];
+	wchar* bufferReal = new wchar[(size_t)maxlength + 1];
 	readStringNullUNICODE(bufferReal, maxlength);
 	int length = CvtNUNICODEToSystem(buffer, (int)(bufferSize), reinterpret_cast<nword *>(bufferReal), (int)(maxlength) + 1);
 	delete[] bufferReal;

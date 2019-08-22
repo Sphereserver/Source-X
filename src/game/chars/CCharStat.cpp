@@ -34,7 +34,7 @@ void CChar::Stat_SetMod( STAT_TYPE i, int iVal )
 		if ( i >= STAT_STR && i <= STAT_DEX )
 		{
 			CScriptTriggerArgs args;
-			args.m_iN1 = i+8;	// shift by 8 to indicate modSTR, modINT, modDEX
+			args.m_iN1 = i + 8LL;	// shift by 8 to indicate modSTR, modINT, modDEX
 			args.m_iN2 = iStatVal;
 			args.m_iN3 = iVal;
 			if ( OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE )
@@ -97,7 +97,7 @@ void CChar::Stat_SetMaxMod( STAT_TYPE i, int iVal )
         if ( i >= STAT_STR && i <= STAT_DEX )
         {
             CScriptTriggerArgs args;
-            args.m_iN1 = i+12;	// shift by 12 to indicate modMaxHits, modMaxMana, modMaxStam
+            args.m_iN1 = i + 12LL;	// shift by 12 to indicate modMaxHits, modMaxMana, modMaxStam
             args.m_iN2 = iStatVal;
             args.m_iN3 = iVal;
             if ( OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE )
@@ -219,7 +219,7 @@ void CChar::Stat_SetMax( STAT_TYPE i, ushort uiVal )
 			if ( i >= STAT_STR && i <= STAT_FOOD )		// only STR, DEX, INT, FOOD fire MaxHits, MaxMana, MaxStam, MaxFood for @StatChange
 			{
 				CScriptTriggerArgs args;
-				args.m_iN1 = i + 4;		// shift by 4 to indicate MaxHits, etc..
+				args.m_iN1 = i + 4LL;		// shift by 4 to indicate MaxHits, etc..
 				args.m_iN2 = Stat_GetMax(i);
 				args.m_iN3 = uiVal;
 				if ( OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE )
@@ -336,7 +336,7 @@ void CChar::Stat_SetBase( STAT_TYPE i, ushort uiVal )
 
 			if (i != STAT_FOOD && m_Stat[i].m_max < 1) // MaxFood cannot depend on something, otherwise if the Stat depends on STR, INT, DEX, fire MaxHits, MaxMana, MaxStam
 			{
-				args.m_iN1 = i+4; // Shift by 4 to indicate MaxHits, MaxMana, MaxStam
+				args.m_iN1 = i + 4LL; // Shift by 4 to indicate MaxHits, MaxMana, MaxStam
 				args.m_iN2 = uiStatVal;
 				args.m_iN3 = uiVal;
 				if (OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE)
@@ -474,11 +474,11 @@ bool CChar::Stats_Regen()
         {
             continue;
         }
-        if (m_Stat[i].m_regenLast > iCurTime) // Check if enough time elapsed till the next regen.
+        if (m_Stat[i].m_regenLast + iRegenDelay > iCurTime) // Check if enough time elapsed till the next regen.
         {
             continue;
         }
-        m_Stat[i].m_regenLast = iCurTime + iRegenDelay; // in msecs
+        m_Stat[i].m_regenLast = iCurTime; // in msecs
 
 		int iMod = (int)Stats_GetRegenVal(i);
         ushort uiStatLimit = Stat_GetMaxAdjusted(i);
@@ -510,7 +510,9 @@ bool CChar::Stats_Regen()
 
 			if (OnTrigger(CTRIG_RegenStat, this, &Args) == TRIGRET_RET_TRUE)
 			{
-				m_Stat[i].m_regenLast = 0;
+                // Setting the last regen time to 0 will make this trigger be called over and over and over, without a delay, which
+                //  can suck quite a bit cpu.
+				//m_Stat[i].m_regenLast = 0;
 				continue;
 			}
 
@@ -626,6 +628,7 @@ void CChar::SetFame(ushort uiNewFame)
 
 bool CChar::Stat_Decrease(STAT_TYPE stat, SKILL_TYPE skill)
 {
+    ADDTOCALLSTACK("CChar::Stat_Decrease");
 	// Stat to decrease
 	// Skill = is this being called from Skill_Gain? if so we check this skill's bonuses.
 	if ( !m_pPlayer )

@@ -271,7 +271,7 @@ bool CWorldSearch::GetNextSector()
 
 CItem * CWorldSearch::GetItem()
 {
-	ADDTOCALLSTACK("CWorldSearch::GetItem");
+	ADDTOCALLSTACK_INTENSIVE("CWorldSearch::GetItem");
 	for (;;)
 	{
 		if ( m_pObj == nullptr )
@@ -746,7 +746,7 @@ int64 CWorldClock::GetSystemClock() // static
 {
 	ADDTOCALLSTACK("CWorldClock::GetSystemClock");
 	// Return system wall-clock using high resolution value (milliseconds)
-    auto timeMaxResolution = std::chrono::high_resolution_clock::now().time_since_epoch();
+    const auto timeMaxResolution = std::chrono::high_resolution_clock::now().time_since_epoch();
     return std::chrono::duration_cast<std::chrono::milliseconds>(timeMaxResolution).count();
 }
 
@@ -773,7 +773,7 @@ bool CWorldClock::Advance()
 	const int64 iTimeDiff = Clock_Sys - m_Clock_SysPrev;
 	if ( iTimeDiff == 0 )
 		return false;
-	else if ( iTimeDiff < 0 )
+	if ( iTimeDiff < 0 )
 	{
 		// System clock has changed forward
 		// Just wait until next cycle and it should be ok
@@ -796,9 +796,10 @@ bool CWorldClock::Advance()
 
 	m_timeClock = Clock_New;
     // Maths here are done with MSECs precision, if proceed we advance a server's TICK.
-    if (m_nextTickTime <= GetCurrentTime())
+    const CServerTime curTime = GetCurrentTime();
+    if (m_nextTickTime <= curTime)
     {
-        m_nextTickTime = GetCurrentTime() + MSECS_PER_TICK;	// Next hit time.
+        m_nextTickTime = curTime + MSECS_PER_TICK;	// Next hit time.
         ++_iCurTick;
     }
 	return true;
@@ -809,6 +810,7 @@ bool CWorldClock::Advance()
 
 CWorld::CWorld()
 {
+    _iLastTick = 0;
 	m_ticksWithoutMySQL = 0;
 	m_savetimer = 0;
 	m_iSaveCountID = 0;
@@ -831,18 +833,17 @@ void CWorld::Init()
 	if ( m_Sectors )	//	disable changes on-a-fly
 		return;
 
+    // Initialize map planes
 	g_MapList.Init();
-	if ( g_MapList.m_pMapDiffCollection )
-		g_MapList.m_pMapDiffCollection->Init();
 
-	//	initialize all sectors
-	int	sectors = 0;
+	// Initialize all sectors
+	uint sectors = 0;
 	int m = 0;
-	for ( m = 0; m < 256; ++m )
+	for ( m = 0; m < MAP_SUPPORTED_QTY; ++m )
 	{
-		if ( !g_MapList.m_maps[m] )
+		if ( !g_MapList.IsMapSupported(m) )
 			continue;
-		sectors += g_MapList.GetSectorQty(m);
+		sectors += (uint)g_MapList.CalcSectorQty(m);
 	}
 
 	m_Sectors = new CSector*[sectors];
@@ -851,21 +852,37 @@ void CWorld::Init()
 	tchar* z = static_cast<tchar *>(tsZ);
 	tchar* z1 = static_cast<tchar *>(tsZ1);
 
-	for ( m = 0; m < 256; ++m )
+	for ( m = 0; m < MAP_SUPPORTED_QTY; ++m )
 	{
-		if ( !g_MapList.m_maps[m] )
+		if ( !g_MapList.IsMapSupported(m) )
 			continue;
 
-		sprintf(z1, " map%d=%d", m, g_MapList.GetSectorQty(m));
+        const int iSectorQty = g_MapList.CalcSectorQty(m);
+		sprintf(z1, " map%d=%d", m, iSectorQty);
 		strcat(z, z1);
-		for ( int s = 0; s < g_MapList.GetSectorQty(m); ++s )
+
+        const int iMaxX = g_MapList.CalcSectorCols(m);
+        const int iMaxY = g_MapList.CalcSectorRows(m);
+        g_MapList._sectorcolumns[m] = iMaxX;
+        g_MapList._sectorrows[m] = iMaxY;
+        g_MapList._sectorqty[m] = g_MapList.CalcSectorQty(m);
+
+		for ( int s = 0, x = 0, y = 0; s < iSectorQty; ++s )
 		{
+            if (x >= iMaxX)
+            {
+                x = 0;
+                ++y;
+            }
 			CSector	*pSector = new CSector;
 			ASSERT(pSector);
-			pSector->Init(s, m);
+			pSector->Init(s, m, x, y);
 			m_Sectors[m_SectorsQty++] = pSector;
+            ++x;
 		}
 	}
+    ASSERT(sectors == m_SectorsQty);
+
     for (uint s = 0; s < m_SectorsQty; ++s)
     {
         CSector *pSector = m_Sectors[s];
@@ -874,6 +891,7 @@ void CWorld::Init()
             pSector->SetAdjacentSectors();
         }
     }
+
     g_Log.Event(LOGM_INIT, "Allocated map sectors:%s\n", static_cast<lpctstr>(z));
 	ASSERT(m_SectorsQty);
 
@@ -1040,7 +1058,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		m_FilePlayers.WriteSection("EOF");
 		m_FileMultis.WriteSection("EOF");
 
-		m_iSaveCountID++;	// Save only counts if we get to the end winout trapping.
+		++m_iSaveCountID;	// Save only counts if we get to the end winout trapping.
 		m_timeSave = g_World.GetCurrentTime().GetTimeRaw() + g_Cfg.m_iSavePeriod;	// next save time.
 
 		g_Log.Event(LOGM_SAVE, "World data saved   (%s).\n", m_FileWorld.GetFilePath());
@@ -1053,7 +1071,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		TIME_PROFILE_END;
 
 		tchar * time = Str_GetTemp();
-		sprintf(time, "%" PRId64 ".%04lld", (int64)(TIME_PROFILE_GET_HI / MSECS_PER_SEC), (int64)(TIME_PROFILE_GET_LO));
+		sprintf(time, "%lld.%04lld", TIME_PROFILE_GET_HI, TIME_PROFILE_GET_LO);
 
 		g_Log.Event(LOGM_SAVE, "World save completed, took %s seconds.\n", time);
 
@@ -1100,10 +1118,10 @@ bool CWorld::SaveForce() // Save world state
 #endif
 
 	g_Serv.SetServerMode(SERVMODE_Saving);	// Forced save freezes the system.
-	bool bSave = true;
-	bool bSuccess = true;
+	bool fSave = true;
+	bool fSuccess = true;
 
-	static lpctstr const msgs[] =
+	static lpctstr constexpr save_msgs[] =
 	{
 		"garbage collection",
 		"sectors",
@@ -1112,35 +1130,35 @@ bool CWorld::SaveForce() // Save world state
 		"accounts",
 		""
 	};
-	const char *pCurBlock = msgs[0];
+	const char *pCurBlock = save_msgs[0];
 
-	while ( bSave )
+	while ( fSave )
 	{
 		try
 		{
 			if (( m_iSaveStage >= 0 ) && ( m_iSaveStage < (int)(m_SectorsQty) ))
-				pCurBlock = msgs[1];
+				pCurBlock = save_msgs[1];
 			else if ( m_iSaveStage == (int)(m_SectorsQty) )
-				pCurBlock = msgs[2];
+				pCurBlock = save_msgs[2];
 			else if ( m_iSaveStage == (int)(m_SectorsQty)+1 )
-				pCurBlock = msgs[3];
+				pCurBlock = save_msgs[3];
 			else if ( m_iSaveStage == (int)(m_SectorsQty)+2 )
-				pCurBlock = msgs[4];
+				pCurBlock = save_msgs[4];
 			else
-				pCurBlock = msgs[5];
+				pCurBlock = save_msgs[5];
 
-			bSave = SaveStage();
+			fSave = SaveStage();
 			if (! ( m_iSaveStage & 0x1FF ))
 			{
-				g_Serv.PrintPercent( m_iSaveStage, m_SectorsQty+3 );
+				g_Serv.PrintPercent( m_iSaveStage, (ssize_t)m_SectorsQty + 3 );
 			}
-			if ( !bSave && ( pCurBlock != msgs[5] ))
+			if ( !fSave && ( pCurBlock != save_msgs[5] ))
 				goto failedstage;
 		}
 		catch ( const CSError& e )
 		{
 			g_Log.CatchEvent(&e, "Save FAILED for stage %u (%s).", m_iSaveStage, pCurBlock);
-			bSuccess = false;
+			fSuccess = false;
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		}
 		catch (...)
@@ -1151,11 +1169,11 @@ bool CWorld::SaveForce() // Save world state
 		continue;
 failedstage:
 		g_Log.CatchEvent( nullptr, "Save FAILED for stage %u (%s).", m_iSaveStage, pCurBlock);
-		bSuccess = false;
+		fSuccess = false;
 	}
 
 	g_Serv.SetServerMode(SERVMODE_Run);			// Game is up and running
-	return bSuccess;
+	return fSuccess;
 }
 
 bool CWorld::SaveTry( bool fForceImmediate ) // Save world state
@@ -1244,10 +1262,10 @@ bool CWorld::CheckAvailableSpaceForSave(bool fStatics)
 #endif
     uiFreeSpace /= 1024;    // from bytes to kilobytes (or to be more precise, kibibytes)
 
-                            // Calculate the previous save file size
+    // Calculate the previous save file size
     bool fSizeErr = false;
     ullong uiPreviousSaveSize = 0;
-    auto CalcPrevSavesSize = [=,&fSizeErr, &uiPreviousSaveSize](lpctstr ptcSaveName) -> void
+    auto CalcPrevSavesSize = [=, &fSizeErr, &uiPreviousSaveSize](lpctstr ptcSaveName) -> void
     {
         struct stat st;
         CSString strSaveFile = g_Cfg.m_sWorldBaseDir + SPHERE_FILE + ptcSaveName + SPHERE_SCRIPT;
@@ -1288,7 +1306,7 @@ bool CWorld::CheckAvailableSpaceForSave(bool fStatics)
     if (uiFreeSpace < uiPreviousSaveSize)
     {
         g_Log.Event(LOGL_CRIT, "-----------------------------");
-        g_Log.Event(LOGL_CRIT, "Save ABORTED! Disk space low!");
+        g_Log.Event(LOGL_CRIT, "Save ABORTED! Low disk space!");
         g_Log.Event(LOGL_CRIT, "-----------------------------");
         Broadcast("Save ABORTED! Warn the administrator!");
         return false;
@@ -1300,12 +1318,12 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 {
 	ADDTOCALLSTACK("CWorld::Save");
 
-    //if (!CheckAvailableSpaceForSave(false))
-    //    return false;
+    if (!CheckAvailableSpaceForSave(false))
+        return false;
 
     //-- Ok we can start the save process, in which we eventually remove the previous saves and create the other.
 
-	bool bSaved = false;
+	bool fSaved = false;
 	try
 	{
 		CScriptTriggerArgs Args(fForceImmediate, m_iSaveStage);
@@ -1314,7 +1332,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 		if ( g_Serv.r_Call("f_onserver_save", &g_Serv, &Args, nullptr, &tr) )
 			if ( tr == TRIGRET_RET_TRUE )
 				return false;
-		//Fushing before the server should fix #2306
+		//Flushing before the server should fix #2306
 		//The scripts fills the clients buffer and the server flush
 		//the data during the save.
 		//Should we flush only non threaded output or force it
@@ -1340,7 +1358,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 		}
 
 		fForceImmediate = (Args.m_iN1 != 0);
-		bSaved = SaveTry(fForceImmediate);
+		fSaved = SaveTry(fForceImmediate);
 	}
 	catch ( const CSError& e )
 	{
@@ -1364,8 +1382,8 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 	}
 
 	CScriptTriggerArgs Args(fForceImmediate, m_iSaveStage);
-	g_Serv.r_Call((bSaved?"f_onserver_save_ok":"f_onserver_save_fail"), &g_Serv, &Args);
-	return bSaved;
+	g_Serv.r_Call((fSaved ? "f_onserver_save_ok" : "f_onserver_save_fail"), &g_Serv, &Args);
+	return fSaved;
 }
 
 void CWorld::SaveStatics()
@@ -1395,9 +1413,9 @@ void CWorld::SaveStatics()
 #endif
 
 		//	loop through all sectors and save static items
-		for ( int m = 0; m < 256; ++m )
+		for ( int m = 0; m < MAP_SUPPORTED_QTY; ++m )
 		{
-			if ( !g_MapList.m_maps[m] )
+			if ( !g_MapList.IsMapSupported(m) )
                 continue;
 
 			for ( int d = 0; d < g_MapList.GetSectorQty(m); ++d )
@@ -1513,7 +1531,7 @@ void CWorld::AddTimedObject(int64 iTimeout, CTimedObject * pTimedObject)
     EXC_TRY("AddTimedObject");
     EXC_SET_BLOCK("Lookup");
 
-    ProfileTask timersTask(PROFILE_TIMERS);
+    const ProfileTask timersTask(PROFILE_TIMERS);
     std::unique_lock<std::shared_mutex> lookupLock(_mWorldTickLookup.THREAD_CMUTEX);
 
     auto itLookup = _mWorldTickLookup.find(pTimedObject);
@@ -1528,7 +1546,7 @@ void CWorld::AddTimedObject(int64 iTimeout, CTimedObject * pTimedObject)
     else
     {
         EXC_SET_BLOCK("LookupInsert");
-        _mWorldTickLookup.insert(std::make_pair(pTimedObject, iTimeout));
+        _mWorldTickLookup.emplace(pTimedObject, iTimeout);
     }
     
     EXC_SET_BLOCK("InsertTimedObject");
@@ -1543,10 +1561,10 @@ void CWorld::DelTimedObject(CTimedObject * pTimedObject)
     EXC_TRY("AddTimedObject");
     EXC_SET_BLOCK("Lookup");
 
-    ProfileTask timersTask(PROFILE_TIMERS);
+    const ProfileTask timersTask(PROFILE_TIMERS);
     std::unique_lock<std::shared_mutex> lookupLock(_mWorldTickLookup.THREAD_CMUTEX);
 
-    auto lookupIt = _mWorldTickLookup.find(pTimedObject);
+    const auto lookupIt = _mWorldTickLookup.find(pTimedObject);
     if (lookupIt == _mWorldTickLookup.end())
         return;
 
@@ -1562,13 +1580,11 @@ void CWorld::DelTimedObject(CTimedObject * pTimedObject)
 
 void CWorld::_InsertCharTicking(int64 iTickNext, CChar* pChar)
 {
-    _mWorldTickList.THREAD_CMUTEX.lock();
+    std::shared_lock<std::shared_mutex> shared_lock(_mWorldTickList.THREAD_CMUTEX);
     TimedCharsContainer& timedObjCont = _mCharTickList[iTickNext];
-    _mWorldTickList.THREAD_CMUTEX.unlock();
 
-    timedObjCont.THREAD_CMUTEX.lock();
+    std::shared_lock<std::shared_mutex> shared_lock_cont(timedObjCont.THREAD_CMUTEX);
     timedObjCont.emplace_back(pChar);
-    timedObjCont.THREAD_CMUTEX.unlock();
 }
 
 void CWorld::_RemoveCharTicking(const int64 iOldTimeout, const CChar* pChar)
@@ -1623,7 +1639,7 @@ void CWorld::AddCharTicking(CChar * pChar, bool fIgnoreSleep, bool fOverwrite)
     }
 
     EXC_SET_BLOCK("Lookup");
-    ProfileTask timersTask(PROFILE_TIMERS);
+    const ProfileTask timersTask(PROFILE_TIMERS);
     std::unique_lock<std::shared_mutex> lookupLock(_mCharTickLookup.THREAD_CMUTEX);
     
     const int64 iTickNext = pChar->_timeNextRegen;
@@ -1631,7 +1647,7 @@ void CWorld::AddCharTicking(CChar * pChar, bool fIgnoreSleep, bool fOverwrite)
     //    return;
 
     bool fDoNotInsert = false;
-    auto itLookup = _mCharTickLookup.find(pChar);
+    const auto itLookup = _mCharTickLookup.find(pChar);
     if (itLookup != _mCharTickLookup.end())
     {
         // Adding an object already on the list? Am i setting a new timeout without deleting the previous one?
@@ -1650,7 +1666,7 @@ void CWorld::AddCharTicking(CChar * pChar, bool fIgnoreSleep, bool fOverwrite)
     else
     {
         EXC_SET_BLOCK("LookupInsert");
-        _mCharTickLookup.insert(std::make_pair(pChar, iTickNext));
+        _mCharTickLookup.emplace(pChar, iTickNext);
     }
 
     if (!fDoNotInsert)
@@ -1668,7 +1684,7 @@ void CWorld::DelCharTicking(CChar * pChar)
     EXC_TRY("DelCharTicking");
     EXC_SET_BLOCK("Lookup");
 
-    ProfileTask timersTask(PROFILE_TIMERS);
+    const ProfileTask timersTask(PROFILE_TIMERS);
     std::unique_lock<std::shared_mutex> lookupLock(_mCharTickLookup.THREAD_CMUTEX);
 
     auto lookupIt = _mCharTickLookup.find(pChar);
@@ -1782,7 +1798,10 @@ bool CWorld::LoadWorld() // Load world from script
             break;
 
 		// Reset everything that has been loaded
-		m_ObjStatusUpdates.clear();
+        {
+            std::shared_lock<std::shared_mutex> lock_su(m_ObjStatusUpdates.THREAD_CMUTEX);
+            m_ObjStatusUpdates.clear();
+        }
         m_Stones.clear();
 		m_TimedFunctions.Clear();
 		m_Parties.Clear();
@@ -1898,22 +1917,22 @@ void CWorld::r_Write( CScript & s )
 	s.Flush();	// Force this out to the file now.
 }
 
-bool CWorld::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CWorld::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CWorld::r_GetRef");
-	if ( ! strnicmp( pszKey, "LASTNEW", 7 ))
+	if ( ! strnicmp( ptcKey, "LASTNEW", 7 ))
 	{
-		if ( ! strnicmp( pszKey+7, "ITEM", 4 ) )
+		if ( ! strnicmp( ptcKey+7, "ITEM", 4 ) )
 		{
-			pszKey += 11;
-			SKIP_SEPARATORS(pszKey);
+			ptcKey += 11;
+			SKIP_SEPARATORS(ptcKey);
 			pRef = m_uidLastNewItem.ItemFind();
 			return true;
 		}
-		else if ( ! strnicmp( pszKey+7, "CHAR", 4 ) )
+		else if ( ! strnicmp( ptcKey+7, "CHAR", 4 ) )
 		{
-			pszKey += 11;
-			SKIP_SEPARATORS(pszKey);
+			ptcKey += 11;
+			SKIP_SEPARATORS(ptcKey);
 			pRef = m_uidLastNewChar.CharFind();
 			return true;
 		}
@@ -1933,7 +1952,7 @@ enum WC_TYPE
 	WC_QTY
 };
 
-lpctstr const CWorld::sm_szLoadKeys[WC_QTY+1] =	// static
+lpctstr constexpr CWorld::sm_szLoadKeys[WC_QTY+1] =	// static
 {
     "CURTICK",
 	"PREVBUILD",
@@ -1945,35 +1964,37 @@ lpctstr const CWorld::sm_szLoadKeys[WC_QTY+1] =	// static
 	nullptr
 };
 
-bool CWorld::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
+bool CWorld::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallParent);
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CWorld::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-	if ( !strnicmp(pszKey, "GMPAGE", 6) )		//	GM pages
+	if ( !strnicmp(ptcKey, "GMPAGE", 6) )		//	GM pages
 	{
-		pszKey += 6;
-		if (( *pszKey == 'S' ) || ( *pszKey == 's' ))	//	SERV.GMPAGES
+		ptcKey += 6;
+		if (( *ptcKey == 'S' ) || ( *ptcKey == 's' ))	//	SERV.GMPAGES
 		{
-			pszKey++;
-			if ( *pszKey != '\0' )
+			ptcKey++;
+			if ( *ptcKey != '\0' )
 				return false;
 
 			sVal.FormatSTVal(m_GMPages.GetCount());
 		}
-		else if ( *pszKey == '.' )						//	SERV.GMPAGE.*
+		else if ( *ptcKey == '.' )						//	SERV.GMPAGE.*
 		{
-			SKIP_SEPARATORS(pszKey);
-			size_t index = Exp_GetVal(pszKey);
+			SKIP_SEPARATORS(ptcKey);
+			size_t index = Exp_GetVal(ptcKey);
 			if ( index >= m_GMPages.GetCount() )
 				return false;
 
-			SKIP_SEPARATORS(pszKey);
+			SKIP_SEPARATORS(ptcKey);
 			CGMPage* pPage = static_cast <CGMPage*> (m_GMPages.GetAt(index));
 			if ( pPage == nullptr )
 				return false;
 
-			if ( !strnicmp(pszKey, "HANDLED", 7) )
+			if ( !strnicmp(ptcKey, "HANDLED", 7) )
 			{
 				CClient *pClient = pPage->FindGMHandler();
 				if ( pClient != nullptr && pClient->GetChar() != nullptr )
@@ -1983,14 +2004,14 @@ bool CWorld::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				return true;
 			}
 			else
-				return pPage->r_WriteVal(pszKey, sVal, pSrc);
+				return pPage->r_WriteVal(ptcKey, sVal, pSrc);
 		}
 		else
 			sVal.FormatVal(0);
 		return true;
 	}
 
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 ))
+	switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 ))
 	{
         case WC_CURTICK:
             sVal.Format64Val(GetCurrentTick());
@@ -2030,8 +2051,8 @@ bool CWorld::r_LoadVal( CScript &s )
 	ADDTOCALLSTACK("CWorld::r_LoadVal");
 	EXC_TRY("LoadVal");
 
-	lpctstr	pszKey = s.GetKey();
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 ))
+	lpctstr	ptcKey = s.GetKey();
+	switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 ))
 	{
 		case WC_PREVBUILD:
 			m_iPrevBuild = s.GetArgVal();
@@ -2067,9 +2088,10 @@ void CWorld::RespawnDeadNPCs()
 	ADDTOCALLSTACK("CWorld::RespawnDeadNPCs");
 	// Respawn dead story NPC's
 	g_Serv.SetServerMode(SERVMODE_RestockAll);
-	for ( int m = 0; m < 256; ++m )
+	for ( int m = 0; m < MAP_SUPPORTED_QTY; ++m )
 	{
-		if ( !g_MapList.m_maps[m] ) continue;
+		if ( !g_MapList.IsMapSupported(m) )
+            continue;
 
 		for ( int s = 0; s < g_MapList.GetSectorQty(m); ++s )
 		{
@@ -2103,9 +2125,9 @@ void CWorld::Restock()
 		}
 	}
 
-	for ( int m = 0; m < 256; ++m )
+	for ( int m = 0; m < MAP_SUPPORTED_QTY; ++m )
 	{
-		if ( !g_MapList.m_maps[m] )
+		if ( !g_MapList.IsMapSupported(m) )
 			continue;
 
 		for ( int s = 0; s < g_MapList.GetSectorQty(m); ++s )
@@ -2127,7 +2149,12 @@ void CWorld::Close()
 		Save(true);
 
 	m_Stones.clear();
-	m_ObjStatusUpdates.clear();
+
+    {
+        std::shared_lock<std::shared_mutex> lock_su(g_World.m_ObjStatusUpdates.THREAD_CMUTEX);
+        m_ObjStatusUpdates.clear();
+    }
+
 	m_Parties.Clear();
 	m_GMPages.Clear();
 
@@ -2235,7 +2262,7 @@ void CWorld::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE wHu
 				if ( sTextGhost.IsEmpty() )
 				{
 					sTextGhost = pszText;
-					for ( int i = 0; i < sTextGhost.GetLength(); i++ )
+					for ( int i = 0; i < sTextGhost.GetLength(); ++i )
 					{
 						if ( sTextGhost[i] != ' ' &&  sTextGhost[i] != '\t' )
 							sTextGhost[i] = Calc_GetRandVal(2) ? 'O' : 'o';
@@ -2423,12 +2450,12 @@ int64 CWorld::GetGameWorldTime( int64 basetime ) const
 	return( basetime / g_Cfg.m_iGameMinuteLength );
 }
 
-int64 CWorld::GetNextNewMoon( bool bMoonIndex ) const
+int64 CWorld::GetNextNewMoon( bool fMoonIndex ) const
 {
 	ADDTOCALLSTACK("CWorld::GetNextNewMoon");
 	// "Predict" the next new moon for this moon
 	// Get the period
-	int64 iSynodic = bMoonIndex ? FELUCCA_SYNODIC_PERIOD : TRAMMEL_SYNODIC_PERIOD;
+	int64 iSynodic = fMoonIndex ? FELUCCA_SYNODIC_PERIOD : TRAMMEL_SYNODIC_PERIOD;
 
 	// Add a "month" to the current game time
 	int64 iNextMonth = GetGameWorldTime() + iSynodic;
@@ -2439,7 +2466,7 @@ int64 CWorld::GetNextNewMoon( bool bMoonIndex ) const
 	
 }
 
-uint CWorld::GetMoonPhase(bool bMoonIndex) const
+uint CWorld::GetMoonPhase(bool fMoonIndex) const
 {
 	ADDTOCALLSTACK("CWorld::GetMoonPhase");
 	// bMoonIndex is FALSE if we are looking for the phase of Trammel,
@@ -2454,12 +2481,12 @@ uint CWorld::GetMoonPhase(bool bMoonIndex) const
 	//			              SynodicPeriod
 	//
 
-	int64 dwCurrentTime = GetGameWorldTime();	// game world time in minutes
+	int64 iCurrentTime = GetGameWorldTime();	// game world time in minutes
 
-	if (!bMoonIndex)	// Trammel
-		return IMulDiv( dwCurrentTime % TRAMMEL_SYNODIC_PERIOD, 8, TRAMMEL_SYNODIC_PERIOD );
+	if (!fMoonIndex)	// Trammel
+		return IMulDiv( iCurrentTime % TRAMMEL_SYNODIC_PERIOD, 8, TRAMMEL_SYNODIC_PERIOD );
 	else	// Luna2
-		return IMulDiv( dwCurrentTime % FELUCCA_SYNODIC_PERIOD, 8, FELUCCA_SYNODIC_PERIOD );
+		return IMulDiv( iCurrentTime % FELUCCA_SYNODIC_PERIOD, 8, FELUCCA_SYNODIC_PERIOD );
 }
 
 void CWorld::OnTick()
@@ -2486,20 +2513,23 @@ void CWorld::OnTick()
         * note: ideally, a better solution to accomplish this should be found if possible
         * TODO: implement a new class inheriting from CTimedObject to get rid of this code.
         */
-        if (!m_ObjStatusUpdates.empty())
         {
-            EXC_TRYSUB("Tick::StatusUpdates");
-
-            // loop backwards to avoid possible infinite loop if a status update is triggered
-            // as part of the status update (e.g. property changed under tooltip trigger)
-            for (CObjBase * pObj : m_ObjStatusUpdates)
+            std::shared_lock<std::shared_mutex> lock_su(g_World.m_ObjStatusUpdates.THREAD_CMUTEX);
+            if (!m_ObjStatusUpdates.empty())
             {
-                if (pObj != nullptr)
-                    pObj->OnTickStatusUpdate();
-            }
-            m_ObjStatusUpdates.clear();
+                EXC_TRYSUB("Tick::StatusUpdates");
 
-            EXC_CATCHSUB("StatusUpdates");
+                // loop backwards to avoid possible infinite loop if a status update is triggered
+                // as part of the status update (e.g. property changed under tooltip trigger)
+                for (CObjBase* pObj : m_ObjStatusUpdates)
+                {
+                    if (pObj != nullptr)
+                        pObj->OnTickStatusUpdate();
+                }
+                m_ObjStatusUpdates.clear();
+
+                EXC_CATCHSUB("StatusUpdates");
+            }
         }
 
         // TimerF
@@ -2514,7 +2544,7 @@ void CWorld::OnTick()
 
     EXC_SET_BLOCK("WorldObjects selection");
     {
-        ProfileTask timersTask(PROFILE_TIMERS);
+        const ProfileTask timersTask(PROFILE_TIMERS);
         std::vector<CTimedObject*> vecTimedObjs;
         {
             // Need here a new, inner scope to get rid of EXC_TRYSUB variables and for the unique_lock
@@ -2553,7 +2583,7 @@ void CWorld::OnTick()
             EXC_SETSUB_BLOCK("Elapsed");
             ptcSubDesc = "Generic";
             const PROFILE_TYPE profile = pObj->GetProfileType();
-            ProfileTask profileTask(profile);
+            const ProfileTask  profileTask(profile);
 
             /*
             * Doing a SetTimeout() in the object's tick will force CWorld to search for that object's
@@ -2662,7 +2692,7 @@ void CWorld::OnTick()
 
     EXC_SET_BLOCK("PeriodicChars selection");
     {
-        ProfileTask taskChars(PROFILE_CHARS);
+        const ProfileTask taskChars(PROFILE_CHARS);
         std::vector<CChar*> vecPeriodicChars;
         {
             // Need here a new, inner scope to get rid of EXC_TRYSUB variables, and for the unique_lock
@@ -2756,27 +2786,27 @@ void CWorld::OnTick()
 
 CSector *CWorld::GetSector(int map, int i) const	// gets sector # from one map
 {
-	ADDTOCALLSTACK_INTENSIVE("CWorld::GetSector");
+	//ADDTOCALLSTACK_INTENSIVE("CWorld::GetSector");
 
 	// if the map is not supported, return empty sector
-	if (( map < 0 ) || ( map >= 256 ) || !g_MapList.m_maps[map] )
+	if (( map < 0 ) || ( map >= MAP_SUPPORTED_QTY ) || !g_MapList.m_maps[map] )
 		return nullptr;
 
-	if ( i >= g_MapList.GetSectorQty(map) )
+    const int iMapSectorQty = g_MapList.GetSectorQty(map);
+	if ( i >= iMapSectorQty)
 	{
 		g_Log.EventError("Unsupported sector #%d for map #%d specified.\n", i, map);
 		return nullptr;
 	}
 
-	int base = 0;
-	for ( int m = 0; m < 256; ++m )
+	for ( int base = 0, m = 0; m < MAP_SUPPORTED_QTY; ++m )
 	{
-		if ( !g_MapList.m_maps[m] )
+		if ( !g_MapList.IsMapSupported(m) )
 			continue;
 
 		if ( m == map )
 		{
-			if ( g_MapList.GetSectorQty(map) < i )
+			if (iMapSectorQty < i )
 				return nullptr;
 
 			return m_Sectors[base + i];

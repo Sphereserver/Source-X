@@ -3,19 +3,18 @@
 
 #include "common.h"
 #include "sphereproto.h"
+#include <cwctype> // iswalnum
 
 extern "C"
 {
     void globalstartsymbol() {}	// put this here as just the starting offset.
-    const int globalstartdata = 0xffffffff;
+    constexpr int globalstartdata = 0xffffffff;
 }
 
 #ifndef _WIN32
 
-	#include <cstdio>
-	#include <cstring>
-
 	#ifdef _BSD
+        #include <cstring>
 		#include <time.h>
 		#include <sys/types.h>
 		int getTimezone()
@@ -26,40 +25,6 @@ extern "C"
 			return (int)tp.tm_zone;
 			}
 	#endif // _BSD
-
-	int	ATOI( const char * str )
-	{
-		int	res;
-		sscanf( str, "%d", &res );
-		return res;
-	}
-
-	char * ITOA(int value, char *string, int radix)
-	{
-		sprintf(string, (radix == 16) ? "%x" : "%d", value);
-		return string;
-	}
-
-	char * LTOA(long value, char *string, int radix)
-	{
-		sprintf(string, (radix == 16) ? "%x" : "%d", value);
-		return string;
-	}
-
-	void STRREV( char* string )
-	{
-		char *pEnd = string;
-		char temp;
-		while (*pEnd)
-			++pEnd;
-		--pEnd;
-		while (string < pEnd)
-		{
-			temp = *pEnd;
-			*pEnd-- = *string;
-			*string++ = temp;
-		}
-	}
 
 #else // _WIN32
 
@@ -228,7 +193,7 @@ int CvtSystemToNUNICODE( nchar * pOut, int iSizeOutChars, lpctstr pInp, int iSiz
 		return 0;
 	}
 
-	iSizeOutChars--;
+	--iSizeOutChars;
 
 	int iOut=0;
 
@@ -257,7 +222,7 @@ int CvtSystemToNUNICODE( nchar * pOut, int iSizeOutChars, lpctstr pInp, int iSiz
 		}
 
 		// flip all the words to network order .
-		for ( ; iOut<iOutTmp; iOut++ )
+		for ( ; iOut<iOutTmp; ++iOut )
 		{
 			pOut[iOut] = *(reinterpret_cast<wchar *>(&(pOut[iOut])));
 		}
@@ -318,7 +283,7 @@ int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const nchar * pInp, in
 		return 0;
 	}
 
-	iSizeOutBytes--;
+	--iSizeOutBytes;
 
 	int iOut=0;
 	int iInp=0;
@@ -330,7 +295,7 @@ int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const nchar * pInp, in
 		// Windows 98, 2000 or NT
 
 		// Flip all from network order.
-		wchar szBuffer[ 1024*8 ];
+		wchar szBuffer[ 1024*6 ];
 		for ( ; iInp < (int)CountOf(szBuffer) - 1 && iInp < iSizeInChars && pInp[iInp]; ++iInp )
 		{
 			szBuffer[iInp] = pInp[iInp];
@@ -388,8 +353,49 @@ int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const nchar * pInp, in
 
 #endif // nchar
 
+
+void CLanguageID::GetStrDef(tchar* pszLang)
+{
+    if (!IsDef())
+    {
+        strcpy(pszLang, "enu");
+    }
+    else
+    {
+        memcpy(pszLang, m_codes, 3);
+        pszLang[3] = '\0';
+    }
+}
+void CLanguageID::GetStr(tchar* pszLang) const
+{
+    memcpy(pszLang, m_codes, 3);
+    pszLang[3] = '\0';
+}
+lpctstr CLanguageID::GetStr() const
+{
+    tchar* pszTmp = Str_GetTemp();
+    GetStr(pszTmp);
+    return pszTmp;
+}
+bool CLanguageID::Set(lpctstr pszLang)
+{
+    // needs not be terminated!
+    if (pszLang != nullptr)
+    {
+        memcpy(m_codes, pszLang, 3);
+        m_codes[3] = 0;
+        if (iswalnum(m_codes[0]))
+            return true;
+        // not valid !
+    }
+    m_codes[0] = 0;
+    return false;
+}
+
+
+
 extern "C"
 {
 	void globalendsymbol() {}	// put this here as just the ending offset.
-	const int globalenddata = 0xffffffff;
+	constexpr int globalenddata = 0xffffffff;
 }

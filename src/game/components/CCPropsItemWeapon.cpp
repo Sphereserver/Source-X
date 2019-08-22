@@ -3,16 +3,24 @@
 #include "CCPropsItemWeapon.h"
 
 
-lpctstr const CCPropsItemWeapon::_ptcPropertyKeys[PROPIWEAP_QTY + 1] =
+lpctstr constexpr CCPropsItemWeapon::_ptcPropertyKeys[PROPIWEAP_QTY + 1] =
 {
-    #define ADD(a,b) b,
+    #define ADDPROP(a,b,c) b,
     #include "../../tables/CCPropsItemWeapon_props.tbl"
-    #undef ADD
+    #undef ADDPROP
     nullptr
 };
 KeyTableDesc_s CCPropsItemWeapon::GetPropertyKeysData() const {
     return {_ptcPropertyKeys, (int)CountOf(_ptcPropertyKeys)};
 }
+
+RESDISPLAY_VERSION CCPropsItemWeapon::_iPropertyExpansion[PROPIWEAP_QTY + 1] =
+{
+#define ADDPROP(a,b,c) c,
+#include "../../tables/CCPropsItemWeapon_props.tbl"
+#undef ADDPROP
+    RDS_QTY
+};
 
 CCPropsItemWeapon::CCPropsItemWeapon() : CComponentProps(COMP_PROPS_ITEMWEAPON)
 {
@@ -21,10 +29,11 @@ CCPropsItemWeapon::CCPropsItemWeapon() : CComponentProps(COMP_PROPS_ITEMWEAPON)
     _iRange = 0;
 }
 
-bool CanSubscribeTypeIW(IT_TYPE type)
+static bool CanSubscribeTypeIW(IT_TYPE type)
 {
     return (type == IT_WEAPON_AXE || type == IT_WEAPON_BOW || type == IT_WEAPON_FENCE || type == IT_WEAPON_MACE_CROOK || type == IT_WEAPON_MACE_PICK || type == IT_WEAPON_MACE_SHARP ||
-        type == IT_WEAPON_MACE_SMITH || type == IT_WEAPON_MACE_STAFF || type == IT_WEAPON_SWORD || type == IT_WEAPON_THROWING || type == IT_WEAPON_WHIP || type == IT_WEAPON_XBOW);
+        type == IT_WEAPON_MACE_SMITH || type == IT_WEAPON_MACE_STAFF || type == IT_WEAPON_SWORD || type == IT_WEAPON_THROWING || type == IT_WEAPON_WHIP || type == IT_WEAPON_XBOW ||
+        type == IT_FISH_POLE);
 }
 
 bool CCPropsItemWeapon::CanSubscribe(const CItemBase* pItemBase) // static
@@ -111,7 +120,7 @@ bool CCPropsItemWeapon::GetPropertyStrPtr(int iPropIndex, CSString* psOutVal, bo
     }
 }
 
-void CCPropsItemWeapon::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, bool fDeleteZero)
+void CCPropsItemWeapon::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemWeapon::SetPropertyNum");
     
@@ -146,9 +155,13 @@ void CCPropsItemWeapon::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CO
         */
         default:
             ASSERT(!IsPropertyStr(iPropIndex));
+            ASSERT((iLimitToExpansion >= RDS_PRET2A) && (iLimitToExpansion < RDS_QTY));
 
-            if (fDeleteZero && (iVal == 0))
-                _mPropsNum.erase(iPropIndex);
+            if ((fDeleteZero && (iVal == 0)) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion))
+            {
+                if (0 == _mPropsNum.erase(iPropIndex))
+                    return; // I didn't have this property, so avoid further processing.
+            }
             else
                 _mPropsNum[iPropIndex] = iVal;
             break;
@@ -161,7 +174,7 @@ void CCPropsItemWeapon::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CO
     pLinkedObj->UpdatePropertyFlag();
 }
 
-void CCPropsItemWeapon::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, bool fDeleteZero)
+void CCPropsItemWeapon::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemWeapon::SetPropertyStr");
     ASSERT(ptcVal);
@@ -172,7 +185,7 @@ void CCPropsItemWeapon::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase*
         {
             int64 piVal[2];
             tchar *ptcTmp = Str_GetTemp();
-            strncpy(ptcTmp, ptcVal, STR_TEMPLENGTH);
+            Str_CopyLimitNull(ptcTmp, ptcVal, STR_TEMPLENGTH);
             int iQty = Str_ParseCmds( ptcTmp, piVal, CountOf(piVal));
             int iRange;
             if ( iQty > 1 )
@@ -190,9 +203,13 @@ void CCPropsItemWeapon::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase*
         
         default:
             ASSERT(IsPropertyStr(iPropIndex));
+            ASSERT((iLimitToExpansion >= RDS_PRET2A) && (iLimitToExpansion < RDS_QTY));
 
-            if (fDeleteZero && (*ptcVal == '\0'))
-                _mPropsStr.erase(iPropIndex);
+            if ((fDeleteZero && (*ptcVal == '\0')) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion))
+            {
+                if (0 == _mPropsNum.erase(iPropIndex))
+                    return; // I didn't have this property, so avoid further processing.
+            }
             else
                 _mPropsStr[iPropIndex] = ptcVal;
             break;
@@ -217,7 +234,7 @@ void CCPropsItemWeapon::DeletePropertyStr(int iPropIndex)
     _mPropsStr.erase(iPropIndex);
 }
 
-bool CCPropsItemWeapon::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, int iPropIndex, bool fPropStr)
+bool CCPropsItemWeapon::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, int iPropIndex, bool fPropStr)
 {
     ADDTOCALLSTACK("CCPropsItemWeapon::FindLoadPropVal");
     if (!fPropStr && (*s.GetArgRaw() == '\0'))
@@ -226,7 +243,7 @@ bool CCPropsItemWeapon::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, int i
         return true;
     }
 
-    BaseProp_LoadPropVal(iPropIndex, fPropStr, s, pLinkedObj);
+    BaseProp_LoadPropVal(iPropIndex, fPropStr, s, pLinkedObj, iLimitToExpansion);
     return true;
 }
 
@@ -280,29 +297,35 @@ void CCPropsItemWeapon::AddPropsTooltipData(CObjBase* pLinkedObj)
 
         switch (prop)
         {
-            case PROPIWEAP_BALANCED: // unimplemented
-                ADDT(1072792); // balanced
+            case PROPIWEAP_ASSASSINHONED: // unimplemented
+                ADDT(1152206);  // Assassin Honed
+                break;
+            case PROPIWEAP_BALANCED: // unimplemented (for two-handed weapons only)
+                ADDT(1072792); // Balanced
                 break;
             case PROPIWEAP_BANE: // unimplemented
-                // Missing cliloc id
+                ADDT(1154671); // Bane
                 break;
             case PROPIWEAP_BATTLELUST: // unimplemented
-                // Missing cliloc id
+                ADDT(1113710); // Battle Lust
                 break;
             case PROPIWEAP_BLOODDRINKER: // unimplemented
-                // Missing cliloc id
+                ADDT(1113591); // Blood Drinker
+                break;
+            case PROPIWEAP_BONEBREAKER: // unimplemented
+                ADDT(1157318); // Bone Breaker
                 break;
             case PROPIWEAP_MAGEWEAPON: // unimplemented
                 ADDTNUM(1060438); // mage weapon -~1_val~ skill
                 break;
             case PROPIWEAP_SEARINGWEAPON: // unimplemented
-                // Missing cliloc id
+                ADDT(1151183); // (1151318, String.Format("#{0}", LabelNumber)); ?
                 break;
             case PROPIWEAP_SPLINTERINGWEAPON: // unimplemented
-                // Missing cliloc id
+                ADDTNUM(1112857); //splintering weapon ~1_val~%
                 break;
             case PROPIWEAP_USEBESTWEAPONSKILL: // unimplemented
-                // Missing cliloc id
+                ADDT(1060400); // use best weapon skill
                 break;
             default:
                 break;

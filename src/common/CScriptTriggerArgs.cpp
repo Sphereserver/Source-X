@@ -7,7 +7,7 @@
 
 void CScriptTriggerArgs::Init( lpctstr pszStr )
 {
-    ADDTOCALLSTACK("CScriptTriggerArgs::Init");
+    ADDTOCALLSTACK_INTENSIVE("CScriptTriggerArgs::Init");
     m_pO1 = nullptr;
 
     if ( pszStr == nullptr )
@@ -21,7 +21,7 @@ void CScriptTriggerArgs::Init( lpctstr pszStr )
         ++pszStr;
     }
 
-    m_s1 = pszStr ;
+    m_s1 = pszStr;
 
     // take quote if present.
     if (fQuote)
@@ -60,21 +60,21 @@ CScriptTriggerArgs::CScriptTriggerArgs( lpctstr pszStr )
     Init( pszStr );
 }
 
-bool CScriptTriggerArgs::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CScriptTriggerArgs::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
     ADDTOCALLSTACK("CScriptTriggerArgs::r_GetRef");
 
-    if ( !strnicmp(pszKey, "ARGO.", 5) )		// ARGO.NAME
+    if ( !strnicmp(ptcKey, "ARGO.", 5) )		// ARGO.NAME
     {
-        pszKey += 5;
-        if ( *pszKey == '1' )
-            ++pszKey;
+        ptcKey += 5;
+        if ( *ptcKey == '1' )
+            ++ptcKey;
         pRef = m_pO1;
         return true;
     }
-    else if ( !strnicmp(pszKey, "REF", 3) )		// REF[1-65535].NAME
+    else if ( !strnicmp(ptcKey, "REF", 3) )		// REF[1-65535].NAME
     {
-        lpctstr pszTemp = pszKey;
+        lpctstr pszTemp = ptcKey;
         pszTemp += 3;
         if (*pszTemp && IsDigit( *pszTemp ))
         {
@@ -87,10 +87,10 @@ bool CScriptTriggerArgs::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
                 if (( !*pszTemp ) || ( *pszTemp == '.' ))
                 {
                     if ( *pszTemp == '.' )
-                        pszTemp++;
+                        ++pszTemp;
 
                     pRef = m_VarObjs.Get( number );
-                    pszKey = pszTemp;
+                    ptcKey = pszTemp;
                     return true;
                 }
             }
@@ -115,7 +115,7 @@ enum AGC_TYPE
     AGC_QTY
 };
 
-lpctstr const CScriptTriggerArgs::sm_szLoadKeys[AGC_QTY+1] =
+lpctstr constexpr CScriptTriggerArgs::sm_szLoadKeys[AGC_QTY+1] =
 {
     "ARGN",
     "ARGN1",
@@ -136,21 +136,21 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
     ADDTOCALLSTACK("CScriptTriggerArgs::r_Verb");
     EXC_TRY("Verb");
     int	index = -1;
-    lpctstr pszKey = s.GetKey();
+    lpctstr ptcKey = s.GetKey();
 
-    if ( !strnicmp( "FLOAT.", pszKey, 6 ) )
+    if ( !strnicmp( "FLOAT.", ptcKey, 6 ) )
     {
-        return( m_VarsFloat.Insert( (pszKey+6), s.GetArgStr(), true ) );
+        return( m_VarsFloat.Insert( (ptcKey+6), s.GetArgStr(), true ) );
     }
-    else if ( !strnicmp( "LOCAL.", pszKey, 6 ) )
+    else if ( !strnicmp( "LOCAL.", ptcKey, 6 ) )
     {
         bool fQuoted = false;
         m_VarsLocal.SetStr( s.GetKey()+6, fQuoted, s.GetArgStr( &fQuoted ), false );
         return true;
     }
-    else if ( !strnicmp( "REF", pszKey, 3 ) )
+    else if ( !strnicmp( "REF", ptcKey, 3 ) )
     {
-        lpctstr pszTemp = pszKey;
+        lpctstr pszTemp = ptcKey;
         pszTemp += 3;
         if (*pszTemp && IsDigit( *pszTemp ))
         {
@@ -164,17 +164,17 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
                     CUID uid = s.GetArgVal();
                     CObjBase * pObj = uid.ObjFind();
                     m_VarObjs.Insert( number, pObj, true );
-                    pszKey = pszTemp;
+                    ptcKey = pszTemp;
                     return true;
                 }
                 else if ( *pszTemp == '.' ) // accessing REFx object
                 {
-                    pszKey = ++pszTemp;
+                    ptcKey = ++pszTemp;
                     CObjBase * pObj = m_VarObjs.Get( number );
                     if ( !pObj )
                         return false;
 
-                    CScript script( pszKey, s.GetArgStr());
+                    CScript script( ptcKey, s.GetArgStr());
                     script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
                     script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
                     return pObj->r_Verb( script, pSrc );
@@ -182,15 +182,15 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
             }
         }
     }
-    else if ( !strnicmp(pszKey, "ARGO", 4) )
+    else if ( !strnicmp(ptcKey, "ARGO", 4) )
     {
-        pszKey += 4;
-        if ( *pszKey == '.' )
+        ptcKey += 4;
+        if ( *ptcKey == '.' )
             index = AGC_O;
         else
         {
-            pszKey ++;
-            CObjBase * pObj = static_cast<CObjBase*>(static_cast<CUID>(Exp_GetSingle(pszKey)).ObjFind());
+            ptcKey ++;
+            CObjBase * pObj = static_cast<CObjBase*>(static_cast<CUID>(Exp_GetSingle(ptcKey)).ObjFind());
             if (!pObj)
                 m_pO1 = nullptr;	// no pObj = cleaning argo
             else
@@ -258,48 +258,48 @@ bool CScriptTriggerArgs::r_LoadVal( CScript & s )
     return false;
 }
 
-bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
+bool CScriptTriggerArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CScriptTriggerArgs::r_WriteVal");
     EXC_TRY("WriteVal");
     if ( IsSetEF( EF_Intrinsic_Locals ) )
     {
         EXC_SET_BLOCK("intrinsic");
-        CVarDefCont * pVar = m_VarsLocal.GetKey( pszKey );
-
+        CVarDefCont * pVar = m_VarsLocal.GetKey( ptcKey );
         if ( pVar )
         {
             sVal = pVar->GetValStr();
             return true;
         }
     }
-    else if ( !strnicmp("LOCAL.", pszKey, 6) )
+    else if ( !strnicmp("LOCAL.", ptcKey, 6) )
     {
         EXC_SET_BLOCK("local");
-        pszKey	+= 6;
-        sVal = m_VarsLocal.GetKeyStr(pszKey, true);
+        ptcKey	+= 6;
+        sVal = m_VarsLocal.GetKeyStr(ptcKey, true);
         return true;
     }
 
-    if ( !strnicmp( "FLOAT.", pszKey, 6 ) )
+    if ( !strnicmp( "FLOAT.", ptcKey, 6 ) )
     {
         EXC_SET_BLOCK("float");
-        pszKey += 6;
-        sVal = m_VarsFloat.Get( pszKey );
+        ptcKey += 6;
+        sVal = m_VarsFloat.Get( ptcKey );
         return true;
     }
-    else if ( !strnicmp(pszKey, "ARGV", 4) )
+    else if ( !strnicmp(ptcKey, "ARGV", 4) )
     {
         EXC_SET_BLOCK("argv");
-        pszKey += 4;
-        SKIP_SEPARATORS(pszKey);
+        ptcKey += 4;
+        SKIP_SEPARATORS(ptcKey);
 
-        size_t iQty = m_v.size();
-        if ( iQty <= 0 )
+        size_t uiQty = m_v.size();
+        if ( uiQty <= 0 )
         {
             // PARSE IT HERE
-            tchar * pszArg = const_cast<tchar *>(m_s1_raw.GetPtr());
-            tchar * s = pszArg;
+            tchar * ptcArg = const_cast<tchar *>(m_s1_raw.GetPtr());
+            tchar * s = ptcArg;
             bool fQuotes = false;
             bool fInerQuotes = false;
             while ( *s )
@@ -327,7 +327,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
                     fInerQuotes = false;
                 }
 
-                pszArg	= s;	// arg starts here
+                ptcArg = s;	// arg starts here
                 ++s;
 
                 while (*s)
@@ -362,30 +362,30 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
                     }
                     ++s;
                 }
-                m_v.emplace_back( pszArg );
+                m_v.emplace_back( ptcArg );
             }
-            iQty = m_v.size();
+            uiQty = m_v.size();
         }
 
-        if ( *pszKey == '\0' )
+        if ( *ptcKey == '\0' )
         {
-            sVal.FormatVal((int)iQty);
+            sVal.FormatUVal((uint)uiQty);
             return true;
         }
 
-        size_t iNum = (size_t)(Exp_GetSingle(pszKey));
-        SKIP_SEPARATORS(pszKey);
-        if ( iNum >= m_v.size() )
+        SKIP_SEPARATORS(ptcKey);
+        uint uiNum = Exp_GetUSingle(ptcKey);
+        if ( uiNum >= m_v.size() )
         {
             sVal = "";
             return true;
         }
-        sVal = m_v[iNum];
+        sVal = m_v[uiNum];
         return true;
     }
 
     EXC_SET_BLOCK("generic");
-    int index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+    int index = FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
     switch (index)
     {
         case AGC_N:
@@ -411,7 +411,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
             sVal = m_s1;
             break;
         default:
-            return CScriptObj::r_WriteVal(pszKey, sVal, pSrc);
+            return (fNoCallParent ? false : CScriptObj::r_WriteVal(ptcKey, sVal, pSrc));
     }
     return true;
     EXC_CATCH;

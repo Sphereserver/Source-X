@@ -1,6 +1,6 @@
 //
 //	Class:	-- none --
-//	Set:	triggers (not obligatory sorted, just easier to work with if sorted)
+//	Set:	triggers
 //	Prefix:	TRIGGER_
 //
 
@@ -38,6 +38,7 @@ ADD(DROPON_GROUND)
 ADD(DROPON_ITEM)
 ADD(DROPON_SELF)
 ADD(DROPON_TRADE)
+ADD(DYE)
 ADD(EAT)
 ADD(EFFECT)
 ADD(EFFECTADD)

@@ -20,7 +20,7 @@ enum RGC_TYPE
     RGC_QTY
 };
 
-lpctstr const CRandGroupDef::sm_szLoadKeys[RGC_QTY+1] =
+lpctstr constexpr CRandGroupDef::sm_szLoadKeys[RGC_QTY+1] =
 {
     "CALCMEMBERINDEX",
     "CATEGORY",
@@ -39,7 +39,7 @@ int CRandGroupDef::CalcTotalWeight()
     ADDTOCALLSTACK("CRandGroupDef::CalcTotalWeight");
     int iTotal = 0;
     size_t iQty = m_Members.size();
-    for ( size_t i = 0; i < iQty; i++ )
+    for ( size_t i = 0; i < iQty; ++i )
     {
         iTotal += (int)(m_Members[i].GetResQty());
     }
@@ -110,12 +110,13 @@ bool CRandGroupDef::r_LoadVal( CScript &s )
     return false;
 }
 
-bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
+bool CRandGroupDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CRandGroupDef::r_WriteVal");
     EXC_TRY("WriteVal");
 
-    switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+    switch ( FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
     {
         case RGC_CATEGORY:
             sVal = m_sCategory;
@@ -130,20 +131,20 @@ bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * p
         case RGC_CONTAINER:
         {
             size_t i = GetRandMemberIndex();
-            if ( i != BadMemberIndex() )
+            if ( i != SCONT_BADINDEX )
                 sVal.FormatHex(GetMemberID(i) & 0xFFFFFF);
             break;
         }
         case RGC_CALCMEMBERINDEX:
         {
-            pszKey += 15;
-            GETNONWHITESPACE( pszKey );
+            ptcKey += 15;
+            GETNONWHITESPACE( ptcKey );
 
-            if ( pszKey[0] == '\0' )
+            if ( ptcKey[0] == '\0' )
                 sVal.FormatSTVal( GetRandMemberIndex(nullptr, false) );
             else
             {
-                CUID uidTofind = Exp_GetDWVal(pszKey);
+                CUID uidTofind = Exp_GetDWVal(ptcKey);
                 CChar * pSend = uidTofind.CharFind();
 
                 if ( pSend )
@@ -160,12 +161,12 @@ bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * p
 
         case RGC_RESOURCES:
         {
-            pszKey	+= 9;
-            if ( *pszKey == '.' )
+            ptcKey	+= 9;
+            if ( *ptcKey == '.' )
             {
-                SKIP_SEPARATORS( pszKey );
+                SKIP_SEPARATORS( ptcKey );
 
-                if ( !strnicmp( pszKey, "COUNT", 5 ))
+                if ( !strnicmp( ptcKey, "COUNT", 5 ))
                 {
                     sVal.FormatSTVal(m_Members.size());
                 }
@@ -173,12 +174,12 @@ bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * p
                 {
                     bool fQtyOnly = false;
                     bool fKeyOnly = false;
-                    int index = Exp_GetVal( pszKey );
-                    SKIP_SEPARATORS( pszKey );
+                    int index = Exp_GetVal( ptcKey );
+                    SKIP_SEPARATORS( ptcKey );
 
-                    if ( !strnicmp( pszKey, "KEY", 3 ))
+                    if ( !strnicmp( ptcKey, "KEY", 3 ))
                         fKeyOnly = true;
-                    else if ( !strnicmp( pszKey, "VAL", 3 ))
+                    else if ( !strnicmp( ptcKey, "VAL", 3 ))
                         fQtyOnly = true;
 
                     tchar *pszTmp = Str_GetTemp();
@@ -198,7 +199,7 @@ bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * p
         } break;
 
         default:
-            return( CResourceDef::r_WriteVal( pszKey, sVal, pSrc ));
+            return ( fNoCallParent ? false : CResourceDef::r_WriteVal( ptcKey, sVal, pSrc ) );
     }
 
     return true;
@@ -210,13 +211,13 @@ bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * p
     return false;
 }
 
-size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) const
+size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool fTrigger ) const
 {
     ADDTOCALLSTACK("CRandGroupDef::GetRandMemberIndex");
     int rid;
     size_t iCount = m_Members.size();
     if ( iCount <= 0 )
-        return m_Members.BadIndex();
+        return SCONT_BADINDEX;
 
     int iWeight = 0;
     size_t i;
@@ -229,7 +230,7 @@ size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) cons
             iWeight -= (int)(m_Members[i].GetResQty());
         }
         if ( i >= iCount && iWeight > 0 )
-            return m_Members.BadIndex();
+            return SCONT_BADINDEX;
 
         ASSERT(i > 0);
         return( i - 1 );
@@ -252,7 +253,7 @@ size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) cons
                     continue;
                 if (IsTrigUsed(TRIGGER_RESOURCETEST))
                 {
-                    if (bTrigger && pOreDef->OnTrigger("@ResourceTest", pCharSrc, nullptr) == TRIGRET_RET_TRUE)
+                    if (fTrigger && pOreDef->OnTrigger("@ResourceTest", pCharSrc, nullptr) == TRIGRET_RET_TRUE)
                         continue;
                 }
             }
@@ -268,7 +269,7 @@ size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) cons
         iWeight -= (int)(m_Members[members[i]].GetResQty());
     }
     if ( i >= iCount && iWeight > 0 )
-        return m_Members.BadIndex();
+        return SCONT_BADINDEX;
     ASSERT(i > 0);
     return members[i - 1];
 }

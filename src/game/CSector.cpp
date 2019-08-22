@@ -59,7 +59,7 @@ enum SC_TYPE
 	SC_QTY
 };
 
-lpctstr const CSector::sm_szLoadKeys[SC_QTY+1] =
+lpctstr constexpr CSector::sm_szLoadKeys[SC_QTY+1] =
 {
     "CANSLEEP",
 	"CLIENTS",
@@ -80,12 +80,14 @@ lpctstr const CSector::sm_szLoadKeys[SC_QTY+1] =
 	nullptr
 };
 
-bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CSector::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallParent);
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CSector::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-	static const CValStr sm_ComplexityTitles[] =
+	static constexpr CValStr sm_ComplexityTitles[] =
 	{
 		{ "HIGH", INT32_MIN },	// speech can be very complex if low char count
 		{ "MEDIUM", 5 },
@@ -93,13 +95,13 @@ bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		{ nullptr, INT32_MAX }
 	};
 
-    SC_TYPE key = (SC_TYPE)FindTableHead(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    SC_TYPE key = (SC_TYPE)FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
 	switch ( key )
 	{
         case SC_CANSLEEP:
             {
-                pszKey += 8;
-                bool fCheckAdjacents = Exp_GetVal(pszKey);
+                ptcKey += 8;
+                const bool fCheckAdjacents = Exp_GetVal(ptcKey);
                 sVal.FormatBVal(CanSleep(fCheckAdjacents));
                 return true;
             }
@@ -110,10 +112,10 @@ bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			sVal.FormatVal( GetColdChance());
 			return true;
 		case SC_COMPLEXITY:
-			if ( pszKey[10] == '.' )
+			if ( ptcKey[10] == '.' )
 			{
-				pszKey += 11;
-				sVal = ( ! strcmpi( pszKey, sm_ComplexityTitles->FindName( (int)GetCharComplexity() )) ) ? "1" : "0";
+				ptcKey += 11;
+				sVal = !strcmpi( ptcKey, sm_ComplexityTitles->FindName((int)GetCharComplexity()) ) ? "1" : "0";
 				return true;
 			}
 			sVal.FormatSTVal( GetCharComplexity() );
@@ -138,7 +140,7 @@ bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			return true;
 		case SC_ISNIGHTTIME:
 			{
-				int iMinutes = GetLocalTime();
+				const int iMinutes = GetLocalTime();
 				sVal = ( iMinutes < 7*60 || iMinutes > (9+12)*60 ) ? "1" : "0";
 			}
 			return true;
@@ -169,7 +171,7 @@ bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 void CSector::GoSleep()
 {
     ADDTOCALLSTACK("CSector::Sleep");
-    ProfileTask charactersTask(PROFILE_TIMERS);
+    const ProfileTask charactersTask(PROFILE_TIMERS);
     CTimedObject::GoSleep();
 
     CChar * pCharNext = nullptr;
@@ -202,7 +204,7 @@ void CSector::GoSleep()
 void CSector::GoAwake()
 {
     ADDTOCALLSTACK("CSector::GoAwake");
-    ProfileTask charactersTask(PROFILE_TIMERS);
+    const ProfileTask charactersTask(PROFILE_TIMERS);
     CTimedObject::GoAwake();  // Awake it first, otherwise other things won't work.
 
     CChar * pCharNext = nullptr;
@@ -250,7 +252,7 @@ void CSector::GoAwake()
         for (int i = 0; i < (int)DIR_QTY; ++i)
         {
             CSector *pSector = GetAdjacentSector((DIR_TYPE)i);
-            if (pSector && !pSector->IsSleeping())
+            if (pSector && pSector->IsSleeping())
             {
                 pSector->GoAwake();
             }
@@ -304,7 +306,7 @@ enum SEV_TYPE
 	SEV_QTY
 };
 
-lpctstr const CSector::sm_szVerbKeys[SEV_QTY+1] =
+lpctstr constexpr CSector::sm_szVerbKeys[SEV_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CSector_functions.tbl"
@@ -644,7 +646,7 @@ int CSector::GetLocalTime() const
 lpctstr CSector::GetLocalGameTime() const
 {
 	ADDTOCALLSTACK("CSector::GetLocalGameTime");
-	return( GetTimeMinDesc( GetLocalTime()));
+	return CServerTime::GetTimeMinDesc(GetLocalTime());
 }
 
 bool CSector::IsMoonVisible(uint iPhase, int iLocalTime) const
@@ -1034,7 +1036,8 @@ bool CSector::MoveCharToSector( CChar * pChar )
         CClient *pClient = pChar->GetClient();
         if (pClient)    // A client just entered
         {
-            GoAwake();    // Awake the sector
+            GoAwake();    // Awake the sector and the chars inside (so, also pChar)
+            ASSERT(!pChar->IsSleeping());
         }
         else if (!pChar->IsSleeping())    // An NPC entered, but the sector is sleeping
         {
@@ -1043,7 +1046,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
     }
     else
     {
-        if (pChar->m_pNPC && pChar->IsSleeping())
+        if (pChar->IsSleeping())
         {
             pChar->GoAwake();
         }
@@ -1115,7 +1118,7 @@ void CSector::RespawnDeadNPCs()
 {
 	ADDTOCALLSTACK("CSector::RespawnDeadNPCs");
 	// skip sectors in unsupported maps
-	if ( !g_MapList.m_maps[m_map] )
+	if ( !g_MapList.IsMapSupported(m_map) )
         return;
 
 	// Respawn dead NPC's
@@ -1189,7 +1192,7 @@ bool CSector::OnTick()
 	EXC_TRY("Tick");
 
 	//	do not tick sectors on maps not supported by server
-	if ( !g_MapList.m_maps[m_map] )
+	if ( !g_MapList.IsMapSupported(m_map) )
 		return true;
 
     EXC_SET_BLOCK("light change");
@@ -1281,7 +1284,7 @@ bool CSector::OnTick()
 	}
 
     // Check environ changes and inform clients of it.
-	ProfileTask charactersTask(PROFILE_CHARS);
+	const ProfileTask charactersTask(PROFILE_CHARS);
 
 	CChar * pCharNext = nullptr;
 	CChar * pChar = static_cast <CChar*>( m_Chars_Active.GetHead());
@@ -1289,9 +1292,10 @@ bool CSector::OnTick()
 	{
 		EXC_TRYSUB("TickChar");
 
+        ASSERT(pChar);
 		pCharNext = pChar->GetNext();
 
-		if (( fEnvironChange ) && ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) ))
+		if (fEnvironChange && ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) ))
 			pChar->OnTrigger(CTRIG_EnvironChange, pChar);
 
 		if ( pChar->IsClient())
@@ -1328,7 +1332,7 @@ bool CSector::OnTick()
 		EXC_DEBUGSUB_END;
 	}
 
-	ProfileTask overheadTask(PROFILE_OVERHEAD);
+	const ProfileTask overheadTask(PROFILE_OVERHEAD);
 
 	EXC_SET_BLOCK("check map cache");
 	if (fCanSleep && m_iMapBlockCacheTime < iCurTime)     // Only if the sector can sleep.

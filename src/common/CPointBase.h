@@ -8,11 +8,13 @@
 
 #include "../game/uo_files/uofiles_enums.h"
 #include "../game/uo_files/CUOMapList.h"
+#include <vector>
 
 class CSString;
 class CSector;
 class CRegion;
-class CRegionLinks;
+
+using CRegionLinks = std::vector<CRegion*>;
 
 
 DIR_TYPE GetDirTurn( DIR_TYPE dir, int offset );
@@ -22,7 +24,7 @@ struct CPointBase	// Non initialized 3d point.
 {
 public:
 	static lpctstr const sm_szLoadKeys[];
-	static const int sm_Moves[DIR_QTY+1][2];
+	static const short sm_Moves[DIR_QTY+1][2];
 	static lpctstr sm_szDirs[DIR_QTY+1];
 public:
 	// Do NOT change these datatypes: they seem to not have much sense, but are stored this way inside the mul files.
@@ -42,30 +44,30 @@ public:
 
 	bool operator == ( const CPointBase & pt ) const;
 	bool operator != ( const CPointBase & pt ) const;
-	const CPointBase operator += ( const CPointBase & pt );
-	const CPointBase operator -= ( const CPointBase & pt );
+	const CPointBase& operator += ( const CPointBase & pt );
+	const CPointBase& operator -= ( const CPointBase & pt );
 
 	
-	int GetDistZ( const CPointBase & pt ) const;
-	int GetDistZAdj( const CPointBase & pt ) const;
-	int GetDistBase( const CPointBase & pt ) const;			// Distance between points
-	int GetDist( const CPointBase & pt ) const;				// Distance between points
-	int GetDistSightBase( const CPointBase & pt ) const;	// Distance between points based on UO sight
-	int GetDistSight( const CPointBase & pt ) const;		// Distance between points based on UO sight
-	int GetDist3D( const CPointBase & pt ) const;			// 3D Distance between points
+	int GetDistZ( const CPointBase & pt ) const noexcept;
+	int GetDistZAdj( const CPointBase & pt ) const noexcept;
+	int GetDistBase( const CPointBase & pt ) const noexcept;	    // Distance between points
+	int GetDist( const CPointBase & pt ) const noexcept;			// Distance between points
+	int GetDistSightBase( const CPointBase & pt ) const noexcept;	// Distance between points based on UO sight
+	int GetDistSight( const CPointBase & pt ) const noexcept;		// Distance between points based on UO sight
+	int GetDist3D( const CPointBase & pt ) const noexcept;			// 3D Distance between points
 
-	bool IsValidZ() const;
-	bool IsValidXY() const;
-	bool IsValidPoint() const;
-	bool IsCharValid() const;
+	bool IsValidZ() const noexcept;
+	bool IsValidXY() const noexcept;
+	bool IsValidPoint() const noexcept;
+	bool IsCharValid() const noexcept;
 
 	void ValidatePoint();
 
-	bool IsSame2D( const CPointBase & pt ) const;
+	bool IsSame2D( const CPointBase & pt ) const noexcept;
 
 	void Set( const CPointBase & pt );
-	void Set( word x, word y, char z = 0, uchar map = 0 );
-	size_t Read( tchar * pVal );
+	void Set( short x, short y, char z = 0, uchar map = 0 );
+	int Read( tchar * pVal );
 
 	tchar * WriteUsed( tchar * pszBuffer ) const;
 	lpctstr WriteUsed() const;
@@ -90,14 +92,14 @@ public:
 
 	int GetPointSortIndex() const;
 
-	bool r_WriteVal( lpctstr pszKey, CSString & sVal ) const;
-	bool r_LoadVal( lpctstr pszKey, lpctstr pszArgs );
+	bool r_WriteVal( lpctstr ptcKey, CSString & sVal ) const;
+	bool r_LoadVal( lpctstr ptcKey, lpctstr pszArgs );
 };
 
 struct CPointMap : public CPointBase
 {
 	// A point in the world (or in a container) (initialized)
-	CPointMap() {};
+    CPointMap() = default;
 	CPointMap( short x, short y, char z = 0, uchar map = 0 );
     inline CPointMap & operator = (const CPointBase & pt)
     {
@@ -116,16 +118,13 @@ struct CPointMap : public CPointBase
 
 struct CPointSort : public CPointMap
 {
-    inline CPointSort()
-    {
-        InitPoint();
-    }
-	CPointSort( word x, word y, char z = 0, uchar map = 0 );
+    CPointSort() = default; // InitPoint() already called by CPointBase constructor
+	CPointSort( short x, short y, char z = 0, uchar map = 0 );
     inline CPointSort(const CPointBase & pt)
     {
         Set( pt );
     }
-    virtual ~CPointSort() {}; // just to make this dynamic
+    virtual ~CPointSort() = default; // just to make this dynamic
 };
 
 

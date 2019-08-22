@@ -12,7 +12,6 @@
 #include "CSFileList.h"
 #include "../../common/CLog.h"
 #include "../../sphere/threads.h"
-#include "../common.h"
 
 // Similar to the MFC CFileFind
 bool CSFileList::ReadFileInfo( lpctstr pszFilePath, time_t & dwDateChange, dword & dwSize ) // static
@@ -72,7 +71,7 @@ int CSFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 #else
 	char szFilename[_MAX_PATH];
 	// Need to strip out the *.scp part
-	for ( size_t i = len; i > 0; i-- )
+	for ( size_t i = len; i > 0; --i )
 	{
 		if ( szFileDir[i] == '/' )
 		{

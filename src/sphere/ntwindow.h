@@ -28,8 +28,6 @@ extern struct CNTWindow : public AbstractSphereThread, public CSWindow, public C
     virtual bool shouldExit();
     virtual void tick();
 
-    void SetWindowTitle(LPCTSTR pText = nullptr);
-
     bool NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLinel, int nCmdShow);
     void NTWindow_ExitServer();
     void NTWindow_DeleteIcon();
@@ -49,7 +47,7 @@ public:
     {
     private:
         bool OnInitDialog();
-        bool OnCommand(word wNotifyCode, INT_PTR wID, HWND hwndCtl);
+        bool OnCommand(WORD wNotifyCode, INT_PTR wID, HWND hwndCtl);
     public:
         virtual BOOL DefDialogProc(UINT message, WPARAM wParam, LPARAM lParam);
     };
@@ -80,8 +78,8 @@ public:
                 return;
 
             TCHAR * ppMessages[255];
-            size_t iQty = Str_ParseCmds(const_cast<TCHAR*>(pszMessage), ppMessages, CountOf(ppMessages), "\n");
-            for (size_t i = 0; i < iQty; ++i)
+            int iQty = Str_ParseCmds(const_cast<TCHAR*>(pszMessage), ppMessages, CountOf(ppMessages), "\n");
+            for (int i = 0; i < iQty; ++i)
             {
                 if (*ppMessages[i])
                     m_wndList.AddString(ppMessages[i]);
@@ -135,6 +133,7 @@ public:
 
     void List_Clear();
     void List_Add(COLORREF color, LPCTSTR pszText);
+    void SetWindowTitle(LPCTSTR pText = nullptr);
 
     CNTWindow();
     virtual ~CNTWindow();

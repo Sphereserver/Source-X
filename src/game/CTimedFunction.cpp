@@ -24,7 +24,7 @@ void CTimedFunctionHandler::OnTick()
 		m_curTick = 0;
 
 	int tick = m_curTick;
-	ProfileTask scriptsTask(PROFILE_TIMEDFUNCTIONS);
+	const ProfileTask scriptsTask(PROFILE_TIMEDFUNCTIONS);
 
 
 	if ( !m_timedFunctions[tick].empty() )
@@ -217,7 +217,7 @@ void CTimedFunctionHandler::Add( CUID uid, int numSeconds, lpctstr funcname )
 	}
 	tf->uid = uid;
 	tf->elapsed = numSeconds;
-	strncpy( tf->funcname, funcname, sizeof(tf->funcname) );
+	Str_CopyLimitNull( tf->funcname, funcname, sizeof(tf->funcname) );
 	if ( m_isBeingProcessed )
 		m_tfQueuedToBeAdded.emplace_back( tf );
 	else
@@ -257,7 +257,7 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
 	else if ( !strnicmp( pszName, "TimerFNumbers", 13 ) )
 	{
 		tchar * ppVal[4];
-		strncpy( tempBuffer, pszVal, sizeof(tempBuffer) );	//because pszVal is constant and Str_ParseCmds wants a non-constant string
+		Str_CopyLimitNull( tempBuffer, pszVal, sizeof(tempBuffer) );	//because pszVal is constant and Str_ParseCmds wants a non-constant string
 		size_t iArgs = Str_ParseCmds( tempBuffer, ppVal, CountOf( ppVal ), " ,\t" );
 		if ( iArgs != 3 )
         {
@@ -318,7 +318,7 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
 			tf = new TimedFunction;
 			isNew = true;
 		}
-		strncpy( tf->funcname, pszVal, sizeof(tf->funcname) );
+		Str_CopyLimitNull( tf->funcname, pszVal, sizeof(tf->funcname) );
 
 		if ( !isNew )
         {

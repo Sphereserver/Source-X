@@ -66,32 +66,32 @@ bool CItem::Ship_Plank(bool fOpen)
     return true;
 }
 
-bool CItemShip::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
+bool CItemShip::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
 {
     ADDTOCALLSTACK("CItemShip::r_GetRef");
 
-    if (!strnicmp(pszKey, "HATCH.", 6))
+    if (!strnicmp(ptcKey, "HATCH.", 6))
     {
-        pszKey += 6;
+        ptcKey += 6;
         pRef = GetShipHold();
         return true;
     }
-    else if (!strnicmp(pszKey, "TILLER.", 7))
+    else if (!strnicmp(ptcKey, "TILLER.", 7))
     {
-        pszKey += 7;
+        ptcKey += 7;
         pRef = Multi_GetSign();
         return true;
     }
-    else if (!strnicmp(pszKey, "PLANK.", 6))
+    else if (!strnicmp(ptcKey, "PLANK.", 6))
     {
-        pszKey += 6;
-        int i = Exp_GetVal(pszKey);
-        SKIP_SEPARATORS(pszKey);
+        ptcKey += 6;
+        int i = Exp_GetVal(ptcKey);
+        SKIP_SEPARATORS(ptcKey);
         pRef = GetShipPlank(i);
         return true;
     }
 
-    return(CItemMulti::r_GetRef(pszKey, pRef));
+    return(CItemMulti::r_GetRef(ptcKey, pRef));
 }
 
 bool CItemShip::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from script
@@ -121,7 +121,7 @@ enum IMCS_TYPE
     IMCS_QTY
 };
 
-lpctstr const CItemShip::sm_szLoadKeys[IMCS_QTY + 1] = // static
+lpctstr constexpr CItemShip::sm_szLoadKeys[IMCS_QTY + 1] = // static
 {
     "HATCH",
     "PLANK",
@@ -129,18 +129,19 @@ lpctstr const CItemShip::sm_szLoadKeys[IMCS_QTY + 1] = // static
     nullptr
 };
 
-bool CItemShip::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
+bool CItemShip::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CItemShip::r_WriteVal");
     EXC_TRY("WriteVal");
 
-    int index = FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int index = FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
 
     switch (index)
     {
         case IMCS_HATCH:
         {
-            pszKey += 5;
+            ptcKey += 5;
             CItem * pItemHold = GetShipHold();
             if (pItemHold)
                 sVal.FormatHex(pItemHold->GetUID());
@@ -150,14 +151,14 @@ bool CItemShip::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
 
         case IMCS_PLANK:
         {
-            pszKey += 6;
+            ptcKey += 6;
             sVal.FormatSTVal(GetShipPlankCount());
         } break;
 
         case IMCS_TILLER:
         {
-            pszKey += 6;
-            CItem * pTiller = Multi_GetSign();
+            ptcKey += 6;
+            const CItem * pTiller = Multi_GetSign();
             if (pTiller)
                 sVal.FormatHex(pTiller->GetUID());
             else
@@ -165,7 +166,7 @@ bool CItemShip::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
         } break;
 
         default:
-            return(CItemMulti::r_WriteVal(pszKey, sVal, pSrc));
+            return (fNoCallParent ? false : CItemMulti::r_WriteVal(ptcKey, sVal, pSrc));
     }
 
     return true;
@@ -181,8 +182,8 @@ bool CItemShip::r_LoadVal(CScript & s)
 {
     ADDTOCALLSTACK("CItemShip::r_LoadVal");
     EXC_TRY("LoadVal");
-    lpctstr	pszKey = s.GetKey();
-    IMCS_TYPE index = (IMCS_TYPE)FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    lpctstr	ptcKey = s.GetKey();
+    IMCS_TYPE index = (IMCS_TYPE)FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     if (g_Serv.IsLoading())
     {
         switch (index)

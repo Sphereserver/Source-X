@@ -30,7 +30,6 @@ using CServerRef = CServerDef*;
 
 /**
  * @enum    OF_TYPE
- *
  * @brief   OptionFlags (sphere.ini)
  */
 enum OF_TYPE
@@ -63,7 +62,6 @@ enum OF_TYPE
 
 /**
  * @enum    EF_TYPE
- *
  * @brief   ExperimentalFlags (sphere.ini)
  */
 enum EF_TYPE
@@ -80,9 +78,97 @@ enum EF_TYPE
 	EF_DamageTools					= 0x0002000,    // Damage tools (and fire @damage on them) while mining or lumberjacking
 	EF_UsePingServer				= 0x0008000,    // Enable the experimental Ping Server (for showing pings on the server list, uses UDP port 12000)
 	EF_FixCanSeeInClosedConts		= 0x0020000,    // Change CANSEE to return 0 for items inside containers that a client hasn't opened
+    EF_WalkCheckHeightMounted       = 0x0040000,    // Unlike the client does, assume an height increased by 4 in walkchecks if the char is mounted. Enabling this may prevent mounted characters to walk under places they could before.
 #ifndef _MTNETWORK
 	EF_NetworkOutThread				= 0x0800000     //
 #endif
+};
+
+/**
+* @enum    COMBATFLAGS_TYPE
+* @brief   CombatFlags (sphere.ini)
+*/
+enum COMBATFLAGS_TYPE
+{
+    COMBAT_NODIRCHANGE          = 0x1,	    // Not rotate player when fighting
+    COMBAT_FACECOMBAT           = 0x2,	    // Allow faced combat only
+    COMBAT_PREHIT               = 0x4,	    // Deal the damage in the same moment as the swing animation starts (OSI like) (use an AnimDelay = 0 instead of = 10 tenths of second)
+    COMBAT_ELEMENTAL_ENGINE     = 0x8,	    // Use DAM*/RES* to split damage/resist into Physical/Fire/Cold/Poison/Energy (AOS) instead use old AR (pre-AOS)
+    COMBAT_DCLICKSELF_UNMOUNTS  = 0x20,	    // Unmount horse when dclicking self while in warmode
+    COMBAT_ALLOWHITFROMSHIP     = 0x40,     // Allow attacking opponents from ships
+    COMBAT_ARCHERYCANMOVE       = 0x100,    // Allow firing bow while moving
+    COMBAT_STAYINRANGE          = 0x200,    // Must be in range at the end of the swing or the hit will miss
+    COMBAT_STACKARMOR           = 0x1000,   // If a region is covered by more than one armor part, all AR will count
+    COMBAT_NOPOISONHIT          = 0x2000,   // Disables old (55i like) poisoning style: Poisoning > 30.0 && (RAND(100.0)> Poisoning) for monsters OR weapon.morez && (RAND(100) < weapon.morez ) for poisoned weapons.
+    COMBAT_SLAYER               = 0x4000,   // Enables Slayer damage on PVM combat.
+    COMBAT_SWING_NORANGE        = 0x8000,   // The hit can be started at any distance and regardless of the Line of Sight, then the damage will be dealt when in range and LoS
+                                            //   WARNING: This flag is ignored if PREHIT is on!
+    COMBAT_ANIM_HIT_SMOOTH      = 0x10000,  // The hit animation has the same duration as the swing delay, instead of having a fixed fast duration and being idle until the delay has expired.
+                                            //   WARNING: doesn't work with Gargoyles due to the new animation packet not accepting a custom animation duration!
+    COMBAT_FIRSTHIT_INSTANT     = 0x20000   // The first hit in a fight doesn't wait for the recoil time (OSI like)
+};
+
+/**
+* @enum    PARRYFLAGS_TYPE
+* @brief   ParryEra (sphere.ini): Parrying behaviour
+*/
+enum PARRYFLAGS_TYPE
+{
+    PARRYERA_PRESEFORMULA = 0x1,	// pre - SE parrying chance formula(not using the Bushido skill).Mutually exclusive with 02 flag.
+    PARRYERA_SEFORMULA = 0x2,		// SE parrying chance formula (using also the Bushido skill). Mutually exclusive with 01 flag.
+    PARRYERA_SHIELDBLOCK = 0x10,	// can parry with a shield
+    PARRYERA_ONEHANDBLOCK = 0x20,	// can parry with a one-handed weapon without a shield
+    PARRYERA_TWOHANDBLOCK = 0x40,	// can parry with two handed weapons
+    PARRYERA_ARSCALING = 0x80 // Shields AR scales with Parrying skill, not compatible with Combat Elemental Engine.
+};
+
+enum MAGICFLAGS_TYPE
+{
+    MAGICF_NODIRCHANGE          = 0x0000001,    // not rotate player when casting/targeting
+    MAGICF_PRECAST              = 0x0000002,    // use precasting (cast spell before targeting)
+    MAGICF_IGNOREAR             = 0x0000004,    // magic ignore ar
+    MAGICF_CANHARMSELF          = 0x0000008,    // i can do damage on self
+    MAGICF_STACKSTATS           = 0x0000010,    // allow multiple stat spells at once
+    MAGICF_FREEZEONCAST         = 0x0000020,    // disallow movement whilst casting
+    MAGICF_SUMMONWALKCHECK      = 0x0000040,    // disallow summoning creatures to places they can't normally step
+    MAGICF_NOFIELDSOVERWALLS    = 0x0000080,    // prevent fields from being formed over blocking objects.
+    MAGICF_NOANIM               = 0x0000100,    // auto spellflag_no_anim on all spells
+    MAGICF_OSIFORMULAS          = 0x0000200,    // calculated damage and duration based on OSI formulas
+    MAGICF_NOCASTFROZENHANDS    = 0x0000400,    // can't cast spells if got paralyzed holding something on hands
+    MAGICF_POLYMORPHSTATS       = 0x0000800,    // Polymorph spells give out stats based on base chars (old behaviour backwards).
+    MAGICF_OVERRIDEFIELDS       = 0x0001000,    // Prevent cast multiple field spells on the same tile, making the new field tile remove the previous field
+    MAGICF_CASTPARALYZED        = 0x0002000     // Can cast even if paralyzed
+};
+
+enum REVEALFLAGS_TYPE
+{
+    REVEALF_DETECTINGHIDDEN      = 0x001,    ///* Reveal Spell with Detecting Hidden Skill.
+    REVEALF_LOOTINGSELF          = 0x002,    ///* Reveal when looting self bodies.
+    REVEALF_LOOTINGOTHERS        = 0x004,    ///* Reveal when looting bodies of other Players or NPCs.
+    REVEALF_SPEAK                = 0x008,    ///* Reveal when speaking.
+    REVEALF_SPELLCAST            = 0x010,    ///* Reveal when starting to cast a Spell.
+    REVEALF_OSILIKEPERSONALSPACE = 0x020     ///* Do not reveal when a character enters on personal space.
+};
+
+enum TOOLTIPMODE_TYPE
+{
+    TOOLTIPMODE_SENDFULL = 0x00,	// always send full tooltip packet
+    TOOLTIPMODE_SENDVERSION = 0x01	// send version packet and wait for client to request full tooltip
+};
+
+enum RACIALFLAGS_TYPE
+{
+    RACIALF_HUMAN_STRONGBACK = 0x0001,		// Increase carrying capacity (+60 stones of weight)
+    RACIALF_HUMAN_TOUGH = 0x0002,		// Regenerate hitpoints faster (+2 Hit Point Regeneration)
+    RACIALF_HUMAN_WORKHORSE = 0x0004,		// Find more resources while gathering hides, ore and lumber
+    RACIALF_HUMAN_JACKOFTRADES = 0x0008,		// Skill calculations always consider 20.0 minimum ability on untrained skills
+    RACIALF_ELF_NIGHTSIGHT = 0x0010,		// Permanent night sight effect
+    RACIALF_ELF_DIFFTRACK = 0x0020,		// Increase difficulty to be tracked while hidden/invisible
+    RACIALF_ELF_WISDOM = 0x0040,		// Permanent max mana bonus (+20 Mana Increase)
+    RACIALF_GARG_FLY = 0x0080,		// Enable gargoyle fly ability (FEATURE_AOS_UPDATE_B is required to enable gargoyle ability book)
+    RACIALF_GARG_BERSERK = 0x0100,		// Increase ferocity in situations of danger (15% Damage Increase + 3% Spell Damage Increase for each 20hp lost)
+    RACIALF_GARG_DEADLYAIM = 0x0200,		// Throwing calculations always consider 20.0 minimum ability when untrained
+    RACIALF_GARG_MYSTICINSIGHT = 0x0400		// Mysticism calculations always consider 30.0 minimum ability when untrained
 };
 
 ///////////////////////////////////////
@@ -127,7 +213,7 @@ public:
 	uint m_iDebugFlags;         // DEBUG In game effects to turn on and off.
 
 	// Decay
-	int64  m_iDecay_Item;         // Base decay time in minutes.
+	int64  m_iDecay_Item;         // Base decay time in minutes (but stored as milliseconds).
 	int64  m_iDecay_CorpsePlayer; // Time in minutes for a playercorpse to decay.
 	int64  m_iDecay_CorpseNPC;    // Time in minutes for a NPC corpse to decay.
 
@@ -143,7 +229,7 @@ public:
 	// Account
 	int64 m_iDeadSocketTime;    // Disconnect inactive socket in x min.
 	int	 m_iArriveDepartMsg;    // General switch to turn on/off arrival/depart messages.
-	uint m_iClientsMax;         // Maximum (FD_SETSIZE) open connections to server
+	int  m_iClientsMax;         // Maximum (FD_SETSIZE) open connections to server
 	int  m_iClientsMaxIP;       // Maximum (FD_SETSIZE) open connections to server per IP
 	int  m_iConnectingMax;      // max clients connecting
 	int  m_iConnectingMaxIP;    // max clients connecting
@@ -183,7 +269,7 @@ public:
 	int	 m_iLightDungeon;			// InDungeon light level.
 	int  m_iLightDay;				// Outdoor light level.
 	int  m_iLightNight;				// Outdoor light level.
-	int64  m_iGameMinuteLength;		// Length of the game world minute in (real world) seconds.
+	int64  m_iGameMinuteLength;		// Length of the game world minute in (real world) seconds, stored as msecs.
 	bool m_fNoWeather;				// Turn off all weather.
 	bool m_fCharTags;				// Show [NPC] tags over chars.
 	bool m_fVendorTradeTitle;		// Show job title on vendor names.
@@ -259,9 +345,9 @@ public:
 	uint m_iOptionFlags;		// Option Flags.
     bool m_fNoResRobe;          // Adding resurrection robe to resurrected players or not.
     int	 m_iLostNPCTeleport;    // if Distance from HOME is greater than this, NPC will teleport to it instead of walking.
-	int64 m_iWoolGrowthTime;     // how long till wool grows back on sheared sheep, in minutes.
-	uint m_iAttackerTimeout;    // Timeout for attacker.
-	int64 m_iNotoTimeout;       // Timeout for NOTOriety checks.
+	int64 m_iWoolGrowthTime;    // how long till wool grows back on sheared sheep, in minutes (stored as milliseconds).
+	int  m_iAttackerTimeout;    // Timeout for an attacker  (stored in seconds, not in milliseconds).
+	int  m_iNotoTimeout;        // Timeout for NOTOriety checks (stored in seconds, not in milliseconds).
 	uint m_iMaxSkill;           // Records the higher [SKILL ] index.
 
 	int	m_iDistanceYell;        // Max distance at which Yells can be readed.
@@ -362,6 +448,10 @@ public:
 	bool m_bAutoResDisp;        // Set account RESDISP automatically based on player client version.
 	int  m_iAutoPrivFlags;      // Default setting for new accounts specifying default priv level.
 
+	RESDISPLAY_VERSION _iEraLimitGear;	// Don't allow to create gear newer than the given era (softcoded).
+	RESDISPLAY_VERSION _iEraLimitLoot;	// Don't allow to create loot newer than the given era (softcoded).
+	RESDISPLAY_VERSION _iEraLimitProps;	// Don't allow to have properties newer than the given era.
+
 	char m_cCommandPrefix;      // Prefix for ingame commands (Default = '.').
 
 	int m_iDefaultCommandLevel;// Set from 0 - 7 to set what the default plevel is to use commands.
@@ -411,7 +501,7 @@ public:
 	bool m_fUsePacketPriorities;    // true to prioritise sending packets
 	bool m_fUseExtraBuffer;         // true to queue packet data in an extra buffer
 
-	int64 m_iTooltipCache;            // time in seconds to cache tooltip for.
+	int64 m_iTooltipCache;          // time in seconds to cache tooltip for.
 	int	m_iTooltipMode;             // tooltip mode (TOOLTIP_TYPE)
 	int	m_iContextMenuLimit;        // max amount of options per context menu
 
@@ -420,7 +510,7 @@ public:
 	int64   _iTimerCall;            // Amount of minutes (converted to milliseconds internally) to call f_onserver_timer (0 disables this, default).
 	bool    m_bAllowLightOverride;  // Allow manual sector light override?
 	CSString m_sZeroPoint;          // Zero point for sextant coordinates counting. Comment this line out if you are not using ML-sized maps.
-	bool    m_bAllowBuySellAgent;   // Allow rapid Buy/Sell through Buy/Sell agent.
+	bool    m_fAllowBuySellAgent;   // Allow rapid Buy/Sell through Buy/Sell agent.
 
 	bool    m_bAllowNewbTransfer;   // Set to 1 for items to keep their attr_newbie flag when item is transfered to an NPC.
 
@@ -450,7 +540,7 @@ public:
 
 	CMultiDefArray m_MultiDefs;		// read from the MUL files. Cached here on demand.
 
-	CObjNameSortArray            m_SkillNameDefs;		// const CSkillDef* Name sorted.
+	CObjNameSortVector           m_SkillNameDefs;		// const CSkillDef* Name sorted.
 	CSPtrTypeArray< CSkillDef* > m_SkillIndexDefs;		// Defined Skills indexed by number.
 	CSObjArray< CSpellDef* >     m_SpellDefs;			// Defined Spells.
 	CSPtrTypeArray< CSpellDef* > m_SpellDefs_Sorted;	// Defined Spells, in skill order.
@@ -459,7 +549,7 @@ public:
 
 public:
 	CObjNameSortArray m_Servers;	// Servers list. we act like the login server with this.
-	CObjNameSortArray m_Functions;	// Subroutines that can be used in scripts.
+    CObjNameSortVector m_Functions;	// Subroutines that can be used in scripts.
 	CRegionLinks m_RegionDefs;		// All [REGION ] stored inside.
 
 	// static definition stuff from *TABLE.SCP mostly.
@@ -482,12 +572,10 @@ private:
 
 public:
 	virtual bool r_LoadVal( CScript &s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc ) override;
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
+	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 
     /**
-     * @fn  bool CServerConfig::LoadIni( bool fTest );
-     *
      * @brief   Loads sphere.ini.
      *
      * @param   fTest   true to test.
@@ -497,8 +585,6 @@ public:
 	bool LoadIni( bool fTest );
 
     /**
-     * @fn  bool CServerConfig::LoadCryptIni( void );
-     *
      * @brief   Loads sphereCrypt.ini.
      *
      * @author  Javier
@@ -509,8 +595,6 @@ public:
 	bool LoadCryptIni( void );
 
     /**
-     * @fn  bool CServerConfig::Load( bool fResync );
-     *
      * @brief   Loads or resync scripts..
      *
      * @param   fResync Resync or normal load?.
@@ -520,8 +604,6 @@ public:
 	bool Load( bool fResync );
 
     /**
-     * @fn  void CServerConfig::Unload( bool fResync );
-     *
      * @brief   Unloads scripts and resources.
      *
      * @param   fResync true to resync.
@@ -530,8 +612,6 @@ public:
 	void OnTick( bool fNow );
 
     /**
-     * @fn  bool CServerConfig::LoadResourceSection( CScript * pScript );
-     *
      * @brief   Loads resource section ([SKILL ], [SPELL ], [CHARDEF ]...).
      *
      * @param [in,out]  pScript If non-null, the script.
@@ -541,15 +621,11 @@ public:
 	bool LoadResourceSection( CScript * pScript );
 
     /**
-     * @fn  void CServerConfig::LoadSortSpells();
-     *
      * @brief   Sort all spells in order.
      */
 	void LoadSortSpells();
 
     /**
-     * @fn  CResourceDef * CServerConfig::ResourceGetDef( RESOURCE_ID_BASE rid ) const;
-     *
      * @brief   Get a CResourceDef from the RESOURCE_ID.
      *
      * @param   rid The rid.
@@ -565,8 +641,6 @@ public:
 	uint GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res = RDS_T2A, uchar chars = 5 );
 
     /**
-     * @fn  bool CServerConfig::CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd, CTextConsole * pSrc ) const;
-     *
      * @brief   Can i use this verb on this object ?
      *
      * @param   pObjTarg        The object targ.
@@ -578,8 +652,6 @@ public:
 	bool CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd, CTextConsole * pSrc ) const;
 
     /**
-     * @fn  PLEVEL_TYPE CServerConfig::GetPrivCommandLevel( lpctstr pszCmd ) const;
-     *
      * @brief   Gets this command's priv level.
      *
      * @param   pszCmd  The command.
@@ -589,19 +661,24 @@ public:
 	PLEVEL_TYPE GetPrivCommandLevel( lpctstr pszCmd ) const;
 
     /**
-     * @fn  static STAT_TYPE CServerConfig::FindStatKey( lpctstr pszKey );
+     * @brief   Returns the Stat key from the given string(STR = STAT_STR, ...).
      *
-     * @brief   Returns the Stat key from the given string( STR = STAT_STR... ).
-     *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The stat name.
      *
      * @return  The found stat key.
      */
-	static STAT_TYPE FindStatKey( lpctstr pszKey );
+	static STAT_TYPE FindStatKey( lpctstr ptcKey );
 
     /**
-     * @fn  static bool CServerConfig::IsValidEmailAddressFormat( lpctstr pszText );
+     * @brief   Returns the Stat name for the given stat key (STAT_STR = "STR", ...).
      *
+     * @param   iKey  The key.
+     *
+     * @return  The found stat name.
+     */
+    static lpctstr GetStatName(STAT_TYPE iKey);
+
+    /**
      * @brief   Query if 'pszText' is valid email address format.
      *
      * @param   pszText The text.
@@ -611,8 +688,6 @@ public:
 	static bool IsValidEmailAddressFormat( lpctstr pszText );
 
     /**
-     * @fn  bool CServerConfig::IsObscene( lpctstr pszText ) const;
-     *
      * @brief   Query if 'pszText' is obscene.
      *
      * @param   pszText The text.
@@ -622,8 +697,6 @@ public:
 	bool IsObscene( lpctstr pszText ) const;
 
     /**
-     * @fn  CWebPageDef * CServerConfig::FindWebPage( lpctstr pszPath ) const;
-     *
      * @brief   Searches for the requested web page.
      *
      * @param   pszPath Full pathname of the file.
@@ -633,8 +706,6 @@ public:
 	CWebPageDef * FindWebPage( lpctstr pszPath ) const;
 
 	/**
-	* @fn  CServerRef CServerConfig::Server_GetDef( size_t index );
-	*
 	* @brief   Get the def for the server in position 'index' in servers list.
 	*
 	* @param   pszText The server index.
@@ -644,8 +715,6 @@ public:
 	CServerRef Server_GetDef( size_t index );
 
     /**
-     * @fn  const CSpellDef * CServerConfig::GetSpellDef( SPELL_TYPE index ) const
-     *
      * @brief   Gets spell definition.
      *
      * @param   index   Zero-based index of the.
@@ -655,8 +724,6 @@ public:
 	const CSpellDef * GetSpellDef( SPELL_TYPE index ) const;
 
     /**
-    * @fn  const CSpellDef * CServerConfig::GetSpellDef( SPELL_TYPE index ) const
-    *
     * @brief   Gets spell definition.
     *
     * @param   index   Zero-based index of the.
@@ -666,8 +733,6 @@ public:
 	CSpellDef * GetSpellDef( SPELL_TYPE index );
 
     /**
-     * @fn  lpctstr CServerConfig::GetSkillKey( SKILL_TYPE index ) const
-     *
      * @brief   Gets skill key.
      *
      * @param   index   Zero-based index of the.
@@ -677,8 +742,6 @@ public:
 	lpctstr GetSkillKey( SKILL_TYPE index ) const;
 
     /**
-     * @fn  bool CServerConfig::IsSkillFlag( SKILL_TYPE index, SKF_TYPE skf ) const
-     *
      * @brief   Query if 'index' has 'skf' skill flag.
      *
      * @param   index   Zero-based index of the.
@@ -693,8 +756,6 @@ public:
 	}
 
     /**
-     * @fn  const CSkillDef* CServerConfig::GetSkillDef( SKILL_TYPE index ) const
-     *
      * @brief   Gets skill definition.
      *
      * @param   index   Zero-based index of the.
@@ -704,8 +765,6 @@ public:
 	const CSkillDef* GetSkillDef( SKILL_TYPE index ) const;
 
     /**
-    * @fn  const CSkillDef* CServerConfig::GetSkillDef( SKILL_TYPE index ) const
-    *
     * @brief   Gets skill definition.
     *
     * @param   index   Zero-based index of the.
@@ -715,41 +774,33 @@ public:
 	CSkillDef* GetSkillDef( SKILL_TYPE index );
 
     /**
-     * @fn  const CSkillDef* CServerConfig::FindSkillDef( lpctstr pszKey ) const
-     *
      * @brief   Find the skill name in the alpha sorted list.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      *
      * @return  null if it fails, else the found skill definition.
      */
-	const CSkillDef* FindSkillDef( lpctstr pszKey ) const;
+	const CSkillDef* FindSkillDef( lpctstr ptcKey ) const;
 
     /**
-     * @fn  const CSkillDef* CServerConfig::SkillLookup( lpctstr pszKey );
+     * @brief   Search for the skill which NAME=ptcKey.
      *
-     * @brief   Search for the skill which NAME=pszKey.
-     *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      *
      * @return  null if it fails, else a pointer to a const CSkillDef.
      */
-	const CSkillDef* SkillLookup( lpctstr pszKey );
+	const CSkillDef* SkillLookup( lpctstr ptcKey );
 
     /**
-     * @fn  SKILL_TYPE CServerConfig::FindSkillKey( lpctstr pszKey ) const;
+     * @brief   Search for the skill which KEY=ptcKey.
      *
-     * @brief   Search for the skill which KEY=pszKey.
-     *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      *
      * @return  The found skill key.
      */
-	SKILL_TYPE FindSkillKey( lpctstr pszKey ) const;
+	SKILL_TYPE FindSkillKey( lpctstr ptcKey ) const;
 
     /**
-     * @fn  int CServerConfig::GetSpellEffect( SPELL_TYPE spell, int iSkillval ) const;
-     *
      * @brief   Gets the Damage/Healing/etc done by the given params.
      *
      * @param   spell       The spell.
@@ -760,25 +811,15 @@ public:
 	int GetSpellEffect( SPELL_TYPE spell, int iSkillval ) const;
 
     /**
-     * @fn  lpctstr CServerConfig::GetRune( tchar ch ) const
-     *
      * @brief   Retrieves a Spell's rune (WOP).
      *
      * @param   ch  The ch.
      *
      * @return  The rune.
      */
-	lpctstr GetRune( tchar ch ) const
-	{
-		size_t index = (size_t)(toupper(ch) - 'A');
-		if ( ! m_Runes.IsValidIndex(index))
-			return "?";
-		return( m_Runes[index]->GetPtr() );
-	}
+	lpctstr GetRune( tchar ch ) const;
 
     /**
-     * @fn  lpctstr CServerConfig::GetNotoTitle( int iLevel, bool bFemale ) const;
-     *
      * @brief   Gets noto title.
      *
      * @param   iLevel  Zero-based index of the level.
@@ -792,8 +833,6 @@ public:
 	const CSphereMulti * GetMultiItemDefs( ITEMID_TYPE itemid );
 
     /**
-     * @fn  bool CServerConfig::IsConsoleCmd( tchar ch ) const;
-     *
      * @brief   Query if 'ch' is a console command or ingame one.
      *
      * @param   ch  The ch.
@@ -806,8 +845,6 @@ public:
 	CRegion * GetRegion( lpctstr pKey ) const; // Find a region with the given name/defname
 
     /**
-     * @fn  int CServerConfig::Calc_MaxCarryWeight( const CChar * pChar ) const;
-     *
      * @brief   Calculates the maximum carry weight.
      *
      * @param   pChar   The character.
@@ -817,8 +854,6 @@ public:
 	int Calc_MaxCarryWeight( const CChar * pChar ) const;
 
     /**
-     * @fn  int CServerConfig::Calc_CombatAttackSpeed( CChar * pChar, CItem * pWeapon );
-     *
      * @brief   Calculates the combat attack speed.
      *
      * @param [in,out]  pChar   If non-null, the character.
@@ -829,8 +864,6 @@ public:
 	int Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pWeapon ) const;
 
     /**
-     * @fn  int CServerConfig::Calc_CombatChanceToHit( CChar * pChar, CChar * pCharTarg, SKILL_TYPE skill );
-     *
      * @brief   Calculates the combat chance to hit.
      *
      * @param [in,out]  pChar       If non-null, the character.
@@ -842,8 +875,6 @@ public:
 	int Calc_CombatChanceToHit( CChar * pChar, CChar * pCharTarg);
 
     /**
-     * @fn  int CServerConfig::Calc_StealingItem( CChar * pCharThief, CItem * pItem, CChar * pCharMark );
-     *
      * @brief   Chance to steal and retrieve the item successfully
      *
      * @param [in,out]  pCharThief  If non-null, the character thief.
@@ -855,8 +886,6 @@ public:
 	int  Calc_StealingItem( CChar * pCharThief, CItem * pItem, CChar * pCharMark );
 
     /**
-     * @fn  bool CServerConfig::Calc_CrimeSeen( CChar * pCharThief, CChar * pCharViewer, SKILL_TYPE SkillToSee, bool fBonus );
-     *
      * @brief   Chance to steal without being seen by a specific person.
      *
      * @param [in,out]  pCharThief  If non-null, the character thief.
@@ -869,8 +898,6 @@ public:
 	bool Calc_CrimeSeen( const CChar * pCharThief, const CChar * pCharViewer, SKILL_TYPE SkillToSee, bool fBonus ) const;
 
     /**
-     * @fn  ushort CServerConfig::Calc_FameKill( CChar * pKill );
-     *
      * @brief   Calculates the fame given by the kill.
      *
      * @param [in,out]  pKill   If non-null, the kill.
@@ -880,8 +907,6 @@ public:
 	int Calc_FameKill( CChar * pKill );
 
     /**
-     * @fn  int CServerConfig::Calc_KarmaKill( CChar * pKill, NOTO_TYPE NotoThem );
-     *
      * @brief   Calculates the karma given or lost by the kill.
      *
      * @param [in,out]  pKill   If non-null, the kill.
@@ -892,8 +917,6 @@ public:
 	int Calc_KarmaKill( CChar * pKill, NOTO_TYPE NotoThem );
 
     /**
-     * @fn  int CServerConfig::Calc_KarmaScale( int iKarma, int iKarmaChange );
-     *
      * @brief   Scale the karma based on the current level, Should be harder to gain karma than to loose it.
      *
      * @param   iKarma          Zero-based index of the karma.
@@ -904,8 +927,6 @@ public:
 	int Calc_KarmaScale( int iKarma, int iKarmaChange );
 
     /**
-     * @fn  lpctstr CServerConfig::Calc_MaptoSextant( CPointMap pntCoords );
-     *
      * @brief   Translates map coords to sextant coords.
      *
      * @author  Javier
@@ -920,22 +941,18 @@ public:
 #define SysMessageDefault( msg )	SysMessage( g_Cfg.GetDefaultMsg( msg ) )
 
     /**
-     * @fn  lpctstr CServerConfig::GetDefaultMsg(lpctstr pszKey);
-     *
      * @brief   Gets default message (sphere_msgs.scp).
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      *
      * @return  The default message.
      */
-	lpctstr GetDefaultMsg(lpctstr pszKey);
+	lpctstr GetDefaultMsg(lpctstr ptcKey);
 
     /**
-    * @fn  lpctstr CServerConfig::GetDefaultMsg(lpctstr pszKey);
-    *
     * @brief   Gets default message (sphere_msgs.scp).
     *
-    * @param   pszKey  The key.
+    * @param   ptcKey  The key.
     *
     * @return  The default message.
     */

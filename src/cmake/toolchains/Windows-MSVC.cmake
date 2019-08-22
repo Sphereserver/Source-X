@@ -122,5 +122,6 @@ function (toolchain_exe_stuff)
 
 	#-- Custom .vcxproj settings (for now, it only affects the debugger working directory).
 
+	SET(SRCDIR ${CMAKE_SOURCE_DIR}) # for the sake of shortness
 	CONFIGURE_FILE("cmake/spheresvr.vcxproj.user.in" "${CMAKE_BINARY_DIR}/spheresvr.vcxproj.user" @ONLY)
 endfunction()

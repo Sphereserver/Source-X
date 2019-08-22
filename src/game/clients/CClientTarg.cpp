@@ -283,7 +283,7 @@ bool CClient::OnTarg_UnExtract( CObjBase * pObj, const CPointMap & pt )
 	if ( ! s.ReadKeyParse())
 		return false; // this has the item count
 
-	int iItemCount = ATOI(s.GetKey()); // item count
+	int iItemCount = atoi(s.GetKey()); // item count
 	while (iItemCount > 0)
 	{
 		if ( ! s.ReadKeyParse())
@@ -292,7 +292,7 @@ bool CClient::OnTarg_UnExtract( CObjBase * pObj, const CPointMap & pt )
 		int64 piCmd[4];		// Maximum parameters in one line
 		Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
 
-		CItem * pItem = CItem::CreateTemplate((ITEMID_TYPE)(ATOI(s.GetKey())), nullptr, m_pChar);
+		CItem * pItem = CItem::CreateTemplate((ITEMID_TYPE)(atoi(s.GetKey())), nullptr, m_pChar);
 		if ( pItem == nullptr )
 			return false;
 
@@ -588,7 +588,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 	case CV_NUDGE:
 		{
 			tchar szTmp[512];
-			strncpynull( szTmp, m_Targ_Text, CountOf(szTmp));
+			Str_CopyLimitNull( szTmp, m_Targ_Text, CountOf(szTmp));
 
 			int64 piArgs[3];		// Maximum parameters in one line
 			Str_ParseCmds( szTmp, piArgs, CountOf( piArgs ));
@@ -608,7 +608,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 				CPointMap ptMove = pItem->GetTopPoint();
 				ptMove += ptNudge;
 				pItem->MoveToCheck( ptMove );
-				iCount++;
+				++iCount;
 			}
 
 			CWorldSearch AreaChar( ptCtr, iRadius );
@@ -693,7 +693,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 	case CV_TILE:
 		{
 			tchar szTmp[256];
-			strncpynull( szTmp, m_Targ_Text, CountOf(szTmp));
+			Str_CopyLimitNull( szTmp, m_Targ_Text, CountOf(szTmp));
 
 			int64 piArgs[16];		// Maximum parameters in one line
 			int iArgQty = Str_ParseCmds( szTmp, piArgs, CountOf( piArgs ));
@@ -1405,7 +1405,7 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 	// CLIMODE_TARG_SKILL_MAGERY
 
     const CChar *pTargChar = dynamic_cast<CChar*>(pObj);
-    if (pObj && pTargChar->Can(CAN_C_NONSELECTABLE))
+    if (pTargChar && pTargChar->Can(CAN_C_NONSELECTABLE))
         return false;
 
 	const CSpellDef * pSpell = g_Cfg.GetSpellDef( m_tmSkillMagery.m_Spell );
@@ -1666,7 +1666,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
     else
     {
         trigtype = ITRIG_TARGON_GROUND;
-        m_Targ_UID.ClearUID();
+        m_Targ_UID.InitUID();
         if ( !IsSetOF(OF_NoTargTurn) && pt.IsValidPoint() )
             m_pChar->UpdateDir(pt);
     }
@@ -1839,6 +1839,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		case IT_JUNK:
 			SysMessageDefault( DEFMSG_ITEMUSE_JUNK_REACH );
 			return false;
+
 		case IT_FOLIAGE:
 		case IT_TREE:
 			// Just targetted a tree type
@@ -1849,7 +1850,6 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			return( m_pChar->Skill_Start( SKILL_LUMBERJACKING ));
 
 		case IT_LOG:
-
 			if ( ! m_pChar->CanUse( pItemTarg, true ))
 			{
 				SysMessageDefault( DEFMSG_ITEMUSE_LOG_UNABLE );
@@ -2118,7 +2118,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 		pItemTarg->m_itLoom.m_ridCloth = CResourceIDBase(RES_ITEMDEF, pItemUse->GetDispID());
 
 		int iUsed = 0;
-		int iNeed = CountOf( sm_Txt_LoomUse ) - 1;
+		int iNeed = int(CountOf( sm_Txt_LoomUse ) - 1);
 		int iHave = pItemTarg->m_itLoom.m_ClothQty;
 		if ( iHave < iNeed )
 		{
@@ -2126,7 +2126,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 			iUsed = pItemUse->ConsumeAmount( (word)iNeed );
 		}
 
-		if ( (uint)(iHave  + iUsed) < (CountOf( sm_Txt_LoomUse ) - 1) )
+		if ( (iHave + iUsed) < int(CountOf( sm_Txt_LoomUse ) - 1) )
 		{
 			pItemTarg->m_itLoom.m_ClothQty += iUsed;
 			SysMessage( sm_Txt_LoomUse[ pItemTarg->m_itLoom.m_ClothQty ] );

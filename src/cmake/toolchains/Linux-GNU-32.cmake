@@ -18,7 +18,7 @@ function (toolchain_exe_stuff)
 		-Wno-error=unused-but-set-variable -Wno-maybe-uninitialized -Wno-implicit-function-declaration") # this line is for warnings issued by 3rd party C code
 	SET (CXX_WARNING_OPTS
 		"-Wall -Wextra -Wno-nonnull-compare -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough\
-		-Wno-parentheses -Wno-misleading-indentation -Wno-conversion-null -Wno-invalid-offsetof -Wno-unused-result")
+		-Wno-parentheses -Wno-misleading-indentation -Wno-conversion-null -Wno-unused-result")
 	SET (C_ARCH_OPTS	"-march=i686 -m32")
 	SET (CXX_ARCH_OPTS	"-march=i686 -m32")
 	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")

@@ -102,43 +102,10 @@ public:
 	{
 		return ( m_codes[0] != 0 );
 	}
-	void GetStrDef( tchar * pszLang )
-	{
-		if ( ! IsDef())
-		{
-			strcpy( pszLang, "enu" );
-		}
-		else
-		{
-			memcpy( pszLang, m_codes, 3 );
-			pszLang[3] = '\0';
-		}
-	}
-	void GetStr( tchar * pszLang ) const
-	{
-		memcpy( pszLang, m_codes, 3 );
-		pszLang[3] = '\0';
-	}
-	lpctstr GetStr() const
-	{
-		tchar * pszTmp = Str_GetTemp();
-		GetStr( pszTmp );
-		return pszTmp;
-	}
-	bool Set( lpctstr pszLang )
-	{
-		// needs not be terminated!
-		if ( pszLang != nullptr )
-		{
-			memcpy( m_codes, pszLang, 3 );
-			m_codes[3] = 0;
-			if ( iswalnum(m_codes[0]))
-				return true;
-			// not valid !
-		}
-		m_codes[0] = 0;
-		return false;
-	}
+    void GetStrDef(tchar* pszLang);
+    void GetStr(tchar* pszLang) const;
+    lpctstr GetStr() const;
+    bool Set(lpctstr pszLang);
 };
 
 enum XCMD_TYPE	// XCMD_* messages are unique in both directions.
@@ -833,26 +800,26 @@ enum RACE_TYPE		// character race, used in new character creation (0x8D) and sta
 
 #define MAX_TALK_BUFFER		256	// how many chars can anyone speak all at once? (client speech is limited to 128 chars and journal is limited to 256 chars)
 #define MAX_ITEM_NAME_SIZE	256	// imposed by client for protocol
-#define MAX_NAME_SIZE 30
+#define MAX_NAME_SIZE       30
 
-#define MAX_ACCOUNT_NAME_SIZE MAX_NAME_SIZE
-#define MAX_ACCOUNT_PASSWORD_ENTER 16	// client only allows n chars.
-#define ACCOUNT_NAME_VALID_CHAR " !\"#$%&()*,/:;<=>?@[\\]^{|}~"
-#define MAX_CHARS_PER_ACCT	7
+#define MAX_ACCOUNT_NAME_SIZE       MAX_NAME_SIZE
+#define MAX_ACCOUNT_PASSWORD_ENTER  16	// client only allows n chars.
+#define ACCOUNT_NAME_VALID_CHAR     " !\"#$%&()*,/:;<=>?@[\\]^{|}~"
+#define MAX_CHARS_PER_ACCT	        7
 
-#define MAX_SERVERS 32
-#define MAX_SERVER_NAME_SIZE 32
+#define MAX_SERVERS             32
+#define MAX_SERVER_NAME_SIZE    32
 
-#define MAX_ITEMS_CONT		255	// Max items in a container. (arbitrary)
-#define MAX_MENU_ITEMS		64	// number of items in a menu. (arbitrary)
+#define MAX_ITEMS_CONT  255 // Max items in a container. (arbitrary)
+#define MAX_MENU_ITEMS  64  // number of items in a menu. (arbitrary)
 
-#define MAX_BOOK_PAGES 64	// arbitrary max number of pages.
-#define MAX_BOOK_LINES 8	// max lines per page.
+#define MAX_BOOK_PAGES  64  // arbitrary max number of pages.
+#define MAX_BOOK_LINES  8   // max lines per page.
 
 
 struct CEvent	// event buffer from client to server..
 {
-#define MAX_EXTCMD_ARG_LEN  30  // Arbitrary, used to prevent exploits
+#define MAX_EXTCMD_ARG_LEN  300  // Arbitrary, used to prevent exploits (smaller values will break some old 3rd party client tools)
 
     union
     {

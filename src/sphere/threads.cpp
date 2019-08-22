@@ -49,7 +49,7 @@ typedef struct tagTHREADNAME_INFO
 } THREADNAME_INFO;
 #pragma pack(pop)
 
-const dword MS_VC_EXCEPTION = 0x406D1388;
+constexpr DWORD MS_VC_EXCEPTION = 0x406D1388;
 #endif
 
 void IThread::setThreadName(const char* name)
@@ -59,10 +59,10 @@ void IThread::setThreadName(const char* name)
 	// Unix uses prctl to set thread name
 	// thread name must be 16 bytes, zero-padded if shorter
 	char name_trimmed[m_nameMaxLength] = { '\0' };	// m_nameMaxLength = 16
-    strncpynull(name_trimmed, name, m_nameMaxLength);
+    Str_CopyLimitNull(name_trimmed, name, m_nameMaxLength);
 
 #if defined(_WIN32)
-#if defined(_MSC_VER)	// TODO: support thread naming when compiling with compilers other than Microsoft
+#if defined(_MSC_VER)	// TODO: support thread naming when compiling with compilers other than Microsoft's
 	// Windows uses THREADNAME_INFO structure to set thread name
 	THREADNAME_INFO info;
 	info.dwType = 0x1000;
@@ -99,24 +99,25 @@ bool ThreadHolder::m_inited = false;
 SimpleMutex ThreadHolder::m_mutex;
 TlsValue<IThread *> ThreadHolder::m_currentThread;
 
-extern CLog g_Log;
-
 IThread *ThreadHolder::current()
 {
-	init();
+    if (!m_inited)
+	    init();
 
 	IThread * thread = m_currentThread;
 	if (thread == nullptr)
 		return DummySphereThread::getInstance();
 
-	ASSERT( thread->isSameThread(thread->getId()) );
+    // Uncomment it only for testing purposes, since this method is called very often and we don't need the additional overhead
+	//ASSERT( thread->isSameThread(thread->getId()) );
 
 	return thread;
 }
 
 void ThreadHolder::push(IThread *thread)
 {
-	init();
+    if (!m_inited)
+        init();
 
 	SimpleThreadLock lock(m_mutex);
 	m_threads.push_back(thread);
@@ -125,7 +126,8 @@ void ThreadHolder::push(IThread *thread)
 
 void ThreadHolder::pop(IThread *thread)
 {
-	init();
+    if (!m_inited)
+        init();
 	if( m_threadCount <= 0 )
 		throw CSError(LOGL_ERROR, 0, "Trying to dequeue thread while no threads are active");
 
@@ -160,13 +162,11 @@ IThread * ThreadHolder::getThreadAt(size_t at)
 
 void ThreadHolder::init()
 {
-	if( !m_inited )
-	{
-		memset(g_tmpStrings, 0, sizeof(g_tmpStrings));
-		memset(g_tmpTemporaryStringStorage, 0, sizeof(g_tmpTemporaryStringStorage));
+	ASSERT(!m_inited);
+    memset(g_tmpStrings, 0, sizeof(g_tmpStrings));
+    memset(g_tmpTemporaryStringStorage, 0, sizeof(g_tmpTemporaryStringStorage));
 
-		m_inited = true;
-	}
+    m_inited = true;
 }
 
 /*
@@ -522,6 +522,7 @@ AbstractSphereThread::AbstractSphereThread(const char *name, Priority priority)
 	m_stackPos = 0;
 	memset(m_stackInfo, 0, sizeof(m_stackInfo));
 	m_freezeCallStack = false;
+    m_exceptionStackUnwinding = false;
 #endif
 
 	// profiles that apply to every thread
@@ -537,7 +538,7 @@ char *AbstractSphereThread::allocateBuffer()
 	SimpleThreadLock stlBuffer(g_tmpStringMutex);
 
 	char * buffer = nullptr;
-	g_tmpStringIndex++;
+	++g_tmpStringIndex;
 
 	if( g_tmpStringIndex >= THREAD_TSTRING_STORAGE )
 	{
@@ -599,30 +600,69 @@ bool AbstractSphereThread::shouldExit()
 	return AbstractThread::shouldExit();
 }
 
+void AbstractSphereThread::exceptionCaught()
+{
 #ifdef THREAD_TRACK_CALLSTACK
+    if (m_exceptionStackUnwinding == false)
+        printStackTrace();
+    else
+        m_exceptionStackUnwinding = false;
+#endif
+}
+
+#ifdef THREAD_TRACK_CALLSTACK
+void AbstractSphereThread::pushStackCall(const char *name)
+{
+    if (m_freezeCallStack == false)
+    {
+        m_stackInfo[m_stackPos].functionName = name;
+        m_stackInfo[m_stackPos].startTime = GetPreciseSysTimeMicro();
+        ++m_stackPos;
+        m_stackInfo[m_stackPos].startTime = 0;
+    }
+}
+
+void AbstractSphereThread::exceptionNotifyStackUnwinding(void)
+{
+    //ASSERT(isCurrentThread());
+    if (m_exceptionStackUnwinding == false)
+    {
+        m_exceptionStackUnwinding = true;
+        printStackTrace();
+    }
+}
+
 void AbstractSphereThread::printStackTrace()
 {
 	// don't allow call stack to be modified whilst we're printing it
 	freezeCallStack(true);
+    
+    const uint threadId = getId();
+    const lpctstr threadName = getName();
+    llong startTime = m_stackInfo[0].startTime;
 
-	llong startTime = m_stackInfo[0].startTime;
-	int timedelta;
-	uint threadId = getId();
-    lpctstr threadName = getName();
-
-	g_Log.EventDebug("Printing STACK TRACE for debugging.\n");
-	g_Log.EventDebug(" ___ thread (id) name __ |  # | _____________ function _____________ | ticks passed from previous function start\n");
-	for ( size_t i = 0; i < 0x1000; ++i )
+	g_Log.EventDebug("Printing STACK TRACE for debugging purposes.\n");
+    // On Windows versions prior to XP, startTime is the number of ticks, not microseconds
+	g_Log.EventDebug(" __ thread (id) name __ |  # | _____________ function _____________ | microseconds passed from previous function start\n");
+	for ( size_t i = 0; i < sizeof(m_stackInfo); ++i )
 	{
 		if( m_stackInfo[i].startTime == 0 )
 			break;
 
-		timedelta = (int)(m_stackInfo[i].startTime - startTime);
+        const bool origin = (i == (m_stackPos - 1));
+        lpctstr extra = " ";
+        if (origin)
+        {
+            if (m_exceptionStackUnwinding)
+                extra = "<-- last function call (stack unwinding began here)";
+            else
+                extra = "<-- exception catch point (below is guessed and could be incorrect!)";
+        }
+
+        const int timedelta = (int)(m_stackInfo[i].startTime - startTime);
 		g_Log.EventDebug("(%0.5u)%16.16s | %2d | %36.36s | +%d %s\n",
-			threadId, threadName, i, m_stackInfo[i].functionName, timedelta,
-				( i == (m_stackPos - 1) ) ?
-				"<-- exception catch point (below is guessed and could be incorrect!)" :
-				"");
+			threadId, threadName, i, m_stackInfo[i].functionName, timedelta, extra);
+
 		startTime = m_stackInfo[i].startTime;
 	}
 
@@ -652,3 +692,31 @@ DummySphereThread *DummySphereThread::getInstance()
 void DummySphereThread::tick()
 {
 }
+
+
+/*
+* StackDebugInformation
+*/
+StackDebugInformation::StackDebugInformation(const char *name)
+{
+    m_context = static_cast<AbstractSphereThread *>(ThreadHolder::current());
+    if (m_context != nullptr)
+        m_context->pushStackCall(name);
+}
+
+StackDebugInformation::~StackDebugInformation()
+{
+    ASSERT(m_context != nullptr);
+
+#if __cplusplus >= __cpp_lib_uncaught_exceptions
+    if (std::uncaught_exceptions() != 0)
+#else
+    if (std::uncaught_exception()) // deprecated in C++17
+#endif
+    {
+        // Exception was thrown and stack unwinding is in progress.
+        m_context->exceptionNotifyStackUnwinding();
+    }
+    m_context->popStackCall();
+}
+

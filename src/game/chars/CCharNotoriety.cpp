@@ -210,12 +210,12 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 		if (m_pPlayer)
 		{
 			// Check the guild/town stuff
-			CItemStone * pMyTown = Guild_Find(MEMORY_TOWN);
-			CItemStone * pMyGuild = Guild_Find(MEMORY_GUILD);
+			const CItemStone * pMyTown = Guild_Find(MEMORY_TOWN);
+			const CItemStone * pMyGuild = Guild_Find(MEMORY_GUILD);
 			if (pMyGuild || pMyTown)
 			{
-				CItemStone * pViewerGuild = pCharViewer->Guild_Find(MEMORY_GUILD);
-				CItemStone * pViewerTown = pCharViewer->Guild_Find(MEMORY_TOWN);
+				const CItemStone * pViewerGuild = pCharViewer->Guild_Find(MEMORY_GUILD);
+				const CItemStone * pViewerTown = pCharViewer->Guild_Find(MEMORY_TOWN);
 				// Are we both in a guild?
 				if (pViewerGuild || pViewerTown)
 				{
@@ -256,7 +256,7 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 	if (this != pCharViewer) // Am I checking myself?
 	{
 		// If they saw me commit a crime or I am their aggressor then criminal to just them.
-		CItemMemory * pMemory = pCharViewer->Memory_FindObjTypes(this, MEMORY_SAWCRIME | MEMORY_AGGREIVED);
+		const CItemMemory * pMemory = pCharViewer->Memory_FindObjTypes(this, MEMORY_SAWCRIME | MEMORY_AGGREIVED);
 		if (pMemory != nullptr)
 			return NOTO_CRIMINAL;
 	}
@@ -273,7 +273,7 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 HUE_TYPE CChar::Noto_GetHue(const CChar * pCharViewer, bool fIncog) const
 {
 	ADDTOCALLSTACK("CChar::Noto_GetHue");
-	CVarDefCont * sVal = GetKey("NAME.HUE", true);
+	const CVarDefCont * sVal = GetKey("NAME.HUE", true);
 	if (sVal)
 		return (HUE_TYPE)(sVal->GetValNum());
 
@@ -548,8 +548,6 @@ void CChar::Noto_Karma( int iKarmaChange, int iBottom, bool fMessage )
 	}
 }
 
-extern uint Calc_ExpGet_Exp(uint);
-
 void CChar::Noto_Kill(CChar * pKill, int iTotalKillers)
 {
 	ADDTOCALLSTACK("CChar::Noto_Kill");
@@ -583,7 +581,7 @@ void CChar::Noto_Kill(CChar * pKill, int iTotalKillers)
 		if ( !IsPriv(PRIV_GM) )
 		{
 			CScriptTriggerArgs args;
-			args.m_iN1 = m_pPlayer->m_wMurders + 1;
+			args.m_iN1 = m_pPlayer->m_wMurders + 1LL;
 			args.m_iN2 = true;
 			args.m_iN3 = false;
 
@@ -649,17 +647,12 @@ void CChar::Noto_Kill(CChar * pKill, int iTotalKillers)
 	Noto_ChangeNewMsg(iPrvLevel);	// inform any title changes
 }
 
-int CChar::NotoSave()
-{
-	ADDTOCALLSTACK("CChar::NotoSave");
-	return (int)(m_notoSaves.size());
-}
 void CChar::NotoSave_Add( CChar * pChar, NOTO_TYPE value, NOTO_TYPE color  )
 {
 	ADDTOCALLSTACK("CChar::NotoSave_Add");
 	if ( !pChar )
 		return;
-	CUID uid = pChar->GetUID();
+	const CUID& uid = pChar->GetUID();
 	if  ( !m_notoSaves.empty() )	// Checking if I already have him in the list, only if there 's any list.
 	{
 		for (std::vector<NotoSaves>::iterator it = m_notoSaves.begin(), end = m_notoSaves.end(); it != end; ++it)
@@ -731,44 +724,44 @@ void CChar::NotoSave_Update()
 void CChar::NotoSave_CheckTimeout()
 {
 	ADDTOCALLSTACK("CChar::NotoSave_CheckTimeout");
-	if (g_Cfg.m_iNotoTimeout <= 0)	// No value = no expiration.
-		return;
 	if (!m_notoSaves.empty())
 	{
-		int count = 0;
-		for (std::vector<NotoSaves>::iterator it = m_notoSaves.begin(), end = m_notoSaves.end(); it != end; ++it)
+        std::vector<CChar*> vToResend;
+
+        EXC_TRY("Loop");
+		for (std::vector<NotoSaves>::iterator it = m_notoSaves.begin(); it != m_notoSaves.end();)
 		{
 			NotoSaves & refNoto = *it;
-			if (++(refNoto.time) > g_Cfg.m_iNotoTimeout)	// updating timer while checking ini's value.
-			{
-				//m_notoSaves.erase(it);
-				NotoSave_Resend(count);
-				break;
-			}
-			++count;
+            ++refNoto.time;
+            if ((refNoto.time > g_Cfg.m_iNotoTimeout) && (g_Cfg.m_iNotoTimeout > 0))
+            {
+                vToResend.emplace_back(CUID::CharFind(refNoto.charUID));
+                it = m_notoSaves.erase(it);
+            }
+            else
+			    ++it;
 		}
+        EXC_CATCH;
+        
+        for (CChar* pChar : vToResend)
+        {
+            NotoSave_Resend(pChar);
+        }
 	}
 }
 
-void CChar::NotoSave_Resend( int id )
+void CChar::NotoSave_Resend(CChar * pChar)
 {
-	ADDTOCALLSTACK("CChar::NotoSave_Resend()");
-	if ( m_notoSaves.empty() )
-		return;
-	if ( (int)(m_notoSaves.size()) <= id )
-		return;
-	NotoSaves & refNotoSave = m_notoSaves[ id ];
-	CUID uid = refNotoSave.charUID;
-	CChar * pChar = uid.CharFind();
-	if ( ! pChar )
-		return;
-	NotoSave_Delete( pChar );
-	CObjBaseTemplate *pObj = pChar->GetTopLevelObj();
-	if ( GetDist( pObj ) < pChar->GetVisualRange() )
-		Noto_GetFlag( pChar, true , true );
+	ADDTOCALLSTACK("CChar::NotoSave_Resend");
+    if (pChar)
+    {
+        const CObjBaseTemplate* pObj = pChar->GetTopLevelObj();
+        if (GetDist(pObj) < pChar->GetVisualRange())
+            Noto_GetFlag(pChar, true, true);
+    }
 }
 
-int CChar::NotoSave_GetID( CChar * pChar )
+int CChar::NotoSave_GetID( CChar * pChar ) const
 {
 	ADDTOCALLSTACK("CChar::NotoSave_GetID(CChar)");
 	if ( !pChar || m_notoSaves.empty() )
@@ -778,8 +771,8 @@ int CChar::NotoSave_GetID( CChar * pChar )
 		int id = 0;
 		for (auto it : m_notoSaves)
 		{
-			CUID uid = it.charUID;
-			if ( uid.CharFind() && uid == (dword)(pChar->GetUID()) )
+			const CUID& uid = it.charUID;
+			if ( uid.CharFind() && uid == pChar->GetUID() )
 				return id;
 			++id;
 		}
@@ -792,18 +785,15 @@ bool CChar::NotoSave_Delete( CChar * pChar )
 	ADDTOCALLSTACK("CChar::NotoSave_Delete");
 	if ( ! pChar )
 		return false;
-	if ( NotoSave() )
+	if ( !m_notoSaves.empty() )
 	{
-		for (std::vector<NotoSaves>::iterator it = m_notoSaves.begin(), end = m_notoSaves.end(); it != end; )
+		for (std::vector<NotoSaves>::iterator it = m_notoSaves.begin(), end = m_notoSaves.end(); it != end; ++it)
 		{
-			NotoSaves & refNotoSave = *it;
-			CUID uid = refNotoSave.charUID;
-			if ( uid.CharFind() && uid == (dword)(pChar->GetUID()) )
+			if (it->charUID == pChar->GetUID() )
 			{
-				it = m_notoSaves.erase(it);
+				m_notoSaves.erase(it);
 				return true;
 			}
-			++it;
 		}
 	}
 	return false;

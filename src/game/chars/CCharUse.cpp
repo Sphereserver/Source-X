@@ -232,7 +232,7 @@ bool CChar::Use_Kindling( CItem * pKindling )
 
 	pKindling->SetID(ITEMID_CAMPFIRE);
 	pKindling->SetAttr(ATTR_MOVE_NEVER|ATTR_DECAY);
-	pKindling->SetTimeoutS((4 + pKindling->GetAmount()) * 60);
+	pKindling->SetTimeoutS((4 + (int64)pKindling->GetAmount()) * 60);
 	pKindling->SetAmount(1);	// all kindling is set to one fire
 	pKindling->m_itLight.m_pattern = LIGHT_LARGE;
 	pKindling->Update();
@@ -578,9 +578,11 @@ bool CChar::Use_Item_Web( CItem * pItemWeb )
 		return false;	// just walk through it
 
 	// Try to break it.
-	int iStr = pItemWeb->m_itWeb.m_Hits_Cur;
-	if ( iStr == 0 )
-		iStr = pItemWeb->m_itWeb.m_Hits_Cur = 60 + Calc_GetRandVal(250);
+
+    if (pItemWeb->m_itWeb.m_Hits_Cur == 0)
+        pItemWeb->m_itWeb.m_Hits_Cur = 60 + Calc_GetRandVal(250);
+    else if (pItemWeb->m_itWeb.m_Hits_Cur > INT32_MAX)
+        pItemWeb->m_itWeb.m_Hits_Cur = INT32_MAX;
 
 	// Since broken webs become spider silk, we should get out of here now if we aren't in a web.
 	CItem *pFlag = LayerFind(LAYER_FLAG_Stuck);
@@ -591,13 +593,14 @@ bool CChar::Use_Item_Web( CItem * pItemWeb )
 		return false;
 	}
 
-	if ( pFlag )
+	if ( pFlag && pFlag->IsTimerSet() )
 	{
-		if ( pFlag->IsTimerSet() )	// don't allow me to try to damage it too often
-			return true;
+		// don't allow me to try to damage it too often
+		return true;
 	}
 
-	int iDmg = pItemWeb->OnTakeDamage(Stat_GetAdjusted(STAT_STR), this);
+    int iCharStr = Stat_GetAdjusted(STAT_STR);
+	const int iDmg = pItemWeb->OnTakeDamage(iCharStr, this);
 	switch ( iDmg )
 	{
 		case 0:			// damage blocked
@@ -624,8 +627,13 @@ bool CChar::Use_Item_Web( CItem * pItemWeb )
 		ASSERT(pFlag);
 		pFlag->SetAttr(ATTR_DECAY);
 		pFlag->SetType(IT_EQ_STUCK);
-		pFlag->m_uidLink = pItemWeb->GetUID();
-		pFlag->SetTimeout(pItemWeb->GetTimerTAdjusted());
+		pFlag->m_uidLink = pItemWeb->GetUID();		
+
+        int iStuckTimerSeconds = 2; // Mininum stuck timer value is 2 seconds.
+        iCharStr = ((100 - minimum(100, iCharStr)) * (int)pItemWeb->m_itWeb.m_Hits_Cur) / 10;
+        iStuckTimerSeconds = minimum(10, iStuckTimerSeconds + iCharStr); //Maximum stuck timer value is 10 seconds
+
+		pFlag->SetTimeout(iStuckTimerSeconds * MSECS_PER_SEC);
 		LayerAdd(pFlag, LAYER_FLAG_Stuck);
 	}
 	else

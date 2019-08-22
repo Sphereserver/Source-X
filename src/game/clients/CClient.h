@@ -69,7 +69,7 @@ public:
 public:
 	void AddText( word id, lpctstr pszText );
 	lpctstr GetName() const;
-	bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false );
 
 public:
 	CDialogResponseArgs()
@@ -151,7 +151,9 @@ public:
 	CUID m_Prop_UID;		// The object of /props (used for skills list as well!)
 
 	// Gump stuff
-	typedef std::map<int,int> OpenedGumpsMap_t;
+    //  first uint: dialog's CResourceID.GetPrivateUID(), or special dialog code
+    //  second int: count (how much of that dialogs are currently open)
+	typedef std::map<uint,int> OpenedGumpsMap_t;
 	OpenedGumpsMap_t m_mapOpenedGumps;
 
 	// Throwing weapons stuff (this is used to play weapon returning anim after throw it)
@@ -172,7 +174,7 @@ public:
 	CPointMap  m_Targ_p;		// For script targeting,
 	int64 m_Targ_Timeout;       // timeout time for targeting
 
-								// Context of the targetting setup. depends on CLIMODE_TYPE m_Targ_Mode
+	// Context of the targetting setup. depends on CLIMODE_TYPE m_Targ_Mode
 	union
 	{
 		// CLIMODE_SETUP_CONNECTING
@@ -259,13 +261,13 @@ private:
 	static CHuffman m_Comp;
 
 private:
-	bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
+	bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef );
 
 	bool OnRxConsoleLoginComplete();
 	bool OnRxConsole( const byte * pData, uint len );
 	bool OnRxAxis( const byte * pData, uint len );
 	bool OnRxPing( const byte * pData, uint len );
-	bool OnRxWebPageRequest( byte * pRequest, uint len );
+	bool OnRxWebPageRequest( byte * pRequest, size_t len );
 
 	byte LogIn( CAccount * pAccount, CSString & sMsg );
 	byte LogIn( lpctstr pszName, lpctstr pPassword, CSString & sMsg );
@@ -364,7 +366,7 @@ public:
 	byte Setup_Start( CChar * pChar ); // Send character startup stuff to player
 
 
-									   // translated commands.
+    // translated commands.
 private:
 	void Cmd_GM_PageInfo();
 	int Cmd_Extract( CScript * pScript, const CRectMap &rect, int & zlowest );
@@ -405,7 +407,7 @@ public:
 	}
 
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute script type command on me
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString & s, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_LoadVal( CScript & s ) override;
 
 	// Low level message traffic.
@@ -454,7 +456,7 @@ public:
 	void addItem_InContainer( const CItem * pItem );
 	void addItem( CItem * pItem );
 
-	void addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word durationSeconds = 0, lpctstr* pArgs = 0, uint uiArgCount = 0) const;
+	void addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word durationSeconds = 0, lpctstr* pArgs = nullptr, uint uiArgCount = 0) const;
 	void removeBuff(const BUFF_ICONS IconId) const;
 	void resendBuffs() const;
 
@@ -534,7 +536,7 @@ public:
 	void addBondedStatus( const CChar * pChar, bool fIsDead ) const;
 	void addSkillWindow(SKILL_TYPE skill, bool fFromInfo = false) const; // Opens the skills list
 	void addBulletinBoard( const CItemContainer * pBoard );
-	bool addBBoardMessage( const CItemContainer * pBoard, BBOARDF_TYPE flag, CUID uidMsg );
+	bool addBBoardMessage( const CItemContainer * pBoard, BBOARDF_TYPE flag, const CUID& uidMsg );
 
 	void addToolTip( const CObjBase * pObj, lpctstr psztext ) const;
 	void addDrawMap( CItemMap * pItem );
@@ -547,7 +549,7 @@ public:
 	void addItemMenu( CLIMODE_TYPE mode, const CMenuItem * item, uint count, CObjBase * pObj = nullptr );
 	void addGumpDialog( CLIMODE_TYPE mode, const CSString * sControls, uint iControls, const CSString * psText, uint iTexts, int x, int y, CObjBase * pObj = nullptr, dword dwRid = 0 );
 
-	bool addGumpDialogProps( CUID uid );
+	bool addGumpDialogProps( const CUID& uid );
 
 	void addLoginComplete();
 	void addChatSystemMessage(CHATMSG_TYPE iType, lpctstr pszName1 = nullptr, lpctstr pszName2 = nullptr, CLanguageID lang = 0 );
@@ -739,29 +741,29 @@ public:
 	CItemMultiCustom * m_pHouseDesign; // The building this client is designing
 
 public:
-	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const
+	lpctstr GetDefStr( lpctstr ptcKey, bool fZero = false ) const
 	{
-		return m_BaseDefs.GetKeyStr( pszKey, fZero );
+		return m_BaseDefs.GetKeyStr( ptcKey, fZero );
 	}
 
-	int64 GetDefNum( lpctstr pszKey ) const
+	int64 GetDefNum( lpctstr ptcKey ) const
 	{
-		return m_BaseDefs.GetKeyNum( pszKey );
+		return m_BaseDefs.GetKeyNum( ptcKey );
 	}
 
-	void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true)
+	void SetDefNum(lpctstr ptcKey, int64 iVal, bool fZero = true)
 	{
-		m_BaseDefs.SetNum(pszKey, iVal, fZero);
+		m_BaseDefs.SetNum(ptcKey, iVal, fZero);
 	}
 
-	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true)
+	void SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true)
 	{
-		m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero);
+		m_BaseDefs.SetStr(ptcKey, fQuoted, pszVal, fZero);
 	}
 
-	void DeleteDef(lpctstr pszKey)
+	void DeleteDef(lpctstr ptcKey)
 	{
-		m_BaseDefs.DeleteKey(pszKey);
+		m_BaseDefs.DeleteKey(ptcKey);
 	}
 
 #ifndef _MTNETWORK

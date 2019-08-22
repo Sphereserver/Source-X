@@ -81,22 +81,26 @@ void CItemContainer::r_Write( CScript &s )
 	r_WriteContent(s);
 }
 
-bool CItemContainer::r_GetRef( lpctstr &pszKey, CScriptObj *&pRef )
+bool CItemContainer::r_GetRef( lpctstr &ptcKey, CScriptObj *&pRef )
 {
 	ADDTOCALLSTACK("CItemContainer::r_GetRef");
-	if ( r_GetRefContainer(pszKey, pRef) )
+	if ( r_GetRefContainer(ptcKey, pRef) )
 		return true;
 
-	return CItemVendable::r_GetRef(pszKey, pRef);
+	return CItemVendable::r_GetRef(ptcKey, pRef);
 }
 
-bool CItemContainer::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc )
+bool CItemContainer::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CItemContainer::r_WriteVal");
+
 	EXC_TRY("WriteVal");
-	if ( r_WriteValContainer(pszKey, sVal, pSrc) )
+
+	if ( r_WriteValContainer(ptcKey, sVal, pSrc) )
 		return true;
-	return CItemVendable::r_WriteVal(pszKey, sVal, pSrc);
+	return (fNoCallParent ? false : CItemVendable::r_WriteVal(ptcKey, sVal, pSrc));
+
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
@@ -215,8 +219,8 @@ void CItemContainer::Trade_Status( bool bCheck )
 			pChar1->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_TRADE_RECEIVED_GOLD), pPartner->m_itEqTradeWindow.m_iGold, pChar2->GetName());
 		}
 
-		int64 iGold1 = m_itEqTradeWindow.m_iGold + (m_itEqTradeWindow.m_iPlatinum * 1000000000);
-		int64 iGold2 = pPartner->m_itEqTradeWindow.m_iGold + (pPartner->m_itEqTradeWindow.m_iPlatinum * 1000000000);
+		const int64 iGold1 = m_itEqTradeWindow.m_iGold           + (          m_itEqTradeWindow.m_iPlatinum * 1000000000LL);
+		const int64 iGold2 = pPartner->m_itEqTradeWindow.m_iGold + (pPartner->m_itEqTradeWindow.m_iPlatinum * 1000000000LL);
 		pChar1->m_virtualGold += iGold2 - iGold1;
 		pChar2->m_virtualGold += iGold1 - iGold2;
 		pChar1->UpdateStatsFlag();
@@ -245,8 +249,8 @@ void CItemContainer::Trade_UpdateGold( dword platinum, dword gold )
 	bool bUpdateChar2 = pChar2->GetClient()->GetNetState()->isClientVersion(MINCLIVER_NEWSECURETRADE);
 
 	// To prevent cheating, check if the char really have these gold/platinum values
-	int64 iMaxValue = pChar1->m_virtualGold;
-	if ( gold + (platinum * 1000000000) > iMaxValue )
+	const int64 iMaxValue = pChar1->m_virtualGold;
+	if ( gold + (platinum * 1000000000LL) > iMaxValue )
 	{
 		gold = (dword)(iMaxValue % 1000000000);
 		platinum = (dword)(iMaxValue / 1000000000);
@@ -325,7 +329,7 @@ void CItemContainer::OnWeightChange( int iChange )
 	if ( iChange == 0 )
 		return;	// no change
 
-				// some containers do not add weight to you.
+	// some containers do not add weight to you.
 	if ( !IsWeighed() )
 		return;
 
@@ -530,9 +534,9 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 			pt.m_y = tmp_MaxY;
 	}
 
+    bool fStackInsert = false;
 	if ( pt.m_x <= 0 || pt.m_y <= 0 || pt.m_x > 512 || pt.m_y > 512 )	// invalid container location ?
 	{
-		bool fInsert = false;
 		// Try to stack it.
 		if ( !g_Serv.IsLoading() && pItem->Item_GetDef()->IsStackableType() && !bForceNoStack )
 		{
@@ -541,12 +545,12 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 				pt = pTry->GetContainedPoint();
 				if ( pItem->Stack(pTry) )
 				{
-					fInsert = true;
+                    fStackInsert = true;
 					break;
 				}
 			}
 		}
-		if ( !fInsert )
+		if ( !fStackInsert)
 			pt = GetRandContainerLoc();
 	}
 
@@ -573,12 +577,6 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 	CContainer::ContentAddPrivate(pItem);
 	pItem->SetContainedPoint(pt);
 	pItem->SetContainedGridIndex(gridIndex);
-
-	// if an item needs OnTickStatusUpdate called on the next tick, it needs
-	// to be added to a separate list since it won't receive ticks whilst in
-	// this container
-	if ( pItem->m_fStatusUpdate != 0 )
-        g_World.m_ObjStatusUpdates.emplace(pItem);
 
 	switch ( GetType() )
 	{
@@ -628,7 +626,9 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 	}
 
 	pItem->Update();
-    UpdatePropertyFlag();
+    if (!fStackInsert)
+        pItem->UpdatePropertyFlag();
+    // UpdatePropertyFlag for this item is called by CContainer::ContentAddPrivate -> CItemContainer::OnWeightChange
 }
 
 void CItemContainer::ContentAdd( CItem *pItem, bool bForceNoStack )
@@ -1198,7 +1198,7 @@ enum ICV_TYPE
 	ICV_QTY
 };
 
-lpctstr const CItemContainer::sm_szVerbKeys[ICV_QTY+1] =
+lpctstr constexpr CItemContainer::sm_szVerbKeys[ICV_QTY+1] =
 {
 	"CLOSE",
 	"DELETE",

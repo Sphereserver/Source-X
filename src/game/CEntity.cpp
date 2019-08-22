@@ -22,14 +22,11 @@ void CEntity::Delete(bool fForce)
     ADDTOCALLSTACK_INTENSIVE("CEntity::Delete");
     if (_List.empty())
         return;
-    for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
+    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
     {
         CComponent *pComponent = it->second;
-        if (pComponent)
-        {
-            pComponent->Delete(fForce);
-        }
-        UnsubscribeComponent(it, false);
+        ASSERT(pComponent);
+        pComponent->Delete(fForce);
     }
     _List.clear();
 }
@@ -39,13 +36,11 @@ void CEntity::ClearComponents()
     ADDTOCALLSTACK_INTENSIVE("CEntity::ClearComponents");
     if (_List.empty())
         return;
-    for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
+    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
     {
         CComponent *pComponent = it->second;
-        if (pComponent)
-        {
-            delete _List[pComponent->GetType()];
-        }
+        ASSERT(pComponent);
+        delete pComponent;
     }
     _List.clear();
 }
@@ -54,7 +49,7 @@ void CEntity::SubscribeComponent(CComponent * pComponent)
 {
     ADDTOCALLSTACK_INTENSIVE("CEntity::SubscribeComponent");
     COMP_TYPE compType = pComponent->GetType();
-    if (_List.count(compType))
+    if (_List.end() != _List.find(compType))
     {
         delete pComponent;
         PERSISTANT_ASSERT(0);  // This should never happen
@@ -64,7 +59,7 @@ void CEntity::SubscribeComponent(CComponent * pComponent)
     _List[compType] = pComponent;
 }
 
-void CEntity::UnsubscribeComponent(std::map<COMP_TYPE, CComponent*>::iterator& it, bool fEraseFromMap)
+void CEntity::UnsubscribeComponent(iterator& it, bool fEraseFromMap)
 {
     ADDTOCALLSTACK_INTENSIVE("CEntity::UnsubscribeComponent(it)");
     delete it->second;
@@ -82,7 +77,7 @@ void CEntity::UnsubscribeComponent(CComponent *pComponent)
         return;
     }
     COMP_TYPE compType = pComponent->GetType();
-    if (!_List.count(compType))
+    if (_List.end() == _List.find(compType))
     {
         g_Log.EventError("Trying to unsuscribe not suscribed component (%d)\n", (int)pComponent->GetType());    // Should never happen?
         delete pComponent;
@@ -94,34 +89,33 @@ void CEntity::UnsubscribeComponent(CComponent *pComponent)
 bool CEntity::IsComponentSubscribed(CComponent *pComponent) const
 {
     ADDTOCALLSTACK_INTENSIVE("CEntity::IsComponentSubscribed");
-    return (!_List.empty() && _List.count(pComponent->GetType()));
+    return ( !_List.empty() && (_List.end() != _List.find(pComponent->GetType())) );
 }
 
-CComponent * CEntity::GetComponent(COMP_TYPE type)
+CComponent * CEntity::GetComponent(COMP_TYPE type) const
 {
     ADDTOCALLSTACK_INTENSIVE("CEntity::GetComponent");
     ASSERT((type >= 0) && (type < COMP_QTY));
-    if (!_List.empty() && _List.count(type))
+    if (_List.empty())
     {
-        return _List[type];
+        return nullptr;
     }
-    return nullptr;
+    auto it = _List.find(type);
+    return (it != _List.end()) ? it->second : nullptr;
 }
 
-bool CEntity::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
+bool CEntity::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
 {
     ADDTOCALLSTACK_INTENSIVE("CEntity::r_GetRef");
     if (_List.empty())
         return false;
-    for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
+    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
     {
         CComponent *pComponent = it->second;
-        if (pComponent)
+        ASSERT(pComponent);
+        if (pComponent->r_GetRef(ptcKey, pRef))   // Returns true if there is a match.
         {
-            if (pComponent->r_GetRef(pszKey, pRef))   // Returns true if there is a match.
-            {
-                return true;
-            }
+            return true;
         }
     }
     return false;
@@ -132,30 +126,26 @@ void CEntity::r_Write(CScript & s) // Storing data in the worldsave.
     ADDTOCALLSTACK_INTENSIVE("CEntity::r_Write");
     if (_List.empty() && !s.IsWriteMode())
         return;
-    for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
+    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
     {
         CComponent *pComponent = it->second;
-        if (pComponent)
-        {
-            pComponent->r_Write(s);
-        }
+        ASSERT(pComponent);
+        pComponent->r_Write(s);
     }
 }
 
-bool CEntity::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
+bool CEntity::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc)
 {
     ADDTOCALLSTACK_INTENSIVE("CEntity::r_WriteVal");
     if (_List.empty())
         return false;
-    for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
+    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
     {
         CComponent *pComponent = it->second;
-        if (pComponent)
+        ASSERT(pComponent);
+        if (pComponent->r_WriteVal(ptcKey, sVal, pSrc))   // Returns true if there is a match.
         {
-            if (pComponent->r_WriteVal(pszKey, sVal, pSrc))   // Returns true if there is a match.
-            {
-                return true;
-            }
+            return true;
         }
     }
     return false;
@@ -166,15 +156,13 @@ bool CEntity::r_LoadVal(CScript & s)
     ADDTOCALLSTACK_INTENSIVE("CEntity::r_LoadVal");
     if (_List.empty())
         return false;
-    for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
+    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
     {
         CComponent *pComponent = it->second;
-        if (pComponent)
+        ASSERT(pComponent);
+        if (pComponent->r_LoadVal(s))  // Returns true if there is a match.
         {
-            if (pComponent->r_LoadVal(s))  // Returns true if there is a match.
-            {
-                return true;
-            }
+            return true;
         }
     }
     return false;
@@ -185,15 +173,13 @@ bool CEntity::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from s
     ADDTOCALLSTACK_INTENSIVE("CEntity::r_Verb");
     if (_List.empty())
         return false;
-    for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
+    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
     {
         CComponent *pComponent = it->second;
-        if (pComponent)
+        ASSERT(pComponent);
+        if (pComponent->r_Verb(s, pSrc))   // Returns true if there is a match.
         {
-            if (pComponent->r_Verb(s, pSrc))   // Returns true if there is a match.
-            {
-                return true;
-            }
+            return true;
         }
     }
     return false;
@@ -204,16 +190,14 @@ void CEntity::Copy(const CEntity *target)
     ADDTOCALLSTACK_INTENSIVE("CEntity::Copy");
     if (_List.empty())
         return;
-    for (std::map<COMP_TYPE, CComponent*>::const_iterator it = target->_List.begin(); it != target->_List.end(); ++it)
+    for (auto it = target->_List.begin(), itEnd = target->_List.end(); it != itEnd; ++it)
     {
         CComponent *pTarget = it->second;    // the CComponent to copy from
-        if (pTarget)
+        ASSERT(pTarget);
+        CComponent *pCopy = GetComponent(pTarget->GetType());    // the CComponent to copy to.
+        if (pCopy)
         {
-            CComponent *pCopy = GetComponent(pTarget->GetType());    // the CComponent to copy to.
-            if (pCopy)
-            {
-                pCopy->Copy(pTarget);
-            }
+            pCopy->Copy(pTarget);
         }
     }
 }
@@ -224,21 +208,16 @@ CCRET_TYPE CEntity::OnTick()
     if (_List.empty())
         return CCRET_CONTINUE;
 
-    for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
+    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
     {
         CComponent *pComponent = it->second;
-        if (pComponent)
+        ASSERT(pComponent);
+        CCRET_TYPE iRet = pComponent->OnTickComponent();
+        if (iRet != CCRET_CONTINUE)   
         {
-            CCRET_TYPE iRet = pComponent->OnTickComponent();
-            if (iRet == CCRET_CONTINUE)   // Continue the loop.
-            {
-                continue;
-            }
-            else    // Stop the loop and return whatever return is needed.
-            {
-                return iRet;
-            }
+            return iRet;    // Stop the loop and return whatever return is needed.
         }
+        // Otherwise, continue the loop.
     }
     return CCRET_CONTINUE;
 }

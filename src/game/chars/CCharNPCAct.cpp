@@ -5,7 +5,6 @@
 #include "../../common/CException.h"
 #include "../../network/receive.h"
 #include "../clients/CClient.h"
-#include "../CPathFinder.h"
 #include "../CWorld.h"
 #include "../triggers.h"
 #include "CCharNPC.h"
@@ -34,7 +33,7 @@ enum NV_TYPE
 	NV_QTY
 };
 
-lpctstr const CCharNPC::sm_szVerbKeys[NV_QTY+1] =
+lpctstr constexpr CCharNPC::sm_szVerbKeys[NV_QTY+1] =
 {
 	"BUY",
 	"BYE",
@@ -715,13 +714,10 @@ bool CChar::NPC_LookAtCharMonster( CChar * pChar )
 	if ( ! Noto_IsCriminal() && (iFoodLevel > 40) )	// Am I not evil ?
 		return NPC_LookAtCharHuman( pChar );
 
-	// Attack if i am stronger.
-	// or i'm just stupid.
-	int iActMotivation = NPC_GetAttackMotivation( pChar );
-	if ( iActMotivation <= 0 )
-		return false;
-	if ( Fight_IsActive() && (m_Fight_Targ_UID == pChar->GetUID()))	// same targ.
-		return false;
+    // Attack if i am stronger, if it's the same target i was attacking, or i'm just stupid.
+    int iActMotivation = NPC_GetAttackMotivation(pChar);
+    if (iActMotivation <= 0)
+        return false;
 	if ( iActMotivation < m_pNPC->m_Act_Motivation )
 		return false;
 
@@ -1078,11 +1074,12 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	if ( !m_pNPC || !pSector )
 		return false;
 
+    const CPointMap& ptTop = GetTopPoint();
 	int iRange = GetVisualRange();
 	int iRangeBlur = UO_MAP_VIEW_SIGHT;
 
 	// If I can't move don't look too far.
-	if ( !Can(CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY|CAN_C_HOVER|CAN_C_RUN) || IsStatFlag(STATF_FREEZE|STATF_STONE) )
+	if ( Can(CAN_C_NONMOVER) || !Can(CAN_C_MOVEMENTCAPABLEMASK) || IsStatFlag(STATF_FREEZE|STATF_STONE) )
 	{
 		if ( !NPC_FightMayCast() )	// And i have no distance attack.
 			iRange = iRangeBlur = 2;
@@ -1090,10 +1087,10 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	else
 	{
 		// I'm mobile. do basic check if i would move here first.
-		if ( !NPC_CheckWalkHere(GetTopPoint(), m_pArea) )
+		if ( !NPC_CheckWalkHere(ptTop, m_pArea) )
 		{
 			// I should move. Someone lit a fire under me.
-			m_Act_p = GetTopPoint();
+			m_Act_p = ptTop;
 			m_Act_p.Move((DIR_TYPE)(Calc_GetRandVal(DIR_QTY)));
 			NPC_WalkToPoint(true);
 			SoundChar(CRESND_NOTICE);
@@ -1111,7 +1108,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	// Any interesting chars here ?
 	int iDist = 0;
 	CChar *pChar = nullptr;
-	CWorldSearch AreaChars(GetTopPoint(), iRange);
+	CWorldSearch AreaChars(ptTop, iRange);
 	for (;;)
 	{
 		pChar = AreaChars.GetChar();
@@ -1140,7 +1137,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	if ( fForceCheckItems )
 	{
 		CItem *pItem = nullptr;
-		CWorldSearch AreaItems(GetTopPoint(), iRange);
+		CWorldSearch AreaItems(ptTop, iRange);
 		for (;;)
 		{
 			pItem = AreaItems.GetItem();
@@ -1257,7 +1254,7 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 	if (Can(CAN_C_NONMOVER))
 		return false;
 
-	EXC_TRY("NPC_Act_Follow")
+	EXC_TRY("NPC_Act_Follow");
 	CChar * pChar = Fight_IsActive() ? m_Fight_Targ_UID.CharFind() : m_Act_UID.CharFind();
 	if (pChar == nullptr)
 	{
@@ -1657,22 +1654,23 @@ bool CChar::NPC_Act_Food()
 	ADDTOCALLSTACK("CChar::NPC_Act_Food");
 	ASSERT(m_pNPC);
 
-	int		iFood = Stat_GetVal(STAT_FOOD);
-	int		iFoodLevel = Food_GetLevelPercent();
+	const int iFood = Stat_GetVal(STAT_FOOD);
+	const int iFoodLevel = Food_GetLevelPercent();
 	if ( iFood >= 10 )
 		return false;							//	search for food is starving or very hungry
 	if ( iFoodLevel > 40 )
 		return false;							// and it is at least 60% hungry
 
-	m_pNPC->m_Act_Motivation = (uchar)(50 - (iFoodLevel / 2));
+	m_pNPC->m_Act_Motivation = (byte)(50 - (iFoodLevel / 2));
 
-	ushort	uiEatAmount = 1;
-	int		iSearchDistance = 2;
-	CItem	*pClosestFood = nullptr;
-	int		iClosestFood = 100;
-	int		iMyZ = GetTopPoint().m_z;
-	bool	bSearchGrass = false;
-	CItem	* pCropItem = nullptr;
+    const int   iMyZ = GetTopPoint().m_z;
+	ushort  uiEatAmount = 1;
+	int     iSearchDistance = 2;
+	CItem   *pClosestFood = nullptr;
+	int     iClosestFood = 100;
+	
+	bool    fSearchGrass = false;
+	CItem   *pCropItem = nullptr;
 
 	CItemContainer	*pPack = GetPack();
 	if ( pPack )
@@ -1705,7 +1703,7 @@ bool CChar::NPC_Act_Food()
 		if ( pItem->IsType(IT_CROPS) || pItem->IsType(IT_FOLIAGE) )
 		{
 			// is it ripe?
-			CItemBase * checkItemBase = pItem->Item_GetDef();
+			const CItemBase * checkItemBase = pItem->Item_GetDef();
 			if ( checkItemBase->m_ttNormal.m_tData3 )
 			{
 				// remember this, just in case we do not find any suitable food
@@ -1714,14 +1712,15 @@ bool CChar::NPC_Act_Food()
 			}
 		}
 
-		if ( pItem->GetTopPoint().m_z > (iMyZ + 10) || pItem->GetTopPoint().m_z < (iMyZ - 1) )
+        const CPointMap& ptItem = pItem->GetTopPoint();
+		if (ptItem.m_z > (iMyZ + 10) || ptItem.m_z < (iMyZ - 1) )
 			continue;
 		if ( pItem->IsAttr(ATTR_MOVE_NEVER|ATTR_STATIC|ATTR_LOCKEDDOWN|ATTR_SECURE) )
 			continue;
 
 		if ( (uiEatAmount = Food_CanEat(pItem)) > 0 )
 		{
-			int iDist = GetDist(pItem);
+			const int iDist = GetDist(pItem);
 			if ( pClosestFood )
 			{
 				if ( iDist < iClosestFood )
@@ -1784,9 +1783,9 @@ bool CChar::NPC_Act_Food()
 
 		const NPCBRAIN_TYPE brain = GetNPCBrainGroup();
 		if ( brain == NPCBRAIN_ANIMAL )						// animals eat grass always
-			bSearchGrass = true;
+			fSearchGrass = true;
 		//else if (( brain == NPCBRAIN_HUMAN ) && !iFood )	// human eat grass if starving nearly to death
-		//	bSearchGrass = true;
+		//	fSearchGrass = true;
 
 		// found any crops or foliage at least (nearby, of course)?
 		if ( pCropItem )
@@ -1794,11 +1793,11 @@ bool CChar::NPC_Act_Food()
 			if ( GetDist(pCropItem) < 5 )
 			{
 				Use_Item(pCropItem);
-				bSearchGrass = false;	// no need to eat grass if at next tick we can eat better stuff
+				fSearchGrass = false;	// no need to eat grass if at next tick we can eat better stuff
 			}
 		}
 	}
-	if ( bSearchGrass )
+	if ( fSearchGrass )
 	{
         const CCharBase *pCharDef = Char_GetDef();
         const CResourceID rid = CResourceID(RES_TYPEDEF, IT_GRASS);
@@ -2270,73 +2269,75 @@ void CChar::NPC_Pathfinding()
 {
 	ADDTOCALLSTACK("CChar::NPC_Pathfinding");
 	ASSERT(m_pNPC);
-	CPointMap local = GetTopPoint();
+	const CPointMap ptLocal = GetTopPoint();
 
 	EXC_TRY("Pathfinding");
 	EXC_SET_BLOCK("pre-checking");
 
+    const CPointMap ptTarg = m_Act_p;
+    const int dist = ptLocal.GetDist(ptTarg);
 	// If NPC_AI_ALWAYSINT is set, just make it as smart as possible.
-	int			iInt = ( NPC_GetAiFlags() & NPC_AI_ALWAYSINT ) ? 300 : Stat_GetAdjusted(STAT_INT);
-	CPointMap	pTarg = m_Act_p;
-	int			dist = local.GetDist(pTarg);
-
+	const int iInt = ( NPC_GetAiFlags() & NPC_AI_ALWAYSINT ) ? 300 : Stat_GetAdjusted(STAT_INT);
+	
 	//	do we really need to find the path?
-	if ( iInt < 75 ) return;					// too dumb
-	if ( m_pNPC->m_nextPt == pTarg ) return;			// we have path to that position already saved in m_NextX/Y
-	if ( !pTarg.IsValidPoint() ) return;		// invalid point
-	if (( pTarg.m_x == local.m_x ) && ( pTarg.m_y == local.m_y )) return; // same spot
-	if ( pTarg.m_map != local.m_map ) return;	// cannot just move to another map
-	if ( dist >= PATH_SIZE/2 ) return;			// skip too far locations which should be too slow
-	if ( dist < 2 ) return;						// skip too low distance (1 step) - good in default
-												// pathfinding is buggy near the edges of the map,
-												// so do not use it there
-	if (( local.m_x <= PATH_SIZE/2 ) || ( local.m_y <= PATH_SIZE/2 ) ||
-		( local.m_x >= ( g_MapList.GetX(local.m_map) - PATH_SIZE/2) ) ||
-		( local.m_y >= ( g_MapList.GetY(local.m_map) - PATH_SIZE/2) ))
+	if ( iInt < 30 ) // too dumb
+        return;					
+	if ( m_pNPC->m_nextPt == ptTarg ) // we have path to that position already saved in m_NextX/Y
+        return;			
+	if ( !ptTarg.IsValidPoint() ) // invalid point
+        return;
+	if (( ptTarg.m_x == ptLocal.m_x ) && ( ptTarg.m_y == ptLocal.m_y )) // same spot
+        return; 
+	if ( ptTarg.m_map != ptLocal.m_map ) // cannot just move to another map
+        return;
+	if ( dist >= MAX_NPC_PATH_STORAGE_SIZE/2 ) // skip too far locations which should be too slow
+        return;
+	if ( dist < 2 ) // skip too low distance (1 step) - good in default
+        return;
+
+	// pathfinding is buggy near the edges of the map,
+	// so do not use it there
+	if ((ptLocal.m_x <= MAX_NPC_PATH_STORAGE_SIZE/2 ) || (ptLocal.m_y <= MAX_NPC_PATH_STORAGE_SIZE/2 ) ||
+		(ptLocal.m_x >= ( g_MapList.GetX(ptLocal.m_map) - MAX_NPC_PATH_STORAGE_SIZE/2) ) ||
+		(ptLocal.m_y >= ( g_MapList.GetY(ptLocal.m_map) - MAX_NPC_PATH_STORAGE_SIZE/2) ))
 		return;
-												// need 300 int at least to pathfind each step, but always
-												// search if this is a first step
-	if (( Calc_GetRandVal(300) > iInt ) && ( m_pNPC->m_nextX[0] )) return;
+
+	// need 300 int at least to pathfind each step, but always
+	// search if this is a first step
+	if (( Calc_GetRandVal(300) > iInt ) && ( m_pNPC->m_nextX[0] ))
+        return;
 
 	//	clear saved steps list
 	EXC_SET_BLOCK("clearing last steps");
-#ifndef _WIN32
-	for (int i_tmpN=0;i_tmpN < MAX_NPC_PATH_STORAGE_SIZE;i_tmpN++)
-	{
-		m_pNPC->m_nextX[i_tmpN] = 0;
-		m_pNPC->m_nextY[i_tmpN] = 0;
-	}
-#else
 	memset(m_pNPC->m_nextX, 0, sizeof(m_pNPC->m_nextX));
 	memset(m_pNPC->m_nextY, 0, sizeof(m_pNPC->m_nextY));
-#endif
 
 	//	proceed with the pathfinding
 	EXC_SET_BLOCK("filling the map");
-	CPathFinder	path(this, pTarg);
+    // The pathfinder class is big, it's better to store that on the heap, instead of on the stack.
+    std::unique_ptr<CPathFinder> path = std::make_unique<CPathFinder>(this, ptTarg);
 
 	EXC_SET_BLOCK("searching the path");
-	if ( path.FindPath() == PATH_NONEXISTENT )
+	if ( !path->FindPath() )
 		return;
 
 	//	save the found path
 	EXC_SET_BLOCK("saving found path");
 
-	CPointMap Next;
 	// Don't read the first step, it's the same as the current position, so i = 1
-	for ( size_t i = 1; (i != path.LastPathSize()) && (i < MAX_NPC_PATH_STORAGE_SIZE /* Don't overflow*/ ); ++i )
+	for ( size_t i = 1, sz = path->LastPathSize(); (i != sz) && (i < MAX_NPC_PATH_STORAGE_SIZE /* Don't overflow*/ ); ++i )
 	{
-		Next = path.ReadStep(i);
-		m_pNPC->m_nextX[i - 1] = Next.m_x;
-		m_pNPC->m_nextY[i - 1] = Next.m_y;
+        const CPointMap& ptNext = path->ReadStep(i);
+		m_pNPC->m_nextX[i - 1] = ptNext.m_x;
+		m_pNPC->m_nextY[i - 1] = ptNext.m_y;
 	}
-	m_pNPC->m_nextPt = pTarg;
-	path.ClearLastPath(); // !! Use explicitly when using one CPathFinder object for more NPCs
+	m_pNPC->m_nextPt = ptTarg;
+	path->ClearLastPath(); // !! Use explicitly when using one CPathFinder object for more NPCs
 
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("'%s' point '%d,%d,%d,%d' [0%x]\n", GetName(), local.m_x, local.m_y, local.m_z, local.m_map, (dword)GetUID());
+	g_Log.EventDebug("'%s' point '%d,%d,%d,%d' [0%x]\n", GetName(), ptLocal.m_x, ptLocal.m_y, ptLocal.m_z, ptLocal.m_map, (dword)GetUID());
 	EXC_DEBUG_END;
 }
 
@@ -2353,7 +2354,7 @@ void CChar::NPC_Food()
 	CItem	*pClosestFood = nullptr;
 	int		iClosestFood = 100;
 	int		iMyZ = GetTopPoint().m_z;
-	bool	bSearchGrass = false;
+	bool	fSearchGrass = false;
 
 	if ( iFood >= 10 )
         return;						//	search for food is starving or very hungry
@@ -2458,12 +2459,12 @@ void CChar::NPC_Food()
 	{
 		NPCBRAIN_TYPE brain = GetNPCBrainGroup();
 		if ( brain == NPCBRAIN_ANIMAL )						// animals eat grass always
-			bSearchGrass = true;
+			fSearchGrass = true;
 		else if (( brain == NPCBRAIN_HUMAN ) && !iFood )	// human eat grass if starving nearly dead
-			bSearchGrass = true;
+			fSearchGrass = true;
 	}
 
-	if ( bSearchGrass )
+	if ( fSearchGrass )
 	{
 		const CCharBase *pCharDef = Char_GetDef();
         const CResourceID rid = CResourceID(RES_TYPEDEF, IT_GRASS);
@@ -2540,6 +2541,13 @@ void CChar::NPC_ExtraAI()
 			return;
 	}
 
+    if (!Can(CAN_C_EQUIP) && !Can(CAN_C_USEHANDS))
+    {
+        // These are checked when trying to equip the item, so avoid further processing if we know from the start
+        //  that we won't be able to use those items.
+        return;
+    }
+
 	// Equip weapons if possible
 	EXC_SET_BLOCK("weapon/shield");
 	if ( IsStatFlag(STATF_WAR) )
@@ -2551,7 +2559,7 @@ void CChar::NPC_ExtraAI()
 		CItem *pShield = LayerFind(LAYER_HAND2);
 		if ( !pShield || !pShield->IsTypeArmor() )
 		{
-			CItemContainer * pPack = GetPack();
+			const CItemContainer * pPack = GetPack();
 			if (pPack)
 			{
 				pShield = pPack->ContentFind(CResourceID(RES_TYPEDEF, IT_SHIELD));
@@ -2564,11 +2572,11 @@ void CChar::NPC_ExtraAI()
 
 	// Equip lightsource at night time
 	EXC_SET_BLOCK("light source");
-	CPointMap pt = GetTopPoint();
-	CSector *pSector = pt.GetSector();
+	const CPointMap& pt = GetTopPoint();
+	const CSector *pSector = pt.GetSector();
 	if ( pSector && pSector->IsDark() )
 	{
-		CItem *pLightSourceCheck = LayerFind(LAYER_HAND2);
+		const CItem *pLightSourceCheck = LayerFind(LAYER_HAND2);
 		if ( !(pLightSourceCheck && (pLightSourceCheck->IsType(IT_LIGHT_OUT) || pLightSourceCheck->IsType(IT_LIGHT_LIT))) )
 		{
 			CItem *pLightSource = ContentFind(CResourceID(RES_TYPEDEF, IT_LIGHT_OUT));

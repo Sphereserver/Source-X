@@ -25,6 +25,8 @@ class CEntityProps
 {
     //tsdynamicmap<COMPPROPS_TYPE, CComponentProps*> _List;
     std::map<COMPPROPS_TYPE, CComponentProps*> _List;
+    using iterator          = decltype(_List)::iterator;
+    using const_iterator    = decltype(_List)::const_iterator;
 
 public:
     CEntityProps();
@@ -48,7 +50,7 @@ public:
     * @param it Iterator to the component to unsubscribe.
     * @param fEraseFromMap Should i erase this component from the internal map? Use false if you're going to erase it manually later
     */
-    void UnsubscribeComponentProps(std::map<COMPPROPS_TYPE, CComponentProps*>::iterator& it, bool fEraseFromMap = true);
+    void UnsubscribeComponentProps(iterator& it, bool fEraseFromMap = true);
 
     /**
     * @brief Unsubscribes a CComponentProps.
@@ -94,21 +96,21 @@ public:
     /**
      * @brief Try to retrieve the property in one of the Prop Components subscribed to this Entity.
     *
-    * @param pszKey the property's key to search for (eg: name, ResCold, etc).
+    * @param ptcKey the property's key to search for (eg: name, ResCold, etc).
     * @param sVal the storage that will contain property's value.
     * @param pObjEntityProps The CObjBase holding the dynamic properties. nullptr if this method is called from a CBaseBaseDef.
     * @param pBaseEntityProps The CBaseBaseDef holding the base properties.
     *
     * @return true if there was a key to retrieve.
     */
-    static bool r_WritePropVal(lpctstr pszKey, CSString & sVal, const CObjBase *pObjEntityProps, const CBaseBaseDef *pBaseEntityProps);
+    static bool r_WritePropVal(lpctstr ptcKey, CSString & sVal, const CObjBase *pObjEntityProps, const CBaseBaseDef *pBaseEntityProps);
 
     /**
     * @brief Try to store the property in one of the Prop Components subscribed to this Entity.
     *
     * @param s the container with the keys and values to set.
     * @param pObjEntityProps The CObjBase holding the dynamic properties. nullptr if this method is called from a CBaseBaseDef.
-    * @param pBaseEntityProps The CBaseBaseDef holding the base properties.
+    * @param pBaseEntityProps The CBaseBaseDef holding the base properties. Can't be nullptr.
     *
     * @return true if the prop was stored in a Component
     */

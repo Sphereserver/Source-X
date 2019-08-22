@@ -54,11 +54,11 @@ private:
 	dword	m_CanUse;		// Base attribute flags. can_u_all/male/female..
 	word	m_weight;
 
-    CUID _uidMultiComponent;   ///< I'm a Component of a CMulti
-    CUID _uidMultiLockDown;    ///< I'm locked down in a CMulti
+    CUID _uidMultiComponent;   // I'm a Component of a CMulti
+    CUID _uidMultiLockDown;    // I'm locked down in a CMulti
 public:
-    void SetComponentOfMulti(CUID uidMulti);
-    void SetLockDownOfMulti(CUID uidMulti);
+    void SetComponentOfMulti(const CUID& uidMulti);
+    void SetLockDownOfMulti(const CUID& uidMulti);
 	byte	m_speed;
 
 // Attribute flags.
@@ -70,8 +70,10 @@ public:
 #define ATTR_MAGIC				0x0020				// DON'T SET THIS WHILE WORN! This item is magic as apposed to marked or markable.
 #define ATTR_OWNED				0x0040				// This is owned by the town. You need to steal it. NEVER DECAYS !
 #define ATTR_INVIS				0x0080				// Gray hidden item (to GM's or owners?)
-#define ATTR_CURSED				0x0100
-#define ATTR_BLESSED			0x0400
+#define ATTR_CURSED				0x0100              // Can not be insured. Will always fall to the corpse, even if somehow blessed or insured.
+                                                    //  OSI: Cannot be blessed (with an Item Bless Deed, Personal Bless Deed, or Clothing Bless Deed and can't be sent to the bank with a Bag of Sending)
+#define ATTR_BLESSED			0x0400              // Stay in your backpack when you die, Be placed into character's backpack upon resurrection if equipped before death,
+                                                    //  Cannot be stolen by using the stealing skill, Cannot be insured
 #define ATTR_FORSALE			0x1000				// For sale on a vendor.
 #define ATTR_STOLEN				0x2000				// The item is hot. m_uidLink = previous owner.
 #define ATTR_STATIC				0x8000				// WorldForge merge marker. (used for statics saves)
@@ -96,7 +98,7 @@ public:
 
 // TODO
 #define ATTR_FACTIONITEM		0x80000000000000	// ? Faction Item (Has cliloc)
-#define ATTR_VVVITEM			0x100000000000000	// ? VvV Item (Has CliLoc)
+#define ATTR_VVVITEM			0x100000000000000	// ? Vice vs Virtue Item (Has CliLoc)
 
 	uint64	m_Attr;
 
@@ -156,7 +158,7 @@ public:
 		// IT_GAME_BOARD
 		struct
 		{
-			int m_GameType;				// more1=0=chess, 1=checkers, 2=backgammon, 3=no pieces.
+			int32 m_GameType;           // more1=0=chess, 1=checkers, 2=backgammon, 3=no pieces.
 		} m_itGameBoard;
 
 		// IT_WAND
@@ -165,7 +167,7 @@ public:
 		{
 			word m_Hits_Cur;		// more1l=eqiv to quality of the item (armor/weapon).
 			word m_Hits_Max;		// more1h=can only be repaired up to this level.
-			int  m_spellcharges;	// more2=for a wand etc.
+			int32 m_spellcharges;	// more2=for a wand etc.
 			word m_spell;			// morex=SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
 			word m_spelllevel;		// morey=level of the spell. (0-1000)
 			byte m_poison_skill;	// morez=0-100 = Is the weapon poisoned ?
@@ -183,7 +185,7 @@ public:
 		{
 			word m_Hits_Cur;		// more1l= eqiv to quality of the item (armor/weapon).
 			word m_Hits_Max;		// more1h= can only be repaired up to this level.
-			int  m_spellcharges;	// more2 = ? spell charges ? not sure how used here..
+			int32 m_spellcharges;	// more2 = ? spell charges ? not sure how used here..
 			word m_spell;			// morex = SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
 			word m_spelllevel;		// morey=level of the spell. (0-1000)
 		} m_itArmor;
@@ -196,9 +198,9 @@ public:
 		// IT_LAVA
 		struct
 		{
-			short m_PolyStr;	// more1l=polymorph effect (stat modifier) of this on strength.
-			short m_PolyDex;	// more1h=polymorph effect (stat modifier) of this on dex.
-			int  m_spellcharges;// more2=not sure how used here..
+			int16 m_PolyStr;	// more1l=polymorph effect (stat modifier) of this on strength.
+			int16 m_PolyDex;	// more1h=polymorph effect (stat modifier) of this on dex.
+			int32 m_spellcharges;// more2=not sure how used here..
 			word m_spell;		// morex=SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
 			word m_spelllevel;	// morey=0-1000=level of the spell.
 			byte m_pattern;		// morez = light pattern - CAN_I_LIGHT LIGHT_QTY
@@ -327,7 +329,7 @@ public:
 		// IT_FOLIAGE - the leaves of a tree normally.
 		struct
 		{
-			int m_Respawn_Sec;					// more1 = plant respawn time in seconds. (for faster growth plants)
+			int32 m_Respawn_Sec;				// more1 = plant respawn time in seconds. (for faster growth plants)
             CResourceIDBase m_ridFruitOverride;	// more2 = Override for TDATA2 = What is the fruit of this plant
 		} m_itCrop;
 
@@ -537,11 +539,11 @@ private:
 
 protected:
 	bool SetBase( CItemBase * pItemDef );
-	virtual int FixWeirdness();
+	virtual int FixWeirdness() override;
 
 public:
-    CCFaction *GetSlayer();
-	virtual bool OnTick();
+    CCFaction *GetSlayer() const;
+	virtual bool OnTick() override;
 	virtual void OnHear( lpctstr pszCmd, CChar * pSrc );
 	CItemBase * Item_GetDef() const;
 	ITEMID_TYPE GetID() const;
@@ -577,29 +579,29 @@ public:
     */
     byte GetRangeH() const;
 
-	void SetAttr(uint64 iAttr)
+	void SetAttr(uint64 uiAttr)
 	{
-		m_Attr |= iAttr;
+		m_Attr |= uiAttr;
 	}
-	void ClrAttr(uint64 iAttr)
+	void ClrAttr(uint64 uiAttr)
 	{
-		m_Attr &= ~iAttr;
+		m_Attr &= ~uiAttr;
 	}
-	bool IsAttr(uint64 iAttr) const	// ATTR_DECAY
+	bool IsAttr(uint64 uiAttr) const	// ATTR_DECAY
 	{
-		return((m_Attr & iAttr) ? true : false);
+		return((m_Attr & uiAttr) ? true : false);
 	}
-	void SetCanUse(uint64 iCanUse)
+	void SetCanUse(uint64 uiCanUse)
 	{
-		m_CanUse |= iCanUse;
+		m_CanUse |= uiCanUse;
 	}
-	void ClrCanUse(uint64 iCanUse)
+	void ClrCanUse(uint64 uiCanUse)
 	{
-		m_CanUse &= ~iCanUse;
+		m_CanUse &= ~uiCanUse;
 	}
-	bool IsCanUse(uint64 iCanUse) const	// CanUse_None
+	bool IsCanUse(uint64 uiCanUse) const	// CanUse_None
 	{
-		return ((m_CanUse & iCanUse) ? true : false);
+		return ((m_CanUse & uiCanUse) ? true : false);
 	}
 
 	height_t GetHeight() const;
@@ -655,9 +657,9 @@ public:
     virtual void SetTimeoutD(int64 iTenths);
 
 	virtual void OnMoveFrom();
-	virtual bool MoveTo(const CPointMap& pt, bool bForceFix = false); // Put item on the ground here.
-	bool MoveToUpdate(const CPointMap& pt, bool bForceFix = false);
-	bool MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool bForceFix = false);
+	virtual bool MoveTo(const CPointMap& pt, bool fForceFix = false); // Put item on the ground here.
+	bool MoveToUpdate(const CPointMap& pt, bool fForceFix = false);
+	bool MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool fForceFix = false);
 	bool MoveToCheck(const CPointMap & pt, CChar * pCharMover = nullptr );
 	virtual bool MoveNearObj( const CObjBaseTemplate *pItem, ushort uiSteps = 0 ) override;
 
@@ -683,10 +685,12 @@ public:
 
 	void r_WriteMore1( CSString & sVal );
 	void r_WriteMore2( CSString & sVal );
+    void r_LoadMore1(dword dwVal);
+    void r_LoadMore2(dword dwVal);
 
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 	virtual void r_Write( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString & s, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_LoadVal( CScript & s ) override;
 	virtual bool r_Load( CScript & s ) override; // Load an item from script
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute command from script
@@ -712,7 +716,6 @@ public:    /**
     void SetTriggerActive(lpctstr trig = nullptr);
 
 	TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
-	TRIGRET_TYPE OnTriggerCreate(CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
 	TRIGRET_TYPE OnTrigger( ITRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = nullptr );
 
 	// Item type specific stuff.
@@ -722,7 +725,7 @@ public:    /**
     inline IT_TYPE GetType() const {
         return m_type;
     }
-	CItem * SetType( IT_TYPE type );
+	bool SetType( IT_TYPE type, bool fPreCheck = true );
 	bool IsTypeLit() const;
 	bool IsTypeBook() const;
 	bool IsTypeSpellbook() const;

@@ -15,7 +15,7 @@ lpctstr const CSpellDef::sm_szTrigName[SPTRIG_QTY+1] =
     "@START",
     "@SUCCESS",
     "@TARGETCANCEL",
-    nullptr,
+    nullptr
 };
 
 enum SPC_TYPE
@@ -84,14 +84,15 @@ CSpellDef::CSpellDef( SPELL_TYPE id ) :
     m_Interrupt.m_aiValues[0] = 1000;
 }
 
-bool CSpellDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CSpellDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CSpellDef::r_WriteVal");
     EXC_TRY("WriteVal");
-    int index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+    int index = FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
     if (index < 0)
     {
-        if (!strnicmp( "RESOURCES.", pszKey, 10 ))
+        if (!strnicmp( "RESOURCES.", ptcKey, 10 ))
             index = SPC_RESOURCES;
     }
     switch (index)
@@ -130,27 +131,27 @@ bool CSpellDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             sVal = m_sName;
             break;
         case SPC_PROMPT_MSG:
-            sVal	= m_sTargetPrompt;
+            sVal = m_sTargetPrompt;
             break;
         case SPC_RESOURCES:
         {
-            pszKey	+= 9;
+            ptcKey	+= 9;
             // Check for "RESOURCES.*"
-            if ( *pszKey == '.' )
+            if ( *ptcKey == '.' )
             {
                 bool fQtyOnly = false;
                 bool fKeyOnly = false;
-                SKIP_SEPARATORS( pszKey );
+                SKIP_SEPARATORS( ptcKey );
                 // Determine the index of the resource
                 // we wish to find
-                index = Exp_GetVal( pszKey );
-                SKIP_SEPARATORS( pszKey );
+                index = Exp_GetVal( ptcKey );
+                SKIP_SEPARATORS( ptcKey );
 
                 // Check for "RESOURCES.x.KEY"
-                if ( !strnicmp( pszKey, "KEY", 3 ))
+                if ( !strnicmp( ptcKey, "KEY", 3 ))
                     fKeyOnly = true;
                 // Check for "RESORUCES.x.VAL"
-                else if ( !strnicmp( pszKey, "VAL", 3 ))
+                else if ( !strnicmp( ptcKey, "VAL", 3 ))
                     fQtyOnly = true;
 
                 tchar *pszTmp = Str_GetTemp();
@@ -191,7 +192,7 @@ bool CSpellDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             sVal.FormatVal(m_wTithingUse);
             break;
         default:
-            return( CResourceDef::r_WriteVal( pszKey, sVal, pSrc ));
+            return ( fNoCallParent ? false : CResourceDef::r_WriteVal( ptcKey, sVal, pSrc ) );
     }
     return true;
     EXC_CATCH;
@@ -282,7 +283,7 @@ bool CSpellDef::GetPrimarySkill( int * piSkill, int * piQty ) const
 {
     ADDTOCALLSTACK("CSpellDef::GetPrimarySkill");
     size_t i = m_SkillReq.FindResourceType( RES_SKILL );
-    if ( i == m_SkillReq.BadIndex() )
+    if ( i == SCONT_BADINDEX )
         return false;
 
     if ( piQty != nullptr )

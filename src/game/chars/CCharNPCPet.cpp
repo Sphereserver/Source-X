@@ -81,7 +81,7 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 	if ( (m_pNPC->m_Brain == NPCBRAIN_BERSERK) && !pSrc->IsPriv(PRIV_GM) )
 		return false;	// Berserk npcs do not listen to any command (except if src is a GM)
 
-	static lpctstr const sm_Pet_table[] =
+	static lpctstr constexpr sm_Pet_table[PC_QTY+1] =
 	{
 		"ATTACK",
 		"BOUGHT",
@@ -106,10 +106,11 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 		"STOCK",
 		"STOP",
 		"TRANSFER",
-		"UNFRIEND"
+		"UNFRIEND",
+        nullptr
 	};
 
-	PC_TYPE iCmd = static_cast<PC_TYPE>(FindTableSorted(pszCmd, sm_Pet_table, CountOf(sm_Pet_table)));
+	PC_TYPE iCmd = static_cast<PC_TYPE>(FindTableSorted(pszCmd, sm_Pet_table, CountOf(sm_Pet_table) - 1));
 	if ( iCmd < 0 )
 	{
 		if ( !strnicmp(pszCmd, sm_Pet_table[PC_PRICE], 5) )
@@ -530,7 +531,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 			if ( !pItemTarg || !NPC_IsVendor() || !pSrc->IsClient() )
 				break;
 			if ( IsDigit(pszArgs[0]) )	// did they name a price
-				return NPC_SetVendorPrice(pItemTarg, ATOI(pszArgs));
+				return NPC_SetVendorPrice(pItemTarg, atoi(pszArgs));
 			if ( !NPC_SetVendorPrice(pItemTarg, -1) )	// test if it can be priced
 				return false;
 			pSrc->m_pClient->addPromptConsole(CLIMODE_PROMPT_VENDOR_PRICE, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_SETPRICE_2), pItemTarg->GetUID(), GetUID());
@@ -599,16 +600,16 @@ bool CChar::NPC_PetSetOwner( CChar * pChar )
 	ADDTOCALLSTACK("CChar::NPC_PetSetOwner");
 	//ASSERT(m_pNPC); // m_pNPC may not be set yet if this is a conjured creature.
 
-	if ( m_pPlayer || !pChar|| (pChar == this) )
+	if ( m_pPlayer || !pChar || (pChar == this) )
 		return false;
 
-	CChar * pOwner = NPC_PetGetOwner();
+	const CChar * pOwner = NPC_PetGetOwner();
 	if ( pOwner == pChar )
 		return false;
 
-	NPC_PetClearOwners();	// clear previous owner before set the new owner
 	m_ptHome.InitPoint();	// no longer homed
-	CCSpawn * pSpawn = static_cast<CCSpawn*>( GetComponent(COMP_SPAWN));
+    NPC_PetClearOwners();	// clear previous owner before set the new owner
+    CCSpawn* pSpawn = GetSpawn();
 	if ( pSpawn )
 		pSpawn->DelObj( GetUID() );
 	Memory_AddObjTypes(pChar, MEMORY_IPET);
@@ -623,7 +624,7 @@ bool CChar::NPC_PetSetOwner( CChar * pChar )
 
 	if ( IsSetOF(OF_PetSlots) )
 	{
-		short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true);
+		const short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true);
 		pChar->FollowersUpdate(this, maximum(1, iFollowerSlots));
 	}
 

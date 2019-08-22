@@ -28,6 +28,7 @@ protected:
 private:
 	height_t    m_Height;       // Height of the object.
 	// -------------- ResLevel -------------
+    byte        m_Expansion;
 	byte        m_ResLevel;     // ResLevel required for players to see me
 	HUE_TYPE    m_ResDispDnHue; // Hue shown to players who don't have my ResLevel
 	word        m_ResDispDnId;  // ID shown to players who don't have my ResLevel
@@ -48,81 +49,65 @@ public:
 	word    m_defenseRange; // variable range of defense.
 
 	dword   m_Can;          // Base attribute flags. CAN_C_GHOST, etc
-    dword	m_CanUse;		// Base attribute flags. can_u_all/male/female..
+    RESDISPLAY_VERSION _iEraLimitProps;	// Don't allow to have properties newer than the given era.
+
     CFactionDef _pFaction;
 
-public:
 
+public:
     CFactionDef GetFaction();
 
     /**
-     * @fn  lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const
-     *
      * @brief   Gets definition string.
-     *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      * @param   fZero   true to zero.
-     *
      * @return  The definition string.
      */
-	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const
+	lpctstr GetDefStr( lpctstr ptcKey, bool fZero = false ) const
 	{
-		return m_BaseDefs.GetKeyStr( pszKey, fZero );
+		return m_BaseDefs.GetKeyStr( ptcKey, fZero );
 	}
 
     /**
-     * @fn  int64 GetDefNum( lpctstr pszKey, bool fZero = false ) const
-     *
      * @brief   Gets definition number.
-     *
-     * @param   pszKey  The key.
-     *
+     * @param   ptcKey  The key.
      * @return  The definition number.
      */
-	int64 GetDefNum( lpctstr pszKey ) const
+	int64 GetDefNum( lpctstr ptcKey ) const
 	{
-		return m_BaseDefs.GetKeyNum( pszKey );
+		return m_BaseDefs.GetKeyNum( ptcKey );
 	}
 
     /**
-     * @fn  void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true)
-     *
      * @brief   Sets definition number.
-     *
-     * @param   pszKey      The key.
+     * @param   ptcKey      The key.
      * @param   iVal        Zero-based index of the value.
      * @param   fDeleteZero true to zero.
      */
-	void SetDefNum(lpctstr pszKey, int64 iVal, bool fDeleteZero = true, bool fWarnOverwrite = true)
+	void SetDefNum(lpctstr ptcKey, int64 iVal, bool fDeleteZero = true, bool fWarnOverwrite = true)
 	{
-		m_BaseDefs.SetNum(pszKey, iVal, fDeleteZero, fWarnOverwrite);
+		m_BaseDefs.SetNum(ptcKey, iVal, fDeleteZero, fWarnOverwrite);
 	}
 
     /**
-     * @fn  void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true)
-     *
      * @brief   Sets definition string.
-     *
-     * @param   pszKey      The key.
+     * @param   ptcKey      The key.
      * @param   pszVal      The value.
      * @param   fQuoted     true if quoted.
      * @param   fDeleteZero true to zero.
      */
-	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fDeleteZero = true, bool fWarnOverwrite = true)
+	void SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted = false, bool fDeleteZero = true, bool fWarnOverwrite = true)
 	{
-		m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fDeleteZero, fWarnOverwrite);
+		m_BaseDefs.SetStr(ptcKey, fQuoted, pszVal, fDeleteZero, fWarnOverwrite);
 	}
 
     /**
-     * @fn  void DeleteDef(lpctstr pszKey)
-     *
-     * @brief   Deletes the definition described by pszKey.
-     *
-     * @param   pszKey  The key.
+     * @brief   Deletes the definition described by ptcKey.
+     * @param   ptcKey  The key.
      */
-	void DeleteDef(lpctstr pszKey)
+	void DeleteDef(lpctstr ptcKey)
 	{
-		m_BaseDefs.DeleteKey(pszKey);
+		m_BaseDefs.DeleteKey(ptcKey);
 	}
 
 // Map Movement flags.
@@ -189,6 +174,7 @@ public:
 #define CAN_C_NONSELECTABLE 0x80000 // Can't be selected/targeted (useful for chars with mt_statue which need to act as an item)
 
 // masks for movement-affecting flags
+#define CAN_C_MOVEMENTCAPABLEMASK (CAN_C_SWIM| CAN_C_WALK|CAN_C_FLY|CAN_C_RUN|CAN_C_HOVER)
 #define CAN_C_MOVEMASK      (CAN_C_GHOST|CAN_C_SWIM|CAN_C_WALK|CAN_C_PASSWALLS|CAN_C_FLY|CAN_C_FIRE_IMMUNE|CAN_C_NOINDOORS|CAN_C_HOVER|CAN_C_NOBLOCKHEIGHT)
 #define CAN_I_MOVEMASK      (CAN_I_DOOR|CAN_I_WATER|CAN_I_PLATFORM|CAN_I_BLOCK|CAN_I_CLIMB|CAN_I_FIRE|CAN_I_ROOF|CAN_I_HOVER)
 
@@ -204,88 +190,60 @@ private:
 public:
 
     /**
-     * @fn  lpctstr GetTypeName() const;
-     *
      * @brief   Gets type name.
-     *
      * @return  The type name.
      */
 	lpctstr GetTypeName() const;
 
     /**
-     * @fn  virtual lpctstr GetName() const;
-     *
      * @brief   Gets the name.
-     *
      * @return  The name.
      */
 	virtual lpctstr GetName() const;
 
     /**
-     * @fn  bool HasTypeName() const;
-     *
      * @brief   Query if this object has type name.
-     *
      * @return  true if type name, false if not.
      */
 	bool HasTypeName() const;
 
     /**
-     * @fn  virtual void SetTypeName( lpctstr pszName );
-     *
      * @brief   Sets type name.
-     *
      * @param   pszName The name.
      */
 	virtual void SetTypeName( lpctstr pszName );
 
     /**
-     * @fn  bool Can( dword dwCan ) const;
-     *
      * @brief   Has the given Can flag.
-     *
      * @param   dwCan    The can flags.
-     *
      * @return  true if it succeeds, false if it fails.
      */
 	bool Can( dword dwCan ) const;
 
     /**
-     * @fn  virtual void UnLink();
-     *
      * @brief   Un link.
-     *
      */
 	virtual void UnLink() override;
 
     //virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_LoadVal( CScript & s ) override;
 
     /**
-     * @fn  bool IsValid() const;
-     *
      * @brief   Query if this object is valid.
-     *
      * @return  true if valid, false if not.
      */
 
 	bool IsValid() const;
 
     /**
-     * @fn  height_t GetHeight() const;
-     *
      * @brief   Gets the height.
-     *
      * @return  The height.
      */
 	height_t GetHeight() const;
 
     /**
-     * @fn  void SetHeight( height_t Height );
-     *
      * @brief   Sets a height.
-     *
      * @param   Height  The height.
      */
 	void SetHeight( height_t Height );
@@ -293,77 +251,52 @@ public:
 	// -------------- ResLevel -------------
 
     /**
-     * @fn  byte GetResLevel() const;
-     *
      * @brief   Gets ResLevel.
-     *
      * @return  The ResLevel.
      */
 	byte GetResLevel() const;
 
     /**
-     * @fn  bool SetResLevel( byte ResLevel );
-     *
      * @brief   Sets ResLevel.
-     *
      * @param   ResLevel    The ResLevel.
-     *
      * @return  true if it succeeds, false if it fails.
      */
 	bool SetResLevel( byte ResLevel );
 
     /**
-     * @fn  HUE_TYPE GetResDispDnHue() const;
-     *
      * @brief   Gets ResDispDNHue.
-     *
      * @return  The ResDispDNHue.
      */
 	HUE_TYPE GetResDispDnHue() const;
 
     /**
-     * @fn  void SetResDispDnHue( HUE_TYPE ResDispDnHue );
-     *
      * @brief   Sets ResDispDNHue.
-     *
      * @param   ResDispDnHue    The ResDispDNHue.
      */
 	void SetResDispDnHue( HUE_TYPE ResDispDnHue );
 
     /**
-     * @fn  word GetResDispDnId() const;
-     *
      * @brief   Gets ResDispDnId.
-     *
      * @return  The ResDispDnId.
      */
 	word GetResDispDnId() const;
 
     /**
-     * @fn  void SetResDispDnId( word ResDispDnId );
-     *
      * @brief   Sets ResDispDnId.
-     *
      * @param   ResDispDnId Identifier for ResDispDnId.
      */
 	void SetResDispDnId( word ResDispDnId );
 	// -------------------------------------
 
     /**
-     * @fn  void CopyBasic( const CBaseBaseDef * pSrc );
-     *
      * @brief   Copies the basic described by pSrc.
-     *
      * @param   pSrc    Source for the.
      */
 	void CopyBasic( const CBaseBaseDef * pSrc );
 
     /**
-     * @fn  void CopyTransfer( CBaseBaseDef * pSrc );
-     *
      * @brief   Copies and transfer what is described by pSrc.
-     *
-     * @param [in,out]  pSrc    If non-null, source for the.
+     * @param   pSrc    If non-null, source for the.
      */
 	void CopyTransfer( CBaseBaseDef * pSrc );
 };

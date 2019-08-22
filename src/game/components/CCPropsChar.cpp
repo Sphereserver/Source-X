@@ -4,16 +4,24 @@
 #include "../clients/CClient.h"
 
 
-lpctstr const CCPropsChar::_ptcPropertyKeys[PROPCH_QTY + 1] =
+lpctstr constexpr CCPropsChar::_ptcPropertyKeys[PROPCH_QTY + 1] =
 {
-    #define ADD(a,b) b,
+    #define ADDPROP(a,b,c) b,
     #include "../../tables/CCPropsChar_props.tbl"
-    #undef ADD
+    #undef ADDPROP
     nullptr
 };
 KeyTableDesc_s CCPropsChar::GetPropertyKeysData() const {
     return {_ptcPropertyKeys, (int)CountOf(_ptcPropertyKeys)};
 }
+
+RESDISPLAY_VERSION CCPropsChar::_iPropertyExpansion[PROPCH_QTY + 1] =
+{
+    #define ADDPROP(a,b,c) c,
+    #include "../../tables/CCPropsChar_props.tbl"
+    #undef ADDPROP
+    RDS_QTY
+};
 
 CCPropsChar::CCPropsChar() : CComponentProps(COMP_PROPS_CHAR)
 {
@@ -27,6 +35,36 @@ bool CCPropsChar::CanSubscribe(const CObjBase* pObj) // static
     return (pObj->IsItem() || pObj->IsChar());
 }
 */
+
+
+bool CCPropsChar::IgnoreElementalProperty(int iPropIndex) // static
+{
+    if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+        return false;
+    switch ( PROPCH_TYPE(iPropIndex) )
+    {
+        case PROPCH_DAMCHAOS:
+        case PROPCH_DAMCOLD:
+        case PROPCH_DAMDIRECT:
+        case PROPCH_DAMENERGY:
+        case PROPCH_DAMFIRE:
+        case PROPCH_DAMPHYSICAL:
+        case PROPCH_DAMPOISON:
+        case PROPCH_HITAREACOLD:
+        case PROPCH_HITAREAENERGY:
+        case PROPCH_HITAREAFIRE:
+        case PROPCH_HITAREAPHYSICAL:
+        case PROPCH_HITAREAPOISON:
+        case PROPCH_RESCOLD:
+        case PROPCH_RESCOLDMAX:
+        case PROPCH_RESENERGY:
+        case PROPCH_RESENERGYMAX:
+        case PROPCH_RESFIRE:
+        case PROPCH_RESFIREMAX:
+            return true;
+    }
+    return false;
+}
 
 
 lpctstr CCPropsChar::GetPropertyName(int iPropIndex) const
@@ -62,13 +100,17 @@ bool CCPropsChar::GetPropertyStrPtr(int iPropIndex, CSString* psOutVal, bool fZe
     return BaseCont_GetPropertyStr(&_mPropsStr, iPropIndex, psOutVal, fZero);
 }
 
-void CCPropsChar::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, bool fDeleteZero)
+void CCPropsChar::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsChar::SetPropertyNum");
     ASSERT(!IsPropertyStr(iPropIndex));
+    ASSERT((iLimitToExpansion >= RDS_PRET2A) && (iLimitToExpansion < RDS_QTY));
 
-    if (fDeleteZero && (iVal == 0))
-        _mPropsNum.erase(iPropIndex);
+    if ((fDeleteZero && (iVal == 0)) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion) /*|| IgnoreElementalProperty(iPropIndex)*/)
+    {
+        if (0 == _mPropsNum.erase(iPropIndex))
+            return; // I didn't have this property, so avoid further processing.
+    }
     else
         _mPropsNum[iPropIndex] = iVal;
 
@@ -81,7 +123,7 @@ void CCPropsChar::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase
         case PROPCH_NIGHTSIGHT:
         {
             CChar * pChar = static_cast <CChar*>(pLinkedObj);
-            pChar->StatFlag_Mod( STATF_NIGHTSIGHT, iVal > 0 ? true : false );
+            pChar->StatFlag_Mod( STATF_NIGHTSIGHT, (iVal > 0) ? true : false );
             if ( pChar->IsClient() )
                 pChar->GetClient()->addLight();
             break;
@@ -132,14 +174,18 @@ void CCPropsChar::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase
     }
 }
 
-void CCPropsChar::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, bool fDeleteZero)
+void CCPropsChar::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsChar::SetPropertyStr");
     ASSERT(ptcVal);
     ASSERT(IsPropertyStr(iPropIndex));
+    ASSERT((iLimitToExpansion >= RDS_PRET2A) && (iLimitToExpansion < RDS_QTY));
 
-    if (fDeleteZero && (*ptcVal == '\0'))
-        _mPropsStr.erase(iPropIndex);
+    if ((fDeleteZero && (*ptcVal == '\0')) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion) /*|| IgnoreElementalProperty(iPropIndex)*/)
+    {
+        if (0 == _mPropsNum.erase(iPropIndex))
+            return; // I didn't have this property, so avoid further processing.
+    }
     else
         _mPropsStr[iPropIndex] = ptcVal;
 
@@ -162,7 +208,7 @@ void CCPropsChar::DeletePropertyStr(int iPropIndex)
     _mPropsStr.erase(iPropIndex);
 }
 
-bool CCPropsChar::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, int iPropIndex, bool fPropStr)
+bool CCPropsChar::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, int iPropIndex, bool fPropStr)
 {
     ADDTOCALLSTACK("CCPropsChar::FindLoadPropVal");
     if (iPropIndex == PROPCH_NIGHTSIGHT)
@@ -182,7 +228,7 @@ bool CCPropsChar::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, int iPropIn
         return true;
     }
 
-    BaseProp_LoadPropVal(iPropIndex, fPropStr, s, pLinkedObj);
+    BaseProp_LoadPropVal(iPropIndex, fPropStr, s, pLinkedObj, iLimitToExpansion);
     return true;
 }
 

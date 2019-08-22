@@ -12,6 +12,7 @@ class CScriptTriggerArgs : public CScriptObj
 {
     // All the args an event will need.
     static lpctstr const sm_szLoadKeys[];
+
 public:
     static const char *m_sClassName;
     int64                   m_iN1;		// "ARGN" or "ARGN1" = a modifying numeric arg to the current trigger.
@@ -31,7 +32,6 @@ public:
     CLocalObjMap			m_VarObjs;		// "REFx" = local object x
 
 public:
-
     CScriptTriggerArgs() :
         m_iN1(0),  m_iN2(0), m_iN3(0)
     {
@@ -85,8 +85,8 @@ public:
     void Init( lpctstr pszStr );
     bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
     bool r_LoadVal( CScript & s ) override;
-    bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
-    bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc ) override;
+    bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
+    bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
     bool r_Copy( CTextConsole * pSrc );
     lpctstr GetName() const
     {

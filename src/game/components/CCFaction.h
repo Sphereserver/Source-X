@@ -54,66 +54,67 @@ enum NPC_GROUP
 */
 enum NPC_FACTION : llong
 {
-    FACTION_NONE                   = 0,
+    FACTION_NONE                = 0,
     // Fey Group (opposed to Abyss Group)
-    FACTION_FEY                    = 0x1,  // SuperSlayer
+    FACTION_FEY                 = 0x1,          // SuperSlayer
 
     // Elemental Group (opposed to Abyss Group)
-    FACTION_ELEMENTAL              = 0x2,  //  SuperSlayer
-    FACTION_BLOODELEMENTAL         = 0x4,
-    FACTION_EARTHELEMENTAL         = 0x8,
-    FACTION_FIREELEMENTAL          = 0x10,
-    FACTION_POISONELEMENTAL        = 0x20,
-    FACTION_SNOWELEMENTAL          = 0x40,
-    FACTION_WATERELEMENTAL         = 0x80,
+    FACTION_ELEMENTAL           = 0x2,          //  SuperSlayer
+    FACTION_AIR_ELEMENTAL       = 0x4,
+    FACTION_BLOOD_ELEMENTAL     = 0x8,
+    FACTION_EARTH_ELEMENTAL     = 0x10,
+    FACTION_FIRE_ELEMENTAL      = 0x20,
+    FACTION_POISON_ELEMENTAL    = 0x40,
+    FACTION_SNOW_ELEMENTAL      = 0x90,
+    FACTION_WATER_ELEMENTAL     = 0x100,
     FACTION_ELEMENTAL_QTY,
 
     // Abyss Group (opposed to Elemental and Fey Groups)
-    FACTION_DEMON                  = 0x100,    // SuperSlayer
-    FACTION_GARGOYLE               = 0x200,
+    FACTION_DEMON               = 0x200,        // SuperSlayer
+    FACTION_GARGOYLE            = 0x400,
     FACTION_ABYSS_QTY,
 
     // Humanoid Group (opposed to Undead Group)
-    FACTION_REPOND                 = 0x400,   // SuperSlayer
-    FACTION_GOBLIN                 = 0x800,
-    FACTION_VERMIN                 = 0x1000,
-    FACTION_OGRE                   = 0x2000,
-    FACTION_ORC                    = 0x4000,
-    FACTION_TROLL                  = 0x8000,
+    FACTION_REPOND              = 0x800,        // SuperSlayer
+    FACTION_GOBLIN              = 0x1000,
+    FACTION_VERMIN              = 0x2000,
+    FACTION_OGRE                = 0x4000,
+    FACTION_ORC                 = 0x8000,
+    FACTION_TROLL               = 0x10000,
     FACTION_HUMANOID_QTY,
 
     // Undead Group (opposed to Humanoid Group)
-    FACTION_UNDEAD                 = 0x10000,  // SuperSlayer
-    FACTION_MAGE                   = 0x20000,
+    FACTION_UNDEAD              = 0x20000,      // SuperSlayer
+    FACTION_MAGE                = 0x40000,
     FACTION_UNDEAD_QTY,
 
     // Arachnid Group (opposed to Reptilian Group)
-    FACTION_ARACHNID               = 0x40000,  // SuperSlayer
-    FACTION_SCORPION               = 0x80000,
-    FACTION_SPIDER                 = 0x100000,
-    FACTION_TERATHAN               = 0x200000,
+    FACTION_ARACHNID            = 0x80000,      // SuperSlayer
+    FACTION_SCORPION            = 0x100000,
+    FACTION_SPIDER              = 0x200000,
+    FACTION_TERATHAN            = 0x400000,
     FACTION_ARACHNID_QTY,
 
     // Reptile Group (opposed to Arachnid)
-    FACTION_REPTILE                = 0x400000,    // SuperSlayer
-    FACTION_DRAGON                 = 0x800000,
-    FACTION_OPHIDIAN               = 0x1000000,
-    FACTION_SNAKE                  = 0x2000000,
-    FACTION_LIZARDMAN              = 0x4000000,
+    FACTION_REPTILE             = 0x800000,     // SuperSlayer
+    FACTION_DRAGON              = 0x1000000,
+    FACTION_OPHIDIAN            = 0x2000000,
+    FACTION_SNAKE               = 0x4000000,
+    FACTION_LIZARDMAN           = 0x8000000,
     FACTION_REPTILIAN_QTY,
 
     // Old Mondain’s Legacy Slayers
-    FACTION_BAT                    = 0x8000000,
-    FACTION_BEAR                   = 0x10000000,
-    FACTION_BEETLE                 = 0x20000000,
-    FACTION_BIRD                   = 0x40000000,
+    FACTION_BAT                 = 0x10000000,
+    FACTION_BEAR                = 0x20000000,
+    FACTION_BEETLE              = 0x40000000,
+    FACTION_BIRD                = 0x80000000,
 
     // Standalone Slayers
-    FACTION_BOVINE                 = 0x80000000,
-    FACTION_FLAME                  = 0x100000000,
-    FACTION_ICE                    = 0x200000000,
-    FACTION_WOLF                   = 0x400000000,
-    FACTION_QTY                    = 0x800000000
+    FACTION_BOVINE              = 0x100000000,
+    FACTION_FLAME               = 0x200000000,
+    FACTION_ICE                 = 0x400000000,
+    FACTION_WOLF                = 0x800000000,
+    FACTION_QTY
 };
 
 class CChar;
@@ -146,9 +147,9 @@ public:
     static bool CanSubscribe(const CItem* pItem);
     virtual void Delete(bool fForced = false) override;
     virtual bool r_LoadVal(CScript & s) override;
-    virtual bool r_WriteVal(lpctstr pszKey, CSString & s, CTextConsole * pSrc = nullptr) override;
+    virtual bool r_WriteVal(lpctstr ptcKey, CSString & s, CTextConsole * pSrc = nullptr) override;
     virtual void r_Write(CScript & s) override;
-    virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef) override;
+    virtual bool r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;
     virtual void Copy(const CComponent *target) override;
     bool r_Load(CScript & s);  // Load a character from Script

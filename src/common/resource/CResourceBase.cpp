@@ -76,7 +76,7 @@ lpctstr const CResourceBase::sm_szResourceBlocks[RES_QTY] =	// static
 	"WORLDLISTS",		// Define instance of list in the world. (SAVED in World)
 	"WORLDSCRIPT",		// Define instance of resource in the world. (SAVED in World)
 	"WORLDVARS",		// block of global variables
-	"WS",				// =WORLDSCRIPT
+	"WS"				// =WORLDSCRIPT
 };
 
 
@@ -306,9 +306,9 @@ CResourceScript * CResourceBase::GetResourceFile( size_t i )
 	return m_ResourceFiles[i];
 }
 
-CResourceID CResourceBase::ResourceGetIDParse(RES_TYPE restype, lpctstr &ptcName, word wPage)
+CResourceID CResourceBase::ResourceGetID_Advance(RES_TYPE restype, lpctstr &ptcName, word wPage)
 {
-    ADDTOCALLSTACK("CResourceBase::ResourceGetIDParse");
+    ADDTOCALLSTACK("CResourceBase::ResourceGetID_Advance");
     // Find the Resource ID given this name.
     // We are NOT creating a new resource. just looking up an existing one
     // NOTE: Do not enforce the restype.
@@ -352,7 +352,7 @@ CResourceID CResourceBase::ResourceGetIDParse(RES_TYPE restype, lpctstr &ptcName
 CResourceID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr ptcName, word wPage )
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetID");
-	return ResourceGetIDParse(restype, ptcName, wPage);
+	return ResourceGetID_Advance(restype, ptcName, wPage);
 }
 
 CResourceID CResourceBase::ResourceGetIDType( RES_TYPE restype, lpctstr pszName, word wPage )
@@ -383,7 +383,7 @@ CResourceDef * CResourceBase::ResourceGetDef(const CResourceID& rid) const
 	if ( ! rid.IsValidResource() )
 		return nullptr;
 	size_t index = m_ResHash.FindKey( rid );
-	if ( index == m_ResHash.BadIndex() )
+	if ( index == SCONT_BADINDEX )
 		return nullptr;
 	return m_ResHash.GetAt( rid, index );
 }

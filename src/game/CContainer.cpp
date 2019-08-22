@@ -439,11 +439,11 @@ size_t CContainer::ResourceConsumePart( const CResourceQtyArray *pResources, int
 	// index of the item we did not have.
 
 	if ( iDamagePercent <= 0 )
-		return pResources->BadIndex();
+		return SCONT_BADINDEX;
 
-	size_t iMissing = pResources->BadIndex();
+	size_t iMissing = SCONT_BADINDEX;
 	size_t iQtyRes = pResources->size();
-	for ( size_t i = 0; i < iQtyRes; i++ )
+	for ( size_t i = 0; i < iQtyRes; ++i )
 	{
 		int iResQty = (int)(pResources->at(i).GetResQty());
 		if ( iResQty <= 0 ) // not sure why this would be true
@@ -465,7 +465,7 @@ size_t CContainer::ResourceConsumePart( const CResourceQtyArray *pResources, int
 	return iMissing;
 }
 
-int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iReplicationQty, bool fTest, dword dwArg )
+int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iReplicationQty, bool fTest )
 {
 	ADDTOCALLSTACK("CContainer::ResourceConsume");
 	// Consume or test all the required resources.
@@ -480,7 +480,7 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
 	{
 		// Test what the max number we can really make is first !
 		// All resources must be consumed with the same number.
-		iReplicationQty = ResourceConsume(pResources, iReplicationQty, true, dwArg);
+		iReplicationQty = ResourceConsume(pResources, iReplicationQty, true);
 	}
 
 	CChar *pChar = dynamic_cast<CChar *>(this);
@@ -513,7 +513,7 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
             }
 		}
 
-		int iQtyCur = iQtyTotal - (fTest ? ContentConsumeTest(rid, iQtyTotal, dwArg) : ContentConsume(rid, iQtyTotal, dwArg));
+		int iQtyCur = iQtyTotal - (fTest ? ContentConsumeTest(rid, iQtyTotal) : ContentConsume(rid, iQtyTotal));
 		iQtyCur /= iResQty;
 		if ( iQtyCur < iQtyMin )
 			iQtyMin = iQtyCur;
@@ -544,34 +544,34 @@ size_t CContainer::ContentCountAll() const
 	return iTotal;
 }
 
-bool CContainer::r_GetRefContainer( lpctstr &pszKey, CScriptObj *&pRef )
+bool CContainer::r_GetRefContainer( lpctstr &ptcKey, CScriptObj *&pRef )
 {
 	ADDTOCALLSTACK("CContainer::r_GetRefContainer");
-	if ( !strnicmp(pszKey, "FIND", 4) )				// find*
+	if ( !strnicmp(ptcKey, "FIND", 4) )				// find*
 	{
-		pszKey += 4;
-		if ( !strnicmp(pszKey, "ID", 2) )			// findid
+		ptcKey += 4;
+		if ( !strnicmp(ptcKey, "ID", 2) )			// findid
 		{
-			pszKey += 2;
-			SKIP_SEPARATORS(pszKey);
-			pRef = ContentFind(g_Cfg.ResourceGetIDParse(RES_ITEMDEF, pszKey));
-			SKIP_SEPARATORS(pszKey);
+			ptcKey += 2;
+			SKIP_SEPARATORS(ptcKey);
+			pRef = ContentFind(g_Cfg.ResourceGetID_Advance(RES_ITEMDEF, ptcKey));
+			SKIP_SEPARATORS(ptcKey);
 			return true;
 		}
-		else if ( !strnicmp(pszKey, "CONT", 4) )	// findcont
+		else if ( !strnicmp(ptcKey, "CONT", 4) )	// findcont
 		{
-			pszKey += 4;
-			SKIP_SEPARATORS(pszKey);
-			pRef = dynamic_cast<CItem*>(GetAt(Exp_GetSingle(pszKey)));
-			SKIP_SEPARATORS(pszKey);
+			ptcKey += 4;
+			SKIP_SEPARATORS(ptcKey);
+			pRef = dynamic_cast<CItem*>(GetAt(Exp_GetSingle(ptcKey)));
+			SKIP_SEPARATORS(ptcKey);
 			return true;
 		}
-		else if ( !strnicmp(pszKey, "TYPE", 4) )	// findtype
+		else if ( !strnicmp(ptcKey, "TYPE", 4) )	// findtype
 		{
-			pszKey += 4;
-			SKIP_SEPARATORS(pszKey);
-			pRef = ContentFind(g_Cfg.ResourceGetIDParse(RES_TYPEDEF, pszKey));
-			SKIP_SEPARATORS(pszKey);
+			ptcKey += 4;
+			SKIP_SEPARATORS(ptcKey);
+			pRef = ContentFind(g_Cfg.ResourceGetID_Advance(RES_TYPEDEF, ptcKey));
+			SKIP_SEPARATORS(ptcKey);
 			return true;
 		}
 	}
@@ -588,35 +588,37 @@ CContainer::~CContainer()
 	Clear(); // call this early so the virtuals will work.
 }
 
-bool CContainer::r_WriteValContainer( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc )
+bool CContainer::r_WriteValContainer( lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc )
 {
 	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CContainer::r_WriteValContainer");
 	EXC_TRY("WriteVal");
 
-	static lpctstr const sm_szParams[] =
+	static lpctstr constexpr sm_szParams[] =
 	{
-		"count",
-		"fcount",
-		"rescount",
-		"restest"
+		"COUNT",
+		"FCOUNT",
+		"RESCOUNT",
+		"RESTEST"
 	};
 
-	int i = FindTableHeadSorted(pszKey, sm_szParams, CountOf(sm_szParams));
+	int i = FindTableHeadSorted(ptcKey, sm_szParams, CountOf(sm_szParams));
 	if ( i < 0 )
 		return false;
 
-	lpctstr	pKey = pszKey + strlen(sm_szParams[i]);
+	lpctstr	pKey = ptcKey + strlen(sm_szParams[i]);
 	SKIP_SEPARATORS(pKey);
 	switch ( i )
 	{
 		case 0:			//	count
 		{
-			int iTotal = 0;
+			size_t uiTotal = 0;
 			for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
-				iTotal++;
+            {
+				++uiTotal;
+            }
 
-			sVal.FormatVal(iTotal);
+			sVal.FormatSTVal(uiTotal);
 			break;
 		}
 

@@ -5,17 +5,213 @@
 #include "../CScript.h"
 
 
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+    #include <codeanalysis/warnings.h>
+    #pragma warning( push )
+    #pragma warning ( disable : ALL_CODE_ANALYSIS_WARNINGS )
+#else
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
 #include "../regex/deelx.h"
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+    #pragma warning( pop )
+#else
     #pragma GCC diagnostic pop
 #endif
 
 
-// String utilities: Modifiers
+// String utilities: Converters
+
+#ifndef _WIN32
+void Str_Reverse(char* string)
+{
+    char* pEnd = string;
+    char temp;
+    while (*pEnd)
+        ++pEnd;
+    --pEnd;
+    while (string < pEnd)
+    {
+        temp = *pEnd;
+        *pEnd-- = *string;
+        *string++ = temp;
+    }
+}
+#endif
+
+int Str_ToI (lpctstr ptcStr, int base) noexcept
+{
+    ASSERT(base > 0);
+    const auto e = errno;
+    const auto ret = int(std::strtol(ptcStr, nullptr, base));
+    errno = e;
+    return ret;
+}
+
+uint Str_ToUI(lpctstr ptcStr, int base) noexcept
+{
+    ASSERT(base > 0);
+    const auto e = errno;
+    const auto ret = uint(std::strtoul(ptcStr, nullptr, base));
+    errno = e;
+    return ret;
+}
+
+llong Str_ToLL(lpctstr ptcStr, int base) noexcept
+{
+    ASSERT(base > 0);
+    const auto e = errno;
+    const auto ret = std::strtoll(ptcStr, nullptr, base);
+    errno = e;
+    return ret;
+}
+
+ullong Str_ToULL(lpctstr ptcStr, int base) noexcept
+{
+    ASSERT(base > 0);
+    const auto e = errno;
+    const auto ret = std::strtoull(ptcStr, nullptr, base);
+    errno = e;
+    return ret;
+}
+
+static_assert (THREAD_STRING_LENGTH > 100, "THREAD_STRING_LENGTH is too small and the Str_From* functions would write past the buffer");
+#define STR_FROM_SET_ZEROSTR \
+    if (hex)    { buf[0] = '0'; buf[1] = '0'; buf[2] = '\0'; } \
+    else        { buf[0] = '0'; buf[1] = '\0'; }
+
+tchar* Str_FromI(int val, tchar* buf, int base) noexcept
+{
+    ASSERT(base > 0);
+    const bool hex = (base == 16);
+    if (val == 0)
+    {
+        STR_FROM_SET_ZEROSTR;
+        return buf;
+    }
+    static constexpr tchar chars[] = "0123456789abcdef";
+
+    const bool sign = (val < 0);
+    /*if (sign && !hex) {
+        if (hex)
+            val = INT_MAX - val;
+        else
+            val = -val;
+    }
+    */
+    if (sign && !hex) {
+        val = -val;
+    }
+
+    unsigned short i = 30;
+    buf[--i] = '\0';
+    do
+    {
+        buf[--i] = chars[val % base];
+        val /= base;
+    } while (val);
+
+    if (hex) {
+        buf[--i] = '0';
+    }
+    else if (sign) {
+        buf[--i] = '-';
+    }
+    return &buf[i];
+}
+
+tchar* Str_FromUI(uint val, tchar* buf, int base) noexcept
+{
+    ASSERT(base > 0);
+    const bool hex = (base == 16);
+    if (val == 0)
+    {
+        STR_FROM_SET_ZEROSTR;
+        return buf;
+    }
+    static constexpr tchar chars[] = "0123456789abcdef";
+
+    unsigned short i = 30;
+    buf[--i] = '\0';
+    do
+    {
+        buf[--i] = chars[val % base];
+        val /= base;
+    } while (val);
+
+    if (base == 16) {
+        buf[--i] = '0';
+    }
+    return &buf[i];
+}
+
+tchar* Str_FromLL (llong val, tchar* buf, int base) noexcept
+{
+    ASSERT(base > 0);
+    const bool hex = (base == 16);
+    if (val == 0)
+    {
+        STR_FROM_SET_ZEROSTR;
+        return buf;
+    }
+    static constexpr tchar chars[] = "0123456789abcdef";
+
+    const bool sign = (val < 0);
+    /*if (sign && !hex) {
+        if (hex)
+            val = LLONG_MAX - val;
+        else
+            val = -val;
+    }
+    */
+    if (sign && !hex) {
+        val = -val;
+    }
+
+    unsigned short i = 62;
+    buf[--i] = '\0';
+    do
+    {
+        buf[--i] = chars[val % base];
+        val /= base;
+    } while (val);
+
+    if (hex) {
+        buf[--i] = '0';
+    }
+    else if (sign) {
+        buf[--i] = '-';
+    }
+    return &buf[i];
+}
+
+tchar* Str_FromULL (ullong val, tchar* buf, int base) noexcept
+{
+    ASSERT(base > 0);
+    const bool hex = (base == 16);
+    if (val == 0)
+    {
+        STR_FROM_SET_ZEROSTR;
+        return buf;
+    }
+    static constexpr tchar chars[] = "0123456789abcdef";
+
+    unsigned short i = 62;
+    buf[--i] = '\0';
+    do
+    {
+        buf[--i] = chars[val % base];
+        val /= base;
+    } while (val);
+
+    if (hex) {
+        buf[--i] = '0';
+    }
+    return &buf[i];
+}
+
+#undef STR_FROM_SET_ZEROSTR
 
 size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord )
 {
@@ -55,29 +251,171 @@ size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord )
     }
 }
 
+int Str_CmpHeadI(lpctstr ptcFind, lpctstr ptcHere)
+{
+    for (uint i = 0; ; ++i)
+    {
+		//	we should always use same case as in other places. since strcmpi lowers,
+        //	we should lower here as well. if strcmpi changes, we have to change it here as well
+        const tchar ch1 = static_cast<tchar>(tolower(ptcFind[i]));
+        const tchar ch2 = static_cast<tchar>(tolower(ptcHere[i]));
+        if (ch2 == 0)
+        {
+            if ( (!isalnum(ch1)) && (ch1 != '_') )
+                return 0;
+            return (ch1 - ch2);
+        }
+        if (ch1 != ch2)
+            return (ch1 - ch2);
+    }
+}
+
+static inline int Str_CmpHeadI_Table(lpctstr ptcFind, lpctstr ptcTable)
+{
+    for (uint i = 0; ; ++i)
+    {
+        const tchar ch1 = static_cast<tchar>(toupper(ptcFind[i]));
+        const tchar ch2 = ptcTable[i];
+        ASSERT(ch2 == toupper(ch2));    // for better performance, in the table all the names have to be LOWERCASE!
+        if (ch2 == 0)
+        {
+            if ( (!isalnum(ch1)) && (ch1 != '_') )
+                return 0;
+            return (ch1 - ch2);
+        }
+        if (ch1 != ch2)
+            return (ch1 - ch2);
+    }
+}
+
+// String utilities: Modifiers
+
+// strcpy doesn't have an argument to truncate the copy to the buffer length;
+// strncpy doesn't null-terminate if it truncates the copy, and if uiMaxlen is > than the source string length, the remaining space is filled with '\0'
+size_t Str_CopyLimit(tchar * pDst, lpctstr pSrc, size_t uiMaxSize)
+{
+    if (uiMaxSize == 0)
+    {
+        return 0;
+    }
+    if (pSrc[0] == '\0')
+    {
+        pDst[0] = '\0';
+        return 0;
+    }
+
+    size_t qty = 0; // how much bytes do i have to copy? (1 based)
+    do
+    {
+        if (pSrc[qty++] == '\0')
+        {
+            break;
+        }
+    } while (qty < uiMaxSize);
+    memcpy(pDst, pSrc, qty);
+    return qty; // bytes copied in pDst string (CAN count the string terminator)
+}
+size_t Str_CopyLimitNull(tchar * pDst, lpctstr pSrc, size_t uiMaxSize)
+{
+    if (uiMaxSize == 0)
+    {
+        return 0;
+    }
+    if (pSrc[0] == '\0')
+    {
+        pDst[0] = '\0';
+        return 0;
+    }
+    
+    size_t qty = 0; // how much bytes do i have to copy? (1 based)
+    do
+    {
+        if (pSrc[qty++] == '\0')
+        {
+            break;
+        }
+    } while (qty < uiMaxSize);
+    memcpy(pDst, pSrc, qty);
+    pDst[qty - 1] = '\0'; // null terminate the string
+    return qty; // bytes copied in pDst string (not counting the string terminator)
+}
+
 size_t strcpylen(tchar * pDst, lpctstr pSrc)
 {
     strcpy(pDst, pSrc);
+    // Remember: strlen returns the number of bytes before the terminator (if the string contains utf-8 characters,
+    //  strlen will return a value != than the actual number of characters, because some of them are codified with more than a byte).
     return strlen(pDst);
 }
 
-size_t strncpylen(tchar * pDst, lpctstr pSrc, size_t uiMaxSize)
+// the number of characters in a multibyte string is the sum of mblen()'s
+// note: the simpler approach is std::mbstowcs(NULL, s.c_str(), s.size())
+/*
+size_t strlen_mb(const char* ptr)  
 {
-    // it does NOT include the iMaxSize element! (just like memcpy)
-    // so iMaxSize=sizeof() is ok !
-    ASSERT(uiMaxSize);
-    strncpy(pDst, pSrc, uiMaxSize - 1);
-    pDst[uiMaxSize - 1] = '\0';	// always terminate.
-    return strlen(pDst);
-}
+    // From: https://en.cppreference.com/w/c/string/multibyte/mblen
 
-void strncpynull(tchar * pDst, lpctstr pSrc, size_t uiMaxSize)
+    // ensure that at some point we have called setlocale:
+    //--    // allow mblen() to work with UTF-8 multibyte encoding
+    //--    std::setlocale(LC_ALL, "en_US.utf8");
+    
+    size_t result = 0;
+    const char* end = ptr + strlen(ptr);
+    mblen(nullptr, 0); // reset the conversion state
+    while(ptr < end) {
+        int next = mblen(ptr, end - ptr);
+        if(next == -1) {
+            throw std::runtime_error("strlen_mb(): conversion error");
+            break;
+        }
+        ptr += next;
+        ++result;
+    }
+    return result;
+}
+*/
+
+/*
+* Appends src to string dst of size siz (unlike strncat, siz is the
+* full size of dst, not space left). At most siz-1 characters
+* will be copied. Always NUL terminates (unless siz <= strlen(dst)).
+* Returns strlen(src) + MIN(siz, strlen(initial dst)).
+* If retval >= siz, truncation occurred.
+*/
+// Adapted from: OpenBSD: strlcpy.c,v 1.11 2006/05/05 15:27:38
+size_t Str_ConcatLimitNull(tchar *dst, const tchar *src, size_t siz)
 {
-    // it does NOT include the iMaxSize element! (just like memcpy)
-    // so iMaxSize=sizeof() is ok !
-    ASSERT(uiMaxSize);
-    strncpy(pDst, pSrc, uiMaxSize - 1);
-    pDst[uiMaxSize - 1] = '\0';	// always terminate.
+    tchar *d = dst;
+    size_t n = siz;
+    size_t dlen;
+
+    /* Find the end of dst and adjust bytes left but don't go past end */
+    while ((n-- != 0) && (*d != '\0'))
+    {
+        ++d;
+    }
+    dlen = d - dst;
+    n = siz - dlen;
+
+    if (n == 0)
+    {
+        return (dlen + strlen(src));
+    }
+
+    const tchar *s = src;
+    while (*s != '\0')
+    {
+        if (n != 1)
+        {
+            *d++ = *s;
+            --n;
+
+        }
+        ++s;
+    }
+    *d = '\0';
+
+    return (dlen + (s - src));	/* count does not include NUL */
 }
 
 lpctstr Str_GetArticleAndSpace(lpctstr pszWord)
@@ -89,7 +427,7 @@ lpctstr Str_GetArticleAndSpace(lpctstr pszWord)
 
     if (pszWord)
     {
-        static const tchar sm_Vowels[] = { 'A', 'E', 'I', 'O', 'U' };
+        static constexpr tchar sm_Vowels[] = { 'A', 'E', 'I', 'O', 'U' };
         tchar chName = static_cast<tchar>(toupper(pszWord[0]));
         for (uint x = 0; x < CountOf(sm_Vowels); ++x)
         {
@@ -108,7 +446,7 @@ int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxOutSize, lpctstr pszStri
     if (!pszStrip)
         pszStrip = "{|}~";	// client cant print these.
 
-                            //GETNONWHITESPACE( pszInp );	// kill leading white space.
+    //GETNONWHITESPACE( pszInp );	// kill leading white space.
 
     int j = 0;
     for (int i = 0; ; ++i)
@@ -183,6 +521,32 @@ void Str_MakeUnFiltered(tchar * pStrOut, lpctstr pStrIn, int iSizeMax)
     }
 }
 
+tchar * Str_GetUnQuoted(tchar * pStr)
+{
+    // TODO: WARNING! Possible Memory Leak here!
+    GETNONWHITESPACE(pStr);
+    if (*pStr != '"')
+    {
+        Str_TrimEndWhitespace(pStr, int(strlen(pStr)));
+        return pStr;
+    }
+
+    ++pStr;
+    // search for last quote symbol starting from the end
+    tchar * pEnd = pStr + strlen(pStr) - 1;
+    for (; pEnd >= pStr; --pEnd )
+    {
+        if ( *pEnd == '"' )
+        {
+            *pEnd = '\0';
+            break;
+        }
+    }
+
+    Str_TrimEndWhitespace(pStr, int(pEnd - pStr));
+    return pStr;
+}
+
 int Str_TrimEndWhitespace(tchar * pStr, int len)
 {
     while (len > 0)
@@ -206,21 +570,22 @@ tchar * Str_TrimWhitespace(tchar * pStr)
     return pStr;
 }
 
+
 // String utilities: String operations
 
-int FindTable(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
+int FindTable(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, size_t uiElemSize)
 {
     // A non-sorted table.
     for (int i = 0; i < iCount; ++i)
     {
         if (!strcmpi(*ppszTable, pszFind))
             return i;
-        ppszTable = (lpctstr const *)((const byte *)ppszTable + iElemSize);
+        ppszTable = (reinterpret_cast<lpctstr const*>(reinterpret_cast<const byte*>(ppszTable) + uiElemSize));
     }
     return -1;
 }
 
-int FindTableSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
+int FindTableSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, size_t uiElemSize)
 {
     // Do a binary search (un-cased) on a sorted table.
     // RETURN: -1 = not found
@@ -231,9 +596,9 @@ int FindTableSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount
 
     while (iLow <= iHigh)
     {
-        int i = (iHigh + iLow) / 2;
-        lpctstr pszName = *((lpctstr const *)((const byte *)ppszTable + (i*iElemSize)));
-        int iCompare = strcmpi(pszFind, pszName);
+        const int i = (iHigh + iLow) >> 1;
+        const lpctstr pszName = *(reinterpret_cast<lpctstr const *>(reinterpret_cast<const byte *>(ppszTable) + (i*uiElemSize)));
+        const int iCompare = strcmpi(pszFind, pszName);
         if (iCompare == 0)
             return i;
         if (iCompare > 0)
@@ -244,39 +609,19 @@ int FindTableSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount
     return -1;
 }
 
-static int Str_CmpHeadI(const lpctstr pszFind, lpctstr pszTable)
-{
-    tchar ch0 = '_';
-    for (int i = 0; ; ++i)
-    {
-        //	we should always use same case as in other places. since strcmpi lowers,
-        //	we should lower here as well. fucking shit!
-        tchar ch1 = static_cast<tchar>(tolower(pszFind[i]));
-        tchar ch2 = static_cast<tchar>(tolower(pszTable[i]));
-        if (ch2 == 0)
-        {
-            if ( (!iswalnum(ch1)) && (ch1 != ch0) )
-                return 0;
-            return (ch1 - ch2);
-        }
-        if (ch1 != ch2)
-            return (ch1 - ch2);
-    }
-}
-
-int FindTableHead(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
+int FindTableHead(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, size_t uiElemSize) // REQUIRES the table to be UPPERCASE
 {
     for (int i = 0; i < iCount; ++i)
     {
-        int iCompare = Str_CmpHeadI(pszFind, *ppszTable);
+        const int iCompare = Str_CmpHeadI_Table(pszFind, *ppszTable);
         if (!iCompare)
             return i;
-        ppszTable = (lpctstr const *)((const byte *)ppszTable + iElemSize);
+        ppszTable = reinterpret_cast<lpctstr const *>(reinterpret_cast<const byte *>(ppszTable) + uiElemSize);
     }
     return -1;
 }
 
-int FindTableHeadSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
+int FindTableHeadSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, size_t uiElemSize) // REQUIRES the table to be UPPERCASE, and sorted
 {
     // Do a binary search (un-cased) on a sorted table.
     // Uses Str_CmpHeadI, which checks if we have reached, during comparison, ppszTable end ('\0'), ignoring if pszFind is longer (maybe has arguments?)
@@ -288,9 +633,9 @@ int FindTableHeadSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iC
 
     while (iLow <= iHigh)
     {
-        int i = (iHigh + iLow) / 2;
-        lpctstr pszName = *((lpctstr const *)((const byte *)ppszTable + (i*iElemSize)));
-        int iCompare = Str_CmpHeadI(pszFind, pszName);
+        const int i = (iHigh + iLow) >> 1;
+        const lpctstr pszName = *(reinterpret_cast<lpctstr const *>(reinterpret_cast<const byte *>(ppszTable) + (i*uiElemSize)));
+        const int iCompare = Str_CmpHeadI_Table(pszFind, pszName);
         if (iCompare == 0)
             return i;
         if (iCompare > 0)
@@ -579,24 +924,24 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
 
     tchar ch;
     // variables used to track opened/closed quotes and brackets
-    bool bQuotes = false;
+    bool fQuotes = false;
     int iCurly, iSquare, iRound, iAngle;
     iCurly = iSquare = iRound = iAngle = 0;
 
     // ignore opened/closed brackets if that type of bracket is also a separator
-    bool bSepHasCurly, bSepHasSquare, bSepHasRound, bSepHasAngle;
-    bSepHasCurly = bSepHasSquare = bSepHasRound = bSepHasAngle = false;
-    for (uint j = 0; pszSep[j + 1] != '\0'; ++j)		// loop through each separator
+    bool fSepHasCurly, fSepHasSquare, fSepHasRound, fSepHasAngle;
+    fSepHasCurly = fSepHasSquare = fSepHasRound = fSepHasAngle = false;
+    for (uint j = 0; pszSep[j] != '\0'; ++j)		// loop through each separator
     {
         const tchar & sep = pszSep[j];
         if (sep == '{' || sep == '}')
-            bSepHasCurly = true;
+            fSepHasCurly = true;
         else if (sep == '[' || sep == ']')
-            bSepHasSquare = true;
+            fSepHasSquare = true;
         else if (sep == '(' || sep == ')')
-            bSepHasRound = true;
+            fSepHasRound = true;
         else if (sep == '<' || sep == '>')
-            bSepHasAngle = true;
+            fSepHasAngle = true;
     }
 
     for (; ; ++pLine)
@@ -604,7 +949,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
         ch = *pLine;
         if (ch == '"')	// quoted argument
         {
-            bQuotes = !bQuotes;
+            fQuotes = !fQuotes;
             continue;
         }
         if (ch == '\0')	// no more args i guess.
@@ -614,56 +959,56 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
             return false;
         }
 
-        if (!bQuotes)
+        if (!fQuotes)
         {
             // We are not inside a quote, so let's check if the char is a bracket or a separator
 
             // Here we track opened and closed brackets.
             //	we'll ignore items inside brackets, if the bracket isn't a separator in the list
             if (ch == '{') {
-                if (!bSepHasCurly) {
+                if (!fSepHasCurly) {
                     if (!iSquare && !iRound && !iAngle)
                         ++iCurly;
                 }
             }
             else if (ch == '[') {
-                if (!bSepHasSquare) {
+                if (!fSepHasSquare) {
                     if (!iCurly && !iRound && !iAngle)
                         ++iSquare;
                 }
             }
             else if (ch == '(') {
-                if (!bSepHasRound) {
+                if (!fSepHasRound) {
                     if (!iCurly && !iSquare && !iAngle)
                         ++iRound;
                 }
             }
             else if (ch == '<') {
-                if (!bSepHasAngle) {
+                if (!fSepHasAngle) {
                     if (!iCurly && !iSquare && !iRound)
                         ++iAngle;
                 }
             }
             else if (ch == '}') {
-                if (!bSepHasCurly) {
+                if (!fSepHasCurly) {
                     if (iCurly)
                         --iCurly;
                 }
             }
             else if (ch == ']') {
-                if (!bSepHasSquare) {
+                if (!fSepHasSquare) {
                     if (iSquare)
                         --iSquare;
                 }
             }
             else if (ch == ')') {
-                if (!bSepHasRound) {
+                if (!fSepHasRound) {
                     if (iRound)
                         --iRound;
                 }
             }
             else if (ch == '>') {
-                if (!bSepHasAngle) {
+                if (!fSepHasAngle) {
                     if (iAngle)
                         --iAngle;
                 }
@@ -700,7 +1045,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
     if (ppArg != nullptr)
         *ppArg = Str_TrimWhitespace(pLine);
 
-    if (iCurly || iSquare || iRound || bQuotes)
+    if (iCurly || iSquare || iRound || fQuotes)
     {
         //g_Log.EventError("Not every bracket or quote was closed.\n");
         return false;
@@ -761,13 +1106,13 @@ int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError)
     }
     catch (const std::bad_alloc &e)
     {
-        strncpynull(lastError, e.what(), SCRIPT_MAX_LINE_LEN);
+        Str_CopyLimitNull(lastError, e.what(), SCRIPT_MAX_LINE_LEN);
         CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
         return -1;
     }
     catch (...)
     {
-        strncpynull(lastError, "Unknown", SCRIPT_MAX_LINE_LEN);
+        Str_CopyLimitNull(lastError, "Unknown", SCRIPT_MAX_LINE_LEN);
         CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
         return -1;
     }

@@ -10,7 +10,7 @@
 #include "CUOTiledata.h"
 
 
-ITEMID_TYPE CUOTiledata::GetMaxTileDataItem() // static
+static ITEMID_TYPE GetMaxTiledataItem()
 {
     ADDTOCALLSTACK("CUOTiledata::GetMaxTileDataItem");
 
@@ -79,7 +79,7 @@ void CUOTiledata::Load()
             switch (format)
             {
                 case VERFORMAT_HIGHSEAS: // high seas format (CUOTerrainTypeRec_HS)
-                    offset = (id == 0? 0 : 4) + (( id / UOTILE_BLOCK_QTY ) * 4 ) + ( id * sizeof( CUOTerrainTypeRec_HS ));
+                    offset = 4 + (( id / UOTILE_BLOCK_QTY ) * 4 ) + ( id * sizeof( CUOTerrainTypeRec_HS ));
                     break;
 
                 case VERFORMAT_ORIGINAL: // original format (CUOTerrainTypeRec)
@@ -112,7 +112,7 @@ void CUOTiledata::Load()
                 cachedEntry->m_flags = record.m_flags;
                 cachedEntry->m_unknown = 0;
                 cachedEntry->m_index = record.m_index;
-                strncpynull(cachedEntry->m_name, record.m_name, CountOf(cachedEntry->m_name));
+                Str_CopyLimitNull(cachedEntry->m_name, record.m_name, CountOf(cachedEntry->m_name));
                 break;
             }
         }
@@ -121,7 +121,7 @@ void CUOTiledata::Load()
 
     // Cache the Tiledata Item entries
 
-    idMax = (uint)GetMaxTileDataItem();
+    idMax = (uint)GetMaxTiledataItem();
     _tiledataItemEntries.clear();
     _tiledataItemEntries.resize(idMax);
     for (uint id = 0; id < idMax; ++id)
@@ -173,12 +173,12 @@ void CUOTiledata::Load()
                 cachedEntry->m_flags = record.m_flags;
                 cachedEntry->m_weight = record.m_weight;
                 cachedEntry->m_layer = record.m_layer;
-                cachedEntry->m_dwAnim = record.m_dwAnim;
-                cachedEntry->m_height = record.m_height;
-                cachedEntry->m_wUnk19 = record.m_wUnk14;
                 cachedEntry->m_dwUnk11 = record.m_dwUnk6;
-                cachedEntry->m_dwUnk5 = 0;
-                strncpynull(cachedEntry->m_name, record.m_name, CountOf(cachedEntry->m_name));
+                cachedEntry->m_wAnim = record.m_wAnim;
+                cachedEntry->m_wHue = record.m_wHue;
+                cachedEntry->m_wLightIndex = record.m_wLightIndex;
+                cachedEntry->m_height = record.m_height;
+                Str_CopyLimitNull(cachedEntry->m_name, record.m_name, CountOf(cachedEntry->m_name));
                 break;
             }
         }

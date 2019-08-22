@@ -4,16 +4,24 @@
 #include "../chars/CChar.h"
 
 
-lpctstr const CCPropsItemEquippable::_ptcPropertyKeys[PROPIEQUIP_QTY + 1] =
+lpctstr constexpr CCPropsItemEquippable::_ptcPropertyKeys[PROPIEQUIP_QTY + 1] =
 {
-    #define ADD(a,b) b,
+    #define ADDPROP(a,b,c) b,
     #include "../../tables/CCPropsItemEquippable_props.tbl"
-    #undef ADD
+    #undef ADDPROP
     nullptr
 };
 KeyTableDesc_s CCPropsItemEquippable::GetPropertyKeysData() const {
     return {_ptcPropertyKeys, (int)CountOf(_ptcPropertyKeys)};
 }
+
+RESDISPLAY_VERSION CCPropsItemEquippable::_iPropertyExpansion[PROPIEQUIP_QTY + 1] =
+{
+#define ADDPROP(a,b,c) c,
+#include "../../tables/CCPropsItemEquippable_props.tbl"
+#undef ADDPROP
+    RDS_QTY
+};
 
 CCPropsItemEquippable::CCPropsItemEquippable() : CComponentProps(COMP_PROPS_ITEMEQUIPPABLE)
 {
@@ -47,6 +55,42 @@ bool CCPropsItemEquippable::IsPropertyStr(int iPropIndex) const
     }
 }
 
+
+/* The idea is: 
+    - Changed: Elemental damages and resistances (RESFIRE, DAMFIRE...) are now loaded only if COMBAT_ELEMENTAL_ENGINE is on, otherwise those keywords will be IGNORED. Bear in mind that if you have created
+        equippable items when that flag was off and you decide to turn it on later, you'll need to RECREATE all of those ITEMS in order to make them load the elemental properties.
+    We'll use this method when we have figured how to avoid possible bugs when equipping and unequipping items and switching COMBAT_ELEMENTAL_ENGINE on and off.
+*/
+bool CCPropsItemEquippable::IgnoreElementalProperty(int iPropIndex) // static
+{
+    if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+        return false;
+    switch ( PROPIEQUIP_TYPE(iPropIndex) )
+    {
+        case PROPIEQUIP_DAMCHAOS:
+        case PROPIEQUIP_DAMCOLD:
+        case PROPIEQUIP_DAMDIRECT:
+        case PROPIEQUIP_DAMENERGY:
+        case PROPIEQUIP_DAMFIRE:
+        case PROPIEQUIP_DAMPHYSICAL:
+        case PROPIEQUIP_DAMPOISON:
+        case PROPIEQUIP_HITAREACOLD:
+        case PROPIEQUIP_HITAREAENERGY:
+        case PROPIEQUIP_HITAREAFIRE:
+        case PROPIEQUIP_HITAREAPHYSICAL:
+        case PROPIEQUIP_HITAREAPOISON:
+        case PROPIEQUIP_RESCOLD:
+        case PROPIEQUIP_RESCOLDMAX:
+        case PROPIEQUIP_RESENERGY:
+        case PROPIEQUIP_RESENERGYMAX:
+        case PROPIEQUIP_RESFIRE:
+        case PROPIEQUIP_RESFIREMAX:
+            return true;
+    }
+    return false;
+}
+
+
 bool CCPropsItemEquippable::GetPropertyNumPtr(int iPropIndex, PropertyValNum_t* piOutVal) const
 {
     ADDTOCALLSTACK("CCPropsItemChar::GetPropertyNumPtr");
@@ -61,13 +105,17 @@ bool CCPropsItemEquippable::GetPropertyStrPtr(int iPropIndex, CSString* psOutVal
     return BaseCont_GetPropertyStr(&_mPropsStr, iPropIndex, psOutVal, fZero);
 }
 
-void CCPropsItemEquippable::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, bool fDeleteZero)
+void CCPropsItemEquippable::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemEquippable::SetPropertyNum");
     ASSERT(!IsPropertyStr(iPropIndex));
+    ASSERT((iLimitToExpansion >= RDS_PRET2A) && (iLimitToExpansion < RDS_QTY));
 
-    if (fDeleteZero && (iVal == 0))
-        _mPropsNum.erase(iPropIndex);
+    if ((fDeleteZero && (iVal == 0)) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion) /*|| IgnoreElementalProperty(iPropIndex)*/)
+    {
+        if (0 == _mPropsNum.erase(iPropIndex))
+            return; // I didn't have this property, so avoid further processing.
+    }
     else
         _mPropsNum[iPropIndex] = iVal;
 
@@ -78,14 +126,18 @@ void CCPropsItemEquippable::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal
     pLinkedObj->UpdatePropertyFlag();
 }
 
-void CCPropsItemEquippable::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, bool fDeleteZero)
+void CCPropsItemEquippable::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemEquippable::SetPropertyStr");
     ASSERT(ptcVal);
     ASSERT(IsPropertyStr(iPropIndex));
+    ASSERT((iLimitToExpansion >= RDS_PRET2A) && (iLimitToExpansion < RDS_QTY));
 
-    if (fDeleteZero && (*ptcVal == '\0'))
-        _mPropsStr.erase(iPropIndex);
+    if ((fDeleteZero && (*ptcVal == '\0')) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion) /*|| IgnoreElementalProperty(iPropIndex)*/)
+    {
+        if (0 == _mPropsNum.erase(iPropIndex))
+            return; // I didn't have this property, so avoid further processing.
+    }
     else
         _mPropsStr[iPropIndex] = ptcVal;
 
@@ -108,7 +160,7 @@ void CCPropsItemEquippable::DeletePropertyStr(int iPropIndex)
     _mPropsStr.erase(iPropIndex);
 }
 
-bool CCPropsItemEquippable::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, int iPropIndex, bool fPropStr)
+bool CCPropsItemEquippable::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, int iPropIndex, bool fPropStr)
 {
     ADDTOCALLSTACK("CCPropsItemEquippable::FindLoadPropVal");
     if (!fPropStr && (*s.GetArgRaw() == '\0'))
@@ -117,7 +169,7 @@ bool CCPropsItemEquippable::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, i
         return true;
     }
 
-    BaseProp_LoadPropVal(iPropIndex, fPropStr, s, pLinkedObj);
+    BaseProp_LoadPropVal(iPropIndex, fPropStr, s, pLinkedObj, iLimitToExpansion);
     return true;
 }
 
@@ -168,8 +220,20 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
 
         switch (prop)
         {
+            case PROPIEQUIP_ALTERED:
+                ADDT(1111880); // Altered
+                break;
+            case PROPIEQUIP_ANTIQUE:
+                ADDT(1152714); // Antique
+                break;
+            case PROPIEQUIP_BONUSBERSERK: // unimplemented
+                ADDTNUM(1151541); // Berserk ~1_VAL~
+                break;
             case PROPIEQUIP_BONUSDEX:
                 ADDTNUM(1060409); // dexterity bonus ~1_val~
+                break;
+            case PROPIEQUIP_BONUSDURABILITY:
+                ADDTNUM(1060410); // durability ~1_val~%
                 break;
             case PROPIEQUIP_BONUSHITSMAX:
                 ADDTNUM(1060431); // hit point increase ~1_val~%
@@ -186,65 +250,74 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
             case PROPIEQUIP_BONUSSTR:
                 ADDTNUM(1060485); // strength bonus ~1_val~
                 break;
+            case PROPIEQUIP_BRITTLE:
+                ADDT(1116209); // Brittle
+                break;
             case PROPIEQUIP_CASTINGFOCUS: // unimplemented
-                // Missing cliloc id
+                ADDTNUM(1113696);
                 break;
             case PROPIEQUIP_COMBATBONUSPERCENT: // unimplemented -> it should raise char's prop
                 //Missing cliloc id
                 break;
-            case PROPIEQUIP_COMBATBONUSSTAT: // unimplemented -> it should raise char's prop
+            case PROPIEQUIP_COMBATBONUSSTAT: // unimplemented (what should this do?)
                 //Missing cliloc id
                 break;
             case PROPIEQUIP_DAMCHAOS: // unimplemented
-                ADDTNUM(1072846); // chaos damage ~1_val~%
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                    ADDTNUM(1072846); // chaos damage ~1_val~%
                 break;
             case PROPIEQUIP_DAMCOLD:
-                ADDTNUM(1060404); // cold damage ~1_val~%
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                    ADDTNUM(1060404); // cold damage ~1_val~%
                 break;
-            case PROPIEQUIP_DAMDIRECT:
-                ADDTNUM(1079978); // direct damage: ~1_PERCENT~%
+            case PROPIEQUIP_DAMDIRECT: // unimplemented
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE)) // ?
+                    ADDTNUM(1079978); // direct damage: ~1_PERCENT~%
                 break;
             case PROPIEQUIP_DAMENERGY:
-                ADDTNUM(1060407); // energy damage ~1_val~%
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                    ADDTNUM(1060407); // energy damage ~1_val~%
                 break;
             case PROPIEQUIP_DAMFIRE:
-                ADDTNUM(1060405); // fire damage ~1_val~%
-                break;
-            case PROPIEQUIP_DAMMODIFIER: // unimplemented
-                // Missing cliloc id
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                    ADDTNUM(1060405); // fire damage ~1_val~%
                 break;
             case PROPIEQUIP_DAMPHYSICAL:
-                ADDTNUM(1060403); // physical damage ~1_val~%
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                    ADDTNUM(1060403); // physical damage ~1_val~%
                 break;
             case PROPIEQUIP_DAMPOISON:
-                ADDTNUM(1060406); // poison damage ~1_val~%
-                break;
-            case PROPIEQUIP_DECREASEHITCHANCE: // unimplemented
-                //Missing cliloc id
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                    ADDTNUM(1060406); // poison damage ~1_val~%
                 break;
             case PROPIEQUIP_EATERCOLD: // Unimplemented
-                //Missing cliloc id
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                    ADDTNUM(1113594); // Cold Eater ~1_Val~%
                 break;
-            case PROPIEQUIP_EATERDAM: // Unimplemented
-                //Missing cliloc id
+            case PROPIEQUIP_EATERDAM: // Unimplemented (what's this for?)
+                // Missing cliloc id
                 break;
             case PROPIEQUIP_EATERENERGY: // Unimplemented
-                //Missing cliloc id
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                    ADDTNUM(1113596); // Energy Eater ~1_Val~%
                 break;
             case PROPIEQUIP_EATERFIRE: // Unimplemented
-                //Missing cliloc id
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                    ADDTNUM(1113593); // Fire Eater ~1_Val~%
                 break;
             case PROPIEQUIP_EATERKINETIC: // Unimplemented
-                //Missing cliloc id
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))   
+                    ADDTNUM(1113597); // Kinetic Eater ~1_Val~%
                 break;
             case PROPIEQUIP_EATERPOISON: // Unimplemented
-                //Missing cliloc id
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                    ADDTNUM(1113595); // Poison Eater ~1_Val~%
                 break;
             case PROPIEQUIP_ENHANCEPOTIONS:
                 ADDTNUM(1060411); // enhance potions ~1_val~%
                 break;
             case PROPIEQUIP_EPHEMERAL: // Unimplemented
-                //Missing cliloc id
+                ADDT(1153085); // Moonbound: Ephemeral
                 break;
             case PROPIEQUIP_FASTERCASTING:
                 ADDTNUM(1060413); // faster casting ~1_val~
@@ -253,27 +326,33 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
                 ADDTNUM(1060412); // faster cast recovery ~1_val~
                 break;
             case PROPIEQUIP_HITAREACOLD: // unimplemented
-                ADDTNUM(1060416); // hit cold area ~1_val~%
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                    ADDTNUM(1060416); // hit cold area ~1_val~%
                 break;
             case PROPIEQUIP_HITAREAENERGY: // unimplemented
-                ADDTNUM(1060418); // hit energy area ~1_val~%
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                    ADDTNUM(1060418); // hit energy area ~1_val~%
                 break;
             case PROPIEQUIP_HITAREAFIRE: // unimplemented
-                ADDTNUM(1060419); // hit fire area ~1_val~%
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                    ADDTNUM(1060419); // hit fire area ~1_val~%
                 break;
             case PROPIEQUIP_HITAREAPHYSICAL: // unimplemented
-                ADDTNUM(1060428); // hit physical area ~1_val~%
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                    ADDTNUM(1060428); // hit physical area ~1_val~%
                 break;
             case PROPIEQUIP_HITAREAPOISON: // unimplemented
-                ADDTNUM(1060429); // hit poison area ~1_val~%
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                    ADDTNUM(1060429); // hit poison area ~1_val~%
                 break;
             case PROPIEQUIP_HITCURSE: // unimplemented
-                // Missing cliloc id
+                ADDTNUM(1113712); // Hit Curse ~1_val~%
                 break;
             case PROPIEQUIP_HITDISPEL: // unimplemented
                 ADDTNUM(1060417); // hit dispel ~1_val~%
                 break;
             case PROPIEQUIP_HITFATIGUE: // unimplemented
+                ADDTNUM(1113700); // // Hit Fatigue ~1_val~%
                 break;
             case PROPIEQUIP_HITFIREBALL: // unimplemented
                 ADDTNUM(1060420); // hit fireball ~1_val~%
@@ -302,11 +381,20 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
             case PROPIEQUIP_HITMAGICARROW: // unimplemented
                 ADDTNUM(1060426); // hit magic arrow ~1_val~%
                 break;
-            case PROPIEQUIP_HITMANADRAIN: // unimplemented -> it should raise char's prop
-                // Missing cliloc id
+            case PROPIEQUIP_HITMANADRAIN: // unimplemented
+                ADDTNUM(1113699); // Hit Mana Drain ~1_val~%
+                break;
+            case PROPIEQUIP_HITSPARKS: // unimplemented
+                ADDTNUM(1157326); // Sparks ~1_val~%
                 break;
             case PROPIEQUIP_HITSPELLSTR: // unimplemented
                 // Missing cliloc id
+                break;
+            case PROPIEQUIP_HITSWARM: // unimplemented
+                ADDTNUM(1157325); // Swarm ~1_val~%
+                break;
+            case PROPIEQUIP_IMBUED: // unimplemented
+                ADDT(1080418); // (Imbued)
                 break;
             case PROPIEQUIP_INCREASEDAM:
                 ADDTNUM(1060401); // damage increase ~1_val~%
@@ -317,8 +405,8 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
             case PROPIEQUIP_INCREASEDEFCHANCEMAX: // unimplemented -> it should raise char's prop
                 //Missing cliloc id
                 break;
-            case PROPIEQUIP_INCREASEGOLD: // Unimplemented
-                //Missing cliloc id
+            case PROPIEQUIP_INCREASEGOLD:
+                ADDTNUM(1060414); // gold increase ~1_val~%
                 break;
             case PROPIEQUIP_INCREASEHITCHANCE:
                 ADDTNUM(1060415); // hit chance increase ~1_val~%
@@ -333,7 +421,7 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
                 ADDTNUM(1060486); // swing speed increase ~1_val~%
                 break;
             case PROPIEQUIP_LOWERAMMOCOST:    // Unimplemented
-                //Missing cliloc id
+                ADDTNUM(1075208); // Lower Ammo Cost ~1_Percentage~%
                 break;
             case PROPIEQUIP_LOWERMANACOST:
                 ADDTNUM(1060433); // lower mana cost ~1_val~%
@@ -349,38 +437,27 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
                 break;
             case PROPIEQUIP_MAGEARMOR: // unimplemented
                 ADDT(1060437); // mage armor
-            case PROPIEQUIP_MANABURSTEVIL: // Unimplemented
-                //Missing cliloc id
-                break;
-            case PROPIEQUIP_MANABURSTGOOD: // Unimplemented
-                //Missing cliloc id
-                break;
-            case PROPIEQUIP_MANABURSTFREQUENCY: // Unimplemented
-                //Missing cliloc id
-                break;
-            case PROPIEQUIP_MANABURSTKARMA: // Unimplemented
-                //Missing cliloc id
-                break;
-            case PROPIEQUIP_MANAPHASE: // Unimplemented
-                //Missing cliloc id
                 break;
             case PROPIEQUIP_MASSIVE: // Unimplemented
-                //Missing cliloc id
+                ADDTNUM(1038003);
                 break;
             case PROPIEQUIP_NIGHTSIGHT:
                 ADDT(1060441); // night sight
                 break;
+            case PROPIEQUIP_PRIZED: // unimplemented
+                ADDT(1154910); // Prized
+                break;
             case PROPIEQUIP_RAGEFOCUS: // Unimplemented
-                //Missing cliloc id
+                //Missing cliloc id 1153788? Rage Attack
                 break;
             case PROPIEQUIP_REACTIVEPARALYZE: // Unimplemented
-                //Missing cliloc id
+                ADDT(1112364); // reactive paralyze
                 break;
             case PROPIEQUIP_REFLECTPHYSICALDAM: // Unimplemented
                 ADDTNUM(1060442); // reflect physical damage ~1_val~%
                 break;
             case PROPIEQUIP_REGENFOOD: // unimplemented
-                // Missing cliloc id
+                // Missing cliloc id (does not exist)
                 break;
             case PROPIEQUIP_REGENHITS: // unimplemented
                 ADDTNUM(1060444); // hit point regeneration ~1_val~
@@ -392,16 +469,16 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
                 ADDTNUM(1060443); // stamina regeneration ~1_val~
                 break;
             case PROPIEQUIP_REGENVALFOOD: // unimplemented
-                // Missing cliloc id?
+                // Missing cliloc id? (doesn't exist)
                 break;
             case PROPIEQUIP_REGENVALHITS: // unimplemented
-                // Missing cliloc id?
+                // Missing cliloc id? (doesn't exist)
                 break;
             case PROPIEQUIP_REGENVALMANA: // unimplemented
-                // Missing cliloc id?
+                // Missing cliloc id? (doesn't exist)
                 break;
             case PROPIEQUIP_REGENVALSTAM: // unimplemented
-                // Missing cliloc id?
+                // Missing cliloc id? (doesn't exist)
                 break;
             case PROPIEQUIP_RESCOLD:
                 if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
@@ -464,22 +541,27 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
                     //Missing cliloc id
                 break;
             case PROPIEQUIP_SOULCHARGE: // Unimplemented
-                //Missing cliloc id
+                    ADDTNUM(1113630); // Soul Charge ~1_val~%
                 break;
             case PROPIEQUIP_SOULCHARGECOLD: // Unimplemented
-                //Missing cliloc id
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                    ADDTNUM(1113632); // Soul Charge : Cold : ~1_val~%
                 break;
             case PROPIEQUIP_SOULCHARGEENERGY: // Unimplemented
-                //Missing cliloc id
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                    ADDTNUM(1113634); // Soul Charge : Energy : ~1_val~%
                 break;
             case PROPIEQUIP_SOULCHARGEFIRE: // Unimplemented
-                //Missing cliloc id
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                    ADDTNUM(1113631); // Soul Charge : Fire : ~1_val~%
                 break;
             case PROPIEQUIP_SOULCHARGEKINETIC: // Unimplemented
-                //Missing cliloc id
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                    ADDTNUM(1113635); // Soul Charge : Kinetic : ~1_val~%
                 break;
             case PROPIEQUIP_SOULCHARGEPOISON: // Unimplemented
-                //Missing cliloc id
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                    ADDTNUM(1113633); // Soul Charge : Poison : ~1_val~%
                 break;
             case PROPIEQUIP_SPELLCHANNELING:
                 ADDT(1060482); // spell channeling
@@ -488,13 +570,16 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
                 //Missing cliloc id
                 break;
             case PROPIEQUIP_SPELLFOCUSING: // Unimplemented
-                //Missing cliloc id
+                ADDT(1151391); // Spell Focusing
+                break;
+            case PROPIEQUIP_UNWIELDLY: // Unimplemented
+                ADDT(1154909); // Unwieldly
                 break;
         }
     }
     // End of Numeric properties
 
-/*
+
     // String properties
     for (const BaseContStrPair_t& propPair : _mPropsStr)
     {
@@ -504,10 +589,16 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
         switch (prop)
         {
             case PROPIEQUIP_HITSPELL: // unimplemented
-                //Missing cliloc id
+            {
+                SPELL_TYPE iSpellNumber = SPELL_TYPE(g_Cfg.ResourceGetID(RES_SPELL, ptcVal, 0).GetResIndex());
+                const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(iSpellNumber);
+                if (!pSpellDef)
+                    break;
+                ptcVal = pSpellDef->GetName();
+                ADDTSTR(1080129); // +~1_HIT_SPELL_EFFECT~% Hit Spell Effect.
                 break;
+            }
         }
     }
     // End of String properties
-*/
 }

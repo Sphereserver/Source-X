@@ -43,14 +43,14 @@ public:
     * @brief Get the record count of the list.
     * @return The record count of the list.
     */
-    inline size_t GetCount() const {
+    inline size_t GetCount() const noexcept {
         return m_iCount;
     }
     /**
     * @brief Check if CSObjList if empty.
     * @return true if CSObjList is empty, false otherwise.
     */
-    inline bool IsEmpty() const {
+    inline bool IsEmpty() const noexcept {
         return !GetCount();
     }
     ///@}
@@ -67,14 +67,14 @@ public:
     * @brief Get the first record of the CSObjList.
     * @return The first record of the CSObjList if list is not empty, nullptr otherwise.
     */
-    inline CSObjListRec * GetHead() const {
+    inline CSObjListRec * GetHead() const noexcept {
         return m_pHead;
     }
     /**
     * @brief Get the last record of the CSObjList.
     * @return The last record of the CSObjList if list is not empty, nullptr otherwise.
     */
-    inline CSObjListRec * GetTail() const {
+    inline CSObjListRec * GetTail() const noexcept {
         return m_pTail;
     }
     ///@}

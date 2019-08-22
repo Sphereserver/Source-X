@@ -25,9 +25,8 @@ SKILL_TYPE CChar::Skill_GetBest( uint iRank ) const
 	if ( iRank >= g_Cfg.m_iMaxSkill )
 		iRank = 0;
 
-	dword * pdwSkills = new dword [iRank + 1];
+	dword * pdwSkills = new dword [(size_t)iRank + 1]();
 	ASSERT(pdwSkills);
-	memset(pdwSkills, 0, (iRank + 1) * sizeof(dword));
 
 	dword dwSkillTmp;
 	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
@@ -404,7 +403,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 	if ( iChance <= 0 )
 		return;
 
-	int iRoll = Calc_GetRandVal(1000);
+	int64 iRoll = Calc_GetRandVal(1000);
 	if ( uiSkillLevelFixed < (ushort)iSkillMax )	// are we in position to gain skill ?
 	{
 		// slightly more chance of decay than gain
@@ -512,7 +511,7 @@ bool CChar::Skill_CheckSuccess( SKILL_TYPE skill, int difficulty, bool bUseBellC
 	return ( iSuccessChance >= Calc_GetRandVal(1000) );
 }
 
-bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain, bool bUseBellCurve )
+bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain, bool bUseBellCurve, bool bForceCheck )
 {
 	ADDTOCALLSTACK("CChar::Skill_UseQuick");
 	// ARGS:
@@ -686,7 +685,7 @@ bool CChar::Skill_MakeItem_Success()
 		// minimum quality is 1, maximum quality is 200.  100 is average.
 
 		// How much variance? This is the difference in quality levels from what I can normally make.
-		int variance = 2 - (int)(log10(static_cast<double>(Calc_GetRandVal(250) + 1)));	// this should result in a value between 0 and 2
+		int variance = 2 - (int)(log10( 1.0 + double(Calc_GetRandVal(250)) ));	// this should result in a value between 0 and 2
 
 		// Determine if lower or higher quality
 		if ( !Calc_GetRandVal(2) )
@@ -876,7 +875,7 @@ bool CChar::Skill_MakeItem( ITEMID_TYPE id, CUID uidTarg, SKTRIG_TYPE stage, boo
 	if ( pItemDragging )
 		ItemBounce(pItemDragging);
 
-	iReplicationQty = ResourceConsume(&(pItemDef->m_BaseResources), iReplicationQty, (stage != SKTRIG_SUCCESS), pItemDef->GetResourceID().GetResIndex());
+	iReplicationQty = ResourceConsume(&(pItemDef->m_BaseResources), iReplicationQty, (stage != SKTRIG_SUCCESS));
 	if ( !iReplicationQty )
 		return false;
 
@@ -886,7 +885,7 @@ bool CChar::Skill_MakeItem( ITEMID_TYPE id, CUID uidTarg, SKTRIG_TYPE stage, boo
 		// If fail only consume part of them.
 		int iConsumePercent = -1;
 		size_t i = pItemDef->m_SkillMake.FindResourceType(RES_SKILL);
-		if ( i != pItemDef->m_SkillMake.BadIndex() )
+		if ( i != SCONT_BADINDEX )
 		{
 			CSkillDef *pSkillDef = g_Cfg.GetSkillDef((SKILL_TYPE)(pItemDef->m_SkillMake[i].GetResIndex()));
 			if ( pSkillDef && !pSkillDef->m_Effect.m_aiValues.empty() )
@@ -905,7 +904,7 @@ bool CChar::Skill_MakeItem( ITEMID_TYPE id, CUID uidTarg, SKTRIG_TYPE stage, boo
 		// Start the skill.
 		// Find the primary skill required.
 		size_t i = pItemDef->m_SkillMake.FindResourceType(RES_SKILL);
-		if ( i == pItemDef->m_SkillMake.BadIndex() )
+		if ( i == SCONT_BADINDEX )
         {
             g_Log.EventError("Trying to make item=%s with invalid SKILLMAKE.\n", pItemDef->GetResourceName());
 			return false;
@@ -2139,25 +2138,26 @@ int CChar::Skill_Taming(SKTRIG_TYPE stage)
 	ASSERT( stage == SKTRIG_SUCCESS );
 
 	// Check if I tamed it before
+    bool fTamedPrev = false;
 	CItemMemory * pMemory = pChar->Memory_FindObjTypes( this, MEMORY_SPEAK );
 	if ( pMemory && pMemory->m_itEqMemory.m_Action == NPC_MEM_ACT_TAMED)
 	{
 		// I did, no skill to tame it again
+        fTamedPrev = true;
+
 		tchar * pszMsg = Str_GetTemp();
 		sprintf(pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_TAMING_REMEMBER ), pChar->GetName());
 		ObjMessage(pszMsg, pChar );
-
-		pChar->NPC_PetSetOwner( this );
-		pChar->Stat_SetVal(STAT_FOOD, 50);	// this is good for something.
-		pChar->m_Act_UID = GetUID();
-		pChar->Skill_Start( NPCACT_FOLLOW_TARG );
-		return -SKTRIG_QTY;	// no credit for this.
 	}
 
-	pChar->NPC_PetSetOwner( this );
-	pChar->Stat_SetVal(STAT_FOOD, 50);	// this is good for something.
-	pChar->m_Act_UID = GetUID();
-	pChar->Skill_Start( NPCACT_FOLLOW_TARG );
+    pChar->NPC_PetSetOwner(this);
+    pChar->Stat_SetVal(STAT_FOOD, 50);	// this is good for something.
+    pChar->m_Act_UID = GetUID();
+    pChar->Skill_Start(NPCACT_FOLLOW_TARG);
+
+    if (fTamedPrev)
+        return -SKTRIG_QTY;	// no credit for this.
+
 	SysMessageDefault( DEFMSG_TAMING_SUCCESS );
 
 	// Create the memory of being tamed to prevent lame macroers
@@ -2531,7 +2531,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
     }
 
     CItemCorpse * pCorpse = nullptr;	// resurrect by corpse
-	if (pObj->IsItem())
+	if (pObj && pObj->IsItem())
 	{
 		pCorpse = dynamic_cast<CItemCorpse *>(pObj);
 		if ( pCorpse == nullptr )
@@ -3025,7 +3025,7 @@ int CChar::Skill_Act_Breath( SKTRIG_TYPE stage )
 	if ( !CanSeeLOS(pChar) )
 		return -SKTRIG_QTY;
 
-	CPointMap pntMe = GetTopPoint();
+	const CPointMap& pntMe = GetTopPoint();
 	if ( pntMe.GetDist( m_Act_p ) > UO_MAP_VIEW_SIGHT )
 		m_Act_p.StepLinePath( pntMe, UO_MAP_VIEW_SIGHT );
 

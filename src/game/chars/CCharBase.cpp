@@ -29,6 +29,9 @@ CCharBase::CCharBase( CREID_TYPE id ) :
 	m_Int = 0;
     _iRange = 0;
 
+	_iEraLimitGear = g_Cfg._iEraLimitGear;		// Always latest by default
+	_iEraLimitLoot = g_Cfg._iEraLimitLoot;		// Always latest by default
+
 	m_iMoveRate = (short)(g_Cfg.m_iMoveRate);
 
 	if ( IsValidDispID(id))
@@ -153,7 +156,7 @@ enum CBC_TYPE
 	CBC_QTY
 };
 
-lpctstr const CCharBase::sm_szLoadKeys[CBC_QTY+1] =
+lpctstr constexpr CCharBase::sm_szLoadKeys[CBC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CCharBase_props.tbl"
@@ -161,34 +164,33 @@ lpctstr const CCharBase::sm_szLoadKeys[CBC_QTY+1] =
 	nullptr
 };
 
-bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CCharBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
-	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CCharBase::r_WriteVal");
     EXC_TRY("WriteVal");
 
     // Checking Props CComponents first
     EXC_SET_BLOCK("EntityProps");
-    if (CEntityProps::r_WritePropVal(pszKey, sVal, nullptr, this))
+    if (!fNoCallChildren && CEntityProps::r_WritePropVal(ptcKey, sVal, nullptr, this))
     {
         return true;
     }
 
     EXC_SET_BLOCK("Keyword");
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		//return as string or hex number or nullptr if not set
 		case CBC_THROWDAM:
 		case CBC_THROWOBJ:
 		case CBC_THROWRANGE:
-			sVal = GetDefStr(pszKey, false);
+			sVal = GetDefStr(ptcKey, false);
 			break;
 		//return as decimal number or 0 if not set
 		case CBC_FOLLOWERSLOTS:
 		case CBC_MAXFOLLOWER:
 		case CBC_BONDED:
 		case CBC_TITHING:
-			sVal.FormatLLVal(GetDefNum(pszKey));
+			sVal.FormatLLVal(GetDefNum(ptcKey));
 			break;
 		case CBC_ANIM:
 			sVal.FormatHex( m_Anims );
@@ -221,6 +223,15 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			break;
 		case CBC_DISPID:
 			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, GetDispID()));
+			break;
+		case CBC_ERALIMITGEAR:
+			sVal.FormatVal(_iEraLimitGear);
+			break;
+		case CBC_ERALIMITLOOT:
+			sVal.FormatVal(_iEraLimitLoot);
+			break;
+		case CBC_ERALIMITPROPS:
+			sVal.FormatVal(_iEraLimitProps);
 			break;
 		case CBC_ID:
 			sVal.FormatHex( GetDispID() );
@@ -294,7 +305,7 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			break;
 		default:
         {
-            return(CBaseBaseDef::r_WriteVal(pszKey, sVal));
+            return (fNoCallParent ? false : CBaseBaseDef::r_WriteVal(ptcKey, sVal, pSrc, false));
         }
 	}
 	return true;
@@ -363,6 +374,15 @@ bool CCharBase::r_LoadVal( CScript & s )
 			break;
 		case CBC_DISPID:
 			return false;
+		case CBC_ERALIMITGEAR:
+			_iEraLimitGear = (RESDISPLAY_VERSION)s.GetArgVal();
+			break;
+		case CBC_ERALIMITLOOT:
+			_iEraLimitLoot = (RESDISPLAY_VERSION)s.GetArgVal();
+			break;
+		case CBC_ERALIMITPROPS:
+			_iEraLimitProps = (RESDISPLAY_VERSION)s.GetArgVal();
+			break;
 		case CBC_FOODTYPE:
 			SetFoodType( s.GetArgStr());
 			break;
@@ -392,7 +412,7 @@ bool CCharBase::r_LoadVal( CScript & s )
         {
             int64 piVal[2];
             tchar *ptcTmp = Str_GetTemp();
-            strncpy(ptcTmp, s.GetArgStr(), STR_TEMPLENGTH);
+            Str_CopyLimitNull(ptcTmp, s.GetArgStr(), STR_TEMPLENGTH);
             int iQty = Str_ParseCmds( ptcTmp, piVal, CountOf(piVal));
             int iRange;
             if ( iQty > 1 )
@@ -495,7 +515,7 @@ CCharBase * CCharBase::FindCharBase( CREID_TYPE baseID ) // static
 
 	CResourceID rid = CResourceID( RES_CHARDEF, baseID );
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
-	if ( index == g_Cfg.m_ResHash.BadIndex() )
+	if ( index == SCONT_BADINDEX )
 		return nullptr;
 
 	CResourceLink * pBaseLink = static_cast <CResourceLink *> ( g_Cfg.m_ResHash.GetAt(rid,index));

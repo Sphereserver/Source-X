@@ -28,16 +28,16 @@ private:
 
 public:
 	// information
-    inline size_t length() {
+    inline size_t length() const {
         return m_length;
     }
-    inline size_t realLength() {
+    inline size_t realLength() const {
         return m_realLength;
     }
-    inline bool isEmpty() {
+    inline bool isEmpty() const {
         return m_length != 0;
     }
-    inline const char *toBuffer() {
+    inline const char *toBuffer() const {
         return m_buf;
     }
 

@@ -1,6 +1,5 @@
 #include <cstdio>
 #include "../common/sphere_library/CSString.h"
-#include "../common/common.h"
 #include "../game/CScriptProfiler.h"
 #include "ProfileData.h"
 #include "threads.h"
@@ -14,7 +13,7 @@ ProfileData::ProfileData()
 	memset(m_PreviousTimes, 0, sizeof(m_PreviousTimes));
 	memset(m_EnabledProfiles, 0, sizeof(m_EnabledProfiles));
 
-	m_iActiveWindowSeconds = 10;
+	m_iActiveWindowSeconds = 10 * 1000; // expressed in milliseconds
 	m_iAverageCount = 1;
 
 	llong llTicksStart;
@@ -25,6 +24,11 @@ ProfileData::ProfileData()
 	m_TimeTotal = 0;
 }
 
+int ProfileData::GetActiveWindow() const noexcept
+{
+    return m_iActiveWindowSeconds / 1000;
+}
+
 void ProfileData::SetActive(int iSampleSec)
 {
 	ADDTOCALLSTACK("ProfileData::SetActive");
@@ -33,7 +37,7 @@ void ProfileData::SetActive(int iSampleSec)
 	memset(m_CurrentTimes, 0, sizeof(m_CurrentTimes));
 	memset(m_PreviousTimes, 0, sizeof(m_PreviousTimes));
 
-	m_iActiveWindowSeconds = iSampleSec;
+	m_iActiveWindowSeconds = iSampleSec * 1000; // expressed in milliseconds;
 	m_iAverageCount		= 1;
 
 	if (m_iActiveWindowSeconds == 0)
@@ -57,7 +61,7 @@ void ProfileData::Start(PROFILE_TYPE id)
 	EnableProfile(id);
 
 	// Stop prev task.
-	if ( m_TimeTotal >= (llTimeProfileFrequency * m_iActiveWindowSeconds) )
+	if ( m_TimeTotal >= m_iActiveWindowSeconds )
 	{
 		for ( int i = 0; i < PROFILE_DATA_QTY; ++i )
 		{
@@ -68,9 +72,6 @@ void ProfileData::Start(PROFILE_TYPE id)
 			}
 			else
 			{
-				if ( m_PreviousTimes[i].m_Time > llTimeProfileFrequency )
-					m_PreviousTimes[i].m_Time = llTimeProfileFrequency;
-
 				m_AverageTimes[i].m_Time	= (((m_AverageTimes[i].m_Time * 90) + (m_PreviousTimes[i].m_Time * 10)) / 100);
 				m_AverageTimes[i].m_iCount	= (((m_AverageTimes[i].m_iCount * 95) + (m_PreviousTimes[i].m_iCount * 10)) / 100);
 			}
@@ -94,9 +95,11 @@ void ProfileData::Start(PROFILE_TYPE id)
 	TIME_PROFILE_START;
 
 	// accumulate the time for this task.
-	llong Diff = ( llTicksStart - m_CurrentTime );
-	m_TimeTotal += Diff;
-	m_CurrentTimes[m_CurrentTask].m_Time += Diff;
+	llong llDiff = ( llTicksStart - m_CurrentTime );
+    ASSERT(llDiff >= 0);
+	m_TimeTotal += llDiff;
+    ASSERT(m_TimeTotal >= 0);
+	m_CurrentTimes[m_CurrentTask].m_Time += llDiff;
 	++ m_CurrentTimes[m_CurrentTask].m_iCount;
 
 	// We are now on to the new task.
@@ -123,7 +126,7 @@ bool ProfileData::IsEnabled(PROFILE_TYPE id) const
 		return m_EnabledProfiles[id];
 
 	// check all profiles
-	for (int i = PROFILE_OVERHEAD; i < PROFILE_QTY; i++)
+	for (int i = PROFILE_OVERHEAD; i < PROFILE_QTY; ++i)
 	{
 		if (IsEnabled(static_cast<PROFILE_TYPE>(i)))
 			return true;
@@ -147,7 +150,7 @@ PROFILE_TYPE ProfileData::GetCurrentTask() const
 
 lpctstr ProfileData::GetName(PROFILE_TYPE id) const
 {
-	static lpctstr const sm_pszProfileName[PROFILE_QTY] =
+	static lpctstr constexpr sm_pszProfileName[PROFILE_QTY] =
 	{
 		"IDLE",
 		"OVERHEAD",
@@ -176,23 +179,21 @@ lpctstr ProfileData::GetDescription(PROFILE_TYPE id) const
 {
 	ADDTOCALLSTACK("ProfileData::GetDesc");
 	tchar * pszTmp = Str_GetTemp();
-	int iCount	= m_PreviousTimes[id].m_iCount;
+	const int iCount = m_PreviousTimes[id].m_iCount;
 
 	if ( id >= PROFILE_DATA_QTY )
 	{
-		sprintf(pszTmp, "%i (total: %i) instances", (int)(m_PreviousTimes[id].m_Time), (int)(m_AverageTimes[id].m_Time));
+		sprintf(pszTmp, "%lld (total: %lld) instances", m_PreviousTimes[id].m_Time, m_AverageTimes[id].m_Time);
 	}
 	else if ( id >= PROFILE_TIME_QTY )
 	{
-		sprintf(pszTmp, "%i (avg: %i) bytes", (int)(m_PreviousTimes[id].m_Time), (int)(m_AverageTimes[id].m_Time));
+		sprintf(pszTmp, "%lld (avg: %lld) bytes", m_PreviousTimes[id].m_Time, m_AverageTimes[id].m_Time);
 	}
 	else
 	{
-		sprintf( pszTmp, "%3i.%04is  avg: %3i.%04is  [samples:%6i  avg:%6i ]  runtime: %is",
-			(int)(		m_PreviousTimes[id].m_Time /			( llTimeProfileFrequency )),
-			(int)(((	m_PreviousTimes[id].m_Time * 10000 ) /	( llTimeProfileFrequency )) % 10000 ),
-			(int)(		m_AverageTimes[id].m_Time /				( llTimeProfileFrequency )),
-			(int)(((	m_AverageTimes[id].m_Time * 10000 ) /	( llTimeProfileFrequency )) % 10000 ),
+		sprintf( pszTmp, "%.4fs  avg: %.4fs  [samples:%8i  avg:%7i]  adjusted runtime: %is",
+			(m_PreviousTimes[id].m_Time    / 1000.0),
+			(m_AverageTimes[id].m_Time     / 1000.0),
 			iCount,
 			m_AverageTimes[id].m_iCount,
 			m_iAverageCount );

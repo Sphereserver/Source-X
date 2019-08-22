@@ -66,7 +66,7 @@ void CTimedObject::SetTimer(int64 iDelayInMsecs)
 void CTimedObject::SetTimeout(int64 iDelayInMsecs)
 {
     ADDTOCALLSTACK("CTimedObject::SetTimeout");
-    ProfileTask timersTask(PROFILE_TIMERS); // profile the settimeout proccess.
+    const ProfileTask timersTask(PROFILE_TIMERS); // profile the settimeout proccess.
     
     /*
     * Setting the new timer must remove any entry from the current world tick's map
@@ -127,6 +127,8 @@ int64 CTimedObject::GetTimerAdjusted() const
     return (iDiffInMsecs);
 }
 
+// We shouldn't really use this
+/*
 int64 CTimedObject::GetTimerTAdjusted() const
 {
     // RETURN: time in ticks from now.
@@ -137,6 +139,7 @@ int64 CTimedObject::GetTimerTAdjusted() const
         return 0;
     return (iDiffInMsecs / MSECS_PER_TICK);
 }
+*/
 
 int64 CTimedObject::GetTimerDAdjusted() const
 {

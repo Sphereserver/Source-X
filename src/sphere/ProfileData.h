@@ -58,7 +58,7 @@ protected:
 
 	// Store the last time start time.
 	PROFILE_TYPE  m_CurrentTask;	// What task are we currently processing ?
-	llong m_CurrentTime;			// QueryPerformanceCount()
+	llong m_CurrentTime;			// in milliseconds
 
 public:
 	ProfileData();
@@ -68,12 +68,10 @@ private:
 	ProfileData& operator=(const ProfileData& other);
 
 public:
-	bool IsActive() const {
+	bool IsActive() const noexcept {
 		return ( m_iActiveWindowSeconds > 0 ? true : false );
 	}
-	int GetActiveWindow() const {
-		return m_iActiveWindowSeconds;
-	}
+    int GetActiveWindow() const noexcept;
 
 	void SetActive(int iSampleSec);
 	void Start(PROFILE_TYPE id);

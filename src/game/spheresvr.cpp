@@ -30,6 +30,8 @@
 #include "CWorld.h"
 #include "spheresvr.h"
 
+lpctstr g_szServerDescription = SPHERE_TITLE " Version " SPHERE_VERSION " " SPHERE_VER_FILEOS_STR	" by www.spherecommunity.net";
+
 
 bool WritePidFile(int iMode = 0)
 {
@@ -71,20 +73,51 @@ bool WritePidFile(int iMode = 0)
 	}
 }
 
-lpctstr const g_Stat_Name[STAT_QTY] =	// not sorted obviously.
-{
-	"STR",
-	"INT",
-	"DEX",
-	"FOOD"
-};
 
-lpctstr g_szServerDescription =	SPHERE_TITLE " Version " SPHERE_VERSION " " SPHERE_VER_FILEOS_STR	" by www.spherecommunity.net";
-
-int g_szServerBuild = 0;
+// Dynamic initialization of some global stuff
 
 dword CObjBase::sm_iCount = 0;			// UID table.
-llong llTimeProfileFrequency = 1000;	// time profiler
+llong g_llTimeProfileFrequency = 1;	    // time profiler (default value, will be changed in GlobalInitializer).
+
+
+GlobalInitializer::GlobalInitializer()
+{
+    constexpr const char* m_sClassName = "GlobalInitializer";
+    EXC_TRY("Pre-startup Init");
+    ASSERT(MAX_BUFFER >= sizeof(CCommand));
+    ASSERT(MAX_BUFFER >= sizeof(CEvent));
+    ASSERT(sizeof(int) == sizeof(dword));	// make this assumption often.
+    ASSERT(sizeof(ITEMID_TYPE) == sizeof(dword));
+    ASSERT(sizeof(word) == 2);
+    ASSERT(sizeof(dword) == 4);
+    ASSERT(sizeof(nword) == 2);
+    ASSERT(sizeof(ndword) == 4);
+    ASSERT(sizeof(CUOItemTypeRec) == 37);	// is byte packing working ?
+
+#ifdef _WIN32
+    LARGE_INTEGER liProfFreq;
+    if (QueryPerformanceFrequency(&liProfFreq))
+        g_llTimeProfileFrequency = liProfFreq.QuadPart;
+
+#if defined(_MSC_VER) && !defined(_NIGHTLYBUILD)
+    // We don't need an exception translator for the Debug build, since that build would, generally, be used with a debugger.
+    // We don't want that for Release build either because, in order to call _set_se_translator, we should set the /EHa
+    //	compiler flag, which slows down code a bit.
+    EXC_SET_BLOCK("setting exception catcher");
+    SetExceptionTranslator();
+#endif
+#endif // _WIN32
+
+#ifndef _DEBUG
+    // Same as for SetExceptionTranslator, Debug build doesn't need a purecall handler.
+    EXC_SET_BLOCK("setting purecall handler");
+    SetPurecallHandler();
+#endif
+    EXC_CATCH;
+}
+
+GlobalInitializer g_GlobalInitializer;
+
 
 // Game servers stuff.
 CWorld			g_World;			// the world. (we save this stuff)
@@ -113,90 +146,10 @@ CSStringList	g_AutoComplete;		// auto-complete list
 CScriptProfiler g_profiler;			// script profiler
 CUOMapList		g_MapList;			// global maps information
 
+MainThread g_Main;
+extern PingServer g_PingServer;
+extern CDataBaseAsyncHelper g_asyncHdb;
 
-lpctstr GetTimeMinDesc( int minutes )
-{
-	tchar *pTime = Str_GetTemp();
-
-	int minute = minutes % 60;
-	int hour = ( minutes / 60 ) % 24;
-
-	lpctstr pMinDif;
-	if ( minute <= 14 )
-//		pMinDif = "";
-		pMinDif = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_QUARTER_FIRST);
-	else if ( ( minute >= 15 ) && ( minute <= 30 ) )
-//		pMinDif = "a quarter past";
-		pMinDif = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_QUARTER_SECOND);
-	else if ( ( minute >= 30 ) && ( minute <= 45 ) )
-		//pMinDif = "half past";
-		pMinDif = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_QUARTER_THIRD);
-	else
-	{
-//		pMinDif = "a quarter till";
-		pMinDif = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_QUARTER_FOURTH);
-		hour = ( hour + 1 ) % 24;
-	}
-/*
-	static lpctstr const sm_ClockHour[] =
-	{
-		"midnight",
-		"one",
-		"two",
-		"three",
-		"four",
-		"five",
-		"six",
-		"seven",
-		"eight",
-		"nine",
-		"ten",
-		"eleven",
-		"noon"
-	};
-*/
-	lpctstr sm_ClockHour[] =
-	{
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_ZERO),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_ONE),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_TWO),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_THREE),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_FOUR),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_FIVE),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_SIX),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_SEVEN),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_EIGHT),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_NINE),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_TEN),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_ELEVEN),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_TWELVE),
-	};
-
-	lpctstr pTail;
-	if ( hour == 0 || hour==12 )
-		pTail = "";
-	else if ( hour > 12 )
-	{
-		hour -= 12;
-		if ((hour>=1)&&(hour<6))
-			pTail = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_13_TO_18);
-//			pTail = " o'clock in the afternoon";
-		else if ((hour>=6)&&(hour<9))
-			pTail = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_18_TO_21);
-//			pTail = " o'clock in the evening.";
-		else
-			pTail = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_21_TO_24);
-//			pTail = " o'clock at night";
-	}
-	else
-	{
-		pTail = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_24_TO_12);
-//		pTail = " o'clock in the morning";
-	}
-
-	sprintf( pTime, "%s %s %s", pMinDif, sm_ClockHour[hour], pTail );
-	return pTime;
-}
 
 
 //*******************************************************************
@@ -248,46 +201,13 @@ bool MainThread::shouldExit()
 	return AbstractSphereThread::shouldExit();
 }
 
-MainThread g_Main;
-extern PingServer g_PingServer;
-extern CDataBaseAsyncHelper g_asyncHdb;
-
 
 //*******************************************************************
 
 int Sphere_InitServer( int argc, char *argv[] )
 {
-	const char *m_sClassName = "Sphere";
-	EXC_TRY("Init");
-	ASSERT(MAX_BUFFER >= sizeof(CCommand));
-	ASSERT(MAX_BUFFER >= sizeof(CEvent));
-	ASSERT(sizeof(int) == sizeof(dword));	// make this assumption often.
-	ASSERT(sizeof(ITEMID_TYPE) == sizeof(dword));
-	ASSERT(sizeof(word) == 2 );
-	ASSERT(sizeof(dword) == 4 );
-	ASSERT(sizeof(nword) == 2 );
-	ASSERT(sizeof(ndword) == 4 );
-	ASSERT(sizeof(CUOItemTypeRec) == 37 );	// is byte packing working ?
-
-#ifdef _WIN32
-	if ( ! QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER *>(&llTimeProfileFrequency)) )
-		llTimeProfileFrequency = 1000;
-
-#if defined(_MSC_VER) && !defined(_NIGHTLYBUILD)
-	// We don't need an exception translator for the Debug build, since that build would, generally, be used with a debugger.
-	// We don't want that for Release build either because, in order to call _set_se_translator, we should set the /EHa
-	//	compiler flag, which slows down code a bit.
-	EXC_SET_BLOCK("setting exception catcher");
-	SetExceptionTranslator();
-#endif
-#endif // _WIN32
-
-#ifndef _DEBUG
-	// Same as for SetExceptionTranslator, Debug build doesn't need a purecall handler.
-	EXC_SET_BLOCK("setting purecall handler");
-	SetPurecallHandler();
-#endif
-
+	constexpr const char *m_sClassName = "SphereInit";
+	EXC_TRY("Init Server");
 	EXC_SET_BLOCK("loading");
 	if ( !g_Serv.Load() )
 		return -3;
@@ -311,7 +231,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 	//	load auto-complete dictionary
 	EXC_SET_BLOCK("auto-complete");
 	{
-		CSFileText	dict;
+		CSFileText dict;
 		if ( dict.Open(SPHERE_FILE ".dic", OF_READ|OF_TEXT|OF_DEFAULTMODE) )
 		{
 			tchar * pszTemp = Str_GetTemp();
@@ -331,7 +251,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 
 					if ( *pszTemp != '\0' )
 					{
-						count++;
+						++count;
 						g_AutoComplete.AddTail(pszTemp);
 					}
 				}
@@ -365,6 +285,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 	EXC_DEBUG_END;
 	return -10;
 }
+
 
 void Sphere_ExitServer()
 {
@@ -412,20 +333,21 @@ void Sphere_ExitServer()
 
 	g_Log.Event(LOGM_INIT|LOGL_FATAL, "Server terminated: %s (code %d)\n", ptcReason, iExitFlag);
 #ifdef _WIN32
-    g_Log.Event(LOGM_INIT|LOGF_CONSOLE_ONLY, "You can now close this window.\n");
+    if (!g_Serv._fCloseNTWindowOnTerminate)
+        g_Log.Event(LOGM_INIT | LOGF_CONSOLE_ONLY, "You can now close this window.\n");
 #endif
-	g_Log.Close();
-
+    g_Log.Close();
 #ifdef _WIN32
     if (iExitFlag != 5)
         g_NTWindow.NTWindow_ExitServer();
 #endif
 }
 
+
 int Sphere_OnTick()
 {
 	// Give the world (CMainTask) a single tick. RETURN: 0 = everything is fine.
-	const char *m_sClassName = "Sphere";
+	constexpr const char *m_sClassName = "SphereTick";
 	EXC_TRY("Tick");
 #ifdef _WIN32
 	EXC_SET_BLOCK("service");
@@ -467,11 +389,13 @@ int Sphere_OnTick()
 	EXC_CATCH;
 	return g_Serv.GetExitFlag();
 }
+
+
 //*****************************************************
 
 static void Sphere_MainMonitorLoop()
 {
-	const char *m_sClassName = "Sphere";
+	constexpr const char *m_sClassName = "SphereMonitor";
 	// Just make sure the main loop is alive every so often.
 	// This should be the parent thread. try to restart it if it is not.
 	while ( !g_Serv.GetExitFlag() )
@@ -510,8 +434,10 @@ static void Sphere_MainMonitorLoop()
 
 }
 
+
 //******************************************************
-void dword_q_sort(dword numbers[], dword left, dword right)
+
+static void dword_q_sort(dword numbers[], dword left, dword right)
 {
 	dword	pivot, l_hold, r_hold;
 
@@ -803,18 +729,21 @@ void defragSphere(char *path)
 	g_Log.Event(LOGM_INIT,	"Defragmentation complete.\n");
 }
 
+
 #ifdef _WIN32
 int Sphere_MainEntryPoint( int argc, char *argv[] )
 #else
 int _cdecl main( int argc, char * argv[] )
 #endif
 {
+
 #ifndef _WIN32
     IThread::setThreadName("T_SphereStartup");
     g_UnixTerminal.start();
-    // We need to find out the log files folder... look it up in the .ini file (on Windows it's done in WinMain function.
+    // We need to find out the log files folder... look it up in the .ini file (on Windows it's done in WinMain function).
     g_Cfg.LoadIni(false);
 #endif
+
 
     g_Serv.SetServerMode(SERVMODE_Loading);
 	g_Serv.SetExitFlag( Sphere_InitServer( argc, argv ));
@@ -840,7 +769,7 @@ int _cdecl main( int argc, char * argv[] )
 									//  an instance of NetworkInput nad NetworkOutput, which support working in a multi threaded way (declarations and definitions in network_multithreaded.h/.cpp)
 #endif
 
-		bool shouldRunInThread = ( g_Cfg.m_iFreezeRestartTime > 0 );
+		const bool shouldRunInThread = ( g_Cfg.m_iFreezeRestartTime > 0 );
 		if (shouldRunInThread)
 		{
 			g_Main.start();				// Starts another thread to do all the work (it does Sphere_OnTick())
@@ -858,13 +787,18 @@ int _cdecl main( int argc, char * argv[] )
 
 	Sphere_ExitServer();
 	WritePidFile(1);
+
 #ifdef _WIN32
-    while (g_NTWindow.isActive())
+    if (!g_Serv._fCloseNTWindowOnTerminate)
     {
-        Sleep (100);
+        while (g_NTWindow.isActive())
+        {
+            Sleep (100);
+        }
     }
 #endif
-	return( g_Serv.GetExitFlag() );
+
+	return g_Serv.GetExitFlag();
 }
 
 #include "../tables/classnames.tbl"

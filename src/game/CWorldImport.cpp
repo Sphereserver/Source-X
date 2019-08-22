@@ -357,7 +357,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			if ( m_pCurSer != nullptr )
 				return false;
 
-			dword dwSerial = ATOI( pArg );
+			dword dwSerial = atoi( pArg );
 			if ( dwSerial == UID_UNUSED )
 			{
 				DEBUG_ERR(( "Import:Bad serial number\n" ));
@@ -385,7 +385,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			{
 				if ( m_pCurObj != nullptr )
 					return false;
-				pItem = CItem::CreateTemplate((ITEMID_TYPE)(ATOI(pArg)));
+				pItem = CItem::CreateTemplate((ITEMID_TYPE)(atoi(pArg)));
 				pItem->SetName( sName );
 				m_pCurObj = pItem;
 				m_pCurSer->m_pObj = pItem;
@@ -399,11 +399,11 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("CONT" ))
 			{
-				m_pCurSer->m_dwContSer = ATOI(pArg);
+				m_pCurSer->m_dwContSer = atoi(pArg);
 			}
 			else if ( s.IsKey("LAYER" ))
 			{
-				m_pCurSer->m_layer = static_cast<LAYER_TYPE>(ATOI(pArg));
+				m_pCurSer->m_layer = static_cast<LAYER_TYPE>(atoi(pArg));
 				continue;
 			}
 			else if (pItem == nullptr)
@@ -415,73 +415,73 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			if ( s.IsKey("X" ))
 			{
 				CPointMap pt = pItem->GetUnkPoint();
-				pt.m_x = (short)( ATOI(pArg) );
+				pt.m_x = (short)( atoi(pArg) );
 				pItem->SetUnkPoint(pt);
 				continue;
 			}
 			else if ( s.IsKey("Y" ))
 			{
 				CPointMap pt = pItem->GetUnkPoint();
-				pt.m_y = (short)( ATOI(pArg) );
+				pt.m_y = (short)( atoi(pArg) );
 				pItem->SetUnkPoint(pt);
 				continue;
 			}
 			else if ( s.IsKey("Z" ))
 			{
 				CPointMap pt = pItem->GetUnkPoint();
-				pt.m_z = (char)( ATOI(pArg) );
+				pt.m_z = (char)( atoi(pArg) );
 				pItem->SetUnkPoint(pt);
 				continue;
 			}
 			else if ( s.IsKey("COLOR" ))
 			{
-				pItem->SetHue( (HUE_TYPE)( ATOI(pArg) ) );
+				pItem->SetHue( (HUE_TYPE)( atoi(pArg) ) );
 				continue;
 			}
 			else if ( s.IsKey("AMOUNT" ))
 			{
-				pItem->SetAmount( (word)ATOI(pArg) );
+				pItem->SetAmount( (word)atoi(pArg) );
 				continue;
 			}
 			else if ( s.IsKey("MOREX" ))
 			{
-				pItem->m_itNormal.m_morep.m_x = (short)(ATOI(pArg));
+				pItem->m_itNormal.m_morep.m_x = (short)(atoi(pArg));
 				continue;
 			}
 			else if ( s.IsKey("MOREY" ))
 			{
-				pItem->m_itNormal.m_morep.m_y = (short)(ATOI(pArg));
+				pItem->m_itNormal.m_morep.m_y = (short)(atoi(pArg));
 				continue;
 			}
 			else if ( s.IsKey("MOREZ" ))
 			{
-				pItem->m_itNormal.m_morep.m_z = (char)( ATOI(pArg) );
+				pItem->m_itNormal.m_morep.m_z = (char)( atoi(pArg) );
 				continue;
 			}
 			else if ( s.IsKey("MORE" ))
 			{
-				pItem->m_itNormal.m_more1 = ATOI(pArg);
+				pItem->m_itNormal.m_more1 = atoi(pArg);
 				continue;
 			}
 			else if ( s.IsKey("MORE2" ))
 			{
-				pItem->m_itNormal.m_more2 = ATOI(pArg);
+				pItem->m_itNormal.m_more2 = atoi(pArg);
 				continue;
 			}
 			else if ( s.IsKey("DYEABLE" ))
 			{
-				if ( ATOI(pArg))
+				if ( atoi(pArg))
 					pItem->m_CanMask |= CAN_I_DYE;
 				continue;
 			}
 			else if ( s.IsKey("ATT" ))
 			{
-				// pItem->m_pDef->m_attackBase = ATOI(pArg);
+				// pItem->m_pDef->m_attackBase = atoi(pArg);
 			}
 			else if ( s.IsKey("TYPE" ))
 			{
 				// ??? translate the type field.
-				//int i = ATOI(pArg);
+				//int i = atoi(pArg);
 			}
 		}
 
@@ -511,64 +511,64 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			if ( s.IsKey("X" ))
 			{
 				CPointMap pt = pChar->GetUnkPoint();
-				pt.m_x = (short)(ATOI(pArg));
+				pt.m_x = (short)(atoi(pArg));
 				pChar->SetUnkPoint(pt);
 				continue;
 			}
 			else if ( s.IsKey("Y" ))
 			{
 				CPointMap pt = pChar->GetUnkPoint();
-				pt.m_y = (short)(ATOI(pArg));
+				pt.m_y = (short)(atoi(pArg));
 				pChar->SetUnkPoint(pt);
 				continue;
 			}
 			else if ( s.IsKey("Z" ))
 			{
 				CPointMap pt = pChar->GetUnkPoint();
-				pt.m_z = (char)(ATOI(pArg));
+				pt.m_z = (char)(atoi(pArg));
 				pChar->SetUnkPoint(pt);
 				continue;
 			}
 			else if ( s.IsKey("BODY" ))
 			{
-				pChar->SetID((CREID_TYPE)(ATOI(pArg)));
+				pChar->SetID((CREID_TYPE)(atoi(pArg)));
 				continue;
 			}
 			else if ( s.IsKey("SKIN" ))
 			{
-				pChar->SetHue( (HUE_TYPE)( ATOI(pArg) ));
+				pChar->SetHue( (HUE_TYPE)( atoi(pArg) ));
 				continue;
 			}
 			else if ( s.IsKey("DIR" ))
 			{
-				pChar->m_dirFace = (DIR_TYPE)(ATOI(pArg));
+				pChar->m_dirFace = (DIR_TYPE)(atoi(pArg));
 				if ( (pChar->m_dirFace < 0) || (pChar->m_dirFace >= DIR_QTY) )
 					pChar->m_dirFace = DIR_SE;
 				continue;
 			}
 			else if ( s.IsKey("XBODY" ))
 			{
-				pChar->m_prev_id = (CREID_TYPE)(ATOI(pArg));
+				pChar->m_prev_id = (CREID_TYPE)(atoi(pArg));
 				continue;
 			}
 			else if ( s.IsKey("XSKIN" ))
 			{
-				pChar->m_prev_Hue = (HUE_TYPE)( ATOI(pArg) );
+				pChar->m_prev_Hue = (HUE_TYPE)( atoi(pArg) );
 				continue;
 			}
 			else if ( s.IsKey("FONT" ))
 			{
-				pChar->m_fonttype = (FONT_TYPE)(ATOI(pArg));
+				pChar->m_fonttype = (FONT_TYPE)(atoi(pArg));
 				continue;
 			}
 			else if ( s.IsKey("KARMA" ))
 			{
-				pChar->SetKarma((short)(ATOI(pArg)));
+				pChar->SetKarma((short)(atoi(pArg)));
 				continue;
 			}
 			else if ( s.IsKey("FAME" ))
 			{
-				pChar->SetFame((ushort)(ATOI(pArg)));
+				pChar->SetFame((ushort)(atoi(pArg)));
 				continue;
 			}
 			else if ( s.IsKey("TITLE" ))
@@ -578,33 +578,33 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("STRENGTH" ))
 			{
-				pChar->Stat_SetBase(STAT_STR, (ushort)(ATOI(pArg)));
+				pChar->Stat_SetBase(STAT_STR, (ushort)(atoi(pArg)));
 			}
 			else if ( s.IsKey("DEXTERITY" ))
 			{
-				pChar->Stat_SetBase(STAT_DEX, (ushort)(ATOI(pArg)));
+				pChar->Stat_SetBase(STAT_DEX, (ushort)(atoi(pArg)));
 			}
 			else if ( s.IsKey("INTELLIGENCE" ))
 			{
-				pChar->Stat_SetBase(STAT_INT, (ushort)(ATOI(pArg)));
+				pChar->Stat_SetBase(STAT_INT, (ushort)(atoi(pArg)));
 			}
 			else if ( s.IsKey("HITPOINTS" ))
 			{
-				pChar->Stat_SetVal(STAT_STR,(ushort)(ATOI(pArg)));
+				pChar->Stat_SetVal(STAT_STR,(ushort)(atoi(pArg)));
 			}
 			else if ( s.IsKey("STAMINA" ))
 			{
-				pChar->Stat_SetVal(STAT_DEX,(ushort)(ATOI(pArg)));
+				pChar->Stat_SetVal(STAT_DEX,(ushort)(atoi(pArg)));
 			}
 			else if ( s.IsKey( "MANA" ))
 			{
-				pChar->Stat_SetVal(STAT_INT,(ushort)(ATOI(pArg)));
+				pChar->Stat_SetVal(STAT_INT,(ushort)(atoi(pArg)));
 			}
 			else if ( s.IsKeyHead( "SKILL", 5 ))
 			{
-				SKILL_TYPE skill = (SKILL_TYPE)(ATOI( &(s.GetKey()[5]) ));
+				SKILL_TYPE skill = (SKILL_TYPE)(atoi( &(s.GetKey()[5]) ));
 				if ( pChar->IsSkillBase(skill) && g_Cfg.m_SkillIndexDefs.IsValidIndex(skill) )
-					pChar->Skill_SetBase( skill, (ushort)ATOI(pArg));
+					pChar->Skill_SetBase( skill, (ushort)atoi(pArg));
 			}
 			else if ( s.IsKey("ACCOUNT" ))
 			{
@@ -613,12 +613,12 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("KILLS" ) && pChar->m_pPlayer )
 			{
-				pChar->m_pPlayer->m_wMurders = (word)(ATOI(pArg));
+				pChar->m_pPlayer->m_wMurders = (word)(atoi(pArg));
 			}
 			else if ( s.IsKey("NPCAITYPE" ))
 			{
 				// Convert to proper NPC type.
-				int i = ATOI( pArg );
+				int i = atoi( pArg );
 				switch ( i )
 				{
 				case 0x01:	pChar->SetNPCBrain( NPCBRAIN_HEALER ); break;

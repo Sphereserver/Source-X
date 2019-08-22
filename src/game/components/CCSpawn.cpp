@@ -306,7 +306,7 @@ void CCSpawn::GenerateChar()
         const CRandGroupDef *pSpawnGroup = static_cast<const CRandGroupDef *>(pDef);
         ASSERT(pSpawnGroup);
         size_t i = pSpawnGroup->GetRandMemberIndex();
-        if (i != pSpawnGroup->BadMemberIndex())
+        if (i != SCONT_BADINDEX)
         {
             rid = pSpawnGroup->GetMemberID(i);
             iRidType = rid.GetResType();
@@ -588,7 +588,7 @@ enum ISPW_TYPE
     ISPW_QTY
 };
 
-lpctstr const CCSpawn::sm_szLoadKeys[ISPW_QTY + 1] =
+lpctstr constexpr CCSpawn::sm_szLoadKeys[ISPW_QTY + 1] =
 {
     "ADDOBJ",
     "AMOUNT",
@@ -608,13 +608,13 @@ lpctstr const CCSpawn::sm_szLoadKeys[ISPW_QTY + 1] =
     nullptr
 };
 
-bool CCSpawn::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole *pSrc)
+bool CCSpawn::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole *pSrc)
 {
     ADDTOCALLSTACK("CCSpawn::r_WriteVal");
     UNREFERENCED_PARAMETER(pSrc);
     EXC_TRY("WriteVal");
 
-    int iCmd = FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int iCmd = FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     if (iCmd < 0)
     {
         return false;
@@ -851,11 +851,11 @@ bool CCSpawn::r_LoadVal(CScript & s)
                 switch (iArgs)
                 {
                     case 3: // m_z
-                        _iMaxDist = (uint8)(ATOI(ppVal[2]));
+                        _iMaxDist = (uint8)(atoi(ppVal[2]));
                     case 2: // m_y
-                        _iTimeHi = (uint16)(ATOI(ppVal[1]));
+                        _iTimeHi = (uint16)(atoi(ppVal[1]));
                     case 1: // m_x
-                        _iTimeLo = (uint16)(ATOI(ppVal[0]));
+                        _iTimeLo = (uint16)(atoi(ppVal[0]));
                         break;
                     default:
                     case 0:
@@ -925,16 +925,16 @@ enum SPAWN_REF
     ISPR_QTY
 };
 
-lpctstr const CCSpawn::sm_szRefKeys[ISPR_QTY + 1]
+lpctstr constexpr CCSpawn::sm_szRefKeys[ISPR_QTY + 1]
 {
     "AT",
     nullptr
 };
 
-bool CCSpawn::r_GetRef(lpctstr & pszKey, CScriptObj *& pRef)
+bool CCSpawn::r_GetRef(lpctstr & ptcKey, CScriptObj *& pRef)
 {
     ADDTOCALLSTACK("CCSpawn::r_GetRef");
-    int iCmd = FindTableSorted(pszKey, sm_szRefKeys, CountOf(sm_szRefKeys) - 1);
+    int iCmd = FindTableSorted(ptcKey, sm_szRefKeys, CountOf(sm_szRefKeys) - 1);
 
     if (iCmd < 0)
     {
@@ -943,17 +943,17 @@ bool CCSpawn::r_GetRef(lpctstr & pszKey, CScriptObj *& pRef)
 
     CItem *pItem = static_cast<CItem*>(GetLink());
 
-    pszKey += strlen(sm_szRefKeys[iCmd]);
-    SKIP_SEPARATORS(pszKey);
+    ptcKey += strlen(sm_szRefKeys[iCmd]);
+    SKIP_SEPARATORS(ptcKey);
 
     switch (iCmd)
     {
         case ISPR_AT:
         {
-            int objIndex = Exp_GetVal(pszKey);
+            int objIndex = Exp_GetVal(ptcKey);
             if (objIndex < 0)
                 return false;
-            SKIP_SEPARATORS(pszKey);
+            SKIP_SEPARATORS(ptcKey);
             if (objIndex >= GetCurrentSpawned())
             {
                 return false;
@@ -992,7 +992,7 @@ enum SPAWN_VERB
     ISPV_QTY
 };
 
-lpctstr const CCSpawn::sm_szVerbKeys[ISPV_QTY + 1]
+lpctstr constexpr CCSpawn::sm_szVerbKeys[ISPV_QTY + 1]
 {
     "DELOBJ",
     "RESET",

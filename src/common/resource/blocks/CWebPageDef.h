@@ -29,6 +29,9 @@ enum WEBPAGE_TYPE
     WEBPAGE_QTY
 };
 
+
+#define HTTPREQ_MAX_SIZE    1024
+
 class CWebPageDef : public CResourceLink
 {
     // RES_WEBPAGE
@@ -57,8 +60,6 @@ public:
 private:
 
     /**
-    * @fn  int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime * pdateLastMod );
-    *
     * @brief   Serv page requested.
     *
     * @param [in,out]  pClient         If non-null, the client.
@@ -71,8 +72,6 @@ private:
 public:
 
     /**
-    * @fn  lpctstr CWebPageDef::GetName() const
-    *
     * @brief   Gets the source template for the generated web page (m_sSrcFilePath).
     *
     * @return  m_sSrcFilePath.
@@ -83,8 +82,6 @@ public:
     }
 
     /**
-    * @fn  lpctstr CWebPageDef::GetDstName() const
-    *
     * @brief   Gets where is the page served from.
     *
     * @return  m_sDstFilePath.
@@ -95,8 +92,6 @@ public:
     }
 
     /**
-    * @fn  bool CWebPageDef::IsMatch( lpctstr IsMatchPage ) const;
-    *
     * @brief   Query if the requested page exists..
     *
     * @param   IsMatchPage The is match page.
@@ -106,8 +101,6 @@ public:
     bool IsMatch(lpctstr IsMatchPage) const;
 
     /**
-    * @fn  bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient );
-    *
     * @brief   Sets source file to be given.
     *
     * @param   pszName         The name.
@@ -118,8 +111,6 @@ public:
     bool SetSourceFile(lpctstr pszName, CClient * pClient);
 
     /**
-    * @fn  bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * pPostData, size_t stContentLength );
-    *
     * @brief   Translate scripted content.
     *
     * @param [in,out]  pClient     If non-null, the client.
@@ -129,23 +120,18 @@ public:
     *
     * @return  true if it succeeds, false if it fails.
     */
-    bool ServPagePost(CClient * pClient, lpctstr pszURLArgs, tchar * pPostData, size_t stContentLength);
+    bool ServPagePost(CClient * pClient, lpctstr pszURLArgs, tchar * pPostData, size_t uiContentLength);
 
     virtual bool r_LoadVal(CScript & s) override;
-    virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr) override;
+    virtual bool r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;	// some command on this object as a target
 
     /**
-    * @fn  void CWebPageDef::WebPageLog();
-    *
     * @brief   Web page log.
-    *
     */
     void WebPageLog();
 
     /**
-    * @fn  bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * pSrc );
-    *
     * @brief   Web page update proccess.
     *
     * @param   fNow            true to now.
@@ -157,24 +143,17 @@ public:
     bool WebPageUpdate(bool fNow, lpctstr pszDstName, CTextConsole * pSrc);
 
     /**
-    * @fn  static bool CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateLastMod );
-    *
     * @brief   Final checks: Control if page can be sent and does it (sends also 404 if not, and some other fails).
     *
     * @param [in,out]  pClient         If non-null, the client.
     * @param [in,out]  pszPage         If non-null, the page.
     * @param [in,out]  pdateLastMod    If non-null, the pdate last modifier.
-    *
-    * @return  true if it succeeds, false if it fails.
     */
-
-    static bool ServPage(CClient * pClient, tchar * pszPage, CSTime * pdateLastMod);
+    static void ServPage(CClient * pClient, tchar * pszPage, CSTime * pDateLastMod);
 
 public:
     explicit CWebPageDef(CResourceID id);
-    virtual ~CWebPageDef()
-    {
-    }
+    virtual ~CWebPageDef() = default;
 
 private:
     CWebPageDef(const CWebPageDef& copy);

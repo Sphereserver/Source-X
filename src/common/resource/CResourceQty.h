@@ -77,15 +77,15 @@ public:
 
     inline bool ContainsResourceID( const CResourceID & rid ) const
     {
-        return FindResourceID(rid) != BadIndex();
+        return FindResourceID(rid) != SCONT_BADINDEX;
     }
     inline bool ContainsResourceType( RES_TYPE type ) const
     {
-        return FindResourceType(type) != BadIndex();
+        return FindResourceType(type) != SCONT_BADINDEX;
     }
     inline bool ContainsResourceMatch( CObjBase * pObj ) const
     {
-        return FindResourceMatch(pObj) != BadIndex();
+        return FindResourceMatch(pObj) != SCONT_BADINDEX;
     }
 
     void setNoMergeOnLoad();

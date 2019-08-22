@@ -43,10 +43,10 @@ public:
     virtual ~CCSpawn();
     CItem *GetLink() const;
     virtual void Delete(bool fForce = false) override;
-    virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc) override;
+    virtual bool r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc) override;
     virtual bool r_LoadVal(CScript & s) override;
     virtual void r_Write(CScript & s) override;
-    virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef) override;
+    virtual bool r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;
     virtual void Copy(const CComponent *target) override;
     /*virtual bool IsDeleted() const override;

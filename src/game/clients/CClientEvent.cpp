@@ -3,7 +3,6 @@
 #include "../../network/network.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
-#include "../../sphere/ProfileTask.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../items/CItemMessage.h"
@@ -19,7 +18,7 @@
 /////////////////////////////////
 // Events from the Client.
 
-lpctstr const CClient::sm_szCmd_Redirect[13] =
+lpctstr constexpr CClient::sm_szCmd_Redirect[13] =
 {
 	"BANK",
 	"CONTROL",
@@ -224,21 +223,26 @@ void CClient::Event_Item_Pickup(CUID uid, word amount) // Client grabs an item
 	EXC_SET_BLOCK("Origin");
 	// Where is the item coming from ? (just in case we have to toss it back)
 	CObjBase * pObjParent = dynamic_cast <CObjBase *>(pItem->GetParent());
-	m_Targ_Prv_UID = pObjParent ? pObjParent->GetUID() : CUID(UID_CLEAR);
+	m_Targ_Prv_UID = pObjParent ? pObjParent->GetUID() : CUID();
 	m_Targ_p = pItem->GetUnkPoint();
 
 	EXC_SET_BLOCK("ItemPickup");
-	int tempamount = m_pChar->ItemPickup(pItem, amount);
+	const int tempamount = m_pChar->ItemPickup(pItem, amount);
 	if ( tempamount < 0 )
 	{
 		EXC_SET_BLOCK("ItemPickup - addItemDragCancel(0)");
-		new PacketDragCancel(this, PacketDragCancel::CannotLift);
         if (pItem->GetType() == IT_CORPSE)
         {
+            // You shouldn't even be able to pick it up if you aren't a GM, but some 7.x client versions do send nonetheless a pickup
+            //  request packet: in this case, we have to prevent it from picking up the corpse.
+            new PacketDragCancel(this, PacketDragCancel::Other);
+
             // This Update() fixes a client-side bug: if a char with GM on sees a new corpse, then turns GM off and tries to drag it, the dragging is cancelled but
             //  the corpse will take the appearance of an ogre until a new Update()
             pItem->Update();
         }
+        else
+            new PacketDragCancel(this, PacketDragCancel::CannotLift);
 		return;
 	}
 	else if ( tempamount > 1 )
@@ -1071,7 +1075,7 @@ void CClient::Event_VendorBuy_Cheater( int iCode )
 	ADDTOCALLSTACK("CClient::Event_VendorBuy_Cheater");
 
 	// iCode descriptions
-	static lpctstr const sm_BuyPacketCheats[] =
+	static lpctstr constexpr sm_BuyPacketCheats[] =
 	{
 		"Other",
 		"Bad vendor UID",
@@ -1115,7 +1119,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
 			return;
 		}
 
-		costtotal += (items[i].m_amount * items[i].m_price);
+		costtotal += ((int64)(items[i].m_amount) * items[i].m_price);
 		if ( costtotal > kuiMaxCost )
 		{
 			pVendor->Speak("Your order cannot be fulfilled, please try again.");
@@ -1146,7 +1150,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
 		pVendor->Speak("Thou hast bought nothing!");
 		return;
 	}
-    costtotal = m_pChar->PayGold(pVendor,(int)costtotal, nullptr, PAYGOLD_BUY);
+    costtotal = m_pChar->PayGold(pVendor, (int)costtotal, nullptr, PAYGOLD_BUY);
 	//	Check for gold being enough to buy this
 	bool fBoss = pVendor->NPC_IsOwnedBy(m_pChar);
 	if ( !fBoss )
@@ -1195,7 +1199,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
 				continue;
 		}
 
-		if ( !fPlayerVendor )									//	NPC vendors
+		if ( !fPlayerVendor )   // NPC vendors
 		{
 			pItem->SetAmount(pItem->GetAmount() - amount);
 
@@ -1258,9 +1262,9 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
 					pPack->ContentAdd( pItemNew );
 			}
 		}
-		else													// Player vendors
+		else    //  Player vendors
 		{
-			if ( pItem->GetAmount() <= amount )		// buy the whole item
+			if ( pItem->GetAmount() <= amount ) // buy the whole item
 			{
 				if ( !pPack->CanContainerHold( pItem, m_pChar ) || !m_pChar->CanCarry( pItem ) )
 					m_pChar->ItemDrop( pItem, m_pChar->GetTopPoint() );
@@ -1323,7 +1327,7 @@ void CClient::Event_VendorSell_Cheater( int iCode )
 	ADDTOCALLSTACK("CClient::Event_VendorSell_Cheater");
 
 	// iCode descriptions
-	static lpctstr const sm_SellPacketCheats[] =
+	static lpctstr constexpr sm_SellPacketCheats[] =
 	{
 		"Other",
 		"Bad vendor UID",
@@ -1361,7 +1365,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 	int iGold = 0;
 	bool fShortfall = false;
 
-	for (uint i = 0; i < uiItemCount; i++)
+	for (uint i = 0; i < uiItemCount; ++i)
 	{
 		CItemVendable * pItem = dynamic_cast <CItemVendable *> (items[i].m_serial.ItemFind());
 		if ( pItem == nullptr || pItem->IsValidSaleItem(true) == false )
@@ -1387,25 +1391,25 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 			amount = pItem->GetAmount();
 		}
 
-		dword lPrice = pItemSell->GetVendorPrice(iConvertFactor) * amount;
+		dword dwPrice = pItemSell->GetVendorPrice(iConvertFactor) * amount;
 
 		if (( IsTrigUsed(TRIGGER_SELL) ) || ( IsTrigUsed(TRIGGER_ITEMSELL) ))
 		{
-			CScriptTriggerArgs Args( amount, lPrice, pVendor );
+			CScriptTriggerArgs Args( amount, dwPrice, pVendor );
 			if ( pItem->OnTrigger( ITRIG_Sell, this->GetChar(), &Args ) == TRIGRET_RET_TRUE )
 				continue;
 		}
 
 		// Can vendor afford this ?
-		if ( lPrice > pBank->m_itEqBankBox.m_Check_Amount )
+		if (dwPrice > pBank->m_itEqBankBox.m_Check_Amount )
 		{
 			fShortfall = true;
 			break;
 		}
-		pBank->m_itEqBankBox.m_Check_Amount -= lPrice;
+		pBank->m_itEqBankBox.m_Check_Amount -= dwPrice;
 
 		// give them the appropriate amount of gold.
-		iGold += (int)(lPrice);
+		iGold += (int)(dwPrice);
 
 		// Take the items from player.
 		// Put items in vendor inventory.
@@ -1445,7 +1449,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 			m_pChar->UpdateStatsFlag();
 		}
 		else
-			m_pChar->AddGoldToPack(iGold);
+			m_pChar->AddGoldToPack(iGold, nullptr, false);
 
 		addVendorClose(pVendor);
 	}
@@ -1573,7 +1577,7 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 	else
 	{
 		if ( fNoStrip )	// Str_GetBare will eat unicode characters
-			len = strncpylen( szText, pszText, CountOf(szText) );
+			len = Str_CopyLimitNull( szText, pszText, CountOf(szText) );
 		else if ( promptMode == CLIMODE_PROMPT_SCRIPT_VERB )
 			len = Str_GetBare( szText, pszText, CountOf(szText), "|~=[]{|}~" );
 		else
@@ -1598,7 +1602,7 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 				CChar * pCharVendor = CUID(context2).CharFind();
 				if ( pCharVendor )
 				{
-					pCharVendor->NPC_SetVendorPrice( m_Prompt_Uid.ItemFind(), ATOI(szText) );
+					pCharVendor->NPC_SetVendorPrice( m_Prompt_Uid.ItemFind(), atoi(szText) );
 				}
 			}
 			return;
@@ -1827,15 +1831,13 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 	if ( fNoStrip )
 	{
 		// The characters in Unicode speech don't need to be filtered
-		strncpy( szText, pszText, MAX_TALK_BUFFER - 1 );
-		szText[MAX_TALK_BUFFER - 1] = '\0';
+		Str_CopyLimitNull( szText, pszText, MAX_TALK_BUFFER );
 		len = strlen( szText );
 	}
 	else
 	{
 		tchar szTextG[MAX_TALK_BUFFER];
-		strncpy( szTextG, pszText, MAX_TALK_BUFFER - 1 );
-		szTextG[MAX_TALK_BUFFER - 1] = '\0';
+		Str_CopyLimitNull( szTextG, pszText, MAX_TALK_BUFFER );
 		len = Str_GetBare( szText, szTextG, sizeof(szText)-1 );
 	}
 
@@ -1847,8 +1849,8 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 
 	if ( !Event_Command(pszText,mode) )
 	{
-		bool	fCancelSpeech	= false;
-		tchar	z[MAX_TALK_BUFFER];
+		bool fCancelSpeech = false;
+		tchar z[MAX_TALK_BUFFER];
 
 		if ( m_pChar->OnTriggerSpeech(false, pszText, m_pChar, mode, wHue) )
 			fCancelSpeech = true;
@@ -2016,25 +2018,26 @@ lpctstr CDialogResponseArgs::GetName() const
 	return "ARGD";
 }
 
-bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
+bool CDialogResponseArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CDialogResponseArgs::r_WriteVal");
 	EXC_TRY("WriteVal");
-	if ( ! strnicmp( pszKey, "ARGCHK", 6 ))
+	if ( ! strnicmp( ptcKey, "ARGCHK", 6 ))
 	{
 		// CSTypedArray <dword,dword> m_CheckArray;
-		pszKey += 6;
-		SKIP_SEPARATORS(pszKey);
+		ptcKey += 6;
+		SKIP_SEPARATORS(ptcKey);
 
 		size_t iQty = m_CheckArray.size();
-		if ( pszKey[0] == '\0' )
+		if ( ptcKey[0] == '\0' )
 		{
 			sVal.FormatSTVal(iQty);
 			return true;
 		}
-		else if ( ! strnicmp( pszKey, "ID", 2) )
+		else if ( ! strnicmp( ptcKey, "ID", 2) )
 		{
-			pszKey += 2;
+			ptcKey += 2;
 
 			if ( iQty > 0 && m_CheckArray[0] )
 				sVal.FormatVal( m_CheckArray[0] );
@@ -2044,11 +2047,11 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConso
 			return true;
 		}
 
-		int iNum = Exp_GetSingle( pszKey );
-		SKIP_SEPARATORS(pszKey);
-		for ( size_t i = 0; i < iQty; i++ )
+		dword dwNum = Exp_GetDWSingle( ptcKey );
+		SKIP_SEPARATORS(ptcKey);
+		for ( uint i = 0; i < iQty; ++i )
 		{
-			if ( (dword)iNum == m_CheckArray[i] )
+			if ( dwNum == m_CheckArray[i] )
 			{
 				sVal = "1";
 				return true;
@@ -2057,24 +2060,24 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConso
 		sVal = "0";
 		return true;
 	}
-	if ( ! strnicmp( pszKey, "ARGTXT", 6 ))
+	if ( ! strnicmp( ptcKey, "ARGTXT", 6 ))
 	{
-		pszKey += 6;
-		SKIP_SEPARATORS(pszKey);
+		ptcKey += 6;
+		SKIP_SEPARATORS(ptcKey);
 
 		size_t iQty = m_TextArray.size();
-		if ( pszKey[0] == '\0' )
+		if ( ptcKey[0] == '\0' )
 		{
 			sVal.FormatSTVal(iQty);
 			return true;
 		}
 
-		int iNum = Exp_GetSingle( pszKey );
-		SKIP_SEPARATORS(pszKey);
+		dword dwNum = Exp_GetDWSingle( ptcKey );
+		SKIP_SEPARATORS(ptcKey);
 
-		for ( size_t i = 0; i < iQty; i++ )
+		for ( uint i = 0; i < iQty; ++i )
 		{
-			if ( iNum == m_TextArray[i]->m_ID )
+			if ( dwNum == m_TextArray[i]->m_ID )
 			{
 				sVal = m_TextArray[i]->m_sText;
 				return true;
@@ -2083,7 +2086,7 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConso
 		sVal.Empty();
 		return false;
 	}
-	return CScriptTriggerArgs::r_WriteVal( pszKey, sVal, pSrc);
+	return (fNoCallParent ? false : CScriptTriggerArgs::r_WriteVal( ptcKey, sVal, pSrc, false ));
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
@@ -2759,7 +2762,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 		case EXTCMD_OPEN_SPELLBOOK:	// open spell book if we have one.
 		{
 			CItem *pBook = nullptr;
-			switch ( ATOI(ppArgs[0]) )
+			switch ( atoi(ppArgs[0]) )
 			{
 				default:
 				case 1:	pBook = m_pChar->GetSpellbook(SPELL_Clumsy);				break;	// magery
@@ -2789,13 +2792,13 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 
 		case EXTCMD_SKILL:
 		{
-			Event_Skill_Use((SKILL_TYPE)(ATOI(ppArgs[0])));
+			Event_Skill_Use((SKILL_TYPE)(atoi(ppArgs[0])));
 			return;
 		}
 
 		case EXTCMD_AUTOTARG:	// bizarre new autotarget mode. "target x y z"
 		{
-			CObjBase *pObj = CUID::ObjFind(ATOI(ppArgs[0]));
+			CObjBase *pObj = CUID::ObjFind(atoi(ppArgs[0]));
 			if ( pObj )
 				DEBUG_ERR(("%x:Event_ExtCmd AutoTarg '%s' '%s'\n", GetSocketID(), pObj->GetName(), !ppArgs[1] ? TSTRING_NULL : ppArgs[1]));
 			else
@@ -2806,7 +2809,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 		case EXTCMD_CAST_BOOK:	// cast spell from book.
 		case EXTCMD_CAST_MACRO:	// macro spell.
 		{
-			SPELL_TYPE spell = (SPELL_TYPE)(ATOI(ppArgs[0]));
+			SPELL_TYPE spell = (SPELL_TYPE)(atoi(ppArgs[0]));
 			CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
 			if ( !pSpellDef )
 				return;
@@ -2871,11 +2874,12 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 			return;
 		}
 
+        /*
 		default:
-		{
+            // It can be a custom ext event
 			g_Log.EventWarn("%x:Event_ExtCmd received unknown event type %d, '%s'\n", GetSocketID(), type, pszName);
 			return;
-		}
+        */
 	}
 }
 

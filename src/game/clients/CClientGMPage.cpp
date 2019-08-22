@@ -170,7 +170,7 @@ enum GPV_TYPE
 	GPV_QTY
 };
 
-static lpctstr const sm_pszGMPageVerbs[GPV_QTY] =
+static lpctstr constexpr sm_pszGMPageVerbs[GPV_QTY] =
 {
 	"BAN",
 	"CURRENT",
@@ -191,7 +191,7 @@ static lpctstr const sm_pszGMPageVerbs[GPV_QTY] =
 void CClient::Cmd_GM_PageCmd( lpctstr pszCmd )
 {
 	ADDTOCALLSTACK("CClient::Cmd_GM_PageCmd");
-	static lpctstr const sm_pszGMPageVerbsHelp[] =
+	static lpctstr constexpr sm_pszGMPageVerbsHelp[] =
 	{
 		".PAGE on/off\n",
 		".PAGE list = list of pages.\n",

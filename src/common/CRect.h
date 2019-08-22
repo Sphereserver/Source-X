@@ -10,7 +10,6 @@
 #include "CPointBase.h"
 
 class CRegion;
-class CRegionLinks;
 class CSector;
 
 
@@ -22,7 +21,12 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
 	int m_bottom;	// South ( NON INCLUSIVE !)
 	int m_map;
 
-    CRect() = default;
+    void SetRectEmpty();
+
+    CRect()
+    {
+        SetRectEmpty();
+    }
     virtual ~CRect() = default;
 
     inline int GetWidth() const
@@ -34,7 +38,6 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
         return( m_bottom - m_top );
     }
 
-	void SetRectEmpty();
     inline bool IsRectEmpty() const
     {
         return( m_left >= m_right || m_top >= m_bottom );
@@ -71,6 +74,7 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
     CPointBase GetCenter() const;
     CPointBase GetRectCorner( DIR_TYPE dir ) const;
     CSector * GetSector( int i ) const;	// ge all the sectors that make up this rect.
+    const CRect operator += (const CRect& rect);
 
 	void SetRect( int left, int top, int right, int bottom, int map );
 

@@ -11,7 +11,7 @@
 #include "CCharPlayer.h"
 
 
-lpctstr const CCharPlayer::sm_szLoadKeys[CPC_QTY+1] =
+lpctstr constexpr CCharPlayer::sm_szLoadKeys[CPC_QTY+1] =
 {
 #define ADD(a,b) b,
 #include "../../tables/CCharPlayer_props.tbl"
@@ -65,7 +65,7 @@ bool CCharPlayer::SetSkillClass( CChar * pChar, CResourceID rid )
 
 	// Remove any previous skillclass from the Events block.
 	size_t i = pChar->m_OEvents.FindResourceType(RES_SKILLCLASS);
-	if ( i != pChar->m_OEvents.BadIndex() )
+	if ( i != SCONT_BADINDEX )
 		pChar->m_OEvents.erase(i);
 
 	m_SkillClass.SetRef(pLink);
@@ -87,12 +87,12 @@ CSkillClassDef * CCharPlayer::GetSkillClass() const
 }
 
 // only players can have skill locks.
-SKILL_TYPE CCharPlayer::Skill_GetLockType( lpctstr pszKey ) const
+SKILL_TYPE CCharPlayer::Skill_GetLockType( lpctstr ptcKey ) const
 {
 	ADDTOCALLSTACK("CCharPlayer::Skill_GetLockType");
 
 	tchar szTmpKey[128];
-    strncpynull( szTmpKey, pszKey, CountOf(szTmpKey) );
+    Str_CopyLimitNull( szTmpKey, ptcKey, CountOf(szTmpKey) );
 
 	tchar * ppArgs[3];
 	size_t i = Str_ParseCmds( szTmpKey, ppArgs, CountOf(ppArgs), ".[]" );
@@ -100,7 +100,7 @@ SKILL_TYPE CCharPlayer::Skill_GetLockType( lpctstr pszKey ) const
 		return SKILL_NONE;
 
 	if ( IsDigit( ppArgs[1][0] ))
-		i = ATOI( ppArgs[1] );
+		i = atoi( ppArgs[1] );
 	else
 		i = g_Cfg.FindSkillKey( ppArgs[1] );
 	
@@ -117,17 +117,17 @@ SKILLLOCK_TYPE CCharPlayer::Skill_GetLock( SKILL_TYPE skill ) const
 
 void CCharPlayer::Skill_SetLock( SKILL_TYPE skill, SKILLLOCK_TYPE state )
 {
-	ASSERT( (skill >= 0) && ((size_t)skill < CountOf(m_SkillLock)));
+	ASSERT( (skill >= 0) && ((uint)skill < CountOf(m_SkillLock)));
 	m_SkillLock[skill] = (uchar)(state);
 }
 
 // only players can have stat locks.
-STAT_TYPE CCharPlayer::Stat_GetLockType( lpctstr pszKey ) const
+STAT_TYPE CCharPlayer::Stat_GetLockType( lpctstr ptcKey ) const
 {
 	ADDTOCALLSTACK("CCharPlayer::Stat_GetLockType");
 
 	tchar szTmpKey[128];
-    strncpynull( szTmpKey, pszKey, CountOf(szTmpKey) );
+    Str_CopyLimitNull( szTmpKey, ptcKey, CountOf(szTmpKey) );
 
 	tchar * ppArgs[3];
 	size_t i = Str_ParseCmds( szTmpKey, ppArgs, CountOf(ppArgs), ".[]" );
@@ -135,7 +135,7 @@ STAT_TYPE CCharPlayer::Stat_GetLockType( lpctstr pszKey ) const
 		return STAT_NONE;
 
 	if ( IsDigit( ppArgs[1][0] ))
-		i = ATOI( ppArgs[1] );
+		i = atoi( ppArgs[1] );
 	else
 		i = g_Cfg.FindStatKey( ppArgs[1] );
 
@@ -146,17 +146,17 @@ STAT_TYPE CCharPlayer::Stat_GetLockType( lpctstr pszKey ) const
 
 SKILLLOCK_TYPE CCharPlayer::Stat_GetLock( STAT_TYPE stat ) const
 {
-	ASSERT( (stat >= 0) && ((size_t)stat < CountOf(m_StatLock)));
+	ASSERT( (stat >= 0) && ((uint)stat < CountOf(m_StatLock)));
 	return (SKILLLOCK_TYPE)m_StatLock[stat];
 }
 
 void CCharPlayer::Stat_SetLock( STAT_TYPE stat, SKILLLOCK_TYPE state )
 {
-	ASSERT( (stat >= 0) && ((size_t)stat < CountOf(m_StatLock)));
+	ASSERT( (stat >= 0) && ((uint)stat < CountOf(m_StatLock)));
 	m_StatLock[stat] = (uchar)state;
 }
 
-bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
+bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 {
 	ADDTOCALLSTACK("CCharPlayer::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -164,31 +164,34 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
 	if ( !pChar || !GetAccount() )
 		return false;
 
-	if ( !strnicmp(pszKey, "SKILLCLASS.", 11) )
+	if ( !strnicmp(ptcKey, "SKILLCLASS.", 11) )
 	{
-		return GetSkillClass()->r_WriteVal(pszKey + 11, sVal, pChar);
+		return GetSkillClass()->r_WriteVal(ptcKey + 11, sVal, pChar);
 	}
-	else if ( ( !strnicmp(pszKey, "GUILD", 5) ) || ( !strnicmp(pszKey, "TOWN", 4) ) )
+	else if ( ( !strnicmp(ptcKey, "GUILD", 5) ) || ( !strnicmp(ptcKey, "TOWN", 4) ) )
 	{
-		bool bIsGuild = !strnicmp(pszKey, "GUILD", 5);
-		pszKey += bIsGuild ? 5 : 4;
-		if ( *pszKey == 0 )
+		bool bIsGuild = !strnicmp(ptcKey, "GUILD", 5);
+		ptcKey += bIsGuild ? 5 : 4;
+		if ( *ptcKey == 0 )
 		{
 			CItemStone *pMyGuild = pChar->Guild_Find(bIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
-			if ( pMyGuild ) sVal.FormatHex((dword)pMyGuild->GetUID());
-			else sVal.FormatVal(0);
+			if ( pMyGuild )
+                sVal.FormatHex((dword)pMyGuild->GetUID());
+			else
+                sVal.FormatVal(0);
 			return true;
 		}
-		else if ( *pszKey == '.' )
+		else if ( *ptcKey == '.' )
 		{
-			pszKey += 1;
+			ptcKey += 1;
 			CItemStone *pMyGuild = pChar->Guild_Find(bIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
-			if ( pMyGuild ) return pMyGuild->r_WriteVal(pszKey, sVal, pChar);
+			if ( pMyGuild )
+                return pMyGuild->r_WriteVal(ptcKey, sVal, pChar);
 		}
 		return false;
 	}
 
-	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CPC_QTY ))
+	switch ( FindTableHeadSorted( ptcKey, sm_szLoadKeys, CPC_QTY ))
 	{
 		case CPC_ACCOUNT:
 			sVal = GetAccount()->GetName();
@@ -209,10 +212,10 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
 			sVal.FormatVal( m_bKrToolbarEnabled );
 			return true;
 		case CPC_ISDSPEECH:
-			if ( pszKey[9] != '.' )
+			if ( ptcKey[9] != '.' )
 				return false;
-			pszKey += 10;
-			sVal = m_Speech.ContainsResourceName(RES_SPEECH, pszKey) ? "1" : "0";
+			ptcKey += 10;
+			sVal = m_Speech.ContainsResourceName(RES_SPEECH, ptcKey) ? "1" : "0";
 			return true;
 		case CPC_LASTUSED:
 			sVal.FormatLLVal( - g_World.GetTimeDiff( m_timeLastUsed ) / MSECS_PER_SEC);  //seconds
@@ -229,7 +232,7 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
 			return true;
 		case CPC_REFUSETRADES:
 			{
-				CVarDefCont * pVar = pChar->GetDefKey(pszKey, true);
+				CVarDefCont * pVar = pChar->GetDefKey(ptcKey, true);
 				sVal.FormatLLVal(pVar ? pVar->GetValNum() : 0);
 			}
 			return true;
@@ -239,7 +242,7 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
 		case CPC_SKILLLOCK:
 			{
 				// "SkillLock[alchemy]"
-				SKILL_TYPE skill = Skill_GetLockType( pszKey );
+				SKILL_TYPE skill = Skill_GetLockType( ptcKey );
 				if ( skill <= SKILL_NONE )
 					return false;
 				sVal.FormatVal( Skill_GetLock( skill ));
@@ -250,13 +253,13 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
 		case CPC_STATLOCK:
 			{
 				// "StatLock[str]"
-				STAT_TYPE stat = Stat_GetLockType( pszKey );
+				STAT_TYPE stat = Stat_GetLockType( ptcKey );
 				if (( stat <= STAT_NONE ) || ( stat >= STAT_BASE_QTY ))
 					return false;
 				sVal.FormatVal( Stat_GetLock( stat ));
 			} return true;
 		default:
-			if ( FindTableSorted( pszKey, CCharNPC::sm_szLoadKeys, CNC_QTY ) >= 0 )
+			if ( FindTableSorted( ptcKey, CCharNPC::sm_szLoadKeys, CNC_QTY ) >= 0 )
 			{
 				sVal = "0";
 				return true;
@@ -276,15 +279,15 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 	ADDTOCALLSTACK("CCharPlayer::r_LoadVal");
 	EXC_TRY("LoadVal");
 
-	lpctstr pszKey = s.GetKey();
+	lpctstr ptcKey = s.GetKey();
 
-	if ( !strnicmp(pszKey, "GMPAGE", 6) )		//	GM pages
+	if ( !strnicmp(ptcKey, "GMPAGE", 6) )		//	GM pages
 	{
-		pszKey += 6;
-		if ( *pszKey == '.' )						//	GMPAGE.*
+		ptcKey += 6;
+		if ( *ptcKey == '.' )						//	GMPAGE.*
 		{
-			SKIP_SEPARATORS(pszKey);
-			size_t index = Exp_GetVal(pszKey);
+			SKIP_SEPARATORS(ptcKey);
+			size_t index = Exp_GetVal(ptcKey);
 			if ( index >= g_World.m_GMPages.GetCount() )
 				return false;
 
@@ -292,8 +295,8 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 			if ( pPage == nullptr )
 				return false;
 
-			SKIP_SEPARATORS(pszKey);
-			if ( !strnicmp(pszKey, "HANDLE", 6) )
+			SKIP_SEPARATORS(ptcKey);
+			if ( !strnicmp(ptcKey, "HANDLE", 6) )
 			{
 				CChar *ppChar = pChar;
 				lpctstr pszArgs = s.GetArgStr(); //Moved here because of error with quoted strings!?!?
@@ -309,7 +312,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 
 				pPage->SetGMHandler(pClient);
 			}
-			else if ( !strnicmp(pszKey, "DELETE", 6) )
+			else if ( !strnicmp(ptcKey, "DELETE", 6) )
 			{
 				delete pPage;
 			}
@@ -317,7 +320,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 			{
 				CClient* pClient = pChar->GetClient();
 				if ( pClient != nullptr && pClient->GetChar() != nullptr )
-					pClient->Cmd_GM_PageCmd(pszKey);
+					pClient->Cmd_GM_PageCmd(ptcKey);
 			}
 			else
 			{
@@ -328,16 +331,16 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 		}
 		return false;
 	}
-	else if ( ( !strnicmp(pszKey, "GUILD", 5) ) || ( !strnicmp(pszKey, "TOWN", 4) ) )
+	else if ( ( !strnicmp(ptcKey, "GUILD", 5) ) || ( !strnicmp(ptcKey, "TOWN", 4) ) )
 	{
-		bool bIsGuild = !strnicmp(pszKey, "GUILD", 5);
-		pszKey += bIsGuild ? 5 : 4;
-		if ( *pszKey == '.' )
+		bool bIsGuild = !strnicmp(ptcKey, "GUILD", 5);
+		ptcKey += bIsGuild ? 5 : 4;
+		if ( *ptcKey == '.' )
 		{
-			pszKey += 1;
+			ptcKey += 1;
 			CItemStone *pMyGuild = pChar->Guild_Find(bIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
 			if ( pMyGuild )
-                return pMyGuild->r_SetVal(pszKey, s.GetArgRaw());
+                return pMyGuild->r_SetVal(ptcKey, s.GetArgRaw());
 		}
 		return false;
 	}
@@ -490,7 +493,7 @@ enum CPV_TYPE	// Player char.
 	CPV_QTY
 };
 
-lpctstr const CCharPlayer::sm_szVerbKeys[CPV_QTY+1] =
+lpctstr constexpr CCharPlayer::sm_szVerbKeys[CPV_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CCharPlayer_functions.tbl"
@@ -505,22 +508,22 @@ bool CChar::Player_OnVerb( CScript &s, CTextConsole * pSrc )
 	if ( !m_pPlayer || !pSrc )
 		return false;
 
-	lpctstr pszKey = s.GetKey();
-	int cpVerb = FindTableSorted( pszKey, CCharPlayer::sm_szVerbKeys, CountOf(CCharPlayer::sm_szVerbKeys)-1 );
+	lpctstr ptcKey = s.GetKey();
+	int cpVerb = FindTableSorted( ptcKey, CCharPlayer::sm_szVerbKeys, CountOf(CCharPlayer::sm_szVerbKeys)-1 );
 
 	if ( cpVerb <= -1 )
 	{
-		if ( ( !strnicmp(pszKey, "GUILD", 5) ) || ( !strnicmp(pszKey, "TOWN", 4) ) )
+		if ( ( !strnicmp(ptcKey, "GUILD", 5) ) || ( !strnicmp(ptcKey, "TOWN", 4) ) )
 		{
-			bool bIsGuild = !strnicmp(pszKey, "GUILD", 5);
-			pszKey += bIsGuild ? 5 : 4;
-			if ( *pszKey == '.' )
+			bool bIsGuild = !strnicmp(ptcKey, "GUILD", 5);
+			ptcKey += bIsGuild ? 5 : 4;
+			if ( *ptcKey == '.' )
 			{
-				pszKey += 1;
+				ptcKey += 1;
 				CItemStone *pMyGuild = Guild_Find(bIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
                 if ( pMyGuild )
                 {
-					CScript script(pszKey, s.GetArgRaw());
+					CScript script(ptcKey, s.GetArgRaw());
 					script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
 					script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
                    	return pMyGuild->r_Verb(script, pSrc);

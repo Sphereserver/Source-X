@@ -6,7 +6,7 @@
 #ifndef _INC_LISTDEFCONTMAP_H
 #define _INC_LISTDEFCONTMAP_H
 
-#include <list>
+#include <deque>
 #include <set>
 #include "common.h"
 #include "sphere_library/CSString.h"
@@ -23,7 +23,7 @@ private:
 public:
 	static const char *m_sClassName;
 
-	explicit CListDefContElem(lpctstr pszKey);
+    explicit CListDefContElem(lpctstr ptcKey) : m_Key(ptcKey) {};
 	virtual ~CListDefContElem() = default;
 
 private:
@@ -34,7 +34,9 @@ public:
     inline lpctstr GetKey() const {
         return m_Key.GetPtr();
     }
-	void SetKey( lpctstr pszKey );
+    inline void SetKey(lpctstr ptcKey) {
+        m_Key = ptcKey;
+    }
 
 	virtual lpctstr GetValStr() const = 0;
 	virtual int64 GetValNum() const = 0;
@@ -50,8 +52,8 @@ private:
 public:
 	static const char *m_sClassName;
 
-	explicit CListDefContNum(lpctstr pszKey);
-	CListDefContNum(lpctstr pszKey, int64 iVal);
+	explicit CListDefContNum(lpctstr ptcKey);
+	CListDefContNum(lpctstr ptcKey, int64 iVal);
 	~CListDefContNum() = default;
 
 private:
@@ -68,7 +70,7 @@ public:
 	lpctstr GetValStr() const;
 
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr);
 
 	virtual CListDefContElem * CopySelf() const;
 };
@@ -82,8 +84,8 @@ private:
 public:
 	static const char *m_sClassName;
 
-	CListDefContStr(lpctstr pszKey, lpctstr pszVal);
-	explicit CListDefContStr(lpctstr pszKey);
+	CListDefContStr(lpctstr ptcKey, lpctstr pszVal);
+	explicit CListDefContStr(lpctstr ptcKey);
 	~CListDefContStr() = default;
 
 private:
@@ -98,7 +100,7 @@ public:
 	int64 GetValNum() const;
 
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr );
 
 	virtual CListDefContElem * CopySelf() const;
 };
@@ -109,19 +111,17 @@ class CListDefCont
 private:
 	CSString m_Key;	// reference to map key
 
-	typedef std::list<CListDefContElem *> DefList;
+	typedef std::deque<CListDefContElem *> DefList;
 
 protected:
 	DefList	m_listElements;
 
-	inline CListDefContElem* ElementAt(size_t nIndex) const;
-	inline void DeleteAtIterator(DefList::iterator it);
-	inline DefList::iterator _GetAt(size_t nIndex);
+	void DeleteAtIterator(DefList::iterator it, bool fEraseFromDefList = true);
 
 public:
 	static const char *m_sClassName;
 
-	explicit CListDefCont(lpctstr pszKey);
+	explicit CListDefCont(lpctstr ptcKey);
 	~CListDefCont() = default;
 
 private:
@@ -132,12 +132,14 @@ public:
     inline lpctstr GetKey() const {
         return m_Key.GetPtr();
     }
-	void SetKey( lpctstr pszKey );
+	void SetKey( lpctstr ptcKey );
 
 	CListDefContElem* GetAt(size_t nIndex) const;
 	bool SetNumAt(size_t nIndex, int64 iVal);
 	bool SetStrAt(size_t nIndex, lpctstr pszVal);
-	size_t GetCount() const;
+    inline size_t GetCount() const {
+        return m_listElements.size();
+    }
 
 	lpctstr GetValStr(size_t nIndex) const;
 	int64 GetValNum(size_t nIndex) const;
@@ -146,21 +148,21 @@ public:
 	int FindValStr( lpctstr pVal, size_t nStartIndex = 0 ) const;
 
 	bool AddElementNum(int64 iVal);
-	bool AddElementStr(lpctstr pszKey);
+	bool AddElementStr(lpctstr ptcKey);
 
 	bool RemoveElement(size_t nIndex);
 	void RemoveAll();
 	void Sort(bool bDesc = false, bool bCase = false);
 
 	bool InsertElementNum(size_t nIndex, int64 iVal);
-	bool InsertElementStr(size_t nIndex, lpctstr pszKey);
+	bool InsertElementStr(size_t nIndex, lpctstr ptcKey);
 
 	CListDefCont * CopySelf();
 	void PrintElements(CSString& strElements) const;
 	void DumpElements( CTextConsole * pSrc, lpctstr pszPrefix = nullptr ) const;
-	void r_WriteSave( CScript& s );
+	void r_WriteSave( CScript& s ) const;
 	bool r_LoadVal( CScript& s );
-	bool r_LoadVal( lpctstr pszArg );
+	bool r_LoadVal( lpctstr ptcArg );
 };
 
 
@@ -169,7 +171,10 @@ class CListDefMap
 private:
 	struct ltstr
 	{
-		bool operator()(CListDefCont * s1, CListDefCont * s2) const;
+        inline bool operator()(const CListDefCont * s1, const CListDefCont * s2) const
+        {
+            return( strcmpi(s1->GetKey(), s2->GetKey()) < 0 );
+        }
 	};
 
 	typedef std::set<CListDefCont *, ltstr> DefSet;
@@ -189,28 +194,30 @@ private:
 
 private:
 	CListDefCont * GetAtKey( lpctstr at );
-	inline void DeleteAt( size_t at );
-	inline void DeleteAtKey( lpctstr at );
-	inline void DeleteAtIterator( DefSet::iterator it );
+	void DeleteAt( size_t at );
+	void DeleteAtKey( lpctstr at );
+	void DeleteAtIterator( DefSet::iterator it );
 
 public:
 	void Copy( const CListDefMap * pArray );
 	void Empty();
-	size_t GetCount() const;
+    inline size_t GetCount() const {
+        return m_Container.size();
+    }
 
 	lpctstr FindValNum( int64 iVal ) const;
 	lpctstr FindValStr( lpctstr pVal ) const;
 
 	CListDefCont * GetAt( size_t at );
-	CListDefCont * GetKey( lpctstr pszKey ) const;
+	CListDefCont * GetKey( lpctstr ptcKey ) const;
 
-	CListDefCont* AddList(lpctstr pszKey);
+	CListDefCont* AddList(lpctstr ptcKey);
 
 	void DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix = nullptr );
 	void ClearKeys(lpctstr mask = nullptr);
 	void DeleteKey( lpctstr key );
 
-	bool r_LoadVal( lpctstr pszKey, CScript & s );
+	bool r_LoadVal( lpctstr ptcKey, CScript & s );
 	bool r_Write( CTextConsole *pSrc, lpctstr pszString, CSString& strVal );
 	void r_WriteSave( CScript& s );
 };

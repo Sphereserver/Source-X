@@ -247,7 +247,7 @@ private:
 	IT_TYPE	m_type;				// default double click action type. (if any)
 	CValueRangeDef m_values;	// range of values given a quality skill
 	byte    m_layer;			// Is this item equippable on paperdoll? LAYER=LAYER_TYPE defaults from the .MUL file.
-	dword   m_dwFlags;			//  UFLAG4_DOOR from CUOItemTypeRec/CUOItemTypeRec_HS
+	uint64  m_qwFlags;			//  UFLAG4_DOOR from CUOItemTypeRec/CUOItemTypeRec_HS
 	byte	m_speed;
 public:
 	static const char *m_sClassName;
@@ -455,7 +455,7 @@ public:
 	bool SetMaxAmount(word amount);
 
 	static CItemBase * FindItemBase( ITEMID_TYPE id );
-	static bool IsValidDispID( ITEMID_TYPE id );
+	inline static bool IsValidDispID( ITEMID_TYPE id );
 
 	// NOTE: ??? All this stuff should be moved to scripts !
 	// Classify item by ID
@@ -470,7 +470,7 @@ public:
     static bool IsID_WaterWash( ITEMID_TYPE id );
     static bool IsID_Chair( ITEMID_TYPE id );
 
-	static bool IsVisibleLayer( LAYER_TYPE layer );
+	inline static bool IsVisibleLayer( LAYER_TYPE layer );
 
 	static tchar * GetNamePluralize( lpctstr pszNameBase, bool fPluralize );
 	static bool GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * ptile );
@@ -510,15 +510,15 @@ public:
 	{
 		return (ITEMID_TYPE)(m_dwDispIndex);
 	}
-	dword GetTFlags() const
+	uint64 GetTFlags() const
 	{
-		return m_dwFlags;
+		return m_qwFlags;
 	}
 	bool IsSameDispID( ITEMID_TYPE id ) const;
 	ITEMID_TYPE GetNextFlipID( ITEMID_TYPE id ) const;
 
 	virtual bool r_LoadVal( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = nullptr ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 
 	bool IsMovableType() const
 	{
@@ -575,7 +575,7 @@ class CItemBaseDupe : public CResourceDef
 public:
 	CResourceRef m_MasterItem;	// What is the "master" item ?
 private:
-	dword		m_dwFlags;		//  UFLAG4_DOOR from CUOItemTypeRec/CUOItemTypeRec_HS
+	uint64		m_qwFlags;		//  UFLAG4_DOOR from CUOItemTypeRec/CUOItemTypeRec_HS
 	height_t	m_Height;
 public:
 	dword		m_Can;
@@ -583,7 +583,7 @@ public:
 	CItemBaseDupe( ITEMID_TYPE id, CItemBase * pMasterItem ) :
 		CResourceDef( CResourceID( RES_ITEMDEF, id ) ),
 		m_MasterItem( pMasterItem ),
-		m_dwFlags(0), m_Height(0), m_Can(0)
+		m_qwFlags(0), m_Height(0), m_Can(0)
 	{
 		ASSERT(pMasterItem);
 		ASSERT( pMasterItem->GetResourceID().GetResIndex() != id );
@@ -610,17 +610,17 @@ public:
 		m_MasterItem.SetRef(nullptr);
 		CResourceDef::UnLink();
 	}
-	dword GetTFlags() const
+	inline uint64 GetTFlags() const
 	{
-		return( m_dwFlags );
+		return( m_qwFlags );
 	}
 	height_t GetHeight() const
 	{
 		return( m_Height );
 	}
-	void SetTFlags( dword Flags )
+	void SetTFlags( uint64 Flags )
 	{
-		m_dwFlags = Flags;
+		m_qwFlags = Flags;
 	}
 	void SetHeight( height_t Height)
 	{
@@ -677,7 +677,7 @@ public:
 	bool AddComponent( tchar * pArgs );
 	void SetMultiRegion( tchar * pArgs );
 	virtual bool r_LoadVal( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pChar ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pChar = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 
 	static CItemBase * MakeMultiRegion( CItemBase * pBase, CScript & s );
 };
@@ -685,12 +685,12 @@ public:
 
 /* Inline Methods Definitions */
 
-inline bool CItemBase::IsVisibleLayer( LAYER_TYPE layer ) // static
+bool CItemBase::IsVisibleLayer( LAYER_TYPE layer ) // static
 {
 	return ((layer > LAYER_NONE) && (layer <= LAYER_HORSE) );
 }
 
-inline bool CItemBase::IsValidDispID( ITEMID_TYPE id ) // static
+bool CItemBase::IsValidDispID( ITEMID_TYPE id ) // static
 {
 	// Is this id in the base artwork set ? tile or multi.
 	return ( id > ITEMID_NOTHING && id < ITEMID_MULTI_MAX );

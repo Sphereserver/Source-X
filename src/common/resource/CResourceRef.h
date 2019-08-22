@@ -49,7 +49,7 @@ public:
     }
 
 public:
-    CResourceLink* GetRef() const
+    inline CResourceLink* GetRef() const
     {
         return m_pLink;
     }
@@ -63,7 +63,7 @@ public:
         if (pLink != nullptr)
             pLink->AddRefInstance();
     }
-    operator CResourceLink*() const
+    inline operator CResourceLink*() const
     {
         return GetRef();
     }
@@ -82,19 +82,19 @@ public:
     CResourceRefArray& operator=(const CResourceRefArray& other);
     size_t FindResourceType( RES_TYPE type ) const;
     size_t FindResourceID( const CResourceID & rid ) const;
-    size_t FindResourceName( RES_TYPE restype, lpctstr pszKey ) const;
+    size_t FindResourceName( RES_TYPE restype, lpctstr ptcKey ) const;
 
     void WriteResourceRefList( CSString & sVal ) const;
     bool r_LoadVal( CScript & s, RES_TYPE restype );
-    void r_Write( CScript & s, lpctstr pszKey ) const;
+    void r_Write( CScript & s, lpctstr ptcKey ) const;
 
     inline bool ContainsResourceID( const CResourceID & rid ) const
     {
-        return FindResourceID(rid) != BadIndex();
+        return FindResourceID(rid) != SCONT_BADINDEX;
     }
-    inline bool ContainsResourceName( RES_TYPE restype, lpctstr & pszKey ) const
+    inline bool ContainsResourceName( RES_TYPE restype, lpctstr & ptcKey ) const
     {
-        return FindResourceName(restype, pszKey) != BadIndex();
+        return FindResourceName(restype, ptcKey) != SCONT_BADINDEX;
     }
 };
 

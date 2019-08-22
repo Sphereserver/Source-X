@@ -39,6 +39,9 @@ public:
 	ushort m_Dex;
 	ushort m_Int;
 
+	RESDISPLAY_VERSION _iEraLimitGear;	// Don't allow to create gear newer than the given era (softcoded).
+	RESDISPLAY_VERSION _iEraLimitLoot;	// Don't allow to create loot newer than the given era (softcoded).
+
     int _iRange;
 
 	short m_iMoveRate;	// move rate percent
@@ -52,9 +55,10 @@ public:
 	CResourceQtyArray m_Aversions;
 	CResourceQtyArray m_Desires;	// DESIRES= that are typical for the char class. see also m_sNeed
 
-									// If this is an NPC.
-									// We respond to what we here with this.
+	// If this is an NPC.
+	// We respond to what we here with this.
 	CResourceRefArray m_Speech;	// Speech fragment list (other stuff we know)
+
 	static lpctstr const sm_szLoadKeys[];
 
 private:
@@ -112,9 +116,9 @@ public:
 
 	lpctstr GetTradeName() const;
 
-	bool r_LoadVal( CScript & s ) override;
-	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = nullptr ) override;
-	bool r_Load( CScript & s ) override;
+	virtual bool r_LoadVal( CScript & s ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
+	virtual bool r_Load( CScript & s ) override;
 };
 
 

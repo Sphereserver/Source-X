@@ -29,7 +29,7 @@ bool IsTrigUsed(const char *name)
 {
     if ( g_Serv.IsLoading() == true)
         return false;
-    for ( auto it = g_triggers.begin(), end = g_triggers.end(); it != end; ++it )
+    for ( auto it = g_triggers.cbegin(), end = g_triggers.cend(); it != end; ++it )
     {
         if ( !strcmpi(it->m_name, name) )
             return (it->m_used != 0); // Returns true or false for known triggers
@@ -76,7 +76,7 @@ void TriglistAdd(const char *name)
 void Triglist(int &total, int &used)
 {
     total = used = 0;
-    for ( auto it = g_triggers.begin(), end = g_triggers.end(); it != end; ++it )
+    for ( auto it = g_triggers.cbegin(), end = g_triggers.cend(); it != end; ++it )
     {
         ++total;
         if ( it->m_used )
@@ -86,7 +86,7 @@ void Triglist(int &total, int &used)
 
 void TriglistPrint()
 {
-    for ( auto it = g_triggers.begin(), end = g_triggers.end(); it != end; ++it )
+    for ( auto it = g_triggers.cbegin(), end = g_triggers.cend(); it != end; ++it )
     {
         if (it->m_used)
         {

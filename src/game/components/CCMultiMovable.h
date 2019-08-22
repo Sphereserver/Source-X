@@ -33,7 +33,7 @@ public:
     //CItem *GetLink() const;
 
     bool OnTick();
-    bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc);
+    bool r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc);
     bool r_LoadVal(CScript & s);
     bool r_Verb(CScript & s, CTextConsole * pSrc); // Execute command from script
 

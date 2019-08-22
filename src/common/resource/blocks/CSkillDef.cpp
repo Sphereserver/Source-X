@@ -13,10 +13,10 @@ lpctstr const CSkillDef::sm_szTrigName[SKTRIG_QTY+1] =
     "@START",	// params for skill are done.
     "@STROKE",
     "@SUCCESS",
-    "@TargetCancel",
-    "@UseQuick",
-    "@Wait",
-    nullptr,
+    "@TARGETCANCEL",
+    "@USEQUICK",
+    "@WAIT",
+    nullptr
 };
 
 enum SKC_TYPE
@@ -44,7 +44,7 @@ enum SKC_TYPE
     SKC_QTY
 };
 
-lpctstr const CSkillDef::sm_szLoadKeys[SKC_QTY+1] =
+lpctstr constexpr CSkillDef::sm_szLoadKeys[SKC_QTY+1] =
 {
     "ADV_RATE",
     "BONUS_DEX",
@@ -82,11 +82,12 @@ CSkillDef::CSkillDef( SKILL_TYPE skill ) :
     m_AdvRate.Init();
 }
 
-bool CSkillDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CSkillDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CSkillDef::r_WriteVal");
     EXC_TRY("WriteVal");
-    switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+    switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
     {
         case SKC_ADV_RATE:	// ADV_RATE=Chance at 100, Chance at 50, chance at 0
             sVal = m_AdvRate.Write();
@@ -147,7 +148,7 @@ bool CSkillDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             sVal.FormatVal( m_GainRadius );
             break;
         default:
-            return( CResourceDef::r_WriteVal( pszKey, sVal, pSrc ));
+            return ( fNoCallParent ? false : CResourceDef::r_WriteVal( ptcKey, sVal, pSrc ) );
     }
     return true;
     EXC_CATCH;

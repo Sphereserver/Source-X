@@ -2,7 +2,6 @@
 Game server for Ultima Online.
 <br>
 [![Windows Build status](https://ci.appveyor.com/api/projects/status/ab152o83mipjojin/branch/master?svg=true)](https://ci.appveyor.com/project/cbnolok/source2/branch/master)
-[![Linux Build Status](https://travis-ci.org/Sphereserver/Source-experimental.svg?branch=master)](https://travis-ci.org/Sphereserver/Source-experimental)
 <br><a href="https://forum.spherecommunity.net/sshare.php?srt=4">Get the automated builds here!</a>
 
 

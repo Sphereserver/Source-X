@@ -20,7 +20,7 @@ function (toolchain_exe_stuff)
 		-Wno-implicit-function-declaration -Wno-type-limits -Wno-incompatible-pointer-types -Wno-array-bounds")
 		# last 2 lines are for warnings issued by 3rd party C code
 	SET (CXX_WARNING_OPTS
-		"-Wall -Wextra -Wno-pragmas -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-parentheses -Wno-conversion-null -Wno-invalid-offsetof -Wno-implicit-fallthrough")
+		"-Wall -Wextra -Wno-pragmas -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-parentheses -Wno-conversion-null -Wno-misleading-indentation -Wno-implicit-fallthrough")
 	SET (C_ARCH_OPTS	"-march=i686 -m32")
 	SET (CXX_ARCH_OPTS	"-march=i686 -m32")
 	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")

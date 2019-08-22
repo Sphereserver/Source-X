@@ -38,11 +38,11 @@ void CDataBaseAsyncHelper::tick()
 		theArgs->m_s1 = currentFunctionPair.second;
 
 		if ( currentPair.first )
-			theArgs->m_iN2 = g_Serv.m_hdb.query(currentFunctionPair.second, theArgs->m_VarsLocal);
+			theArgs->m_iN2 = g_Serv._hDb.query(currentFunctionPair.second, theArgs->m_VarsLocal);
 		else
-			theArgs->m_iN2 = g_Serv.m_hdb.exec(currentFunctionPair.second);
+			theArgs->m_iN2 = g_Serv._hDb.exec(currentFunctionPair.second);
 
-		g_Serv.m_hdb.addQueryResult(currentFunctionPair.first, theArgs);
+		g_Serv._hDb.addQueryResult(currentFunctionPair.first, theArgs);
 	}
 }
 

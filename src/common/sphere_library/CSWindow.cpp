@@ -14,7 +14,7 @@ CSWindow::operator HWND () const       // cast as a HWND
 {
     return m_hWnd;
 }
-CSWindow::CSWindow()
+CSWindow::CSWindow() : m_pnid{}
 {
     m_hWnd = nullptr;
 }
@@ -344,9 +344,8 @@ COLORREF CRichEditCtrl::SetBackgroundColor(BOOL bSysColor, COLORREF cr)
     return ((COLORREF)(DWORD)SendMessage(EM_SETBKGNDCOLOR, (WPARAM)bSysColor, (LPARAM)cr));
 }
 
-void CRichEditCtrl::SetSel(int nStartChar, int nEndChar, BOOL bNoScroll)
+void CRichEditCtrl::SetSel(int nStartChar, int nEndChar)
 {
-    UNREFERENCED_PARAMETER(bNoScroll);
     ASSERT(IsWindow());
     CHARRANGE range;
     range.cpMin = nStartChar;
@@ -362,19 +361,34 @@ void CRichEditCtrl::GetSel(int& nStartChar, int& nEndChar) const
     nEndChar = range.cpMax;
 }
 
+void CRichEditCtrl::SetRedraw(BOOL val)
+{
+    ASSERT(IsWindow());
+    SendMessage(WM_SETREDRAW, (WPARAM)val, 0);
+}
+
+void CRichEditCtrl::SetCaretHide(BOOL val)
+{
+    ASSERT(IsWindow());
+    if (val)
+        HideCaret(m_hWnd);
+    else
+        ShowCaret(m_hWnd);
+}
+
 DWORD CRichEditCtrl::ScrollLine()
 {
-    return (DWORD)SendMessage(EM_SCROLL, (WPARAM)SB_LINEDOWN);
+    return (DWORD)PostMessage(EM_SCROLL, (WPARAM)SB_LINEDOWN);
 }
 
 DWORD CRichEditCtrl::ScrollPageDown()
 {
-    return (DWORD)SendMessage(EM_SCROLL, (WPARAM)SB_PAGEDOWN);
+    return (DWORD)PostMessage(EM_SCROLL, (WPARAM)SB_PAGEDOWN);
 }
 
 DWORD CRichEditCtrl::ScrollBottomRight()
 {
-    return (DWORD)SendMessage(WM_VSCROLL, (WPARAM)SB_BOTTOM);
+    return (DWORD)PostMessage(WM_VSCROLL, (WPARAM)SB_BOTTOM);
 }
 
 // Formatting.

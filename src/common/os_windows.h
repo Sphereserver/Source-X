@@ -34,14 +34,6 @@
 #include <windows.h>
 
 
-/*  cross-platform functions macros  */
-#define strcmpi		_strcmpi	// Non ANSI equiv functions ?
-#define strnicmp	_strnicmp
-#define ATOI		atoi
-#define ITOA		_itoa
-#define LTOA		_ltoa
-#define STRREV		_strrev
-
 /*	file handling definitions  */
 #define STDFUNC_FILENO(_x_)		_get_osfhandle(_fileno(_x_))
 #define STDFUNC_UNLINK			_unlink

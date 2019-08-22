@@ -98,13 +98,13 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 	bool bIsEquipped = pItem->IsItemEquipped();
 	if ( pItemDef->IsTypeEquippable() && !bIsEquipped && pItemDef->GetEquipLayer() )
 	{
-		bool bMustEquip = true;
+		bool fMustEquip = true;
 		if ( pItem->IsTypeSpellbook() )
-			bMustEquip = false;
+			fMustEquip = false;
 		else if ( (pItem->IsType(IT_LIGHT_OUT) || pItem->IsType(IT_LIGHT_LIT)) && !pItem->IsItemInContainer() )
-			bMustEquip = false;
+			fMustEquip = false;
 
-		if ( bMustEquip )
+		if ( fMustEquip )
 		{
 			if ( !m_pChar->CanMove(pItem) )
 				return false;
@@ -255,7 +255,8 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 				if ( m_pChar->ItemPickup(pItem, 1) == -1 )	// put the potion in our hand
 					return false;
 
-				pItem->m_itPotion.m_tick = 4;		// countdown to explode
+				if (pItem->m_itPotion.m_tick <= 0) //Set default countdown for explosion if morex is not  set.
+					pItem->m_itPotion.m_tick = 4;
 				pItem->m_itPotion.m_ignited = 1;	// ignite it
 				pItem->m_uidLink = m_pChar->GetUID();
 				pItem->SetTimeoutS(1);
@@ -728,12 +729,25 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
     }
 
     bool fSkip = false;		// skip this if we lack resources or skill.
+    bool fSkipNeedCleanup = false;
 	int iOnCount = 0;
 	int iShowCount = 0;
 	CScriptTriggerArgs Args;
 
-	while ( s.ReadKeyParse())
+	while ( s.ReadKeyParse() )
 	{
+        if (fSkipNeedCleanup)
+        {
+            fSkip = true;
+            fSkipNeedCleanup = false;
+            if (iSelect != -2)
+            {
+                ASSERT(item != nullptr);
+                item[iShowCount] = {};
+                m_tmMenu.m_Item[iShowCount] = 0;
+            }
+            --iShowCount;
+        }
 		if ( s.IsKeyHead("ON", 2) )
 		{
 			if ( *s.GetArgStr() == '@' )
@@ -760,6 +774,7 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 					continue;
 				}
                 ++iShowCount;
+                // I have increased iShowCount, now i need fSkipNeedCleanup
 
 				if ( iSelect == -1 )
                 {
@@ -781,17 +796,8 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 			continue;
 		}
 
-        if ( fSkip )	// we have decided we cant do the option indicated by the previous conditional (ON, TEST, TESTIF...) line.
-        {
-            if (iSelect != -2)
-            {
-                ASSERT(item != nullptr);
-                item[iShowCount] = {};
-                m_tmMenu.m_Item[iShowCount] = 0;
-            }
-            --iShowCount;
+        if ( fSkip )	// we have decided we cant do the option indicated by the previous (ON, TEST, TESTIF, MAKEITEM, SKILLMENU...) line.
             continue;
-        }
 		if ( (iSelect > 0) && (iOnCount != iSelect) )	// only interested in the selected option
 			continue;
 
@@ -802,7 +808,7 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 			CResourceQtyArray skills(s.GetArgStr());
 			if ( !skills.IsResourceMatchAll(m_pChar) )
 			{
-                fSkip = true;
+                fSkipNeedCleanup = true;
 			}
 			continue;
 		}
@@ -812,7 +818,7 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 			m_pChar->ParseText(s.GetArgRaw(), m_pChar);
 			if ( !s.GetArgVal() )
 			{
-                fSkip = true;
+                fSkipNeedCleanup = true;
 			}
 			continue;
 		}
@@ -846,7 +852,7 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 					++sm_iReentrant;
 					if ( !Cmd_Skill_Menu_Build(g_Cfg.ResourceGetIDType(RES_SKILLMENU, s.GetArgStr()), -2, nullptr, iMaxSize, fShowMenu, fLimitReached) )
 					{
-                        fSkip = true;
+                        fSkipNeedCleanup = true;
 					}
 					else
                     {
@@ -863,12 +869,22 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 				// There should ALWAYS be a valid id here.
 				if ( !m_pChar->Skill_MakeItem((ITEMID_TYPE)(g_Cfg.ResourceGetIndexType(RES_ITEMDEF, s.GetArgStr())), m_Targ_UID, SKTRIG_SELECT) )
 				{
-                    fSkip = true;
+                    fSkipNeedCleanup = true;
 				}
 				continue;
 			}
 		}
 	}
+    if (fSkipNeedCleanup)
+    {
+        if (iSelect != -2)
+        {
+            ASSERT(item != nullptr);
+            item[iShowCount] = {};
+            m_tmMenu.m_Item[iShowCount] = 0;
+        }
+        --iShowCount;
+    }
 	return iShowCount;
 }
 
@@ -988,7 +1004,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 	ASSERT(m_pChar);
 	if ( track_sel == UINT32_MAX )
 	{
-		// Tacking (unlike other skills) is used during menu setup.
+		// Tracking (unlike other skills) is used during menu setup.
 		m_pChar->Skill_Cleanup();	// clean up current skill.
 
 		CMenuItem item[6];

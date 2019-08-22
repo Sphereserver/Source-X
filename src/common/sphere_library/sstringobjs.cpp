@@ -155,7 +155,7 @@ void String::ensureLength(size_t newLength)
 
 		if ( m_buf != nullptr )
 		{
-			strncpy(newBuf, m_buf, m_length);
+			Str_CopyLimitNull(newBuf, m_buf, m_length);
 			delete[] m_buf;
 		}
 		newBuf[m_length] = 0;
@@ -257,7 +257,7 @@ void TemporaryString::ensureLength(size_t newLength)
 			if ( newBuf == nullptr )
 				throw CSError(LOGL_FATAL, 0, "Run out of memory while allocating memory for string");
 
-			strncpy(newBuf, m_buf, m_length);
+			Str_CopyLimitNull(newBuf, m_buf, m_length);
 			newBuf[m_length] = '\0';
 			
 			m_buf = newBuf;

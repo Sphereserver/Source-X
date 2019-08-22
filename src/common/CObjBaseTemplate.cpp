@@ -133,7 +133,7 @@ int CObjBaseTemplate::GetDist( const CObjBaseTemplate * pObj ) const
 {
 	// logged out chars have infinite distance
 	if ( pObj == nullptr )
-		return INT16_MAX ;
+		return INT16_MAX;
 	pObj = pObj->GetTopLevelObj();
 	if ( pObj->IsDisconnected())
 		return INT16_MAX;

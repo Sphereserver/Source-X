@@ -7,6 +7,7 @@
 #define _INC_CCOMPONENTPROPS_H
 
 #include "../common/sphere_library/CSString.h"
+#include "game_enums.h"
 #include <map>
 
 class CScript;
@@ -73,18 +74,20 @@ public:
     *@param iPropIndex Property index
     *@param iVal The value for the property
     *@param pLinkedObj The CObjBase-child we are setting the prop on. Use nullptr if you are storing the prop in a BaseDef! (CItemBase, CCharBase...)
+    *@param iLimitToExpansion This EntityProps accepts/stores/uses properties only up to this expansion.
     *@param fDeleteZero If true, if iVal == 0 or is empty, delete the prop (if already existing)
     */
-    virtual void SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, bool fDeleteZero = false) = 0;
+    virtual void SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero = true) = 0;
 
     /*
     *@brief Set the string value for the given property
     *@param iPropIndex Property index
     *@param ptcVal The value for the property
     *@param pLinkedObj The CObjBase-child we are setting the prop on. Use nullptr if you are storing the prop in a BaseDef! (CItemBase, CCharBase...)
+    *@param iLimitToExpansion This EntityProps accepts/stores/uses properties only up to this expansion.
     *@param fDeleteZero If true, if ptcVal == nullptr or is empty, delete the prop (if already existing)
     */
-    virtual void SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, bool fDeleteZero = false) = 0;
+    virtual void SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero = true) = 0;
 
     /*
     @brief Delete the numerical property at the given index
@@ -119,7 +122,7 @@ public:
 protected:
     bool BaseCont_GetPropertyNum(const BaseContNum_t* container, int iPropIndex, PropertyValNum_t* piOutVal) const;
     bool BaseCont_GetPropertyStr(const BaseContStr_t* container, int iPropIndex, CSString *psOutVal, bool fZero = false) const;
-    void BaseProp_LoadPropVal(int iPropIndex, bool fPropStr, CScript & s, CObjBase* pLinkedObj);
+    void BaseProp_LoadPropVal(int iPropIndex, bool fPropStr, CScript & s, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion);
     bool BaseProp_WritePropVal(int iPropIndex, bool fPropStr, CSString & sVal) const;
     static void BaseCont_Write_ContNum(const BaseContNum_t* container, const lpctstr *ptcPropsTable, CScript &s);
     static void BaseCont_Write_ContStr(const BaseContStr_t* container, const lpctstr *ptcPropsTable, CScript &s);
@@ -132,11 +135,12 @@ public:
     *@brief Check if a property can be stored inside this CComponentProps, if it can, store it.
     *@param s The input script
     *@param pLinkedObj The CObjBase which is attached this CEntityProps. Use pLinkedObj = nullptr if calling this from CItemBase or CCharBase instead
+    *@param iLimitToExpansion This EntityProps accepts/stores/uses properties only up to this expansion.
     *@param iPropIndex The index of the property in this CComponentProps specialization-specific key table
     *@param fPropStr If the property is string-type
     *@return true if the property could be stored inside this component
     */
-    virtual bool FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, int iPropIndex, bool fPropStr) = 0;
+    virtual bool FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, int iPropIndex, bool fPropStr) = 0;
 
     /**
     *@brief Retrieve a property from this CComponentProps.

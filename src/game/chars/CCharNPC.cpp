@@ -9,7 +9,7 @@
 #include "CCharNPC.h"
 
 
-lpctstr const CCharNPC::sm_szLoadKeys[CNC_QTY+1] =
+lpctstr constexpr CCharNPC::sm_szLoadKeys[CNC_QTY+1] =
 {
 #define ADD(a,b) b,
 #include "../../tables/CCharNpc_props.tbl"
@@ -146,10 +146,10 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 	return false;
 }
 
-bool CCharNPC::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
+bool CCharNPC::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 {
 	EXC_TRY("WriteVal");
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CNC_QTY ))
+	switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CNC_QTY ))
 	{
 
 		//return as string or hex number or nullptr if not set
@@ -157,7 +157,7 @@ bool CCharNPC::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
 		case CNC_THROWDAM:
 		case CNC_THROWOBJ:
 		case CNC_THROWRANGE:
-			sVal = pChar->GetDefStr(pszKey, false, true);
+			sVal = pChar->GetDefStr(ptcKey, false, true);
 			break;
 			//return as decimal number or 0 if not set
 			//On these ones, check BaseDef if not found on dynamic
@@ -165,7 +165,7 @@ bool CCharNPC::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
 			sVal.FormatVal( m_bonded );
 			break;
 		case CNC_FOLLOWERSLOTS:
-			sVal.FormatLLVal(pChar->GetDefNum(pszKey, true));
+			sVal.FormatLLVal(pChar->GetDefNum(ptcKey, true));
 			break;
 		case CNC_ACTPRI:
 			sVal.FormatVal( m_Act_Motivation );
@@ -208,12 +208,12 @@ bool CCharNPC::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
 		}
 		break;
 		default:
-			if ( FindTableHeadSorted( pszKey, CCharPlayer::sm_szLoadKeys, CPC_QTY ) >= 0 )
+			if ( FindTableHeadSorted( ptcKey, CCharPlayer::sm_szLoadKeys, CPC_QTY ) >= 0 )
 			{
 				sVal = "0";
 				return true;
 			}
-			if ( FindTableSorted( pszKey, CClient::sm_szLoadKeys, CC_QTY ) >= 0 )
+			if ( FindTableSorted( ptcKey, CClient::sm_szLoadKeys, CC_QTY ) >= 0 )
 			{
 				sVal = "0";
 				return true;
