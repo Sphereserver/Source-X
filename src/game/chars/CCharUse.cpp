@@ -719,7 +719,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	ASSERT(pItemDef);
 
 	size_t i = pItemDef->m_SkillMake.FindResourceType(RES_SKILL);
-	if (i == pItemDef->m_SkillMake.BadIndex())
+	if (i == SCONT_BADINDEX)
 		return false;
 
 	SKILL_TYPE skill = static_cast<SKILL_TYPE>(pItemDef->m_SkillMake[i].GetResIndex());
@@ -742,7 +742,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	int iDamagePercent = 100 - ((pItemArmor->m_itArmor.m_Hits_Cur * 100) / pItemArmor->m_itArmor.m_Hits_Max);
 
 	size_t iMissing = ResourceConsumePart(&pItemDef->m_BaseResources, 1, iDamagePercent, true);
-	if (iMissing != pItemDef->m_BaseResources.BadIndex())
+	if (iMissing != SCONT_BADINDEX)
 	{
 		const CResourceDef *pResourceDef = g_Cfg.ResourceGetDef(pItemDef->m_BaseResources.at(iMissing).GetResourceID());
 		SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_LACK_1), pResourceDef ? pResourceDef->GetName() : g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_LACK_2));
