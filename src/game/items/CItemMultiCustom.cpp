@@ -19,18 +19,10 @@
 CItemMultiCustom::CItemMultiCustom(ITEMID_TYPE id, CItemBase * pItemDef) : 
     CTimedObject(PROFILE_MULTIS), CItemMulti(id, pItemDef, true)
 {
-    m_designMain.m_iRevision = 0;
-    m_designMain.m_pData = nullptr;
-    m_designMain.m_iDataRevision = 0;
-    m_designWorking.m_iRevision = 0;
-    m_designWorking.m_pData = nullptr;
-    m_designWorking.m_iDataRevision = 0;
-    m_designBackup.m_iRevision = 0;
-    m_designBackup.m_pData = nullptr;
-    m_designBackup.m_iDataRevision = 0;
-    m_designRevert.m_iRevision = 0;
-    m_designRevert.m_pData = nullptr;
-    m_designRevert.m_iDataRevision = 0;
+    m_designMain = {};
+    m_designWorking = {};
+    m_designBackup = {};
+    m_designRevert = {};
     m_pArchitect = nullptr;
     m_pSphereMulti = nullptr;
     m_rectDesignArea.SetRectEmpty();
@@ -603,8 +595,8 @@ void CItemMultiCustom::AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, 
     if (iStairID == -1)
         iStairID = GetStairCount() + 1;
 
-    size_t iQty = pMulti->GetItemCount();
-    for (size_t i = 0; i < iQty; i++)
+    uint iQty = pMulti->GetItemCount();
+    for (uint i = 0; i < iQty; ++i)
     {
         const CUOMultiItemRec_HS * pMultiItem = pMulti->GetItem(i);
         if (pMultiItem == nullptr)
@@ -698,7 +690,7 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x,
         return;
 
     bool bReplaceDirt = false;
-    for (size_t i = 0; i < iCount; i++)
+    for (size_t i = 0; i < iCount; ++i)
     {
         for (ComponentsContainer::iterator j = m_designWorking.m_vectorComponents.begin(); j != m_designWorking.m_vectorComponents.end(); ++j)
         {
@@ -910,7 +902,7 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
 
                 wPlaneBuffer[index] = (word)(pComp->m_item.GetDispID());
                 bFoundItems = true;
-                iItemCount++;
+                ++iItemCount;
                 iMaxIndex = maximum(iMaxIndex, index);
             }
 
@@ -991,8 +983,8 @@ void CItemMultiCustom::ResetStructure(CClient * pClientSrc)
     const CSphereMulti * pMulti = g_Cfg.GetMultiItemDefs(GetID());
     if (pMulti != nullptr)
     {
-        size_t iQty = pMulti->GetItemCount();
-        for (size_t i = 0; i < iQty; i++)
+        uint iQty = pMulti->GetItemCount();
+        for (uint i = 0; i < iQty; ++i)
         {
             const CUOMultiItemRec_HS * pMultiItem = pMulti->GetItem(i);
             if (pMultiItem == nullptr)
@@ -1094,13 +1086,13 @@ size_t CItemMultiCustom::GetComponentsAt(short x, short y, char z, Component ** 
     return count;
 }
 
-const CPointMap CItemMultiCustom::GetComponentPoint(Component * pComp) const
+CPointMap CItemMultiCustom::GetComponentPoint(const Component * pComp) const
 {
     ADDTOCALLSTACK("CItemMultiCustom::GetComponentPoint");
     return GetComponentPoint(pComp->m_item.m_dx, pComp->m_item.m_dy, (char)(pComp->m_item.m_dz));
 }
 
-const CPointMap CItemMultiCustom::GetComponentPoint(short dx, short dy, char dz) const
+CPointMap CItemMultiCustom::GetComponentPoint(short dx, short dy, char dz) const
 {
     ADDTOCALLSTACK("CItemMultiCustom::GetComponentPoint");
     // return the real world location from the given offset
@@ -1468,7 +1460,7 @@ bool CItemMultiCustom::r_Verb(CScript & s, CTextConsole * pSrc) // Execute comma
         case IMCV_ADDITEM:
         {
             tchar * ppArgs[4];
-            size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, CountOf(ppArgs), ",");
+            int iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, CountOf(ppArgs), ",");
             if (iQty != 4)
             {
                 return false;
@@ -1537,7 +1529,7 @@ bool CItemMultiCustom::r_Verb(CScript & s, CTextConsole * pSrc) // Execute comma
         case IMCV_CUSTOMIZE:
         {
             if (s.HasArgs())
-                pChar = CUID(s.GetArgVal()).CharFind();
+                pChar = CUID::CharFind(s.GetArgVal());
             else if (pSrc)
                 pChar = pSrc->GetChar();
 
@@ -1746,7 +1738,7 @@ bool CItemMultiCustom::r_LoadVal(CScript & s)
         if (s.IsKey("COMP"))
         {
             tchar * ppArgs[5];
-            size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, CountOf(ppArgs), ",");
+            int iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, CountOf(ppArgs), ",");
             if (iQty != 5)
                 return false;
 
@@ -1893,7 +1885,7 @@ bool CItemMultiCustom::LoadValidItems()
                 if (strFeatureMask.empty())
                 {
                     sm_mapValidItems[itemid] = 0;
-                    DEBUG_MSG(("No FeatureMask in file '%s', row=%d.\n", sm_szItemFiles[i][0], curCSV.GetCurrentRow()));
+                    DEBUG_WARN(("No FeatureMask in file '%s', row=%d.\n", sm_szItemFiles[i][0], curCSV.GetCurrentRow()));
                     continue;
                 }
                 sm_mapValidItems[itemid] = (uint)std::stoul(strFeatureMask, nullptr, 10);

@@ -1253,22 +1253,22 @@ bool CItem::Stack( CItem * pItem )
 	if ( IsAttr(ATTR_LOCKEDDOWN) != pItem->IsAttr(ATTR_LOCKEDDOWN) )
 		return false;
 
-	word destMaxAmount = pItem->GetMaxAmount();
-	if ( (pItem->GetAmount() + GetAmount()) > destMaxAmount )
+	const uint destMaxAmount = pItem->GetMaxAmount();
+    const word destAmount = pItem->GetAmount();
+    const word thisAmount = GetAmount();
+	if ( ((uint)destAmount + thisAmount) > destMaxAmount )
 	{
-		word amount = destMaxAmount - pItem->GetAmount();
-		pItem->SetAmountUpdate(pItem->GetAmount() + amount);
-		SetAmountUpdate(GetAmount() - amount);
+		word amount = (word)(destMaxAmount - destAmount);
+		pItem->SetAmountUpdate(destAmount + amount);
+		SetAmountUpdate(thisAmount - amount);
 		UpdatePropertyFlag();
 		pItem->UpdatePropertyFlag();
 		return false;
 	}
-	else
-	{
-		SetAmount(pItem->GetAmount() + GetAmount());
-		UpdatePropertyFlag();
-		pItem->Delete();
-	}
+
+    SetAmount(destAmount + thisAmount);
+    UpdatePropertyFlag();
+    pItem->Delete();
 	return true;
 }
 
@@ -1492,6 +1492,7 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 			iDecayTime = -1 * MSECS_PER_SEC;
 	}
 
+    const CObjBase *pCont = GetContainer();
 	TRIGRET_TYPE ttResult = TRIGRET_RET_DEFAULT;
 	if ( IsTrigUsed(TRIGGER_DROPON_GROUND) || IsTrigUsed(TRIGGER_ITEMDROPON_GROUND) )
 	{
@@ -1514,7 +1515,11 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
             ptNewPlace = ptChanged;
 	}
 
-    MoveTo(ptNewPlace);
+    // If i have changed the container via scripts, we shouldn't change item's position again here
+    if (pCont == GetContainer())
+    {
+        MoveTo(ptNewPlace);
+    }
 
 	if ( ttResult != TRIGRET_RET_TRUE )
 	{

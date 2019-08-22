@@ -8,6 +8,7 @@
 #include "CItemMulti.h"
 #include "CItemShip.h"
 #include "CItemContainer.h"
+#include <algorithm>
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -360,26 +361,26 @@ void CItemMulti::Multi_Setup(CChar *pChar, dword dwKeyCode)
     if (pChar)
     {
         SetOwner(pChar->GetUID());
-    }
 
-    if (pChar)
-    {
-        m_itShip.m_UIDCreator = pChar->GetUID();
-        if (IsType(IT_SHIP))
+        if (fNeedKey)
         {
-            if (g_Cfg._fAutoShipKeys)
+            m_itShip.m_UIDCreator = pChar->GetUID();
+            if (IsType(IT_SHIP))
             {
-                GenerateKey(pChar->GetUID(), true);
+                if (g_Cfg._fAutoShipKeys)
+                {
+                    GenerateKey(pChar->GetUID(), true);
+                }
+            }
+            else
+            {
+                if (g_Cfg._fAutoHouseKeys)
+                {
+                    GenerateKey(pChar->GetUID(), true);
+                }
             }
         }
-        else
-        {
-            if (g_Cfg._fAutoHouseKeys)
-            {
-                GenerateKey(pChar->GetUID(), true);
-            }
-        }
-    }
+    }    
 }
 
 bool CItemMulti::Multi_IsPartOf(const CItem * pItem) const
@@ -3005,16 +3006,18 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
     {
         return nullptr;
     }
-
-    const CItemBaseMulti * pMultiDef = dynamic_cast <const CItemBaseMulti *> (pItemDef);
-    ASSERT(pMultiDef);
+    
     const bool fShip = pItemDef->IsType(IT_SHIP);    // must be in water.
+
+    // pMultiDef can be nullptr, because we can also add simple items with a deed, not only multis.
+    const CItemBaseMulti* pMultiDef = dynamic_cast <const CItemBaseMulti*> (pItemDef);
 
     /*
     * First thing to do is to check if the character creating the multi is allowed to have it
     */
     if (fShip)
     {
+        ASSERT(pMultiDef);
         if (!pChar->GetMultiStorage()->CanAddShip(pChar->GetUID(), pMultiDef->_iMultiCount))
         {
             return nullptr;
@@ -3022,6 +3025,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
     }
     else if (pItemDef->IsType(IT_MULTI) || pItemDef->IsType(IT_MULTI_CUSTOM))
     {
+        ASSERT(pMultiDef);
         if (!pChar->GetMultiStorage()->CanAddHouse(pChar->GetUID(), pMultiDef->_iMultiCount))
         {
             return nullptr;
@@ -3030,7 +3034,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
     CScriptTriggerArgs args;
     args.m_VarsLocal.SetStrNew("check_blockradius", "-1, -1, 1, 1");    // Values are West, Norht, East, South
     args.m_VarsLocal.SetStrNew("check_multiradius", "0, -5, 0, 5");
-    args.m_VarsLocal.SetStrNew("id", g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, pMultiDef->GetID())));
+    args.m_VarsLocal.SetStrNew("id", g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, pItemDef->GetID())));
     args.m_VarsLocal.SetStrNew("p", pt.WriteUsed());
     TRIGRET_TYPE tRet;
     pChar->r_Call("f_multi_onplacement_check", pChar, &args, nullptr, &tRet);
@@ -3044,7 +3048,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
     * let's remove that difference.
     * Note: this fix is added here, before GM check, because otherwise they will place houses on wrong position.
     */
-    if (CItemBase::IsID_Multi(pItemDef->GetID()) || pItemDef->IsType(IT_MULTI_ADDON))
+    if (pMultiDef && (CItemBase::IsID_Multi(pItemDef->GetID()) || pItemDef->IsType(IT_MULTI_ADDON)))
     // or is this happening only for houses? if (CItemBase::IsID_House(pItemDef->GetID()))
     {
         pt.m_y -= (short)(pMultiDef->m_rect.m_bottom - 1);
@@ -3058,7 +3062,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
         CRect rectMultiRadius;
         rectMultiRadius.Read(args.m_VarsLocal.GetKeyStr("check_multiradius"));
 
-        if ((pMultiDef != nullptr) && !(pDeed->IsAttr(ATTR_MAGIC)))
+        if (!pDeed->IsAttr(ATTR_MAGIC))
         {
             CRect rect;
             CRect baseRect;
@@ -3076,7 +3080,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
             CPointMap ptn = pt;             // A copy to work on.
 
             // Check for chars in the way, just search for any char in the house area, no extra tiles, it's enough for them to do not be inside the house.
-            CWorldSearch Area(pt, maximum(rect.GetWidth(), rect.GetHeight()));
+            CWorldSearch Area(pt, std::max(rect.GetWidth(), rect.GetHeight()));
             Area.SetSearchSquare(true);
             for (;;)
             {

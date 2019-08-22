@@ -1885,3 +1885,8 @@ WARNING: Important change!
 	the triggers were called after the new P was set.
 - Added: In @(Item)DropOn_Ground, ARGN2 value is now == 1 if the trigger is called during a BOUNCE check (the char is overloaded and the item is being dropped on ground).
 - Fixed: @(Item)DropOn_Ground not firing when, during a BOUNCE check, the char was overloaded and the item was being dropped on ground (Issue #295).
+
+22-08-2019, Nolok
+- Fixed: Couldn't overwrite an item's container in @DropOn_Ground (Issue #317).
+- Fixed: Error while placing a non-multi item using a deed (Issue #312).
+- Fixed: Placing a multi always created a key in the backpack, regardlessly of the type of the multi.
