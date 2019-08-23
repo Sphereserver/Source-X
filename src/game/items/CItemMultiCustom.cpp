@@ -434,7 +434,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
             return;
     }
 
-    CItemBase * pItemBase = CItemBase::FindItemBase(id);
+    const CItemBase * pItemBase = CItemBase::FindItemBase(id);
     if (pItemBase == nullptr)
     {
         g_Log.EventWarn("Unscripted item 0%x being added to building 0%x by 0%x.\n", id, (dword)GetUID(), pCharSrc != nullptr ? (dword)pCharSrc->GetUID() : 0);
@@ -443,9 +443,9 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
     }
 
     // floor tiles have no height and can be placed under other objects (walls, doors, etc)
-    bool bFloor = (pItemBase->GetHeight() == 0);
+    const bool fFloor = (pItemBase->GetHeight() == 0);
     // fixtures are items that should be replaced by dynamic items
-    bool bFixture = (pItemBase->IsType(IT_DOOR) || pItemBase->IsType(IT_DOOR_LOCKED) || pItemBase->IsID_Door(id) || pItemBase->IsType(IT_TELEPAD));
+    const bool fFixture = (pItemBase->IsType(IT_DOOR) || pItemBase->IsType(IT_DOOR_LOCKED) || pItemBase->IsID_Door(id) || pItemBase->IsType(IT_TELEPAD));
 
     if (!g_Serv.IsLoading())
     {
@@ -490,16 +490,38 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
         }
 
         Component * pPrevComponents[INT8_MAX];
-        size_t iCount = GetComponentsAt(x, y, z, pPrevComponents, &m_designWorking);
+        size_t iCount;
+
+        /*
+        // abort if we are placing a floor tile above some stairs (not needed for ground floor)
+        // if we ever need this code, be sure to add a z check (we can place a floor on the first couple of blocks of stairs)
+        uchar uiCurPlane = GetPlane(z);
+        if (uiCurPlane > 1)
+        {
+            char zPrevPlane = GetPlaneZ(uiCurPlane - 1);
+            iCount = GetComponentsAt(x, y, zPrevPlane, pPrevComponents, &m_designWorking);
+            if (iCount > 0)
+            {
+                for (size_t i = 0; i < iCount; ++i)
+                {
+                    if (pPrevComponents[i]->m_isStair > 0)
+                        return;
+                }
+            }
+        }
+        */
+
+        // remove previous item(s) in this location
+        iCount = GetComponentsAt(x, y, z, pPrevComponents, &m_designWorking);
         if (iCount > 0)
         {
-            // remove previous item(s) in this location
-            for (size_t i = 0; i < iCount; i++)
+            for (size_t i = 0; i < iCount; ++i)
             {
-                if (bFloor != pPrevComponents[i]->m_isFloor)
+                if (fFloor != pPrevComponents[i]->m_isFloor)
                     continue;
 
-                RemoveItem(nullptr, pPrevComponents[i]->m_item.GetDispID(), pPrevComponents[i]->m_item.m_dx, pPrevComponents[i]->m_item.m_dy, (char)(pPrevComponents[i]->m_item.m_dz));
+                const Component* pComp = pPrevComponents[i];
+                RemoveItem(nullptr, pComp->m_item.GetDispID(), pComp->m_item.m_dx, pComp->m_item.m_dy, (char)(pComp->m_item.m_dz));
             }
         }
     }
@@ -509,27 +531,27 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
     pComponent->m_item.m_dx = x;
     pComponent->m_item.m_dy = y;
     pComponent->m_item.m_dz = z;
-    pComponent->m_item.m_visible = !bFixture;
+    pComponent->m_item.m_visible = !fFixture;
     pComponent->m_isStair = iStairID;
-    pComponent->m_isFloor = bFloor;
+    pComponent->m_isFloor = fFloor;
 
     m_designWorking.m_vectorComponents.emplace_back(pComponent);
     ++m_designWorking.m_iRevision;
 
     if (!g_Serv.IsLoading()) // quick fix, change it to execute only on customize mode
-
     {
         CItemContainer *pMovingCrate = static_cast<CItemContainer*>(GetMovingCrate(true).ItemFind());
+        ASSERT(pMovingCrate);
         std::vector<CUID> vListLocks;
         GetLockdownsAt(x, y, z, vListLocks);
         if (!vListLocks.empty())
         {
-            for (std::vector<CUID>::iterator it = vListLocks.begin(); it != vListLocks.end(); ++it)
+            for (const CUID& uid : vListLocks)
             {
-                CItem *pItem = static_cast<CItem*>((*it).ItemFind());
+                CItem *pItem = static_cast<CItem*>(uid.ItemFind());
                 if (pItem)
                 {
-                    UnlockItem((*it));
+                    UnlockItem(uid);
                     pMovingCrate->ContentAdd(pItem);
                     pItem->RemoveFromView();
                 }
@@ -541,12 +563,12 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
         GetSecuredAt(x, y, z, vListConts);
         if (!vListConts.empty())
         {
-            for (std::vector<CUID>::iterator it = vListConts.begin(); it != vListConts.end(); ++it)
+            for (const CUID& uid : vListLocks)
             {
-                CItemContainer *pCont = static_cast<CItemContainer*>((*it).ItemFind());
+                CItemContainer *pCont = static_cast<CItemContainer*>(uid.ItemFind());
                 if (pCont)
                 {
-                    Release((*it));
+                    Release(uid);
                     pMovingCrate->ContentAdd(pCont);
                     pCont->RemoveFromView();
                 }
@@ -689,31 +711,56 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x,
     if (iCount <= 0)
         return;
 
-    bool bReplaceDirt = false;
+    auto& vectorComponents = m_designWorking.m_vectorComponents;
+
+    // If i'm removing a single floor tile, the client actually removes the whole floor, so we need to reflect that change here.
+    bool fRemoveFloor = false;
     for (size_t i = 0; i < iCount; ++i)
     {
-        for (ComponentsContainer::iterator j = m_designWorking.m_vectorComponents.begin(); j != m_designWorking.m_vectorComponents.end(); ++j)
+        if (pComponents[i]->m_isFloor)
         {
-            if (*j != pComponents[i])
+            fRemoveFloor = true;
+            break;
+        }
+    }
+    if (fRemoveFloor)
+    {
+        for (ComponentsContainer::iterator it = vectorComponents.begin(); it != vectorComponents.end(); )
+        {
+            Component* pComp = *it;
+            if ((pComp->m_isFloor) && (pComp->m_item.m_dz == z))
+                it = vectorComponents.erase(it);
+            else
+                ++it;
+        }
+    }
+
+    bool fReplaceDirt = false;
+    for (size_t i = 0; i < iCount; ++i)
+    {
+        for (ComponentsContainer::iterator it = vectorComponents.begin(); it != vectorComponents.end(); ++it)
+        {
+            Component* pComp = *it;
+            if (pComp != pComponents[i])
                 continue;
 
-            if (id != ITEMID_NOTHING && ((*j)->m_item.GetDispID() != id))
+            if (id != ITEMID_NOTHING && (pComp->m_item.GetDispID() != id))
                 break;
 
-            if (pClientSrc != nullptr && RemoveStairs(*j))
+            if (pClientSrc != nullptr && RemoveStairs(pComp))
                 break;
 
             // floor tiles the ground floor are replaced with dirt tiles
-            if (((*j)->m_item.m_wTileID != ITEMID_DIRT_TILE) && (*j)->m_isFloor && (GetPlane(*j) == 1) && (GetPlaneZ(GetPlane(*j)) == (char)((*j)->m_item.m_dz)))
-                bReplaceDirt = true;
+            if ((pComp->m_item.m_wTileID != ITEMID_DIRT_TILE) && pComp->m_isFloor && (GetPlane(pComp) == 1) && (GetPlaneZ(GetPlane(pComp)) == (char)(pComp->m_item.m_dz)))
+                fReplaceDirt = true;
 
-            m_designWorking.m_vectorComponents.erase(j);
-            m_designWorking.m_iRevision++;
+            vectorComponents.erase(it);
+            ++ m_designWorking.m_iRevision;
             break;
         }
     }
 
-    if (pClientSrc != nullptr && bReplaceDirt)
+    if (pClientSrc != nullptr && fReplaceDirt)
     {
         // make sure that the location is within the proper boundaries
         if (rectDesign.IsInsideX(pt.m_x) && rectDesign.IsInsideX(pt.m_x - 1) && rectDesign.IsInsideY(pt.m_y) && rectDesign.IsInsideY(pt.m_y - 1))
@@ -979,7 +1026,7 @@ void CItemMultiCustom::ResetStructure(CClient * pClientSrc)
     // is simply the 'foundation' design from the multi.mul file
 
     m_designWorking.m_vectorComponents.clear();
-    m_designWorking.m_iRevision++;
+    ++ m_designWorking.m_iRevision;
     const CSphereMulti * pMulti = g_Cfg.GetMultiItemDefs(GetID());
     if (pMulti != nullptr)
     {
@@ -1029,12 +1076,12 @@ short CItemMultiCustom::GetStairCount()
     ADDTOCALLSTACK("CItemMultiCustom::GetStairCount");
     // find and return the highest stair id
     short iCount = 0;
-    for (ComponentsContainer::iterator i = m_designWorking.m_vectorComponents.begin(); i != m_designWorking.m_vectorComponents.end(); ++i)
+    for (Component *pComp : m_designWorking.m_vectorComponents)
     {
-        if ((*i)->m_isStair == 0)
+        if (pComp->m_isStair == 0)
             continue;
 
-        iCount = maximum(iCount, (*i)->m_isStair);
+        iCount = maximum(iCount, pComp->m_isStair);
     }
 
     return iCount;
@@ -1133,8 +1180,8 @@ const CRect CItemMultiCustom::GetDesignArea()
         {
             // the client uses the multi items to determine the area
             // that's editable
-            size_t iQty = pMulti->GetItemCount();
-            for (size_t i = 0; i < iQty; i++)
+            const uint iQty = pMulti->GetItemCount();
+            for (uint i = 0; i < iQty; ++i)
             {
                 const CUOMultiItemRec_HS * pMultiItem = pMulti->GetItem(i);
                 if (pMultiItem == nullptr)
@@ -1150,10 +1197,10 @@ const CRect CItemMultiCustom::GetDesignArea()
         {
             // multi data is not available, so assume the region boundaries
             // are correct
-            CRect rectRegion = m_pRegion->GetRegionRect(0);
+            const CRect& rectRegion = m_pRegion->GetRegionRect(0);
             m_rectDesignArea.SetRect(rectRegion.m_left, rectRegion.m_top, rectRegion.m_right, rectRegion.m_top, rectRegion.m_map);
 
-            const CPointMap pt = GetTopPoint();
+            const CPointMap& pt = GetTopPoint();
             m_rectDesignArea.OffsetRect(-pt.m_x, -pt.m_y);
 
             DEBUG_WARN(("Multi data is not available for customizable building 0%x.", GetID()));
@@ -1161,7 +1208,7 @@ const CRect CItemMultiCustom::GetDesignArea()
     }
 
     CRect rect;
-    const CPointMap pt = GetTopPoint();
+    const CPointMap& pt = GetTopPoint();
 
     rect.SetRect(m_rectDesignArea.m_left, m_rectDesignArea.m_top, m_rectDesignArea.m_right, m_rectDesignArea.m_bottom, GetTopMap());
     rect.OffsetRect(pt.m_x, pt.m_y);

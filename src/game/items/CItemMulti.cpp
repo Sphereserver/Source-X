@@ -46,11 +46,11 @@ CItemMulti::~CItemMulti()
 
     if (_uidGuild.IsValidUID())
     {
-        SetGuild(UID_UNUSED);
+        SetGuild(CUID());
     }
     if (_uidOwner.IsValidUID())
     {
-        SetOwner(UID_UNUSED);
+        SetOwner(CUID());
     }
     RemoveAllKeys();
     if (!_lCoowners.empty())
@@ -134,7 +134,7 @@ CItemMulti::~CItemMulti()
     CItemContainer *pMovingCrate = static_cast<CItemContainer*>(GetMovingCrate(false).ItemFind());
     if (pMovingCrate)
     {
-        SetMovingCrate(UID_UNUSED);
+        SetMovingCrate(CUID());
     }
     MultiUnRealizeRegion();    // unrealize before removed from ground.
     DeletePrepare();    // Must remove early because virtuals will fail in child destructor.
@@ -349,7 +349,7 @@ void CItemMulti::Multi_Setup(CChar *pChar, dword dwKeyCode)
     // ??? SetTimeout( GetDecayTime()); house decay ?
 
     bool fNeedKey = false;
-    GenerateBaseComponents(fNeedKey, dwKeyCode);
+    GenerateBaseComponents(&fNeedKey, dwKeyCode);
 
     if (IsType(IT_MULTI_ADDON))   // Addons doesn't require keys and are not added to any list.
     {
@@ -567,41 +567,40 @@ void CItemMulti::OnHearRegion(lpctstr pszCmd, CChar * pSrc)
     }
 }
 
-void CItemMulti::RevokePrivs(CUID uidSrc)
+void CItemMulti::RevokePrivs(const CUID& uidSrc)
 {
     ADDTOCALLSTACK("CItemMulti::RevokePrivs");
     if (!uidSrc.IsValidUID())
     {
         return;
     }
-    CUID charUID = uidSrc;
-    if (IsOwner(charUID))
+    if (IsOwner(uidSrc))
     {
-        SetOwner(UID_UNUSED);
+        SetOwner(CUID());
     }
-    else if (GetCoownerPos(charUID) >= 0)
+    else if (GetCoownerPos(uidSrc) >= 0)
     {
-        DelCoowner(charUID);
+        DelCoowner(uidSrc);
     }
-    else if (GetFriendPos(charUID) >= 0)
+    else if (GetFriendPos(uidSrc) >= 0)
     {
-        DelFriend(charUID);
+        DelFriend(uidSrc);
     }
-    else if (GetBanPos(charUID) >= 0)
+    else if (GetBanPos(uidSrc) >= 0)
     {
-        DelBan(charUID);
+        DelBan(uidSrc);
     }
-    else if (GetAccessPos(charUID) >= 0)
+    else if (GetAccessPos(uidSrc) >= 0)
     {
-        DelAccess(charUID);
+        DelAccess(uidSrc);
     }
-    else if (GetHouseVendorPos(charUID) >= 0)
+    else if (GetHouseVendorPos(uidSrc) >= 0)
     {
-        DelVendor(charUID);
+        DelVendor(uidSrc);
     }
 }
 
-void CItemMulti::SetOwner(CUID uidOwner)
+void CItemMulti::SetOwner(const CUID& uidOwner)
 {
     ADDTOCALLSTACK("CItemMulti::SetOwner");
     CChar *pOldOwner = _uidOwner.CharFind();
@@ -624,7 +623,7 @@ void CItemMulti::SetOwner(CUID uidOwner)
     _uidOwner = uidOwner;
 }
 
-bool CItemMulti::IsOwner(const CUID uidTarget) const
+bool CItemMulti::IsOwner(const CUID& uidTarget) const
 {
     return (_uidOwner == uidTarget);
 }
@@ -635,10 +634,10 @@ CUID CItemMulti::GetOwner() const
     {
         return _uidOwner;
     }
-    return UID_UNUSED;
+    return {};
 }
 
-void CItemMulti::SetGuild(CUID uidGuild)
+void CItemMulti::SetGuild(const CUID& uidGuild)
 {
     ADDTOCALLSTACK("CItemMulti::SetGuild");
     CItemStone *pGuild = static_cast<CItemStone*>(GetGuild().ItemFind());
@@ -656,7 +655,7 @@ void CItemMulti::SetGuild(CUID uidGuild)
     pGuild->GetMultiStorage()->AddMulti(GetUID(), HP_GUILD);
 }
 
-bool CItemMulti::IsGuild(const CUID uidTarget) const
+bool CItemMulti::IsGuild(const CUID& uidTarget) const
 {
     return (_uidGuild == uidTarget);
 }
@@ -667,10 +666,10 @@ CUID CItemMulti::GetGuild() const
     {
         return _uidGuild;
     }
-    return UID_UNUSED;
+    return {};
 }
 
-void CItemMulti::AddCoowner(CUID uidCoowner)
+void CItemMulti::AddCoowner(const CUID& uidCoowner)
 {
     ADDTOCALLSTACK("CItemMulti::AddCoowner");
     if (!uidCoowner.IsValidUID())
@@ -694,12 +693,12 @@ void CItemMulti::AddCoowner(CUID uidCoowner)
     _lCoowners.emplace_back(uidCoowner);
 }
 
-void CItemMulti::DelCoowner(CUID uidCoowner)
+void CItemMulti::DelCoowner(const CUID& uidCoowner)
 {
     ADDTOCALLSTACK("CItemMulti::DelCoowner");
     for (size_t i = 0; i < _lCoowners.size(); ++i)
     {
-        CUID uid = _lCoowners[i];
+        const CUID& uid = _lCoowners[i];
         if (uid == uidCoowner)
         {
             CChar *pCoowner = uidCoowner.CharFind();
@@ -720,7 +719,7 @@ size_t CItemMulti::GetCoownerCount() const
     return _lCoowners.size();
 }
 
-int CItemMulti::GetCoownerPos(const CUID uidTarget) const
+int CItemMulti::GetCoownerPos(const CUID& uidTarget) const
 {
     ADDTOCALLSTACK("CItemMulti::GetCoownerPos");
     if (_lCoowners.empty())
@@ -737,7 +736,7 @@ int CItemMulti::GetCoownerPos(const CUID uidTarget) const
     return -1;
 }
 
-void CItemMulti::AddFriend(CUID uidFriend)
+void CItemMulti::AddFriend(const CUID& uidFriend)
 {
     ADDTOCALLSTACK("CItemMulti::AddFriend");
     if (!uidFriend.IsValidUID())
@@ -761,7 +760,7 @@ void CItemMulti::AddFriend(CUID uidFriend)
     _lFriends.emplace_back(uidFriend);
 }
 
-void CItemMulti::DelFriend(CUID uidFriend)
+void CItemMulti::DelFriend(const CUID& uidFriend)
 {
     ADDTOCALLSTACK("CItemMulti::DelFriend");
     for (size_t i = 0; i < _lFriends.size(); ++i)
@@ -786,7 +785,7 @@ size_t CItemMulti::GetFriendCount() const
     return _lFriends.size();
 }
 
-int CItemMulti::GetFriendPos(const CUID uidFriend) const
+int CItemMulti::GetFriendPos(const CUID& uidFriend) const
 {
     ADDTOCALLSTACK("CItemMulti::GetFriendPos");
     if (_lFriends.empty())
@@ -803,7 +802,7 @@ int CItemMulti::GetFriendPos(const CUID uidFriend) const
     return -1;
 }
 
-void CItemMulti::AddBan(CUID uidBan)
+void CItemMulti::AddBan(const CUID& uidBan)
 {
     ADDTOCALLSTACK("CItemMulti::AddBan");
     if (!uidBan)
@@ -827,7 +826,7 @@ void CItemMulti::AddBan(CUID uidBan)
     _lBans.emplace_back(uidBan);
 }
 
-void CItemMulti::DelBan(CUID uidBan)
+void CItemMulti::DelBan(const CUID& uidBan)
 {
     ADDTOCALLSTACK("CItemMulti::DelBan");
     for (size_t i = 0; i < _lBans.size(); ++i)
@@ -848,7 +847,7 @@ size_t CItemMulti::GetBanCount() const
     return _lBans.size();
 }
 
-int CItemMulti::GetBanPos(const CUID uidBan) const
+int CItemMulti::GetBanPos(const CUID& uidBan) const
 {
     ADDTOCALLSTACK("CItemMulti::GetBanPos");
     if (_lBans.empty())
@@ -866,7 +865,7 @@ int CItemMulti::GetBanPos(const CUID uidBan) const
     return -1;
 }
 
-void CItemMulti::AddAccess(CUID uidAccess)
+void CItemMulti::AddAccess(const CUID& uidAccess)
 {
     ADDTOCALLSTACK("CItemMulti::AddAccess");
     if (!uidAccess)
@@ -890,7 +889,7 @@ void CItemMulti::AddAccess(CUID uidAccess)
     _lAccesses.emplace_back(uidAccess);
 }
 
-void CItemMulti::DelAccess(CUID uidAccess)
+void CItemMulti::DelAccess(const CUID& uidAccess)
 {
     ADDTOCALLSTACK("CItemMulti::DelAccess");
     for (size_t i = 0; i < _lAccesses.size(); ++i)
@@ -911,7 +910,7 @@ size_t CItemMulti::GetAccessCount() const
     return _lAccesses.size();
 }
 
-int CItemMulti::GetAccessPos(const CUID uidAccess) const
+int CItemMulti::GetAccessPos(const CUID& uidAccess) const
 {
     if (_lAccesses.empty())
     {
@@ -928,7 +927,7 @@ int CItemMulti::GetAccessPos(const CUID uidAccess) const
     return -1;
 }
 
-void CItemMulti::Eject(CUID uidChar)
+void CItemMulti::Eject(const CUID& uidChar)
 {
     if (!uidChar.IsValidUID())
     {
@@ -963,7 +962,7 @@ void CItemMulti::EjectAll(CUID uidCharNoTp)
     }
 }
 
-CItem *CItemMulti::GenerateKey(CUID uidTarget, bool fDupeOnBank)
+CItem *CItemMulti::GenerateKey(const CUID& uidTarget, bool fDupeOnBank)
 {
     ADDTOCALLSTACK("CItemMulti::GenerateKey");
     if (!uidTarget.IsValidUID())
@@ -1004,7 +1003,7 @@ CItem *CItemMulti::GenerateKey(CUID uidTarget, bool fDupeOnBank)
     return pKey;
 }
 
-void CItemMulti::RemoveKeys(CUID uidTarget)
+void CItemMulti::RemoveKeys(const CUID& uidTarget)
 {
     ADDTOCALLSTACK("CItemMulti::RemoveKeys");
     if (!uidTarget.IsValidUID())
@@ -1174,7 +1173,7 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
     Delete();
 }
 
-void CItemMulti::SetMovingCrate(CUID uidCrate)
+void CItemMulti::SetMovingCrate(const CUID& uidCrate)
 {
     ADDTOCALLSTACK("CItemMulti::SetMovingCrate");
     CItemContainer *pCurrentCrate = static_cast<CItemContainer*>(GetMovingCrate(false).ItemFind());
@@ -1187,7 +1186,7 @@ void CItemMulti::SetMovingCrate(CUID uidCrate)
     }
     if (pCurrentCrate && pCurrentCrate->GetCount() > 0)
     {
-        pCurrentCrate->SetCrateOfMulti(UID_UNUSED);
+        pCurrentCrate->SetCrateOfMulti(CUID());
         pNewCrate->ContentsTransfer(pCurrentCrate, false);
         pCurrentCrate->Delete();
     }
@@ -1207,11 +1206,11 @@ CUID CItemMulti::GetMovingCrate(bool fCreate)
     }
     if (!fCreate)
     {
-        return UID_UNUSED;
+        return CUID();
     }
     CItemContainer *pCrate = static_cast<CItemContainer*>(CItem::CreateBase(ITEMID_CRATE1));
     ASSERT(pCrate);
-    CUID uidCrate = pCrate->GetUID();
+    const CUID& uidCrate = pCrate->GetUID();
     CPointMap pt = GetTopPoint();
     pt.m_z -= 20;
     pCrate->MoveTo(pt); // Move the crate to z -20
@@ -1226,10 +1225,10 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
     CItemContainer *pCrate = static_cast<CItemContainer*>(GetMovingCrate(true).ItemFind());
     ASSERT(pCrate);
     //Transfer Types
-    bool fTransferAddons = ((iType & TRANSFER_ADDONS) || (iType & TRANSFER_ALL));
-    bool fTransferAll = (iType & TRANSFER_ALL);
-    bool fTransferLockDowns = ((iType & TRANSFER_LOCKDOWNS) || (iType & TRANSFER_ALL));
-    bool fTransferSecuredContainers = ((iType &TRANSFER_SECURED) || (iType & TRANSFER_ALL));
+    const bool fTransferAddons = ((iType & TRANSFER_ADDONS) || (iType & TRANSFER_ALL));
+    const bool fTransferAll = (iType & TRANSFER_ALL);
+    const bool fTransferLockDowns = ((iType & TRANSFER_LOCKDOWNS) || (iType & TRANSFER_ALL));
+    const bool fTransferSecuredContainers = ((iType &TRANSFER_SECURED) || (iType & TRANSFER_ALL));
     if (fTransferLockDowns) // Try to move locked down items, also to reduce the CWorldSearch impact.
     {
         TransferLockdownsToMovingCrate();
@@ -1414,7 +1413,7 @@ void CItemMulti::TransferMovingCrateToBank()
     }
 }
 
-void CItemMulti::AddAddon(CUID uidAddon)
+void CItemMulti::AddAddon(const CUID& uidAddon)
 {
     ADDTOCALLSTACK("CItemMulti::AddAddon");
     if (!uidAddon.IsValidUID())
@@ -1440,7 +1439,7 @@ void CItemMulti::AddAddon(CUID uidAddon)
     _lAddons.emplace_back(uidAddon);
 }
 
-void CItemMulti::DelAddon(CUID uidAddon)
+void CItemMulti::DelAddon(const CUID& uidAddon)
 {
     ADDTOCALLSTACK("CItemMulti::DelAddon");
     for (size_t i = 0; i < _lAddons.size(); ++i)
@@ -1453,7 +1452,7 @@ void CItemMulti::DelAddon(CUID uidAddon)
     }
 }
 
-int CItemMulti::GetAddonPos(const CUID uidAddon) const
+int CItemMulti::GetAddonPos(const CUID& uidAddon) const
 {
     if (_lAddons.empty())
     {
@@ -1475,7 +1474,7 @@ size_t CItemMulti::GetAddonCount() const
     return _lAddons.size();
 }
 
-void CItemMulti::AddComp(CUID uidComponent)
+void CItemMulti::AddComp(const CUID& uidComponent)
 {
     ADDTOCALLSTACK("CItemMulti::AddComp");
     if (!uidComponent.IsValidUID())
@@ -1497,7 +1496,7 @@ void CItemMulti::AddComp(CUID uidComponent)
     _lComps.emplace_back(uidComponent);
 }
 
-void CItemMulti::DelComp(CUID uidComponent)
+void CItemMulti::DelComp(const CUID& uidComponent)
 {
     ADDTOCALLSTACK("CItemMulti::DelComponent");
     for (size_t i = 0; i < _lComps.size(); ++i)
@@ -1515,11 +1514,11 @@ void CItemMulti::DelComp(CUID uidComponent)
     CItem *pComp = uidComponent.ItemFind();
     if (pComp)
     {
-        pComp->SetComponentOfMulti(UID_UNUSED);
+        pComp->SetComponentOfMulti(CUID());
     }
 }
 
-int CItemMulti::GetCompPos(const CUID uidComponent) const
+int CItemMulti::GetCompPos(const CUID& uidComponent) const
 {
     if (_lComps.empty())
     {
@@ -1560,7 +1559,7 @@ void CItemMulti::RemoveAllComps()
     _lComps.clear();
 }
 
-void CItemMulti::GenerateBaseComponents(bool & fNeedKey, dword &dwKeyCode)
+void CItemMulti::GenerateBaseComponents(bool *pfNeedKey, dword dwKeyCode)
 {
     ADDTOCALLSTACK("CItemMulti::GenerateBaseComponents");
     const CItemBaseMulti * pMultiDef = Multi_GetDef();
@@ -1568,7 +1567,7 @@ void CItemMulti::GenerateBaseComponents(bool & fNeedKey, dword &dwKeyCode)
     for (size_t i = 0; i < pMultiDef->m_Components.size(); ++i)
     {
         const CItemBaseMulti::CMultiComponentItem &component = pMultiDef->m_Components[i];
-        fNeedKey |= Multi_CreateComponent(component.m_id, component.m_dx, component.m_dy, component.m_dz, dwKeyCode);
+        *pfNeedKey |= Multi_CreateComponent(component.m_id, component.m_dx, component.m_dy, component.m_dz, dwKeyCode);
     }
 }
 
@@ -1632,7 +1631,7 @@ void CItemMulti::SetLockdownsPercent(uint8 iPercent)
     _iLockdownsPercent = iPercent;
 }
 
-void CItemMulti::LockItem(CUID uidItem)
+void CItemMulti::LockItem(const CUID& uidItem)
 {
     ADDTOCALLSTACK("CItemMulti::LockItem");
     if (!uidItem.IsValidUID())
@@ -1656,7 +1655,7 @@ void CItemMulti::LockItem(CUID uidItem)
     _lLockDowns.emplace_back(uidItem);
 }
 
-void CItemMulti::UnlockItem(CUID uidItem)
+void CItemMulti::UnlockItem(const CUID& uidItem)
 {
     ADDTOCALLSTACK("CItemMulti::UnlockItem");
     for (size_t i = 0; i < _lLockDowns.size(); ++i)
@@ -1676,10 +1675,10 @@ void CItemMulti::UnlockItem(CUID uidItem)
     pItem->m_uidLink.InitUID();
     CScript event("events -ei_house_lockdown");
     pItem->r_LoadVal(event);
-    pItem->SetLockDownOfMulti(UID_UNUSED);
+    pItem->SetLockDownOfMulti(CUID());
 }
 
-int CItemMulti::GetLockedItemPos(const CUID uidItem) const
+int CItemMulti::GetLockedItemPos(const CUID& uidItem) const
 {
     if (_lLockDowns.empty())
     {
@@ -1700,7 +1699,7 @@ size_t CItemMulti::GetLockdownCount() const
     return _lLockDowns.size() + _lSecureContainers.size();
 }
 
-void CItemMulti::Secure(CUID uidContainer)
+void CItemMulti::Secure(const CUID& uidContainer)
 {
     ADDTOCALLSTACK("CItemMulti::Secure");
     if (!uidContainer.IsValidUID())
@@ -1725,7 +1724,7 @@ void CItemMulti::Secure(CUID uidContainer)
     _lSecureContainers.emplace_back(uidContainer);
 }
 
-void CItemMulti::Release(CUID uidContainer)
+void CItemMulti::Release(const CUID& uidContainer)
 {
     ADDTOCALLSTACK("CItemMulti::Release");
     for (size_t i = 0; i < _lSecureContainers.size(); ++i)
@@ -1745,10 +1744,10 @@ void CItemMulti::Release(CUID uidContainer)
     pContainer->m_uidLink.InitUID();
     CScript event("events -ei_house_secure");
     pContainer->r_LoadVal(event);
-    pContainer->SetSecuredOfMulti(UID_UNUSED);
+    pContainer->SetSecuredOfMulti(CUID());
 }
 
-int CItemMulti::GetSecuredContainerPos(const CUID uidContainer) const
+int CItemMulti::GetSecuredContainerPos(const CUID& uidContainer) const
 {
     ADDTOCALLSTACK("CItemMulti::GetSecuredContainerPos");
     if (_lSecureContainers.empty())
@@ -1785,7 +1784,7 @@ size_t CItemMulti::GetSecuredContainersCount() const
     return _lSecureContainers.size();
 }
 
-void CItemMulti::AddVendor(CUID uidVendor)
+void CItemMulti::AddVendor(const CUID& uidVendor)
 {
     ADDTOCALLSTACK("CItemMulti::AddVendor");
     if (!uidVendor.IsValidUID())
@@ -1806,7 +1805,7 @@ void CItemMulti::AddVendor(CUID uidVendor)
     _lVendors.emplace_back(uidVendor);
 }
 
-void CItemMulti::DelVendor(CUID uidVendor)
+void CItemMulti::DelVendor(const CUID& uidVendor)
 {
     ADDTOCALLSTACK("CItemMulti::DelVendor");
     for (size_t i = 0; i < _lVendors.size(); ++i)
@@ -1822,7 +1821,7 @@ void CItemMulti::DelVendor(CUID uidVendor)
     }
 }
 
-int CItemMulti::GetHouseVendorPos(const CUID uidVendor) const
+int CItemMulti::GetHouseVendorPos(const CUID& uidVendor) const
 {
     ADDTOCALLSTACK("CItemMulti::GetHouseVendorPos");
     if (_lVendors.empty())
@@ -2118,7 +2117,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
     {
         case SHV_DELACCESS:
         {
-            CUID uidAccess = s.GetArgDWVal();
+            CUID uidAccess(s.GetArgDWVal());
             if (!uidAccess.IsValidUID())
             {
                 _lAccesses.clear();
@@ -2131,7 +2130,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         }
         case SHV_DELADDON:
         {
-            CUID uidAddon = s.GetArgDWVal();
+            CUID uidAddon(s.GetArgDWVal());
             if (!uidAddon.IsValidUID())
             {
                 _lAddons.clear();
@@ -2144,7 +2143,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         }
         case SHV_DELBAN:
         {
-            CUID uidBan = s.GetArgDWVal();
+            CUID uidBan(s.GetArgDWVal());
             if (!uidBan.IsValidUID())
             {
                 _lBans.clear();
@@ -2157,7 +2156,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         }
         case SHV_DELCOMPONENT:
         {
-            CUID uidComp = s.GetArgDWVal();
+            CUID uidComp(s.GetArgDWVal());
             if (!uidComp.IsValidUID())
             {
                 _lComps.clear();
@@ -2170,7 +2169,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         }
         case SHV_DELCOOWNER:
         {
-            CUID uidCoowner = s.GetArgDWVal();
+            CUID uidCoowner(s.GetArgDWVal());
             if (!uidCoowner.IsValidUID())
             {
                 _lCoowners.clear();
@@ -2196,7 +2195,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         }
         case SHV_DELVENDOR:
         {
-            CUID uidVendor = s.GetArgDWVal();
+            CUID uidVendor(s.GetArgDWVal());
             if (!uidVendor.IsValidUID())
             {
                 _lVendors.clear();
@@ -2232,7 +2231,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         }
         case SHV_MULTICREATE:
         {
-            CUID uidChar = s.GetArgDWVal();
+            CUID uidChar(s.GetArgDWVal());
             CChar *pCharSrc = uidChar.CharFind();
             Multi_Setup(pCharSrc, 0);
             break;
@@ -2243,7 +2242,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
             Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
             bool fShowMsg = piCmd[0] ? true : false;
             bool fMoveToBank = piCmd[1] ? true : false;
-            CUID charUID(UID_UNUSED);
+            CUID charUID;
             if (pSrc && pSrc->GetChar())
             {
                 charUID.SetPrivateUID(pSrc->GetChar()->GetUID());
@@ -2276,7 +2275,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         }
         case SHV_REMOVEKEYS:
         {
-            CUID uidChar = s.GetArgDWVal();
+            CUID uidChar(s.GetArgDWVal());
             RemoveKeys(uidChar);
             break;
         }
@@ -2288,8 +2287,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         case SHV_GENERATEBASECOMPONENTS:
         {
             bool fNeedKey = false;
-            dword uid = UID_CLEAR;
-            GenerateBaseComponents(fNeedKey, uid);
+            GenerateBaseComponents(&fNeedKey, UID_CLEAR);
             break;
         }
         default:
@@ -2561,13 +2559,13 @@ bool CItemMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_ISOWNER:
         {
-            CUID uidOwner = static_cast<CUID>(Exp_GetVal(ptcKey));
+            CUID uidOwner(Exp_GetVal(ptcKey));
             sVal.FormatBVal(IsOwner(uidOwner));
             break;
         }
         case SHL_GETCOOWNERPOS:
         {
-            CUID uidCoowner = static_cast<CUID>(Exp_GetVal(ptcKey));
+            CUID uidCoowner(Exp_GetVal(ptcKey));
             sVal.FormatVal(GetCoownerPos(uidCoowner));
             break;
         }
@@ -2578,7 +2576,7 @@ bool CItemMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_GETFRIENDPOS:
         {
-            CUID uidFriend = static_cast<CUID>(Exp_GetVal(ptcKey));
+            CUID uidFriend(Exp_GetVal(ptcKey));
             sVal.FormatVal(GetFriendPos(uidFriend));
             break;
         }
@@ -2594,7 +2592,7 @@ bool CItemMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_GETACCESSPOS:
         {
-            CUID uidAccess = static_cast<CUID>(Exp_GetVal(ptcKey));
+            CUID uidAccess(Exp_GetVal(ptcKey));
             sVal.FormatVal(GetAccessPos(uidAccess));
             break;
         }
@@ -2605,7 +2603,7 @@ bool CItemMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_GETADDONPOS:
         {
-            CUID uidAddon = static_cast<CUID>(Exp_GetVal(ptcKey));
+            CUID uidAddon(Exp_GetVal(ptcKey));
             sVal.FormatVal(GetAddonPos(uidAddon));
             break;
         }
@@ -2616,7 +2614,7 @@ bool CItemMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_GETBANPOS:
         {
-            CUID uidBan = static_cast<CUID>(Exp_GetVal(ptcKey));
+            CUID uidBan(Exp_GetVal(ptcKey));
             sVal.FormatVal(GetBanPos(uidBan));
             break;
         }
@@ -2629,7 +2627,7 @@ bool CItemMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_GETCOMPPOS:
         {
-            CUID uidComp = static_cast<CUID>(Exp_GetVal(ptcKey));
+            CUID uidComp(Exp_GetVal(ptcKey));
             sVal.FormatVal(GetCompPos(uidComp));
             break;
         }
@@ -2664,7 +2662,7 @@ bool CItemMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
         case SHL_ADDKEY:
         {
             ptcKey += 6;
-            CUID uidOwner = static_cast<CUID>(Exp_GetVal(ptcKey));
+            CUID uidOwner(Exp_GetVal(ptcKey));
             bool fDupeOnBank = Exp_GetVal(ptcKey) ? 1 : 0;
             CChar *pCharOwner = uidOwner.CharFind();
             CItem *pKey = nullptr;
@@ -2694,7 +2692,7 @@ bool CItemMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_GETSECUREDCONTAINERPOS:
         {
-            CUID uidCont = (CUID)Exp_GetDWVal(ptcKey);
+            CUID uidCont(Exp_GetDWVal(ptcKey));
             if (uidCont.IsValidUID())
             {
                 sVal.FormatVal(GetSecuredContainerPos(uidCont));
@@ -2739,12 +2737,12 @@ bool CItemMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_GETHOUSEVENDORPOS:
         {
-            sVal.FormatVal(GetHouseVendorPos((CUID)Exp_GetVal(ptcKey)));
+            sVal.FormatVal(GetHouseVendorPos(CUID(Exp_GetVal(ptcKey))));
             break;
         }
         case SHL_GETLOCKEDITEMPOS:
         {
-            sVal.FormatVal(GetLockedItemPos((CUID)Exp_GetVal(ptcKey)));
+            sVal.FormatVal(GetLockedItemPos(CUID(Exp_GetVal(ptcKey))));
             break;
         }
         case SHL_LOCKDOWNSPERCENT:
@@ -2816,12 +2814,12 @@ bool CItemMulti::r_LoadVal(CScript & s)
                 }
                 else
                 {
-                    SetMovingCrate(static_cast<CUID>(dwCrate));
+                    SetMovingCrate(CUID(dwCrate));
                 }
             }
             else
             {
-                SetMovingCrate(UID_UNUSED);
+                SetMovingCrate(CUID());
             }
             break;
         }
@@ -2829,7 +2827,7 @@ bool CItemMulti::r_LoadVal(CScript & s)
         {
             int64 piCmd[2];
             int iLen = Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
-            CUID uidOwner = static_cast<CUID>((dword)piCmd[0]);
+            CUID uidOwner((dword)piCmd[0]);
             bool fDupeOnBank = false;
             if (iLen > 1)
             {
@@ -2857,10 +2855,10 @@ bool CItemMulti::r_LoadVal(CScript & s)
                 }
                 return false;
             }
-            CUID uid = (CUID)s.GetArgDWVal();
+            CUID uid(s.GetArgDWVal());
             if (!uid.IsValidUID())
             {
-                SetOwner(UID_UNUSED);
+                SetOwner(CUID());
             }
             else
             {
@@ -2881,13 +2879,13 @@ bool CItemMulti::r_LoadVal(CScript & s)
                 }
                 return false;
             }
-            CUID uid = (CUID)s.GetArgDWVal();
+            CUID uid(s.GetArgDWVal());
             if (!uid.IsValidUID())
             {
-                SetGuild(UID_UNUSED);
+                SetGuild(CUID());
                 break;
             }
-            CItem *pItem = uid.ItemFind();
+            const CItem *pItem = uid.ItemFind();
             if (pItem)
             {
                 if (pItem->IsType(IT_STONE_GUILD))
@@ -2904,39 +2902,39 @@ bool CItemMulti::r_LoadVal(CScript & s)
         }
         case SHL_ADDCOOWNER:
         {
-            AddCoowner(static_cast<CUID>(s.GetArgDWVal()));
+            AddCoowner(CUID(s.GetArgDWVal()));
             break;
         }
         case SHL_ADDFRIEND:
         {
-            AddFriend(static_cast<CUID>(s.GetArgDWVal()));
+            AddFriend(CUID(s.GetArgDWVal()));
             break;
         }
         case SHL_ADDBAN:
         {
-            AddBan(static_cast<CUID>(s.GetArgDWVal()));
+            AddBan(CUID(s.GetArgDWVal()));
             break;
         }
         case SHL_ADDACCESS:
         {
-            AddAccess(static_cast<CUID>(s.GetArgDWVal()));
+            AddAccess(CUID(s.GetArgDWVal()));
             break;
         }
         case SHL_ADDADDON:
         {
-            AddAddon(static_cast<CUID>(s.GetArgDWVal()));
+            AddAddon(CUID(s.GetArgDWVal()));
             break;
         }
 
         // House Storage
         case SHL_ADDCOMP:
         {
-            AddComp(((CUID)s.GetArgDWVal()));
+            AddComp(CUID(s.GetArgDWVal()));
             break;
         }
         case SHL_ADDVENDOR:
         {
-            AddVendor(((CUID)s.GetArgDWVal()));
+            AddVendor(CUID(s.GetArgDWVal()));
             break;
         }
         case SHL_BASESTORAGE:
@@ -2961,7 +2959,7 @@ bool CItemMulti::r_LoadVal(CScript & s)
         }
         case SHL_LOCKITEM:
         {
-            CUID uidLock = (CUID)s.GetArgDWVal();
+            CUID uidLock(s.GetArgDWVal());
             if (uidLock.IsValidUID())
             {
                 LockItem(uidLock);
@@ -2970,7 +2968,7 @@ bool CItemMulti::r_LoadVal(CScript & s)
         }
         case SHL_SECURE:
         {
-            CUID uidSecured = (CUID)s.GetArgDWVal();
+            CUID uidSecured(s.GetArgDWVal());
             CItem *pItem = uidSecured.ItemFind();
             if (pItem && (pItem->IsType(IT_CONTAINER) || pItem->IsType(IT_CONTAINER_LOCKED)))
             {
@@ -3007,6 +3005,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
         return nullptr;
     }
     
+    ASSERT(pItemDef);
     const bool fShip = pItemDef->IsType(IT_SHIP);    // must be in water.
 
     // pMultiDef can be nullptr, because we can also add simple items with a deed, not only multis.
@@ -3274,7 +3273,7 @@ void CItemMulti::OnComponentCreate(CItem * pComponent, bool fIsAddon)
     }
 }
 
-CMultiStorage::CMultiStorage(CUID uidSrc)
+CMultiStorage::CMultiStorage(const CUID& uidSrc)
 {
     _uidSrc = uidSrc;
     _iShipsTotal = 0;
@@ -3285,7 +3284,7 @@ CMultiStorage::~CMultiStorage()
 {
     for (std::map<CUID, HOUSE_PRIV>::iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)
     {
-        CUID uid = it->first;
+        const CUID& uid = it->first;
         CItemMulti *pMulti = static_cast<CItemMulti*>(uid.ItemFind());
         if (_uidSrc.IsChar())
         {
@@ -3293,12 +3292,12 @@ CMultiStorage::~CMultiStorage()
         }
         else if (_uidSrc.IsItem())   //Only guild/town stones
         {
-            pMulti->SetGuild(UID_UNUSED);
+            pMulti->SetGuild(CUID());
         }
     }
     for (std::map<CUID, HOUSE_PRIV>::iterator it = _lShips.begin(); it != _lShips.end(); ++it)
     {
-        CUID uid = it->first;
+        const CUID& uid = it->first;
         CItemShip *pShip = static_cast<CItemShip*>(uid.ItemFind());
         if (_uidSrc.IsChar())
         {
@@ -3306,25 +3305,25 @@ CMultiStorage::~CMultiStorage()
         }
         else if (_uidSrc.IsItem())   //Only guild/town stones
         {
-            pShip->SetGuild(UID_UNUSED);
+            pShip->SetGuild(CUID());
         }
     }
     _uidSrc.InitUID();
 }
 
-void CMultiStorage::AddMulti(CUID uidMulti, HOUSE_PRIV ePriv)
+void CMultiStorage::AddMulti(const CUID& uidMulti, HOUSE_PRIV ePriv)
 {
     if (!uidMulti.IsValidUID())
     {
         return;
     }
-    CItemMulti *pMulti = static_cast<CItemMulti*>(uidMulti.ItemFind());
+    const CItemMulti *pMulti = static_cast<CItemMulti*>(uidMulti.ItemFind());
     if (!pMulti)
     {
         return;
     }
     CObjBase *pSrc = _uidSrc.ObjFind();
-    bool isChar = pSrc && pSrc->IsChar();
+    const bool isChar = pSrc && pSrc->IsChar();
     if (pMulti->IsType(IT_SHIP))
     {
         if (_lShips.empty() && isChar)
@@ -3345,7 +3344,7 @@ void CMultiStorage::AddMulti(CUID uidMulti, HOUSE_PRIV ePriv)
     }
 }
 
-void CMultiStorage::DelMulti(CUID uidMulti)
+void CMultiStorage::DelMulti(const CUID& uidMulti)
 {
     CItemMulti *pMulti = static_cast<CItemMulti*>(uidMulti.ItemFind());
     CObjBase *pSrc = _uidSrc.ObjFind();
@@ -3370,7 +3369,7 @@ void CMultiStorage::DelMulti(CUID uidMulti)
     pMulti->RevokePrivs(_uidSrc);
 }
 
-void CMultiStorage::AddHouse(CUID uidHouse, HOUSE_PRIV ePriv)
+void CMultiStorage::AddHouse(const CUID& uidHouse, HOUSE_PRIV ePriv)
 {
     ADDTOCALLSTACK("CMultiStorage::AddHouse");
     if (!uidHouse.IsValidUID())
@@ -3381,12 +3380,12 @@ void CMultiStorage::AddHouse(CUID uidHouse, HOUSE_PRIV ePriv)
     {
         return;
     }
-    CItemMulti *pMulti = static_cast<CItemMulti*>(uidHouse.ItemFind());
+    const CItemMulti *pMulti = static_cast<CItemMulti*>(uidHouse.ItemFind());
     _iHousesTotal += pMulti->GetMultiCount();
     _lHouses[uidHouse] = ePriv;
 }
 
-void CMultiStorage::DelHouse(CUID uidHouse)
+void CMultiStorage::DelHouse(const CUID& uidHouse)
 {
     ADDTOCALLSTACK("CMultiStorage::DelHouse");
     if (_lHouses.empty())
@@ -3396,17 +3395,17 @@ void CMultiStorage::DelHouse(CUID uidHouse)
 
     if (_lHouses.find(uidHouse) != _lHouses.end())
     {
-        CItemMulti *pMulti = static_cast<CItemMulti*>(uidHouse.ItemFind());
+        const CItemMulti *pMulti = static_cast<CItemMulti*>(uidHouse.ItemFind());
         _iHousesTotal -= pMulti->GetMultiCount();
         _lHouses.erase(uidHouse);
         return;
     }
 }
 
-HOUSE_PRIV CMultiStorage::GetPriv(CUID uidMulti)
+HOUSE_PRIV CMultiStorage::GetPriv(const CUID& uidMulti)
 {
     ADDTOCALLSTACK("CMultiStorage::GetPrivMulti");
-    CItemMulti *pMulti = static_cast<CItemMulti*>(uidMulti.ItemFind());
+    const CItemMulti *pMulti = static_cast<CItemMulti*>(uidMulti.ItemFind());
     if (pMulti->IsType(IT_MULTI))
     {
         return _lHouses[uidMulti];
@@ -3418,14 +3417,14 @@ HOUSE_PRIV CMultiStorage::GetPriv(CUID uidMulti)
     return HP_NONE;
 }
 
-bool CMultiStorage::CanAddHouse(CUID uidChar, int16 iHouseCount) const
+bool CMultiStorage::CanAddHouse(const CUID& uidChar, int16 iHouseCount) const
 {
     ADDTOCALLSTACK("CMultiStorage::CanAddHouse");
     if (uidChar.IsItem())
     {
         return true;    // Guilds can have unlimited houses atm.
     }
-    CChar *pChar = uidChar.CharFind();
+    const CChar *pChar = uidChar.CharFind();
     if (iHouseCount == 0 || pChar->IsPriv(PRIV_GM))
     {
         return true;
@@ -3450,7 +3449,7 @@ bool CMultiStorage::CanAddHouse(CUID uidChar, int16 iHouseCount) const
     return false;
 }
 
-int16 CMultiStorage::GetHousePos(const CUID uidHouse) const
+int16 CMultiStorage::GetHousePos(const CUID& uidHouse) const
 {
     ADDTOCALLSTACK("CMultiStorage::GetHousePos");
     if (_lHouses.empty())
@@ -3497,7 +3496,7 @@ void CMultiStorage::r_Write(CScript & s)
     UNREFERENCED_PARAMETER(s);
 }
 
-void CMultiStorage::AddShip(CUID uidShip, HOUSE_PRIV ePriv)
+void CMultiStorage::AddShip(const CUID& uidShip, HOUSE_PRIV ePriv)
 {
     ADDTOCALLSTACK("CMultiStorage::AddShip");
     if (!uidShip.IsValidUID())
@@ -3508,7 +3507,7 @@ void CMultiStorage::AddShip(CUID uidShip, HOUSE_PRIV ePriv)
     {
         return;
     }
-    CItemShip *pShip = static_cast<CItemShip*>(uidShip.ItemFind());
+    const CItemShip *pShip = static_cast<CItemShip*>(uidShip.ItemFind());
     if (!pShip)
     {
         return;
@@ -3517,7 +3516,7 @@ void CMultiStorage::AddShip(CUID uidShip, HOUSE_PRIV ePriv)
     _lShips[uidShip] = ePriv;
 }
 
-void CMultiStorage::DelShip(CUID uidShip)
+void CMultiStorage::DelShip(const CUID& uidShip)
 {
     ADDTOCALLSTACK("CMultiStorage::DelShip");
     if (_lShips.empty())
@@ -3527,7 +3526,7 @@ void CMultiStorage::DelShip(CUID uidShip)
 
     if (_lShips.find(uidShip) != _lShips.end())
     {
-        CItemShip *pShip = static_cast<CItemShip*>(uidShip.ItemFind());
+        const CItemShip *pShip = static_cast<CItemShip*>(uidShip.ItemFind());
         if (pShip)
         {
             _iShipsTotal -= pShip->GetMultiCount();
@@ -3537,14 +3536,14 @@ void CMultiStorage::DelShip(CUID uidShip)
     }
 }
 
-bool CMultiStorage::CanAddShip(CUID uidChar, int16 iShipCount)
+bool CMultiStorage::CanAddShip(const CUID& uidChar, int16 iShipCount)
 {
     ADDTOCALLSTACK("CMultiStorage::CanAddShip");
     if (uidChar.IsItem())
     {
         return true; // Guilds can have unlimited ships atm.
     }
-    CChar *pChar = uidChar.CharFind();
+    const CChar *pChar = uidChar.CharFind();
     if (!pChar)
     {
         return false;
@@ -3573,7 +3572,7 @@ bool CMultiStorage::CanAddShip(CUID uidChar, int16 iShipCount)
     return false;
 }
 
-int16 CMultiStorage::GetShipPos(CUID uidShip)
+int16 CMultiStorage::GetShipPos(const CUID& uidShip)
 {
     if (_lShips.empty())
     {
@@ -3582,7 +3581,7 @@ int16 CMultiStorage::GetShipPos(CUID uidShip)
     int16 i = 0;
     for (std::map<CUID, HOUSE_PRIV>::iterator it = _lShips.begin(); it != _lShips.end(); ++it)
     {
-        if ((*it).first == uidShip)
+        if (it->first == uidShip)
         {
             return i;
         }
@@ -3603,9 +3602,9 @@ int16 CMultiStorage::GetShipCountReal()
 
 CUID CMultiStorage::GetShipAt(int16 iPos)
 {
-    std::map<CUID, HOUSE_PRIV>::iterator it = _lShips.begin();
+    std::map<CUID, HOUSE_PRIV>::const_iterator it = _lShips.begin();
     std::advance(it, iPos);
-    return (*it).first;
+    return it->first;
 }
 
 void CMultiStorage::ClearShips()
