@@ -38,7 +38,7 @@ public:
 	CObjBaseTemplate * GetNext() const;
 	CObjBaseTemplate * GetPrev() const;
 
-	CUID GetUID() const {
+    const CUID& GetUID() const {
 		return m_UID; 
 	}
 	bool IsItem() const {

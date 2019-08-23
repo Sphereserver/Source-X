@@ -68,8 +68,8 @@ private:
     virtual bool r_LoadVal(CScript & s) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override; // Execute command from script
 
-    const CPointMap GetComponentPoint(Component * pComponent) const;
-    const CPointMap GetComponentPoint(short dx, short dy, char dz) const;/**
+    CPointMap GetComponentPoint(const Component * pComponent) const;
+    CPointMap GetComponentPoint(short dx, short dy, char dz) const;/**
     * @brief Removes a Component from the components list.
     * @param pComponent the component.
     */

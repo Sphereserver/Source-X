@@ -3663,7 +3663,7 @@ bool PacketHouseDesignCommit::onReceive(NetState* net)
 /***************************************************************************
  *
  *
- *	Packet 0xD7.0x05 : PacketHouseDesignDestroyItem	destroy house design item
+ *	Packet 0xD7.0x05 : PacketHouseDesignDestroyItem	    destroy house design item
  *
  *
  ***************************************************************************/
