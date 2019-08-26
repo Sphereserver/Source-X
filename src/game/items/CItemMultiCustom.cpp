@@ -677,29 +677,30 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x,
     ADDTOCALLSTACK("CItemMultiCustom::RemoveItem");
     // remove the item that's found at given location
     // ITEMID_NOTHING means we should remove any items found
-    CRect rectDesign = GetDesignArea();
+    const uchar uiPlaneAtZ = GetPlane(z);
+    const CRect rectDesign = GetDesignArea();
     CPointMap pt(GetTopPoint());
     pt.m_x += x;
     pt.m_y += y;
 
     if (pClientSrc != nullptr)
     {
-        bool allowRemove = true;
-        switch (GetPlane(z))
+        bool fAllowRemove = true;
+        switch (uiPlaneAtZ)
         {
             case 1:
                 // at first level, clients cannot remove dirt tiles
                 if (id == ITEMID_DIRT_TILE)
-                    allowRemove = false;
+                    fAllowRemove = false;
                 break;
 
             case 0:
                 // at ground level, clients can only remove components along the bottom edge (stairs)
                 if (pt.m_y != rectDesign.m_bottom)
-                    allowRemove = false;
+                    fAllowRemove = false;
         }
 
-        if (allowRemove == false)
+        if (fAllowRemove == false)
         {
             SendStructureTo(pClientSrc);
             return;
@@ -707,36 +708,39 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x,
     }
 
     Component * pComponents[INT8_MAX];
-    size_t iCount = GetComponentsAt(x, y, z, pComponents, &m_designWorking);
-    if (iCount <= 0)
+    size_t uiCount = GetComponentsAt(x, y, z, pComponents, &m_designWorking);
+    if (uiCount <= 0)
         return;
 
     auto& vectorComponents = m_designWorking.m_vectorComponents;
 
-    // If i'm removing a single floor tile, the client actually removes the whole floor, so we need to reflect that change here.
-    bool fRemoveFloor = false;
-    for (size_t i = 0; i < iCount; ++i)
+    if (uiPlaneAtZ > 1)
     {
-        if (pComponents[i]->m_isFloor)
+        // If i'm removing a single floor tile, the client actually removes the whole floor (even if it has different IDs), so we need to reflect that change here.
+        bool fRemoveFloor = false;
+        for (size_t i = 0; i < uiCount; ++i)
         {
-            fRemoveFloor = true;
-            break;
+            if (pComponents[i]->m_isFloor)
+            {
+                fRemoveFloor = true;
+                break;
+            }
         }
-    }
-    if (fRemoveFloor)
-    {
-        for (ComponentsContainer::iterator it = vectorComponents.begin(); it != vectorComponents.end(); )
+        if (fRemoveFloor)
         {
-            Component* pComp = *it;
-            if ((pComp->m_isFloor) && (pComp->m_item.m_dz == z))
-                it = vectorComponents.erase(it);
-            else
-                ++it;
+            for (ComponentsContainer::iterator it = vectorComponents.begin(); it != vectorComponents.end(); )
+            {
+                Component* pComp = *it;
+                if ((pComp->m_isFloor) && (pComp->m_item.m_dz == z))
+                    it = vectorComponents.erase(it);
+                else
+                    ++it;
+            }
         }
     }
 
     bool fReplaceDirt = false;
-    for (size_t i = 0; i < iCount; ++i)
+    for (size_t i = 0; i < uiCount; ++i)
     {
         for (ComponentsContainer::iterator it = vectorComponents.begin(); it != vectorComponents.end(); ++it)
         {
@@ -751,7 +755,7 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x,
                 break;
 
             // floor tiles the ground floor are replaced with dirt tiles
-            if ((pComp->m_item.m_wTileID != ITEMID_DIRT_TILE) && pComp->m_isFloor && (GetPlane(pComp) == 1) && (GetPlaneZ(GetPlane(pComp)) == (char)(pComp->m_item.m_dz)))
+            if ((pComp->m_item.GetDispID() != ITEMID_DIRT_TILE) && pComp->m_isFloor && (GetPlane(pComp) == 1) && (GetPlaneZ(GetPlane(pComp)) == pComp->m_item.m_dz))
                 fReplaceDirt = true;
 
             vectorComponents.erase(it);
