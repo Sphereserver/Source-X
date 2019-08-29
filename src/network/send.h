@@ -180,7 +180,7 @@ private:
 	CUID m_item;
 
 protected:
-	PacketItemWorld(byte id, uint size, CUID uid);
+	PacketItemWorld(byte id, uint size, const CUID& uid);
 
 public:
 	PacketItemWorld(const CClient* target, const CItem* item);
@@ -1965,7 +1965,7 @@ public:
 class PacketItemWorldNew : public PacketItemWorld
 {
 protected:
-	PacketItemWorldNew(byte id, uint size, CUID uid);
+	PacketItemWorldNew(byte id, uint size, const CUID& uid);
 
 public:
 	enum DataSource

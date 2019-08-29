@@ -612,8 +612,13 @@ bool CScript::FindNextSection()
 			m_iSectionData = GetPosition();
 			return false;
 		}
-		if ( m_pszKey[0] == '[' )
-			break;
+        tchar* ptcScriptLine = m_pszKey;
+        GETNONWHITESPACE(ptcScriptLine);
+        if (ptcScriptLine[0] == '[')
+        {
+            m_pszKey = ptcScriptLine;
+            break;
+        }
 	}
 
 foundit:
@@ -686,7 +691,9 @@ bool CScript::ReadKey( bool fRemoveBlanks )
 	ADDTOCALLSTACK("CScript::ReadKey");
 	if ( ! ReadTextLine(fRemoveBlanks))
 		return false;
-	if ( m_pszKey[0] == '[' )	// hit the end of our section.
+    tchar* ptcKey = m_pszKey;
+    GETNONWHITESPACE(ptcKey);
+	if ( ptcKey[0] == '[' )	// hit the end of our section.
 	{
 		m_fSectionHead = true;
 		return false;

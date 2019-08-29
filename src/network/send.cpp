@@ -6,7 +6,6 @@
 #include "../common/resource/CResourceLock.h"
 #include "../common/CLog.h"
 #include "../common/CUOInstall.h"
-#include "../common/CObjBaseTemplate.h"
 #include "../game/chars/CChar.h"
 #include "../game/clients/CClient.h"
 #include "../game/clients/CClientTooltip.h"
@@ -19,10 +18,8 @@
 #include "../game/items/CItemVendable.h"
 #include "../game/components/CCItemDamageable.h"
 #include "../game/components/CCPropsChar.h"
-#include "../game/CObjBase.h"
 #include "../game/CWorld.h"
 #include "network.h"
-#include "packet.h"
 #include "send.h"
 #include "../common/zlib/zlib.h"
 
@@ -450,7 +447,7 @@ bool PacketHealthBarUpdate::onSend(const CClient* client)
  *
  *
  ***************************************************************************/
-PacketItemWorld::PacketItemWorld(byte id, uint size, CUID uid) : PacketSend(id, size, PRI_NORMAL), m_item(uid)
+PacketItemWorld::PacketItemWorld(byte id, uint size, const CUID& uid) : PacketSend(id, size, PRI_NORMAL), m_item(uid)
 {
 }
 
@@ -462,7 +459,7 @@ PacketItemWorld::PacketItemWorld(const CClient* target, const CItem *item) : Pac
 	word amount = 0;
     if (item->GetType() == IT_CORPSE)
     {
-        amount =item->GetAmount();  // char id of the corpse
+        amount = item->GetAmount();  // char id of the corpse
     }
     else if (item->CanSendAmount())
     {
@@ -5102,7 +5099,7 @@ PacketTimeSyncResponse::PacketTimeSyncResponse(const CClient* target) : PacketSe
  *
  *
  ***************************************************************************/
-PacketItemWorldNew::PacketItemWorldNew(byte id, uint size, CUID uid) : PacketItemWorld(id, size, uid)
+PacketItemWorldNew::PacketItemWorldNew(byte id, uint size, const CUID& uid) : PacketItemWorld(id, size, uid)
 {
 }
 
@@ -5118,7 +5115,7 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item)
     word amount = 0;
     if (item->GetType() == IT_CORPSE)
     {
-        amount =item->GetAmount();  // char id of the corpse
+        amount = item->GetAmount();  // char id of the corpse
     }
     else if (item->CanSendAmount())
     {

@@ -450,7 +450,7 @@ bool CDataBase::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, b
 		{
 			ptcKey += strlen(sm_szLoadKeys[index]);
 			SKIP_SEPARATORS(ptcKey);
-			sVal = m_QueryResult.GetKeyStr(ptcKey);
+			sVal = m_QueryResult.GetKeyStr(ptcKey, true);
 		} break;
 
 		default:

@@ -2158,7 +2158,8 @@ void CServer::OnTick()
 			SetResyncPause(true, m_fResyncRequested);
 			SetResyncPause(false, m_fResyncRequested);
 		}
-		else SetResyncPause(false, m_fResyncRequested, true);
+		else
+            SetResyncPause(false, m_fResyncRequested, true);
 		m_fResyncRequested = nullptr;
 	}
 
