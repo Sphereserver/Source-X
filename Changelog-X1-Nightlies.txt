@@ -1893,3 +1893,7 @@ WARNING: Important change!
 
 23-08-2019, Nolok
 - Fixed: Removing the floor during house customization didn't synchronize correctly the change with the server, making possible to commit invalid designs (Issue #202).
+
+29-08-2019, Nolok
+- Fixed: Sphere couldn't recognize the start of a new [ ] section if there was some whitespace before the first bracket.
+- Fixed: *DB.ROW.NUMROWS returning "" instead of 0 if the previous query didn't get any result.

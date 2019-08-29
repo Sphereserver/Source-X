@@ -1821,44 +1821,66 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 	ADDTOCALLSTACK("CClient::addPlayerSee");
 	// Adjust to my new location, what do I now see here?
 
-    CChar *pCharThis = GetChar();
-	int iViewDist = pCharThis->GetVisualRange();
-	CRegion *pCurrentCharRegion = pCharThis->GetTopPoint().GetRegion(REGION_TYPE_HOUSE);
-    bool bOSIMultiSight = IsSetOF(OF_OSIMultiSight);
+    const bool fOSIMultiSight = IsSetOF(OF_OSIMultiSight);
+    const CChar *pCharThis = GetChar();
+	const int iViewDist = pCharThis->GetVisualRange();
+    const CPointMap& ptCharThis = pCharThis->GetTopPoint();
+	const CRegion *pCurrentCharRegion = ptCharThis.GetRegion(REGION_TYPE_HOUSE);
 
 	// Nearby items on ground
-	CItem *pItem = nullptr;
 	uint iSeeCurrent = 0;
 	uint iSeeMax = g_Cfg.m_iMaxItemComplexity * 30;
 
-	CWorldSearch AreaItems(pCharThis->GetTopPoint(), UO_MAP_VIEW_RADAR * 2);    // *2 to catch big multis
+    std::vector<CItem*> vecMultis;
+    std::vector<CItem*> vecItems;
+
+    // ptOld: the point from where i moved (i can call this method when i'm moving to a new position),
+    //  If ptOld is an invalid point, just send every object i can see.
+	CWorldSearch AreaItems(ptCharThis, UO_MAP_VIEW_RADAR * 2);    // *2 to catch big multis
 	AreaItems.SetSearchSquare(true);
 	for (;;)
 	{
-		pItem = AreaItems.GetItem();
+        CItem* pItem = AreaItems.GetItem();
 		if ( !pItem )
 			break;
 
-        // ptOld: the point from where i moved (i can call this method when i'm moving to a new position),
-        //  If ptOld is an invalid point, just send every object i can see.
-        const int iOldDist = ptOld.GetDistSight(pItem->GetTopPoint());  // handles also the case of an invalid point
+        const CPointMap& ptItemTop = pItem->GetTopLevelObj()->GetTopPoint();       
         if ( pItem->IsTypeMulti() )		// incoming multi on radar view
 		{
-            const DIR_TYPE dirFace = pCharThis->GetDir(pItem);
-            const CItemMulti *pMulti = static_cast<const CItemMulti*>(pItem);
-            if ((iOldDist + pMulti->GetSideDistanceFromCenter(dirFace)) > UO_MAP_VIEW_RADAR)
+            const DIR_TYPE dirFace = pItem->GetDir(pCharThis);
+            const CItemMulti* pMulti = static_cast<const CItemMulti*>(pItem);
+            
+            // This looks like the only way to make this thing work. Even if i send the worldobj packet with the commented code, the client
+            //  will ignore it (and SpyUO 2 doesn't show that packet ?! it only shows packets that actually result in the generation of a world item, how weird)
+            const int iOldDist = ptOld.GetDistSight(ptItemTop);  // handles also the case of an invalid point
+            const int iCornerDistFromCenter = pMulti->GetSideDistanceFromCenter(dirFace);
+            if ((iOldDist + iCornerDistFromCenter) > iViewDist)
             {
-                addItem_OnGround(pItem);
-                continue;
+                //const int iCurDist = ptCharThis.GetDistSight(ptItemTop);
+                //if (iCurDist + iCornerDistFromCenter <= iViewDist)
+                    vecMultis.emplace_back(pItem);
             }
+
+            /*
+            const CPointMap ptMultiCorner = pMulti->GetRegion()->GetRegionCorner(dirFace);
+            if ( ptOld.GetDistSight(ptMultiCorner) > UO_MAP_VIEW_RADAR )
+            {
+                if (ptCharThis.GetDistSight(ptMultiCorner) <= UO_MAP_VIEW_RADAR )
+                {
+                    // this just came into view
+                    vecMultis.emplace_back(pItem);
+                }
+            }
+            */
+
+            continue;            
 		}
 
 		if ( (iSeeCurrent > iSeeMax) || !pCharThis->CanSee(pItem) )
             continue;
 
-        const CPointMap& ptItemTop = pItem->GetTopLevelObj()->GetTopPoint();
-        const CPointMap& ptCharThis = pCharThis->GetTopPoint();
-		if ( bOSIMultiSight )
+        const int iOldDist = ptOld.GetDistSight(ptItemTop);  // handles also the case of an invalid point
+		if ( fOSIMultiSight )
 		{
             bool bSee = false;
             if (((ptOld.GetRegion(REGION_TYPE_HOUSE) != pCurrentCharRegion) || (ptOld.GetDistSight(ptItemTop) > iViewDist)) &&
@@ -1879,7 +1901,7 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
             if (bSee)
 			{
 				++iSeeCurrent;
-				addItem_OnGround(pItem);
+				vecItems.emplace_back(pItem);
 			}
 		}
 		else
@@ -1887,13 +1909,20 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 			if ( (iOldDist > iViewDist) && (ptCharThis.GetDistSight(ptItemTop) <= iViewDist) )		// item just came into view
 			{
 				++iSeeCurrent;
-				addItem_OnGround(pItem);
+                vecItems.emplace_back(pItem);
 			}
 		}
 	}
 
+    // First send the multis
+    for (CItem *pItem : vecMultis)
+        addItem_OnGround(pItem);
+
+    // Then the items
+    for (CItem * pItem : vecItems)
+        addItem_OnGround(pItem);
+
 	// Nearby chars
-	CChar *pChar = nullptr;
 	iSeeCurrent = 0;
 	iSeeMax = g_Cfg.m_iMaxCharComplexity * 5;
 
@@ -1902,7 +1931,7 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 	AreaChars.SetSearchSquare(true);
 	for (;;)
 	{
-		pChar = AreaChars.GetChar();
+        CChar* pChar = AreaChars.GetChar();
 		if ( !pChar || iSeeCurrent > iSeeMax )
 			break;
 		if ( pCharThis == pChar || !CanSee(pChar) )
