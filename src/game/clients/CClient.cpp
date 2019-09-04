@@ -62,8 +62,8 @@ CClient::CClient(NetState* state)
 	m_zLastObjMessage[0] = 0;
 	m_tNextPickup = 0;
 
-    m_BfAntiCheat = { 0 };
-    m_ScreenSize = { 0 };
+    m_BfAntiCheat = {};
+    m_ScreenSize = {};
 	m_pPopupPacket = nullptr;
 	m_pHouseDesign = nullptr;
 	m_fUpdateStats = 0;
