@@ -422,7 +422,7 @@ enum CLIR_TYPE
 	CLIR_QTY
 };
 
-lpctstr constexpr CClient::sm_szRefKeys[CLIR_QTY+1] =
+lpctstr const CClient::sm_szRefKeys[CLIR_QTY+1] =
 {
 	"ACCOUNT",
 	"GMPAGEP",
@@ -501,7 +501,7 @@ bool CClient::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 	return( CScriptObj::r_GetRef( ptcKey, pRef ));
 }
 
-lpctstr constexpr CClient::sm_szLoadKeys[CC_QTY+1] = // static
+lpctstr const CClient::sm_szLoadKeys[CC_QTY+1] = // static
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CClient_props.tbl"
@@ -509,7 +509,7 @@ lpctstr constexpr CClient::sm_szLoadKeys[CC_QTY+1] = // static
 	nullptr
 };
 
-lpctstr constexpr CClient::sm_szVerbKeys[CV_QTY+1] =	// static
+lpctstr const CClient::sm_szVerbKeys[CV_QTY+1] =	// static
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CClient_functions.tbl"

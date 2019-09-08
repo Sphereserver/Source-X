@@ -115,7 +115,7 @@ enum AGC_TYPE
     AGC_QTY
 };
 
-lpctstr constexpr CScriptTriggerArgs::sm_szLoadKeys[AGC_QTY+1] =
+lpctstr const CScriptTriggerArgs::sm_szLoadKeys[AGC_QTY+1] =
 {
     "ARGN",
     "ARGN1",

@@ -212,7 +212,7 @@ enum SC_TYPE
 	SC_QTY
 };
 
-lpctstr constexpr CServerDef::sm_szLoadKeys[SC_QTY+1] =	// static
+lpctstr const CServerDef::sm_szLoadKeys[SC_QTY+1] =	// static
 {
 	"ACCAPP",
 	"ACCAPPS",

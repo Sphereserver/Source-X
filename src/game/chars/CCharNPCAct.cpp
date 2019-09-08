@@ -33,7 +33,7 @@ enum NV_TYPE
 	NV_QTY
 };
 
-lpctstr constexpr CCharNPC::sm_szVerbKeys[NV_QTY+1] =
+lpctstr const CCharNPC::sm_szVerbKeys[NV_QTY+1] =
 {
 	"BUY",
 	"BYE",

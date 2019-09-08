@@ -13,7 +13,7 @@ CItemCommCrystal::~CItemCommCrystal()
     DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
 }
 
-lpctstr constexpr CItemCommCrystal::sm_szLoadKeys[] =
+lpctstr const CItemCommCrystal::sm_szLoadKeys[] =
 {
 	"SPEECH",
 	nullptr,

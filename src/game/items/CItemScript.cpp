@@ -17,12 +17,12 @@ CItemScript::~CItemScript()
     DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
 }
 
-lpctstr constexpr CItemScript::sm_szLoadKeys[] =
+lpctstr const CItemScript::sm_szLoadKeys[] =
 {
     nullptr
 };
 
-lpctstr constexpr CItemScript::sm_szVerbKeys[] =
+lpctstr const CItemScript::sm_szVerbKeys[] =
 {
     nullptr
 };

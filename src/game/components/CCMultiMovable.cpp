@@ -877,7 +877,7 @@ enum
     CMV_QTY
 };
 
-lpctstr constexpr CCMultiMovable::sm_szVerbKeys[CMV_QTY + 1] =
+lpctstr const CCMultiMovable::sm_szVerbKeys[CMV_QTY + 1] =
 {
     "SHIPANCHORDROP",
     "SHIPANCHORRAISE",
@@ -1209,7 +1209,7 @@ enum CML_TYPE
     CML_QTY
 };
 
-lpctstr constexpr CCMultiMovable::sm_szLoadKeys[CML_QTY + 1] =
+lpctstr const CCMultiMovable::sm_szLoadKeys[CML_QTY + 1] =
 {
     "PILOT",
     "SHIPSPEED",

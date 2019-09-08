@@ -37,7 +37,7 @@ enum SREF_TYPE
     SREF_QTY
 };
 
-static lpctstr constexpr _ptcSRefKeys[SREF_QTY+1] =
+static lpctstr const _ptcSRefKeys[SREF_QTY+1] =
 {
     "DB",
     "FILE",
@@ -1095,7 +1095,7 @@ enum SSV_TYPE
 	SSV_QTY
 };
 
-lpctstr constexpr CScriptObj::sm_szVerbKeys[SSV_QTY+1] =
+lpctstr const CScriptObj::sm_szVerbKeys[SSV_QTY+1] =
 {
 	"NEW",
 	"NEWDUPE",
@@ -1966,7 +1966,7 @@ enum SK_TYPE
 
 
 
-lpctstr constexpr CScriptObj::sm_szScriptKeys[SK_QTY+1] =
+lpctstr const CScriptObj::sm_szScriptKeys[SK_QTY+1] =
 {
 	"BEGIN",
 	"BREAK",

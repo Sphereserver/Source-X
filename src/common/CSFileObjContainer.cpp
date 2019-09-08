@@ -14,7 +14,7 @@ enum CFO_TYPE
     CFO_QTY
 };
 
-lpctstr constexpr CSFileObjContainer::sm_szLoadKeys[CFO_QTY+1] =
+lpctstr const CSFileObjContainer::sm_szLoadKeys[CFO_QTY+1] =
 {
 #define ADD(a,b) b,
 #include "../tables/CSFileObjContainer_props.tbl"
@@ -30,7 +30,7 @@ enum CFOV_TYPE
     CFOV_QTY
 };
 
-lpctstr constexpr CSFileObjContainer::sm_szVerbKeys[CFOV_QTY+1] =
+lpctstr const CSFileObjContainer::sm_szVerbKeys[CFOV_QTY+1] =
 {
 #define ADD(a,b) b,
 #include "../tables/CSFileObjContainer_functions.tbl"

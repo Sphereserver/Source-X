@@ -44,7 +44,7 @@ enum SKC_TYPE
     SKC_QTY
 };
 
-lpctstr constexpr CSkillDef::sm_szLoadKeys[SKC_QTY+1] =
+lpctstr const CSkillDef::sm_szLoadKeys[SKC_QTY+1] =
 {
     "ADV_RATE",
     "BONUS_DEX",

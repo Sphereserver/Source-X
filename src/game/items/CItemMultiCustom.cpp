@@ -1462,7 +1462,7 @@ enum
     IMCV_QTY
 };
 
-lpctstr constexpr CItemMultiCustom::sm_szVerbKeys[IMCV_QTY + 1] =
+lpctstr const CItemMultiCustom::sm_szVerbKeys[IMCV_QTY + 1] =
 {
     "ADDITEM",
     "ADDMULTI",
@@ -1678,7 +1678,7 @@ enum IMCC_TYPE
     IMCC_QTY
 };
 
-lpctstr constexpr CItemMultiCustom::sm_szLoadKeys[IMCC_QTY + 1] = // static
+lpctstr const CItemMultiCustom::sm_szLoadKeys[IMCC_QTY + 1] = // static
 {
     "COMPONENTS",
     "DESIGN",

@@ -588,7 +588,7 @@ enum ISPW_TYPE
     ISPW_QTY
 };
 
-lpctstr constexpr CCSpawn::sm_szLoadKeys[ISPW_QTY + 1] =
+lpctstr const CCSpawn::sm_szLoadKeys[ISPW_QTY + 1] =
 {
     "ADDOBJ",
     "AMOUNT",
@@ -925,7 +925,7 @@ enum SPAWN_REF
     ISPR_QTY
 };
 
-lpctstr constexpr CCSpawn::sm_szRefKeys[ISPR_QTY + 1]
+lpctstr const CCSpawn::sm_szRefKeys[ISPR_QTY + 1]
 {
     "AT",
     nullptr
@@ -992,7 +992,7 @@ enum SPAWN_VERB
     ISPV_QTY
 };
 
-lpctstr constexpr CCSpawn::sm_szVerbKeys[ISPV_QTY + 1]
+lpctstr const CCSpawn::sm_szVerbKeys[ISPV_QTY + 1]
 {
     "DELOBJ",
     "RESET",

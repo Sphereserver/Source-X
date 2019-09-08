@@ -490,7 +490,7 @@ enum PDV_TYPE
 	PDV_QTY
 };
 
-lpctstr constexpr CPartyDef::sm_szVerbKeys[PDV_QTY+1] =
+lpctstr const CPartyDef::sm_szVerbKeys[PDV_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CParty_functions.tbl"
@@ -506,7 +506,7 @@ enum PDC_TYPE
 	PDC_QTY
 };
 
-lpctstr constexpr CPartyDef::sm_szLoadKeys[PDC_QTY+1] =
+lpctstr const CPartyDef::sm_szLoadKeys[PDC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CParty_props.tbl"
