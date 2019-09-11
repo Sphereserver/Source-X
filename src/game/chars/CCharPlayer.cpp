@@ -11,7 +11,7 @@
 #include "CCharPlayer.h"
 
 
-lpctstr constexpr CCharPlayer::sm_szLoadKeys[CPC_QTY+1] =
+lpctstr const CCharPlayer::sm_szLoadKeys[CPC_QTY+1] =
 {
 #define ADD(a,b) b,
 #include "../../tables/CCharPlayer_props.tbl"
@@ -493,7 +493,7 @@ enum CPV_TYPE	// Player char.
 	CPV_QTY
 };
 
-lpctstr constexpr CCharPlayer::sm_szVerbKeys[CPV_QTY+1] =
+lpctstr const CCharPlayer::sm_szVerbKeys[CPV_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CCharPlayer_functions.tbl"

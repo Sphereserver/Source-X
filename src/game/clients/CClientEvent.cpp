@@ -18,7 +18,7 @@
 /////////////////////////////////
 // Events from the Client.
 
-lpctstr constexpr CClient::sm_szCmd_Redirect[13] =
+lpctstr const CClient::sm_szCmd_Redirect[13] =
 {
 	"BANK",
 	"CONTROL",

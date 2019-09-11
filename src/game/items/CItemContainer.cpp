@@ -1198,7 +1198,7 @@ enum ICV_TYPE
 	ICV_QTY
 };
 
-lpctstr constexpr CItemContainer::sm_szVerbKeys[ICV_QTY+1] =
+lpctstr const CItemContainer::sm_szVerbKeys[ICV_QTY+1] =
 {
 	"CLOSE",
 	"DELETE",

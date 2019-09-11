@@ -1371,7 +1371,7 @@ enum SV_TYPE
 	SV_QTY
 };
 
-lpctstr constexpr CServer::sm_szVerbKeys[SV_QTY+1] =
+lpctstr const CServer::sm_szVerbKeys[SV_QTY+1] =
 {
 	"ACCOUNT",
 	"ACCOUNTS", // read only

@@ -414,7 +414,7 @@ enum LDBO_TYPE
 	LDBO_QTY
 };
 
-lpctstr constexpr CSQLite::sm_szLoadKeys[LDBO_QTY+1] =
+lpctstr const CSQLite::sm_szLoadKeys[LDBO_QTY+1] =
 {
 	"CONNECTED",
     "FILENAME",
@@ -433,7 +433,7 @@ enum LDBOV_TYPE
 	LDBOV_QTY
 };
 
-lpctstr constexpr CSQLite::sm_szVerbKeys[LDBOV_QTY+1] =
+lpctstr const CSQLite::sm_szVerbKeys[LDBOV_QTY+1] =
 {
 	"CLOSE",
 	"CONNECT",

@@ -1,0 +1,2 @@
+# Ignore changes to the Windows/Unix line ending format (CRLF/LF) in a file
+* -crlf

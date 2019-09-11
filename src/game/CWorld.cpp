@@ -1952,7 +1952,7 @@ enum WC_TYPE
 	WC_QTY
 };
 
-lpctstr constexpr CWorld::sm_szLoadKeys[WC_QTY+1] =	// static
+lpctstr const CWorld::sm_szLoadKeys[WC_QTY+1] =	// static
 {
     "CURTICK",
 	"PREVBUILD",

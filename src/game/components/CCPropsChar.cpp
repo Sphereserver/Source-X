@@ -4,7 +4,7 @@
 #include "../clients/CClient.h"
 
 
-lpctstr constexpr CCPropsChar::_ptcPropertyKeys[PROPCH_QTY + 1] =
+lpctstr const CCPropsChar::_ptcPropertyKeys[PROPCH_QTY + 1] =
 {
     #define ADDPROP(a,b,c) b,
     #include "../../tables/CCPropsChar_props.tbl"

@@ -1861,7 +1861,7 @@ enum MULTIREF_REF
     SHR_QTY
 };
 
-lpctstr constexpr CItemMulti::sm_szRefKeys[SHR_QTY + 1] =
+lpctstr const CItemMulti::sm_szRefKeys[SHR_QTY + 1] =
 {
     "ACCESS",
     "ADDON",
@@ -2080,7 +2080,7 @@ enum
     SHV_QTY
 };
 
-lpctstr constexpr CItemMulti::sm_szVerbKeys[SHV_QTY + 1] =
+lpctstr const CItemMulti::sm_szVerbKeys[SHV_QTY + 1] =
 {
     "DELACCESS",
     "DELADDON",

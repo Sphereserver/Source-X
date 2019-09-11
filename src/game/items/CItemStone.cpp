@@ -179,7 +179,7 @@ enum STC_TYPE
 	STC_QTY
 };
 
-lpctstr constexpr CItemStone::sm_szLoadKeys[STC_QTY+1] =
+lpctstr const CItemStone::sm_szLoadKeys[STC_QTY+1] =
 {
 #define ADD(a,b) b,
 #include "../../tables/CItemStone_props.tbl"
@@ -195,7 +195,7 @@ enum ISV_TYPE
 	ISV_QTY
 };
 
-lpctstr constexpr CItemStone::sm_szVerbKeys[ISV_QTY+1] =
+lpctstr const CItemStone::sm_szVerbKeys[ISV_QTY+1] =
 {
 #define ADD(a,b) b,
 #include "../../tables/CItemStone_functions.tbl"

@@ -13,7 +13,7 @@ enum FO_TYPE
     FO_QTY
 };
 
-lpctstr constexpr CSFileObj::sm_szLoadKeys[FO_QTY+1] =
+lpctstr const CSFileObj::sm_szLoadKeys[FO_QTY+1] =
 {
 #define ADD(a,b) b,
 #include "../tables/CSFileObj_props.tbl"
@@ -29,7 +29,7 @@ enum FOV_TYPE
     FOV_QTY
 };
 
-lpctstr constexpr CSFileObj::sm_szVerbKeys[FOV_QTY+1] =
+lpctstr const CSFileObj::sm_szVerbKeys[FOV_QTY+1] =
 {
 #define ADD(a,b) b,
 #include "../tables/CSFileObj_functions.tbl"

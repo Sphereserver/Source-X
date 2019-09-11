@@ -16,7 +16,7 @@ enum RMC_TYPE
     RMC_QTY
 };
 
-lpctstr constexpr CRegionResourceDef::sm_szLoadKeys[RMC_QTY+1] =
+lpctstr const CRegionResourceDef::sm_szLoadKeys[RMC_QTY+1] =
 {
     "AMOUNT",
     "DEFNAME",

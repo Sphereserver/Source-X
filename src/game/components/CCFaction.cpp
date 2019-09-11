@@ -156,7 +156,7 @@ enum CHF_TYPE
     CHF_QTY
 };
 
-lpctstr constexpr CCFaction::sm_szLoadKeys[CHF_QTY + 1] =
+lpctstr const CCFaction::sm_szLoadKeys[CHF_QTY + 1] =
 {
     "FACTION",
     "SLAYER",

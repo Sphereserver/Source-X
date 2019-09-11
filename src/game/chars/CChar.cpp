@@ -28,7 +28,7 @@
 #include "CCharNPC.h"
 
 
-lpctstr constexpr CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
+lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
 	"@AfterClick",
@@ -1931,7 +1931,7 @@ enum CHR_TYPE
 	CHR_QTY
 };
 
-lpctstr constexpr CChar::sm_szRefKeys[CHR_QTY+1] =
+lpctstr const CChar::sm_szRefKeys[CHR_QTY+1] =
 {
 	"ACCOUNT",
 	"ACT",
@@ -2032,7 +2032,7 @@ enum CHC_TYPE
 	CHC_QTY
 };
 
-lpctstr constexpr CChar::sm_szLoadKeys[CHC_QTY+1] =
+lpctstr const CChar::sm_szLoadKeys[CHC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CChar_props.tbl"
@@ -3894,7 +3894,7 @@ enum CHV_TYPE
 	CHV_QTY
 };
 
-lpctstr constexpr CChar::sm_szVerbKeys[CHV_QTY+1] =
+lpctstr const CChar::sm_szVerbKeys[CHV_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../../tables/CChar_functions.tbl"

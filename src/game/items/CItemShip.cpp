@@ -121,7 +121,7 @@ enum IMCS_TYPE
     IMCS_QTY
 };
 
-lpctstr constexpr CItemShip::sm_szLoadKeys[IMCS_QTY + 1] = // static
+lpctstr const CItemShip::sm_szLoadKeys[IMCS_QTY + 1] = // static
 {
     "HATCH",
     "PLANK",

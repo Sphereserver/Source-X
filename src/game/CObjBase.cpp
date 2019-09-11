@@ -691,7 +691,7 @@ enum OBR_TYPE
 	OBR_QTY
 };
 
-lpctstr constexpr CObjBase::sm_szRefKeys[OBR_QTY+1] =
+lpctstr const CObjBase::sm_szRefKeys[OBR_QTY+1] =
 {
 	"ROOM",
 	"SECTOR",
@@ -750,7 +750,7 @@ enum OBC_TYPE
 	OC_QTY
 };
 
-lpctstr constexpr CObjBase::sm_szLoadKeys[OC_QTY+1] =
+lpctstr const CObjBase::sm_szLoadKeys[OC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CObjBase_props.tbl"
@@ -1831,7 +1831,7 @@ enum OV_TYPE
 	OV_QTY
 };
 
-lpctstr constexpr CObjBase::sm_szVerbKeys[OV_QTY+1] =
+lpctstr const CObjBase::sm_szVerbKeys[OV_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CObjBase_functions.tbl"

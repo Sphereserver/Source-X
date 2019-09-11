@@ -295,7 +295,7 @@ enum VACS_TYPE
 	VACS_QTY // TODOC.
 };
 
-lpctstr constexpr CAccounts::sm_szVerbKeys[] =	// CAccounts:: // account group verbs.
+lpctstr const CAccounts::sm_szVerbKeys[] =	// CAccounts:: // account group verbs.
 {
 	"ADD",
 	"ADDMD5",
@@ -1068,7 +1068,7 @@ enum AC_TYPE
 	AC_QTY
 };
 
-lpctstr constexpr CAccount::sm_szLoadKeys[AC_QTY+1] = // static
+lpctstr const CAccount::sm_szLoadKeys[AC_QTY+1] = // static
 {
 	"ACCOUNT",
 	"BLOCK",

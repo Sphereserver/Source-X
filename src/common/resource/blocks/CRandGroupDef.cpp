@@ -20,7 +20,7 @@ enum RGC_TYPE
     RGC_QTY
 };
 
-lpctstr constexpr CRandGroupDef::sm_szLoadKeys[RGC_QTY+1] =
+lpctstr const CRandGroupDef::sm_szLoadKeys[RGC_QTY+1] =
 {
     "CALCMEMBERINDEX",
     "CATEGORY",
