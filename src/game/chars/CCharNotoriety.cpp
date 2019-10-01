@@ -85,6 +85,7 @@ bool CChar::Noto_IsNeutral() const
 	{
 		case NPCBRAIN_MONSTER:
 		case NPCBRAIN_BERSERK:
+		case NPCBRAIN_UNDEAD:
 			return ( iKarma <= 0 );
 		case NPCBRAIN_ANIMAL:
 			return ( iKarma <= 100 );

@@ -1020,6 +1020,7 @@ bool CChar::NPC_LookAtChar( CChar * pChar, int iDist )
 
 		case NPCBRAIN_MONSTER:
 		case NPCBRAIN_DRAGON:
+		case NPCBRAIN_UNDEAD:
 			if ( NPC_LookAtCharMonster( pChar ))
 				return true;
 			break;
