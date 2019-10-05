@@ -3568,7 +3568,7 @@ bool CChar::r_LoadVal( CScript & s )
             if (!(g_Cfg.m_iFeatureTOL & FEATURE_TOL_VIRTUALGOLD))
             {
                 int newGold = s.GetArgVal();
-                if (newGold <= 0)
+                if (newGold < 0)
                     return false;
 
                 int currentGold = ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD));
