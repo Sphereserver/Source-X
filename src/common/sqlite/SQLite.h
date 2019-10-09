@@ -14,7 +14,6 @@
 // Typedefs
 //////////////////////////////////////////////////////////////////////////
 
-typedef std::basic_string<tchar> stdstring;
 typedef std::vector<tchar> stdvstring;
 typedef std::vector<stdvstring> vstrlist;
 typedef vstrlist row;
@@ -42,9 +41,9 @@ public:
 	bool IsOpen();
 
 
-	sqlite3 * GetPtr(){ return m_sqlite3; };
-	int GetLastError(){ return m_iLastError; };
-	void ClearError() { m_iLastError=0; };  // SQLITE_OK = 0
+	sqlite3 * GetPtr() const    { return m_sqlite3; };
+	int GetLastError() const    { return m_iLastError; };
+	void ClearError()           { m_iLastError=0; };  // SQLITE_OK = 0
 
 	TablePtr QuerySQLPtr( lpctstr strSQL );
 	Table QuerySQL( lpctstr strSQL );
@@ -85,7 +84,7 @@ private:
     CSString _sFileName;
     bool _fInMemory;
 
-	void ConvertUTF8ToString( char * strInUTF8MB, stdvstring & strOut );
+	static void ConvertUTF8ToVString( const char * strInUTF8MB, stdvstring & strOut );
 };
 
 // Table class...
@@ -209,29 +208,6 @@ public:
 	// Pointer to the table.
 	// I do not see any reason for encapsulating in Get/Set functions.
 	Table * m_pTable;
-};
-
-// Class for converting tchar to Multi-Byte UTF-8
-//   and vice versa
-class UTF8MBSTR
-{
-public:
-	UTF8MBSTR(void);
-	UTF8MBSTR(lpctstr lpStr);
-	UTF8MBSTR(UTF8MBSTR& lpStr);
-	virtual ~UTF8MBSTR();
-
-	void operator =(lpctstr lpStr);
-	void operator =(UTF8MBSTR& lpStr);
-	operator char* ();
-	operator stdstring ();
-
-private:
-	char * m_strUTF8_MultiByte;
-	size_t ConvertStringToUTF8(lpctstr strIn, char *& strOutUTF8MB);
-	static void ConvertUTF8ToString(char * strInUTF8MB, size_t len, lptstr & strOut);
-
-	size_t m_iLen;
 };
 
 

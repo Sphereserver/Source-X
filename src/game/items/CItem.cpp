@@ -1650,7 +1650,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 	if (fSingular) // m_corpse_DispID is m_amount
 	{
 		if ( ! IsIndividualName())
-			len += strcpylen( pTemp+len, pItemDef->GetArticleAndSpace());
+			len += Str_CopyLen( pTemp+len, pItemDef->GetArticleAndSpace());
 	}
 	else
 	{
@@ -1691,8 +1691,8 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 		if ( fTitleSet )
 		{
 			if ( fSingular && !IsSetOF(OF_NoPrefix) )
-				len = strcpylen( pTemp, Str_GetArticleAndSpace(pszTitle));
-			len += strcpylen( pTemp+len, pszTitle );
+				len = Str_CopyLen( pTemp, Str_GetArticleAndSpace(pszTitle));
+			len += Str_CopyLen( pTemp+len, pszTitle );
 		}
 
 		if ( IsAttr(ATTR_MAGIC))
@@ -1700,11 +1700,11 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 			if ( !pszTitle )
 			{
 				pszTitle = IsSetOF(OF_NoPrefix) ? "" : "a ";
-				len = strcpylen( pTemp, pszTitle );
+				len = Str_CopyLen( pTemp, pszTitle );
 			}
 
 			if ( !IsTypeArmorWeapon() && (strnicmp( pszName, "MAGIC", 5 ) != 0))		// don't put "magic" prefix on armor/weapons and names already starting with "magic"
-				len += strcpylen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_MAGIC ) );
+				len += Str_CopyLen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_MAGIC ) );
 		}
 	}
 
@@ -1712,37 +1712,37 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 	switch ( m_type )
 	{
 		case IT_STONE_GUILD:
-			len += strcpylen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_GUILDSTONE_FOR ) );
+			len += Str_CopyLen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_GUILDSTONE_FOR ) );
 			break;
 		case IT_STONE_TOWN:
-			len += strcpylen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_TOWN_OF ) );
+			len += Str_CopyLen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_TOWN_OF ) );
 			break;
 		case IT_EQ_MEMORY_OBJ:
-			len += strcpylen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_MEMORY_OF ) );
+			len += Str_CopyLen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_MEMORY_OF ) );
 			break;
 		case IT_SPAWN_CHAR:
 			if ( ! IsIndividualName())
-				len += strcpylen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_SPAWN ) );
+				len += Str_CopyLen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_SPAWN ) );
 			break;
 		case IT_KEY:
 			if ( ! m_itKey.m_UIDLock.IsValidUID())
-				len += strcpylen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ) );
+				len += Str_CopyLen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ) );
 			break;
 		case IT_RUNE:
 			if ( ! m_itRune.m_ptMark.IsCharValid())
-				len += strcpylen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ) );
+				len += Str_CopyLen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ) );
 			else if ( ! m_itRune.m_Strength )
-				len += strcpylen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_FADED ) );
+				len += Str_CopyLen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_FADED ) );
 			break;
 		case IT_TELEPAD:
 			if ( ! m_itTelepad.m_ptMark.IsValidPoint())
-				len += strcpylen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ) );
+				len += Str_CopyLen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ) );
 			break;
 		default:
 			break;
 	}
 
-	len += strcpylen( pTemp+len, pszName );
+	len += Str_CopyLen( pTemp+len, pszName );
 
 	// Suffix the name.
 

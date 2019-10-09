@@ -255,10 +255,10 @@ int CvtSystemToNUNICODE( nchar * pOut, int iSizeOutChars, lpctstr pInp, int iSiz
 			else
 			{
 				pOut[iOut] = ch;
-				iInp++;
+				++iInp;
 			}
 
-			iOut++;
+			++iOut;
 		}
 	}
 

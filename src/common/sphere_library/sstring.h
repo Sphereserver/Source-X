@@ -102,7 +102,14 @@ size_t Str_CopyLimitNull(tchar * pDst, lpctstr pSrc, size_t uiMaxSize);
 * @param pSrc source data.
 * @return length of the string copied (number of characters).
 */
-size_t strcpylen(tchar * pDst, lpctstr pSrc);
+size_t Str_CopyLen(tchar * pDst, lpctstr pSrc);
+
+/**
+* @brief strlen equivalent to be used with UTF8 multi-byte string.
+* @param pStr UTF8 string.
+* @return number of characters in the string, excluding the '\0' terminator.
+*/
+size_t Str_LengthUTF8(const char* pStr);
 
 /**
 * @brief Appends pSrc to string pDst of maximum size uiMaxSize. Always '\0' terminates (unless uiMaxSize <= strlen(pDst)).
@@ -306,5 +313,29 @@ void CharToMultiByteNonNull(byte * Dest, const char * Src, int MBytes);
 #define Str_GetWTemp static_cast<AbstractSphereThread *>(ThreadHolder::current())->allocateWBuffer
 #define STR_TEMPLENGTH (size_t)(THREAD_STRING_LENGTH)
 
+
+// Class for converting tchar to Multi-Byte UTF-8 and vice versa
+//  SHOULDN'T really be used nowadays, because we don't #define UNICODE, thus tchar will always have UTF-8 encoding.
+//  Convert* methods may be useful only if we rework them to accept lpcwstr/lpwstr, they may be used to convert encodings
+//   when interacting with Windows API calls and passing Unicode strings (since only Windows uses UTF-16 encoding encapsulated
+//   in wchar_t* strings, instead of UTF-8 in char* strings).
+class UTF8MBSTR
+{
+public:
+    UTF8MBSTR(void);
+    UTF8MBSTR(lpctstr lpStr);
+    UTF8MBSTR(UTF8MBSTR& lpStr);
+    virtual ~UTF8MBSTR();
+
+    void operator =(lpctstr lpStr);
+    void operator =(UTF8MBSTR& lpStr);
+    operator char* ();
+
+    static size_t ConvertStringToUTF8(lpctstr strIn, char*& strOutUTF8MB);
+    static size_t ConvertUTF8ToString(const char* strInUTF8MB, lptstr& strOut);
+
+private:
+    char* m_strUTF8_MultiByte;
+};
 
 #endif // _INC_SSTRING_H

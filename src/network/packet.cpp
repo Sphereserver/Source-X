@@ -741,15 +741,20 @@ void Packet::readStringASCII(wchar* buffer, uint length, bool includeNull)
 
 #ifdef USE_UNICODE_LIB
 
-	char* bufferReal = new char[(size_t)length + 1];
+	char* bufferReal = new char[(size_t)length + 1]();
 	readStringASCII(bufferReal, length, includeNull);
-	mbstowcs(buffer, bufferReal, length + 1);
+#ifdef _MSC_VER
+    size_t aux;
+    mbstowcs_s(&aux, buffer, length + 1, bufferReal, length);
+#else
+    mbstowcs(buffer, bufferReal, length);
+#endif
 	delete[] bufferReal;
 #else
 	
-	char* bufferReal = new char[(size_t)length + 1];
+	char* bufferReal = new char[(size_t)length + 1]();
 	readStringASCII(bufferReal, length, includeNull);
-	CvtSystemToNUNICODE(reinterpret_cast<nword *>(buffer), (int)(length), bufferReal, (int)(length) + 1);
+	CvtSystemToNUNICODE(reinterpret_cast<nword *>(buffer), (int)(length), bufferReal, (int)(length));
 	delete[] bufferReal;
 
 	// need to flip byte order to convert NUNICODE to UNICODE

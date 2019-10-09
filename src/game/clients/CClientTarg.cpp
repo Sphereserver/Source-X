@@ -125,7 +125,7 @@ bool CClient::OnTarg_Obj_Info( CObjBase * pObj, const CPointMap & pt, ITEMID_TYP
 		else
 		{
 			// tile info for location.
-			len = strcpylen( pszTemp, "[No static tile], " );
+			len = Str_CopyLen( pszTemp, "[No static tile], " );
 		}
 
 		const CUOMapMeter * pMeter = g_World.GetMapMeter( pt );
@@ -1032,23 +1032,23 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 
 	if ( iHitsCur <= 3 || iHitsMax <= 3 )
 	{
-		len += strcpylen( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_REP_0 ) );
+		len += Str_CopyLen( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_REP_0 ) );
 	}
 
 	// Magical effects ?
 	if ( pItem->IsAttr(ATTR_MAGIC))
 	{
-		len += strcpylen( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEM_MAGIC ) );
+		len += Str_CopyLen( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEM_MAGIC ) );
 	}
 	else if ( pItem->IsAttr(ATTR_NEWBIE|ATTR_MOVE_NEVER))
 	{
-		len += strcpylen( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEM_NEWBIE ) );
+		len += Str_CopyLen( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEM_NEWBIE ) );
 	}
 
 	// Repairable ?
 	if ( ! pItem->Armor_IsRepairable())
 	{
-		len += strcpylen( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEM_REPAIR ) );
+		len += Str_CopyLen( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEM_REPAIR ) );
 	}
 
 	// Poisoned ?

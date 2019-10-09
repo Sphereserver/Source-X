@@ -120,7 +120,7 @@ void CResourceRefArray::WriteResourceRefList( CSString & sVal ) const
         if ( j > 0 )
             pszVal[len++] = ',';
 
-        len += strcpylen( pszVal + len, GetResourceName(j) );
+        len += Str_CopyLen( pszVal + len, GetResourceName(j) );
         if ( len >= SCRIPT_MAX_LINE_LEN-1 )
             break;
     }

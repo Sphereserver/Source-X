@@ -3185,7 +3185,7 @@ int CChar::Spell_CastStart()
 				tchar ch = pSpellDef->m_sRunes[i];
 				if ( !ch )
 					break;
-				len += strcpylen(pszTemp + len, g_Cfg.GetRune(ch));
+				len += Str_CopyLen(pszTemp + len, g_Cfg.GetRune(ch));
 				if ( pSpellDef->m_sRunes[i + 1] )
 					pszTemp[len++] = ' ';
 			}
