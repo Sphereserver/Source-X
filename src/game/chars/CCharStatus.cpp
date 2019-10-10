@@ -1061,6 +1061,21 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 
     const CPointMap& ptTop = GetTopPoint();
     int iDistSight = GetVisualRange();
+
+    /*
+    const CRegion* pRegionHouse = ptTop.GetRegion(REGION_TYPE_HOUSE);
+    if (pRegionHouse)
+    {
+        const CItemMulti* pMultiRegion = static_cast<const CItemMulti*>(pRegionHouse->GetResourceID().ItemFindFromResource());
+        // If it's a public house
+        {
+            const bool fShowPublicHouseContent = IsClient() ? GetClient()->_fShowPublicHouseContent : true;
+            if (!fShowPublicHouseContent)
+                return false;
+        }
+    }
+    */
+
 	if ( pObj->IsItem() )
 	{
 		const CItem *pItem = static_cast<const CItem*>(pObj);

@@ -104,19 +104,19 @@ public:
 	static lpctstr const sm_szRefKeys[];
 	static lpctstr const sm_szLoadKeys[];
 	static lpctstr const sm_szVerbKeys[];
+
 private:
-	CChar * m_pChar;		// What char are we playing ?
+    CChar* m_pChar;		// What char are we playing ?
 	NetState* m_net;		// network state
-
-	// Client last know state stuff.
-	CSectorEnviron m_Env;	// Last Environment Info Sent. so i don't have to keep resending if it's the same.
-
-	uchar m_fUpdateStats;	// update our own status (weight change) when done with the cycle.
 
 	// Walk limiting code
 	int m_iWalkStepCount;	// Count the actual steps. Turning does not count.
     llong m_iWalkTimeAvg;
 	int64 m_timeWalkStep;	// the last %8 walk step time.
+
+    // Client last know state stuff.
+    CSectorEnviron m_Env;	// Last Environment Info Sent. so i don't have to keep resending if it's the same.
+    uchar m_fUpdateStats;	// update our own status (weight change) when done with the cycle.
 
 	// Screensize
 	struct __screensize
@@ -145,6 +145,9 @@ public:
 	int64 m_timeLastEvent;		    // Last time we got event from client.
 	int64 m_timeLastEventWalk;	    // Last time we got a walk event from client
 	int64 m_timeNextEventWalk;		// Fastwalk prevention: only allow more walk requests after this timer
+
+    // Client-sent flags
+    bool _fShowPublicHouseContent;
 
 	// GM only stuff.
 	CGMPage * m_pGMPage;	// Current GM page we are connected to.

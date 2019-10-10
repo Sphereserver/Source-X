@@ -1900,3 +1900,7 @@ WARNING: Important change!
 
 04-09-2019, Nolok
 - Added: TAG.OVERRIDE.NOREVEALSPEAK. If its value is 1, the hidden char won't be revealed when it speaks (Issue #89).
+
+10-10-2019, Nolok
+- Added: Initial support to 0xFB packet (PacketPublicHouseContent). Public/private houses aren't hardcoded yet, but this will prevent the unknown packet warning.
+- Changed: SYSMESSAGEUA will return error if the number of arguments is insufficient.

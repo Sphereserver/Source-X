@@ -4613,3 +4613,28 @@ bool PacketUltimaStoreButton::onReceive(NetState *net)
         character->OnTrigger(CTRIG_UserUltimaStoreButton, character, nullptr);
     return true;
 }
+
+
+
+/***************************************************************************
+*
+*
+*	Packet 0xFB : PacketPublicHouseContent			show/hide public house content (SA)
+*
+*
+***************************************************************************/
+PacketPublicHouseContent::PacketPublicHouseContent() : Packet(2)
+{
+}
+
+bool PacketPublicHouseContent::onReceive(NetState* net)
+{
+    ADDTOCALLSTACK("PacketPublicHouseContent::onReceive");
+
+    CClient* client = net->getClient();
+    ASSERT(client);
+    
+    client->_fShowPublicHouseContent = readBool();
+
+    return true;
+}

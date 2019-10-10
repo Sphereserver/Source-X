@@ -55,7 +55,7 @@ class PacketTelnet : public PacketSend
 {
 public:
 
-	PacketTelnet(const CClient* target, lpctstr message, bool bNullTerminated = false);
+	PacketTelnet(const CClient* target, lpctstr message, bool fNullTerminated = false);
 };
 
 /***************************************************************************
