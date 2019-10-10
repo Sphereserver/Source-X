@@ -4123,7 +4123,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_GOUID:	// uid
 			if ( s.HasArgs() )
 			{
-				CObjBaseTemplate * pObj = CUID::ObjFind(s.GetArgVal());
+				const CObjBaseTemplate * pObj = CUID::ObjFind(s.GetArgVal());
 				if ( pObj == nullptr )
 					return false;
 				pObj = pObj->GetTopLevelObj();

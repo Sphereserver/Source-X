@@ -127,25 +127,37 @@ void NetState::clear(void)
 	if (m_client != nullptr)
 	{
 		g_Serv.StatDec(SERV_STAT_CLIENTS);
-		if ( m_client->GetConnectType() == CONNECT_LOGIN )
+
+        const CONNECT_TYPE connectionType = m_client->GetConnectType();
+        const LOG_TYPE logFlags = LOG_TYPE(LOGM_NOCONTEXT | LOGM_CLIENTS_LOG | LOGL_EVENT);
+        const size_t uiClients = g_Serv.StatGet(SERV_STAT_CLIENTS);
+        const lpctstr ptcAddress = m_peerAddress.GetAddrStr();
+		if (connectionType == CONNECT_LOGIN )
 		{	// when a connection is refused (ie. wrong password), there's no account
-			g_Log.Event(LOGM_NOCONTEXT|LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. IP='%s'.\n",
-				m_id, g_Serv.StatGet(SERV_STAT_CLIENTS), m_peerAddress.GetAddrStr());
+			g_Log.Event(logFlags, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. IP='%s'.\n",
+				m_id, uiClients, ptcAddress);
 		}
-		else
+		else if (connectionType == CONNECT_GAME)
 		{
-			if (!m_client->GetChar())
+            const lpctstr ptcAccountName = m_client->GetName();
+            const CChar* pAttachedChar = m_client->GetChar();
+			if (!pAttachedChar)
 			{
-				g_Log.Event(LOGM_NOCONTEXT|LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. Account: '%s'. IP='%s'.\n",
-					m_id, g_Serv.StatGet(SERV_STAT_CLIENTS), m_client->GetName(), m_peerAddress.GetAddrStr());
+				g_Log.Event(logFlags, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. Account: '%s'. IP='%s'.\n",
+					m_id, uiClients, ptcAccountName, ptcAddress);
 			}
 			else
 			{
-				g_Log.Event(LOGM_NOCONTEXT|LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. Account: '%s'. Char: '%s'. IP='%s'.\n",
-					m_id, g_Serv.StatGet(SERV_STAT_CLIENTS), m_client->GetName(), m_client->GetChar()->GetName(), m_peerAddress.GetAddrStr());
+				g_Log.Event(logFlags, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. Account: '%s'. Char: '%s'. IP='%s'.\n",
+					m_id, uiClients, ptcAccountName, pAttachedChar->GetName(), ptcAddress);
 			}
-			
 		}
+        else
+        {
+            g_Log.Event(logFlags, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. Connection Type: '%s'. IP='%s'.\n",
+                m_id, uiClients, m_client->GetConnectTypeStr(connectionType), ptcAddress);
+        }
+
 
 #ifdef _LIBEV
 		if (m_socket.IsOpen() && g_Cfg.m_fUseAsyncNetwork != 0)

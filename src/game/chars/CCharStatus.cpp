@@ -1069,7 +1069,7 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
         const CItemMulti* pMultiRegion = static_cast<const CItemMulti*>(pRegionHouse->GetResourceID().ItemFindFromResource());
         // If it's a public house
         {
-            const bool fShowPublicHouseContent = IsClient() ? GetClient()->_fShowPublicHouseContent : true;
+            const bool fShowPublicHouseContent = IsClient() ? GetClient()->_fShowPublicHouseContent : false;
             if (!fShowPublicHouseContent)
                 return false;
         }
