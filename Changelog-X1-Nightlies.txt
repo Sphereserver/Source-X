@@ -1900,3 +1900,12 @@ WARNING: Important change!
 
 04-09-2019, Nolok
 - Added: TAG.OVERRIDE.NOREVEALSPEAK. If its value is 1, the hidden char won't be revealed when it speaks (Issue #89).
+
+10-10-2019, Nolok
+- Added: Initial support to 0xFB packet (PacketPublicHouseContent). Public/private houses aren't hardcoded yet, but this will prevent the unknown packet warning.
+- Changed: SYSMESSAGEUA will return error if the number of arguments is insufficient.
+
+11-10-2019, Nolok
+- Fixed: HTTP server did check the date of last modification of the webpage to provide even if the "If-Modified-Since" request HTTP header was not sent by the browser,
+	thus serving a blank webpage.
+- Added: Connection Type information to the client disconnection log message, when the client wasn't a Ultima Online one (but HTTP, Axis, etc).

@@ -1172,7 +1172,7 @@ void CClient::addItemName( const CItem * pItem )
 	{
 		if ( pItem->IsAttr(ATTR_INVIS ))
 		{
-			len += strcpylen( szName+len, " (invis)" );
+			len += Str_CopyLen( szName+len, " (invis)" );
 		}
 		// Show the restock count
 		if ( pMyCont != nullptr && pMyCont->IsType(IT_EQ_VENDOR_BOX) )

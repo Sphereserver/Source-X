@@ -86,11 +86,11 @@ typedef	uint64_t		uint64;
 #ifndef _WIN32			//	assume unix if !_WIN32
 
 	#include <wchar.h>
-	#ifdef UNICODE
-		typedef	char16_t		tchar;
-	#else
+	//#ifdef UNICODE
+	//	typedef	char16_t		tchar;
+	//#else
 		typedef char			tchar;
-	#endif
+	//#endif
 	typedef char16_t			wchar;
 	typedef char16_t *			lpwstr;
 	typedef const char16_t *	lpcwstr;

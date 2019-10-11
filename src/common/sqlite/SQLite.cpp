@@ -126,12 +126,12 @@ Table CSQLite::QuerySQL( lpctstr strSQL )
 
 	for (; iPos<iCols; ++iPos)
 	{
-		retTable.m_strlstCols.push_back(stdvstring());
+		retTable.m_strlstCols.emplace_back(stdvstring());
 
 		if (retStrings[iPos])
-			ConvertUTF8ToString( retStrings[iPos], retTable.m_strlstCols.back() );
+			ConvertUTF8ToVString( retStrings[iPos], retTable.m_strlstCols.back() );
 		else
-            retTable.m_strlstCols.back().push_back('\0');
+            retTable.m_strlstCols.back().emplace_back('\0');
 	}
 
 	retTable.m_lstRows.resize(iRows);
@@ -140,12 +140,12 @@ Table CSQLite::QuerySQL( lpctstr strSQL )
 		retTable.m_lstRows[iRow].reserve(iCols);
 		for (int iCol=0; iCol<iCols; ++iCol)
 		{
-			retTable.m_lstRows[iRow].push_back(stdvstring());
+			retTable.m_lstRows[iRow].emplace_back(stdvstring());
 
 			if (retStrings[iPos])
-				ConvertUTF8ToString( retStrings[iPos], retTable.m_lstRows[iRow].back() );
+				ConvertUTF8ToVString( retStrings[iPos], retTable.m_lstRows[iRow].back() );
 			else
-                retTable.m_lstRows[iRow].back().push_back('\0');
+                retTable.m_lstRows[iRow].back().emplace_back('\0');
 
 			++iPos;
 		}
@@ -159,7 +159,8 @@ Table CSQLite::QuerySQL( lpctstr strSQL )
 
 TablePtr CSQLite::QuerySQLPtr( lpctstr strSQL )
 {
-	if (!IsOpen()) {
+	if (!IsOpen())
+    {
 		m_iLastError=SQLITE_ERROR;
 		return nullptr;
 	}
@@ -192,12 +193,12 @@ TablePtr CSQLite::QuerySQLPtr( lpctstr strSQL )
 
 	for (; iPos<iCols; ++iPos)
 	{
-		retTable->m_strlstCols.push_back(stdvstring());
+		retTable->m_strlstCols.emplace_back(stdvstring());
 
 		if (retStrings[iPos])
-			ConvertUTF8ToString( retStrings[iPos], retTable->m_strlstCols.back() );
+			ConvertUTF8ToVString( retStrings[iPos], retTable->m_strlstCols.back() );
 		else
-            retTable->m_strlstCols.back().push_back('\0');
+            retTable->m_strlstCols.back().emplace_back('\0');
 	}
 
 	retTable->m_lstRows.resize(iRows);
@@ -206,12 +207,12 @@ TablePtr CSQLite::QuerySQLPtr( lpctstr strSQL )
 		retTable->m_lstRows[iRow].reserve(iCols);
 		for (int iCol=0; iCol<iCols; ++iCol)
 		{
-			retTable->m_lstRows[iRow].push_back(stdvstring());
+			retTable->m_lstRows[iRow].emplace_back(stdvstring());
 
 			if (retStrings[iPos])
-				ConvertUTF8ToString( retStrings[iPos], retTable->m_lstRows[iRow].back() );
+				ConvertUTF8ToVString( retStrings[iPos], retTable->m_lstRows[iRow].back() );
 			else
-                retTable->m_lstRows[iRow].back().push_back('\0');
+                retTable->m_lstRows[iRow].back().emplace_back('\0');
 
 			++iPos;
 		}
@@ -222,20 +223,18 @@ TablePtr CSQLite::QuerySQLPtr( lpctstr strSQL )
 	return TablePtr(retTable);
 }
 
-void CSQLite::ConvertUTF8ToString( char * strInUTF8MB, stdvstring & strOut )
+void CSQLite::ConvertUTF8ToVString( const char * strInUTF8MB, stdvstring & strOut )
 {
-	int len=(int)strlen(strInUTF8MB)+1;
-	strOut.resize(len, 0);
-	wchar_t * wChar = new wchar_t[len];
-	wChar[0] = '\0';
-	mbstowcs(wChar,strInUTF8MB,len);
-	wcstombs(&strOut[0],wChar,len);
-	delete [] wChar;
+    size_t len = Str_LengthUTF8(strInUTF8MB);
+    strOut.resize(len + 1, 0);
+    lptstr ptcStrOut = strOut.data();
+    UTF8MBSTR::ConvertUTF8ToString(strInUTF8MB, ptcStrOut);
 }
 
 int CSQLite::ExecuteSQL( lpctstr strSQL )
 {
-	if (!IsOpen()) {
+	if (!IsOpen())
+    {
 		m_iLastError=SQLITE_ERROR;
 		return SQLITE_ERROR;
 	}
@@ -366,7 +365,8 @@ int CSQLite::GetLastChangesCount()
 
 llong CSQLite::GetLastInsertRowID()
 {
-	if (m_sqlite3==nullptr) return 0; // RowID's starts with 1...
+	if (m_sqlite3==nullptr)
+        return 0; // RowID's starts with 1...
 
 	return llong(sqlite3_last_insert_rowid(m_sqlite3));
 }
@@ -726,102 +726,5 @@ void TablePtr::Destroy()
 	if (m_pTable)
         delete m_pTable;
 	m_pTable=nullptr;
-}
-
-UTF8MBSTR::UTF8MBSTR()
-{
-	m_strUTF8_MultiByte=new char[1];
-	m_strUTF8_MultiByte[0]='\0';
-	m_iLen=0;
-}
-
-UTF8MBSTR::UTF8MBSTR( lpctstr lpStr )
-{
-	if (lpStr)
-		m_iLen=ConvertStringToUTF8(lpStr, m_strUTF8_MultiByte);
-	else
-	{
-		m_strUTF8_MultiByte=new char[1];
-		m_strUTF8_MultiByte[0]='\0';
-		m_iLen=0;
-	}
-}
-
-UTF8MBSTR::UTF8MBSTR( UTF8MBSTR& lpStr )
-{
-	m_iLen=lpStr.m_iLen;
-	m_strUTF8_MultiByte=new char[m_iLen+1];
-	Str_CopyLimitNull(m_strUTF8_MultiByte, lpStr.m_strUTF8_MultiByte, m_iLen+1);
-}
-
-UTF8MBSTR::~UTF8MBSTR()
-{
-	if (m_strUTF8_MultiByte)
-		delete [] m_strUTF8_MultiByte;
-}
-
-void UTF8MBSTR::operator =( lpctstr lpStr )
-{
-	if (m_strUTF8_MultiByte)
-		delete [] m_strUTF8_MultiByte;
-
-	if (lpStr)
-		m_iLen=ConvertStringToUTF8(lpStr, m_strUTF8_MultiByte);
-	else
-	{
-		m_strUTF8_MultiByte=new char[1];
-		m_strUTF8_MultiByte[0]='\0';
-		m_iLen=0;
-	}
-}
-
-void UTF8MBSTR::operator =( UTF8MBSTR& lpStr )
-{
-	if (m_strUTF8_MultiByte)
-		delete [] m_strUTF8_MultiByte;
-
-	m_iLen=lpStr.m_iLen;
-	m_strUTF8_MultiByte=new char[m_iLen+1];
-	Str_CopyLimitNull(m_strUTF8_MultiByte, lpStr.m_strUTF8_MultiByte, m_iLen+1);
-}
-
-UTF8MBSTR::operator char* ()
-{
-	return m_strUTF8_MultiByte;
-}
-
-UTF8MBSTR::operator stdstring ()
-{
-	tchar * strRet;
-	ConvertUTF8ToString(m_strUTF8_MultiByte, m_iLen + 1, strRet);
-	stdstring cstrRet(strRet);
-	delete [] strRet;
-
-	return cstrRet;
-}
-
-size_t UTF8MBSTR::ConvertStringToUTF8( lpctstr strIn, char *& strOutUTF8MB )
-{
-	size_t len = strlen(strIn);
-	wchar_t * wChar = new wchar_t[len + 1];
-	wChar[0] = '\0';
-	mbstowcs(wChar, strIn, len + 1);
-	int iRequiredSize = (int)(wcstombs(nullptr, wChar, len + 1));
-	strOutUTF8MB = new char[(size_t)iRequiredSize + 1];
-	strOutUTF8MB[0] = '\0';
-	wcstombs(strOutUTF8MB,wChar, (size_t)iRequiredSize + 1);
-	delete [] wChar;
-	return len;
-}
-
-void UTF8MBSTR::ConvertUTF8ToString( char * strInUTF8MB, size_t len, lptstr & strOut )
-{
-	strOut = new tchar[len];
-	strOut[0] = '\0';
-	wchar_t * wChar = new wchar_t[len];
-	wChar[0] = '\0';
-	mbstowcs(wChar, strInUTF8MB, len);
-	wcstombs(strOut, wChar, len);
-	delete [] wChar;
 }
 

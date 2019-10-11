@@ -23,7 +23,7 @@ size_t CResourceQty::WriteKey( tchar * pszArgs, bool fQtyOnly, bool fKeyOnly ) c
     if ( (GetResQty() || fQtyOnly) && !fKeyOnly )
         i = sprintf( pszArgs, "%" PRId64 " ", GetResQty());
     if ( !fQtyOnly )
-        i += strcpylen( pszArgs+i, g_Cfg.ResourceGetName( m_rid ));
+        i += Str_CopyLen( pszArgs+i, g_Cfg.ResourceGetName( m_rid ));
     return i;
 }
 
@@ -35,13 +35,13 @@ size_t CResourceQty::WriteNameSingle( tchar * pszArgs, int iQty ) const
         const CItemBase * pItemBase = CItemBase::FindItemBase((ITEMID_TYPE)(m_rid.GetResIndex()));
         //DEBUG_ERR(("pItemBase 0x%x  m_rid 0%x  m_rid.GetResIndex() 0%x\n",pItemBase,m_rid,m_rid.GetResIndex()));
         if ( pItemBase )
-            return( strcpylen( pszArgs, pItemBase->GetNamePluralize(pItemBase->GetTypeName(),(( iQty > 1 ) ? true : false))) );
+            return( Str_CopyLen( pszArgs, pItemBase->GetNamePluralize(pItemBase->GetTypeName(),(( iQty > 1 ) ? true : false))) );
     }
     const CScriptObj * pResourceDef = g_Cfg.ResourceGetDef( m_rid );
     if ( pResourceDef != nullptr )
-        return( strcpylen( pszArgs, pResourceDef->GetName()) );
+        return( Str_CopyLen( pszArgs, pResourceDef->GetName()) );
     else
-        return( strcpylen( pszArgs, g_Cfg.ResourceGetName( m_rid )) );
+        return( Str_CopyLen( pszArgs, g_Cfg.ResourceGetName( m_rid )) );
 }
 
 bool CResourceQty::Load(lpctstr &pszCmds)

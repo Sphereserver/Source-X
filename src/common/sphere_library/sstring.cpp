@@ -340,7 +340,7 @@ size_t Str_CopyLimitNull(tchar * pDst, lpctstr pSrc, size_t uiMaxSize)
     return qty; // bytes copied in pDst string (not counting the string terminator)
 }
 
-size_t strcpylen(tchar * pDst, lpctstr pSrc)
+size_t Str_CopyLen(tchar * pDst, lpctstr pSrc)
 {
     strcpy(pDst, pSrc);
     // Remember: strlen returns the number of bytes before the terminator (if the string contains utf-8 characters,
@@ -374,6 +374,17 @@ size_t strlen_mb(const char* ptr)
     return result;
 }
 */
+
+size_t Str_LengthUTF8(const char* strInUTF8MB)
+{
+    size_t len; // number of characters in the string
+#ifdef _MSC_VER
+    mbstowcs_s(&len, nullptr, 0, strInUTF8MB, 0);
+#else
+    len = mbstowcs(nullptr, strInUTF8MB, 0);
+#endif
+    return len;
+}
 
 /*
 * Appends src to string dst of size siz (unlike strncat, siz is the
@@ -415,7 +426,7 @@ size_t Str_ConcatLimitNull(tchar *dst, const tchar *src, size_t siz)
     }
     *d = '\0';
 
-    return (dlen + (s - src));	/* count does not include NUL */
+    return (dlen + (s - src));	/* count does not include '\0' */
 }
 
 lpctstr Str_GetArticleAndSpace(lpctstr pszWord)
@@ -1125,4 +1136,111 @@ void CharToMultiByteNonNull(byte * Dest, const char * Src, int MBytes)
             break;
         Dest[idx] = (byte)(Src[idx / 2]);
     }
+}
+
+UTF8MBSTR::UTF8MBSTR()
+{
+    m_strUTF8_MultiByte = new char[1]();
+}
+
+UTF8MBSTR::UTF8MBSTR(lpctstr lpStr)
+{
+    if (lpStr)
+    {
+        m_strUTF8_MultiByte = nullptr;
+        ConvertStringToUTF8(lpStr, m_strUTF8_MultiByte);
+    }
+    else
+        m_strUTF8_MultiByte = new char[1]();
+}
+
+UTF8MBSTR::UTF8MBSTR(UTF8MBSTR& lpStr)
+{
+    size_t len = Str_LengthUTF8(lpStr.m_strUTF8_MultiByte);
+    m_strUTF8_MultiByte = new char[len + 1]();
+    memcpy(m_strUTF8_MultiByte, lpStr.m_strUTF8_MultiByte, len);
+}
+
+UTF8MBSTR::~UTF8MBSTR()
+{
+    if (m_strUTF8_MultiByte)
+        delete[] m_strUTF8_MultiByte;
+}
+
+void UTF8MBSTR::operator =(lpctstr lpStr)
+{
+    if (m_strUTF8_MultiByte)
+        delete[] m_strUTF8_MultiByte;
+
+    if (lpStr)
+    {
+        m_strUTF8_MultiByte = nullptr;
+        ConvertStringToUTF8(lpStr, m_strUTF8_MultiByte);
+    }
+    else
+        m_strUTF8_MultiByte = new char[1]();
+}
+
+void UTF8MBSTR::operator =(UTF8MBSTR& lpStr)
+{
+    if (m_strUTF8_MultiByte)
+        delete[] m_strUTF8_MultiByte;
+
+    size_t len = Str_LengthUTF8(lpStr.m_strUTF8_MultiByte);
+    m_strUTF8_MultiByte = new char[len + 1]();
+    memcpy(m_strUTF8_MultiByte, lpStr.m_strUTF8_MultiByte, len);
+}
+
+UTF8MBSTR::operator char* ()
+{
+    return m_strUTF8_MultiByte;
+}
+
+size_t UTF8MBSTR::ConvertStringToUTF8(lpctstr strIn, char*& strOutUTF8MB)
+{
+    size_t len;
+#if defined(_WIN32) && defined(UNICODE)
+    // tchar is wchar_t
+    len = wcslen(strIn);
+#else
+    // tchar is char (UTF8 encoding)
+    len = Str_LengthUTF8(strIn);
+#endif
+    strOutUTF8MB = new char[len + 1]();
+
+#if defined(_WIN32) && defined(UNICODE)
+#ifdef _MSC_VER
+    size_t aux = 0;
+    wcstombs_s(&aux, strOutUTF8MB, len + 1, strIn, len);
+#else
+    wcstombs(strOutUTF8MB, strIn, len);
+#endif
+
+#else
+    memcpy(strOutUTF8MB, strIn, len);
+#endif
+
+    return len;
+}
+
+size_t UTF8MBSTR::ConvertUTF8ToString(const char* strInUTF8MB, lptstr& strOut)
+{
+    size_t len = Str_LengthUTF8(strInUTF8MB);
+    if (!strOut)
+        strOut = new tchar[len + 1]();
+
+#if defined(_WIN32) && defined(UNICODE)
+    // tchar is wchar_t
+#ifdef _MSC_VER
+    size_t aux = 0;
+    mbstowcs_s(&aux, strInUTF8MB, len + 1, strInUTF8MB, len);
+#else
+    mbstowcs(strInUTF8MB, strInUTF8MB, len);
+#endif
+#else
+    // tchar is char (UTF8 encoding)
+    memcpy(strOut, strInUTF8MB, len);
+#endif
+
+    return len;
 }

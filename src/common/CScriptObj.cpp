@@ -279,7 +279,7 @@ bool CScriptObj::r_LoadVal( CScript & s )
             const bool fZero = (index == SSC_VAR0);
             bool fQuoted = false;
             lpctstr ptcArg = s.GetArgStr(&fQuoted);
-            g_Exp.m_VarGlobals.SetStr(ptcKey + (fZero ? 5 : 4), fQuoted, ptcArg, true);
+            g_Exp.m_VarGlobals.SetStr(ptcKey + (fZero ? 5 : 4), fQuoted, ptcArg, false);
             return true;
         }
 

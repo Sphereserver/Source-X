@@ -45,6 +45,8 @@ CClient::CClient(NetState* state)
 	m_iWalkTimeAvg	= 100;
 	m_timeWalkStep = GetPreciseSysTimeMilli();
 
+    _fShowPublicHouseContent = true;
+
 	m_Targ_Timeout = 0;
 	m_Targ_Mode = CLIMODE_SETUP_CONNECTING;
 	m_Prompt_Mode = CLIMODE_NORMAL;
@@ -684,7 +686,7 @@ bool CClient::r_LoadVal( CScript & s )
             ptcKey = ptcKey + (fZero ? 6 : 5);
             bool fQuoted = false;
             lpctstr ptcArg = s.GetArgStr(&fQuoted);
-            m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, true);
+            m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, false);
             return true;
         }
     }
@@ -1449,14 +1451,13 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			{
 				tchar * pszArgs[5];
 				int iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, CountOf(pszArgs) );
-				if ( iArgQty > 4 )
-				{
-					// Font and mode are actually ignored here, but they never made a difference
-					// anyway.. I'd like to keep the syntax similar to SAYUA
-			 		nchar szBuffer[ MAX_TALK_BUFFER ];
-					CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), pszArgs[4], -1 );
-					addBarkUNICODE( szBuffer, nullptr, (HUE_TYPE)(Exp_GetVal(pszArgs[0])), TALKMODE_SAY, FONT_NORMAL, pszArgs[3] );
-				}
+                if (iArgQty < 5)
+                    return false;
+				// Font and mode are actually ignored here, but they never made a difference
+				// anyway.. I'd like to keep the syntax similar to SAYUA
+                nchar szBuffer[MAX_TALK_BUFFER];
+                CvtSystemToNUNICODE(szBuffer, CountOf(szBuffer), pszArgs[4], -1);
+                addBarkUNICODE(szBuffer, nullptr, (HUE_TYPE)(Exp_GetVal(pszArgs[0])), TALKMODE_SAY, FONT_NORMAL, pszArgs[3]);
 			}
 			break;
 		case CV_SMSGL:

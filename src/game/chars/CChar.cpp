@@ -2322,7 +2322,7 @@ do_default:
 				const CSString* pFameAt0 = g_Cfg.m_Fame.at(0);
 
 				tchar * pszFameAt0 = new tchar[(size_t)pFameAt0->GetLength() + 1];
-				strcpylen(pszFameAt0, pFameAt0->GetPtr());
+				Str_CopyLen(pszFameAt0, pFameAt0->GetPtr());
 
 				int iFame = GetFame();
 				int i = Str_ParseCmds( pszFameAt0, ppLevel_sep, CountOf(ppLevel_sep), "," ) - 1; //range
@@ -2417,7 +2417,7 @@ do_default:
 				const CSString* pKarmaAt0 = g_Cfg.m_Karma.at(0);
 
 				tchar * pszKarmaAt0 = new tchar[(size_t)pKarmaAt0->GetLength() + 1];
-				strcpylen(pszKarmaAt0, pKarmaAt0->GetPtr());
+				Str_CopyLen(pszKarmaAt0, pKarmaAt0->GetPtr());
 
 				short iKarma = GetKarma();
 
@@ -4128,7 +4128,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_GOUID:	// uid
 			if ( s.HasArgs() )
 			{
-				CObjBaseTemplate * pObj = CUID::ObjFind(s.GetArgVal());
+				const CObjBaseTemplate * pObj = CUID::ObjFind(s.GetArgVal());
 				if ( pObj == nullptr )
 					return false;
 				pObj = pObj->GetTopLevelObj();

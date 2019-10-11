@@ -671,7 +671,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t uiLen )
 	// ensure request is null-terminated (if the request is well-formed, we are overwriting a trailing \n here)
 	pRequest[uiLen - 1] = '\0';
 
-    uiLen = strlen(reinterpret_cast<char*>(pRequest));
+    uiLen = strlen(reinterpret_cast<const char*>(pRequest));
     if (uiLen > HTTPREQ_MAX_SIZE)     // too long request
     {
     httpreq_err_long:
@@ -679,7 +679,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t uiLen )
         return false;
     }
 
-	if ( !strpbrk( reinterpret_cast<char *>(pRequest), " \t\012\015" ) )    // malformed request
+	if ( !strpbrk( reinterpret_cast<const char *>(pRequest), " \t\012\015" ) )    // malformed request
 		return false;
 
 	tchar * ppLines[16];

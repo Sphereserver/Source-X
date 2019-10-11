@@ -1507,4 +1507,19 @@ public:
     virtual bool onReceive(NetState* net);
 };
 
+
+/***************************************************************************
+*
+*
+*	Packet 0xFB : PacketPublicHouseContent			show/hide public house content
+*
+*
+***************************************************************************/
+class PacketPublicHouseContent : public Packet
+{
+public:
+    PacketPublicHouseContent();
+    virtual bool onReceive(NetState* net);
+};
+
 #endif // _INC_RECEIVE_H

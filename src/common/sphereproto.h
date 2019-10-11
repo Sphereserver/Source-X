@@ -287,6 +287,7 @@ enum XCMD_TYPE	// XCMD_* messages are unique in both directions.
 	XCMD_PacketCont			= 0xf7,
 	XCMD_CreateHS			= 0xf8,
     XCMD_UltimaStoreButton  = 0xfa,
+    XCMD_PublicHouseContent = 0xfb,
 	XCMD_QTY				= 0xf9
 };
 

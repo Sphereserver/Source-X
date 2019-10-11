@@ -52,7 +52,7 @@ public:
     CResourceQty() : m_iQty(0) { };
 };
 
-class CResourceQtyArray : public CSTypedArray<CResourceQty>
+class CResourceQtyArray : public std::vector<CResourceQty>
 {
     // Define a list of index id's (not references) to resource objects. (Not owned by the list)
 public:

@@ -168,7 +168,7 @@ bool CWebPageDef::r_LoadVal( CScript & s ) // Load an item Script
 			}
 			break;
 		default:
-			return( CScriptObj::r_LoadVal( s ));
+			return CScriptObj::r_LoadVal( s );
 	}
 	return true;
 	EXC_CATCH;
@@ -426,7 +426,7 @@ bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient )
 		WEBPAGE_BMP,
 		WEBPAGE_GIF,
 		WEBPAGE_TEMPLATE,
-		WEBPAGE_TEXT,
+        WEBPAGE_TEMPLATE,
 		WEBPAGE_JPG,
 		WEBPAGE_JPG,
 		WEBPAGE_TEXT,
@@ -501,8 +501,8 @@ bool CWebPageDef::IsMatch( lpctstr pszMatch ) const
 
 lpctstr const CWebPageDef::sm_szPageType[WEBPAGE_QTY+1] =
 {
-	"text/html",		// WEBPAGE_TEMPLATE
-	"text/html",		// WEBPAGE_TEXT
+	"text/html",		// WEBPAGE_TEMPLATE (.htm)
+	"text/html",		// WEBPAGE_TEMPLATE (.html)
 	"image/x-xbitmap",	// WEBPAGE_BMP,
 	"image/gif",		// WEBPAGE_GIF,
 	"image/jpeg",		// WEBPAGE_JPG,
@@ -582,8 +582,8 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 	}
 
 	const char *sDate = datetime.FormatGmt(nullptr);	// current date.
-
-	if ( !fGenerate || !pdateIfModifiedSince || (pdateIfModifiedSince->IsTimeValid() && pdateIfModifiedSince->GetTime() > dateChange) )
+    // If pdateIfModifiedSince is not valid, it means that "If-Modified-Since:" wasn't sent by the web browser, so we need to send the whole page in any case here.
+	if ( pdateIfModifiedSince->IsTimeValid() && !fGenerate && (pdateIfModifiedSince->GetTime() <= dateChange) )
 	{
 		tchar *pszTemp = Str_GetTemp();
 		sprintf(pszTemp, "HTTP/1.1 304 Not Modified\r\nDate: %s\r\nServer: " SPHERE_TITLE " " SPHERE_VERSION_PREFIX SPHERE_VERSION "\r\nContent-Length: 0\r\n\r\n", sDate);
@@ -597,7 +597,10 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 		return 500;
 
 	// Send the header first.
-	tchar szTmp[8*1024];
+    static constexpr size_t uiWebDataBufSize = 8 * 1024;
+    std::unique_ptr<tchar[]> ptcWebDataBuf = std::make_unique<tchar[]>(uiWebDataBufSize);
+	tchar* szTmp = ptcWebDataBuf.get();
+
 	int iLen = sprintf(szTmp,
 		"HTTP/1.1 200 OK\r\n" // 100 Continue
 		"Date: %s\r\n"
@@ -625,15 +628,15 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 
 	for (;;)
 	{
-		iLen = FileRead.Read( szTmp, sizeof( szTmp ) );
+		iLen = FileRead.Read( szTmp, uiWebDataBufSize);
 		if ( iLen <= 0 )
 			break;
 		packet.setData((byte*)szTmp, (uint)iLen);
 		packet.send(pClient);
 		//dwSize -= iLen;
-		if ( iLen < (int)sizeof( szTmp ) )
+		if ( iLen < (int)uiWebDataBufSize)
 		{
-			// memset( szTmp+iLen, 0, sizeof(szTmp)-iLen );
+			// memset( szTmp+iLen, 0, uiWebDataBufSize-iLen );
 			break;
 		}
 	}
