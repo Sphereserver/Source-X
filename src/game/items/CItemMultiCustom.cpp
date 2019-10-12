@@ -443,7 +443,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
     }
 
     // floor tiles have no height and can be placed under other objects (walls, doors, etc)
-    const bool fFloor = (pItemBase->GetHeight() == 0);
+    const bool fFloor = (pItemBase->GetHeight() == 0) && (pItemBase->GetTFlags() & UFLAG1_FLOOR);
     // fixtures are items that should be replaced by dynamic items
     const bool fFixture = (pItemBase->IsType(IT_DOOR) || pItemBase->IsType(IT_DOOR_LOCKED) || pItemBase->IsID_Door(id) || pItemBase->IsType(IT_TELEPAD));
 
@@ -521,7 +521,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
                     continue;
 
                 const Component* pComp = pPrevComponents[i];
-                RemoveItem(nullptr, pComp->m_item.GetDispID(), pComp->m_item.m_dx, pComp->m_item.m_dy, (char)(pComp->m_item.m_dz));
+                RemoveItem(nullptr, pComp->m_item.GetDispID(), pComp->m_item.m_dx, pComp->m_item.m_dy, (char)(pComp->m_item.m_dz), false);
             }
         }
     }
@@ -629,6 +629,7 @@ void CItemMultiCustom::AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, 
 
         AddItem(nullptr, pMultiItem->GetDispID(), x + pMultiItem->m_dx, y + pMultiItem->m_dy, z + (char)(pMultiItem->m_dz), iStairID);
     }
+
     SendStructureTo(pClientSrc);
 }
 
@@ -672,7 +673,7 @@ void CItemMultiCustom::AddRoof(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
     AddItem(pClientSrc, id, x, y, z);
 }
 
-void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z)
+void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z, bool fAllowRemoveWholeFloor)
 {
     ADDTOCALLSTACK("CItemMultiCustom::RemoveItem");
     // remove the item that's found at given location
@@ -712,33 +713,59 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x,
     if (uiCount <= 0)
         return;
 
+    bool fComponentsChanged = false;
     auto& vectorComponents = m_designWorking.m_vectorComponents;
 
-    if (uiPlaneAtZ > 1)
+    if (fAllowRemoveWholeFloor && (uiPlaneAtZ > 1))
     {
-        // If i'm removing a single floor tile, the client actually removes the whole floor (even if it has different IDs), so we need to reflect that change here.
-        bool fRemoveFloor = false;
+        // If i'm removing a single floor tile and below there's a stair, this tile is invalid;
+        //  by removing this single invalid tile, the client actually removes the whole floor (even if it has different IDs), so we need to reflect that change here.
+        // It's not perfect though, because the client removes the whole floor if on the same row or column of the selected tile there's a stair below.
+        //  The way we are checking if we have a stair below doesn't work if the selected floor tile has below the lowest (lowest z) stair part.
+        bool fIsFloor = false;
         for (size_t i = 0; i < uiCount; ++i)
         {
             if (pComponents[i]->m_isFloor)
             {
-                fRemoveFloor = true;
+                fIsFloor = true;
                 break;
             }
         }
-        if (fRemoveFloor)
+
+        if (fIsFloor)
         {
-            for (ComponentsContainer::iterator it = vectorComponents.begin(); it != vectorComponents.end(); )
+            bool fStairsBelow = false;
+            Component* pComponentsStairs[INT8_MAX];
+            size_t uiCountStairs = GetComponentsAt(x, y, z - 1, pComponentsStairs, &m_designWorking);
+            if (uiCountStairs > 0)
             {
-                Component* pComp = *it;
-                if ((pComp->m_isFloor) && (pComp->m_item.m_dz == z))
-                    it = vectorComponents.erase(it);
-                else
-                    ++it;
+                for (size_t i = 0; i < uiCountStairs; ++i)
+                {
+                    if (pComponentsStairs[i]->m_isStair)
+                    {
+                        fStairsBelow = true;
+                        break;
+                    }
+                }
             }
+
+            if (fStairsBelow)
+            {
+                for (ComponentsContainer::iterator it = vectorComponents.begin(); it != vectorComponents.end(); )
+                {
+                    Component* pComp = *it;
+                    if ((pComp->m_isFloor) && (pComp->m_item.m_dz == z))
+                    {
+                        it = vectorComponents.erase(it);
+                        fComponentsChanged = true;
+                    }
+                    else
+                        ++it;
+                }
+            }           
         }
     }
-
+    
     bool fReplaceDirt = false;
     for (size_t i = 0; i < uiCount; ++i)
     {
@@ -759,10 +786,13 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x,
                 fReplaceDirt = true;
 
             vectorComponents.erase(it);
-            ++ m_designWorking.m_iRevision;
+            fComponentsChanged = true;
             break;
         }
     }
+
+    if (fComponentsChanged)
+        ++m_designWorking.m_iRevision;
 
     if (pClientSrc != nullptr && fReplaceDirt)
     {
@@ -770,6 +800,7 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x,
         if (rectDesign.IsInsideX(pt.m_x) && rectDesign.IsInsideX(pt.m_x - 1) && rectDesign.IsInsideY(pt.m_y) && rectDesign.IsInsideY(pt.m_y - 1))
             AddItem(nullptr, ITEMID_DIRT_TILE, x, y, 7);
     }
+
     SendStructureTo(pClientSrc);
 }
 
@@ -792,18 +823,18 @@ bool CItemMultiCustom::RemoveStairs(Component * pStairComponent)
     {
         if ((*i)->m_isStair == iStairID)
         {
-            bool bReplaceDirt = false;
+            bool fReplaceDirt = false;
             if ((*i)->m_isFloor && (GetPlane(*i) == 1) && (GetPlaneZ(GetPlane(*i)) == (*i)->m_item.m_dz))
-                bReplaceDirt = true;
+                fReplaceDirt = true;
 
             short x = (*i)->m_item.m_dx;
             short y = (*i)->m_item.m_dy;
             char z = (char)((*i)->m_item.m_dz);
 
             i = m_designWorking.m_vectorComponents.erase(i);
-            m_designWorking.m_iRevision++;
+            ++m_designWorking.m_iRevision;
 
-            if (bReplaceDirt)
+            if (fReplaceDirt)
                 AddItem(nullptr, ITEMID_DIRT_TILE, x, y, z);
         }
         else
@@ -826,7 +857,7 @@ void CItemMultiCustom::RemoveRoof(CClient * pClientSrc, ITEMID_TYPE id, short x,
     if ((pItemBase->GetTFlags() & UFLAG4_ROOF) == 0)
         return;
 
-    RemoveItem(pClientSrc, id, x, y, z);
+    RemoveItem(pClientSrc, id, x, y, z, false);
 }
 
 void CItemMultiCustom::SendVersionTo(CClient * pClientSrc) const
@@ -1121,9 +1152,9 @@ size_t CItemMultiCustom::GetComponentsAt(short x, short y, char z, Component ** 
 
     size_t count = 0;
     Component * pComponent;
-    for (size_t i = 0; i < pDesign->m_vectorComponents.size(); i++)
+    for (size_t i = 0; i < pDesign->m_vectorComponents.size(); ++i)
     {
-        pComponent = pDesign->m_vectorComponents.at(i);
+        pComponent = pDesign->m_vectorComponents[i];
 
         if (pComponent->m_item.m_dx != x || pComponent->m_item.m_dy != y)
             continue;
@@ -1608,7 +1639,8 @@ bool CItemMultiCustom::r_Verb(CScript & s, CTextConsole * pSrc) // Execute comma
                 (ITEMID_TYPE)(Exp_GetVal(ppArgs[0])),
                 (Exp_GetSVal(ppArgs[1])),
                 (Exp_GetSVal(ppArgs[2])),
-                (Exp_GetCVal(ppArgs[3])));
+                (Exp_GetCVal(ppArgs[3])),
+                false);
         }
         break;
 

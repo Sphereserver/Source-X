@@ -102,7 +102,7 @@ public:
     void AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z = INT8_MIN, short iStairID = 0);
     void AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z = INT8_MIN, short iStairID = -1);
     void AddRoof(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z);
-    void RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z);
+    void RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z, bool fRemoveWholeFloor);
     bool RemoveStairs(Component * pStairComponent);
     void RemoveRoof(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z);
     void SendVersionTo(CClient * pClientSrc) const;

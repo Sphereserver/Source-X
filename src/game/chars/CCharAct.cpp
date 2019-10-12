@@ -1984,19 +1984,20 @@ bool CChar::ItemDrop( CItem * pItem, const CPointMap & pt )
 		//DEBUG_ERR(("Drop: %d / Min: %d / Max: %d\n", pItem->GetFixZ(pt), block.m_Bottom.m_z, block.m_Top.m_z));
 
 		CPointMap ptStack = pt;
-		char iStackMaxZ = block.m_Top.m_z;	//pt.m_z + 16;
-		CItem * pStack = nullptr;
+		const char iStackMaxZ = block.m_Top.m_z;	//pt.m_z + 16;
+		const CItem * pStack = nullptr;
 		CWorldSearch AreaItems(ptStack);
 		for (;;)
 		{
 			pStack = AreaItems.GetItem();
 			if ( pStack == nullptr )
 				break;
-			if ( pStack->GetTopZ() < pt.m_z || pStack->GetTopZ() > iStackMaxZ )
+            const char iStackZ = pStack->GetTopZ();
+			if (iStackZ < pt.m_z || iStackZ > iStackMaxZ )
 				continue;
 
-			const short iStackHeight = ptStack.m_z + pStack->GetHeight();
-			ptStack.m_z = (char)maximum(iStackHeight, 1);
+			const short iStackHeight = pStack->GetHeight();
+			ptStack.m_z += (char)maximum(iStackHeight, 1);
 			//DEBUG_ERR(("(%d > %d) || (%d > %d)\n", ptStack.m_z, iStackMaxZ, ptStack.m_z + maximum(iItemHeight, 1), iStackMaxZ + 3));
 			if ( (ptStack.m_z > iStackMaxZ) || (ptStack.m_z + maximum(iItemHeight, 1) > iStackMaxZ + 3) )
 			{
