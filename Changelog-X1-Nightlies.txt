@@ -1917,3 +1917,8 @@ WARNING: Important change!
 
 13-10-2019, Nolok
 - Fixed: Exception was generated when using an item on a t_loom item with invalid MORE.
+
+13-10-2019, Julian
+- Modified: Train ContextMenu to not show disabled skills (SKF_DISABLED).
+- Modified: Now you can modify Animal Taming range from [SKILL] definition.
+- Updated: sphereCrypt.ini
