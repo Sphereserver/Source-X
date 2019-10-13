@@ -3691,7 +3691,7 @@ bool PacketHouseDesignDestroyItem::onReceive(NetState* net)
 	skip(1); // 0x00
 	word z = (word)(readInt32());
 
-	house->RemoveItem(client, id, x, y, (char)(z));
+	house->RemoveItem(client, id, x, y, (char)z, true);
 	return true;
 }
 

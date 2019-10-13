@@ -1909,3 +1909,8 @@ WARNING: Important change!
 - Fixed: HTTP server did check the date of last modification of the webpage to provide even if the "If-Modified-Since" request HTTP header was not sent by the browser,
 	thus serving a blank webpage.
 - Added: Connection Type information to the client disconnection log message, when the client wasn't a Ultima Online one (but HTTP, Axis, etc).
+
+12-10-2019, Nolok
+- Fixed: EF_ItemStacking not working when dropping an item at Z < 0 (Issue #322).
+- Fixed: While removing a floor tile in house customization, the whole floor was removed even if it wasn't invalid. Also, every other item on that floor was removed. (Issue #323).
+- Fixed: Ridden animations not being displayed by the Enhanced Client.

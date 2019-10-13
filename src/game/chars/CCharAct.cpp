@@ -1068,13 +1068,16 @@ bool CChar::UpdateAnimate(ANIM_TYPE action, bool fTranslate, bool fBackward , by
 	ANIM_TYPE_NEW subaction = (ANIM_TYPE_NEW)(-1);
 	byte variation = 0;		//Seems to have some effect for humans/elfs vs gargoyles
 	if (fTranslate)
-		action = GenerateAnimate( action, true, fBackward);
+		action = GenerateAnimate(action, true, fBackward);
 	ANIM_TYPE_NEW action1 = (ANIM_TYPE_NEW)(action);
 
 	if (IsPlayableCharacter())		//Perform these checks only for Gargoyles or in Enhanced Client
 	{
 		CItem * pWeapon = m_uidWeapon.ItemFind();
-		if (pWeapon && ((action == ANIM_ATTACK_WEAPON) || (action == ANIM_ATTACK_BOW) || (action == ANIM_ATTACK_XBOW)) )
+		if (pWeapon && 
+            ( (action == ANIM_ATTACK_WEAPON) || (action == ANIM_ATTACK_BOW) || (action == ANIM_ATTACK_XBOW) || (action == ANIM_HORSE_SLAP) ||
+              (action == ANIM_HORSE_ATTACK) || (action == ANIM_HORSE_ATTACK_BOW) || (action == ANIM_HORSE_ATTACK_XBOW)
+            ) )
 		{
 			if (!IsGargoyle())		//Set variation to 1 for non gargoyle characters (Humans and Elfs using EC) in all fighting animations.
 				variation = 1;
@@ -1117,11 +1120,12 @@ bool CChar::UpdateAnimate(ANIM_TYPE action, bool fTranslate, bool fBackward , by
 		{
 			switch (action)
 			{
-				case ANIM_ATTACK_1H_SLASH:
+                case ANIM_HORSE_ATTACK:
 					action1 = NANIM_ATTACK;
 					subaction = NANIM_ATTACK_2H_BASH;
 					break;
 				case ANIM_ATTACK_1H_PIERCE:
+                case ANIM_ATTACK_1H_SLASH:
 					action1 = NANIM_ATTACK;
 					subaction = NANIM_ATTACK_1H_SLASH;
 					break;
@@ -1129,6 +1133,7 @@ bool CChar::UpdateAnimate(ANIM_TYPE action, bool fTranslate, bool fBackward , by
 					action1 = NANIM_ATTACK;
 					subaction = NANIM_ATTACK_1H_PIERCE;
 					break;
+                case ANIM_HORSE_SLAP:
 				case ANIM_ATTACK_2H_PIERCE:
 					action1 = NANIM_ATTACK;
 					subaction = NANIM_ATTACK_2H_SLASH;
@@ -1150,9 +1155,11 @@ bool CChar::UpdateAnimate(ANIM_TYPE action, bool fTranslate, bool fBackward , by
 					subaction = NANIM_SPELL_SUMMON;
 					break;
 				case ANIM_ATTACK_BOW:
+                case ANIM_HORSE_ATTACK_BOW:
 					subaction = NANIM_ATTACK_BOW;
 					break;
 				case ANIM_ATTACK_XBOW:
+                case ANIM_HORSE_ATTACK_XBOW:
 					subaction = NANIM_ATTACK_CROSSBOW;
 					break;
 				case ANIM_GET_HIT:
@@ -1197,10 +1204,11 @@ bool CChar::UpdateAnimate(ANIM_TYPE action, bool fTranslate, bool fBackward , by
 
 
 	// New animation packet (PacketActionBasic): it supports some extra Gargoyle animations (and it can play Human/Elf animations), but lacks the animation "timing"/delay.
+    //  EA always uses this packet for the Enhanced Client.
 
-	// Old animation packet (PacketAction): doesn't really support Gargoyle animations (supported even by the Enhanced Client).
+	// Old animation packet (PacketAction): doesn't really support Gargoyle animations; supported also by the Enhanced Client.
 	//  On 2D/CC clients it can play Gargoyle animations, on Enhanced Client it can play some Gargoyle anims.
-	//	 On 2D/CC clients (even recent, Stygian Abyss ones) it supports the animation "timing"/delay, on Enhanced Client it has a fixed delay. EA always uses this packet for the EC.
+	//	On 2D/CC clients (even recent, Stygian Abyss ones) it supports the animation "timing"/delay, on Enhanced Client it has a fixed delay.
 
 	PacketActionBasic* cmdnew = new PacketActionBasic(this, action1, subaction, variation);
 	PacketAction* cmd = new PacketAction(this, action, 1, fBackward, iFrameDelay, iAnimLen);
@@ -1993,19 +2001,20 @@ bool CChar::ItemDrop( CItem * pItem, const CPointMap & pt )
 		//DEBUG_ERR(("Drop: %d / Min: %d / Max: %d\n", pItem->GetFixZ(pt), block.m_Bottom.m_z, block.m_Top.m_z));
 
 		CPointMap ptStack = pt;
-		char iStackMaxZ = block.m_Top.m_z;	//pt.m_z + 16;
-		CItem * pStack = nullptr;
+		const char iStackMaxZ = block.m_Top.m_z;	//pt.m_z + 16;
+		const CItem * pStack = nullptr;
 		CWorldSearch AreaItems(ptStack);
 		for (;;)
 		{
 			pStack = AreaItems.GetItem();
 			if ( pStack == nullptr )
 				break;
-			if ( pStack->GetTopZ() < pt.m_z || pStack->GetTopZ() > iStackMaxZ )
+            const char iStackZ = pStack->GetTopZ();
+			if (iStackZ < pt.m_z || iStackZ > iStackMaxZ )
 				continue;
 
-			const short iStackHeight = ptStack.m_z + pStack->GetHeight();
-			ptStack.m_z = (char)maximum(iStackHeight, 1);
+			const short iStackHeight = pStack->GetHeight();
+			ptStack.m_z += (char)maximum(iStackHeight, 1);
 			//DEBUG_ERR(("(%d > %d) || (%d > %d)\n", ptStack.m_z, iStackMaxZ, ptStack.m_z + maximum(iItemHeight, 1), iStackMaxZ + 3));
 			if ( (ptStack.m_z > iStackMaxZ) || (ptStack.m_z + maximum(iItemHeight, 1) > iStackMaxZ + 3) )
 			{
