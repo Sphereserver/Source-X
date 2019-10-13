@@ -2056,11 +2056,17 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 		SysMessageDefault( DEFMSG_TAMING_CANT );
 		return -SKTRIG_QTY;
 	}
-	if ( GetTopDist3D(pChar) > 10 )
+
+	CSkillDef* pSkillDef = g_Cfg.GetSkillDef(SKILL_TAMING);
+	if (pSkillDef->m_Range <= 0)
+		pSkillDef->m_Range = 10;
+
+	if ( GetTopDist3D(pChar) > pSkillDef->m_Range)
 	{
 		SysMessageDefault( DEFMSG_TAMING_REACH );
 		return -SKTRIG_QTY;
 	}
+	
 	if ( !CanSeeLOS( pChar ) )
 	{
 		SysMessageDefault( DEFMSG_TAMING_LOS );

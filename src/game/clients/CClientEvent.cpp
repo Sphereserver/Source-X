@@ -2383,6 +2383,8 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 						continue;
 					if (i == SKILL_SPELLWEAVING)
 						continue;
+					if (g_Cfg.IsSkillFlag((SKILL_TYPE)i, SKF_DISABLED))
+						continue;
 
 					ushort wSkillNPC = pChar->Skill_GetBase( (SKILL_TYPE)i );
 					if (wSkillNPC < 300)
