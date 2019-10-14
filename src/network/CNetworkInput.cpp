@@ -334,7 +334,7 @@ bool CNetworkInput::processGameClientData(CNetState* state, Packet* buffer)
     {
         ASSERT(remainingLength == packet->getRemainingLength());
         byte packetId = packet->getRemainingData()[0];
-        Packet* handler = m_thread->m_manager.getPacketManager().getHandler(packetId);
+        Packet* handler = m_thread->m_manager->getPacketManager().getHandler(packetId);
 
         if (g_Cfg.m_iDebugFlags & DEBUGF_PACKETS)
         {

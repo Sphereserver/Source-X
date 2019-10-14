@@ -14,7 +14,7 @@ static const char* GenerateNetworkThreadName(size_t id)
 }
 
 
-CNetworkThread::CNetworkThread(CNetworkManager& manager, size_t id)
+CNetworkThread::CNetworkThread(CNetworkManager* manager, size_t id)
     : AbstractSphereThread(GenerateNetworkThreadName(id), IThread::Disabled),
     m_manager(manager), m_id(id)
 {
@@ -171,9 +171,9 @@ CNetState* NetworkThreadStateIterator::next(void)
     else
     {
         // different thread, we have to use the manager's states
-        while (m_nextIndex < m_thread->m_manager.m_stateCount)
+        while (m_nextIndex < m_thread->m_manager->m_stateCount)
         {
-            CNetState* state = m_thread->m_manager.m_states[m_nextIndex];
+            CNetState* state = m_thread->m_manager->m_states[m_nextIndex];
             ++m_nextIndex;
 
             if (state != nullptr && state->getParentThread() == m_thread)
