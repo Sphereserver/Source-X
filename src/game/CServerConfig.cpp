@@ -8,8 +8,9 @@
 #include "../common/CException.h"
 #include "../common/CUOInstall.h"
 #include "../common/sphereversion.h"
+#include "../network/CClientIterator.h"
+#include "../network/CNetworkManager.h"
 #include "../network/CSocket.h"
-#include "../network/network.h"
 #include "../sphere/ProfileTask.h"
 #include "../sphere/ntwindow.h"
 #include "clients/CAccount.h"
@@ -268,10 +269,8 @@ CServerConfig::CServerConfig()
 
 	m_iPetsInheritNotoriety = 0;
 
-#ifdef _MTNETWORK
-	m_iNetworkThreads			= 0;				// if there aren't the ini settings, by default we'll not use additional network threads
-	m_iNetworkThreadPriority	= IThread::Disabled;
-#endif
+	m_iNetworkThreads		= 0;				// if there aren't the ini settings, by default we'll not use additional network threads
+	m_iNetworkThreadPriority= IThread::Disabled;
 	m_fUseAsyncNetwork		= 0;
 	m_iNetMaxPings			= 15;
 	m_iNetHistoryTTL		= 300;
@@ -562,10 +561,8 @@ enum RC_TYPE
 	RC_MYSQLTICKS,				// m_bMySqlTicks
 	RC_MYSQLUSER,				// m_sMySqlUser
 	RC_NETTTL,					// m_iNetHistoryTTL
-#ifdef _MTNETWORK
 	RC_NETWORKTHREADPRIORITY,	// m_iNetworkThreadPriority
 	RC_NETWORKTHREADS,			// m_iNetworkThreads
-#endif
 	RC_NORESROBE,
 	RC_NOTOTIMEOUT,
 	RC_NOWEATHER,				// m_fNoWeather
@@ -810,10 +807,8 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "MYSQLTICKS",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bMySqlTicks),			0 }},
 	{ "MYSQLUSER",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sMySqlUser),			0 }},
 	{ "NETTTL",					{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetHistoryTTL),		0 }},
-#ifdef _MTNETWORK
 	{ "NETWORKTHREADPRIORITY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetworkThreadPriority),	0 }},
 	{ "NETWORKTHREADS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetworkThreads),		0 }},
-#endif
 	{ "NORESROBE",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNoResRobe),			0 }},
 	{ "NOTOTIMEOUT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNotoTimeout),			0 }},
 	{ "NOWEATHER",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNoWeather),			0 }},
@@ -1297,7 +1292,6 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			g_Cfg.m_iTooltipCache = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 
-#ifdef _MTNETWORK
 		case RC_NETWORKTHREADS:
 			if (g_Serv.IsLoading())
 			{
@@ -1325,7 +1319,6 @@ bool CServerConfig::r_LoadVal( CScript &s )
 				m_iNetworkThreadPriority = priority;
 			}
 			break;
-#endif
 		case RC_WALKBUFFER:
 			m_iWalkBuffer = s.GetArgVal() * MSECS_PER_TENTH;
 			break;
@@ -2565,7 +2558,7 @@ void CServerConfig::LoadSortSpells()
 uint CServerConfig::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar chars )
 {
 	// This is needed by the packet 0xB9, which is sent to the client very early, before we can know if this is a 2D, KR, EC, 3D client.
-	// Using the NetState here to know which kind of client is it is pointless, because at this time the client type is always the default value (2D).
+	// Using the CNetState here to know which kind of client is it is pointless, because at this time the client type is always the default value (2D).
 
 	uint retValue = 0;
 
@@ -2854,11 +2847,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			while ( pScript->ReadKeyParse())
 			{
 				strcpy(ipBuffer, pScript->GetKey());
-#ifndef _MTNETWORK
-				HistoryIP& history = g_NetworkIn.getIPHistoryManager().getHistoryForIP(ipBuffer);
-#else
 				HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(ipBuffer);
-#endif
 				history.setBlocked(true);
 			}
 		}
@@ -4167,9 +4156,6 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 		if ( IsSetEF(EF_UsePingServer) )			catresname(zExperimentalFlags, "UsePingServer");
 		if ( IsSetEF(EF_FixCanSeeInClosedConts) )	catresname(zExperimentalFlags, "FixCanSeeInClosedConts");
         if ( IsSetEF(EF_WalkCheckHeightMounted) )	catresname(zExperimentalFlags, "WalkCheckHeightMounted");
-#ifndef _MTNETWORK
-		if ( IsSetEF(EF_NetworkOutThread) ) catresname(zExperimentalFlags, "NetworkOutThread");
-#endif
 
 		if ( zExperimentalFlags[0] != '\0' )
 		{

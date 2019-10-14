@@ -1,7 +1,9 @@
 
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
-#include "../../network/network.h"
+#include "../../network/CClientIterator.h"
+#include "../../network/CNetworkManager.h"
+#include "../../network/CIPHistoryManager.h"
 #include "../../network/send.h"
 #include "../../network/packet.h"
 #include "../chars/CChar.h"
@@ -16,18 +18,14 @@
 /////////////////////////////////////////////////////////////////
 // -CClient stuff.
 
-CClient::CClient(NetState* state)
+CClient::CClient(CNetState* state)
 {
 	// This may be a web connection or Telnet ?
 	m_net = state;
 	SetConnectType( CONNECT_UNK );	// don't know what sort of connect this is yet.
 
 	// update ip history
-#ifndef _MTNETWORK
-	HistoryIP& history = g_NetworkIn.getIPHistoryManager().getHistoryForIP(GetPeer());
-#else
 	HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(GetPeer());
-#endif
 	++ history.m_connecting;
 	++ history.m_connected;
 
@@ -80,11 +78,7 @@ CClient::~CClient()
 	bool bWasChar;
 
 	// update ip history
-#ifndef _MTNETWORK
-	HistoryIP& history = g_NetworkIn.getIPHistoryManager().getHistoryForIP(GetPeer());
-#else
 	HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(GetPeer());
-#endif
 	if ( GetConnectType() != CONNECT_GAME )
 		--history.m_connecting;
 	--history.m_connected;
@@ -1327,11 +1321,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			addTarget( CLIMODE_TARG_REPAIR, g_Cfg.GetDefaultMsg( DEFMSG_SELECT_ITEM_REPAIR ) );
 			break;
 		case CV_FLUSH:
-#ifndef _MTNETWORK
-			g_NetworkOut.flush(this);
-#else
 			g_NetworkManager.flush(GetNetState());
-#endif
 			break;
 		case CV_RESEND:
 			addReSync();

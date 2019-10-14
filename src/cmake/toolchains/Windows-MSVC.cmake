@@ -83,10 +83,8 @@ function (toolchain_exe_stuff)
 	TARGET_COMPILE_DEFINITIONS ( spheresvr PUBLIC
 	  # _WIN32 is always defined, even on 64 bits. Keeping it for compatibility with external code and libraries.
 		_WIN32
-      # Use the "z_" prefix for the zlib functions
+	  # Use the "z_" prefix for the zlib functions
 		Z_PREFIX
-	  # Multi-threaded networking support.
-		_MTNETWORK
 	  # GIT defs.
 		_GITVERSION
 	  # Temporary setting _CRT_SECURE_NO_WARNINGS to do not spam

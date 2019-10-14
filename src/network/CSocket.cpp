@@ -4,6 +4,18 @@
 #endif
 #include "../common/sphere_library/sstring.h"
 
+void AddSocketToSet(fd_set& fds, SOCKET socket, int& count)
+{
+#ifdef _WIN32
+    UNREFERENCED_PARAMETER(count);
+    FD_SET(socket, &fds);
+#else
+    FD_SET(socket, &fds);
+    if (socket > count)
+        count = socket;
+#endif
+}
+
 
 //		***		***			***
 //

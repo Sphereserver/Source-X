@@ -79,9 +79,6 @@ enum EF_TYPE
 	EF_UsePingServer				= 0x0008000,    // Enable the experimental Ping Server (for showing pings on the server list, uses UDP port 12000)
 	EF_FixCanSeeInClosedConts		= 0x0020000,    // Change CANSEE to return 0 for items inside containers that a client hasn't opened
     EF_WalkCheckHeightMounted       = 0x0040000,    // Unlike the client does, assume an height increased by 4 in walkchecks if the char is mounted. Enabling this may prevent mounted characters to walk under places they could before.
-#ifndef _MTNETWORK
-	EF_NetworkOutThread				= 0x0800000     //
-#endif
 };
 
 /**
@@ -488,10 +485,8 @@ public:
 	CSString m_sMySqlDB;    // MySQL DB.
 
 	// network settings
-#ifdef _MTNETWORK
 	uint m_iNetworkThreads;         // number of network threads to create
 	uint m_iNetworkThreadPriority;  // priority of network threads
-#endif
 	int	 m_fUseAsyncNetwork;        // 0=normal send, 1=async send, 2=async send for 4.0.0+ only
 	int	 m_iNetMaxPings;            // max pings before blocking an ip
 	int	 m_iNetHistoryTTL;          // time to remember an ip

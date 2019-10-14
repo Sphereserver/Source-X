@@ -1,7 +1,6 @@
 
 #include "../../common/resource/blocks/CDialogDef.h"
 #include "../../common/resource/CResourceLock.h"
-#include "../../network/network.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"

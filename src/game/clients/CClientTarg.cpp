@@ -707,11 +707,12 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 					if ( ++iArg >= iArgQty )
 						iArg = 1;
 					CItem * pItem = CItem::CreateTemplate((ITEMID_TYPE)(RES_GET_INDEX(piArgs[iArg])), nullptr, m_pChar);
-					ASSERT(pItem);
+                    if (!pItem)
+                        continue;
 					pItem->SetAttr( ATTR_MOVE_NEVER );
 					CPointMap ptCur((word)mx, (word)my, z, pt.m_map);
 					pItem->MoveToUpdate( ptCur );
-					iCount++;
+					++iCount;
 				}
 			}
 
@@ -2108,6 +2109,8 @@ static lpctstr const sm_Txt_LoomUse[] =
 			// throw away what was on here before
 			SysMessageDefault( DEFMSG_ITEMUSE_LOOM_REMOVE );
 			CItem * pItemCloth = CItem::CreateTemplate( ClothID, nullptr, m_pChar );
+            if (!pItemCloth)
+                return false;
 			pItemCloth->SetAmount( (word)pItemTarg->m_itLoom.m_ClothQty );
 			pItemTarg->m_itLoom.m_ClothQty = 0;
 			pItemTarg->m_itLoom.m_ridCloth.Clear();

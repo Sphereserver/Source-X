@@ -1,6 +1,5 @@
 
 #include "../../common/resource/CResourceLock.h"
-#include "../../network/network.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
@@ -2399,6 +2398,8 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 					if (!g_Cfg.m_SkillIndexDefs.IsValidIndex(i))
 						continue;
 					if (i == SKILL_SPELLWEAVING)
+						continue;
+					if (g_Cfg.IsSkillFlag((SKILL_TYPE)i, SKF_DISABLED))
 						continue;
 
 					ushort wSkillNPC = pChar->Skill_GetBase( (SKILL_TYPE)i );

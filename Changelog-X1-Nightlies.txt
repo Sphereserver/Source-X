@@ -29,7 +29,7 @@
 - Fixed: Weird crash related to a change on CChar:OnTick()
 	(Not really fixed, just reverted the code because I couldn't track what is exactly causing it and seems to happen when there are ~100 clients
 	 online, so I'm not going to mess a lot with it, it's not cool to use 100 players to do tests :) ).
-- Attempt to log and stop a crash related to the NetworkOutput.
+- Attempt to log and stop a crash related to the CNetworkOutput.
 - Fixed: NPC_FightMagery not correctly checking if the NPC can use magic skills and creating some infinite loops under certain circumstances.
 
 15-05-2016, XuN
@@ -1913,4 +1913,12 @@ WARNING: Important change!
 12-10-2019, Nolok
 - Fixed: EF_ItemStacking not working when dropping an item at Z < 0 (Issue #322).
 - Fixed: While removing a floor tile in house customization, the whole floor was removed even if it wasn't invalid. Also, every other item on that floor was removed. (Issue #323).
-- Fixed: Ridden animations not being displayed by the Enhanced Client.
+- Fixed: Ridden combat animations not being displayed by the Enhanced Client.
+
+13-10-2019, Nolok
+- Fixed: Exception was generated when using an item on a t_loom item with invalid MORE.
+
+13-10-2019, Julian
+- Modified: Train ContextMenu to not show disabled skills (SKF_DISABLED).
+- Modified: Now you can modify Animal Taming range from [SKILL] definition.
+- Updated: sphereCrypt.ini

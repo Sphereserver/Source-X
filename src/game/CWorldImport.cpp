@@ -385,7 +385,12 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			{
 				if ( m_pCurObj != nullptr )
 					return false;
-				pItem = CItem::CreateTemplate((ITEMID_TYPE)(atoi(pArg)));
+				pItem = CItem::CreateTemplate((ITEMID_TYPE)atoi(pArg));
+                if (!pItem)
+                {
+                    DEBUG_ERR(("Import: Bad Item '%s'\n", pArg));
+                    break;
+                }
 				pItem->SetName( sName );
 				m_pCurObj = pItem;
 				m_pCurSer->m_pObj = pItem;
@@ -394,7 +399,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 
 			if ( m_pCurObj == nullptr )
 			{
-				DEBUG_ERR(( "Import:Bad Item Key '%s'\n", s.GetKey()));
+				DEBUG_ERR(( "Import: Bad Item Key '%s'\n", s.GetKey()));
 				break;
 			}
 			else if ( s.IsKey("CONT" ))

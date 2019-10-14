@@ -29,6 +29,15 @@
 #endif	// _WIN32
 
 
+#ifdef _WIN32
+#	define CLOSESOCKET(_x_)	{ shutdown(_x_, 2); closesocket(_x_); }
+#else
+#	define CLOSESOCKET(_x_)	{ shutdown(_x_, 2); close(_x_); }
+#endif
+
+void AddSocketToSet(fd_set& fds, SOCKET socket, int& count);
+
+
 struct CSocketAddressIP : public in_addr
 {
 	// Just the ip address. Not the port.
@@ -137,6 +146,7 @@ public:
 
 	int SetSockOpt( int nOptionName, const void* optval, int optlen, int nLevel = SOL_SOCKET ) const;
 	int GetSockOpt( int nOptionName, void* optval, int * poptlen, int nLevel = SOL_SOCKET ) const;
+
 #ifdef _WIN32
 	int IOCtlSocket(int icmd, DWORD * pdwArgs );
 	int SendAsync( LPWSABUF lpBuffers, DWORD dwBufferCount, LPDWORD lpNumberOfBytesSent, DWORD dwFlags, LPWSAOVERLAPPED lpOverlapped, LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine ) const;

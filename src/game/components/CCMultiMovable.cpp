@@ -1,3 +1,4 @@
+#include "../../network/CClientIterator.h"
 #include "../../network/send.h"
 #include "../clients/CClient.h"
 #include "../chars/CChar.h"
@@ -285,7 +286,7 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta, bool fUpdateViewFull)
         if (pCharClient == nullptr)
             continue;
 
-        const NetState* pNetState = pClient->GetNetState();
+        const CNetState* pNetState = pClient->GetNetState();
         const bool fClientUsesSmoothSailing = !IsSetOF(OF_NoSmoothSailing) && (pNetState->isClientVersion(MINCLIVER_HS) || pNetState->isClientEnhanced());
 
         const CPointMap& ptMe = pCharClient->GetTopPoint();

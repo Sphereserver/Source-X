@@ -3,7 +3,6 @@
 
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
-#include "../../network/network.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
@@ -2138,7 +2137,7 @@ void CClient::addHealthBarUpdate( const CChar * pChar ) const
 	if ( pChar == nullptr )
 		return;
 
-    const NetState* pNetState = GetNetState();
+    const CNetState* pNetState = GetNetState();
     if ( PacketHealthBarUpdateNew::CanSendTo(pNetState) )
         new PacketHealthBarUpdateNew(this, pChar);
     else if ( PacketHealthBarUpdate::CanSendTo(pNetState) )

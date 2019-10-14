@@ -93,8 +93,6 @@ function (toolchain_exe_stuff)
 		_WIN32
       # Use the "z_" prefix for the zlib functions
 		Z_PREFIX
-	  # Multi-threaded networking support.
-		_MTNETWORK
 	  # GIT defs.
 		_GITVERSION
 	  # Temporary setting _CRT_SECURE_NO_WARNINGS to do not spam

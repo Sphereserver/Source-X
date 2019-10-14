@@ -77,15 +77,10 @@ ADD(CVarDefCont,			"CVarDefCont");
 ADD(CVarDefContNum,			"CVarDefContNum");
 ADD(CVarDefContStr,			"CVarDefContStr");
 ADD(CVarDefMap,				"CVarDefMap");
-#ifndef _MTNETWORK
-	ADD(NetworkIn,				"NetworkIn");
-	ADD(NetworkOut,				"NetworkOut");
-#else
-	ADD(NetworkInput,			"NetworkInput");
-	ADD(NetworkOutput,			"NetworkOutput");
-	ADD(NetworkThread,			"NetworkThread");
-	ADD(NetworkManager,			"NetworkManager");
-#endif
+ADD(CNetworkInput,			"CNetworkInput");
+ADD(CNetworkOutput,			"CNetworkOutput");
+ADD(CNetworkThread,			"CNetworkThread");
+ADD(CNetworkManager,			"CNetworkManager");
 #ifdef _WIN32
 	ADD(CNTWindow,              "CNTWindow");
 #endif

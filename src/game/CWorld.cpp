@@ -1,7 +1,8 @@
 #include "../common/CDataBase.h"
 #include "../common/CException.h"
 #include "../common/sphereversion.h"
-#include "../network/network.h"
+#include "../network/CClientIterator.h"
+#include "../network/CNetworkManager.h"
 #include "../network/send.h"
 #include "../sphere/ProfileTask.h"
 #include "../common/CLog.h"
@@ -1109,13 +1110,8 @@ bool CWorld::SaveForce() // Save world state
 {
 	ADDTOCALLSTACK("CWorld::SaveForce");
 	Broadcast( g_Cfg.GetDefaultMsg( DEFMSG_SERVER_WORLDSAVE ) );
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive() == false)
-		g_NetworkOut.flushAll();
-#else
 	if (g_NetworkManager.isOutputThreaded() == false)
 		g_NetworkManager.flushAllClients();
-#endif
 
 	g_Serv.SetServerMode(SERVMODE_Saving);	// Forced save freezes the system.
 	bool fSave = true;
@@ -1338,20 +1334,12 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 		//Should we flush only non threaded output or force it
 		//to flush on any conditions?
 
-#ifndef _MTNETWORK
-		if (g_NetworkOut.isActive() == false)
-#else
 		if (g_NetworkManager.isOutputThreaded() == false)
-#endif
         {
 #ifdef _DEBUG
 			g_Log.EventDebug("Flushing %" PRIuSIZE_T " client(s) output data...\n", g_Serv.StatGet(SERV_STAT_CLIENTS));
 #endif
-#ifndef _MTNETWORK
-			g_NetworkOut.flushAll();
-#else
 			g_NetworkManager.flushAllClients();
-#endif
 #ifdef _DEBUG
 			g_Log.EventDebug("Done flushing clients output data.\n");
 #endif
@@ -1404,13 +1392,9 @@ void CWorld::SaveStatics()
 		r_Write(m_FileStatics);
 
 		Broadcast( g_Cfg.GetDefaultMsg(DEFMSG_SERVER_WORLDSTATICSAVE) );
-#ifndef _MTNETWORK
-		if (g_NetworkOut.isActive() == false)
-			g_NetworkOut.flushAll();
-#else
+
 		if (g_NetworkManager.isOutputThreaded() == false)
 			g_NetworkManager.flushAllClients();
-#endif
 
 		//	loop through all sectors and save static items
 		for ( int m = 0; m < MAP_SUPPORTED_QTY; ++m )

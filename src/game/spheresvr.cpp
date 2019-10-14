@@ -1,6 +1,6 @@
 
 #ifdef _LIBEV
-	#include "../sphere/linuxev.h"
+	#include "../network/linuxev.h"
 	#include "../sphere/UnixTerminal.h"
 #endif
 
@@ -16,7 +16,7 @@
 #include "../common/CException.h"
 #include "../common/CUOInstall.h"
 #include "../common/sphereversion.h"	// sphere version
-#include "../network/network.h" // network thread
+#include "../network/CNetworkManager.h"
 #include "../network/PingServer.h"
 #include "../sphere/asyncdb.h"
 #include "../sphere/ntwindow.h"
@@ -127,12 +127,7 @@ CWorld			g_World;			// the world. (we save this stuff)
 #ifdef _LIBEV
 	extern LinuxEv g_NetworkEvent;
 #endif
-#ifndef _MTNETWORK
-	NetworkIn g_NetworkIn;
-	NetworkOut g_NetworkOut;
-#else
-	NetworkManager g_NetworkManager;
-#endif
+	CNetworkManager g_NetworkManager;
 
 // Again, game servers stuff.
 CServerConfig	g_Cfg;
@@ -170,17 +165,6 @@ MainThread::MainThread()
     m_profile.EnableProfile(PROFILE_SHIPS);
     m_profile.EnableProfile(PROFILE_TIMEDFUNCTIONS);
     m_profile.EnableProfile(PROFILE_TIMERS);
-#ifndef _MTNETWORK
-	//m_profile.EnableProfile(PROFILE_DATA_TX);
-	m_profile.EnableProfile(PROFILE_DATA_RX);
-#else
-#ifndef MTNETWORK_INPUT
-	m_profile.EnableProfile(PROFILE_DATA_RX);
-#endif
-#ifndef MTNETWORK_OUTPUT
-	m_profile.EnableProfile(PROFILE_DATA_TX);
-#endif
-#endif
 }
 
 void MainThread::onStart()
@@ -294,11 +278,7 @@ void Sphere_ExitServer()
 
 	g_Serv.SetServerMode(SERVMODE_Exiting);
 
-#ifndef _MTNETWORK
-	g_NetworkOut.waitForClose();
-#else
 	g_NetworkManager.stop();
-#endif
 	g_Main.waitForClose();
 	g_PingServer.waitForClose();
 	g_asyncHdb.waitForClose();
@@ -359,32 +339,18 @@ int Sphere_OnTick()
 
 	// process incoming data
 	EXC_SET_BLOCK("network-in");
-#ifndef _MTNETWORK
-	g_NetworkIn.tick();
-#else
 	g_NetworkManager.processAllInput();
-#endif
 
 	EXC_SET_BLOCK("server");
 	g_Serv.OnTick();
 
 	// push outgoing data
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive() == false)
-	{
-		EXC_SET_BLOCK("network-out");
-		g_NetworkOut.tick();
-	}
-#else
 	EXC_SET_BLOCK("network-out");
 	g_NetworkManager.processAllOutput();
-#endif
 
-#ifdef _MTNETWORK
 	// don't put the network-tick between in.tick and out.tick, otherwise it will clean the out queue!
 	EXC_SET_BLOCK("network-tick");
 	g_NetworkManager.tick();	// then this thread has to call the network tick
-#endif
 
 	EXC_CATCH;
 	return g_Serv.GetExitFlag();
@@ -760,14 +726,9 @@ int _cdecl main( int argc, char * argv[] )
 			g_NetworkEvent.start();
 #endif
 
-#ifndef _MTNETWORK
-		g_NetworkIn.onStart();					// A class to process network input, but not multi threaded (declarations and definitions in network_singlethreaded.h/.cpp)
-		if (IsSetEF( EF_NetworkOutThread ))
-			g_NetworkOut.start();				// A class to process network output, but not multi threaded (declarations and definitions in network_singlethreaded.h/.cpp)
-#else
-		g_NetworkManager.start();	// NetworkManager creates a number of NetworkThread classes, which may run on new threads or on the calling thread. Every NetworkThread has
-									//  an instance of NetworkInput nad NetworkOutput, which support working in a multi threaded way (declarations and definitions in network_multithreaded.h/.cpp)
-#endif
+        // CNetworkManager creates a number of CNetworkThread classes, which may run on new threads or on the calling thread. Every CNetworkThread has
+        //  an instance of CNetworkInput nad CNetworkOutput, which support working in a multi threaded way (declarations and definitions in network_multithreaded.h/.cpp)
+		g_NetworkManager.start();
 
 		const bool shouldRunInThread = ( g_Cfg.m_iFreezeRestartTime > 0 );
 		if (shouldRunInThread)
@@ -800,5 +761,10 @@ int _cdecl main( int argc, char * argv[] )
 
 	return g_Serv.GetExitFlag();
 }
+
+
+#include "../../network/CNetworkInput.h"
+#include "../../network/CNetworkOutput.h"
+#include "../../network/CNetworkThread.h"
 
 #include "../tables/classnames.tbl"

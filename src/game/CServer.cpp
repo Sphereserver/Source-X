@@ -16,7 +16,9 @@
 #include "../common/CTextConsole.h"
 #include "../common/CLog.h"
 #include "../common/sphereversion.h"	// sphere version
-#include "../network/network.h"
+#include "../network/CClientIterator.h"
+#include "../network/CIPHistoryManager.h"
+#include "../network/CNetworkManager.h"
 #include "../sphere/ProfileTask.h"
 #include "../sphere/ntwindow.h"
 #include "chars/CChar.h"
@@ -1513,11 +1515,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 				if (ppArgs[1])
 					iTimeDecay = Exp_GetVal(ppArgs[1]);
 
-#ifndef _MTNETWORK
-				HistoryIP& history = g_NetworkIn.getIPHistoryManager().getHistoryForIP(ppArgs[0]);
-#else
 				HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(ppArgs[0]);
-#endif
 
                 if (iTimeDecay >= 0)
                 {
@@ -1801,11 +1799,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 		case SV_UNBLOCKIP:	// "UNBLOCKIP"
 			if (pSrc->GetPrivLevel() >= PLEVEL_Admin)
 			{
-#ifndef _MTNETWORK
-				HistoryIP& history = g_NetworkIn.getIPHistoryManager().getHistoryForIP(s.GetArgRaw());
-#else
 				HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(s.GetArgRaw());
-#endif
                 if (pSrc != this)
                 {
                     pSrc->SysMessagef("IP%s unblocked\n", history.m_blocked ? "" : " already");

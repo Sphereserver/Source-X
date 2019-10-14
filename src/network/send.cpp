@@ -19,7 +19,7 @@
 #include "../game/components/CCItemDamageable.h"
 #include "../game/components/CCPropsChar.h"
 #include "../game/CWorld.h"
-#include "network.h"
+#include "CNetworkManager.h"
 #include "send.h"
 #include "../common/zlib/zlib.h"
 
@@ -127,7 +127,7 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 	ADDTOCALLSTACK("PacketObjectStatus::PacketObjectStatus");
     ASSERT(object);
 
-	const NetState * state = target->GetNetState();
+	const CNetState * state = target->GetNetState();
 	const CChar *character = target->GetChar();
 	const CChar *objectChar = dynamic_cast<const CChar *>(object);
 	bool fCanRename = false;
@@ -353,11 +353,7 @@ PacketHealthBarUpdateNew::PacketHealthBarUpdateNew(const CClient* target, const 
 bool PacketHealthBarUpdateNew::onSend(const CClient* client)
 {
     ADDTOCALLSTACK("PacketHealthBarUpdateNew::onSend");
-#ifndef _MTNETWORK
-    if (g_NetworkOut.isActive())
-#else
     if (g_NetworkManager.isOutputThreaded())
-#endif
         return true;
 
     return client->CanSee(m_character.CharFind());
@@ -390,11 +386,7 @@ PacketHealthBarUpdate::PacketHealthBarUpdate(const CClient* target, const CChar*
 bool PacketHealthBarUpdate::onSend(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketHealthBarUpdate::onSend");
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive())
-#else
 	if (g_NetworkManager.isOutputThreaded())
-#endif
 		return true;
 
 	return client->CanSee(m_character.CharFind());
@@ -551,11 +543,7 @@ void PacketItemWorld::adjustItemData(const CClient* target, const CItem* item, I
 bool PacketItemWorld::onSend(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketItemWorld::onSend");
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive())
-#else
 	if (g_NetworkManager.isOutputThreaded())
-#endif
 		return true;
 
 	return client->CanSee(m_item.ItemFind());
@@ -796,7 +784,7 @@ PacketDragAnimation::PacketDragAnimation(const CChar* source, const CItem* item,
 	}
 }
 
-bool PacketDragAnimation::canSendTo(const NetState* state) const
+bool PacketDragAnimation::canSendTo(const CNetState* state) const
 {
 	// don't send to SA clients
 	if (state->isClientEnhanced() || state->isClientVersion(MINCLIVER_SA))
@@ -834,11 +822,7 @@ PacketContainerOpen::PacketContainerOpen(const CClient* target, const CObjBase* 
 bool PacketContainerOpen::onSend(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketContainerOpen::onSend");
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive())
-#else
 	if (g_NetworkManager.isOutputThreaded())
-#endif
 		return true;
 
 	return client->CanSee(m_container.ObjFind());
@@ -930,11 +914,7 @@ void PacketItemContainer::completeForTarget(const CClient* target, const CItem* 
 bool PacketItemContainer::onSend(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketItemContainer::onSend");
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive())
-#else
 	if (g_NetworkManager.isOutputThreaded())
-#endif
 		return true;
 
 	return client->CanSee(m_item.ItemFind());
@@ -1156,7 +1136,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 	initLength();
 	skip(2);
 
-    const NetState* ns = target->GetNetState();
+    const CNetState* ns = target->GetNetState();
     ASSERT(ns);
     const bool fClientEnhanced = ns->isClientEnhanced();
 	const bool fIncludeGrid = (ns->isClientVersion(MINCLIVER_ITEMGRID) || ns->isClientKR() || fClientEnhanced);
@@ -1264,7 +1244,7 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItem* spell
 {
 	ADDTOCALLSTACK("PacketItemContents::PacketItemContents(2)");
 
-    const NetState* ns = target->GetNetState();
+    const CNetState* ns = target->GetNetState();
     ASSERT(ns);
     const bool fIncludeGrid = (ns->isClientVersion(MINCLIVER_ITEMGRID) || ns->isClientKR() || ns->isClientEnhanced());
 
@@ -1304,7 +1284,7 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItemContain
 {
 	ADDTOCALLSTACK("PacketItemContents::PacketItemContents(3)");
 
-    const NetState* ns = target->GetNetState();
+    const CNetState* ns = target->GetNetState();
     ASSERT(ns);
     const bool fIncludeGrid = (ns->isClientVersion(MINCLIVER_ITEMGRID) || ns->isClientKR() || ns->isClientEnhanced());
 	const CSpellDef* spellDefinition;
@@ -1348,11 +1328,7 @@ bool PacketItemContents::onSend(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketItemContents::onSend");
 
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive())
-#else
 	if (g_NetworkManager.isOutputThreaded())
-#endif
 		return true;
 
 	return client->CanSee(m_container.ItemFind());
@@ -2343,7 +2319,7 @@ PacketCharacter::PacketCharacter(CClient* target, const CChar* character) : Pack
 	HUE_TYPE hue;
 	target->GetAdjustedCharID(character, id, hue);
 	const CPointMap &pos = character->GetTopPoint();
-    const NetState *ns = target->GetNetState();
+    const CNetState *ns = target->GetNetState();
 
 	initLength();
 	writeInt32(character->GetUID());
@@ -2412,11 +2388,7 @@ PacketCharacter::PacketCharacter(CClient* target, const CChar* character) : Pack
 bool PacketCharacter::onSend(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketCharacter::onSend");
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive())
-#else
 	if (g_NetworkManager.isOutputThreaded())
-#endif
 		return true;
 
 	return client->CanSee(m_character.CharFind());
@@ -2667,11 +2639,7 @@ bool PacketCorpseEquipment::onSend(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketCorpseEquipment::onSend");
 
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive())
-#else
 	if (g_NetworkManager.isOutputThreaded())
-#endif
 		return true;
 
 	return client->CanSee(m_corpse.ItemFind());
@@ -3505,7 +3473,7 @@ void PacketGumpDialog::writeControls(const CClient* target, const CSString* cont
 {
 	ADDTOCALLSTACK("PacketGumpDialog::writeControls");
 
-	const NetState* net = target->GetNetState();
+	const CNetState* net = target->GetNetState();
 	if (net->isClientVersion(MINCLIVER_COMPRESSDIALOG) || net->isClientKR() || net->isClientEnhanced())
 		writeCompressedControls(controls, controlCount, texts, textCount);
 	else
@@ -3970,11 +3938,7 @@ PacketPropertyListVersionOld::PacketPropertyListVersionOld(const CClient* target
 bool PacketPropertyListVersionOld::onSend(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketPropertyListVersionOld::onSend");
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive())
-#else
 	if (g_NetworkManager.isOutputThreaded())
-#endif
 		return true;
 
 	const CChar* character = client->GetChar();
@@ -4204,7 +4168,7 @@ PacketStatLocks::PacketStatLocks(const CClient* target, const CChar* character) 
 
     /*
     // Packet guides report this difference, but it would be better to test this before uncommenting
-    const NetState* ns = target->GetNetState();
+    const CNetState* ns = target->GetNetState();
     if (ns->isClient3D() || ns->isClientKR())
         writeByte(0x05);
     else
@@ -4611,11 +4575,7 @@ PacketPropertyList::PacketPropertyList(const CClient* target, const PacketProper
 bool PacketPropertyList::onSend(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketPropertyList::onSend");
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive())
-#else
 	if (g_NetworkManager.isOutputThreaded())
-#endif
 		return true;
 
 	const CChar* character = client->GetChar();
@@ -4835,11 +4795,7 @@ PacketPropertyListVersion::PacketPropertyListVersion(const CClient* target, cons
 bool PacketPropertyListVersion::onSend(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketPropertyList::onSend");
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive())
-#else
 	if (g_NetworkManager.isOutputThreaded())
-#endif
 		return true;
 
 	const CChar* character = client->GetChar();
@@ -5066,7 +5022,7 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item)
 {
 	ADDTOCALLSTACK("PacketItemWorldNew::PacketItemWorldNew");
     
-    const NetState *ns = target->GetNetState();
+    const CNetState *ns = target->GetNetState();
 	DataSource source;		// 0=Tiledata, 1=Character, 2=Multi
 	dword uid = item->GetUID();
 	ITEMID_TYPE id = item->GetDispID();
