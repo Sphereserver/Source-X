@@ -1,6 +1,6 @@
 
 #include "../../common/CLog.h"
-#include "../../network/network.h"
+#include "../../network/CClientIterator.h"
 #include "../chars/CChar.h"
 #include "../CWorld.h"
 #include "CClient.h"

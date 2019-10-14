@@ -61,5 +61,5 @@ void CDataBaseAsyncHelper::addQuery(bool isQuery, lpctstr sFunction, lpctstr sQu
 {
 	SimpleThreadLock stlThelock(m_queryMutex);
 
-	m_queriesTodo.push_back( QueryBlob_t(isQuery, FunctionQueryPair_t(CSString(sFunction), CSString(sQuery))) );
+	m_queriesTodo.emplace_back( QueryBlob_t(isQuery, FunctionQueryPair_t(CSString(sFunction), CSString(sQuery))) );
 }

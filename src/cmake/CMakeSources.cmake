@@ -5,8 +5,6 @@ sphere/asyncdb.h
 sphere/containers.h
 sphere/ConsoleInterface.cpp
 sphere/ConsoleInterface.h
-sphere/linuxev.cpp
-sphere/linuxev.h
 sphere/ProfileData.cpp
 sphere/ProfileData.h
 sphere/ProfileTask.cpp
@@ -25,11 +23,28 @@ SOURCE_GROUP (sphere FILES ${sphere_SRCS})
 
 # Network management files
 SET (network_SRCS
+network/CClientIterator.cpp
+network/CClientIterator.h
+network/CIPHistoryManager.cpp
+network/CIPHistoryManager.h
+network/CNetState.cpp
+network/CNetState.h
+network/CNetworkInput.cpp
+network/CNetworkInput.h
+network/CNetworkManager.cpp
+network/CNetworkManager.h
+network/CNetworkOutput.cpp
+network/CNetworkOutput.h
+network/CNetworkThread.cpp
+network/CNetworkThread.h
+network/CPacketManager.cpp
+network/CPacketManager.h
 network/CSocket.cpp
 network/CSocket.h
-network/network_common.cpp
-network/network_multithreaded.cpp
-network/network.h
+network/linuxev.cpp
+network/linuxev.h
+network/net_datatypes.h
+network/net_datatypes.cpp
 network/packet.cpp
 network/packet.h
 network/receive.cpp

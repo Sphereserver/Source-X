@@ -6,7 +6,6 @@
 #include "../../common/CObjBaseTemplate.h"
 #include "../../common/CRect.h"
 #include "../../common/CLog.h"
-#include "../../network/network.h"
 #include "../../sphere/ProfileTask.h"
 #include "../clients/CAccount.h"
 #include "../clients/CClient.h"

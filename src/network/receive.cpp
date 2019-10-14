@@ -11,7 +11,9 @@
 #include "../game/items/CItemVendable.h"
 #include "../game/CWorld.h"
 #include "../game/triggers.h"
-#include "network.h"
+#include "CClientIterator.h"
+#include "CNetState.h"
+#include "CNetworkManager.h"
 #include "receive.h"
 #include "send.h"
 
@@ -27,7 +29,7 @@ PacketUnknown::PacketUnknown(uint size) : Packet(size)
 {
 }
 
-bool PacketUnknown::onReceive(NetState* net)
+bool PacketUnknown::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketUnknown::onReceive");
 	UNREFERENCED_PARAMETER(net);
@@ -47,7 +49,7 @@ PacketCreate::PacketCreate(uint size) : Packet(size)
 {
 }
 
-bool PacketCreate::onReceive(NetState* net)
+bool PacketCreate::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketCreate::onReceive");
 	tchar charname[MAX_NAME_SIZE];
@@ -144,7 +146,7 @@ bool PacketCreate::onReceive(NetState* net)
 		hue, hairid, hairhue, beardid, beardhue, shirthue, pantshue, ITEMID_NOTHING, startloc, flags);
 }
 
-bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_TYPE rtRace, short wStr, short wDex, short wInt,
+bool PacketCreate::doCreate(CNetState* net, lpctstr charname, bool bFemale, RACE_TYPE rtRace, short wStr, short wDex, short wInt,
 	PROFESSION_TYPE prProf, SKILL_TYPE skSkill1, ushort uiSkillVal1, SKILL_TYPE skSkill2, ushort uiSkillVal2, SKILL_TYPE skSkill3, ushort uiSkillVal3, SKILL_TYPE skSkill4, ushort uiSkillVal4,
 	HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, ITEMID_TYPE idFace, int iStartLoc, int iFlags)
 {
@@ -242,7 +244,7 @@ PacketMovementReq::PacketMovementReq(uint size) : Packet(size)
 {
 }
 
-bool PacketMovementReq::onReceive(NetState* net)
+bool PacketMovementReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketMovementReq::onReceive");
 
@@ -281,7 +283,7 @@ PacketSpeakReq::PacketSpeakReq() : Packet(0)
 {
 }
 
-bool PacketSpeakReq::onReceive(NetState* net)
+bool PacketSpeakReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketSpeakReq::onReceive");
 
@@ -321,7 +323,7 @@ PacketAttackReq::PacketAttackReq() : Packet(5)
 {
 }
 
-bool PacketAttackReq::onReceive(NetState* net)
+bool PacketAttackReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketAttackReq::onReceive");
 
@@ -345,7 +347,7 @@ PacketDoubleClick::PacketDoubleClick() : Packet(5)
 {
 }
 
-bool PacketDoubleClick::onReceive(NetState* net)
+bool PacketDoubleClick::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketDoubleClick::onReceive");
 
@@ -372,7 +374,7 @@ PacketItemPickupReq::PacketItemPickupReq() : Packet(7)
 {
 }
 
-bool PacketItemPickupReq::onReceive(NetState* net)
+bool PacketItemPickupReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketItemPickupReq::onReceive");
 
@@ -397,7 +399,7 @@ PacketItemDropReq::PacketItemDropReq() : Packet(14)
 {
 }
 
-uint PacketItemDropReq::getExpectedLength(NetState* net, Packet* packet)
+uint PacketItemDropReq::getExpectedLength(CNetState* net, Packet* packet)
 {
 	ADDTOCALLSTACK("PacketItemDropReq::getExpectedLength");
 	UNREFERENCED_PARAMETER(packet);
@@ -409,7 +411,7 @@ uint PacketItemDropReq::getExpectedLength(NetState* net, Packet* packet)
 	return 14;
 }
 
-bool PacketItemDropReq::onReceive(NetState* net)
+bool PacketItemDropReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketItemDropReq::onReceive");
 
@@ -454,7 +456,7 @@ PacketSingleClick::PacketSingleClick() : Packet(5)
 {
 }
 
-bool PacketSingleClick::onReceive(NetState* net)
+bool PacketSingleClick::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketSingleClick::onReceive");
 
@@ -478,7 +480,7 @@ PacketTextCommand::PacketTextCommand() : Packet(0)
 {
 }
 
-bool PacketTextCommand::onReceive(NetState* net)
+bool PacketTextCommand::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketTextCommand::onReceive");
 
@@ -509,7 +511,7 @@ PacketItemEquipReq::PacketItemEquipReq() : Packet(10)
 {
 }
 
-bool PacketItemEquipReq::onReceive(NetState* net)
+bool PacketItemEquipReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketItemEquipReq::onReceive");
 
@@ -558,7 +560,7 @@ PacketResynchronize::PacketResynchronize() : Packet(3)
 {
 }
 
-bool PacketResynchronize::onReceive(NetState* net)
+bool PacketResynchronize::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketResynchronize::onReceive");
 
@@ -588,7 +590,7 @@ PacketDeathStatus::PacketDeathStatus() : Packet(2)
 {
 }
 
-bool PacketDeathStatus::onReceive(NetState* net)
+bool PacketDeathStatus::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketDeathStatus::onReceive");
 
@@ -622,7 +624,7 @@ PacketObjStatusReq::PacketObjStatusReq() : Packet(10)
 {
 }
 
-bool PacketObjStatusReq::onReceive(NetState* net)
+bool PacketObjStatusReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketObjStatusReq::onReceive");
 
@@ -653,7 +655,7 @@ PacketSkillLockChange::PacketSkillLockChange() : Packet(0)
 {
 }
 
-bool PacketSkillLockChange::onReceive(NetState* net)
+bool PacketSkillLockChange::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketSkillLockChange::onReceive");
 
@@ -697,7 +699,7 @@ PacketVendorBuyReq::PacketVendorBuyReq() : Packet(0)
 {
 }
 
-bool PacketVendorBuyReq::onReceive(NetState* net)
+bool PacketVendorBuyReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketVendorBuyReq::onReceive");
 
@@ -796,7 +798,7 @@ PacketStaticUpdate::PacketStaticUpdate() : Packet(0)
 {
 }
 
-bool PacketStaticUpdate::onReceive(NetState* net)
+bool PacketStaticUpdate::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketStaticUpdate::onReceive");
 	/*skip(12);
@@ -819,7 +821,7 @@ PacketMapEdit::PacketMapEdit() : Packet(11)
 {
 }
 
-bool PacketMapEdit::onReceive(NetState* net)
+bool PacketMapEdit::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketMapEdit::onReceive");
 
@@ -918,7 +920,7 @@ PacketCharPlay::PacketCharPlay() : Packet(73)
 {
 }
 
-bool PacketCharPlay::onReceive(NetState* net)
+bool PacketCharPlay::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketCharPlay::onReceive");
 
@@ -951,7 +953,7 @@ PacketBookPageEdit::PacketBookPageEdit() : Packet(0)
 {
 }
 
-bool PacketBookPageEdit::onReceive(NetState* net)
+bool PacketBookPageEdit::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketBookPageEdit::onReceive");
 
@@ -1038,7 +1040,7 @@ PacketTarget::PacketTarget() : Packet(19)
 {
 }
 
-bool PacketTarget::onReceive(NetState* net)
+bool PacketTarget::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketTarget::onReceive");
 
@@ -1074,7 +1076,7 @@ PacketSecureTradeReq::PacketSecureTradeReq() : Packet(0)
 {
 }
 
-bool PacketSecureTradeReq::onReceive(NetState* net)
+bool PacketSecureTradeReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketSecureTradeReq::onReceive");
 
@@ -1135,7 +1137,7 @@ PacketBulletinBoardReq::PacketBulletinBoardReq() : Packet(0)
 {
 }
 
-bool PacketBulletinBoardReq::onReceive(NetState* net)
+bool PacketBulletinBoardReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketBulletinBoardReq::onReceive");
 
@@ -1273,7 +1275,7 @@ PacketWarModeReq::PacketWarModeReq() : Packet(5)
 {
 }
 
-bool PacketWarModeReq::onReceive(NetState* net)
+bool PacketWarModeReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketWarModeReq::onReceive");
 
@@ -1295,7 +1297,7 @@ PacketPingReq::PacketPingReq() : Packet(2)
 {
 }
 
-bool PacketPingReq::onReceive(NetState* net)
+bool PacketPingReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketPingReq::onReceive");
 
@@ -1316,7 +1318,7 @@ PacketCharRename::PacketCharRename() : Packet(35)
 {
 }
 
-bool PacketCharRename::onReceive(NetState* net)
+bool PacketCharRename::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketCharRename::onReceive");
 
@@ -1340,7 +1342,7 @@ PacketMenuChoice::PacketMenuChoice() : Packet(13)
 {
 }
 
-bool PacketMenuChoice::onReceive(NetState* net)
+bool PacketMenuChoice::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketMenuChoice::onReceive");
 
@@ -1415,7 +1417,7 @@ PacketServersReq::PacketServersReq() : Packet(62)
 {
 }
 
-bool PacketServersReq::onReceive(NetState* net)
+bool PacketServersReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketServersReq::onReceive");
 
@@ -1444,7 +1446,7 @@ PacketCharDelete::PacketCharDelete() : Packet(39)
 {
 }
 
-bool PacketCharDelete::onReceive(NetState* net)
+bool PacketCharDelete::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketCharDelete::onReceive");
 
@@ -1472,7 +1474,7 @@ PacketCreateNew::PacketCreateNew() : PacketCreate(146)
 {
 }
 
-bool PacketCreateNew::onReceive(NetState* net)
+bool PacketCreateNew::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketCreateNew::onReceive");
 
@@ -1649,7 +1651,7 @@ PacketCharListReq::PacketCharListReq() : Packet(65)
 {
 }
 
-bool PacketCharListReq::onReceive(NetState* net)
+bool PacketCharListReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketCharListReq::onReceive");
 
@@ -1675,7 +1677,7 @@ PacketBookHeaderEdit::PacketBookHeaderEdit() : Packet(99)
 {
 }
 
-bool PacketBookHeaderEdit::onReceive(NetState* net)
+bool PacketBookHeaderEdit::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketBookHeaderEdit::onReceive");
 
@@ -1706,7 +1708,7 @@ PacketDyeObject::PacketDyeObject() : Packet(9)
 {
 }
 
-bool PacketDyeObject::onReceive(NetState* net)
+bool PacketDyeObject::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketDyeObject::onReceive");
 
@@ -1730,7 +1732,7 @@ PacketAllNamesReq::PacketAllNamesReq() : Packet(0)
 {
 }
 
-bool PacketAllNamesReq::onReceive(NetState* net)
+bool PacketAllNamesReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketAllNamesReq::onReceive");
 
@@ -1768,7 +1770,7 @@ PacketPromptResponse::PacketPromptResponse() : Packet(0)
 {
 }
 
-bool PacketPromptResponse::onReceive(NetState* net)
+bool PacketPromptResponse::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketPromptResponse::onReceive");
 
@@ -1803,7 +1805,7 @@ PacketHelpPageReq::PacketHelpPageReq() : Packet(258)
 {
 }
 
-bool PacketHelpPageReq::onReceive(NetState* net)
+bool PacketHelpPageReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHelpPageReq::onReceive");
 
@@ -1830,7 +1832,7 @@ PacketVendorSellReq::PacketVendorSellReq() : Packet(0)
 {
 }
 
-bool PacketVendorSellReq::onReceive(NetState* net)
+bool PacketVendorSellReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketVendorSellReq::onReceive");
 
@@ -1903,7 +1905,7 @@ PacketServerSelect::PacketServerSelect() : Packet(3)
 {
 }
 
-bool PacketServerSelect::onReceive(NetState* net)
+bool PacketServerSelect::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketServerSelect::onReceive");
 
@@ -1925,7 +1927,7 @@ PacketSystemInfo::PacketSystemInfo() : Packet(149)
 {
 }
 
-bool PacketSystemInfo::onReceive(NetState* net)
+bool PacketSystemInfo::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketSystemInfo::onReceive");
 	UNREFERENCED_PARAMETER(net);
@@ -1946,7 +1948,7 @@ PacketTipReq::PacketTipReq() : Packet(4)
 {
 }
 
-bool PacketTipReq::onReceive(NetState* net)
+bool PacketTipReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketTipReq::onReceive");
 
@@ -1976,7 +1978,7 @@ PacketGumpValueInputResponse::PacketGumpValueInputResponse() : Packet(0)
 {
 }
 
-bool PacketGumpValueInputResponse::onReceive(NetState* net)
+bool PacketGumpValueInputResponse::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketGumpValueInputResponse::onReceive");
 
@@ -2053,7 +2055,7 @@ PacketSpeakReqUNICODE::PacketSpeakReqUNICODE() : Packet(0)
 {
 }
 
-bool PacketSpeakReqUNICODE::onReceive(NetState* net)
+bool PacketSpeakReqUNICODE::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketSpeakReqUNICODE::onReceive");
 
@@ -2120,7 +2122,7 @@ PacketGumpDialogRet::PacketGumpDialogRet() : Packet(0)
 {
 }
 
-bool PacketGumpDialogRet::onReceive(NetState* net)
+bool PacketGumpDialogRet::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketGumpDialogRet::onReceive");
 
@@ -2282,7 +2284,7 @@ PacketChatCommand::PacketChatCommand() : Packet(0)
 {
 }
 
-bool PacketChatCommand::onReceive(NetState* net)
+bool PacketChatCommand::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketChatCommand::onReceive");
 
@@ -2319,7 +2321,7 @@ PacketChatButton::PacketChatButton() : Packet(64)
 {
 }
 
-bool PacketChatButton::onReceive(NetState* net)
+bool PacketChatButton::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketChatButton::onReceive");
 
@@ -2346,7 +2348,7 @@ PacketToolTipReq::PacketToolTipReq() : Packet(9)
 {
 }
 
-bool PacketToolTipReq::onReceive(NetState* net)
+bool PacketToolTipReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketToolTipReq::onReceive");
 
@@ -2370,7 +2372,7 @@ PacketProfileReq::PacketProfileReq() : Packet(0)
 {
 }
 
-bool PacketProfileReq::onReceive(NetState* net)
+bool PacketProfileReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketProfileReq::onReceive");
 
@@ -2409,7 +2411,7 @@ PacketMailMessage::PacketMailMessage() : Packet(9)
 {
 }
 
-bool PacketMailMessage::onReceive(NetState* net)
+bool PacketMailMessage::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketMailMessage::onReceive");
 
@@ -2435,7 +2437,7 @@ PacketClientVersion::PacketClientVersion() : Packet(0)
 {
 }
 
-bool PacketClientVersion::onReceive(NetState* net)
+bool PacketClientVersion::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketClientVersion::onReceive");
 
@@ -2490,7 +2492,7 @@ PacketExtendedCommand::PacketExtendedCommand() : Packet(0)
 {
 }
 
-bool PacketExtendedCommand::onReceive(NetState* net)
+bool PacketExtendedCommand::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketExtendedCommand::onReceive");
 
@@ -2533,7 +2535,7 @@ PacketScreenSize::PacketScreenSize() : Packet(0)
 {
 }
 
-bool PacketScreenSize::onReceive(NetState* net)
+bool PacketScreenSize::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketScreenSize::onReceive");
 
@@ -2563,7 +2565,7 @@ PacketPartyMessage::PacketPartyMessage() : Packet(0)
 {
 }
 
-bool PacketPartyMessage::onReceive(NetState* net)
+bool PacketPartyMessage::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketPartyMessage::onReceive");
 
@@ -2664,7 +2666,7 @@ PacketArrowClick::PacketArrowClick() : Packet(0)
 {
 }
 
-bool PacketArrowClick::onReceive(NetState* net)
+bool PacketArrowClick::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketArrowClick::onReceive");
 
@@ -2703,7 +2705,7 @@ PacketWrestleDisarm::PacketWrestleDisarm() : Packet(0)
 {
 }
 
-bool PacketWrestleDisarm::onReceive(NetState* net)
+bool PacketWrestleDisarm::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketWrestleDisarm::onReceive");
 
@@ -2723,7 +2725,7 @@ PacketWrestleStun::PacketWrestleStun() : Packet(0)
 {
 }
 
-bool PacketWrestleStun::onReceive(NetState* net)
+bool PacketWrestleStun::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketWrestleStun::onReceive");
 
@@ -2743,7 +2745,7 @@ PacketLanguage::PacketLanguage() : Packet(0)
 {
 }
 
-bool PacketLanguage::onReceive(NetState* net)
+bool PacketLanguage::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketLanguage::onReceive");
 
@@ -2769,7 +2771,7 @@ PacketStatusClose::PacketStatusClose() : Packet(0)
 {
 }
 
-bool PacketStatusClose::onReceive(NetState* net)
+bool PacketStatusClose::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketStatusClose::onReceive");
 	UNREFERENCED_PARAMETER(net);
@@ -2789,7 +2791,7 @@ PacketAnimationReq::PacketAnimationReq() : Packet(0)
 {
 }
 
-bool PacketAnimationReq::onReceive(NetState* net)
+bool PacketAnimationReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketAnimationReq::onReceive");
 
@@ -2838,7 +2840,7 @@ PacketClientInfo::PacketClientInfo() : Packet(0)
 {
 }
 
-bool PacketClientInfo::onReceive(NetState* net)
+bool PacketClientInfo::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketClientInfo::onReceive");
 	UNREFERENCED_PARAMETER(net);
@@ -2860,7 +2862,7 @@ PacketAosTooltipInfo::PacketAosTooltipInfo() : Packet(0)
 {
 }
 
-bool PacketAosTooltipInfo::onReceive(NetState* net)
+bool PacketAosTooltipInfo::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketAosTooltipInfo::onReceive");
 
@@ -2894,7 +2896,7 @@ PacketPopupReq::PacketPopupReq() : Packet(0)
 {
 }
 
-bool PacketPopupReq::onReceive(NetState* net)
+bool PacketPopupReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketPopupReq::onReceive");
 
@@ -2922,7 +2924,7 @@ PacketPopupSelect::PacketPopupSelect() : Packet(0)
 {
 }
 
-bool PacketPopupSelect::onReceive(NetState* net)
+bool PacketPopupSelect::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketPopupSelect::onReceive");
 
@@ -2952,7 +2954,7 @@ PacketChangeStatLock::PacketChangeStatLock() : Packet(0)
 {
 }
 
-bool PacketChangeStatLock::onReceive(NetState* net)
+bool PacketChangeStatLock::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketChangeStatLock::onReceive");
 
@@ -3006,7 +3008,7 @@ PacketSpellSelect::PacketSpellSelect() : Packet(0)
 {
 }
 
-bool PacketSpellSelect::onReceive(NetState* net)
+bool PacketSpellSelect::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketSpellSelect::onReceive");
 
@@ -3060,7 +3062,7 @@ PacketHouseDesignReq::PacketHouseDesignReq() : Packet(0)
 {
 }
 
-bool PacketHouseDesignReq::onReceive(NetState* net)
+bool PacketHouseDesignReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignReq::onReceive");
 
@@ -3091,7 +3093,7 @@ PacketAntiCheat::PacketAntiCheat() : Packet(0)
 {
 }
 
-bool PacketAntiCheat::onReceive(NetState* net)
+bool PacketAntiCheat::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketAntiCheat::onReceive");
 	UNREFERENCED_PARAMETER(net);
@@ -3111,7 +3113,7 @@ PacketBandageMacro::PacketBandageMacro() : Packet(0)
 {
 }
 
-bool PacketBandageMacro::onReceive(NetState* net)
+bool PacketBandageMacro::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketBandageMacro::onReceive");
 
@@ -3176,7 +3178,7 @@ PacketTargetedSkill::PacketTargetedSkill() : Packet(0)
 {
 }
 
-bool PacketTargetedSkill::onReceive(NetState* net)
+bool PacketTargetedSkill::onReceive(CNetState* net)
 {
     ADDTOCALLSTACK("PacketTargetedSkill::onReceive");
     
@@ -3221,7 +3223,7 @@ PacketGargoyleFly::PacketGargoyleFly() : Packet(0)
 {
 }
 
-bool PacketGargoyleFly::onReceive(NetState* net)
+bool PacketGargoyleFly::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketGargoyleFly::onReceive");
 
@@ -3291,7 +3293,7 @@ PacketWheelBoatMove::PacketWheelBoatMove() : Packet(0)
 {
 }
 
-bool PacketWheelBoatMove::onReceive(NetState* net)
+bool PacketWheelBoatMove::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketWheelBoatMove::onReceive");
 
@@ -3306,7 +3308,7 @@ bool PacketWheelBoatMove::onReceive(NetState* net)
 
 	skip(4);
 	//dword serial = readInt32(); //player serial
-	//CUID from(serial &~ UID_F_RESOURCE); //do we need this? NetState provides the player character
+	//CUID from(serial &~ UID_F_RESOURCE); //do we need this? CNetState provides the player character
 
 	DIR_TYPE facing = static_cast<DIR_TYPE>(readByte()); //new boat facing, yes client send it
 	DIR_TYPE moving = static_cast<DIR_TYPE>(readByte()); //the boat movement
@@ -3351,7 +3353,7 @@ PacketPromptResponseUnicode::PacketPromptResponseUnicode() : Packet(0)
 {
 }
 
-bool PacketPromptResponseUnicode::onReceive(NetState* net)
+bool PacketPromptResponseUnicode::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketPromptResponseUnicode::onReceive");
 
@@ -3385,7 +3387,7 @@ PacketViewRange::PacketViewRange() : Packet(2)
 {
 }
 
-bool PacketViewRange::onReceive(NetState* net)
+bool PacketViewRange::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketViewRange::onReceive");
 
@@ -3410,7 +3412,7 @@ PacketLogout::PacketLogout() : Packet(1)
 {
 }
 
-bool PacketLogout::onReceive(NetState* net)
+bool PacketLogout::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketLogout::onReceive");
 
@@ -3430,7 +3432,7 @@ PacketBookHeaderEditNew::PacketBookHeaderEditNew() : Packet(0)
 {
 }
 
-bool PacketBookHeaderEditNew::onReceive(NetState* net)
+bool PacketBookHeaderEditNew::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketBookHeaderEditNew::onReceive");
 
@@ -3465,7 +3467,7 @@ PacketAOSTooltipReq::PacketAOSTooltipReq() : Packet(0)
 {
 }
 
-bool PacketAOSTooltipReq::onReceive(NetState* net)
+bool PacketAOSTooltipReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketAOSTooltipReq::onReceive");
 
@@ -3537,7 +3539,7 @@ PacketEncodedCommand::PacketEncodedCommand() : Packet(0)
 {
 }
 
-bool PacketEncodedCommand::onReceive(NetState* net)
+bool PacketEncodedCommand::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketEncodedCommand::onReceive");
 
@@ -3585,7 +3587,7 @@ PacketHouseDesignBackup::PacketHouseDesignBackup() : Packet(0)
 {
 }
 
-bool PacketHouseDesignBackup::onReceive(NetState* net)
+bool PacketHouseDesignBackup::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignBackup::onReceive");
 
@@ -3612,7 +3614,7 @@ PacketHouseDesignRestore::PacketHouseDesignRestore() : Packet(0)
 {
 }
 
-bool PacketHouseDesignRestore::onReceive(NetState* net)
+bool PacketHouseDesignRestore::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignRestore::onReceive");
 
@@ -3639,7 +3641,7 @@ PacketHouseDesignCommit::PacketHouseDesignCommit() : Packet(0)
 {
 }
 
-bool PacketHouseDesignCommit::onReceive(NetState* net)
+bool PacketHouseDesignCommit::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignCommit::onReceive");
 
@@ -3666,7 +3668,7 @@ PacketHouseDesignDestroyItem::PacketHouseDesignDestroyItem() : Packet(0)
 {
 }
 
-bool PacketHouseDesignDestroyItem::onReceive(NetState* net)
+bool PacketHouseDesignDestroyItem::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignDestroyItem::onReceive");
 
@@ -3702,7 +3704,7 @@ PacketHouseDesignPlaceItem::PacketHouseDesignPlaceItem() : Packet(0)
 {
 }
 
-bool PacketHouseDesignPlaceItem::onReceive(NetState* net)
+bool PacketHouseDesignPlaceItem::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignPlaceItem::onReceive");
 
@@ -3736,7 +3738,7 @@ PacketHouseDesignExit::PacketHouseDesignExit() : Packet(0)
 {
 }
 
-bool PacketHouseDesignExit::onReceive(NetState* net)
+bool PacketHouseDesignExit::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignExit::onReceive");
 
@@ -3763,7 +3765,7 @@ PacketHouseDesignPlaceStair::PacketHouseDesignPlaceStair() : Packet(0)
 {
 }
 
-bool PacketHouseDesignPlaceStair::onReceive(NetState* net)
+bool PacketHouseDesignPlaceStair::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignPlaceStair::onReceive");
 
@@ -3797,7 +3799,7 @@ PacketHouseDesignSync::PacketHouseDesignSync() : Packet(0)
 {
 }
 
-bool PacketHouseDesignSync::onReceive(NetState* net)
+bool PacketHouseDesignSync::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignSync::onReceive");
 
@@ -3824,7 +3826,7 @@ PacketHouseDesignClear::PacketHouseDesignClear() : Packet(0)
 {
 }
 
-bool PacketHouseDesignClear::onReceive(NetState* net)
+bool PacketHouseDesignClear::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignClear::onReceive");
 
@@ -3851,7 +3853,7 @@ PacketHouseDesignSwitch::PacketHouseDesignSwitch() : Packet(0)
 {
 }
 
-bool PacketHouseDesignSwitch::onReceive(NetState* net)
+bool PacketHouseDesignSwitch::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignSwitch::onReceive");
 
@@ -3881,7 +3883,7 @@ PacketHouseDesignPlaceRoof::PacketHouseDesignPlaceRoof() : Packet(0)
 {
 }
 
-bool PacketHouseDesignPlaceRoof::onReceive(NetState* net)
+bool PacketHouseDesignPlaceRoof::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignPlaceRoof::onReceive");
 
@@ -3917,7 +3919,7 @@ PacketHouseDesignDestroyRoof::PacketHouseDesignDestroyRoof() : Packet(0)
 {
 }
 
-bool PacketHouseDesignDestroyRoof::onReceive(NetState* net)
+bool PacketHouseDesignDestroyRoof::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignDestroyRoof::onReceive");
 
@@ -3953,7 +3955,7 @@ PacketSpecialMove::PacketSpecialMove() : Packet(0)
 {
 }
 
-bool PacketSpecialMove::onReceive(NetState* net)
+bool PacketSpecialMove::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketSpecialMove::onReceive");
 
@@ -3987,7 +3989,7 @@ PacketHouseDesignRevert::PacketHouseDesignRevert() : Packet(0)
 {
 }
 
-bool PacketHouseDesignRevert::onReceive(NetState* net)
+bool PacketHouseDesignRevert::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignRevert::onReceive");
 
@@ -4014,7 +4016,7 @@ PacketEquipLastWeapon::PacketEquipLastWeapon() : Packet(0)
 {
 }
 
-bool PacketEquipLastWeapon::onReceive(NetState* net)
+bool PacketEquipLastWeapon::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketEquipLastWeapon::onReceive");
 
@@ -4053,7 +4055,7 @@ PacketGuildButton::PacketGuildButton() : Packet(0)
 {
 }
 
-bool PacketGuildButton::onReceive(NetState* net)
+bool PacketGuildButton::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketGuildButton::onReceive");
 
@@ -4080,7 +4082,7 @@ PacketQuestButton::PacketQuestButton() : Packet(0)
 {
 }
 
-bool PacketQuestButton::onReceive(NetState* net)
+bool PacketQuestButton::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketQuestButton::onReceive");
 
@@ -4107,7 +4109,7 @@ PacketHardwareInfo::PacketHardwareInfo() : Packet(268)
 {
 }
 
-bool PacketHardwareInfo::onReceive(NetState* net)
+bool PacketHardwareInfo::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHardwareInfo::onReceive");
 	UNREFERENCED_PARAMETER(net);
@@ -4153,7 +4155,7 @@ PacketBugReport::PacketBugReport() : Packet(0)
 {
 }
 
-bool PacketBugReport::onReceive(NetState* net)
+bool PacketBugReport::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketBugReport::onReceive");
 
@@ -4185,7 +4187,7 @@ PacketClientType::PacketClientType() : Packet(0)
 {
 }
 
-bool PacketClientType::onReceive(NetState* net)
+bool PacketClientType::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketClientType::onReceive");
 
@@ -4212,7 +4214,7 @@ PacketRemoveUIHighlight::PacketRemoveUIHighlight() : Packet(13)
 {
 }
 
-bool PacketRemoveUIHighlight::onReceive(NetState* net)
+bool PacketRemoveUIHighlight::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketRemoveUIHighlight::onReceive");
 	UNREFERENCED_PARAMETER(net);
@@ -4237,7 +4239,7 @@ PacketUseHotbar::PacketUseHotbar() : Packet(11)
 {
 }
 
-bool PacketUseHotbar::onReceive(NetState* net)
+bool PacketUseHotbar::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketUseHotbar::onReceive");
 
@@ -4269,7 +4271,7 @@ PacketEquipItemMacro::PacketEquipItemMacro() : Packet(0)
 {
 }
 
-bool PacketEquipItemMacro::onReceive(NetState* net)
+bool PacketEquipItemMacro::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketEquipItemMacro::onReceive");
 
@@ -4315,7 +4317,7 @@ PacketUnEquipItemMacro::PacketUnEquipItemMacro() : Packet(0)
 {
 }
 
-bool PacketUnEquipItemMacro::onReceive(NetState* net)
+bool PacketUnEquipItemMacro::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketUnEquipItemMacro::onReceive");
 
@@ -4361,7 +4363,7 @@ PacketMovementReqNew::PacketMovementReqNew() : Packet(0)
 {
 }
 
-bool PacketMovementReqNew::onReceive(NetState* net)
+bool PacketMovementReqNew::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketMovementReqNew::onReceive");
 	// New walk packet used on newest clients (still incomplete)
@@ -4426,7 +4428,7 @@ PacketTimeSyncRequest::PacketTimeSyncRequest() : Packet(9)
 {
 }
 
-bool PacketTimeSyncRequest::onReceive(NetState* net)
+bool PacketTimeSyncRequest::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketTimeSyncRequest::onReceive");
 
@@ -4450,7 +4452,7 @@ PacketCrashReport::PacketCrashReport() : Packet(0)
 {
 }
 
-bool PacketCrashReport::onReceive(NetState* net)
+bool PacketCrashReport::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketCrashReport::onReceive");
 
@@ -4508,7 +4510,7 @@ PacketCreateHS::PacketCreateHS() : PacketCreate(106)
 {
 }
 
-bool PacketCreateHS::onReceive(NetState* net)
+bool PacketCreateHS::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketCreateHS::onReceive");
 	// standard character creation packet, but with 4 skills and different handling of race and sex.
@@ -4591,7 +4593,7 @@ PacketUltimaStoreButton::PacketUltimaStoreButton() : Packet(1)
 {
 }
 
-bool PacketUltimaStoreButton::onReceive(NetState *net)
+bool PacketUltimaStoreButton::onReceive(CNetState *net)
 {
     ADDTOCALLSTACK("PacketUltimaStoreButton::onReceive");
 
@@ -4619,7 +4621,7 @@ PacketPublicHouseContent::PacketPublicHouseContent() : Packet(2)
 {
 }
 
-bool PacketPublicHouseContent::onReceive(NetState* net)
+bool PacketPublicHouseContent::onReceive(CNetState* net)
 {
     ADDTOCALLSTACK("PacketPublicHouseContent::onReceive");
 

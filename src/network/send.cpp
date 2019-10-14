@@ -19,7 +19,7 @@
 #include "../game/components/CCItemDamageable.h"
 #include "../game/components/CCPropsChar.h"
 #include "../game/CWorld.h"
-#include "network.h"
+#include "CNetworkManager.h"
 #include "send.h"
 #include "../common/zlib/zlib.h"
 
@@ -127,7 +127,7 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 	ADDTOCALLSTACK("PacketObjectStatus::PacketObjectStatus");
     ASSERT(object);
 
-	const NetState * state = target->GetNetState();
+	const CNetState * state = target->GetNetState();
 	const CChar *character = target->GetChar();
 	CChar *objectChar = object->IsChar() ? static_cast<CChar *>(object) : nullptr;
 	bool fCanRename = false;
@@ -823,7 +823,7 @@ PacketDragAnimation::PacketDragAnimation(const CChar* source, const CItem* item,
 	}
 }
 
-bool PacketDragAnimation::canSendTo(const NetState* state) const
+bool PacketDragAnimation::canSendTo(const CNetState* state) const
 {
 	// don't send to SA clients
 	if (state->isClientEnhanced() || state->isClientVersion(MINCLIVER_SA))
@@ -1175,7 +1175,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 	initLength();
 	skip(2);
 
-    const NetState* ns = target->GetNetState();
+    const CNetState* ns = target->GetNetState();
     ASSERT(ns);
     const bool fClientEnhanced = ns->isClientEnhanced();
 	const bool fIncludeGrid = (ns->isClientVersion(MINCLIVER_ITEMGRID) || ns->isClientKR() || fClientEnhanced);
@@ -1283,7 +1283,7 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItem* spell
 {
 	ADDTOCALLSTACK("PacketItemContents::PacketItemContents(2)");
 
-    const NetState* ns = target->GetNetState();
+    const CNetState* ns = target->GetNetState();
     ASSERT(ns);
     const bool fIncludeGrid = (ns->isClientVersion(MINCLIVER_ITEMGRID) || ns->isClientKR() || ns->isClientEnhanced());
 
@@ -1323,7 +1323,7 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItemContain
 {
 	ADDTOCALLSTACK("PacketItemContents::PacketItemContents(3)");
 
-    const NetState* ns = target->GetNetState();
+    const CNetState* ns = target->GetNetState();
     ASSERT(ns);
     const bool fIncludeGrid = (ns->isClientVersion(MINCLIVER_ITEMGRID) || ns->isClientKR() || ns->isClientEnhanced());
 	const CSpellDef* spellDefinition;
@@ -2358,7 +2358,7 @@ PacketCharacter::PacketCharacter(CClient* target, const CChar* character) : Pack
 	HUE_TYPE hue;
 	target->GetAdjustedCharID(character, id, hue);
 	const CPointMap &pos = character->GetTopPoint();
-    const NetState *ns = target->GetNetState();
+    const CNetState *ns = target->GetNetState();
 
 	initLength();
 	writeInt32(character->GetUID());
@@ -3512,7 +3512,7 @@ void PacketGumpDialog::writeControls(const CClient* target, const CSString* cont
 {
 	ADDTOCALLSTACK("PacketGumpDialog::writeControls");
 
-	const NetState* net = target->GetNetState();
+	const CNetState* net = target->GetNetState();
 	if (net->isClientVersion(MINCLIVER_COMPRESSDIALOG) || net->isClientKR() || net->isClientEnhanced())
 		writeCompressedControls(controls, controlCount, texts, textCount);
 	else
@@ -4209,7 +4209,7 @@ PacketStatLocks::PacketStatLocks(const CClient* target, const CChar* character) 
 
     /*
     // Packet guides report this difference, but it would be better to test this before uncommenting
-    const NetState* ns = target->GetNetState();
+    const CNetState* ns = target->GetNetState();
     if (ns->isClient3D() || ns->isClientKR())
         writeByte(0x05);
     else
@@ -5063,7 +5063,7 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item)
 {
 	ADDTOCALLSTACK("PacketItemWorldNew::PacketItemWorldNew");
     
-    const NetState *ns = target->GetNetState();
+    const CNetState *ns = target->GetNetState();
 	DataSource source;		// 0=Tiledata, 1=Character, 2=Multi
 	dword uid = item->GetUID();
 	ITEMID_TYPE id = item->GetDispID();

@@ -1,7 +1,9 @@
 
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
-#include "../../network/network.h"
+#include "../../network/CClientIterator.h"
+#include "../../network/CNetworkManager.h"
+#include "../../network/CIPHistoryManager.h"
 #include "../../network/send.h"
 #include "../../network/packet.h"
 #include "../chars/CChar.h"
@@ -16,7 +18,7 @@
 /////////////////////////////////////////////////////////////////
 // -CClient stuff.
 
-CClient::CClient(NetState* state)
+CClient::CClient(CNetState* state)
 {
 	// This may be a web connection or Telnet ?
 	m_net = state;

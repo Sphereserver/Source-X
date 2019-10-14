@@ -16,7 +16,9 @@
 #include "../common/CTextConsole.h"
 #include "../common/CLog.h"
 #include "../common/sphereversion.h"	// sphere version
-#include "../network/network.h"
+#include "../network/CClientIterator.h"
+#include "../network/CIPHistoryManager.h"
+#include "../network/CNetworkManager.h"
 #include "../sphere/ProfileTask.h"
 #include "../sphere/ntwindow.h"
 #include "chars/CChar.h"

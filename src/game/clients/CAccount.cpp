@@ -1,7 +1,7 @@
-
 #include "../../common/crypto/CMD5.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
+#include "../../network/CClientIterator.h"
 #include "../chars/CChar.h"
 #include "../CWorld.h"
 #include "CAccount.h"

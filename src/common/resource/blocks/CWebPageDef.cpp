@@ -3,6 +3,7 @@
 #include "../../../game/clients/CClient.h"
 #include "../../../game/CServer.h"
 #include "../../../game/CWorld.h"
+#include "../../../network/CClientIterator.h"
 #include "../../sphere_library/CSFileList.h"
 #include "../../CException.h"
 #include "../../sphereversion.h"

@@ -3,7 +3,6 @@
 #include "../../common/CLog.h"
 #include "../components/CCPropsItemEquippable.h"
 #include "../components/CCPropsItemWeapon.h"
-#include "../../network/network.h"
 #include "../clients/CClient.h"
 #include "../CWorld.h"
 #include "../spheresvr.h"

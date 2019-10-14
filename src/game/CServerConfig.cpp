@@ -8,8 +8,9 @@
 #include "../common/CException.h"
 #include "../common/CUOInstall.h"
 #include "../common/sphereversion.h"
+#include "../network/CClientIterator.h"
+#include "../network/CNetworkManager.h"
 #include "../network/CSocket.h"
-#include "../network/network.h"
 #include "../sphere/ProfileTask.h"
 #include "../sphere/ntwindow.h"
 #include "clients/CAccount.h"
@@ -2554,7 +2555,7 @@ void CServerConfig::LoadSortSpells()
 uint CServerConfig::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar chars )
 {
 	// This is needed by the packet 0xB9, which is sent to the client very early, before we can know if this is a 2D, KR, EC, 3D client.
-	// Using the NetState here to know which kind of client is it is pointless, because at this time the client type is always the default value (2D).
+	// Using the CNetState here to know which kind of client is it is pointless, because at this time the client type is always the default value (2D).
 
 	uint retValue = 0;
 

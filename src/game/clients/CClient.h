@@ -9,7 +9,6 @@
 #include "../../common/crypto/CCrypto.h"
 #include "../../common/CScriptTriggerArgs.h"
 #include "../../common/CTextConsole.h"
-#include "../../network/network.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
 #include "../items/CItemBase.h"
@@ -107,7 +106,7 @@ public:
 
 private:
     CChar* m_pChar;		// What char are we playing ?
-	NetState* m_net;		// network state
+	CNetState* m_net;		// network state
 
 	// Walk limiting code
 	int m_iWalkStepCount;	// Count the actual steps. Turning does not count.
@@ -394,7 +393,7 @@ public:
 	int GetSocketID() const;								// get socket id
 
 public:
-	explicit CClient(NetState* state);
+	explicit CClient(CNetState* state);
 	~CClient();
 
 private:
@@ -729,7 +728,7 @@ public:
 
 	bool IsConnecting() const;
 
-	NetState* GetNetState(void) const { return m_net; };
+	CNetState* GetNetState(void) const { return m_net; };
 
 public:
 	char		m_zLastMessage[SCRIPT_MAX_LINE_LEN];	// last sysmessage
@@ -769,8 +768,8 @@ public:
 		m_BaseDefs.DeleteKey(ptcKey);
 	}
 
-	friend class NetworkInput;
-	friend class NetworkOutput;
+	friend class CNetworkInput;
+	friend class CNetworkOutput;
 	friend class PacketCreate;
 	friend class PacketServerRelay;
 };

@@ -6,18 +6,29 @@
 #ifndef _INC_PACKET_H
 #define _INC_PACKET_H
 
-#include <list>
 #include "../common/common.h"
-#include "../game/game_macros.h"
-
-#define PACKET_BUFFERDEFAULT 4
-#define PACKET_BUFFERGROWTH 4
 
 
-class NetState;
+#define NETWORK_MAXPACKETS		g_Cfg.m_iNetMaxPacketsPerTick	// max packets to send per tick (per queue)
+#define NETWORK_MAXPACKETLEN	g_Cfg.m_iNetMaxLengthPerTick	// max packet length to send per tick (per queue)
+
+
+class CClient;
+class Packet;
+
+#if defined(_PACKETDUMP) || defined(_DUMPSUPPORT)
+    void xRecordPacketData(const CClient* client, const byte* data, uint length, lpctstr heading);
+    void xRecordPacket(const CClient* client, Packet* packet, lpctstr heading);
+#else
+    #define xRecordPacketData(_client_, _data_, _length, _heading_)
+    #define xRecordPacket(_client_, _packet_, _heading_)
+#endif
+
+
+
+class CNetState;
 class SimplePacketTransaction;
 class AbstractString;
-class CClient;
 
 /***************************************************************************
  *
@@ -111,9 +122,9 @@ public:
 	uint readStringNullNUNICODE(char* buffer, uint bufferSize, uint maxlength); // read unicode-string until null terminator found, network order
 	uint readStringNullNUNICODE(wchar* buffer, uint maxlength); // read unicode-string until null terminator found, network order
 
-	uint checkLength(NetState* client, Packet* packet);
-	virtual uint getExpectedLength(NetState* client, Packet* packet);
-	virtual bool onReceive(NetState* client);
+	uint checkLength(CNetState* client, Packet* packet);
+	virtual uint getExpectedLength(CNetState* client, Packet* packet);
+	virtual bool onReceive(CNetState* client);
 
 protected:
 	void clear(void);
@@ -143,7 +154,7 @@ public:
 
 protected:
 	int m_priority; // packet priority
-	NetState* m_target; // selected network target for this packet
+	CNetState* m_target; // selected network target for this packet
 	uint m_lengthPosition; // position of length-byte
 
 public:
@@ -163,13 +174,13 @@ public:
 	void push(const CClient* client = nullptr, bool appendTransaction = true); // moves the packet to the send queue (will not be used anywhere else)
 
 	int getPriority() const { return m_priority; }; // get packet priority
-	NetState* getTarget() const { return m_target; }; // get target state
+	CNetState* getTarget() const { return m_target; }; // get target state
 
 	virtual bool onSend(const CClient* client);
 	virtual void onSent(CClient* client);
-	virtual bool canSendTo(const NetState* client) const;
+	virtual bool canSendTo(const CNetState* client) const;
 
-	friend class NetworkOutput;
+	friend class CNetworkOutput;
 	friend class SimplePacketTransaction;
 
 protected:
@@ -201,7 +212,7 @@ public:
 	virtual void pop(void) = 0; // remove first packet from the transaction
 	virtual bool empty(void) = 0; // check if any packets are available
 
-	virtual NetState* getTarget(void) const = 0; // get target of the transaction
+	virtual CNetState* getTarget(void) const = 0; // get target of the transaction
 	virtual int getPriority(void) const = 0; // get priority of the transaction
 	virtual void setPriority(int priority) = 0; // set priority of the transaction
 };
@@ -228,7 +239,7 @@ private:
 	SimplePacketTransaction& operator=(const SimplePacketTransaction& other);
 
 public:
-	NetState* getTarget(void) const { return m_packet->getTarget(); }
+	CNetState* getTarget(void) const { return m_packet->getTarget(); }
 	int getPriority(void) const { return m_packet->getPriority(); }
 	void setPriority(int priority) { m_packet->m_priority = priority; }
 
@@ -249,11 +260,11 @@ class ExtendedPacketTransaction : public PacketTransaction
 {
 private:
 	std::list<PacketSend*> m_packets;
-	NetState* m_target;
+	CNetState* m_target;
 	int m_priority;
 
 public:
-	ExtendedPacketTransaction(NetState* target, int priority) : m_target(target), m_priority(priority) { };
+	ExtendedPacketTransaction(CNetState* target, int priority) : m_target(target), m_priority(priority) { };
 	~ExtendedPacketTransaction(void);
 
 private:
@@ -261,7 +272,7 @@ private:
 	ExtendedPacketTransaction& operator=(const ExtendedPacketTransaction& other);
 
 public:
-	NetState* getTarget(void) const	{ return m_target; }
+	CNetState* getTarget(void) const	{ return m_target; }
 	int getPriority(void) const { return m_priority; }
 	void setPriority(int priority) { m_priority = priority; }
 
@@ -284,7 +295,7 @@ public:
 class OpenPacketTransaction
 {
 private:
-	NetState* m_client;
+	CNetState* m_client;
 
 public:
 	OpenPacketTransaction(const CClient* client, int priority);

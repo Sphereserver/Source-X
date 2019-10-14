@@ -1,7 +1,7 @@
 
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
-#include "../../network/network.h"
+#include "../../network/CClientIterator.h"
 #include "../../network/send.h"
 #include "../../sphere/ProfileTask.h"
 #include "../clients/CClient.h"
@@ -1216,7 +1216,7 @@ bool CChar::UpdateAnimate(ANIM_TYPE action, bool fTranslate, bool fBackward , by
 		if (!pClient->CanSee(this))
 			continue;
 
-		NetState* state = pClient->GetNetState();
+		CNetState* state = pClient->GetNetState();
 		if (state->isClientEnhanced() || state->isClientKR())
 			cmdnew->send(pClient);
 		else if (IsGargoyle() && state->isClientVersion(MINCLIVER_NEWMOBILEANIM))

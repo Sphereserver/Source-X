@@ -29,7 +29,7 @@
 - Fixed: Weird crash related to a change on CChar:OnTick()
 	(Not really fixed, just reverted the code because I couldn't track what is exactly causing it and seems to happen when there are ~100 clients
 	 online, so I'm not going to mess a lot with it, it's not cool to use 100 players to do tests :) ).
-- Attempt to log and stop a crash related to the NetworkOutput.
+- Attempt to log and stop a crash related to the CNetworkOutput.
 - Fixed: NPC_FightMagery not correctly checking if the NPC can use magic skills and creating some infinite loops under certain circumstances.
 
 15-05-2016, XuN

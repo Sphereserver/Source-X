@@ -6,74 +6,13 @@
 #ifndef _INC_SPHEREPROTO_H
 #define _INC_SPHEREPROTO_H
 
+#include "../network/net_datatypes.h"
 #include "../sphere/threads.h"
 #include "sphere_library/CSString.h"
-#include "common.h"
-#ifdef _WIN32
-	#include <winsock2.h>	// this needs to be included after common.h, which sets some defines and then includes windows.h, since winsock2.h needs windows.h
-#endif
 
 
 //---------------------------PROTOCOL DEFS---------------------------
 
-// All these structures must be byte packed.
-#if defined(_WIN32) && defined(_MSC_VER)
-	// Microsoft dependant pragma
-	#pragma pack(1)
-	#define PACK_NEEDED
-#else
-	// GCC based compiler you can add:
-	#define PACK_NEEDED __attribute__ ((packed))
-#endif
-
-#ifndef _WIN32
-	#include <netinet/in.h>
-#endif
-
-// Pack/unpack in network order.
-
-struct nword
-{
-	// Deal with the stupid Little Endian / Big Endian crap just once.
-	// On little endian machines this code would do nothing.
-	word m_val;
-	operator word () const
-	{
-		return ntohs( m_val );
-	}
-	nword & operator = ( word val )
-	{
-		m_val = htons( val );
-		return (* this);
-	}
-
-#define PACKWORD(p,w)	(p)[0]=HIBYTE(w); (p)[1]=LOBYTE(w)
-#define UNPACKWORD(p)	MAKEWORD((p)[1],(p)[0])	// low,high
-
-} PACK_NEEDED;
-
-struct ndword
-{
-	dword m_val;
-	operator dword () const
-	{
-		return ntohl( m_val );
-	}
-	ndword & operator = ( dword val )
-	{
-		m_val = htonl( val );
-		return (* this);
-	}
-
-#define PACKDWORD(p,d)	(p)[0]=((d)>>24)&0xFF; (p)[1]=((d)>>16)&0xFF; (p)[2]=HIBYTE(d); (p)[3]=LOBYTE(d)
-#define UNPACKDWORD(p)	MAKEDWORD( MAKEWORD((p)[3],(p)[2]), MAKEWORD((p)[1],(p)[0]))
-
-} PACK_NEEDED;
-
-#define	nchar	nword			// a UNICODE text char on the network.
-
-extern int CvtSystemToNUNICODE( nchar * pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes );
-extern int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const nchar * pInp, int iSizeInChars );
 
 class CLanguageID
 {
@@ -869,9 +808,5 @@ struct CCommand	// command buffer from server to client.
 	byte m_Raw[ MAX_BUFFER ];
 };
 
-// Turn off structure packing.
-#if defined(_WIN32) && defined(_MSC_VER)
-	#pragma pack()
-#endif
 
 #endif // _INC_SPHEREPROTO_H

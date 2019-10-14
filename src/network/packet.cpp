@@ -1,10 +1,14 @@
 
+#include "../common/CLog.h"
 #include "../game/clients/CClient.h"
-#include "network.h"
+#include "CNetState.h"
+#include "CNetworkThread.h"
+#include "net_datatypes.h"
 #include "packet.h"
 
-extern int CvtSystemToNUNICODE( nchar * pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes );
-extern int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const nchar * pInp, int iSizeInChars );
+
+#define PACKET_BUFFERDEFAULT 4
+#define PACKET_BUFFERGROWTH 4
 
 // on windows we can use the win32 api for converting between unicode<->ascii,
 // otherwise we need to convert with our own functions (gcc uses utf32 instead
@@ -16,6 +20,72 @@ extern int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const nchar * p
 #else
 #undef USE_UNICODE_LIB
 #endif
+
+//
+// Packet logging
+//
+#if defined(_PACKETDUMP) || defined(_DUMPSUPPORT)
+
+void xRecordPacketData(const CClient* client, const byte* data, uint length, lpctstr heading)
+{
+#ifdef _DUMPSUPPORT
+    if (client->GetAccount() != nullptr && strnicmp(client->GetAccount()->GetName(), (lpctstr)g_Cfg.m_sDumpAccPackets, strlen(client->GetAccount()->GetName())))
+        return;
+#else
+    if (!(g_Cfg.m_iDebugFlags & DEBUGF_PACKETS))
+        return;
+#endif
+
+    Packet packet(data, length);
+    xRecordPacket(client, &packet, heading);
+}
+
+void xRecordPacket(const CClient* client, Packet* packet, lpctstr heading)
+{
+#ifdef _DUMPSUPPORT
+    if (client->GetAccount() != nullptr && strnicmp(client->GetAccount()->GetName(), (lpctstr)g_Cfg.m_sDumpAccPackets, strlen(client->GetAccount()->GetName())))
+        return;
+#else
+    if (!(g_Cfg.m_iDebugFlags & DEBUGF_PACKETS))
+        return;
+#endif
+
+    TemporaryString tsDump;
+    packet->dump(tsDump);
+
+#ifdef _DEBUG
+    // write to console
+    g_Log.EventDebug("%x:%s %s\n", client->GetSocketID(), heading, (lpctstr)tsDump);
+#endif
+
+    // build file name
+    tchar fname[64];
+    strcpy(fname, "packets_");
+    if (client->GetAccount())
+        strcat(fname, client->GetAccount()->GetName());
+    else
+    {
+        strcat(fname, "(");
+        strcat(fname, client->GetPeerStr());
+        strcat(fname, ")");
+    }
+
+    strcat(fname, ".log");
+
+    CSString sFullFileName = CSFile::GetMergedFileName(g_Log.GetLogDir(), fname);
+
+    // write to file
+    CSFileText out;
+    if (out.Open(sFullFileName, OF_READWRITE | OF_TEXT))
+    {
+        out.Printf("%s %s\n\n", heading, (lpctstr)tsDump);
+        out.Close();
+    }
+}
+
+#endif	//defined(_PACKETDUMP) || defined(_DUMPSUPPORT)
+
+
 
 Packet::Packet(uint size) : m_buffer(nullptr)
 {
@@ -1084,7 +1154,7 @@ void Packet::dump(AbstractString& output) const
 #undef PROTECT_BYTE
 }
 
-uint Packet::checkLength(NetState* client, Packet* packet)
+uint Packet::checkLength(CNetState* client, Packet* packet)
 {
 	ASSERT(client != nullptr);
 	ASSERT(packet != nullptr);
@@ -1112,14 +1182,14 @@ uint Packet::checkLength(NetState* client, Packet* packet)
 	return packetLength;
 }
 
-uint Packet::getExpectedLength(NetState* client, Packet* packet)
+uint Packet::getExpectedLength(CNetState* client, Packet* packet)
 {
 	UNREFERENCED_PARAMETER(client);
 	UNREFERENCED_PARAMETER(packet);
 	return m_expectedLength;
 }
 
-bool Packet::onReceive(NetState* client)
+bool Packet::onReceive(CNetState* client)
 {
 	UNREFERENCED_PARAMETER(client);
 	return true;
@@ -1246,7 +1316,7 @@ void PacketSend::onSent(CClient* client)
 	UNREFERENCED_PARAMETER(client);
 }
 
-bool PacketSend::canSendTo(const NetState* state) const
+bool PacketSend::canSendTo(const CNetState* state) const
 {
 	UNREFERENCED_PARAMETER(state);
 	return true;

@@ -1,6 +1,6 @@
 
 #ifdef _LIBEV
-	#include "../sphere/linuxev.h"
+	#include "../network/linuxev.h"
 	#include "../sphere/UnixTerminal.h"
 #endif
 
@@ -16,7 +16,7 @@
 #include "../common/CException.h"
 #include "../common/CUOInstall.h"
 #include "../common/sphereversion.h"	// sphere version
-#include "../network/network.h" // network thread
+#include "../network/CNetworkManager.h"
 #include "../network/PingServer.h"
 #include "../sphere/asyncdb.h"
 #include "../sphere/ntwindow.h"
@@ -127,7 +127,7 @@ CWorld			g_World;			// the world. (we save this stuff)
 #ifdef _LIBEV
 	extern LinuxEv g_NetworkEvent;
 #endif
-	NetworkManager g_NetworkManager;
+	CNetworkManager g_NetworkManager;
 
 // Again, game servers stuff.
 CServerConfig	g_Cfg;
@@ -726,8 +726,8 @@ int _cdecl main( int argc, char * argv[] )
 			g_NetworkEvent.start();
 #endif
 
-        // NetworkManager creates a number of NetworkThread classes, which may run on new threads or on the calling thread. Every NetworkThread has
-        //  an instance of NetworkInput nad NetworkOutput, which support working in a multi threaded way (declarations and definitions in network_multithreaded.h/.cpp)
+        // CNetworkManager creates a number of CNetworkThread classes, which may run on new threads or on the calling thread. Every CNetworkThread has
+        //  an instance of CNetworkInput nad CNetworkOutput, which support working in a multi threaded way (declarations and definitions in network_multithreaded.h/.cpp)
 		g_NetworkManager.start();
 
 		const bool shouldRunInThread = ( g_Cfg.m_iFreezeRestartTime > 0 );
@@ -761,5 +761,10 @@ int _cdecl main( int argc, char * argv[] )
 
 	return g_Serv.GetExitFlag();
 }
+
+
+#include "../../network/CNetworkInput.h"
+#include "../../network/CNetworkOutput.h"
+#include "../../network/CNetworkThread.h"
 
 #include "../tables/classnames.tbl"
