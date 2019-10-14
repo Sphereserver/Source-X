@@ -2505,11 +2505,7 @@ bool PacketExtendedCommand::onReceive(NetState* net)
 	EXTDATA_TYPE type = static_cast<EXTDATA_TYPE>(readInt16());
 	seek();
 
-#ifndef _MTNETWORK
-	Packet* handler = g_NetworkIn.getPacketManager().getExtendedHandler(type);
-#else
 	Packet* handler = g_NetworkManager.getPacketManager().getExtendedHandler(type);
-#endif
 	if (handler == nullptr)
 		return false;
 
@@ -3561,11 +3557,7 @@ bool PacketEncodedCommand::onReceive(NetState* net)
 	seek();
 
 
-#ifndef _MTNETWORK
-	Packet* handler = g_NetworkIn.getPacketManager().getEncodedHandler(type);
-#else
 	Packet* handler = g_NetworkManager.getPacketManager().getEncodedHandler(type);
-#endif
 	if (handler == nullptr)
 		return false;
 

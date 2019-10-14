@@ -96,17 +96,13 @@ NetState::NetState(int id)
 	m_outgoing.currentTransaction = nullptr;
 	m_outgoing.pendingTransaction = nullptr;
 	m_incoming.buffer = nullptr;
-#ifdef _MTNETWORK
 	m_incoming.rawBuffer = nullptr;
-#endif
 	m_packetExceptions = 0;
 	m_clientType = CLIENTTYPE_2D;
 	m_clientVersion = 0;
 	m_reportedVersion = 0;
 	m_isInUse = false;
-#ifdef _MTNETWORK
 	m_parent = nullptr;
-#endif
 
 	clear();
 }
@@ -183,9 +179,7 @@ void NetState::clear(void)
 	for (int i = 0; i < PacketSend::PRI_QTY; i++)
 		m_outgoing.queue[i].clean();
 	m_outgoing.asyncQueue.clean();
-#ifdef _MTNETWORK
 	m_incoming.rawPackets.clean();
-#endif
 
 	if (m_outgoing.currentTransaction != nullptr)
 	{
@@ -205,13 +199,11 @@ void NetState::clear(void)
 		m_incoming.buffer = nullptr;
 	}
 
-#ifdef _MTNETWORK
 	if (m_incoming.rawBuffer != nullptr)
 	{
 		delete m_incoming.rawBuffer;
 		m_incoming.rawBuffer = nullptr;
 	}
-#endif
 
 	m_sequence = 0;
 	m_seeded = false;
@@ -249,14 +241,12 @@ void NetState::clearQueues(void)
 	// clear byte queue
 	m_outgoing.bytes.Empty();
 
-#ifdef _MTNETWORK
 	// clear received queue
 	while (m_incoming.rawPackets.empty() == false)
 	{
 		delete m_incoming.rawPackets.front();
 		m_incoming.rawPackets.pop();
 	}
-#endif
 }
 
 void NetState::init(SOCKET socket, CSocketAddress addr)
@@ -306,16 +296,12 @@ bool NetState::isInUse(const CClient* client) const volatile
 
 void NetState::markReadClosed(void) volatile
 {
-#ifdef _MTNETWORK
 	ADDTOCALLSTACK("NetState::markReadClosed");
-#endif
 
 	DEBUGNETWORK(("%x:Client being closed by read-thread\n", m_id));
 	m_isReadClosed = true;
-#ifdef _MTNETWORK
 	if (m_parent != nullptr && m_parent->getPriority() == IThread::Disabled)
 		m_parent->awaken();
-#endif
 }
 
 void NetState::markWriteClosed(void) volatile
@@ -431,11 +417,7 @@ void NetState::endTransaction(void)
 
 	//DEBUGNETWORK(("%x:Scheduling packet transaction to be sent.\n", id()));
 
-#ifndef _MTNETWORK
-	g_NetworkOut.scheduleOnce(m_outgoing.pendingTransaction);
-#else
 	m_parent->queuePacketTransaction(m_outgoing.pendingTransaction);
-#endif
 	m_outgoing.pendingTransaction = nullptr;
 }
 
@@ -549,29 +531,21 @@ HistoryIP& IPHistoryManager::getHistoryForIP(const CSocketAddressIP& ip)
 {
 	// get history for an ip
 	ADDTOCALLSTACK("IPHistoryManager::getHistoryForIP");
-	// commented to test
-	//if (&ip)	//Temporal code until I find out the cause of an error produced here crashing the server.
-	//{
-		// find existing entry
-		for (IPHistoryList::iterator it = m_ips.begin(), end = m_ips.end(); it != end; ++it)
-		{
-			if (it->m_ip == ip)
-				return *it;
-		}
-	//}
-	//else
-	//{
-	//	g_Log.EventDebug("No IP on getHistoryForIP, stack trace:\n" );
-	//	ASSERT(&ip);
-	//}
+
+    // find existing entry
+    for (IPHistoryList::iterator it = m_ips.begin(), end = m_ips.end(); it != end; ++it)
+    {
+        if (it->m_ip == ip)
+            return *it;
+    }
 
 	// create a new entry
 	HistoryIP hist = {};
 	hist.m_ip = ip;
 	hist.m_pingDecay = NETHISTORY_PINGDECAY;
 	hist.update();
+	m_ips.emplace_back(std::move(hist));
 
-	m_ips.emplace_back(hist);
 	return getHistoryForIP(ip);
 }
 
@@ -832,19 +806,11 @@ Packet* PacketManager::getEncodedHandler(uint id) const
  *
  ***************************************************************************/
 
-#ifndef _MTNETWORK
-ClientIterator::ClientIterator(const NetworkIn* network)
-{
-	m_network = (network == nullptr? &g_NetworkIn : network);
-	m_nextClient = static_cast <CClient*> (m_network->m_clients.GetHead());
-}
-#else
 ClientIterator::ClientIterator(const NetworkManager* network)
 {
 	m_network = (network == nullptr? &g_NetworkManager : network);
 	m_nextClient = static_cast<CClient*> (m_network->m_clients.GetHead());
 }
-#endif
 
 ClientIterator::~ClientIterator(void)
 {

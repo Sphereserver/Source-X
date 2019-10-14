@@ -1,5 +1,3 @@
-#ifdef _MTNETWORK
-
 #include "../common/CException.h"
 #include "../game/clients/CClient.h"
 #include "../game/chars/CChar.h"
@@ -583,14 +581,10 @@ void NetworkThread::onStart(void)
 	AbstractSphereThread::onStart();
 	m_input.setOwner(this);
 	m_output.setOwner(this);
-#ifdef MTNETWORK_INPUT
 	m_profile.EnableProfile(PROFILE_NETWORK_RX);
 	m_profile.EnableProfile(PROFILE_DATA_RX);
-#endif
-#ifdef MTNETWORK_OUTPUT
 	m_profile.EnableProfile(PROFILE_NETWORK_TX);
 	m_profile.EnableProfile(PROFILE_DATA_TX);
-#endif
 }
 
 void NetworkThread::tick(void)
@@ -608,12 +602,8 @@ void NetworkThread::tick(void)
 		return;
 	}
 
-#ifdef MTNETWORK_INPUT
 	processInput();
-#endif
-#ifdef MTNETWORK_OUTPUT
 	processOutput();
-#endif
 
 	// we're active, take priority
 	setPriority(static_cast<IThread::Priority>(g_Cfg.m_iNetworkThreadPriority));
@@ -653,10 +643,6 @@ bool NetworkInput::processInput()
 	ADDTOCALLSTACK("NetworkInput::processInput");
 	ASSERT(m_thread != nullptr);
 
-#ifndef MTNETWORK_INPUT
-	receiveData();
-	processData();
-#else
 	// when called from within the thread's context, we just receive data
 	if ( (m_thread->isActive() && m_thread->isCurrentThread()) ||	// check for multi-threaded network
 		!m_thread->isActive() )										// check for single-threaded network
@@ -679,7 +665,6 @@ bool NetworkInput::processInput()
 
 		processData();
 	}
-#endif
 	return true;
 }
 
@@ -687,9 +672,7 @@ void NetworkInput::receiveData()
 {
 	ADDTOCALLSTACK("NetworkInput::receiveData");
 	ASSERT(m_thread != nullptr);
-#ifdef MTNETWORK_INPUT
 	ASSERT(!m_thread->isActive() || m_thread->isCurrentThread());
-#endif
 	EXC_TRY("ReceiveData");
 
 	// check for incoming data
@@ -755,9 +738,7 @@ void NetworkInput::processData()
 {
 	ADDTOCALLSTACK("NetworkInput::processData");
 	ASSERT(m_thread != nullptr);
-#ifdef MTNETWORK_INPUT
 	ASSERT(!m_thread->isActive() || m_thread->isCurrentThread());
-#endif
 	EXC_TRY("ProcessData");
 
 	// check which states have data
@@ -1319,9 +1300,7 @@ bool NetworkOutput::processOutput()
 {
 	ADDTOCALLSTACK("NetworkOutput::processOutput");
 	ASSERT(m_thread != nullptr);
-#ifdef MTNETWORK_OUTPUT
 	ASSERT(!m_thread->isActive() || m_thread->isCurrentThread());
-#endif
 
 	const ProfileTask networkTask(PROFILE_NETWORK_TX);
 
@@ -1399,9 +1378,7 @@ void NetworkOutput::checkFlushRequests(void)
 {
 	// check for clients who need data flushing
 	ADDTOCALLSTACK("NetworkOutput::checkFlushRequests");
-#ifdef MTNETWORK_OUTPUT
 	ASSERT(!m_thread->isActive() || m_thread->isCurrentThread());
-#endif
 
 	NetworkThreadStateIterator states(m_thread);
 	while (NetState* state = states.next())
@@ -1462,9 +1439,7 @@ size_t NetworkOutput::processPacketQueue(NetState* state, uint priority)
 	// process a client's packet queue
 	ADDTOCALLSTACK("NetworkOutput::processPacketQueue");
 	ASSERT(state != nullptr);
-#ifdef MTNETWORK_OUTPUT
 	ASSERT(!m_thread->isActive() || m_thread->isCurrentThread());
-#endif
 
 	if (state->isWriteClosed() ||
 		(state->m_outgoing.queue[priority].empty() && state->m_outgoing.currentTransaction == nullptr))
@@ -1549,9 +1524,7 @@ size_t NetworkOutput::processAsyncQueue(NetState* state)
 	// process a client's async queue
 	ADDTOCALLSTACK("NetworkOutput::processAsyncQueue");
 	ASSERT(state != nullptr);
-#ifdef MTNETWORK_OUTPUT
 	ASSERT(!m_thread->isActive() || m_thread->isCurrentThread());
-#endif
 
 	if (state->isWriteClosed() || state->isAsyncMode() == false)
 		return 0;
@@ -1599,9 +1572,7 @@ bool NetworkOutput::processByteQueue(NetState* state)
 	// process a client's byte queue
 	ADDTOCALLSTACK("NetworkOutput::processByteQueue");
 	ASSERT(state != nullptr);
-#ifdef MTNETWORK_OUTPUT
 	ASSERT(!m_thread->isActive() || m_thread->isCurrentThread());
-#endif
 
 	if (state->isWriteClosed() || state->m_outgoing.bytes.GetDataQty() <= 0)
 		return false;
@@ -1627,9 +1598,7 @@ bool NetworkOutput::sendPacket(NetState* state, PacketSend* packet)
 	ADDTOCALLSTACK("NetworkOutput::sendPacket");
 	ASSERT(state != nullptr);
 	ASSERT(packet != nullptr);
-#ifdef MTNETWORK_OUTPUT
 	ASSERT(!m_thread->isActive() || m_thread->isCurrentThread());
-#endif
 
 	// check the client is allowed the packet
 	if (state->canReceive(packet) == false)
@@ -1653,9 +1622,7 @@ bool NetworkOutput::sendPacketData(NetState* state, PacketSend* packet)
 	ADDTOCALLSTACK("NetworkOutput::sendPacketData");
 	ASSERT(state != nullptr);
 	ASSERT(packet != nullptr);
-#ifdef MTNETWORK_OUTPUT
 	ASSERT(!m_thread->isActive() || m_thread->isCurrentThread());
-#endif
 
 	CClient* client = state->getClient();
 	ASSERT(client != nullptr);
@@ -1748,9 +1715,7 @@ size_t NetworkOutput::sendData(NetState* state, const byte* data, size_t length)
 	ASSERT(data != nullptr);
 	ASSERT(length > 0);
 	ASSERT(length != _failed_result());
-#ifdef MTNETWORK_OUTPUT
 	ASSERT(!m_thread->isActive() || m_thread->isCurrentThread());
-#endif
 
 	EXC_TRY("SendData");
 	size_t result = 0;
@@ -1852,7 +1817,6 @@ void NetworkOutput::onAsyncSendComplete(NetState* state, bool success)
 	if (success == false)
 		return;
 
-#ifdef MTNETWORK_OUTPUT
 	// we could process another batch of async data right now, but only if we
 	// are in the output thread
 	// - WinSock calls this from the same thread (so, enter the if)
@@ -1862,7 +1826,6 @@ void NetworkOutput::onAsyncSendComplete(NetState* state, bool success)
 		if (processAsyncQueue(state) > 0)
 			processByteQueue(state);
 	}
-#endif
 }
 
 void NetworkOutput::QueuePacket(PacketSend* packet, bool appendTransaction)
@@ -1975,4 +1938,3 @@ NetState* NetworkThreadStateIterator::next(void)
 	return nullptr;
 }
 
-#endif

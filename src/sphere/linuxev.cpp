@@ -22,11 +22,7 @@ static void socketmain_cb(struct ev_loop * /* loop */, struct ev_io * /* w */, i
 		{
 			// warning: accepting a new connection here can result in a threading issue,
 			// where the main thread can clear the connection before it has been fully initialised
-#ifndef _MTNETWORK
-			g_NetworkIn.acceptConnection();
-#else
 			g_NetworkManager.acceptNewConnection();
-#endif
 		}
 	}
 	
@@ -50,13 +46,9 @@ static void socketslave_cb(struct ev_loop *loop, struct ev_io *w, int revents)
 		}		
 		else if ( revents & EV_WRITE )
 		{
-#ifndef _MTNETWORK
-			g_NetworkOut.onAsyncSendComplete(state, true);
-#else
 			NetworkThread* thread = state->getParentThread();
 			if (thread != nullptr)
 				thread->onAsyncSendComplete(state, true);	// we can send (again) data
-#endif
 		}
 	}
 	

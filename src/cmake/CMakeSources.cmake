@@ -28,7 +28,6 @@ SET (network_SRCS
 network/CSocket.cpp
 network/CSocket.h
 network/network_common.cpp
-network/network_singlethreaded.cpp
 network/network_multithreaded.cpp
 network/network.h
 network/packet.cpp

@@ -769,13 +769,8 @@ public:
 		m_BaseDefs.DeleteKey(ptcKey);
 	}
 
-#ifndef _MTNETWORK
-	friend class NetworkIn;
-	friend class NetworkOut;
-#else
 	friend class NetworkInput;
 	friend class NetworkOutput;
-#endif
 	friend class PacketCreate;
 	friend class PacketServerRelay;
 };
