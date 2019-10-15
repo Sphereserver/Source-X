@@ -45,7 +45,7 @@ void CNetworkManager::createNetworkThreads(size_t count)
 
     ASSERT(m_threads.empty());
     for (size_t i = 0; i < count; ++i)
-        m_threads.push_back(new CNetworkThread(*this, i));
+        m_threads.emplace_back(new CNetworkThread(this, i));
 }
 
 CNetworkThread* CNetworkManager::selectBestThread(void)

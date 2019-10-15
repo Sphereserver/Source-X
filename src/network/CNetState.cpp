@@ -10,7 +10,6 @@
 #include "CNetState.h"
 
 #ifdef _LIBEV
-    #include "linuxev.h"
     extern LinuxEv g_NetworkEvent;
 #endif
 

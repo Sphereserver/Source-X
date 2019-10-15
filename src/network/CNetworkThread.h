@@ -12,13 +12,14 @@
 #include "CNetworkOutput.h"
 
 class CNetState;
+class CNetworkManager;
 class PacketSend;
 class PacketTransaction;
 
 class CNetworkThread : public AbstractSphereThread
 {
 private:
-    CNetworkManager& m_manager;					// parent network manager
+    CNetworkManager* m_manager;					// parent network manager
     size_t m_id;								// network thread #
 
     typedef std::deque<CNetState*> NetworkStateList;
@@ -35,7 +36,7 @@ public:
 
 public:
     static const char* m_sClassName;
-    CNetworkThread(CNetworkManager& manager, size_t id);
+    CNetworkThread(CNetworkManager* manager, size_t id);
     virtual ~CNetworkThread(void);
 
 private:

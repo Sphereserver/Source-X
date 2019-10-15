@@ -1,4 +1,5 @@
 #include "net_datatypes.h"
+#include <cstring>
 
 #ifdef _WIN32
 	#include <winsock2.h>	// this needs to be included after common.h, which sets some defines and then includes windows.h, since winsock2.h needs windows.h
@@ -11,16 +12,19 @@ nword::operator word () const
 {
     return ntohs(m_val);
 }
+
 nword& nword::operator = (word val)
 {
     m_val = htons(val);
     return (*this);
 }
 
+
 ndword::operator dword () const
 {
     return ntohl(m_val);
 }
+
 ndword& ndword::operator = (dword val)
 {
     m_val = htonl(val);

@@ -12,6 +12,10 @@
 #include "CSocket.h"
 #include "packet.h"
 
+#ifdef _LIBEV
+    #include "linuxev.h"
+#endif
+
 
 #ifdef DEBUGPACKETS
     #define DEBUGNETWORK(_x_)	g_Log.EventDebug _x_;
