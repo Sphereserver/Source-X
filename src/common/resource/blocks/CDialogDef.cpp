@@ -32,6 +32,8 @@ enum GUMPCTL_TYPE // controls we can put in a gump.
     GUMPCTL_GUMPPICTILED, // x, y, gumpID, w, h, hue=color
     GUMPCTL_HTMLGUMP, // 7 = x,y,sx,sy, 0 0 0
 
+	GUMPCTL_ITEMPROPERTY, // 1 = tooltip?
+
     // Not really controls but more attributes.
     GUMPCTL_NOCLOSE, // 0 = The gump cannot be closed by right clicking.
     GUMPCTL_NODISPOSE, // 0 = The gump cannot be closed by gump-closing macro.
@@ -77,6 +79,8 @@ lpctstr const CDialogDef::sm_szLoadKeys[GUMPCTL_QTY+1] =
     "GUMPPIC",
     "GUMPPICTILED",
     "HTMLGUMP",
+
+	"ITEMPROPERTY",
 
     "NOCLOSE",
     "NODISPOSE",

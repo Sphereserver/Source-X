@@ -3707,8 +3707,8 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_WARRIOR, wPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_MAGE" ))
 				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_MAGE, wPage );
-			else if ( ! strcmpi( pszName, "PROFESSION_BLACKSMITH" ))
-				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_BLACKSMITH, wPage );
+			else if (!strcmpi(pszName, "PROFESSION_ARCHER"))
+				return CResourceID(RES_NEWBIE, RES_NEWBIE_PROF_ARCHER, wPage);
 			else if ( ! strcmpi( pszName, "PROFESSION_NECROMANCER" ))
 				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_NECROMANCER, wPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_PALADIN" ))
@@ -3717,6 +3717,10 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_SAMURAI, wPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_NINJA" ))
 				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_NINJA, wPage );
+			else if (!strcmpi(pszName, "PROFESSION_BARD"))
+				return CResourceID(RES_NEWBIE, RES_NEWBIE_PROF_BARD, wPage);
+			else if (!strcmpi(pszName, "PROFESSION_BLACKSMITH"))
+				return CResourceID(RES_NEWBIE, RES_NEWBIE_PROF_BLACKSMITH, wPage);
 		}
 		break;
 	case RES_AREA:

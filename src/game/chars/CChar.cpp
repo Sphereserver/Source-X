@@ -1829,8 +1829,8 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 		case PROFESSION_MAGE:
 			iProfession = RES_NEWBIE_PROF_MAGE;
 			break;
-		case PROFESSION_BLACKSMITH:
-			iProfession = RES_NEWBIE_PROF_BLACKSMITH;
+		case PROFESSION_ARCHER:
+			iProfession = RES_NEWBIE_PROF_ARCHER;
 			break;
 		case PROFESSION_NECROMANCER:
 			iProfession = RES_NEWBIE_PROF_NECROMANCER;
@@ -1847,6 +1847,12 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 		case PROFESSION_NINJA:
 			iProfession = RES_NEWBIE_PROF_NINJA;
 			fCreateSkillItems = false;
+			break;
+		case PROFESSION_BARD:
+			iProfession = RES_NEWBIE_PROF_BARD;
+			break;
+		case PROFESSION_BLACKSMITH:
+			iProfession = RES_NEWBIE_PROF_BLACKSMITH;
 			break;
 	}
 

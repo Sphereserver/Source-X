@@ -85,11 +85,13 @@ enum RES_TYPE	// all the script resource blocks we know how to deal with !
 #define RES_NEWBIE_PROF_ADVANCED	(10000+3)
 #define RES_NEWBIE_PROF_WARRIOR		(10000+4)
 #define RES_NEWBIE_PROF_MAGE		(10000+5)
-#define RES_NEWBIE_PROF_BLACKSMITH	(10000+6)
+#define RES_NEWBIE_PROF_ARCHER		(10000+6)
 #define RES_NEWBIE_PROF_NECROMANCER	(10000+7)
 #define RES_NEWBIE_PROF_PALADIN		(10000+8)
 #define RES_NEWBIE_PROF_SAMURAI		(10000+9)
 #define RES_NEWBIE_PROF_NINJA		(10000+10)
+#define RES_NEWBIE_PROF_BARD		(10000+11)
+#define RES_NEWBIE_PROF_BLACKSMITH	(10000+12)
 
 
 struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variable. Use it to store defnames or UIDs of world objects (items, chars...) or spawns and templates.
