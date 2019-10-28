@@ -2971,7 +2971,7 @@ CComponentProps::PropertyValNum_t CObjBase::GetPropNum( COMPPROPS_TYPE iCompProp
 void CObjBase::SetPropStr( CComponentProps* pCompProps, int iPropIndex, lpctstr ptcVal, bool fDeleteZero )
 {
     ASSERT(pCompProps);
-    const RESDISPLAY_VERSION iLimitToEra = !IsChar() ? RDS_PRET2A : static_cast<const CCharBase*>(Base_GetDef())->_iEraLimitProps;
+    const RESDISPLAY_VERSION iLimitToEra = Base_GetDef()->_iEraLimitProps;
     pCompProps->SetPropertyStr(iPropIndex, ptcVal, this, iLimitToEra, fDeleteZero);
 }
 
@@ -2983,14 +2983,14 @@ void CObjBase::SetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, lpctst
         g_Log.EventDebug("CEntityProps: SetPropStr on unsubscribed CCProps. iCompPropsType %d, iPropIndex %d.\n", iCompPropsType, iPropIndex);
         CreateSubscribeComponentProps(iCompPropsType);
     }
-    const RESDISPLAY_VERSION iLimitToEra = !IsChar() ? RDS_PRET2A : static_cast<const CCharBase*>(Base_GetDef())->_iEraLimitProps;
+    const RESDISPLAY_VERSION iLimitToEra = Base_GetDef()->_iEraLimitProps;
     pCompProps->SetPropertyStr(iPropIndex, ptcVal, this, iLimitToEra, fDeleteZero);
 }
 
 void CObjBase::SetPropNum( CComponentProps* pCompProps, int iPropIndex, CComponentProps::PropertyValNum_t iVal )
 {
     ASSERT(pCompProps);
-    const RESDISPLAY_VERSION iLimitToEra = !IsChar() ? RDS_PRET2A : static_cast<const CCharBase*>(Base_GetDef())->_iEraLimitProps;
+    const RESDISPLAY_VERSION iLimitToEra = Base_GetDef()->_iEraLimitProps;
     pCompProps->SetPropertyNum(iPropIndex, iVal, this, iLimitToEra);
 }
 
@@ -3002,7 +3002,7 @@ void CObjBase::SetPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CCompo
         g_Log.EventDebug("CEntityProps: SetPropNum on unsubscribed CCProps. iCompPropsType %d, iPropIndex %d.\n", iCompPropsType, iPropIndex);
         CreateSubscribeComponentProps(iCompPropsType);
     }
-    const RESDISPLAY_VERSION iLimitToEra = !IsChar() ? RDS_PRET2A : static_cast<const CCharBase*>(Base_GetDef())->_iEraLimitProps;
+    const RESDISPLAY_VERSION iLimitToEra = Base_GetDef()->_iEraLimitProps;
     pCompProps->SetPropertyNum(iPropIndex, iVal, this, iLimitToEra);
 }
 
@@ -3017,7 +3017,7 @@ void CObjBase::ModPropNum( CComponentProps* pCompProps, int iPropIndex, CCompone
     }
     if (!iVal && !iMod)
         return;
-    const RESDISPLAY_VERSION iLimitToEra = !IsChar() ? RDS_PRET2A : static_cast<const CCharBase*>(Base_GetDef())->_iEraLimitProps;
+    const RESDISPLAY_VERSION iLimitToEra = Base_GetDef()->_iEraLimitProps;
     pCompProps->SetPropertyNum(iPropIndex, iMod + iVal, this, iLimitToEra);
 }
 
@@ -3044,7 +3044,7 @@ void CObjBase::ModPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CCompo
     }
     if (!iVal && !iMod)
         return;
-    const RESDISPLAY_VERSION iLimitToEra = !IsChar() ? RDS_PRET2A : static_cast<const CCharBase*>(Base_GetDef())->_iEraLimitProps;
+    const RESDISPLAY_VERSION iLimitToEra = Base_GetDef()->_iEraLimitProps;
     pCompProps->SetPropertyNum(iPropIndex, iVal + iMod, this, iLimitToEra);
 }
 

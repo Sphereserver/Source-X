@@ -1922,3 +1922,12 @@ WARNING: Important change!
 - Modified: Train ContextMenu to not show disabled skills (SKF_DISABLED).
 - Modified: Now you can modify Animal Taming range from [SKILL] definition.
 - Updated: sphereCrypt.ini
+
+28-10-2019, Nolok
+- Fixed: Failing debug assertion when using a ranged weapon which has set as a ammo id a non-defname value.
+- Fixed: Expansion limitation for properties was working only for items, not of chars. In that case they were considered as RDS_PRET2A properties.
+- Fixed: Z-checks inside multis considering the blocking item's Z as an absolute Z, instead of being relative to the multi's position (Issue #328).
+- Fixed: Item being moved to 0,0,0,0 P when, for some reasons, dropping it on ground failed (Issue #328).
+- Fixed: P checks didn't consider custom (customized) multi items (Issue #328).
+- Fixed: using GO or teleports when having GM mode on used a wrong destination Z (Issue #331).
+- Fixed: RegenValStam and RegenValMana swapped in world saves (Issue #332).

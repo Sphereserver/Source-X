@@ -69,11 +69,14 @@ private:
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override; // Execute command from script
 
     CPointMap GetComponentPoint(const Component * pComponent) const;
-    CPointMap GetComponentPoint(short dx, short dy, char dz) const;/**
+    CPointMap GetComponentPoint(short dx, short dy, char dz) const;
+    
+    /**
     * @brief Removes a Component from the components list.
     * @param pComponent the component.
     */
-    virtual void DelComp(CUID  pComponent);
+    virtual void DelComp(const CUID& pComponent) override;
+
     void CopyDesign(DesignDetails * designFrom, DesignDetails * designTo);
     void GetLockdownsAt(short dx, short dy, char dz, std::vector<CUID> &vList);
     void GetSecuredAt(short dx, short dy, char dz, std::vector<CUID> &vList);
@@ -124,6 +127,11 @@ public:
     static uchar GetPlane(Component * pComponent);
     static char GetPlaneZ(uchar plane);
     static bool IsValidItem(ITEMID_TYPE id, CClient * pClientSrc, bool bMulti);
+
+    DesignDetails* GetDesignMain()
+    {
+        return &m_designMain;
+    }
 };
 
 

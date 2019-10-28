@@ -669,7 +669,10 @@ char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
 {
 	if ( !dwBlockFlags )
 		dwBlockFlags = GetMoveBlockFlags();
+
 	const dword dwCan = GetMoveBlockFlags();
+    if (dwCan == 0xFFFFFFFF)
+        return pt.m_z;
 	if ( dwCan & CAN_C_WALK )
 		dwBlockFlags |= CAN_I_CLIMB; // If we can walk than we can climb. Ignore CAN_C_FLY at all here
 
@@ -681,38 +684,40 @@ char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
 	if ( block.m_Top.m_dwBlockFlags )
 	{
 		dwBlockFlags |= CAN_I_ROOF;	// we are covered by something.
-		if ( block.m_Top.m_z < pt.m_z + (m_zClimbHeight + (block.m_Top.m_dwTile > TERRAIN_QTY ? iHeightMount : iHeightMount/2 )) )
+		if ( block.m_Top.m_z < pt.m_z + (m_zClimbHeight + ((block.m_Top.m_dwTile > TERRAIN_QTY) ? iHeightMount : iHeightMount/2 )) )
 			dwBlockFlags |= CAN_I_BLOCK; // we can't fit under this!
 	}
-	if (( dwCan != 0xFFFFFFFF ) && ( dwBlockFlags != 0x0 ))
+	if ( dwBlockFlags != 0x0 )
 	{
-		if ( ( dwBlockFlags & CAN_I_DOOR ) && Can( CAN_C_GHOST ))
+		if ( (dwBlockFlags & CAN_I_DOOR) && Can(CAN_C_GHOST) )
 			dwBlockFlags &= ~CAN_I_BLOCK;
 
-		if ( ( dwBlockFlags & CAN_I_WATER ) && Can( CAN_C_SWIM ))
+		if ( (dwBlockFlags & CAN_I_WATER) && Can(CAN_C_SWIM) )
 			dwBlockFlags &= ~CAN_I_BLOCK;
 
-		if ( ! Can( CAN_C_FLY ))
+		if ( !Can(CAN_C_FLY) )
 		{
 			if ( ! ( dwBlockFlags & CAN_I_CLIMB ) ) // we can climb anywhere
 			{
 				if ( block.m_Bottom.m_dwTile > TERRAIN_QTY )
 				{
-					if ( block.m_Bottom.m_z > pt.m_z + m_zClimbHeight + 2) // Too high to climb.
+					if ( block.m_Bottom.m_z > (pt.m_z + m_zClimbHeight + 2) ) // Too high to climb.
 						return pt.m_z;
 				}
-				else if ( block.m_Bottom.m_z > pt.m_z + m_zClimbHeight + iHeightMount + 3)
+				else if ( block.m_Bottom.m_z > (pt.m_z + m_zClimbHeight + iHeightMount + 3) )
 					return pt.m_z;
 			}
 		}
-		if (( dwBlockFlags & CAN_I_BLOCK ) && ( ! Can( CAN_C_PASSWALLS )) )
+		if ( (dwBlockFlags & CAN_I_BLOCK) && !Can(CAN_C_PASSWALLS) )
 			return pt.m_z;
 
 		if ( block.m_Bottom.m_z >= UO_SIZE_Z )
 			return pt.m_z;
 	}
-	if (( iHeightMount + pt.m_z >= block.m_Top.m_z ) && ( g_Cfg.m_iMountHeight ) && ( !IsPriv( PRIV_GM ) ) && ( !IsPriv( PRIV_ALLMOVE ) ))
+
+	if ( (iHeightMount + pt.m_z >= block.m_Top.m_z) && g_Cfg.m_iMountHeight && !IsPriv(PRIV_ALLMOVE) )
 		return pt.m_z;
+
 	return block.m_Bottom.m_z;
 }
 
@@ -3807,8 +3812,8 @@ void CChar::r_Write( CScript & s )
     static constexpr lpctstr _ptcKeyRegenVal[STAT_QTY] =
     {
         "REGENVALHITS",
-        "REGENVALSTAM",
         "REGENVALMANA",
+        "REGENVALSTAM",
         "REGENVALFOOD"
     };
     for (ushort j = 0; j < STAT_QTY; ++j)

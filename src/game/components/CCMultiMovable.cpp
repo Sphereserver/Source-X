@@ -1304,7 +1304,7 @@ bool CCMultiMovable::r_LoadVal(CScript & s)
     // ASSERT(pItemThis);
     if (index == -1)
     {
-        if (!strnicmp(pszKey, "SHIPSPEED.", 10))
+        if (!strnicmp(ptcKey, "SHIPSPEED.", 10))
             index = CML_SHIPSPEED;
     }
 

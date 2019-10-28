@@ -259,15 +259,18 @@ void CNetworkManager::start(void)
 
             // Since isThreaded is false the main/first thread will only run Sphere_MainMonitorLoop, and all the sphere/scripts/networking work will be done in the MainThread class,
             //	which code will be executed in another thread named "T_Main". So, in this case even the CNetworkThread(s) will be executed on the main thread.
+            ASSERT(ntCount == 1);
+            /*
             if (ntCount > 1)
             {
                 // If we have more than one thread (this hasn't sense... at this point isThreaded should be == true)
                 char name[IThread::m_nameMaxLength];
-                snprintf(name, sizeof(name), "T_Worker #%u", (uint)pThread->getId());
+                snprintf(name, sizeof(name), "T_Net #%u", (uint)pThread->getId());
                 pThread->overwriteInternalThreadName(name);
             }
+            */
 
-            (*it)->onStart();	// the thread structure (class) was created via createNetworkThreads, but we execute the worker method of that class in this thread
+            pThread->onStart();	// the thread structure (class) was created via createNetworkThreads, but we execute the worker method of that class in this thread
         }
     }
 }

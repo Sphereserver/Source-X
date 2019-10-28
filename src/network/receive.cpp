@@ -2189,6 +2189,7 @@ bool PacketGumpDialogRet::onReceive(CNetState* net)
 	}
 
 #ifdef _DEBUG
+    if (g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS)
 	{
 		const CResourceDef* resource = g_Cfg.ResourceGetDef(CResourceID(RES_DIALOG, RES_GET_INDEX(context)));
 		if (resource == nullptr)
@@ -2512,7 +2513,7 @@ bool PacketExtendedCommand::onReceive(CNetState* net)
 		return false;
 
 	handler->seek();
-	for (int i = 0; i < packetLength; i++)
+	for (int i = 0; i < packetLength; ++i)
 	{
 		byte next = readByte();
 		handler->writeByte(next);

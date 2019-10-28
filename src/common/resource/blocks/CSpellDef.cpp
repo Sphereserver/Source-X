@@ -268,7 +268,7 @@ bool CSpellDef::r_LoadVal( CScript &s )
             m_wTithingUse = (word)(s.GetArgVal());
             break;
         default:
-            return( CResourceDef::r_LoadVal( s ) );
+            return CResourceDef::r_LoadVal( s );
     }
     return true;
     EXC_CATCH;

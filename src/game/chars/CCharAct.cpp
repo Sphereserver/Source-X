@@ -6,6 +6,7 @@
 #include "../../sphere/ProfileTask.h"
 #include "../clients/CClient.h"
 #include "../items/CItem.h"
+#include "../items/CItemMultiCustom.h"
 #include "../components/CCSpawn.h"
 #include "../components/CCPropsChar.h"
 #include "../components/CCPropsItemChar.h"

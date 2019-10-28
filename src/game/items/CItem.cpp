@@ -1471,18 +1471,22 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	// Make noise and try to pile it and such.
 
 	CPointMap ptNewPlace;
-	if ( pt.IsValidPoint() && 
-        ((pCharMover && pCharMover->IsPriv(PRIV_GM)) || !g_World.IsItemTypeNear(pt, IT_WALL, 0, true)) )
+	if (pt.IsValidPoint())
     {
-		ptNewPlace = pt;
+        if (pCharMover && pCharMover->IsPriv(PRIV_GM))
+		    ptNewPlace = pt;
+        else
+        {
+            const CPointMap ptNear = g_World.FindItemTypeNearby(pt, IT_WALL, 0, true, true);
+            if (!ptNear.IsValidPoint())
+                ptNewPlace = pt;
+        }
     }
-	else if ( pCharMover )
+	if (pCharMover && !ptNewPlace.IsValidPoint())
 	{
 		pCharMover->ItemBounce(this);
 		return false;
 	}
-	else
-		ptNewPlace.ValidatePoint();
 
 	llong iDecayTime = GetDecayTime();
 	if ( iDecayTime > 0 )
@@ -1494,18 +1498,18 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 
     const CObjBase *pCont = GetContainer();
 	TRIGRET_TYPE ttResult = TRIGRET_RET_DEFAULT;
-	if ( IsTrigUsed(TRIGGER_DROPON_GROUND) || IsTrigUsed(TRIGGER_ITEMDROPON_GROUND) )
-	{
-		CScriptTriggerArgs args;
-		args.m_iN1 = iDecayTime / MSECS_PER_TENTH;  // ARGN1 = Decay time for the dropped item (in tenths of second)
+    if (IsTrigUsed(TRIGGER_DROPON_GROUND) || IsTrigUsed(TRIGGER_ITEMDROPON_GROUND))
+    {
+        CScriptTriggerArgs args;
+        args.m_iN1 = iDecayTime / MSECS_PER_TENTH;  // ARGN1 = Decay time for the dropped item (in tenths of second)
         //args.m_iN2 = 0;
         args.m_s1 = ptNewPlace.WriteUsed();
-		ttResult = OnTrigger(ITRIG_DROPON_GROUND, pCharMover, &args);
+        ttResult = OnTrigger(ITRIG_DROPON_GROUND, pCharMover, &args);
 
-		if ( IsDeleted() )
-			return false;
+        if (IsDeleted())
+            return false;
 
-		iDecayTime = args.m_iN1 * MSECS_PER_TENTH;
+        iDecayTime = args.m_iN1 * MSECS_PER_TENTH;
 
         CPointMap ptChanged;
         ptChanged.Read(const_cast<lpstr>(args.m_s1.GetPtr()));
@@ -1513,7 +1517,11 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
             g_Log.EventError("Trying to override item drop P with an invalid P. Using the original one.\n");
         else
             ptNewPlace = ptChanged;
-	}
+    }
+    else if (!ptNewPlace.IsValidPoint())
+    {
+        return false;
+    }
 
     // If i have changed the container via scripts, we shouldn't change item's position again here
     if (pCont == GetContainer())
@@ -4693,14 +4701,15 @@ CResourceID CItem::Weapon_GetRangedAmmoRes()
 	if ( !sAmmoID.IsEmpty() )
 	{
 		lpctstr pszAmmoID = sAmmoID.GetPtr();
-		return CResourceID(g_Cfg.ResourceGetID(RES_ITEMDEF, pszAmmoID));
+		return g_Cfg.ResourceGetID(RES_ITEMDEF, pszAmmoID);
 	}
 
 	CItemBase *pItemDef = Item_GetDef();
+    pItemDef->m_ttWeaponBow.m_ridAmmo.FixRes();
 	return pItemDef->m_ttWeaponBow.m_ridAmmo;
 }
 
-CItem *CItem::Weapon_FindRangedAmmo(CResourceID id)
+CItem *CItem::Weapon_FindRangedAmmo(const CResourceID& id)
 {
 	ADDTOCALLSTACK("CItem::Weapon_FindRangedAmmo");
 	// Find ammo used by this ranged weapon (archery/throwing)
@@ -4714,20 +4723,26 @@ CItem *CItem::Weapon_FindRangedAmmo(CResourceID id)
 		// Search container using UID
 		lpctstr  ptcAmmoCont = sAmmoCont.GetPtr();
 		CContainer *pCont = dynamic_cast<CContainer *>(CUID::ItemFind(Exp_GetDWVal(ptcAmmoCont)));
-		if ( pCont )	//If the container exist that means the uid was a valid container uid.
+		if ( pCont )
 		{
+            //If the container exist that means the uid was a valid container uid.
 			return pCont->ContentFind(id);
 		}
-		else // Search container using ITEMID_TYPE
+		else
 		{
-			//Reassigned the value from sAmmoCont.GetPtr() because it seems that Exp_GetDWal clears it 
+            // Search container using ITEMID_TYPE
+            if (!pParent)
+                return nullptr;
+
+			//Reassigned the value from sAmmoCont.GetPtr() because Exp_GetDWal clears it 
 			ptcAmmoCont = sAmmoCont.GetPtr();
-			CResourceID ridCont(g_Cfg.ResourceGetID(RES_ITEMDEF, ptcAmmoCont));
+			const CResourceID ridCont(g_Cfg.ResourceGetID(RES_ITEMDEF, ptcAmmoCont));
 			pCont = dynamic_cast<CContainer *>(pParent->ContentFind(ridCont));
 			if (pCont)
 				return pCont->ContentFind(id);
 			return nullptr;
 		}
+
 		//CVarDefCont *pVarCont = GetDefKey("AMMOCONT", true);
 		/*if ( pVarCont )
 		{
@@ -4749,6 +4764,7 @@ CItem *CItem::Weapon_FindRangedAmmo(CResourceID id)
 			return nullptr;
 		}*/
 	}
+
 	// Search on parent container if there's no specific container to search
 	if ( pParent )
 		return pParent->ContentFind(id);

@@ -19,6 +19,7 @@
 #include "chars/CCharBase.h"
 #include "items/CItemBase.h"
 #include "items/CItemStone.h"
+#include "items/CItemMultiCustom.h"
 #include "components/CCChampion.h"
 #include "uo_files/CUOItemInfo.h"
 #include "uo_files/CUOTerrainInfo.h"
@@ -2535,7 +2536,7 @@ void CServerConfig::LoadSortSpells()
 		int	iVal = 0;
 		m_SpellDefs[i]->GetPrimarySkill( nullptr, &iVal );
 
-		size_t iQty = m_SpellDefs_Sorted.size();
+		const size_t iQty = m_SpellDefs_Sorted.size();
 		size_t k = 1;
 		while ( k < iQty )
 		{

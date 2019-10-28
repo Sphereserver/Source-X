@@ -1128,12 +1128,12 @@ size_t CItemMultiCustom::GetFixtureCount(DesignDetails * pDesign)
         pDesign = &m_designMain;
 
     size_t count = 0;
-    for (ComponentsContainer::iterator i = pDesign->m_vectorComponents.begin(); i != pDesign->m_vectorComponents.end(); ++i)
+    for (const Component * pComponent : pDesign->m_vectorComponents)
     {
-        if ((*i)->m_item.m_visible)
+        if (pComponent->m_item.m_visible)
             continue;
 
-        count++;
+        ++count;
     }
 
     return count;
@@ -1149,16 +1149,14 @@ size_t CItemMultiCustom::GetComponentsAt(short x, short y, char z, Component ** 
     if (pDesign == nullptr)
         pDesign = &m_designMain;
 
+    const uchar uiPlane = GetPlane(z);
     size_t count = 0;
-    Component * pComponent;
-    for (size_t i = 0; i < pDesign->m_vectorComponents.size(); ++i)
+    for (Component* pComponent : pDesign->m_vectorComponents)
     {
-        pComponent = pDesign->m_vectorComponents[i];
-
         if (pComponent->m_item.m_dx != x || pComponent->m_item.m_dy != y)
             continue;
 
-        if (z != INT8_MIN && GetPlane((char)(pComponent->m_item.m_dz)) != GetPlane(z))
+        if (z != INT8_MIN && GetPlane((char)(pComponent->m_item.m_dz)) != uiPlane)
             continue;
 
         pComponents[count++] = pComponent;
@@ -1169,7 +1167,7 @@ size_t CItemMultiCustom::GetComponentsAt(short x, short y, char z, Component ** 
 
 CPointMap CItemMultiCustom::GetComponentPoint(const Component * pComp) const
 {
-    ADDTOCALLSTACK("CItemMultiCustom::GetComponentPoint");
+    ADDTOCALLSTACK("CItemMultiCustom::GetComponentPoint(ptr)");
     return GetComponentPoint(pComp->m_item.m_dx, pComp->m_item.m_dy, (char)(pComp->m_item.m_dz));
 }
 
@@ -1250,9 +1248,9 @@ const CRect CItemMultiCustom::GetDesignArea()
     return rect;
 }
 
-void CItemMultiCustom::DelComp(CUID uidComponent)
+void CItemMultiCustom::DelComp(const CUID& uidComponent)
 {
-    /* The code bellow should remove the item from the m_mainDesign, however it's not being deleted from there even if the world item is
+    /* The code below should remove the item from the m_mainDesign, however it's not being deleted from there even if the world item is
         So, in the next customize, the item will appear again.
         TODO: Make the whole customizing system more flexible to allow 'enter' and 'exit' customize mode and tweak the items without involving 
         any heavy load, trigger, or player iteraction/notifications.
@@ -1461,7 +1459,7 @@ void CItemMultiCustom::ClearFloor(char iFloor)
         if (comp->m_item.m_dz >= iMinZ && comp->m_item.m_dz <= iMaxZ)
         {
             m_designMain.m_vectorComponents.erase(m_designMain.m_vectorComponents.begin()+i);
-            m_designMain.m_iRevision++;
+            ++ m_designMain.m_iRevision;
             continue;
         }
     }

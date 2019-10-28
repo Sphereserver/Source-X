@@ -48,6 +48,15 @@ CResourceIDBase& CResourceIDBase::operator = (const CResourceIDBase& rid)  // as
     return *this;
 }
 
+void CResourceIDBase::FixRes()
+{
+    // When setting a TDATA* or a MORE*, a script could set a raw UID (valid/invalid resource) without calling the CResourceID(Base) methods
+    // to set the value properly: for this reason it's better to ensure this is a valid resource before using it.
+    m_dwInternalVal |= UID_F_RESOURCE;
+    ASSERT(IsResource());
+    ASSERT(IsValidUID());
+}
+
 bool CResourceIDBase::IsUIDItem() const
 {
     // replacement for CUIDBase::IsItem(), but don't be virtual, since we don't need that and the class size will increase due to the vtable
