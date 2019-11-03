@@ -1921,7 +1921,7 @@ WARNING: Important change!
 13-10-2019, Julian
 - Modified: Train ContextMenu to not show disabled skills (SKF_DISABLED).
 - Modified: Now you can modify Animal Taming range from [SKILL] definition.
-- Updated: sphereCrypt.ini
+- Updated: sphereCrypt.ini.
 
 28-10-2019, Nolok
 - Fixed: Failing debug assertion when using a ranged weapon which has set as a ammo id a non-defname value.
@@ -1929,5 +1929,9 @@ WARNING: Important change!
 - Fixed: Z-checks inside multis considering the blocking item's Z as an absolute Z, instead of being relative to the multi's position (Issue #328).
 - Fixed: Item being moved to 0,0,0,0 P when, for some reasons, dropping it on ground failed (Issue #328).
 - Fixed: P checks didn't consider custom (customized) multi items (Issue #328).
-- Fixed: using GO or teleports when having GM mode on used a wrong destination Z (Issue #331).
+- Fixed: Using GO or teleports when having GM mode on used a wrong destination Z (Issue #331).
 - Fixed: RegenValStam and RegenValMana swapped in world saves (Issue #332).
+
+03-11-2019, Nolok
+- Fixed: SERV.TIME value not being saved correctly. Also, now X saves SERV.TIMEHIRES instead of SERV.TIME (Issue #334).
+- Fixed: Spells and other kind of resources didn't resync correctly (Issue #333).

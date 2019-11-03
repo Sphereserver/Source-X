@@ -1177,12 +1177,13 @@ void CChar::NPC_Act_Wander()
 	if ( Can(CAN_C_NONMOVER) )
 		return;
 
+    const int iRand = Calc_GetRandVal(UINT16_MAX);  // Call the rand function once, since repeated calls can be expensive
 	int iStopWandering = 0;
 
-	if ( ! Calc_GetRandVal( 7 + (Stat_GetVal(STAT_DEX) / 30)) )
+	if ( !(iRand % (7 + (Stat_GetVal(STAT_DEX) / 30))) )
 		iStopWandering = 1;			// i'm stopping to wander "for the dexterity". 
 
-	if ( !Calc_GetRandVal(2 + TICKS_PER_SEC/2) )
+	if ( !(iRand % (2 + TICKS_PER_SEC/2)) )
 	{
 		// NPC_LookAround() is very expensive, so since NPC_Act_Wander is called every tick for every char with ACTION == NPCACT_WANDER,
 		//	don't look around every time.
@@ -1192,7 +1193,7 @@ void CChar::NPC_Act_Wander()
 
 	// Staggering Walk around.
 	m_Act_p = GetTopPoint();
-	m_Act_p.Move( GetDirTurn(m_dirFace, 1 - Calc_GetRandVal(3)) );
+	m_Act_p.Move( GetDirTurn(m_dirFace, 1 - (iRand % 3)) );
 
 	int iReturnToHome = 0;
 
@@ -1205,7 +1206,7 @@ void CChar::NPC_Act_Wander()
 	if (IsTrigUsed(TRIGGER_NPCACTWANDER))
 	{
 		CScriptTriggerArgs Args(iStopWandering, iReturnToHome);
-		if (OnTrigger(CTRIG_NPCActWander, const_cast<CChar*>(this), &Args) == TRIGRET_RET_TRUE)
+		if (OnTrigger(CTRIG_NPCActWander, this, &Args) == TRIGRET_RET_TRUE)
 			return;
 
 		iStopWandering = (int)Args.m_iN1;

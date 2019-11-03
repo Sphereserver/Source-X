@@ -592,34 +592,34 @@ void CVerDataMul::QSort(size_t left, size_t right)
 	do
 	{
 		while (j < m_Data.size() && QCompare(j, dwRefIndex) < 0)
-			j++;
+			++j;
 		while (i > 0 && QCompare(i, dwRefIndex) > 0)
-			i--;
+			--i;
 
 		if (i >= j)
 		{
 			if (i != j)
 			{
-				CUOVersionBlock Tmp = m_Data.at(i);
-				CUOVersionBlock block = m_Data.at(j);
-				m_Data.assign(i, block);
-				m_Data.assign(j, Tmp);
+				CUOVersionBlock Tmp = m_Data[i];
+				CUOVersionBlock block = m_Data[j];
+				m_Data[i] = std::move(block);
+				m_Data[j] = std::move(Tmp);
 			}
 
 			if (i > 0)
-				i--;
+				--i;
 			if (j < m_Data.size())
-				j++;
+				++j;
 		}
 
 	} while (j <= i);
 
-	iReentrant++;
+	++iReentrant;
 	if (left < i)
 		QSort(left, i);
 	if (j < right)
 		QSort(j, right);
-	iReentrant--;
+	--iReentrant;
 }
 
 void CVerDataMul::Load(CSFile & file)

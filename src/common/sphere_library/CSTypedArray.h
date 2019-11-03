@@ -64,7 +64,7 @@ public:
     * @param nIndex index of element to update.
     * @param newElement new value.
     */
-    void assign(size_t nIndex, TYPE newElement);
+    void assign_at(size_t nIndex, TYPE newElement);
     /**
     * @brief Update element nth to a new value.
     * @param nIndex index of element to update.
@@ -126,7 +126,7 @@ void CSTypedArray<TYPE>::erase(size_t nIndex)
 }
 
 template<class TYPE>
-void CSTypedArray<TYPE>::assign(size_t nIndex, TYPE newElement)
+void CSTypedArray<TYPE>::assign_at(size_t nIndex, TYPE newElement)
 {
     ASSERT(IsValidIndex(nIndex));
 
@@ -141,7 +141,7 @@ void CSTypedArray<TYPE>::assign_at_grow(size_t nIndex, TYPE newElement)
 
     if ( ! IsValidIndex(nIndex))
         std::vector<TYPE>::resize(nIndex + 1);
-    assign(nIndex, newElement);
+    assign_at(nIndex, newElement);
 }
 
 

@@ -299,20 +299,21 @@ bool CChar::Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic)
     pGateOrig->SetAttr(ATTR_MOVE_NEVER);
     pGateOrig->m_itNormal.m_more1 = (dword)GetUID();
     pGateOrig->m_itTelepad.m_ptMark = ptDest;
-    pGateOrig->MoveToDecay(ptMe, iDuration, true);
-    pGateOrig->Sound(pSpellDef->m_sound);
-
+   
     CItem *pGateDest = CItem::CreateBase(idDest);
     ASSERT(pGateDest);
     pGateDest->SetType(IT_TELEPAD);
     pGateDest->SetAttr(ATTR_MOVE_NEVER);
     pGateDest->m_itNormal.m_more1 = (dword)GetUID();
     pGateDest->m_itTelepad.m_ptMark = ptMe;
-    pGateDest->MoveToDecay(ptDest, iDuration, true);
-    pGateDest->Sound(pSpellDef->m_sound);
 
     pGateOrig->m_uidLink = pGateDest->GetUID();
     pGateDest->m_uidLink = pGateOrig->GetUID();
+
+    pGateOrig->MoveToDecay(ptMe, iDuration, true);
+    pGateOrig->Sound(pSpellDef->m_sound);
+    pGateDest->MoveToDecay(ptDest, iDuration, true);
+    pGateDest->Sound(pSpellDef->m_sound);
 
     SysMessageDefault(DEFMSG_SPELL_GATE_OPEN);
     return true;

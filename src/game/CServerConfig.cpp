@@ -3077,7 +3077,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			for ( size_t i = 0; i < iQty; ++i )
 			{
 				if (g_World.m_TileTypes[i] == pTypeDef )
-					g_World.m_TileTypes.assign(i, nullptr);
+					g_World.m_TileTypes.assign_at(i, nullptr);
 			}
 
 		}
