@@ -720,6 +720,58 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x,
     bool fComponentsChanged = false;
     auto& vectorComponents = m_designWorking.m_vectorComponents;
 	    
+	/*
+	if (fAllowRemoveWholeFloor && (uiPlaneAtZ > 1))
+	{
+		// If i'm removing a single floor tile and below there's a stair, this tile is invalid;
+		//  by removing this single invalid tile, the client actually removes the whole floor (even if it has different IDs), so we need to reflect that change here.
+		// It's not perfect though, because the client removes the whole floor if on the same row or column of the selected tile there's a stair below.
+		//  The way we are checking if we have a stair below doesn't work if the selected floor tile has below the lowest (lowest z) stair part.
+		bool fIsFloor = false;
+		for (size_t i = 0; i < uiCount; ++i)
+		{
+			if (pComponents[i]->m_isFloor)
+			{
+				fIsFloor = true;
+				break;
+			}
+		}
+
+		if (fIsFloor)
+		{
+			bool fStairsBelow = false;
+			Component* pComponentsStairs[INT8_MAX];
+			size_t uiCountStairs = GetComponentsAt(x, y, z - 1, pComponentsStairs, &m_designWorking);
+			if (uiCountStairs > 0)
+			{
+				for (size_t i = 0; i < uiCountStairs; ++i)
+				{
+					if (pComponentsStairs[i]->m_isStair)
+					{
+						fStairsBelow = true;
+						break;
+					}
+				}
+			}
+
+			if (fStairsBelow)
+			{
+				for (ComponentsContainer::iterator it = vectorComponents.begin(); it != vectorComponents.end(); )
+				{
+					Component* pComp = *it;
+					if ((pComp->m_isFloor) && (pComp->m_item.m_dz == z))
+					{
+						it = vectorComponents.erase(it);
+						fComponentsChanged = true;
+					}
+					else
+						++it;
+				}
+			}
+		}
+	}
+	*/
+
     bool fReplaceDirt = false;
     for (size_t i = 0; i < uiCount; ++i)
     {
