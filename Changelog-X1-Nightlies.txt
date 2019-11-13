@@ -1935,3 +1935,22 @@ WARNING: Important change!
 03-11-2019, Nolok
 - Fixed: SERV.TIME value not being saved correctly. Also, now X saves SERV.TIMEHIRES instead of SERV.TIME (Issue #334).
 - Fixed: Spells and other kind of resources didn't resync correctly (Issue #333).
+
+12-11-2019, Drk84
+- Added:    COMBAT_NPC_BONUSDAMAGE Combat flag in the sphere.ini, enabling this flag  will allows the NPCs to gain the following modifier to combat damage:
+			-Bonus from the CombatBonusStat and CombatBonusPercent properties:
+				The default value for CombatBonusStat is STR.
+				The default value for CombatBonusPercent varies according to the CombatDamageFormula 10% if CombatDamageFormula is 0, 20% if CombatDamageFormula is 1 and 30% if CombatDamageFormula is 3.
+				See changelog of the 19-03-2015  from the 56c-Changelog.txt  revision file for more details on CombatBonusStat and CombatBonusPercent.
+			-Modifier from the INCREASEDAM property (from -100 up to 100%).
+			-Anatomy, Lumberjacking and Tactics if the CombatDamage formula is set to a value above 0.
+			This should satisfy entry #241
+- Added:   BREATH.DAMTYPE, used for changing the type of damage of the breath. Default value is: DAM_FIRE.
+- Added:   THROWDAMTYPE, used for changing the type of damage of the thrown item. Default value is: DAM_PHYSICAL.
+		   Remember that NPCs need at least one the throwable item equipped or in the backpack.
+- Added:   Two new damage flags, DAM_BREATH and DAM_THROWN. These are added automatically to the BREATH.DAMTYPE and THROWDAMTYPE properties, i think they are useful for discriminating the source of damage in the @GetHit trigger.
+- Changed: Veterinary now works with all tameable creatures: that means all NPCs with brain set to BRAIN_ANIMAL, BRAIN_DRAGON or BRAIN_MONSTER AND with a Taming skill above 0.
+		   Before Veterinary only worked with BRAIN_ANIMAL npcs. Remember that a NPC  is tameable when it has a Taming Skill above 0 and an Animal Lore skill set to 0
+		   and the NPCs ID it's not one of the playable character races.
+- Changed: All NPCs with a Poisoning skill above 0 can now apply poison (if unarmed), before only creatures with BRAIN_MONSTER could apply a poison. 
+- Fixed:   There was no timeout for the NPC action THROWING, resulting in a mass spam of throwing actions, the timeout is now 3 seconds.

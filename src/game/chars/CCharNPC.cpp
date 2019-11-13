@@ -69,6 +69,7 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 	{
 		//Set as Strings
 		case CNC_THROWDAM:
+		case CNC_THROWDAMTYPE:
 		case CNC_THROWOBJ:
 		case CNC_THROWRANGE:
 		{
@@ -155,6 +156,7 @@ bool CCharNPC::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 		//return as string or hex number or nullptr if not set
 		//On these ones, check BaseDef too if not found on dynamic
 		case CNC_THROWDAM:
+		case CNC_THROWDAMTYPE:
 		case CNC_THROWOBJ:
 		case CNC_THROWRANGE:
 			sVal = pChar->GetDefStr(ptcKey, false, true);
