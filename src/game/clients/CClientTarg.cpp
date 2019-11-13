@@ -1953,7 +1953,12 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			return false;
 		m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID;
 		m_pChar->m_Act_UID = m_Targ_UID;
-		if (pCharTarg->m_pNPC && pCharTarg->Skill_GetBase(SKILL_TAMING) > 0)
+
+		/*An NPC will be healed by the Veterinary skill if the following conditions are satisfied:
+		  It has a Taming value above > 0 AND its ID is not the ID one of the playable races (Human, Elf or Gargoyle)	
+		*/
+		if (pCharTarg->m_pNPC && pCharTarg->Skill_GetBase(SKILL_TAMING) > 0 && 
+			!pCharTarg->IsPlayableCharacter() )
 		{
 			switch (pCharTarg->GetNPCBrain())
 			{

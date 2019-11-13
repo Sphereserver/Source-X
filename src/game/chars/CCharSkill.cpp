@@ -2085,7 +2085,13 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 			return -SKTRIG_QTY;
 		}
 
-		if ( !iTameBase || pChar->Skill_GetBase(SKILL_ANIMALLORE))	// too smart or not an animal
+		/* An NPC cannot be tamed if:
+			Its Taming skill is equal to 0.
+			Its Animal Lore is above 0 (no reason why, this is probably an old check)
+			It's ID is either one of the playable characters (Human, Elf or Gargoyle).
+		*/
+		if ( !iTameBase || pChar->Skill_GetBase(SKILL_ANIMALLORE) || 
+			pChar->IsPlayableCharacter())
 		{
 			SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_TAMING_TAMED ), pChar->GetName());
 			return -SKTRIG_QTY;
