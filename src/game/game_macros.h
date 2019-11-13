@@ -66,6 +66,8 @@
 #define DAMAGE_NOREVEAL		0x4000	// Attacker is not revealed for this
 #define DAMAGE_NOUNPARALYZE	0x8000  // victim won't be unparalyzed
 #define DAMAGE_FIXED		0x10000	// already fixed damage, don't do calcs ... only create blood, anim, sounds... and update memories and attacker
+#define DAMAGE_BREATH		0x20000	// Damage flag for breath NPC action.
+#define DAMAGE_THROWN		0x40000	// Damage flag for the throw NPCs action (not the throwing skill!).
 
 typedef dword DAMAGE_TYPE;		// describe a type of damage.
 
