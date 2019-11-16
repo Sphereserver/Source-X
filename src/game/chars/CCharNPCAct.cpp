@@ -1074,8 +1074,13 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	if ( !m_pNPC || !pSector )
 		return false;
 
+    // Call the rand function once, since repeated calls can be expensive (and this function is called a LOT of times, if there are lots of active NPCs)
+    const int iRand = Calc_GetRandVal(UO_MAP_VIEW_RADAR);
     const CPointMap& ptTop = GetTopPoint();
-	int iRange = GetVisualRange();
+	
+    int iRange = GetVisualRange();
+    if (iRange > UO_MAP_VIEW_RADAR)
+        iRange = UO_MAP_VIEW_RADAR;
 	int iRangeBlur = UO_MAP_VIEW_SIGHT;
 
 	// If I can't move don't look too far.
@@ -1091,7 +1096,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 		{
 			// I should move. Someone lit a fire under me.
 			m_Act_p = ptTop;
-			m_Act_p.Move((DIR_TYPE)(Calc_GetRandVal(DIR_QTY)));
+			m_Act_p.Move((DIR_TYPE)(iRand % DIR_QTY));
 			NPC_WalkToPoint(true);
 			SoundChar(CRESND_NOTICE);
 			return true;
@@ -1120,7 +1125,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 		iDist = GetTopDist3D(pChar);
 		if ( iDist > iRangeBlur )
 		{
-			if ( Calc_GetRandVal(iDist) )
+			if (iRand % iDist )
 				continue;	// can't see them.
 		}
 		if ( NPC_LookAtChar(pChar, iDist) )		// expensive function call
@@ -1131,7 +1136,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	}
 
 	// Check the ground for good stuff.
-	if ( !fForceCheckItems && (Stat_GetAdjusted(STAT_INT) > 10) && !IsSkillBase(Skill_GetActive()) && !Calc_GetRandVal(3) )
+	if ( !fForceCheckItems && (Stat_GetAdjusted(STAT_INT) > 10) && !IsSkillBase(Skill_GetActive()) && !(iRand % 3) )
 		fForceCheckItems = true;
 
 	if ( fForceCheckItems )
@@ -1147,7 +1152,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 			iDist = GetTopDist3D(pItem);
 			if ( iDist > iRangeBlur )
 			{
-				if ( Calc_GetRandVal(iDist) )
+				if ( iRand % iDist )
 					continue;	// can't see them.
 			}
 			if ( NPC_LookAtItem(pItem, iDist) )
@@ -1159,7 +1164,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 		}
 	}
 
-	if ( !IsPlayableCharacter() && ( (m_pNPC->m_Brain == NPCBRAIN_BERSERK) || !Calc_GetRandVal(6) ) )
+	if ( !IsPlayableCharacter() && ( (m_pNPC->m_Brain == NPCBRAIN_BERSERK) || !(iRand % 6) ) )
 		SoundChar(CRESND_IDLE);
 
 	// Move stuff that is in our way ? (chests etc.)
@@ -1177,7 +1182,8 @@ void CChar::NPC_Act_Wander()
 	if ( Can(CAN_C_NONMOVER) )
 		return;
 
-    const int iRand = Calc_GetRandVal(UINT16_MAX);  // Call the rand function once, since repeated calls can be expensive
+    // Call the rand function once, since repeated calls can be expensive (and this function is called a LOT of times, if there are lots of active NPCs)
+    const int iRand = Calc_GetRandVal(UINT16_MAX);
 	int iStopWandering = 0;
 
 	if ( !(iRand % (7 + (Stat_GetVal(STAT_DEX) / 30))) )

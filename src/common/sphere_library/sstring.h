@@ -26,7 +26,6 @@
 
 /*  cross-platform functions macros  */
 #ifdef _WIN32
-    #include <Shlwapi.h> // for StrStrIA
     #define strcmpi		    _strcmpi
     #define strnicmp	    _strnicmp
     #define Str_Reverse	    _strrev

@@ -107,7 +107,7 @@ void CChatChanMember::ToggleIgnore(lpctstr pszName)
     if ( i != SCONT_BADINDEX )
     {
         ASSERT( m_IgnoredMembers.IsValidIndex(i) );
-        m_IgnoredMembers.erase(i);
+        m_IgnoredMembers.erase_at(i);
 
         SendChatMsg(CHATMSG_NoLongerIgnoring, pszName);
 
@@ -132,7 +132,7 @@ void CChatChanMember::ClearIgnoreList()
     ADDTOCALLSTACK("CChatChanMember::ClearIgnoreList");
     for (size_t i = 0; i < m_IgnoredMembers.size(); ++i)
     {
-        m_IgnoredMembers.erase(i);
+        m_IgnoredMembers.erase_at(i);
     }
     SendChatMsg(CHATMSG_NoLongerIgnoringAnyone);
 }

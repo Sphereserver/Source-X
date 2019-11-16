@@ -189,14 +189,14 @@ void CChatChannel::RemoveMember(CChatChanMember * pMember)
         if ( pClient == nullptr )		//	auto-remove offline clients
         {
             m_Members[i]->SetChannel(nullptr);
-            m_Members.erase(i);
+            m_Members.erase_at(i);
             continue;
         }
 
         pClient->addChatSystemMessage(CHATMSG_RemoveMember, pMember->GetChatName());
         if (m_Members[i] == pMember)	// disjoin
         {
-            m_Members.erase(i);
+            m_Members.erase_at(i);
             break;
         }
 
@@ -261,7 +261,7 @@ void CChatChannel::SetModerator(lpctstr pszMember, bool fFlag)
         if (m_Moderators[i]->Compare(pszMember) == 0)
         {
             if (fFlag == false)
-                m_Moderators.erase(i);
+                m_Moderators.erase_at(i);
             return;
         }
     }
@@ -374,7 +374,7 @@ void CChatChannel::SetVoice(lpctstr pszName, bool fFlag)
         if (m_NoVoices[i]->Compare(pszName) == 0)
         {
             if (fFlag == true)
-                m_NoVoices.erase(i);
+                m_NoVoices.erase_at(i);
             return;
         }
     }

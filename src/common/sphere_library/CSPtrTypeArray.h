@@ -87,7 +87,7 @@ bool CSPtrTypeArray<TYPE>::RemovePtr( TYPE pData )
         return false;
 
     ASSERT( IsValidIndex(nIndex) );
-    this->erase(nIndex);
+    this->erase_at(nIndex);
     return true;
 }
 

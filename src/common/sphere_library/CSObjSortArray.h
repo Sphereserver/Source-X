@@ -119,7 +119,7 @@ size_t CSObjSortArray<TYPE, KEY_TYPE>::AddSortKey( TYPE pNew, KEY_TYPE key )
 	if ( iCompareRes == 0 )
 	{
 		// duplicate should not happen ?!?
-		this->assign(index, pNew);
+		this->operator[](index) = pNew;
 		return index;
 	}
 	return AddPresorted(index, iCompareRes, pNew);

@@ -1954,3 +1954,6 @@ WARNING: Important change!
 		   and the NPCs ID it's not one of the playable character races.
 - Changed: All NPCs with a Poisoning skill above 0 can now apply poison (if unarmed), before only creatures with BRAIN_MONSTER could apply a poison. 
 - Fixed:   There was no timeout for the NPC action THROWING, resulting in a mass spam of throwing actions, the timeout is now 3 seconds.
+
+16-11-2019, Nolok
+- Fixed: Resync sometimes messed up unchanged, cached scripts.

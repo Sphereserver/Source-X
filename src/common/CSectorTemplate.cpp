@@ -29,18 +29,21 @@ CCharsActiveList::CCharsActiveList()
 	m_iClients = 0;
 }
 
-void CCharsActiveList::OnRemoveObj( CSObjListRec * pObRec )
+void CCharsActiveList::OnRemoveObj( CSObjListRec * pObjRec )
 {
 	ADDTOCALLSTACK("CCharsActiveList::OnRemoveObj");
+    ASSERT(pObjRec);
+
 	// Override this = called when removed from group.
-	CChar * pChar = dynamic_cast <CChar*>(pObRec);
+	CChar * pChar = dynamic_cast <CChar*>(pObjRec);
 	ASSERT( pChar );
 	if ( pChar->IsClient())
 	{
         ClientDecrease();
         m_timeLastClient = g_World.GetCurrentTime().GetTimeRaw();	// mark time in case it's the last client
 	}
-	CSObjList::OnRemoveObj(pObRec);
+
+	CSObjList::OnRemoveObj(pObjRec);
 	pChar->SetUIDContainerFlags(UID_O_DISCONNECT);
 }
 
@@ -210,7 +213,7 @@ CSector *CSectorBase::GetAdjacentSector(DIR_TYPE dir) const
 }
 
 CSectorBase::CSectorBase() :
-    _ppAdjacentSectors{nullptr}
+    _ppAdjacentSectors{}
 {
 	m_map = 0;
 	m_index = 0;
@@ -417,10 +420,11 @@ size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLink
 		CRegion * pRegion = m_RegionLinks[i];
 		ASSERT(pRegion);
 
-		ASSERT( pRegion->GetResourceID().IsValidUID());
-		if ( pRegion->GetResourceID().IsUIDItem())
+        const CResourceID& ridRegion = pRegion->GetResourceID();
+		ASSERT(ridRegion.IsValidUID());
+		if (ridRegion.IsUIDItem())
 		{
-			CItemShip * pShipItem = dynamic_cast <CItemShip *>(pRegion->GetResourceID().ItemFindFromResource());
+			const CItemShip * pShipItem = dynamic_cast <const CItemShip *>(ridRegion.ItemFindFromResource());
 			if (pShipItem)
 			{
 				if (!(dwType & REGION_TYPE_SHIP))
@@ -429,7 +433,7 @@ size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLink
 			else if (!(dwType & REGION_TYPE_HOUSE))
 				continue;
 		}
-		else if ( pRegion->GetResourceID().GetResType() == RES_AREA )
+		else if (ridRegion.GetResType() == RES_AREA )
 		{
 			if ( ! ( dwType & REGION_TYPE_AREA ))
 				continue;

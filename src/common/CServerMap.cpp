@@ -665,7 +665,7 @@ CServerMapDiffCollection::~CServerMapDiffCollection()
 	{
 		while ( !m_pMapDiffBlocks[m].empty() )
 		{
-			m_pMapDiffBlocks[m].erase(0);
+			m_pMapDiffBlocks[m].erase_at(0);
 		}
 	}
 }

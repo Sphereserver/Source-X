@@ -890,7 +890,7 @@ bool PacketMapEdit::onReceive(CNetState* net)
 				client->SysMessage("That's strange... (bad pin)");
 				return true;
 			}
-			map->m_Pins.erase(pin);
+			map->m_Pins.erase_at(pin);
 			break;
 
 		case MAP_CLEAR: // clear all pins

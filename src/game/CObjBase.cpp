@@ -35,7 +35,7 @@ int CObjBaseTemplate::IsWeird() const
 	return 0;
 }
 
-bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
+static bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 {
 	tchar * ppCmd[3];
 	size_t iQty = Str_ParseCmds( pszDir, ppCmd, CountOf(ppCmd));
@@ -70,7 +70,7 @@ bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 
 CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not a real CTimedObject, it just needs it's virtual inheritance.
 {
-	sm_iCount ++;
+	++ sm_iCount;
 	m_iCreatedResScriptIdx = (size_t)-1;
 	m_iCreatedResScriptLine = -1;
     _iRunningTriggerId = -1;
