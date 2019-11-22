@@ -11,6 +11,7 @@
 #include "../sphere/threads.h"
 #include "chars/CChar.h"
 #include "items/CItem.h"
+#include "items/CItemMultiCustom.h"
 #include "uo_files/CUOTerrainInfo.h"
 #include "triggers.h"
 #include "../game/CWorld.h"
@@ -478,16 +479,16 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 #undef RESOURCE_Z_CHECK
 }
 
-bool CWorld::IsItemTypeNear( const CPointMap & pt, IT_TYPE iType, int iDistance, bool bCheckMulti )
+bool CWorld::IsItemTypeNear( const CPointMap & pt, IT_TYPE iType, int iDistance, bool fCheckMulti )
 {
 	ADDTOCALLSTACK("CWorld::IsItemTypeNear");
 	if ( !pt.IsValidPoint() )
 		return false;
-	CPointMap ptn = FindItemTypeNearby( pt, iType, iDistance, bCheckMulti );
+	const CPointMap ptn = FindItemTypeNearby( pt, iType, iDistance, fCheckMulti );
 	return ptn.IsValidPoint();
 }
 
-CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iDistance, bool bCheckMulti, bool bLimitZ)
+CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iDistance, bool fCheckMulti, bool fLimitZ)
 {
 	ADDTOCALLSTACK("CWorld::FindItemTypeNearby");
 	// Find the closest item of this type.
@@ -502,14 +503,14 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 	CWorldSearch Area( pt, iDistance );
 	for (;;)
 	{
-		CItem * pItem = Area.GetItem();
+        const CItem * pItem = Area.GetItem();
 		if ( pItem == nullptr )
 			break;
 
 		if ( ! pItem->IsType( iType ) && ! pItem->Item_GetDef()->IsType(iType) )
 			continue;
         const CPointMap& ptItemTop = pItem->GetTopPoint();
-		if ( bLimitZ && ( ptItemTop.m_z != pt.m_z ))
+		if ( fLimitZ && ( ptItemTop.m_z != pt.m_z ))
 			continue;
 
 		iTestDistance = pt.GetDist(ptItemTop);
@@ -533,12 +534,12 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 	{
 		for ( int y = rect.m_top; y < rect.m_bottom; ++y, pMeter = nullptr )
 		{
-			CPointMap ptTest((word)(x), (word)(y), pt.m_z, pt.m_map);
+            CPointMap ptTest((short)x, (short)y, pt.m_z, pt.m_map);
 			pMeter = GetMapMeter(ptTest);
 
 			if ( !pMeter )
 				continue;
-			if ( bLimitZ && ( pMeter->m_z != pt.m_z ) )
+			if ( fLimitZ && ( pMeter->m_z != pt.m_z ) )
 				continue;
 
 			ptTest.m_z = pMeter->m_z;
@@ -575,7 +576,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 	{
 		for ( int y = rect.m_top; y < rect.m_bottom; y += UO_BLOCK_SIZE, pMapBlock = nullptr )
 		{
-			CPointMap ptTest((word)(x), (word)(y), pt.m_z, pt.m_map);
+            const CPointMap ptTest((short)x, (short)y, pt.m_z, pt.m_map);
 			pMapBlock = GetMapBlock( ptTest );
 
 			if ( !pMapBlock )
@@ -591,16 +592,16 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 			for ( uint i = 0; i < iQty; ++i, pStatic = nullptr, pItemDef = nullptr )
 			{
 				pStatic = pMapBlock->m_Statics.GetStatic( i );
-				if ( bLimitZ && ( pStatic->m_z != ptTest.m_z ) )
+				if ( fLimitZ && ( pStatic->m_z != ptTest.m_z ) )
 					continue;
 
 				// inside the range we want ?
-				CPointMap ptStatic( pStatic->m_x+pMapBlock->m_x, pStatic->m_y+pMapBlock->m_y, pStatic->m_z, ptTest.m_map);
+                const CPointMap ptStatic( pStatic->m_x+pMapBlock->m_x, pStatic->m_y+pMapBlock->m_y, pStatic->m_z, ptTest.m_map);
 				iTestDistance = pt.GetDist(ptStatic);
 				if ( iTestDistance > iDistance )
 					continue;
 
-				ITEMID_TYPE idTile = pStatic->GetDispID();
+                const ITEMID_TYPE idTile = pStatic->GetDispID();
 
 				// Check the script def for the item.
 				pItemDef = CItemBase::FindItemBase( idTile );
@@ -622,7 +623,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 	}
 
 	// Check for multi components
-	if (bCheckMulti == true)
+	if (fCheckMulti == true)
 	{
 		rect.SetRect( pt.m_x - iDistance, pt.m_y - iDistance,
 			pt.m_x + iDistance + 1, pt.m_y + iDistance + 1,
@@ -632,7 +633,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 		{
 			for (int y = rect.m_top; y < rect.m_bottom; ++y)
 			{
-				CPointMap ptTest((word)(x), (word)(y), pt.m_z, pt.m_map);
+                const CPointMap ptTest((short)x, (short)y, pt.m_z, pt.m_map);
 
 				CRegionLinks rlinks;
 				size_t iRegionQty = ptTest.GetRegions(REGION_TYPE_MULTI, &rlinks);
@@ -641,51 +642,99 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 					for (size_t iRegion = 0; iRegion < iRegionQty; ++iRegion)
 					{
 						const CRegion* pRegion = rlinks[iRegion];
-						CItem* pItem = pRegion->GetResourceID().ItemFindFromResource();
-						if (pItem == nullptr)
+						CItem* pRegionItem = pRegion->GetResourceID().ItemFindFromResource();
+						if (pRegionItem == nullptr)
 							continue;
 
-						const CSphereMulti * pMulti = g_Cfg.GetMultiItemDefs(pItem);
-						if (pMulti == nullptr)
-							continue;
+                        const CPointMap& ptTop = pRegionItem->GetTopPoint();
+                        const short x2 = ptTest.m_x - ptTop.m_x;
+                        const short y2 = ptTest.m_y - ptTop.m_y;
+                        const short z2 = ptTest.m_z - ptTop.m_z;
 
-                        const CPointMap& ptTop = pItem->GetTopPoint();
-						int x2 = ptTest.m_x - ptTop.m_x;
-						int y2 = ptTest.m_y - ptTop.m_y;
+                        if (CItemMultiCustom* pItemMultiCustom = dynamic_cast<CItemMultiCustom*>(pRegionItem))
+                        {
+                            CItemMultiCustom::Component* pComponents[INT8_MAX];
+                            size_t iItemQty = pItemMultiCustom->GetComponentsAt(x2, y2, (char)z2, pComponents, pItemMultiCustom->GetDesignMain());
+                            if (iItemQty <= 0)
+                                continue;
 
-						size_t iItemQty = pMulti->GetItemCount();
-						for (size_t iItem = 0; iItem < iItemQty; ++iItem)
-						{
-							const CUOMultiItemRec_HS* pMultiItem = pMulti->GetItem(iItem);
-							ASSERT(pMultiItem);
+                            for (size_t iItem = 0; iItem < iItemQty; ++iItem)
+                            {
+                                const CUOMultiItemRec_HS* pMultiItem = &pComponents[iItem]->m_item;
+                                ASSERT(pMultiItem);
 
-							if ( !pMultiItem->m_visible )
-								continue;
-							if ( pMultiItem->m_dx != x2 || pMultiItem->m_dy != y2 )
-								continue;
-							if ( bLimitZ && (pMultiItem->m_dz != ptTest.m_z))
-								continue;
+                                iTestDistance = pt.GetDist(ptTest);
+                                if (iTestDistance > iDistance)
+                                    continue;
 
-							iTestDistance = pt.GetDist(ptTest);
-							if (iTestDistance > iDistance)
-								continue;
+                                const ITEMID_TYPE idTile = pMultiItem->GetDispID();
 
-							ITEMID_TYPE idTile = pMultiItem->GetDispID();
+                                // Check the script def for the item.
+                                pItemDef = CItemBase::FindItemBase(idTile);
+                                if (pItemDef == nullptr || !pItemDef->IsType(iType))
+                                    continue;
 
-							// Check the script def for the item.
-							pItemDef = CItemBase::FindItemBase(idTile);
-							if (pItemDef == nullptr || !pItemDef->IsType(iType))
-								continue;
+                                if (fLimitZ)
+                                {
+                                    const height_t uiItemHeight = pItemDef->GetHeight();
+                                    if ((pMultiItem->m_dz + uiItemHeight) != z2)
+                                        continue;
+                                }
 
-							ptFound = ptTest;
-							iDistance = iTestDistance;
-							if ( !iDistance )
-								return ptFound;
+                                ptFound = ptTest;
+                                iDistance = iTestDistance;
+                                if (!iDistance)
+                                    return ptFound;
+                            }
+                        }
+                        if (const CSphereMulti* pSphereMulti = g_Cfg.GetMultiItemDefs(pRegionItem))
+                        {
+                            size_t iItemQty = pSphereMulti->GetItemCount();
+                            for (size_t iItem = 0; iItem < iItemQty; ++iItem)
+                            {
+                                const CUOMultiItemRec_HS* pMultiItem = pSphereMulti->GetItem(iItem);
+                                ASSERT(pMultiItem);
 
-							rect.SetRect( pt.m_x - iDistance, pt.m_y - iDistance,
-										  pt.m_x + iDistance + 1, pt.m_y + iDistance + 1,
-										  pt.m_map);
-						}
+                                if (!pMultiItem->m_visible)
+                                    continue;
+                                if (pMultiItem->m_dx != x2 || pMultiItem->m_dy != y2)
+                                    continue;
+                                //if (fLimitZ && (pMultiItem->m_dz != z2))
+                                //    continue;
+
+                                iTestDistance = pt.GetDist(ptTest);
+                                if (iTestDistance > iDistance)
+                                    continue;
+
+                                const ITEMID_TYPE idTile = pMultiItem->GetDispID();
+
+                                // Check the script def for the item.
+                                pItemDef = CItemBase::FindItemBase(idTile);
+                                if (pItemDef == nullptr || !pItemDef->IsType(iType))
+                                    continue;
+
+                                if (fLimitZ)
+                                {
+                                    const height_t uiItemHeight = pItemDef->GetHeight();
+                                    if ((pMultiItem->m_dz + uiItemHeight) != z2)
+                                        continue;
+                                    else if (pItemDef->IsType(IT_WALL))
+                                        continue;
+                                    // A valid building will have a floor on the top of a wall, so i can technically put an item
+                                    //  at the height == top of the wall, which is the height of the floor of the upper level, since
+                                    //  the floor has 0 height.
+                                }
+
+                                ptFound = ptTest;
+                                iDistance = iTestDistance;
+                                if (!iDistance)
+                                    return ptFound;
+
+                                rect.SetRect(pt.m_x - iDistance, pt.m_y - iDistance,
+                                    pt.m_x + iDistance + 1, pt.m_y + iDistance + 1,
+                                    pt.m_map);
+                            }
+                        }
 					}
 				}
 			}

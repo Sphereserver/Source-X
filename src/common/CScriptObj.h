@@ -51,6 +51,7 @@ class CScriptObj
 
 private:
 	TRIGRET_TYPE OnTriggerForLoop( CScript &s, int iType, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult );
+
 public:
 	static const char *m_sClassName;
 	TRIGRET_TYPE OnTriggerScript( CScript &s, lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = nullptr );

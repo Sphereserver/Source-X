@@ -13,7 +13,6 @@
 #include "../../network/send.h"
 #include "../items/CItemBase.h"
 #include "../items/CItemContainer.h"
-#include "../items/CItemMultiCustom.h"
 #include "../CSectorEnviron.h"
 #include "../game_enums.h"
 #include "CAccount.h"
@@ -24,6 +23,7 @@
 
 
 class CItemMap;
+class CItemMultiCustom;
 
 enum CV_TYPE
 {

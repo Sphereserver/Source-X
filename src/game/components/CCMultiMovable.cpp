@@ -821,7 +821,7 @@ bool CCMultiMovable::OnTick()
     ADDTOCALLSTACK("CCMultiMovable::OnTick");
     // Ships move on their tick.
 
-    if (m_shipSpeed.period == 0 && m_shipSpeed.tiles)    // Multis without movement values can decay as normal items.
+    if (m_shipSpeed.period == 0 && m_shipSpeed.tiles == 0)    // Multis without movement values can decay as normal items.
     {
         return false;
     }
@@ -1302,6 +1302,11 @@ bool CCMultiMovable::r_LoadVal(CScript & s)
     CML_TYPE index = (CML_TYPE)FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     // CItem *pItemThis = dynamic_cast<CItem*>(this);
     // ASSERT(pItemThis);
+    if (index == -1)
+    {
+        if (!strnicmp(ptcKey, "SHIPSPEED.", 10))
+            index = CML_SHIPSPEED;
+    }
 
     switch (index)
     {

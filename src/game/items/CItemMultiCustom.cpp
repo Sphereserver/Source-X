@@ -520,7 +520,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
                     continue;
 
                 const Component* pComp = pPrevComponents[i];
-                RemoveItem(nullptr, pComp->m_item.GetDispID(), pComp->m_item.m_dx, pComp->m_item.m_dy, (char)(pComp->m_item.m_dz), false);
+                RemoveItem(nullptr, pComp->m_item.GetDispID(), pComp->m_item.m_dx, pComp->m_item.m_dy, (char)(pComp->m_item.m_dz));
             }
         }
     }
@@ -577,7 +577,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
     }
 }
 
-void CItemMultiCustom::AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z, short iStairID)
+void CItemMultiCustom::AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z)
 {
     ADDTOCALLSTACK("CItemMultiCustom::AddStairs");
     // add a staircase to the building, the given ID must
@@ -613,8 +613,13 @@ void CItemMultiCustom::AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, 
             z = 0;
     }
 
-    if (iStairID == -1)
-        iStairID = GetStairCount() + 1;
+	short iStairID = 0;
+	for (ComponentsContainer::iterator i = m_designWorking.m_vectorComponents.begin(); i != m_designWorking.m_vectorComponents.end(); ++i)
+	{
+		if ((*i)->m_isStair > iStairID)
+			iStairID = (*i)->m_isStair;
+	}
+	++iStairID;
 
     uint iQty = pMulti->GetItemCount();
     for (uint i = 0; i < iQty; ++i)
@@ -672,7 +677,7 @@ void CItemMultiCustom::AddRoof(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
     AddItem(pClientSrc, id, x, y, z);
 }
 
-void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z, bool fAllowRemoveWholeFloor)
+void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z)
 {
     ADDTOCALLSTACK("CItemMultiCustom::RemoveItem");
     // remove the item that's found at given location
@@ -714,57 +719,59 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x,
 
     bool fComponentsChanged = false;
     auto& vectorComponents = m_designWorking.m_vectorComponents;
+	    
+	/*
+	if (fAllowRemoveWholeFloor && (uiPlaneAtZ > 1))
+	{
+		// If i'm removing a single floor tile and below there's a stair, this tile is invalid;
+		//  by removing this single invalid tile, the client actually removes the whole floor (even if it has different IDs), so we need to reflect that change here.
+		// It's not perfect though, because the client removes the whole floor if on the same row or column of the selected tile there's a stair below.
+		//  The way we are checking if we have a stair below doesn't work if the selected floor tile has below the lowest (lowest z) stair part.
+		bool fIsFloor = false;
+		for (size_t i = 0; i < uiCount; ++i)
+		{
+			if (pComponents[i]->m_isFloor)
+			{
+				fIsFloor = true;
+				break;
+			}
+		}
 
-    if (fAllowRemoveWholeFloor && (uiPlaneAtZ > 1))
-    {
-        // If i'm removing a single floor tile and below there's a stair, this tile is invalid;
-        //  by removing this single invalid tile, the client actually removes the whole floor (even if it has different IDs), so we need to reflect that change here.
-        // It's not perfect though, because the client removes the whole floor if on the same row or column of the selected tile there's a stair below.
-        //  The way we are checking if we have a stair below doesn't work if the selected floor tile has below the lowest (lowest z) stair part.
-        bool fIsFloor = false;
-        for (size_t i = 0; i < uiCount; ++i)
-        {
-            if (pComponents[i]->m_isFloor)
-            {
-                fIsFloor = true;
-                break;
-            }
-        }
+		if (fIsFloor)
+		{
+			bool fStairsBelow = false;
+			Component* pComponentsStairs[INT8_MAX];
+			size_t uiCountStairs = GetComponentsAt(x, y, z - 1, pComponentsStairs, &m_designWorking);
+			if (uiCountStairs > 0)
+			{
+				for (size_t i = 0; i < uiCountStairs; ++i)
+				{
+					if (pComponentsStairs[i]->m_isStair)
+					{
+						fStairsBelow = true;
+						break;
+					}
+				}
+			}
 
-        if (fIsFloor)
-        {
-            bool fStairsBelow = false;
-            Component* pComponentsStairs[INT8_MAX];
-            size_t uiCountStairs = GetComponentsAt(x, y, z - 1, pComponentsStairs, &m_designWorking);
-            if (uiCountStairs > 0)
-            {
-                for (size_t i = 0; i < uiCountStairs; ++i)
-                {
-                    if (pComponentsStairs[i]->m_isStair)
-                    {
-                        fStairsBelow = true;
-                        break;
-                    }
-                }
-            }
+			if (fStairsBelow)
+			{
+				for (ComponentsContainer::iterator it = vectorComponents.begin(); it != vectorComponents.end(); )
+				{
+					Component* pComp = *it;
+					if ((pComp->m_isFloor) && (pComp->m_item.m_dz == z))
+					{
+						it = vectorComponents.erase(it);
+						fComponentsChanged = true;
+					}
+					else
+						++it;
+				}
+			}
+		}
+	}
+	*/
 
-            if (fStairsBelow)
-            {
-                for (ComponentsContainer::iterator it = vectorComponents.begin(); it != vectorComponents.end(); )
-                {
-                    Component* pComp = *it;
-                    if ((pComp->m_isFloor) && (pComp->m_item.m_dz == z))
-                    {
-                        it = vectorComponents.erase(it);
-                        fComponentsChanged = true;
-                    }
-                    else
-                        ++it;
-                }
-            }           
-        }
-    }
-    
     bool fReplaceDirt = false;
     for (size_t i = 0; i < uiCount; ++i)
     {
@@ -856,7 +863,7 @@ void CItemMultiCustom::RemoveRoof(CClient * pClientSrc, ITEMID_TYPE id, short x,
     if ((pItemBase->GetTFlags() & UFLAG4_ROOF) == 0)
         return;
 
-    RemoveItem(pClientSrc, id, x, y, z, false);
+    RemoveItem(pClientSrc, id, x, y, z);
 }
 
 void CItemMultiCustom::SendVersionTo(CClient * pClientSrc) const
@@ -1105,22 +1112,6 @@ uchar CItemMultiCustom::GetLevelCount()
     return 3;
 }
 
-short CItemMultiCustom::GetStairCount()
-{
-    ADDTOCALLSTACK("CItemMultiCustom::GetStairCount");
-    // find and return the highest stair id
-    short iCount = 0;
-    for (Component *pComp : m_designWorking.m_vectorComponents)
-    {
-        if (pComp->m_isStair == 0)
-            continue;
-
-        iCount = maximum(iCount, pComp->m_isStair);
-    }
-
-    return iCount;
-}
-
 size_t CItemMultiCustom::GetFixtureCount(DesignDetails * pDesign)
 {
     ADDTOCALLSTACK("CItemMultiCustom::GetFixtureCount");
@@ -1128,12 +1119,12 @@ size_t CItemMultiCustom::GetFixtureCount(DesignDetails * pDesign)
         pDesign = &m_designMain;
 
     size_t count = 0;
-    for (ComponentsContainer::iterator i = pDesign->m_vectorComponents.begin(); i != pDesign->m_vectorComponents.end(); ++i)
+    for (const Component * pComponent : pDesign->m_vectorComponents)
     {
-        if ((*i)->m_item.m_visible)
+        if (pComponent->m_item.m_visible)
             continue;
 
-        count++;
+        ++count;
     }
 
     return count;
@@ -1149,16 +1140,14 @@ size_t CItemMultiCustom::GetComponentsAt(short x, short y, char z, Component ** 
     if (pDesign == nullptr)
         pDesign = &m_designMain;
 
+    const uchar uiPlane = GetPlane(z);
     size_t count = 0;
-    Component * pComponent;
-    for (size_t i = 0; i < pDesign->m_vectorComponents.size(); ++i)
+    for (Component* pComponent : pDesign->m_vectorComponents)
     {
-        pComponent = pDesign->m_vectorComponents[i];
-
         if (pComponent->m_item.m_dx != x || pComponent->m_item.m_dy != y)
             continue;
 
-        if (z != INT8_MIN && GetPlane((char)(pComponent->m_item.m_dz)) != GetPlane(z))
+        if (z != INT8_MIN && GetPlane((char)(pComponent->m_item.m_dz)) != uiPlane)
             continue;
 
         pComponents[count++] = pComponent;
@@ -1169,7 +1158,7 @@ size_t CItemMultiCustom::GetComponentsAt(short x, short y, char z, Component ** 
 
 CPointMap CItemMultiCustom::GetComponentPoint(const Component * pComp) const
 {
-    ADDTOCALLSTACK("CItemMultiCustom::GetComponentPoint");
+    ADDTOCALLSTACK("CItemMultiCustom::GetComponentPoint(ptr)");
     return GetComponentPoint(pComp->m_item.m_dx, pComp->m_item.m_dy, (char)(pComp->m_item.m_dz));
 }
 
@@ -1250,9 +1239,9 @@ const CRect CItemMultiCustom::GetDesignArea()
     return rect;
 }
 
-void CItemMultiCustom::DelComp(CUID uidComponent)
+void CItemMultiCustom::DelComp(const CUID& uidComponent)
 {
-    /* The code bellow should remove the item from the m_mainDesign, however it's not being deleted from there even if the world item is
+    /* The code below should remove the item from the m_mainDesign, however it's not being deleted from there even if the world item is
         So, in the next customize, the item will appear again.
         TODO: Make the whole customizing system more flexible to allow 'enter' and 'exit' customize mode and tweak the items without involving 
         any heavy load, trigger, or player iteraction/notifications.
@@ -1461,7 +1450,7 @@ void CItemMultiCustom::ClearFloor(char iFloor)
         if (comp->m_item.m_dz >= iMinZ && comp->m_item.m_dz <= iMaxZ)
         {
             m_designMain.m_vectorComponents.erase(m_designMain.m_vectorComponents.begin()+i);
-            m_designMain.m_iRevision++;
+            ++ m_designMain.m_iRevision;
             continue;
         }
     }
@@ -1572,8 +1561,7 @@ bool CItemMultiCustom::r_Verb(CScript & s, CTextConsole * pSrc) // Execute comma
                 id,
                 (Exp_GetSVal(ppArgs[1])),
                 (Exp_GetSVal(ppArgs[2])),
-                (Exp_GetCVal(ppArgs[3])),
-                (sm_mapValidItems.find(id) == sm_mapValidItems.end() ? 0 : -1));
+                (Exp_GetCVal(ppArgs[3])));
         }
         break;
 
@@ -1638,8 +1626,7 @@ bool CItemMultiCustom::r_Verb(CScript & s, CTextConsole * pSrc) // Execute comma
                 (ITEMID_TYPE)(Exp_GetVal(ppArgs[0])),
                 (Exp_GetSVal(ppArgs[1])),
                 (Exp_GetSVal(ppArgs[2])),
-                (Exp_GetCVal(ppArgs[3])),
-                false);
+                (Exp_GetCVal(ppArgs[3])));
         }
         break;
 

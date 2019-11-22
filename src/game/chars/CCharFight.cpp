@@ -1020,7 +1020,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 		}
 	}
 
-	if ( m_pPlayer )	// only players can have damage bonus
+	if ( m_pPlayer || IsSetCombatFlags(COMBAT_NPC_BONUSDAMAGE))	
 	{
 		int iIncreaseDam = (int)GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASEDAM, true);
 		int iDmgBonus = maximum(-100, minimum(iIncreaseDam, 100));		// Damage Increase is capped at +-100%
@@ -1955,7 +1955,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		if ( iDamageChance > Calc_GetRandVal(100) )
 			pWeapon->OnTakeDamage(iDmg, pCharTarg);
 	}
-	else if ( m_pNPC && (m_pNPC->m_Brain == NPCBRAIN_MONSTER) )
+	else if ( m_pNPC )
 	{
 		// Base poisoning for NPCs
 		if ( !IsSetCombatFlags(COMBAT_NOPOISONHIT) && 50 >= Calc_GetRandVal(100) )

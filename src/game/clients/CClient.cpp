@@ -8,11 +8,12 @@
 #include "../../network/packet.h"
 #include "../chars/CChar.h"
 #include "../components/CCSpawn.h"
+#include "../items/CItemMultiCustom.h"
 #include "../CWorld.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
-#include "CClient.h"
 #include "CParty.h"
+#include "CClient.h"
 
 
 /////////////////////////////////////////////////////////////////
@@ -494,7 +495,7 @@ bool CClient::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 				return true;
 		}
 	}
-	return( CScriptObj::r_GetRef( ptcKey, pRef ));
+	return CScriptObj::r_GetRef( ptcKey, pRef );
 }
 
 lpctstr const CClient::sm_szLoadKeys[CC_QTY+1] = // static

@@ -890,7 +890,7 @@ bool PacketMapEdit::onReceive(CNetState* net)
 				client->SysMessage("That's strange... (bad pin)");
 				return true;
 			}
-			map->m_Pins.erase(pin);
+			map->m_Pins.erase_at(pin);
 			break;
 
 		case MAP_CLEAR: // clear all pins
@@ -2173,6 +2173,7 @@ bool PacketGumpDialogRet::onReceive(CNetState* net)
 	}
 
 #ifdef _DEBUG
+    if (g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS)
 	{
 		const CResourceDef* resource = g_Cfg.ResourceGetDef(CResourceID(RES_DIALOG, RES_GET_INDEX(context)));
 		if (resource == nullptr)
@@ -2496,7 +2497,7 @@ bool PacketExtendedCommand::onReceive(CNetState* net)
 		return false;
 
 	handler->seek();
-	for (int i = 0; i < packetLength; i++)
+	for (int i = 0; i < packetLength; ++i)
 	{
 		byte next = readByte();
 		handler->writeByte(next);
@@ -3669,7 +3670,7 @@ bool PacketHouseDesignDestroyItem::onReceive(CNetState* net)
 	skip(1); // 0x00
 	word z = (word)(readInt32());
 
-	house->RemoveItem(client, id, x, y, (char)z, true);
+	house->RemoveItem(client, id, x, y, (char)z);
 	return true;
 }
 

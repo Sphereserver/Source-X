@@ -9,7 +9,6 @@
 #include "../game/uo_files/CUOVersionBlock.h"
 #include "../game/uo_files/CUOTiledata.h"
 #include "../game/uo_files/CUOIndexRec.h"
-#include "sphere_library/CSTypedArray.h"
 #include "sphere_library/CSFile.h"
 #include "CSVFile.h"
 
@@ -93,7 +92,7 @@ extern class CVerDataMul
 	// Assume this is a sorted array of some sort.
 public:
 	static const char *m_sClassName;
-	CSTypedArray<CUOVersionBlock> m_Data;
+	std::vector<CUOVersionBlock> m_Data;
 private:
 	int QCompare( size_t left, dword dwRefIndex ) const;
 	void QSort( size_t left, size_t right );

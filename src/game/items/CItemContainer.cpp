@@ -7,6 +7,7 @@
 #include "../CWorld.h"
 #include "../triggers.h"
 #include "CItem.h"
+#include "CItemMulti.h"
 #include "CItemContainer.h"
 
 //----------------------------------------------------
@@ -16,8 +17,6 @@ CItemContainer::CItemContainer( ITEMID_TYPE id, CItemBase *pItemDef ) :
     CTimedObject(PROFILE_ITEMS), CItemVendable( id, pItemDef )
 {
 	// m_fTinkerTrapped = false;
-    _uidMultiSecured.InitUID();
-    _uidMultiCrate.InitUID();
 }
 
 CItemContainer::~CItemContainer()

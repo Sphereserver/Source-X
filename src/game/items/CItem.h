@@ -787,7 +787,7 @@ public:    /**
 	SOUND_TYPE Weapon_GetSoundMiss() const;
 	void Weapon_GetRangedAmmoAnim(ITEMID_TYPE &id, dword &hue, dword &render);
 	CResourceID Weapon_GetRangedAmmoRes();
-	CItem *Weapon_FindRangedAmmo(CResourceID id);
+	CItem *Weapon_FindRangedAmmo(const CResourceID& id);
 
 	bool IsMemoryTypes( word wType ) const;
 

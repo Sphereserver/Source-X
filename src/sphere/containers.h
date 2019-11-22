@@ -9,7 +9,7 @@
 #include <list>
 #include "../common/CException.h"
 // a thread-safe implementation of a queue container that doesn't use any locks
-// this only works as long as there is only a single reader thread and writer thread
+// this only works as long as there is only a single reader thread and writer thread (can be different)
 
 
 template<class T>

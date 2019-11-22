@@ -315,6 +315,7 @@ size_t Str_CopyLimit(tchar * pDst, lpctstr pSrc, size_t uiMaxSize)
     memcpy(pDst, pSrc, qty);
     return qty; // bytes copied in pDst string (CAN count the string terminator)
 }
+
 size_t Str_CopyLimitNull(tchar * pDst, lpctstr pSrc, size_t uiMaxSize)
 {
     if (uiMaxSize == 0)
@@ -379,9 +380,10 @@ size_t Str_LengthUTF8(const char* strInUTF8MB)
 {
     size_t len; // number of characters in the string
 #ifdef _MSC_VER
-    mbstowcs_s(&len, nullptr, 0, strInUTF8MB, 0);
+    mbstowcs_s(&len, nullptr, 0, strInUTF8MB, 0); // includes null terminator
+    len -= 1;
 #else
-    len = mbstowcs(nullptr, strInUTF8MB, 0);
+    len = mbstowcs(nullptr, strInUTF8MB, 0); // not including null terminator
 #endif
     return len;
 }

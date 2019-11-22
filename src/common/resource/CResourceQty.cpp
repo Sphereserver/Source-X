@@ -213,7 +213,7 @@ size_t CResourceQtyArray::Load(lpctstr pszCmds)
                 size_t i = FindResourceID( res.GetResourceID() );
                 if ( i != SCONT_BADINDEX )
                 {
-                    assign(i, res);
+                    operator[](i) = std::move(res);
                 }
                 else
                 {

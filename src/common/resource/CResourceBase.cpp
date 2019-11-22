@@ -148,7 +148,8 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
         return nullptr;
     }
 
-    pNewRes->m_iResourceFileIndex = (int)m_ResourceFiles.push_back(pNewRes);
+    m_ResourceFiles.push_back(pNewRes);
+    pNewRes->m_iResourceFileIndex = int(m_ResourceFiles.size() -1);
     return pNewRes;
 }
 

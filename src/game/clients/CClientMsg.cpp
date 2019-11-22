@@ -8,6 +8,7 @@
 #include "../chars/CCharNPC.h"
 #include "../items/CItemMap.h"
 #include "../items/CItemMessage.h"
+#include "../items/CItemMultiCustom.h"
 #include "../components/CCSpawn.h"
 #include "../CWorld.h"
 #include "../spheresvr.h"

@@ -134,6 +134,8 @@ struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variab
     CResourceIDBase(const CResourceIDBase& rid);                // copy constructor
     CResourceIDBase& operator = (const CResourceIDBase& rid);   // assignment operator
 
+    void FixRes();
+
     RES_TYPE GetResType() const
     {
         return (RES_TYPE)(RES_GET_TYPE(m_dwInternalVal));
@@ -154,6 +156,7 @@ struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variab
     CObjBase*   ObjFind()  const = delete;   // Same as above
     CItem*      ItemFind() const = delete;
     CChar*      CharFind() const = delete;
+
     bool IsUIDItem() const; //  replacement for CUIDBase::IsItem(), but don't be virtual, since we don't need that and the class size will increase due to the vtable
     CItem* ItemFindFromResource() const;   //  replacement for CUIDBase::ItemFind()
 };

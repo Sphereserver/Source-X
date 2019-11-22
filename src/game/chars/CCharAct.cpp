@@ -6,6 +6,7 @@
 #include "../../sphere/ProfileTask.h"
 #include "../clients/CClient.h"
 #include "../items/CItem.h"
+#include "../items/CItemMultiCustom.h"
 #include "../components/CCSpawn.h"
 #include "../components/CCPropsChar.h"
 #include "../components/CCPropsItemChar.h"
@@ -1885,40 +1886,40 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
 		return true;
 
 	lpctstr pszWhere = nullptr;
-	bool bCanAddToPack = false;
-    bool bDropOnGround = false;
+	bool fCanAddToPack = false;
+    bool fDropOnGround = false;
 
 	if (pPack && CanCarry(pItem) && pPack->CanContainerHold(pItem, this))		// this can happen at load time
 	{
-		bCanAddToPack = true;
+		fCanAddToPack = true;
 		if (IsTrigUsed(TRIGGER_DROPON_SELF) || IsTrigUsed(TRIGGER_ITEMDROPON_SELF))
 		{
-            CItem* pPrevCont = dynamic_cast<CItem*>(pItem->GetContainer());
+            const CItem* pPrevCont = dynamic_cast<CItem*>(pItem->GetContainer());
 			CScriptTriggerArgs Args(pItem);
-            TRIGRET_TYPE ret = pPack->OnTrigger(ITRIG_DROPON_SELF, this, &Args);
+            const TRIGRET_TYPE ret = pPack->OnTrigger(ITRIG_DROPON_SELF, this, &Args);
             if ( pItem->IsDeleted() )	// the trigger had deleted the item
                 return false;
 			if (ret == TRIGRET_RET_TRUE)
             {
-				bCanAddToPack = false;
-                CItem* pCont = dynamic_cast<CItem*>(pItem->GetContainer());
+				fCanAddToPack = false;
+                const CItem* pCont = dynamic_cast<const CItem*>(pItem->GetContainer());
                 if ((pPrevCont == pCont) && (pPrevCont != nullptr))
-                    bDropOnGround = true;
+                    fDropOnGround = true;
             }
 		}
 	}
     else
     {
-        bDropOnGround = true;
+        fDropOnGround = true;
     }
 
-	if (bCanAddToPack)
+	if (fCanAddToPack)
 	{
 		pszWhere = g_Cfg.GetDefaultMsg( DEFMSG_MSG_BOUNCE_PACK );
 		pItem->RemoveFromView();
 		pPack->ContentAdd(pItem);		// add it to pack
 	}
-	else if (bDropOnGround)
+	else if (fDropOnGround)
 	{
 		if ( !GetTopPoint().IsValidPoint() )
 		{

@@ -185,7 +185,7 @@ AbstractThread::AbstractThread(const char *name, IThread::Priority priority)
 			throw CSError(LOGL_FATAL, 0, "OLE is not available, threading model unimplementable");
 		}
 #endif
-		AbstractThread::m_threadsAvailable++;
+		++AbstractThread::m_threadsAvailable;
 	}
 	m_id = 0;
 	m_name = name;

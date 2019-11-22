@@ -35,7 +35,7 @@ public:
 	int64 m_timeLastClient;	// age the sector based on last client here.
 
 protected:
-	void OnRemoveObj( CSObjListRec* pObRec );	// Override this = called when removed from list.
+	void OnRemoveObj( CSObjListRec* pObjRec );	// Override this = called when removed from list.
 
 public:
     int GetClientsNumber() const;

@@ -755,8 +755,8 @@ void CWorldClock::InitTime( int64 iTimeBase )
 {
 	ADDTOCALLSTACK("CWorldClock::InitTime");
 	m_Clock_SysPrev = GetSystemClock();
-	m_timeClock.InitTime(iTimeBase+MSECS_PER_TICK);
-    _iCurTick = iTimeBase;
+	m_timeClock.InitTime(iTimeBase + MSECS_PER_TICK);
+    _iCurTick = 0;
 }
 
 void CWorldClock::Init()
@@ -1896,7 +1896,7 @@ void CWorld::r_Write( CScript & s )
 	#ifdef __GITREVISION__
 		s.WriteKeyVal("PREVBUILD", __GITREVISION__);
 	#endif
-	s.WriteKeyVal( "TIME", GetCurrentTick() );
+	s.WriteKeyVal( "TIMEHIRES", GetCurrentTime().GetTimeRaw() );
 	s.WriteKeyVal( "SAVECOUNT", m_iSaveCountID );
 	s.Flush();	// Force this out to the file now.
 }
@@ -2045,13 +2045,23 @@ bool CWorld::r_LoadVal( CScript &s )
 			m_iSaveCountID = s.GetArgVal();
 			break;
 		case WC_TIME:	// "TIME"
-			if ( ! g_Serv.IsLoading() )
-			{
-				DEBUG_WARN(( "Setting TIME while running is BAD!\n" ));
-			}
-			m_Clock.InitTime( s.GetArgLLVal());
+            if (!g_Serv.IsLoading())
+            {
+                g_Log.EventError("Can't set TIME while server is running.\n");
+                return false;
+            }
+			m_Clock.InitTime( s.GetArgLLVal() * MSECS_PER_SEC);
             _iLastTick = m_Clock.GetCurrentTick();
 			break;
+        case WC_TIMEHIRES:	// "TIMEHIRES"
+            if (!g_Serv.IsLoading())
+            {
+                g_Log.EventError("Can't set TIMEHIRES while server is running.\n");
+                return false;
+            }
+            m_Clock.InitTime(s.GetArgLLVal());
+            _iLastTick = m_Clock.GetCurrentTick();
+            break;
 		case WC_VERSION: // "VERSION"
 			m_iLoadVersion = s.GetArgVal();
 			break;

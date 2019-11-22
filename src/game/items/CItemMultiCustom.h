@@ -69,11 +69,14 @@ private:
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override; // Execute command from script
 
     CPointMap GetComponentPoint(const Component * pComponent) const;
-    CPointMap GetComponentPoint(short dx, short dy, char dz) const;/**
+    CPointMap GetComponentPoint(short dx, short dy, char dz) const;
+    
+    /**
     * @brief Removes a Component from the components list.
     * @param pComponent the component.
     */
-    virtual void DelComp(CUID  pComponent);
+    virtual void DelComp(const CUID& pComponent) override;
+
     void CopyDesign(DesignDetails * designFrom, DesignDetails * designTo);
     void GetLockdownsAt(short dx, short dy, char dz, std::vector<CUID> &vList);
     void GetSecuredAt(short dx, short dy, char dz, std::vector<CUID> &vList);
@@ -100,9 +103,9 @@ public:
     void SwitchToLevel(CClient * pClientSrc, uchar iLevel);
     void CommitChanges(CClient * pClientSrc = nullptr);
     void AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z = INT8_MIN, short iStairID = 0);
-    void AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z = INT8_MIN, short iStairID = -1);
+    void AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z = INT8_MIN);
     void AddRoof(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z);
-    void RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z, bool fRemoveWholeFloor);
+    void RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z);
     bool RemoveStairs(Component * pStairComponent);
     void RemoveRoof(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z);
     void SendVersionTo(CClient * pClientSrc) const;
@@ -118,12 +121,16 @@ public:
     size_t GetComponentsAt(short dx, short dy, char dz, Component ** pComponents, DesignDetails * pDesign = nullptr);
     int GetRevision(const CClient * pClientSrc = nullptr) const;
     uchar GetLevelCount();
-    short GetStairCount();
 
     static uchar GetPlane(char z);
     static uchar GetPlane(Component * pComponent);
     static char GetPlaneZ(uchar plane);
     static bool IsValidItem(ITEMID_TYPE id, CClient * pClientSrc, bool bMulti);
+
+    DesignDetails* GetDesignMain()
+    {
+        return &m_designMain;
+    }
 };
 
 

@@ -109,7 +109,7 @@ void CCPropsItemChar::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObj
         {
             if (iVal != iOldVal)
             {
-                CItem* pItemLink = static_cast<CItem*>(pLinkedObj);
+                const CItem* pItemLink = static_cast<const CItem*>(pLinkedObj);
                 CContainer* pCont = dynamic_cast <CContainer*> (pItemLink->GetParent());
                 if (pCont)
                 {

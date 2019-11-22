@@ -4,6 +4,7 @@
 #include "../components/CCPropsItemEquippable.h"
 #include "../components/CCPropsItemWeapon.h"
 #include "../clients/CClient.h"
+#include "../items/CItemMulti.h"
 #include "../CWorld.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
@@ -693,10 +694,10 @@ byte CChar::GetDirFlag(bool fSquelchForwardStep) const
 	return dir;
 }
 
-dword CChar::GetMoveBlockFlags(bool bIgnoreGM) const
+dword CChar::GetMoveBlockFlags(bool fIgnoreGM) const
 {
 	// What things block us ?
-	if ( IsPriv(PRIV_GM|PRIV_ALLMOVE) && !bIgnoreGM )	// nothing blocks us.
+	if ( IsPriv(PRIV_GM|PRIV_ALLMOVE) && !fIgnoreGM )	// nothing blocks us.
 		return 0xFFFFFFFF;
 
 	dword dwCan = GetCanFlags();

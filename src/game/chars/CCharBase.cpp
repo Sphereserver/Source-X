@@ -181,6 +181,7 @@ bool CCharBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 	{
 		//return as string or hex number or nullptr if not set
 		case CBC_THROWDAM:
+		case CBC_THROWDAMTYPE:
 		case CBC_THROWOBJ:
 		case CBC_THROWRANGE:
 			sVal = GetDefStr(ptcKey, false);
@@ -336,6 +337,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 	{
 		//Set as Strings
 		case CBC_THROWDAM:
+		case CBC_THROWDAMTYPE:
 		case CBC_THROWOBJ:
 		case CBC_THROWRANGE:
 			{

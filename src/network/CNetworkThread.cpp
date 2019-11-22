@@ -9,7 +9,7 @@
 static const char* GenerateNetworkThreadName(size_t id)
 {
     char* name = new char[IThread::m_nameMaxLength];
-    snprintf(name, IThread::m_nameMaxLength, "T_Network #%" PRIuSIZE_T, id);
+    snprintf(name, IThread::m_nameMaxLength, "T_Net #%" PRIuSIZE_T, id);
     return name;
 }
 

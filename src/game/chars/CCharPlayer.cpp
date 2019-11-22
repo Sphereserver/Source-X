@@ -66,7 +66,7 @@ bool CCharPlayer::SetSkillClass( CChar * pChar, CResourceID rid )
 	// Remove any previous skillclass from the Events block.
 	size_t i = pChar->m_OEvents.FindResourceType(RES_SKILLCLASS);
 	if ( i != SCONT_BADINDEX )
-		pChar->m_OEvents.erase(i);
+		pChar->m_OEvents.erase_at(i);
 
 	m_SkillClass.SetRef(pLink);
 

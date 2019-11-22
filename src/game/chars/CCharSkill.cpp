@@ -2087,12 +2087,17 @@ int CChar::Skill_Taming(SKTRIG_TYPE stage)
 		return -SKTRIG_QTY;
 	}
 
-	// Low skill to tame it
-	int iTamingRequire = iTameBase + ((int)pChar->GetKeyNum("TAMEOWNERS") * 60);
-	if (iTamingRequire > Skill_GetAdjusted(SKILL_TAMING))
-	{
-		SysMessageDefault(DEFMSG_TAMING_CANT);
-		return -SKTRIG_QTY;
+		/* An NPC cannot be tamed if:
+			Its Taming skill is equal to 0.
+			Its Animal Lore is above 0 (no reason why, this is probably an old check)
+			It's ID is either one of the playable characters (Human, Elf or Gargoyle).
+		*/
+		if ( !iTameBase || pChar->Skill_GetBase(SKILL_ANIMALLORE) || 
+			pChar->IsPlayableCharacter())
+		{
+			SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_TAMING_TAMED ), pChar->GetName());
+			return -SKTRIG_QTY;
+		}
 	}
 
 	// Too many owners
@@ -3034,6 +3039,7 @@ int CChar::Skill_Act_Breath( SKTRIG_TYPE stage )
 		m_Act_p.StepLinePath( pntMe, UO_MAP_VIEW_SIGHT );
 
 	int iDamage = (int)(GetDefNum("BREATH.DAM", true));
+
 	if ( !iDamage )
 	{
 		iDamage = (Stat_GetVal(STAT_STR) * 5) / 100;
@@ -3046,13 +3052,34 @@ int CChar::Skill_Act_Breath( SKTRIG_TYPE stage )
 	HUE_TYPE hue = (HUE_TYPE)(GetDefNum("BREATH.HUE", true));
 	ITEMID_TYPE id = (ITEMID_TYPE)(GetDefNum("BREATH.ANIM", true));
 	EFFECT_TYPE effect = static_cast<EFFECT_TYPE>(GetDefNum("BREATH.TYPE",true));
+	DAMAGE_TYPE iDmgType = (DAMAGE_TYPE)(GetDefNum("BREATH.DAMTYPE", true));
+
+	/* AOS damage types (used by COMBAT_ELEMENTAL_ENGINE)*/
+	int iDmgPhysical = 0, iDmgFire = 0, iDmgCold = 0, iDmgPoison = 0, iDmgEnergy = 0;
+
 	if ( !id )
 		id = ITEMID_FX_FIRE_BALL;
-	if (! effect )
+	if ( !effect )
 		effect = EFFECT_BOLT;
+	
+	if (!iDmgType)
+		iDmgType = DAMAGE_FIRE;
+
+	if (iDmgType & DAMAGE_FIRE)
+		iDmgFire = 100;
+	else if (iDmgType & DAMAGE_COLD)
+		iDmgCold = 100;
+	else if (iDmgType & DAMAGE_POISON)
+		iDmgPoison = 100;
+	else if (iDmgType & DAMAGE_ENERGY)
+		iDmgEnergy = 100;
+	else
+		iDmgPhysical = 100;
+	iDmgType |= DAMAGE_BREATH;
+
 	Sound( 0x227 );
 	pChar->Effect( effect, id, this, 20, 30, false, hue );
-	pChar->OnTakeDamage( iDamage, this, DAMAGE_FIRE, 0, 100, 0, 0, 0 );
+	pChar->OnTakeDamage( iDamage, this, iDmgType, iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy);
 	return 0;
 }
 
@@ -3079,6 +3106,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 		if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOANIM ) )
 			UpdateAnimate( ANIM_MON_Stomp );
 
+		SetTimeoutS(3);
 		return 0;
 	}
 
@@ -3094,8 +3122,13 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 	// a rock or a boulder ?
 	ITEMID_TYPE id = ITEMID_NOTHING;
 	int iDamage = 0;
+	DAMAGE_TYPE iDmgType = DAMAGE_HIT_BLUNT|DAMAGE_THROWN;
+
+	// AOS damage types (used by COMBAT_ELEMENTAL_ENGINE)
+	int iDmgPhysical = 0, iDmgFire = 0, iDmgCold = 0, iDmgPoison = 0, iDmgEnergy = 0;
 
 	CVarDefCont * pDam = GetDefKey("THROWDAM",true);
+	
 	if ( pDam )
 	{
 		int64 DVal[2];
@@ -3110,7 +3143,24 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 				break;
 		}
 	}
-
+	/*Set  the damage type if THROWDAMTYPE is set*/
+	CVarDefCont  * pDamType = GetDefKey("THROWDAMTYPE", true);
+	if (pDamType)
+	{
+		iDmgType = (DAMAGE_TYPE)pDamType->GetValNum();
+		if (iDmgType & DAMAGE_FIRE)
+			iDmgFire = 100;
+		else if (iDmgType & DAMAGE_COLD)
+			iDmgCold = 100;
+		else if (iDmgType & DAMAGE_POISON)
+			iDmgPoison = 100;
+		else if (iDmgType & DAMAGE_ENERGY)
+			iDmgEnergy = 100;
+		else
+			iDmgPhysical = 100;
+		iDmgType |= DAMAGE_THROWN;
+	}
+	
 	CVarDefCont * pRock = GetDefKey("THROWOBJ",true);
     if ( pRock )
 	{
@@ -3146,7 +3196,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 			pItemRock->Effect(EFFECT_BOLT, id, this);
 		}
 		if ( ! Calc_GetRandVal( pChar->GetTopPoint().GetDist( m_Act_p )))	// did it hit?
-			pChar->OnTakeDamage( iDamage, this, DAMAGE_HIT_BLUNT );
+			pChar->OnTakeDamage( iDamage, this, iDmgType,iDmgPhysical,iDmgFire,iDmgCold,iDmgPoison,iDmgEnergy);
 	}
 
 	return 0;

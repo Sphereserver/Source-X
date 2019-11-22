@@ -52,19 +52,13 @@ public:
     * @brief Removes the nth element and move the next elements one position left.
     * @param nIndex position of the element to remove.
     */
-    void erase(size_t nIndex);
-    /**
-    * @brief Insert a new element to the end of the array.
-    * @param newElement element to insert.
-    * @return the element count of the array.
-    */
-    size_t push_back(TYPE newElement);
+    void erase_at(size_t nIndex);
     /**
     * @brief Update element nth to a new value.
     * @param nIndex index of element to update.
     * @param newElement new value.
     */
-    void assign(size_t nIndex, TYPE newElement);
+    void assign_at(size_t nIndex, TYPE newElement);
     /**
     * @brief Update element nth to a new value.
     * @param nIndex index of element to update.
@@ -103,13 +97,6 @@ CSTypedArray<TYPE> & CSTypedArray<TYPE>::operator=( const CSTypedArray<TYPE> & a
 // CSTypedArray:: Modifiers.
 
 template<class TYPE>
-size_t CSTypedArray<TYPE>::push_back(TYPE newElement)
-{
-    std::vector<TYPE>::push_back(newElement);
-    return std::vector<TYPE>::size() - 1;
-}
-
-template<class TYPE>
 void CSTypedArray<TYPE>::insert(size_t nIndex, TYPE newElement)
 {	// Bump the existing entry here forward.
     ASSERT(nIndex != SCONT_BADINDEX);
@@ -118,7 +105,7 @@ void CSTypedArray<TYPE>::insert(size_t nIndex, TYPE newElement)
 
 
 template<class TYPE>
-void CSTypedArray<TYPE>::erase(size_t nIndex)
+void CSTypedArray<TYPE>::erase_at(size_t nIndex)
 {
     if ( !IsValidIndex(nIndex) )
         return;
@@ -126,7 +113,7 @@ void CSTypedArray<TYPE>::erase(size_t nIndex)
 }
 
 template<class TYPE>
-void CSTypedArray<TYPE>::assign(size_t nIndex, TYPE newElement)
+void CSTypedArray<TYPE>::assign_at(size_t nIndex, TYPE newElement)
 {
     ASSERT(IsValidIndex(nIndex));
 
@@ -141,7 +128,7 @@ void CSTypedArray<TYPE>::assign_at_grow(size_t nIndex, TYPE newElement)
 
     if ( ! IsValidIndex(nIndex))
         std::vector<TYPE>::resize(nIndex + 1);
-    assign(nIndex, newElement);
+    assign_at(nIndex, newElement);
 }
 
 
