@@ -3363,18 +3363,28 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		break;
 
 	case RES_FUNCTION:
-		{
-			// Define a char macro. (Name is NOT DEFNAME)
-			pNewLink = new CResourceNamedDef(rid, pScript->GetArgStr());
+	{
+        lpctstr ptcFunctionName = pScript->GetArgStr();
+        size_t uiFunctionIndex = m_Functions.find_sorted(ptcFunctionName);
+        if (uiFunctionIndex == SCONT_BADINDEX)
+        {
+            // Define a char macro. (Name is NOT DEFNAME)
+            pNewLink = new CResourceNamedDef(rid, ptcFunctionName);
 
-			// Link the CResourceLink to the CResourceScript it was read and created,
-			//	so later we can retrieve the file and the line for debugging purposes.
-			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
-			if (pLinkResScript != nullptr)
-				pNewLink->SetLink(pLinkResScript);
+            // Link the CResourceLink to the CResourceScript it was read and created,
+            //	so later we can retrieve the file and the line for debugging purposes.
+            CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
+            if (pLinkResScript != nullptr)
+                pNewLink->SetLink(pLinkResScript);
 
-			m_Functions.emplace(pNewLink);
-		}
+            m_Functions.emplace(pNewLink);
+        }
+        else
+        {
+            pNewLink = dynamic_cast<CResourceNamedDef*>(m_Functions[uiFunctionIndex]);
+            ASSERT(pNewLink);
+        }
+	}
 		break;
 
 	case RES_SERVERS:	// Old way to define a block of servers.
