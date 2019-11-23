@@ -1957,3 +1957,6 @@ WARNING: Important change!
 
 16-11-2019, Nolok
 - Fixed: Resync sometimes messed up unchanged, cached scripts.
+
+23-11-2019, Nolok
+- Fixed: Resyncing after modifying a FUNCTION broke the internal functions lookup table order, resulting in random errors when calling functions.
