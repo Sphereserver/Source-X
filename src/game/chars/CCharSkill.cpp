@@ -524,7 +524,7 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 
 	int64 result = Skill_CheckSuccess( skill, (int)difficulty, bUseBellCurve );
 	CScriptTriggerArgs pArgs( 0 , difficulty, result);
-	TRIGRET_TYPE ret = TRIGRET_RET_DEFAULT;
+	TRIGRET_TYPE ret = (TRIGRET_TYPE)TRIGRET_RET_DEFAULT;
 
 	if ( IsTrigUsed(TRIGGER_SKILLUSEQUICK) )
 	{
@@ -2081,21 +2081,23 @@ int CChar::Skill_Taming(SKTRIG_TYPE stage)
 
 	// No taming defined on char
 	int iTameBase = pChar->Skill_GetBase(SKILL_TAMING);
-	if (!iTameBase || pChar->Skill_GetBase(SKILL_ANIMALLORE))
+	if (!IsPriv(PRIV_GM)) // if its a gm doing it, just check that its not
 	{
-		SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_TAMING_TAMED), pChar->GetName());
-		return -SKTRIG_QTY;
-	}
+		if (pChar->IsStatFlag(STATF_PET))		// is it tamable ?
+		{
+			SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_TAMING_TAME), pChar->GetName());
+			return -SKTRIG_QTY;
+		}
 
 		/* An NPC cannot be tamed if:
 			Its Taming skill is equal to 0.
 			Its Animal Lore is above 0 (no reason why, this is probably an old check)
 			It's ID is either one of the playable characters (Human, Elf or Gargoyle).
 		*/
-		if ( !iTameBase || pChar->Skill_GetBase(SKILL_ANIMALLORE) || 
+		if (!iTameBase || pChar->Skill_GetBase(SKILL_ANIMALLORE) ||
 			pChar->IsPlayableCharacter())
 		{
-			SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_TAMING_TAMED ), pChar->GetName());
+			SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_TAMING_TAMED), pChar->GetName());
 			return -SKTRIG_QTY;
 		}
 	}
