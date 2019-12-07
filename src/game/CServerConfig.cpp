@@ -2091,7 +2091,7 @@ int CServerConfig::GetSpellEffect( SPELL_TYPE spell, int iSkillVal ) const
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef( spell );
 	if ( pSpellDef == nullptr )
 		return 0;
-	return pSpellDef->m_Effect.GetLinear( iSkillVal );
+	return pSpellDef->m_vcEffect.GetLinear( iSkillVal );
 }
 
 lpctstr CServerConfig::GetRune( tchar ch ) const
@@ -2701,16 +2701,17 @@ uint CServerConfig::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar
 bool CServerConfig::LoadResourceSection( CScript * pScript )
 {
 	ADDTOCALLSTACK("CServerConfig::LoadResourceSection");
-	bool fNewStyleDef = false;
-
 	// Index or read any resource blocks we know how to handle.
+
 	ASSERT(pScript);
 	CScriptFileContext FileContext( pScript );	// set this as the context.
-	CVarDefContNum * pVarNum = nullptr;
-	CResourceID rid;
     CSString sSection = pScript->GetSection();
     lpctstr pszSection = sSection.GetPtr();
 
+	CVarDefContNum * pVarNum = nullptr;
+	CResourceID rid;
+    
+    bool fNewStyleDef = false;
 	RES_TYPE restype;
 	if ( !strnicmp( pszSection, "DEFMESSAGE", 10 ) )
 	{
@@ -2740,8 +2741,10 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		restype			= RES_ITEMDEF;
 		fNewStyleDef	= true;
 	}
-	else
-		restype	= (RES_TYPE) FindTableSorted( pszSection, sm_szResourceBlocks, CountOf( sm_szResourceBlocks ));
+    else
+    {
+        restype = (RES_TYPE)FindTableSorted(pszSection, sm_szResourceBlocks, CountOf(sm_szResourceBlocks));
+    }
 
 
 	if (( restype == RES_WORLDSCRIPT ) || ( restype == RES_WS ))
@@ -2932,7 +2935,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 			// read karma levels
 			iQty = Str_ParseCmds(pScript->GetKeyBuffer(), piNotoLevels, CountOf(piNotoLevels));
-			for (i = 0; i < iQty; i++)
+			for (i = 0; i < iQty; ++i)
 				m_NotoKarmaLevels.assign_at_grow(i, (int) (piNotoLevels[i]));
 
 			m_NotoKarmaLevels.resize(i);
@@ -2945,7 +2948,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 			// read fame levels
 			iQty = Str_ParseCmds(pScript->GetKeyBuffer(), piNotoLevels, CountOf(piNotoLevels));
-			for (i = 0; i < iQty; i++)
+			for (i = 0; i < iQty; ++i)
 				m_NotoFameLevels.assign_at_grow(i, (int) (piNotoLevels[i]));
 
 			m_NotoFameLevels.resize(i);
@@ -2962,9 +2965,12 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				++i;
 			}
 
-			if (m_NotoTitles.size() != ((m_NotoKarmaLevels.size() + 1) * (m_NotoFameLevels.size() + 1)))
-				g_Log.Event(LOGM_INIT|LOGL_WARN, "Expected %" PRIuSIZE_T " titles in NOTOTITLES section but found %" PRIuSIZE_T ".\n", (m_NotoKarmaLevels.size() + 1) * (m_NotoFameLevels.size() + 1),
-							m_NotoTitles.size());
+            if (m_NotoTitles.size() != ((m_NotoKarmaLevels.size() + 1) * (m_NotoFameLevels.size() + 1)))
+            {
+                g_Log.Event(LOGM_INIT | LOGL_WARN, "Expected %" PRIuSIZE_T " titles in NOTOTITLES section but found %" PRIuSIZE_T ".\n",
+                    (m_NotoKarmaLevels.size() + 1) * (m_NotoFameLevels.size() + 1),
+                    m_NotoTitles.size());
+            }
 		}
 		return true;
 	case RES_OBSCENE:
@@ -3005,7 +3011,10 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 	case RES_SECTOR: // saved in world file.
 		{
 			CPointMap pt = GetRegionPoint( pScript->GetArgStr() ); // Decode a teleport location number into X/Y/Z
-			return pt.GetSector()->r_Load(*pScript);
+            CSector* pSector = pt.GetSector();
+            if (!pSector)
+                return false;
+			return pSector->r_Load(*pScript);
 		}
 	case RES_SPELL:
 		{
@@ -3073,7 +3082,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			ASSERT(pNewLink);
 
 			// clear old tile links to this type
-			size_t iQty = g_World.m_TileTypes.size();
+			const size_t iQty = g_World.m_TileTypes.size();
 			for ( size_t i = 0; i < iQty; ++i )
 			{
 				if (g_World.m_TileTypes[i] == pTypeDef )
@@ -3362,7 +3371,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 	case RES_FUNCTION:
 	{
         lpctstr ptcFunctionName = pScript->GetArgStr();
-        size_t uiFunctionIndex = m_Functions.find_sorted(ptcFunctionName);
+        const size_t uiFunctionIndex = m_Functions.find_sorted(ptcFunctionName);
         if (uiFunctionIndex == SCONT_BADINDEX)
         {
             // Define a char macro. (Name is NOT DEFNAME)
@@ -3393,7 +3402,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				// Does the name already exist ?
 				bool fAddNew = false;
 				CServerRef pServ;
-				size_t i = m_Servers.FindKey( pScript->GetKey());
+				const size_t i = m_Servers.FindKey( pScript->GetKey());
 				if ( i == SCONT_BADINDEX )
 				{
 					pServ = new CServerDef( pScript->GetKey(), CSocketAddressIP( SOCKET_LOCAL_ADDRESS ));

@@ -729,7 +729,7 @@ void CItemContainer::MakeKey()
 	ADDTOCALLSTACK("CItemContainer::MakeKey");
 	SetType(IT_CONTAINER);
 	m_itContainer.m_UIDLock = GetUID();
-	m_itContainer.m_lock_complexity = 500 + Calc_GetRandVal(600);
+	m_itContainer.m_dwLockComplexity = 500 + Calc_GetRandVal(600);
 
 	CItem *pKey = CreateScript(ITEMID_KEY_COPPER);
 	ASSERT(pKey);

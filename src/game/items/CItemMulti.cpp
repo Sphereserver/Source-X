@@ -310,7 +310,7 @@ bool CItemMulti::Multi_CreateComponent(ITEMID_TYPE id, short dx, short dy, char 
     if (pItem->IsTypeLockable() || pItem->IsTypeLocked())
     {
         pItem->m_itContainer.m_UIDLock.SetPrivateUID(dwKeyCode);    // Set the key id for the door/key/sign.
-        pItem->m_itContainer.m_lock_complexity = 10000;    // never pickable.
+        pItem->m_itContainer.m_dwLockComplexity = 10000;    // never pickable.
     }
 
     CScript event("events +ei_house_component");

@@ -2373,7 +2373,7 @@ CItem * CChar::Make_Figurine( CUID uidOwner, ITEMID_TYPE id )
 	StatFlag_Set(STATF_RIDDEN);
 	Skill_Start(NPCACT_RIDDEN);
 	SetDisconnected();
-	m_atRidden.m_FigurineUID = pItem->GetUID().GetObjUID();
+	m_atRidden.m_dwFigurineUID = pItem->GetUID().GetObjUID();
 
 	return pItem;
 }
@@ -2409,35 +2409,64 @@ CItem * CChar::Horse_GetMountItem() const
 	if ( ! IsStatFlag( STATF_RIDDEN ))
 		return nullptr;
 
-	CItem * pItem = CUID(m_atRidden.m_FigurineUID).ItemFind();
-
-	if ( pItem == nullptr )
+	CItem * pItemMount = CUID::ItemFind(m_atRidden.m_dwFigurineUID);   // ACTARG1 = Mount item UID
+	if (pItemMount == nullptr )
 	{
-		CItemMemory* pItemMem = Memory_FindTypes( MEMORY_IPET );
+        int iFailureCode = 0;
+        const CItemMemory* pItemMemPet = Memory_FindTypes( MEMORY_IPET );
+        if (pItemMemPet)
+        {
+            const CChar* pOwner = pItemMemPet->m_uidLink.CharFind();
+            if (pOwner)
+            {
+                CItem* pOwnerItemMount = pOwner->LayerFind(LAYER_HORSE);
+                if (pOwnerItemMount)
+                {
+                    if (pOwnerItemMount->m_itNormal.m_more2 == GetUID().GetObjUID())
+                    {
+                        m_atRidden.m_dwFigurineUID = pOwnerItemMount->GetUID().GetObjUID();
+                        pItemMount = pOwnerItemMount;
+                    }
+                    else
+                        iFailureCode = 4;
+                }
+                else
+                    iFailureCode = 3;
+            }
+            else
+                iFailureCode = 2;
+        }
+        else
+            iFailureCode = 1;
 
-		if ( pItemMem != nullptr )
-		{
-			CChar* pOwner = pItemMem->m_uidLink.CharFind();
-
-			if ( pOwner != nullptr )
-			{
-				CItem* pItemMount = pOwner->LayerFind(LAYER_HORSE);
-
-				if ( pItemMount != nullptr && pItemMount->m_itNormal.m_more2 == GetUID().GetObjUID() )
-				{
-					m_atRidden.m_FigurineUID = pItemMount->GetUID().GetObjUID();
-					pItem = pItemMount;
-
-					DEBUG_ERR(("UID=0%x, id=0%x '%s', Fixed mount item UID=0%x, id=0%x '%s'\n",
-						(dword)GetUID(), GetBaseID(), GetName(), (dword)(pItem->GetUID()), pItem->GetBaseID(), pItem->GetName()));
-				}
-			}
-		}
+        if (!iFailureCode)
+        {
+            g_Log.EventError("Mount (UID=0%x, id=0%x '%s'): Fixed mount item (ACTARG1=0%x) with UID=0%x, id=0%x '%s'\n",
+                (dword)GetUID(), GetBaseID(), GetName(), m_atRidden.m_dwFigurineUID,
+                (dword)(pItemMount->GetUID()), pItemMount->GetBaseID(), pItemMount->GetName());
+        }
+        else
+        {
+            lpctstr ptcFailureString;
+            switch (iFailureCode)
+            {
+                default:    ptcFailureString = "";                                          break;
+                case 1:     ptcFailureString = "MEMORY_IPET missing";                       break;
+                case 2:     ptcFailureString = "MEMORY_IPET has invalid LINK (owner)";      break;
+                case 3:     ptcFailureString = "Missing mount item in owner's LAYER_HORSE"; break;
+                case 4:
+                    ptcFailureString = "Mount item in owner's LAYER_HORSE has a MORE2 which doesn't match this mount UID (owner's riding another mount?)";
+                    break;
+            }
+            g_Log.EventError("Mount (UID=0%x, id=0%x '%s'): Can't auto-fix invalid mount item (ACTARG1=0%x)'\n",
+                (dword)GetUID(), GetBaseID(), GetName(), m_atRidden.m_dwFigurineUID);
+            g_Log.EventError(" Reason: %s.\n", ptcFailureString);
+        }
 	}
 
-	if ( pItem == nullptr || ( ! pItem->IsType( IT_FIGURINE ) && ! pItem->IsType( IT_EQ_HORSE )) )
+	if (pItemMount == nullptr || (!pItemMount->IsType(IT_FIGURINE) && !pItemMount->IsType(IT_EQ_HORSE)) )
 		return nullptr;
-	return pItem;
+	return pItemMount;
 }
 
 // Gets my riding character, if i'm being mounted.
@@ -2538,7 +2567,7 @@ bool CChar::Horse_UnMount()
 	}
 
 	CChar * pPet = pItem->m_itFigurine.m_UID.CharFind();
-	if ( IsTrigUsed(TRIGGER_DISMOUNT) && pPet != nullptr && pPet->IsDisconnected() && !pPet->IsDeleted() ) // valid horse for trigger
+	if (pPet && IsTrigUsed(TRIGGER_DISMOUNT) && pPet->IsDisconnected() && !pPet->IsDeleted() ) // valid horse for trigger
 	{
 		CScriptTriggerArgs Args(pPet);
 		if ( OnTrigger(CTRIG_Dismount, this, &Args) == TRIGRET_RET_TRUE )
@@ -2548,7 +2577,8 @@ bool CChar::Horse_UnMount()
 	if (pItem->GetBaseID() == ITEMID_SHIP_PILOT)
 	{
 		CItem *pShip = pItem->m_uidLink.ItemFind();
-		pShip->m_itShip.m_Pilot.InitUID();
+        if (pShip)
+		    pShip->m_itShip.m_Pilot.InitUID();
 
 		SysMessageDefault(DEFMSG_SHIP_PILOT_OFF);
 		pItem->Delete();
@@ -3043,7 +3073,7 @@ bool CChar::OnFreezeCheck() const
 
 		if ( IsSetMagicFlags(MAGICF_FREEZEONCAST) && g_Cfg.IsSkillFlag(m_Act_SkillCurrent, SKF_MAGIC) )		// casting magic spells
 		{
-			const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
+			const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
 			if ( pSpellDef && !pSpellDef->IsSpellType(SPELLFLAG_NOFREEZEONCAST) )
 				return true;
 		}
@@ -3267,7 +3297,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 		else if ( g_Cfg.IsSkillFlag(iSkillActive, SKF_FIGHT) && g_Cfg.IsSkillFlag(iSkillActive, SKF_RANGED) && !IsSetCombatFlags(COMBAT_ARCHERYCANMOVE) && !IsStatFlag(STATF_ARCHERCANMOVE) )
 		{
 			// Keep timer active holding the swing action until the char stops moving
-			m_atFight.m_War_Swing_State = WAR_SWING_EQUIPPING;
+			m_atFight.m_iWarSwingState = WAR_SWING_EQUIPPING;
 			SetTimeoutD(1);
 		}
 
@@ -3370,7 +3400,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
                 continue;
             }
 			case IT_SWITCH:
-				if ( pItem->m_itSwitch.m_fStep )
+				if ( pItem->m_itSwitch.m_wStep )
 					Use_Item(pItem);
 				continue;
 			case IT_MOONGATE:

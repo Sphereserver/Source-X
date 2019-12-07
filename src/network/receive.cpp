@@ -774,7 +774,7 @@ bool PacketVendorBuyReq::onReceive(CNetState* net)
 			}
 		}
 
-		items[index].m_amount += amount;
+		items[index].m_vcAmount += amount;
 		if (items[index].m_price <= 0)
 		{
 			vendor->Speak("Alas, I don't have these goods currently stocked. Let me know if there is something else thou wouldst buy.");
@@ -1886,7 +1886,7 @@ bool PacketVendorSellReq::onReceive(CNetState* net)
 	for (uint i = 0; i < itemCount; ++i)
 	{
 		items[i].m_serial = CUID(readInt32());
-		items[i].m_amount = readInt16();
+		items[i].m_vcAmount = readInt16();
 	}
 
 	client->Event_VendorSell(vendor, items, itemCount);
@@ -3038,8 +3038,8 @@ bool PacketSpellSelect::onReceive(CNetState* net)
 	{
 		if (spellDef->IsSpellType(SPELLFLAG_NOPRECAST) == false)
 		{
-			client->m_tmSkillMagery.m_Spell = spell;
-			character->m_atMagery.m_Spell = spell;
+			client->m_tmSkillMagery.m_iSpell = spell;
+			character->m_atMagery.m_iSpell = spell;
 			client->m_Targ_UID = character->GetUID();
 			client->m_Targ_Prv_UID = character->GetUID();
 			character->Skill_Start((SKILL_TYPE)skill);

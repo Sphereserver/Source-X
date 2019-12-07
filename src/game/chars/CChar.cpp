@@ -290,9 +290,9 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
     m_iKarma = 0;
 
 	Skill_Cleanup();
-    m_atUnk.m_Arg1 = 0;
-    m_atUnk.m_Arg2 = 0;
-    m_atUnk.m_Arg3 = 0;
+    m_atUnk.m_dwArg1 = 0;
+    m_atUnk.m_dwArg2 = 0;
+    m_atUnk.m_dwArg3 = 0;
 
 	g_World.m_uidLastNewChar = GetUID();	// for script access.
 
@@ -1011,9 +1011,9 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
     m_ModMaxWeight = pChar->m_ModMaxWeight;
     _iRange = pChar->_iRange;
 
-	m_atUnk.m_Arg1 = pChar->m_atUnk.m_Arg1;
-	m_atUnk.m_Arg2 = pChar->m_atUnk.m_Arg2;
-	m_atUnk.m_Arg3 = pChar->m_atUnk.m_Arg3;
+	m_atUnk.m_dwArg1 = pChar->m_atUnk.m_dwArg1;
+	m_atUnk.m_dwArg2 = pChar->m_atUnk.m_dwArg2;
+	m_atUnk.m_dwArg3 = pChar->m_atUnk.m_dwArg3;
 
 	_timeNextRegen = pChar->_timeNextRegen;
 	m_timeCreate = pChar->m_timeCreate;
@@ -2686,7 +2686,7 @@ do_default:
 			}
 			return true;
 		case CHC_SWING:
-			sVal.FormatVal( m_atFight.m_War_Swing_State );
+			sVal.FormatVal( m_atFight.m_iWarSwingState );
 			break;
 		case CHC_TOWNABBREV:
 			{
@@ -2768,13 +2768,13 @@ do_default:
 			sVal.FormatVal( m_Act_Difficulty * 10 );
 			break;
 		case CHC_ACTARG1:
-			sVal.FormatHex( m_atUnk.m_Arg1 );
+			sVal.FormatHex( m_atUnk.m_dwArg1 );
 			break;
 		case CHC_ACTARG2:
-			sVal.FormatHex( m_atUnk.m_Arg2 );
+			sVal.FormatHex( m_atUnk.m_dwArg2 );
 			break;
 		case CHC_ACTARG3:
-			sVal.FormatHex( m_atUnk.m_Arg3 );
+			sVal.FormatHex( m_atUnk.m_dwArg3 );
 			break;
 		case CHC_ACTION:
 		{
@@ -3264,13 +3264,13 @@ bool CChar::r_LoadVal( CScript & s )
 			m_Act_Difficulty = (s.GetArgVal() / 10);
 			break;
 		case CHC_ACTARG1:
-			m_atUnk.m_Arg1 = s.GetArgVal();
+			m_atUnk.m_dwArg1 = s.GetArgVal();
 			break;
 		case CHC_ACTARG2:
-			m_atUnk.m_Arg2 = s.GetArgVal();
+			m_atUnk.m_dwArg2 = s.GetArgVal();
 			break;
 		case CHC_ACTARG3:
-			m_atUnk.m_Arg3 = s.GetArgVal();
+			m_atUnk.m_dwArg3 = s.GetArgVal();
 			break;
 		case CHC_ACTION:
 		{
@@ -3579,7 +3579,7 @@ bool CChar::r_LoadVal( CScript & s )
                 int iVal = s.GetArgVal();
 				if ( iVal && ((iVal < -1) || (iVal > WAR_SWING_SWINGING) ) )
 					return false;
-				m_atFight.m_War_Swing_State = (WAR_SWING_TYPE)iVal;
+				m_atFight.m_iWarSwingState = (WAR_SWING_TYPE)iVal;
 			}
 			break;
 		case CHC_TITLE:
@@ -3729,12 +3729,12 @@ void CChar::r_Write( CScript & s )
 		*/
         if ((action > SKILL_NONE && action < SKILL_QTY) || action == NPCACT_FLEE || action == NPCACT_TALK || action == NPCACT_TALK_FOLLOW || action == NPCACT_RIDDEN)
         {
-            if (m_atUnk.m_Arg1 != 0)
-                s.WriteKeyHex("ACTARG1", m_atUnk.m_Arg1);
-            if (m_atUnk.m_Arg2 != 0)
-                s.WriteKeyHex("ACTARG2", m_atUnk.m_Arg2);
-            if (m_atUnk.m_Arg3 != 0)
-                s.WriteKeyHex("ACTARG3", m_atUnk.m_Arg3);
+            if (m_atUnk.m_dwArg1 != 0)
+                s.WriteKeyHex("ACTARG1", m_atUnk.m_dwArg1);
+            if (m_atUnk.m_dwArg2 != 0)
+                s.WriteKeyHex("ACTARG2", m_atUnk.m_dwArg2);
+            if (m_atUnk.m_dwArg3 != 0)
+                s.WriteKeyHex("ACTARG3", m_atUnk.m_dwArg3);
         }
 	}
 
@@ -4316,8 +4316,8 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			if ( !pSpellDef )
 				return false;
 
-			m_atMagery.m_Spell = SPELL_Polymorph;
-			m_atMagery.m_SummonID = (CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
+			m_atMagery.m_iSpell = SPELL_Polymorph;
+			m_atMagery.m_iSummonID = (CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
 			m_Act_UID = GetUID();
 			m_Act_Prv_UID = GetUID();
 

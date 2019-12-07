@@ -128,7 +128,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, bool f
 	pResBit->m_itResource.m_ridRes = pOreDef->GetResourceID();
 
 	// Total amount of ore here.
-	word amount = (word)pOreDef->m_Amount.GetRandom();
+	word amount = (word)pOreDef->m_vcAmount.GetRandom();
 	if ( (g_Cfg.m_iRacialFlags & RACIALF_HUMAN_WORKHORSE) && pCharSrc->IsHuman() )
 	{
 		if ( (iType == IT_ROCK) && (pCharSrc->GetTopMap() == 0) )
@@ -137,7 +137,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, bool f
 			amount += 2;	// Workhorse racial bonus, giving +2 logs to humans in Trammel.
 	}
 	pResBit->SetAmount( amount );
-	pResBit->MoveToDecay(pt, pOreDef->m_iRegenerateTime.GetRandom() * MSECS_PER_TENTH);	// Delete myself in this amount of time.
+	pResBit->MoveToDecay(pt, pOreDef->m_vcRegenerateTime.GetRandom() * MSECS_PER_TENTH);	// Delete myself in this amount of time.
 
 	EXC_SET_BLOCK("resourcefound");
 	if ( pCharSrc != nullptr )

@@ -330,8 +330,8 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 				if ( !pSpellDef->GetPrimarySkill(&skill, nullptr) )
 					return false;
 
-				m_tmSkillMagery.m_Spell = spell;	// m_atMagery.m_Spell
-				m_pChar->m_atMagery.m_Spell = spell;
+				m_tmSkillMagery.m_iSpell = spell;	// m_atMagery.m_iSpell
+				m_pChar->m_atMagery.m_iSpell = spell;
 				m_pChar->Skill_Start((SKILL_TYPE)skill);
 				return true;
 			}
@@ -951,11 +951,11 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 	ASSERT(m_pChar);
 
 	const CSpellDef *pSpellDef;
-	if ( IsSetMagicFlags(MAGICF_PRECAST) && iSpell == m_tmSkillMagery.m_Spell )
+	if ( IsSetMagicFlags(MAGICF_PRECAST) && iSpell == m_tmSkillMagery.m_iSpell )
 	{
-		pSpellDef = g_Cfg.GetSpellDef(m_tmSkillMagery.m_Spell);
+		pSpellDef = g_Cfg.GetSpellDef(m_tmSkillMagery.m_iSpell);
 		if ( pSpellDef != nullptr && !pSpellDef->IsSpellType(SPELLFLAG_NOPRECAST) )
-			iSpell = m_tmSkillMagery.m_Spell;
+			iSpell = m_tmSkillMagery.m_iSpell;
 	}
 	else
 		pSpellDef = g_Cfg.GetSpellDef(iSpell);
@@ -968,7 +968,7 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 		return false;
 
 	SetTargMode();
-	m_tmSkillMagery.m_Spell = iSpell;	// m_atMagery.m_Spell
+	m_tmSkillMagery.m_iSpell = iSpell;	// m_atMagery.m_iSpell
 	m_Targ_UID = m_pChar->GetUID();		// Default target.
 	m_Targ_Prv_UID = pSrc->GetUID();		// Source of the spell.
 
@@ -1030,7 +1030,7 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 	m_pChar->m_Act_p = m_pChar->GetTopPoint();
 	m_pChar->m_Act_UID = m_Targ_UID;
 	m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID;
-	m_pChar->m_atMagery.m_Spell = iSpell;
+	m_pChar->m_atMagery.m_iSpell = iSpell;
 	m_Targ_p = m_pChar->GetTopPoint();
 
 	if ( IsSetMagicFlags(MAGICF_PRECAST) && !pSpellDef->IsSpellType(SPELLFLAG_NOPRECAST) )
@@ -1119,12 +1119,12 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 		int iSkillLevel = m_pChar->Skill_GetAdjusted(SKILL_TRACKING);
 		if ((g_Cfg.m_iRacialFlags & RACIALF_HUMAN_JACKOFTRADES) && m_pChar->IsHuman())
 			iSkillLevel = maximum(iSkillLevel, 200);			// humans always have a 20.0 minimum skill (racial traits)
-		m_pChar->m_atTracking.m_DistMax = iSkillLevel / 10 + 10;
+		m_pChar->m_atTracking.m_dwDistMax = iSkillLevel / 10 + 10;
 		CSkillDef * pSkillDef = g_Cfg.GetSkillDef(SKILL_TRACKING);
-		if (!pSkillDef->m_Effect.m_aiValues.empty())
-			m_pChar->m_atTracking.m_DistMax = pSkillDef->m_Effect.GetLinear(iSkillLevel);
+		if (!pSkillDef->m_vcEffect.m_aiValues.empty())
+			m_pChar->m_atTracking.m_dwDistMax = pSkillDef->m_vcEffect.GetLinear(iSkillLevel);
 
-		CWorldSearch AreaChars(m_pChar->GetTopPoint(), m_pChar->m_atTracking.m_DistMax);
+		CWorldSearch AreaChars(m_pChar->GetTopPoint(), m_pChar->m_atTracking.m_dwDistMax);
 		for (;;)
 		{
 			CChar *pChar = AreaChars.GetChar();

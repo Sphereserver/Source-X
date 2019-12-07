@@ -41,11 +41,11 @@ public:
     static lpctstr const sm_szTrigName[RRTRIG_QTY+1];
 
     ITEMID_TYPE m_ReapItem;         // What item do we get when we try to mine this. ITEMID_ORE_1 most likely
-    CValueCurveDef m_ReapAmount;    // How much can we reap at one time (based on skill)
+    CValueCurveDef m_vcReapAmount;    // How much can we reap at one time (based on skill)
 
-    CValueCurveDef m_Amount;        // How is here total
-    CValueCurveDef m_Skill;         // Skill levels required to mine this.
-    CValueCurveDef m_iRegenerateTime;// tenth of seconds once found how long to regen this type.
+    CValueCurveDef m_vcAmount;        // How is here total
+    CValueCurveDef m_vcSkill;         // Skill levels required to mine this.
+    CValueCurveDef m_vcRegenerateTime;// tenth of seconds once found how long to regen this type.
 
 public:
     explicit CRegionResourceDef( CResourceID rid );

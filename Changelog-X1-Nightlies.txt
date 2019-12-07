@@ -1960,3 +1960,6 @@ WARNING: Important change!
 
 23-11-2019, Nolok
 - Fixed: Resyncing after modifying a FUNCTION broke the internal functions lookup table order, resulting in random errors when calling functions.
+
+07-12-2019, Nolok
+- Added: More detailed error messages when the garbage collection removes a somehow corrupt mounted npc (Issue #347).

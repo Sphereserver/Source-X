@@ -620,7 +620,7 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 		const CSkillDef * pSkillDef = g_Cfg.GetSkillDef(skill);
 		if (pSkillDef != nullptr && pSkillDef->m_sTargetPrompt.IsEmpty() == false)
 		{
-			m_tmSkillTarg.m_Skill = skill;	// targetting what skill ?
+			m_tmSkillTarg.m_iSkill = skill;	// targetting what skill ?
 			addTarget( CLIMODE_TARG_SKILL, pSkillDef->m_sTargetPrompt.GetPtr(), false, fCheckCrime );
 			return;
 		}
@@ -696,7 +696,7 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 			return;
 		}
 
-		m_tmSkillTarg.m_Skill = skill;	// targetting what skill ?
+		m_tmSkillTarg.m_iSkill = skill;	// targetting what skill ?
 		addTarget( CLIMODE_TARG_SKILL, pSkillDef->m_sTargetPrompt.GetPtr(), false, fCheckCrime );
 		return;
 	}
@@ -1094,14 +1094,14 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
 		if ( pItem == nullptr )
 			continue;
 
-		if ((items[i].m_amount <= 0) || (items[i].m_amount > pItem->GetAmount()))
+		if ((items[i].m_vcAmount <= 0) || (items[i].m_vcAmount > pItem->GetAmount()))
 		{
 			pVendor->Speak("Your order cannot be fulfilled, please try again.");
 			Event_VendorBuy_Cheater( 0x3 );
 			return;
 		}
 
-		costtotal += ((int64)(items[i].m_amount) * items[i].m_price);
+		costtotal += ((int64)(items[i].m_vcAmount) * items[i].m_price);
 		if ( costtotal > kuiMaxCost )
 		{
 			pVendor->Speak("Your order cannot be fulfilled, please try again.");
@@ -1168,14 +1168,14 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
 			break;
 
 		pItem = dynamic_cast <CItemVendable *> (items[i].m_serial.ItemFind());
-		word amount = items[i].m_amount;
+		word amount = items[i].m_vcAmount;
 
 		if ( pItem == nullptr )
 			continue;
 
 		if (( IsTrigUsed(TRIGGER_BUY) ) || ( IsTrigUsed(TRIGGER_ITEMBUY) ))
 		{
-			CScriptTriggerArgs Args( amount, items[i].m_amount * items[i].m_price, pVendor );
+			CScriptTriggerArgs Args( amount, items[i].m_vcAmount * items[i].m_price, pVendor );
 			Args.m_VarsLocal.SetNum( "TOTALCOST", costtotal);
 			if ( pItem->OnTrigger( ITRIG_Buy, this->GetChar(), &Args ) == TRIGRET_RET_TRUE )
 				continue;
@@ -1365,7 +1365,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 		if ( pItemSell == nullptr )
 			continue;
 
-		word amount = items[i].m_amount;
+		word amount = items[i].m_vcAmount;
 
 		// Now how much did i say i wanted to sell ?
 		if ( pItem->GetAmount() < amount )	// Selling more than i have ?
@@ -2796,8 +2796,8 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 				if ( !pSpellDef->GetPrimarySkill(&skill) )
 					return;
 
-				m_tmSkillMagery.m_Spell = spell;
-				m_pChar->m_atMagery.m_Spell = spell;
+				m_tmSkillMagery.m_iSpell = spell;
+				m_pChar->m_atMagery.m_iSpell = spell;
 				m_pChar->m_Act_p = m_pChar->GetTopPoint();
 				m_pChar->m_Act_UID = m_Targ_UID;
 				m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID;

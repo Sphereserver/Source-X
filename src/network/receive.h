@@ -248,7 +248,7 @@ public:
 struct VendorItem
 {
 	CUID m_serial;
-	word m_amount;
+	word m_vcAmount;
 	dword m_price;
 };
 

@@ -374,7 +374,7 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                 if (bSpellSuits)
                 {
                     pTarg = pTarget;
-                    m_atMagery.m_Spell = spell;
+                    m_atMagery.m_iSpell = spell;
                     return true;
                 }
                 return false;
@@ -418,13 +418,13 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                     return false;
 
                 pTarg = this;
-                m_atMagery.m_Spell = spell;
+                m_atMagery.m_iSpell = spell;
                 return true;
             }
         }
         else if (pSpellDef->IsSpellType(SPELLFLAG_SUMMON))
         {
-            m_atMagery.m_Spell = spell;
+            m_atMagery.m_iSpell = spell;
             return true;	// if flag is present ... we leave the rest to the incoming code
         }
     }
@@ -443,6 +443,6 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
         if (pSpellDef->IsSpellType(SPELLFLAG_FIELD) && Calc_GetRandVal(4))
         return false;*/
     }
-    m_atMagery.m_Spell = spell;
+    m_atMagery.m_iSpell = spell;
     return true;
 }

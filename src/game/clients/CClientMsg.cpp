@@ -348,7 +348,7 @@ void CClient::addItem_OnGround( CItem * pItem ) // Send items (on ground)
 
 	// send item sound
 	if (pItem->IsType(IT_SOUND))
-		addSound((SOUND_TYPE)(pItem->m_itSound.m_Sound), pItem, pItem->m_itSound.m_Repeat );
+		addSound((SOUND_TYPE)(pItem->m_itSound.m_dwSound), pItem, pItem->m_itSound.m_iRepeat );
 
 	// send corpse clothing
 	if ( !IsPriv(PRIV_DEBUG) && (fCorpse && CCharBase::IsPlayableID(pItem->GetCorpseType())) )	// cloths on corpse
@@ -1557,10 +1557,10 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 
 		case CLIMODE_TARG_SKILL_MAGERY:
 		{
-			const CSpellDef* pSpellDef = g_Cfg.GetSpellDef(m_tmSkillMagery.m_Spell);
+			const CSpellDef* pSpellDef = g_Cfg.GetSpellDef(m_tmSkillMagery.m_iSpell);
 			if (m_pChar != nullptr && pSpellDef != nullptr)
 			{
-				CScriptTriggerArgs Args(m_tmSkillMagery.m_Spell, 0, m_Targ_Prv_UID.ObjFind());
+				CScriptTriggerArgs Args(m_tmSkillMagery.m_iSpell, 0, m_Targ_Prv_UID.ObjFind());
 
 				if ( IsTrigUsed(TRIGGER_SPELLTARGETCANCEL) )
 				{
@@ -1573,7 +1573,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 
 				if ( IsTrigUsed(TRIGGER_TARGETCANCEL) )
 				{
-					if ( m_pChar->Spell_OnTrigger( m_tmSkillMagery.m_Spell, SPTRIG_TARGETCANCEL, m_pChar, &Args ) == TRIGRET_RET_TRUE )
+					if ( m_pChar->Spell_OnTrigger( m_tmSkillMagery.m_iSpell, SPTRIG_TARGETCANCEL, m_pChar, &Args ) == TRIGRET_RET_TRUE )
 						bSuppressCancelMessage = true;
 				}
 			}
@@ -1588,7 +1588,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 			switch (GetTargMode())
 			{
 				case CLIMODE_TARG_SKILL:
-					action = m_tmSkillTarg.m_Skill;
+					action = m_tmSkillTarg.m_iSkill;
 					break;
 				case CLIMODE_TARG_SKILL_HERD_DEST:
 					action = SKILL_HERDING;

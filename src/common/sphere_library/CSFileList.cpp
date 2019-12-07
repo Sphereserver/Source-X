@@ -30,7 +30,7 @@ bool CSFileList::ReadFileInfo( lpctstr pszFilePath, time_t & dwDateChange, dword
 	if ( stat( pszFilePath, &fileStat) == -1 )
 #endif
 	{
-		DEBUG_ERR(( "Can't open input dir [%s]\n", pszFilePath ));
+		g_Log.EventError( "Can't open input directory for '%s' (error: '%s').\n", pszFilePath, strerror(errno) );
 		return false;
 	}
 
@@ -88,7 +88,7 @@ int CSFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 	{
 		if (bShowError == true)
 		{
-			DEBUG_ERR(("Unable to open directory %s\n", szFileDir));
+			g_Log.EventError("Unable to open directory '%s' (error: '%s').\n", szFileDir, strerror(errno));
 		}
 		return -1;
 	}

@@ -51,15 +51,15 @@ bool CItem::Ship_Plank(bool fOpen)
     if (IsType(IT_SHIP_PLANK) && (oldType == IT_SHIP_SIDE || oldType == IT_SHIP_SIDE_LOCKED))
     {
         // Save the original Type of the plank if it used to be a ship side
-        m_itShipPlank.m_itSideType = (word)oldType;
+        m_itShipPlank.m_wSideType = (word)oldType;
     }
     else if (oldType == IT_SHIP_PLANK)
     {
         // Restore the type of the ship side
-        if (m_itShipPlank.m_itSideType == IT_SHIP_SIDE || m_itShipPlank.m_itSideType == IT_SHIP_SIDE_LOCKED)
-            SetType((IT_TYPE)(m_itShipPlank.m_itSideType));
+        if (m_itShipPlank.m_wSideType == IT_SHIP_SIDE || m_itShipPlank.m_wSideType == IT_SHIP_SIDE_LOCKED)
+            SetType((IT_TYPE)(m_itShipPlank.m_wSideType));
 
-        m_itShipPlank.m_itSideType = IT_NORMAL;
+        m_itShipPlank.m_wSideType = IT_NORMAL;
     }
 
     Update();
