@@ -51,7 +51,8 @@ private:
     // Retrieved from CCChampionDef
     typedef std::vector<CREID_TYPE> idNPC;
     typedef std::map<uchar, idNPC> idSpawn;
-    idSpawn _idSpawn;    ///< Defining how many uchar (or levels) this Champion has and the group of monsters for each level.
+    CResourceIDBase _idSpawn;   // legacy more1=ID of the Object to Spawn.
+    idSpawn _spawnGroupsId;    ///< Defining how many uchar (or levels) this Champion has and the group of monsters for each level.
     CREID_TYPE _idChampion;               ///< Boss id
 
     // Ingame Spawn behaviour.
@@ -271,7 +272,9 @@ public:
     virtual ~CCChampionDef();
     lpctstr GetName() const { return(m_sName); }
     virtual bool r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false) override;
-    virtual bool r_LoadVal(CScript & s) override;
+    virtual bool r_LoadVal(CScript& s) override;
+    virtual bool r_Load(CScript& s) override;
+
 };
 
 #endif //_INC_CCCHAMPION_H

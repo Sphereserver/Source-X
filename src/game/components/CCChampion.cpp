@@ -16,6 +16,7 @@
 #include "../chars/CChar.h"
 #include "../CWorld.h"
 #include "CCChampion.h"	// predef header.
+#include <string>
 
 
 #define CANDLESNEXTRED 4
@@ -62,10 +63,8 @@ void CCChampion::Init()
     _iCandlesNextRed = CANDLESNEXTRED;
     _iCandlesNextLevel = 0;
     _iLastActivationTime = 0;
-
-    CCSpawn *pSpawn = static_cast<CCSpawn*>(GetLink()->GetComponent(COMP_SPAWN));
-    ASSERT(pSpawn);
-    CCChampionDef *pChampDef = static_cast<CCChampionDef*>(g_Cfg.ResourceGetDef(pSpawn->GetSpawnID()));
+    CResourceDef *pRes = g_Cfg.ResourceGetDef(_idSpawn);
+    CCChampionDef *pChampDef = static_cast<CCChampionDef*>(pRes);
     if (!pChampDef)
     {
         return;
@@ -74,7 +73,7 @@ void CCChampion::Init()
     _iLevelMax = pChampDef->_iLevelMax;
     _iSpawnsMax = pChampDef->_iSpawnsMax;
     _idChampion = pChampDef->_idChampion;
-    _idSpawn.insert(pChampDef->_idSpawn.begin(), pChampDef->_idSpawn.end());
+    _spawnGroupsId.insert(pChampDef->_idSpawn.begin(), pChampDef->_idSpawn.end());
 }
 
 void CCChampion::Start()
@@ -138,7 +137,7 @@ void CCChampion::SpawnNPC()
     }
     else
     {
-        int iSize = (int)_idSpawn[_iLevel].size();
+        int iSize = (int)_spawnGroupsId[_iLevel].size();
         if ( iSize <= 0)
         {
             g_Log.EventError("CCChampion:: Trying to create NPCs for undefined NPCGROUP[%d]\n", _iLevel);
@@ -147,7 +146,7 @@ void CCChampion::SpawnNPC()
         --_iSpawnsNextWhite;
         ASSERT(iSize <= UCHAR_MAX);
         uchar iRand = (uchar)Calc_GetRandVal2(1, (int)iSize - 1);
-        pNpc = _idSpawn[_iLevel][iRand];	//Find out the random npc.
+        pNpc = _spawnGroupsId[_iLevel][iRand];	//Find out the random npc.
         CResourceDef * pDef = g_Cfg.ResourceGetDef(CResourceID(RES_CHARDEF, pNpc));
         if (!pDef)
         {
@@ -555,6 +554,8 @@ enum ICHMPL_TYPE
     ICHMPL_LEVEL,
     ICHMPL_LEVELMAX,
     ICHMPL_NPCGROUP,
+    ICHMPL_MORE,
+    ICHMPL_MORE1,
     ICHMPL_REDCANDLES,
     ICHMPL_SPAWNSCUR,
     ICHMPL_SPAWNSMAX,
@@ -569,6 +570,8 @@ lpctstr const CCChampion::sm_szLoadKeys[ICHMPL_QTY + 1] =
     "LEVEL",
     "LEVELMAX",
     "NPCGROUP",
+    "MORE",
+    "MORE1",
     "REDCANDLES",
     "SPAWNSCUR",
     "SPAWNSMAX",
@@ -587,6 +590,7 @@ enum ICHMPV_TYPE
     ICHMPV_DELWHITECANDLE,
     ICHMPV_INIT,
     ICHMPV_MULTICREATE,
+    ICHMPV_START,
     ICHMPV_STOP,
     ICHMPV_QTY
 };
@@ -603,6 +607,7 @@ lpctstr const CCChampion::sm_szVerbKeys[ICHMPV_QTY + 1] =
     "DELWHITECANDLE",
     "INIT",
     "MULTICREATE",
+    "START",
     "STOP",
     nullptr
 };
@@ -637,8 +642,20 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 {
     UNREFERENCED_PARAMETER(pSrc);
     ADDTOCALLSTACK("CCChampion::r_WriteVal");
-
     int iCmd = FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+
+    int group = 0;
+    if (iCmd < 0)
+    {
+        std::string str = ptcKey;
+        std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
+        if (str.compare(0, 8, "npcgroup") == 0)
+        {
+            Exp_GetSingle(ptcKey);
+            SKIP_SEPARATORS(ptcKey);
+            iCmd = ICHMPL_NPCGROUP;
+        }
+    }
     switch (iCmd)
     {
         case ICHMPL_LASTACTIVATIONTIME:
@@ -661,23 +678,39 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
             return true;
         case ICHMPL_NPCGROUP:
         {
-            ptcKey += 8;
             uchar uiGroup = (uchar)Exp_GetSingle(ptcKey);
-            if (_idSpawn[uiGroup].empty() || uiGroup > UCHAR_MAX)
+            if (_spawnGroupsId[uiGroup].empty() || uiGroup > UCHAR_MAX)
             {
-                return false;
+                sVal.FormatVal(-1);
+                return true;
             }
             ++ptcKey;
             uchar uiNpc = (uchar)Exp_GetSingle(ptcKey);
-            size_t uiGroupSize = _idSpawn[uiGroup].size();
+            size_t uiGroupSize = _spawnGroupsId[uiGroup].size();
             if (uiNpc && (uiNpc >= uiGroupSize))
-                return false;
-            if (uiGroupSize >= uiNpc)
             {
-                sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _idSpawn[uiGroup][uiNpc]));
+                sVal.FormatVal(-1);
                 return true;
             }
-            return false;
+            if (uiGroupSize >= uiNpc)
+            {
+                sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _spawnGroupsId[uiGroup][uiNpc]));
+                return true;
+            }
+            return true;
+        }
+        case ICHMPL_MORE:
+        case ICHMPL_MORE1:
+        {
+            if (_idSpawn.IsValidResource())
+            {
+                sVal = g_Cfg.ResourceGetName(_idSpawn);
+            }
+            else
+            {
+                sVal.FormatVal(0);
+            }
+            return true;
         }
         case ICHMPL_SPAWNSCUR:
             sVal.FormatUSVal(_iSpawnsCur);
@@ -686,7 +719,7 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
             sVal.FormatUSVal(_iSpawnsMax);
             return true;
         default:
-            return false;
+            break;
     }
     return false;
 }
@@ -716,6 +749,36 @@ bool CCChampion::r_LoadVal(CScript & s)
         case ICHMPL_SPAWNSMAX:
             _iSpawnsMax = s.GetArgUSVal();
             return true;
+        case ICHMPL_MORE:
+        case ICHMPL_MORE1:
+        {
+            Stop();
+            const dword dwPrivateUID = s.GetArgDWVal();
+            if (!CUID::IsValidUID(dwPrivateUID))
+            {
+                return true;
+            }
+            CResourceIDBase ridArg(dwPrivateUID);    // Not using CResourceID because res_chardef, spawn, itemdef, template do not use the "page" arg
+            const int iRidIndex = ridArg.GetResIndex();
+            const int iRidType = ridArg.GetResType();
+            
+            if ((iRidType == RES_CHAMPION))
+            {
+                // If i have the ResType probably i passed a Defname
+                _idSpawn = ridArg;
+                break;
+            }
+            else
+            {
+                _idSpawn = CResourceIDBase(RES_CHAMPION, iRidIndex);
+            }
+            if (_idSpawn.IsValidUID() == false)
+            {
+                g_Log.EventDebug("Invalid champion id"); //todo better log
+            }
+            Init();
+            return true;            
+        }
         default:
             break;
     }
@@ -826,6 +889,9 @@ bool CCChampion::r_Verb(CScript & s, CTextConsole * pSrc)
             Multi_Setup( pCharSrc, 0 );*/
             return true;
         }
+        case ICHMPV_START:
+            Start();
+            return true;
         case ICHMPV_STOP:
             Stop();
             return true;
@@ -848,7 +914,7 @@ void CCChampion::Copy(const CComponent * target)
 
 enum CHAMPIONDEF_TYPE
 {
-    CHAMPIONDEF_CHAMPION,	///< Champion ID: _iChampion.
+    CHAMPIONDEF_CHAMPIONID,	///< Champion ID: _iChampion.
     CHAMPIONDEF_DEFNAME,	///< Champion's DEFNAME.
     CHAMPIONDEF_LEVELMAX,   ///< Max Level for this champion.
     CHAMPIONDEF_NAME,		///< Champion name: m_sName.
@@ -859,9 +925,9 @@ enum CHAMPIONDEF_TYPE
 
 lpctstr const CCChampionDef::sm_szLoadKeys[] =
 {
-    "CHAMPION",
+    "CHAMPIONID",
     "DEFNAME",
-    "LEVEL",
+    "LEVELMAX",
     "NAME",
     "NPCGROUP",
     "SPAWNS",
@@ -887,11 +953,24 @@ bool CCChampionDef::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * p
     UNREFERENCED_PARAMETER(fNoCallParent);
     UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CCChampionDef::r_WriteVal");
-    CHAMPIONDEF_TYPE iCmd = (CHAMPIONDEF_TYPE)FindTableSorted(ptcKey, sm_szLoadKeys, CHAMPIONDEF_QTY);
+    CHAMPIONDEF_TYPE iCmd = (CHAMPIONDEF_TYPE)(int)FindTableSorted(ptcKey, sm_szLoadKeys, CHAMPIONDEF_QTY);
 
+    int group = 0;
+    if (iCmd < 0)
+    {
+        std::string str = ptcKey;
+        std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
+        if (str.compare(0, 8, "npcgroup") == 0)
+        {
+            Exp_GetSingle(ptcKey);
+            SKIP_SEPARATORS(ptcKey);
+            iCmd = CHAMPIONDEF_NPCGROUP;
+
+        }
+    }
     switch (iCmd)
     {
-        case CHAMPIONDEF_CHAMPION:
+        case CHAMPIONDEF_CHAMPIONID:
             sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _idChampion));
             return true;
         case CHAMPIONDEF_DEFNAME:
@@ -904,24 +983,33 @@ bool CCChampionDef::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * p
         {
             if (_idSpawn.empty())
             {
-                return false;
+                sVal.FormatVal(-1);
+                return true;
             }
-            ptcKey += 8;
             uchar uiGroup = (uchar)Exp_GetSingle(ptcKey);
             ++ptcKey;
             uchar uiNPC = (uchar)Exp_GetSingle(ptcKey);
-            if (uiNPC && (uiGroup >= _idSpawn.size()))
-                return false;
-            if (_idSpawn[uiGroup].size() >= uiNPC)
+            if (uiNPC && (_idSpawn.find(uiGroup) == _idSpawn.end()))
             {
-                CREID_TYPE idNPC = (CREID_TYPE)uiNPC;
-                if (idNPC != CREID_INVALID)
+                sVal.FormatVal(-1);
+                return true;
+            }
+            int npcCount = _idSpawn.at(uiGroup).size();
+            if (npcCount == 0)
+            {
+                sVal.FormatVal(-1);
+                return true;
+            }
+            if ( uiNPC < npcCount )
+            {
+                auto npc = _idSpawn[uiGroup].at(uiNPC);
+                if (npc != CREID_INVALID)
                 {
-                    sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _idSpawn[uiGroup][idNPC]));
+                    sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, npc));
                     return true;
                 }
             }
-            return false;
+            return true;
         }
         case CHAMPIONDEF_SPAWNS:
             sVal.FormatUSVal(_iSpawnsMax);
@@ -935,47 +1023,67 @@ bool CCChampionDef::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * p
     return false;
 }
 
-bool CCChampionDef::r_LoadVal(CScript & s)
+bool CCChampionDef::r_LoadVal(CScript& s)
 {
     ADDTOCALLSTACK("CCChampionDef::r_LoadVal");
     lpctstr ptcKey = s.GetKey();
     CHAMPIONDEF_TYPE iCmd = (CHAMPIONDEF_TYPE)FindTableSorted(ptcKey, sm_szLoadKeys, (int)CountOf(sm_szLoadKeys) - 1);
 
+    int group = 0;
+    if (iCmd < 0)
+    {
+        std::string str = ptcKey;
+        std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
+        if (str.compare(0, 8, "npcgroup") == 0)
+        {
+            Exp_GetSingle(ptcKey);
+            SKIP_SEPARATORS(ptcKey);
+            iCmd = CHAMPIONDEF_NPCGROUP;
+        }
+    }
     switch (iCmd)
     {
-        case CHAMPIONDEF_CHAMPION:
-            _idChampion = (CREID_TYPE)g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr());
-            return true;
-        case CHAMPIONDEF_DEFNAME:
-            return SetResourceName(s.GetArgStr());
-        case CHAMPIONDEF_NAME:
-            m_sName = s.GetArgStr();
-            return true;
-        case CHAMPIONDEF_NPCGROUP:
+    case CHAMPIONDEF_CHAMPIONID:
+        _idChampion = (CREID_TYPE)g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr());
+        return true;
+    case CHAMPIONDEF_DEFNAME:
+        return SetResourceName(s.GetArgStr());
+    case CHAMPIONDEF_NAME:
+        m_sName = s.GetArgStr();
+        return true;
+    case CHAMPIONDEF_NPCGROUP:
+    {
+        uchar iGroup = Exp_GetUCVal(ptcKey);
+        tchar* piCmd[UCHAR_MAX];
+        size_t iArgQty = Str_ParseCmds(s.GetArgRaw(), piCmd, (int)CountOf(piCmd), ",");
+        _idSpawn[iGroup].clear();
+        for (uint i = 0; i < iArgQty; ++i)
         {
-            ptcKey += 8;
-            uchar iGroup = Exp_GetUCVal(ptcKey);
-            tchar * piCmd[4];
-            size_t iArgQty = Str_ParseCmds(s.GetArgRaw(), piCmd, (int)CountOf(piCmd), ",");
-            _idSpawn[iGroup].clear();
-            for (uint i = 0; i < iArgQty; ++i)
+            CREID_TYPE pCharDef = (CREID_TYPE)g_Cfg.ResourceGetIndexType(RES_CHARDEF, piCmd[i]);
+            if (pCharDef)
             {
-                CREID_TYPE pCharDef = (CREID_TYPE)g_Cfg.ResourceGetIndexType(RES_CHARDEF, piCmd[i]);
-                if (pCharDef)
-                {
-                    _idSpawn[iGroup].emplace_back(pCharDef);
-                }
+                _idSpawn[iGroup].emplace_back(pCharDef);
             }
-            return true;
         }
-        case CHAMPIONDEF_SPAWNS:
-            _iSpawnsMax = s.GetArgUSVal();
-            return true;
-        case CHAMPIONDEF_LEVELMAX:
-            _iLevelMax = s.GetArgUCVal();
-            return true;
-        default:
-            break;
+        return true;
+    }
+    case CHAMPIONDEF_SPAWNS:
+        _iSpawnsMax = s.GetArgUSVal();
+        return true;
+    case CHAMPIONDEF_LEVELMAX:
+        _iLevelMax = s.GetArgUCVal();
+        return true;
+    default:
+        break;
     }
     return false;
+}
+
+bool CCChampionDef::r_Load(CScript& s)
+{
+    if (r_LoadVal(s))
+    {
+        return true;
+    }
+    return CScriptObj::r_Load(s);
 }

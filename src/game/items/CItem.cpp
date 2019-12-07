@@ -3664,20 +3664,26 @@ bool CItem::SetType(IT_TYPE type, bool fPreCheck)
         {
             pComp = GetComponent(COMP_CHAMPION);
             if (pComp)
+            {
                 UnsubscribeComponent(pComp);
+            }
             pComp = GetComponent(COMP_SPAWN);
             if (pComp)
+            {
                 UnsubscribeComponent(pComp);
+            }
         }
     }
     else
     {
-        pComp = GetComponent(COMP_CHAMPION);
-        if (!pComp)
+        if (!GetComponent(COMP_CHAMPION))
+        {
             SubscribeComponent(new CCChampion(this));
-        pComp = GetComponent(COMP_SPAWN);
-        if (!pComp)
+        }
+        if (!GetComponent(COMP_SPAWN))
+        {
             SubscribeComponent(new CCSpawn(this));
+        }
     }
 
     pComp = GetComponent(COMP_ITEMDAMAGEABLE);
