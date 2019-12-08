@@ -320,7 +320,7 @@ CChar::~CChar()
 
     if ( IsStatFlag( STATF_RIDDEN ))
     {
-        CItem * pItem = Horse_GetMountItem();
+        CItem * pItem = Horse_GetValidMountItem();
         if ( pItem )
         {
             pItem->m_itFigurine.m_UID.InitUID();    // unlink it first.
@@ -621,15 +621,9 @@ int CChar::IsWeird() const
 				}
 
 				// Make sure we are still linked back to the world.
-				const CItem * pItem = Horse_GetMountItem();
-				if ( pItem == nullptr )
+				if ( Horse_GetMountItem() == nullptr )
 				{
 					iResultCode = 0x1104;
-					return iResultCode;
-				}
-				if ( pItem->m_itFigurine.m_UID != GetUID())
-				{
-					iResultCode = 0x1105;
 					return iResultCode;
 				}
 			}

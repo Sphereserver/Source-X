@@ -173,7 +173,7 @@ CItem::~CItem()
 				CChar * pHorse = m_itFigurine.m_UID.CharFind();
 				if ( pHorse && pHorse->IsDisconnected() && ! pHorse->m_pPlayer )
 				{
-					pHorse->m_atRidden.m_dwFigurineUID = UID_UNUSED;
+                    pHorse->m_atRidden.m_uidFigurine.InitUID();
 					pHorse->Delete();
 				}
 			}

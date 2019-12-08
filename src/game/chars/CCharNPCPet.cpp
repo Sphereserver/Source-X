@@ -583,7 +583,7 @@ void CChar::NPC_PetClearOwners()
 
 	if ( IsStatFlag(STATF_RIDDEN) )
 	{
-		CChar *pCharRider = Horse_GetMountChar();
+		CChar *pCharRider = Horse_GetValidMountChar();
 		if ( pCharRider )
 			pCharRider->Horse_UnMount();
 	}

@@ -939,14 +939,16 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 
 	id = pItem->GetDispID();
 	wHue = pItem->GetHue();
-	CItemBase * pItemDef = pItem->Item_GetDef();
+
+	const CItemBase * pItemDef = pItem->Item_GetDef();
+    const uchar uiResDisp = GetResDisp();
 
 	if ( pItem->IsType(IT_EQ_HORSE) )
 	{
 		// check the reslevel of the ridden horse
 		CREID_TYPE idHorse = pItem->m_itFigurine.m_ID;
-		CCharBase * pCharDef = CCharBase::FindCharBase(idHorse);
-		if ( pCharDef && ( GetResDisp() < pCharDef->GetResLevel() ) )
+		const CCharBase * pCharDef = CCharBase::FindCharBase(idHorse);
+		if ( pCharDef && (uiResDisp < pCharDef->GetResLevel() ) )
 		{
 			idHorse = (CREID_TYPE)(pCharDef->GetResDispDnId());
 			wHue = pCharDef->GetResDispDnHue();
@@ -975,7 +977,7 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 		wHue = g_Cfg.m_iColorInvis;
 	else
 	{
-		if ( pItemDef && ( GetResDisp() < pItemDef->GetResLevel() ) )
+		if ( pItemDef && (uiResDisp < pItemDef->GetResLevel() ) )
 			if ( pItemDef->GetResDispDnHue() != HUE_DEFAULT )
 				wHue = pItemDef->GetResDispDnHue();
 
@@ -986,7 +988,7 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 
 	}
 
-	if ( pItemDef && ( GetResDisp() < pItemDef->GetResLevel() ) )
+	if ( pItemDef && (uiResDisp < pItemDef->GetResLevel() ) )
 		id = (ITEMID_TYPE)(pItemDef->GetResDispDnId());
 }
 
@@ -1063,7 +1065,7 @@ void CClient::addCharMove( const CChar * pChar ) const
 
 void CClient::addCharMove( const CChar * pChar, byte iCharDirFlag ) const
 {
-	ADDTOCALLSTACK("CClient::addCharMove");
+	ADDTOCALLSTACK("CClient::addCharMove (DirFlag)");
 	// This char has just moved on screen.
 	// or changed in a subtle way like "hidden"
 	// NOTE: If i have been turned this will NOT update myself.
@@ -1115,7 +1117,7 @@ void CClient::addChar( CChar * pChar, bool fFull )
 	EXC_DEBUG_END;
 }
 
-void CClient::addItemName( const CItem * pItem )
+void CClient::addItemName( CItem * pItem )
 {
 	ADDTOCALLSTACK("CClient::addItemName");
 	// NOTE: CanSee() has already been called.
@@ -1184,7 +1186,7 @@ void CClient::addItemName( const CItem * pItem )
 			case IT_SPAWN_CHAR:
 			case IT_SPAWN_ITEM:
 				{
-					CCSpawn *pSpawn = const_cast<CItem*>(pItem)->GetSpawn();
+					CCSpawn *pSpawn = pItem->GetSpawn();
 					if ( pSpawn )
 						len += pSpawn->WriteName(szName + len);
 				}
@@ -1214,7 +1216,7 @@ void CClient::addItemName( const CItem * pItem )
 		Args.m_VarsLocal.SetStrNew("ClickMsgText", &szName[0]);
 		Args.m_VarsLocal.SetNumNew("ClickMsgHue", (int64)(wHue));
 
-		TRIGRET_TYPE ret = dynamic_cast<CObjBase*>(const_cast<CItem*>(pItem))->OnTrigger( "@AfterClick", m_pChar, &Args );	// CTRIG_AfterClick, ITRIG_AfterClick
+		TRIGRET_TYPE ret = pItem->OnTrigger( "@AfterClick", m_pChar, &Args );	// CTRIG_AfterClick, ITRIG_AfterClick
 
 		if ( ret == TRIGRET_RET_TRUE )
 			return;

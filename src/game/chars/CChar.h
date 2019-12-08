@@ -272,9 +272,9 @@ public:
 		// SKILL_PROVOCATION
 		struct
 		{
-			dword m_dwInstrumentUID;	// ACTARG1 = UID of the instrument we are playing.
+			dword m_dwInstrumentUID;    // ACTARG1 = UID of the instrument we are playing.
 			dword m_Unused2;
-			dword m_dwIsAlly;				// ACTARG3 = Is the provoked considered an ally of the target? 0/1
+			dword m_dwIsAlly;			// ACTARG3 = Is the provoked considered an ally of the target? 0/1
 		} m_atProvocation;				//	If so, abort the skill. To allow always, override it to 0 in @Success via scripts.
 
 		// SKILL_TRACKING
@@ -287,7 +287,7 @@ public:
 		// NPCACT_RIDDEN
 		struct
 		{
-			mutable dword m_dwFigurineUID;// ACTARG1 = This creature is being ridden by this object link. IT_FIGURINE IT_EQ_HORSE
+			CUIDBase m_uidFigurine;     // ACTARG1 = This creature is being ridden by this object link. IT_FIGURINE IT_EQ_HORSE
 		} m_atRidden;
 
 		// NPCACT_TALK
@@ -295,7 +295,7 @@ public:
 		struct
 		{
 			dword m_dwHearUnknown;		// ACTARG1 = Speaking NPC has no idea what u're saying.
-			dword m_dwWaitCount;			// ACTARG2 = How long have i been waiting (xN sec)
+			dword m_dwWaitCount;		// ACTARG2 = How long have i been waiting (xN sec)
 										// m_Act_UID = who am i talking to ?
 		} m_atTalk;
 
@@ -1086,13 +1086,16 @@ public:
 	bool Horse_UnMount(); // Remove horse char and give player a horse item
 
 private:
-	CItem * Horse_GetMountItem() const;
-	CChar * Horse_GetMountChar() const;
+	CItem* Horse_GetMountItem() const;
+    CChar* Horse_GetMountChar() const;
+    CItem* Horse_GetValidMountItem();
+    CChar* Horse_GetValidMountChar();
+
 public:
 	bool IsOwnedBy( const CChar * pChar, bool fAllowGM = true ) const;
 	CChar * GetOwner() const;
 	CChar * Use_Figurine( CItem * pItem, bool fCheckFollowerSlots = true );
-	CItem * Make_Figurine( CUID uidOwner, ITEMID_TYPE id = ITEMID_NOTHING );
+	CItem * Make_Figurine( const CUID &uidOwner, ITEMID_TYPE id = ITEMID_NOTHING );
 	CItem * NPC_Shrink();
 	bool FollowersUpdate( CChar * pChar, short iFollowerSlots = 0, bool fCheckOnly = false );
 

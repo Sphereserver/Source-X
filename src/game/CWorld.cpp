@@ -57,11 +57,7 @@ lpctstr GetReasonForGarbageCode(int iCode = -1)
 
 		case 0x1104:
 		case 0x1204:
-			pStr = "Ridden NPC without a mount item";
-			break;
-
-		case 0x1105:
-			pStr = "Ridden NPC with a mislinked mount item";
+			pStr = "Ridden NPC without a valid mount item";
 			break;
 
 		case 0x1106:
