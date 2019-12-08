@@ -537,13 +537,17 @@ bool PacketItemEquipReq::onReceive(CNetState* net)
 	client->ClearTargMode(); // done dragging.
 
 	CChar* target = targetSerial.CharFind();
-	const bool fCanCarry = target->CanCarry(item);
-	if ( (target == nullptr) || (itemLayer >= LAYER_HORSE) || !target->IsOwnedBy(source) || !fCanCarry || !target->ItemEquip(item, source) )
-	{
-		client->Event_Item_Drop_Fail(item);		//cannot equip
-		if ( !fCanCarry )
-			client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_HEAVY));
+    bool fSuccess = false;
+    if (target && (itemLayer < LAYER_HORSE) && target->IsOwnedBy(source) && target->CanTouch(item))
+    {
+        if (target->CanCarry(item))
+            fSuccess = target->ItemEquip(item, source);
+        else
+            client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_HEAVY));
 	}
+
+    if (!fSuccess)
+        client->Event_Item_Drop_Fail(item);		//cannot equip
 
 	return true;
 }
@@ -3124,15 +3128,17 @@ bool PacketBandageMacro::onReceive(CNetState* net)
 	if (character == nullptr)
 		return false;
 
-	CItem* bandage = CUID(readInt32()).ItemFind();
-	CObjBase* target = CUID(readInt32()).ObjFind();
+    CUID uidBandage = readInt32();
+    CUID uidTarget = readInt32();
+	CItem* bandage = uidBandage.ItemFind();
+	CObjBase* target = uidTarget.ObjFind();
 	if (bandage == nullptr || target == nullptr)
 		return true;
 
 	// check the client can see the bandage they're trying to use
 	if (character->CanSee(bandage) == false)
 	{
-		client->addObjectRemoveCantSee(bandage->GetUID(), "the target");
+		client->addObjectRemoveCantSee(uidBandage, "the target");
 		return true;
 	}
 
@@ -3160,11 +3166,11 @@ bool PacketBandageMacro::onReceive(CNetState* net)
 	// client->SetTargMode();
 
 	// prepare targeting information
-	client->m_Targ_UID = bandage->GetUID();
+	client->m_Targ_UID = uidBandage;
 	client->m_tmUseItem.m_pParent = bandage->GetParent();
 	client->SetTargMode(CLIMODE_TARG_USE_ITEM);
 
-	client->Event_Target(CLIMODE_TARG_USE_ITEM, target->GetUID(), target->GetUnkPoint());
+	client->Event_Target(CLIMODE_TARG_USE_ITEM, uidTarget, target->GetUnkPoint());
 	return true;
 }
 
@@ -4031,12 +4037,14 @@ bool PacketEquipLastWeapon::onReceive(CNetState* net)
         return false;
 
     if (!pCharPlayer->m_uidWeaponLast.IsValidUID())
-        return true;
+        return false;
     if ( pCharPlayer->m_uidWeaponLast == pChar->m_uidWeapon )
         return true;
 
     CItem *pWeapon = pCharPlayer->m_uidWeaponLast.ItemFind();
-    if ( pWeapon && pChar->ItemPickup(pWeapon, 1) == -1 )
+    if (!pWeapon)
+        return false;
+    if (pChar->ItemPickup(pWeapon, 1) == -1)
         return true;
 
     pChar->ItemEquip(pWeapon);

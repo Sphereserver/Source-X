@@ -318,7 +318,7 @@ CChar::~CChar()
 
     g_World.DelCharTicking(this);
 
-    if ( IsStatFlag( STATF_RIDDEN ))
+    if (IsStatFlag( STATF_RIDDEN ))
     {
         CItem * pItem = Horse_GetValidMountItem();
         if ( pItem )
@@ -328,15 +328,15 @@ CChar::~CChar()
         }
     }
 
-    if ( IsClient())    // this should never happen.
+    if (IsClient())    // this should never happen.
     {
         ASSERT( m_pClient );
         m_pClient->GetNetState()->markReadClosed();
     }
 
-    if ( m_pParty )
+    if (m_pParty)
     {
-        m_pParty->RemoveMember( GetUID(), (dword) GetUID() );
+        m_pParty->RemoveMember( GetUID(), GetUID() );
         m_pParty = nullptr;
     }
     Guild_Resign(MEMORY_GUILD);
