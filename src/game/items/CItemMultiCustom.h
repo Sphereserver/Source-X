@@ -37,12 +37,9 @@ private:
     class CSphereMultiCustom : public CSphereMulti
     {
     public:
+        CSphereMultiCustom() = default;
         void LoadFrom(DesignDetails * pDesign);
 
-    public:
-        CSphereMultiCustom()
-        {
-        };
     private:
         CSphereMultiCustom(const CSphereMultiCustom& copy);
         CSphereMultiCustom& operator=(const CSphereMultiCustom& other);
@@ -99,7 +96,7 @@ private:
 
 public:
     void BeginCustomize(CClient * pClientSrc);
-    void EndCustomize(bool bForce = false);
+    void EndCustomize(bool fForce = false);
     void SwitchToLevel(CClient * pClientSrc, uchar iLevel);
     void CommitChanges(CClient * pClientSrc = nullptr);
     void AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z = INT8_MIN, short iStairID = 0);
