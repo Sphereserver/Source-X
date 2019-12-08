@@ -186,7 +186,7 @@ CItem::~CItem()
         CItemMulti *pMulti = static_cast<CItemMulti*>(_uidMultiComponent.ItemFind());
         if (pMulti)
         {
-            pMulti->DelComp(GetUID());
+            pMulti->DeleteComponent(GetUID());
         }
     }
     if (_uidMultiLockDown.IsValidUID())

@@ -54,7 +54,7 @@ private:
 	dword	m_CanUse;		// Base attribute flags. can_u_all/male/female..
 	word	m_weight;
 
-    CUID _uidMultiComponent;   // I'm a Component of a CMulti
+    CUID _uidMultiComponent;   // I'm a CMultiComponent of a CMulti
     CUID _uidMultiLockDown;    // I'm locked down in a CMulti
 public:
     void SetComponentOfMulti(const CUID& uidMulti);

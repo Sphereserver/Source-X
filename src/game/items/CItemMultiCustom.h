@@ -17,7 +17,7 @@ class CItemMultiCustom : public CItemMulti
 // IT_MULTI_CUSTOM
 // A customizable multi
 public:
-    struct Component
+    struct CMultiComponent
     {
         CUOMultiItemRec_HS m_item;
         short m_isStair;
@@ -25,11 +25,10 @@ public:
     };
 
 private:
-    typedef std::vector<Component*> ComponentsContainer;
-    struct DesignDetails
+    struct CDesignDetails
     {
         int m_iRevision;
-        ComponentsContainer m_vectorComponents;
+        std::vector<CMultiComponent*> m_vectorComponents;
         PacketHouseDesign* m_pData;
         int m_iDataRevision;
     };
@@ -38,7 +37,7 @@ private:
     {
     public:
         CSphereMultiCustom() = default;
-        void LoadFrom(DesignDetails * pDesign);
+        void LoadFrom(CDesignDetails * pDesign);
 
     private:
         CSphereMultiCustom(const CSphereMultiCustom& copy);
@@ -49,10 +48,10 @@ private:
     static lpctstr const sm_szLoadKeys[];
     static lpctstr const sm_szVerbKeys[];
 
-    DesignDetails m_designMain;
-    DesignDetails m_designWorking;
-    DesignDetails m_designBackup;
-    DesignDetails m_designRevert;
+    CDesignDetails m_designMain;
+    CDesignDetails m_designWorking;
+    CDesignDetails m_designBackup;
+    CDesignDetails m_designRevert;
 
     CClient * m_pArchitect;
     CRectMap m_rectDesignArea;
@@ -65,16 +64,16 @@ private:
     virtual bool r_LoadVal(CScript & s) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override; // Execute command from script
 
-    CPointMap GetComponentPoint(const Component * pComponent) const;
+    CPointMap GetComponentPoint(const CMultiComponent * pComponent) const;
     CPointMap GetComponentPoint(short dx, short dy, char dz) const;
     
     /**
-    * @brief Removes a Component from the components list.
+    * @brief Removes a CMultiComponent from the components list.
     * @param pComponent the component.
     */
-    virtual void DelComp(const CUID& pComponent) override;
+    virtual void DeleteComponent(const CUID& uidComponent) override;
 
-    void CopyDesign(DesignDetails * designFrom, DesignDetails * designTo);
+    void CopyDesign(CDesignDetails * designFrom, CDesignDetails * designTo);
     void GetLockdownsAt(short dx, short dy, char dz, std::vector<CUID> &vList);
     void GetSecuredAt(short dx, short dy, char dz, std::vector<CUID> &vList);
     char CalculateLevel(char z);
@@ -103,7 +102,7 @@ public:
     void AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z = INT8_MIN);
     void AddRoof(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z);
     void RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z);
-    bool RemoveStairs(Component * pStairComponent);
+    bool RemoveStairs(CMultiComponent * pStairComponent);
     void RemoveRoof(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z);
     void SendVersionTo(CClient * pClientSrc) const;
     void SendStructureTo(CClient * pClientSrc);
@@ -114,17 +113,17 @@ public:
 
     const CSphereMultiCustom * GetMultiItemDefs();
     const CRect GetDesignArea();
-    size_t GetFixtureCount(DesignDetails * pDesign = nullptr);
-    size_t GetComponentsAt(short dx, short dy, char dz, Component ** pComponents, DesignDetails * pDesign = nullptr);
+    size_t GetFixtureCount(CDesignDetails * pDesign = nullptr);
+    size_t GetComponentsAt(short dx, short dy, char dz, CMultiComponent ** pComponents, CDesignDetails * pDesign = nullptr);
     int GetRevision(const CClient * pClientSrc = nullptr) const;
     uchar GetLevelCount();
 
     static uchar GetPlane(char z);
-    static uchar GetPlane(Component * pComponent);
+    static uchar GetPlane(const CMultiComponent * pComponent);
     static char GetPlaneZ(uchar plane);
     static bool IsValidItem(ITEMID_TYPE id, CClient * pClientSrc, bool bMulti);
 
-    DesignDetails* GetDesignMain()
+    CDesignDetails* GetDesignMain()
     {
         return &m_designMain;
     }

@@ -339,7 +339,7 @@ void CItemShip::OnComponentCreate(CItem * pComponent)
             break;
     }
 
-    CItemMulti::OnComponentCreate(pComponent);
+    CItemMulti::OnComponentCreate(pComponent, false);
     return;
 }
 

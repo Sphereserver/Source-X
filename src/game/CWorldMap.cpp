@@ -653,7 +653,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 
                         if (CItemMultiCustom* pItemMultiCustom = dynamic_cast<CItemMultiCustom*>(pRegionItem))
                         {
-                            CItemMultiCustom::Component* pComponents[INT8_MAX];
+                            CItemMultiCustom::CMultiComponent* pComponents[INT8_MAX];
                             size_t iItemQty = pItemMultiCustom->GetComponentsAt(x2, y2, (char)z2, pComponents, pItemMultiCustom->GetDesignMain());
                             if (iItemQty <= 0)
                                 continue;

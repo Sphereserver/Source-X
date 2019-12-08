@@ -39,51 +39,43 @@ CItemMultiCustom::~CItemMultiCustom()
     if (m_pArchitect != nullptr)
     {
         m_pArchitect->m_pHouseDesign = nullptr;
-        m_pArchitect = nullptr;
     }
 
     if (m_pSphereMulti != nullptr)
     {
         delete m_pSphereMulti;
-        m_pSphereMulti = nullptr;
     }
 
-    ComponentsContainer::iterator it;
-    for (it = m_designMain.m_vectorComponents.begin(); it != m_designMain.m_vectorComponents.end(); it = m_designMain.m_vectorComponents.erase(it))				delete *it;
-    for (it = m_designWorking.m_vectorComponents.begin(); it != m_designWorking.m_vectorComponents.end(); it = m_designWorking.m_vectorComponents.erase(it))	delete *it;
-    for (it = m_designBackup.m_vectorComponents.begin(); it != m_designBackup.m_vectorComponents.end(); it = m_designBackup.m_vectorComponents.erase(it))		delete *it;
-    for (it = m_designRevert.m_vectorComponents.begin(); it != m_designRevert.m_vectorComponents.end(); it = m_designRevert.m_vectorComponents.erase(it))		delete *it;
-
+    for (CMultiComponent* pComp : m_designMain.m_vectorComponents)
+        delete pComp;
     m_designMain.m_vectorComponents.clear();
     if (m_designMain.m_pData != nullptr)
     {
         delete[] m_designMain.m_pData;
-        m_designMain.m_pData = nullptr;
-        m_designMain.m_iDataRevision = 0;
     }
 
+    for (CMultiComponent* pComp : m_designWorking.m_vectorComponents)
+        delete pComp;
     m_designWorking.m_vectorComponents.clear();
     if (m_designWorking.m_pData != nullptr)
     {
         delete[] m_designWorking.m_pData;
-        m_designWorking.m_pData = nullptr;
-        m_designWorking.m_iDataRevision = 0;
     }
 
+    for (CMultiComponent* pComp : m_designBackup.m_vectorComponents)
+        delete pComp;
     m_designBackup.m_vectorComponents.clear();
     if (m_designBackup.m_pData != nullptr)
     {
         delete[] m_designBackup.m_pData;
-        m_designBackup.m_pData = nullptr;
-        m_designBackup.m_iDataRevision = 0;
     }
 
+    for (CMultiComponent* pComp : m_designRevert.m_vectorComponents)
+        delete pComp;
     m_designRevert.m_vectorComponents.clear();
     if (m_designRevert.m_pData != nullptr)
     {
         delete[] m_designRevert.m_pData;
-        m_designRevert.m_pData = nullptr;
-        m_designRevert.m_iDataRevision = 0;
     }
 }
 
@@ -281,9 +273,9 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
         const bool fSendFullTrigger = IsTrigUsed(TRIGGER_HOUSEDESIGNCOMMITITEM);
         short iMaxZ = 0;
 
-        for (ComponentsContainer::iterator i = m_designWorking.m_vectorComponents.begin(); i != m_designWorking.m_vectorComponents.end(); ++i)
+        for (auto i = m_designWorking.m_vectorComponents.begin(); i != m_designWorking.m_vectorComponents.end(); ++i)
         {
-            const Component* pComp = *i;
+            const CMultiComponent* pComp = *i;
             if (fSendFullTrigger)
             {
                 CScriptTriggerArgs Args;
@@ -355,9 +347,9 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
     CRectMap rectNew;
     rectNew.m_map = GetTopMap();
 
-    for (ComponentsContainer::const_iterator i = m_designMain.m_vectorComponents.begin(); i != m_designMain.m_vectorComponents.end(); ++i)
+    for (auto it = m_designMain.m_vectorComponents.begin(); it != m_designMain.m_vectorComponents.end(); ++it)
     {
-        const Component* pComp = *i;
+        const CMultiComponent* pComp = *it;
         rectNew.UnionPoint(pComp->m_item.m_dx, pComp->m_item.m_dy);
         if (pComp->m_item.m_visible)
             continue;
@@ -379,17 +371,17 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
         if (pItem->IsType(IT_TELEPAD))
         {
             // link telepads
-            for (ComponentsContainer::const_iterator j = i + 1; j != i; ++j)
+            for (auto itTest = it + 1; itTest != it; ++itTest)
             {
-                if (j == m_designMain.m_vectorComponents.end())
-                    j = m_designMain.m_vectorComponents.begin();
-                const Component* pCompTest = *j;
+                if (itTest == m_designMain.m_vectorComponents.end())
+                    itTest = m_designMain.m_vectorComponents.begin();
+                const CMultiComponent* pCompTest = *itTest;
 
                 if (pCompTest->m_item.GetDispID() != pComp->m_item.GetDispID())
                     continue;
 
-                pItem->m_uidLink = GetUID();
-                //pItem->m_itTelepad.m_ptMark = GetComponentPoint(pCompTest);
+                // Do not set the link, otherwise it will teleport the char to the house center coordinates
+                pItem->m_itTelepad.m_ptMark = GetComponentPoint(pCompTest);
                 break;
             }
         }
@@ -398,8 +390,8 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
             pItem->m_uidLink = GetUID();
         }
         pItem->MoveToUpdate(pt);
-        OnComponentCreate(pItem);
-        AddComp(pItem->GetUID());
+        OnComponentCreate(pItem, false);    // TODO: how do i know that this is an AddOn?
+        AddComponent(pItem->GetUID());
     }
 
     rectNew.OffsetRect(ptMe.m_x, ptMe.m_y);
@@ -498,7 +490,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
                 z = 0;
         }
 
-        Component * pPrevComponents[INT8_MAX];
+        CMultiComponent * pPrevComponents[INT8_MAX];
         size_t iCount;
 
         /*
@@ -529,13 +521,13 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
                 if (fFloor != pPrevComponents[i]->m_isFloor)
                     continue;
 
-                const Component* pComp = pPrevComponents[i];
+                const CMultiComponent* pComp = pPrevComponents[i];
                 RemoveItem(nullptr, pComp->m_item.GetDispID(), pComp->m_item.m_dx, pComp->m_item.m_dy, (char)(pComp->m_item.m_dz));
             }
         }
     }
 
-    Component * pComponent = new Component;
+    CMultiComponent * pComponent = new CMultiComponent;
     pComponent->m_item.m_wTileID = (word)(id);
     pComponent->m_item.m_dx = x;
     pComponent->m_item.m_dy = y;
@@ -624,10 +616,10 @@ void CItemMultiCustom::AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, 
     }
 
 	short iStairID = 0;
-	for (ComponentsContainer::iterator i = m_designWorking.m_vectorComponents.begin(); i != m_designWorking.m_vectorComponents.end(); ++i)
+	for (const CMultiComponent *pComp : m_designWorking.m_vectorComponents)
 	{
-		if ((*i)->m_isStair > iStairID)
-			iStairID = (*i)->m_isStair;
+		if (pComp->m_isStair > iStairID)
+			iStairID = pComp->m_isStair;
 	}
 	++iStairID;
 
@@ -722,7 +714,7 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x,
         }
     }
 
-    Component * pComponents[INT8_MAX];
+    CMultiComponent * pComponents[INT8_MAX];
     size_t uiCount = GetComponentsAt(x, y, z, pComponents, &m_designWorking);
     if (uiCount <= 0)
         return;
@@ -750,7 +742,7 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x,
 		if (fIsFloor)
 		{
 			bool fStairsBelow = false;
-			Component* pComponentsStairs[INT8_MAX];
+			CMultiComponent* pComponentsStairs[INT8_MAX];
 			size_t uiCountStairs = GetComponentsAt(x, y, z - 1, pComponentsStairs, &m_designWorking);
 			if (uiCountStairs > 0)
 			{
@@ -766,9 +758,9 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x,
 
 			if (fStairsBelow)
 			{
-				for (ComponentsContainer::iterator it = vectorComponents.begin(); it != vectorComponents.end(); )
+				for (auto it = vectorComponents.begin(); it != vectorComponents.end(); )
 				{
-					Component* pComp = *it;
+					CMultiComponent* pComp = *it;
 					if ((pComp->m_isFloor) && (pComp->m_item.m_dz == z))
 					{
 						it = vectorComponents.erase(it);
@@ -785,9 +777,9 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x,
     bool fReplaceDirt = false;
     for (size_t i = 0; i < uiCount; ++i)
     {
-        for (ComponentsContainer::iterator it = vectorComponents.begin(); it != vectorComponents.end(); ++it)
+        for (auto it = vectorComponents.begin(); it != vectorComponents.end(); ++it)
         {
-            Component* pComp = *it;
+            CMultiComponent* pComp = *it;
             if (pComp != pComponents[i])
                 continue;
 
@@ -820,7 +812,7 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x,
     SendStructureTo(pClientSrc);
 }
 
-bool CItemMultiCustom::RemoveStairs(Component * pStairComponent)
+bool CItemMultiCustom::RemoveStairs(CMultiComponent * pStairComponent)
 {
     ADDTOCALLSTACK("CItemMultiCustom::RemoveStairs");
     // attempt to remove the given component as a stair piece,
@@ -835,27 +827,32 @@ bool CItemMultiCustom::RemoveStairs(Component * pStairComponent)
 
     short iStairID = pStairComponent->m_isStair;
 
-    for (ComponentsContainer::iterator i = m_designWorking.m_vectorComponents.begin(); i != m_designWorking.m_vectorComponents.end(); )
+    for (auto it = m_designWorking.m_vectorComponents.begin(); it != m_designWorking.m_vectorComponents.end(); )
     {
-        if ((*i)->m_isStair == iStairID)
+        CMultiComponent* pComp = *it;
+        if (pComp->m_isStair == iStairID)
         {
             bool fReplaceDirt = false;
-            if ((*i)->m_isFloor && (GetPlane(*i) == 1) && (GetPlaneZ(GetPlane(*i)) == (*i)->m_item.m_dz))
-                fReplaceDirt = true;
+            if (pComp->m_isFloor)
+            {
+                const uchar uiCompPlane = GetPlane(pComp);
+                if ((uiCompPlane == 1) && (GetPlaneZ(uiCompPlane) == pComp->m_item.m_dz))
+                    fReplaceDirt = true;
+            }
 
-            short x = (*i)->m_item.m_dx;
-            short y = (*i)->m_item.m_dy;
-            char z = (char)((*i)->m_item.m_dz);
+            short x = pComp->m_item.m_dx;
+            short y = pComp->m_item.m_dy;
+            char z = (char)(pComp->m_item.m_dz);
 
-            i = m_designWorking.m_vectorComponents.erase(i);
-            ++m_designWorking.m_iRevision;
+            it = m_designWorking.m_vectorComponents.erase(it);
+            ++ m_designWorking.m_iRevision;
 
             if (fReplaceDirt)
                 AddItem(nullptr, ITEMID_DIRT_TILE, x, y, z);
         }
         else
         {
-            ++i;
+            ++it;
         }
     }
 
@@ -899,7 +896,7 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
     if (PacketHouseDesign::CanSendTo(pClientSrc->GetNetState()) == false)
         return;
 
-    DesignDetails * pDesign = nullptr;
+    CDesignDetails * pDesign = nullptr;
     if (m_pArchitect == pClientSrc)
         pDesign = &m_designWorking;	// send the working copy to the designer
     else
@@ -923,34 +920,30 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
 
     PacketHouseDesign* cmd = new PacketHouseDesign(this, pDesign->m_iRevision);
 
-    if (pDesign->m_vectorComponents.size())
+    if (!pDesign->m_vectorComponents.empty())
     {
-        // determine the dimensions of the building
-        const CRect rectDesign = GetDesignArea();
-        int iMinX = rectDesign.m_left, iMinY = rectDesign.m_top;
-        int iWidth = rectDesign.GetWidth();
-        int iHeight = rectDesign.GetHeight();
-
-        ComponentsContainer vectorStairs;
-        Component * pComp;
-        CItemBase * pItemBase;
-
         if (_iMaxPlane < 0)
         {
-
             // find the highest plane/floor
-            for (ComponentsContainer::iterator i = pDesign->m_vectorComponents.begin(); i != pDesign->m_vectorComponents.end(); ++i)
+            for (const CMultiComponent *pComp : pDesign->m_vectorComponents)
             {
-                if (GetPlane(*i) <= _iMaxPlane)
+                const uchar uiPlane = GetPlane(pComp);
+                if (uiPlane <= _iMaxPlane)
                     continue;
 
-                _iMaxPlane = GetPlane(*i);
+                _iMaxPlane = uiPlane;
             }
         }
 
-        nword wPlaneBuffer[PLANEDATA_BUFFER];
+        // determine the dimensions of the building
+        const CRect rectDesign = GetDesignArea();
+        const int iMinX = rectDesign.m_left, iMinY = rectDesign.m_top;
+        const int iWidth = rectDesign.GetWidth();
+        const int iHeight = rectDesign.GetHeight();
 
-        for (int iCurrentPlane = 0; iCurrentPlane <= _iMaxPlane; iCurrentPlane++)
+        std::vector<const CMultiComponent*> vectorStairs;
+        nword wPlaneBuffer[PLANEDATA_BUFFER];
+        for (int iCurrentPlane = 0; iCurrentPlane <= _iMaxPlane; ++iCurrentPlane)
         {
             // for each plane, generate a list of items
             bool fFoundItems = false;
@@ -958,16 +951,16 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
             int iMaxIndex = 0;
 
             memset(wPlaneBuffer, 0, sizeof(wPlaneBuffer));
-            for (ComponentsContainer::iterator i = pDesign->m_vectorComponents.begin(); i != pDesign->m_vectorComponents.end(); ++i)
+            for (const CMultiComponent* pComp : pDesign->m_vectorComponents)
             {
-                if (GetPlane(*i) != iCurrentPlane)
+                const uchar uiCompPlane = GetPlane(pComp);
+                if (uiCompPlane != iCurrentPlane)
                     continue;
 
-                pComp = *i;
                 if (!pComp->m_item.m_visible && pDesign != &m_designWorking)
                     continue;
 
-                pItemBase = CItemBase::FindItemBase(pComp->m_item.GetDispID());
+                const CItemBase* pItemBase = CItemBase::FindItemBase(pComp->m_item.GetDispID());
                 if (pItemBase == nullptr)
                     continue;
 
@@ -983,7 +976,7 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
                 else
                     index = (x * (iHeight - 1)) + y;
 
-                if ((GetPlaneZ(GetPlane(pComp)) != (char)(pComp->m_item.m_dz)) ||
+                if ((GetPlaneZ(uiCompPlane) != (char)(pComp->m_item.m_dz)) ||
                     (pItemBase->GetHeight() == 0 || pComp->m_isFloor) ||
                     (x < 0 || y < 0 || x >= iWidth || y >= iHeight) ||
                     (index < 0 || index >= PLANEDATA_BUFFER))
@@ -1011,9 +1004,8 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
             cmd->writePlaneData(iCurrentPlane, iItemCount, (byte*)wPlaneBuffer, iPlaneSize);
         }
 
-        for (ComponentsContainer::iterator i = vectorStairs.begin(); i != vectorStairs.end(); ++i)
+        for (const CMultiComponent* pComp : vectorStairs)
         {
-            pComp = *i;
             if (!pComp->m_item.m_visible && pDesign != &m_designWorking)
                 continue;
 
@@ -1122,14 +1114,14 @@ uchar CItemMultiCustom::GetLevelCount()
     return 3;
 }
 
-size_t CItemMultiCustom::GetFixtureCount(DesignDetails * pDesign)
+size_t CItemMultiCustom::GetFixtureCount(CDesignDetails * pDesign)
 {
     ADDTOCALLSTACK("CItemMultiCustom::GetFixtureCount");
     if (pDesign == nullptr)
         pDesign = &m_designMain;
 
     size_t count = 0;
-    for (const Component * pComponent : pDesign->m_vectorComponents)
+    for (const CMultiComponent * pComponent : pDesign->m_vectorComponents)
     {
         if (pComponent->m_item.m_visible)
             continue;
@@ -1140,11 +1132,11 @@ size_t CItemMultiCustom::GetFixtureCount(DesignDetails * pDesign)
     return count;
 }
 
-size_t CItemMultiCustom::GetComponentsAt(short x, short y, char z, Component ** pComponents, DesignDetails * pDesign)
+size_t CItemMultiCustom::GetComponentsAt(short x, short y, char z, CMultiComponent ** pComponents, CDesignDetails * pDesign)
 {
     ADDTOCALLSTACK("CItemMultiCustom::GetComponentsAt");
     // find a list of components that are located at the given
-    // position, and store them in the given Component* array,
+    // position, and store them in the given CMultiComponent* array,
     // returning the number of components found
 
     if (pDesign == nullptr)
@@ -1152,7 +1144,7 @@ size_t CItemMultiCustom::GetComponentsAt(short x, short y, char z, Component ** 
 
     const uchar uiPlane = GetPlane(z);
     size_t count = 0;
-    for (Component* pComponent : pDesign->m_vectorComponents)
+    for (CMultiComponent* pComponent : pDesign->m_vectorComponents)
     {
         if (pComponent->m_item.m_dx != x || pComponent->m_item.m_dy != y)
             continue;
@@ -1166,7 +1158,7 @@ size_t CItemMultiCustom::GetComponentsAt(short x, short y, char z, Component ** 
     return count;
 }
 
-CPointMap CItemMultiCustom::GetComponentPoint(const Component * pComp) const
+CPointMap CItemMultiCustom::GetComponentPoint(const CMultiComponent * pComp) const
 {
     ADDTOCALLSTACK("CItemMultiCustom::GetComponentPoint(ptr)");
     return GetComponentPoint(pComp->m_item.m_dx, pComp->m_item.m_dy, (char)(pComp->m_item.m_dz));
@@ -1249,7 +1241,7 @@ const CRect CItemMultiCustom::GetDesignArea()
     return rect;
 }
 
-void CItemMultiCustom::DelComp(const CUID& uidComponent)
+void CItemMultiCustom::DeleteComponent(const CUID& uidComponent)
 {
     /* The code below should remove the item from the m_mainDesign, however it's not being deleted from there even if the world item is
         So, in the next customize, the item will appear again.
@@ -1265,21 +1257,21 @@ void CItemMultiCustom::DelComp(const CUID& uidComponent)
         pt.m_z -= GetTopPoint().m_z;
         RemoveItem(GetOwner().CharFind()->GetClient(), pComp->GetDispID(), pt.m_x, pt.m_y, pt.m_z);
     }*/
-    CItemMulti::DelComp(uidComponent);
+    CItemMulti::DeleteComponent(uidComponent);
 }
 
-void CItemMultiCustom::CopyDesign(DesignDetails * designFrom, DesignDetails * designTo)
+void CItemMultiCustom::CopyDesign(CDesignDetails * designFrom, CDesignDetails * designTo)
 {
     ADDTOCALLSTACK("CItemMultiCustom::CopyComponents");
     // overwrite the details of one design with the details
     // of another
-    Component * pComponent;
+    CMultiComponent * pComponent;
 
     // copy components
     designTo->m_vectorComponents.clear();
-    for (ComponentsContainer::iterator i = designFrom->m_vectorComponents.begin(); i != designFrom->m_vectorComponents.end(); ++i)
+    for (auto i = designFrom->m_vectorComponents.begin(); i != designFrom->m_vectorComponents.end(); ++i)
     {
-        pComponent = new Component;
+        pComponent = new CMultiComponent;
         *pComponent = **i;
 
         designTo->m_vectorComponents.push_back(pComponent);
@@ -1423,7 +1415,7 @@ void CItemMultiCustom::ClearFloor(char iFloor)
         {
             continue;
         }
-        if (GetCompPos(pItem->GetUID()) != -1) // Components are not moved, Custom Multis only have sign and post as components and we are not going to remove them
+        if (GetComponentIndex(pItem->GetUID()) != -1) // Components are not moved, Custom Multis only have sign and post as components and we are not going to remove them
         {
             continue;
         }
@@ -1445,7 +1437,7 @@ void CItemMultiCustom::ClearFloor(char iFloor)
         pCrate->ContentAdd(pItem);
     }
     
-    Component *comp;
+    CMultiComponent *comp;
 
     // Reset Main Design
     i = (int)m_designMain.m_vectorComponents.size()-1; 
@@ -1578,7 +1570,7 @@ bool CItemMultiCustom::r_Verb(CScript & s, CTextConsole * pSrc) // Execute comma
         case IMCV_CLEAR:
         {
             m_designWorking.m_vectorComponents.clear();
-            m_designWorking.m_iRevision++;
+            ++ m_designWorking.m_iRevision;
         }
         break;
 
@@ -1684,8 +1676,8 @@ void CItemMultiCustom::r_Write(CScript & s)
     ADDTOCALLSTACK_INTENSIVE("CItemMultiCustom::r_Write");
     CItemMulti::r_Write(s);
 
-    Component * comp;
-    for (ComponentsContainer::iterator i = m_designMain.m_vectorComponents.begin(); i != m_designMain.m_vectorComponents.end(); ++i)
+    CMultiComponent * comp;
+    for (auto i = m_designMain.m_vectorComponents.begin(); i != m_designMain.m_vectorComponents.end(); ++i)
     {
         comp = *i;
         s.WriteKeyFormat("COMP", "%d,%d,%d,%d,%d", comp->m_item.GetDispID(), comp->m_item.m_dx, comp->m_item.m_dy, (char)(comp->m_item.m_dz), comp->m_isStair);
@@ -1752,14 +1744,22 @@ bool CItemMultiCustom::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole 
                 SKIP_SEPARATORS(ptcKey);
                 CUOMultiItemRec_HS item = m_designMain.m_vectorComponents.at(iQty)->m_item;
 
-                if (!strnicmp(ptcKey, "ID", 2))		    sVal.FormatVal(item.GetDispID());
-                else if (!strnicmp(ptcKey, "DX", 2))	sVal.FormatVal(item.m_dx);
-                else if (!strnicmp(ptcKey, "DY", 2))	sVal.FormatVal(item.m_dy);
-                else if (!strnicmp(ptcKey, "DZ", 2))	sVal.FormatVal(item.m_dz);
-                else if (!strnicmp(ptcKey, "D", 1))	    sVal.Format("%i,%i,%i", item.m_dx, item.m_dy, item.m_dz);
-                else if (!strnicmp(ptcKey, "FIXTURE", 7))	sVal.FormatVal(item.m_visible ? 0 : 1);
-                else if (!*ptcKey)				        sVal.Format("%u,%i,%i,%i", item.GetDispID(), item.m_dx, item.m_dy, item.m_dz);
-                else								    return false;
+                if (!strnicmp(ptcKey, "ID", 2))
+                    sVal.FormatVal(item.GetDispID());
+                else if (!strnicmp(ptcKey, "DX", 2))
+                    sVal.FormatVal(item.m_dx);
+                else if (!strnicmp(ptcKey, "DY", 2))
+                    sVal.FormatVal(item.m_dy);
+                else if (!strnicmp(ptcKey, "DZ", 2))
+                    sVal.FormatVal(item.m_dz);
+                else if (!strnicmp(ptcKey, "D", 1))
+                    sVal.Format("%i,%i,%i", item.m_dx, item.m_dy, item.m_dz);
+                else if (!strnicmp(ptcKey, "FIXTURE", 7))
+                    sVal.FormatVal(item.m_visible ? 0 : 1);
+                else if (!*ptcKey)
+                    sVal.Format("%u,%i,%i,%i", item.GetDispID(), item.m_dx, item.m_dy, item.m_dz);
+                else
+                    return false;
             }
             else
                 return false;
@@ -1859,7 +1859,7 @@ uchar CItemMultiCustom::GetPlane(char z)
         return 0;
 }
 
-uchar CItemMultiCustom::GetPlane(Component * pComponent)
+uchar CItemMultiCustom::GetPlane(const CMultiComponent * pComponent)
 {
     return GetPlane((char)(pComponent->m_item.m_dz));
 }
@@ -2019,7 +2019,7 @@ bool CItemMultiCustom::LoadValidItems()
     return false;
 }
 
-void CItemMultiCustom::CSphereMultiCustom::LoadFrom(CItemMultiCustom::DesignDetails * pDesign)
+void CItemMultiCustom::CSphereMultiCustom::LoadFrom(CItemMultiCustom::CDesignDetails * pDesign)
 {
     m_iItemQty = (uint)pDesign->m_vectorComponents.size();
 
