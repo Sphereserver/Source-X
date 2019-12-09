@@ -8,6 +8,7 @@
 #include "../sphere/ProfileTask.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"
+#include "components/CCChampion.h"
 #include "components/CCPropsItemChar.h"
 #include "components/CCPropsItemWeapon.h"
 #include "components/CCSpawn.h"
@@ -112,8 +113,15 @@ CObjBase::~CObjBase()
     RemoveSelf();
     if (CCSpawn *pSpawn = GetSpawn())    // If I was created from a Spawn
     {
-        //pEntity->UnsubscribeComponent(pSpawn);    // Avoiding recursive calls from CCSpawn::DelObj when forcing the pChar/pItem to Delete();
-        pSpawn->DelObj(GetUID());  // Then I should be removed from it's list.
+        if (CCChampion* pChampion = static_cast<CCChampion*>(GetSpawn()->GetLink()->GetComponent(COMP_CHAMPION)))
+        {
+            pChampion->DelObj(GetUID());
+        }
+        else
+        {
+            //pEntity->UnsubscribeComponent(pSpawn);    // Avoiding recursive calls from CCSpawn::DelObj when forcing the pChar/pItem to Delete();
+            pSpawn->DelObj(GetUID());  // Then I should be removed from it's list.
+        }
     }
 
     {

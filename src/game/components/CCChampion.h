@@ -93,6 +93,8 @@ private:
 public:
     //static const char *m_sClassName;    ///< Class definition
 
+    CCSpawn* GetSpawnItem();
+
     /**
     * @brief Start the champion, setup everything needed.
     *

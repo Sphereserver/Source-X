@@ -51,6 +51,11 @@ CCRET_TYPE CCChampion::OnTickComponent()
     return CCRET_CONTINUE;
 }
 
+CCSpawn* CCChampion::GetSpawnItem()
+{
+    return static_cast<CCSpawn*>(GetLink()->GetComponent(COMP_SPAWN));
+}
+
 void CCChampion::Init()
 {
     ADDTOCALLSTACK("CCChampion::Init");
@@ -131,6 +136,7 @@ void CCChampion::SpawnNPC()
         return;
 
     CREID_TYPE pNpc = CREID_INVALID;
+    CResourceIDBase rid;
     if ((_pRedCandles.size() == _iLevelMax) && (_iSpawnsNextWhite == 0)) // Reached 16th red candle and spawned all the normal npcs, so next one should be the champion
     {
         pNpc = _idChampion;
@@ -138,37 +144,58 @@ void CCChampion::SpawnNPC()
     else
     {
         int iSize = (int)_spawnGroupsId[_iLevel].size();
-        if ( iSize <= 0)
+        idSpawn spawngroup;
+        if ( iSize > 0)
         {
-            g_Log.EventError("CCChampion:: Trying to create NPCs for undefined NPCGROUP[%d]\n", _iLevel);
-            return;
+            spawngroup = _spawnGroupsId;
+        }
+        else
+        {
+            CResourceDef* pRes = g_Cfg.ResourceGetDef(_idSpawn);
+            CCChampionDef* pChampDef = static_cast<CCChampionDef*>(pRes);
+            if (pChampDef != nullptr)
+            {
+                iSize = (int)pChampDef->_idSpawn[_iLevel].size();
+                if ( iSize > 0)
+                {
+                    spawngroup = pChampDef->_idSpawn;
+                }
+                else
+                {
+                    g_Log.EventError("CCChampion:: Trying to create NPCs from undefined NPCGROUP[%d]\n", _iLevel);
+                    return;
+                }
+            }
         }
         --_iSpawnsNextWhite;
         ASSERT(iSize <= UCHAR_MAX);
         uchar iRand = (uchar)Calc_GetRandVal2(1, (int)iSize - 1);
-        pNpc = _spawnGroupsId[_iLevel][iRand];	//Find out the random npc.
-        CResourceDef * pDef = g_Cfg.ResourceGetDef(CResourceID(RES_CHARDEF, pNpc));
-        if (!pDef)
-        {
-            return;
-        }
-        CCChampionDef * pChamp = static_cast<CCChampionDef*>(pDef);
-        if (!pChamp)
-        {
-            return;
-        }
-        if (!pNpc)	// At least one NPC per level should be added, check just in case.
-            return;
+        pNpc = spawngroup[_iLevel][iRand];	//Find out the random npc.
     }
-    CChar * pChar = CChar::CreateBasic(pNpc);
-    if (!pChar)
+    rid = CResourceIDBase(RES_CHARDEF, pNpc);
+    CResourceDef* pDef = g_Cfg.ResourceGetDef(rid);
+    if (!pDef)
+    {
         return;
-    CPointMap pt = GetLink()->GetTopPoint();
-    pChar->SetTopPoint(pt);
-    pChar->MoveNear(pt, 10);
-    pChar->Update();
-    pChar->NPC_LoadScript(true);
-    AddObj(pChar->GetUID());
+    }
+    CCChampionDef* pChamp = static_cast<CCChampionDef*>(pDef);
+    if (!pChamp)
+    {
+        return;
+    }
+    if (!pNpc)	// At least one NPC per level should be added, check just in case.
+    {
+        return;
+    }
+    CCSpawn* pSpawn = GetSpawnItem();
+    if (pSpawn)
+    {
+        CChar* spawn = pSpawn->GenerateChar(rid);
+        if (spawn != nullptr)
+        {
+            AddObj(spawn->GetUID());
+        }
+    }
 }
 
 void CCChampion::AddWhiteCandle(CUID uid)
@@ -480,39 +507,22 @@ void CCChampion::DelObj(CUID uid)
     CChar *pChar = uid.CharFind();
     if (pChar)
     {
-        CScript s("-e_spawn_champion");
+        CScript s("-e_spawn_champion");//Removing it here just for safety, preventing any additional DelObj being called from the trigger and causing an infinite loop.
         pChar->m_OEvents.r_LoadVal(s, RES_EVENTS);  //removing event from the char.
-        if (pChar->Stat_GetAdjusted(STAT_STR) <= 0) // NPC died.
-        {
-            OnKill();
-        }
     }
+    //Not checking HP or anything else, an NPC was created and counted so killing, removing or just taking it out of the lists counts towards the progression.
+    OnKill();
 }
 
 // Storing one UID in Spawn's _pObj[]
 void CCChampion::AddObj(CUID uid)
 {
     ADDTOCALLSTACK("CCSpawn:AddObj");
-    if (!uid || !uid.CharFind()->m_pNPC)    // Only adding UIDs...
-    {
-        return;
-    }
-    if (uid.CharFind()->GetSpawn())	//... which doesn't have a SpawnItem already
-    {
-        return;
-    }
-    CCSpawn *pSpawn = static_cast<CCSpawn*>(GetLink()->GetComponent(COMP_SPAWN));
-    ASSERT(pSpawn);
-    if (pSpawn->GetCurrentSpawned() < _iSpawnsMax)
-    {
-        pSpawn->AddObj(uid);
-    }
-
     CChar *pChar = uid.CharFind();
     if (pChar)
     {
-        CScript s("+e_spawn_champion");
-        uid.CharFind()->m_OEvents.r_LoadVal(s, RES_EVENTS);	//adding event to the char
+        CScript s("events +e_spawn_champion");
+        pChar->r_LoadVal(s);
     }
 }
 // Returns the monster's 'level' according to the champion's level (red candles).
