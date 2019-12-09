@@ -129,7 +129,17 @@ public:
     void GenerateItem();
 
     /**
-    * @brief Generate a *pDef char from this spawn.
+    * @brief Generate a char with the given id from this spawn.
+    * @params rid the id of the char.
+    */
+    CChar* GenerateChar(const CResourceIDBase &rid);
+    /**
+    * @brief Get a valid char id from the spawn.
+    * @return the char id.
+    */
+    CResourceIDBase GetCharRid();
+    /**
+    * @brief Complete character generation.
     */
     void GenerateChar();
 

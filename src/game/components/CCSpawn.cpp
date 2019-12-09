@@ -284,44 +284,31 @@ void CCSpawn::GenerateItem()
     AddObj(pItem->GetUID());
 }
 
-void CCSpawn::GenerateChar()
+
+CChar* CCSpawn::GenerateChar(const CResourceIDBase &rid)
 {
-    ADDTOCALLSTACK("CCSpawn::GenerateChar");
+    ADDTOCALLSTACK("CCSpawn::GenerateChar(rid)");
 
     const CItem *pSpawnItem = static_cast<const CItem*>(GetLink());
     if (!pSpawnItem->IsTopLevel())
-        return;
-
-    const CResourceDef *pDef = FixDef();
-    if (!pDef)
     {
-        g_Log.EventError("Bad spawn point (UID=0%" PRIx32 ") is trying to generate a char/spawngroup. Invalid spawn index 0%x (ResourceID=0%" PRIx32 ").\n", (dword)pSpawnItem->GetUID(), _idSpawn.GetResIndex(), _idSpawn.GetPrivateUID());
-        return;
+        return nullptr;
     }
 
-    CResourceIDBase rid = pDef->GetResourceID();
     RES_TYPE iRidType = rid.GetResType();
-    if (iRidType == RES_SPAWN)
-    {
-        const CRandGroupDef *pSpawnGroup = static_cast<const CRandGroupDef *>(pDef);
-        ASSERT(pSpawnGroup);
-        size_t i = pSpawnGroup->GetRandMemberIndex();
-        if (i != SCONT_BADINDEX)
-        {
-            rid = pSpawnGroup->GetMemberID(i);
-            iRidType = rid.GetResType();
-        }
-    }
+    iRidType = rid.GetResType();
 
     if ((iRidType != RES_CHARDEF) && (iRidType != RES_UNKNOWN))
     {
         g_Log.EventError("Spawner UID=0%" PRIx32 " tried to GenerateChar with invalid ResType=%d (ResourceID=0% " PRIx32 ").\n", (dword)pSpawnItem->GetUID(), (int)iRidType, rid.GetPrivateUID() );
-        return;
+        return nullptr;
     }
 
     CChar *pChar = CChar::CreateBasic( (CREID_TYPE)rid.GetResIndex() );
     if (!pChar)
-        return;
+    {
+        return nullptr;
+    }
 
     const CPointMap& pt = pSpawnItem->GetTopPoint();
     pChar->NPC_LoadScript(true);
@@ -333,14 +320,16 @@ void CCSpawn::GenerateChar()
     {
         ++iPlacingTries;
         if (iPlacingTries <= 3)
+        {
             continue;
+        }
 
         // If this fails, try placing the char ON the spawn
         if (!pChar->MoveTo(pt))
         {
             DEBUG_ERR(("Spawner UID=0%" PRIx32 " is unable to place a character inside the world, deleted the character.", (dword)pSpawnItem->GetUID()));
             pChar->Delete();
-            return;
+            return nullptr;
         }
         break;
     }
@@ -351,7 +340,7 @@ void CCSpawn::GenerateChar()
     {
         g_Log.EventWarn("Spawner UID=0%" PRIx32 " is trying to spawn an evil NPC into a guarded area. Deleting the NPC.\n", (dword)pSpawnItem->GetUID());
         pChar->Delete();
-        return;
+        return nullptr;
     }
 
     AddObj(pChar->GetUID());
@@ -360,7 +349,44 @@ void CCSpawn::GenerateChar()
 
     size_t iCount = pSpawnItem->GetTopSector()->GetCharComplexity();
     if (iCount > g_Cfg.m_iMaxCharComplexity)
+    {
         g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " chars at %s. Sector too complex!\n", iCount, pSpawnItem->GetTopSector()->GetBasePoint().WriteUsed());
+    }
+    return pChar;
+}
+
+CResourceIDBase CCSpawn::GetCharRid()
+{
+    ADDTOCALLSTACK("CCSpawn::GetCharRid");
+    const CItem* pSpawnItem = static_cast<const CItem*>(GetLink());
+
+    CResourceIDBase rid(UID_UNUSED);
+    const CResourceDef* pDef = FixDef();
+    if (!pDef)
+    {
+        g_Log.EventError("Bad spawn point (UID=0%" PRIx32 ") is trying to generate a char/spawngroup. Invalid spawn index 0%x (ResourceID=0%" PRIx32 ").\n", (dword)pSpawnItem->GetUID(), _idSpawn.GetResIndex(), _idSpawn.GetPrivateUID());
+        return rid;
+    }
+
+    rid = pDef->GetResourceID();
+    RES_TYPE iRidType = rid.GetResType();
+    if (iRidType == RES_SPAWN)
+    {
+        const CRandGroupDef* pSpawnGroup = static_cast<const CRandGroupDef*>(pDef);
+        ASSERT(pSpawnGroup);
+        size_t i = pSpawnGroup->GetRandMemberIndex();
+        if (i != SCONT_BADINDEX)
+        {
+            rid = pSpawnGroup->GetMemberID(i);
+        }
+    }
+    return rid;
+}
+
+void CCSpawn::GenerateChar()
+{
+    ADDTOCALLSTACK("CCSpawn::GenerateChar");
+    GenerateChar(GetCharRid());
 }
 
 void CCSpawn::DelObj(const CUID& uid)
