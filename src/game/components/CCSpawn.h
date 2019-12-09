@@ -12,6 +12,7 @@
 #include "../uo_files/uofiles_enums_creid.h"
 #include "../CComponent.h"
 #include "../CTimedObject.h"
+#include "../../sphere/threads.h"
 
 
 class CCharBase;
@@ -20,6 +21,7 @@ class CUID;
 
 class CCSpawn : public CComponent
 {
+    THREAD_CMUTEX_DEF;
     CItem* _pLink;
     static lpctstr const sm_szLoadKeys[];
     static lpctstr const sm_szVerbKeys[];
@@ -27,6 +29,7 @@ class CCSpawn : public CComponent
 
     std::vector<CUID> _uidList; // Storing UIDs of the created items/chars.
     bool _fKillingChildren;     // For internal usage, set to true when KillChildren() is in proccess to prevent DelObj() being called from CObjBase when deleteing the objs.
+    bool _fIsChampion;          // Is this a CHAMPION spawn?
 
     uint16 _iAmount;            // Maximum of objects to spawn.
     CResourceIDBase _idSpawn;   // legacy more1=ID of the Object to Spawn.
@@ -36,10 +39,17 @@ class CCSpawn : public CComponent
     uint16 _iTimeHi;            // legacy morey=Hi time in minutes.
     uint8 _iMaxDist;            // legacy morez=How far from this spawns will be created the items/chars?
 
+    static std::vector<CCSpawn*> _vBadSpawns;
+    bool _fIsBadSpawn;
+
+    void AddBadSpawn();
+    void DelBadSpawn();
+
 public:
     static const char *m_sClassName;
+    static CCSpawn * GetBadSpawn(int index = -1);
 
-    CCSpawn(CItem *pLink);
+    CCSpawn(CItem *pLink, bool fIsChampion = false);
     virtual ~CCSpawn();
     CItem *GetLink() const;
     virtual void Delete(bool fForce = false) override;
@@ -159,6 +169,7 @@ public:
     * @brief Get a proper CResourceID from the id provided.
     * @return a valid CResourceDef.
     */
+    const CResourceDef * _FixDef();
     const CResourceDef * FixDef();
 
     /**

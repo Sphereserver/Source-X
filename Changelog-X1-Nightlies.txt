@@ -1960,3 +1960,76 @@ WARNING: Important change!
 
 23-11-2019, Nolok
 - Fixed: Resyncing after modifying a FUNCTION broke the internal functions lookup table order, resulting in random errors when calling functions.
+
+08-12-2019, XuN
+Champions:
+
+Added basic champion's support, CChampionDef (script block):
+	[CHAMPION 01]
+	DEFNAME=CHAMPION_Abyss
+	NAME=Abyss
+	LevelMax=5 //Maximum levels of this champion, for default ones it must be 5 (4 npcgroups + boss)
+	Spawns=100 //Total npc spawns for this champion (excepting the boss)
+	NPCGroup[1] = c_mongbat, c_imp //Group of npcs for level 1
+	NPCGroup[2] = c_gargoyle, c_harpy //Group of npcs for level 2
+	NPCGroup[3] = c_gargoyle_fire, c_gargoyle_stone //Group of npcs for level 3
+	NPCGroup[4] = c_daemon, c_succubus //Group of npcs for level 4
+	CHAMPIONID=c_semidar	//The boss
+
+Ingame item example:
+	[ITEMDEF i_champion_idol]
+	ID=01f18
+	TYPE=t_champion_spawn //this defname should match 300
+	NAME=Champion Idol
+
+	ON=@Create
+	more=CHAMPION_Abyss
+	ATTR |= <DEF.ATTR_MOVE_NEVER>
+
+	ON=@DClick
+	if (<timer> == -1)
+		start //init the champion
+	else
+		stop // stop the champion
+	endif
+	return 1
+
+R/W Keywords available for the t_champion_spawn item:
+    "DEATHCOUNT": Gets/sets the total count of deaths, counts towards progression, setting a value higher than the one required by the system will have effect only when that value is requested by the code and not instantly (eg: another monster dies.
+    "LASTACTIVATIONTIME": TimeHiRes of the last activation time, allowing to create cooldowns.
+    "LEVEL": Current level of the champion spawn.
+    "LEVELMAX": Maximum level, should be 5 by default ... other values are allowed but using other values requires scripting their behaviour since the system is done to match OSI and will not calculate good other values.
+    "NPCGROUP": Gets a given npcgroup (eg .xshow npcgroup[1][3] will give the fourth npc on the first group), or create/overwrite a group (eg: .xnpcgroup[2] c_ogre, c_ettin, c_orc).
+    "MORE/MORE1": Gets or sets the champion id (eg: .xmore1 CHAMPION_Abyss)
+    "REDCANDLES": Gets the count of red candles (Read only).
+    "SPAWNSCUR": Gets or sets the current count of spawns.
+    "SPAWNSMAX": Gets or sets the total maximum spawns.
+    "WHITECANDLES": Gets thhe count of white candles (read only).
+Verbs available for theh t_champion_spawn item:
+	
+    "ADDOBJ": Inserts an already created npc into the champion spawn (be sure you add them when the champion is activated, or they will be removed when it start).
+    "DELOBJ": Removes one character from the champion counting towards the progression of itself, this does not remove the character.
+    "ADDREDCANDLE": Advances the champion by adding one red candle (red candles and levels explained bellow).
+    "ADDWHITECANDLE": Advances the champion by adding one white candle.
+    "DELREDCANDLE": Regress one red candle (if any).
+    "DELWHITECANDLE": Regress one white candle (if any) (If there are no white candles, then calls DELREDCANDLE).
+    "ADDSPAWN": Forces the generation of one spawn (applying champion level and so)
+    "INIT": Restores the champion's attributes (pretty much like a 'clear'), this is forced when changing the item's more1 so be aware to do not change (or call it) when the champion is active or it will mess up.
+    "MULTICREATE": Emplaces a champion by script, a champion requires a multi area to be renamed and have custom flags, forbidding recalls or whatever.
+    "START": Activates the champion.
+    "STOP": Deactivates the champion and removes any progress and npcs.
+	
+Default levels explanation with pseudocode:
+	//By default the level is 1, and when a red candle is added ...
+    if (RedCandlesAmount >= 14 && Level < 4)
+        SetLevel 4;
+    else if (RedCandlesAmount >= 10 && Level < 3)
+        SetLevel 3
+    else if (RedCandlesAmount >= 6 && Level < 2)
+        SetLevel 2
+
+
+Must have event: [events e_spawn_champion]
+
+09-12-2019 - XuN
+Fixed BadSpawn not working: Now each bad spawn is inserted in a vector and accessed through this command, the command now accepts args to go into a direct index (invalid index is defaulted to the first one found).

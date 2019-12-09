@@ -14,9 +14,47 @@
 
 
 /////////////////////////////////////////////////////////////////////////////
+std::vector<CCSpawn*> CCSpawn::_vBadSpawns;
 
+void CCSpawn::AddBadSpawn()
+{
+    ADDTOCALLSTACK("CCSpawn::AddBadSpawn");
+    if (_fIsBadSpawn == true)
+    {
+        return;
+    }
+    THREAD_UNIQUE_LOCK_SET;
+    if (std::find(_vBadSpawns.begin(), _vBadSpawns.end(), this) == _vBadSpawns.end())
+    {
+        _vBadSpawns.emplace_back(this); //only if it's not inserted already.
+    }
+    _fIsBadSpawn = true;
+}
 
-CCSpawn::CCSpawn(CItem *pLink) : CComponent(COMP_SPAWN)
+void CCSpawn::DelBadSpawn()
+{
+    ADDTOCALLSTACK("CCSpawn::DelBadSpawn");
+    THREAD_UNIQUE_LOCK_SET;
+    std::remove(_vBadSpawns.begin(), _vBadSpawns.end(), this);
+    _fIsBadSpawn = false;
+}
+
+CCSpawn *CCSpawn::GetBadSpawn(int index)
+{
+    ADDTOCALLSTACK("CCSpawn::GetBadSpawn");
+    CCSpawn* ret = nullptr;
+    if (_vBadSpawns.size() > 0)
+    {
+        if (index >= _vBadSpawns.size() || index < 0)
+        {
+            index = 0;
+        }
+        ret = _vBadSpawns.at(index);
+    }
+    return ret;
+}
+
+CCSpawn::CCSpawn(CItem *pLink, bool fIsChampion) : CComponent(COMP_SPAWN), _fIsChampion(fIsChampion)
 {
     ADDTOCALLSTACK("CCSpawn::CCSpawn");
     _pLink = pLink;
@@ -32,10 +70,12 @@ CCSpawn::CCSpawn(CItem *pLink) : CComponent(COMP_SPAWN)
 CCSpawn::~CCSpawn()
 {
     KillChildren();
+    DelBadSpawn();
 }
 
 CItem * CCSpawn::GetLink() const
 {
+    ADDTOCALLSTACK("CCSpawn::GetLink");
     return _pLink;
 }
 
@@ -81,11 +121,11 @@ void CCSpawn::SetAmount(uint16 iAmount)
     _iAmount = iAmount;
 }
 
-const CResourceDef *CCSpawn::FixDef()
+const CResourceDef* CCSpawn::_FixDef()
 {
     ADDTOCALLSTACK("CCSpawn:FixDef");
 
-    const CItem *pItem = static_cast<CItem*>(GetLink());
+    const CItem* pItem = static_cast<CItem*>(GetLink());
     const uint uiItemUID = pItem->GetUID().GetObjUID();
     if (!_idSpawn.IsValidUID())
     {
@@ -94,7 +134,7 @@ const CResourceDef *CCSpawn::FixDef()
     }
 
     const RES_TYPE resType = _idSpawn.GetResType();
-    const CResourceDef *pResDef;
+    const CResourceDef* pResDef;
     if (resType != RES_UNKNOWN)
     {
         pResDef = g_Cfg.ResourceGetDef(_idSpawn);
@@ -112,12 +152,12 @@ const CResourceDef *CCSpawn::FixDef()
         g_Log.EventDebug("CCSpawn::FixDef found invalid spawn (UID=0%x) without type info and SpawnID=0%x. Attempting to fix it.\n", uiItemUID, iIndex);
     else
         g_Log.EventDebug("CCSpawn::FixDef found invalid spawn (UID=0%x) with SpawnID=0%x. Attempting to fix it.\n", uiItemUID, iIndex);
-    
+
     if (pItem->IsType(IT_SPAWN_CHAR))
     {
-        auto _TryChar = [this](CREID_TYPE idChar) -> const CResourceDef *
+        auto _TryChar = [this](CREID_TYPE idChar) -> const CResourceDef*
         {
-            const CResourceDef *pResDef = CCharBase::FindCharBase(idChar);
+            const CResourceDef* pResDef = CCharBase::FindCharBase(idChar);
             if (pResDef)
                 _idSpawn = CResourceIDBase(RES_CHARDEF, idChar);
             return pResDef;
@@ -161,9 +201,9 @@ const CResourceDef *CCSpawn::FixDef()
     }
     else
     {
-        auto _TryItem = [this](ITEMID_TYPE idItem) -> const CResourceDef *
+        auto _TryItem = [this](ITEMID_TYPE idItem) -> const CResourceDef*
         {
-            const CResourceDef *pResDef = CItemBase::FindItemBase(idItem);
+            const CResourceDef* pResDef = CItemBase::FindItemBase(idItem);
             if (pResDef)
                 _idSpawn = CResourceIDBase(RES_ITEMDEF, idItem);
             return pResDef;
@@ -207,6 +247,16 @@ const CResourceDef *CCSpawn::FixDef()
     }
 }
 
+const CResourceDef *CCSpawn::FixDef()
+{
+    const CResourceDef* pRef = _FixDef();
+    if (pRef == nullptr && _fIsChampion == false)
+    {
+        AddBadSpawn();
+    }
+    return pRef;
+}
+
 uint CCSpawn::WriteName(tchar *pszOut) const
 {
     ADDTOCALLSTACK("CCSpawn::GetName");
@@ -225,6 +275,10 @@ void CCSpawn::Delete(bool fForce)
     ADDTOCALLSTACK("CCSpawn::Delete");
     UNREFERENCED_PARAMETER(fForce);
     KillChildren();
+    if (_fIsBadSpawn == true)
+    {
+        DelBadSpawn();
+    }
 }
 
 void CCSpawn::GenerateItem()
@@ -239,6 +293,7 @@ void CCSpawn::GenerateItem()
     if (!pDef)
     {
         g_Log.EventError("Bad spawn point (UID=0%" PRIx32 ") is trying to generate an item/template. Invalid spawn index 0%x (ResourceID=0%" PRIx32 ").\n", (dword)pSpawnItem->GetUID(), _idSpawn.GetResIndex(), _idSpawn.GetPrivateUID());
+        AddBadSpawn();
         return;
     }
 
@@ -365,6 +420,7 @@ CResourceIDBase CCSpawn::GetCharRid()
     if (!pDef)
     {
         g_Log.EventError("Bad spawn point (UID=0%" PRIx32 ") is trying to generate a char/spawngroup. Invalid spawn index 0%x (ResourceID=0%" PRIx32 ").\n", (dword)pSpawnItem->GetUID(), _idSpawn.GetResIndex(), _idSpawn.GetPrivateUID());
+        AddBadSpawn();
         return rid;
     }
 
@@ -779,6 +835,7 @@ bool CCSpawn::r_LoadVal(CScript & s)
                         {
                             _idSpawn = CResourceIDBase(RES_CHARDEF, iRidIndex);
                             g_Log.EventDebug("Setting to spawner with UID=0%x SpawnID=0%x being not a SPAWN, but >= SPAWNTYPE_START.\n", (dword)pSpawnItem->GetUID(), iRidIndex);
+                            FixDef();
                         }
                     }
                     break;
@@ -812,14 +869,7 @@ bool CCSpawn::r_LoadVal(CScript & s)
                         }
                     }
                     break;
-                }
-                case IT_SPAWN_CHAMPION: // handled on CCChampion
-                {
-                    _idSpawn = CResourceIDBase(RES_CHAMPION, iRidIndex);
-                    CCChampion *pChampion = static_cast<CCChampion*>(pSpawnItem->GetComponent(COMP_CHAMPION));
-                    ASSERT(pChampion);
-                    pChampion->Init();
-                    return true; // More CCChampion's custom code done in Init() plus FixDef() and SetTrackID() are not needed so halt here.
+                    FixDef();
                 }
                 default:
                 {
@@ -903,19 +953,22 @@ void CCSpawn::r_Write(CScript & s)
     EXC_TRY("Write");
 
     CItem *pItem = static_cast<CItem*>(GetLink());
-    if (!FixDef())
+    if (_fIsChampion == false)
     {
-        g_Log.EventWarn("Saving a bad spawn point (UID=0%" PRIx32 "). Invalid spawn index 0%x (ResourceID=0%" PRIx32 ").\n", (dword)pItem->GetUID(), _idSpawn.GetResIndex(), _idSpawn.GetPrivateUID());
+        if (!FixDef())
+        {
+            g_Log.EventWarn("Saving a bad spawn point (UID=0%" PRIx32 "). Invalid spawn index 0%x (ResourceID=0%" PRIx32 ").\n", (dword)pItem->GetUID(), _idSpawn.GetResIndex(), _idSpawn.GetPrivateUID());
+        }
+        if (_idSpawn.IsValidResource())
+        {
+            s.WriteKey("SPAWNID", g_Cfg.ResourceGetName(_idSpawn));
+        }
     }
 
     uint16 uiAmount = GetAmount();
     if (uiAmount != 1)
     {
         s.WriteKeyVal("AMOUNT", uiAmount);
-    }
-    if (_idSpawn.IsValidResource())
-    {
-        s.WriteKey("SPAWNID", g_Cfg.ResourceGetName(_idSpawn));
     }
     uint16 uiPile = GetPile();
     if ((uiPile > 1) && (pItem->GetType() == IT_SPAWN_ITEM))

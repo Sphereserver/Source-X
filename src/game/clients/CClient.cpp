@@ -956,46 +956,23 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_BADSPAWN:
 			{
 				//	Loop the world searching for bad spawns
-				bool fFound = false;
-				for ( int m = 0; m < MAP_SUPPORTED_QTY && !fFound; ++m )
-				{
-					if ( !g_MapList.IsMapSupported(m) )
-						continue;
-
-					for ( int d = 0; d < g_MapList.GetSectorQty(m) && !fFound; ++d )
-					{
-						CSector	*pSector = g_World.GetSector(m, d);
-						if ( !pSector )
-							continue;
-
-						CItem *pNext;
-						CItem *pItem = static_cast <CItem*>(pSector->m_Items_Timer.GetHead());
-						for ( ; pItem != nullptr && !fFound; pItem = pNext )
-						{
-							pNext = pItem->GetNext();
-
-							if ( pItem->IsType(IT_SPAWN_ITEM) || pItem->IsType(IT_SPAWN_CHAR) )
-							{
-                                CCSpawn *pSpawn = pItem->GetSpawn();
-                                if (pSpawn)
-                                {
-                                    const CResourceDef *pDef = pSpawn->FixDef();
-                                    if (!pDef)
-                                    {
-                                        const CResourceID& rid = pSpawn->GetSpawnID();
-                                        const CPointMap&   pt  = pItem->GetTopPoint();
-                                        m_pChar->Spell_Teleport(pt, true, false);
-                                        m_pChar->m_Act_UID = pItem->GetUID();
-                                        SysMessagef("Bad spawn (0%x, id=%s). Set as ACT", (dword)pItem->GetUID(), g_Cfg.ResourceGetName(rid));
-                                        fFound = true;
-                                    }
-                                }
-							}
-						}
-					}
-				}
-				if ( ! fFound )
-					SysMessage(g_Cfg.GetDefaultMsg( DEFMSG_NO_BAD_SPAWNS ));
+                int index = s.GetArgVal();
+                CCSpawn *pSpawn = CCSpawn::GetBadSpawn(index ? index : -1);
+                if (pSpawn != nullptr)
+                {
+                    CItem* pSpawnItem = pSpawn->GetLink();
+                    const CResourceID& rid = pSpawn->GetSpawnID();
+                    const CPointMap& pt = pSpawnItem->GetTopPoint();
+                    CUID spawnUID = pSpawnItem->GetUID();
+                    m_pChar->Spell_Teleport(pt, true, false);
+                    m_pChar->Update();
+                    m_pChar->m_Act_UID = spawnUID;
+                    SysMessagef("Bad spawn (0%x, id=%s). Set as ACT", (dword)spawnUID, g_Cfg.ResourceGetName(rid));
+                }
+                else
+                {
+                    SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NO_BAD_SPAWNS));
+                }
 			}
 			break;
 		case CV_BANKSELF: // open my own bank

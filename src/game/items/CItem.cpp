@@ -3682,7 +3682,7 @@ bool CItem::SetType(IT_TYPE type, bool fPreCheck)
         }
         if (!GetComponent(COMP_SPAWN))
         {
-            SubscribeComponent(new CCSpawn(this));
+            SubscribeComponent(new CCSpawn(this, true));
         }
     }
 
