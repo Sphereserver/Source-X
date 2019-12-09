@@ -168,9 +168,15 @@ void CCChampion::SpawnNPC()
             }
         }
         --_iSpawnsNextWhite;
-        ASSERT(iSize <= UCHAR_MAX);
-        uchar iRand = (uchar)Calc_GetRandVal2(1, (int)iSize - 1);
-        pNpc = spawngroup[_iLevel][iRand];	//Find out the random npc.
+        if (iSize > 0 && iSize <= UCHAR_MAX)
+        {
+            uchar iRand = (uchar)Calc_GetRandVal2(1, (int)iSize - 1);
+            pNpc = spawngroup[_iLevel][iRand];	//Find out the random npc.
+        }
+        else
+        {
+            g_Log.EventError("Champion bad group index %d.\n", _iLevel);
+        }
     }
     rid = CResourceIDBase(RES_CHARDEF, pNpc);
     CResourceDef* pDef = g_Cfg.ResourceGetDef(rid);
@@ -559,13 +565,14 @@ void CCChampion::AddObj(CUID uid)
 
 enum ICHMPL_TYPE
 {
+    ICHMPL_CHAMPIONSPAWN,
     ICHMPL_DEATHCOUNT,
     ICHMPL_LASTACTIVATIONTIME,
     ICHMPL_LEVEL,
     ICHMPL_LEVELMAX,
-    ICHMPL_NPCGROUP,
     ICHMPL_MORE,
     ICHMPL_MORE1,
+    ICHMPL_NPCGROUP,
     ICHMPL_REDCANDLES,
     ICHMPL_SPAWNSCUR,
     ICHMPL_SPAWNSMAX,
@@ -575,13 +582,14 @@ enum ICHMPL_TYPE
 
 lpctstr const CCChampion::sm_szLoadKeys[ICHMPL_QTY + 1] =
 {
+    "CHAMPIONSPAWN",
     "DEATHCOUNT",
     "LASTACTIVATIONTIME",
     "LEVEL",
     "LEVELMAX",
-    "NPCGROUP",
     "MORE",
     "MORE1",
+    "NPCGROUP",
     "REDCANDLES",
     "SPAWNSCUR",
     "SPAWNSMAX",
@@ -629,6 +637,7 @@ void CCChampion::r_Write(CScript & s)
     s.WriteKeyVal("SPAWNSCUR", _iSpawnsCur);
     s.WriteKeyVal("LEVEL", _iLevel);
     s.WriteKeyVal("LASTACTIVATIONTIME", _iLastActivationTime);
+    s.WriteKey("CHAMPIONSPAWN", g_Cfg.ResourceGetName(_idSpawn));
 
     for (const CUID& uidCandle : _pRedCandles)
     {
@@ -709,6 +718,7 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
             }
             return true;
         }
+        case ICHMPL_CHAMPIONSPAWN:
         case ICHMPL_MORE:
         case ICHMPL_MORE1:
         {
@@ -759,6 +769,7 @@ bool CCChampion::r_LoadVal(CScript & s)
         case ICHMPL_SPAWNSMAX:
             _iSpawnsMax = s.GetArgUSVal();
             return true;
+        case ICHMPL_CHAMPIONSPAWN:
         case ICHMPL_MORE:
         case ICHMPL_MORE1:
         {
