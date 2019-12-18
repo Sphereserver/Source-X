@@ -25,6 +25,9 @@ CCChampion::CCChampion(CItem *pLink) : CComponent(COMP_CHAMPION)
 {
     ADDTOCALLSTACK("CCChampion::CCChampion");
     _pLink = pLink;
+    _iLevelMax = 4;
+    _iSpawnsMax = 100;
+    _idChampion = CREID_INVALID;
     Init();
 }
 
@@ -137,7 +140,7 @@ void CCChampion::SpawnNPC()
 
     CREID_TYPE pNpc = CREID_INVALID;
     CResourceIDBase rid;
-    if ((_pRedCandles.size() == _iLevelMax) && (_iSpawnsNextWhite == 0)) // Reached 16th red candle and spawned all the normal npcs, so next one should be the champion
+    if ((_iLevel == _iLevelMax) && (_iSpawnsNextWhite <= 0)) // Reached 16th red candle and spawned all the normal npcs, so next one should be the champion
     {
         pNpc = _idChampion;
     }
@@ -167,10 +170,13 @@ void CCChampion::SpawnNPC()
                 }
             }
         }
-        --_iSpawnsNextWhite;
+        if (_iSpawnsNextWhite > 0)
+        {
+            --_iSpawnsNextWhite;
+        }
         if (iSize > 0 && iSize <= UCHAR_MAX)
         {
-            uchar iRand = (uchar)Calc_GetRandVal2(1, (int)iSize - 1);
+            uchar iRand = (uchar)Calc_GetRandVal2(0, (int)iSize -1);
             pNpc = spawngroup[_iLevel][iRand];	//Find out the random npc.
         }
         else
@@ -267,15 +273,27 @@ void CCChampion::AddRedCandle(CUID uid)
     CItem *pLink = static_cast<CItem*>(GetLink());
 
     size_t uiRedCandlesAmount = _pRedCandles.size();
+    if (uiRedCandlesAmount >= 16 && _iLevel < 5)
+    {
+        SetLevel(5);
+    }
     if (uiRedCandlesAmount >= 14 && _iLevel < 4)
+    {
         SetLevel(4);
+    }
     else if (uiRedCandlesAmount >= 10 && _iLevel < 3)
+    {
         SetLevel(3);
+    }
     else if (uiRedCandlesAmount >= 6 && _iLevel < 2)
+    {
         SetLevel(2);
+    }
     _iSpawnsNextWhite = _iSpawnsNextRed / 5;
     if (!g_Serv.IsLoading())	// White candles may be created before red ones when restoring items from worldsave we must not remove them.
+    {
         ClearWhiteCandles();
+    }
 
     if (!pCandle)
     {
@@ -362,8 +380,8 @@ void CCChampion::AddRedCandle(CUID uid)
 void CCChampion::SetLevel(byte iLevel)
 {
     ADDTOCALLSTACK("CCChampion::SetLevel");
-    if (iLevel > 4)
-        iLevel = 4;
+    if (iLevel > _iLevelMax)
+        iLevel = _iLevelMax;
     else if (iLevel < 1)
         iLevel = 1;
     ushort iLevelMonsters = GetMonstersPerLevel(_iSpawnsMax);
@@ -663,7 +681,6 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
     ADDTOCALLSTACK("CCChampion::r_WriteVal");
     int iCmd = FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
 
-    int group = 0;
     if (iCmd < 0)
     {
         std::string str = ptcKey;
@@ -952,7 +969,6 @@ lpctstr const CCChampionDef::sm_szLoadKeys[] =
     "NAME",
     "NPCGROUP",
     "SPAWNS",
-    "TYPE",
     nullptr
 };
 
