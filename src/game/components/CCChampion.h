@@ -51,9 +51,10 @@ private:
     // Retrieved from CCChampionDef
     typedef std::vector<CREID_TYPE> idNPC;
     typedef std::map<uchar, idNPC> idSpawn;
-    CResourceIDBase _idSpawn;   // legacy more1=ID of the Object to Spawn.
-    idSpawn _spawnGroupsId;    ///< Defining how many uchar (or levels) this Champion has and the group of monsters for each level.
-    CREID_TYPE _idChampion;               ///< Boss id
+    CResourceIDBase _idSpawn;   ///< legacy more1=ID of the Object to Spawn.
+    idSpawn _spawnGroupsId;     ///< Defining how many uchar (or levels) this Champion has and the group of monsters for each level.
+    CREID_TYPE _idChampion;     ///< Boss id
+    bool _bChampionSummoned;    ///< True if the champion's boss has been summoned already (wether it was killed or not).
 
     // Ingame Spawn behaviour.
     bool _fActive;                  ///< Champion status
@@ -196,12 +197,13 @@ public:
     /**
     * @brief Retrieves how much Red Candles are needed to reach next Champion's Level.
     *
+    * @param iLevel the level to check for (0 = reach for next Level).
     * More detailed description ...
     * Called from SetLevel() to set the amount of candles.
     * Value stored in morex (m_itNormal.m_morep.m_x).
     * @return how much red candles are needed to reach the next level
     */
-    byte GetCandlesPerLevel() const;
+    byte GetCandlesPerLevel(byte iLevel = -1) const;
     /**
     * @brief Set a new Level for this champion.
     *

@@ -66,11 +66,12 @@ void CCChampion::Init()
     _iLevel = 0;
     _iSpawnsCur = 0;
     _iDeathCount = 0;
-    _iSpawnsNextWhite = 0;
-    _iSpawnsNextRed = GetCandlesPerLevel();
+    _iSpawnsNextWhite = 2;
+    _iSpawnsNextRed = 10;
     _iCandlesNextRed = CANDLESNEXTRED;
     _iCandlesNextLevel = 0;
     _iLastActivationTime = 0;
+    _bChampionSummoned = false;
     CResourceDef *pRes = g_Cfg.ResourceGetDef(_idSpawn);
     CCChampionDef *pChampDef = static_cast<CCChampionDef*>(pRes);
     if (!pChampDef)
@@ -88,6 +89,10 @@ void CCChampion::Start()
 {
     ADDTOCALLSTACK("CCChampion::Start");
     // TODO store light in the area
+    if (_fActive == true)
+    {
+        Stop();
+    }
     _fActive = true;
     _iLastActivationTime = g_World.GetCurrentTime().GetTimeRaw();
 
@@ -109,6 +114,7 @@ void CCChampion::Stop()
     _iLevel = 0;
     _iCandlesNextRed = 0;
     _iCandlesNextLevel = 0;
+    _bChampionSummoned = false;
     GetLink()->SetTimeout(_iLastActivationTime - g_World.GetCurrentTime().GetTimeRaw());
     ClearWhiteCandles();
     ClearRedCandles();
@@ -135,14 +141,19 @@ void CCChampion::SpawnNPC()
 {
     ADDTOCALLSTACK("CCChampion::SpawnNPC");
 
-    if (_iLevel == _iLevelMax)	// Already summoned the Champion, stop
-        return;
-
     CREID_TYPE pNpc = CREID_INVALID;
     CResourceIDBase rid;
-    if ((_iLevel == _iLevelMax) && (_iSpawnsNextWhite <= 0)) // Reached 16th red candle and spawned all the normal npcs, so next one should be the champion
+
+    if (_iLevel > _iLevelMax)        
     {
-        pNpc = _idChampion;
+        if (_bChampionSummoned == true)// Already summoned the Champion, stop
+        {
+            return;
+        }
+        if (_iSpawnsNextWhite <= 0) //Reached 16th red candle and spawned all the normal npcs, so next one should be the champion
+        {            
+            pNpc = _idChampion;
+        }
     }
     else
     {
@@ -273,11 +284,11 @@ void CCChampion::AddRedCandle(CUID uid)
     CItem *pLink = static_cast<CItem*>(GetLink());
 
     size_t uiRedCandlesAmount = _pRedCandles.size();
-    if (uiRedCandlesAmount >= 16 && _iLevel < 5)
+    if (uiRedCandlesAmount >= _iCandlesNextLevel)
     {
-        SetLevel(5);
+        SetLevel(_iLevel + 1);
     }
-    if (uiRedCandlesAmount >= 14 && _iLevel < 4)
+    /*if (uiRedCandlesAmount >= 14 && _iLevel < 4)
     {
         SetLevel(4);
     }
@@ -288,7 +299,7 @@ void CCChampion::AddRedCandle(CUID uid)
     else if (uiRedCandlesAmount >= 6 && _iLevel < 2)
     {
         SetLevel(2);
-    }
+    }*/
     _iSpawnsNextWhite = _iSpawnsNextRed / 5;
     if (!g_Serv.IsLoading())	// White candles may be created before red ones when restoring items from worldsave we must not remove them.
     {
@@ -384,8 +395,10 @@ void CCChampion::SetLevel(byte iLevel)
         iLevel = _iLevelMax;
     else if (iLevel < 1)
         iLevel = 1;
+    _iLevel = iLevel;
     ushort iLevelMonsters = GetMonstersPerLevel(_iSpawnsMax);
-    _iCandlesNextLevel = GetCandlesPerLevel();
+    //Get the current candles required - last required candles (if current level = 1, then gets 6-0 = 6, level 2 = 10 - 6 = 4, and so on).
+    _iCandlesNextLevel = GetCandlesPerLevel() - GetCandlesPerLevel(_iLevel - 1);
     _iCandlesNextRed = 4;
     ushort iRedMonsters = iLevelMonsters / _iCandlesNextLevel;
     ushort iWhiteMonsters = iRedMonsters / _iCandlesNextRed;
@@ -393,28 +406,31 @@ void CCChampion::SetLevel(byte iLevel)
     // TODO: Trigger @Level (old level, new level, GetMonstersPerLevel, _iCandlesNextLevel)
     // TODO: As the level increases, the light on the area decreases.
 
-    _iLevel = iLevel;
     _iSpawnsNextWhite = iWhiteMonsters;
     _iSpawnsNextRed = iRedMonsters;
     GetLink()->SetTimeoutS(60 * 10);	//10 minutes
 }
 
-byte CCChampion::GetCandlesPerLevel() const
+byte CCChampion::GetCandlesPerLevel(byte iLevel) const
 {
     ADDTOCALLSTACK("CCChampion::GetCandlesPerLevel");
-    switch (_iLevel)
+    if (iLevel == -1)
+    {
+        iLevel = _iLevel;
+    }
+    switch (iLevel)
     {
         case 4:
-            return 2;
+            return 16;
         case 3:
-            return 4;
+            return 14;
         case 2:
-            return 4;
-        default:
+            return 10;
         case 1:
             return 6;
+        default:
+            return 0;
     }
-    return 2;
 }
 
 ushort CCChampion::GetMonstersPerLevel(ushort iMonsters) const
@@ -508,7 +524,7 @@ void CCChampion::ClearRedCandles()
 // kill everything spawned from this spawn !
 void CCChampion::KillChildren()
 {
-    ADDTOCALLSTACK("CCSpawn:KillChildren");
+    ADDTOCALLSTACK("CCChampion:KillChildren");
     CCSpawn *pSpawn = static_cast<CCSpawn*>(GetLink()->GetComponent(COMP_SPAWN));
     if (pSpawn)
     {
@@ -519,7 +535,7 @@ void CCChampion::KillChildren()
 // Deleting one object from Spawn's memory, reallocating memory automatically.
 void CCChampion::DelObj(CUID uid)
 {
-    ADDTOCALLSTACK("CCSpawn:DelObj");
+    ADDTOCALLSTACK("CCChampion:DelObj");
     if (!uid.IsValidUID())
     {
         return;
@@ -541,7 +557,7 @@ void CCChampion::DelObj(CUID uid)
 // Storing one UID in Spawn's _pObj[]
 void CCChampion::AddObj(CUID uid)
 {
-    ADDTOCALLSTACK("CCSpawn:AddObj");
+    ADDTOCALLSTACK("CCChampion:AddObj");
     CChar *pChar = uid.CharFind();
     if (pChar)
     {
