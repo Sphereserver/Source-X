@@ -583,8 +583,14 @@ void CCChampion::AddObj(CUID uid)
 
 enum ICHMPL_TYPE
 {
+    ICHMPL_ADDREDCANDLE,
+    ICHMPL_ADDWHITECANDLE,
+    ICHMPL_CANDLESNEXTLEVEL,
+    ICHMPL_CANDLESNEXTRED,
     ICHMPL_CHAMPIONSPAWN,
     ICHMPL_DEATHCOUNT,
+    ICHMPL_KILLSNEXTRED,
+    ICHMPL_KILLSNEXTWHITE,
     ICHMPL_LASTACTIVATIONTIME,
     ICHMPL_LEVEL,
     ICHMPL_LEVELMAX,
@@ -600,8 +606,14 @@ enum ICHMPL_TYPE
 
 lpctstr const CCChampion::sm_szLoadKeys[ICHMPL_QTY + 1] =
 {
+    "ADDREDCANDLE",
+    "ADDWHITECANDLE",
+    "CANDLESNEXTLEVEL",
+    "CANDLESNEXTRED",
     "CHAMPIONSPAWN",
     "DEATHCOUNT",
+    "KILLSNEXTRED",
+    "KILLSNEXTWHITE",
     "LASTACTIVATIONTIME",
     "LEVEL",
     "LEVELMAX",
@@ -618,9 +630,7 @@ lpctstr const CCChampion::sm_szLoadKeys[ICHMPL_QTY + 1] =
 enum ICHMPV_TYPE
 {
     ICHMPV_ADDOBJ,
-    ICHMPV_ADDREDCANDLE,
     ICHMPV_ADDSPAWN,
-    ICHMPV_ADDWHITECANDLE,
     ICHMPV_DELOBJ,
     ICHMPV_DELREDCANDLE,
     ICHMPV_DELWHITECANDLE,
@@ -635,9 +645,7 @@ enum ICHMPV_TYPE
 lpctstr const CCChampion::sm_szVerbKeys[ICHMPV_QTY + 1] =
 {
     "ADDOBJ",
-    "ADDREDCANDLE",
     "ADDSPAWN",
-    "ADDWHITECANDLE",
     "DELOBJ",
     "DELREDCANDLE",
     "DELWHITECANDLE",
@@ -651,11 +659,17 @@ lpctstr const CCChampion::sm_szVerbKeys[ICHMPV_QTY + 1] =
 void CCChampion::r_Write(CScript & s)
 {
     ADDTOCALLSTACK("CCChampion::r_Write");
-    s.WriteKeyVal("DEATHCOUNT", _iDeathCount);
-    s.WriteKeyVal("SPAWNSCUR", _iSpawnsCur);
-    s.WriteKeyVal("LEVEL", _iLevel);
-    s.WriteKeyVal("LASTACTIVATIONTIME", _iLastActivationTime);
     s.WriteKey("CHAMPIONSPAWN", g_Cfg.ResourceGetName(_idSpawn));
+    s.WriteKeyVal("CANDLEXNEXTLEVEL", _iCandlesNextLevel);
+    s.WriteKeyVal("CANDLESNEXTRED", _iCandlesNextRed);
+    s.WriteKeyVal("DEATHCOUNT", _iDeathCount);
+    s.WriteKeyVal("KILLSNEXTRED", _iSpawnsNextRed);
+    s.WriteKeyVal("KILLSNEXTWHITE", _iSpawnsNextWhite);
+    s.WriteKeyVal("LASTACTIVATIONTIME", _iLastActivationTime);
+    s.WriteKeyVal("LEVEL", _iLevel);
+    s.WriteKeyVal("LEVELMAX", _iLevelMax);
+    //s.WriteKeyVal("SPAWNSCUR", _iSpawnsCur); // Inherited from CCSpawn's count?
+    s.WriteKeyVal("SPAWNSMAX", _iSpawnsMax);
 
     for (const CUID& uidCandle : _pRedCandles)
     {
@@ -692,33 +706,46 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
             iCmd = ICHMPL_NPCGROUP;
         }
     }
+    bool bMatchKey = true;
     switch (iCmd)
     {
+        case ICHMPL_CANDLESNEXTLEVEL:
+            sVal.FormatUCVal(_iCandlesNextLevel);
+            break;
+        case ICHMPL_CANDLESNEXTRED:
+            sVal.FormatUCVal(_iCandlesNextRed);
+            break;
         case ICHMPL_LASTACTIVATIONTIME:
             sVal.FormatLLVal(_iLastActivationTime);
-            return true;
+            break;
         case ICHMPL_LEVEL:
             sVal.FormatUCVal(_iLevel);
-            return true;
+            break;
         case ICHMPL_LEVELMAX:
             sVal.FormatUCVal(_iLevelMax);
-            return true;
+            break;
+        case ICHMPL_KILLSNEXTRED:
+            sVal.FormatUCVal(_iSpawnsNextRed);
+            break;
+        case ICHMPL_KILLSNEXTWHITE:
+            sVal.FormatUCVal(_iSpawnsNextWhite);
+            break;
         case ICHMPL_REDCANDLES:
             sVal.FormatVal((int)_pRedCandles.size());
-            return true;
+            break;
         case ICHMPL_WHITECANDLES:
             sVal.FormatVal((int)_pWhiteCandles.size());
-            return true;
+            break;
         case ICHMPL_DEATHCOUNT:
             sVal.FormatUSVal(_iDeathCount);
-            return true;
+            break;
         case ICHMPL_NPCGROUP:
         {
             uchar uiGroup = (uchar)Exp_GetSingle(ptcKey);
             if (_spawnGroupsId[uiGroup].empty() || uiGroup > UCHAR_MAX)
             {
                 sVal.FormatVal(-1);
-                return true;
+                break;
             }
             ++ptcKey;
             uchar uiNpc = (uchar)Exp_GetSingle(ptcKey);
@@ -726,14 +753,15 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
             if (uiNpc && (uiNpc >= uiGroupSize))
             {
                 sVal.FormatVal(-1);
-                return true;
+                break;
             }
             if (uiGroupSize >= uiNpc)
             {
                 sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _spawnGroupsId[uiGroup][uiNpc]));
-                return true;
+                break;
             }
-            return true;
+            bMatchKey = false;
+            break;
         }
         case ICHMPL_CHAMPIONSPAWN:
         case ICHMPL_MORE:
@@ -747,18 +775,19 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
             {
                 sVal.FormatVal(0);
             }
-            return true;
+            break;
         }
         case ICHMPL_SPAWNSCUR:
             sVal.FormatUSVal(_iSpawnsCur);
-            return true;
+            break;
         case ICHMPL_SPAWNSMAX:
             sVal.FormatUSVal(_iSpawnsMax);
-            return true;
+            break;
         default:
+            bMatchKey = false;
             break;
     }
-    return false;
+    return bMatchKey;
 }
 
 bool CCChampion::r_LoadVal(CScript & s)
@@ -766,26 +795,51 @@ bool CCChampion::r_LoadVal(CScript & s)
     ADDTOCALLSTACK("CCChampion::r_LoadVal");
     int iCmd = FindTableSorted(s.GetKey(), sm_szLoadKeys, (int)CountOf(sm_szLoadKeys) - 1);
 
+    bool bMatchKey = true;
     switch (iCmd)
     {
-        case ICHMPL_LASTACTIVATIONTIME:
-            _iLastActivationTime = s.GetArgLLVal();
-            return true;
-        case ICHMPL_LEVEL:
-            _iLevel = s.GetArgUCVal();
-            return true;
-        case ICHMPL_LEVELMAX:
-            _iLevelMax = s.GetArgUCVal();
-            return true;
+        case ICHMPL_ADDREDCANDLE:
+        {
+            CUID uid(s.GetArgVal());
+            AddRedCandle(uid);
+            break;
+        }
+        case ICHMPL_ADDWHITECANDLE:
+        {
+            CUID uid(s.GetArgVal());
+            AddWhiteCandle(uid);
+            break;
+        }
+        case ICHMPL_CANDLESNEXTLEVEL:
+            _iCandlesNextLevel = s.GetArgUCVal();
+            break;
+        case ICHMPL_CANDLESNEXTRED:
+            _iCandlesNextRed = s.GetArgUCVal();
+            break;
         case ICHMPL_DEATHCOUNT:
             _iDeathCount = s.GetArgUSVal();
-            return true;
+            break;
+        case ICHMPL_LASTACTIVATIONTIME:
+            _iLastActivationTime = s.GetArgLLVal();
+            break;
+        case ICHMPL_LEVEL:
+            _iLevel = s.GetArgUCVal();
+            break;
+        case ICHMPL_LEVELMAX:
+            _iLevelMax = s.GetArgUCVal();
+            break;
+        case ICHMPL_KILLSNEXTRED:
+            _iSpawnsNextRed = s.GetArgUCVal();
+            break;
+        case ICHMPL_KILLSNEXTWHITE:
+            _iSpawnsNextWhite = s.GetArgUCVal();
+            break;
         case ICHMPL_SPAWNSCUR:
             _iSpawnsCur = s.GetArgUSVal();
-            return true;
+            break;
         case ICHMPL_SPAWNSMAX:
             _iSpawnsMax = s.GetArgUSVal();
-            return true;
+            break;
         case ICHMPL_CHAMPIONSPAWN:
         case ICHMPL_MORE:
         case ICHMPL_MORE1:
@@ -794,7 +848,7 @@ bool CCChampion::r_LoadVal(CScript & s)
             const dword dwPrivateUID = s.GetArgDWVal();
             if (!CUID::IsValidUID(dwPrivateUID))
             {
-                return true;
+                break;
             }
             CResourceIDBase ridArg(dwPrivateUID);    // Not using CResourceID because res_chardef, spawn, itemdef, template do not use the "page" arg
             const int iRidIndex = ridArg.GetResIndex();
@@ -815,12 +869,13 @@ bool CCChampion::r_LoadVal(CScript & s)
                 g_Log.EventDebug("Invalid champion id"); //todo better log
             }
             Init();
-            return true;            
+            break;
         }
         default:
+            bMatchKey = false;
             break;
     }
-    return false;
+    return bMatchKey;
 }
 
 void CCChampion::Delete(bool fForce)
@@ -887,18 +942,6 @@ bool CCChampion::r_Verb(CScript & s, CTextConsole * pSrc)
             CUID uid(s.GetArgVal());
             if (uid.ObjFind())
                 AddObj(uid);
-            return true;
-        }
-        case ICHMPV_ADDREDCANDLE:
-        {
-            CUID uid(s.GetArgVal());
-            AddRedCandle(uid);
-            return true;
-        }
-        case ICHMPV_ADDWHITECANDLE:
-        {
-            CUID uid(s.GetArgVal());
-            AddWhiteCandle(uid);
             return true;
         }
         case ICHMPV_ADDSPAWN:
