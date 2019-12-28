@@ -956,8 +956,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_BADSPAWN:
 			{
 				//	Loop the world searching for bad spawns
-                int index = s.GetArgVal();
-                CCSpawn *pSpawn = CCSpawn::GetBadSpawn(index ? index : -1);
+                int iPos = s.GetArgVal();
+                CCSpawn *pSpawn = CCSpawn::GetBadSpawn(iPos ? iPos : -1);
                 if (pSpawn != nullptr)
                 {
                     CItem* pSpawnItem = pSpawn->GetLink();

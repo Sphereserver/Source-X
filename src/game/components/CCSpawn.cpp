@@ -866,10 +866,10 @@ bool CCSpawn::r_LoadVal(CScript & s)
                         {
                             _idSpawn = CResourceIDBase(RES_ITEMDEF, iRidIndex);
                             g_Log.EventDebug("Setting to spawner with UID=0%x SpawnID=0%x being not a ITEM, but >= ITEMID_TEMPLATE.\n", (dword)pSpawnItem->GetUID(), iRidIndex);
+                            FixDef();
                         }
                     }
                     break;
-                    FixDef();
                 }
                 default:
                 {

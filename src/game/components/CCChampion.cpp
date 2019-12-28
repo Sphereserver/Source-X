@@ -27,7 +27,7 @@ CCChampion::CCChampion(CItem *pLink) : CComponent(COMP_CHAMPION)
     ADDTOCALLSTACK("CCChampion::CCChampion");
     _pLink = pLink;
     _iLevelMax = 4;
-    _iSpawnsMax = 100;
+    _iSpawnsMax = 2368;
     _idChampion = CREID_INVALID;
     Init();
 }
@@ -215,11 +215,7 @@ void CCChampion::SpawnNPC()
     if (pSpawn)
     {
         CChar* spawn = pSpawn->GenerateChar(rid);
-        if (spawn == nullptr)
-        {
-            g_Log.EventDebug("asdasd");
-        }
-        else
+        if (spawn != nullptr)
         {
             AddObj(spawn->GetUID());
         }
@@ -256,7 +252,6 @@ void CCChampion::AddWhiteCandle(CUID uid)
             {
                 TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
                 CScriptTriggerArgs args(pCandle);
-                CItem* pItem = GetLink();
                 OnTrigger(ITRIG_ADDWHITECANDLE, &g_Serv, &args);
             }
         }
@@ -322,7 +317,6 @@ void CCChampion::AddRedCandle(CUID uid)
             {
                 TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
                 CScriptTriggerArgs args(pCandle);
-                CItem* pItem = GetLink();
                 OnTrigger(ITRIG_ADDREDCANDLE, &g_Serv, &args);
             }
         }
@@ -409,10 +403,10 @@ void CCChampion::SetLevel(byte iLevel)
     {
         return;
     }
-    /*if (_iLevel > _iLevelMax)
-        _iLevel = _iLevelMax;
-    else */if (_iLevel < 1)
+    if (_iLevel < 1)
+    {
         _iLevel = 1;
+    }
     ushort iLevelMonsters = GetMonstersPerLevel(_iSpawnsMax);
     //Get the current candles required - last required candles (if current level = 1, then gets 6-0 = 6, level 2 = 10 - 6 = 4, and so on).
     _iCandlesNextLevel = GetCandlesPerLevel() - GetCandlesPerLevel(_iLevel - 1);
@@ -453,18 +447,24 @@ byte CCChampion::GetCandlesPerLevel(byte iLevel) const
 ushort CCChampion::GetMonstersPerLevel(ushort iMonsters) const
 {
     ADDTOCALLSTACK("CCChampion::GetMonstersPerLevel");
+    ushort iTotal = 0;
     switch (_iLevel)
     {
         case 4:
-            return (7 * iMonsters) / 100;
+            iTotal = (7 * iMonsters) / 100;   // 7% of monsters are spawned in level 4.
+            break;
         case 3:
-            return (13 * iMonsters) / 100;
+            iTotal = (13 * iMonsters) / 100;  // 13% of monsters are spawned in level 3.
+            break;
         case 2:
-            return (27 * iMonsters) / 100;
+            iTotal = (27 * iMonsters) / 100;  // 27% of monsters are spawned in level 2.
+            break;
         default:
         case 1:
-            return (53 * iMonsters) / 100;
+            iTotal = (53 * iMonsters) / 100;  // 53% of monster are spawned in level 1.
+            break;
     }
+    return iTotal;
 }
 
 // Delete the last created white candle.
@@ -472,7 +472,9 @@ void CCChampion::DelWhiteCandle()
 {
     ADDTOCALLSTACK("CCChampion::DelWhiteCandle");
     if (_pWhiteCandles.size() == 0)
+    {
         return;
+    }
 
     //TODO Trigger @DelWhiteCandle
 
@@ -489,7 +491,9 @@ void CCChampion::DelRedCandle()
 {
     ADDTOCALLSTACK("CCChampion::DelRedCandle");
     if (_pRedCandles.empty())
+    {
         return;
+    }
 
     //TODO Trigger @DelRedCandle
 
@@ -506,7 +510,9 @@ void CCChampion::ClearWhiteCandles()
 {
     ADDTOCALLSTACK("CCChampion::ClearWhiteCandles");
     if (_pWhiteCandles.empty())
+    {
         return;
+    }
     do
     {
         DelWhiteCandle();
@@ -526,7 +532,9 @@ void CCChampion::ClearRedCandles()
 {
     ADDTOCALLSTACK("CCChampion::ClearRedCandles");
     if (_pRedCandles.empty())
+    {
         return;
+    }
     for (std::vector<CUID>::iterator it = _pRedCandles.begin(); it != _pRedCandles.end(); ++it)
     {
         CItem * pCandle = it->ItemFind();
@@ -764,10 +772,10 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
             sVal.FormatUCVal(_iLevelMax);
             break;
         case ICHMPL_KILLSNEXTRED:
-            sVal.FormatUCVal(_iSpawnsNextRed);
+            sVal.FormatUSVal(_iSpawnsNextRed);
             break;
         case ICHMPL_KILLSNEXTWHITE:
-            sVal.FormatUCVal(_iSpawnsNextWhite);
+            sVal.FormatUSVal(_iSpawnsNextWhite);
             break;
         case ICHMPL_REDCANDLES:
             sVal.FormatVal((int)_pRedCandles.size());
@@ -1091,7 +1099,8 @@ CCChampionDef::CCChampionDef(CResourceID rid) : CResourceLink(rid)
 {
     ADDTOCALLSTACK("CCChampionDef::CCChampionDef");
     _iSpawnsMax = 2368;
-    _iLevelMax = 16;
+    _iLevelMax = 4;
+    _idChampion = CREID_INVALID;
 }
 
 CCChampionDef::~CCChampionDef()
@@ -1106,7 +1115,6 @@ bool CCChampionDef::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * p
     ADDTOCALLSTACK("CCChampionDef::r_WriteVal");
     CHAMPIONDEF_TYPE iCmd = (CHAMPIONDEF_TYPE)(int)FindTableSorted(ptcKey, sm_szLoadKeys, CHAMPIONDEF_QTY);
 
-    int group = 0;
     if (iCmd < 0)
     {
         std::string str = ptcKey;
@@ -1116,7 +1124,6 @@ bool CCChampionDef::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * p
             Exp_GetSingle(ptcKey);
             SKIP_SEPARATORS(ptcKey);
             iCmd = CHAMPIONDEF_NPCGROUP;
-
         }
     }
     switch (iCmd)
@@ -1145,7 +1152,7 @@ bool CCChampionDef::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * p
                 sVal.FormatVal(-1);
                 return true;
             }
-            int npcCount = _idSpawn.at(uiGroup).size();
+            int npcCount = (int)_idSpawn.at(uiGroup).size();
             if (npcCount == 0)
             {
                 sVal.FormatVal(-1);
@@ -1180,7 +1187,6 @@ bool CCChampionDef::r_LoadVal(CScript& s)
     lpctstr ptcKey = s.GetKey();
     CHAMPIONDEF_TYPE iCmd = (CHAMPIONDEF_TYPE)FindTableSorted(ptcKey, sm_szLoadKeys, (int)CountOf(sm_szLoadKeys) - 1);
 
-    int group = 0;
     if (iCmd < 0)
     {
         std::string str = ptcKey;
