@@ -15,6 +15,7 @@
 #include "../../common/CScript.h"
 #include "../chars/CChar.h"
 #include "../CWorld.h"
+#include "../../common/resource/CResourceLock.h"
 #include "CCChampion.h"	// predef header.
 #include <string>
 
@@ -214,7 +215,11 @@ void CCChampion::SpawnNPC()
     if (pSpawn)
     {
         CChar* spawn = pSpawn->GenerateChar(rid);
-        if (spawn != nullptr)
+        if (spawn == nullptr)
+        {
+            g_Log.EventDebug("asdasd");
+        }
+        else
         {
             AddObj(spawn->GetUID());
         }
@@ -245,6 +250,16 @@ void CCChampion::AddWhiteCandle(CUID uid)
         pCandle = pLink->CreateBase(ITEMID_SKULL_CANDLE);
         if (!pCandle)
             return;
+        if (g_Serv.IsLoading() == false)
+        {
+            if (IsTrigUsed(TRIGGER_ADDWHITECANDLE))
+            {
+                TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
+                CScriptTriggerArgs args(pCandle);
+                CItem* pItem = GetLink();
+                OnTrigger(ITRIG_ADDWHITECANDLE, &g_Serv, &args);
+            }
+        }
         CPointMap pt = pLink->GetTopPoint();
         switch (_pWhiteCandles.size()+1)    // +1 here because the candle is post placed.
         {
@@ -288,18 +303,6 @@ void CCChampion::AddRedCandle(CUID uid)
     {
         SetLevel(_iLevel + 1);
     }
-    /*if (uiRedCandlesAmount >= 14 && _iLevel < 4)
-    {
-        SetLevel(4);
-    }
-    else if (uiRedCandlesAmount >= 10 && _iLevel < 3)
-    {
-        SetLevel(3);
-    }
-    else if (uiRedCandlesAmount >= 6 && _iLevel < 2)
-    {
-        SetLevel(2);
-    }*/
     _iSpawnsNextWhite = _iSpawnsNextRed / 5;
     if (!g_Serv.IsLoading())	// White candles may be created before red ones when restoring items from worldsave we must not remove them.
     {
@@ -311,8 +314,18 @@ void CCChampion::AddRedCandle(CUID uid)
         pCandle = pLink->CreateBase(ITEMID_SKULL_CANDLE);
         if (!pCandle)
             return;
-        CPointMap pt = pLink->GetTopPoint();
         _iCandlesNextRed = CANDLESNEXTRED;
+        CPointMap pt = pLink->GetTopPoint();
+        if (g_Serv.IsLoading() == false)
+        {
+            if (IsTrigUsed(TRIGGER_ADDREDCANDLE))
+            {
+                TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
+                CScriptTriggerArgs args(pCandle);
+                CItem* pItem = GetLink();
+                OnTrigger(ITRIG_ADDREDCANDLE, &g_Serv, &args);
+            }
+        }
         switch (uiRedCandlesAmount+1)  // +1 here because the candle is post placed.
         {
             case 1:
@@ -391,11 +404,15 @@ void CCChampion::AddRedCandle(CUID uid)
 void CCChampion::SetLevel(byte iLevel)
 {
     ADDTOCALLSTACK("CCChampion::SetLevel");
-    if (iLevel > _iLevelMax)
-        iLevel = _iLevelMax;
-    else if (iLevel < 1)
-        iLevel = 1;
     _iLevel = iLevel;
+    if (g_Serv.IsLoading() == true)
+    {
+        return;
+    }
+    /*if (_iLevel > _iLevelMax)
+        _iLevel = _iLevelMax;
+    else */if (_iLevel < 1)
+        _iLevel = 1;
     ushort iLevelMonsters = GetMonstersPerLevel(_iSpawnsMax);
     //Get the current candles required - last required candles (if current level = 1, then gets 6-0 = 6, level 2 = 10 - 6 = 4, and so on).
     _iCandlesNextLevel = GetCandlesPerLevel() - GetCandlesPerLevel(_iLevel - 1);
@@ -414,7 +431,7 @@ void CCChampion::SetLevel(byte iLevel)
 byte CCChampion::GetCandlesPerLevel(byte iLevel) const
 {
     ADDTOCALLSTACK("CCChampion::GetCandlesPerLevel");
-    if (iLevel == -1)
+    if (iLevel == 255)
     {
         iLevel = _iLevel;
     }
@@ -599,6 +616,7 @@ void CCChampion::AddObj(CUID uid)
 
 enum ICHMPL_TYPE
 {
+    ICHMPL_ACTIVE,
     ICHMPL_ADDREDCANDLE,
     ICHMPL_ADDWHITECANDLE,
     ICHMPL_CANDLESNEXTLEVEL,
@@ -622,6 +640,7 @@ enum ICHMPL_TYPE
 
 lpctstr const CCChampion::sm_szLoadKeys[ICHMPL_QTY + 1] =
 {
+    "ACTIVE",
     "ADDREDCANDLE",
     "ADDWHITECANDLE",
     "CANDLESNEXTLEVEL",
@@ -675,6 +694,7 @@ lpctstr const CCChampion::sm_szVerbKeys[ICHMPV_QTY + 1] =
 void CCChampion::r_Write(CScript & s)
 {
     ADDTOCALLSTACK("CCChampion::r_Write");
+    s.WriteKeyVal("ACTIVE", _fActive);
     s.WriteKey("CHAMPIONSPAWN", g_Cfg.ResourceGetName(_idSpawn));
     s.WriteKeyVal("CANDLEXNEXTLEVEL", _iCandlesNextLevel);
     s.WriteKeyVal("CANDLESNEXTRED", _iCandlesNextRed);
@@ -725,6 +745,9 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
     bool bMatchKey = true;
     switch (iCmd)
     {
+        case ICHMPL_ACTIVE:
+            sVal.FormatBVal(_fActive);
+            break;
         case ICHMPL_CANDLESNEXTLEVEL:
             sVal.FormatUCVal(_iCandlesNextLevel);
             break;
@@ -814,6 +837,14 @@ bool CCChampion::r_LoadVal(CScript & s)
     bool bMatchKey = true;
     switch (iCmd)
     {
+        case ICHMPL_ACTIVE:
+        {
+            if (g_Serv.IsLoading() == true)    //Only when the server is loading.
+            {
+                _fActive = (bool)s.GetArgBVal();
+            }
+            break;
+        }
         case ICHMPL_ADDREDCANDLE:
         {
             CUID uid(s.GetArgVal());
@@ -1006,6 +1037,30 @@ void CCChampion::Copy(const CComponent * target)
     /*I don't see the point of duping a Champion, its insane and makes no sense,
     * if someone wants to totally dupe a champion it can be done from scripts.
     */
+}
+
+TRIGRET_TYPE CCChampion::OnTrigger(ITRIG_TYPE trig, CTextConsole* pSrc, CScriptTriggerArgs* pArgs)
+{
+    lpctstr pszTrigName = CItem::sm_szTrigName[trig];
+
+    CResourceDef* pRes = g_Cfg.ResourceGetDef(_idSpawn);
+    CCChampionDef* pChampDef = static_cast<CCChampionDef*>(pRes);
+    CResourceLink* pResourceLink = static_cast <CResourceLink*>(pChampDef);
+    ASSERT(pResourceLink);
+    TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
+    if (pResourceLink->HasTrigger(trig))
+    {
+        CResourceLock s;
+        if (pResourceLink->ResourceLock(s))
+        {
+            iRet = GetLink()->OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+        }
+    }
+    if (iRet == TRIGRET_RET_DEFAULT)
+    {
+        iRet = GetLink()->OnTrigger(trig, pSrc, pArgs);
+    }
+    return iRet;
 }
 
 

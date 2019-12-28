@@ -1043,7 +1043,9 @@ enum STONEALIGN_TYPE // Types of Guild/Town stones
 enum ITRIG_TYPE
 {
 	// XTRIG_UNKNOWN = some named trigger not on this list.
-	ITRIG_AfterClick=1,
+    ITRIG_ADDREDCANDLE = 1,
+    ITRIG_ADDWHITECANDLE,
+	ITRIG_AfterClick,
 	ITRIG_Buy,
 	ITRIG_Click,
 	ITRIG_CLIENTTOOLTIP,        // Sending tooltip to client for this item

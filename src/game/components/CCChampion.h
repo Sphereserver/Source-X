@@ -10,6 +10,8 @@
 #include "../uo_files/uofiles_enums_creid.h"
 #include "../items/CItemMulti.h"
 #include "../chars/CChar.h"
+#include "../CScriptTriggerArgs.h"
+#include "../triggers.h"
 #include "CCSpawn.h"
 
 enum CHAMPION_ID
@@ -203,7 +205,7 @@ public:
     * Value stored in morex (m_itNormal.m_morep.m_x).
     * @return how much red candles are needed to reach the next level
     */
-    byte GetCandlesPerLevel(byte iLevel = -1) const;
+    byte GetCandlesPerLevel(byte iLevel = 255) const;
     /**
     * @brief Set a new Level for this champion.
     *
@@ -228,6 +230,7 @@ public:
     virtual bool r_LoadVal(CScript & s) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override; // Execute command from script
     virtual void Copy(const CComponent *target) override;
+    TRIGRET_TYPE OnTrigger(ITRIG_TYPE trig, CTextConsole *pSrc, CScriptTriggerArgs *args);
 
     /************************************************************************
     * CItem related section.

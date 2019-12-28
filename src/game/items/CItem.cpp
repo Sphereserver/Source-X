@@ -39,6 +39,8 @@
 lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
+	"@AddRedCandle",
+	"@AddWhiteCandle",
 	"@AfterClick",
 	"@Buy",
 	"@Click",
