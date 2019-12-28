@@ -131,6 +131,13 @@ void CCChampion::Complete()
 void CCChampion::OnKill()
 {
     ADDTOCALLSTACK("CCChampion::OnKill");
+    if ()
+    {
+        if (OnTrigger() == TRIGRET_RET_TRUE)
+        {
+            return;
+        }
+    }
     if (_iSpawnsNextWhite == 0)
     {
         AddWhiteCandle();
@@ -250,9 +257,12 @@ void CCChampion::AddWhiteCandle(CUID uid)
         {
             if (IsTrigUsed(TRIGGER_ADDWHITECANDLE))
             {
-                TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
                 CScriptTriggerArgs args(pCandle);
-                OnTrigger(ITRIG_ADDWHITECANDLE, &g_Serv, &args);
+                if (OnTrigger(ITRIG_ADDWHITECANDLE, &g_Serv, &args) == TRIGRET_RET_TRUE)
+                {
+                    pCandle->Delete();
+                    return;
+                }
             }
         }
         CPointMap pt = pLink->GetTopPoint();
@@ -315,9 +325,12 @@ void CCChampion::AddRedCandle(CUID uid)
         {
             if (IsTrigUsed(TRIGGER_ADDREDCANDLE))
             {
-                TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
                 CScriptTriggerArgs args(pCandle);
-                OnTrigger(ITRIG_ADDREDCANDLE, &g_Serv, &args);
+                if (OnTrigger(ITRIG_ADDREDCANDLE, &g_Serv, &args) == TRIGRET_RET_TRUE)
+                {
+                    pCandle->Delete();
+                    return;
+                }
             }
         }
         switch (uiRedCandlesAmount+1)  // +1 here because the candle is post placed.
