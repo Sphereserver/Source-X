@@ -280,10 +280,10 @@ void CClient::Announce( bool fArrive ) const
 	if ( pMurders )
 	{
 		if ( fArrive )	// on client login, set active timer on murder memory
-			pMurders->SetTimeoutS(pMurders->m_itEqMurderCount.m_Decay_Balance);
+			pMurders->SetTimeoutS(pMurders->m_itEqMurderCount.m_dwDecayBalance);
 		else			// or make it inactive on logout
 		{
-			pMurders->m_itEqMurderCount.m_Decay_Balance = (dword)(pMurders->GetTimerSAdjusted());
+			pMurders->m_itEqMurderCount.m_dwDecayBalance = (dword)(pMurders->GetTimerSAdjusted());
 			pMurders->SetTimeout(-1);
 		}
 	}
@@ -830,11 +830,11 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				m_tmAdd.m_id = rid.GetResIndex();
 				if (iQty > 1)
 				{
-					m_tmAdd.m_amount = (word)atoi(ppszArgs[1]);
-					m_tmAdd.m_amount = maximum(m_tmAdd.m_amount, 1);
+					m_tmAdd.m_vcAmount = (word)atoi(ppszArgs[1]);
+					m_tmAdd.m_vcAmount = maximum(m_tmAdd.m_vcAmount, 1);
 				}
 				else
-					m_tmAdd.m_amount = 1;
+					m_tmAdd.m_vcAmount = 1;
 				if ( (rid.GetResType() == RES_CHARDEF) || (rid.GetResType() == RES_SPAWN) )
 				{
 					m_Targ_Prv_UID.InitUID();
@@ -993,8 +993,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					if (!pSpellDef->GetPrimarySkill(&skill, nullptr))
 						return true;
 
-					m_tmSkillMagery.m_Spell = spell;	// m_atMagery.m_Spell
-					m_pChar->m_atMagery.m_Spell = spell;
+					m_tmSkillMagery.m_iSpell = spell;	// m_atMagery.m_iSpell
+					m_pChar->m_atMagery.m_iSpell = spell;
 					if (pObjSrc != nullptr)
 					{
 						m_Targ_UID = pObjSrc->GetUID();	// default target.
@@ -1358,8 +1358,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 
 			if ( pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ|SPELLFLAG_TARG_XYZ) )
 			{
-				m_tmSkillMagery.m_Spell = SPELL_Summon;
-				m_tmSkillMagery.m_SummonID = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
+				m_tmSkillMagery.m_iSpell = SPELL_Summon;
+				m_tmSkillMagery.m_iSummonID = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
 
 				lpctstr pPrompt = g_Cfg.GetDefaultMsg(DEFMSG_SELECT_MAGIC_TARGET);
 				if ( !pSpellDef->m_sTargetPrompt.IsEmpty() )
@@ -1374,8 +1374,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			}
 			else
 			{
-				m_pChar->m_atMagery.m_Spell = SPELL_Summon;
-				m_pChar->m_atMagery.m_SummonID = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
+				m_pChar->m_atMagery.m_iSpell = SPELL_Summon;
+				m_pChar->m_atMagery.m_iSummonID = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
 
 				if ( IsSetMagicFlags(MAGICF_PRECAST) && !pSpellDef->IsSpellType(SPELLFLAG_NOPRECAST) )
 				{

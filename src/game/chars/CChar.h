@@ -197,9 +197,9 @@ public:
 
 		struct
 		{
-			dword m_Arg1;	// "ACTARG1"
-			dword m_Arg2;	// "ACTARG2"
-			dword m_Arg3;	// "ACTARG3"
+			dword m_dwArg1;	// "ACTARG1"
+			dword m_dwArg2;	// "ACTARG2"
+			dword m_dwArg3;	// "ACTARG3"
 		} m_atUnk;
 
 		// SKILL_MAGERY
@@ -210,8 +210,8 @@ public:
 		// SKILL_SPELLWEAVING
 		struct
 		{
-			SPELL_TYPE m_Spell;			// ACTARG1 = Currently casting spell.
-			CREID_TYPE m_SummonID;		// ACTARG2 = A sub arg of the skill. (summoned type ?)
+			SPELL_TYPE m_iSpell;			// ACTARG1 = Currently casting spell.
+			CREID_TYPE m_iSummonID;		// ACTARG2 = A sub arg of the skill. (summoned type ?)
 		} m_atMagery;
 
 		// SKILL_ALCHEMY
@@ -224,9 +224,9 @@ public:
 		// SKILL_TINKERING
 		struct
 		{
-			dword m_Stroke_Count;		// ACTARG1 = For smithing, tinkering, etc. all requiring multi strokes.
-			ITEMID_TYPE m_ItemID;		// ACTARG2 = Making this item.
-			dword m_Amount;				// ACTARG3 = How many of this item are we making?
+			dword m_dwStrokeCount;		// ACTARG1 = For smithing, tinkering, etc. all requiring multi strokes.
+			ITEMID_TYPE m_iItemID;		// ACTARG2 = Making this item.
+			dword m_dwAmount;				// ACTARG3 = How many of this item are we making?
 		} m_atCreate;
 
 		// SKILL_LUMBERJACKING
@@ -235,15 +235,15 @@ public:
 		struct
 		{
 			CResourceIDBase m_ridType;	// ACTARG1 = Type of item we're harvesting
-			dword m_bounceItem;			// ACTARG2 = Drop item on backpack (true) or drop it on ground (false)
-            dword m_Stroke_Count;		// ACTARG3 = All requiring multi strokes.
+			dword m_dwBounceItem;			// ACTARG2 = Drop item on backpack (true) or drop it on ground (false)
+            dword m_dwStrokeCount;		// ACTARG3 = All requiring multi strokes.
 		} m_atResource;
 
 		// SKILL_TAMING
 		// SKILL_MEDITATION
 		struct
 		{
-			dword m_Stroke_Count;		// ACTARG1 = All requiring multi strokes.
+			dword m_dwStrokeCount;		// ACTARG1 = All requiring multi strokes.
 		} m_atTaming;
 
 		// SKILL_ARCHERY
@@ -254,7 +254,7 @@ public:
 		// SKILL_THROWING
 		struct
 		{
-			WAR_SWING_TYPE m_War_Swing_State;   // ACTARG1 = We are in the war mode swing.
+			WAR_SWING_TYPE m_iWarSwingState;    // ACTARG1 = We are in the war mode swing.
 			int16 m_iRecoilDelay;		        // ACTARG2 & 0x0000FFFF = Duration (in tenth of secs) of the previous swing recoil time.
             int16 m_iSwingAnimationDelay;       // ACTARG2 & 0xFFFF0000 = Duration (in tenth of secs) of the previous swing animation duration.
             int16 m_iSwingAnimation;            // ACTARG3 & 0x0000FFFF = hit animation id.
@@ -266,36 +266,36 @@ public:
 		// SKILL_PEACEMAKING
 		struct
 		{
-			dword m_InstrumentUID;		// ACTARG1 = UID of the instrument we are playing.
+			dword m_dwInstrumentUID;		// ACTARG1 = UID of the instrument we are playing.
 		} m_atBard;
 
 		// SKILL_PROVOCATION
 		struct
 		{
-			dword m_InstrumentUID;		// ACTARG1 = UID of the instrument we are playing.
+			dword m_dwInstrumentUID;    // ACTARG1 = UID of the instrument we are playing.
 			dword m_Unused2;
-			dword m_IsAlly;				// ACTARG3 = Is the provoked considered an ally of the target? 0/1
+			dword m_dwIsAlly;			// ACTARG3 = Is the provoked considered an ally of the target? 0/1
 		} m_atProvocation;				//	If so, abort the skill. To allow always, override it to 0 in @Success via scripts.
 
 		// SKILL_TRACKING
 		struct
 		{
-			DIR_TYPE m_PrvDir;			// ACTARG1 = Previous direction of tracking target, used for when to notify player
-			dword m_DistMax;			// ACTARG2 = Maximum distance when starting and continuing to use the Tracking skill.
+			DIR_TYPE m_iPrvDir;			// ACTARG1 = Previous direction of tracking target, used for when to notify player
+			dword m_dwDistMax;			// ACTARG2 = Maximum distance when starting and continuing to use the Tracking skill.
 		} m_atTracking;
 
 		// NPCACT_RIDDEN
 		struct
 		{
-			mutable dword m_FigurineUID;// ACTARG1 = This creature is being ridden by this object link. IT_FIGURINE IT_EQ_HORSE
+			CUIDBase m_uidFigurine;     // ACTARG1 = This creature is being ridden by this object link. IT_FIGURINE IT_EQ_HORSE
 		} m_atRidden;
 
 		// NPCACT_TALK
 		// NPCACT_TALK_FOLLOW
 		struct
 		{
-			dword m_HearUnknown;		// ACTARG1 = Speaking NPC has no idea what u're saying.
-			dword m_WaitCount;			// ACTARG2 = How long have i been waiting (xN sec)
+			dword m_dwHearUnknown;		// ACTARG1 = Speaking NPC has no idea what u're saying.
+			dword m_dwWaitCount;		// ACTARG2 = How long have i been waiting (xN sec)
 										// m_Act_UID = who am i talking to ?
 		} m_atTalk;
 
@@ -1086,13 +1086,16 @@ public:
 	bool Horse_UnMount(); // Remove horse char and give player a horse item
 
 private:
-	CItem * Horse_GetMountItem() const;
-	CChar * Horse_GetMountChar() const;
+	CItem* Horse_GetMountItem() const;
+    CChar* Horse_GetMountChar() const;
+    CItem* Horse_GetValidMountItem();
+    CChar* Horse_GetValidMountChar();
+
 public:
 	bool IsOwnedBy( const CChar * pChar, bool fAllowGM = true ) const;
 	CChar * GetOwner() const;
-	CChar * Use_Figurine( CItem * pItem, bool bCheckFollowerSlots = true );
-	CItem * Make_Figurine( CUID uidOwner, ITEMID_TYPE id = ITEMID_NOTHING );
+	CChar * Use_Figurine( CItem * pItem, bool fCheckFollowerSlots = true );
+	CItem * Make_Figurine( const CUID &uidOwner, ITEMID_TYPE id = ITEMID_NOTHING );
 	CItem * NPC_Shrink();
 	bool FollowersUpdate( CChar * pChar, short iFollowerSlots = 0, bool fCheckOnly = false );
 

@@ -48,13 +48,13 @@ public:
 
 private:
 	ITEMID_TYPE m_dwDispIndex;		// The current display type. ITEMID_TYPE
-	word m_amount;		// Amount of items in pile. 64K max (or corpse type)
+	word m_wAmount;		// Amount of items in pile. 64K max (or corpse type)
 	IT_TYPE m_type;		// What does this item do when dclicked ? defines dynamic_cast type
 	uchar m_containedGridIndex;	// Which grid have i been placed in ? (when in a container)
 	dword	m_CanUse;		// Base attribute flags. can_u_all/male/female..
 	word	m_weight;
 
-    CUID _uidMultiComponent;   // I'm a Component of a CMulti
+    CUID _uidMultiComponent;   // I'm a CMultiComponent of a CMulti
     CUID _uidMultiLockDown;    // I'm locked down in a CMulti
 public:
     void SetComponentOfMulti(const CUID& uidMulti);
@@ -131,7 +131,7 @@ public:
 		struct	// IsTypeLockable()
 		{
 			CUIDBase m_UIDLock;			// more1=the lock code. normally this is the same as the uid (magic lock=non UID)
-			dword m_lock_complexity;	// more2=0-1000 = How hard to pick or magic unlock. (conflict with door ?)
+			dword m_dwLockComplexity;	// more2=0-1000 = How hard to pick or magic unlock. (conflict with door ?)
 		} m_itContainer;
 
 		// IT_SHIP_TILLER
@@ -168,8 +168,8 @@ public:
 		// IT_WEAPON_*
 		struct
 		{
-			word m_Hits_Cur;		// more1l=eqiv to quality of the item (armor/weapon).
-			word m_Hits_Max;		// more1h=can only be repaired up to this level.
+			word m_wHitsCur;		// more1l=eqiv to quality of the item (armor/weapon).
+			word m_wHitsMax;		// more1h=can only be repaired up to this level.
 			int32 m_spellcharges;	// more2=for a wand etc.
 			word m_spell;			// morex=SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
 			word m_spelllevel;		// morey=level of the spell. (0-1000)
@@ -184,8 +184,8 @@ public:
 		// IT_JEWELRY
 		struct
 		{
-			word m_Hits_Cur;		// more1l= eqiv to quality of the item (armor/weapon).
-			word m_Hits_Max;		// more1h= can only be repaired up to this level.
+			word m_wHitsCur;		// more1l= eqiv to quality of the item (armor/weapon).
+			word m_wHitsMax;		// more1h= can only be repaired up to this level.
 			int32 m_spellcharges;	// more2 = ? spell charges ? not sure how used here..
 			word m_spell;			// morex = SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
 			word m_spelllevel;		// morey=level of the spell. (0-1000)
@@ -226,7 +226,7 @@ public:
 		struct
 		{
 			SPELL_TYPE m_Type;		// more1 = potion effect type
-			dword m_skillquality;	// more2 = 0-1000 Strength of the resulting spell.
+			dword m_dwSkillQuality;	// more2 = 0-1000 Strength of the resulting spell.
 			word m_tick;			// morex = countdown to explode purple.
 			word m_junk4;
 			byte m_ignited;
@@ -277,7 +277,7 @@ public:
 			CUIDBase		m_uidKiller;	// more2 = Who killed this corpse, carved or looted it last. sleep=self.
 			CREID_TYPE		m_BaseID;		// morex,morey = The true type of the creature who's corpse this is.
 			DIR_TYPE		m_facing_dir;	// morez = Corpse dir. 0x80 = on face.
-											// m_amount = the body type.
+											// m_vcAmount = the body type.
 											// m_uidLink = the creatures ghost.
 		} m_itCorpse;
 
@@ -354,7 +354,7 @@ public:
 		// IT_RUNE
 		struct
 		{
-			int m_Strength;			// more1 = How many uses til a rune will wear out ?
+			int32 m_Strength;			// more1 = How many uses til a rune will wear out ?
 			dword m_junk2;
             CPointBase m_ptMark;		// morep = rune marked to a location or a teleport ?
 		} m_itRune;
@@ -363,15 +363,15 @@ public:
 		// IT_MOONGATE
 		struct
 		{
-			int m_fPlayerOnly;		// more1 = The gate is player only. (no npcs, xcept pets)
-			int m_fQuiet;			// more2 = The gate/telepad makes no noise.
+			int32 m_fPlayerOnly;		// more1 = The gate is player only. (no npcs, xcept pets)
+			int32 m_fQuiet;			// more2 = The gate/telepad makes no noise.
             CPointBase m_ptMark;		// morep = marked to a location or a teleport ?
 		} m_itTelepad;
 
 		// IT_EQ_MEMORY_OBJ
 		struct
 		{
-			// m_amount = memory type mask.
+			// m_vcAmount = memory type mask.
 			word m_Action;		// more1l = NPC_MEM_ACT_TYPE What sort of action is this memory about ? (1=training, 2=hire, etc)
 			word m_Skill;		// more1h = SKILL_TYPE = training a skill ?
 			dword m_junk2;		// more2 = It was the start time of the memory, now it's in TIMESTAMP (for int64 support)
@@ -398,36 +398,36 @@ public:
 		struct
 		{
 			CUIDBase m_UIDLock;			// more1 = the lock code. normally this is the same as the uid (magic lock=non UID)
-			dword m_lock_complexity;	// more2=0-1000 = How hard to pick or magic unlock. (conflict with door ?)
-			word m_itSideType;			// morex = type to become (IT_SHIP_SIDE or IT_SHIP_SIDE_LOCKED)
+			dword m_dwLockComplexity;	// more2=0-1000 = How hard to pick or magic unlock. (conflict with door ?)
+			word m_wSideType;			// morex = type to become (IT_SHIP_SIDE or IT_SHIP_SIDE_LOCKED)
 		} m_itShipPlank;
 
 		// IT_PORTCULIS
 		// IT_PORT_LOCKED
 		struct
 		{
-			int m_z1;			// more1 = The down z height.
-			int m_z2;			// more2 = The up z height.
+			int32 m_z1;			// more1 = The down z height.
+			int32 m_z2;			// more2 = The up z height.
 		} m_itPortculis;
 
 		// IT_BEE_HIVE
 		struct
 		{
-			int m_honeycount;		// more1 = How much honey has accumulated here.
+			int32 m_iHoneyCount;		// more1 = How much honey has accumulated here.
 		} m_itBeeHive;
 
 		// IT_LOOM
 		struct
 		{
             CResourceIDBase m_ridCloth;	// more1 = the cloth type currenctly loaded here.
-			int m_ClothQty;				// more2 = IS the loom loaded with cloth ?
+			int32 m_iClothQty;				// more2 = IS the loom loaded with cloth ?
 		} m_itLoom;
 
 		// IT_ARCHERY_BUTTE
 		struct
 		{
             CResourceIDBase m_ridAmmoType;	// more1 = arrow or bolt currently stuck in it.
-			int m_AmmoCount;				// more2 = how many arrows or bolts ?
+			int32 m_iAmmoCount;				// more2 = how many arrows or bolts ?
 		} m_itArcheryButte;
 
 		// IT_CANNON_MUZZLE
@@ -440,14 +440,14 @@ public:
 		// IT_EQ_MURDER_COUNT
 		struct
 		{
-			dword m_Decay_Balance;	// more1 = For the murder flag, how much time is left ?
+			dword m_dwDecayBalance;	// more1 = For the murder flag, how much time is left ?
 		} m_itEqMurderCount;
 
 		// IT_ITEM_STONE
 		struct
 		{
-			ITEMID_TYPE m_ItemID;	// more1= generate this item or template.
-			int m_iPrice;			// more2= ??? gold to purchase / sellback. (vending machine)
+			ITEMID_TYPE m_iItemID;	// more1= generate this item or template.
+			int32 m_iPrice;			// more2= ??? gold to purchase / sellback. (vending machine)
 			word m_wRegenTime;		// morex=regen time in seconds. 0 = no regen required.
 			word m_wAmount;			// morey=Total amount to deliver. 0 = infinite, 0xFFFF=none left
 		} m_itItemStone;
@@ -461,7 +461,7 @@ public:
 		// IT_WEB
 		struct
 		{
-			dword m_Hits_Cur;	// more1 = how much damage the web can take.
+			dword m_wHitsCur;	// more1 = how much damage the web can take.
 		} m_itWeb;
 
 		// IT_DREAM_GATE
@@ -476,10 +476,10 @@ public:
 		struct
 		{
 			ITEMID_TYPE m_AnimID;	// more1 = What does a trap do when triggered. 0=just use the next id.
-			int32 m_Damage;			// more2 = Base damage for a trap.
+			int32 m_iDamage;			// more2 = Base damage for a trap.
 			word  m_wAnimSec;		// morex = How long to animate as a dangerous trap.
 			word  m_wResetSec;		// morey = How long to sit idle til reset.
-			byte  m_fPeriodic;		// morez = Does the trap just cycle from active to inactive ?
+			byte  m_bPeriodic;		// morez = Does the trap just cycle from active to inactive ?
 		} m_itTrap;
 
 		// IT_ANIM_ACTIVE
@@ -495,7 +495,7 @@ public:
 		{
 			ITEMID_TYPE m_SwitchID;	// more1 = the next state of this switch.
 			dword		m_junk2;
-			word		m_fStep;	// morex = can we just step on this to activate ?
+			word		m_wStep;	// morex = can we just step on this to activate ?
 			word		m_wDelay;	// morey = delay this how long before activation.
 									// uidLink = the item to use when this item is thrown or used.
 		} m_itSwitch;
@@ -503,8 +503,8 @@ public:
 		// IT_SOUND
 		struct
 		{
-			dword	m_Sound;	// more1 = SOUND_TYPE
-			int		m_Repeat;	// more2 =
+			dword	m_dwSound;	// more1 = SOUND_TYPE
+			int32	m_iRepeat;	// more2 =
 		} m_itSound;
 
 		// IT_STONE_GUILD
@@ -639,7 +639,7 @@ public:
 	void SetAmountUpdate( word amount );
 	virtual word GetAmount() const
 	{
-		return m_amount;
+		return m_wAmount;
 	}
     bool CanSendAmount() const;
 

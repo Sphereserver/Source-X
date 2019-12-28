@@ -325,7 +325,7 @@ CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap ptTarg )
 	// Summon an NPC using summon spells.
 
 	int skill;
-	CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
+	CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
 	if ( !pSpellDef || !pSpellDef->GetPrimarySkill(&skill, nullptr) )
 		return nullptr;
 
@@ -997,7 +997,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					iBuffIcon = BI_POLYMORPH;
 					break;
 				case SPELL_Lich_Form:
-					m_atMagery.m_SummonID = CREID_LICH;
+					m_atMagery.m_iSummonID = CREID_LICH;
 					Stats_AddRegenVal(STAT_INT, + pSpell->m_itSpell.m_PolyStr);	// RegenManaVal
                     Stats_AddRegenVal(STAT_STR, - pSpell->m_itSpell.m_PolyDex);	// RegenHitsVal
                     ModPropNum(pCCPChar, PROPCH_RESFIRE,    - pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
@@ -1006,7 +1006,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					iBuffIcon = BI_LICHFORM;
 					break;
 				case SPELL_Wraith_Form:
-					m_atMagery.m_SummonID = CREID_SPECTRE;
+					m_atMagery.m_iSummonID = CREID_SPECTRE;
 					iBuffIcon = BI_WRAITHFORM;
                     pSpell->m_itSpell.m_PolyStr = 15;
                     pSpell->m_itSpell.m_PolyDex = 5;
@@ -1016,12 +1016,12 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
                     ModPropNum(pCCPChar, PROPCH_RESENERGY,    - pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
 					break;
 				case SPELL_Horrific_Beast:
-					m_atMagery.m_SummonID = CREID_HORRIFIC_BEAST;
+					m_atMagery.m_iSummonID = CREID_HORRIFIC_BEAST;
                     Stats_AddRegenVal(STAT_STR, + pSpell->m_itSpell.m_spellcharges);
 					iBuffIcon = BI_HORRIFICBEAST;
 					break;
 				case SPELL_Vampiric_Embrace:
-					m_atMagery.m_SummonID = CREID_VAMPIRE_BAT;
+					m_atMagery.m_iSummonID = CREID_VAMPIRE_BAT;
                     ModPropNum(pCCPChar, PROPCH_HITLEECHLIFE, + pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);	// +Hit Leech Life
                     Stats_AddRegenVal(STAT_DEX, + pSpell->m_itSpell.m_PolyDex);		    // +RegenStamVal
                     Stats_AddRegenVal(STAT_INT, + pSpell->m_itSpell.m_spellcharges);	// RegenManaVal
@@ -1029,11 +1029,11 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					iBuffIcon = BI_VAMPIRICEMBRACE;
 					break;
 				case SPELL_Stone_Form:
-					m_atMagery.m_SummonID = CREID_STONE_FORM;
+					m_atMagery.m_iSummonID = CREID_STONE_FORM;
 					iBuffIcon = BI_STONEFORM;
 					break;
 				case SPELL_Reaper_Form:
-					m_atMagery.m_SummonID = CREID_STONE_FORM;
+					m_atMagery.m_iSummonID = CREID_STONE_FORM;
 					iBuffIcon = BI_REAPERFORM;
 					break;
 				default:
@@ -1041,7 +1041,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			}
 
 			const ushort SPELL_MAX_POLY_STAT = (ushort)(g_Cfg.m_iMaxPolyStats);
-			SetID(m_atMagery.m_SummonID);
+			SetID(m_atMagery.m_iSummonID);
 
 			const CCharBase * pCharDef = Char_GetDef();
 			ASSERT(pCharDef);
@@ -1964,7 +1964,7 @@ void CChar::Spell_Area( CPointMap pntTarg, int iDist, int iSkillLevel )
 	// iSkillLevel = 0-1000
 	//
 
-	SPELL_TYPE spelltype = m_atMagery.m_Spell;
+	SPELL_TYPE spelltype = m_atMagery.m_iSpell;
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spelltype);
 	if ( pSpellDef == nullptr )
 		return;
@@ -2009,7 +2009,7 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 	// iSkillLevel = 0-1000
 	// idnewEW and idnewNS are the overriders created in @Success trigger, passed as another arguments because checks are made using default items
 
-	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
+	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
 	ASSERT(pSpellDef);
 
 	if ( m_pArea && m_pArea->IsGuarded() && pSpellDef->IsSpellType(SPELLFLAG_HARM) )
@@ -2138,15 +2138,15 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 					pItem->Delete();
 					continue;
 				}
-				pItem->OnSpellEffect( m_atMagery.m_Spell, this, iSkillLevel, nullptr );
+				pItem->OnSpellEffect( m_atMagery.m_iSpell, this, iSkillLevel, nullptr );
 			}
 
             if (iDuration <= 0)
-                iDuration = GetSpellDuration( m_atMagery.m_Spell, iSkillLevel, pCharSrc );
+                iDuration = GetSpellDuration( m_atMagery.m_iSpell, iSkillLevel, pCharSrc );
 
 			CItem * pSpell = CItem::CreateBase( id );
 			ASSERT(pSpell);
-			pSpell->m_itSpell.m_spell = (word)(m_atMagery.m_Spell);
+			pSpell->m_itSpell.m_spell = (word)(m_atMagery.m_iSpell);
 			pSpell->m_itSpell.m_spelllevel = (word)(iSkillLevel);
 			pSpell->m_itSpell.m_spellcharges = 1;
 			pSpell->m_uidLink = GetUID();	// link it back to you
@@ -2426,7 +2426,7 @@ bool CChar::Spell_TargCheck_Face()
 
 	// Check if target in on anti-magic region
 	CRegion *pArea = m_Act_p.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA);
-	if ( !IsPriv(PRIV_GM) && pArea && pArea->CheckAntiMagic(m_atMagery.m_Spell) )
+	if ( !IsPriv(PRIV_GM) && pArea && pArea->CheckAntiMagic(m_atMagery.m_iSpell) )
 	{
 		SysMessageDefault( DEFMSG_SPELL_TRY_AM );
 		m_Act_Difficulty = -1;	// Give very little credit for failure !
@@ -2440,10 +2440,10 @@ bool CChar::Spell_TargCheck()
 	ADDTOCALLSTACK("CChar::Spell_TargCheck");
 	// Is the spells target or target pos valid ?
 
-	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
+	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
 	if ( pSpellDef == nullptr )
 	{
-		DEBUG_ERR(( "Bad Spell %d, uid 0%0x\n", m_atMagery.m_Spell, (dword)GetUID()));
+		DEBUG_ERR(( "Bad Spell %d, uid 0%0x\n", m_atMagery.m_iSpell, (dword)GetUID()));
 		return false;
 	}
 
@@ -2564,7 +2564,7 @@ bool CChar::Spell_CastDone()
 	uint fieldGauge = 0;
 	uint areaRadius = 0;
 
-	SPELL_TYPE spell = m_atMagery.m_Spell;
+	SPELL_TYPE spell = m_atMagery.m_iSpell;
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
 	if (pSpellDef == nullptr)
 		return false;
@@ -2659,8 +2659,8 @@ bool CChar::Spell_CastDone()
 		{
 			if (iC1)
 			{
-				m_atMagery.m_SummonID = iC1;
-				Spell_Summon(m_atMagery.m_SummonID, m_Act_p);
+				m_atMagery.m_iSummonID = iC1;
+				Spell_Summon(m_atMagery.m_iSummonID, m_Act_p);
 			}
 		}
 		else if (bIsSpellField)
@@ -2732,8 +2732,8 @@ bool CChar::Spell_CastDone()
 		if (spell == SPELL_Summon)
 		{
 			if (iC1)
-				m_atMagery.m_SummonID = iC1;
-			Spell_Summon(m_atMagery.m_SummonID, m_Act_p);
+				m_atMagery.m_iSummonID = iC1;
+			Spell_Summon(m_atMagery.m_iSummonID, m_Act_p);
 		}
 		else
 		{
@@ -2741,31 +2741,31 @@ bool CChar::Spell_CastDone()
 			{
 				switch (spell)
 				{
-					case SPELL_Blade_Spirit:	m_atMagery.m_SummonID = CREID_BLADE_SPIRIT;	break;
-					case SPELL_Vortex:			m_atMagery.m_SummonID = CREID_ENERGY_VORTEX;break;
-					case SPELL_Air_Elem:		m_atMagery.m_SummonID = CREID_AIR_ELEM;		break;
-					case SPELL_Daemon:			m_atMagery.m_SummonID = CREID_DEMON;		break;
-					case SPELL_Earth_Elem:		m_atMagery.m_SummonID = CREID_EARTH_ELEM;	break;
-					case SPELL_Fire_Elem:		m_atMagery.m_SummonID = CREID_FIRE_ELEM;	break;
-					case SPELL_Water_Elem:		m_atMagery.m_SummonID = CREID_WATER_ELEM;	break;
+					case SPELL_Blade_Spirit:	m_atMagery.m_iSummonID = CREID_BLADE_SPIRIT;	break;
+					case SPELL_Vortex:			m_atMagery.m_iSummonID = CREID_ENERGY_VORTEX;break;
+					case SPELL_Air_Elem:		m_atMagery.m_iSummonID = CREID_AIR_ELEM;		break;
+					case SPELL_Daemon:			m_atMagery.m_iSummonID = CREID_DEMON;		break;
+					case SPELL_Earth_Elem:		m_atMagery.m_iSummonID = CREID_EARTH_ELEM;	break;
+					case SPELL_Fire_Elem:		m_atMagery.m_iSummonID = CREID_FIRE_ELEM;	break;
+					case SPELL_Water_Elem:		m_atMagery.m_iSummonID = CREID_WATER_ELEM;	break;
 					case SPELL_Summon_Undead:
 						switch (Calc_GetRandVal(15))
 						{
-							case 1:				m_atMagery.m_SummonID = CREID_LICH;			break;
+							case 1:				m_atMagery.m_iSummonID = CREID_LICH;			break;
 							case 3:
 							case 5:
 							case 7:
-							case 9:				m_atMagery.m_SummonID = CREID_SKELETON;		break;
-							default:			m_atMagery.m_SummonID = CREID_ZOMBIE;		break;
+							case 9:				m_atMagery.m_iSummonID = CREID_SKELETON;		break;
+							default:			m_atMagery.m_iSummonID = CREID_ZOMBIE;		break;
 						}
-					case SPELL_Vengeful_Spirit:	m_atMagery.m_SummonID = CREID_REVENANT;		break;
+					case SPELL_Vengeful_Spirit:	m_atMagery.m_iSummonID = CREID_REVENANT;		break;
 					default: break;
 				}
 			}
 			else
-				m_atMagery.m_SummonID = iC1;
+				m_atMagery.m_iSummonID = iC1;
 
-			Spell_Summon(m_atMagery.m_SummonID, m_Act_p);
+			Spell_Summon(m_atMagery.m_iSummonID, m_Act_p);
 		}
 	}
 	else
@@ -2901,22 +2901,22 @@ bool CChar::Spell_CastDone()
 				}
 				if (IsPriv(PRIV_GM))
 				{
-					m_atMagery.m_SummonID = pCorpse->m_itCorpse.m_BaseID;
+					m_atMagery.m_iSummonID = pCorpse->m_itCorpse.m_BaseID;
 				}
 				else if (CCharBase::IsPlayableID(pCorpse->GetCorpseType())) 	// Must be a human corpse ?
 				{
-					m_atMagery.m_SummonID = CREID_ZOMBIE;
+					m_atMagery.m_iSummonID = CREID_ZOMBIE;
 				}
 				else
 				{
-					m_atMagery.m_SummonID = pCorpse->GetCorpseType();
+					m_atMagery.m_iSummonID = pCorpse->GetCorpseType();
 				}
 
 				if (!pCorpse->IsTopLevel())
 				{
 					return false;
 				}
-				CChar *pChar = Spell_Summon(m_atMagery.m_SummonID, pCorpse->GetTopPoint());
+				CChar *pChar = Spell_Summon(m_atMagery.m_iSummonID, pCorpse->GetTopPoint());
 				ASSERT(pChar);
 				if (!pChar->RaiseCorpse(pCorpse))
 				{
@@ -3011,7 +3011,7 @@ void CChar::Spell_CastFail()
 {
 	ADDTOCALLSTACK("CChar::Spell_CastFail");
 	ITEMID_TYPE iT1 = ITEMID_FX_SPELL_FAIL;
-	CScriptTriggerArgs	Args( m_atMagery.m_Spell, 0, m_Act_Prv_UID.ObjFind() );
+	CScriptTriggerArgs	Args( m_atMagery.m_iSpell, 0, m_Act_Prv_UID.ObjFind() );
 	Args.m_VarsLocal.SetNum("CreateObject1",iT1);
 	if ( IsTrigUsed(TRIGGER_SPELLFAIL) )
 	{
@@ -3021,7 +3021,7 @@ void CChar::Spell_CastFail()
 
 	if ( IsTrigUsed(TRIGGER_FAIL) )
 	{
-		if ( Spell_OnTrigger( m_atMagery.m_Spell, SPTRIG_FAIL, this, &Args ) == TRIGRET_RET_TRUE )
+		if ( Spell_OnTrigger( m_atMagery.m_iSpell, SPTRIG_FAIL, this, &Args ) == TRIGRET_RET_TRUE )
 			return;
 	}
 
@@ -3039,7 +3039,7 @@ void CChar::Spell_CastFail()
 	if ( g_Cfg.m_fReagentLossFail )
 	{
 		// consume the regs.
-		Spell_CanCast( m_atMagery.m_Spell, false, m_Act_Prv_UID.ObjFind(), false );
+		Spell_CanCast( m_atMagery.m_iSpell, false, m_Act_Prv_UID.ObjFind(), false );
 	}
 }
 
@@ -3050,13 +3050,13 @@ int CChar::Spell_CastStart()
 	// but down with skill, int and dex
 	// ARGS:
 	//  m_Act_p = location to cast to.
-	//  m_atMagery.m_Spell = the spell.
+	//  m_atMagery.m_iSpell = the spell.
 	//  m_Act_Prv_UID = the source of the spell.
 	//  m_Act_UID = target for the spell.
 	// RETURN:
 	//  0-100
 	//  -1 = instant failure.
-	const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
+	const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
 	if ( !pSpellDef )
 		return -1;
 
@@ -3066,7 +3066,7 @@ int CChar::Spell_CastStart()
 		m_Act_UID = GetClient()->m_Targ_UID;
 		m_Act_Prv_UID = GetClient()->m_Targ_Prv_UID;
 
-		if ( !Spell_CanCast(m_atMagery.m_Spell, true, m_Act_Prv_UID.ObjFind(), true) )
+		if ( !Spell_CanCast(m_atMagery.m_iSpell, true, m_Act_Prv_UID.ObjFind(), true) )
 			return -1;
 	}
 	else
@@ -3111,7 +3111,7 @@ int CChar::Spell_CastStart()
 	if ( iWaitTime < 1 )
 		iWaitTime = 1;
 
-	CScriptTriggerArgs Args((int)m_atMagery.m_Spell, iDifficulty, pItem);
+	CScriptTriggerArgs Args((int)m_atMagery.m_iSpell, iDifficulty, pItem);
 	Args.m_iN3 = iWaitTime;
 	Args.m_VarsLocal.SetNum("WOP", fWOP);
 	int64 WOPFont = g_Cfg.m_iWordsOfPowerFont;
@@ -3148,11 +3148,11 @@ int CChar::Spell_CastStart()
 			return -1;
 	}
 
-	m_atMagery.m_Spell = (SPELL_TYPE)Args.m_iN1;
+	m_atMagery.m_iSpell = (SPELL_TYPE)Args.m_iN1;
 	iDifficulty = (int)Args.m_iN2;
 	iWaitTime = Args.m_iN3;
 
-	pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
+	pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
 	if ( !pSpellDef )
 		return -1;
 

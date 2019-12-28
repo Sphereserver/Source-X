@@ -253,6 +253,7 @@ void CNetworkManager::start(void)
     {
         // initialise network threads (if g_Cfg.m_iNetworkThreads is == 0 then we'll have only 1 CNetworkThread)
         size_t ntCount = m_threads.size();
+        UNREFERENCED_PARAMETER(ntCount);
         for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
         {
             CNetworkThread* pThread = *it;

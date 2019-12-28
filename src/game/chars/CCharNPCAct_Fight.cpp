@@ -191,7 +191,7 @@ void CChar::NPC_Act_Fight()
     int iDist = GetDist(pChar);
 
     if ((m_pNPC->m_Brain == NPCBRAIN_GUARD) &&
-        (m_atFight.m_War_Swing_State == WAR_SWING_READY) &&
+        (m_atFight.m_iWarSwingState == WAR_SWING_READY) &&
         !Calc_GetRandVal(3))
     {
         // If a guard is ever too far away (missed a chance to swing)
@@ -221,7 +221,7 @@ void CChar::NPC_Act_Fight()
                 SPELL_TYPE iSpellforced = (SPELL_TYPE)RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("spell"));
                 if (g_Cfg.IsSkillFlag(iSkillforced, SKF_MAGIC))
                 {
-                    m_atMagery.m_Spell = iSpellforced;
+                    m_atMagery.m_iSpell = iSpellforced;
                     m_Act_UID = m_Fight_Targ_UID; // Setting the spell's target.
                 }
 

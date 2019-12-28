@@ -348,7 +348,7 @@ void CClient::addItem_OnGround( CItem * pItem ) // Send items (on ground)
 
 	// send item sound
 	if (pItem->IsType(IT_SOUND))
-		addSound((SOUND_TYPE)(pItem->m_itSound.m_Sound), pItem, pItem->m_itSound.m_Repeat );
+		addSound((SOUND_TYPE)(pItem->m_itSound.m_dwSound), pItem, pItem->m_itSound.m_iRepeat );
 
 	// send corpse clothing
 	if ( !IsPriv(PRIV_DEBUG) && (fCorpse && CCharBase::IsPlayableID(pItem->GetCorpseType())) )	// cloths on corpse
@@ -939,14 +939,16 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 
 	id = pItem->GetDispID();
 	wHue = pItem->GetHue();
-	CItemBase * pItemDef = pItem->Item_GetDef();
+
+	const CItemBase * pItemDef = pItem->Item_GetDef();
+    const uchar uiResDisp = GetResDisp();
 
 	if ( pItem->IsType(IT_EQ_HORSE) )
 	{
 		// check the reslevel of the ridden horse
 		CREID_TYPE idHorse = pItem->m_itFigurine.m_ID;
-		CCharBase * pCharDef = CCharBase::FindCharBase(idHorse);
-		if ( pCharDef && ( GetResDisp() < pCharDef->GetResLevel() ) )
+		const CCharBase * pCharDef = CCharBase::FindCharBase(idHorse);
+		if ( pCharDef && (uiResDisp < pCharDef->GetResLevel() ) )
 		{
 			idHorse = (CREID_TYPE)(pCharDef->GetResDispDnId());
 			wHue = pCharDef->GetResDispDnHue();
@@ -975,7 +977,7 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 		wHue = g_Cfg.m_iColorInvis;
 	else
 	{
-		if ( pItemDef && ( GetResDisp() < pItemDef->GetResLevel() ) )
+		if ( pItemDef && (uiResDisp < pItemDef->GetResLevel() ) )
 			if ( pItemDef->GetResDispDnHue() != HUE_DEFAULT )
 				wHue = pItemDef->GetResDispDnHue();
 
@@ -986,7 +988,7 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 
 	}
 
-	if ( pItemDef && ( GetResDisp() < pItemDef->GetResLevel() ) )
+	if ( pItemDef && (uiResDisp < pItemDef->GetResLevel() ) )
 		id = (ITEMID_TYPE)(pItemDef->GetResDispDnId());
 }
 
@@ -1063,7 +1065,7 @@ void CClient::addCharMove( const CChar * pChar ) const
 
 void CClient::addCharMove( const CChar * pChar, byte iCharDirFlag ) const
 {
-	ADDTOCALLSTACK("CClient::addCharMove");
+	ADDTOCALLSTACK("CClient::addCharMove (DirFlag)");
 	// This char has just moved on screen.
 	// or changed in a subtle way like "hidden"
 	// NOTE: If i have been turned this will NOT update myself.
@@ -1115,7 +1117,7 @@ void CClient::addChar( CChar * pChar, bool fFull )
 	EXC_DEBUG_END;
 }
 
-void CClient::addItemName( const CItem * pItem )
+void CClient::addItemName( CItem * pItem )
 {
 	ADDTOCALLSTACK("CClient::addItemName");
 	// NOTE: CanSee() has already been called.
@@ -1184,7 +1186,7 @@ void CClient::addItemName( const CItem * pItem )
 			case IT_SPAWN_CHAR:
 			case IT_SPAWN_ITEM:
 				{
-					CCSpawn *pSpawn = const_cast<CItem*>(pItem)->GetSpawn();
+					CCSpawn *pSpawn = pItem->GetSpawn();
 					if ( pSpawn )
 						len += pSpawn->WriteName(szName + len);
 				}
@@ -1214,7 +1216,7 @@ void CClient::addItemName( const CItem * pItem )
 		Args.m_VarsLocal.SetStrNew("ClickMsgText", &szName[0]);
 		Args.m_VarsLocal.SetNumNew("ClickMsgHue", (int64)(wHue));
 
-		TRIGRET_TYPE ret = dynamic_cast<CObjBase*>(const_cast<CItem*>(pItem))->OnTrigger( "@AfterClick", m_pChar, &Args );	// CTRIG_AfterClick, ITRIG_AfterClick
+		TRIGRET_TYPE ret = pItem->OnTrigger( "@AfterClick", m_pChar, &Args );	// CTRIG_AfterClick, ITRIG_AfterClick
 
 		if ( ret == TRIGRET_RET_TRUE )
 			return;
@@ -1557,10 +1559,10 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 
 		case CLIMODE_TARG_SKILL_MAGERY:
 		{
-			const CSpellDef* pSpellDef = g_Cfg.GetSpellDef(m_tmSkillMagery.m_Spell);
+			const CSpellDef* pSpellDef = g_Cfg.GetSpellDef(m_tmSkillMagery.m_iSpell);
 			if (m_pChar != nullptr && pSpellDef != nullptr)
 			{
-				CScriptTriggerArgs Args(m_tmSkillMagery.m_Spell, 0, m_Targ_Prv_UID.ObjFind());
+				CScriptTriggerArgs Args(m_tmSkillMagery.m_iSpell, 0, m_Targ_Prv_UID.ObjFind());
 
 				if ( IsTrigUsed(TRIGGER_SPELLTARGETCANCEL) )
 				{
@@ -1573,7 +1575,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 
 				if ( IsTrigUsed(TRIGGER_TARGETCANCEL) )
 				{
-					if ( m_pChar->Spell_OnTrigger( m_tmSkillMagery.m_Spell, SPTRIG_TARGETCANCEL, m_pChar, &Args ) == TRIGRET_RET_TRUE )
+					if ( m_pChar->Spell_OnTrigger( m_tmSkillMagery.m_iSpell, SPTRIG_TARGETCANCEL, m_pChar, &Args ) == TRIGRET_RET_TRUE )
 						bSuppressCancelMessage = true;
 				}
 			}
@@ -1588,7 +1590,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 			switch (GetTargMode())
 			{
 				case CLIMODE_TARG_SKILL:
-					action = m_tmSkillTarg.m_Skill;
+					action = m_tmSkillTarg.m_iSkill;
 					break;
 				case CLIMODE_TARG_SKILL_HERD_DEST:
 					action = SKILL_HERDING;

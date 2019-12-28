@@ -2346,7 +2346,7 @@ void CChar::SpeakUTF8Ex( const nword * pszText, HUE_TYPE wHue, TALKMODE_TYPE mod
 }
 
 // Convert me into a figurine
-CItem * CChar::Make_Figurine( CUID uidOwner, ITEMID_TYPE id )
+CItem * CChar::Make_Figurine( const CUID &uidOwner, ITEMID_TYPE id )
 {
 	ADDTOCALLSTACK("CChar::Make_Figurine");
 	if ( IsDisconnected() || m_pPlayer )
@@ -2355,7 +2355,7 @@ CItem * CChar::Make_Figurine( CUID uidOwner, ITEMID_TYPE id )
 	CCharBase* pCharDef = Char_GetDef();
 
 	// turn creature into a figurine.
-	CItem * pItem = CItem::CreateScript( ( id == ITEMID_NOTHING ) ? pCharDef->m_trackID : id, this );
+	CItem * pItem = CItem::CreateScript( (id == ITEMID_NOTHING) ? pCharDef->m_trackID : id, this );
 	if ( !pItem )
 		return nullptr;
 
@@ -2373,7 +2373,7 @@ CItem * CChar::Make_Figurine( CUID uidOwner, ITEMID_TYPE id )
 	StatFlag_Set(STATF_RIDDEN);
 	Skill_Start(NPCACT_RIDDEN);
 	SetDisconnected();
-	m_atRidden.m_FigurineUID = pItem->GetUID().GetObjUID();
+	m_atRidden.m_uidFigurine = pItem->GetUID();
 
 	return pItem;
 }
@@ -2400,51 +2400,108 @@ CItem * CChar::NPC_Shrink()
 	return pItem;
 }
 
+
 // I am a horse.
 // Get my mount object. (attached to my rider)
-CItem * CChar::Horse_GetMountItem() const
+CItem* CChar::Horse_GetMountItem() const
 {
-	ADDTOCALLSTACK("CChar::Horse_GetMountItem");
+    ADDTOCALLSTACK("CChar::Horse_GetMountItem");
 
-	if ( ! IsStatFlag( STATF_RIDDEN ))
-		return nullptr;
+    if (!IsStatFlag(STATF_RIDDEN))
+        return nullptr;
 
-	CItem * pItem = CUID(m_atRidden.m_FigurineUID).ItemFind();
+    CItem* pItemMount = m_atRidden.m_uidFigurine.ItemFind();   // ACTARG1 = Mount item UID
+    if (pItemMount && (pItemMount->IsType(IT_FIGURINE) || pItemMount->IsType(IT_EQ_HORSE)))
+    {
+        const CUID& uidThis = GetUID();
+        if (pItemMount->m_itFigurine.m_UID != uidThis)
+        {
+            g_Log.EventWarn("Auto-fixing mislinked mount item (UID=0%x) for this mount (UID=0%x, id=0%x '%s').\n",
+                (dword)pItemMount->GetUID(), (dword)uidThis, GetBaseID(), GetName());
+            pItemMount->m_itFigurine.m_UID = uidThis;
+        }
+        return pItemMount;
+    }
+    return nullptr;
+}
 
-	if ( pItem == nullptr )
-	{
-		CItemMemory* pItemMem = Memory_FindTypes( MEMORY_IPET );
+CItem* CChar::Horse_GetValidMountItem()
+{
+    ADDTOCALLSTACK("CChar::Horse_GetValidMountItem");
 
-		if ( pItemMem != nullptr )
-		{
-			CChar* pOwner = pItemMem->m_uidLink.CharFind();
+    CItem* pItemMount = Horse_GetMountItem();
+    if (pItemMount)
+        return pItemMount;
 
-			if ( pOwner != nullptr )
-			{
-				CItem* pItemMount = pOwner->LayerFind(LAYER_HORSE);
+    // Try to auto-create a valid mount item
+    int iFailureCode = 0;
+    const CItemMemory* pItemMemPet = Memory_FindTypes(MEMORY_IPET);
+    if (pItemMemPet)
+    {
+        const CChar* pOwner = pItemMemPet->m_uidLink.CharFind();
+        if (pOwner)
+        {
+            CItem* pOwnerItemMount = pOwner->LayerFind(LAYER_HORSE);
+            if (pOwnerItemMount)
+            {
+                if (pOwnerItemMount->m_itFigurine.m_UID == GetUID())
+                {
+                    m_atRidden.m_uidFigurine = pOwnerItemMount->GetUID();
+                    pItemMount = pOwnerItemMount;
+                }
+                else
+                    iFailureCode = 4;
+            }
+            else
+                iFailureCode = 3;
+        }
+        else
+            iFailureCode = 2;
+    }
+    else
+        iFailureCode = 1;
 
-				if ( pItemMount != nullptr && pItemMount->m_itNormal.m_more2 == GetUID().GetObjUID() )
-				{
-					m_atRidden.m_FigurineUID = pItemMount->GetUID().GetObjUID();
-					pItem = pItemMount;
+    if (!iFailureCode)
+    {
+        g_Log.EventWarn("Mount (UID=0%x, id=0%x '%s'): Fixed mount item (ACTARG1=0%x) with UID=0%x, id=0%x '%s'\n",
+            (dword)GetUID(), GetBaseID(), GetName(), (dword)m_atRidden.m_uidFigurine,
+            (dword)(pItemMount->GetUID()), pItemMount->GetBaseID(), pItemMount->GetName());
+    }
+    else
+    {
+        lpctstr ptcFailureString;
+        switch (iFailureCode)
+        {
+        default:    ptcFailureString = "";                                          break;
+        case 1:     ptcFailureString = "MEMORY_IPET missing";                       break;
+        case 2:     ptcFailureString = "MEMORY_IPET has invalid LINK (owner)";      break;
+        case 3:     ptcFailureString = "Missing mount item in owner's LAYER_HORSE"; break;
+        case 4:
+            ptcFailureString = "Mount item in owner's LAYER_HORSE has a MORE2 which doesn't match this mount UID (owner's riding another mount?)";
+            break;
+        }
+        g_Log.EventError("Mount (UID=0%x, id=0%x '%s'): Can't auto-fix invalid mount item (ACTARG1=0%x)'\n",
+            (dword)GetUID(), GetBaseID(), GetName(), (dword)m_atRidden.m_uidFigurine);
+        g_Log.EventError(" Reason: %s.\n", ptcFailureString);
+    }
 
-					DEBUG_ERR(("UID=0%x, id=0%x '%s', Fixed mount item UID=0%x, id=0%x '%s'\n",
-						(dword)GetUID(), GetBaseID(), GetName(), (dword)(pItem->GetUID()), pItem->GetBaseID(), pItem->GetName()));
-				}
-			}
-		}
-	}
-
-	if ( pItem == nullptr || ( ! pItem->IsType( IT_FIGURINE ) && ! pItem->IsType( IT_EQ_HORSE )) )
-		return nullptr;
-	return pItem;
+    return Horse_GetMountItem();
 }
 
 // Gets my riding character, if i'm being mounted.
-CChar * CChar::Horse_GetMountChar() const
+CChar* CChar::Horse_GetMountChar() const
 {
-	ADDTOCALLSTACK("CChar::Horse_GetMountChar");
-	CItem * pItem = Horse_GetMountItem();
+    ADDTOCALLSTACK("CChar::Horse_GetMountChar");
+    CItem* pItem = Horse_GetMountItem();
+    if (pItem == nullptr)
+        return nullptr;
+    return dynamic_cast <CChar*>(pItem->GetTopLevelObj());
+}
+
+CChar * CChar::Horse_GetValidMountChar()
+{
+	ADDTOCALLSTACK("CChar::Horse_GetValidMountChar");
+    CItem * pItem = Horse_GetValidMountItem();
 	if ( pItem == nullptr )
 		return nullptr;
 	return dynamic_cast <CChar*>( pItem->GetTopLevelObj());
@@ -2538,7 +2595,7 @@ bool CChar::Horse_UnMount()
 	}
 
 	CChar * pPet = pItem->m_itFigurine.m_UID.CharFind();
-	if ( IsTrigUsed(TRIGGER_DISMOUNT) && pPet != nullptr && pPet->IsDisconnected() && !pPet->IsDeleted() ) // valid horse for trigger
+	if (pPet && IsTrigUsed(TRIGGER_DISMOUNT) && pPet->IsDisconnected() && !pPet->IsDeleted() ) // valid horse for trigger
 	{
 		CScriptTriggerArgs Args(pPet);
 		if ( OnTrigger(CTRIG_Dismount, this, &Args) == TRIGRET_RET_TRUE )
@@ -2548,7 +2605,8 @@ bool CChar::Horse_UnMount()
 	if (pItem->GetBaseID() == ITEMID_SHIP_PILOT)
 	{
 		CItem *pShip = pItem->m_uidLink.ItemFind();
-		pShip->m_itShip.m_Pilot.InitUID();
+        if (pShip)
+		    pShip->m_itShip.m_Pilot.InitUID();
 
 		SysMessageDefault(DEFMSG_SHIP_PILOT_OFF);
 		pItem->Delete();
@@ -3043,7 +3101,7 @@ bool CChar::OnFreezeCheck() const
 
 		if ( IsSetMagicFlags(MAGICF_FREEZEONCAST) && g_Cfg.IsSkillFlag(m_Act_SkillCurrent, SKF_MAGIC) )		// casting magic spells
 		{
-			const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
+			const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
 			if ( pSpellDef && !pSpellDef->IsSpellType(SPELLFLAG_NOFREEZEONCAST) )
 				return true;
 		}
@@ -3267,7 +3325,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 		else if ( g_Cfg.IsSkillFlag(iSkillActive, SKF_FIGHT) && g_Cfg.IsSkillFlag(iSkillActive, SKF_RANGED) && !IsSetCombatFlags(COMBAT_ARCHERYCANMOVE) && !IsStatFlag(STATF_ARCHERCANMOVE) )
 		{
 			// Keep timer active holding the swing action until the char stops moving
-			m_atFight.m_War_Swing_State = WAR_SWING_EQUIPPING;
+			m_atFight.m_iWarSwingState = WAR_SWING_EQUIPPING;
 			SetTimeoutD(1);
 		}
 
@@ -3370,7 +3428,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
                 continue;
             }
 			case IT_SWITCH:
-				if ( pItem->m_itSwitch.m_fStep )
+				if ( pItem->m_itSwitch.m_wStep )
 					Use_Item(pItem);
 				continue;
 			case IT_MOONGATE:
@@ -4049,7 +4107,7 @@ void CChar::OnTickFood(ushort uiVal, int HitsHungerLoss)
 
 	char *pszMsg = Str_GetTemp();
 	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MSG_FOOD_LVL_LOOKS), pszMsgLevel);
-	CItem *pMountItem = Horse_GetMountItem();
+	CItem *pMountItem = Horse_GetValidMountItem();
 	if ( pMountItem )
 		pMountItem->Emote(pszMsg);
 	else

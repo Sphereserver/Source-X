@@ -234,20 +234,20 @@ public:
 		struct
 		{
 			int m_id;
-			word m_amount;
+			word m_vcAmount;
 		} m_tmAdd;
 
 		// CLIMODE_TARG_SKILL
 		struct
 		{
-			SKILL_TYPE m_Skill;			// targetting what spell ?
+			SKILL_TYPE m_iSkill;			// targetting what spell ?
 		} m_tmSkillTarg;
 
 		// CLIMODE_TARG_SKILL_MAGERY
 		struct
 		{
-			SPELL_TYPE m_Spell;			// targetting what spell ?
-			CREID_TYPE m_SummonID;
+			SPELL_TYPE m_iSpell;			// targetting what spell ?
+			CREID_TYPE m_iSummonID;
 		} m_tmSkillMagery;
 
 		// CLIMODE_TARG_USE_ITEM
@@ -475,7 +475,7 @@ public:
 	void addCharMove( const CChar * pChar, byte iCharDirFlag ) const;
 	void addChar( CChar * pChar, bool fFull = true );
 	void addCharName( const CChar * pChar ); // Singleclick text for a character
-	void addItemName( const CItem * pItem );
+	void addItemName( CItem * pItem );
 
 	bool addKick( CTextConsole * pSrc, bool fBlock = true );
 	void addMusic( MIDI_TYPE id ) const;

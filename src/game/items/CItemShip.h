@@ -27,7 +27,8 @@ private:
     virtual bool r_LoadVal(CScript & s) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override; // Execute command from script
     virtual int FixWeirdness() override;
-    virtual void OnComponentCreate(CItem * pComponent);
+
+    void OnComponentCreate(CItem * pComponent);
 
 public:
     static const char *m_sClassName;

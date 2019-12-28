@@ -107,7 +107,7 @@ bool CSpellDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
             sVal = m_Duration.Write();
             break;
         case SPC_EFFECT:
-            sVal = m_Effect.Write();
+            sVal = m_vcEffect.Write();
             break;
         case SPC_EFFECT_ID:
             sVal.FormatVal( m_idEffect );
@@ -219,7 +219,7 @@ bool CSpellDef::r_LoadVal( CScript &s )
             m_Duration.Load( s.GetArgRaw());
             break;
         case SPC_EFFECT:
-            m_Effect.Load( s.GetArgRaw());
+            m_vcEffect.Load( s.GetArgRaw());
             break;
         case SPC_EFFECT_ID:
             m_idEffect = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
