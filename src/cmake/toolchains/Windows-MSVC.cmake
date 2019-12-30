@@ -11,12 +11,12 @@ function (toolchain_after_project)
 
 	 # Setting the Visual Studio warning level to 4 and forcing MultiProccessor compilation
 	SET (C_FLAGS_COMMON		"${C_FLAGS_EXTRA} /W4 /MP /GR /fp:fast\
-					/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703"		)
+					/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703 /wd26812"		)
 	 #				# Disable warnings caused by external c libraries.
 	 # For zlib: C4244, C4245
 
 	SET (CXX_FLAGS_COMMON		"${CXX_FLAGS_EXTRA} /W4 /MP /GR /fp:fast /std:c++17\
-					/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703"		)
+					/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703 /wd26812"		)
 
 	 # Setting the exe to be a GUI application and not a console one.
 	SET (LINKER_FLAGS_COMMON	"/SUBSYSTEM:WINDOWS"		)
