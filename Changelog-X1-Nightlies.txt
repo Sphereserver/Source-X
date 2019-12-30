@@ -1965,3 +1965,113 @@ WARNING: Important change!
 - Added: More detailed error messages when the garbage collection removes or auto-fixes a somehow corrupt mounted npc (Issue #347).
 - Fixed: Teleporters created from custom houses teleporting to the house center coordinates (Issue #336).
 - Fixed: Item equip macro not checking distance and line of sight (Issue #344).
+
+30-12-2019, XuN
+Spanws:
+Added triggers:
+	@PreSpawn:	Called before any npc or item is created
+			-argn1: Id of the object to create, can be changed.
+			-return 1: Stops the proccess.
+	@Spawn: Called when an object has been created and before it has been placed, placing it in a valid spot will disable default placement checks.
+			-argo: The spawned object.
+			*NOTE: Since character creation is slightly different than the item's one, for chars this trigger and the placement will occur before the @Create trigger is called.
+
+Fixed BadSpawn not working: Now each bad spawn is inserted in a vector and accessed through this command, the command now accepts args to go into a direct index (invalid index is defaulted to the first one found).
+
+
+Added champion's support:
+-CChampionDef (script block):
+	[CHAMPION 01]
+	DEFNAME=CHAMPION_Abyss
+	NAME=Abyss
+	LevelMax=5 //Maximum levels of this champion, for default ones it must be 5 (4 npcgroups + boss)
+	Spawns=100 //Total npc spawns for this champion (excepting the boss)
+	NPCGroup[1] = c_mongbat, c_imp //Group of npcs for level 1
+	NPCGroup[2] = c_gargoyle, c_harpy //Group of npcs for level 2
+	NPCGroup[3] = c_gargoyle_fire, c_gargoyle_stone //Group of npcs for level 3
+	NPCGroup[4] = c_daemon, c_succubus //Group of npcs for level 4
+	CHAMPIONID=c_semidar	//The boss
+
+-Ingame item example 1:
+	[ITEMDEF i_champion_idol]
+	ID=01f18
+	TYPE=t_champion_spawn //this defname should match 300
+	NAME=Champion Idol
+
+	ON=@Create
+	more=CHAMPION_Abyss
+	ATTR |= <DEF.ATTR_MOVE_NEVER>
+
+	ON=@DClick
+	if (<timer> == -1)
+		start //init the champion
+	else
+		stop // stop the champion
+	endif
+	return 1
+
+-Ingame item example 2:
+	[ITEMDEF i_champion_idol_abyss]
+	ID=01f18
+	TYPE=t_champion_spawn //this defname should match 300
+	NAME=Abyss Champion Idol
+
+	ON=@Create
+	more=CHAMPION_Abyss
+	ATTR |= <DEF.ATTR_MOVE_NEVER>
+
+	ON=@DClick
+	if (<timer> == -1)
+		start //init the champion
+	else
+		stop // stop the champion
+	endif
+	return 1
+
+	ON=@AddWhiteCandle
+		AddSpawn//Adding twice npcs when a new white candle appears
+
+    ON=@AddRedCandle
+		timer=600	// A timeout means a redcandle removed, so force players to get the next candle within the next 10 minutes.
+
+	ON=@Spawn
+		if (<argo.baseid>==<serv.champion.<argn1>.ChampionID>)//If the spawned NPC is the champion's boss...
+			argo.events=e_champion_boss	// ... give it an impressive event!. (Note: this is an example thus this event is also an example and does not exist by default.)
+	    endif
+
+R/W Keywords available for the t_champion_spawn item:
+    "DEATHCOUNT": Gets/sets the total count of deaths, counts towards progression, setting a value higher than the one required by the system will have effect only when that value is requested by the code and not instantly (eg: another monster dies.
+    "LASTACTIVATIONTIME": TimeHiRes of the last activation time, allowing to create cooldowns.
+    "LEVEL": Current level of the champion spawn.
+    "LEVELMAX": Maximum level, should be 5 by default ... other values are allowed but using other values requires scripting their behaviour since the system is done to match OSI and will not calculate good other values.
+    "NPCGROUP": Gets a given npcgroup (eg .xshow npcgroup[1][3] will give the fourth npc on the first group), or create/overwrite a group (eg: .xnpcgroup[2] c_ogre, c_ettin, c_orc).
+    "MORE/MORE1": Gets or sets the champion id (eg: .xmore1 CHAMPION_Abyss)
+    "REDCANDLES": Gets the count of red candles (Read only).
+    "SPAWNSCUR": Gets or sets the current count of spawns.
+    "SPAWNSMAX": Gets or sets the total maximum spawns.
+    "WHITECANDLES": Gets thhe count of white candles (read only).
+
+Verbs available for the t_champion_spawn item:	
+    "ADDOBJ": Inserts an already created npc into the champion spawn (be sure you add them when the champion is activated, or they will be removed when it start).
+    "DELOBJ": Removes one character from the champion counting towards the progression of itself, this does not remove the character.
+    "ADDREDCANDLE": Advances the champion by adding one red candle (red candles and levels explained bellow).
+    "ADDWHITECANDLE": Advances the champion by adding one white candle.
+    "DELREDCANDLE": Regress one red candle (if any).
+    "DELWHITECANDLE": Regress one white candle (if any) (If there are no white candles, then calls DELREDCANDLE).
+    "ADDSPAWN": Forces the generation of one spawn (applying champion level and so)
+    "INIT": Restores the champion's attributes (pretty much like a 'clear'), this is forced when changing the item's more1 so be aware to do not change (or call it) when the champion is active or it will mess up.
+    "MULTICREATE": Emplaces a champion by script, a champion requires a multi area to be renamed and have custom flags, forbidding recalls or whatever.
+    "START": Activates the champion.
+    "STOP": Deactivates the champion and removes any progress and npcs.
+	
+Default levels explanation:
+	Level 1: From start until 6th red candle is finished.
+	Level 2: From 7th red candle to Level 10th red candle.
+	Level 3: From red candle 11 to 14.
+	Level 4: From red candle 15 to 16.
+	Boss: SpawnsCur >= SpawnsMax.
+	Note: Timer being called when a red candle is active will remove it and, since it has to be done again, the SpawnsMax increase by KillsNextRed.
+
+When a spawned npc is killed, AddSpawn is being called to spawn the next one.
+	-When all npcs are alredy spawned then AddSpawn checks for DeathCount > SpawnsMax, so the boss will only be generated when all the other spawns are killed.
+Must have event, even if it's empty, since it's applied by the source to generated objects: [events e_spawn_champion]
