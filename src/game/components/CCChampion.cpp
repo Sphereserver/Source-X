@@ -20,7 +20,8 @@
 #include <algorithm> 
 #include <sstream> 
 #include <iterator> 
-#include <iostream> 
+#include <iostream>
+#include <cctype>
 
 #define CANDLESNEXTRED 4
 
@@ -645,6 +646,7 @@ enum ICHMPL_TYPE
     ICHMPL_CANDLESNEXTRED,
     ICHMPL_CHAMPIONID,
     ICHMPL_CHAMPIONSPAWN,
+    ICHMPL_CHAMPIONSUMMONED,
     ICHMPL_DEATHCOUNT,
     ICHMPL_KILLSNEXTRED,
     ICHMPL_KILLSNEXTWHITE,
@@ -670,6 +672,7 @@ lpctstr const CCChampion::sm_szLoadKeys[ICHMPL_QTY + 1] =
     "CANDLESNEXTRED",
     "CHAMPIONID",
     "CHAMPIONSPAWN",
+    "CHAMPIONSUMMONED",
     "DEATHCOUNT",
     "KILLSNEXTRED",
     "KILLSNEXTWHITE",
@@ -796,8 +799,7 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
         std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return (unsigned char)std::tolower(c); });
         if (str.compare(0, 8, "npcgroup") == 0)
         {
-            Exp_GetSingle(ptcKey);
-            SKIP_SEPARATORS(ptcKey);
+            ptcKey += 8;
             iCmd = ICHMPL_NPCGROUP;
         }
     }
@@ -840,7 +842,7 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
         case ICHMPL_NPCGROUP:
         {
             uchar uiGroup = (uchar)Exp_GetSingle(ptcKey);        
-            int iSize = (int)_spawnGroupsId[_iLevel].size();    //Try to get custom spawngroups for this champion spawn.
+            int iSize = (int)_spawnGroupsId[uiGroup].size();    //Try to get custom spawngroups for this champion spawn.
             idSpawn spawnGroup;
             if (iSize > 0)
             {
@@ -852,14 +854,14 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
                 CCChampionDef* pChampDef = static_cast<CCChampionDef*>(pRes);
                 if (pChampDef != nullptr)
                 {
-                    iSize = (int)pChampDef->_idSpawn[_iLevel].size();
+                    iSize = (int)pChampDef->_idSpawn[uiGroup].size();
                     if (iSize > 0)
                     {
                         spawnGroup = pChampDef->_idSpawn;
                     }
                 }
             }
-            if (spawnGroup.count(uiGroup) <= 0 || uiGroup > UCHAR_MAX)  // Didn't found any group for the given level, stop!s
+            if (spawnGroup.count(uiGroup) <= 0 || uiGroup > UCHAR_MAX)  // Didn't found any group for the given level, stop!
             {
                 sVal.FormatVal(-1);
                 break;
@@ -877,7 +879,7 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
                 sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, spawnGroup[uiGroup][uiNpc]));
                 break;
             }
-            bMatchKey = false;  //Bad format?
+            sVal.FormatVal(-1);  //Bad format?
             break;
         }
         case ICHMPL_CHAMPIONID:
@@ -885,6 +887,9 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
             sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _idChampion));            
             break;
         }
+        case ICHMPL_CHAMPIONSUMMONED:
+            sVal.FormatCVal(_fChampionSummoned);
+            break;
         case ICHMPL_CHAMPIONSPAWN:
         case ICHMPL_MORE:
         case ICHMPL_MORE1:
@@ -916,7 +921,18 @@ bool CCChampion::r_LoadVal(CScript & s)
 {
     ADDTOCALLSTACK("CCChampion::r_LoadVal");
     int iCmd = FindTableSorted(s.GetKey(), sm_szLoadKeys, (int)CountOf(sm_szLoadKeys) - 1);
-
+    lpctstr ptcKey = s.GetKey();
+       
+    if (iCmd < 0)
+    {
+        std::string str = ptcKey;
+        std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return (unsigned char)std::tolower(c); });
+        if (str.compare(0, 8, "npcgroup") == 0)
+        {
+            ptcKey += 8;
+            iCmd = ICHMPL_NPCGROUP;
+        }
+    }
     bool bMatchKey = true;
     switch (iCmd)
     {
@@ -958,6 +974,22 @@ bool CCChampion::r_LoadVal(CScript & s)
         case ICHMPL_LEVELMAX:
             _iLevelMax = s.GetArgUCVal();
             break;
+        case ICHMPL_NPCGROUP:
+        {
+            uchar iGroup = Exp_GetUCVal(ptcKey);
+            tchar* piCmd[UCHAR_MAX];
+            size_t iArgQty = Str_ParseCmds(s.GetArgRaw(), piCmd, (int)CountOf(piCmd), ",");
+            _spawnGroupsId[iGroup].clear();
+            for (uint i = 0; i < iArgQty; ++i)
+            {
+                CREID_TYPE pCharDef = (CREID_TYPE)g_Cfg.ResourceGetIndexType(RES_CHARDEF, piCmd[i]);
+                if (pCharDef)
+                {
+                    _spawnGroupsId[iGroup].emplace_back(pCharDef);
+                }
+            }
+            break;
+        }
         case ICHMPL_KILLSNEXTRED:
             _iSpawnsNextRed = s.GetArgUCVal();
             break;
@@ -972,6 +1004,9 @@ bool CCChampion::r_LoadVal(CScript & s)
             break;
         case ICHMPL_CHAMPIONID:
             _idChampion = (CREID_TYPE)g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr());
+            break;
+        case ICHMPL_CHAMPIONSUMMONED:
+            _fChampionSummoned = s.GetArgCVal();
             break;
         case ICHMPL_CHAMPIONSPAWN:
         case ICHMPL_MORE:
@@ -1198,8 +1233,7 @@ bool CCChampionDef::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * p
         std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return (unsigned char)std::tolower(c); });
         if (str.compare(0, 8, "npcgroup") == 0)
         {
-            Exp_GetSingle(ptcKey);
-            SKIP_SEPARATORS(ptcKey);
+            ptcKey += 8;
             iCmd = CHAMPIONDEF_NPCGROUP;
         }
     }
@@ -1270,8 +1304,7 @@ bool CCChampionDef::r_LoadVal(CScript& s)
         std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return (unsigned char)std::tolower(c); });
         if (str.compare(0, 8, "npcgroup") == 0)
         {
-            Exp_GetSingle(ptcKey);
-            SKIP_SEPARATORS(ptcKey);
+            ptcKey += 8;
             iCmd = CHAMPIONDEF_NPCGROUP;
         }
     }
