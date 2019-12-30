@@ -1068,11 +1068,13 @@ enum ITRIG_TYPE
 	ITRIG_PICKUP_PACK,          // picked up from inside some container.
 	ITRIG_PICKUP_SELF,          // picked up from this container
 	ITRIG_PICKUP_STACK,         // picked up from a stack (ARGO)
+    ITRIG_PreSpawn,             // Called before something is spawned, pre-check it's id and validity.
     ITRIG_Redeed,               // Redeeding a multi.
     ITRIG_RegionEnter,          // Ship entering a new region.
     ITRIG_RegionLeave,          // Ship leaving the region.
 	ITRIG_Sell,                 // I'm being sold.
 	ITRIG_Ship_Turn,            // I'm a ship and i'm turning around.
+    ITRIG_Spawn,                // This spawn is going to generate something.
 	ITRIG_SPELLEFFECT,          // cast some spell on me.
 	ITRIG_STEP,                 // I have been walked on. (or shoved)
 	ITRIG_TARGON_CANCEL,        // Someone requested me (item) to target, now the targeting was canceled.

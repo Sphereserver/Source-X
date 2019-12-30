@@ -142,7 +142,7 @@ public:
     * @brief Generate a char with the given id from this spawn.
     * @params rid the id of the char.
     */
-    CChar* GenerateChar(const CResourceIDBase &rid);
+    CChar* GenerateChar(CResourceIDBase rid);
     /**
     * @brief Get a valid char id from the spawn.
     * @return the char id.

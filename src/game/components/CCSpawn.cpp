@@ -35,7 +35,7 @@ void CCSpawn::DelBadSpawn()
 {
     ADDTOCALLSTACK("CCSpawn::DelBadSpawn");
     THREAD_UNIQUE_LOCK_SET;
-    std::remove(_vBadSpawns.begin(), _vBadSpawns.end(), this);
+    _vBadSpawns.erase(std::find(_vBadSpawns.begin(), _vBadSpawns.end(), this));
     _fIsBadSpawn = false;
 }
 
@@ -297,7 +297,17 @@ void CCSpawn::GenerateItem()
         return;
     }
 
-    const CResourceIDBase& rid = pDef->GetResourceID();
+    CResourceIDBase& rid = const_cast<CResourceID&>(pDef->GetResourceID());
+
+    if (IsTrigUsed(TRIGGER_PRESPAWN))
+    {
+        CScriptTriggerArgs args(rid.GetResIndex());
+        if (GetLink()->OnTrigger(ITRIG_PreSpawn, &g_Serv, &args) == TRIGRET_RET_TRUE)
+        {
+            return;
+        }
+        rid = CResourceIDBase(RES_ITEMDEF, (int)args.m_iN1);
+    }
     const ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
     CItem *pItem = CItem::CreateTemplate(id);
     if (!pItem)
@@ -318,21 +328,34 @@ void CCSpawn::GenerateItem()
 
     pItem->ClrAttr(pItem->m_Attr & (ATTR_OWNED | ATTR_MOVE_ALWAYS));
     pItem->SetDecayTime(g_Cfg.m_iDecay_Item);	// it will decay eventually to be replaced later
-    const CPointMap& ptSpawn = pSpawnItem->GetTopPoint();
-    if (_iMaxDist == 0)
+    if (IsTrigUsed(TRIGGER_SPAWN))
     {
-        if (!pItem->MoveTo(ptSpawn))
-            goto move_failed;
-    }
-    else if (!pItem->MoveNear(ptSpawn, (word)(Calc_GetRandVal(_iMaxDist) + 1) ))
-    {
-    move_failed:
-        // If this fails, try placing the char ON the spawn
-        if (!pItem->MoveTo(ptSpawn))
+        CScriptTriggerArgs args;
+        args.m_pO1 = pItem;
+        if (GetLink()->OnTrigger(ITRIG_Spawn, &g_Serv, &args) == TRIGRET_RET_TRUE)
         {
-            DEBUG_ERR(("Spawner UID=0%" PRIx32 " is unable to place an item inside the world, deleted the item.", (dword)pItem->GetUID()));
             pItem->Delete();
             return;
+        }
+    }
+    if (pItem->GetTopPoint().IsValidPoint() == false)//Try to placed the item if the @Spawn trigger didn't set a valid P for it.
+    {
+        const CPointMap& ptSpawn = pSpawnItem->GetTopPoint();
+        if (_iMaxDist == 0)
+        {
+            if (!pItem->MoveTo(ptSpawn))
+                goto move_failed;
+        }
+        else if (!pItem->MoveNear(ptSpawn, (word)(Calc_GetRandVal(_iMaxDist) + 1)))
+        {
+        move_failed:
+            // If this fails, try placing the char ON the spawn
+            if (!pItem->MoveTo(ptSpawn))
+            {
+                DEBUG_ERR(("Spawner UID=0%" PRIx32 " is unable to place an item inside the world, deleted the item.", (dword)pItem->GetUID()));
+                pItem->Delete();
+                return;
+            }
         }
     }
     pItem->Update();
@@ -340,7 +363,7 @@ void CCSpawn::GenerateItem()
 }
 
 
-CChar* CCSpawn::GenerateChar(const CResourceIDBase &rid)
+CChar* CCSpawn::GenerateChar(CResourceIDBase rid)
 {
     ADDTOCALLSTACK("CCSpawn::GenerateChar(rid)");
 
@@ -348,6 +371,15 @@ CChar* CCSpawn::GenerateChar(const CResourceIDBase &rid)
     if (!pSpawnItem->IsTopLevel())
     {
         return nullptr;
+    }
+    if (IsTrigUsed(TRIGGER_PRESPAWN))
+    {
+        CScriptTriggerArgs args(rid.GetResIndex());
+        if (GetLink()->OnTrigger(ITRIG_PreSpawn, &g_Serv, &args) == TRIGRET_RET_TRUE)
+        {
+            return nullptr;
+        }
+        rid = CResourceIDBase(RES_CHARDEF, (int)args.m_iN1);
     }
 
     RES_TYPE iRidType = rid.GetResType();
@@ -359,6 +391,7 @@ CChar* CCSpawn::GenerateChar(const CResourceIDBase &rid)
         return nullptr;
     }
 
+
     CChar *pChar = CChar::CreateBasic( (CREID_TYPE)rid.GetResIndex() );
     if (!pChar)
     {
@@ -368,25 +401,39 @@ CChar* CCSpawn::GenerateChar(const CResourceIDBase &rid)
     const CPointMap& pt = pSpawnItem->GetTopPoint();
     pChar->NPC_LoadScript(true);
     pChar->StatFlag_Set(STATF_SPAWNED);
-    // Try placing this char near the spawn
 
-    ushort iPlacingTries = 0;
-    while (!pChar->MoveNear(pt, _iMaxDist ? (word)(Calc_GetRandVal(_iMaxDist) + 1) : 1) || pChar->IsStuck(false))
+    if (IsTrigUsed(TRIGGER_SPAWN))
     {
-        ++iPlacingTries;
-        if (iPlacingTries <= 3)
+        CScriptTriggerArgs args;
+        args.m_pO1 = pChar;
+        if (GetLink()->OnTrigger(ITRIG_Spawn, &g_Serv, &args) == TRIGRET_RET_TRUE)
         {
-            continue;
-        }
-
-        // If this fails, try placing the char ON the spawn
-        if (!pChar->MoveTo(pt))
-        {
-            DEBUG_ERR(("Spawner UID=0%" PRIx32 " is unable to place a character inside the world, deleted the character.", (dword)pSpawnItem->GetUID()));
             pChar->Delete();
             return nullptr;
         }
-        break;
+    }
+
+    // Try placing this char near the spawn
+    if (pChar->GetTopPoint().IsValidPoint() == false)// Try to place it only if the @Spawn trigger didn't set it a valid P.
+    {
+        ushort iPlacingTries = 0;
+        while (!pChar->MoveNear(pt, _iMaxDist ? (word)(Calc_GetRandVal(_iMaxDist) + 1) : 1) || pChar->IsStuck(false))
+        {
+            ++iPlacingTries;
+            if (iPlacingTries <= 3)
+            {
+                continue;
+            }
+
+            // If this fails, try placing the char ON the spawn
+            if (!pChar->MoveTo(pt))
+            {
+                DEBUG_ERR(("Spawner UID=0%" PRIx32 " is unable to place a character inside the world, deleted the character.", (dword)pSpawnItem->GetUID()));
+                pChar->Delete();
+                return nullptr;
+            }
+            break;
+        }
     }
 
     // Check if the NPC can spawn in this region
