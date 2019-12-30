@@ -53,10 +53,10 @@ private:
     // Retrieved from CCChampionDef
     typedef std::vector<CREID_TYPE> idNPC;
     typedef std::map<uchar, idNPC> idSpawn;
-    CResourceIDBase _idSpawn;   ///< legacy more1=ID of the Object to Spawn.
     idSpawn _spawnGroupsId;     ///< Defining how many uchar (or levels) this Champion has and the group of monsters for each level.
+    CResourceIDBase _idSpawn;   ///< legacy more1=ID of the Object to Spawn.
     CREID_TYPE _idChampion;     ///< Boss id
-    bool _bChampionSummoned;    ///< True if the champion's boss has been summoned already (wether it was killed or not).
+    bool _fChampionSummoned;    ///< True if the champion's boss has been summoned already (wether it was killed or not).
 
     // Ingame Spawn behaviour.
     bool _fActive;                  ///< Champion status

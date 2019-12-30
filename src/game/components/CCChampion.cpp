@@ -10,7 +10,7 @@
 * this data is read by CCChampion to know Champion's type, npcs to spawn at each level, boss id....
 * class is declared inside CResource.h
 */
-
+#pragma warning(disable : 26812)
 #include "../../common/CException.h"
 #include "../../common/CScript.h"
 #include "../chars/CChar.h"
@@ -18,7 +18,10 @@
 #include "../../common/resource/CResourceLock.h"
 #include "CCChampion.h"	// predef header.
 #include <string>
-
+#include <algorithm> 
+#include <sstream> 
+#include <iterator> 
+#include <iostream> 
 
 #define CANDLESNEXTRED 4
 
@@ -48,9 +51,14 @@ CCRET_TYPE CCChampion::OnTickComponent()
 {
     ADDTOCALLSTACK("CCChampion::OnTick");
     if (!_pRedCandles.empty())
+    {
+        _iSpawnsMax += _iSpawnsNextRed;
         DelRedCandle();
+    }
     else
+    {
         Stop();
+    }
     GetLink()->SetTimeoutS(60 * 10);	//10 minutes
     return CCRET_CONTINUE;
 }
@@ -72,7 +80,7 @@ void CCChampion::Init()
     _iCandlesNextRed = CANDLESNEXTRED;
     _iCandlesNextLevel = 0;
     _iLastActivationTime = 0;
-    _bChampionSummoned = false;
+    _fChampionSummoned = false;
     CResourceDef *pRes = g_Cfg.ResourceGetDef(_idSpawn);
     CCChampionDef *pChampDef = static_cast<CCChampionDef*>(pRes);
     if (!pChampDef)
@@ -115,7 +123,7 @@ void CCChampion::Stop()
     _iLevel = 0;
     _iCandlesNextRed = 0;
     _iCandlesNextLevel = 0;
-    _bChampionSummoned = false;
+    _fChampionSummoned = false;
     GetLink()->SetTimeout(_iLastActivationTime - g_World.GetCurrentTime().GetTimeRaw());
     ClearWhiteCandles();
     ClearRedCandles();
@@ -131,13 +139,6 @@ void CCChampion::Complete()
 void CCChampion::OnKill()
 {
     ADDTOCALLSTACK("CCChampion::OnKill");
-    if ()
-    {
-        if (OnTrigger() == TRIGRET_RET_TRUE)
-        {
-            return;
-        }
-    }
     if (_iSpawnsNextWhite == 0)
     {
         AddWhiteCandle();
@@ -152,14 +153,14 @@ void CCChampion::SpawnNPC()
     CREID_TYPE pNpc = CREID_INVALID;
     CResourceIDBase rid;
 
-    if (_iLevel > _iLevelMax)        
+    if (_iSpawnsCur >= _iSpawnsMax) // Spawned all NPCs...
     {
-        if (_bChampionSummoned == true)// Already summoned the Champion, stop
+        if (_fChampionSummoned == true)// Already summoned the Champion, stop
         {
             return;
         }
-        if (_iSpawnsNextWhite <= 0) //Reached 16th red candle and spawned all the normal npcs, so next one should be the champion
-        {            
+        if (_iDeathCount >= _iSpawnsMax)    // Killed all npcs, summon the boss.
+        {
             pNpc = _idChampion;
         }
     }
@@ -227,12 +228,12 @@ void CCChampion::SpawnNPC()
             AddObj(spawn->GetUID());
         }
     }
+    ++_iSpawnsCur;
 }
 
 void CCChampion::AddWhiteCandle(CUID uid)
 {
     ADDTOCALLSTACK("CCChampion::AddWhiteCandle");
-    //TODO Trigger @AddWhiteCandle(uid)
     if (_pWhiteCandles.size() >= _iCandlesNextRed)
     {
         AddRedCandle();
@@ -253,6 +254,25 @@ void CCChampion::AddWhiteCandle(CUID uid)
         pCandle = pLink->CreateBase(ITEMID_SKULL_CANDLE);
         if (!pCandle)
             return;
+        CPointMap pt = pLink->GetTopPoint();
+        switch (_pWhiteCandles.size() + 1)    // +1 here because the candle is post placed.
+        {
+        case 1:
+            pt.MoveN(DIR_SW, 1);
+            break;
+        case 2:
+            pt.MoveN(DIR_SE, 1);
+            break;
+        case 3:
+            pt.MoveN(DIR_NW, 1);
+            break;
+        case 4:
+            pt.MoveN(DIR_NE, 1);
+            break;
+        default:
+            break;
+        }
+        pCandle->SetTopPoint(pt);
         if (g_Serv.IsLoading() == false)
         {
             if (IsTrigUsed(TRIGGER_ADDWHITECANDLE))
@@ -264,24 +284,6 @@ void CCChampion::AddWhiteCandle(CUID uid)
                     return;
                 }
             }
-        }
-        CPointMap pt = pLink->GetTopPoint();
-        switch (_pWhiteCandles.size()+1)    // +1 here because the candle is post placed.
-        {
-            case 1:
-                pt.MoveN(DIR_SW, 1);
-                break;
-            case 2:
-                pt.MoveN(DIR_SE, 1);
-                break;
-            case 3:
-                pt.MoveN(DIR_NW, 1);
-                break;
-            case 4:
-                pt.MoveN(DIR_NE, 1);
-                break;
-            default:
-                break;
         }
         pCandle->SetAttr(ATTR_MOVE_NEVER);
         pCandle->MoveTo(pt);
@@ -642,6 +644,7 @@ enum ICHMPL_TYPE
     ICHMPL_ADDWHITECANDLE,
     ICHMPL_CANDLESNEXTLEVEL,
     ICHMPL_CANDLESNEXTRED,
+    ICHMPL_CHAMPIONID,
     ICHMPL_CHAMPIONSPAWN,
     ICHMPL_DEATHCOUNT,
     ICHMPL_KILLSNEXTRED,
@@ -666,6 +669,7 @@ lpctstr const CCChampion::sm_szLoadKeys[ICHMPL_QTY + 1] =
     "ADDWHITECANDLE",
     "CANDLESNEXTLEVEL",
     "CANDLESNEXTRED",
+    "CHAMPIONID",
     "CHAMPIONSPAWN",
     "DEATHCOUNT",
     "KILLSNEXTRED",
@@ -715,9 +719,18 @@ lpctstr const CCChampion::sm_szVerbKeys[ICHMPV_QTY + 1] =
 void CCChampion::r_Write(CScript & s)
 {
     ADDTOCALLSTACK("CCChampion::r_Write");
+    CResourceDef* pRes = g_Cfg.ResourceGetDef(_idSpawn);
+    CCChampionDef* pChampDef = static_cast<CCChampionDef*>(pRes);
+    if (!pChampDef)
+    {
+        g_Log.EventDebug("Trying to save a champion spawn 0%x with bad id %.\n", GetLink()->GetUID(), _idSpawn.GetPrivateUID());
+        return;
+    }
     s.WriteKeyVal("ACTIVE", _fActive);
+    s.WriteKey("CHAMPIONID", g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _idChampion)));
     s.WriteKey("CHAMPIONSPAWN", g_Cfg.ResourceGetName(_idSpawn));
-    s.WriteKeyVal("CANDLEXNEXTLEVEL", _iCandlesNextLevel);
+    s.WriteKeyVal("CHAMPIONSUMMONED", _fChampionSummoned);
+    s.WriteKeyVal("CANDLESNEXTLEVEL", _iCandlesNextLevel);
     s.WriteKeyVal("CANDLESNEXTRED", _iCandlesNextRed);
     s.WriteKeyVal("DEATHCOUNT", _iDeathCount);
     s.WriteKeyVal("KILLSNEXTRED", _iSpawnsNextRed);
@@ -725,7 +738,7 @@ void CCChampion::r_Write(CScript & s)
     s.WriteKeyVal("LASTACTIVATIONTIME", _iLastActivationTime);
     s.WriteKeyVal("LEVEL", _iLevel);
     s.WriteKeyVal("LEVELMAX", _iLevelMax);
-    //s.WriteKeyVal("SPAWNSCUR", _iSpawnsCur); // Inherited from CCSpawn's count?
+    s.WriteKeyVal("SPAWNSCUR", _iSpawnsCur);
     s.WriteKeyVal("SPAWNSMAX", _iSpawnsMax);
 
     for (const CUID& uidCandle : _pRedCandles)
@@ -743,6 +756,32 @@ void CCChampion::r_Write(CScript & s)
             continue;   // ??
         s.WriteKeyHex("ADDWHITECANDLE", (dword)uidCandle);
     }
+
+    if (_spawnGroupsId.size())
+    {
+        for (auto group : _spawnGroupsId)
+        {
+            std::stringstream groupStream;
+            auto vec = group.second;
+            if (vec.empty() == true)
+            {
+                continue;
+            }
+            for (auto npc : vec)
+            {
+                groupStream << g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, npc)) << ",";
+            }
+            std::string groupString = groupStream.str();
+            //groupString.substr(groupString.size() -1, groupString.size()); //Remove the last comma.
+            groupString.pop_back();
+            std::stringstream finalStream;
+            finalStream << "npcgroup[";
+            finalStream << (int)group.first;
+            finalStream << "]";
+            //finalStream << groupString;
+            s.WriteKey(finalStream.str().c_str(), groupString.c_str());
+        }
+    }
     return;
 }
 
@@ -755,7 +794,7 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
     if (iCmd < 0)
     {
         std::string str = ptcKey;
-        std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
+        std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return (unsigned char)std::tolower(c); });
         if (str.compare(0, 8, "npcgroup") == 0)
         {
             Exp_GetSingle(ptcKey);
@@ -801,15 +840,34 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
             break;
         case ICHMPL_NPCGROUP:
         {
-            uchar uiGroup = (uchar)Exp_GetSingle(ptcKey);
-            if (_spawnGroupsId[uiGroup].empty() || uiGroup > UCHAR_MAX)
+            uchar uiGroup = (uchar)Exp_GetSingle(ptcKey);        
+            int iSize = (int)_spawnGroupsId[_iLevel].size();    //Try to get custom spawngroups for this champion spawn.
+            idSpawn spawnGroup;
+            if (iSize > 0)
+            {
+                spawnGroup = _spawnGroupsId;
+            }
+            else // If it doesnt have, then try to retrieve the group from [CHAMPION ]
+            {
+                CResourceDef* pRes = g_Cfg.ResourceGetDef(_idSpawn);
+                CCChampionDef* pChampDef = static_cast<CCChampionDef*>(pRes);
+                if (pChampDef != nullptr)
+                {
+                    iSize = (int)pChampDef->_idSpawn[_iLevel].size();
+                    if (iSize > 0)
+                    {
+                        spawnGroup = pChampDef->_idSpawn;
+                    }
+                }
+            }
+            if (spawnGroup.count(uiGroup) <= 0 || uiGroup > UCHAR_MAX)  // Didn't found any group for the given level, stop!s
             {
                 sVal.FormatVal(-1);
                 break;
             }
             ++ptcKey;
             uchar uiNpc = (uchar)Exp_GetSingle(ptcKey);
-            size_t uiGroupSize = _spawnGroupsId[uiGroup].size();
+            size_t uiGroupSize = spawnGroup[uiGroup].size();
             if (uiNpc && (uiNpc >= uiGroupSize))
             {
                 sVal.FormatVal(-1);
@@ -817,10 +875,15 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
             }
             if (uiGroupSize >= uiNpc)
             {
-                sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _spawnGroupsId[uiGroup][uiNpc]));
+                sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, spawnGroup[uiGroup][uiNpc]));
                 break;
             }
-            bMatchKey = false;
+            bMatchKey = false;  //Bad format?
+            break;
+        }
+        case ICHMPL_CHAMPIONID:
+        {
+            sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _idChampion));            
             break;
         }
         case ICHMPL_CHAMPIONSPAWN:
@@ -908,6 +971,9 @@ bool CCChampion::r_LoadVal(CScript & s)
         case ICHMPL_SPAWNSMAX:
             _iSpawnsMax = s.GetArgUSVal();
             break;
+        case ICHMPL_CHAMPIONID:
+            _idChampion = (CREID_TYPE)g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr());
+            break;
         case ICHMPL_CHAMPIONSPAWN:
         case ICHMPL_MORE:
         case ICHMPL_MORE1:
@@ -926,7 +992,6 @@ bool CCChampion::r_LoadVal(CScript & s)
             {
                 // If i have the ResType probably i passed a Defname
                 _idSpawn = ridArg;
-                break;
             }
             else
             {
@@ -1096,7 +1161,7 @@ enum CHAMPIONDEF_TYPE
     CHAMPIONDEF_QTY
 };
 
-lpctstr const CCChampionDef::sm_szLoadKeys[] =
+lpctstr const CCChampionDef::sm_szLoadKeys[CHAMPIONDEF_QTY + 1] =
 {
     "CHAMPIONID",
     "DEFNAME",
@@ -1131,7 +1196,7 @@ bool CCChampionDef::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * p
     if (iCmd < 0)
     {
         std::string str = ptcKey;
-        std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
+        std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return (unsigned char)std::tolower(c); });
         if (str.compare(0, 8, "npcgroup") == 0)
         {
             Exp_GetSingle(ptcKey);
@@ -1203,7 +1268,7 @@ bool CCChampionDef::r_LoadVal(CScript& s)
     if (iCmd < 0)
     {
         std::string str = ptcKey;
-        std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
+        std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return (unsigned char)std::tolower(c); });
         if (str.compare(0, 8, "npcgroup") == 0)
         {
             Exp_GetSingle(ptcKey);
