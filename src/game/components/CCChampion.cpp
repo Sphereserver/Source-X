@@ -10,7 +10,6 @@
 * this data is read by CCChampion to know Champion's type, npcs to spawn at each level, boss id....
 * class is declared inside CResource.h
 */
-#pragma warning(disable : 26812)
 #include "../../common/CException.h"
 #include "../../common/CScript.h"
 #include "../chars/CChar.h"

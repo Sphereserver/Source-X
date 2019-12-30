@@ -17,7 +17,7 @@
 enum CHAMPION_ID
 {
     // Original champions.
-    CHAMPION_ABYSS,
+    CHAMPION_ABYSS = 1,
     CHAMPION_ARACHNID,
     CHAMPION_COLD_BLOOD,
     CHAMPION_FOREST_LORD,
