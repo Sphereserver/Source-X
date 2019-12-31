@@ -30,7 +30,7 @@ CCChampion::CCChampion(CItem *pLink) : CComponent(COMP_CHAMPION)
     ADDTOCALLSTACK("CCChampion::CCChampion");
     _pLink = pLink;
     _iLevelMax = 4;
-    _iSpawnsMax = 2368;
+    _iSpawnsMax = 2400;
     _idChampion = CREID_INVALID;
     Init();
 }
@@ -143,6 +143,16 @@ void CCChampion::OnKill()
     {
         AddWhiteCandle();
     }
+    ++_iDeathCount;
+    if (_iDeathCount >= _iSpawnsMax)
+    {
+        ClearWhiteCandles();
+        ClearRedCandles();
+        if (_fChampionSummoned == false)
+        {
+            SetLevel(UCHAR_MAX);
+        }
+    }
     SpawnNPC();
 }
 
@@ -153,7 +163,7 @@ void CCChampion::SpawnNPC()
     CREID_TYPE pNpc = CREID_INVALID;
     CResourceIDBase rid;
 
-    if (_iSpawnsCur >= _iSpawnsMax) // Spawned all NPCs...
+    if (_iLevel == UCHAR_MAX)// Completed the champion's minor spawns, summon the boss (once).
     {
         if (_fChampionSummoned == true)// Already summoned the Champion, stop
         {
@@ -162,9 +172,10 @@ void CCChampion::SpawnNPC()
         if (_iDeathCount >= _iSpawnsMax)    // Killed all npcs, summon the boss.
         {
             pNpc = _idChampion;
+            _fChampionSummoned = true;
         }
     }
-    else
+    else if (_iSpawnsCur < _iSpawnsMax)
     {
         int iSize = (int)_spawnGroupsId[_iLevel].size();
         idSpawn spawngroup;
@@ -204,6 +215,10 @@ void CCChampion::SpawnNPC()
             g_Log.EventError("Champion bad group index %d.\n", _iLevel);
         }
     }
+    else
+    {
+        return;
+    }
     rid = CResourceIDBase(RES_CHARDEF, pNpc);
     CResourceDef* pDef = g_Cfg.ResourceGetDef(rid);
     if (!pDef)
@@ -234,6 +249,10 @@ void CCChampion::SpawnNPC()
 void CCChampion::AddWhiteCandle(CUID uid)
 {
     ADDTOCALLSTACK("CCChampion::AddWhiteCandle");
+    if (_iLevel == UCHAR_MAX)
+    {
+        return;
+    }
     if (_pWhiteCandles.size() >= _iCandlesNextRed)
     {
         AddRedCandle();
@@ -309,6 +328,10 @@ void CCChampion::AddRedCandle(CUID uid)
     if (uiRedCandlesAmount >= _iCandlesNextLevel)
     {
         SetLevel(_iLevel + 1);
+    }
+    if (_iLevel >= _iLevelMax)
+    {
+        return;
     }
     _iSpawnsNextWhite = _iSpawnsNextRed / 5;
     if (!g_Serv.IsLoading())	// White candles may be created before red ones when restoring items from worldsave we must not remove them.
@@ -424,7 +447,7 @@ void CCChampion::SetLevel(byte iLevel)
     }
     ushort iLevelMonsters = GetMonstersPerLevel(_iSpawnsMax);
     //Get the current candles required - last required candles (if current level = 1, then gets 6-0 = 6, level 2 = 10 - 6 = 4, and so on).
-    _iCandlesNextLevel = GetCandlesPerLevel() - GetCandlesPerLevel(_iLevel - 1);
+    _iCandlesNextLevel = GetCandlesPerLevel();
     _iCandlesNextRed = 4;
     ushort iRedMonsters = iLevelMonsters / _iCandlesNextLevel;
     ushort iWhiteMonsters = iRedMonsters / _iCandlesNextRed;
@@ -455,7 +478,7 @@ byte CCChampion::GetCandlesPerLevel(byte iLevel) const
         case 1:
             return 6;
         default:
-            return 0;
+            return 1;
     }
 }
 
@@ -1191,7 +1214,7 @@ enum CHAMPIONDEF_TYPE
     CHAMPIONDEF_LEVELMAX,   ///< Max Level for this champion.
     CHAMPIONDEF_NAME,		///< Champion name: m_sName.
     CHAMPIONDEF_NPCGROUP,	///< Monster level / group: _iSpawn[n][n].
-    CHAMPIONDEF_SPAWNS,		///< Total amount of monsters: _iSpawnsMax.
+    CHAMPIONDEF_SPAWNSMAX ,		///< Total amount of monsters: _iSpawnsMax.
     CHAMPIONDEF_QTY
 };
 
@@ -1202,7 +1225,7 @@ lpctstr const CCChampionDef::sm_szLoadKeys[CHAMPIONDEF_QTY + 1] =
     "LEVELMAX",
     "NAME",
     "NPCGROUP",
-    "SPAWNS",
+    "SPAWNSMAX",
     nullptr
 };
 
@@ -1210,7 +1233,7 @@ lpctstr const CCChampionDef::sm_szLoadKeys[CHAMPIONDEF_QTY + 1] =
 CCChampionDef::CCChampionDef(CResourceID rid) : CResourceLink(rid)
 {
     ADDTOCALLSTACK("CCChampionDef::CCChampionDef");
-    _iSpawnsMax = 2368;
+    _iSpawnsMax = 2400;
     _iLevelMax = 4;
     _idChampion = CREID_INVALID;
 }
@@ -1280,7 +1303,7 @@ bool CCChampionDef::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * p
             }
             return true;
         }
-        case CHAMPIONDEF_SPAWNS:
+        case CHAMPIONDEF_SPAWNSMAX:
             sVal.FormatUSVal(_iSpawnsMax);
             return true;
         case CHAMPIONDEF_LEVELMAX:
@@ -1334,7 +1357,7 @@ bool CCChampionDef::r_LoadVal(CScript& s)
         }
         return true;
     }
-    case CHAMPIONDEF_SPAWNS:
+    case CHAMPIONDEF_SPAWNSMAX:
         _iSpawnsMax = s.GetArgUSVal();
         return true;
     case CHAMPIONDEF_LEVELMAX:
