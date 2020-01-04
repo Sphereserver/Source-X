@@ -1948,11 +1948,26 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		break;
 
 	case IT_BANDAGE:	// SKILL_HEALING, or SKILL_VETERINARY
-		// Use bandages on some creature.
-		if ( pCharTarg == nullptr )
+		// Use bandages on some creatures or on a corpse item.
+		if ( pCharTarg == nullptr && pItemTarg == nullptr )
 			return false;
-		m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID;
-		m_pChar->m_Act_UID = m_Targ_UID;
+
+		if (pItemTarg)
+		{
+			if (pItemTarg->GetType() == IT_CORPSE)
+			{
+				CItemCorpse* pCorpse = static_cast<CItemCorpse*>(pItemTarg);
+				pCharTarg = pCorpse->m_uidLink.CharFind();
+				if (pCharTarg == nullptr || pCharTarg->IsNPC())
+					return false;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID; //The bandage item
+		m_pChar->m_Act_UID = m_Targ_UID;  //The target.
 
 		/*An NPC will be healed by the Veterinary skill if the following conditions are satisfied:
 		  It has a Taming value above > 0 AND its ID is not the ID one of the playable races (Human, Elf or Gargoyle)	

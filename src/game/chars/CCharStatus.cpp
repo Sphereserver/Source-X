@@ -1303,6 +1303,9 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 				return true;
 			if ( IsPriv(PRIV_GM) )
 				return (GetPrivLevel() >= pChar->GetPrivLevel());
+			//The check below is needed otherwise, you cannot resurrect a player ghost by using bandages (unless you are a GM), maybe there is a better way?
+			if (pChar->IsStatFlag(STATF_DEAD) && (Skill_GetActive() == SKILL_HEALING || Skill_GetActive() == SKILL_VETERINARY))
+				return true;
 			if ( pChar->IsStatFlag(STATF_DEAD|STATF_STONE) || Can(CAN_C_STATUE) )
 				return false;
 		}
