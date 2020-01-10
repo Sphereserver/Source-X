@@ -551,18 +551,11 @@ void CCChampion::ClearWhiteCandles()
     {
         return;
     }
-    do
+
+    for (int iTotal = 0; iTotal < _pWhiteCandles.size(); ++iTotal)
     {
         DelWhiteCandle();
-    } while (!_pWhiteCandles.empty());
-    /*for (std::vector<CUID>::iterator it = _pWhiteCandles.begin(); it != _pWhiteCandles.end(); ++it)
-    {
-        CItem * pCandle = it->ItemFind();;
-        if (pCandle)
-        {
-            pCandle->Delete();
-        }
-    }*/
+    }
 }
 
 // Clear all red candles.
@@ -573,15 +566,10 @@ void CCChampion::ClearRedCandles()
     {
         return;
     }
-    for (std::vector<CUID>::iterator it = _pRedCandles.begin(); it != _pRedCandles.end(); ++it)
+    for (int iTotal = 0; iTotal < _pRedCandles.size(); ++iTotal)
     {
-        CItem * pCandle = it->ItemFind();
-        if (pCandle)
-        {
-            pCandle->Delete();
-        }
+        DelRedCandle();
     }
-    _pRedCandles.clear();
 }
 
 // kill everything spawned from this spawn !
