@@ -351,8 +351,7 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 		word m_miny;
 		word m_maxx;
 		word m_maxy;
-	}
-	sm_ContSize[] =
+	} sm_ContSize[] =
 	{
         { GUMP_SCROLL, 30, 30, 270, 170 },
         { GUMP_CORPSE, 20, 85, 124, 196 },
@@ -432,7 +431,7 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 
 	// Get a random location in the container.
 
-	CItemBase *pItemDef = Item_GetDef();
+	const CItemBase *pItemDef = Item_GetDef();
 	GUMP_TYPE gump = pItemDef->m_ttContainer.m_idGump;	// Get the TDATA2
 
 	// check for custom values in TDATA3/TDATA4
@@ -452,18 +451,22 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 	// No TDATA3 or no TDATA4: check if we have hardcoded in sm_ContSize the size of the gump indicated by TDATA2
 
 	uint i = 0;
-	for ( ; ; ++i )
+	// We may want a keyring with no gump, so no need to show the warning.
+	if (!IsType(IT_KEYRING))
 	{
-		if ( i >= CountOf(sm_ContSize) )
+		for (; ; ++i)
 		{
-			i = 0;	// set to default
-			g_Log.EventWarn("Unknown container gump id %d for 0%x\n", gump, GetDispID());
-			break;
+			if (i >= CountOf(sm_ContSize))
+			{
+				i = 0;	// set to default
+				g_Log.EventWarn("Unknown container gump id %d for 0%x\n", gump, GetDispID());
+				break;
+			}
+			if (sm_ContSize[i].m_gump == gump)
+				break;
 		}
-		if ( sm_ContSize[i].m_gump == gump )
-			break;
 	}
-
+	
 	return CPointMap(
 		(word)(sm_ContSize[i].m_minx + Calc_GetRandVal(sm_ContSize[i].m_maxx - sm_ContSize[i].m_minx)),
 		(word)(sm_ContSize[i].m_miny + Calc_GetRandVal(sm_ContSize[i].m_maxy - sm_ContSize[i].m_miny)),

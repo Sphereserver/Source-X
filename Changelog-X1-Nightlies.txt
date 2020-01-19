@@ -577,7 +577,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 (Source)
 Added the basics of an ECS: CEntity and CComponent so we can split into modules (components) the core of the current big classes (CObjBase, CItem, CChar).
 
- - CEntity act as a wrapper for CObjBase (ATM) storing a list of CComponent* inside and redirecting some basic code to all of them (r_Write, r_WriteVal, r_Load, r_LoadVal, r_Verb and r_GetRef) and provides also a GetComponent(COMP_TYPE) for external interaction.
+ - CEntity act as a wrapper for CObjBase (at the moment) storing a list of CComponent* inside and redirecting some basic code to all of them (r_Write, r_WriteVal, r_Load, r_LoadVal, r_Verb and r_GetRef) and provides also a GetComponent(COMP_TYPE) for external interaction.
  - CComponent acts as a wrapper for each module of code and, as abstract, class requires the above functions to be on them for overriding (these must return true if something was executed on them, so CEntity will stop to try them on other CComponents or false if not so the loop continues). For items these components must be added on CItem::CreateBase, eg:
          case IT_SPAWN_CHAMPION:
         {
@@ -2076,7 +2076,7 @@ When a spawned npc is killed, AddSpawn is being called to spawn the next one.
 	-When all npcs are alredy spawned then AddSpawn checks for DeathCount > SpawnsMax, so the boss will only be generated when all the other spawns are killed.
 Must have event, even if it's empty, since it's applied by the source to generated objects: [events e_spawn_champion]
 
-03-01-020, Drk84
+03-01-2020, Drk84
 - Fixed: Bandage resurrection did not work when targetting a corpse or a ghost.
 		 For resurrecting when targetting a corpse the following conditions must be satisfied:
 			1)The ghost must be in line of sight of its corpse.
@@ -2092,3 +2092,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		   Remember that you need FEATURE_AOS_UPDATE_B ini flag set for enabling the default Focus behaviour.
 		   For disabling the Focus skill you can set SKF_SCRIPTED in the Focus SKILLDEF block or by adding a return 0 in the @UseQuick trigger.
 - Updated SphereCrypt.ini.
+
+19-01-2020, Nolok
+- Fixed: Valid mounts being reported by the garbage collection (Issue #350).
+- Fixed: Warning issued when a keyring (which can act also as a classic container) had legit TDATA2 (gump ID) == 0 (Issue #352).

@@ -2407,20 +2407,39 @@ CItem* CChar::Horse_GetMountItem() const
 {
     ADDTOCALLSTACK("CChar::Horse_GetMountItem");
 
-    if (!IsStatFlag(STATF_RIDDEN))
-        return nullptr;
+    ASSERT(STATF_RIDDEN);   // This function should be called only on mounts.
+    //if (!IsStatFlag(STATF_RIDDEN))
+    //    return nullptr;
+
+	if (!IsStatFlag(STATF_PET))
+		return false;
 
     CItem* pItemMount = m_atRidden.m_uidFigurine.ItemFind();   // ACTARG1 = Mount item UID
     if (pItemMount && (pItemMount->IsType(IT_FIGURINE) || pItemMount->IsType(IT_EQ_HORSE)))
     {
         const CUID& uidThis = GetUID();
+        //ASSERT(uidThis.IsValidUID());
         if (pItemMount->m_itFigurine.m_UID != uidThis)
         {
             g_Log.EventWarn("Auto-fixing mislinked mount item (UID=0%x) for this mount (UID=0%x, id=0%x '%s').\n",
                 (dword)pItemMount->GetUID(), (dword)uidThis, GetBaseID(), GetName());
             pItemMount->m_itFigurine.m_UID = uidThis;
         }
-        return pItemMount;
+
+        const CItemMemory* pItemMemPet = Memory_FindTypes(MEMORY_IPET);
+        if (pItemMemPet)
+        {
+            const CChar* pOwner = pItemMemPet->m_uidLink.CharFind();
+            if (pOwner)
+            {
+                CItem* pOwnerItemMount = pOwner->LayerFind(LAYER_HORSE);
+                if (pOwnerItemMount)
+                {
+                    if (pOwnerItemMount->m_itFigurine.m_UID == uidThis)
+                        return pItemMount;
+                }
+            }
+        }
     }
     return nullptr;
 }
@@ -2428,6 +2447,10 @@ CItem* CChar::Horse_GetMountItem() const
 CItem* CChar::Horse_GetValidMountItem()
 {
     ADDTOCALLSTACK("CChar::Horse_GetValidMountItem");
+
+    ASSERT(STATF_RIDDEN);
+	if (!IsStatFlag(STATF_PET))
+		return false;
 
     CItem* pItemMount = Horse_GetMountItem();
     if (pItemMount)
@@ -2472,7 +2495,7 @@ CItem* CChar::Horse_GetValidMountItem()
         lpctstr ptcFailureString;
         switch (iFailureCode)
         {
-        default:    ptcFailureString = "";                                          break;
+        default:    ptcFailureString = "Undefined";                                 break;
         case 1:     ptcFailureString = "MEMORY_IPET missing";                       break;
         case 2:     ptcFailureString = "MEMORY_IPET has invalid LINK (owner)";      break;
         case 3:     ptcFailureString = "Missing mount item in owner's LAYER_HORSE"; break;
@@ -2615,6 +2638,7 @@ bool CChar::Horse_UnMount()
 	{
 		Use_Figurine(pItem, false);
 		pItem->Delete();
+        m_atRidden.m_uidFigurine.InitUID();
 	}
 	return true;
 }

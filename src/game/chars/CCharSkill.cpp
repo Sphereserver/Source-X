@@ -3936,7 +3936,7 @@ int CChar::Skill_Focus(STAT_TYPE stat)
 	if (g_Cfg.IsSkillFlag(SKILL_FOCUS, SKF_SCRIPTED))
 		return -SKTRIG_QTY;
 
-	int iFocusValue = Skill_GetAdjusted(SKILL_FOCUS);
+	ushort iFocusValue = Skill_GetAdjusted(SKILL_FOCUS);
 
 	//By giving the character skill focus value as difficulty, the chance to succeed is always around 50%
 	if (Skill_UseQuick(SKILL_FOCUS, iFocusValue/10)) 

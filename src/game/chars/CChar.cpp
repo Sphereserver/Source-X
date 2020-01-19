@@ -318,7 +318,7 @@ CChar::~CChar()
 
     g_World.DelCharTicking(this);
 
-    if (IsStatFlag( STATF_RIDDEN ))
+    if (IsStatFlag(STATF_RIDDEN))
     {
         CItem * pItem = Horse_GetValidMountItem();
         if ( pItem )
@@ -326,6 +326,7 @@ CChar::~CChar()
             pItem->m_itFigurine.m_UID.InitUID();    // unlink it first.
             pItem->Delete();
         }
+        StatFlag_Clear(STATF_RIDDEN);
     }
 
     if (IsClient())    // this should never happen.

@@ -301,7 +301,7 @@ GUMP_TYPE CItemBase::IsTypeContainer() const
 		case IT_EQ_BANK_BOX:
 		case IT_EQ_VENDOR_BOX:
 		case IT_KEYRING:
-			return	m_ttContainer.m_idGump;
+			return m_ttContainer.m_idGump;
 		default:
 			return GUMP_NONE;
 	}
