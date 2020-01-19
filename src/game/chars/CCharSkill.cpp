@@ -2457,7 +2457,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 	}
 
 	CObjBase * pObj = m_Act_UID.ObjFind();
-	if ( ! CanTouch(pObj))
+	if ( !CanTouch(pObj))
 	{
 		SysMessageDefault( DEFMSG_HEALING_REACH );
 		return -SKTRIG_QTY;
@@ -2497,28 +2497,8 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 		return -SKTRIG_QTY;
 	}
 
-	if ( pCorpse )
+	if ( pCorpse && !pCorpse->IsCorpseResurrectable(this,pChar))
 	{
-		if ( ! pCorpse->IsTopLevel())
-		{
-			SysMessageDefault( DEFMSG_HEALING_CORPSEG );
-			return -SKTRIG_QTY;
-		}
-		CRegion * pRegion = pCorpse->GetTopPoint().GetRegion(REGION_TYPE_AREA|REGION_TYPE_MULTI);
-		if ( pRegion == nullptr )
-			return -SKTRIG_QTY;
-		if ( pRegion->IsFlag( REGION_ANTIMAGIC_ALL | REGION_ANTIMAGIC_RECALL_IN | REGION_ANTIMAGIC_TELEPORT ))
-		{
-			SysMessageDefault( DEFMSG_HEALING_AM );
-			if ( pChar != this )
-				pChar->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_ATTEMPT), GetName(), pCorpse->GetName());
-
-			return -SKTRIG_QTY;
-		}
-	}
-	else if ( pChar->IsStatFlag(STATF_DEAD))
-	{
-		SysMessageDefault( DEFMSG_HEALING_GHOST );
 		return -SKTRIG_QTY;
 	}
 
@@ -2556,12 +2536,12 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 		{
 			Emote( g_Cfg.GetDefaultMsg( DEFMSG_HEALING_SELF ) );
 		}
-		if ( pCorpse )	// resurrect
+		if ( pCorpse || pChar->IsStatFlag(STATF_DEAD))	// resurrect
 			return( 85 + Calc_GetRandVal(25));
 		if ( pChar->IsStatFlag( STATF_POISONED ))	// poison level
 			return( 50 + Calc_GetRandVal(50));
 
-		return Calc_GetRandVal(80);	// How difficult? 1-1000
+		return Calc_GetRandVal(80);	// Normal healing, How difficult? 1-1000
 	}
 
 	ASSERT( stage == SKTRIG_SUCCESS );
@@ -2574,7 +2554,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 	if (pSkillDef == nullptr)
 		return -SKTRIG_QTY;
 
-	if ( pCorpse )
+	if (pCorpse || pChar->IsStatFlag(STATF_DEAD))
 	{
 		pChar->Spell_Resurrection(pCorpse);
 		return 0;
@@ -3956,25 +3936,27 @@ int CChar::Skill_Focus(STAT_TYPE stat)
 	if (g_Cfg.IsSkillFlag(SKILL_FOCUS, SKF_SCRIPTED))
 		return -SKTRIG_QTY;
 
-	ushort uiFocusValue = Skill_GetAdjusted(SKILL_FOCUS);
-	ushort uiGain;
-	switch (stat)
+	int iFocusValue = Skill_GetAdjusted(SKILL_FOCUS);
+
+	//By giving the character skill focus value as difficulty, the chance to succeed is always around 50%
+	if (Skill_UseQuick(SKILL_FOCUS, iFocusValue/10)) 
 	{
+		ushort uiGain = 0;
+		switch (stat)
+		{
 		case STAT_DEX:
-			uiGain = uiFocusValue / 100;
+			uiGain = iFocusValue / 100;
 			break;
 		case STAT_INT:
-			uiGain = uiFocusValue / 200;
+			uiGain = iFocusValue / 200;
 			break;
 		default:
 			return -SKTRIG_QTY;
+		}
+		return uiGain;
 	}
-	/*
-	By using the player skill value as difficulty, the chance to get an increase will be 50% because
-	the bell curva formula is used.
-	*/
-	Skill_Experience(SKILL_FOCUS, uiFocusValue);
-	return uiGain;
+	return -SKTRIG_QTY;
+	
 }
 bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 {

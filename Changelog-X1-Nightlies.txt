@@ -2075,3 +2075,20 @@ Default levels explanation:
 When a spawned npc is killed, AddSpawn is being called to spawn the next one.
 	-When all npcs are alredy spawned then AddSpawn checks for DeathCount > SpawnsMax, so the boss will only be generated when all the other spawns are killed.
 Must have event, even if it's empty, since it's applied by the source to generated objects: [events e_spawn_champion]
+
+03-01-020, Drk84
+- Fixed: Bandage resurrection did not work when targetting a corpse or a ghost.
+		 For resurrecting when targetting a corpse the following conditions must be satisfied:
+			1)The ghost must be in line of sight of its corpse.
+			2)The ghost must be within 2 tiles of its corpse.
+			3)The ghost must be visible.
+	You can also resurrect a Bonded pet by targetting their ghost.
+- Changed: Focus skill behaviour
+			1)It now uses the Skill_UseQuick method, that means it will fires the SkillUseQuick/UseQuick triggers, the chance to succeed is around 50%.
+			2)A small fix, Focus skill was used when Hitpoints where regenerating, now it is used only when regenerating Mana and Stamina.
+			3)Focus skill will not be used if the character  Mana or Stamina are already at their maximum value, so NPCS should not spam the Focus skill anymore I think.
+		    4)You can read/set the amount of mana/stamina gained by the Focus skill by using local.FocusGain in the @RegenStat trigger.
+			  Default value for mana gain is Focus / 20 while for stamina is Focus / 10.
+		   Remember that you need FEATURE_AOS_UPDATE_B ini flag set for enabling the default Focus behaviour.
+		   For disabling the Focus skill you can set SKF_SCRIPTED in the Focus SKILLDEF block or by adding a return 0 in the @UseQuick trigger.
+- Updated SphereCrypt.ini.
