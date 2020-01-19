@@ -19,7 +19,7 @@
 - Fixed: Protection spell not working correctly if COMBAT_ELEMENTAL_ENGINE combat flag is disabled.
 
 
----- X1 (Milestone 1 opened)
+---- X1 (Milestone 1 opened) ------------------------------------------------------------------------------------
 
 14-05-2016, XuN
 - Fixed: Pets not gaining Karma (it can be blocked through @KarmaChange trigger, no reason to stop it from the source).
