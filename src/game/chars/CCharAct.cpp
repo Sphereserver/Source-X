@@ -2412,7 +2412,7 @@ CItem* CChar::Horse_GetMountItem() const
     //    return nullptr;
 
 	if (!IsStatFlag(STATF_PET))
-		return false;
+		return nullptr;
 
     CItem* pItemMount = m_atRidden.m_uidFigurine.ItemFind();   // ACTARG1 = Mount item UID
     if (pItemMount && (pItemMount->IsType(IT_FIGURINE) || pItemMount->IsType(IT_EQ_HORSE)))
@@ -2450,7 +2450,7 @@ CItem* CChar::Horse_GetValidMountItem()
 
     ASSERT(STATF_RIDDEN);
 	if (!IsStatFlag(STATF_PET))
-		return false;
+		return nullptr;
 
     CItem* pItemMount = Horse_GetMountItem();
     if (pItemMount)
