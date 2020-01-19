@@ -30,7 +30,7 @@ addons:
       
   coverity_scan:
     project:
-      name: "Sphereserver/Source-experimental"
+      name: "Sphereserver/Source-X"
       description: "Game server for Ultima Online"
     notification_email: null@null
     branch_pattern: coverity_scan
