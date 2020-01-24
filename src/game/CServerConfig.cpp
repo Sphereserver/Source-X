@@ -167,7 +167,7 @@ CServerConfig::CServerConfig()
 	m_iMaxPolyStats			= 150;
 	m_iRacialFlags			= 0;
 	m_iRevealFlags			= (REVEALF_DETECTINGHIDDEN|REVEALF_LOOTINGSELF|REVEALF_LOOTINGOTHERS|REVEALF_SPEAK|REVEALF_SPELLCAST);
-
+	m_fDisplayPercentAr = false;
 	m_fNoResRobe		= 0;
 	m_iLostNPCTeleport	= 50;
     m_iAutoProcessPriority = 0;
@@ -462,6 +462,7 @@ enum RC_TYPE
 	RC_DEBUGFLAGS,
 	RC_DECAYTIMER,
 	RC_DEFAULTCOMMANDLEVEL,		//m_iDefaultCommandLevel
+	RC_DISPLAYPERCENTAR,	    //m_fDisplayPercentAr
 	RC_DISTANCETALK,
 	RC_DISTANCEWHISPER,
 	RC_DISTANCEYELL,
@@ -707,6 +708,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "DEBUGFLAGS",				{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iDebugFlags),			0 }},
 	{ "DECAYTIMER",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDecay_Item),			0 }},
 	{ "DEFAULTCOMMANDLEVEL",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDefaultCommandLevel),	0 }},
+	{ "DISPLAYARMORASPERCENT",  { ELEM_BOOL,    OFFSETOF(CServerConfig,m_fDisplayPercentAr),    0 }},
 	{ "DISTANCETALK",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceTalk ),		0 }},
 	{ "DISTANCEWHISPER",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceWhisper ),	0 }},
 	{ "DISTANCEYELL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceYell ),		0 }},

@@ -319,58 +319,17 @@ bool CChar::Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic)
     return true;
 }
 
-CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap ptTarg )
+CChar * CChar::Spell_Summon( CChar * pChar, CPointMap ptTarg )
 {
 	ADDTOCALLSTACK("CChar::Spell_Summon");
-	// Summon an NPC using summon spells.
+	// Finally place the NPC in the world.
+	int iSkill;
+	CSpellDef* pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
 
-	int skill;
-	CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
-	if ( !pSpellDef || !pSpellDef->GetPrimarySkill(&skill, nullptr) )
-		return nullptr;
-
-	if ( !pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ|SPELLFLAG_TARG_XYZ) )
-        ptTarg = GetTopPoint();
-
-	CChar *pChar = CChar::CreateBasic(id);
-	if ( pChar == nullptr )
-		return nullptr;
-
-	if ( !IsPriv(PRIV_GM) )
+	if (!pSpellDef || !pSpellDef->GetPrimarySkill(&iSkill, nullptr) || !pChar)
 	{
-		if ( IsSetMagicFlags(MAGICF_SUMMONWALKCHECK) )	// check if the target location is valid
-		{
-			const dword dwCan = pChar->GetCanFlags() & CAN_C_MOVEMASK;
-			dword dwBlockFlags = 0;
-			g_World.GetHeightPoint2(ptTarg, dwBlockFlags, true);
-
-			if ( dwBlockFlags & ~dwCan )
-			{
-				SysMessageDefault(DEFMSG_MSG_SUMMON_INVALIDTARG);
-				pChar->Delete();
-				return nullptr;
-			}
-		}
-
-		if ( IsSetOF(OF_PetSlots) )
-		{
-			short iFollowerSlots = (short)pChar->GetDefNum("FOLLOWERSLOTS", true);
-			if ( !FollowersUpdate(pChar, maximum(1, iFollowerSlots), true) )
-			{
-				SysMessageDefault(DEFMSG_PETSLOTS_TRY_SUMMON);
-				pChar->Delete();
-				return nullptr;
-			}
-		}
-
-		if ( g_Cfg.m_iMountHeight && !pChar->IsVerticalSpace(GetTopPoint(), false) )
-		{
-			SysMessageDefault(DEFMSG_MSG_SUMMON_CEILING);
-			pChar->Delete();
-			return nullptr;
-		}
+		return nullptr;
 	}
-
 	pChar->StatFlag_Set(STATF_CONJURED);	// conjured creates have no loot
 	pChar->NPC_LoadScript(false);
 	pChar->MoveToChar(ptTarg);
@@ -378,8 +337,7 @@ CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap ptTarg )
 	pChar->m_pNPC->m_Home_Dist_Wander = 10;
 	pChar->NPC_CreateTrigger();		// removed from NPC_LoadScript() and triggered after char placement
 	pChar->NPC_PetSetOwner(this);
-	pChar->OnSpellEffect(SPELL_Summon, this, Skill_GetAdjusted((SKILL_TYPE)skill), nullptr);
-
+	pChar->OnSpellEffect(SPELL_Summon, this, Skill_GetAdjusted((SKILL_TYPE)iSkill), nullptr);
 	pChar->Update();
 	pChar->UpdateAnimate(ANIM_CAST_DIR);
 	pChar->SoundChar(CRESND_GETHIT);
@@ -2417,7 +2375,147 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 
 	return true;
 }
+CChar * CChar::Spell_CanSummon(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE iC1)
+{
+	ADDTOCALLSTACK("CChar::Spell_CanSummon");
+	//Create the NPC and check if we can actually place it in the world, but do not place it yet.
 
+	int iSkill;
+	CSpellDef* pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
+	if (!pSpellDef || !pSpellDef->GetPrimarySkill(&iSkill, nullptr))
+		return nullptr;
+
+	if (!pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ | SPELLFLAG_TARG_XYZ))
+		ptTarg = GetTopPoint();
+
+	if (iC1)//if iC1 is set that means we are overriding the default summoned creature.
+	{
+		m_atMagery.m_iSummonID = iC1;
+	}
+	else
+	{
+		switch (spell)
+		{
+		/*The creature ID for the Summon Spell is already stored in m_atMagery.m_iSummonID when the creature 
+		is chosen from the summoning menu.*/
+		case SPELL_Summon:						
+			break; 
+		case SPELL_Blade_Spirit:
+			m_atMagery.m_iSummonID = CREID_BLADE_SPIRIT;	
+			break;
+		case SPELL_Vortex:			
+			m_atMagery.m_iSummonID = CREID_ENERGY_VORTEX; 
+			break;
+		case SPELL_Air_Elem:		
+			m_atMagery.m_iSummonID = CREID_AIR_ELEM;		
+			break;
+		case SPELL_Daemon:			
+			m_atMagery.m_iSummonID = CREID_DEMON;			
+			break;
+		case SPELL_Earth_Elem:		
+			m_atMagery.m_iSummonID = CREID_EARTH_ELEM;	
+			break;
+		case SPELL_Fire_Elem:		
+			m_atMagery.m_iSummonID = CREID_FIRE_ELEM;	
+			break;
+		case SPELL_Water_Elem:		
+			m_atMagery.m_iSummonID = CREID_WATER_ELEM;	
+			break;
+		case SPELL_Vengeful_Spirit:	
+			m_atMagery.m_iSummonID = CREID_REVENANT;		
+			break;
+		case SPELL_Rising_Colossus:
+			m_atMagery.m_iSummonID = CREID_RISING_COLOSSUS;	
+			break;
+		case SPELL_Summon_Undead: //Sphere custom spell.
+			switch (Calc_GetRandVal(15))
+			{
+			case 1:				
+				m_atMagery.m_iSummonID = CREID_LICH;			
+				break;
+			case 3:
+			case 5:
+			case 7:
+			case 9:				
+				m_atMagery.m_iSummonID = CREID_SKELETON;		
+				break;
+			default:			
+				m_atMagery.m_iSummonID = CREID_ZOMBIE;			
+				break;
+			}
+			break;
+		case SPELL_Animate_Dead:	//This is the Sphere custom spell, not the necromancy one.
+		{
+			CItemCorpse* pCorpse = dynamic_cast <CItemCorpse*> (m_Act_UID.ObjFind());
+			if (pCorpse == nullptr)
+			{
+				SysMessageDefault(DEFMSG_SPELL_ANIMDEAD_NC);
+				return nullptr;
+			}
+			if (IsPriv(PRIV_GM))
+			{
+				m_atMagery.m_iSummonID = pCorpse->m_itCorpse.m_BaseID;
+			}
+			else if (CCharBase::IsPlayableID(pCorpse->GetCorpseType())) 	// Must be a human corpse ?
+			{
+				m_atMagery.m_iSummonID = CREID_ZOMBIE;
+			}
+			else
+			{
+				m_atMagery.m_iSummonID = pCorpse->GetCorpseType();
+			}
+			if (!pCorpse->IsTopLevel())
+			{
+				return nullptr;
+			}
+			break;
+		}
+		default: 
+			m_atMagery.m_iSummonID = CREID_INVALID;
+			break;
+		}
+	}
+
+	CChar* pChar = CChar::CreateBasic(m_atMagery.m_iSummonID);
+	if (pChar == nullptr)
+		return nullptr;
+
+	if (!IsPriv(PRIV_GM))
+	{
+		if (IsSetMagicFlags(MAGICF_SUMMONWALKCHECK))	// check if the target location is valid
+		{
+			const dword dwCan = pChar->GetCanFlags() & CAN_C_MOVEMASK;
+			dword dwBlockFlags = 0;
+			g_World.GetHeightPoint2(ptTarg, dwBlockFlags, true);
+
+			if (dwBlockFlags & ~dwCan)
+			{
+				SysMessageDefault(DEFMSG_MSG_SUMMON_INVALIDTARG);
+				pChar->Delete();
+				return nullptr;
+			}
+		}
+
+		if (IsSetOF(OF_PetSlots))
+		{
+			short iFollowerSlots = (short)pChar->GetDefNum("FOLLOWERSLOTS", true);
+			if (!FollowersUpdate(pChar, maximum(1, iFollowerSlots), true))
+			{
+				SysMessageDefault(DEFMSG_PETSLOTS_TRY_SUMMON);
+				pChar->Delete();
+				return nullptr;
+			}
+		}
+
+		if (g_Cfg.m_iMountHeight && !pChar->IsVerticalSpace(GetTopPoint(), false))
+		{
+			SysMessageDefault(DEFMSG_MSG_SUMMON_CEILING);
+			pChar->Delete();
+			return nullptr;
+		}
+	}
+	return pChar;
+}
 bool CChar::Spell_TargCheck_Face()
 {
 	ADDTOCALLSTACK("CChar::Spell_TargCheck_Face");
@@ -2555,6 +2653,8 @@ bool CChar::Spell_CastDone()
 
 	CObjBase * pObj = m_Act_UID.ObjFind();	// dont always need a target.
 	CObjBase * pObjSrc = m_Act_Prv_UID.ObjFind();
+	CChar* pSummon = nullptr;
+
 	ITEMID_TYPE iT1 = ITEMID_NOTHING;
 	ITEMID_TYPE iT2 = ITEMID_NOTHING;
 	CREID_TYPE iC1 = CREID_INVALID;
@@ -2649,6 +2749,14 @@ bool CChar::Spell_CastDone()
 	iDuration = maximum(0, iDuration);
 	iColor = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("EffectColor"));
 
+	if (pSpellDef->IsSpellType(SPELLFLAG_SUMMON))
+	{
+		pSummon = Spell_CanSummon(spell,m_Act_p ,iC1);
+		if (!pSummon)
+		{
+			return false;
+		}
+	}
 	// Consume the reagents/mana/scroll/charge
 	if (!Spell_CanCast(spell, false, pObjSrc, true))
 		return false;
@@ -2657,11 +2765,7 @@ bool CChar::Spell_CastDone()
 	{
 		if (pSpellDef->IsSpellType(SPELLFLAG_SUMMON))
 		{
-			if (iC1)
-			{
-				m_atMagery.m_iSummonID = iC1;
-				Spell_Summon(m_atMagery.m_iSummonID, m_Act_p);
-			}
+			Spell_Summon(pSummon, m_Act_p);
 		}
 		else if (bIsSpellField)
 		{
@@ -2729,44 +2833,7 @@ bool CChar::Spell_CastDone()
 	}
 	else if (pSpellDef->IsSpellType(SPELLFLAG_SUMMON))
 	{
-		if (spell == SPELL_Summon)
-		{
-			if (iC1)
-				m_atMagery.m_iSummonID = iC1;
-			Spell_Summon(m_atMagery.m_iSummonID, m_Act_p);
-		}
-		else
-		{
-			if (!iC1)
-			{
-				switch (spell)
-				{
-					case SPELL_Blade_Spirit:	m_atMagery.m_iSummonID = CREID_BLADE_SPIRIT;	break;
-					case SPELL_Vortex:			m_atMagery.m_iSummonID = CREID_ENERGY_VORTEX;break;
-					case SPELL_Air_Elem:		m_atMagery.m_iSummonID = CREID_AIR_ELEM;		break;
-					case SPELL_Daemon:			m_atMagery.m_iSummonID = CREID_DEMON;		break;
-					case SPELL_Earth_Elem:		m_atMagery.m_iSummonID = CREID_EARTH_ELEM;	break;
-					case SPELL_Fire_Elem:		m_atMagery.m_iSummonID = CREID_FIRE_ELEM;	break;
-					case SPELL_Water_Elem:		m_atMagery.m_iSummonID = CREID_WATER_ELEM;	break;
-					case SPELL_Summon_Undead:
-						switch (Calc_GetRandVal(15))
-						{
-							case 1:				m_atMagery.m_iSummonID = CREID_LICH;			break;
-							case 3:
-							case 5:
-							case 7:
-							case 9:				m_atMagery.m_iSummonID = CREID_SKELETON;		break;
-							default:			m_atMagery.m_iSummonID = CREID_ZOMBIE;		break;
-						}
-					case SPELL_Vengeful_Spirit:	m_atMagery.m_iSummonID = CREID_REVENANT;		break;
-					default: break;
-				}
-			}
-			else
-				m_atMagery.m_iSummonID = iC1;
-
-			Spell_Summon(m_atMagery.m_iSummonID, m_Act_p);
-		}
+			Spell_Summon(pSummon, m_Act_p);
 	}
 	else
 	{
@@ -2893,30 +2960,8 @@ bool CChar::Spell_CastDone()
 
 			case SPELL_Animate_Dead:
 			{
-				CItemCorpse * pCorpse = dynamic_cast <CItemCorpse*> (pObj);
-				if (pCorpse == nullptr)
-				{
-					SysMessageDefault(DEFMSG_SPELL_ANIMDEAD_NC);
-					return false;
-				}
-				if (IsPriv(PRIV_GM))
-				{
-					m_atMagery.m_iSummonID = pCorpse->m_itCorpse.m_BaseID;
-				}
-				else if (CCharBase::IsPlayableID(pCorpse->GetCorpseType())) 	// Must be a human corpse ?
-				{
-					m_atMagery.m_iSummonID = CREID_ZOMBIE;
-				}
-				else
-				{
-					m_atMagery.m_iSummonID = pCorpse->GetCorpseType();
-				}
-
-				if (!pCorpse->IsTopLevel())
-				{
-					return false;
-				}
-				CChar *pChar = Spell_Summon(m_atMagery.m_iSummonID, pCorpse->GetTopPoint());
+				CItemCorpse* pCorpse = dynamic_cast <CItemCorpse*> (pObj); //This is probably redundant.
+				CChar *pChar = Spell_Summon(pSummon, pCorpse->GetTopPoint());
 				ASSERT(pChar);
 				if (!pChar->RaiseCorpse(pCorpse))
 				{

@@ -537,6 +537,52 @@ int CChar::CalcArmorDefense() const
 	return maximum(( iDefenseTotal / 100 ) + m_ModAr, 0);
 }
 
+ int CChar::CalcPercentArmorDefence(LAYER_TYPE layer) //static
+{
+	 ADDTOCALLSTACK("CChar::CalcPercentArmorDefence");
+	 int iPercentArmorDefence = 0;
+	 switch (layer)
+	 {
+	 case LAYER_HELM:	//15% from head location.
+		 iPercentArmorDefence = sm_ArmorLayers[0].m_iCoverage;
+		 break;
+	 case LAYER_COLLAR: //7% from neck location.
+		 iPercentArmorDefence = sm_ArmorLayers[1].m_iCoverage;
+		 break;
+	 case LAYER_SHIRT: //LAYER_SHIRT, LAYER_CHEST and LAYER_TUNIC get the 35% of AR  from chest location.
+	 case LAYER_CHEST:
+	 case LAYER_TUNIC: 
+		 iPercentArmorDefence = sm_ArmorLayers[3].m_iCoverage;
+		 break;
+	 case LAYER_ROBE:	//35% from chest, 22% from legs and 14% from arms locations.
+		 iPercentArmorDefence = sm_ArmorLayers[3].m_iCoverage + sm_ArmorLayers[4].m_iCoverage + sm_ArmorLayers[6].m_iCoverage;
+		 break;
+	 case LAYER_CAPE: //Both get 14% from arms location.
+	 case LAYER_ARMS:
+		 iPercentArmorDefence = sm_ArmorLayers[4].m_iCoverage;
+		 break;
+	 case LAYER_GLOVES: //Gloves get 7% from hands location.
+		 iPercentArmorDefence = sm_ArmorLayers[5].m_iCoverage;
+		 break;
+	 case LAYER_PANTS: //LAYER_PANTS, LAYER_SKIRT, LAYER_HALF_APRON and LAYER_LEGS get a 22% of AR from legs location.
+	 case LAYER_SKIRT:
+	 case LAYER_HALF_APRON:
+	 case LAYER_LEGS:
+		 iPercentArmorDefence = sm_ArmorLayers[6].m_iCoverage;
+		 break;
+	 case LAYER_HAND2:	//By default Shields get a 7% armor coverage, if PARRYERA_ARSCALING is enabled they get a 100% armor coverage.
+		 iPercentArmorDefence = sm_ArmorLayers[5].m_iCoverage;
+		 if (g_Cfg.m_iCombatParryingEra & PARRYERA_ARSCALING)
+		 {
+			 iPercentArmorDefence = sm_ArmorLayers[8].m_iCoverage;
+		 }
+		 break;
+	 default:	//Back and Feet location provide no protections (0%).
+		 break;
+	 }
+	 return iPercentArmorDefence;
+}
+
 // Someone hit us.
 // iDmg already defined, here we just apply armor related calculations
 //
@@ -2129,8 +2175,12 @@ bool CChar::Fight_Parry(CItem * &pItemParry)
         if ((iParryChance > 0) && (iParrying >= 1000))
             iParryChance += 5;
     }
-
-    if (iParryChance <= 0)
+	/* 
+	Had to replace <= with < otherwise we will never be able to increase the parrying  skill if the Parrying skill is too low.
+	For example, without a shield and using the legacy formula we will not be able to get a gain in the skill if the character
+	Parrying skill is less than 8.0.
+	*/
+    if (iParryChance < 0)
         return false;
 	
     int iDex = Stat_GetAdjusted(STAT_DEX);

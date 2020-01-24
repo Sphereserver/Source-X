@@ -732,7 +732,7 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 	    CItemBase *pItemDef = pReturn->Item_GetDef();
 	    SPELL_TYPE min = (SPELL_TYPE)pItemDef->m_ttSpellbook.m_iOffset;
 	    SPELL_TYPE max = (SPELL_TYPE)(pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells);
-	    if ( (iSpell > min) && (iSpell < max) )
+	    if ( (iSpell > min) && (iSpell <= max) ) //Had to replace < with <= otherwise the spell would not be considered a valid one.
 	    {
 		    if (pReturn->IsSpellInBook(iSpell) )	//We found a book with this same spell, nothing more to do.
 			    return pReturn;
@@ -751,7 +751,7 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 			CItemBase *pItemDef = pItem->Item_GetDef();
 			SPELL_TYPE min = (SPELL_TYPE)pItemDef->m_ttSpellbook.m_iOffset;
 			SPELL_TYPE max = (SPELL_TYPE)(pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells);
-			if ( (iSpell > min) && (iSpell < max) ) // and check now the spell is within the spells that this book can hold.
+			if ( (iSpell > min) && (iSpell <= max) ) // and check now the spell is within the spells that this book can hold. Had to replace < with <= otherwise the spell would not be considered a valid one.
 			{
 				if ( pItem->IsSpellInBook(iSpell) )	//I found a book with this spell, nothing more to do.
 					return pItem;
