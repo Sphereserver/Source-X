@@ -1470,7 +1470,8 @@ uint CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 {
 	ADDTOCALLSTACK("CClient::Setup_FillCharList");
 	// list available chars for your account that are idle.
-	CAccount * pAccount = GetAccount();
+	ASSERT(pPacket);
+	const CAccount * pAccount = GetAccount();
 	ASSERT( pAccount );
 
 	size_t count = 0;
@@ -1485,17 +1486,17 @@ uint CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 		++count;
 	}
 
-	size_t iAcctCharCount = pAccount->m_Chars.GetCharCount(), iAcctMaxChars = pAccount->GetMaxChars();
-	uint iMax = (uint)minimum(maximum(iAcctCharCount,iAcctMaxChars), MAX_CHARS_PER_ACCT);
+	const size_t iAcctCharCount = pAccount->m_Chars.GetCharCount(), iAcctMaxChars = pAccount->GetMaxChars();
+	const uint iMax = (uint)minimum(maximum(iAcctCharCount,iAcctMaxChars), MAX_CHARS_PER_ACCT);
 
-	uint iQty = (uint)pAccount->m_Chars.GetCharCount();
+	uint iQty = (uint)iAcctCharCount;
 	if (iQty > iMax)
 		iQty = iMax;
 
 	for (uint i = 0; i < iQty; ++i)
 	{
-		CUID uid(pAccount->m_Chars.GetChar(i));
-		CChar* pChar = uid.CharFind();
+		const CUID uid(pAccount->m_Chars.GetChar(i));
+		const CChar* pChar = uid.CharFind();
 		if ( pChar == nullptr )
 			continue;
 		if ( pCharFirst == pChar )
@@ -1533,7 +1534,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 	// Can i close a menu ?
 	// Cancel a cursor input.
 
-	bool bSuppressCancelMessage = false;
+	bool fSuppressCancelMessage = false;
 
 	switch ( GetTargMode() )
 	{
@@ -1544,7 +1545,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 				CScriptTriggerArgs Args;
 				Args.m_s1 =  m_Targ_Text;
 				if ( GetChar()->OnTrigger( CTRIG_Targon_Cancel, m_pChar, &Args ) == TRIGRET_RET_TRUE )
-					bSuppressCancelMessage = true;
+					fSuppressCancelMessage = true;
 			}
 		} break;
 		case CLIMODE_TARG_USE_ITEM:
@@ -1553,7 +1554,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 			if ( pItemUse != nullptr && (( IsTrigUsed(TRIGGER_TARGON_CANCEL) ) || ( IsTrigUsed(TRIGGER_ITEMTARGON_CANCEL) ) ))
 			{
 				if ( pItemUse->OnTrigger( ITRIG_TARGON_CANCEL, m_pChar ) == TRIGRET_RET_TRUE )
-					bSuppressCancelMessage = true;
+					fSuppressCancelMessage = true;
 			}
 		} break;
 
@@ -1568,7 +1569,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 				{
 					if ( m_pChar->OnTrigger( CTRIG_SpellTargetCancel, this, &Args ) == TRIGRET_RET_TRUE )
 					{
-						bSuppressCancelMessage = true;
+						fSuppressCancelMessage = true;
 						break;
 					}
 				}
@@ -1576,7 +1577,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 				if ( IsTrigUsed(TRIGGER_TARGETCANCEL) )
 				{
 					if ( m_pChar->Spell_OnTrigger( m_tmSkillMagery.m_iSpell, SPTRIG_TARGETCANCEL, m_pChar, &Args ) == TRIGRET_RET_TRUE )
-						bSuppressCancelMessage = true;
+						fSuppressCancelMessage = true;
 				}
 			}
 		} break;
@@ -1611,14 +1612,14 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 				{
 					if ( m_pChar->Skill_OnCharTrigger(action, CTRIG_SkillTargetCancel) == TRIGRET_RET_TRUE )
 					{
-						bSuppressCancelMessage = true;
+						fSuppressCancelMessage = true;
 						break;
 					}
 				}
 				if ( IsTrigUsed(TRIGGER_TARGETCANCEL) )
 				{
 					if ( m_pChar->Skill_OnTrigger(action, SKTRIG_TARGETCANCEL) == TRIGRET_RET_TRUE )
-						bSuppressCancelMessage = true;
+						fSuppressCancelMessage = true;
 				}
 			}
 		} break;
@@ -1645,13 +1646,13 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 			pItem->RemoveFromView();		//Removing from view to avoid seeing it in the cursor
 			m_pChar->ItemBounce(pItem);
 			// Just clear the old target mode
-			if (bSuppressCancelMessage == false)
+			if (fSuppressCancelMessage == false)
 				addSysMessage(g_Cfg.GetDefaultMsg(DEFMSG_TARGET_CANCEL_2));
 		}
 	}
 
 	m_Targ_Mode = targmode;
-	if ( targmode == CLIMODE_NORMAL && bSuppressCancelMessage == false )
+	if ( targmode == CLIMODE_NORMAL && fSuppressCancelMessage == false )
 		addSysMessage( g_Cfg.GetDefaultMsg(DEFMSG_TARGET_CANCEL_1) );
 	else if ( pPrompt && *pPrompt ) // Check that the message is not blank.
 		addSysMessage( pPrompt );

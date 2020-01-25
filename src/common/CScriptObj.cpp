@@ -1718,11 +1718,11 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 	if ( iType & 0x40 )	// FORINSTANCES
 	{
 		CResourceID rid;
-		tchar * ppArgs[1];
+		tchar * pArg = nullptr;
 
-		if (Str_ParseCmds( s.GetArgStr(), ppArgs, CountOf( ppArgs ), " \t," ) >= 1)
+		if (Str_Parse( s.GetArgStr(), &pArg, " \t," ))
 		{
-			rid = g_Cfg.ResourceGetID(RES_UNKNOWN, ppArgs[0]);
+			rid = g_Cfg.ResourceGetID(RES_UNKNOWN, pArg);
 		}
 		else
 		{
@@ -1886,7 +1886,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, lpctstr pszTrigName, CTex
 		{
 			pTrig = new CScriptProfiler::CScriptProfilerTrigger;
 			memset(pTrig, 0, sizeof(CScriptProfiler::CScriptProfilerTrigger));
-			strcpy(pTrig->name, pName);
+			strncpy(pTrig->name, pName, sizeof(pTrig->name));
 			if ( g_profiler.TriggersTail )
 				g_profiler.TriggersTail->next = pTrig;
 			else

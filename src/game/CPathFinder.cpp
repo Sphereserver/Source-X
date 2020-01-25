@@ -25,7 +25,7 @@ void CPathFinder::GetAdjacentCells(const CPathFinderPoint* Point, std::deque<CPa
 				continue;
             const short RealX = x + Point->m_x;
             const short RealY = y + Point->m_y;
-			if ( RealX < 0 || RealY < 0 || RealX >= MAX_NPC_PATH_STORAGE_SIZE || RealY >= MAX_NPC_PATH_STORAGE_SIZE)
+			if ( RealX < 0 || RealY < 0 || RealX >= (MAX_NPC_PATH_STORAGE_SIZE - 1) || (RealY >= MAX_NPC_PATH_STORAGE_SIZE - 1))
 				continue;
 			if ( m_Points[RealX][RealY]._Walkable == false )
 				continue;

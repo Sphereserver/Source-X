@@ -214,7 +214,7 @@ bool CAccounts::Account_Delete( CAccount * pAccount )
 		return false;
 	}
 
-	m_Accounts.DeleteObj( pAccount );
+	m_Accounts.RemovePtr( pAccount );
 	return true;
 }
 

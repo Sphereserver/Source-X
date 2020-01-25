@@ -13,6 +13,9 @@
 template<class TYPE>
 class CSObjArray : public CSPtrTypeArray<TYPE>
 {
+private:
+    void DeleteElements();
+
 public:
     static const char *m_sClassName;
 
@@ -20,8 +23,10 @@ public:
     */
     ///@{
 public:
-    CSObjArray() {}
-    virtual ~CSObjArray() {}
+    CSObjArray() = default;
+    virtual ~CSObjArray() {
+        DeleteElements();
+    }
 private:
     /**
     * @brief No copy on construction allowed.
@@ -37,11 +42,13 @@ private:
     ///@{
 public:
     /**
-    * @brief Remove an element if exists in the array.
-    * @param pData data to remove.
-    * @return true if data is removed, false otherwise.
-    */
-    bool DeleteObj( TYPE pData );
+   * @brief Check if an index is between 0 and element count.
+   * @param i index to check.
+   * @return true if index is valid, false otherwise.
+   */
+    bool IsValidIndex(size_t i) const;
+
+    void clear();
     ///@}
 };
 
@@ -51,9 +58,23 @@ public:
 // CSObjArray:: Modifiers.
 
 template<class TYPE>
-inline bool CSObjArray<TYPE>::DeleteObj( TYPE pData )
+void CSObjArray<TYPE>::DeleteElements()
 {
-    return this->RemovePtr(pData);
+    for (TYPE elem : *this)
+        delete elem;
+}
+
+template<class TYPE>
+bool CSObjArray<TYPE>::IsValidIndex(size_t i) const
+{
+    return ((i < this->size()) && ((*this)[i] != nullptr));
+}
+
+template<class TYPE>
+void CSObjArray<TYPE>::clear()
+{
+    DeleteElements();
+    this->std::vector<TYPE>::clear();
 }
 
 #endif //_INC_CSOBJARRAY_H

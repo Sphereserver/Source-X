@@ -146,9 +146,9 @@ bool PacketCreate::onReceive(CNetState* net)
 		hue, hairid, hairhue, beardid, beardhue, shirthue, pantshue, ITEMID_NOTHING, startloc, flags);
 }
 
-bool PacketCreate::doCreate(CNetState* net, lpctstr charname, bool bFemale, RACE_TYPE rtRace, short wStr, short wDex, short wInt,
-	PROFESSION_TYPE prProf, SKILL_TYPE skSkill1, ushort uiSkillVal1, SKILL_TYPE skSkill2, ushort uiSkillVal2, SKILL_TYPE skSkill3, ushort uiSkillVal3, SKILL_TYPE skSkill4, ushort uiSkillVal4,
-	HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, ITEMID_TYPE idFace, int iStartLoc, int iFlags)
+bool PacketCreate::doCreate(CNetState* net, lpctstr charname, bool fFemale, RACE_TYPE rtRace, ushort wStr, ushort wDex, ushort wInt, PROFESSION_TYPE prProf,
+	SKILL_TYPE skSkill1, ushort uiSkillVal1, SKILL_TYPE skSkill2, ushort uiSkillVal2, SKILL_TYPE skSkill3, ushort uiSkillVal3, SKILL_TYPE skSkill4, ushort uiSkillVal4,
+	HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, ITEMID_TYPE idFace, int iStartLoc, uint uiFlags)
 {
 	ADDTOCALLSTACK("PacketCreate::doCreate");
 
@@ -194,7 +194,7 @@ bool PacketCreate::doCreate(CNetState* net, lpctstr charname, bool bFemale, RACE
 	TRIGRET_TYPE tr = TRIGRET_RET_DEFAULT;
 	CScriptTriggerArgs createArgs;
     // RW
-	createArgs.m_iN1 = iFlags;
+	createArgs.m_iN1 = uiFlags;
 	createArgs.m_iN2 = prProf;
 	createArgs.m_iN3 = rtRace;
     // R
@@ -205,12 +205,12 @@ bool PacketCreate::doCreate(CNetState* net, lpctstr charname, bool bFemale, RACE
     if (tr == TRIGRET_RET_TRUE)
         goto block_creation;
 
-    iFlags = (int)createArgs.m_iN1;
+    //uiFlags = (uint)createArgs.m_iN1;  // unused at this point
     prProf = (PROFESSION_TYPE)createArgs.m_iN2;
     rtRace = (RACE_TYPE)createArgs.m_iN3;
 
 	// Creating the pChar
-	pChar->InitPlayer(client, charname, bFemale, rtRace, wStr, wDex, wInt,
+	pChar->InitPlayer(client, charname, fFemale, rtRace, wStr, wDex, wInt,
 		prProf, skSkill1, uiSkillVal1, skSkill2, uiSkillVal2, skSkill3, uiSkillVal3, skSkill4, uiSkillVal4,
 		wSkinHue, idHair, wHairHue, idBeard, wBeardHue, wShirtHue, wPantsHue, idFace, iStartLoc);
 
@@ -1624,7 +1624,7 @@ bool PacketCreateNew::onReceive(CNetState* net)
 	bool success = doCreate(net, charname, sex > 0, race,
 		strength, dexterity, intelligence, profession,
 		skill1, skillval1, skill2, skillval2, skill3, skillval3, skill4, skillval4,
-		hue, hairid, hairhue, beardid, beardhue, shirthue, shirthue, faceid, startloc, -1);
+		hue, hairid, hairhue, beardid, beardhue, shirthue, shirthue, faceid, startloc, UINT32_MAX);
 	if (!success)
 		return false;
 

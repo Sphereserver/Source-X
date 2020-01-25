@@ -2097,6 +2097,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: Valid mounts being reported by the garbage collection (Issue #350).
 - Fixed: Warning issued when a keyring (which can act also as a classic container) had legit TDATA2 (gump ID) == 0 (Issue #352).
 
+
 23-01-2020, Drk84
 - Added: New ini flag DisplayArmorAsPercent.
          When enabled, display, in the tooltip, the Armor of the item as a percentage of its full armor value, the percentage is based upon the body parts the item covers. 
@@ -2117,3 +2118,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: Loss of reagents and mana when a summoning spell fail because Maxfollower property was reached.
 		 Note: You will still lose reagents and mana if ManaLossOnFail and ReagentLossOnFail are enabled in the ini. (Issue #351)
 -Updated SphereCrypt.ini.
+
+25-01-2020, Nolok
+- Fixed: Invalid keywords in the [ADVANCE] block were likely to cause memory corruption.
+- Updated: SQlite to version 3.31.0.
