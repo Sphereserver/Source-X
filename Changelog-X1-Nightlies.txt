@@ -2096,3 +2096,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 19-01-2020, Nolok
 - Fixed: Valid mounts being reported by the garbage collection (Issue #350).
 - Fixed: Warning issued when a keyring (which can act also as a classic container) had legit TDATA2 (gump ID) == 0 (Issue #352).
+
+25-01-2020, Nolok
+- Fixed: Invalid keywords in the [ADVANCE] block were likely to cause memory corruption.
+- Updated: SQlite to version 3.31.0.

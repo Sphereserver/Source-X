@@ -288,7 +288,7 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
                 TRIGRET_TYPE iRet = pCharClient->OnTrigger(CTRIG_HouseDesignCommitItem, pCharClient, &Args);
                 if (iRet == TRIGRET_RET_FALSE)
                 {
-                    m_designMain.m_vectorComponents.erase(i);
+                    m_designWorking.m_vectorComponents.erase(i);
                     continue;
                 }
             }

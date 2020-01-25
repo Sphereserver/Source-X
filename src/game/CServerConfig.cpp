@@ -2835,9 +2835,13 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		// Stat advance rates.
 		while ( pScript->ReadKeyParse())
 		{
-			int i = FindStatKey( pScript->GetKey());
-			if ( i >= STAT_BASE_QTY )
+			lpctstr ptcKey = pScript->GetKey();
+			STAT_TYPE i = FindStatKey(ptcKey);
+			if ((i <= STAT_NONE) || (i >= STAT_BASE_QTY))
+			{
+				g_Log.EventError("Invalid keyword '%s'.\n", ptcKey);
 				continue;
+			}
 			m_StatAdv[i].Load( pScript->GetArgStr());
 		}
 		return true;
@@ -2847,7 +2851,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			tchar* ipBuffer = Str_GetTemp();
 			while ( pScript->ReadKeyParse())
 			{
-				strcpy(ipBuffer, pScript->GetKey());
+				strncpy(ipBuffer, pScript->GetKey(), STR_TEMPLENGTH);
 				HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(ipBuffer);
 				history.setBlocked(true);
 			}
@@ -3461,7 +3465,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 	case RES_STARTS:
 		{
-			int iStartVersion = pScript->GetArgVal();
+			const int iStartVersion = pScript->GetArgVal();
 			m_StartDefs.clear();
 			while ( pScript->ReadKey())
 			{
@@ -3475,10 +3479,10 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 					if (iStartVersion == 2)
 					{
 						if ( pScript->ReadKey())
-							pStart->iClilocDescription = atoi(pScript->GetKey());
+							pStart->iClilocDescription = Str_ToI(pScript->GetKey());
 					}
 				}
-				m_StartDefs.push_back(pStart);
+				m_StartDefs.emplace_back(pStart);
 			}
 
 			return true;

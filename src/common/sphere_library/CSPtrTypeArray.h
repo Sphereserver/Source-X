@@ -17,8 +17,8 @@ public:
     /** @name Constructors, Destructor, Asign operator:
     */
     ///@{
-    CSPtrTypeArray() {}
-    virtual ~CSPtrTypeArray() {}
+    CSPtrTypeArray() = default;
+    virtual ~CSPtrTypeArray() = default;
     /**
     * @brief Copy constructor.
     */

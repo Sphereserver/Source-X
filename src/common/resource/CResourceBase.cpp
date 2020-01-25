@@ -148,7 +148,7 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
         return nullptr;
     }
 
-    m_ResourceFiles.push_back(pNewRes);
+    m_ResourceFiles.emplace_back(pNewRes);
     pNewRes->m_iResourceFileIndex = int(m_ResourceFiles.size() -1);
     return pNewRes;
 }
@@ -240,7 +240,7 @@ CResourceScript * CResourceBase::LoadResourcesAdd( lpctstr pszNewFileName )
 	return pScript;
 }
 
-bool CResourceBase::OpenResourceFind( CScript &s, lpctstr pszFilename, bool bCritical )
+bool CResourceBase::OpenResourceFind( CScript &s, lpctstr pszFilename, bool fCritical )
 {
 	ADDTOCALLSTACK("CResourceBase::OpenResourceFind");
 	// Open a single resource script file.
@@ -252,7 +252,7 @@ bool CResourceBase::OpenResourceFind( CScript &s, lpctstr pszFilename, bool bCri
 	// search the local dir or full path first.
 	if ( s.Open(pszFilename, OF_READ | OF_NONCRIT ))
 		return true;
-	if ( !bCritical )
+	if ( !fCritical )
 		return false;
 
 	// next, check the script file path

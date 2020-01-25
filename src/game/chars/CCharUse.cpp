@@ -1814,7 +1814,7 @@ bool CChar::ItemEquipArmor( bool fForce )
 
 		// Can I even equip this?
 		LAYER_TYPE layer = CanEquipLayer(pItem, LAYER_QTY, nullptr, true);
-		if ( layer == LAYER_NONE )
+		if ((layer == LAYER_NONE) || (layer >= LAYER_HORSE))
 			continue;
 
 		if ( iScore > iBestScore[layer] )

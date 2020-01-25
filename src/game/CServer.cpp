@@ -2090,7 +2090,7 @@ bool CServer::SocketsInit() // Initialize sockets
 	{
 		pHost = gethostbyname(szName);
 		if ( pHost && pHost->h_addr && pHost->h_name && pHost->h_name[0] )
-			strcpy(szName, pHost->h_name);
+			strncpy(szName, pHost->h_name, _MAX_PATH);
 	}
 
 	g_Log.Event( LOGM_INIT, "Server started on hostname '%s'\n", szName);

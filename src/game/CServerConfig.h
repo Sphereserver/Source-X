@@ -547,7 +547,7 @@ public:
 	CRegionLinks m_RegionDefs;		// All [REGION ] stored inside.
 
 	// static definition stuff from *TABLE.SCP mostly.
-	CSObjArray< const CStartLoc* > m_StartDefs;			// Start points list
+    CSObjArray<CStartLoc *> m_StartDefs;    // Start points list
     CValueCurveDef m_StatAdv[STAT_BASE_QTY];			// "skill curve"
 	CSTypedArray<CPointMap> m_MoonGates;	// The array of moongates.
 
