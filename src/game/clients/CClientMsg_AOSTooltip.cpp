@@ -445,7 +445,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 			int iPercentArmorRating = 0;
 			if (g_Cfg.m_fDisplayPercentAr)
 			{
-				iPercentArmorRating = CChar::CalcPercentArmorDefence(pItem->Item_GetDef()->GetEquipLayer());
+				iPercentArmorRating = CChar::CalcPercentArmorDefense(pItem->Item_GetDef()->GetEquipLayer());
 				iArmorRating = IMulDivDown(iArmorRating, iPercentArmorRating, 100);
 			}
             if (iArmorRating != 0)

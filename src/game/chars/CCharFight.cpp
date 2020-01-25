@@ -537,9 +537,9 @@ int CChar::CalcArmorDefense() const
 	return maximum(( iDefenseTotal / 100 ) + m_ModAr, 0);
 }
 
- int CChar::CalcPercentArmorDefence(LAYER_TYPE layer) //static
+ int CChar::CalcPercentArmorDefense(LAYER_TYPE layer) //static
 {
-	 ADDTOCALLSTACK("CChar::CalcPercentArmorDefence");
+	 ADDTOCALLSTACK("CChar::CalcPercentArmorDefense");
 	 int iPercentArmorDefence = 0;
 	 switch (layer)
 	 {

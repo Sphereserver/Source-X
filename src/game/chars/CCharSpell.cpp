@@ -319,9 +319,9 @@ bool CChar::Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic)
     return true;
 }
 
-CChar * CChar::Spell_Summon( CChar * pChar, CPointMap ptTarg )
+CChar * CChar::Spell_Summon_Place( CChar * pChar, CPointMap ptTarg )
 {
-	ADDTOCALLSTACK("CChar::Spell_Summon");
+	ADDTOCALLSTACK("CChar::Spell_Summon_Place");
 	// Finally place the NPC in the world.
 	int iSkill;
 	CSpellDef* pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
@@ -2375,7 +2375,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 
 	return true;
 }
-CChar * CChar::Spell_CanSummon(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE iC1)
+CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE iC1)
 {
 	ADDTOCALLSTACK("CChar::Spell_CanSummon");
 	//Create the NPC and check if we can actually place it in the world, but do not place it yet.
@@ -2751,7 +2751,7 @@ bool CChar::Spell_CastDone()
 
 	if (pSpellDef->IsSpellType(SPELLFLAG_SUMMON))
 	{
-		pSummon = Spell_CanSummon(spell,m_Act_p ,iC1);
+		pSummon = Spell_Summon_Try(spell,m_Act_p ,iC1);
 		if (!pSummon)
 		{
 			return false;
@@ -2765,7 +2765,7 @@ bool CChar::Spell_CastDone()
 	{
 		if (pSpellDef->IsSpellType(SPELLFLAG_SUMMON))
 		{
-			Spell_Summon(pSummon, m_Act_p);
+			Spell_Summon_Place(pSummon, m_Act_p);
 		}
 		else if (bIsSpellField)
 		{
@@ -2833,7 +2833,7 @@ bool CChar::Spell_CastDone()
 	}
 	else if (pSpellDef->IsSpellType(SPELLFLAG_SUMMON))
 	{
-			Spell_Summon(pSummon, m_Act_p);
+		Spell_Summon_Place(pSummon, m_Act_p);
 	}
 	else
 	{
@@ -2961,7 +2961,7 @@ bool CChar::Spell_CastDone()
 			case SPELL_Animate_Dead:
 			{
 				CItemCorpse* pCorpse = dynamic_cast <CItemCorpse*> (pObj); //This is probably redundant.
-				CChar *pChar = Spell_Summon(pSummon, pCorpse->GetTopPoint());
+				CChar *pChar = Spell_Summon_Place(pSummon, pCorpse->GetTopPoint());
 				ASSERT(pChar);
 				if (!pChar->RaiseCorpse(pCorpse))
 				{
