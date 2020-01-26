@@ -2097,6 +2097,28 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: Valid mounts being reported by the garbage collection (Issue #350).
 - Fixed: Warning issued when a keyring (which can act also as a classic container) had legit TDATA2 (gump ID) == 0 (Issue #352).
 
+
+23-01-2020, Drk84
+- Added: New ini flag DisplayArmorAsPercent.
+         When enabled, display, in the tooltip, the Armor of the item as a percentage of its full armor value, the percentage is based upon the body parts the item covers. 
+         Remember that the displayed value is just for "cosmetical" purpose and, by default, is not used when calculating combat damage, the full AR is the one used.
+		 In some cases, the Armor value displayed in the tooltip will not match with the sum of the AR of each piece of armor displayed in the status gump, this happens when an armor item cover location
+		 overlaps with another armor item cover location that as an higher value.
+		 Quick summary of layer body coverage:
+		  Helm: 15% of AR from head.
+		  Collar: 7% of AR from neck.
+		  Shirt/Chest/Tunic: 35% of AR from chest.
+		  Robe: A robe cover multiple position, 35% of AR from chest, 22% of AR from legs and 14% of AR from arms.
+		  Cape/Arms: 14% from arms.
+		  Pants/Skirt/Half-Apron/Legs: 22% of AR from legs.
+		  Gloves: 7% of AR from hands.
+		  Shield: 7% of AR from shield, if CombatParryEra has the 080 flag set it uses the 100% of AR  from the shield value.
+		 Only works when COMBAT_ELEMENTAL_ENGINE is disabled and FEATURES_AOS_UPDATE_B is enabled. (Issue #241)
+- Added: Missing layer LAYER_SPELL_Enchant.
+- Fixed: Loss of reagents and mana when a summoning spell fail because Maxfollower property was reached.
+		 Note: You will still lose reagents and mana if ManaLossOnFail and ReagentLossOnFail are enabled in the ini. (Issue #351)
+-Updated SphereCrypt.ini.
+
 25-01-2020, Nolok
 - Fixed: Invalid keywords in the [ADVANCE] block were likely to cause memory corruption.
 - Updated: SQlite to version 3.31.0.

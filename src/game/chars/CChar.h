@@ -930,7 +930,7 @@ private:
 	int Skill_Act_Training( SKTRIG_TYPE stage );
 
 	void Spell_Dispel( int iskilllevel );
-	CChar * Spell_Summon( CREID_TYPE id, CPointMap ptTarg );
+	CChar * Spell_Summon_Place( CChar * pChar, CPointMap ptTarg );
 	bool Spell_Recall(CItem * pRune, bool fGate);
     CItem * Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int64 iDurationInTenths, CObjBase * pSrc = nullptr, bool bEquip = true );
 	SPELL_TYPE Spell_GetIndex(SKILL_TYPE skill = SKILL_NONE);	//gets first spell for the magic skill given.
@@ -957,6 +957,7 @@ public:
 	bool Spell_CastDone();
 	bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool fReflecting = false );
 	bool Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bool fFailMsg, bool fCheckAntiMagic = true );
+	CChar * Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE iC1);
 	int64 GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc = nullptr ); // in tenths of second
 
 	// Memories about objects in the world. -------------------
@@ -1013,7 +1014,7 @@ private:
 	bool Fight_IsActive() const;
 public:
 	int CalcArmorDefense() const;
-	
+	static int CalcPercentArmorDefense(LAYER_TYPE layer);
 	void Memory_Fight_Retreat( CChar * pTarg, CItemMemory * pFight );
 	void Memory_Fight_Start( const CChar * pTarg );
 	bool Memory_Fight_OnTick( CItemMemory * pMemory );

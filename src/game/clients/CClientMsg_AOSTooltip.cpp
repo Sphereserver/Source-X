@@ -441,13 +441,19 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 	{
         if (!IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
         {
-            const int ArmorRating = pItem->Armor_GetDefense();
-            if (ArmorRating != 0)
+            int iArmorRating = pItem->Armor_GetDefense();
+			int iPercentArmorRating = 0;
+			if (g_Cfg.m_fDisplayPercentAr)
+			{
+				iPercentArmorRating = CChar::CalcPercentArmorDefense(pItem->Item_GetDef()->GetEquipLayer());
+				iArmorRating = IMulDivDown(iArmorRating, iPercentArmorRating, 100);
+			}
+            if (iArmorRating != 0)
             {
                 // Obsolete AR was replaced by physical/fire/cold/poison/energy resist since AOS
                 // and doesn't even have proper tooltips. It's just there for backward compatibility
                 PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060658)); // ~1_val~: ~2_val~
-                t->FormatArgs("%s\t%d", g_Cfg.GetDefaultMsg(DEFMSG_TOOLTIP_TAG_ARMOR), ArmorRating);
+				t->FormatArgs("%s\t%d", g_Cfg.GetDefaultMsg(DEFMSG_TOOLTIP_TAG_ARMOR), iArmorRating);
             }
         }
 
