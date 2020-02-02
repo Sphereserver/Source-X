@@ -2645,7 +2645,7 @@ bool CItemMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
             }
             if (fCreate)
             {
-                GetMovingCrate(true).ItemFind();
+                GetMovingCrate(true);
             }
             if (_uidMovingCrate.IsValidUID())
             {

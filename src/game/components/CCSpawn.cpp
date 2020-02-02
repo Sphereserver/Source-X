@@ -14,7 +14,7 @@
 
 
 /////////////////////////////////////////////////////////////////////////////
-std::vector<CCSpawn*> CCSpawn::_vBadSpawns;
+std::vector<CCSpawn*> CCSpawn::_vBadSpawns; // static
 
 void CCSpawn::AddBadSpawn()
 {
@@ -24,7 +24,7 @@ void CCSpawn::AddBadSpawn()
         return;
     }
     THREAD_UNIQUE_LOCK_SET;
-    if (std::find(_vBadSpawns.begin(), _vBadSpawns.end(), this) == _vBadSpawns.end())
+    if (std::find(_vBadSpawns.cbegin(), _vBadSpawns.cend(), this) == _vBadSpawns.cend())
     {
         _vBadSpawns.emplace_back(this); //only if it's not inserted already.
     }
@@ -43,13 +43,13 @@ CCSpawn *CCSpawn::GetBadSpawn(int index)
 {
     ADDTOCALLSTACK("CCSpawn::GetBadSpawn");
     CCSpawn* ret = nullptr;
-    if (_vBadSpawns.size() > 0)
+    if (!_vBadSpawns.empty())
     {
-        if (index >= _vBadSpawns.size() || index < 0)
+        if ((index < 0) || (index >= (int)_vBadSpawns.size()))
         {
             index = 0;
         }
-        ret = _vBadSpawns.at(index);
+        ret = _vBadSpawns[index];
     }
     return ret;
 }
@@ -257,17 +257,17 @@ const CResourceDef *CCSpawn::FixDef()
     return pRef;
 }
 
-uint CCSpawn::WriteName(tchar *pszOut) const
+uint CCSpawn::WriteName(tchar *ptcOut) const
 {
     ADDTOCALLSTACK("CCSpawn::GetName");
-    lpctstr pszName = nullptr;
+    lpctstr ptcName = nullptr;
     const CResourceDef *pDef = g_Cfg.ResourceGetDef(_idSpawn);
     if (pDef != nullptr)
-        pszName = pDef->GetName();
-    if (pDef == nullptr || pszName == nullptr || pszName[0] == '\0')
-        pszName = g_Cfg.ResourceGetName(_idSpawn);
+        ptcName = pDef->GetName();
+    if (pDef == nullptr || ptcName == nullptr || ptcName[0] == '\0')
+        ptcName = g_Cfg.ResourceGetName(_idSpawn);
 
-    return sprintf(pszOut, " (%s)", pszName);
+    return snprintf(ptcOut, STR_TEMPLENGTH, " (%s)", ptcName);
 }
 
 void CCSpawn::Delete(bool fForce)
@@ -297,7 +297,7 @@ void CCSpawn::GenerateItem()
         return;
     }
 
-    CResourceIDBase& rid = const_cast<CResourceID&>(pDef->GetResourceID());
+    CResourceIDBase rid(pDef->GetResourceID());
 
     if (IsTrigUsed(TRIGGER_PRESPAWN))
     {
@@ -462,7 +462,7 @@ CResourceIDBase CCSpawn::GetCharRid()
     ADDTOCALLSTACK("CCSpawn::GetCharRid");
     const CItem* pSpawnItem = static_cast<const CItem*>(GetLink());
 
-    CResourceIDBase rid(UID_UNUSED);
+    CResourceIDBase rid;
     const CResourceDef* pDef = FixDef();
     if (!pDef)
     {
@@ -511,8 +511,8 @@ void CCSpawn::DelObj(const CUID& uid)
     }
 
     CItem *pSpawnItem = static_cast<CItem*>(GetLink());
-    auto itObj = std::find(_uidList.cbegin(), _uidList.cend(), uid);
-    if (itObj != _uidList.cend())
+    auto itObj = std::find(_uidList.begin(), _uidList.end(), uid);
+    if (itObj != _uidList.end())
     {
         CObjBase *pSpawnedObj = uid.ObjFind();
         if (pSpawnedObj && !pSpawnedObj->IsDeleted())

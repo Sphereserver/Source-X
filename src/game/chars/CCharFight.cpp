@@ -127,7 +127,7 @@ bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObj
 			if (IsTrigUsed(TRIGGER_SEESNOOP))
 			{
 				CScriptTriggerArgs Args(pAction);
-				Args.m_iN1 = (SkillToSee != SKILL_NONE) ? SkillToSee : pCharMark->Skill_GetActive();
+				Args.m_iN1 = SkillToSee;
 				Args.m_iN2 = pItem ? (dword)pItem->GetUID() : 0;    // here i can modify pItem via scripts, so it isn't really const
 				Args.m_pO1 = pCharMark;
 				TRIGRET_TYPE iRet = pChar->OnTrigger(CTRIG_SeeSnoop, this, &Args);

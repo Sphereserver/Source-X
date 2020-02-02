@@ -357,7 +357,7 @@ void _cdecl CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...
 		else
 		{
 			eSeverity = LOGL_CRIT;
-			strcpy(szMsg, "Generic exception");
+			Str_CopyLimitNull(szMsg, "Generic exception", sizeof(szMsg));
 			stLen = strlen(szMsg);
 		}
 

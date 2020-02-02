@@ -1199,6 +1199,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
 						pVendor->Speak( g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CANTBUY) );
 						continue;
 					}
+					break;
 				case IT_HAIR:
 					// Must be added directly. can't exist in pack!
 					if ( ! m_pChar->IsPlayableCharacter())

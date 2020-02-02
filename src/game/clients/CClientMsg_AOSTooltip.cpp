@@ -408,6 +408,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 	{
 	case IT_CONTAINER_LOCKED:
 		PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(3005142)); // Locked
+		break;
 	case IT_CONTAINER:
 	case IT_TRASH_CAN:
 		if (pItem->IsContainer())

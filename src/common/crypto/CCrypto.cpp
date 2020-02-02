@@ -663,7 +663,7 @@ bool CCrypto::LoginCryptStart( dword dwIP, const byte * pEvent, uint inLen )
 				// (matex) TODO: What for? We do not really need pszAccountNameCheck here do we?!
 				if (iAccountNameLen > 0)
 					pszAccountNameCheck[iAccountNameLen-1] = '\0';
-				if (sRawAccountName && (iAccountNameLen != strlen(sRawAccountName)))
+				if (iAccountNameLen != strlen(sRawAccountName))
 				{
 					iAccountNameLen = 0;
 					++i;

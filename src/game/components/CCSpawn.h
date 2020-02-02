@@ -169,14 +169,14 @@ public:
     * @brief Get a proper CResourceID from the id provided.
     * @return a valid CResourceDef.
     */
-    const CResourceDef * _FixDef();
-    const CResourceDef * FixDef();
+ private:   const CResourceDef * _FixDef();
+ public:    const CResourceDef * FixDef();
 
     /**
     * @brief Gets the name of the resource created (item or char).
     * @return the name of the resource.
     */
-    uint WriteName(tchar * pszOut) const;
+    uint WriteName(tchar * ptcOut) const;
 };
 
 #endif // _INC_CCSPAWN_H

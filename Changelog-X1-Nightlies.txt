@@ -2097,7 +2097,6 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: Valid mounts being reported by the garbage collection (Issue #350).
 - Fixed: Warning issued when a keyring (which can act also as a classic container) had legit TDATA2 (gump ID) == 0 (Issue #352).
 
-
 23-01-2020, Drk84
 - Added: New ini flag DisplayArmorAsPercent.
          When enabled, display, in the tooltip, the Armor of the item as a percentage of its full armor value, the percentage is based upon the body parts the item covers. 

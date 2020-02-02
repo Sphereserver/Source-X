@@ -1076,7 +1076,7 @@ int Str_ParseCmds(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSep)
     int iQty = 0;
     GETNONWHITESPACE(pszCmdLine);
 
-    if (pszCmdLine != nullptr && pszCmdLine[0] != '\0')
+    if (pszCmdLine[0] != '\0')
     {
         ppCmd[0] = pszCmdLine;
         ++iQty;

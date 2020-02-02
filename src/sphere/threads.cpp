@@ -476,6 +476,7 @@ void AbstractThread::onStart()
 
 void AbstractThread::setPriority(IThread::Priority pri)
 {
+	ASSERT(((pri >= IThread::Idle) && (pri <= IThread::RealTime)) || (pri == IThread::Disabled));
 	m_priority = pri;
 
 	// detect a sleep period for thread depending on priority
@@ -502,8 +503,6 @@ void AbstractThread::setPriority(IThread::Priority pri)
 		case IThread::Disabled:
 			m_tickPeriod = AutoResetEvent::_infinite;
 			break;
-		default:
-			throw CSError(LOGL_FATAL, 0, "Unable to determine thread priority");
 	}
 }
 
@@ -644,7 +643,7 @@ void AbstractSphereThread::printStackTrace()
 	g_Log.EventDebug("Printing STACK TRACE for debugging purposes.\n");
     // On Windows versions prior to XP, startTime is the number of ticks, not microseconds
 	g_Log.EventDebug(" __ thread (id) name __ |  # | _____________ function _____________ | microseconds passed from previous function start\n");
-	for ( size_t i = 0; i < sizeof(m_stackInfo); ++i )
+	for ( size_t i = 0; i < CountOf(m_stackInfo); ++i )
 	{
 		if( m_stackInfo[i].startTime == 0 )
 			break;
@@ -660,8 +659,8 @@ void AbstractSphereThread::printStackTrace()
         }
 
         const int timedelta = (int)(m_stackInfo[i].startTime - startTime);
-		g_Log.EventDebug("(%0.5u)%16.16s | %2d | %36.36s | +%d %s\n",
-			threadId, threadName, i, m_stackInfo[i].functionName, timedelta, extra);
+		g_Log.EventDebug("(%0.5u)%16.16s | %2u | %36.36s | +%d %s\n",
+			threadId, threadName, (uint)i, m_stackInfo[i].functionName, timedelta, extra);
 
 		startTime = m_stackInfo[i].startTime;
 	}

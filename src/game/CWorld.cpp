@@ -2375,7 +2375,7 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pwText, 
 					int iLen = CvtSystemToNUNICODE( wTextName, CountOf(wTextName), sTextName, -1 );
 					if ( wTextGhost[0] != '\0' )
 					{
-						for ( int i = 0; wTextGhost[i] != '\0' && iLen < MAX_TALK_BUFFER; i++, iLen++ )
+						for ( int i = 0; wTextGhost[i] != '\0' && iLen < MAX_TALK_BUFFER - 1; i++, iLen++ )
 							wTextName[iLen] = wTextGhost[i];
 					}
 					else

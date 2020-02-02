@@ -16,9 +16,11 @@ enum ShipDelay
     ShipDelay_Fast = 250
 };
 
-CCMultiMovable::CCMultiMovable(bool fCanTurn)
+CCMultiMovable::CCMultiMovable(bool fCanTurn) :
+    m_shipSpeed{}
 {
     _fCanTurn = fCanTurn;
+    _eSpeedMode = SMS_NORMAL;
 }
 
 void CCMultiMovable::SetCaptain(CTextConsole * pSrc)

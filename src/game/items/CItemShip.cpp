@@ -85,7 +85,7 @@ bool CItemShip::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
     else if (!strnicmp(ptcKey, "PLANK.", 6))
     {
         ptcKey += 6;
-        int i = Exp_GetVal(ptcKey);
+        uint i = Exp_GetUVal(ptcKey);
         SKIP_SEPARATORS(ptcKey);
         pRef = GetShipPlank(i);
         return true;

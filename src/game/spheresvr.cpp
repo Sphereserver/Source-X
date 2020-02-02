@@ -439,7 +439,7 @@ void defragSphere(char *path)
 
 	CSFileText inf;
 	CSFile ouf;
-	char z[256], z1[256], buf[1024];
+	char z[_MAX_PATH], z1[_MAX_PATH], buf[1024];
 	size_t i;
 	dword uid = 0;
 	char *p = nullptr, *p1 = nullptr;
@@ -466,7 +466,7 @@ void defragSphere(char *path)
 	uids = (dword*)calloc(MAX_UID, sizeof(dword));
 	for ( i = 0; i < 3; ++i )
 	{
-		strcpy(z, path);
+		Str_CopyLimitNull(z, path, sizeof(z));
 		if ( i == 0 )		strcat(z, SPHERE_FILE "statics" SPHERE_SCRIPT);
 		else if ( i == 1 )	strcat(z, SPHERE_FILE "world" SPHERE_SCRIPT);
 		else				strcat(z, SPHERE_FILE "chars" SPHERE_SCRIPT);
@@ -506,14 +506,14 @@ void defragSphere(char *path)
 		inf.Close();
 	}
 	dTotalUIDs = uid;
-	g_Log.Event(LOGM_INIT, "Totally having %u unique objects (UIDs), latest: 0%x\n", uid, uids[uid-1]);
+	g_Log.Event(LOGM_INIT, "Totally having %u unique objects (UIDs), latest: 0%x\n", uid, uids[uid]);
 
 	g_Log.Event(LOGM_INIT, "Quick-Sorting the UIDs array...\n");
 	dword_q_sort(uids, 0, dTotalUIDs-1);
 
 	for ( i = 0; i < 5; ++i )
 	{
-		strcpy(z, path);
+		Str_CopyLimitNull(z, path, sizeof(z));
 		if ( !i )			strcat(z, SPHERE_FILE "accu.scp");
 		else if ( i == 1 )	strcat(z, SPHERE_FILE "chars" SPHERE_SCRIPT);
 		else if ( i == 2 )	strcat(z, SPHERE_FILE "data" SPHERE_SCRIPT);
@@ -525,7 +525,7 @@ void defragSphere(char *path)
 			g_Log.Event(LOGM_INIT, "Cannot open file for reading. Skipped!\n");
 			continue;
 		}
-		strcat(z, ".new");
+		Str_ConcatLimitNull(z, ".new", sizeof(z));
 		if ( !ouf.Open(z, OF_WRITE|OF_CREATE|OF_DEFAULTMODE) )
 		{
 			g_Log.Event(LOGM_INIT, "Cannot open file for writing. Skipped!\n");

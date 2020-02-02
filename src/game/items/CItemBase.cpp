@@ -2061,12 +2061,14 @@ bool CItemBaseMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * 
             else if (*ptcKey == '.')
             {
                 SKIP_SEPARATORS(ptcKey);
-                size_t index = Exp_GetVal(ptcKey);
-                if (m_Components.IsValidIndex(index) == false)
+				const llong iIndex = Exp_GetLLVal(ptcKey);
+				if (iIndex < 0)
+					return false;
+                if (m_Components.IsValidIndex(size_t(iIndex)) == false)
                     return false;
 
                 SKIP_SEPARATORS(ptcKey);
-                CMultiComponentItem item = m_Components.at(index);
+                CMultiComponentItem item = m_Components.at(size_t(iIndex));
 
                 if (!strnicmp(ptcKey, "ID", 2)) sVal.FormatVal(item.m_id);
                 else if (!strnicmp(ptcKey, "DX", 2)) sVal.FormatVal(item.m_dx);

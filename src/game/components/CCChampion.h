@@ -148,13 +148,13 @@ public:
     * Store in m_WhiteCandle[m_WhiteCandles] the CItem stored in pCandle.
     * @param uid, if given (mostly during world loading) instead of creating a new candle, only the uid will be set to hold the already existing candle and do not have duplicates.
     */
-    void AddWhiteCandle(CUID uid = UID_UNUSED);
+    void AddWhiteCandle(const CUID& uid = CUID());
     /**
     * @brief Red candles check, add new one or I am in boss phase?
     *
     * @param uid, if given (mostly during world loading) instead of creating a new candle, only the uid will be set to hold the already existing candle and do not have duplicates.
     */
-    void AddRedCandle(CUID uid = UID_UNUSED);
+    void AddRedCandle(const CUID& uid = CUID());
     /**
     * @brief Deleting last added White Candle.
     */
@@ -180,13 +180,13 @@ public:
     *
     * @param uid UID of the character to add to the 'spawn'.
     */
-    void AddObj(CUID uid);
+    void AddObj(const CUID& uid);
     /**
     * @brief CCSpawn's replica: Remove one char from this 'spawn'.
     *
     * @param uid UID of the character to remove from the 'spawn'.
     */
-    void DelObj(CUID uid);
+    void DelObj(const CUID& uid);
 
     /**
     * @brief How many monsters do we need to kill to gain a White Candle.

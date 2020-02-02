@@ -3211,6 +3211,7 @@ bool CChar::r_LoadVal( CScript & s )
         case CHC_OINT:
         case CHC_INT:
             Stat_SetBase(STAT_INT, s.GetArgUSVal());
+			break;
 		case CHC_MAXFOOD:
 			Stat_SetMax(STAT_FOOD, s.GetArgUSVal());
 			break;

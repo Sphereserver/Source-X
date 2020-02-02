@@ -1,7 +1,7 @@
 # SphereServer X version
 Game server for Ultima Online.
 <br>
-[![Windows Build status](https://ci.appveyor.com/api/projects/status/ab152o83mipjojin/branch/master?svg=true)](https://ci.appveyor.com/project/cbnolok/source2/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/ab152o83mipjojin?svg=true)](https://ci.appveyor.com/project/cbnolok/sphereserver-x)
 <br><a href="https://forum.spherecommunity.net/sshare.php?srt=4">Get the automated builds here!</a>
 
 

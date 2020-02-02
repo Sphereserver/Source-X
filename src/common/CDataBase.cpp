@@ -46,11 +46,11 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 	const char *port = nullptr;
 	if ( (port = strchr(host, ':')) != nullptr )
 	{
-		char *pszTemp = Str_GetTemp();
-		strcpy(pszTemp, host);
-		*(strchr(pszTemp, ':')) = 0;
+		char *pcTemp = Str_GetTemp();
+		Str_CopyLimitNull(pcTemp, host, STR_TEMPLENGTH);
+		*(strchr(pcTemp, ':')) = 0;
 		portnum = atoi(port+1);
-		host = pszTemp;
+		host = pcTemp;
 	}
 
 	if ( !mysql_real_connect(_myData, host, user, password, base, portnum, nullptr, CLIENT_MULTI_STATEMENTS ) )

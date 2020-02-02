@@ -185,8 +185,6 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_TRASH_CAN:
 		{
 			CItemContainer *pPack = static_cast<CItemContainer *>(pItem);
-			if ( !pPack )
-				return false;
 
 			if ( !m_pChar->Skill_Snoop_Check(pPack) )
 			{

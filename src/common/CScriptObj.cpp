@@ -837,12 +837,13 @@ badcmd:
 				GETNONWHITESPACE(ptcKey);
 				tchar	*buf = Str_GetTemp();
 				tchar	*Arg_ppCmd[10];		// limit to 9 arguments
-				strcpy(buf, ptcKey);
+				Str_CopyLimitNull(buf, ptcKey, STR_TEMPLENGTH);
 				int iQty = Str_ParseCmds(buf, Arg_ppCmd, CountOf(Arg_ppCmd));
 				if ( iQty < 1 )
 					return false;
 
 				bool bWait = (index == SSC_SYSCMD);
+				g_Log.EventDebug("Process execution started (%s).\n", (bWait ? "SYSCMD" : "SYSSPAWN"));
 
 #ifdef _WIN32
 				_spawnl( bWait ? _P_WAIT : _P_NOWAIT,
@@ -882,7 +883,7 @@ badcmd:
 					sVal.FormatLLHex(WEXITSTATUS(status));
 				}
 #endif
-				g_Log.EventDebug("Process execution finished\n");
+				g_Log.EventDebug("Process execution finished.\n");
 				return true;
 			}
 			
@@ -1886,7 +1887,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, lpctstr pszTrigName, CTex
 		{
 			pTrig = new CScriptProfiler::CScriptProfilerTrigger;
 			memset(pTrig, 0, sizeof(CScriptProfiler::CScriptProfilerTrigger));
-			strncpy(pTrig->name, pName, sizeof(pTrig->name));
+			Str_CopyLimitNull(pTrig->name, pName, sizeof(pTrig->name));
 			if ( g_profiler.TriggersTail )
 				g_profiler.TriggersTail->next = pTrig;
 			else

@@ -2536,16 +2536,19 @@ void CServerConfig::LoadSortSpells()
 			continue;
 
 		int	iVal = 0;
-		m_SpellDefs[i]->GetPrimarySkill( nullptr, &iVal );
+		if (!m_SpellDefs[i]->GetPrimarySkill(nullptr, &iVal))
+			continue;
 
 		const size_t iQty = m_SpellDefs_Sorted.size();
 		size_t k = 1;
 		while ( k < iQty )
 		{
 			int	iVal2 = 0;
-			m_SpellDefs_Sorted[k]->GetPrimarySkill( nullptr, &iVal2 );
-			if ( iVal2 > iVal )
-				break;
+			if (m_SpellDefs_Sorted[k]->GetPrimarySkill(nullptr, &iVal2))
+			{
+				if (iVal2 > iVal)
+					break;
+			}
 			++k;
 		}
 		m_SpellDefs_Sorted.insert(k, m_SpellDefs[i]);
@@ -2853,7 +2856,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			tchar* ipBuffer = Str_GetTemp();
 			while ( pScript->ReadKeyParse())
 			{
-				strncpy(ipBuffer, pScript->GetKey(), STR_TEMPLENGTH);
+				Str_CopyLimitNull(ipBuffer, pScript->GetKey(), STR_TEMPLENGTH);
 				HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(ipBuffer);
 				history.setBlocked(true);
 			}
@@ -3198,13 +3201,13 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		else
 		{
 			CRegionWorld * pRegion = new CRegionWorld( rid, pScript->GetArgStr());
-			pNewDef = pRegion;
-			ASSERT(pNewDef);
 			pRegion->r_Load( *pScript );
 			if ( ! pRegion->RealizeRegion() )
 				delete pRegion; // might be a dupe ?
 			else
 			{
+				pNewDef = pRegion;
+				ASSERT(pNewDef);
 				m_ResHash.AddSortKey( rid, pRegion );
 				// if it's old style but has a defname, it's already set via r_Load,
 				// so this will do nothing, which is good
@@ -3837,6 +3840,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 						if ( pVarStr != nullptr )
 							return ResourceGetNewID(restype, pVarStr->GetValStr(), ppVarNum, fNewStyleDef);
 					}
+					break;
 					default:
 						DEBUG_ERR(( "Re-Using DEFNAME='%s' to define a new block\n", pszName ));
 						return ridInvalid;

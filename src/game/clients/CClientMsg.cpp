@@ -1434,8 +1434,6 @@ bool CClient::addBookOpen( CItem * pBook ) const
 	{
 		// User written book.
 		CItemMessage *pMsgItem = static_cast<CItemMessage *>(pBook);
-		if (pMsgItem == nullptr)
-			return false;
 
 		if (pMsgItem->IsBookWritable())
             wPagesNow = pMsgItem->GetPageCount(); // for some reason we must send them now

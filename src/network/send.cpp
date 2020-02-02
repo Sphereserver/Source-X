@@ -1416,6 +1416,7 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
             for (int i = 0; i < padding; ++i)
                 writeByte(0);
 
+			break;
 		}
 		case 0x02:
 		{
@@ -1426,6 +1427,7 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
 			writeByte(0x02);
 			writeByte(0);
 			writeStringFixedASCII(g_Serv.GetName(),28);
+			break;
 		}
 		case 0x03:
 		{
@@ -1435,6 +1437,7 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
 			writeInt16(0);
 			writeByte(0x03);
 			writeByte(0);
+			break;
 		}
 		case 0xFF:
 		{
@@ -1448,6 +1451,7 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
 			writeInt16(0);
 			writeByte(0xFF);
 			writeByte(bMap);
+			break;
 		}
 	}
 

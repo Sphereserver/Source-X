@@ -101,8 +101,6 @@ bool PacketCreate::onReceive(CNetState* net)
 		*/
 		switch (race_sex_flag)
 		{
-			default:
-				g_Log.Event(LOGL_WARN|LOGM_NOCONTEXT,"PacketCreate: unknown race_sex_flag (% " PRIu8 "), defaulting to 2 (human male).\n", race_sex_flag);
 			case 0x2: case 0x3:
 				rtRace = RACETYPE_HUMAN;
 				break;
@@ -112,6 +110,8 @@ bool PacketCreate::onReceive(CNetState* net)
 			case 0x6: case 0x7:
 				rtRace = RACETYPE_GARGOYLE;
 				break;
+			default:
+				g_Log.Event(LOGL_WARN | LOGM_NOCONTEXT, "PacketCreate: unknown race_sex_flag (% " PRIu8 "), defaulting to 2 (human male).\n", race_sex_flag);
 		}
 	}
 	else
@@ -996,7 +996,7 @@ bool PacketBookPageEdit::onReceive(CNetState* net)
 	uint len = 0;
 	tchar* content = Str_GetTemp();
 
-	for (int i = 0; i < pageCount; i++)
+	for (ushort i = 0; i < pageCount; ++i)
 	{
 		// read next page to change with line count
 		page = readInt16();
@@ -1004,7 +1004,7 @@ bool PacketBookPageEdit::onReceive(CNetState* net)
 		if (page < 1 || page > MAX_BOOK_PAGES || lineCount <= 0)
 			continue;
 
-		page--;
+		-- page;
 		len = 0;
 
 		// read each line of the page
@@ -4572,8 +4572,6 @@ bool PacketCreateHS::onReceive(CNetState* net)
 	*/
 	switch (race_sex_flag)
 	{
-	default:
-		g_Log.Event(LOGL_WARN|LOGM_NOCONTEXT, "Creating new character (client > 7.0.16.0 packet) with unknown race_sex_flag (% " PRIu8 "): defaulting to 2 (human male).\n", race_sex_flag);
 	case 0x2: case 0x3:
 		rtRace = RACETYPE_HUMAN;
 		break;
@@ -4583,6 +4581,8 @@ bool PacketCreateHS::onReceive(CNetState* net)
 	case 0x6: case 0x7:
 		rtRace = RACETYPE_GARGOYLE;
 		break;
+	default:
+		g_Log.Event(LOGL_WARN | LOGM_NOCONTEXT, "Creating new character (client > 7.0.16.0 packet) with unknown race_sex_flag (% " PRIu8 "): defaulting to 2 (human male).\n", race_sex_flag);
 	}
 
 	return doCreate(net, charname, isFemale, rtRace,
