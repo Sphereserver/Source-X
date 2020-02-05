@@ -2121,3 +2121,12 @@ Must have event, even if it's empty, since it's applied by the source to generat
 25-01-2020, Nolok
 - Fixed: Invalid keywords in the [ADVANCE] block were likely to cause memory corruption.
 - Updated: SQlite to version 3.31.0.
+
+05-02-2020, Drk84
+- Added: New ini flag NPCCanFizzle, when enabled, a NPC can fizzle a spell when hit during combat. (Issue #241)
+- Added: TAG.NPCNoCastTill behaviour, this tag will not allow a NPC to cast a spell if tag.NPCNoCastTill > SERV.Time.
+		 Example:
+		  ON=@SpellCast
+		  tag.NPCNoCastTill = <eval <serv.time> + <argn3> + 50>
+		 In this case, the next spell will be casted after 5 seconds, ARGN3 is the casting speed of the spell, we add it because the spell will take place
+		 after ARGN3 seconds. If you are using PRECAST you probably don't need to add ARGN3.(Issue #241)

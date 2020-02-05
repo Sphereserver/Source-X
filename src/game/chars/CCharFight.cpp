@@ -817,7 +817,7 @@ effect_bounce:
     }
 
 	// Disturb magic spells (only players can be disturbed)
-	if ( m_pPlayer && (pSrc != this) && !(uType & DAMAGE_NODISTURB) && g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_MAGIC) )
+	if ( (m_pPlayer || g_Cfg.m_fNPCCanFizzle) && (pSrc != this) && !(uType & DAMAGE_NODISTURB) && g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_MAGIC) )
 	{
 		// Check if my spell can be interrupted
 		int iDisturbChance = 0;
