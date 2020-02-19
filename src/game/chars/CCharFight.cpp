@@ -816,8 +816,8 @@ effect_bounce:
         }
     }
 
-	// Disturb magic spells (only players can be disturbed)
-	if ( (m_pPlayer || g_Cfg.m_fNPCCanFizzle) && (pSrc != this) && !(uType & DAMAGE_NODISTURB) && g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_MAGIC) )
+	// Disturb magic spells (only players can be disturbed if NpCCanFizzleOnHit is false in sphere.ini)
+	if ( (m_pPlayer || g_Cfg.m_fNPCCanFizzleOnHit) && (pSrc != this) && !(uType & DAMAGE_NODISTURB) && g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_MAGIC) )
 	{
 		// Check if my spell can be interrupted
 		int iDisturbChance = 0;

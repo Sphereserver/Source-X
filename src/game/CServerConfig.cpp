@@ -48,7 +48,7 @@ CServerConfig::CServerConfig()
 
 	//Magic
     m_fManaLossFail		    = false;
-	m_fNPCCanFizzle			= false;
+	m_fNPCCanFizzleOnHit	= false;
 	m_fReagentLossFail		= false;
     m_fReagentsRequired		= false;
 	m_iWordsOfPowerColor	= HUE_TEXT_DEF;
@@ -568,7 +568,7 @@ enum RC_TYPE
 	RC_NOTOTIMEOUT,
 	RC_NOWEATHER,				// m_fNoWeather
 	RC_NPCAI,					// m_iNpcAi
-	RC_NPCCANFIZZLE,			// m_fNPCCanFizzle
+	RC_NPCCANFIZZLEONHIT,		// m_fNPCCanFizzle
 	RC_NPCNOFAMETITLE,			// m_NPCNoFameTitle
 	RC_NPCSKILLSAVE,			// m_iSaveNPCSkills
 	RC_NPCTRAINCOST,			// m_iTrainSkillCost
@@ -815,7 +815,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "NOTOTIMEOUT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNotoTimeout),			0 }},
 	{ "NOWEATHER",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNoWeather),			0 }},
 	{ "NPCAI",					{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNpcAi),				0 }},
-	{ "NPCCANFIZZLE",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNPCCanFizzle),		0 }},
+	{ "NPCCANFIZZLEONHIT",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNPCCanFizzleOnHit),		0 }},
 	{ "NPCNOFAMETITLE",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_NPCNoFameTitle),		0 }},
 	{ "NPCSKILLSAVE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveNPCSkills),		0 }},
 	{ "NPCTRAINCOST",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTrainSkillCost),		0 }},
