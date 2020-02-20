@@ -423,9 +423,13 @@ bool CChar::NPC_FightMayCast(bool fCheckSkill) const
 {
 	ADDTOCALLSTACK("CChar::NPC_FightMayCast");
 	ASSERT(m_pNPC);
-	// This NPC could cast spells if they wanted to ?
-	// check mana and anti-magic
-	// Dont check for skill if !fCheckSkill
+	// This NPC could cast spells if they wanted to?
+	// Check mana, anti-magic and tag.noCastTill.
+	// Don't check for skill if !fCheckSkill.
+	
+	//Don't cast the spell if tag.NPCNoCastTill is > than CurrentTime.
+	if (GetKeyNum("NPCNoCastTill") > (g_World.GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH))
+		return false;
 	if (fCheckSkill && !const_cast<CChar*>(this)->Skill_GetMagicRandom(300))
 		return false;
 	if ( m_pArea && m_pArea->IsFlag(REGION_ANTIMAGIC_DAMAGE|REGION_FLAG_SAFE) )
