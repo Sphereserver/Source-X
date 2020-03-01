@@ -2129,4 +2129,8 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		  ON=@SpellCast
 		  tag.NPCNoCastTill = <eval <serv.time> + <argn3> + 50>
 		 In this case, the next spell will be casted after 5 seconds, ARGN3 is the casting speed of the spell, we add it because the spell will take place
-		 after ARGN3 seconds. If you are using PRECAST you probably don't need to add ARGN3.(Issue #241)
+		 after ARGN3 seconds. If you are using PRECAST you probably don't need to add ARGN3. (Issue #241)
+
+01-03-2020, Nolok
+- Fixed: Auto-fixing figurines always treated them as mount items, finding fake errors (Issue #367).
+- Fixed: FORINSTANCES not parsing correctly the argument.

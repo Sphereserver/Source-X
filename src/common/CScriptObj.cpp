@@ -1722,9 +1722,10 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 	if ( iType & 0x40 )	// FORINSTANCES
 	{
 		CResourceID rid;
-		tchar * pArg = nullptr;
+		tchar * pArg = s.GetArgStr();
+		Str_Parse(pArg, nullptr, " \t,");
 
-		if (Str_Parse( s.GetArgStr(), &pArg, " \t," ))
+		if (*pArg != '\0')
 		{
 			rid = g_Cfg.ResourceGetID(RES_UNKNOWN, pArg);
 		}
