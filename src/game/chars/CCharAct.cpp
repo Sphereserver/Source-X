@@ -2445,12 +2445,48 @@ CItem* CChar::Horse_GetValidMountItem()
 	int iFixCode = 0;
 
 	const CUID& uidThis = GetUID();
+	const CChar* pOwner = NPC_PetGetOwner();
+
 	pMountItem = m_atRidden.m_uidFigurine.ItemFind();
-    if (pMountItem)
+	if (!pMountItem && pOwner)
+	{
+		// Invalid ACTARG1 (which should hold the UID of the mount item).
+		// Let's try to find and check owner's mount item equipped in LAYER_HORSE.
+		pMountItem = pOwner->LayerFind(LAYER_HORSE);
+		if (pMountItem)
+		{
+			if (pMountItem->m_itFigurine.m_UID == uidThis)
+			{
+				// Horse linked to an invalid figurine (broken ACTARG1?)
+				iFixCode = 1;
+				m_atRidden.m_uidFigurine = pMountItem->GetUID();
+			}
+			else if (pMountItem->IsType(IT_FIGURINE) || pMountItem->IsType(IT_EQ_HORSE))
+			{
+				const CChar* pLinkedChar = pMountItem->m_uidLink.CharFind();
+				if (pLinkedChar && pLinkedChar->IsStatFlag(STATF_RIDDEN))
+				{
+					// Owner has a mount item linked to another, valid mount, so don't touch that
+					iFailureCode = 3;
+				}
+				else
+				{
+					iFixCode = 2;
+					pMountItem->m_itFigurine.m_UID = uidThis;
+					pMountItem->m_uidLink = pOwner->GetUID();
+					m_atRidden.m_uidFigurine = pMountItem->GetUID();
+				}
+			}
+			else
+				iFailureCode = 2;
+		}
+		else
+			iFailureCode = 1;
+	}
+	else if (pMountItem)
     {
         const CChar* pRider = dynamic_cast<CChar*>(pMountItem->GetTopLevelObj());
-        const CChar* pOwner = NPC_PetGetOwner();
-        if (!pOwner && pRider && pRider->IsPriv(PRIV_GM))
+        if (pRider && !pOwner)
             pOwner = pRider;
 
         if (pOwner && pOwner->IsStatFlag(STATF_ONHORSE))
@@ -2464,13 +2500,13 @@ CItem* CChar::Horse_GetValidMountItem()
                     if (pOwnerMountItem->m_itFigurine.m_UID == uidThis)
                     {
                         // Fixable.
-                        iFixCode = 1;
+                        iFixCode = 3;
                         m_atRidden.m_uidFigurine = pOwnerMountItem->GetUID();
                     }
                     else
                     {
                         // Completely broken.
-                        iFailureCode = 5;
+                        iFailureCode = 7;
                     }
                 }
                 else if (pOwnerMountItem != pMountItem)
@@ -2485,30 +2521,39 @@ CItem* CChar::Horse_GetValidMountItem()
                     if (pMountItem->m_itFigurine.m_UID == uidThis)
                     {
                         // Horse linked (by ACTARG1) to a wrong figurine.
-                        iFixCode = 2;
+                        iFixCode = 4;
                         m_atRidden.m_uidFigurine = pMountItem->GetUID();
                     }
                     else if (pMountItem->IsType(IT_FIGURINE) || pMountItem->IsType(IT_EQ_HORSE))
                     {
-                        iFixCode = 3;
-                        pMountItem->m_itFigurine.m_UID = uidThis;
-                        pMountItem->m_uidLink = pOwner->GetUID();
-						m_atRidden.m_uidFigurine = pMountItem->GetUID();
+						const CChar* pLinkedChar = pMountItem->m_uidLink.CharFind();
+						if (pLinkedChar && pLinkedChar->IsStatFlag(STATF_RIDDEN))
+						{
+							// Owner has a mount item linked to another, valid mount, so don't touch that
+							iFailureCode = 8;
+						}
+						else
+						{
+							iFixCode = 5;
+							pMountItem->m_itFigurine.m_UID = uidThis;
+							pMountItem->m_uidLink = pOwner->GetUID();
+							m_atRidden.m_uidFigurine = pMountItem->GetUID();
+						}
                     }
                     else
-                        iFailureCode = 6;
+                        iFailureCode = 9;
                 }
                 else
-                    iFailureCode = 4;
+                    iFailureCode = 6;
             }
             else
             {
                 // Horse owner==rider doesn't have a mount item...
-                iFailureCode = 3;
+                iFailureCode = 5;
             }
         }
         else
-            iFailureCode = 2;
+            iFailureCode = 4;
 
 		if (!iFailureCode)
 		{
@@ -2526,15 +2571,15 @@ CItem* CChar::Horse_GetValidMountItem()
 			switch (iFixCode)
 			{
 			default:	ptcFixString = "Undefined";														break;
-			case 1:		ptcFixString = "Mount item was equipped by a char different from the rider";	break;
-			case 2:		ptcFixString = "Malformed mount item";											break;
-			case 3:		ptcFixString = "Mount item not linked to the mount char";						break;
+			case 1:		ptcFixString = "Figurine UID was corrupted";									break;
+			case 2:		ptcFixString = "Corrupted figurine UID corrupted and malformed mount item";		break;
+			case 3:		ptcFixString = "Mount item was equipped by a char different from the rider";	break;
+			case 4:		ptcFixString = "Malformed mount item";											break;
+			case 5:		ptcFixString = "Mount item not linked to the mount char";						break;
 			}
 			g_Log.EventWarn(" Issue: %s.\n", ptcFixString);
 		}
     }
-	else
-        iFailureCode = 1;
 
     if (iFailureCode)
     {
@@ -2545,12 +2590,15 @@ CItem* CChar::Horse_GetValidMountItem()
         switch (iFailureCode)
         {
         default:    ptcFailureString = "Undefined";											break;
-		case 1:     ptcFailureString = "UID of the mount item is invalid";					break;
-        case 2:     ptcFailureString = "Invalid owner";										break;
-		case 3:		ptcFailureString = "Owner has no mount item in LAYER_HORSE";			break;
-		case 4:		ptcFailureString = "ACTARG1 is not a mount item";						break;
-		case 5:		ptcFailureString = "Both rider and owner had invalid mount item";		break;
-		case 6:		ptcFailureString = "Owner has an invalid mount item in LAYER_HORSE";	break;
+		case 1:     ptcFailureString = "Invalid mount item UID and owner has no equipped mount item";										break;
+		case 2:     ptcFailureString = "Invalid mount item UID and mount item equipped by the owner is invalid";							break;
+		case 3:     ptcFailureString = "Invalid mount item UID and mount item equipped by the owner is valid and linked to another mount";	break;
+        case 4:     ptcFailureString = "Invalid owner";										break;
+		case 5:		ptcFailureString = "Owner has no mount item in LAYER_HORSE";			break;
+		case 6:		ptcFailureString = "ACTARG1 is not a mount item";						break;
+		case 7:		ptcFailureString = "Both rider and owner had invalid mount item";		break;
+		case 8:		ptcFailureString = "Owner has an invalid mount item in LAYER_HORSE";	break;
+		case 9:		ptcFailureString = "Mount item equipped by the owner is valid and linked to another mount";								break;
         }
         g_Log.EventError(" Reason: %s.\n", ptcFailureString);
     }

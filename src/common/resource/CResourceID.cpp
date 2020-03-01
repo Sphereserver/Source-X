@@ -34,14 +34,18 @@ CResourceIDBase::CResourceIDBase(dword dwPrivateID) // explicit
 
 CResourceIDBase::CResourceIDBase(const CResourceIDBase& rid) : CUIDBase(rid) // copy constructor
 {
-    ASSERT(rid.IsResource());
+    if (!rid.IsResource())
+        LOG_WARN_RES_INVALID(1);
+
     m_dwInternalVal |= UID_F_RESOURCE;
     ASSERT(IsResource());
 }
 
 CResourceIDBase& CResourceIDBase::operator = (const CResourceIDBase& rid)  // assignment operator
 {
-    ASSERT(rid.IsResource());
+    if (!rid.IsResource())
+        LOG_WARN_RES_INVALID(2);
+
     CUIDBase::operator=(rid);
     m_dwInternalVal |= UID_F_RESOURCE;
     ASSERT(IsResource());
@@ -69,8 +73,9 @@ bool CResourceIDBase::IsUIDItem() const
 
 CItem* CResourceIDBase::ItemFindFromResource() const   // replacement for CUIDBase::ItemFind()
 {
-    // Used by multis: when they are realized, a new CRegionWorld is created with a CResourceID with an internal value = to the internal value of the multi, plus a | UID_F_RESOURCE.
+    // Used by multis: when they are realized, a new CRegionWorld is created from a CResourceID with an internal value = to the m_dwInternalVal (private UID) of the multi, plus a | UID_F_RESOURCE.
     //  Remove the reserved UID_* flags (so also UID_F_RESOURCE), and find the item (in our case actually the multi) with that uid.
+    ASSERT(IsResource());
     return CUIDBase::ItemFind(m_dwInternalVal & UID_O_INDEX_MASK);
 }
 
@@ -80,7 +85,7 @@ CItem* CResourceIDBase::ItemFindFromResource() const   // replacement for CUIDBa
 CResourceID& CResourceID::operator = (const CResourceID& rid)   // assignment operator
 {
     if (!rid.IsResource())
-        LOG_WARN_RES_INVALID(1);
+        LOG_WARN_RES_INVALID(3);
 
     CUIDBase::operator=(rid);
     ASSERT(IsResource());
@@ -91,7 +96,7 @@ CResourceID& CResourceID::operator = (const CResourceID& rid)   // assignment op
 CResourceID& CResourceID::operator = (const CResourceIDBase& rid)
 {
     if (!rid.IsResource())
-        LOG_WARN_RES_INVALID(2);
+        LOG_WARN_RES_INVALID(4);
 
     CUIDBase::operator=(rid);
     ASSERT(IsResource());

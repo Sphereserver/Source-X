@@ -35,7 +35,10 @@ void CCSpawn::DelBadSpawn()
 {
     ADDTOCALLSTACK("CCSpawn::DelBadSpawn");
     THREAD_UNIQUE_LOCK_SET;
-    _vBadSpawns.erase(std::find(_vBadSpawns.begin(), _vBadSpawns.end(), this));
+    if (!_vBadSpawns.empty())
+    {
+        _vBadSpawns.erase(std::find(_vBadSpawns.begin(), _vBadSpawns.end(), this));
+    }
     _fIsBadSpawn = false;
 }
 

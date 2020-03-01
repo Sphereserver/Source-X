@@ -320,7 +320,7 @@ CChar::~CChar()
 
     if (IsStatFlag(STATF_RIDDEN))
     {
-        CItem * pItem = Horse_GetValidMountItem();
+        CItem * pItem = Horse_GetMountItem();
         if ( pItem )
         {
             pItem->m_itFigurine.m_UID.InitUID();    // unlink it first.
