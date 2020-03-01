@@ -26,7 +26,7 @@ void CScriptTriggerArgs::Init( lpctstr pszStr )
     // take quote if present.
     if (fQuote)
     {
-        tchar * str = const_cast<tchar*>( strchr(m_s1.GetPtr(), '"') );
+        tchar * str = strchr(const_cast<tchar*>(m_s1.GetPtr()), '"');
         if ( str != nullptr )
             *str = '\0';
     }

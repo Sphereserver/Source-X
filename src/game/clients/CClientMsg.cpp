@@ -445,14 +445,14 @@ bool CClient::addContainerSetup( const CItemContainer * pContainer ) // Send Bac
 {
 	ADDTOCALLSTACK("CClient::addContainerSetup");
 	ASSERT(pContainer);
-	ASSERT( pContainer->IsItem() );
+	ASSERT(pContainer->IsItem());
 
 	// open the container with the proper GUMP.
 	CItemBase * pItemDef = pContainer->Item_GetDef();
-	GUMP_TYPE gump = pItemDef->IsTypeContainer();
 	if (!pItemDef)
 		return false;
 
+	GUMP_TYPE gump = pItemDef->IsTypeContainer();
 	if ( gump <= GUMP_RESERVED )
 		return false;
 
@@ -471,8 +471,8 @@ void CClient::LogOpenedContainer(const CItemContainer* pContainer) // record a c
 	if (pContainer == nullptr)
 		return;
 
-	CObjBaseTemplate * pTopMostContainer = pContainer->GetTopLevelObj();
-	CObjBase * pTopContainer = pContainer->GetContainer();
+	const CObjBaseTemplate * pTopMostContainer = pContainer->GetTopLevelObj();
+	const CObjBase * pTopContainer = pContainer->GetContainer();
 
 	dword dwTopMostContainerUID = pTopMostContainer->GetUID().GetPrivateUID();
 	dword dwTopContainerUID = 0;

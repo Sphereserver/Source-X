@@ -32,7 +32,7 @@ public:
 	{
 		return m_uidCharArray.size();
 	}
-	inline CUID GetChar( size_t i ) const
+	inline const CUID& GetChar( size_t i ) const
 	{
 		return m_uidCharArray[i];
 	}

@@ -3577,7 +3577,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined char type '%s'\n", pScript->GetArgStr());
 			return false;
 		}
-		return CChar::CreateBasic(CREID_TYPE(rid.GetResIndex()))->r_Load(*pScript);
+		return CChar::CreateBasic( CREID_TYPE(rid.GetResIndex()) )->r_Load(*pScript);
 	case RES_WI:
 	case RES_WORLDITEM:	// saved in world file.
 		if ( ! rid.IsValidUID())
@@ -3585,7 +3585,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined item type '%s'\n", pScript->GetArgStr());
 			return false;
 		}
-		return CItem::CreateBase(ITEMID_TYPE(rid.GetResIndex()))->r_Load(*pScript);
+		return CItem::CreateBase( ITEMID_TYPE(rid.GetResIndex()) )->r_Load(*pScript);
 
 	default:
 		break;
@@ -3938,9 +3938,10 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 		break;
 
 	case RES_BOOK:			// A book or a page from a book.
-	case RES_DIALOG:			// A scriptable gump dialog: text or handler block.
+	case RES_DIALOG:		// A scriptable gump dialog: text or handler block.
 		if ( wPage )	// We MUST define the main section FIRST !
 			return ridInvalid;
+		FALLTHROUGH;
 
 	case RES_REGIONTYPE:	// Triggers etc. that can be assinged to a RES_AREA
 		iHashRange = 100;

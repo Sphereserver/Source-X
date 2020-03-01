@@ -2160,7 +2160,7 @@ bool PacketGumpDialogRet::onReceive(CNetState* net)
 			CChar *viewed = character;
 			if ((button == 1) && (checkCount > 0))
 			{
-				viewed = CUID(readInt32()).CharFind();
+				viewed = CUID::CharFind(readInt32());
 				if (!viewed)
 					viewed = character;
 			}
@@ -2228,12 +2228,6 @@ bool PacketGumpDialogRet::onReceive(CNetState* net)
 
 
 	dword textCount = readInt32();
-    if (checkCount > MAX_DIALOG_CONTROLTYPE_QTY)
-    {
-        g_Log.EventError("%x:PacketGumpDialogRet textentry count too high.\n", net->id());
-        return false;
-    }
-
 	tchar* text = Str_GetTemp();
 	for (uint i = 0; i < textCount; ++i)
 	{

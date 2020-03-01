@@ -464,10 +464,16 @@ CChar* CChar::GetNext() const
 	return( static_cast <CChar*>( CObjBase::GetNext()) );
 }
 
-CObjBaseTemplate * CChar::GetTopLevelObj() const
+const CObjBaseTemplate * CChar::GetTopLevelObj() const
 {
 	// Get the object that has a location in the world. (Ground level)
-	return const_cast<CChar*>(this);
+	return this;
+}
+
+CObjBaseTemplate* CChar::GetTopLevelObj()
+{
+	// Get the object that has a location in the world. (Ground level)
+	return this;
 }
 
 bool CChar::IsSwimming() const
@@ -1016,7 +1022,7 @@ bool CChar::CanSeeInContainer( const CItemContainer *pContItem ) const
 	// Not normally searchable.
 	// Make some special cases for searchable.
 
-    const CChar *pChar = static_cast<CChar*>(pContItem->GetTopLevelObj());
+    const CChar *pChar = static_cast<const CChar*>(pContItem->GetTopLevelObj());
 	if ( !pChar )
 		return false;
 
@@ -1028,7 +1034,7 @@ bool CChar::CanSeeInContainer( const CItemContainer *pContItem ) const
         const CItem *pItemTrade = pContItem->m_uidLink.ItemFind();
 		if ( pItemTrade )
 		{
-            const CChar *pCharTrade = static_cast<CChar*>(pItemTrade->GetTopLevelObj());
+            const CChar *pCharTrade = static_cast<const CChar*>(pItemTrade->GetTopLevelObj());
 			if ( pCharTrade == this )
 				return true;
 		}
@@ -1147,8 +1153,6 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 	else
 	{
 		const CChar *pChar = static_cast<const CChar*>(pObj);
-		if ( !pChar )
-			return false;
 		if ( pChar == this )
 			return true;
 		if ( ptTop.GetDistSight(pChar->GetTopPoint()) > iDistSight )
@@ -1581,7 +1585,7 @@ bool CChar::CanMove( const CItem *pItem, bool fMsg ) const
 			{
 				if (( pItem->IsAttr(ATTR_NEWBIE) ) && g_Cfg.m_bAllowNewbTransfer )
 				{
-                    const CChar *pPet = dynamic_cast<CChar*>( pItem->GetTopLevelObj() );
+                    const CChar *pPet = dynamic_cast<const CChar*>( pItem->GetTopLevelObj() );
 					if (pPet && (pPet->GetOwner() == this) )
 						return true;
 				}
@@ -1620,7 +1624,7 @@ bool CChar::IsTakeCrime( const CItem *pItem, CChar ** ppCharMark ) const
 	if ( IsPriv(PRIV_GM | PRIV_ALLMOVE) )
 		return false;
 
-	CObjBaseTemplate *pObjTop = pItem->GetTopLevelObj();
+	CObjBaseTemplate *pObjTop = const_cast<CObjBaseTemplate*>(pItem->GetTopLevelObj());
 	CChar *pCharMark = dynamic_cast<CChar*>(pObjTop);
 	if ( ppCharMark != nullptr )
 		*ppCharMark = pCharMark;

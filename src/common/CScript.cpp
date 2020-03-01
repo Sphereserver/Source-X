@@ -314,7 +314,7 @@ CScriptKey::~CScriptKey()
 
 tchar * CScriptKeyAlloc::_GetKeyBufferRaw( size_t iLen )
 {
-	ADDTOCALLSTACK_INTENSIVE("CScriptKeyAlloc::_GetKeyBufferRaw");
+	//ADDTOCALLSTACK_INTENSIVE("CScriptKeyAlloc::_GetKeyBufferRaw");
 	// iLen = length of the string we want to hold.
 	if ( iLen > SCRIPT_MAX_LINE_LEN )
 		iLen = SCRIPT_MAX_LINE_LEN;
@@ -345,7 +345,7 @@ tchar * CScriptKeyAlloc::GetKeyBuffer()
 
 bool CScriptKeyAlloc::ParseKey( lpctstr ptcKey )
 {
-	ADDTOCALLSTACK("CScriptKeyAlloc::ParseKey");
+	//ADDTOCALLSTACK("CScriptKeyAlloc::ParseKey");
 	// Skip leading white space
 	if ( ! ptcKey )
 	{
@@ -367,7 +367,7 @@ bool CScriptKeyAlloc::ParseKey( lpctstr ptcKey )
 
 bool CScriptKeyAlloc::ParseKey( lpctstr ptcKey, lpctstr pszVal )
 {
-	ADDTOCALLSTACK("CScriptKeyAlloc::ParseKey");
+	//ADDTOCALLSTACK("CScriptKeyAlloc::ParseKey");
 	ASSERT(ptcKey);
 
 	size_t lenkey = strlen( ptcKey );
@@ -397,7 +397,7 @@ bool CScriptKeyAlloc::ParseKey( lpctstr ptcKey, lpctstr pszVal )
 
 size_t CScriptKeyAlloc::ParseKeyEnd()
 {
-	ADDTOCALLSTACK("CScriptKeyAlloc::ParseKeyEnd");
+	//ADDTOCALLSTACK("CScriptKeyAlloc::ParseKeyEnd");
 	// Now parse the line for comments and trailing whitespace junk
 	// NOTE: leave leading whitespace for now.
 
@@ -427,7 +427,7 @@ size_t CScriptKeyAlloc::ParseKeyEnd()
 
 void CScriptKeyAlloc::ParseKeyLate()
 {
-	ADDTOCALLSTACK("CScriptKeyAlloc::ParseKeyLate");
+	//ADDTOCALLSTACK("CScriptKeyAlloc::ParseKeyLate");
 	ASSERT(m_pszKey);
 	ParseKeyEnd();
 	GETNONWHITESPACE(m_pszKey);
@@ -517,9 +517,9 @@ bool CScript::Open( lpctstr ptcFilename, uint uiFlags )
 
 bool CScript::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
 {
-    // Same caveat as for ReadTextLine when using ADDTOCALLSTACK, it would be better for performance to use ADDTOCALLSTACK_INTENSIVE,
-    //  but it's safer to have at least one trace of a _ReadString call, so we'll use ADDTOCALLSTACK here.
-    ADDTOCALLSTACK("CScript::_ReadString");
+	// This function is called for each script line which is being parsed (so VERY frequently), and ADDTOCALLSTACK is expensive if called
+	// this much often, so here it's to be preferred ADDTOCALLSTACK_INTENSIVE, even if we'll lose stack trace precision.
+	//ADDTOCALLSTACK_INTENSIVE("CScript::_ReadTextLine");
 	// ARGS:
 	// fRemoveBlanks = Don't report any blank lines, (just keep reading)
 
@@ -540,9 +540,6 @@ bool CScript::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened
 }
 bool CScript::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
 {
-    // This function is called for each script line which is being parsed (so VERY frequently), and ADDTOCALLSTACK is expensive if called
-    // this much often, so here it's to be preferred ADDTOCALLSTACK_INTENSIVE, even if we'll lose stack trace precision.
-    ADDTOCALLSTACK_INTENSIVE("CScript::ReadTextLine");
     THREAD_UNIQUE_LOCK_RETURN(_ReadTextLine(fRemoveBlanks));
 }
 

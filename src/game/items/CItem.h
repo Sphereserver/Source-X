@@ -673,14 +673,15 @@ public:
 		return static_cast <CItem*>(CObjBase::GetPrev());
 	}
 
+	const CObjBaseTemplate* GetTopLevelObj() const override;
+	CObjBaseTemplate* GetTopLevelObj() override;
 	CObjBase * GetContainer() const;
-	CObjBaseTemplate * GetTopLevelObj() const;
 	uchar GetContainedGridIndex() const;
 	void SetContainedGridIndex(uchar index);
 
 	void Update( const CClient * pClientExclude = nullptr );		// send this new item to everyone.
 	void Flip();
-	bool LoadSetContainer( CUID uid, LAYER_TYPE layer );
+	bool LoadSetContainer( const CUID& uid, LAYER_TYPE layer );
 
 	void WriteUOX( CScript & s, int index );
 

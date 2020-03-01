@@ -2304,7 +2304,7 @@ void CItem::r_Write( CScript & s )
     CEntityProps::r_Write(s);
 }
 
-bool CItem::LoadSetContainer( CUID uid, LAYER_TYPE layer )
+bool CItem::LoadSetContainer(const CUID& uidCont, LAYER_TYPE layer )
 {
 	ADDTOCALLSTACK("CItem::LoadSetContainer");
 	// Set the CItem in a container of some sort.
@@ -2312,10 +2312,10 @@ bool CItem::LoadSetContainer( CUID uid, LAYER_TYPE layer )
 	// "CONT" IC_CONT
 	// NOTE: We don't have a valid point in the container yet probably. get that later.
 
-	CObjBase * pObjCont = uid.ObjFind();
+	CObjBase * pObjCont = uidCont.ObjFind();
 	if ( pObjCont == nullptr )
 	{
-		DEBUG_ERR(( "Invalid container 0%x\n", (dword) uid ));
+		DEBUG_ERR(( "Invalid container 0%x\n", (dword)uidCont));
 		return false;	// not valid object.
 	}
 
@@ -2342,7 +2342,7 @@ bool CItem::LoadSetContainer( CUID uid, LAYER_TYPE layer )
 		if ( pChar != nullptr )
 		{
 			// equip the item
-			CItemBase * pItemDef = Item_GetDef();
+			const CItemBase * pItemDef = Item_GetDef();
 			ASSERT(pItemDef);
 			if ( ! layer )
 				layer = pItemDef->GetEquipLayer();
@@ -2352,7 +2352,7 @@ bool CItem::LoadSetContainer( CUID uid, LAYER_TYPE layer )
 		}
 	}
 
-	DEBUG_ERR(( "Non container uid=0%x,id=0%x\n", (dword) uid, pObjCont->GetBaseID() ));
+	DEBUG_ERR(( "Non container uid=0%x,id=0%x\n", (dword)uidCont, pObjCont->GetBaseID() ));
 	return false;		// not a container.
 }
 
@@ -3869,14 +3869,25 @@ CObjBase * CItem::GetContainer() const
 	return ( dynamic_cast <CObjBase*> (GetParent()));
 }
 
-CObjBaseTemplate * CItem::GetTopLevelObj() const
+const CObjBaseTemplate * CItem::GetTopLevelObj() const
 {
 	// recursively get the item that is at "top" level.
 	const CObjBase* pObj = GetContainer();
 	if ( !pObj )
-		return const_cast <CItem*>(this);
+		return this;
 	else if ( pObj == this )		// to avoid script errors setting same CONT
-		return const_cast <CItem*>(this);
+		return this;
+	return pObj->GetTopLevelObj();
+}
+
+CObjBaseTemplate* CItem::GetTopLevelObj()
+{
+	// recursively get the item that is at "top" level.
+	CObjBase* pObj = GetContainer();
+	if (!pObj)
+		return this;
+	else if (pObj == this)		// to avoid script errors setting same CONT
+		return this;
 	return pObj->GetTopLevelObj();
 }
 

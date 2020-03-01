@@ -1018,7 +1018,7 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 			++pExpr;
 			{
 				llong iVal = GetVal( pExpr );
-				if (llVal <= 0)
+				if (llVal < 0)
 				{
 					g_Log.EventError("Power with negative base is a complex number.\n");
 					break;

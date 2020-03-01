@@ -1403,6 +1403,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 		case OC_UID:
 			if ( ptcKey[3] == '.' )
 				return CScriptObj::r_WriteVal( ptcKey, sVal, pSrc );
+			FALLTHROUGH;
 		case OC_SERIAL:
 			sVal.FormatHex( GetUID() );
 			break;

@@ -21,6 +21,7 @@ CCMultiMovable::CCMultiMovable(bool fCanTurn) :
 {
     _fCanTurn = fCanTurn;
     _eSpeedMode = SMS_NORMAL;
+    _pCaptain = nullptr;
 }
 
 void CCMultiMovable::SetCaptain(CTextConsole * pSrc)

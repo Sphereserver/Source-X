@@ -449,7 +449,8 @@ private:
 
 public:
 	CChar* GetNext() const;
-	CObjBaseTemplate * GetTopLevelObj() const;
+	const CObjBaseTemplate * GetTopLevelObj() const override;
+	CObjBaseTemplate* GetTopLevelObj() override;
 
 	bool IsSwimming() const;
 
@@ -1083,6 +1084,7 @@ public:
 	void NPC_CreateTrigger();
 
 	// Mounting and figurines
+	ITEMID_TYPE Horse_GetMountItemID() const;
 	bool Horse_Mount( CChar * pHorse ); // Remove horse char and give player a horse item
 	bool Horse_UnMount(); // Remove horse char and give player a horse item
 

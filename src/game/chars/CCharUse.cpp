@@ -1576,6 +1576,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 				SysMessageDefault(DEFMSG_ITEMUSE_PORT_LOCKED);
 				return true;
 			}
+			FALLTHROUGH;
 		case IT_PORTCULIS:
 			// Open a metal gate vertically
 			pItem->Use_Portculis();

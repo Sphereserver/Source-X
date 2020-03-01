@@ -846,7 +846,7 @@ int CChar::FixWeirdness()
 				iResultCode = 0x1203;
 				return iResultCode;
 			}
-			const CItem * pFigurine = Horse_GetMountItem();
+			const CItem * pFigurine = Horse_GetValidMountItem();
 			if ( pFigurine == nullptr )
 			{
 				iResultCode = 0x1204;

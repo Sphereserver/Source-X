@@ -206,7 +206,7 @@ bool CScriptObj::r_Call( size_t uiFunctionIndex, CTextConsole * pSrc, CScriptTri
             {
                 pFun = new CScriptProfiler::CScriptProfilerFunction;
                 memset(pFun, 0, sizeof(CScriptProfiler::CScriptProfilerFunction));
-                strcpy(pFun->name, pName);
+                Str_CopyLimitNull(pFun->name, pName, sizeof(CScriptProfiler::CScriptProfilerFunction::name));
                 if ( g_profiler.FunctionsTail )
                     g_profiler.FunctionsTail->next = pFun;
                 else
@@ -541,7 +541,8 @@ badcmd:
 			}
 			return pRef->r_WriteVal( ptcKey, sVal, pSrc );
 		case SSC_VAR0:
-			fZero	= true;
+			fZero = true;
+			FALLTHROUGH;
 		case SSC_VAR:
 			// "VAR." = get/set a system wide variable.
 			{
@@ -560,7 +561,8 @@ badcmd:
                 sVal = "-1";
             return true;
 		case SSC_DEF0:
-			fZero	= true;
+			fZero = true;
+			FALLTHROUGH;
 		case SSC_DEF:
 			{
 				const CVarDefCont * pVar = g_Exp.m_VarDefs.GetKey(ptcKey);
@@ -571,7 +573,8 @@ badcmd:
 			}
 			return true;
         case SSC_RESDEF0:
-            fZero	= true;
+            fZero = true;
+			FALLTHROUGH;
         case SSC_RESDEF:
         {
             const CVarDefCont * pVar = g_Exp.m_VarResDefs.GetKey(ptcKey);
@@ -1798,12 +1801,11 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 
 	if (iType & 0x100)	// FORTIMERF
 	{
-		tchar * ppArgs[1];
-
-		if (Str_ParseCmds(s.GetArgStr(), ppArgs, CountOf(ppArgs), " \t,") >= 1)
+		tchar* ptcArgs;
+		if (Str_Parse(s.GetArgStr(), &ptcArgs, " \t,"))
 		{
 			char funcname[1024];
-			Str_CopyLimitNull(funcname, ppArgs[0], sizeof(funcname));
+			Str_CopyLimitNull(funcname, ptcArgs, sizeof(funcname));
 
 			TRIGRET_TYPE iRet = g_World.m_TimedFunctions.Loop(funcname, LoopsMade, StartContext, EndContext, s, pSrc, pArgs, pResult);
 			if ((iRet != TRIGRET_ENDIF) && (iRet != TRIGRET_CONTINUE))

@@ -178,6 +178,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 				if ( !IsPriv(PRIV_GM) )
 					return false;
 			}
+			break;
 
 		case IT_CORPSE:
 		case IT_SHIP_HOLD:

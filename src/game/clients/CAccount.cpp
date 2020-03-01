@@ -1108,7 +1108,7 @@ bool CAccount::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 	{
 		// How many chars.
 		ptcKey += 5;
-		size_t i = Exp_GetVal(ptcKey);
+		size_t i = Exp_GetSTVal(ptcKey);
 		if ( m_Chars.IsValidIndex(i) )
 		{
 			pRef = m_Chars.GetChar(i).CharFind();
@@ -1116,7 +1116,7 @@ bool CAccount::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 		SKIP_SEPARATORS(ptcKey);
 		return true;
 	}
-	return( CScriptObj::r_GetRef( ptcKey, pRef ));
+	return CScriptObj::r_GetRef( ptcKey, pRef );
 }
 
 bool CAccount::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )

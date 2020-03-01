@@ -72,7 +72,8 @@ public:
     }
 
 	virtual int IsWeird() const;
-	virtual CObjBaseTemplate * GetTopLevelObj() const = 0;
+	virtual const CObjBaseTemplate * GetTopLevelObj() const = 0;
+	virtual CObjBaseTemplate* GetTopLevelObj() = 0;
 
 	CSector * GetTopSector() const;
 	// Location
