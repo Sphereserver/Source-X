@@ -339,7 +339,7 @@ public:
 	void Event_MailMsg( CUID uid1, CUID uid2 );
 	void Event_Profile( byte fWriteMode, CUID uid, lpctstr pszProfile, int iProfileLen );
 	void Event_PromptResp( lpctstr pszText, size_t len, dword context1, dword context2, dword type, bool fNoStrip = false );
-	void Event_SetName( CUID uid, const char * pszCharName );
+	bool Event_SetName( CUID uid, const char * pszCharName );
 	void Event_SingleClick( CUID uid );
 	void Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bool fNoStrip = false ); // PC speech
 	void Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, lpctstr pszLang );
@@ -593,6 +593,7 @@ private:
 #define POPUP_STABLESTABLE 51
 #define POPUP_STABLERETRIEVE 52
 #define POPUP_TAME 53
+#define POPUP_PETRENAME 54
 #define POPUP_TRAINSKILL 100
 
 	PacketDisplayPopup* m_pPopupPacket;

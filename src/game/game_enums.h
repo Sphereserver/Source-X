@@ -98,10 +98,12 @@ enum CLIMODE_TYPE	// What mode is the client to server connection in ? (waiting 
     CLIMODE_MENU_EDIT,              // edit the contents of a container
 
     // Prompting for text input ------------------------------------------------------
-	CLIMODE_PROMPT_NAME_RUNE,
     CLIMODE_PROMPT_NAME_KEY,        // naming a key
-    CLIMODE_PROMPT_NAME_SIGN,       // naming a house sign
+    CLIMODE_PROMPT_NAME_PET,        // naming a pet
+    CLIMODE_PROMPT_NAME_RUNE,
     CLIMODE_PROMPT_NAME_SHIP,
+    CLIMODE_PROMPT_NAME_SIGN,       // naming a house sign
+ 
     CLIMODE_PROMPT_GM_PAGE_TEXT,    // allowed to enter text for GM page
     CLIMODE_PROMPT_VENDOR_PRICE,    // what would you like the price to be?
     CLIMODE_PROMPT_TARG_VERB,       // send message to another player
