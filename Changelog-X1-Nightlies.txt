@@ -2123,7 +2123,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Updated: SQlite to version 3.31.0.
 
 05-02-2020, Drk84
-- Added: New ini flag NPCCanFizzle, when enabled, a NPC can fizzle a spell when hit during combat. (Issue #241)
+- Added: New ini flag NPCCanFizzleOnHit, when enabled, a NPC can fizzle a spell when hit during combat. (Issue #241)
 - Added: TAG.NPCNoCastTill behaviour, this tag will not allow a NPC to cast a spell if tag.NPCNoCastTill > SERV.Time.
 		 Example:
 		  ON=@SpellCast
@@ -2134,3 +2134,8 @@ Must have event, even if it's empty, since it's applied by the source to generat
 01-03-2020, Nolok
 - Fixed: Auto-fixing figurines always treated them as mount items, finding fake errors (Issue #367).
 - Fixed: FORINSTANCES not parsing correctly the argument.
+
+04-03-2020, Drk84
+- [Port from Source, 10-09-2019, Coruja] Added: Missing context menu option "Rename" when player click on a owned pet. (Issue #368)
+- Fixed: Parrying skill increase when weapon / shield wielded does not match with CombatParryEra setting. (Issue #365)
+- Updated SphereCrypt.ini.

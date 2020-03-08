@@ -2106,7 +2106,11 @@ bool CChar::Fight_Parry(CItem * &pItemParry)
     const bool fCanTwoHanded = g_Cfg.m_iCombatParryingEra & PARRYERA_TWOHANDBLOCK;
 
     const int iParrying = Skill_GetBase(SKILL_PARRYING);
-    int iParryChance = 0;   // 0-100 difficulty! without the decimal!
+	/*
+	While the difficulty range is 0-100 (without decimal) we initialize iParryChance to -1 for avoiding the player
+	to gain parrying skill when his combination of weapon/shield does not match the values set in the CombatParryingEra  in the sphere.ini.
+	*/
+    int iParryChance = -1;
     if (g_Cfg.m_iCombatParryingEra & PARRYERA_SEFORMULA)   // Samurai Empire formula
     {
         const int iBushido = Skill_GetBase(SKILL_BUSHIDO);

@@ -1572,6 +1572,11 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 
 	switch ( promptMode )
 	{
+		case CLIMODE_PROMPT_NAME_PET:
+			if (Event_SetName(CUID(context1), szText))
+				SysMessageDefault(DEFMSG_NPC_PET_RENAME_SUCCESS1);
+			return;
+
 		case CLIMODE_PROMPT_GM_PAGE_TEXT:
 			// m_Targ_Text
 			Cmd_GM_Page( szText );
@@ -1958,26 +1963,26 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 	}
 }
 
-void CClient::Event_SetName( CUID uid, const char * pszCharName )
+bool CClient::Event_SetName( CUID uid, const char * pszCharName )
 {
 	ADDTOCALLSTACK("CClient::Event_SetName");
 	// Set the name in the character status window.
 	CChar * pChar = uid.CharFind();
-	if ( !pChar || !m_pChar )
-		return;
+	if (!pChar || !m_pChar)
+		return false;
 
    if ( Str_CheckName(pszCharName) || !strlen(pszCharName) )
-		return;
+		return false;
 
 	// Do we have the right to do this ?
 	if ( (m_pChar == pChar) || !pChar->IsOwnedBy( m_pChar, true ) )
-		return;
+		return false;
 	if ( FindTableSorted( pszCharName, sm_szCmd_Redirect, CountOf(sm_szCmd_Redirect) ) >= 0 )
-		return;
+		return false;
 	if ( FindTableSorted( pszCharName, CCharNPC::sm_szVerbKeys, 14 ) >= 0 )
-		return;
+		return false;
 	if ( g_Cfg.IsObscene(pszCharName) )
-		return;
+		return false;
 
 	if ( IsTrigUsed(TRIGGER_RENAME) )
 	{
@@ -1985,10 +1990,13 @@ void CClient::Event_SetName( CUID uid, const char * pszCharName )
 		args.m_pO1 = pChar;
 		args.m_s1 = pszCharName;
 		if ( m_pChar->OnTrigger(CTRIG_Rename, this, &args) == TRIGRET_RET_TRUE )
-			return;
+			return false;
 	}
+	if (pChar->IsOwnedBy(m_pChar))
+		SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_RENAME_SUCCESS2), pChar->GetName(), pszCharName);
 
 	pChar->SetName(pszCharName);
+	return true;
 }
 
 void CDialogResponseArgs::AddText( word id, lpctstr pszText )
@@ -2419,6 +2427,9 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 					m_pPopupPacket->addOption(POPUP_PETSTOP, 6112, POPUPFLAG_COLOR, 0xFFFF);
 					m_pPopupPacket->addOption(POPUP_PETSTAY, 6114, POPUPFLAG_COLOR, 0xFFFF);
 
+					if (GetNetState()->isClientVersion(MINCLIVER_NEWDAMAGE))
+						m_pPopupPacket->addOption(POPUP_PETRENAME, 1115557, POPUPFLAG_COLOR, 0xFFFF);
+
 					if (!pChar->IsStatFlag(STATF_CONJURED))
 					{
 						m_pPopupPacket->addOption(POPUP_PETFRIEND_ADD, 6110, iEnabled, 0xFFFF);
@@ -2580,6 +2591,11 @@ void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something 
 
 			case POPUP_PETRELEASE:
 				pChar->NPC_OnHearPetCmd("release", m_pChar);
+				break;
+
+			case POPUP_PETRENAME:
+				if (pChar->NPC_IsOwnedBy(m_pChar))
+					addPromptConsole(CLIMODE_PROMPT_NAME_PET, g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_RENAME_PROMPT), pChar->GetUID());
 				break;
 
 			case POPUP_STABLESTABLE:
