@@ -299,6 +299,16 @@ public:
      * @param   pSrc    If non-null, source for the.
      */
 	void CopyTransfer( CBaseBaseDef * pSrc );
+
+
+    /**
+    * @brief   Returns the internal numeric range value from the string, used for value assignment.
+    * @return  Value.
+    */
+    static int ConvertRangeStr(lpctstr ptcRange);
+#define RANGE_MAKE(iHi, iLo)    (((iHi & 0xFF) << 8) | (iLo & 0xFF))   // Highest byte contains highest value, lowest contains the lowest value
+#define RANGE_GET_HI(iRange)    ((iRange >> 8) & 0xFF)
+#define RANGE_GET_LO(iRange)    (iRange & 0xFF)
 };
 
 #endif // _INC_CBASE_H

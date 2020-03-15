@@ -70,7 +70,7 @@ int CSkillKeySortArray::CompareKey(lpctstr ptcKey, CValStr * pVal, bool fNoSpace
     return strcmpi(ptcKey, pVal->m_pszName);
 }
 
-int CMultiDefArray::CompareKey(MULTI_TYPE id, CSphereMulti* pBase, bool fNoSpaces) const
+int CMultiDefArray::CompareKey(MULTI_TYPE id, CUOMulti* pBase, bool fNoSpaces) const
 {
     UNREFERENCED_PARAMETER(fNoSpaces);
     ASSERT(pBase);

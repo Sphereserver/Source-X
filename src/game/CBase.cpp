@@ -5,6 +5,7 @@
 #include "components/CCPropsItemWeapon.h"
 #include "CServerConfig.h"
 #include "CBase.h"
+#include <algorithm>
 
 enum OBC_TYPE
 {
@@ -483,4 +484,29 @@ word CBaseBaseDef::GetResDispDnId() const
 void CBaseBaseDef::SetResDispDnId( word ResDispDnId )
 {
 	m_ResDispDnId = ResDispDnId;
+}
+
+int CBaseBaseDef::ConvertRangeStr(lpctstr ptcRange) // static
+{
+	int64 piVal[2];
+	tchar* ptcTmp = Str_GetTemp();
+	Str_CopyLimitNull(ptcTmp, ptcRange, STR_TEMPLENGTH);
+	int iQty = Str_ParseCmds(ptcTmp, piVal, CountOf(piVal));
+	int iHi = 0, iLo = 0;
+	if (iQty > 1)	// args: "min, max"
+	{
+		iHi = (int)piVal[1];
+		iLo = (int)piVal[0];
+		if (iLo > iHi)
+		{
+			std::swap(iHi, iLo);
+		}
+		iHi = maximum(0, iHi);
+		iLo = maximum(0, iLo);
+	}
+	else			// arg: "max"
+	{
+		iHi = std::max(0, (int)piVal[0]);
+	}
+	return RANGE_MAKE(iHi, iLo);
 }

@@ -633,12 +633,13 @@ void CVarDefMap::r_WritePrefix( CScript & s, lpctstr pszPrefix, lpctstr pszKeyEx
     const bool fHasPrefix = (pszPrefix && *pszPrefix);
     const bool fHasExclude = (pszKeyExclude && *pszKeyExclude);
 
-    auto _WritePrefix = [&z, fHasPrefix, pszPrefix](lpctstr ptcKey) -> void
+	// Prefix is usually TAG, VAR, etc...
+    auto _WritePrefix = [z, fHasPrefix, pszPrefix](lpctstr ptcKey) -> void
     {
-        if ( fHasPrefix )
-            sprintf(z, "%s.%s", pszPrefix, ptcKey);
-        else
-            sprintf(z, "%s", ptcKey);
+		if (fHasPrefix)
+			sprintf(z, "%s.%s", pszPrefix, ptcKey);
+		else
+			Str_CopyLimitNull(z, ptcKey, THREAD_STRING_LENGTH);
     };
 
 	// Write with any prefix.
@@ -647,7 +648,7 @@ void CVarDefMap::r_WritePrefix( CScript & s, lpctstr pszPrefix, lpctstr pszKeyEx
 		if ( !pVar )
 			continue;	// This should not happen, a warning maybe?
 
-        lpctstr ptcKey = pVar->GetKey();
+        const lpctstr ptcKey = pVar->GetKey();
 		if ( fHasExclude && !strcmpi(pszKeyExclude, ptcKey))
 			continue;
 		

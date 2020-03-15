@@ -258,7 +258,7 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
     m_defense = 0;
 	m_height = 0;
 	m_ModMaxWeight = 0;
-    _iRange = 1 << 8;   // RangeH = 1; RangeL = 0
+    _iRange = RANGE_MAKE(1, 0);   // RangeH = 1; RangeL = 0
 
 	m_StepStealth = 0;
 	m_iVisualRange = UO_MAP_VIEW_SIZE_DEFAULT;
@@ -2968,8 +2968,8 @@ do_default:
         case CHC_RANGE:
         {
             const int iRangeH = GetRangeH(), iRangeL = GetRangeL();
-            if ( iRangeH == 0 )
-                sVal.Format( "%d", iRangeL );
+            if ( iRangeL == 0 )
+                sVal.Format( "%d", iRangeH );
             else
                 sVal.Format( "%d,%d", iRangeH, iRangeL );
             break;
@@ -3527,21 +3527,7 @@ bool CChar::r_LoadVal( CScript & s )
 			break;
         case CHC_RANGE:
         {
-            int64 piVal[2];
-            tchar *ptcTmp = Str_GetTemp();
-            Str_CopyLimitNull(ptcTmp, s.GetArgStr(), STR_TEMPLENGTH);
-            int iQty = Str_ParseCmds( ptcTmp, piVal, CountOf(piVal));
-            int iRange;
-            if ( iQty > 1 )
-            {
-                iRange = (int)((piVal[1] & 0xff) << 8); // highest byte contains the lowest value
-                iRange |= (int)(piVal[0] & 0xff);       // lowest byte contains the highest value
-            }
-            else
-            {
-                iRange = (int)(piVal[0] << 8);
-            }
-            _iRange = iRange;
+			_iRange = CBaseBaseDef::ConvertRangeStr(s.GetArgStr());
             break;
         }
         case CHC_RANGEH:

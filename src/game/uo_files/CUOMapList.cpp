@@ -32,6 +32,9 @@ void CUOMapList::Clear()
     constexpr int iMaxMapFileIdx = 6;
     for (int i = 0; i < iMaxMapFileIdx; ++i)
         ResetMap(i, -1, -1, -1, i, i);
+
+    for (int i = 0; i < MAP_SUPPORTED_QTY ; ++i)
+        _mapBlocks[i].reset();
 }
 
 bool CUOMapList::ResetMap(int map, int maxx, int maxy, int sectorsize, int realmapnum, int mapid)
@@ -125,7 +128,11 @@ bool CUOMapList::Load(int map, char *args)
                 m_mapid[map] = mapid;
             else
                 m_mapid[map] = map;
+
+            const int iBlocks = (maxx * maxy) / UO_BLOCK_SIZE;
+            _mapBlocks[map] = std::make_unique<MapBlockCacheCont []>(iBlocks);
         }
+
         m_mapsinitalized[map] = true;
     }
     return true;

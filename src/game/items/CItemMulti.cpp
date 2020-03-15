@@ -502,10 +502,11 @@ bool CItemMulti::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the 
     // Add new region info.
     if (IsType(IT_MULTI_ADDON)) // Addons doesn't have region, don't try to realize it.
     {
-        CRegionWorld *pRegion = dynamic_cast<CRegionWorld*>(GetTopPoint().GetRegion(REGION_TYPE_HOUSE));
+        const CPointMap& ptTop = GetTopPoint();
+        CRegionWorld *pRegion = dynamic_cast<CRegionWorld*>(ptTop.GetRegion(REGION_TYPE_HOUSE));
         if (!pRegion)
         {
-            pRegion = dynamic_cast<CRegionWorld*>(GetTopPoint().GetRegion(REGION_TYPE_AREA));
+            pRegion = dynamic_cast<CRegionWorld*>(ptTop.GetRegion(REGION_TYPE_AREA));
         }
         ASSERT(pRegion);
         m_pRegion = pRegion;

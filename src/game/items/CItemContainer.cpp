@@ -490,10 +490,6 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
                 Trade_Status(false);
                 break;
 
-            case IT_CONTAINER:
-            case IT_CONTAINER_LOCKED:
-                pItem->GoSleep();
-                break;
             default:
                 break;
         }
@@ -516,6 +512,11 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
             default:
                 break;
 		}
+	}
+
+	if (/*pItem->IsTimerSet() &&*/ !pItem->IsSleeping())
+	{
+		pItem->GoSleep();		// prevent the timer from firing if the item is inside a container
 	}
 
 	// check for custom values in TDATA3/TDATA4
@@ -687,11 +688,11 @@ bool CItemContainer::IsItemInside( const CItem *pItem ) const
 	}
 }
 
-void CItemContainer::OnRemoveObj( CSObjListRec *pObRec )	// Override this = called when removed from list.
+void CItemContainer::OnRemoveObj( CSObjListRec *pObjRec )	// Override this = called when removed from list.
 {
 	ADDTOCALLSTACK("CItemContainer::OnRemoveObj");
 	// remove this object from the container list.
-	CItem *pItem = static_cast<CItem *>(pObRec);
+	CItem *pItem = static_cast<CItem *>(pObjRec);
 	ASSERT(pItem);
 	if ( IsType(IT_EQ_TRADE_WINDOW) )
 	{
@@ -704,7 +705,7 @@ void CItemContainer::OnRemoveObj( CSObjListRec *pObRec )	// Override this = call
 		if ( pItemVend )
 			pItemVend->SetPlayerVendorPrice(0);
 	}
-	CContainer::OnRemoveObj(pObRec);
+	CContainer::OnRemoveObj(pObjRec);
     UpdatePropertyFlag();
 
 	if ( IsType(IT_KEYRING) )	// key ring.
@@ -723,7 +724,7 @@ void CItemContainer::DupeCopy( const CItem *pItem )
 	if ( !pContItem )
 		return;
 
-	for ( CItem *pContent = pContItem->GetContentHead(); pContent != nullptr; pContent = pContent->GetNext() )
+	for ( const CItem *pContent = pContItem->GetContentHead(); pContent != nullptr; pContent = pContent->GetNext() )
 		ContentAdd(CreateDupeItem(pContent), pContent->GetContainedPoint());
 }
 

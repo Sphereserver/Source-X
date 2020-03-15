@@ -9,6 +9,7 @@
 #include "../game/uo_files/CUOVersionBlock.h"
 #include "../game/uo_files/CUOTiledata.h"
 #include "../game/uo_files/CUOIndexRec.h"
+#include "../game/uo_files/CUOMapList.h"
 #include "sphere_library/CSFile.h"
 #include "CSVFile.h"
 
@@ -37,16 +38,16 @@ public:
 	CSFile m_File[ VERFILE_QTY ];	// Get our list of files we need to access.
 	VERFILE_FORMAT m_FileFormat[ VERFILE_QTY ]; // File format versions
 
-	CSFile	m_Maps[256];		// mapX.mul
-	CSFile	m_Mapdif[256];		// mapdifX.mul
-	CSFile	m_Mapdifl[256];		// mapdiflX.mul
-	CSFile	m_Statics[256];		// staticsX.mul
-	CSFile	m_Staidx[256];		// staidxX.mul
-	CSFile	m_Stadif[256];		// stadifX.mul
-	CSFile	m_Stadifi[256];		// stadifiX.mul
-	CSFile	m_Stadifl[256];		// stadiflX.mul
-	bool m_IsMapUopFormat[256]; // true for maps that are uop format
-	MapAddress m_UopMapAddress[256][256]; //For uop parsing. Note: might need to be ajusted later if format changes.
+	CSFile	m_Maps[MAP_SUPPORTED_QTY];			// mapX.mul
+	CSFile	m_Mapdif[MAP_SUPPORTED_QTY];		// mapdifX.mul
+	CSFile	m_Mapdifl[MAP_SUPPORTED_QTY];		// mapdiflX.mul
+	CSFile	m_Statics[MAP_SUPPORTED_QTY];		// staticsX.mul
+	CSFile	m_Staidx[MAP_SUPPORTED_QTY];		// staidxX.mul
+	CSFile	m_Stadif[MAP_SUPPORTED_QTY];		// stadifX.mul
+	CSFile	m_Stadifi[MAP_SUPPORTED_QTY];		// stadifiX.mul
+	CSFile	m_Stadifl[MAP_SUPPORTED_QTY];		// stadiflX.mul
+	bool m_IsMapUopFormat[MAP_SUPPORTED_QTY];	// true for maps that are uop format
+	MapAddress m_UopMapAddress[MAP_SUPPORTED_QTY][MAP_SUPPORTED_QTY]; //For uop parsing. Note: might need to be ajusted later if format changes.
     CUOTiledata m_tiledata;
 
 	CSVFile m_CsvFiles[8];		// doors.txt, stairs.txt (x2), roof.txt, misc.txt, teleprts.txt, floors.txt, walls.txt

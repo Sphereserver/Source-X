@@ -17,7 +17,6 @@
 #include "CServerConfig.h"
 
 
-class CBaseBase;
 class PacketSend;
 class PacketPropertyList;
 class CCSpawn;
@@ -754,7 +753,7 @@ public:
      * @param   mode    The mode.
      * @param   font    The font.
      */
-	virtual void Speak( lpctstr pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL );
+	virtual void Speak( lpctstr pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL ) const;
 
     /**
      * @fn  virtual void CObjBase::SpeakUTF8( lpctstr pText, HUE_TYPE wHue= HUE_TEXT_DEF, TALKMODE_TYPE mode= TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL, CLanguageID lang = 0 );
@@ -767,7 +766,7 @@ public:
      * @param   font    The font.
      * @param   lang    The language.
      */
-	virtual void SpeakUTF8( lpctstr pText, HUE_TYPE wHue= HUE_TEXT_DEF, TALKMODE_TYPE mode= TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL, CLanguageID lang = 0 );
+	virtual void SpeakUTF8( lpctstr pText, HUE_TYPE wHue= HUE_TEXT_DEF, TALKMODE_TYPE mode= TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL, CLanguageID lang = 0 ) const;
 
     /**
      * @fn  virtual void CObjBase::SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
@@ -780,7 +779,7 @@ public:
      * @param   font    The font.
      * @param   lang    The language.
      */
-	virtual void SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
+	virtual void SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) const;
 
     /**
      * @fn  void CObjBase::RemoveFromView( CClient * pClientExclude = nullptr , bool fHardcoded = true );

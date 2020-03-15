@@ -1292,7 +1292,7 @@ int64 CExpression::GetRangeNumber(lpctstr & pExpr)
 		llWeights[i] = GetSingle(pToParseCasted);	// GetSingle changes the pointer value, so i need to work with a copy
 
 		if ( ! llWeights[i] )	// having a weight of 0 is very strange !
-			DEBUG_ERR(( "Weight of 0 in random range: invalid. Value-weight couple number %d\n", i ));	// the whole table should really just be invalid here !
+			g_Log.EventError( "Weight of 0 in random range: invalid. Value-weight couple number %d\n", i );	// the whole table should really just be invalid here !
 		llTotalWeight += llWeights[i];
 	}
 

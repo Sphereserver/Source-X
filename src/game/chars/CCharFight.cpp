@@ -937,21 +937,21 @@ byte CChar::GetRangeL() const
 {
     if (_iRange == 0)
         return Char_GetDef()->GetRangeL();
-    return (byte)(_iRange & 0xff);
+    return (byte)(RANGE_GET_LO(_iRange));
 }
 
 byte CChar::GetRangeH() const
 {
     if (_iRange == 0)
         return Char_GetDef()->GetRangeH();
-    return (byte)((_iRange >> 8) & 0xff);
+    return (byte)(RANGE_GET_HI(_iRange));
 }
 
 // What sort of weapon am i using?
 SKILL_TYPE CChar::Fight_GetWeaponSkill() const
 {
 	ADDTOCALLSTACK_INTENSIVE("CChar::Fight_GetWeaponSkill");
-	CItem * pWeapon = m_uidWeapon.ItemFind();
+	const CItem * pWeapon = m_uidWeapon.ItemFind();
 	if ( pWeapon == nullptr )
 		return SKILL_WRESTLING;
 	return pWeapon->Weapon_GetSkill();
@@ -963,7 +963,7 @@ DAMAGE_TYPE CChar::Fight_GetWeaponDamType(const CItem* pWeapon) const
     DAMAGE_TYPE iDmgType = DAMAGE_HIT_BLUNT;
     if ( pWeapon )
     {
-        CVarDefCont *pDamTypeOverride = pWeapon->GetKey("OVERRIDE.DAMAGETYPE", true);
+        const CVarDefCont *pDamTypeOverride = pWeapon->GetKey("OVERRIDE.DAMAGETYPE", true);
         if ( pDamTypeOverride )
         {
             iDmgType = (DAMAGE_TYPE)(pDamTypeOverride->GetValNum());
@@ -998,7 +998,7 @@ bool CChar::Fight_IsActive() const
 	if ( ! IsStatFlag(STATF_WAR))
 		return false;
 
-	SKILL_TYPE iSkillActive = Skill_GetActive();
+	const SKILL_TYPE iSkillActive = Skill_GetActive();
 	switch ( iSkillActive )
 	{
 		case SKILL_ARCHERY:
@@ -1283,8 +1283,10 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool fToldByMaster )
 
     pCharTarg->Memory_AddObjTypes(this, MEMORY_IRRITATEDBY);
     // Looking for MEMORY_AGGREIVED|MEMORY_HARMEDBY because in this case it won't be a crime, but most importantly to avoid infinite recursion
-    if (g_Cfg.m_fAttackingIsACrime && (pCharTarg->Noto_GetFlag(this) == NOTO_GOOD) && !pCharTarg->Memory_FindObjTypes(this, MEMORY_AGGREIVED|MEMORY_HARMEDBY))
-        CheckCrimeSeen(SKILL_NONE, pTarget, nullptr, nullptr);
+	if (g_Cfg.m_fAttackingIsACrime && (pCharTarg->Noto_GetFlag(this) == NOTO_GOOD) && !pCharTarg->Memory_FindObjTypes(this, MEMORY_AGGREIVED | MEMORY_HARMEDBY))
+	{
+		CheckCrimeSeen(SKILL_NONE, pTarget, nullptr, nullptr);
+	}
 
     if (m_pNPC && !fToldByMaster)		// call FindBestTarget when this CChar is a NPC and was not commanded to attack, otherwise it attack directly
     {
@@ -1447,9 +1449,8 @@ int CChar::Fight_CalcRange( CItem * pWeapon ) const
 {
 	ADDTOCALLSTACK("CChar::Fight_CalcRange");
 
-	int iCharRange = GetRangeH();
-	int iWeaponRange = pWeapon ? pWeapon->GetRangeH() : 0;
-
+	const int iCharRange = GetRangeH();
+	const int iWeaponRange = pWeapon ? pWeapon->GetRangeH() : 0;
 	return ( maximum(iCharRange , iWeaponRange) );
 }
 

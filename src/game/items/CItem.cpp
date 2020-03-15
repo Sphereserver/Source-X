@@ -631,7 +631,7 @@ bool CItem::IsMovable() const
 int CItem::GetVisualRange() const	// virtual
 {
 	if ( GetDispID() >= ITEMID_MULTI ) // ( IsTypeMulti() ) why not this?
-		return( UO_MAP_VIEW_RADAR );
+		return UO_MAP_VIEW_RADAR;
 	return UO_MAP_VIEW_SIZE_DEFAULT;
 }
 
@@ -1452,7 +1452,7 @@ bool CItem::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the groun
 
 	CSector * pSector = pt.GetSector();
 	ASSERT( pSector );
-	pSector->MoveItemToSector( this, IsTimerSet());
+	pSector->MoveItemToSector( this, IsTimerSet() );	// This also awakes the item
 
 	// Is this area too complex ?
 	if ( ! g_Serv.IsLoading())
@@ -5646,7 +5646,7 @@ void CItem::OnExplosion()
 	// Async explosion.
 	// RETURN: true = done. (delete the animation)
 
-	ASSERT( IsTopLevel());
+	// It can explode both on the ground and on the player's hand, if he doesn't throw it in time.
 	ASSERT( m_type == IT_EXPLOSION );
 
 	// AOS damage types (used by COMBAT_ELEMENTAL_ENGINE)

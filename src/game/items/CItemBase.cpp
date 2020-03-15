@@ -2020,7 +2020,7 @@ bool CItemBaseMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * 
         case MLC_BASECOMPONENT:
         {
             ptcKey += 13;
-            const CSphereMulti* pMulti = g_Cfg.GetMultiItemDefs(GetDispID());
+            const CUOMulti* pMulti = g_Cfg.GetMultiItemDefs(GetDispID());
             if (pMulti == nullptr)
                 return false;
 

@@ -264,8 +264,8 @@ bool CCharBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
         case CBC_RANGE:
         {
             const int iRangeH = GetRangeH(), iRangeL = GetRangeL();
-            if ( iRangeH == 0 )
-                sVal.Format( "%d", iRangeL );
+            if ( iRangeL == 0 )
+                sVal.Format( "%d", iRangeH );
             else
                 sVal.Format( "%d,%d", iRangeH, iRangeL );
             break;
@@ -411,21 +411,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 			break;
         case CBC_RANGE:
         {
-            int64 piVal[2];
-            tchar *ptcTmp = Str_GetTemp();
-            Str_CopyLimitNull(ptcTmp, s.GetArgStr(), STR_TEMPLENGTH);
-            int iQty = Str_ParseCmds( ptcTmp, piVal, CountOf(piVal));
-            int iRange;
-            if ( iQty > 1 )
-            {
-                iRange = (int)((piVal[1] & 0xff) << 8); // highest byte contains the lowest value
-                iRange |= (int)(piVal[0] & 0xff);            // lowest byte contains the highest value
-            }
-            else
-            {
-                iRange = (int)(piVal[0] << 8);
-            }
-            _iRange = iRange;
+            _iRange = ConvertRangeStr(s.GetArgStr());
             break;
         }
         case CBC_RANGEH:
@@ -497,13 +483,14 @@ bool CCharBase::r_Load( CScript & s )
 
 byte CCharBase::GetRangeL() const
 {
-    return (byte)(_iRange & 0xff);
+    return (byte)(RANGE_GET_LO(_iRange));
 }
 
 byte CCharBase::GetRangeH() const
 {
-    return (byte)((_iRange >> 8) & 0xff);
+    return (byte)(RANGE_GET_HI(_iRange));
 }
+
 
 ////////////////////////////////////////////
 
@@ -514,7 +501,7 @@ CCharBase * CCharBase::FindCharBase( CREID_TYPE baseID ) // static
     if (baseID <= CREID_INVALID)
         return nullptr;
 
-	CResourceID rid = CResourceID( RES_CHARDEF, baseID );
+	const CResourceID rid( RES_CHARDEF, baseID );
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
 	if ( index == SCONT_BADINDEX )
 		return nullptr;

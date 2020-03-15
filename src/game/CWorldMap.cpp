@@ -13,6 +13,7 @@
 #include "items/CItem.h"
 #include "items/CItemMultiCustom.h"
 #include "uo_files/CUOTerrainInfo.h"
+#include "uo_files/CUOMapList.h"
 #include "triggers.h"
 #include "../game/CWorld.h"
 
@@ -170,6 +171,46 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, bool f
 //////////////////////////////////////////////////////////////////
 // Map reading and blocking.
 
+const CServerMapBlock* CWorld::GetMapBlock(const CPointMap& pt) const
+{
+	ADDTOCALLSTACK_INTENSIVE("CWorld::GetMapBlock");
+	// Get a map block from the cache. load it if not.
+
+	if (!pt.IsValidXY() || !g_MapList.IsInitialized(pt.m_map))
+	{
+		g_Log.EventWarn("Attempting to access invalid memory block at %s.\n", pt.WriteUsed());
+		return nullptr;
+	}
+
+	const ProfileTask mapTask(PROFILE_MAP);
+
+	const int iBx = pt.m_x / UO_BLOCK_SIZE;
+	const int iBy = pt.m_y / UO_BLOCK_SIZE;
+	const int iMaxY = g_MapList.GetY(pt.m_map);
+	const int iBlockIdx = (iBy * iMaxY) + iBx;
+	CUOMapList::MapBlockCacheCont& block = g_MapList._mapBlocks[pt.m_map][iBlockIdx];
+	if (block)
+	{
+		// Found it in cache.
+		block->m_CacheTime.HitCacheTime();
+		return block.get();
+	}
+	
+	// else load and add it to the cache.
+	block = std::make_unique<CServerMapBlock>(iBx, iBy, pt.m_map);
+	ASSERT(block);
+
+	return block.get();
+}
+
+const CUOMapMeter* CWorld::GetMapMeter(const CPointMap& pt) const // Height of MAP0.MUL at given coordinates
+{
+	const CServerMapBlock* pMapBlock = GetMapBlock(pt);
+	if (!pMapBlock)
+		return nullptr;
+	return(pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y)));
+}
+
 bool CWorld::IsTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance )
 {
 	ADDTOCALLSTACK("CWorld::IsTypeNear_Top");
@@ -264,7 +305,7 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 	if ( iRegionQty > 0 )
 	{
         const CRegion *pRegion = nullptr;
-		const CSphereMulti *pMulti = nullptr;				// Multi Def (multi check)
+		const CUOMulti *pMulti = nullptr;				// Multi Def (multi check)
 		const CUOMultiItemRec_HS *pMultiItem = nullptr;	    // Multi item iterator
 		for ( size_t iRegion = 0; iRegion < iRegionQty; pMulti = nullptr, ++iRegion )
 		{
@@ -687,7 +728,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
                                     return ptFound;
                             }
                         }
-                        if (const CSphereMulti* pSphereMulti = g_Cfg.GetMultiItemDefs(pRegionItem))
+                        if (const CUOMulti* pSphereMulti = g_Cfg.GetMultiItemDefs(pRegionItem))
                         {
                             size_t iItemQty = pSphereMulti->GetItemCount();
                             for (size_t iItem = 0; iItem < iItemQty; ++iItem)
@@ -846,7 +887,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 	{
 		//  ------------ For variables --------------------
 		const CRegion * pRegion = nullptr;
-		const CSphereMulti * pMulti = nullptr;
+		const CUOMulti * pMulti = nullptr;
 		const CUOMultiItemRec_HS * pMultiItem = nullptr;
 		x2 = 0;
 		y2 = 0;
@@ -1157,7 +1198,7 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 		{
 			//  ------------ For variables --------------------
             const CRegion * pRegion = nullptr;
-			const CSphereMulti * pMulti = nullptr;
+			const CUOMulti * pMulti = nullptr;
 			const CUOMultiItemRec_HS * pMultiItem = nullptr;
 			x2 = 0;
 			y2 = 0;
@@ -1415,7 +1456,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 				CItem * pItem = pRegion->GetResourceID().ItemFindFromResource();
 				if ( pItem != nullptr )
 				{
-					const CSphereMulti * pMulti = g_Cfg.GetMultiItemDefs(pItem);
+					const CUOMulti * pMulti = g_Cfg.GetMultiItemDefs(pItem);
 					if ( pMulti )
 					{
                         const CPointMap& ptItemTop = pItem->GetTopPoint();

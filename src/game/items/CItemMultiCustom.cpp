@@ -592,7 +592,7 @@ void CItemMultiCustom::AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, 
             return;
     }
 
-    const CSphereMulti * pMulti = g_Cfg.GetMultiItemDefs(id);
+    const CUOMulti * pMulti = g_Cfg.GetMultiItemDefs(id);
     if (pMulti == nullptr)
     {
         g_Log.EventWarn("Unscripted multi 0%x being added to building 0%x by 0%x.\n", id, (dword)GetUID(), pCharSrc != nullptr ? (dword)pCharSrc->GetUID() : 0);
@@ -1070,7 +1070,7 @@ void CItemMultiCustom::ResetStructure(CClient * pClientSrc)
 
     m_designWorking.m_vectorComponents.clear();
     ++ m_designWorking.m_iRevision;
-    const CSphereMulti * pMulti = g_Cfg.GetMultiItemDefs(GetID());
+    const CUOMulti * pMulti = g_Cfg.GetMultiItemDefs(GetID());
     if (pMulti != nullptr)
     {
         uint iQty = pMulti->GetItemCount();
@@ -1200,7 +1200,7 @@ const CRect CItemMultiCustom::GetDesignArea()
     {
         m_rectDesignArea.SetRect(0, 0, 1, 1, GetTopMap());
 
-        const CSphereMulti * pMulti = g_Cfg.GetMultiItemDefs(GetID());
+        const CUOMulti * pMulti = g_Cfg.GetMultiItemDefs(GetID());
         if (pMulti != nullptr)
         {
             // the client uses the multi items to determine the area

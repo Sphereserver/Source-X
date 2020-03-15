@@ -1983,7 +1983,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
             sVal.FormatVal( TICKS_PER_SEC );
             break;
 		case RC_TIMEUP:
-			sVal.FormatLLVal( ( - g_World.GetTimeDiff( g_World.m_timeStartup )) / MSECS_PER_SEC );
+			sVal.FormatLLVal( ( - g_World.GetTimeDiff( g_World._iTimeStartup )) / MSECS_PER_SEC );
 			break;
 		case RC_TIMERCALL:
 			sVal.FormatLLVal(_iTimerCall / (60*MSECS_PER_SEC));
@@ -2284,7 +2284,7 @@ dword CServerConfig::GetKRDialog(dword rid)
 	return 0;
 }
 
-const CSphereMulti * CServerConfig::GetMultiItemDefs( CItem * pItem )
+const CUOMulti * CServerConfig::GetMultiItemDefs( CItem * pItem )
 {
 	ADDTOCALLSTACK("CServerConfig::GetMultiItemDefs(CItem*)");
 	if ( !pItem )
@@ -2297,7 +2297,7 @@ const CSphereMulti * CServerConfig::GetMultiItemDefs( CItem * pItem )
 	return GetMultiItemDefs(pItem->GetDispID());		// multi.mul multi
 }
 
-const CSphereMulti * CServerConfig::GetMultiItemDefs( ITEMID_TYPE itemid )
+const CUOMulti * CServerConfig::GetMultiItemDefs( ITEMID_TYPE itemid )
 {
 	ADDTOCALLSTACK("CServerConfig::GetMultiItemDefs(ITEMID_TYPE)");
 	if ( !CItemBase::IsID_Multi(itemid) )
@@ -2306,11 +2306,11 @@ const CSphereMulti * CServerConfig::GetMultiItemDefs( ITEMID_TYPE itemid )
 	MULTI_TYPE id = (MULTI_TYPE)(itemid - ITEMID_MULTI);
 	size_t index = m_MultiDefs.FindKey(id);
 	if ( index == SCONT_BADINDEX )
-		index = m_MultiDefs.AddSortKey(new CSphereMulti(id), id);
+		index = m_MultiDefs.AddSortKey(new CUOMulti(id), id);
 	else
 		m_MultiDefs[index]->HitCacheTime();
 
-	const CSphereMulti *pMulti = m_MultiDefs[index];
+	const CUOMulti *pMulti = m_MultiDefs[index];
 	return pMulti;
 }
 

@@ -33,7 +33,7 @@ private:
         int m_iDataRevision;
     };
 
-    class CSphereMultiCustom : public CSphereMulti
+    class CSphereMultiCustom : public CUOMulti
     {
     public:
         CSphereMultiCustom() = default;

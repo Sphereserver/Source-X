@@ -25,7 +25,7 @@ RESDISPLAY_VERSION CCPropsItemWeapon::_iPropertyExpansion[PROPIWEAP_QTY + 1] =
 CCPropsItemWeapon::CCPropsItemWeapon() : CComponentProps(COMP_PROPS_ITEMWEAPON)
 {
     // All the unset properties have to be 0
-    #define PROP_RANGE_DEFAULT  (1 << 8)   // minimum value for Range, even if not set: RangeH = 1; RangeL = 0
+    //#define PROP_RANGE_DEFAULT          RANGE_MAKE(1, 0)    // minimum value for Range, even if not set: RangeH = 1; RangeL = 0
     _iRange = 0;
 }
 
@@ -74,17 +74,17 @@ bool CCPropsItemWeapon::GetPropertyNumPtr(int iPropIndex, PropertyValNum_t* piOu
         case PROPIWEAP_RANGEH:
             if (_iRange == 0)
             {
-                *piOutVal = PROP_RANGE_DEFAULT;
+                *piOutVal = 1;
                 return false;   // not set
             }
             if (iPropIndex == PROPIWEAP_RANGEL)
             {
-                *piOutVal = (_iRange & 0xFF);
+                *piOutVal = RANGE_GET_LO(_iRange);
                 return true;
             }
             else
             {
-                *piOutVal = ((_iRange >> 8) & 0xFF);
+                *piOutVal = RANGE_GET_HI(_iRange);
                 return true;
             }
 
@@ -103,11 +103,11 @@ bool CCPropsItemWeapon::GetPropertyStrPtr(int iPropIndex, CSString* psOutVal, bo
         {
             if (_iRange == 0)
             {
-                psOutVal->FormatVal(PROP_RANGE_DEFAULT);
+                psOutVal->FormatVal(1);
                 return false;   // not set
             }
-            int iRangeH = (_iRange >> 8) & 0xFF;
-            int iRangeL = _iRange & 0xFF;
+            int iRangeH = RANGE_GET_HI(_iRange);
+            int iRangeL = RANGE_GET_LO(_iRange);
             if ( iRangeL == 0 )
                 psOutVal->Format( "%d", iRangeH );
             else
@@ -126,26 +126,10 @@ void CCPropsItemWeapon::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CO
     
     switch (iPropIndex)
     {
-        case PROPIWEAP_RANGEH:  // internally: rangeh seems to be the Range Lowest value.
-        /*{
-            //iVal = maximum(iVal, PROP_RANGE_DEFAULT);
-            int iRange = GetPropertyNum(iPropIndex);
-            if (iRange == 0)
-                iRange = iVal;
-            _iRange = (iRange & 0xFF00) | (iVal & 0xFF);
-            break;
-        }*/
+        case PROPIWEAP_RANGEH:
             ASSERT(0); // should never happen: we set only the whole range value
             break;
-        case PROPIWEAP_RANGEL: // rangel seems to be Range Highest value
-        /*{
-            //iVal = maximum(iVal, PROP_RANGE_DEFAULT);
-            int iRange = GetPropertyNum(iPropIndex);
-            if (iRange == 0)
-                iRange = iVal << 8;
-            _iRange = ((iVal & 0xFF) << 8) | (iRange & 0xFF);
-            break;
-        }*/
+        case PROPIWEAP_RANGEL:
             ASSERT(0); // should never happen: we set only the whole range value
             break;
         /*
@@ -183,21 +167,7 @@ void CCPropsItemWeapon::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase*
     {
         case PROPIWEAP_RANGE:
         {
-            int64 piVal[2];
-            tchar *ptcTmp = Str_GetTemp();
-            Str_CopyLimitNull(ptcTmp, ptcVal, STR_TEMPLENGTH);
-            int iQty = Str_ParseCmds( ptcTmp, piVal, CountOf(piVal));
-            int iRange;
-            if ( iQty > 1 )
-            {
-                iRange = (int)((piVal[1] & 0xff) << 8); // highest byte contains the highest value
-                iRange |= (int)(piVal[0] & 0xff);            // lowest byte contains the lowest value
-            }
-            else
-            {
-                iRange = (int)((piVal[0] & 0xff) << 8);
-            }
-            _iRange = iRange;
+            _iRange = CBaseBaseDef::ConvertRangeStr(ptcVal);
             break;
         }
         
@@ -260,7 +230,7 @@ void CCPropsItemWeapon::r_Write(CScript & s)
     // r_Write isn't called by CItemBase/CCharBase, so we don't get base props saved
 
     if (_iRange != 0)
-        s.WriteKeyVal(s.GetKey(), _iRange);
+        s.WriteKeyFormat("RANGE", "%d,%d", RANGE_GET_HI(_iRange), RANGE_GET_LO(_iRange)); // RANGE = hi, lo
     BaseCont_Write_ContNum(&_mPropsNum, _ptcPropertyKeys, s);
     BaseCont_Write_ContStr(&_mPropsStr, _ptcPropertyKeys, s);
 }

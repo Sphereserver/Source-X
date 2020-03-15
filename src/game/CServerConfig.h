@@ -824,8 +824,8 @@ public:
      */
 	lpctstr GetNotoTitle( int iLevel, bool bFemale ) const;
 
-	const CSphereMulti * GetMultiItemDefs( CItem * pItem );
-	const CSphereMulti * GetMultiItemDefs( ITEMID_TYPE itemid );
+	const CUOMulti * GetMultiItemDefs( CItem * pItem );
+	const CUOMulti * GetMultiItemDefs( ITEMID_TYPE itemid );
 
     /**
      * @brief   Query if 'ch' is a console command or ingame one.

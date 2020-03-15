@@ -18,8 +18,6 @@
 //////////////////////////////////////////////////////////////////
 // -CSector
 
-int64 CSectorBase::m_iMapBlockCacheTime = 0;
-
 CSector::CSector() : CTimedObject(PROFILE_SECTORS)
 {
 	m_ListenItems = 0;
@@ -1211,10 +1209,8 @@ bool CSector::OnTick()
 	}
 
 	EXC_SET_BLOCK("sector sleeping?");
-    bool fCanSleep = CanSleep(true);
-    int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();
-
 	// Put the sector to sleep if no clients been here in a while.
+    const bool fCanSleep = CanSleep(true);	
 	if (fCanSleep && (g_Cfg._iSectorSleepDelay > 0))
 	{
         if (!IsSleeping())
@@ -1332,15 +1328,6 @@ bool CSector::OnTick()
 		EXC_DEBUGSUB_END;
 	}
 
-	const ProfileTask overheadTask(PROFILE_OVERHEAD);
-
-	EXC_SET_BLOCK("check map cache");
-	if (fCanSleep && m_iMapBlockCacheTime < iCurTime)     // Only if the sector can sleep.
-	{
-		// delete the static CServerMapBlock items that have not been used recently.
-		m_iMapBlockCacheTime = CServerTime::GetCurrentTime().GetTimeRaw() + g_Cfg.m_iMapCacheTime ;
-		CheckMapBlockCache();
-	}
 	EXC_CATCH;
 
     SetTimeoutS(30);  // Sector is Awake, make it tick after 30 seconds.

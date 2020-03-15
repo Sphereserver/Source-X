@@ -808,17 +808,18 @@ bool CWorldClock::Advance()
 CWorld::CWorld()
 {
     _iLastTick = 0;
+	_iTimeLastWorldSave = 0;
+	_iTimeLastMapBlockCacheCheck = 0;
 	m_ticksWithoutMySQL = 0;
 	m_savetimer = 0;
 	m_iSaveCountID = 0;
 	m_iSaveStage = 0;
 	m_iPrevBuild = 0;
 	m_iLoadVersion = 0;
-	m_bSaveNotificationSent = false;
-	m_timeSave = 0;
-	m_timeRespawn = 0;
-	m_timeStartup = 0;
-	m_timeCallUserFunc = 0;
+	_fSaveNotificationSent = false;
+	_iTimeLastDeadRespawn = 0;
+	_iTimeStartup = 0;
+	_iTimeLastCallUserFunc = 0;
 	m_Sectors = nullptr;
 	m_SectorsQty = 0;
 }
@@ -1056,7 +1057,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		m_FileMultis.WriteSection("EOF");
 
 		++m_iSaveCountID;	// Save only counts if we get to the end winout trapping.
-		m_timeSave = g_World.GetCurrentTime().GetTimeRaw() + g_Cfg.m_iSavePeriod;	// next save time.
+		_iTimeLastWorldSave = g_World.GetCurrentTime().GetTimeRaw() + g_Cfg.m_iSavePeriod;	// next save time.
 
 		g_Log.Event(LOGM_SAVE, "World data saved   (%s).\n", m_FileWorld.GetFilePath());
 		g_Log.Event(LOGM_SAVE, "Player data saved  (%s).\n", m_FilePlayers.GetFilePath());
@@ -1087,7 +1088,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		int64 iNextTime = g_Cfg.m_iSaveBackgroundTime / m_SectorsQty;
 		if ( iNextTime > MSECS_PER_SEC *30 * 60 )
 			iNextTime = MSECS_PER_SEC * 30 * 60;	// max out at 30 minutes or so.
-		m_timeSave = g_World.GetCurrentTime().GetTimeRaw() + iNextTime;
+		_iTimeLastWorldSave = g_World.GetCurrentTime().GetTimeRaw() + iNextTime;
 	}
 	++m_iSaveStage;
 	return bRc;
@@ -1095,7 +1096,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("stage '%d' qty '%d' time '%" PRId64 "'\n", m_iSaveStage, m_SectorsQty, m_timeSave);
+	g_Log.EventDebug("stage '%d' qty '%d' time '%" PRId64 "'\n", m_iSaveStage, m_SectorsQty, _iTimeLastWorldSave);
 	EXC_DEBUG_END;
 
 	++m_iSaveStage;	// to avoid loops, we need to skip the current operation in world save
@@ -1207,8 +1208,8 @@ bool CWorld::SaveTry( bool fForceImmediate ) // Save world state
 
 	m_fSaveParity = ! m_fSaveParity; // Flip the parity of the save.
 	m_iSaveStage = -1;
-	m_bSaveNotificationSent = false;
-	m_timeSave = 0;
+	_fSaveNotificationSent = false;
+	_iTimeLastWorldSave = 0;
 
 	// Write the file headers.
 	r_Write(m_FileData);
@@ -1843,8 +1844,8 @@ bool CWorld::LoadAll() // Load world from script
 	if ( !LoadWorld() )
 		return false;
 
-	m_timeStartup = g_World.GetCurrentTime().GetTimeRaw();
-	m_timeSave = g_World.GetCurrentTime().GetTimeRaw() + g_Cfg.m_iSavePeriod;	// next save time.
+	_iTimeStartup = g_World.GetCurrentTime().GetTimeRaw();
+	_iTimeLastWorldSave = g_World.GetCurrentTime().GetTimeRaw() + g_Cfg.m_iSavePeriod;	// next save time.
 
 	// Set all the sector light levels now that we know the time.
 	// This should not look like part of the load. (CTRIG_EnvironChange triggers should run)
@@ -2203,7 +2204,7 @@ void CWorld::GarbageCollection()
 	g_Log.Flush();
 }
 
-void CWorld::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font )
+void CWorld::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font ) const
 {
 	ADDTOCALLSTACK("CWorld::Speak");
 	if ( !pszText || !pszText[0] )
@@ -2230,7 +2231,7 @@ void CWorld::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE wHu
 
 	// For things
 	bool fCanSee = false;
-	CChar * pChar = nullptr;
+	const CChar * pChar = nullptr;
 
 	ClientIterator it;
 	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next(), fCanSee = false, pChar = nullptr)
@@ -2292,7 +2293,7 @@ void CWorld::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE wHu
 	}
 }
 
-void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pwText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
+void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pwText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) const
 {
 	ADDTOCALLSTACK("CWorld::SpeakUNICODE");
 	bool fSpeakAsGhost = false;
@@ -2331,7 +2332,7 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pwText, 
 
 	// For things
 	bool fCanSee = false;
-	CChar * pChar = nullptr;
+	const CChar * pChar = nullptr;
 
 	ClientIterator it;
 	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next(), fCanSee = false, pChar = nullptr)
@@ -2530,7 +2531,7 @@ void CWorld::OnTick()
 
     /* World ticking (timers) */
     // Items, Chars ... Everything relying on CTimedObject (excepting CObjBase, which inheritance is only virtual)
-    const int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
+    int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
 
     EXC_SET_BLOCK("WorldObjects selection");
     {
@@ -2732,40 +2733,53 @@ void CWorld::OnTick()
 
     m_ObjDelete.Clear();	// clean up our delete list (this DOES delete the objects, thanks to the virtual destructors).
 
-    const int64 iCurTimeRaw = GetCurrentTime().GetTimeRaw();
 
+    iCurTime = GetCurrentTime().GetTimeRaw();
+
+	EXC_SET_BLOCK("Worldsave checks");
     // Save state checks
     // Notifications
-	if ( (m_bSaveNotificationSent == false) && ((m_timeSave - (10 * MSECS_PER_SEC)) <= iCurTimeRaw) )
+	if ( (_fSaveNotificationSent == false) && ((_iTimeLastWorldSave - (10 * MSECS_PER_SEC)) <= iCurTime) )
 	{
 		Broadcast( g_Cfg.GetDefaultMsg( DEFMSG_SERVER_WORLDSAVE_NOTIFY ) );
-		m_bSaveNotificationSent = true;
+		_fSaveNotificationSent = true;
 	}
 
     // Save
-	if ( m_timeSave <= iCurTimeRaw)
+	if ( _iTimeLastWorldSave <= iCurTime)
 	{
 		// Auto save world
-		m_timeSave = iCurTimeRaw + g_Cfg.m_iSavePeriod;
+		_iTimeLastWorldSave = iCurTime + g_Cfg.m_iSavePeriod;
 		g_Log.Flush();
 		Save( false );
 	}
 
-    // Global (ini) stuff.
-    // Respawn Dead NPCs
-	if ( m_timeRespawn <= iCurTimeRaw)
+	// Update map cache
+	if (_iTimeLastMapBlockCacheCheck < iCurTime)
 	{
-		// Time to regen all the dead NPC's in the world.
-		m_timeRespawn = iCurTimeRaw + (20 * 60 * MSECS_PER_SEC);
-		RespawnDeadNPCs();
+		EXC_SET_BLOCK("Check map cache");
+		// delete the static CServerMapBlock items that have not been used recently.
+		_iTimeLastMapBlockCacheCheck = iCurTime + g_Cfg.m_iMapCacheTime;
+		CheckMapBlockCache();
 	}
 
+    // Global (ini) stuff.
+    // Respawn Dead NPCs
+	if ( _iTimeLastDeadRespawn <= iCurTime)
+	{
+		EXC_SET_BLOCK("Respawn dead NPCs");
+		// Time to regen all the dead NPC's in the world.
+		_iTimeLastDeadRespawn = iCurTime + (20 * 60 * MSECS_PER_SEC);
+		RespawnDeadNPCs();
+	}
+	
     // f_onserver_timer function.
-	if ( m_timeCallUserFunc < iCurTimeRaw)
+	if ( _iTimeLastCallUserFunc < iCurTime)
 	{
 		if ( g_Cfg._iTimerCall )
 		{
-			m_timeCallUserFunc = iCurTimeRaw + g_Cfg._iTimerCall;
+			EXC_SET_BLOCK("f_onserver_timer");
+			_iTimeLastCallUserFunc = iCurTime + g_Cfg._iTimerCall;
 			CScriptTriggerArgs args(g_Cfg._iTimerCall/(60 * MSECS_PER_SEC));
 			g_Serv.r_Call("f_onserver_timer", &g_Serv, &args);
 		}
@@ -2805,4 +2819,30 @@ CSector *CWorld::GetSector(int map, int i) const	// gets sector # from one map
 		base += g_MapList.GetSectorQty(m);
 	}
 	return nullptr;
+}
+
+void CWorld::CheckMapBlockCache()
+{
+	ADDTOCALLSTACK("CWorld::CheckMapBlockCache");
+	// Clean out the sectors map cache if it has not been used recently.
+	// iTime == 0 = delete all.
+
+	const ProfileTask overheadTask(PROFILE_MAP);
+	for (size_t i = 0; i < MAP_SUPPORTED_QTY; ++i)
+	{
+		CUOMapList::MapBlockCache& cache = g_MapList._mapBlocks[i];
+		if (!cache)
+			continue;
+
+		const int iBlocks = (g_MapList.m_sizex[i] * g_MapList.m_sizey[i]) / UO_BLOCK_SIZE;
+		for (int j = 0; j < iBlocks; ++j)
+		{
+			CUOMapList::MapBlockCacheCont& block = cache[j];
+			if (!block)
+				continue;
+
+			if (g_Cfg.m_iMapCacheTime <= 0 || block->m_CacheTime.GetCacheAge() >= g_Cfg.m_iMapCacheTime)
+				block.release();
+		}
+	}
 }

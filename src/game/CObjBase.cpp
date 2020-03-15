@@ -550,7 +550,7 @@ void CObjBase::Emote2(lpctstr pText, lpctstr pText1, CClient * pClientExclude, b
 
 // Speak to all clients in the area.
 // ASCII packet
-void CObjBase::Speak( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font )
+void CObjBase::Speak( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CObjBase::Speak");
 	g_World.Speak( this, pText, wHue, mode, font );
@@ -558,7 +558,7 @@ void CObjBase::Speak( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYP
 
 // Speak to all clients in the area.
 // Unicode packet
-void CObjBase::SpeakUTF8( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
+void CObjBase::SpeakUTF8( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CObjBase::SpeakUTF8");
 	// convert UTF8 to UNICODE.
@@ -570,7 +570,7 @@ void CObjBase::SpeakUTF8( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT
 // Speak to all clients in the area.
 // Unicode packet
 // Difference with SpeakUTF8: this method accepts as text input an nword, which is unicode if sphere is compiled with UNICODE macro)
-void CObjBase::SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
+void CObjBase::SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CObjBase::SpeakUTF8Ex");
 	g_World.SpeakUNICODE( this, pText, wHue, mode, font, lang );

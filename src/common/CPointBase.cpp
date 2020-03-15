@@ -293,7 +293,7 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 			for ( uint i = 0; i < uiStaticMaxQty; ++i )
 			{
 				const CUOStaticItemRec * pStatic = pBlock->m_Statics.GetStatic( i );
-				CPointMap ptTest( pStatic->m_x + pBlock->m_x, pStatic->m_y + pBlock->m_y, pStatic->m_z, this->m_map );
+				const CPointMap ptTest( pStatic->m_x + pBlock->m_x, pStatic->m_y + pBlock->m_y, pStatic->m_z, this->m_map );
 				if ( this->GetDist( ptTest ) > 0 )
 					continue;
 				++uiStaticQty;
@@ -404,7 +404,7 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 		CRegionLinks rlinks;
 		const CRegion* pRegion = nullptr;
 		CItem* pItem = nullptr;
-		const CSphereMulti* pMulti = nullptr;
+		const CUOMulti* pMulti = nullptr;
 		const CUOMultiItemRec_HS* pMultiItem = nullptr;
 		size_t iMultiQty = GetRegions(REGION_TYPE_MULTI, &rlinks);
 

@@ -269,26 +269,19 @@ void CChar::NPC_Act_Fight()
         //check Range
         int iRangeMin = 2;
         int iRangeMax = 9;
-        CVarDefCont * pRange = GetDefKey("THROWRANGE", true);
+        const CVarDefCont * pRange = GetDefKey("THROWRANGE", true);
         if (pRange)
         {
-            int64 RVal[2];
-            size_t iQty = Str_ParseCmds(const_cast<tchar*>(pRange->GetValStr()), RVal, CountOf(RVal));
-            switch (iQty)
-            {
-            case 1:
-                iRangeMax = (int)(RVal[0]);
-                break;
-            case 2:
-                iRangeMin = (int)(RVal[0]);
-                iRangeMax = (int)(RVal[1]);
-                break;
-            }
+            int iRangeTot = CBaseBaseDef::ConvertRangeStr(pRange->GetValStr());
+            iRangeMin = RANGE_GET_LO(iRangeTot);
+            iRangeMax = RANGE_GET_HI(iRangeTot);
         }
+
         if (iDist >= iRangeMin && iDist <= iRangeMax && CanSeeLOS(pChar, LOS_NB_WINDOWS))//NPCs can throw through a window
         {
-            CVarDefCont * pRock = GetDefKey("THROWOBJ", true);
-            if (GetDispID() == CREID_OGRE || GetDispID() == CREID_ETTIN || GetDispID() == CREID_CYCLOPS || pRock)
+            const CVarDefCont * pRock = GetDefKey("THROWOBJ", true);
+            const CREID_TYPE iDispID = GetDispID();
+            if (iDispID == CREID_OGRE || iDispID == CREID_ETTIN || iDispID == CREID_CYCLOPS || pRock)
             {
                 ITEMID_TYPE id = ITEMID_NOTHING;
                 if (pRock)
