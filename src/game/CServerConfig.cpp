@@ -3538,7 +3538,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		{
 			bool fQuoted = false;
             lpctstr ptcArg = pScript->GetArgStr( &fQuoted );
-			g_World.m_TimedFunctions.Load( pScript->GetKey(), fQuoted, ptcArg );
+			g_World._Ticker.m_TimedFunctions.Load( pScript->GetKey(), fQuoted, ptcArg );
 		}
 		return true;
 	case RES_TELEPORTERS:

@@ -9,12 +9,10 @@
 #include "../common/CScript.h"
 #include "../common/CUID.h"
 #include "items/CItemStone.h"
-#include "CServerTime.h"
 #include "CSector.h"
-#include "CTimedFunction.h"
-#include "CTimedObject.h"
-#include <unordered_map>
-#include <unordered_set>
+#include "CWorldCache.h"
+#include "CWorldClock.h"
+#include "CWorldTick.h"
 
 class CObjBase;
 class CItemTypeDef;
@@ -94,75 +92,6 @@ private:
 	CWorldThread& operator=(const CWorldThread& other);
 };
 
-class CWorldClock
-{
-private:
-    int64 _iCurTick;            // Current TICK count of the server from it's first start.
-	CServerTime m_timeClock;    // Internal clock record, on msecs, used to advance the ticks.
-	int64 m_Clock_SysPrev;	    // SERVER time (in milliseconds) of the last OnTick()
-    CServerTime	m_nextTickTime;	// next time to do sector stuff.
-
-public:
-	static const char *m_sClassName;
-	CWorldClock()
-	{
-		Init();
-	}
-
-private:
-	CWorldClock(const CWorldClock& copy);
-	CWorldClock& operator=(const CWorldClock& other);
-
-public:
-	void Init();
-	void InitTime( int64 iTimeBase );
-	bool Advance();
-    inline void AdvanceTick()
-    {
-        ++_iCurTick;
-    }
-	inline CServerTime GetCurrentTime() const // in milliseconds
-	{
-		return m_timeClock;
-	}
-    inline int64 GetCurrentTick() const
-    {
-        return _iCurTick;
-    }
-	static int64 GetSystemClock(); // in milliseconds
-};
-
-struct TimedObjectsContainer : public std::vector<CTimedObject*>
-{
-    THREAD_CMUTEX_DEF;
-};
-struct WorldTickList : public std::map<int64, TimedObjectsContainer>
-{
-    THREAD_CMUTEX_DEF;
-};
-struct TimedObjectLookupList : public std::unordered_map<CTimedObject*, int64>
-{
-    THREAD_CMUTEX_DEF;
-};
-
-struct TimedCharsContainer : public std::vector<CChar*>
-{
-    THREAD_CMUTEX_DEF;
-};
-struct CharTickList : public std::map<int64, TimedCharsContainer>
-{
-    THREAD_CMUTEX_DEF;
-};
-struct CharTickLookupList : public std::unordered_map<CChar*, int64>
-{
-    THREAD_CMUTEX_DEF;
-};
-
-struct StatusUpdatesList : public std::unordered_set<CObjBase*>
-{
-    THREAD_CMUTEX_DEF;
-};
-
 
 extern class CWorld : public CScriptObj, public CWorldThread
 {
@@ -171,10 +100,16 @@ private:
 	// Clock stuff. how long have we been running ? all i care about.
 	CWorldClock m_Clock;		// the current relative tick time (in milliseconds)
 
+public:
+	// Map cache
+	CWorldCache _Cache;
+
+	// Ticking world objects
+	CWorldTick _Ticker;
+
+private:
 	// Special purpose timers.
-	int64   _iLastTick;             // Last tick done.
 	int64	_iTimeLastWorldSave;				// when to auto do the worldsave ?
-	int64	_iTimeLastMapBlockCacheCheck;
 	bool	_fSaveNotificationSent;// has notification been sent?
 	int64	_iTimeLastDeadRespawn;			// when to res dead NPC's ?
 	int64	_iTimeLastCallUserFunc;		// when to call next user func
@@ -182,26 +117,6 @@ private:
     
 	int		m_iSaveStage;	// Current stage of the background save.
 	llong	m_savetimer; // Time it takes to save
-
-    WorldTickList _mWorldTickList;
-    TimedObjectLookupList _mWorldTickLookup;
-    CharTickList _mCharTickList;
-    CharTickLookupList _mCharTickLookup;
-
-public:
-    StatusUpdatesList m_ObjStatusUpdates;   // objects that need OnTickStatusUpdate called
-    CTimedFunctionHandler m_TimedFunctions; // TimedFunction Container/Wrapper
-
-public:
-    void AddTimedObject(int64 iTimeout, CTimedObject *pTimedObject);
-    void DelTimedObject(CTimedObject* pTimedObject);
-    void AddCharTicking(CChar *pChar, bool fIgnoreSleep = false, bool fOverwrite = true);
-    void DelCharTicking(CChar *pChar);
-private:
-    void _InsertTimedObject(int64 iTimeout, CTimedObject* pTimedObject);
-    void _RemoveTimedObject(const int64 iOldTimeout, const CTimedObject* pTimedObject);
-    void _InsertCharTicking(int64 iTickNext, CChar* pChar);
-    void _RemoveCharTicking(const int64 iOldTimeout, const CChar* pChar);
 
 public:
 	static const char *m_sClassName;
@@ -221,7 +136,6 @@ public:
 	CUID m_uidNew;			// for script access - auxiliary obj
 
 	CSObjList m_GMPages;		// Current outstanding GM pages. (CGMPage)
-
 	
 	CSPtrTypeArray<CItemStone*> m_Stones;	// links to leige/town stones. (not saved array)
 	CSObjList m_Parties;	// links to all active parties. CPartyDef
@@ -262,7 +176,7 @@ public:
 	{
 		return m_Clock.GetCurrentTime();  // Time in milliseconds
 	}
-    inline int64 GetTimeDiff(CServerTime time) const
+    inline int64 GetTimeDiff(const CServerTime& time) const
     {
         // How long till this event
         // negative = in the past.
@@ -274,14 +188,14 @@ public:
         // negative = in the past.
         return time - GetCurrentTime().GetTimeRaw(); // Time in milliseconds
     }
-    inline int64 GetTickDiff(int64 iTick) const
-    {
-        return _iLastTick - iTick;
-    }
     inline int64 GetCurrentTick() const
     {
         return m_Clock.GetCurrentTick();
     }
+	inline int64 GetTickDiff(int64 iTick) const
+	{
+		return m_Clock.GetCurrentTick() - iTick;
+	}
 
 #define TRAMMEL_SYNODIC_PERIOD 105 // in game world minutes
 #define FELUCCA_SYNODIC_PERIOD 840 // in game world minutes
@@ -304,8 +218,6 @@ public:
 
 	const CServerMapBlock* GetMapBlock(const CPointMap& pt) const;
 	const CUOMapMeter* GetMapMeter(const CPointMap& pt) const; // Height of MAP0.MUL at given coordinates
-
-	void CheckMapBlockCache();
 
 
 	// CSector World Map stuff.

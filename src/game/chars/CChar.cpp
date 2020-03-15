@@ -316,7 +316,7 @@ CChar::~CChar()
 {
     DeletePrepare();    // remove me early so virtuals will work.
 
-    g_World.DelCharTicking(this);
+    g_World._Ticker.DelCharTicking(this);
 
     if (IsStatFlag(STATF_RIDDEN))
     {
@@ -428,7 +428,7 @@ void CChar::SetDisconnected()
         m_pParty->RemoveMember( GetUID(), GetUID() );
         m_pParty = nullptr;
     }
-    g_World.DelCharTicking(this);
+    g_World._Ticker.DelCharTicking(this);
 
     if ( IsDisconnected() )
         return;
@@ -545,7 +545,7 @@ void CChar::Delete(bool bforce)
 	if (( NotifyDelete() == false ) && !bforce)
 		return;
 
-    g_World.DelCharTicking(this);
+    g_World._Ticker.DelCharTicking(this);
 
 	// Character has been deleted
 	if ( IsClient() )
@@ -566,7 +566,7 @@ void CChar::GoSleep()
     ADDTOCALLSTACK("CChar::GoSleep");
     ASSERT(!IsSleeping());
     
-    g_World.DelCharTicking(this);   // do not insert into the mutex lock, it access back to this char.
+    g_World._Ticker.DelCharTicking(this);   // do not insert into the mutex lock, it access back to this char.
 
     THREAD_UNIQUE_LOCK_SET;
     CTimedObject::GoSleep();
@@ -585,7 +585,7 @@ void CChar::GoAwake()
     THREAD_UNIQUE_LOCK_SET;
 
     CTimedObject::GoAwake();       // Awake it first, otherwise some other things won't work
-    g_World.AddCharTicking(this);
+    g_World._Ticker.AddCharTicking(this);
     SetTimeout(Calc_GetRandVal(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
 
     for (CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext())
@@ -1139,7 +1139,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	// End copying items.
 	FixWeight();
 	Update();
-    g_World.AddCharTicking(this);
+    g_World._Ticker.AddCharTicking(this);
 	return true;
 }
 

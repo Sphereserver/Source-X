@@ -188,7 +188,7 @@ const CServerMapBlock* CWorld::GetMapBlock(const CPointMap& pt) const
 	const int iBy = pt.m_y / UO_BLOCK_SIZE;
 	const int iMaxY = g_MapList.GetY(pt.m_map);
 	const int iBlockIdx = (iBy * iMaxY) + iBx;
-	CUOMapList::MapBlockCacheCont& block = g_MapList._mapBlocks[pt.m_map][iBlockIdx];
+	CWorldCache::MapBlockCacheCont& block = _Cache._mapBlocks[pt.m_map][iBlockIdx];
 	if (block)
 	{
 		// Found it in cache.

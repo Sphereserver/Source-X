@@ -37,10 +37,6 @@ protected:
 
     CServerMapDiffCollection * m_pMapDiffCollection;
 
-    using MapBlockCacheCont = std::unique_ptr<CServerMapBlock>;
-    using MapBlockCache     = std::unique_ptr<MapBlockCacheCont []>;
-    MapBlockCache _mapBlocks[MAP_SUPPORTED_QTY];
-
 public:
     /** @name Constructors, Destructor, Asign operator:
      */

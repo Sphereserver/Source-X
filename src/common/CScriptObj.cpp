@@ -1808,7 +1808,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 			char funcname[1024];
 			Str_CopyLimitNull(funcname, ptcArgs, sizeof(funcname));
 
-			TRIGRET_TYPE iRet = g_World.m_TimedFunctions.Loop(funcname, LoopsMade, StartContext, EndContext, s, pSrc, pArgs, pResult);
+			TRIGRET_TYPE iRet = g_World._Ticker.m_TimedFunctions.Loop(funcname, LoopsMade, StartContext, EndContext, s, pSrc, pArgs, pResult);
 			if ((iRet != TRIGRET_ENDIF) && (iRet != TRIGRET_CONTINUE))
 				return iRet;
 		}

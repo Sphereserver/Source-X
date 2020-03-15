@@ -12,13 +12,13 @@ CCItemDamageable::CCItemDamageable(CItem * pLink) : CComponent(COMP_ITEMDAMAGEAB
     _iCurHits = 0;
     _iMaxHits = 0;
     _iTimeLastUpdate = 0;
-    g_World.m_ObjStatusUpdates.emplace(pLink);
+    g_World._Ticker.m_ObjStatusUpdates.emplace(pLink);
 }
 
 CCItemDamageable::~CCItemDamageable()
 {
-    std::shared_lock<std::shared_mutex> lock_su(g_World.m_ObjStatusUpdates.THREAD_CMUTEX);
-    g_World.m_ObjStatusUpdates.erase(GetLink());
+    std::shared_lock<std::shared_mutex> lock_su(g_World._Ticker.m_ObjStatusUpdates.THREAD_CMUTEX);
+    g_World._Ticker.m_ObjStatusUpdates.erase(GetLink());
 }
 
 CItem * CCItemDamageable::GetLink() const

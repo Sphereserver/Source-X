@@ -308,6 +308,11 @@ game/CTimedObject.cpp
 game/CTimedObject.h
 game/CWorld.cpp
 game/CWorld.h
+game/CWorldCache.cpp
+game/CWorldClock.h
+game/CWorldClock.cpp
+game/CWorldTick.h
+game/CWorldTick.cpp
 game/CWorldImport.cpp
 game/CWorldMap.cpp
 game/game_enums.h

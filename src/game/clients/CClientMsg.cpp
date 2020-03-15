@@ -2697,7 +2697,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 
 	DEBUG_MSG(( "%x:Setup_Start done\n", GetSocketID()));
 
-    g_World.AddCharTicking(m_pChar);
+    g_World._Ticker.AddCharTicking(m_pChar);
 	return PacketLoginError::Success;
 }
 

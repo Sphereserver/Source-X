@@ -2266,6 +2266,9 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
         g_Log.Event(LOGM_INIT, "Setting process priority... %s.\n", fPrioritySuccess ? "Success" : "Failed");
     }
 
+	EXC_SET_BLOCK("init world cache");
+	g_World._Cache.Init();
+
 	EXC_SET_BLOCK("loading scripts");
 	TriglistInit();
 	if ( !g_Cfg.Load(false) )

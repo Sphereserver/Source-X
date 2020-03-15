@@ -167,7 +167,7 @@ void CChar::Stat_SetVal( STAT_TYPE i, ushort uiVal )
 
     if ((i == STAT_STR) && (uiVal == 0))
     {   // Ensure this char will tick and die
-        g_World.AddCharTicking(this, true, false);
+        g_World._Ticker.AddCharTicking(this, true, false);
     }
 }
 
@@ -189,7 +189,7 @@ void CChar::Stat_AddVal( STAT_TYPE i, int iVal )
 
     if ((i == STAT_STR) && (iVal <= 0))
     {   // Ensure this char will tick and die
-        g_World.AddCharTicking(this, true, false);
+        g_World._Ticker.AddCharTicking(this, true, false);
     }
 }
 

@@ -6,7 +6,6 @@
 #ifndef _INC_CUOMAPBLOCK_H
 #define _INC_CUOMAPBLOCK_H
 
-#include "../../common/common.h"
 #include "CUOMapMeter.h"
 #include "uofiles_macros.h"
 
