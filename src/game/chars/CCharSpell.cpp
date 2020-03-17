@@ -3643,11 +3643,11 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			UpdateStatVal( STAT_STR, iEffect );
 			break;
 
-		case SPELL_Sustenance:		// 105 // serves to fill you up. (Remember, healing rate depends on how well fed you are!)
-			Stat_SetVal( STAT_FOOD, Stat_GetAdjusted(STAT_FOOD) );
+		case SPELL_Sustenance:		// serves to fill you up. (Remember, healing rate depends on how well fed you are!)
+			Stat_SetVal( STAT_FOOD, Stat_GetMaxAdjusted(STAT_FOOD) );
 			break;
 
-		case SPELL_Gender_Swap:		// 110 // permanently changes your gender.
+		case SPELL_Gender_Swap:	// permanently changes your gender.
 			if ( IsPlayableCharacter())
 			{
 				CCharBase * pCharDef = Char_GetDef();
@@ -3675,19 +3675,19 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		}
 		break;
 
-		case SPELL_Chameleon:		// 106 // makes your skin match the colors of whatever is behind you.
-		case SPELL_BeastForm:		// 107 // polymorphs you into an animal for a while.
-		case SPELL_Monster_Form:	// 108 // polymorphs you into a monster for a while.
+		case SPELL_Chameleon:		// makes your skin match the colors of whatever is behind you.
+		case SPELL_BeastForm:		// polymorphs you into an animal for a while.
+		case SPELL_Monster_Form:	// polymorphs you into a monster for a while.
 			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_Polymorph, iEffect, iDuration, pCharSrc );
 			break;
 
-		case SPELL_Trance:			// 111 // temporarily increases your meditation skill.
+		case SPELL_Trance:			// temporarily increases your meditation skill.
 			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_STATS, iEffect, iDuration, pCharSrc );
 			break;
 
-		case SPELL_Shield:			// 113 // erects a temporary force field around you. Nobody approaching will be able to get within 1 tile of you, though you can move close to them if you wish.
-		case SPELL_Steelskin:		// 114 // turns your skin into steel, giving a boost to your AR.
-		case SPELL_Stoneskin:		// 115 // turns your skin into stone, giving a boost to your AR.
+		case SPELL_Shield:			// erects a temporary force field around you. Nobody approaching will be able to get within 1 tile of you, though you can move close to them if you wish.
+		case SPELL_Steelskin:		// turns your skin into steel, giving a boost to your AR.
+		case SPELL_Stoneskin:		// turns your skin into stone, giving a boost to your AR.
 			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_Protection, iEffect, iDuration, pCharSrc );
 			break;
 
