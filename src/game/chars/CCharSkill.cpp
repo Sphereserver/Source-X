@@ -2706,7 +2706,7 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
 	{
 		m_atFight.m_iWarSwingState = WAR_SWING_EQUIPPING;
         Fight_HitTry();	// this cleans up itself, executes the code related to the current m_iWarSwingState and sets the needed timers.
-		return g_Cfg.Calc_CombatChanceToHit(this, m_Fight_Targ_UID.CharFind());	// How difficult? 1-10000
+		return m_Act_Difficulty;	// How difficult? 1-10000
 	}
 
 	if ( stage == SKTRIG_STROKE )
@@ -2719,8 +2719,6 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
 
         if (m_atFight.m_iWarSwingState == WAR_SWING_EQUIPPING)
         {
-            // calculate the chance at every hit
-            m_Act_Difficulty = g_Cfg.Calc_CombatChanceToHit(this, m_Fight_Targ_UID.CharFind());
             if ( !Skill_CheckSuccess(Skill_GetActive(), m_Act_Difficulty, false) )
                 m_Act_Difficulty = -m_Act_Difficulty;	// will result in failure
         }

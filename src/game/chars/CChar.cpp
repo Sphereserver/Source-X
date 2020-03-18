@@ -2760,7 +2760,14 @@ do_default:
 			sVal.FormatHex( m_Act_Prv_UID.GetObjUID() );
 			break;
 		case CHC_ACTDIFF:
-			sVal.FormatVal( m_Act_Difficulty * 10 );
+			if (m_Act_Difficulty >= 0)
+			{
+				sVal.FormatVal(m_Act_Difficulty * 10);
+			}
+			else
+			{
+				sVal.FormatVal(m_Act_Difficulty);
+			}
 			break;
 		case CHC_ACTARG1:
 			sVal.FormatHex( m_atUnk.m_dwArg1 );
@@ -3257,7 +3264,18 @@ bool CChar::r_LoadVal( CScript & s )
 			m_Act_Prv_UID = s.GetArgVal();
 			break;
 		case CHC_ACTDIFF:
-			m_Act_Difficulty = (s.GetArgVal() / 10);
+			{
+				int iVal = s.GetArgVal();
+				if (iVal < -1)
+				{
+					iVal = -1;
+				}
+				else if (iVal > 0)
+				{
+					iVal /= 10;
+				}
+				m_Act_Difficulty = iVal;
+			}
 			break;
 		case CHC_ACTARG1:
 			m_atUnk.m_dwArg1 = s.GetArgVal();
