@@ -1114,11 +1114,12 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
 			continue;
 		if ( IsSetOF(OF_PetSlots) )
 		{
-			CCharBase *pPetDef = CCharBase::FindCharBase( pItem->m_itFigurine.m_ID );
+			CItemBase* pItemPet = CItemBase::FindItemBase(pItem->GetID());
+			CCharBase* pPetDef = CCharBase::FindCharBase(CREID_TYPE(pItemPet->m_ttFigurine.m_idChar.GetResIndex()));
 			if ( pPetDef )
 			{
 				short iFollowerSlots = (short)pPetDef->GetDefNum("FOLLOWERSLOTS");
-				if ( !m_pChar->FollowersUpdate(pVendor, (maximum(1, iFollowerSlots))) )
+				if ( !m_pChar->FollowersUpdate(pVendor, (maximum(1, iFollowerSlots) * items[i].m_vcAmount), true) )
 				{
 					m_pChar->SysMessageDefault( DEFMSG_PETSLOTS_TRY_CONTROL );
 					return;
