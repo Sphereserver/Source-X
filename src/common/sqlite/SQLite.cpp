@@ -228,6 +228,7 @@ void CSQLite::ConvertUTF8ToVString( const char * strInUTF8MB, stdvstring & strOu
     size_t len = Str_LengthUTF8(strInUTF8MB);
     strOut.resize(len + 1, 0);
     lptstr ptcStrOut = strOut.data();
+	ASSERT(ptcStrOut);
     UTF8MBSTR::ConvertUTF8ToString(strInUTF8MB, ptcStrOut);
 }
 

@@ -333,7 +333,7 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 			{
 				case INTRINSIC_ID:
 				{
-					if ( pArgs && *pArgs )
+					if ( *pArgs )
 					{
 						iCount = 1;
 						rResult = RES_GET_INDEX(int(MakeFloatMath(pArgs))); // RES_GET_INDEX
@@ -424,7 +424,7 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_NAPIERPOW:
 				{
-					if ( pArgs && *pArgs )
+					if ( *pArgs )
 					{
 						iCount = 1;
 						rResult = exp(MakeFloatMath(pArgs));
@@ -441,7 +441,7 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 				{
 					iCount = 0;
 
-					if ( pArgs && *pArgs )
+					if ( *pArgs )
 					{
 						realtype dTosquare = MakeFloatMath(pArgs);
 
@@ -465,7 +465,7 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_SIN:
 				{
-					if ( pArgs && *pArgs )
+					if ( *pArgs )
 					{
 						iCount = 1;
 						realtype dArgument = MakeFloatMath(pArgs);
@@ -481,7 +481,7 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_ARCSIN:
 				{
-					if ( pArgs && *pArgs )
+					if ( *pArgs )
 					{
 						iCount = 1;
 						realtype dArgument = MakeFloatMath(pArgs);
@@ -497,7 +497,7 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_COS:
 				{
-					if ( pArgs && *pArgs )
+					if ( *pArgs )
 					{
 						iCount = 1;
 						realtype dArgument = MakeFloatMath(pArgs);
@@ -513,7 +513,7 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_ARCCOS:
 				{
-					if ( pArgs && *pArgs )
+					if ( *pArgs )
 					{
 						iCount = 1;
 						realtype dArgument = MakeFloatMath(pArgs);
@@ -529,7 +529,7 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_TAN:
 				{
-					if ( pArgs && *pArgs )
+					if ( *pArgs )
 					{
 						iCount = 1;
 						realtype dArgument = MakeFloatMath(pArgs);
@@ -545,7 +545,7 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_ARCTAN:
 				{
-					if ( pArgs && *pArgs )
+					if ( *pArgs )
 					{
 						iCount = 1;
 						realtype dArgument = MakeFloatMath(pArgs);
@@ -612,7 +612,7 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_STRASCII:
 				{
-					if ( pArgs && *pArgs )
+					if ( *pArgs )
 					{
 						iCount = 1;
 						rResult = pArgs[0];

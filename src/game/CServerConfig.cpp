@@ -48,6 +48,7 @@ CServerConfig::CServerConfig()
 
 	//Magic
     m_fManaLossFail		    = false;
+	m_fNPCCanFizzleOnHit	= false;
 	m_fReagentLossFail		= false;
     m_fReagentsRequired		= false;
 	m_iWordsOfPowerColor	= HUE_TEXT_DEF;
@@ -167,7 +168,7 @@ CServerConfig::CServerConfig()
 	m_iMaxPolyStats			= 150;
 	m_iRacialFlags			= 0;
 	m_iRevealFlags			= (REVEALF_DETECTINGHIDDEN|REVEALF_LOOTINGSELF|REVEALF_LOOTINGOTHERS|REVEALF_SPEAK|REVEALF_SPELLCAST);
-
+	m_fDisplayPercentAr = false;
 	m_fNoResRobe		= 0;
 	m_iLostNPCTeleport	= 50;
     m_iAutoProcessPriority = 0;
@@ -464,6 +465,7 @@ enum RC_TYPE
 	RC_DEBUGFLAGS,
 	RC_DECAYTIMER,
 	RC_DEFAULTCOMMANDLEVEL,		//m_iDefaultCommandLevel
+	RC_DISPLAYPERCENTAR,	    //m_fDisplayPercentAr
 	RC_DISTANCETALK,
 	RC_DISTANCEWHISPER,
 	RC_DISTANCEYELL,
@@ -568,6 +570,7 @@ enum RC_TYPE
 	RC_NOTOTIMEOUT,
 	RC_NOWEATHER,				// m_fNoWeather
 	RC_NPCAI,					// m_iNpcAi
+	RC_NPCCANFIZZLEONHIT,		// m_fNPCCanFizzle
 	RC_NPCNOFAMETITLE,			// m_NPCNoFameTitle
 	RC_NPCSKILLSAVE,			// m_iSaveNPCSkills
 	RC_NPCTRAINCOST,			// m_iTrainSkillCost
@@ -710,6 +713,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "DEBUGFLAGS",				{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iDebugFlags),			0 }},
 	{ "DECAYTIMER",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDecay_Item),			0 }},
 	{ "DEFAULTCOMMANDLEVEL",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDefaultCommandLevel),	0 }},
+	{ "DISPLAYARMORASPERCENT",  { ELEM_BOOL,    OFFSETOF(CServerConfig,m_fDisplayPercentAr),    0 }},
 	{ "DISTANCETALK",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceTalk ),		0 }},
 	{ "DISTANCEWHISPER",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceWhisper ),	0 }},
 	{ "DISTANCEYELL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceYell ),		0 }},
@@ -814,6 +818,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "NOTOTIMEOUT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNotoTimeout),			0 }},
 	{ "NOWEATHER",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNoWeather),			0 }},
 	{ "NPCAI",					{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNpcAi),				0 }},
+	{ "NPCCANFIZZLEONHIT",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNPCCanFizzleOnHit),		0 }},
 	{ "NPCNOFAMETITLE",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_NPCNoFameTitle),		0 }},
 	{ "NPCSKILLSAVE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveNPCSkills),		0 }},
 	{ "NPCTRAINCOST",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTrainSkillCost),		0 }},
@@ -1981,7 +1986,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
             sVal.FormatVal( TICKS_PER_SEC );
             break;
 		case RC_TIMEUP:
-			sVal.FormatLLVal( ( - g_World.GetTimeDiff( g_World.m_timeStartup )) / MSECS_PER_SEC );
+			sVal.FormatLLVal( ( - g_World.GetTimeDiff( g_World._iTimeStartup )) / MSECS_PER_SEC );
 			break;
 		case RC_TIMERCALL:
 			sVal.FormatLLVal(_iTimerCall / (60*MSECS_PER_SEC));
@@ -2094,7 +2099,7 @@ int CServerConfig::GetSpellEffect( SPELL_TYPE spell, int iSkillVal ) const
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef( spell );
 	if ( pSpellDef == nullptr )
 		return 0;
-	return pSpellDef->m_Effect.GetLinear( iSkillVal );
+	return pSpellDef->m_vcEffect.GetLinear( iSkillVal );
 }
 
 lpctstr CServerConfig::GetRune( tchar ch ) const
@@ -2282,7 +2287,7 @@ dword CServerConfig::GetKRDialog(dword rid)
 	return 0;
 }
 
-const CSphereMulti * CServerConfig::GetMultiItemDefs( CItem * pItem )
+const CUOMulti * CServerConfig::GetMultiItemDefs( CItem * pItem )
 {
 	ADDTOCALLSTACK("CServerConfig::GetMultiItemDefs(CItem*)");
 	if ( !pItem )
@@ -2295,7 +2300,7 @@ const CSphereMulti * CServerConfig::GetMultiItemDefs( CItem * pItem )
 	return GetMultiItemDefs(pItem->GetDispID());		// multi.mul multi
 }
 
-const CSphereMulti * CServerConfig::GetMultiItemDefs( ITEMID_TYPE itemid )
+const CUOMulti * CServerConfig::GetMultiItemDefs( ITEMID_TYPE itemid )
 {
 	ADDTOCALLSTACK("CServerConfig::GetMultiItemDefs(ITEMID_TYPE)");
 	if ( !CItemBase::IsID_Multi(itemid) )
@@ -2304,11 +2309,11 @@ const CSphereMulti * CServerConfig::GetMultiItemDefs( ITEMID_TYPE itemid )
 	MULTI_TYPE id = (MULTI_TYPE)(itemid - ITEMID_MULTI);
 	size_t index = m_MultiDefs.FindKey(id);
 	if ( index == SCONT_BADINDEX )
-		index = m_MultiDefs.AddSortKey(new CSphereMulti(id), id);
+		index = m_MultiDefs.AddSortKey(new CUOMulti(id), id);
 	else
 		m_MultiDefs[index]->HitCacheTime();
 
-	const CSphereMulti *pMulti = m_MultiDefs[index];
+	const CUOMulti *pMulti = m_MultiDefs[index];
 	return pMulti;
 }
 
@@ -2537,16 +2542,19 @@ void CServerConfig::LoadSortSpells()
 			continue;
 
 		int	iVal = 0;
-		m_SpellDefs[i]->GetPrimarySkill( nullptr, &iVal );
+		if (!m_SpellDefs[i]->GetPrimarySkill(nullptr, &iVal))
+			continue;
 
 		const size_t iQty = m_SpellDefs_Sorted.size();
 		size_t k = 1;
 		while ( k < iQty )
 		{
 			int	iVal2 = 0;
-			m_SpellDefs_Sorted[k]->GetPrimarySkill( nullptr, &iVal2 );
-			if ( iVal2 > iVal )
-				break;
+			if (m_SpellDefs_Sorted[k]->GetPrimarySkill(nullptr, &iVal2))
+			{
+				if (iVal2 > iVal)
+					break;
+			}
 			++k;
 		}
 		m_SpellDefs_Sorted.insert(k, m_SpellDefs[i]);
@@ -2704,16 +2712,17 @@ uint CServerConfig::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar
 bool CServerConfig::LoadResourceSection( CScript * pScript )
 {
 	ADDTOCALLSTACK("CServerConfig::LoadResourceSection");
-	bool fNewStyleDef = false;
-
 	// Index or read any resource blocks we know how to handle.
+
 	ASSERT(pScript);
 	CScriptFileContext FileContext( pScript );	// set this as the context.
-	CVarDefContNum * pVarNum = nullptr;
-	CResourceID rid;
     CSString sSection = pScript->GetSection();
     lpctstr pszSection = sSection.GetPtr();
 
+	CVarDefContNum * pVarNum = nullptr;
+	CResourceID rid;
+    
+    bool fNewStyleDef = false;
 	RES_TYPE restype;
 	if ( !strnicmp( pszSection, "DEFMESSAGE", 10 ) )
 	{
@@ -2743,8 +2752,10 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		restype			= RES_ITEMDEF;
 		fNewStyleDef	= true;
 	}
-	else
-		restype	= (RES_TYPE) FindTableSorted( pszSection, sm_szResourceBlocks, CountOf( sm_szResourceBlocks ));
+    else
+    {
+        restype = (RES_TYPE)FindTableSorted(pszSection, sm_szResourceBlocks, CountOf(sm_szResourceBlocks));
+    }
 
 
 	if (( restype == RES_WORLDSCRIPT ) || ( restype == RES_WS ))
@@ -2835,9 +2846,13 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		// Stat advance rates.
 		while ( pScript->ReadKeyParse())
 		{
-			int i = FindStatKey( pScript->GetKey());
-			if ( i >= STAT_BASE_QTY )
+			lpctstr ptcKey = pScript->GetKey();
+			STAT_TYPE i = FindStatKey(ptcKey);
+			if ((i <= STAT_NONE) || (i >= STAT_BASE_QTY))
+			{
+				g_Log.EventError("Invalid keyword '%s'.\n", ptcKey);
 				continue;
+			}
 			m_StatAdv[i].Load( pScript->GetArgStr());
 		}
 		return true;
@@ -2847,7 +2862,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			tchar* ipBuffer = Str_GetTemp();
 			while ( pScript->ReadKeyParse())
 			{
-				strcpy(ipBuffer, pScript->GetKey());
+				Str_CopyLimitNull(ipBuffer, pScript->GetKey(), STR_TEMPLENGTH);
 				HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(ipBuffer);
 				history.setBlocked(true);
 			}
@@ -2935,7 +2950,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 			// read karma levels
 			iQty = Str_ParseCmds(pScript->GetKeyBuffer(), piNotoLevels, CountOf(piNotoLevels));
-			for (i = 0; i < iQty; i++)
+			for (i = 0; i < iQty; ++i)
 				m_NotoKarmaLevels.assign_at_grow(i, (int) (piNotoLevels[i]));
 
 			m_NotoKarmaLevels.resize(i);
@@ -2948,7 +2963,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 			// read fame levels
 			iQty = Str_ParseCmds(pScript->GetKeyBuffer(), piNotoLevels, CountOf(piNotoLevels));
-			for (i = 0; i < iQty; i++)
+			for (i = 0; i < iQty; ++i)
 				m_NotoFameLevels.assign_at_grow(i, (int) (piNotoLevels[i]));
 
 			m_NotoFameLevels.resize(i);
@@ -2965,9 +2980,12 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				++i;
 			}
 
-			if (m_NotoTitles.size() != ((m_NotoKarmaLevels.size() + 1) * (m_NotoFameLevels.size() + 1)))
-				g_Log.Event(LOGM_INIT|LOGL_WARN, "Expected %" PRIuSIZE_T " titles in NOTOTITLES section but found %" PRIuSIZE_T ".\n", (m_NotoKarmaLevels.size() + 1) * (m_NotoFameLevels.size() + 1),
-							m_NotoTitles.size());
+            if (m_NotoTitles.size() != ((m_NotoKarmaLevels.size() + 1) * (m_NotoFameLevels.size() + 1)))
+            {
+                g_Log.Event(LOGM_INIT | LOGL_WARN, "Expected %" PRIuSIZE_T " titles in NOTOTITLES section but found %" PRIuSIZE_T ".\n",
+                    (m_NotoKarmaLevels.size() + 1) * (m_NotoFameLevels.size() + 1),
+                    m_NotoTitles.size());
+            }
 		}
 		return true;
 	case RES_OBSCENE:
@@ -3008,7 +3026,10 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 	case RES_SECTOR: // saved in world file.
 		{
 			CPointMap pt = GetRegionPoint( pScript->GetArgStr() ); // Decode a teleport location number into X/Y/Z
-			return pt.GetSector()->r_Load(*pScript);
+            CSector* pSector = pt.GetSector();
+            if (!pSector)
+                return false;
+			return pSector->r_Load(*pScript);
 		}
 	case RES_SPELL:
 		{
@@ -3076,7 +3097,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			ASSERT(pNewLink);
 
 			// clear old tile links to this type
-			size_t iQty = g_World.m_TileTypes.size();
+			const size_t iQty = g_World.m_TileTypes.size();
 			for ( size_t i = 0; i < iQty; ++i )
 			{
 				if (g_World.m_TileTypes[i] == pTypeDef )
@@ -3186,13 +3207,13 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		else
 		{
 			CRegionWorld * pRegion = new CRegionWorld( rid, pScript->GetArgStr());
-			pNewDef = pRegion;
-			ASSERT(pNewDef);
 			pRegion->r_Load( *pScript );
 			if ( ! pRegion->RealizeRegion() )
 				delete pRegion; // might be a dupe ?
 			else
 			{
+				pNewDef = pRegion;
+				ASSERT(pNewDef);
 				m_ResHash.AddSortKey( rid, pRegion );
 				// if it's old style but has a defname, it's already set via r_Load,
 				// so this will do nothing, which is good
@@ -3365,7 +3386,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 	case RES_FUNCTION:
 	{
         lpctstr ptcFunctionName = pScript->GetArgStr();
-        size_t uiFunctionIndex = m_Functions.find_sorted(ptcFunctionName);
+        const size_t uiFunctionIndex = m_Functions.find_sorted(ptcFunctionName);
         if (uiFunctionIndex == SCONT_BADINDEX)
         {
             // Define a char macro. (Name is NOT DEFNAME)
@@ -3396,7 +3417,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				// Does the name already exist ?
 				bool fAddNew = false;
 				CServerRef pServ;
-				size_t i = m_Servers.FindKey( pScript->GetKey());
+				const size_t i = m_Servers.FindKey( pScript->GetKey());
 				if ( i == SCONT_BADINDEX )
 				{
 					pServ = new CServerDef( pScript->GetKey(), CSocketAddressIP( SOCKET_LOCAL_ADDRESS ));
@@ -3455,7 +3476,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 	case RES_STARTS:
 		{
-			int iStartVersion = pScript->GetArgVal();
+			const int iStartVersion = pScript->GetArgVal();
 			m_StartDefs.clear();
 			while ( pScript->ReadKey())
 			{
@@ -3469,10 +3490,10 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 					if (iStartVersion == 2)
 					{
 						if ( pScript->ReadKey())
-							pStart->iClilocDescription = atoi(pScript->GetKey());
+							pStart->iClilocDescription = Str_ToI(pScript->GetKey());
 					}
 				}
-				m_StartDefs.push_back(pStart);
+				m_StartDefs.emplace_back(pStart);
 			}
 
 			return true;
@@ -3520,7 +3541,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		{
 			bool fQuoted = false;
             lpctstr ptcArg = pScript->GetArgStr( &fQuoted );
-			g_World.m_TimedFunctions.Load( pScript->GetKey(), fQuoted, ptcArg );
+			g_World._Ticker.m_TimedFunctions.Load( pScript->GetKey(), fQuoted, ptcArg );
 		}
 		return true;
 	case RES_TELEPORTERS:
@@ -3559,7 +3580,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined char type '%s'\n", pScript->GetArgStr());
 			return false;
 		}
-		return CChar::CreateBasic(CREID_TYPE(rid.GetResIndex()))->r_Load(*pScript);
+		return CChar::CreateBasic( CREID_TYPE(rid.GetResIndex()) )->r_Load(*pScript);
 	case RES_WI:
 	case RES_WORLDITEM:	// saved in world file.
 		if ( ! rid.IsValidUID())
@@ -3567,7 +3588,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined item type '%s'\n", pScript->GetArgStr());
 			return false;
 		}
-		return CItem::CreateBase(ITEMID_TYPE(rid.GetResIndex()))->r_Load(*pScript);
+		return CItem::CreateBase( ITEMID_TYPE(rid.GetResIndex()) )->r_Load(*pScript);
 
 	default:
 		break;
@@ -3829,6 +3850,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 						if ( pVarStr != nullptr )
 							return ResourceGetNewID(restype, pVarStr->GetValStr(), ppVarNum, fNewStyleDef);
 					}
+					break;
 					default:
 						DEBUG_ERR(( "Re-Using DEFNAME='%s' to define a new block\n", pszName ));
 						return ridInvalid;
@@ -3923,9 +3945,10 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 		break;
 
 	case RES_BOOK:			// A book or a page from a book.
-	case RES_DIALOG:			// A scriptable gump dialog: text or handler block.
+	case RES_DIALOG:		// A scriptable gump dialog: text or handler block.
 		if ( wPage )	// We MUST define the main section FIRST !
 			return ridInvalid;
+		FALLTHROUGH;
 
 	case RES_REGIONTYPE:	// Triggers etc. that can be assinged to a RES_AREA
 		iHashRange = 100;

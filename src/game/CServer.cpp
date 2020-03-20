@@ -2090,7 +2090,7 @@ bool CServer::SocketsInit() // Initialize sockets
 	{
 		pHost = gethostbyname(szName);
 		if ( pHost && pHost->h_addr && pHost->h_name && pHost->h_name[0] )
-			strcpy(szName, pHost->h_name);
+			Str_CopyLimitNull(szName, pHost->h_name, _MAX_PATH);
 	}
 
 	g_Log.Event( LOGM_INIT, "Server started on hostname '%s'\n", szName);
@@ -2265,6 +2265,9 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
         bool fPrioritySuccess = SetProcessPriority(g_Cfg.m_iAutoProcessPriority);
         g_Log.Event(LOGM_INIT, "Setting process priority... %s.\n", fPrioritySuccess ? "Success" : "Failed");
     }
+
+	EXC_SET_BLOCK("init world cache");
+	g_World._Cache.Init();
 
 	EXC_SET_BLOCK("loading scripts");
 	TriglistInit();

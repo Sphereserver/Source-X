@@ -24,10 +24,6 @@ CCachedMulItem::CCachedMulItem()
 	InitCacheTime();
 }
 
-CCachedMulItem::~CCachedMulItem()
-{
-}
-
 void CCachedMulItem::InitCacheTime()
 {
 	m_timeRef = 0;
@@ -41,13 +37,12 @@ bool CCachedMulItem::IsTimeValid() const
 void CCachedMulItem::HitCacheTime()
 {
 	// When was this last referenced.
-	m_timeRef = g_World.GetCurrentTick();
+	m_timeRef = g_World.GetCurrentTime().GetTimeRaw();
 }
 
 int64 CCachedMulItem::GetCacheAge() const
 {
-	// In ticks
-	return (g_World.GetCurrentTick() - m_timeRef );
+	return (g_World.GetCurrentTime().GetTimeRaw() - m_timeRef );
 }
 
 CServerMapBlockState::CServerMapBlockState( dword dwBlockFlags, char z, int iHeight, height_t zHeight ) :
@@ -534,14 +529,6 @@ void CServerMapBlock::Load( int bx, int by )
 	m_CacheTime.HitCacheTime();		// validate.
 }
 
-CServerMapBlock::CServerMapBlock( const CPointMap & pt ) :
-		CPointSort( pt )	// The upper left corner.
-{
-	++sm_iCount;
-	m_map = pt.m_map;
-	Load(pt.m_x/UO_BLOCK_SIZE, pt.m_y/UO_BLOCK_SIZE);
-}
-
 CServerMapBlock::CServerMapBlock(int bx, int by, int map) :
 		CPointSort((short)(bx)* UO_BLOCK_SIZE, (short)(by) * UO_BLOCK_SIZE)
 {
@@ -552,15 +539,15 @@ CServerMapBlock::CServerMapBlock(int bx, int by, int map) :
 
 
 //////////////////////////////////////////////////////////////////
-// -CSphereMulti
+// -CUOMulti
 
-void CSphereMulti::Init()
+void CUOMulti::Init()
 {
 	m_id = MULTI_QTY;
 	m_pItems = nullptr;
 	m_iItemQty = 0;
 }
-void CSphereMulti::Release()
+void CUOMulti::Release()
 {
 	if ( m_pItems != nullptr )
 	{
@@ -569,29 +556,29 @@ void CSphereMulti::Release()
 	}
 }
 
-CSphereMulti::CSphereMulti()
+CUOMulti::CUOMulti()
 {
 	Init();
 }
-CSphereMulti::CSphereMulti( MULTI_TYPE id )
+CUOMulti::CUOMulti( MULTI_TYPE id )
 {
 	Init();
 	Load( id );
 }
-CSphereMulti::~CSphereMulti()
+CUOMulti::~CUOMulti()
 {
 	Release();
 }
 
-const CUOMultiItemRec_HS * CSphereMulti::GetItem( size_t i ) const
+const CUOMultiItemRec_HS * CUOMulti::GetItem( size_t i ) const
 {
 	ASSERT( i<m_iItemQty );
 	return &m_pItems[i];
 }
 
-size_t CSphereMulti::Load(MULTI_TYPE id)
+size_t CUOMulti::Load(MULTI_TYPE id)
 {
-	ADDTOCALLSTACK("CSphereMulti::Load");
+	ADDTOCALLSTACK("CUOMulti::Load");
 	// Just load the whole thing.
 
 	Release();

@@ -348,7 +348,7 @@ void CClient::addItem_OnGround( CItem * pItem ) // Send items (on ground)
 
 	// send item sound
 	if (pItem->IsType(IT_SOUND))
-		addSound((SOUND_TYPE)(pItem->m_itSound.m_Sound), pItem, pItem->m_itSound.m_Repeat );
+		addSound((SOUND_TYPE)(pItem->m_itSound.m_dwSound), pItem, pItem->m_itSound.m_iRepeat );
 
 	// send corpse clothing
 	if ( !IsPriv(PRIV_DEBUG) && (fCorpse && CCharBase::IsPlayableID(pItem->GetCorpseType())) )	// cloths on corpse
@@ -445,14 +445,14 @@ bool CClient::addContainerSetup( const CItemContainer * pContainer ) // Send Bac
 {
 	ADDTOCALLSTACK("CClient::addContainerSetup");
 	ASSERT(pContainer);
-	ASSERT( pContainer->IsItem() );
+	ASSERT(pContainer->IsItem());
 
 	// open the container with the proper GUMP.
 	CItemBase * pItemDef = pContainer->Item_GetDef();
-	GUMP_TYPE gump = pItemDef->IsTypeContainer();
 	if (!pItemDef)
 		return false;
 
+	GUMP_TYPE gump = pItemDef->IsTypeContainer();
 	if ( gump <= GUMP_RESERVED )
 		return false;
 
@@ -471,8 +471,8 @@ void CClient::LogOpenedContainer(const CItemContainer* pContainer) // record a c
 	if (pContainer == nullptr)
 		return;
 
-	CObjBaseTemplate * pTopMostContainer = pContainer->GetTopLevelObj();
-	CObjBase * pTopContainer = pContainer->GetContainer();
+	const CObjBaseTemplate * pTopMostContainer = pContainer->GetTopLevelObj();
+	const CObjBase * pTopContainer = pContainer->GetContainer();
 
 	dword dwTopMostContainerUID = pTopMostContainer->GetUID().GetPrivateUID();
 	dword dwTopContainerUID = 0;
@@ -939,14 +939,16 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 
 	id = pItem->GetDispID();
 	wHue = pItem->GetHue();
-	CItemBase * pItemDef = pItem->Item_GetDef();
+
+	const CItemBase * pItemDef = pItem->Item_GetDef();
+    const uchar uiResDisp = GetResDisp();
 
 	if ( pItem->IsType(IT_EQ_HORSE) )
 	{
 		// check the reslevel of the ridden horse
 		CREID_TYPE idHorse = pItem->m_itFigurine.m_ID;
-		CCharBase * pCharDef = CCharBase::FindCharBase(idHorse);
-		if ( pCharDef && ( GetResDisp() < pCharDef->GetResLevel() ) )
+		const CCharBase * pCharDef = CCharBase::FindCharBase(idHorse);
+		if ( pCharDef && (uiResDisp < pCharDef->GetResLevel() ) )
 		{
 			idHorse = (CREID_TYPE)(pCharDef->GetResDispDnId());
 			wHue = pCharDef->GetResDispDnHue();
@@ -975,7 +977,7 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 		wHue = g_Cfg.m_iColorInvis;
 	else
 	{
-		if ( pItemDef && ( GetResDisp() < pItemDef->GetResLevel() ) )
+		if ( pItemDef && (uiResDisp < pItemDef->GetResLevel() ) )
 			if ( pItemDef->GetResDispDnHue() != HUE_DEFAULT )
 				wHue = pItemDef->GetResDispDnHue();
 
@@ -986,7 +988,7 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 
 	}
 
-	if ( pItemDef && ( GetResDisp() < pItemDef->GetResLevel() ) )
+	if ( pItemDef && (uiResDisp < pItemDef->GetResLevel() ) )
 		id = (ITEMID_TYPE)(pItemDef->GetResDispDnId());
 }
 
@@ -1063,7 +1065,7 @@ void CClient::addCharMove( const CChar * pChar ) const
 
 void CClient::addCharMove( const CChar * pChar, byte iCharDirFlag ) const
 {
-	ADDTOCALLSTACK("CClient::addCharMove");
+	ADDTOCALLSTACK("CClient::addCharMove (DirFlag)");
 	// This char has just moved on screen.
 	// or changed in a subtle way like "hidden"
 	// NOTE: If i have been turned this will NOT update myself.
@@ -1115,7 +1117,7 @@ void CClient::addChar( CChar * pChar, bool fFull )
 	EXC_DEBUG_END;
 }
 
-void CClient::addItemName( const CItem * pItem )
+void CClient::addItemName( CItem * pItem )
 {
 	ADDTOCALLSTACK("CClient::addItemName");
 	// NOTE: CanSee() has already been called.
@@ -1184,7 +1186,7 @@ void CClient::addItemName( const CItem * pItem )
 			case IT_SPAWN_CHAR:
 			case IT_SPAWN_ITEM:
 				{
-					CCSpawn *pSpawn = const_cast<CItem*>(pItem)->GetSpawn();
+					CCSpawn *pSpawn = pItem->GetSpawn();
 					if ( pSpawn )
 						len += pSpawn->WriteName(szName + len);
 				}
@@ -1214,7 +1216,7 @@ void CClient::addItemName( const CItem * pItem )
 		Args.m_VarsLocal.SetStrNew("ClickMsgText", &szName[0]);
 		Args.m_VarsLocal.SetNumNew("ClickMsgHue", (int64)(wHue));
 
-		TRIGRET_TYPE ret = dynamic_cast<CObjBase*>(const_cast<CItem*>(pItem))->OnTrigger( "@AfterClick", m_pChar, &Args );	// CTRIG_AfterClick, ITRIG_AfterClick
+		TRIGRET_TYPE ret = pItem->OnTrigger( "@AfterClick", m_pChar, &Args );	// CTRIG_AfterClick, ITRIG_AfterClick
 
 		if ( ret == TRIGRET_RET_TRUE )
 			return;
@@ -1432,8 +1434,6 @@ bool CClient::addBookOpen( CItem * pBook ) const
 	{
 		// User written book.
 		CItemMessage *pMsgItem = static_cast<CItemMessage *>(pBook);
-		if (pMsgItem == nullptr)
-			return false;
 
 		if (pMsgItem->IsBookWritable())
             wPagesNow = pMsgItem->GetPageCount(); // for some reason we must send them now
@@ -1468,7 +1468,8 @@ uint CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 {
 	ADDTOCALLSTACK("CClient::Setup_FillCharList");
 	// list available chars for your account that are idle.
-	CAccount * pAccount = GetAccount();
+	ASSERT(pPacket);
+	const CAccount * pAccount = GetAccount();
 	ASSERT( pAccount );
 
 	size_t count = 0;
@@ -1483,17 +1484,17 @@ uint CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 		++count;
 	}
 
-	size_t iAcctCharCount = pAccount->m_Chars.GetCharCount(), iAcctMaxChars = pAccount->GetMaxChars();
-	uint iMax = (uint)minimum(maximum(iAcctCharCount,iAcctMaxChars), MAX_CHARS_PER_ACCT);
+	const size_t iAcctCharCount = pAccount->m_Chars.GetCharCount(), iAcctMaxChars = pAccount->GetMaxChars();
+	const uint iMax = (uint)minimum(maximum(iAcctCharCount,iAcctMaxChars), MAX_CHARS_PER_ACCT);
 
-	uint iQty = (uint)pAccount->m_Chars.GetCharCount();
+	uint iQty = (uint)iAcctCharCount;
 	if (iQty > iMax)
 		iQty = iMax;
 
 	for (uint i = 0; i < iQty; ++i)
 	{
-		CUID uid(pAccount->m_Chars.GetChar(i));
-		CChar* pChar = uid.CharFind();
+		const CUID uid(pAccount->m_Chars.GetChar(i));
+		const CChar* pChar = uid.CharFind();
 		if ( pChar == nullptr )
 			continue;
 		if ( pCharFirst == pChar )
@@ -1531,7 +1532,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 	// Can i close a menu ?
 	// Cancel a cursor input.
 
-	bool bSuppressCancelMessage = false;
+	bool fSuppressCancelMessage = false;
 
 	switch ( GetTargMode() )
 	{
@@ -1542,7 +1543,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 				CScriptTriggerArgs Args;
 				Args.m_s1 =  m_Targ_Text;
 				if ( GetChar()->OnTrigger( CTRIG_Targon_Cancel, m_pChar, &Args ) == TRIGRET_RET_TRUE )
-					bSuppressCancelMessage = true;
+					fSuppressCancelMessage = true;
 			}
 		} break;
 		case CLIMODE_TARG_USE_ITEM:
@@ -1551,30 +1552,30 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 			if ( pItemUse != nullptr && (( IsTrigUsed(TRIGGER_TARGON_CANCEL) ) || ( IsTrigUsed(TRIGGER_ITEMTARGON_CANCEL) ) ))
 			{
 				if ( pItemUse->OnTrigger( ITRIG_TARGON_CANCEL, m_pChar ) == TRIGRET_RET_TRUE )
-					bSuppressCancelMessage = true;
+					fSuppressCancelMessage = true;
 			}
 		} break;
 
 		case CLIMODE_TARG_SKILL_MAGERY:
 		{
-			const CSpellDef* pSpellDef = g_Cfg.GetSpellDef(m_tmSkillMagery.m_Spell);
+			const CSpellDef* pSpellDef = g_Cfg.GetSpellDef(m_tmSkillMagery.m_iSpell);
 			if (m_pChar != nullptr && pSpellDef != nullptr)
 			{
-				CScriptTriggerArgs Args(m_tmSkillMagery.m_Spell, 0, m_Targ_Prv_UID.ObjFind());
+				CScriptTriggerArgs Args(m_tmSkillMagery.m_iSpell, 0, m_Targ_Prv_UID.ObjFind());
 
 				if ( IsTrigUsed(TRIGGER_SPELLTARGETCANCEL) )
 				{
 					if ( m_pChar->OnTrigger( CTRIG_SpellTargetCancel, this, &Args ) == TRIGRET_RET_TRUE )
 					{
-						bSuppressCancelMessage = true;
+						fSuppressCancelMessage = true;
 						break;
 					}
 				}
 
 				if ( IsTrigUsed(TRIGGER_TARGETCANCEL) )
 				{
-					if ( m_pChar->Spell_OnTrigger( m_tmSkillMagery.m_Spell, SPTRIG_TARGETCANCEL, m_pChar, &Args ) == TRIGRET_RET_TRUE )
-						bSuppressCancelMessage = true;
+					if ( m_pChar->Spell_OnTrigger( m_tmSkillMagery.m_iSpell, SPTRIG_TARGETCANCEL, m_pChar, &Args ) == TRIGRET_RET_TRUE )
+						fSuppressCancelMessage = true;
 				}
 			}
 		} break;
@@ -1588,7 +1589,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 			switch (GetTargMode())
 			{
 				case CLIMODE_TARG_SKILL:
-					action = m_tmSkillTarg.m_Skill;
+					action = m_tmSkillTarg.m_iSkill;
 					break;
 				case CLIMODE_TARG_SKILL_HERD_DEST:
 					action = SKILL_HERDING;
@@ -1609,14 +1610,14 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 				{
 					if ( m_pChar->Skill_OnCharTrigger(action, CTRIG_SkillTargetCancel) == TRIGRET_RET_TRUE )
 					{
-						bSuppressCancelMessage = true;
+						fSuppressCancelMessage = true;
 						break;
 					}
 				}
 				if ( IsTrigUsed(TRIGGER_TARGETCANCEL) )
 				{
 					if ( m_pChar->Skill_OnTrigger(action, SKTRIG_TARGETCANCEL) == TRIGRET_RET_TRUE )
-						bSuppressCancelMessage = true;
+						fSuppressCancelMessage = true;
 				}
 			}
 		} break;
@@ -1643,13 +1644,13 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 			pItem->RemoveFromView();		//Removing from view to avoid seeing it in the cursor
 			m_pChar->ItemBounce(pItem);
 			// Just clear the old target mode
-			if (bSuppressCancelMessage == false)
+			if (fSuppressCancelMessage == false)
 				addSysMessage(g_Cfg.GetDefaultMsg(DEFMSG_TARGET_CANCEL_2));
 		}
 	}
 
 	m_Targ_Mode = targmode;
-	if ( targmode == CLIMODE_NORMAL && bSuppressCancelMessage == false )
+	if ( targmode == CLIMODE_NORMAL && fSuppressCancelMessage == false )
 		addSysMessage( g_Cfg.GetDefaultMsg(DEFMSG_TARGET_CANCEL_1) );
 	else if ( pPrompt && *pPrompt ) // Check that the message is not blank.
 		addSysMessage( pPrompt );
@@ -2696,7 +2697,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 
 	DEBUG_MSG(( "%x:Setup_Start done\n", GetSocketID()));
 
-    g_World.AddCharTicking(m_pChar);
+    g_World._Ticker.AddCharTicking(m_pChar);
 	return PacketLoginError::Success;
 }
 

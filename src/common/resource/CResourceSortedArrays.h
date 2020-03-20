@@ -47,11 +47,11 @@ class CSkillKeySortArray : public CSObjSortArray< CValStr*, lpctstr >
     int CompareKey( lpctstr ptcKey, CValStr * pVal, bool fNoSpaces ) const;
 };
 
-struct CMultiDefArray : public CSObjSortArray< CSphereMulti*, MULTI_TYPE >
+struct CMultiDefArray : public CSObjSortArray< CUOMulti*, MULTI_TYPE >
 {
     // store the static components of a IT_MULTI
     // Sorted array
-    int CompareKey( MULTI_TYPE id, CSphereMulti* pBase, bool fNoSpaces ) const;
+    int CompareKey( MULTI_TYPE id, CUOMulti* pBase, bool fNoSpaces ) const;
 };
 
 

@@ -127,7 +127,7 @@ bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObj
 			if (IsTrigUsed(TRIGGER_SEESNOOP))
 			{
 				CScriptTriggerArgs Args(pAction);
-				Args.m_iN1 = (SkillToSee != SKILL_NONE) ? SkillToSee : pCharMark->Skill_GetActive();
+				Args.m_iN1 = SkillToSee;
 				Args.m_iN2 = pItem ? (dword)pItem->GetUID() : 0;    // here i can modify pItem via scripts, so it isn't really const
 				Args.m_pO1 = pCharMark;
 				TRIGRET_TYPE iRet = pChar->OnTrigger(CTRIG_SeeSnoop, this, &Args);
@@ -537,6 +537,52 @@ int CChar::CalcArmorDefense() const
 	return maximum(( iDefenseTotal / 100 ) + m_ModAr, 0);
 }
 
+ int CChar::CalcPercentArmorDefense(LAYER_TYPE layer) //static
+{
+	 ADDTOCALLSTACK("CChar::CalcPercentArmorDefense");
+	 int iPercentArmorDefence = 0;
+	 switch (layer)
+	 {
+	 case LAYER_HELM:	//15% from head location.
+		 iPercentArmorDefence = sm_ArmorLayers[0].m_iCoverage;
+		 break;
+	 case LAYER_COLLAR: //7% from neck location.
+		 iPercentArmorDefence = sm_ArmorLayers[1].m_iCoverage;
+		 break;
+	 case LAYER_SHIRT: //LAYER_SHIRT, LAYER_CHEST and LAYER_TUNIC get the 35% of AR  from chest location.
+	 case LAYER_CHEST:
+	 case LAYER_TUNIC: 
+		 iPercentArmorDefence = sm_ArmorLayers[3].m_iCoverage;
+		 break;
+	 case LAYER_ROBE:	//35% from chest, 22% from legs and 14% from arms locations.
+		 iPercentArmorDefence = sm_ArmorLayers[3].m_iCoverage + sm_ArmorLayers[4].m_iCoverage + sm_ArmorLayers[6].m_iCoverage;
+		 break;
+	 case LAYER_CAPE: //Both get 14% from arms location.
+	 case LAYER_ARMS:
+		 iPercentArmorDefence = sm_ArmorLayers[4].m_iCoverage;
+		 break;
+	 case LAYER_GLOVES: //Gloves get 7% from hands location.
+		 iPercentArmorDefence = sm_ArmorLayers[5].m_iCoverage;
+		 break;
+	 case LAYER_PANTS: //LAYER_PANTS, LAYER_SKIRT, LAYER_HALF_APRON and LAYER_LEGS get a 22% of AR from legs location.
+	 case LAYER_SKIRT:
+	 case LAYER_HALF_APRON:
+	 case LAYER_LEGS:
+		 iPercentArmorDefence = sm_ArmorLayers[6].m_iCoverage;
+		 break;
+	 case LAYER_HAND2:	//By default Shields get a 7% armor coverage, if PARRYERA_ARSCALING is enabled they get a 100% armor coverage.
+		 iPercentArmorDefence = sm_ArmorLayers[5].m_iCoverage;
+		 if (g_Cfg.m_iCombatParryingEra & PARRYERA_ARSCALING)
+		 {
+			 iPercentArmorDefence = sm_ArmorLayers[8].m_iCoverage;
+		 }
+		 break;
+	 default:	//Back and Feet location provide no protections (0%).
+		 break;
+	 }
+	 return iPercentArmorDefence;
+}
+
 // Someone hit us.
 // iDmg already defined, here we just apply armor related calculations
 //
@@ -770,13 +816,13 @@ effect_bounce:
         }
     }
 
-	// Disturb magic spells (only players can be disturbed)
-	if ( m_pPlayer && (pSrc != this) && !(uType & DAMAGE_NODISTURB) && g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_MAGIC) )
+	// Disturb magic spells (only players can be disturbed if NpCCanFizzleOnHit is false in sphere.ini)
+	if ( (m_pPlayer || g_Cfg.m_fNPCCanFizzleOnHit) && (pSrc != this) && !(uType & DAMAGE_NODISTURB) && g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_MAGIC) )
 	{
 		// Check if my spell can be interrupted
 		int iDisturbChance = 0;
 		int iSpellSkill = -1;
-		const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
+		const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
 		if ( pSpellDef && pSpellDef->GetPrimarySkill(&iSpellSkill) )
 			iDisturbChance = pSpellDef->m_Interrupt.GetLinear(Skill_GetBase((SKILL_TYPE)iSpellSkill));
 
@@ -887,7 +933,7 @@ effect_bounce:
 		return iDmg;
 	}
 
-	if (m_atFight.m_War_Swing_State != WAR_SWING_SWINGING)	// don't interrupt my swing animation
+	if (m_atFight.m_iWarSwingState != WAR_SWING_SWINGING)	// don't interrupt my swing animation
 		UpdateAnimate(ANIM_GET_HIT);
 
 	return iDmg;
@@ -902,21 +948,21 @@ byte CChar::GetRangeL() const
 {
     if (_iRange == 0)
         return Char_GetDef()->GetRangeL();
-    return (byte)(_iRange & 0xff);
+    return (byte)(RANGE_GET_LO(_iRange));
 }
 
 byte CChar::GetRangeH() const
 {
     if (_iRange == 0)
         return Char_GetDef()->GetRangeH();
-    return (byte)((_iRange >> 8) & 0xff);
+    return (byte)(RANGE_GET_HI(_iRange));
 }
 
 // What sort of weapon am i using?
 SKILL_TYPE CChar::Fight_GetWeaponSkill() const
 {
 	ADDTOCALLSTACK_INTENSIVE("CChar::Fight_GetWeaponSkill");
-	CItem * pWeapon = m_uidWeapon.ItemFind();
+	const CItem * pWeapon = m_uidWeapon.ItemFind();
 	if ( pWeapon == nullptr )
 		return SKILL_WRESTLING;
 	return pWeapon->Weapon_GetSkill();
@@ -928,7 +974,7 @@ DAMAGE_TYPE CChar::Fight_GetWeaponDamType(const CItem* pWeapon) const
     DAMAGE_TYPE iDmgType = DAMAGE_HIT_BLUNT;
     if ( pWeapon )
     {
-        CVarDefCont *pDamTypeOverride = pWeapon->GetKey("OVERRIDE.DAMAGETYPE", true);
+        const CVarDefCont *pDamTypeOverride = pWeapon->GetKey("OVERRIDE.DAMAGETYPE", true);
         if ( pDamTypeOverride )
         {
             iDmgType = (DAMAGE_TYPE)(pDamTypeOverride->GetValNum());
@@ -963,7 +1009,7 @@ bool CChar::Fight_IsActive() const
 	if ( ! IsStatFlag(STATF_WAR))
 		return false;
 
-	SKILL_TYPE iSkillActive = Skill_GetActive();
+	const SKILL_TYPE iSkillActive = Skill_GetActive();
 	switch ( iSkillActive )
 	{
 		case SKILL_ARCHERY:
@@ -1143,8 +1189,9 @@ void CChar::Fight_ClearAll()
 		m_Fight_Targ_UID.InitUID();
 	}
     Attacker_Clear();
+	StatFlag_Clear(STATF_WAR);
 
-    m_atFight.m_War_Swing_State = WAR_SWING_EQUIPPING;
+    m_atFight.m_iWarSwingState = WAR_SWING_EQUIPPING;
     m_atFight.m_iRecoilDelay = 0;
     m_atFight.m_iSwingAnimationDelay = 0;
     m_atFight.m_iSwingAnimation = 0;
@@ -1160,7 +1207,7 @@ bool CChar::Fight_Clear(CChar *pChar, bool bForced)
 	if ( !pChar || !Attacker_Delete(pChar, bForced, ATTACKER_CLEAR_FORCED) )
 		return false;
 
-    m_atFight.m_War_Swing_State = WAR_SWING_EQUIPPING;
+    m_atFight.m_iWarSwingState = WAR_SWING_EQUIPPING;
     m_atFight.m_iRecoilDelay = 0;
     m_atFight.m_iSwingAnimationDelay = 0;
     m_atFight.m_iSwingAnimation = 0;
@@ -1256,8 +1303,10 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool fToldByMaster )
 
     pCharTarg->Memory_AddObjTypes(this, MEMORY_IRRITATEDBY);
     // Looking for MEMORY_AGGREIVED|MEMORY_HARMEDBY because in this case it won't be a crime, but most importantly to avoid infinite recursion
-    if (g_Cfg.m_fAttackingIsACrime && (pCharTarg->Noto_GetFlag(this) == NOTO_GOOD) && !pCharTarg->Memory_FindObjTypes(this, MEMORY_AGGREIVED|MEMORY_HARMEDBY))
-        CheckCrimeSeen(SKILL_NONE, pTarget, nullptr, nullptr);
+	if (g_Cfg.m_fAttackingIsACrime && (pCharTarg->Noto_GetFlag(this) == NOTO_GOOD) && !pCharTarg->Memory_FindObjTypes(this, MEMORY_AGGREIVED | MEMORY_HARMEDBY))
+	{
+		CheckCrimeSeen(SKILL_NONE, pTarget, nullptr, nullptr);
+	}
 
     if (m_pNPC && !fToldByMaster)		// call FindBestTarget when this CChar is a NPC and was not commanded to attack, otherwise it attack directly
     {
@@ -1297,7 +1346,7 @@ void CChar::Fight_HitTry()
 
     bool fIH_ShouldInstaHit = false, fIH_LastHitTag_Newer = false;
     int64 iIH_LastHitTag_FullHit = 0;  // Time required to perform a normal hit, without the PreHit delay reduction.
-    if (m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING)
+    if (m_atFight.m_iWarSwingState == WAR_SWING_EQUIPPING)
     {
         if (IsSetCombatFlags(COMBAT_FIRSTHIT_INSTANT))
         {
@@ -1333,7 +1382,7 @@ void CChar::Fight_HitTry()
     if (IsSetCombatFlags(COMBAT_FIRSTHIT_INSTANT))
     {
         // This needs to be set after the @HitTry call, because we may want to change the default iRecoilDelay and iSwingAnimationDelay in that trigger.
-        if ((m_atFight.m_War_Swing_State == WAR_SWING_READY) && (retHit == WAR_SWING_READY))
+        if ((m_atFight.m_iWarSwingState == WAR_SWING_READY) && (retHit == WAR_SWING_READY))
         {
             if (fIH_LastHitTag_Newer)
             {
@@ -1364,8 +1413,8 @@ void CChar::Fight_HitTry()
 		case WAR_SWING_EQUIPPING:	// keep hitting the same target
         case WAR_SWING_EQUIPPING_NOWAIT:
 		{
-            if ((m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING)
-                || (IsSetCombatFlags(COMBAT_SWING_NORANGE) && (m_atFight.m_War_Swing_State == WAR_SWING_READY)) ) // Ready to start a new swing, check swingTypeHold in Fight_Hit
+            if ((m_atFight.m_iWarSwingState == WAR_SWING_EQUIPPING)
+                || (IsSetCombatFlags(COMBAT_SWING_NORANGE) && (m_atFight.m_iWarSwingState == WAR_SWING_READY)) ) // Ready to start a new swing, check swingTypeHold in Fight_Hit
             {
                 if (retHit == WAR_SWING_EQUIPPING_NOWAIT)
                 {
@@ -1420,9 +1469,8 @@ int CChar::Fight_CalcRange( CItem * pWeapon ) const
 {
 	ADDTOCALLSTACK("CChar::Fight_CalcRange");
 
-	int iCharRange = GetRangeH();
-	int iWeaponRange = pWeapon ? pWeapon->GetRangeH() : 0;
-
+	const int iCharRange = GetRangeH();
+	const int iWeaponRange = pWeapon ? pWeapon->GetRangeH() : 0;
 	return ( maximum(iCharRange , iWeaponRange) );
 }
 
@@ -1480,8 +1528,8 @@ WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc, bool fSwingNoRange)
 
     // Ignore the distance and the line of sight if fSwingNoRange is true, but only if i'm starting the swing. To land the hit i need to be in range.
     if (!fSwingNoRange ||
-        (IsSetCombatFlags(COMBAT_ANIM_HIT_SMOOTH) && (m_atFight.m_War_Swing_State == WAR_SWING_SWINGING)) || 
-        (!IsSetCombatFlags(COMBAT_ANIM_HIT_SMOOTH) && (m_atFight.m_War_Swing_State == WAR_SWING_READY)))
+        (IsSetCombatFlags(COMBAT_ANIM_HIT_SMOOTH) && (m_atFight.m_iWarSwingState == WAR_SWING_SWINGING)) || 
+        (!IsSetCombatFlags(COMBAT_ANIM_HIT_SMOOTH) && (m_atFight.m_iWarSwingState == WAR_SWING_READY)))
     {
         int dist = GetTopDist3D(pCharSrc);
         if (dist > GetVisualRange())
@@ -1537,7 +1585,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	if ( IsTrigUsed(TRIGGER_HITCHECK) )
 	{
 		CScriptTriggerArgs pArgs;
-		pArgs.m_iN1 = m_atFight.m_War_Swing_State;
+		pArgs.m_iN1 = m_atFight.m_iWarSwingState;
 		pArgs.m_iN2 = iDmgType;
         pArgs.m_VarsLocal.SetNum("Recoil_NoRange", (int)fSwingNoRange);
 		TRIGRET_TYPE tRet = OnTrigger(CTRIG_HitCheck, pCharTarg, &pArgs);
@@ -1546,13 +1594,13 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		if ( tRet == -1 )
 			return WAR_SWING_INVALID;
 
-		m_atFight.m_War_Swing_State = (WAR_SWING_TYPE)(pArgs.m_iN1);
+		m_atFight.m_iWarSwingState = (WAR_SWING_TYPE)(pArgs.m_iN1);
         iDmgType = (DAMAGE_TYPE)(pArgs.m_iN2);
         fSwingNoRange = (bool)pArgs.m_VarsLocal.GetKeyNum("Recoil_NoRange");
 
         if (tRet != -2)     // if @HitCheck returns -2, just continue with the hardcoded stuff
         {
-            if ( (m_atFight.m_War_Swing_State == WAR_SWING_SWINGING) && (iDmgType & DAMAGE_FIXED) )
+            if ( (m_atFight.m_iWarSwingState == WAR_SWING_SWINGING) && (iDmgType & DAMAGE_FIXED) )
             {
                 if ( tRet == TRIGRET_RET_DEFAULT )
                     return WAR_SWING_EQUIPPING;
@@ -1604,7 +1652,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
     const WAR_SWING_TYPE iStageToSuspend = (IsSetCombatFlags(COMBAT_PREHIT) ? WAR_SWING_SWINGING : WAR_SWING_EQUIPPING);
     if ( IsSetCombatFlags(COMBAT_FIRSTHIT_INSTANT) && (!m_atFight.m_iSwingIgnoreLastHitTag) 
-        && (m_atFight.m_War_Swing_State == iStageToSuspend) )
+        && (m_atFight.m_iWarSwingState == iStageToSuspend) )
     {
         const int64 iTimeDiff = ((g_World.GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH) - GetKeyNum("LastHit"));
         if (iTimeDiff < 0)
@@ -1647,10 +1695,10 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
             }
         }
 
-        if (!fSwingNoRange || (m_atFight.m_War_Swing_State == WAR_SWING_SWINGING))
+        if (!fSwingNoRange || (m_atFight.m_iWarSwingState == WAR_SWING_SWINGING))
         {
             // If we are using Swing_NoRange, we can start the swing regardless of the distance, but we can land the hit only when we are at the right distance
-            const WAR_SWING_TYPE swingTypeHold = fSwingNoRange ? m_atFight.m_War_Swing_State : WAR_SWING_READY;
+            const WAR_SWING_TYPE swingTypeHold = fSwingNoRange ? m_atFight.m_iWarSwingState : WAR_SWING_READY;
 
             int	iMinDist = pWeapon ? pWeapon->GetRangeL() : g_Cfg.m_iArcheryMinDist;
             int	iMaxDist = pWeapon ? pWeapon->GetRangeH() : g_Cfg.m_iArcheryMaxDist;
@@ -1662,13 +1710,13 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
             if ( dist < iMinDist )
             {
                 SysMessageDefault(DEFMSG_COMBAT_ARCH_TOOCLOSE);
-                if ( !IsSetCombatFlags(COMBAT_STAYINRANGE) || (m_atFight.m_War_Swing_State != WAR_SWING_SWINGING) )
+                if ( !IsSetCombatFlags(COMBAT_STAYINRANGE) || (m_atFight.m_iWarSwingState != WAR_SWING_SWINGING) )
                     return swingTypeHold;
                 return WAR_SWING_EQUIPPING;
             }
             else if ( dist > iMaxDist )
             {
-                if ( !IsSetCombatFlags(COMBAT_STAYINRANGE) || (m_atFight.m_War_Swing_State != WAR_SWING_SWINGING) )
+                if ( !IsSetCombatFlags(COMBAT_STAYINRANGE) || (m_atFight.m_iWarSwingState != WAR_SWING_SWINGING) )
                     return swingTypeHold;
                 return WAR_SWING_EQUIPPING;
             }
@@ -1676,16 +1724,16 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	}
 	else
 	{
-        if (!fSwingNoRange || (m_atFight.m_War_Swing_State == WAR_SWING_SWINGING))
+        if (!fSwingNoRange || (m_atFight.m_iWarSwingState == WAR_SWING_SWINGING))
         {
             // If we are using PreHit_NoRange, we can start the swing regardless of the distance, but we can land the hit only when we are at the right distance
-            const WAR_SWING_TYPE swingTypeHold = fSwingNoRange ? m_atFight.m_War_Swing_State : WAR_SWING_READY;
+            const WAR_SWING_TYPE swingTypeHold = fSwingNoRange ? m_atFight.m_iWarSwingState : WAR_SWING_READY;
 
 		    int	iMinDist = pWeapon ? pWeapon->GetRangeL() : 0;
 		    int	iMaxDist = Fight_CalcRange(pWeapon);
 		    if ( (dist < iMinDist) || (dist > iMaxDist) )
 		    {
-			    if ( !IsSetCombatFlags(COMBAT_STAYINRANGE) || (m_atFight.m_War_Swing_State != WAR_SWING_SWINGING) )
+			    if ( !IsSetCombatFlags(COMBAT_STAYINRANGE) || (m_atFight.m_iWarSwingState != WAR_SWING_SWINGING) )
 				    return swingTypeHold;
 			    return WAR_SWING_EQUIPPING;
 		    }
@@ -1693,8 +1741,11 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	}
 
     // Do i have to wait for the recoil time?
-    if (m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING)
+    if (m_atFight.m_iWarSwingState == WAR_SWING_EQUIPPING)
     {
+		// calculate the chance at every hit
+		m_Act_Difficulty = g_Cfg.Calc_CombatChanceToHit(this, m_Fight_Targ_UID.CharFind());
+
         m_atFight.m_iSwingAnimation = (int16)GenerateAnimate(ANIM_ATTACK_WEAPON);
 
         if ( IsTrigUsed(TRIGGER_HITTRY) )
@@ -1720,14 +1771,14 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
         }
 
         SetTimeoutD(m_atFight.m_iRecoilDelay);   // Wait for the recoil time.
-        m_atFight.m_War_Swing_State = WAR_SWING_READY;
+        m_atFight.m_iWarSwingState = WAR_SWING_READY;
         return WAR_SWING_READY;
     }
 
 	// I have waited for the recoil time, then i can start the swing
-	if ( m_atFight.m_War_Swing_State == WAR_SWING_READY )
+	if ( m_atFight.m_iWarSwingState == WAR_SWING_READY )
 	{
-		m_atFight.m_War_Swing_State = WAR_SWING_SWINGING;
+		m_atFight.m_iWarSwingState = WAR_SWING_SWINGING;
 		Reveal();
 
 		if ( !IsSetCombatFlags(COMBAT_NODIRCHANGE) )
@@ -1775,7 +1826,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	}
 
 	// We made our swing. Apply the damage and start the recoil.
-	m_atFight.m_War_Swing_State = WAR_SWING_EQUIPPING;
+	m_atFight.m_iWarSwingState = WAR_SWING_EQUIPPING;
 
 	// We missed
 	if ( m_Act_Difficulty < 0 )
@@ -1846,8 +1897,8 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 			// If Effect property is defined on the Parrying skill use it instead of the hardcoded value of 100.
 			iParryReduction = 100;
-			if (!pSkillDef->m_Effect.m_aiValues.empty())
-				iParryReduction = pSkillDef->m_Effect.GetLinear(pCharTarg->Skill_GetAdjusted(SKILL_PARRYING));
+			if (!pSkillDef->m_vcEffect.m_aiValues.empty())
+				iParryReduction = pSkillDef->m_vcEffect.GetLinear(pCharTarg->Skill_GetAdjusted(SKILL_PARRYING));
 
 			/*
 			ARGN1 = Percent of damage that will be reduced.
@@ -2086,7 +2137,11 @@ bool CChar::Fight_Parry(CItem * &pItemParry)
     const bool fCanTwoHanded = g_Cfg.m_iCombatParryingEra & PARRYERA_TWOHANDBLOCK;
 
     const int iParrying = Skill_GetBase(SKILL_PARRYING);
-    int iParryChance = 0;   // 0-100 difficulty! without the decimal!
+	/*
+	While the difficulty range is 0-100 (without decimal) we initialize iParryChance to -1 for avoiding the player
+	to gain parrying skill when his combination of weapon/shield does not match the values set in the CombatParryingEra  in the sphere.ini.
+	*/
+    int iParryChance = -1;
     if (g_Cfg.m_iCombatParryingEra & PARRYERA_SEFORMULA)   // Samurai Empire formula
     {
         const int iBushido = Skill_GetBase(SKILL_BUSHIDO);
@@ -2159,8 +2214,7 @@ bool CChar::Fight_Parry(CItem * &pItemParry)
 	if ( GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASEPARRYCHANCE) )
 		iParryChance += GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASEPARRYCHANCE);
 
-    if (iParryChance <= 0)
-        return false;
+    if (iParryChance < 0)        return false;
 	
     int iDex = Stat_GetAdjusted(STAT_DEX);
     if (iDex < 80)

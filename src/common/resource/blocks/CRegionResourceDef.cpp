@@ -60,7 +60,7 @@ bool CRegionResourceDef::r_LoadVal( CScript & s )
     switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
     {
         case RMC_AMOUNT: // AMOUNT
-            m_Amount.Load( s.GetArgRaw() );
+            m_vcAmount.Load( s.GetArgRaw() );
             break;
         case RMC_DEFNAME: // "DEFNAME",
             return SetResourceName( s.GetArgStr());
@@ -68,13 +68,13 @@ bool CRegionResourceDef::r_LoadVal( CScript & s )
             m_ReapItem = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
             break;
         case RMC_REAPAMOUNT:
-            m_ReapAmount.Load( s.GetArgRaw() );
+            m_vcReapAmount.Load( s.GetArgRaw() );
             break;
         case RMC_REGEN:	// Tenths of second once found how long to regen this type.
-            m_iRegenerateTime.Load( s.GetArgRaw() );
+            m_vcRegenerateTime.Load( s.GetArgRaw() );
             break;
         case RMC_SKILL:
-            m_Skill.Load( s.GetArgRaw() );
+            m_vcSkill.Load( s.GetArgRaw() );
             break;
         default:
             return( CResourceDef::r_LoadVal( s ));
@@ -97,7 +97,7 @@ bool CRegionResourceDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConso
     switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
     {
         case RMC_AMOUNT:
-            sVal = m_Amount.Write();
+            sVal = m_vcAmount.Write();
             break;
         case RMC_REAP: // "REAP",
         {
@@ -110,13 +110,13 @@ bool CRegionResourceDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConso
             sVal = pItemDef->GetResourceName();
         } break;
         case RMC_REAPAMOUNT:
-            sVal = m_ReapAmount.Write();
+            sVal = m_vcReapAmount.Write();
             break;
         case RMC_REGEN:
-            sVal = m_iRegenerateTime.Write();
+            sVal = m_vcRegenerateTime.Write();
             break;
         case RMC_SKILL:
-            sVal = m_Skill.Write();
+            sVal = m_vcSkill.Write();
             break;
         default:
             return ( fNoCallParent ? false : CResourceDef::r_WriteVal( ptcKey, sVal, pSrc ) );

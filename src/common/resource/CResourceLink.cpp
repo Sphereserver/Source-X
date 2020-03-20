@@ -34,6 +34,7 @@ void CResourceLink::ScanSection( RES_TYPE restype )
 
     switch (restype)
     {
+        case RES_CHAMPION:
         case RES_TYPEDEF:
         case RES_ITEMDEF:
             ppTable = CItem::sm_szTrigName;

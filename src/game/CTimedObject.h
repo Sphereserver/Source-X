@@ -11,7 +11,7 @@
 
 class CTimedObject
 {
-    friend class CWorld;
+    friend class CWorldTick;
 
 private:
     THREAD_CMUTEX_DEF;

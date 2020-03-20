@@ -351,8 +351,7 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 		word m_miny;
 		word m_maxx;
 		word m_maxy;
-	}
-	sm_ContSize[] =
+	} sm_ContSize[] =
 	{
         { GUMP_SCROLL, 30, 30, 270, 170 },
         { GUMP_CORPSE, 20, 85, 124, 196 },
@@ -432,7 +431,7 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 
 	// Get a random location in the container.
 
-	CItemBase *pItemDef = Item_GetDef();
+	const CItemBase *pItemDef = Item_GetDef();
 	GUMP_TYPE gump = pItemDef->m_ttContainer.m_idGump;	// Get the TDATA2
 
 	// check for custom values in TDATA3/TDATA4
@@ -452,18 +451,22 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 	// No TDATA3 or no TDATA4: check if we have hardcoded in sm_ContSize the size of the gump indicated by TDATA2
 
 	uint i = 0;
-	for ( ; ; ++i )
+	// We may want a keyring with no gump, so no need to show the warning.
+	if (!IsType(IT_KEYRING))
 	{
-		if ( i >= CountOf(sm_ContSize) )
+		for (; ; ++i)
 		{
-			i = 0;	// set to default
-			g_Log.EventWarn("Unknown container gump id %d for 0%x\n", gump, GetDispID());
-			break;
+			if (i >= CountOf(sm_ContSize))
+			{
+				i = 0;	// set to default
+				g_Log.EventWarn("Unknown container gump id %d for 0%x\n", gump, GetDispID());
+				break;
+			}
+			if (sm_ContSize[i].m_gump == gump)
+				break;
 		}
-		if ( sm_ContSize[i].m_gump == gump )
-			break;
 	}
-
+	
 	return CPointMap(
 		(word)(sm_ContSize[i].m_minx + Calc_GetRandVal(sm_ContSize[i].m_maxx - sm_ContSize[i].m_minx)),
 		(word)(sm_ContSize[i].m_miny + Calc_GetRandVal(sm_ContSize[i].m_maxy - sm_ContSize[i].m_miny)),
@@ -487,10 +490,6 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
                 Trade_Status(false);
                 break;
 
-            case IT_CONTAINER:
-            case IT_CONTAINER_LOCKED:
-                pItem->GoSleep();
-                break;
             default:
                 break;
         }
@@ -513,6 +512,11 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
             default:
                 break;
 		}
+	}
+
+	if (/*pItem->IsTimerSet() &&*/ !pItem->IsSleeping())
+	{
+		pItem->GoSleep();		// prevent the timer from firing if the item is inside a container
 	}
 
 	// check for custom values in TDATA3/TDATA4
@@ -684,11 +688,11 @@ bool CItemContainer::IsItemInside( const CItem *pItem ) const
 	}
 }
 
-void CItemContainer::OnRemoveObj( CSObjListRec *pObRec )	// Override this = called when removed from list.
+void CItemContainer::OnRemoveObj( CSObjListRec *pObjRec )	// Override this = called when removed from list.
 {
 	ADDTOCALLSTACK("CItemContainer::OnRemoveObj");
 	// remove this object from the container list.
-	CItem *pItem = static_cast<CItem *>(pObRec);
+	CItem *pItem = static_cast<CItem *>(pObjRec);
 	ASSERT(pItem);
 	if ( IsType(IT_EQ_TRADE_WINDOW) )
 	{
@@ -701,7 +705,7 @@ void CItemContainer::OnRemoveObj( CSObjListRec *pObRec )	// Override this = call
 		if ( pItemVend )
 			pItemVend->SetPlayerVendorPrice(0);
 	}
-	CContainer::OnRemoveObj(pObRec);
+	CContainer::OnRemoveObj(pObjRec);
     UpdatePropertyFlag();
 
 	if ( IsType(IT_KEYRING) )	// key ring.
@@ -720,7 +724,7 @@ void CItemContainer::DupeCopy( const CItem *pItem )
 	if ( !pContItem )
 		return;
 
-	for ( CItem *pContent = pContItem->GetContentHead(); pContent != nullptr; pContent = pContent->GetNext() )
+	for ( const CItem *pContent = pContItem->GetContentHead(); pContent != nullptr; pContent = pContent->GetNext() )
 		ContentAdd(CreateDupeItem(pContent), pContent->GetContainedPoint());
 }
 
@@ -729,7 +733,7 @@ void CItemContainer::MakeKey()
 	ADDTOCALLSTACK("CItemContainer::MakeKey");
 	SetType(IT_CONTAINER);
 	m_itContainer.m_UIDLock = GetUID();
-	m_itContainer.m_lock_complexity = 500 + Calc_GetRandVal(600);
+	m_itContainer.m_dwLockComplexity = 500 + Calc_GetRandVal(600);
 
 	CItem *pKey = CreateScript(ITEMID_KEY_COPPER);
 	ASSERT(pKey);

@@ -19,31 +19,41 @@ bool CItemTypeDef::r_LoadVal( CScript & s )
 
     if ( !strnicmp( ptcKey, "TERRAIN", 7 ) )
     {
-        size_t iLo = Exp_GetVal( pszArgs );
-        GETNONWHITESPACE( pszArgs );
+        llong iLo = Exp_GetLLVal( pszArgs );
+        if (iLo < 0)
+        {
+            g_Log.EventError("TERRAIN lower ID has negative value.\n");
+            return false;
+        }
 
+        GETNONWHITESPACE( pszArgs );
         if ( *pszArgs == ',' )
         {
-            pszArgs++;
+            ++pszArgs;
             GETNONWHITESPACE( pszArgs );
         }
 
-        size_t iHi;
+        llong iHi;
         if ( *pszArgs == '\0' )
             iHi	= iLo;
         else
-            iHi	= Exp_GetVal( pszArgs );
+            iHi	= Exp_GetLLVal( pszArgs );
+        if (iHi < 0)
+        {
+            g_Log.EventError("TERRAIN upper ID has negative value.\n");
+            return false;
+        }
 
         if ( iLo > iHi )		// swap
         {
-            size_t iTmp = iHi;
+            llong iTmp = iHi;
             iHi	= iLo;
             iLo	= iTmp;
         }
 
-        for ( size_t i = iLo; i <= iHi; i++ )
+        for (llong i = iLo; i <= iHi; ++i )
         {
-            g_World.m_TileTypes.assign_at_grow(i, this);
+            g_World.m_TileTypes.assign_at_grow(size_t(i), this);
         }
         return true;
     }

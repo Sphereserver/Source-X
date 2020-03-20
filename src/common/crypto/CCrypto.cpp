@@ -302,14 +302,23 @@ CCrypto::CCrypto()
 
 	tf_cipher	= new cipherInstance;
 	tf_key		= new keyInstance;
-	md5_engine	= new CMD5();
+	m_md5_engine	= new CMD5();
+
+	m_CryptMaskHi = m_CryptMaskLo = 0;
+	m_seed = 0;
+	m_ConnectType = CONNECT_NONE;
+	tf_position = 0;
+	m_gameTable = 0;
+	m_gameBlockPos = 0;
+	m_gameStreamPos = 0;
+	m_md5_position = 0;
 }
 
 CCrypto::~CCrypto()
 {
 	delete tf_cipher;
 	delete tf_key;
-	delete md5_engine;
+	delete m_md5_engine;
 }
 
 bool CCrypto::Init( dword dwIP, const byte * pEvent, uint inLen, bool isclientKr )
@@ -425,7 +434,7 @@ bool CCrypto::RelayGameCryptStart( byte * pOutput, const byte * pInput, uint out
 	m_seed = dwNewSeed;
 
 	// new seed requires a reset of the md5 engine
-	md5_engine->reset();
+	m_md5_engine->reset();
 
 	ENCRYPTION_TYPE etPrevious = GetEncryptionType();
 
@@ -663,7 +672,7 @@ bool CCrypto::LoginCryptStart( dword dwIP, const byte * pEvent, uint inLen )
 				// (matex) TODO: What for? We do not really need pszAccountNameCheck here do we?!
 				if (iAccountNameLen > 0)
 					pszAccountNameCheck[iAccountNameLen-1] = '\0';
-				if (sRawAccountName && (iAccountNameLen != strlen(sRawAccountName)))
+				if (iAccountNameLen != strlen(sRawAccountName))
 				{
 					iAccountNameLen = 0;
 					++i;

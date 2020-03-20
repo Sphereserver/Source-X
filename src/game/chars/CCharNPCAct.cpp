@@ -215,8 +215,8 @@ void CChar::NPC_ActStart_SpeakTo( CChar * pSrc )
 	// My new action is that i am speaking to this person.
 	// Or just update the amount of time i will wait for this person.
 	m_Act_UID = pSrc->GetUID();
-	m_atTalk.m_WaitCount = 20;
-	m_atTalk.m_HearUnknown = 0;
+	m_atTalk.m_dwWaitCount = 20;
+	m_atTalk.m_dwHearUnknown = 0;
 
 	Skill_Start( ( pSrc->GetFame() > 7000 ) ? NPCACT_TALK_FOLLOW : NPCACT_TALK );
 	SetTimeoutS(3);
@@ -342,11 +342,11 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 
 	if ( (Skill_GetActive() == NPCACT_TALK) || (Skill_GetActive() == NPCACT_TALK_FOLLOW) )
 	{
-		++ m_atTalk.m_HearUnknown;
+		++ m_atTalk.m_dwHearUnknown;
 		uint iMaxUnk = 4;
 		if ( GetDist( pSrc ) > 4 )
 			iMaxUnk = 1;
-		if ( m_atTalk.m_HearUnknown > iMaxUnk )
+		if ( m_atTalk.m_dwHearUnknown > iMaxUnk )
 		{
 			Skill_Start( SKILL_NONE ); // say good by
 		}
@@ -1389,7 +1389,7 @@ bool CChar::NPC_Act_Talk()
 			return false;
 	}
 
-	if ( m_atTalk.m_WaitCount <= 1 )
+	if ( m_atTalk.m_dwWaitCount <= 1 )
 	{
 		if ( NPC_CanSpeak() )
 		{
@@ -1405,7 +1405,7 @@ bool CChar::NPC_Act_Talk()
 		return false;
 	}
 
-	--m_atTalk.m_WaitCount;
+	--m_atTalk.m_dwWaitCount;
 	return true;	// just keep waiting.
 }
 
@@ -2070,7 +2070,7 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 		{
 			VendorItem item;
 			item.m_serial = pItem->GetUID();
-			item.m_amount = pItem->GetAmount();
+			item.m_vcAmount = pItem->GetAmount();
 			pCharSrc->GetClient()->Event_VendorSell(this, &item, 1);
 		}
 		return false;

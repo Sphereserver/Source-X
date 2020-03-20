@@ -19,7 +19,7 @@
 - Fixed: Protection spell not working correctly if COMBAT_ELEMENTAL_ENGINE combat flag is disabled.
 
 
----- X1 (Milestone 1 opened)
+---- X1 (Milestone 1 opened) ------------------------------------------------------------------------------------
 
 14-05-2016, XuN
 - Fixed: Pets not gaining Karma (it can be blocked through @KarmaChange trigger, no reason to stop it from the source).
@@ -577,7 +577,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 (Source)
 Added the basics of an ECS: CEntity and CComponent so we can split into modules (components) the core of the current big classes (CObjBase, CItem, CChar).
 
- - CEntity act as a wrapper for CObjBase (ATM) storing a list of CComponent* inside and redirecting some basic code to all of them (r_Write, r_WriteVal, r_Load, r_LoadVal, r_Verb and r_GetRef) and provides also a GetComponent(COMP_TYPE) for external interaction.
+ - CEntity act as a wrapper for CObjBase (at the moment) storing a list of CComponent* inside and redirecting some basic code to all of them (r_Write, r_WriteVal, r_Load, r_LoadVal, r_Verb and r_GetRef) and provides also a GetComponent(COMP_TYPE) for external interaction.
  - CComponent acts as a wrapper for each module of code and, as abstract, class requires the above functions to be on them for overriding (these must return true if something was executed on them, so CEntity will stop to try them on other CComponents or false if not so the loop continues). For items these components must be added on CItem::CreateBase, eg:
          case IT_SPAWN_CHAMPION:
         {
@@ -1960,3 +1960,187 @@ WARNING: Important change!
 
 23-11-2019, Nolok
 - Fixed: Resyncing after modifying a FUNCTION broke the internal functions lookup table order, resulting in random errors when calling functions.
+
+08-12-2019, Nolok
+- Added: More detailed error messages when the garbage collection removes or auto-fixes a somehow corrupt mounted npc (Issue #347).
+- Fixed: Teleporters created from custom houses teleporting to the house center coordinates (Issue #336).
+- Fixed: Item equip macro not checking distance and line of sight (Issue #344).
+
+30-12-2019, XuN
+Spanws:
+Added triggers:
+	@PreSpawn:	Called before any npc or item is created
+			-argn1: Id of the object to create, can be changed.
+			-return 1: Stops the proccess.
+	@Spawn: Called when an object has been created and before it has been placed, placing it in a valid spot will disable default placement checks.
+			-argo: The spawned object.
+			*NOTE: Since character creation is slightly different than the item's one, for chars this trigger and the placement will occur before the @Create trigger is called.
+
+Fixed BadSpawn not working: Now each bad spawn is inserted in a vector and accessed through this command, the command now accepts args to go into a direct index (invalid index is defaulted to the first one found).
+
+
+Added champion's support:
+-CChampionDef (script block):
+	[CHAMPION 01]
+	DEFNAME=CHAMPION_Abyss
+	NAME=Abyss
+	LevelMax=5 //Maximum levels of this champion, for default ones it must be 5 (4 npcgroups + boss)
+	Spawns=100 //Total npc spawns for this champion (excepting the boss)
+	NPCGroup[1] = c_mongbat, c_imp //Group of npcs for level 1
+	NPCGroup[2] = c_gargoyle, c_harpy //Group of npcs for level 2
+	NPCGroup[3] = c_gargoyle_fire, c_gargoyle_stone //Group of npcs for level 3
+	NPCGroup[4] = c_daemon, c_succubus //Group of npcs for level 4
+	CHAMPIONID=c_semidar	//The boss
+
+-Ingame item example 1:
+	[ITEMDEF i_champion_idol]
+	ID=01f18
+	TYPE=t_champion_spawn //this defname should match 300
+	NAME=Champion Idol
+
+	ON=@Create
+	more=CHAMPION_Abyss
+	ATTR |= <DEF.ATTR_MOVE_NEVER>
+
+	ON=@DClick
+	if (<timer> == -1)
+		start //init the champion
+	else
+		stop // stop the champion
+	endif
+	return 1
+
+-Ingame item example 2:
+	[ITEMDEF i_champion_idol_abyss]
+	ID=01f18
+	TYPE=t_champion_spawn //this defname should match 300
+	NAME=Abyss Champion Idol
+
+	ON=@Create
+	more=CHAMPION_Abyss
+	ATTR |= <DEF.ATTR_MOVE_NEVER>
+
+	ON=@DClick
+	if (<timer> == -1)
+		start //init the champion
+	else
+		stop // stop the champion
+	endif
+	return 1
+
+	ON=@AddWhiteCandle
+		AddSpawn//Adding twice npcs when a new white candle appears
+
+    ON=@AddRedCandle
+		timer=600	// A timeout means a redcandle removed, so force players to get the next candle within the next 10 minutes.
+
+	ON=@Spawn
+		if (<argo.baseid>==<serv.champion.<argn1>.ChampionID>)//If the spawned NPC is the champion's boss...
+			argo.events=e_champion_boss	// ... give it an impressive event!. (Note: this is an example thus this event is also an example and does not exist by default.)
+	    endif
+
+R/W Keywords available for the t_champion_spawn item:
+    "DEATHCOUNT": Gets/sets the total count of deaths, counts towards progression, setting a value higher than the one required by the system will have effect only when that value is requested by the code and not instantly (eg: another monster dies.
+    "LASTACTIVATIONTIME": TimeHiRes of the last activation time, allowing to create cooldowns.
+    "LEVEL": Current level of the champion spawn.
+    "LEVELMAX": Maximum level, should be 5 by default ... other values are allowed but using other values requires scripting their behaviour since the system is done to match OSI and will not calculate good other values.
+    "NPCGROUP": Gets a given npcgroup (eg .xshow npcgroup[1][3] will give the fourth npc on the first group), or create/overwrite a group (eg: .xnpcgroup[2] c_ogre, c_ettin, c_orc).
+    "MORE/MORE1": Gets or sets the champion id (eg: .xmore1 CHAMPION_Abyss)
+    "REDCANDLES": Gets the count of red candles (Read only).
+    "SPAWNSCUR": Gets or sets the current count of spawns.
+    "SPAWNSMAX": Gets or sets the total maximum spawns.
+    "WHITECANDLES": Gets thhe count of white candles (read only).
+
+Verbs available for the t_champion_spawn item:	
+    "ADDOBJ": Inserts an already created npc into the champion spawn (be sure you add them when the champion is activated, or they will be removed when it start).
+    "DELOBJ": Removes one character from the champion counting towards the progression of itself, this does not remove the character.
+    "ADDREDCANDLE": Advances the champion by adding one red candle (red candles and levels explained bellow).
+    "ADDWHITECANDLE": Advances the champion by adding one white candle.
+    "DELREDCANDLE": Regress one red candle (if any).
+    "DELWHITECANDLE": Regress one white candle (if any) (If there are no white candles, then calls DELREDCANDLE).
+    "ADDSPAWN": Forces the generation of one spawn (applying champion level and so)
+    "INIT": Restores the champion's attributes (pretty much like a 'clear'), this is forced when changing the item's more1 so be aware to do not change (or call it) when the champion is active or it will mess up.
+    "MULTICREATE": Emplaces a champion by script, a champion requires a multi area to be renamed and have custom flags, forbidding recalls or whatever.
+    "START": Activates the champion.
+    "STOP": Deactivates the champion and removes any progress and npcs.
+	
+Default levels explanation:
+	Level 1: From start until 6th red candle is finished.
+	Level 2: From 7th red candle to Level 10th red candle.
+	Level 3: From red candle 11 to 14.
+	Level 4: From red candle 15 to 16.
+	Boss: SpawnsCur >= SpawnsMax.
+	Note: Timer being called when a red candle is active will remove it and, since it has to be done again, the SpawnsMax increase by KillsNextRed.
+
+When a spawned npc is killed, AddSpawn is being called to spawn the next one.
+	-When all npcs are alredy spawned then AddSpawn checks for DeathCount > SpawnsMax, so the boss will only be generated when all the other spawns are killed.
+Must have event, even if it's empty, since it's applied by the source to generated objects: [events e_spawn_champion]
+
+03-01-2020, Drk84
+- Fixed: Bandage resurrection did not work when targetting a corpse or a ghost.
+		 For resurrecting when targetting a corpse the following conditions must be satisfied:
+			1)The ghost must be in line of sight of its corpse.
+			2)The ghost must be within 2 tiles of its corpse.
+			3)The ghost must be visible.
+	You can also resurrect a Bonded pet by targetting their ghost.
+- Changed: Focus skill behaviour
+			1)It now uses the Skill_UseQuick method, that means it will fires the SkillUseQuick/UseQuick triggers, the chance to succeed is around 50%.
+			2)A small fix, Focus skill was used when Hitpoints where regenerating, now it is used only when regenerating Mana and Stamina.
+			3)Focus skill will not be used if the character  Mana or Stamina are already at their maximum value, so NPCS should not spam the Focus skill anymore I think.
+		    4)You can read/set the amount of mana/stamina gained by the Focus skill by using local.FocusGain in the @RegenStat trigger.
+			  Default value for mana gain is Focus / 20 while for stamina is Focus / 10.
+		   Remember that you need FEATURE_AOS_UPDATE_B ini flag set for enabling the default Focus behaviour.
+		   For disabling the Focus skill you can set SKF_SCRIPTED in the Focus SKILLDEF block or by adding a return 0 in the @UseQuick trigger.
+- Updated SphereCrypt.ini.
+
+19-01-2020, Nolok
+- Fixed: Valid mounts being reported by the garbage collection (Issue #350).
+- Fixed: Warning issued when a keyring (which can act also as a classic container) had legit TDATA2 (gump ID) == 0 (Issue #352).
+
+23-01-2020, Drk84
+- Added: New ini flag DisplayArmorAsPercent.
+         When enabled, display, in the tooltip, the Armor of the item as a percentage of its full armor value, the percentage is based upon the body parts the item covers. 
+         Remember that the displayed value is just for "cosmetical" purpose and, by default, is not used when calculating combat damage, the full AR is the one used.
+		 In some cases, the Armor value displayed in the tooltip will not match with the sum of the AR of each piece of armor displayed in the status gump, this happens when an armor item cover location
+		 overlaps with another armor item cover location that as an higher value.
+		 Quick summary of layer body coverage:
+		  Helm: 15% of AR from head.
+		  Collar: 7% of AR from neck.
+		  Shirt/Chest/Tunic: 35% of AR from chest.
+		  Robe: A robe cover multiple position, 35% of AR from chest, 22% of AR from legs and 14% of AR from arms.
+		  Cape/Arms: 14% from arms.
+		  Pants/Skirt/Half-Apron/Legs: 22% of AR from legs.
+		  Gloves: 7% of AR from hands.
+		  Shield: 7% of AR from shield, if CombatParryEra has the 080 flag set it uses the 100% of AR  from the shield value.
+		 Only works when COMBAT_ELEMENTAL_ENGINE is disabled and FEATURES_AOS_UPDATE_B is enabled. (Issue #241)
+- Added: Missing layer LAYER_SPELL_Enchant.
+- Fixed: Loss of reagents and mana when a summoning spell fail because Maxfollower property was reached.
+		 Note: You will still lose reagents and mana if ManaLossOnFail and ReagentLossOnFail are enabled in the ini. (Issue #351)
+-Updated SphereCrypt.ini.
+
+25-01-2020, Nolok
+- Fixed: Invalid keywords in the [ADVANCE] block were likely to cause memory corruption.
+- Updated: SQlite to version 3.31.0.
+
+05-02-2020, Drk84
+- Added: New ini flag NPCCanFizzleOnHit, when enabled, a NPC can fizzle a spell when hit during combat. (Issue #241)
+- Added: TAG.NPCNoCastTill behaviour, this tag will not allow a NPC to cast a spell if tag.NPCNoCastTill > SERV.Time.
+		 Example:
+		  ON=@SpellCast
+		  tag.NPCNoCastTill = <eval <serv.time> + <argn3> + 50>
+		 In this case, the next spell will be casted after 5 seconds, ARGN3 is the casting speed of the spell, we add it because the spell will take place
+		 after ARGN3 seconds. If you are using PRECAST you probably don't need to add ARGN3. (Issue #241)
+
+01-03-2020, Nolok
+- Fixed: Auto-fixing figurines always treated them as mount items, finding fake errors (Issue #367).
+- Fixed: FORINSTANCES not parsing correctly the argument.
+
+04-03-2020, Drk84
+- [Port from Source, 10-09-2019, Coruja] Added: Missing context menu option "Rename" when player click on a owned pet. (Issue #368)
+- Fixed: Parrying skill increase when weapon / shield wielded does not match with CombatParryEra setting. (Issue #365)
+- Updated SphereCrypt.ini.
+
+15-03-2020, Nolok
+- Fixed: RANGE property broke when overridden.
+- Changed: Improved Map Block Cache, allowing a much faster access to map data and improving the speed of walking and LoS checks.
+- Fixed: Items not going to "sleep" when put in containers different than t_container and t_container_locked.

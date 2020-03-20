@@ -259,7 +259,7 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
     m_defense = 0;
 	m_height = 0;
 	m_ModMaxWeight = 0;
-    _iRange = 1 << 8;   // RangeH = 1; RangeL = 0
+    _iRange = RANGE_MAKE(1, 0);   // RangeH = 1; RangeL = 0
 
 	m_StepStealth = 0;
 	m_iVisualRange = UO_MAP_VIEW_SIZE_DEFAULT;
@@ -291,9 +291,9 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
     m_iKarma = 0;
 
 	Skill_Cleanup();
-    m_atUnk.m_Arg1 = 0;
-    m_atUnk.m_Arg2 = 0;
-    m_atUnk.m_Arg3 = 0;
+    m_atUnk.m_dwArg1 = 0;
+    m_atUnk.m_dwArg2 = 0;
+    m_atUnk.m_dwArg3 = 0;
 
 	g_World.m_uidLastNewChar = GetUID();	// for script access.
 
@@ -317,9 +317,9 @@ CChar::~CChar()
 {
     DeletePrepare();    // remove me early so virtuals will work.
 
-    g_World.DelCharTicking(this);
+    g_World._Ticker.DelCharTicking(this);
 
-    if ( IsStatFlag( STATF_RIDDEN ))
+    if (IsStatFlag(STATF_RIDDEN))
     {
         CItem * pItem = Horse_GetMountItem();
         if ( pItem )
@@ -327,17 +327,18 @@ CChar::~CChar()
             pItem->m_itFigurine.m_UID.InitUID();    // unlink it first.
             pItem->Delete();
         }
+        StatFlag_Clear(STATF_RIDDEN);
     }
 
-    if ( IsClient())    // this should never happen.
+    if (IsClient())    // this should never happen.
     {
         ASSERT( m_pClient );
         m_pClient->GetNetState()->markReadClosed();
     }
 
-    if ( m_pParty )
+    if (m_pParty)
     {
-        m_pParty->RemoveMember( GetUID(), (dword) GetUID() );
+        m_pParty->RemoveMember( GetUID(), GetUID() );
         m_pParty = nullptr;
     }
     Guild_Resign(MEMORY_GUILD);
@@ -428,7 +429,7 @@ void CChar::SetDisconnected()
         m_pParty->RemoveMember( GetUID(), GetUID() );
         m_pParty = nullptr;
     }
-    g_World.DelCharTicking(this);
+    g_World._Ticker.DelCharTicking(this);
 
     if ( IsDisconnected() )
         return;
@@ -545,7 +546,7 @@ void CChar::Delete(bool bforce)
 	if (( NotifyDelete() == false ) && !bforce)
 		return;
 
-    g_World.DelCharTicking(this);
+    g_World._Ticker.DelCharTicking(this);
 
 	// Character has been deleted
 	if ( IsClient() )
@@ -566,7 +567,7 @@ void CChar::GoSleep()
     ADDTOCALLSTACK("CChar::GoSleep");
     ASSERT(!IsSleeping());
     
-    g_World.DelCharTicking(this);   // do not insert into the mutex lock, it access back to this char.
+    g_World._Ticker.DelCharTicking(this);   // do not insert into the mutex lock, it access back to this char.
 
     THREAD_UNIQUE_LOCK_SET;
     CTimedObject::GoSleep();
@@ -585,7 +586,7 @@ void CChar::GoAwake()
     THREAD_UNIQUE_LOCK_SET;
 
     CTimedObject::GoAwake();       // Awake it first, otherwise some other things won't work
-    g_World.AddCharTicking(this);
+    g_World._Ticker.AddCharTicking(this);
     SetTimeout(Calc_GetRandVal(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
 
     for (CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext())
@@ -622,15 +623,9 @@ int CChar::IsWeird() const
 				}
 
 				// Make sure we are still linked back to the world.
-				const CItem * pItem = Horse_GetMountItem();
-				if ( pItem == nullptr )
+				if ( Horse_GetMountItem() == nullptr )
 				{
 					iResultCode = 0x1104;
-					return iResultCode;
-				}
-				if ( pItem->m_itFigurine.m_UID != GetUID())
-				{
-					iResultCode = 0x1105;
 					return iResultCode;
 				}
 			}
@@ -852,7 +847,7 @@ int CChar::FixWeirdness()
 				iResultCode = 0x1203;
 				return iResultCode;
 			}
-			const CItem * pFigurine = Horse_GetMountItem();
+			const CItem * pFigurine = Horse_GetValidMountItem();
 			if ( pFigurine == nullptr )
 			{
 				iResultCode = 0x1204;
@@ -1012,9 +1007,9 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
     m_ModMaxWeight = pChar->m_ModMaxWeight;
     _iRange = pChar->_iRange;
 
-	m_atUnk.m_Arg1 = pChar->m_atUnk.m_Arg1;
-	m_atUnk.m_Arg2 = pChar->m_atUnk.m_Arg2;
-	m_atUnk.m_Arg3 = pChar->m_atUnk.m_Arg3;
+	m_atUnk.m_dwArg1 = pChar->m_atUnk.m_dwArg1;
+	m_atUnk.m_dwArg2 = pChar->m_atUnk.m_dwArg2;
+	m_atUnk.m_dwArg3 = pChar->m_atUnk.m_dwArg3;
 
 	_timeNextRegen = pChar->_timeNextRegen;
 	m_timeCreate = pChar->m_timeCreate;
@@ -1145,7 +1140,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	// End copying items.
 	FixWeight();
 	Update();
-    g_World.AddCharTicking(this);
+    g_World._Ticker.AddCharTicking(this);
 	return true;
 }
 
@@ -2693,7 +2688,7 @@ do_default:
 			}
 			return true;
 		case CHC_SWING:
-			sVal.FormatVal( m_atFight.m_War_Swing_State );
+			sVal.FormatVal( m_atFight.m_iWarSwingState );
 			break;
 		case CHC_TOWNABBREV:
 			{
@@ -2772,16 +2767,23 @@ do_default:
 			sVal.FormatHex( m_Act_Prv_UID.GetObjUID() );
 			break;
 		case CHC_ACTDIFF:
-			sVal.FormatVal( m_Act_Difficulty * 10 );
+			if (m_Act_Difficulty >= 0)
+			{
+				sVal.FormatVal(m_Act_Difficulty * 10);
+			}
+			else
+			{
+				sVal.FormatVal(m_Act_Difficulty);
+			}
 			break;
 		case CHC_ACTARG1:
-			sVal.FormatHex( m_atUnk.m_Arg1 );
+			sVal.FormatHex( m_atUnk.m_dwArg1 );
 			break;
 		case CHC_ACTARG2:
-			sVal.FormatHex( m_atUnk.m_Arg2 );
+			sVal.FormatHex( m_atUnk.m_dwArg2 );
 			break;
 		case CHC_ACTARG3:
-			sVal.FormatHex( m_atUnk.m_Arg3 );
+			sVal.FormatHex( m_atUnk.m_dwArg3 );
 			break;
 		case CHC_ACTION:
 		{
@@ -2980,8 +2982,8 @@ do_default:
         case CHC_RANGE:
         {
             const int iRangeH = GetRangeH(), iRangeL = GetRangeL();
-            if ( iRangeH == 0 )
-                sVal.Format( "%d", iRangeL );
+            if ( iRangeL == 0 )
+                sVal.Format( "%d", iRangeH );
             else
                 sVal.Format( "%d,%d", iRangeH, iRangeL );
             break;
@@ -3223,6 +3225,7 @@ bool CChar::r_LoadVal( CScript & s )
         case CHC_OINT:
         case CHC_INT:
             Stat_SetBase(STAT_INT, s.GetArgUSVal());
+			break;
 		case CHC_MAXFOOD:
 			Stat_SetMax(STAT_FOOD, s.GetArgUSVal());
 			break;
@@ -3268,16 +3271,27 @@ bool CChar::r_LoadVal( CScript & s )
 			m_Act_Prv_UID = s.GetArgVal();
 			break;
 		case CHC_ACTDIFF:
-			m_Act_Difficulty = (s.GetArgVal() / 10);
+			{
+				int iVal = s.GetArgVal();
+				if (iVal < -1)
+				{
+					iVal = -1;
+				}
+				else if (iVal > 0)
+				{
+					iVal /= 10;
+				}
+				m_Act_Difficulty = iVal;
+			}
 			break;
 		case CHC_ACTARG1:
-			m_atUnk.m_Arg1 = s.GetArgVal();
+			m_atUnk.m_dwArg1 = s.GetArgVal();
 			break;
 		case CHC_ACTARG2:
-			m_atUnk.m_Arg2 = s.GetArgVal();
+			m_atUnk.m_dwArg2 = s.GetArgVal();
 			break;
 		case CHC_ACTARG3:
-			m_atUnk.m_Arg3 = s.GetArgVal();
+			m_atUnk.m_dwArg3 = s.GetArgVal();
 			break;
 		case CHC_ACTION:
 		{
@@ -3542,21 +3556,7 @@ bool CChar::r_LoadVal( CScript & s )
 			break;
         case CHC_RANGE:
         {
-            int64 piVal[2];
-            tchar *ptcTmp = Str_GetTemp();
-            Str_CopyLimitNull(ptcTmp, s.GetArgStr(), STR_TEMPLENGTH);
-            int iQty = Str_ParseCmds( ptcTmp, piVal, CountOf(piVal));
-            int iRange;
-            if ( iQty > 1 )
-            {
-                iRange = (int)((piVal[1] & 0xff) << 8); // highest byte contains the lowest value
-                iRange |= (int)(piVal[0] & 0xff);       // lowest byte contains the highest value
-            }
-            else
-            {
-                iRange = (int)(piVal[0] << 8);
-            }
-            _iRange = iRange;
+			_iRange = CBaseBaseDef::ConvertRangeStr(s.GetArgStr());
             break;
         }
         case CHC_RANGEH:
@@ -3590,7 +3590,7 @@ bool CChar::r_LoadVal( CScript & s )
                 int iVal = s.GetArgVal();
 				if ( iVal && ((iVal < -1) || (iVal > WAR_SWING_SWINGING) ) )
 					return false;
-				m_atFight.m_War_Swing_State = (WAR_SWING_TYPE)iVal;
+				m_atFight.m_iWarSwingState = (WAR_SWING_TYPE)iVal;
 			}
 			break;
 		case CHC_TITLE:
@@ -3614,7 +3614,7 @@ bool CChar::r_LoadVal( CScript & s )
             if (!(g_Cfg.m_iFeatureTOL & FEATURE_TOL_VIRTUALGOLD))
             {
                 int newGold = s.GetArgVal();
-                if (newGold <= 0)
+                if (newGold < 0)
                     return false;
 
                 int currentGold = ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD));
@@ -3740,12 +3740,12 @@ void CChar::r_Write( CScript & s )
 		*/
         if ((action > SKILL_NONE && action < SKILL_QTY) || action == NPCACT_FLEE || action == NPCACT_TALK || action == NPCACT_TALK_FOLLOW || action == NPCACT_RIDDEN)
         {
-            if (m_atUnk.m_Arg1 != 0)
-                s.WriteKeyHex("ACTARG1", m_atUnk.m_Arg1);
-            if (m_atUnk.m_Arg2 != 0)
-                s.WriteKeyHex("ACTARG2", m_atUnk.m_Arg2);
-            if (m_atUnk.m_Arg3 != 0)
-                s.WriteKeyHex("ACTARG3", m_atUnk.m_Arg3);
+            if (m_atUnk.m_dwArg1 != 0)
+                s.WriteKeyHex("ACTARG1", m_atUnk.m_dwArg1);
+            if (m_atUnk.m_dwArg2 != 0)
+                s.WriteKeyHex("ACTARG2", m_atUnk.m_dwArg2);
+            if (m_atUnk.m_dwArg3 != 0)
+                s.WriteKeyHex("ACTARG3", m_atUnk.m_dwArg3);
         }
 	}
 
@@ -4327,8 +4327,8 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			if ( !pSpellDef )
 				return false;
 
-			m_atMagery.m_Spell = SPELL_Polymorph;
-			m_atMagery.m_SummonID = (CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
+			m_atMagery.m_iSpell = SPELL_Polymorph;
+			m_atMagery.m_iSummonID = (CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
 			m_Act_UID = GetUID();
 			m_Act_Prv_UID = GetUID();
 

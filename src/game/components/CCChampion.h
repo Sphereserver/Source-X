@@ -10,12 +10,14 @@
 #include "../uo_files/uofiles_enums_creid.h"
 #include "../items/CItemMulti.h"
 #include "../chars/CChar.h"
+#include "../CScriptTriggerArgs.h"
+#include "../triggers.h"
 #include "CCSpawn.h"
 
 enum CHAMPION_ID
 {
     // Original champions.
-    CHAMPION_ABYSS,
+    CHAMPION_ABYSS = 1,
     CHAMPION_ARACHNID,
     CHAMPION_COLD_BLOOD,
     CHAMPION_FOREST_LORD,
@@ -51,8 +53,10 @@ private:
     // Retrieved from CCChampionDef
     typedef std::vector<CREID_TYPE> idNPC;
     typedef std::map<uchar, idNPC> idSpawn;
-    idSpawn _idSpawn;    ///< Defining how many uchar (or levels) this Champion has and the group of monsters for each level.
-    CREID_TYPE _idChampion;               ///< Boss id
+    idSpawn _spawnGroupsId;     ///< Defining how many uchar (or levels) this Champion has and the group of monsters for each level.
+    CResourceIDBase _idSpawn;   ///< legacy more1=ID of the Object to Spawn.
+    CREID_TYPE _idChampion;     ///< Boss id
+    bool _fChampionSummoned;    ///< True if the champion's boss has been summoned already (wether it was killed or not).
 
     // Ingame Spawn behaviour.
     bool _fActive;                  ///< Champion status
@@ -91,6 +95,8 @@ private:
 
 public:
     //static const char *m_sClassName;    ///< Class definition
+
+    CCSpawn* GetSpawnItem();
 
     /**
     * @brief Start the champion, setup everything needed.
@@ -142,13 +148,13 @@ public:
     * Store in m_WhiteCandle[m_WhiteCandles] the CItem stored in pCandle.
     * @param uid, if given (mostly during world loading) instead of creating a new candle, only the uid will be set to hold the already existing candle and do not have duplicates.
     */
-    void AddWhiteCandle(CUID uid = UID_UNUSED);
+    void AddWhiteCandle(const CUID& uid = CUID());
     /**
     * @brief Red candles check, add new one or I am in boss phase?
     *
     * @param uid, if given (mostly during world loading) instead of creating a new candle, only the uid will be set to hold the already existing candle and do not have duplicates.
     */
-    void AddRedCandle(CUID uid = UID_UNUSED);
+    void AddRedCandle(const CUID& uid = CUID());
     /**
     * @brief Deleting last added White Candle.
     */
@@ -174,13 +180,13 @@ public:
     *
     * @param uid UID of the character to add to the 'spawn'.
     */
-    void AddObj(CUID uid);
+    void AddObj(const CUID& uid);
     /**
     * @brief CCSpawn's replica: Remove one char from this 'spawn'.
     *
     * @param uid UID of the character to remove from the 'spawn'.
     */
-    void DelObj(CUID uid);
+    void DelObj(const CUID& uid);
 
     /**
     * @brief How many monsters do we need to kill to gain a White Candle.
@@ -193,12 +199,13 @@ public:
     /**
     * @brief Retrieves how much Red Candles are needed to reach next Champion's Level.
     *
+    * @param iLevel the level to check for (0 = reach for next Level).
     * More detailed description ...
     * Called from SetLevel() to set the amount of candles.
     * Value stored in morex (m_itNormal.m_morep.m_x).
     * @return how much red candles are needed to reach the next level
     */
-    byte GetCandlesPerLevel() const;
+    byte GetCandlesPerLevel(byte iLevel = 255) const;
     /**
     * @brief Set a new Level for this champion.
     *
@@ -223,6 +230,7 @@ public:
     virtual bool r_LoadVal(CScript & s) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override; // Execute command from script
     virtual void Copy(const CComponent *target) override;
+    TRIGRET_TYPE OnTrigger(ITRIG_TYPE trig, CTextConsole *pSrc, CScriptTriggerArgs *args);
 
     /************************************************************************
     * CItem related section.
@@ -271,7 +279,9 @@ public:
     virtual ~CCChampionDef();
     lpctstr GetName() const { return(m_sName); }
     virtual bool r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false) override;
-    virtual bool r_LoadVal(CScript & s) override;
+    virtual bool r_LoadVal(CScript& s) override;
+    virtual bool r_Load(CScript& s) override;
+
 };
 
 #endif //_INC_CCCHAMPION_H

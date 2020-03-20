@@ -214,7 +214,7 @@ bool CAccounts::Account_Delete( CAccount * pAccount )
 		return false;
 	}
 
-	m_Accounts.DeleteObj( pAccount );
+	m_Accounts.RemovePtr( pAccount );
 	return true;
 }
 
@@ -787,7 +787,7 @@ bool CAccount::CheckPasswordTries(CSocketAddress csaPeerName)
 		TimeTriesStruct_t & ttsData = itResult.first;
 		ttsData.m_Last = timeCurrent;
 
-		if ( ttsData.m_Delay > timeCurrent )
+		if ( ttsData.m_vcDelay > timeCurrent )
 		{
 			bReturn = false;
 		}
@@ -796,7 +796,7 @@ bool CAccount::CheckPasswordTries(CSocketAddress csaPeerName)
 			if ((( ttsData.m_Last - ttsData.m_First ) > 15* MSECS_PER_SEC) && (itResult.second < iAccountMaxTries))
 			{
 				ttsData.m_First = timeCurrent;
-				ttsData.m_Delay = 0;
+				ttsData.m_vcDelay = 0;
 				itResult.second = 0;
 			}
 			else
@@ -805,13 +805,13 @@ bool CAccount::CheckPasswordTries(CSocketAddress csaPeerName)
 
 				if ( itResult.second > iAccountMaxTries )
 				{
-					ttsData.m_First = ttsData.m_Delay;
-					ttsData.m_Delay = 0;
+					ttsData.m_First = ttsData.m_vcDelay;
+					ttsData.m_vcDelay = 0;
 					itResult.second = 0;
 				}
 				else if ( itResult.second == iAccountMaxTries )
 				{
-					ttsData.m_Delay = ttsData.m_Last + (llong)(g_Cfg.m_iClientLoginTempBan);
+					ttsData.m_vcDelay = ttsData.m_Last + (llong)(g_Cfg.m_iClientLoginTempBan);
 					bReturn = false;
 				}
 			}
@@ -824,7 +824,7 @@ bool CAccount::CheckPasswordTries(CSocketAddress csaPeerName)
 		TimeTriesStruct_t ttsData;
 		ttsData.m_First = timeCurrent;
 		ttsData.m_Last = timeCurrent;
-		ttsData.m_Delay = 0;
+		ttsData.m_vcDelay = 0;
 
 		m_BlockIP[dwCurrentIP] = std::make_pair(ttsData, 0);
 	}
@@ -1108,7 +1108,7 @@ bool CAccount::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 	{
 		// How many chars.
 		ptcKey += 5;
-		size_t i = Exp_GetVal(ptcKey);
+		size_t i = Exp_GetSTVal(ptcKey);
 		if ( m_Chars.IsValidIndex(i) )
 		{
 			pRef = m_Chars.GetChar(i).CharFind();
@@ -1116,7 +1116,7 @@ bool CAccount::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 		SKIP_SEPARATORS(ptcKey);
 		return true;
 	}
-	return( CScriptObj::r_GetRef( ptcKey, pRef ));
+	return CScriptObj::r_GetRef( ptcKey, pRef );
 }
 
 bool CAccount::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )

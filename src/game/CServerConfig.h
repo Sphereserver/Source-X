@@ -252,7 +252,8 @@ public:
 	bool m_fWordsOfPowerPlayer; // Words of Power for players.
 	bool m_fWordsOfPowerStaff;  // Words of Power for staff.
 	bool m_fEquippedCast;       // Allow casting while equipped.
-    bool m_fManaLossFail;    // Lose mana when spell casting failed.
+    bool m_fManaLossFail;       // Lose mana when spell casting failed.
+    bool m_fNPCCanFizzleOnHit;  // NPCs can fizzle the spell when hit in combat.
 	bool m_fReagentLossFail;    // Lose reagents when spell casting failed.
 	int  m_iMagicUnlockDoor;    // 1 in N chance of magic unlock working on doors -- 0 means never.
 	ITEMID_TYPE m_iSpell_Teleport_Effect_NPC;       // ID of the item shown when a NPC teleports.
@@ -307,10 +308,10 @@ public:
 	int  m_iCombatHitChanceEra;		// define hit chance formula to use on physical combat.
 	int  m_iCombatSpeedEra;			// define swing speed formula to use on physical combat.
 	int  m_iSpeedScaleFactor;		// fight skill delay = m_iSpeedScaleFactor / ( (dex + 100) * Weapon Speed ).
-    uint m_iCombatParryingEra;     // Parrying behaviour flags
-
+    uint m_iCombatParryingEra;      // Parrying behaviour flags
 	int  m_iSkillPracticeMax;		// max skill level a player can practice on dummies/targets upto.
 	bool m_iPacketDeathAnimation;	// packet 02c
+    bool m_fDisplayPercentAr;       // Display the ARMOR value in the tooltip as the % 
 
 	// Flags for controlling pvp/pvm behaviour of players
 	uint m_iCombatFlags;   // combat flags
@@ -549,8 +550,8 @@ public:
 	CRegionLinks m_RegionDefs;		// All [REGION ] stored inside.
 
 	// static definition stuff from *TABLE.SCP mostly.
-	CSObjArray< const CStartLoc* > m_StartDefs;			// Start points list
-	CValueCurveDef m_StatAdv[STAT_BASE_QTY];			// "skill curve"
+    CSObjArray<CStartLoc *> m_StartDefs;    // Start points list
+    CValueCurveDef m_StatAdv[STAT_BASE_QTY];			// "skill curve"
 	CSTypedArray<CPointMap> m_MoonGates;	// The array of moongates.
 
 	CResourceHashArray m_WebPages;		// These can be linked back to the script.
@@ -825,8 +826,8 @@ public:
      */
 	lpctstr GetNotoTitle( int iLevel, bool bFemale ) const;
 
-	const CSphereMulti * GetMultiItemDefs( CItem * pItem );
-	const CSphereMulti * GetMultiItemDefs( ITEMID_TYPE itemid );
+	const CUOMulti * GetMultiItemDefs( CItem * pItem );
+	const CUOMulti * GetMultiItemDefs( ITEMID_TYPE itemid );
 
     /**
      * @brief   Query if 'ch' is a console command or ingame one.

@@ -16,9 +16,12 @@ enum ShipDelay
     ShipDelay_Fast = 250
 };
 
-CCMultiMovable::CCMultiMovable(bool fCanTurn)
+CCMultiMovable::CCMultiMovable(bool fCanTurn) :
+    m_shipSpeed{}
 {
     _fCanTurn = fCanTurn;
+    _eSpeedMode = SMS_NORMAL;
+    _pCaptain = nullptr;
 }
 
 void CCMultiMovable::SetCaptain(CTextConsole * pSrc)
@@ -601,18 +604,19 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
 bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
 {
     ADDTOCALLSTACK("CCMultiMovable::Move");
-    CItem *pItemThis = dynamic_cast<CItem*>(this);
-    ASSERT(pItemThis);
-    CItemMulti *pMulti = static_cast<CItemMulti*>(pItemThis);
-    if (dir >= DIR_QTY)
+    if ((dir >= DIR_QTY) || (dir <= DIR_INVALID))
         return false;
 
+    CItemMulti *pMulti = static_cast<CItemMulti*>(this);
     const CRegion* pMultiRegion = pMulti->GetRegion();
     if (pMultiRegion == nullptr)
     {
         DEBUG_ERR(("Ship bad region\n"));
         return false;
     }
+
+    CItem* pItemThis = dynamic_cast<CItem*>(this);
+    ASSERT(pItemThis);
 
     CPointMap ptDelta;
     ptDelta.ZeroPoint();

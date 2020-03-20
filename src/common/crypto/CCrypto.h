@@ -158,9 +158,9 @@ private:
 protected:
 	// -------------------- MD5 ------------------------------
 	#define MD5_RESET 0x0F
-	CMD5 * md5_engine;
-	uint md5_position;
-	byte md5_digest[16];
+	CMD5 * m_md5_engine;
+	uint m_md5_position;
+	byte m_md5_digest[16];
 protected:
 	bool EncryptMD5( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
 	void InitMD5(byte * ucInitialize);

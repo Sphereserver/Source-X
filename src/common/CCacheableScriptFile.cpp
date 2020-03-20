@@ -78,15 +78,18 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
             buf.setAt(0, '\0');
             fgets(buf, SCRIPT_MAX_LINE_LEN, _pStream);
             uiStrLen = strlen(buf);
-            if (uiStrLen > INT_MAX)
-                uiStrLen = INT_MAX;
+            ASSERT(SCRIPT_MAX_LINE_LEN < INT_MAX);
+            if (uiStrLen > SCRIPT_MAX_LINE_LEN)
+                uiStrLen = SCRIPT_MAX_LINE_LEN;
 
-            // first line may contain utf marker
-            if ( fFirstLine && uiStrLen >= 3 &&
+            // first line may contain utf marker (byte order mark)
+            if (fFirstLine && uiStrLen >= 3 &&
                 (uchar)(buf[0]) == 0xEF &&
                 (uchar)(buf[1]) == 0xBB &&
-                (uchar)(buf[2]) == 0xBF )
+                (uchar)(buf[2]) == 0xBF)
+            {
                 fUTF = true;
+            }
 
             _fileContent->emplace_back( (fUTF ? &buf[3]:buf), uiStrLen - (fUTF ? 3:0) );
             fFirstLine = false;

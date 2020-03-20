@@ -39,6 +39,8 @@
 lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
+	"@AddRedCandle",
+	"@AddWhiteCandle",
 	"@AfterClick",
 	"@Buy",
 	"@Click",
@@ -62,11 +64,13 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	"@PICKUP_PACK",	// picked up from inside some container.
 	"@PICKUP_SELF", // picked up from here
 	"@PICKUP_STACK",	// was picked up from a stack
+	"@PreSpawn",
     "@Redeed",
     "@RegionEnter",
     "@RegionLeave",
 	"@SELL",
 	"@Ship_Turn",
+	"@Spawn",
 	"@SpellEffect",		// cast some spell on me.
 	"@STEP",			// I have been walked on.
 	"@TARGON_CANCEL",
@@ -100,7 +104,7 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEM
     m_type = IT_NORMAL;
 	m_Attr = 0;
 	m_CanUse = pItemDef->m_CanUse;
-	m_amount = 1;
+	m_wAmount = 1;
 	m_containedGridIndex = 0;
 	m_dwDispIndex = ITEMID_NOTHING;
 
@@ -173,7 +177,7 @@ CItem::~CItem()
 				CChar * pHorse = m_itFigurine.m_UID.CharFind();
 				if ( pHorse && pHorse->IsDisconnected() && ! pHorse->m_pPlayer )
 				{
-					pHorse->m_atRidden.m_FigurineUID = UID_UNUSED;
+                    pHorse->m_atRidden.m_uidFigurine.InitUID();
 					pHorse->Delete();
 				}
 			}
@@ -186,7 +190,7 @@ CItem::~CItem()
         CItemMulti *pMulti = static_cast<CItemMulti*>(_uidMultiComponent.ItemFind());
         if (pMulti)
         {
-            pMulti->DelComp(GetUID());
+            pMulti->DeleteComponent(GetUID());
         }
     }
     if (_uidMultiLockDown.IsValidUID())
@@ -627,7 +631,7 @@ bool CItem::IsMovable() const
 int CItem::GetVisualRange() const	// virtual
 {
 	if ( GetDispID() >= ITEMID_MULTI ) // ( IsTypeMulti() ) why not this?
-		return( UO_MAP_VIEW_RADAR );
+		return UO_MAP_VIEW_RADAR;
 	return UO_MAP_VIEW_SIZE_DEFAULT;
 }
 
@@ -996,16 +1000,16 @@ int CItem::FixWeirdness()
         case IT_SHIP_HOLD_LOCK:
         case IT_DOOR_LOCKED:
             // Doors and containers must have a lock complexity set.
-            if (!m_itContainer.m_lock_complexity)
+            if (!m_itContainer.m_dwLockComplexity)
             {
-                m_itContainer.m_lock_complexity = 500 + Calc_GetRandVal(600);
+                m_itContainer.m_dwLockComplexity = 500 + Calc_GetRandVal(600);
             }
             break;
 
         case IT_POTION:
-            if (m_itPotion.m_skillquality == 0) // store bought ?
+            if (m_itPotion.m_dwSkillQuality == 0) // store bought ?
             {
-                m_itPotion.m_skillquality = Calc_GetRandVal(950);
+                m_itPotion.m_dwSkillQuality = Calc_GetRandVal(950);
             }
             break;
         case IT_MAP_BLANK:
@@ -1184,7 +1188,7 @@ bool CItem::IsStackableException() const
 {
 	ADDTOCALLSTACK("CItem::IsStackableException");
 	// IS this normally unstackable type item now stackable ?
-	// NOTE: This means the m_amount can be = 0
+	// NOTE: This means the m_vcAmount can be = 0
 
 	if ( IsTopLevel() && IsAttr( ATTR_INVIS ))
 		return true;	// resource tracker.
@@ -1448,7 +1452,7 @@ bool CItem::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the groun
 
 	CSector * pSector = pt.GetSector();
 	ASSERT( pSector );
-	pSector->MoveItemToSector( this, IsTimerSet());
+	pSector->MoveItemToSector( this, IsTimerSet() );	// This also awakes the item
 
 	// Is this area too complex ?
 	if ( ! g_Serv.IsLoading())
@@ -1636,7 +1640,7 @@ lpctstr CItem::GetName() const
 
 	// Watch for names that should be pluralized.
 	// Get rid of the % in the names.
-	return( CItemBase::GetNamePluralize( pszNameBase, m_amount != 1 && ! IsType(IT_CORPSE) ));
+	return CItemBase::GetNamePluralize( pszNameBase, ((m_wAmount != 1) && ! IsType(IT_CORPSE)) );
 }
 
 lpctstr CItem::GetNameFull( bool fIdentified ) const
@@ -1655,7 +1659,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 	ASSERT(pItemDef);
 
 	bool fSingular = (GetAmount()==1 || IsType(IT_CORPSE));
-	if (fSingular) // m_corpse_DispID is m_amount
+	if (fSingular) // m_corpse_DispID is m_vcAmount
 	{
 		if ( ! IsIndividualName())
 			len += Str_CopyLen( pTemp+len, pItemDef->GetArticleAndSpace());
@@ -1756,22 +1760,22 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 	switch ( m_type )
 	{
 		case IT_LOOM:
-			if ( m_itLoom.m_ClothQty )
+			if ( m_itLoom.m_iClothQty )
 			{
 				ITEMID_TYPE AmmoID = (ITEMID_TYPE)m_itLoom.m_ridCloth.GetResIndex();
 				const CItemBase * pAmmoDef = CItemBase::FindItemBase(AmmoID);
 				if ( pAmmoDef )
-					len += sprintf( pTemp+len, " (%d %ss)", m_itLoom.m_ClothQty, pAmmoDef->GetName());
+					len += sprintf( pTemp+len, " (%d %ss)", m_itLoom.m_iClothQty, pAmmoDef->GetName());
 			}
 			break;
 
 		case IT_ARCHERY_BUTTE:
-			if ( m_itArcheryButte.m_AmmoCount )
+			if ( m_itArcheryButte.m_iAmmoCount )
 			{
 				ITEMID_TYPE AmmoID = (ITEMID_TYPE)(m_itArcheryButte.m_ridAmmoType.GetResIndex());
 				const CItemBase * pAmmoDef = CItemBase::FindItemBase(AmmoID);
 				if ( pAmmoDef )
-					len += sprintf( pTemp+len, " %d %ss", m_itArcheryButte.m_AmmoCount, pAmmoDef->GetName());
+					len += sprintf( pTemp+len, " %d %ss", m_itArcheryButte.m_iAmmoCount, pAmmoDef->GetName());
 			}
 			break;
 
@@ -2031,7 +2035,7 @@ void CItem::SetAmount(word amount )
 	if ( oldamount == amount )
 		return;
 
-	m_amount = amount;
+	m_wAmount = amount;
 	// sometimes the diff graphics for the types are not in the client.
 	if ( IsType(IT_ORE) )
 	{
@@ -2116,7 +2120,7 @@ void CItem::WriteUOX( CScript & s, int index )
 	s.Printf( "Z %d\n", GetTopZ());
 	s.Printf( "CONT %d\n", -1 );
 	s.Printf( "TYPE %d\n", m_type );
-	s.Printf( "AMOUNT %d\n", m_amount );
+	s.Printf( "AMOUNT %d\n", m_wAmount );
 	s.Printf( "COLOR %d\n", GetHue());
 	//ATT 5
 	//VALUE 1
@@ -2284,7 +2288,7 @@ void CItem::r_Write( CScript & s )
     CEntityProps::r_Write(s);
 }
 
-bool CItem::LoadSetContainer( CUID uid, LAYER_TYPE layer )
+bool CItem::LoadSetContainer(const CUID& uidCont, LAYER_TYPE layer )
 {
 	ADDTOCALLSTACK("CItem::LoadSetContainer");
 	// Set the CItem in a container of some sort.
@@ -2292,10 +2296,10 @@ bool CItem::LoadSetContainer( CUID uid, LAYER_TYPE layer )
 	// "CONT" IC_CONT
 	// NOTE: We don't have a valid point in the container yet probably. get that later.
 
-	CObjBase * pObjCont = uid.ObjFind();
+	CObjBase * pObjCont = uidCont.ObjFind();
 	if ( pObjCont == nullptr )
 	{
-		DEBUG_ERR(( "Invalid container 0%x\n", (dword) uid ));
+		DEBUG_ERR(( "Invalid container 0%x\n", (dword)uidCont));
 		return false;	// not valid object.
 	}
 
@@ -2322,7 +2326,7 @@ bool CItem::LoadSetContainer( CUID uid, LAYER_TYPE layer )
 		if ( pChar != nullptr )
 		{
 			// equip the item
-			CItemBase * pItemDef = Item_GetDef();
+			const CItemBase * pItemDef = Item_GetDef();
 			ASSERT(pItemDef);
 			if ( ! layer )
 				layer = pItemDef->GetEquipLayer();
@@ -2332,7 +2336,7 @@ bool CItem::LoadSetContainer( CUID uid, LAYER_TYPE layer )
 		}
 	}
 
-	DEBUG_ERR(( "Non container uid=0%x,id=0%x\n", (dword) uid, pObjCont->GetBaseID() ));
+	DEBUG_ERR(( "Non container uid=0%x,id=0%x\n", (dword)uidCont, pObjCont->GetBaseID() ));
 	return false;		// not a container.
 }
 
@@ -2620,7 +2624,7 @@ bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 			sVal.FormatVal(LOWORD(m_itNormal.m_more1));
 			break;
 		case IC_HITPOINTS:
-			sVal.FormatVal( IsTypeArmorWeapon() ? m_itArmor.m_Hits_Cur : 0 );
+			sVal.FormatVal( IsTypeArmorWeapon() ? m_itArmor.m_wHitsCur : 0 );
 			break;
 		case IC_ID:
 			fDoDefault = true;
@@ -3055,7 +3059,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				DEBUG_ERR(("Item:Hitpoints assigned for non-weapon %s\n", GetResourceName()));
 				return false;
 			}
-			m_itArmor.m_Hits_Cur = m_itArmor.m_Hits_Max = (word)(s.GetArgVal());
+			m_itArmor.m_wHitsCur = m_itArmor.m_wHitsMax = (word)(s.GetArgVal());
             break;
 		case IC_ID:
 		{
@@ -3648,20 +3652,26 @@ bool CItem::SetType(IT_TYPE type, bool fPreCheck)
         {
             pComp = GetComponent(COMP_CHAMPION);
             if (pComp)
+            {
                 UnsubscribeComponent(pComp);
+            }
             pComp = GetComponent(COMP_SPAWN);
             if (pComp)
+            {
                 UnsubscribeComponent(pComp);
+            }
         }
     }
     else
     {
-        pComp = GetComponent(COMP_CHAMPION);
-        if (!pComp)
+        if (!GetComponent(COMP_CHAMPION))
+        {
             SubscribeComponent(new CCChampion(this));
-        pComp = GetComponent(COMP_SPAWN);
-        if (!pComp)
-            SubscribeComponent(new CCSpawn(this));
+        }
+        if (!GetComponent(COMP_SPAWN))
+        {
+            SubscribeComponent(new CCSpawn(this, true));
+        }
     }
 
     pComp = GetComponent(COMP_ITEMDAMAGEABLE);
@@ -3806,7 +3816,7 @@ void CItem::DupeCopy( const CItem * pItem )
 	SetBase( pItem->Item_GetDef() );
 	SetTimeout( pItem->GetTimerDiff() );
 	SetType(pItem->m_type);
-	m_amount = pItem->m_amount;
+	m_wAmount = pItem->m_wAmount;
 	m_Attr  = pItem->m_Attr;
 	m_CanMask = pItem->m_CanMask;
 	m_CanUse = pItem->m_CanUse;
@@ -3843,14 +3853,25 @@ CObjBase * CItem::GetContainer() const
 	return ( dynamic_cast <CObjBase*> (GetParent()));
 }
 
-CObjBaseTemplate * CItem::GetTopLevelObj() const
+const CObjBaseTemplate * CItem::GetTopLevelObj() const
 {
 	// recursively get the item that is at "top" level.
 	const CObjBase* pObj = GetContainer();
 	if ( !pObj )
-		return const_cast <CItem*>(this);
+		return this;
 	else if ( pObj == this )		// to avoid script errors setting same CONT
-		return const_cast <CItem*>(this);
+		return this;
+	return pObj->GetTopLevelObj();
+}
+
+CObjBaseTemplate* CItem::GetTopLevelObj()
+{
+	// recursively get the item that is at "top" level.
+	CObjBase* pObj = GetContainer();
+	if (!pObj)
+		return this;
+	else if (pObj == this)		// to avoid script errors setting same CONT
+		return this;
 	return pObj->GetTopLevelObj();
 }
 
@@ -4026,7 +4047,8 @@ CREID_TYPE CItem::GetCorpseType() const
 void CItem::SetCorpseType( CREID_TYPE id )
 {
 	// future: strongly typed enums will remove the need for this cast
-	m_amount = (word)id;	// m_corpse_DispID
+    ASSERT(id <= UINT16_MAX);
+	m_wAmount = (word)id;	// m_corpse_DispID
 }
 
 SPELL_TYPE CItem::GetScrollSpell() const
@@ -4553,9 +4575,9 @@ int CItem::Armor_GetDefense() const
 		return 0;
 
 	int iVal = m_defenseBase + m_ModAr;
-	if ( IsSetOF(OF_ScaleDamageByDurability) && m_itArmor.m_Hits_Max > 0 && m_itArmor.m_Hits_Cur < m_itArmor.m_Hits_Max )
+	if ( IsSetOF(OF_ScaleDamageByDurability) && m_itArmor.m_wHitsMax > 0 && m_itArmor.m_wHitsCur < m_itArmor.m_wHitsMax )
 	{
-		int iRepairPercent = 50 + ((50 * m_itArmor.m_Hits_Cur) / m_itArmor.m_Hits_Max);
+		int iRepairPercent = 50 + ((50 * m_itArmor.m_wHitsCur) / m_itArmor.m_wHitsMax);
 		iVal = (int)IMulDivLL( iVal, iRepairPercent, 100 );
 	}
 	if ( IsAttr(ATTR_MAGIC) )
@@ -4577,9 +4599,9 @@ int CItem::Weapon_GetAttack(bool bGetRange) const
 	if ( bGetRange )
 		iVal += m_attackRange;
 
-	if ( IsSetOF(OF_ScaleDamageByDurability) && m_itArmor.m_Hits_Max > 0 && m_itArmor.m_Hits_Cur < m_itArmor.m_Hits_Max )
+	if ( IsSetOF(OF_ScaleDamageByDurability) && m_itArmor.m_wHitsMax > 0 && m_itArmor.m_wHitsCur < m_itArmor.m_wHitsMax )
 	{
-		int iRepairPercent = 50 + ((50 * m_itArmor.m_Hits_Cur) / m_itArmor.m_Hits_Max);
+		int iRepairPercent = 50 + ((50 * m_itArmor.m_wHitsCur) / m_itArmor.m_wHitsMax);
 		iVal = (int)IMulDivLL( iVal, iRepairPercent, 100 );
 	}
 	if ( IsAttr(ATTR_MAGIC) && ! IsType(IT_WAND))
@@ -5084,7 +5106,7 @@ int CItem::Use_LockPick( CChar * pCharSrc, bool fTest, bool fFail )
 		pCharSrc->Use_KeyChange( this );
 	}
 
-	return( m_itContainer.m_lock_complexity / 10 );
+	return( m_itContainer.m_dwLockComplexity / 10 );
 }
 
 void CItem::SetSwitchState()
@@ -5142,8 +5164,8 @@ int CItem::Use_Trap()
 		SetTrapState( IT_TRAP_ACTIVE, m_itTrap.m_AnimID, m_itTrap.m_wAnimSec );
 	}
 
-	if ( ! m_itTrap.m_Damage ) m_itTrap.m_Damage = 2;
-	return m_itTrap.m_Damage;	// base damage done.
+	if ( ! m_itTrap.m_iDamage ) m_itTrap.m_iDamage = 2;
+	return m_itTrap.m_iDamage;	// base damage done.
 }
 
 bool CItem::SetMagicLock( CChar * pCharSrc, int iSkillLevel )
@@ -5368,7 +5390,7 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			m_itRune.m_ptMark = pCharSrc->GetTopPoint();
 			if ( IsType(IT_RUNE) )
 			{
-				m_itRune.m_Strength = pSpellDef->m_Effect.GetLinear( iSkillLevel );
+				m_itRune.m_Strength = pSpellDef->m_vcEffect.GetLinear( iSkillLevel );
 				SetName( pCharSrc->m_pArea->GetName() );
 			}
 			break;
@@ -5399,23 +5421,23 @@ int CItem::Armor_GetRepairPercent() const
 {
 	ADDTOCALLSTACK("CItem::Armor_GetRepairPercent");
 
-	if ( !m_itArmor.m_Hits_Max || ( m_itArmor.m_Hits_Max < m_itArmor.m_Hits_Cur ))
+	if ( !m_itArmor.m_wHitsMax || ( m_itArmor.m_wHitsMax < m_itArmor.m_wHitsCur ))
 		return 100;
- 	return IMulDiv( m_itArmor.m_Hits_Cur, 100, m_itArmor.m_Hits_Max );
+ 	return IMulDiv( m_itArmor.m_wHitsCur, 100, m_itArmor.m_wHitsMax );
 }
 
 lpctstr CItem::Armor_GetRepairDesc() const
 {
 	ADDTOCALLSTACK("CItem::Armor_GetRepairDesc");
-	if ( m_itArmor.m_Hits_Cur > m_itArmor.m_Hits_Max )
+	if ( m_itArmor.m_wHitsCur > m_itArmor.m_wHitsMax )
 		return g_Cfg.GetDefaultMsg( DEFMSG_ITEMSTATUS_PERFECT );
-	else if ( m_itArmor.m_Hits_Cur == m_itArmor.m_Hits_Max )
+	else if ( m_itArmor.m_wHitsCur == m_itArmor.m_wHitsMax )
 		return g_Cfg.GetDefaultMsg( DEFMSG_ITEMSTATUS_FULL );
-	else if ( m_itArmor.m_Hits_Cur > m_itArmor.m_Hits_Max / 2 )
+	else if ( m_itArmor.m_wHitsCur > m_itArmor.m_wHitsMax / 2 )
 		return g_Cfg.GetDefaultMsg( DEFMSG_ITEMSTATUS_SCRATCHED );
-	else if ( m_itArmor.m_Hits_Cur > m_itArmor.m_Hits_Max / 3 )
+	else if ( m_itArmor.m_wHitsCur > m_itArmor.m_wHitsMax / 3 )
 		return g_Cfg.GetDefaultMsg( DEFMSG_ITEMSTATUS_WELLWORN );
-	else if ( m_itArmor.m_Hits_Cur > 3 )
+	else if ( m_itArmor.m_wHitsCur > 3 )
 		return g_Cfg.GetDefaultMsg( DEFMSG_ITEMSTATUS_BADLY );
 	else
 		return g_Cfg.GetDefaultMsg( DEFMSG_ITEMSTATUS_FALL_APART );
@@ -5438,17 +5460,17 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 		return 0;
 
     const bool fHasMaxHits = IsTypeArmorWeapon();
-    if (fHasMaxHits && (m_itArmor.m_Hits_Max > 0))
+    if (fHasMaxHits && (m_itArmor.m_wHitsMax > 0))
     {
         const int64 iSelfRepair = GetDefNum("SELFREPAIR", true);
         if (iSelfRepair > Calc_GetRandVal(10))
         {
-            const ushort uiOldHits = m_itArmor.m_Hits_Cur;
-            m_itArmor.m_Hits_Cur += 2;
-            if (m_itArmor.m_Hits_Cur > m_itArmor.m_Hits_Max)
-                m_itArmor.m_Hits_Cur = m_itArmor.m_Hits_Max;
+            const ushort uiOldHits = m_itArmor.m_wHitsCur;
+            m_itArmor.m_wHitsCur += 2;
+            if (m_itArmor.m_wHitsCur > m_itArmor.m_wHitsMax)
+                m_itArmor.m_wHitsCur = m_itArmor.m_wHitsMax;
 
-            if (uiOldHits != m_itArmor.m_Hits_Cur)
+            if (uiOldHits != m_itArmor.m_wHitsCur)
                 UpdatePropertyFlag();
 
             return 0;
@@ -5499,7 +5521,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 
 			if ( pSrc )
 				pItem->m_uidLink = pSrc->GetUID();
-			pItem->m_itExplode.m_iDamage = (word)(g_Cfg.GetSpellEffect(SPELL_Explosion, m_itPotion.m_skillquality));
+			pItem->m_itExplode.m_iDamage = (word)(g_Cfg.GetSpellEffect(SPELL_Explosion, m_itPotion.m_dwSkillQuality));
 			pItem->m_itExplode.m_wFlags = pSpell->IsSpellType(SPELLFLAG_NOUNPARALYZE) ? DAMAGE_FIRE|DAMAGE_NOUNPARALYZE : DAMAGE_FIRE;
 			pItem->m_itExplode.m_iDist = 2;
 			pItem->SetType(IT_EXPLOSION);
@@ -5519,7 +5541,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 			return 0;
 		}
 
-		if ( (dword)iDmg > m_itWeb.m_Hits_Cur || ( uType & DAMAGE_FIRE ))
+		if ( (dword)iDmg > m_itWeb.m_wHitsCur || ( uType & DAMAGE_FIRE ))
 		{
 			if ( pSrc )
 				pSrc->SysMessage( g_Cfg.GetDefaultMsg( DEFMSG_WEB_DESTROY ) );
@@ -5529,7 +5551,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 
 		if ( pSrc )
 			pSrc->SysMessage( g_Cfg.GetDefaultMsg( DEFMSG_WEB_WEAKEN ) );
-		m_itWeb.m_Hits_Cur -= iDmg;
+		m_itWeb.m_wHitsCur -= iDmg;
 		return 1;
 
 	default:
@@ -5542,9 +5564,9 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 forcedamage:
 		CChar * pChar = dynamic_cast <CChar*> ( GetTopLevelObj());
 
-		if ( m_itArmor.m_Hits_Cur <= 1 )
+		if ( m_itArmor.m_wHitsCur <= 1 )
 		{
-			m_itArmor.m_Hits_Cur = 0;
+			m_itArmor.m_wHitsCur = 0;
 			Emote( g_Cfg.GetDefaultMsg( DEFMSG_ITEM_DMG_DESTROYED ) );
 			Delete();
 			return( INT32_MAX );
@@ -5553,7 +5575,7 @@ forcedamage:
 		const int previousDefense = Armor_GetDefense();
 		const int previousDamage = Weapon_GetAttack();
 
-		--m_itArmor.m_Hits_Cur;
+		--m_itArmor.m_wHitsCur;
 		UpdatePropertyFlag();
 
 		if (pChar != nullptr && IsItemEquipped() )
@@ -5593,7 +5615,7 @@ forcedamage:
 			{
 				// Tell target they got damaged.
 				*pszMsg = 0;
-				if (m_itArmor.m_Hits_Cur < m_itArmor.m_Hits_Max / 2)
+				if (m_itArmor.m_wHitsCur < m_itArmor.m_wHitsMax / 2)
 				{
 					int iPercent = Armor_GetRepairPercent();
 					if (pChar->Skill_GetAdjusted(SKILL_ARMSLORE) / 10 > iPercent)
@@ -5618,7 +5640,7 @@ void CItem::OnExplosion()
 	// Async explosion.
 	// RETURN: true = done. (delete the animation)
 
-	ASSERT( IsTopLevel());
+	// It can explode both on the ground and on the player's hand, if he doesn't throw it in time.
 	ASSERT( m_type == IT_EXPLOSION );
 
 	// AOS damage types (used by COMBAT_ELEMENTAL_ENGINE)
@@ -5846,7 +5868,7 @@ bool CItem::OnTick()
 			{
 				EXC_SET_BLOCK("default behaviour::IT_TRAP_INACTIVE");
 				// Set inactive til someone triggers it again.
-				if ( m_itTrap.m_fPeriodic )
+				if ( m_itTrap.m_bPeriodic )
 					SetTrapState( IT_TRAP_ACTIVE, m_itTrap.m_AnimID, m_itTrap.m_wResetSec );
 				else
 					SetTrapState( IT_TRAP, GetDispID(), -1 );
@@ -5913,8 +5935,8 @@ bool CItem::OnTick()
 			{
 				EXC_SET_BLOCK("default behaviour::IT_BEE_HIVE");
 				// Regenerate honey count
-				if ( m_itBeeHive.m_honeycount < 5 )
-					++m_itBeeHive.m_honeycount;
+				if ( m_itBeeHive.m_iHoneyCount < 5 )
+					++m_itBeeHive.m_iHoneyCount;
 				SetTimeoutS( 15 * 60);
 			}
 			return true;

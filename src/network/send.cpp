@@ -1229,14 +1229,14 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 	writeInt16(m_count);
 	seek(l);
 
-	push(target);
-
 	if (m_count > 0)
 	{
 		// send tooltips
         for (CItem *pItem : items)
 			target->addAOSTooltip(pItem, false, fIsShop);
-	}	
+	}
+
+	push(target);
 }
 
 PacketItemContents::PacketItemContents(const CClient* target, const CItem* spellbook) : PacketSend(XCMD_Content, 5, PRI_NORMAL),
@@ -1377,6 +1377,7 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
             for (int i = 0; i < padding; ++i)
                 writeByte(0);
 
+			break;
 		}
 		case 0x02:
 		{
@@ -1387,6 +1388,7 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
 			writeByte(0x02);
 			writeByte(0);
 			writeStringFixedASCII(g_Serv.GetName(),28);
+			break;
 		}
 		case 0x03:
 		{
@@ -1396,6 +1398,7 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
 			writeInt16(0);
 			writeByte(0x03);
 			writeByte(0);
+			break;
 		}
 		case 0xFF:
 		{
@@ -1409,6 +1412,7 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
 			writeInt16(0);
 			writeByte(0xFF);
 			writeByte(bMap);
+			break;
 		}
 	}
 
@@ -3240,6 +3244,7 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 {
 	ADDTOCALLSTACK("PacketCharacterList::PacketCharacterList");
 
+	ASSERT(target != nullptr);
 	const CAccount * account = target->GetAccount();
 	ASSERT(account != nullptr);
 
@@ -3254,8 +3259,8 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 	writeByte((byte)count);
 	skip(count * 60);
 
-	uint startCount = (uint)g_Cfg.m_StartDefs.size();
-	writeByte((byte)startCount);
+	size_t startCount = g_Cfg.m_StartDefs.size();
+	writeByte( byte((startCount > UINT8_MAX) ? UINT8_MAX : startCount) );
 
 	// since 7.0.13.0, start locations have extra information
 	dword tmVer = (dword)(account->m_TagDefs.GetKeyNum("clientversion"));
@@ -3263,10 +3268,11 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 	if ( tmVer >= MINCLIVER_EXTRASTARTINFO || tmVerReported >= MINCLIVER_EXTRASTARTINFO )
 	{
 		// newer clients receive additional start info
-		for ( uint i = 0; i < startCount; ++i )
+		for (size_t i = 0; i < startCount; ++i )
 		{
 			const CStartLoc *start = g_Cfg.m_StartDefs[i];
-			writeByte((byte)(i));
+			ASSERT(start);
+			writeByte((byte)i);
 			writeStringFixedASCII(static_cast<lpctstr>(start->m_sArea), MAX_NAME_SIZE + 2);
 			writeStringFixedASCII(static_cast<lpctstr>(start->m_sName), MAX_NAME_SIZE + 2);
 			writeInt32(start->m_pt.m_x);
@@ -3279,10 +3285,11 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 	}
 	else
 	{
-		for ( uint i = 0; i < startCount; ++i )
+		for (size_t i = 0; i < startCount; ++i )
 		{
 			const CStartLoc *start = g_Cfg.m_StartDefs[i];
-			writeByte((byte)(i));
+			ASSERT(start);
+			writeByte((byte)i);
 			writeStringFixedASCII(static_cast<lpctstr>(start->m_sArea), MAX_NAME_SIZE + 1);
 			writeStringFixedASCII(static_cast<lpctstr>(start->m_sName), MAX_NAME_SIZE + 1);
 		}
@@ -3290,21 +3297,22 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 
     if (tmVerReported > 1260000)
     {
+		const CNetState* ns = target->GetNetState();
         dword flags = g_Cfg.GetPacketFlag(true, (RESDISPLAY_VERSION)(account->GetResDisp()),
             maximum(account->GetMaxChars(), (byte)(account->m_Chars.GetCharCount())));
-        if ( !target->GetNetState()->getClientType() )
+        if (ns->getClientType() == CLIENTTYPE_2D)
             flags |= 0x400;
         writeInt32(flags);
 
-		if (target->GetNetState()->isClientEnhanced())
-		{
-			word iLastCharSlot = 0;
-			for (ushort i = 0; i < count; ++i)
-			{
-				if (!account->m_Chars.IsValidIndex(i))
-					continue;
-				if (account->m_Chars.GetChar(i) != account->m_uidLastChar)
-					continue;
+        if (ns->isClientEnhanced() )
+        {
+            word iLastCharSlot = 0;
+            for ( ushort i = 0; i < count; ++i )
+            {
+                if ( !account->m_Chars.IsValidIndex(i) )
+                    continue;
+                if ( account->m_Chars.GetChar(i) != account->m_uidLastChar )
+                    continue;
 
 				iLastCharSlot = (word)i;
 				break;
@@ -5198,7 +5206,7 @@ PacketContainer::PacketContainer(const CClient* target, CObjBase** objects, uint
 		CObjBase* object = objects[i];
 		if (object->IsItem())
 		{
-			CItem* item = dynamic_cast<CItem*>(object);
+			CItem* item = static_cast<CItem*>(object);
 			DataSource source = TileData;
 			dword uid = item->GetUID();
 			word amount = item->GetAmount();
@@ -5235,7 +5243,7 @@ PacketContainer::PacketContainer(const CClient* target, CObjBase** objects, uint
 		}
 		else
 		{
-			CChar* mobile = dynamic_cast<CChar*>(object);
+			CChar* mobile = static_cast<CChar*>(object);
 			DataSource source = Character;
 			dword uid = mobile->GetUID();
 			CREID_TYPE id = mobile->GetDispID();

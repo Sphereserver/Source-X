@@ -126,6 +126,7 @@ bool CUOMapList::Load(int map, char *args)
             else
                 m_mapid[map] = map;
         }
+
         m_mapsinitalized[map] = true;
     }
     return true;

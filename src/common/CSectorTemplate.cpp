@@ -218,11 +218,7 @@ CSectorBase::CSectorBase() :
 	m_map = 0;
 	m_index = 0;
 	m_dwFlags = 0;
-}
-
-CSectorBase::~CSectorBase()
-{
-	ClearMapBlockCache();
+	_x = _y = -1;
 }
 
 void CSectorBase::Init(int index, int map, int x, int y)
@@ -245,110 +241,6 @@ void CSectorBase::Init(int index, int map, int x, int y)
         _x = x;
         _y = y;
 	}
-}
-
-bool CSectorBase::CheckMapBlockTime( const MapBlockCache::value_type& Elem ) //static
-{
-	ADDTOCALLSTACK("CSectorBase::CheckMapBlockTime");
-	return (Elem.second->m_CacheTime.GetCacheAge() > m_iMapBlockCacheTime);
-}
-
-void CSectorBase::ClearMapBlockCache()
-{
-	ADDTOCALLSTACK("CSectorBase::ClearMapBlockCache");
-
-	for (MapBlockCache::iterator it = m_MapBlockCache.begin(); it != m_MapBlockCache.end(); ++it)
-		delete it->second;
-
-	m_MapBlockCache.clear();
-}
-
-void CSectorBase::CheckMapBlockCache()
-{
-	ADDTOCALLSTACK("CSectorBase::CheckMapBlockCache");
-	// Clean out the sectors map cache if it has not been used recently.
-	// iTime == 0 = delete all.
-	if ( m_MapBlockCache.empty() )
-		return;
-	//DEBUG_ERR(("CacheHit\n"));
-    int iBlock = -1;
-	for (MapBlockCache::iterator it;;)
-	{
-		EXC_TRY("CheckMapBlockCache_new");
-		it = find_if( m_MapBlockCache.begin(), m_MapBlockCache.end(), CheckMapBlockTime );
-		if ( it == m_MapBlockCache.end() )
-			break;
-		else
-		{
-			if ( m_iMapBlockCacheTime <= 0 || it->second->m_CacheTime.GetCacheAge() >= m_iMapBlockCacheTime )
-			{
-				//DEBUG_ERR(("removing...\n"));
-				EXC_SET_BLOCK("CacheTime up - Deleting");
-                iBlock = it->first;
-				delete it->second;
-				m_MapBlockCache.erase(it);
-			}
-		}
-		EXC_CATCH;
-		EXC_DEBUG_START;
-		CPointMap pt = GetBasePoint();
-		g_Log.EventDebug("m_MapBlockCache.erase(%d)\n", iBlock); 
-		g_Log.EventDebug("check time %d, index %d/%" PRIuSIZE_T "\n", m_iMapBlockCacheTime, iBlock, m_MapBlockCache.size());
-		g_Log.EventDebug("sector #%d [%d,%d,%d,%d]\n", GetIndex(), pt.m_x, pt.m_y, pt.m_z, pt.m_map);
-		EXC_DEBUG_END;
-	}
-}
-
-
-const CServerMapBlock * CSectorBase::GetMapBlock( const CPointMap & pt )
-{
-	ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetMapBlock");
-	// Get a map block from the cache. load it if not.
-	ASSERT( pt.IsValidXY());
-	const CPointMap pntBlock( UO_BLOCK_ALIGN(pt.m_x), UO_BLOCK_ALIGN(pt.m_y), 0, pt.m_map);
-	ASSERT( m_MapBlockCache.size() <= (UO_BLOCK_SIZE * UO_BLOCK_SIZE));
-
-	const ProfileTask mapTask(PROFILE_MAP);
-
-	if ( !pt.IsValidXY() )
-	{
-		g_Log.EventWarn("Attempting to access invalid memory block at %s.\n", pt.WriteUsed());
-		return nullptr;
-	}
-
-	CServerMapBlock * pMapBlock;
-
-	// Find it in cache.
-	int iBlock = pntBlock.GetPointSortIndex();
-	MapBlockCache::const_iterator it = m_MapBlockCache.find(iBlock);
-	if ( it != m_MapBlockCache.end() )
-	{
-		it->second->m_CacheTime.HitCacheTime();
-		return it->second;
-	}
-
-	// else load it.
-	try
-	{
-		pMapBlock = new CServerMapBlock(pntBlock);
-		ASSERT(pMapBlock != nullptr);
-	}
-	catch ( const CSError& e )
-	{
-		g_Log.EventError("Exception creating new memory block at %s. (%s)\n", pntBlock.WriteUsed(), e.m_pszDescription);
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
-		return nullptr;
-	}
-	catch (...)
-	{
-		g_Log.EventError("Exception creating new memory block at %s.\n", pntBlock.WriteUsed());
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
-		return nullptr;
-	}
-
-	// Add it to the cache.
-	m_MapBlockCache[iBlock] = pMapBlock;
-	return pMapBlock;
 }
 
 bool CSectorBase::IsInDungeon() const

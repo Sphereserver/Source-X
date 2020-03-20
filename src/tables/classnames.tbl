@@ -42,6 +42,8 @@ ADD(CResourceRefArray,		"CResourceRefArray");
 ADD(CRegionWorld,			"CRegionWorld");
 ADD(CRegion,				"CRegion");
 ADD(CWorld,					"CWorld");
+ADD(CWorldCache,			"CWorldCache");
+ADD(CWorldTick,				"CWorldTick");
 ADD(CWorldThread,			"CWorldThread");
 ADD(CWebPageDef,			"CWebPageDef");
 ADD(CServerDef,				"CServerDef");

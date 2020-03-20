@@ -110,7 +110,7 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
         nullptr
 	};
 
-	PC_TYPE iCmd = static_cast<PC_TYPE>(FindTableSorted(pszCmd, sm_Pet_table, CountOf(sm_Pet_table) - 1));
+	PC_TYPE iCmd = (PC_TYPE)FindTableSorted(pszCmd, sm_Pet_table, CountOf(sm_Pet_table) - 1);
 	if ( iCmd < 0 )
 	{
 		if ( !strnicmp(pszCmd, sm_Pet_table[PC_PRICE], 5) )
@@ -413,6 +413,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 				pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_TARG_TRANSFER_SUMMONED));
 				return false;
 			}
+			break;
 		default:
 		{
 			// All others commands are avaible only to pet owner

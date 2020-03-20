@@ -355,7 +355,7 @@ bool CClient::OnTarg_Item_Add( CObjBase * pObj, CPointMap & pt )
 		return pMulti ? true : false;
 	}
 	else
-		pItem->SetAmount(m_tmAdd.m_amount);
+		pItem->SetAmount(m_tmAdd.m_vcAmount);
 
 	pItem->MoveToCheck(pt, m_pChar);
 	m_pChar->m_Act_UID = pItem->GetUID();		// for last target stuff (trigger stuff) and to make AxisII able to initialize placed spawn items.
@@ -1006,8 +1006,8 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 		case IT_CLOTHING:
 		case IT_JEWELRY:
 			fWeapon = false;
-			iHitsCur = pItem->m_itArmor.m_Hits_Cur;
-			iHitsMax = pItem->m_itArmor.m_Hits_Max;
+			iHitsCur = pItem->m_itArmor.m_wHitsCur;
+			iHitsMax = pItem->m_itArmor.m_wHitsMax;
 			len += sprintf( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_DEF ), pItem->Armor_GetDefense());
 			break;
 		case IT_WEAPON_MACE_CROOK:
@@ -1022,8 +1022,8 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 		case IT_WEAPON_XBOW:
 		case IT_WEAPON_THROWING:
 			fWeapon = true;
-			iHitsCur = pItem->m_itWeapon.m_Hits_Cur;
-			iHitsMax = pItem->m_itWeapon.m_Hits_Max;
+			iHitsCur = pItem->m_itWeapon.m_wHitsCur;
+			iHitsMax = pItem->m_itWeapon.m_wHitsMax;
 			len += sprintf( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_DAM ), pItem->Weapon_GetAttack());
 			break;
 		default:
@@ -1226,7 +1226,7 @@ int CClient::OnSkill_TasteID( CUID uid, int iSkillLevel, bool fTest )
 		case IT_POTION:
 			if ( RES_GET_INDEX(pItem->m_itPotion.m_Type) == SPELL_Poison )
 			{
-				iPoisonLevel = pItem->m_itPotion.m_skillquality;
+				iPoisonLevel = pItem->m_itPotion.m_dwSkillQuality;
 			}
 			break;
 		case IT_FRUIT:
@@ -1239,7 +1239,7 @@ int CClient::OnSkill_TasteID( CUID uid, int iSkillLevel, bool fTest )
 		case IT_WEAPON_SWORD:		// 13 =
 		case IT_WEAPON_FENCE:		// 14 = can't be used to chop trees. (make kindling)
 		case IT_WEAPON_AXE:
-			// pItem->m_itWeapon.m_poison_skill = pPoison->m_itPotion.m_skillquality / 10;
+			// pItem->m_itWeapon.m_poison_skill = pPoison->m_itPotion.m_SkillQuality / 10;
 			iPoisonLevel = pItem->m_itWeapon.m_poison_skill * 10;
 			break;
 		default:
@@ -1302,14 +1302,14 @@ bool CClient::OnTarg_Skill( CObjBase * pObj )
 	m_Targ_UID = pObj->GetUID();	// keep for 'last target' info.
 
 	// did we target a scripted skill ?
-	if ( g_Cfg.IsSkillFlag( m_tmSkillTarg.m_Skill, SKF_SCRIPTED ) )
+	if ( g_Cfg.IsSkillFlag( m_tmSkillTarg.m_iSkill, SKF_SCRIPTED ) )
 	{
 		// is this scripted skill a targeted skill ?
-		const CSkillDef * pSkillDef = g_Cfg.GetSkillDef(m_tmSkillTarg.m_Skill);
-		if (pSkillDef != nullptr && pSkillDef->m_sTargetPrompt.IsEmpty() == false)
+		const CSkillDef * pSkillDef = g_Cfg.GetSkillDef(m_tmSkillTarg.m_iSkill);
+		if (pSkillDef && pSkillDef->m_sTargetPrompt.IsEmpty() == false)
 		{
 			m_pChar->m_Act_UID = m_Targ_UID;
-			return m_pChar->Skill_Start( m_tmSkillTarg.m_Skill );
+			return m_pChar->Skill_Start( m_tmSkillTarg.m_iSkill );
 		}
 		else
 		{
@@ -1318,7 +1318,7 @@ bool CClient::OnTarg_Skill( CObjBase * pObj )
 	}
 
 	// targetting what skill ?
-	switch ( m_tmSkillTarg.m_Skill )
+	switch ( m_tmSkillTarg.m_iSkill )
 	{
 		// Delayed response type skills.
 	case SKILL_BEGGING:
@@ -1337,7 +1337,7 @@ bool CClient::OnTarg_Skill( CObjBase * pObj )
 	case SKILL_FORENSICS:
 	case SKILL_TASTEID:
 		m_pChar->m_Act_UID = m_Targ_UID;
-		return( m_pChar->Skill_Start( m_tmSkillTarg.m_Skill ));
+		return( m_pChar->Skill_Start( m_tmSkillTarg.m_iSkill ));
 
 	case SKILL_PROVOCATION:
 		if ( !pObj->IsChar() )
@@ -1409,7 +1409,7 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
     if (pTargChar && pTargChar->Can(CAN_C_NONSELECTABLE))
         return false;
 
-	const CSpellDef * pSpell = g_Cfg.GetSpellDef( m_tmSkillMagery.m_Spell );
+	const CSpellDef * pSpell = g_Cfg.GetSpellDef( m_tmSkillMagery.m_iSpell );
 	if ( ! pSpell )	
 		return false;
 
@@ -1454,8 +1454,8 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 		}
 	}
 
-	m_pChar->m_atMagery.m_Spell			= m_tmSkillMagery.m_Spell;
-	m_pChar->m_atMagery.m_SummonID		= m_tmSkillMagery.m_SummonID;
+	m_pChar->m_atMagery.m_iSpell			= m_tmSkillMagery.m_iSpell;
+	m_pChar->m_atMagery.m_iSummonID		= m_tmSkillMagery.m_iSummonID;
 
 	m_pChar->m_Act_Prv_UID				= m_Targ_Prv_UID;	// Source (wand or you?)
 	m_pChar->m_Act_UID					= pObj ? (dword) pObj->GetUID() : UID_CLEAR ;
@@ -1932,11 +1932,26 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		break;
 
 	case IT_BANDAGE:	// SKILL_HEALING, or SKILL_VETERINARY
-		// Use bandages on some creature.
-		if ( pCharTarg == nullptr )
+		// Use bandages on some creatures or on a corpse item.
+		if ( pCharTarg == nullptr && pItemTarg == nullptr )
 			return false;
-		m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID;
-		m_pChar->m_Act_UID = m_Targ_UID;
+
+		if (pItemTarg)
+		{
+			if (pItemTarg->GetType() == IT_CORPSE)
+			{
+				CItemCorpse* pCorpse = static_cast<CItemCorpse*>(pItemTarg);
+				pCharTarg = pCorpse->m_uidLink.CharFind();
+				if (pCharTarg == nullptr || pCharTarg->IsNPC())
+					return false;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID; //The bandage item
+		m_pChar->m_Act_UID = m_Targ_UID;  //The target.
 
 		/*An NPC will be healed by the Veterinary skill if the following conditions are satisfied:
 		  It has a Taming value above > 0 AND its ID is not the ID one of the playable races (Human, Elf or Gargoyle)	
@@ -2128,8 +2143,8 @@ static lpctstr const sm_Txt_LoomUse[] =
 			CItem * pItemCloth = CItem::CreateTemplate( ClothID, nullptr, m_pChar );
             if (!pItemCloth)
                 return false;
-			pItemCloth->SetAmount( (word)pItemTarg->m_itLoom.m_ClothQty );
-			pItemTarg->m_itLoom.m_ClothQty = 0;
+			pItemCloth->SetAmount( (word)pItemTarg->m_itLoom.m_iClothQty );
+			pItemTarg->m_itLoom.m_iClothQty = 0;
 			pItemTarg->m_itLoom.m_ridCloth.Clear();
 			m_pChar->ItemBounce( pItemCloth );
 			return true;
@@ -2139,7 +2154,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 
 		int iUsed = 0;
 		int iNeed = int(CountOf( sm_Txt_LoomUse ) - 1);
-		int iHave = pItemTarg->m_itLoom.m_ClothQty;
+		int iHave = pItemTarg->m_itLoom.m_iClothQty;
 		if ( iHave < iNeed )
 		{
 			iNeed -= iHave;
@@ -2148,13 +2163,13 @@ static lpctstr const sm_Txt_LoomUse[] =
 
 		if ( (iHave + iUsed) < int(CountOf( sm_Txt_LoomUse ) - 1) )
 		{
-			pItemTarg->m_itLoom.m_ClothQty += iUsed;
-			SysMessage( sm_Txt_LoomUse[ pItemTarg->m_itLoom.m_ClothQty ] );
+			pItemTarg->m_itLoom.m_iClothQty += iUsed;
+			SysMessage( sm_Txt_LoomUse[ pItemTarg->m_itLoom.m_iClothQty ] );
 		}
 		else
 		{
 			SysMessage( sm_Txt_LoomUse[ CountOf( sm_Txt_LoomUse ) - 1 ] );
-			pItemTarg->m_itLoom.m_ClothQty = 0;
+			pItemTarg->m_itLoom.m_iClothQty = 0;
 			pItemTarg->m_itLoom.m_ridCloth.Clear();
 
 /*

@@ -219,7 +219,7 @@ bool CSocketAddress::SetHostPortStr( lpctstr pszIP )
 
 struct sockaddr_in CSocketAddress::GetAddrPort() const
 {
-	struct sockaddr_in SockAddrIn;
+	struct sockaddr_in SockAddrIn {};
 	SockAddrIn.sin_family = AF_INET;
 	SockAddrIn.sin_addr.s_addr = s_addr;
 	SockAddrIn.sin_port = htons(m_port);

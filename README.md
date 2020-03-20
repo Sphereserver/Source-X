@@ -1,7 +1,7 @@
-# SphereServer-eXperimental
+# SphereServer X version
 Game server for Ultima Online.
 <br>
-[![Windows Build status](https://ci.appveyor.com/api/projects/status/ab152o83mipjojin/branch/master?svg=true)](https://ci.appveyor.com/project/cbnolok/source2/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/ab152o83mipjojin?svg=true)](https://ci.appveyor.com/project/cbnolok/sphereserver-x)
 <br><a href="https://forum.spherecommunity.net/sshare.php?srt=4">Get the automated builds here!</a>
 
 
@@ -11,12 +11,11 @@ https://discord.gg/ZrMTXrs
 
 ## Why a fork?
 
-This is an experimental branch of SphereServer. Since we are doing so many (and sometimes radical) changes, it is impossible to work on the main branch.<br>
-This branch will preserve scripts compatibility with the main one.<br>
+This branch started in 2016 from a slow and radical rework of SphereServer 0.56d, while trying to preserve script compatibility with the starting branch.<br>
+Though, something has changed script-wise, so we suggest to take a look <a href="https://github.com/Sphereserver/Source-X/blob/master/docs/Porting%20from%200.56%20to%20X.txt">here</a>.<br>
 Most notable changes (right now) are:
 * Bug fixes and heavy changing of some internal behaviours, with the aim to achieve truly better **speed** and **stability**;
 * Support for 64 bits architecture and MinGW compiler for Windows;
-* Experimental support for multi-threaded and async networking;
 * Support for CMake, which is now the standard way to generate updated build and project files;
 * Added (and still adding) comments to the code to make it more understandable;
 * Reorganization of directories and files, avoiding big files with thousands of lines;
@@ -189,7 +188,7 @@ if (fTrue)<br>
 
 ## Licensing
 
-Copyright 2018 SphereServer development team.<br>
+Copyright 2020 SphereServer development team.<br>
 
 Licensed under the Apache License, Version 2.0 (the "License").<br>
 You may not use any file of this project except in compliance with the License.<br>

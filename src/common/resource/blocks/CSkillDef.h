@@ -64,8 +64,8 @@ public:
     CSString m_sName;       // fancy skill name
     CSString m_sTargetPrompt;// targetting prompt. (if needed)
 
-    CValueCurveDef m_Delay; // Delay before skill complete (tenth of seconds).
-    CValueCurveDef m_Effect;// Effectiveness of the skill, depends on skill.
+    CValueCurveDef m_vcDelay; // Delay before skill complete (tenth of seconds).
+    CValueCurveDef m_vcEffect;// Effectiveness of the skill, depends on skill.
 
     // Stat effects.
     // You will tend toward these stat vals if you use this skill a lot.

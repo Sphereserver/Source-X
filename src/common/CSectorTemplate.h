@@ -11,7 +11,6 @@
 
 
 class CItem;
-class CServerMapBlock;
 class CSector;
 
 class CCharsDisconnectList : public CSObjList
@@ -93,10 +92,6 @@ protected:
     int	m_index;    // sector index
     int _x, _y;     // x and y (row and column) of the sector in the map
 
-private:
-	typedef std::map<int, CServerMapBlock*>	MapBlockCache;
-	MapBlockCache							m_MapBlockCache;
-
 public:
 	static const char  *m_sClassName;
 	CObjPointSortArray	m_Teleports;		//	CTeleport array
@@ -119,7 +114,7 @@ public:
     CSector *GetAdjacentSector(DIR_TYPE dir) const;
 
 	CSectorBase();
-	virtual ~CSectorBase();
+	virtual ~CSectorBase() = default;
 
 private:
 	CSectorBase(const CSectorBase& copy);
@@ -134,12 +129,6 @@ public:
 	CPointMap GetBasePoint() const;
 	CRectMap GetRect() const;
 	bool IsInDungeon() const;
-
-	bool static CheckMapBlockTime( const MapBlockCache::value_type& Elem );
-	void ClearMapBlockCache();
-	void CheckMapBlockCache();
-	static int64 m_iMapBlockCacheTime;
-	const CServerMapBlock * GetMapBlock( const CPointMap & pt );
 
 	// CRegion
 	CRegion * GetRegion( const CPointBase & pt, dword dwType ) const;

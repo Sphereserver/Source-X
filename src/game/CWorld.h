@@ -9,12 +9,10 @@
 #include "../common/CScript.h"
 #include "../common/CUID.h"
 #include "items/CItemStone.h"
-#include "CServerTime.h"
 #include "CSector.h"
-#include "CTimedFunction.h"
-#include "CTimedObject.h"
-#include <unordered_map>
-#include <unordered_set>
+#include "CWorldCache.h"
+#include "CWorldClock.h"
+#include "CWorldTick.h"
 
 class CObjBase;
 class CItemTypeDef;
@@ -94,74 +92,6 @@ private:
 	CWorldThread& operator=(const CWorldThread& other);
 };
 
-class CWorldClock
-{
-private:
-    int64 _iCurTick;            // Current TICK count of the server from it's first start.
-	CServerTime m_timeClock;    // Internal clock record, on msecs, used to advance the ticks.
-	int64 m_Clock_SysPrev;	    // SERVER time (in milliseconds) of the last OnTick()
-    CServerTime	m_nextTickTime;	// next time to do sector stuff.
-public:
-	static const char *m_sClassName;
-	CWorldClock()
-	{
-		Init();
-	}
-
-private:
-	CWorldClock(const CWorldClock& copy);
-	CWorldClock& operator=(const CWorldClock& other);
-
-public:
-	void Init();
-	void InitTime( int64 iTimeBase );
-	bool Advance();
-    inline void AdvanceTick()
-    {
-        ++_iCurTick;
-    }
-	inline CServerTime GetCurrentTime() const // in milliseconds
-	{
-		return m_timeClock;
-	}
-    inline int64 GetCurrentTick() const
-    {
-        return _iCurTick;
-    }
-	static int64 GetSystemClock(); // in milliseconds
-};
-
-struct TimedObjectsContainer : public std::vector<CTimedObject*>
-{
-    THREAD_CMUTEX_DEF;
-};
-struct WorldTickList : public std::map<int64, TimedObjectsContainer>
-{
-    THREAD_CMUTEX_DEF;
-};
-struct TimedObjectLookupList : public std::unordered_map<CTimedObject*, int64>
-{
-    THREAD_CMUTEX_DEF;
-};
-
-struct TimedCharsContainer : public std::vector<CChar*>
-{
-    THREAD_CMUTEX_DEF;
-};
-struct CharTickList : public std::map<int64, TimedCharsContainer>
-{
-    THREAD_CMUTEX_DEF;
-};
-struct CharTickLookupList : public std::unordered_map<CChar*, int64>
-{
-    THREAD_CMUTEX_DEF;
-};
-
-struct StatusUpdatesList : public std::unordered_set<CObjBase*>
-{
-    THREAD_CMUTEX_DEF;
-};
-
 
 extern class CWorld : public CScriptObj, public CWorldThread
 {
@@ -170,36 +100,23 @@ private:
 	// Clock stuff. how long have we been running ? all i care about.
 	CWorldClock m_Clock;		// the current relative tick time (in milliseconds)
 
-	// Special purpose timers.
-	int64	m_timeSave;				// when to auto save ?
-	bool	m_bSaveNotificationSent;// has notification been sent?
-	int64	m_timeRespawn;			// when to res dead NPC's ?
-	int64	m_timeCallUserFunc;		// when to call next user func
-	ullong	m_ticksWithoutMySQL;	// MySQL should be running constantly if MySQLTicks is true, keep here record of how much ticks since Sphere is not connected.
-    int64   _iLastTick;             // Last tick done.
-
-	int m_iSaveStage;	// Current stage of the background save.
-	llong	m_savetimer; // Time it takes to save
-
-    WorldTickList _mWorldTickList;
-    TimedObjectLookupList _mWorldTickLookup;
-    CharTickList _mCharTickList;
-    CharTickLookupList _mCharTickLookup;
-
 public:
-    StatusUpdatesList m_ObjStatusUpdates;   // objects that need OnTickStatusUpdate called
-    CTimedFunctionHandler m_TimedFunctions; // TimedFunction Container/Wrapper
+	// Map cache
+	CWorldCache _Cache;
 
-public:
-    void AddTimedObject(int64 iTimeout, CTimedObject *pTimedObject);
-    void DelTimedObject(CTimedObject* pTimedObject);
-    void AddCharTicking(CChar *pChar, bool fIgnoreSleep = false, bool fOverwrite = true);
-    void DelCharTicking(CChar *pChar);
+	// Ticking world objects
+	CWorldTick _Ticker;
+
 private:
-    void _InsertTimedObject(int64 iTimeout, CTimedObject* pTimedObject);
-    void _RemoveTimedObject(const int64 iOldTimeout, const CTimedObject* pTimedObject);
-    void _InsertCharTicking(int64 iTickNext, CChar* pChar);
-    void _RemoveCharTicking(const int64 iOldTimeout, const CChar* pChar);
+	// Special purpose timers.
+	int64	_iTimeLastWorldSave;				// when to auto do the worldsave ?
+	bool	_fSaveNotificationSent;// has notification been sent?
+	int64	_iTimeLastDeadRespawn;			// when to res dead NPC's ?
+	int64	_iTimeLastCallUserFunc;		// when to call next user func
+	ullong	m_ticksWithoutMySQL;	// MySQL should be running constantly if MySQLTicks is true, keep here record of how much ticks since Sphere is not connected.
+    
+	int		m_iSaveStage;	// Current stage of the background save.
+	llong	m_savetimer; // Time it takes to save
 
 public:
 	static const char *m_sClassName;
@@ -211,7 +128,7 @@ public:
 	int m_iSaveCountID;			// Current archival backup id. Whole World must have this same stage id
 	int m_iLoadVersion;			// Previous load version. (only used during load of course)
 	int m_iPrevBuild;			// Previous __GITREVISION__
-	int64 m_timeStartup;	// When did the system restore load/save ?
+	int64 _iTimeStartup;	// When did the system restore load/save ?
 
 	CUID m_uidLastNewItem;	// for script access.
 	CUID m_uidLastNewChar;	// for script access.
@@ -219,7 +136,6 @@ public:
 	CUID m_uidNew;			// for script access - auxiliary obj
 
 	CSObjList m_GMPages;		// Current outstanding GM pages. (CGMPage)
-
 	
 	CSPtrTypeArray<CItemStone*> m_Stones;	// links to leige/town stones. (not saved array)
 	CSObjList m_Parties;	// links to all active parties. CPartyDef
@@ -248,7 +164,11 @@ private:
 public:
 	void Init();
 
-	CSector *GetSector( int map, int i ) const;	// gets sector # from one map
+	void r_Write(CScript& s);
+	virtual bool r_WriteVal(lpctstr ptcKey, CSString& sVal, CTextConsole* pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false) override;
+	virtual bool r_LoadVal(CScript& s) override;
+	virtual bool r_GetRef(lpctstr& ptcKey, CScriptObj*& pRef) override;
+
 
 	// Time
 
@@ -256,7 +176,7 @@ public:
 	{
 		return m_Clock.GetCurrentTime();  // Time in milliseconds
 	}
-    inline int64 GetTimeDiff(CServerTime time) const
+    inline int64 GetTimeDiff(const CServerTime& time) const
     {
         // How long till this event
         // negative = in the past.
@@ -268,14 +188,14 @@ public:
         // negative = in the past.
         return time - GetCurrentTime().GetTimeRaw(); // Time in milliseconds
     }
-    inline int64 GetTickDiff(int64 iTick) const
-    {
-        return _iLastTick - iTick;
-    }
     inline int64 GetCurrentTick() const
     {
         return m_Clock.GetCurrentTick();
     }
+	inline int64 GetTickDiff(int64 iTick) const
+	{
+		return m_Clock.GetCurrentTick() - iTick;
+	}
 
 #define TRAMMEL_SYNODIC_PERIOD 105 // in game world minutes
 #define FELUCCA_SYNODIC_PERIOD 840 // in game world minutes
@@ -290,7 +210,20 @@ public:
 		return( GetGameWorldTime(GetCurrentTime().GetTimeRaw()));
 	}
 
+
+	// CWorldMap
+
+	CItemTypeDef*	GetTerrainItemTypeDef(dword dwIndex);
+	IT_TYPE			GetTerrainItemType(dword dwIndex);
+
+	const CServerMapBlock* GetMapBlock(const CPointMap& pt) const;
+	const CUOMapMeter* GetMapMeter(const CPointMap& pt) const; // Height of MAP0.MUL at given coordinates
+
+
 	// CSector World Map stuff.
+
+	CSector* GetSector(int map, int i) const;	// gets sector # from one map
+
 	void GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck = false );
 	char GetHeightPoint2(const CPointMap & pt, dword & dwBlockFlags, bool fHouseCheck = false); // Height of player who walked to X/Y/OLDZ
 
@@ -299,21 +232,6 @@ public:
 
 	void GetFixPoint( const CPointMap & pt, CServerMapBlockState & block);
 
-	CItemTypeDef *	GetTerrainItemTypeDef( dword dwIndex );
-	IT_TYPE			GetTerrainItemType( dword dwIndex );
-
-	const CServerMapBlock * GetMapBlock( const CPointMap & pt )
-	{
-		return( pt.GetSector()->GetMapBlock(pt));
-	}
-	const CUOMapMeter * GetMapMeter( const CPointMap & pt ) const // Height of MAP0.MUL at given coordinates
-	{
-		const CServerMapBlock * pMapBlock = pt.GetSector()->GetMapBlock(pt);
-		if ( !pMapBlock )
-			return nullptr;
-		return( pMapBlock->GetTerrain( UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y)));
-	}
-
 	CPointMap FindItemTypeNearby( const CPointMap & pt, IT_TYPE iType, int iDistance = 0, bool fCheckMulti = false, bool fLimitZ = false );
 	bool IsItemTypeNear( const CPointMap & pt, IT_TYPE iType, int iDistance, bool fCheckMulti );
 
@@ -321,33 +239,34 @@ public:
 	bool IsTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance = 0 );
 	CItem * CheckNaturalResource( const CPointMap & pt, IT_TYPE iType, bool fTest = true, CChar * pCharSrc = nullptr );
 
-	static bool OpenScriptBackup( CScript & s, lpctstr pszBaseDir, lpctstr pszBaseName, int savecount );
 
-	void r_Write( CScript & s );
-	virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
-    virtual bool r_LoadVal( CScript & s ) override;
-    virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
+	// Communication
+
+	void Speak(const CObjBaseTemplate* pSrc, lpctstr pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD) const;
+	void SpeakUNICODE(const CObjBaseTemplate* pSrc, const nchar* pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang) const;
+
+	void Broadcast(lpctstr pMsg);
+	void __cdecl Broadcastf(lpctstr pMsg, ...) __printfargs(2, 3);
+
+
+	// World stuff
 
 	void OnTick();
 
 	void GarbageCollection();
 	void Restock();
 	void RespawnDeadNPCs();
-
-	void Speak( const CObjBaseTemplate * pSrc, lpctstr pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD );
-	void SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
-
-	void Broadcast( lpctstr pMsg );
-	void __cdecl Broadcastf( lpctstr pMsg, ...) __printfargs(2,3);
-
-	bool Export( lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, int dx = 0, int dy = 0 );
-	bool Import( lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, tchar *pszAgs1 = nullptr, tchar *pszAgs2 = nullptr );
+	
+	static bool OpenScriptBackup(CScript& s, lpctstr pszBaseDir, lpctstr pszBaseName, int savecount);
     bool CheckAvailableSpaceForSave(bool fStatics);
 	bool Save( bool fForceImmediate ); // Save world state
 	void SaveStatics();
 	bool LoadAll();
 	bool DumpAreas( CTextConsole * pSrc, lpctstr pszFilename );
 	void Close();
+
+	bool Export(lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, int dx = 0, int dy = 0);
+	bool Import(lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, tchar* pszAgs1 = nullptr, tchar* pszAgs2 = nullptr);
 
 	lpctstr GetName() const { return( "World" ); }
 

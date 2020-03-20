@@ -637,7 +637,7 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 		const CSkillDef * pSkillDef = g_Cfg.GetSkillDef(skill);
 		if (pSkillDef != nullptr && pSkillDef->m_sTargetPrompt.IsEmpty() == false)
 		{
-			m_tmSkillTarg.m_Skill = skill;	// targetting what skill ?
+			m_tmSkillTarg.m_iSkill = skill;	// targetting what skill ?
 			addTarget( CLIMODE_TARG_SKILL, pSkillDef->m_sTargetPrompt.GetPtr(), false, fCheckCrime );
 			return;
 		}
@@ -713,7 +713,7 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 			return;
 		}
 
-		m_tmSkillTarg.m_Skill = skill;	// targetting what skill ?
+		m_tmSkillTarg.m_iSkill = skill;	// targetting what skill ?
 		addTarget( CLIMODE_TARG_SKILL, pSkillDef->m_sTargetPrompt.GetPtr(), false, fCheckCrime );
 		return;
 	}
@@ -1111,14 +1111,14 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
 		if ( pItem == nullptr )
 			continue;
 
-		if ((items[i].m_amount <= 0) || (items[i].m_amount > pItem->GetAmount()))
+		if ((items[i].m_vcAmount <= 0) || (items[i].m_vcAmount > pItem->GetAmount()))
 		{
 			pVendor->Speak("Your order cannot be fulfilled, please try again.");
 			Event_VendorBuy_Cheater( 0x3 );
 			return;
 		}
 
-		costtotal += ((int64)(items[i].m_amount) * items[i].m_price);
+		costtotal += ((int64)(items[i].m_vcAmount) * items[i].m_price);
 		if ( costtotal > kuiMaxCost )
 		{
 			pVendor->Speak("Your order cannot be fulfilled, please try again.");
@@ -1131,11 +1131,12 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
 			continue;
 		if ( IsSetOF(OF_PetSlots) )
 		{
-			CCharBase *pPetDef = CCharBase::FindCharBase( pItem->m_itFigurine.m_ID );
+			CItemBase* pItemPet = CItemBase::FindItemBase(pItem->GetID());
+			CCharBase* pPetDef = CCharBase::FindCharBase(CREID_TYPE(pItemPet->m_ttFigurine.m_idChar.GetResIndex()));
 			if ( pPetDef )
 			{
 				short iFollowerSlots = (short)pPetDef->GetDefNum("FOLLOWERSLOTS");
-				if ( !m_pChar->FollowersUpdate(pVendor, (maximum(1, iFollowerSlots))) )
+				if ( !m_pChar->FollowersUpdate(pVendor, (maximum(1, iFollowerSlots) * items[i].m_vcAmount), true) )
 				{
 					m_pChar->SysMessageDefault( DEFMSG_PETSLOTS_TRY_CONTROL );
 					return;
@@ -1185,14 +1186,14 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
 			break;
 
 		pItem = dynamic_cast <CItemVendable *> (items[i].m_serial.ItemFind());
-		word amount = items[i].m_amount;
+		word amount = items[i].m_vcAmount;
 
 		if ( pItem == nullptr )
 			continue;
 
 		if (( IsTrigUsed(TRIGGER_BUY) ) || ( IsTrigUsed(TRIGGER_ITEMBUY) ))
 		{
-			CScriptTriggerArgs Args( amount, items[i].m_amount * items[i].m_price, pVendor );
+			CScriptTriggerArgs Args( amount, items[i].m_vcAmount * items[i].m_price, pVendor );
 			Args.m_VarsLocal.SetNum( "TOTALCOST", costtotal);
 			if ( pItem->OnTrigger( ITRIG_Buy, this->GetChar(), &Args ) == TRIGRET_RET_TRUE )
 				continue;
@@ -1216,6 +1217,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
 						pVendor->Speak( g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CANTBUY) );
 						continue;
 					}
+					break;
 				case IT_HAIR:
 					// Must be added directly. can't exist in pack!
 					if ( ! m_pChar->IsPlayableCharacter())
@@ -1382,7 +1384,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 		if ( pItemSell == nullptr )
 			continue;
 
-		word amount = items[i].m_amount;
+		word amount = items[i].m_vcAmount;
 
 		// Now how much did i say i wanted to sell ?
 		if ( pItem->GetAmount() < amount )	// Selling more than i have ?
@@ -1588,6 +1590,11 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 
 	switch ( promptMode )
 	{
+		case CLIMODE_PROMPT_NAME_PET:
+			if (Event_SetName(CUID(context1), szText))
+				SysMessageDefault(DEFMSG_NPC_PET_RENAME_SUCCESS1);
+			return;
+
 		case CLIMODE_PROMPT_GM_PAGE_TEXT:
 			// m_Targ_Text
 			Cmd_GM_Page( szText );
@@ -1974,26 +1981,26 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 	}
 }
 
-void CClient::Event_SetName( CUID uid, const char * pszCharName )
+bool CClient::Event_SetName( CUID uid, const char * pszCharName )
 {
 	ADDTOCALLSTACK("CClient::Event_SetName");
 	// Set the name in the character status window.
 	CChar * pChar = uid.CharFind();
-	if ( !pChar || !m_pChar )
-		return;
+	if (!pChar || !m_pChar)
+		return false;
 
    if ( Str_CheckName(pszCharName) || !strlen(pszCharName) )
-		return;
+		return false;
 
 	// Do we have the right to do this ?
 	if ( (m_pChar == pChar) || !pChar->IsOwnedBy( m_pChar, true ) )
-		return;
+		return false;
 	if ( FindTableSorted( pszCharName, sm_szCmd_Redirect, CountOf(sm_szCmd_Redirect) ) >= 0 )
-		return;
+		return false;
 	if ( FindTableSorted( pszCharName, CCharNPC::sm_szVerbKeys, 14 ) >= 0 )
-		return;
+		return false;
 	if ( g_Cfg.IsObscene(pszCharName) )
-		return;
+		return false;
 
 	if ( IsTrigUsed(TRIGGER_RENAME) )
 	{
@@ -2001,10 +2008,13 @@ void CClient::Event_SetName( CUID uid, const char * pszCharName )
 		args.m_pO1 = pChar;
 		args.m_s1 = pszCharName;
 		if ( m_pChar->OnTrigger(CTRIG_Rename, this, &args) == TRIGRET_RET_TRUE )
-			return;
+			return false;
 	}
+	if (pChar->IsOwnedBy(m_pChar))
+		SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_RENAME_SUCCESS2), pChar->GetName(), pszCharName);
 
 	pChar->SetName(pszCharName);
+	return true;
 }
 
 void CDialogResponseArgs::AddText( word id, lpctstr pszText )
@@ -2435,6 +2445,9 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 					m_pPopupPacket->addOption(POPUP_PETSTOP, 6112, POPUPFLAG_COLOR, 0xFFFF);
 					m_pPopupPacket->addOption(POPUP_PETSTAY, 6114, POPUPFLAG_COLOR, 0xFFFF);
 
+					if (GetNetState()->isClientVersion(MINCLIVER_NEWDAMAGE))
+						m_pPopupPacket->addOption(POPUP_PETRENAME, 1115557, POPUPFLAG_COLOR, 0xFFFF);
+
 					if (!pChar->IsStatFlag(STATF_CONJURED))
 					{
 						m_pPopupPacket->addOption(POPUP_PETFRIEND_ADD, 6110, iEnabled, 0xFFFF);
@@ -2604,6 +2617,11 @@ void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something 
 
 			case POPUP_PETRELEASE:
 				pChar->NPC_OnHearPetCmd("release", m_pChar);
+				break;
+
+			case POPUP_PETRENAME:
+				if (pChar->NPC_IsOwnedBy(m_pChar))
+					addPromptConsole(CLIMODE_PROMPT_NAME_PET, g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_RENAME_PROMPT), pChar->GetUID());
 				break;
 
 			case POPUP_STABLESTABLE:
@@ -2821,8 +2839,8 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 				if ( !pSpellDef->GetPrimarySkill(&skill) )
 					return;
 
-				m_tmSkillMagery.m_Spell = spell;
-				m_pChar->m_atMagery.m_Spell = spell;
+				m_tmSkillMagery.m_iSpell = spell;
+				m_pChar->m_atMagery.m_iSpell = spell;
 				m_pChar->m_Act_p = m_pChar->GetTopPoint();
 				m_pChar->m_Act_UID = m_Targ_UID;
 				m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID;

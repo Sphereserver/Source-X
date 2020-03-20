@@ -204,7 +204,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 
 	const CServerMapBlock *pBlock			= nullptr;		// Block of the map (for statics)
 	const CUOStaticItemRec *pStatic			= nullptr;		// Statics iterator (based on SphereMapBlock)
-	const CSphereMulti *pMulti 				= nullptr;		// Multi Def (multi check)
+	const CUOMulti *pMulti 				= nullptr;		// Multi Def (multi check)
 	const CUOMultiItemRec_HS *pMultiItem	= nullptr;		// Multi item iterator
 	CRegion *pRegion					= nullptr;		// Nulti regions
 	CRegionLinks rlinks;								// Links to multi regions

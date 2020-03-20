@@ -54,7 +54,7 @@ public:
 	CResourceScript * LoadResourcesAdd( lpctstr pszNewName );
 
 	virtual CResourceDef * ResourceGetDef( const CResourceID& rid ) const;
-	virtual bool OpenResourceFind( CScript &s, lpctstr pszFilename, bool bCritical = true );
+	virtual bool OpenResourceFind( CScript &s, lpctstr pszFilename, bool fCritical = true );
 	virtual bool LoadResourceSection( CScript * pScript ) = 0;
 
 public:

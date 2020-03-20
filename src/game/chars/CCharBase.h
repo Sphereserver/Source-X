@@ -89,29 +89,28 @@ public:
 	uint GetHireDayWage() const { return( m_iHireDayWage ); }
 
     /**
-    * @fn  byte GetRangeL() const;
     * @brief   Returns the RangeLow.
     * @return  Value.
     */
     byte GetRangeL() const;
 
     /**
-    * @fn  byte GetRangeH() const;
     * @brief   Returns the RangeHigh.
     * @return  Value.
     */
     byte GetRangeH() const;
 
+
 	static CCharBase * FindCharBase( CREID_TYPE id );
 	static bool IsValidDispID( CREID_TYPE id );
-	static bool IsPlayableID( CREID_TYPE id, bool bCheckGhost = false);
-	static bool IsHumanID( CREID_TYPE id, bool bCheckGhost = false );
-	static bool IsElfID( CREID_TYPE id, bool bCheckGhost = false);
-	static bool IsGargoyleID( CREID_TYPE id, bool bCheckGhost = false );
+	static bool IsPlayableID( CREID_TYPE id, bool fCheckGhost = false);
+	static bool IsHumanID( CREID_TYPE id, bool fCheckGhost = false );
+	static bool IsElfID( CREID_TYPE id, bool fCheckGhost = false);
+	static bool IsGargoyleID( CREID_TYPE id, bool fCheckGhost = false );
 
 	bool IsFemale() const
 	{
-		return(( m_Can & CAN_C_FEMALE ) ? true : false );
+		return (( m_Can & CAN_C_FEMALE ) ? true : false );
 	}
 
 	lpctstr GetTradeName() const;

@@ -48,27 +48,27 @@ private:
     std::vector<CUID> _lCoowners;   // List of Coowners.
     std::vector<CUID> _lFriends;    // List of Friends.
     std::vector<CUID> _lVendors;    // List of Vendors.
-    std::vector<CUID> _lBans;        // List of Banned chars.
-    std::vector<CUID> _lAccesses;    // List of Accesses chars.
+    std::vector<CUID> _lBans;       // List of Banned chars.
+    std::vector<CUID> _lAccesses;   // List of Accesses chars.
 protected:
     std::vector<CUID> _lLockDowns;  // List of Locked Down items.
     std::vector<CUID> _lSecureContainers; // List of Secured containers.
-    std::vector<CUID> _lAddons;  // List of AddOns.
+    std::vector<CUID> _lAddons;     // List of AddOns.
 private:
-    std::vector<CUID> _lComps; // List of Components.
+    std::vector<CUID> _lComps;      // List of Components.
 
     // house general
-    CUID  _pMovingCrate;   // Moving Crate's container.
-    bool _fIsAddon;         // House AddOns are also multis
+    CUID  _uidMovingCrate;      // Moving Crate's container.
+    bool _fIsAddon;             // House AddOns are also multis
     HOUSE_TYPE _iHouseType;
     uint8 _iMultiCount;         // Does this counts towars the char's house limit
 
     // house storage
-    uint16 _iBaseStorage;       // Base limit for secure storage (Max = 65535).
-    uint8 _iBaseVendors;        // Base limit for player vendors (Max = 255).
-    uint16 _iIncreasedStorage;  // % of increasd storage. Note: uint8 should be enough since the default max is 60%, but someone may want 300%, 1000% or even more.
+    uint16 _uiBaseStorage;       // Base limit for secure storage (Max = 65535).
+    uint8  _uiBaseVendors;       // Base limit for player vendors (Max = 255).
+    uint16 _uiIncreasedStorage;  // % of increasd storage. Note: uint8 should be enough since the default max is 60%, but someone may want 300%, 1000% or even more.
     // Total Storage = _iBaseStorage + ( _iBaseStorage * _iIncreasedStorage )
-    uint8 _iLockdownsPercent;   // % of Total Storage reserved for locked down items. (Default = 50%)
+    uint8 _uiLockdownsPercent;   // % of Total Storage reserved for locked down items. (Default = 50%)
 
 protected:
     CRegionWorld * m_pRegion;		// we own this region.
@@ -146,6 +146,7 @@ public:
     */
     static CItem *Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPointMap & pt, CItem *pDeed);
 
+
     /** House Permissions
     */
     ///@{
@@ -201,7 +202,7 @@ public:
     * @brief Deletes a coowner to the _lCoowners list.
     * @param pCoowner the coowner
     */
-    void DelCoowner(const CUID& uidCoowner);
+    void DeleteCoowner(const CUID& uidCoowner);
     /**
     * @brief Returns the total count of coowners on the list.
     * @return the count.
@@ -212,7 +213,7 @@ public:
     * @param pTarget the coowner.
     * @return the position.
     */
-    int GetCoownerPos(const CUID& uidTarget) const;
+    int GetCoownerIndex(const CUID& uidTarget) const;
 
     // Friend
     /**
@@ -224,7 +225,7 @@ public:
     * @brief Deletes a friend to the _lFriends list.
     * @param pFriend the friend
     */
-    void DelFriend(const CUID& uidFriend);
+    void DeleteFriend(const CUID& uidFriend);
     /**
     * @brief Returns the total count of friends on the list.
     * @return the count.
@@ -235,7 +236,8 @@ public:
     * @param pTarget the friend.
     * @return the position.
     */
-    int GetFriendPos(const CUID& uidTarget) const;
+    int GetFriendIndex(const CUID& uidTarget) const;
+
     // Ban
     /**
     * @brief Adds a char to the _lBans list.
@@ -246,7 +248,7 @@ public:
     * @brief Deletes a char from the _lBans list.
     * @param pBan the char.
     */
-    void DelBan(const CUID& uidBan);
+    void DeleteBan(const CUID& uidBan);
     /**
     * @brief Returns the total count of banned chars.
     * @return the count
@@ -257,7 +259,8 @@ public:
     * @param pBan the char.
     * @return the pos.
     */
-    int GetBanPos(const CUID& uidBan) const;
+    int GetBanIndex(const CUID& uidBan) const;
+
     // Access
     /**
     * @brief Adds access to this house to the given char.
@@ -270,7 +273,7 @@ public:
     * Note: This removes the char from the list, but won't prevent it from enter like a Ban.
     * @param pAccess the char.
     */
-    void DelAccess(const CUID& uidAccess);
+    void DeleteAccess(const CUID& uidAccess);
     /**
     * @brief Returns the count of chars with access.
     * @return the count.
@@ -281,7 +284,7 @@ public:
     * @param pAccess the char.
     * @return the position.
     */
-    int GetAccessPos(const CUID& uidAccess) const;
+    int GetAccessIndex(const CUID& uidAccess) const;
     /**
     * @brief Ejects a char from inside the house to the House Sign.
     * @param pChar the char.
@@ -294,9 +297,11 @@ public:
     void EjectAll(CUID uidChar = CUID());
     ///@}
 
+
     /** House general:
     */
     ///@{
+
     // Keys:
     /**
     * @brief Creates a key for the given character.
@@ -314,6 +319,7 @@ public:
     * @brief Calls RemoveKeys(player_uid) on all players with access to this house.
     */
     void RemoveAllKeys();
+
     // Misc
     /**
     * @brief Returns the multi count.
@@ -323,6 +329,7 @@ public:
     * @return the count.
     */
     int16 GetMultiCount() const;
+
     // Redeed
     /**
     * @brief Redeeds this multi
@@ -331,6 +338,7 @@ public:
     * @param pChar the char doing the redeed (if any).
     */
     void Redeed(bool fDisplayMsg = true, bool fMoveToBank = true, CUID uidChar = CUID());
+
     //Moving Crate
     /**
     * @brief Sets the Moving Crate to the target.
@@ -371,13 +379,13 @@ public:
     * @brief Removes an Addon from the addons list.
     * @param pAddon the Addon
     */
-    void DelAddon(const CUID& uidAddon);
+    void DeleteAddon(const CUID& uidAddon);
     /**
     * @brief Returns the position of a given Addon.
     * @param pAddon the Addon
     * @return the position
     */
-    int GetAddonPos(const CUID& uidAddon) const;
+    int GetAddonIndex(const CUID& uidAddon) const;
     /**
     * @brief Returns the total count of Addons.
     * @return the count.
@@ -390,30 +398,30 @@ public:
 
     // Components
     /**
-    * @brief Adds a Component to the components list.
+    * @brief Adds a CMultiComponent to the components list.
     * @param pComponent the component.
     */
-    void AddComp(const CUID& uidComponent);
+    void AddComponent(const CUID& uidComponent);
     /**
-    * @brief Removes a Component from the components list.
+    * @brief Removes a CMultiComponent from the components list.
     * @param pComponent the component.
     */
-    virtual void DelComp(const CUID& uidComponent);
+    virtual void DeleteComponent(const CUID& uidComponent);
     /**
-    * @brief Returns the position of a given Component.
+    * @brief Returns the position of a given CMultiComponent.
     * @param pComponent the component
     * @return the position
     */
-    int GetCompPos(const CUID& uidComponent) const;
+    int GetComponentIndex(const CUID& uidComponent) const;
     /**
     * @brief Returns the total count of Components.
     * @return the count.
     */
-    size_t GetCompCount() const;
+    size_t GetComponentCount() const;
     /**
     * @brief Removes all Components.
     */
-    void RemoveAllComps();
+    void RemoveAllComponents();
     /**
     * @brief Generates the base components of the multi.
     * @param fNeedKey wether a key is required or not.
@@ -439,7 +447,7 @@ public:
     * @brief Sets the modifier of Base Storage.
     * @param iIncrease the modifier.
     */
-    void SetIncreasedStorage(uint16 iIncrease);
+    void SetIncreasedStorage(uint16 uiIncrease);
     /**
     * @brief Returns the modifier for Base Storage.
     * @return the modifier.
@@ -503,7 +511,7 @@ public:
     * @brief Returns the position of the given item.
     * @param pItem the item.
     */
-    int GetLockedItemPos(const CUID& pItem) const;
+    int GetLockedItemIndex(const CUID& pItem) const;
     /**
     * @brief Returns the total locked down items.
     * @return the count.
@@ -525,7 +533,7 @@ public:
     * @param pContainer the container
     * @return the pos.
     */
-    int GetSecuredContainerPos(const CUID& uidContainer) const;
+    int GetSecuredContainerIndex(const CUID& uidContainer) const;
     /**
     * @brief Returns the total items secured on containers.
     * @return the count
@@ -546,13 +554,13 @@ public:
     * @brief Removes a char from the vendors list.
     * @param pVendor the vendor
     */
-    void DelVendor(const CUID& uidVendor);
+    void DeleteVendor(const CUID& uidVendor);
     /**
     * @brief Returns the position of the given char.
     * @param pVendor the char
     * @return the pos.
     */
-    int GetHouseVendorPos(const CUID& uidVendor) const;
+    int GetVendorIndex(const CUID& uidVendor) const;
     /**
     * @brief Returns the total vendors.
     * @return the count.
@@ -565,7 +573,7 @@ protected:
     * @param pComponent the component
     * @param fIsAddon true if the component is an addon.
     */
-    virtual void OnComponentCreate(CItem * pComponent, bool fIsAddon = false);
+    void OnComponentCreate(CItem * pComponent, bool fIsAddon);
 
 
 public:

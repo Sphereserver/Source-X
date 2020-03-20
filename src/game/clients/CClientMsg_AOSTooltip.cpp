@@ -408,6 +408,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 	{
 	case IT_CONTAINER_LOCKED:
 		PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(3005142)); // Locked
+		break;
 	case IT_CONTAINER:
 	case IT_TRASH_CAN:
 		if (pItem->IsContainer())
@@ -443,13 +444,19 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 	{
         if (!IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
         {
-            const int ArmorRating = pItem->Armor_GetDefense();
-            if (ArmorRating != 0)
+            int iArmorRating = pItem->Armor_GetDefense();
+			int iPercentArmorRating = 0;
+			if (g_Cfg.m_fDisplayPercentAr)
+			{
+				iPercentArmorRating = CChar::CalcPercentArmorDefense(pItem->Item_GetDef()->GetEquipLayer());
+				iArmorRating = IMulDivDown(iArmorRating, iPercentArmorRating, 100);
+			}
+            if (iArmorRating != 0)
             {
                 // Obsolete AR was replaced by physical/fire/cold/poison/energy resist since AOS
                 // and doesn't even have proper tooltips. It's just there for backward compatibility
                 PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060658)); // ~1_val~: ~2_val~
-                t->FormatArgs("%s\t%d", g_Cfg.GetDefaultMsg(DEFMSG_TOOLTIP_TAG_ARMOR), ArmorRating);
+				t->FormatArgs("%s\t%d", g_Cfg.GetDefaultMsg(DEFMSG_TOOLTIP_TAG_ARMOR), iArmorRating);
             }
         }
 
@@ -462,10 +469,10 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 			t->FormatArgs("%" PRId64, StrengthRequirement);
 		}
 
-        if ( pItem->m_itArmor.m_Hits_Max > 0 )
+        if ( pItem->m_itArmor.m_wHitsMax > 0 )
         {
 		    PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060639)); // durability ~1_val~ / ~2_val~
-		    t->FormatArgs("%hu\t%hu", pItem->m_itArmor.m_Hits_Cur, pItem->m_itArmor.m_Hits_Max);
+		    t->FormatArgs("%hu\t%hu", pItem->m_itArmor.m_wHitsCur, pItem->m_itArmor.m_wHitsMax);
         }
 	}
 	break;
@@ -523,10 +530,10 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 			}
 		}
 
-        if ( pItem->m_itWeapon.m_Hits_Max > 0 )
+        if ( pItem->m_itWeapon.m_wHitsMax > 0 )
         {
 		    PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060639)); // durability ~1_val~ / ~2_val~
-		    t->FormatArgs("%hu\t%hu", pItem->m_itWeapon.m_Hits_Cur, pItem->m_itWeapon.m_Hits_Max);
+		    t->FormatArgs("%hu\t%hu", pItem->m_itWeapon.m_wHitsCur, pItem->m_itWeapon.m_wHitsMax);
         }
 	}
 	break;

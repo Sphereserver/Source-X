@@ -543,6 +543,7 @@ enum LAYER_TYPE		// defined by UO. Only one item can be in a slot.
     LAYER_SPELL_Essence_Of_Wind,
 
     //Mysticism
+    LAYER_SPELL_Enchant,
     LAYER_SPELL_Sleep,
     LAYER_SPELL_Bombard,
     LAYER_SPELL_Spell_Plague,
@@ -698,6 +699,7 @@ enum SPELL_TYPE	// List of spell numbers in spell book.
     // Mysticism (SA)
     SPELL_Nether_Bolt = 678,
     SPELL_Healing_Stone,
+    SPELL_Purge_Magic,
     SPELL_Enchant_Weapon,
     SPELL_Sleep,
     SPELL_Eagle_Strike,

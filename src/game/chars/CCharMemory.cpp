@@ -481,7 +481,7 @@ void CChar::Memory_Fight_Start( const CChar * pTarg )
 	}
 	else
 	{
-		if (Attacker_GetID(pTarg->GetUID()))	// I'm already in fight against pTarg, no need of more code
+		if (Attacker_GetID(pTarg->GetUID()) >= 0)	// I'm already in fight against pTarg, no need of more code
 			return;
 		if ( pMemory->IsMemoryTypes(MEMORY_HARMEDBY|MEMORY_SAWCRIME|MEMORY_AGGREIVED))
 			MemTypes = 0;	// I am defending myself rightly.

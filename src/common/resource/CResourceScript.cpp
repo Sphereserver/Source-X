@@ -21,7 +21,7 @@ bool CResourceScript::_CheckForChange()
 
     if ( !CSFileList::ReadFileInfo(ptcFilePath, dateChange, dwSize) )
     {
-        DEBUG_ERR(( "Can't get stats info for file '%s'\n", ptcFilePath ));
+        g_Log.EventError( "Can't get stats info for file '%s'\n", ptcFilePath );
         return false;
     }
 

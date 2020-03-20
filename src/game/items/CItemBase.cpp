@@ -303,7 +303,7 @@ GUMP_TYPE CItemBase::IsTypeContainer() const
 		case IT_EQ_BANK_BOX:
 		case IT_EQ_VENDOR_BOX:
 		case IT_KEYRING:
-			return	m_ttContainer.m_idGump;
+			return m_ttContainer.m_idGump;
 		default:
 			return GUMP_NONE;
 	}
@@ -2023,7 +2023,7 @@ bool CItemBaseMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * 
         case MLC_BASECOMPONENT:
         {
             ptcKey += 13;
-            const CSphereMulti* pMulti = g_Cfg.GetMultiItemDefs(GetDispID());
+            const CUOMulti* pMulti = g_Cfg.GetMultiItemDefs(GetDispID());
             if (pMulti == nullptr)
                 return false;
 
@@ -2064,12 +2064,14 @@ bool CItemBaseMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * 
             else if (*ptcKey == '.')
             {
                 SKIP_SEPARATORS(ptcKey);
-                size_t index = Exp_GetVal(ptcKey);
-                if (m_Components.IsValidIndex(index) == false)
+				const llong iIndex = Exp_GetLLVal(ptcKey);
+				if (iIndex < 0)
+					return false;
+                if (m_Components.IsValidIndex(size_t(iIndex)) == false)
                     return false;
 
                 SKIP_SEPARATORS(ptcKey);
-                CMultiComponentItem item = m_Components.at(index);
+                CMultiComponentItem item = m_Components.at(size_t(iIndex));
 
                 if (!strnicmp(ptcKey, "ID", 2)) sVal.FormatVal(item.m_id);
                 else if (!strnicmp(ptcKey, "DX", 2)) sVal.FormatVal(item.m_dx);

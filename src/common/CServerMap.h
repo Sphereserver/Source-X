@@ -17,10 +17,11 @@ class CCachedMulItem
 {
 private:
 	int64 m_timeRef;		// When in world.GetTime() was this last referenced.
+
 public:
 	static const char *m_sClassName;
 	CCachedMulItem();
-	virtual ~CCachedMulItem();
+	virtual ~CCachedMulItem() = default;
 
 private:
 	CCachedMulItem(const CCachedMulItem& copy);
@@ -38,6 +39,7 @@ class CServerStaticsBlock
 private:
 	uint m_iStatics;
 	CUOStaticItemRec * m_pStatics;	// dyn alloc array block.
+
 public:
 	void LoadStatics(dword dwBlockIndex, int map);
 	void LoadStatics(uint uiCount, CUOStaticItemRec * pStatics);
@@ -181,15 +183,13 @@ public:
 	static const char *m_sClassName;
 	CServerStaticsBlock m_Statics;
 	CCachedMulItem m_CacheTime;	// keep track of the use time of this item. (client does not care about this)
+
 private:
 	void Load(int bx, int by);	// NOTE: This will "throw" on failure !
 	//void LoadDiffs(dword dwBlockIndex, int map);
 
 public:
-	explicit CServerMapBlock( const CPointMap & pt );
-
 	CServerMapBlock(int bx, int by, int map);
-
 	virtual ~CServerMapBlock()
 	{ 
 		--sm_iCount;
@@ -200,47 +200,50 @@ private:
 	CServerMapBlock& operator=(const CServerMapBlock& other);
 
 public:
-	int GetOffsetX(int x) const
+	inline int GetOffsetX(int x) const
 	{
 		return (x - m_x);
 	}
-	int GetOffsetY( int y ) const
+	inline int GetOffsetY( int y ) const
 	{
 		return (y - m_y);
 	}
 
-	const CUOMapMeter * GetTerrain( int xo, int yo ) const
-	{
-		ASSERT(xo >= 0 && xo < UO_BLOCK_SIZE);
-		ASSERT(yo >= 0 && yo < UO_BLOCK_SIZE);
-		return &(m_Terrain.m_Meter[yo*UO_BLOCK_SIZE + xo]);
-	}
-	const CUOMapBlock * GetTerrainBlock() const
+	inline const CUOMapBlock * GetTerrainBlock() const
 	{
 		return &m_Terrain;
 	}
+	const CUOMapMeter* GetTerrain(int xo, int yo) const
+	{
+		ASSERT(xo >= 0 && xo < UO_BLOCK_SIZE);
+		ASSERT(yo >= 0 && yo < UO_BLOCK_SIZE);
+		return &(m_Terrain.m_Meter[yo * UO_BLOCK_SIZE + xo]);
+	}
 };
 
-class CSphereMulti : public CCachedMulItem
+class CUOMulti : public CCachedMulItem
 {
 	// Load all the relivant info for the
 private:
 	MULTI_TYPE m_id;
+
 protected:
 	CUOMultiItemRec_HS * m_pItems;
 	uint m_iItemQty;
+
+public:
+	static const char *m_sClassName;
+	CUOMulti();
+	explicit CUOMulti( MULTI_TYPE id );
+	virtual ~CUOMulti();
+
+private:
+	CUOMulti(const CUOMulti& copy);
+	CUOMulti& operator=(const CUOMulti& other);
+
 private:
 	void Init();
 	void Release();
-public:
-	static const char *m_sClassName;
-	CSphereMulti();
-	explicit CSphereMulti( MULTI_TYPE id );
-	virtual ~CSphereMulti();
-
-private:
-	CSphereMulti(const CSphereMulti& copy);
-	CSphereMulti& operator=(const CSphereMulti& other);
 
 public:
 	size_t Load( MULTI_TYPE id );

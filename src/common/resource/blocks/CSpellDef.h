@@ -61,7 +61,7 @@ public:
     LAYER_TYPE m_idLayer;           // Where the layer buff/debuff/data is stored.
 
     CValueCurveDef m_CastTime;      // In tenths of second.
-    CValueCurveDef m_Effect;        // Damage or effect level based on skill of caster.100% magery
+    CValueCurveDef m_vcEffect;        // Damage or effect level based on skill of caster.100% magery
     CValueCurveDef m_Duration;      // length of effect. in tenth of second
     CValueCurveDef m_Interrupt;     // chance to interrupt a spell
 

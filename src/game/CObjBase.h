@@ -17,7 +17,6 @@
 #include "CServerConfig.h"
 
 
-class CBaseBase;
 class PacketSend;
 class PacketPropertyList;
 class CCSpawn;
@@ -754,7 +753,7 @@ public:
      * @param   mode    The mode.
      * @param   font    The font.
      */
-	virtual void Speak( lpctstr pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL );
+	virtual void Speak( lpctstr pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL ) const;
 
     /**
      * @fn  virtual void CObjBase::SpeakUTF8( lpctstr pText, HUE_TYPE wHue= HUE_TEXT_DEF, TALKMODE_TYPE mode= TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL, CLanguageID lang = 0 );
@@ -767,7 +766,7 @@ public:
      * @param   font    The font.
      * @param   lang    The language.
      */
-	virtual void SpeakUTF8( lpctstr pText, HUE_TYPE wHue= HUE_TEXT_DEF, TALKMODE_TYPE mode= TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL, CLanguageID lang = 0 );
+	virtual void SpeakUTF8( lpctstr pText, HUE_TYPE wHue= HUE_TEXT_DEF, TALKMODE_TYPE mode= TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL, CLanguageID lang = 0 ) const;
 
     /**
      * @fn  virtual void CObjBase::SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
@@ -780,7 +779,7 @@ public:
      * @param   font    The font.
      * @param   lang    The language.
      */
-	virtual void SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
+	virtual void SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) const;
 
     /**
      * @fn  void CObjBase::RemoveFromView( CClient * pClientExclude = nullptr , bool fHardcoded = true );
@@ -1043,7 +1042,9 @@ enum STONEALIGN_TYPE // Types of Guild/Town stones
 enum ITRIG_TYPE
 {
 	// XTRIG_UNKNOWN = some named trigger not on this list.
-	ITRIG_AfterClick=1,
+    ITRIG_ADDREDCANDLE = 1,
+    ITRIG_ADDWHITECANDLE,
+	ITRIG_AfterClick,
 	ITRIG_Buy,
 	ITRIG_Click,
 	ITRIG_CLIENTTOOLTIP,        // Sending tooltip to client for this item
@@ -1066,11 +1067,13 @@ enum ITRIG_TYPE
 	ITRIG_PICKUP_PACK,          // picked up from inside some container.
 	ITRIG_PICKUP_SELF,          // picked up from this container
 	ITRIG_PICKUP_STACK,         // picked up from a stack (ARGO)
+    ITRIG_PreSpawn,             // Called before something is spawned, pre-check it's id and validity.
     ITRIG_Redeed,               // Redeeding a multi.
     ITRIG_RegionEnter,          // Ship entering a new region.
     ITRIG_RegionLeave,          // Ship leaving the region.
 	ITRIG_Sell,                 // I'm being sold.
 	ITRIG_Ship_Turn,            // I'm a ship and i'm turning around.
+    ITRIG_Spawn,                // This spawn is going to generate something.
 	ITRIG_SPELLEFFECT,          // cast some spell on me.
 	ITRIG_STEP,                 // I have been walked on. (or shoved)
 	ITRIG_TARGON_CANCEL,        // Someone requested me (item) to target, now the targeting was canceled.

@@ -514,7 +514,7 @@ try_dec:
 				{
 					case INTRINSIC_ID:
 					{
-						if ( pszArgs && *pszArgs )
+						if ( *pszArgs )
 						{
 							iCount = 1;
 							iResult = RES_GET_INDEX( GetVal(pszArgs) );
@@ -556,7 +556,7 @@ try_dec:
 						iCount = 0;
 						iResult = 0;
 
-						if ( pszArgs && *pszArgs )
+						if ( *pszArgs )
 						{
 							llong iArgument = GetVal(pszArgs);
 							if ( iArgument <= 0 )
@@ -600,7 +600,7 @@ try_dec:
 
 					case INTRINSIC_NAPIERPOW:
 					{
-						if ( pszArgs && *pszArgs )
+						if ( *pszArgs )
 						{
 							iCount = 1;
 							iResult = (llong)exp( (double)GetVal( pszArgs ) );
@@ -618,7 +618,7 @@ try_dec:
 						iCount = 0;
 						iResult = 0;
 
-						if ( pszArgs && *pszArgs )
+						if ( *pszArgs )
 						{
 							llong iTosquare = GetVal(pszArgs);
 
@@ -635,7 +635,7 @@ try_dec:
 
 					case INTRINSIC_SIN:
 					{
-						if ( pszArgs && *pszArgs )
+						if ( *pszArgs )
 						{
 							iCount = 1;
 							iResult = (llong)sin( (double)GetVal( pszArgs ) );
@@ -650,7 +650,7 @@ try_dec:
 
 					case INTRINSIC_ARCSIN:
 					{
-						if ( pszArgs && *pszArgs )
+						if ( *pszArgs )
 						{
 							iCount = 1;
 							iResult = (llong)asin( (double)GetVal( pszArgs ) );
@@ -665,7 +665,7 @@ try_dec:
 
 					case INTRINSIC_COS:
 					{
-						if ( pszArgs && *pszArgs )
+						if ( *pszArgs )
 						{
 							iCount = 1;
 							iResult = (llong)cos( (double)GetVal( pszArgs ) );
@@ -680,7 +680,7 @@ try_dec:
 
 					case INTRINSIC_ARCCOS:
 					{
-						if ( pszArgs && *pszArgs )
+						if ( *pszArgs )
 						{
 							iCount = 1;
 							iResult = (llong)acos( (double)GetVal( pszArgs ) );
@@ -695,7 +695,7 @@ try_dec:
 
 					case INTRINSIC_TAN:
 					{
-						if ( pszArgs && *pszArgs )
+						if ( *pszArgs )
 						{
 							iCount = 1;
 							iResult = (llong)tan( (double)GetVal( pszArgs ) );
@@ -710,7 +710,7 @@ try_dec:
 
 					case INTRINSIC_ARCTAN:
 					{
-						if ( pszArgs && *pszArgs )
+						if ( *pszArgs )
 						{
 							iCount = 1;
 							iResult = (llong)atan( (double)GetVal( pszArgs ) );
@@ -768,7 +768,7 @@ try_dec:
 
 					case INTRINSIC_STRASCII:
 					{
-						if ( pszArgs && *pszArgs )
+						if ( *pszArgs )
 						{
 							iCount = 1;
 							iResult = pszArgs[0];
@@ -1018,9 +1018,14 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 			++pExpr;
 			{
 				llong iVal = GetVal( pExpr );
-				if ( (llVal == 0) && (iVal < 0) )
+				if (llVal < 0)
 				{
-					DEBUG_ERR(( "Exp_GetVal: Power of zero with negative exponent is undefined\n" ));
+					g_Log.EventError("Power with negative base is a complex number.\n");
+					break;
+				}
+				else if ( (llVal == 0) && (iVal < 0) )
+				{
+					g_Log.EventError("Power of zero with negative exponent is undefined.\n");
 					break;
 				}
 				llVal = power(llVal, iVal);
@@ -1287,7 +1292,7 @@ int64 CExpression::GetRangeNumber(lpctstr & pExpr)
 		llWeights[i] = GetSingle(pToParseCasted);	// GetSingle changes the pointer value, so i need to work with a copy
 
 		if ( ! llWeights[i] )	// having a weight of 0 is very strange !
-			DEBUG_ERR(( "Weight of 0 in random range: invalid. Value-weight couple number %d\n", i ));	// the whole table should really just be invalid here !
+			g_Log.EventError( "Weight of 0 in random range: invalid. Value-weight couple number %d\n", i );	// the whole table should really just be invalid here !
 		llTotalWeight += llWeights[i];
 	}
 

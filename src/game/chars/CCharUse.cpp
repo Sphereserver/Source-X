@@ -403,16 +403,16 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 
 	// If standing right next to the butte, gather the arrows/bolts
 	int iDist = GetDist(pButte);
-	if ( (iDist < 2) && pButte->m_itArcheryButte.m_AmmoCount )
+	if ( (iDist < 2) && pButte->m_itArcheryButte.m_iAmmoCount )
 	{
 		CItem *pRemovedAmmo = CItem::CreateBase((ITEMID_TYPE)pButte->m_itArcheryButte.m_ridAmmoType.GetResIndex());
 		ASSERT(pRemovedAmmo);
-		pRemovedAmmo->SetAmount((word)pButte->m_itArcheryButte.m_AmmoCount);
+		pRemovedAmmo->SetAmount((word)pButte->m_itArcheryButte.m_iAmmoCount);
 		ItemBounce(pRemovedAmmo, false);
 		SysMessageDefault(DEFMSG_ITEMUSE_ARCHBUTTE_GATHER);
 
 		pButte->m_itArcheryButte.m_ridAmmoType.Clear();
-		pButte->m_itArcheryButte.m_AmmoCount = 0;
+		pButte->m_itArcheryButte.m_iAmmoCount = 0;
 		return true;
 	}
 
@@ -550,7 +550,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 		if ( WeaponAmmoID )
 		{
 			pButte->m_itArcheryButte.m_ridAmmoType = CResourceIDBase(RES_ITEMDEF, (int)WeaponAmmoID);
-			++ pButte->m_itArcheryButte.m_AmmoCount;
+			++ pButte->m_itArcheryButte.m_iAmmoCount;
 		}
 	}
 	else
@@ -579,10 +579,10 @@ bool CChar::Use_Item_Web( CItem * pItemWeb )
 
 	// Try to break it.
 
-    if (pItemWeb->m_itWeb.m_Hits_Cur == 0)
-        pItemWeb->m_itWeb.m_Hits_Cur = 60 + Calc_GetRandVal(250);
-    else if (pItemWeb->m_itWeb.m_Hits_Cur > INT32_MAX)
-        pItemWeb->m_itWeb.m_Hits_Cur = INT32_MAX;
+    if (pItemWeb->m_itWeb.m_wHitsCur == 0)
+        pItemWeb->m_itWeb.m_wHitsCur = 60 + Calc_GetRandVal(250);
+    else if (pItemWeb->m_itWeb.m_wHitsCur > INT32_MAX)
+        pItemWeb->m_itWeb.m_wHitsCur = INT32_MAX;
 
 	// Since broken webs become spider silk, we should get out of here now if we aren't in a web.
 	CItem *pFlag = LayerFind(LAYER_FLAG_Stuck);
@@ -630,7 +630,7 @@ bool CChar::Use_Item_Web( CItem * pItemWeb )
 		pFlag->m_uidLink = pItemWeb->GetUID();		
 
         int iStuckTimerSeconds = 2; // Mininum stuck timer value is 2 seconds.
-        iCharStr = ((100 - minimum(100, iCharStr)) * (int)pItemWeb->m_itWeb.m_Hits_Cur) / 10;
+        iCharStr = ((100 - minimum(100, iCharStr)) * (int)pItemWeb->m_itWeb.m_wHitsCur) / 10;
         iStuckTimerSeconds = minimum(10, iStuckTimerSeconds + iCharStr); //Maximum stuck timer value is 10 seconds
 
 		pFlag->SetTimeout(iStuckTimerSeconds * MSECS_PER_SEC);
@@ -702,7 +702,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 		return false;
 	}
 	
-	if ( pItemArmor->m_itArmor.m_Hits_Cur >= pItemArmor->m_itArmor.m_Hits_Max )
+	if ( pItemArmor->m_itArmor.m_wHitsCur >= pItemArmor->m_itArmor.m_wHitsMax )
 	{
 		SysMessageDefault(DEFMSG_REPAIR_FULL);
 		return false;
@@ -718,9 +718,10 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	CItemBase *pItemDef = pItemArmor->Item_GetDef();
 	ASSERT(pItemDef);
 
-	size_t i = pItemDef->m_SkillMake.FindResourceType(RES_SKILL);
-	if (i == SCONT_BADINDEX)
-		return false;
+	// Use up some raw materials to repair.
+	int iTotalHits = pItemArmor->m_itArmor.m_wHitsMax;
+	int iDamageHits = pItemArmor->m_itArmor.m_wHitsMax - pItemArmor->m_itArmor.m_wHitsCur;
+	int iDamagePercent = IMulDiv(100, iDamageHits, iTotalHits);
 
 	SKILL_TYPE skill = static_cast<SKILL_TYPE>(pItemDef->m_SkillMake[i].GetResIndex());
 	WORD wSkillVal = Skill_GetAdjusted(skill);
@@ -940,7 +941,7 @@ void CChar::Use_Drink( CItem * pItem )
 		}
 
 		// Convey the effect of the potion.
-		int iSkillQuality = pItem->m_itPotion.m_skillquality;
+		int iSkillQuality = pItem->m_itPotion.m_dwSkillQuality;
 		int iEnhance = (int)GetPropNum(COMP_PROPS_CHAR, PROPCH_ENHANCEPOTIONS, true);
 		if ( iEnhance )
 			iSkillQuality += IMulDiv(iSkillQuality, iEnhance, 100);
@@ -981,21 +982,22 @@ void CChar::Use_Drink( CItem * pItem )
 		ItemBounce(CItem::CreateScript(idbottle, this), false);
 }
 
-CChar * CChar::Use_Figurine( CItem * pItem, bool bCheckFollowerSlots )
+CChar * CChar::Use_Figurine( CItem * pItem, bool fCheckFollowerSlots )
 {
 	ADDTOCALLSTACK("CChar::Use_Figurine");
 	// NOTE: The figurine is NOT destroyed.
-	bool bCreatedNewNpc = false;
+	
 	if ( !pItem )
 		return nullptr;
 
-	if ( pItem->m_uidLink.IsValidUID() && pItem->m_uidLink.IsChar() && pItem->m_uidLink != GetUID() && !IsPriv(PRIV_GM) )
+	if ( pItem->m_uidLink.IsValidUID() && pItem->m_uidLink.IsChar() && (pItem->m_uidLink != GetUID()) && !IsPriv(PRIV_GM) )
 	{
 		SysMessageDefault(DEFMSG_MSG_FIGURINE_NOTYOURS);
 		return nullptr;
 	}
 
 	// Create a new NPC if there's no one linked to this figurine
+    bool fCreatedNewNpc = false;
 	CChar *pPet = pItem->m_itFigurine.m_UID.CharFind();
 	if ( !pPet )
 	{
@@ -1009,24 +1011,25 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool bCheckFollowerSlots )
 				return nullptr;
 			}
 		}
-		bCreatedNewNpc = true;
+		fCreatedNewNpc = true;
 		pPet = CreateNPC(id);
 		ASSERT(pPet);
 		pPet->SetName(pItem->GetName());
-		if ( pItem->GetHue() )
+        const HUE_TYPE iMountHue = pItem->GetHue();
+		if (iMountHue)
 		{
-			pPet->m_prev_Hue = pItem->GetHue();
-			pPet->SetHue(pItem->GetHue());
+			pPet->m_prev_Hue = iMountHue;
+			pPet->SetHue(iMountHue);
 		}
 	}
 
-	if ( bCheckFollowerSlots && IsSetOF(OF_PetSlots) )
+	if ( fCheckFollowerSlots && IsSetOF(OF_PetSlots) )
 	{
-		short iFollowerSlots = (short)pPet->GetDefNum("FOLLOWERSLOTS", true);
+		const short iFollowerSlots = (short)pPet->GetDefNum("FOLLOWERSLOTS", true);
 		if ( !FollowersUpdate(pPet, (maximum(1, iFollowerSlots)), true) )
 		{
 			SysMessageDefault(DEFMSG_PETSLOTS_TRY_CONTROL);
-			if ( bCreatedNewNpc )
+			if ( fCreatedNewNpc )
 				pPet->Delete();
 			return nullptr;
 		}
@@ -1370,7 +1373,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 				}
 				pItem->SetTimeoutS(pItem->m_itItemStone.m_wRegenTime);
 			}
-			ItemBounce(CItem::CreateTemplate(pItem->m_itItemStone.m_ItemID, GetPackSafe(), this));
+			ItemBounce(CItem::CreateTemplate(pItem->m_itItemStone.m_iItemID, GetPackSafe(), this));
 			if (pItem->m_itItemStone.m_wAmount != 0)
 			{
 				--pItem->m_itItemStone.m_wAmount;
@@ -1458,7 +1461,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 
 			// Get honey from it
 			ITEMID_TYPE id = ITEMID_NOTHING;
-			if (!pItem->m_itBeeHive.m_honeycount)
+			if (!pItem->m_itBeeHive.m_iHoneyCount)
 				SysMessageDefault(DEFMSG_ITEMUSE_BEEHIVE);
 			else
 			{
@@ -1475,7 +1478,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			if (id)
 			{
 				ItemBounce(CItem::CreateScript(id, this));
-				--pItem->m_itBeeHive.m_honeycount;
+				--pItem->m_itBeeHive.m_iHoneyCount;
 			}
 			else
             {
@@ -1536,6 +1539,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 				SysMessageDefault(DEFMSG_ITEMUSE_PORT_LOCKED);
 				return true;
 			}
+			FALLTHROUGH;
 		case IT_PORTCULIS:
 			// Open a metal gate vertically
 			pItem->Use_Portculis();
@@ -1572,7 +1576,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			// Close the plank if I'm inside the ship
 			if (m_pArea->IsFlag(REGION_FLAG_SHIP) && m_pArea->GetResourceID() == pItem->m_uidLink)
 			{
-				if (pItem->m_itShipPlank.m_itSideType == IT_SHIP_SIDE_LOCKED && !ContentFindKeyFor(pItem))
+				if (pItem->m_itShipPlank.m_wSideType == IT_SHIP_SIDE_LOCKED && !ContentFindKeyFor(pItem))
 				{
 					SysMessageDefault(DEFMSG_ITEMUSE_SHIPSIDE);
 					return true;
@@ -1777,7 +1781,7 @@ bool CChar::ItemEquipArmor( bool fForce )
 
 		// Can I even equip this?
 		LAYER_TYPE layer = CanEquipLayer(pItem, LAYER_QTY, nullptr, true);
-		if ( layer == LAYER_NONE )
+		if ((layer == LAYER_NONE) || (layer >= LAYER_HORSE))
 			continue;
 
 		if ( iScore > iBestScore[layer] )

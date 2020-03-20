@@ -10,11 +10,10 @@ int CEventLog::VEvent(dword dwMask, lpctstr pszFormat, va_list args)
     if (pszFormat == nullptr || pszFormat[0] == '\0')
         return 0;
 
-    TemporaryString tsTemp;
-    tchar* pszTemp = static_cast<tchar *>(tsTemp);
-    size_t len = vsnprintf(pszTemp, (SCRIPT_MAX_LINE_LEN - 1), pszFormat, args);
+	tchar* pszTemp = Str_GetTemp();
+    size_t len = vsnprintf(pszTemp, (STR_TEMPLENGTH - 1), pszFormat, args);
     if (! len)
-        Str_CopyLimitNull(pszTemp, pszFormat, (SCRIPT_MAX_LINE_LEN - 1));
+        Str_CopyLimitNull(pszTemp, pszFormat, (STR_TEMPLENGTH - 1));
 
     // This get rids of exploits done sending 0x0C to the log subsytem.
     // tchar *	 pFix;
@@ -357,7 +356,7 @@ void _cdecl CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...
 		else
 		{
 			eSeverity = LOGL_CRIT;
-			strcpy(szMsg, "Generic exception");
+			Str_CopyLimitNull(szMsg, "Generic exception", sizeof(szMsg));
 			stLen = strlen(szMsg);
 		}
 

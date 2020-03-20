@@ -101,8 +101,6 @@ bool PacketCreate::onReceive(CNetState* net)
 		*/
 		switch (race_sex_flag)
 		{
-			default:
-				g_Log.Event(LOGL_WARN|LOGM_NOCONTEXT,"PacketCreate: unknown race_sex_flag (% " PRIu8 "), defaulting to 2 (human male).\n", race_sex_flag);
 			case 0x2: case 0x3:
 				rtRace = RACETYPE_HUMAN;
 				break;
@@ -112,6 +110,8 @@ bool PacketCreate::onReceive(CNetState* net)
 			case 0x6: case 0x7:
 				rtRace = RACETYPE_GARGOYLE;
 				break;
+			default:
+				g_Log.Event(LOGL_WARN | LOGM_NOCONTEXT, "PacketCreate: unknown race_sex_flag (% " PRIu8 "), defaulting to 2 (human male).\n", race_sex_flag);
 		}
 	}
 	else
@@ -146,9 +146,9 @@ bool PacketCreate::onReceive(CNetState* net)
 		hue, hairid, hairhue, beardid, beardhue, shirthue, pantshue, ITEMID_NOTHING, startloc, flags);
 }
 
-bool PacketCreate::doCreate(CNetState* net, lpctstr charname, bool bFemale, RACE_TYPE rtRace, short wStr, short wDex, short wInt,
-	PROFESSION_TYPE prProf, SKILL_TYPE skSkill1, ushort uiSkillVal1, SKILL_TYPE skSkill2, ushort uiSkillVal2, SKILL_TYPE skSkill3, ushort uiSkillVal3, SKILL_TYPE skSkill4, ushort uiSkillVal4,
-	HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, ITEMID_TYPE idFace, int iStartLoc, int iFlags)
+bool PacketCreate::doCreate(CNetState* net, lpctstr charname, bool fFemale, RACE_TYPE rtRace, ushort wStr, ushort wDex, ushort wInt, PROFESSION_TYPE prProf,
+	SKILL_TYPE skSkill1, ushort uiSkillVal1, SKILL_TYPE skSkill2, ushort uiSkillVal2, SKILL_TYPE skSkill3, ushort uiSkillVal3, SKILL_TYPE skSkill4, ushort uiSkillVal4,
+	HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, ITEMID_TYPE idFace, int iStartLoc, uint uiFlags)
 {
 	ADDTOCALLSTACK("PacketCreate::doCreate");
 
@@ -194,7 +194,7 @@ bool PacketCreate::doCreate(CNetState* net, lpctstr charname, bool bFemale, RACE
 	TRIGRET_TYPE tr = TRIGRET_RET_DEFAULT;
 	CScriptTriggerArgs createArgs;
     // RW
-	createArgs.m_iN1 = iFlags;
+	createArgs.m_iN1 = uiFlags;
 	createArgs.m_iN2 = prProf;
 	createArgs.m_iN3 = rtRace;
     // R
@@ -205,12 +205,12 @@ bool PacketCreate::doCreate(CNetState* net, lpctstr charname, bool bFemale, RACE
     if (tr == TRIGRET_RET_TRUE)
         goto block_creation;
 
-    iFlags = (int)createArgs.m_iN1;
+    //uiFlags = (uint)createArgs.m_iN1;  // unused at this point
     prProf = (PROFESSION_TYPE)createArgs.m_iN2;
     rtRace = (RACE_TYPE)createArgs.m_iN3;
 
 	// Creating the pChar
-	pChar->InitPlayer(client, charname, bFemale, rtRace, wStr, wDex, wInt,
+	pChar->InitPlayer(client, charname, fFemale, rtRace, wStr, wDex, wInt,
 		prProf, skSkill1, uiSkillVal1, skSkill2, uiSkillVal2, skSkill3, uiSkillVal3, skSkill4, uiSkillVal4,
 		wSkinHue, idHair, wHairHue, idBeard, wBeardHue, wShirtHue, wPantsHue, idFace, iStartLoc);
 
@@ -537,13 +537,17 @@ bool PacketItemEquipReq::onReceive(CNetState* net)
 	client->ClearTargMode(); // done dragging.
 
 	CChar* target = targetSerial.CharFind();
-	const bool fCanCarry = target->CanCarry(item);
-	if ( (target == nullptr) || (itemLayer >= LAYER_HORSE) || !target->IsOwnedBy(source) || !fCanCarry || !target->ItemEquip(item, source) )
-	{
-		client->Event_Item_Drop_Fail(item);		//cannot equip
-		if ( !fCanCarry )
-			client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_HEAVY));
+    bool fSuccess = false;
+    if (target && (itemLayer < LAYER_HORSE) && target->IsOwnedBy(source) && target->CanTouch(item))
+    {
+        if (target->CanCarry(item))
+            fSuccess = target->ItemEquip(item, source);
+        else
+            client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_HEAVY));
 	}
+
+    if (!fSuccess)
+        client->Event_Item_Drop_Fail(item);		//cannot equip
 
 	return true;
 }
@@ -774,7 +778,7 @@ bool PacketVendorBuyReq::onReceive(CNetState* net)
 			}
 		}
 
-		items[index].m_amount += amount;
+		items[index].m_vcAmount += amount;
 		if (items[index].m_price <= 0)
 		{
 			vendor->Speak("Alas, I don't have these goods currently stocked. Let me know if there is something else thou wouldst buy.");
@@ -992,7 +996,7 @@ bool PacketBookPageEdit::onReceive(CNetState* net)
 	uint len = 0;
 	tchar* content = Str_GetTemp();
 
-	for (int i = 0; i < pageCount; i++)
+	for (ushort i = 0; i < pageCount; ++i)
 	{
 		// read next page to change with line count
 		page = readInt16();
@@ -1000,7 +1004,7 @@ bool PacketBookPageEdit::onReceive(CNetState* net)
 		if (page < 1 || page > MAX_BOOK_PAGES || lineCount <= 0)
 			continue;
 
-		page--;
+		-- page;
 		len = 0;
 
 		// read each line of the page
@@ -1604,7 +1608,7 @@ bool PacketCreateNew::onReceive(CNetState* net)
 	bool success = doCreate(net, charname, sex > 0, race,
 		strength, dexterity, intelligence, profession,
 		skill1, skillval1, skill2, skillval2, skill3, skillval3, skill4, skillval4,
-		hue, hairid, hairhue, beardid, beardhue, shirthue, shirthue, faceid, startloc, -1);
+		hue, hairid, hairhue, beardid, beardhue, shirthue, shirthue, faceid, startloc, UINT32_MAX);
 	if (!success)
 		return false;
 
@@ -1870,7 +1874,7 @@ bool PacketVendorSellReq::onReceive(CNetState* net)
 	for (uint i = 0; i < itemCount; ++i)
 	{
 		items[i].m_serial = CUID(readInt32());
-		items[i].m_amount = readInt16();
+		items[i].m_vcAmount = readInt16();
 	}
 
 	client->Event_VendorSell(vendor, items, itemCount);
@@ -2140,7 +2144,7 @@ bool PacketGumpDialogRet::onReceive(CNetState* net)
 			CChar *viewed = character;
 			if ((button == 1) && (checkCount > 0))
 			{
-				viewed = CUID(readInt32()).CharFind();
+				viewed = CUID::CharFind(readInt32());
 				if (!viewed)
 					viewed = character;
 			}
@@ -2208,12 +2212,6 @@ bool PacketGumpDialogRet::onReceive(CNetState* net)
 
 
 	dword textCount = readInt32();
-    if (checkCount > MAX_DIALOG_CONTROLTYPE_QTY)
-    {
-        g_Log.EventError("%x:PacketGumpDialogRet textentry count too high.\n", net->id());
-        return false;
-    }
-
 	tchar* text = Str_GetTemp();
 	for (uint i = 0; i < textCount; ++i)
 	{
@@ -3019,8 +3017,8 @@ bool PacketSpellSelect::onReceive(CNetState* net)
 	{
 		if (spellDef->IsSpellType(SPELLFLAG_NOPRECAST) == false)
 		{
-			client->m_tmSkillMagery.m_Spell = spell;
-			character->m_atMagery.m_Spell = spell;
+			client->m_tmSkillMagery.m_iSpell = spell;
+			character->m_atMagery.m_iSpell = spell;
 			client->m_Targ_UID = character->GetUID();
 			client->m_Targ_Prv_UID = character->GetUID();
 			character->Skill_Start((SKILL_TYPE)skill);
@@ -3105,15 +3103,17 @@ bool PacketBandageMacro::onReceive(CNetState* net)
 	if (character == nullptr)
 		return false;
 
-	CItem* bandage = CUID(readInt32()).ItemFind();
-	CObjBase* target = CUID(readInt32()).ObjFind();
+    CUID uidBandage = readInt32();
+    CUID uidTarget = readInt32();
+	CItem* bandage = uidBandage.ItemFind();
+	CObjBase* target = uidTarget.ObjFind();
 	if (bandage == nullptr || target == nullptr)
 		return true;
 
 	// check the client can see the bandage they're trying to use
 	if (character->CanSee(bandage) == false)
 	{
-		client->addObjectRemoveCantSee(bandage->GetUID(), "the target");
+		client->addObjectRemoveCantSee(uidBandage, "the target");
 		return true;
 	}
 
@@ -3141,11 +3141,11 @@ bool PacketBandageMacro::onReceive(CNetState* net)
 	// client->SetTargMode();
 
 	// prepare targeting information
-	client->m_Targ_UID = bandage->GetUID();
+	client->m_Targ_UID = uidBandage;
 	client->m_tmUseItem.m_pParent = bandage->GetParent();
 	client->SetTargMode(CLIMODE_TARG_USE_ITEM);
 
-	client->Event_Target(CLIMODE_TARG_USE_ITEM, target->GetUID(), target->GetUnkPoint());
+	client->Event_Target(CLIMODE_TARG_USE_ITEM, uidTarget, target->GetUnkPoint());
 	return true;
 }
 
@@ -4012,12 +4012,14 @@ bool PacketEquipLastWeapon::onReceive(CNetState* net)
         return false;
 
     if (!pCharPlayer->m_uidWeaponLast.IsValidUID())
-        return true;
+        return false;
     if ( pCharPlayer->m_uidWeaponLast == pChar->m_uidWeapon )
         return true;
 
     CItem *pWeapon = pCharPlayer->m_uidWeaponLast.ItemFind();
-    if ( pWeapon && pChar->ItemPickup(pWeapon, 1) == -1 )
+    if (!pWeapon)
+        return false;
+    if (pChar->ItemPickup(pWeapon, 1) == -1)
         return true;
 
     pChar->ItemEquip(pWeapon);
@@ -4545,8 +4547,6 @@ bool PacketCreateHS::onReceive(CNetState* net)
 	*/
 	switch (race_sex_flag)
 	{
-	default:
-		g_Log.Event(LOGL_WARN|LOGM_NOCONTEXT, "Creating new character (client > 7.0.16.0 packet) with unknown race_sex_flag (% " PRIu8 "): defaulting to 2 (human male).\n", race_sex_flag);
 	case 0x2: case 0x3:
 		rtRace = RACETYPE_HUMAN;
 		break;
@@ -4556,6 +4556,8 @@ bool PacketCreateHS::onReceive(CNetState* net)
 	case 0x6: case 0x7:
 		rtRace = RACETYPE_GARGOYLE;
 		break;
+	default:
+		g_Log.Event(LOGL_WARN | LOGM_NOCONTEXT, "Creating new character (client > 7.0.16.0 packet) with unknown race_sex_flag (% " PRIu8 "): defaulting to 2 (human male).\n", race_sex_flag);
 	}
 
 	return doCreate(net, charname, isFemale, rtRace,

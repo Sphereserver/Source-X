@@ -103,10 +103,10 @@ bool CSkillDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
             break;
             // case SKC_DEFNAME: // "DEFNAME"
         case SKC_DELAY:
-            sVal = m_Delay.Write();
+            sVal = m_vcDelay.Write();
             break;
         case SKC_EFFECT:
-            sVal = m_Effect.Write();
+            sVal = m_vcEffect.Write();
             break;
         case SKC_FLAGS:
             sVal.FormatHex( m_dwFlags );
@@ -180,7 +180,7 @@ bool CSkillDef::r_LoadVal( CScript &s )
         case SKC_DEFNAME: // "DEFNAME"
             return SetResourceName( s.GetArgStr());
         case SKC_DELAY:
-            m_Delay.Load( s.GetArgStr());
+            m_vcDelay.Load( s.GetArgStr());
             break;
         case SKC_FLAGS:
             m_dwFlags = s.GetArgVal();
@@ -189,7 +189,7 @@ bool CSkillDef::r_LoadVal( CScript &s )
             m_dwGroup = s.GetArgVal();
             break;
         case SKC_EFFECT:
-            m_Effect.Load( s.GetArgStr());
+            m_vcEffect.Load( s.GetArgStr());
             break;
         case SKC_KEY: // "KEY"
             m_sKey = s.GetArgStr();
