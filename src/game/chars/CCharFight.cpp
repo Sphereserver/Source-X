@@ -845,7 +845,7 @@ effect_bounce:
 		{
 			if ( IsTrigUsed(TRIGGER_SPELLINTERRUPT) )
 			{
-				CScriptTriggerArgs ArgsInterrupt(m_atMagery.m_Spell);
+				CScriptTriggerArgs ArgsInterrupt(m_atMagery.m_iSpell);
 				if ( pSrc->OnTrigger(CTRIG_SpellInterrupt, this, &ArgsInterrupt) != TRIGRET_RET_TRUE )
 					Skill_Fail();
 			}

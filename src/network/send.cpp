@@ -122,15 +122,16 @@ PacketCombatDamage::PacketCombatDamage(const CClient* target, word damage, CUID 
  *
  *
  ***************************************************************************/
-PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) : PacketSend(XCMD_Status, 7, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
+PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) : PacketSend(XCMD_Status, 7, g_Cfg.m_fUsePacketPriorities ? PRI_LOW : PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketObjectStatus::PacketObjectStatus");
-    ASSERT(object);
+	ASSERT(object);
 
-	const CNetState * state = target->GetNetState();
-	const CChar *character = target->GetChar();
-	const CChar *objectChar = dynamic_cast<const CChar *>(object);
+	const CNetState* state = target->GetNetState();
+	const CChar* character = target->GetChar();
+	CChar* objectChar = object->IsChar() ? static_cast<CChar*>(object) : nullptr;
 	bool fCanRename = false;
+
 	byte version = 0;
 
 	initLength();
@@ -162,18 +163,35 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 	}
 	else
 	{
-		if ( objectChar )
+		word iHitsCurrent = 0;
+		word iHitsMax = 100;
+		if (objectChar)
 		{
-            fCanRename = objectChar->IsOwnedBy(character);
-			writeInt16(static_cast<WORD>((objectChar->Stat_GetVal(STAT_STR) * 100) / maximum(objectChar->Stat_GetMax(STAT_STR), 1)));
+			fCanRename = objectChar->IsOwnedBy(character);
+			iHitsCurrent = (word)objectChar->Stat_GetVal(STAT_STR);
+			iHitsMax = (word)objectChar->Stat_GetMaxAdjusted(STAT_STR);
 		}
 		else
 		{
-			const CItem *objectItem = static_cast<const CItem *>(object);
-			writeInt16(static_cast<WORD>((objectItem->m_itArmor.m_Hits_Cur * 100) / maximum(objectItem->m_itArmor.m_Hits_Max, 1)));
- 		}
+			const CItem* objectItem = object->IsItem() ? static_cast<const CItem*>(object) : nullptr;
+			if (objectItem)
+			{
+				CCItemDamageable* pItem = static_cast<CCItemDamageable*>(object->GetComponent(COMP_ITEMDAMAGEABLE));
+				if (pItem)
+				{
+					iHitsCurrent = pItem->GetCurHits();
+					iHitsMax = pItem->GetMaxHits();
+				}
+				else
+				{
+					iHitsCurrent = iHitsMax;  // Can't get hitpoints, asume 100%
+				}
+			}
+		}
 
-		writeInt16(100);		// Max hit points
+		// Send percentual hitpoints
+		writeInt16(iHitsCurrent);		// Max hit points
+		writeInt16(iHitsMax);		// Max hit points
 		writeBool(fCanRename);
 		writeByte(version);
 		if (state->isClientEnhanced() && objectChar && objectChar->IsPlayableCharacter())

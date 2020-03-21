@@ -32,38 +32,39 @@ public:
     CLocalObjMap			m_VarObjs;		// "REFx" = local object x
 
 public:
-    CScriptTriggerArgs() :
-        m_iN1(0),  m_iN2(0), m_iN3(0)
-    {
-        m_pO1 = nullptr;
-    }
+	CScriptTriggerArgs() :
+		m_iN1(0), m_iN2(0), m_iN3(0)
+	{
+		m_pO1 = nullptr;
+	}
 
-    explicit CScriptTriggerArgs( lpctstr pszStr );
+	explicit CScriptTriggerArgs(lpctstr pszStr);
 
-    explicit CScriptTriggerArgs( CScriptObj * pObj ) :
-        m_iN1(0),  m_iN2(0), m_iN3(0), m_pO1(pObj)
-    {
-    }
+	explicit CScriptTriggerArgs(CScriptObj* pObj) :
+		m_iN1(0), m_iN2(0), m_iN3(0), m_pO1(pObj)
+	{
+	}
 
-    explicit CScriptTriggerArgs( int64 iVal1 ) :
-        m_iN1(iVal1),  m_iN2(0), m_iN3(0)
-    {
-        m_pO1 = nullptr;
-    }
-    CScriptTriggerArgs( int64 iVal1, int64 iVal2, int64 iVal3 = 0 ) :
-        m_iN1(iVal1), m_iN2(iVal2), m_iN3(iVal3)
-    {
-        m_pO1 = nullptr;
-    }
+	explicit CScriptTriggerArgs(int64 iVal1) :
+		m_iN1(iVal1), m_iN2(0), m_iN3(0)
+	{
+		m_pO1 = nullptr;
+	}
+	CScriptTriggerArgs(int64 iVal1, int64 iVal2, int64 iVal3 = 0) :
+		m_iN1(iVal1), m_iN2(iVal2), m_iN3(iVal3)
+	{
+		m_pO1 = nullptr;
+	}
 
-    CScriptTriggerArgs( int64 iVal1, int64 iVal2, CScriptObj * pObj ) :
-        m_iN1(iVal1), m_iN2(iVal2), m_iN3(0), m_pO1(pObj)
-    {
-    }
+	CScriptTriggerArgs(int64 iVal1, int64 iVal2, CScriptObj* pObj) :
+		m_iN1(iVal1), m_iN2(iVal2), m_iN3(0), m_pO1(pObj)
+	{
+	}
 
-    virtual ~CScriptTriggerArgs()
-    {
-    };
+	virtual ~CScriptTriggerArgs()
+	{
+	};
+
 
 private:
     CScriptTriggerArgs(const CScriptTriggerArgs& copy);
