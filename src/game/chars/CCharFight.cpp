@@ -1723,9 +1723,6 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
     // Do i have to wait for the recoil time?
     if (m_atFight.m_iWarSwingState == WAR_SWING_EQUIPPING)
     {
-		// calculate the chance at every hit
-		m_Act_Difficulty = g_Cfg.Calc_CombatChanceToHit(this, m_Fight_Targ_UID.CharFind());
-
         m_atFight.m_iSwingAnimation = (int16)GenerateAnimate(ANIM_ATTACK_WEAPON);
 
         if ( IsTrigUsed(TRIGGER_HITTRY) )

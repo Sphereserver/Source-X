@@ -225,7 +225,7 @@ void CCChampion::SpawnNPC()
     {
         return;
     }
-    ASSERT(dynamic_cast<CCChampionDef*>(pDef));
+    //ASSERT(dynamic_cast<CCChampionDef*>(pDef));
     if (!pNpc)	// At least one NPC per level should be added, check just in case.
     {
         return;
