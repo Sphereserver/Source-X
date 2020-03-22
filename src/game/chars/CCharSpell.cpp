@@ -3420,7 +3420,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 				}
 				else
 				{
-					pCharSrc->OnSpellEffect( spell, pCharSrc, iSkillLevel, pSourceItem );
+					pCharSrc->OnSpellEffect(spell, pCharSrc, iSkillLevel, pSourceItem, true);
 					return true;
 				}
 			}
