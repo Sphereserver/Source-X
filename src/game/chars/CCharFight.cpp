@@ -5,6 +5,7 @@
 #include "../clients/CClient.h"
 #include "../components/CCPropsChar.h"
 #include "../components/CCPropsItemWeapon.h"
+#include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CChar.h"
@@ -166,7 +167,7 @@ void CChar::CallGuards()
 		return;
 
     // Spam check, not calling this more than once per second, which will cause an excess of calls and checks on crowded areas because of the 2 CWorldSearch.
-	if (CServerTime::GetCurrentTime().GetTimeDiff(m_timeLastCallGuards + (1 * MSECS_PER_SEC)) > 0)
+	if (CWorldGameTime::GetCurrentTime().GetTimeDiff(m_timeLastCallGuards + (1 * MSECS_PER_SEC)) > 0)
 		return;
 
 	// We don't have any target yet, let's check everyone nearby
@@ -206,10 +207,10 @@ bool CChar::CallGuards( CChar * pCriminal )
 		return false;
     }
 
-    if (CServerTime::GetCurrentTime().GetTimeDiff(m_timeLastCallGuards + (25 * MSECS_PER_TENTH)) > 0)	// Spam check
+    if (CWorldGameTime::GetCurrentTime().GetTimeDiff(m_timeLastCallGuards + (25 * MSECS_PER_TENTH)) > 0)	// Spam check
         return false;
 
-    m_timeLastCallGuards = CServerTime::GetCurrentTime().GetTimeRaw();
+    m_timeLastCallGuards = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
 	CChar *pGuard = nullptr;
 	if (m_pNPC && m_pNPC->m_Brain == NPCBRAIN_GUARD)
@@ -1352,7 +1353,7 @@ void CChar::Fight_HitTry()
         {
             fIH_ShouldInstaHit = (!m_atFight.m_iRecoilDelay && !m_atFight.m_iSwingAnimationDelay);
             Fight_SetDefaultSwingDelays();
-            const int64 iTimeCur = CServerTime::GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH;
+            const int64 iTimeCur = CWorldGameTime::GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH;
             // Time required to perform the previous normal hit, without the InstaHit delay reduction.
             const int64 iIH_LastHitTag_FullHit_Prev = GetKeyNum("LastHit");   // TAG.LastHit is in tenths of second
             // Time required to perform the shortened hit with InstaHit.
@@ -1654,7 +1655,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
     if ( IsSetCombatFlags(COMBAT_FIRSTHIT_INSTANT) && (!m_atFight.m_iSwingIgnoreLastHitTag) 
         && (m_atFight.m_iWarSwingState == iStageToSuspend) )
     {
-        const int64 iTimeDiff = ((CServerTime::GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH) - GetKeyNum("LastHit"));
+        const int64 iTimeDiff = ((CWorldGameTime::GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH) - GetKeyNum("LastHit"));
         if (iTimeDiff < 0)
         {
             return iStageToSuspend;
@@ -1677,7 +1678,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		{
 			// Only start the swing this much tenths of second after the char stopped moving.
 			//  (Values changed between expansions. SE:0,25s / AOS:0,5s / pre-AOS:1,0s)
-			if ( m_pClient && ( -(CServerTime::GetCurrentTime().GetTimeDiff(m_pClient->m_timeLastEventWalk) / MSECS_PER_TENTH) < g_Cfg.m_iCombatArcheryMovementDelay) )
+			if ( m_pClient && ( -(CWorldGameTime::GetCurrentTime().GetTimeDiff(m_pClient->m_timeLastEventWalk) / MSECS_PER_TENTH) < g_Cfg.m_iCombatArcheryMovementDelay) )
 				return WAR_SWING_EQUIPPING;
 		}
 
@@ -1814,7 +1815,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 		if ( m_pClient && (skill == SKILL_THROWING) )		// throwing weapons also have anim of the weapon returning after throw it
 		{
-			m_pClient->m_timeLastSkillThrowing = CServerTime::GetCurrentTime().GetTimeRaw();
+			m_pClient->m_timeLastSkillThrowing = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 			m_pClient->m_pSkillThrowingTarg = pCharTarg;
 			m_pClient->m_SkillThrowingAnimID = AnimID;
 			m_pClient->m_SkillThrowingAnimHue = AnimHue;

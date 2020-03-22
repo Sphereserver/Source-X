@@ -314,6 +314,10 @@ game/CWorldCache.cpp
 game/CWorldCache.h
 game/CWorldClock.cpp
 game/CWorldClock.h
+game/CWorldComm.cpp
+game/CWorldComm.h
+game/CWorldGameTime.cpp
+game/CWorldGameTime.h
 game/CWorldImport.cpp
 game/CWorldMap.cpp
 game/CWorldMap.h

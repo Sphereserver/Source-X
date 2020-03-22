@@ -5,6 +5,7 @@
 #include "../chars/CChar.h"
 #include "../CServer.h"
 #include "../CWorld.h"
+#include "../CWorldGameTime.h"
 #include "CAccount.h"
 #include "CClient.h"
 
@@ -693,7 +694,7 @@ void CAccount::OnLogin( CClient * pClient )
 	ADDTOCALLSTACK("CAccount::OnLogin");
 
 	ASSERT(pClient);
-	pClient->m_timeLogin = CServerTime::GetCurrentTime().GetTimeRaw();	// g_World clock of login time. "LASTCONNECTTIME"
+	pClient->m_timeLogin = CWorldGameTime::GetCurrentTime().GetTimeRaw();	// g_World clock of login time. "LASTCONNECTTIME"
 
 	if ( GetPrivLevel() >= PLEVEL_Counsel )	// ON by default.
 	{
@@ -736,7 +737,7 @@ void CAccount::OnLogout(CClient *pClient, bool bWasChar)
 	// so we should check whatever player is attached to a char
 	if ( pClient->IsConnectTypePacket() && bWasChar )
 	{
-		m_Last_Connect_Time = ( -CServerTime::GetCurrentTime().GetTimeDiff(pClient->m_timeLogin) ) / (MSECS_PER_SEC * 60 );
+		m_Last_Connect_Time = ( -CWorldGameTime::GetCurrentTime().GetTimeDiff(pClient->m_timeLogin) ) / (MSECS_PER_SEC * 60 );
 		if ( m_Last_Connect_Time < 0 )
 			m_Last_Connect_Time = 0;
 
@@ -779,7 +780,7 @@ bool CAccount::CheckPasswordTries(CSocketAddress csaPeerName)
 	int iAccountMaxTries = g_Cfg.m_iClientLoginMaxTries;
 	bool bReturn = true;
 	dword dwCurrentIP = csaPeerName.GetAddrIP();
-	int64 timeCurrent = CServerTime::GetCurrentTime().GetTimeRaw();
+	int64 timeCurrent = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
 	BlockLocalTime_t::iterator itData = m_BlockIP.find(dwCurrentIP);
 	if ( itData != m_BlockIP.end() )
@@ -847,7 +848,7 @@ void CAccount::ClearPasswordTries(bool bAll)
 		return;
 	}
 
-	llong timeCurrent = CServerTime::GetCurrentTime().GetTimeRaw();
+	llong timeCurrent = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 	for ( BlockLocalTime_t::iterator itData = m_BlockIP.begin(), end = m_BlockIP.end(); itData != end; )
 	{
 		BlockLocalTimePair_t itResult = (*itData).second;

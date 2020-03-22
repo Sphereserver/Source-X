@@ -3,17 +3,15 @@
 #include "../common/sphereversion.h"
 #include "../network/CClientIterator.h"
 #include "../network/CNetworkManager.h"
-#include "../network/send.h"
 #include "../sphere/ProfileTask.h"
 #include "../common/CLog.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"
 #include "clients/CGMPage.h"
-#include "chars/CChar.h"
-#include "CObjBase.h"
 #include "CServer.h"
 #include "CScriptProfiler.h"
 #include "CSector.h"
+#include "CWorldComm.h"
 #include "CWorldMap.h"
 #include "CWorld.h"
 
@@ -22,15 +20,6 @@
 #endif
 #include <sys/stat.h>
 
-
-static const SOUND_TYPE sm_Sounds_Ghost[] =
-{
-	SOUND_GHOST_1,
-	SOUND_GHOST_2,
-	SOUND_GHOST_3,
-	SOUND_GHOST_4,
-	SOUND_GHOST_5
-};
 
 lpctstr GetReasonForGarbageCode(int iCode = -1)
 {
@@ -215,187 +204,6 @@ void ReportGarbageCollection(CObjBase * pObj, int iResultCode)
 	}
 }
 
-
-
-//////////////////////////////////////////////////////////////////
-// -CWorldSearch
-
-CWorldSearch::CWorldSearch( const CPointMap & pt, int iDist ) :
-	m_pt(pt), m_iDist(iDist)
-{
-	// define a search of the world.
-	m_fAllShow = false;
-	m_fSearchSquare = false;
-	m_pObj = m_pObjNext = nullptr;
-	m_fInertToggle = false;
-
-	m_pSectorBase = m_pSector = pt.GetSector();
-
-	m_rectSector.SetRect(
-		pt.m_x - iDist,
-		pt.m_y - iDist,
-		pt.m_x + iDist + 1,
-		pt.m_y + iDist + 1,
-		pt.m_map);
-
-	// Get upper left of search rect.
-	m_iSectorCur = 0;
-}
-
-bool CWorldSearch::GetNextSector()
-{
-	ADDTOCALLSTACK("CWorldSearch::GetNextSector");
-	// Move search into nearby CSector(s) if necessary
-
-	if ( ! m_iDist )
-		return false;
-
-	for (;;)
-	{
-		m_pSector = m_rectSector.GetSector(m_iSectorCur++);
-		if ( m_pSector == nullptr )
-			return false;	// done searching.
-		if ( m_pSectorBase == m_pSector )
-			continue;	// same as base.
-		m_pObj = nullptr;	// start at head of next Sector.
-		return true;
-	}
-}
-
-CItem * CWorldSearch::GetItem()
-{
-	ADDTOCALLSTACK_INTENSIVE("CWorldSearch::GetItem");
-	for (;;)
-	{
-		if ( m_pObj == nullptr )
-		{
-			m_fInertToggle = false;
-			m_pObj = static_cast <CObjBase*> ( m_pSector->m_Items_Inert.GetHead());
-		}
-		else
-		{
-			m_pObj = m_pObjNext;
-		}
-		if ( m_pObj == nullptr )
-		{
-			if ( ! m_fInertToggle )
-			{
-				m_fInertToggle = true;
-				m_pObj = static_cast <CObjBase*> ( m_pSector->m_Items_Timer.GetHead());
-				if ( m_pObj != nullptr )
-					goto jumpover;
-			}
-			if ( GetNextSector() )
-				continue;
-			return nullptr;
-		}
-
-jumpover:
-		m_pObjNext = m_pObj->GetNext();
-		if ( m_fSearchSquare )
-		{
-			if ( m_fAllShow )
-			{
-				if ( m_pt.GetDistSightBase( m_pObj->GetTopPoint() ) <= m_iDist )
-					return static_cast <CItem *> ( m_pObj );
-			}
-			else
-			{
-				if ( m_pt.GetDistSight( m_pObj->GetTopPoint() ) <= m_iDist )
-					return static_cast <CItem *> ( m_pObj );
-			}
-		}
-		else
-		{
-			if ( m_fAllShow )
-			{
-				if ( m_pt.GetDistBase( m_pObj->GetTopPoint() ) <= m_iDist )
-					return static_cast <CItem *> ( m_pObj );
-			}
-			else
-			{
-				if ( m_pt.GetDist( m_pObj->GetTopPoint()) <= m_iDist )
-					return static_cast <CItem *> ( m_pObj );
-			}
-		}
-	}
-}
-
-void CWorldSearch::SetAllShow( bool fView )
-{
-	ADDTOCALLSTACK("CWorldSearch::SetAllShow");
-	m_fAllShow = fView;
-}
-
-void CWorldSearch::SetSearchSquare( bool fSquareSearch )
-{
-	ADDTOCALLSTACK("CWorldSearch::SetSearchSquare");
-	m_fSearchSquare = fSquareSearch;
-}
-
-void CWorldSearch::RestartSearch()
-{
-	ADDTOCALLSTACK("CWorldSearch::RestartSearch");
-	m_pObj = nullptr;
-}
-
-CChar * CWorldSearch::GetChar()
-{
-	ADDTOCALLSTACK("CWorldSearch::GetChar");
-	for (;;)
-	{
-		if ( m_pObj == nullptr )
-		{
-			m_fInertToggle = false;
-			m_pObj = static_cast <CObjBase*> ( m_pSector->m_Chars_Active.GetHead());
-		}
-		else
-			m_pObj = m_pObjNext;
-
-		if ( m_pObj == nullptr )
-		{
-			if ( ! m_fInertToggle && m_fAllShow )
-			{
-				m_fInertToggle = true;
-				m_pObj = static_cast <CObjBase*> ( m_pSector->m_Chars_Disconnect.GetHead());
-				if ( m_pObj != nullptr )
-					goto jumpover;
-			}
-			if ( GetNextSector() )
-				continue;
-			return nullptr;
-		}
-
-jumpover:
-		m_pObjNext = m_pObj->GetNext();
-		if ( m_fSearchSquare )
-		{
-			if ( m_fAllShow )
-			{
-				if ( m_pt.GetDistSightBase( m_pObj->GetTopPoint()) <= m_iDist )
-					return static_cast <CChar *> ( m_pObj );
-			}
-			else
-			{
-				if ( m_pt.GetDistSight( m_pObj->GetTopPoint()) <= m_iDist )
-					return static_cast <CChar *> ( m_pObj );
-			}
-		}
-		else
-		{
-			if ( m_fAllShow )
-			{
-				if ( m_pt.GetDistBase( m_pObj->GetTopPoint()) <= m_iDist )
-					return static_cast <CChar *> ( m_pObj );
-			}
-			else
-			{
-				if ( m_pt.GetDist( m_pObj->GetTopPoint()) <= m_iDist )
-					return static_cast <CChar *> ( m_pObj );
-			}
-		}
-	}
-}
 
 
 //////////////////////////////////////////////////////////////////
@@ -736,7 +544,7 @@ void CWorldThread::GarbageCollection_UIDs()
 // -CWorld
 
 CWorld::CWorld() :
-	_Ticker(&m_Clock)
+	_Ticker(&_GameClock)
 {
 	_iTimeLastWorldSave = 0;
 	m_ticksWithoutMySQL = 0;
@@ -986,7 +794,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		m_FileMultis.WriteSection("EOF");
 
 		++m_iSaveCountID;	// Save only counts if we get to the end winout trapping.
-		_iTimeLastWorldSave = g_World.GetCurrentTime().GetTimeRaw() + g_Cfg.m_iSavePeriod;	// next save time.
+		_iTimeLastWorldSave = _GameClock.GetCurrentTime().GetTimeRaw() + g_Cfg.m_iSavePeriod;	// next save time.
 
 		g_Log.Event(LOGM_SAVE, "World data saved   (%s).\n", m_FileWorld.GetFilePath());
 		g_Log.Event(LOGM_SAVE, "Player data saved  (%s).\n", m_FilePlayers.GetFilePath());
@@ -1017,7 +825,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		int64 iNextTime = g_Cfg.m_iSaveBackgroundTime / m_SectorsQty;
 		if ( iNextTime > MSECS_PER_SEC *30 * 60 )
 			iNextTime = MSECS_PER_SEC * 30 * 60;	// max out at 30 minutes or so.
-		_iTimeLastWorldSave = g_World.GetCurrentTime().GetTimeRaw() + iNextTime;
+		_iTimeLastWorldSave = _GameClock.GetCurrentTime().GetTimeRaw() + iNextTime;
 	}
 	++m_iSaveStage;
 	return bRc;
@@ -1035,7 +843,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 bool CWorld::SaveForce() // Save world state
 {
 	ADDTOCALLSTACK("CWorld::SaveForce");
-	Broadcast( g_Cfg.GetDefaultMsg( DEFMSG_SERVER_WORLDSAVE ) );
+	CWorldComm::Broadcast( g_Cfg.GetDefaultMsg( DEFMSG_SERVER_WORLDSAVE ) );
 	if (g_NetworkManager.isOutputThreaded() == false)
 		g_NetworkManager.flushAllClients();
 
@@ -1230,7 +1038,7 @@ bool CWorld::CheckAvailableSpaceForSave(bool fStatics)
         g_Log.Event(LOGL_CRIT, "-----------------------------");
         g_Log.Event(LOGL_CRIT, "Save ABORTED! Low disk space!");
         g_Log.Event(LOGL_CRIT, "-----------------------------");
-        Broadcast("Save ABORTED! Warn the administrator!");
+		CWorldComm::Broadcast("Save ABORTED! Warn the administrator!");
         return false;
     }
     return true;
@@ -1277,7 +1085,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 	catch ( const CSError& e )
 	{
 		g_Log.CatchEvent( &e, "Save FAILED." );
-		Broadcast("Save FAILED. " SPHERE_TITLE " is UNSTABLE!");
+		CWorldComm::Broadcast("Save FAILED. " SPHERE_TITLE " is UNSTABLE!");
 		m_FileData.Close();		// close if not already closed.
 		m_FileWorld.Close();	// close if not already closed.
 		m_FilePlayers.Close();	// close if not already closed.
@@ -1287,7 +1095,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 	catch (...)	// catch all
 	{
 		g_Log.CatchEvent( nullptr, "Save FAILED" );
-		Broadcast("Save FAILED. " SPHERE_TITLE " is UNSTABLE!");
+		CWorldComm::Broadcast("Save FAILED. " SPHERE_TITLE " is UNSTABLE!");
 		m_FileData.Close();		// close if not already closed.
 		m_FileWorld.Close();	// close if not already closed.
 		m_FilePlayers.Close();	// close if not already closed.
@@ -1317,7 +1125,7 @@ void CWorld::SaveStatics()
 			return;
 		r_Write(m_FileStatics);
 
-		Broadcast( g_Cfg.GetDefaultMsg(DEFMSG_SERVER_WORLDSTATICSAVE) );
+		CWorldComm::Broadcast( g_Cfg.GetDefaultMsg(DEFMSG_SERVER_WORLDSTATICSAVE) );
 
 		if (g_NetworkManager.isOutputThreaded() == false)
 			g_NetworkManager.flushAllClients();
@@ -1496,7 +1304,7 @@ bool CWorld::LoadWorld() // Load world from script
 		}
 
 		CloseAllUIDs();
-		m_Clock.Init();
+		_GameClock.Init();
 		m_UIDs.resize(8 * 1024);
 
 		// Get the name of the previous backups.
@@ -1532,7 +1340,7 @@ bool CWorld::LoadAll() // Load world from script
 {
 	// start count. (will grow as needed)
 	m_UIDs.resize(8 * 1024);
-	m_Clock.Init();		// will be loaded from the world file.
+	_GameClock.Init();		// will be loaded from the world file.
 
 	// Load all the accounts.
 	if ( !g_Accounts.Account_LoadAll(false) )
@@ -1542,8 +1350,8 @@ bool CWorld::LoadAll() // Load world from script
 	if ( !LoadWorld() )
 		return false;
 
-	_iTimeStartup = g_World.GetCurrentTime().GetTimeRaw();
-	_iTimeLastWorldSave = g_World.GetCurrentTime().GetTimeRaw() + g_Cfg.m_iSavePeriod;	// next save time.
+	_iTimeStartup = _GameClock.GetCurrentTime().GetTimeRaw();
+	_iTimeLastWorldSave = _GameClock.GetCurrentTime().GetTimeRaw() + g_Cfg.m_iSavePeriod;	// next save time.
 
 	// Set all the sector light levels now that we know the time.
 	// This should not look like part of the load. (CTRIG_EnvironChange triggers should run)
@@ -1591,7 +1399,7 @@ void CWorld::r_Write( CScript & s )
 	#ifdef __GITREVISION__
 		s.WriteKeyVal("PREVBUILD", __GITREVISION__);
 	#endif
-	s.WriteKeyVal( "TIMEHIRES", GetCurrentTime().GetTimeRaw() );
+	s.WriteKeyVal( "TIMEHIRES", _GameClock.GetCurrentTime().GetTimeRaw() );
 	s.WriteKeyVal( "SAVECOUNT", m_iSaveCountID );
 	s.Flush();	// Force this out to the file now.
 }
@@ -1693,7 +1501,7 @@ bool CWorld::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bo
 	switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 ))
 	{
         case WC_CURTICK:
-            sVal.Format64Val(GetCurrentTick());
+            sVal.Format64Val(_GameClock.GetCurrentTick());
             break;
 		case WC_PREVBUILD:
 			sVal.FormatVal(m_iPrevBuild);
@@ -1702,10 +1510,10 @@ bool CWorld::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bo
 			sVal.FormatVal( m_iSaveCountID );
 			break;
 		case WC_TIME:	    // "TIME"
-			sVal.FormatLLVal(GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH);  // in tenths of second, for backwards compatibility
+			sVal.FormatLLVal(_GameClock.GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH);  // in tenths of second, for backwards compatibility
 			break;
         case WC_TIMEHIRES:	// "TIMEHIRES"
-            sVal.FormatLLVal( GetCurrentTime().GetTimeRaw() );      // in milliseconds
+            sVal.FormatLLVal(_GameClock.GetCurrentTime().GetTimeRaw() );      // in milliseconds
             break;
 		case WC_TITLE:      // "TITLE",
 			sVal = (SPHERE_TITLE " World Script");
@@ -1745,7 +1553,7 @@ bool CWorld::r_LoadVal( CScript &s )
                 g_Log.EventError("Can't set TIME while server is running.\n");
                 return false;
             }
-			m_Clock.InitTime( s.GetArgLLVal() * MSECS_PER_SEC);
+			_GameClock.InitTime( s.GetArgLLVal() * MSECS_PER_SEC);
 			break;
         case WC_TIMEHIRES:	// "TIMEHIRES"
             if (!g_Serv.IsLoading())
@@ -1753,7 +1561,7 @@ bool CWorld::r_LoadVal( CScript &s )
                 g_Log.EventError("Can't set TIMEHIRES while server is running.\n");
                 return false;
             }
-            m_Clock.InitTime(s.GetArgLLVal());
+            _GameClock.InitTime(s.GetArgLLVal());
             break;
 		case WC_VERSION: // "VERSION"
 			m_iLoadVersion = s.GetArgVal();
@@ -1886,7 +1694,7 @@ void CWorld::Close()
 
 	CloseAllUIDs();
 
-	m_Clock.Init();	// no more sense of time.
+	_GameClock.Init();	// no more sense of time.
 }
 
 void CWorld::GarbageCollection()
@@ -1900,318 +1708,42 @@ void CWorld::GarbageCollection()
 	g_Log.Flush();
 }
 
-void CWorld::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font ) const
-{
-	ADDTOCALLSTACK("CWorld::Speak");
-	if ( !pszText || !pszText[0] )
-		return;
-
-	bool fSpeakAsGhost = false;
-	if ( pSrc )
-	{
-		if ( pSrc->IsChar() )
-		{
-			const CChar *pSrcChar = static_cast<const CChar *>(pSrc);
-			ASSERT(pSrcChar);
-
-			// Are they dead? Garble the text. unless we have SpiritSpeak
-			fSpeakAsGhost = pSrcChar->IsSpeakAsGhost();
-		}
-	}
-	else
-		mode = TALKMODE_BROADCAST;
-
-	//CSString sTextUID;
-	//CSString sTextName;	// name labelled text.
-	CSString sTextGhost;	// ghost speak.
-
-	// For things
-	bool fCanSee = false;
-	const CChar * pChar = nullptr;
-
-	ClientIterator it;
-	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next(), fCanSee = false, pChar = nullptr)
-	{
-		if ( ! pClient->CanHear( pSrc, mode ) )
-			continue;
-
-		tchar * myName = Str_GetTemp();
-
-		lpctstr pszSpeak = pszText;
-		pChar = pClient->GetChar();
-
-		if ( pChar != nullptr )
-		{
-			fCanSee = pChar->CanSee(pSrc);
-
-			if ( fSpeakAsGhost && !pChar->CanUnderstandGhost() )
-			{
-				if ( sTextGhost.IsEmpty() )
-				{
-					sTextGhost = pszText;
-					for ( int i = 0; i < sTextGhost.GetLength(); ++i )
-					{
-						if ( sTextGhost[i] != ' ' &&  sTextGhost[i] != '\t' )
-							sTextGhost[i] = Calc_GetRandVal(2) ? 'O' : 'o';
-					}
-				}
-				pszSpeak = sTextGhost;
-				pClient->addSound( sm_Sounds_Ghost[ Calc_GetRandVal( CountOf( sm_Sounds_Ghost )) ], pSrc );
-			}
-
-			if ( !fCanSee && pSrc )
-			{
-				//if ( sTextName.IsEmpty() )
-				//{
-				//	sTextName.Format("<%s>", pSrc->GetName());
-				//}
-				//myName = sTextName;
-				if ( !*myName )
-					sprintf(myName, "<%s>", pSrc->GetName());
-			}
-		}
-
-		if ( ! fCanSee && pSrc && pClient->IsPriv( PRIV_HEARALL|PRIV_DEBUG ))
-		{
-			//if ( sTextUID.IsEmpty() )
-			//{
-			//	sTextUID.Format("<%s [%x]>", pSrc->GetName(), (dword)pSrc->GetUID());
-			//}
-			//myName = sTextUID;
-			if ( !*myName )
-				sprintf(myName, "<%s [%x]>", pSrc->GetName(), (dword)pSrc->GetUID());
-		}
-
-		if (*myName)
-			pClient->addBarkParse( pszSpeak, pSrc, wHue, mode, font, false, myName );
-		else
-			pClient->addBarkParse( pszSpeak, pSrc, wHue, mode, font );
-	}
-}
-
-void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pwText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) const
-{
-	ADDTOCALLSTACK("CWorld::SpeakUNICODE");
-	bool fSpeakAsGhost = false;
-	const CChar * pSrcChar = nullptr;
-
-	if ( pSrc )
-	{
-		if ( pSrc->IsChar() )
-		{
-			pSrcChar = static_cast<const CChar *>(pSrc);
-			ASSERT(pSrcChar);
-
-			// Are they dead? Garble the text. unless we have SpiritSpeak
-			fSpeakAsGhost = pSrcChar->IsSpeakAsGhost();
-		}
-	}
-	else
-		mode = TALKMODE_BROADCAST;
-
-	if (mode != TALKMODE_SPELL)
-	{
-		if (pSrcChar && pSrcChar->m_SpeechHueOverride)
-		{
-			// This hue overwriting part for ASCII text isn't done in CWorld::Speak but in CClient::AddBarkParse.
-			// If a specific hue is not given, use SpeechHueOverride.
-			wHue = pSrcChar->m_SpeechHueOverride;
-		}
-	}
-
-	nchar wTextUID[MAX_TALK_BUFFER];	// uid labelled text.
-	wTextUID[0] = '\0';
-	nchar wTextName[MAX_TALK_BUFFER];	// name labelled text.
-	wTextName[0] = '\0';
-	nchar wTextGhost[MAX_TALK_BUFFER];	// ghost speak.
-	wTextGhost[0] = '\0';
-
-	// For things
-	bool fCanSee = false;
-	const CChar * pChar = nullptr;
-
-	ClientIterator it;
-	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next(), fCanSee = false, pChar = nullptr)
-	{
-		if ( ! pClient->CanHear( pSrc, mode ) )
-			continue;
-
-		const nchar * pwSpeak = pwText;
-		pChar = pClient->GetChar();
-
-		if ( pChar != nullptr )
-		{
-			// Cansee?
-			fCanSee = pChar->CanSee( pSrc );
-
-			if ( fSpeakAsGhost && ! pChar->CanUnderstandGhost() )
-			{
-				if ( wTextGhost[0] == '\0' )	// Garble ghost.
-				{
-					size_t i;
-					for ( i = 0; i < MAX_TALK_BUFFER - 1 && pwText[i]; ++i )
-					{
-						if ( pwText[i] != ' ' && pwText[i] != '\t' )
-							wTextGhost[i] = Calc_GetRandVal(2) ? 'O' : 'o';
-						else
-							wTextGhost[i] = pwText[i];
-					}
-					wTextGhost[i] = '\0';
-				}
-				pwSpeak = wTextGhost;
-				pClient->addSound( sm_Sounds_Ghost[ Calc_GetRandVal( CountOf( sm_Sounds_Ghost )) ], pSrc );
-			}
-
-			// Must label the text.
-			if ( ! fCanSee && pSrc )
-			{
-				if ( wTextName[0] == '\0' )
-				{
-					CSString sTextName;
-					sTextName.Format("<%s>", pSrc->GetName());
-					int iLen = CvtSystemToNUNICODE( wTextName, CountOf(wTextName), sTextName, -1 );
-					if ( wTextGhost[0] != '\0' )
-					{
-						for ( int i = 0; wTextGhost[i] != '\0' && iLen < MAX_TALK_BUFFER - 1; i++, iLen++ )
-							wTextName[iLen] = wTextGhost[i];
-					}
-					else
-					{
-						for ( int i = 0; pwText[i] != 0 && iLen < MAX_TALK_BUFFER - 1; i++, iLen++ )
-							wTextName[iLen] = pwText[i];
-					}
-					wTextName[iLen] = '\0';
-				}
-				pwSpeak = wTextName;
-			}
-		}
-
-		if ( ! fCanSee && pSrc && pClient->IsPriv( PRIV_HEARALL|PRIV_DEBUG ))
-		{
-			if ( wTextUID[0] == '\0' )
-			{
-				tchar * pszMsg = Str_GetTemp();
-				sprintf(pszMsg, "<%s [%x]>", pSrc->GetName(), (dword)pSrc->GetUID());
-				int iLen = CvtSystemToNUNICODE( wTextUID, CountOf(wTextUID), pszMsg, -1 );
-				for ( int i = 0; pwText[i] && iLen < MAX_TALK_BUFFER - 1; i++, iLen++ )
-					wTextUID[iLen] = pwText[i];
-				wTextUID[iLen] = '\0';
-			}
-			pwSpeak = wTextUID;
-		}
-
-		pClient->addBarkUNICODE( pwSpeak, pSrc, wHue, mode, font, lang );
-	}
-}
-
-void CWorld::Broadcast(lpctstr pMsg) // System broadcast in bold text
-{
-	ADDTOCALLSTACK("CWorld::Broadcast");
-	Speak( nullptr, pMsg, HUE_TEXT_DEF, TALKMODE_BROADCAST, FONT_BOLD );
-}
-
-void __cdecl CWorld::Broadcastf(lpctstr pMsg, ...) // System broadcast in bold text
-{
-	ADDTOCALLSTACK("CWorld::Broadcastf");
-	TemporaryString tsTemp;
-	tchar* pszTemp = static_cast<tchar *>(tsTemp);
-	va_list vargs;
-	va_start(vargs, pMsg);
-	vsnprintf(pszTemp, tsTemp.realLength(), pMsg, vargs);
-	va_end(vargs);
-	Broadcast(pszTemp);
-}
-
-//////////////////////////////////////////////////////////////////
-// Game time.
-
-int64 CWorld::GetGameWorldTime( int64 basetime ) const
-{
-	ADDTOCALLSTACK("CWorld::GetGameWorldTime");
-	// Get the time of the day in GameWorld minutes.
-    // basetime = ticks.
-	// 8 real world seconds = 1 game minute.
-	// 1 real minute = 7.5 game minutes
-	// 3.2 hours = 1 game day.
-    
-	return( basetime / g_Cfg.m_iGameMinuteLength );
-}
-
-int64 CWorld::GetNextNewMoon( bool fMoonIndex ) const
-{
-	ADDTOCALLSTACK("CWorld::GetNextNewMoon");
-	// "Predict" the next new moon for this moon
-	// Get the period
-	int64 iSynodic = fMoonIndex ? FELUCCA_SYNODIC_PERIOD : TRAMMEL_SYNODIC_PERIOD;
-
-	// Add a "month" to the current game time
-	int64 iNextMonth = GetGameWorldTime() + iSynodic;
-
-	// Get the game time when this cycle will start
-	int64 iNewStart = (int64)(iNextMonth - (double)(iNextMonth % iSynodic));
-	return iNewStart * g_Cfg.m_iGameMinuteLength;
-	
-}
-
-uint CWorld::GetMoonPhase(bool fMoonIndex) const
-{
-	ADDTOCALLSTACK("CWorld::GetMoonPhase");
-	// bMoonIndex is FALSE if we are looking for the phase of Trammel,
-	// TRUE if we are looking for the phase of Felucca.
-
-	// There are 8 distinct moon phases:  New, Waxing Crescent, First Quarter, Waxing Gibbous,
-	// Full, Waning Gibbous, Third Quarter, and Waning Crescent
-
-	// To calculate the phase, we use the following formula:
-	//				CurrentTime % SynodicPeriod
-	//	Phase = 	-----------------------------------------     * 8
-	//			              SynodicPeriod
-	//
-
-	int64 iCurrentTime = GetGameWorldTime();	// game world time in minutes
-
-	if (!fMoonIndex)	// Trammel
-		return IMulDiv( iCurrentTime % TRAMMEL_SYNODIC_PERIOD, 8, TRAMMEL_SYNODIC_PERIOD );
-	else	// Luna2
-		return IMulDiv( iCurrentTime % FELUCCA_SYNODIC_PERIOD, 8, FELUCCA_SYNODIC_PERIOD );
-}
-
 void CWorld::OnTick()
 {
 	ADDTOCALLSTACK("CWorld::OnTick");
 	// 256 real secs = 1 server hour. 19 light levels. check every 10 minutes or so.
 
-    // Do not tick while loading (startup, resync, exiting...) or when double ticking in the same msec?.
-	if ( g_Serv.IsLoading() || !m_Clock.Advance() )
+	// Do not tick while loading (startup, resync, exiting...) or when double ticking in the same msec?.
+	if (g_Serv.IsLoading() || !_GameClock.Advance())
 		return;
 
 	EXC_TRY("CWorld Tick");
-   
+
 	EXC_SET_BLOCK("World Tick");
 	_Ticker.Tick();
 
 	EXC_SET_BLOCK("Delete objects");
-    m_ObjDelete.Clear();	// clean up our delete list (this DOES delete the objects, thanks to the virtual destructors).
-	
+	m_ObjDelete.Clear();	// clean up our delete list (this DOES delete the objects, thanks to the virtual destructors).
 
-    int64 iCurTime = GetCurrentTime().GetTimeRaw();
+
+	int64 iCurTime = _GameClock.GetCurrentTime().GetTimeRaw();
 
 	EXC_SET_BLOCK("Worldsave checks");
-    // Save state checks
-    // Notifications
-	if ( (_fSaveNotificationSent == false) && ((_iTimeLastWorldSave - (10 * MSECS_PER_SEC)) <= iCurTime) )
+	// Save state checks
+	// Notifications
+	if ((_fSaveNotificationSent == false) && ((_iTimeLastWorldSave - (10 * MSECS_PER_SEC)) <= iCurTime))
 	{
-		Broadcast( g_Cfg.GetDefaultMsg( DEFMSG_SERVER_WORLDSAVE_NOTIFY ) );
+		CWorldComm::Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_WORLDSAVE_NOTIFY));
 		_fSaveNotificationSent = true;
 	}
 
-    // Save
-	if ( _iTimeLastWorldSave <= iCurTime)
+	// Save
+	if (_iTimeLastWorldSave <= iCurTime)
 	{
 		// Auto save world
 		_iTimeLastWorldSave = iCurTime + g_Cfg.m_iSavePeriod;
 		g_Log.Flush();
-		Save( false );
+		Save(false);
 	}
 
 	// Update map cache
@@ -2222,27 +1754,27 @@ void CWorld::OnTick()
 		_Cache.CheckMapBlockCache(iCurTime, g_Cfg.m_iMapCacheTime);
 	}
 
-    // Global (ini) stuff.
-    // Respawn Dead NPCs
-	if ( _iTimeLastDeadRespawn <= iCurTime)
+	// Global (ini) stuff.
+	// Respawn Dead NPCs
+	if (_iTimeLastDeadRespawn <= iCurTime)
 	{
 		EXC_SET_BLOCK("Respawn dead NPCs");
 		// Time to regen all the dead NPC's in the world.
 		_iTimeLastDeadRespawn = iCurTime + (20 * 60 * MSECS_PER_SEC);
 		RespawnDeadNPCs();
 	}
-	
-    // f_onserver_timer function.
-	if ( _iTimeLastCallUserFunc < iCurTime)
+
+	// f_onserver_timer function.
+	if (_iTimeLastCallUserFunc < iCurTime)
 	{
-		if ( g_Cfg._iTimerCall )
+		if (g_Cfg._iTimerCall)
 		{
 			EXC_SET_BLOCK("f_onserver_timer");
 			_iTimeLastCallUserFunc = iCurTime + g_Cfg._iTimerCall;
-			CScriptTriggerArgs args(g_Cfg._iTimerCall/(60 * MSECS_PER_SEC));
+			CScriptTriggerArgs args(g_Cfg._iTimerCall / (60 * MSECS_PER_SEC));
 			g_Serv.r_Call("f_onserver_timer", &g_Serv, &args);
 		}
 	}
 
-    EXC_CATCH;
+	EXC_CATCH;
 }

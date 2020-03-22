@@ -1,5 +1,6 @@
 /**
 * @file CWorldClock.h
+* @brief The time is advanced in each server's tick, so all the code executed in this tick will use the same time value, to adjust timers and so.
 */
 
 #ifndef _INC_CWORLDCLOCK_H
@@ -42,7 +43,6 @@ public:
 	{
 		return _iCurTick;
 	}
-	static int64 GetSystemClock(); // in milliseconds
 };
 
 #endif // _INC_CWORLDCLOCK_H

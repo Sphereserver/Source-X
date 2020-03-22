@@ -8,7 +8,6 @@
 #include "chars/CChar.h"
 #include "clients/CClient.h"
 #include "CSector.h"
-#include "CWorld.h"
 #include "CWorldMap.h"
 
 

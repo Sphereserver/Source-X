@@ -10,6 +10,7 @@
 #include "../game/items/CItemShip.h"
 #include "../game/items/CItemVendable.h"
 #include "../game/CServer.h"
+#include "../game/CWorldGameTime.h"
 #include "../game/CWorldMap.h"
 #include "../game/triggers.h"
 #include "CClientIterator.h"
@@ -742,7 +743,7 @@ bool PacketVendorBuyReq::onReceive(CNetState* net)
 	if (vardef != nullptr)
 	{
 		const int64 allowsell = vardef->GetValNum() + (itemCount * 3LL);
-		if (CServerTime::GetCurrentTime().GetTimeRaw() < allowsell)
+		if (CWorldGameTime::GetCurrentTime().GetTimeRaw() < allowsell)
 		{
 			client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_BUYFAST));
 			return true;
@@ -1221,7 +1222,7 @@ bool PacketBulletinBoardReq::onReceive(CNetState* net)
 
 			newMessage->SetAttr(ATTR_MOVE_NEVER);
 			newMessage->SetName(str);
-			newMessage->SetTimeStamp(CServerTime::GetCurrentTime().GetTimeRaw());
+			newMessage->SetTimeStamp(CWorldGameTime::GetCurrentTime().GetTimeRaw());
 			newMessage->m_sAuthor = character->GetName();
 			newMessage->m_uidLink = character->GetUID();
 
@@ -1864,7 +1865,7 @@ bool PacketVendorSellReq::onReceive(CNetState* net)
 	if (vardef != nullptr)
 	{
 		int64 allowsell = vardef->GetValNum() + ((itemCount * 3LL) * MSECS_PER_TENTH);
-		if (CServerTime::GetCurrentTime() < allowsell)
+		if (CWorldGameTime::GetCurrentTime() < allowsell)
 		{
 			client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_SELLFAST));
 			return true;

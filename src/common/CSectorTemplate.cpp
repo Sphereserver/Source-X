@@ -4,6 +4,7 @@
 #include "../game/chars/CChar.h"
 #include "../game/items/CItemShip.h"
 #include "../game/CWorld.h"
+#include "../game/CWorldGameTime.h"
 #include "../sphere/ProfileTask.h"
 #include "CException.h"
 #include "CRect.h"
@@ -40,7 +41,7 @@ void CCharsActiveList::OnRemoveObj( CSObjListRec * pObjRec )
 	if ( pChar->IsClient())
 	{
         ClientDecrease();
-        m_timeLastClient = CServerTime::GetCurrentTime().GetTimeRaw();	// mark time in case it's the last client
+        m_timeLastClient = CWorldGameTime::GetCurrentTime().GetTimeRaw();	// mark time in case it's the last client
 	}
 
 	CSObjList::OnRemoveObj(pObjRec);
@@ -69,13 +70,11 @@ void CCharsActiveList::AddCharActive( CChar * pChar )
 
 void CCharsActiveList::ClientIncrease()
 {
-	ADDTOCALLSTACK("CCharsActiveList::ClientIncrease");
 	++m_iClients;
 }
 
 void CCharsActiveList::ClientDecrease()
 {
-	ADDTOCALLSTACK("CCharsActiveList::ClientDecrease");
 	--m_iClients;
 }
 

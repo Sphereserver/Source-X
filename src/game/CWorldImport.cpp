@@ -8,12 +8,14 @@
 struct CImportSer : public CSObjListRec
 {
 	// Temporary holding structure for new objects being impoted.
+
 public:
 	// Translate the import UID's into my UID's
 	const dword m_dwSer;		// My Imported serial number
 	CObjBase * m_pObj;	// new world object corresponding.
 	dword m_dwContSer;	// My containers' serial number
 	LAYER_TYPE m_layer;	// UOX does this diff than us. so store this here.
+
 public:
 	bool IsTopLevel() const
 	{
@@ -27,9 +29,8 @@ public:
 		m_dwContSer = UID_UNUSED;
 		m_layer = LAYER_NONE;
 	}
-	~CImportSer()
-	{
-	}
+	~CImportSer() = default;
+
 private:
 	CImportSer(const CImportSer& copy);
 	CImportSer& operator=(const CImportSer& other);
@@ -60,6 +61,7 @@ public:
 		m_pszArg1 = nullptr;
 		m_pszArg2 = nullptr;
 	}
+
 private:
 	CImportFile(const CImportFile& copy);
 	CImportFile& operator=(const CImportFile& other);
@@ -170,7 +172,7 @@ void CImportFile::ImportFix()
 		item_delete:
 			delete m_pCurSer->m_pObj;
 			delete m_pCurSer;
-			iRemoved ++;
+			++ iRemoved;
 			continue;
 		}
 

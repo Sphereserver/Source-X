@@ -6,6 +6,7 @@
 #include "../../common/CException.h"
 #include "../clients/CClient.h"
 #include "../CWorld.h"
+#include "../CWorldGameTime.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 #include "CCharPlayer.h"
@@ -27,7 +28,7 @@ CCharPlayer::CCharPlayer(CChar *pChar, CAccount *pAccount) : m_pAccount(pAccount
 	m_speedMode = 0;
 	m_pflag = 0;
 	m_bKrToolbarEnabled = false;
-	m_timeLastUsed = CServerTime::GetCurrentTime().GetTimeRaw();
+	m_timeLastUsed = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
 	memset(m_SkillLock, 0, sizeof(m_SkillLock));
 	memset(m_StatLock, 0, sizeof(m_StatLock));
@@ -216,7 +217,7 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 			sVal = m_Speech.ContainsResourceName(RES_SPEECH, ptcKey) ? "1" : "0";
 			return true;
 		case CPC_LASTUSED:
-			sVal.FormatLLVal( - CServerTime::GetCurrentTime().GetTimeDiff( m_timeLastUsed ) / MSECS_PER_SEC);  //seconds
+			sVal.FormatLLVal( - CWorldGameTime::GetCurrentTime().GetTimeDiff( m_timeLastUsed ) / MSECS_PER_SEC);  //seconds
 			return true;
 		case CPC_PFLAG:
 			sVal.FormatVal(m_pflag);

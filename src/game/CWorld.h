@@ -9,7 +9,6 @@
 #include "../common/sphere_library/CSObjList.h"
 #include "../common/CScript.h"
 #include "../common/CUID.h"
-#include "../sphereproto.h"
 #include "CWorldCache.h"
 #include "CWorldClock.h"
 #include "CWorldTicker.h"
@@ -98,21 +97,24 @@ private:
 extern class CWorld : public CScriptObj, public CWorldThread
 {
 	// the world. Stuff saved in *World.SCP
+public:
+	static const char* m_sClassName;
+	
 private:
 	// Clock stuff. how long have we been running ? all i care about.
-	friend CWorldClock;
-	CWorldClock m_Clock;		// the current relative tick time (in milliseconds)
+	friend class CWorldGameTime;
+	friend CServerTime;
+	CWorldClock _GameClock;		// the current relative tick time (in milliseconds)
 
 	// Ticking world objects
 	friend class CWorldTickingList;
 	friend class CTimedFunctions;
 	CWorldTicker _Ticker;
 
-public:
 	// Map cache
-	friend CWorldCache;
+	friend class CServer;
+	friend class CWorldMap;
 	CWorldCache _Cache;	
-
 	
 
 private:
@@ -127,12 +129,10 @@ private:
 	llong	m_savetimer; // Time it takes to save
 
 public:
-	static const char *m_sClassName;
 	// World data.
 	CSector **m_Sectors;
 	uint m_SectorsQty;
 
-public:
 	int m_iSaveCountID;			// Current archival backup id. Whole World must have this same stage id
 	int m_iLoadVersion;			// Previous load version. (only used during load of course)
 	int m_iPrevBuild;			// Previous __GITREVISION__
@@ -176,55 +176,6 @@ public:
 	virtual bool r_WriteVal(lpctstr ptcKey, CSString& sVal, CTextConsole* pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false) override;
 	virtual bool r_LoadVal(CScript& s) override;
 	virtual bool r_GetRef(lpctstr& ptcKey, CScriptObj*& pRef) override;
-
-
-	// Time
-
-	inline CServerTime GetCurrentTime() const
-	{
-		return m_Clock.GetCurrentTime();  // Time in milliseconds
-	}
-    inline int64 GetTimeDiff(const CServerTime& time) const
-    {
-        // How long till this event
-        // negative = in the past.
-        return time.GetTimeDiff(GetCurrentTime()); // Time in milliseconds
-    }
-    inline int64 GetTimeDiff(int64 time) const
-    {
-        // How long till this event
-        // negative = in the past.
-        return time - GetCurrentTime().GetTimeRaw(); // Time in milliseconds
-    }
-    inline int64 GetCurrentTick() const
-    {
-        return m_Clock.GetCurrentTick();
-    }
-	inline int64 GetTickDiff(int64 iTick) const
-	{
-		return m_Clock.GetCurrentTick() - iTick;
-	}
-
-#define TRAMMEL_SYNODIC_PERIOD 105 // in game world minutes
-#define FELUCCA_SYNODIC_PERIOD 840 // in game world minutes
-#define TRAMMEL_FULL_BRIGHTNESS 2 // light units LIGHT_BRIGHT
-#define FELUCCA_FULL_BRIGHTNESS 6 // light units LIGHT_BRIGHT
-	uint GetMoonPhase( bool fMoonIndex = false ) const;
-	int64 GetNextNewMoon( bool fMoonIndex ) const;
-
-	int64 GetGameWorldTime( int64 basetime ) const;
-    int64 GetGameWorldTime() const	// return game world minutes
-	{
-		return( GetGameWorldTime(GetCurrentTime().GetTimeRaw()));
-	}
-
-	// Communication
-
-	void Speak(const CObjBaseTemplate* pSrc, lpctstr pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD) const;
-	void SpeakUNICODE(const CObjBaseTemplate* pSrc, const nchar* pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang) const;
-
-	void Broadcast(lpctstr pMsg);
-	void __cdecl Broadcastf(lpctstr pMsg, ...) __printfargs(2, 3);
 
 
 	// World stuff

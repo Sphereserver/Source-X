@@ -11,6 +11,7 @@
 #include "../items/CItemMultiCustom.h"
 #include "../CServer.h"
 #include "../CWorld.h"
+#include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
@@ -38,8 +39,8 @@ CClient::CClient(CNetState* state)
 	m_pGMPage = nullptr;
 
 	m_timeLogin = 0;
-	m_timeLastEvent = CServerTime::GetCurrentTime().GetTimeRaw();
-	m_timeLastEventWalk = CServerTime::GetCurrentTime().GetTimeRaw();
+	m_timeLastEvent = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+	m_timeLastEventWalk = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 	m_timeNextEventWalk = 0;
 
 	m_iWalkStepCount = 0;

@@ -1,7 +1,7 @@
 #include "../common/CScriptTriggerArgs.h"
 #include "../game/CServer.h"
 #include "../game/CServerConfig.h"
-#include "../game/CWorld.h"
+#include "../game/CWorldGameTime.h"
 #include "CIPHistoryManager.h"
 
 #define NETHISTORY_TTL			g_Cfg.m_iNetHistoryTTL			// time to remember an ip
@@ -44,7 +44,7 @@ void HistoryIP::setBlocked(bool isBlocked, int timeout)
     m_blocked = isBlocked;
 
     if (isBlocked && timeout >= 0)
-        m_blockExpire = CServerTime::GetCurrentTime().GetTimeRaw() + (timeout * MSECS_PER_SEC);
+        m_blockExpire = CWorldGameTime::GetCurrentTime().GetTimeRaw() + (timeout * MSECS_PER_SEC);
     else
         m_blockExpire = 0;
 }
@@ -72,16 +72,16 @@ void IPHistoryManager::tick(void)
     ADDTOCALLSTACK("IPHistoryManager::tick");
 
     // check if ttl should decay (only do this once every second)
-    bool decayTTL = (!(m_lastDecayTime > 0) || (-CServerTime::GetCurrentTime().GetTimeDiff(m_lastDecayTime)) >= MSECS_PER_SEC);
+    bool decayTTL = (!(m_lastDecayTime > 0) || (-CWorldGameTime::GetCurrentTime().GetTimeDiff(m_lastDecayTime)) >= MSECS_PER_SEC);
     if (decayTTL)
-        m_lastDecayTime = CServerTime::GetCurrentTime().GetTimeRaw();
+        m_lastDecayTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
     for (IPHistoryList::iterator it = m_ips.begin(), end = m_ips.end(); it != end; ++it)
     {
         if (it->m_blocked)
         {
             // blocked ips don't decay, but check if the ban has expired
-            if (it->m_blockExpire > 0 && (CServerTime::GetCurrentTime().GetTimeRaw() > it->m_blockExpire))
+            if (it->m_blockExpire > 0 && (CWorldGameTime::GetCurrentTime().GetTimeRaw() > it->m_blockExpire))
                 it->setBlocked(false);
         }
         else if (decayTTL)

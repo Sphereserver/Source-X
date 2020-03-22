@@ -1,6 +1,6 @@
 #include "../sphere/ProfileTask.h"
 #include "../sphere/threads.h"
-#include "CServerTime.h"
+#include "CWorldGameTime.h"
 #include "CWorldTickingList.h"
 #include "CTimedObject.h"
 
@@ -42,7 +42,7 @@ void CTimedObject::GoAwake()
     * if the timeout did expire then it got ignored on it's tick and removed from the tick's map so we add it again,
     * otherwise it's not needed since the timer is already there.
     */
-    if ((_timeout > 0) && (_timeout < CServerTime::GetCurrentTime().GetTimeRaw()))
+    if ((_timeout > 0) && (_timeout < CWorldGameTime::GetCurrentTime().GetTimeRaw()))
     {
         SetTimeout(1);  // set to 1msec to tick it ASAP.
     }
@@ -87,7 +87,7 @@ void CTimedObject::SetTimeout(int64 iDelayInMsecs)
     }
     else
     {
-        _timeout = CServerTime::GetCurrentTime().GetTimeRaw() + iDelayInMsecs;   // Setting the new Timeout value
+        _timeout = CWorldGameTime::GetCurrentTime().GetTimeRaw() + iDelayInMsecs;   // Setting the new Timeout value
         CWorldTickingList::AddObjSingle(_timeout, this); // Adding this object to the tick's list.
     }
 }
@@ -106,7 +106,7 @@ void CTimedObject::SetTimeoutD(int64 iTenths)
 int64 CTimedObject::GetTimerDiff() const
 {
     // How long till this will expire ?
-    return CServerTime::GetCurrentTime().GetTimeDiff(_timeout);
+    return CWorldGameTime::GetCurrentTime().GetTimeDiff(_timeout);
 }
 
 int64 CTimedObject::GetTimerAdjusted() const

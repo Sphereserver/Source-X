@@ -2,6 +2,7 @@
 // But take no actions here.
 #include "../../common/CLog.h"
 #include "../items/CItemVendable.h"
+#include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "../spheresvr.h"
 #include "CChar.h"
@@ -428,7 +429,7 @@ bool CChar::NPC_FightMayCast(bool fCheckSkill) const
 	// Don't check for skill if !fCheckSkill.
 	
 	//Don't cast the spell if tag.NPCNoCastTill is > than CurrentTime.
-	if (GetKeyNum("NPCNoCastTill") > (CServerTime::GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH))
+	if (GetKeyNum("NPCNoCastTill") > (CWorldGameTime::GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH))
 		return false;
 	if (fCheckSkill && !const_cast<CChar*>(this)->Skill_GetMagicRandom(300))
 		return false;

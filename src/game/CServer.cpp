@@ -25,11 +25,13 @@
 #include "clients/CAccount.h"
 #include "clients/CClient.h"
 #include "items/CItemShip.h"
-#include "CWorld.h"
-#include "spheresvr.h"
-#include "triggers.h"
 #include "CScriptProfiler.h"
 #include "CServer.h"
+#include "CWorld.h"
+#include "CWorldComm.h"
+#include "CWorldGameTime.h"
+#include "spheresvr.h"
+#include "triggers.h"
 #include <cstdio>
 
 
@@ -85,7 +87,7 @@ void CServer::SetSignals( bool fMsg )
 
 	if ( fMsg && !IsLoading() )
 	{
-		g_World.Broadcast( g_Cfg.m_fSecure ?
+		CWorldComm::Broadcast( g_Cfg.m_fSecure ?
 			"The world is now running in SECURE MODE." :
 			"WARNING: The world is NOT running in SECURE MODE." );
 	}
@@ -191,20 +193,20 @@ void CServer::Shutdown( int64 iMinutes ) // If shutdown is initialized
 		if ( ! (m_timeShutdown > 0) )
 			return;
 		m_timeShutdown = 0;
-		g_World.Broadcast( g_Cfg.GetDefaultMsg( DEFMSG_MSG_SERV_SHUTDOWN_CANCEL ) );
+		CWorldComm::Broadcast( g_Cfg.GetDefaultMsg( DEFMSG_MSG_SERV_SHUTDOWN_CANCEL ) );
 		return;
 	}
 
 	if ( iMinutes < 0 )
 	{
-		iMinutes = CServerTime::GetCurrentTime().GetTimeDiff( m_timeShutdown ) / ( 60 * MSECS_PER_SEC);
+		iMinutes = CWorldGameTime::GetCurrentTime().GetTimeDiff( m_timeShutdown ) / ( 60 * MSECS_PER_SEC);
 	}
 	else
 	{
-		m_timeShutdown = CServerTime::GetCurrentTime().GetTimeRaw() + ( iMinutes * 60 * MSECS_PER_SEC);
+		m_timeShutdown = CWorldGameTime::GetCurrentTime().GetTimeRaw() + ( iMinutes * 60 * MSECS_PER_SEC);
 	}
 
-	g_World.Broadcastf(g_Cfg.GetDefaultMsg( DEFMSG_MSG_SERV_SHUTDOWN ), iMinutes);
+	CWorldComm::Broadcastf(g_Cfg.GetDefaultMsg( DEFMSG_MSG_SERV_SHUTDOWN ), iMinutes);
 }
 
 void CServer::SysMessage( lpctstr pszMsg ) const
@@ -308,7 +310,7 @@ ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal ) const
 int64 CServer::GetAgeHours() const
 {
 	ADDTOCALLSTACK("CServer::GetAgeHours");
-	return (CServerTime::GetCurrentTime().GetTimeRaw() / (60 * 60 * MSECS_PER_SEC));
+	return (CWorldGameTime::GetCurrentTime().GetTimeRaw() / (60 * 60 * MSECS_PER_SEC));
 }
 
 lpctstr CServer::GetStatusString( byte iIndex ) const
@@ -1500,7 +1502,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			break;
 
 		case SV_B: // "B"
-			g_World.Broadcast( s.GetArgStr());
+			CWorldComm::Broadcast( s.GetArgStr());
 			break;
 
 		case SV_BLOCKIP:
@@ -1990,7 +1992,7 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool bMessage)
         g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
 
 		if ( bMessage )
-			g_World.Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
+			CWorldComm::Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
 		else if ( pSrc && pSrc->GetChar() )
 			pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
 
@@ -2006,7 +2008,7 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool bMessage)
 		{
             g_Log.EventError("%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
 			if ( bMessage )
-				g_World.Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
+				CWorldComm::Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
 			else if ( pSrc && pSrc->GetChar() )
 				pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
 		}
@@ -2014,7 +2016,7 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool bMessage)
 		{
             g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS));
 			if ( bMessage )
-				g_World.Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS));
+				CWorldComm::Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS));
 			else if ( pSrc && pSrc->GetChar() )
 				pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS));
 		}
@@ -2165,7 +2167,7 @@ void CServer::OnTick()
 	if ( m_timeShutdown > 0 )
 	{
 		EXC_SET_BLOCK("shutdown");
-		if ( CServerTime::GetCurrentTime().GetTimeDiff(m_timeShutdown) <= 0 )
+		if ( CWorldGameTime::GetCurrentTime().GetTimeDiff(m_timeShutdown) <= 0 )
 			SetExitFlag(2);
 	}
 

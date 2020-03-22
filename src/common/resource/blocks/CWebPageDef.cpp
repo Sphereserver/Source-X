@@ -1,10 +1,10 @@
-
 #include "../../../game/chars/CChar.h"
 #include "../../../game/clients/CClient.h"
 #include "../../../game/CServer.h"
 #include "../../../game/CWorld.h"
-#include "../../../network/CClientIterator.h"
+#include "../../../game/CWorldGameTime.h"
 #include "../../sphere_library/CSFileList.h"
+#include "../../network/CClientIterator.h"
 #include "../../CException.h"
 #include "../../sphereversion.h"
 #include "../CResourceLock.h"
@@ -290,12 +290,12 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 	{
 		if ( m_iUpdatePeriod <= 0 )
 			return false;
-		if (CServerTime::GetCurrentTime().GetTimeRaw() < m_timeNextUpdate )
+		if (CWorldGameTime::GetCurrentTime().GetTimeRaw() < m_timeNextUpdate )
 			return true;	// should still be valid
 	}
 
 	ASSERT(pSrc);
-	m_timeNextUpdate = CServerTime::GetCurrentTime().GetTimeRaw() + (m_iUpdatePeriod * MSECS_PER_SEC);
+	m_timeNextUpdate = CWorldGameTime::GetCurrentTime().GetTimeRaw() + (m_iUpdatePeriod * MSECS_PER_SEC);
 	if ( pszDstName == nullptr )
 		pszDstName = m_sDstFilePath;
 

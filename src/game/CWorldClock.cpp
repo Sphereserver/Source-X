@@ -4,13 +4,15 @@
 #include <ctime>
 #include <chrono>
 
-int64 CWorldClock::GetSystemClock() // static
+static int64 GetSystemClock()
 {
 	ADDTOCALLSTACK("CWorldClock::GetSystemClock");
 	// Return system wall-clock using high resolution value (milliseconds)
 	const auto timeMaxResolution = std::chrono::high_resolution_clock::now().time_since_epoch();
 	return std::chrono::duration_cast<std::chrono::milliseconds>(timeMaxResolution).count();
 }
+
+// --
 
 void CWorldClock::InitTime(int64 iTimeBase)
 {

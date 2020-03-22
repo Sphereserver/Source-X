@@ -21,6 +21,7 @@
 #include "../CSector.h"
 #include "../CServer.h"
 #include "../CWorld.h"
+#include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "../CWorldTickingList.h"
 #include "../spheresvr.h"
@@ -268,8 +269,8 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 	m_iVisualRange = UO_MAP_VIEW_SIZE_DEFAULT;
 	m_virtualGold = 0;
 
-    m_timeCreate = CServerTime::GetCurrentTime().GetTimeRaw();
-    m_timeLastHitsUpdate = CServerTime::GetCurrentTime().GetTimeRaw();
+    m_timeCreate = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+    m_timeLastHitsUpdate = CWorldGameTime::GetCurrentTime().GetTimeRaw();
     _timeNextRegen = m_timeLastHitsUpdate + MSECS_PER_SEC;  // make it regen in one second from now, no need to instant regen.
     _iRegenTickCount = 0;
 	m_timeLastCallGuards = 0;
@@ -403,7 +404,7 @@ void CChar::ClientAttach( CClient * pClient )
 		return;
 
 	ASSERT(m_pPlayer);
-	m_pPlayer->m_timeLastUsed = CServerTime::GetCurrentTime().GetTimeRaw();
+	m_pPlayer->m_timeLastUsed = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
 	m_pClient = pClient;
 	FixClimbHeight();
@@ -2457,7 +2458,7 @@ do_default:
 			sVal.FormatVal( m_defense + pCharDef->m_defense );
 			return true;
 		case CHC_AGE:
-			sVal.FormatLLVal( -( CServerTime::GetCurrentTime().GetTimeDiff(m_timeCreate) / ( MSECS_PER_SEC * 60 * 60 *24 ) )); //displayed in days
+			sVal.FormatLLVal( -( CWorldGameTime::GetCurrentTime().GetTimeDiff(m_timeCreate) / ( MSECS_PER_SEC * 60 * 60 *24 ) )); //displayed in days
 			return true;
 		case CHC_BANKBALANCE:
 			sVal.FormatVal( GetBank()->ContentCount( CResourceID(RES_TYPEDEF,IT_GOLD)));
@@ -2805,7 +2806,7 @@ do_default:
 			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, GetDispID()) );
 			break;
 		case CHC_CREATE:
-			sVal.FormatLLVal( -( CServerTime::GetCurrentTime().GetTimeDiff(m_timeCreate) / MSECS_PER_TENTH));  // Displayed in Tenths of Second.
+			sVal.FormatLLVal( -( CWorldGameTime::GetCurrentTime().GetTimeDiff(m_timeCreate) / MSECS_PER_TENTH));  // Displayed in Tenths of Second.
 			break;
 		case CHC_DIR:
 			{
@@ -3662,7 +3663,7 @@ void CChar::r_Write( CScript & s )
 	EXC_TRY("r_Write");
 
 	s.WriteSection("WORLDCHAR %s", GetResourceName());
-	//s.WriteKeyVal("CREATE", -(CServerTime::GetCurrentTime().GetTimeDiff(m_timeCreate) / MSECS_PER_TENTH)); // Do we need to save it?
+	//s.WriteKeyVal("CREATE", -(CWorldGameTime::GetCurrentTime().GetTimeDiff(m_timeCreate) / MSECS_PER_TENTH)); // Do we need to save it?
 
     // Do not save TAG.LastHit (used by PreHit combat flag). It's based on the server uptime, so if this tag isn't zeroed,
     //  after the server restart the char may not be able to attack until the server reaches the serv.time when the previous TAG.LastHit was set.

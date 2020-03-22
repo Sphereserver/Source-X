@@ -6,6 +6,7 @@
 #include "items/CItemShip.h"
 #include "CSector.h"
 #include "CWorldClock.h"
+#include "CWorldGameTime.h"
 #include "CWorldTicker.h"
 
 
@@ -73,7 +74,7 @@ void CWorldTicker::_RemoveTimedObject(const int64 iOldTimeout, const CTimedObjec
 void CWorldTicker::AddTimedObject(int64 iTimeout, CTimedObject* pTimedObject)
 {
     ADDTOCALLSTACK("CWorld::AddTimedObject");
-    //if (iTimeout < CServerTime::GetCurrentTime().GetTimeRaw())    // We do that to get them tick as sooner as possible
+    //if (iTimeout < CWorldGameTime::GetCurrentTime().GetTimeRaw())    // We do that to get them tick as sooner as possible
     //    return;
 
     EXC_TRY("AddTimedObject");
@@ -191,7 +192,7 @@ void CWorldTicker::AddCharTicking(CChar* pChar, bool fIgnoreSleep, bool fOverwri
     std::unique_lock<std::shared_mutex> lookupLock(_mCharTickLookup.THREAD_CMUTEX);
 
     const int64 iTickNext = pChar->_timeNextRegen;
-    //if (iTickNext < CServerTime::GetCurrentTime().GetTimeRaw())    // We do that to get them tick as sooner as possible
+    //if (iTickNext < CWorldGameTime::GetCurrentTime().GetTimeRaw())    // We do that to get them tick as sooner as possible
     //    return;
 
     bool fDoNotInsert = false;
@@ -294,7 +295,7 @@ void CWorldTicker::Tick()
 
     /* World ticking (timers) */
     // Items, Chars ... Everything relying on CTimedObject (excepting CObjBase, which inheritance is only virtual)
-    int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
+    int64 iCurTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
 
     EXC_SET_BLOCK("WorldObjects selection");
     {

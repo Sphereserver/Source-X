@@ -3,7 +3,7 @@
 
 #include "../../network/send.h"
 #include "../clients/CClient.h"
-#include "../CWorld.h"
+#include "../CWorldGameTime.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 
@@ -173,7 +173,7 @@ void CChar::Memory_AddTypes( CItemMemory * pMemory, word MemTypes )
 	{
 		pMemory->SetMemoryTypes( pMemory->GetMemoryTypes() | MemTypes );
 		pMemory->m_itEqMemory.m_pt = GetTopPoint();	// Where did the fight start ?
-		pMemory->SetTimeStamp(CServerTime::GetCurrentTime().GetTimeRaw());
+		pMemory->SetTimeStamp(CWorldGameTime::GetCurrentTime().GetTimeRaw());
 		Memory_UpdateFlags( pMemory );
 	}
 }
@@ -430,7 +430,7 @@ bool CChar::Memory_Fight_OnTick( CItemMemory * pMemory )
 		return true;
 	}
 
-	int64 iTimeDiff = - CServerTime::GetCurrentTime().GetTimeDiff( pMemory->GetTimeStamp() );
+	int64 iTimeDiff = - CWorldGameTime::GetCurrentTime().GetTimeDiff( pMemory->GetTimeStamp() );
 
 	// If am fully healthy then it's not much of a fight.
 	if ( iTimeDiff > 60*60*MSECS_PER_SEC )

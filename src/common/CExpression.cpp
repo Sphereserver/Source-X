@@ -2,7 +2,6 @@
 #include <cmath>
 #include "../game/CObjBase.h"
 #include "../game/CServerConfig.h"
-#include "../game/CWorld.h"
 #include "sphere_library/CSRand.h"
 #include "CException.h"
 #include "CExpression.h"

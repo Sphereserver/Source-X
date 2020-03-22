@@ -15,6 +15,7 @@
 #include "../CContainer.h"
 #include "../CServer.h"
 #include "../CWorld.h"
+#include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
@@ -3256,7 +3257,7 @@ bool CChar::OnFreezeCheck() const
 
 	if ( IsStatFlag(STATF_FREEZE|STATF_STONE) && !IsPriv(PRIV_GM) )
 		return true;
-	if ( GetKeyNum("NoMoveTill") > (CServerTime::GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH)) // in tenths of second.
+	if ( GetKeyNum("NoMoveTill") > (CWorldGameTime::GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH)) // in tenths of second.
 		return true;
 
 	if ( m_pPlayer )
@@ -4234,7 +4235,7 @@ void CChar::OnTickStatusUpdate()
 	if ( IsClient() )
 		GetClient()->UpdateStats();
 
-	int64 iTimeDiff = - CServerTime::GetCurrentTime().GetTimeDiff( m_timeLastHitsUpdate );
+	int64 iTimeDiff = - CWorldGameTime::GetCurrentTime().GetTimeDiff( m_timeLastHitsUpdate );
 	if ( g_Cfg.m_iHitsUpdateRate && ( iTimeDiff >= g_Cfg.m_iHitsUpdateRate ) )
 	{
 		if ( m_fStatusUpdate & SU_UPDATE_HITS )
@@ -4243,7 +4244,7 @@ void CChar::OnTickStatusUpdate()
 			UpdateCanSee(cmd, m_pClient);		// send hits update to all nearby clients
 			m_fStatusUpdate &= ~SU_UPDATE_HITS;
 		}
-		m_timeLastHitsUpdate = CServerTime::GetCurrentTime().GetTimeRaw();
+		m_timeLastHitsUpdate = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 	}
 
 	if ( m_fStatusUpdate & SU_UPDATE_MODE )
@@ -4409,7 +4410,7 @@ bool CChar::OnTickPeriodic()
 {
     EXC_TRY("OnTickPeriodic");
     ++_iRegenTickCount;
-    _timeNextRegen = CServerTime::GetCurrentTime().GetTimeRaw() + MSECS_PER_TICK;
+    _timeNextRegen = CWorldGameTime::GetCurrentTime().GetTimeRaw() + MSECS_PER_TICK;
     const bool fRegen = (_iRegenTickCount >= TICKS_PER_SEC);
 
     if (fRegen)
@@ -4452,13 +4453,13 @@ bool CChar::OnTickPeriodic()
     {
         CClient* pClient = GetClient();
         // Players have a silly "always run" flag that gets stuck on.
-        if (-(CServerTime::GetCurrentTime().GetTimeDiff(pClient->m_timeLastEventWalk)) > 2 * MSECS_PER_TENTH)
+        if (-(CWorldGameTime::GetCurrentTime().GetTimeDiff(pClient->m_timeLastEventWalk)) > 2 * MSECS_PER_TENTH)
         {
             StatFlag_Clear(STATF_FLY);
         }
 
         // Check targeting timeout, if set
-        if ((pClient->m_Targ_Timeout > 0) && (CServerTime::GetCurrentTime().GetTimeDiff(pClient->m_Targ_Timeout) <= 0))
+        if ((pClient->m_Targ_Timeout > 0) && (CWorldGameTime::GetCurrentTime().GetTimeDiff(pClient->m_Targ_Timeout) <= 0))
         {
             pClient->addTargetCancel();
         }

@@ -2,7 +2,7 @@
 #include "CCItemDamageable.h"
 #include "../CServer.h"
 #include "../CObjBase.h"
-#include "../CWorld.h"
+#include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "../CWorldTickingList.h"
 #include "../chars/CChar.h"
@@ -68,7 +68,7 @@ void CCItemDamageable::OnTickStatsUpdate()
     {
         return;
     }
-    const int64 iCurtime = CServerTime::GetCurrentTime().GetTimeRaw();
+    const int64 iCurtime = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
     if (_iTimeLastUpdate + g_Cfg._iItemHitpointsUpdate < iCurtime)
     {

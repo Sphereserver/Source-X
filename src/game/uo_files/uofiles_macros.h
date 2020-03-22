@@ -77,5 +77,8 @@
 #define LIGHT_DARK		30
 #define LIGHT_BLACK		32
 
+#define TRAMMEL_FULL_BRIGHTNESS		2		// light units LIGHT_BRIGHT
+#define FELUCCA_FULL_BRIGHTNESS		6		// light units LIGHT_BRIGHT
+
 
 #endif //_INC_UOFILES_MACROS_H

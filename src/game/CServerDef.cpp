@@ -9,7 +9,7 @@
 #include "CServer.h"
 #include "CServerConfig.h"
 #include "CServerDef.h"
-#include "CWorld.h"
+#include "CWorldGameTime.h"
 
 //	Memory profiling
 #ifdef _WIN32	// (Win32)
@@ -50,7 +50,7 @@ CServerDef::CServerDef( lpctstr pszName, CSocketAddressIP dwIP ) :
 
 	SetName( pszName );
 	m_timeLastValid = 0;
-	m_timeCreate = g_World.GetCurrentTime().GetTimeRaw();
+	m_timeCreate = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
 	// Set default time zone from UTC
 	m_TimeZone = (char)( _timezone / (60 * 60) );	// Greenwich mean time.
@@ -177,13 +177,13 @@ void CServerDef::SetName( lpctstr pszName )
 void CServerDef::SetValidTime()
 {
 	ADDTOCALLSTACK("CServerDef::SetValidTime");
-	m_timeLastValid = g_World.GetCurrentTime().GetTimeRaw();
+	m_timeLastValid = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 }
 
 int64 CServerDef::GetTimeSinceLastValid() const
 {
 	ADDTOCALLSTACK("CServerDef::GetTimeSinceLastValid");
-	return ( - CServerTime::GetCurrentTime().GetTimeDiff( m_timeLastValid ) );
+	return ( - CWorldGameTime::GetCurrentTime().GetTimeDiff( m_timeLastValid ) );
 }
 
 enum SC_TYPE
@@ -393,7 +393,7 @@ bool CServerDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 		}
 		break;
 	case SC_CREATE:
-		sVal.FormatLLVal( (- CServerTime::GetCurrentTime().GetTimeDiff(m_timeCreate))/MSECS_PER_TENTH );
+		sVal.FormatLLVal( (- CWorldGameTime::GetCurrentTime().GetTimeDiff(m_timeCreate))/MSECS_PER_TENTH );
 		break;
 	case SC_LANG:
 		sVal = m_sLang;
@@ -483,5 +483,5 @@ int64 CServerDef::GetAgeHours() const
 {
 	ADDTOCALLSTACK("CServerDef::GetAgeHours");
 	// This is just the amount of time it has been listed.
-	return ( (- CServerTime::GetCurrentTime().GetTimeDiff(m_timeCreate)) / ( MSECS_PER_SEC * 60 * 60 ));
+	return ( (- CWorldGameTime::GetCurrentTime().GetTimeDiff(m_timeCreate)) / ( MSECS_PER_SEC * 60 * 60 ));
 }

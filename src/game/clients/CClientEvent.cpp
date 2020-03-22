@@ -1,4 +1,4 @@
-
+#include "../../common/sphere_library/CSTime.h"
 #include "../../common/resource/CResourceLock.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
@@ -9,7 +9,6 @@
 #include "../items/CItemVendable.h"
 #include "../CException.h"
 #include "../CSector.h"
-#include "../CWorldClock.h"
 #include "../CWorldMap.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
@@ -213,13 +212,14 @@ void CClient::Event_Item_Pickup(CUID uid, word amount) // Client grabs an item
 
 	EXC_SET_BLOCK("FastLoot");
 	//	fastloot (,emptycontainer) protection
-	if ( m_tNextPickup > CServerTime::GetCurrentTime().GetTimeRaw())
+	const int64 iCurTime = GetPreciseSysTimeMilli();
+	if ( m_tNextPickup > iCurTime)
 	{
 		EXC_SET_BLOCK("FastLoot - addItemDragCancel(0)");
 		new PacketDragCancel(this, PacketDragCancel::CannotLift);
 		return;
 	}
-	m_tNextPickup = CServerTime::GetCurrentTime().GetTimeRaw() + (MSECS_PER_SEC/3);    // Using time in MSECS to work with this packet.
+	m_tNextPickup = iCurTime + (MSECS_PER_SEC/3);    // Using time in MSECS to work with this packet.
 
 	EXC_SET_BLOCK("Origin");
 	// Where is the item coming from ? (just in case we have to toss it back)
@@ -735,7 +735,7 @@ bool CClient::Event_CheckWalkBuffer()
 		return true;
 
 	// Client only allows 4 steps of walk ahead.
-	const int64 iCurTime = CWorldClock::GetSystemClock();
+	const int64 iCurTime = GetPreciseSysTimeMilli();
     int64 iTimeDiff = (int64)llabs(iCurTime - m_timeWalkStep);	// use absolute value to prevent overflows
     int64 iTimeMin = m_pChar->IsStatFlag(STATF_ONHORSE|STATF_HOVERING) ? 700 : 1400; // minimum time to move 8 steps in milliseconds
 
@@ -833,10 +833,11 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 			return false;
 		}
 
+		// To get milliseconds precision we must get the system clock manually at each walk request (the server clock advances only at every tick).
+		const int64 iCurTime = GetPreciseSysTimeMilli();
+
         if ( IsSetEF(EF_FastWalkPrevention) )
         {
-            // To get milliseconds precision we must get the system clock manually at each walk request (the server clock advances only at every tick).
-            int64 iCurTime = CWorldClock::GetSystemClock();
             if ( iCurTime < m_timeNextEventWalk )		// fastwalk detected
             {
                 new PacketMovementRej(this, sequence);
@@ -890,7 +891,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
             }
 		}
 
-		m_timeLastEventWalk = CServerTime::GetCurrentTime().GetTimeRaw();
+		m_timeLastEventWalk = iCurTime;
 		++m_iWalkStepCount;					// Increase step count to use on walk buffer checks
 	}
 	else

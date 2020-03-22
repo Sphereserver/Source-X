@@ -27,6 +27,7 @@
 #include "CServerTime.h"
 #include "CTimedFunctions.h"
 #include "CWorld.h"
+#include "CWorldGameTime.h"
 #include "CWorldMap.h"
 #include "spheresvr.h"
 #include "triggers.h"
@@ -1989,7 +1990,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
             sVal.FormatVal( TICKS_PER_SEC );
             break;
 		case RC_TIMEUP:
-			sVal.FormatLLVal( ( - CServerTime::GetCurrentTime().GetTimeDiff( g_World._iTimeStartup )) / MSECS_PER_SEC );
+			sVal.FormatLLVal( ( - CWorldGameTime::GetCurrentTime().GetTimeDiff( g_World._iTimeStartup )) / MSECS_PER_SEC );
 			break;
 		case RC_TIMERCALL:
 			sVal.FormatLLVal(_iTimerCall / (60*MSECS_PER_SEC));
@@ -4103,7 +4104,7 @@ void CServerConfig::OnTick( bool fNow )
 {
 	ADDTOCALLSTACK("CServerConfig::OnTick");
 	// Give a tick to the less critical stuff.
-	if ( !fNow && ( g_Serv.IsLoading() || ( m_timePeriodic > CServerTime::GetCurrentTime().GetTimeRaw()) ) )
+	if ( !fNow && ( g_Serv.IsLoading() || ( m_timePeriodic > CWorldGameTime::GetCurrentTime().GetTimeRaw()) ) )
 		return;
 
 	if ( this->m_fUseHTTP )
@@ -4131,7 +4132,7 @@ void CServerConfig::OnTick( bool fNow )
 		}
 	}
 
-	m_timePeriodic = CServerTime::GetCurrentTime().GetTimeRaw() + ( 60 * MSECS_PER_SEC );
+	m_timePeriodic = CWorldGameTime::GetCurrentTime().GetTimeRaw() + ( 60 * MSECS_PER_SEC );
 }
 
 void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
