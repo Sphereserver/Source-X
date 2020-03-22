@@ -10,6 +10,8 @@
 #include "../CScriptObj.h"
 #include "CResourceID.h"
 
+class CVarDefContNum;
+
 
 class CResourceDef : public CScriptObj
 {
@@ -79,7 +81,7 @@ public:
     }
 
     bool HasResourceName();
-    bool MakeResourceName();
+    //bool MakeResourceName();  // unused
 };
 
 

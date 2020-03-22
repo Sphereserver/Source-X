@@ -1,3 +1,6 @@
+#include "../../sphere/threads.h"
+#include "../CLog.h"
+#include "CSFile.h"
 #ifdef _WIN32
     #include <io.h> 	// findfirst
 #else
@@ -5,10 +8,6 @@
 	#include <sys/types.h>
 	#include <sys/stat.h>
 #endif
-#include "../../sphere/threads.h"
-#include "../CLog.h"
-#include "CSFile.h"
-
 
 // CSFile:: Constructors, Destructor, Asign operator.
 

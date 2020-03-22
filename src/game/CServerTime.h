@@ -3,10 +3,10 @@
 *
 */
 
-#ifndef _INC_CSERVTIME_H
-#define _INC_CSERVTIME_H
+#ifndef _INC_CSERVERTIME_H
+#define _INC_CSERVERTIME_H
 
-#include "../common/datatypes.h"	// here we need only the numeric data types
+#include "../common/common.h"
 
 /*
 * A time stamp in the server/game world, starting from server's Creation (not from the Epoch).
@@ -105,4 +105,4 @@ void CServerTime::SetCurrentTime()
 }
 
 
-#endif // _INC_CSERVTIME_H
+#endif // _INC_CSERVERTIME_H

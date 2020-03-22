@@ -1,5 +1,5 @@
-
 #include "CWorld.h"
+#include "CServerConfig.h"
 #include "CServerTime.h"
 
 int64 CServerTime::GetTimeRaw() const

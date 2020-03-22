@@ -6,15 +6,15 @@
 #ifndef _INC_CSCRIPTOBJ_H
 #define _INC_CSCRIPTOBJ_H
 
-#include "../sphere/threads.h"
-#include "CVarDefMap.h"
-#include "CVarFloat.h"
-#include "CTextConsole.h"
+#include "../common/common.h"
 
 class CScript;
+class CTextConsole;
 class CSFileText;
+class CSString;
 class CChar;
 class CScriptTriggerArgs;
+
 
 enum TRIGRUN_TYPE
 {

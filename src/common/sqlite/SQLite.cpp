@@ -1,9 +1,10 @@
-#include "SQLite.h"
-#include "sqlite3.h"
 #include "../../common/CLog.h"
+#include "../../sphere/threads.h"
 #include "../CExpression.h"
 #include "../CException.h"
 #include "../CScript.h"
+#include "SQLite.h"
+#include "sqlite3.h"
 
 
 CSQLite::CSQLite()

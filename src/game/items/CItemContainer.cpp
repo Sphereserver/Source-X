@@ -4,7 +4,7 @@
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
-#include "../CWorld.h"
+#include "../CServer.h"
 #include "../triggers.h"
 #include "CItem.h"
 #include "CItemMulti.h"

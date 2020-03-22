@@ -1,8 +1,8 @@
 #include "../game/uo_files/CUOMapList.h"
 #include "../game/CSector.h"
 #include "../game/CServer.h"
-#include "../game/CWorld.h"
-#include "../common/CLog.h"
+#include "../game/CWorldMap.h"
+#include "CLog.h"
 #include "CRect.h"
 
 
@@ -293,13 +293,13 @@ CSector * CRect::GetSector( int i ) const	// ge all the sectors that make up thi
 	if ( i >= ( height * width ))
 	{
 		if ( ! i )
-			return g_World.GetSector(m_map, iBase);
+			return CWorldMap::GetSector(m_map, iBase);
 		return nullptr;
 	}
 
 	int indexoffset = (( i / width ) * iSectorCols) + ( i % width );
 
-	return g_World.GetSector(m_map, iBase+indexoffset);
+	return CWorldMap::GetSector(m_map, iBase+indexoffset);
 }
 
 

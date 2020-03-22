@@ -3,6 +3,8 @@
 *
 */
 
+#include "../../sphere/threads.h"
+#include "../CVarDefMap.h"
 #include "../CExpression.h"
 #include "../CLog.h"
 #include "CResourceDef.h"

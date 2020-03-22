@@ -7,7 +7,10 @@
 #include "../sphere/threads.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"
+#include "CSector.h"
 #include "CWorld.h"
+#include "CWorldMap.h"
+
 
 //************************************************************************
 // -CTeleport
@@ -110,7 +113,7 @@ bool CRegion::RealizeRegion()
 	ASSERT( m_iLinkedSectors == 0 );
 	for ( int i = 0, iMax = g_MapList.GetSectorQty(m_pt.m_map); i < iMax; ++i )
 	{
-		CSector *pSector = g_World.GetSector(m_pt.m_map, i);
+		CSector *pSector = CWorldMap::GetSector(m_pt.m_map, i);
 
 		if ( pSector && IsOverlapped(pSector->GetRect()) )
 		{

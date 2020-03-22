@@ -8,7 +8,9 @@
 #include "../items/CItemMulti.h"
 #include "../items/CItemVendable.h"
 #include "../CException.h"
-#include "../CWorld.h"
+#include "../CSector.h"
+#include "../CWorldClock.h"
+#include "../CWorldMap.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"
@@ -211,13 +213,13 @@ void CClient::Event_Item_Pickup(CUID uid, word amount) // Client grabs an item
 
 	EXC_SET_BLOCK("FastLoot");
 	//	fastloot (,emptycontainer) protection
-	if ( m_tNextPickup > g_World.GetCurrentTime().GetTimeRaw())
+	if ( m_tNextPickup > CServerTime::GetCurrentTime().GetTimeRaw())
 	{
 		EXC_SET_BLOCK("FastLoot - addItemDragCancel(0)");
 		new PacketDragCancel(this, PacketDragCancel::CannotLift);
 		return;
 	}
-	m_tNextPickup = g_World.GetCurrentTime().GetTimeRaw() + (MSECS_PER_SEC/3);    // Using time in MSECS to work with this packet.
+	m_tNextPickup = CServerTime::GetCurrentTime().GetTimeRaw() + (MSECS_PER_SEC/3);    // Using time in MSECS to work with this packet.
 
 	EXC_SET_BLOCK("Origin");
 	// Where is the item coming from ? (just in case we have to toss it back)
@@ -871,7 +873,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
             }
 		}
 
-		m_timeLastEventWalk = g_World.GetCurrentTime().GetTimeRaw();
+		m_timeLastEventWalk = CServerTime::GetCurrentTime().GetTimeRaw();
 		++m_iWalkStepCount;					// Increase step count to use on walk buffer checks
 	}
 	else

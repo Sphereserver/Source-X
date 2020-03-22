@@ -4,8 +4,9 @@
 
 #include "../../common/CException.h"
 #include "../chars/CChar.h"
+#include "../CServer.h"
+#include "../CWorldMap.h"
 #include "../triggers.h"
-#include "../CWorld.h"
 #include "CItemContainer.h"
 #include "CItemShip.h"
 #include "CItem.h"

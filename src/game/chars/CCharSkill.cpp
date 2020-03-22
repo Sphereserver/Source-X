@@ -9,7 +9,7 @@
 #include "../items/CItemVendable.h"
 #include "../triggers.h"
 #include "../CLog.h"
-#include "../CWorld.h"
+#include "../CWorldMap.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 
@@ -1034,7 +1034,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	if ( pItemTarg != nullptr && pItemTarg->IsTopLevel() && pItemTarg->IsType( IT_FORGE ))
 		m_Act_p = pItemTarg->GetTopPoint();
 	else
-		m_Act_p = g_World.FindItemTypeNearby( GetTopPoint(), IT_FORGE, 3, false );
+		m_Act_p = CWorldMap::FindItemTypeNearby( GetTopPoint(), IT_FORGE, 3, false );
 
 	if ( !m_Act_p.IsValidPoint() || !CanTouch(m_Act_p))
 	{
@@ -1305,7 +1305,7 @@ int CChar::Skill_Mining( SKTRIG_TYPE stage )
 	}
 
 	// Resource check
-	CItem *pResBit = g_World.CheckNaturalResource(m_Act_p, (IT_TYPE)(m_atResource.m_ridType.GetResIndex()), stage == SKTRIG_START, this);
+	CItem *pResBit = CWorldMap::CheckNaturalResource(m_Act_p, (IT_TYPE)(m_atResource.m_ridType.GetResIndex()), stage == SKTRIG_START, this);
 	if ( !pResBit )
 	{
 		SysMessageDefault(DEFMSG_MINING_1);
@@ -1400,7 +1400,7 @@ int CChar::Skill_Fishing( SKTRIG_TYPE stage )
 	}
 
 	// Resource check
-	CItem *pResBit = g_World.CheckNaturalResource(m_Act_p, (IT_TYPE)(m_atResource.m_ridType.GetResIndex()), stage == SKTRIG_START, this);
+	CItem *pResBit = CWorldMap::CheckNaturalResource(m_Act_p, (IT_TYPE)(m_atResource.m_ridType.GetResIndex()), stage == SKTRIG_START, this);
 	if ( !pResBit )
 	{
 		SysMessageDefault(DEFMSG_FISHING_1);
@@ -1487,7 +1487,7 @@ int CChar::Skill_Lumberjack( SKTRIG_TYPE stage )
 	}
 
 	// Resource check
-	CItem *pResBit = g_World.CheckNaturalResource(m_Act_p, (IT_TYPE)(m_atResource.m_ridType.GetResIndex()), stage == SKTRIG_START, this);
+	CItem *pResBit = CWorldMap::CheckNaturalResource(m_Act_p, (IT_TYPE)(m_atResource.m_ridType.GetResIndex()), stage == SKTRIG_START, this);
 	if ( !pResBit )
 	{
 		if ( pTool->IsType(IT_WEAPON_FENCE) )	//dagger
@@ -2009,13 +2009,13 @@ int CChar::Skill_Cooking( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_START )
 	{
-		m_Act_p = g_World.FindItemTypeNearby( GetTopPoint(), IT_FIRE, iMaxDist, false );
+		m_Act_p = CWorldMap::FindItemTypeNearby( GetTopPoint(), IT_FIRE, iMaxDist, false );
 		if ( ! m_Act_p.IsValidPoint())
 		{
-			m_Act_p = g_World.FindItemTypeNearby( GetTopPoint(), IT_FORGE, iMaxDist, false );
+			m_Act_p = CWorldMap::FindItemTypeNearby( GetTopPoint(), IT_FORGE, iMaxDist, false );
 			if ( ! m_Act_p.IsValidPoint())
 			{
-				m_Act_p = g_World.FindItemTypeNearby( GetTopPoint(), IT_CAMPFIRE, iMaxDist, false );
+				m_Act_p = CWorldMap::FindItemTypeNearby( GetTopPoint(), IT_CAMPFIRE, iMaxDist, false );
 				if ( ! m_Act_p.IsValidPoint())
 				{
 					SysMessageDefault( DEFMSG_COOKING_FIRE_SOURCE );
@@ -2810,7 +2810,7 @@ int CChar::Skill_Blacksmith( SKTRIG_TYPE stage )
 	int iMaxDist = 2;
 	if ( stage == SKTRIG_START )
 	{
-		m_Act_p = g_World.FindItemTypeNearby( GetTopPoint(), IT_FORGE, iMaxDist, false );
+		m_Act_p = CWorldMap::FindItemTypeNearby( GetTopPoint(), IT_FORGE, iMaxDist, false );
 		if ( ! m_Act_p.IsValidPoint())
 		{
 			SysMessageDefault( DEFMSG_SMITHING_FORGE );

@@ -1,5 +1,7 @@
-#include "../../sphere/ProfileTask.h"
-#include "CWorld.h"
+#include "../sphere/ProfileTask.h"
+#include "../sphere/threads.h"
+#include "CServerTime.h"
+#include "CWorldTickingList.h"
 #include "CTimedObject.h"
 
 
@@ -20,7 +22,7 @@ CTimedObject::~CTimedObject()
     ADDTOCALLSTACK("CTimedObject::~CTimedObject");
     //if (_timeout > 0)
     //{
-        g_World._Ticker.DelTimedObject(this);
+        CWorldTickingList::DelObjSingle(this);
     //}
 }
 
@@ -29,12 +31,13 @@ void CTimedObject::Delete()
     ADDTOCALLSTACK("CTimedObject::Delete");
     //if (_timeout > 0)
     //{
-        g_World._Ticker.DelTimedObject(this);
+        CWorldTickingList::DelObjSingle(this);
     //}
 }
 
 void CTimedObject::GoAwake()
 {
+    ADDTOCALLSTACK("CTimedObject::GoAwake");
     /*
     * if the timeout did expire then it got ignored on it's tick and removed from the tick's map so we add it again,
     * otherwise it's not needed since the timer is already there.
@@ -52,17 +55,6 @@ bool CTimedObject::OnTick()
     return true;
 }
 
-void CTimedObject::SetTimer(int64 iDelayInMsecs)
-{
-    /*
-    * Only called from CObjBase::r_LoadVal when server is loading to set the raw timer
-    * instead of doing conversions to msecs.
-    */
-    THREAD_CMUTEX.lock();
-    _timeout = iDelayInMsecs;
-    THREAD_CMUTEX.unlock();
-}
-
 void CTimedObject::SetTimeout(int64 iDelayInMsecs)
 {
     ADDTOCALLSTACK("CTimedObject::SetTimeout");
@@ -74,7 +66,7 @@ void CTimedObject::SetTimeout(int64 iDelayInMsecs)
     */
     //if (_timeout > 0)
     //{
-        g_World._Ticker.DelTimedObject(this);
+        CWorldTickingList::DelObjSingle(this);
     //}
     if (IsDeleted()) //prevent deleted objects from setting new timers to avoid nullptr calls
     {
@@ -88,14 +80,15 @@ void CTimedObject::SetTimeout(int64 iDelayInMsecs)
     *   New timer will be the current server's time (not CPU's time, just the server's one) + the given delay.
     *   Adding the object to the tick's map.
     */
+    THREAD_UNIQUE_LOCK_SET;
     if (iDelayInMsecs < 0)
     {
-        SetTimer(0);
+        _timeout = 0;
     }
     else
     {
-        SetTimer(CServerTime::GetCurrentTime().GetTimeRaw() + iDelayInMsecs);   // Setting the new Timeout value
-        g_World._Ticker.AddTimedObject(_timeout, this); // Adding this object to the tick's list.
+        _timeout = CServerTime::GetCurrentTime().GetTimeRaw() + iDelayInMsecs;   // Setting the new Timeout value
+        CWorldTickingList::AddObjSingle(_timeout, this); // Adding this object to the tick's list.
     }
 }
 
@@ -113,7 +106,7 @@ void CTimedObject::SetTimeoutD(int64 iTenths)
 int64 CTimedObject::GetTimerDiff() const
 {
     // How long till this will expire ?
-    return g_World.GetTimeDiff(_timeout);
+    return CServerTime::GetCurrentTime().GetTimeDiff(_timeout);
 }
 
 int64 CTimedObject::GetTimerAdjusted() const

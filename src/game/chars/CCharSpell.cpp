@@ -3,7 +3,9 @@
 #include "../components/CCPropsChar.h"
 #include "../components/CCPropsItemEquippable.h"
 #include "../clients/CClient.h"
+#include "../CSector.h"
 #include "../CWorld.h"
+#include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
@@ -272,7 +274,7 @@ bool CChar::Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic)
             }
         }
 
-        if ( g_World.IsItemTypeNear(ptMe, IT_TELEPAD, 0, false) || g_World.IsItemTypeNear(ptDest, IT_TELEPAD, 0, false) )
+        if ( CWorldMap::IsItemTypeNear(ptMe, IT_TELEPAD, 0, false) || CWorldMap::IsItemTypeNear(ptDest, IT_TELEPAD, 0, false) )
         {
             SysMessageDefault(DEFMSG_SPELL_GATE_ALREADYTHERE);
             return false;
@@ -2014,7 +2016,7 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 				}
 
 				dword dwBlockFlags = 0;
-				g_World.GetHeightPoint2(ptg, dwBlockFlags, true);
+				CWorldMap::GetHeightPoint2(ptg, dwBlockFlags, true);
 				if ( dwBlockFlags & ( CAN_I_BLOCK | CAN_I_DOOR ) )
 				{
 					if (ix < 0)	// field cannot extend fully to the left
@@ -2486,7 +2488,7 @@ CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE i
 		{
 			const dword dwCan = pChar->GetCanFlags() & CAN_C_MOVEMASK;
 			dword dwBlockFlags = 0;
-			g_World.GetHeightPoint2(ptTarg, dwBlockFlags, true);
+			CWorldMap::GetHeightPoint2(ptTarg, dwBlockFlags, true);
 
 			if (dwBlockFlags & ~dwCan)
 			{

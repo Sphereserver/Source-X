@@ -6,10 +6,10 @@
 #include "items/CItemShip.h"
 #include "CSector.h"
 #include "CWorldClock.h"
-#include "CWorldTick.h"
+#include "CWorldTicker.h"
 
 
-CWorldTick::CWorldTick(CWorldClock *pClock)
+CWorldTicker::CWorldTicker(CWorldClock *pClock)
 {
     ASSERT(pClock);
     _pWorldClock = pClock;
@@ -18,7 +18,7 @@ CWorldTick::CWorldTick(CWorldClock *pClock)
 }
 
 
-void CWorldTick::_InsertTimedObject(int64 iTimeout, CTimedObject* pTimedObject)
+void CWorldTicker::_InsertTimedObject(int64 iTimeout, CTimedObject* pTimedObject)
 {
     _mWorldTickList.THREAD_CMUTEX.lock();
     TimedObjectsContainer& timedObjCont = _mWorldTickList[iTimeout];
@@ -29,7 +29,7 @@ void CWorldTick::_InsertTimedObject(int64 iTimeout, CTimedObject* pTimedObject)
     timedObjCont.THREAD_CMUTEX.unlock();
 }
 
-void CWorldTick::_RemoveTimedObject(const int64 iOldTimeout, const CTimedObject* pTimedObject)
+void CWorldTicker::_RemoveTimedObject(const int64 iOldTimeout, const CTimedObject* pTimedObject)
 {
     _mWorldTickList.THREAD_CMUTEX.lock();
     auto itList = _mWorldTickList.find(iOldTimeout);
@@ -70,10 +70,10 @@ void CWorldTick::_RemoveTimedObject(const int64 iOldTimeout, const CTimedObject*
     cont.THREAD_CMUTEX.unlock();
 }
 
-void CWorldTick::AddTimedObject(int64 iTimeout, CTimedObject* pTimedObject)
+void CWorldTicker::AddTimedObject(int64 iTimeout, CTimedObject* pTimedObject)
 {
     ADDTOCALLSTACK("CWorld::AddTimedObject");
-    //if (iTimeout < g_World.GetCurrentTime().GetTimeRaw())    // We do that to get them tick as sooner as possible
+    //if (iTimeout < CServerTime::GetCurrentTime().GetTimeRaw())    // We do that to get them tick as sooner as possible
     //    return;
 
     EXC_TRY("AddTimedObject");
@@ -103,7 +103,7 @@ void CWorldTick::AddTimedObject(int64 iTimeout, CTimedObject* pTimedObject)
     EXC_CATCH;
 }
 
-void CWorldTick::DelTimedObject(CTimedObject* pTimedObject)
+void CWorldTicker::DelTimedObject(CTimedObject* pTimedObject)
 {
     ADDTOCALLSTACK("CWorld::DelTimedObject");
     EXC_TRY("AddTimedObject");
@@ -126,7 +126,7 @@ void CWorldTick::DelTimedObject(CTimedObject* pTimedObject)
     EXC_CATCH;
 }
 
-void CWorldTick::_InsertCharTicking(int64 iTickNext, CChar* pChar)
+void CWorldTicker::_InsertCharTicking(int64 iTickNext, CChar* pChar)
 {
     std::shared_lock<std::shared_mutex> shared_lock(_mWorldTickList.THREAD_CMUTEX);
     TimedCharsContainer& timedObjCont = _mCharTickList[iTickNext];
@@ -135,7 +135,7 @@ void CWorldTick::_InsertCharTicking(int64 iTickNext, CChar* pChar)
     timedObjCont.emplace_back(pChar);
 }
 
-void CWorldTick::_RemoveCharTicking(const int64 iOldTimeout, const CChar* pChar)
+void CWorldTicker::_RemoveCharTicking(const int64 iOldTimeout, const CChar* pChar)
 {
     _mCharTickList.THREAD_CMUTEX.lock();
     auto itList = _mCharTickList.find(iOldTimeout);
@@ -176,7 +176,7 @@ void CWorldTick::_RemoveCharTicking(const int64 iOldTimeout, const CChar* pChar)
     cont.THREAD_CMUTEX.unlock();
 }
 
-void CWorldTick::AddCharTicking(CChar* pChar, bool fIgnoreSleep, bool fOverwrite)
+void CWorldTicker::AddCharTicking(CChar* pChar, bool fIgnoreSleep, bool fOverwrite)
 {
     ADDTOCALLSTACK("CWorld::AddCharTicking");
     EXC_TRY("AddCharTicking");
@@ -191,7 +191,7 @@ void CWorldTick::AddCharTicking(CChar* pChar, bool fIgnoreSleep, bool fOverwrite
     std::unique_lock<std::shared_mutex> lookupLock(_mCharTickLookup.THREAD_CMUTEX);
 
     const int64 iTickNext = pChar->_timeNextRegen;
-    //if (iTickNext < g_World.GetCurrentTime().GetTimeRaw())    // We do that to get them tick as sooner as possible
+    //if (iTickNext < CServerTime::GetCurrentTime().GetTimeRaw())    // We do that to get them tick as sooner as possible
     //    return;
 
     bool fDoNotInsert = false;
@@ -226,7 +226,7 @@ void CWorldTick::AddCharTicking(CChar* pChar, bool fIgnoreSleep, bool fOverwrite
     EXC_CATCH;
 }
 
-void CWorldTick::DelCharTicking(CChar* pChar)
+void CWorldTicker::DelCharTicking(CChar* pChar)
 {
     ADDTOCALLSTACK("CWorld::DelCharTicking");
     EXC_TRY("DelCharTicking");
@@ -250,7 +250,7 @@ void CWorldTick::DelCharTicking(CChar* pChar)
 }
 
 
-void CWorldTick::Tick()
+void CWorldTicker::Tick()
 {
     EXC_TRY("CWorld::OnTick");
     EXC_SET_BLOCK("Once per tick stuff");
@@ -268,19 +268,19 @@ void CWorldTick::Tick()
         * TODO: implement a new class inheriting from CTimedObject to get rid of this code.
         */
         {
-            std::shared_lock<std::shared_mutex> lock_su(m_ObjStatusUpdates.THREAD_CMUTEX);
-            if (!m_ObjStatusUpdates.empty())
+            std::unique_lock<std::shared_mutex> lock_su(_ObjStatusUpdates.THREAD_CMUTEX);
+            if (!_ObjStatusUpdates.empty())
             {
                 EXC_TRYSUB("Tick::StatusUpdates");
 
                 // loop backwards to avoid possible infinite loop if a status update is triggered
                 // as part of the status update (e.g. property changed under tooltip trigger)
-                for (CObjBase* pObj : m_ObjStatusUpdates)
+                for (CObjBase* pObj : _ObjStatusUpdates)
                 {
                     if (pObj != nullptr)
                         pObj->OnTickStatusUpdate();
                 }
-                m_ObjStatusUpdates.clear();
+                _ObjStatusUpdates.clear();
 
                 EXC_CATCHSUB("StatusUpdates");
             }
@@ -288,7 +288,7 @@ void CWorldTick::Tick()
 
         // TimerF
         EXC_TRYSUB("Tick::TimerF");
-        m_TimedFunctions.OnTick();
+        _TimedFunctions.OnTick();
         EXC_CATCHSUB("CTimedFunction");
     }
 
@@ -483,7 +483,7 @@ void CWorldTick::Tick()
         {
             if (pChar->OnTickPeriodic())
             {
-                AddCharTicking(pChar);
+                AddCharTicking(pChar, false, false);
             }
             else
             {

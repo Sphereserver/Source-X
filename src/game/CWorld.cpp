@@ -13,13 +13,14 @@
 #include "CObjBase.h"
 #include "CServer.h"
 #include "CScriptProfiler.h"
+#include "CSector.h"
+#include "CWorldMap.h"
 #include "CWorld.h"
 
 #ifndef _WIN32
     #include <sys/statvfs.h>
 #endif
 #include <sys/stat.h>
-#include <algorithm>    // for std::vector.erase(std::remove())
 
 
 static const SOUND_TYPE sm_Sounds_Ghost[] =
@@ -942,7 +943,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 	else if ( m_iSaveStage == (int)(m_SectorsQty) )
 	{
 		m_FileData.WriteSection( "TIMERF" );
-		_Ticker.m_TimedFunctions.r_Write(m_FileData);
+		_Ticker._TimedFunctions.r_Write(m_FileData);
 
 		m_FileData.WriteSection("GLOBALS");
 		g_Exp.m_VarGlobals.r_WritePrefix(m_FileData, nullptr);
@@ -952,7 +953,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		size_t iQty = g_Cfg.m_RegionDefs.size();
 		for ( size_t i = 0; i < iQty; ++i )
 		{
-			CRegion *pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs.at(i));
+			CRegion *pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs[i]);
 			if ( !pRegion || !pRegion->HasResourceName() || !pRegion->m_iModified )
 				continue;
 
@@ -1330,7 +1331,7 @@ void CWorld::SaveStatics()
 			for ( int d = 0; d < g_MapList.GetSectorQty(m); ++d )
 			{
 				CItem	*pNext, *pItem;
-				CSector	*pSector = GetSector(m, d);
+				CSector	*pSector = CWorldMap::GetSector(m, d);
 
 				if ( !pSector )
                     continue;
@@ -1477,11 +1478,11 @@ bool CWorld::LoadWorld() // Load world from script
 
 		// Reset everything that has been loaded
         {
-            std::shared_lock<std::shared_mutex> lock_su(_Ticker.m_ObjStatusUpdates.THREAD_CMUTEX);
-			_Ticker.m_ObjStatusUpdates.clear();
+            std::unique_lock<std::shared_mutex> lock_su(_Ticker._ObjStatusUpdates.THREAD_CMUTEX);
+			_Ticker._ObjStatusUpdates.clear();
         }
         m_Stones.clear();
-		_Ticker.m_TimedFunctions.Clear();
+		_Ticker._TimedFunctions.Clear();
 		m_Parties.Clear();
 		m_GMPages.Clear();
 
@@ -1781,7 +1782,7 @@ void CWorld::RespawnDeadNPCs()
 
 		for ( int s = 0; s < g_MapList.GetSectorQty(m); ++s )
 		{
-			CSector	*pSector = GetSector(m, s);
+			CSector	*pSector = CWorldMap::GetSector(m, s);
 
 			if ( pSector )
 				pSector->RespawnDeadNPCs();
@@ -1818,7 +1819,7 @@ void CWorld::Restock()
 
 		for ( int s = 0; s < g_MapList.GetSectorQty(m); ++s )
 		{
-			CSector	*pSector = GetSector(m, s);
+			CSector	*pSector = CWorldMap::GetSector(m, s);
 			if ( pSector != nullptr )
 				pSector->Restock();
 		}
@@ -1837,8 +1838,8 @@ void CWorld::Close()
 	m_Stones.clear();
 
     {
-        std::shared_lock<std::shared_mutex> lock_su(_Ticker.m_ObjStatusUpdates.THREAD_CMUTEX);
-		_Ticker.m_ObjStatusUpdates.clear();
+        std::unique_lock<std::shared_mutex> lock_su(_Ticker._ObjStatusUpdates.THREAD_CMUTEX);
+		_Ticker._ObjStatusUpdates.clear();
     }
 
 	m_Parties.Clear();
@@ -2244,37 +2245,4 @@ void CWorld::OnTick()
 	}
 
     EXC_CATCH;
-}
-
-CSector *CWorld::GetSector(int map, int i) const	// gets sector # from one map
-{
-	//ADDTOCALLSTACK_INTENSIVE("CWorld::GetSector");
-
-	// if the map is not supported, return empty sector
-	if (( map < 0 ) || ( map >= MAP_SUPPORTED_QTY ) || !g_MapList.m_maps[map] )
-		return nullptr;
-
-    const int iMapSectorQty = g_MapList.GetSectorQty(map);
-	if ( i >= iMapSectorQty)
-	{
-		g_Log.EventError("Unsupported sector #%d for map #%d specified.\n", i, map);
-		return nullptr;
-	}
-
-	for ( int base = 0, m = 0; m < MAP_SUPPORTED_QTY; ++m )
-	{
-		if ( !g_MapList.IsMapSupported(m) )
-			continue;
-
-		if ( m == map )
-		{
-			if (iMapSectorQty < i )
-				return nullptr;
-
-			return m_Sectors[base + i];
-		}
-
-		base += g_MapList.GetSectorQty(m);
-	}
-	return nullptr;
 }

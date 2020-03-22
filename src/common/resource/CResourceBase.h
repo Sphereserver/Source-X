@@ -11,6 +11,7 @@
 #include "CResourceDef.h"
 #include "CResourceHash.h"
 #include "CResourceLink.h"
+#include "CResourceScript.h"
 #include "CResourceQty.h"
 
 

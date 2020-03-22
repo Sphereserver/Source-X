@@ -1,5 +1,5 @@
 #include "../resource/CResourceLock.h"
-#include "../CWorld.h"
+#include "../CSector.h"
 #include "CItemVendable.h"
 #include "CItemCommCrystal.h"
 

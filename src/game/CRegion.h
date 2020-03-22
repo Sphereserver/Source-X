@@ -8,6 +8,7 @@
 
 #include "../common/resource/CResourceBase.h"
 #include "../common/resource/CResourceRef.h"
+#include "../common/CVarDefMap.h"
 #include "CRegionBase.h"
 
 class CItemMulti;

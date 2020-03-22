@@ -13,10 +13,15 @@
 #include "components/CCPropsItemWeapon.h"
 #include "components/CCSpawn.h"
 #include "components/CCItemDamageable.h"
-#include "CObjBase.h"
+#include "CTimedFunctions.h"
+#include "CSector.h"
+#include "CServer.h"
 #include "CWorld.h"
+#include "CWorldMap.h"
+#include "CWorldTickingList.h"
 #include "spheresvr.h"
 #include "triggers.h"
+#include "CObjBase.h"
 
 bool CObjBaseTemplate::IsDeleted() const
 {
@@ -124,12 +129,8 @@ CObjBase::~CObjBase()
         }
     }
 
-    {
-        std::shared_lock<std::shared_mutex> lock_su(g_World._Ticker.m_ObjStatusUpdates.THREAD_CMUTEX);
-        g_World._Ticker.m_ObjStatusUpdates.erase(this);
-    }
-
-    g_World._Ticker.m_TimedFunctions.Erase( GetUID() );
+	CWorldTickingList::DelObjStatusUpdate(this);
+    CTimedFunctions::Erase( GetUID() );
 
 	FreePropertyList();
 
@@ -1206,7 +1207,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 
 					if ( fP )
 					{
-						CPointMap pt = ( index == OC_ISNEARTYPETOP ) ? ( g_World.FindTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( g_World.FindItemTypeNearby(GetTopPoint(), (IT_TYPE)iType, iDistance, fCheckMulti ) );
+						CPointMap pt = ( index == OC_ISNEARTYPETOP ) ? ( CWorldMap::FindTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( CWorldMap::FindItemTypeNearby(GetTopPoint(), (IT_TYPE)iType, iDistance, fCheckMulti ) );
 
 						if ( !pt.IsValidPoint() )
 							sVal.FormatVal( 0 );
@@ -1214,7 +1215,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 							sVal = pt.WriteUsed();
 					}
 					else
-						sVal.FormatVal( ( index == OC_ISNEARTYPETOP ) ? ( g_World.IsTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( g_World.IsItemTypeNear(GetTopPoint(), (IT_TYPE)iType, iDistance, fCheckMulti ) ) );
+						sVal.FormatVal( ( index == OC_ISNEARTYPETOP ) ? ( CWorldMap::IsTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( CWorldMap::IsItemTypeNear(GetTopPoint(), (IT_TYPE)iType, iDistance, fCheckMulti ) ) );
 				}
 			}
 			break;
@@ -1304,8 +1305,8 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 				if ( ptcKey[8] != '.' )
 					return false;
 				ptcKey += 9;
-				//sVal.FormatVal( (g_World.m_TimedFunctions.IsTimer(GetUID(),ptcKey)) ? 1 : 0 );
-				sVal.FormatVal( g_World._Ticker.m_TimedFunctions.IsTimer(GetUID(),ptcKey) );
+				//sVal.FormatVal( (g_World._TimedFunctions.IsTimer(GetUID(),ptcKey)) ? 1 : 0 );
+				sVal.FormatVal( CTimedFunctions::IsTimer(GetUID(),ptcKey) );
                 break;
 			}
 			break;
@@ -2397,11 +2398,11 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				EXC_SET_BLOCK("TIMERF");
 				if ( !strnicmp( s.GetArgStr(), "CLEAR", 5 ) )
 				{
-					g_World._Ticker.m_TimedFunctions.Erase(GetUID());
+					CTimedFunctions::Erase(GetUID());
 				}
 				else if ( !strnicmp( s.GetArgStr(), "STOP", 4 ) )
 				{
-					g_World._Ticker.m_TimedFunctions.Stop(GetUID(),s.GetArgStr()+5);
+					CTimedFunctions::Stop(GetUID(),s.GetArgStr()+5);
 				}
 				else
 				{
@@ -2422,7 +2423,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 						}
 						else
 						{
-							g_World._Ticker.m_TimedFunctions.Add(GetUID(), el, p);
+							CTimedFunctions::Add(GetUID(), el, p);
 						}
 					}
 				}
@@ -2815,8 +2816,7 @@ void CObjBase::UpdatePropertyFlag()
     // Items equipped, inside containers or with timer expired doesn't receive ticks and need to be added to a list of items to be processed separately
     if (!IsTopLevel() || IsTimerExpired())
     {
-        std::shared_lock<std::shared_mutex> lock_su(g_World._Ticker.m_ObjStatusUpdates.THREAD_CMUTEX);
-        g_World._Ticker.m_ObjStatusUpdates.emplace(this);
+		CWorldTickingList::AddObjStatusUpdate(this);
     }
 }
 
@@ -3201,13 +3201,8 @@ void CObjBase::Delete(bool fForce)
 	DeletePrepare();
     CEntity::Delete(fForce);
     CTimedObject::Delete();
-
-    {
-        std::shared_lock<std::shared_mutex> lock_su(g_World._Ticker.m_ObjStatusUpdates.THREAD_CMUTEX);
-        g_World._Ticker.m_ObjStatusUpdates.erase(this);
-    }
-
-    g_World._Ticker.m_TimedFunctions.Erase( GetUID() );
+	CWorldTickingList::DelObjStatusUpdate(this);
+    CTimedFunctions::Erase( GetUID() );
     g_World.m_ObjDelete.InsertHead(this);
 }
 

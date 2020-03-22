@@ -5,7 +5,7 @@
 #include "../../common/CException.h"
 #include "../../network/receive.h"
 #include "../clients/CClient.h"
-#include "../CWorld.h"
+#include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CCharNPC.h"
 
@@ -123,7 +123,7 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 		if ( !pClientSrc->addShopMenuBuy(this) )
 			Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_NO_GOODS));
 		else
-			pClientSrc->m_TagDefs.SetNum("BUYSELLTIME", g_World.GetCurrentTime().GetTimeRaw());
+			pClientSrc->m_TagDefs.SetNum("BUYSELLTIME", CServerTime::GetCurrentTime().GetTimeRaw());
 		break;
 	}
 	case NV_BYE:
@@ -177,7 +177,7 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 		if ( ! pClientSrc->addShopMenuSell( this ))
 			Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_NOTHING_BUY));
 		else
-			pClientSrc->m_TagDefs.SetNum("BUYSELLTIME", g_World.GetCurrentTime().GetTimeRaw());
+			pClientSrc->m_TagDefs.SetNum("BUYSELLTIME", CServerTime::GetCurrentTime().GetTimeRaw());
 		break;
 	}
 	case NV_SHRINK:
@@ -1811,7 +1811,7 @@ bool CChar::NPC_Act_Food()
 
 		if ( pCharDef->m_FoodType.ContainsResourceID(rid) ) // do I accept grass as food?
 		{
-			CItem *pResBit = g_World.CheckNaturalResource(GetTopPoint(), IT_GRASS, true, this);
+			CItem *pResBit = CWorldMap::CheckNaturalResource(GetTopPoint(), IT_GRASS, true, this);
 			if ( pResBit && pResBit->GetAmount() && ( pResBit->GetTopPoint().m_z == iMyZ ) )
 			{
 				ushort uiEaten = pResBit->ConsumeAmount(10);
@@ -1827,7 +1827,7 @@ bool CChar::NPC_Act_Food()
 			}
 			else									//	search for grass nearby
 			{
-				CPointMap pt = g_World.FindTypeNear_Top(GetTopPoint(), IT_GRASS, minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
+				CPointMap pt = CWorldMap::FindTypeNear_Top(GetTopPoint(), IT_GRASS, minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
 				if (( pt.m_x >= 1 ) && ( pt.m_y >= 1 ))
 				{
 					if (( pt.m_x != GetTopPoint().m_x ) && ( pt.m_y != GetTopPoint().m_y ) && ( pt.m_map == GetTopPoint().m_map ))
@@ -1888,7 +1888,7 @@ void CChar::NPC_Act_Idle()
 		switch ( GetDispID())
 		{
 			case CREID_FIRE_ELEM:
-				if ( !g_World.IsItemTypeNear(GetTopPoint(), IT_FIRE, 0, false) )
+				if ( !CWorldMap::IsItemTypeNear(GetTopPoint(), IT_FIRE, 0, false) )
 				{
 					Action_StartSpecial(CREID_FIRE_ELEM);
 					return;
@@ -2479,7 +2479,7 @@ void CChar::NPC_Food()
 		EXC_SET_BLOCK("searching grass");
 		if ( pCharDef->m_FoodType.ContainsResourceID(rid) ) // do I accept grass as a food?
 		{
-			CItem *pResBit = g_World.CheckNaturalResource(GetTopPoint(), IT_GRASS, true, this);
+			CItem *pResBit = CWorldMap::CheckNaturalResource(GetTopPoint(), IT_GRASS, true, this);
 			if ( pResBit && pResBit->GetAmount() && ( pResBit->GetTopPoint().m_z == iMyZ ) )
 			{
 				EXC_SET_BLOCK("eating grass");
@@ -2504,11 +2504,11 @@ void CChar::NPC_Food()
 					case NPCACT_FLEE:
 						{
 							EXC_SET_BLOCK("searching grass nearby");
-							CPointMap pt = g_World.FindTypeNear_Top(GetTopPoint(), IT_GRASS, minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
+							CPointMap pt = CWorldMap::FindTypeNear_Top(GetTopPoint(), IT_GRASS, minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
 							if (( pt.m_x >= 1 ) && ( pt.m_y >= 1 ))
 							{
 								// we found grass nearby, but has it already been consumed?
-								pResBit = g_World.CheckNaturalResource(pt, IT_GRASS, false, this);
+								pResBit = CWorldMap::CheckNaturalResource(pt, IT_GRASS, false, this);
 								if ( pResBit != nullptr && pResBit->GetAmount() && CanMoveWalkTo(pt) )
 								{
 									EXC_SET_BLOCK("walking to grass");

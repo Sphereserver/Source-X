@@ -10,6 +10,7 @@
 class CWorldCache
 {
 	friend class CWorld;
+	friend class CWorldMap;
 
 	int64	_iTimeLastMapBlockCacheCheck;
 	

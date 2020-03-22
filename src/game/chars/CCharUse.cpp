@@ -6,6 +6,7 @@
 #include "../components/CCPropsChar.h"
 #include "../components/CCSpawn.h"
 #include "../CWorld.h"
+#include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
@@ -528,7 +529,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 
 	if ( m_pClient && (skill == SKILL_THROWING) )		// throwing weapons also have anim of the weapon returning after throw it
 	{
-		m_pClient->m_timeLastSkillThrowing = g_World.GetCurrentTime().GetTimeRaw();
+		m_pClient->m_timeLastSkillThrowing = CServerTime::GetCurrentTime().GetTimeRaw();
 		m_pClient->m_pSkillThrowingTarg = pButte;
 		m_pClient->m_SkillThrowingAnimID = AnimID;
 		m_pClient->m_SkillThrowingAnimHue = AnimHue;
@@ -723,7 +724,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 		return false;
 	}
 
-	m_Act_p = g_World.FindItemTypeNearby(GetTopPoint(), IT_ANVIL, 2, false);
+	m_Act_p = CWorldMap::FindItemTypeNearby(GetTopPoint(), IT_ANVIL, 2, false);
 	if ( !m_Act_p.IsValidPoint() )
 	{
 		SysMessageDefault(DEFMSG_REPAIR_ANVIL);
@@ -1288,7 +1289,7 @@ bool CChar::Use_Seed( CItem * pSeed, CPointMap * pPoint )
 	}
 
 	// is there soil here ? IT_DIRT
-	if ( !IsPriv(PRIV_GM) && !g_World.IsItemTypeNear(pt, IT_DIRT, 0, false) )
+	if ( !IsPriv(PRIV_GM) && !CWorldMap::IsItemTypeNear(pt, IT_DIRT, 0, false) )
 	{
 		SysMessageDefault(DEFMSG_MSG_SEED_TARGSOIL);
 		return false;

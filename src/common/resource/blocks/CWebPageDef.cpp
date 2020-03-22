@@ -290,12 +290,12 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 	{
 		if ( m_iUpdatePeriod <= 0 )
 			return false;
-		if (g_World.GetCurrentTime().GetTimeRaw() < m_timeNextUpdate )
+		if (CServerTime::GetCurrentTime().GetTimeRaw() < m_timeNextUpdate )
 			return true;	// should still be valid
 	}
 
 	ASSERT(pSrc);
-	m_timeNextUpdate = g_World.GetCurrentTime().GetTimeRaw() + (m_iUpdatePeriod * MSECS_PER_SEC);
+	m_timeNextUpdate = CServerTime::GetCurrentTime().GetTimeRaw() + (m_iUpdatePeriod * MSECS_PER_SEC);
 	if ( pszDstName == nullptr )
 		pszDstName = m_sDstFilePath;
 

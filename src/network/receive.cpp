@@ -9,7 +9,8 @@
 #include "../game/items/CItemMultiCustom.h"
 #include "../game/items/CItemShip.h"
 #include "../game/items/CItemVendable.h"
-#include "../game/CWorld.h"
+#include "../game/CServer.h"
+#include "../game/CWorldMap.h"
 #include "../game/triggers.h"
 #include "CClientIterator.h"
 #include "CNetState.h"
@@ -741,7 +742,7 @@ bool PacketVendorBuyReq::onReceive(CNetState* net)
 	if (vardef != nullptr)
 	{
 		const int64 allowsell = vardef->GetValNum() + (itemCount * 3LL);
-		if (g_World.GetCurrentTime().GetTimeRaw() < allowsell)
+		if (CServerTime::GetCurrentTime().GetTimeRaw() < allowsell)
 		{
 			client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_BUYFAST));
 			return true;
@@ -1220,7 +1221,7 @@ bool PacketBulletinBoardReq::onReceive(CNetState* net)
 
 			newMessage->SetAttr(ATTR_MOVE_NEVER);
 			newMessage->SetName(str);
-			newMessage->SetTimeStamp(g_World.GetCurrentTime().GetTimeRaw());
+			newMessage->SetTimeStamp(CServerTime::GetCurrentTime().GetTimeRaw());
 			newMessage->m_sAuthor = character->GetName();
 			newMessage->m_uidLink = character->GetUID();
 
@@ -1879,7 +1880,7 @@ bool PacketVendorSellReq::onReceive(CNetState* net)
 	if (vardef != nullptr)
 	{
 		int64 allowsell = vardef->GetValNum() + ((itemCount * 3LL) * MSECS_PER_TENTH);
-		if (g_World.GetCurrentTime() < allowsell)
+		if (CServerTime::GetCurrentTime() < allowsell)
 		{
 			client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_SELLFAST));
 			return true;
@@ -3260,7 +3261,7 @@ bool PacketGargoyleFly::onReceive(CNetState* net)
 		client->addBuff(BI_GARGOYLEFLY, 1112193, 1112567);
 
 		// float player up to the hover Z
-		CPointMap ptHover = g_World.FindItemTypeNearby(character->GetTopPoint(), IT_HOVEROVER, 0);
+		CPointMap ptHover = CWorldMap::FindItemTypeNearby(character->GetTopPoint(), IT_HOVEROVER, 0);
 		if ( ptHover.IsValidPoint() )
 			character->MoveTo(ptHover);
 	}

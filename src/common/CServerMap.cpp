@@ -37,12 +37,12 @@ bool CCachedMulItem::IsTimeValid() const
 void CCachedMulItem::HitCacheTime()
 {
 	// When was this last referenced.
-	m_timeRef = g_World.GetCurrentTime().GetTimeRaw();
+	m_timeRef = CServerTime::GetCurrentTime().GetTimeRaw();
 }
 
 int64 CCachedMulItem::GetCacheAge() const
 {
-	return (g_World.GetCurrentTime().GetTimeRaw() - m_timeRef );
+	return (CServerTime::GetCurrentTime().GetTimeRaw() - m_timeRef );
 }
 
 CServerMapBlockState::CServerMapBlockState( dword dwBlockFlags, char z, int iHeight, height_t zHeight ) :

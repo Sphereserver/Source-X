@@ -6,7 +6,8 @@
 #include "../items/CItemMulti.h"
 #include "../items/CItemShip.h"
 #include "../CObjBase.h"
-#include "../CWorld.h"
+#include "../CServer.h"
+#include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CCMultiMovable.h"
 
@@ -451,7 +452,7 @@ bool CCMultiMovable::CanMoveTo(const CPointMap & pt) const
 
     dword dwBlockFlags = CAN_I_WATER;
 
-    g_World.GetHeightPoint2(pt, dwBlockFlags, true);
+    CWorldMap::GetHeightPoint2(pt, dwBlockFlags, true);
     if (dwBlockFlags & CAN_I_WATER)
         return true;
 
@@ -1158,7 +1159,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
             pt.m_z = zold;
             pItemThis->SetTopZ(-UO_SIZE_Z);	// bottom of the world where i won't get in the way.
             dword dwBlockFlags = CAN_I_WATER;
-            char z = g_World.GetHeightPoint2(pt, dwBlockFlags);
+            char z = CWorldMap::GetHeightPoint2(pt, dwBlockFlags);
             pItemThis->SetTopZ(zold);	// restore z for now.
             pt.InitPoint();
             pt.m_z = z - zold;

@@ -1,3 +1,4 @@
+#include "../sphere/threads.h"
 #include "CScript.h"
 #include "CLog.h"
 #include "CException.h"

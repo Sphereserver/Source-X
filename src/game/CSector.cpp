@@ -1084,14 +1084,14 @@ bool CSector::CanSleep(bool fCheckAdjacents) const
     }
 
 	//default behaviour;
-	return ((g_World.GetCurrentTime().GetTimeRaw() - GetLastClientTime()) > g_Cfg._iSectorSleepDelay); // Sector Sleep timeout.
+	return ((CServerTime::GetCurrentTime().GetTimeRaw() - GetLastClientTime()) > g_Cfg._iSectorSleepDelay); // Sector Sleep timeout.
 }
 
 void CSector::SetSectorWakeStatus()
 {
 	ADDTOCALLSTACK("CSector::SetSectorWakeStatus");
 	// Ships may enter a sector before it's riders ! ships need working timers to move !
-	m_Chars_Active.m_timeLastClient = g_World.GetCurrentTime().GetTimeRaw();
+	m_Chars_Active.m_timeLastClient = CServerTime::GetCurrentTime().GetTimeRaw();
     if (IsSleeping())
     {
         GoAwake();

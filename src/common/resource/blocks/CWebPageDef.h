@@ -7,8 +7,10 @@
 #define _INC_CWEBPAGEDEF_H
 
 #include "../CResourceLink.h"
+#include "../CTextConsole.h"
 #include "../CValueDefs.h"
 
+class CSTime;
 class CClient;
 
 
