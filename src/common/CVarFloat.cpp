@@ -3,9 +3,7 @@
 #include <limits>
 #include "../game/CObjBase.h"
 #include "../game/CServerConfig.h"
-#include "../game/CWorld.h"
 #include "../sphere/threads.h"
-#include "resource/CResourceLock.h"
 #include "CExpression.h"
 #include "CScriptObj.h"
 #include "CLog.h"

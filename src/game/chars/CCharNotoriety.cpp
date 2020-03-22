@@ -1,7 +1,6 @@
 // Actions specific to an NPC.
 #include "../clients/CClient.h"
 #include "../triggers.h"
-#include "../CWorld.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 

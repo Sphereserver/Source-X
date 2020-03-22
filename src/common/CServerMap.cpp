@@ -12,7 +12,7 @@
 #include "../common/CLog.h"
 #include "../game/CObjBase.h"
 #include "../game/CServerConfig.h"
-#include "../game/CWorld.h"
+#include "../game/CWorldGameTime.h"
 #include "../sphere/threads.h"
 
 
@@ -37,12 +37,12 @@ bool CCachedMulItem::IsTimeValid() const
 void CCachedMulItem::HitCacheTime()
 {
 	// When was this last referenced.
-	m_timeRef = CServerTime::GetCurrentTime().GetTimeRaw();
+	m_timeRef = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 }
 
 int64 CCachedMulItem::GetCacheAge() const
 {
-	return (CServerTime::GetCurrentTime().GetTimeRaw() - m_timeRef );
+	return (CWorldGameTime::GetCurrentTime().GetTimeRaw() - m_timeRef );
 }
 
 CServerMapBlockState::CServerMapBlockState( dword dwBlockFlags, char z, int iHeight, height_t zHeight ) :

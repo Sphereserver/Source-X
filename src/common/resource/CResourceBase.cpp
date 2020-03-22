@@ -2,7 +2,6 @@
 #include "../../game/chars/CChar.h"
 #include "../../game/items/CItem.h"
 #include "../../game/triggers.h"
-#include "../../game/CWorld.h"
 #include "../../game/game_enums.h"
 #include "../../game/game_macros.h"
 #include "../sphere_library/CSFileList.h"

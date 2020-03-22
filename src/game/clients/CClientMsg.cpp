@@ -12,6 +12,7 @@
 #include "../components/CCSpawn.h"
 #include "../CSector.h"
 #include "../CWorld.h"
+#include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "../CWorldTickingList.h"
 #include "../spheresvr.h"
@@ -251,7 +252,7 @@ void CClient::addTime( bool fCurrent ) const
 
 	if ( fCurrent )
 	{
-		llong lCurrentTime = CServerTime::GetCurrentTime().GetTimeRaw();
+		const llong lCurrentTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 		new PacketGameTime(this,
 								( lCurrentTime / ( 60*60*MSECS_PER_SEC)) % 24,
 								( lCurrentTime / ( 60*MSECS_PER_SEC)) % 60,
@@ -1631,7 +1632,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 
 	// determine timeout time
     if (iTimeout > 0)
-        m_Targ_Timeout = CServerTime::GetCurrentTime().GetTimeRaw() + iTimeout;
+        m_Targ_Timeout = CWorldGameTime::GetCurrentTime().GetTimeRaw() + iTimeout;
     else
         m_Targ_Timeout = 0;
 
@@ -2755,7 +2756,7 @@ byte CClient::Setup_Delete( dword iSlot ) // Deletion of character
 
 	// Make sure the char is at least x seconds old.
 	if ( g_Cfg.m_iMinCharDeleteTime &&
-		(- CServerTime::GetCurrentTime().GetTimeDiff(pChar->m_timeCreate)/MSECS_PER_TENTH) < g_Cfg.m_iMinCharDeleteTime )
+		(- CWorldGameTime::GetCurrentTime().GetTimeDiff(pChar->m_timeCreate)/MSECS_PER_TENTH) < g_Cfg.m_iMinCharDeleteTime )
 	{
 		if ( GetPrivLevel() < PLEVEL_Counsel )
 		{

@@ -5,7 +5,7 @@
 #include "../items/CItemCorpse.h"
 #include "../components/CCPropsChar.h"
 #include "../components/CCSpawn.h"
-#include "../CWorld.h"
+#include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CChar.h"
@@ -164,8 +164,8 @@ void CChar::Use_MoonGate( CItem * pItem )
 
 		// Set it's current destination based on the moon phases.
 		// ensure iTrammelPhrase isn't smaller than iFeluccaPhase, to avoid uint underflow in next calculation
-		size_t iTrammelPhase = g_World.GetMoonPhase(false) % iCount;
-		size_t iFeluccaPhase = g_World.GetMoonPhase(true) % iCount;
+		size_t iTrammelPhase = CWorldGameTime::GetMoonPhase(false) % iCount;
+		size_t iFeluccaPhase = CWorldGameTime::GetMoonPhase(true) % iCount;
 		if ( iTrammelPhase < iFeluccaPhase )
 			iTrammelPhase += iCount;
 
@@ -529,7 +529,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 
 	if ( m_pClient && (skill == SKILL_THROWING) )		// throwing weapons also have anim of the weapon returning after throw it
 	{
-		m_pClient->m_timeLastSkillThrowing = CServerTime::GetCurrentTime().GetTimeRaw();
+		m_pClient->m_timeLastSkillThrowing = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 		m_pClient->m_pSkillThrowingTarg = pButte;
 		m_pClient->m_SkillThrowingAnimID = AnimID;
 		m_pClient->m_SkillThrowingAnimHue = AnimHue;
@@ -1725,8 +1725,8 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 							g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SPYGLASS_M7),
 							g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SPYGLASS_M8)
 					};
-			SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SPYGLASS_TR), sm_sPhases[g_World.GetMoonPhase(false)]);
-			SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SPYGLASS_FE), sm_sPhases[g_World.GetMoonPhase(true)]);
+			SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SPYGLASS_TR), sm_sPhases[CWorldGameTime::GetMoonPhase(false)]);
+			SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SPYGLASS_FE), sm_sPhases[CWorldGameTime::GetMoonPhase(true)]);
 
 			if (m_pArea && m_pArea->IsFlag(REGION_FLAG_SHIP))
 				ObjMessage(pItem->Use_SpyGlass(this), this);

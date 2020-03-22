@@ -12,6 +12,7 @@
 #include "CObjBase.h"
 #include "CSector.h"
 #include "CWorld.h"
+#include "CWorldGameTime.h"
 #include "spheresvr.h"
 #include "triggers.h"
 
@@ -617,7 +618,7 @@ int CSector::GetLocalTime() const
 	ADDTOCALLSTACK("CSector::GetLocalTime");
 	//	Get local time of the day (in minutes)
 	CPointMap pt = GetBasePoint();
-	int64 iLocalTime = g_World.GetGameWorldTime();
+	int64 iLocalTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
 	if ( !g_Cfg.m_bAllowLightOverride )
 	{
@@ -728,41 +729,43 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 	{
 		// Factor in the effects of the moons
 		// Trammel
-		uint iTrammelPhase = g_World.GetMoonPhase( false );
+		uint iTrammelPhase = CWorldGameTime::GetMoonPhase( false );
 		// Check to see if Trammel is up here...
 
 		if ( IsMoonVisible( iTrammelPhase, localtime ))
 		{
-static const byte sm_TrammelPhaseBrightness[] =
-{
-	0, // New Moon
-	TRAMMEL_FULL_BRIGHTNESS / 4,	// Crescent Moon
-	TRAMMEL_FULL_BRIGHTNESS / 2, 	// Quarter Moon
-	( TRAMMEL_FULL_BRIGHTNESS * 3) / 4, // Gibbous Moon
-	TRAMMEL_FULL_BRIGHTNESS,		// Full Moon
-	( TRAMMEL_FULL_BRIGHTNESS * 3) / 4, // Gibbous Moon
-	TRAMMEL_FULL_BRIGHTNESS / 2, 	// Quarter Moon
-	TRAMMEL_FULL_BRIGHTNESS / 4		// Crescent Moon
-};
+			static const byte sm_TrammelPhaseBrightness[] =
+			{
+				0, // New Moon
+				TRAMMEL_FULL_BRIGHTNESS / 4,	// Crescent Moon
+				TRAMMEL_FULL_BRIGHTNESS / 2, 	// Quarter Moon
+				( TRAMMEL_FULL_BRIGHTNESS * 3) / 4, // Gibbous Moon
+				TRAMMEL_FULL_BRIGHTNESS,		// Full Moon
+				( TRAMMEL_FULL_BRIGHTNESS * 3) / 4, // Gibbous Moon
+				TRAMMEL_FULL_BRIGHTNESS / 2, 	// Quarter Moon
+				TRAMMEL_FULL_BRIGHTNESS / 4		// Crescent Moon
+			};
+
 			ASSERT( iTrammelPhase < CountOf(sm_TrammelPhaseBrightness));
 			iTargLight -= sm_TrammelPhaseBrightness[iTrammelPhase];
 		}
 
 		// Felucca
-		uint iFeluccaPhase = g_World.GetMoonPhase( true );
+		uint iFeluccaPhase = CWorldGameTime::GetMoonPhase( true );
 		if ( IsMoonVisible( iFeluccaPhase, localtime ))
 		{
-static const byte sm_FeluccaPhaseBrightness[] =
-{
-	0, // New Moon
-	FELUCCA_FULL_BRIGHTNESS / 4,	// Crescent Moon
-	FELUCCA_FULL_BRIGHTNESS / 2, 	// Quarter Moon
-	( FELUCCA_FULL_BRIGHTNESS * 3) / 4, // Gibbous Moon
-	FELUCCA_FULL_BRIGHTNESS,		// Full Moon
-	( FELUCCA_FULL_BRIGHTNESS * 3) / 4, // Gibbous Moon
-	FELUCCA_FULL_BRIGHTNESS / 2, 	// Quarter Moon
-	FELUCCA_FULL_BRIGHTNESS / 4		// Crescent Moon
-};
+			static const byte sm_FeluccaPhaseBrightness[] =
+			{
+				0, // New Moon
+				FELUCCA_FULL_BRIGHTNESS / 4,	// Crescent Moon
+				FELUCCA_FULL_BRIGHTNESS / 2, 	// Quarter Moon
+				( FELUCCA_FULL_BRIGHTNESS * 3) / 4, // Gibbous Moon
+				FELUCCA_FULL_BRIGHTNESS,		// Full Moon
+				( FELUCCA_FULL_BRIGHTNESS * 3) / 4, // Gibbous Moon
+				FELUCCA_FULL_BRIGHTNESS / 2, 	// Quarter Moon
+				FELUCCA_FULL_BRIGHTNESS / 4		// Crescent Moon
+			};
+
 			ASSERT( iFeluccaPhase < CountOf(sm_FeluccaPhaseBrightness));
 			iTargLight -= sm_FeluccaPhaseBrightness[iFeluccaPhase];
 		}
@@ -1084,14 +1087,14 @@ bool CSector::CanSleep(bool fCheckAdjacents) const
     }
 
 	//default behaviour;
-	return ((CServerTime::GetCurrentTime().GetTimeRaw() - GetLastClientTime()) > g_Cfg._iSectorSleepDelay); // Sector Sleep timeout.
+	return ((CWorldGameTime::GetCurrentTime().GetTimeRaw() - GetLastClientTime()) > g_Cfg._iSectorSleepDelay); // Sector Sleep timeout.
 }
 
 void CSector::SetSectorWakeStatus()
 {
 	ADDTOCALLSTACK("CSector::SetSectorWakeStatus");
 	// Ships may enter a sector before it's riders ! ships need working timers to move !
-	m_Chars_Active.m_timeLastClient = CServerTime::GetCurrentTime().GetTimeRaw();
+	m_Chars_Active.m_timeLastClient = CWorldGameTime::GetCurrentTime().GetTimeRaw();
     if (IsSleeping())
     {
         GoAwake();

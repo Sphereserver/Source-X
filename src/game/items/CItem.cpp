@@ -18,6 +18,7 @@
 #include "../CSector.h"
 #include "../CServer.h"
 #include "../CWorld.h"
+#include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CItem.h"
@@ -1293,9 +1294,9 @@ int64 CItem::GetDecayTime() const
             if (m_itCrop.m_Respawn_Sec > 0) // MORE1 override
                 return (m_itCrop.m_Respawn_Sec * MSECS_PER_SEC);
 
-            const int64 iTimeNextNewMoon = g_World.GetNextNewMoon((GetTopPoint().m_map == 1) ? false : true);
+            const int64 iTimeNextNewMoon = CWorldGameTime::GetNextNewMoon((GetTopPoint().m_map == 1) ? false : true);
             const int64 iMinutesDelay = Calc_GetRandLLVal(20) * g_Cfg.m_iGameMinuteLength;
-			return CServerTime::GetCurrentTime().GetTimeDiff(iTimeNextNewMoon) + iMinutesDelay;
+			return CWorldGameTime::GetCurrentTime().GetTimeDiff(iTimeNextNewMoon) + iMinutesDelay;
         }
 		case IT_MULTI:
 		case IT_SHIP:

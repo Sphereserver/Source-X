@@ -17,6 +17,7 @@
 #include "CSector.h"
 #include "CServer.h"
 #include "CWorld.h"
+#include "CWorldComm.h"
 #include "CWorldMap.h"
 #include "CWorldTickingList.h"
 #include "spheresvr.h"
@@ -554,7 +555,7 @@ void CObjBase::Emote2(lpctstr pText, lpctstr pText1, CClient * pClientExclude, b
 void CObjBase::Speak( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CObjBase::Speak");
-	g_World.Speak( this, pText, wHue, mode, font );
+	CWorldComm::Speak( this, pText, wHue, mode, font );
 }
 
 // Speak to all clients in the area.
@@ -565,7 +566,7 @@ void CObjBase::SpeakUTF8( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT
 	// convert UTF8 to UNICODE.
 	nchar szBuffer[ MAX_TALK_BUFFER ];
 	CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), pText, -1 );
-	g_World.SpeakUNICODE( this, szBuffer, wHue, mode, font, lang );
+	CWorldComm::SpeakUNICODE( this, szBuffer, wHue, mode, font, lang );
 }
 
 // Speak to all clients in the area.
@@ -574,7 +575,7 @@ void CObjBase::SpeakUTF8( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT
 void CObjBase::SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CObjBase::SpeakUTF8Ex");
-	g_World.SpeakUNICODE( this, pText, wHue, mode, font, lang );
+	CWorldComm::SpeakUNICODE( this, pText, wHue, mode, font, lang );
 }
 
 bool CObjBase::MoveNear(CPointMap pt, ushort iSteps )

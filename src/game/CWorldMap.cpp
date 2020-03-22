@@ -1710,3 +1710,184 @@ char CWorldMap::GetHeightPoint2( const CPointMap & pt, dword & dwBlockFlags, boo
 
 	return( block.m_Bottom.m_z );
 }
+
+
+//////////////////////////////////////////////////////////////////
+// -CWorldSearch
+
+CWorldSearch::CWorldSearch(const CPointMap& pt, int iDist) :
+	m_pt(pt), m_iDist(iDist)
+{
+	// define a search of the world.
+	m_fAllShow = false;
+	m_fSearchSquare = false;
+	m_pObj = m_pObjNext = nullptr;
+	m_fInertToggle = false;
+
+	m_pSectorBase = m_pSector = pt.GetSector();
+
+	m_rectSector.SetRect(
+		pt.m_x - iDist,
+		pt.m_y - iDist,
+		pt.m_x + iDist + 1,
+		pt.m_y + iDist + 1,
+		pt.m_map);
+
+	// Get upper left of search rect.
+	m_iSectorCur = 0;
+}
+
+bool CWorldSearch::GetNextSector()
+{
+	ADDTOCALLSTACK("CWorldSearch::GetNextSector");
+	// Move search into nearby CSector(s) if necessary
+
+	if (!m_iDist)
+		return false;
+
+	for (;;)
+	{
+		m_pSector = m_rectSector.GetSector(m_iSectorCur++);
+		if (m_pSector == nullptr)
+			return false;	// done searching.
+		if (m_pSectorBase == m_pSector)
+			continue;	// same as base.
+		m_pObj = nullptr;	// start at head of next Sector.
+		return true;
+	}
+}
+
+CItem* CWorldSearch::GetItem()
+{
+	ADDTOCALLSTACK_INTENSIVE("CWorldSearch::GetItem");
+	for (;;)
+	{
+		if (m_pObj == nullptr)
+		{
+			m_fInertToggle = false;
+			m_pObj = static_cast <CObjBase*> (m_pSector->m_Items_Inert.GetHead());
+		}
+		else
+		{
+			m_pObj = m_pObjNext;
+		}
+		if (m_pObj == nullptr)
+		{
+			if (!m_fInertToggle)
+			{
+				m_fInertToggle = true;
+				m_pObj = static_cast <CObjBase*> (m_pSector->m_Items_Timer.GetHead());
+				if (m_pObj != nullptr)
+					goto jumpover;
+			}
+			if (GetNextSector())
+				continue;
+			return nullptr;
+		}
+
+	jumpover:
+		m_pObjNext = m_pObj->GetNext();
+		if (m_fSearchSquare)
+		{
+			if (m_fAllShow)
+			{
+				if (m_pt.GetDistSightBase(m_pObj->GetTopPoint()) <= m_iDist)
+					return static_cast <CItem*> (m_pObj);
+			}
+			else
+			{
+				if (m_pt.GetDistSight(m_pObj->GetTopPoint()) <= m_iDist)
+					return static_cast <CItem*> (m_pObj);
+			}
+		}
+		else
+		{
+			if (m_fAllShow)
+			{
+				if (m_pt.GetDistBase(m_pObj->GetTopPoint()) <= m_iDist)
+					return static_cast <CItem*> (m_pObj);
+			}
+			else
+			{
+				if (m_pt.GetDist(m_pObj->GetTopPoint()) <= m_iDist)
+					return static_cast <CItem*> (m_pObj);
+			}
+		}
+	}
+}
+
+void CWorldSearch::SetAllShow(bool fView)
+{
+	ADDTOCALLSTACK("CWorldSearch::SetAllShow");
+	m_fAllShow = fView;
+}
+
+void CWorldSearch::SetSearchSquare(bool fSquareSearch)
+{
+	ADDTOCALLSTACK("CWorldSearch::SetSearchSquare");
+	m_fSearchSquare = fSquareSearch;
+}
+
+void CWorldSearch::RestartSearch()
+{
+	ADDTOCALLSTACK("CWorldSearch::RestartSearch");
+	m_pObj = nullptr;
+}
+
+CChar* CWorldSearch::GetChar()
+{
+	ADDTOCALLSTACK("CWorldSearch::GetChar");
+	for (;;)
+	{
+		if (m_pObj == nullptr)
+		{
+			m_fInertToggle = false;
+			m_pObj = static_cast <CObjBase*> (m_pSector->m_Chars_Active.GetHead());
+		}
+		else
+			m_pObj = m_pObjNext;
+
+		if (m_pObj == nullptr)
+		{
+			if (!m_fInertToggle && m_fAllShow)
+			{
+				m_fInertToggle = true;
+				m_pObj = static_cast <CObjBase*> (m_pSector->m_Chars_Disconnect.GetHead());
+				if (m_pObj != nullptr)
+					goto jumpover;
+			}
+			if (GetNextSector())
+				continue;
+			return nullptr;
+		}
+
+	jumpover:
+		m_pObjNext = m_pObj->GetNext();
+		if (m_fSearchSquare)
+		{
+			if (m_fAllShow)
+			{
+				if (m_pt.GetDistSightBase(m_pObj->GetTopPoint()) <= m_iDist)
+					return static_cast <CChar*> (m_pObj);
+			}
+			else
+			{
+				if (m_pt.GetDistSight(m_pObj->GetTopPoint()) <= m_iDist)
+					return static_cast <CChar*> (m_pObj);
+			}
+		}
+		else
+		{
+			if (m_fAllShow)
+			{
+				if (m_pt.GetDistBase(m_pObj->GetTopPoint()) <= m_iDist)
+					return static_cast <CChar*> (m_pObj);
+			}
+			else
+			{
+				if (m_pt.GetDist(m_pObj->GetTopPoint()) <= m_iDist)
+					return static_cast <CChar*> (m_pObj);
+			}
+		}
+	}
+}

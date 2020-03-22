@@ -5,6 +5,7 @@
 #include "../../common/CScriptTriggerArgs.h"
 #include "../triggers.h"
 #include "../CServer.h"
+#include "../CWorldGameTime.h"
 #include "../CWorldTickingList.h"
 #include "CChar.h"
 
@@ -467,7 +468,7 @@ bool CChar::Stats_Regen()
 	// Food decay called here too.
 	// calling @RegenStat for each stat if proceed.
 	int iHitsHungerLoss = g_Cfg.m_iHitsHungerLoss ? g_Cfg.m_iHitsHungerLoss : 0;
-    const int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();
+    const int64 iCurTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 	for (STAT_TYPE i = STAT_STR; i <= STAT_FOOD; i = (STAT_TYPE)(i + 1))
 	{
         const int64 iRegenDelay = Stats_GetRegenRate(i); // Get chars regen[n] delay (if none, check's for sphere.ini's value)

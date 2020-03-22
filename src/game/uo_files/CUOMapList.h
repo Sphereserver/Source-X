@@ -16,7 +16,6 @@ extern class CUOMapList
     friend struct CUOInstall;
     friend class  CWorld;
     friend class  CWorldMap;
-    friend class  CServerMap;
     friend class  CServerMapBlock;
 
 protected:
@@ -41,10 +40,12 @@ public:
      */
     ///@{
     CUOMapList();
+
 private:
     CUOMapList(const CUOMapList& copy);
     CUOMapList& operator=(const CUOMapList& other);
     ///@}
+
 public:
     /** @name Modifiers:
      */
@@ -54,6 +55,7 @@ public:
     void Init();
     bool Load(int map, char *args);
     ///@}
+
     /** @name Operations:
      */
     ///@{

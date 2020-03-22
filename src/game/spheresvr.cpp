@@ -768,6 +768,8 @@ int _cdecl main( int argc, char * argv[] )
 #include "../../network/CNetworkOutput.h"
 #include "../../network/CNetworkThread.h"
 #include "items/CItemMultiCustom.h"
+#include "CWorldComm.h"
+#include "CWorldGameTime.h"
 #include "CWorldMap.h"
 #include "CWorldTickingList.h"
 

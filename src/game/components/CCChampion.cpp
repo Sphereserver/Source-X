@@ -16,6 +16,7 @@
 #include "../../common/CScript.h"
 #include "../chars/CChar.h"
 #include "../CServer.h"
+#include "../CWorldGameTime.h"
 #include "CCChampion.h"	// predef header.
 #include <string>
 #include <algorithm> 
@@ -102,7 +103,7 @@ void CCChampion::Start()
         Stop();
     }
     _fActive = true;
-    _iLastActivationTime = CServerTime::GetCurrentTime().GetTimeRaw();
+    _iLastActivationTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
     _iSpawnsNextRed = GetCandlesPerLevel();
     _iCandlesNextRed = CANDLESNEXTRED;
@@ -123,7 +124,7 @@ void CCChampion::Stop()
     _iCandlesNextRed = 0;
     _iCandlesNextLevel = 0;
     _fChampionSummoned = false;
-    GetLink()->SetTimeout(_iLastActivationTime - CServerTime::GetCurrentTime().GetTimeRaw());
+    GetLink()->SetTimeout(_iLastActivationTime - CWorldGameTime::GetCurrentTime().GetTimeRaw());
     ClearWhiteCandles();
     ClearRedCandles();
 }

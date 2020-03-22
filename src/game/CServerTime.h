@@ -1,6 +1,6 @@
 /**
 * @file CServerTime.h
-*
+* @brief A time stamp in the server/game world, starting from server's Creation (not from the Epoch).
 */
 
 #ifndef _INC_CSERVERTIME_H
@@ -8,11 +8,7 @@
 
 #include "../common/common.h"
 
-/*
-* A time stamp in the server/game world, starting from server's Creation (not from the Epoch).
-* The time is advanced in each server's tick, so all the code executed in this tick will use
-* the same time value, to adjust timers and so.
-*/
+
 struct CServerTime
 {
 	#define TICKS_PER_SEC   (int64)10      // Amount of ticks to advance in a second.
@@ -46,10 +42,6 @@ struct CServerTime
 	inline bool operator<=(CServerTime time) const;
 	inline bool operator>=(CServerTime time) const;
     inline int64 GetTimeDiff( const CServerTime & time ) const;
-	inline void SetCurrentTime();
-
-    #undef GetCurrentTime
-	static CServerTime GetCurrentTime();
 
     static lpctstr GetTimeMinDesc(int iMinutes);
 };
@@ -98,10 +90,6 @@ bool CServerTime::operator<=(CServerTime time) const
 bool CServerTime::operator>=(CServerTime time) const
 {
 	return (m_llPrivateTime >= time.m_llPrivateTime);
-}
-void CServerTime::SetCurrentTime()
-{
-	m_llPrivateTime = GetCurrentTime().m_llPrivateTime;
 }
 
 

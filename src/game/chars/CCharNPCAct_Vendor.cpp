@@ -2,7 +2,7 @@
 
 #include "../../network/receive.h"
 #include "../clients/CClient.h"
-#include "../CWorld.h"
+#include "../CWorldGameTime.h"
 #include "../CPathFinder.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
@@ -43,7 +43,7 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 	bool bRestockNow = false;
     int64 iRestockDelay = 10 * 60 * MSECS_PER_SEC;  // 10 Minutes delay
 
-	if ( !bForce && (CServerTime::GetCurrentTime().GetTimeDiff(m_pNPC->m_timeRestock) < 0))
+	if ( !bForce && (CWorldGameTime::GetCurrentTime().GetTimeDiff(m_pNPC->m_timeRestock) < 0))
 	{
         bRestockNow = true; // restock timeout has expired, make it restock again (unless it's declared to do not restock in the bellow lines).
 		CRegionWorld *region = GetRegion();
@@ -58,7 +58,7 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 		if ( m_TagDefs.GetKey("NoRestock") != nullptr )
 			bRestockNow = false;
 	}
-    int64 iNextRestock = CServerTime::GetCurrentTime().GetTimeRaw() + iRestockDelay;
+    int64 iNextRestock = CWorldGameTime::GetCurrentTime().GetTimeRaw() + iRestockDelay;
     
 	// At restock the containers are actually emptied
 	if ( bRestockNow )

@@ -1,4 +1,3 @@
-#include "CWorld.h"
 #include "CServerConfig.h"
 #include "CServerTime.h"
 
@@ -48,11 +47,6 @@ CServerTime CServerTime::operator-( int64 llTimeDiff ) const
 	return time;
 }
 
-
-CServerTime CServerTime::GetCurrentTime()	// static
-{
-    return g_World.GetCurrentTime();
-}
 
 lpctstr CServerTime::GetTimeMinDesc(int minutes) // static
 {

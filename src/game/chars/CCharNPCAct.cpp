@@ -5,6 +5,7 @@
 #include "../../common/CException.h"
 #include "../../network/receive.h"
 #include "../clients/CClient.h"
+#include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CCharNPC.h"
@@ -123,7 +124,7 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 		if ( !pClientSrc->addShopMenuBuy(this) )
 			Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_NO_GOODS));
 		else
-			pClientSrc->m_TagDefs.SetNum("BUYSELLTIME", CServerTime::GetCurrentTime().GetTimeRaw());
+			pClientSrc->m_TagDefs.SetNum("BUYSELLTIME", CWorldGameTime::GetCurrentTime().GetTimeRaw());
 		break;
 	}
 	case NV_BYE:
@@ -177,7 +178,7 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 		if ( ! pClientSrc->addShopMenuSell( this ))
 			Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_NOTHING_BUY));
 		else
-			pClientSrc->m_TagDefs.SetNum("BUYSELLTIME", CServerTime::GetCurrentTime().GetTimeRaw());
+			pClientSrc->m_TagDefs.SetNum("BUYSELLTIME", CWorldGameTime::GetCurrentTime().GetTimeRaw());
 		break;
 	}
 	case NV_SHRINK:

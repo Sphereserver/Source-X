@@ -43,6 +43,8 @@ ADD(CRegionWorld,			"CRegionWorld");
 ADD(CRegion,				"CRegion");
 ADD(CWorld,					"CWorld");
 ADD(CWorldCache,			"CWorldCache");
+ADD(CWorldComm,				"CWorldComm");
+ADD(CWorldGameTime,			"CWorldGameTime");
 ADD(CWorldMap,				"CWorldMap");
 ADD(CWorldTicker,			"CWorldTicker");
 ADD(CWorldTickingList,		"CWorldTickingList");
