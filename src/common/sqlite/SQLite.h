@@ -1,12 +1,14 @@
 /**
-* @file CSRand.h
+* @file SQLite.h
 * @brief Sphere wrapper for SQLite functions.
 */
 
 #ifndef _INC_SQLITE_H
 #define _INC_SQLITE_H
 
+#include "../sphere_library/CSString.h"
 #include "../CScriptObj.h"
+#include "../CVarDefMap.h"
 #include <vector>
 
 
@@ -18,6 +20,7 @@ typedef std::vector<tchar> stdvstring;
 typedef std::vector<stdvstring> vstrlist;
 typedef vstrlist row;
 
+
 //////////////////////////////////////////////////////////////////////////
 // Classes
 //////////////////////////////////////////////////////////////////////////
@@ -26,6 +29,7 @@ typedef vstrlist row;
 struct sqlite3;
 class Table; 
 class TablePtr;
+
 
 // Main wrapper
 class CSQLite : public CScriptObj

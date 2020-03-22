@@ -1,6 +1,6 @@
 #include "../common/crypto/CCrypto.h"
 #include "../game/clients/CClient.h"
-#include "../game/CWorld.h"
+#include "../game/CServer.h"
 #include "../sphere/threads.h"
 #include "packet.h"
 #include "send.h"
@@ -159,7 +159,7 @@ void CNetworkInput::processData()
             {
                 // check for timeout
                 EXC_SET_BLOCK("check frozen");
-                const int64 iLastEventDiff = -g_World.GetTimeDiff(client->m_timeLastEvent);
+                const int64 iLastEventDiff = -CServerTime::GetCurrentTime().GetTimeDiff(client->m_timeLastEvent);
                 if (g_Cfg.m_iDeadSocketTime > 0 && iLastEventDiff > g_Cfg.m_iDeadSocketTime)
                 {
                     g_Log.Event(LOGM_CLIENTS_LOG | LOGL_EVENT, "%x:Frozen client disconnected (DeadSocketTime reached).\n", state->id());
@@ -283,7 +283,7 @@ bool CNetworkInput::processData(CNetState* state, Packet* buffer)
     if (client->GetConnectType() == CONNECT_UNK)
         return processUnknownClientData(state, buffer);
 
-    client->m_timeLastEvent = g_World.GetCurrentTime().GetTimeRaw();
+    client->m_timeLastEvent = CServerTime::GetCurrentTime().GetTimeRaw();
 
     if (client->m_Crypt.IsInit() == false)
         return processOtherClientData(state, buffer);

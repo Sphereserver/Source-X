@@ -2,7 +2,7 @@
 #include "../../common/sphereproto.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
-#include "../CWorld.h"
+#include "../CWorldMap.h"
 #include "CItem.h"
 #include "CItemCorpse.h"
 
@@ -191,7 +191,7 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 	if (IsStatFlag(STATF_DEAD))
 	{
 		iDecayTimer = (m_pPlayer) ? g_Cfg.m_iDecay_CorpsePlayer : g_Cfg.m_iDecay_CorpseNPC;
-		pCorpse->SetTimeStamp(g_World.GetCurrentTime().GetTimeRaw());	// death time
+		pCorpse->SetTimeStamp(CServerTime::GetCurrentTime().GetTimeRaw());	// death time
 		if (Attacker_GetLast())
 			pCorpse->m_itCorpse.m_uidKiller = Attacker_GetLast()->GetUID();
 		else

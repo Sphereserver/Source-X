@@ -1,12 +1,11 @@
 /**
-* @file CWorldTick.h
+* @file CWorldTicker.h
 */
 
-#ifndef _INC_CWORLDTICK_H
-#define _INC_CWORLDTICK_H
+#ifndef _INC_CWORLDTICKER_H
+#define _INC_CWORLDTICKER_H
 
-#include "uo_files/CUOMapList.h"
-#include "CTimedFunction.h"
+#include "CTimedFunctionHandler.h"
 #include "CTimedObject.h"
 #include <map>
 #include <unordered_map>
@@ -17,12 +16,14 @@ class CObjBase;
 class CChar;
 class CWorldClock;
 
-class CWorldTick
+class CWorldTicker
 {
+    friend class CWorldTickingList;
+
 public:
     static const char* m_sClassName;
-    CWorldTick(CWorldClock* pClock);
-    ~CWorldTick() = default;
+    CWorldTicker(CWorldClock* pClock);
+    ~CWorldTicker() = default;
 
 private:
     struct TimedObjectsContainer : public std::vector<CTimedObject*>
@@ -65,15 +66,15 @@ private:
     int64        _iLastTickDone;
 
 public:
-    StatusUpdatesList m_ObjStatusUpdates;   // objects that need OnTickStatusUpdate called
-    CTimedFunctionHandler m_TimedFunctions; // TimedFunction Container/Wrapper
+    StatusUpdatesList _ObjStatusUpdates;   // objects that need OnTickStatusUpdate called
+    CTimedFunctionHandler _TimedFunctions; // TimedFunction Container/Wrapper
 
 public:
     void Tick();
 
     void AddTimedObject(int64 iTimeout, CTimedObject* pTimedObject);
     void DelTimedObject(CTimedObject* pTimedObject);
-    void AddCharTicking(CChar* pChar, bool fIgnoreSleep = false, bool fOverwrite = true);
+    void AddCharTicking(CChar* pChar, bool fIgnoreSleep, bool fOverwrite);
     void DelCharTicking(CChar* pChar);
 private:
     void _InsertTimedObject(int64 iTimeout, CTimedObject* pTimedObject);
@@ -82,4 +83,4 @@ private:
     void _RemoveCharTicking(const int64 iOldTimeout, const CChar* pChar);
 };
 
-#endif // _INC_CWORLDTICK_H
+#endif // _INC_CWORLDTICKER_H

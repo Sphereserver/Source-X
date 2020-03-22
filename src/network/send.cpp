@@ -18,6 +18,7 @@
 #include "../game/items/CItemVendable.h"
 #include "../game/components/CCItemDamageable.h"
 #include "../game/components/CCPropsChar.h"
+#include "../game/CServer.h"
 #include "../game/CWorld.h"
 #include "CNetworkManager.h"
 #include "send.h"
@@ -4562,7 +4563,7 @@ PacketPropertyList::PacketPropertyList(const CObjBase* object, dword version, co
 {
 	ADDTOCALLSTACK("PacketPropertyList::PacketPropertyList");
 
-	m_time = g_World.GetCurrentTime().GetTimeRaw();
+	m_time = CServerTime::GetCurrentTime().GetTimeRaw();
 	m_object = object->GetUID();
 	m_version = version;
 	m_entryCount = (int)data.size();
@@ -4590,7 +4591,7 @@ PacketPropertyList::PacketPropertyList(const CClient* target, const PacketProper
 {
 	ADDTOCALLSTACK("PacketPropertyList::PacketPropertyList2");
 
-	m_time = g_World.GetCurrentTime().GetTimeRaw();
+	m_time = CServerTime::GetCurrentTime().GetTimeRaw();
 	m_object = other->getObject();
 	m_version = other->getVersion();
 	m_entryCount = other->getEntryCount();
@@ -4622,7 +4623,7 @@ bool PacketPropertyList::onSend(const CClient* client)
 bool PacketPropertyList::hasExpired(int64 iTimeout) const
 {
 	ADDTOCALLSTACK("PacketPropertyList::hasExpired");
-	return (m_time + iTimeout) < g_World.GetCurrentTime().GetTimeRaw();
+	return (m_time + iTimeout) < CServerTime::GetCurrentTime().GetTimeRaw();
 }
 
 
@@ -5024,7 +5025,7 @@ PacketTimeSyncResponse::PacketTimeSyncResponse(const CClient* target) : PacketSe
 {
 	ADDTOCALLSTACK("PacketTimeSyncResponse::PacketTimeSyncResponse");
 
-	int64 llTime = g_World.GetCurrentTime().GetTimeRaw();
+	int64 llTime = CServerTime::GetCurrentTime().GetTimeRaw();
 	writeInt64(llTime);
 	writeInt64(llTime+100);
 	writeInt64(llTime+100);	//No idea if different values make a difference. I didn't notice anything different when all values were the same.

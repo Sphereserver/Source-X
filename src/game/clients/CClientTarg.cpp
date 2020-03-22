@@ -6,7 +6,7 @@
 #include "../items/CItemMulti.h"
 #include "../items/CItemVendable.h"
 #include "../CLog.h"
-#include "../CWorld.h"
+#include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CClient.h"
 
@@ -128,12 +128,12 @@ bool CClient::OnTarg_Obj_Info( CObjBase * pObj, const CPointMap & pt, ITEMID_TYP
 			len = Str_CopyLen( pszTemp, "[No static tile], " );
 		}
 
-		const CUOMapMeter * pMeter = g_World.GetMapMeter( pt );
+		const CUOMapMeter * pMeter = CWorldMap::GetMapMeter( pt );
 		if ( pMeter )
 		{
 			len += sprintf( pszTemp+len, "TERRAIN=0%x   TYPE=%s",
 				pMeter->m_wTerrainIndex,
-				g_World.GetTerrainItemTypeDef( pMeter->m_wTerrainIndex )->GetResourceName() );
+				CWorldMap::GetTerrainItemTypeDef( pMeter->m_wTerrainIndex )->GetResourceName() );
 		}
 
 		SysMessage(pszTemp);
@@ -445,7 +445,7 @@ int CClient::Cmd_Extract( CScript * pScript, const CRectMap &rect, int & zlowest
 		for ( int my = rect.m_top; my <= rect.m_bottom; my++)
 		{
 			CPointMap ptCur((word)(mx), (word)(my), 0, (uchar)(rect.m_map));
-			const CServerMapBlock * pBlock = g_World.GetMapBlock( ptCur );
+			const CServerMapBlock * pBlock = CWorldMap::GetMapBlock( ptCur );
 			if ( pBlock == nullptr )
 				continue;
 			size_t iQty = pBlock->m_Statics.GetStaticQty();
@@ -1182,7 +1182,7 @@ int CClient::OnSkill_Forensics( CUID uid, int iSkillLevel, bool fTest )
 	}
 	else if ( pCorpse->GetTimeStamp() > 0 )
 	{
-		int len = sprintf( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_TIMER), pCorpse->GetName(), -g_World.GetTimeDiff(pCorpse->GetTimeStamp()) / MSECS_PER_SEC);
+		int len = sprintf( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_TIMER), pCorpse->GetName(), -CServerTime::GetCurrentTime().GetTimeDiff(pCorpse->GetTimeStamp()) / MSECS_PER_SEC);
 		if ( pName )
 			sprintf( pszTemp + len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_NAME), pName );
 		else
@@ -1705,7 +1705,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 				return false;
 
 			// Check if we have clear LOS to target location and also if it's not over a wall (to prevent hit chars on the other side of the wall)
-			if ( m_pChar->CanSeeLOS(pt, nullptr, UO_MAP_VIEW_SIGHT, LOS_NB_WINDOWS) && !g_World.IsItemTypeNear(pt, IT_WALL, 0, true) )
+			if ( m_pChar->CanSeeLOS(pt, nullptr, UO_MAP_VIEW_SIGHT, LOS_NB_WINDOWS) && !CWorldMap::IsItemTypeNear(pt, IT_WALL, 0, true) )
 			{
 				pItemUse->SetAttr(ATTR_MOVE_NEVER);
 				pItemUse->MoveToUpdate(pt);
@@ -2409,7 +2409,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 	}
 
 	CVarDefCont * pTagInvitetime = m_pChar->m_TagDefs.GetKey("PARTY_LASTINVITETIME");
-	if ( pTagInvitetime && (g_World.GetTimeDiff(pTagInvitetime->GetValNum()) > 0) )
+	if ( pTagInvitetime && (CServerTime::GetCurrentTime().GetTimeDiff(pTagInvitetime->GetValNum()) > 0) )
 	{
 		SysMessageDefault( DEFMSG_PARTY_ADD_TOO_FAST );
 		return false;
@@ -2430,7 +2430,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 	pChar->SysMessage( sTemp );
 
 	m_pChar->SetKeyNum("PARTY_LASTINVITE", (dword)(pChar->GetUID()));
-	m_pChar->SetKeyNum("PARTY_LASTINVITETIME", g_World.GetCurrentTime().GetTimeRaw() + (Calc_GetRandVal2(2,5) * MSECS_PER_SEC));
+	m_pChar->SetKeyNum("PARTY_LASTINVITETIME", CServerTime::GetCurrentTime().GetTimeRaw() + (Calc_GetRandVal2(2,5) * MSECS_PER_SEC));
 
 	new PacketPartyInvite(pChar->GetClient(), m_pChar);
 

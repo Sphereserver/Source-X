@@ -1,15 +1,16 @@
 /**
-* @file CTimedFunction.h
+* @file CTimedFunctionHandler.h
 *
 */
 
-#ifndef _INC_CTIMEDFUNCTION_H
-#define _INC_CTIMEDFUNCTION_H
+#ifndef _INC_CTIMEDFUNCTIONHANDLER_H
+#define _INC_CTIMEDFUNCTIONHANDLER_H
 
-#include "../CUID.h"
-#include "../../common/CScript.h"
-#include "../../common/CScriptObj.h"
+#include "../common/CScript.h"
+#include "../common/CScriptObj.h"
+#include "../common/CUID.h"
 #include "CServerTime.h"
+#include <vector>
 
 class CTimedFunctionHandler
 {
@@ -50,4 +51,4 @@ public:
         CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult);
     int IsTimer(CUID uid, lpctstr funcname);
 };
-#endif // _INC_CTIMEDFUNCTION_H
+#endif // _INC_CTIMEDFUNCTIONHANDLER_H

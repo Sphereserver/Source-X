@@ -302,19 +302,25 @@ game/CServerDef.cpp
 game/CServerDef.h
 game/CServerTime.cpp
 game/CServerTime.h
-game/CTimedFunction.cpp
-game/CTimedFunction.h
+game/CTimedFunctionHandler.cpp
+game/CTimedFunctionHandler.h
+game/CTimedFunctions.cpp
+game/CTimedFunctions.h
 game/CTimedObject.cpp
 game/CTimedObject.h
 game/CWorld.cpp
 game/CWorld.h
 game/CWorldCache.cpp
-game/CWorldClock.h
+game/CWorldCache.h
 game/CWorldClock.cpp
-game/CWorldTick.h
-game/CWorldTick.cpp
+game/CWorldClock.h
 game/CWorldImport.cpp
 game/CWorldMap.cpp
+game/CWorldMap.h
+game/CWorldTicker.cpp
+game/CWorldTicker.h
+game/CWorldTickingList.cpp
+game/CWorldTickingList.h
 game/game_enums.h
 game/game_macros.h
 game/spheresvr.cpp
@@ -356,6 +362,7 @@ game/items/CItemStone.cpp
 game/items/CItemStone.h
 game/items/CItemVendable.cpp
 game/items/CItemVendable.h
+game/items/item_types.h
 )
 SOURCE_GROUP (game\\items FILES ${items_SRCS})
 

@@ -6,6 +6,7 @@
 #define _INC_CSFILETEXT_H
 
 #include "CSFile.h"
+#include <cstdio>
 
 /**
 * @brief Text files. Try to be compatible with MFC CFile class.

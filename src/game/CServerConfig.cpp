@@ -23,8 +23,11 @@
 #include "components/CCChampion.h"
 #include "uo_files/CUOItemInfo.h"
 #include "uo_files/CUOTerrainInfo.h"
+#include "CServer.h"
 #include "CServerTime.h"
+#include "CTimedFunctions.h"
 #include "CWorld.h"
+#include "CWorldMap.h"
 #include "spheresvr.h"
 #include "triggers.h"
 
@@ -952,7 +955,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 							script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
 							script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
 							for ( int nIndex = 0; nIndex < nSectors; ++nIndex )
-								g_World.GetSector(nMapNumber, nIndex)->r_Verb(script, &g_Serv);
+								CWorldMap::GetSector(nMapNumber, nIndex)->r_Verb(script, &g_Serv);
 						}
 
 						return true;
@@ -973,7 +976,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 								CScript script(pszStr);
 								script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
 								script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
-								g_World.GetSector(nMapNumber, iSecNumber-1)->r_Verb(script, &g_Serv);
+								CWorldMap::GetSector(nMapNumber, iSecNumber-1)->r_Verb(script, &g_Serv);
 							}
 						}
 						else
@@ -1563,7 +1566,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 					int nSectors = g_MapList.GetSectorQty(iMapNumber);
 
 					if ((iSecNumber > 0) && (iSecNumber <=  nSectors))
-						return( g_World.GetSector(iMapNumber, iSecNumber-1)->r_WriteVal(ptcKey, sVal, pSrc) );
+						return( CWorldMap::GetSector(iMapNumber, iSecNumber-1)->r_WriteVal(ptcKey, sVal, pSrc) );
 					else
 					{
 						g_Log.EventError("Invalid Sector #%d for Map %d\n", iSecNumber, iMapNumber);
@@ -1986,7 +1989,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
             sVal.FormatVal( TICKS_PER_SEC );
             break;
 		case RC_TIMEUP:
-			sVal.FormatLLVal( ( - g_World.GetTimeDiff( g_World._iTimeStartup )) / MSECS_PER_SEC );
+			sVal.FormatLLVal( ( - CServerTime::GetCurrentTime().GetTimeDiff( g_World._iTimeStartup )) / MSECS_PER_SEC );
 			break;
 		case RC_TIMERCALL:
 			sVal.FormatLLVal(_iTimerCall / (60*MSECS_PER_SEC));
@@ -3541,7 +3544,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		{
 			bool fQuoted = false;
             lpctstr ptcArg = pScript->GetArgStr( &fQuoted );
-			g_World._Ticker.m_TimedFunctions.Load( pScript->GetKey(), fQuoted, ptcArg );
+			CTimedFunctions::Load( pScript->GetKey(), fQuoted, ptcArg );
 		}
 		return true;
 	case RES_TELEPORTERS:
@@ -4100,7 +4103,7 @@ void CServerConfig::OnTick( bool fNow )
 {
 	ADDTOCALLSTACK("CServerConfig::OnTick");
 	// Give a tick to the less critical stuff.
-	if ( !fNow && ( g_Serv.IsLoading() || ( m_timePeriodic > g_World.GetCurrentTime().GetTimeRaw()) ) )
+	if ( !fNow && ( g_Serv.IsLoading() || ( m_timePeriodic > CServerTime::GetCurrentTime().GetTimeRaw()) ) )
 		return;
 
 	if ( this->m_fUseHTTP )
@@ -4128,7 +4131,7 @@ void CServerConfig::OnTick( bool fNow )
 		}
 	}
 
-	m_timePeriodic = g_World.GetCurrentTime().GetTimeRaw() + ( 60 * MSECS_PER_SEC );
+	m_timePeriodic = CServerTime::GetCurrentTime().GetTimeRaw() + ( 60 * MSECS_PER_SEC );
 }
 
 void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)

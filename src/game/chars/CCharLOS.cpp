@@ -1,6 +1,6 @@
 #include "../../common/CLog.h"
 #include "../uo_files/CUOTerrainInfo.h"
-#include "../CWorld.h"
+#include "../CWorldMap.h"
 #include "CChar.h"
 #include <cmath>
 
@@ -47,7 +47,7 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 
 			ptTest.Move(dirTest1);
 			dwBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
-			char z = g_World.GetHeightPoint2(ptTest, dwBlockFlags, true);
+			char z = CWorldMap::GetHeightPoint2(ptTest, dwBlockFlags, true);
 			short zDiff = (short)(abs(z - ptTest.m_z));
 
 			if ( (zDiff > PLAYER_HEIGHT) || (dwBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR)) )		// blocked
@@ -56,7 +56,7 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 				ptTest.Move(dirTest2);
 				{
 					dwBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
-					z = g_World.GetHeightPoint2(ptTest, dwBlockFlags, true);
+					z = CWorldMap::GetHeightPoint2(ptTest, dwBlockFlags, true);
 					zDiff = (short)(abs(z - ptTest.m_z));
 					if ( zDiff > PLAYER_HEIGHT )
 						goto blocked;
@@ -75,7 +75,7 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 		{
 			ptSrc.Move(dir);	// NOTE: The dir is very coarse and can change slightly.
 			dwBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
-			char z = g_World.GetHeightPoint2(ptSrc, dwBlockFlags, true);
+			char z = CWorldMap::GetHeightPoint2(ptSrc, dwBlockFlags, true);
             short zDiff = (short)(abs(z - ptSrc.m_z));
 
 			if ( (zDiff > PLAYER_HEIGHT) || (dwBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR)) || (iDistTry > iMaxDist) )
@@ -249,7 +249,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 		if ( (lp_x != ptNow.m_x) || (lp_y != ptNow.m_y) )
 		{
 			WARNLOS(("\tLoading new map block.\n"));
-			pBlock = g_World.GetMapBlock(ptNow);
+			pBlock = CWorldMap::GetMapBlock(ptNow);
 		}
 
 		if ( !pBlock ) // something is wrong
@@ -267,10 +267,11 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 				terrainid = pBlock->GetTerrain(UO_BLOCK_OFFSET(ptNow.m_x), UO_BLOCK_OFFSET(ptNow.m_y))->m_wTerrainIndex;
 				WARNLOS(("Terrain %d\n", terrainid));
 
-				if ( (flags & LOS_FISHING) && (ptSrc.GetDist(ptNow) >= 2) && (g_World.GetTerrainItemType(terrainid) != IT_WATER) && (g_World.GetTerrainItemType(terrainid) != IT_NORMAL) )
+				IT_TYPE itTerrain = CWorldMap::GetTerrainItemType(terrainid);
+				if ( (flags & LOS_FISHING) && (ptSrc.GetDist(ptNow) >= 2) && (itTerrain != IT_WATER) && (itTerrain != IT_NORMAL) )
 				{
 					WARNLOS(("Terrain %d blocked - flags & LOS_FISHING, distance >= 2 and type of pItemDef is not IT_WATER\n", terrainid));
-					WARNLOS(("ptSrc: %d,%d,%d; ptNow: %d,%d,%d; terrainid: %d; terrainid type: %d\n", ptSrc.m_x, ptSrc.m_y, ptSrc.m_z, ptNow.m_x, ptNow.m_y, ptNow.m_z, terrainid, g_World.GetTerrainItemType(terrainid)));
+					WARNLOS(("ptSrc: %d,%d,%d; ptNow: %d,%d,%d; terrainid: %d; terrainid type: %d\n", ptSrc.m_x, ptSrc.m_y, ptSrc.m_z, ptNow.m_x, ptNow.m_y, ptNow.m_z, terrainid, itTerrain));
 					bPath = false;
 					break;
 				}

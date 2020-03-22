@@ -6,17 +6,19 @@
 #ifndef _INC_CWORLD_H
 #define _INC_CWORLD_H
 
+#include "../common/sphere_library/CSObjList.h"
 #include "../common/CScript.h"
 #include "../common/CUID.h"
-#include "items/CItemStone.h"
-#include "CSector.h"
+#include "../sphereproto.h"
 #include "CWorldCache.h"
 #include "CWorldClock.h"
-#include "CWorldTick.h"
+#include "CWorldTicker.h"
 
-class CObjBase;
 class CItemTypeDef;
+class CSector;
 class CObjBaseTemplate;
+class CObjBase;
+class CItemStone;
 
 
 enum IMPFLAGS_TYPE	// IMPORT and EXPORT flags.
@@ -98,14 +100,20 @@ extern class CWorld : public CScriptObj, public CWorldThread
 	// the world. Stuff saved in *World.SCP
 private:
 	// Clock stuff. how long have we been running ? all i care about.
+	friend CWorldClock;
 	CWorldClock m_Clock;		// the current relative tick time (in milliseconds)
+
+	// Ticking world objects
+	friend class CWorldTickingList;
+	friend class CTimedFunctions;
+	CWorldTicker _Ticker;
 
 public:
 	// Map cache
-	CWorldCache _Cache;
+	friend CWorldCache;
+	CWorldCache _Cache;	
 
-	// Ticking world objects
-	CWorldTick _Ticker;
+	
 
 private:
 	// Special purpose timers.
@@ -210,36 +218,6 @@ public:
 		return( GetGameWorldTime(GetCurrentTime().GetTimeRaw()));
 	}
 
-
-	// CWorldMap
-
-	CItemTypeDef*	GetTerrainItemTypeDef(dword dwIndex);
-	IT_TYPE			GetTerrainItemType(dword dwIndex);
-
-	const CServerMapBlock* GetMapBlock(const CPointMap& pt) const;
-	const CUOMapMeter* GetMapMeter(const CPointMap& pt) const; // Height of MAP0.MUL at given coordinates
-
-
-	// CSector World Map stuff.
-
-	CSector* GetSector(int map, int i) const;	// gets sector # from one map
-
-	void GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck = false );
-	char GetHeightPoint2(const CPointMap & pt, dword & dwBlockFlags, bool fHouseCheck = false); // Height of player who walked to X/Y/OLDZ
-
-	void GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck = false );
-	char GetHeightPoint( const CPointMap & pt, dword & dwBlockFlags, bool fHouseCheck = false );
-
-	void GetFixPoint( const CPointMap & pt, CServerMapBlockState & block);
-
-	CPointMap FindItemTypeNearby( const CPointMap & pt, IT_TYPE iType, int iDistance = 0, bool fCheckMulti = false, bool fLimitZ = false );
-	bool IsItemTypeNear( const CPointMap & pt, IT_TYPE iType, int iDistance, bool fCheckMulti );
-
-	CPointMap FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance = 0 );
-	bool IsTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance = 0 );
-	CItem * CheckNaturalResource( const CPointMap & pt, IT_TYPE iType, bool fTest = true, CChar * pCharSrc = nullptr );
-
-
 	// Communication
 
 	void Speak(const CObjBaseTemplate* pSrc, lpctstr pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD) const;
@@ -271,39 +249,6 @@ public:
 	lpctstr GetName() const { return( "World" ); }
 
 } g_World;
-
-class CWorldSearch	// define a search of the world.
-{
-private:
-	const CPointMap m_pt;		// Base point of our search.
-	const int m_iDist;			// How far from the point are we interested in
-	bool m_fAllShow;		// Include Even inert items.
-	bool m_fSearchSquare;		// Search in a square (uo-sight distance) rather than a circle (standard distance).
-
-	CObjBase * m_pObj;	// The current object of interest.
-	CObjBase * m_pObjNext;	// In case the object get deleted.
-	bool m_fInertToggle;		// We are now doing the inert items
-
-	CSector * m_pSectorBase;	// Don't search the center sector 2 times.
-	CSector * m_pSector;	// current Sector
-	CRectMap m_rectSector;		// A rectangle containing our sectors we can search.
-	int		m_iSectorCur;		// What is the current Sector index in m_rectSector
-private:
-	bool GetNextSector();
-public:
-	static const char *m_sClassName;
-	explicit CWorldSearch( const CPointMap & pt, int iDist = 0 );
-private:
-	CWorldSearch(const CWorldSearch& copy);
-	CWorldSearch& operator=(const CWorldSearch& other);
-
-public:
-	void SetAllShow( bool fView );
-	void SetSearchSquare( bool fSquareSearch );
-	void RestartSearch();		// Setting current obj to nullptr will restart the search 
-	CChar * GetChar();
-	CItem * GetItem();
-};
 
 
 #endif // _INC_CWORLD_H

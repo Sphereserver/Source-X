@@ -1,9 +1,9 @@
-#include "../common/resource/blocks/CItemTypeDef.h"
-#include "../common/CLog.h"
 #include "../game/items/CItem.h"
 #include "../game/CSector.h"
 #include "../game/CServer.h"
-#include "../game/CWorld.h"
+#include "../game/CWorldMap.h"
+#include "resource/blocks/CItemTypeDef.h"
+#include "CLog.h"
 #include "CRect.h"
 #include "CPointBase.h"
 
@@ -284,7 +284,7 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 	if ( !strnicmp( ptcKey, "STATICS", 7 ) )
 	{
 		ptcKey	+= 7;
-		const CServerMapBlock * pBlock = g_World.GetMapBlock( *(this) );
+		const CServerMapBlock * pBlock = CWorldMap::GetMapBlock( *(this) );
 		if ( !pBlock ) return false;
 
 		if ( *ptcKey == '\0' )
@@ -634,7 +634,7 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 
 			if ( *ptcKey ) iDistance = Exp_GetVal(ptcKey);
 			if ( *ptcKey ) bCheckMulti = Exp_GetVal(ptcKey) != 0;
-			sVal.FormatVal( g_World.IsItemTypeNear(*this, static_cast<IT_TYPE>(iType), iDistance, bCheckMulti));
+			sVal.FormatVal( CWorldMap::IsItemTypeNear(*this, static_cast<IT_TYPE>(iType), iDistance, bCheckMulti));
 			break;
 		}
 		case PT_REGION:
@@ -691,14 +691,14 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 		}
 		default:
 		{
-			const CUOMapMeter * pMeter = g_World.GetMapMeter(*this);
+			const CUOMapMeter * pMeter = CWorldMap::GetMapMeter(*this);
 			if ( pMeter )
 			{
 				switch( index )
 				{
 					case PT_TYPE:
 					{
-						CItemTypeDef * pTypeDef = g_World.GetTerrainItemTypeDef( pMeter->m_wTerrainIndex );
+						CItemTypeDef * pTypeDef = CWorldMap::GetTerrainItemTypeDef( pMeter->m_wTerrainIndex );
 						if ( pTypeDef != nullptr )
 							sVal = pTypeDef->GetResourceName();
 						else
@@ -882,11 +882,11 @@ CSector * CPointBase::GetSector() const
 	{
 		g_Log.Event(LOGL_ERROR, "Point(%d,%d): trying to get a sector for point on map #%d out of bounds for this map(%d,%d). Defaulting to sector 0 of the map.\n",
 			m_x, m_y, m_map, g_MapList.GetX(m_map), g_MapList.GetY(m_map));
-		return g_World.GetSector(m_map, 0);
+		return CWorldMap::GetSector(m_map, 0);
 	}
 	// Get the world Sector we are in.
     const int iSectorSize = g_MapList.GetSectorSize(m_map);
-	return g_World.GetSector(m_map, ((m_y / iSectorSize * g_MapList.GetSectorCols(m_map)) + ( m_x / iSectorSize)));
+	return CWorldMap::GetSector(m_map, ((m_y / iSectorSize * g_MapList.GetSectorCols(m_map)) + ( m_x / iSectorSize)));
 }
 
 CRegion * CPointBase::GetRegion( dword dwType ) const

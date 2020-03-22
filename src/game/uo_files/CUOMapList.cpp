@@ -17,31 +17,30 @@ void CUOMapList::Clear()
 {
     m_pMapDiffCollection = nullptr;
 
-    memset(m_mapsinitalized,    false, sizeof(m_mapsinitalized));
-    memset(m_sizex,             -1, sizeof(m_sizex));
-    memset(m_sizey,             -1, sizeof(m_sizey));
-    memset(m_maps,              true, sizeof(m_maps));
-    memset(m_mapnum,            -1, sizeof(m_mapnum));
-    memset(m_mapid,             -1, sizeof(m_mapid));
-    memset(m_sectorsize,        -1, sizeof(m_sectorsize));
+    memset(m_mapsinitalized,    false,  sizeof(m_mapsinitalized));
+    memset(m_sizex,             -1,     sizeof(m_sizex));
+    memset(m_sizey,             -1,     sizeof(m_sizey));
+    memset(m_maps,              true,   sizeof(m_maps));
+    memset(m_mapnum,            -1,     sizeof(m_mapnum));
+    memset(m_mapid,             -1,     sizeof(m_mapid));
+    memset(m_sectorsize,        -1,     sizeof(m_sectorsize));
 
-    memset(_sectorcolumns,      -1, sizeof(_sectorcolumns));
-    memset(_sectorrows,         -1, sizeof(_sectorrows));
-    memset(_sectorqty,          -1, sizeof(_sectorqty));
+    memset(_sectorcolumns,      -1,     sizeof(_sectorcolumns));
+    memset(_sectorrows,         -1,     sizeof(_sectorrows));
+    memset(_sectorqty,          -1,     sizeof(_sectorqty));
 
     constexpr int iMaxMapFileIdx = 6;
     for (int i = 0; i < iMaxMapFileIdx; ++i)
         ResetMap(i, -1, -1, -1, i, i);
 }
 
-bool CUOMapList::ResetMap(int map, int maxx, int maxy, int sectorsize, int realmapnum, int mapid)
+void CUOMapList::ResetMap(int map, int maxx, int maxy, int sectorsize, int realmapnum, int mapid)
 {
     m_sizex[map] = maxx;
     m_sizey[map] = maxy;
     m_sectorsize[map] = sectorsize;
     m_mapnum[map] = realmapnum;
     m_mapid[map] = mapid;
-    return true;
 }
 
 void CUOMapList::Init()

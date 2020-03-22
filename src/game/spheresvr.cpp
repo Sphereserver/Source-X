@@ -13,6 +13,7 @@
 	#include <process.h>	// getpid()
 #endif
 
+#include "../common/CLog.h"
 #include "../common/CException.h"
 #include "../common/CUOInstall.h"
 #include "../common/sphereversion.h"	// sphere version
@@ -24,8 +25,8 @@
 #include "items/CItemMap.h"
 #include "items/CItemMessage.h"
 #include "components/CCChampion.h"
-#include "../common/CLog.h"
 #include "CScriptProfiler.h"
+#include "CSector.h"
 #include "CServer.h"
 #include "CWorld.h"
 #include "spheresvr.h"
@@ -767,5 +768,7 @@ int _cdecl main( int argc, char * argv[] )
 #include "../../network/CNetworkOutput.h"
 #include "../../network/CNetworkThread.h"
 #include "items/CItemMultiCustom.h"
+#include "CWorldMap.h"
+#include "CWorldTickingList.h"
 
 #include "../tables/classnames.tbl"

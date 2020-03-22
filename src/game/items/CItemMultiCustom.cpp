@@ -9,7 +9,8 @@
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
-#include "../CWorld.h"
+#include "../CServer.h"
+#include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CItemMultiCustom.h"
 
@@ -226,7 +227,7 @@ void CItemMultiCustom::EndCustomize(bool fForce)
 
             // find ground height, since the signpost is usually raised
             dword dwBlockFlags = 0;
-            ptDest.m_z = g_World.GetHeightPoint2(ptDest, dwBlockFlags, true);
+            ptDest.m_z = CWorldMap::GetHeightPoint2(ptDest, dwBlockFlags, true);
 
             pChar->MoveToChar(ptDest);
             pChar->UpdateMove(ptOld);

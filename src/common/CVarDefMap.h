@@ -8,7 +8,6 @@
 
 #include "sphere_library/CSString.h"
 #include "sphere_library/CSSortedVector.h"
-#include "common.h"
 
 
 class CTextConsole;

@@ -6,6 +6,8 @@
 #define _INC_CSCRIPTTRIGGERARGS_H
 
 #include "CScriptObj.h"
+#include "CVarDefMap.h"
+#include "CVarFloat.h"
 #include <vector>
 
 class CScriptTriggerArgs : public CScriptObj
@@ -88,7 +90,7 @@ public:
     bool r_LoadVal( CScript & s ) override;
     bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
     bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
-    bool r_Copy( CTextConsole * pSrc );
+    //bool r_Copy( CTextConsole * pSrc );
     lpctstr GetName() const
     {
         return "ARG";

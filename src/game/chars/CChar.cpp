@@ -18,8 +18,11 @@
 #include "../components/CCPropsItemChar.h"
 #include "../components/CCSpawn.h"
 #include "../CContainer.h"
+#include "../CSector.h"
 #include "../CServer.h"
 #include "../CWorld.h"
+#include "../CWorldMap.h"
+#include "../CWorldTickingList.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CChar.h"
@@ -265,8 +268,8 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 	m_iVisualRange = UO_MAP_VIEW_SIZE_DEFAULT;
 	m_virtualGold = 0;
 
-    m_timeCreate = g_World.GetCurrentTime().GetTimeRaw();
-    m_timeLastHitsUpdate = g_World.GetCurrentTime().GetTimeRaw();
+    m_timeCreate = CServerTime::GetCurrentTime().GetTimeRaw();
+    m_timeLastHitsUpdate = CServerTime::GetCurrentTime().GetTimeRaw();
     _timeNextRegen = m_timeLastHitsUpdate + MSECS_PER_SEC;  // make it regen in one second from now, no need to instant regen.
     _iRegenTickCount = 0;
 	m_timeLastCallGuards = 0;
@@ -317,7 +320,7 @@ CChar::~CChar()
 {
     DeletePrepare();    // remove me early so virtuals will work.
 
-    g_World._Ticker.DelCharTicking(this);
+    CWorldTickingList::DelCharPeriodic(this);
 
     if (IsStatFlag(STATF_RIDDEN))
     {
@@ -400,7 +403,7 @@ void CChar::ClientAttach( CClient * pClient )
 		return;
 
 	ASSERT(m_pPlayer);
-	m_pPlayer->m_timeLastUsed = g_World.GetCurrentTime().GetTimeRaw();
+	m_pPlayer->m_timeLastUsed = CServerTime::GetCurrentTime().GetTimeRaw();
 
 	m_pClient = pClient;
 	FixClimbHeight();
@@ -429,7 +432,7 @@ void CChar::SetDisconnected()
         m_pParty->RemoveMember( GetUID(), GetUID() );
         m_pParty = nullptr;
     }
-    g_World._Ticker.DelCharTicking(this);
+    CWorldTickingList::DelCharPeriodic(this);
 
     if ( IsDisconnected() )
         return;
@@ -546,7 +549,7 @@ void CChar::Delete(bool bforce)
 	if (( NotifyDelete() == false ) && !bforce)
 		return;
 
-    g_World._Ticker.DelCharTicking(this);
+    CWorldTickingList::DelCharPeriodic(this);
 
 	// Character has been deleted
 	if ( IsClient() )
@@ -567,7 +570,7 @@ void CChar::GoSleep()
     ADDTOCALLSTACK("CChar::GoSleep");
     ASSERT(!IsSleeping());
     
-    g_World._Ticker.DelCharTicking(this);   // do not insert into the mutex lock, it access back to this char.
+	CWorldTickingList::DelCharPeriodic(this);   // do not insert into the mutex lock, it access back to this char.
 
     THREAD_UNIQUE_LOCK_SET;
     CTimedObject::GoSleep();
@@ -586,7 +589,7 @@ void CChar::GoAwake()
     THREAD_UNIQUE_LOCK_SET;
 
     CTimedObject::GoAwake();       // Awake it first, otherwise some other things won't work
-    g_World._Ticker.AddCharTicking(this);
+	CWorldTickingList::AddCharPeriodic(this);
     SetTimeout(Calc_GetRandVal(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
 
     for (CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext())
@@ -674,7 +677,7 @@ char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
 
     height_t iHeightMount = GetHeightMount( false );
 	CServerMapBlockState block( dwBlockFlags, pt.m_z, pt.m_z + m_zClimbHeight + iHeightMount, pt.m_z + m_zClimbHeight + 2, iHeightMount );
-	g_World.GetFixPoint( pt, block );
+	CWorldMap::GetFixPoint( pt, block );
 
 	dwBlockFlags = block.m_Bottom.m_dwBlockFlags;
 	if ( block.m_Top.m_dwBlockFlags )
@@ -1140,7 +1143,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	// End copying items.
 	FixWeight();
 	Update();
-    g_World._Ticker.AddCharTicking(this);
+	CWorldTickingList::AddCharPeriodic(this);
 	return true;
 }
 
@@ -2454,7 +2457,7 @@ do_default:
 			sVal.FormatVal( m_defense + pCharDef->m_defense );
 			return true;
 		case CHC_AGE:
-			sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate) / ( MSECS_PER_SEC * 60 * 60 *24 ) )); //displayed in days
+			sVal.FormatLLVal( -( CServerTime::GetCurrentTime().GetTimeDiff(m_timeCreate) / ( MSECS_PER_SEC * 60 * 60 *24 ) )); //displayed in days
 			return true;
 		case CHC_BANKBALANCE:
 			sVal.FormatVal( GetBank()->ContentCount( CResourceID(RES_TYPEDEF,IT_GOLD)));
@@ -2570,7 +2573,7 @@ do_default:
 				else
 				{
 					dword dwBlockFlags = 0;
-					g_World.GetHeightPoint2( ptDst, dwBlockFlags, true );
+					CWorldMap::GetHeightPoint2( ptDst, dwBlockFlags, true );
 					sVal.FormatHex( dwBlockFlags );
 				}
 			}
@@ -2802,7 +2805,7 @@ do_default:
 			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, GetDispID()) );
 			break;
 		case CHC_CREATE:
-			sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate) / MSECS_PER_TENTH));  // Displayed in Tenths of Second.
+			sVal.FormatLLVal( -( CServerTime::GetCurrentTime().GetTimeDiff(m_timeCreate) / MSECS_PER_TENTH));  // Displayed in Tenths of Second.
 			break;
 		case CHC_DIR:
 			{
@@ -3659,7 +3662,7 @@ void CChar::r_Write( CScript & s )
 	EXC_TRY("r_Write");
 
 	s.WriteSection("WORLDCHAR %s", GetResourceName());
-	//s.WriteKeyVal("CREATE", -(g_World.GetTimeDiff(m_timeCreate) / MSECS_PER_TENTH)); // Do we need to save it?
+	//s.WriteKeyVal("CREATE", -(CServerTime::GetCurrentTime().GetTimeDiff(m_timeCreate) / MSECS_PER_TENTH)); // Do we need to save it?
 
     // Do not save TAG.LastHit (used by PreHit combat flag). It's based on the server uptime, so if this tag isn't zeroed,
     //  after the server restart the char may not be able to attack until the server reaches the serv.time when the previous TAG.LastHit was set.

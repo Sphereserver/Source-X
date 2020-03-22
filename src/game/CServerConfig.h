@@ -17,9 +17,11 @@
 #include "../common/resource/CValueDefs.h"
 #include "../common/CExpression.h"
 #include "../common/CServerMap.h"
+#include "../common/CTextConsole.h"
 #include "../common/sphereproto.h"
 #include "CRegion.h"
 #include "game_enums.h"
+#include <map>
 
 
 class CAccount;

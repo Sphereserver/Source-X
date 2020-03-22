@@ -10,17 +10,16 @@
 * this data is read by CCChampion to know Champion's type, npcs to spawn at each level, boss id....
 * class is declared inside CResource.h
 */
+
+#include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
 #include "../../common/CScript.h"
 #include "../chars/CChar.h"
-#include "../CWorld.h"
-#include "../../common/resource/CResourceLock.h"
+#include "../CServer.h"
 #include "CCChampion.h"	// predef header.
 #include <string>
 #include <algorithm> 
 #include <sstream> 
-#include <iterator> 
-#include <iostream>
 #include <cctype>
 
 #define CANDLESNEXTRED 4
@@ -103,7 +102,7 @@ void CCChampion::Start()
         Stop();
     }
     _fActive = true;
-    _iLastActivationTime = g_World.GetCurrentTime().GetTimeRaw();
+    _iLastActivationTime = CServerTime::GetCurrentTime().GetTimeRaw();
 
     _iSpawnsNextRed = GetCandlesPerLevel();
     _iCandlesNextRed = CANDLESNEXTRED;
@@ -124,7 +123,7 @@ void CCChampion::Stop()
     _iCandlesNextRed = 0;
     _iCandlesNextLevel = 0;
     _fChampionSummoned = false;
-    GetLink()->SetTimeout(_iLastActivationTime - g_World.GetCurrentTime().GetTimeRaw());
+    GetLink()->SetTimeout(_iLastActivationTime - CServerTime::GetCurrentTime().GetTimeRaw());
     ClearWhiteCandles();
     ClearRedCandles();
 }
@@ -225,7 +224,7 @@ void CCChampion::SpawnNPC()
     {
         return;
     }
-    ASSERT(dynamic_cast<CCChampionDef*>(pDef));
+    //ASSERT(dynamic_cast<CCChampionDef*>(pDef));
     if (!pNpc)	// At least one NPC per level should be added, check just in case.
     {
         return;

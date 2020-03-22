@@ -11,7 +11,7 @@
 
 class CTimedObject
 {
-    friend class CWorldTick;
+    friend class CWorldTicker;
 
 private:
     THREAD_CMUTEX_DEF;
@@ -52,12 +52,6 @@ public:
     * @return true if it's deleted.
     */
     virtual bool IsDeleted() const = 0;
-
-    /**
-     * @brief   &lt; Raw timer.
-     * @param   iDelayInMsecs   Zero-based index of the delay in milliseconds.
-     */
-    void SetTimer(int64 iDelayInMsecs);
 
     /**
      * @brief   &lt; Timer.

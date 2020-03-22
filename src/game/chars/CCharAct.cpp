@@ -13,7 +13,9 @@
 #include "../components/CCPropsItemEquippable.h"
 #include "../components/CCPropsItemWeapon.h"
 #include "../CContainer.h"
+#include "../CServer.h"
 #include "../CWorld.h"
+#include "../CWorldMap.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CChar.h"
@@ -1998,7 +2000,7 @@ bool CChar::ItemDrop( CItem * pItem, const CPointMap & pt )
 	{
 		char iItemHeight = pItem->GetHeight();
 		CServerMapBlockState block( CAN_C_WALK, pt.m_z, pt.m_z, pt.m_z, maximum(iItemHeight,1) );
-		//g_World.GetHeightPoint( pt, block, true );
+		//CWorldMap::GetHeightPoint( pt, block, true );
 		//DEBUG_ERR(("Drop: %d / Min: %d / Max: %d\n", pItem->GetFixZ(pt), block.m_Bottom.m_z, block.m_Top.m_z));
 
 		CPointMap ptStack = pt;
@@ -3254,7 +3256,7 @@ bool CChar::OnFreezeCheck() const
 
 	if ( IsStatFlag(STATF_FREEZE|STATF_STONE) && !IsPriv(PRIV_GM) )
 		return true;
-	if ( GetKeyNum("NoMoveTill") > (g_World.GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH)) // in tenths of second.
+	if ( GetKeyNum("NoMoveTill") > (CServerTime::GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH)) // in tenths of second.
 		return true;
 
 	if ( m_pPlayer )
@@ -3950,7 +3952,7 @@ bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool fFromS
 			// Reset Z back to start Z + PLAYER_HEIGHT so we don't climb buildings
 			pt.m_z = startZ;
 			// Set new Z so we don't end up floating or underground
-			pt.m_z = g_World.GetHeightPoint( pt, dwBlockFlags, true );
+			pt.m_z = CWorldMap::GetHeightPoint( pt, dwBlockFlags, true );
 
 			// don't allow characters to pass through walls or other blocked
 			// paths when they're disembarking from a ship
@@ -4232,7 +4234,7 @@ void CChar::OnTickStatusUpdate()
 	if ( IsClient() )
 		GetClient()->UpdateStats();
 
-	int64 iTimeDiff = - g_World.GetTimeDiff( m_timeLastHitsUpdate );
+	int64 iTimeDiff = - CServerTime::GetCurrentTime().GetTimeDiff( m_timeLastHitsUpdate );
 	if ( g_Cfg.m_iHitsUpdateRate && ( iTimeDiff >= g_Cfg.m_iHitsUpdateRate ) )
 	{
 		if ( m_fStatusUpdate & SU_UPDATE_HITS )
@@ -4241,7 +4243,7 @@ void CChar::OnTickStatusUpdate()
 			UpdateCanSee(cmd, m_pClient);		// send hits update to all nearby clients
 			m_fStatusUpdate &= ~SU_UPDATE_HITS;
 		}
-		m_timeLastHitsUpdate = g_World.GetCurrentTime().GetTimeRaw();
+		m_timeLastHitsUpdate = CServerTime::GetCurrentTime().GetTimeRaw();
 	}
 
 	if ( m_fStatusUpdate & SU_UPDATE_MODE )
@@ -4407,7 +4409,7 @@ bool CChar::OnTickPeriodic()
 {
     EXC_TRY("OnTickPeriodic");
     ++_iRegenTickCount;
-    _timeNextRegen = g_World.GetCurrentTime().GetTimeRaw() + MSECS_PER_TICK;
+    _timeNextRegen = CServerTime::GetCurrentTime().GetTimeRaw() + MSECS_PER_TICK;
     const bool fRegen = (_iRegenTickCount >= TICKS_PER_SEC);
 
     if (fRegen)
@@ -4450,13 +4452,13 @@ bool CChar::OnTickPeriodic()
     {
         CClient* pClient = GetClient();
         // Players have a silly "always run" flag that gets stuck on.
-        if (-(g_World.GetTimeDiff(pClient->m_timeLastEventWalk)) > 2 * MSECS_PER_TENTH)
+        if (-(CServerTime::GetCurrentTime().GetTimeDiff(pClient->m_timeLastEventWalk)) > 2 * MSECS_PER_TENTH)
         {
             StatFlag_Clear(STATF_FLY);
         }
 
         // Check targeting timeout, if set
-        if ((pClient->m_Targ_Timeout > 0) && (g_World.GetTimeDiff(pClient->m_Targ_Timeout) <= 0))
+        if ((pClient->m_Targ_Timeout > 0) && (CServerTime::GetCurrentTime().GetTimeDiff(pClient->m_Targ_Timeout) <= 0))
         {
             pClient->addTargetCancel();
         }

@@ -5,7 +5,7 @@
 #include "../components/CCPropsItemWeapon.h"
 #include "../clients/CClient.h"
 #include "../items/CItemMulti.h"
-#include "../CWorld.h"
+#include "../CWorldMap.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CChar.h"
@@ -484,7 +484,7 @@ bool CChar::IsSwimming() const
 
 	const CPointMap& ptTop = GetTopPoint();
 
-	const CPointMap pt = g_World.FindItemTypeNearby(ptTop, IT_WATER);
+	const CPointMap pt = CWorldMap::FindItemTypeNearby(ptTop, IT_WATER);
 	if ( !pt.IsValidPoint() )
 		return false;
 
@@ -494,7 +494,7 @@ bool CChar::IsSwimming() const
 
 	// Is there a solid surface under us?
 	dword dwBlockFlags = GetMoveBlockFlags();
-	char iSurfaceZ = g_World.GetHeightPoint2(ptTop, dwBlockFlags, true);
+	char iSurfaceZ = CWorldMap::GetHeightPoint2(ptTop, dwBlockFlags, true);
 	if ( (iSurfaceZ == pt.m_z) && (dwBlockFlags & CAN_I_WATER) )
 		return true;
 
@@ -1383,7 +1383,7 @@ IT_TYPE CChar::CanTouchStatic( CPointMap *pPt, ITEMID_TYPE id, const CItem *pIte
 		return IT_JUNK;
 
 	// Is this static really here ?
-	const CServerMapBlock *pMapBlock = g_World.GetMapBlock(*pPt);
+	const CServerMapBlock *pMapBlock = CWorldMap::GetMapBlock(*pPt);
 	if ( !pMapBlock )
 		return IT_JUNK;
 
@@ -1722,7 +1722,7 @@ bool CChar::IsVerticalSpace( const CPointMap& ptDest, bool fForceMount ) const
 
     const height_t iHeightMount = GetHeightMount();
 	CServerMapBlockState block(dwBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + iHeightMount, ptDest.m_z + m_zClimbHeight + 2, iHeightMount);
-	g_World.GetHeightPoint(ptDest, block, true);
+	CWorldMap::GetHeightPoint(ptDest, block, true);
 
 	if ( iHeightMount + ptDest.m_z + (fForceMount ? 4 : 0) >= block.m_Top.m_z )		// 4 is the mount height
 		return false;
@@ -1796,7 +1796,7 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
 		g_Log.EventWarn("\t\tCServerMapBlockState block( 0%x, %d, %d, %d );ptDest.m_z(%d) m_zClimbHeight(%d).\n",
 					dwBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + iHeight, ptDest.m_z + m_zClimbHeight + 2, ptDest.m_z, m_zClimbHeight);
 
-	g_World.GetHeightPoint(ptDest, block, true);
+	CWorldMap::GetHeightPoint(ptDest, block, true);
 
 	// Pass along my results.
 	dwBlockFlags = block.m_Bottom.m_dwBlockFlags;
@@ -1971,7 +1971,7 @@ void CChar::FixClimbHeight()
 	const CPointMap& pt = GetTopPoint();
     const height_t iHeightMount = GetHeightMount();
 	CServerMapBlockState block(CAN_I_CLIMB, pt.m_z, pt.m_z + iHeightMount + 3, pt.m_z + 2, iHeightMount);
-	g_World.GetHeightPoint(pt, block, true);
+	CWorldMap::GetHeightPoint(pt, block, true);
 
 	if ( (block.m_Bottom.m_z == pt.m_z) && (block.m_dwBlockFlags & CAN_I_CLIMB) )	// we are standing on stairs
 		m_zClimbHeight = block.m_zClimbHeight;

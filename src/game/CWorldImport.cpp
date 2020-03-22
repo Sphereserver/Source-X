@@ -3,6 +3,7 @@
 #include "items/CItem.h"
 #include "CObjBase.h"
 #include "CWorld.h"
+#include "CWorldMap.h"
 
 struct CImportSer : public CSObjListRec
 {

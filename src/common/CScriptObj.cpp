@@ -10,13 +10,18 @@
 #include "../game/clients/CAccount.h"
 #include "../game/clients/CClient.h"
 #include "../game/CScriptProfiler.h"
+#include "../game/CSector.h"
+#include "../game/CServer.h"
 #include "../game/CWorld.h"
+#include "../game/CWorldMap.h"
+#include "../game/CTimedFunctions.h"
 #include "../sphere/ProfileTask.h"
 #include "crypto/CBCrypt.h"
 #include "crypto/CMD5.h"
 #include "resource/blocks/CResourceNamedDef.h"
 #include "resource/CResourceLock.h"
 #include "CExpression.h"
+#include "CVarFloat.h"
 #include "CSFileObjContainer.h"
 #include "CScriptTriggerArgs.h"
 
@@ -1808,7 +1813,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 			char funcname[1024];
 			Str_CopyLimitNull(funcname, ptcArgs, sizeof(funcname));
 
-			TRIGRET_TYPE iRet = g_World._Ticker.m_TimedFunctions.Loop(funcname, LoopsMade, StartContext, EndContext, s, pSrc, pArgs, pResult);
+			TRIGRET_TYPE iRet = CTimedFunctions::Loop(funcname, LoopsMade, StartContext, EndContext, s, pSrc, pArgs, pResult);
 			if ((iRet != TRIGRET_ENDIF) && (iRet != TRIGRET_CONTINUE))
 				return iRet;
 		}

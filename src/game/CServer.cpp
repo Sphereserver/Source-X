@@ -197,11 +197,11 @@ void CServer::Shutdown( int64 iMinutes ) // If shutdown is initialized
 
 	if ( iMinutes < 0 )
 	{
-		iMinutes = g_World.GetTimeDiff( m_timeShutdown ) / ( 60 * MSECS_PER_SEC);
+		iMinutes = CServerTime::GetCurrentTime().GetTimeDiff( m_timeShutdown ) / ( 60 * MSECS_PER_SEC);
 	}
 	else
 	{
-		m_timeShutdown = g_World.GetCurrentTime().GetTimeRaw() + ( iMinutes * 60 * MSECS_PER_SEC);
+		m_timeShutdown = CServerTime::GetCurrentTime().GetTimeRaw() + ( iMinutes * 60 * MSECS_PER_SEC);
 	}
 
 	g_World.Broadcastf(g_Cfg.GetDefaultMsg( DEFMSG_MSG_SERV_SHUTDOWN ), iMinutes);
@@ -308,7 +308,7 @@ ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal ) const
 int64 CServer::GetAgeHours() const
 {
 	ADDTOCALLSTACK("CServer::GetAgeHours");
-	return (g_World.GetCurrentTime().GetTimeRaw() / (60 * 60 * MSECS_PER_SEC));
+	return (CServerTime::GetCurrentTime().GetTimeRaw() / (60 * 60 * MSECS_PER_SEC));
 }
 
 lpctstr CServer::GetStatusString( byte iIndex ) const
@@ -2165,7 +2165,7 @@ void CServer::OnTick()
 	if ( m_timeShutdown > 0 )
 	{
 		EXC_SET_BLOCK("shutdown");
-		if ( g_World.GetTimeDiff(m_timeShutdown) <= 0 )
+		if ( CServerTime::GetCurrentTime().GetTimeDiff(m_timeShutdown) <= 0 )
 			SetExitFlag(2);
 	}
 

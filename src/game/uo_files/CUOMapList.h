@@ -6,8 +6,6 @@
 #ifndef _INC_CUOMAPLIST_H
 #define _INC_CUOMAPLIST_H
 
-#include "../../common/common.h"
-
 
 class CServerMapDiffCollection;
 
@@ -17,6 +15,7 @@ extern class CUOMapList
 
     friend struct CUOInstall;
     friend class  CWorld;
+    friend class  CWorldMap;
     friend class  CServerMap;
     friend class  CServerMapBlock;
 
@@ -51,7 +50,7 @@ public:
      */
     ///@{
     void Clear();
-    bool ResetMap(int map, int maxx, int maxy, int sectorsize, int realmapnum, int mapid);
+    void ResetMap(int map, int maxx, int maxy, int sectorsize, int realmapnum, int mapid);
     void Init();
     bool Load(int map, char *args);
     ///@}

@@ -4,7 +4,7 @@
 #include "CObjBase.h"
 #include "CServer.h"
 #include "CServerConfig.h"
-#include "CTimedFunction.h"
+#include "CTimedFunctionHandler.h"
 
 CTimedFunctionHandler::CTimedFunctionHandler()
 {

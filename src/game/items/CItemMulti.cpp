@@ -3,7 +3,7 @@
 #include "../../common/sphereproto.h"
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
-#include "../CWorld.h"
+#include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CItemMulti.h"
 #include "CItemShip.h"
@@ -3135,7 +3135,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
                     * Also update those dwBlockFlags with all the flags found at the given location.
                     * 3rd param is set to also update Z with any house component found in the proccess.
                     */
-                    ptn.m_z = g_World.GetHeightPoint2(ptn, dwBlockFlags, true);
+                    ptn.m_z = CWorldMap::GetHeightPoint2(ptn, dwBlockFlags, true);
                     if (abs(ptn.m_z - pt.m_z) > 4)  // Difference of Z > 4? so much, stop.
                     {
                         pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_BUMP);

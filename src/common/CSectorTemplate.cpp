@@ -40,7 +40,7 @@ void CCharsActiveList::OnRemoveObj( CSObjListRec * pObjRec )
 	if ( pChar->IsClient())
 	{
         ClientDecrease();
-        m_timeLastClient = g_World.GetCurrentTime().GetTimeRaw();	// mark time in case it's the last client
+        m_timeLastClient = CServerTime::GetCurrentTime().GetTimeRaw();	// mark time in case it's the last client
 	}
 
 	CSObjList::OnRemoveObj(pObjRec);

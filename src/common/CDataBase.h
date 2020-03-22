@@ -6,17 +6,21 @@
 #ifndef _INC_CDATABASE_H
 #define	_INC_CDATABASE_H
 
-#include "common.h"
+#include "sphere_library/CSString.h"
 #include "sphere_library/smutex.h"
 #include "CScriptObj.h"
+#include "CVarDefMap.h"
 #include <vector>
 #include <queue>
+
 #include "mysql/errmsg.h"	// mysql standard include
 #include "mysql/mysql.h"	// this needs to be defined AFTER common.h
 
 
 #define	MIN_MYSQL_VERSION_ALLOW	40115
 
+
+class CVarDefMap;
 
 class CDataBase : public CScriptObj
 {

@@ -43,7 +43,9 @@ ADD(CRegionWorld,			"CRegionWorld");
 ADD(CRegion,				"CRegion");
 ADD(CWorld,					"CWorld");
 ADD(CWorldCache,			"CWorldCache");
-ADD(CWorldTick,				"CWorldTick");
+ADD(CWorldMap,				"CWorldMap");
+ADD(CWorldTicker,			"CWorldTicker");
+ADD(CWorldTickingList,		"CWorldTickingList");
 ADD(CWorldThread,			"CWorldThread");
 ADD(CWebPageDef,			"CWebPageDef");
 ADD(CServerDef,				"CServerDef");
@@ -82,7 +84,7 @@ ADD(CVarDefMap,				"CVarDefMap");
 ADD(CNetworkInput,			"CNetworkInput");
 ADD(CNetworkOutput,			"CNetworkOutput");
 ADD(CNetworkThread,			"CNetworkThread");
-ADD(CNetworkManager,			"CNetworkManager");
+ADD(CNetworkManager,		"CNetworkManager");
 #ifdef _WIN32
 	ADD(CNTWindow,              "CNTWindow");
 #endif

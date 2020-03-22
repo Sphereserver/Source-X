@@ -6,7 +6,7 @@
 #include "../chars/CChar.h"
 #include "../CException.h"
 #include "../CLog.h"
-#include "../CWorld.h"
+#include "../CServer.h"
 #include "CClient.h"
 
 

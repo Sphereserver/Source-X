@@ -6,6 +6,7 @@
 #include "../common/CScriptTriggerArgs.h"
 #include "../sphere/threads.h"
 #include "CObjBase.h"
+#include "CServer.h"
 #include "CServerConfig.h"
 #include "CServerDef.h"
 #include "CWorld.h"
@@ -182,7 +183,7 @@ void CServerDef::SetValidTime()
 int64 CServerDef::GetTimeSinceLastValid() const
 {
 	ADDTOCALLSTACK("CServerDef::GetTimeSinceLastValid");
-	return ( - g_World.GetTimeDiff( m_timeLastValid ) );
+	return ( - CServerTime::GetCurrentTime().GetTimeDiff( m_timeLastValid ) );
 }
 
 enum SC_TYPE
@@ -392,7 +393,7 @@ bool CServerDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 		}
 		break;
 	case SC_CREATE:
-		sVal.FormatLLVal( (- g_World.GetTimeDiff(m_timeCreate))/MSECS_PER_TENTH );
+		sVal.FormatLLVal( (- CServerTime::GetCurrentTime().GetTimeDiff(m_timeCreate))/MSECS_PER_TENTH );
 		break;
 	case SC_LANG:
 		sVal = m_sLang;
@@ -482,5 +483,5 @@ int64 CServerDef::GetAgeHours() const
 {
 	ADDTOCALLSTACK("CServerDef::GetAgeHours");
 	// This is just the amount of time it has been listed.
-	return ( (- g_World.GetTimeDiff(m_timeCreate)) / ( MSECS_PER_SEC * 60 * 60 ));
+	return ( (- CServerTime::GetCurrentTime().GetTimeDiff(m_timeCreate)) / ( MSECS_PER_SEC * 60 * 60 ));
 }

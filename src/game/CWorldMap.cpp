@@ -1,6 +1,3 @@
-//************************
-// Natural resources.
-
 #include "../common/resource/blocks/CItemTypeDef.h"
 #include "../common/resource/blocks/CRandGroupDef.h"
 #include "../common/resource/blocks/CRegionResourceDef.h"
@@ -15,11 +12,17 @@
 #include "uo_files/CUOTerrainInfo.h"
 #include "uo_files/CUOMapList.h"
 #include "triggers.h"
-#include "../game/CWorld.h"
+#include "CWorld.h"
+#include "CWorldCache.h"
+#include "CWorldMap.h"
 
-CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, bool fTest, CChar * pCharSrc )
+
+//************************
+// Natural resources.
+
+CItem * CWorldMap::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, bool fTest, CChar * pCharSrc ) // static
 {
-	ADDTOCALLSTACK("CWorld::CheckNaturalResource");
+	ADDTOCALLSTACK("CWorldMap::CheckNaturalResource");
 	// RETURN:
 	//  The resource tracking item.
 	//  nullptr = nothing here.
@@ -38,12 +41,12 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, bool f
 		EXC_SET_BLOCK("is item near type");
 		if ((iType != IT_TREE) && (iType != IT_ROCK) )
 		{
-			if ( !g_World.IsTypeNear_Top(pt, iType, 0) )
+			if ( !IsTypeNear_Top(pt, iType, 0) )
 				return nullptr;
 		}
 		else
 		{
-			if ( !g_World.IsItemTypeNear(pt, iType, 0, false) ) //cannot be used, because it does no Z check... what if there is a static tile 70 tiles under me?
+			if ( !IsItemTypeNear(pt, iType, 0, false) ) //cannot be used, because it does no Z check... what if there is a static tile 70 tiles under me?
 				return nullptr;
 		}
 	}
@@ -168,12 +171,93 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, bool f
 	return nullptr;
 }
 
+
+CItemTypeDef* CWorldMap::GetTerrainItemTypeDef(dword dwTerrainIndex) // static
+{
+	ADDTOCALLSTACK("CWorldMap::GetTerrainItemTypeDef");
+	CResourceDef* pRes = nullptr;
+
+	if (g_World.m_TileTypes.IsValidIndex(dwTerrainIndex))
+	{
+		pRes = g_World.m_TileTypes[dwTerrainIndex];
+	}
+
+	if (!pRes)
+	{
+		pRes = g_Cfg.ResourceGetDef(CResourceID(RES_TYPEDEF, 0));
+	}
+	ASSERT(pRes);
+
+	CItemTypeDef* pItemTypeDef = dynamic_cast <CItemTypeDef*> (pRes);
+	ASSERT(pItemTypeDef);
+
+	return pItemTypeDef;
+}
+
+
+IT_TYPE CWorldMap::GetTerrainItemType(dword dwTerrainIndex) // static
+{
+	ADDTOCALLSTACK("CWorldMap::GetTerrainItemType");
+	CResourceDef* pRes = nullptr;
+
+	if (g_World.m_TileTypes.IsValidIndex(dwTerrainIndex))
+	{
+		pRes = g_World.m_TileTypes[dwTerrainIndex];
+	}
+
+	if (!pRes)
+		return IT_NORMAL;
+
+	const CItemTypeDef* pItemTypeDef = dynamic_cast<CItemTypeDef*>(pRes);
+	if (!pItemTypeDef)
+		return IT_NORMAL;
+
+	return (IT_TYPE)pItemTypeDef->GetItemType();
+}
+
+
+
 //////////////////////////////////////////////////////////////////
 // Map reading and blocking.
 
-const CServerMapBlock* CWorld::GetMapBlock(const CPointMap& pt) const
+// gets sector # from one map
+CSector* CWorldMap::GetSector(int map, int i) // static
 {
-	ADDTOCALLSTACK_INTENSIVE("CWorld::GetMapBlock");
+	//ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetSector");
+
+	// if the map is not supported, return empty sector
+	if ((map < 0) || (map >= MAP_SUPPORTED_QTY) || !g_MapList.m_maps[map])
+		return nullptr;
+
+	const int iMapSectorQty = g_MapList.GetSectorQty(map);
+	if (i >= iMapSectorQty)
+	{
+		g_Log.EventError("Unsupported sector #%d for map #%d specified.\n", i, map);
+		return nullptr;
+	}
+
+	for (int base = 0, m = 0; m < MAP_SUPPORTED_QTY; ++m)
+	{
+		if (!g_MapList.IsMapSupported(m))
+			continue;
+
+		if (m == map)
+		{
+			if (iMapSectorQty < i)
+				return nullptr;
+
+			return g_World.m_Sectors[base + i];
+		}
+
+		base += g_MapList.GetSectorQty(m);
+	}
+	return nullptr;
+}
+
+
+const CServerMapBlock* CWorldMap::GetMapBlock(const CPointMap& pt) // static
+{
+	ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetMapBlock");
 	// Get a map block from the cache. load it if not.
 
 	if (!pt.IsValidXY() || !g_MapList.IsInitialized(pt.m_map))
@@ -188,7 +272,7 @@ const CServerMapBlock* CWorld::GetMapBlock(const CPointMap& pt) const
 	const int iBy = pt.m_y / UO_BLOCK_SIZE;
 	const int iMaxY = g_MapList.GetY(pt.m_map);
 	const int iBlockIdx = (iBy * iMaxY) + iBx;
-	CWorldCache::MapBlockCacheCont& block = _Cache._mapBlocks[pt.m_map][iBlockIdx];
+	CWorldCache::MapBlockCacheCont& block = g_World._Cache._mapBlocks[pt.m_map][iBlockIdx];
 	if (block)
 	{
 		// Found it in cache.
@@ -203,7 +287,8 @@ const CServerMapBlock* CWorld::GetMapBlock(const CPointMap& pt) const
 	return block.get();
 }
 
-const CUOMapMeter* CWorld::GetMapMeter(const CPointMap& pt) const // Height of MAP0.MUL at given coordinates
+// Tile info fromMAP*.MUL at given coordinates
+const CUOMapMeter* CWorldMap::GetMapMeter(const CPointMap& pt) // static
 {
 	const CServerMapBlock* pMapBlock = GetMapBlock(pt);
 	if (!pMapBlock)
@@ -211,18 +296,18 @@ const CUOMapMeter* CWorld::GetMapMeter(const CPointMap& pt) const // Height of M
 	return(pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y)));
 }
 
-bool CWorld::IsTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance )
+bool CWorldMap::IsTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance ) // static
 {
-	ADDTOCALLSTACK("CWorld::IsTypeNear_Top");
+	ADDTOCALLSTACK("CWorldMap::IsTypeNear_Top");
 	if ( !pt.IsValidPoint() )
 		return false;
 	CPointMap ptn = FindTypeNear_Top( pt, iType, iDistance );
 	return( ptn.IsValidPoint());
 }
 
-CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance )
+CPointMap CWorldMap::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance ) // static
 {
-	ADDTOCALLSTACK("CWorld::FindTypeNear_Top");
+	ADDTOCALLSTACK("CWorldMap::FindTypeNear_Top");
 
 #define RESOURCE_Z_CHECK 8
 
@@ -474,7 +559,7 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 			fElem[3] = false;
 
 			//DEBUG_ERR(("iType %x, TerrainType %x\n",iType,g_World.GetTerrainItemType( pMeter->m_wTerrainIndex )));
-			if ( iType == g_World.GetTerrainItemType( pMeter->m_wTerrainIndex ) )
+			if ( iType == GetTerrainItemType( pMeter->m_wTerrainIndex ) )
 			{
 				fElem[3] = true;
 				//if ( ptElem[iRetElem].m_z > ptElem[3].m_z )
@@ -520,18 +605,18 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 #undef RESOURCE_Z_CHECK
 }
 
-bool CWorld::IsItemTypeNear( const CPointMap & pt, IT_TYPE iType, int iDistance, bool fCheckMulti )
+bool CWorldMap::IsItemTypeNear( const CPointMap & pt, IT_TYPE iType, int iDistance, bool fCheckMulti ) // static
 {
-	ADDTOCALLSTACK("CWorld::IsItemTypeNear");
+	ADDTOCALLSTACK("CWorldMap::IsItemTypeNear");
 	if ( !pt.IsValidPoint() )
 		return false;
 	const CPointMap ptn = FindItemTypeNearby( pt, iType, iDistance, fCheckMulti );
 	return ptn.IsValidPoint();
 }
 
-CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iDistance, bool fCheckMulti, bool fLimitZ)
+CPointMap CWorldMap::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iDistance, bool fCheckMulti, bool fLimitZ) // static
 {
-	ADDTOCALLSTACK("CWorld::FindItemTypeNearby");
+	ADDTOCALLSTACK("CWorldMap::FindItemTypeNearby");
 	// Find the closest item of this type.
 	// This does not mean that i can touch it.
 	// ARGS:
@@ -585,7 +670,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 
 			ptTest.m_z = pMeter->m_z;
 
-			if ( iType != g_World.GetTerrainItemType( pMeter->m_wTerrainIndex ) )
+			if ( iType != GetTerrainItemType( pMeter->m_wTerrainIndex ) )
 				continue;
 
 			iTestDistance = pt.GetDist(ptTest);
@@ -785,12 +870,14 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 	return ptFound;
 }
 
+
 //****************************************************
 
-void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
+void CWorldMap::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block) // static
 {
 	//Will get the highest CAN_I_PLATFORM|CAN_I_CLIMB and places it into block.Bottom
-	ADDTOCALLSTACK("CWorld::GetFixPoint");
+	ADDTOCALLSTACK("CWorldMap::GetFixPoint");
+
 	CItemBase * pItemDef = nullptr;
 	CItemBaseDupe * pDupeDef = nullptr;
 	CItem * pItem = nullptr;
@@ -1106,9 +1193,9 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 	}
 }
 
-void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck )
+void CWorldMap::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck ) // static
 {
-	ADDTOCALLSTACK_INTENSIVE("CWorld::GetHeightPoint");
+	ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetHeightPoint");
     const CItemBase * pItemDef = nullptr;
     const CItemBaseDupe * pDupeDef = nullptr;
 	CItem * pItem = nullptr;
@@ -1374,9 +1461,9 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 	}
 }
 
-char CWorld::GetHeightPoint( const CPointMap & pt, dword & dwBlockFlags, bool fHouseCheck )
+char CWorldMap::GetHeightPoint( const CPointMap & pt, dword & dwBlockFlags, bool fHouseCheck ) // static
 {
-	ADDTOCALLSTACK_INTENSIVE("CWorld::GetHeightPoint");
+	ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetHeightPoint");
 	const dword dwCan = dwBlockFlags;
 	CServerMapBlockState block( dwBlockFlags, pt.m_z + (PLAYER_HEIGHT / 2), pt.m_z + PLAYER_HEIGHT );
 	GetHeightPoint( pt, block, fHouseCheck );
@@ -1407,9 +1494,9 @@ char CWorld::GetHeightPoint( const CPointMap & pt, dword & dwBlockFlags, bool fH
 	return block.m_Bottom.m_z;
 }
 
-void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck )
+void CWorldMap::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck ) // static
 {
-	ADDTOCALLSTACK_INTENSIVE("CWorld::GetHeightPoint2");
+	ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetHeightPoint2");
 	// Height of statics at/above given coordinates
 	// do gravity here for the z.
 
@@ -1555,9 +1642,10 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 	}
 }
 
-char CWorld::GetHeightPoint2( const CPointMap & pt, dword & dwBlockFlags, bool fHouseCheck ) // Height of player who walked to X/Y/OLDZ
+// Height of player who walked to X/Y/OLDZ
+char CWorldMap::GetHeightPoint2( const CPointMap & pt, dword & dwBlockFlags, bool fHouseCheck ) // static
 {
-    ADDTOCALLSTACK_INTENSIVE("CWorld::GetHeightPoint2");
+    ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetHeightPoint2");
 	// Given our coords at pt including pt.m_z
 	// What is the height that gravity would put me at should i step here ?
 	// Assume my head height is PLAYER_HEIGHT/2
@@ -1621,48 +1709,4 @@ char CWorld::GetHeightPoint2( const CPointMap & pt, dword & dwBlockFlags, bool f
 		return( pt.m_z );
 
 	return( block.m_Bottom.m_z );
-}
-
-
-CItemTypeDef * CWorld::GetTerrainItemTypeDef( dword dwTerrainIndex )
-{
-	ADDTOCALLSTACK("CWorld::GetTerrainItemTypeDef");
-	CResourceDef * pRes = nullptr;
-
-	if ( g_World.m_TileTypes.IsValidIndex( dwTerrainIndex ) )
-	{
-		pRes = g_World.m_TileTypes[dwTerrainIndex];
-	}
-
-	if ( !pRes )
-	{
-		pRes = g_Cfg.ResourceGetDef( CResourceID( RES_TYPEDEF, 0 ) );
-	}
-	ASSERT( pRes );
-
-	CItemTypeDef * pItemTypeDef = dynamic_cast <CItemTypeDef*> (pRes);
-	ASSERT( pItemTypeDef );
-
-	return pItemTypeDef;
-}
-
-
-IT_TYPE CWorld::GetTerrainItemType( dword dwTerrainIndex )
-{
-	ADDTOCALLSTACK("CWorld::GetTerrainItemType");
-	CResourceDef * pRes = nullptr;
-
-	if ( g_World.m_TileTypes.IsValidIndex( dwTerrainIndex ) )
-	{
-		pRes = g_World.m_TileTypes[dwTerrainIndex];
-	}
-
-	if ( !pRes )
-		return IT_NORMAL;
-
-	const CItemTypeDef * pItemTypeDef = dynamic_cast<CItemTypeDef *>(pRes);
-	if ( !pItemTypeDef )
-		return IT_NORMAL;
-
-	return (IT_TYPE)pItemTypeDef->GetItemType();
 }

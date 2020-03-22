@@ -26,7 +26,7 @@ void CWorldCache::Init()
 
 void CWorldCache::CheckMapBlockCache(int64 iCurTime, int64 iCacheTime)
 {
-	ADDTOCALLSTACK("CWorld::CheckMapBlockCache");
+	ADDTOCALLSTACK("CWorldCache::CheckMapBlockCache");
 	// Clean out the sectors map cache if it has not been used recently.
 	// iTime == 0 = delete all.
 

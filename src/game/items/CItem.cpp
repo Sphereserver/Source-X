@@ -15,7 +15,10 @@
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../clients/CClient.h"
+#include "../CSector.h"
+#include "../CServer.h"
 #include "../CWorld.h"
+#include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CItem.h"
 #include "CItemCommCrystal.h"
@@ -704,7 +707,7 @@ char CItem::GetFixZ( CPointMap pt, dword dwBlockFlags )
 {
 	height_t zHeight = CItemBase::GetItemHeight( GetDispID(), &dwBlockFlags );
 	CServerMapBlockState block( dwBlockFlags, pt.m_z, pt.m_z + zHeight, pt.m_z + 2, zHeight );
-	g_World.GetFixPoint( pt, block );
+	CWorldMap::GetFixPoint( pt, block );
 	return block.m_Bottom.m_z;
 }
 
@@ -1292,7 +1295,7 @@ int64 CItem::GetDecayTime() const
 
             const int64 iTimeNextNewMoon = g_World.GetNextNewMoon((GetTopPoint().m_map == 1) ? false : true);
             const int64 iMinutesDelay = Calc_GetRandLLVal(20) * g_Cfg.m_iGameMinuteLength;
-			return g_World.GetTimeDiff(iTimeNextNewMoon) + iMinutesDelay;
+			return CServerTime::GetCurrentTime().GetTimeDiff(iTimeNextNewMoon) + iMinutesDelay;
         }
 		case IT_MULTI:
 		case IT_SHIP:
@@ -1481,7 +1484,7 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 		    ptNewPlace = pt;
         else
         {
-            const CPointMap ptNear = g_World.FindItemTypeNearby(pt, IT_WALL, 0, true, true);
+            const CPointMap ptNear = CWorldMap::FindItemTypeNearby(pt, IT_WALL, 0, true, true);
             if (!ptNear.IsValidPoint())
                 ptNewPlace = pt;
         }
@@ -4810,7 +4813,7 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 	int iVisibility = (int) (BASE_SIGHT + rWeatherSight + rLightSight);
 
 	// Check for the nearest land, only check every 4th square for speed
-	const CUOMapMeter * pMeter = g_World.GetMapMeter( ptCoords ); // Are we at sea?
+	const CUOMapMeter * pMeter = CWorldMap::GetMapMeter( ptCoords ); // Are we at sea?
 	if ( pMeter == nullptr )
 		return pResult;
 
@@ -4830,7 +4833,7 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 				for (int y = ptCoords.m_y - iVisibility; y <= (ptCoords.m_y + iVisibility); y += 2)
 				{
 					CPointMap ptCur((word)(x), (word)(y), ptCoords.m_z);
-					pMeter = g_World.GetMapMeter( ptCur );
+					pMeter = CWorldMap::GetMapMeter( ptCur );
 					if ( pMeter == nullptr )
 						continue;
 

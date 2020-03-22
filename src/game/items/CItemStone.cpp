@@ -3,6 +3,7 @@
 #include "../../common/CLog.h"
 #include "../../common/CScriptTriggerArgs.h"
 #include "../chars/CChar.h"
+#include "../CServer.h"
 #include "../CWorld.h"
 #include "CItemStone.h"
 #include "CItemMulti.h"
@@ -1239,7 +1240,7 @@ bool CItemStone::CheckValidMember( CStoneMember * pMember )
 	ASSERT(pMember);
 	ASSERT( pMember->GetParent() == this );
 
-	if ( GetAmount()==0 || g_Serv.GetExitFlag() )	// no reason to elect new if the stone is dead.
+	if ( (GetAmount() == 0) || g_Serv.GetExitFlag() )	// no reason to elect new if the stone is dead.
 		return true;	// we are deleting anyhow.
 
 	switch ( pMember->GetPriv())

@@ -63,7 +63,7 @@ void CClient::Cmd_GM_Page( lpctstr pszReason ) // Help button (Calls GM Call Men
 	{
 		SysMessageDefault( DEFMSG_MSG_GMPAGE_UPDATE );
 		pPage->SetReason( pszReason );
-		pPage->m_timePage = g_World.GetCurrentTime().GetTimeRaw();
+		pPage->m_timePage = CServerTime::GetCurrentTime().GetTimeRaw();
 	}
 	else
 	{
