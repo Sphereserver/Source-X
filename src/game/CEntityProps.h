@@ -6,9 +6,8 @@
 #ifndef _INC_CENTITYPROPS_H
 #define _INC_CENTITYPROPS_H
 
-//#include "../common/sphere_library/smap.h"
+#include "../common/parallel_hashmap/btree.h"
 #include "CComponentProps.h"
-#include <map>
 
 class CCPropsChar;
 class CCPropsItem;
@@ -23,8 +22,7 @@ struct CBaseBaseDef;
 
 class CEntityProps
 {
-    //tsdynamicmap<COMPPROPS_TYPE, CComponentProps*> _List;
-    std::map<COMPPROPS_TYPE, CComponentProps*> _List;
+    phmap::btree_map<COMPPROPS_TYPE, CComponentProps*> _List;
     using iterator          = decltype(_List)::iterator;
     using const_iterator    = decltype(_List)::const_iterator;
 

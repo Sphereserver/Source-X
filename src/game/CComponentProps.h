@@ -6,16 +6,16 @@
 #ifndef _INC_CCOMPONENTPROPS_H
 #define _INC_CCOMPONENTPROPS_H
 
+#include "../common/parallel_hashmap/btree.h"
 #include "../common/sphere_library/CSString.h"
 #include "game_enums.h"
-#include <map>
 
 class CScript;
 class CObjBase;
 class CClientTooltip;
 
 
-enum COMPPROPS_TYPE
+enum COMPPROPS_TYPE : uchar
 {
     COMP_PROPS_ITEMCHAR,
     COMP_PROPS_CHAR,
@@ -33,9 +33,9 @@ class CComponentProps
 
 public:
     using PropertyValNum_t  = int;
-    using BaseContNum_t = std::map<int, PropertyValNum_t>;  // <PropertyIndex (in the component-specific enum), PropertyVal>
+    using BaseContNum_t = phmap::btree_map<int, PropertyValNum_t>;  // <PropertyIndex (in the component-specific enum), PropertyVal>
     using BaseContNumPair_t = BaseContNum_t::value_type;
-    using BaseContStr_t = std::map<int, CSString>;          // <PropertyIndex (in the component-specific enum), PropertyVal>
+    using BaseContStr_t = phmap::btree_map<int, CSString>;          // <PropertyIndex (in the component-specific enum), PropertyVal>
     using BaseContStrPair_t = BaseContStr_t::value_type;
 
     CComponentProps(COMPPROPS_TYPE type);

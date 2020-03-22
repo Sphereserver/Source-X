@@ -59,16 +59,6 @@ void CEntity::SubscribeComponent(CComponent * pComponent)
     _List[compType] = pComponent;
 }
 
-void CEntity::UnsubscribeComponent(iterator& it, bool fEraseFromMap)
-{
-    ADDTOCALLSTACK_INTENSIVE("CEntity::UnsubscribeComponent(it)");
-    delete it->second;
-    if (fEraseFromMap)
-    {
-        it = _List.erase(it);
-    }
-}
-
 void CEntity::UnsubscribeComponent(CComponent *pComponent)
 {
     ADDTOCALLSTACK_INTENSIVE("CEntity::UnsubscribeComponent");

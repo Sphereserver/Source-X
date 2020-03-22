@@ -6,14 +6,13 @@
 #ifndef _INC_CENTITY_H
 #define _INC_CENTITY_H
 
-//#include "../common/sphere_library/smap.h"
+#include "../common/parallel_hashmap/btree.h"
 #include "CComponent.h"
 #include <map>
 
 class CEntity
 {
-    //tsdynamicmap<COMP_TYPE, CComponent*> _List;
-    std::map<COMP_TYPE, CComponent*> _List;
+    phmap::btree_map<COMP_TYPE, CComponent*> _List;
     using iterator          = decltype(_List)::iterator;
     using const_iterator    = decltype(_List)::const_iterator;
 
@@ -38,14 +37,6 @@ public:
     * @param pComponent the CComponent to suscribe.
     */
     void SubscribeComponent(CComponent *pComponent);
-
-    /**
-    * @brief Unsuscribes a CComponent. Use this if looping through the components with an iterator!
-    *
-    * @param it Iterator to the component to unsubscribe.
-    * @param fEraseFromMap Should i erase this component from the internal map? Use false if you're going to erase it manually later
-    */
-    void UnsubscribeComponent(iterator& it, bool fEraseFromMap = true);
 
     /**
     * @brief Unsuscribes a CComponent.
