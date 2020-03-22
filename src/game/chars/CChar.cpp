@@ -3344,8 +3344,6 @@ bool CChar::r_LoadVal( CScript & s )
 						return true;
 					}
 
-					if (! IsStrNumeric(ptcKey) )
-						return false;
 					int attackerIndex = Exp_GetVal(ptcKey);
 
 					SKIP_SEPARATORS(ptcKey);
