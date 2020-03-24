@@ -3309,6 +3309,7 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 
 	if ( Can(CAN_C_NONMOVER|CAN_C_STATUE) || IsStatFlag(STATF_FREEZE|STATF_STONE) )
 		return nullptr;
+
 	int iWeightLoadPercent = GetWeightLoadPercent(GetTotalWeight());
 	if ( !fCheckOnly )
 	{
@@ -4235,7 +4236,8 @@ void CChar::OnTickStatusUpdate()
 	if ( IsClient() )
 		GetClient()->UpdateStats();
 
-	int64 iTimeDiff = - CWorldGameTime::GetCurrentTime().GetTimeDiff( m_timeLastHitsUpdate );
+	const int64 iTimeCur = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+	int64 iTimeDiff = iTimeCur - _iTimeLastHitsUpdate;
 	if ( g_Cfg.m_iHitsUpdateRate && ( iTimeDiff >= g_Cfg.m_iHitsUpdateRate ) )
 	{
 		if ( m_fStatusUpdate & SU_UPDATE_HITS )
@@ -4244,7 +4246,7 @@ void CChar::OnTickStatusUpdate()
 			UpdateCanSee(cmd, m_pClient);		// send hits update to all nearby clients
 			m_fStatusUpdate &= ~SU_UPDATE_HITS;
 		}
-		m_timeLastHitsUpdate = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+		_iTimeLastHitsUpdate = iTimeCur;
 	}
 
 	if ( m_fStatusUpdate & SU_UPDATE_MODE )
@@ -4409,8 +4411,10 @@ bool CChar::OnTick()
 bool CChar::OnTickPeriodic()
 {
     EXC_TRY("OnTickPeriodic");
+	const int64 iTimeCur = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+
     ++_iRegenTickCount;
-    _timeNextRegen = CWorldGameTime::GetCurrentTime().GetTimeRaw() + MSECS_PER_TICK;
+    _iTimeNextRegen = iTimeCur + MSECS_PER_TICK;
     const bool fRegen = (_iRegenTickCount >= TICKS_PER_SEC);
 
     if (fRegen)
@@ -4453,13 +4457,13 @@ bool CChar::OnTickPeriodic()
     {
         CClient* pClient = GetClient();
         // Players have a silly "always run" flag that gets stuck on.
-        if (-(CWorldGameTime::GetCurrentTime().GetTimeDiff(pClient->m_timeLastEventWalk)) > 2 * MSECS_PER_TENTH)
+        if ( (iTimeCur - pClient->m_timeLastEventWalk) > (2 * MSECS_PER_TENTH) )
         {
             StatFlag_Clear(STATF_FLY);
         }
 
         // Check targeting timeout, if set
-        if ((pClient->m_Targ_Timeout > 0) && (CWorldGameTime::GetCurrentTime().GetTimeDiff(pClient->m_Targ_Timeout) <= 0))
+        if ((pClient->m_Targ_Timeout > 0) && ((iTimeCur - pClient->m_Targ_Timeout) > 0) )
         {
             pClient->addTargetCancel();
         }

@@ -737,7 +737,7 @@ void CAccount::OnLogout(CClient *pClient, bool bWasChar)
 	// so we should check whatever player is attached to a char
 	if ( pClient->IsConnectTypePacket() && bWasChar )
 	{
-		m_Last_Connect_Time = ( -CWorldGameTime::GetCurrentTime().GetTimeDiff(pClient->m_timeLogin) ) / (MSECS_PER_SEC * 60 );
+		m_Last_Connect_Time = ( CWorldGameTime::GetCurrentTime().GetTimeDiff(pClient->m_timeLogin) ) / (MSECS_PER_SEC * 60 );
 		if ( m_Last_Connect_Time < 0 )
 			m_Last_Connect_Time = 0;
 

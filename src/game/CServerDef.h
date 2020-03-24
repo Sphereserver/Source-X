@@ -47,7 +47,7 @@ private:
 	int64  m_timeLastValid;	// Last valid poll time
 	CSTime m_dateLastValid;
 
-	int64  m_timeCreate;	// When added to the list ? 0 = at start up.
+	int64  _iTimeCreate;	// When added to the list ? 0 = at start up.
 
 	// Status read from returned string.
 	CSString m_sStatus;	// last returned status string.

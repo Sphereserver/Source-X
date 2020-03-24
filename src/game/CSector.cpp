@@ -618,7 +618,7 @@ int CSector::GetLocalTime() const
 	ADDTOCALLSTACK("CSector::GetLocalTime");
 	//	Get local time of the day (in minutes)
 	CPointMap pt = GetBasePoint();
-	int64 iLocalTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+	int64 iLocalTime = CWorldGameTime::GetCurrentTimeInGameMinutes();
 
 	if ( !g_Cfg.m_bAllowLightOverride )
 	{
@@ -728,10 +728,10 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 	if ( fNight )
 	{
 		// Factor in the effects of the moons
+
 		// Trammel
 		uint iTrammelPhase = CWorldGameTime::GetMoonPhase( false );
 		// Check to see if Trammel is up here...
-
 		if ( IsMoonVisible( iTrammelPhase, localtime ))
 		{
 			static const byte sm_TrammelPhaseBrightness[] =

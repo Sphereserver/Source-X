@@ -54,7 +54,7 @@ void ProfileData::SetActive(int iSampleSec)
 void ProfileData::Start(PROFILE_TYPE id)
 {
 	ADDTOCALLSTACK("ProfileData::Start");
-	if (( id < 0 ) || ( id >= PROFILE_TIME_QTY ) || !m_iActiveWindowSeconds )
+	if (( id >= PROFILE_TIME_QTY ) || !m_iActiveWindowSeconds )
 		return;
 
 	// ensure profile is enabled
@@ -119,7 +119,7 @@ void ProfileData::Count(PROFILE_TYPE id, dword dwVal)
 bool ProfileData::IsEnabled(PROFILE_TYPE id) const
 {
 	ADDTOCALLSTACK("ProfileData::IsEnabled");
-	if (id < 0 || id > PROFILE_QTY)
+	if (id > PROFILE_QTY)
 		return false;
 
 	if (id < PROFILE_QTY)
@@ -137,7 +137,7 @@ bool ProfileData::IsEnabled(PROFILE_TYPE id) const
 
 void ProfileData::EnableProfile(PROFILE_TYPE id)
 {
-	if (id < 0 || id >= PROFILE_QTY)
+	if (id >= PROFILE_QTY)
 		return;
 
 	m_EnabledProfiles[id] = true;
@@ -172,7 +172,7 @@ lpctstr ProfileData::GetName(PROFILE_TYPE id) const
 		"FAULTS"
 	};
 
-	return (( id >= 0 ) && ( id < PROFILE_QTY )) ? sm_pszProfileName[id] : "";
+	return (id < PROFILE_QTY) ? sm_pszProfileName[id] : "";
 }
 
 lpctstr ProfileData::GetDescription(PROFILE_TYPE id) const

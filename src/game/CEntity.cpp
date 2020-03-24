@@ -59,16 +59,6 @@ void CEntity::SubscribeComponent(CComponent * pComponent)
     _List[compType] = pComponent;
 }
 
-void CEntity::UnsubscribeComponent(iterator& it, bool fEraseFromMap)
-{
-    ADDTOCALLSTACK_INTENSIVE("CEntity::UnsubscribeComponent(it)");
-    delete it->second;
-    if (fEraseFromMap)
-    {
-        it = _List.erase(it);
-    }
-}
-
 void CEntity::UnsubscribeComponent(CComponent *pComponent)
 {
     ADDTOCALLSTACK_INTENSIVE("CEntity::UnsubscribeComponent");
@@ -95,7 +85,7 @@ bool CEntity::IsComponentSubscribed(CComponent *pComponent) const
 CComponent * CEntity::GetComponent(COMP_TYPE type) const
 {
     ADDTOCALLSTACK_INTENSIVE("CEntity::GetComponent");
-    ASSERT((type >= 0) && (type < COMP_QTY));
+    ASSERT(type < COMP_QTY);
     if (_List.empty())
     {
         return nullptr;
@@ -213,7 +203,7 @@ CCRET_TYPE CEntity::OnTick()
         CComponent *pComponent = it->second;
         ASSERT(pComponent);
         CCRET_TYPE iRet = pComponent->OnTickComponent();
-        if (iRet != CCRET_CONTINUE)   
+        if (iRet != CCRET_CONTINUE)
         {
             return iRet;    // Stop the loop and return whatever return is needed.
         }

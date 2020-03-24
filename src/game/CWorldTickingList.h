@@ -17,7 +17,7 @@ public:
     static void AddObjSingle(int64 iTimeout, CTimedObject* pObj);
     static void DelObjSingle(CTimedObject* pObj);
 
-    static void AddCharPeriodic(CChar* pChar, bool fIgnoreSleep = false, bool fOverwrite = true);
+    static void AddCharPeriodic(CChar* pChar, bool fIgnoreSleep = false);
     static void DelCharPeriodic(CChar* pChar);
 
     static void AddObjStatusUpdate(CObjBase* pObj);

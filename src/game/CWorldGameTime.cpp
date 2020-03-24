@@ -10,7 +10,7 @@
 
 CServerTime CWorldGameTime::GetCurrentTime() // static
 {
-	ADDTOCALLSTACK_INTENSIVE("CWorldGameTime::GetCurrentTime");
+	//ADDTOCALLSTACK_INTENSIVE("CWorldGameTime::GetCurrentTime");
 	return g_World._GameClock.GetCurrentTime();  // Time in milliseconds
 }
 
@@ -29,7 +29,7 @@ int64 CWorldGameTime::GetCurrentTimeInGameMinutes( int64 basetime ) // static
 
 int64 CWorldGameTime::GetCurrentTimeInGameMinutes() // static
 {
-	ADDTOCALLSTACK_INTENSIVE("CWorldGameTime::GetCurrentTimeInGameMinutes");
+	ADDTOCALLSTACK("CWorldGameTime::GetCurrentTimeInGameMinutes");
 	return GetCurrentTimeInGameMinutes(GetCurrentTime().GetTimeRaw());
 }
 

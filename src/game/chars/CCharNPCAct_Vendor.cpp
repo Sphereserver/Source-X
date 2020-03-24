@@ -43,7 +43,7 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 	bool bRestockNow = false;
     int64 iRestockDelay = 10 * 60 * MSECS_PER_SEC;  // 10 Minutes delay
 
-	if ( !bForce && (CWorldGameTime::GetCurrentTime().GetTimeDiff(m_pNPC->m_timeRestock) < 0))
+	if ( !bForce && (CWorldGameTime::GetCurrentTime().GetTimeDiff(m_pNPC->m_timeRestock) <= 0))
 	{
         bRestockNow = true; // restock timeout has expired, make it restock again (unless it's declared to do not restock in the bellow lines).
 		CRegionWorld *region = GetRegion();

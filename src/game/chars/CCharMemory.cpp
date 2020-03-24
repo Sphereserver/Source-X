@@ -430,7 +430,7 @@ bool CChar::Memory_Fight_OnTick( CItemMemory * pMemory )
 		return true;
 	}
 
-	int64 iTimeDiff = - CWorldGameTime::GetCurrentTime().GetTimeDiff( pMemory->GetTimeStamp() );
+	const int64 iTimeDiff = CWorldGameTime::GetCurrentTime().GetTimeDiff( pMemory->GetTimeStamp() );
 
 	// If am fully healthy then it's not much of a fight.
 	if ( iTimeDiff > 60*60*MSECS_PER_SEC )

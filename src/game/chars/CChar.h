@@ -107,6 +107,7 @@ public:
 	std::vector<NotoSaves> m_notoSaves;
 
 	static const char *m_sClassName;
+
 	CCharPlayer * m_pPlayer;	// May even be an off-line player !
 	CCharNPC * m_pNPC;			// we can be both a player and an NPC if "controlled" ?
 	CPartyDef * m_pParty;		// What party am i in ?
@@ -175,11 +176,13 @@ public:
     short m_iKarma;
     ushort m_uiFame;
 
-	int64  _timeNextRegen;	    // When did i get my last regen tick ?
+	int64  _iTimeCreate;	    // When was i created ?
+	int64  _iTimePeriodicTick;
+	int64  _iTimeNextRegen;	    // When did i get my last regen tick ?
     ushort _iRegenTickCount;    // ticks until next regen.
-	int64  m_timeCreate;	    // When was i created ?
+	
 
-	int64 m_timeLastHitsUpdate;
+	int64 _iTimeLastHitsUpdate;
 	int64 m_timeLastCallGuards;
 
 	// Some character action in progress.
@@ -1144,9 +1147,9 @@ public:
 #define DEATH_HASCORPSE 0x010
 
     void Speak_RevealCheck(TALKMODE_TYPE mode);
-	virtual void Speak( lpctstr pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL );
-	virtual void SpeakUTF8( lpctstr pText, HUE_TYPE wHue= HUE_TEXT_DEF, TALKMODE_TYPE mode= TALKMODE_SAY, FONT_TYPE font= FONT_NORMAL, CLanguageID lang = 0 );
-	virtual void SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
+	virtual void Speak( lpctstr pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL ) override;
+	virtual void SpeakUTF8( lpctstr pText, HUE_TYPE wHue= HUE_TEXT_DEF, TALKMODE_TYPE mode= TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL, CLanguageID lang = 0 ) override;
+	virtual void SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) override;
 
 	bool OnFreezeCheck() const;
     bool IsStuck(bool fFreezeCheck);
@@ -1299,6 +1302,7 @@ public:
 	static CChar * CreateBasic( CREID_TYPE baseID );
 	static CChar * CreateNPC( CREID_TYPE id );
 };
+
 
 inline bool CChar::IsSkillBase( SKILL_TYPE skill ) noexcept // static
 {

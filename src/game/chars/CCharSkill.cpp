@@ -4056,7 +4056,8 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		return false;
 	}
 
-	if ( Skill_GetActive() != SKILL_NONE )
+	SKILL_TYPE skActive = Skill_GetActive();
+	if (skActive != SKILL_NONE )
 		Skill_Fail(true);		// fail previous skill unfinished. (with NO skill gain!)
 
 	if ( skill != SKILL_NONE )
@@ -4143,11 +4144,13 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		// Casting sound & animation when starting, Skill_Stroke() will do it the next times.
 		if ( fCraftSkill || fGatherSkill )
 		{
-			if ( !g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_NOSFX) )
-				Sound(Skill_GetSound(Skill_GetActive()));
+			skActive = Skill_GetActive();
 
-			if ( !g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_NOANIM) )
-				UpdateAnimate(Skill_GetAnim(Skill_GetActive()));
+			if ( !g_Cfg.IsSkillFlag(skActive, SKF_NOSFX) )
+				Sound(Skill_GetSound(skActive));
+
+			if ( !g_Cfg.IsSkillFlag(skActive, SKF_NOANIM) )
+				UpdateAnimate(Skill_GetAnim(skActive));
 		}
 
 		if ( IsSkillBase(skill) )

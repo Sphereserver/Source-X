@@ -646,7 +646,7 @@ void CWorld::GetBackupName( CSString & sArchive, lpctstr pszBaseDir, tchar chTyp
 	ADDTOCALLSTACK("CWorld::GetBackupName");
 	int iCount = iSaveCount;
 	int iGroup = 0;
-	for ( ; iGroup<g_Cfg.m_iSaveBackupLevels; ++iGroup )
+	for ( ; iGroup < g_Cfg.m_iSaveBackupLevels; ++iGroup )
 	{
 		if ( iCount & 0x7 )
 			break;

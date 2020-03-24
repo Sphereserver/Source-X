@@ -167,7 +167,7 @@ void CChar::CallGuards()
 		return;
 
     // Spam check, not calling this more than once per second, which will cause an excess of calls and checks on crowded areas because of the 2 CWorldSearch.
-	if (CWorldGameTime::GetCurrentTime().GetTimeDiff(m_timeLastCallGuards + (1 * MSECS_PER_SEC)) > 0)
+	if (CWorldGameTime::GetCurrentTime().GetTimeDiff(m_timeLastCallGuards + (1 * MSECS_PER_SEC)) <= 0)
 		return;
 
 	// We don't have any target yet, let's check everyone nearby
@@ -207,7 +207,7 @@ bool CChar::CallGuards( CChar * pCriminal )
 		return false;
     }
 
-    if (CWorldGameTime::GetCurrentTime().GetTimeDiff(m_timeLastCallGuards + (25 * MSECS_PER_TENTH)) > 0)	// Spam check
+    if (CWorldGameTime::GetCurrentTime().GetTimeDiff(m_timeLastCallGuards + (25 * MSECS_PER_TENTH)) <= 0)	// Spam check
         return false;
 
     m_timeLastCallGuards = CWorldGameTime::GetCurrentTime().GetTimeRaw();
@@ -1652,8 +1652,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
     }
 
     const WAR_SWING_TYPE iStageToSuspend = (IsSetCombatFlags(COMBAT_PREHIT) ? WAR_SWING_SWINGING : WAR_SWING_EQUIPPING);
-    if ( IsSetCombatFlags(COMBAT_FIRSTHIT_INSTANT) && (!m_atFight.m_iSwingIgnoreLastHitTag) 
-        && (m_atFight.m_iWarSwingState == iStageToSuspend) )
+    if ( IsSetCombatFlags(COMBAT_FIRSTHIT_INSTANT) && (!m_atFight.m_iSwingIgnoreLastHitTag) && (m_atFight.m_iWarSwingState == iStageToSuspend) )
     {
         const int64 iTimeDiff = ((CWorldGameTime::GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH) - GetKeyNum("LastHit"));
         if (iTimeDiff < 0)
@@ -1678,7 +1677,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		{
 			// Only start the swing this much tenths of second after the char stopped moving.
 			//  (Values changed between expansions. SE:0,25s / AOS:0,5s / pre-AOS:1,0s)
-			if ( m_pClient && ( -(CWorldGameTime::GetCurrentTime().GetTimeDiff(m_pClient->m_timeLastEventWalk) / MSECS_PER_TENTH) < g_Cfg.m_iCombatArcheryMovementDelay) )
+			if ( m_pClient && ( (CWorldGameTime::GetCurrentTime().GetTimeDiff(m_pClient->m_timeLastEventWalk) / MSECS_PER_TENTH) < g_Cfg.m_iCombatArcheryMovementDelay) )
 				return WAR_SWING_EQUIPPING;
 		}
 

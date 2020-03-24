@@ -160,8 +160,8 @@ void CNetworkInput::processData()
             {
                 // check for timeout
                 EXC_SET_BLOCK("check frozen");
-                const int64 iLastEventDiff = -CWorldGameTime::GetCurrentTime().GetTimeDiff(client->m_timeLastEvent);
-                if (g_Cfg.m_iDeadSocketTime > 0 && iLastEventDiff > g_Cfg.m_iDeadSocketTime)
+                const int64 iLastEventDiff = CWorldGameTime::GetCurrentTime().GetTimeDiff(client->m_timeLastEvent);
+                if ((g_Cfg.m_iDeadSocketTime > 0) && (iLastEventDiff > g_Cfg.m_iDeadSocketTime))
                 {
                     g_Log.Event(LOGM_CLIENTS_LOG | LOGL_EVENT, "%x:Frozen client disconnected (DeadSocketTime reached).\n", state->id());
                     state->m_client->addLoginErr(PacketLoginError::Other);		//state->markReadClosed();

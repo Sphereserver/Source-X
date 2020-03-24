@@ -2756,7 +2756,7 @@ byte CClient::Setup_Delete( dword iSlot ) // Deletion of character
 
 	// Make sure the char is at least x seconds old.
 	if ( g_Cfg.m_iMinCharDeleteTime &&
-		(- CWorldGameTime::GetCurrentTime().GetTimeDiff(pChar->m_timeCreate)/MSECS_PER_TENTH) < g_Cfg.m_iMinCharDeleteTime )
+		(CWorldGameTime::GetCurrentTime().GetTimeDiff(pChar->_iTimeCreate)/MSECS_PER_TENTH) < g_Cfg.m_iMinCharDeleteTime )
 	{
 		if ( GetPrivLevel() < PLEVEL_Counsel )
 		{

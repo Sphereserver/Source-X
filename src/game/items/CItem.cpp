@@ -1296,7 +1296,7 @@ int64 CItem::GetDecayTime() const
 
             const int64 iTimeNextNewMoon = CWorldGameTime::GetNextNewMoon((GetTopPoint().m_map == 1) ? false : true);
             const int64 iMinutesDelay = Calc_GetRandLLVal(20) * g_Cfg.m_iGameMinuteLength;
-			return CWorldGameTime::GetCurrentTime().GetTimeDiff(iTimeNextNewMoon) + iMinutesDelay;
+			return (iTimeNextNewMoon - CWorldGameTime::GetCurrentTime().GetTimeRaw() + iMinutesDelay);
         }
 		case IT_MULTI:
 		case IT_SHIP:

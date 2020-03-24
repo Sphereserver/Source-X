@@ -47,7 +47,7 @@ int64 CGMPage::GetAge() const
 {
 	ADDTOCALLSTACK("CGMPage::GetAge");
 	// How old in seconds.
-	return (-CWorldGameTime::GetCurrentTime().GetTimeDiff( m_timePage ) / MSECS_PER_SEC);
+	return (CWorldGameTime::GetCurrentTime().GetTimeDiff( m_timePage ) / MSECS_PER_SEC);
 }
 
 void CGMPage::ClearGMHandler()
