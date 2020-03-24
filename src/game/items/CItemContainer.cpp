@@ -991,7 +991,7 @@ void CItemContainer::OnOpenEvent( CChar *pCharOpener, const CObjBaseTemplate *pO
 		if ( pCharTop == pCharOpener )
 			sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_BVBOX_OPEN_SELF), iStones, GetName());
 		else
-			sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_BVBOX_OPEN_OTHER), pCharTop->GetPronoun(), iStones, pCharTop->GetPossessPronoun(), GetName());
+			sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_BVBOX_OPEN_OTHER), pCharTop->GetName(), iStones, GetName());
 
 		pCharOpener->SysMessage(pszMsg);
 
