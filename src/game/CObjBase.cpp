@@ -392,7 +392,7 @@ void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSour
     byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, word explodeid, word explodesound, dword effectuid, byte type) const
 {
 	ADDTOCALLSTACK("CObjBase::Effect");
-	
+
     if ( motion == EFFECT_FADE_SCREEN )
     {
         // This effect must be used only on client chars (and send it only to this client)
@@ -427,7 +427,7 @@ void CObjBase::EffectLocation(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMa
     byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, word explodeid, word explodesound, dword effectuid, byte type) const
 {
 	ADDTOCALLSTACK("CObjBase::EffectLocation");
-	
+
     if ( motion == EFFECT_FADE_SCREEN )
     {
         // This effect must be used only on client chars (and send it only to this client)
@@ -441,7 +441,7 @@ void CObjBase::EffectLocation(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMa
         }
         return;
     }
-    
+
     // show for everyone nearby
 	ClientIterator it;
 	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
@@ -552,7 +552,7 @@ void CObjBase::Emote2(lpctstr pText, lpctstr pText1, CClient * pClientExclude, b
 
 // Speak to all clients in the area.
 // ASCII packet
-void CObjBase::Speak( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font ) const
+void CObjBase::Speak( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font )
 {
 	ADDTOCALLSTACK_INTENSIVE("CObjBase::Speak");
 	CWorldComm::Speak( this, pText, wHue, mode, font );
@@ -560,7 +560,7 @@ void CObjBase::Speak( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYP
 
 // Speak to all clients in the area.
 // Unicode packet
-void CObjBase::SpeakUTF8( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) const
+void CObjBase::SpeakUTF8( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
 {
 	ADDTOCALLSTACK_INTENSIVE("CObjBase::SpeakUTF8");
 	// convert UTF8 to UNICODE.
@@ -572,7 +572,7 @@ void CObjBase::SpeakUTF8( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT
 // Speak to all clients in the area.
 // Unicode packet
 // Difference with SpeakUTF8: this method accepts as text input an nword, which is unicode if sphere is compiled with UNICODE macro)
-void CObjBase::SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) const
+void CObjBase::SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
 {
 	ADDTOCALLSTACK_INTENSIVE("CObjBase::SpeakUTF8Ex");
 	CWorldComm::SpeakUNICODE( this, pText, wHue, mode, font, lang );
@@ -837,7 +837,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 			break;
 		//return as decimal number or 0 if not set
 		//On these ones, check BaseDef if not found on dynamic
-		
+
         case OC_RECIPEALCHEMY:
         case OC_RECIPEBLACKSMITH:
         case OC_RECIPEBOWCRAFT:
@@ -1146,7 +1146,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
             GETNONWHITESPACE(ptcKey);
 
             COMPPROPS_TYPE id = (COMPPROPS_TYPE)Exp_GetVal(ptcKey);
-            bool fRes = (id >= 0) && (id < COMP_PROPS_QTY) && (nullptr != CEntityProps::GetComponentProps(id));
+            bool fRes = (id < COMP_PROPS_QTY) && (nullptr != CEntityProps::GetComponentProps(id));
             sVal.FormatVal(int(fRes));
             break;
         }
@@ -2070,7 +2070,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					iMaxLength,	sPrompt, sOrgValue, this );
 			}
 			break;
-		
+
 		case OV_MENU:
 			{
 				EXC_SET_BLOCK("MENU");
@@ -2179,7 +2179,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
             }
             else
                 return false;
-        }	
+        }
 			break;
 		case OV_PROMPTCONSOLE:
 		case OV_PROMPTCONSOLEU:

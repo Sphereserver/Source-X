@@ -1181,7 +1181,7 @@ int CClient::OnSkill_Forensics( CUID uid, int iSkillLevel, bool fTest )
 	}
 	else if ( pCorpse->GetTimeStamp() > 0 )
 	{
-		int len = sprintf( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_TIMER), pCorpse->GetName(), -CWorldGameTime::GetCurrentTime().GetTimeDiff(pCorpse->GetTimeStamp()) / MSECS_PER_SEC);
+		int len = sprintf( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_TIMER), pCorpse->GetName(), CWorldGameTime::GetCurrentTime().GetTimeDiff(pCorpse->GetTimeStamp()) / MSECS_PER_SEC);
 		if ( pName )
 			sprintf( pszTemp + len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_NAME), pName );
 		else
@@ -2442,7 +2442,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 	}
 
 	CVarDefCont * pTagInvitetime = m_pChar->m_TagDefs.GetKey("PARTY_LASTINVITETIME");
-	if ( pTagInvitetime && (CWorldGameTime::GetCurrentTime().GetTimeDiff(pTagInvitetime->GetValNum()) > 0) )
+	if ( pTagInvitetime && (CWorldGameTime::GetCurrentTime().GetTimeDiff(pTagInvitetime->GetValNum()) <= 0) )
 	{
 		SysMessageDefault( DEFMSG_PARTY_ADD_TOO_FAST );
 		return false;

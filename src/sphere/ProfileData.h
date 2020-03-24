@@ -8,7 +8,7 @@
 
 #include "../common/common.h"
 
-enum PROFILE_TYPE
+enum PROFILE_TYPE : uchar
 {
 	PROFILE_IDLE,		// Wait for stuff.
 	PROFILE_OVERHEAD,	// In between stuff.

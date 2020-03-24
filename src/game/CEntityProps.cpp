@@ -113,7 +113,7 @@ bool CEntityProps::IsSubscribedComponentProps(CComponentProps *pComponent) const
 CComponentProps * CEntityProps::GetComponentProps(COMPPROPS_TYPE type)
 {
     ADDTOCALLSTACK("CEntityProps::GetComponentProps");
-    ASSERT((type >= 0) && (type < COMP_PROPS_QTY));
+    ASSERT(type < COMP_PROPS_QTY);
     if (_List.empty())
     {
         return nullptr;
@@ -221,7 +221,7 @@ bool CEntityProps::r_WritePropVal(lpctstr ptcKey, CSString & sVal, const CObjBas
     ADDTOCALLSTACK("CEntityProps::r_WritePropVal");
     // return false: invalid property for any of the subscribed components
     // return true: valid property, whether it has a defined value or not
-   
+
     int iPropIndex = -1;
     bool fPropStr = false;
     COMPPROPS_TYPE iCCPType = (COMPPROPS_TYPE)-1;
@@ -282,7 +282,7 @@ bool CEntityProps::r_WritePropVal(lpctstr ptcKey, CSString & sVal, const CObjBas
             return true;        // return true regardlessly of the value being set or not (it's still a valid property)
         }
     }
-    
+
     if (pBaseEntityProps)
         return _CEPLoopWrite(pBaseEntityProps);
     return false;

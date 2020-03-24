@@ -1313,7 +1313,8 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 	}
 
 	EXC_SET_BLOCK("Distance checks");
-	int dist = GetTopPoint().GetDist(m_Act_p);
+	const CPointMap& ptMe = GetTopPoint();
+	int dist = ptMe.GetDist(m_Act_p);
     if (dist > UO_MAP_VIEW_RADAR)		// too far away ?
     {
         return false;
@@ -1345,7 +1346,7 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 	if (fFlee)
 	{
 		CPointMap ptOld = m_Act_p;
-		m_Act_p = GetTopPoint();
+		m_Act_p = ptMe;
 		m_Act_p.Move(GetDirTurn(m_Act_p.GetDir(ptOld), 4 + 1 - Calc_GetRandVal(3)));
 		int iRet = NPC_WalkToPoint(dist > 3);
 		m_Act_p = ptOld;	// last known point of the enemy.
@@ -1462,7 +1463,7 @@ void CChar::NPC_Act_GoHome()
 
 	if ( g_Cfg.m_iLostNPCTeleport )
 	{
-		int	iDistance	= m_ptHome.GetDist( ptCurrent );
+		const int iDistance = m_ptHome.GetDist( ptCurrent );
 		if ( (iDistance > g_Cfg.m_iLostNPCTeleport) && (iDistance > m_pNPC->m_Home_Dist_Wander) )
 		{
 			if ( IsTrigUsed(TRIGGER_NPCLOSTTELEPORT) )
@@ -1497,8 +1498,12 @@ void CChar::NPC_LootMemory( CItem * pItem )
 	pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_IGNORE;
 
 	// If the item is set to decay.
-	if ( pItem->IsTimerSet() && pItem->GetTimerDiff() > 0 )
-		pMemory->SetTimeout(pItem->GetTimerDiff());		// forget about this once the item is gone
+	if (pItem->IsTimerSet())
+	{
+		const int64 iTimerDiff = pItem->GetTimerDiff();
+		if (iTimerDiff > 0)
+			pMemory->SetTimeout(iTimerDiff);		// forget about this once the item is gone
+	}
 }
 
 void CChar::NPC_Act_Looting()
@@ -1510,11 +1515,11 @@ void CChar::NPC_Act_Looting()
 	//
 	// m_Act_UID = UID of the item/corpse that we trying to loot
 
-	if ( !(NPC_GetAiFlags() & NPC_AI_LOOTING) )
-		return;
-	if ( m_pNPC->m_Brain != NPCBRAIN_MONSTER || !Can(CAN_C_USEHANDS) || IsStatFlag(STATF_CONJURED|STATF_PET) || (GetKeyNum("DEATHFLAGS") & DEATH_NOCORPSE) )
-		return;
 	if ( m_pArea->IsFlag(REGION_FLAG_SAFE|REGION_FLAG_GUARDED) )
+		return;
+	if (!(NPC_GetAiFlags() & NPC_AI_LOOTING))
+		return;
+	if (m_pNPC->m_Brain != NPCBRAIN_MONSTER || !Can(CAN_C_USEHANDS) || IsStatFlag(STATF_CONJURED | STATF_PET) || (GetKeyNum("DEATHFLAGS") & DEATH_NOCORPSE))
 		return;
 
 	CItem * pItem = m_Act_UID.ItemFind();
@@ -1588,12 +1593,18 @@ void CChar::NPC_Act_Runto(int iDist)
 		case 2:
 			// Give it up...
 			// Go directly there...
-			if ( NPC_GetAiFlags()&NPC_AI_PERSISTENTPATH )
+			if ( NPC_GetAiFlags() & NPC_AI_PERSISTENTPATH )
 			{
-				if (!GetTopPoint().IsValidPoint())
-					iDist --;
+				const CPointMap& ptMe = GetTopPoint();
+				if (!ptMe.IsValidPoint())
+				{
+					--iDist;
+				}
 				else
-					iDist = iDist > m_Act_p.GetDist(GetTopPoint()) ? m_Act_p.GetDist(GetTopPoint()) : iDist-1;
+				{
+					const int iPDist = m_Act_p.GetDist(ptMe);
+					iDist = iDist > iPDist ? iPDist : iDist - 1;
+				}
 
 				if (iDist)
 					NPC_Act_Runto(iDist);
@@ -1602,10 +1613,8 @@ void CChar::NPC_Act_Runto(int iDist)
 			}
 			else
 			{
-				if ( m_Act_p.IsValidPoint() &&
-					IsPlayableCharacter() &&
-					!IsStatFlag( STATF_FREEZE|STATF_STONE ))
-					Spell_Teleport( m_Act_p, true, false);
+				if (m_Act_p.IsValidPoint() && IsPlayableCharacter() && !IsStatFlag(STATF_FREEZE | STATF_STONE))
+					Spell_Teleport(m_Act_p, true, false);
 				else
 					NPC_Act_Idle();
 			}
@@ -1632,12 +1641,18 @@ void CChar::NPC_Act_Goto(int iDist)
 		case 2:
 			// Give it up...
 			// Go directly there...
-			if ( NPC_GetAiFlags()&NPC_AI_PERSISTENTPATH )
+			if ( NPC_GetAiFlags() & NPC_AI_PERSISTENTPATH )
 			{
-				if (!GetTopPoint().IsValidPoint())
-					iDist --;
+				const CPointMap& ptMe = GetTopPoint();
+				if (!ptMe.IsValidPoint())
+				{
+					--iDist;
+				}
 				else
-					iDist = iDist > m_Act_p.GetDist(GetTopPoint()) ? m_Act_p.GetDist(GetTopPoint()) : iDist-1;
+				{
+					const int iPDist = m_Act_p.GetDist(ptMe);
+					iDist = iDist > iPDist ? iPDist : iDist - 1;
+				}
 
 				if (iDist)
 					NPC_Act_Runto(iDist);
@@ -1646,10 +1661,8 @@ void CChar::NPC_Act_Goto(int iDist)
 			}
 			else
 			{
-				if ( m_Act_p.IsValidPoint() &&
-					IsPlayableCharacter() &&
-					!IsStatFlag( STATF_FREEZE|STATF_STONE ))
-					Spell_Teleport( m_Act_p, true, false);
+				if (m_Act_p.IsValidPoint() && IsPlayableCharacter() && !IsStatFlag(STATF_FREEZE | STATF_STONE))
+					Spell_Teleport(m_Act_p, true, false);
 				else
 					NPC_Act_Idle();	// look for something new to do.
 			}
@@ -2305,10 +2318,12 @@ void CChar::NPC_Pathfinding()
 
 	// pathfinding is buggy near the edges of the map,
 	// so do not use it there
-	if ((ptLocal.m_x <= MAX_NPC_PATH_STORAGE_SIZE/2 ) || (ptLocal.m_y <= MAX_NPC_PATH_STORAGE_SIZE/2 ) ||
-		(ptLocal.m_x >= ( g_MapList.GetX(ptLocal.m_map) - MAX_NPC_PATH_STORAGE_SIZE/2) ) ||
-		(ptLocal.m_y >= ( g_MapList.GetY(ptLocal.m_map) - MAX_NPC_PATH_STORAGE_SIZE/2) ))
+	if ((ptLocal.m_x <= MAX_NPC_PATH_STORAGE_SIZE / 2) || (ptLocal.m_y <= MAX_NPC_PATH_STORAGE_SIZE / 2) ||
+		(ptLocal.m_x >= (g_MapList.GetX(ptLocal.m_map) - MAX_NPC_PATH_STORAGE_SIZE / 2)) ||
+		(ptLocal.m_y >= (g_MapList.GetY(ptLocal.m_map) - MAX_NPC_PATH_STORAGE_SIZE / 2)))
+	{
 		return;
+	}
 
 	// need 300 int at least to pathfind each step, but always
 	// search if this is a first step
@@ -2355,13 +2370,14 @@ void CChar::NPC_Food()
 	ASSERT(m_pNPC);
 	EXC_TRY("FoodAI");
 
+	const CPointMap& ptMe = GetTopPoint();
 	int		iFood = Stat_GetVal(STAT_FOOD);
 	int		iFoodLevel = Food_GetLevelPercent();
 	ushort	uiEatAmount = 1;
 	int		iSearchDistance = 2;
 	CItem	*pClosestFood = nullptr;
 	int		iClosestFood = 100;
-	int		iMyZ = GetTopPoint().m_z;
+	int		iMyZ = ptMe.m_z;
 	bool	fSearchGrass = false;
 
 	if ( iFood >= 10 )
@@ -2391,7 +2407,7 @@ void CChar::NPC_Food()
 	// Search for food nearby
 	EXC_SET_BLOCK("searching nearby");
 	iSearchDistance = (UO_MAP_VIEW_SIGHT * ( 100 - iFoodLevel ) ) / 100;
-	CWorldSearch AreaItems(GetTopPoint(), minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
+	CWorldSearch AreaItems(ptMe, minimum(iSearchDistance, m_pNPC->m_Home_Dist_Wander));
 	for (;;)
 	{
 		CItem *pItem = AreaItems.GetItem();
@@ -2465,7 +2481,7 @@ void CChar::NPC_Food()
 					// no food around, but maybe i am ok with grass?
 	else
 	{
-		NPCBRAIN_TYPE brain = GetNPCBrainGroup();
+		const NPCBRAIN_TYPE brain = GetNPCBrainGroup();
 		if ( brain == NPCBRAIN_ANIMAL )						// animals eat grass always
 			fSearchGrass = true;
 		else if (( brain == NPCBRAIN_HUMAN ) && !iFood )	// human eat grass if starving nearly dead
@@ -2480,11 +2496,11 @@ void CChar::NPC_Food()
 		EXC_SET_BLOCK("searching grass");
 		if ( pCharDef->m_FoodType.ContainsResourceID(rid) ) // do I accept grass as a food?
 		{
-			CItem *pResBit = CWorldMap::CheckNaturalResource(GetTopPoint(), IT_GRASS, true, this);
+			CItem *pResBit = CWorldMap::CheckNaturalResource(ptMe, IT_GRASS, true, this);
 			if ( pResBit && pResBit->GetAmount() && ( pResBit->GetTopPoint().m_z == iMyZ ) )
 			{
 				EXC_SET_BLOCK("eating grass");
-				ushort uiEaten = pResBit->ConsumeAmount(15);
+				const ushort uiEaten = pResBit->ConsumeAmount(15);
 				EatAnim("grass", uiEaten/10);
 
 				//	the bit is not needed in a worldsave, timeout of 10 minutes
@@ -2505,7 +2521,7 @@ void CChar::NPC_Food()
 					case NPCACT_FLEE:
 						{
 							EXC_SET_BLOCK("searching grass nearby");
-							CPointMap pt = CWorldMap::FindTypeNear_Top(GetTopPoint(), IT_GRASS, minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
+							CPointMap pt = CWorldMap::FindTypeNear_Top(ptMe, IT_GRASS, minimum(iSearchDistance, m_pNPC->m_Home_Dist_Wander));
 							if (( pt.m_x >= 1 ) && ( pt.m_y >= 1 ))
 							{
 								// we found grass nearby, but has it already been consumed?

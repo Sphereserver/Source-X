@@ -268,9 +268,9 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 	m_iVisualRange = UO_MAP_VIEW_SIZE_DEFAULT;
 	m_virtualGold = 0;
 
-    m_timeCreate = CWorldGameTime::GetCurrentTime().GetTimeRaw();
-    m_timeLastHitsUpdate = CWorldGameTime::GetCurrentTime().GetTimeRaw();
-    _timeNextRegen = m_timeLastHitsUpdate + MSECS_PER_SEC;  // make it regen in one second from now, no need to instant regen.
+	_iTimePeriodicTick = 0;
+    _iTimeCreate = _iTimeLastHitsUpdate = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+    _iTimeNextRegen = _iTimeLastHitsUpdate + MSECS_PER_SEC;  // make it regen in one second from now, no need to instant regen.
     _iRegenTickCount = 0;
 	m_timeLastCallGuards = 0;
 
@@ -586,10 +586,11 @@ void CChar::GoAwake()
 {
     ADDTOCALLSTACK("CChar::GoAwake");
     ASSERT(IsSleeping());
-    THREAD_UNIQUE_LOCK_SET;
 
+	CWorldTickingList::AddCharPeriodic(this, true);
+
+    THREAD_UNIQUE_LOCK_SET;
     CTimedObject::GoAwake();       // Awake it first, otherwise some other things won't work
-	CWorldTickingList::AddCharPeriodic(this);
     SetTimeout(Calc_GetRandVal(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
 
     for (CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext())
@@ -1014,10 +1015,10 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	m_atUnk.m_dwArg2 = pChar->m_atUnk.m_dwArg2;
 	m_atUnk.m_dwArg3 = pChar->m_atUnk.m_dwArg3;
 
-	_timeNextRegen = pChar->_timeNextRegen;
-	m_timeCreate = pChar->m_timeCreate;
+	_iTimeNextRegen = pChar->_iTimeNextRegen;
+	_iTimeCreate = pChar->_iTimeCreate;
 
-	m_timeLastHitsUpdate = pChar->m_timeLastHitsUpdate;
+	_iTimeLastHitsUpdate = pChar->_iTimeLastHitsUpdate;
 
 	m_prev_Hue = pChar->m_prev_Hue;
 	SetHue(pChar->GetHue());
@@ -1060,7 +1061,9 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 		m_pNPC->m_Brain = pChar->m_pNPC->m_Brain;
 		//m_pNPC->m_bonded = pChar->m_pNPC->m_bonded;
 	}
+
 	FixWeirdness();
+
 	SetName( pChar->GetName());	// SetName after FixWeirdness, otherwise it can be replaced again.
 	// We copy tags,etc first and place it because of NPC_LoadScript and @Create trigger, so it have information before calling it
 	m_TagDefs.Copy( &( pChar->m_TagDefs ) );
@@ -1071,7 +1074,8 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	//Not calling NPC_LoadScript() because, in some part, it's breaking the name and looking for template names.
 	// end of CChar
 
-    CEntity::Copy(static_cast<CEntity*>(pChar));
+    CEntity::Copy(pChar);
+
 	// Begin copying items.
 	for ( int i = 0 ; i < LAYER_QTY; ++i)
 	{
@@ -1141,9 +1145,15 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 
 	}
 	// End copying items.
+
 	FixWeight();
+
+	if (pChar->_iTimePeriodicTick != 0)
+	{
+		CWorldTickingList::AddCharPeriodic(this);
+	}
+
 	Update();
-	CWorldTickingList::AddCharPeriodic(this);
 	return true;
 }
 
@@ -2451,7 +2461,7 @@ do_default:
 			sVal.FormatVal( m_defense + pCharDef->m_defense );
 			return true;
 		case CHC_AGE:
-			sVal.FormatLLVal( -( CWorldGameTime::GetCurrentTime().GetTimeDiff(m_timeCreate) / ( MSECS_PER_SEC * 60 * 60 *24 ) )); //displayed in days
+			sVal.FormatLLVal( CWorldGameTime::GetCurrentTime().GetTimeDiff(_iTimeCreate) / ( MSECS_PER_SEC * 60 * 60 *24 ) ); //displayed in days
 			return true;
 		case CHC_BANKBALANCE:
 			sVal.FormatVal( GetBank()->ContentCount( CResourceID(RES_TYPEDEF,IT_GOLD)));
@@ -2799,7 +2809,7 @@ do_default:
 			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, GetDispID()) );
 			break;
 		case CHC_CREATE:
-			sVal.FormatLLVal( -( CWorldGameTime::GetCurrentTime().GetTimeDiff(m_timeCreate) / MSECS_PER_TENTH));  // Displayed in Tenths of Second.
+			sVal.FormatLLVal( CWorldGameTime::GetCurrentTime().GetTimeDiff(_iTimeCreate) / MSECS_PER_TENTH );  // Displayed in Tenths of Second.
 			break;
 		case CHC_DIR:
 			{
@@ -3650,7 +3660,7 @@ void CChar::r_Write( CScript & s )
 	EXC_TRY("r_Write");
 
 	s.WriteSection("WORLDCHAR %s", GetResourceName());
-	//s.WriteKeyVal("CREATE", -(CWorldGameTime::GetCurrentTime().GetTimeDiff(m_timeCreate) / MSECS_PER_TENTH)); // Do we need to save it?
+	//s.WriteKeyVal("CREATE", CWorldGameTime::GetCurrentTime().GetTimeDiff(_iTimeCreate) / MSECS_PER_TENTH ); // Do we need to save it?
 
     // Do not save TAG.LastHit (used by PreHit combat flag). It's based on the server uptime, so if this tag isn't zeroed,
     //  after the server restart the char may not be able to attack until the server reaches the serv.time when the previous TAG.LastHit was set.

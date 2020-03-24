@@ -188,24 +188,17 @@ bool CServer::IsResyncing() const
 void CServer::Shutdown( int64 iMinutes ) // If shutdown is initialized
 {
 	ADDTOCALLSTACK("CServer::Shutdown");
-	if ( iMinutes == 0 )
+	if ( iMinutes <= 0 )
 	{
-		if ( ! (m_timeShutdown > 0) )
+		if ( m_timeShutdown == 0 )
 			return;
+
 		m_timeShutdown = 0;
 		CWorldComm::Broadcast( g_Cfg.GetDefaultMsg( DEFMSG_MSG_SERV_SHUTDOWN_CANCEL ) );
 		return;
 	}
 
-	if ( iMinutes < 0 )
-	{
-		iMinutes = CWorldGameTime::GetCurrentTime().GetTimeDiff( m_timeShutdown ) / ( 60 * MSECS_PER_SEC);
-	}
-	else
-	{
-		m_timeShutdown = CWorldGameTime::GetCurrentTime().GetTimeRaw() + ( iMinutes * 60 * MSECS_PER_SEC);
-	}
-
+	m_timeShutdown = CWorldGameTime::GetCurrentTime().GetTimeRaw() + ( iMinutes * 60 * MSECS_PER_SEC);
 	CWorldComm::Broadcastf(g_Cfg.GetDefaultMsg( DEFMSG_MSG_SERV_SHUTDOWN ), iMinutes);
 }
 
@@ -2167,7 +2160,7 @@ void CServer::OnTick()
 	if ( m_timeShutdown > 0 )
 	{
 		EXC_SET_BLOCK("shutdown");
-		if ( CWorldGameTime::GetCurrentTime().GetTimeDiff(m_timeShutdown) <= 0 )
+		if ( CWorldGameTime::GetCurrentTime().GetTimeDiff(m_timeShutdown) > 0 )
 			SetExitFlag(2);
 	}
 

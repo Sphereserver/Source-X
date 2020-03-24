@@ -169,7 +169,7 @@ void CChar::Stat_SetVal( STAT_TYPE i, ushort uiVal )
 
     if ((i == STAT_STR) && (uiVal == 0))
     {   // Ensure this char will tick and die
-        CWorldTickingList::AddCharPeriodic(this, true, false);
+        CWorldTickingList::AddCharPeriodic(this, true);
     }
 }
 
@@ -191,7 +191,7 @@ void CChar::Stat_AddVal( STAT_TYPE i, int iVal )
 
     if ((i == STAT_STR) && (iVal <= 0))
     {   // Ensure this char will tick and die
-		CWorldTickingList::AddCharPeriodic(this, true, false);
+		CWorldTickingList::AddCharPeriodic(this, true);
     }
 }
 

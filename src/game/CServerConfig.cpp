@@ -1987,7 +1987,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
             sVal.FormatVal( TICKS_PER_SEC );
             break;
 		case RC_TIMEUP:
-			sVal.FormatLLVal( ( - CWorldGameTime::GetCurrentTime().GetTimeDiff( g_World._iTimeStartup )) / MSECS_PER_SEC );
+			sVal.FormatLLVal( CWorldGameTime::GetCurrentTime().GetTimeDiff( g_World._iTimeStartup ) / MSECS_PER_SEC );
 			break;
 		case RC_TIMERCALL:
 			sVal.FormatLLVal(_iTimerCall / (60*MSECS_PER_SEC));
