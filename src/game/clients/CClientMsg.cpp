@@ -1708,7 +1708,7 @@ bool CClient::addTargetChars( CLIMODE_TYPE mode, CREID_TYPE baseID, bool fNotoCh
 		return false;
 
 	tchar * pszTemp = Str_GetTemp();
-	snprintf(pszTemp, STR_TEMPLENGTH, "%s '%s'?", g_Cfg.GetDefaultMsg(DEFMSG_WHERE_TO_SUMMON), pBase->GetTradeName());
+	snprintf(pszTemp, STR_TEMPLENGTH, "%s '%s'", g_Cfg.GetDefaultMsg(DEFMSG_WHERE_TO_SUMMON), pBase->GetTradeName());
 
 	addTarget(mode, pszTemp, true, fNotoCheck, iTimeout);
 	return true;
@@ -1749,7 +1749,7 @@ bool CClient::addTargetItems( CLIMODE_TYPE targmode, ITEMID_TYPE id, HUE_TYPE co
 	}
 
 	tchar *pszTemp = Str_GetTemp();
-	snprintf(pszTemp, STR_TEMPLENGTH, "%s %s?", g_Cfg.GetDefaultMsg(DEFMSG_WHERE_TO_PLACE), pszName);
+	snprintf(pszTemp, STR_TEMPLENGTH, "%s %s", g_Cfg.GetDefaultMsg(DEFMSG_WHERE_TO_PLACE), pszName);
 
 	if ( CItemBase::IsID_Multi( id ) )	// a multi we get from Multi.mul
 	{
