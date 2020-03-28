@@ -1,6 +1,6 @@
-
 // Actions specific to an NPC.
 
+#include "../../common/flat_containers/flat_set.hpp"
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
 #include "../clients/CClient.h"
@@ -263,7 +263,7 @@ bool CCharNPC::IsVendor() const
 
 int CCharNPC::GetNpcAiFlags( const CChar *pChar ) const 
 {
-	CVarDefCont *pVar = pChar->GetKey( "OVERRIDE.NPCAI", true );
+	CVarDefCont *pVar = pChar->GetKey("OVERRIDE.NPCAI", true );
 	if (pVar != nullptr)
 		return (int)(pVar->GetValNum());
 	return g_Cfg.m_iNpcAi;
@@ -307,20 +307,25 @@ void CChar::NPC_CreateTrigger()
 	ADDTOCALLSTACK("CChar::NPC_CreateTrigger");
 	ASSERT(m_pNPC);
 
+	fc::vector_set<const CResourceLink*> executedEvents;
 	CCharBase *pCharDef = Char_GetDef();
+
 	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
 	lpctstr pszTrigName = "@Create";
-	CTRIG_TYPE iAction = (CTRIG_TYPE)FindTableSorted(pszTrigName, sm_szTrigName, CountOf(sm_szTrigName) - 1);
+	CTRIG_TYPE iAction = (CTRIG_TYPE)FindTableSorted(pszTrigName, sm_szTrigName, CountOf(sm_szTrigName) - 1);	
 
 	// 2) TEVENTS
 	for (size_t i = 0; i < pCharDef->m_TEvents.size(); ++i)
 	{
-		CResourceLink * pLink = pCharDef->m_TEvents[i];
-		if (!pLink || !pLink->HasTrigger(iAction))
+		CResourceLink * pLink = pCharDef->m_TEvents[i].GetRef();
+		if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
 			continue;
+
 		CResourceLock s;
 		if (!pLink->ResourceLock(s))
 			continue;
+
+		executedEvents.emplace(pLink);
 		iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, 0);
 		if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
 			return;
@@ -329,12 +334,15 @@ void CChar::NPC_CreateTrigger()
 	// 4) EVENTSPET triggers
 	for (size_t i = 0; i < g_Cfg.m_pEventsPetLink.size(); ++i)
 	{
-		CResourceLink * pLink = g_Cfg.m_pEventsPetLink[i];
-		if (!pLink || !pLink->HasTrigger(iAction))
+		CResourceLink * pLink = g_Cfg.m_pEventsPetLink[i].GetRef();
+		if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
 			continue;
+
 		CResourceLock s;
 		if (!pLink->ResourceLock(s))
 			continue;
+
+		executedEvents.emplace(pLink);
 		iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, 0);
 		if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
 			return;

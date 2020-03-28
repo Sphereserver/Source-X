@@ -1,5 +1,6 @@
 #include "../../../sphere/threads.h"
 #include "../../CException.h"
+#include "../../CScript.h"
 #include "CSkillDef.h"
 
 lpctstr const CSkillDef::sm_szTrigName[SKTRIG_QTY+1] =

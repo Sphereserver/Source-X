@@ -6,11 +6,12 @@
 #ifndef _INC_CTIMEDFUNCTIONS_H
 #define _INC_CTIMEDFUNCTIONS_H
 
-#include "../common/CScript.h"
+#include "../common/CScriptContexts.h"
 #include "../common/CScriptObj.h"
 #include "../common/CUID.h"
 
 struct TimedFunction;
+class CScript;
 class CString;
 
 class CTimedFunctions

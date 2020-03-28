@@ -1,18 +1,22 @@
 /*
-* @file CEncrypt.h
+* @file CCrypto.h
 * @brief Support for login encryption and MD5 hashing.
 */
 
 #ifndef _INC_CCRYPT_H
 #define _INC_CCRYPT_H
 
-#include "../CScript.h"
+#include "../common.h"
+#include <vector>
 
 #define CLIENT_END 0x00000001
+
 
 typedef struct keyInstance*		tf_keyInstance;
 typedef struct cipherInstance*	tf_cipherInstance;
 class CMD5;
+class CScript;
+
 
 enum CONNECT_TYPE	// What type of client connection is this ?
 {
@@ -106,8 +110,9 @@ protected:
 	//static const word packet_size[0xde];
 
 public:
-	static void LoadKeyTable(CScript & s);
 	static std::vector<CCryptoClientKey> client_keys;
+
+	static void LoadKeyTable(CScript & s);
 	static void addNoCryptKey(void);
 
 	// --------------- Generic -----------------------------------

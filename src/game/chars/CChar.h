@@ -21,7 +21,6 @@
 
 
 class CCharNPC;
-class CMultiStorage;
 
 enum NPCBRAIN_TYPE	// General AI type.
 {
@@ -151,15 +150,6 @@ public:
 	HUE_TYPE m_prev_Hue;		// Backup of skin color. in case of polymorph etc.
 	HUE_TYPE m_wBloodHue;		// Replicating CharDef's BloodColor on the char, or overriding it.
 
-	// Client's local light (might be useful in the future for NPCs also? keep it here for now)
-	byte m_LocalLight;
-
-    // Multis
-    uint8 _iMaxHouses;              // Max houses this player (Client?) can have (Overriding CAccount::_iMaxHouses)
-    uint8 _iMaxShips;               // Max ships this player (Client?) can have (Overriding CAccount::_iMaxShips)
-    CMultiStorage *_pMultiStorage;	// List of houses.
-
-	// When events happen to the char. check here for reaction scripts.
 
 	// Skills, Stats and health
 	struct
@@ -322,9 +312,9 @@ private:
 	CChar& operator=(const CChar& other);
 
 public:
-    CMultiStorage *GetMultiStorage();
     virtual void GoSleep();
     virtual void GoAwake();
+
 	// Status and attributes ------------------------------------
 	int IsWeird() const;
 	char GetFixZ( const CPointMap& pt, dword dwBlockFlags = 0);

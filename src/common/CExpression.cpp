@@ -1,6 +1,5 @@
 
 #include <cmath>
-#include "../game/CObjBase.h"
 #include "../game/CServerConfig.h"
 #include "sphere_library/CSRand.h"
 #include "CException.h"
@@ -1035,7 +1034,7 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 	return llVal;
 }
 
-int g_getval_reentrant_check = 0;
+short int _iGetVal_reentrant_check = 0;
 
 llong CExpression::GetVal( lpctstr & pExpr )
 {
@@ -1066,15 +1065,15 @@ llong CExpression::GetVal( lpctstr & pExpr )
 	if ( pExpr == nullptr )
 		return 0;
 
-	++g_getval_reentrant_check;
-	if ( g_getval_reentrant_check > 128 )
+	++_iGetVal_reentrant_check;
+	if (_iGetVal_reentrant_check > 128 )
 	{
 		g_Log.EventError( "Deadlock detected while parsing '%s'. Fix the error in your scripts.\n", pExpr );
-		--g_getval_reentrant_check;
+		--_iGetVal_reentrant_check;
 		return 0;
 	}
 	llong llVal = GetValMath(GetSingle(pExpr), pExpr);
-	--g_getval_reentrant_check;
+	--_iGetVal_reentrant_check;
 
 	return llVal;
 }

@@ -7,6 +7,7 @@
 #include "../components/CCSpawn.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
+#include "../CWorldTickingList.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
@@ -1056,6 +1057,7 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool fCheckFollowerSlots )
 	pPet->Update();
 	pPet->Skill_Start(SKILL_NONE);	// was NPCACT_RIDDEN
 	pPet->SoundChar(CRESND_IDLE);
+	CWorldTickingList::AddCharPeriodic(pPet);
 	return pPet;
 }
 

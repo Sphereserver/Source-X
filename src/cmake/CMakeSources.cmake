@@ -126,6 +126,10 @@ common/CException.cpp
 common/CException.h
 common/CExpression.cpp
 common/CExpression.h
+common/CFloatMath.cpp
+common/CFloatMath.h
+common/CLocalVarsExtra.cpp
+common/CLocalVarsExtra.h
 common/CLog.cpp
 common/CLog.h
 common/CServerMap.cpp
@@ -162,8 +166,6 @@ common/CUOInstall.cpp
 common/CUOInstall.h
 common/CVarDefMap.cpp
 common/CVarDefMap.h
-common/CVarFloat.cpp
-common/CVarFloat.h
 common/datatypes.h
 common/sphereproto.h
 common/sphereversion.h
@@ -560,5 +562,6 @@ sphereCrypt.ini
 
 INCLUDE_DIRECTORIES (
 common/mysql/
+common/flat_containers/
 common/parallel_hashmap/
 )

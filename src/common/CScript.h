@@ -7,22 +7,9 @@
 #define _INC_CSCRIPT_H
 
 #include "sphere_library/CSMemBlock.h"
+#include "CScriptContexts.h"
 #include "CCacheableScriptFile.h"
 
-#define SPHERE_SCRIPT		".scp"
-#define SCRIPT_MAX_SECTION_LEN 128
-
-
-struct CScriptLineContext
-{
-public:
-	int m_iOffset;
-	int m_iLineNum;		// for debug purposes if there is an error.
-public:
-	void Init();
-	bool IsValid() const;
-	CScriptLineContext();
-};
 
 class CScriptKey
 {

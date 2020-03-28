@@ -6,7 +6,6 @@
 #ifndef _INC_CRESOURCEDEF_H
 #define _INC_CRESOURCEDEF_H
 
-#include "../CScript.h"
 #include "../CScriptObj.h"
 #include "CResourceID.h"
 
@@ -18,10 +17,13 @@ class CResourceDef : public CScriptObj
     // Define a generic resource block in the scripts.
     // Now the scripts can be modular. resources can be defined any place.
     // NOTE: This may be loaded fully into memory or just an Index to a file.
+
 private:
     CResourceID m_rid;		// the true resource id. (must be unique for the RES_TYPE)
+
 protected:
     const CVarDefContNum * m_pDefName;	// The name of the resource. (optional)
+
 public:
     static const char *m_sClassName;
     CResourceDef(CResourceID rid, lpctstr pszDefName) : m_rid(rid), m_pDefName(nullptr)
@@ -32,8 +34,9 @@ public:
     {
     }
     virtual ~CResourceDef()
-    {// need a virtual for the dynamic_cast to work.
-     // ?? Attempt to remove m_pDefName ?
+    {
+        // need a virtual for the dynamic_cast to work.
+        // ?? Attempt to remove m_pDefName ?
     }
 
 private:
@@ -61,7 +64,7 @@ public:
 
     // Get the name of the resource item. (Used for saving) may be number or name
     lpctstr GetResourceName() const;
-    virtual inline lpctstr GetName() const	// default to same as the DEFNAME name.
+    virtual lpctstr GetName() const	// default to same as the DEFNAME name.
     {
         return GetResourceName();
     }

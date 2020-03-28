@@ -6,13 +6,13 @@
 #ifndef _INC_CENTITY_H
 #define _INC_CENTITY_H
 
-#include "../common/parallel_hashmap/btree.h"
+#include "../common/flat_containers/flat_map.hpp"
 #include "CComponent.h"
 #include <map>
 
 class CEntity
 {
-    phmap::btree_map<COMP_TYPE, CComponent*> _List;
+    fc::vector_map<COMP_TYPE, CComponent*> _List;
     using iterator          = decltype(_List)::iterator;
     using const_iterator    = decltype(_List)::const_iterator;
 

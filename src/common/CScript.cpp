@@ -9,22 +9,6 @@
 #include "common.h"
 
 
-void CScriptLineContext::Init()
-{
-	m_iOffset = -1;
-	m_iLineNum = -1;
-}
-
-bool CScriptLineContext::IsValid() const
-{
-	return ( m_iOffset != -1 );
-}
-
-CScriptLineContext::CScriptLineContext()
-{
-	Init();
-}
-
 
 ///////////////////////////////////////////////////////////////
 // -CScriptKey

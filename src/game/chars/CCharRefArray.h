@@ -6,12 +6,12 @@
 #ifndef _INC_CCHARREFARRAY_H
 #define _INC_CCHARREFARRAY_H
 
-#include "../../common/CScript.h"
 #include "../../common/sphere_library/CSTypedArray.h"
 #include "../../common/CUID.h"
 
 
 class CChar;
+class CScript;
 
 class CCharRefArray
 {
@@ -43,9 +43,7 @@ public:
 	void WritePartyChars( CScript & s );
 
 public:
-	CCharRefArray()
-	{
-	}
+	CCharRefArray() = default;
 
 private:
 	CCharRefArray(const CCharRefArray& copy);

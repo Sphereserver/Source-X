@@ -232,7 +232,6 @@ CChar * CChar::CreateBasic(CREID_TYPE baseID) // static
 {
 	ADDTOCALLSTACK("CChar::CreateBasic");
     CChar *pChar = new CChar(baseID);
-    pChar->_pMultiStorage = new CMultiStorage(pChar->GetUID());
 	return pChar;
 }
 
@@ -251,12 +250,10 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 
 	if ( g_World.m_fSaveParity )
 		StatFlag_Set(STATF_SAVEPARITY);	// It will get saved next time.
+
 	m_dirFace = DIR_SE;
 	m_fonttype = FONT_NORMAL;
 	m_SpeechHueOverride = 0;
-    _iMaxHouses = g_Cfg._iMaxHousesPlayer;
-    _iMaxShips = g_Cfg._iMaxShipsPlayer;
-    _pMultiStorage = nullptr;
 
     m_exp = 0;
     m_level = 0;
@@ -276,6 +273,7 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 	m_timeLastCallGuards = 0;
 
     m_zClimbHeight = 0;
+	m_fClimbUpdated = false;
 	m_prev_Hue = HUE_DEFAULT;
 	m_prev_id = CREID_INVALID;
 	SetID( baseID );
@@ -301,15 +299,12 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 
 	g_World.m_uidLastNewChar = GetUID();	// for script access.
 
-	m_LocalLight = 0;
-	m_fClimbUpdated = false;
-
     // SubscribeComponent Prop Components
     SubscribeComponentProps(new CCPropsChar());
     SubscribeComponentProps(new CCPropsItemChar());
 
     // SubscribeComponent regular Components
-    SubscribeComponent(new CCFaction(this));
+    SubscribeComponent(new CCFaction());
 
     CTimedObject::GoSleep();  // Make it be sleeping at first, to awake it when placing it in the world (errors will show up otherwise).
 
@@ -354,8 +349,6 @@ CChar::~CChar()
     Clear();                    // Remove me early so virtuals will work
     ClearNPC();
     ClearPlayer();
-    delete _pMultiStorage;
-    _pMultiStorage = nullptr;
 
     g_Serv.StatDec( SERV_STAT_CHARS );
 }
@@ -658,11 +651,6 @@ int CChar::IsWeird() const
 	}
 
 	return 0;
-}
-
-CMultiStorage *CChar::GetMultiStorage()
-{
-    return _pMultiStorage;
 }
 
 // Get the Z we should be at
@@ -1043,7 +1031,6 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 		m_Skill[i] = pChar->m_Skill[i];
 	}
 
-	m_LocalLight = pChar->m_LocalLight;
 	m_fClimbUpdated = pChar->m_fClimbUpdated;
 	/*if ( m_pNPC )
 	{
@@ -1996,27 +1983,31 @@ bool CChar::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 				SKIP_SEPARATORS(ptcKey);
 				return true;
             case CHR_HOUSE:
-            {
-                int16 iPos = (int16)Exp_GetSingle(ptcKey);
-                if (GetMultiStorage()->GetHouseCountReal() <= iPos)
-                {
-                    return false;
-                }
-                pRef = static_cast<CItemMulti*>(GetMultiStorage()->GetHouseAt(iPos).ItemFind());
-                SKIP_SEPARATORS(ptcKey);
-                return true;
-            }
+				if (m_pPlayer)
+				{
+					const int16 iPos = (int16)Exp_GetSingle(ptcKey);
+					CMultiStorage* pMultiStorage = m_pPlayer->GetMultiStorage();
+					if (pMultiStorage->GetHouseCountReal() <= iPos)
+					{
+						return false;
+					}
+					pRef = static_cast<CItemMulti*>(pMultiStorage->GetHouseAt(iPos).ItemFind());
+					SKIP_SEPARATORS(ptcKey);
+					return true;
+				}
             case CHR_SHIP:
-            {
-                int16 iPos = (int16)Exp_GetSingle(ptcKey);
-                if (GetMultiStorage()->GetShipCountReal() <= iPos)
-                {
-                    return false;
-                }
-                pRef = static_cast<CItemShip*>(GetMultiStorage()->GetShipAt(iPos).ItemFind());
-                SKIP_SEPARATORS(ptcKey);
-                return true;
-            }
+				if (m_pPlayer)
+				{
+					const int16 iPos = (int16)Exp_GetSingle(ptcKey);
+					CMultiStorage* pMultiStorage = m_pPlayer->GetMultiStorage();
+					if (pMultiStorage->GetShipCountReal() <= iPos)
+					{
+						return false;
+					}
+					pRef = static_cast<CItemShip*>(pMultiStorage->GetShipAt(iPos).ItemFind());
+					SKIP_SEPARATORS(ptcKey);
+					return true;
+				}
 			case CHR_MEMORYFINDTYPE:	// FInd a type of memory.
 				pRef = Memory_FindTypes((word)(Exp_GetSingle(ptcKey)));
 				SKIP_SEPARATORS(ptcKey);
@@ -2713,34 +2704,6 @@ do_default:
 		case CHC_MAXWEIGHT:
 			sVal.FormatVal( g_Cfg.Calc_MaxCarryWeight(this));
 			return true;
-        case CHC_MAXHOUSES:
-            sVal.FormatU8Val(_iMaxHouses);
-            return true;
-        case CHC_HOUSES:
-            sVal.Format16Val(GetMultiStorage()->GetHouseCountReal());
-            return true;
-        case CHC_GETHOUSEPOS:
-        {
-            ptcKey += 11;
-            sVal.Format16Val(GetMultiStorage()->GetHousePos((CUID)Exp_GetDWVal(ptcKey)));
-            return true;
-        }
-		case CHC_MAXSHIPS:
-		{
-			sVal.FormatU8Val(_iMaxShips);
-			return true;
-		}
-        case CHC_SHIPS:
-        {
-            sVal.Format16Val(GetMultiStorage()->GetShipCountReal());
-            return true;
-        }
-        case CHC_GETSHIPPOS:
-        {
-            ptcKey += 11;
-            sVal.Format16Val(GetMultiStorage()->GetShipPos((CUID)Exp_GetDWVal(ptcKey)));
-            return true;
-        }
 		case CHC_ACCOUNT:
 			if ( ptcKey[7] == '.' )	// used as a ref ?
 			{
@@ -2963,13 +2926,13 @@ do_default:
 				ptcKey += 11;
 				GETNONWHITESPACE(ptcKey);
 
-				CUID uid = Exp_GetVal( ptcKey );
+				const CUID uid(Exp_GetDWVal(ptcKey));
 				SKIP_ARGSEP( ptcKey );
-				bool fAllowIncog = ( Exp_GetVal( ptcKey ) >= 1 );
+				const bool fAllowIncog = ( Exp_GetVal( ptcKey ) >= 1 );
 				SKIP_ARGSEP( ptcKey );
-				bool fAllowInvul = ( Exp_GetVal( ptcKey ) >= 1 );
-				CChar * pChar;
+				const bool fAllowInvul = ( Exp_GetVal( ptcKey ) >= 1 );
 
+				const CChar * pChar;
 				if ( ! uid.IsValidUID() )
 					pChar = pCharSrc;
 				else
@@ -3018,9 +2981,6 @@ do_default:
 				else
 					sVal = GetTradeTitle();
 			}break;
-		case CHC_LIGHT:
-			sVal.FormatHex(m_LocalLight);
-			break;
 		case CHC_EXP:
 			sVal.FormatVal(m_exp);
 			break;
@@ -3104,65 +3064,6 @@ bool CChar::r_LoadVal( CScript & s )
 
 	switch (iKeyNum)
 	{
-        case CHC_ADDHOUSE:
-        {
-            if (g_Serv.IsLoading()) //Prevent to load it from saves, it may cause a crash when accessing to a non-yet existant multi
-            {
-                break;
-            }
-            int64 piCmd[2];
-            Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
-            HOUSE_PRIV ePriv = HP_OWNER;
-            if (piCmd[1] > 0 && piCmd[1] < HP_QTY)
-            {
-                ePriv = (HOUSE_PRIV)piCmd[1];
-            }
-            GetMultiStorage()->AddHouse(CUID((dword)piCmd[0]), ePriv);
-            break;
-        }
-        case CHC_DELHOUSE:
-        {
-            dword dwUID = s.GetArgDWVal();
-            if (dwUID == UID_UNUSED)
-            {
-                GetMultiStorage()->ClearHouses();
-            }
-            else
-            {
-                GetMultiStorage()->DelHouse(CUID(dwUID));
-            }
-            break;
-        }
-        case CHC_ADDSHIP:
-        {
-            if (g_Serv.IsLoading()) //Prevent to load it from saves, it may cause a crash when accessing to a non-yet existant multi
-            {
-                break;
-            }
-            int64 piCmd[2];
-            Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
-            HOUSE_PRIV ePriv = HP_OWNER;
-            if (piCmd[1] > 0 && piCmd[1] < HP_QTY)
-            {
-                ePriv = (HOUSE_PRIV)piCmd[1];
-            }
-            GetMultiStorage()->AddShip(CUID((dword)piCmd[0]), ePriv);
-            break;
-        }
-        case CHC_DELSHIP:
-        {
-            dword dwUID = s.GetArgDWVal();
-            if (dwUID == UINT_MAX)
-            {
-                GetMultiStorage()->ClearShips();
-            }
-            else
-            {
-                GetMultiStorage()->DelShip(CUID(dwUID));
-            }
-            break;
-        }
-
 		//Status Update Variables
         case CHC_REGENHITS:
             Stats_SetRegenRate(STAT_STR, s.GetArg64Val()* MSECS_PER_SEC);
@@ -3266,12 +3167,6 @@ bool CChar::r_LoadVal( CScript & s )
             break;
 		case CHC_ACCOUNT:
 			return SetPlayerAccount( s.GetArgStr() );
-        case CHC_MAXHOUSES:
-            _iMaxHouses = s.GetArgU8Val();
-            break;
-		case CHC_MAXSHIPS:
-			_iMaxShips = s.GetArgU8Val();;
-			break;
 		case CHC_ACT:
 			m_Act_UID = s.GetArgVal();
 			break;
@@ -3608,11 +3503,6 @@ bool CChar::r_LoadVal( CScript & s )
 		case CHC_TITLE:
 			m_sTitle = s.GetArgStr();
 			break;
-		case CHC_LIGHT:
-			m_LocalLight = s.GetArgBVal();
-			if (m_pClient)
-				m_pClient->addLight();
-			break;
 		case CHC_EXP:
 			m_exp = s.GetArgUVal();
 			ChangeExperience();			//	auto-update level if applicable
@@ -3712,27 +3602,17 @@ void CChar::r_Write( CScript & s )
 		s.WriteKeyHex("OSKIN", m_prev_Hue);
 	if ( m_iStatFlag )
 		s.WriteKeyHex("FLAGS", m_iStatFlag);
-	if ( m_LocalLight )
-		s.WriteKeyHex("LIGHT", m_LocalLight);
 	if ( m_attackBase )
 		s.WriteKeyFormat("DAM", "%" PRIu16 ",%" PRIu16, m_attackBase, m_attackBase + m_attackRange);
 	if ( m_defense )
 		s.WriteKeyVal("ARMOR", m_defense);
+
     const uint uiActUID = m_Act_UID.GetObjUID();
 	if ( (uiActUID & UID_UNUSED) != UID_UNUSED )
 		s.WriteKeyHex("ACT", uiActUID);
+
 	if ( m_Act_p.IsValidPoint() )
 		s.WriteKey("ACTP", m_Act_p.WriteUsed());
-
-    if (_iMaxHouses != g_Cfg._iMaxHousesPlayer)
-    {
-        s.WriteKeyVal("MaxHouses", _iMaxHouses);
-    }
-    if (_iMaxShips != g_Cfg._iMaxShipsPlayer)
-    {
-        s.WriteKeyVal("MaxShips", _iMaxShips);
-    }
-    GetMultiStorage()->r_Write(s);
 
     const SKILL_TYPE action = Skill_GetActive();
 	if ( action != SKILL_NONE )
@@ -4560,7 +4440,7 @@ lbl_cchar_ontriggerspeech:
 	{
 		for ( size_t i = 0; i < m_pPlayer->m_Speech.size(); ++i )
 		{
-			CResourceLink * pLinkDSpeech = m_pPlayer->m_Speech[i];
+			CResourceLink * pLinkDSpeech = m_pPlayer->m_Speech[i].GetRef();
 			if ( !pLinkDSpeech )
 				continue;
 

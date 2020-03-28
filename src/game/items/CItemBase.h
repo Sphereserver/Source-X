@@ -352,49 +352,32 @@ private:
 class CItemBaseDupe : public CResourceDef
 {
 	// RES_ITEMDEF
-public:
 	CResourceRef m_MasterItem;	// What is the "master" item ?
-private:
 	uint64		m_qwFlags;		//  UFLAG4_DOOR from CUOItemTypeRec/CUOItemTypeRec_HS
 	height_t	m_Height;
+
 public:
 	dword		m_Can;
+
 	static const char *m_sClassName;
-	CItemBaseDupe( ITEMID_TYPE id, CItemBase * pMasterItem ) :
-		CResourceDef( CResourceID( RES_ITEMDEF, id ) ),
-		m_MasterItem( pMasterItem ),
-		m_qwFlags(0), m_Height(0), m_Can(0)
-	{
-		ASSERT(pMasterItem);
-		ASSERT( pMasterItem->GetResourceID().GetResIndex() != id );
-	}
-	virtual	~CItemBaseDupe()
-	{
-	}
+	CItemBaseDupe(ITEMID_TYPE id, CItemBase* pMasterItem);
+	virtual	~CItemBaseDupe() = default;
+
 private:
 	CItemBaseDupe(const CItemBaseDupe& copy);
 	CItemBaseDupe& operator=(const CItemBaseDupe& other);
 
 public:
-	CItemBase * GetItemDef() const
-	{
-		CResourceLink * pLink = m_MasterItem;
-		ASSERT(pLink);
-		CItemBase * pItemDef = dynamic_cast <CItemBase*>(pLink);
-		ASSERT(pItemDef);
-		return( pItemDef );
-	}
-	static CItemBaseDupe * GetDupeRef( ITEMID_TYPE id );
-	virtual void UnLink() override
-	{
-		m_MasterItem.SetRef(nullptr);
-		CResourceDef::UnLink();
-	}
+	static CItemBaseDupe* GetDupeRef(ITEMID_TYPE id);
+
+	virtual void UnLink() override;
+	CItemBase* GetItemDef() const;	
+
 	inline uint64 GetTFlags() const
 	{
 		return( m_qwFlags );
 	}
-	height_t GetHeight() const
+	inline height_t GetHeight() const
 	{
 		return( m_Height );
 	}
@@ -429,7 +412,7 @@ public:
 		uchar tiles;	// distance to move
 	};
 
-	CSTypedArray<CMultiComponentItem> m_Components;
+	std::vector<CMultiComponentItem> m_Components;
 	CRect m_rect;		// my region.
 	dword m_dwRegionFlags;	// Base region flags (REGION_FLAG_GUARDED etc)
 	CResourceRefArray m_Speech;	// Speech fragment list (other stuff we know)
@@ -442,9 +425,7 @@ public:
 
 public:
 	explicit CItemBaseMulti( CItemBase* pBase );
-	virtual ~CItemBaseMulti()
-	{
-	}
+	virtual ~CItemBaseMulti() = default;
 
 private:
 	CItemBaseMulti(const CItemBaseMulti& copy);

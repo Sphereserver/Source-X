@@ -5,6 +5,7 @@
 #include "../../sphere/threads.h"
 #include "../sphereproto.h"
 #include "../CExpression.h"
+#include "../CScript.h"
 #include "../CLog.h"
 #include "CCrypto.h"
 

@@ -6,11 +6,14 @@
 #ifndef _INC_CTIMEDFUNCTIONHANDLER_H
 #define _INC_CTIMEDFUNCTIONHANDLER_H
 
-#include "../common/CScript.h"
+#include "../common/CScriptContexts.h"
 #include "../common/CScriptObj.h"
 #include "../common/CUID.h"
 #include "CServerTime.h"
 #include <vector>
+
+
+class CScript;
 
 class CTimedFunctionHandler
 {

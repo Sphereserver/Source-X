@@ -157,7 +157,8 @@ public:     int SeekToEnd();
 	* @param dwLength lenght of the data to write.
 	* @return true is success, false otherwise.
 	*/
-	virtual bool Write( const void * pData, int iLength );
+protected:  virtual bool _Write(const void* pData, int iLength);
+public:	    virtual bool Write (const void* pData, int iLength);
 	///@}
 
     /** @name File name operations:

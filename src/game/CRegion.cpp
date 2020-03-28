@@ -902,9 +902,10 @@ TRIGRET_TYPE CRegion::OnRegionTrigger( CTextConsole * pSrc, RTRIG_TYPE iAction )
 
 	for ( size_t i = 0; i < m_Events.size(); ++i )
 	{
-		CResourceLink * pLink = m_Events[i];
+		CResourceLink * pLink = m_Events[i].GetRef();
 		if ( !pLink || ( pLink->GetResType() != RES_REGIONTYPE ) || !pLink->HasTrigger(iAction) )
 			continue;
+
 		CResourceLock s;
 		if ( pLink->ResourceLock(s) )
 		{
@@ -917,12 +918,14 @@ TRIGRET_TYPE CRegion::OnRegionTrigger( CTextConsole * pSrc, RTRIG_TYPE iAction )
 	//	EVENTSREGION triggers (constant events of regions set from sphere.ini)
 	for ( size_t i = 0; i < g_Cfg.m_pEventsRegionLink.size(); ++i )
 	{
-		CResourceLink * pLink = g_Cfg.m_pEventsRegionLink[i];
+		CResourceLink * pLink = g_Cfg.m_pEventsRegionLink[i].GetRef();
 		if ( !pLink || ( pLink->GetResType() != RES_REGIONTYPE ) || !pLink->HasTrigger(iAction) )
 			continue;
+
 		CResourceLock s;
 		if ( !pLink->ResourceLock(s) )
 			continue;
+
 		iRet = CScriptObj::OnTriggerScript(s, sm_szTrigName[iAction], pSrc);
 		if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
 			return iRet;
@@ -1095,7 +1098,7 @@ const CRandGroupDef * CRegionWorld::FindNaturalResource(int type) const
 
 	for ( size_t i = 0; i < m_Events.size(); ++i )
 	{
-		CResourceLink * pLink = m_Events[i];
+		CResourceLink * pLink = m_Events[i].GetRef();
 		if ( !pLink || ( pLink->GetResType() != RES_REGIONTYPE ))
 			continue;
 

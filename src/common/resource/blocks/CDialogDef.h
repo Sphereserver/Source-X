@@ -6,6 +6,7 @@
 #ifndef _INC_CDIALOGDEF_H
 #define _INC_CDIALOGDEF_H
 
+#include "../../sphere_library/CSString.h"
 #include "../CResourceLink.h"
 
 class CClient;

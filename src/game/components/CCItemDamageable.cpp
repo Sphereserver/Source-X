@@ -15,6 +15,7 @@ CCItemDamageable::CCItemDamageable(CItem * pLink) : CComponent(COMP_ITEMDAMAGEAB
     _iCurHits = 0;
     _iMaxHits = 0;
     _iTimeLastUpdate = 0;
+    _fNeedUpdate = true;
     CWorldTickingList::AddObjStatusUpdate(pLink);
 }
 
@@ -75,7 +76,7 @@ void CCItemDamageable::OnTickStatsUpdate()
         _iTimeLastUpdate = iCurtime;
 
         CItem *pItem = static_cast<CItem*>(GetLink());
-        CWorldSearch AreaChars(GetLink()->GetTopPoint(), UO_MAP_VIEW_SIZE_DEFAULT);
+        CWorldSearch AreaChars(pItem->GetTopPoint(), UO_MAP_VIEW_SIZE_DEFAULT);
         AreaChars.SetSearchSquare(true);
         CChar *pChar = nullptr;
         for (;;)

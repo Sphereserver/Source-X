@@ -9,13 +9,14 @@
 #include "../../common/sphere_library/CSString.h"
 #include "../../common/resource/CResourceBase.h"
 #include "../../common/sphereproto.h"
-#include "../../common/CScript.h"
 #include "../../common/CScriptObj.h"
 #include "../../common/CTextConsole.h"
 #include "../uo_files/uofiles_enums_creid.h"
 #include "../CBase.h"
 #include "../components/CCFaction.h"
 
+
+class CScript;
 
 class CCharBase : public CBaseBaseDef // define basic info about each "TYPE" of monster/creature.
 {

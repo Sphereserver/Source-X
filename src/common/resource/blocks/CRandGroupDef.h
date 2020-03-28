@@ -6,6 +6,7 @@
 #ifndef _INC_CRANDGROUPDEF_H
 #define _INC_CRANDGROUPDEF_H
 
+#include "../../sphere_library/CSString.h"
 #include "../CResourceLink.h"
 #include "../CResourceQty.h"
 

@@ -45,6 +45,7 @@ void CEntityProps::SubscribeComponentProps(CComponentProps * pComponent)
         return;
     }
     _List[compType] = pComponent;
+    //_List.container.shrink_to_fit();
 }
 
 void CEntityProps::UnsubscribeComponentProps(iterator& it, bool fEraseFromMap)
@@ -55,6 +56,7 @@ void CEntityProps::UnsubscribeComponentProps(iterator& it, bool fEraseFromMap)
     {
         it = _List.erase(it);
     }
+    //_List.container.shrink_to_fit();
 }
 
 void CEntityProps::UnsubscribeComponentProps(CComponentProps *pComponent)
@@ -154,9 +156,9 @@ bool CEntityProps::r_LoadPropVal(CScript & s, CObjBase* pObjEntityProps, CBaseBa
     ASSERT(pBaseEntityProps);
     const RESDISPLAY_VERSION iLimitToExpansion = pBaseEntityProps->_iEraLimitProps;
 
-    int iPropIndex = -1;
+    CComponentProps::PropertyIndex_t iPropIndex = (CComponentProps::PropertyIndex_t) -1;
     bool fPropStr = false;
-    COMPPROPS_TYPE iCCPType = (COMPPROPS_TYPE)-1;
+    COMPPROPS_TYPE iCCPType = COMP_PROPS_INVALID;
     auto _CEPLoopLoad = [&s, &iPropIndex, &fPropStr, &iCCPType, iLimitToExpansion](CEntityProps *pEP, CObjBase* pLinkedObj) -> bool
     {
         if (pEP->_List.empty())
@@ -167,8 +169,8 @@ bool CEntityProps::r_LoadPropVal(CScript & s, CObjBase* pObjEntityProps, CBaseBa
             if ( CComponentProps *pComponent = it->second )
             {
                 const KeyTableDesc_s ktd = pComponent->GetPropertyKeysData();
-                iPropIndex = FindTableSorted(ptcKey, ktd.pptcTable, ktd.iTableSize - 1);
-                if (iPropIndex == -1)
+                iPropIndex = (CComponentProps::PropertyIndex_t) FindTableSorted(ptcKey, ktd.pptcTable, ktd.iTableSize - 1);
+                if (iPropIndex == (CComponentProps::PropertyIndex_t) -1)
                 {
                     // The key doesn't belong to this CComponentProps.
                     continue;
@@ -196,7 +198,7 @@ bool CEntityProps::r_LoadPropVal(CScript & s, CObjBase* pObjEntityProps, CBaseBa
     if (_CEPLoopLoad(pObjEntityProps, pObjEntityProps)) // Check the object dynamic props first, then the base
     {
         // A subscribed CComponentProps can store this prop...
-        if (iCCPType == (COMPPROPS_TYPE)-1)
+        if (iCCPType == COMP_PROPS_INVALID)
         {
             // The prop is set. We found it.
             return true;
@@ -207,8 +209,8 @@ bool CEntityProps::r_LoadPropVal(CScript & s, CObjBase* pObjEntityProps, CBaseBa
             CComponentProps *pComp = pBaseEntityProps->GetComponentProps(iCCPType);
             if (!pComp)
                 return true;    // The base doesn't have this component, but the obj did -> return true
-            ASSERT(iPropIndex != -1);
-            pComp->FindLoadPropVal(s, nullptr, iLimitToExpansion, iPropIndex, fPropStr);
+            ASSERT(iPropIndex != (CComponentProps::PropertyIndex_t)-1);
+            pComp->FindLoadPropVal(s, nullptr, iLimitToExpansion, (CComponentProps::PropertyIndex_t)iPropIndex, fPropStr);
             return true;        // return true regardlessly of the value being set or not (it's still a valid property)
         }
     }
@@ -222,9 +224,9 @@ bool CEntityProps::r_WritePropVal(lpctstr ptcKey, CSString & sVal, const CObjBas
     // return false: invalid property for any of the subscribed components
     // return true: valid property, whether it has a defined value or not
 
-    int iPropIndex = -1;
+    CComponentProps::PropertyIndex_t iPropIndex = (CComponentProps::PropertyIndex_t) -1;
     bool fPropStr = false;
-    COMPPROPS_TYPE iCCPType = (COMPPROPS_TYPE)-1;
+    COMPPROPS_TYPE iCCPType = COMP_PROPS_INVALID;
     auto _CEPLoopWrite = [ptcKey, &sVal, &iPropIndex, &fPropStr, &iCCPType](const CEntityProps *pEP) -> bool
     {
         if (pEP->_List.empty())
@@ -235,8 +237,8 @@ bool CEntityProps::r_WritePropVal(lpctstr ptcKey, CSString & sVal, const CObjBas
             if (pComponent)
             {
                 const KeyTableDesc_s ktd = pComponent->GetPropertyKeysData();
-                iPropIndex = FindTableSorted(ptcKey, ktd.pptcTable, ktd.iTableSize - 1);
-                if (iPropIndex == -1)
+                iPropIndex = (COMPPROPS_TYPE)FindTableSorted(ptcKey, ktd.pptcTable, ktd.iTableSize - 1);
+                if (iPropIndex == (CComponentProps::PropertyIndex_t) -1)
                 {
                     // The key doesn't belong to this CComponentProps.
                     continue;
@@ -265,7 +267,7 @@ bool CEntityProps::r_WritePropVal(lpctstr ptcKey, CSString & sVal, const CObjBas
     if (_CEPLoopWrite(pObjEntityProps)) // Check the object dynamic props first, then the base
     {
         // A subscribed CComponentProps can store this prop...
-        if (iCCPType == (COMPPROPS_TYPE)-1)
+        if (iCCPType == COMP_PROPS_INVALID)
         {
             // The prop is set. We found it.
             return true;
@@ -277,8 +279,8 @@ bool CEntityProps::r_WritePropVal(lpctstr ptcKey, CSString & sVal, const CObjBas
             const CComponentProps *pComp = pBaseEntityProps->GetComponentProps(iCCPType);
             if (!pComp)
                 return true;    // The base doesn't have this component, but the obj did -> return true
-            ASSERT(iPropIndex != -1);
-            pComp->FindWritePropVal(sVal, iPropIndex, fPropStr);
+            ASSERT(iPropIndex != (CComponentProps::PropertyIndex_t)-1);
+            pComp->FindWritePropVal(sVal, (CComponentProps::PropertyIndex_t)iPropIndex, fPropStr);
             return true;        // return true regardlessly of the value being set or not (it's still a valid property)
         }
     }
@@ -331,14 +333,14 @@ void CEntityProps::DumpComponentProps(CTextConsole *pSrc, lpctstr ptcPrefix) con
     bool fIsClient = pSrc->GetChar();
     CSString sPropVal;
     CComponentProps::PropertyValNum_t iPropVal;
-    for (int iCCP = 0; iCCP < COMP_PROPS_QTY; ++iCCP)
+    for (CComponentProps::PropertyIndex_t iCCP = 0; iCCP < COMP_PROPS_QTY; ++iCCP)
     {
         const CComponentProps* pCCP = GetComponentProps((COMPPROPS_TYPE)iCCP);
         if (!pCCP)
             continue;
         lpctstr ptcCCPName = pCCP->GetName();
-        int iCCPQty = pCCP->GetPropsQty();
-        for (int iPropIndex = 0; iPropIndex < iCCPQty; ++iPropIndex)
+        const CComponentProps::PropertyIndex_t iCCPQty = pCCP->GetPropsQty();
+        for (CComponentProps::PropertyIndex_t iPropIndex = 0; iPropIndex < iCCPQty; ++iPropIndex)
         {
             bool fPropFound;
             if (pCCP->IsPropertyStr(iPropIndex))

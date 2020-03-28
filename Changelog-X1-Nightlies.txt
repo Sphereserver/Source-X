@@ -2144,3 +2144,6 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: RANGE property broke when overridden.
 - Changed: Improved Map Block Cache, allowing a much faster access to map data and improving the speed of walking and LoS checks.
 - Fixed: Items not going to "sleep" when put in containers different than t_container and t_container_locked.
+
+28-03-2020, Nolok
+- Fixed: The same EVENT couldn't be stored in both EventsPet and EventsPlayer.
