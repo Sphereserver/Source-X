@@ -330,10 +330,9 @@ int CSFile::SeekToEnd()
 	return Seek( 0, SEEK_END );
 }
 
-bool CSFile::Write( const void * pData, int iLength )
+bool CSFile::_Write( const void * pData, int iLength )
 {
-    ADDTOCALLSTACK("CSFile::Write");
-    THREAD_UNIQUE_LOCK_SET;
+    ADDTOCALLSTACK("CSFile::_Write");
 
 #ifdef _WIN32
 	DWORD dwWritten;
@@ -353,6 +352,12 @@ bool CSFile::Write( const void * pData, int iLength )
     }
 	return true;
 #endif
+}
+
+bool CSFile::Write(const void* pData, int iLength)
+{
+    ADDTOCALLSTACK("CSFile::Write");
+    THREAD_UNIQUE_LOCK_RETURN(_Write(pData, iLength));
 }
 
 // CSFile:: File name operations.

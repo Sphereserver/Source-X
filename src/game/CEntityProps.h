@@ -6,7 +6,7 @@
 #ifndef _INC_CENTITYPROPS_H
 #define _INC_CENTITYPROPS_H
 
-#include "../common/parallel_hashmap/btree.h"
+#include "../common/flat_containers/flat_map.hpp"
 #include "CComponentProps.h"
 
 class CCPropsChar;
@@ -15,6 +15,7 @@ class CCPropsItemChar;
 class CCPropsItemEquippable;
 class CCPropsItemWeapon;
 class CCPropsItemWeaponRanged;
+
 class CTextConsole;
 class CObjBase;
 struct CBaseBaseDef;
@@ -22,7 +23,7 @@ struct CBaseBaseDef;
 
 class CEntityProps
 {
-    phmap::btree_map<COMPPROPS_TYPE, CComponentProps*> _List;
+    fc::vector_map<COMPPROPS_TYPE, CComponentProps*> _List;
     using iterator          = decltype(_List)::iterator;
     using const_iterator    = decltype(_List)::const_iterator;
 

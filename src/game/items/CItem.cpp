@@ -134,7 +134,7 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEM
     }
     if (CCFaction::CanSubscribe(this))
     {
-        SubscribeComponent(new CCFaction(this));  // Adding it only to equippable items
+        SubscribeComponent(new CCFaction());  // Adding it only to equippable items
     }
     SubscribeComponentProps(new CCPropsItem());
     SubscribeComponentProps(new CCPropsItemChar());
@@ -3719,7 +3719,7 @@ bool CItem::SetType(IT_TYPE type, bool fPreCheck)
     }
     else if (!pComp)
     {
-        SubscribeComponent(new CCFaction(this));
+        SubscribeComponent(new CCFaction());
     }
 
 	return true;

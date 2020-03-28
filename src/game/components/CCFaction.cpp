@@ -165,24 +165,18 @@ lpctstr const CCFaction::sm_szLoadKeys[CHF_QTY + 1] =
     nullptr
 };
 
-CCFaction::CCFaction(CObjBase* pLink) : CFactionDef(), CComponent(COMP_FACTION)
+CCFaction::CCFaction() : CFactionDef(), CComponent(COMP_FACTION)
 {
-    ADDTOCALLSTACK_INTENSIVE("CCFaction::CCFaction(FACTION_TYPE)");
-    _pLink = pLink;
+    //ADDTOCALLSTACK_INTENSIVE("CCFaction::CCFaction(FACTION_TYPE)");
     _iFaction = FACTION_NONE;
 }
 
-CCFaction::CCFaction(CCFaction *copy, CObjBase* pLink) : CFactionDef(), CComponent(COMP_FACTION)
+CCFaction::CCFaction(CCFaction *copy) : CFactionDef(), CComponent(COMP_FACTION)
 {
-    ADDTOCALLSTACK_INTENSIVE("CCFaction::CCFaction(CCFaction*)");
-    _pLink = pLink;
+    //ADDTOCALLSTACK_INTENSIVE("CCFaction::CCFaction(CCFaction*)");
     Copy(copy);
 }
 
-CObjBase * CCFaction::GetLink() const
-{
-    return _pLink;
-}
 
 bool CCFaction::CanSubscribe(const CItem* pItem) // static
 {

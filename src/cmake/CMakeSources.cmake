@@ -560,5 +560,6 @@ sphereCrypt.ini
 
 INCLUDE_DIRECTORIES (
 common/mysql/
+common/flat_containers/
 common/parallel_hashmap/
 )

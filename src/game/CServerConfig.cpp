@@ -362,14 +362,14 @@ bool CServerConfig::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 	else if ( iResType == RES_CHARDEF )
 	{
 		//pRef = CCharBase::FindCharBase(static_cast<CREID_TYPE>(Exp_GetVal(ptcKey)));
-		pRef = CCharBase::FindCharBase((CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, ptcKey)));
+		pRef = CCharBase::FindCharBase((CREID_TYPE)(ResourceGetIndexType(RES_CHARDEF, ptcKey)));
 	}
 	else if ( iResType == RES_ITEMDEF )
 	{
 		if (fNewStyleDef && IsDigit(ptcKey[0]))
 			pRef = CItemBase::FindItemBase((ITEMID_TYPE)(Exp_GetVal(ptcKey) + ITEMID_MULTI));
 		else
-			pRef = CItemBase::FindItemBase((ITEMID_TYPE)(g_Cfg.ResourceGetIndexType(RES_ITEMDEF, ptcKey)));
+			pRef = CItemBase::FindItemBase((ITEMID_TYPE)(ResourceGetIndexType(RES_ITEMDEF, ptcKey)));
 	}
 	else if ( iResType == RES_SPELL && *ptcKey == '-' )
 	{
@@ -913,7 +913,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			int index = atoi(s.GetKey()+5);
 			if (index < 0 || index > STAT_FOOD)
 				return false;
-			g_Cfg.m_iRegenRate[index] = (s.GetArgLLVal() * MSECS_PER_SEC);
+			m_iRegenRate[index] = (s.GetArgLLVal() * MSECS_PER_SEC);
 			return true;
 		}
 		else if ( s.IsKeyHead("MAP", 3) )		//	MAPx=settings
@@ -1282,12 +1282,12 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 
 		case RC_EXPERIMENTAL:
-			g_Cfg.m_iExperimentalFlags = s.GetArgUVal();
+			m_iExperimentalFlags = s.GetArgUVal();
 			//PrintEFOFFlags(true, false);
 			break;
 
 		case RC_OPTIONFLAGS:
-			g_Cfg.m_iOptionFlags = s.GetArgUVal();
+			m_iOptionFlags = s.GetArgUVal();
 			//PrintEFOFFlags(false, true);
 			break;
 
@@ -1296,7 +1296,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 
 		case RC_TOOLTIPCACHE:
-			g_Cfg.m_iTooltipCache = s.GetArgLLVal() * MSECS_PER_SEC;
+			m_iTooltipCache = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 
 		case RC_NETWORKTHREADS:
@@ -1307,7 +1307,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 				//	iNetThreads = 0;
 				//else if (iNetThreads > 10)
 				//	iNetThreads = 10;
-				g_Cfg.m_iNetworkThreads = (uint)iNetThreads;
+				m_iNetworkThreads = (uint)iNetThreads;
 			}
 			else
 				g_Log.EventError("The value of NetworkThreads cannot be modified after the server has started\n");
@@ -1443,7 +1443,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			index = atoi(ptcKey+5);
 			if (( index < 0 ) || ( index >= STAT_QTY ))
 				return false;
-			sVal.FormatLLVal(g_Cfg.m_iRegenRate[index] / MSECS_PER_SEC);
+			sVal.FormatLLVal(m_iRegenRate[index] / MSECS_PER_SEC);
 			return true;
 		}
 
@@ -1996,11 +1996,11 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			sVal = g_szServerDescription;
 			break;
 		case RC_EXPERIMENTAL:
-			sVal.FormatHex( g_Cfg.m_iExperimentalFlags );
+			sVal.FormatHex( m_iExperimentalFlags );
 			//PrintEFOFFlags(true, false, pSrc);
 			break;
 		case RC_OPTIONFLAGS:
-			sVal.FormatHex( g_Cfg.m_iOptionFlags );
+			sVal.FormatHex( m_iOptionFlags );
 			//PrintEFOFFlags(false, true, pSrc);
 			break;
 		case RC_CLIENTS:		// this is handled by CServerDef as SV_CLIENTS
@@ -2015,13 +2015,13 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			sVal.FormatLLVal( m_iTooltipCache / MSECS_PER_SEC );
 			break;
 		case RC_GUARDSINSTANTKILL:
-			sVal.FormatVal(g_Cfg.m_fGuardsInstantKill);
+			sVal.FormatVal(m_fGuardsInstantKill);
 			break;
 		case RC_GUARDSONMURDERERS:
-			sVal.FormatVal(g_Cfg.m_fGuardsOnMurderers);
+			sVal.FormatVal(m_fGuardsOnMurderers);
 			break;
 		case RC_CONTEXTMENULIMIT:
-			sVal.FormatVal(g_Cfg.m_iContextMenuLimit);
+			sVal.FormatVal(m_iContextMenuLimit);
 			break;
 		case RC_WALKBUFFER:
 			sVal.FormatLLVal(m_iWalkBuffer);
@@ -2056,7 +2056,7 @@ SKILL_TYPE CServerConfig::FindSkillKey( lpctstr ptcKey ) const
 	if ( IsDigit( ptcKey[0] ) )
 	{
 		SKILL_TYPE skill = (SKILL_TYPE)(Exp_GetVal(ptcKey));
-		if ( ( !CChar::IsSkillBase(skill) || !g_Cfg.m_SkillIndexDefs.IsValidIndex(skill) ) && !CChar::IsSkillNPC(skill) )
+		if ( ( !CChar::IsSkillBase(skill) || !m_SkillIndexDefs.IsValidIndex(skill) ) && !CChar::IsSkillNPC(skill) )
 			return SKILL_NONE;
 		return skill;
 	}
@@ -2097,7 +2097,7 @@ int CServerConfig::GetSpellEffect( SPELL_TYPE spell, int iSkillVal ) const
 	// iSkillVal = 0-1000
 	if ( !spell )
 		return 0;
-	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef( spell );
+	const CSpellDef * pSpellDef = GetSpellDef( spell );
 	if ( pSpellDef == nullptr )
 		return 0;
 	return pSpellDef->m_vcEffect.GetLinear( iSkillVal );
@@ -2127,7 +2127,7 @@ lpctstr CServerConfig::GetNotoTitle( int iLevel, bool bFemale ) const
 		if (pFemaleTitle == nullptr)
 			return m_NotoTitles[iLevel]->GetPtr();
 
-		pFemaleTitle++;
+		++pFemaleTitle;
 		if (bFemale)
 			return pFemaleTitle;
 
@@ -2149,9 +2149,7 @@ bool CServerConfig::IsValidEmailAddressFormat( lpctstr pszEmail ) // static
 		return false;
 
 	tchar szEmailStrip[256];
-	size_t len2 = Str_GetBare( szEmailStrip, pszEmail,
-		sizeof(szEmailStrip),
-		" !\"#%&()*,/:;<=>?[\\]^{|}'`+" );
+	size_t len2 = Str_GetBare( szEmailStrip, pszEmail, sizeof(szEmailStrip), " !\"#%&()*,/:;<=>?[\\]^{|}'`+" );
 	if ( len2 != len1 )
 		return false;
 
@@ -2179,7 +2177,7 @@ CWebPageDef * CServerConfig::FindWebPage( lpctstr pszPath ) const
 	ADDTOCALLSTACK("CServerConfig::FindWebPage");
 	if ( pszPath == nullptr )
 	{
-		if (m_WebPages.size() <= 0 )
+		if (m_WebPages.empty())
 			return nullptr;
 		// Take this as the default page.
 		return static_cast <CWebPageDef*>( m_WebPages[0] );
@@ -2200,6 +2198,7 @@ CWebPageDef * CServerConfig::FindWebPage( lpctstr pszPath ) const
 	{
 		if ( m_WebPages[i] == nullptr )	// not sure why this would happen
 			continue;
+
 		CWebPageDef * pWeb = static_cast <CWebPageDef*>(m_WebPages[i] );
 		ASSERT(pWeb);
 		if ( pWeb->IsMatch(pszTitle))
@@ -2233,7 +2232,7 @@ bool CServerConfig::SetKRDialogMap(dword rid, dword idKRDialog)
 	ADDTOCALLSTACK("CServerConfig::SetKRDialogMap");
 	// Defines a link between the given ResourceID and KR DialogID, so that
 	// the dialogs of KR clients can be handled in scripts.
-	KRGumpsMap::iterator it;
+	KRGumpsMap::const_iterator it;
 
 	// prevent double mapping of same dialog
 	it = m_mapKRGumps.find(rid);
@@ -2246,7 +2245,7 @@ bool CServerConfig::SetKRDialogMap(dword rid, dword idKRDialog)
 	}
 
 	// prevent double mapping of KR dialog
-	KRGumpsMap::iterator end = m_mapKRGumps.end();
+	KRGumpsMap::const_iterator end = m_mapKRGumps.end();
 	for (it = m_mapKRGumps.begin(); it != end; ++it)
 	{
 		if (it->second != idKRDialog)
@@ -2265,7 +2264,7 @@ dword CServerConfig::GetKRDialogMap(dword idKRDialog)
 	ADDTOCALLSTACK("CServerConfig::GetKRDialogMap");
 	// Translates the given KR DialogID into the ResourceID of its scripted dialog.
 	// Returns 0 on failure
-	for (KRGumpsMap::iterator it = m_mapKRGumps.begin(); it != m_mapKRGumps.end(); ++it)
+	for (KRGumpsMap::const_iterator it = m_mapKRGumps.begin(); it != m_mapKRGumps.end(); ++it)
 	{
 		if (it->second != idKRDialog)
 			continue;
@@ -2281,7 +2280,7 @@ dword CServerConfig::GetKRDialog(dword rid)
 	ADDTOCALLSTACK("CServerConfig::GetKRDialog");
 	// Translates the given ResourceID into it's equivalent KR DialogID.
 	// Returns 0 on failure
-	KRGumpsMap::iterator it = m_mapKRGumps.find(rid);
+	KRGumpsMap::const_iterator it = m_mapKRGumps.find(rid);
 	if (it != m_mapKRGumps.end())
 		return it->second;
 
@@ -2332,12 +2331,12 @@ PLEVEL_TYPE CServerConfig::GetPrivCommandLevel( lpctstr pszCmd ) const
 		lpctstr const * pszTable = m_PrivCommands[ilevel].data();
 		int iCount = (int)m_PrivCommands[ilevel].size();
 		if ( FindTableHeadSorted( pszCmd, pszTable, iCount ) >= 0 )
-			return( static_cast<PLEVEL_TYPE>(ilevel) );
+			return (PLEVEL_TYPE)ilevel;
 	}
 
 	// A GM will default to use all commands.
 	// xcept those that are specifically named that i can't use.
-	return ( static_cast<PLEVEL_TYPE>(m_iDefaultCommandLevel) ); // default level.
+	return (PLEVEL_TYPE)m_iDefaultCommandLevel; // default level.
 }
 
 bool CServerConfig::CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd, CTextConsole * pSrc ) const
@@ -2449,14 +2448,14 @@ CPointMap CServerConfig::GetRegionPoint( lpctstr pCmd ) const // Decode a telepo
 	{
 		tchar *pszTemp = Str_GetTemp();
 		strcpy( pszTemp, pCmd );
-		size_t iCount = pt.Read( pszTemp );
-		if ( iCount >= 2 )
+		const size_t uiCount = pt.Read( pszTemp );
+		if ( uiCount >= 2 )
 			return pt;
 	}
 	else
 	{
 		// Match the region name with global regions.
-		CRegion * pRegion = GetRegion(pCmd);
+		const CRegion * pRegion = GetRegion(pCmd);
 		if ( pRegion != nullptr )
 		{
 			return pRegion->m_pt;
@@ -2490,7 +2489,7 @@ CRegion * CServerConfig::GetRegion( lpctstr pKey ) const
         uchar minMap = 255;
         for (CRegion* pRegion : regions)
         {
-            uchar m = pRegion->GetRegionCorner(DIR_N).m_map;
+			const uchar m = pRegion->GetRegionCorner(DIR_N).m_map;
             if (m <= minMap)
             {
                 minMap = m;
@@ -2513,10 +2512,10 @@ CRegion * CServerConfig::GetRegion( lpctstr pKey ) const
         }
 
         ptcColonPos += 1; // skip the , (which now is \0)
-        uchar uiMapIdx = Exp_GetUCVal(ptcColonPos);
+		const uchar uiMapIdx = Exp_GetUCVal(ptcColonPos);
         for (CRegion* pRegion : regions)
         {
-            uchar m = pRegion->GetRegionCorner(DIR_N).m_map;
+			const uchar m = pRegion->GetRegionCorner(DIR_N).m_map;
             if (uiMapIdx == m)
             {
                 return pRegion;
@@ -3026,7 +3025,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		return true;
 	case RES_SECTOR: // saved in world file.
 		{
-			CPointMap pt = GetRegionPoint( pScript->GetArgStr() ); // Decode a teleport location number into X/Y/Z
+			const CPointMap pt = GetRegionPoint( pScript->GetArgStr() ); // Decode a teleport location number into X/Y/Z
             CSector* pSector = pt.GetSector();
             if (!pSector)
                 return false;
@@ -3062,8 +3061,8 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			}
 			else
 			{
-				if ( rid.GetResIndex() >= (int)(g_Cfg.m_iMaxSkill) )
-					g_Cfg.m_iMaxSkill = rid.GetResIndex() + 1;
+				if ( rid.GetResIndex() >= (int)(m_iMaxSkill) )
+					m_iMaxSkill = rid.GetResIndex() + 1;
 
 				// Just replace any previous CSkillDef
 				pSkill = new CSkillDef((SKILL_TYPE)(rid.GetResIndex()));
@@ -3559,9 +3558,9 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 	case RES_KRDIALOGLIST:
 		while ( pScript->ReadKeyParse() )
 		{
-			CDialogDef *pDef = dynamic_cast<CDialogDef *>( g_Cfg.ResourceGetDefByName(RES_DIALOG, pScript->GetKey()) );
+			CDialogDef *pDef = dynamic_cast<CDialogDef *>( ResourceGetDefByName(RES_DIALOG, pScript->GetKey()) );
 			if ( pDef != nullptr )
-				g_Cfg.SetKRDialogMap( pDef->GetResourceID().GetPrivateUID(), pScript->GetArgVal());
+				SetKRDialogMap( pDef->GetResourceID().GetPrivateUID(), pScript->GetArgVal());
 			else
 				DEBUG_ERR(("Dialog '%s' not found...\n", pScript->GetKey()));
 		}
@@ -4405,7 +4404,7 @@ bool CServerConfig::Load( bool fResync )
 		g_Serv.SetName(( ! iRet && szName[0] ) ? szName : SPHERE_TITLE );
 	}
 
-	if ( ! g_Cfg.ResourceGetDef( CResourceID( RES_SKILLCLASS, 0 )))
+	if ( ! ResourceGetDef( CResourceID( RES_SKILLCLASS, 0 )))
 	{
 		// must have at least 1 skill class.
 		CSkillClassDef * pSkillClass = new CSkillClassDef( CResourceID( RES_SKILLCLASS ));
@@ -4429,10 +4428,10 @@ bool CServerConfig::Load( bool fResync )
 	}
 
 	// Make region DEFNAMEs
-    size_t iRegionMax = g_Cfg.m_RegionDefs.size();
+    size_t iRegionMax = m_RegionDefs.size();
     for (size_t k = 0; k < iRegionMax; ++k)
     {
-        CRegion * pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs[k]);
+        CRegion * pRegion = dynamic_cast <CRegion*> (m_RegionDefs[k]);
         if (!pRegion)
             continue;
         pRegion->MakeRegionDefname();
@@ -4631,7 +4630,7 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 			g_Serv.PrintPercent(i, idMaxItem);
 
 		CResourceID rid = CResourceID(RES_ITEMDEF, i);
-		if (g_Cfg.m_ResHash.FindKey(rid) != SCONT_BADINDEX)
+		if (m_ResHash.FindKey(rid) != SCONT_BADINDEX)
 			continue;
 
 		// check item in tiledata

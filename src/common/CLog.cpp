@@ -78,8 +78,7 @@ CLog::CLog()
 	m_fLockOpen = false;
 	m_pScriptContext = nullptr;
 	m_pObjectContext = nullptr;
-	m_dwMsgMask = LOGL_ERROR |
-				  LOGM_INIT | LOGM_CLIENTS_LOG | LOGM_GM_PAGE;
+	m_dwMsgMask = LOGL_ERROR | LOGM_INIT | LOGM_CLIENTS_LOG | LOGM_GM_PAGE;
 	SetFilePath( SPHERE_FILE "log.log" );	// default name to go to.
 }
 
@@ -151,13 +150,15 @@ bool CLog::IsLoggedLevel( LOG_TYPE level ) const
 
 bool CLog::IsLogged( dword dwMask ) const
 {
-	bool mask = IsLoggedMask(dwMask);
-	bool lvl = IsLoggedLevel((LOG_TYPE)dwMask);
+	const bool mask = IsLoggedMask(dwMask);
+	const bool lvl = IsLoggedLevel((LOG_TYPE)dwMask);
 	return mask || lvl;
 }
 
-bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
+bool CLog::_OpenLog( lpctstr pszBaseDirName )	// name set previously.
 {
+	ADDTOCALLSTACK("CLog::_OpenLog");
+
 	if ( m_fLockOpen )	// the log is already locked open
 		return false;
 
@@ -170,7 +171,7 @@ bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
 		{
 			if ( *pszBaseDirName == '0' )
 			{
-				Close();
+				_Close();
 				return false;
 			}
 		}
@@ -188,12 +189,18 @@ bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
 	CSString sFileName = GetMergedFileName(m_sBaseDir, pszTemp);
 
 	// Use the OF_READWRITE to append to an existing file.
-	if ( CSFileText::Open( sFileName.GetPtr(), OF_SHARE_DENY_NONE|OF_READWRITE|OF_TEXT ) )
+	if ( CSFileText::_Open( sFileName.GetPtr(), OF_SHARE_DENY_NONE|OF_READWRITE|OF_TEXT ) )
 	{
 		setvbuf(_pStream, nullptr, _IONBF, 0);
 		return true;
 	}
 	return false;
+}
+
+bool CLog::OpenLog(lpctstr pszBaseDirName)	// name set previously.
+{
+	ADDTOCALLSTACK("CLog::OpenLog");
+	THREAD_UNIQUE_LOCK_RETURN(_OpenLog(pszBaseDirName));
 }
 
 int CLog::EventStr( dword dwMask, lpctstr pszMsg )
@@ -202,11 +209,11 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 	// NOTE: This could be called in odd interrupt context so don't use dynamic stuff
 	if ( !IsLogged(dwMask) )	// I don't care about these.
 		return 0;
-	else if ( !pszMsg || !*pszMsg )
+	if ( !pszMsg || !*pszMsg )
 		return 0;
 
 	int iRet = 0;
-	m_mutex.lock();
+	THREAD_UNIQUE_LOCK_SET;
 
 	try
 	{
@@ -290,29 +297,29 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 			if ( datetime.GetDay() != m_dateStamp.GetDay())
 			{
 				// it's a new day, open a log file with new day name.
-				Close();	// LINUX should alrady be closed.
-				OpenLog();
+				_Close();	// LINUX should alrady be closed.
+				_OpenLog();
                 Printf("Log date: %s\n", m_dateStamp.Format(nullptr));
 			}
 #ifndef _WIN32
 			else
 			{
-                Close(); // The log file is opened for the first time by the OpenLog call done when reading the sphere.ini.
-				uint mode = OF_READWRITE|OF_TEXT|OF_SHARE_DENY_NONE;
-				Open(nullptr, mode);	// LINUX needs to close and re-open for each log line !
+                _Close(); // The log file is opened for the first time by the OpenLog call done when reading the sphere.ini.
+				const uint mode = OF_READWRITE|OF_TEXT|OF_SHARE_DENY_NONE;
+				_Open(nullptr, mode);	// LINUX needs to close and re-open for each log line !
 			}
 #endif
 
-			WriteString( szTime );
+			_WriteString( szTime );
 			if ( pszLabel )
-				WriteString( pszLabel );
+				_WriteString( pszLabel );
 			if ( szScriptContext[0] )
-				WriteString( szScriptContext );
+				_WriteString( szScriptContext );
 
-			WriteString( pszMsg );
+			_WriteString( pszMsg );
 
 #ifndef _WIN32
-			Close();
+			_Close();
 #endif
 		}
 
@@ -326,9 +333,9 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 	}
 
-	m_mutex.unlock();
 	return iRet;
 }
+
 
 CSTime CLog::sm_prevCatchTick;
 
@@ -342,7 +349,7 @@ void _cdecl CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...
 	{
 		tchar szMsg[512];
 		LOG_TYPE eSeverity;
-		size_t stLen = 0;
+		size_t uiLen = 0;
 		if ( pErr != nullptr )
 		{
 			eSeverity = pErr->m_eSeverity;
@@ -351,22 +358,22 @@ void _cdecl CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...
 				pAssertErr->GetErrorMessage(szMsg, sizeof(szMsg));
 			else
 				pErr->GetErrorMessage(szMsg, sizeof(szMsg));
-			stLen = strlen(szMsg);
+			uiLen = strlen(szMsg);
 		}
 		else
 		{
 			eSeverity = LOGL_CRIT;
 			Str_CopyLimitNull(szMsg, "Generic exception", sizeof(szMsg));
-			stLen = strlen(szMsg);
+			uiLen = strlen(szMsg);
 		}
 
-		stLen += sprintf( szMsg+stLen, ", in " );
+		uiLen += sprintf( szMsg + uiLen, ", in " );
 
 		va_list vargs;
 		va_start(vargs, pszCatchContext);
 
-		stLen += vsprintf(szMsg+stLen, pszCatchContext, vargs);
-		stLen += sprintf(szMsg+stLen, "\n");
+		uiLen += vsprintf(szMsg + uiLen, pszCatchContext, vargs);
+		uiLen += sprintf (szMsg + uiLen, "\n");
 
 		EventStr(eSeverity, szMsg);
 		va_end(vargs);
@@ -385,9 +392,12 @@ void _cdecl CLog::CatchStdException(const std::exception * pExc, lpctstr pszCatc
 
     va_list vargs;
     va_start(vargs, pszCatchContext);
-    size_t iLen = vsnprintf(szMsg, sizeof(szMsg), pszCatchContext, vargs);
-    Str_ConcatLimitNull(szMsg, "\n", sizeof(szMsg)-iLen);
+
+    const size_t uiLen = vsnprintf(szMsg, sizeof(szMsg), pszCatchContext, vargs);
+    Str_ConcatLimitNull(szMsg, "\n", sizeof(szMsg) - uiLen);
+
     va_end(vargs);
+
     EventStr(LOGL_CRIT, szMsg);
 
     snprintf(szMsg, sizeof(szMsg), "exception.what(): %s\n", pExc->what());

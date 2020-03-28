@@ -8,7 +8,6 @@
 
 #include "sphere_library/CSFileText.h"
 #include "sphere_library/CSTime.h"
-#include "sphere_library/smutex.h"
 #include "../sphere/ConsoleInterface.h"
 #include "../sphere/UnixTerminal.h"
 #include <exception>
@@ -84,6 +83,8 @@ private:
 extern struct CLog : public CSFileText, public CEventLog
 {
 private:
+	// THREAD_CMUTEX_DEF; // There's already the CSFileText::THREAD_CMUTEX
+
 	dword m_dwMsgMask;			// Level of log detail messages. IsLogMsg()
 	CSTime m_dateStamp;			// last real time stamp.
 	CSString m_sBaseDir;
@@ -95,17 +96,19 @@ private:
 
 public:
 	bool m_fLockOpen;
-	SimpleMutex m_mutex;
 
 protected:	const CScript * _SetScriptContext( const CScript * pScriptContext );
 public:     const CScript * SetScriptContext( const CScript * pScriptContext );
 protected:  const CScriptObj * _SetObjectContext( const CScriptObj * pObjectContext );
 public:	    const CScriptObj * SetObjectContext( const CScriptObj * pObjectContext );
 
-	bool SetFilePath( lpctstr pszName );
+	
+protected:	bool _OpenLog(lpctstr pszName = nullptr);	// name set previously.
+public:		bool OpenLog(lpctstr pszName = nullptr);
+
+	bool SetFilePath(lpctstr pszName);
 
 	lpctstr GetLogDir() const;
-	bool OpenLog( lpctstr pszName = nullptr );	// name set previously.
 	dword GetLogMask() const;
 	void SetLogMask( dword dwMask );
 	bool IsLoggedMask( dword dwMask ) const;

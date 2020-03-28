@@ -165,7 +165,7 @@ public:
     *@param fZero If the prop val is an empty string, return "0" instead.
     *@param pBaseCompProps If nullptr and the prop doesn't exist, stop. Otherwise, this should point to the same type of CComponentProps, but in the object's CBaseBaseDef. So, check if the Base Property exists
     */
-    CSString GetPropStr( const CComponentProps* pCompProps, int iPropIndex, bool fZero, const CComponentProps* pBaseCompProps = nullptr ) const;
+    CSString GetPropStr( const CComponentProps* pCompProps, CComponentProps::PropertyIndex_t iPropIndex, bool fZero, const CComponentProps* pBaseCompProps = nullptr ) const;
 
     /**
     *@brief Returns the value of the string-type prop from the CComponentProps
@@ -174,7 +174,7 @@ public:
     *@param fZero If the prop val is an empty string, return "0" instead
     *@param fDef If true, if the prop wasn't found, check the Base Prop (in my CBaseBaseDef).
     */
-    CSString GetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, bool fZero, bool fDef = false ) const;
+    CSString GetPropStr( COMPPROPS_TYPE iCompPropsType, CComponentProps::PropertyIndex_t iPropIndex, bool fZero, bool fDef = false ) const;
 
     /**
     *@brief Returns the value of the numerical-type prop from the CComponentProps. Faster than the variant accepting a COMPPROPS_TYPE if you need to retrieve multiple props from the same CComponentProps
@@ -182,7 +182,7 @@ public:
     *@param iPropIndex The index (enum) of the property for that CComponentProps
     *@param pBaseCompProps If nullptr and the prop doesn't exist, stop. Otherwise, this should point to the same type of CComponentProps, but in the object's CBaseBaseDef. So, check if the Base Property exists
     */
-    CComponentProps::PropertyValNum_t GetPropNum( const CComponentProps* pCompProps, int iPropIndex, const CComponentProps* pBaseCompProps = nullptr ) const;
+    CComponentProps::PropertyValNum_t GetPropNum( const CComponentProps* pCompProps, CComponentProps::PropertyIndex_t iPropIndex, const CComponentProps* pBaseCompProps = nullptr ) const;
 
     /**
     *@brief Returns the value of the numerical-type prop from the CComponentProps.
@@ -190,7 +190,7 @@ public:
     *@param iPropIndex The index (enum) of the property for that CComponentProps
     *@param fDef If true, if the prop wasn't found, check the Base Prop (in my CBaseBaseDef).
     */
-    CComponentProps::PropertyValNum_t GetPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, bool fDef = false ) const;
+    CComponentProps::PropertyValNum_t GetPropNum( COMPPROPS_TYPE iCompPropsType, CComponentProps::PropertyIndex_t iPropIndex, bool fDef = false ) const;
 
     /**
     *@brief Sets the value of the string-type prop from the CComponentProps. Faster than the variant accepting a COMPPROPS_TYPE if you need to set multiple props from the same CComponentProps
@@ -199,7 +199,7 @@ public:
     *@param ptcVal The property value
     *@param fDeleteZero If the prop val is an empty string, delete the prop
     */
-    void SetPropStr( CComponentProps* pCompProps, int iPropIndex, lpctstr ptcVal, bool fDeleteZero = true);
+    void SetPropStr( CComponentProps* pCompProps, CComponentProps::PropertyIndex_t iPropIndex, lpctstr ptcVal, bool fDeleteZero = true);
 
     /**
     *@brief Sets the value of the string-type prop from the CComponentProps.
@@ -208,7 +208,7 @@ public:
     *@param ptcVal The property value
     *@param fDeleteZero If the prop val is an empty string, delete the prop
     */
-    void SetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, lpctstr ptcVal, bool fDeleteZero = true);
+    void SetPropStr( COMPPROPS_TYPE iCompPropsType, CComponentProps::PropertyIndex_t iPropIndex, lpctstr ptcVal, bool fDeleteZero = true);
 
     /**
     *@brief Sets the value of the numerical-type prop from the CComponentProps. Faster than the variant accepting a COMPPROPS_TYPE if you need to set multiple props from the same CComponentProps
@@ -216,7 +216,7 @@ public:
     *@param iPropIndex The index (enum) of the property for that CComponentProps
     *@param iVal The property value
     */
-    void SetPropNum( CComponentProps* pCompProps, int iPropIndex, CComponentProps::PropertyValNum_t iVal );
+    void SetPropNum( CComponentProps* pCompProps, CComponentProps::PropertyIndex_t iPropIndex, CComponentProps::PropertyValNum_t iVal );
 
     /*
     *@brief Sets the value of the numerical-type prop from the CComponentProps.
@@ -224,7 +224,7 @@ public:
     *@param iPropIndex The index (enum) of the property for that CComponentProps
     *@param iVal The property value
     */
-    void SetPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CComponentProps::PropertyValNum_t iVal );
+    void SetPropNum( COMPPROPS_TYPE iCompPropsType, CComponentProps::PropertyIndex_t iPropIndex, CComponentProps::PropertyValNum_t iVal );
 
     /**
     *@brief Sums a number to the value of the numerical-type prop from the CComponentProps. Faster than the variant accepting a COMPPROPS_TYPE if you need to set multiple props from the same CComponentProps
@@ -234,7 +234,7 @@ public:
     *@param pBaseCompProps If nullptr and the prop doesn't exist, consider 0 as the previous value. Otherwise, this should point to the same type of CComponentProps, but in the object's CBaseBaseDef.
     *       So, check if the Base Property exists and use its value as the previous value. If it doesn't exists, use 0.
     */
-    void ModPropNum( CComponentProps* pCompProps, int iPropIndex, CComponentProps::PropertyValNum_t iMod, const CComponentProps* pBaseCompProps = nullptr);
+    void ModPropNum( CComponentProps* pCompProps, CComponentProps::PropertyIndex_t iPropIndex, CComponentProps::PropertyValNum_t iMod, const CComponentProps* pBaseCompProps = nullptr);
 
     /**
     *@brief Sums a number to the value of the numerical-type prop from the CComponentProps.
@@ -243,7 +243,7 @@ public:
     *@param iMod The signed number to sum to the prop value
     *@param fBaseDef If false and the prop doesn't exist, consider 0 as the previous value. Otherwise, check if the Base Property exists and use its value as the previous value. If it doesn't exists, use 0.
     */
-    void ModPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CComponentProps::PropertyValNum_t iMod, bool fBaseDef = false);
+    void ModPropNum( COMPPROPS_TYPE iCompPropsType, CComponentProps::PropertyIndex_t iPropIndex, CComponentProps::PropertyValNum_t iMod, bool fBaseDef = false);
 
     /**
      * @fn  lpctstr CObjBase::GetDefStr( lpctstr ptcKey, bool fZero = false, bool fDef = false ) const;

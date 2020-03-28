@@ -12,7 +12,7 @@ lpctstr const CCPropsItemEquippable::_ptcPropertyKeys[PROPIEQUIP_QTY + 1] =
     nullptr
 };
 KeyTableDesc_s CCPropsItemEquippable::GetPropertyKeysData() const {
-    return {_ptcPropertyKeys, (int)CountOf(_ptcPropertyKeys)};
+    return {_ptcPropertyKeys, (PropertyIndex_t)CountOf(_ptcPropertyKeys)};
 }
 
 RESDISPLAY_VERSION CCPropsItemEquippable::_iPropertyExpansion[PROPIEQUIP_QTY + 1] =
@@ -38,13 +38,13 @@ bool CCPropsItemEquippable::CanSubscribe(const CItem* pItem) // static
 }
 
 
-lpctstr CCPropsItemEquippable::GetPropertyName(int iPropIndex) const
+lpctstr CCPropsItemEquippable::GetPropertyName(PropertyIndex_t iPropIndex) const
 {
     ASSERT(iPropIndex < PROPIEQUIP_QTY);
     return _ptcPropertyKeys[iPropIndex];
 }
 
-bool CCPropsItemEquippable::IsPropertyStr(int iPropIndex) const
+bool CCPropsItemEquippable::IsPropertyStr(PropertyIndex_t iPropIndex) const
 {
     switch (iPropIndex)
     {
@@ -61,7 +61,7 @@ bool CCPropsItemEquippable::IsPropertyStr(int iPropIndex) const
         equippable items when that flag was off and you decide to turn it on later, you'll need to RECREATE all of those ITEMS in order to make them load the elemental properties.
     We'll use this method when we have figured how to avoid possible bugs when equipping and unequipping items and switching COMBAT_ELEMENTAL_ENGINE on and off.
 */
-bool CCPropsItemEquippable::IgnoreElementalProperty(int iPropIndex) // static
+bool CCPropsItemEquippable::IgnoreElementalProperty(PropertyIndex_t iPropIndex) // static
 {
     if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
         return false;
@@ -91,21 +91,21 @@ bool CCPropsItemEquippable::IgnoreElementalProperty(int iPropIndex) // static
 }
 
 
-bool CCPropsItemEquippable::GetPropertyNumPtr(int iPropIndex, PropertyValNum_t* piOutVal) const
+bool CCPropsItemEquippable::GetPropertyNumPtr(PropertyIndex_t iPropIndex, PropertyValNum_t* piOutVal) const
 {
     ADDTOCALLSTACK("CCPropsItemChar::GetPropertyNumPtr");
     ASSERT(!IsPropertyStr(iPropIndex));
     return BaseCont_GetPropertyNum(&_mPropsNum, iPropIndex, piOutVal);
 }
 
-bool CCPropsItemEquippable::GetPropertyStrPtr(int iPropIndex, CSString* psOutVal, bool fZero) const
+bool CCPropsItemEquippable::GetPropertyStrPtr(PropertyIndex_t iPropIndex, CSString* psOutVal, bool fZero) const
 {
     ADDTOCALLSTACK("CCPropsItemEquippable::GetPropertyStrPtr");
     ASSERT(IsPropertyStr(iPropIndex));
     return BaseCont_GetPropertyStr(&_mPropsStr, iPropIndex, psOutVal, fZero);
 }
 
-void CCPropsItemEquippable::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
+void CCPropsItemEquippable::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemEquippable::SetPropertyNum");
     ASSERT(!IsPropertyStr(iPropIndex));
@@ -117,7 +117,10 @@ void CCPropsItemEquippable::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal
             return; // I didn't have this property, so avoid further processing.
     }
     else
+    {
         _mPropsNum[iPropIndex] = iVal;
+        //_mPropsNum.container.shrink_to_fit();
+    }
 
     if (!pLinkedObj)
         return;
@@ -126,7 +129,7 @@ void CCPropsItemEquippable::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal
     pLinkedObj->UpdatePropertyFlag();
 }
 
-void CCPropsItemEquippable::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
+void CCPropsItemEquippable::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemEquippable::SetPropertyStr");
     ASSERT(ptcVal);
@@ -139,7 +142,10 @@ void CCPropsItemEquippable::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjB
             return; // I didn't have this property, so avoid further processing.
     }
     else
+    {
         _mPropsStr[iPropIndex] = ptcVal;
+        //_mPropsStr.container.shrink_to_fit();
+    }
 
     if (!pLinkedObj)
         return;
@@ -148,19 +154,19 @@ void CCPropsItemEquippable::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjB
     pLinkedObj->UpdatePropertyFlag();
 }
 
-void CCPropsItemEquippable::DeletePropertyNum(int iPropIndex)
+void CCPropsItemEquippable::DeletePropertyNum(PropertyIndex_t iPropIndex)
 {
     ADDTOCALLSTACK("CCPropsItemEquippable::DeletePropertyNum");
     _mPropsNum.erase(iPropIndex);
 }
 
-void CCPropsItemEquippable::DeletePropertyStr(int iPropIndex)
+void CCPropsItemEquippable::DeletePropertyStr(PropertyIndex_t iPropIndex)
 {
     ADDTOCALLSTACK("CCPropsItemEquippable::DeletePropertyStr");
     _mPropsStr.erase(iPropIndex);
 }
 
-bool CCPropsItemEquippable::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, int iPropIndex, bool fPropStr)
+bool CCPropsItemEquippable::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, PropertyIndex_t iPropIndex, bool fPropStr)
 {
     ADDTOCALLSTACK("CCPropsItemEquippable::FindLoadPropVal");
     if (!fPropStr && (*s.GetArgRaw() == '\0'))
@@ -173,7 +179,7 @@ bool CCPropsItemEquippable::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, R
     return true;
 }
 
-bool CCPropsItemEquippable::FindWritePropVal(CSString & sVal, int iPropIndex, bool fPropStr) const
+bool CCPropsItemEquippable::FindWritePropVal(CSString & sVal, PropertyIndex_t iPropIndex, bool fPropStr) const
 {
     ADDTOCALLSTACK("CCPropsItemEquippable::FindWritePropVal");
 
@@ -212,7 +218,7 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
     // Numeric properties
     for (const BaseContNumPair_t& propPair : _mPropsNum)
     {
-        int prop = propPair.first;
+        PropertyIndex_t prop = propPair.first;
         PropertyValNum_t iVal = propPair.second;
 
         if (iVal == 0)
@@ -583,7 +589,7 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
     // String properties
     for (const BaseContStrPair_t& propPair : _mPropsStr)
     {
-        int prop = propPair.first;
+        PropertyIndex_t prop = propPair.first;
         lpctstr ptcVal = propPair.second.GetPtr();
 
         switch (prop)

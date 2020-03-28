@@ -57,6 +57,7 @@ void CEntity::SubscribeComponent(CComponent * pComponent)
         return;
     }
     _List[compType] = pComponent;
+    //_List.container.shrink_to_fit();
 }
 
 void CEntity::UnsubscribeComponent(CComponent *pComponent)
@@ -74,6 +75,7 @@ void CEntity::UnsubscribeComponent(CComponent *pComponent)
         return;
     }
     _List.erase(compType);  // iterator invalidation!
+    //_List.container.shrink_to_fit();
 }
 
 bool CEntity::IsComponentSubscribed(CComponent *pComponent) const

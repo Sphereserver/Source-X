@@ -16,7 +16,7 @@ CItemStone::CItemStone( ITEMID_TYPE id, CItemBase * pItemDef ) :
 {
 	m_itStone.m_iAlign = STONEALIGN_STANDARD;
     g_World.m_Stones.emplace_back(this);
-    _pMultiStorage = new CMultiStorage(UID_UNUSED);
+    _pMultiStorage = new CMultiStorage(CUID());
     _iMaxShips = g_Cfg._iMaxShipsGuild;
     _iMaxHouses = g_Cfg._iMaxHousesGuild;
 }

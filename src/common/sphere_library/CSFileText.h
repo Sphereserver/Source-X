@@ -114,12 +114,14 @@ public:     virtual tchar * ReadString( tchar * pBuffer, int sizemax );
     * @param iLen lenght of the data to write.
     * @return true is success, false otherwise.
     */
-    virtual bool Write( const void * pData, int iLen ) override;
+protected:  virtual bool _Write( const void * pData, int iLen ) override;
+public:     virtual bool Write(const void* pData, int iLen) override;
     /**
     * @brief write string into file.
     * @return true is success, false otherwise.
     */
-    virtual bool WriteString( lpctstr pStr );
+protected:  bool _WriteString(lpctstr pStr);
+public:     bool WriteString(lpctstr pStr);
     ///@}
     /** @name Mode operations:
     */

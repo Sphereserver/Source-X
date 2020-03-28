@@ -308,7 +308,7 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
     SubscribeComponentProps(new CCPropsItemChar());
 
     // SubscribeComponent regular Components
-    SubscribeComponent(new CCFaction(this));
+    SubscribeComponent(new CCFaction());
 
     CTimedObject::GoSleep();  // Make it be sleeping at first, to awake it when placing it in the world (errors will show up otherwise).
 
