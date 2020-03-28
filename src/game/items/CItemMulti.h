@@ -190,7 +190,7 @@ public:
     * @brief Returns the guild linked.
     * @return the guild
     */
-    CUID GetGuild() const;
+    CUID GetGuildStone() const;
 
     // Coowner
     /**
@@ -786,6 +786,6 @@ public:
     * @brief Writes the houses/ships on the worldsave.
     * @param s The datastream.
     */
-    virtual void r_Write(CScript & s);
+    void r_Write(CScript & s) const;
 };
 #endif // _INC_CITEMMULTI_H

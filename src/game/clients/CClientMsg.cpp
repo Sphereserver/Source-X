@@ -533,6 +533,7 @@ void CClient::addLight() const
 	// NOTE: This could just be a flash of light.
 	// Global light level.
 	ASSERT(m_pChar);
+	ASSERT(m_pChar->m_pPlayer);
 
 	if (m_pChar->IsStatFlag(STATF_NIGHTSIGHT|STATF_DEAD))
 	{
@@ -542,8 +543,8 @@ void CClient::addLight() const
 
 	byte iLight = UINT8_MAX;
 
-	if ( m_pChar->m_LocalLight )			// personal light override
-		iLight = m_pChar->m_LocalLight;
+	if ( m_pChar->m_pPlayer->m_LocalLight )			// personal light override
+		iLight = m_pChar->m_pPlayer->m_LocalLight;
 
 	if ( iLight == UINT8_MAX )
 		iLight = m_pChar->GetLightLevel();

@@ -797,17 +797,17 @@ void CSector::SetLightNow( bool fFlash )
 		if ( pChar->IsStatFlag( STATF_DEAD | STATF_NIGHTSIGHT ))
 			continue;
 
-		if ( pChar->IsClient())
+		if ( pChar->m_pPlayer && pChar->IsClient())
 		{
 			CClient * pClient = pChar->GetClient();
 			ASSERT(pClient);
 
 			if ( fFlash )	// This does not seem to work predicably ! too fast?
 			{
-				byte bPrvLight = pChar->m_LocalLight;
-				pChar->m_LocalLight = LIGHT_BRIGHT;	// full bright.
+				byte bPrvLight = pChar->m_pPlayer->m_LocalLight;
+				pChar->m_pPlayer->m_LocalLight = LIGHT_BRIGHT;	// full bright.
 				pClient->addLight();
-				pChar->m_LocalLight = bPrvLight;	// back to previous.
+				pChar->m_pPlayer->m_LocalLight = bPrvLight;	// back to previous.
 			}
 			pClient->addLight();
 		}

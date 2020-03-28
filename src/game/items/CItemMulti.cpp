@@ -605,7 +605,10 @@ void CItemMulti::SetOwner(const CUID& uidOwner)
     _uidOwner.InitUID();
     if (pOldOwner)  // Old Owner may not exist, was removed?
     {
-        pOldOwner->GetMultiStorage()->DelMulti(GetUID());
+        ASSERT(pOldOwner->m_pPlayer);
+        CMultiStorage* pMultiStorage = pOldOwner->m_pPlayer->GetMultiStorage();
+        ASSERT(pMultiStorage);
+        pMultiStorage->DelMulti(GetUID());
         RemoveKeys(pOldOwner->GetUID());
     }
     if (!uidOwner.IsValidUID())
@@ -616,7 +619,10 @@ void CItemMulti::SetOwner(const CUID& uidOwner)
     CChar *pOwner = uidOwner.CharFind();
     if (pOwner)
     {
-        pOwner->GetMultiStorage()->AddMulti(GetUID(), HP_OWNER);
+        ASSERT(pOwner->m_pPlayer);
+        CMultiStorage* pMultiStorage = pOwner->m_pPlayer->GetMultiStorage();
+        ASSERT(pMultiStorage);
+        pMultiStorage->AddMulti(GetUID(), HP_OWNER);
     }
     _uidOwner = uidOwner;
 }
@@ -638,19 +644,23 @@ CUID CItemMulti::GetOwner() const
 void CItemMulti::SetGuild(const CUID& uidGuild)
 {
     ADDTOCALLSTACK("CItemMulti::SetGuild");
-    CItemStone *pGuild = static_cast<CItemStone*>(GetGuild().ItemFind());
+    CItemStone *pGuildStone = static_cast<CItemStone*>(GetGuildStone().ItemFind());
     _uidGuild.InitUID();
-    if (pGuild)  // Old Guild may not exist, was it removed...?
+    if (pGuildStone)  // Old Guild may not exist, was it removed...?
     {
-        pGuild->GetMultiStorage()->DelMulti(GetUID());   // ... if not, unlink it from this multi.
+        CMultiStorage* pMultiStorage = pGuildStone->GetMultiStorage();
+        ASSERT(pMultiStorage);
+        pMultiStorage->DelMulti(GetUID());   // ... if not, unlink it from this multi.
     }
     if (!uidGuild.IsValidUID())  // Just clearing it
     {
         return;
     }
     _uidGuild = uidGuild;   // Set the Guild* to a new guildstone.
-    pGuild = static_cast<CItemStone*>(uidGuild.ItemFind());
-    pGuild->GetMultiStorage()->AddMulti(GetUID(), HP_GUILD);
+    pGuildStone = static_cast<CItemStone*>(uidGuild.ItemFind());
+    CMultiStorage* pMultiStorage = pGuildStone->GetMultiStorage();
+    ASSERT(pMultiStorage);
+    pMultiStorage->AddMulti(GetUID(), HP_GUILD);
 }
 
 bool CItemMulti::IsGuild(const CUID& uidTarget) const
@@ -658,7 +668,7 @@ bool CItemMulti::IsGuild(const CUID& uidTarget) const
     return (_uidGuild == uidTarget);
 }
 
-CUID CItemMulti::GetGuild() const
+CUID CItemMulti::GetGuildStone() const
 {
     if (_uidGuild.IsValidUID())
     {
@@ -682,12 +692,14 @@ void CItemMulti::AddCoowner(const CUID& uidCoowner)
         }
     }
     CChar *pCoowner = uidCoowner.CharFind();
-    if (!pCoowner)
+    if (!pCoowner || !pCoowner->m_pPlayer)
     {
         return;
     }
     RevokePrivs(uidCoowner);
-    pCoowner->GetMultiStorage()->AddMulti(GetUID(), HP_COOWNER);
+    CMultiStorage* pMultiStorage = pCoowner->m_pPlayer->GetMultiStorage();
+    ASSERT(pMultiStorage);
+    pMultiStorage->AddMulti(GetUID(), HP_COOWNER);
     _lCoowners.emplace_back(uidCoowner);
 }
 
@@ -700,12 +712,14 @@ void CItemMulti::DeleteCoowner(const CUID& uidCoowner)
         if (uid == uidCoowner)
         {
             CChar *pCoowner = uidCoowner.CharFind();
-            if (!pCoowner)
+            if (!pCoowner || !pCoowner->m_pPlayer)
             {
                 continue;
             }
             _lCoowners.erase(_lCoowners.begin() + i);
-            pCoowner->GetMultiStorage()->DelMulti(GetUID());
+            CMultiStorage* pMultiStorage = pCoowner->m_pPlayer->GetMultiStorage();
+            ASSERT(pMultiStorage);
+            pMultiStorage->DelMulti(GetUID());
             RemoveKeys(uid);
             return;
         }
@@ -749,12 +763,14 @@ void CItemMulti::AddFriend(const CUID& uidFriend)
         }
     }
     CChar *pFriend = uidFriend.CharFind();
-    if (!pFriend)
+    if (!pFriend || !pFriend->m_pPlayer)
     {
         return;
     }
     RevokePrivs(uidFriend);
-    pFriend->GetMultiStorage()->AddMulti(GetUID(), HP_FRIEND);
+    CMultiStorage* pMultiStorage = pFriend->m_pPlayer->GetMultiStorage();
+    ASSERT(pMultiStorage);
+    pMultiStorage->AddMulti(GetUID(), HP_FRIEND);
     _lFriends.emplace_back(uidFriend);
 }
 
@@ -766,12 +782,14 @@ void CItemMulti::DeleteFriend(const CUID& uidFriend)
         if (_lFriends[i] == uidFriend)
         {
             CChar *pFriend = uidFriend.CharFind();
-            if (!pFriend)
+            if (!pFriend || !pFriend->m_pPlayer)
             {
                 continue;
             }
             _lFriends.erase(_lFriends.begin() + i);
-            pFriend->GetMultiStorage()->DelMulti(GetUID());
+            CMultiStorage* pMultiStorage = pFriend->m_pPlayer->GetMultiStorage();
+            ASSERT(pMultiStorage);
+            pMultiStorage->DelMulti(GetUID());
             RemoveKeys(uidFriend);
             return;
         }
@@ -815,12 +833,14 @@ void CItemMulti::AddBan(const CUID& uidBan)
         }
     }
     CChar *pBan = uidBan.CharFind();
-    if (!pBan)
+    if (!pBan || !pBan->m_pPlayer)
     {
         return;
     }
     RevokePrivs(uidBan);
-    pBan->GetMultiStorage()->AddMulti(GetUID(), HP_BAN);
+    CMultiStorage* pMultiStorage = pBan->m_pPlayer->GetMultiStorage();
+    ASSERT(pMultiStorage);
+    pMultiStorage->AddMulti(GetUID(), HP_BAN);
     _lBans.emplace_back(uidBan);
 }
 
@@ -833,8 +853,12 @@ void CItemMulti::DeleteBan(const CUID& uidBan)
         {
             _lBans.erase(_lBans.begin() + i);
             CChar *pBan = uidBan.CharFind();
-            if (pBan)
-                pBan->GetMultiStorage()->DelMulti(GetUID());
+            if (pBan && pBan->m_pPlayer)
+            {
+                CMultiStorage* pMultiStorage = pBan->m_pPlayer->GetMultiStorage();
+                ASSERT(pMultiStorage);
+                pMultiStorage->DelMulti(GetUID());
+            }
             return;
         }
     }
@@ -878,12 +902,14 @@ void CItemMulti::AddAccess(const CUID& uidAccess)
         }
     }
     CChar *pAccess = uidAccess.CharFind();
-    if (!pAccess)
+    if (!pAccess || !pAccess->m_pPlayer)
     {
         return;
     }
     RevokePrivs(uidAccess);
-    pAccess->GetMultiStorage()->AddMulti(GetUID(), HP_ACCESSONLY);
+    CMultiStorage* pMultiStorage = pAccess->m_pPlayer->GetMultiStorage();
+    ASSERT(pMultiStorage);
+    pMultiStorage->AddMulti(GetUID(), HP_ACCESSONLY);
     _lAccesses.emplace_back(uidAccess);
 }
 
@@ -896,8 +922,12 @@ void CItemMulti::DeleteAccess(const CUID& uidAccess)
         {
             _lAccesses.erase(_lAccesses.begin() + i);
             CChar *pAccess = uidAccess.CharFind();
-            if (pAccess)
-                pAccess->GetMultiStorage()->DelMulti(GetUID());
+            if (pAccess && pAccess->m_pPlayer)
+            {
+                CMultiStorage* pMultiStorage = pAccess->m_pPlayer->GetMultiStorage();
+                ASSERT(pMultiStorage);
+                pMultiStorage->DelMulti(GetUID());
+            }
             return;
         }
     }
@@ -1131,7 +1161,7 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
         }
     }
 
-    if (!pOwner)
+    if (!pOwner || !pOwner->m_pPlayer)
     {
         return;
     }
@@ -1142,7 +1172,9 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
         {
             TransferMovingCrateToBank();
         }
-        pOwner->GetMultiStorage()->DelMulti(GetUID());
+        CMultiStorage* pMultiStorage = pOwner->m_pPlayer->GetMultiStorage();
+        ASSERT(pMultiStorage);
+        pMultiStorage->DelMulti(GetUID());
     }
     if (tRet == TRIGRET_RET_TRUE)
     {
@@ -1795,12 +1827,14 @@ void CItemMulti::AddVendor(const CUID& uidVendor)
         return;
     }
     CChar *pVendor = uidVendor.CharFind();
-    if (!pVendor)
+    if (!pVendor || !pVendor->m_pPlayer)
     {
         return;
     }
     RevokePrivs(uidVendor);
-    pVendor->GetMultiStorage()->AddMulti(GetUID(), HP_VENDOR);
+    CMultiStorage* pMultiStorage = pVendor->m_pPlayer->GetMultiStorage();
+    ASSERT(pMultiStorage);
+    pMultiStorage->AddMulti(GetUID(), HP_VENDOR);
     _lVendors.emplace_back(uidVendor);
 }
 
@@ -1813,8 +1847,12 @@ void CItemMulti::DeleteVendor(const CUID& uidVendor)
         {
             _lVendors.erase(_lVendors.begin() + i);
             CChar *pVendor = uidVendor.CharFind();
-            if (pVendor)
-                pVendor->GetMultiStorage()->DelMulti(GetUID());
+            if (pVendor && pVendor->m_pPlayer)
+            {
+                CMultiStorage* pMultiStorage = pVendor->m_pPlayer->GetMultiStorage();
+                ASSERT(pMultiStorage);
+                pMultiStorage->DelMulti(GetUID());
+            }
             break;
         }
     }
@@ -2514,8 +2552,21 @@ bool CItemMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
     {
         // House Permissions
         case SHL_PRIV:
-            sVal.FormatU8Val((uint8)pSrc->GetChar()->GetMultiStorage()->GetPriv(GetUID()));
+        {
+            ASSERT(pSrc);
+            if (CChar* pSrcChar = pSrc->GetChar())
+            {
+                if (pSrcChar->m_pPlayer)
+                {
+                    CMultiStorage* pMultiStorage = pSrcChar->m_pPlayer->GetMultiStorage();
+                    ASSERT(pMultiStorage);
+                    sVal.FormatU8Val((uint8)pMultiStorage->GetPriv(GetUID()));
+                    break;
+                }
+            }
+            sVal.FormatVal(0);
             break;
+        }
         case SHL_OWNER:
         {
             CChar *pOwner = GetOwner().CharFind();
@@ -2538,7 +2589,7 @@ bool CItemMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_GUILD:
         {
-            CItemStone *pGuild = static_cast<CItemStone*>(GetGuild().ItemFind());
+            CItemStone *pGuild = static_cast<CItemStone*>(GetGuildStone().ItemFind());
             if (!IsStrEmpty(ptcKey))
             {
                 if (pGuild)
@@ -2871,7 +2922,7 @@ bool CItemMulti::r_LoadVal(CScript & s)
             ptcKey += 5;
             if (*ptcKey == '.')
             {
-                CItemStone *pGuild = static_cast<CItemStone*>(GetGuild().ItemFind());
+                CItemStone *pGuild = static_cast<CItemStone*>(GetGuildStone().ItemFind());
                 if (pGuild)
                 {
                     return pGuild->r_LoadVal(s);
@@ -2999,7 +3050,7 @@ void CItemMulti::DupeCopy(const CItem * pItem)
 
 CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPointMap & pt, CItem *pDeed)
 {
-    if (!pChar)
+    if (!pChar || !pChar->m_pPlayer)
     {
         return nullptr;
     }
@@ -3016,7 +3067,9 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
     if (fShip)
     {
         ASSERT(pMultiDef);
-        if (!pChar->GetMultiStorage()->CanAddShip(pChar->GetUID(), pMultiDef->_iMultiCount))
+        CMultiStorage* pMultiStorage = pChar->m_pPlayer->GetMultiStorage();
+        ASSERT(pMultiStorage);
+        if (!pMultiStorage->CanAddShip(pChar->GetUID(), pMultiDef->_iMultiCount))
         {
             return nullptr;
         }
@@ -3024,7 +3077,9 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
     else if (pItemDef->IsType(IT_MULTI) || pItemDef->IsType(IT_MULTI_CUSTOM))
     {
         ASSERT(pMultiDef);
-        if (!pChar->GetMultiStorage()->CanAddHouse(pChar->GetUID(), pMultiDef->_iMultiCount))
+        CMultiStorage* pMultiStorage = pChar->m_pPlayer->GetMultiStorage();
+        ASSERT(pMultiStorage);
+        if (!pMultiStorage->CanAddHouse(pChar->GetUID(), pMultiDef->_iMultiCount))
         {
             return nullptr;
         }
@@ -3423,12 +3478,18 @@ bool CMultiStorage::CanAddHouse(const CUID& uidChar, int16 iHouseCount) const
     {
         return true;    // Guilds can have unlimited houses atm.
     }
+
     const CChar *pChar = uidChar.CharFind();
+    if (!pChar || !pChar->m_pPlayer)
+    {
+        return false;
+    }
     if (iHouseCount == 0 || pChar->IsPriv(PRIV_GM))
     {
         return true;
     }
-    uint8 iMaxHouses = pChar->_iMaxHouses;
+
+    uint8 iMaxHouses = pChar->m_pPlayer->_iMaxHouses;
     if (iMaxHouses == 0)
     {
         if (pChar->GetClient())
@@ -3489,7 +3550,7 @@ void CMultiStorage::ClearHouses()
     _lHouses.clear();
 }
 
-void CMultiStorage::r_Write(CScript & s)
+void CMultiStorage::r_Write(CScript & s) const
 {
     ADDTOCALLSTACK("CMultiStorage::r_Write");
     UNREFERENCED_PARAMETER(s);
@@ -3542,8 +3603,9 @@ bool CMultiStorage::CanAddShip(const CUID& uidChar, int16 iShipCount)
     {
         return true; // Guilds can have unlimited ships atm.
     }
+
     const CChar *pChar = uidChar.CharFind();
-    if (!pChar)
+    if (!pChar || !pChar->m_pPlayer)
     {
         return false;
     }
@@ -3551,7 +3613,8 @@ bool CMultiStorage::CanAddShip(const CUID& uidChar, int16 iShipCount)
     {
         return true;
     }
-    uint8 iMaxShips = pChar->_iMaxShips;
+
+    uint8 iMaxShips = pChar->m_pPlayer->_iMaxShips;
     if (iMaxShips == 0)
     {
         if (pChar->GetClient())

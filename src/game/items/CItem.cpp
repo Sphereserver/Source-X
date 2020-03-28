@@ -3283,7 +3283,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 	EXC_TRY("Verb");
 	ASSERT(pSrc);
 
-    if (static_cast<CEntity*>(this)->r_Verb(s, pSrc))
+    if (CEntity::r_Verb(s, pSrc))
     {
         return true;
     }

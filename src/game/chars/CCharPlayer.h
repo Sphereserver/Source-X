@@ -12,6 +12,7 @@
 #include "../CServerConfig.h"
 
 class CSkillClassDef;
+class CMultiStorage;
 
 
 enum CPC_TYPE	// Player char.
@@ -31,10 +32,12 @@ private:
 	CResourceRef m_SkillClass;		// RES_SKILLCLASS CSkillClassDef What skill class group have we selected.
 	bool m_bKrToolbarEnabled;
 
+	// Multis
+	CMultiStorage* _pMultiStorage;	// List of houses.
+
 public:
 	static const char *m_sClassName;
 	CAccount * m_pAccount;		// The account index. (for idle players mostly)
-	static lpctstr const sm_szVerbKeys[];
 
 	int64 m_timeLastUsed;	// Time the player char was last used.
 
@@ -47,11 +50,21 @@ public:
 	byte m_speedMode;		// speed mode (0x0 = Normal movement, 0x1 = Fast movement, 0x2 = Slow movement, 0x3 and above = Hybrid movement)
 	dword m_pflag;			// PFLAG
 
+	// Client's local light (might be useful in the future for NPCs also? keep it here for now)
+	byte m_LocalLight;
+
+	// Multis
+	uint8 _iMaxHouses;              // Max houses this player (Client?) can have (Overriding CAccount::_iMaxHouses)
+	uint8 _iMaxShips;               // Max ships this player (Client?) can have (Overriding CAccount::_iMaxShips)
+
+	static lpctstr const sm_szVerbKeys[];
 	static lpctstr const sm_szLoadKeys[];
 
 	CResourceRefArray m_Speech;	// Speech fragment list (other stuff we know)
 
 public:
+	CAccount* GetAccount() const;
+
 	SKILL_TYPE Skill_GetLockType( lpctstr ptcKey ) const;
 	SKILLLOCK_TYPE Skill_GetLock( SKILL_TYPE skill ) const;
 	void Skill_SetLock( SKILL_TYPE skill, SKILLLOCK_TYPE state );
@@ -60,16 +73,16 @@ public:
 	SKILLLOCK_TYPE Stat_GetLock( STAT_TYPE stat ) const;
 	void Stat_SetLock( STAT_TYPE stat, SKILLLOCK_TYPE state );
 
+	bool getKrToolbarStatus();
+	CMultiStorage* GetMultiStorage();
+
+	bool SetSkillClass(CChar* pChar, CResourceID rid);
+	CSkillClassDef* GetSkillClass() const;
+
 	void r_WriteChar( CChar * pChar, CScript & s );
 	bool r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & s );
 	bool r_LoadVal( CChar * pChar, CScript & s );
-
-	bool SetSkillClass( CChar * pChar, CResourceID rid );
-	CSkillClassDef * GetSkillClass() const;
-
-	bool getKrToolbarStatus();
-
-	CAccount * GetAccount() const;
+	
 
 public:
 	CCharPlayer( CChar * pChar, CAccount * pAccount );

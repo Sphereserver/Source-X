@@ -719,13 +719,15 @@ dword CChar::GetMoveBlockFlags(bool fIgnoreGM) const
 byte CChar::GetLightLevel() const
 {
 	ADDTOCALLSTACK("CChar::GetLightLevel");
-	// Get personal light level.
+	// Get personal default light level.
 
 	if ( IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_NIGHTSIGHT) || IsPriv(PRIV_DEBUG) )
 		return LIGHT_BRIGHT;
 	if ( (g_Cfg.m_iRacialFlags & RACIALF_ELF_NIGHTSIGHT) && IsElf() )		// elves always have nightsight enabled (Night Sight racial trait)
 		return LIGHT_BRIGHT;
-	return GetTopSector()->GetLight();
+	const CSector* pSector = GetTopSector();
+	ASSERT(pSector);
+	return pSector->GetLight();
 }
 
 CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook from the magic school given in iSpell

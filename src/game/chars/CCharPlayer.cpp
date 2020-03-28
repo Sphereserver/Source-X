@@ -5,6 +5,8 @@
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
 #include "../clients/CClient.h"
+#include "../items/CItemMulti.h"
+#include "../CServer.h"
 #include "../CWorld.h"
 #include "../CWorldGameTime.h"
 #include "CChar.h"
@@ -29,6 +31,11 @@ CCharPlayer::CCharPlayer(CChar *pChar, CAccount *pAccount) : m_pAccount(pAccount
 	m_pflag = 0;
 	m_bKrToolbarEnabled = false;
 	m_timeLastUsed = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+	m_LocalLight = 0;
+
+	_iMaxHouses = g_Cfg._iMaxHousesPlayer;
+	_iMaxShips = g_Cfg._iMaxShipsPlayer;
+	_pMultiStorage = new CMultiStorage(pChar->GetUID());
 
 	memset(m_SkillLock, 0, sizeof(m_SkillLock));
 	memset(m_StatLock, 0, sizeof(m_StatLock));
@@ -38,6 +45,8 @@ CCharPlayer::CCharPlayer(CChar *pChar, CAccount *pAccount) : m_pAccount(pAccount
 CCharPlayer::~CCharPlayer()
 {
 	m_Speech.clear();
+	delete _pMultiStorage;
+	//_pMultiStorage = nullptr;
 }
 
 CAccount * CCharPlayer::GetAccount() const
@@ -49,6 +58,11 @@ CAccount * CCharPlayer::GetAccount() const
 bool CCharPlayer::getKrToolbarStatus()
 {
 	return m_bKrToolbarEnabled;
+}
+
+CMultiStorage* CCharPlayer::GetMultiStorage()
+{
+	return _pMultiStorage;
 }
 
 bool CCharPlayer::SetSkillClass( CChar * pChar, CResourceID rid )
@@ -219,6 +233,9 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 		case CPC_LASTUSED:
 			sVal.FormatLLVal( CWorldGameTime::GetCurrentTime().GetTimeDiff( m_timeLastUsed ) / MSECS_PER_SEC );  //seconds
 			return true;
+		case CPC_LIGHT:
+			sVal.FormatHex(m_LocalLight);
+			break;
 		case CPC_PFLAG:
 			sVal.FormatVal(m_pflag);
 			return true;
@@ -257,6 +274,36 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 					return false;
 				sVal.FormatVal( Stat_GetLock( stat ));
 			} return true;
+
+		case CPC_MAXHOUSES:
+			sVal.FormatU8Val(_iMaxHouses);
+			return true;
+		case CPC_HOUSES:
+			sVal.Format16Val(GetMultiStorage()->GetHouseCountReal());
+			return true;
+		case CPC_GETHOUSEPOS:
+		{
+			ptcKey += 11;
+			sVal.Format16Val(GetMultiStorage()->GetHousePos((CUID)Exp_GetDWVal(ptcKey)));
+			return true;
+		}
+		case CPC_MAXSHIPS:
+		{
+			sVal.FormatU8Val(_iMaxShips);
+			return true;
+		}
+		case CPC_SHIPS:
+		{
+			sVal.Format16Val(GetMultiStorage()->GetShipCountReal());
+			return true;
+		}
+		case CPC_GETSHIPPOS:
+		{
+			ptcKey += 11;
+			sVal.Format16Val(GetMultiStorage()->GetShipPos((CUID)Exp_GetDWVal(ptcKey)));
+			return true;
+		}
+
 		default:
 			if ( FindTableSorted( ptcKey, CCharNPC::sm_szLoadKeys, CNC_QTY ) >= 0 )
 			{
@@ -346,6 +393,79 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 
 	switch ( FindTableHeadSorted( s.GetKey(), sm_szLoadKeys, CPC_QTY ))
 	{
+
+		case CPC_ADDHOUSE:
+		{
+			if (g_Serv.IsLoading()) //Prevent to load it from saves, it may cause a crash when accessing to a non-yet existant multi
+			{
+				break;
+			}
+			int64 piCmd[2];
+			Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
+			HOUSE_PRIV ePriv = HP_OWNER;
+			if (piCmd[1] > 0 && piCmd[1] < HP_QTY)
+			{
+				ePriv = (HOUSE_PRIV)piCmd[1];
+			}
+			GetMultiStorage()->AddHouse(CUID((dword)piCmd[0]), ePriv);
+			break;
+		}
+		case CPC_DELHOUSE:
+		{
+			dword dwUID = s.GetArgDWVal();
+			if (dwUID == UID_UNUSED)
+			{
+				GetMultiStorage()->ClearHouses();
+			}
+			else
+			{
+				GetMultiStorage()->DelHouse(CUID(dwUID));
+			}
+			break;
+		}
+		case CPC_ADDSHIP:
+		{
+			if (g_Serv.IsLoading()) //Prevent to load it from saves, it may cause a crash when accessing to a non-yet existant multi
+			{
+				break;
+			}
+			int64 piCmd[2];
+			Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
+			HOUSE_PRIV ePriv = HP_OWNER;
+			if (piCmd[1] > 0 && piCmd[1] < HP_QTY)
+			{
+				ePriv = (HOUSE_PRIV)piCmd[1];
+			}
+			GetMultiStorage()->AddShip(CUID((dword)piCmd[0]), ePriv);
+			break;
+		}
+		case CPC_DELSHIP:
+		{
+			dword dwUID = s.GetArgDWVal();
+			if (dwUID == UINT_MAX)
+			{
+				GetMultiStorage()->ClearShips();
+			}
+			else
+			{
+				GetMultiStorage()->DelShip(CUID(dwUID));
+			}
+			break;
+		}
+
+		case CPC_MAXHOUSES:
+			_iMaxHouses = s.GetArgU8Val();
+			break;
+		case CPC_MAXSHIPS:
+			_iMaxShips = s.GetArgU8Val();;
+			break;
+
+		case CPC_LIGHT:
+			m_LocalLight = s.GetArgBVal();
+			if (pChar->IsClient())
+				pChar->GetClient()->addLight();
+			break;
+
         case CPC_SPEECHCOLOR:
             m_SpeechHue = (HUE_TYPE)s.GetArgWVal();
             return true;
@@ -428,7 +548,10 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 	UNREFERENCED_PARAMETER(pChar);
 	EXC_TRY("r_WriteChar");
 
-	s.WriteKey("ACCOUNT", GetAccount()->GetName());
+	const CAccount* pAccount = GetAccount();
+	ASSERT (pAccount);
+
+	s.WriteKey("ACCOUNT", pAccount->GetName());
 
 	if ( m_wDeaths )
 		s.WriteKeyVal( "DEATHS", m_wDeaths );
@@ -440,8 +563,10 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 		s.WriteKeyVal( "PFLAG", m_pflag );
 	if ( m_speedMode )
 		s.WriteKeyVal("SPEEDMODE", m_speedMode);
-	if (( GetAccount()->GetResDisp() >= RDS_KR ) && m_bKrToolbarEnabled )
+	if ((pAccount->GetResDisp() >= RDS_KR) && m_bKrToolbarEnabled )
 		s.WriteKeyVal("KRTOOLBARSTATUS", m_bKrToolbarEnabled);
+	if (m_LocalLight)
+		s.WriteKeyHex("LIGHT", m_LocalLight);
     if ( m_SpeechHue )
         s.WriteKeyVal("SPEECHCOLOR", m_SpeechHue);
 
@@ -456,31 +581,45 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 	EXC_SET_BLOCK("saving profile");
 	if ( ! m_sProfile.IsEmpty())
 	{
-		tchar szLine[SCRIPT_MAX_LINE_LEN-16];
+		tchar szLine[SCRIPT_MAX_LINE_LEN - 16];
 		Str_MakeUnFiltered( szLine, m_sProfile, sizeof(szLine));
 		s.WriteKey( "PROFILE", szLine );
 	}
 
+	tchar szTemp[128];
+
 	EXC_SET_BLOCK("saving stats locks");
-	for ( int x = 0; x < STAT_BASE_QTY; x++)	// Don't write all lock states!
+	for ( int x = 0; x < STAT_BASE_QTY; ++x)	// Don't write all lock states!
 	{
 		if ( ! m_StatLock[x] )
 			continue;
-		tchar szTemp[128];
 		sprintf( szTemp, "StatLock[%d]", x );	// smaller storage space.
 		s.WriteKeyVal( szTemp, m_StatLock[x] );
 	}
 
 	EXC_SET_BLOCK("saving skill locks");
-	for ( size_t j = 0; j < g_Cfg.m_iMaxSkill; j++ )	// Don't write all lock states!
+	for ( size_t j = 0; j < g_Cfg.m_iMaxSkill; ++j )	// Don't write all lock states!
 	{
 		ASSERT(j < CountOf(m_SkillLock));
 		if ( ! m_SkillLock[j] )
 			continue;
-		tchar szTemp[128];
 		sprintf( szTemp, "SkillLock[%" PRIuSIZE_T "]", j );	// smaller storage space.
 		s.WriteKeyVal( szTemp, m_SkillLock[j] );
 	}
+
+	if (_iMaxHouses != g_Cfg._iMaxHousesPlayer)
+	{
+		s.WriteKeyVal("MaxHouses", _iMaxHouses);
+	}
+	if (_iMaxShips != g_Cfg._iMaxShipsPlayer)
+	{
+		s.WriteKeyVal("MaxShips", _iMaxShips);
+	}
+	
+	const CMultiStorage* pMultiStorage = GetMultiStorage();
+	ASSERT(pMultiStorage);
+	pMultiStorage->r_Write(s);
+
 	EXC_CATCH;
 }
 
