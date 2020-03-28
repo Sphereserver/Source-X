@@ -1170,7 +1170,6 @@ void CChar::Fight_ClearAll()
 		m_Fight_Targ_UID.InitUID();
 	}
     Attacker_Clear();
-	StatFlag_Clear(STATF_WAR);
 
     m_atFight.m_iWarSwingState = WAR_SWING_EQUIPPING;
     m_atFight.m_iRecoilDelay = 0;
