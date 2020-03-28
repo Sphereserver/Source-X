@@ -1,4 +1,4 @@
-
+#include "../../sphere_library/CSString.h"
 #include "../CResourceLink.h"
 
 class CResourceNamedDef : public CResourceLink

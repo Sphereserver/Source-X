@@ -44,9 +44,9 @@ void CItemCommCrystal::OnHear(lpctstr pszCmd, CChar *pSrc)
     // IT_COMM_CRYSTAL
     // STATF_COMM_CRYSTAL = if i am on a person.
     TALKMODE_TYPE mode = TALKMODE_SAY;
-    for ( size_t i = 0; i < m_Speech.size(); i++ )
+    for ( size_t i = 0; i < m_Speech.size(); ++i )
     {
-        CResourceLink *pLink = m_Speech[i];
+        CResourceLink *pLink = m_Speech[i].GetRef();
         ASSERT(pLink);
         CResourceLock s;
         if ( !pLink->ResourceLock(s) )

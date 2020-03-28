@@ -7,7 +7,7 @@
 
 #include "CScriptObj.h"
 #include "CVarDefMap.h"
-#include "CVarFloat.h"
+#include "CLocalVarsExtra.h"
 #include <vector>
 
 class CScriptTriggerArgs : public CScriptObj
@@ -30,7 +30,7 @@ public:
     std::vector<lpctstr>	m_v;
 
     CVarDefMap 				m_VarsLocal;	// "LOCAL.x" = local variable x
-    CVarFloat				m_VarsFloat;	// "FLOAT.x" = float local variable x
+    CLocalFloatVars			m_VarsFloat;	// "FLOAT.x" = float local variable x
     CLocalObjMap			m_VarObjs;		// "REFx" = local object x
 
 public:

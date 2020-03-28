@@ -2,6 +2,7 @@
 #include "../sphere/ProfileTask.h"
 #include "../game/CServer.h"
 #include "CException.h"
+#include "CScript.h"
 #include "CLog.h"
 
 

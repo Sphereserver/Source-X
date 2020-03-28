@@ -551,9 +551,9 @@ void CItemMulti::OnHearRegion(lpctstr pszCmd, CChar * pSrc)
         return;
     TALKMODE_TYPE mode = TALKMODE_SAY;
 
-    for (size_t i = 0; i < pMultiDef->m_Speech.size(); i++)
+    for (size_t i = 0; i < pMultiDef->m_Speech.size(); ++i)
     {
-        CResourceLink * pLink = pMultiDef->m_Speech[i];
+        CResourceLink * pLink = pMultiDef->m_Speech[i].GetRef();
         ASSERT(pLink);
         CResourceLock s;
         if (!pLink->ResourceLock(s))

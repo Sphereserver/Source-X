@@ -42,7 +42,9 @@
 	#define M_PI 3.14159265358979323846
 #endif
 
-#define EXPRESSION_MAX_KEY_LEN	SCRIPT_MAX_SECTION_LEN
+
+#define EXPRESSION_MAX_KEY_LEN		SCRIPT_MAX_SECTION_LEN
+#define VARDEF_FLOAT_MAXBUFFERSIZE	82
 
 
 enum DEFMSG_TYPE
@@ -132,7 +134,7 @@ public:
 	llong GetSingle(lpctstr & pExpr);
 	int GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty, bool bNoWarn = false);
 	int64 GetRangeNumber(lpctstr & pExpr);
-    CSString GetRangeString(lpctstr & pExpr);
+	CSString GetRangeString(lpctstr & pExpr);
 	llong GetValMath(llong llVal, lpctstr & pExpr);
 	llong GetVal(lpctstr & pExpr);
 
@@ -160,6 +162,7 @@ private:
 	CExpression& operator=(const CExpression& other);
 } g_Exp;
 
+
 uint GetIdentifierString( tchar * szTag, lpctstr pszArgs );
 
 bool IsValidDef( lpctstr pszTest );
@@ -178,6 +181,7 @@ template<typename T> inline const T SphereAbs(T x)
     static_assert(std::is_signed<T>::value, "Trying to get the absolute value of an unsigned number?");
 	return (x<0) ? -x : x;
 }
+
 int64 Calc_GetRandLLVal( int64 iQty );					// Get a random value between 0 and iQty - 1
 int64 Calc_GetRandLLVal2( int64 iMin, int64 iMax );
 int32 Calc_GetRandVal( int32 iQty );					// Get a random value between 0 and iQty - 1

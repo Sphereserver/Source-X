@@ -4429,7 +4429,7 @@ lbl_cchar_ontriggerspeech:
 	{
 		for ( size_t i = 0; i < m_pPlayer->m_Speech.size(); ++i )
 		{
-			CResourceLink * pLinkDSpeech = m_pPlayer->m_Speech[i];
+			CResourceLink * pLinkDSpeech = m_pPlayer->m_Speech[i].GetRef();
 			if ( !pLinkDSpeech )
 				continue;
 

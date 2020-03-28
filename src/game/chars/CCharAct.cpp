@@ -1,4 +1,4 @@
-
+#include "../../common/flat_containers/flat_set.hpp"
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
 #include "../../network/CClientIterator.h"
@@ -4082,19 +4082,23 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 	//
 	if ( IsTrigUsed(pszTrigName) )
 	{
+		fc::vector_set<const CResourceLink*> executedEvents;
+
         {
             EXC_SET_BLOCK("events");
             size_t origEvents = m_OEvents.size();
             size_t curEvents = origEvents;
             for (size_t i = 0; i < curEvents; ++i) // EVENTS (could be modifyed ingame!)
             {
-                CResourceLink* pLink = m_OEvents[i];
-                if (!pLink || !pLink->HasTrigger(iAction))
+                CResourceLink* pLink = m_OEvents[i].GetRef();
+                if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
                     continue;
+
                 CResourceLock s;
                 if (!pLink->ResourceLock(s))
                     continue;
 
+				executedEvents.emplace(pLink);
                 iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
                 if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
                     goto stopandret;
@@ -4114,12 +4118,15 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 			EXC_SET_BLOCK("NPC triggers"); // TEVENTS (constant events of NPCs)
 			for ( size_t i = 0; i < pCharDef->m_TEvents.size(); ++i )
 			{
-				CResourceLink * pLink = pCharDef->m_TEvents[i];
-				if ( !pLink || !pLink->HasTrigger(iAction) )
+				CResourceLink * pLink = pCharDef->m_TEvents[i].GetRef();
+				if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
 					continue;
+
 				CResourceLock s;
-				if ( !pLink->ResourceLock(s) )
+				if (!pLink->ResourceLock(s))
 					continue;
+
+				executedEvents.emplace(pLink);
 				iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
 				if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
 					goto stopandret;
@@ -4148,12 +4155,15 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 			EXC_SET_BLOCK("NPC triggers - EVENTSPET"); // EVENTSPET (constant events of NPCs set from sphere.ini)
 			for (size_t i = 0; i < g_Cfg.m_pEventsPetLink.size(); ++i)
 			{
-				CResourceLink * pLink = g_Cfg.m_pEventsPetLink[i];
-				if (!pLink || !pLink->HasTrigger(iAction))
+				CResourceLink * pLink = g_Cfg.m_pEventsPetLink[i].GetRef();
+				if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
 					continue;
+
 				CResourceLock s;
 				if (!pLink->ResourceLock(s))
 					continue;
+
+				executedEvents.emplace(pLink);
 				iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
 				if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
 					goto stopandret;
@@ -4167,12 +4177,15 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 			EXC_SET_BLOCK("chardef triggers - EVENTSPLAYER");
 			for ( size_t i = 0; i < g_Cfg.m_pEventsPlayerLink.size(); ++i )
 			{
-				CResourceLink	*pLink = g_Cfg.m_pEventsPlayerLink[i];
-				if ( !pLink || !pLink->HasTrigger(iAction) )
+				CResourceLink *pLink = g_Cfg.m_pEventsPlayerLink[i].GetRef();
+				if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
 					continue;
+
 				CResourceLock s;
-				if ( !pLink->ResourceLock(s) )
+				if (!pLink->ResourceLock(s))
 					continue;
+
+				executedEvents.emplace(pLink);
 				iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
 				if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
 					goto stopandret;

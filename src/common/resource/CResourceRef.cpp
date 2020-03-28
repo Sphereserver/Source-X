@@ -9,10 +9,57 @@
 #include "../CScript.h"
 #include "CResourceRef.h"
 
+CResourceRef::CResourceRef()
+{
+    m_pLink = nullptr;
+}
+
+CResourceRef::CResourceRef(CResourceLink* pLink) : m_pLink(pLink)
+{
+    ASSERT(pLink);
+    pLink->AddRefInstance();
+}
+
+CResourceRef::CResourceRef(const CResourceRef& copy)
+{
+    m_pLink = copy.m_pLink;
+    if (m_pLink != nullptr)
+        m_pLink->AddRefInstance();
+}
+
+CResourceRef::~CResourceRef()
+{
+    if (m_pLink != nullptr)
+        m_pLink->DelRefInstance();
+}
+
+
+CResourceRef& CResourceRef::operator=(const CResourceRef& other)
+{
+    if (this != &other)
+        SetRef(other.m_pLink);
+    return *this;
+}
+
+void CResourceRef::SetRef(CResourceLink* pLink)
+{
+    if (m_pLink != nullptr)
+        m_pLink->DelRefInstance();
+
+    m_pLink = pLink;
+
+    if (pLink != nullptr)
+        pLink->AddRefInstance();
+}
+
+
+//--
+
+
 lpctstr CResourceRefArray::GetResourceName( size_t iIndex ) const
 {
     // look up the name of the fragment given it's index.
-    const CResourceLink * pResourceLink = (*this)[iIndex];
+    const CResourceLink * pResourceLink = operator[](iIndex).GetRef();
     ASSERT(pResourceLink);
     return pResourceLink->GetResourceName();
 }
@@ -54,7 +101,9 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
                 continue;
             }
 
-            fRet = RemovePtr(pResourceLink);
+            iterator pos = std::find(begin(), end(), pResourceLink);
+            fRet = (end() != pos);
+            erase(pos);
         }
         else
         {
@@ -72,28 +121,8 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
 
             // Is it already in the list ?
             fRet = true;
-            if ( ContainsPtr(pResourceLink) )
+            if ( cend() != find(cbegin(), cend(), pResourceLink) )
             {
-                continue;
-            }
-            if ( g_Cfg.m_pEventsPetLink.ContainsPtr(pResourceLink) )
-            {
-                DEBUG_ERR(("'%s' already defined in sphere.ini - skipping\n", pResourceLink->GetName()));
-                continue;
-            }
-            else if ( g_Cfg.m_pEventsPlayerLink.ContainsPtr(pResourceLink) )
-            {
-                DEBUG_ERR(("'%s' already defined in sphere.ini - skipping\n", pResourceLink->GetName()));
-                continue;
-            }
-            else if ( restype == RES_REGIONTYPE && g_Cfg.m_pEventsRegionLink.ContainsPtr(pResourceLink) )
-            {
-                DEBUG_ERR(("'%s' already defined in sphere.ini - skipping\n", pResourceLink->GetName()));
-                continue;
-            }
-            else if ( g_Cfg.m_iEventsItemLink.ContainsPtr(pResourceLink) )
-            {
-                DEBUG_ERR(("'%s' already defined in sphere.ini - skipping\n", pResourceLink->GetName()));
                 continue;
             }
 
@@ -128,16 +157,6 @@ void CResourceRefArray::WriteResourceRefList( CSString & sVal ) const
     sVal = pszVal;
 }
 
-CResourceRefArray::CResourceRefArray(const CResourceRefArray& copy) : CSPtrTypeArray<CResourceRef>(static_cast<const CSPtrTypeArray<CResourceRef> &>(copy))
-{
-}
-
-CResourceRefArray& CResourceRefArray::operator=(const CResourceRefArray& other)
-{
-    static_cast<CSPtrTypeArray<CResourceRef> &>(*this) = static_cast<const CSPtrTypeArray<CResourceRef> &>(other);
-    return *this;
-}
-
 size_t CResourceRefArray::FindResourceType( RES_TYPE restype ) const
 {
     ADDTOCALLSTACK("CResourceRefArray::FindResourceType");
@@ -147,7 +166,7 @@ size_t CResourceRefArray::FindResourceType( RES_TYPE restype ) const
     {
         const CResourceID& ridtest = (*this)[i].GetRef()->GetResourceID();
         if ( ridtest.GetResType() == restype )
-            return( i );
+            return i;
     }
     return SCONT_BADINDEX;
 }
@@ -173,7 +192,7 @@ size_t CResourceRefArray::FindResourceName( RES_TYPE restype, lpctstr ptcKey ) c
     CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, ptcKey ));
     if ( pResourceLink == nullptr )
         return SCONT_BADINDEX;
-    return FindPtr(pResourceLink);
+    return FindResourceID(pResourceLink->GetResourceID());
 }
 
 void CResourceRefArray::r_Write( CScript & s, lpctstr ptcKey ) const

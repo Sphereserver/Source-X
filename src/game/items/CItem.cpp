@@ -90,14 +90,34 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 /////////////////////////////////////////////////////////////////
 // -CItem
 
+CUID CItem::GetComponentOfMulti() const	// I'm a CMultiComponent of a CMulti
+{
+	if (CVarDefCont* pVarDef = m_TagDefs.GetKey("MultiComponent"))
+		return CUID((dword)pVarDef->GetValNum());
+	return CUID();
+}
+
+CUID CItem::GetLockDownOfMulti() const	// I'm locked down in a CMulti
+{
+	if (CVarDefCont* pVarDef = m_TagDefs.GetKey("MultiLockDown"))
+		return CUID((dword)pVarDef->GetValNum());
+	return CUID();
+}
+
 void CItem::SetComponentOfMulti(const CUID& uidMulti)
 {
-    _uidMultiComponent = uidMulti;
+	if (!uidMulti.IsValidUID())
+		m_TagDefs.DeleteKey("MultiComponent");
+	else
+		m_TagDefs.SetNum("MultiComponent", uidMulti.GetObjUID());
 }
 
 void CItem::SetLockDownOfMulti(const CUID& uidMulti)
 {
-    _uidMultiLockDown = uidMulti;
+	if (!uidMulti.IsValidUID())
+		m_TagDefs.DeleteKey("MultiLockDown");
+	else
+		m_TagDefs.SetNum("MultiLockDown", uidMulti.GetObjUID());
 }
 
 CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEMS), CObjBase( true )
@@ -189,17 +209,17 @@ CItem::~CItem()
 		default:
 			break;
 	}
-    if (_uidMultiComponent.IsValidUID())
+    if (CUID uidMulti = GetComponentOfMulti())
     {
-        CItemMulti *pMulti = static_cast<CItemMulti*>(_uidMultiComponent.ItemFind());
+        CItemMulti *pMulti = static_cast<CItemMulti*>(uidMulti.ItemFind());
         if (pMulti)
         {
             pMulti->DeleteComponent(GetUID());
         }
     }
-    if (_uidMultiLockDown.IsValidUID())
+    if (CUID uidMulti = GetLockDownOfMulti())
     {
-        CItemMulti *pMulti = static_cast<CItemMulti*>(_uidMultiLockDown.ItemFind());
+        CItemMulti *pMulti = static_cast<CItemMulti*>(uidMulti.ItemFind());
         if (pMulti)
         {
             pMulti->UnlockItem(GetUID());
@@ -3491,7 +3511,7 @@ standard_order:
             size_t curEvents = origEvents;
             for (size_t i = 0; i < curEvents; ++i)
             {
-                CResourceLink* pLink = m_OEvents[i];
+                CResourceLink* pLink = m_OEvents[i].GetRef();
                 if (!pLink || !pLink->HasTrigger(iAction))
                     continue;
                 CResourceLock s;
@@ -3515,7 +3535,7 @@ standard_order:
 		EXC_SET_BLOCK("tevents");
 		for ( size_t i = 0; i < pItemDef->m_TEvents.size(); ++i )
 		{
-			CResourceLink * pLink = pItemDef->m_TEvents[i];
+			CResourceLink * pLink = pItemDef->m_TEvents[i].GetRef();
 			ASSERT(pLink);
 			if ( !pLink->HasTrigger(iAction) )
 				continue;
@@ -3531,7 +3551,7 @@ standard_order:
 		EXC_SET_BLOCK("Item triggers - EVENTSITEM");
 		for ( size_t i = 0; i < g_Cfg.m_iEventsItemLink.size(); ++i )
 		{
-			CResourceLink * pLink = g_Cfg.m_iEventsItemLink[i];
+			CResourceLink * pLink = g_Cfg.m_iEventsItemLink[i].GetRef();
 			if ( !pLink || !pLink->HasTrigger(iAction) )
 				continue;
 			CResourceLock s;

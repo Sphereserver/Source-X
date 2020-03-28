@@ -121,6 +121,28 @@ CItemBase::~CItemBase()
 	// These don't really get destroyed til the server is shut down but keep this around anyhow.
 }
 
+word CItemBase::GetMaxAmount()
+{
+	ADDTOCALLSTACK("CItemBase::GetMaxAmount");
+	if (!IsStackableType())
+		return 0;
+
+	int64 iMax = GetDefNum("MaxAmount");
+	if (iMax)
+		return (word)minimum(iMax, UINT16_MAX);
+	else
+		return (word)minimum(g_Cfg.m_iItemsMaxAmount, UINT16_MAX);
+}
+
+bool CItemBase::SetMaxAmount(word amount)
+{
+	ADDTOCALLSTACK("CItemBase::SetMaxAmount");
+	if (!IsStackableType())
+		return false;
+
+	SetDefNum("MaxAmount", amount, false);
+	return true;
+}
 
 void CItemBase::SetTypeName( lpctstr pszName )
 {
@@ -2064,11 +2086,11 @@ bool CItemBaseMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * 
 				const llong iIndex = Exp_GetLLVal(ptcKey);
 				if (iIndex < 0)
 					return false;
-                if (m_Components.IsValidIndex(size_t(iIndex)) == false)
+                if ((size_t)iIndex >= m_Components.size())
                     return false;
 
                 SKIP_SEPARATORS(ptcKey);
-                CMultiComponentItem item = m_Components.at(size_t(iIndex));
+                const CMultiComponentItem& item = m_Components[iIndex];
 
                 if (!strnicmp(ptcKey, "ID", 2)) sVal.FormatVal(item.m_id);
                 else if (!strnicmp(ptcKey, "DX", 2)) sVal.FormatVal(item.m_dx);
@@ -2204,7 +2226,18 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 	return pBase;
 }
 
+
 //**************************************************
+
+CItemBaseDupe::CItemBaseDupe(ITEMID_TYPE id, CItemBase* pMasterItem) :
+	CResourceDef(CResourceID(RES_ITEMDEF, id)),
+	m_MasterItem(pMasterItem),
+	m_qwFlags(0), m_Height(0), m_Can(0)
+{
+	ASSERT(pMasterItem);
+	ASSERT(pMasterItem->GetResourceID().GetResIndex() != id);
+}
+
 CItemBaseDupe * CItemBaseDupe::GetDupeRef( ITEMID_TYPE id ) // static
 {
 	ADDTOCALLSTACK("CItemBaseDupe::GetDupeRef");
@@ -2229,26 +2262,17 @@ CItemBaseDupe * CItemBaseDupe::GetDupeRef( ITEMID_TYPE id ) // static
 	return nullptr; //we suspect item is loaded
 }
 
-
-word CItemBase::GetMaxAmount()
+void CItemBaseDupe::UnLink()
 {
-	ADDTOCALLSTACK("CItemBase::GetMaxAmount");
-	if (!IsStackableType())
-		return 0;
-
-	int64 iMax = GetDefNum("MaxAmount");
-	if (iMax)
-		return (word)minimum(iMax, UINT16_MAX);
-	else
-		return (word)minimum(g_Cfg.m_iItemsMaxAmount, UINT16_MAX);
+	m_MasterItem.SetRef(nullptr);
+	CResourceDef::UnLink();
 }
 
-bool CItemBase::SetMaxAmount(word amount)
+CItemBase* CItemBaseDupe::GetItemDef() const
 {
-	ADDTOCALLSTACK("CItemBase::SetMaxAmount");
-	if (!IsStackableType())
-		return false;
-
-	SetDefNum("MaxAmount", amount, false);
-	return true;
+	CResourceLink* pLink = m_MasterItem.GetRef();
+	ASSERT(pLink);
+	CItemBase* pItemDef = dynamic_cast <CItemBase*>(pLink);
+	ASSERT(pItemDef);
+	return pItemDef;
 }

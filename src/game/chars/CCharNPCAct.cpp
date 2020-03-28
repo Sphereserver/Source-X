@@ -287,9 +287,9 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 	SKILL_TYPE skill = m_Act_SkillCurrent;
 
 	TALKMODE_TYPE mode = TALKMODE_SAY;
-	for ( size_t i = 0; i < m_pNPC->m_Speech.size(); i++ )
+	for ( size_t i = 0; i < m_pNPC->m_Speech.size(); ++i )
 	{
-		CResourceLink * pLink = m_pNPC->m_Speech[i];
+		CResourceLink * pLink = m_pNPC->m_Speech[i].GetRef();
 		if ( !pLink )
 			continue;
 		CResourceLock s;
@@ -308,9 +308,9 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 
 	CCharBase * pCharDef = Char_GetDef();
 	ASSERT(pCharDef != nullptr);
-	for ( size_t i = 0; i < pCharDef->m_Speech.size(); i++ )
+	for ( size_t i = 0; i < pCharDef->m_Speech.size(); ++i )
 	{
-		CResourceLink * pLink = pCharDef->m_Speech[i];
+		CResourceLink * pLink = pCharDef->m_Speech[i].GetRef();
 		if ( !pLink )
 			continue;
 		CResourceLock s;

@@ -20,8 +20,8 @@
 #include "crypto/CMD5.h"
 #include "resource/blocks/CResourceNamedDef.h"
 #include "resource/CResourceLock.h"
+#include "CFloatMath.h"
 #include "CExpression.h"
-#include "CVarFloat.h"
 #include "CSFileObjContainer.h"
 #include "CScriptTriggerArgs.h"
 
@@ -641,7 +641,7 @@ badcmd:
 			break;
 		case SSC_FLOATVAL: //Float math
 			{
-				sVal = CVarFloat::FloatMath( ptcKey );
+				sVal = CFloatMath::FloatMath( ptcKey );
 				break;
 			}
 //FLOAT STUFF ENDS HERE

@@ -209,7 +209,7 @@ bool CEntityProps::r_LoadPropVal(CScript & s, CObjBase* pObjEntityProps, CBaseBa
             CComponentProps *pComp = pBaseEntityProps->GetComponentProps(iCCPType);
             if (!pComp)
                 return true;    // The base doesn't have this component, but the obj did -> return true
-            ASSERT(iPropIndex != -1);
+            ASSERT(iPropIndex != (CComponentProps::PropertyIndex_t)-1);
             pComp->FindLoadPropVal(s, nullptr, iLimitToExpansion, (CComponentProps::PropertyIndex_t)iPropIndex, fPropStr);
             return true;        // return true regardlessly of the value being set or not (it's still a valid property)
         }
@@ -279,7 +279,7 @@ bool CEntityProps::r_WritePropVal(lpctstr ptcKey, CSString & sVal, const CObjBas
             const CComponentProps *pComp = pBaseEntityProps->GetComponentProps(iCCPType);
             if (!pComp)
                 return true;    // The base doesn't have this component, but the obj did -> return true
-            ASSERT(iPropIndex != -1);
+            ASSERT(iPropIndex != (CComponentProps::PropertyIndex_t)-1);
             pComp->FindWritePropVal(sVal, (CComponentProps::PropertyIndex_t)iPropIndex, fPropStr);
             return true;        // return true regardlessly of the value being set or not (it's still a valid property)
         }
