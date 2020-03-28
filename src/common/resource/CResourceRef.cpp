@@ -68,20 +68,21 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
 {
     ADDTOCALLSTACK("CResourceRefArray::r_LoadVal");
     EXC_TRY("LoadVal");
-    bool fRet = false;
     // A bunch of CResourceLink (CResourceDef) pointers.
     // Add or remove from the list.
     // RETURN: false = it failed.
 
     // ? "TOWN" and "REGION" are special !
 
-    tchar * pszCmd = s.GetArgStr();
+    bool fRet = true;
 
+    tchar * pszCmd = s.GetArgStr();
     tchar * ppBlocks[128];	// max is arbitrary
     int iArgCount = Str_ParseCmds( pszCmd, ppBlocks, CountOf(ppBlocks));
-
     for ( int i = 0; i < iArgCount; ++i )
     {
+        CResourceLink* pResourceLink = nullptr;
+
         pszCmd = ppBlocks[i];
         if ( pszCmd[0] == '-' )
         {
@@ -94,16 +95,16 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
                 continue;
             }
 
-            CResourceLink * pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, pszCmd ));
-            if ( pResourceLink == nullptr )
+            pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, pszCmd ));
+            if (pResourceLink)
             {
-                fRet = false;
-                continue;
+                const iterator pos = std::find(begin(), end(), pResourceLink);
+                const bool fFound = (end() != pos);
+                if (fRet && !fFound)
+                    fRet = false;
+                if (fFound)
+                    erase(pos);
             }
-
-            iterator pos = std::find(begin(), end(), pResourceLink);
-            fRet = (end() != pos);
-            erase(pos);
         }
         else
         {
@@ -111,24 +112,22 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
             if ( pszCmd[0] == '+' )
                 ++pszCmd;
 
-            CResourceLink * pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, pszCmd ));
-            if ( pResourceLink == nullptr )
+            pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, pszCmd ));
+            if ( pResourceLink )
             {
-                fRet = false;
-                DEBUG_ERR(( "Unknown '%s' Resource '%s'\n", CResourceBase::GetResourceBlockName(restype), pszCmd ));
-                continue;
+                // Check if it's already in the list, before adding it
+                if (cend() == find(cbegin(), cend(), pResourceLink))
+                    emplace_back(pResourceLink);
             }
+        }
 
-            // Is it already in the list ?
-            fRet = true;
-            if ( cend() != find(cbegin(), cend(), pResourceLink) )
-            {
-                continue;
-            }
-
-            emplace_back(pResourceLink);
+        if (pResourceLink == nullptr)
+        {
+            fRet = false;
+            DEBUG_ERR(("Unknown '%s' Resource '%s'\n", CResourceBase::GetResourceBlockName(restype), pszCmd));
         }
     }
+
     return fRet;
     EXC_CATCH;
 
