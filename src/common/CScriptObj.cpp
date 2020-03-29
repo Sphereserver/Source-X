@@ -1218,8 +1218,8 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 					g_World.m_uidNew = (dword)0;
 					return false;
 				}
-				pItem->m_iCreatedResScriptIdx = s.m_iResourceFileIndex;
-				pItem->m_iCreatedResScriptLine = s.m_iLineNum;
+				pItem->_iCreatedResScriptIdx = s.m_iResourceFileIndex;
+				pItem->_iCreatedResScriptLine = s.m_iLineNum;
 
 				if ( ppCmd[1] )
 					pItem->SetAmount(Exp_GetWVal(ppCmd[1]));
@@ -1269,8 +1269,8 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 					return false;
 				}
 
-				pChar->m_iCreatedResScriptIdx = s.m_iResourceFileIndex;
-				pChar->m_iCreatedResScriptLine = s.m_iLineNum;
+				pChar->_iCreatedResScriptIdx = s.m_iResourceFileIndex;
+				pChar->_iCreatedResScriptLine = s.m_iLineNum;
 
 				g_World.m_uidNew = pChar->GetUID();
 
@@ -1304,8 +1304,8 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	                return false;
 	            }
 
-				pChar->m_iCreatedResScriptIdx = s.m_iResourceFileIndex;
-				pChar->m_iCreatedResScriptLine = s.m_iLineNum;
+				pChar->_iCreatedResScriptIdx = s.m_iResourceFileIndex;
+				pChar->_iCreatedResScriptLine = s.m_iLineNum;
 
 	            if (this != &g_Serv)
 	            {

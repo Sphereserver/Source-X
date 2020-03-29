@@ -1141,9 +1141,6 @@ bool CCChampion::r_Verb(CScript & s, CTextConsole * pSrc)
         case ICHMPV_STOP:
             Stop();
             return true;
-
-        default:
-            return false;
     }
     return false;
 }

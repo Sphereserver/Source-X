@@ -92,7 +92,7 @@ enum RES_TYPE	// all the script resource blocks we know how to deal with !
 #define RES_NEWBIE_PROF_NINJA		(10000+10)
 
 
-struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variable. Use it to store defnames or UIDs of world objects (items, chars...) or spawns and templates.
+struct CResourceIDBase : public CUID    // It has not the "page" part/variable. Use it to store defnames or UIDs of world objects (items, chars...) or spawns and templates.
 {
     // What is a Resource? Look at the comment made to the RES_TYPE enum.
     // RES_TYPE: Resource Type (look at the RES_TYPE enum entries).
@@ -149,14 +149,14 @@ struct CResourceIDBase : public CUIDBase    // It has not the "page" part/variab
 
     void SetPrivateUID(dword dwVal) = delete;   // Don't do this, you'll end forgetting UID_F_RESOURCE or god knows what else...
 
-    bool IsItem() const = delete;   // Try to warn and block the calls to this CUIDBase method, in most cases it's incorrect and it will lead to bugs
-    bool IsChar() const = delete;   // Try to warn and block the calls to this CUIDBase method, in most cases it's incorrect and it will lead to bugs
+    bool IsItem() const = delete;   // Try to warn and block the calls to this CUID method, in most cases it's incorrect and it will lead to bugs
+    bool IsChar() const = delete;   // Try to warn and block the calls to this CUID method, in most cases it's incorrect and it will lead to bugs
     CObjBase*   ObjFind()  const = delete;   // Same as above
     CItem*      ItemFind() const = delete;
     CChar*      CharFind() const = delete;
 
-    bool IsUIDItem() const; //  replacement for CUIDBase::IsItem(), but don't be virtual, since we don't need that and the class size will increase due to the vtable
-    CItem* ItemFindFromResource() const;   //  replacement for CUIDBase::ItemFind()
+    bool IsUIDItem() const; //  replacement for CUID::IsItem(), but don't be virtual, since we don't need that and the class size will increase due to the vtable
+    CItem* ItemFindFromResource() const;   //  replacement for CUID::ItemFind()
 };
 
 struct CResourceID : public CResourceIDBase     // It has the "page" part. Use it to handle every other resource block.

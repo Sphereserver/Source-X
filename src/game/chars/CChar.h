@@ -280,7 +280,7 @@ public:
 		// NPCACT_RIDDEN
 		struct
 		{
-			CUIDBase m_uidFigurine;     // ACTARG1 = This creature is being ridden by this object link. IT_FIGURINE IT_EQ_HORSE
+			CUID m_uidFigurine;     // ACTARG1 = This creature is being ridden by this object link. IT_FIGURINE IT_EQ_HORSE
 		} m_atRidden;
 
 		// NPCACT_TALK

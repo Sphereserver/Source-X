@@ -61,6 +61,7 @@ public:
 	bool IsCharValid() const noexcept;
 	inline bool IsValidPoint() const noexcept
 	{
+		// Called a LOT of times, it's worth inlining it.
 		return (IsValidXY() && IsValidZ());
 	}
 

@@ -130,7 +130,7 @@ public:
 		// IT_SHIP_HOLD_LOCK
 		struct	// IsTypeLockable()
 		{
-			CUIDBase m_UIDLock;			// more1=the lock code. normally this is the same as the uid (magic lock=non UID)
+			CUID m_UIDLock;			// more1=the lock code. normally this is the same as the uid (magic lock=non UID)
 			dword m_dwLockComplexity;	// more2=0-1000 = How hard to pick or magic unlock. (conflict with door ?)
 		} m_itContainer;
 
@@ -139,7 +139,7 @@ public:
 		// IT_SIGN_GUMP
 		struct
 		{
-			CUIDBase m_UIDLock;			// more1 = the lock code. Normally this is the UID, except if uidLink is set.
+			CUID m_UIDLock;			// more1 = the lock code. Normally this is the UID, except if uidLink is set.
 		} m_itKey;
 
 		// IT_EQ_BANK_BOX
@@ -274,7 +274,7 @@ public:
 		struct	// might just be a sleeping person as well
 		{
 			dword			m_carved;		// more1 = Corpse is already carved? (0=not carved, 1=carved)
-			CUIDBase		m_uidKiller;	// more2 = Who killed this corpse, carved or looted it last. sleep=self.
+			CUID		m_uidKiller;	// more2 = Who killed this corpse, carved or looted it last. sleep=self.
 			CREID_TYPE		m_BaseID;		// morex,morey = The true type of the creature who's corpse this is.
 			DIR_TYPE		m_facing_dir;	// morez = Corpse dir. 0x80 = on face.
 											// m_vcAmount = the body type.
@@ -348,7 +348,7 @@ public:
 		struct
 		{
 			CREID_TYPE m_ID;	// more1 = What sort of creature will this turn into.
-			CUIDBase m_UID;		// more2 = If stored by the stables. (offline creature)
+			CUID m_UID;		// more2 = If stored by the stables. (offline creature)
 		} m_itFigurine;
 
 		// IT_RUNE
@@ -385,19 +385,19 @@ public:
 		// IT_SHIP
 		struct
 		{
-			CUIDBase m_UIDCreator;	// more1 = who created this house or ship ?
+			CUID m_UIDCreator;	// more1 = who created this house or ship ?
             ShipMovementType _eMovementType;	// more2 & 0x000000FF. From packet 0xBF.0x32: 0 = Stop Movement, 1 = One Tile Movement, 2 = Normal Movement
 			byte m_fAnchored;
 			byte m_DirMove;			// DIR_TYPE
 			byte m_DirFace;
 			// uidLink = my IT_SHIP_TILLER or IT_SIGN_GUMP,
-			CUIDBase m_Pilot;
+			CUID m_Pilot;
 		} m_itShip;
 
 		// IT_SHIP_PLANK
 		struct
 		{
-			CUIDBase m_UIDLock;			// more1 = the lock code. normally this is the same as the uid (magic lock=non UID)
+			CUID m_UIDLock;			// more1 = the lock code. normally this is the same as the uid (magic lock=non UID)
 			dword m_dwLockComplexity;	// more2=0-1000 = How hard to pick or magic unlock. (conflict with door ?)
 			word m_wSideType;			// morex = type to become (IT_SHIP_SIDE or IT_SHIP_SIDE_LOCKED)
 		} m_itShipPlank;

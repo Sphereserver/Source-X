@@ -200,8 +200,6 @@ bool CCFaction::r_LoadVal(CScript & s)
             SetFactionID(static_cast<NPC_FACTION>(s.GetArgULLVal()));
             return true;
         }
-        default:
-            return false;
     }
     return false;
 }

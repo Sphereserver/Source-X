@@ -31,8 +31,10 @@ class CTextConsole
 	// CClient, CChar, CServer, CSFileConsole
 protected:
 	int OnConsoleKey( CSString & sText, tchar nChar, bool fEcho );
+
 public:
 	static const char *m_sClassName;
+
 	// What privs do i have ?
 	virtual PLEVEL_TYPE GetPrivLevel() const = 0;
 	virtual lpctstr GetName() const = 0;	// ( every object must have at least a type name )

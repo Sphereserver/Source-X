@@ -42,8 +42,8 @@ public:
     static const char *m_sClassName;
     static dword sm_iCount;    // how many total objects in the world ?
 
-    size_t m_iCreatedResScriptIdx;	// index in g_Cfg.m_ResourceFiles of the script file where this obj was created
-    int m_iCreatedResScriptLine;	// line in the script file where this obj was created
+    int _iCreatedResScriptIdx;	// index in g_Cfg.m_ResourceFiles of the script file where this obj was created
+    int _iCreatedResScriptLine;	// line in the script file where this obj was created
 
     CVarDefMap m_TagDefs;		// attach extra tags here.
     CVarDefMap m_BaseDefs;		// New Variable storage system

@@ -24,7 +24,7 @@ class CChar;
 #define UID_O_INDEX_MASK	0x0FFFFFFF	// lose the upper bits.
 #define UID_O_INDEX_FREE	0x01000000	// Spellbook needs unused UID's ?
 
-class CUIDBase		// A unique system serial id. 4 bytes long
+class CUID		// A unique system serial id. 4 bytes long
 {
 	// This is a ref to a game object. It may or may not be valid.
 	// The top few bits are just flags.
@@ -36,10 +36,19 @@ public:
 		m_dwInternalVal = UID_UNUSED;
 	}
 
-    // Use ClearUID only if the CUID/CUIDBase is not used as a pure UID, but it can assume other kind of values.
+    // Use ClearUID only if the CUID is not used as a pure UID, but it can assume other kind of values.
     //  Example: m_itFigurine.m_UID, m_itKey.m_UIDLock -> a MORE1/MORE2 == 0 is considered legit, also for many many item types MORE* isn't a UID.
 	inline void ClearUID() {
 		m_dwInternalVal = UID_CLEAR;
+	}
+
+	inline CUID()
+	{
+		InitUID();
+	}
+	inline CUID(dword dwPrivateUID)
+	{
+		SetPrivateUID(dwPrivateUID);
 	}
 
     static bool IsValidUID(dword dwPrivateUID);
@@ -100,19 +109,6 @@ public:
     CItem * ItemFind() const;
     CChar * CharFind() const;
     
-};
-
-class CUID : public CUIDBase
-{
-public:
-	inline CUID()
-	{
-		InitUID();
-	}
-	inline CUID(dword dwPrivateUID)
-	{
-		SetPrivateUID(dwPrivateUID);
-	}
 };
 
 #endif // _INC_CUID_H

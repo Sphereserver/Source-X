@@ -78,10 +78,8 @@ static bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not a real CTimedObject, it just needs it's virtual inheritance.
 {
 	++ sm_iCount;
-	m_iCreatedResScriptIdx = (size_t)-1;
-	m_iCreatedResScriptLine = -1;
-    _iRunningTriggerId = -1;
-    _iCallingObjTriggerId = -1;
+	_iCreatedResScriptIdx	= _iCreatedResScriptLine	= -1;
+    _iRunningTriggerId		= _iCallingObjTriggerId		= -1;
 
 	m_timestamp = 0;
 	m_CanMask = 0;
@@ -121,7 +119,8 @@ CObjBase::~CObjBase()
     RemoveSelf();
     if (CCSpawn *pSpawn = GetSpawn())    // If I was created from a Spawn
     {
-        if (CCChampion* pChampion = static_cast<CCChampion*>(GetSpawn()->GetLink()->GetComponent(COMP_CHAMPION)))
+		CItem* pSpawnLink = pSpawn->GetLink();
+        if (CCChampion* pChampion = static_cast<CCChampion*>(pSpawnLink->GetComponent(COMP_CHAMPION)))
         {
             pChampion->DelObj(GetUID());
         }
