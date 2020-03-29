@@ -159,7 +159,7 @@ void CSectorBase::SetAdjacentSectors()
       SW        S        SE
     */
 
-    struct _xyDir_s { int x, y; };
+    struct _xyDir_s { short x, y; };
     static constexpr _xyDir_s _xyDir[DIR_QTY]
     {
         {0, -1},    // N
@@ -172,28 +172,18 @@ void CSectorBase::SetAdjacentSectors()
         {-1, -1}    // NW
     };
 
-    int tmpIndex[DIR_QTY] =
-    {
-        tmpIndex[DIR_N]  = -iMaxX,
-        tmpIndex[DIR_NE] = -iMaxX + 1,
-        tmpIndex[DIR_E]  = 1,
-        tmpIndex[DIR_SE] = iMaxX + 1,
-        tmpIndex[DIR_S]  = iMaxX,
-        tmpIndex[DIR_SW] = iMaxX - 1,
-        tmpIndex[DIR_W]  = -1,
-        tmpIndex[DIR_NW] = -iMaxX - 1
-    };
-
-    int index = 0;
     for (int i = 0; i < (int)DIR_QTY; ++i)
     {
         // out of bounds checks
-        if ((_x + _xyDir[i].x < 0) || (_x + _xyDir[i].x >= iMaxX))
-            continue;
-        if ((_y + _xyDir[i].y < 0) || (_y + _xyDir[i].y >= iMaxY))
+		const int iAdjX = _x + _xyDir[i].x;
+        if ((iAdjX < 0) || (iAdjX >= iMaxX))
             continue;
 
-        index = m_index + tmpIndex[i];
+		const int iAdjY = _y + _xyDir[i].y;
+        if ((iAdjY < 0) || (iAdjY >= iMaxY))
+            continue;
+
+		const int index = (iAdjY * iMaxX) + iAdjX;
         
         // This should not happen, because i did the checks above
         //if ((index < 0) || (index > iMaxSectors))
@@ -220,7 +210,7 @@ CSectorBase::CSectorBase() :
 	_x = _y = -1;
 }
 
-void CSectorBase::Init(int index, int map, int x, int y)
+void CSectorBase::Init(int index, uchar map, short x, short y)
 {
 	ADDTOCALLSTACK("CSectorBase::Init");
 	if (!g_MapList.IsMapSupported(map) || !g_MapList.IsInitialized(map))
@@ -254,7 +244,7 @@ bool CSectorBase::IsInDungeon() const
 
 CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 {
-	ADDTOCALLSTACK("CSectorBase::GetRegion");
+	ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetRegion");
 	// Does it match the mask of types we care about ?
 	// Assume sorted so that the smallest are first.
 	//
@@ -304,7 +294,7 @@ CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 // Balkon: get regions list (to cycle through intercepted house regions)
 size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLinks *pRLinks ) const
 {
-	ADDTOCALLSTACK("CSectorBase::GetRegions");
+	ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetRegions");
 	size_t iQty = m_RegionLinks.size();
 	for ( size_t i = 0; i < iQty; ++i )
 	{
@@ -454,7 +444,7 @@ CPointMap CSectorBase::GetBasePoint() const
         (short)((m_index % iCols) * iSize),
 		(short)((m_index / iCols) * iSize),
 		0,
-		(uchar)(m_map));
+		m_map);
 	return pt;
 }
 

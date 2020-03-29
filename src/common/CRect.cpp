@@ -318,10 +318,10 @@ const CRect CRect::operator += (const CRect& rect)
 bool CRectMap::IsValid() const
 {
     const int iSizeX = GetWidth();
-    if ( iSizeX < 0 || iSizeX > g_MapList.GetX(m_map) )
+    if ( iSizeX < 0 || iSizeX > g_MapList.GetMapSizeX(m_map) )
         return false;
     const int iSizeY = GetHeight();
-    if ( iSizeY < 0 || iSizeY > g_MapList.GetY(m_map) )
+    if ( iSizeY < 0 || iSizeY > g_MapList.GetMapSizeY(m_map) )
         return false;
     return true;
 }
@@ -336,5 +336,5 @@ void CRectMap::NormalizeRect()
 void CRectMap::NormalizeRectMax()
 {
     //ADDTOCALLSTACK_INTENSIVE("CRectMap::NormalizeRectMax");
-	CRect::NormalizeRectMax( g_MapList.GetX(m_map), g_MapList.GetY(m_map));
+	CRect::NormalizeRectMax( g_MapList.GetMapSizeX(m_map), g_MapList.GetMapSizeY(m_map));
 }

@@ -270,7 +270,7 @@ const CServerMapBlock* CWorldMap::GetMapBlock(const CPointMap& pt) // static
 
 	const int iBx = pt.m_x / UO_BLOCK_SIZE;
 	const int iBy = pt.m_y / UO_BLOCK_SIZE;
-	const int iBXMax = g_MapList.GetX(pt.m_map) / UO_BLOCK_SIZE;
+	const int iBXMax = g_MapList.GetMapSizeX(pt.m_map) / UO_BLOCK_SIZE;
 	const int iBlockIdx = (iBy * iBXMax) + iBx;
 	CWorldCache::MapBlockCacheCont& block = g_World._Cache._mapBlocks[pt.m_map][iBlockIdx];
 	if (block)

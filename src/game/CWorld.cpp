@@ -607,55 +607,57 @@ void CWorld::Init()
 	g_MapList.Init();
 
 	// Initialize all sectors
-	uint sectors = 0;
-	int m = 0;
-	for ( m = 0; m < MAP_SUPPORTED_QTY; ++m )
+	uint uiSectorCount = 0;
+	uchar uiMapIndex = 0;
+	for (uiMapIndex = 0; uiMapIndex < MAP_SUPPORTED_QTY; ++uiMapIndex)
 	{
-		if ( !g_MapList.IsMapSupported(m) )
+		if ( !g_MapList.IsMapSupported(uiMapIndex) )
 			continue;
-		sectors += (uint)g_MapList.CalcSectorQty(m);
+		uiSectorCount += (uint)g_MapList.CalcSectorQty(uiMapIndex);
 	}
 
-	m_Sectors = new CSector*[sectors];
+	m_Sectors = new CSector*[uiSectorCount];
 	TemporaryString tsZ;
 	TemporaryString tsZ1;
 	tchar* z = static_cast<tchar *>(tsZ);
 	tchar* z1 = static_cast<tchar *>(tsZ1);
 
-	for ( m = 0; m < MAP_SUPPORTED_QTY; ++m )
+	for (uiMapIndex = 0; uiMapIndex < MAP_SUPPORTED_QTY; ++uiMapIndex)
 	{
-		if ( !g_MapList.IsMapSupported(m) )
+		if ( !g_MapList.IsMapSupported(uiMapIndex) )
 			continue;
 
-        const int iSectorQty = g_MapList.CalcSectorQty(m);
-		sprintf(z1, " map%d=%d", m, iSectorQty);
+        const int iSectorQty = g_MapList.CalcSectorQty(uiMapIndex);
+		sprintf(z1, " map%d=%d", uiMapIndex, iSectorQty);
 		strcat(z, z1);
 
-        const int iMaxX = g_MapList.CalcSectorCols(m);
-        const int iMaxY = g_MapList.CalcSectorRows(m);
-        g_MapList._sectorcolumns[m] = iMaxX;
-        g_MapList._sectorrows[m] = iMaxY;
-        g_MapList._sectorqty[m] = g_MapList.CalcSectorQty(m);
+        const int iMaxX = g_MapList.CalcSectorCols(uiMapIndex);
+        const int iMaxY = g_MapList.CalcSectorRows(uiMapIndex);
+        g_MapList._sectorcolumns[uiMapIndex] = iMaxX;
+        g_MapList._sectorrows[uiMapIndex] = iMaxY;
+        g_MapList._sectorqty[uiMapIndex] = g_MapList.CalcSectorQty(uiMapIndex);
 
-		for ( int s = 0, x = 0, y = 0; s < iSectorQty; ++s )
+		int iSectorIndex = 0;
+		short iSectorX = 0, iSectorY = 0;
+		for ( ; iSectorIndex < iSectorQty; ++iSectorIndex )
 		{
-            if (x >= iMaxX)
+            if (iSectorX >= iMaxX)
             {
-                x = 0;
-                ++y;
+				iSectorX = 0;
+                ++iSectorY;
             }
 			CSector	*pSector = new CSector;
 			ASSERT(pSector);
-			pSector->Init(s, m, x, y);
+			pSector->Init(iSectorIndex, uiMapIndex, iSectorX, iSectorY);
 			m_Sectors[m_SectorsQty++] = pSector;
-            ++x;
+            ++iSectorX;
 		}
 	}
-    ASSERT(sectors == m_SectorsQty);
+    ASSERT(uiSectorCount == m_SectorsQty);
 
-    for (uint s = 0; s < m_SectorsQty; ++s)
+    for (uint uiSectorIndex = 0; uiSectorIndex < m_SectorsQty; ++ uiSectorIndex)
     {
-        CSector *pSector = m_Sectors[s];
+        CSector *pSector = m_Sectors[uiSectorIndex];
         if (pSector)
         {
             pSector->SetAdjacentSectors();

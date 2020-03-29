@@ -88,9 +88,9 @@ class CSectorBase		// world sector
     };
 
 protected:
-	int m_map;      // sector map
-    int	m_index;    // sector index
-    int _x, _y;     // x and y (row and column) of the sector in the map
+	uchar m_map;    // sector map
+    short _x, _y;   // x and y (row and column) of the sector in the map
+	int	m_index;    // sector index
 
 public:
 	static const char  *m_sClassName;
@@ -121,7 +121,7 @@ private:
 	CSectorBase& operator=(const CSectorBase& other);
 
 public:
-	void Init(int index, int map, int x, int y);
+	void Init(int index, uchar map, short x, short y);
 
 	// Location map units.
 	int GetIndex() const { return m_index; }

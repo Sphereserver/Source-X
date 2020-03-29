@@ -190,6 +190,8 @@ void CWorldTicker::Tick()
     ADDTOCALLSTACK("CWorldTicker::Tick");
     EXC_TRY("CWorldTicker::Tick");
 
+    std::vector<CTimedObject*> vecObjs; // Reuse the same container to avoid unnecessary reallocations
+
     EXC_SET_BLOCK("Once per tick stuff");
     // Do this once per tick.
     // Update status flags from objects, update current tick.
@@ -205,30 +207,31 @@ void CWorldTicker::Tick()
         * TODO: implement a new class inheriting from CTimedObject to get rid of this code.
         */
         {
-            EXC_TRYSUB("Tick::StatusUpdates");
-            std::vector<CObjBase*> vecSU;
+            EXC_TRYSUB("StatusUpdates");
             {
+                EXC_SETSUB_BLOCK("Selection");
                 std::unique_lock<std::shared_mutex> lock_su(_ObjStatusUpdates.THREAD_CMUTEX);
                 if (!_ObjStatusUpdates.empty())
                 {
-                    EXC_SETSUB_BLOCK("Filter from container");
                     // loop backwards? to avoid possible infinite loop if a status update is triggered
                     // as part of the status update (e.g. property changed under tooltip trigger)
                     for (CObjBase* pObj : _ObjStatusUpdates)
                     {
                         if (pObj != nullptr)
-                            vecSU.emplace_back(pObj);
+                            vecObjs.emplace_back(pObj);
                     }
                     _ObjStatusUpdates.clear();
                 }
             }
 
-            EXC_SETSUB_BLOCK("Loop through filtered");
-            for (CObjBase* pObj : vecSU)
+            EXC_SETSUB_BLOCK("Loop");
+            for (CTimedObject* pObj : vecObjs)
             {
-                pObj->OnTickStatusUpdate();
+                dynamic_cast<CObjBase*>(pObj)->OnTickStatusUpdate();
             }
-            EXC_CATCHSUB("StatusUpdates");
+            EXC_CATCHSUB("");
+
+            vecObjs.clear();
         }
 
         // TimerF
@@ -239,32 +242,37 @@ void CWorldTicker::Tick()
         }
     }
 
+
     /* World ticking (timers) */
+
     // Items, Chars ... Everything relying on CTimedObject (excepting CObjBase, which inheritance is only virtual)
     int64 iCurTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
 
-    EXC_SET_BLOCK("WorldObjects selection");
+    EXC_SET_BLOCK("WorldObjects");
     {
         const ProfileTask timersTask(PROFILE_TIMERS);
-        std::vector<CTimedObject*> vecTimedObjs;
         {
             // Need here a new, inner scope to get rid of EXC_TRYSUB variables and for the unique_lock
-            EXC_TRYSUB("Tick::WorldObj");
+            EXC_TRYSUB("Timed Objects Selection");
             std::unique_lock<std::shared_mutex> lock(_mWorldTickList.THREAD_CMUTEX);
-            WorldTickList::iterator itList = _mWorldTickList.begin();
-            const WorldTickList::iterator itListEnd = _mWorldTickList.end();
+
+            WorldTickList::iterator itList      = _mWorldTickList.begin();
+            WorldTickList::iterator itListEnd   = _mWorldTickList.end();
+
             int64 iTime;
             while ((itList != itListEnd) && (iCurTime > (iTime = itList->first)))
             {
                 TimedObjectsContainer& cont = itList->second;
-                for (auto it = cont.begin(); it != cont.end();)
+
+                TimedObjectsContainer::iterator itContEnd = cont.end();
+                for (auto it = cont.begin(); it != itContEnd;)
                 {
                     CTimedObject* pTimedObj = *it;
                     if (pTimedObj->IsTimerSet() && !pTimedObj->IsSleeping()) // Double check
                     {
                         if (pTimedObj->_iTimeout <= iTime)
                         {
-                            vecTimedObjs.emplace_back(pTimedObj);
+                            vecObjs.emplace_back(pTimedObj);
                         }
 
                         /*
@@ -275,25 +283,32 @@ void CWorldTicker::Tick()
                         pTimedObj->ClearTimeout();
 
                         it = cont.erase(it);
+                        itContEnd = cont.end();
                     }
                     else
+                    {
                         ++it;
+                    }
                 }
 
                 if (cont.empty())
-                    itList = _mWorldTickList.erase(itList);
+                {
+                    itList      = _mWorldTickList.erase(itList);
+                    itListEnd   = _mWorldTickList.end();
+                }
                 else
+                {
                     ++itList;
+                }
             }
 
-            EXC_CATCHSUB("Reading from _mWorldTickList");
+            EXC_CATCHSUB("");
         }
 
-        EXC_SET_BLOCK("WorldObjects loop");
         lpctstr ptcSubDesc = TSTRING_NULL;
-        for (CTimedObject* pObj : vecTimedObjs)    // Loop through all msecs stored, unless we passed the timestamp.
+        for (CTimedObject* pObj : vecObjs)    // Loop through all msecs stored, unless we passed the timestamp.
         {
-            EXC_TRYSUB("Tick::WorldObj");
+            EXC_TRYSUB("Timed Object Tick");
             EXC_SETSUB_BLOCK("Elapsed");
             ptcSubDesc = "Generic";
 
@@ -381,51 +396,66 @@ void CWorldTicker::Tick()
         }
     }
 
+    vecObjs.clear();
+
+
     /* Periodic, automatic ticking for every char */
 
-    EXC_SET_BLOCK("PeriodicChars selection");
-    {
-        const ProfileTask taskChars(PROFILE_CHARS);
-        std::vector<CChar*> vecPeriodicChars;
-        {
-            // Need here a new, inner scope to get rid of EXC_TRYSUB variables, and for the unique_lock
-            EXC_TRYSUB("Tick::PeriodicChar");
-            std::unique_lock<std::shared_mutex> lock(_mCharTickList.THREAD_CMUTEX);
-            CharTickList::iterator itList = _mCharTickList.begin();
-            const CharTickList::iterator itListEnd = _mCharTickList.end();
-            int64 iTime;
-            while ((itList != itListEnd) && (iCurTime > (iTime = itList->first)))
-            {
-                TimedCharsContainer& cont = itList->second;
-                for (auto it = cont.begin(); it != cont.end();)
-                {
-                    CChar* pChar = *it;
-                    if ((pChar->_iTimePeriodicTick != 0) && !pChar->IsSleeping())
-                    {
-                        if (pChar->_iTimePeriodicTick <= iTime)
-                        {
-                            vecPeriodicChars.emplace_back(pChar);
-                        }
-                        pChar->_iTimePeriodicTick = 0;
-                        it = cont.erase(it);
-                    }
-                    else
-                        ++it;
-                }
+    const ProfileTask taskChars(PROFILE_CHARS);
 
-                if (cont.empty())
-                    itList = _mCharTickList.erase(itList);
+    {
+        // Need here a new, inner scope to get rid of EXC_TRYSUB variables, and for the unique_lock
+        EXC_TRYSUB("Char Periodic Ticks Selection");
+        std::unique_lock<std::shared_mutex> lock(_mCharTickList.THREAD_CMUTEX);
+
+        CharTickList::iterator itList       = _mCharTickList.begin();
+        CharTickList::iterator itListEnd    = _mCharTickList.end();
+
+        int64 iTime;
+        while ((itList != itListEnd) && (iCurTime > (iTime = itList->first)))
+        {
+            TimedCharsContainer& cont = itList->second;
+
+            TimedCharsContainer::iterator itContEnd = cont.end();
+            for (auto it = cont.begin(); it != itContEnd;)
+            {
+                CChar* pChar = *it;
+                if ((pChar->_iTimePeriodicTick != 0) && !pChar->IsSleeping())
+                {
+                    if (pChar->_iTimePeriodicTick <= iTime)
+                    {
+                        vecObjs.emplace_back(pChar);
+                    }
+                    pChar->_iTimePeriodicTick = 0;
+
+                    it = cont.erase(it);
+                    itContEnd = cont.end();
+                }
                 else
-                    ++itList;
+                {
+                    ++it;
+                }
             }
 
-            EXC_CATCHSUB("Reading from container");
+            if (cont.empty())
+            {
+                itList      = _mCharTickList.erase(itList);
+                itListEnd   = _mCharTickList.end();
+            }
+            else
+            {
+                ++itList;
+            }
         }
 
-        EXC_SET_BLOCK("PeriodicChars loop");
-        EXC_TRYSUB("Tick::PeriodicChar::Elapsed");
-        for (CChar* pChar : vecPeriodicChars)    // Loop through all msecs stored, unless we passed the timestamp.
+        EXC_CATCHSUB("");
+    }
+
+    {
+        EXC_TRYSUB("Char Periodic Ticks Loop");
+        for (CTimedObject* pObj : vecObjs)    // Loop through all msecs stored, unless we passed the timestamp.
         {
+            CChar* pChar = dynamic_cast<CChar*>(pObj);
             if (pChar->OnTickPeriodic())
             {
                 AddCharTicking(pChar, false);

@@ -265,28 +265,14 @@ int CUOMapList::GetSectorRows(int map) const
     return _sectorrows[map];
 }
 
-int CUOMapList::GetX(int map) const
-{
-    ASSERT(IsMapSupported(map));
-    ASSERT(m_sizex[map] != -1);
-    return m_sizex[map];
-}
-
-int CUOMapList::GetY(int map) const 
-{
-    ASSERT(IsMapSupported(map));
-    ASSERT(m_sizey[map] != -1);
-    return m_sizey[map];
-}
-
-int CUOMapList::GetCenterX(int map) const
+int CUOMapList::GetMapCenterX(int map) const
 {
     ASSERT(IsMapSupported(map));
     ASSERT(m_sizex[map] != -1);
     return (m_sizex[map] / 2);
 }
 
-int CUOMapList::GetCenterY(int map) const
+int CUOMapList::GetMapCenterY(int map) const
 {
     ASSERT(IsMapSupported(map));
     ASSERT(m_sizey[map] != -1);

@@ -1520,13 +1520,13 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 				if ( g_MapList.IsMapSupported(iNumber) )
 				{
 					if (!strnicmp(pszCmd,"BOUND.X", 7))
-						sVal.FormatVal( g_MapList.GetX(iNumber) );
+						sVal.FormatVal( g_MapList.GetMapSizeX(iNumber) );
 					else if (!strnicmp(pszCmd,"BOUND.Y", 7))
-						sVal.FormatVal( g_MapList.GetY(iNumber) );
+						sVal.FormatVal( g_MapList.GetMapSizeY(iNumber) );
 					else if (!strnicmp(pszCmd,"CENTER.X", 8))
-						sVal.FormatVal( g_MapList.GetCenterX(iNumber) );
+						sVal.FormatVal( g_MapList.GetMapCenterX(iNumber) );
 					else if (!strnicmp(pszCmd,"CENTER.Y", 8))
-						sVal.FormatVal( g_MapList.GetCenterY(iNumber) );
+						sVal.FormatVal( g_MapList.GetMapCenterY(iNumber) );
 					else if (!strnicmp(pszCmd, "SECTOR.", 7))
 					{
 						pszCmd += 7;

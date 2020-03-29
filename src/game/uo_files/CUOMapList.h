@@ -11,7 +11,7 @@ class CServerMapDiffCollection;
 
 extern class CUOMapList
 {
-#define MAP_SUPPORTED_QTY 256
+#define MAP_SUPPORTED_QTY 255
 
     friend struct CUOInstall;
     friend class  CWorld;
@@ -71,10 +71,10 @@ public:
     int CalcSectorRows(int map) const; // Use it only when initializing the map sectors! (because it's slower than the Get* method)
     int GetSectorCols(int map) const;
     int GetSectorRows(int map) const;
-    int GetX(int map) const;
-    int GetY(int map) const;
-    int GetCenterX(int map) const;
-    int GetCenterY(int map) const;
+    inline int GetMapSizeX(int map) const noexcept;
+    inline int GetMapSizeY(int map) const noexcept;
+    int GetMapCenterX(int map) const;
+    int GetMapCenterY(int map) const;
 
     int GetMapFileNum(int map) const;
     int GetMapID(int map) const;
@@ -82,5 +82,23 @@ public:
     ///@}
 } g_MapList;
 
+
+// Inline methods definition
+
+int CUOMapList::GetMapSizeX(int map) const noexcept
+{
+    // Used by CPointBase::IsValidXY(), which is called a LOT
+    //ASSERT(IsMapSupported(map));
+    //ASSERT(m_sizex[map] != -1);
+    return m_sizex[map];
+}
+
+int CUOMapList::GetMapSizeY(int map) const noexcept
+{
+    // Used by CPointBase::IsValidXY(), which is called a LOT
+    //ASSERT(IsMapSupported(map));
+    //ASSERT(m_sizey[map] != -1);
+    return m_sizey[map];
+}
 
 #endif //_INC_CUOMAPLIST_H

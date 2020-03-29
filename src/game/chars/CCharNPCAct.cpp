@@ -2319,8 +2319,8 @@ void CChar::NPC_Pathfinding()
 	// pathfinding is buggy near the edges of the map,
 	// so do not use it there
 	if ((ptLocal.m_x <= MAX_NPC_PATH_STORAGE_SIZE / 2) || (ptLocal.m_y <= MAX_NPC_PATH_STORAGE_SIZE / 2) ||
-		(ptLocal.m_x >= (g_MapList.GetX(ptLocal.m_map) - MAX_NPC_PATH_STORAGE_SIZE / 2)) ||
-		(ptLocal.m_y >= (g_MapList.GetY(ptLocal.m_map) - MAX_NPC_PATH_STORAGE_SIZE / 2)))
+		(ptLocal.m_x >= (g_MapList.GetMapSizeX(ptLocal.m_map) - MAX_NPC_PATH_STORAGE_SIZE / 2)) ||
+		(ptLocal.m_y >= (g_MapList.GetMapSizeY(ptLocal.m_map) - MAX_NPC_PATH_STORAGE_SIZE / 2)))
 	{
 		return;
 	}

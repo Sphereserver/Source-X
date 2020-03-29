@@ -14,8 +14,8 @@ CWorldCache::CWorldCache()
 
 static int _GetMapBlocksCount(int iMap)
 {
-	const int iXBlocks = g_MapList.GetX(iMap) / UO_BLOCK_SIZE;
-	const int iYBlocks = g_MapList.GetY(iMap) / UO_BLOCK_SIZE;
+	const int iXBlocks = g_MapList.GetMapSizeX(iMap) / UO_BLOCK_SIZE;
+	const int iYBlocks = g_MapList.GetMapSizeY(iMap) / UO_BLOCK_SIZE;
 	return (iXBlocks * iYBlocks);
 }
 

@@ -638,8 +638,8 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
     CPointMap ptRight(pMultiRegion->GetRegionCorner(GetDirTurn(dir, 1 + (dir % 2))));
     CPointMap ptTest(ptLeft.m_x, ptLeft.m_y, pItemThis->GetTopZ(), pItemThis->GetTopMap());
 
-	short iMapBoundX = (short)(g_MapList.GetX(ptBack.m_map));
-	short iMapBoundY = (short)(g_MapList.GetY(ptBack.m_map));
+	short iMapBoundX = (short)(g_MapList.GetMapSizeX(ptBack.m_map));
+	short iMapBoundY = (short)(g_MapList.GetMapSizeY(ptBack.m_map));
 	bool fStopped = false, fTurbulent = false, fMapBoundary = false;
 
     for (int i = 0; i < distance; ++i)

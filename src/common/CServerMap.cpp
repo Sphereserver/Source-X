@@ -418,8 +418,8 @@ void CServerMapBlock::Load( int bx, int by )
 	// Read in all the statics data for this block.
 	m_CacheTime.InitCacheTime();		// This is invalid !
 
-	ASSERT( bx < (g_MapList.GetX(m_map)/UO_BLOCK_SIZE) );
-	ASSERT( by < (g_MapList.GetY(m_map)/UO_BLOCK_SIZE) );
+	ASSERT( bx < (g_MapList.GetMapSizeX(m_map)/UO_BLOCK_SIZE) );
+	ASSERT( by < (g_MapList.GetMapSizeY(m_map)/UO_BLOCK_SIZE) );
 
 	if ( !g_MapList.IsMapSupported(m_map) )
 	{
@@ -428,7 +428,7 @@ void CServerMapBlock::Load( int bx, int by )
 		throw CSError(LOGL_CRIT, 0, "CServerMapBlock: Map is not supported since MUL files for it not available.");
 	}
 
-	const uint uiBlockIndex = (bx * (g_MapList.GetY(m_map) / UO_BLOCK_SIZE) + by);
+	const uint uiBlockIndex = (bx * (g_MapList.GetMapSizeY(m_map) / UO_BLOCK_SIZE) + by);
     bool fPatchedTerrain = false;
     bool fPatchedStatics = false;
 	if ( g_Cfg.m_fUseMapDiffs && g_MapList.m_pMapDiffCollection )
@@ -523,11 +523,15 @@ void CServerMapBlock::Load( int bx, int by )
 }
 
 CServerMapBlock::CServerMapBlock(int bx, int by, int map) :
-		CPointSort((short)(bx)* UO_BLOCK_SIZE, (short)(by) * UO_BLOCK_SIZE)
+		CPointSort((short)(bx)* UO_BLOCK_SIZE, (short)(by) * UO_BLOCK_SIZE, (uchar)map)
 {
 	++sm_iCount;
-	m_map = map;
 	Load( bx, by );
+}
+
+CServerMapBlock::~CServerMapBlock()
+{
+	--sm_iCount;
 }
 
 
@@ -805,7 +809,7 @@ CServerMapDiffBlock * CServerMapDiffCollection::GetNewBlock(dword dwBlockId, int
 CServerMapDiffBlock * CServerMapDiffCollection::GetAtBlock(int bx, int by, int map)
 {
 	// See GetAtBlock(dword,int)
-	dword dwBlockId = (bx * (g_MapList.GetY( map ) / UO_BLOCK_SIZE)) + by;
+	dword dwBlockId = (bx * (g_MapList.GetMapSizeY( map ) / UO_BLOCK_SIZE)) + by;
 	return GetAtBlock( dwBlockId, map );
 }
 

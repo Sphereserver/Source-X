@@ -171,9 +171,6 @@ public:
 class CServerMapBlock :	// Cache this from the MUL files. 8x8 block of the world.
 	public CPointSort	// The upper left corner. (ignore z) sort by this
 {
-protected:
-	int	m_map;
-
 private:
 	static size_t sm_iCount;	// count number of loaded blocks.
 
@@ -190,10 +187,7 @@ private:
 
 public:
 	CServerMapBlock(int bx, int by, int map);
-	virtual ~CServerMapBlock()
-	{ 
-		--sm_iCount;
-	}
+	virtual ~CServerMapBlock();
 
 private:
 	CServerMapBlock(const CServerMapBlock& copy);

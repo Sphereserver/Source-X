@@ -622,7 +622,7 @@ int CSector::GetLocalTime() const
 
 	if ( !g_Cfg.m_bAllowLightOverride )
 	{
-		iLocalTime += ( pt.m_x * 24*60 ) / g_MapList.GetX(pt.m_map);
+		iLocalTime += ( pt.m_x * 24*60 ) / g_MapList.GetMapSizeX(pt.m_map);
 	}
 	else
 	{
@@ -841,7 +841,7 @@ void CSector::SetDefaultWeatherChance()
 {
 	ADDTOCALLSTACK("CSector::SetDefaultWeatherChance");
 	CPointMap pt = GetBasePoint();
-	byte iPercent = (byte)(IMulDiv( pt.m_y, 100, g_MapList.GetY(pt.m_map) ));	// 100 = south
+	byte iPercent = (byte)(IMulDiv( pt.m_y, 100, g_MapList.GetMapSizeY(pt.m_map) ));	// 100 = south
 	if ( iPercent < 50 )
 	{
 		// Anywhere north of the Britain Moongate is a good candidate for snow
@@ -1079,7 +1079,7 @@ bool CSector::CanSleep(bool fCheckAdjacents) const
             {
                 continue;
             }
-            if (!pAdjacent->IsSleeping() || !pAdjacent->CanSleep(false))
+            if (!pAdjacent->CanSleep(false))
             {
                 return false;   // assume the base sector can't sleep.
             }
@@ -1087,7 +1087,8 @@ bool CSector::CanSleep(bool fCheckAdjacents) const
     }
 
 	//default behaviour;
-	return ((CWorldGameTime::GetCurrentTime().GetTimeRaw() - GetLastClientTime()) > g_Cfg._iSectorSleepDelay); // Sector Sleep timeout.
+	const int64 iTimeDiff = CWorldGameTime::GetCurrentTime().GetTimeRaw() - GetLastClientTime();
+	return (iTimeDiff > g_Cfg._iSectorSleepDelay); // Sector Sleep timeout.
 }
 
 void CSector::SetSectorWakeStatus()
@@ -1214,7 +1215,7 @@ bool CSector::OnTick()
 	EXC_SET_BLOCK("sector sleeping?");
 	// Put the sector to sleep if no clients been here in a while.
     const bool fCanSleep = CanSleep(true);	
-	if (fCanSleep && (g_Cfg._iSectorSleepDelay > 0))
+	if (fCanSleep)
 	{
         if (!IsSleeping())
         {
@@ -1411,18 +1412,17 @@ bool CSector::IsItemInSector( const CItem * pItem ) const
 	if ( !pItem )
 		return false;
 
-	return pItem->GetParent() == &m_Items_Inert ||
-		pItem->GetParent() == &m_Items_Timer;
+	return ((pItem->GetParent() == &m_Items_Inert) || (pItem->GetParent() == &m_Items_Timer));
 }
 
 void CSector::AddListenItem()
 {
-	m_ListenItems++;
+	++m_ListenItems;
 }
 
 void CSector::RemoveListenItem()
 {
-	m_ListenItems--;
+	--m_ListenItems;
 }
 
 bool CSector::HasListenItems() const
