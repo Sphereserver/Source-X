@@ -1136,18 +1136,18 @@ bool CItemBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 				++ptcKey;
 				if (!strnicmp(ptcKey, "TILES", 5))
 				{
-					sVal.FormatVal(pItemMulti->m_shipSpeed.tiles);
+					sVal.FormatVal(pItemMulti->_shipSpeed.tiles);
 					break;
 				}
 				else if (!strnicmp(ptcKey, "PERIOD", 6))
 				{
-					sVal.FormatVal(pItemMulti->m_shipSpeed.period);
+					sVal.FormatVal(pItemMulti->_shipSpeed.period);
 					break;
 				}
 				return false;
 			}
 
-			sVal.Format("%d,%d", pItemMulti->m_shipSpeed.period, pItemMulti->m_shipSpeed.tiles);
+			sVal.Format("%d,%d", pItemMulti->_shipSpeed.period, pItemMulti->_shipSpeed.tiles);
 		} break;
         case IBC_MULTICOUNT:
         {
@@ -1465,20 +1465,20 @@ bool CItemBase::r_LoadVal( CScript &s )
 				CItemBaseMulti *pItemMulti = dynamic_cast<CItemBaseMulti*>(dynamic_cast<CItemBase*>(this));
 				if (!strnicmp(ptcKey, "TILES", 5))
 				{
-					pItemMulti->m_shipSpeed.tiles = (uchar)(s.GetArgVal());
+					pItemMulti->_shipSpeed.tiles = (uchar)(s.GetArgVal());
 					return true;
 				}
 				else if (!strnicmp(ptcKey, "PERIOD", 6))
 				{
-					pItemMulti->m_shipSpeed.tiles = (uchar)(s.GetArgVal());
+					pItemMulti->_shipSpeed.tiles = (uchar)(s.GetArgVal());
 					return true;
 				}
 				int64 piVal[2];
 				size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, CountOf(piVal));
 				if (iQty == 2)
 				{
-					pItemMulti->m_shipSpeed.period = (uchar)(piVal[0]);
-					pItemMulti->m_shipSpeed.tiles = (uchar)(piVal[1]);
+					pItemMulti->_shipSpeed.period = (uchar)(piVal[0]);
+					pItemMulti->_shipSpeed.tiles = (uchar)(piVal[1]);
 					return true;
 				}
 				else
@@ -1865,8 +1865,8 @@ CItemBaseMulti::CItemBaseMulti( CItemBase* pBase ) :
 {
     m_dwRegionFlags = REGION_FLAG_NODECAY | REGION_ANTIMAGIC_TELEPORT | REGION_ANTIMAGIC_RECALL_IN | REGION_FLAG_NOBUILDING;
 	m_rect.SetRectEmpty();
-	m_shipSpeed.period = 0;
-	m_shipSpeed.tiles = 0;
+	_shipSpeed.period = 0;
+	_shipSpeed.tiles = 0;
 	m_SpeedMode = SMS_SLOW;
 
     _iBaseStorage = 489;    // Minimum possible value from 7x7 houses.
@@ -2003,10 +2003,10 @@ bool CItemBaseMulti::r_LoadVal(CScript &s)
             if (iQty < 1)
                 return false;
 
-            m_shipSpeed.period = (uchar)(ppArgs[0]);
+            _shipSpeed.period = (uchar)(ppArgs[0]);
 
             if (iQty >= 2)
-                m_shipSpeed.tiles = (uchar)(ppArgs[1]);
+                _shipSpeed.tiles = (uchar)(ppArgs[1]);
         }
         break;
         case MLC_TSPEECH:
@@ -2120,18 +2120,18 @@ bool CItemBaseMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * 
                 ++ptcKey;
                 if (!strnicmp(ptcKey, "TILES", 5))
                 {
-                    sVal.FormatVal(m_shipSpeed.tiles);
+                    sVal.FormatVal(_shipSpeed.tiles);
                     break;
                 }
                 else if (!strnicmp(ptcKey, "PERIOD", 6))
                 {
-                    sVal.FormatVal(m_shipSpeed.period);
+                    sVal.FormatVal(_shipSpeed.period);
                     break;
                 }
                 return false;
             }
 
-            sVal.Format("%d,%d", m_shipSpeed.period, m_shipSpeed.tiles);
+            sVal.Format("%d,%d", _shipSpeed.period, _shipSpeed.tiles);
             break;
         }
         default:

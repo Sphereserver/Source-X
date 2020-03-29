@@ -80,8 +80,9 @@ private:
     void ClearFloor(char iFloor);
 
 private:
-    typedef std::map<ITEMID_TYPE, uint> ValidItemsContainer;	// ItemID, FeatureMask
+    using ValidItemsContainer = phmap::btree_map<ITEMID_TYPE, uint>;	// ItemID, FeatureMask
     static ValidItemsContainer sm_mapValidItems;
+
     static bool LoadValidItems();
 
 public:
@@ -121,7 +122,7 @@ public:
     static uchar GetPlane(char z);
     static uchar GetPlane(const CMultiComponent * pComponent);
     static char GetPlaneZ(uchar plane);
-    static bool IsValidItem(ITEMID_TYPE id, CClient * pClientSrc, bool bMulti);
+    static bool IsValidItem(ITEMID_TYPE id, CClient * pClientSrc, bool fMulti);
 
     CDesignDetails* GetDesignMain()
     {

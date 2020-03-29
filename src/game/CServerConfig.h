@@ -191,8 +191,8 @@ public:
 	bool m_fUseNTService;       // Start this as a system service on Win2000, XP, NT
 	int	 m_fUseHTTP;            // Use the built in http server
 	bool m_fUseAuthID;          // Use the OSI AuthID to avoid possible hijack to game server.
-	int64  m_iMapCacheTime;     // Time in sec to keep unused map data..
-	int	 _iSectorSleepDelay;    // The mask for how long sectors will sleep.
+	int64  _iMapCacheTime;     // Time in sec to keep unused map data..
+	int64  _iSectorSleepDelay;    // The mask for how long sectors will sleep.
 	bool m_fUseMapDiffs;        // Whether or not to use map diff files.
 
 	CSString m_sWorldBaseDir;   // save\" = world files go here.

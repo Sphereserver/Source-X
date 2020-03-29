@@ -58,8 +58,11 @@ public:
 
 	bool IsValidZ() const noexcept;
 	bool IsValidXY() const noexcept;
-	bool IsValidPoint() const noexcept;
 	bool IsCharValid() const noexcept;
+	inline bool IsValidPoint() const noexcept
+	{
+		return (IsValidXY() && IsValidZ());
+	}
 
 	void ValidatePoint();
 

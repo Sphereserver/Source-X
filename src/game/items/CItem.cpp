@@ -3443,7 +3443,7 @@ void CItem::SetTriggerActive(lpctstr trig)
     int iAction = FindTableSorted( trig, CItem::sm_szTrigName, CountOf(CItem::sm_szTrigName)-1 );
     if (iAction != -1)
     {
-        _iRunningTriggerId = iAction;
+        _iRunningTriggerId = (short)iAction;
         _sRunningTrigger.Empty();
         return;
     }

@@ -83,13 +83,15 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
     _iRunningTriggerId = -1;
     _iCallingObjTriggerId = -1;
 
-	m_wHue = HUE_DEFAULT;
 	m_timestamp = 0;
-
 	m_CanMask = 0;
+	
+	m_attackBase = m_attackRange = 0;
+	m_defenseBase = m_defenseRange = 0;
 	m_ModAr = 0;
+
+	m_wHue = HUE_DEFAULT;
 	m_ModMaxWeight = 0;
-    _uidSpawn.InitUID();
 
 	m_fStatusUpdate = 0;
 	m_PropertyList = nullptr;

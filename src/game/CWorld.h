@@ -40,11 +40,12 @@ class CWorldThread
 	// as well as those just created here. (but may not be here anymore)
 
 protected:
-	std::vector<CObjBase*> m_UIDs;  // all the UID's in the World. CChar and CItem.
-	int m_iUIDIndexLast;            // remeber the last index allocated so we have more even usage.
+	CObjBase**	_ppUIDObjArray;		// Array containing all the UID's in the World. CChar and CItem.
+	size_t		_uiUIDObjArraySize;
+	dword		_dwUIDIndexLast;	// remeber the last index allocated so we have more even usage.
 
-	dword	*m_FreeUIDs;		//	list of free uids available
-	dword	m_FreeOffset;		//	offset of the first free element
+	dword*		_pdwFreeUIDs;		// list of free uids available
+	dword		_dwFreeUIDOffset;		// offset of the first free element
 
 public:
 	static const char *m_sClassName;
@@ -82,6 +83,7 @@ public:
 	void GarbageCollection_UIDs();
 	void GarbageCollection_New();
 
+	void InitUIDs();
 	void CloseAllUIDs();
 
 public:

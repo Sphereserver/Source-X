@@ -53,7 +53,7 @@ void ProfileData::SetActive(int iSampleSec)
 
 void ProfileData::Start(PROFILE_TYPE id)
 {
-	ADDTOCALLSTACK("ProfileData::Start");
+	// ADDTOCALLSTACK("ProfileData::Start"); // CPU intensive
 	if (( id >= PROFILE_TIME_QTY ) || !m_iActiveWindowSeconds )
 		return;
 

@@ -34,12 +34,13 @@ private:
 protected:
 	CResourceRef m_BaseRef;     // Pointer to the resource that describes this type.
 
-    int _iRunningTriggerId;     // Current trigger being run on this object. Used to prevent the same trigger being called over and over.
     CSString _sRunningTrigger;
-    int _iCallingObjTriggerId;  // I am running a trigger called via TRIGGER (CallPersonalTrigger method). In which trigger (OF THIS SAME OBJECT) was this call executed?
+    short _iRunningTriggerId;     // Current trigger being run on this object. Used to prevent the same trigger being called over and over.
+    short _iCallingObjTriggerId;  // I am running a trigger called via TRIGGER (CallPersonalTrigger method). In which trigger (OF THIS SAME OBJECT) was this call executed?
 
 public:
     static const char *m_sClassName;
+    static dword sm_iCount;    // how many total objects in the world ?
 
     size_t m_iCreatedResScriptIdx;	// index in g_Cfg.m_ResourceFiles of the script file where this obj was created
     int m_iCreatedResScriptLine;	// line in the script file where this obj was created
@@ -54,16 +55,13 @@ public:
     word	m_defenseBase;	    // Armor for IsArmor items
     word	m_defenseRange;     // variable range of defense.
     int 	m_ModMaxWeight;		// ModMaxWeight prop.
+
     CUID 	_uidSpawn;          // SpawnItem for this item
 
     CResourceRefArray m_OEvents;
-    static dword sm_iCount;    // how many total objects in the world ?
-
+    
 	/**
-	* @fn  CBaseBaseDef * CObjBase::Base_GetDef() const;
-	*
 	* @brief   Base get definition.
-	*
 	* @return  null if it fails, else a pointer to a CBaseBaseDef.
 	*/
 	CBaseBaseDef * Base_GetDef() const
@@ -1096,7 +1094,7 @@ enum WAR_SWING_TYPE	// m_Act_War_Swing_State
     WAR_SWING_EQUIPPING_NOWAIT = 10 // Special return value for CChar::Fight_Hit, DON'T USE IT IN SCRIPTS!
 };
 
-enum CTRIG_TYPE
+enum CTRIG_TYPE : short
 {
 	CTRIG_AAAUNUSED		= 0,
 	CTRIG_AfterClick,       // I'm not yet clicked, name should be generated before.

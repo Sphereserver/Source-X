@@ -18,8 +18,8 @@ CItemMulti::CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef, bool fTurnable) :  
     CCMultiMovable(fTurnable)
 {
     CItemBaseMulti * pItemBase = static_cast<CItemBaseMulti*>(Base_GetDef());
-    m_shipSpeed.period = pItemBase->m_shipSpeed.period;
-    m_shipSpeed.tiles = pItemBase->m_shipSpeed.tiles;
+    _shipSpeed.period = pItemBase->_shipSpeed.period;
+    _shipSpeed.tiles = pItemBase->_shipSpeed.tiles;
     _eSpeedMode = pItemBase->m_SpeedMode;
 
     m_pRegion = nullptr;
@@ -3336,7 +3336,7 @@ CMultiStorage::CMultiStorage(const CUID& uidSrc)
 
 CMultiStorage::~CMultiStorage()
 {
-    for (std::map<CUID, HOUSE_PRIV>::iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)
+    for (MultiOwnedCont::iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)
     {
         const CUID& uid = it->first;
         CItemMulti *pMulti = static_cast<CItemMulti*>(uid.ItemFind());
@@ -3349,7 +3349,7 @@ CMultiStorage::~CMultiStorage()
             pMulti->SetGuild(CUID());
         }
     }
-    for (std::map<CUID, HOUSE_PRIV>::iterator it = _lShips.begin(); it != _lShips.end(); ++it)
+    for (MultiOwnedCont::iterator it = _lShips.begin(); it != _lShips.end(); ++it)
     {
         const CUID& uid = it->first;
         CItemShip *pShip = static_cast<CItemShip*>(uid.ItemFind());
@@ -3517,7 +3517,7 @@ int16 CMultiStorage::GetHousePos(const CUID& uidHouse) const
         return -1;
     }
     int16 i = 0;
-    for (std::map<CUID, HOUSE_PRIV>::const_iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)
+    for (MultiOwnedCont::const_iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)
     {
         if (it->first == uidHouse)
         {
@@ -3540,7 +3540,7 @@ int16 CMultiStorage::GetHouseCountReal() const
 
 CUID CMultiStorage::GetHouseAt(int16 iPos) const
 {
-    std::map<CUID, HOUSE_PRIV>::const_iterator it = _lHouses.begin();
+    MultiOwnedCont::const_iterator it = _lHouses.begin();
     std::advance(it, iPos);
     return it->first;
 }
@@ -3641,7 +3641,7 @@ int16 CMultiStorage::GetShipPos(const CUID& uidShip)
         return -1;
     }
     int16 i = 0;
-    for (std::map<CUID, HOUSE_PRIV>::iterator it = _lShips.begin(); it != _lShips.end(); ++it)
+    for (MultiOwnedCont::iterator it = _lShips.begin(); it != _lShips.end(); ++it)
     {
         if (it->first == uidShip)
         {
@@ -3664,7 +3664,7 @@ int16 CMultiStorage::GetShipCountReal()
 
 CUID CMultiStorage::GetShipAt(int16 iPos)
 {
-    std::map<CUID, HOUSE_PRIV>::const_iterator it = _lShips.begin();
+    MultiOwnedCont::const_iterator it = _lShips.begin();
     std::advance(it, iPos);
     return it->first;
 }

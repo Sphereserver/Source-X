@@ -6,11 +6,14 @@
 #ifndef _INC_CITEMMULTI_H
 #define _INC_CITEMMULTI_H
 
-#include "CItem.h"
+#include "../parallel_hashmap/btree.h"
 #include "../components/CCMultiMovable.h"
+#include "CItem.h"
+
 
 #define MAX_MULTI_LIST_OBJS 128
 #define MAX_MULTI_CONTENT 1024
+
 
 enum HOUSE_TYPE
 {
@@ -642,7 +645,7 @@ public:
 /*
 * Privileges/Access type for multis, mutually exclusive.
 */
-enum HOUSE_PRIV
+enum HOUSE_PRIV : uchar
 {
     HP_NONE,
     HP_OWNER,
@@ -663,11 +666,14 @@ enum HOUSE_PRIV
 class CMultiStorage
 {
 private:
-    std::map<CUID, HOUSE_PRIV> _lHouses;  // List of stored houses.
-    std::map<CUID, HOUSE_PRIV> _lShips;    // List of stored ships.
+    using MultiOwnedCont = phmap::btree_map<CUID, HOUSE_PRIV>;
+    MultiOwnedCont _lHouses;  // List of stored houses.
+    MultiOwnedCont _lShips;   // List of stored ships.
+
     int16 _iHousesTotal;    // Max of houses.
     int16 _iShipsTotal;     // Max of ships.
     CUID _uidSrc;
+
 public:
     CMultiStorage(const CUID& uidSrc);
     virtual ~CMultiStorage();
