@@ -43,7 +43,7 @@ public:
 	RESDISPLAY_VERSION _iEraLimitGear;	// Don't allow to create gear newer than the given era (softcoded).
 	RESDISPLAY_VERSION _iEraLimitLoot;	// Don't allow to create loot newer than the given era (softcoded).
 
-    int _iRange;
+    ushort _uiRange;
 
 	short m_iMoveRate;	// move rate percent
 

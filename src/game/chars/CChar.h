@@ -89,8 +89,8 @@ public:
 	{
 		int64	elapsed;
 		dword	charUID;
-		int64	amountDone;
-		int64	threat;
+		int		amountDone;
+		int		threat;
 		bool	ignore;
 	};
 	std::vector<LastAttackers> m_lastAttackers;
@@ -98,8 +98,8 @@ public:
 	struct NotoSaves
 	{
 		dword		charUID;	// Character viewing me
-		NOTO_TYPE	color;		// Color sent on movement packets
 		int64		time;		// Update timer
+		NOTO_TYPE	color;		// Color sent on movement packets
 		NOTO_TYPE	value;		// Notoriety type
 	};
 	std::vector<NotoSaves> m_notoSaves;
@@ -121,7 +121,7 @@ public:
 	// Combat stuff. cached data. (not saved)
 	CUID m_uidWeapon;			// current Wielded weapon.	(could just get rid of this ?)
 	word m_defense;				// calculated armor worn (NOT intrinsic armor)
-    int _iRange;
+    ushort _uiRange;
 
 	height_t m_height;			// Height set in-game or under some trigger (height=) - for both items and chars
 
@@ -136,7 +136,7 @@ public:
 
 	// Saved stuff.
 	DIR_TYPE m_dirFace;			// facing this dir.
-	CSString m_sTitle;			// Special title such as "the guard" (replaces the normal skill title)
+	std::string m_sTitle;		// Special title such as "the guard" (replaces the normal skill title) [use std::string instead of CSString because the former is allocated on-demand]
 	CPointMap m_ptHome;			// What is our "home" region. (towns and bounding of NPC's)
 	int64 m_virtualGold;		// Virtual gold used by TOL clients
 
@@ -1040,29 +1040,29 @@ public:
 	inline int GetAttackersCount() {
 		return (int)m_lastAttackers.size();
 	}
-	bool	Attacker_Add(CChar * pChar, int64 threat = 0);
+	bool	Attacker_Add(CChar * pChar, int threat = 0);
 	CChar * Attacker_GetLast() const;
-	bool	Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
-	bool	Attacker_Delete(int attackerIndex, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
-	bool	Attacker_Delete(const CChar * pChar, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
+	bool	Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bool fForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
+	bool	Attacker_Delete(int attackerIndex, bool fForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
+	bool	Attacker_Delete(const CChar * pChar, bool fForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
 	void	Attacker_RemoveChar();
 	void	Attacker_Clear();
 	void	Attacker_CheckTimeout();
-	int64	Attacker_GetDam(int attackerIndex) const;
-	void	Attacker_SetDam(const CChar * pChar, int64 value);
-	void	Attacker_SetDam(int attackerIndex, int64 value);
+	int		Attacker_GetDam(int attackerIndex) const;
+	void	Attacker_SetDam(const CChar * pChar, int value);
+	void	Attacker_SetDam(int attackerIndex, int value);
 	CChar * Attacker_GetUID(int attackerIndex) const;
 	int64	Attacker_GetElapsed(int attackerIndex) const;
 	void	Attacker_SetElapsed(const CChar * pChar, int64 value);
 	void	Attacker_SetElapsed(int attackerIndex, int64 value);
-	int64	Attacker_GetThreat(int attackerIndex) const;
-	void	Attacker_SetThreat(const CChar * pChar, int64 value);
-	void	Attacker_SetThreat(int attackerIndex, int64 value);
+	int		Attacker_GetThreat(int attackerIndex) const;
+	void	Attacker_SetThreat(const CChar * pChar, int value);
+	void	Attacker_SetThreat(int attackerIndex, int value);
 	bool	Attacker_GetIgnore(int pChar) const;
 	bool	Attacker_GetIgnore(const CChar * pChar) const;
 	void	Attacker_SetIgnore(size_t pChar, bool fIgnore);
 	void	Attacker_SetIgnore(const CChar * pChar, bool fIgnore);
-	int64	Attacker_GetHighestThreat() const;
+	int		Attacker_GetHighestThreat() const;
 	int		Attacker_GetID(const CChar * pChar) const;
 	int		Attacker_GetID(const CUID& pChar) const;
 

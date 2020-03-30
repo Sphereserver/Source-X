@@ -17,7 +17,7 @@ void CSObjListRec::RemoveSelf()
 CSObjList::CSObjList()
 {
 	m_pHead = m_pTail = nullptr;
-	m_iCount = 0;
+	m_uiCount = 0;
 }
 
 // CSObjList:: Element access.
@@ -46,7 +46,7 @@ void CSObjList::Clear()
 		ASSERT( pRec->GetParent() == this );
 		delete pRec;
 	}
-	m_iCount = 0;
+	m_uiCount = 0;
 	m_pHead = nullptr;
 	m_pTail = nullptr;
 }
@@ -88,7 +88,7 @@ void CSObjList::InsertAfter( CSObjListRec * pNewRec, CSObjListRec * pPrev )
 	}
 
 	pNewRec->m_pNext = pNext;
-	++m_iCount;
+	++m_uiCount;
 }
 
 void CSObjList::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when removed from list.
@@ -113,6 +113,6 @@ void CSObjList::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called wh
 	pObRec->m_pNext = nullptr;	// this should not really be necessary.
 	pObRec->m_pPrev = nullptr;
 	pObRec->m_pParent = nullptr;	// We are now unlinked.
-	--m_iCount;
+	--m_uiCount;
 }
 

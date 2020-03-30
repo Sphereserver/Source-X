@@ -61,7 +61,7 @@ private:
     BaseContNum_t _mPropsNum;
     BaseContStr_t _mPropsStr;
 
-    int _iRange;
+    ushort _uiRange;
 };
 
 

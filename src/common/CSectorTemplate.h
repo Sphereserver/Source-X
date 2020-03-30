@@ -13,58 +13,61 @@
 class CItem;
 class CSector;
 
-class CCharsDisconnectList : public CSObjList
+struct CCharsDisconnectList : public CSObjList
 {
-public:
 	static const char *m_sClassName;
+
 public:
 	CCharsDisconnectList() = default;
     void AddCharDisconnected( CChar * pChar );
+
 private:
 	CCharsDisconnectList(const CCharsDisconnectList& copy);
 	CCharsDisconnectList& operator=(const CCharsDisconnectList& other);
 };
 
-class CCharsActiveList : public CSObjList
+struct CCharsActiveList : public CSObjList
 {
-private:
-    int m_iClients; // How many clients in this sector now?
-public:
-	static const char *m_sClassName;
-	int64 m_timeLastClient;	// age the sector based on last client here.
+	static const char* m_sClassName;
 
+private:
+	int m_iClients;				// How many clients in this sector now?
+	int64 m_iTimeLastClient;	// age the sector based on last client here.
+    
 protected:
 	void OnRemoveObj( CSObjListRec* pObjRec );	// Override this = called when removed from list.
 
 public:
-    int GetClientsNumber() const;
+	CCharsActiveList();
+	void AddCharActive(CChar* pChar);
 	void ClientIncrease();
 	void ClientDecrease();
-	void AddCharActive( CChar * pChar );
-
-public:
-	CCharsActiveList();
+	void SetTimeLastClient(int64 iTime);
+	int GetClientsNumber() const {
+		return m_iClients;
+	}
+	int64 GetTimeLastClient() const {
+		return m_iTimeLastClient;
+	}
 
 private:
 	CCharsActiveList(const CCharsActiveList& copy);
 	CCharsActiveList& operator=(const CCharsActiveList& other);
 };
 
-class CItemsList : public CSObjList
+struct CItemsList : public CSObjList
 {
 	// Top level list of items.
-public:
+	static const char* m_sClassName;
+
 	static bool sm_fNotAMove;	// hack flag to prevent items from bouncing around too much.
-
-protected:
-	void OnRemoveObj( CSObjListRec* pObRec );	// Override this = called when removed from list.
-
-public:
-	static const char *m_sClassName;
-	void AddItemToSector( CItem * pItem );
 
 public:
 	CItemsList() = default;
+	void AddItemToSector( CItem * pItem );
+
+protected:
+	void OnRemoveObj(CSObjListRec* pObRec);	// Override this = called when removed from list.
 
 private:
 	CItemsList(const CItemsList& copy);

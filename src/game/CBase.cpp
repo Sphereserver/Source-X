@@ -486,17 +486,17 @@ void CBaseBaseDef::SetResDispDnId( word ResDispDnId )
 	m_ResDispDnId = ResDispDnId;
 }
 
-int CBaseBaseDef::ConvertRangeStr(lpctstr ptcRange) // static
+ushort CBaseBaseDef::ConvertRangeStr(lpctstr ptcRange) // static
 {
 	int64 piVal[2];
 	tchar* ptcTmp = Str_GetTemp();
 	Str_CopyLimitNull(ptcTmp, ptcRange, STR_TEMPLENGTH);
-	int iQty = Str_ParseCmds(ptcTmp, piVal, CountOf(piVal));
-	int iHi = 0, iLo = 0;
+	const int iQty = Str_ParseCmds(ptcTmp, piVal, CountOf(piVal));
+	ushort iHi = 0, iLo = 0;
 	if (iQty > 1)	// args: "min, max"
 	{
-		iHi = (int)piVal[1];
-		iLo = (int)piVal[0];
+		iHi = (ushort)piVal[1];
+		iLo = (ushort)piVal[0];
 		if (iLo > iHi)
 		{
 			std::swap(iHi, iLo);
@@ -506,7 +506,7 @@ int CBaseBaseDef::ConvertRangeStr(lpctstr ptcRange) // static
 	}
 	else			// arg: "max"
 	{
-		iHi = std::max(0, (int)piVal[0]);
+		iHi = std::max((ushort)0, (ushort)piVal[0]);
 	}
 	return RANGE_MAKE(iHi, iLo);
 }

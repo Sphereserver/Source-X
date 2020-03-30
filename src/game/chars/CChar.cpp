@@ -259,7 +259,7 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
     m_defense = 0;
 	m_height = 0;
 	m_ModMaxWeight = 0;
-    _iRange = RANGE_MAKE(1, 0);   // RangeH = 1; RangeL = 0
+    _uiRange = RANGE_MAKE(1, 0);   // RangeH = 1; RangeL = 0
 
 	m_StepStealth = 0;
 	m_iVisualRange = UO_MAP_VIEW_SIZE_DEFAULT;
@@ -997,7 +997,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	m_defense = pChar->m_defense;
     m_height = pChar->m_height;
     m_ModMaxWeight = pChar->m_ModMaxWeight;
-    _iRange = pChar->_iRange;
+    _uiRange = pChar->_uiRange;
 
 	m_atUnk.m_dwArg1 = pChar->m_atUnk.m_dwArg1;
 	m_atUnk.m_dwArg2 = pChar->m_atUnk.m_dwArg2;
@@ -1566,10 +1566,10 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 			Skill_SetBase(skSkill4, uiSkillVal4 * 10);
 	}
 
-    m_pPlayer->m_SpeechHue = HUE_TEXT_DEF;	// Set default client-sent speech color
-	m_fonttype			 = FONT_NORMAL;		// Set speech font type
-	m_SpeechHueOverride  = 0;		        // Set no server-side speech color override
-	m_sTitle.Empty();						// Set title
+    m_pPlayer->m_SpeechHue	= HUE_TEXT_DEF;	// Set default client-sent speech color
+	m_fonttype				= FONT_NORMAL;	// Set speech font type
+	m_SpeechHueOverride		= 0;			// Set no server-side speech color override
+	m_sTitle.clear();						// Set title
 
 	GetBank(LAYER_BANKBOX);			// Create bankbox
 	GetPackSafe();					// Create backpack
@@ -2206,7 +2206,7 @@ do_default:
 							}
 							else if (!strnicmp(ptcKey, "THREAT", 6))
 							{
-								sVal.FormatLLVal(refAttacker.threat);
+								sVal.FormatVal(refAttacker.threat);
 								return true;
 							}
 							else if (!strnicmp(ptcKey, "IGNORE", 6))
@@ -2951,18 +2951,18 @@ do_default:
 			goto do_default;
         case CHC_RANGE:
         {
-            const int iRangeH = GetRangeH(), iRangeL = GetRangeL();
+            const uchar iRangeH = GetRangeH(), iRangeL = GetRangeL();
             if ( iRangeL == 0 )
-                sVal.Format( "%d", iRangeH );
+                sVal.Format( "%hhd", iRangeH );
             else
-                sVal.Format( "%d,%d", iRangeH, iRangeL );
+                sVal.Format( "%hhd,%hhd", iRangeH, iRangeL );
             break;
         }
         case CHC_RANGEH:
-            sVal.FormatVal(GetRangeH());
+            sVal.FormatBVal(GetRangeH());
             break;
         case CHC_RANGEL:
-            sVal.FormatVal(GetRangeL());
+            sVal.FormatBVal(GetRangeL());
             break;
 		case CHC_STONE:
 			sVal.FormatVal( IsStatFlag( STATF_STONE ));
@@ -2970,7 +2970,7 @@ do_default:
 		case CHC_TITLE:
 			{
 				if (strlen(ptcKey) == 5)
-					sVal = m_sTitle; //GetTradeTitle
+					sVal = m_sTitle.c_str(); //GetTradeTitle
 				else
 					sVal = GetTradeTitle();
 			}break;
@@ -3452,7 +3452,7 @@ bool CChar::r_LoadVal( CScript & s )
 			break;
         case CHC_RANGE:
         {
-			_iRange = CBaseBaseDef::ConvertRangeStr(s.GetArgStr());
+			_uiRange = CBaseBaseDef::ConvertRangeStr(s.GetArgStr());
             break;
         }
         case CHC_RANGEH:
@@ -3577,8 +3577,8 @@ void CChar::r_Write( CScript & s )
     const CPointMap& pt = GetTopPoint();
 	if ( pt.IsValidPoint() )
 		s.WriteKey("P", pt.WriteUsed());
-	if ( !m_sTitle.IsEmpty() )
-		s.WriteKey("TITLE", m_sTitle);
+	if ( !m_sTitle.empty() )
+		s.WriteKey("TITLE", m_sTitle.c_str());
 	if ( m_fonttype != FONT_NORMAL )
 		s.WriteKeyVal("FONT", m_fonttype);
 	if (m_SpeechHueOverride)

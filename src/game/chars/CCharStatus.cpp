@@ -894,8 +894,8 @@ bool CChar::IsOwnedBy( const CChar * pChar, bool fAllowGM ) const
 lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 {
 	ADDTOCALLSTACK("CChar::GetTradeTitle");
-	if ( !m_sTitle.IsEmpty() )
-		return m_sTitle;
+	if ( !m_sTitle.empty() )
+		return m_sTitle.c_str();
 
 	tchar *pTemp = Str_GetTemp();
     const CCharBase *pCharDef = Char_GetDef();

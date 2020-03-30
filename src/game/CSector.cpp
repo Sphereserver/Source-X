@@ -1095,7 +1095,7 @@ void CSector::SetSectorWakeStatus()
 {
 	ADDTOCALLSTACK("CSector::SetSectorWakeStatus");
 	// Ships may enter a sector before it's riders ! ships need working timers to move !
-	m_Chars_Active.m_timeLastClient = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+	m_Chars_Active.SetTimeLastClient(CWorldGameTime::GetCurrentTime().GetTimeRaw());
     if (IsSleeping())
     {
         GoAwake();
@@ -1459,6 +1459,6 @@ size_t CSector::GetClientsNumber() const
 
 int64 CSector::GetLastClientTime() const
 {
-	return( m_Chars_Active.m_timeLastClient );
+	return( m_Chars_Active.GetTimeLastClient() );
 }
 

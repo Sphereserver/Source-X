@@ -44,7 +44,7 @@ public:
     * @return The record count of the list.
     */
     inline size_t GetCount() const noexcept {
-        return m_iCount;
+        return m_uiCount;
     }
     /**
     * @brief Check if CSObjList if empty.
@@ -122,7 +122,7 @@ private:
 
     CSObjListRec * m_pHead;  // Head of the list.
     CSObjListRec * m_pTail;  // Tail of the list. Do we really care about tail ? (as it applies to lists anyhow)
-    size_t m_iCount;		// Count of elements of the CSObjList.
+    size_t m_uiCount;		// Count of elements of the CSObjList.
 };
 
 

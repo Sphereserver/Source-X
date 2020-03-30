@@ -26,7 +26,7 @@ CCPropsItemWeapon::CCPropsItemWeapon() : CComponentProps(COMP_PROPS_ITEMWEAPON)
 {
     // All the unset properties have to be 0
     //#define PROP_RANGE_DEFAULT          RANGE_MAKE(1, 0)    // minimum value for Range, even if not set: RangeH = 1; RangeL = 0
-    _iRange = 0;
+    _uiRange = 0;
 }
 
 static bool CanSubscribeTypeIW(IT_TYPE type)
@@ -72,19 +72,19 @@ bool CCPropsItemWeapon::GetPropertyNumPtr(PropertyIndex_t iPropIndex, PropertyVa
     {
         case PROPIWEAP_RANGEL:
         case PROPIWEAP_RANGEH:
-            if (_iRange == 0)
+            if (_uiRange == 0)
             {
                 *piOutVal = 1;
                 return false;   // not set
             }
             if (iPropIndex == PROPIWEAP_RANGEL)
             {
-                *piOutVal = RANGE_GET_LO(_iRange);
+                *piOutVal = RANGE_GET_LO(_uiRange);
                 return true;
             }
             else
             {
-                *piOutVal = RANGE_GET_HI(_iRange);
+                *piOutVal = RANGE_GET_HI(_uiRange);
                 return true;
             }
 
@@ -101,17 +101,17 @@ bool CCPropsItemWeapon::GetPropertyStrPtr(PropertyIndex_t iPropIndex, CSString* 
     {
         case PROPIWEAP_RANGE:
         {
-            if (_iRange == 0)
+            if (_uiRange == 0)
             {
                 psOutVal->FormatVal(1);
                 return false;   // not set
             }
-            int iRangeH = RANGE_GET_HI(_iRange);
-            int iRangeL = RANGE_GET_LO(_iRange);
+            uchar iRangeH = RANGE_GET_HI(_uiRange);
+            uchar iRangeL = RANGE_GET_LO(_uiRange);
             if ( iRangeL == 0 )
-                psOutVal->Format( "%d", iRangeH );
+                psOutVal->Format( "%hhd", iRangeH );
             else
-                psOutVal->Format( "%d,%d", iRangeL, iRangeH );
+                psOutVal->Format( "%hhd,%hhd", iRangeL, iRangeH );
         }
         return true;
 
@@ -170,7 +170,7 @@ void CCPropsItemWeapon::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVa
     {
         case PROPIWEAP_RANGE:
         {
-            _iRange = CBaseBaseDef::ConvertRangeStr(ptcVal);
+            _uiRange = CBaseBaseDef::ConvertRangeStr(ptcVal);
             break;
         }
         
@@ -235,8 +235,11 @@ void CCPropsItemWeapon::r_Write(CScript & s)
     ADDTOCALLSTACK("CCPropsItemWeapon::Write");
     // r_Write isn't called by CItemBase/CCharBase, so we don't get base props saved
 
-    if (_iRange != 0)
-        s.WriteKeyFormat("RANGE", "%d,%d", RANGE_GET_HI(_iRange), RANGE_GET_LO(_iRange)); // RANGE = hi, lo
+    if (_uiRange != 0)
+    {
+        s.WriteKeyFormat("RANGE", "%d,%d", RANGE_GET_HI(_uiRange), RANGE_GET_LO(_uiRange)); // RANGE = hi, lo
+    }
+
     BaseCont_Write_ContNum(&_mPropsNum, _ptcPropertyKeys, s);
     BaseCont_Write_ContStr(&_mPropsStr, _ptcPropertyKeys, s);
 }

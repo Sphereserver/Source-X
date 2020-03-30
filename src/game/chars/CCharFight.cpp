@@ -940,16 +940,16 @@ effect_bounce:
 
 byte CChar::GetRangeL() const
 {
-    if (_iRange == 0)
+    if (_uiRange == 0)
         return Char_GetDef()->GetRangeL();
-    return (byte)(RANGE_GET_LO(_iRange));
+    return (byte)(RANGE_GET_LO(_uiRange));
 }
 
 byte CChar::GetRangeH() const
 {
-    if (_iRange == 0)
+    if (_uiRange == 0)
         return Char_GetDef()->GetRangeH();
-    return (byte)(RANGE_GET_HI(_iRange));
+    return (byte)(RANGE_GET_HI(_uiRange));
 }
 
 // What sort of weapon am i using?
@@ -1241,9 +1241,11 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool fToldByMaster )
 		return false;
 	}	
 
-	int64 threat = 0;
-	if ( fToldByMaster )
+	int threat = 0;
+	if (fToldByMaster)
+	{
 		threat = ATTACKER_THREAT_TOLDBYMASTER + Attacker_GetHighestThreat();
+	}
 
     CChar *pTarget = pCharTarg;
 	if ( ((IsTrigUsed(TRIGGER_ATTACK)) || (IsTrigUsed(TRIGGER_CHARATTACK))) && m_Fight_Targ_UID != pCharTarg->GetUID() )
@@ -1252,7 +1254,7 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool fToldByMaster )
 		Args.m_iN1 = threat;
 		if ( OnTrigger(CTRIG_Attack, pTarget, &Args) == TRIGRET_RET_TRUE )
 			return false;
-		threat = Args.m_iN1;
+		threat = (int)Args.m_iN1;
 	}
 
     if (!Attacker_Add(pTarget, threat))
@@ -1273,8 +1275,8 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool fToldByMaster )
 			GetClient()->addPlayerWarMode();
 	}
 
-	SKILL_TYPE skillWeapon = Fight_GetWeaponSkill();
-	SKILL_TYPE skillActive = Skill_GetActive();
+	const SKILL_TYPE skillWeapon = Fight_GetWeaponSkill();
+	const SKILL_TYPE skillActive = Skill_GetActive();
 
     if ((skillActive == skillWeapon) && (m_Fight_Targ_UID == pCharTarg->GetUID()))	// already attacking this same target using the same skill
     {
@@ -1297,7 +1299,7 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool fToldByMaster )
         pTarget = NPC_FightFindBestTarget();
     }
 
-	m_Fight_Targ_UID = pTarget ? pTarget->GetUID() : CUID(UID_UNUSED);
+	m_Fight_Targ_UID = pTarget ? pTarget->GetUID() : CUID();
 	Skill_Start(skillWeapon);
 	return true;
 }

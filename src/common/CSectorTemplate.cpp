@@ -26,7 +26,7 @@ void CCharsDisconnectList::AddCharDisconnected( CChar * pChar )
 
 CCharsActiveList::CCharsActiveList()
 {
-	m_timeLastClient = 0;
+	m_iTimeLastClient = 0;
 	m_iClients = 0;
 }
 
@@ -41,16 +41,11 @@ void CCharsActiveList::OnRemoveObj( CSObjListRec * pObjRec )
 	if ( pChar->IsClient())
 	{
         ClientDecrease();
-        m_timeLastClient = CWorldGameTime::GetCurrentTime().GetTimeRaw();	// mark time in case it's the last client
+        m_iTimeLastClient = CWorldGameTime::GetCurrentTime().GetTimeRaw();	// mark time in case it's the last client
 	}
 
 	CSObjList::OnRemoveObj(pObjRec);
 	pChar->SetUIDContainerFlags(UID_O_DISCONNECT);
-}
-
-int CCharsActiveList::GetClientsNumber() const
-{
-	return m_iClients;
 }
 
 void CCharsActiveList::AddCharActive( CChar * pChar )
@@ -76,6 +71,11 @@ void CCharsActiveList::ClientIncrease()
 void CCharsActiveList::ClientDecrease()
 {
 	--m_iClients;
+}
+
+void CCharsActiveList::SetTimeLastClient(int64 iTime)
+{
+	m_iTimeLastClient = iTime;
 }
 
 //////////////////////////////////////////////////////////////

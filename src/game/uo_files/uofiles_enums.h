@@ -291,7 +291,7 @@ enum CRESND_TYPE	// Placeholders (not real sound IDs): the SoundChar method choo
 };
 
 
-enum FONT_TYPE
+enum FONT_TYPE : unsigned short
 {
     FONT_BOLD,		// 0 - Bold Text = Large plain filled block letters.
     FONT_SHAD,		// 1 - Text with shadow = small gray
