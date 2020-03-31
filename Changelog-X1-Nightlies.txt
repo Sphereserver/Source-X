@@ -2152,3 +2152,6 @@ Must have event, even if it's empty, since it's applied by the source to generat
 29-03-2020, Nolok
 - Fixed: Sectors not always going to sleep.
 - Changed: More meaningful error message when a MUL/UOP file is not found during startup.
+
+31-03-2020, xwerswoodx
+- Fixed: Wrong if statement fixed in on Vendor Restock. (Issue #389)
