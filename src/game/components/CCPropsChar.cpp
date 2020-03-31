@@ -153,18 +153,15 @@ void CCPropsChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iV
             break;
         }
 
-        case PROPCH_COMBATBONUSSTAT:
-        case PROPCH_COMBATBONUSPERCENT:
-        case PROPCH_FASTERCASTRECOVERY:
-        case PROPCH_FASTERCASTING:
-        case PROPCH_INCREASESWINGSPEED:
+        case PROPCH_CASTINGFOCUS:
+        case PROPCH_INCREASEBARDCHANCE:
         case PROPCH_INCREASEDAM:
         case PROPCH_INCREASEDEFCHANCE:
-        case PROPCH_INCREASEDEFCHANCEMAX:
-        case PROPCH_INCREASESPELLDAM:
+        case PROPCH_INCREASEGOLD:
+        case PROPCH_INCREASEHITCHANCE:
+        case PROPCH_INCREASEPARRYCHANCE:
+        case PROPCH_INCREASESPELLDAM:  
         case PROPCH_LUCK:
-        case PROPCH_LOWERREAGENTCOST:
-        case PROPCH_LOWERMANACOST:
         {
             CChar * pChar = static_cast <CChar*>(pLinkedObj);
             pChar->UpdateStatsFlag();
