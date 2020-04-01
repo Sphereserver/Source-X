@@ -1,5 +1,6 @@
 #include "../../sphere/threads.h"
 #include "CCrypto.h"
+#include <cstring> // for memcpy
 
 // Encryption used when logging in, to access the server list
 bool CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen )
