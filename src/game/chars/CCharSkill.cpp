@@ -3629,7 +3629,7 @@ bool CChar::Skill_Wait( SKILL_TYPE skilltry )
 
 	if ( skill == SKILL_NONE )	// not currently doing anything.
 	{
-		if ((skilltry == SKILL_STEALTH) || ((skilltry == SKILL_SNOOPING) && (g_Cfg.m_iRevealFlags & REVEALF_SNOOPING)))
+		if ((skilltry == SKILL_STEALTH) || ((skilltry == SKILL_SNOOPING) && (g_Cfg.m_iRevealFlags & REVEALF_SNOOPING)) || ((skilltry == SKILL_STEALING) && (g_Cfg.m_iRevealFlags & REVEALF_STEALING)))
 			return false;
 		else
 			Reveal();
@@ -3871,7 +3871,7 @@ int CChar::Skill_Stealing(SKTRIG_TYPE stage)
 		return -SKTRIG_QTY;
 	}
 
-	Reveal();	// If we take an item off the ground we are revealed.
+	//Reveal();	// If we take an item off the ground we are revealed.
 
 	bool fGround = false;
 	if (pCharMark != nullptr)
@@ -3914,6 +3914,11 @@ int CChar::Skill_Stealing(SKTRIG_TYPE stage)
 			pPack->ContentAdd(pItem);
 		}
 	}
+	
+	if ((stage == SKTRIG_SUCCESS) && (g_Cfg.m_iRevealFlags & REVEALF_STEALING_SUCCESS))
+		Reveal();
+	else if ((stage == SKTRIG_FAIL) && (g_Cfg.m_iRevealFlags & REVEALF_STEALING_FAIL))
+		Reveal();
 
 	if (m_Act_Difficulty == 0)
 		return 0;	// Too easy to be bad. hehe
