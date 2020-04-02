@@ -2155,3 +2155,6 @@ Must have event, even if it's empty, since it's applied by the source to generat
 
 31-03-2020, xwerswoodx
 - Fixed: Wrong if statement fixed in on Vendor Restock. (Issue #389)
+
+02-04-2020, xwerswoodx
+- Added: REVEALF_SNOOPING, REVEALF_STEALING, REVEALF_STEALING_SUCCESS, REVEALF_STEALING_FAIL flags to sphere.ini (Issue #393)
