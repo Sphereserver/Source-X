@@ -696,6 +696,9 @@ void DummySphereThread::tick()
 /*
 * StackDebugInformation
 */
+
+#ifdef THREAD_TRACK_CALLSTACK
+
 StackDebugInformation::StackDebugInformation(const char *name)
 {
     m_context = static_cast<AbstractSphereThread *>(ThreadHolder::current());
@@ -719,3 +722,4 @@ StackDebugInformation::~StackDebugInformation()
     m_context->popStackCall();
 }
 
+#endif // THREAD_TRACK_CALLSTACK

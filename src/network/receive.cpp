@@ -3310,7 +3310,7 @@ bool PacketWheelBoatMove::onReceive(CNetState* net)
 			//	ship_face = pShipItem->Ship_Face()
 
 			//Ship_* need to be private? there is another way to ask the ship to move?
-			//pShipItem->Ship_Move(static_cast<DIR_TYPE>((moving - pShipItem->m_itShip.m_DirFace)), pShipItem->m_shipSpeed.tiles);
+			//pShipItem->Ship_Move(static_cast<DIR_TYPE>((moving - pShipItem->m_itShip.m_DirFace)), pShipItem->_shipSpeed.tiles);
 
 			if ((facing == DIR_N || facing == DIR_E || facing == DIR_S || facing == DIR_W) && pShipItem->m_itShip.m_DirFace != facing) //boat cannot face intermediate directions
 				pShipItem->Face(moving);

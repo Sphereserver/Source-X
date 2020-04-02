@@ -1870,12 +1870,12 @@ char CItemMultiCustom::GetPlaneZ(uchar plane)
     return 7 + ((plane - 1) * 20);
 }
 
-bool CItemMultiCustom::IsValidItem(ITEMID_TYPE id, CClient * pClientSrc, bool bMulti)
+bool CItemMultiCustom::IsValidItem(ITEMID_TYPE id, CClient * pClientSrc, bool fMulti)
 {
     ADDTOCALLSTACK("CItemMultiCustom::IsValidItem");
-    if (!bMulti && (id <= 0 || id >= ITEMID_MULTI))
+    if (!fMulti && (id <= 0 || id >= ITEMID_MULTI))
         return false;
-    if (bMulti && (id < ITEMID_MULTI || id > ITEMID_MULTI_MAX))
+    if (fMulti && (id < ITEMID_MULTI || id > ITEMID_MULTI_MAX))
         return false;
 
     // GMs and scripts can place any item
@@ -1887,7 +1887,7 @@ bool CItemMultiCustom::IsValidItem(ITEMID_TYPE id, CClient * pClientSrc, bool bM
         return false;
 
     // check the item exists in the database
-    ValidItemsContainer::iterator it = sm_mapValidItems.find(id);
+    ValidItemsContainer::const_iterator it = sm_mapValidItems.find(id);
     if (it == sm_mapValidItems.end())
         return false;
 

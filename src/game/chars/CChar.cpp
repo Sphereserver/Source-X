@@ -1241,8 +1241,8 @@ bool CChar::ReadScript(CResourceLock &s, bool bVendor)
 						}
 						m_UIDLastNewItem.InitUID();	//Clearing the attr for the next cycle
 
-						pItem->m_iCreatedResScriptIdx = s.m_iResourceFileIndex;
-						pItem->m_iCreatedResScriptLine = s.m_iLineNum;
+						pItem->_iCreatedResScriptIdx = s.m_iResourceFileIndex;
+						pItem->_iCreatedResScriptLine = s.m_iLineNum;
 
 						if ( iCmd == ITC_ITEMNEWBIE )
 							pItem->SetAttr(ATTR_NEWBIE);
@@ -3947,8 +3947,8 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				CChar * pChar = CreateNPC( GetID() );
 				pChar->MoveTo( GetTopPoint() );
 				pChar->DupeFrom(this, s.GetArgVal() < 1 ? true : false);
-				pChar->m_iCreatedResScriptIdx = s.m_iResourceFileIndex;
-				pChar->m_iCreatedResScriptLine = s.m_iLineNum;
+				pChar->_iCreatedResScriptIdx = s.m_iResourceFileIndex;
+				pChar->_iCreatedResScriptLine = s.m_iLineNum;
 			}
 			break;
 		case CHV_EQUIP:	// uid
@@ -4169,8 +4169,8 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
                     }
 					else
 					{
-                        pItem->m_iCreatedResScriptIdx = s.m_iResourceFileIndex;
-                        pItem->m_iCreatedResScriptLine = s.m_iLineNum;
+                        pItem->_iCreatedResScriptIdx = s.m_iResourceFileIndex;
+                        pItem->_iCreatedResScriptLine = s.m_iLineNum;
 
 						ItemEquip(pItem);
 						g_World.m_uidNew = pItem->GetUID();

@@ -41,9 +41,9 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 		return false;
 
 	bool bRestockNow = false;
-    int64 iRestockDelay = 10 * 60 * MSECS_PER_SEC;  // 10 Minutes delay
-
-	if ( !bForce && (CWorldGameTime::GetCurrentTime().GetTimeDiff(m_pNPC->m_timeRestock) <= 0))
+        int64 iRestockDelay = 10 * 60 * MSECS_PER_SEC;  // 10 Minutes delay
+    
+	if ( !bForce && (CWorldGameTime::GetCurrentTime().GetTimeDiff(m_pNPC->m_timeRestock) >= 0))
 	{
         bRestockNow = true; // restock timeout has expired, make it restock again (unless it's declared to do not restock in the bellow lines).
 		CRegionWorld *region = GetRegion();
@@ -51,14 +51,14 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 		{
 			CVarDefCont *vardef = region->m_TagDefs.GetKey("RestockVendors");
 			if( vardef != nullptr )
-                iRestockDelay = vardef->GetValNum() * MSECS_PER_TENTH;  // backwards: it was working on tenths in scripts before, keep it like that and update it to seconds.
+				iRestockDelay = vardef->GetValNum() * MSECS_PER_TENTH;  // backwards: it was working on tenths in scripts before, keep it like that and update it to seconds.
 			if ( region->m_TagDefs.GetKey("NoRestock") != nullptr )
 				bRestockNow = false;
 		}
 		if ( m_TagDefs.GetKey("NoRestock") != nullptr )
 			bRestockNow = false;
 	}
-    int64 iNextRestock = CWorldGameTime::GetCurrentTime().GetTimeRaw() + iRestockDelay;
+        int64 iNextRestock = CWorldGameTime::GetCurrentTime().GetTimeRaw() + iRestockDelay;
     
 	// At restock the containers are actually emptied
 	if ( bRestockNow )

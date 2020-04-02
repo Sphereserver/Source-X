@@ -13,6 +13,7 @@
 #include "CSector.h"
 #include "CWorldComm.h"
 #include "CWorldMap.h"
+#include "CWorldTickingList.h"
 #include "CWorld.h"
 
 #ifndef _WIN32
@@ -194,13 +195,13 @@ void ReportGarbageCollection(CObjBase * pObj, int iResultCode)
 	DEBUG_ERR(("GC: Deleted UID=0%" PRIx32 ", Defname='%s', Name='%s'. Invalid code=0x%x (%s).\n",
 		(dword)pObj->GetUID(), pObj->Base_GetDef()->GetResourceName(), pObj->GetName(), iResultCode, GetReasonForGarbageCode(iResultCode)));
 
-	if ( (pObj->m_iCreatedResScriptIdx != (size_t)-1) && (pObj->m_iCreatedResScriptLine != -1) )
+	if ( (pObj->_iCreatedResScriptIdx != -1) && (pObj->_iCreatedResScriptLine != -1) )
 	{
 		// Object was created via NEWITEM or NEWNPC in scripts, tell me where
-		CResourceScript* pResFile = g_Cfg.GetResourceFile((size_t)(pObj->m_iCreatedResScriptIdx));
+		CResourceScript* pResFile = g_Cfg.GetResourceFile((size_t)(pObj->_iCreatedResScriptIdx));
 		if (pResFile == nullptr)
 			return;
-		DEBUG_ERR(("GC:\t Object was created in '%s', line %d.\n", (lpctstr)pResFile->GetFilePath(), pObj->m_iCreatedResScriptLine));
+		DEBUG_ERR(("GC:\t Object was created in '%s', line %d.\n", (lpctstr)pResFile->GetFilePath(), pObj->_iCreatedResScriptLine));
 	}
 }
 
@@ -212,10 +213,13 @@ void ReportGarbageCollection(CObjBase * pObj, int iResultCode)
 CWorldThread::CWorldThread()
 {
 	m_fSaveParity = false;		// has the sector been saved relative to the char entering it ?
-	m_iUIDIndexLast = 1;
 
-	m_FreeUIDs = (dword*)calloc(FREE_UIDS_SIZE, sizeof(dword));
-	m_FreeOffset = FREE_UIDS_SIZE;
+	_ppUIDObjArray = nullptr;
+	_uiUIDObjArraySize = 0;
+	_dwUIDIndexLast = 0;
+
+	_pdwFreeUIDs = nullptr;
+	_dwFreeUIDOffset = 0;
 }
 
 CWorldThread::~CWorldThread()
@@ -223,19 +227,37 @@ CWorldThread::~CWorldThread()
 	CloseAllUIDs();
 }
 
+void CWorldThread::InitUIDs()
+{
+	_uiUIDObjArraySize = 8 * 1024;
+	_ppUIDObjArray = (CObjBase**)calloc(_uiUIDObjArraySize, sizeof(CObjBase*));
+	_dwUIDIndexLast = 1;
+
+	_dwFreeUIDOffset = FREE_UIDS_SIZE;
+	_pdwFreeUIDs = (dword*)calloc(_dwFreeUIDOffset, sizeof(dword));
+}
+
 void CWorldThread::CloseAllUIDs()
 {
 	ADDTOCALLSTACK("CWorldThread::CloseAllUIDs");
 	m_ObjDelete.Clear();	// empty our list of unplaced objects (and delete the objects in the list)
 	m_ObjNew.Clear();		// empty our list of objects to delete (and delete the objects in the list)
-	m_UIDs.clear();
 
-	if ( m_FreeUIDs != nullptr )
+	if (_ppUIDObjArray != nullptr)
 	{
-		free(m_FreeUIDs);
-		m_FreeUIDs = nullptr;
+		free(_ppUIDObjArray);
+		_ppUIDObjArray = nullptr;
+		_uiUIDObjArraySize = 0;
 	}
-	m_FreeOffset = FREE_UIDS_SIZE;
+
+	if ( _pdwFreeUIDs != nullptr )
+	{
+		free(_pdwFreeUIDs);
+		_pdwFreeUIDs = nullptr;
+	}
+
+	_dwFreeUIDOffset = 0;
+	_dwUIDIndexLast = 0;
 }
 
 bool CWorldThread::IsSaving() const
@@ -245,22 +267,23 @@ bool CWorldThread::IsSaving() const
 
 dword CWorldThread::GetUIDCount() const
 {
-	return (dword) m_UIDs.size();
+	ASSERT(_uiUIDObjArraySize <= UINT32_MAX);
+	return (dword)_uiUIDObjArraySize;
 }
 
 CObjBase *CWorldThread::FindUID(dword dwIndex) const
 {
 	if ( !dwIndex || dwIndex >= GetUIDCount() )
 		return nullptr;
-	if ( m_UIDs[ dwIndex ] == UID_PLACE_HOLDER )	// unusable for now. (background save is going on)
+	if ( _ppUIDObjArray[ dwIndex ] == UID_PLACE_HOLDER )	// unusable for now. (background save is going on)
 		return nullptr;
-	return m_UIDs[dwIndex];
+	return _ppUIDObjArray[dwIndex];
 }
 
 void CWorldThread::FreeUID(dword dwIndex)
 {
 	// Can't free up the UID til after the save !
-	m_UIDs[dwIndex] = IsSaving() ? UID_PLACE_HOLDER : nullptr;
+	_ppUIDObjArray[dwIndex] = IsSaving() ? UID_PLACE_HOLDER : nullptr;
 }
 
 dword CWorldThread::AllocUID( dword dwIndex, CObjBase * pObj )
@@ -276,24 +299,24 @@ dword CWorldThread::AllocUID( dword dwIndex, CObjBase * pObj )
 			goto setcount;
 		}
 
-		if ( m_FreeOffset < FREE_UIDS_SIZE && m_FreeUIDs != nullptr )
+		if ( _dwFreeUIDOffset < FREE_UIDS_SIZE && _pdwFreeUIDs != nullptr )
 		{
 			//	We do have a free uid's array. Use it if possible to determine the first free element
-			for ( ; m_FreeOffset < FREE_UIDS_SIZE && m_FreeUIDs[m_FreeOffset] != 0; m_FreeOffset++ )
+			for ( ; _dwFreeUIDOffset < FREE_UIDS_SIZE && _pdwFreeUIDs[_dwFreeUIDOffset] != 0; _dwFreeUIDOffset++ )
 			{
 				//	yes, that's a free slot
-				if ( !m_UIDs[m_FreeUIDs[m_FreeOffset]] )
+				if ( !_ppUIDObjArray[_pdwFreeUIDs[_dwFreeUIDOffset]] )
 				{
-					dwIndex = m_FreeUIDs[m_FreeOffset++];
+					dwIndex = _pdwFreeUIDs[_dwFreeUIDOffset++];
 					goto successalloc;
 				}
 			}
 		}
-		m_FreeOffset = FREE_UIDS_SIZE;	// mark array invalid, since it does not contain any empty slots
+		_dwFreeUIDOffset = FREE_UIDS_SIZE;	// mark array invalid, since it does not contain any empty slots
 										// use default allocation for a while, till the next garbage collection
 		dword dwCount = dwCountTotal - 1;
-		dwIndex = m_iUIDIndexLast;
-		while ( m_UIDs[dwIndex] != nullptr )
+		dwIndex = _dwUIDIndexLast;
+		while ( _ppUIDObjArray[dwIndex] != nullptr )
 		{
 			if ( ! -- dwIndex )
 			{
@@ -310,12 +333,24 @@ dword CWorldThread::AllocUID( dword dwIndex, CObjBase * pObj )
 	{
 setcount:
 		// We have run out of free UID's !!! Grow the array
-		m_UIDs.resize((dwIndex + 0x1000) & ~0xFFF);
+		const size_t uiOldArraySize = _uiUIDObjArraySize;
+		_uiUIDObjArraySize = ((dwIndex + 0x1000) & ~0xFFF);
+
+		CObjBase** pNewBlock = (CObjBase**)realloc(_ppUIDObjArray, _uiUIDObjArraySize * sizeof(CObjBase*));
+		if (pNewBlock == nullptr)
+		{
+			throw CSError(LOGL_FATAL, 0, "Not enough memory to store new UIDs!.\n");
+		}
+
+		// zero initialize the expanded part of the memory, leave untouched the original one
+		memset(pNewBlock + uiOldArraySize, 0, (_uiUIDObjArraySize - uiOldArraySize) * sizeof(CObjBase*));
+
+		_ppUIDObjArray = (CObjBase**)pNewBlock;
 	}
 
 successalloc:
-	m_iUIDIndexLast = dwIndex; // start from here next time so we have even distribution of allocation.
-	CObjBase *pObjPrv = m_UIDs[dwIndex];
+	_dwUIDIndexLast = dwIndex; // start from here next time so we have even distribution of allocation.
+	CObjBase *pObjPrv = _ppUIDObjArray[dwIndex];
 	if ( pObjPrv )
 	{
 		//NOTE: We cannot use Delete() in here because the UID will
@@ -323,7 +358,7 @@ successalloc:
 		DEBUG_ERR(("UID conflict delete 0%x, '%s'\n", dwIndex, pObjPrv->GetName()));
 		delete pObjPrv;
 	}
-	m_UIDs[dwIndex] = pObj;
+	_ppUIDObjArray[dwIndex] = pObj;
 	return dwIndex;
 }
 
@@ -332,8 +367,8 @@ void CWorldThread::SaveThreadClose()
 	ADDTOCALLSTACK("CWorldThread::SaveThreadClose");
 	for ( size_t i = 1; i < GetUIDCount(); ++i )
 	{
-		if ( m_UIDs[i] == UID_PLACE_HOLDER )
-			m_UIDs[i] = nullptr;
+		if ( _ppUIDObjArray[i] == UID_PLACE_HOLDER )
+			_ppUIDObjArray[i] = nullptr;
 	}
 
 	m_FileData.Close();
@@ -482,7 +517,7 @@ void CWorldThread::GarbageCollection_UIDs()
 	{
 		try
 		{
-			CObjBase * pObj = m_UIDs[i];
+			CObjBase * pObj = _ppUIDObjArray[i];
 			if ( !pObj || pObj == UID_PLACE_HOLDER )
 				continue;
 
@@ -519,22 +554,22 @@ void CWorldThread::GarbageCollection_UIDs()
 	else
 		g_Log.Event(LOGL_EVENT|LOGM_NOCONTEXT, "Garbage Collection: done. %" PRIu32 " Objects accounted for.\n", iCount);
 
-	if ( m_FreeUIDs != nullptr )	// new UID engine - search for empty holes and store it in a huge array
+	if ( _pdwFreeUIDs != nullptr )	// new UID engine - search for empty holes and store it in a huge array
 	{							// the size of the array should be enough even for huge shards
 								// to survive till next garbage collection
-		memset(m_FreeUIDs, 0, FREE_UIDS_SIZE * sizeof(dword));
-		m_FreeOffset = 0;
+		memset(_pdwFreeUIDs, 0, FREE_UIDS_SIZE * sizeof(dword));
+		_dwFreeUIDOffset = 0;
 
 		for ( dword d = 1; d < GetUIDCount(); ++d )
 		{
-			CObjBase *pObj = m_UIDs[d];
+			CObjBase *pObj = _ppUIDObjArray[d];
 
 			if ( !pObj )
 			{
-				if ( m_FreeOffset >= ( FREE_UIDS_SIZE - 1 ))
+				if ( _dwFreeUIDOffset >= ( FREE_UIDS_SIZE - 1 ))
 					break;
 
-				m_FreeUIDs[m_FreeOffset++] = d;
+				_pdwFreeUIDs[_dwFreeUIDOffset++] = d;
 			}
 		}
 	}
@@ -572,55 +607,57 @@ void CWorld::Init()
 	g_MapList.Init();
 
 	// Initialize all sectors
-	uint sectors = 0;
-	int m = 0;
-	for ( m = 0; m < MAP_SUPPORTED_QTY; ++m )
+	uint uiSectorCount = 0;
+	uchar uiMapIndex = 0;
+	for (uiMapIndex = 0; uiMapIndex < MAP_SUPPORTED_QTY; ++uiMapIndex)
 	{
-		if ( !g_MapList.IsMapSupported(m) )
+		if ( !g_MapList.IsMapSupported(uiMapIndex) )
 			continue;
-		sectors += (uint)g_MapList.CalcSectorQty(m);
+		uiSectorCount += (uint)g_MapList.CalcSectorQty(uiMapIndex);
 	}
 
-	m_Sectors = new CSector*[sectors];
+	m_Sectors = new CSector*[uiSectorCount];
 	TemporaryString tsZ;
 	TemporaryString tsZ1;
 	tchar* z = static_cast<tchar *>(tsZ);
 	tchar* z1 = static_cast<tchar *>(tsZ1);
 
-	for ( m = 0; m < MAP_SUPPORTED_QTY; ++m )
+	for (uiMapIndex = 0; uiMapIndex < MAP_SUPPORTED_QTY; ++uiMapIndex)
 	{
-		if ( !g_MapList.IsMapSupported(m) )
+		if ( !g_MapList.IsMapSupported(uiMapIndex) )
 			continue;
 
-        const int iSectorQty = g_MapList.CalcSectorQty(m);
-		sprintf(z1, " map%d=%d", m, iSectorQty);
+        const int iSectorQty = g_MapList.CalcSectorQty(uiMapIndex);
+		sprintf(z1, " map%d=%d", uiMapIndex, iSectorQty);
 		strcat(z, z1);
 
-        const int iMaxX = g_MapList.CalcSectorCols(m);
-        const int iMaxY = g_MapList.CalcSectorRows(m);
-        g_MapList._sectorcolumns[m] = iMaxX;
-        g_MapList._sectorrows[m] = iMaxY;
-        g_MapList._sectorqty[m] = g_MapList.CalcSectorQty(m);
+        const int iMaxX = g_MapList.CalcSectorCols(uiMapIndex);
+        const int iMaxY = g_MapList.CalcSectorRows(uiMapIndex);
+        g_MapList._sectorcolumns[uiMapIndex] = iMaxX;
+        g_MapList._sectorrows[uiMapIndex] = iMaxY;
+        g_MapList._sectorqty[uiMapIndex] = g_MapList.CalcSectorQty(uiMapIndex);
 
-		for ( int s = 0, x = 0, y = 0; s < iSectorQty; ++s )
+		int iSectorIndex = 0;
+		short iSectorX = 0, iSectorY = 0;
+		for ( ; iSectorIndex < iSectorQty; ++iSectorIndex )
 		{
-            if (x >= iMaxX)
+            if (iSectorX >= iMaxX)
             {
-                x = 0;
-                ++y;
+				iSectorX = 0;
+                ++iSectorY;
             }
 			CSector	*pSector = new CSector;
 			ASSERT(pSector);
-			pSector->Init(s, m, x, y);
+			pSector->Init(iSectorIndex, uiMapIndex, iSectorX, iSectorY);
 			m_Sectors[m_SectorsQty++] = pSector;
-            ++x;
+            ++iSectorX;
 		}
 	}
-    ASSERT(sectors == m_SectorsQty);
+    ASSERT(uiSectorCount == m_SectorsQty);
 
-    for (uint s = 0; s < m_SectorsQty; ++s)
+    for (uint uiSectorIndex = 0; uiSectorIndex < m_SectorsQty; ++ uiSectorIndex)
     {
-        CSector *pSector = m_Sectors[s];
+        CSector *pSector = m_Sectors[uiSectorIndex];
         if (pSector)
         {
             pSector->SetAdjacentSectors();
@@ -1273,6 +1310,8 @@ bool CWorld::LoadWorld() // Load world from script
 	int iPrevSaveCount = m_iSaveCountID;
 	for (;;)
 	{
+		InitUIDs();
+
 		LoadFile(sDataName, false);
 		LoadFile(sStaticsName, false);
 		if ( LoadFile(sWorldName) && LoadFile(sCharsName) && LoadFile(sMultisName, false))
@@ -1285,15 +1324,11 @@ bool CWorld::LoadWorld() // Load world from script
             break;
 
 		// Reset everything that has been loaded
-        {
-            std::unique_lock<std::shared_mutex> lock_su(_Ticker._ObjStatusUpdates.THREAD_CMUTEX);
-			_Ticker._ObjStatusUpdates.clear();
-        }
-        m_Stones.clear();
-		_Ticker._TimedFunctions.Clear();
+		CloseAllUIDs();
+		CWorldTickingList::ClearTickingLists();
+		m_Stones.clear();
 		m_Parties.Clear();
 		m_GMPages.Clear();
-
 		if ( m_Sectors )
 		{
 			for ( uint s = 0; s < m_SectorsQty; ++s )
@@ -1302,10 +1337,7 @@ bool CWorld::LoadWorld() // Load world from script
 				m_Sectors[s]->Close();
 			}
 		}
-
-		CloseAllUIDs();
 		_GameClock.Init();
-		m_UIDs.resize(8 * 1024);
 
 		// Get the name of the previous backups.
 		CSString sArchive;
@@ -1339,7 +1371,6 @@ bool CWorld::LoadWorld() // Load world from script
 bool CWorld::LoadAll() // Load world from script
 {
 	// start count. (will grow as needed)
-	m_UIDs.resize(8 * 1024);
 	_GameClock.Init();		// will be loaded from the world file.
 
 	// Load all the accounts.
@@ -1751,7 +1782,7 @@ void CWorld::OnTick()
 	{
 		EXC_SET_BLOCK("Check map cache");
 		// delete the static CServerMapBlock items that have not been used recently.
-		_Cache.CheckMapBlockCache(iCurTime, g_Cfg.m_iMapCacheTime);
+		_Cache.CheckMapBlockCache(iCurTime, g_Cfg._iMapCacheTime);
 	}
 
 	// Global (ini) stuff.

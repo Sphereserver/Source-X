@@ -11,6 +11,14 @@ CWorldCache::CWorldCache()
 		_mapBlocks[i].reset();
 }
 
+
+static int _GetMapBlocksCount(int iMap)
+{
+	const int iXBlocks = g_MapList.GetMapSizeX(iMap) / UO_BLOCK_SIZE;
+	const int iYBlocks = g_MapList.GetMapSizeY(iMap) / UO_BLOCK_SIZE;
+	return (iXBlocks * iYBlocks);
+}
+
 void CWorldCache::Init()
 {
 	for (int i = 0; i < MAP_SUPPORTED_QTY; ++i)
@@ -18,10 +26,9 @@ void CWorldCache::Init()
 		if (!g_MapList.IsInitialized(i))
 			continue;
 
-		const int iBlocks = (g_MapList.GetX(i) * g_MapList.GetY(i)) / UO_BLOCK_SIZE;
+		const int iBlocks = _GetMapBlocksCount(i);
 		_mapBlocks[i] = std::make_unique<MapBlockCacheCont[]>(iBlocks);
 	}
-	
 }
 
 void CWorldCache::CheckMapBlockCache(int64 iCurTime, int64 iCacheTime)
@@ -37,7 +44,7 @@ void CWorldCache::CheckMapBlockCache(int64 iCurTime, int64 iCacheTime)
 		if (!cache)
 			continue;
 
-		const int iBlocks = (g_MapList.GetX(i) * g_MapList.GetY(i)) / UO_BLOCK_SIZE;
+		const int iBlocks = _GetMapBlocksCount(i);
 		for (int j = 0; j < iBlocks; ++j)
 		{
 			MapBlockCacheCont& block = cache[j];

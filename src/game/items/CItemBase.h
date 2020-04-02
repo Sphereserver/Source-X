@@ -413,11 +413,11 @@ public:
 	};
 
 	std::vector<CMultiComponentItem> m_Components;
+	ShipSpeed _shipSpeed; // Speed of ships (IT_SHIP)
+	ShipMovementSpeed m_SpeedMode;
 	CRect m_rect;		// my region.
 	dword m_dwRegionFlags;	// Base region flags (REGION_FLAG_GUARDED etc)
 	CResourceRefArray m_Speech;	// Speech fragment list (other stuff we know)
-	ShipSpeed m_shipSpeed; // Speed of ships (IT_SHIP)
-    ShipMovementSpeed m_SpeedMode;
     uint16 _iBaseStorage;
     uint8 _iBaseVendors;
     uint8 _iLockdownsPercent;

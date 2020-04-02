@@ -401,12 +401,12 @@ lpctstr CServerConfig::Calc_MaptoSextant( CPointMap pntCoords )
 	CPointMap zeroPoint;
 	zeroPoint.Read(strcpy(z, g_Cfg.m_sZeroPoint));
 
-	int iLat = (pntCoords.m_y - zeroPoint.m_y) * 360 * 60 / g_MapList.GetY(zeroPoint.m_map);
+	int iLat = (pntCoords.m_y - zeroPoint.m_y) * 360 * 60 / g_MapList.GetMapSizeY(zeroPoint.m_map);
 	int iLong;
 	if ( pntCoords.m_map <= 1 )
 		iLong = (pntCoords.m_x - zeroPoint.m_x) * 360 * 60 / UO_SIZE_X_REAL;
 	else
-		iLong = (pntCoords.m_x - zeroPoint.m_x) * 360 * 60 / g_MapList.GetX(pntCoords.m_map);
+		iLong = (pntCoords.m_x - zeroPoint.m_x) * 360 * 60 / g_MapList.GetMapSizeX(pntCoords.m_map);
 
 	tchar * pTemp = Str_GetTemp();
 	sprintf( pTemp, "%io %i'%s, %io %i'%s",

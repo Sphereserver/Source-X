@@ -52,7 +52,7 @@ CPointMap CRegionBase::GetRegionCorner( DIR_TYPE dir ) const
 
 bool CRegionBase::IsInside2d( const CPointMap & pt ) const
 {
-	ADDTOCALLSTACK("CRegionBase::IsInside2d");
+	ADDTOCALLSTACK_INTENSIVE("CRegionBase::IsInside2d");
 	if ( ! m_rectUnion.IsInside2d( pt ))
 		return false;
 

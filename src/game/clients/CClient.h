@@ -63,17 +63,15 @@ public:
 		TResponseString& operator=( const TResponseString& other );
 	};
 
-	CSTypedArray<dword>		m_CheckArray;
+	CSTypedArray<dword>				m_CheckArray;
 	CSObjArray<TResponseString *>	m_TextArray;
+
 public:
 	void AddText( word id, lpctstr pszText );
 	lpctstr GetName() const;
 	bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false );
 
-public:
-	CDialogResponseArgs()
-	{
-	};
+	CDialogResponseArgs() = default;
 
 private:
 	CDialogResponseArgs( const CDialogResponseArgs& copy );
@@ -188,12 +186,12 @@ public:
 		} m_tmSetup;
 
 		// CLIMODE_SETUP_CHARLIST
-		CUIDBase m_tmSetupCharList[MAX_CHARS_PER_ACCT];
+		CUID m_tmSetupCharList[MAX_CHARS_PER_ACCT];
 
 		// CLIMODE_INPVAL
 		struct
 		{
-			CUIDBase m_UID;
+			CUID m_UID;
 			CResourceID m_PrvGumpID;	// the gump that was up before this
 		} m_tmInpVal;
 
@@ -202,7 +200,7 @@ public:
 		// CLIMODE_MENU_GM_PAGES
 		struct
 		{
-			CUIDBase m_UID;
+			CUID m_UID;
 			CResourceID m_ResourceID;		// What menu is this ?
 			dword m_Item[MAX_MENU_ITEMS];	// It's a buffer to save the in-range tracking targets or other data
 		} m_tmMenu;	// the menu that is up.

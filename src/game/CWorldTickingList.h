@@ -23,11 +23,9 @@ public:
     static void AddObjStatusUpdate(CObjBase* pObj);
     static void DelObjStatusUpdate(CObjBase* pObj);
 
-/*
 private:
     friend class CWorld;
-    static void ClearObjStatusUpdates();
-*/
+    static void ClearTickingLists();
 };
 
 #endif // _INC_CWORLDTICKINGLIST_H

@@ -3348,8 +3348,8 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 				while ( iCount-- )
 				{
 					CItem* pDupe = CItem::CreateDupeItem(this, dynamic_cast<CChar *>(pSrc), true);
-					pDupe->m_iCreatedResScriptIdx = s.m_iResourceFileIndex;
-					pDupe->m_iCreatedResScriptLine = s.m_iLineNum;
+					pDupe->_iCreatedResScriptIdx = s.m_iResourceFileIndex;
+					pDupe->_iCreatedResScriptLine = s.m_iLineNum;
 					pDupe->MoveNearObj(this, 1);
                     if (fNoCont)
                         pDupe->Update();
@@ -3427,7 +3427,7 @@ void CItem::SetTriggerActive(lpctstr trig)
     int iAction = FindTableSorted( trig, CItem::sm_szTrigName, CountOf(CItem::sm_szTrigName)-1 );
     if (iAction != -1)
     {
-        _iRunningTriggerId = iAction;
+        _iRunningTriggerId = (short)iAction;
         _sRunningTrigger.Empty();
         return;
     }

@@ -134,6 +134,7 @@ int CPointBase::GetDistBase( const CPointBase & pt ) const noexcept // Distance 
 {
     // This method is called very frequently, ADDTOCALLSTACK unneededly sucks cpu
     //ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDistBase");
+
 	// Do not consider z or m_map.
     const int dx = abs(m_x - pt.m_x);
     const int dy = abs(m_y - pt.m_y);
@@ -151,6 +152,7 @@ int CPointBase::GetDist( const CPointBase & pt ) const noexcept // Distance betw
 {
     // This method is called very frequently, ADDTOCALLSTACK unneededly sucks cpu
 	//ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDist");
+
 	// Get the basic 2d distance.
 	if ( !pt.IsValidPoint() )
 		return INT16_MAX;
@@ -162,7 +164,8 @@ int CPointBase::GetDist( const CPointBase & pt ) const noexcept // Distance betw
 
 int CPointBase::GetDistSightBase( const CPointBase & pt ) const noexcept // Distance between points based on UO sight
 {
-    ADDTOCALLSTACK("CPointBase::GetDistSightBase");
+	//ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDistSightBase");
+
 	int dx = abs(m_x - pt.m_x);
 	int dy = abs(m_y - pt.m_y);
 	return maximum(dx, dy);
@@ -170,7 +173,8 @@ int CPointBase::GetDistSightBase( const CPointBase & pt ) const noexcept // Dist
 
 int CPointBase::GetDistSight( const CPointBase & pt ) const noexcept // Distance between points based on UO sight
 {
-	ADDTOCALLSTACK("CPointBase::GetDistSight");
+	//ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDistSight");
+
 	if ( !pt.IsValidPoint() )
 		return INT16_MAX;
 	if ( pt.m_map != m_map )
@@ -181,7 +185,8 @@ int CPointBase::GetDistSight( const CPointBase & pt ) const noexcept // Distance
 
 int CPointBase::GetDist3D( const CPointBase & pt ) const noexcept // Distance between points
 {
-	ADDTOCALLSTACK("CPointBase::GetDist3D");
+	//ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDist3D");
+
 	// OK, 1 unit of Z is not the same (real life) distance as 1
 	// unit of X (or Y)
 	int dist = GetDist(pt);
@@ -203,25 +208,20 @@ bool CPointBase::IsValidZ() const noexcept
 
 bool CPointBase::IsValidXY() const noexcept
 {
-	if ( m_x < 0 || m_x >= g_MapList.GetX(m_map) )
+	if ( (m_x < 0) || (m_y < 0) )
 		return false;
-	if ( m_y < 0 || m_y >= g_MapList.GetY(m_map) )
+	if ( (m_x >= g_MapList.GetMapSizeX(m_map)) || (m_y >= g_MapList.GetMapSizeY(m_map)) )
 		return false;
 	return true;
 }
 
-bool CPointBase::IsValidPoint() const noexcept
-{
-	return ( IsValidXY() && IsValidZ() );
-}
-
 bool CPointBase::IsCharValid() const noexcept
 {
-	if ( m_z <= -UO_SIZE_Z || m_z >= UO_SIZE_Z )
+	if ( (m_z <= -UO_SIZE_Z) || (m_z >= UO_SIZE_Z) )
 		return false;
-	if (m_x <= 0 || m_x >= (short)(g_MapList.GetX(m_map)))
+	if ((m_x <= 0) || (m_y <= 0))
 		return false;
-	if (m_y <= 0 || m_y >= (short)(g_MapList.GetY(m_map)))
+	if ((m_x >= g_MapList.GetMapSizeX(m_map)) || (m_y >= g_MapList.GetMapSizeY(m_map)))
 		return false;
 	return true;
 }
@@ -230,13 +230,13 @@ void CPointBase::ValidatePoint()
 {
 	if ( m_x < 0 )
 		m_x = 0;
-    const short iMaxX = (short)g_MapList.GetX(m_map);
+    const short iMaxX = (short)g_MapList.GetMapSizeX(m_map);
 	if (m_x >= iMaxX)
 		m_x = iMaxX - 1;
 
 	if ( m_y < 0 )
 		m_y = 0;
-    const short iMaxY = (short)g_MapList.GetY(m_map);
+    const short iMaxY = (short)g_MapList.GetMapSizeY(m_map);
 	if (m_y >= iMaxY)
 		m_y = iMaxY - 1;
 }
@@ -881,7 +881,7 @@ CSector * CPointBase::GetSector() const
 	if ( !IsValidXY() )
 	{
 		g_Log.Event(LOGL_ERROR, "Point(%d,%d): trying to get a sector for point on map #%d out of bounds for this map(%d,%d). Defaulting to sector 0 of the map.\n",
-			m_x, m_y, m_map, g_MapList.GetX(m_map), g_MapList.GetY(m_map));
+			m_x, m_y, m_map, g_MapList.GetMapSizeX(m_map), g_MapList.GetMapSizeY(m_map));
 		return CWorldMap::GetSector(m_map, 0);
 	}
 	// Get the world Sector we are in.
@@ -891,7 +891,7 @@ CSector * CPointBase::GetSector() const
 
 CRegion * CPointBase::GetRegion( dword dwType ) const
 {
-	ADDTOCALLSTACK("CPointBase::GetRegion");
+	ADDTOCALLSTACK_INTENSIVE("CPointBase::GetRegion");
 	// What region in the current CSector am i in ?
 	// We only need to update this every 8 or so steps ?
 	// REGION_TYPE_AREA
@@ -907,7 +907,7 @@ CRegion * CPointBase::GetRegion( dword dwType ) const
 
 size_t CPointBase::GetRegions( dword dwType, CRegionLinks *pRLinks ) const
 {
-	ADDTOCALLSTACK("CPointBase::GetRegions");
+	ADDTOCALLSTACK_INTENSIVE("CPointBase::GetRegions");
 	if ( !IsValidPoint() )
 		return 0;
 

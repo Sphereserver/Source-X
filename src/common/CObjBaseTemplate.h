@@ -19,6 +19,7 @@ private:
 	CUID		m_UID;		// How the server will refer to this. 0 = static item
 	CSString	m_sName;	// unique name for the individual object.
 	CPointMap	m_pt;		// List is sorted by m_z_sort.
+
 protected:
 	void DupeCopy( const CObjBaseTemplate * pObj ); // it's not a virtual, pay attention to the argument of this method!
 
@@ -76,6 +77,8 @@ public:
 	virtual CObjBaseTemplate* GetTopLevelObj() = 0;
 
 	CSector * GetTopSector() const;
+
+
 	// Location
 
     LAYER_TYPE GetEquipLayer() const {
@@ -108,7 +111,9 @@ public:
     }
 	char GetUnkZ() const;
 
+
 	// Distance and direction
+
 	int GetTopDist( const CPointMap & pt ) const;
 
 	int GetTopDist( const CObjBaseTemplate * pObj ) const;

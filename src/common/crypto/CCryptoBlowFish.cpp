@@ -1,5 +1,6 @@
 #include "../../sphere/threads.h"
 #include "CCrypto.h"
+#include <cstring> // for memcpy
 
 
 dword sm_dwCodingData[CRYPT_GAMEKEY_COUNT][18+1024];	// to be filled by InitTables and PrepareKey

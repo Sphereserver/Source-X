@@ -594,8 +594,8 @@ PacketPlayerStart::PacketPlayerStart(const CClient* target) : PacketSend(XCMD_St
 	writeInt32(0xffffffff);
 	writeInt16(0);
 	writeInt16(0);
-	writeInt16(pt.m_map > 0 ? (word)(g_MapList.GetX(pt.m_map)) : 0x1800);
-	writeInt16(pt.m_map > 0 ? (word)(g_MapList.GetY(pt.m_map)) : 0x1000);
+	writeInt16(pt.m_map > 0 ? (word)(g_MapList.GetMapSizeX(pt.m_map)) : 0x1800);
+	writeInt16(pt.m_map > 0 ? (word)(g_MapList.GetMapSizeY(pt.m_map)) : 0x1000);
 	writeInt16(0);
 	writeInt32(0);
 
@@ -1387,10 +1387,10 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
 			for (uchar i = 0; i < 2; ++i)
 			{
 				writeByte((byte)i);
-				writeInt16((word)(g_MapList.GetX(i)));
-				writeInt16((word)(g_MapList.GetY(i)));
-				writeInt16((word)(g_MapList.GetX(i)));
-				writeInt16((word)(g_MapList.GetY(i)));
+				writeInt16((word)(g_MapList.GetMapSizeX(i)));
+				writeInt16((word)(g_MapList.GetMapSizeY(i)));
+				writeInt16((word)(g_MapList.GetMapSizeX(i)));
+				writeInt16((word)(g_MapList.GetMapSizeY(i)));
             }
 
             for (int i = 0; i < padding; ++i)
@@ -1425,7 +1425,7 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
             const CChar* pChar = target->GetChar();
 			byte bMap = pChar->GetTopMap();
 			CPointMap pt = pChar->GetTopPoint();
-			dword dwBlockId = (pt.m_x * (g_MapList.GetY( bMap ) / UO_BLOCK_SIZE)) + pt.m_y;
+			dword dwBlockId = (pt.m_x * (g_MapList.GetMapSizeY( bMap ) / UO_BLOCK_SIZE)) + pt.m_y;
 			writeInt32(dwBlockId);
 			writeInt32(0);
 			writeInt16(0);
@@ -2285,8 +2285,8 @@ PacketZoneChange::PacketZoneChange(const CClient* target, const CPointMap& pos) 
 	writeByte(0);
 	writeInt16(0);
 	writeInt16(0);
-	writeInt16((word)(g_MapList.GetX(pos.m_map)));
-	writeInt16((word)(g_MapList.GetY(pos.m_map)));
+	writeInt16((word)(g_MapList.GetMapSizeX(pos.m_map)));
+	writeInt16((word)(g_MapList.GetMapSizeY(pos.m_map)));
 
 	push(target);
 }

@@ -40,8 +40,8 @@ CServerConfig::CServerConfig()
 	m_fUseNTService		= false;
 	m_fUseHTTP			= 2;
 	m_fUseAuthID		= true;
-	m_iMapCacheTime		= 2*60 * MSECS_PER_SEC;
-	_iSectorSleepDelay	= (1 << 10) - 1;
+	_iMapCacheTime		= 2  * 60 * MSECS_PER_SEC;
+	_iSectorSleepDelay  = 10 * 60 * MSECS_PER_SEC;
 	m_fUseMapDiffs		= false;
 
 	m_iDebugFlags			= 0;	//DEBUGF_NPC_EMOTE
@@ -777,7 +777,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "MAGICFLAGS",				{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iMagicFlags),			0 }},
 	{ "MAGICUNLOCKDOOR",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMagicUnlockDoor),		0 }},
     { "MANALOSSFAIL",		    { ELEM_BOOL,	OFFSETOF(CServerConfig,m_fManaLossFail),		0 }},
-	{ "MAPCACHETIME",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMapCacheTime),		0 }},
+	{ "MAPCACHETIME",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iMapCacheTime),		0 }},
 	{ "MAXBASESKILL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxBaseSkill),		0 }},
 	{ "MAXCHARSPERACCOUNT",		{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_iMaxCharsPerAccount),	0 }},
 	{ "MAXCOMPLEXITY",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxCharComplexity),	0 }},
@@ -1144,7 +1144,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			g_Install.SetPreferPath( CSFile::GetMergedFileName( s.GetArgStr(), "" ));
 			break;
 		case RC_MAPCACHETIME:
-			m_iMapCacheTime = s.GetArgLLVal() * MSECS_PER_SEC;
+			_iMapCacheTime = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 		case RC_MAXCHARSPERACCOUNT:
 			m_iMaxCharsPerAccount = (uchar)(s.GetArgVal());
@@ -1257,9 +1257,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 
 		case RC_SECTORSLEEP:
-			{
-				_iSectorSleepDelay = s.GetArgVal() * MSECS_PER_SEC;
-			}
+			_iSectorSleepDelay = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
 			break;
 
 		case RC_SAVEBACKGROUND:
@@ -1267,13 +1265,13 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 
         case RC_SAVESECTORSPERTICK:
-            m_iSaveSectorsPerTick = s.GetArgVal();
+            m_iSaveSectorsPerTick = s.GetArgUVal();
             if( m_iSaveSectorsPerTick <= 0 )
                 m_iSaveSectorsPerTick = 1;
             break;
 
         case RC_SAVESTEPMAXCOMPLEXITY:
-            m_iSaveStepMaxComplexity = s.GetArgVal();
+            m_iSaveStepMaxComplexity = s.GetArgUVal();
             break;
 
 		case RC_WORLDSAVE: // Put save files here.
@@ -1525,13 +1523,13 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 				if ( g_MapList.IsMapSupported(iNumber) )
 				{
 					if (!strnicmp(pszCmd,"BOUND.X", 7))
-						sVal.FormatVal( g_MapList.GetX(iNumber) );
+						sVal.FormatVal( g_MapList.GetMapSizeX(iNumber) );
 					else if (!strnicmp(pszCmd,"BOUND.Y", 7))
-						sVal.FormatVal( g_MapList.GetY(iNumber) );
+						sVal.FormatVal( g_MapList.GetMapSizeY(iNumber) );
 					else if (!strnicmp(pszCmd,"CENTER.X", 8))
-						sVal.FormatVal( g_MapList.GetCenterX(iNumber) );
+						sVal.FormatVal( g_MapList.GetMapCenterX(iNumber) );
 					else if (!strnicmp(pszCmd,"CENTER.Y", 8))
-						sVal.FormatVal( g_MapList.GetCenterY(iNumber) );
+						sVal.FormatVal( g_MapList.GetMapCenterY(iNumber) );
 					else if (!strnicmp(pszCmd, "SECTOR.", 7))
 					{
 						pszCmd += 7;
@@ -1864,7 +1862,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			sVal = g_Install.GetPreferPath(nullptr);
 			break;
 		case RC_MAPCACHETIME:
-			sVal.FormatLLVal( m_iMapCacheTime / MSECS_PER_SEC );
+			sVal.FormatLLVal( _iMapCacheTime / MSECS_PER_SEC );
 			break;
 		case RC_NOTOTIMEOUT:
 			sVal.FormatVal(m_iNotoTimeout);
@@ -1966,10 +1964,10 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 				}
 			} break;
 		case RC_SAVEPERIOD:
-			sVal.FormatLLVal( m_iSavePeriod / (60*MSECS_PER_SEC));
+			sVal.FormatLLVal( m_iSavePeriod / (60 * MSECS_PER_SEC));
 			break;
 		case RC_SECTORSLEEP:
-			sVal.FormatVal(_iSectorSleepDelay / MSECS_PER_SEC);
+			sVal.FormatLLVal(_iSectorSleepDelay / (60 * MSECS_PER_SEC));
 			break;
 		case RC_SAVEBACKGROUND:
 			sVal.FormatLLVal( m_iSaveBackgroundTime / (60 * MSECS_PER_SEC));

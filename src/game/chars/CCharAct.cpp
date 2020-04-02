@@ -4028,7 +4028,7 @@ void CChar::SetTriggerActive(lpctstr trig)
     int iAction = FindTableSorted( trig, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName)-1 );
     if (iAction != -1)
     {
-        _iRunningTriggerId = iAction;
+        _iRunningTriggerId = (short)iAction;
         _sRunningTrigger.Empty();
         return;
     }
