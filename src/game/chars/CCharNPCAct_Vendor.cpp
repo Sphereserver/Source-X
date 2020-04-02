@@ -41,15 +41,8 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 		return false;
 
 	bool bRestockNow = false;
-    int64 iRestockDelay = 10 * 60 * MSECS_PER_SEC;  // 10 Minutes delay
+        int64 iRestockDelay = 10 * 60 * MSECS_PER_SEC;  // 10 Minutes delay
     
-    /*
-		Note: Notmally, Diff functions should work like inputTime - serverTime but this GetTimeDiff works like serverTime - inputTime, so I changed <= equality to >= to fix restock bug.
-		Reason: I haven't changed Diff function totally because there is so many code that uses GetTimeDiff. I haven't checked if they have same issue or they coded with this system so I just changed that code to fix it.
-
-		I am leaving that comment to let you know my change. So if you change Diff function the correct way later, you can change the if statement from >= to <=.
-		xwerswoodx
-    */
 	if ( !bForce && (CWorldGameTime::GetCurrentTime().GetTimeDiff(m_pNPC->m_timeRestock) >= 0))
 	{
         bRestockNow = true; // restock timeout has expired, make it restock again (unless it's declared to do not restock in the bellow lines).
@@ -65,7 +58,7 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 		if ( m_TagDefs.GetKey("NoRestock") != nullptr )
 			bRestockNow = false;
 	}
-    int64 iNextRestock = CWorldGameTime::GetCurrentTime().GetTimeRaw() + iRestockDelay;
+        int64 iNextRestock = CWorldGameTime::GetCurrentTime().GetTimeRaw() + iRestockDelay;
     
 	// At restock the containers are actually emptied
 	if ( bRestockNow )
