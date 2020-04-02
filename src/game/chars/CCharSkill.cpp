@@ -3629,7 +3629,9 @@ bool CChar::Skill_Wait( SKILL_TYPE skilltry )
 
 	if ( skill == SKILL_NONE )	// not currently doing anything.
 	{
-		if ( skilltry != SKILL_STEALTH )
+		if ((skilltry == SKILL_STEALTH) || ((skilltry == SKILL_SNOOPING) && (g_Cfg.m_iRevealFlags & REVEALF_SNOOPING)))
+			return false;
+		else
 			Reveal();
 		return false;
 	}
