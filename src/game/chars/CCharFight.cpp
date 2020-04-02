@@ -893,7 +893,7 @@ effect_bounce:
 						iReactiveDamage = 1;
 
 					iDmg -= iReactiveDamage;
-					pSrc->OnTakeDamage( iReactiveDamage, this, (DAMAGE_TYPE)(DAMAGE_FIXED), iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy );
+					pSrc->OnTakeDamage( iReactiveDamage, this, DAMAGE_FIXED, iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy );
 					pSrc->Sound( 0x1F1 );
 					pSrc->Effect( EFFECT_OBJ, ITEMID_FX_CURSE_EFFECT, this, 10, 16 );
 				}
@@ -2089,24 +2089,18 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			{
                 const ITEMID_TYPE iBloodID = sm_Blood[Calc_GetRandVal(CountOf(sm_Blood))];
 
+				/*
                 CItem *pBlood = CItem::CreateBase(iBloodID);
                 ASSERT(pBlood);
                 pBlood->SetHue(pCharTarg->m_wBloodHue);
                 pBlood->MoveNear(pCharTarg->GetTopPoint(), 1);
                 pBlood->Update();
                 pBlood->SetDecayTimeS(5);
-
-                // Looks like the hues with index >= 1000 cause the blood to be black, instead of the right color
-                /*
-                CPointMap pt = pCharTarg->GetTopPoint();
-                pt.m_x += (short)Calc_GetRandVal2(-1, 1);
-                pt.m_y += (short)Calc_GetRandVal2(-1, 1);
-
-				CItem * pBlood = CItem::CreateBase(iBloodID);
-				ASSERT(pBlood);
-				pBlood->SetHue(pCharTarg->m_wBloodHue);
-				pBlood->MoveToDecay(pt, 3000);
-                */
+				*/
+				CPointMap pt = pCharTarg->GetTopPoint();
+				pt.m_x += (short)Calc_GetRandVal2(-1, 1);
+				pt.m_y += (short)Calc_GetRandVal2(-1, 1);
+				EffectLocation(EFFECT_XYZ, iBloodID, nullptr, &pt, 10, 40, true, pCharTarg->m_wBloodHue, 1, iBloodID);
 			}
 		}
 

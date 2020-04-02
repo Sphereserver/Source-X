@@ -1957,7 +1957,7 @@ void PacketEffect::writeBasicEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CO
 	writeByte(dstpos.m_z);
 	writeByte(speed); // 0=very fast, 7=slow
 	writeByte(loop); // 0=really long, 1=shortest, 6=longer
-	writeInt16(0);
+	writeInt16(0100);
 	writeByte(oneDirection);
 	writeByte(explode);
 
