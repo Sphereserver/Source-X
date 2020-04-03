@@ -377,7 +377,8 @@ void CItemMulti::Multi_Setup(CChar *pChar, dword dwKeyCode)
                 }
             }
         }
-    }    
+    }
+    pChar->r_Call("f_multi_setup", pChar, nullptr, nullptr, nullptr);
 }
 
 bool CItemMulti::Multi_IsPartOf(const CItem * pItem) const

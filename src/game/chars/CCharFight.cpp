@@ -872,24 +872,28 @@ effect_bounce:
 		// A physical blow of some sort.
 		if (uType & (DAMAGE_HIT_BLUNT|DAMAGE_HIT_PIERCE|DAMAGE_HIT_SLASH))
 		{
-			// Check if Reactive Armor will reflect some damage back
-			if ( IsStatFlag(STATF_REACTIVE) && !(uType & DAMAGE_GOD) )
+			// Check if Reactive Armor will reflect some damage back.
+			// Preventing recurrent reflection with DAMAGE_REACTIVE.
+			if ( IsStatFlag(STATF_REACTIVE) && !((uType & DAMAGE_GOD) || (uType & DAMAGE_REACTIVE)) )
 			{
 				if ( GetTopDist3D(pSrc) < 2 )
 				{
-					int iReactiveDamage = iDmg / 5;
-					if ( iReactiveDamage < 1 )
+					CItem* pReactive = LayerFind(LAYER_SPELL_Reactive);
+					int iReactiveDamage = (iDmg * pReactive->m_itSpell.m_PolyStr) / 100;
+					if (iReactiveDamage < 1)
+					{
 						iReactiveDamage = 1;
+					}
 
 					iDmg -= iReactiveDamage;
-					pSrc->OnTakeDamage( iReactiveDamage, this, (DAMAGE_TYPE)(DAMAGE_FIXED), iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy );
+					pSrc->OnTakeDamage( iReactiveDamage, this, (DAMAGE_TYPE)(DAMAGE_FIXED | DAMAGE_REACTIVE), iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy );
 					pSrc->Sound( 0x1F1 );
 					pSrc->Effect( EFFECT_OBJ, ITEMID_FX_CURSE_EFFECT, this, 10, 16 );
 				}
 			}
 		}
 	}
-
+	
 	if (iDmg <= 0)
 		return 0;
 

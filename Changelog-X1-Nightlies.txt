@@ -1723,7 +1723,7 @@ WARNING: Important change!
 - Added: RemoveAllKeys to the source executing RemoveKeys(uid) to owner, coowner(s), friend(s) and players in the access list.
 - Changed: Now all multis call RemoveAllKeys when being removed if AutoHouseKeys is enabled in the .ini
 - Fixed: Redeed crashing sphere when no real char was given as src (for example via @Timer).
-- Added: f_house_onplacement_check function called from CItemMulti::Multi_Create (where the multis do their checks to be placed) with this params:
+- Added: f_multi_onplacement_check function called from CItemMulti::Multi_Create (where the multis do their checks to be placed) with this params:
 	return 0 // Use default checks (wich values may be modified with the bellow locals)
 	return 1 // Prevents the multi from being placed.
 	return 6 // Allows the multi to be placed without default placement checks.
@@ -2155,3 +2155,13 @@ Must have event, even if it's empty, since it's applied by the source to generat
 
 31-03-2020, xwerswoodx
 - Fixed: Wrong if statement fixed in on Vendor Restock. (Issue #389)
+
+03-04-2020, XuN
+-Added f_multi_setup, called after the multi has been created, placed and it's component added, so events and types can be setup without weird workarounds. It accepts no returns and has no arg.
+[Changelog] Fixed: Updated text of f_house_onplacement_check was never working, it's correct name is f_multi_onplacement_check.
+-Reactive Armor:
+	-Fixed server crash when 2 attackers with Reactive Armor effect damage each other and the damage bounced back recursivelly.
+	-The %of damage reflected by Reactive Armor is now stored in More1L in it's rune item.
+	-The value is asigned by default by a linear formula reflecting the caster's magery skill and the effect value of the spell.
+	-The value can also be modified now via @EffectAdd.
+
