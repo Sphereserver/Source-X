@@ -6,6 +6,7 @@
 #ifndef _INC_CSECTORTEMPLATE_H
 #define _INC_CSECTORTEMPLATE_H
 
+#include "sphere_library/CSObjCont.h"
 #include "../game/CServer.h"
 #include "../game/CRegion.h"
 
@@ -13,7 +14,7 @@
 class CItem;
 class CSector;
 
-struct CCharsDisconnectList : public CSObjList
+struct CCharsDisconnectList : public CSObjCont
 {
 	static const char *m_sClassName;
 
@@ -26,7 +27,7 @@ private:
 	CCharsDisconnectList& operator=(const CCharsDisconnectList& other);
 };
 
-struct CCharsActiveList : public CSObjList
+struct CCharsActiveList : public CSObjCont
 {
 	static const char* m_sClassName;
 
@@ -35,19 +36,19 @@ private:
 	int64 m_iTimeLastClient;	// age the sector based on last client here.
     
 protected:
-	void OnRemoveObj( CSObjListRec* pObjRec );	// Override this = called when removed from list.
+	void OnRemoveObj(CSObjContRec* pObjRec );	// Override this = called when removed from list.
 
 public:
 	CCharsActiveList();
 	void AddCharActive(CChar* pChar);
-	void ClientIncrease();
-	void ClientDecrease();
-	void SetTimeLastClient(int64 iTime);
 	int GetClientsNumber() const {
 		return m_iClients;
 	}
 	int64 GetTimeLastClient() const {
 		return m_iTimeLastClient;
+	}
+	inline void SetTimeLastClient(int64 iTime) {
+		m_iTimeLastClient = iTime;
 	}
 
 private:
@@ -55,7 +56,7 @@ private:
 	CCharsActiveList& operator=(const CCharsActiveList& other);
 };
 
-struct CItemsList : public CSObjList
+struct CItemsList : public CSObjCont
 {
 	// Top level list of items.
 	static const char* m_sClassName;
@@ -67,7 +68,7 @@ public:
 	void AddItemToSector( CItem * pItem );
 
 protected:
-	void OnRemoveObj(CSObjListRec* pObRec);	// Override this = called when removed from list.
+	void OnRemoveObj(CSObjContRec* pObRec);	// Override this = called when removed from list.
 
 private:
 	CItemsList(const CItemsList& copy);

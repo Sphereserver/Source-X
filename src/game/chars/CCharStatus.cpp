@@ -175,8 +175,9 @@ CItem *CChar::GetBackpackItem(ITEMID_TYPE id)
 	CItemContainer *pPack = GetPack();
 	if ( pPack )
 	{
-		for ( CItem *pItem = pPack->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+		for (CSObjContRec* pObjRec : *pPack)
 		{
+			CItem* pItem = static_cast<CItem*>(pObjRec);
 			if ( pItem->GetID() == id )
 				return pItem;
 		}
@@ -189,8 +190,9 @@ CItem *CChar::LayerFind( LAYER_TYPE layer ) const
 	ADDTOCALLSTACK("CChar::LayerFind");
 	// Find an item i have equipped.
 
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+	for (CSObjContRec* pObjRec : *this)
 	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( pItem->GetEquipLayer() == layer )
 			return pItem;
 	}
@@ -200,11 +202,12 @@ CItem *CChar::LayerFind( LAYER_TYPE layer ) const
 TRIGRET_TYPE CChar::OnCharTrigForLayerLoop( CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs, CSString *pResult, LAYER_TYPE layer )
 {
 	ADDTOCALLSTACK("CChar::OnCharTrigForLayerLoop");
-	CScriptLineContext StartContext = s.GetContext();
+	const CScriptLineContext StartContext = s.GetContext();
 	CScriptLineContext EndContext = StartContext;
 
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+	for (CSObjContRec* pObjRec : GetIterationSafeCont())
 	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( pItem->GetEquipLayer() == layer )
 		{
 			TRIGRET_TYPE iRet = pItem->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult);
@@ -457,11 +460,6 @@ int CChar::GetHealthPercent() const
 	if ( !str )
 		return 0;
 	return IMulDiv(Stat_GetVal(STAT_STR), 100, str);
-}
-
-CChar* CChar::GetNext() const
-{
-	return( static_cast <CChar*>( CObjBase::GetNext()) );
 }
 
 const CObjBaseTemplate * CChar::GetTopLevelObj() const
@@ -751,8 +749,9 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 	CItemContainer *pPack = GetPack();
 	if ( pPack )
 	{
-		for ( CItem *pItem = pPack->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+		for (CSObjContRec* pObjRec : *pPack)
 		{
+			CItem* pItem = static_cast<CItem*>(pObjRec);
 			if ( !pItem->IsTypeSpellbook() )
 				continue;
             // Found a book, let's find each magic school's offsets to search for the desired spell.

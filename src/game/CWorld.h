@@ -6,6 +6,7 @@
 #ifndef _INC_CWORLD_H
 #define _INC_CWORLD_H
 
+#include "../common/sphere_library/CSObjCont.h"
 #include "../common/sphere_library/CSObjList.h"
 #include "../common/CScript.h"
 #include "../common/CUID.h"
@@ -55,8 +56,9 @@ public:
 	//int m_iUIDIndexBase;		// The start of the uid range that i will allocate from.
 	//int m_iUIDIndexMaxQty;	// The max qty of UIDs i can allocate.
 
-	CSObjList m_ObjNew;			// Obj created but not yet placed in the world.
-	CSObjList m_ObjDelete;		// Objects to be deleted.
+	CSObjCont m_ObjNew;			// Obj created but not yet placed in the world.
+	CSObjCont m_ObjDelete;		// Objects to be deleted.
+	CSObjList m_ObjSpecialDelete;
 
 	// Background save. Does this belong here ?
 	CScript m_FileData;			// Save or Load file.

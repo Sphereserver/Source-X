@@ -173,29 +173,30 @@ void CSector::GoSleep()
     const ProfileTask charactersTask(PROFILE_TIMERS);
     CTimedObject::GoSleep();
 
-    CChar * pCharNext = nullptr;
-    CChar * pChar = static_cast <CChar*>(m_Chars_Active.GetHead());
-    for (; pChar != nullptr; pChar = pCharNext)
-    {
-		pCharNext = pChar->GetNext();
-        if (!pChar->IsSleeping())
+	for (CSObjContRec* pObjRec : m_Chars_Active)
+	{
+		CChar* pChar = static_cast<CChar*>(pObjRec);
+		const bool fSleeping = pChar->IsSleeping();
+		ASSERT(!pChar->IsDisconnected());
+        if (!fSleeping)
             pChar->GoSleep();
     }
 
-    CItem * pItemNext = nullptr;
-    CItem * pItem = static_cast <CItem*>(m_Items_Timer.GetHead());
-    for (; pItem != nullptr; pItem = pItemNext)
-    {
-		pItemNext = pItem->GetNext();
-        if (!pItem->IsSleeping())
+	for (CSObjContRec* pObjRec : m_Items_Timer)
+	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
+		const bool fSleeping = pItem->IsSleeping();
+		ASSERT(!fSleeping);
+        if (!fSleeping)
 			pItem->GoSleep();
     }
-    pItemNext = nullptr;
-    pItem = static_cast <CItem*>(m_Items_Inert.GetHead());
-    for (; pItem != nullptr; pItem = pItemNext)
-    {
-        pItemNext = pItem->GetNext();
-		if (!pItem->IsSleeping())
+
+	for (CSObjContRec* pObjRec : m_Items_Inert)
+	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
+		const bool fSleeping = pItem->IsSleeping();
+		ASSERT(fSleeping);
+		if (!fSleeping)
 	        pItem->GoSleep();
     }
 }
@@ -206,36 +207,39 @@ void CSector::GoAwake()
     const ProfileTask charactersTask(PROFILE_TIMERS);
     CTimedObject::GoAwake();  // Awake it first, otherwise other things won't work.
 
-    CChar * pCharNext = nullptr;
-    CChar * pChar = static_cast <CChar*>(m_Chars_Active.GetHead());
-    for (; pChar != nullptr; pChar = pCharNext)
-    {
-        pCharNext = pChar->GetNext();
-        if (pChar->IsSleeping())
-            pChar->GoAwake();
-    }
+	for (CSObjContRec* pObjRec : m_Chars_Active)
+	{
+		CChar* pChar = static_cast<CChar*>(pObjRec);
+		const bool fSleeping = pChar->IsSleeping();
+		ASSERT(!pChar->IsDisconnected());
+		if (fSleeping)
+			pChar->GoAwake();
+	}
 
-    pChar = static_cast<CChar*>(m_Chars_Disconnect.GetHead());
-    for (; pChar != nullptr; pChar = pCharNext)
-    {
-        pCharNext = pChar->GetNext();
-        if (pChar->IsSleeping())
-            pChar->GoAwake();
-    }
+	for (CSObjContRec* pObjRec : m_Chars_Disconnect)
+	{
+		CChar* pChar = static_cast<CChar*>(pObjRec);
+		const bool fSleeping = pChar->IsSleeping();
+		ASSERT(pChar->IsDisconnected());
+		if (fSleeping)
+			pChar->GoAwake();
+	}
 
-    CItem * pItemNext = nullptr;
-    CItem * pItem = static_cast <CItem*>(m_Items_Timer.GetHead());
-    for (; pItem != nullptr; pItem = pItemNext)
-    {
-        pItemNext = pItem->GetNext();
-		if (pItem->IsSleeping())
+	for (CSObjContRec* pObjRec : m_Items_Timer)
+	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
+		const bool fSleeping = pItem->IsSleeping();
+		ASSERT(!fSleeping);
+		if (fSleeping)
         	pItem->GoAwake();
     }
-    pItem = static_cast <CItem*>(m_Items_Inert.GetHead());
-    for (; pItem != nullptr; pItem = pItemNext)
-    {
-        pItemNext = pItem->GetNext();
-        if (pItem->IsSleeping())
+
+	for (CSObjContRec* pObjRec : m_Items_Inert)
+	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
+		const bool fSleeping = pItem->IsSleeping();
+		ASSERT(fSleeping);
+        if (fSleeping)
 			pItem->GoAwake();
     }
 
@@ -247,7 +251,7 @@ void CSector::GoAwake()
     static CSector *pCentral = nullptr;   // do this only for the awaken sector
     if (!pCentral)
     {
-        pCentral = this;  
+        pCentral = this;
         for (int i = 0; i < (int)DIR_QTY; ++i)
         {
             CSector *pSector = GetAdjacentSector((DIR_TYPE)i);
@@ -275,7 +279,7 @@ bool CSector::r_LoadVal( CScript &s )
 			return true;
 		case SC_LIGHT:
 			if ( g_Cfg.m_bAllowLightOverride )
-				SetLight( (s.HasArgs()) ? s.GetArgVal() : -1 );
+				SetLight( s.HasArgs() ? s.GetArgVal() : -1 );
 			else
 				g_Log.EventWarn("AllowLightOverride flag is disabled in sphere.ini, so sector's LIGHT property wasn't set\n");
 			return true;
@@ -283,10 +287,10 @@ bool CSector::r_LoadVal( CScript &s )
 			SetWeatherChance( true, s.HasArgs() ? s.GetArgVal() : -1 );
 			return true;
 		case SC_SEASON:
-			SetSeason(s.HasArgs() ? static_cast<SEASON_TYPE>(s.GetArgVal()) : SEASON_Summer);
+			SetSeason(s.HasArgs() ? SEASON_TYPE(s.GetArgVal()) : SEASON_Summer);
 			return (true);
 		case SC_WEATHER:
-			SetWeather(s.HasArgs() ? static_cast<WEATHER_TYPE>(s.GetArgVal()) : WEATHER_DRY);
+			SetWeather(s.HasArgs() ? WEATHER_TYPE(s.GetArgVal()) : WEATHER_DRY);
 			return true;
 	}
 	EXC_CATCH;
@@ -350,17 +354,17 @@ bool CSector::r_Verb( CScript & s, CTextConsole * pSrc )
 				g_Log.EventWarn("AllowLightOverride flag is disabled in sphere.ini, so sector's LIGHT property wasn't set\n");
 			break;
 		case SEV_RAIN:
-			SetWeather(s.HasArgs() ? static_cast<WEATHER_TYPE>(s.GetArgVal()) : WEATHER_RAIN);
+			SetWeather(s.HasArgs() ? WEATHER_TYPE(s.GetArgVal()) : WEATHER_RAIN);
 			break;
 		case SEV_RESPAWN:
-			( toupper( s.GetArgRaw()[0] ) == 'A' ) ? g_World.RespawnDeadNPCs() : RespawnDeadNPCs();
+			( toupper(s.GetArgRaw()[0]) == 'A' ) ? g_World.RespawnDeadNPCs() : RespawnDeadNPCs();
 			break;
 		case SEV_RESTOCK:	// x
 			// set restock time of all vendors in World, set the respawn time of all spawns in World.
-			( toupper( s.GetArgRaw()[0] ) == 'A' ) ? g_World.Restock() : Restock();
+			( toupper(s.GetArgRaw()[0]) == 'A' ) ? g_World.Restock() : Restock();
 			break;
 		case SEV_SEASON:
-			SetSeason(static_cast<SEASON_TYPE>(s.GetArgVal()));
+			SetSeason(SEASON_TYPE(s.GetArgVal()));
 			break;
         case SEV_SLEEP:
             {
@@ -382,7 +386,7 @@ bool CSector::r_Verb( CScript & s, CTextConsole * pSrc )
 			SetWeather( WEATHER_SNOW );
 			break;
 		default:
-			return( CScriptObj::r_Verb( s, pSrc ));
+			return CScriptObj::r_Verb( s, pSrc );
 	}
 	return true;
 	EXC_CATCH;
@@ -401,21 +405,21 @@ void CSector::r_Write()
 	CPointMap pt = GetBasePoint();
 
 	m_fSaveParity = g_World.m_fSaveParity;
-	bool bHeaderCreated = false;
+	bool fHeaderCreated = false;
 
 	if ( m_dwFlags > 0)
 	{
 		g_World.m_FileWorld.WriteSection("SECTOR %d,%d,0,%d", pt.m_x, pt.m_y, pt.m_map );
 		g_World.m_FileWorld.WriteKeyHex("FLAGS", m_dwFlags);
-		bHeaderCreated = true;
+		fHeaderCreated = true;
 	}
 
 	if (g_Cfg.m_bAllowLightOverride && IsLightOverriden())
 	{
-		if ( bHeaderCreated == false )
+		if (fHeaderCreated == false )
 		{
 			g_World.m_FileWorld.WriteSection("SECTOR %d,%d,0,%d", pt.m_x, pt.m_y, pt.m_map);
-			bHeaderCreated = true;
+			fHeaderCreated = true;
 		}
 
 		g_World.m_FileWorld.WriteKeyVal("LIGHT", GetLight());
@@ -423,10 +427,10 @@ void CSector::r_Write()
 
 	if (!g_Cfg.m_fNoWeather && (IsRainOverriden() || IsColdOverriden()))
 	{
-		if ( bHeaderCreated == false )
+		if (fHeaderCreated == false )
 		{
 			g_World.m_FileWorld.WriteSection("SECTOR %d,%d,0,%d", pt.m_x, pt.m_y, pt.m_map);
-			bHeaderCreated = true;
+			fHeaderCreated = true;
 		}
 
 		if ( IsRainOverriden() )
@@ -438,32 +442,30 @@ void CSector::r_Write()
 
 	if (GetSeason() != SEASON_Summer)
 	{
-		if ( bHeaderCreated == false )
+		if (fHeaderCreated == false )
 			g_World.m_FileWorld.WriteSection("SECTOR %d,%d,0,%d", pt.m_x, pt.m_y, pt.m_map);
 
 		g_World.m_FileWorld.WriteKeyVal("SEASON", GetSeason());
 	}
 
 	// Chars in the sector.
-	CChar *pCharNext = nullptr;
-	for ( CChar *pChar = static_cast<CChar*>(m_Chars_Active.GetHead()); pChar != nullptr; pChar = pCharNext )
+	for (CSObjContRec* pObjRec : m_Chars_Active.GetIterationSafeCont())
 	{
-		pCharNext = pChar->GetNext();
+		CChar* pChar = static_cast<CChar*>(pObjRec);
 		pChar->r_WriteParity(pChar->m_pPlayer ? g_World.m_FilePlayers : g_World.m_FileWorld);
 	}
 
 	// Inactive Client Chars, ridden horses and dead NPCs (NOTE: Push inactive player chars out to the account files here?)
-	for ( CChar *pChar = static_cast<CChar*>(m_Chars_Disconnect.GetHead()); pChar != nullptr; pChar = pCharNext )
+	for (CSObjContRec* pObjRec : m_Chars_Disconnect.GetIterationSafeCont())
 	{
-		pCharNext = pChar->GetNext();
+		CChar* pChar = static_cast<CChar*>(pObjRec);
 		pChar->r_WriteParity(pChar->m_pPlayer ? g_World.m_FilePlayers : g_World.m_FileWorld);
 	}
 
 	// Items on the ground.
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = static_cast<CItem*>(m_Items_Inert.GetHead()); pItem != nullptr; pItem = pItemNext )
+	for (CSObjContRec* pObjRec : m_Items_Inert.GetIterationSafeCont())
 	{
-		pItemNext = pItem->GetNext();
+		CItem* pItem = static_cast<CItem*>(pObjRec);
         if (pItem->IsTypeMulti())
         {
             pItem->r_WriteSafe(g_World.m_FileMultis);
@@ -474,9 +476,9 @@ void CSector::r_Write()
         }
 	}
 
-	for ( CItem *pItem = static_cast<CItem*>(m_Items_Timer.GetHead()); pItem != nullptr; pItem = pItemNext )
+	for (CSObjContRec* pObjRec : m_Items_Timer.GetIterationSafeCont())
 	{
-		pItemNext = pItem->GetNext();
+		CItem* pItem = static_cast<CItem*>(pObjRec);
         if (pItem->IsTypeMulti())
         {
             pItem->r_WriteSafe(g_World.m_FileMultis);
@@ -491,18 +493,18 @@ void CSector::r_Write()
 bool CSector::v_AllChars( CScript & s, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSector::v_AllChars");
+
 	CScript script(s.GetArgStr());
 	script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
 	script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
-	CChar * pChar = nullptr;
+
 	bool fRet = false;
 
 	// Loop through all the characters in m_Chars_Active.
 	// We should start at the end incase some are removed during the loop.
-	size_t i = m_Chars_Active.GetCount();
-	while ( i > 0 )
+	for (CSObjContRec* pObjRec : m_Chars_Active.GetIterationSafeContReverse())
 	{
-		pChar = static_cast <CChar*>(m_Chars_Active.GetAt(--i));
+		CChar* pChar = static_cast<CChar*>(pObjRec);
 
 		// Check that a character was returned and keep looking if not.
 		if (pChar == nullptr)
@@ -520,15 +522,14 @@ bool CSector::v_AllCharsIdle( CScript & s, CTextConsole * pSrc )
 	CScript script(s.GetArgStr());
 	script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
 	script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
-	CChar * pChar = nullptr;
+
 	bool fRet = false;
 
 	// Loop through all the characters in m_Chars_Disconnect.
 	// We should start at the end incase some are removed during the loop.
-	size_t i = m_Chars_Disconnect.GetCount();
-	while ( i > 0 )
+	for (CSObjContRec* pObjRec : m_Chars_Disconnect.GetIterationSafeContReverse())
 	{
-		pChar = static_cast <CChar*>(m_Chars_Disconnect.GetAt(--i));
+		CChar* pChar = static_cast<CChar*>(pObjRec);
 
 		// Check that a character was returned and keep looking if not.
 		if (pChar == nullptr)
@@ -546,16 +547,14 @@ bool CSector::v_AllItems( CScript & s, CTextConsole * pSrc )
 	CScript script(s.GetArgStr());
 	script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
 	script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
-	CItem * pItem = nullptr;
+
 	bool fRet = false;
 
 	// Loop through all the items in m_Items_Timer.
 	// We should start at the end incase items are removed during the loop.
-	size_t i = m_Items_Timer.GetCount();
-	while ( i > 0 )
+	for (CSObjContRec* pObjRec : m_Items_Timer.GetIterationSafeContReverse())
 	{
-		// Get the next item
-		pItem = static_cast <CItem*>(m_Items_Timer.GetAt(--i));
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 
 		// Check that an item was returned and keep looking if not.
 		if (pItem == nullptr)
@@ -567,11 +566,9 @@ bool CSector::v_AllItems( CScript & s, CTextConsole * pSrc )
 
 	// Loop through all the items in m_Items_Inert.
 	// We should start at the end incase items are removed during the loop.
-	i = m_Items_Inert.GetCount();
-	while ( i > 0 )
+	for (CSObjContRec* pObjRec : m_Items_Inert.GetIterationSafeContReverse())
 	{
-		// Get the next item.
-		pItem = static_cast <CItem*>(m_Items_Inert.GetAt(--i));
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 
 		// Check that an item was returned and keep looking if not.
 		if (pItem == nullptr)
@@ -586,25 +583,25 @@ bool CSector::v_AllItems( CScript & s, CTextConsole * pSrc )
 bool CSector::v_AllClients( CScript & s, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSector::v_AllClients");
+
 	CScript script(s.GetArgStr());
 	script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
 	script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
-	CChar * pChar = nullptr;
+
 	bool fRet = false;
 
 	// Loop through all the characters in m_Chars_Active.
 	// We should start at the end incase some are removed during the loop.
-	size_t i = m_Chars_Active.GetCount();
-	while ( i > 0 )
+	for (CSObjContRec* pObjRec : m_Chars_Active.GetIterationSafeContReverse())
 	{
-		pChar = static_cast <CChar*>(m_Chars_Active.GetAt(--i));
+		CChar* pChar = static_cast<CChar*>(pObjRec);
 
 		// Check that a character was returned and keep looking if not.
 		if (pChar == nullptr)
 			continue;
 
 		// Check that the character is a client (we only want to affect clients with this)
-		if ( ! pChar->IsClient())
+		if (!pChar->IsClient())
 			continue;
 
 		// Execute the verb on the client
@@ -617,7 +614,7 @@ int CSector::GetLocalTime() const
 {
 	ADDTOCALLSTACK("CSector::GetLocalTime");
 	//	Get local time of the day (in minutes)
-	CPointMap pt = GetBasePoint();
+	const CPointMap pt(GetBasePoint());
 	int64 iLocalTime = CWorldGameTime::GetCurrentTimeInGameMinutes();
 
 	if ( !g_Cfg.m_bAllowLightOverride )
@@ -627,14 +624,14 @@ int CSector::GetLocalTime() const
 	else
 	{
 		// Time difference between adjacent sectors in minutes
-		int iSectorTimeDiff = (24*60) / g_MapList.GetSectorCols(pt.m_map);
+		const int iSectorTimeDiff = (24*60) / g_MapList.GetSectorCols(pt.m_map);
 
 		// Calculate the # of columns between here and Castle Britannia ( x = 1400 )
 		//int iSectorOffset = ( pt.m_x / g_MapList.GetX(pt.m_map) ) - ( (24*60) / g_MapList.GetSectorSize(pt.m_map));
-		int iSectorOffset = ( pt.m_x / g_MapList.GetSectorSize(pt.m_map));
+		const int iSectorOffset = ( pt.m_x / g_MapList.GetSectorSize(pt.m_map));
 
 		// Calculate the time offset from global time
-		int iTimeOffset = iSectorOffset * iSectorTimeDiff;
+		const int iTimeOffset = iSectorOffset * iSectorTimeDiff;
 
 		// Calculate the local time
 		iLocalTime += iTimeOffset;
@@ -656,21 +653,21 @@ bool CSector::IsMoonVisible(uint iPhase, int iLocalTime) const
 	switch (iPhase)
 	{
 		case 0:	// new moon
-			return( (iLocalTime > 360) && (iLocalTime < 1080));
+			return ( (iLocalTime > 360) && (iLocalTime < 1080) );
 		case 1:	// waxing crescent
-			return( (iLocalTime > 540) && (iLocalTime < 1270));
+			return ( (iLocalTime > 540) && (iLocalTime < 1270) );
 		case 2:	// first quarter
-			return( iLocalTime > 720 );
+			return ( iLocalTime > 720 );
 		case 3:	// waxing gibbous
-			return( (iLocalTime < 180) || (iLocalTime > 900));
+			return ( (iLocalTime < 180) || (iLocalTime > 900) );
 		case 4:	// full moon
-			return( (iLocalTime < 360) || (iLocalTime > 1080));
+			return ( (iLocalTime < 360) || (iLocalTime > 1080) );
 		case 5:	// waning gibbous
-			return( (iLocalTime < 540) || (iLocalTime > 1270));
+			return ( (iLocalTime < 540) || (iLocalTime > 1270) );
 		case 6:	// third quarter
-			return( iLocalTime < 720 );
+			return ( iLocalTime < 720 );
 		case 7:	// waning crescent
-			return( (iLocalTime > 180) && (iLocalTime < 900));
+			return ( (iLocalTime > 180) && (iLocalTime < 900) );
 		default: // How'd we get here?
 			return false;
 	}
@@ -685,7 +682,7 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 		return m_Env.m_Light;
 
 	if ( IsInDungeon() )
-		return (uchar)(g_Cfg.m_iLightDungeon);
+		return (uchar)g_Cfg.m_iLightDungeon;
 
 	int localtime = GetLocalTime();
 
@@ -711,8 +708,8 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 		return (uchar)(iTargLight);
 	}
 
-	int hour = ( localtime / ( 60)) % 24;
-	bool fNight = ( hour < 6 || hour > 12+8 );	// Is it night or day ?
+	const int hour = ( localtime / ( 60)) % 24;
+	const bool fNight = ( hour < 6 || hour > 12+8 );	// Is it night or day ?
 	int iTargLight = (fNight) ? g_Cfg.m_iLightNight : g_Cfg.m_iLightDay;	// Target light level.
 
 	// Check for clouds...if it is cloudy, then we don't even need to check for the effects of the moons...
@@ -791,9 +788,9 @@ void CSector::SetLightNow( bool fFlash )
 	ADDTOCALLSTACK("CSector::SetLightNow");
 	// Set the light level for all the CClients here.
 
-	CChar * pChar = static_cast <CChar*>( m_Chars_Active.GetHead());
-	for ( ; pChar != nullptr; pChar = pChar->GetNext())
+	for (CSObjContRec* pObjRec : m_Chars_Active)
 	{
+		CChar* pChar = static_cast<CChar*>(pObjRec);
 		if ( pChar->IsStatFlag( STATF_DEAD | STATF_NIGHTSIGHT ))
 			continue;
 
@@ -891,9 +888,9 @@ void CSector::SetWeather( WEATHER_TYPE w )
 
 	m_Env.m_Weather = w;
 
-	CChar * pChar = static_cast <CChar*>( m_Chars_Active.GetHead());
-	for ( ; pChar != nullptr; pChar = pChar->GetNext())
+	for (CSObjContRec* pObjRec : m_Chars_Active)
 	{
+		CChar* pChar = static_cast<CChar*>(pObjRec);
 		if ( pChar->IsClient())
 			pChar->GetClient()->addWeather( w );
 
@@ -912,9 +909,9 @@ void CSector::SetSeason( SEASON_TYPE season )
 
 	m_Env.m_Season = season;
 
-	CChar * pChar = static_cast <CChar*>( m_Chars_Active.GetHead());
-	for ( ; pChar != nullptr; pChar = pChar->GetNext())
+	for (CSObjContRec* pObjRec : m_Chars_Active)
 	{
+		CChar* pChar = static_cast<CChar*>(pObjRec);
 		if ( pChar->IsClient() )
 			pChar->GetClient()->addSeason(season);
 
@@ -956,18 +953,16 @@ void CSector::OnHearItem( CChar * pChar, lpctstr pszText )
 
 	ASSERT(m_ListenItems);
 
-	CItem * pItemNext;
-	CItem * pItem = static_cast <CItem*>( m_Items_Timer.GetHead());
-	for ( ; pItem != nullptr; pItem = pItemNext )
+	for (CSObjContRec* pObjRec : m_Items_Timer.GetIterationSafeContReverse())
 	{
-		pItemNext = pItem->GetNext();
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		pItem->OnHear( pszText, pChar );
 	}
-	pItem = static_cast <CItem*>( m_Items_Inert.GetHead());
-	for ( ; pItem != nullptr; pItem = pItemNext )
+
+	for (CSObjContRec* pObjRec : m_Items_Inert.GetIterationSafeContReverse())
 	{
-		pItemNext = pItem->GetNext();
-		pItem->OnHear( pszText, pChar );
+		CItem* pItem = static_cast<CItem*>(pObjRec);
+		pItem->OnHear(pszText, pChar);
 	}
 }
 
@@ -1007,7 +1002,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
 	// Move a CChar into this CSector.
     ASSERT(pChar);
 
-	if ( IsCharActiveIn(pChar) )
+	if ( IsCharActiveIn(pChar) || IsCharDisconnectedIn(pChar) )
 		return false;	// already here
 
 	// Check my save parity vs. this sector's
@@ -1031,7 +1026,16 @@ bool CSector::MoveCharToSector( CChar * pChar )
 		}
 	}
 
-    m_Chars_Active.AddCharActive(pChar);	// remove from previous spot.
+	// Remove from previous spot.
+	if (pChar->IsDisconnected())
+	{
+		m_Chars_Disconnect.AddCharDisconnected(pChar);
+	}
+	else
+	{
+		m_Chars_Active.AddCharActive(pChar);
+	}
+
     if (IsSleeping())
     {
         CClient *pClient = pChar->GetClient();
@@ -1052,7 +1056,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
             pChar->GoAwake();
         }
     }
-	
+
 	return true;
 }
 
@@ -1065,7 +1069,7 @@ bool CSector::CanSleep(bool fCheckAdjacents) const
         return false;	// has at least one client, no sleep
 	if ( IsFlagSet(SECF_InstaSleep) )
 		return true;	// no active client inside, instant sleep
-    
+
     if (fCheckAdjacents)
     {
         for (int i = 0; i < (int)DIR_QTY; ++i)// Check for adjacent's sectors sleeping allowance.
@@ -1106,10 +1110,10 @@ void CSector::Close()
 {
 	ADDTOCALLSTACK("CSector::Close");
 	// Clear up all dynamic data for this sector.
-	m_Items_Timer.Clear();
-	m_Items_Inert.Clear();
-	m_Chars_Active.Clear();
-	m_Chars_Disconnect.Clear();
+	m_Items_Timer.ClearContainer();
+	m_Items_Inert.ClearContainer();
+	m_Chars_Active.ClearContainer();
+	m_Chars_Disconnect.ClearContainer();
 
 	// These are resource type things.
 	// m_Teleports.RemoveAll();
@@ -1123,18 +1127,16 @@ void CSector::RespawnDeadNPCs()
 	if ( !g_MapList.IsMapSupported(m_map) )
         return;
 
-	// Respawn dead NPC's
-	CChar * pCharNext;
-	CChar * pChar = static_cast <CChar *>( m_Chars_Disconnect.GetHead());
-	for ( ; pChar != nullptr; pChar = pCharNext )
+	// Respawn dead NPCs
+	size_t sizeStart = m_Chars_Active.GetContentCount();
+	for (size_t i = 0; i < sizeStart; )
 	{
-		pCharNext = pChar->GetNext();
-		if ( ! pChar->m_pNPC )
+		CChar* pChar = static_cast <CChar*>(m_Chars_Active.GetContentIndex(i));
+		if (!pChar->m_pNPC || !pChar->m_ptHome.IsValidPoint() || !pChar->IsStatFlag(STATF_DEAD))
+		{
+			++i;
 			continue;
-		if ( ! pChar->m_ptHome.IsValidPoint())
-			continue;
-		if ( ! pChar->IsStatFlag( STATF_DEAD ))
-			continue;
+		}
 
 		// Restock them with npc stuff.
 		pChar->NPC_LoadScript(true);
@@ -1144,6 +1146,10 @@ void CSector::RespawnDeadNPCs()
 		pChar->MoveNear( pChar->m_ptHome, uiDist );
 		pChar->NPC_CreateTrigger(); //Removed from NPC_LoadScript() and triggered after char placement
 		pChar->Spell_Resurrection();
+
+		size_t sizeCur = m_Items_Inert.GetContentCount();
+		ASSERT(sizeCur != sizeStart);
+		sizeStart = sizeCur;
 	}
 }
 
@@ -1154,22 +1160,20 @@ void CSector::Restock()
     // set restock time of all vendors in Sector.
     // set the respawn time of all spawns in Sector.
 
-    CChar * pCharNext;
-    CChar * pChar = dynamic_cast <CChar*>(m_Chars_Active.GetHead());
-    for (; pChar; pChar = pCharNext)
-    {
-        pCharNext = pChar->GetNext();
+	for (CSObjContRec* pObjRec : m_Chars_Active)
+	{
+		CChar* pChar = static_cast<CChar*>(pObjRec);
         if (pChar->m_pNPC)
         {
             pChar->NPC_Vendor_Restock(true);
         }
     }
 
-    CItem * pItemNext;
-    CItem * pItem = dynamic_cast <CItem*>(m_Items_Timer.GetHead());
-    for (; pItem; pItem = pItemNext)
-    {
-        pItemNext = pItem->GetNext();
+	size_t i = m_Items_Timer.GetContentCount();
+	while (i > 0)
+	{
+		ASSERT(i < m_Items_Timer.GetContentCount());
+		CItem* pItem = static_cast<CItem*>(m_Items_Timer.GetContentIndex(--i));
         if (pItem->IsType(IT_SPAWN_ITEM) || pItem->IsType(IT_SPAWN_CHAR) || pItem->IsType(IT_SPAWN_CHAMPION))
         {
             CCSpawn *pSpawn = pItem->GetSpawn();
@@ -1214,7 +1218,7 @@ bool CSector::OnTick()
 
 	EXC_SET_BLOCK("sector sleeping?");
 	// Put the sector to sleep if no clients been here in a while.
-    const bool fCanSleep = CanSleep(true);	
+    const bool fCanSleep = CanSleep(true);
 	if (fCanSleep)
 	{
         if (!IsSleeping())
@@ -1286,14 +1290,14 @@ bool CSector::OnTick()
     // Check environ changes and inform clients of it.
 	const ProfileTask charactersTask(PROFILE_CHARS);
 
-	CChar * pCharNext = nullptr;
-	CChar * pChar = static_cast <CChar*>( m_Chars_Active.GetHead());
-	for ( ; pChar != nullptr; pChar = pCharNext )
+	size_t i = m_Chars_Active.GetContentCount();
+	while (i > 0)
 	{
+		ASSERT(i <= m_Chars_Active.GetContentCount());
+		CChar* pChar = static_cast<CChar*>(m_Chars_Active.GetContentIndex(--i));
 		EXC_TRYSUB("TickChar");
 
         ASSERT(pChar);
-		pCharNext = pChar->GetNext();
 
 		if (fEnvironChange && ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) ))
 			pChar->OnTrigger(CTRIG_EnvironChange, pChar);
@@ -1404,7 +1408,7 @@ void CSector::LightFlash()
 
 size_t CSector::GetItemComplexity() const
 {
-	return m_Items_Timer.GetCount() + m_Items_Inert.GetCount();
+	return m_Items_Timer.GetContentCount() + m_Items_Inert.GetContentCount();
 }
 
 bool CSector::IsItemInSector( const CItem * pItem ) const
@@ -1444,12 +1448,12 @@ bool CSector::IsCharDisconnectedIn( const CChar * pChar ) //const
 
 size_t CSector::GetCharComplexity() const
 {
-	return( m_Chars_Active.GetCount());
+	return( m_Chars_Active.GetContentCount());
 }
 
 size_t CSector::GetInactiveChars() const
 {
-	return( m_Chars_Disconnect.GetCount());
+	return( m_Chars_Disconnect.GetContentCount());
 }
 
 size_t CSector::GetClientsNumber() const

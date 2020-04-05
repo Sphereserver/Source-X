@@ -35,6 +35,7 @@ private: //setting, getting
 public: //setting, getting
 	bool Insert( const char* VarName, const char* VarValue, bool fForceSet = false);
 	CSString Get( const char* VarName );
+	void Clear();
 };
 
 
@@ -55,6 +56,7 @@ private:
 public:
 	CObjBase * Get( ushort Number );
 	bool Insert( ushort Number, CObjBase * pObj, bool fForceSet = false );
+	void Clear();
 };
 
 #endif // _INC_CLOCALVARSEXTRA_H

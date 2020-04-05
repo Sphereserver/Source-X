@@ -137,15 +137,15 @@ private:
 public:
 	CSStringListRec * GetHead() const
 	{
-		return static_cast<CSStringListRec *>( CSObjList::GetHead() );
+		return static_cast<CSStringListRec *>( CSObjList::GetContainerHead() );
 	}
 	void AddHead( lpctstr pszVal )
 	{
-		InsertHead( new CSStringListRec( pszVal ));
+		InsertContentHead( new CSStringListRec( pszVal ));
 	}
 	void AddTail( lpctstr pszVal )
 	{
-		InsertTail( new CSStringListRec( pszVal ));
+		InsertContentTail( new CSStringListRec( pszVal ));
 	}
 };
 

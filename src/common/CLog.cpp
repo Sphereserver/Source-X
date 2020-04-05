@@ -300,7 +300,7 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 				// it's a new day, open a log file with new day name.
 				_Close();	// LINUX should alrady be closed.
 				_OpenLog();
-                Printf("Log date: %s\n", m_dateStamp.Format(nullptr));
+                _Printf("Log date: %s\n", m_dateStamp.Format(nullptr));
 			}
 #ifndef _WIN32
 			else

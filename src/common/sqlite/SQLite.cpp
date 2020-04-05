@@ -58,7 +58,7 @@ bool CSQLite::IsOpen()
 
 int CSQLite::QuerySQL( lpctstr strSQL,  CVarDefMap & mapQueryResult )
 {
-	mapQueryResult.Empty();
+	mapQueryResult.Clear();
 	mapQueryResult.SetNumNew("NUMROWS", 0);
 
 	TablePtr retTable = QuerySQLPtr(strSQL);

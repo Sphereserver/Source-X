@@ -1533,8 +1533,8 @@ void CChar::NPC_Act_Looting()
 	}
 
 	CItemCorpse * pCorpse = dynamic_cast<CItemCorpse *>(pItem);
-	if ( pCorpse && pCorpse->GetCount() > 0 )
-		pItem = static_cast<CItem*>( pCorpse->GetAt(Calc_GetRandVal( (int)pCorpse->GetCount() )) );
+	if ( pCorpse && !pCorpse->IsContainerEmpty() )
+		pItem = static_cast<CItem*>( pCorpse->GetContentIndex(Calc_GetRandVal( (int)pCorpse->GetContentCount() )) );
 
 	if ( !CanTouch(pItem) || !CanMove(pItem) || !CanCarry(pItem) )
 	{
@@ -1696,8 +1696,9 @@ bool CChar::NPC_Act_Food()
 	CItemContainer	*pPack = GetPack();
 	if ( pPack )
 	{
-		for ( CItem *pFood = pPack->GetContentHead(); pFood != nullptr; pFood = pFood->GetNext() )
+		for (CSObjContRec* pObjRec : *pPack)
 		{
+			CItem* pFood = static_cast<CItem*>(pObjRec);
 			// I have some food personaly, so no need to search for something
 			if ( pFood->IsType(IT_FOOD) )
 			{
@@ -2389,8 +2390,9 @@ void CChar::NPC_Food()
 	if ( pPack )
 	{
 		EXC_SET_BLOCK("searching in pack");
-		for ( CItem *pFood = pPack->GetContentHead(); pFood != nullptr; pFood = pFood->GetNext() )
+		for (CSObjContRec* pObjRec : *pPack)
 		{
+			CItem* pFood = static_cast<CItem*>(pObjRec);
 			// i have some food personaly, so no need to search for something
 			if ( pFood->IsType(IT_FOOD) )
 			{

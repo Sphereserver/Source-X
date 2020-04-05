@@ -120,7 +120,7 @@ CVarDefMap & CVarDefMap::operator = ( const CVarDefMap & array )
 
 CVarDefMap::~CVarDefMap()
 {
-	Empty();
+	Clear();
 }
 
 lpctstr CVarDefMap::FindValStr( lpctstr pVal ) const
@@ -216,7 +216,7 @@ void CVarDefMap::DeleteKey( lpctstr key )
 		DeleteAtKey(key);
 }
 
-void CVarDefMap::Empty()
+void CVarDefMap::Clear()
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::Empty");
 	iterator it = m_Container.begin();
@@ -236,7 +236,7 @@ void CVarDefMap::Copy( const CVarDefMap * pArray )
 	if ( !pArray || pArray == this )
 		return;
 
-	Empty();
+	Clear();
 	if ( pArray->GetCount() <= 0 )
 		return;
 
@@ -607,7 +607,7 @@ void CVarDefMap::ClearKeys(lpctstr mask)
 	}
 	else
 	{
-		Empty();
+		Clear();
 	}
 }
 
@@ -621,7 +621,7 @@ bool CVarDefMap::r_LoadVal( CScript & s )
 }
 */
 
-void CVarDefMap::r_WritePrefix( CScript & s, lpctstr pszPrefix, lpctstr pszKeyExclude )
+void CVarDefMap::r_WritePrefix( CScript & s, lpctstr pszPrefix, lpctstr pszKeyExclude ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::r_WritePrefix");
     if (m_Container.empty())

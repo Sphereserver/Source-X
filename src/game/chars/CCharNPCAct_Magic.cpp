@@ -97,8 +97,9 @@ void CChar::NPC_GetAllSpellbookSpells()		// Add all spells found on spellbooks t
     ASSERT(m_pNPC);
 
     //	search for suitable book in hands first
-    for (CItem *pBook = GetContentHead(); pBook != nullptr; pBook = pBook->GetNext())
+    for (CSObjContRec* pObjRec : *this)
     {
+        CItem* pBook = static_cast<CItem*>(pObjRec);
         if (pBook->IsTypeSpellbook())
             NPC_AddSpellsFromBook(pBook);
     }
@@ -107,8 +108,9 @@ void CChar::NPC_GetAllSpellbookSpells()		// Add all spells found on spellbooks t
     CItemContainer *pPack = GetPack();
     if (pPack)
     {
-        for (CItem *pBook = pPack->GetContentHead(); pBook != nullptr; pBook = pBook->GetNext())
+        for (CSObjContRec* pObjRec : *pPack)
         {
+            CItem* pBook = static_cast<CItem*>(pObjRec);
             if (pBook->IsTypeSpellbook())
                 NPC_AddSpellsFromBook(pBook);
         }

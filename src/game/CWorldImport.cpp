@@ -118,7 +118,7 @@ void CImportFile::ImportFix()
 	int iRemoved = 0;
 
 	CImportSer * pSerNext;
-	m_pCurSer = static_cast <CImportSer*> ( m_ListSer.GetHead());
+	m_pCurSer = static_cast <CImportSer*> ( m_ListSer.GetContainerHead());
 	for ( ; m_pCurSer != nullptr; m_pCurSer = pSerNext )
 	{
 		pSerNext = static_cast <CImportSer*> ( m_pCurSer->GetNext());
@@ -177,7 +177,7 @@ void CImportFile::ImportFix()
 		}
 
 		// Find it's container.
-		CImportSer* pSerCont = static_cast <CImportSer*> ( m_ListSer.GetHead());
+		CImportSer* pSerCont = static_cast <CImportSer*> ( m_ListSer.GetContainerHead());
 		CObjBase * pObjCont = nullptr;
 		for ( ; pSerCont != nullptr; pSerCont = static_cast <CImportSer*> ( pSerCont->GetNext()))
 		{
@@ -200,8 +200,11 @@ void CImportFile::ImportFix()
 		}
 
 		// Is it a dupe in the container or equipped ?
-		for ( CItem *pItem = dynamic_cast<CContainer*>(pObjCont)->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+		CContainer* pObjContBase = dynamic_cast<CContainer*>(pObjCont);
+		ASSERT(pObjCont);
+		for (CSObjContRec* pObjRec : *pObjContBase)
 		{
+			CItem* pItem = static_cast<CItem*>(pObjRec);
 			if ( pItemTest == pItem )
 				continue;
 			if ( pItemTest->IsItemEquipped())
@@ -228,7 +231,7 @@ void CImportFile::ImportFix()
 	{
 		DEBUG_ERR(( "Import: removed %d bad items\n", iRemoved ));
 	}
-	m_ListSer.Clear();	// done with the list now.
+	m_ListSer.ClearContainer();	// done with the list now.
 }
 
 bool CImportFile::ImportSCP( CScript & s, word wModeFlags )
@@ -275,7 +278,7 @@ bool CImportFile::ImportSCP( CScript & s, word wModeFlags )
 					return false;
 				m_pCurSer = new CImportSer( s.GetArgVal());
 				m_pCurSer->m_pObj = m_pCurObj;
-				m_ListSer.InsertHead( m_pCurSer );
+				m_ListSer.InsertContentHead( m_pCurSer );
 				continue;
 			}
 
@@ -367,7 +370,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 				break;
 			}
 			m_pCurSer = new CImportSer( dwSerial );
-			m_ListSer.InsertHead( m_pCurSer );
+			m_ListSer.InsertContentHead( m_pCurSer );
 			continue;
 		}
 		if ( s.IsKey("NAME" ))

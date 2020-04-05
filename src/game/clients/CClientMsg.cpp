@@ -55,8 +55,9 @@ void CClient::resendBuffs() const
 	word wStatEffect = 0;
 	word wTimerEffect = 0;
 
-	for ( const CItem *pItem = pChar->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+	for (const CSObjContRec* pObjRec : *pChar)
 	{
+		const CItem* pItem = static_cast<const CItem*>(pObjRec);
 		if ( !pItem->IsType(IT_SPELL) )
 			continue;
 
@@ -1139,7 +1140,7 @@ void CClient::addItemName( CItem * pItem )
 	if ( pCont != nullptr )
 	{
 		// ??? Corpses show hair as an item !!
-		len += sprintf( szName+len, g_Cfg.GetDefaultMsg(DEFMSG_CONT_ITEMS), pCont->GetCount(), pCont->GetTotalWeight() / WEIGHT_UNITS);
+		len += sprintf( szName+len, g_Cfg.GetDefaultMsg(DEFMSG_CONT_ITEMS), pCont->GetContentCount(), pCont->GetTotalWeight() / WEIGHT_UNITS);
 	}
 
 	// obviously damaged ?
@@ -2216,12 +2217,13 @@ void CClient::addCustomSpellbookOpen( CItem * pBook, dword gumpID )
 	if ( !pContainer )
 		return;
 
-	int count=0;
-	for ( CItem *pItem = pContainer->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+	int count = 0;
+	for (CSObjContRec* pObjRec : *pContainer)
 	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( !pItem->IsType( IT_SCROLL ) )
 			continue;
-		count++;
+		++ count;
 	}
 
 	OpenPacketTransaction transaction(this, PacketSend::PRI_NORMAL);
@@ -2666,9 +2668,9 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 		}
 	}
 
-	if ( IsPriv(PRIV_GM_PAGE) && g_World.m_GMPages.GetCount() > 0 )
+	if ( IsPriv(PRIV_GM_PAGE) && !g_World.m_GMPages.IsContainerEmpty() )
 	{
-		sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_GMPAGES), (int)(g_World.m_GMPages.GetCount()), g_Cfg.m_cCommandPrefix);
+		sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_GMPAGES), (int)(g_World.m_GMPages.GetContentCount()), g_Cfg.m_cCommandPrefix);
 		addSysMessage(z);
 	}
 	if ( IsPriv(PRIV_JAILED) )

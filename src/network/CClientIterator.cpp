@@ -6,7 +6,7 @@
 ClientIterator::ClientIterator(const CNetworkManager* network)
 {
     m_network = (network == nullptr ? &g_NetworkManager : network);
-    m_nextClient = static_cast<CClient*> (m_network->m_clients.GetHead());
+    m_nextClient = static_cast<CClient*> (m_network->m_clients.GetContainerHead());
 }
 
 ClientIterator::~ClientIterator(void)

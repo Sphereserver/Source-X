@@ -109,7 +109,7 @@ void CItem::SetComponentOfMulti(const CUID& uidMulti)
 	if (!uidMulti.IsValidUID())
 		m_TagDefs.DeleteKey("MultiComponent");
 	else
-		m_TagDefs.SetNum("MultiComponent", uidMulti.GetObjUID());
+		m_TagDefs.SetNum("MultiComponent", uidMulti.GetObjUID(), false, false);
 }
 
 void CItem::SetLockDownOfMulti(const CUID& uidMulti)
@@ -117,7 +117,7 @@ void CItem::SetLockDownOfMulti(const CUID& uidMulti)
 	if (!uidMulti.IsValidUID())
 		m_TagDefs.DeleteKey("MultiLockDown");
 	else
-		m_TagDefs.SetNum("MultiLockDown", uidMulti.GetObjUID());
+		m_TagDefs.SetNum("MultiLockDown", uidMulti.GetObjUID(), false, false);
 }
 
 CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEMS), CObjBase( true )
@@ -171,10 +171,10 @@ bool CItem::NotifyDelete()
 	return true;
 }
 
-void CItem::Delete(bool bforce)
+bool CItem::Delete(bool bforce)
 {
 	if (( NotifyDelete() == false ) && !bforce)
-		return;
+		return false;
 
     // Remove corpse map waypoint on enhanced clients
     if (IsType(IT_CORPSE) && m_uidLink)
@@ -186,7 +186,7 @@ void CItem::Delete(bool bforce)
         }
     }
 
-	CObjBase::Delete();
+	return CObjBase::Delete();
 }
 
 CItem::~CItem()
@@ -925,8 +925,9 @@ int CItem::FixWeirdness()
                     {
                         CItemContainer* pTradeCont = dynamic_cast<CItemContainer*>(this);
                         ASSERT(pTradeCont);
-                        for (CItem *pItem = pTradeCont->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext())
-                        {
+						for (CSObjContRec* pObjRec : pTradeCont->GetIterationSafeContReverse())
+						{
+							CItem* pItem = static_cast<CItem*>(pObjRec);
                             pCharCont->ItemBounce(pItem, false);
                         }
                     }
@@ -1823,7 +1824,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 			{
 				const CItemStone * pStone = dynamic_cast <const CItemStone*>(this);
 				ASSERT(pStone);
-				len += sprintf( pTemp+len, " (pop:%" PRIuSIZE_T ")", pStone->GetCount());
+				len += sprintf( pTemp+len, " (pop:%" PRIuSIZE_T ")", pStone->GetContentCount());
 			}
 			break;
 

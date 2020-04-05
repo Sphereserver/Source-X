@@ -304,7 +304,7 @@ public:
 public:
 	CChar( CREID_TYPE id );
 	virtual ~CChar(); // Delete character
-	bool DupeFrom( CChar * pChar, bool fNewbieItems);
+	bool DupeFrom(const CChar * pChar, bool fNewbieItems);
 
 private:
 	CChar(const CChar& copy);
@@ -317,7 +317,7 @@ public:
 	// Status and attributes ------------------------------------
 	int IsWeird() const;
 	char GetFixZ( const CPointMap& pt, dword dwBlockFlags = 0);
-	virtual void Delete(bool bforce = false) override;
+	virtual bool Delete(bool bforce = false) override;
 	bool NotifyDelete();
 	bool IsStatFlag( uint64 iStatFlag ) const;
 	void StatFlag_Set(uint64 iStatFlag);
@@ -429,6 +429,8 @@ public:
     ushort GetFame() const;
     void SetFame(ushort uiNewFame);
 
+	void Stat_StrCheckEquip();
+
 	// Location and movement ------------------------------------
 private:
 	bool TeleportToCli( int iType, int iArgs );
@@ -441,7 +443,6 @@ private:
 	bool IsVerticalSpace( const CPointMap& ptDest, bool fForceMount = false ) const;
 
 public:
-	CChar* GetNext() const;
 	const CObjBaseTemplate * GetTopLevelObj() const override;
 	CObjBaseTemplate* GetTopLevelObj() override;
 
@@ -511,11 +512,12 @@ public:
 	int FixWeirdness();
 	void CreateNewCharCheck();
 
-private:
 	// Contents/Carry stuff. ---------------------------------
-	void ContentAdd( CItem * pItem, bool bForceNoStack = false );
+private:
+	virtual void ContentAdd( CItem * pItem, bool bForceNoStack = false ) override;
 protected:
-	void OnRemoveObj( CSObjListRec* pObRec );	// Override this = called when removed from list.
+	virtual void OnRemoveObj( CSObjContRec* pObRec ) override;	// Override this = called when removed from list.
+
 public:
 	bool CanCarry( const CItem * pItem ) const;
 	bool CanEquipStr( CItem * pItem ) const;
@@ -1071,8 +1073,8 @@ public:
 	void InitPlayer( CClient * pClient, const char * pszCharname, bool fFemale, RACE_TYPE rtRace, ushort wStr, ushort wDex, ushort wInt,
 		PROFESSION_TYPE iProf, SKILL_TYPE skSkill1, ushort uiSkillVal1, SKILL_TYPE skSkill2, ushort uiSkillVal2, SKILL_TYPE skSkill3, ushort uiSkillVal3, SKILL_TYPE skSkill4, ushort uiSkillVal4,
 		HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, ITEMID_TYPE idFace, int iStartLoc );
-	bool ReadScriptTrig(CCharBase * pCharDef, CTRIG_TYPE trig, bool bVendor = false);
-	bool ReadScript(CResourceLock &s, bool bVendor = false);
+	bool ReadScriptTrig(CCharBase * pCharDef, CTRIG_TYPE trig, bool fVendor = false);
+	bool ReadScript(CResourceLock &s, bool fVendor = false);
 	void NPC_LoadScript( bool fRestock );
 	void NPC_CreateTrigger();
 
@@ -1143,7 +1145,7 @@ public:
     bool IsStuck(bool fFreezeCheck);
 
 	void DropAll( CItemContainer * pCorpse = nullptr, uint64 dwAttr = 0 );
-	void UnEquipAllItems( CItemContainer * pCorpse = nullptr, bool bLeaveHands = false );
+	void UnEquipAllItems( CItemContainer * pCorpse = nullptr, bool fLeaveHands = false );
 	void Wake();
 	void SleepStart( bool fFrontFall );
 

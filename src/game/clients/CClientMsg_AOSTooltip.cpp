@@ -419,18 +419,18 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 				if ( pItem->m_ModMaxWeight )
 				{
                     PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1072241)); // Contents: ~1_COUNT~/~2_MAXCOUNT~ items, ~3_WEIGHT~/~4_MAXWEIGHT~ stones
-					t->FormatArgs("%" PRIuSIZE_T "\t%d\t%d\t%d", pContainer->GetCount(), g_Cfg.m_iContainerMaxItems, pContainer->GetTotalWeight() / WEIGHT_UNITS, pItem->m_ModMaxWeight / WEIGHT_UNITS);
+					t->FormatArgs("%" PRIuSIZE_T "\t%d\t%d\t%d", pContainer->GetContentCount(), g_Cfg.m_iContainerMaxItems, pContainer->GetTotalWeight() / WEIGHT_UNITS, pItem->m_ModMaxWeight / WEIGHT_UNITS);
 				}
 				else
 				{
                     PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1073841)); // Contents: ~1_COUNT~/~2_MAXCOUNT~ items, ~3_WEIGHT~ stones
-					t->FormatArgs("%" PRIuSIZE_T "\t%d\t%d", pContainer->GetCount(), g_Cfg.m_iContainerMaxItems, pContainer->GetTotalWeight() / WEIGHT_UNITS);
+					t->FormatArgs("%" PRIuSIZE_T "\t%d\t%d", pContainer->GetContentCount(), g_Cfg.m_iContainerMaxItems, pContainer->GetTotalWeight() / WEIGHT_UNITS);
 				}
 			}
 			else
 			{
                 PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1050044));
-				t->FormatArgs("%" PRIuSIZE_T "\t%d", pContainer->GetCount(), pContainer->GetTotalWeight() / WEIGHT_UNITS); // ~1_COUNT~ items, ~2_WEIGHT~ stones
+				t->FormatArgs("%" PRIuSIZE_T "\t%d", pContainer->GetContentCount(), pContainer->GetTotalWeight() / WEIGHT_UNITS); // ~1_COUNT~ items, ~2_WEIGHT~ stones
 			}
 		}
 		break;

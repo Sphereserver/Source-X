@@ -75,14 +75,23 @@ void CChar::Spell_Dispel(int iLevel)
 	// remove all the spells. NOT if caused by objects worn !!!
 	// ATTR_MAGIC && ! ATTR_MOVE_NEVER
 
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	for (size_t i = 0; i < GetContentCount();)
 	{
-		pItemNext = pItem->GetNext();
-		if ( iLevel <= 100 && pItem->IsAttr(ATTR_MOVE_NEVER) )	// we don't lose this.
-			continue;
-		if ( (pItem->GetEquipLayer() == LAYER_FACE) || ((pItem->GetEquipLayer() >= LAYER_SPELL_STATS) && (pItem->GetEquipLayer() <= LAYER_SPELL_Summon)) )
-			pItem->Delete();
+		CItem* pItem = static_cast<CItem*>(GetContentIndex(i));
+		bool fIncrease = true;
+		if (iLevel <= 100 && pItem->IsAttr(ATTR_MOVE_NEVER))
+		{
+			// we don't lose this.
+		}
+		else
+		{
+			const LAYER_TYPE itLayer = pItem->GetEquipLayer();
+			if ( ((itLayer == LAYER_FACE) && pItem->IsType(IT_LIGHT_LIT)) || ((itLayer >= LAYER_SPELL_STATS) && (itLayer <= LAYER_SPELL_Summon)) )
+				fIncrease = !pItem->Delete();
+		}
+
+		if (fIncrease)
+			++i;
 	}
 }
 
@@ -1323,9 +1332,9 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			else
 			{
 				StatFlag_Set( STATF_REACTIVE );
-				int iSkill;
+				int iSkill = -1;
 				pSpellDef->GetPrimarySkill(&iSkill, nullptr);
-				pSpell->m_itSpell.m_PolyStr = pSpellDef->m_vcEffect.GetLinear(pCaster->Skill_GetBase((SKILL_TYPE)iSkill)) / 10;	// % of damage reflected.
+				pSpell->m_itSpell.m_PolyStr = (int16)pSpellDef->m_vcEffect.GetLinear(pCaster->Skill_GetBase((SKILL_TYPE)iSkill)) / 10;	// % of damage reflected.
 			}
 			if (pClient && IsSetOF(OF_Buffs))
 			{
@@ -1867,8 +1876,9 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEff
 
 
 	// Check if there's any previous effect to clear before apply the new effect
-	for ( CItem *pSpellPrev = GetContentHead(); pSpellPrev != nullptr; pSpellPrev = pSpellPrev->GetNext() )
+	for (CSObjContRec* pObjRec : *this)
 	{
+		CItem* pSpellPrev = static_cast<CItem*>(pObjRec);
 		if ( layer != pSpellPrev->GetEquipLayer() )
 			continue;
 

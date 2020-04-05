@@ -22,15 +22,6 @@ void CObjBaseTemplate::SetUnkZ( char z )
 	m_pt.m_z = z;
 }
 
-CObjBaseTemplate * CObjBaseTemplate::GetNext() const
-{
-	return ( static_cast <CObjBaseTemplate*> ( CSObjListRec::GetNext()) );
-}
-CObjBaseTemplate * CObjBaseTemplate::GetPrev() const
-{
-	return ( static_cast <CObjBaseTemplate*> ( CSObjListRec::GetPrev()) );
-}
-
 
 // Location
 

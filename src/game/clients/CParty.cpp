@@ -461,7 +461,7 @@ bool CPartyDef::AcceptEvent( CChar *pCharAccept, CUID uidInviter, bool bForced, 
 		// Create the party now.
 		pParty = new CPartyDef(pCharInviter, pCharAccept);
 		ASSERT(pParty);
-		g_World.m_Parties.InsertHead(pParty);
+		g_World.m_Parties.InsertContentHead(pParty);
 		if (bSendMessages)
 			pCharInviter->SysMessage(pszMsg);
 	}

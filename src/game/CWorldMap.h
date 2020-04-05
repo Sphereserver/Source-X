@@ -61,19 +61,20 @@ public:
 
 class CWorldSearch	// define a search of the world.
 {
-	const CPointMap m_pt;		// Base point of our search.
-	const int m_iDist;			// How far from the point are we interested in
-	bool m_fAllShow;		// Include Even inert items.
-	bool m_fSearchSquare;		// Search in a square (uo-sight distance) rather than a circle (standard distance).
+	const CPointMap _pt;		// Base point of our search.
+	const int _iDist;			// How far from the point are we interested in
+	bool _fAllShow;				// Include Even inert items.
+	bool _fSearchSquare;		// Search in a square (uo-sight distance) rather than a circle (standard distance).
 
-	CObjBase * m_pObj;	// The current object of interest.
-	CObjBase * m_pObjNext;	// In case the object get deleted.
-	bool m_fInertToggle;		// We are now doing the inert items
+	bool _fInertToggle;			// We are now doing the inert items
+	CSObjCont* _pCurCont;		// Sector-attached object container in which we are searching right now.
+	CObjBase* _pObj;			// The current object of interest.
+	size_t _idxObj;
 
-	CSector * m_pSectorBase;	// Don't search the center sector 2 times.
-	CSector * m_pSector;	// current Sector
-	CRectMap m_rectSector;		// A rectangle containing our sectors we can search.
-	int		m_iSectorCur;		// What is the current Sector index in m_rectSector
+	CSector * _pSectorBase;		// Don't search the center sector 2 times.
+	CSector * _pSector;			// current Sector
+	CRectMap _rectSector;		// A rectangle containing our sectors we can search.
+	int		 _iSectorCur;		// What is the current Sector index in m_rectSector
 
 public:
 	static const char *m_sClassName;
@@ -82,15 +83,14 @@ public:
 
 	explicit CWorldSearch( const CPointMap & pt, int iDist = 0 );
 
-private:
-	bool GetNextSector();
-
-public:
 	void SetAllShow( bool fView );
 	void SetSearchSquare( bool fSquareSearch );
 	void RestartSearch();		// Setting current obj to nullptr will restart the search 
 	CChar * GetChar();
 	CItem * GetItem();
+
+private:
+	bool GetNextSector();
 };
 
 

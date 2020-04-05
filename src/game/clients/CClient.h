@@ -251,7 +251,7 @@ public:
 		// CLIMODE_TARG_USE_ITEM
 		struct
 		{
-			CSObjList * m_pParent;	// the parent of the item being targetted .
+			CSObjCont * m_pParent;	// the parent of the item being targetted .
 		} m_tmUseItem;
 	};
 

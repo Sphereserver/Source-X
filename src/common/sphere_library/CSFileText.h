@@ -85,7 +85,8 @@ public:     virtual bool IsEOF() const;
     * @param ... argument list.
     * @return total chars of the output.
     */
-    int _cdecl Printf( lpctstr pFormat, ... ) __printfargs(2,3);
+protected:  int _cdecl _Printf( lpctstr pFormat, ... ) __printfargs(2,3);
+public:     int _cdecl Printf(lpctstr pFormat, ...) __printfargs(2, 3);
     /**
     * @brief Reads data from the file.
     * @param pBuffer buffer where store the readed data.
@@ -107,7 +108,8 @@ public:     virtual tchar * ReadString( tchar * pBuffer, int sizemax );
     * @param args argument list.
     * @return total chars of the output.
     */
-    int VPrintf( lpctstr pFormat, va_list args );
+protected:  int _VPrintf( lpctstr pFormat, va_list args );
+public:     int VPrintf(lpctstr pFormat, va_list args);
     /**
     * @brief writes supplied data into file.
     * @param pData data to write.

@@ -234,7 +234,7 @@ CChar * CChar::CreateBasic(CREID_TYPE baseID) // static
 	return pChar;
 }
 
-CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false ), 
+CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false ),
     m_Skill{}, m_Stat{}
 {
 	g_Serv.StatInc( SERV_STAT_CHARS );	// Count created CChars.
@@ -345,7 +345,7 @@ CChar::~CChar()
     if (m_pNPC)
         NPC_PetClearOwners();   // Clear follower slots on pet owner
 
-    Clear();                    // Remove me early so virtuals will work
+    ClearContainer();                    // Remove me early so virtuals will work
     ClearNPC();
     ClearPlayer();
 
@@ -358,11 +358,10 @@ void CChar::ClientDetach()
 	ADDTOCALLSTACK("CChar::ClientDetach");
 
 	// remove all trade windows.
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	for (CSObjContRec* pObjRec : GetIterationSafeCont())
 	{
-		pItemNext = pItem->GetNext();
-		if ( pItem->IsType(IT_EQ_TRADE_WINDOW) )
+		CItem* pItem = static_cast<CItem*>(pObjRec);
+		if (pItem->IsType(IT_EQ_TRADE_WINDOW) )
 			pItem->Delete();
 	}
 	if ( !IsClient() )
@@ -383,7 +382,7 @@ void CChar::ClientDetach()
 			pShipItem->Stop();
 	}
 
-    m_pClient = nullptr;	
+    m_pClient = nullptr;
 }
 
 // Client is Attaching to this CChar.
@@ -535,12 +534,12 @@ bool CChar::NotifyDelete()
 	return true;
 }
 
-void CChar::Delete(bool bforce)
+bool CChar::Delete(bool bforce)
 {
 	ADDTOCALLSTACK("CChar::Delete");
 
 	if (( NotifyDelete() == false ) && !bforce)
-		return;
+		return false;
 
     CWorldTickingList::DelCharPeriodic(this);
 
@@ -555,21 +554,22 @@ void CChar::Delete(bool bforce)
 	// Detach from account now
 	ClearPlayer();
 
-	CObjBase::Delete();
+	return CObjBase::Delete();
 }
 
 void CChar::GoSleep()
 {
     ADDTOCALLSTACK("CChar::GoSleep");
     ASSERT(!IsSleeping());
-    
+
 	CWorldTickingList::DelCharPeriodic(this);   // do not insert into the mutex lock, it access back to this char.
 
     THREAD_UNIQUE_LOCK_SET;
     CTimedObject::GoSleep();
 
-    for (CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext())
-    {
+	for (CSObjContRec* pObjRec : *this)
+	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
         if (!pItem->IsSleeping())
             pItem->GoSleep();
     }
@@ -586,8 +586,9 @@ void CChar::GoAwake()
     CTimedObject::GoAwake();       // Awake it first, otherwise some other things won't work
     SetTimeout(Calc_GetRandVal(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
 
-    for (CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext())
-    {
+	for (CSObjContRec* pObjRec : *this)
+	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
         if (pItem->IsSleeping())
             pItem->GoAwake();
     }
@@ -971,7 +972,7 @@ void CChar::CreateNewCharCheck()
 	}
 }
 
-bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
+bool CChar::DupeFrom(const CChar * pChar, bool fNewbieItems )
 {
 	// CChar part
 	if ( !pChar )
@@ -1018,8 +1019,6 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 
 	Skill_Cleanup();
 
-	g_World.m_uidLastNewChar = GetUID();	// for script access.
-
 	for ( uint i = 0; i < STAT_QTY; ++i )
 	{
         m_Stat[i] = pChar->m_Stat[i];
@@ -1062,6 +1061,10 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	// end of CChar
 
     CEntity::Copy(pChar);
+	CEntityProps::Copy(pChar);
+
+	const CUID& myUID(GetUID());
+	g_World.m_uidLastNewChar = myUID;	// for script access.
 
 	// Begin copying items.
 	for ( int i = 0 ; i < LAYER_QTY; ++i)
@@ -1076,39 +1079,41 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 			continue;
 
 		CItem * pItem = CItem::CreateDupeItem(fromLayer, this, true);
-		pItem->LoadSetContainer(GetUID(), layer);
+		pItem->LoadSetContainer(myUID, layer);
 		if ( fNewbieItems )
 		{
 			pItem->SetAttr(ATTR_NEWBIE);
 			if (pItem->IsType(IT_CONTAINER) )
 			{
-				for ( CItem *pItemCont = static_cast<CItemContainer*>(pItem)->GetContentHead(); pItemCont != nullptr; pItemCont = pItemCont->GetNext() )
+				CItemContainer* pContainer = static_cast<CItemContainer*>(pItem);
+				for (CSObjContRec* pObjRec : *pContainer)
 				{
+					CItem* pItemCont = static_cast<CItem*>(pObjRec);
 					pItemCont->SetAttr(ATTR_NEWBIE);
 
-					CChar *pTest = CUID::CharFind(pItemCont->m_itNormal.m_more1);
-					if ( pTest && pTest == pChar )
-						pItemCont->m_itNormal.m_more1 = this->GetUID();
+					const CChar *pTest = CUID::CharFind(pItemCont->m_itNormal.m_more1);
+					if (pTest && pTest == pChar)
+						pItemCont->m_itNormal.m_more1 = myUID;
 
-					CChar *pTest2 = CUID::CharFind(pItemCont->m_itNormal.m_more2);
+					const CChar *pTest2 = CUID::CharFind(pItemCont->m_itNormal.m_more2);
 					if ( pTest2 && pTest2 == pChar )
-						pItemCont->m_itNormal.m_more2 = this->GetUID();
+						pItemCont->m_itNormal.m_more2 = myUID;
 
-					CChar *pTest3 = CUID::CharFind(pItemCont->m_uidLink);
+					const CChar *pTest3 = CUID::CharFind(pItemCont->m_uidLink);
 					if ( pTest3 && pTest3 == pChar )
-						pItemCont->m_uidLink = this->GetUID();
+						pItemCont->m_uidLink = myUID;
 				}
 			}
 		}
-		CChar * pTest = CUID::CharFind(pItem->m_itNormal.m_more1);
+		const CChar * pTest = CUID::CharFind(pItem->m_itNormal.m_more1);
 		if ( pTest && pTest == pChar)
-			pItem->m_itNormal.m_more1 = this->GetUID();
+			pItem->m_itNormal.m_more1 = myUID;
 
-		CChar * pTest2 = CUID::CharFind(pItem->m_itNormal.m_more2);
+		const CChar * pTest2 = CUID::CharFind(pItem->m_itNormal.m_more2);
 		if (pTest2)
 		{
 			if (pTest2 == pChar)
-				pItem->m_itNormal.m_more2 = this->GetUID();
+				pItem->m_itNormal.m_more2 = myUID;
 			else if ( pTest2->NPC_IsOwnedBy(pChar, true) )	// Mount's fix
 			{
 				if ( fNewbieItems )	// Removing any mount references for the memory, so when character dies or dismounts ... no mount will appear.
@@ -1119,17 +1124,16 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 					pItem->Delete(true);
 					CChar * pChar2 = CreateNPC( pTest2->GetID());
 					pChar2->SetTopPoint( pChar->GetTopPoint() );	// Moving the mount again because the dupe will place it in the same place as the 'invisible & disconnected' original (usually far away from where the guy will be, so the duped char can't touch the mount).
-					pChar2->DupeFrom(pTest2,fNewbieItems);
+					pChar2->DupeFrom(pTest2, fNewbieItems);
 					pChar2->NPC_PetSetOwner(this);
 					Horse_Mount(pChar2);
 				}
 			}
 		}
 
-		CChar * pTest3 = CUID::CharFind(pItem->m_uidLink);
+		const CChar * pTest3 = CUID::CharFind(pItem->m_uidLink);
 		if ( pTest3 && pTest3 == pChar)
-			pItem->m_uidLink = this->GetUID();
-
+			pItem->m_uidLink = myUID;
 	}
 	// End copying items.
 
@@ -1145,21 +1149,23 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 }
 
 // Reading triggers from CHARDEF
-bool CChar::ReadScriptTrig(CCharBase * pCharDef, CTRIG_TYPE trig, bool bVendor)
+bool CChar::ReadScriptTrig(CCharBase * pCharDef, CTRIG_TYPE trig, bool fVendor)
 {
 	ADDTOCALLSTACK("CChar::ReadScriptTrig");
 	if ( !pCharDef || !pCharDef->HasTrigger(trig) )
 		return false;
+
 	CResourceLock s;
 	if ( !pCharDef->ResourceLock(s) || !OnTriggerFind(s, sm_szTrigName[trig]) )
 		return false;
-	return ReadScript(s, bVendor);
+
+	return ReadScript(s, fVendor);
 }
 
 // If this is a regen they will have a pack already.
 // RETURN:
 //  true = default return. (mostly ignored).
-bool CChar::ReadScript(CResourceLock &s, bool bVendor)
+bool CChar::ReadScript(CResourceLock &s, bool fVendor)
 {
 	ADDTOCALLSTACK("CChar::ReadScript");
 	bool fFullInterp = false;
@@ -1172,7 +1178,7 @@ bool CChar::ReadScript(CResourceLock &s, bool bVendor)
 
 		int iCmd = FindTableSorted(s.GetKey(), CItem::sm_szTemplateTable, CountOf(CItem::sm_szTemplateTable)-1);
 
-		if ( bVendor )
+		if ( fVendor )
 		{
 			if (iCmd != -1)
 			{
@@ -2509,7 +2515,7 @@ do_default:
 						SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
 						if ( iSkill == SKILL_NONE )
 							return false;
-						
+
 						sVal.FormatVal( Skill_UseQuick( iSkill, Exp_GetVal( ppArgs[1] ), true ,(Exp_GetVal(ppArgs[2]) != 0 ? false : true), (Exp_GetVal(ppArgs[3]) != 0 ? true : false)));
 						return true;
 					}
@@ -3319,7 +3325,7 @@ bool CChar::r_LoadVal( CScript & s )
 				StatFlag_Mod(STATF_EMOTEACTION,fSet);
 			}
 			break;
-		case CHC_FLAGS:		
+		case CHC_FLAGS:
 			if (g_Serv.IsLoading())
 			{
 				// Don't set STATF_SAVEPARITY at server startup, otherwise the first worldsave will not save these chars
@@ -3332,7 +3338,7 @@ bool CChar::r_LoadVal( CScript & s )
 			break;
 		case CHC_FONT:
 			m_fonttype = (FONT_TYPE)s.GetArgVal();
-			if ( m_fonttype < 0 || m_fonttype >= FONT_QTY )
+			if (m_fonttype >= FONT_QTY)
 				m_fonttype = FONT_NORMAL;
 			break;
 		case CHC_SPEECHCOLOROVERRIDE:
@@ -3902,7 +3908,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			}
 			break;
 		case CHV_CRIMINAL:
-			if (s.HasArgs() && !s.GetArgVal()) 
+			if (s.HasArgs() && !s.GetArgVal())
 			{
 				CItem * pMemoryCriminal = LayerFind(LAYER_FLAG_Criminal);
                 if (pMemoryCriminal)
@@ -4177,7 +4183,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
         {
             if (!s.HasArgs())   // If there are no args, direct call on NPC_PetSetOwner.
                 return NPC_PetSetOwner(pCharSrc);
-            
+
 			CChar * pChar = CUID::CharFind(s.GetArgDWVal()); // otherwise we try to run it from the CChar with the given UID.
             if (pChar)
                 return pChar->NPC_PetSetOwner(this);
@@ -4229,7 +4235,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 
 		case CHV_PRIVSET:
 			return SetPrivLevel( pSrc, s.GetArgStr());
-		
+
 		case CHV_REMOVE:	// remove this char from the world instantly.
 			if ( m_pPlayer )
 			{

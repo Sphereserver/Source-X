@@ -119,8 +119,6 @@ NOTO_TYPE CChar::Noto_GetFlag(const CChar * pCharViewer, bool fAllowIncog, bool 
 		pThis->OnTrigger(CTRIG_NotoSend, pTarget, &args);
 		iNoto = (NOTO_TYPE)(args.m_iN1);
 		iColor = (NOTO_TYPE)(args.m_iN2);
-		if (iNoto < NOTO_INVALID)
-			iNoto = NOTO_INVALID;
 	}
 
 	if (iNoto == NOTO_INVALID)
@@ -161,7 +159,7 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 
 	if (this != pCharViewer)	// Am I checking myself?
 	{
-		if (m_pNPC)	
+		if (m_pNPC)
 		{
 			if (g_Cfg.m_iPetsInheritNotoriety != 0)
 			{
@@ -187,7 +185,7 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 
 			if (NPC_IsOwnedBy(pCharViewer, false))	// All pets are neutral to their owners.
 				return NOTO_NEUTRAL;
-		}		
+		}
 
 		// Are we in the same party ?
 		if (m_pParty && (m_pParty == pCharViewer->m_pParty) )
@@ -580,7 +578,7 @@ void CChar::Noto_Kill(CChar * pKill, int iTotalKillers)
 					args.m_iN1 = 0;
 			}
 
-			if ( args.m_iN3 < 1 ) 
+			if ( args.m_iN3 < 1 )
 			{
 				m_pPlayer->m_wMurders = (word)(args.m_iN1);
 				if (args.m_iN2)
@@ -730,7 +728,7 @@ void CChar::NotoSave_CheckTimeout()
 			    ++it;
 		}
         EXC_CATCH;
-        
+
         for (CChar* pChar : vToResend)
         {
             NotoSave_Resend(pChar);

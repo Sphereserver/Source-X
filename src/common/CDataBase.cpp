@@ -90,7 +90,7 @@ void CDataBase::Close()
 bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
 {
 	ADDTOCALLSTACK("CDataBase::query");
-	mapQueryResult.Empty();
+	mapQueryResult.Clear();
 	mapQueryResult.SetNumNew("NUMROWS", 0);
 
 	if ( !isConnected() )

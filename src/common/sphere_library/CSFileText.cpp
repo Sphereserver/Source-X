@@ -155,15 +155,31 @@ bool CSFileText::IsEOF() const
     THREAD_SHARED_LOCK_RETURN(CSFileText::_IsEOF());
 }
 
+
+int _cdecl CSFileText::_Printf(lpctstr pFormat, ...)
+{
+    ADDTOCALLSTACK("CSFileText::_Printf");
+    ASSERT(pFormat);
+
+    va_list vargs;
+    va_start(vargs, pFormat);
+    int iRet = _VPrintf(pFormat, vargs);
+    va_end(vargs);
+
+    return iRet;
+}
 int _cdecl CSFileText::Printf( lpctstr pFormat, ... )
 {
     ADDTOCALLSTACK("CSFileText::Printf");
     ASSERT(pFormat);
 
+    THREAD_UNIQUE_LOCK_SET;
+
     va_list vargs;
     va_start( vargs, pFormat );
-    int iRet = VPrintf( pFormat, vargs );
+    int iRet = _VPrintf( pFormat, vargs );
     va_end( vargs );
+
     return iRet;
 }
 
@@ -205,15 +221,23 @@ tchar * CSFileText::ReadString( tchar * pBuffer, int sizemax )
     THREAD_UNIQUE_LOCK_RETURN(_ReadString(pBuffer, sizemax));
 }
 
-int CSFileText::VPrintf( lpctstr pFormat, va_list args )
+int CSFileText::_VPrintf( lpctstr pFormat, va_list args )
+{
+    ADDTOCALLSTACK("CSFileText::_VPrintf");
+    ASSERT(pFormat);
+
+    if ( !_IsFileOpen() )
+        return -1;
+
+    return vfprintf( _pStream, pFormat, args );
+}
+
+int CSFileText::VPrintf(lpctstr pFormat, va_list args)
 {
     ADDTOCALLSTACK("CSFileText::VPrintf");
     ASSERT(pFormat);
 
-    if ( !IsFileOpen() )
-        return -1;
-
-    THREAD_UNIQUE_LOCK_RETURN(vfprintf( _pStream, pFormat, args ));
+    THREAD_UNIQUE_LOCK_RETURN(_VPrintf(pFormat, args));
 }
 
 bool CSFileText::_Write( const void * pData, int iLen )

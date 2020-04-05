@@ -484,9 +484,11 @@ public:
      *
      * @brief   Deletes this CObjBase from game (doesn't delete the raw class instance).
      *
-     * @param   bforce  Force deletion.
+     * @param   bForce  Force deletion.
+     *
+     * @return  Was deleted.
      */
-	virtual void Delete(bool fforce = false);
+	virtual bool Delete(bool fForce = false);
 
 
 	// Accessors
@@ -1298,17 +1300,5 @@ enum CTRIG_TYPE : short
  */
 DIR_TYPE GetDirStr( lpctstr pszDir );
 
-
-/* Inline Methods Definitions */
-
-inline CObjBase* CObjBase::GetPrev() const
-{
-	return static_cast <CObjBase*>(CSObjListRec::GetPrev());
-}
-
-inline CObjBase* CObjBase::GetNext() const
-{
-	return static_cast <CObjBase*>(CSObjListRec::GetNext());
-}
 
 #endif // _INC_COBJBASE_H

@@ -248,7 +248,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 			{
 				if ( ! s.HasArgs())
 					return false;
-				CGMPage * pPage = static_cast <CGMPage*>( g_World.m_GMPages.GetHead());
+				CGMPage * pPage = static_cast <CGMPage*>( g_World.m_GMPages.GetContainerHead());
 				for ( ; pPage!=nullptr; pPage = pPage->GetNext())
 				{
 					++sm_iListIndex;

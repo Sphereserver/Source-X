@@ -20,11 +20,16 @@ CSObjList::CSObjList()
 	m_uiCount = 0;
 }
 
+CSObjList::~CSObjList()
+{
+	ClearContainer();
+}
+
 // CSObjList:: Element access.
 
-CSObjListRec * CSObjList::GetAt( size_t index ) const
+CSObjListRec * CSObjList::GetContentAt( size_t index ) const
 {
-	CSObjListRec * pRec = GetHead();
+	CSObjListRec * pRec = GetContainerHead();
 	while ( index > 0 && pRec != nullptr )
 	{
 		pRec = pRec->GetNext();
@@ -35,12 +40,12 @@ CSObjListRec * CSObjList::GetAt( size_t index ) const
 
 // CSObjList:: Modifiers.
 
-void CSObjList::Clear()
+void CSObjList::ClearContainer()
 {
 	// delete all entries.
 	for (;;)	// iterate the list.
 	{
-		CSObjListRec * pRec = GetHead();
+		CSObjListRec * pRec = GetContainerHead();
 		if ( pRec == nullptr )
 			break;
 		ASSERT( pRec->GetParent() == this );
@@ -51,7 +56,7 @@ void CSObjList::Clear()
 	m_pTail = nullptr;
 }
 
-void CSObjList::InsertAfter( CSObjListRec * pNewRec, CSObjListRec * pPrev )
+void CSObjList::InsertContentAfter( CSObjListRec * pNewRec, CSObjListRec * pPrev )
 {
 	// Add after pPrev.
 	// pPrev = nullptr == add to the start.
@@ -71,7 +76,7 @@ void CSObjList::InsertAfter( CSObjListRec * pNewRec, CSObjListRec * pPrev )
 	}
 	else
 	{
-		pNext = GetHead();
+		pNext = GetContainerHead();
 		m_pHead = pNewRec;
 	}
 

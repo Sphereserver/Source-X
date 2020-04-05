@@ -237,6 +237,9 @@ common/sphere_library/CSFileText.h
 common/sphere_library/CSMemBlock.cpp
 common/sphere_library/CSMemBlock.h
 common/sphere_library/CSObjArray.h
+common/sphere_library/CSObjCont.cpp
+common/sphere_library/CSObjCont.h
+common/sphere_library/CSObjContRec.h
 common/sphere_library/CSObjList.cpp
 common/sphere_library/CSObjList.h
 common/sphere_library/CSObjListRec.h
