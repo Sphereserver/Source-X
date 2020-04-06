@@ -152,7 +152,7 @@ void CTimedFunctionHandler::Clear()
     m_tfRecycled.clear();
 }
 
-TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext,
+TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext,
     CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult)
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Loop");
@@ -175,7 +175,6 @@ TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScrip
                 if (!pObj)
                 {
                 LoopStop:
-                    EndContext = StartContext;
                     endLooping = true;
                     break;
                 }
@@ -186,10 +185,6 @@ TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScrip
 				}
 				if ((iRet != TRIGRET_ENDIF) && (iRet != TRIGRET_CONTINUE))
 					return iRet;
-				if (iRet == TRIGRET_CONTINUE)
-					EndContext = StartContext;
-				else
-					EndContext = s.GetContext();
 				s.SeekContext(StartContext);
 			}
 			++it;
@@ -283,7 +278,7 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
         unsigned long uidTest = std::strtoul(ppVal[1], nullptr, 10);
         if ((errno == ERANGE) || (uidTest > UINT32_MAX))
         {
-            g_Log.Event(LOGM_INIT|LOGL_ERROR, "Invalid TimerFNumbers in %sdata.scp. Invalid UID (second value=%ul).\n", SPHERE_FILE, uidTest);
+            g_Log.Event(LOGM_INIT|LOGL_ERROR, "Invalid TimerFNumbers in %sdata.scp. Invalid UID (second value=%lu).\n", SPHERE_FILE, uidTest);
             errno = oldErrno;
             return -1;
         }

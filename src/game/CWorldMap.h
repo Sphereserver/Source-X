@@ -61,12 +61,20 @@ public:
 
 class CWorldSearch	// define a search of the world.
 {
+	enum class ws_search_e
+	{
+		None = 0,
+		Items,
+		Chars
+	};
+
 	const CPointMap _pt;		// Base point of our search.
 	const int _iDist;			// How far from the point are we interested in
 	bool _fAllShow;				// Include Even inert items.
 	bool _fSearchSquare;		// Search in a square (uo-sight distance) rather than a circle (standard distance).
 
-	bool _fInertToggle;			// We are now doing the inert items
+	ws_search_e _eSearchType;
+	bool _fInertToggle;			// We are now doing the inert chars.
 	CSObjCont* _pCurCont;		// Sector-attached object container in which we are searching right now.
 	CObjBase* _pObj;			// The current object of interest.
 	size_t _idxObj;

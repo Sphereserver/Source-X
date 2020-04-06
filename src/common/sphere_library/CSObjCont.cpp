@@ -37,17 +37,24 @@ CSObjCont::~CSObjCont()
 
 void CSObjCont::ClearContainer()
 {
+	if (empty())
+		return;
+
 	// delete all entries.
 	_fIsClearing = true;
 
-	for (CSObjContRec* pRec : *this)	// iterate the list.
+	// Loop through a copy of the current state of the container, since by deleting other container objects it could happen that
+	//	other objects are deleted and appended to this list, thus invalidating the iterators used by the for loop.
+	const auto stateCopy = GetIterationSafeContReverse();
+	clear();
+
+	for (CSObjContRec* pRec : stateCopy)	// iterate the list.
 	{
 		ASSERT( pRec->GetParent() == this );
 		delete pRec;
 	}
 
 	_fIsClearing = false;
-	clear();
 }
 
 /*

@@ -21,10 +21,10 @@ void CTimedFunctions::Clear() // static
 	g_World._Ticker._TimedFunctions.Clear();
 }
 
-TRIGRET_TYPE CTimedFunctions::Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext,
+TRIGRET_TYPE CTimedFunctions::Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext,
 	CScript& s, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, CSString* pResult) // static
 {
-	return  g_World._Ticker._TimedFunctions.Loop(funcname, LoopsMade, StartContext, EndContext, s, pSrc, pArgs, pResult);
+	return  g_World._Ticker._TimedFunctions.Loop(funcname, LoopsMade, StartContext, s, pSrc, pArgs, pResult);
 }
 
 void CTimedFunctions::Add( CUID uid, int numSeconds, lpctstr funcname ) // static

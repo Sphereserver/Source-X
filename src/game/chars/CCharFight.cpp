@@ -21,9 +21,13 @@ void CChar::OnNoticeCrime( CChar * pCriminal, CChar * pCharMark )
 	ADDTOCALLSTACK("CChar::OnNoticeCrime");
 	if ( !pCriminal || pCriminal == this || pCriminal == pCharMark || pCriminal->IsPriv(PRIV_GM) || (pCriminal->m_pNPC && pCriminal->GetNPCBrain() == NPCBRAIN_GUARD) )
 		return;
-    NOTO_TYPE iNoto = pCharMark->Noto_GetFlag(pCriminal);
-    if (iNoto == NOTO_CRIMINAL || iNoto == NOTO_EVIL)
-		return;
+
+	if (pCharMark)
+	{
+		const NOTO_TYPE iNoto = pCharMark->Noto_GetFlag(pCriminal);
+		if (iNoto == NOTO_CRIMINAL || iNoto == NOTO_EVIL)
+			return;
+	}
 
 	// Make my owner criminal too (if I have one)
 	/*CChar * pOwner = pCriminal->GetOwner();
@@ -38,7 +42,7 @@ void CChar::OnNoticeCrime( CChar * pCriminal, CChar * pCharMark )
 		{
 			CScriptTriggerArgs Args;
 			Args.m_iN1 = fMakeCriminal;
-			Args.m_pO1 = const_cast<CChar*>(pCharMark);
+			Args.m_pO1 = pCharMark;
 			OnTrigger(CTRIG_SeeCrime, pCriminal, &Args);
             fMakeCriminal = Args.m_iN1 ? true : false;
 		}
@@ -85,6 +89,7 @@ void CChar::OnNoticeCrime( CChar * pCriminal, CChar * pCharMark )
 // I am commiting a crime.
 // Did others see me commit or try to commit the crime.
 //  SkillToSee = NONE = everyone can notice this.
+//	pCharMark = offended char.
 // RETURN:
 //  true = somebody saw me.
 bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObjBase * pItem, lpctstr pAction )
@@ -109,7 +114,7 @@ bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObj
 		if ( ! pChar->CanSeeLOS( this, LOS_NB_WINDOWS )) //what if I was standing behind a window when I saw a crime? :)
 			continue;
 
-        bool fYour = ( pCharMark == pChar );
+        const bool fYour = (pCharMark && ( pCharMark == pChar ));
         if (!g_Cfg.Calc_CrimeSeen(this, pChar, SkillToSee, fYour))
             continue;
 		
@@ -148,12 +153,14 @@ bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObj
 
             if (fYour)
                 pCharMark->Memory_AddObjTypes(this, MEMORY_IRRITATEDBY);
+
             pChar->ObjMessage(z, this);
 		}
 		else
 		{
             fSeen = true;
 			pChar->OnNoticeCrime( this, pCharMark );
+
             pChar->ObjMessage(z, this);
 		}
 	}

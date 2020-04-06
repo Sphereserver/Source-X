@@ -223,8 +223,10 @@ int64 ahextoi64( lpctstr pArgs );	// Convert decimal or (Sphere) hex string (sta
 
 #ifdef _32BITS
 	#define Exp_GetSTVal		Exp_GetU32Val
+	#define Exp_GetSTSingle		Exp_GetUSingle
 #else
 	#define Exp_GetSTVal		Exp_GetU64Val
+	#define Exp_GetSTSingle		(size_t)Exp_GetLLSingle
 #endif
 
 #endif	// _INC_CEXPRSSION_H

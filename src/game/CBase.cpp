@@ -501,12 +501,10 @@ ushort CBaseBaseDef::ConvertRangeStr(lpctstr ptcRange) // static
 		{
 			std::swap(iHi, iLo);
 		}
-		iHi = maximum(0, iHi);
-		iLo = maximum(0, iLo);
 	}
 	else			// arg: "max"
 	{
-		iHi = std::max((ushort)0, (ushort)piVal[0]);
+		iHi = (ushort)piVal[0];
 	}
 	return RANGE_MAKE(iHi, iLo);
 }

@@ -1355,7 +1355,7 @@ void CItem::SetTimeout( int64 iMsecs )
 		return;
 
 	CItemsList::sm_fNotAMove = true;
-	pSector->MoveItemToSector( this, iMsecs >= 0 );
+	pSector->MoveItemToSector(this);
 	CItemsList::sm_fNotAMove = false;
 	SetUIDContainerFlags(0);
 }
@@ -1477,7 +1477,7 @@ bool CItem::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the groun
 
 	CSector * pSector = pt.GetSector();
 	ASSERT( pSector );
-	pSector->MoveItemToSector( this, IsTimerSet() );	// This also awakes the item
+	pSector->MoveItemToSector(this);	// This also awakes the item
 
 	// Is this area too complex ?
 	if ( ! g_Serv.IsLoading())

@@ -22,7 +22,7 @@ public:
     static void Erase(CUID uid);
     static void Stop(CUID uid, lpctstr funcname);
     static void Clear();
-    static TRIGRET_TYPE Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext,
+    static TRIGRET_TYPE Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext,
         CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult);
     static int IsTimer(CUID uid, lpctstr funcname);
 };

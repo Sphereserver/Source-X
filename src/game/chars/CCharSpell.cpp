@@ -1333,7 +1333,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			{
 				StatFlag_Set( STATF_REACTIVE );
 				int iSkill = -1;
-				pSpellDef->GetPrimarySkill(&iSkill, nullptr);
+				const bool fValidSkill = pSpellDef->GetPrimarySkill(&iSkill, nullptr);
+				PERSISTANT_ASSERT(fValidSkill);
 				pSpell->m_itSpell.m_PolyStr = (int16)pSpellDef->m_vcEffect.GetLinear(pCaster->Skill_GetBase((SKILL_TYPE)iSkill)) / 10;	// % of damage reflected.
 			}
 			if (pClient && IsSetOF(OF_Buffs))
