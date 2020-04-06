@@ -141,12 +141,16 @@ enum MAGICFLAGS_TYPE
 
 enum REVEALFLAGS_TYPE
 {
-    REVEALF_DETECTINGHIDDEN      = 0x001,    ///* Reveal Spell with Detecting Hidden Skill.
-    REVEALF_LOOTINGSELF          = 0x002,    ///* Reveal when looting self bodies.
-    REVEALF_LOOTINGOTHERS        = 0x004,    ///* Reveal when looting bodies of other Players or NPCs.
-    REVEALF_SPEAK                = 0x008,    ///* Reveal when speaking.
-    REVEALF_SPELLCAST            = 0x010,    ///* Reveal when starting to cast a Spell.
-    REVEALF_OSILIKEPERSONALSPACE = 0x020     ///* Do not reveal when a character enters on personal space.
+    REVEALF_DETECTINGHIDDEN      = 0x0001,    // Reveal Spell with Detecting Hidden Skill.
+    REVEALF_LOOTINGSELF          = 0x0002,    // Reveal when looting self bodies.
+    REVEALF_LOOTINGOTHERS        = 0x0004,    // Reveal when looting bodies of other Players or NPCs.
+    REVEALF_SPEAK                = 0x0008,    // Reveal when speaking.
+    REVEALF_SPELLCAST            = 0x0010,    // Reveal when starting to cast a Spell.
+    REVEALF_OSILIKEPERSONALSPACE = 0x0020,    // Do not reveal when a character enters on personal space.
+    REVEALF_SNOOPING             = 0x0040,    // Do not reveal while a character snooping.
+    REVEALF_STEALING             = 0x0080,    // Do not reveal while a character stealing.
+    REVEALF_STEALING_SUCCESS     = 0x0100,    // Reveal if stealing successfully finished.
+    REVEALF_STEALING_FAIL        = 0x0200     // Reveal if stealing failed.
 };
 
 enum TOOLTIPMODE_TYPE

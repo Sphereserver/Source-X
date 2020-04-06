@@ -2156,6 +2156,9 @@ Must have event, even if it's empty, since it's applied by the source to generat
 31-03-2020, xwerswoodx
 - Fixed: Wrong if statement fixed in on Vendor Restock. (Issue #389)
 
+02-04-2020, xwerswoodx
+- Added: REVEALF_SNOOPING, REVEALF_STEALING, REVEALF_STEALING_SUCCESS, REVEALF_STEALING_FAIL flags to sphere.ini (Issue #393)
+
 03-04-2020, XuN
 -Added f_multi_setup, called after the multi has been created, placed and it's component added, so events and types can be setup without weird workarounds. It accepts no returns and has no arg.
 [Changelog] Fixed: Updated text of f_house_onplacement_check was never working, it's correct name is f_multi_onplacement_check.
@@ -2164,4 +2167,3 @@ Must have event, even if it's empty, since it's applied by the source to generat
 	-The %of damage reflected by Reactive Armor is now stored in More1L in it's rune item.
 	-The value is asigned by default by a linear formula reflecting the caster's magery skill and the effect value of the spell.
 	-The value can also be modified now via @EffectAdd.
-
