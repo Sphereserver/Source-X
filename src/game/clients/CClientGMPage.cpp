@@ -48,12 +48,12 @@ void CClient::Cmd_GM_Page( lpctstr pszReason ) // Help button (Calls GM Call Men
 	else
 		SysMessageDefault( DEFMSG_MSG_GMPAGE_NOTIFIED );
 
-	sprintf(pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_MSG_GMPAGE_QNUM ), (int)(g_World.m_GMPages.GetCount()));
+	sprintf(pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_MSG_GMPAGE_QNUM ), (int)(g_World.m_GMPages.GetContentCount()));
 	SysMessage(pszMsg);
 
 	// Already have a message in the queue ?
 	// Find an existing GM page for this account.
-	CGMPage * pPage = static_cast <CGMPage*>(g_World.m_GMPages.GetHead());
+	CGMPage * pPage = static_cast <CGMPage*>(g_World.m_GMPages.GetContainerHead());
 	for ( ; pPage != nullptr; pPage = pPage->GetNext())
 	{
 		if (strcmpi( pPage->GetName(), GetAccount()->GetName()) == 0)
@@ -99,7 +99,7 @@ void CClient::Cmd_GM_PageMenu( uint uiEntryStart )
 
 	dword entry = 0;
 	word count = 0;
-	CGMPage * pPage = static_cast <CGMPage*>( g_World.m_GMPages.GetHead());
+	CGMPage * pPage = static_cast <CGMPage*>( g_World.m_GMPages.GetContainerHead());
 	for ( ; pPage!= nullptr; pPage = pPage->GetNext(), entry++ )
 	{
 		if ( entry < uiEntryStart )
@@ -248,7 +248,7 @@ void CClient::Cmd_GM_PageCmd( lpctstr pszCmd )
 		case GPV_WIPE:
 			if ( ! IsPriv( PRIV_GM ))
 				return;
-			g_World.m_GMPages.Clear();
+			g_World.m_GMPages.ClearContainer();
 			return;
 	}
 
@@ -357,7 +357,7 @@ void CClient::Cmd_GM_PageSelect( uint iSelect )
 		return;
 	}
 
-	CGMPage * pPage = static_cast <CGMPage*>( g_World.m_GMPages.GetAt( m_tmMenu.m_Item[iSelect] ));
+	CGMPage * pPage = static_cast <CGMPage*>( g_World.m_GMPages.GetContentAt( m_tmMenu.m_Item[iSelect] ));
 	if ( pPage != nullptr )
 	{
 		if ( pPage->FindGMHandler())

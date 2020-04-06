@@ -407,8 +407,9 @@ int CChar::CalcArmorDefense() const
 	for ( int i = 0; i < ARMOR_QTY; ++i )
 		ArmorRegionMax[i] = 0;
 
-	for ( CItem* pItem=GetContentHead(); pItem!=nullptr; pItem=pItem->GetNext() )
+	for (CSObjContRec* pObjRec : *this)
 	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		int iDefense = pItem->Armor_GetDefense();
 		if ( !iDefense && !pItem->IsType(IT_SPELL) )
 			continue;
@@ -872,24 +873,28 @@ effect_bounce:
 		// A physical blow of some sort.
 		if (uType & (DAMAGE_HIT_BLUNT|DAMAGE_HIT_PIERCE|DAMAGE_HIT_SLASH))
 		{
-			// Check if Reactive Armor will reflect some damage back
-			if ( IsStatFlag(STATF_REACTIVE) && !(uType & DAMAGE_GOD) )
+			// Check if Reactive Armor will reflect some damage back.
+			// Preventing recurrent reflection with DAMAGE_REACTIVE.
+			if ( IsStatFlag(STATF_REACTIVE) && !((uType & DAMAGE_GOD) || (uType & DAMAGE_REACTIVE)) )
 			{
 				if ( GetTopDist3D(pSrc) < 2 )
 				{
-					int iReactiveDamage = iDmg / 5;
-					if ( iReactiveDamage < 1 )
+					CItem* pReactive = LayerFind(LAYER_SPELL_Reactive);
+					int iReactiveDamage = (iDmg * pReactive->m_itSpell.m_PolyStr) / 100;
+					if (iReactiveDamage < 1)
+					{
 						iReactiveDamage = 1;
+					}
 
 					iDmg -= iReactiveDamage;
-					pSrc->OnTakeDamage( iReactiveDamage, this, (DAMAGE_TYPE)(DAMAGE_FIXED), iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy );
+					pSrc->OnTakeDamage( iReactiveDamage, this, (DAMAGE_TYPE)(DAMAGE_FIXED | DAMAGE_REACTIVE), iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy );
 					pSrc->Sound( 0x1F1 );
 					pSrc->Effect( EFFECT_OBJ, ITEMID_FX_CURSE_EFFECT, this, 10, 16 );
 				}
 			}
 		}
 	}
-
+	
 	if (iDmg <= 0)
 		return 0;
 
@@ -936,16 +941,16 @@ effect_bounce:
 
 byte CChar::GetRangeL() const
 {
-    if (_iRange == 0)
+    if (_uiRange == 0)
         return Char_GetDef()->GetRangeL();
-    return (byte)(RANGE_GET_LO(_iRange));
+    return (byte)(RANGE_GET_LO(_uiRange));
 }
 
 byte CChar::GetRangeH() const
 {
-    if (_iRange == 0)
+    if (_uiRange == 0)
         return Char_GetDef()->GetRangeH();
-    return (byte)(RANGE_GET_HI(_iRange));
+    return (byte)(RANGE_GET_HI(_uiRange));
 }
 
 // What sort of weapon am i using?
@@ -1237,9 +1242,11 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool fToldByMaster )
 		return false;
 	}	
 
-	int64 threat = 0;
-	if ( fToldByMaster )
+	int threat = 0;
+	if (fToldByMaster)
+	{
 		threat = ATTACKER_THREAT_TOLDBYMASTER + Attacker_GetHighestThreat();
+	}
 
     CChar *pTarget = pCharTarg;
 	if ( ((IsTrigUsed(TRIGGER_ATTACK)) || (IsTrigUsed(TRIGGER_CHARATTACK))) && m_Fight_Targ_UID != pCharTarg->GetUID() )
@@ -1248,7 +1255,7 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool fToldByMaster )
 		Args.m_iN1 = threat;
 		if ( OnTrigger(CTRIG_Attack, pTarget, &Args) == TRIGRET_RET_TRUE )
 			return false;
-		threat = Args.m_iN1;
+		threat = (int)Args.m_iN1;
 	}
 
     if (!Attacker_Add(pTarget, threat))
@@ -1269,8 +1276,8 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool fToldByMaster )
 			GetClient()->addPlayerWarMode();
 	}
 
-	SKILL_TYPE skillWeapon = Fight_GetWeaponSkill();
-	SKILL_TYPE skillActive = Skill_GetActive();
+	const SKILL_TYPE skillWeapon = Fight_GetWeaponSkill();
+	const SKILL_TYPE skillActive = Skill_GetActive();
 
     if ((skillActive == skillWeapon) && (m_Fight_Targ_UID == pCharTarg->GetUID()))	// already attacking this same target using the same skill
     {
@@ -1293,7 +1300,7 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool fToldByMaster )
         pTarget = NPC_FightFindBestTarget();
     }
 
-	m_Fight_Targ_UID = pTarget ? pTarget->GetUID() : CUID(UID_UNUSED);
+	m_Fight_Targ_UID = pTarget ? pTarget->GetUID() : CUID();
 	Skill_Start(skillWeapon);
 	return true;
 }

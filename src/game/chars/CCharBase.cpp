@@ -27,7 +27,7 @@ CCharBase::CCharBase( CREID_TYPE id ) :
 	m_Str = 0;
 	m_Dex = 0;
 	m_Int = 0;
-    _iRange = 0;
+    _uiRange = 0;
 
 	_iEraLimitGear = g_Cfg._iEraLimitGear;		// Always latest by default
 	_iEraLimitLoot = g_Cfg._iEraLimitLoot;		// Always latest by default
@@ -89,7 +89,7 @@ void CCharBase::CopyBasic( const CCharBase * pCharDef )
 
 	m_defense = pCharDef->m_defense;
 	m_Anims = pCharDef->m_Anims;
-    _iRange = pCharDef->_iRange;
+    _uiRange = pCharDef->_uiRange;
 
 	m_BaseResources = pCharDef->m_BaseResources;
     _pFaction = pCharDef->_pFaction;
@@ -263,18 +263,18 @@ bool CCharBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 			break;
         case CBC_RANGE:
         {
-            const int iRangeH = GetRangeH(), iRangeL = GetRangeL();
+            const uchar iRangeH = GetRangeH(), iRangeL = GetRangeL();
             if ( iRangeL == 0 )
-                sVal.Format( "%d", iRangeH );
+                sVal.Format( "%hhd", iRangeH );
             else
-                sVal.Format( "%d,%d", iRangeH, iRangeL );
+                sVal.Format( "%hhd,%hhd", iRangeH, iRangeL );
             break;
         }
         case CBC_RANGEH:
-            sVal.FormatVal(GetRangeH());
+            sVal.FormatBVal(GetRangeH());
             break;
         case CBC_RANGEL:
-            sVal.FormatVal(GetRangeL());
+            sVal.FormatBVal(GetRangeL());
             break;
 		case CBC_RESDISPDNID:
 			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, (int)GetResDispDnId()) );
@@ -411,7 +411,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 			break;
         case CBC_RANGE:
         {
-            _iRange = ConvertRangeStr(s.GetArgStr());
+            _uiRange = ConvertRangeStr(s.GetArgStr());
             break;
         }
         case CBC_RANGEH:
@@ -483,12 +483,12 @@ bool CCharBase::r_Load( CScript & s )
 
 byte CCharBase::GetRangeL() const
 {
-    return (byte)(RANGE_GET_LO(_iRange));
+    return (byte)(RANGE_GET_LO(_uiRange));
 }
 
 byte CCharBase::GetRangeH() const
 {
-    return (byte)(RANGE_GET_HI(_iRange));
+    return (byte)(RANGE_GET_HI(_uiRange));
 }
 
 

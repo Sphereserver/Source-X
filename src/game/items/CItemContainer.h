@@ -50,15 +50,17 @@ public:
 	virtual int GetWeight(word amount = 0) const;
 	void OnWeightChange( int iChange );
 
-	void ContentAdd( CItem * pItem, bool bForceNoStack = false );
-	void ContentAdd( CItem * pItem, CPointMap pt, bool bForceNoStack = false, uchar gridIndex = 0 );
+	// Contents/Carry stuff. ---------------------------------
+	virtual void ContentAdd( CItem * pItem, bool bForceNoStack = false ) override;
+	void ContentAdd( CItem * pItem, CPointMap pt, bool fForceNoStack = false, uchar gridIndex = 0 );
 protected:
-	void OnRemoveObj( CSObjListRec* pObRec );	// Override this = called when removed from list.
+	virtual void OnRemoveObj( CSObjContRec* pObRec ) override;	// Override this = called when removed from list.
+
 public:
 	bool IsItemInTrade() const;
 	void Trade_Status( bool bCheck );
 	void Trade_UpdateGold( dword platinum, dword gold );
-	void Trade_Delete();
+	bool Trade_Delete();
 
 	void MakeKey();
 	void SetKeyRing();

@@ -419,18 +419,18 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 				if ( pItem->m_ModMaxWeight )
 				{
                     PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1072241)); // Contents: ~1_COUNT~/~2_MAXCOUNT~ items, ~3_WEIGHT~/~4_MAXWEIGHT~ stones
-					t->FormatArgs("%" PRIuSIZE_T "\t%d\t%d\t%d", pContainer->GetCount(), g_Cfg.m_iContainerMaxItems, pContainer->GetTotalWeight() / WEIGHT_UNITS, pItem->m_ModMaxWeight / WEIGHT_UNITS);
+					t->FormatArgs("%" PRIuSIZE_T "\t%d\t%d\t%d", pContainer->GetContentCount(), g_Cfg.m_iContainerMaxItems, pContainer->GetTotalWeight() / WEIGHT_UNITS, pItem->m_ModMaxWeight / WEIGHT_UNITS);
 				}
 				else
 				{
                     PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1073841)); // Contents: ~1_COUNT~/~2_MAXCOUNT~ items, ~3_WEIGHT~ stones
-					t->FormatArgs("%" PRIuSIZE_T "\t%d\t%d", pContainer->GetCount(), g_Cfg.m_iContainerMaxItems, pContainer->GetTotalWeight() / WEIGHT_UNITS);
+					t->FormatArgs("%" PRIuSIZE_T "\t%d\t%d", pContainer->GetContentCount(), g_Cfg.m_iContainerMaxItems, pContainer->GetTotalWeight() / WEIGHT_UNITS);
 				}
 			}
 			else
 			{
                 PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1050044));
-				t->FormatArgs("%" PRIuSIZE_T "\t%d", pContainer->GetCount(), pContainer->GetTotalWeight() / WEIGHT_UNITS); // ~1_COUNT~ items, ~2_WEIGHT~ stones
+				t->FormatArgs("%" PRIuSIZE_T "\t%d", pContainer->GetContentCount(), pContainer->GetTotalWeight() / WEIGHT_UNITS); // ~1_COUNT~ items, ~2_WEIGHT~ stones
 			}
 		}
 		break;
@@ -497,11 +497,10 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061167)); // weapon speed ~1_val~
 		t->FormatArgs("%hhu", pItem->GetSpeed());
 
-		int Range = pItem->GetRangeH();
+		uchar Range = pItem->GetRangeH();
 		if (Range > 1)
 		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061169)); // range ~1_val~
-			t->FormatArgs("%d", Range);
+			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061169, Range)); // range ~1_val~
 		}
 
 		int64 StrengthRequirement = (int64)(pItem->Item_GetDef()->m_ttEquippable.m_iStrReq) - pItem->GetPropNum(pCCPItemEquip, PROPIEQUIP_LOWERREQ, pBaseCCPItemEquip);

@@ -230,13 +230,12 @@ bool CChar::RaiseCorpse( CItemCorpse * pCorpse )
 	if ( !pCorpse )
 		return false;
 
-	if ( pCorpse->GetCount() > 0 )
+	if ( !pCorpse->IsContainerEmpty() )
 	{
 		CItemContainer *pPack = GetPackSafe();
-		CItem *pItemNext = nullptr;
-		for ( CItem *pItem = pCorpse->GetContentHead(); pItem != nullptr; pItem = pItemNext )
+		for ( CSObjContRec *pObjRec : pCorpse->GetIterationSafeContReverse() )
 		{
-			pItemNext = pItem->GetNext();
+			CItem* pItem = static_cast<CItem*>(pObjRec);
 			if ( pItem->IsType(IT_HAIR) || pItem->IsType(IT_BEARD) )	// hair on corpse was copied!
 				continue;
 
@@ -246,7 +245,7 @@ bool CChar::RaiseCorpse( CItemCorpse * pCorpse )
 				pPack->ContentAdd(pItem);
 		}
 
-		pCorpse->ContentsDump( GetTopPoint());		// drop left items on ground
+		pCorpse->ContentsDump( GetTopPoint() );		// drop left items on ground
 	}
 
 	UpdateAnimate((pCorpse->m_itCorpse.m_facing_dir & 0x80) ? ANIM_DIE_FORWARD : ANIM_DIE_BACK, true, true);

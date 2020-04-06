@@ -34,7 +34,7 @@ private:
 protected:
 	CResourceRef m_BaseRef;     // Pointer to the resource that describes this type.
 
-    CSString _sRunningTrigger;
+    std::string _sRunningTrigger;   // Name of the running trigger (can be custom!) [use std::string instead of CSString because the former is allocated on-demand]
     short _iRunningTriggerId;     // Current trigger being run on this object. Used to prevent the same trigger being called over and over.
     short _iCallingObjTriggerId;  // I am running a trigger called via TRIGGER (CallPersonalTrigger method). In which trigger (OF THIS SAME OBJECT) was this call executed?
 
@@ -484,9 +484,11 @@ public:
      *
      * @brief   Deletes this CObjBase from game (doesn't delete the raw class instance).
      *
-     * @param   bforce  Force deletion.
+     * @param   bForce  Force deletion.
+     *
+     * @return  Was deleted.
      */
-	virtual void Delete(bool fforce = false);
+	virtual bool Delete(bool fForce = false);
 
 
 	// Accessors
@@ -1298,17 +1300,5 @@ enum CTRIG_TYPE : short
  */
 DIR_TYPE GetDirStr( lpctstr pszDir );
 
-
-/* Inline Methods Definitions */
-
-inline CObjBase* CObjBase::GetPrev() const
-{
-	return static_cast <CObjBase*>(CSObjListRec::GetPrev());
-}
-
-inline CObjBase* CObjBase::GetNext() const
-{
-	return static_cast <CObjBase*>(CSObjListRec::GetNext());
-}
 
 #endif // _INC_COBJBASE_H

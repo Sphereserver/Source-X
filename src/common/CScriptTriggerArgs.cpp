@@ -53,6 +53,15 @@ void CScriptTriggerArgs::Init( lpctstr pszStr )
 
     // ensure argv will be recalculated next time it is accessed
     m_v.clear();
+
+    // Clear LOCALs
+    m_VarsLocal.Clear();
+
+    // Clear FLOATs
+    m_VarsFloat.Clear();
+
+    // Clear REFx
+    m_VarObjs.Clear();
 }
 
 CScriptTriggerArgs::CScriptTriggerArgs( lpctstr pszStr )

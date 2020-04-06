@@ -334,10 +334,10 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 		{
 			SKIP_SEPARATORS(ptcKey);
 			size_t index = Exp_GetVal(ptcKey);
-			if ( index >= g_World.m_GMPages.GetCount() )
+			if ( index >= g_World.m_GMPages.GetContentCount() )
 				return false;
 
-			CGMPage* pPage = static_cast <CGMPage*> (g_World.m_GMPages.GetAt(index));
+			CGMPage* pPage = static_cast <CGMPage*> (g_World.m_GMPages.GetContentAt(index));
 			if ( pPage == nullptr )
 				return false;
 

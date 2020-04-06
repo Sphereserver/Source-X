@@ -89,7 +89,7 @@ void CNetState::clear(void)
 #endif
 
         //	record the client reference to the garbage collection to be deleted on it's time
-        g_World.m_ObjDelete.InsertHead(m_client);
+        g_World.m_ObjSpecialDelete.InsertContentHead(m_client);
     }
 
 #ifdef _WIN32

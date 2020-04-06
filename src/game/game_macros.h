@@ -68,6 +68,7 @@
 #define DAMAGE_FIXED		0x10000	// already fixed damage, don't do calcs ... only create blood, anim, sounds... and update memories and attacker
 #define DAMAGE_BREATH		0x20000	// Damage flag for breath NPC action.
 #define DAMAGE_THROWN		0x40000	// Damage flag for the throw NPCs action (not the throwing skill!).
+#define DAMAGE_REACTIVE     0x80000 // Damage reflected by Reactive Armor spell.
 
 typedef dword DAMAGE_TYPE;		// describe a type of damage.
 

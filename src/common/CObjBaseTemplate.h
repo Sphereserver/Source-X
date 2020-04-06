@@ -6,13 +6,13 @@
 #ifndef _INC_COBJBASETEMPLATE_H
 #define _INC_COBJBASETEMPLATE_H
 
-#include "sphere_library/CSObjListRec.h"
+#include "sphere_library/CSObjContRec.h"
 #include "sphere_library/CSString.h"
 #include "CRect.h"
 #include "CUID.h"
 
 
-class CObjBaseTemplate : public CSObjListRec
+class CObjBaseTemplate : public CSObjContRec
 {
 	// A dynamic object of some sort.
 private:
@@ -36,9 +36,6 @@ private:
 	CObjBaseTemplate& operator=(const CObjBaseTemplate& other);
 
 public:
-	CObjBaseTemplate * GetNext() const;
-	CObjBaseTemplate * GetPrev() const;
-
     const CUID& GetUID() const {
 		return m_UID; 
 	}

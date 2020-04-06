@@ -6,7 +6,7 @@
 #ifndef _INC_CCONTAINER_H
 #define _INC_CCONTAINER_H
 
-#include "../common/sphere_library/CSObjList.h"
+#include "../common/sphere_library/CSObjCont.h"
 #include "../common/resource/CResourceBase.h"
 #include "../common/CUID.h"
 #include "../common/CRect.h"
@@ -14,7 +14,7 @@
 
 class CItemContainer;
 
-class CContainer : public CSObjList	// This class contains a list of items but may or may not be an item itself.
+class CContainer : public CSObjCont	// This class contains a list of items but may or may not be an item itself.
 {
 public:
 	int	m_totalweight;      // weight of all the items it has. (1/WEIGHT_UNITS pound)
@@ -24,7 +24,7 @@ public:
      * @brief   Override this = called when removed from list.
      * @param [in,out]  pObRec  If non-null, the ob record.
      */
-	virtual void OnRemoveObj( CSObjListRec* pObRec );
+	virtual void OnRemoveObj( CSObjContRec* pObRec );
 
     /**
      * @fn  void CContainer::ContentAddPrivate( CItem * pItem );
@@ -55,20 +55,6 @@ public:
      * @return  The total weight.
      */
 	int	GetTotalWeight() const;
-
-    /**
-     * @fn  CItem* CContainer::GetContentHead() const;
-     * @brief   Gets content head.
-     * @return  null if it fails, else the content head.
-     */
-	CItem* GetContentHead() const;
-
-    /**
-     * @fn  CItem* CContainer::GetContentTail() const;
-     * @brief   Gets content tail.
-     * @return  null if it fails, else the content tail.
-     */
-	CItem* GetContentTail() const;
 
     /**
      * @fn  int CContainer::FixWeight();

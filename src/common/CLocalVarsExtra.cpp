@@ -81,6 +81,11 @@ CSString CLocalFloatVars::Get( const char* VarName )
 	return CSString(szReal);
 }
 
+void CLocalFloatVars::Clear()
+{
+	m_VarMap.clear();
+}
+
 
 //--
 
@@ -109,4 +114,9 @@ bool CLocalObjMap::Insert( ushort Number, CObjBase * pObj, bool fForceSet )
 
 	m_ObjMap[Number] = pObj;
 	return true;
+}
+
+void CLocalObjMap::Clear()
+{
+	m_ObjMap.clear();
 }

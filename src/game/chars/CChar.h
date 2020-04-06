@@ -89,8 +89,8 @@ public:
 	{
 		int64	elapsed;
 		dword	charUID;
-		int64	amountDone;
-		int64	threat;
+		int		amountDone;
+		int		threat;
 		bool	ignore;
 	};
 	std::vector<LastAttackers> m_lastAttackers;
@@ -98,8 +98,8 @@ public:
 	struct NotoSaves
 	{
 		dword		charUID;	// Character viewing me
-		NOTO_TYPE	color;		// Color sent on movement packets
 		int64		time;		// Update timer
+		NOTO_TYPE	color;		// Color sent on movement packets
 		NOTO_TYPE	value;		// Notoriety type
 	};
 	std::vector<NotoSaves> m_notoSaves;
@@ -121,7 +121,7 @@ public:
 	// Combat stuff. cached data. (not saved)
 	CUID m_uidWeapon;			// current Wielded weapon.	(could just get rid of this ?)
 	word m_defense;				// calculated armor worn (NOT intrinsic armor)
-    int _iRange;
+    ushort _uiRange;
 
 	height_t m_height;			// Height set in-game or under some trigger (height=) - for both items and chars
 
@@ -136,7 +136,7 @@ public:
 
 	// Saved stuff.
 	DIR_TYPE m_dirFace;			// facing this dir.
-	CSString m_sTitle;			// Special title such as "the guard" (replaces the normal skill title)
+	std::string m_sTitle;		// Special title such as "the guard" (replaces the normal skill title) [use std::string instead of CSString because the former is allocated on-demand]
 	CPointMap m_ptHome;			// What is our "home" region. (towns and bounding of NPC's)
 	int64 m_virtualGold;		// Virtual gold used by TOL clients
 
@@ -304,7 +304,7 @@ public:
 public:
 	CChar( CREID_TYPE id );
 	virtual ~CChar(); // Delete character
-	bool DupeFrom( CChar * pChar, bool fNewbieItems);
+	bool DupeFrom(const CChar * pChar, bool fNewbieItems);
 
 private:
 	CChar(const CChar& copy);
@@ -317,7 +317,7 @@ public:
 	// Status and attributes ------------------------------------
 	int IsWeird() const;
 	char GetFixZ( const CPointMap& pt, dword dwBlockFlags = 0);
-	virtual void Delete(bool bforce = false) override;
+	virtual bool Delete(bool bforce = false) override;
 	bool NotifyDelete();
 	bool IsStatFlag( uint64 iStatFlag ) const;
 	void StatFlag_Set(uint64 iStatFlag);
@@ -429,6 +429,8 @@ public:
     ushort GetFame() const;
     void SetFame(ushort uiNewFame);
 
+	void Stat_StrCheckEquip();
+
 	// Location and movement ------------------------------------
 private:
 	bool TeleportToCli( int iType, int iArgs );
@@ -441,7 +443,6 @@ private:
 	bool IsVerticalSpace( const CPointMap& ptDest, bool fForceMount = false ) const;
 
 public:
-	CChar* GetNext() const;
 	const CObjBaseTemplate * GetTopLevelObj() const override;
 	CObjBaseTemplate* GetTopLevelObj() override;
 
@@ -511,11 +512,12 @@ public:
 	int FixWeirdness();
 	void CreateNewCharCheck();
 
-private:
 	// Contents/Carry stuff. ---------------------------------
-	void ContentAdd( CItem * pItem, bool bForceNoStack = false );
+private:
+	virtual void ContentAdd( CItem * pItem, bool bForceNoStack = false ) override;
 protected:
-	void OnRemoveObj( CSObjListRec* pObRec );	// Override this = called when removed from list.
+	virtual void OnRemoveObj( CSObjContRec* pObRec ) override;	// Override this = called when removed from list.
+
 public:
 	bool CanCarry( const CItem * pItem ) const;
 	bool CanEquipStr( CItem * pItem ) const;
@@ -1040,29 +1042,29 @@ public:
 	inline int GetAttackersCount() {
 		return (int)m_lastAttackers.size();
 	}
-	bool	Attacker_Add(CChar * pChar, int64 threat = 0);
+	bool	Attacker_Add(CChar * pChar, int threat = 0);
 	CChar * Attacker_GetLast() const;
-	bool	Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
-	bool	Attacker_Delete(int attackerIndex, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
-	bool	Attacker_Delete(const CChar * pChar, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
+	bool	Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bool fForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
+	bool	Attacker_Delete(int attackerIndex, bool fForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
+	bool	Attacker_Delete(const CChar * pChar, bool fForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
 	void	Attacker_RemoveChar();
 	void	Attacker_Clear();
 	void	Attacker_CheckTimeout();
-	int64	Attacker_GetDam(int attackerIndex) const;
-	void	Attacker_SetDam(const CChar * pChar, int64 value);
-	void	Attacker_SetDam(int attackerIndex, int64 value);
+	int		Attacker_GetDam(int attackerIndex) const;
+	void	Attacker_SetDam(const CChar * pChar, int value);
+	void	Attacker_SetDam(int attackerIndex, int value);
 	CChar * Attacker_GetUID(int attackerIndex) const;
 	int64	Attacker_GetElapsed(int attackerIndex) const;
 	void	Attacker_SetElapsed(const CChar * pChar, int64 value);
 	void	Attacker_SetElapsed(int attackerIndex, int64 value);
-	int64	Attacker_GetThreat(int attackerIndex) const;
-	void	Attacker_SetThreat(const CChar * pChar, int64 value);
-	void	Attacker_SetThreat(int attackerIndex, int64 value);
+	int		Attacker_GetThreat(int attackerIndex) const;
+	void	Attacker_SetThreat(const CChar * pChar, int value);
+	void	Attacker_SetThreat(int attackerIndex, int value);
 	bool	Attacker_GetIgnore(int pChar) const;
 	bool	Attacker_GetIgnore(const CChar * pChar) const;
 	void	Attacker_SetIgnore(size_t pChar, bool fIgnore);
 	void	Attacker_SetIgnore(const CChar * pChar, bool fIgnore);
-	int64	Attacker_GetHighestThreat() const;
+	int		Attacker_GetHighestThreat() const;
 	int		Attacker_GetID(const CChar * pChar) const;
 	int		Attacker_GetID(const CUID& pChar) const;
 
@@ -1071,8 +1073,8 @@ public:
 	void InitPlayer( CClient * pClient, const char * pszCharname, bool fFemale, RACE_TYPE rtRace, ushort wStr, ushort wDex, ushort wInt,
 		PROFESSION_TYPE iProf, SKILL_TYPE skSkill1, ushort uiSkillVal1, SKILL_TYPE skSkill2, ushort uiSkillVal2, SKILL_TYPE skSkill3, ushort uiSkillVal3, SKILL_TYPE skSkill4, ushort uiSkillVal4,
 		HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, ITEMID_TYPE idFace, int iStartLoc );
-	bool ReadScriptTrig(CCharBase * pCharDef, CTRIG_TYPE trig, bool bVendor = false);
-	bool ReadScript(CResourceLock &s, bool bVendor = false);
+	bool ReadScriptTrig(CCharBase * pCharDef, CTRIG_TYPE trig, bool fVendor = false);
+	bool ReadScript(CResourceLock &s, bool fVendor = false);
 	void NPC_LoadScript( bool fRestock );
 	void NPC_CreateTrigger();
 
@@ -1143,7 +1145,7 @@ public:
     bool IsStuck(bool fFreezeCheck);
 
 	void DropAll( CItemContainer * pCorpse = nullptr, uint64 dwAttr = 0 );
-	void UnEquipAllItems( CItemContainer * pCorpse = nullptr, bool bLeaveHands = false );
+	void UnEquipAllItems( CItemContainer * pCorpse = nullptr, bool fLeaveHands = false );
 	void Wake();
 	void SleepStart( bool fFrontFall );
 

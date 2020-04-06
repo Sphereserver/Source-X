@@ -1725,8 +1725,11 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 
 		if ( pChar->IsStatFlag(STATF_COMM_CRYSTAL) )
 		{
-			for ( CItem *pItem = pChar->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+			for (CSObjContRec* pObjRec : pChar->GetIterationSafeCont())
+			{
+				CItem* pItem = static_cast<CItem*>(pObjRec);
 				pItem->OnHear(pszText, m_pChar);
+			}
 		}
 
 		if ( pChar == m_pChar )

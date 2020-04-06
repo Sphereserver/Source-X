@@ -175,7 +175,7 @@ bool IsStrEmpty( lpctstr pszTest );
 
 
 // Numeric formulas
-template<typename T> inline const T SphereAbs(T x)
+template<typename T> inline T SphereAbs(T x) noexcept
 {	
     static_assert(std::is_arithmetic<T>::value, "Invalid data type.");
     static_assert(std::is_signed<T>::value, "Trying to get the absolute value of an unsigned number?");
