@@ -1182,21 +1182,10 @@ void CWorld::SaveStatics()
 				if ( !pSector )
                     continue;
 
-				for (CSObjContRec* pObjRec : pSector->m_Items_Inert)
+				for (CSObjContRec* pObjRec : pSector->m_Items)
 				{
 					CItem* pItem = static_cast<CItem*>(pObjRec);
                     if (pItem->IsTypeMulti())
-						continue;
-					if ( !pItem->IsAttr(ATTR_STATIC) )
-						continue;
-
-					pItem->r_WriteSafe(m_FileStatics);
-				}
-
-				for (CSObjContRec* pObjRec : pSector->m_Items_Timer)
-				{
-					CItem* pItem = static_cast<CItem*>(pObjRec);
-					if ( pItem->IsTypeMulti() )
 						continue;
 					if ( !pItem->IsAttr(ATTR_STATIC) )
 						continue;

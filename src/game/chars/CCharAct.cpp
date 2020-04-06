@@ -3862,6 +3862,7 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocation,
 
 	const CPointMap ptOld(GetTopPoint());
     SetTopPoint(pt);
+
     bool fSectorChanged = GetTopPoint().GetSector()->MoveCharToSector(this);
 
 	if ( !m_fClimbUpdated || fForceFix )

@@ -182,22 +182,12 @@ void CSector::GoSleep()
             pChar->GoSleep();
     }
 
-	for (CSObjContRec* pObjRec : m_Items_Timer)
+	for (CSObjContRec* pObjRec : m_Items)
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
 		const bool fSleeping = pItem->IsSleeping();
-		ASSERT(!fSleeping);
         if (!fSleeping)
 			pItem->GoSleep();
-    }
-
-	for (CSObjContRec* pObjRec : m_Items_Inert)
-	{
-		CItem* pItem = static_cast<CItem*>(pObjRec);
-		const bool fSleeping = pItem->IsSleeping();
-		ASSERT(fSleeping);
-		if (!fSleeping)
-	        pItem->GoSleep();
     }
 }
 
@@ -225,22 +215,12 @@ void CSector::GoAwake()
 			pChar->GoAwake();
 	}
 
-	for (CSObjContRec* pObjRec : m_Items_Timer)
+	for (CSObjContRec* pObjRec : m_Items)
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
 		const bool fSleeping = pItem->IsSleeping();
-		ASSERT(!fSleeping);
 		if (fSleeping)
         	pItem->GoAwake();
-    }
-
-	for (CSObjContRec* pObjRec : m_Items_Inert)
-	{
-		CItem* pItem = static_cast<CItem*>(pObjRec);
-		const bool fSleeping = pItem->IsSleeping();
-		ASSERT(fSleeping);
-        if (fSleeping)
-			pItem->GoAwake();
     }
 
     /*
@@ -463,20 +443,7 @@ void CSector::r_Write()
 	}
 
 	// Items on the ground.
-	for (CSObjContRec* pObjRec : m_Items_Inert.GetIterationSafeCont())
-	{
-		CItem* pItem = static_cast<CItem*>(pObjRec);
-        if (pItem->IsTypeMulti())
-        {
-            pItem->r_WriteSafe(g_World.m_FileMultis);
-        }
-        else if (!pItem->IsAttr(ATTR_STATIC))
-        {
-            pItem->r_WriteSafe(g_World.m_FileWorld);
-        }
-	}
-
-	for (CSObjContRec* pObjRec : m_Items_Timer.GetIterationSafeCont())
+	for (CSObjContRec* pObjRec : m_Items.GetIterationSafeCont())
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
         if (pItem->IsTypeMulti())
@@ -550,9 +517,8 @@ bool CSector::v_AllItems( CScript & s, CTextConsole * pSrc )
 
 	bool fRet = false;
 
-	// Loop through all the items in m_Items_Timer.
-	// We should start at the end incase items are removed during the loop.
-	for (CSObjContRec* pObjRec : m_Items_Timer.GetIterationSafeContReverse())
+	// Loop through all the items in the sector.
+	for (CSObjContRec* pObjRec : m_Items.GetIterationSafeContReverse())
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
 
@@ -564,19 +530,6 @@ bool CSector::v_AllItems( CScript & s, CTextConsole * pSrc )
 		fRet |= pItem->r_Verb(script, pSrc);
 	}
 
-	// Loop through all the items in m_Items_Inert.
-	// We should start at the end incase items are removed during the loop.
-	for (CSObjContRec* pObjRec : m_Items_Inert.GetIterationSafeContReverse())
-	{
-		CItem* pItem = static_cast<CItem*>(pObjRec);
-
-		// Check that an item was returned and keep looking if not.
-		if (pItem == nullptr)
-			continue;
-
-		// Execute the verb on the item
-		fRet |= pItem->r_Verb(script, pSrc);
-	}
 	return fRet;
 }
 
@@ -953,25 +906,20 @@ void CSector::OnHearItem( CChar * pChar, lpctstr pszText )
 
 	ASSERT(m_ListenItems);
 
-	for (CSObjContRec* pObjRec : m_Items_Timer.GetIterationSafeContReverse())
+	for (CSObjContRec* pObjRec : m_Items.GetIterationSafeContReverse())
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
 		pItem->OnHear( pszText, pChar );
 	}
-
-	for (CSObjContRec* pObjRec : m_Items_Inert.GetIterationSafeContReverse())
-	{
-		CItem* pItem = static_cast<CItem*>(pObjRec);
-		pItem->OnHear(pszText, pChar);
-	}
 }
 
-void CSector::MoveItemToSector( CItem * pItem, bool fActive )
+void CSector::MoveItemToSector( CItem * pItem )
 {
 	ADDTOCALLSTACK("CSector::MoveItemToSector");
 	// remove from previous list and put in new.
 	// May just be setting a timer. SetTimer or MoveTo()
 	ASSERT( pItem );
+
     if (IsSleeping())
     {
         if (CanSleep(true))
@@ -990,10 +938,7 @@ void CSector::MoveItemToSector( CItem * pItem, bool fActive )
         if (pItem->IsSleeping())
             pItem->GoAwake();
     }
-	if ( fActive )
-		m_Items_Timer.AddItemToSector( pItem );
-	else
-		m_Items_Inert.AddItemToSector( pItem );
+	m_Items.AddItemToSector( pItem );
 }
 
 bool CSector::MoveCharToSector( CChar * pChar )
@@ -1002,8 +947,9 @@ bool CSector::MoveCharToSector( CChar * pChar )
 	// Move a CChar into this CSector.
     ASSERT(pChar);
 
-	if ( IsCharActiveIn(pChar) || IsCharDisconnectedIn(pChar) )
-		return false;	// already here
+	// Already here?
+	if (IsCharActiveIn(pChar))
+		return false;	
 
 	// Check my save parity vs. this sector's
 	if ( pChar->IsStatFlag( STATF_SAVEPARITY ) != m_fSaveParity )
@@ -1027,14 +973,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
 	}
 
 	// Remove from previous spot.
-	if (pChar->IsDisconnected())
-	{
-		m_Chars_Disconnect.AddCharDisconnected(pChar);
-	}
-	else
-	{
-		m_Chars_Active.AddCharActive(pChar);
-	}
+	m_Chars_Active.AddCharActive(pChar);
 
     if (IsSleeping())
     {
@@ -1110,8 +1049,7 @@ void CSector::Close()
 {
 	ADDTOCALLSTACK("CSector::Close");
 	// Clear up all dynamic data for this sector.
-	m_Items_Timer.ClearContainer();
-	m_Items_Inert.ClearContainer();
+	m_Items.ClearContainer();
 	m_Chars_Active.ClearContainer();
 	m_Chars_Disconnect.ClearContainer();
 
@@ -1147,7 +1085,7 @@ void CSector::RespawnDeadNPCs()
 		pChar->NPC_CreateTrigger(); //Removed from NPC_LoadScript() and triggered after char placement
 		pChar->Spell_Resurrection();
 
-		size_t sizeCur = m_Items_Inert.GetContentCount();
+		size_t sizeCur = m_Chars_Active.GetContentCount();
 		ASSERT(sizeCur != sizeStart);
 		sizeStart = sizeCur;
 	}
@@ -1169,18 +1107,15 @@ void CSector::Restock()
         }
     }
 
-	size_t i = m_Items_Timer.GetContentCount();
+	size_t i = m_Items.GetContentCount();
 	while (i > 0)
 	{
-		ASSERT(i < m_Items_Timer.GetContentCount());
-		CItem* pItem = static_cast<CItem*>(m_Items_Timer.GetContentIndex(--i));
-        if (pItem->IsType(IT_SPAWN_ITEM) || pItem->IsType(IT_SPAWN_CHAR) || pItem->IsType(IT_SPAWN_CHAMPION))
+		ASSERT(i < m_Items.GetContentCount());
+		CItem* pItem = static_cast<CItem*>(m_Items.GetContentIndex(--i));
+        CCSpawn* pSpawn = pItem->GetSpawn();
+        if (pSpawn)
         {
-            CCSpawn *pSpawn = pItem->GetSpawn();
-            if (pSpawn)
-            {
-                pSpawn->OnTickComponent();
-            }
+            pSpawn->OnTickComponent();
         }
     }
 }
@@ -1408,7 +1343,7 @@ void CSector::LightFlash()
 
 size_t CSector::GetItemComplexity() const
 {
-	return m_Items_Timer.GetContentCount() + m_Items_Inert.GetContentCount();
+	return m_Items.GetContentCount();
 }
 
 bool CSector::IsItemInSector( const CItem * pItem ) const
@@ -1416,7 +1351,7 @@ bool CSector::IsItemInSector( const CItem * pItem ) const
 	if ( !pItem )
 		return false;
 
-	return ((pItem->GetParent() == &m_Items_Inert) || (pItem->GetParent() == &m_Items_Timer));
+	return (pItem->GetParent() == &m_Items);
 }
 
 void CSector::AddListenItem()

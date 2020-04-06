@@ -104,8 +104,7 @@ public:
 
 	CCharsActiveList		m_Chars_Active;		// CChar(s) activte in this CSector.
 	CCharsDisconnectList	m_Chars_Disconnect;	// dead NPCs, etc
-	CItemsList m_Items_Timer;				// CItem(s) in this CSector that need timers.
-	CItemsList m_Items_Inert;				// CItem(s) in this CSector. (no timer required)
+	CItemsList m_Items;				// CItem(s) in this CSector (not relevant if they have a timer set or not).
 
 private:
     CSector* _ppAdjacentSectors[DIR_QTY];

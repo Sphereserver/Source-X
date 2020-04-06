@@ -718,17 +718,17 @@ bool CChar::Skill_MakeItem_Success()
 		{
 			case 0:
 				// Shoddy quality
-				strcpy(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_1));
+				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_1), STR_TEMPLENGTH);
 				quality = Calc_GetRandVal(25) + 1;
 				break;
 			case 1:
 				// Poor quality
-				strcpy(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_2));
+				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_2), STR_TEMPLENGTH);
 				quality = Calc_GetRandVal(25) + 26;
 				break;
 			case 2:
 				// Below average quality
-				strcpy(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_3));
+				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_3), STR_TEMPLENGTH);
 				quality = Calc_GetRandVal(25) + 51;
 				break;
 			case 3:
@@ -737,17 +737,17 @@ bool CChar::Skill_MakeItem_Success()
 				break;
 			case 4:
 				// Above average quality
-				strcpy(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_4));
+				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_4), STR_TEMPLENGTH);
 				quality = Calc_GetRandVal(25) + 126;
 				break;
 			case 5:
 				// Excellent quality
-				strcpy(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_5));
+				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_5), STR_TEMPLENGTH);
 				quality = Calc_GetRandVal(25) + 151;
 				break;
 			case 6:
 				// Superior quality
-				strcpy(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_6));
+				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_6), STR_TEMPLENGTH);
 				quality = Calc_GetRandVal(25) + 176;
 				break;
 			default:

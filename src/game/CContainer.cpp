@@ -34,13 +34,13 @@ int CContainer::FixWeight()
 	for ( CSObjContRec *pObjRec : *this )
 	{
 		CItemContainer *pCont = dynamic_cast<CItemContainer *>(pObjRec);
-		if ( pCont )
-		{
-			pCont->FixWeight();
-			if ( !pCont->IsWeighed() )	// bank box doesn't count for weight.
-				continue;
-		}
-		m_totalweight += pCont->GetWeight();
+		if (!pCont)
+			continue;
+
+        pCont->FixWeight();
+        if (!pCont->IsWeighed())	// bank box doesn't count for weight.
+            continue;
+        m_totalweight += pCont->GetWeight();
 	}
 	return m_totalweight;
 }
@@ -76,14 +76,13 @@ void CContainer::OnRemoveObj( CSObjContRec *pObRec )	// Override this = called w
 void CContainer::r_WriteContent( CScript &s ) const
 {
 	ADDTOCALLSTACK("CContainer::r_WriteContent");
-	ASSERT(dynamic_cast<const CSObjList *>(this) != nullptr);
 
 	// Write out all the items in me.
 	for (CSObjContRec* pObjRec : *this)
 	{
-		CItem* pItem = static_cast<CItem*>(pObjRec);
+		ASSERT(pObjRec->GetParent() == this);
 
-		ASSERT(pItem->GetParent() == this);
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		pItem->r_WriteSafe(s);
 	}
 }
@@ -304,6 +303,7 @@ int CContainer::ContentConsume( const CResourceID& rid, int amount, dword dwArg 
 	for (size_t i = 0; i < GetContentCount();)
 	{
 		CItem* pItem = static_cast<CItem*>(GetContentIndex(i));
+		ASSERT(pItem);
 		if ( pItem->IsResourceMatch(rid, dwArg) )
 		{
 			amount -= pItem->ConsumeAmount( (word)minimum(amount,UINT16_MAX));
@@ -558,7 +558,7 @@ bool CContainer::r_GetRefContainer( lpctstr &ptcKey, CScriptObj *&pRef )
 		{
 			ptcKey += 4;
 			SKIP_SEPARATORS(ptcKey);
-			pRef = dynamic_cast<CItem*>(GetContentIndex(Exp_GetSingle(ptcKey)));
+			pRef = dynamic_cast<CItem*>(GetContentIndex(Exp_GetSTSingle(ptcKey)));
 			SKIP_SEPARATORS(ptcKey);
 			return true;
 		}

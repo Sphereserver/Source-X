@@ -1719,13 +1719,14 @@ CWorldSearch::CWorldSearch(const CPointMap& pt, int iDist) :
 	_pt(pt), _iDist(iDist)
 {
 	// define a search of the world.
+	_eSearchType = ws_search_e::None;
 	_fAllShow = false;
 	_fSearchSquare = false;
-	_pObj = nullptr;
-	_idxObj = 0;
 	_fInertToggle = false;
+	_pObj = nullptr;
 	_pCurCont = nullptr;
-
+	_idxObj = 0;
+	
 	_pSectorBase = _pSector = pt.GetSector();
 
 	_rectSector.SetRect(
@@ -1754,6 +1755,7 @@ void CWorldSearch::SetSearchSquare(bool fSquareSearch)
 void CWorldSearch::RestartSearch()
 {
 	ADDTOCALLSTACK("CWorldSearch::RestartSearch");
+	_eSearchType = ws_search_e::None;
 	_pObj = nullptr;
 }
 
@@ -1772,9 +1774,12 @@ bool CWorldSearch::GetNextSector()
 			return false;	// done searching.
 		if (_pSectorBase == _pSector)
 			continue;	// same as base.
+
+		_eSearchType = ws_search_e::None;
+		_pCurCont = nullptr;
 		_pObj = nullptr;	// start at head of next Sector.
 		_idxObj = 0;
-		_pCurCont = nullptr;
+
 		return true;
 	}
 }
@@ -1786,38 +1791,26 @@ CItem* CWorldSearch::GetItem()
 	{
 		if (_pObj == nullptr)
 		{
-			_fInertToggle = false;
-			_pCurCont = &_pSector->m_Items_Inert;
+			ASSERT(_eSearchType == ws_search_e::None);
+			_eSearchType = ws_search_e::Items;
+			_pCurCont = &_pSector->m_Items;
 			_idxObj = 0;
-
-			_pObj = (_idxObj >= _pCurCont->GetContentCount()) ? nullptr : static_cast <CObjBase*> (_pCurCont->GetContentIndex(_idxObj));
 		}
 		else
 		{
 			++_idxObj;
-			_pObj = (_idxObj >= _pCurCont->GetContentCount()) ? nullptr : static_cast <CObjBase*> (_pCurCont->GetContentIndex(_idxObj));
 		}
 
+		ASSERT(_eSearchType == ws_search_e::Items);
+		_pObj = (_idxObj >= _pCurCont->GetContentCount()) ? nullptr : static_cast <CObjBase*> (_pCurCont->GetContentIndex(_idxObj));
 		if (_pObj == nullptr)
 		{
-			if (!_fInertToggle)
-			{
-				_fInertToggle = true;
-				_pCurCont = &_pSector->m_Items_Timer;
-				_idxObj = 0;
-
-				_pObj = (_idxObj >= _pCurCont->GetContentCount()) ? nullptr : static_cast <CObjBase*> (_pCurCont->GetContentIndex(_idxObj));
-				if (_pObj != nullptr)
-					goto jumpover;
-			}
-
 			if (GetNextSector())
 				continue;
 
 			return nullptr;
 		}
 
-	jumpover:
 		const CPointMap& ptObj = _pObj->GetTopPoint();
 		if (_fSearchSquare)
 		{
@@ -1855,18 +1848,19 @@ CChar* CWorldSearch::GetChar()
 	{
 		if (_pObj == nullptr)
 		{
+			ASSERT(_eSearchType == ws_search_e::None);
+			_eSearchType = ws_search_e::Chars;
 			_fInertToggle = false;
 			_pCurCont = &_pSector->m_Chars_Active;
 			_idxObj = 0;
-
-			_pObj = (_idxObj >= _pCurCont->GetContentCount()) ? nullptr : static_cast <CObjBase*> (_pCurCont->GetContentIndex(_idxObj));
 		}
 		else
 		{
 			++_idxObj;
-			_pObj = (_idxObj >= _pCurCont->GetContentCount()) ? nullptr : static_cast <CObjBase*> (_pCurCont->GetContentIndex(_idxObj));
 		}
 
+		ASSERT(_eSearchType == ws_search_e::Chars);
+		_pObj = (_idxObj >= _pCurCont->GetContentCount()) ? nullptr : static_cast <CObjBase*> (_pCurCont->GetContentIndex(_idxObj));
 		if (_pObj == nullptr)
 		{
 			if (!_fInertToggle && _fAllShow)
