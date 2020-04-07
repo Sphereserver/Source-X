@@ -394,7 +394,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 		if ( Skill_OnTrigger( skill, SKTRIG_GAIN, &pArgs ) == TRIGRET_RET_TRUE )
 			return;
 	}
-	pArgs.getArgNs( 0, &iChance, &iSkillMax );
+	pArgs.GetArgNs( 0, &iChance, &iSkillMax );
 
 	if ( iChance <= 0 )
 		return;
@@ -528,7 +528,7 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 	if ( IsTrigUsed(TRIGGER_SKILLUSEQUICK) )
 	{
 		ret = Skill_OnCharTrigger( skill, CTRIG_SkillUseQuick, &pArgs );
-		pArgs.getArgNs( 0, &difficulty, &result);
+		pArgs.GetArgNs( 0, &difficulty, &result);
 
 		if ( ret == TRIGRET_RET_TRUE )
 			return true;
@@ -538,7 +538,7 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 	if ( IsTrigUsed(TRIGGER_USEQUICK) )
 	{
 		ret = Skill_OnTrigger( skill, SKTRIG_USEQUICK, &pArgs );
-		pArgs.getArgNs( 0, &difficulty, &result );
+		pArgs.GetArgNs( 0, &difficulty, &result );
 
 		if ( ret == TRIGRET_RET_TRUE )
 			return true;
