@@ -2167,3 +2167,6 @@ Must have event, even if it's empty, since it's applied by the source to generat
 	-The %of damage reflected by Reactive Armor is now stored in More1L in it's rune item.
 	-The value is asigned by default by a linear formula reflecting the caster's magery skill and the effect value of the spell.
 	-The value can also be modified now via @EffectAdd.
+
+07-04-2020, xwerswoodx
+- Fixed: The issue on Resurrection, which causes the server freezes. (Issue #398)
