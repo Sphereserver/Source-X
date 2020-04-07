@@ -394,11 +394,15 @@ void CContainer::ContentsDump( const CPointMap &pt, uint64 iAttrLeave )
 	// Just dump the contents onto the ground.
 
     iAttrLeave |= ATTR_NEWBIE|ATTR_MOVE_NEVER|ATTR_CURSED2|ATTR_BLESSED2;
+	
 	for (size_t i = 0; i < GetContentCount(); )
 	{
 		CItem* pItem = static_cast<CItem*>(GetContentIndex(i));
 		if ( pItem->IsAttr(iAttrLeave) )	// hair and newbie stuff.
+		{
+			++i;
 			continue;
+		}
 
 		// ??? scatter a little ?
 		if (!pItem->MoveToCheck(pt))
