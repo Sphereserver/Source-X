@@ -407,29 +407,6 @@ void CContainer::ContentsDump( const CPointMap &pt, uint64 iAttrLeave )
 	}
 	*/
 	
-	/*
-	The original code commented upon that note.
-
-	Continue does not increase i value, so it causes the infinite loop. The way I chose to fix it to add ++i to for loop and removed last if condition.
-	I totally don't understand why someone use MoveToCheck boolean for checking if false to increase i value (as default it turns as a true - that also causes infinite loop if any item return as true), and use continue without increasing i value.
-	The issue is, blessed/newbie and cursed items, because if the item has one of these attributes, it causes the infinite loop because of not increasing i value before continue.
-	  
-	- xwerswoodx
-	*/
-	for (size_t i = 0; i < GetContentCount(); ++i)
-	{
-		CItem* pItem = static_cast<CItem*>(GetContentIndex(i));
-		if ( pItem->IsAttr(iAttrLeave) ) //Hair and newbie stuff.
-			continue;
-		pItem->MoveToCheck(pt);
-	}
-	/*
-	Fix for the code that developers used before...
-	I make another fix for it, because maybe there is a reason to use if condition for MoveToCheck boolean.
-	
-	-xwerswoodx
-	*/
-	/*
 	for (size_t i = 0; i < GetContentCount(); )
 	{
 		CItem* pItem = static_cast<CItem*>(GetContentIndex(i));
@@ -443,7 +420,6 @@ void CContainer::ContentsDump( const CPointMap &pt, uint64 iAttrLeave )
 		if (!pItem->MoveToCheck(pt))
 			++i;
 	}
-	*/
 }
 
 void CContainer::ContentsTransfer( CItemContainer *pCont, bool fNoNewbie )
