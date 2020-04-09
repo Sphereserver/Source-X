@@ -3228,6 +3228,11 @@ TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CCh
 	return TRIGRET_RET_DEFAULT;
 }
 
+bool CObjBase::IsRunningTrigger() const
+{
+	return ((_iRunningTriggerId >= 0) || !_sRunningTrigger.empty());
+}
+
 bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult)
 {
 	ADDTOCALLSTACK("CObjBase::CallPersonalTrigger");
