@@ -316,13 +316,19 @@ int CContainer::ContentConsume( const CResourceID& rid, int amount, dword dwArg 
 		{
 			if ( rid == CResourceID(RES_TYPEDEF, IT_GOLD) )
 			{
-				if ( pCont->IsType(IT_CONTAINER_LOCKED) )
+				if (pCont->IsType(IT_CONTAINER_LOCKED))
+				{
+					++i;
 					continue;
+				}
 			}
 			else
 			{
-				if ( !pCont->IsSearchable() )
+				if (!pCont->IsSearchable())
+				{
+					++i;
 					continue;
+				}
 			}
 			amount = pCont->ContentConsume(rid, amount, dwArg);
 			if ( amount <= 0 )

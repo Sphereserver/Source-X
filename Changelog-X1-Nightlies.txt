@@ -1,5 +1,5 @@
 ﻿
----- 0.56d (eXperimental branch forked from 0.56d) --------------------------------------------------------------
+---- 0.56d (former eXperimental branch, now simply Sphere-X, forked from 0.56d) --------------------------------------------------------------
 ---- 11/04/2016
 
 10-04-2016, Coruja
@@ -2170,3 +2170,6 @@ Must have event, even if it's empty, since it's applied by the source to generat
 
 07-04-2020, xwerswoodx
 - Fixed: The issue on Resurrection, which causes the server freezes. (Issue #398)
+
+09-04-2020, Nolok
+- Fixed: Using ACCOUNT object inside a trigger checked if the SRC had high enough privilege (PLEVEL) to access/modify ACCOUNT's properties, instead of acting with the highest PLEVEL (Issue #391).
