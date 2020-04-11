@@ -25,32 +25,22 @@ int	CContainer::GetTotalWeight() const
 	return m_totalweight;
 }
 
-CItem* CContainer::GetContentHead() const
-{
-	return( static_cast <CItem*>( GetHead()));
-}
-
-CItem* CContainer::GetContentTail() const
-{
-	return( static_cast <CItem*>( GetTail()));
-}
-
 int CContainer::FixWeight()
 {
 	ADDTOCALLSTACK("CContainer::FixWeight");
 	// If there is some sort of ASSERT during item add then this is used to fix it.
 	m_totalweight = 0;
 
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+	for ( CSObjContRec *pObjRec : *this )
 	{
-		CItemContainer *pCont = dynamic_cast<CItemContainer *>(pItem);
-		if ( pCont )
-		{
-			pCont->FixWeight();
-			if ( !pCont->IsWeighed() )	// bank box doesn't count for weight.
-				continue;
-		}
-		m_totalweight += pItem->GetWeight();
+		CItemContainer *pCont = dynamic_cast<CItemContainer *>(pObjRec);
+		if (!pCont)
+			continue;
+
+        pCont->FixWeight();
+        if (!pCont->IsWeighed())	// bank box doesn't count for weight.
+            continue;
+        m_totalweight += pCont->GetWeight();
 	}
 	return m_totalweight;
 }
@@ -63,24 +53,12 @@ void CContainer::ContentAddPrivate( CItem *pItem )
 	ASSERT(pItem->IsValidUID());	// it should be valid at this point.
 	if ( pItem->GetParent() == this )
 		return;
-	if ( !CSObjList::GetCount() )
-		CSObjList::InsertHead(pItem);
-	else
-	{
-		CItem *pTest = GetContentHead();
-		CItem *pPrevItem = pTest;
-		for ( ; pTest != nullptr; pTest = pTest->GetNext() )
-		{
-			if ( pTest->GetUID() < pPrevItem->GetUID() )
-				pPrevItem = pTest;
-		}
-		CSObjList::InsertAfter(pItem, pPrevItem);
-	}
-	//CSObjList::InsertTail( pItem );//Reversing the order in which things are added into a container
+
+	CSObjCont::InsertContentTail( pItem );
 	OnWeightChange(pItem->GetWeight());
 }
 
-void CContainer::OnRemoveObj( CSObjListRec *pObRec )	// Override this = called when removed from list.
+void CContainer::OnRemoveObj( CSObjContRec *pObRec )	// Override this = called when removed from list.
 {
 	ADDTOCALLSTACK("CContainer::OnRemoveObj");
 	// remove this object from the container list.
@@ -88,7 +66,7 @@ void CContainer::OnRemoveObj( CSObjListRec *pObRec )	// Override this = called w
 	CItem *pItem = static_cast<CItem *>(pObRec);
 	ASSERT(pItem);
 
-	CSObjList::OnRemoveObj(pItem);
+	CSObjCont::OnRemoveObj(pItem);
 	ASSERT(pItem->GetParent() == nullptr);
 
 	pItem->SetUIDContainerFlags(UID_O_DISCONNECT);		// It is no place for the moment.
@@ -98,12 +76,13 @@ void CContainer::OnRemoveObj( CSObjListRec *pObRec )	// Override this = called w
 void CContainer::r_WriteContent( CScript &s ) const
 {
 	ADDTOCALLSTACK("CContainer::r_WriteContent");
-	ASSERT(dynamic_cast<const CSObjList *>(this) != nullptr);
 
 	// Write out all the items in me.
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+	for (CSObjContRec* pObjRec : *this)
 	{
-		ASSERT(pItem->GetParent() == this);
+		ASSERT(pObjRec->GetParent() == this);
+
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		pItem->r_WriteSafe(s);
 	}
 }
@@ -116,11 +95,12 @@ CItem *CContainer::ContentFind( CResourceID rid, dword dwArg, int iDecendLevels 
 	if ( rid.GetResIndex() == 0 )
 		return nullptr;
 
-	CItem *pItem = GetContentHead();
-	for ( ; pItem != nullptr; pItem = pItem->GetNext() )
+	for (CSObjContRec* pObjRec : *this)
 	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( pItem->IsResourceMatch(rid, dwArg) )
-			break;
+			return pItem;
+
 		if ( iDecendLevels <= 0 )
 			continue;
 
@@ -134,19 +114,19 @@ CItem *CContainer::ContentFind( CResourceID rid, dword dwArg, int iDecendLevels 
 				return pItemInCont;
 		}
 	}
-	return pItem;
+	return nullptr;
 }
 
-TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs,
+TRIGRET_TYPE CContainer::OnContTriggerForLoop(
+	CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs,
 	CSString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, CResourceID rid, dword dwArg, int iDecendLevels )
 {
 	ADDTOCALLSTACK("CContainer::OnContTriggerForLoop");
 	if ( rid.GetResIndex() != 0 )
 	{
-		CItem *pItemNext = nullptr;
-		for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
+		for (CSObjContRec *pObjRec : GetIterationSafeContReverse())
 		{
-			pItemNext = pItem->GetNext();
+			CItem* pItem = static_cast<CItem*>(pObjRec);
 			if ( pItem->IsResourceMatch(rid, dwArg) )
 			{
 				s.SeekContext(StartContext);
@@ -182,6 +162,7 @@ TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole *pSrc, C
 			}
 		}
 	}
+
 	if ( EndContext.m_iOffset <= StartContext.m_iOffset )
 	{
 		CScriptObj *pScript = dynamic_cast<CScriptObj *>(this);
@@ -196,14 +177,14 @@ TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole *pSrc, C
 	return TRIGRET_ENDIF;
 }
 
-TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop( CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs,
+TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop(
+CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs,
 	CSString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, int iDecendLevels )
 {
 	ADDTOCALLSTACK("CContainer::OnGenericContTriggerForLoop");
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	for (CSObjContRec* pObjRec : GetIterationSafeContReverse())
 	{
-		pItemNext = pItem->GetNext();
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		s.SeekContext(StartContext);
 		TRIGRET_TYPE iRet = pItem->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult);
 		if ( iRet == TRIGRET_BREAK )
@@ -232,6 +213,7 @@ TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop( CScript &s, CTextConsole *
 			EndContext = s.GetContext();
 		}
 	}
+
 	if ( EndContext.m_iOffset <= StartContext.m_iOffset )
 	{
 		CScriptObj *pScript = dynamic_cast<CScriptObj *>(this);
@@ -240,7 +222,9 @@ TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop( CScript &s, CTextConsole *
 			return iRet;
 	}
 	else
+	{
 		s.SeekContext(EndContext);
+	}
 	return TRIGRET_ENDIF;
 }
 
@@ -248,14 +232,14 @@ bool CContainer::ContentFindKeyFor( CItem *pLocked ) const
 {
 	ADDTOCALLSTACK("CContainer::ContentFindKeyFor");
 	// Look for the key that fits this in my possesion.
-	return (pLocked->m_itContainer.m_UIDLock && (ContentFind(CResourceID(RES_TYPEDEF, IT_KEY), pLocked->m_itContainer.m_UIDLock) != nullptr));
+	return (pLocked->m_itContainer.m_UIDLock && (nullptr != ContentFind(CResourceID(RES_TYPEDEF, IT_KEY), pLocked->m_itContainer.m_UIDLock)));
 }
 
 CItem *CContainer::ContentFindRandom() const
 {
 	ADDTOCALLSTACK("CContainer::ContentFindRandom");
 	// returns Pointer of random item, nullptr if player carrying none
-	return dynamic_cast<CItem *>(GetAt(Calc_GetRandVal((int32)GetCount())));
+	return static_cast<CItem *>(GetContentIndex(Calc_GetRandVal((int32)GetContentCount())));
 }
 
 int CContainer::ContentConsumeTest( const CResourceID& rid, int amount, dword dwArg ) const
@@ -270,10 +254,9 @@ int CContainer::ContentConsumeTest( const CResourceID& rid, int amount, dword dw
     if ( rid.GetResIndex() == 0 )
         return amount;	// from skills menus.
 
-    const CItem *pItemNext = nullptr;
-    for ( const CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
-    {
-        pItemNext = pItem->GetNext();
+	for (const CSObjContRec* pObjRec : *this)
+	{
+		const CItem* pItem = static_cast<const CItem*>(pObjRec);
         if ( pItem->IsResourceMatch(rid, dwArg) )
         {
             const word wAmountMax = pItem->GetAmount();
@@ -317,10 +300,10 @@ int CContainer::ContentConsume( const CResourceID& rid, int amount, dword dwArg 
 	if ( rid.GetResIndex() == 0 )
 		return amount;	// from skills menus.
 
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	for (size_t i = 0; i < GetContentCount();)
 	{
-		pItemNext = pItem->GetNext();
+		CItem* pItem = static_cast<CItem*>(GetContentIndex(i));
+		ASSERT(pItem);
 		if ( pItem->IsResourceMatch(rid, dwArg) )
 		{
 			amount -= pItem->ConsumeAmount( (word)minimum(amount,UINT16_MAX));
@@ -333,18 +316,27 @@ int CContainer::ContentConsume( const CResourceID& rid, int amount, dword dwArg 
 		{
 			if ( rid == CResourceID(RES_TYPEDEF, IT_GOLD) )
 			{
-				if ( pCont->IsType(IT_CONTAINER_LOCKED) )
+				if (pCont->IsType(IT_CONTAINER_LOCKED))
+				{
+					++i;
 					continue;
+				}
 			}
 			else
 			{
-				if ( !pCont->IsSearchable() )
+				if (!pCont->IsSearchable())
+				{
+					++i;
 					continue;
+				}
 			}
 			amount = pCont->ContentConsume(rid, amount, dwArg);
 			if ( amount <= 0 )
 				break;
 		}
+
+		if (!pItem->IsDeleted())
+			++i;
 	}
 	return amount;
 }
@@ -360,8 +352,9 @@ void CContainer::ContentAttrMod( uint64 iAttr, bool fSet )
 {
 	ADDTOCALLSTACK("CContainer::ContentAttrMod");
 	// Mark the attr
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+	for (CSObjContRec* pObjRec : *this)
 	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( fSet )
 			pItem->SetAttr(iAttr);
 		else
@@ -376,20 +369,27 @@ void CContainer::ContentAttrMod( uint64 iAttr, bool fSet )
 void CContainer::ContentNotifyDelete()
 {
 	ADDTOCALLSTACK("CContainer::ContentNotifyDelete");
-	if ( IsTrigUsed(TRIGGER_DESTROY) ) // no point entering this loop if the trigger is disabled
+	if ( !IsTrigUsed(TRIGGER_DESTROY) ) // no point entering this loop if the trigger is not used
 		return;
 
 	// trigger @Destroy on contained items
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	for (size_t i = 0; i < GetContentCount(); )
 	{
-		pItemNext = pItem->GetNext();
-		if ( !pItem->NotifyDelete() )
+		CItem* pItem = static_cast<CItem*>(GetContentIndex(i));
+		bool fIncreaseIndex = true;
+		if (!pItem->NotifyDelete())
 		{
 			// item shouldn't be destroyed and so cannot remain in this container,
 			// drop it to the ground if it hasn't been moved already
-			if ( pItem->GetParent() == this )
-				pItem->MoveToCheck(pItem->GetTopLevelObj()->GetTopPoint());
+			if (pItem->GetParent() == this)
+			{
+				fIncreaseIndex = !pItem->MoveToCheck(pItem->GetTopLevelObj()->GetTopPoint());
+			}
+		}
+		
+		if (fIncreaseIndex)
+		{
+			++i;
 		}
 	}
 }
@@ -399,14 +399,19 @@ void CContainer::ContentsDump( const CPointMap &pt, uint64 iAttrLeave )
 	ADDTOCALLSTACK("CContainer::ContentsDump");
 	// Just dump the contents onto the ground.
     iAttrLeave |= ATTR_NEWBIE|ATTR_MOVE_NEVER;
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	
+	for (size_t i = 0; i < GetContentCount(); )
 	{
-		pItemNext = pItem->GetNext();
+		CItem* pItem = static_cast<CItem*>(GetContentIndex(i));
 		if ( pItem->IsAttr(iAttrLeave) )	// hair and newbie stuff.
+		{
+			++i;
 			continue;
+		}
+
 		// ??? scatter a little ?
-		pItem->MoveToCheck(pt);
+		if (!pItem->MoveToCheck(pt))
+			++i;
 	}
 }
 
@@ -417,10 +422,9 @@ void CContainer::ContentsTransfer( CItemContainer *pCont, bool fNoNewbie )
 	if ( !pCont )
 		return;
 
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	for (CSObjContRec* pObjRec : GetIterationSafeCont())
 	{
-		pItemNext = pItem->GetNext();
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( fNoNewbie && pItem->IsAttr(ATTR_NEWBIE|ATTR_MOVE_NEVER) )	// keep newbie stuff.
 			continue;
 		pCont->ContentAdd(pItem);	// add content
@@ -445,7 +449,7 @@ size_t CContainer::ResourceConsumePart( const CResourceQtyArray *pResources, int
 	size_t iQtyRes = pResources->size();
 	for ( size_t i = 0; i < iQtyRes; ++i )
 	{
-		int iResQty = (int)(pResources->at(i).GetResQty());
+		int iResQty = (int)((*pResources)[i].GetResQty());
 		if ( iResQty <= 0 ) // not sure why this would be true
 			continue;
 
@@ -456,7 +460,7 @@ size_t CContainer::ResourceConsumePart( const CResourceQtyArray *pResources, int
 		if ( iQtyTotal <= 0 )
 			continue;
 
-		CResourceID rid = pResources->at(i).GetResourceID();
+		const CResourceID rid = (*pResources)[i].GetResourceID();
 		int iRet = fTest ? ContentConsumeTest(rid, iQtyTotal, dwArg) : ContentConsume(rid, iQtyTotal, dwArg);
 		if ( iRet )
 			iMissing = i;
@@ -485,14 +489,14 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
 
 	CChar *pChar = dynamic_cast<CChar *>(this);
 	int iQtyMin = INT32_MAX;
-	for ( size_t i = 0; i < pResources->size(); i++ )
+	for ( size_t i = 0; i < pResources->size(); ++i )
 	{
-		int iResQty = (int)(pResources->at(i).GetResQty());
+		int iResQty = (int)((*pResources)[i].GetResQty());
 		if ( iResQty <= 0 ) // not sure why this would be true
 			continue;
 
-		int iQtyTotal = (iResQty * iReplicationQty);
-		CResourceID rid = pResources->at(i).GetResourceID();
+		const int iQtyTotal = (iResQty * iReplicationQty);
+		CResourceID rid = (*pResources)[i].GetResourceID();
 		if ( rid.GetResType() == RES_SKILL )
 		{
 			if ( !pChar )
@@ -531,9 +535,10 @@ size_t CContainer::ContentCountAll() const
 	// RETURN:
 	//  A count of all the items in this container and sub contianers.
 	size_t iTotal = 0;
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+	for (const CSObjContRec* pObjRec : *this)
 	{
-		iTotal++;
+		++ iTotal;
+		const CItem* pItem = static_cast<const CItem*>(pObjRec);
 		const CItemContainer *pCont = dynamic_cast<const CItemContainer *>(pItem);
 		if ( !pCont )
 			continue;
@@ -562,7 +567,7 @@ bool CContainer::r_GetRefContainer( lpctstr &ptcKey, CScriptObj *&pRef )
 		{
 			ptcKey += 4;
 			SKIP_SEPARATORS(ptcKey);
-			pRef = dynamic_cast<CItem*>(GetAt(Exp_GetSingle(ptcKey)));
+			pRef = dynamic_cast<CItem*>(GetContentIndex(Exp_GetSTSingle(ptcKey)));
 			SKIP_SEPARATORS(ptcKey);
 			return true;
 		}
@@ -585,7 +590,7 @@ CContainer::CContainer()
 
 CContainer::~CContainer()
 {
-	Clear(); // call this early so the virtuals will work.
+	ClearContainer(); // call this early so the virtuals will work.
 }
 
 bool CContainer::r_WriteValContainer( lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc )
@@ -612,13 +617,7 @@ bool CContainer::r_WriteValContainer( lpctstr ptcKey, CSString &sVal, CTextConso
 	{
 		case 0:			//	count
 		{
-			size_t uiTotal = 0;
-			for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
-            {
-				++uiTotal;
-            }
-
-			sVal.FormatSTVal(uiTotal);
+			sVal.FormatSTVal(CSObjCont::GetContentCount());
 			break;
 		}
 
@@ -627,7 +626,7 @@ bool CContainer::r_WriteValContainer( lpctstr ptcKey, CSString &sVal, CTextConso
 			break;
 
 		case 2:			//	rescount
-			sVal.FormatSTVal(*pKey ? ContentCount(g_Cfg.ResourceGetID(RES_ITEMDEF, pKey)) : GetCount());
+			sVal.FormatSTVal(*pKey ? ContentCount(g_Cfg.ResourceGetID(RES_ITEMDEF, pKey)) : GetContentCount());
 			break;
 
 		case 3:			//	restest

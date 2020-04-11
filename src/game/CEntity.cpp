@@ -48,15 +48,15 @@ void CEntity::ClearComponents()
 void CEntity::SubscribeComponent(CComponent * pComponent)
 {
     ADDTOCALLSTACK_INTENSIVE("CEntity::SubscribeComponent");
-    COMP_TYPE compType = pComponent->GetType();
-    if (_List.end() != _List.find(compType))
+    const COMP_TYPE compType = pComponent->GetType();
+    const auto pairResult = _List.try_emplace(compType, pComponent);
+    if (pairResult.second == false)
     {
         delete pComponent;
-        PERSISTANT_ASSERT(0);  // This should never happen
+        ASSERT(false);  // This should never happen
         //g_Log.EventError("Trying to duplicate component (%d) for %s '0x%08x'\n", (int)pComponent->GetType(), pComponent->GetLink()->GetName(), pComponent->GetLink()->GetUID());
         return;
     }
-    _List[compType] = pComponent;
     //_List.container.shrink_to_fit();
 }
 
@@ -67,14 +67,15 @@ void CEntity::UnsubscribeComponent(CComponent *pComponent)
     {
         return;
     }
-    COMP_TYPE compType = pComponent->GetType();
-    if (_List.end() == _List.find(compType))
+    const COMP_TYPE compType = pComponent->GetType();
+    auto it = _List.find(compType);
+    if (it == _List.end())
     {
         g_Log.EventError("Trying to unsuscribe not suscribed component (%d)\n", (int)pComponent->GetType());    // Should never happen?
         delete pComponent;
         return;
     }
-    _List.erase(compType);  // iterator invalidation!
+    _List.erase(it);  // iterator invalidation!
     //_List.container.shrink_to_fit();
 }
 

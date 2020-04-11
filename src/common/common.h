@@ -35,9 +35,11 @@
 
 #if __cplusplus >= 201703L  // is C++17 enabled?
     #define FALLTHROUGH [[fallthrough]]
+	#define NODISCARD	[[nodiscard]]
 #else
     #define FALLTHROUGH // fall through
     /* yep, the comment appears to silence the warning with GCC, dunno for clang */
+	#define NODISCARD
 #endif
 
 

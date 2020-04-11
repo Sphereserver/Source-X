@@ -150,7 +150,7 @@ STAT_TYPE CCharPlayer::Stat_GetLockType( lpctstr ptcKey ) const
 	if ( IsDigit( ppArgs[1][0] ))
 		i = atoi( ppArgs[1] );
 	else
-		i = g_Cfg.FindStatKey( ppArgs[1] );
+		i = g_Cfg.GetStatKey( ppArgs[1] );
 
 	if ( i >= STAT_BASE_QTY )
 		return STAT_NONE;
@@ -334,10 +334,10 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 		{
 			SKIP_SEPARATORS(ptcKey);
 			size_t index = Exp_GetVal(ptcKey);
-			if ( index >= g_World.m_GMPages.GetCount() )
+			if ( index >= g_World.m_GMPages.GetContentCount() )
 				return false;
 
-			CGMPage* pPage = static_cast <CGMPage*> (g_World.m_GMPages.GetAt(index));
+			CGMPage* pPage = static_cast <CGMPage*> (g_World.m_GMPages.GetContentAt(index));
 			if ( pPage == nullptr )
 				return false;
 

@@ -392,7 +392,7 @@ CStoneMember::CStoneMember( CItemStone * pStone, CUID uid, STONEPRIV_TYPE iType,
 		}
 	}
 
-	pStone->InsertTail( this );
+	pStone->InsertContentTail( this );
 }
 
 CStoneMember::~CStoneMember()

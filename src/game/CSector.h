@@ -83,7 +83,7 @@ public:
 	// Items in the sector
 	size_t GetItemComplexity() const;
 	bool IsItemInSector( const CItem * pItem ) const;
-	void MoveItemToSector( CItem * pItem, bool fActive );
+	void MoveItemToSector( CItem * pItem );
 
 	void AddListenItem();
 	void RemoveListenItem();

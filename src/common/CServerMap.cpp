@@ -523,7 +523,7 @@ void CServerMapBlock::Load( int bx, int by )
 }
 
 CServerMapBlock::CServerMapBlock(int bx, int by, int map) :
-		CPointSort((short)(bx)* UO_BLOCK_SIZE, (short)(by) * UO_BLOCK_SIZE, (uchar)map)
+		CPointSort((short)(bx)* UO_BLOCK_SIZE, (short)(by) * UO_BLOCK_SIZE, 0, (uchar)map)
 {
 	++sm_iCount;
 	Load( bx, by );

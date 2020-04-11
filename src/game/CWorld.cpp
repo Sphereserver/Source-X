@@ -240,8 +240,9 @@ void CWorldThread::InitUIDs()
 void CWorldThread::CloseAllUIDs()
 {
 	ADDTOCALLSTACK("CWorldThread::CloseAllUIDs");
-	m_ObjDelete.Clear();	// empty our list of unplaced objects (and delete the objects in the list)
-	m_ObjNew.Clear();		// empty our list of objects to delete (and delete the objects in the list)
+	m_ObjDelete.ClearContainer();	// empty our list of unplaced objects (and delete the objects in the list)
+	m_ObjSpecialDelete.ClearContainer();
+	m_ObjNew.ClearContainer();		// empty our list of objects to delete (and delete the objects in the list)
 
 	if (_ppUIDObjArray != nullptr)
 	{
@@ -472,25 +473,26 @@ void CWorldThread::GarbageCollection_New()
 	ADDTOCALLSTACK("CWorldThread::GarbageCollection_New");
 	EXC_TRY("GarbageCollection_New");
 	// Clean up new objects that are never placed.
-	size_t iObjCount = m_ObjNew.GetCount();
+	size_t iObjCount = m_ObjNew.GetContentCount();
 	if (iObjCount > 0 )
 	{
 		g_Log.Event(LOGL_ERROR, "GC: %" PRIuSIZE_T " unplaced objects!\n", iObjCount);
 
 		for (size_t i = 0; i < iObjCount; ++i)
 		{
-			CObjBase * pObj = dynamic_cast<CObjBase*>(m_ObjNew.GetAt(i));
+			CObjBase * pObj = dynamic_cast<CObjBase*>(m_ObjNew.GetContentIndex(i));
 			if (pObj == nullptr)
 				continue;
 
 			ReportGarbageCollection(pObj, 0x3202);
 		}
-		m_ObjNew.Clear();	// empty our list of unplaced objects (and delete the objects in the list)
+		m_ObjNew.ClearContainer();	// empty our list of unplaced objects (and delete the objects in the list)
 	}
-	m_ObjDelete.Clear();	// empty our list of objects to delete (and delete the objects in the list)
+	m_ObjDelete.ClearContainer();	// empty our list of objects to delete (and delete the objects in the list)
+	m_ObjSpecialDelete.ClearContainer();
 
 	// Make sure all GM pages have accounts.
-	CGMPage *pPage = static_cast<CGMPage *>(g_World.m_GMPages.GetHead());
+	CGMPage *pPage = static_cast<CGMPage *>(g_World.m_GMPages.GetContainerHead());
 	while ( pPage != nullptr )
 	{
 		CGMPage * pPageNext = pPage->GetNext();
@@ -807,7 +809,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		}
 
 		// GM_Pages.
-		CGMPage *pPage = static_cast <CGMPage*>(m_GMPages.GetHead());
+		CGMPage *pPage = static_cast <CGMPage*>(m_GMPages.GetContainerHead());
 		for ( ; pPage != nullptr; pPage = pPage->GetNext())
 		{
 			pPage->r_Write(m_FileData);
@@ -1175,29 +1177,15 @@ void CWorld::SaveStatics()
 
 			for ( int d = 0; d < g_MapList.GetSectorQty(m); ++d )
 			{
-				CItem	*pNext, *pItem;
 				CSector	*pSector = CWorldMap::GetSector(m, d);
 
 				if ( !pSector )
                     continue;
 
-				pItem = static_cast <CItem*>(pSector->m_Items_Inert.GetHead());
-				for ( ; pItem != nullptr; pItem = pNext )
+				for (CSObjContRec* pObjRec : pSector->m_Items)
 				{
-					pNext = pItem->GetNext();
+					CItem* pItem = static_cast<CItem*>(pObjRec);
                     if (pItem->IsTypeMulti())
-						continue;
-					if ( !pItem->IsAttr(ATTR_STATIC) )
-						continue;
-
-					pItem->r_WriteSafe(m_FileStatics);
-				}
-
-				pItem = static_cast <CItem*>(pSector->m_Items_Timer.GetHead());
-				for ( ; pItem != nullptr; pItem = pNext )
-				{
-					pNext = pItem->GetNext();
-					if ( pItem->IsTypeMulti() )
 						continue;
 					if ( !pItem->IsAttr(ATTR_STATIC) )
 						continue;
@@ -1327,8 +1315,8 @@ bool CWorld::LoadWorld() // Load world from script
 		CloseAllUIDs();
 		CWorldTickingList::ClearTickingLists();
 		m_Stones.clear();
-		m_Parties.Clear();
-		m_GMPages.Clear();
+		m_Parties.ClearContainer();
+		m_GMPages.ClearContainer();
 		if ( m_Sectors )
 		{
 			for ( uint s = 0; s < m_SectorsQty; ++s )
@@ -1498,17 +1486,17 @@ bool CWorld::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bo
 			if ( *ptcKey != '\0' )
 				return false;
 
-			sVal.FormatSTVal(m_GMPages.GetCount());
+			sVal.FormatSTVal(m_GMPages.GetContentCount());
 		}
 		else if ( *ptcKey == '.' )						//	SERV.GMPAGE.*
 		{
 			SKIP_SEPARATORS(ptcKey);
 			size_t index = Exp_GetVal(ptcKey);
-			if ( index >= m_GMPages.GetCount() )
+			if ( index >= m_GMPages.GetContentCount() )
 				return false;
 
 			SKIP_SEPARATORS(ptcKey);
-			CGMPage* pPage = static_cast <CGMPage*> (m_GMPages.GetAt(index));
+			CGMPage* pPage = static_cast <CGMPage*> (m_GMPages.GetContentAt(index));
 			if ( pPage == nullptr )
 				return false;
 
@@ -1681,8 +1669,8 @@ void CWorld::Close()
 		_Ticker._ObjStatusUpdates.clear();
     }
 
-	m_Parties.Clear();
-	m_GMPages.Clear();
+	m_Parties.ClearContainer();
+	m_GMPages.ClearContainer();
 
     // Disconnect the players, so that we have none of them in a sector
     ClientIterator it;
@@ -1754,8 +1742,8 @@ void CWorld::OnTick()
 	_Ticker.Tick();
 
 	EXC_SET_BLOCK("Delete objects");
-	m_ObjDelete.Clear();	// clean up our delete list (this DOES delete the objects, thanks to the virtual destructors).
-
+	m_ObjDelete.ClearContainer();	// clean up our delete list (this DOES delete the objects, thanks to the virtual destructors).
+	m_ObjSpecialDelete.ClearContainer();
 
 	int64 iCurTime = _GameClock.GetCurrentTime().GetTimeRaw();
 

@@ -92,7 +92,7 @@ CClient::~CClient()
 	Cmd_GM_PageClear();
 
 	// Clear containers (CTAG and TOOLTIP)
-	m_TagDefs.Empty();
+	m_TagDefs.Clear();
 
 	CAccount * pAccount = GetAccount();
 	if ( pAccount )

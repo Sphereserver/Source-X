@@ -1786,8 +1786,9 @@ bool CChar::ItemEquipArmor( bool fForce )
 		}
 	}
 
-	for ( CItem *pItem = pPack->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+	for (CSObjContRec* pObjRec : *pPack)
 	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		int iScore = pItem->Armor_GetDefense();
 		if ( !iScore )	// might not be armor
 			continue;
@@ -1831,8 +1832,9 @@ bool CChar::ItemEquipWeapon( bool fForce )
 	CItem *pBestWeapon = nullptr;
 	int iWeaponScoreMax = NPC_GetWeaponUseScore(nullptr);	// wrestling
 
-	for ( CItem *pItem = pPack->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+	for (CSObjContRec* pObjRec : *pPack)
 	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		int iWeaponScore = NPC_GetWeaponUseScore(pItem);
 		if ( iWeaponScore > iWeaponScoreMax )
 		{

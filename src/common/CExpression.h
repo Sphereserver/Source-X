@@ -175,7 +175,7 @@ bool IsStrEmpty( lpctstr pszTest );
 
 
 // Numeric formulas
-template<typename T> inline const T SphereAbs(T x)
+template<typename T> inline T SphereAbs(T x) noexcept
 {	
     static_assert(std::is_arithmetic<T>::value, "Invalid data type.");
     static_assert(std::is_signed<T>::value, "Trying to get the absolute value of an unsigned number?");
@@ -223,8 +223,10 @@ int64 ahextoi64( lpctstr pArgs );	// Convert decimal or (Sphere) hex string (sta
 
 #ifdef _32BITS
 	#define Exp_GetSTVal		Exp_GetU32Val
+	#define Exp_GetSTSingle		Exp_GetUSingle
 #else
 	#define Exp_GetSTVal		Exp_GetU64Val
+	#define Exp_GetSTSingle		(size_t)Exp_GetLLSingle
 #endif
 
 #endif	// _INC_CEXPRSSION_H

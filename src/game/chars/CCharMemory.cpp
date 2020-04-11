@@ -148,8 +148,8 @@ bool CChar::Memory_UpdateClearTypes( CItemMemory * pMemory, word MemTypes )
 	ADDTOCALLSTACK("CChar::Memory_UpdateClearTypes");
 	ASSERT(pMemory);
 
-	word wPrvMemTypes = pMemory->GetMemoryTypes();
-	bool fMore = ( pMemory->SetMemoryTypes( wPrvMemTypes &~ MemTypes ) != 0);
+	const word wPrvMemTypes = pMemory->GetMemoryTypes();
+	const bool fMore = ( pMemory->SetMemoryTypes( wPrvMemTypes &~ MemTypes ) != 0);
 
 	MemTypes &= wPrvMemTypes;	// Which actually got turned off ?
 
@@ -221,11 +221,10 @@ CItemMemory * CChar::Memory_CreateObj( const CObjBase * pObj, word MemTypes )
 // Remove all the memories of this type.
 void CChar::Memory_ClearTypes( word MemTypes )
 {
-	ADDTOCALLSTACK("CChar::Memory_ClearTypes");
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	ADDTOCALLSTACK("CChar::Memory_ClearTypes(type)");
+	for (CSObjContRec* pObjRec : GetIterationSafeCont())
 	{
-		pItemNext = pItem->GetNext();
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( !pItem->IsMemoryTypes(MemTypes) )
 			continue;
 		CItemMemory * pMemory = dynamic_cast <CItemMemory *>(pItem);
@@ -239,8 +238,9 @@ void CChar::Memory_ClearTypes( word MemTypes )
 CItemMemory * CChar::Memory_FindObj( const CUID& uid ) const
 {
 	ADDTOCALLSTACK("CChar::Memory_FindObj(UID)");
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+	for (CSObjContRec* pObjRec : *this)
 	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( !pItem->IsType(IT_EQ_MEMORY_OBJ) )
 			continue;
 		if ( pItem->m_uidLink != uid )
@@ -266,8 +266,9 @@ CItemMemory * CChar::Memory_FindTypes( word MemTypes ) const
 	if ( !MemTypes )
 		return nullptr;
 
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+	for (CSObjContRec* pObjRec : *this)
 	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( !pItem->IsMemoryTypes(MemTypes) )
 			continue;
 		return dynamic_cast<CItemMemory *>(pItem);
@@ -300,13 +301,14 @@ CItemMemory * CChar::Memory_AddObj( const CObjBase * pObj, word MemTypes )
 TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, word wMemType )
 {
 	ADDTOCALLSTACK("CChar::OnCharTrigForMemTypeLoop");
-	CScriptLineContext StartContext = s.GetContext();
+	const CScriptLineContext StartContext = s.GetContext();
 	CScriptLineContext EndContext = StartContext;
 
 	if ( wMemType )
 	{
-		for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+		for (CSObjContRec* pObjRec : GetIterationSafeCont())
 		{
+			CItem* pItem = static_cast<CItem*>(pObjRec);
 			if ( !pItem->IsMemoryTypes(wMemType) )
 				continue;
 			TRIGRET_TYPE iRet = pItem->OnTriggerRun( s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult );
@@ -329,7 +331,7 @@ TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, C
 		// just skip to the end.
 		TRIGRET_TYPE iRet = OnTriggerRun( s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult );
 		if ( iRet != TRIGRET_ENDIF )
-			return( iRet );
+			return iRet;
 	}
 	else
 		s.SeekContext( EndContext );

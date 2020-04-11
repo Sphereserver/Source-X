@@ -390,7 +390,7 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 // Unequip the item.
 // This may be a delete etc. It can not FAIL !
 // Removing 'Equip beneficts' from this item
-void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when removed from list.
+void CChar::OnRemoveObj( CSObjContRec* pObRec )	// Override this = called when removed from list.
 {
 	ADDTOCALLSTACK("CChar::OnRemoveObj");
 	CItem * pItem = static_cast <CItem*>(pObRec);
@@ -574,19 +574,21 @@ void CChar::DropAll( CItemContainer * pCorpse, uint64 iAttr )
 // Pets can be told to "Drop All"
 // drop item that is up in the air as well.
 // pDest       = Container to place items in
-// bLeaveHands = true to leave items in hands; otherwise, false
-void CChar::UnEquipAllItems( CItemContainer * pDest, bool bLeaveHands )
+// fLeaveHands = true to leave items in hands; otherwise, false
+void CChar::UnEquipAllItems( CItemContainer * pDest, bool fLeaveHands )
 {
 	ADDTOCALLSTACK("CChar::UnEquipAllItems");
 
-	if ( GetCount() <= 0 )
+	if ( IsContainerEmpty())
 		return;
-	CItemContainer *pPack = GetPackSafe();
 
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	CItemContainer *pPack = GetPackSafe();
+	for (CSObjContRec* pObjRec : GetIterationSafeContReverse())
 	{
-		pItemNext = pItem->GetNext();
+		if (pObjRec->GetParent() != this)
+			continue;
+
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		LAYER_TYPE layer = pItem->GetEquipLayer();
 
 		switch ( layer )
@@ -622,7 +624,7 @@ void CChar::UnEquipAllItems( CItemContainer * pDest, bool bLeaveHands )
 				break;
 			case LAYER_HAND1:
 			case LAYER_HAND2:
-				if ( bLeaveHands )
+				if ( fLeaveHands )
 					continue;
 				break;
 			default:
@@ -638,7 +640,7 @@ void CChar::UnEquipAllItems( CItemContainer * pDest, bool bLeaveHands )
 			if ( pDest->IsType(IT_CORPSE) )
 			{
 				// Equip layer only matters on a corpse.
-				pItem->SetContainedLayer((byte)(layer));
+				pItem->SetContainedLayer((byte)layer);
 			}
 		}
 		else if ( pPack )
@@ -1608,7 +1610,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	if ( !pItem )
 		return -1;
 
-    CSObjList* pItemParent = pItem->GetParent();
+    CSObjCont* pItemParent = pItem->GetParent();
     const LAYER_TYPE iItemLayer = pItem->GetEquipLayer();
 	if (pItemParent == this && iItemLayer == LAYER_HORSE )
 		return -1;
@@ -3049,10 +3051,9 @@ bool CChar::Death()
 	}
 
 	// Look through memories of who I was fighting (make sure they knew they where fighting me)
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	for (CSObjContRec* pObjRec : GetIterationSafeContReverse())
 	{
-		pItemNext = pItem->GetNext();
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( pItem->IsType(IT_EQ_TRADE_WINDOW) )
 		{
 			CItemContainer *pCont = dynamic_cast<CItemContainer *>(pItem);
@@ -3065,7 +3066,7 @@ bool CChar::Death()
 
 		// Remove every memory, with some exceptions
 		if ( pItem->IsType(IT_EQ_MEMORY_OBJ) )
-			Memory_ClearTypes( static_cast<CItemMemory *>(pItem), (MEMORY_FIGHT | MEMORY_HARMEDBY));
+			Memory_ClearTypes( static_cast<CItemMemory *>(pItem), (MEMORY_FIGHT | MEMORY_HARMEDBY) );
 	}
 
 	// Give credit for the kill to my attacker(s)
@@ -3869,8 +3870,9 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocation,
 	if ( !MoveToRoom(pRoomNew, fAllowReject) )
 		return false;
 
-	CPointMap ptOld(GetTopPoint());
+	const CPointMap ptOld(GetTopPoint());
     SetTopPoint(pt);
+
     bool fSectorChanged = GetTopPoint().GetSector()->MoveCharToSector(this);
 
 	if ( !m_fClimbUpdated || fForceFix )
@@ -4005,16 +4007,16 @@ bool CChar::SetPrivLevel(CTextConsole * pSrc, lpctstr pszFlags)
 
 bool CChar::IsTriggerActive(lpctstr trig) const
 {
-    if (((_iRunningTriggerId == -1) && _sRunningTrigger.IsEmpty()) || (trig == nullptr))
+    if (((_iRunningTriggerId == -1) && _sRunningTrigger.empty()) || (trig == nullptr))
         return false;
     if (_iRunningTriggerId != -1)
     {
         ASSERT(_iRunningTriggerId < CTRIG_QTY);
-        int iAction = FindTableSorted( trig, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName)-1 );
+        const int iAction = FindTableSorted( trig, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName)-1 );
         return (_iRunningTriggerId == iAction);
     }
-    ASSERT(!_sRunningTrigger.IsEmpty());
-    return !_sRunningTrigger.CompareNoCase(trig) ? true : false;
+    ASSERT(!_sRunningTrigger.empty());
+	return (strcmpi(_sRunningTrigger.c_str(), trig) == 0);
 }
 
 void CChar::SetTriggerActive(lpctstr trig)
@@ -4022,14 +4024,14 @@ void CChar::SetTriggerActive(lpctstr trig)
     if (trig == nullptr)
     {
         _iRunningTriggerId = -1;
-        _sRunningTrigger.Empty();
+        _sRunningTrigger.clear();
         return;
     }
-    int iAction = FindTableSorted( trig, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName)-1 );
+	const int iAction = FindTableSorted( trig, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName)-1 );
     if (iAction != -1)
     {
         _iRunningTriggerId = (short)iAction;
-        _sRunningTrigger.Empty();
+        _sRunningTrigger.clear();
         return;
     }
     _sRunningTrigger = trig;

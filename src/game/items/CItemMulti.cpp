@@ -142,10 +142,10 @@ CItemMulti::~CItemMulti()
     delete m_pRegion;
 }
 
-void CItemMulti::Delete(bool fForce)
+bool CItemMulti::Delete(bool fForce)
 {
     RemoveAllComponents();
-    CObjBase::Delete(fForce);
+    return CObjBase::Delete(fForce);
 }
 
 const CItemBaseMulti * CItemMulti::Multi_GetDef() const
@@ -377,7 +377,8 @@ void CItemMulti::Multi_Setup(CChar *pChar, dword dwKeyCode)
                 }
             }
         }
-    }    
+    }
+    pChar->r_Call("f_multi_setup", pChar, nullptr, nullptr, nullptr);
 }
 
 bool CItemMulti::Multi_IsPartOf(const CItem * pItem) const
@@ -1038,28 +1039,24 @@ void CItemMulti::RemoveKeys(const CUID& uidTarget)
     {
         return;
     }
+
     CChar* pTarget = uidTarget.CharFind();
     if (!pTarget)
     {
         return;
     }
-    CUID uidHouse = GetUID();
-    CItem* pItemNext = nullptr;
-    for (CItem* pItemKey = pTarget->GetPack()->GetContentHead(); pItemKey != nullptr; pItemKey = pItemNext)
-    {
-        pItemNext = pItemKey->GetNext();
-        if (pItemKey->m_uidLink == uidHouse)
-        {
-            pItemKey->Delete();
-        }
-    }
 
-    for (CItem* pItemKey = pTarget->GetPack()->GetContentHead(); pItemKey != nullptr; pItemKey = pItemNext)
+    const CUID uidHouse(GetUID());
+    CItemContainer* pTargPack = pTarget->GetPack();
+    if (pTargPack)
     {
-        pItemNext = pItemKey->GetNext();
-        if (pItemKey->m_uidLink == uidHouse)
+        for (CSObjContRec* pObjRec : pTargPack->GetIterationSafeCont())
         {
-            pItemKey->Delete();
+            CItem* pItemKey = static_cast<CItem*>(pObjRec);
+            if (pItemKey->m_uidLink == uidHouse)
+            {
+                pItemKey->Delete();
+            }
         }
     }
 }
@@ -1072,23 +1069,23 @@ void CItemMulti::RemoveAllKeys()
         return;
     }
     RemoveKeys(GetOwner().GetObjUID());
-    if (_lCoowners.size() > 0)
+    if (!_lCoowners.empty())
     {
-        for (auto itCoowner : _lCoowners)
+        for (const CUID& itCoowner : _lCoowners)
         {
             RemoveKeys(itCoowner.GetPrivateUID());
         }
     }
-    if (_lFriends.size() > 0)
+    if (!_lFriends.empty())
     {
-        for (auto itFriend : _lFriends)
+        for (const CUID& itFriend : _lFriends)
         {
             RemoveKeys(itFriend.GetPrivateUID());
         }
     }
-    if (_lAccesses.size() > 0)
+    if (!_lAccesses.empty())
     {
-        for (auto itAccess : _lAccesses)
+        for (const CUID& itAccess : _lAccesses)
         {
             RemoveKeys(itAccess.GetPrivateUID());
         }
@@ -1208,13 +1205,13 @@ void CItemMulti::SetMovingCrate(const CUID& uidCrate)
     ADDTOCALLSTACK("CItemMulti::SetMovingCrate");
     CItemContainer *pCurrentCrate = static_cast<CItemContainer*>(GetMovingCrate(false).ItemFind());
     CItemContainer *pNewCrate = static_cast<CItemContainer*>(uidCrate.ItemFind());
-    
+
     if (!uidCrate.IsValidUID() || !pNewCrate)
     {
         _uidMovingCrate.InitUID();
         return;
     }
-    if (pCurrentCrate && pCurrentCrate->GetCount() > 0)
+    if (pCurrentCrate && !pCurrentCrate->IsContainerEmpty())
     {
         pCurrentCrate->SetCrateOfMulti(CUID());
         pNewCrate->ContentsTransfer(pCurrentCrate, false);
@@ -1336,7 +1333,7 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
         pItem->RemoveFromView();
         pCrate->ContentAdd(pItem);
     }
-    if (pCrate->GetCount() == 0)
+    if (pCrate->IsContainerEmpty())
     {
         pCrate->Delete();
     }
@@ -1428,12 +1425,14 @@ void CItemMulti::TransferMovingCrateToBank()
     CChar *pOwner = GetOwner().CharFind();
     if (pCrate && pOwner)
     {
-        if (pCrate->GetCount() > 0)
+        if (!pCrate->IsContainerEmpty())
         {
             if (pOwner)
             {
                 pCrate->RemoveFromView();
-                pOwner->GetBank()->ContentAdd(pCrate);
+                CItemContainer *pBank = pOwner->GetBank();
+                ASSERT(pBank);
+                pBank->ContentAdd(pCrate);
             }
         }
         else
@@ -1804,7 +1803,7 @@ int16 CItemMulti::GetSecuredItemsCount() const
         CItemContainer *pContainer = static_cast<CItemContainer*>(_lSecureContainers[i].ItemFind());
         if (pContainer)
         {
-            iCount += pContainer->GetCount();
+            iCount += pContainer->GetContentCount();
         }
     }
     return (int16)iCount;
@@ -3054,7 +3053,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
     {
         return nullptr;
     }
-    
+
     ASSERT(pItemDef);
     const bool fShip = pItemDef->IsType(IT_SHIP);    // must be in water.
 
@@ -3255,7 +3254,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
         pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_COLLAPSE);
         return nullptr;
     }
-    
+
     pItemNew->SetAttr(ATTR_MOVE_NEVER | (pDeed->m_Attr & (ATTR_MAGIC | ATTR_INVIS)));
     pItemNew->SetHue(pDeed->GetHue());
     pItemNew->MoveToUpdate(pt);

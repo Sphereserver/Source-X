@@ -109,7 +109,7 @@ void CItem::SetComponentOfMulti(const CUID& uidMulti)
 	if (!uidMulti.IsValidUID())
 		m_TagDefs.DeleteKey("MultiComponent");
 	else
-		m_TagDefs.SetNum("MultiComponent", uidMulti.GetObjUID());
+		m_TagDefs.SetNum("MultiComponent", uidMulti.GetObjUID(), false, false);
 }
 
 void CItem::SetLockDownOfMulti(const CUID& uidMulti)
@@ -117,7 +117,7 @@ void CItem::SetLockDownOfMulti(const CUID& uidMulti)
 	if (!uidMulti.IsValidUID())
 		m_TagDefs.DeleteKey("MultiLockDown");
 	else
-		m_TagDefs.SetNum("MultiLockDown", uidMulti.GetObjUID());
+		m_TagDefs.SetNum("MultiLockDown", uidMulti.GetObjUID(), false, false);
 }
 
 CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEMS), CObjBase( true )
@@ -171,10 +171,10 @@ bool CItem::NotifyDelete()
 	return true;
 }
 
-void CItem::Delete(bool bforce)
+bool CItem::Delete(bool bforce)
 {
 	if (( NotifyDelete() == false ) && !bforce)
-		return;
+		return false;
 
     // Remove corpse map waypoint on enhanced clients
     if (IsType(IT_CORPSE) && m_uidLink)
@@ -186,7 +186,7 @@ void CItem::Delete(bool bforce)
         }
     }
 
-	CObjBase::Delete();
+	return CObjBase::Delete();
 }
 
 CItem::~CItem()
@@ -925,8 +925,9 @@ int CItem::FixWeirdness()
                     {
                         CItemContainer* pTradeCont = dynamic_cast<CItemContainer*>(this);
                         ASSERT(pTradeCont);
-                        for (CItem *pItem = pTradeCont->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext())
-                        {
+						for (CSObjContRec* pObjRec : pTradeCont->GetIterationSafeContReverse())
+						{
+							CItem* pItem = static_cast<CItem*>(pObjRec);
                             pCharCont->ItemBounce(pItem, false);
                         }
                     }
@@ -1354,7 +1355,7 @@ void CItem::SetTimeout( int64 iMsecs )
 		return;
 
 	CItemsList::sm_fNotAMove = true;
-	pSector->MoveItemToSector( this, iMsecs >= 0 );
+	pSector->MoveItemToSector(this);
 	CItemsList::sm_fNotAMove = false;
 	SetUIDContainerFlags(0);
 }
@@ -1476,7 +1477,7 @@ bool CItem::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the groun
 
 	CSector * pSector = pt.GetSector();
 	ASSERT( pSector );
-	pSector->MoveItemToSector( this, IsTimerSet() );	// This also awakes the item
+	pSector->MoveItemToSector(this);	// This also awakes the item
 
 	// Is this area too complex ?
 	if ( ! g_Serv.IsLoading())
@@ -1807,7 +1808,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 			{
 				const CItemStone * pStone = dynamic_cast <const CItemStone*>(this);
 				ASSERT(pStone);
-				len += sprintf( pTemp+len, " (pop:%" PRIuSIZE_T ")", pStone->GetCount());
+				len += sprintf( pTemp+len, " (pop:%" PRIuSIZE_T ")", pStone->GetContentCount());
 			}
 			break;
 
@@ -3404,7 +3405,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 
 bool CItem::IsTriggerActive(lpctstr trig) const
 {
-    if (((_iRunningTriggerId == -1) && _sRunningTrigger.IsEmpty()) || (trig == nullptr))
+    if (((_iRunningTriggerId == -1) && _sRunningTrigger.empty()) || (trig == nullptr))
         return false;
     if (_iRunningTriggerId != -1)
     {
@@ -3412,8 +3413,8 @@ bool CItem::IsTriggerActive(lpctstr trig) const
         int iAction = FindTableSorted( trig, CItem::sm_szTrigName, CountOf(CItem::sm_szTrigName)-1 );
         return (_iRunningTriggerId == iAction);
     }
-    ASSERT(!_sRunningTrigger.IsEmpty());
-    return !_sRunningTrigger.CompareNoCase(trig) ? true : false;
+    ASSERT(!_sRunningTrigger.empty());
+    return (strcmpi(_sRunningTrigger.c_str(), trig) == 0);
 }
 
 void CItem::SetTriggerActive(lpctstr trig)
@@ -3421,14 +3422,14 @@ void CItem::SetTriggerActive(lpctstr trig)
     if (trig == nullptr)
     {
         _iRunningTriggerId = -1;
-        _sRunningTrigger.Empty();
+        _sRunningTrigger.clear();
         return;
     }
     int iAction = FindTableSorted( trig, CItem::sm_szTrigName, CountOf(CItem::sm_szTrigName)-1 );
     if (iAction != -1)
     {
         _iRunningTriggerId = (short)iAction;
-        _sRunningTrigger.Empty();
+        _sRunningTrigger.clear();
         return;
     }
     _sRunningTrigger = trig;
@@ -4615,7 +4616,7 @@ int CItem::Armor_GetDefense() const
 	return iVal;
 }
 
-int CItem::Weapon_GetAttack(bool bGetRange) const
+int CItem::Weapon_GetAttack(bool fGetRange) const
 {
 	ADDTOCALLSTACK("CItem::Weapon_GetAttack");
 	// Get the base attack for the weapon plus magic modifiers.
@@ -4624,7 +4625,7 @@ int CItem::Weapon_GetAttack(bool bGetRange) const
 		return 1;
 
 	int iVal = m_attackBase + m_ModAr;
-	if ( bGetRange )
+	if ( fGetRange )
 		iVal += m_attackRange;
 
 	if ( IsSetOF(OF_ScaleDamageByDurability) && m_itArmor.m_wHitsMax > 0 && m_itArmor.m_wHitsCur < m_itArmor.m_wHitsMax )

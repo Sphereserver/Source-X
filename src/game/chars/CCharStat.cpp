@@ -27,10 +27,6 @@ void CChar::Stat_SetMod( STAT_TYPE i, int iVal )
 	ASSERT(i >= 0 && i < STAT_QTY);
 
 	int iStatVal = Stat_GetMod(i);
-    if (iVal > UINT16_MAX)
-        iVal = UINT16_MAX;
-    else if (iVal < -UINT16_MAX)
-        iVal = -UINT16_MAX;
 	if ( IsTrigUsed(TRIGGER_STATCHANGE) && !IsTriggerActive("CREATE") )
 	{
 		if ( i >= STAT_STR && i <= STAT_DEX )
@@ -42,29 +38,25 @@ void CChar::Stat_SetMod( STAT_TYPE i, int iVal )
 			if ( OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE )
 				return;
 			// do not restore argn1 to i, bad things will happen! leave i untouched. (matex)
+			
 			iVal = (int)(args.m_iN3);
-            if (iVal > UINT16_MAX)
-                iVal = UINT16_MAX;
-            else if (iVal < -UINT16_MAX)
-                iVal = -UINT16_MAX;
 		}
 	}
+
+	const int iPrevVal = iVal;
+	if (iVal > UINT16_MAX)
+		iVal = UINT16_MAX;
+	else if (iVal < -UINT16_MAX)
+		iVal = -UINT16_MAX;
+	if (iVal != iPrevVal)
+		g_Log.EventWarn("Trying to set MOD%s to invalid value=%d. Defaulting it to %d.\n", g_Cfg.GetStatName(i), iPrevVal, iVal);
 
 	m_Stat[i].m_mod = iVal;
 
 	if ( i == STAT_STR && iVal < iStatVal )
 	{
 		// ModSTR is being decreased, so check if the char still have enough STR to use current equipped items
-		CItem *pItemNext = nullptr;
-		for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
-		{
-			pItemNext = pItem->GetNext();
-			if ( !CanEquipStr(pItem) )
-			{
-				SysMessagef("%s %s.", g_Cfg.GetDefaultMsg(DEFMSG_EQUIP_NOT_STRONG_ENOUGH), pItem->GetName());
-				ItemBounce(pItem, false);
-			}
-		}
+		Stat_StrCheckEquip();
 	}
 
     if (!IsSetOF(OF_StatAllowValOverMax))
@@ -90,10 +82,6 @@ void CChar::Stat_SetMaxMod( STAT_TYPE i, int iVal )
     ASSERT(i >= 0 && i < STAT_QTY);
 
     int iStatVal = Stat_GetMaxMod(i);
-    if (iVal > UINT16_MAX)
-        iVal = UINT16_MAX;
-    else if (iVal < -UINT16_MAX)
-        iVal = -UINT16_MAX;
     if ( IsTrigUsed(TRIGGER_STATCHANGE) && !IsTriggerActive("CREATE") )
     {
         if ( i >= STAT_STR && i <= STAT_DEX )
@@ -106,12 +94,16 @@ void CChar::Stat_SetMaxMod( STAT_TYPE i, int iVal )
                 return;
             // do not restore argn1 to i, bad things will happen! leave i untouched. (matex)
             iVal = (int)(args.m_iN3);
-            if (iVal > UINT16_MAX)
-                iVal = UINT16_MAX;
-            else if (iVal < -UINT16_MAX)
-                iVal = -UINT16_MAX;
         }
     }
+
+	const int iPrevVal = iVal;
+	if (iVal > UINT16_MAX)
+		iVal = UINT16_MAX;
+	else if (iVal < -UINT16_MAX)
+		iVal = -UINT16_MAX;
+	if (iVal != iPrevVal)
+		g_Log.EventWarn("Trying to set MODMAX%s to invalid value=%d. Defaulting it to %d.\n", g_Cfg.GetStatName(i), iPrevVal, iVal);
 
     m_Stat[i].m_maxMod = iVal;
 
@@ -132,11 +124,15 @@ void CChar::Stat_AddMaxMod( STAT_TYPE i, int iVal )
     if (iVal == 0)
         return;
 
-    if (iVal > UINT16_MAX)
-        iVal = UINT16_MAX;
-    else if (iVal < -UINT16_MAX)
-        iVal = -UINT16_MAX;
-    m_Stat[i].m_maxMod	+= iVal;
+	const int iPrevVal = iVal;
+	if (iVal > UINT16_MAX)
+		iVal = UINT16_MAX;
+	else if (iVal < -UINT16_MAX)
+		iVal = -UINT16_MAX;
+	if (iVal != iPrevVal)
+		g_Log.EventWarn("Trying to add MODMAX%s to invalid value=%d. Defaulting it to %d.\n", g_Cfg.GetStatName(i), iPrevVal, iVal);
+
+    m_Stat[i].m_maxMod += iVal;
 
     if (!IsSetOF(OF_StatAllowValOverMax))
     {
@@ -382,16 +378,7 @@ void CChar::Stat_SetBase( STAT_TYPE i, ushort uiVal )
 	if ( (i == STAT_STR) && (uiVal < uiStatVal) )
 	{
 		// STR is being decreased, so check if the char still have enough STR to use current equipped items
-		CItem *pItemNext = nullptr;
-		for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
-		{
-			pItemNext = pItem->GetNext();
-			if ( !CanEquipStr(pItem) )
-			{
-				SysMessagef("%s %s.", g_Cfg.GetDefaultMsg(DEFMSG_EQUIP_NOT_STRONG_ENOUGH), pItem->GetName());
-				ItemBounce(pItem, false);
-			}
-		}
+		Stat_StrCheckEquip();
 	}
 
     if (!IsSetOF(OF_StatAllowValOverMax))
@@ -707,4 +694,17 @@ bool CChar::Stat_Decrease(STAT_TYPE stat, SKILL_TYPE skill)
 		}
 	}
 	return false;
+}
+
+void CChar::Stat_StrCheckEquip()
+{
+	for (CSObjContRec* pObjRec : GetIterationSafeCont())
+	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
+		if (!CanEquipStr(pItem))
+		{
+			SysMessagef("%s %s.", g_Cfg.GetDefaultMsg(DEFMSG_EQUIP_NOT_STRONG_ENOUGH), pItem->GetName());
+			ItemBounce(pItem, false);
+		}
+	}
 }

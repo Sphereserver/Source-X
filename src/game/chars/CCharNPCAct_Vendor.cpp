@@ -69,7 +69,7 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 			if ( !pCont )
 				return false;
 
-			pCont->Clear();
+			pCont->ClearContainer();
 		}
         bFillStock = true;  // force the vendor to restock.
 	}
@@ -108,7 +108,7 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 	// Might have too many pets already ?
 	int iCount = 0;
 	CItemContainer * pBank = GetBank();
-	if ( pBank->GetCount() >= g_Cfg.m_iContainerMaxItems )
+	if ( pBank->GetContentCount() >= g_Cfg.m_iContainerMaxItems )
 	{
 		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_FULL ) );
 		return false;
@@ -161,8 +161,9 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 		}
 	}
 
-	for ( CItem *pItem = pBank->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+	for (CSObjContRec* pObjRec : *pBank)
 	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( pItem->IsType(IT_FIGURINE) && pItem->m_uidLink == pCharPlayer->GetUID() )
 			++iCount;
 	}
@@ -187,12 +188,14 @@ bool CChar::NPC_StablePetRetrieve( CChar * pCharPlayer )
 	if ( m_pNPC->m_Brain != NPCBRAIN_STABLE )
 		return false;
 
+	CItemContainer* pBank = GetBank();
+	ASSERT(pBank);
+
 	int iCount = 0;
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = GetBank()->GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	for (CSObjContRec* pObjRec : pBank->GetIterationSafeCont())
 	{
-		pItemNext = pItem->GetNext();
-		if ( pItem->IsType(IT_FIGURINE) && pItem->m_uidLink == pCharPlayer->GetUID() )
+		CItem* pItem = static_cast<CItem*>(pObjRec);
+		if ( pItem->IsType(IT_FIGURINE) && (pItem->m_uidLink == pCharPlayer->GetUID()) )
 		{
 			if ( !pCharPlayer->Use_Figurine(pItem) )
 			{

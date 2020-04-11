@@ -21,7 +21,7 @@ CItemContainer::CItemContainer( ITEMID_TYPE id, CItemBase *pItemDef ) :
 
 CItemContainer::~CItemContainer()
 {
-    Clear();		// get rid of my contents first to protect against weight calc errors.
+    ClearContainer();		// get rid of my contents first to protect against weight calc errors.
     DeletePrepare();
     CItemMulti *pMulti = nullptr;
     if (_uidMultiSecured.IsValidUID())
@@ -153,14 +153,22 @@ void CItemContainer::Trade_Status( bool bCheck )
 	{
 		CScriptTriggerArgs Args1(pChar1);
 		ushort i = 1;
-		for ( CItem *pItem = pPartner->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext(), ++i )
+		for (CSObjContRec* pObjRec : *pPartner)
+		{
+			++i;
+			CItem* pItem = static_cast<CItem*>(pObjRec);
 			Args1.m_VarObjs.Insert(i, pItem, true);
+		}
 		Args1.m_iN1 = --i;
 
 		CScriptTriggerArgs Args2(pChar2);
 		i = 1;
-		for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext(), ++i )
+		for (CSObjContRec * pObjRec : *this)
+		{
+			++i;
+			CItem* pItem = static_cast<CItem*>(pObjRec);
 			Args2.m_VarObjs.Insert(i, pItem, true);
+		}
 		Args2.m_iN2 = --i;
 
 		Args1.m_iN2 = Args2.m_iN2;
@@ -170,16 +178,15 @@ void CItemContainer::Trade_Status( bool bCheck )
 	}
 
 	// Transfer items
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = pPartner->GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	for (CSObjContRec* pObjRec : pPartner->GetIterationSafeContReverse())
 	{
-		pItemNext = pItem->GetNext();
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		pChar1->ItemBounce(pItem, false);
 	}
 
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	for (CSObjContRec* pObjRec : GetIterationSafeContReverse())
 	{
-		pItemNext = pItem->GetNext();
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		pChar2->ItemBounce(pItem, false);
 	}
 
@@ -267,7 +274,7 @@ void CItemContainer::Trade_UpdateGold( dword platinum, dword gold )
 		cmd.send(pChar2->GetClient());
 }
 
-void CItemContainer::Trade_Delete()
+bool CItemContainer::Trade_Delete()
 {
 	ADDTOCALLSTACK("CItemContainer::Trade_Delete");
 	// Called when object deleted.
@@ -277,7 +284,7 @@ void CItemContainer::Trade_Delete()
 
 	CChar *pChar = dynamic_cast<CChar *>(GetParent());
 	if ( !pChar )
-		return;
+		return false;
 
 	if ( pChar->IsClient() )
 	{
@@ -288,17 +295,16 @@ void CItemContainer::Trade_Delete()
 	}
 
 	// Drop items back in my pack.
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	for (CSObjContRec* pObjRec : GetIterationSafeContReverse())
 	{
-		pItemNext = pItem->GetNext();
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		pChar->ItemBounce(pItem, false);
 	}
 
 	// Kill my trading partner.
 	CItemContainer *pPartner = dynamic_cast<CItemContainer *>(m_uidLink.ItemFind());
 	if ( !pPartner )
-		return;
+		return false;
 
 	if ( IsTrigUsed(TRIGGER_TRADECLOSE) )
 	{
@@ -311,7 +317,7 @@ void CItemContainer::Trade_Delete()
 
 	m_uidLink.InitUID();	// unlink.
 	pPartner->m_uidLink.InitUID();
-	pPartner->Delete();
+	return pPartner->Delete();
 }
 
 int CItemContainer::GetWeight(word amount) const
@@ -466,7 +472,7 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 				break;
 		}
 	}
-	
+
 	return CPointMap(
 		(word)(sm_ContSize[i].m_minx + Calc_GetRandVal(sm_ContSize[i].m_maxx - sm_ContSize[i].m_minx)),
 		(word)(sm_ContSize[i].m_miny + Calc_GetRandVal(sm_ContSize[i].m_maxy - sm_ContSize[i].m_miny)),
@@ -506,7 +512,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 				// delete all it's pieces.
 				CItemContainer *pCont = dynamic_cast<CItemContainer *>(pItem);
 				ASSERT(pCont);
-				pCont->Clear();
+				pCont->ClearContainer();
 				break;
 			}
             default:
@@ -543,8 +549,9 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 		// Try to stack it.
 		if ( !g_Serv.IsLoading() && pItem->Item_GetDef()->IsStackableType() && !bForceNoStack )
 		{
-			for ( CItem *pTry = GetContentHead(); pTry != nullptr; pTry = pTry->GetNext() )
+			for (CSObjContRec* pObjRec : *this)
 			{
+				CItem* pTry = static_cast<CItem*>(pObjRec);
 				pt = pTry->GetContainedPoint();
 				if ( pItem->Stack(pTry) )
 				{
@@ -562,8 +569,9 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
     for ( uint i = 0; i < UCHAR_MAX; ++i )
     {
         fGridAvailable = true;
-        for ( CItem *pTry = GetContentHead(); pTry != nullptr; pTry = pTry->GetNext() )
-        {
+		for (const CSObjContRec* pObjRec : *this)
+		{
+			const CItem* pTry = static_cast<const CItem*>(pObjRec);
             if ( pTry->GetContainedGridIndex() == gridIndex )
             {
                 fGridAvailable = false;
@@ -641,6 +649,7 @@ void CItemContainer::ContentAdd( CItem *pItem, bool bForceNoStack )
 		return;
 	if ( pItem->GetParent() == this )
 		return;	// already here.
+
 	CPointMap pt;	// invalid point.
 	if ( g_Serv.IsLoading() )
 		pt = pItem->GetUnkPoint();
@@ -688,7 +697,7 @@ bool CItemContainer::IsItemInside( const CItem *pItem ) const
 	}
 }
 
-void CItemContainer::OnRemoveObj( CSObjListRec *pObjRec )	// Override this = called when removed from list.
+void CItemContainer::OnRemoveObj( CSObjContRec *pObjRec )	// Override this = called when removed from list.
 {
 	ADDTOCALLSTACK("CItemContainer::OnRemoveObj");
 	// remove this object from the container list.
@@ -724,8 +733,11 @@ void CItemContainer::DupeCopy( const CItem *pItem )
 	if ( !pContItem )
 		return;
 
-	for ( const CItem *pContent = pContItem->GetContentHead(); pContent != nullptr; pContent = pContent->GetNext() )
+	for (const CSObjContRec* pObjRec : *pContItem)
+	{
+		const CItem* pContent = static_cast<const CItem*>(pObjRec);
 		ContentAdd(CreateDupeItem(pContent), pContent->GetContainedPoint());
+	}
 }
 
 void CItemContainer::MakeKey()
@@ -755,7 +767,7 @@ void CItemContainer::SetKeyRing()
 		ITEMID_KEY_RING5
 	};
 
-	size_t iQty = GetCount();
+	size_t iQty = GetContentCount();
 	if ( iQty >= CountOf(sm_Item_Keyrings) )
 		iQty = CountOf(sm_Item_Keyrings) - 1;
 
@@ -784,7 +796,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 
 	size_t pTagTmp = (size_t)(GetKeyNum("OVERRIDE.MAXITEMS"));
 	size_t tMaxItemsCont = pTagTmp ? pTagTmp : g_Cfg.m_iContainerMaxItems;
-	if ( GetCount() >= tMaxItemsCont )
+	if ( GetContentCount() >= tMaxItemsCont )
 	{
 		pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL);
 		return false;
@@ -894,7 +906,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 			}
 
 			// Check that this vendor box hasn't already reached its content limit
-			if ( GetCount() >= g_Cfg.m_iContainerMaxItems )
+			if ( GetContentCount() >= g_Cfg.m_iContainerMaxItems )
 			{
 				pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL);
 				return false;
@@ -930,8 +942,9 @@ void CItemContainer::Restock()
 				case LAYER_VENDOR_STOCK:
 					// Magic restock the vendors container.
 				{
-					for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+					for (CSObjContRec* pObjRec : *this)
 					{
+						CItem* pItem = static_cast<CItem*>(pObjRec);
 						CItemVendable *pVendItem = dynamic_cast<CItemVendable *>(pItem);
 						if ( pVendItem )
 							pVendItem->Restock(true);
@@ -942,14 +955,15 @@ void CItemContainer::Restock()
 				case LAYER_VENDOR_EXTRA:
 					// clear all this junk periodically.
 					// sell it back for cash value ?
-					Clear();
+					ClearContainer();
 					break;
 
 				case LAYER_VENDOR_BUYS:
 				{
 					// Reset what we will buy from players.
-					for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+					for (CSObjContRec* pObjRec : *this)
 					{
+						CItem* pItem = static_cast<CItem*>(pObjRec);
 						CItemVendable *pVendItem = dynamic_cast<CItemVendable *>(pItem);
 						if ( pVendItem )
 							pVendItem->Restock(false);
@@ -1006,7 +1020,7 @@ void CItemContainer::Game_Create()
 	ADDTOCALLSTACK("CItemContainer::Game_Create");
 	ASSERT(IsType(IT_GAME_BOARD));
 
-	if ( GetCount() > 0 )
+	if ( GetContentCount() > 0 )
 		return;	// already here.
 
 	static const ITEMID_TYPE sm_Item_ChessPieces[] =
@@ -1223,16 +1237,18 @@ bool CItemContainer::r_Verb( CScript &s, CTextConsole *pSrc )
 			{
 				// 1 based pages.
 				size_t index = s.GetArgVal();
-				if ( index > 0 && index <= GetCount() )
+				if ( index > 0 && index <= GetContentCount() )
 				{
-					delete GetAt(index - 1);
+					CItem *pItem = static_cast<CItem*>(GetContentIndex(index - 1));
+					ASSERT(pItem);
+					pItem->Delete();
 					return true;
 				}
 			}
 			return false;
 		case ICV_EMPTY:
 		{
-			Clear();
+			ClearContainer();
 			return true;
 		}
 		case ICV_FIXWEIGHT:
@@ -1289,7 +1305,7 @@ bool CItemContainer::OnTick()
 	{
 		case IT_TRASH_CAN:
 			// Empty it !
-			Clear();
+			ClearContainer();
 			return true;
 		case IT_CONTAINER:
 			if ( IsAttr(ATTR_MAGIC) )

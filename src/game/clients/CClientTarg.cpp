@@ -161,10 +161,9 @@ bool CClient::Cmd_Control( CChar * pChar2 )
 	CChar * pChar1 = m_pChar;
 
 	// Put my newbie equipped items on it.
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = pChar1->GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	for (CSObjContRec* pObjRec : pChar1->GetIterationSafeContReverse())
 	{
-		pItemNext = pItem->GetNext();
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( !pItem->IsAttr(ATTR_MOVE_NEVER) )
 			continue; // keep GM stuff.
 		if ( !CItemBase::IsVisibleLayer(pItem->GetEquipLayer()) )
@@ -187,9 +186,9 @@ bool CClient::Cmd_Control( CChar * pChar2 )
 	CItemContainer *pPack2 = pChar2->GetPackSafe();
 	if ( pPack1 && pPack2 )
 	{
-		for ( CItem *pItem = pPack1->GetContentHead(); pItem != nullptr; pItem = pItemNext )
+		for (CSObjContRec* pObjRec : pPack1->GetIterationSafeContReverse())
 		{
-			pItemNext = pItem->GetNext();
+			CItem* pItem = static_cast<CItem*>(pObjRec);
 			if ( !pItem->IsAttr(ATTR_MOVE_NEVER) )	// keep newbie stuff.
 				continue;
 			pPack2->ContentAdd(pItem);	// add content
@@ -1560,7 +1559,7 @@ bool CClient::OnTarg_Pet_Stable( CChar * pCharPet )
 	CItemContainer * pPack = pCharPet->GetPack();
 	if ( pPack )
 	{
-		if ( ! pPack->IsEmpty() )
+		if ( ! pPack->IsContainerEmpty() )
 		{
 			pCharMaster->Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_TARG_UNLOAD ) );
 			return false;

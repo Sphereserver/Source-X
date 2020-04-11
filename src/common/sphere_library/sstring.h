@@ -65,10 +65,10 @@ uint   Str_ToUI (lpctstr ptcStr, int base = 10) noexcept;
 llong  Str_ToLL (lpctstr ptcStr, int base = 10) noexcept;
 ullong Str_ToULL(lpctstr ptcStr, int base = 10) noexcept;
 
-tchar* Str_FromI   (int val,    tchar* buf, int base = 10) noexcept;
-tchar* Str_FromUI  (uint val,   tchar* buf, int base = 10) noexcept;
-tchar* Str_FromLL  (llong val,  tchar* buf, int base = 10) noexcept;
-tchar* Str_FromULL (ullong val, tchar* buf, int base = 10) noexcept;
+NODISCARD tchar* Str_FromI   (int val,    tchar* buf, int base = 10) noexcept;
+NODISCARD tchar* Str_FromUI  (uint val,   tchar* buf, int base = 10) noexcept;
+NODISCARD tchar* Str_FromLL  (llong val,  tchar* buf, int base = 10) noexcept;
+NODISCARD tchar* Str_FromULL (ullong val, tchar* buf, int base = 10) noexcept;
 
 
 size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord );

@@ -186,7 +186,7 @@ void CChar::Skill_SetBase( SKILL_TYPE skill, ushort uiValue )
 	ADDTOCALLSTACK("CChar::Skill_SetBase");
 	ASSERT( IsSkillBase(skill));
 
-	bool bUpdateStats = false;
+	bool fUpdateStats = false;
 	if ( IsTrigUsed(TRIGGER_SKILLCHANGE) )
 	{
 		CScriptTriggerArgs args;
@@ -195,6 +195,16 @@ void CChar::Skill_SetBase( SKILL_TYPE skill, ushort uiValue )
 		if ( OnTrigger(CTRIG_SkillChange, this, &args) == TRIGRET_RET_TRUE )
 			return;
 
+		if (args.m_iN2 > UINT16_MAX)
+		{
+			g_Log.EventWarn("Trying to set skill '%s' to invalid value=%lld. Defaulting it to %d.\n", Skill_GetName(skill), args.m_iN2, UINT16_MAX);
+			args.m_iN2 = UINT16_MAX;
+		}
+		else if (args.m_iN2 < 0)
+		{
+			g_Log.EventWarn("Trying to set skill '%s' to invalid value=%lld. Defaulting it to 0.\n", Skill_GetName(skill), args.m_iN2);
+			args.m_iN2 = 0;
+		}
 		uiValue = (ushort)(args.m_iN2);
 	}
 	m_Skill[skill] = uiValue;
@@ -205,7 +215,7 @@ void CChar::Skill_SetBase( SKILL_TYPE skill, ushort uiValue )
 	if ( g_Cfg.m_iCombatDamageEra )
 	{
 		if ( skill == SKILL_ANATOMY || skill == SKILL_TACTICS || skill == SKILL_LUMBERJACKING )
-			bUpdateStats = true;		// those skills are used to calculate the char damage bonus, so we must update the client status gump
+			fUpdateStats = true;		// those skills are used to calculate the char damage bonus, so we must update the client status gump
 	}
 
 	// We need to update the AC given by the Shield when parrying increase.
@@ -213,10 +223,10 @@ void CChar::Skill_SetBase( SKILL_TYPE skill, ushort uiValue )
 	{
 		
 		m_defense = (word)CalcArmorDefense();
-		bUpdateStats = true;
+		fUpdateStats = true;
 	}
 	
-	if (bUpdateStats)
+	if (fUpdateStats)
 		UpdateStatsFlag();
 }
 
@@ -398,7 +408,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 		if ( Skill_OnTrigger( skill, SKTRIG_GAIN, &pArgs ) == TRIGRET_RET_TRUE )
 			return;
 	}
-	pArgs.getArgNs( 0, &iChance, &iSkillMax );
+	pArgs.GetArgNs( 0, &iChance, &iSkillMax );
 
 	if ( iChance <= 0 )
 		return;
@@ -529,7 +539,7 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 	if ( IsTrigUsed(TRIGGER_SKILLUSEQUICK) )
 	{
 		ret = Skill_OnCharTrigger( skill, CTRIG_SkillUseQuick, &pArgs );
-		pArgs.getArgNs( 0, &difficulty, &result);
+		pArgs.GetArgNs( 0, &difficulty, &result);
 
 		if ( ret == TRIGRET_RET_TRUE )
 			return true;
@@ -539,7 +549,7 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 	if ( IsTrigUsed(TRIGGER_USEQUICK) )
 	{
 		ret = Skill_OnTrigger( skill, SKTRIG_USEQUICK, &pArgs );
-		pArgs.getArgNs( 0, &difficulty, &result );
+		pArgs.GetArgNs( 0, &difficulty, &result );
 
 		if ( ret == TRIGRET_RET_TRUE )
 			return true;
@@ -719,17 +729,17 @@ bool CChar::Skill_MakeItem_Success()
 		{
 			case 0:
 				// Shoddy quality
-				strcpy(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_1));
+				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_1), STR_TEMPLENGTH);
 				quality = Calc_GetRandVal(25) + 1;
 				break;
 			case 1:
 				// Poor quality
-				strcpy(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_2));
+				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_2), STR_TEMPLENGTH);
 				quality = Calc_GetRandVal(25) + 26;
 				break;
 			case 2:
 				// Below average quality
-				strcpy(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_3));
+				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_3), STR_TEMPLENGTH);
 				quality = Calc_GetRandVal(25) + 51;
 				break;
 			case 3:
@@ -738,17 +748,17 @@ bool CChar::Skill_MakeItem_Success()
 				break;
 			case 4:
 				// Above average quality
-				strcpy(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_4));
+				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_4), STR_TEMPLENGTH);
 				quality = Calc_GetRandVal(25) + 126;
 				break;
 			case 5:
 				// Excellent quality
-				strcpy(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_5));
+				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_5), STR_TEMPLENGTH);
 				quality = Calc_GetRandVal(25) + 151;
 				break;
 			case 6:
 				// Superior quality
-				strcpy(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_6));
+				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_6), STR_TEMPLENGTH);
 				quality = Calc_GetRandVal(25) + 176;
 				break;
 			default:
@@ -2275,8 +2285,9 @@ int CChar::Skill_Hiding( SKTRIG_TYPE stage )
 		}
 
 		// Make sure I'm not carrying a light ?
-		for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+		for (const CSObjContRec* pObjRec : *this)
 		{
+			const CItem* pItem = static_cast<const CItem*>(pObjRec);
 			if ( !CItemBase::IsVisibleLayer( pItem->GetEquipLayer()))
 				continue;
 			if ( pItem->Can( CAN_I_LIGHT ))
@@ -3701,7 +3712,9 @@ bool CChar::Skill_Wait( SKILL_TYPE skilltry )
 
 	if ( skill == SKILL_NONE )	// not currently doing anything.
 	{
-		if ( skilltry != SKILL_STEALTH )
+		if ((skilltry == SKILL_STEALTH) || ((skilltry == SKILL_SNOOPING) && (g_Cfg.m_iRevealFlags & REVEALF_SNOOPING)) || ((skilltry == SKILL_STEALING) && (g_Cfg.m_iRevealFlags & REVEALF_STEALING)))
+			return false;
+		else
 			Reveal();
 		return false;
 	}
@@ -3941,7 +3954,7 @@ int CChar::Skill_Stealing(SKTRIG_TYPE stage)
 		return -SKTRIG_QTY;
 	}
 
-	Reveal();	// If we take an item off the ground we are revealed.
+	//Reveal();	// If we take an item off the ground we are revealed.
 
 	bool fGround = false;
 	if (pCharMark != nullptr)
@@ -3984,6 +3997,11 @@ int CChar::Skill_Stealing(SKTRIG_TYPE stage)
 			pPack->ContentAdd(pItem);
 		}
 	}
+	
+	if ((stage == SKTRIG_SUCCESS) && (g_Cfg.m_iRevealFlags & REVEALF_STEALING_SUCCESS))
+		Reveal();
+	else if ((stage == SKTRIG_FAIL) && (g_Cfg.m_iRevealFlags & REVEALF_STEALING_FAIL))
+		Reveal();
 
 	if (m_Act_Difficulty == 0)
 		return 0;	// Too easy to be bad. hehe

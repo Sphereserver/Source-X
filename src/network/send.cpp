@@ -1163,14 +1163,29 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 
 	const CChar* viewer = target->GetChar();
 	std::vector<CItem*> items;
-	items.reserve(container->GetCount());
+	items.reserve(container->GetContentCount());
 
 	// Classic Client wants the container items sent with order a->z, Enhanced Client with order z->a;
 	// Classic client wants the prices sent (in PacketVendorBuyList::fillBuyData) with order a->z, Enhanced Client with order a->z.
-	for ( CItem* item = (fClientEnhanced ? container->GetContentTail() : container->GetContentHead());
-		(item != nullptr) && (m_count < g_Cfg.m_iContainerMaxItems);
-		item = (fClientEnhanced ? item->GetPrev() : item->GetNext()) )
+	auto it		= container->begin(), itEnd = container->end();
+	auto itRev	= container->rbegin(), itRevEnd = container->rend();
+	for ( ; m_count < g_Cfg.m_iContainerMaxItems ; ++it, ++itRev )
 	{
+		CItem* item;
+		if (fClientEnhanced)
+		{
+			if (itRev == itRevEnd)
+				break;
+			item = static_cast<CItem *>(*itRev);
+		}
+		else
+		{
+			if (it == itEnd)
+				break;
+			item = static_cast<CItem*>(*it);
+		}
+		ASSERT (item != nullptr);
+
 		word wAmount = item->GetAmount();
 		CPointMap pos = item->GetContainedPoint();
 
@@ -1311,8 +1326,9 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItemContain
 	initLength();
 	skip(2);
 
-	for (CItem* item = spellbook->GetContentHead(); item != nullptr; item = item->GetNext())
+	for (const CSObjContRec* pObjRec : *spellbook)
 	{
+		const CItem* item = static_cast<const CItem*>(pObjRec);
 		if (item->IsType(IT_SCROLL) == false)
 			continue;
 
@@ -2216,9 +2232,10 @@ uint PacketVendorBuyList::fillBuyData(const CItemContainer* container, int iConv
 
 	// Classic Client wants the container items sent (in PacketItemContents) with order a->z, Enhanced Client with order z->a;
 	// Classic Client wants the prices sent with order a->z, Enhanced Client with order a->z.
-	for (CItem* item = container->GetContentHead(); item != nullptr; item = item->GetNext())
+	for (CSObjContRec* pObjRec : *container)
 	{
-		CItemVendable* vendorItem = static_cast<CItemVendable *>(item);
+		CItem* pItem = static_cast<CItem*>(pObjRec);
+		CItemVendable* vendorItem = static_cast<CItemVendable *>(pItem);
 		if (vendorItem == nullptr || vendorItem->GetAmount() == 0)
 			continue;
 
@@ -2361,8 +2378,9 @@ PacketCharacter::PacketCharacter(CClient* target, const CChar* character) : Pack
 	{
         bool isLayerSent[LAYER_HORSE + 1] = {false};
 
-		for (CItem* item = character->GetContentHead(); item != nullptr; item = item->GetNext())
+		for (CSObjContRec* pObjRec : *character)
 		{
+			CItem* item = static_cast<CItem*>(pObjRec);
 			LAYER_TYPE layer = item->GetEquipLayer();
 			if (CItemBase::IsVisibleLayer(layer) == false)
 				continue;
@@ -2621,8 +2639,9 @@ PacketCorpseEquipment::PacketCorpseEquipment(CClient* target, const CItemContain
 	LAYER_TYPE layer;
 	uint count = 0;
 
-	for (CItem* item = corpse->GetContentHead(); item != nullptr; item = item->GetNext())
+	for (CSObjContRec* pObjRec : *corpse)
 	{
+		CItem* item = static_cast<CItem*>(pObjRec);
 		if (item->IsAttr(ATTR_INVIS) && viewer->CanSee(item) == false)
 			continue;
 
@@ -2953,19 +2972,20 @@ uint PacketVendorSellList::fillSellList(CClient* target, const CItemContainer* c
 	uint countpos = getPosition();
 	skip(2);
 
-	CItem* item = container->GetContentHead();
-	if (item == nullptr)
-		return 0;
-
 	uint count = 0;
-	std::deque<const CItemContainer*> otherBoxes;
 
-	for (;;)
+	std::deque<const CItemContainer*> otherBoxes;
+	while (true)
 	{
-		if (item != nullptr)
+		if (container == nullptr)
+			break;
+
+		for (CSObjContRec* pObjRec : *container)
 		{
+			CItem* item = static_cast<CItem*>(pObjRec);
+
 			container = dynamic_cast<CItemContainer*>(item);
-			if (container != nullptr && container->GetCount() > 0)
+			if (container != nullptr && !container->IsContainerEmpty())
 			{
 				if (container->IsSearchable())
 					otherBoxes.push_back(container);
@@ -3001,19 +3021,13 @@ uint PacketVendorSellList::fillSellList(CClient* target, const CItemContainer* c
 					}
 				}
 			}
-
-			item = item->GetNext();
 		}
 
-		else
-		{
-			if (otherBoxes.empty())
-				break;
+        if (otherBoxes.empty())
+            break;
 
-			container = otherBoxes.front();
-			otherBoxes.pop_front();
-			item = container->GetContentHead();
-		}
+        container = otherBoxes.front();
+        otherBoxes.pop_front();
 	}
 
 	// seek back to write count
@@ -3195,7 +3209,7 @@ PacketServerList::PacketServerList(const CClient* target) : PacketSend(XCMD_Serv
 
 	//	too many servers in list can crash the client
 #define	MAX_SERVERS_LIST	32
-	for (uint i = 0; count < MAX_SERVERS_LIST; i++)
+	for (uint i = 0; count < MAX_SERVERS_LIST; ++i)
 	{
 		CServerRef server = g_Cfg.Server_GetDef(i);
 		if (server == nullptr)

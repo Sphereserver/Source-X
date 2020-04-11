@@ -9,6 +9,7 @@
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
+#include <cstdio>	// for itoa and similars
 
 SPELL_TYPE CChar::Spell_GetIndex(SKILL_TYPE skill)	// Returns the first spell for the given skill
 {
@@ -75,14 +76,23 @@ void CChar::Spell_Dispel(int iLevel)
 	// remove all the spells. NOT if caused by objects worn !!!
 	// ATTR_MAGIC && ! ATTR_MOVE_NEVER
 
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	for (size_t i = 0; i < GetContentCount();)
 	{
-		pItemNext = pItem->GetNext();
-		if ( iLevel <= 100 && pItem->IsAttr(ATTR_MOVE_NEVER) )	// we don't lose this.
-			continue;
-		if ( (pItem->GetEquipLayer() == LAYER_FACE) || ((pItem->GetEquipLayer() >= LAYER_SPELL_STATS) && (pItem->GetEquipLayer() <= LAYER_SPELL_Summon)) )
-			pItem->Delete();
+		CItem* pItem = static_cast<CItem*>(GetContentIndex(i));
+		bool fIncrease = true;
+		if (iLevel <= 100 && pItem->IsAttr(ATTR_MOVE_NEVER))
+		{
+			// we don't lose this.
+		}
+		else
+		{
+			const LAYER_TYPE itLayer = pItem->GetEquipLayer();
+			if ( ((itLayer == LAYER_FACE) && pItem->IsType(IT_LIGHT_LIT)) || ((itLayer >= LAYER_SPELL_STATS) && (itLayer <= LAYER_SPELL_Summon)) )
+				fIncrease = !pItem->Delete();
+		}
+
+		if (fIncrease)
+			++i;
 	}
 }
 
@@ -1153,7 +1163,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case LAYER_SPELL_Gift_Of_Renewal:
 			if (pClient && IsSetOF(OF_Buffs))
 			{
-				Str_FromI(pSpell->m_itSpell.m_spelllevel,NumBuff[0], 10);
+				itoa(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
 				pClient->removeBuff(BI_GIFTOFRENEWAL);
 				pClient->addBuff(BI_GIFTOFRENEWAL, 1075796, 1075797, wTimerEffect, pNumBuff, 1);
 			}
@@ -1161,7 +1171,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case LAYER_SPELL_Attunement:
 			if (pClient && IsSetOF(OF_Buffs))
 			{
-				Str_FromI(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
+				itoa(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
 				pClient->removeBuff(BI_ATTUNEWEAPON);
 				pClient->addBuff(BI_ATTUNEWEAPON, 1075798, 1075799, wTimerEffect, pNumBuff, 1);
 			}
@@ -1169,7 +1179,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case LAYER_SPELL_Thunderstorm:
 			if (pClient && IsSetOF(OF_Buffs))
 			{
-				Str_FromI(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
+				itoa(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
 				pClient->removeBuff(BI_THUNDERSTORM);
 				pClient->addBuff(BI_THUNDERSTORM, 1075800, 1075801, wTimerEffect, pNumBuff, 1);
 			}
@@ -1177,7 +1187,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case LAYER_SPELL_Essence_Of_Wind:
 			if (pClient && IsSetOF(OF_Buffs))
 			{
-				Str_FromI(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
+				itoa(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
 				pClient->removeBuff(BI_ESSENCEOFWIND);
 				pClient->addBuff(BI_ESSENCEOFWIND, 1075802, 1075803, wTimerEffect, pNumBuff, 1);
 			}
@@ -1199,8 +1209,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case LAYER_SPELL_Arcane_Empowerment:
 			if (pClient && IsSetOF(OF_Buffs))
 			{
-				Str_FromI(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
-				Str_FromI(pSpell->m_itSpell.m_spellcharges,NumBuff[1], 10);
+				itoa(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
+				itoa(pSpell->m_itSpell.m_spellcharges,NumBuff[1], 10);
 				pClient->removeBuff(BI_ARCANEEMPOWERMENT);
 				pClient->addBuff(BI_ARCANEEMPOWERMENT, 1075805, 1075804, wTimerEffect, pNumBuff, 1);
 			}
@@ -1323,15 +1333,19 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			else
 			{
 				StatFlag_Set( STATF_REACTIVE );
+				int iSkill = -1;
+				const bool fValidSkill = pSpellDef->GetPrimarySkill(&iSkill, nullptr);
+				PERSISTANT_ASSERT(fValidSkill);
+				pSpell->m_itSpell.m_PolyStr = (int16)pSpellDef->m_vcEffect.GetLinear(pCaster->Skill_GetBase((SKILL_TYPE)iSkill)) / 10;	// % of damage reflected.
 			}
 			if (pClient && IsSetOF(OF_Buffs))
 			{
 				pClient->removeBuff(BI_REACTIVEARMOR);
 				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 				{
-					Str_FromI(wStatEffectRef, NumBuff[0], 10);
+					itoa(wStatEffectRef, NumBuff[0], 10);
 					for ( int idx = 1; idx < 5; ++idx )
-						Str_FromI(5, NumBuff[idx], 10);
+						itoa(5, NumBuff[idx], 10);
 
 					pClient->addBuff(BI_REACTIVEARMOR, 1075812, 1075813, wTimerEffect, pNumBuff, 5);
 				}
@@ -1352,7 +1366,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				Stat_AddMod( STAT_DEX, -wStatEffectRef );
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					Str_FromI(wStatEffectRef, NumBuff[0], 10);
+					itoa(wStatEffectRef, NumBuff[0], 10);
 					pClient->removeBuff(BI_CLUMSY);
 					pClient->addBuff(BI_CLUMSY, 1075831, 1075832, wTimerEffect, pNumBuff, 1);
 				}
@@ -1383,7 +1397,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				Stat_AddMod( STAT_INT, -wStatEffectRef );
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					Str_FromI(wStatEffectRef, NumBuff[0], 10);
+					itoa(wStatEffectRef, NumBuff[0], 10);
 					pClient->removeBuff(BI_FEEBLEMIND);
 					pClient->addBuff(BI_FEEBLEMIND, 1075833, 1075834, wTimerEffect, pNumBuff, 1);
 				}
@@ -1400,7 +1414,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				Stat_AddMod( STAT_STR, -wStatEffectRef );
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					Str_FromI(wStatEffectRef, NumBuff[0], 10);
+					itoa(wStatEffectRef, NumBuff[0], 10);
 					pClient->removeBuff(BI_WEAKEN);
 					pClient->addBuff(BI_WEAKEN, 1075837, 1075838, wTimerEffect, pNumBuff, 1);
 				}
@@ -1433,11 +1447,11 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				{
 					pClient->removeBuff(BI_CURSE);
 					for ( int idx = STAT_STR; idx < STAT_BASE_QTY; ++idx )
-						Str_FromI(wStatEffectRef, NumBuff[idx], 10);
+						itoa(wStatEffectRef, NumBuff[idx], 10);
 					if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 					{
 						for ( int idx = 3; idx < 7; ++idx )
-							Str_FromI(10, NumBuff[idx], 10);
+							itoa(10, NumBuff[idx], 10);
 
 						pClient->addBuff(BI_CURSE, 1075835, 1075836, wTimerEffect, pNumBuff, 7);
 					}
@@ -1459,7 +1473,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					Str_FromI(wStatEffectRef, NumBuff[0], 10);
+					itoa(wStatEffectRef, NumBuff[0], 10);
 					pClient->removeBuff(BI_AGILITY);
 					pClient->addBuff(BI_AGILITY, 1075841, 1075842, wTimerEffect, pNumBuff, 1);
 				}
@@ -1474,7 +1488,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				Stat_AddMod( STAT_INT, +wStatEffectRef );
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					Str_FromI(wStatEffectRef, NumBuff[0], 10);
+					itoa(wStatEffectRef, NumBuff[0], 10);
 					pClient->removeBuff(BI_CUNNING);
 					pClient->addBuff(BI_CUNNING, 1075843, 1075844, wTimerEffect, pNumBuff, 1);
 				}
@@ -1489,7 +1503,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				Stat_AddMod( STAT_STR, +wStatEffectRef );
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					Str_FromI(wStatEffectRef, NumBuff[0], 10);
+					itoa(wStatEffectRef, NumBuff[0], 10);
 					pClient->removeBuff(BI_STRENGTH);
 					pClient->addBuff(BI_STRENGTH, 1075845, 1075846, wTimerEffect, pNumBuff, 1);
 				}
@@ -1507,7 +1521,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				if (pClient && IsSetOF(OF_Buffs))
 				{
 					for ( int idx = STAT_STR; idx < STAT_BASE_QTY; ++idx)
-						Str_FromI(wStatEffectRef, NumBuff[idx], 10);
+						itoa(wStatEffectRef, NumBuff[idx], 10);
 
 					pClient->removeBuff(BI_BLESS);
 					pClient->addBuff(BI_BLESS, 1075847, 1075848, wTimerEffect, pNumBuff, STAT_BASE_QTY);
@@ -1543,9 +1557,9 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				pClient->removeBuff(BI_MAGICREFLECTION);
 				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 				{
-					Str_FromI(-wStatEffectRef, NumBuff[0], 10);
+					itoa(-wStatEffectRef, NumBuff[0], 10);
 					for ( int idx = 1; idx < 5; ++idx )
-						Str_FromI(10, NumBuff[idx], 10);
+						itoa(10, NumBuff[idx], 10);
 
 					pClient->addBuff(BI_MAGICREFLECTION, 1075817, 1075818, wTimerEffect, pNumBuff, 5);
 				}
@@ -1597,8 +1611,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					pClient->removeBuff(BuffIcon);
 					if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 					{
-						Str_FromI(-uiPhysicalResist, NumBuff[0], 10);
-						Str_FromI(-uiMagicResist/10, NumBuff[1], 10);
+						itoa(-uiPhysicalResist, NumBuff[0], 10);
+						itoa(-uiMagicResist/10, NumBuff[1], 10);
 						pClient->addBuff(BuffIcon, BuffCliloc, 1075815, wTimerEffect, pNumBuff, 2);
 					}
 					else
@@ -1864,8 +1878,9 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEff
 
 
 	// Check if there's any previous effect to clear before apply the new effect
-	for ( CItem *pSpellPrev = GetContentHead(); pSpellPrev != nullptr; pSpellPrev = pSpellPrev->GetNext() )
+	for (CSObjContRec* pObjRec : *this)
 	{
+		CItem* pSpellPrev = static_cast<CItem*>(pObjRec);
 		if ( layer != pSpellPrev->GetEquipLayer() )
 			continue;
 

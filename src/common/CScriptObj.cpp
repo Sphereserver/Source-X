@@ -1136,6 +1136,23 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 			CScript script(ptcKey, s.GetArgStr());
 			script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
 			script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+
+			if ( dynamic_cast<CAccount*>(pRef) != nullptr)
+			{
+				// Dirty fix:
+				// If the REF is an ACCOUNT, it does special checks with the SRC to compare the PrivLevel to allow read/write its values.
+				//	If i'm running in a trigger, so in a script, get the max privileges and change the SRC.
+				CObjBase* pThisObj = dynamic_cast<CObjBase*>(this);
+				if (pThisObj)
+				{
+					if (pThisObj->IsRunningTrigger())
+					{
+						pSrc = &g_Serv;
+						ASSERT(pSrc);
+					}
+				}	
+			}
+
 			return pRef->r_Verb( script, pSrc );
 		}
 		// else just fall through. as they seem to be setting the pointer !?
@@ -1813,7 +1830,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 			char funcname[1024];
 			Str_CopyLimitNull(funcname, ptcArgs, sizeof(funcname));
 
-			TRIGRET_TYPE iRet = CTimedFunctions::Loop(funcname, LoopsMade, StartContext, EndContext, s, pSrc, pArgs, pResult);
+			TRIGRET_TYPE iRet = CTimedFunctions::Loop(funcname, LoopsMade, StartContext, s, pSrc, pArgs, pResult);
 			if ((iRet != TRIGRET_ENDIF) && (iRet != TRIGRET_CONTINUE))
 				return iRet;
 		}

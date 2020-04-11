@@ -446,7 +446,7 @@ void CChat::KillChannels()
 	// First /kick everyone
 	for ( ; pChannel != nullptr; pChannel = pChannel->GetNext())
 		pChannel->KickAll();
-	m_Channels.Clear();
+	m_Channels.ClearContainer();
 }
 
 void CChat::WhereIs(CChatChanMember * pBy, lpctstr pszName ) const
@@ -644,7 +644,7 @@ bool CChat::CreateChannel(lpctstr pszName, lpctstr pszPassword, CChatChanMember 
 		return false;
 	}
 	CChatChannel * pChannel = new CChatChannel( pszName, pszPassword );
-	m_Channels.InsertTail( pChannel );
+	m_Channels.InsertContentTail( pChannel );
 	pChannel->SetModerator(pMember->GetChatName());
 	// Send all clients with an open chat window the new channel name
 	SendNewChannel(pChannel);
@@ -737,7 +737,7 @@ CChat::CChat()
 
 CChatChannel * CChat::GetFirstChannel() const
 {
-	return static_cast <CChatChannel *>(m_Channels.GetHead());
+	return static_cast <CChatChannel *>(m_Channels.GetContainerHead());
 }
 
 bool CChat::IsDuplicateChannelName(const char * pszName) const

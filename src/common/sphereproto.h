@@ -533,7 +533,7 @@ enum EFFECT_TYPE
     EFFECT_FADE_SCREEN  // Fade client screen (only available on clients >= 6.0.0.0)
 };
 
-enum NOTO_TYPE
+enum NOTO_TYPE : byte
 {
 	NOTO_INVALID = 0,	// 0= not a valid color!!
 	NOTO_GOOD,			// 1= good(blue),

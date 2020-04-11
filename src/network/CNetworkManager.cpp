@@ -182,7 +182,7 @@ void CNetworkManager::acceptNewConnection(void)
 
     EXC_SET_BLOCK("recording client");
     if (state->getClient() != nullptr)
-        m_clients.InsertHead(state->getClient());
+        m_clients.InsertContentHead(state->getClient());
 
     EXC_SET_BLOCK("assigning thread");
     DEBUGNETWORK(("%x:Selecting a thread to assign to.\n", state->id()));

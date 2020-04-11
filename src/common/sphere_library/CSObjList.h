@@ -21,70 +21,71 @@ public:
     * @brief Sets head, tail and count.
     */
     CSObjList();
-    virtual ~CSObjList() {
-        Clear();
-    }
+    virtual ~CSObjList();
 
 private:
     /**
     * @brief No copies allowed.
     */
     CSObjList(const CSObjList& copy);
+
     /**
     * @brief No copies allowed.
     */
     CSObjList& operator=(const CSObjList& other);
     ///@}
+
     /** @name Capacity:
     */
     ///@{
 public:
+
     /**
     * @brief Get the record count of the list.
     * @return The record count of the list.
     */
-    inline size_t GetCount() const noexcept {
-        return m_iCount;
-    }
+    inline size_t GetContentCount() const noexcept;
+
     /**
     * @brief Check if CSObjList if empty.
     * @return true if CSObjList is empty, false otherwise.
     */
-    inline bool IsEmpty() const noexcept {
-        return !GetCount();
-    }
+    inline bool IsContainerEmpty() const noexcept;
+
     ///@}
     /** @name Element Access:
     */
     ///@{
+
     /**
     * @brief Get the nth element of the list.
     * @param index of the element to get.
     * @return nth element if lenght is greater or equal to index, nullptr otherwise.
     */
-    CSObjListRec * GetAt( size_t index ) const;
+    CSObjListRec * GetContentAt( size_t index ) const;
+
     /**
     * @brief Get the first record of the CSObjList.
     * @return The first record of the CSObjList if list is not empty, nullptr otherwise.
     */
-    inline CSObjListRec * GetHead() const noexcept {
-        return m_pHead;
-    }
+    inline CSObjListRec* GetContainerHead() const noexcept;
+
     /**
     * @brief Get the last record of the CSObjList.
     * @return The last record of the CSObjList if list is not empty, nullptr otherwise.
     */
-    inline CSObjListRec * GetTail() const noexcept {
-        return m_pTail;
-    }
+    inline CSObjListRec* GetContainerTail() const noexcept;
     ///@}
+
     /** @name Modifiers:
     */
     ///@{
+
     /**
     * @brief Remove all records of the CSObjList.
     */
-    void Clear();
+    void ClearContainer();
+
     /**
     * @brief Insert a record after the referenced record.
     *
@@ -92,21 +93,20 @@ public:
     * @param pNewRec record to insert.
     * @param pPrev position to insert after.
     */
-    virtual void InsertAfter( CSObjListRec * pNewRec, CSObjListRec * pPrev = nullptr );
+    void InsertContentAfter( CSObjListRec * pNewRec, CSObjListRec * pPrev = nullptr );
+
     /**
     * @brief Insert a record at head.
     * @param pNewRec record to insert.
     */
-    inline void InsertHead( CSObjListRec * pNewRec ) {
-        InsertAfter(pNewRec, nullptr);
-    }
+    inline void InsertContentHead(CSObjListRec* pNewRec);
+
     /**
     * @brief Insert a record at tail.
     * @param pNewRec record to insert.
     */
-    inline void InsertTail( CSObjListRec * pNewRec ) {
-        InsertAfter(pNewRec, GetTail());
-    }
+    inline void InsertContentTail(CSObjListRec* pNewRec);
+
 protected:
     /**
     * @brief Trigger that fires when a record if removed.
@@ -118,12 +118,44 @@ protected:
     */
     virtual void OnRemoveObj( CSObjListRec* pObRec );
     ///@}
-private:
 
-    CSObjListRec * m_pHead;  // Head of the list.
-    CSObjListRec * m_pTail;  // Tail of the list. Do we really care about tail ? (as it applies to lists anyhow)
-    size_t m_iCount;		// Count of elements of the CSObjList.
+private:
+    CSObjListRec * m_pHead; // Head of the list.
+    CSObjListRec * m_pTail; // Tail of the list.
+    size_t m_uiCount;	    // Count of elements of the CSObjList.
 };
 
+
+/* Inlined methods are defined here */
+
+size_t CSObjList::GetContentCount() const noexcept
+{
+    return m_uiCount;
+}
+
+bool CSObjList::IsContainerEmpty() const noexcept
+{
+    return !GetContentCount();
+}
+
+CSObjListRec* CSObjList::GetContainerHead() const noexcept
+{
+    return m_pHead;
+}
+
+CSObjListRec* CSObjList::GetContainerTail() const noexcept
+{
+    return m_pTail;
+}
+
+void CSObjList::InsertContentHead(CSObjListRec* pNewRec)
+{
+    InsertContentAfter(pNewRec, nullptr);
+}
+
+void CSObjList::InsertContentTail(CSObjListRec* pNewRec)
+{
+    InsertContentAfter(pNewRec, GetContainerTail());
+}
 
 #endif //_INC_CSOBJLIST_H

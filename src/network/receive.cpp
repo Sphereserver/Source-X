@@ -1200,10 +1200,13 @@ bool PacketBulletinBoardReq::onReceive(CNetState* net)
 				return true;
 			}
 
-			if (board->GetCount() > 32)
+			size_t uiContCount = board->GetContentCount();
+			if (uiContCount > 32)
 			{
 				// roll a message off
-				delete board->GetAt(board->GetCount() - 1);
+				CItem *pMsg = static_cast<CItem*>(board->GetContentIndex(uiContCount - 1));
+				ASSERT(pMsg);
+				pMsg->Delete();
 			}
 
 			uint lenstr = readByte();
@@ -1227,7 +1230,8 @@ bool PacketBulletinBoardReq::onReceive(CNetState* net)
 			newMessage->m_uidLink = character->GetUID();
 
 			int lines = readByte();
-			if (lines > 32) lines = 32;
+			if (lines > 32)
+                lines = 32;
 
 			while (lines--)
 			{
@@ -3165,7 +3169,7 @@ PacketTargetedSkill::PacketTargetedSkill() : Packet(0)
 bool PacketTargetedSkill::onReceive(CNetState* net)
 {
     ADDTOCALLSTACK("PacketTargetedSkill::onReceive");
-    
+
     word  wSkillID    = readInt16();    // if SkillID = 0, it means that is lastskill
     dword dwTargetUID = readInt32();
 
@@ -3474,7 +3478,7 @@ bool PacketAOSTooltipReq::onReceive(CNetState* net)
 		CObjBase* object = CUID(readInt32()).ObjFind();
 		if (object == nullptr)
 			continue;
-		
+
         bool bShop = false;
         const CItem* pSearchObjItem = dynamic_cast<const CItem*>(object);
         if (pSearchObjItem)
@@ -3487,7 +3491,7 @@ bool PacketAOSTooltipReq::onReceive(CNetState* net)
                 pSearchObjItem = dynamic_cast<const CItem*>(pSearchObj);
                 if (!pSearchObjItem)
                     break;
-                
+
                 LAYER_TYPE objContItemLayer = pSearchObjItem->GetEquipLayer();
                 if (objContItemLayer >= 26 && objContItemLayer <= 28)
                 {
@@ -3496,11 +3500,11 @@ bool PacketAOSTooltipReq::onReceive(CNetState* net)
                     break;
                 }
             }
-        }	
+        }
 
 		if (bShop)	// shop item
 			client->addAOSTooltip(object, true, true);
-		else		// char or regular items		
+		else		// char or regular items
 		{
 			if (character->CanSee(object) == false)
 				continue;
@@ -4481,7 +4485,7 @@ bool PacketCrashReport::onReceive(CNetState* net)
             g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN|LOGM_NOCONTEXT, "Char attached. Last server P=%d,%d,%d,%d\n", ptChar.m_x, ptChar.m_y, ptChar.m_z, ptChar.m_map);
         }
     }
-    
+
 	return true;
 }
 
@@ -4500,7 +4504,7 @@ bool PacketCreateHS::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketCreateHS::onReceive");
 	// standard character creation packet, but with 4 skills and different handling of race and sex.
-	
+
 	tchar charname[MAX_NAME_SIZE];
 	SKILL_TYPE skill1 = SKILL_NONE, skill2 = SKILL_NONE, skill3 = SKILL_NONE, skill4 = SKILL_NONE;
 	byte skillval1 = 0, skillval2 = 0, skillval3 = 0, skillval4 = 0;
@@ -4537,7 +4541,7 @@ bool PacketCreateHS::onReceive(CNetState* net)
 
 	// convert race_sex_flag: determine which race and sex the client has selected
 	bool isFemale = (race_sex_flag % 2) != 0;	// Even=Male, Odd=Female (rule applies to all clients)
-	RACE_TYPE rtRace = RACETYPE_HUMAN;			// Human								   
+	RACE_TYPE rtRace = RACETYPE_HUMAN;			// Human
 	/*
 	race_sex_flag values since Classic Client 7.0.16.0
 	0x2 = Human (male)
@@ -4613,7 +4617,7 @@ bool PacketPublicHouseContent::onReceive(CNetState* net)
 
     CClient* client = net->getClient();
     ASSERT(client);
-    
+
     client->_fShowPublicHouseContent = readBool();
 
     return true;

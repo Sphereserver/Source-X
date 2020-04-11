@@ -26,7 +26,6 @@
 
 bool CObjBaseTemplate::IsDeleted() const
 {
-	ADDTOCALLSTACK("CObjBaseTemplate::IsDeleted");
 	return (!m_UID.IsValidUID() || ( GetParent() == &g_World.m_ObjDelete ));
 }
 
@@ -111,7 +110,7 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 	}
 
 	// Put in the idle list by default. (til placed in the world)
-	g_World.m_ObjNew.InsertHead( this );
+	g_World.m_ObjNew.InsertContentTail( this );
 }
 
 CObjBase::~CObjBase()
@@ -350,7 +349,8 @@ void CObjBase::r_WriteSafe( CScript & s )
 		uid = GetUID();
 
 		//	objects with TAG.NOSAVE set are not saved
-		if ( m_TagDefs.GetKeyNum("NOSAVE") )
+		const CVarDefCont* pVarNoSave = m_TagDefs.GetKey("NOSAVE");
+		if (pVarNoSave && pVarNoSave->GetKey())
 			return;
 
 		if ( !g_Cfg.m_fSaveGarbageCollect )
@@ -3197,7 +3197,7 @@ void CObjBase::DupeCopy( const CObjBase * pObj )
     CEntityProps::Copy(pObj);
 }
 
-void CObjBase::Delete(bool fForce)
+bool CObjBase::Delete(bool fForce)
 {
 	ADDTOCALLSTACK("CObjBase::Delete");
 	DeletePrepare();
@@ -3205,7 +3205,8 @@ void CObjBase::Delete(bool fForce)
     CTimedObject::Delete();
 	CWorldTickingList::DelObjStatusUpdate(this);
     CTimedFunctions::Erase( GetUID() );
-    g_World.m_ObjDelete.InsertHead(this);
+    g_World.m_ObjDelete.InsertContentTail(this);
+	return true;
 }
 
 TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgs * pArgs )
@@ -3225,6 +3226,11 @@ TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CCh
 		}
 	}
 	return TRIGRET_RET_DEFAULT;
+}
+
+bool CObjBase::IsRunningTrigger() const
+{
+	return ((_iRunningTriggerId >= 0) || !_sRunningTrigger.empty());
 }
 
 bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult)

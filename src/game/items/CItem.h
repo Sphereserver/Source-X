@@ -663,15 +663,6 @@ public:
 	bool MoveToCheck(const CPointMap & pt, CChar * pCharMover = nullptr );
 	virtual bool MoveNearObj( const CObjBaseTemplate *pItem, ushort uiSteps = 0 ) override;
 
-	inline CItem* GetNext() const
-	{
-		return static_cast <CItem*>(CObjBase::GetNext());
-	}
-	inline CItem* GetPrev() const
-	{
-		return static_cast <CItem*>(CObjBase::GetPrev());
-	}
-
 	const CObjBaseTemplate* GetTopLevelObj() const override;
 	CObjBaseTemplate* GetTopLevelObj() override;
 	CObjBase * GetContainer() const;
@@ -805,7 +796,7 @@ public:
 
 	static CItem * ReadTemplate( CResourceLock & s, CObjBase * pCont );
 
-	virtual void Delete(bool bforce = false) override;
+	virtual bool Delete(bool bforce = false) override;
 	virtual bool NotifyDelete();
 };
 

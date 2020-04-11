@@ -6,6 +6,7 @@
 #ifndef _INC_CSECTORTEMPLATE_H
 #define _INC_CSECTORTEMPLATE_H
 
+#include "sphere_library/CSObjCont.h"
 #include "../game/CServer.h"
 #include "../game/CRegion.h"
 
@@ -13,58 +14,61 @@
 class CItem;
 class CSector;
 
-class CCharsDisconnectList : public CSObjList
+struct CCharsDisconnectList : public CSObjCont
 {
-public:
 	static const char *m_sClassName;
+
 public:
 	CCharsDisconnectList() = default;
     void AddCharDisconnected( CChar * pChar );
+
 private:
 	CCharsDisconnectList(const CCharsDisconnectList& copy);
 	CCharsDisconnectList& operator=(const CCharsDisconnectList& other);
 };
 
-class CCharsActiveList : public CSObjList
+struct CCharsActiveList : public CSObjCont
 {
+	static const char* m_sClassName;
+
 private:
-    int m_iClients; // How many clients in this sector now?
-public:
-	static const char *m_sClassName;
-	int64 m_timeLastClient;	// age the sector based on last client here.
-
+	int m_iClients;				// How many clients in this sector now?
+	int64 m_iTimeLastClient;	// age the sector based on last client here.
+    
 protected:
-	void OnRemoveObj( CSObjListRec* pObjRec );	// Override this = called when removed from list.
-
-public:
-    int GetClientsNumber() const;
-	void ClientIncrease();
-	void ClientDecrease();
-	void AddCharActive( CChar * pChar );
+	void OnRemoveObj(CSObjContRec* pObjRec );	// Override this = called when removed from list.
 
 public:
 	CCharsActiveList();
+	void AddCharActive(CChar* pChar);
+	int GetClientsNumber() const {
+		return m_iClients;
+	}
+	int64 GetTimeLastClient() const {
+		return m_iTimeLastClient;
+	}
+	inline void SetTimeLastClient(int64 iTime) {
+		m_iTimeLastClient = iTime;
+	}
 
 private:
 	CCharsActiveList(const CCharsActiveList& copy);
 	CCharsActiveList& operator=(const CCharsActiveList& other);
 };
 
-class CItemsList : public CSObjList
+struct CItemsList : public CSObjCont
 {
 	// Top level list of items.
-public:
+	static const char* m_sClassName;
+
 	static bool sm_fNotAMove;	// hack flag to prevent items from bouncing around too much.
-
-protected:
-	void OnRemoveObj( CSObjListRec* pObRec );	// Override this = called when removed from list.
-
-public:
-	static const char *m_sClassName;
-	void AddItemToSector( CItem * pItem );
 
 public:
 	CItemsList() = default;
+	void AddItemToSector( CItem * pItem );
+
+protected:
+	void OnRemoveObj(CSObjContRec* pObRec);	// Override this = called when removed from list.
 
 private:
 	CItemsList(const CItemsList& copy);
@@ -100,8 +104,7 @@ public:
 
 	CCharsActiveList		m_Chars_Active;		// CChar(s) activte in this CSector.
 	CCharsDisconnectList	m_Chars_Disconnect;	// dead NPCs, etc
-	CItemsList m_Items_Timer;				// CItem(s) in this CSector that need timers.
-	CItemsList m_Items_Inert;				// CItem(s) in this CSector. (no timer required)
+	CItemsList m_Items;				// CItem(s) in this CSector (not relevant if they have a timer set or not).
 
 private:
     CSector* _ppAdjacentSectors[DIR_QTY];

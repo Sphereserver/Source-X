@@ -280,13 +280,13 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 				{
 					sprintf(pszTemp1, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_1), pBank->m_itEqBankBox.m_Check_Amount);
 					sprintf(pszTemp2, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_2), pBank->m_itEqBankBox.m_Check_Amount / iWage);
-					sprintf(pszTemp3, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_3), (int)(pCont->GetCount()));
+					sprintf(pszTemp3, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_3), (int)(pCont->GetContentCount()));
 				}
 				else
 				{
 					sprintf(pszTemp1, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_1), pBank->m_itEqBankBox.m_Check_Amount);
 					sprintf(pszTemp2, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_4), pBank->m_itEqBankBox.m_Check_Restock, pBank->GetTimerAdjusted() / 60);
-					sprintf(pszTemp3, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_3), (int)(pCont->GetCount()));
+					sprintf(pszTemp3, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_3), (int)(pCont->GetContentCount()));
 				}
 				sprintf(pszMsg, "%s %s %s", pszTemp1, pszTemp2, pszTemp3);
 			}
@@ -572,10 +572,9 @@ void CChar::NPC_PetClearOwners()
 				if ( !pCont )
 					continue;
 
-				CItem *pItemNext = nullptr;
-				for ( CItem *pItem = pCont->GetContentHead(); pItem != nullptr; pItem = pItemNext )
+				for (CSObjContRec* pObjRec : pCont->GetIterationSafeCont())
 				{
-					pItemNext = pItem->GetNext();
+					CItem* pItem = static_cast<CItem*>(pObjRec);
 					pBankOwner->ContentAdd(pItem);
 				}
 			}

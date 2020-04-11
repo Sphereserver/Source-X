@@ -18,9 +18,11 @@ public:
 private:
     const _Comp _comparatorObj;
 
-    inline size_t lower_element(size_t mySize, _Type const& value) const;
+
+    inline size_t lower_element(size_t mySize, _Type const& value) const noexcept;
+
     template <class _ValType, class _Pred>
-    inline size_t binary_search_predicate(size_t mySize, _ValType const& value, _Pred const& predicate) const;
+    inline size_t binary_search_predicate(size_t mySize, _ValType const& value, _Pred const& predicate) const noexcept;
 
 public:
     CSSortedVector() : _comparatorObj() {}
@@ -65,18 +67,18 @@ public:
     //iterator insert(const size_Typepe _Count, const _Typepe& value) = delete;
 
 
-    size_t find(_Type const& value) const;
+    size_t find(_Type const& value) const noexcept;
 
     // predicates should return an int and accept two arguments: the CSSortedVecotor template type and a generic value
     template <class _ValType, class _Pred>
-    size_t find_predicate(_ValType const& value, _Pred const& predicate) const;
+    size_t find_predicate(_ValType const& value, _Pred const& predicate) const noexcept;
 };
 
 
 /* Template methods (inlined or not) are defined here */
 
 template <class _Type, class _Comp>
-size_t CSSortedVector<_Type, _Comp>::lower_element(size_t _hi, _Type const& value) const
+size_t CSSortedVector<_Type, _Comp>::lower_element(size_t _hi, _Type const& value) const noexcept
 {
     // Ensure that we don't call this private method with _hi == 0! Check it before! (Not doing it here to avoiding redundancy)
     /*
@@ -101,7 +103,7 @@ size_t CSSortedVector<_Type, _Comp>::lower_element(size_t _hi, _Type const& valu
 
 template <class _Type, class _Comp>
 template <class _ValType, class _Pred>
-size_t CSSortedVector<_Type, _Comp>::binary_search_predicate(size_t _hi, _ValType const& value, _Pred const& predicate) const
+size_t CSSortedVector<_Type, _Comp>::binary_search_predicate(size_t _hi, _ValType const& value, _Pred const& predicate) const noexcept
 {
     // Ensure that we don't call this private method with _hi == 0! Check it before! (Not doing it here to avoiding redundancy)
     /*
@@ -130,7 +132,7 @@ size_t CSSortedVector<_Type, _Comp>::binary_search_predicate(size_t _hi, _ValTyp
 }
 
 template <class _Type, class _Comp>
-size_t CSSortedVector<_Type, _Comp>::find(_Type const& value) const
+size_t CSSortedVector<_Type, _Comp>::find(_Type const& value) const noexcept
 {
     const size_t _sz = this->size();
     if (_sz == 0) {
@@ -145,7 +147,7 @@ size_t CSSortedVector<_Type, _Comp>::find(_Type const& value) const
 
 template <class _Type, class _Comp>
 template <class _ValType, class _Pred>
-size_t CSSortedVector<_Type, _Comp>::find_predicate(_ValType const& value, _Pred const& predicate) const
+size_t CSSortedVector<_Type, _Comp>::find_predicate(_ValType const& value, _Pred const& predicate) const noexcept
 {
     const size_t _sz = this->size();
     if (_sz == 0) {

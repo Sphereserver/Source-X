@@ -34,9 +34,9 @@ private:
 protected:
 	CResourceRef m_BaseRef;     // Pointer to the resource that describes this type.
 
-    CSString _sRunningTrigger;
-    short _iRunningTriggerId;     // Current trigger being run on this object. Used to prevent the same trigger being called over and over.
-    short _iCallingObjTriggerId;  // I am running a trigger called via TRIGGER (CallPersonalTrigger method). In which trigger (OF THIS SAME OBJECT) was this call executed?
+    std::string _sRunningTrigger;   // Name of the running trigger (can be custom!) [use std::string instead of CSString because the former is allocated on-demand]
+    short _iRunningTriggerId;       // Current trigger being run on this object. Used to prevent the same trigger being called over and over.
+    short _iCallingObjTriggerId;    // I am running a trigger called via TRIGGER (CallPersonalTrigger method). In which trigger (OF THIS SAME OBJECT) was this call executed?
 
 public:
     static const char *m_sClassName;
@@ -87,6 +87,8 @@ public:
 	{
 		return (GetCanFlags() & dwCan);
 	}
+
+    bool IsRunningTrigger() const;
 
 	/**
 	* @fn  inline bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull);
@@ -484,9 +486,11 @@ public:
      *
      * @brief   Deletes this CObjBase from game (doesn't delete the raw class instance).
      *
-     * @param   bforce  Force deletion.
+     * @param   bForce  Force deletion.
+     *
+     * @return  Was deleted.
      */
-	virtual void Delete(bool fforce = false);
+	virtual bool Delete(bool fForce = false);
 
 
 	// Accessors
@@ -510,24 +514,6 @@ public:
      * @param   fItem   true to item.
      */
 	void SetUID( dword dwVal, bool fItem );
-
-    /**
-     * @fn  CObjBase* CObjBase::GetNext() const;
-     *
-     * @brief   Gets the next item.
-     *
-     * @return  null if it fails, else the next.
-     */
-	CObjBase* GetNext() const;
-
-    /**
-     * @fn  CObjBase* CObjBase::GetPrev() const;
-     *
-     * @brief   Gets the previous item.
-     *
-     * @return  null if it fails, else the previous.
-     */
-	CObjBase* GetPrev() const;
 
     /**
      * @fn  virtual lpctstr CObjBase::GetName() const;
@@ -1299,17 +1285,5 @@ enum CTRIG_TYPE : short
  */
 DIR_TYPE GetDirStr( lpctstr pszDir );
 
-
-/* Inline Methods Definitions */
-
-inline CObjBase* CObjBase::GetPrev() const
-{
-	return static_cast <CObjBase*>(CSObjListRec::GetPrev());
-}
-
-inline CObjBase* CObjBase::GetNext() const
-{
-	return static_cast <CObjBase*>(CSObjListRec::GetNext());
-}
 
 #endif // _INC_COBJBASE_H

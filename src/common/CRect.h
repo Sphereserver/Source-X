@@ -29,16 +29,16 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
     }
     virtual ~CRect() = default;
 
-    inline int GetWidth() const
+    inline int GetWidth() const noexcept
     {
         return( m_right - m_left );
     }
-    inline int GetHeight() const
+    inline int GetHeight() const noexcept
     {
         return( m_bottom - m_top );
     }
 
-    inline bool IsRectEmpty() const
+    inline bool IsRectEmpty() const noexcept
     {
         return( m_left >= m_right || m_top >= m_bottom );
     }

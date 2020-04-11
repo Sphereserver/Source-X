@@ -49,7 +49,6 @@ public:
 
 	
 	int GetDistZ( const CPointBase & pt ) const noexcept;
-	int GetDistZAdj( const CPointBase & pt ) const noexcept;
 	int GetDistBase( const CPointBase & pt ) const noexcept;	    // Distance between points
 	int GetDist( const CPointBase & pt ) const noexcept;			// Distance between points
 	int GetDistSightBase( const CPointBase & pt ) const noexcept;	// Distance between points based on UO sight

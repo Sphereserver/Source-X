@@ -122,22 +122,20 @@ void CPointBase::ZeroPoint()
 	m_z = 0;
 	m_map = 0;
 }
+
 int CPointBase::GetDistZ( const CPointBase & pt ) const noexcept
 {
-	return( abs(m_z-pt.m_z));
+	return SphereAbs(m_z - pt.m_z);
 }
-int CPointBase::GetDistZAdj( const CPointBase & pt ) const noexcept
-{
-	return( GetDistZ(pt) / (PLAYER_HEIGHT/2) );
-}
+
 int CPointBase::GetDistBase( const CPointBase & pt ) const noexcept // Distance between points
 {
     // This method is called very frequently, ADDTOCALLSTACK unneededly sucks cpu
     //ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDistBase");
 
 	// Do not consider z or m_map.
-    const int dx = abs(m_x - pt.m_x);
-    const int dy = abs(m_y - pt.m_y);
+    const int dx = SphereAbs(m_x - pt.m_x);
+    const int dy = SphereAbs(m_y - pt.m_y);
 
 	return maximum(dx, dy);
 
@@ -164,35 +162,30 @@ int CPointBase::GetDist( const CPointBase & pt ) const noexcept // Distance betw
 
 int CPointBase::GetDistSightBase( const CPointBase & pt ) const noexcept // Distance between points based on UO sight
 {
-	//ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDistSightBase");
-
-	int dx = abs(m_x - pt.m_x);
-	int dy = abs(m_y - pt.m_y);
+	const int dx = SphereAbs(m_x - pt.m_x);
+	const int dy = SphereAbs(m_y - pt.m_y);
 	return maximum(dx, dy);
 }
 
 int CPointBase::GetDistSight( const CPointBase & pt ) const noexcept // Distance between points based on UO sight
 {
-	//ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDistSight");
-
 	if ( !pt.IsValidPoint() )
 		return INT16_MAX;
 	if ( pt.m_map != m_map )
 		return INT16_MAX;
 
-	return GetDistSightBase(pt);
+	const int dx = SphereAbs(m_x - pt.m_x);
+	const int dy = SphereAbs(m_y - pt.m_y);
+	return maximum(dx, dy);
 }
 
 int CPointBase::GetDist3D( const CPointBase & pt ) const noexcept // Distance between points
 {
-	//ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDist3D");
-
-	// OK, 1 unit of Z is not the same (real life) distance as 1
-	// unit of X (or Y)
-	int dist = GetDist(pt);
+	// OK, 1 unit of Z is not the same (real life) distance as 1 unit of X (or Y)
+	const int dist = GetDist(pt);
 
 	// Get the deltas and correct the Z for height first
-	int dz = GetDistZAdj(pt); // Take player height into consideration
+	const int dz = (GetDistZ(pt) / (PLAYER_HEIGHT / 2)); // Take player height into consideration
 
 	return maximum(dz, dist);
 	// What the heck?
@@ -203,7 +196,7 @@ int CPointBase::GetDist3D( const CPointBase & pt ) const noexcept // Distance be
 
 bool CPointBase::IsValidZ() const noexcept
 {
-	return ( m_z > -UO_SIZE_Z && m_z < UO_SIZE_Z );
+	return ( (m_z > -UO_SIZE_Z) && (m_z < UO_SIZE_Z) );
 }
 
 bool CPointBase::IsValidXY() const noexcept

@@ -5,9 +5,64 @@
 #include "CScriptTriggerArgs.h"
 
 
+CScriptTriggerArgs::CScriptTriggerArgs() :
+    m_iN1(0), m_iN2(0), m_iN3(0)
+{
+    m_pO1 = nullptr;
+}
+
+CScriptTriggerArgs::CScriptTriggerArgs(lpctstr pszStr)
+{
+    Init(pszStr);
+}
+
+CScriptTriggerArgs::CScriptTriggerArgs(CScriptObj* pObj) :
+    m_iN1(0), m_iN2(0), m_iN3(0), m_pO1(pObj)
+{
+}
+
+CScriptTriggerArgs::CScriptTriggerArgs(int64 iVal1) :
+    m_iN1(iVal1), m_iN2(0), m_iN3(0)
+{
+    m_pO1 = nullptr;
+}
+
+CScriptTriggerArgs::CScriptTriggerArgs(int64 iVal1, int64 iVal2, int64 iVal3) :
+    m_iN1(iVal1), m_iN2(iVal2), m_iN3(iVal3)
+{
+    m_pO1 = nullptr;
+}
+
+CScriptTriggerArgs::CScriptTriggerArgs(int64 iVal1, int64 iVal2, CScriptObj* pObj) :
+    m_iN1(iVal1), m_iN2(iVal2), m_iN3(0), m_pO1(pObj)
+{
+}
+
+void CScriptTriggerArgs::Clear()
+{
+    m_iN1 = 0;
+    m_iN2 = 0;
+    m_iN3 = 0;
+
+    m_s1_raw.Empty();
+    m_s1.Empty();
+
+    m_v.clear();
+
+    m_pO1 = nullptr;
+
+    // Clear LOCALs
+    m_VarsLocal.Clear();
+
+    // Clear FLOATs
+    m_VarsFloat.Clear();
+
+    // Clear REFx
+    m_VarObjs.Clear();
+}
+
 void CScriptTriggerArgs::Init( lpctstr pszStr )
 {
-    ADDTOCALLSTACK_INTENSIVE("CScriptTriggerArgs::Init");
     m_pO1 = nullptr;
 
     if ( pszStr == nullptr )
@@ -55,9 +110,17 @@ void CScriptTriggerArgs::Init( lpctstr pszStr )
     m_v.clear();
 }
 
-CScriptTriggerArgs::CScriptTriggerArgs( lpctstr pszStr )
+
+void CScriptTriggerArgs::GetArgNs(int64* iVar1, int64* iVar2, int64* iVar3) //Puts the ARGN's into the specified variables
 {
-    Init( pszStr );
+    if (iVar1)
+        *iVar1 = m_iN1;
+
+    if (iVar2)
+        *iVar2 = m_iN2;
+
+    if (iVar3)
+        *iVar3 = m_iN3;
 }
 
 bool CScriptTriggerArgs::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
@@ -189,8 +252,8 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
             index = AGC_O;
         else
         {
-            ptcKey ++;
-            CObjBase * pObj = static_cast<CObjBase*>(static_cast<CUID>(Exp_GetSingle(ptcKey)).ObjFind());
+            ++ptcKey;
+            CObjBase * pObj = static_cast<CObjBase*>(CUID::ObjFind(Exp_GetSingle(ptcKey)));
             if (!pObj)
                 m_pO1 = nullptr;	// no pObj = cleaning argo
             else
