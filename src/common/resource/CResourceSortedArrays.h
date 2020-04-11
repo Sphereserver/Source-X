@@ -22,6 +22,9 @@ struct CSStringSortArray : public CSObjSortArray< tchar*, tchar* >
     // Sorted array of strings
     int CompareKey( tchar* pszID1, tchar* pszID2, bool fNoSpaces ) const;
     void AddSortString( lpctstr pszText );
+
+private:
+    virtual void DeleteElements() override;
 };
 
 struct CObjNameSortArray : public CSObjSortArray< CScriptObj*, lpctstr >

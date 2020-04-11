@@ -72,26 +72,26 @@ void CClient::resendBuffs() const
 				addBuff(BI_NIGHTSIGHT, 1075643, 1075644, wTimerEffect);
 				break;
 			case SPELL_Clumsy:
-				Str_FromI(wStatEffect, NumBuff[0], 10);
+				Str_FromI(wStatEffect, NumBuff[0], sizeof(NumBuff[0]), 10);
 				removeBuff(BI_CLUMSY);
 				addBuff(BI_CLUMSY, 1075831, 1075832, wTimerEffect, pNumBuff, 1);
 				break;
 			case SPELL_Weaken:
-				Str_FromI(wStatEffect, NumBuff[0], 10);
+				Str_FromI(wStatEffect, NumBuff[0], sizeof(NumBuff[0]), 10);
 				removeBuff(BI_WEAKEN);
 				addBuff(BI_WEAKEN, 1075837, 1075838, wTimerEffect, pNumBuff, 1);
 				break;
 			case SPELL_Feeblemind:
-				Str_FromI(wStatEffect, NumBuff[0], 10);
+				Str_FromI(wStatEffect, NumBuff[0], sizeof(NumBuff[0]), 10);
 				removeBuff(BI_FEEBLEMIND);
 				addBuff(BI_FEEBLEMIND, 1075833, 1075834, wTimerEffect, pNumBuff, 1);
 				break;
 			case SPELL_Curse:
 			{
 				for ( int idx = STAT_STR; idx < STAT_BASE_QTY; ++idx )
-					Str_FromI(wStatEffect, NumBuff[idx], 10);
+					Str_FromI(wStatEffect, NumBuff[idx], sizeof(NumBuff[0]), 10);
 				for ( int idx = 3; idx < 7; ++idx )
-					Str_FromI(10, NumBuff[idx], 10);
+					Str_FromI(10, NumBuff[idx], sizeof(NumBuff[0]), 10);
 
 				removeBuff(BI_CURSE);
 				addBuff(BI_CURSE, 1075835, 1075836, wTimerEffect, pNumBuff, 7);
@@ -100,31 +100,31 @@ void CClient::resendBuffs() const
 			case SPELL_Mass_Curse:
 			{
 				for ( int idx = STAT_STR; idx < STAT_BASE_QTY; ++idx )
-					Str_FromI(wStatEffect, NumBuff[idx], 10);
+					Str_FromI(wStatEffect, NumBuff[idx], sizeof(NumBuff[0]), 10);
 
 				removeBuff(BI_MASSCURSE);
 				addBuff(BI_MASSCURSE, 1075839, 1075840, wTimerEffect, pNumBuff, 3);
 				break;
 			}
 			case SPELL_Strength:
-				Str_FromI(wStatEffect, NumBuff[0], 10);
+				Str_FromI(wStatEffect, NumBuff[0], sizeof(NumBuff[0]), 10);
 				removeBuff(BI_STRENGTH);
 				addBuff(BI_STRENGTH, 1075845, 1075846, wTimerEffect, pNumBuff, 1);
 				break;
 			case SPELL_Agility:
-				Str_FromI(wStatEffect, NumBuff[0], 10);
+				Str_FromI(wStatEffect, NumBuff[0], sizeof(NumBuff[0]), 10);
 				removeBuff(BI_AGILITY);
 				addBuff(BI_AGILITY, 1075841, 1075842, wTimerEffect, pNumBuff, 1);
 				break;
 			case SPELL_Cunning:
-				Str_FromI(wStatEffect, NumBuff[0], 10);
+				Str_FromI(wStatEffect, NumBuff[0], sizeof(NumBuff[0]), 10);
 				removeBuff(BI_CUNNING);
 				addBuff(BI_CUNNING, 1075843, 1075844, wTimerEffect, pNumBuff, 1);
 				break;
 			case SPELL_Bless:
 			{
 				for ( int idx = STAT_STR; idx < STAT_BASE_QTY; ++idx )
-					Str_FromI(wStatEffect, NumBuff[idx], 10);
+					Str_FromI(wStatEffect, NumBuff[idx], sizeof(NumBuff[0]), 10);
 
 				removeBuff(BI_BLESS);
 				addBuff(BI_BLESS, 1075847, 1075848, wTimerEffect, pNumBuff, STAT_BASE_QTY);
@@ -135,9 +135,9 @@ void CClient::resendBuffs() const
 				removeBuff(BI_REACTIVEARMOR);
 				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 				{
-					Str_FromI(wStatEffect, NumBuff[0], 10);
+					Str_FromI(wStatEffect, NumBuff[0], sizeof(NumBuff[0]), 10);
 					for ( int idx = 1; idx < 5; ++idx )
-						Str_FromI(5, NumBuff[idx], 10);
+						Str_FromI(5, NumBuff[idx], sizeof(NumBuff[0]), 10);
 
 					addBuff(BI_REACTIVEARMOR, 1075812, 1075813, wTimerEffect, pNumBuff, 5);
 				}
@@ -161,8 +161,8 @@ void CClient::resendBuffs() const
 				removeBuff(BuffIcon);
 				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 				{
-					Str_FromI(-pItem->m_itSpell.m_PolyStr, NumBuff[0], 10);
-					Str_FromI(-pItem->m_itSpell.m_PolyDex / 10, NumBuff[1], 10);
+					Str_FromI(-pItem->m_itSpell.m_PolyStr, NumBuff[0], sizeof(NumBuff[0]), 10);
+					Str_FromI(-pItem->m_itSpell.m_PolyDex / 10, NumBuff[1], sizeof(NumBuff[0]), 10);
 					addBuff(BuffIcon, BuffCliloc, 1075815, wTimerEffect, pNumBuff, 2);
 				}
 				else
@@ -188,9 +188,9 @@ void CClient::resendBuffs() const
 				removeBuff(BI_MAGICREFLECTION);
 				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 				{
-					Str_FromI(-wStatEffect, NumBuff[0], 10);
+					Str_FromI(-wStatEffect, NumBuff[0], sizeof(NumBuff[0]), 10);
 					for ( int idx = 1; idx < 5; ++idx )
-						Str_FromI(10, NumBuff[idx], 10);
+						Str_FromI(10, NumBuff[idx], sizeof(NumBuff[0]), 10);
 
 					addBuff(BI_MAGICREFLECTION, 1075817, 1075818, wTimerEffect, pNumBuff, 5);
 				}

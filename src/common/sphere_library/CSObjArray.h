@@ -14,7 +14,7 @@ template<class TYPE>
 class CSObjArray : public CSPtrTypeArray<TYPE>
 {
 private:
-    void DeleteElements();
+    virtual void DeleteElements();
 
 public:
     static const char *m_sClassName;

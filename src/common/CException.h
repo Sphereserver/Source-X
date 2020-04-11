@@ -6,7 +6,8 @@
 #ifndef _INC_CEXCEPTION_H
 #define _INC_CEXCEPTION_H
 
-#include "../common/CLog.h"
+#include "../sphere/threads.h"
+#include "CLog.h"
 
 // -------------------------------------------------------------------
 // -------------------------------------------------------------------

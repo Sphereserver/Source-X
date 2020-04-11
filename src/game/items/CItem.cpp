@@ -5943,7 +5943,7 @@ bool CItem::OnTick()
 						tchar *pszMsg = Str_GetTemp();
 						CObjBase* pObj = static_cast<CObjBase*>(GetTopLevelObj());
 						ASSERT(pObj);
-						pObj->Speak(Str_FromI(m_itPotion.m_tick, pszMsg, 10), HUE_RED);
+						pObj->Speak(Str_FromI_Fast(m_itPotion.m_tick, pszMsg, STR_TEMPLENGTH, 10), HUE_RED);
 						SetTimeoutS(1);
 					}
 					return true;

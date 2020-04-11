@@ -5,18 +5,18 @@
 #include "../CScript.h"
 
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
     #include <codeanalysis/warnings.h>
     #pragma warning( push )
     #pragma warning ( disable : ALL_CODE_ANALYSIS_WARNINGS )
-#else
+#elif defined(__GNUC__)
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
 #include "../regex/deelx.h"
 #ifdef _MSC_VER
     #pragma warning( pop )
-#else
+#elif defined(__GNUC__)
     #pragma GCC diagnostic pop
 #endif
 
@@ -76,16 +76,15 @@ ullong Str_ToULL(lpctstr ptcStr, int base) noexcept
     return ret;
 }
 
-static_assert (THREAD_STRING_LENGTH > 100, "THREAD_STRING_LENGTH is too small and the Str_From* functions would write past the buffer");
+static_assert (THREAD_STRING_LENGTH > 100, "THREAD_STRING_LENGTH is too small and the Str_From* functions would write past the buffer.");
 #define STR_FROM_SET_ZEROSTR \
     if (hex)    { buf[0] = '0'; buf[1] = '0'; buf[2] = '\0'; } \
     else        { buf[0] = '0'; buf[1] = '\0'; }
 
-tchar* Str_FromI(int val, tchar* buf, int base) noexcept
+tchar* Str_FromI_Fast(int val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    ASSERT(base > 0);
     const bool hex = (base == 16);
-    if (val == 0)
+    if (!val || !buf_length || !base)
     {
         STR_FROM_SET_ZEROSTR;
         return buf;
@@ -104,53 +103,49 @@ tchar* Str_FromI(int val, tchar* buf, int base) noexcept
         val = -val;
     }
 
-    unsigned short i = 30;
-    buf[--i] = '\0';
+    buf[--buf_length] = '\0';
     do
     {
-        buf[--i] = chars[val % base];
+        buf[--buf_length] = chars[val % base];
         val /= base;
     } while (val);
 
     if (hex) {
-        buf[--i] = '0';
+        buf[--buf_length] = '0';
     }
     else if (sign) {
-        buf[--i] = '-';
+        buf[--buf_length] = '-';
     }
-    return &buf[i];
+    return &buf[buf_length];
 }
 
-tchar* Str_FromUI(uint val, tchar* buf, int base) noexcept
+tchar* Str_FromUI_Fast(uint val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    ASSERT(base > 0);
     const bool hex = (base == 16);
-    if (val == 0)
+    if (!val || !buf_length || !base)
     {
         STR_FROM_SET_ZEROSTR;
         return buf;
     }
     static constexpr tchar chars[] = "0123456789abcdef";
 
-    unsigned short i = 30;
-    buf[--i] = '\0';
+    buf[--buf_length] = '\0';
     do
     {
-        buf[--i] = chars[val % base];
+        buf[--buf_length] = chars[val % base];
         val /= base;
     } while (val);
 
     if (base == 16) {
-        buf[--i] = '0';
+        buf[--buf_length] = '0';
     }
-    return &buf[i];
+    return &buf[buf_length];
 }
 
-tchar* Str_FromLL (llong val, tchar* buf, int base) noexcept
+tchar* Str_FromLL_Fast (llong val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    ASSERT(base > 0);
     const bool hex = (base == 16);
-    if (val == 0)
+    if (!val || !buf_length || !base)
     {
         STR_FROM_SET_ZEROSTR;
         return buf;
@@ -169,49 +164,83 @@ tchar* Str_FromLL (llong val, tchar* buf, int base) noexcept
         val = -val;
     }
 
-    unsigned short i = 62;
-    buf[--i] = '\0';
+    buf[--buf_length] = '\0';
     do
     {
-        buf[--i] = chars[val % base];
+        buf[--buf_length] = chars[val % base];
         val /= base;
     } while (val);
 
     if (hex) {
-        buf[--i] = '0';
+        buf[--buf_length] = '0';
     }
     else if (sign) {
-        buf[--i] = '-';
+        buf[--buf_length] = '-';
     }
-    return &buf[i];
+    return &buf[buf_length];
 }
 
-tchar* Str_FromULL (ullong val, tchar* buf, int base) noexcept
+tchar* Str_FromULL_Fast (ullong val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    ASSERT(base > 0);
     const bool hex = (base == 16);
-    if (val == 0)
+    if (!val || !buf_length || !base)
     {
         STR_FROM_SET_ZEROSTR;
         return buf;
     }
     static constexpr tchar chars[] = "0123456789abcdef";
 
-    unsigned short i = 62;
-    buf[--i] = '\0';
+    buf[--buf_length] = '\0';
     do
     {
-        buf[--i] = chars[val % base];
+        buf[--buf_length] = chars[val % base];
         val /= base;
     } while (val);
 
     if (hex) {
-        buf[--i] = '0';
+        buf[--buf_length] = '0';
     }
-    return &buf[i];
+    return &buf[buf_length];
 }
 
 #undef STR_FROM_SET_ZEROSTR
+
+void Str_FromI(int val, tchar* buf, size_t buf_length, uint base) noexcept
+{
+    tchar* modified_buf = Str_FromI_Fast(val, buf, buf_length, base);
+    const size_t offset = size_t(modified_buf - buf);
+    if (offset > 0) {
+        memmove(buf, modified_buf, buf_length - offset);
+    }
+}
+
+void Str_FromUI(uint val, tchar* buf, size_t buf_length, uint base) noexcept
+{
+    tchar* modified_buf = Str_FromUI_Fast(val, buf, buf_length, base);
+    const size_t offset = size_t(modified_buf - buf);
+    if (offset > 0) {
+        memmove(buf, modified_buf, buf_length - offset);
+    }
+}
+
+void Str_FromLL(llong val, tchar* buf, size_t buf_length, uint base) noexcept
+{
+    tchar* modified_buf = Str_FromLL_Fast(val, buf, buf_length, base);
+    const size_t offset = size_t(modified_buf - buf);
+    if (offset > 0) {
+        memmove(buf, modified_buf, buf_length - offset);
+    }
+}
+
+void Str_FromULL(ullong val, tchar* buf, size_t buf_length, uint base) noexcept
+{
+    tchar* modified_buf = Str_FromULL_Fast(val, buf, buf_length, base);
+    const size_t offset = size_t(modified_buf - buf);
+    if (offset > 0) {
+        memmove(buf, modified_buf, buf_length - offset);
+    }
+}
+
 
 size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord )
 {

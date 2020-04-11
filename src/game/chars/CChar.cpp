@@ -314,8 +314,6 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 // Delete character
 CChar::~CChar()
 {
-    DeletePrepare();    // remove me early so virtuals will work.
-
     CWorldTickingList::DelCharPeriodic(this);
 
     if (IsStatFlag(STATF_RIDDEN))
@@ -346,7 +344,6 @@ CChar::~CChar()
     if (m_pNPC)
         NPC_PetClearOwners();	// Clear follower slots on pet owner
 
-    ClearContainer();			// Remove me early so virtuals will work
     ClearNPC();
     ClearPlayer();
 
@@ -524,6 +521,7 @@ bool CChar::SetNPCBrain( NPCBRAIN_TYPE NPCBrain )
 // @Destroy can prevent the deletion
 bool CChar::NotifyDelete()
 {
+	ADDTOCALLSTACK("CChar::NotifyDelete");
 	if (IsDeleted())
 		return false;
 
@@ -536,6 +534,13 @@ bool CChar::NotifyDelete()
 
 	ContentNotifyDelete();
 	return true;
+}
+
+void CChar::DeletePrepare()
+{
+	ADDTOCALLSTACK("CChar::DeletePrepare");
+	ClearContainer();	// This object and its contents need to be deleted on the same tick
+	CObjBase::DeletePrepare();
 }
 
 bool CChar::Delete(bool bforce)
@@ -3631,7 +3636,7 @@ void CChar::r_Write( CScript & s )
 		if (pSkillDef != nullptr)
 			pszActionTemp = const_cast<tchar*>(pSkillDef->GetKey());
 		else
-			pszActionTemp = Str_FromI(action, Str_GetTemp());
+			pszActionTemp = Str_FromI_Fast(action, Str_GetTemp(), STR_TEMPLENGTH, 10);
 		s.WriteKey("ACTION", pszActionTemp);
 
 		/* We save ACTARG1/ACTARG2/ACTARG3 only if the following conditions are satisfied:

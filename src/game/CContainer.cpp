@@ -7,11 +7,18 @@
 #include "items/CItem.h"
 #include "items/CItemContainer.h"
 #include "items/CItemVendable.h"
-#include "CContainer.h"
 #include "triggers.h"
+#include "CContainer.h"
 
-//***************************************************************************
-// -CContainer
+
+CContainer::CContainer()
+{
+	m_totalweight = 0;
+}
+
+CContainer::~CContainer()
+{
+}
 
 void CContainer::OnWeightChange( int iChange )
 {
@@ -581,16 +588,6 @@ bool CContainer::r_GetRefContainer( lpctstr &ptcKey, CScriptObj *&pRef )
 		}
 	}
 	return false;
-}
-
-CContainer::CContainer()
-{
-	m_totalweight = 0;
-}
-
-CContainer::~CContainer()
-{
-	ClearContainer(); // call this early so the virtuals will work.
 }
 
 bool CContainer::r_WriteValContainer( lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc )

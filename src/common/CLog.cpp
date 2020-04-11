@@ -214,7 +214,6 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 		return 0;
 
 	int iRet = 0;
-	THREAD_UNIQUE_LOCK_SET;
 
 	try
 	{
@@ -295,6 +294,8 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 		// Print to log file.
 		if ( !(dwMask & LOGF_CONSOLE_ONLY) )
 		{
+			THREAD_UNIQUE_LOCK_SET;
+
 			if ( datetime.GetDay() != m_dateStamp.GetDay())
 			{
 				// it's a new day, open a log file with new day name.
