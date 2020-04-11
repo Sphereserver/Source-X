@@ -16,7 +16,7 @@
 	#pragma pack(1)
 	#define PACK_NEEDED
 #else
-	// GCC based compiler you can add:
+	// GCC and Clang based compiler you can add:
 	#define PACK_NEEDED __attribute__ ((packed))
 #endif
 

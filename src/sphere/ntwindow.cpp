@@ -22,9 +22,8 @@
 #define IDC_M_INPUT 11
 #define IDT_ONTICK	1
 
-CNTApp theApp;
-CNTWindow g_NTWindow;
 
+CNTApp theApp;
 
 //************************************
 // -CAboutDlg
@@ -280,12 +279,12 @@ void CNTWindow::List_Add( COLORREF color, LPCTSTR pszText )
         iMaxTextLen -= 256; // Remove more than we need, so that we have to remove text less often
 		const int iCut = iNewLen - iMaxTextLen; 
 
-        // These SetRedraw FALSE/TRUE calls will make the log panel scroll much faster when spamming text, but
-        //  it will generate some drawing artifact
-        m_wndLog.SetRedraw(FALSE);
-
 		m_wndLog.SetSel( 0, iCut );
-		m_wndLog.ReplaceSel( "" );
+
+		// These SetRedraw FALSE/TRUE calls will make the log panel scroll much faster when spamming text, but
+		//  it will generate some drawing artifact
+		m_wndLog.SetRedraw(FALSE);
+		m_wndLog.ReplaceSel( "" );	
 
         m_iLogTextLen = iMaxTextLen;
 	}

@@ -313,8 +313,6 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 // Delete character
 CChar::~CChar()
 {
-    DeletePrepare();    // remove me early so virtuals will work.
-
     CWorldTickingList::DelCharPeriodic(this);
 
     if (IsStatFlag(STATF_RIDDEN))
@@ -345,7 +343,6 @@ CChar::~CChar()
     if (m_pNPC)
         NPC_PetClearOwners();	// Clear follower slots on pet owner
 
-    ClearContainer();			// Remove me early so virtuals will work
     ClearNPC();
     ClearPlayer();
 
@@ -523,6 +520,7 @@ bool CChar::SetNPCBrain( NPCBRAIN_TYPE NPCBrain )
 // @Destroy can prevent the deletion
 bool CChar::NotifyDelete()
 {
+	ADDTOCALLSTACK("CChar::NotifyDelete");
 	if (IsDeleted())
 		return false;
 
@@ -535,6 +533,13 @@ bool CChar::NotifyDelete()
 
 	ContentNotifyDelete();
 	return true;
+}
+
+void CChar::DeletePrepare()
+{
+	ADDTOCALLSTACK("CChar::DeletePrepare");
+	ClearContainer();	// This object and its contents need to be deleted on the same tick
+	CObjBase::DeletePrepare();
 }
 
 bool CChar::Delete(bool bforce)

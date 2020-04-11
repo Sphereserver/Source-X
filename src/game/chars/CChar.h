@@ -315,10 +315,11 @@ public:
     virtual void GoAwake();
 
 	// Status and attributes ------------------------------------
-	int IsWeird() const;
-	char GetFixZ( const CPointMap& pt, dword dwBlockFlags = 0);
+	virtual void DeletePrepare() override;
 	virtual bool Delete(bool bforce = false) override;
 	bool NotifyDelete();
+	int IsWeird() const;
+	char GetFixZ(const CPointMap& pt, dword dwBlockFlags = 0);
 	bool IsStatFlag( uint64 iStatFlag ) const;
 	void StatFlag_Set(uint64 iStatFlag);
 	void StatFlag_Clear(uint64 iStatFlag);

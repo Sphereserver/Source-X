@@ -5,18 +5,18 @@
 #include "../CScript.h"
 
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
     #include <codeanalysis/warnings.h>
     #pragma warning( push )
     #pragma warning ( disable : ALL_CODE_ANALYSIS_WARNINGS )
-#else
+#elif defined(__GNUC__)
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
 #include "../regex/deelx.h"
 #ifdef _MSC_VER
     #pragma warning( pop )
-#else
+#elif defined(__GNUC__)
     #pragma GCC diagnostic pop
 #endif
 

@@ -58,8 +58,11 @@ bool CItemContainer::NotifyDelete()
 
 void CItemContainer::DeletePrepare()
 {
+	ADDTOCALLSTACK("CItemContainer::DeletePrepare");
 	if ( IsType( IT_EQ_TRADE_WINDOW ))
 		Trade_Delete();
+	
+	ClearContainer();	// This object and its contents need to be deleted on the same tick
 	CItem::DeletePrepare();
 }
 
