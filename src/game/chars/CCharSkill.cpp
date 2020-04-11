@@ -521,7 +521,7 @@ bool CChar::Skill_CheckSuccess( SKILL_TYPE skill, int difficulty, bool bUseBellC
 	return ( iSuccessChance >= Calc_GetRandVal(1000) );
 }
 
-bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain, bool bUseBellCurve, bool bForceCheck )
+bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain, bool bUseBellCurve )
 {
 	ADDTOCALLSTACK("CChar::Skill_UseQuick");
 	// ARGS:

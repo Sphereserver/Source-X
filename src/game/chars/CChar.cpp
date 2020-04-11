@@ -2526,7 +2526,7 @@ do_default:
 						if ( iSkill == SKILL_NONE )
 							return false;
 
-						sVal.FormatVal( Skill_UseQuick( iSkill, Exp_GetVal( ppArgs[1] ), true ,(Exp_GetVal(ppArgs[2]) != 0 ? false : true), (Exp_GetVal(ppArgs[3]) != 0 ? true : false)));
+						sVal.FormatVal( Skill_UseQuick( iSkill, Exp_GetVal( ppArgs[1] ), true ,(Exp_GetVal(ppArgs[2]) != 0 ? false : true)));
 						return true;
 					}
 				}
@@ -3426,7 +3426,7 @@ bool CChar::r_LoadVal( CScript & s )
 						if ( iSkill == SKILL_NONE )
 							return false;
 
-						Skill_UseQuick( iSkill, Exp_GetVal( ppArgs[1] ), true, (Exp_GetVal(ppArgs[2]) != 0 ? false : true), (Exp_GetVal(ppArgs[3]) != 0 ? true : false));
+						Skill_UseQuick( iSkill, Exp_GetVal( ppArgs[1] ), true, (Exp_GetVal(ppArgs[2]) != 0 ? false : true));
 						return true;
 					}
 				}
