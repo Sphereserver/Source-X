@@ -3620,7 +3620,7 @@ void CChar::r_Write( CScript & s )
 		if (pSkillDef != nullptr)
 			pszActionTemp = const_cast<tchar*>(pSkillDef->GetKey());
 		else
-			pszActionTemp = Str_FromI(action, Str_GetTemp());
+			pszActionTemp = Str_FromI_Fast(action, Str_GetTemp(), STR_TEMPLENGTH, 10);
 		s.WriteKey("ACTION", pszActionTemp);
 
 		/* We save ACTARG1/ACTARG2/ACTARG3 only if the following conditions are satisfied:

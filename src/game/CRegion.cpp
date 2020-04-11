@@ -237,7 +237,7 @@ bool CRegion::MakeRegionDefname()
     }
 
     // Only one, no need for the extra "_"
-    pszDef = Str_FromI(iVar, pszDef);
+    pszDef = Str_FromI_Fast(iVar, pszDef, STR_TEMPLENGTH, 10);
     SetResourceName( pbuf );
     // Assign name
     return true;

@@ -2076,7 +2076,7 @@ static constexpr lpctstr _ptcStatName[STAT_QTY] = // not alphabetically sorted o
 
 STAT_TYPE CServerConfig::GetStatKey( lpctstr ptcKey ) // static
 {
-	//ADDTOCALLSTACK_INTENSIVE("CServerConfig::FindStatKey");
+	//ADDTOCALLSTACK_INTENSIVE("CServerConfig::GetStatKey");
 	return (STAT_TYPE) FindTable( ptcKey, _ptcStatName, CountOf(_ptcStatName));
 }
 
@@ -4512,15 +4512,16 @@ lpctstr CServerConfig::GetDefaultMsg(lpctstr ptcKey)
 	return "";
 }
 
-bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpctstr pPrefix, tchar *pOutput, bool bCheckConflict, CVarDefMap* vDefnames)
+bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpctstr pPrefix, TemporaryString *pOutput, bool bCheckConflict, CVarDefMap* vDefnames)
 {
 	ADDTOCALLSTACK("CServerConfig::GenerateDefname");
 	if ( !pOutput )
 		return false;
 
+	tchar* buf = const_cast<tchar*>(pOutput->toBuffer());
 	if ( !pObjectName || !pObjectName[0] )
 	{
-		pOutput[0] = '\0';
+		buf[0] = '\0';
 		return false;
 	}
 
@@ -4530,7 +4531,7 @@ bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpc
 	{
 		// write prefix
 		for (size_t i = 0; pPrefix[i] != '\0'; ++i)
-			pOutput[iOut++] = pPrefix[i];
+			buf[iOut++] = pPrefix[i];
 	}
 
 	// write object name
@@ -4541,21 +4542,21 @@ bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpc
 
 		if ( ISWHITESPACE(pObjectName[i]) )
 		{
-			if (iOut > 0 && pOutput[iOut - 1] != '_') // avoid double '_'
-				pOutput[iOut++] = '_';
+			if (iOut > 0 && buf[iOut - 1] != '_') // avoid double '_'
+				buf[iOut++] = '_';
 		}
 		else if ( _ISCSYMF(pObjectName[i]) )
 		{
-			if (pObjectName[i] != '_' || (iOut > 0 && pOutput[iOut - 1] != '_')) // avoid double '_'
-				pOutput[iOut++] = static_cast<tchar>(tolower(pObjectName[i]));
+			if (pObjectName[i] != '_' || (iOut > 0 && buf[iOut - 1] != '_')) // avoid double '_'
+				buf[iOut++] = static_cast<tchar>(tolower(pObjectName[i]));
 		}
 	}
 
 	// remove trailing _
-	while (iOut > 0 && pOutput[iOut - 1] == '_')
+	while (iOut > 0 && buf[iOut - 1] == '_')
 		--iOut;
 
-	pOutput[iOut] = '\0';
+	buf[iOut] = '\0';
 	if (iOut == 0)
 		return false;
 
@@ -4568,12 +4569,12 @@ bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpc
 		for (;;)
 		{
 			bool isValid = true;
-			if (g_Exp.m_VarResDefs.GetKey(pOutput) != nullptr)
+			if (g_Exp.m_VarResDefs.GetKey(buf) != nullptr)
 			{
 				// check loaded defnames
 				isValid = false;
 			}
-			else if (vDefnames && vDefnames->GetKey(pOutput) != nullptr)
+			else if (vDefnames && vDefnames->GetKey(buf) != nullptr)
 			{
 				isValid = false;
 			}
@@ -4583,14 +4584,14 @@ bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpc
 
 			// attach suffix
 			iOut = iEnd;
-			pOutput[iOut++] = '_';
-            Str_FromI(++iAttempts, &pOutput[iOut], 10);
+			buf[iOut++] = '_';
+            Str_FromI(++iAttempts, &buf[iOut], pOutput->realLength(), 10);
 		}
 	}
 
 	// record defname
 	if (vDefnames != nullptr)
-		vDefnames->SetNum(pOutput, 1);
+		vDefnames->SetNum(buf, 1);
 
 	return true;
 }
@@ -4647,7 +4648,7 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
         Str_CopyLimitNull(sItemName, tiledata.m_name, CountOf(sItemName));
 
 		// generate a suitable defname
-		if (GenerateDefname(sItemName, CountOf(sItemName), "i_", pDefnameBuffer, true, &defnames))
+		if (GenerateDefname(sItemName, CountOf(sItemName), "i_", &tsDefnameBuffer, true, &defnames))
 		{
 			s.Printf("// %s\n", sItemName);
 			s.WriteKey("DEFNAME", pDefnameBuffer);

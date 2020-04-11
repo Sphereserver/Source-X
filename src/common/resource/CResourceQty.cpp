@@ -103,16 +103,6 @@ CResourceQtyArray::CResourceQtyArray(lpctstr pszCmds)
     m_mergeOnLoad = true;
     Load(pszCmds);
 }
-//
-//CResourceQtyArray& CResourceQtyArray::operator=(const CResourceQtyArray& other)
-//{
-//	if (this != &other)
-//	{
-//		m_mergeOnLoad = other.m_mergeOnLoad;
-//		Copy(&other);
-//	}
-//	return *this;
-//}
 
 void CResourceQtyArray::setNoMergeOnLoad()
 {
