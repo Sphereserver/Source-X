@@ -9,6 +9,7 @@
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
+#include <cstdio>	// for itoa and similars
 
 SPELL_TYPE CChar::Spell_GetIndex(SKILL_TYPE skill)	// Returns the first spell for the given skill
 {

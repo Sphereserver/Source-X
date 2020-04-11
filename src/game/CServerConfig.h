@@ -668,7 +668,7 @@ public:
      *
      * @return  The found stat key.
      */
-	static STAT_TYPE FindStatKey( lpctstr ptcKey );
+	static STAT_TYPE GetStatKey( lpctstr ptcKey );
 
     /**
      * @brief   Returns the Stat name for the given stat key (STAT_STR = "STR", ...).

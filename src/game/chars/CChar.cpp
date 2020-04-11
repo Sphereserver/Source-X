@@ -341,11 +341,11 @@ CChar::~CChar()
     }
     Guild_Resign(MEMORY_GUILD);
     Guild_Resign(MEMORY_TOWN);
-    Attacker_RemoveChar();      // Removing me from enemy's attacker list (I asume that if he is on my list, I'm on his one and no one have me on their list if I dont have them)
+    Attacker_RemoveChar();		// Removing me from enemy's attacker list (I asume that if he is on my list, I'm on his one and no one have me on their list if I dont have them)
     if (m_pNPC)
-        NPC_PetClearOwners();   // Clear follower slots on pet owner
+        NPC_PetClearOwners();	// Clear follower slots on pet owner
 
-    ClearContainer();                    // Remove me early so virtuals will work
+    ClearContainer();			// Remove me early so virtuals will work
     ClearNPC();
     ClearPlayer();
 
@@ -523,6 +523,9 @@ bool CChar::SetNPCBrain( NPCBRAIN_TYPE NPCBrain )
 // @Destroy can prevent the deletion
 bool CChar::NotifyDelete()
 {
+	if (IsDeleted())
+		return false;
+
 	if ( IsTrigUsed(TRIGGER_DESTROY) )
 	{
 		//We can forbid the deletion in here with no pain
@@ -4236,6 +4239,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_PRIVSET:
 			return SetPrivLevel( pSrc, s.GetArgStr());
 
+		case CHV_DESTROY:	// remove this char from the world and bypass trigger's return value.
 		case CHV_REMOVE:	// remove this char from the world instantly.
 			if ( m_pPlayer )
 			{
@@ -4247,20 +4251,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				if ( IsClient() )
 					GetClient()->addObjectRemove(this);
 			}
-			Delete();
-			break;
-		case CHV_DESTROY:	// remove this char from the world and bypass trigger's return value.
-			if ( m_pPlayer )
-			{
-				if ( s.GetArgRaw()[0] != '1' || pSrc->GetPrivLevel() < PLEVEL_Admin )
-				{
-					pSrc->SysMessage( g_Cfg.GetDefaultMsg(DEFMSG_CMD_REMOVE_PLAYER) );
-					return false;
-				}
-				if ( IsClient() )
-					GetClient()->addObjectRemove(this);
-			}
-			Delete(true);
+			Delete((index == CHV_DESTROY));
 			break;
 		case CHV_RESURRECT:
 			{

@@ -2173,3 +2173,6 @@ Must have event, even if it's empty, since it's applied by the source to generat
 
 09-04-2020, Nolok
 - Fixed: Using ACCOUNT object inside a trigger checked if the SRC had high enough privilege (PLEVEL) to access/modify ACCOUNT's properties, instead of acting with the highest PLEVEL (Issue #391).
+
+11-04-2019, Nolok
+- Added: Safety checks and warnings when trying to set a skill or a stat to an invalid value (Issue #404).

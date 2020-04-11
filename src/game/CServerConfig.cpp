@@ -2074,7 +2074,7 @@ static constexpr lpctstr _ptcStatName[STAT_QTY] = // not alphabetically sorted o
     "FOOD"
 };
 
-STAT_TYPE CServerConfig::FindStatKey( lpctstr ptcKey ) // static
+STAT_TYPE CServerConfig::GetStatKey( lpctstr ptcKey ) // static
 {
 	//ADDTOCALLSTACK_INTENSIVE("CServerConfig::FindStatKey");
 	return (STAT_TYPE) FindTable( ptcKey, _ptcStatName, CountOf(_ptcStatName));
@@ -2845,7 +2845,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		while ( pScript->ReadKeyParse())
 		{
 			lpctstr ptcKey = pScript->GetKey();
-			STAT_TYPE i = FindStatKey(ptcKey);
+			STAT_TYPE i = GetStatKey(ptcKey);
 			if ((i <= STAT_NONE) || (i >= STAT_BASE_QTY))
 			{
 				g_Log.EventError("Invalid keyword '%s'.\n", ptcKey);
