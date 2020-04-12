@@ -313,8 +313,6 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 // Delete character
 CChar::~CChar()
 {
-    DeletePrepare();    // remove me early so virtuals will work.
-
     CWorldTickingList::DelCharPeriodic(this);
 
     if (IsStatFlag(STATF_RIDDEN))
@@ -341,11 +339,10 @@ CChar::~CChar()
     }
     Guild_Resign(MEMORY_GUILD);
     Guild_Resign(MEMORY_TOWN);
-    Attacker_RemoveChar();      // Removing me from enemy's attacker list (I asume that if he is on my list, I'm on his one and no one have me on their list if I dont have them)
+    Attacker_RemoveChar();		// Removing me from enemy's attacker list (I asume that if he is on my list, I'm on his one and no one have me on their list if I dont have them)
     if (m_pNPC)
-        NPC_PetClearOwners();   // Clear follower slots on pet owner
+        NPC_PetClearOwners();	// Clear follower slots on pet owner
 
-    ClearContainer();                    // Remove me early so virtuals will work
     ClearNPC();
     ClearPlayer();
 
@@ -523,6 +520,10 @@ bool CChar::SetNPCBrain( NPCBRAIN_TYPE NPCBrain )
 // @Destroy can prevent the deletion
 bool CChar::NotifyDelete()
 {
+	ADDTOCALLSTACK("CChar::NotifyDelete");
+	if (IsDeleted())
+		return false;
+
 	if ( IsTrigUsed(TRIGGER_DESTROY) )
 	{
 		//We can forbid the deletion in here with no pain
@@ -532,6 +533,13 @@ bool CChar::NotifyDelete()
 
 	ContentNotifyDelete();
 	return true;
+}
+
+void CChar::DeletePrepare()
+{
+	ADDTOCALLSTACK("CChar::DeletePrepare");
+	ClearContainer();	// This object and its contents need to be deleted on the same tick
+	CObjBase::DeletePrepare();
 }
 
 bool CChar::Delete(bool bforce)
@@ -3617,7 +3625,7 @@ void CChar::r_Write( CScript & s )
 		if (pSkillDef != nullptr)
 			pszActionTemp = const_cast<tchar*>(pSkillDef->GetKey());
 		else
-			pszActionTemp = Str_FromI(action, Str_GetTemp());
+			pszActionTemp = Str_FromI_Fast(action, Str_GetTemp(), STR_TEMPLENGTH, 10);
 		s.WriteKey("ACTION", pszActionTemp);
 
 		/* We save ACTARG1/ACTARG2/ACTARG3 only if the following conditions are satisfied:
@@ -4236,6 +4244,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_PRIVSET:
 			return SetPrivLevel( pSrc, s.GetArgStr());
 
+		case CHV_DESTROY:	// remove this char from the world and bypass trigger's return value.
 		case CHV_REMOVE:	// remove this char from the world instantly.
 			if ( m_pPlayer )
 			{
@@ -4247,20 +4256,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				if ( IsClient() )
 					GetClient()->addObjectRemove(this);
 			}
-			Delete();
-			break;
-		case CHV_DESTROY:	// remove this char from the world and bypass trigger's return value.
-			if ( m_pPlayer )
-			{
-				if ( s.GetArgRaw()[0] != '1' || pSrc->GetPrivLevel() < PLEVEL_Admin )
-				{
-					pSrc->SysMessage( g_Cfg.GetDefaultMsg(DEFMSG_CMD_REMOVE_PLAYER) );
-					return false;
-				}
-				if ( IsClient() )
-					GetClient()->addObjectRemove(this);
-			}
-			Delete(true);
+			Delete((index == CHV_DESTROY));
 			break;
 		case CHV_RESURRECT:
 			{

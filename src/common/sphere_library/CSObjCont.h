@@ -29,8 +29,10 @@ public:
 /* CSObjCont */
 
 #define BASECONT std::vector<CSObjContRec*>
-class CSObjCont : private BASECONT
+class CSObjCont
 {
+    BASECONT _Contents;
+
 public:
     friend class CSObjContRec;
     static const char * m_sClassName;
@@ -65,17 +67,17 @@ public:
     using reverse_iterator       = BASECONT::reverse_iterator;
     using const_reverse_iterator = BASECONT::const_reverse_iterator;
 
-    inline iterator begin() noexcept                        { return BASECONT::begin();  }
-    inline iterator end()   noexcept                        { return BASECONT::end();    }
-    inline const_iterator begin()  const noexcept           { return BASECONT::begin();  }
-    inline const_iterator end()    const noexcept           { return BASECONT::end();    }
-    inline const_iterator cbegin() const noexcept           { return BASECONT::cbegin(); }
-    inline const_iterator cend()   const noexcept           { return BASECONT::cend();   }
+    inline iterator begin() noexcept                        { return _Contents.begin();  }
+    inline iterator end()   noexcept                        { return _Contents.end();    }
+    inline const_iterator begin()  const noexcept           { return _Contents.begin();  }
+    inline const_iterator end()    const noexcept           { return _Contents.end();    }
+    inline const_iterator cbegin() const noexcept           { return _Contents.cbegin(); }
+    inline const_iterator cend()   const noexcept           { return _Contents.cend();   }
 
-    inline reverse_iterator rbegin() noexcept               { return BASECONT::rbegin(); }
-    inline reverse_iterator rend()   noexcept               { return BASECONT::rend();   }
-    inline const_reverse_iterator rbegin()  const noexcept  { return BASECONT::rbegin(); }
-    inline const_reverse_iterator rend()    const noexcept  { return BASECONT::rend();   }
+    inline reverse_iterator rbegin() noexcept               { return _Contents.rbegin(); }
+    inline reverse_iterator rend()   noexcept               { return _Contents.rend();   }
+    inline const_reverse_iterator rbegin()  const noexcept  { return _Contents.rbegin(); }
+    inline const_reverse_iterator rend()    const noexcept  { return _Contents.rend();   }
 
     /**
     * @brief Returns a copy of the CSObjCont base container, which is safe to iterate on even if one of its elements is ::Delete'd.
@@ -184,37 +186,37 @@ private:
 
 BASECONT CSObjCont::GetIterationSafeCont() const noexcept
 {
-    return *this;
+    return _Contents;   // Return a copy of the base container
 }
 
 reverse_cont<BASECONT> CSObjCont::GetIterationSafeContReverse() const noexcept
 {
-    return reverse_cont<BASECONT>(BASECONT(*this));
+    return reverse_cont<BASECONT>(BASECONT(_Contents)); // Return a reverse-iterable copy of the base container
 }
 
 bool CSObjCont::IsContainerEmpty() const noexcept
 {
-    return empty();
+    return _Contents.empty();
 }
 
 size_t CSObjCont::GetContentCount() const noexcept
 {
-    return size();
+    return _Contents.size();
 }
 
 CSObjContRec* CSObjCont::GetContentIndex(size_t i) const noexcept
 {
-    return operator[](i);
+    return _Contents[i];
 }
 
 CSObjContRec* CSObjCont::GetContainerHead() const noexcept
 {
-    return front();
+    return _Contents.front();
 }
 
 CSObjContRec* CSObjCont::GetContainerTail() const noexcept
 {
-    return back();
+    return _Contents.back();
 }
 
 #undef BASECONT

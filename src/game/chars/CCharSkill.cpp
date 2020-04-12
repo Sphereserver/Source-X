@@ -182,7 +182,7 @@ void CChar::Skill_SetBase( SKILL_TYPE skill, ushort uiValue )
 	ADDTOCALLSTACK("CChar::Skill_SetBase");
 	ASSERT( IsSkillBase(skill));
 
-	bool bUpdateStats = false;
+	bool fUpdateStats = false;
 	if ( IsTrigUsed(TRIGGER_SKILLCHANGE) )
 	{
 		CScriptTriggerArgs args;
@@ -191,6 +191,16 @@ void CChar::Skill_SetBase( SKILL_TYPE skill, ushort uiValue )
 		if ( OnTrigger(CTRIG_SkillChange, this, &args) == TRIGRET_RET_TRUE )
 			return;
 
+		if (args.m_iN2 > UINT16_MAX)
+		{
+			g_Log.EventWarn("Trying to set skill '%s' to invalid value=%lld. Defaulting it to %d.\n", Skill_GetName(skill), args.m_iN2, UINT16_MAX);
+			args.m_iN2 = UINT16_MAX;
+		}
+		else if (args.m_iN2 < 0)
+		{
+			g_Log.EventWarn("Trying to set skill '%s' to invalid value=%lld. Defaulting it to 0.\n", Skill_GetName(skill), args.m_iN2);
+			args.m_iN2 = 0;
+		}
 		uiValue = (ushort)(args.m_iN2);
 	}
 	m_Skill[skill] = uiValue;
@@ -201,7 +211,7 @@ void CChar::Skill_SetBase( SKILL_TYPE skill, ushort uiValue )
 	if ( g_Cfg.m_iCombatDamageEra )
 	{
 		if ( skill == SKILL_ANATOMY || skill == SKILL_TACTICS || skill == SKILL_LUMBERJACKING )
-			bUpdateStats = true;		// those skills are used to calculate the char damage bonus, so we must update the client status gump
+			fUpdateStats = true;		// those skills are used to calculate the char damage bonus, so we must update the client status gump
 	}
 
 	// We need to update the AC given by the Shield when parrying increase.
@@ -209,10 +219,10 @@ void CChar::Skill_SetBase( SKILL_TYPE skill, ushort uiValue )
 	{
 		
 		m_defense = (word)CalcArmorDefense();
-		bUpdateStats = true;
+		fUpdateStats = true;
 	}
 	
-	if (bUpdateStats)
+	if (fUpdateStats)
 		UpdateStatsFlag();
 }
 

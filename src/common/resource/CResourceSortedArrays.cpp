@@ -26,6 +26,12 @@ void CSStringSortArray::AddSortString( lpctstr pszText )
     AddSortKey( pNew, pNew );
 }
 
+void CSStringSortArray::DeleteElements()
+{
+    for (tchar* elem : *this)
+        delete[] elem;
+}
+
 // Array of CScriptObj. name sorted.
 int CObjNameSortArray::CompareKey( lpctstr pszID, CScriptObj* pObj, bool fNoSpaces ) const
 {

@@ -115,7 +115,6 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 
 CObjBase::~CObjBase()
 {
-    RemoveSelf();
     if (CCSpawn *pSpawn = GetSpawn())    // If I was created from a Spawn
     {
 		CItem* pSpawnLink = pSpawn->GetLink();

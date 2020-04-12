@@ -21,7 +21,7 @@ public:
 
 	// bool m_fTinkerTrapped;	// magic trap is diff.
 
-	virtual bool NotifyDelete() override;
+	virtual bool NotifyDelete() override;	// overrides CItem:: method
 	virtual void DeletePrepare() override;
 
     void SetSecuredOfMulti(CUID uidMulti);

@@ -668,7 +668,7 @@ public:
      *
      * @return  The found stat key.
      */
-	static STAT_TYPE FindStatKey( lpctstr ptcKey );
+	static STAT_TYPE GetStatKey( lpctstr ptcKey );
 
     /**
      * @brief   Returns the Stat name for the given stat key (STAT_STR = "STR", ...).
@@ -966,7 +966,7 @@ typedef std::map<dword,dword> KRGumpsMap;
 	dword GetKRDialogMap(dword idKRDialog);
 	dword GetKRDialog(dword rid);
 
-	bool GenerateDefname(tchar *pObjectName, size_t iInputLength, lpctstr pPrefix, tchar *pOutput, bool bCheckConflict = true, CVarDefMap* vDefnames = nullptr);
+	bool GenerateDefname(tchar *pObjectName, size_t iInputLength, lpctstr pPrefix, TemporaryString *pOutput, bool fCheckConflict = true, CVarDefMap* vDefnames = nullptr);
 	bool DumpUnscriptedItems(CTextConsole * pSrc, lpctstr pszFilename);
 } g_Cfg;
 

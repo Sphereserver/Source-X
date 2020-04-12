@@ -60,10 +60,9 @@ public:
     CResourceQtyArray();
     explicit CResourceQtyArray(lpctstr pszCmds);
     bool operator == ( const CResourceQtyArray & array ) const;
-    //CResourceQtyArray& operator=(const CResourceQtyArray& other);
 
-private:
-    CResourceQtyArray(const CResourceQtyArray& copy);
+    CResourceQtyArray& operator=(const CResourceQtyArray& other) = default;
+    CResourceQtyArray(const CResourceQtyArray& copy) = default;
 
 public:
     size_t Load( lpctstr pszCmds );

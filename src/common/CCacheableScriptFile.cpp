@@ -59,10 +59,12 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
     if (_fileContent)
     {
         delete _fileContent;
+        _fileContent = nullptr;
     }
+
     if ((uiModeFlags & OF_WRITE) || (uiModeFlags & OF_READWRITE))
     {
-        _fileContent = nullptr;
+        ;
     }
     else
     {
@@ -263,7 +265,7 @@ int CCacheableScriptFile::_GetPosition() const
 {
     ADDTOCALLSTACK("CCacheableScriptFile::_GetPosition");
     if (_useDefaultFile())
-        return CSFileText::_GetPosition();  // this requires a unique lock
+        return CSFile::_GetPosition();  // this requires a unique lock
 
     return _iCurrentLine;
 }

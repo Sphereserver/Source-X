@@ -150,7 +150,7 @@ STAT_TYPE CCharPlayer::Stat_GetLockType( lpctstr ptcKey ) const
 	if ( IsDigit( ppArgs[1][0] ))
 		i = atoi( ppArgs[1] );
 	else
-		i = g_Cfg.FindStatKey( ppArgs[1] );
+		i = g_Cfg.GetStatKey( ppArgs[1] );
 
 	if ( i >= STAT_BASE_QTY )
 		return STAT_NONE;

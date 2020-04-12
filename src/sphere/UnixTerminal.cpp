@@ -11,7 +11,6 @@
 	#include <sys/time.h>
 #endif
 
-UnixTerminal g_UnixTerminal;
 
 UnixTerminal::UnixTerminal() : AbstractSphereThread("T_UnixTerm", IThread::Highest),
 #ifdef _USECURSES
