@@ -31,7 +31,9 @@ public:
 #define BASECONT std::vector<CSObjContRec*>
 class CSObjCont
 {
+protected:
     BASECONT _Contents;
+    bool _fIsClearing;
 
 public:
     friend class CSObjContRec;
@@ -176,9 +178,6 @@ protected:
     */
     virtual void OnRemoveObj( CSObjContRec* pObRec );
     ///@}
-
-private:
-    bool _fIsClearing;
 };
 
 

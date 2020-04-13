@@ -12,7 +12,6 @@ CItemMemory::CItemMemory( ITEMID_TYPE id, CItemBase * pItemDef ) :
 
 CItemMemory::~CItemMemory()
 {
-	DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
 }
 
 word CItemMemory::SetMemoryTypes( word wType )	// For memory type objects.

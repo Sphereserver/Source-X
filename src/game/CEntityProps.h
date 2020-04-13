@@ -23,9 +23,18 @@ struct CBaseBaseDef;
 
 class CEntityProps
 {
-    fc::vector_map<COMPPROPS_TYPE, CComponentProps*> _List;
-    using iterator          = decltype(_List)::iterator;
-    using const_iterator    = decltype(_List)::const_iterator;
+    fc::vector_map<COMPPROPS_TYPE, CComponentProps*> _lComponentProps;
+    using iterator          = decltype(_lComponentProps)::iterator;
+    using const_iterator    = decltype(_lComponentProps)::const_iterator;
+
+    struct CEPLoopRet_t
+    {
+        CComponentProps::PropertyIndex_t iPropIndex;
+        bool fPropStr;
+        COMPPROPS_TYPE iCCPType;
+    };
+    bool CEPLoopLoad (CEPLoopRet_t* pRet, CScript& s, CObjBase* pLinkedObj, const RESDISPLAY_VERSION iLimitToExpansion);
+    bool CEPLoopWrite(CEPLoopRet_t* pRet, lpctstr ptcKey, CSString& sVal) const;
 
 public:
     CEntityProps();

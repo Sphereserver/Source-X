@@ -17,28 +17,6 @@ class CItemContainer;
 class CContainer : public CSObjCont	// This class contains a list of items but may or may not be an item itself.
 {
 public:
-	int	m_totalweight;      // weight of all the items it has. (1/WEIGHT_UNITS pound)
-
-    /**
-     * @fn  virtual void CContainer::OnRemoveObj( CSObjListRec* pObRec );
-     * @brief   Override this = called when removed from list.
-     * @param [in,out]  pObRec  If non-null, the ob record.
-     */
-	virtual void OnRemoveObj( CSObjContRec* pObRec );
-
-    /**
-     * @fn  void CContainer::ContentAddPrivate( CItem * pItem );
-     * @brief  Adds an item to this CContainer.
-     * @param [in,out]  pItem   If non-null, the item.
-     */
-	void ContentAddPrivate( CItem * pItem );
-
-	void r_WriteContent( CScript & s ) const;
-
-	bool r_WriteValContainer(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc);
-	bool r_GetRefContainer( lpctstr & ptcKey, CScriptObj * & pRef );
-
-public:
 	static const char *m_sClassName;
 	CContainer();
 	virtual ~CContainer();
@@ -48,6 +26,31 @@ private:
 	CContainer& operator=(const CContainer& other);
 
 public:
+    int	m_totalweight;      // weight of all the items it has. (1/WEIGHT_UNITS pound)
+
+
+public:
+    void ContentDelete(bool fForce);
+
+    /**
+     * @fn  virtual void CContainer::OnRemoveObj( CSObjListRec* pObRec );
+     * @brief   Override this = called when removed from list.
+     * @param [in,out]  pObRec  If non-null, the ob record.
+     */
+    virtual void OnRemoveObj(CSObjContRec* pObRec) override;
+
+    /**
+     * @fn  void CContainer::ContentAddPrivate( CItem * pItem );
+     * @brief  Adds an item to this CContainer.
+     * @param [in,out]  pItem   If non-null, the item.
+     */
+    void ContentAddPrivate(CItem* pItem);
+
+    void r_WriteContent(CScript& s) const;
+
+    bool r_WriteValContainer(lpctstr ptcKey, CSString& sVal, CTextConsole* pSrc);
+    bool r_GetRefContainer(lpctstr& ptcKey, CScriptObj*& pRef);
+
 
     /**
      * @fn  int CContainer::GetTotalWeight() const;
@@ -85,7 +88,7 @@ public:
      * @param   pt      The point.
      * @param   dwAttr  The attribute.
      */
-	void ContentsDump( const CPointMap & pt, uint64 iAttr = 0 );
+	void ContentsDump( const CPointMap & pt, uint64 uiAttr = 0 );
 
     /**
      * @fn  void CContainer::ContentsTransfer( CItemContainer * pCont, bool fNoNewbie );
@@ -101,7 +104,7 @@ public:
      * @param   dwAttr  The attribute.
      * @param   fSet    true to set.
      */
-	void ContentAttrMod( uint64 iAttr, bool fSet );
+	void ContentAttrMod( uint64 uiAttr, bool fSet );
 
     /**
      * @fn  void CContainer::ContentNotifyDelete();

@@ -2198,7 +2198,7 @@ bool CServer::Load()
 	tchar * wSockInfo = Str_GetTemp();
 	if ( !m_SocketMain.IsOpen() )
 	{
-		WSADATA wsaData;
+		WSADATA wsaData{};
 		int err = WSAStartup(MAKEWORD(2,2), &wsaData);
 		if ( err )
 		{

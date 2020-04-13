@@ -311,14 +311,17 @@ private:
 	CChar(const CChar& copy);
 	CChar& operator=(const CChar& other);
 
-public:
-    virtual void GoSleep();
-    virtual void GoAwake();
-
-	// Status and attributes ------------------------------------
+protected:
+	void DeleteCleanup(bool fForce);
 	virtual void DeletePrepare() override;
-	virtual bool Delete(bool bforce = false) override;
+public:
 	bool NotifyDelete();
+	virtual bool Delete(bool fForce = false) override;
+
+    virtual void GoSleep() override;
+    virtual void GoAwake() override;
+
+	// Status and attributes ------------------------------------	
 	int IsWeird() const;
 	char GetFixZ(const CPointMap& pt, dword dwBlockFlags = 0);
 	bool IsStatFlag( uint64 iStatFlag ) const;

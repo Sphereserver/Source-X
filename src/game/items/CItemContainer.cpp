@@ -16,7 +16,6 @@
 CItemContainer::CItemContainer( ITEMID_TYPE id, CItemBase *pItemDef ) :
     CTimedObject(PROFILE_ITEMS), CItemVendable( id, pItemDef )
 {
-	// m_fTinkerTrapped = false;
 }
 
 CItemContainer::~CItemContainer()
@@ -62,7 +61,7 @@ void CItemContainer::DeletePrepare()
 	if ( IsType( IT_EQ_TRADE_WINDOW ))
 		Trade_Delete();
 	
-	ClearContainer();	// This object and its contents need to be deleted on the same tick
+	ContentDelete(false);	// This object and its contents need to be deleted on the same tick
 	CItem::DeletePrepare();
 }
 
