@@ -160,38 +160,19 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEM
     SubscribeComponentProps(new CCPropsItemChar());
 }
 
-bool CItem::NotifyDelete()
+void CItem::DeleteCleanup(bool fForce)
 {
-	if (( IsTrigUsed(TRIGGER_DESTROY) ) || ( IsTrigUsed(TRIGGER_ITEMDESTROY) ))
+	ADDTOCALLSTACK("CItem::DeleteCleanup");
+
+	// Remove corpse map waypoint on enhanced clients
+	if (IsType(IT_CORPSE) && m_uidLink)
 	{
-		if (CItem::OnTrigger(ITRIG_DESTROY, &g_Serv) == TRIGRET_RET_TRUE)
-			return false;
+		CChar* pChar = m_uidLink.CharFind();
+		if (pChar && pChar->GetClient())
+		{
+			pChar->GetClient()->addMapWaypoint(this, Remove);
+		}
 	}
-
-	return true;
-}
-
-bool CItem::Delete(bool bforce)
-{
-	if (( NotifyDelete() == false ) && !bforce)
-		return false;
-
-    // Remove corpse map waypoint on enhanced clients
-    if (IsType(IT_CORPSE) && m_uidLink)
-    {
-        CChar *pChar = m_uidLink.CharFind();
-        if (pChar && pChar->GetClient())
-        {
-            pChar->GetClient()->addMapWaypoint(this, Remove);
-        }
-    }
-
-	return CObjBase::Delete();
-}
-
-CItem::~CItem()
-{
-	DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
 
 	switch ( m_type )
 	{
@@ -209,6 +190,7 @@ CItem::~CItem()
 		default:
 			break;
 	}
+
     if (CUID uidMulti = GetComponentOfMulti())
     {
         CItemMulti *pMulti = static_cast<CItemMulti*>(uidMulti.ItemFind());
@@ -225,6 +207,38 @@ CItem::~CItem()
             pMulti->UnlockItem(GetUID());
         }
     }
+}
+
+bool CItem::NotifyDelete()
+{
+	ADDTOCALLSTACK("CItem::NotifyDelete");
+	if ((IsTrigUsed(TRIGGER_DESTROY)) || (IsTrigUsed(TRIGGER_ITEMDESTROY)))
+	{
+		if (CItem::OnTrigger(ITRIG_DESTROY, &g_Serv) == TRIGRET_RET_TRUE)
+			return false;
+	}
+
+	return true;
+}
+
+bool CItem::Delete(bool fForce)
+{
+	ADDTOCALLSTACK("CItem::Delete");
+	if (( NotifyDelete() == false ) && !fForce)
+		return false;
+
+	DeletePrepare();
+	DeleteCleanup(fForce);
+
+	return CObjBase::Delete(fForce);
+}
+
+CItem::~CItem()
+{
+	ADDTOCALLSTACK("CItem::~CItem");
+	DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
+	DeleteCleanup(true);
+	
 	g_Serv.StatDec(SERV_STAT_ITEMS);
 }
 

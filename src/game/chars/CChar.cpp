@@ -313,18 +313,10 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 // Delete character
 CChar::~CChar()
 {
-    CWorldTickingList::DelCharPeriodic(this);
+	ADDTOCALLSTACK("CChar::~CChar");
 
-    if (IsStatFlag(STATF_RIDDEN))
-    {
-        CItem * pItem = Horse_GetMountItem();
-        if ( pItem )
-        {
-            pItem->m_itFigurine.m_UID.InitUID();    // unlink it first.
-            pItem->Delete();
-        }
-        StatFlag_Clear(STATF_RIDDEN);
-    }
+	ClearContainer();
+	DeleteCleanup(true);
 
     if (IsClient())    // this should never happen.
     {
@@ -347,6 +339,71 @@ CChar::~CChar()
     ClearPlayer();
 
     g_Serv.StatDec( SERV_STAT_CHARS );
+}
+
+void CChar::DeleteCleanup(bool fForce)
+{
+	CWorldTickingList::DelCharPeriodic(this);
+
+	if (IsStatFlag(STATF_RIDDEN))
+	{
+		CItem* pItem = Horse_GetMountItem();
+		if (pItem)
+		{
+			pItem->m_itFigurine.m_UID.InitUID();    // unlink it first.
+			pItem->Delete(fForce);
+		}
+		StatFlag_Clear(STATF_RIDDEN);
+	}
+}
+
+// Called before Delete()
+// @Destroy can prevent the deletion
+bool CChar::NotifyDelete()
+{
+	ADDTOCALLSTACK("CChar::NotifyDelete");
+	if (IsDeleted())
+		return false;
+
+	if (IsTrigUsed(TRIGGER_DESTROY))
+	{
+		//We can forbid the deletion in here with no pain
+		if (CChar::OnTrigger(CTRIG_Destroy, &g_Serv) == TRIGRET_RET_TRUE)
+			return false;
+	}
+
+	ContentNotifyDelete();
+	return true;
+}
+
+void CChar::DeletePrepare()
+{
+	ADDTOCALLSTACK("CChar::DeletePrepare");
+	ContentDelete(false);	// This object and its contents need to be deleted on the same tick
+	CObjBase::DeletePrepare();
+}
+
+bool CChar::Delete(bool fForce)
+{
+	ADDTOCALLSTACK("CChar::Delete");
+
+	if ((NotifyDelete() == false) && !fForce)
+		return false;
+
+	// Character has been deleted
+	if (IsClient())
+	{
+		CClient* pClient = GetClient();
+		pClient->CharDisconnect();
+		pClient->GetNetState()->markReadClosed();
+	}
+	
+	DeleteCleanup(fForce);
+
+	// Detach from account now
+	ClearPlayer();
+
+	return CObjBase::Delete();
 }
 
 // Client is detaching from this CChar.
@@ -514,55 +571,6 @@ bool CChar::SetNPCBrain( NPCBRAIN_TYPE NPCBrain )
     else
         m_pNPC->m_Brain = NPCBrain;		// just replace existing brain
     return true;
-}
-
-// Called before Delete()
-// @Destroy can prevent the deletion
-bool CChar::NotifyDelete()
-{
-	ADDTOCALLSTACK("CChar::NotifyDelete");
-	if (IsDeleted())
-		return false;
-
-	if ( IsTrigUsed(TRIGGER_DESTROY) )
-	{
-		//We can forbid the deletion in here with no pain
-		if (CChar::OnTrigger(CTRIG_Destroy, &g_Serv) == TRIGRET_RET_TRUE)
-			return false;
-	}
-
-	ContentNotifyDelete();
-	return true;
-}
-
-void CChar::DeletePrepare()
-{
-	ADDTOCALLSTACK("CChar::DeletePrepare");
-	ClearContainer();	// This object and its contents need to be deleted on the same tick
-	CObjBase::DeletePrepare();
-}
-
-bool CChar::Delete(bool bforce)
-{
-	ADDTOCALLSTACK("CChar::Delete");
-
-	if (( NotifyDelete() == false ) && !bforce)
-		return false;
-
-    CWorldTickingList::DelCharPeriodic(this);
-
-	// Character has been deleted
-	if ( IsClient() )
-	{
-		CClient* pClient = GetClient();
-		pClient->CharDisconnect();
-		pClient->GetNetState()->markReadClosed();
-	}
-
-	// Detach from account now
-	ClearPlayer();
-
-	return CObjBase::Delete();
 }
 
 void CChar::GoSleep()
