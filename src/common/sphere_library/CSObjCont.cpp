@@ -50,13 +50,19 @@ void CSObjCont::ClearContainer()
 	const auto stateCopy = GetIterationSafeContReverse();
 	_Contents.clear();
 
-	EXC_TRY("Deleting objects scheduled for deletion");
 	for (CSObjContRec* pRec : stateCopy)	// iterate the list.
 	{
-		ASSERT( pRec->GetParent() == this );
-		delete pRec;
+		EXC_TRY("Deleting objects scheduled for deletion");
+
+		if (pRec->GetParent() == this)
+		{
+			// I still haven't figured why sometimes, when force closing sectors, an item is stored in both the g_World.m_ObjDelete and the sector object lists
+			OnRemoveObj(pRec);
+			delete pRec;
+		}
+
+		EXC_CATCH;
 	}
-	EXC_CATCH;
 
 	_fIsClearing = false;
 }
@@ -78,18 +84,17 @@ void CSObjCont::InsertContentHead(CSObjContRec* pNewRec)
 
 void CSObjCont::InsertContentTail(CSObjContRec* pNewRec)
 {
-	pNewRec->RemoveSelf();
-	pNewRec->m_pParent = this;
+    pNewRec->RemoveSelf();
+    pNewRec->m_pParent = this;
 
 #ifdef _DEBUG
 	const_iterator itEnd = cend();
 	const_iterator itObjRec = std::find(cbegin(), itEnd, pNewRec);
-	if (itObjRec == itEnd)
+	ASSERT(itObjRec == itEnd);
+	// Avoid duplicates, thus delete-ing objects multiple times
 #endif
-	{
-		// Avoid duplicates, thus delete-ing objects multiple times
-		_Contents.emplace_back(pNewRec);
-	}
+
+    _Contents.emplace_back(pNewRec);
 }
 
 void CSObjCont::OnRemoveObj(CSObjContRec* pObjRec)	// Override this = called when removed from list.

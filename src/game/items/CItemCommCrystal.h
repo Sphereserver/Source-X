@@ -26,8 +26,8 @@ private:
     CItemCommCrystal& operator=(const CItemCommCrystal& other);
 
 public:
-    virtual void OnMoveFrom();
-    virtual bool MoveTo(CPointMap pt, bool bForceFix = false);
+    virtual void OnMoveFrom() override;
+    virtual bool MoveTo(const CPointMap& pt, bool fForceFix = false) override;
 
     virtual void OnHear( lpctstr pszCmd, CChar * pSrc );
     virtual void  r_Write( CScript & s );

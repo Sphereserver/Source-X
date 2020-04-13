@@ -22,15 +22,6 @@ CTimedObject::~CTimedObject()
 }
 
 
-void CTimedObject::Delete()
-{
-    ADDTOCALLSTACK("CTimedObject::Delete");
-    //if (_iTimeout > 0)
-    //{
-        CWorldTickingList::DelObjSingle(this);
-    //}
-}
-
 void CTimedObject::GoAwake()
 {
     ADDTOCALLSTACK("CTimedObject::GoAwake");

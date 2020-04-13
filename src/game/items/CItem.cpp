@@ -183,7 +183,7 @@ void CItem::DeleteCleanup(bool fForce)
 				if ( pHorse && pHorse->IsDisconnected() && ! pHorse->m_pPlayer )
 				{
                     pHorse->m_atRidden.m_uidFigurine.InitUID();
-					pHorse->Delete();
+					pHorse->Delete(fForce);
 				}
 			}
 			break;

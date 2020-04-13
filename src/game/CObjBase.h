@@ -78,6 +78,8 @@ protected:
     void DeleteCleanup(bool fForce);
 
 public:
+    virtual bool IsDeleted() const override;
+
     /**
      * @fn  virtual void CObjBase::Delete(bool bforce = false);
      *
@@ -589,7 +591,6 @@ protected:
      */
 	void SetHueAlt( HUE_TYPE wHue );
 
-public:
 
 public:
 
@@ -710,10 +711,6 @@ public:
 	virtual bool r_LoadVal( CScript & s ) override;
 	virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;	// some command on this object as a target
-    inline virtual bool IsDeleted() const override
-    {
-        return CObjBaseTemplate::IsDeleted();
-    }
 
     /**
      * @fn  void CObjBase::Emote(lpctstr pText, CClient * pClientExclude = nullptr, bool fPossessive = false);

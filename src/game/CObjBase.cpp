@@ -24,10 +24,6 @@
 #include "triggers.h"
 #include "CObjBase.h"
 
-bool CObjBaseTemplate::IsDeleted() const
-{
-	return (!m_UID.IsValidUID() || ( GetParent() == &g_World.m_ObjDelete ));
-}
 
 int CObjBaseTemplate::IsWeird() const
 {
@@ -141,6 +137,11 @@ CObjBase::~CObjBase()
 	SetUID( UID_UNUSED, false );
 }
 
+bool CObjBase::IsDeleted() const
+{
+	return (!GetUID().IsValidUID() || (GetParent() == &g_World.m_ObjDelete));
+}
+
 void CObjBase::DeletePrepare()
 {
 	ADDTOCALLSTACK("CObjBase::DeletePrepare");
@@ -153,8 +154,8 @@ void CObjBase::DeleteCleanup(bool fForce)
 {
 	ADDTOCALLSTACK("CObjBase::DeleteCleanup");
 	CEntity::Delete(fForce);
-	CTimedObject::Delete();
 	CWorldTickingList::DelObjStatusUpdate(this);
+	CWorldTickingList::DelObjSingle(this);
 	CTimedFunctions::Erase(GetUID());
 }
 
