@@ -190,7 +190,7 @@ void CWorldTicker::Tick()
     ADDTOCALLSTACK("CWorldTicker::Tick");
     EXC_TRY("CWorldTicker::Tick");
 
-    std::vector<CTimedObject*> vecObjs; // Reuse the same container to avoid unnecessary reallocations
+    std::vector<void*> vecObjs; // Reuse the same container to avoid unnecessary reallocations
 
     EXC_SET_BLOCK("Once per tick stuff");
     // Do this once per tick.
@@ -218,16 +218,17 @@ void CWorldTicker::Tick()
                     for (CObjBase* pObj : _ObjStatusUpdates)
                     {
                         if (pObj != nullptr)
-                            vecObjs.emplace_back(pObj);
+                            vecObjs.emplace_back(static_cast<void*>(pObj));
                     }
                     _ObjStatusUpdates.clear();
                 }
             }
 
             EXC_SETSUB_BLOCK("Loop");
-            for (CTimedObject* pObj : vecObjs)
+            for (void* pObjVoid : vecObjs)
             {
-                dynamic_cast<CObjBase*>(pObj)->OnTickStatusUpdate();
+                CObjBase* pObj = static_cast<CObjBase*>(pObjVoid);
+                pObj->OnTickStatusUpdate();
             }
             EXC_CATCHSUB("");
 
@@ -272,7 +273,7 @@ void CWorldTicker::Tick()
                     {
                         if (pTimedObj->_iTimeout <= iTime)
                         {
-                            vecObjs.emplace_back(pTimedObj);
+                            vecObjs.emplace_back(static_cast<void*>(pTimedObj));
                         }
 
                         /*
@@ -306,12 +307,13 @@ void CWorldTicker::Tick()
         }
 
         lpctstr ptcSubDesc = TSTRING_NULL;
-        for (CTimedObject* pObj : vecObjs)    // Loop through all msecs stored, unless we passed the timestamp.
+        for (void* pObjVoid : vecObjs)    // Loop through all msecs stored, unless we passed the timestamp.
         {
             EXC_TRYSUB("Timed Object Tick");
             EXC_SETSUB_BLOCK("Elapsed");
             ptcSubDesc = "Generic";
 
+            CTimedObject* pObj = static_cast<CTimedObject*>(pObjVoid);
             const PROFILE_TYPE profile = pObj->GetProfileType();
             const ProfileTask  profileTask(profile);
 
@@ -424,7 +426,7 @@ void CWorldTicker::Tick()
                 {
                     if (pChar->_iTimePeriodicTick <= iTime)
                     {
-                        vecObjs.emplace_back(pChar);
+                        vecObjs.emplace_back(static_cast<void*>(pChar));
                     }
                     pChar->_iTimePeriodicTick = 0;
 
@@ -453,9 +455,9 @@ void CWorldTicker::Tick()
 
     {
         EXC_TRYSUB("Char Periodic Ticks Loop");
-        for (CTimedObject* pObj : vecObjs)    // Loop through all msecs stored, unless we passed the timestamp.
+        for (void* pObjVoid : vecObjs)    // Loop through all msecs stored, unless we passed the timestamp.
         {
-            CChar* pChar = dynamic_cast<CChar*>(pObj);
+            CChar* pChar = static_cast<CChar*>(pObjVoid);
             if (pChar->OnTickPeriodic())
             {
                 AddCharTicking(pChar, false);

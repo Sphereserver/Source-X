@@ -10,7 +10,7 @@
 
 CEntityProps::CEntityProps()
 {
-    _List.clear();
+    _lComponentProps.clear();
 }
 
 CEntityProps::~CEntityProps()
@@ -22,22 +22,22 @@ CEntityProps::~CEntityProps()
 void CEntityProps::ClearPropComponents()
 {
     ADDTOCALLSTACK("CEntityProps::ClearPropComponents");
-    if (_List.empty())
+    if (_lComponentProps.empty())
         return;
-    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
+    for (auto it = _lComponentProps.begin(), itEnd = _lComponentProps.end(); it != itEnd; ++it)
     {
         CComponentProps *pComponent = it->second;
         ASSERT(pComponent);
         delete pComponent;
     }
-    _List.clear();
+    _lComponentProps.clear();
 }
 
 void CEntityProps::SubscribeComponentProps(CComponentProps * pComponent)
 {
     ADDTOCALLSTACK("CEntityProps::SubscribeComponentProps");
     const COMPPROPS_TYPE compType = pComponent->GetType();
-    const auto pairResult = _List.try_emplace(compType, pComponent);
+    const auto pairResult = _lComponentProps.try_emplace(compType, pComponent);
     if (pairResult.second == false)
     {
         delete pComponent;
@@ -45,7 +45,7 @@ void CEntityProps::SubscribeComponentProps(CComponentProps * pComponent)
         //g_Log.EventError("Trying to duplicate prop component (%d) for %s '0x%08x'\n", (int)pComponent->GetType(), pComponent->GetLink()->GetName(), pComponent->GetLink()->GetUID());
         return;
     }
-    //_List.container.shrink_to_fit();
+    //_lComponentProps.container.shrink_to_fit();
 }
 
 void CEntityProps::UnsubscribeComponentProps(iterator& it, bool fEraseFromMap)
@@ -54,27 +54,27 @@ void CEntityProps::UnsubscribeComponentProps(iterator& it, bool fEraseFromMap)
     delete it->second;
     if (fEraseFromMap)
     {
-        it = _List.erase(it);
+        it = _lComponentProps.erase(it);
     }
-    //_List.container.shrink_to_fit();
+    //_lComponentProps.container.shrink_to_fit();
 }
 
 void CEntityProps::UnsubscribeComponentProps(CComponentProps *pComponent)
 {
     ADDTOCALLSTACK("CEntityProps::UnsubscribeComponentProps");
-    if (_List.empty())
+    if (_lComponentProps.empty())
     {
         return;
     }
     const COMPPROPS_TYPE compType = pComponent->GetType();
-    auto it = _List.find(compType);
-    if (it == _List.end())
+    auto it = _lComponentProps.find(compType);
+    if (it == _lComponentProps.end())
     {
         g_Log.EventError("Trying to unsuscribe not suscribed prop component (%d)\n", (int)pComponent->GetType());    // Should never happen?
         delete pComponent;
         return;
     }
-    _List.erase(it);  // iterator invalidation!
+    _lComponentProps.erase(it);  // iterator invalidation!
 }
 
 void CEntityProps::CreateSubscribeComponentProps(COMPPROPS_TYPE iComponentPropsType)
@@ -110,28 +110,28 @@ void CEntityProps::CreateSubscribeComponentProps(COMPPROPS_TYPE iComponentPropsT
 bool CEntityProps::IsSubscribedComponentProps(CComponentProps *pComponent) const
 {
     ADDTOCALLSTACK("CEntityProps::IsSubscribedComponentProps");
-    return ( !_List.empty() && (_List.end() != _List.find(pComponent->GetType())) );
+    return ( !_lComponentProps.empty() && (_lComponentProps.end() != _lComponentProps.find(pComponent->GetType())) );
 }
 
 CComponentProps * CEntityProps::GetComponentProps(COMPPROPS_TYPE type)
 {
     ADDTOCALLSTACK("CEntityProps::GetComponentProps");
     ASSERT(type < COMP_PROPS_QTY);
-    if (_List.empty())
+    if (_lComponentProps.empty())
     {
         return nullptr;
     }
-    auto it = _List.find(type);
-    return (it != _List.end()) ? it->second : nullptr;
+    auto it = _lComponentProps.find(type);
+    return (it != _lComponentProps.end()) ? it->second : nullptr;
 }
 
 const CComponentProps * CEntityProps::GetComponentProps(COMPPROPS_TYPE type) const
 {
     ADDTOCALLSTACK("CEntityProps::GetComponentProps(const)");
-    if (!_List.empty())
+    if (!_lComponentProps.empty())
     {
-        auto it = _List.find(type);
-        return (it == _List.end()) ? nullptr : it->second;
+        auto it = _lComponentProps.find(type);
+        return (it == _lComponentProps.end()) ? nullptr : it->second;
     }
     return nullptr;
 }
@@ -139,14 +139,43 @@ const CComponentProps * CEntityProps::GetComponentProps(COMPPROPS_TYPE type) con
 void CEntityProps::r_Write(CScript & s) // Storing data in the worldsave.
 {
     ADDTOCALLSTACK("CEntityProps::r_Write");
-    if (_List.empty() && !s.IsWriteMode())
+    if (_lComponentProps.empty() && !s.IsWriteMode())
         return;
-    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
+    for (auto it = _lComponentProps.begin(), itEnd = _lComponentProps.end(); it != itEnd; ++it)
     {
         CComponentProps *pComponent = it->second;
         ASSERT(pComponent);
         pComponent->r_Write(s);
     }
+}
+
+
+bool CEntityProps::CEPLoopLoad(CEPLoopRet_t *pRet, CScript& s, CObjBase* pLinkedObj, const RESDISPLAY_VERSION iLimitToExpansion)
+{
+    const lpctstr ptcKey = s.GetKey();
+    for (const auto& pairElem : _lComponentProps)
+    {
+        if (CComponentProps* pComponent = pairElem.second)
+        {
+            const KeyTableDesc_s ktd = pComponent->GetPropertyKeysData();
+            pRet->iPropIndex = (CComponentProps::PropertyIndex_t) FindTableSorted(ptcKey, ktd.pptcTable, ktd.iTableSize - 1);
+            if (pRet->iPropIndex == (CComponentProps::PropertyIndex_t) - 1)
+            {
+                // The key doesn't belong to this CComponentProps.
+                continue;
+            }
+            pRet->fPropStr = pComponent->IsPropertyStr(pRet->iPropIndex);
+            if (pComponent->FindLoadPropVal(s, pLinkedObj, iLimitToExpansion, pRet->iPropIndex, pRet->fPropStr))
+            {
+                // The property belongs to this CCP and it is set.
+                return true;
+            }
+            // The property belongs to this CCP but is not set. Remember which CCP this is, so if needed we can search directly for this CCP type instead of looping through all of them again.
+            pRet->iCCPType = pComponent->GetType();
+            return true;
+        }
+    }
+    return false;
 }
 
 bool CEntityProps::r_LoadPropVal(CScript & s, CObjBase* pObjEntityProps, CBaseBaseDef *pBaseEntityProps) // static
@@ -157,50 +186,20 @@ bool CEntityProps::r_LoadPropVal(CScript & s, CObjBase* pObjEntityProps, CBaseBa
 
     ASSERT(pBaseEntityProps);
     const RESDISPLAY_VERSION iLimitToExpansion = pBaseEntityProps->_iEraLimitProps;
-
-    CComponentProps::PropertyIndex_t iPropIndex = (CComponentProps::PropertyIndex_t) -1;
-    bool fPropStr = false;
-    COMPPROPS_TYPE iCCPType = COMP_PROPS_INVALID;
-    auto _CEPLoopLoad = [&s, &iPropIndex, &fPropStr, &iCCPType, iLimitToExpansion](CEntityProps *pEP, CObjBase* pLinkedObj) -> bool
-    {
-        if (pEP->_List.empty())
-            return false;
-        const lpctstr ptcKey = s.GetKey();
-        for (const_iterator it = pEP->_List.begin(), itEnd = pEP->_List.end(); it != itEnd; ++it)
-        {
-            if ( CComponentProps *pComponent = it->second )
-            {
-                const KeyTableDesc_s ktd = pComponent->GetPropertyKeysData();
-                iPropIndex = (CComponentProps::PropertyIndex_t) FindTableSorted(ptcKey, ktd.pptcTable, ktd.iTableSize - 1);
-                if (iPropIndex == (CComponentProps::PropertyIndex_t) -1)
-                {
-                    // The key doesn't belong to this CComponentProps.
-                    continue;
-                }
-                fPropStr = pComponent->IsPropertyStr(iPropIndex);
-                if (pComponent->FindLoadPropVal(s, pLinkedObj, iLimitToExpansion, iPropIndex, fPropStr))
-                {
-                    // The property belongs to this CCP and it is set.
-                    return true;
-                }
-                // The property belongs to this CCP but is not set. Remember which CCP this is, so if needed we can search directly for this CCP type instead of looping through all of them again.
-                iCCPType = pComponent->GetType();
-                return true;
-            }
-        }
-        return false;
-    };
+    CEPLoopRet_t loopRet{ (CComponentProps::PropertyIndex_t) - 1, false, COMP_PROPS_INVALID };
 
     if (pObjEntityProps == nullptr)    // I'm calling it from a base CEntityProps
     {
-        return _CEPLoopLoad(pBaseEntityProps, nullptr);  // pEntityProps is already a base cep
+        if (pBaseEntityProps->_lComponentProps.empty())
+            return false;
+        return pBaseEntityProps->CEPLoopLoad(&loopRet, s, nullptr, iLimitToExpansion);  // pEntityProps is already a base cep
     }
 
     ASSERT(pObjEntityProps);
-    if (_CEPLoopLoad(pObjEntityProps, pObjEntityProps)) // Check the object dynamic props first, then the base
+    if (!pObjEntityProps->_lComponentProps.empty() && pObjEntityProps->CEPLoopLoad(&loopRet, s, pObjEntityProps, iLimitToExpansion)) // Check the object dynamic props first, then the base
     {
         // A subscribed CComponentProps can store this prop...
-        if (iCCPType == COMP_PROPS_INVALID)
+        if (loopRet.iCCPType == COMP_PROPS_INVALID)
         {
             // The prop is set. We found it.
             return true;
@@ -208,16 +207,44 @@ bool CEntityProps::r_LoadPropVal(CScript & s, CObjBase* pObjEntityProps, CBaseBa
         else
         {
             // But the prop isn't set. Let's check the base. We already have iPropIndex and fPropStr.
-            CComponentProps *pComp = pBaseEntityProps->GetComponentProps(iCCPType);
+            CComponentProps *pComp = pBaseEntityProps->GetComponentProps(loopRet.iCCPType);
             if (!pComp)
                 return true;    // The base doesn't have this component, but the obj did -> return true
-            ASSERT(iPropIndex != (CComponentProps::PropertyIndex_t)-1);
-            pComp->FindLoadPropVal(s, nullptr, iLimitToExpansion, (CComponentProps::PropertyIndex_t)iPropIndex, fPropStr);
+            ASSERT(loopRet.iPropIndex != (CComponentProps::PropertyIndex_t)-1);
+            pComp->FindLoadPropVal(s, nullptr, iLimitToExpansion, (CComponentProps::PropertyIndex_t)loopRet.iPropIndex, loopRet.fPropStr);
             return true;        // return true regardlessly of the value being set or not (it's still a valid property)
         }
     }
 
-    return _CEPLoopLoad(pBaseEntityProps, nullptr);
+    return ((pBaseEntityProps->_lComponentProps.empty() == false) && pBaseEntityProps->CEPLoopLoad(&loopRet, s, nullptr, iLimitToExpansion));
+}
+
+
+bool CEntityProps::CEPLoopWrite(CEPLoopRet_t* pRet, lpctstr ptcKey, CSString& sVal) const
+{
+    for (const auto& pairElem : _lComponentProps)
+    {
+        if (CComponentProps* pComponent = pairElem.second)
+        {
+            const KeyTableDesc_s ktd = pComponent->GetPropertyKeysData();
+            pRet->iPropIndex = (COMPPROPS_TYPE)FindTableSorted(ptcKey, ktd.pptcTable, ktd.iTableSize - 1);
+            if (pRet->iPropIndex == (CComponentProps::PropertyIndex_t) - 1)
+            {
+                // The key doesn't belong to this CComponentProps.
+                continue;
+            }
+            pRet->fPropStr = pComponent->IsPropertyStr(pRet->iPropIndex);
+            if (pComponent->FindWritePropVal(sVal, pRet->iPropIndex, pRet->fPropStr))
+            {
+                // The property belongs to this CCP and it is set.
+                return true;
+            }
+            // The property belongs to this CCP but is not set. Remember which CCP this is, so if needed we can search directly for this CCP type instead of looping through all of them again.
+            pRet->iCCPType = pComponent->GetType();
+            return true;
+        }
+    }
+    return false;
 }
 
 bool CEntityProps::r_WritePropVal(lpctstr ptcKey, CSString & sVal, const CObjBase *pObjEntityProps, const CBaseBaseDef *pBaseEntityProps) // static
@@ -226,50 +253,22 @@ bool CEntityProps::r_WritePropVal(lpctstr ptcKey, CSString & sVal, const CObjBas
     // return false: invalid property for any of the subscribed components
     // return true: valid property, whether it has a defined value or not
 
-    CComponentProps::PropertyIndex_t iPropIndex = (CComponentProps::PropertyIndex_t) -1;
-    bool fPropStr = false;
-    COMPPROPS_TYPE iCCPType = COMP_PROPS_INVALID;
-    auto _CEPLoopWrite = [ptcKey, &sVal, &iPropIndex, &fPropStr, &iCCPType](const CEntityProps *pEP) -> bool
-    {
-        if (pEP->_List.empty())
-            return false;
-        for (const_iterator it = pEP->_List.begin(), itEnd = pEP->_List.end(); it != itEnd; ++it)
-        {
-            const CComponentProps *pComponent = it->second;
-            if (pComponent)
-            {
-                const KeyTableDesc_s ktd = pComponent->GetPropertyKeysData();
-                iPropIndex = (COMPPROPS_TYPE)FindTableSorted(ptcKey, ktd.pptcTable, ktd.iTableSize - 1);
-                if (iPropIndex == (CComponentProps::PropertyIndex_t) -1)
-                {
-                    // The key doesn't belong to this CComponentProps.
-                    continue;
-                }
-                fPropStr = pComponent->IsPropertyStr(iPropIndex);
-                if (pComponent->FindWritePropVal(sVal, iPropIndex, fPropStr))
-                {
-                    // The property belongs to this CCP and it is set.
-                    return true;
-                }
-                // The property belongs to this CCP but is not set. Remember which CCP this is, so if needed we can search directly for this CCP type instead of looping through all of them again.
-                iCCPType = pComponent->GetType();
-                return true;
-            }
-        }
-        return false;
-    };
+    CEPLoopRet_t loopRet{ (CComponentProps::PropertyIndex_t) - 1, false, COMP_PROPS_INVALID };
 
     if (pObjEntityProps == nullptr)    // I'm calling it from a base CEntityProps
     {
         ASSERT(pBaseEntityProps);
-        return _CEPLoopWrite(pBaseEntityProps);  // pEntityProps is already a base cep
+        if (pBaseEntityProps->_lComponentProps.empty())
+            return false;
+
+        return pBaseEntityProps->CEPLoopWrite(&loopRet, ptcKey, sVal);  // pEntityProps is already a base cep
     }
 
     ASSERT(pObjEntityProps);
-    if (_CEPLoopWrite(pObjEntityProps)) // Check the object dynamic props first, then the base
+    if (!pObjEntityProps->_lComponentProps.empty() && pObjEntityProps->CEPLoopWrite(&loopRet, ptcKey, sVal)) // Check the object dynamic props first, then the base
     {
         // A subscribed CComponentProps can store this prop...
-        if (iCCPType == COMP_PROPS_INVALID)
+        if (loopRet.iCCPType == COMP_PROPS_INVALID)
         {
             // The prop is set. We found it.
             return true;
@@ -278,26 +277,24 @@ bool CEntityProps::r_WritePropVal(lpctstr ptcKey, CSString & sVal, const CObjBas
         {
             // But the prop isn't set. Let's check the base. We already have iPropIndex and fPropStr.
             ASSERT(pBaseEntityProps);
-            const CComponentProps *pComp = pBaseEntityProps->GetComponentProps(iCCPType);
+            const CComponentProps *pComp = pBaseEntityProps->GetComponentProps(loopRet.iCCPType);
             if (!pComp)
                 return true;    // The base doesn't have this component, but the obj did -> return true
-            ASSERT(iPropIndex != (CComponentProps::PropertyIndex_t)-1);
-            pComp->FindWritePropVal(sVal, (CComponentProps::PropertyIndex_t)iPropIndex, fPropStr);
+            ASSERT(loopRet.iPropIndex != (CComponentProps::PropertyIndex_t)-1);
+            pComp->FindWritePropVal(sVal, (CComponentProps::PropertyIndex_t)loopRet.iPropIndex, loopRet.fPropStr);
             return true;        // return true regardlessly of the value being set or not (it's still a valid property)
         }
     }
 
-    if (pBaseEntityProps)
-        return _CEPLoopWrite(pBaseEntityProps);
-    return false;
+    return (pBaseEntityProps && (pBaseEntityProps->_lComponentProps.empty() == false) && pBaseEntityProps->CEPLoopWrite(&loopRet, ptcKey, sVal));
 }
 
 void CEntityProps::AddPropsTooltipData(CObjBase* pObj)
 {
     ADDTOCALLSTACK("CEntityProps::AddPropsTooltipData");
-    if (_List.empty())
+    if (_lComponentProps.empty())
         return;
-    for (auto it = _List.begin(), itEnd = _List.end(); it != itEnd; ++it)
+    for (auto it = _lComponentProps.begin(), itEnd = _lComponentProps.end(); it != itEnd; ++it)
     {
         CComponentProps *pComponent = it->second;
         ASSERT(pComponent);
@@ -309,9 +306,9 @@ void CEntityProps::AddPropsTooltipData(CObjBase* pObj)
 void CEntityProps::Copy(const CEntityProps *target)
 {
     ADDTOCALLSTACK("CEntityProps::Copy");
-    if (_List.empty())
+    if (_lComponentProps.empty())
         return;
-    for (auto it = target->_List.begin(), itEnd = target->_List.end(); it != itEnd; ++it)
+    for (auto it = target->_lComponentProps.begin(), itEnd = target->_lComponentProps.end(); it != itEnd; ++it)
     {
         CComponentProps *pTarget = it->second;    // the CComponent to copy from
         ASSERT(pTarget);

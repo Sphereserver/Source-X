@@ -12,9 +12,9 @@
 
 class CEntity
 {
-    fc::vector_map<COMP_TYPE, CComponent*> _List;
-    using iterator          = decltype(_List)::iterator;
-    using const_iterator    = decltype(_List)::const_iterator;
+    fc::vector_map<COMP_TYPE, CComponent*> _lComponents;
+    using iterator          = decltype(_lComponents)::iterator;
+    using const_iterator    = decltype(_lComponents)::const_iterator;
 
 public:
     CEntity();
