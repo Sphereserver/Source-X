@@ -1,4 +1,3 @@
-#include "../../common/sphere_library/CSTime.h"
 #include "../../common/resource/CResourceLock.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
@@ -10,6 +9,7 @@
 #include "../CException.h"
 #include "../CSector.h"
 #include "../CWorldMap.h"
+#include "../CWorldGameTime.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"
@@ -793,7 +793,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 	if ( !m_pChar )
 		return false;
 
-	DIR_TYPE dir = static_cast<DIR_TYPE>(rawdir & 0x0F);
+	DIR_TYPE dir = DIR_TYPE(rawdir & 0x0F);
 	if ( dir >= DIR_QTY )
 	{
 		new PacketMovementRej(this, sequence);
@@ -817,7 +817,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 		}
 
 		// To get milliseconds precision we must get the system clock manually at each walk request (the server clock advances only at every tick).
-		const int64 iCurTime = GetPreciseSysTimeMilli();
+		const int64 iCurTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
         if ( IsSetEF(EF_FastWalkPrevention) )
         {
