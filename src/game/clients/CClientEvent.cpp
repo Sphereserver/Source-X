@@ -856,11 +856,11 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 			return false;
 		}
 
-		// Are we invis ?
-		m_pChar->CheckRevealOnMove();
-
 		// Set running flag if I'm running
 		m_pChar->StatFlag_Mod(STATF_FLY, (rawdir & 0x80) ? true : false);
+
+		// Are we invis ?
+		m_pChar->CheckRevealOnMove();
 
 		if ( iRet == TRIGRET_RET_TRUE )
 		{
