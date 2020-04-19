@@ -3358,7 +3358,12 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 		case CIV_DESTROY:	// remove this object now.
 		{
 			if (s.GetArgVal())
-				Emote(g_Cfg.GetDefaultMsg(DEFMSG_ITEM_DMG_DESTROYED));
+			{
+				if ( g_Cfg.m_iEmoteFlags & EMOTEF_DESTROY )
+					EmoteObj(g_Cfg.GetDefaultMsg(DEFMSG_ITEM_DMG_DESTROYED));
+				else
+					Emote(g_Cfg.GetDefaultMsg(DEFMSG_ITEM_DMG_DESTROYED));
+			}
 			Delete(true);
 			return true;
 		}
@@ -5616,7 +5621,10 @@ forcedamage:
 		if ( m_itArmor.m_wHitsCur <= 1 )
 		{
 			m_itArmor.m_wHitsCur = 0;
-			Emote( g_Cfg.GetDefaultMsg( DEFMSG_ITEM_DMG_DESTROYED ) );
+			if ( g_Cfg.m_iEmoteFlags & EMOTEF_DESTROY )
+				EmoteObj( g_Cfg.GetDefaultMsg( DEFMSG_ITEM_DMG_DESTROYED ) );
+			else
+				Emote( g_Cfg.GetDefaultMsg( DEFMSG_ITEM_DMG_DESTROYED ) );
 			Delete();
 			return( INT32_MAX );
 		}

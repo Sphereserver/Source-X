@@ -722,6 +722,7 @@ public:
      * @param   fPossessive             true to possessive.
      */
 	void Emote(lpctstr pText, CClient * pClientExclude = nullptr, bool fPossessive = false);
+	void EmoteObj(lpctstr pText);
 
     /**
      * @fn  void CObjBase::Emote2(lpctstr pText, lpctstr pText2, CClient * pClientExclude = nullptr, bool fPossessive = false);
