@@ -2180,3 +2180,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 12-04-2020, xwerswoodx
 - Added: EMOTECOLOROVERRIDE added to characters to override default emote color. (Issue #358)
 - Fixed: HOUSES command not working.
+
+19-04-2020, xwerswoodx
+- Fixed: EMOTECOLOROVERRIDE not override attack emotes.
+- Added: EmoteFlags to sphere.ini to override default emote settings. (Issue #416)

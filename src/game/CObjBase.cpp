@@ -533,6 +533,27 @@ void CObjBase::Emote(lpctstr pText, CClient * pClientExclude, bool fForcePossess
 	pObjTop->UpdateObjMessage(pszThem, pszYou, pClientExclude, HUE_TEXT_DEF, TALKMODE_EMOTE);
 }
 
+void CObjBase::EmoteObj(lpctstr pText)
+{
+	ADDTOCALLSTACK("CObjBase::EmoteObj");
+	//This is function that only send an emote to a affacted character.
+
+	CObjBase *pObjTop = static_cast<CObjBase*>(GetTopLevelObj());
+	if ( !pObjTop )
+		return;
+
+	tchar *pszYou = Str_GetTemp();
+
+	if ( pObjTop->IsChar() )
+	{
+		if ( pObjTop != this )
+			sprintf(pszYou, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_2), GetName(), pText);
+		else
+			sprintf(pszYou, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_6), pText);
+		pObjTop->UpdateObjMessage(nullptr, pszYou, nullptr, HUE_TEXT_DEF, TALKMODE_EMOTE);
+	}
+}
+
 void CObjBase::Emote2(lpctstr pText, lpctstr pText1, CClient * pClientExclude, bool fForcePossessive)
 {
 	ADDTOCALLSTACK("CObjBase::Emote");
@@ -652,8 +673,13 @@ void CObjBase::UpdateObjMessage( lpctstr pTextThem, lpctstr pTextYou, CClient * 
 			continue;
 		if ( ! pClient->CanSee( this ))
 			continue;
-
-		pClient->addBarkParse(( pClient->GetChar() == this )? pTextYou : pTextThem, this, wHue, mode, font, bUnicode );
+			
+		if (( pClient->GetChar() == this ) && pTextYou != nullptr )
+			pClient->addBarkParse(pTextYou, this, wHue, mode, font, bUnicode );
+		else if (( pClient->GetChar() != this ) && pTextThem != nullptr )
+			pClient->addBarkParse(pTextThem, this, wHue, mode, font, bUnicode );
+		
+		//pClient->addBarkParse(( pClient->GetChar() == this )? pTextYou : pTextThem, this, wHue, mode, font, bUnicode );
 	}
 }
 
