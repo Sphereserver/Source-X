@@ -1312,7 +1312,6 @@ bool CWorld::LoadWorld() // Load world from script
             break;
 
 		// Reset everything that has been loaded
-		CloseAllUIDs();
 		CWorldTickingList::ClearTickingLists();
 		m_Stones.clear();
 		m_Parties.ClearContainer();
@@ -1325,6 +1324,7 @@ bool CWorld::LoadWorld() // Load world from script
 				m_Sectors[s]->Close();
 			}
 		}
+		CloseAllUIDs();
 		_GameClock.Init();
 
 		// Get the name of the previous backups.

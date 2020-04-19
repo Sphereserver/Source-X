@@ -35,14 +35,16 @@ void CContainer::ContentDelete(bool fForce)
     const auto stateCopy = GetIterationSafeContReverse();
     _Contents.clear();
 
-    EXC_TRY("Scheduling objects for deletion");
     for (CSObjContRec* pRec : stateCopy)	// iterate the list.
     {
+		EXC_TRY("Scheduling objects for deletion");
+
         ASSERT(pRec->GetParent() == this);
         CItem* pItem = static_cast<CItem*>(pRec);
         pItem->Delete(fForce);
+
+		EXC_CATCH;
     }
-    EXC_CATCH;
 
     _fIsClearing = false;
 }

@@ -1184,20 +1184,3 @@ void CCSpawn::Copy(const CComponent * target)
 
     // Not copying created objects.
 }
-/*
-bool CCSpawn::IsDeleted()
-{
-    ADDTOCALLSTACK("CCSpawn::IsDeleted");
-    return dynamic_cast<CItem*>(this)->IsDeleted();
-}
-
-void CCSpawn::GoAwake()
-{
-    CTimedObject::GoAwake();
-}
-
-void CCSpawn::GoSleep()
-{
-    CTimedObject::GoSleep();
-}
-*/

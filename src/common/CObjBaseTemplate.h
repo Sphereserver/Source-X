@@ -60,7 +60,6 @@ public:
 	bool IsValidUID() const {
 		return m_UID.IsValidUID();
 	}
-	bool IsDeleted() const;
 
 	void SetUIDContainerFlags(dword dwFlags) {
 		m_UID.SetObjContainerFlags( dwFlags );
@@ -72,8 +71,6 @@ public:
 	virtual int IsWeird() const;
 	virtual const CObjBaseTemplate * GetTopLevelObj() const = 0;
 	virtual CObjBaseTemplate* GetTopLevelObj() = 0;
-
-	CSector * GetTopSector() const;
 
 
 	// Location
@@ -100,6 +97,7 @@ public:
 	virtual void SetTopZ( char z );
 	char GetTopZ() const;
 	uchar GetTopMap() const;
+	CSector* GetTopSector() const;
 
 	void SetUnkPoint( const CPointMap & pt );
     inline const CPointMap & GetUnkPoint() const {

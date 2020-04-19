@@ -316,8 +316,8 @@ CChar::~CChar()
 {
 	ADDTOCALLSTACK("CChar::~CChar");
 
-	ClearContainer();
 	DeleteCleanup(true);
+	ClearContainer();
 
     if (IsClient())    // this should never happen.
     {
@@ -344,6 +344,7 @@ CChar::~CChar()
 
 void CChar::DeleteCleanup(bool fForce)
 {
+	ADDTOCALLSTACK("CChar::DeleteCleanup");
 	CWorldTickingList::DelCharPeriodic(this);
 
 	if (IsStatFlag(STATF_RIDDEN))

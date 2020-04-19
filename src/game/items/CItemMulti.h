@@ -604,7 +604,7 @@ public:
     /**
     * @brief Moving from current location.
     */
-    virtual void OnMoveFrom();
+    virtual void OnMoveFrom() override;
     /**
     * @brief Speech commands on the multi.
     * @param pszCmd the speech.
