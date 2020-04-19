@@ -253,6 +253,7 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 	m_dirFace = DIR_SE;
 	m_fonttype = FONT_NORMAL;
 	m_SpeechHueOverride = 0;
+	m_EmoteHueOverride = 0;
 
     m_exp = 0;
     m_level = 0;
@@ -1005,6 +1006,7 @@ bool CChar::DupeFrom(const CChar * pChar, bool fNewbieItems )
 	m_dirFace = pChar->m_dirFace;
 	m_fonttype = pChar->m_fonttype;
 	m_SpeechHueOverride = pChar->m_SpeechHueOverride;
+	m_EmoteHueOverride = pChar->m_EmoteHueOverride;
 
 	m_StepStealth = pChar->m_StepStealth;
 	m_iVisualRange = pChar->m_iVisualRange;
@@ -1592,6 +1594,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
     m_pPlayer->m_SpeechHue	= HUE_TEXT_DEF;	// Set default client-sent speech color
 	m_fonttype				= FONT_NORMAL;	// Set speech font type
 	m_SpeechHueOverride		= 0;			// Set no server-side speech color override
+	m_EmoteHueOverride		= 0;			// Set no server-side emote color override
 	m_sTitle.clear();						// Set title
 
 	GetBank(LAYER_BANKBOX);			// Create bankbox
@@ -2818,6 +2821,9 @@ do_default:
 		case CHC_SPEECHCOLOROVERRIDE:
 			sVal.FormatWVal( m_SpeechHueOverride );
 			break;
+		case CHC_EMOTECOLOROVERRIDE:
+			sVal.FormatWVal( m_EmoteHueOverride );
+			break;
         case CHC_STEPSTEALTH:
             sVal.FormatVal( m_StepStealth );
             break;
@@ -3361,6 +3367,9 @@ bool CChar::r_LoadVal( CScript & s )
 		case CHC_SPEECHCOLOROVERRIDE:
 			m_SpeechHueOverride = (HUE_TYPE)s.GetArgWVal();
 			break;
+		case CHC_EMOTECOLOROVERRIDE:
+			m_EmoteHueOverride = (HUE_TYPE)s.GetArgWVal();
+			break;
         case CHC_OFOOD: // used in the save file
             Stat_SetBase(STAT_FOOD, s.GetArgUSVal());
             break;
@@ -3606,6 +3615,8 @@ void CChar::r_Write( CScript & s )
 		s.WriteKeyVal("FONT", m_fonttype);
 	if (m_SpeechHueOverride)
 		s.WriteKeyVal("SPEECHCOLOROVERRIDE", m_SpeechHueOverride);
+	if (m_EmoteHueOverride)
+		s.WriteKeyVal("EMOTECOLOROVERRIDE", m_EmoteHueOverride);
 	if ( m_dirFace != DIR_SE )
 		s.WriteKeyVal("DIR", m_dirFace);
 	if ( m_prev_id != GetID() )
