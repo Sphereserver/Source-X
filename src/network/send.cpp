@@ -3501,13 +3501,13 @@ PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nword* p
  *
  *
  ***************************************************************************/
-PacketDeath::PacketDeath(CChar* dead, CItemCorpse* corpse) : PacketSend(XCMD_CharDeath, 13, PRI_NORMAL)
+PacketDeath::PacketDeath(CChar* dead, CItemCorpse* corpse, bool fFrontFall) : PacketSend(XCMD_CharDeath, 13, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketDeath::PacketDeath");
 
 	writeInt32(dead->GetUID());
-	writeInt32(corpse == nullptr? 0 : (dword)corpse->GetUID());
-	writeInt32(0);
+	writeInt32(corpse == nullptr ? 0 : (dword)corpse->GetUID());
+	writeInt32((dword)fFrontFall);
 }
 
 

@@ -2184,3 +2184,10 @@ Must have event, even if it's empty, since it's applied by the source to generat
 19-04-2020, xwerswoodx
 - Fixed: EMOTECOLOROVERRIDE not override attack emotes.
 - Added: EmoteFlags to sphere.ini to override default emote settings. (Issue #416)
+
+20-04-2020, Julian
+- [Ports from Source, different dates, Coruja]
+- Added: Support for 'front falling' when a character dies. (Issue #62)
+- Fixed: f_onchar_delete not being called if the player char get deleted in any other way different from client Character Selecion menu. (Issue #55)
+- Fixed: Boats components resetting TYPE after use 'turn' commands. (Issue #52)
+- Fixed: ARGN1 on @SkillPreStart not working correctly. (Issue #61)

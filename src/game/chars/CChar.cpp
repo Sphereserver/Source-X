@@ -360,17 +360,29 @@ void CChar::DeleteCleanup(bool fForce)
 }
 
 // Called before Delete()
-// @Destroy can prevent the deletion
+// @Destroy or f_onchar_delete can prevent the deletion
 bool CChar::NotifyDelete()
 {
 	ADDTOCALLSTACK("CChar::NotifyDelete");
 	if (IsDeleted())
 		return false;
 
+	//	Checking for delete allowed in @Destroy
 	if (IsTrigUsed(TRIGGER_DESTROY))
 	{
 		//We can forbid the deletion in here with no pain
 		if (CChar::OnTrigger(CTRIG_Destroy, &g_Serv) == TRIGRET_RET_TRUE)
+			return false;
+	}
+
+	// If this is a player, check for f_onchar_delete
+	if (m_pClient)
+	{
+		TRIGRET_TYPE trigReturn;
+		CScriptTriggerArgs Args;
+		Args.m_pO1 = m_pClient;
+		r_Call("f_onchar_delete", this, &Args, nullptr, &trigReturn);
+		if (trigReturn == TRIGRET_RET_TRUE)
 			return false;
 	}
 
