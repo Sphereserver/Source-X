@@ -210,6 +210,7 @@ CServerConfig::CServerConfig()
 	m_iFeatureSA		= 0;
 	m_iFeatureTOL		= 0;
 	m_iFeatureExtra		= 0;
+	m_bFeatureUltimaLive = 0;
 
 	m_iStatFlag			= 0;
 
@@ -499,6 +500,7 @@ enum RC_TYPE
 	RC_FEATURESSE,
 	RC_FEATUREST2A,
 	RC_FEATURESTOL,
+	RC_FEATUREULTIMALIVE,
 	RC_FLIPDROPPEDITEMS,		// m_fFlipDroppedItems
 	RC_FORCEGARBAGECOLLECT,		// m_fSaveGarbageCollect
 	RC_FREEZERESTARTTIME,		// m_iFreezeRestartTime
@@ -747,6 +749,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "FEATURESE",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureSE),			0 }},
 	{ "FEATURET2A",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureT2A),			0 }},
 	{ "FEATURETOL",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureTOL),			0 }},
+	{ "FEATUREULTIMALIVE",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bFeatureUltimaLive),	0 }},
 	{ "FLIPDROPPEDITEMS",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fFlipDroppedItems),	0 }},
 	{ "FORCEGARBAGECOLLECT",	{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fSaveGarbageCollect),	0 }},
 	{ "FREEZERESTARTTIME",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFreezeRestartTime),	0 }},

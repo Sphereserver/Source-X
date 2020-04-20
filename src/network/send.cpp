@@ -1384,39 +1384,39 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
 	{
 		case 0x01:
 		{
-			//Update Map Definitions Command
-			int length = 2 * 9; //map count * 9
-            int count = length / 7;
-            int padding = 0;
-            if (length - (count * 7) > 0)
-            {
-                ++count;
-                padding = (count * 7) - length;
-            }
+			int length = 1 * 9;
+			int count = length / 7;
+			int padding = 0;
+			
+			if (length - (count * 7) > 0)
+			{
+				count++;
+				padding = (count * 7) - length;
+			}
 
 			writeInt32(0);
-			writeInt32(4);
-			writeInt16(0);
+			writeInt32(count);
+			
+			writeInt16(0x00);
 			writeByte(0x01);
+			writeByte(0x00);
+
 			writeByte(0);
-
-			for (uchar i = 0; i < 2; ++i)
+			writeInt16(7168);
+			writeInt16(4096);
+			writeInt16(5120);
+			writeInt16(4096);
+			
+			for (int i = 0; i < padding; ++i)
 			{
-				writeByte((byte)i);
-				writeInt16((word)(g_MapList.GetMapSizeX(i)));
-				writeInt16((word)(g_MapList.GetMapSizeY(i)));
-				writeInt16((word)(g_MapList.GetMapSizeX(i)));
-				writeInt16((word)(g_MapList.GetMapSizeY(i)));
-            }
-
-            for (int i = 0; i < padding; ++i)
-                writeByte(0);
+				writeByte(0x00);
+			}
 
 			break;
 		}
 		case 0x02:
 		{
-			//Login Complete Command
+			// Login Complete Command
 			writeInt32(1);
 			writeInt32(4);
 			writeInt16(0);
@@ -1427,7 +1427,7 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
 		}
 		case 0x03:
 		{
-			//Refresh Client View Command
+			// Refresh Client View Command
 			writeInt32(0);
 			writeInt32(0);
 			writeInt16(0);
@@ -1441,8 +1441,15 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
             const CChar* pChar = target->GetChar();
 			byte bMap = pChar->GetTopMap();
 			CPointMap pt = pChar->GetTopPoint();
-			dword dwBlockId = (pt.m_x * (g_MapList.GetMapSizeY( bMap ) / UO_BLOCK_SIZE)) + pt.m_y;
-			writeInt32(dwBlockId);
+			// dword dwBlockId = (pt.m_x * (g_MapList.GetMapSizeY( bMap ) / UO_BLOCK_SIZE)) + pt.m_y;
+			// int blocknum = (((m.Location.X >> 3) * tm.BlockHeight) + (m.Location.Y >> 3));
+			const int iBx = pt.m_x / UO_BLOCK_SIZE;
+			const int iBy = pt.m_y / UO_BLOCK_SIZE;
+			const int iBXMax = g_MapList.GetMapSizeX(pt.m_map) / UO_BLOCK_SIZE;
+			const int iBlockIdx = (iBy * iBXMax) + iBx;
+			// int dwBlockId = ((pt.m_x >> 3) * UO_BLOCK_SIZE) + (pt.m_y >> 3);
+			// g_Log.Event(LOGL_EVENT, "BlockID is %d\n", iBlockIdx);
+			writeInt32((dword)iBlockIdx);
 			writeInt32(0);
 			writeInt16(0);
 			writeByte(0xFF);

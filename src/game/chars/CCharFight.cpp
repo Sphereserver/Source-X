@@ -2114,7 +2114,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 				CPointMap pt = pCharTarg->GetTopPoint();
 				pt.m_x += (short)Calc_GetRandVal2(-1, 1);
 				pt.m_y += (short)Calc_GetRandVal2(-1, 1);
-				EffectLocation(EFFECT_XYZ, iBloodID, nullptr, &pt, 10, 40, true, pCharTarg->m_wBloodHue, 1, iBloodID);
+				EffectLocation(EFFECT_XYZ, iBloodID, nullptr, &pt, 10, 40, true, pCharTarg->m_wBloodHue, 1, (word)iBloodID);
 			}
 		}
 

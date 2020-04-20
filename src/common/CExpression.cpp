@@ -1,5 +1,6 @@
 
 #include <cmath>
+#include <complex>
 #include "../game/CServerConfig.h"
 #include "sphere_library/CSRand.h"
 #include "CException.h"
@@ -626,7 +627,12 @@ try_dec:
 								iResult = (llong)sqrt( (double)iTosquare );
 							}
 							else
-								DEBUG_ERR(( "Exp_GetVal: Sqrt of negative number (%" PRId64 ") is impossible\n", iTosquare ));
+							{
+								++iCount;
+								std::complex<double> number( (double)iTosquare, 0);
+								std::complex<double> result = sqrt(number);
+								iResult = (llong)result.real();
+							}
 						}
 
 					} break;
@@ -1018,7 +1024,9 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 				llong iVal = GetVal( pExpr );
 				if (llVal < 0)
 				{
-					g_Log.EventError("Power with negative base is a complex number.\n");
+					std::complex<llong> number(iVal, 0);
+					std::complex<llong> result = power(llVal, iVal);
+					llVal = result.real();
 					break;
 				}
 				else if ( (llVal == 0) && (iVal < 0) )

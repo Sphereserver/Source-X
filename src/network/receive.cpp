@@ -807,12 +807,45 @@ PacketStaticUpdate::PacketStaticUpdate() : Packet(0)
 bool PacketStaticUpdate::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketStaticUpdate::onReceive");
-	/*skip(12);
-    byte UlCmd = readByte();*/
-	TemporaryString tsDump;
-	this->dump(tsDump);
-	g_Log.EventDebug("%x:Parsing %s", net->id(), tsDump.toBuffer());
-	return true;
+	
+	CChar* pChar = net->getClient()->GetChar();
+	ASSERT(pChar);
+
+	skip(12);
+    byte ulCmd = readByte();
+
+	switch (ulCmd)
+	{
+		case 0xFF: //block query response
+		{
+			seek(3);
+			dword dwBlockNum = readInt32();
+			dword dwCount = readInt32();
+
+			seek(14);
+			int iMapID = readByte();
+
+			if (iMapID != pChar->GetTopMap())
+				return false;
+
+			word receivedCRCs[25];
+			for (int i = 0; i < 25; i++)
+			{
+				receivedCRCs[i] = readInt16();
+			}
+
+			g_Log.Event(LOGL_EVENT, "Received command 0xFF in Packet 0x3F\n");
+			// pChar->PushBlockUpdates( 1, 0, receivedCRCs);
+		}
+		break;
+
+		case 0xFE: //read client version of UltimaLive
+		{
+
+		}
+		default:
+			break;
+	}
 }
 
 
@@ -4375,9 +4408,40 @@ bool PacketMovementReqNew::onReceive(CNetState* net)
 	CClient *client = net->getClient();
 	ASSERT(client);
 
+	// Extended command packet
 	word packetlen = readInt16();
-    if (getLength() != packetlen)
-        return false;   // It's not a valid PacketMovementReqNew, maybe it's a Krrios or Injection packet?
+	if (getLength() != packetlen)
+	{	
+		/*
+		seek(0);
+		byte iCmd = readByte();
+		
+		switch (iCmd)
+		{
+			case 0x00:	// QueryPartyLocations
+			{
+				if (client->GetChar()->m_pParty == nullptr)
+					return false;
+				// PacketExtendedKrioss::PacketExtendedKrioss(const CClient * target, byte cmd, byte location, int length) : PacketSend(XCMD_WalkRequestNew, length, PRI_NORMAL)
+
+				int iLength = 0;
+				// new PacketExtendedKrioss(client, 0x00, 0x01, );
+			} break;
+			case 0x01:	// QueryGuildLocations
+			{
+				if (client->GetChar()->Guild_Find(MEMORY_GUILD) == nullptr)
+					return false;
+
+				byte bLocation = readByte();
+
+			} break;
+
+			default:
+				break;
+		}
+		*/
+		return false;
+	}
 
 	byte steps = readByte();
 	while ( steps )

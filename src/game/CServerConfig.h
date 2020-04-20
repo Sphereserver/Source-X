@@ -413,6 +413,7 @@ public:
 	int	m_iFeatureSA;		// SA features.
 	int	m_iFeatureTOL;		// TOL features.
 	int	m_iFeatureExtra;	// Extra features.
+    bool m_bFeatureUltimaLive;  // Ultima Live features.
 
 	int	m_iMaxLoopTimes;
 #define	STAT_FLAG_NORMAL    0x00    //    MAX* status allowed (default)

@@ -1382,7 +1382,7 @@ void CClient::addPlayerStart( CChar * pChar )
 		m_pAccount->SetAutoResDisp(this);
 
 	ClearTargMode();	// clear death menu mode. etc. ready to walk about. cancel any previous modes
-
+	
     const CPointMap pt = m_pChar->GetTopPoint();
 	m_Env.SetInvalid();
 
@@ -1391,6 +1391,7 @@ void CClient::addPlayerStart( CChar * pChar )
 	ExtData.Party_Enable.m_state = 1;
 	addExtData( EXTDATA_Party_Enable, &ExtData, sizeof(ExtData.Party_Enable));
 */
+	
 
 	new PacketPlayerStart(this);
 	addMapDiff();
@@ -1399,6 +1400,9 @@ void CClient::addPlayerStart( CChar * pChar )
 	addPlayerWarMode();
 	addLoginComplete();
 	addTime(true);
+
+	if (g_Cfg.m_bFeatureUltimaLive == true)
+		new PacketQueryClient(this, 0xFF);
 	if ( CSector *pSector = pt.GetSector() )
 		addSeason(pSector->GetSeason());
 	if (pChar->m_pParty)
@@ -2627,6 +2631,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 
 	bool fNoMessages = false;
 	bool fQuickLogIn = pChar->LayerFind(LAYER_FLAG_ClientLinger);
+
 	if ( IsTrigUsed(TRIGGER_LOGIN) )
 	{
 		CScriptTriggerArgs Args( fNoMessages, fQuickLogIn );

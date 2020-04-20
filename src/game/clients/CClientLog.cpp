@@ -313,6 +313,12 @@ byte CClient::Login_ServerList( const char * pszAccount, const char * pszPasswor
 
 	new PacketServerList(this);
 
+	if (g_Cfg.m_bFeatureUltimaLive == true)
+	{
+		new PacketQueryClient(this, 0x02);
+		new PacketQueryClient(this, 0x01);
+	}
+
 	m_Targ_Mode = CLIMODE_SETUP_SERVERS;
 	return( PacketLoginError::Success );
 }
