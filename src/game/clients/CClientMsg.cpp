@@ -2026,10 +2026,14 @@ void CClient::addMapDiff() const
 void CClient::addMapWaypoint(CObjBase *pObj, MAPWAYPOINT_TYPE type) const
 {
     ADDTOCALLSTACK("CClient::addMapWaypoint");
-    // Add/remove map waypoints on enhanced clients
+    // Add/remove map waypoints on newer classic or every enhanced clients
 
     if (type)
     {
+		// Classic clients only support MAPWAYPOINT_Remove and MAPWAYPOINT_Healer
+		if ((type != MAPWAYPOINT_Healer) && !GetNetState()->isClientKR() && !GetNetState()->isClientEnhanced())
+			return;
+
         if (PacketWaypointAdd::CanSendTo(GetNetState()))
             new PacketWaypointAdd(this, pObj, type);
     }

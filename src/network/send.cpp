@@ -4981,7 +4981,7 @@ PacketWaypointAdd::PacketWaypointAdd(const CClient *target, CObjBase *object, MA
         return;
 
     CPointMap pt = object->GetTopPoint();
-    dword cliloc = (type == Corpse) ? 1028198 : 1062613;	// corpse : "~1_NAME~"
+    dword cliloc = (type == MAPWAYPOINT_Corpse) ? 1028198 : 1062613;	// corpse : "~1_NAME~"
 
     initLength();
     writeInt32(object->GetUID());

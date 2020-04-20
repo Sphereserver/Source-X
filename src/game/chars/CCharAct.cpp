@@ -3202,7 +3202,7 @@ bool CChar::Death()
             }
             pClient->addPlayerWarMode();
             pClient->addSeason(SEASON_Desolate);
-            pClient->addMapWaypoint(pCorpse, Corpse);		// add corpse map waypoint on enhanced clients
+            pClient->addMapWaypoint(pCorpse, MAPWAYPOINT_Corpse);		// add corpse map waypoint on enhanced clients
 
             CItem *pPack = LayerFind(LAYER_PACK);
             if ( pPack )

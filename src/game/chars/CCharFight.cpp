@@ -295,7 +295,7 @@ void CChar::OnHarmedBy( CChar * pCharSrc )
 		// NPC will Change targets.
 	}
 
-	if ( m_pNPC && NPC_IsOwnedBy(pCharSrc, false) )
+	if (!IsSetCombatFlags(COMBAT_NOPETDESERT) && m_pNPC && NPC_IsOwnedBy(pCharSrc, false))
 		NPC_PetDesert();
 
 	// I will Auto-Defend myself.

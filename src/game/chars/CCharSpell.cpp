@@ -2414,9 +2414,6 @@ CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE i
 	if (!pSpellDef || !pSpellDef->GetPrimarySkill(&iSkill, nullptr))
 		return nullptr;
 
-	if (!pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ | SPELLFLAG_TARG_XYZ))
-		ptTarg = GetTopPoint();
-
 	if (iC1)//if iC1 is set that means we are overriding the default summoned creature.
 	{
 		m_atMagery.m_iSummonID = iC1;
@@ -2780,7 +2777,10 @@ bool CChar::Spell_CastDone()
 
 	if (pSpellDef->IsSpellType(SPELLFLAG_SUMMON))
 	{
-		pSummon = Spell_Summon_Try(spell,m_Act_p ,iC1);
+		if (!pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ | SPELLFLAG_TARG_XYZ))
+			m_Act_p = GetTopPoint();
+
+		pSummon = Spell_Summon_Try(spell, m_Act_p, iC1);
 		if (!pSummon)
 		{
 			return false;
