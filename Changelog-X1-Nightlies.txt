@@ -2197,3 +2197,4 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: Boats components resetting TYPE after use 'turn' commands. (Issue #52)
 - Fixed: ARGN1 on @SkillPreStart not working correctly. (Issue #61)
 - Fixed: Null SRC on @Resurrect trigger when char is resurrected using bandages.
+- Fixed: Summon spells were checking for correct target position but didn't reset it when casting. (Issue #413)
