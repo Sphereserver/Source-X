@@ -39,6 +39,7 @@ enum GUMPCTL_TYPE // controls we can put in a gump.
 
     GUMPCTL_PAGE, // 1 = set current page number // for multi tab dialogs.
 
+    GUMPCTL_PICINPIC, // x y gump spritex spritey width height
     GUMPCTL_RADIO, // 6 = x,y,gump1,gump2,starting state,id
     GUMPCTL_RESIZEPIC, // 5 = x,y,gumpback,sx,sy // can come first if multi page. put up some background gump
     GUMPCTL_TEXT, // 4 = x,y,color?,startstringindex // put some text here.
@@ -84,6 +85,7 @@ lpctstr const CDialogDef::sm_szLoadKeys[GUMPCTL_QTY+1] =
 
     "PAGE",
 
+    "PICINPIC",
     "RADIO",
     "RESIZEPIC",
     "TEXT",
@@ -235,6 +237,20 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             GET_ABSOLUTE( id );
 
             m_sControls[m_uiControls].Format( "gumppictiled %d %d %d %d %d", x, y, sX, sY, id );
+            ++m_uiControls;
+            return true;
+        }
+        case GUMPCTL_PICINPIC:
+        {
+            GET_RELATIVE(x, m_iOriginX);
+            GET_RELATIVE(y, m_iOriginY);
+            GET_ABSOLUTE(id);
+            GET_ABSOLUTE(w);
+            GET_ABSOLUTE(h);
+            GET_ABSOLUTE(sX);
+            GET_ABSOLUTE(sY);
+
+            m_sControls[m_uiControls].Format("picinpic %d %d %d %d %d %d %d", x, y, id, w, h, sX, sY);
             ++m_uiControls;
             return true;
         }

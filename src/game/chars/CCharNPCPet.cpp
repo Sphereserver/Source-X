@@ -221,17 +221,24 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 			break;
 
 		case PC_RELEASE:
-			if ( IsStatFlag(STATF_CONJURED) || (m_pNPC->m_bonded && IsStatFlag(STATF_DEAD)) )
+			if (IsValidDef("d_pet_release"))
 			{
-				Effect(EFFECT_XYZ, ITEMID_FX_TELE_VANISH, this, 10, 15);
-				Sound(SOUND_TELEPORT);
-				Delete();
-				return true;
+				pSrc->m_pClient->Dialog_Setup(CLIMODE_DIALOG, g_Cfg.ResourceGetIDType(RES_DIALOG, "d_pet_release"), 0, this);
 			}
-			SoundChar(CRESND_NOTICE);
-			Skill_Start(SKILL_NONE);
-			NPC_PetClearOwners();
-			UpdatePropertyFlag();
+			else
+			{
+				if (IsStatFlag(STATF_CONJURED) || (m_pNPC->m_bonded && IsStatFlag(STATF_DEAD)))
+				{
+					Effect(EFFECT_XYZ, ITEMID_FX_TELE_VANISH, this, 10, 15);
+					Sound(SOUND_TELEPORT);
+					Delete();
+					return true;
+				}
+				SoundChar(CRESND_NOTICE);
+				Skill_Start(SKILL_NONE);
+				NPC_PetClearOwners();
+				UpdatePropertyFlag();
+			}
 			break;
 
 		case PC_DROP:

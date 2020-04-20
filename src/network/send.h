@@ -1882,7 +1882,7 @@ public:
 /***************************************************************************
 *
 *
-*	Packet 0xE5 : PacketWaypointAdd			add waypoint on KR/SA radar map (LOW)
+*	Packet 0xE5 : PacketWaypointAdd			add waypoint on radar map (LOW)
 *
 *
 ***************************************************************************/
@@ -1894,14 +1894,14 @@ public:
     virtual bool canSendTo(const CNetState *state) const { return CanSendTo(state); }
     static bool CanSendTo(const CNetState *state)
     {
-        return state->isClientKR() || state->isClientEnhanced();
+        return state->isClientVersion(MINCLIVER_MAPWAYPOINT) || state->isClientKR() || state->isClientEnhanced();
     }
 };
 
 /***************************************************************************
 *
 *
-*	Packet 0xE6 : PacketWaypointRemove		remove waypoint on KR/SA radar map (LOW)
+*	Packet 0xE6 : PacketWaypointRemove		remove waypoint on radar map (LOW)
 *
 *
 ***************************************************************************/
@@ -1913,7 +1913,7 @@ public:
     virtual bool canSendTo(const CNetState *state) const { return CanSendTo(state); }
     static bool CanSendTo(const CNetState *state)
     {
-        return state->isClientKR() || state->isClientEnhanced();
+        return state->isClientVersion(MINCLIVER_MAPWAYPOINT) || state->isClientKR() || state->isClientEnhanced();
     }
 };
 

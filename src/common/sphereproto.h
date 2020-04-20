@@ -489,22 +489,22 @@ enum MAPCMD_TYPE
 
 enum MAPWAYPOINT_TYPE
 {
-    Remove = 0x0,
-    Corpse = 0x1,
-    PartyMember = 0x2,
-    Unk1 = 0x3,
-    QuestGiver = 0x4,
-    NewPlayerQuest = 0x5,
-    Healer = 0x6,
-    Unk2 = 0x7,
-    Unk3 = 0x8,
-    Unk4 = 0x9,
-    Unk5 = 0xA,
-    Shrine = 0xB,
-    Moongate = 0xC,
-    Unk6 = 0xD,
-    GreenDot = 0xE,
-    GreenDotFlashing = 0xF
+    MAPWAYPOINT_Remove = 0x0,
+	MAPWAYPOINT_Corpse = 0x1,
+	MAPWAYPOINT_PartyMember = 0x2,
+	MAPWAYPOINT_Unk1 = 0x3,
+	MAPWAYPOINT_QuestGiver = 0x4,
+	MAPWAYPOINT_NewPlayerQuest = 0x5,
+	MAPWAYPOINT_Healer = 0x6,
+	MAPWAYPOINT_Unk2 = 0x7,
+	MAPWAYPOINT_Unk3 = 0x8,
+	MAPWAYPOINT_Unk4 = 0x9,
+	MAPWAYPOINT_Unk5 = 0xA,
+	MAPWAYPOINT_Shrine = 0xB,
+	MAPWAYPOINT_Moongate = 0xC,
+	MAPWAYPOINT_Unk6 = 0xD,
+	MAPWAYPOINT_GreenDot = 0xE,
+	MAPWAYPOINT_GreenDotFlashing = 0xF
 };
 
 enum WEATHER_TYPE
@@ -713,6 +713,7 @@ enum RACE_TYPE		// character race, used in new character creation (0x8D) and sta
 #define MINCLIVER_NEWVERSIONING		5000605	// minimum client to use the new versioning format (after 5.0.6e it change to 5.0.6.5)
 #define MINCLIVER_ITEMGRID			6000107	// minimum client to use grid index (6.0.1.7)
 #define MINCLIVER_NEWSECURETRADE	7004565	// minimum client to use virtual gold/platinum on trade window (7.0.45.65)
+#define MINCLIVER_MAPWAYPOINT		7008400 // minimum client to use map waypoints on classic client (7.0.84.0)
 
 // client versions (packets)
 #define MAXCLIVER_REVERSEIP			4000000	// maximum client to reverse IP in 0xA8 packet

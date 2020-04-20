@@ -94,6 +94,7 @@ enum COMBATFLAGS_TYPE
     COMBAT_ELEMENTAL_ENGINE     = 0x8,	    // Use DAM*/RES* to split damage/resist into Physical/Fire/Cold/Poison/Energy (AOS) instead use old AR (pre-AOS)
     COMBAT_DCLICKSELF_UNMOUNTS  = 0x20,	    // Unmount horse when dclicking self while in warmode
     COMBAT_ALLOWHITFROMSHIP     = 0x40,     // Allow attacking opponents from ships
+    COMBAT_NOPETDESERT          = 0x80,     // Allow pet owner attack own pet without make it desert its owner
     COMBAT_ARCHERYCANMOVE       = 0x100,    // Allow firing bow while moving
     COMBAT_STAYINRANGE          = 0x200,    // Must be in range at the end of the swing or the hit will miss
     COMBAT_STACKARMOR           = 0x1000,   // If a region is covered by more than one armor part, all AR will count
