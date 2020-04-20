@@ -24,10 +24,6 @@
 #include "triggers.h"
 #include "CObjBase.h"
 
-bool CObjBaseTemplate::IsDeleted() const
-{
-	return (!m_UID.IsValidUID() || ( GetParent() == &g_World.m_ObjDelete ));
-}
 
 int CObjBaseTemplate::IsWeird() const
 {
@@ -115,6 +111,7 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 
 CObjBase::~CObjBase()
 {
+	ADDTOCALLSTACK("CObjBase::~CObjBase");
     if (CCSpawn *pSpawn = GetSpawn())    // If I was created from a Spawn
     {
 		CItem* pSpawnLink = pSpawn->GetLink();
@@ -127,10 +124,9 @@ CObjBase::~CObjBase()
             //pEntity->UnsubscribeComponent(pSpawn);    // Avoiding recursive calls from CCSpawn::DelObj when forcing the pChar/pItem to Delete();
             pSpawn->DelObj(GetUID());  // Then I should be removed from it's list.
         }
-    }
+    }	
 
-	CWorldTickingList::DelObjStatusUpdate(this);
-    CTimedFunctions::Erase( GetUID() );
+	DeleteCleanup(true);
 
 	FreePropertyList();
 
@@ -139,6 +135,38 @@ CObjBase::~CObjBase()
 
 	// free up the UID slot.
 	SetUID( UID_UNUSED, false );
+}
+
+bool CObjBase::IsDeleted() const
+{
+	return (!GetUID().IsValidUID() || (GetParent() == &g_World.m_ObjDelete));
+}
+
+void CObjBase::DeletePrepare()
+{
+	ADDTOCALLSTACK("CObjBase::DeletePrepare");
+	// Prepare to delete.
+	RemoveFromView();
+	RemoveSelf();	// Must remove early or else virtuals will fail.
+}
+
+void CObjBase::DeleteCleanup(bool fForce)
+{
+	ADDTOCALLSTACK("CObjBase::DeleteCleanup");
+	CEntity::Delete(fForce);
+	CWorldTickingList::DelObjStatusUpdate(this);
+	CWorldTickingList::DelObjSingle(this);
+	CTimedFunctions::Erase(GetUID());
+}
+
+bool CObjBase::Delete(bool fForce)
+{
+	ADDTOCALLSTACK("CObjBase::Delete");
+	DeletePrepare();
+	DeleteCleanup(fForce);
+	
+	g_World.m_ObjDelete.InsertContentTail(this);
+	return true;
 }
 
 bool CObjBase::IsContainer() const
@@ -505,6 +533,27 @@ void CObjBase::Emote(lpctstr pText, CClient * pClientExclude, bool fForcePossess
 	pObjTop->UpdateObjMessage(pszThem, pszYou, pClientExclude, HUE_TEXT_DEF, TALKMODE_EMOTE);
 }
 
+void CObjBase::EmoteObj(lpctstr pText)
+{
+	ADDTOCALLSTACK("CObjBase::EmoteObj");
+	//This is function that only send an emote to a affacted character.
+
+	CObjBase *pObjTop = static_cast<CObjBase*>(GetTopLevelObj());
+	if ( !pObjTop )
+		return;
+
+	tchar *pszYou = Str_GetTemp();
+
+	if ( pObjTop->IsChar() )
+	{
+		if ( pObjTop != this )
+			sprintf(pszYou, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_2), GetName(), pText);
+		else
+			sprintf(pszYou, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_6), pText);
+		pObjTop->UpdateObjMessage(nullptr, pszYou, nullptr, HUE_TEXT_DEF, TALKMODE_EMOTE);
+	}
+}
+
 void CObjBase::Emote2(lpctstr pText, lpctstr pText1, CClient * pClientExclude, bool fForcePossessive)
 {
 	ADDTOCALLSTACK("CObjBase::Emote");
@@ -624,8 +673,13 @@ void CObjBase::UpdateObjMessage( lpctstr pTextThem, lpctstr pTextYou, CClient * 
 			continue;
 		if ( ! pClient->CanSee( this ))
 			continue;
-
-		pClient->addBarkParse(( pClient->GetChar() == this )? pTextYou : pTextThem, this, wHue, mode, font, bUnicode );
+			
+		if (( pClient->GetChar() == this ) && pTextYou != nullptr )
+			pClient->addBarkParse(pTextYou, this, wHue, mode, font, bUnicode );
+		else if (( pClient->GetChar() != this ) && pTextThem != nullptr )
+			pClient->addBarkParse(pTextThem, this, wHue, mode, font, bUnicode );
+		
+		//pClient->addBarkParse(( pClient->GetChar() == this )? pTextYou : pTextThem, this, wHue, mode, font, bUnicode );
 	}
 }
 
@@ -2877,14 +2931,6 @@ void CObjBase::ResendTooltip(bool fSendFull, bool fUseCache)
         m_fStatusUpdate &= ~SU_UPDATE_TOOLTIP;
 }
 
-void CObjBase::DeletePrepare()
-{
-	ADDTOCALLSTACK("CObjBase::DeletePrepare");
-	// Prepare to delete.
-	RemoveFromView();
-	RemoveSelf();	// Must remove early or else virtuals will fail.
-}
-
 CCSpawn * CObjBase::GetSpawn()
 {
     if (_uidSpawn.IsValidUID())
@@ -3194,18 +3240,6 @@ void CObjBase::DupeCopy( const CObjBase * pObj )
 	m_TagDefs.Copy( &(pObj->m_TagDefs) );
 	m_BaseDefs.Copy(&(pObj->m_BaseDefs));
     CEntityProps::Copy(pObj);
-}
-
-bool CObjBase::Delete(bool fForce)
-{
-	ADDTOCALLSTACK("CObjBase::Delete");
-	DeletePrepare();
-    CEntity::Delete(fForce);
-    CTimedObject::Delete();
-	CWorldTickingList::DelObjStatusUpdate(this);
-    CTimedFunctions::Erase( GetUID() );
-    g_World.m_ObjDelete.InsertContentTail(this);
-	return true;
 }
 
 TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgs * pArgs )

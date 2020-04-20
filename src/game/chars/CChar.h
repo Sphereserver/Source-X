@@ -144,6 +144,7 @@ public:
 	// Speech
 	FONT_TYPE m_fonttype;			// speech font to use (client send this to server, but it's not used)
 	HUE_TYPE m_SpeechHueOverride;	// speech hue to use (ignore the one sent by the client, if a player, and from the defname and use this)
+	HUE_TYPE m_EmoteHueOverride;	// emote hue to use
 
 	// In order to revert to original Hue and body.
 	CREID_TYPE m_prev_id;		// Backup of body type for ghosts and poly
@@ -311,14 +312,17 @@ private:
 	CChar(const CChar& copy);
 	CChar& operator=(const CChar& other);
 
-public:
-    virtual void GoSleep();
-    virtual void GoAwake();
-
-	// Status and attributes ------------------------------------
+protected:
+	void DeleteCleanup(bool fForce);
 	virtual void DeletePrepare() override;
-	virtual bool Delete(bool bforce = false) override;
+public:
 	bool NotifyDelete();
+	virtual bool Delete(bool fForce = false) override;
+
+    virtual void GoSleep() override;
+    virtual void GoAwake() override;
+
+	// Status and attributes ------------------------------------	
 	int IsWeird() const;
 	char GetFixZ(const CPointMap& pt, dword dwBlockFlags = 0);
 	bool IsStatFlag( uint64 iStatFlag ) const;

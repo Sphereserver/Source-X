@@ -1206,7 +1206,7 @@ public:
 class PacketDeath : public PacketSend
 {
 public:
-	PacketDeath(CChar* dead, CItemCorpse* corpse);
+	PacketDeath(CChar* dead, CItemCorpse* corpse, bool fFrontFall);
 };
 
 /***************************************************************************

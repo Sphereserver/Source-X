@@ -2174,5 +2174,20 @@ Must have event, even if it's empty, since it's applied by the source to generat
 09-04-2020, Nolok
 - Fixed: Using ACCOUNT object inside a trigger checked if the SRC had high enough privilege (PLEVEL) to access/modify ACCOUNT's properties, instead of acting with the highest PLEVEL (Issue #391).
 
-11-04-2019, Nolok
+11-04-2020, Nolok
 - Added: Safety checks and warnings when trying to set a skill or a stat to an invalid value (Issue #404).
+
+12-04-2020, xwerswoodx
+- Added: EMOTECOLOROVERRIDE added to characters to override default emote color. (Issue #358)
+- Fixed: HOUSES command not working.
+
+19-04-2020, xwerswoodx
+- Fixed: EMOTECOLOROVERRIDE not override attack emotes.
+- Added: EmoteFlags to sphere.ini to override default emote settings. (Issue #416)
+
+20-04-2020, Julian
+- [Ports from Source, different dates, Coruja]
+- Added: Support for 'front falling' when a character dies. (Issue #62)
+- Fixed: f_onchar_delete not being called if the player char get deleted in any other way different from client Character Selecion menu. (Issue #55)
+- Fixed: Boats components resetting TYPE after use 'turn' commands. (Issue #52)
+- Fixed: ARGN1 on @SkillPreStart not working correctly. (Issue #61)

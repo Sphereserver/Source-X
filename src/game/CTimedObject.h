@@ -28,7 +28,6 @@ private:
 public:
     CTimedObject(PROFILE_TYPE profile);
     virtual ~CTimedObject();
-    void Delete();
 
     inline bool IsSleeping() const;
     inline virtual void GoSleep();

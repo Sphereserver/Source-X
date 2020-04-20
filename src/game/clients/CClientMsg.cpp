@@ -691,6 +691,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	FONT_TYPE defaultFont = FONT_NORMAL;
 	bool defaultUnicode = false;
     bool fUseSpeechHueOverride = false;
+    bool fUseEmoteHueOverride = false;
 	const CChar * pSrcChar = nullptr;
 	if (pSrc && pSrc->IsChar())
 	    pSrcChar = static_cast<const CChar *>(pSrc);
@@ -707,6 +708,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		}
 		case TALKMODE_EMOTE:
 		{
+			fUseEmoteHueOverride = true;
 			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_COLOR"));
 			defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_FONT"));
 			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_UNICODE") > 0 ? true : false;
@@ -784,7 +786,19 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
         if (pSrcChar->m_SpeechHueOverride)
             Args[0] = (word)pSrcChar->m_SpeechHueOverride;
 	}
-    else if (mode <= TALKMODE_YELL)
+	else if (fUseEmoteHueOverride && pSrcChar)
+	{
+		if (pSrcChar->m_EmoteHueOverride)
+			Args[0] = (word)pSrcChar->m_EmoteHueOverride;
+	}
+	/*
+	else if (mode <= TALKMODE_YELL)
+	I removed else from the beginning of the condition, because if pSrcChar->m_SpeechHueOverride or pSrcChar->m_EmoteHueOverride not set, we still need to set default value.
+	It should not block the overrides, because Args[0] changed another value from "HUE_TEXT_DEF".
+	
+	- xwerswoodx
+	*/
+    if (mode <= TALKMODE_YELL)
     {
         if (Args[0] == HUE_TEXT_DEF)
             Args[0] = (word)defaultHue;

@@ -29,13 +29,13 @@ void CItemCommCrystal::OnMoveFrom()
 }
 
 // Move this item to it's point in the world. (ground/top level)
-bool CItemCommCrystal::MoveTo(CPointMap pt, bool bForceFix)
+bool CItemCommCrystal::MoveTo(const CPointMap& pt, bool fForceFix)
 {
     ADDTOCALLSTACK("CItemCommCrystal::MoveTo");
     CSector *pSector = pt.GetSector();
     ASSERT(pSector);
     pSector->AddListenItem();
-    return CItem::MoveTo(pt, bForceFix);
+    return CItem::MoveTo(pt, fForceFix);
 }
 
 void CItemCommCrystal::OnHear(lpctstr pszCmd, CChar *pSrc)

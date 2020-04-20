@@ -172,6 +172,7 @@ CServerConfig::CServerConfig()
 	m_iMaxPolyStats			= 150;
 	m_iRacialFlags			= 0;
 	m_iRevealFlags			= (REVEALF_DETECTINGHIDDEN|REVEALF_LOOTINGSELF|REVEALF_LOOTINGOTHERS|REVEALF_SPEAK|REVEALF_SPELLCAST);
+	m_iEmoteFlags			= 0;
 	m_fDisplayPercentAr = false;
 	m_fNoResRobe		= 0;
 	m_iLostNPCTeleport	= 50;
@@ -478,6 +479,7 @@ enum RC_TYPE
 	RC_DUMPPACKETSFORACC,
 #endif
 	RC_DUNGEONLIGHT,
+	RC_EMOTEFLAGS,				// m_iEmoteFlags
 	RC_EQUIPPEDCAST,			// m_fEquippedCast
     RC_ERALIMITGEAR,			// _iEraLimitGear
     RC_ERALIMITLOOT,			// _iEraLimitLoot
@@ -727,6 +729,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "DUMPPACKETSFORACC",		{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sDumpAccPackets),		0 }},
 #endif
 	{ "DUNGEONLIGHT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLightDungeon),		0 }},
+	{ "EMOTEFLAGS",				{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iEmoteFlags),			0 }},
 	{ "EQUIPPEDCAST",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fEquippedCast),		0 }},
 	{ "ERALIMITGEAR",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iEraLimitGear),			0 }},
 	{ "ERALIMITLOOT",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iEraLimitLoot),			0 }},

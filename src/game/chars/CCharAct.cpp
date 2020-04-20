@@ -3020,7 +3020,7 @@ void CChar::SleepStart( bool fFrontFall )
 	}
 
 	// Play death animation (fall on ground)
-	UpdateCanSee(new PacketDeath(this, pCorpse));
+	UpdateCanSee(new PacketDeath(this, pCorpse, fFrontFall));
     pCorpse->Update();
 
 	SetID(m_prev_id);
@@ -3119,7 +3119,8 @@ bool CChar::Death()
     }
 
 	// Create the corpse item
-	CItemCorpse * pCorpse = MakeCorpse(Calc_GetRandVal(2) ? true : false);
+	bool fFrontFall = Calc_GetRandVal(2);
+	CItemCorpse * pCorpse = MakeCorpse(fFrontFall);
 	if ( pCorpse )
 	{
 		if ( IsTrigUsed(TRIGGER_DEATHCORPSE) )
@@ -3131,7 +3132,7 @@ bool CChar::Death()
 	m_lastAttackers.clear();	// clear list of attackers
 
 	// Play death animation (fall on ground)
-	UpdateCanSee(new PacketDeath(this, pCorpse), m_pClient);
+	UpdateCanSee(new PacketDeath(this, pCorpse, fFrontFall), m_pClient);
 
 	if ( m_pNPC )
 	{

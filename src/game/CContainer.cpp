@@ -20,6 +20,63 @@ CContainer::~CContainer()
 {
 }
 
+void CContainer::ContentDelete(bool fForce)
+{
+    ADDTOCALLSTACK("CContainer::ContentDelete");
+    if (_Contents.empty())
+        return;
+
+    // delete all entries.
+    ASSERT(!_fIsClearing);
+    _fIsClearing = true;
+
+    // Loop through a copy of the current state of the container, since by deleting other container objects it could happen that
+    //	other objects are deleted and appended to this list, thus invalidating the iterators used by the for loop.
+    const auto stateCopy = GetIterationSafeContReverse();
+    _Contents.clear();
+
+    for (CSObjContRec* pRec : stateCopy)	// iterate the list.
+    {
+		EXC_TRY("Scheduling objects for deletion");
+
+        ASSERT(pRec->GetParent() == this);
+        CItem* pItem = static_cast<CItem*>(pRec);
+        pItem->Delete(fForce);
+
+		EXC_CATCH;
+    }
+
+    _fIsClearing = false;
+}
+
+void CContainer::ContentNotifyDelete()
+{
+	ADDTOCALLSTACK("CContainer::ContentNotifyDelete");
+	if (!IsTrigUsed(TRIGGER_DESTROY)) // no point entering this loop if the trigger is not used
+		return;
+
+	// trigger @Destroy on contained items
+	for (size_t i = 0; i < GetContentCount(); )
+	{
+		CItem* pItem = static_cast<CItem*>(GetContentIndex(i));
+		bool fIncreaseIndex = true;
+		if (!pItem->NotifyDelete())
+		{
+			// item shouldn't be destroyed and so cannot remain in this container,
+			// drop it to the ground if it hasn't been moved already
+			if (pItem->GetParent() == this)
+			{
+				fIncreaseIndex = !pItem->MoveToCheck(pItem->GetTopLevelObj()->GetTopPoint());
+			}
+		}
+
+		if (fIncreaseIndex)
+		{
+			++i;
+		}
+	}
+}
+
 void CContainer::OnWeightChange( int iChange )
 {
 	ADDTOCALLSTACK("CContainer::OnWeightChange");
@@ -185,7 +242,7 @@ TRIGRET_TYPE CContainer::OnContTriggerForLoop(
 }
 
 TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop(
-CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs,
+	CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs,
 	CSString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, int iDecendLevels )
 {
 	ADDTOCALLSTACK("CContainer::OnGenericContTriggerForLoop");
@@ -294,7 +351,6 @@ int CContainer::ContentConsumeTest( const CResourceID& rid, int amount, dword dw
     return amount;
 }
 
-
 int CContainer::ContentConsume( const CResourceID& rid, int amount, dword dwArg )
 {
 	ADDTOCALLSTACK("CContainer::ContentConsume");
@@ -370,34 +426,6 @@ void CContainer::ContentAttrMod( uint64 iAttr, bool fSet )
 		CItemContainer *pCont = dynamic_cast<CItemContainer *>(pItem);
 		if ( pCont )	// this is a sub-container.
 			pCont->ContentAttrMod(iAttr, fSet);
-	}
-}
-
-void CContainer::ContentNotifyDelete()
-{
-	ADDTOCALLSTACK("CContainer::ContentNotifyDelete");
-	if ( !IsTrigUsed(TRIGGER_DESTROY) ) // no point entering this loop if the trigger is not used
-		return;
-
-	// trigger @Destroy on contained items
-	for (size_t i = 0; i < GetContentCount(); )
-	{
-		CItem* pItem = static_cast<CItem*>(GetContentIndex(i));
-		bool fIncreaseIndex = true;
-		if (!pItem->NotifyDelete())
-		{
-			// item shouldn't be destroyed and so cannot remain in this container,
-			// drop it to the ground if it hasn't been moved already
-			if (pItem->GetParent() == this)
-			{
-				fIncreaseIndex = !pItem->MoveToCheck(pItem->GetTopLevelObj()->GetTopPoint());
-			}
-		}
-		
-		if (fIncreaseIndex)
-		{
-			++i;
-		}
 	}
 }
 

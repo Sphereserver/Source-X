@@ -254,6 +254,7 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 	m_dirFace = DIR_SE;
 	m_fonttype = FONT_NORMAL;
 	m_SpeechHueOverride = 0;
+	m_EmoteHueOverride = 0;
 
     m_exp = 0;
     m_level = 0;
@@ -314,18 +315,10 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 // Delete character
 CChar::~CChar()
 {
-    CWorldTickingList::DelCharPeriodic(this);
+	ADDTOCALLSTACK("CChar::~CChar");
 
-    if (IsStatFlag(STATF_RIDDEN))
-    {
-        CItem * pItem = Horse_GetMountItem();
-        if ( pItem )
-        {
-            pItem->m_itFigurine.m_UID.InitUID();    // unlink it first.
-            pItem->Delete();
-        }
-        StatFlag_Clear(STATF_RIDDEN);
-    }
+	DeleteCleanup(true);
+	ClearContainer();
 
     if (IsClient())    // this should never happen.
     {
@@ -348,6 +341,84 @@ CChar::~CChar()
     ClearPlayer();
 
     g_Serv.StatDec( SERV_STAT_CHARS );
+}
+
+void CChar::DeleteCleanup(bool fForce)
+{
+	ADDTOCALLSTACK("CChar::DeleteCleanup");
+	CWorldTickingList::DelCharPeriodic(this);
+
+	if (IsStatFlag(STATF_RIDDEN))
+	{
+		CItem* pItem = Horse_GetMountItem();
+		if (pItem)
+		{
+			pItem->m_itFigurine.m_UID.InitUID();    // unlink it first.
+			pItem->Delete(fForce);
+		}
+		StatFlag_Clear(STATF_RIDDEN);
+	}
+}
+
+// Called before Delete()
+// @Destroy or f_onchar_delete can prevent the deletion
+bool CChar::NotifyDelete()
+{
+	ADDTOCALLSTACK("CChar::NotifyDelete");
+	if (IsDeleted())
+		return false;
+
+	//	Checking for delete allowed in @Destroy
+	if (IsTrigUsed(TRIGGER_DESTROY))
+	{
+		//We can forbid the deletion in here with no pain
+		if (CChar::OnTrigger(CTRIG_Destroy, &g_Serv) == TRIGRET_RET_TRUE)
+			return false;
+	}
+
+	// If this is a player, check for f_onchar_delete
+	if (m_pClient)
+	{
+		TRIGRET_TYPE trigReturn;
+		CScriptTriggerArgs Args;
+		Args.m_pO1 = m_pClient;
+		r_Call("f_onchar_delete", this, &Args, nullptr, &trigReturn);
+		if (trigReturn == TRIGRET_RET_TRUE)
+			return false;
+	}
+
+	ContentNotifyDelete();
+	return true;
+}
+
+void CChar::DeletePrepare()
+{
+	ADDTOCALLSTACK("CChar::DeletePrepare");
+	ContentDelete(false);	// This object and its contents need to be deleted on the same tick
+	CObjBase::DeletePrepare();
+}
+
+bool CChar::Delete(bool fForce)
+{
+	ADDTOCALLSTACK("CChar::Delete");
+
+	if ((NotifyDelete() == false) && !fForce)
+		return false;
+
+	// Character has been deleted
+	if (IsClient())
+	{
+		CClient* pClient = GetClient();
+		pClient->CharDisconnect();
+		pClient->GetNetState()->markReadClosed();
+	}
+	
+	DeleteCleanup(fForce);
+
+	// Detach from account now
+	ClearPlayer();
+
+	return CObjBase::Delete();
 }
 
 // Client is detaching from this CChar.
@@ -515,55 +586,6 @@ bool CChar::SetNPCBrain( NPCBRAIN_TYPE NPCBrain )
     else
         m_pNPC->m_Brain = NPCBrain;		// just replace existing brain
     return true;
-}
-
-// Called before Delete()
-// @Destroy can prevent the deletion
-bool CChar::NotifyDelete()
-{
-	ADDTOCALLSTACK("CChar::NotifyDelete");
-	if (IsDeleted())
-		return false;
-
-	if ( IsTrigUsed(TRIGGER_DESTROY) )
-	{
-		//We can forbid the deletion in here with no pain
-		if (CChar::OnTrigger(CTRIG_Destroy, &g_Serv) == TRIGRET_RET_TRUE)
-			return false;
-	}
-
-	ContentNotifyDelete();
-	return true;
-}
-
-void CChar::DeletePrepare()
-{
-	ADDTOCALLSTACK("CChar::DeletePrepare");
-	ClearContainer();	// This object and its contents need to be deleted on the same tick
-	CObjBase::DeletePrepare();
-}
-
-bool CChar::Delete(bool bforce)
-{
-	ADDTOCALLSTACK("CChar::Delete");
-
-	if (( NotifyDelete() == false ) && !bforce)
-		return false;
-
-    CWorldTickingList::DelCharPeriodic(this);
-
-	// Character has been deleted
-	if ( IsClient() )
-	{
-		CClient* pClient = GetClient();
-		pClient->CharDisconnect();
-		pClient->GetNetState()->markReadClosed();
-	}
-
-	// Detach from account now
-	ClearPlayer();
-
-	return CObjBase::Delete();
 }
 
 void CChar::GoSleep()
@@ -997,6 +1019,7 @@ bool CChar::DupeFrom(const CChar * pChar, bool fNewbieItems )
 	m_dirFace = pChar->m_dirFace;
 	m_fonttype = pChar->m_fonttype;
 	m_SpeechHueOverride = pChar->m_SpeechHueOverride;
+	m_EmoteHueOverride = pChar->m_EmoteHueOverride;
 
 	m_StepStealth = pChar->m_StepStealth;
 	m_iVisualRange = pChar->m_iVisualRange;
@@ -1584,6 +1607,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
     m_pPlayer->m_SpeechHue	= HUE_TEXT_DEF;	// Set default client-sent speech color
 	m_fonttype				= FONT_NORMAL;	// Set speech font type
 	m_SpeechHueOverride		= 0;			// Set no server-side speech color override
+	m_EmoteHueOverride		= 0;			// Set no server-side emote color override
 	m_sTitle.clear();						// Set title
 
 	GetBank(LAYER_BANKBOX);			// Create bankbox
@@ -2816,6 +2840,9 @@ do_default:
 		case CHC_SPEECHCOLOROVERRIDE:
 			sVal.FormatWVal( m_SpeechHueOverride );
 			break;
+		case CHC_EMOTECOLOROVERRIDE:
+			sVal.FormatWVal( m_EmoteHueOverride );
+			break;
         case CHC_STEPSTEALTH:
             sVal.FormatVal( m_StepStealth );
             break;
@@ -3359,6 +3386,9 @@ bool CChar::r_LoadVal( CScript & s )
 		case CHC_SPEECHCOLOROVERRIDE:
 			m_SpeechHueOverride = (HUE_TYPE)s.GetArgWVal();
 			break;
+		case CHC_EMOTECOLOROVERRIDE:
+			m_EmoteHueOverride = (HUE_TYPE)s.GetArgWVal();
+			break;
         case CHC_OFOOD: // used in the save file
             Stat_SetBase(STAT_FOOD, s.GetArgUSVal());
             break;
@@ -3608,6 +3638,8 @@ void CChar::r_Write( CScript & s )
 		s.WriteKeyVal("FONT", m_fonttype);
 	if (m_SpeechHueOverride)
 		s.WriteKeyVal("SPEECHCOLOROVERRIDE", m_SpeechHueOverride);
+	if (m_EmoteHueOverride)
+		s.WriteKeyVal("EMOTECOLOROVERRIDE", m_EmoteHueOverride);
 	if ( m_dirFace != DIR_SE )
 		s.WriteKeyVal("DIR", m_dirFace);
 	if ( m_prev_id != GetID() )

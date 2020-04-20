@@ -531,15 +531,20 @@ public:
 
 protected:
 	CItem( ITEMID_TYPE id, CItemBase * pItemDef );	// only created via CreateBase()
+	bool SetBase(CItemBase* pItemDef);
 public:
 	virtual ~CItem();
+
 private:
 	CItem(const CItem& copy);
 	CItem& operator=(const CItem& other);
 
 protected:
-	bool SetBase( CItemBase * pItemDef );
 	virtual int FixWeirdness() override;
+	void DeleteCleanup(bool fForce);
+public:
+	virtual bool NotifyDelete(); // overridden CItemContainer:: method
+	virtual bool Delete(bool fForce = false) override;
 
 public:
     CCFaction *GetSlayer() const;
@@ -796,8 +801,6 @@ public:
 
 	static CItem * ReadTemplate( CResourceLock & s, CObjBase * pCont );
 
-	virtual bool Delete(bool bforce = false) override;
-	virtual bool NotifyDelete();
 };
 
 #endif // _INC_CITEM_H

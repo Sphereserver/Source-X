@@ -580,7 +580,9 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
                     if ((xdiff == component.m_dx) && (ydiff == component.m_dy) && ((pItem->GetTopZ() - pMultiThis->GetTopZ()) == component.m_dz))
                     {
                         const CItemBaseMulti::CMultiComponentItem & componentnew = pMultiNew->m_Components[j];
+                        IT_TYPE oldType = pItem->GetType();
                         pItem->SetID(componentnew.m_id);
+                        pItem->SetType(oldType);
                         pt.m_x = pMultiThis->GetTopPoint().m_x + componentnew.m_dx;
                         pt.m_y = pMultiThis->GetTopPoint().m_y + componentnew.m_dy;
                     }

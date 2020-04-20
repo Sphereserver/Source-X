@@ -60,6 +60,47 @@ public:
 
     CResourceRefArray m_OEvents;
     
+public:
+    explicit CObjBase(bool fItem);
+    virtual ~CObjBase();
+private:
+    CObjBase(const CObjBase& copy);
+    CObjBase& operator=(const CObjBase& other);
+
+protected:
+    /**
+     * @fn  virtual void CObjBase::DeletePrepare();
+     *
+     * @brief   Prepares to delete.
+     */
+    virtual void DeletePrepare();
+
+    void DeleteCleanup(bool fForce);
+
+public:
+    virtual bool IsDeleted() const override;
+
+    /**
+     * @fn  virtual void CObjBase::Delete(bool bforce = false);
+     *
+     * @brief   Deletes this CObjBase from game (doesn't delete the raw class instance).
+     *
+     * @param   bForce  Force deletion.
+     *
+     * @return  Was deleted.
+     */
+    virtual bool Delete(bool fForce = false);
+
+    /**
+     * @fn  virtual void CObjBase::DupeCopy( const CObjBase * pObj );
+     *
+     * @brief   Dupe copy.
+     *
+     * @param   pObj    The object.
+     */
+    virtual void DupeCopy(const CObjBase* pObj); // overridden by CItem
+
+public:
 	/**
 	* @brief   Base get definition.
 	* @return  null if it fails, else a pointer to a CBaseBaseDef.
@@ -103,12 +144,6 @@ public:
 	*/
 	bool CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult);
 
-    /**
-     * @fn  virtual void CObjBase::DeletePrepare();
-     *
-     * @brief   Prepares to delete.
-     */
-	virtual void DeletePrepare();
 
 public:
 
@@ -427,16 +462,6 @@ public:
      */
 	void DeleteKey( lpctstr ptcKey );
 
-protected:
-
-    /**
-     * @fn  virtual void CObjBase::DupeCopy( const CObjBase * pObj );
-     *
-     * @brief   Dupe copy.
-     *
-     * @param   pObj    The object.
-     */
-	void DupeCopy( const CObjBase * pObj );
 
 public:
 
@@ -480,18 +505,6 @@ public:
      * @return  An int.
      */
 	virtual int IsWeird() const;
-
-    /**
-     * @fn  virtual void CObjBase::Delete(bool bforce = false);
-     *
-     * @brief   Deletes this CObjBase from game (doesn't delete the raw class instance).
-     *
-     * @param   bForce  Force deletion.
-     *
-     * @return  Was deleted.
-     */
-	virtual bool Delete(bool fForce = false);
-
 
 	// Accessors
 
@@ -578,7 +591,6 @@ protected:
      */
 	void SetHueAlt( HUE_TYPE wHue );
 
-public:
 
 public:
 
@@ -699,10 +711,6 @@ public:
 	virtual bool r_LoadVal( CScript & s ) override;
 	virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;	// some command on this object as a target
-    inline virtual bool IsDeleted() const override
-    {
-        return CObjBaseTemplate::IsDeleted();
-    }
 
     /**
      * @fn  void CObjBase::Emote(lpctstr pText, CClient * pClientExclude = nullptr, bool fPossessive = false);
@@ -714,6 +722,7 @@ public:
      * @param   fPossessive             true to possessive.
      */
 	void Emote(lpctstr pText, CClient * pClientExclude = nullptr, bool fPossessive = false);
+	void EmoteObj(lpctstr pText);
 
     /**
      * @fn  void CObjBase::Emote2(lpctstr pText, lpctstr pText2, CClient * pClientExclude = nullptr, bool fPossessive = false);
@@ -851,16 +860,14 @@ public:
      *
      * @param   pClientExclude  Do not send to this CClient.
      */
-	virtual void Update(const CClient * pClientExclude = nullptr)
-		= 0;
+	virtual void Update(const CClient * pClientExclude = nullptr) = 0;
 
     /**
      * @fn  virtual void CObjBase::Flip() = 0;
      *
      * @brief   Flips this object.
      */
-	virtual void Flip()
-		= 0;
+	virtual void Flip()	= 0;
 
     /**
      * @fn  virtual bool CObjBase::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool bReflecting = false ) = 0;
@@ -891,13 +898,6 @@ public:
      * @return  A TRIGRET_TYPE.
      */
 	virtual TRIGRET_TYPE Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgs * pArgs );
-
-public:
-	explicit CObjBase( bool fItem );
-	virtual ~CObjBase();
-private:
-	CObjBase(const CObjBase& copy);
-	CObjBase& operator=(const CObjBase& other);
 
 public:
 	//	Some global object variables

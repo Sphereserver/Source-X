@@ -16,10 +16,9 @@ class CItemContainer : public CItemVendable, public CContainer
 	static lpctstr const sm_szVerbKeys[];
     CUID _uidMultiSecured;
     CUID _uidMultiCrate;
+
 public:
 	static const char *m_sClassName;
-
-	// bool m_fTinkerTrapped;	// magic trap is diff.
 
 	virtual bool NotifyDelete() override;	// overrides CItem:: method
 	virtual void DeletePrepare() override;
@@ -42,10 +41,10 @@ public:
 	bool IsItemInside(const CItem * pItem) const;
 	bool CanContainerHold(const CItem * pItem, const CChar * pCharMsg );
 
-	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
+	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
 	virtual void r_Write( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false );
-	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef );
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
+	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 
 	virtual int GetWeight(word amount = 0) const;
 	void OnWeightChange( int iChange );
