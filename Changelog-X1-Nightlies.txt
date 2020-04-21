@@ -2184,3 +2184,17 @@ Must have event, even if it's empty, since it's applied by the source to generat
 19-04-2020, xwerswoodx
 - Fixed: EMOTECOLOROVERRIDE not override attack emotes.
 - Added: EmoteFlags to sphere.ini to override default emote settings. (Issue #416)
+
+20-04-2020, Julian
+- [Ports from Source, different dates, Coruja]
+- Added: COMBATF_NOPETDESERT combat flag to allow pet owner attack own pet without make it desert its owner (OSI-like).
+- Added: Support for new 'picinpic' dialog element os client >= 7.0.80.0. This is used to add sprites pictures on dialogs.
+		 Syntax: picinpic x y gump spritex spritey width height
+		 Example: picinpic 0 0 09d3b 150 150 30 30 (add background area on 0,0 to 30,30 and add sprite 150,150 from gump 09d3b inside it)
+- Added: Support for function MAPWAYPOINT on classic clients >= 7.0.84.0.
+- Added: Support for 'front falling' when a character dies. (Issue #62)
+- Fixed: f_onchar_delete not being called if the player char get deleted in any other way different from client Character Selecion menu. (Issue #55)
+- Fixed: Boats components resetting TYPE after use 'turn' commands. (Issue #52)
+- Fixed: ARGN1 on @SkillPreStart not working correctly. (Issue #61)
+- Fixed: Null SRC on @Resurrect trigger when char is resurrected using bandages.
+- Fixed: Summon spells were checking for correct target position but didn't reset it when casting. (Issue #413)

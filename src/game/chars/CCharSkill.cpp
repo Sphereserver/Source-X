@@ -2567,7 +2567,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 
 	if (pCorpse || pChar->IsStatFlag(STATF_DEAD))
 	{
-		pChar->Spell_Resurrection(pCorpse);
+		pChar->Spell_Resurrection(pCorpse, this);
 		return 0;
 	}
 
@@ -4009,29 +4009,26 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		// Do the cleanup only at the end the skill, not at the start: we may want to set some parameters before the skill call
 		// (like ACTARG1/2 for magery, they are respectively m_atMagery.m_iSpell	and m_atMagery.m_iSummonID and are set in
 		// CClient::OnTarg_Skill_Magery, which then calls Skill_Start).
-		//Skill_Cleanup();
-		m_Act_SkillCurrent = skill;
+		// Skill_Cleanup();
+		CScriptTriggerArgs pArgs;
+		pArgs.m_iN1 = skill;
 
 		// Some skill can start right away. Need no targetting.
 		// 0-100 scale of Difficulty
 		if ( IsTrigUsed(TRIGGER_SKILLPRESTART) )
 		{
 			if ( Skill_OnCharTrigger(skill, CTRIG_SkillPreStart) == TRIGRET_RET_TRUE )
-			{
-				Skill_Cleanup();
 				return false;
-			}
 		}
 		if ( IsTrigUsed(TRIGGER_PRESTART) )
 		{
 			if ( Skill_OnTrigger(skill, SKTRIG_PRESTART) == TRIGRET_RET_TRUE )
-			{
-				Skill_Cleanup();
 				return false;
-			}
 		}
 
+		m_Act_SkillCurrent = skill;
 		m_Act_Difficulty = Skill_Stage(SKTRIG_START);
+
 		if (m_Act_Difficulty >= 0)	// If m_Act_Difficulty == -1 then the skill stage has failed, so preserve this result for later.
 			m_Act_Difficulty += iDifficultyIncrease;
 
@@ -4039,13 +4036,12 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		const bool fCraftSkill = g_Cfg.IsSkillFlag(skill, SKF_CRAFT);
 		const bool fGatherSkill = g_Cfg.IsSkillFlag(skill, SKF_GATHER);
 		CResourceID pResBase(RES_ITEMDEF, fCraftSkill ? m_atCreate.m_iItemID : 0, 0);
-        CScriptTriggerArgs pArgs;
 
 		if ( fCraftSkill )
 		{
-			m_atCreate.m_dwStrokeCount = 1;		//This matches the new strokes amount used on OSI.
+			m_atCreate.m_dwStrokeCount = 1;		// This matches the new strokes amount used on OSI.
 			pArgs.m_VarsLocal.SetNum("CraftItemdef", pResBase.GetPrivateUID());
-            //pArgs.m_VarsLocal.SetStr("CraftItemdef", g_Cfg.ResourceGetName(pResBase), false);
+            // pArgs.m_VarsLocal.SetStr("CraftItemdef", g_Cfg.ResourceGetName(pResBase), false);
 			pArgs.m_VarsLocal.SetNum("CraftStrokeCnt", m_atCreate.m_dwStrokeCount);
 			pArgs.m_VarsLocal.SetNum("CraftAmount", m_atCreate.m_dwAmount);
 		}

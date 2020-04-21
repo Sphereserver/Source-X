@@ -170,7 +170,7 @@ void CItem::DeleteCleanup(bool fForce)
 		CChar* pChar = m_uidLink.CharFind();
 		if (pChar && pChar->GetClient())
 		{
-			pChar->GetClient()->addMapWaypoint(this, Remove);
+			pChar->GetClient()->addMapWaypoint(this, MAPWAYPOINT_Remove);
 		}
 	}
 
@@ -5867,7 +5867,7 @@ bool CItem::OnTick()
                     const CClient* pClient = pSrc->GetClient();
                     if (pClient)
                     {
-                        pClient->addMapWaypoint(this, Remove);	// remove corpse map waypoint on enhanced clients
+                        pClient->addMapWaypoint(this, MAPWAYPOINT_Remove);	// remove corpse map waypoint on enhanced clients
                     }
 					SetID((ITEMID_TYPE)(Calc_GetRandVal2(ITEMID_SKELETON_1, ITEMID_SKELETON_9)));
 					SetHue((HUE_TYPE)(HUE_DEFAULT));

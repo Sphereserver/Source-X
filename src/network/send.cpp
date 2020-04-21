@@ -3501,13 +3501,13 @@ PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nword* p
  *
  *
  ***************************************************************************/
-PacketDeath::PacketDeath(CChar* dead, CItemCorpse* corpse) : PacketSend(XCMD_CharDeath, 13, PRI_NORMAL)
+PacketDeath::PacketDeath(CChar* dead, CItemCorpse* corpse, bool fFrontFall) : PacketSend(XCMD_CharDeath, 13, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketDeath::PacketDeath");
 
 	writeInt32(dead->GetUID());
-	writeInt32(corpse == nullptr? 0 : (dword)corpse->GetUID());
-	writeInt32(0);
+	writeInt32(corpse == nullptr ? 0 : (dword)corpse->GetUID());
+	writeInt32((dword)fFrontFall);
 }
 
 
@@ -4997,7 +4997,7 @@ PacketWaypointAdd::PacketWaypointAdd(const CClient *target, CObjBase *object, MA
         return;
 
     CPointMap pt = object->GetTopPoint();
-    dword cliloc = (type == Corpse) ? 1028198 : 1062613;	// corpse : "~1_NAME~"
+    dword cliloc = (type == MAPWAYPOINT_Corpse) ? 1028198 : 1062613;	// corpse : "~1_NAME~"
 
     initLength();
     writeInt32(object->GetUID());

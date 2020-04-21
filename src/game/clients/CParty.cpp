@@ -36,7 +36,7 @@ size_t CPartyDef::AttachChar( CChar *pChar )
 	//  index of the char in the group. BadIndex = not in group.
 	size_t i = m_Chars.AttachChar(pChar);
 	pChar->NotoSave_Update();
-    UpdateWaypointAll(pChar, PartyMember);
+    UpdateWaypointAll(pChar, MAPWAYPOINT_PartyMember);
 	return i;
 }
 
@@ -48,7 +48,7 @@ size_t CPartyDef::DetachChar( CChar *pChar )
 	size_t i = m_Chars.DetachChar(pChar);
 	if ( i != SCONT_BADINDEX )
 	{
-        UpdateWaypointAll(pChar, Remove);
+        UpdateWaypointAll(pChar, MAPWAYPOINT_Remove);
 		pChar->m_pParty = nullptr;
 		pChar->DeleteKey("PARTY_LASTINVITE");
 		pChar->DeleteKey("PARTY_LASTINVITETIME");

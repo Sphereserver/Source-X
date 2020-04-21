@@ -870,7 +870,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 
             if (m_pChar->m_pParty && ((m_iWalkStepCount % 10) == 0))	// Send map waypoint location to party members at each 10 steps taken (enhanced clients only)
             {
-                m_pChar->m_pParty->UpdateWaypointAll(m_pChar, PartyMember);
+                m_pChar->m_pParty->UpdateWaypointAll(m_pChar, MAPWAYPOINT_PartyMember);
             }
 		}
 
