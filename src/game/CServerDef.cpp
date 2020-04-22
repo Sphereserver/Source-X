@@ -10,6 +10,7 @@
 #include "CServerConfig.h"
 #include "CServerDef.h"
 #include "CWorldGameTime.h"
+#include "CWorld.h"
 
 //	Memory profiling
 #ifdef _WIN32	// (Win32)
@@ -197,6 +198,7 @@ enum SC_TYPE
 	SC_CLIENTS,
 	SC_CLIENTVERSION,
 	SC_CREATE,
+	SC_GMPAGES,
 	SC_ITEMS,
 	SC_LANG,
 	SC_LASTVALIDDATE,
@@ -224,6 +226,7 @@ lpctstr const CServerDef::sm_szLoadKeys[SC_QTY+1] =	// static
 	"CLIENTS",
 	"CLIENTVERSION",
 	"CREATE",
+	"GMPAGES",
 	"ITEMS",
 	"LANG",
 	"LASTVALIDDATE",
@@ -433,6 +436,9 @@ bool CServerDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 		break;
 	case SC_CHARS:
 		sVal.FormatSTVal( StatGet( SERV_STAT_CHARS ) );
+		break;
+	case SC_GMPAGES:
+		sVal.FormatVal( g_World.m_GMPages.GetContentCount() );
 		break;
 	case SC_TIMEZONE:
 		sVal.FormatVal( m_TimeZone );
