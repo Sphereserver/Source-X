@@ -223,39 +223,39 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 22-10-2017, Nolok
 - Fixed: when using the meditation skill, if the SKF_NOSFX flag was set, the bufficon wasn't added.
 - Fixed: ACTARG1/2/3 weren't zeroed at skill success, abort or failure if the SKF_SCRIPTED was set.
-- [Port from Source, 13-02-2017, Coruja] Changed: Spellbooks now store spell offset / max spells using TDATA3/TDATA4 instead MOREZ/MOREX.
-- [Port from Source, 21-04-2017, Coruja] Changed: Mount memories now can have their own i_mt_* ITEMDEFs instead use DEFNAME=i_mt_* directly on base items (usually 'boat parts').
+- [Port from 0.56d, 13-02-2017, Coruja] Changed: Spellbooks now store spell offset / max spells using TDATA3/TDATA4 instead MOREZ/MOREX.
+- [Port from 0.56d, 21-04-2017, Coruja] Changed: Mount memories now can have their own i_mt_* ITEMDEFs instead use DEFNAME=i_mt_* directly on base items (usually 'boat parts').
 
 23-10-2017, Drk84
-- [Port from Source, 14-02-2017, Coruja] Fixed: Combat Hit Chance formulas incorrectly assuming that defender is always using the same combat skill as the attacker.
+- [Port from 0.56d, 14-02-2017, Coruja] Fixed: Combat Hit Chance formulas incorrectly assuming that defender is always using the same combat skill as the attacker.
   
 24-10-2017, Drk84 
-- [Port from Source, 19-09-2017, Coruja] Fixed: Client 'Open Spellbook' macro making the client crash if it tries to open the requested spellbook gump when the spellbook item is not loaded yet.
+- [Port from 0.56d, 19-09-2017, Coruja] Fixed: Client 'Open Spellbook' macro making the client crash if it tries to open the requested spellbook gump when the spellbook item is not loaded yet.
 
 24-10-2017, Nolok
 - Fixed: using ADDCIRCLE without the second argument caused sphere to crash. Also, its use on non t_spellbook items was incorrectly allowed.
 - Fixed: MODMAXWEIGHT of a new player or item was a random number instead of zero.
 - Fixed: corpse MORE2 held an invalid UID instead of the killer's.
-- [Port from Source, 15-10-2017, Coruja]
+- [Port from 0.56d, 15-10-2017, Coruja]
 	Fixed: MODMAXWEIGHT property not working correctly.
 	Changed: Updated 'weight' tooltip on containers.
 
 24-10-2017, Drk84
-- [Port from Source, 27-09-2016, Coruja] Fixed: Worldsave not saving DAM/ARMOR properties set manually on chars/items already placed on world.
+- [Port from 0.56d, 27-09-2016, Coruja] Fixed: Worldsave not saving DAM/ARMOR properties set manually on chars/items already placed on world.
 
 28-10-2017, Drk84
-- [Port from Source, 08-05-2016, Coruja] Fixed: Explosion potions not working correctly.
-- [Port from Source, 07-02-2017, Coruja] Fixed: Hidden/Invisible chars not getting revealed when being stumbled.
+- [Port from 0.56d, 08-05-2016, Coruja] Fixed: Explosion potions not working correctly.
+- [Port from 0.56d, 07-02-2017, Coruja] Fixed: Hidden/Invisible chars not getting revealed when being stumbled.
 
 29-10-2017, Nolok
 - Added: now the logout console message shows also the character's name.
 
 30-10-2017, Drk84
-- [Port from Source, 17-10-2016, Coruja] Fixed: NPCs losing 'statf_spawned' flag after server restart.
-- [Port from Source, 30-01-2017, Coruja] Fixed: ML/SA/HS/TOL doors not working correctly.
+- [Port from 0.56d, 17-10-2016, Coruja] Fixed: NPCs losing 'statf_spawned' flag after server restart.
+- [Port from 0.56d, 30-01-2017, Coruja] Fixed: ML/SA/HS/TOL doors not working correctly.
 
 01-11-2017, Drk84
-- [Port from Source, 12-01-2017, Coruja] Fixed: Char death counting kill/fame/karma gain for killers that started the attack but don't have caused any damage yet.
+- [Port from 0.56d, 12-01-2017, Coruja] Fixed: Char death counting kill/fame/karma gain for killers that started the attack but don't have caused any damage yet.
 
 05-11-2017, Drk84
 - Added SkillAdjusted commmand, returns the skill value adjusted by the stat bonus.
@@ -292,7 +292,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed: RAND(x) not returning a value between 0 and x - 1 (instead it returned a value between 0 and x).
 
 09-11-2017, Drk84
-- [Port from Source, 12-03-2017, Coruja] Added: Basic internal packet filters that will make Sphere avoid crash or consume excessive resources when under DDoS attack.
+- [Port from 0.56d, 12-03-2017, Coruja] Added: Basic internal packet filters that will make Sphere avoid crash or consume excessive resources when under DDoS attack.
 
 10-11-2017, Nolok
 - Updated NPC ally groups. Before this commit, they included the creatures up only to the LBR expansion. This affects the NPC hostility
@@ -308,7 +308,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Changed: ADD command does not show anymore the console error if the argument is invalid. The sysmessage is still displayed.
 
 05-12-2017, Drk84
-- [Port from Source, 05-09-2016, Coruja] Fixed: TimerCall setting on sphere.ini using wrong time format (hours instead minutes) to call f_onserver_timer function
+- [Port from 0.56d, 05-09-2016, Coruja] Fixed: TimerCall setting on sphere.ini using wrong time format (hours instead minutes) to call f_onserver_timer function
 
 13-12-2017, Drk84
 - Possible fix for stat cap issue when the sum of the players stats are at StatCap -1. 
@@ -374,20 +374,20 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 	UseAsyncNetwork (enable/disable asynchronous packet sending).
 
 02-02-2018, Drk84
-- [Port from Source, 22-01-2018, Coruja] Fixed: Spells being disturbed even when they have INTERRUPT=0.0 set.
+- [Port from 0.56d, 22-01-2018, Coruja] Fixed: Spells being disturbed even when they have INTERRUPT=0.0 set.
 
 14-02-2018, Nolok
 - Fixed: ARGN2 of @Login trigger storing a wrong value.
 - Changed: like Source, also this branch now uses 64 bits internal tick count, instead of the old 32 bits.
 - Updated SphereCrypt.ini.
-- [Port from Source, 20-03-2017, Coruja] Fixed: Message 'World save completed in X seconds' not showing correct timing precision on Linux builds.
-- [Port from Source, 01-10-2017, Coruja] Fixed: Lightsource items not updating tooltip after toggle light state.
-- [Port from Source, 03-10-2017, Coruja]
+- [Port from 0.56d, 20-03-2017, Coruja] Fixed: Message 'World save completed in X seconds' not showing correct timing precision on Linux builds.
+- [Port from 0.56d, 01-10-2017, Coruja] Fixed: Lightsource items not updating tooltip after toggle light state.
+- [Port from 0.56d, 03-10-2017, Coruja]
 	Fixed: AutoTooltipResend .ini setting not working on equipped items.
 	Fixed: Summoned NPCs not showing smoke effect when they got released.
-- [Port from Source, 26-12-2017, Coruja] Fixed: 'memory_guard' memories not being removed after its linked item get deleted.
-- [Port from Source, 27-01-2018, Coruja] Fixed: Items placed on char backpack not checking char weight limit correctly before get equipped.
-- [Port from Source, 30-01-2018, Coruja] Fixed: Items not getting amount stacked when dropped on ground.
+- [Port from 0.56d, 26-12-2017, Coruja] Fixed: 'memory_guard' memories not being removed after its linked item get deleted.
+- [Port from 0.56d, 27-01-2018, Coruja] Fixed: Items placed on char backpack not checking char weight limit correctly before get equipped.
+- [Port from 0.56d, 30-01-2018, Coruja] Fixed: Items not getting amount stacked when dropped on ground.
 
 16-02-2018, Nolok
 - Updated: VisualRange maximum value is now 24 (this maximum value is valid for Classic Clients 7.0.55.27+ and probably all the Enhanced Client versions;
@@ -410,7 +410,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 03-03-2018, Drk84
 
 05-03-2018, Drk84
-- [Port from Source, 30-06-2016, Coruja] Fixed: WOP flood when casting spells using extremely short delays.
+- [Port from 0.56d, 30-06-2016, Coruja] Fixed: WOP flood when casting spells using extremely short delays.
 
 07-03-2018, Nolok
 - Fixed: light sources didn't change their light type according to their MOREZ.
@@ -453,29 +453,29 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 20-03-2018, Nolok
 - Added: .ADD command accepts as a second parameter the amount of the item to create. Usage: .add i_gold, 500
 - Fixed: starting locations of the Enhanced Client's character creation wasn't working.
-- [Port from Source, 27-11-2016, Coruja]
+- [Port from 0.56d, 27-11-2016, Coruja]
 	Added: Support for items health bar on HS clients >= 7.0.30.0. Added the CAN flag 'can_i_damageable' to enable health bar on items (MORE1L = cur hitpoints / MORE1H = max hitpoints).
-- [Port from Source, 30-11-2016, Coruja]
+- [Port from 0.56d, 30-11-2016, Coruja]
 	Fixed: Server crash when custom clients connect using invalid client version.
-- [Port from Source, 22-12-2016, Coruja]
+- [Port from 0.56d, 22-12-2016, Coruja]
 	Fixed: Enhanced clients not able to login on accounts with no created chars.
-- [Port from Source, 24-12-2016, Coruja]
+- [Port from 0.56d, 24-12-2016, Coruja]
 	Added: Support for character face style on enhanced clients. It works like hairs/beards, just create the item and equip it on character.
 	[Sphere.ini] Added: new FEATURE_EXTRA_ROLEPLAYFACES feature to enable extra roleplay face styles on character creation
-- [Port from Source, 25-12-2016, Coruja]
+- [Port from 0.56d, 25-12-2016, Coruja]
 	Removed: Support for CHARLIST function on enhanced clients, they don't have support for this packet anymore, so disabling it will prevent client crash.
-- [Port from Source, 17-01-2017, Coruja]
+- [Port from 0.56d, 17-01-2017, Coruja]
 	Fixed: Functions SYSMESSAGELOC / SYSMESSAGELOCEX using wrong default color.
-- [Port from Source, 16-06-2017]
+- [Port from 0.56d, 16-06-2017]
 	Added: New item property PICKUPSOUND to override default pickup sound for items (it can be used together with DROPSOUND).
-- [Port from Source, 02-01-2018, Coruja]
+- [Port from 0.56d, 02-01-2018, Coruja]
 	Fixed: ENHANCEPOTIONS item property only working when FEATURE_AOS_UPDATE_B .ini feature is enabled.
-- [Port from Source, 19-02-2018, Coruja] 
+- [Port from 0.56d, 19-02-2018, Coruja] 
 	Fixed: Sphere console not closing correctly when it get closed before load startup files.
 	Fixed: Multis (houses/boats) not being loaded at proper distance when client is walking.
-- [Port from Source, 14-03-2018, Coruja]
+- [Port from 0.56d, 14-03-2018, Coruja]
 	Fixed: Server function 'f_onaccount_connect' not being called correctly when AccApp=2 (free/auto account) is set on sphere.ini.
-- [Port from Source, 19-03-2018, Coruja]
+- [Port from 0.56d, 19-03-2018, Coruja]
 	Fixed: Multi placement making players get stuck when place the multi over his own char.
 	Fixed: Multi placement being incorrectly blocked by region flags region_flag_underground, region_flag_guarded, region_flag_safe.
 
@@ -483,9 +483,9 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed: ATTACK command didn't set maximum priority to attacking the specified character over the others.
 - Added: .ini setting CombatArcheryMovementDelay. If the COMBAT_ARCHERYCANMOVE CombatFlag isn't set, use that value to set the seconds after which a player, after he stopped moving,
 	can start again a new combat swing with	a ranged weapon.
-- [Port from Source, 19-04-2016, Coruja] Fixed: Protection spell not working correctly if COMBAT_ELEMENTAL_ENGINE combat flag is disabled.
-- [Port from Source, 21-04-2016, Coruja] Added: New guild functions ISALLY/WEALLIANCE/THEYALLIANCE, they work exactly in the same way as ISENEMY/WEWAR/THEYWAR but used to set alliances instead of wars.
-- [Port from Source, 29-04-2016, Coruja]
+- [Port from 0.56d, 19-04-2016, Coruja] Fixed: Protection spell not working correctly if COMBAT_ELEMENTAL_ENGINE combat flag is disabled.
+- [Port from 0.56d, 21-04-2016, Coruja] Added: New guild functions ISALLY/WEALLIANCE/THEYALLIANCE, they work exactly in the same way as ISENEMY/WEWAR/THEYWAR but used to set alliances instead of wars.
+- [Port from 0.56d, 29-04-2016, Coruja]
 	Fixed: Hidden (statf_hidden|statf_invisible) chars not being revealed when others chars walk over him.
 	Fixed: Vendor buy menu showing wrong char 'gold available' value.
 
@@ -496,8 +496,8 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed: some noto checks weren't considering the Incognito status of the character.
 - Fixed: green noto was sent for party members only if tag.PARTY_CANLOOTME == 1.
 - Changed: '?' console command shows better informations.
-- [Port from Source, 08-05-2016, Coruja] Fixed: Functions SKILLLOCK/STATLOCK not updating the lock icon on client skills/stats window.
-- [Port from Source, 07-06-2016, Coruja]
+- [Port from 0.56d, 08-05-2016, Coruja] Fixed: Functions SKILLLOCK/STATLOCK not updating the lock icon on client skills/stats window.
+- [Port from 0.56d, 07-06-2016, Coruja]
 	Added: Missing features on Incognito spell
 		- It will change char name to a random human/elf/gargoyle male/female name instead of using always Man/Woman.
 		- It will change char body/hair/beard to a random color temporarily.
@@ -521,12 +521,12 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed: the new animation packet wasn't working properly when attacking with a bow or a crossbow.
 - Fixed: temporarily animated items, when their timer reached zero, never appeared to return to their original state (even if they actually did) when using some clients.
 - Fixed: some items (like lanterns, fruits, crops...) accepted as valid MORE1/2 or TDATA1/2/3/4 only an item ID and generated an error if that was a defname.
-- [Port from Source, 02/06/2017, Coruja] Changed: Misc fixes and improvements on training items (Training Dummy, Pickpocket Dip and Archery Butte).
-- [Port from Source, 06/06/2017, Coruja]
+- [Port from 0.56d, 02/06/2017, Coruja] Changed: Misc fixes and improvements on training items (Training Dummy, Pickpocket Dip and Archery Butte).
+- [Port from 0.56d, 06/06/2017, Coruja]
 	Fixed: Throwing weapons not working correctly.
 	Added: Missing animation of throwing weapons returning after throwing them.
-- [Port from Source, 16/06/2017, Coruja] Improved Throwing weapons returning animation.
-- [Port from Source, 02-01-2018, Coruja] Changed: Improved how ranged weapons handle ammo.
+- [Port from 0.56d, 16/06/2017, Coruja] Improved Throwing weapons returning animation.
+- [Port from 0.56d, 02-01-2018, Coruja] Changed: Improved how ranged weapons handle ammo.
 
 04-04-2018, Nolok
 - Fixed: wrong NEWBIE set added at the character creation (gargoyle in place of the human one, if the player was a human).
@@ -565,7 +565,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 29-04-2018, Nolok
 - Fixed: parrying chance didn't scale correctly with Dexterity.
-- [Port from Source, 18-04-2018, Coruja] Changed: Small improvements on tooltip engine (containers weren't resending their tooltip after their weight changed,
+- [Port from 0.56d, 18-04-2018, Coruja] Changed: Small improvements on tooltip engine (containers weren't resending their tooltip after their weight changed,
     and some tooltips weren't updated for items with an expired timer).
 	
 30-04-2018, Drk84
@@ -630,7 +630,7 @@ Simple explanation:
 
 
 05-05-2018, XuN:
-[Port from Source, 20-01-2017, Coruja]
+[Port from 0.56d, 20-01-2017, Coruja]
 Added: New function MAPWAYPOINT to add/remove waypoints on client radar map (enhanced clients only).
 	Syntax: MAPWAYPOINT ObjectUID, WaypointType
 	Waypoint types:
@@ -645,7 +645,7 @@ Added: New function MAPWAYPOINT to add/remove waypoints on client radar map (enh
 		14 = Green Dot
 		15 = Green Dot (flashing)
 
-[Port from Source, 02-04-2018, Coruja]
+[Port from 0.56d, 02-04-2018, Coruja]
 Added: New char trigger @UserUltimaStoreButton, fired when click on 'Ultima Store' button on new clients 7.0.62+
 
 06-05-2018, XuN
@@ -867,7 +867,7 @@ Added to [MULTIDEF ]:
 - Fixed: false-positive speedhack check when trying to walk on a disabled map.
 
 11-05-2018, XuN
-- [Port from Source, 07-02-2017, Coruja]:
+- [Port from 0.56d, 07-02-2017, Coruja]:
 - Fixed: Char flag 'statf_hovering' (gargoyle fly ability) not clearing when gargoyle chars polymorph into non-gargoyle char ID.
 
 11-05-2018, Nolok
@@ -1279,7 +1279,7 @@ Added: Now Sectors store their adjacent sectors:
 02-11-2018, Nolok
 - Added: ModMaxHits, ModMaxMana, ModMaxStam properties. To avoid CONFLICTS, remove or comment the scripted functions with the same name in the sphere_events_npcs.scp of the default scriptpack.
 - Added: @StatChange fires also when a ModMax* property changes. ARGN1 = 12 for ModMaxHits, 13 for ModMaxMana and 14 ModMaxStam.
-- [Port from Source, 12-01-2017, Coruja] Fixed: FeatureSE setting on sphere.ini not working correctly.
+- [Port from 0.56d, 12-01-2017, Coruja] Fixed: FeatureSE setting on sphere.ini not working correctly.
 
 03-11-2018, Nolok
 - Fixed: Broken BTFISH encryption/decryption (used by clients <= 2.0.3 and >= 2.0.0x) and wrong login encryption/decryption algorithm chosen for some old clients < 2.0.0x.
@@ -1295,7 +1295,7 @@ NOTE: Awake will awake the sector, tho it will insta sleep again since it checks
 Added CanSleep function (Read Only) for sectors to check wether a sector can Sleep or not (use CanSleep 1 to check for adjacent's sectors too (source checks does it like this)).
 
 11-11-2018, Nolok
-- [Port from Source, 15-02-2017, Coruja] Fixed: Enhanced clients not updating backpack content on death.
+- [Port from 0.56d, 15-02-2017, Coruja] Fixed: Enhanced clients not updating backpack content on death.
 - Added: Error console message when trying to load from the saves a char attached to an invalid account.
 - Added: Error console message when trying to define a resource (itemdef, chardef, etc) with an invalid ID (> 03FFFF), instead of letting sphere throw an assertion failure.
 
@@ -1351,27 +1351,27 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 
 16-12-2018, Nolok
 - Added: Option flag OF_NoTargetTurn, to avoid the char to turn against the targetted point.
-- [Port from Source, 02-08-2018, Coruja]
+- [Port from 0.56d, 02-08-2018, Coruja]
 	Changed: Internal improvements on Teleport / Recall / Gate Travel spells.
 		- Gate Travel now will use proper blue/red moongate ITEMDEFs instead always use blue moongate changing its color when needed
 		- Gate Travel now will link moongates to each other based on UID instead MOREP. This will make possible cast Gate Travel inside moving boats (if multi region flags allow cast it)
-- [Port from Source, 05-08-2018, Coruja] Added: EFFECT function now supports client fade screen effect (EFFECT 4,[0-4]).
+- [Port from 0.56d, 05-08-2018, Coruja] Added: EFFECT function now supports client fade screen effect (EFFECT 4,[0-4]).
 	NOTE: It can be used only directly on client chars and requires client >= 6x]
-- [Port from Source, 06-08-2018, Coruja] Fixed: Tooltips not updating correctly when TooltipMode=1 is set on sphere.ini.
-- [Port from Source, 08-08-2018, Coruja] Fixed: EFFECT_ID/SOUND not working correctly on some spells.
-- [Port from Source, 01-09-2018, Coruja]
+- [Port from 0.56d, 06-08-2018, Coruja] Fixed: Tooltips not updating correctly when TooltipMode=1 is set on sphere.ini.
+- [Port from 0.56d, 08-08-2018, Coruja] Fixed: EFFECT_ID/SOUND not working correctly on some spells.
+- [Port from 0.56d, 01-09-2018, Coruja]
 	Changed: When enhanced clients drop items on container grid index already in use, the item now will be placed on next available index (OSI style) instead first available index starting on 0.
 	Fixed: Enhanced clients showing wrong hitpoints color on health bar.
-	- [Port from Source, 04-09-2018, Coruja] Fixed: Optional flag OF_NoDClickTurn on sphere.ini affecting target-based actions (now it will affect only DClick actions, as the name suggests).
-- [Port from Source, 25-09-2018, Coruja] Added: New function CODEXOFWISDOM to open client Codex of Wisdom menu at given topic ID.
+	- [Port from 0.56d, 04-09-2018, Coruja] Fixed: Optional flag OF_NoDClickTurn on sphere.ini affecting target-based actions (now it will affect only DClick actions, as the name suggests).
+- [Port from 0.56d, 25-09-2018, Coruja] Added: New function CODEXOFWISDOM to open client Codex of Wisdom menu at given topic ID.
 	Syntax: CODEXOFWISDOM TopicID (1~176), [ForceOpen (0/1)]
-- [Port from Source, 01-11-2018, Coruja] Added: Support for new Whip weapon type.
+- [Port from 0.56d, 01-11-2018, Coruja] Added: Support for new Whip weapon type.
 	
 17-12-2018, Nolok
-- [Port from Source, 04-07-2018, Coruja]
+- [Port from 0.56d, 04-07-2018, Coruja]
 	- Added: Support for 'EquipLastWeapon' client macro.
 	- Changed: Reduced DClick/PickUp_Ground reachable distance [3 tiles -> 2 tiles] to match client internal DropOn_Ground distance.
-- [Port from Source, 21-07-2018, Coruja]
+- [Port from 0.56d, 21-07-2018, Coruja]
 	- Added: Support for 'combat ability' (@UserSpecialMove) and 'virtue' (@UserVirtue) slots on KR toolbar (@UserKRToolbar).
 		NOTE: KR clients still obsolete and not supported, but triggers will be called if someone want use it
 	- Fixed: FOR loop not working correctly when range value is negative.
@@ -1526,7 +1526,7 @@ WARNING: the following change could break some hackish expedient used in scripts
 
 14-02-2019, Julian
 - Fixed: DIALOGCLOSE not removing the dialog from the internal list of dialogs when src is changed through TRYSRC. (Issue #219)
-- [Port from Source, 29-06-2016, Coruja] Fixed: Attack/Kill command on pets allowing select the pet itself as target, making it attack his owner. (Issue #57)
+- [Port from 0.56d, 29-06-2016, Coruja] Fixed: Attack/Kill command on pets allowing select the pet itself as target, making it attack his owner. (Issue #57)
 - Added: ARGN3 to @MurderMark. If it's set to 1 (or anything but zero), it will skip murder count and criminal flag. (Issue #221)
 	This will allow users to script their own kill/murder system. Note that Noto_Update() still will be called after the trigger.
 
@@ -1555,7 +1555,7 @@ WARNING: the following change could break some hackish expedient used in scripts
 	You can modify spk_ship_cmds and add this:
 		ON=Pilot
 		PILOT <SRC.UID>
-- [Port from Source, 23-02-2019, Coruja] Added: .ini Option Flag OF_MapBoundarySailing (Issue #147) to make boats move to the other side of the map when reach map boundary.
+- [Port from 0.56d, 23-02-2019, Coruja] Added: .ini Option Flag OF_MapBoundarySailing (Issue #147) to make boats move to the other side of the map when reach map boundary.
 
 07-03-2019, Drk
 - Added: @HitParry trigger for characters:
@@ -2136,7 +2136,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: FORINSTANCES not parsing correctly the argument.
 
 04-03-2020, Drk84
-- [Port from Source, 10-09-2019, Coruja] Added: Missing context menu option "Rename" when player click on a owned pet. (Issue #368)
+- [Port from 0.56d, 10-09-2019, Coruja] Added: Missing context menu option "Rename" when player click on a owned pet. (Issue #368)
 - Fixed: Parrying skill increase when weapon / shield wielded does not match with CombatParryEra setting. (Issue #365)
 - Updated SphereCrypt.ini.
 
@@ -2186,7 +2186,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Added: EmoteFlags to sphere.ini to override default emote settings. (Issue #416)
 
 20-04-2020, Julian
-- [Ports from Source, different dates, Coruja]
+- [Ports from 0.56d, different dates, Coruja]
 - Added: COMBATF_NOPETDESERT combat flag to allow pet owner attack own pet without make it desert its owner (OSI-like).
 - Added: Support for new 'picinpic' dialog element os client >= 7.0.80.0. This is used to add sprites pictures on dialogs.
 		 Syntax: picinpic x y gump spritex spritey width height

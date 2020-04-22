@@ -1724,8 +1724,7 @@ CWorldSearch::CWorldSearch(const CPointMap& pt, int iDist) :
 	_fSearchSquare = false;
 	_fInertToggle = false;
 	_pObj = nullptr;
-	_pCurCont = nullptr;
-	_idxObj = 0;
+	_idxObj = _idxObjMax = 0;
 	
 	_pSectorBase = _pSector = pt.GetSector();
 
@@ -1756,7 +1755,9 @@ void CWorldSearch::RestartSearch()
 {
 	ADDTOCALLSTACK("CWorldSearch::RestartSearch");
 	_eSearchType = ws_search_e::None;
+	_vCurContObjs.clear();
 	_pObj = nullptr;
+	_idxObj = _idxObjMax = 0;
 }
 
 bool CWorldSearch::GetNextSector()
@@ -1776,9 +1777,9 @@ bool CWorldSearch::GetNextSector()
 			continue;	// same as base.
 
 		_eSearchType = ws_search_e::None;
-		_pCurCont = nullptr;
+		_vCurContObjs.clear();
 		_pObj = nullptr;	// start at head of next Sector.
-		_idxObj = 0;
+		_idxObj = _idxObjMax = 0;
 
 		return true;
 	}
@@ -1793,7 +1794,8 @@ CItem* CWorldSearch::GetItem()
 		{
 			ASSERT(_eSearchType == ws_search_e::None);
 			_eSearchType = ws_search_e::Items;
-			_pCurCont = &_pSector->m_Items;
+			_vCurContObjs = _pSector->m_Items.GetIterationSafeCont();
+			_idxObjMax = _vCurContObjs.size();
 			_idxObj = 0;
 		}
 		else
@@ -1802,7 +1804,7 @@ CItem* CWorldSearch::GetItem()
 		}
 
 		ASSERT(_eSearchType == ws_search_e::Items);
-		_pObj = (_idxObj >= _pCurCont->GetContentCount()) ? nullptr : static_cast <CObjBase*> (_pCurCont->GetContentIndex(_idxObj));
+		_pObj = (_idxObj >= _idxObjMax) ? nullptr : static_cast <CObjBase*> (_vCurContObjs[_idxObj]);
 		if (_pObj == nullptr)
 		{
 			if (GetNextSector())
@@ -1851,7 +1853,8 @@ CChar* CWorldSearch::GetChar()
 			ASSERT(_eSearchType == ws_search_e::None);
 			_eSearchType = ws_search_e::Chars;
 			_fInertToggle = false;
-			_pCurCont = &_pSector->m_Chars_Active;
+			_vCurContObjs = _pSector->m_Chars_Active.GetIterationSafeCont();
+			_idxObjMax = _vCurContObjs.size();
 			_idxObj = 0;
 		}
 		else
@@ -1860,16 +1863,17 @@ CChar* CWorldSearch::GetChar()
 		}
 
 		ASSERT(_eSearchType == ws_search_e::Chars);
-		_pObj = (_idxObj >= _pCurCont->GetContentCount()) ? nullptr : static_cast <CObjBase*> (_pCurCont->GetContentIndex(_idxObj));
+		_pObj = (_idxObj >= _idxObjMax) ? nullptr : static_cast <CObjBase*> (_vCurContObjs[_idxObj]);
 		if (_pObj == nullptr)
 		{
 			if (!_fInertToggle && _fAllShow)
 			{
 				_fInertToggle = true;
-				_pCurCont = &_pSector->m_Chars_Disconnect;
+				_vCurContObjs = _pSector->m_Chars_Disconnect.GetIterationSafeCont();
+				_idxObjMax = _vCurContObjs.size();
 				_idxObj = 0;
 
-				_pObj = (_idxObj >= _pCurCont->GetContentCount()) ? nullptr : static_cast <CObjBase*> (_pCurCont->GetContentIndex(_idxObj));
+				_pObj = (_idxObj >= _idxObjMax) ? nullptr : static_cast <CObjBase*> (_vCurContObjs[_idxObj]);
 				if (_pObj != nullptr)
 					goto jumpover;
 			}

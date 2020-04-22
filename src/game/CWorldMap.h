@@ -75,9 +75,10 @@ class CWorldSearch	// define a search of the world.
 
 	ws_search_e _eSearchType;
 	bool _fInertToggle;			// We are now doing the inert chars.
-	CSObjCont* _pCurCont;		// Sector-attached object container in which we are searching right now.
-	CObjBase* _pObj;			// The current object of interest.
-	size_t _idxObj;
+
+	std::vector<CSObjContRec*>  _vCurContObjs;	// Sector-attached object container in which we are searching right now.
+	CObjBase*					_pObj;			// The current object of interest.
+	size_t						_idxObj, _idxObjMax;
 
 	CSector * _pSectorBase;		// Don't search the center sector 2 times.
 	CSector * _pSector;			// current Sector
@@ -93,7 +94,7 @@ public:
 
 	void SetAllShow( bool fView );
 	void SetSearchSquare( bool fSquareSearch );
-	void RestartSearch();		// Setting current obj to nullptr will restart the search 
+	void RestartSearch();
 	CChar * GetChar();
 	CItem * GetItem();
 
