@@ -493,8 +493,8 @@ void CWorldThread::GarbageCollection_New()
 
 
 	// Clean up GM pages not linked to an valid char/account
-	CGMPage* pGMPageNext = NULL;
-	for (CGMPage* pGMPage = static_cast<CGMPage*>(g_World.m_GMPages.GetContainerHead()); pGMPage != NULL; pGMPage = pGMPageNext)
+	CGMPage* pGMPageNext = nullptr;
+	for (CGMPage* pGMPage = static_cast<CGMPage*>(g_World.m_GMPages.GetContainerHead()); pGMPage != nullptr; pGMPage = pGMPageNext)
 	{
 		pGMPageNext = pGMPage->GetNext();
 		

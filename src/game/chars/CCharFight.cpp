@@ -1506,17 +1506,25 @@ WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc, bool fSwingNoRange)
 
 	// We can't hit them. Char deleted? Target deleted? Am I dead?
 	if (IsDisconnected() || pCharSrc->IsDisconnected() || IsStatFlag(STATF_DEAD))
+	{
 		return WAR_SWING_INVALID;
+	}
 	// We can't hit them. They are dead, stoned, invul or whatever.
 	else if (pCharSrc->IsStatFlag(STATF_DEAD | STATF_STONE | STATF_INVUL | STATF_INSUBSTANTIAL))
+	{
 		return WAR_SWING_INVALID;
+	}
 	// We can't hit them right now. Because we can't see them or reach them (invis/hidden).
 	else if (pCharSrc->IsStatFlag(STATF_HIDDEN | STATF_INVISIBLE | STATF_SLEEPING | STATF_FREEZE))
+	{
 		return WAR_SWING_SWINGING;
-		
+	}	
+	
 	if (pCharSrc->m_pArea && pCharSrc->m_pArea->IsFlag(REGION_FLAG_SAFE))
-        return WAR_SWING_INVALID;
-    
+	{
+		return WAR_SWING_INVALID;
+	}
+
     // Ignore the distance and the line of sight if fSwingNoRange is true, but only if i'm starting the swing. To land the hit i need to be in range.
     if (!fSwingNoRange ||
         (IsSetCombatFlags(COMBAT_ANIM_HIT_SMOOTH) && (m_atFight.m_iWarSwingState == WAR_SWING_SWINGING)) || 

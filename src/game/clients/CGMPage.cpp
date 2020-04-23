@@ -11,11 +11,11 @@
 
 CGMPage::CGMPage( lpctstr pszAccount )
 {
-	m_pClientHandling = NULL;
+	m_pClientHandling = nullptr;
 	m_sAccount = pszAccount;
 	m_uidChar = UID_UNUSED;
 	m_pt.InitPoint();
-	m_sReason = NULL;
+	m_sReason = nullptr;
 	m_time = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
 	g_World.m_GMPages.InsertContentTail(this);		// put it at the end of the list
@@ -71,7 +71,7 @@ enum GC_TYPE
 	GC_QTY
 };
 
-LPCTSTR const CGMPage::sm_szLoadKeys[GC_QTY + 1] =
+lpctstr const CGMPage::sm_szLoadKeys[GC_QTY + 1] =
 {
 	"ACCOUNT",
 	"CHARUID",
@@ -80,11 +80,11 @@ LPCTSTR const CGMPage::sm_szLoadKeys[GC_QTY + 1] =
 	"P",
 	"REASON",
 	"TIME",
-	NULL
+	nullptr
 };
 
 
-bool CGMPage::r_WriteVal(LPCTSTR pszKey, CSString &sVal, CTextConsole *pSrc)
+bool CGMPage::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc)
 {
 	ADDTOCALLSTACK("CGMPage::r_WriteVal");
 	EXC_TRY("WriteVal");

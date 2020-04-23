@@ -438,7 +438,7 @@ bool CServerDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 		sVal.FormatSTVal( StatGet( SERV_STAT_CHARS ) );
 		break;
 	case SC_GMPAGES:
-		sVal.FormatVal( g_World.m_GMPages.GetContentCount() );
+		sVal.FormatSTVal( g_World.m_GMPages.GetContentCount() );
 		break;
 	case SC_TIMEZONE:
 		sVal.FormatVal( m_TimeZone );

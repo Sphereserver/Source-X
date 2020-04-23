@@ -18,8 +18,8 @@ class CGMPage : public CSObjListRec, public CScriptObj
 	// RES_GMPAGE
 public:
 	static const char* m_sClassName;
-	static LPCTSTR const sm_szLoadKeys[];
-	CGMPage(LPCTSTR pszAccount);
+	static lpctstr const sm_szLoadKeys[];
+	CGMPage(lpctstr pszAccount);
 	~CGMPage();
 
 public:
@@ -34,11 +34,11 @@ public:
 	void SetHandler(CClient* pClient);
 	void ClearHandler();
 
-	LPCTSTR GetName() const		{ return m_sAccount; }
+	lpctstr GetName() const		{ return m_sAccount; }
 	CGMPage* GetNext() const	{ return static_cast<CGMPage*>(CSObjListRec::GetNext()); }
 
 	void r_Write(CScript& s) const;
-	bool r_WriteVal(LPCTSTR pszKey, CSString& sVal, CTextConsole* pSrc);
+	bool r_WriteVal(lpctstr pszKey, CSString& sVal, CTextConsole* pSrc);
 	bool r_LoadVal(CScript& s);
 
 private:

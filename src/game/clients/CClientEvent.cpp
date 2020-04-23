@@ -1680,7 +1680,7 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 	SysMessage(sMsg);
 }
 
-void CClient::Event_PromptResp_GMPage(LPCTSTR pszReason)
+void CClient::Event_PromptResp_GMPage(lpctstr pszReason)
 {
 	ADDTOCALLSTACK("CClient::Event_PromptResp_GMPage");
 	// Player sent an GM page
@@ -1698,7 +1698,7 @@ void CClient::Event_PromptResp_GMPage(LPCTSTR pszReason)
 	g_Log.Event(LOGM_NOCONTEXT | LOGM_GM_PAGE, "%s\n", pszMsg);
 
 	CGMPage* pGMPage = static_cast<CGMPage*>(g_World.m_GMPages.GetContainerHead());
-	for (; pGMPage != NULL; pGMPage = pGMPage->GetNext())
+	for (; pGMPage != nullptr; pGMPage = pGMPage->GetNext())
 	{
 		if (strcmp(pGMPage->GetName(), m_pAccount->GetName()) == 0)
 			break;
