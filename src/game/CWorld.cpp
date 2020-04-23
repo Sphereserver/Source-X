@@ -815,7 +815,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		}
 
 		// GM_Pages.
-		for (CGMPage* pGMPage = static_cast<CGMPage*>(m_GMPages.GetContainerHead()); pGMPage != NULL; pGMPage = pGMPage->GetNext())
+		for (CGMPage* pGMPage = static_cast<CGMPage*>(m_GMPages.GetContainerHead()); pGMPage != nullptr; pGMPage = pGMPage->GetNext())
 		{
 			pGMPage->r_Write(m_FileData);
 		}
