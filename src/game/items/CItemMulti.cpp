@@ -520,6 +520,10 @@ bool CItemMulti::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the 
     }
     else
     {
+        if (m_pRegion)
+        {
+            m_pRegion->UnRealizeRegion();
+        }
         MultiRealizeRegion();
     }
     return true;

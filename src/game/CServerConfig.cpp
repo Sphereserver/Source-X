@@ -399,7 +399,8 @@ bool CServerConfig::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 	{
 		ptcKey += strlen(ptcKey);
 	}
-	return true;
+
+	return (pRef != nullptr);
 }
 
 
@@ -955,11 +956,17 @@ bool CServerConfig::r_LoadVal( CScript &s )
 							CScript script(pszStr);
 							script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
 							script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
-							for ( int nIndex = 0; nIndex < nSectors; ++nIndex )
-								CWorldMap::GetSector(nMapNumber, nIndex)->r_Verb(script, &g_Serv);
+							for (int nIndex = 0; nIndex < nSectors; ++nIndex)
+							{
+								CSector* pSector = CWorldMap::GetSector(nMapNumber, nIndex);
+								ASSERT(pSector);
+								pSector->r_Verb(script, &g_Serv);
+							}
+
+							return true;
 						}
 
-						return true;
+						return false;
 					}
 					else if ( !strnicmp( pszStr, "SECTOR.",7 ) )
 					{
@@ -974,16 +981,19 @@ bool CServerConfig::r_LoadVal( CScript &s )
 
 							if ( pszStr && *pszStr )
 							{
+								CSector* pSector = CWorldMap::GetSector(nMapNumber, iSecNumber);
+								ASSERT(pSector);
+
 								CScript script(pszStr);
 								script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
 								script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
-								CWorldMap::GetSector(nMapNumber, iSecNumber-1)->r_Verb(script, &g_Serv);
+								return pSector->r_Verb(script, &g_Serv);
 							}
 						}
 						else
 							g_Log.EventError("Invalid Sector #%d for Map %d\n", iSecNumber, nMapNumber);
 
-						return true;
+						return false;
 					}
 				}
 			}
@@ -1516,20 +1526,22 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			SKIP_SEPARATORS(pszCmd);
 			sVal.FormatVal(0);
 
-			if ( !*pszCmd )
-				sVal.FormatVal( g_MapList.IsMapSupported(iNumber) );
+			if (!*pszCmd)
+			{
+				sVal.FormatVal(g_MapList.IsMapSupported(iNumber));
+			}
 			else
 			{
-				if ( g_MapList.IsMapSupported(iNumber) )
+				if (g_MapList.IsMapSupported(iNumber))
 				{
-					if (!strnicmp(pszCmd,"BOUND.X", 7))
-						sVal.FormatVal( g_MapList.GetMapSizeX(iNumber) );
-					else if (!strnicmp(pszCmd,"BOUND.Y", 7))
-						sVal.FormatVal( g_MapList.GetMapSizeY(iNumber) );
-					else if (!strnicmp(pszCmd,"CENTER.X", 8))
-						sVal.FormatVal( g_MapList.GetMapCenterX(iNumber) );
-					else if (!strnicmp(pszCmd,"CENTER.Y", 8))
-						sVal.FormatVal( g_MapList.GetMapCenterY(iNumber) );
+					if (!strnicmp(pszCmd, "BOUND.X", 7))
+						sVal.FormatVal(g_MapList.GetMapSizeX(iNumber));
+					else if (!strnicmp(pszCmd, "BOUND.Y", 7))
+						sVal.FormatVal(g_MapList.GetMapSizeY(iNumber));
+					else if (!strnicmp(pszCmd, "CENTER.X", 8))
+						sVal.FormatVal(g_MapList.GetMapCenterX(iNumber));
+					else if (!strnicmp(pszCmd, "CENTER.Y", 8))
+						sVal.FormatVal(g_MapList.GetMapCenterY(iNumber));
 					else if (!strnicmp(pszCmd, "SECTOR.", 7))
 					{
 						pszCmd += 7;
@@ -1541,8 +1553,12 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 							sVal.FormatVal(g_MapList.GetSectorCols(iNumber));
 						else if (!strnicmp(pszCmd, "QTY", 3))
 							sVal.FormatVal(g_MapList.GetSectorQty(iNumber));
+						else
+							return false;
 					}
 				}
+				else
+					return false;
 			}
 
 			return true;
@@ -1564,8 +1580,12 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 					SKIP_SEPARATORS(ptcKey);
 					int nSectors = g_MapList.GetSectorQty(iMapNumber);
 
-					if ((iSecNumber > 0) && (iSecNumber <=  nSectors))
-						return( CWorldMap::GetSector(iMapNumber, iSecNumber-1)->r_WriteVal(ptcKey, sVal, pSrc) );
+					if ((iSecNumber > 0) && (iSecNumber <= nSectors))
+					{
+						CSector* pSector = CWorldMap::GetSector(iMapNumber, iSecNumber);
+						ASSERT(pSector);
+						return pSector->r_WriteVal(ptcKey, sVal, pSrc);
+					}
 					else
 					{
 						g_Log.EventError("Invalid Sector #%d for Map %d\n", iSecNumber, iMapNumber);
