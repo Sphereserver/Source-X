@@ -500,7 +500,7 @@ void CWorldThread::GarbageCollection_New()
 		
 		if (!pGMPage->m_uidChar.CharFind())
 		{
-			DEBUG_ERR(("GC: Deleted GM Page linked to invalid char uid=0%lx\n", static_cast<DWORD>(pGMPage->m_uidChar)));
+			DEBUG_ERR(("GC: Deleted GM Page linked to invalid char (UID=0%x)\n", (dword)(pGMPage->m_uidChar)));
 			delete pGMPage;
 		}
 		else if (!g_Accounts.Account_Find(pGMPage->m_sAccount))
