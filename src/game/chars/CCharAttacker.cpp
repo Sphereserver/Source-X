@@ -360,7 +360,7 @@ bool CChar::Attacker_Delete(const CChar * pChar, bool fForced, ATTACKER_CLEAR_TY
     {
         return false;
     }
-    if (m_Fight_Targ_UID == pChar->GetUID);
+    if (m_Fight_Targ_UID == pChar->GetUID())
     {
         m_Fight_Targ_UID.InitUID();
     }
