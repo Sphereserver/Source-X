@@ -1707,16 +1707,19 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	}
 
 	CItemCorpse * pCorpse = dynamic_cast<CItemCorpse *>(pObjTop);
-	if ( pCorpse && pCorpse->m_uidLink == GetUID() )
+	if (pCorpse)
 	{
-		if ( g_Cfg.m_iRevealFlags & REVEALF_LOOTINGSELF )
-			Reveal();
-	}
-	else
-	{
-		CheckCorpseCrime(pCorpse, true, false);
-		if ( g_Cfg.m_iRevealFlags & REVEALF_LOOTINGOTHERS )
-			Reveal();
+		if (pCorpse->m_uidLink == GetUID())
+		{
+			if (g_Cfg.m_iRevealFlags & REVEALF_LOOTINGSELF)
+				Reveal();
+		}
+		else
+		{
+			CheckCorpseCrime(pCorpse, true, false);
+			if (g_Cfg.m_iRevealFlags & REVEALF_LOOTINGOTHERS)
+				Reveal();
+		}
 	}
 
 	const word iAmountMax = pItem->GetAmount();

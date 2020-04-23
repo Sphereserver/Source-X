@@ -2198,3 +2198,8 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: ARGN1 on @SkillPreStart not working correctly. (Issue #61)
 - Fixed: Null SRC on @Resurrect trigger when char is resurrected using bandages.
 - Fixed: Summon spells were checking for correct target position but didn't reset it when casting. (Issue #413)
+
+23-04-2020, Nolok
+- Fixed: SERV.MAP.x.SECTOR.* accepting indexes starting from 1, being the indexes actually 0-based.
+- Fixed: Moving item in backpack reveal character (Issue #426) (fix by xwerswoodx).
+- Fixed: No error returned when used valid SERV. objects with invalid keywords.

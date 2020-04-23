@@ -105,7 +105,7 @@ bool CSector::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
                 return true;
             }
 		case SC_CLIENTS:
-			sVal.FormatSTVal(m_Chars_Active.GetClientsNumber());
+			sVal.FormatVal(m_Chars_Active.GetClientsNumber());
 			return true;
 		case SC_COLDCHANCE:
 			sVal.FormatVal( GetColdChance());
@@ -169,7 +169,7 @@ bool CSector::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 
 void CSector::GoSleep()
 {
-    ADDTOCALLSTACK("CSector::Sleep");
+    ADDTOCALLSTACK("CSector::GoSleep");
     const ProfileTask charactersTask(PROFILE_TIMERS);
     CTimedObject::GoSleep();
 
@@ -938,7 +938,8 @@ void CSector::MoveItemToSector( CItem * pItem )
         if (pItem->IsSleeping())
             pItem->GoAwake();
     }
-	m_Items.AddItemToSector( pItem );
+
+	m_Items.AddItemToSector(pItem);
 }
 
 bool CSector::MoveCharToSector( CChar * pChar )

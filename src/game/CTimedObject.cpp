@@ -101,20 +101,6 @@ int64 CTimedObject::GetTimerAdjusted() const
     return (iDiffInMsecs);
 }
 
-// We shouldn't really use this
-/*
-int64 CTimedObject::GetTimerTAdjusted() const
-{
-    // RETURN: time in ticks from now.
-    if (!IsTimerSet())
-        return -1;
-    int64 iDiffInMsecs = GetTimerDiff();
-    if (iDiffInMsecs < 0)
-        return 0;
-    return (iDiffInMsecs / MSECS_PER_TICK);
-}
-*/
-
 int64 CTimedObject::GetTimerDAdjusted() const
 {
     // RETURN: time in tenths of second from now.

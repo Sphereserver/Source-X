@@ -95,12 +95,6 @@ public:
     int64 GetTimerAdjusted() const;
 
     /**
-     * @brief   Gets timer in ticks.
-     * @return  The adjusted timer.
-     */
-    //int64 GetTimerTAdjusted() const;
-
-    /**
     * @brief   Gets timer in tenths of seconds.
     * @return  The adjusted timer.
     */
