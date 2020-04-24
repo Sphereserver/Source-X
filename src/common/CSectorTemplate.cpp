@@ -37,14 +37,14 @@ void CCharsActiveList::OnRemoveObj(CSObjContRec* pObjRec )
     ASSERT(pObjRec);
 
 	// Override this = called when removed from group.
-	CChar * pChar = static_cast<CChar*>(pObjRec);
+	CSObjCont::OnRemoveObj(pObjRec);
+
+	CChar* pChar = static_cast<CChar*>(pObjRec);
 	if (pChar->IsClient())
 	{
 		--m_iClients;
-        m_iTimeLastClient = CWorldGameTime::GetCurrentTime().GetTimeRaw();	// mark time in case it's the last client
+		m_iTimeLastClient = CWorldGameTime::GetCurrentTime().GetTimeRaw();	// mark time in case it's the last client
 	}
-
-	CSObjCont::OnRemoveObj(pObjRec);
 	pChar->SetUIDContainerFlags(UID_O_DISCONNECT);
 }
 
@@ -54,15 +54,19 @@ void CCharsActiveList::AddCharActive( CChar * pChar )
 	ASSERT( pChar );
 	// ASSERT( pChar->m_pt.IsValid());
 
-	CSObjCont::InsertContentTail(pChar); // this also removes the Char from the old sector
+	CSObjCont* pParent = pChar->GetParent();
+	if (pParent != this)
+	{
+		CSObjCont::InsertContentTail(pChar); // this also removes the Char from the old sector
+		if (pChar->IsClient())
+		{
+			++m_iClients;
+		}
+	}
 
     // UID_O_DISCONNECT is removed also by SetTopPoint. But the calls are in this order: SetTopPoint, then AddCharActive -> CSObjList::InsertContentHead(pChar) ->-> OnRemoveObj
     //  (which sets UID_O_DISCONNECT), then we return in AddCharActive, where we need to manually remove this flag, otherwise we need to call SetTopPoint() here.
     pChar->RemoveUIDFlags(UID_O_DISCONNECT);
-    if (pChar->IsClient())
-    {
-		++m_iClients;
-    }
 }
 
 //////////////////////////////////////////////////////////////
@@ -96,9 +100,13 @@ void CItemsList::AddItemToSector( CItem * pItem )
 	// Either MoveTo() or SetTimeout is being called.
 	ASSERT( pItem );
 
-	//ASSERT((pItem->GetParent() == nullptr) || (pItem->GetParent() == &g_World.m_ObjNew));
-	CSObjCont::InsertContentTail( pItem ); // this also removes the Char from the old sector
-	//ASSERT(pItem->GetParent() == this);
+	CSObjCont* pParent = pItem->GetParent();
+	if (pParent != this)
+	{
+		//ASSERT((pItem->GetParent() == nullptr) || (pItem->GetParent() == &g_World.m_ObjNew));
+		CSObjCont::InsertContentTail(pItem); // this also removes the Char from the old sector
+		//ASSERT(pItem->GetParent() == this);
+	}
 
     pItem->RemoveUIDFlags(UID_O_DISCONNECT);
 }

@@ -2206,3 +2206,8 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		GM pages now can be replied even to AFK/Offline players. The message will show on next login.
 		Function .PAGE doesn't use args anymore, now everything is dialog-based.
 		New property SERV.GMPAGE.x.CHARUID (read-only) to get char UID
+
+23-04-2020, Nolok
+- Fixed: SERV.MAP.x.SECTOR.* accepting indexes starting from 1, being the indexes actually 0-based.
+- Fixed: Moving item in backpack reveal character (Issue #426) (fix by xwerswoodx).
+- Fixed: No error returned when used valid SERV. objects with invalid keywords.
