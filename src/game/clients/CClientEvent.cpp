@@ -1693,8 +1693,8 @@ void CClient::Event_PromptResp_GMPage(lpctstr pszReason)
 	}
 
 	const CPointMap& pt = m_pChar->GetTopPoint();
-	TCHAR* pszMsg = Str_GetTemp();
-	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_GMPAGE_RECEIVED), m_pChar->GetName(), static_cast<DWORD>(m_pChar->GetUID()), pt.WriteUsed(), pszReason);
+	tchar * pszMsg = Str_GetTemp();
+	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_GMPAGE_RECEIVED), m_pChar->GetName(), (dword)m_pChar->GetUID(), pt.WriteUsed(), pszReason);
 	g_Log.Event(LOGM_NOCONTEXT | LOGM_GM_PAGE, "%s\n", pszMsg);
 
 	CGMPage* pGMPage = static_cast<CGMPage*>(g_World.m_GMPages.GetContainerHead());
