@@ -1744,7 +1744,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
                         iSecondsDelay = 2;
 						break;
 				}
-                SetTimeoutS(iSecondsDelay);
+				pItem->SetTimeoutS(iSecondsDelay);
 
 				static lpctstr const sm_Poison_MessageOSI[] =
 				{

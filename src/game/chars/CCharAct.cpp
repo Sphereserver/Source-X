@@ -2923,13 +2923,12 @@ bool CChar::SetPoison( int iSkill, int iHits, CChar * pCharSrc )
 	}
 	else
 	{
-		pPoison = Spell_Effect_Create(SPELL_Poison, LAYER_FLAG_Poison, iSkill, (1 + Calc_GetRandLLVal(2)), pCharSrc, false);
+		int64 iPoisonDuration = (1 + Calc_GetRandLLVal(2)) * TENTHS_PER_SEC;	//in TENTHS of second
+		pPoison = Spell_Effect_Create(SPELL_Poison, LAYER_FLAG_Poison, iSkill, iPoisonDuration, pCharSrc, false);
 		if ( !pPoison )
 			return false;
 		LayerAdd(pPoison, LAYER_FLAG_Poison);
 	}
-
-	pPoison->SetTimeoutS(5 + Calc_GetRandLLVal(4));
 
 	if (!IsSetMagicFlags(MAGICF_OSIFORMULAS))
 	{
