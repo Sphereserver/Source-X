@@ -137,7 +137,9 @@ enum MAGICFLAGS_TYPE
     MAGICF_NOCASTFROZENHANDS    = 0x0000400,    // can't cast spells if got paralyzed holding something on hands
     MAGICF_POLYMORPHSTATS       = 0x0000800,    // Polymorph spells give out stats based on base chars (old behaviour backwards).
     MAGICF_OVERRIDEFIELDS       = 0x0001000,    // Prevent cast multiple field spells on the same tile, making the new field tile remove the previous field
-    MAGICF_CASTPARALYZED        = 0x0002000     // Can cast even if paralyzed
+    MAGICF_CASTPARALYZED        = 0x0002000,    // Can cast even if paralyzed
+    MAGICF_NOREFLECTOWN         = 0x0004000,    // Do not reflect the own spells if the spell reflected from the target.
+    MAGICF_DELREFLECTOWN        = 0x0008000     // Remove reflection instead of damaging himself when NOREFLECTOWN active if the spell reflected from another target.
 };
 
 enum REVEALFLAGS_TYPE

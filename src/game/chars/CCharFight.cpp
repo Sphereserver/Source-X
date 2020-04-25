@@ -1335,6 +1335,10 @@ void CChar::Fight_HitTry()
 					StatFlag_Clear(STATF_WAR);
 			}
 		}
+		else {
+				Skill_Start(SKILL_NONE);
+				m_Fight_Targ_UID.InitUID();
+		}
 		return;
 	}
 

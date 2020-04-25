@@ -2203,3 +2203,8 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: SERV.MAP.x.SECTOR.* accepting indexes starting from 1, being the indexes actually 0-based.
 - Fixed: Moving item in backpack reveal character (Issue #426) (fix by xwerswoodx).
 - Fixed: No error returned when used valid SERV. objects with invalid keywords.
+
+24-04-2020, xwerswoodx
+- Fixed: Some missing coding for spellbook check. (thanks for Xun)
+- Added: MAGICF_NOREFLECTOWN and MAGICF_DELREFLECTOWN flags to block reflect player's own damage which has already reflected from another character.
+- Fixed: Not cleaning target when target is not attackable anymore. (Issue #409)
