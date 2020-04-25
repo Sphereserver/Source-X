@@ -94,7 +94,6 @@ enum CLIMODE_TYPE	// What mode is the client to server connection in ? (waiting 
 	CLIMODE_MENU_SKILL,             // result of some skill (tracking, tinkering, blacksmith, etc)
     CLIMODE_MENU_SKILL_TRACK_SETUP,
     CLIMODE_MENU_SKILL_TRACK,
-    CLIMODE_MENU_GM_PAGES,          // open gm pages list
     CLIMODE_MENU_EDIT,              // edit the contents of a container
 
     // Prompting for text input ------------------------------------------------------

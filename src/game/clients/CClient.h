@@ -147,7 +147,7 @@ public:
     bool _fShowPublicHouseContent;
 
 	// GM only stuff.
-	CGMPage * m_pGMPage;	// Current GM page we are connected to.
+	CGMPage * m_pGMPage;	// Current GM page being handled by this client
 	CUID m_Prop_UID;		// The object of /props (used for skills list as well!)
 
 	// Gump stuff
@@ -197,7 +197,6 @@ public:
 
 		// CLIMODE_MENU_*
 		// CLIMODE_MENU_SKILL
-		// CLIMODE_MENU_GM_PAGES
 		struct
 		{
 			CUID m_UID;
@@ -273,7 +272,6 @@ private:
 	byte LogIn( lpctstr pszName, lpctstr pPassword, CSString & sMsg );
 
 	bool CanInstantLogOut() const;
-	void Cmd_GM_PageClear();
 
 	void Announce( bool fArrive ) const;
 
@@ -337,6 +335,7 @@ public:
 	void Event_MailMsg( CUID uid1, CUID uid2 );
 	void Event_Profile( byte fWriteMode, CUID uid, lpctstr pszProfile, int iProfileLen );
 	void Event_PromptResp( lpctstr pszText, size_t len, dword context1, dword context2, dword type, bool fNoStrip = false );
+	void Event_PromptResp_GMPage( lpctstr pszReason );
 	bool Event_SetName( CUID uid, const char * pszCharName );
 	void Event_SingleClick( CUID uid );
 	void Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bool fNoStrip = false ); // PC speech
@@ -368,15 +367,9 @@ public:
 
     // translated commands.
 private:
-	void Cmd_GM_PageInfo();
 	int Cmd_Extract( CScript * pScript, const CRectMap &rect, int & zlowest );
 	int Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuItem* item, int iMaxSize, bool *fShowMenu, bool *fLimitReached );
 public:
-	void Cmd_GM_PageMenu( uint uiEntryStart = 0 );
-	void Cmd_GM_PageCmd( lpctstr pCmd );
-	void Cmd_GM_PageSelect( uint iSelect );
-	void Cmd_GM_Page(lpctstr pszreason); // Help button (Calls GM Call Menus up)
-
 	bool Cmd_Skill_Menu( const CResourceID& rid, int iSelect = -1 );
 	bool Cmd_Skill_Smith( CItem * pIngots );
 	bool Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase * pSrc );

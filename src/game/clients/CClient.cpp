@@ -89,7 +89,9 @@ CClient::~CClient()
 
 	bWasChar = ( m_pChar != nullptr );
 	CharDisconnect();	// am i a char in game ?
-	Cmd_GM_PageClear();
+
+	if (m_pGMPage)
+		m_pGMPage->ClearHandler();
 
 	// Clear containers (CTAG and TOOLTIP)
 	m_TagDefs.Clear();
@@ -1172,7 +1174,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			m_Targ_Text = s.GetArgStr();
 			if ( !m_Targ_Text.IsEmpty() && !strnicmp( m_Targ_Text, "ADD ", 4 ) )
 			{
-				Cmd_GM_Page( m_Targ_Text + 4 );
+				Event_PromptResp_GMPage(m_Targ_Text + 4);
 				break;
 			}
 			addPromptConsole( CLIMODE_PROMPT_GM_PAGE_TEXT, g_Cfg.GetDefaultMsg( DEFMSG_GMPAGE_PROMPT ) );
@@ -1308,9 +1310,6 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			break;
 		}
 
-		case CV_PAGE:
-			Cmd_GM_PageCmd( s.GetArgStr());
-			break;
 		case CV_REPAIR:
 			addTarget( CLIMODE_TARG_REPAIR, g_Cfg.GetDefaultMsg( DEFMSG_SELECT_ITEM_REPAIR ) );
 			break;

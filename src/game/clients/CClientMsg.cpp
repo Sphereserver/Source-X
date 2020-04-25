@@ -2688,7 +2688,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 
 	if ( IsPriv(PRIV_GM_PAGE) && !g_World.m_GMPages.IsContainerEmpty() )
 	{
-		sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_GMPAGES), (int)(g_World.m_GMPages.GetContentCount()), g_Cfg.m_cCommandPrefix);
+		sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_GMPAGE_PENDING), (int)(g_World.m_GMPages.GetContentCount()), g_Cfg.m_cCommandPrefix);
 		addSysMessage(z);
 	}
 	if ( IsPriv(PRIV_JAILED) )

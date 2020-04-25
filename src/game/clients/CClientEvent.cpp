@@ -1,4 +1,5 @@
 #include "../../common/resource/CResourceLock.h"
+#include "../../network/CClientIterator.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
@@ -13,6 +14,7 @@
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"
+#include "../CWorld.h"
 
 
 /////////////////////////////////
@@ -1583,7 +1585,7 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 
 		case CLIMODE_PROMPT_GM_PAGE_TEXT:
 			// m_Targ_Text
-			Cmd_GM_Page( szText );
+			Event_PromptResp_GMPage(szText);
 			return;
 
 		case CLIMODE_PROMPT_VENDOR_PRICE:
@@ -1676,6 +1678,53 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 	sMsg.Format(g_Cfg.GetDefaultMsg( DEFMSG_MSG_RENAME_SUCCESS ), pszReName, pItem->GetName());
 
 	SysMessage(sMsg);
+}
+
+void CClient::Event_PromptResp_GMPage(lpctstr pszReason)
+{
+	ADDTOCALLSTACK("CClient::Event_PromptResp_GMPage");
+	// Player sent an GM page
+	// CLIMODE_PROMPT_GM_PAGE_TEXT
+
+	if (pszReason[0] == '\0')
+	{
+		SysMessageDefault(DEFMSG_GMPAGE_PROMPT_CANCEL);
+		return;
+	}
+
+	const CPointMap& pt = m_pChar->GetTopPoint();
+	tchar * pszMsg = Str_GetTemp();
+	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_GMPAGE_RECEIVED), m_pChar->GetName(), (dword)m_pChar->GetUID(), pt.WriteUsed(), pszReason);
+	g_Log.Event(LOGM_NOCONTEXT | LOGM_GM_PAGE, "%s\n", pszMsg);
+
+	CGMPage* pGMPage = static_cast<CGMPage*>(g_World.m_GMPages.GetContainerHead());
+	for (; pGMPage != nullptr; pGMPage = pGMPage->GetNext())
+	{
+		if (strcmp(pGMPage->GetName(), m_pAccount->GetName()) == 0)
+			break;
+	}
+
+	if (pGMPage)
+	{
+		SysMessageDefault(DEFMSG_GMPAGE_UPDATED);
+	}
+	else
+	{
+		pGMPage = new CGMPage(m_pAccount->GetName());
+		SysMessageDefault(DEFMSG_GMPAGE_SENT);
+	}
+	pGMPage->m_uidChar = m_pChar->GetUID();
+	pGMPage->m_pt = pt;
+	pGMPage->m_sReason = pszReason;
+	pGMPage->m_time = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+	SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_GMPAGE_QUEUE), static_cast<int>(g_World.m_GMPages.GetContentCount()));
+
+	ClientIterator it;
+	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
+	{
+		if (pClient->IsPriv(PRIV_GM_PAGE))
+			pClient->SysMessage(pszMsg);
+	}
 }
 
 
