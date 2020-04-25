@@ -12,7 +12,7 @@
 #include "CAccount.h"
 
 
-class CClient;	//fixme
+class CClient;
 class CGMPage : public CSObjListRec, public CScriptObj
 {
 	// RES_GMPAGE
@@ -38,8 +38,8 @@ public:
 	CGMPage* GetNext() const	{ return static_cast<CGMPage*>(CSObjListRec::GetNext()); }
 
 	void r_Write(CScript& s) const;
-	bool r_WriteVal(lpctstr pszKey, CSString& sVal, CTextConsole* pSrc, bool fNoCallParent = false, bool fNoCallChildren = false);
-	bool r_LoadVal(CScript& s);
+	virtual bool r_WriteVal(lpctstr pszKey, CSString& sVal, CTextConsole* pSrc, bool fNoCallParent = false, bool fNoCallChildren = false) override;
+	virtual bool r_LoadVal(CScript& s) override;
 
 private:
 	CGMPage(const CGMPage& copy);
