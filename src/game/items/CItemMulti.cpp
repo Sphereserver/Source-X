@@ -3339,10 +3339,13 @@ CMultiStorage::CMultiStorage(const CUID& uidSrc)
 
 CMultiStorage::~CMultiStorage()
 {
-    for (MultiOwnedCont::iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)
+    for (auto& pair : _lHouses)
     {
-        const CUID& uid = it->first;
+        const CUID& uid = pair.first;
         CItemMulti *pMulti = static_cast<CItemMulti*>(uid.ItemFind());
+        if (!pMulti)
+            continue;
+
         if (_uidSrc.IsChar())
         {
             pMulti->RevokePrivs(_uidSrc);
@@ -3352,10 +3355,14 @@ CMultiStorage::~CMultiStorage()
             pMulti->SetGuild(CUID());
         }
     }
-    for (MultiOwnedCont::iterator it = _lShips.begin(); it != _lShips.end(); ++it)
+
+    for (auto& pair : _lShips)
     {
-        const CUID& uid = it->first;
+        const CUID& uid = pair.first;
         CItemShip *pShip = static_cast<CItemShip*>(uid.ItemFind());
+        if (!pShip)
+            continue;
+
         if (_uidSrc.IsChar())
         {
             pShip->RevokePrivs(_uidSrc);
@@ -3365,6 +3372,7 @@ CMultiStorage::~CMultiStorage()
             pShip->SetGuild(CUID());
         }
     }
+
     _uidSrc.InitUID();
 }
 

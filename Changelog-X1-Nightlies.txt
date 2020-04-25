@@ -1,4 +1,3 @@
-﻿
 ---- 0.56d (former eXperimental branch, now simply Sphere-X, forked from 0.56d) --------------------------------------------------------------
 ---- 11/04/2016
 
@@ -2199,15 +2198,16 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: Null SRC on @Resurrect trigger when char is resurrected using bandages.
 - Fixed: Summon spells were checking for correct target position but didn't reset it when casting. (Issue #413)
 
-22-04-2020, Julian
-- [Port from 0.56d, 12-Apr-2019, Coruja]
-- Updated: Internal GM Pages
-		Old hardcoded menu is now softcoded. You can get it on the ScriptPack-X.
-		GM pages now can be replied even to AFK/Offline players. The message will show on next login.
-		Function .PAGE doesn't use args anymore, now everything is dialog-based.
-		New property SERV.GMPAGE.x.CHARUID (read-only) to get char UID
-
 23-04-2020, Nolok
 - Fixed: SERV.MAP.x.SECTOR.* accepting indexes starting from 1, being the indexes actually 0-based.
 - Fixed: Moving item in backpack reveal character (Issue #426) (fix by xwerswoodx).
 - Fixed: No error returned when used valid SERV. objects with invalid keywords.
+
+24-04-2020, xwerswoodx
+- Fixed: Some missing coding for spellbook check. (thanks for Xun)
+- Added: MAGICF_NOREFLECTOWN and MAGICF_DELREFLECTOWN flags to block reflect player's own damage which has already reflected from another character.
+- Fixed: Not cleaning target when target is not attackable anymore. (Issue #409)
+
+25-04-2020, Nolok
+- Fixed: Equipped items not going back to active from sleeping state when a sector awakes again (Issue #430).
+- Fixed: Setting stat values greater than the maximum value caused an overflow, instead of setting its value to the maximum.

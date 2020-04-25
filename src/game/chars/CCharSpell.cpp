@@ -1744,7 +1744,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
                         iSecondsDelay = 2;
 						break;
 				}
-                SetTimeoutS(iSecondsDelay);
+				pItem->SetTimeoutS(iSecondsDelay);
 
 				static lpctstr const sm_Poison_MessageOSI[] =
 				{
@@ -3429,7 +3429,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 				if ( pMagicReflect )
 					pMagicReflect->Delete();
 
-				if ( pCharSrc->IsStatFlag(STATF_REFLECTION) )		// caster is under reflection effect too, so the spell will reflect back to default target
+				if ((pCharSrc->IsStatFlag(STATF_REFLECTION)) && (!IsSetMagicFlags(MAGICF_NOREFLECTOWN))) // caster is under reflection effect too, so the spell will reflect back to default target
 				{
 					pCharSrc->Effect(EFFECT_OBJ, ITEMID_FX_GLOW, pCharSrc, 10, 5);
 					pMagicReflect = pCharSrc->LayerFind(LAYER_SPELL_Magic_Reflect);
@@ -3438,7 +3438,15 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 				}
 				else
 				{
-					pCharSrc->OnSpellEffect(spell, pCharSrc, iSkillLevel, pSourceItem, true);
+					pMagicReflect = pCharSrc->LayerFind(LAYER_SPELL_Magic_Reflect);
+					if (pMagicReflect && (IsSetMagicFlags(MAGICF_DELREFLECTOWN)))
+					{
+						pCharSrc->Effect(EFFECT_OBJ, ITEMID_FX_GLOW, pCharSrc, 10, 5);
+						pMagicReflect->Delete();
+					}
+					else {
+						pCharSrc->OnSpellEffect(spell, pCharSrc, iSkillLevel, pSourceItem, true);
+					}
 					return true;
 				}
 			}

@@ -317,7 +317,7 @@ CServerConfig::~CServerConfig()
 bool CServerConfig::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CServerConfig::r_GetRef");
-	tchar * pszSep = const_cast<tchar*>(strchr( ptcKey, '(' ));	// acts like const_cast
+	tchar * pszSep = const_cast<tchar*>(strchr( ptcKey, '(' ));
 	if ( pszSep == nullptr )
 	{
 		pszSep = const_cast<tchar*>(strchr( ptcKey, '.' ));
@@ -909,7 +909,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 #define LOG_WARN_NOINIT(x)  if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) g_Log.EventWarn(x)
 #define LOG_ERR_NOINIT(x)   if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) g_Log.EventError(x)
 
-	int i = FindTableHeadSorted( s.GetKey(), reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf( sm_szLoadKeys )-1, sizeof(sm_szLoadKeys[0]));
+	int i = FindCAssocRegTableHeadSorted( s.GetKey(), reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf( sm_szLoadKeys )-1, sizeof(sm_szLoadKeys[0]));
 	if ( i < 0 )
 	{
 		if ( s.IsKeyHead( "REGEN", 5 ))			//	REGENx=<stat regeneration rate>
@@ -975,7 +975,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 						int nSectors = g_MapList.GetSectorQty(nMapNumber);
 						SKIP_SEPARATORS(pszStr);
 
-						if ((iSecNumber > 0) && (iSecNumber <=  nSectors))
+						if ((iSecNumber > 0) && (iSecNumber <  nSectors))
 						{
 							pszStr = s.GetArgRaw();
 
@@ -1446,7 +1446,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 	ADDTOCALLSTACK("CServerConfig::r_WriteVal");
 	EXC_TRY("WriteVal");
 	// Just do stats values for now.
-	int index = FindTableHeadSorted( ptcKey, reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf(sm_szLoadKeys) - 1, sizeof(sm_szLoadKeys[0]) );
+	int index = FindCAssocRegTableHeadSorted( ptcKey, reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf(sm_szLoadKeys) - 1, sizeof(sm_szLoadKeys[0]) );
 	if ( index < 0 )
 	{
 		if ( !strnicmp( ptcKey, "REGEN", 5 ))
@@ -1580,7 +1580,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 					SKIP_SEPARATORS(ptcKey);
 					int nSectors = g_MapList.GetSectorQty(iMapNumber);
 
-					if ((iSecNumber > 0) && (iSecNumber <= nSectors))
+					if ((iSecNumber > 0) && (iSecNumber < nSectors))
 					{
 						CSector* pSector = CWorldMap::GetSector(iMapNumber, iSecNumber);
 						ASSERT(pSector);
@@ -2174,7 +2174,7 @@ bool CServerConfig::IsValidEmailAddressFormat( lpctstr pszEmail ) // static
 	if ( len2 != len1 )
 		return false;
 
-	tchar * pszAt = const_cast<tchar*>(strchr( pszEmail, '@' ));
+	lpctstr pszAt =strchr( pszEmail, '@' );
 	if ( ! pszAt )
 		return false;
 	if ( pszAt == pszEmail )

@@ -418,7 +418,7 @@ public:
 	* @brief cast as const lpcstr.
 	* @return internal data pointer.
 	*/
-	inline operator lpctstr() const
+	inline operator lpctstr() const noexcept
 	{
 		return GetPtr();
 	}
@@ -432,7 +432,7 @@ public:
 	* @param pStr string to compare.
 	* @return <0 if the first character that not match has lower value in CSString than in pStr. 0 if the contents of both are equal. >0 if the first character that does not match has greater value in CSString than pStr.
 	*/
-	inline int Compare(lpctstr pStr) const
+	inline int Compare(lpctstr pStr) const noexcept
 	{
 		return strcmp(m_pchData, pStr);
 	}
@@ -446,7 +446,7 @@ public:
 	* @param pStr string to compare.
 	* @return <0 if the first character that not match has lower value in CSString than in pStr. 0 if the contents of both are equal. >0 if the first character that does not match has greater value in CSString than pStr.
 	*/
-	inline int CompareNoCase(lpctstr pStr) const
+	inline int CompareNoCase(lpctstr pStr) const noexcept
 	{
 		return strcmpi(m_pchData, pStr);
 	}
@@ -454,7 +454,7 @@ public:
 	* @brief Gets the internal pointer.
 	* @return Pointer to internal data.
 	*/
-	inline lpctstr GetPtr() const
+	inline lpctstr GetPtr() const noexcept
 	{
 		return m_pchData;
 	}

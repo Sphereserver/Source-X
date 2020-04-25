@@ -182,6 +182,15 @@ void CSector::GoSleep()
             pChar->GoSleep();
     }
 
+	for (CSObjContRec* pObjRec : m_Chars_Disconnect)
+	{
+		CChar* pChar = static_cast<CChar*>(pObjRec);
+		const bool fSleeping = pChar->IsSleeping();
+		ASSERT(pChar->IsDisconnected());
+		if (!fSleeping)
+			pChar->GoSleep();
+	}
+
 	for (CSObjContRec* pObjRec : m_Items)
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);

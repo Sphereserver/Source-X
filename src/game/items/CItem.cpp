@@ -1374,21 +1374,6 @@ void CItem::SetTimeout( int64 iMsecs )
 	SetUIDContainerFlags(0);
 }
 
-void CItem::SetTimeoutS(int64 iSeconds)
-{
-    SetTimeout(iSeconds * MSECS_PER_SEC);
-}
-
-void CItem::SetTimeoutT(int64 iTicks)
-{
-    SetTimeout(iTicks * MSECS_PER_TICK);
-}
-
-void CItem::SetTimeoutD(int64 iTenths)
-{
-    SetTimeout(iTenths * MSECS_PER_TENTH);
-}
-
 void CItem::OnMoveFrom()	// Moving from current location.
 {
 }

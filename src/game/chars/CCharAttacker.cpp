@@ -357,13 +357,7 @@ bool CChar::Attacker_Delete(const CChar * pChar, bool fForced, ATTACKER_CLEAR_TY
 {
     ADDTOCALLSTACK("CChar::Attacker_Delete(CChar)");
     if (!pChar || m_lastAttackers.empty())
-    {
         return false;
-    }
-    if (m_Fight_Targ_UID == pChar->GetUID())
-    {
-        m_Fight_Targ_UID.InitUID();
-    }
     return Attacker_Delete(Attacker_GetID(pChar), fForced, type);
 }
 

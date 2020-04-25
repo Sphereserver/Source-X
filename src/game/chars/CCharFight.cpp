@@ -509,9 +509,9 @@ int CChar::CalcArmorDefense() const
 				{
 					/*
 					If CombatParryingEra flag PARRYERA_SCALING is enabled:
-					Displayed AR = ((Parrying Skill * Base AR of Shield) ÷ 200) + 1
+					Displayed AR = ((Parrying Skill * Base AR of Shield) Ã· 200) + 1
 					For all shields the maximum AR will be reached before your parry skill reaches GM level.
-					Also note that the maximum displayed AR for a shield cannot exceed Base AR ÷ 2.
+					Also note that the maximum displayed AR for a shield cannot exceed Base AR Ã· 2.
 					See: http://web.archive.org/web/20000306210936/http://uo.stratics.com:80/parr.htm
 					Else, CombatParryingEra flag PARRYERA_SCALING is disabled and only a flat 7% AR of the shield will be used.
 					*/
@@ -1336,6 +1336,12 @@ void CChar::Fight_HitTry()
 			}
 			return;
 		}
+		else
+    {
+				Skill_Start(SKILL_NONE);
+				m_Fight_Targ_UID.InitUID();
+		}
+		return;
 	}
 
     bool fIH_ShouldInstaHit = false, fIH_LastHitTag_Newer = false;

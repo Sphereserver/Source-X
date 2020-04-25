@@ -329,7 +329,12 @@ void CEntityProps::DumpComponentProps(CTextConsole *pSrc, lpctstr ptcPrefix) con
     if ( ptcPrefix == nullptr )
         ptcPrefix = "";
 
-    bool fIsClient = pSrc->GetChar();
+    bool fIsClient = false;
+    if (const CChar* pChar = pSrc->GetChar())
+    {
+        fIsClient = pChar->IsClient();
+    }
+
     CSString sPropVal;
     CComponentProps::PropertyValNum_t iPropVal;
     for (CComponentProps::PropertyIndex_t iCCP = 0; iCCP < COMP_PROPS_QTY; ++iCCP)

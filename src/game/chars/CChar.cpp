@@ -481,7 +481,7 @@ CClient * CChar::GetClient() const
 }
 
 // Client logged out or NPC is dead.
-void CChar::SetDisconnected()
+void CChar::SetDisconnected(CSector* pNewSector)
 {
 	ADDTOCALLSTACK("CChar::SetDisconnected");
     if (IsClient())
@@ -499,9 +499,18 @@ void CChar::SetDisconnected()
         return;
 
     RemoveFromView();	// Remove from views.
-    MoveToRegion(nullptr,false);
+    MoveToRegion(nullptr, false);
 
-    GetTopSector()->m_Chars_Disconnect.AddCharDisconnected( this );
+	CSector* pCurSector = GetTopPoint().GetSector();
+	if (pNewSector && (pNewSector != pCurSector))
+	{
+		pNewSector->m_Chars_Disconnect.AddCharDisconnected(this);
+	}
+	else
+	{
+		ASSERT(pCurSector);
+		pCurSector->m_Chars_Disconnect.AddCharDisconnected(this);
+	}
 }
 
 void CChar::ClearPlayer()
