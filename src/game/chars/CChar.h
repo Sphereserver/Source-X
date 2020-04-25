@@ -473,7 +473,7 @@ public:
 
 	bool SetPrivLevel( CTextConsole * pSrc, lpctstr pszFlags );
 	bool CanDisturb( const CChar * pChar ) const;
-	void SetDisconnected();
+	void SetDisconnected( CSector *pNewSector = nullptr );
 	bool SetPlayerAccount( CAccount * pAccount );
 	bool SetPlayerAccount( lpctstr pszAccount );
     bool IsNPC() const;

@@ -747,7 +747,7 @@ void CChar::UpdateStamFlag() const
 void CChar::UpdateStatVal( STAT_TYPE type, int iChange, ushort uiLimit )
 {
 	ADDTOCALLSTACK("CChar::UpdateStatVal");
-	int iValPrev = Stat_GetVal(type);
+	const int iValPrev = Stat_GetVal(type);
 	int iVal = iValPrev + iChange;
 
 	if ( iVal < 0 )
@@ -766,6 +766,8 @@ void CChar::UpdateStatVal( STAT_TYPE type, int iChange, ushort uiLimit )
     }
 	if ( iVal == iValPrev )
 		return;
+	if (iVal > UINT16_MAX)
+		iVal = UINT16_MAX;
 
 	Stat_SetVal(type, (ushort)iVal);
 
@@ -3848,8 +3850,7 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocation,
 			return false;
 
 		// We cannot put this char in non-disconnect state.
-		SetDisconnected();
-        pSector->m_Chars_Disconnect.AddCharDisconnected(this);  // the sector may be different now!
+		SetDisconnected(pSector);
         SetTopPoint(pt);
 		return true;
 	}

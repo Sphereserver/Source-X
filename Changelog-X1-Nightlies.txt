@@ -2208,3 +2208,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: Some missing coding for spellbook check. (thanks for Xun)
 - Added: MAGICF_NOREFLECTOWN and MAGICF_DELREFLECTOWN flags to block reflect player's own damage which has already reflected from another character.
 - Fixed: Not cleaning target when target is not attackable anymore. (Issue #409)
+
+25-04-2020, Nolok
+- Fixed: Equipped items not going back to active from sleeping state when a sector awakes again (Issue #430).
+- Fixed: Setting stat values greater than the maximum value caused an overflow, instead of setting its value to the maximum.

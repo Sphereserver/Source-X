@@ -317,7 +317,7 @@ CServerConfig::~CServerConfig()
 bool CServerConfig::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CServerConfig::r_GetRef");
-	tchar * pszSep = const_cast<tchar*>(strchr( ptcKey, '(' ));	// acts like const_cast
+	tchar * pszSep = const_cast<tchar*>(strchr( ptcKey, '(' ));
 	if ( pszSep == nullptr )
 	{
 		pszSep = const_cast<tchar*>(strchr( ptcKey, '.' ));
@@ -975,7 +975,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 						int nSectors = g_MapList.GetSectorQty(nMapNumber);
 						SKIP_SEPARATORS(pszStr);
 
-						if ((iSecNumber > 0) && (iSecNumber <=  nSectors))
+						if ((iSecNumber > 0) && (iSecNumber <  nSectors))
 						{
 							pszStr = s.GetArgRaw();
 
@@ -1580,7 +1580,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 					SKIP_SEPARATORS(ptcKey);
 					int nSectors = g_MapList.GetSectorQty(iMapNumber);
 
-					if ((iSecNumber > 0) && (iSecNumber <= nSectors))
+					if ((iSecNumber > 0) && (iSecNumber < nSectors))
 					{
 						CSector* pSector = CWorldMap::GetSector(iMapNumber, iSecNumber);
 						ASSERT(pSector);
@@ -2174,7 +2174,7 @@ bool CServerConfig::IsValidEmailAddressFormat( lpctstr pszEmail ) // static
 	if ( len2 != len1 )
 		return false;
 
-	tchar * pszAt = const_cast<tchar*>(strchr( pszEmail, '@' ));
+	lpctstr pszAt =strchr( pszEmail, '@' );
 	if ( ! pszAt )
 		return false;
 	if ( pszAt == pszEmail )

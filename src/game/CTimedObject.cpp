@@ -74,12 +74,12 @@ void CTimedObject::SetTimeout(int64 iDelayInMsecs)
 
 void CTimedObject::SetTimeoutS(int64 iSeconds)
 {
-    SetTimeout(iSeconds * MSECS_PER_SEC);
+    SetTimeout(iSeconds * MSECS_PER_SEC);   // It calls the right virtual for SetTimeout
 }
 
 void CTimedObject::SetTimeoutD(int64 iTenths)
 {
-    SetTimeout(iTenths * MSECS_PER_TENTH);
+    SetTimeout(iTenths * MSECS_PER_TENTH);  // It calls the right virtual for SetTimeout
 }
 
 int64 CTimedObject::GetTimerDiff() const
