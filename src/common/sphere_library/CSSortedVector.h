@@ -85,11 +85,13 @@ size_t CSSortedVector<_Type, _Comp>::lower_element(size_t _hi, _Type const& valu
     if (_hi == 0)
         return 0;
     */
+
+    const _Type* const raw = this->data();
     size_t _lo = 0;
     while (_lo < _hi)
     {
         const size_t _mid = _lo + ((_hi - _lo) >> 1);
-        if (this->_comparatorObj(this->operator[](_mid), value))
+        if (this->_comparatorObj(raw[_mid], value))
         {	// <
             _lo = _mid + 1;
         }
@@ -99,6 +101,21 @@ size_t CSSortedVector<_Type, _Comp>::lower_element(size_t _hi, _Type const& valu
         }
     }
     return _hi;
+
+    /*
+    // Alternative implementation. Logarithmic time, but better use of CPU instruction pipelining and branch prediction, at the cost of more comparations.
+    // It's worth running some benchmarks before switching to this.
+
+    const _Type* const  raw  = this->data();
+    const _Type*        base = raw;
+    while (_hi > 1)
+    {
+        const size_t half = _hi >> 1;
+        base = this->_comparatorObj(base[half], value) ? base : &base[half];
+        _hi -= half;
+    }
+    return (base - raw + (this->_comparatorObj(*base, value)));
+    */
 }
 
 template <class _Type, class _Comp>
@@ -110,11 +127,13 @@ size_t CSSortedVector<_Type, _Comp>::binary_search_predicate(size_t _hi, _ValTyp
     if (_hi == 0)
         return 0;
     */
+
+    const _Type* const raw = this->data();
     size_t _lo = 0;
     while (_lo < _hi)
     {
         const size_t _mid = _lo + ((_hi - _lo) >> 1);
-        const int _ret = predicate(this->operator[](_mid), value);
+        const int _ret = predicate(raw[_mid], value);
         if (_ret < 0)
         {
             _lo = _mid + 1;
@@ -139,9 +158,6 @@ size_t CSSortedVector<_Type, _Comp>::find(_Type const& value) const noexcept
         return SCONT_BADINDEX;
     }
     const size_t _idx = this->lower_element(_sz, value);
-    if (_idx >= _sz) {
-        return SCONT_BADINDEX;
-    }
     return (!this->_comparatorObj(value, this->operator[](_idx))) ? _idx : SCONT_BADINDEX;
 }
 
