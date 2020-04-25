@@ -909,7 +909,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 #define LOG_WARN_NOINIT(x)  if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) g_Log.EventWarn(x)
 #define LOG_ERR_NOINIT(x)   if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) g_Log.EventError(x)
 
-	int i = FindTableHeadSorted( s.GetKey(), reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf( sm_szLoadKeys )-1, sizeof(sm_szLoadKeys[0]));
+	int i = FindCAssocRegTableHeadSorted( s.GetKey(), reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf( sm_szLoadKeys )-1, sizeof(sm_szLoadKeys[0]));
 	if ( i < 0 )
 	{
 		if ( s.IsKeyHead( "REGEN", 5 ))			//	REGENx=<stat regeneration rate>
@@ -1446,7 +1446,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 	ADDTOCALLSTACK("CServerConfig::r_WriteVal");
 	EXC_TRY("WriteVal");
 	// Just do stats values for now.
-	int index = FindTableHeadSorted( ptcKey, reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf(sm_szLoadKeys) - 1, sizeof(sm_szLoadKeys[0]) );
+	int index = FindCAssocRegTableHeadSorted( ptcKey, reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf(sm_szLoadKeys) - 1, sizeof(sm_szLoadKeys[0]) );
 	if ( index < 0 )
 	{
 		if ( !strnicmp( ptcKey, "REGEN", 5 ))
