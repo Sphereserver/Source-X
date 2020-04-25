@@ -1,4 +1,3 @@
-﻿
 ---- 0.56d (former eXperimental branch, now simply Sphere-X, forked from 0.56d) --------------------------------------------------------------
 ---- 11/04/2016
 

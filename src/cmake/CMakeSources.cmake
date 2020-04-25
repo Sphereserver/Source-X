@@ -420,7 +420,6 @@ game/clients/CChatChanMember.h
 game/clients/CClient.cpp
 game/clients/CClientDialog.cpp
 game/clients/CClientEvent.cpp
-game/clients/CClientGMPage.cpp
 game/clients/CClient.h
 game/clients/CClientLog.cpp
 game/clients/CClientMsg.cpp

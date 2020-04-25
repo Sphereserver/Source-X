@@ -49,6 +49,7 @@ enum GUMPCTL_TYPE // controls we can put in a gump.
     GUMPCTL_TILEPICHUE, // NEW: x,y,item,color
 
     GUMPCTL_TOOLTIP, // From SE client. tooltip cliloc(1003000)
+    GUMPCTL_ITEMPROPERTY,   // 1 = uid of the item in question.
 
     GUMPCTL_XMFHTMLGUMP, // 7 = x,y,sx,sy, cliloc(1003000) hasBack canScroll
     GUMPCTL_XMFHTMLGUMPCOLOR, // NEW: x,y,w,h ???
