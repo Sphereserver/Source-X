@@ -84,7 +84,7 @@ lpctstr const CGMPage::sm_szLoadKeys[GC_QTY + 1] =
 };
 
 
-bool CGMPage::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc)
+bool CGMPage::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
 	ADDTOCALLSTACK("CGMPage::r_WriteVal");
 	EXC_TRY("WriteVal");
