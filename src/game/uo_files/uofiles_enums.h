@@ -57,6 +57,7 @@ enum HUE_CODE
 
     HUE_TEXT_DEF		= 0x03b2,	// NPC speech default: light gray color.
 	HUE_SAY_DEF			= 0x0034,	// Player speech default: yellow
+	HUE_EMOTE_DEF		= 0x0022,	// Default emote color.
 
     HUE_DYE_HIGH		= 0x03e9,	// highest dyeable color = 1001
 

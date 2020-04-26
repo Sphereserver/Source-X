@@ -754,7 +754,7 @@ effect_bounce:
 		if ( IsStatFlag(STATF_FREEZE) )
 		{
 			StatFlag_Clear(STATF_FREEZE);
-			UpdateMode();
+			UpdateModeFlag(); //We are going to update char flags, not the sight...
 		}
 	}
 
@@ -1322,7 +1322,11 @@ void CChar::Fight_HitTry()
 	ASSERT( Fight_IsActive() );
 
 	CChar *pCharTarg = m_Fight_Targ_UID.CharFind();
-	if ( !pCharTarg || (pCharTarg && !pCharTarg->Fight_IsAttackable()) )
+	/*
+	  We still need to check if player is hidden/invisible but do not need to make anything if the attacker is player, 
+	  So we only check Statf_Dead,stone,insub and invul for players to avoid continue attack the not attackable targets.
+	*/
+	if ( !pCharTarg || (pCharTarg && pCharTarg->IsStatFlag(STATF_DEAD|STATF_STONE|STATF_INSUBSTANTIAL|STATF_INVUL)) || (pCharTarg->IsStatFlag(STATF_HIDDEN|STATF_INVISIBLE) && m_pNPC) )
 	{
 		// I can't hit this target, try switch to another one
 		if (m_pNPC)
@@ -1334,7 +1338,6 @@ void CChar::Fight_HitTry()
 				if ( m_pNPC )
 					StatFlag_Clear(STATF_WAR);
 			}
-			return;
 		}
 		else
     {
@@ -1343,7 +1346,7 @@ void CChar::Fight_HitTry()
 		}
 		return;
 	}
-
+	
     bool fIH_ShouldInstaHit = false, fIH_LastHitTag_Newer = false;
     int64 iIH_LastHitTag_FullHit = 0;  // Time required to perform a normal hit, without the PreHit delay reduction.
     if (m_atFight.m_iWarSwingState == WAR_SWING_EQUIPPING)
@@ -1509,27 +1512,21 @@ WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc, bool fSwingNoRange)
 	//	WAR_SWING_EQUIPPING	= recoiling weapon / swing made
 	//  WAR_SWING_READY		= Ready to hit, will switch to WAR_SWING_SWINGING ASAP.
 	//  WAR_SWING_SWINGING	= taking my swing now
-
-	// We can't hit them. Char deleted? Target deleted? Am I dead?
-	if (IsDisconnected() || pCharSrc->IsDisconnected() || IsStatFlag(STATF_DEAD))
-	{
-		return WAR_SWING_INVALID;
-	}
-	// We can't hit them. They are dead, stoned, invul or whatever.
-	else if (pCharSrc->IsStatFlag(STATF_DEAD | STATF_STONE | STATF_INVUL | STATF_INSUBSTANTIAL))
+  
+	// We can't hit them. Char deleted? Target deleted? Am I dead or stoned? or Is target Dead, stone, invul, insub or slept?
+	if (IsDisconnected() || pCharSrc->IsDisconnected() || IsStatFlag(STATF_DEAD | STATF_STONE) || (pCharSrc->IsStatFlag(STATF_DEAD | STATF_STONE | STATF_INVUL | STATF_INSUBSTANTIAL)))
 	{
 		return WAR_SWING_INVALID;
 	}
 	// We can't hit them right now. Because we can't see them or reach them (invis/hidden).
-	else if (pCharSrc->IsStatFlag(STATF_HIDDEN | STATF_INVISIBLE | STATF_SLEEPING | STATF_FREEZE))
+	// Why the target is freeze we are change the attack type to swinging? Player can still attack paralyzed or sleeping characters.
+	// We make sure that the target is freeze or sleeping must wait ready for attack!
+	else if ( (pCharSrc->IsStatFlag(STATF_HIDDEN | STATF_INVISIBLE | STATF_SLEEPING)) || (IsStatFlag(STATF_FREEZE | STATF_SLEEPING)) ) // STATF_FREEZE | STATF_SLEEPING
 	{
 		return WAR_SWING_SWINGING;
-	}	
-	
-	if (pCharSrc->m_pArea && pCharSrc->m_pArea->IsFlag(REGION_FLAG_SAFE))
-	{
-		return WAR_SWING_INVALID;
 	}
+	if (pCharSrc->m_pArea && pCharSrc->m_pArea->IsFlag(REGION_FLAG_SAFE)) //Is area safe zone?
+		return WAR_SWING_INVALID;
 
     // Ignore the distance and the line of sight if fSwingNoRange is true, but only if i'm starting the swing. To land the hit i need to be in range.
     if (!fSwingNoRange ||

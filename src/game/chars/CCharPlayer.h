@@ -43,6 +43,7 @@ public:
 
 	CSString m_sProfile;	// limited to SCRIPT_MAX_LINE_LEN-16
     HUE_TYPE m_SpeechHue;	// speech hue used (sent by client)
+    HUE_TYPE m_EmoteHue;	// emote hue used (sent by client)
     CUID m_uidWeaponLast;   // last equipped weapon (only used by 'EquipLastWeapon' client macro)
 
 	word m_wMurders;		// Murder count.

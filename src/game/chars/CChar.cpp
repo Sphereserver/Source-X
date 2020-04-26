@@ -1253,13 +1253,15 @@ bool CChar::ReadScript(CResourceLock &s, bool fVendor)
 							continue;
 						}
 					default:
-						pItem = nullptr;
-						continue;
+						//pItem = nullptr;
+						//continue;
+						goto globalswitch; //Continue in global switch event instead of cleaning the item to avoid COLOR override the source's color.
 				}
 			}
 		}
 		else
 		{
+globalswitch:
 			switch ( iCmd )
 			{
 				case ITC_FULLINTERP:
@@ -1627,11 +1629,12 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 			Skill_SetBase(skSkill4, uiSkillVal4 * 10);
 	}
 
-    m_pPlayer->m_SpeechHue	= HUE_TEXT_DEF;	// Set default client-sent speech color
-	m_fonttype				= FONT_NORMAL;	// Set speech font type
-	m_SpeechHueOverride		= 0;			// Set no server-side speech color override
-	m_EmoteHueOverride		= 0;			// Set no server-side emote color override
-	m_sTitle.clear();						// Set title
+    m_pPlayer->m_SpeechHue	= HUE_TEXT_DEF;		// Set default client-sent speech color
+    m_pPlayer->m_EmoteHue	= HUE_EMOTE_DEF;	// Set default emote color
+	m_fonttype				= FONT_NORMAL;		// Set speech font type
+	m_SpeechHueOverride		= 0;				// Set no server-side speech color override
+	m_EmoteHueOverride		= 0;				// Set no server-side emote color override
+	m_sTitle.clear();							// Set title
 
 	GetBank(LAYER_BANKBOX);			// Create bankbox
 	GetPackSafe();					// Create backpack

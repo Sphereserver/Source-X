@@ -26,6 +26,7 @@ lpctstr const CCharPlayer::sm_szLoadKeys[CPC_QTY+1] =
 CCharPlayer::CCharPlayer(CChar *pChar, CAccount *pAccount) : m_pAccount(pAccount)
 {
     m_SpeechHue = 0;
+    m_EmoteHue = 0;
 	m_wDeaths = m_wMurders = 0;
 	m_speedMode = 0;
 	m_pflag = 0;
@@ -212,6 +213,9 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
         case CPC_SPEECHCOLOR:
             sVal.FormatWVal( m_SpeechHue );
             return true;
+        case CPC_EMOTECOLOR:
+        	sVal.FormatWVal( m_EmoteHue );
+        	return true;
 		case CPC_DEATHS:
 			sVal.FormatVal( m_wDeaths );
 			return true;
@@ -419,6 +423,9 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
         case CPC_SPEECHCOLOR:
             m_SpeechHue = (HUE_TYPE)s.GetArgWVal();
             return true;
+        case CPC_EMOTECOLOR:
+        	m_EmoteHue = (HUE_TYPE)s.GetArgWVal();
+        	return true;
 		case CPC_DEATHS:
 			m_wDeaths = (word)(s.GetArgVal());
 			return true;
@@ -519,7 +526,9 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 		s.WriteKeyHex("LIGHT", m_LocalLight);
     if ( m_SpeechHue )
         s.WriteKeyVal("SPEECHCOLOR", m_SpeechHue);
-
+    if ( m_EmoteHue )
+    	s.WriteKeyVal("EMOTECOLOR", m_EmoteHue);
+        
 	EXC_SET_BLOCK("saving dynamic speech");
 	if (!m_Speech.empty())
 	{
