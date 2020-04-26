@@ -2030,10 +2030,6 @@ void CClient::addMapWaypoint(CObjBase *pObj, MAPWAYPOINT_TYPE type) const
 
     if (type)
     {
-		// Classic clients only support MAPWAYPOINT_Remove and MAPWAYPOINT_Healer
-		if ((type != MAPWAYPOINT_Healer) && !GetNetState()->isClientKR() && !GetNetState()->isClientEnhanced())
-			return;
-
         if (PacketWaypointAdd::CanSendTo(GetNetState()))
             new PacketWaypointAdd(this, pObj, type);
     }
