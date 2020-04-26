@@ -25,10 +25,6 @@ void CSectorList::Init()
 
 	if ( _fInitialized )	//	disable changes on-a-fly
 		return;
-
-    // Initialize map planes
-	g_MapList.Init();
-
 	// Initialize sector data for every map plane
 	TemporaryString ts;
 	TemporaryString tsConcat;
@@ -98,10 +94,6 @@ void CSectorList::Close()
 		{
 			sd._pSectors[iSector].Close();
 		}
-
-		// Free memory allocated by sectors
-		//  Do this in two separate moments because destructors of items may access server sectors
-		sd._pSectors.release();
 	}
 	_fInitialized = false;
 }
