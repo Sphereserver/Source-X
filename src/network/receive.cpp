@@ -1,5 +1,5 @@
 
-#include "../common/resource/blocks/CDialogDef.h"
+#include "../common/resource/sections/CDialogDef.h"
 #include "../common/CLog.h"
 #include "../game/chars/CChar.h"
 #include "../game/clients/CClient.h"
@@ -1430,11 +1430,6 @@ bool PacketMenuChoice::onReceive(CNetState* net)
 		case CLIMODE_MENU_SKILL_TRACK:
 			// tracking menu got us here. start tracking the selected creature
 			client->Cmd_Skill_Tracking(select, true);
-			return true;
-
-		case CLIMODE_MENU_GM_PAGES:
-			// select a gm page from the menu
-			client->Cmd_GM_PageSelect(select);
 			return true;
 
 		case CLIMODE_MENU_EDIT:

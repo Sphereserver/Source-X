@@ -1,6 +1,6 @@
-#include "../common/resource/blocks/CItemTypeDef.h"
-#include "../common/resource/blocks/CRandGroupDef.h"
-#include "../common/resource/blocks/CRegionResourceDef.h"
+#include "../common/resource/sections/CItemTypeDef.h"
+#include "../common/resource/sections/CRandGroupDef.h"
+#include "../common/resource/sections/CRegionResourceDef.h"
 #include "../common/CException.h"
 #include "../common/CScriptTriggerArgs.h"
 #include "../common/CRect.h"
@@ -221,37 +221,24 @@ IT_TYPE CWorldMap::GetTerrainItemType(dword dwTerrainIndex) // static
 // Map reading and blocking.
 
 // gets sector # from one map
-CSector* CWorldMap::GetSector(int map, int i) // static
+CSector* CWorldMap::GetSector(int map, int index) noexcept // static
 {
-	//ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetSector");
+	//ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetSector(index)");
 
-	// if the map is not supported, return empty sector
-	if ((map < 0) || (map >= MAP_SUPPORTED_QTY) || !g_MapList.m_maps[map])
-		return nullptr;
-
-	const int iMapSectorQty = g_MapList.GetSectorQty(map);
-	if (i >= iMapSectorQty)
+	const int iMapSectorQty = g_World._Sectors.GetSectorQty(map);
+	if (index >= iMapSectorQty)
 	{
-		g_Log.EventError("Unsupported sector #%d for map #%d specified.\n", i, map);
+		g_Log.EventError("Unsupported sector #%d for map #%d specified.\n", index, map);
 		return nullptr;
 	}
 
-	for (int base = 0, m = 0; m < MAP_SUPPORTED_QTY; ++m)
-	{
-		if (!g_MapList.IsMapSupported(m))
-			continue;
+	return g_World._Sectors.GetSector(map, index);
+}
 
-		if (m == map)
-		{
-			if (iMapSectorQty < i)
-				return nullptr;
-
-			return g_World.m_Sectors[base + i];
-		}
-
-		base += g_MapList.GetSectorQty(m);
-	}
-	return nullptr;
+CSector* CWorldMap::GetSector(int map, short x, short y) noexcept // static
+{
+	//ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetSector(x,y)");
+	return g_World._Sectors.GetSector(map, x, y);
 }
 
 
@@ -1724,8 +1711,7 @@ CWorldSearch::CWorldSearch(const CPointMap& pt, int iDist) :
 	_fSearchSquare = false;
 	_fInertToggle = false;
 	_pObj = nullptr;
-	_pCurCont = nullptr;
-	_idxObj = 0;
+	_idxObj = _idxObjMax = 0;
 	
 	_pSectorBase = _pSector = pt.GetSector();
 
@@ -1756,7 +1742,9 @@ void CWorldSearch::RestartSearch()
 {
 	ADDTOCALLSTACK("CWorldSearch::RestartSearch");
 	_eSearchType = ws_search_e::None;
+	_vCurContObjs.clear();
 	_pObj = nullptr;
+	_idxObj = _idxObjMax = 0;
 }
 
 bool CWorldSearch::GetNextSector()
@@ -1776,9 +1764,9 @@ bool CWorldSearch::GetNextSector()
 			continue;	// same as base.
 
 		_eSearchType = ws_search_e::None;
-		_pCurCont = nullptr;
+		_vCurContObjs.clear();
 		_pObj = nullptr;	// start at head of next Sector.
-		_idxObj = 0;
+		_idxObj = _idxObjMax = 0;
 
 		return true;
 	}
@@ -1793,7 +1781,8 @@ CItem* CWorldSearch::GetItem()
 		{
 			ASSERT(_eSearchType == ws_search_e::None);
 			_eSearchType = ws_search_e::Items;
-			_pCurCont = &_pSector->m_Items;
+			_vCurContObjs = _pSector->m_Items.GetIterationSafeCont();
+			_idxObjMax = _vCurContObjs.size();
 			_idxObj = 0;
 		}
 		else
@@ -1802,7 +1791,7 @@ CItem* CWorldSearch::GetItem()
 		}
 
 		ASSERT(_eSearchType == ws_search_e::Items);
-		_pObj = (_idxObj >= _pCurCont->GetContentCount()) ? nullptr : static_cast <CObjBase*> (_pCurCont->GetContentIndex(_idxObj));
+		_pObj = (_idxObj >= _idxObjMax) ? nullptr : static_cast <CObjBase*> (_vCurContObjs[_idxObj]);
 		if (_pObj == nullptr)
 		{
 			if (GetNextSector())
@@ -1851,7 +1840,8 @@ CChar* CWorldSearch::GetChar()
 			ASSERT(_eSearchType == ws_search_e::None);
 			_eSearchType = ws_search_e::Chars;
 			_fInertToggle = false;
-			_pCurCont = &_pSector->m_Chars_Active;
+			_vCurContObjs = _pSector->m_Chars_Active.GetIterationSafeCont();
+			_idxObjMax = _vCurContObjs.size();
 			_idxObj = 0;
 		}
 		else
@@ -1860,16 +1850,17 @@ CChar* CWorldSearch::GetChar()
 		}
 
 		ASSERT(_eSearchType == ws_search_e::Chars);
-		_pObj = (_idxObj >= _pCurCont->GetContentCount()) ? nullptr : static_cast <CObjBase*> (_pCurCont->GetContentIndex(_idxObj));
+		_pObj = (_idxObj >= _idxObjMax) ? nullptr : static_cast <CObjBase*> (_vCurContObjs[_idxObj]);
 		if (_pObj == nullptr)
 		{
 			if (!_fInertToggle && _fAllShow)
 			{
 				_fInertToggle = true;
-				_pCurCont = &_pSector->m_Chars_Disconnect;
+				_vCurContObjs = _pSector->m_Chars_Disconnect.GetIterationSafeCont();
+				_idxObjMax = _vCurContObjs.size();
 				_idxObj = 0;
 
-				_pObj = (_idxObj >= _pCurCont->GetContentCount()) ? nullptr : static_cast <CObjBase*> (_pCurCont->GetContentIndex(_idxObj));
+				_pObj = (_idxObj >= _idxObjMax) ? nullptr : static_cast <CObjBase*> (_vCurContObjs[_idxObj]);
 				if (_pObj != nullptr)
 					goto jumpover;
 			}

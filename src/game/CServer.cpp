@@ -1318,6 +1318,20 @@ bool CServer::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 		// we're trying to retrieve a property from an invalid account
 		return false;
 	}
+	else if (!strnicmp(ptcKey, "GMPAGE.", 7))
+	{
+		ptcKey += 7;
+		size_t iNum = Exp_GetVal(ptcKey);
+		if (iNum >= g_World.m_GMPages.GetContentCount())
+			return false;
+
+		CGMPage* pGMPage = static_cast<CGMPage*>(g_World.m_GMPages.GetContentAt(iNum));
+		if (!pGMPage)
+			return false;
+
+		SKIP_SEPARATORS(ptcKey);
+		return pGMPage->r_WriteVal(ptcKey, sVal, pSrc);
+	}
 
 	// Just do stats values for now.
     if (!fNoCallChildren)
@@ -1345,6 +1359,7 @@ enum SV_TYPE
 #endif
 	SV_EXPORT,
 	SV_GARBAGE,
+	SV_GMPAGES,
 	SV_HEARALL,
 	SV_IMPORT,
 	SV_INFORMATION,
@@ -1383,6 +1398,7 @@ lpctstr const CServer::sm_szVerbKeys[SV_QTY+1] =
 #endif
 	"EXPORT",
 	"GARBAGE",
+	"GMPAGES",
 	"HEARALL",
 	"IMPORT",
 	"INFORMATION",
@@ -1457,8 +1473,22 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			}
 			return false;
 		}
+		else if (!strnicmp(ptcKey, "GMPAGE.", 7))
+		{
+			ptcKey += 7;
+			size_t iNum = Exp_GetVal(ptcKey);
+			if (iNum >= g_World.m_GMPages.GetContentCount())
+				return false;
 
-		if ( !strnicmp(ptcKey, "CLEARVARS", 9) )
+			CGMPage* pGMPage = static_cast<CGMPage*>(g_World.m_GMPages.GetContentAt(iNum));
+			if (!pGMPage)
+				return false;
+
+			SKIP_SEPARATORS(ptcKey);
+			CScript script(ptcKey, s.GetArgStr());
+			return pGMPage->r_LoadVal(script);
+		}
+		else if (!strnicmp(ptcKey, "CLEARVARS", 9))
 		{
 			ptcKey = s.GetArgStr();
 			SKIP_SEPARATORS(ptcKey);
@@ -1471,6 +1501,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 	{
 		case SV_ACCOUNTS:
 		case SV_CHARS:
+		case SV_GMPAGES:
 		case SV_ITEMS:
 		case SV_SAVECOUNT:
 		case SV_TIME:

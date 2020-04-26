@@ -55,9 +55,11 @@ bool CChar::Attacker_Add(CChar * pChar, int threat)
         //{
         if (!( g_Cfg.m_iEmoteFlags & EMOTEF_ATTACKER ))
         {
-    	  	HUE_TYPE emoteHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_COLOR"));
-	       	if (this && this->m_EmoteHueOverride) //Set EMOTECOLOROVERRIDE to ATTACKERS
-       			emoteHue = this->m_EmoteHueOverride;
+    	  	HUE_TYPE emoteHue;
+	       	if (m_EmoteHueOverride != 0) //Set EMOTECOLOROVERRIDE to ATTACKERS
+       			emoteHue = m_EmoteHueOverride;
+            else
+                emoteHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_COLOR"));
 	        sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_COMBAT_ATTACKO), GetName(), pChar->GetName());
     	    UpdateObjMessage(z, nullptr, pChar->GetClient(), emoteHue, TALKMODE_EMOTE);
 		}

@@ -84,15 +84,15 @@ void CSObjCont::InsertContentHead(CSObjContRec* pNewRec)
 
 void CSObjCont::InsertContentTail(CSObjContRec* pNewRec)
 {
-    pNewRec->RemoveSelf();
-    pNewRec->m_pParent = this;
-
 #ifdef _DEBUG
 	const_iterator itEnd = cend();
 	const_iterator itObjRec = std::find(cbegin(), itEnd, pNewRec);
 	ASSERT(itObjRec == itEnd);
 	// Avoid duplicates, thus delete-ing objects multiple times
 #endif
+
+    pNewRec->RemoveSelf();
+    pNewRec->m_pParent = this;
 
     _Contents.emplace_back(pNewRec);
 }
@@ -107,7 +107,7 @@ void CSObjCont::OnRemoveObj(CSObjContRec* pObjRec)	// Override this = called whe
 
 	if (!_fIsClearing)
 	{
-		iterator itEnd = end();
+		const iterator itEnd = end();
 		iterator itObjRec = std::find(begin(), itEnd, pObjRec);
 		ASSERT(itObjRec != itEnd);
 		_Contents.erase(itObjRec);

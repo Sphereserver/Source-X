@@ -110,7 +110,7 @@ SET(ALL_SRCS
 	${uofiles_SRCS}
 	${common_SRCS}
 	${resource_SRCS}
-	${resourceblocks_SRCS}
+	${resourcesections_SRCS}
 	${network_SRCS}
 	${crypto_SRCS}
 	${sphere_SRCS}

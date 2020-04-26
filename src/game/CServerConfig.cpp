@@ -1,9 +1,9 @@
-﻿#include "../common/resource/blocks/CDialogDef.h"
-#include "../common/resource/blocks/CItemTypeDef.h"
-#include "../common/resource/blocks/CSkillClassDef.h"
-#include "../common/resource/blocks/CRandGroupDef.h"
-#include "../common/resource/blocks/CRegionResourceDef.h"
-#include "../common/resource/blocks/CResourceNamedDef.h"
+﻿#include "../common/resource/sections/CDialogDef.h"
+#include "../common/resource/sections/CItemTypeDef.h"
+#include "../common/resource/sections/CSkillClassDef.h"
+#include "../common/resource/sections/CRandGroupDef.h"
+#include "../common/resource/sections/CRegionResourceDef.h"
+#include "../common/resource/sections/CResourceNamedDef.h"
 #include "../common/sphere_library/CSFileList.h"
 #include "../common/CException.h"
 #include "../common/CUOInstall.h"
@@ -319,7 +319,7 @@ CServerConfig::~CServerConfig()
 bool CServerConfig::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CServerConfig::r_GetRef");
-	tchar * pszSep = const_cast<tchar*>(strchr( ptcKey, '(' ));	// acts like const_cast
+	tchar * pszSep = const_cast<tchar*>(strchr( ptcKey, '(' ));
 	if ( pszSep == nullptr )
 	{
 		pszSep = const_cast<tchar*>(strchr( ptcKey, '.' ));
@@ -401,7 +401,8 @@ bool CServerConfig::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 	{
 		ptcKey += strlen(ptcKey);
 	}
-	return true;
+
+	return (pRef != nullptr);
 }
 
 
@@ -914,7 +915,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 #define LOG_WARN_NOINIT(x)  if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) g_Log.EventWarn(x)
 #define LOG_ERR_NOINIT(x)   if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) g_Log.EventError(x)
 
-	int i = FindTableHeadSorted( s.GetKey(), reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf( sm_szLoadKeys )-1, sizeof(sm_szLoadKeys[0]));
+	int i = FindCAssocRegTableHeadSorted( s.GetKey(), reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf( sm_szLoadKeys )-1, sizeof(sm_szLoadKeys[0]));
 	if ( i < 0 )
 	{
 		if ( s.IsKeyHead( "REGEN", 5 ))			//	REGENx=<stat regeneration rate>
@@ -949,11 +950,9 @@ bool CServerConfig::r_LoadVal( CScript &s )
 
 				if ( g_MapList.IsMapSupported(nMapNumber) )
 				{
-					SKIP_SEPARATORS(pszStr);
-
 					if ( !strnicmp(pszStr, "ALLSECTORS", 10) )
 					{
-						int nSectors = g_MapList.GetSectorQty(nMapNumber);
+						const int nSectors = CSectorList::Get()->GetSectorQty(nMapNumber);
 						pszStr = s.GetArgRaw();
 
 						if ( pszStr && *pszStr )
@@ -961,35 +960,36 @@ bool CServerConfig::r_LoadVal( CScript &s )
 							CScript script(pszStr);
 							script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
 							script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
-							for ( int nIndex = 0; nIndex < nSectors; ++nIndex )
-								CWorldMap::GetSector(nMapNumber, nIndex)->r_Verb(script, &g_Serv);
+							for (int nIndex = 0; nIndex < nSectors; ++nIndex)
+							{
+								CSector* pSector = CWorldMap::GetSector(nMapNumber, nIndex);
+								ASSERT(pSector);
+								pSector->r_Verb(script, &g_Serv);
+							}
+
+							return true;
 						}
 
-						return true;
+						return false;
 					}
 					else if ( !strnicmp( pszStr, "SECTOR.",7 ) )
 					{
-						pszStr = pszStr + 7;
-						int iSecNumber = Exp_GetVal(pszStr);
-						int nSectors = g_MapList.GetSectorQty(nMapNumber);
-						SKIP_SEPARATORS(pszStr);
+                        pszStr = pszStr + 7;
+                        const int iSecNumber = Exp_GetVal(pszStr);
+                        pszStr = s.GetArgRaw();
+                        if (pszStr && *pszStr)
+                        {
+                            CSector* pSector = CWorldMap::GetSector(nMapNumber, iSecNumber);
+                            if (pSector)
+                            {
+                                CScript script(pszStr);
+                                script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
+                                script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
+                                return pSector->r_Verb(script, &g_Serv);
+                            }
 
-						if ((iSecNumber > 0) && (iSecNumber <=  nSectors))
-						{
-							pszStr = s.GetArgRaw();
-
-							if ( pszStr && *pszStr )
-							{
-								CScript script(pszStr);
-								script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
-								script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
-								CWorldMap::GetSector(nMapNumber, iSecNumber-1)->r_Verb(script, &g_Serv);
-							}
-						}
-						else
-							g_Log.EventError("Invalid Sector #%d for Map %d\n", iSecNumber, nMapNumber);
-
-						return true;
+                        }
+                        return false;
 					}
 				}
 			}
@@ -1442,7 +1442,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 	ADDTOCALLSTACK("CServerConfig::r_WriteVal");
 	EXC_TRY("WriteVal");
 	// Just do stats values for now.
-	int index = FindTableHeadSorted( ptcKey, reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf(sm_szLoadKeys) - 1, sizeof(sm_szLoadKeys[0]) );
+	int index = FindCAssocRegTableHeadSorted( ptcKey, reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf(sm_szLoadKeys) - 1, sizeof(sm_szLoadKeys[0]) );
 	if ( index < 0 )
 	{
 		if ( !strnicmp( ptcKey, "REGEN", 5 ))
@@ -1522,33 +1522,41 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			SKIP_SEPARATORS(pszCmd);
 			sVal.FormatVal(0);
 
-			if ( !*pszCmd )
-				sVal.FormatVal( g_MapList.IsMapSupported(iNumber) );
+			if (!*pszCmd)
+			{
+				sVal.FormatVal(g_MapList.IsMapSupported(iNumber));
+			}
 			else
 			{
-				if ( g_MapList.IsMapSupported(iNumber) )
+				if (g_MapList.IsMapSupported(iNumber))
 				{
-					if (!strnicmp(pszCmd,"BOUND.X", 7))
-						sVal.FormatVal( g_MapList.GetMapSizeX(iNumber) );
-					else if (!strnicmp(pszCmd,"BOUND.Y", 7))
-						sVal.FormatVal( g_MapList.GetMapSizeY(iNumber) );
-					else if (!strnicmp(pszCmd,"CENTER.X", 8))
-						sVal.FormatVal( g_MapList.GetMapCenterX(iNumber) );
-					else if (!strnicmp(pszCmd,"CENTER.Y", 8))
-						sVal.FormatVal( g_MapList.GetMapCenterY(iNumber) );
+					if (!strnicmp(pszCmd, "BOUND.X", 7))
+						sVal.FormatVal(g_MapList.GetMapSizeX(iNumber));
+					else if (!strnicmp(pszCmd, "BOUND.Y", 7))
+						sVal.FormatVal(g_MapList.GetMapSizeY(iNumber));
+					else if (!strnicmp(pszCmd, "CENTER.X", 8))
+						sVal.FormatVal(g_MapList.GetMapCenterX(iNumber));
+					else if (!strnicmp(pszCmd, "CENTER.Y", 8))
+						sVal.FormatVal(g_MapList.GetMapCenterY(iNumber));
 					else if (!strnicmp(pszCmd, "SECTOR.", 7))
 					{
 						pszCmd += 7;
+						const CSectorList* pSectors = CSectorList::Get();
+
 						if (!strnicmp(pszCmd, "SIZE", 4))
-							sVal.FormatVal(g_MapList.GetSectorSize(iNumber));
+							sVal.FormatVal(pSectors->GetSectorSize(iNumber));
 						else if (!strnicmp(pszCmd, "ROWS", 4))
-							sVal.FormatVal(g_MapList.GetSectorRows(iNumber));
+							sVal.FormatVal(pSectors->GetSectorRows(iNumber));
 						else if (!strnicmp(pszCmd, "COLS", 4))
-							sVal.FormatVal(g_MapList.GetSectorCols(iNumber));
+							sVal.FormatVal(pSectors->GetSectorCols(iNumber));
 						else if (!strnicmp(pszCmd, "QTY", 3))
-							sVal.FormatVal(g_MapList.GetSectorQty(iNumber));
+							sVal.FormatVal(pSectors->GetSectorQty(iNumber));
+						else
+							return false;
 					}
 				}
+				else
+					return false;
 			}
 
 			return true;
@@ -1568,15 +1576,8 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 					ptcKey = ptcKey + 6;
 					int iSecNumber = Exp_GetVal(ptcKey);
 					SKIP_SEPARATORS(ptcKey);
-					int nSectors = g_MapList.GetSectorQty(iMapNumber);
-
-					if ((iSecNumber > 0) && (iSecNumber <=  nSectors))
-						return( CWorldMap::GetSector(iMapNumber, iSecNumber-1)->r_WriteVal(ptcKey, sVal, pSrc) );
-					else
-					{
-						g_Log.EventError("Invalid Sector #%d for Map %d\n", iSecNumber, iMapNumber);
-						return false;
-					}
+					CSector* pSector = CWorldMap::GetSector(iMapNumber, iSecNumber);
+					return !pSector ? false : pSector->r_WriteVal(ptcKey, sVal, pSrc);
 				}
 			}
 			g_Log.EventError("Unsupported Map %d\n", iMapNumber);
@@ -2160,7 +2161,7 @@ bool CServerConfig::IsValidEmailAddressFormat( lpctstr pszEmail ) // static
 	if ( len2 != len1 )
 		return false;
 
-	tchar * pszAt = const_cast<tchar*>(strchr( pszEmail, '@' ));
+	lpctstr pszAt =strchr( pszEmail, '@' );
 	if ( ! pszAt )
 		return false;
 	if ( pszAt == pszEmail )

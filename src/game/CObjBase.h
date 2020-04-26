@@ -8,9 +8,9 @@
 
 #include "../common/resource/CResourceBase.h"
 #include "../common/resource/CResourceRef.h"
-#include "../common/CObjBaseTemplate.h"
 #include "../common/CScriptObj.h"
 #include "clients/CClientTooltip.h"
+#include "CObjBaseTemplate.h"
 #include "CTimedObject.h"
 #include "CEntity.h"
 #include "CBase.h"

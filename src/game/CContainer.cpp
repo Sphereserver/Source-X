@@ -1,12 +1,12 @@
 
 #include "../common/CException.h"
 #include "../common/CUID.h"
-#include "../common/CObjBaseTemplate.h"
 #include "../network/send.h"
 #include "chars/CChar.h"
 #include "items/CItem.h"
 #include "items/CItemContainer.h"
 #include "items/CItemVendable.h"
+#include "CObjBaseTemplate.h"
 #include "triggers.h"
 #include "CContainer.h"
 

@@ -25,10 +25,6 @@ void CUOMapList::Clear()
     memset(m_mapid,             -1,     sizeof(m_mapid));
     memset(m_sectorsize,        -1,     sizeof(m_sectorsize));
 
-    memset(_sectorcolumns,      -1,     sizeof(_sectorcolumns));
-    memset(_sectorrows,         -1,     sizeof(_sectorrows));
-    memset(_sectorqty,          -1,     sizeof(_sectorqty));
-
     constexpr int iMaxMapFileIdx = 6;
     for (int i = 0; i < iMaxMapFileIdx; ++i)
         ResetMap(i, -1, -1, -1, i, i);
@@ -232,13 +228,6 @@ int CUOMapList::CalcSectorQty(int map) const
     return (CalcSectorCols(map) * CalcSectorRows(map));
 }
 
-int CUOMapList::GetSectorQty(int map) const
-{
-    ASSERT(IsInitialized(map));
-    ASSERT(_sectorqty[map] != -1);
-    return _sectorqty[map];
-}
-
 int CUOMapList::CalcSectorCols(int map) const
 {
     ASSERT(IsMapSupported(map));
@@ -249,20 +238,6 @@ int CUOMapList::CalcSectorRows(int map) const
 {
     ASSERT(IsMapSupported(map));
     return (m_sizey[map] / GetSectorSize(map));
-}
-
-int CUOMapList::GetSectorCols(int map) const
-{
-    ASSERT(IsMapSupported(map));
-    ASSERT(_sectorcolumns[map] != -1);
-    return _sectorcolumns[map];
-}
-
-int CUOMapList::GetSectorRows(int map) const
-{
-    ASSERT(IsMapSupported(map));
-    ASSERT(_sectorrows[map] != -1);
-    return _sectorrows[map];
 }
 
 int CUOMapList::GetMapCenterX(int map) const

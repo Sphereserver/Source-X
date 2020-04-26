@@ -1,7 +1,7 @@
 // An item is targetted.
 
 #include "../../network/send.h"
-#include "../resource/blocks/CItemTypeDef.h"
+#include "../resource/sections/CItemTypeDef.h"
 #include "../chars/CChar.h"
 #include "../items/CItemMulti.h"
 #include "../items/CItemVendable.h"

@@ -738,7 +738,7 @@ void CChar::UpdateStamFlag() const
 void CChar::UpdateStatVal( STAT_TYPE type, int iChange, ushort uiLimit )
 {
 	ADDTOCALLSTACK("CChar::UpdateStatVal");
-	int iValPrev = Stat_GetVal(type);
+	const int iValPrev = Stat_GetVal(type);
 	int iVal = iValPrev + iChange;
 
 	if ( iVal < 0 )
@@ -757,6 +757,8 @@ void CChar::UpdateStatVal( STAT_TYPE type, int iChange, ushort uiLimit )
     }
 	if ( iVal == iValPrev )
 		return;
+	if (iVal > UINT16_MAX)
+		iVal = UINT16_MAX;
 
 	Stat_SetVal(type, (ushort)iVal);
 
@@ -1698,22 +1700,19 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	}
 
 	CItemCorpse * pCorpse = dynamic_cast<CItemCorpse *>(pObjTop);
-	if ( pCorpse && pCorpse->m_uidLink == GetUID() )
+	if (pCorpse)
 	{
-		UINT64 iRevealFlags = STATF_HIDDEN | STATF_SLEEPING;
-		if ( g_Cfg.m_iRevealFlags & REVEALF_LOOTINGSELF )
-			iRevealFlags |= STATF_INVISIBLE;
-
-		Reveal(iRevealFlags);
-	}
-	else
-	{
-		CheckCorpseCrime(pCorpse, true, false);
-		UINT64 iRevealFlags = STATF_HIDDEN | STATF_SLEEPING;
-		if (g_Cfg.m_iRevealFlags & REVEALF_LOOTINGOTHERS)
-			iRevealFlags |= STATF_INVISIBLE;
-
-		Reveal(iRevealFlags);
+		if (pCorpse->m_uidLink == GetUID())
+		{
+			if (g_Cfg.m_iRevealFlags & REVEALF_LOOTINGSELF)
+				Reveal();
+		}
+		else
+		{
+			CheckCorpseCrime(pCorpse, true, false);
+			if (g_Cfg.m_iRevealFlags & REVEALF_LOOTINGOTHERS)
+				Reveal();
+		}
 	}
 
 	const word iAmountMax = pItem->GetAmount();
@@ -2914,13 +2913,12 @@ bool CChar::SetPoison( int iSkill, int iHits, CChar * pCharSrc )
 	}
 	else
 	{
-		pPoison = Spell_Effect_Create(SPELL_Poison, LAYER_FLAG_Poison, iSkill, (1 + Calc_GetRandLLVal(2)), pCharSrc, false);
+		int64 iPoisonDuration = (1 + Calc_GetRandLLVal(2)) * TENTHS_PER_SEC;	//in TENTHS of second
+		pPoison = Spell_Effect_Create(SPELL_Poison, LAYER_FLAG_Poison, iSkill, iPoisonDuration, pCharSrc, false);
 		if ( !pPoison )
 			return false;
 		LayerAdd(pPoison, LAYER_FLAG_Poison);
 	}
-
-	pPoison->SetTimeoutS(5 + Calc_GetRandLLVal(4));
 
 	if (!IsSetMagicFlags(MAGICF_OSIFORMULAS))
 	{
@@ -3856,8 +3854,7 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocation,
 			return false;
 
 		// We cannot put this char in non-disconnect state.
-		SetDisconnected();
-        pSector->m_Chars_Disconnect.AddCharDisconnected(this);  // the sector may be different now!
+		SetDisconnected(pSector);
         SetTopPoint(pt);
 		return true;
 	}
@@ -3874,7 +3871,9 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocation,
 	const CPointMap ptOld(GetTopPoint());
     SetTopPoint(pt);
 
-    bool fSectorChanged = GetTopPoint().GetSector()->MoveCharToSector(this);
+	CSector* pNewSector = GetTopPoint().GetSector();
+	ASSERT(pNewSector);
+    bool fSectorChanged = pNewSector->MoveCharToSector(this);
 
 	if ( !m_fClimbUpdated || fForceFix )
 		FixClimbHeight();

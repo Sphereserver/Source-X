@@ -6,9 +6,9 @@
 #ifndef _INC_CSECTOR_H
 #define _INC_CSECTOR_H
 
-#include "../common/CSectorTemplate.h"
 #include "../common/CScriptObj.h"
 #include "CSectorEnviron.h"
+#include "CSectorTemplate.h"
 #include "CTimedObject.h"
 
 
@@ -49,6 +49,7 @@ private:
 	CSector& operator=(const CSector& other);
 
 public:
+	virtual void Init(int index, uchar map, short x, short y) override;
 	virtual bool OnTick();
     inline virtual bool IsDeleted() const override
     {

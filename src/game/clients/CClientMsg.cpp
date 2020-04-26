@@ -11,6 +11,7 @@
 #include "../items/CItemMultiCustom.h"
 #include "../components/CCSpawn.h"
 #include "../CSector.h"
+#include "../CServer.h"
 #include "../CWorld.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
@@ -2030,6 +2031,10 @@ void CClient::addMapWaypoint(CObjBase *pObj, MAPWAYPOINT_TYPE type) const
 
     if (type)
     {
+		// Classic clients only support MAPWAYPOINT_Remove and MAPWAYPOINT_Healer
+		if ((type != MAPWAYPOINT_Healer) && !GetNetState()->isClientKR() && !GetNetState()->isClientEnhanced())
+			return;
+
         if (PacketWaypointAdd::CanSendTo(GetNetState()))
             new PacketWaypointAdd(this, pObj, type);
     }
@@ -2689,7 +2694,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 
 	if ( IsPriv(PRIV_GM_PAGE) && !g_World.m_GMPages.IsContainerEmpty() )
 	{
-		sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_GMPAGES), (int)(g_World.m_GMPages.GetContentCount()), g_Cfg.m_cCommandPrefix);
+		sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_GMPAGE_PENDING), (int)(g_World.m_GMPages.GetContentCount()), g_Cfg.m_cCommandPrefix);
 		addSysMessage(z);
 	}
 	if ( IsPriv(PRIV_JAILED) )
@@ -2734,17 +2739,18 @@ byte CClient::Setup_Play( uint iSlot ) // After hitting "Play Character" button
 
 	DEBUG_MSG(( "%x:Setup_Play slot %u\n", GetSocketID(), iSlot ));
 
-	if ( ! GetAccount())
+	CAccount* pAccount = GetAccount();
+	if ( !pAccount )
 		return( PacketLoginError::Invalid );
 	if ( iSlot >= CountOf(m_tmSetupCharList))
 		return( PacketLoginError::BadCharacter );
 
 	CChar * pChar = m_tmSetupCharList[ iSlot ].CharFind();
-	if ( ! GetAccount()->IsMyAccountChar( pChar ))
+	if ( !pAccount->IsMyAccountChar( pChar ))
 		return( PacketLoginError::BadCharacter );
 
-	CChar * pCharLast = GetAccount()->m_uidLastChar.CharFind();
-	if ( pCharLast && GetAccount()->IsMyAccountChar( pCharLast ) && GetAccount()->GetPrivLevel() <= PLEVEL_GM &&
+	CChar * pCharLast = pAccount->m_uidLastChar.CharFind();
+	if ( pCharLast && pAccount->IsMyAccountChar( pCharLast ) && pAccount->GetPrivLevel() <= PLEVEL_GM &&
 		! pCharLast->IsDisconnected() && (pChar->GetUID() != pCharLast->GetUID()))
 	{
 		addIdleWarning(PacketWarningMessage::CharacterInWorld);
@@ -2753,8 +2759,8 @@ byte CClient::Setup_Play( uint iSlot ) // After hitting "Play Character" button
 
 	// LastLogged update
 	CSTime datetime = CSTime::GetCurrentTime();
-	GetAccount()->m_TagDefs.SetStr("LastLogged", false, GetAccount()->m_dateLastConnect.Format(nullptr));
-	GetAccount()->m_dateLastConnect = datetime;
+	pAccount->m_TagDefs.SetStr("LastLogged", false, pAccount->m_dateLastConnect.Format(nullptr));
+	pAccount->m_dateLastConnect = datetime;
 
 	return Setup_Start( pChar );
 }

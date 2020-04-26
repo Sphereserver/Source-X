@@ -14,16 +14,30 @@
 /* Reverse container wrapper */
 
 template <typename T>
-class reverse_cont
+class cont_reversed
 {
     T _iterable;
 
 public:
-    explicit reverse_cont(T&& iterable) noexcept : _iterable{ std::move(iterable) } {}
+    explicit cont_reversed(T&& iterable) noexcept : _iterable{ std::move(iterable) } {}
 
     inline auto begin() const noexcept  { return std::rbegin(_iterable); }
     inline auto end() const noexcept    { return std::rend(_iterable);   }
 };
+
+
+template <typename T>
+class cont_reverse_iterate
+{
+    T & _iterable;
+
+public:
+    explicit cont_reverse_iterate(T &iterable) noexcept : _iterable{ iterable } {}
+
+    inline auto begin() const noexcept  { return std::rbegin(_iterable); }
+    inline auto end() const noexcept    { return std::rend(_iterable); }
+};
+
 
 
 /* CSObjCont */
@@ -100,7 +114,7 @@ public:
     *   removing the last element is more efficient than removing the first element (since we are using std::vector as BASECONT).
     * @return A copy of the base container, which will be iterated in reverse order.
     */
-    inline reverse_cont<BASECONT> GetIterationSafeContReverse() const noexcept;
+    inline cont_reversed<BASECONT> GetIterationSafeContReverse() const noexcept;
 
     ///@}
 
@@ -188,9 +202,9 @@ BASECONT CSObjCont::GetIterationSafeCont() const noexcept
     return _Contents;   // Return a copy of the base container
 }
 
-reverse_cont<BASECONT> CSObjCont::GetIterationSafeContReverse() const noexcept
+cont_reversed<BASECONT> CSObjCont::GetIterationSafeContReverse() const noexcept
 {
-    return reverse_cont<BASECONT>(BASECONT(_Contents)); // Return a reverse-iterable copy of the base container
+    return cont_reversed<BASECONT>(BASECONT(_Contents)); // Return a reverse-iterable copy of the base container
 }
 
 bool CSObjCont::IsContainerEmpty() const noexcept

@@ -1,5 +1,5 @@
 #include "../game/uo_files/CUOMapList.h"
-#include "../game/CSector.h"
+#include "../game/CSectorList.h"
 #include "../game/CServer.h"
 #include "../game/CWorldMap.h"
 #include "CLog.h"
@@ -270,7 +270,9 @@ CSector * CRect::GetSector( int i ) const	// ge all the sectors that make up thi
 	// RETURN: nullptr = no more
 
 	// Align new rect.
-    const int iSectorSize = g_MapList.GetSectorSize(m_map);
+	const CSectorList* pSectors = CSectorList::Get();
+
+    const int iSectorSize = pSectors->GetSectorSize(m_map);
 	CRectMap rect;
 	rect.m_left = m_left &~ (iSectorSize-1);
 	rect.m_right = ( m_right | (iSectorSize-1)) + 1;
@@ -279,12 +281,12 @@ CSector * CRect::GetSector( int i ) const	// ge all the sectors that make up thi
 	rect.m_map = m_map;
 	rect.NormalizeRectMax();
 
-    const int iSectorCols = g_MapList.GetSectorCols(m_map);
+    const int iSectorCols = pSectors->GetSectorCols(m_map);
 	const int width = (rect.GetWidth()) / iSectorSize;
-	ASSERT(width <= iSectorCols);
 	const int height = (rect.GetHeight()) / iSectorSize;
 #ifdef _DEBUG
-	const int iSectorRows = g_MapList.GetSectorRows(m_map);
+	ASSERT(width <= iSectorCols);
+	const int iSectorRows = pSectors->GetSectorRows(m_map);
 	ASSERT(height <= iSectorRows);
 #endif
 
@@ -293,12 +295,12 @@ CSector * CRect::GetSector( int i ) const	// ge all the sectors that make up thi
 	if ( i >= ( height * width ))
 	{
 		if ( ! i )
-			return CWorldMap::GetSector(m_map, iBase);
+			return pSectors->GetSector(m_map, iBase);
 		return nullptr;
 	}
 
 	const int indexoffset = (( i / width ) * iSectorCols) + ( i % width );
-	return CWorldMap::GetSector(m_map, iBase + indexoffset);
+	return pSectors->GetSector(m_map, iBase + indexoffset);
 }
 
 

@@ -656,10 +656,7 @@ public:
 
 	virtual int GetWeight(word amount = 0) const;
 
-    virtual void SetTimeout(int64 iMsecs);
-    virtual void SetTimeoutS(int64 iSeconds);
-    virtual void SetTimeoutT(int64 iTicks);
-    virtual void SetTimeoutD(int64 iTenths);
+    virtual void SetTimeout(int64 iMsecs) override;
 
 	virtual void OnMoveFrom();
 	virtual bool MoveTo(const CPointMap& pt, bool fForceFix = false); // Put item on the ground here.

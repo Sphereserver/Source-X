@@ -74,12 +74,12 @@ void CTimedObject::SetTimeout(int64 iDelayInMsecs)
 
 void CTimedObject::SetTimeoutS(int64 iSeconds)
 {
-    SetTimeout(iSeconds * MSECS_PER_SEC);
+    SetTimeout(iSeconds * MSECS_PER_SEC);   // It calls the right virtual for SetTimeout
 }
 
 void CTimedObject::SetTimeoutD(int64 iTenths)
 {
-    SetTimeout(iTenths * MSECS_PER_TENTH);
+    SetTimeout(iTenths * MSECS_PER_TENTH);  // It calls the right virtual for SetTimeout
 }
 
 int64 CTimedObject::GetTimerDiff() const
@@ -100,20 +100,6 @@ int64 CTimedObject::GetTimerAdjusted() const
 
     return (iDiffInMsecs);
 }
-
-// We shouldn't really use this
-/*
-int64 CTimedObject::GetTimerTAdjusted() const
-{
-    // RETURN: time in ticks from now.
-    if (!IsTimerSet())
-        return -1;
-    int64 iDiffInMsecs = GetTimerDiff();
-    if (iDiffInMsecs < 0)
-        return 0;
-    return (iDiffInMsecs / MSECS_PER_TICK);
-}
-*/
 
 int64 CTimedObject::GetTimerDAdjusted() const
 {

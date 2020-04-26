@@ -76,7 +76,6 @@ ullong Str_ToULL(lpctstr ptcStr, int base) noexcept
     return ret;
 }
 
-static_assert (THREAD_STRING_LENGTH > 100, "THREAD_STRING_LENGTH is too small and the Str_From* functions would write past the buffer.");
 #define STR_FROM_SET_ZEROSTR \
     if (hex)    { buf[0] = '0'; buf[1] = '0'; buf[2] = '\0'; } \
     else        { buf[0] = '0'; buf[1] = '\0'; }
@@ -299,7 +298,7 @@ int Str_CmpHeadI(lpctstr ptcFind, lpctstr ptcHere)
     }
 }
 
-static inline int Str_CmpHeadI_Table(lpctstr ptcFind, lpctstr ptcTable)
+static inline int Str_CmpHeadI_Table(lpctstr ptcFind, lpctstr ptcTable) noexcept
 {
     for (uint i = 0; ; ++i)
     {
@@ -615,32 +614,31 @@ tchar * Str_TrimWhitespace(tchar * pStr)
 
 // String utilities: String operations
 
-int FindTable(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, size_t uiElemSize)
+int FindTable(const lpctstr ptcFind, lpctstr const * pptcTable, int iCount) noexcept
 {
     // A non-sorted table.
     for (int i = 0; i < iCount; ++i)
     {
-        if (!strcmpi(*ppszTable, pszFind))
+        if (!strcmpi(pptcTable[i], ptcFind))
             return i;
-        ppszTable = (reinterpret_cast<lpctstr const*>(reinterpret_cast<const byte*>(ppszTable) + uiElemSize));
     }
     return -1;
 }
 
-int FindTableSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, size_t uiElemSize)
+int FindTableSorted(const lpctstr ptcFind, lpctstr const * pptcTable, int iCount) noexcept
 {
     // Do a binary search (un-cased) on a sorted table.
     // RETURN: -1 = not found
-    int iHigh = iCount - 1;
-    if (iHigh < 0)
+
+    if (iCount < 1)
         return -1;
+    int iHigh = iCount - 1;
     int iLow = 0;
 
     while (iLow <= iHigh)
     {
         const int i = (iHigh + iLow) >> 1;
-        const lpctstr pszName = *(reinterpret_cast<lpctstr const *>(reinterpret_cast<const byte *>(ppszTable) + (i*uiElemSize)));
-        const int iCompare = strcmpi(pszFind, pszName);
+        const int iCompare = strcmpi(ptcFind, pptcTable[i]);
         if (iCompare == 0)
             return i;
         if (iCompare > 0)
@@ -649,34 +647,91 @@ int FindTableSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount
             iHigh = i - 1;
     }
     return -1;
+
+    /*
+    // Alternative implementation. Logarithmic time, but better use of CPU instruction pipelining and branch prediction, at the cost of more comparations.
+    // It's worth running some benchmarks before switching to this.
+    lpctstr const* base = pptcTable;
+    if (iCount > 1)
+    {
+        do
+        {
+            const int half = iCount >> 1;
+            base = (strcmpi(base[half], ptcFind) < 0) ? &base[half] : base;
+            iCount -= half;
+        } while (iCount > 1);
+        base = (strcmpi(*base, ptcFind) < 0) ? &base[1] : base;
+    }
+    return (0 == strcmpi(*base, ptcFind)) ? int(base - pptcTable) : -1;
+    */
 }
 
-int FindTableHead(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, size_t uiElemSize) // REQUIRES the table to be UPPERCASE
+int FindTableHead(const lpctstr ptcFind, lpctstr const * pptcTable, int iCount) noexcept // REQUIRES the table to be UPPERCASE
 {
     for (int i = 0; i < iCount; ++i)
     {
-        const int iCompare = Str_CmpHeadI_Table(pszFind, *ppszTable);
-        if (!iCompare)
+        if (!Str_CmpHeadI_Table(pptcTable[i], ptcFind))
             return i;
-        ppszTable = reinterpret_cast<lpctstr const *>(reinterpret_cast<const byte *>(ppszTable) + uiElemSize);
     }
     return -1;
 }
 
-int FindTableHeadSorted(const lpctstr pszFind, lpctstr const * ppszTable, int iCount, size_t uiElemSize) // REQUIRES the table to be UPPERCASE, and sorted
+int FindTableHeadSorted(const lpctstr ptcFind, lpctstr const * pptcTable, int iCount) noexcept // REQUIRES the table to be UPPERCASE, and sorted
 {
     // Do a binary search (un-cased) on a sorted table.
     // Uses Str_CmpHeadI, which checks if we have reached, during comparison, ppszTable end ('\0'), ignoring if pszFind is longer (maybe has arguments?)
     // RETURN: -1 = not found
-    int iHigh = iCount - 1;
-    if (iHigh < 0)
+
+    if (iCount < 1)
         return -1;
+    int iHigh = iCount - 1;
     int iLow = 0;
 
     while (iLow <= iHigh)
     {
         const int i = (iHigh + iLow) >> 1;
-        const lpctstr pszName = *(reinterpret_cast<lpctstr const *>(reinterpret_cast<const byte *>(ppszTable) + (i*uiElemSize)));
+        const int iCompare = Str_CmpHeadI_Table(ptcFind, pptcTable[i]);
+        if (iCompare == 0)
+            return i;
+        if (iCompare > 0)
+            iLow = i + 1;
+        else
+            iHigh = i - 1;
+    }
+    return -1;
+
+    /*
+    // Alternative implementation. Logarithmic time, but better use of CPU instruction pipelining and branch prediction, at the cost of more comparations.
+    // It's worth running some benchmarks before switching to this.
+    lpctstr const* base = pptcTable;
+    if (iCount > 1)
+    {
+        do
+        {
+            const int half = iCount >> 1;
+            base = (Str_CmpHeadI_Table(base[half], ptcFind) < 0) ? &base[half] : base;
+            iCount -= half;
+        } while (iCount > 1);
+        base = (Str_CmpHeadI_Table(*base, ptcFind) < 0) ? &base[1] : base;
+    }
+    return (0 == Str_CmpHeadI_Table(*base, ptcFind)) ? int(base - pptcTable) : -1;
+    */
+}
+
+int FindCAssocRegTableHeadSorted(const lpctstr pszFind, lpctstr const* ppszTable, int iCount, size_t uiElemSize) noexcept // REQUIRES the table to be UPPERCASE, and sorted
+{
+    // Do a binary search (un-cased) on a sorted table.
+    // Uses Str_CmpHeadI, which checks if we have reached, during comparison, ppszTable end ('\0'), ignoring if pszFind is longer (maybe has arguments?)
+    // RETURN: -1 = not found
+    if (iCount < 1)
+        return -1;
+    int iHigh = iCount - 1;
+    int iLow = 0;
+
+    while (iLow <= iHigh)
+    {
+        const int i = (iHigh + iLow) >> 1;
+        const lpctstr pszName = *(reinterpret_cast<lpctstr const*>(reinterpret_cast<const byte*>(ppszTable) + (i * uiElemSize)));
         const int iCompare = Str_CmpHeadI_Table(pszFind, pszName);
         if (iCompare == 0)
             return i;

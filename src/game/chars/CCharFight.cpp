@@ -509,9 +509,9 @@ int CChar::CalcArmorDefense() const
 				{
 					/*
 					If CombatParryingEra flag PARRYERA_SCALING is enabled:
-					Displayed AR = ((Parrying Skill * Base AR of Shield) ÷ 200) + 1
+					Displayed AR = ((Parrying Skill * Base AR of Shield) Ã· 200) + 1
 					For all shields the maximum AR will be reached before your parry skill reaches GM level.
-					Also note that the maximum displayed AR for a shield cannot exceed Base AR ÷ 2.
+					Also note that the maximum displayed AR for a shield cannot exceed Base AR Ã· 2.
 					See: http://web.archive.org/web/20000306210936/http://uo.stratics.com:80/parr.htm
 					Else, CombatParryingEra flag PARRYERA_SCALING is disabled and only a flat 7% AR of the shield will be used.
 					*/
@@ -754,7 +754,7 @@ effect_bounce:
 		if ( IsStatFlag(STATF_FREEZE) )
 		{
 			StatFlag_Clear(STATF_FREEZE);
-			UpdateMode();
+			UpdateModeFlag(); //We are going to update char flags, not the sight...
 		}
 	}
 
@@ -1342,7 +1342,11 @@ void CChar::Fight_HitTry()
 	ASSERT( Fight_IsActive() );
 
 	CChar *pCharTarg = m_Fight_Targ_UID.CharFind();
-	if ( !pCharTarg || (pCharTarg && !pCharTarg->Fight_IsAttackable()) )
+	/*
+	  We still need to check if player is hidden/invisible but do not need to make anything if the attacker is player, 
+	  So we only check Statf_Dead,stone,insub and invul for players to avoid continue attack the not attackable targets.
+	*/
+	if ( !pCharTarg || (pCharTarg && pCharTarg->IsStatFlag(STATF_DEAD|STATF_STONE|STATF_INSUBSTANTIAL|STATF_INVUL)) || (pCharTarg->IsStatFlag(STATF_HIDDEN|STATF_INVISIBLE) && m_pNPC) )
 	{
 		// I can't hit this target, try switch to another one
 		if (m_pNPC)
@@ -1355,9 +1359,14 @@ void CChar::Fight_HitTry()
 					StatFlag_Clear(STATF_WAR);
 			}
 		}
+		else
+    {
+				Skill_Start(SKILL_NONE);
+				m_Fight_Targ_UID.InitUID();
+		}
 		return;
 	}
-
+	
     bool fIH_ShouldInstaHit = false, fIH_LastHitTag_Newer = false;
     int64 iIH_LastHitTag_FullHit = 0;  // Time required to perform a normal hit, without the PreHit delay reduction.
     if (m_atFight.m_iWarSwingState == WAR_SWING_EQUIPPING)
@@ -1517,28 +1526,27 @@ void CChar::Fight_SetDefaultSwingDelays()
 WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc, bool fSwingNoRange)
 {
 	ADDTOCALLSTACK("CChar::Fight_CanHit");
-	// Very basic check on possibility to hit
-	//return:
+	//	Very basic check on possibility to hit
+	//	return:
 	//  WAR_SWING_INVALID	= target is invalid
 	//	WAR_SWING_EQUIPPING	= recoiling weapon / swing made
 	//  WAR_SWING_READY		= Ready to hit, will switch to WAR_SWING_SWINGING ASAP.
 	//  WAR_SWING_SWINGING	= taking my swing now
-    if (IsDisconnected()) // Was the char deleted? (without this check, the server would crash!)
-    {
-        return WAR_SWING_INVALID;
-    }
-    else if (IsStatFlag(STATF_DEAD) || !pCharSrc->Fight_IsAttackable())
-    {
-        return WAR_SWING_INVALID;
-    }
-    else if (IsStatFlag(STATF_SLEEPING | STATF_FREEZE | STATF_STONE))
-    {
-        return WAR_SWING_EQUIPPING; // Can't hit now, but may want to hit later.
-    }
-    if (pCharSrc->m_pArea && pCharSrc->m_pArea->IsFlag(REGION_FLAG_SAFE))
-    {
-        return WAR_SWING_INVALID;
-    }
+  
+	// We can't hit them. Char deleted? Target deleted? Am I dead or stoned? or Is target Dead, stone, invul, insub or slept?
+	if (IsDisconnected() || pCharSrc->IsDisconnected() || IsStatFlag(STATF_DEAD | STATF_STONE) || (pCharSrc->IsStatFlag(STATF_DEAD | STATF_STONE | STATF_INVUL | STATF_INSUBSTANTIAL)))
+	{
+		return WAR_SWING_INVALID;
+	}
+	// We can't hit them right now. Because we can't see them or reach them (invis/hidden).
+	// Why the target is freeze we are change the attack type to swinging? Player can still attack paralyzed or sleeping characters.
+	// We make sure that the target is freeze or sleeping must wait ready for attack!
+	else if ( (pCharSrc->IsStatFlag(STATF_HIDDEN | STATF_INVISIBLE | STATF_SLEEPING)) || (IsStatFlag(STATF_FREEZE | STATF_SLEEPING)) ) // STATF_FREEZE | STATF_SLEEPING
+	{
+		return WAR_SWING_SWINGING;
+	}
+	if (pCharSrc->m_pArea && pCharSrc->m_pArea->IsFlag(REGION_FLAG_SAFE)) //Is area safe zone?
+		return WAR_SWING_INVALID;
 
     // Ignore the distance and the line of sight if fSwingNoRange is true, but only if i'm starting the swing. To land the hit i need to be in range.
     if (!fSwingNoRange ||
@@ -1791,7 +1799,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		m_atFight.m_iWarSwingState = WAR_SWING_SWINGING;
 		Reveal();
 
-		if ( !IsSetCombatFlags(COMBAT_NODIRCHANGE) )
+		if ( !IsSetCombatFlags(COMBAT_NODIRCHANGE) && CanSee(pCharTarg) )
         {
 			UpdateDir(pCharTarg);
         }

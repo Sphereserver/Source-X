@@ -1,5 +1,5 @@
 
-#include "../../common/resource/blocks/CDialogDef.h"
+#include "../../common/resource/sections/CDialogDef.h"
 #include "../../common/resource/CResourceLock.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"

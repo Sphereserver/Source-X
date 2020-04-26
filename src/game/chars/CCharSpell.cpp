@@ -4,6 +4,7 @@
 #include "../components/CCPropsItemEquippable.h"
 #include "../clients/CClient.h"
 #include "../CSector.h"
+#include "../CServer.h"
 #include "../CWorld.h"
 #include "../CWorldMap.h"
 #include "../triggers.h"
@@ -1744,7 +1745,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
                         iSecondsDelay = 2;
 						break;
 				}
-                SetTimeoutS(iSecondsDelay);
+				pItem->SetTimeoutS(iSecondsDelay);
 
 				static lpctstr const sm_Poison_MessageOSI[] =
 				{
@@ -3459,6 +3460,38 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		if ( !OnAttackedBy(pCharSrc, false, !pSpellDef->IsSpellType(SPELLFLAG_FIELD)) && !fReflecting )
 			return false;
 
+		// Check if the spell can be reflected
+		if ( pSpellDef->IsSpellType(SPELLFLAG_TARG_CHAR) && pCharSrc && (pCharSrc != this) )		// only spells with direct target can be reflected
+		{
+			if ( IsStatFlag(STATF_REFLECTION) )
+			{
+				Effect(EFFECT_OBJ, ITEMID_FX_GLOW, this, 10, 5);
+				CItem *pMagicReflect = LayerFind(LAYER_SPELL_Magic_Reflect);
+				if ( pMagicReflect )
+					pMagicReflect->Delete();
+
+				if ((pCharSrc->IsStatFlag(STATF_REFLECTION)) && (!IsSetMagicFlags(MAGICF_NOREFLECTOWN))) // caster is under reflection effect too, so the spell will reflect back to default target
+				{
+					pCharSrc->Effect(EFFECT_OBJ, ITEMID_FX_GLOW, pCharSrc, 10, 5);
+					pMagicReflect = pCharSrc->LayerFind(LAYER_SPELL_Magic_Reflect);
+					if ( pMagicReflect )
+						pMagicReflect->Delete();
+				}
+				else
+				{
+					pMagicReflect = pCharSrc->LayerFind(LAYER_SPELL_Magic_Reflect);
+					if (pMagicReflect && (IsSetMagicFlags(MAGICF_DELREFLECTOWN)))
+					{
+						pCharSrc->Effect(EFFECT_OBJ, ITEMID_FX_GLOW, pCharSrc, 10, 5);
+						pMagicReflect->Delete();
+					}
+					else {
+						pCharSrc->OnSpellEffect(spell, pCharSrc, iSkillLevel, pSourceItem, true);
+					}
+					return true;
+				}
+			}
+		}
 	}
 
 	if (pSpellDef->IsSpellType(SPELLFLAG_SCRIPTED))

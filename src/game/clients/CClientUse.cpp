@@ -32,8 +32,15 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			{
 				// protect from ,snoop - disallow picking from not opened containers
 				bool isInOpenedContainer = false;
-				if ( pContainer->GetType() == IT_EQ_TRADE_WINDOW )
+				if ( pContainer->IsType(IT_EQ_TRADE_WINDOW) )
+				{
 					isInOpenedContainer = true;
+				}
+				else if ( pContainer->IsType(IT_EQ_VENDOR_BOX) || pContainer->IsType(IT_EQ_BANK_BOX) )
+				{
+					if ( pContainer->m_itEqBankBox.m_pntOpen == GetChar()->GetTopPoint() )
+						isInOpenedContainer = true;
+				}
 				else
 				{
 					CClient::OpenedContainerMap_t::iterator itContainerFound = m_openedContainers.find(pContainer->GetUID().GetPrivateUID());

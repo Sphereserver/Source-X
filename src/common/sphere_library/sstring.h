@@ -209,7 +209,7 @@ tchar * Str_TrimWhitespace(tchar * pStr);
 * @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTable(const lpctstr pFind, lpctstr const * ppTable, int iCount, size_t uiElemSize = sizeof(lpctstr));
+int FindTable(const lpctstr pFind, lpctstr const * ppTable, int iCount) noexcept;
 
 /**
 * @brief Look for a string in a table (binary search).
@@ -219,7 +219,17 @@ int FindTable(const lpctstr pFind, lpctstr const * ppTable, int iCount, size_t u
 * @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTableSorted(const lpctstr pFind, lpctstr const * ppTable, int iCount, size_t uiElemSize = sizeof(lpctstr));
+int FindTableSorted(const lpctstr pFind, lpctstr const * ppTable, int iCount) noexcept;
+
+/**
+* @brief Look for a string header in a CAssocReg table (uses Str_CmpHeadI to compare instead of strcmpi).
+* @param pFind string we are looking for.
+* @param ppTable table where we are looking for the string.
+* @param iCount max iterations.
+* @param uiElemSize size of elements of the table.
+* @return the index of string if success, -1 otherwise.
+*/
+int FindCAssocRegTableHeadSorted(const lpctstr pFind, lpctstr const* ppTable, int iCount, size_t uiElemSize) noexcept;
 
 /**
 * @brief Look for a string header in a table (uses Str_CmpHeadI to compare instead of strcmpi).
@@ -229,7 +239,7 @@ int FindTableSorted(const lpctstr pFind, lpctstr const * ppTable, int iCount, si
 * @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTableHead(const lpctstr pFind, lpctstr const * ppTable, int iCount, size_t uiElemSize = sizeof(lpctstr));
+int FindTableHead(const lpctstr pFind, lpctstr const * ppTable, int iCount) noexcept;
 
 /**
 * @brief Look for a string header in a table (binary search, uses Str_CmpHeadI to compare instead of strcmpi).
@@ -239,7 +249,7 @@ int FindTableHead(const lpctstr pFind, lpctstr const * ppTable, int iCount, size
 * @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTableHeadSorted(const lpctstr pFind, lpctstr const * ppTable, int iCount, size_t uiElemSize = sizeof(lpctstr));
+int FindTableHeadSorted(const lpctstr pFind, lpctstr const * ppTable, int iCount) noexcept;
 
 /**
 * @param pszIn string to check.

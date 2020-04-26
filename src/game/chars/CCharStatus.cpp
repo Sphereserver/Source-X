@@ -5,6 +5,7 @@
 #include "../components/CCPropsItemWeapon.h"
 #include "../clients/CClient.h"
 #include "../items/CItemMulti.h"
+#include "../CServer.h"
 #include "../CWorldMap.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
@@ -732,16 +733,19 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 {
 	ADDTOCALLSTACK("CChar::GetSpellbook");
 	// Search for suitable book in hands first
-	CItem *pReturn = LayerFind(LAYER_HAND1);    // Let's do first a direct search for any book in hands.
-	if (pReturn && pReturn->IsTypeSpellbook() )
+	CItem* pReturn = nullptr;
+	CItem* pItem = LayerFind(LAYER_HAND1);    // Let's do first a direct search for any book in hands.
+	if (pItem && pItem->IsTypeSpellbook() )
     {
-	    CItemBase *pItemDef = pReturn->Item_GetDef();
+	    CItemBase *pItemDef = pItem->Item_GetDef();
 	    SPELL_TYPE min = (SPELL_TYPE)pItemDef->m_ttSpellbook.m_iOffset;
 	    SPELL_TYPE max = (SPELL_TYPE)(pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells);
 	    if ( (iSpell > min) && (iSpell <= max) ) //Had to replace < with <= otherwise the spell would not be considered a valid one.
 	    {
-		    if (pReturn->IsSpellInBook(iSpell) )	//We found a book with this same spell, nothing more to do.
-			    return pReturn;
+		    if (pItem->IsSpellInBook(iSpell) )	//We found a book with this same spell, nothing more to do.
+			    return pItem;
+			else // I did not find the spell, but this book is of the same school ... so i'll return this book if none better is found (NOTE: some book must be returned or the code will think that i don't have any book).
+		    	pReturn = pItem;
 		}
     }
 
@@ -751,7 +755,7 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 	{
 		for (CSObjContRec* pObjRec : *pPack)
 		{
-			CItem* pItem = static_cast<CItem*>(pObjRec);
+			pItem = static_cast<CItem*>(pObjRec);
 			if ( !pItem->IsTypeSpellbook() )
 				continue;
             // Found a book, let's find each magic school's offsets to search for the desired spell.
@@ -762,8 +766,8 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 			{
 				if ( pItem->IsSpellInBook(iSpell) )	//I found a book with this spell, nothing more to do.
 					return pItem;
-				else
-					pReturn = pItem;	// I did not find the spell, but this book is of the same school ... so i'll return this book if none better is found (NOTE: some book must be returned or the code will think that i don't have any book).
+				else // I did not find the spell, but this book is of the same school ... so i'll return this book if none better is found (NOTE: some book must be returned or the code will think that i don't have any book).
+					pReturn = pItem;
 			}
 		}
 	}

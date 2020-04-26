@@ -1,7 +1,7 @@
 
 // Actions specific to a Player.
 
-#include "../../common/resource/blocks/CSkillClassDef.h"
+#include "../../common/resource/sections/CSkillClassDef.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
 #include "../clients/CClient.h"
@@ -11,7 +11,6 @@
 #include "../CWorldGameTime.h"
 #include "CChar.h"
 #include "CCharNPC.h"
-#include "CCharPlayer.h"
 
 
 lpctstr const CCharPlayer::sm_szLoadKeys[CPC_QTY+1] =
@@ -26,6 +25,7 @@ lpctstr const CCharPlayer::sm_szLoadKeys[CPC_QTY+1] =
 CCharPlayer::CCharPlayer(CChar *pChar, CAccount *pAccount) : m_pAccount(pAccount)
 {
     m_SpeechHue = 0;
+    m_EmoteHue = 0;
 	m_wDeaths = m_wMurders = 0;
 	m_speedMode = 0;
 	m_pflag = 0;
@@ -212,6 +212,9 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
         case CPC_SPEECHCOLOR:
             sVal.FormatWVal( m_SpeechHue );
             return true;
+        case CPC_EMOTECOLOR:
+        	sVal.FormatWVal( m_EmoteHue );
+        	return true;
 		case CPC_DEATHS:
 			sVal.FormatVal( m_wDeaths );
 			return true;
@@ -327,57 +330,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 
 	lpctstr ptcKey = s.GetKey();
 
-	if ( !strnicmp(ptcKey, "GMPAGE", 6) )		//	GM pages
-	{
-		ptcKey += 6;
-		if ( *ptcKey == '.' )						//	GMPAGE.*
-		{
-			SKIP_SEPARATORS(ptcKey);
-			size_t index = Exp_GetVal(ptcKey);
-			if ( index >= g_World.m_GMPages.GetContentCount() )
-				return false;
-
-			CGMPage* pPage = static_cast <CGMPage*> (g_World.m_GMPages.GetContentAt(index));
-			if ( pPage == nullptr )
-				return false;
-
-			SKIP_SEPARATORS(ptcKey);
-			if ( !strnicmp(ptcKey, "HANDLE", 6) )
-			{
-				CChar *ppChar = pChar;
-				lpctstr pszArgs = s.GetArgStr(); //Moved here because of error with quoted strings!?!?
-				if ( *pszArgs )
-					ppChar = dynamic_cast<CChar*>(g_World.FindUID(s.GetArgVal()));
-
-				if ( ppChar == nullptr )
-					return false;
-
-				CClient *pClient = ppChar->GetClient();
-				if ( pClient == nullptr )
-					return false;
-
-				pPage->SetGMHandler(pClient);
-			}
-			else if ( !strnicmp(ptcKey, "DELETE", 6) )
-			{
-				delete pPage;
-			}
-			else if ( pPage->FindGMHandler() )
-			{
-				CClient* pClient = pChar->GetClient();
-				if ( pClient != nullptr && pClient->GetChar() != nullptr )
-					pClient->Cmd_GM_PageCmd(ptcKey);
-			}
-			else
-			{
-				return false;
-			}
-
-			return true;
-		}
-		return false;
-	}
-	else if ( ( !strnicmp(ptcKey, "GUILD", 5) ) || ( !strnicmp(ptcKey, "TOWN", 4) ) )
+	if ( ( !strnicmp(ptcKey, "GUILD", 5) ) || ( !strnicmp(ptcKey, "TOWN", 4) ) )
 	{
 		bool bIsGuild = !strnicmp(ptcKey, "GUILD", 5);
 		ptcKey += bIsGuild ? 5 : 4;
@@ -469,6 +422,9 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
         case CPC_SPEECHCOLOR:
             m_SpeechHue = (HUE_TYPE)s.GetArgWVal();
             return true;
+        case CPC_EMOTECOLOR:
+        	m_EmoteHue = (HUE_TYPE)s.GetArgWVal();
+        	return true;
 		case CPC_DEATHS:
 			m_wDeaths = (word)(s.GetArgVal());
 			return true;
@@ -569,7 +525,9 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 		s.WriteKeyHex("LIGHT", m_LocalLight);
     if ( m_SpeechHue )
         s.WriteKeyVal("SPEECHCOLOR", m_SpeechHue);
-
+    if ( m_EmoteHue )
+    	s.WriteKeyVal("EMOTECOLOR", m_EmoteHue);
+        
 	EXC_SET_BLOCK("saving dynamic speech");
 	if (!m_Speech.empty())
 	{

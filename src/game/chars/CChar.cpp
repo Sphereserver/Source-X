@@ -3,7 +3,6 @@
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
 #include "../../common/CUID.h"
-#include "../../common/CObjBaseTemplate.h"
 #include "../../common/CRect.h"
 #include "../../common/CLog.h"
 #include "../../sphere/ProfileTask.h"
@@ -29,6 +28,7 @@
 #include "CChar.h"
 #include "CCharBase.h"
 #include "CCharNPC.h"
+#include <algorithm>
 
 
 lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
@@ -481,7 +481,7 @@ CClient * CChar::GetClient() const
 }
 
 // Client logged out or NPC is dead.
-void CChar::SetDisconnected()
+void CChar::SetDisconnected(CSector* pNewSector)
 {
 	ADDTOCALLSTACK("CChar::SetDisconnected");
     if (IsClient())
@@ -499,9 +499,18 @@ void CChar::SetDisconnected()
         return;
 
     RemoveFromView();	// Remove from views.
-    MoveToRegion(nullptr,false);
+    MoveToRegion(nullptr, false);
 
-    GetTopSector()->m_Chars_Disconnect.AddCharDisconnected( this );
+	CSector* pCurSector = GetTopPoint().GetSector();
+	if (pNewSector && (pNewSector != pCurSector))
+	{
+		pNewSector->m_Chars_Disconnect.AddCharDisconnected(this);
+	}
+	else
+	{
+		ASSERT(pCurSector);
+		pCurSector->m_Chars_Disconnect.AddCharDisconnected(this);
+	}
 }
 
 void CChar::ClearPlayer()
@@ -687,24 +696,30 @@ int CChar::IsWeird() const
 // Get the Z we should be at
 char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
 {
-	if ( !dwBlockFlags )
-		dwBlockFlags = GetMoveBlockFlags();
-
 	const dword dwCan = GetMoveBlockFlags();
+
+	if ( !dwBlockFlags )
+		dwBlockFlags = dwCan;
+	
     if (dwCan == 0xFFFFFFFF)
         return pt.m_z;
 	if ( dwCan & CAN_C_WALK )
 		dwBlockFlags |= CAN_I_CLIMB; // If we can walk than we can climb. Ignore CAN_C_FLY at all here
 
-    height_t iHeightMount = GetHeightMount( false );
-	CServerMapBlockState block( dwBlockFlags, pt.m_z, pt.m_z + m_zClimbHeight + iHeightMount, pt.m_z + m_zClimbHeight + 2, iHeightMount );
+	const short iZClimbed = pt.m_z + m_zClimbHeight;
+    const height_t uiHeightMount = GetHeightMount( false );
+
+	const int iBlockMaxHeight = std::max(int(iZClimbed + uiHeightMount), int(INT8_MAX));
+	const height_t uiClimbHeight = height_t(std::max(short(iZClimbed + 2), short(UINT8_MAX)));
+
+	CServerMapBlockState block( dwBlockFlags, pt.m_z, iBlockMaxHeight, uiClimbHeight, uiHeightMount );
 	CWorldMap::GetFixPoint( pt, block );
 
 	dwBlockFlags = block.m_Bottom.m_dwBlockFlags;
 	if ( block.m_Top.m_dwBlockFlags )
 	{
 		dwBlockFlags |= CAN_I_ROOF;	// we are covered by something.
-		if ( block.m_Top.m_z < pt.m_z + (m_zClimbHeight + ((block.m_Top.m_dwTile > TERRAIN_QTY) ? iHeightMount : iHeightMount/2 )) )
+		if ( block.m_Top.m_z < (iZClimbed + ((block.m_Top.m_dwTile > TERRAIN_QTY) ? uiHeightMount : uiHeightMount/2 )) )
 			dwBlockFlags |= CAN_I_BLOCK; // we can't fit under this!
 	}
 	if ( dwBlockFlags != 0x0 )
@@ -721,11 +736,14 @@ char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
 			{
 				if ( block.m_Bottom.m_dwTile > TERRAIN_QTY )
 				{
-					if ( block.m_Bottom.m_z > (pt.m_z + m_zClimbHeight + 2) ) // Too high to climb.
+					if ( block.m_Bottom.m_z > uiClimbHeight) // Too high to climb.
 						return pt.m_z;
 				}
-				else if ( block.m_Bottom.m_z > (pt.m_z + m_zClimbHeight + iHeightMount + 3) )
-					return pt.m_z;
+				else
+				{
+					if (block.m_Bottom.m_z > (iZClimbed + uiHeightMount + 3))
+						return pt.m_z;
+				}
 			}
 		}
 		if ( (dwBlockFlags & CAN_I_BLOCK) && !Can(CAN_C_PASSWALLS) )
@@ -735,7 +753,7 @@ char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
 			return pt.m_z;
 	}
 
-	if ( (iHeightMount + pt.m_z >= block.m_Top.m_z) && g_Cfg.m_iMountHeight && !IsPriv(PRIV_ALLMOVE) )
+	if ( (uiHeightMount + pt.m_z >= block.m_Top.m_z) && g_Cfg.m_iMountHeight && !IsPriv(PRIV_ALLMOVE) )
 		return pt.m_z;
 
 	return block.m_Bottom.m_z;
@@ -744,6 +762,7 @@ char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
 
 bool CChar::IsStatFlag( uint64 iStatFlag ) const
 {
+	THREAD_SHARED_LOCK_SET;
 	return ((m_iStatFlag & iStatFlag) ? true : false );
 }
 
@@ -769,7 +788,8 @@ void CChar::StatFlag_Mod(uint64 iStatFlag, bool fMod )
 }
 
 bool CChar::IsPriv( word flag ) const
-{	// PRIV_GM flags
+{	
+	// PRIV_GM flags
 	if ( m_pPlayer == nullptr )
 		return false;	// NPC's have no privs.
 	return m_pPlayer->GetAccount()->IsPriv( flag );
@@ -805,12 +825,15 @@ int CChar::GetVisualRange() const
 
 void CChar::SetVisualRange(byte newSight)
 {
-    THREAD_UNIQUE_LOCK_SET;
-	// max value is 18 on classic clients prior 7.0.55.27 version and 24 on enhanced clients and latest classic clients
-	m_iVisualRange = minimum(newSight, UO_MAP_VIEW_SIZE_MAX);
-	if ( IsClient() )
+	CClient* pClient;
+	{
+		THREAD_UNIQUE_LOCK_SET;
+		// max value is 18 on classic clients prior 7.0.55.27 version and 24 on enhanced clients and latest classic clients
+		m_iVisualRange = minimum(newSight, UO_MAP_VIEW_SIZE_MAX);
+		pClient = GetClient();
+	}
+	if (pClient)
     {
-        CClient* pClient = GetClient();
         pClient->addVisualRange(m_iVisualRange);
         pClient->addReSync();
     }
@@ -1230,13 +1253,15 @@ bool CChar::ReadScript(CResourceLock &s, bool fVendor)
 							continue;
 						}
 					default:
-						pItem = nullptr;
-						continue;
+						//pItem = nullptr;
+						//continue;
+						goto globalswitch; //Continue in global switch event instead of cleaning the item to avoid COLOR override the source's color.
 				}
 			}
 		}
 		else
 		{
+globalswitch:
 			switch ( iCmd )
 			{
 				case ITC_FULLINTERP:
@@ -1604,11 +1629,12 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 			Skill_SetBase(skSkill4, uiSkillVal4 * 10);
 	}
 
-    m_pPlayer->m_SpeechHue	= HUE_TEXT_DEF;	// Set default client-sent speech color
-	m_fonttype				= FONT_NORMAL;	// Set speech font type
-	m_SpeechHueOverride		= 0;			// Set no server-side speech color override
-	m_EmoteHueOverride		= 0;			// Set no server-side emote color override
-	m_sTitle.clear();						// Set title
+    m_pPlayer->m_SpeechHue	= HUE_TEXT_DEF;		// Set default client-sent speech color
+    m_pPlayer->m_EmoteHue	= HUE_EMOTE_DEF;	// Set default emote color
+	m_fonttype				= FONT_NORMAL;		// Set speech font type
+	m_SpeechHueOverride		= 0;				// Set no server-side speech color override
+	m_EmoteHueOverride		= 0;				// Set no server-side emote color override
+	m_sTitle.clear();							// Set title
 
 	GetBank(LAYER_BANKBOX);			// Create bankbox
 	GetPackSafe();					// Create backpack
