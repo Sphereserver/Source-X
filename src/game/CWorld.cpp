@@ -605,7 +605,13 @@ CWorld::CWorld() :
 void CWorld::Init()
 {
 	EXC_TRY("Init");
+
+	// Initialize map planes
+	g_MapList.Init();
+
+	// Initialize sectors
 	_Sectors.Init();
+
 	EXC_CATCH;
 }
 
@@ -1255,12 +1261,15 @@ bool CWorld::LoadWorld() // Load world from script
 
 		// Reset everything that has been loaded
 		CWorldTickingList::ClearTickingLists();
+
 		m_Stones.clear();
 		m_Parties.ClearContainer();
 		m_GMPages.ClearContainer();
-		CloseAllUIDs();
+
 		_Sectors.Close();
+		CloseAllUIDs();
 		_GameClock.Init();
+
 
 		// Get the name of the previous backups.
 		CSString sArchive;
