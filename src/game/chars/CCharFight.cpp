@@ -1340,7 +1340,7 @@ void CChar::Fight_HitTry()
 			}
 		}
 		else
-		{
+    {
 				Skill_Start(SKILL_NONE);
 				m_Fight_Targ_UID.InitUID();
 		}
@@ -1512,10 +1512,9 @@ WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc, bool fSwingNoRange)
 	//	WAR_SWING_EQUIPPING	= recoiling weapon / swing made
 	//  WAR_SWING_READY		= Ready to hit, will switch to WAR_SWING_SWINGING ASAP.
 	//  WAR_SWING_SWINGING	= taking my swing now
-
+  
 	// We can't hit them. Char deleted? Target deleted? Am I dead or stoned? or Is target Dead, stone, invul, insub or slept?
 	if (IsDisconnected() || pCharSrc->IsDisconnected() || IsStatFlag(STATF_DEAD | STATF_STONE) || (pCharSrc->IsStatFlag(STATF_DEAD | STATF_STONE | STATF_INVUL | STATF_INSUBSTANTIAL)))
-	{
 		return WAR_SWING_INVALID;
 	}
 	// We can't hit them right now. Because we can't see them or reach them (invis/hidden).
