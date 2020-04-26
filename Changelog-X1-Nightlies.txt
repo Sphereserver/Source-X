@@ -2211,3 +2211,15 @@ Must have event, even if it's empty, since it's applied by the source to generat
 25-04-2020, Nolok
 - Fixed: Equipped items not going back to active from sleeping state when a sector awakes again (Issue #430).
 - Fixed: Setting stat values greater than the maximum value caused an overflow, instead of setting its value to the maximum.
+
+26-04-2020, xwerswoodx
+- Added: EmoteColor to players to get Client-Side emote color of the player. (Issue #358)
+	Note:	To set emote colors for players, the players use emote speech at once.
+		If the player change his emote color, he need to use emote ": message" to sphere override his default emote color.
+		Also, make sure Player has no EmoteColorOverride on himself to make sure emote color change for player.
+- Fixed: Stoned, paralyzed, sleep characters continue attacking.
+- Fixed: Can't attack again after the characters stoned. (Issue #432)
+- Possible Fix: COLOR variable change the color of human if the human is shop keeper (vendor). (Issue #397)
+- Fixed: Unreferenced variables for new GMPage system to avoid possible issues.
+- Fixed: Archery bug occurs when the attacker is stoned. (Issue #432)
+

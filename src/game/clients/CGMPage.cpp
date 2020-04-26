@@ -86,6 +86,8 @@ lpctstr const CGMPage::sm_szLoadKeys[GC_QTY + 1] =
 
 bool CGMPage::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UNREFERENCED_PARAMETER(fNoCallParent);
 	ADDTOCALLSTACK("CGMPage::r_WriteVal");
 	EXC_TRY("WriteVal");
 	switch ( FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1) )
