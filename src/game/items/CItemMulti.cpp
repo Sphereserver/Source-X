@@ -3,6 +3,7 @@
 #include "../../common/sphereproto.h"
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
+#include "../CServer.h"
 #include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CItemMulti.h"

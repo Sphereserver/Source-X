@@ -1,6 +1,6 @@
 // Common for client and server.
 
-#include "../common/resource/blocks/CRandGroupDef.h"
+#include "../common/resource/sections/CRandGroupDef.h"
 #include "../common/resource/CResourceLock.h"
 #include "../common/CScript.h"
 #include "../network/CClientIterator.h"
@@ -8,7 +8,8 @@
 #include "chars/CChar.h"
 #include "clients/CClient.h"
 #include "CSector.h"
-#include "CWorldMap.h"
+#include "CSectorList.h"
+#include "CServer.h"
 
 
 //************************************************************************
@@ -110,9 +111,10 @@ bool CRegion::RealizeRegion()
 
 	// Attach to all sectors that i overlap.
 	ASSERT( m_iLinkedSectors == 0 );
-	for ( int i = 0, iMax = g_MapList.GetSectorQty(m_pt.m_map); i < iMax; ++i )
+	const CSectorList* pSectors = CSectorList::Get();
+	for ( int i = 0, iMax = pSectors->GetSectorQty(m_pt.m_map); i < iMax; ++i )
 	{
-		CSector *pSector = CWorldMap::GetSector(m_pt.m_map, i);
+		CSector *pSector = pSectors->GetSector(m_pt.m_map, i);
 
 		if ( pSector && IsOverlapped(pSector->GetRect()) )
 		{

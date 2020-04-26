@@ -9,12 +9,11 @@
 #include "components/CCSpawn.h"
 #include "components/CCItemDamageable.h"
 #include "items/CItem.h"
-#include "CObjBase.h"
-#include "CSector.h"
 #include "CWorld.h"
 #include "CWorldGameTime.h"
-#include "spheresvr.h"
+#include "CServer.h"
 #include "triggers.h"
+#include "CSector.h"
 
 //////////////////////////////////////////////////////////////////
 // -CSector
@@ -25,7 +24,6 @@ CSector::CSector() : CTimedObject(PROFILE_SECTORS)
 
 	m_RainChance = 0;		// 0 to 100%
 	m_ColdChance = 0;		// Will be snow if rain chance success.
-	SetDefaultWeatherChance();
 
 	m_dwFlags = 0;
 	m_fSaveParity = false;
@@ -35,6 +33,12 @@ CSector::CSector() : CTimedObject(PROFILE_SECTORS)
 CSector::~CSector()
 {
 	ASSERT( ! GetClientsNumber());
+}
+
+void CSector::Init(int index, uchar map, short x, short y)
+{
+	CSectorBase::Init(index, map, x, y);
+	SetDefaultWeatherChance();
 }
 
 enum SC_TYPE
@@ -576,7 +580,8 @@ int CSector::GetLocalTime() const
 {
 	ADDTOCALLSTACK("CSector::GetLocalTime");
 	//	Get local time of the day (in minutes)
-	const CPointMap pt(GetBasePoint());
+	const CSectorList* pSectors = CSectorList::Get();
+	const CPointMap& pt(GetBasePoint());
 	int64 iLocalTime = CWorldGameTime::GetCurrentTimeInGameMinutes();
 
 	if ( !g_Cfg.m_bAllowLightOverride )
@@ -586,11 +591,11 @@ int CSector::GetLocalTime() const
 	else
 	{
 		// Time difference between adjacent sectors in minutes
-		const int iSectorTimeDiff = (24*60) / g_MapList.GetSectorCols(pt.m_map);
+		const int iSectorTimeDiff = (24*60) / pSectors->GetSectorCols(pt.m_map);
 
 		// Calculate the # of columns between here and Castle Britannia ( x = 1400 )
 		//int iSectorOffset = ( pt.m_x / g_MapList.GetX(pt.m_map) ) - ( (24*60) / g_MapList.GetSectorSize(pt.m_map));
-		const int iSectorOffset = ( pt.m_x / g_MapList.GetSectorSize(pt.m_map));
+		const int iSectorOffset = ( pt.m_x / pSectors->GetSectorSize(pt.m_map));
 
 		// Calculate the time offset from global time
 		const int iTimeOffset = iSectorOffset * iSectorTimeDiff;

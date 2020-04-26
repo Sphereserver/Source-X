@@ -4,6 +4,7 @@
 #include "../components/CCPropsItemEquippable.h"
 #include "../clients/CClient.h"
 #include "../CSector.h"
+#include "../CServer.h"
 #include "../CWorld.h"
 #include "../CWorldMap.h"
 #include "../triggers.h"

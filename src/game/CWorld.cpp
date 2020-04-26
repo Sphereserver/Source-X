@@ -600,81 +600,12 @@ CWorld::CWorld() :
 	_iTimeLastDeadRespawn = 0;
 	_iTimeStartup = 0;
 	_iTimeLastCallUserFunc = 0;
-	m_Sectors = nullptr;
-	m_SectorsQty = 0;
 }
 
 void CWorld::Init()
 {
 	EXC_TRY("Init");
-
-	if ( m_Sectors )	//	disable changes on-a-fly
-		return;
-
-    // Initialize map planes
-	g_MapList.Init();
-
-	// Initialize all sectors
-	uint uiSectorCount = 0;
-	uchar uiMapIndex = 0;
-	for (uiMapIndex = 0; uiMapIndex < MAP_SUPPORTED_QTY; ++uiMapIndex)
-	{
-		if ( !g_MapList.IsMapSupported(uiMapIndex) )
-			continue;
-		uiSectorCount += (uint)g_MapList.CalcSectorQty(uiMapIndex);
-	}
-
-	m_Sectors = new CSector*[uiSectorCount];
-	TemporaryString tsZ;
-	TemporaryString tsZ1;
-	tchar* z = static_cast<tchar *>(tsZ);
-	tchar* z1 = static_cast<tchar *>(tsZ1);
-
-	for (uiMapIndex = 0; uiMapIndex < MAP_SUPPORTED_QTY; ++uiMapIndex)
-	{
-		if ( !g_MapList.IsMapSupported(uiMapIndex) )
-			continue;
-
-        const int iSectorQty = g_MapList.CalcSectorQty(uiMapIndex);
-		sprintf(z1, " map%d=%d", uiMapIndex, iSectorQty);
-		strcat(z, z1);
-
-        const int iMaxX = g_MapList.CalcSectorCols(uiMapIndex);
-        const int iMaxY = g_MapList.CalcSectorRows(uiMapIndex);
-        g_MapList._sectorcolumns[uiMapIndex] = iMaxX;
-        g_MapList._sectorrows[uiMapIndex] = iMaxY;
-        g_MapList._sectorqty[uiMapIndex] = g_MapList.CalcSectorQty(uiMapIndex);
-
-		int iSectorIndex = 0;
-		short iSectorX = 0, iSectorY = 0;
-		for ( ; iSectorIndex < iSectorQty; ++iSectorIndex )
-		{
-            if (iSectorX >= iMaxX)
-            {
-				iSectorX = 0;
-                ++iSectorY;
-            }
-			CSector	*pSector = new CSector;
-			ASSERT(pSector);
-			pSector->Init(iSectorIndex, uiMapIndex, iSectorX, iSectorY);
-			m_Sectors[m_SectorsQty++] = pSector;
-            ++iSectorX;
-		}
-	}
-    ASSERT(uiSectorCount == m_SectorsQty);
-
-    for (uint uiSectorIndex = 0; uiSectorIndex < m_SectorsQty; ++ uiSectorIndex)
-    {
-        CSector *pSector = m_Sectors[uiSectorIndex];
-        if (pSector)
-        {
-            pSector->SetAdjacentSectors();
-        }
-    }
-
-    g_Log.Event(LOGM_INIT, "Allocated map sectors:%s\n", static_cast<lpctstr>(z));
-	ASSERT(m_SectorsQty);
-
+	_Sectors.Init();
 	EXC_CATCH;
 }
 
@@ -739,6 +670,9 @@ bool CWorld::SaveStage() // Save world state in stages.
 	ADDTOCALLSTACK("CWorld::SaveStage");
 	// Do the next stage of the save.
 	// RETURN: true = continue; false = done.
+
+	const int iSectorsQty = _Sectors.GetSectorAbsoluteQty();
+
 	EXC_TRY("SaveStage");
 	bool bRc = true;
 
@@ -747,7 +681,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		if ( !g_Cfg.m_fSaveGarbageCollect )
 			GarbageCollection_New();
 	}
-	else if ( m_iSaveStage < (int)(m_SectorsQty) )
+	else if ( m_iSaveStage < iSectorsQty)
 	{
 		// NPC Chars in the world secors and the stuff they are carrying.
 		// Sector lighting info.
@@ -755,19 +689,20 @@ bool CWorld::SaveStage() // Save world state in stages.
 		{
 			size_t szComplexity = 0;
 
-			CSector *s = m_Sectors[m_iSaveStage];
+			CSector *s = _Sectors.GetSectorAbsolute(m_iSaveStage);
 			if( s )
 			{
 				s->r_Write();
 				szComplexity += ( s->GetCharComplexity() + s->GetInactiveChars())*100 + s->GetItemComplexity();
 			}
-			uint dynStage = m_iSaveStage + 1;
+
+			int dynStage = m_iSaveStage + 1;
 			if( szComplexity <= g_Cfg.m_iSaveStepMaxComplexity )
 			{
 				uint szSectorCnt = 1;
-				while(dynStage < m_SectorsQty && szSectorCnt <= g_Cfg.m_iSaveSectorsPerTick)
+				while(dynStage < iSectorsQty && szSectorCnt <= g_Cfg.m_iSaveSectorsPerTick)
 				{
-					s = m_Sectors[dynStage];
+					s = _Sectors.GetSectorAbsolute(dynStage);
 					if ( s )
 					{
 						szComplexity += ( s->GetCharComplexity() + s->GetInactiveChars())*100 + s->GetItemComplexity();
@@ -789,11 +724,12 @@ bool CWorld::SaveStage() // Save world state in stages.
 		}
 		else
 		{
-			if ( m_Sectors[m_iSaveStage] )
-				m_Sectors[m_iSaveStage]->r_Write();
+			CSector* s = _Sectors.GetSectorAbsolute(m_iSaveStage);
+			if ( s )
+				s->r_Write();
 		}
 	}
-	else if ( m_iSaveStage == (int)(m_SectorsQty) )
+	else if ( m_iSaveStage == iSectorsQty)
 	{
 		m_FileData.WriteSection( "TIMERF" );
 		_Ticker._TimedFunctions.r_Write(m_FileData);
@@ -820,16 +756,16 @@ bool CWorld::SaveStage() // Save world state in stages.
 			pGMPage->r_Write(m_FileData);
 		}
 	}
-	else if ( m_iSaveStage == (int)(m_SectorsQty)+1 )
+	else if ( m_iSaveStage == iSectorsQty +1 )
 	{
 		//	Empty save stage
 	}
-	else if ( m_iSaveStage == (int)(m_SectorsQty)+2 )
+	else if ( m_iSaveStage == iSectorsQty +2 )
 	{
 		// Now make a backup of the account file.
 		bRc = g_Accounts.Account_SaveAll();
 	}
-	else if ( m_iSaveStage == (int)(m_SectorsQty)+3 )
+	else if ( m_iSaveStage == iSectorsQty +3 )
 	{
 		// EOF marker to show we reached the end.
 		m_FileData.WriteSection("EOF");
@@ -866,7 +802,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 
 	if ( g_Cfg.m_iSaveBackgroundTime )
 	{
-		int64 iNextTime = g_Cfg.m_iSaveBackgroundTime / m_SectorsQty;
+		int64 iNextTime = g_Cfg.m_iSaveBackgroundTime / iSectorsQty;
 		if ( iNextTime > MSECS_PER_SEC *30 * 60 )
 			iNextTime = MSECS_PER_SEC * 30 * 60;	// max out at 30 minutes or so.
 		_iTimeLastWorldSave = _GameClock.GetCurrentTime().GetTimeRaw() + iNextTime;
@@ -877,7 +813,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("stage '%d' qty '%d' time '%" PRId64 "'\n", m_iSaveStage, m_SectorsQty, _iTimeLastWorldSave);
+	g_Log.EventDebug("stage '%d' qty '%d' time '%" PRId64 "'\n", m_iSaveStage, iSectorsQty, _iTimeLastWorldSave);
 	EXC_DEBUG_END;
 
 	++m_iSaveStage;	// to avoid loops, we need to skip the current operation in world save
@@ -906,17 +842,18 @@ bool CWorld::SaveForce() // Save world state
 	};
 	const char *pCurBlock = save_msgs[0];
 
+	const int iSectorsQty = _Sectors.GetSectorAbsoluteQty();
 	while ( fSave )
 	{
 		try
 		{
-			if (( m_iSaveStage >= 0 ) && ( m_iSaveStage < (int)(m_SectorsQty) ))
+			if (( m_iSaveStage >= 0 ) && ( m_iSaveStage < iSectorsQty))
 				pCurBlock = save_msgs[1];
-			else if ( m_iSaveStage == (int)(m_SectorsQty) )
+			else if ( m_iSaveStage == iSectorsQty)
 				pCurBlock = save_msgs[2];
-			else if ( m_iSaveStage == (int)(m_SectorsQty)+1 )
+			else if ( m_iSaveStage == iSectorsQty +1 )
 				pCurBlock = save_msgs[3];
-			else if ( m_iSaveStage == (int)(m_SectorsQty)+2 )
+			else if ( m_iSaveStage == iSectorsQty +2 )
 				pCurBlock = save_msgs[4];
 			else
 				pCurBlock = save_msgs[5];
@@ -924,7 +861,7 @@ bool CWorld::SaveForce() // Save world state
 			fSave = SaveStage();
 			if (! ( m_iSaveStage & 0x1FF ))
 			{
-				g_Serv.PrintPercent( m_iSaveStage, (ssize_t)m_SectorsQty + 3 );
+				g_Serv.PrintPercent( m_iSaveStage, (ssize_t)iSectorsQty + 3 );
 			}
 			if ( !fSave && ( pCurBlock != save_msgs[5] ))
 				goto failedstage;
@@ -1180,10 +1117,9 @@ void CWorld::SaveStatics()
 			if ( !g_MapList.IsMapSupported(m) )
                 continue;
 
-			for ( int d = 0; d < g_MapList.GetSectorQty(m); ++d )
+			for (int s = 0, qty = _Sectors.GetSectorQty(m); s < qty; ++s)
 			{
-				CSector	*pSector = CWorldMap::GetSector(m, d);
-
+				CSector* pSector = _Sectors.GetSector(m, s);
 				if ( !pSector )
                     continue;
 
@@ -1195,6 +1131,7 @@ void CWorld::SaveStatics()
 					if ( !pItem->IsAttr(ATTR_STATIC) )
 						continue;
 
+					// No try/catch, this method has its own security measures
 					pItem->r_WriteSafe(m_FileStatics);
 				}
 			}
@@ -1321,15 +1258,8 @@ bool CWorld::LoadWorld() // Load world from script
 		m_Stones.clear();
 		m_Parties.ClearContainer();
 		m_GMPages.ClearContainer();
-		if ( m_Sectors )
-		{
-			for ( uint s = 0; s < m_SectorsQty; ++s )
-			{
-				// Remove everything from the sectors
-				m_Sectors[s]->Close();
-			}
-		}
 		CloseAllUIDs();
+		_Sectors.Close();
 		_GameClock.Init();
 
 		// Get the name of the previous backups.
@@ -1379,27 +1309,34 @@ bool CWorld::LoadAll() // Load world from script
 
 	// Set all the sector light levels now that we know the time.
 	// This should not look like part of the load. (CTRIG_EnvironChange triggers should run)
-	size_t iCount;
-	for ( uint s = 0; s < m_SectorsQty; ++s )
+	
+	for (int m = 0; m < MAP_SUPPORTED_QTY; ++m)
 	{
-		EXC_TRYSUB("Load");
-		CSector *pSector = m_Sectors[s];
+		if (!g_MapList.IsMapSupported(m))
+			continue;
 
-		if ( pSector != nullptr )
+		for (int s = 0, qty = _Sectors.GetSectorQty(m); s < qty; ++s)
 		{
-			if ( !pSector->IsLightOverriden() )
-				pSector->SetLight(-1);
+			EXC_TRYSUB("Load");
 
-			// Is this area too complex ?
-			iCount = pSector->GetItemComplexity();
-			if ( iCount > g_Cfg.m_iMaxSectorComplexity )
-				g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " items at %s. Sector too complex!\n", iCount, pSector->GetBasePoint().WriteUsed());
+			CSector* pSector = _Sectors.GetSector(m, s);
+			ASSERT(pSector);
 
-			iCount = pSector->GetCharComplexity();
-			if ( iCount > g_Cfg.m_iMaxCharComplexity )
-				g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " chars at %s. Sector too complex!\n", iCount, pSector->GetBasePoint().WriteUsed());
+            if (!pSector->IsLightOverriden())
+                pSector->SetLight(-1);
+
+            // Is this area too complex ?
+            size_t iCount;
+            iCount = pSector->GetItemComplexity();
+            if (iCount > g_Cfg.m_iMaxSectorComplexity)
+                g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " items at %s. Sector too complex!\n", iCount, pSector->GetBasePoint().WriteUsed());
+
+            iCount = pSector->GetCharComplexity();
+            if (iCount > g_Cfg.m_iMaxCharComplexity)
+                g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " chars at %s. Sector too complex!\n", iCount, pSector->GetBasePoint().WriteUsed());
+
+			EXC_CATCHSUB("Sector light levels");
 		}
-		EXC_CATCHSUB("Sector light levels");
 	}
 
 	EXC_TRYSUB("Load");
@@ -1572,12 +1509,15 @@ void CWorld::RespawnDeadNPCs()
 		if ( !g_MapList.IsMapSupported(m) )
             continue;
 
-		for ( int s = 0; s < g_MapList.GetSectorQty(m); ++s )
+		for (int s = 0, qty = _Sectors.GetSectorQty(m); s < qty; ++s)
 		{
-			CSector	*pSector = CWorldMap::GetSector(m, s);
+			EXC_TRY("OnSector");
 
-			if ( pSector )
-				pSector->RespawnDeadNPCs();
+			CSector* pSector = _Sectors.GetSector(m, s);
+			ASSERT(pSector);
+			pSector->RespawnDeadNPCs();
+
+			EXC_CATCH;
 		}
 	}
 	g_Serv.SetServerMode(SERVMODE_Run);
@@ -1609,11 +1549,15 @@ void CWorld::Restock()
 		if ( !g_MapList.IsMapSupported(m) )
 			continue;
 
-		for ( int s = 0; s < g_MapList.GetSectorQty(m); ++s )
+		for ( int s = 0, qty = _Sectors.GetSectorQty(m); s < qty; ++s )
 		{
-			CSector	*pSector = CWorldMap::GetSector(m, s);
-			if ( pSector != nullptr )
-				pSector->Restock();
+			EXC_TRY("OnSector");
+
+			CSector	*pSector = _Sectors.GetSector(m, s);
+			ASSERT(pSector);
+			pSector->Restock();
+
+			EXC_CATCH;
 		}
 	}
 
@@ -1646,30 +1590,9 @@ void CWorld::Close()
         pClient->CharDisconnect();
     }
 
-	if ( m_Sectors != nullptr )
-	{
-		//	free memory allocated by sectors
-		for ( uint s = 0; s < m_SectorsQty; ++s )
-		{
-			// delete everything in sector
-			m_Sectors[s]->Close();
-		}
-		// do this in two loops because destructors of items
-		// may access server sectors
-		for ( uint s = 0; s < m_SectorsQty; ++s )
-		{
-			// delete the sectors
-			delete m_Sectors[s];
-			m_Sectors[s] = nullptr;
-		}
-
-		delete[] m_Sectors;
-		m_Sectors = nullptr;
-		m_SectorsQty = 0;
-	}
+	_Sectors.Close();
 
 	memset(g_MapList.m_maps, 0, sizeof(g_MapList.m_maps));
-
 	if ( g_MapList.m_pMapDiffCollection != nullptr )
 	{
 		delete g_MapList.m_pMapDiffCollection;

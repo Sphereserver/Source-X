@@ -43,14 +43,14 @@ public:
 	bool IsOverlapped( const CRegionBase * pRegionTest ) const;
 	bool IsEqualRegion( const CRegionBase * pRegionTest ) const;
 
-	CSector * GetSector( int i ) const	// get all the sectors that make up this rect.
+	inline CSector * GetSector( int i ) const // get all the sectors that make up this rect.
 	{
 		return m_rectUnion.GetSector(i);
 	}
 
 public:
 	CRegionBase();
-	virtual ~CRegionBase() { };
+	virtual ~CRegionBase() = default;
 
 private:
 	CRegionBase(const CRegionBase& copy);

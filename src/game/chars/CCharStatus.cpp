@@ -5,6 +5,7 @@
 #include "../components/CCPropsItemWeapon.h"
 #include "../clients/CClient.h"
 #include "../items/CItemMulti.h"
+#include "../CServer.h"
 #include "../CWorldMap.h"
 #include "../spheresvr.h"
 #include "../triggers.h"

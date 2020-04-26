@@ -7,9 +7,9 @@
 #define _INC_CSERVERCONFIG_H
 
 #include "../common/sphere_library/CSAssoc.h"
-#include "../common/resource/blocks/CSkillDef.h"
-#include "../common/resource/blocks/CSpellDef.h"
-#include "../common/resource/blocks/CWebPageDef.h"
+#include "../common/resource/sections/CSkillDef.h"
+#include "../common/resource/sections/CSpellDef.h"
+#include "../common/resource/sections/CWebPageDef.h"
 #include "../common/resource/CResourceBase.h"
 #include "../common/resource/CResourceRef.h"
 #include "../common/resource/CResourceScript.h"

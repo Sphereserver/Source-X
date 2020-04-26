@@ -136,8 +136,6 @@ common/CServerMap.cpp
 common/CServerMap.h
 common/CUID.cpp
 common/CUID.h
-common/CObjBaseTemplate.cpp
-common/CObjBaseTemplate.h
 common/common.cpp
 common/common.h
 common/CPointBase.cpp
@@ -152,8 +150,6 @@ common/CScriptObj.cpp
 common/CScriptObj.h
 common/CScriptTriggerArgs.cpp
 common/CScriptTriggerArgs.h
-common/CSectorTemplate.cpp
-common/CSectorTemplate.h
 common/CSFileObj.cpp
 common/CSFileObj.h
 common/CSFileObjContainer.cpp
@@ -203,26 +199,26 @@ common/resource/CValueDefs.h
 )
 SOURCE_GROUP (common\\resource FILES ${resource_SRCS})
 
-SET (resourceblocks_SRCS
-common/resource/blocks/CDialogDef.cpp
-common/resource/blocks/CDialogDef.h
-common/resource/blocks/CItemTypeDef.cpp
-common/resource/blocks/CItemTypeDef.h
-common/resource/blocks/CRandGroupDef.cpp
-common/resource/blocks/CRandGroupDef.h
-common/resource/blocks/CRegionResourceDef.cpp
-common/resource/blocks/CRegionResourceDef.h
-common/resource/blocks/CResourceNamedDef.h
-common/resource/blocks/CSkillClassDef.cpp
-common/resource/blocks/CSkillClassDef.h
-common/resource/blocks/CSkillDef.cpp
-common/resource/blocks/CSkillDef.h
-common/resource/blocks/CSpellDef.cpp
-common/resource/blocks/CSpellDef.h
-common/resource/blocks/CWebPageDef.cpp
-common/resource/blocks/CWebPageDef.h
+SET (resourcesections_SRCS
+common/resource/sections/CDialogDef.cpp
+common/resource/sections/CDialogDef.h
+common/resource/sections/CItemTypeDef.cpp
+common/resource/sections/CItemTypeDef.h
+common/resource/sections/CRandGroupDef.cpp
+common/resource/sections/CRandGroupDef.h
+common/resource/sections/CRegionResourceDef.cpp
+common/resource/sections/CRegionResourceDef.h
+common/resource/sections/CResourceNamedDef.h
+common/resource/sections/CSkillClassDef.cpp
+common/resource/sections/CSkillClassDef.h
+common/resource/sections/CSkillDef.cpp
+common/resource/sections/CSkillDef.h
+common/resource/sections/CSpellDef.cpp
+common/resource/sections/CSpellDef.h
+common/resource/sections/CWebPageDef.cpp
+common/resource/sections/CWebPageDef.h
 )
-SOURCE_GROUP (common\\resource\\blocks FILES ${resourceblocks_SRCS})
+SOURCE_GROUP (common\\resource\\sections FILES ${resourcesections_SRCS})
 
 # Sphere library files
 SET (spherelibrary_SRCS
@@ -287,6 +283,8 @@ game/CEntityProps.cpp
 game/CEntityProps.h
 game/CObjBase.cpp
 game/CObjBase.h
+game/CObjBaseTemplate.cpp
+game/CObjBaseTemplate.h
 game/CPathFinder.cpp
 game/CPathFinder.h
 game/CRegion.cpp
@@ -299,6 +297,10 @@ game/CSector.cpp
 game/CSector.h
 game/CSectorEnviron.h
 game/CSectorEnviron.cpp
+game/CSectorTemplate.cpp
+game/CSectorTemplate.h
+game/CSectorList.cpp
+game/CSectorList.h
 game/CServer.cpp
 game/CServer.h
 game/CServerConfig.cpp

@@ -6,7 +6,7 @@
 #ifndef _INC_CWORLDMAP_H
 #define _INC_CWORLDMAP_H
 
-#include "../common/resource/blocks/CItemTypeDef.h"
+#include "../common/resource/sections/CItemTypeDef.h"
 #include "../common/CServerMap.h"
 #include "items/item_types.h"
 #include "CSector.h"
@@ -26,7 +26,8 @@ public:
 
 	// Sectors
 
-	static CSector* GetSector(int map, int i);	// gets sector # from one map
+	static CSector* GetSector(int map, int index) noexcept;	// gets sector # from one map
+	static CSector* GetSector(int map, short x, short y) noexcept;
 
 
 	// Map blocks (for caching) and terrain

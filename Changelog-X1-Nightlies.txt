@@ -100,7 +100,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 30-07-2016, Nolok
 - Updated the README.md file with fundamental informations about this fork.
-- Fixed: REGIONTYPE block could not accept landtile types with index > 163. Extended this limit to 255.
+- Fixed: REGIONTYPE section could not accept landtile types with index > 163. Extended this limit to 255.
 	This also extends the maximum number of pages in a book.
 - Fixed: Sphere crashing sometimes just before saying Defmessages: npc_generic_gone_1 and npc_generic_gone_2.
 - Changed: The redefinition of a resource will always be notified, even without DEBUGF_SCRIPTS enabled in Sphere.ini.
@@ -420,7 +420,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
     When retrieving the CAN property, now it is first XORed with CANMASK (the return value will be CAN ^ CANMASK), so in other words:
         If a flag set in the CANMASK is also set in CAN, the flag is ignored;
         If a flag set in the CANMASK isn't set in CAN, the flag is considered as set.
-- Changed: the CAN property now is READ-ONLY and can be set only in the ITEMDEF/CHARDEF blocks.
+- Changed: the CAN property now is READ-ONLY and can be set only in the ITEMDEF/CHARDEF sections.
     This change ensures that the CAN property of an object will always be synchronized with the current ITEMDEF/CHARDEF.
     Retrieving the CAN value (<CAN>) will return the ITEMDEF/CHARDEF CAN modified with the CANMASK.
     To retrieve the base CAN value, use <SERV.ITEMDEF(defname).CAN> or <SERV.CHARDEF(defname).CAN>.
@@ -1380,7 +1380,7 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 	For this purpose, the classes CEntityProps, CComponentProps and the relative specializations were created. Think at each ComponentProps as a container, which can hold specific kind of properties and generate the related tooltips.
 	For example, CCPropsItemWeapon can hold the properties MAGEWEAPON, USEBESTWEAPONSKILL, etc, CCPropsItemEquippable can hold FASTERCASTING, RESFIRE, etc. For items, the right ComponentProps are attached when their TYPE changes.
 - Changed: PROPLIST now shows also the properties stored in ComponentProps, preceded by the name of the component inside square brackets.
-- Added: BASETAGLIST and BASEPROPLIST, which output the tags and the props stored in the Base Def block (Chardef/Itemdef...).
+- Added: BASETAGLIST and BASEPROPLIST, which output the tags and the props stored in the Base Def section (Chardef/Itemdef...).
 - Added properties (only the keyword, no functionality for now) for:
 	- Items: LavaInfused, Prized, ShipwreckItem, Unlucky, Unwieldly.
 	- Weapons: Antique, AssassinHoned.
@@ -1471,7 +1471,7 @@ WARNING: the following change could break some hackish expedient used in scripts
 - Added: <RESOURCEINDEX defname> to retrieve the resource index from the defname, ignoring the resource type (Chardef, Spell, Itemdef, Template...) bits.
 	As example, <RESOURCEINDEX s_clumsy> returns 1, which is the spell number (id).
 - Added: <RESOURCETYPE defname>, which gets the resource type (RES_ITEMDEF, RES_SPAWN, etc) from the defname. The list of the resource type numbers is in the X scriptpack in core/defs.scp.
-- Changed: REGIONTYPE block could not accept landtile types with index > 255. Extended this limit to 65534.	This also extends the maximum number of pages in a book by the same amount.
+- Changed: REGIONTYPE section could not accept landtile types with index > 255. Extended this limit to 65534.	This also extends the maximum number of pages in a book by the same amount.
 
 11-01-2019, Nolok
 - Fixed: NPC skill training (Issue #176).
@@ -1645,7 +1645,7 @@ WARNING: the following change could break some hackish expedient used in scripts
 
 WARNING: the following change could break compatibility with previous scripts! Read carefully!
 - Added: RESDEF keyword, similar to DEF, but retrieves only the numeric identifier of Resource DEFNAMEs. Example of usage: <RESDEF.i_dagger>.
-- Changed: The DEF keyword doesn't find the numeric identifier of Resource (ITEMDEF/CHARDEF...) DEFNAMEs anymore. Use RESDEF. DEF is used to retrieve values from [DEFNAME] blocks. Example of usage: <DEF.mt_walk>.
+- Changed: The DEF keyword doesn't find the numeric identifier of Resource (ITEMDEF/CHARDEF...) DEFNAMEs anymore. Use RESDEF. DEF is used to retrieve values from [DEFNAME] sections. Example of usage: <DEF.mt_walk>.
 	This can break compatibility with previous scripts, if you used DEF to retrieve items/chars defname numeric value. You have to use RESDEF now.
 	You're safe (even if the underlying code is a bit slower) if you just used ID=i_dagger instead of ID=<DEF.i_dagger>.
 	If you know that a keyword is a DEF or a RESDEF, the best thing would be to use the right prefix. When Sphere enconunters a keyword without a prefix, it searches in the keyword lists in this order:
@@ -1979,7 +1979,7 @@ Fixed BadSpawn not working: Now each bad spawn is inserted in a vector and acces
 
 
 Added champion's support:
--CChampionDef (script block):
+-CChampionDef (script section):
 	[CHAMPION 01]
 	DEFNAME=CHAMPION_Abyss
 	NAME=Abyss
@@ -2089,7 +2089,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		    4)You can read/set the amount of mana/stamina gained by the Focus skill by using local.FocusGain in the @RegenStat trigger.
 			  Default value for mana gain is Focus / 20 while for stamina is Focus / 10.
 		   Remember that you need FEATURE_AOS_UPDATE_B ini flag set for enabling the default Focus behaviour.
-		   For disabling the Focus skill you can set SKF_SCRIPTED in the Focus SKILLDEF block or by adding a return 0 in the @UseQuick trigger.
+		   For disabling the Focus skill you can set SKF_SCRIPTED in the Focus SKILLDEF section or by adding a return 0 in the @UseQuick trigger.
 - Updated SphereCrypt.ini.
 
 19-01-2020, Nolok
@@ -2118,7 +2118,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 -Updated SphereCrypt.ini.
 
 25-01-2020, Nolok
-- Fixed: Invalid keywords in the [ADVANCE] block were likely to cause memory corruption.
+- Fixed: Invalid keywords in the [ADVANCE] section were likely to cause memory corruption.
 - Updated: SQlite to version 3.31.0.
 
 05-02-2020, Drk84

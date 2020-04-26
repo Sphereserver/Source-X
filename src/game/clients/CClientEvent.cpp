@@ -9,12 +9,13 @@
 #include "../items/CItemVendable.h"
 #include "../CException.h"
 #include "../CSector.h"
+#include "../CServer.h"
+#include "../CWorld.h"
 #include "../CWorldMap.h"
 #include "../CWorldGameTime.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"
-#include "../CWorld.h"
 
 
 /////////////////////////////////

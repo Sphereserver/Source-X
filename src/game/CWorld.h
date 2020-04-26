@@ -10,6 +10,7 @@
 #include "../common/sphere_library/CSObjList.h"
 #include "../common/CScript.h"
 #include "../common/CUID.h"
+#include "CSectorList.h"
 #include "CWorldCache.h"
 #include "CWorldClock.h"
 #include "CWorldTicker.h"
@@ -103,7 +104,8 @@ extern class CWorld : public CScriptObj, public CWorldThread
 	// the world. Stuff saved in *World.SCP
 public:
 	static const char* m_sClassName;
-	
+
+// Helper classes
 private:
 	// Clock stuff. how long have we been running ? all i care about.
 	friend class CWorldGameTime;
@@ -119,8 +121,12 @@ private:
 	friend class CServer;
 	friend class CWorldMap;
 	CWorldCache _Cache;	
-	
 
+	// Sector data
+	friend class CSectorList;
+	CSectorList _Sectors;
+
+// World data.
 private:
 	// Special purpose timers.
 	int64	_iTimeLastWorldSave;				// when to auto do the worldsave ?
@@ -133,10 +139,6 @@ private:
 	llong	m_savetimer; // Time it takes to save
 
 public:
-	// World data.
-	CSector **m_Sectors;
-	uint m_SectorsQty;
-
 	int m_iSaveCountID;			// Current archival backup id. Whole World must have this same stage id
 	int m_iLoadVersion;			// Previous load version. (only used during load of course)
 	int m_iPrevBuild;			// Previous __GITREVISION__

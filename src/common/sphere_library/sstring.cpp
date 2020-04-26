@@ -723,10 +723,9 @@ int FindCAssocRegTableHeadSorted(const lpctstr pszFind, lpctstr const* ppszTable
     // Do a binary search (un-cased) on a sorted table.
     // Uses Str_CmpHeadI, which checks if we have reached, during comparison, ppszTable end ('\0'), ignoring if pszFind is longer (maybe has arguments?)
     // RETURN: -1 = not found
-    ASSERT(iCount > 0);
-    int iHigh = iCount - 1;
-    if (iHigh < 0)
+    if (iCount < 1)
         return -1;
+    int iHigh = iCount - 1;
     int iLow = 0;
 
     while (iLow <= iHigh)

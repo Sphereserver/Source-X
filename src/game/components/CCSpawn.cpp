@@ -1,7 +1,6 @@
-#include "../../common/resource/blocks/CRandGroupDef.h"
+#include "../../common/resource/sections/CRandGroupDef.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
-#include "../../common/CObjBaseTemplate.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../CObjBase.h"

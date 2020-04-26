@@ -3,11 +3,11 @@
 //	Set:	class  names
 //
 
-#include "../common/resource/blocks/CDialogDef.h"
-#include "../common/resource/blocks/CItemTypeDef.h"
-#include "../common/resource/blocks/CRandGroupDef.h"
-#include "../common/resource/blocks/CRegionResourceDef.h"
-#include "../common/resource/blocks/CSkillClassDef.h"
+#include "../common/resource/sections/CDialogDef.h"
+#include "../common/resource/sections/CItemTypeDef.h"
+#include "../common/resource/sections/CRandGroupDef.h"
+#include "../common/resource/sections/CRegionResourceDef.h"
+#include "../common/resource/sections/CSkillClassDef.h"
 #include "../common/sphere_library/CSObjCont.h"
 #include "../common/sphere_library/CSObjList.h"
 #include "../common/sqlite/SQLite.h"
@@ -21,6 +21,7 @@
 #include "../game/components/CCChampion.h"
 #include "../game/items/CItemMultiCustom.h"
 #include "../game/items/CItemShip.h"
+#include "../game/CSectorList.h"
 #include "../game/CPathFinder.h"
 #include "../game/CWorldComm.h"
 #include "../game/CWorldGameTime.h"
@@ -45,7 +46,6 @@ ADD(CCharPlayer,			"CCharPlayer");
 ADD(CClient,				"CClient");
 ADD(CDialogDef,				"CDialogDef");
 ADD(CDialogResponseArgs,	"CDialogResponseArgs");
-ADD(CSectorBase,			"CSectorBase");
 ADD(CSFileObj,				"CSFileObj");
 ADD(CSFileObjContainer,		"CSFileObjContainer");
 ADD(CScriptObj,				"CScriptObj");
@@ -66,6 +66,8 @@ ADD(CWebPageDef,			"CWebPageDef");
 ADD(CServerDef,				"CServerDef");
 ADD(CServer,				"CServer");
 ADD(CSector,				"CSector");
+ADD(CSectorBase,			"CSectorBase");
+ADD(CSectorList,			"CSectorList");
 ADD(CRegionResourceDef,		"CRegionResourceDef");
 ADD(CRandGroupDef,			"CRandGroupDef");
 ADD(CSpellDef,				"CSpellDef");

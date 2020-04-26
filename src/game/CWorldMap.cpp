@@ -1,6 +1,6 @@
-#include "../common/resource/blocks/CItemTypeDef.h"
-#include "../common/resource/blocks/CRandGroupDef.h"
-#include "../common/resource/blocks/CRegionResourceDef.h"
+#include "../common/resource/sections/CItemTypeDef.h"
+#include "../common/resource/sections/CRandGroupDef.h"
+#include "../common/resource/sections/CRegionResourceDef.h"
 #include "../common/CException.h"
 #include "../common/CScriptTriggerArgs.h"
 #include "../common/CRect.h"
@@ -221,37 +221,24 @@ IT_TYPE CWorldMap::GetTerrainItemType(dword dwTerrainIndex) // static
 // Map reading and blocking.
 
 // gets sector # from one map
-CSector* CWorldMap::GetSector(int map, int i) // static
+CSector* CWorldMap::GetSector(int map, int index) noexcept // static
 {
-	//ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetSector");
+	//ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetSector(index)");
 
-	// if the map is not supported, return empty sector
-	if ((map < 0) || (map >= MAP_SUPPORTED_QTY) || !g_MapList.m_maps[map])
-		return nullptr;
-
-	const int iMapSectorQty = g_MapList.GetSectorQty(map);
-	if (i >= iMapSectorQty)
+	const int iMapSectorQty = g_World._Sectors.GetSectorQty(map);
+	if (index >= iMapSectorQty)
 	{
-		g_Log.EventError("Unsupported sector #%d for map #%d specified.\n", i, map);
+		g_Log.EventError("Unsupported sector #%d for map #%d specified.\n", index, map);
 		return nullptr;
 	}
 
-	for (int base = 0, m = 0; m < MAP_SUPPORTED_QTY; ++m)
-	{
-		if (!g_MapList.IsMapSupported(m))
-			continue;
+	return g_World._Sectors.GetSector(map, index);
+}
 
-		if (m == map)
-		{
-			if (iMapSectorQty < i)
-				return nullptr;
-
-			return g_World.m_Sectors[base + i];
-		}
-
-		base += g_MapList.GetSectorQty(m);
-	}
-	return nullptr;
+CSector* CWorldMap::GetSector(int map, short x, short y) noexcept // static
+{
+	//ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetSector(x,y)");
+	return g_World._Sectors.GetSector(map, x, y);
 }
 
 

@@ -2,13 +2,14 @@
 //  CChar is either an NPC or a Player.
 
 #include <cmath>
-#include "../../common/resource/blocks/CSkillClassDef.h"
-#include "../../common/resource/blocks/CRegionResourceDef.h"
+#include "../../common/resource/sections/CSkillClassDef.h"
+#include "../../common/resource/sections/CRegionResourceDef.h"
 #include "../../common/resource/CResourceLock.h"
 #include "../clients/CClient.h"
 #include "../items/CItemVendable.h"
 #include "../triggers.h"
 #include "../CLog.h"
+#include "../CServer.h"
 #include "../CWorldMap.h"
 #include "CChar.h"
 #include "CCharNPC.h"

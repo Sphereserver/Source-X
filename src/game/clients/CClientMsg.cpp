@@ -11,6 +11,7 @@
 #include "../items/CItemMultiCustom.h"
 #include "../components/CCSpawn.h"
 #include "../CSector.h"
+#include "../CServer.h"
 #include "../CWorld.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"

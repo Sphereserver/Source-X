@@ -18,7 +18,7 @@
 #include "../sphere/ProfileTask.h"
 #include "crypto/CBCrypt.h"
 #include "crypto/CMD5.h"
-#include "resource/blocks/CResourceNamedDef.h"
+#include "resource/sections/CResourceNamedDef.h"
 #include "resource/CResourceLock.h"
 #include "CFloatMath.h"
 #include "CExpression.h"

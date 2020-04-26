@@ -1,9 +1,9 @@
-﻿#include "../common/resource/blocks/CDialogDef.h"
-#include "../common/resource/blocks/CItemTypeDef.h"
-#include "../common/resource/blocks/CSkillClassDef.h"
-#include "../common/resource/blocks/CRandGroupDef.h"
-#include "../common/resource/blocks/CRegionResourceDef.h"
-#include "../common/resource/blocks/CResourceNamedDef.h"
+﻿#include "../common/resource/sections/CDialogDef.h"
+#include "../common/resource/sections/CItemTypeDef.h"
+#include "../common/resource/sections/CSkillClassDef.h"
+#include "../common/resource/sections/CRandGroupDef.h"
+#include "../common/resource/sections/CRegionResourceDef.h"
+#include "../common/resource/sections/CResourceNamedDef.h"
 #include "../common/sphere_library/CSFileList.h"
 #include "../common/CException.h"
 #include "../common/CUOInstall.h"
@@ -944,11 +944,9 @@ bool CServerConfig::r_LoadVal( CScript &s )
 
 				if ( g_MapList.IsMapSupported(nMapNumber) )
 				{
-					SKIP_SEPARATORS(pszStr);
-
 					if ( !strnicmp(pszStr, "ALLSECTORS", 10) )
 					{
-						int nSectors = g_MapList.GetSectorQty(nMapNumber);
+						const int nSectors = CSectorList::Get()->GetSectorQty(nMapNumber);
 						pszStr = s.GetArgRaw();
 
 						if ( pszStr && *pszStr )
@@ -970,30 +968,22 @@ bool CServerConfig::r_LoadVal( CScript &s )
 					}
 					else if ( !strnicmp( pszStr, "SECTOR.",7 ) )
 					{
-						pszStr = pszStr + 7;
-						int iSecNumber = Exp_GetVal(pszStr);
-						int nSectors = g_MapList.GetSectorQty(nMapNumber);
-						SKIP_SEPARATORS(pszStr);
+                        pszStr = pszStr + 7;
+                        const int iSecNumber = Exp_GetVal(pszStr);
+                        pszStr = s.GetArgRaw();
+                        if (pszStr && *pszStr)
+                        {
+                            CSector* pSector = CWorldMap::GetSector(nMapNumber, iSecNumber);
+                            if (pSector)
+                            {
+                                CScript script(pszStr);
+                                script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
+                                script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
+                                return pSector->r_Verb(script, &g_Serv);
+                            }
 
-						if ((iSecNumber > 0) && (iSecNumber <  nSectors))
-						{
-							pszStr = s.GetArgRaw();
-
-							if ( pszStr && *pszStr )
-							{
-								CSector* pSector = CWorldMap::GetSector(nMapNumber, iSecNumber);
-								ASSERT(pSector);
-
-								CScript script(pszStr);
-								script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
-								script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
-								return pSector->r_Verb(script, &g_Serv);
-							}
-						}
-						else
-							g_Log.EventError("Invalid Sector #%d for Map %d\n", iSecNumber, nMapNumber);
-
-						return false;
+                        }
+                        return false;
 					}
 				}
 			}
@@ -1545,14 +1535,16 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 					else if (!strnicmp(pszCmd, "SECTOR.", 7))
 					{
 						pszCmd += 7;
+						const CSectorList* pSectors = CSectorList::Get();
+
 						if (!strnicmp(pszCmd, "SIZE", 4))
-							sVal.FormatVal(g_MapList.GetSectorSize(iNumber));
+							sVal.FormatVal(pSectors->GetSectorSize(iNumber));
 						else if (!strnicmp(pszCmd, "ROWS", 4))
-							sVal.FormatVal(g_MapList.GetSectorRows(iNumber));
+							sVal.FormatVal(pSectors->GetSectorRows(iNumber));
 						else if (!strnicmp(pszCmd, "COLS", 4))
-							sVal.FormatVal(g_MapList.GetSectorCols(iNumber));
+							sVal.FormatVal(pSectors->GetSectorCols(iNumber));
 						else if (!strnicmp(pszCmd, "QTY", 3))
-							sVal.FormatVal(g_MapList.GetSectorQty(iNumber));
+							sVal.FormatVal(pSectors->GetSectorQty(iNumber));
 						else
 							return false;
 					}
@@ -1578,19 +1570,8 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 					ptcKey = ptcKey + 6;
 					int iSecNumber = Exp_GetVal(ptcKey);
 					SKIP_SEPARATORS(ptcKey);
-					int nSectors = g_MapList.GetSectorQty(iMapNumber);
-
-					if ((iSecNumber > 0) && (iSecNumber < nSectors))
-					{
-						CSector* pSector = CWorldMap::GetSector(iMapNumber, iSecNumber);
-						ASSERT(pSector);
-						return pSector->r_WriteVal(ptcKey, sVal, pSrc);
-					}
-					else
-					{
-						g_Log.EventError("Invalid Sector #%d for Map %d\n", iSecNumber, iMapNumber);
-						return false;
-					}
+					CSector* pSector = CWorldMap::GetSector(iMapNumber, iSecNumber);
+					return !pSector ? false : pSector->r_WriteVal(ptcKey, sVal, pSrc);
 				}
 			}
 			g_Log.EventError("Unsupported Map %d\n", iMapNumber);

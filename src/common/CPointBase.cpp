@@ -2,7 +2,7 @@
 #include "../game/CSector.h"
 #include "../game/CServer.h"
 #include "../game/CWorldMap.h"
-#include "resource/blocks/CItemTypeDef.h"
+#include "resource/sections/CItemTypeDef.h"
 #include "CLog.h"
 #include "CRect.h"
 #include "CPointBase.h"
@@ -428,11 +428,11 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 					if (pMultiItem->m_visible == 0)
 						continue;
 
-					CPointMap ptTest((word)(ptMulti.m_x + pMultiItem->m_dx), (word)(ptMulti.m_y + pMultiItem->m_dy), (char)(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
+					const CPointMap ptTest((word)(ptMulti.m_x + pMultiItem->m_dx), (word)(ptMulti.m_y + pMultiItem->m_dy), (char)(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
 					if (GetDist(ptTest) > 0)
 						continue;
 
-					iComponentQty++;
+					++iComponentQty;
 				}
 			}
 
@@ -838,7 +838,7 @@ int CPointBase::Read( tchar * pszVal )
 		case 4:	// m_map
 			if ( IsDigit(ppVal[3][0]))
 			{
-                ptTest.m_map = (uchar)(atoi(ppVal[3]));
+                ptTest.m_map = (uchar)(Str_ToUI(ppVal[3]));
 				if ( !g_MapList.IsMapSupported(ptTest.m_map) )
 				{
 					g_Log.EventError("Unsupported map #%d specified. Auto-fixing that to 0.\n", ptTest.m_map);
@@ -847,13 +847,13 @@ int CPointBase::Read( tchar * pszVal )
 			}
 		case 3: // m_z
 			if ( IsDigit(ppVal[2][0]) || ppVal[2][0] == '-' )
-                ptTest.m_z = (char)(atoi(ppVal[2]));
+                ptTest.m_z = (char)(Str_ToI(ppVal[2]));
 		case 2:
 			if (IsDigit(ppVal[1][0]))
-                ptTest.m_y = (short)(atoi(ppVal[1]));
+                ptTest.m_y = (short)(Str_ToI(ppVal[1]));
 		case 1:
 			if (IsDigit(ppVal[0][0]))
-                ptTest.m_x = (short)(atoi(ppVal[0]));
+                ptTest.m_x = (short)(Str_ToI(ppVal[0]));
 		case 0:
 			break;
 	}
@@ -877,9 +877,9 @@ CSector * CPointBase::GetSector() const
 			m_x, m_y, m_map, g_MapList.GetMapSizeX(m_map), g_MapList.GetMapSizeY(m_map));
 		return CWorldMap::GetSector(m_map, 0);
 	}
+
 	// Get the world Sector we are in.
-    const int iSectorSize = g_MapList.GetSectorSize(m_map);
-	return CWorldMap::GetSector(m_map, ((m_y / iSectorSize * g_MapList.GetSectorCols(m_map)) + ( m_x / iSectorSize)));
+	return CWorldMap::GetSector(m_map, m_x, m_y);
 }
 
 CRegion * CPointBase::GetRegion( dword dwType ) const

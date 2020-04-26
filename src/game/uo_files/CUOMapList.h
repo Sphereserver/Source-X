@@ -14,6 +14,7 @@ extern class CUOMapList
 #define MAP_SUPPORTED_QTY 255
 
     friend struct CUOInstall;
+    friend class  CSectorList;
     friend class  CWorld;
     friend class  CWorldMap;
     friend class  CServerMapBlock;
@@ -24,14 +25,10 @@ protected:
     int m_mapid[MAP_SUPPORTED_QTY];	    // map id used by the client
     int m_sizex[MAP_SUPPORTED_QTY];
     int m_sizey[MAP_SUPPORTED_QTY];
+
     int m_sectorsize[MAP_SUPPORTED_QTY];
 
     bool m_mapsinitalized[MAP_SUPPORTED_QTY];
-
-    // Pre-calculated values, for faster retrieval
-    int _sectorcolumns[MAP_SUPPORTED_QTY];  // how much sectors are in a column (x) in a given map
-    int _sectorrows[MAP_SUPPORTED_QTY];     // how much sectors are in a row (y) in a given map
-    int _sectorqty[MAP_SUPPORTED_QTY];      // how much sectors are in a map
 
     CServerMapDiffCollection * m_pMapDiffCollection;
 
@@ -61,16 +58,14 @@ public:
     ///@{
 protected:
     bool DetectMapSize(int map);
+    int GetSectorSize(int map) const;
+
 public:
     bool IsMapSupported(int map) const noexcept;
     bool IsInitialized(int map) const;
-    int GetSectorSize(int map) const;
     int CalcSectorQty(int map) const;  // Use it only when initializing the map sectors! (because it's slower than the Get* method)
-    int GetSectorQty(int map) const;
     int CalcSectorCols(int map) const; // Use it only when initializing the map sectors! (because it's slower than the Get* method)
     int CalcSectorRows(int map) const; // Use it only when initializing the map sectors! (because it's slower than the Get* method)
-    int GetSectorCols(int map) const;
-    int GetSectorRows(int map) const;
     inline int GetMapSizeX(int map) const noexcept;
     inline int GetMapSizeY(int map) const noexcept;
     int GetMapCenterX(int map) const;
