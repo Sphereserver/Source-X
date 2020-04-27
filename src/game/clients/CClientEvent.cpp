@@ -1057,20 +1057,29 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 void CClient::Event_Attack( CUID uid )
 {
 	ADDTOCALLSTACK("CClient::Event_Attack");
-	// d-click in war mode
-	// I am attacking someone.
 	if ( m_pChar == nullptr )
 		return;
 
-	CChar * pChar = uid.CharFind();
-	if ( pChar == nullptr )
+	bool fFail = false;
+	CChar* pChar = uid.CharFind();
+	if (pChar != nullptr)
+	{
+		bool fFail = !m_pChar->Fight_Attack(pChar);
+		if (!fFail)
+			new PacketAttack(this, (fFail ? 0 : (dword)pChar->GetUID()));
 		return;
+	}
 
-    bool fFail = pChar->Can(CAN_C_NONSELECTABLE);
-    if (!fFail)
-        fFail = !m_pChar->Fight_Attack(pChar);
-
-	new PacketAttack(this, (fFail ? 0 : (dword)pChar->GetUID()));
+	CItem* pItem = uid.ItemFind();
+	if (pItem != nullptr)
+	{
+		bool fFail = !m_pChar->Fight_Attack(pItem);
+		if (pItem->Can(CAN_I_DAMAGEABLE))
+			new PacketAttack(this, (dword)pItem->GetUID());
+		return;
+	}
+	
+	return;
 }
 
 // Client/Player buying items from the Vendor

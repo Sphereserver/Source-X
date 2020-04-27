@@ -5096,7 +5096,7 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item)
 	if ( id >= ITEMID_MULTI )
 	{
 		source = Multi;
-		id = (ITEMID_TYPE)(id & 0x3FFF);
+		id = (ITEMID_TYPE)(id & 0x7FFF);
 	}
 	else
 	{

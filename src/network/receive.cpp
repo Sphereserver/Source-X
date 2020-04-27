@@ -360,6 +360,14 @@ bool PacketDoubleClick::onReceive(CNetState* net)
 
 	CClient* client = net->getClient();
 	ASSERT(client);
+
+	CItem* pItem = target.ItemFind();
+	if (client->GetChar()->IsStatFlag(STATF_WAR) && pItem->Can(CAN_I_DAMAGEABLE))
+	{
+		client->Event_Attack(target);
+		return true;
+	}
+
 	client->Event_DoubleClick(target, macro, true);
 	return true;
 }

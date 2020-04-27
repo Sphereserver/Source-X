@@ -1125,7 +1125,7 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
     }
     TRIGRET_TYPE tRet = TRIGRET_RET_FALSE;
     bool fTransferAll = false;
-    CItem *pDeed = CItem::CreateBase(itDeed <= ITEMID_NOTHING ? itDeed : ITEMID_DEED1);
+    CItem *pDeed = CItem::CreateBase((itDeed < ITEMID_NOTHING || itDeed > (ITEMID_TYPE)0x7FFF) ? itDeed : ITEMID_DEED1);
     tchar *pszName = Str_GetTemp();
     CItemBaseMulti * pItemBase = static_cast<CItemBaseMulti*>(Base_GetDef());
     snprintf(pszName, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_DEED_NAME), pItemBase->GetName());
@@ -1156,6 +1156,8 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
             fTransferAll = true;
             fMoveToBank = args.m_iN3 ? true : false;
         }
+        if (args.m_iN1 != itDeed)
+            pDeed->SetID((ITEMID_TYPE)args.m_iN1);
     }
     RemoveAllComponents();
     if (!fIsAddon) // Addons doesn't have to transfer anything but themselves.

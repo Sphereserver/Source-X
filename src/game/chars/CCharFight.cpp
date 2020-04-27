@@ -1241,6 +1241,12 @@ bool CChar::Fight_Clear(CChar *pChar, bool bForced)
 	return (pChar != nullptr);	// I did not know about this ?
 }
 
+
+bool Fight_Attack(CItem* pItemTarg, bool fToldByMaster = false)
+{
+	return true;
+}
+
 // We want to attack some one.
 // But they won't notice til we actually hit them.
 // This is just my intent.

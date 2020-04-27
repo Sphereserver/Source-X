@@ -1023,6 +1023,7 @@ public:
 	bool Memory_Fight_OnTick( CItemMemory * pMemory );
 
 	bool Fight_Attack( CChar * pCharTarg, bool fToldByMaster = false );
+	bool Fight_Attack(CItem* pItemTarg, bool fToldByMaster = false);
 	bool Fight_Clear( CChar * pCharTarg , bool fForced = false );
 	void Fight_ClearAll();
 	void Fight_HitTry();
