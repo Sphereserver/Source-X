@@ -1064,7 +1064,7 @@ void CClient::Event_Attack( CUID uid )
 	CChar* pChar = uid.CharFind();
 	if (pChar != nullptr)
 	{
-		bool fFail = !m_pChar->Fight_Attack(pChar);
+		fFail = !m_pChar->Fight_Attack(pChar);
 		if (!fFail)
 			new PacketAttack(this, (fFail ? 0 : (dword)pChar->GetUID()));
 		return;
@@ -1073,7 +1073,7 @@ void CClient::Event_Attack( CUID uid )
 	CItem* pItem = uid.ItemFind();
 	if (pItem != nullptr)
 	{
-		bool fFail = !m_pChar->Fight_Attack(pItem);
+		fFail = !m_pChar->Fight_Attack(pItem);
 		if (pItem->Can(CAN_I_DAMAGEABLE))
 			new PacketAttack(this, (dword)pItem->GetUID());
 		return;
