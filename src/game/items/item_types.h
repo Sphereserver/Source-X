@@ -223,6 +223,7 @@ enum IT_TYPE		// double click type action.
 	IT_ARMOR_CHAIN = 600,	// 600 = t_armor_chain
 	IT_ARMOR_RING,			// 601 = t_armor_ring
 	IT_TALISMAN,			// 602 = t_talisman goes to layer_talisman
+	IT_SHIP_WHEEL,			// 603 = t_ship_wheel for piloting ships
 
 	IT_QTY,
 	IT_TRIGGER = 1000	// custom triggers starts from here

@@ -1026,7 +1026,8 @@ enum STONEALIGN_TYPE // Types of Guild/Town stones
 enum ITRIG_TYPE
 {
 	// XTRIG_UNKNOWN = some named trigger not on this list.
-    ITRIG_ADDREDCANDLE = 1,
+    ITRIG_AAAUNUSED,
+    ITRIG_ADDREDCANDLE,
     ITRIG_ADDWHITECANDLE,
 	ITRIG_AfterClick,
 	ITRIG_Buy,
@@ -1056,6 +1057,7 @@ enum ITRIG_TYPE
     ITRIG_RegionEnter,          // Ship entering a new region.
     ITRIG_RegionLeave,          // Ship leaving the region.
 	ITRIG_Sell,                 // I'm being sold.
+    ITRIG_Ship_Move,            // I'm a ship and i'm moving around.
 	ITRIG_Ship_Turn,            // I'm a ship and i'm turning around.
     ITRIG_Spawn,                // This spawn is going to generate something.
 	ITRIG_SPELLEFFECT,          // cast some spell on me.

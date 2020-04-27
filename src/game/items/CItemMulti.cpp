@@ -227,6 +227,9 @@ bool CItemMulti::MultiRealizeRegion()
     if (IsType(IT_SHIP))
     {
         dwFlags |= REGION_FLAG_SHIP;
+        CScript event("events +r_Ship");
+        m_pRegion->r_LoadVal(event);
+        
     }
     else
     {

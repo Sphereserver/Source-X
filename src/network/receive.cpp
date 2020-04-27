@@ -846,6 +846,8 @@ bool PacketStaticUpdate::onReceive(CNetState* net)
 		default:
 			break;
 	}
+
+	return true;
 }
 
 
@@ -3161,6 +3163,9 @@ bool PacketBandageMacro::onReceive(CNetState* net)
 
 	// make sure the macro isn't used for other types of items
 	if (bandage->IsType(IT_BANDAGE) == false)
+		return true;
+
+	if (character->Stat_GetVal(STAT_DEX) < 2)
 		return true;
 
 	// clear previous target

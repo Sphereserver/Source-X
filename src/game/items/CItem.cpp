@@ -72,12 +72,13 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
     "@Redeed",
     "@RegionEnter",
     "@RegionLeave",
-	"@SELL",
-	"@Ship_Turn",
+	"@Sell",
+	"@ShipMove",
+	"@ShipTurn",
 	"@Spawn",
 	"@SpellEffect",		// cast some spell on me.
-	"@STEP",			// I have been walked on.
-	"@TARGON_CANCEL",
+	"@Step",			// I have been walked on.
+	"@TargON_Cancel",
 	"@TARGON_CHAR",
 	"@TARGON_GROUND",
 	"@TARGON_ITEM",	// I am being combined with an item
