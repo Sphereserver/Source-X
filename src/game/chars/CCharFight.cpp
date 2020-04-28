@@ -1241,12 +1241,6 @@ bool CChar::Fight_Clear(CChar *pChar, bool bForced)
 	return (pChar != nullptr);	// I did not know about this ?
 }
 
-
-bool Fight_Attack(CItem* pItemTarg, bool fToldByMaster = false)
-{
-	return true;
-}
-
 // We want to attack some one.
 // But they won't notice til we actually hit them.
 // This is just my intent.
@@ -1347,32 +1341,42 @@ void CChar::Fight_HitTry()
 
 	ASSERT( Fight_IsActive() );
 
-	CChar *pCharTarg = m_Fight_Targ_UID.CharFind();
-	/*
-	  We still need to check if player is hidden/invisible but do not need to make anything if the attacker is player, 
-	  So we only check Statf_Dead,stone,insub and invul for players to avoid continue attack the not attackable targets.
-	*/
-	if ( !pCharTarg || (pCharTarg && pCharTarg->IsStatFlag(STATF_DEAD|STATF_STONE|STATF_INSUBSTANTIAL|STATF_INVUL)) || (pCharTarg->IsStatFlag(STATF_HIDDEN|STATF_INVISIBLE) && m_pNPC) )
+	bool fIsItem = false;;
+
+	CItem* pItemTarg = m_Fight_Targ_UID.ItemFind();
+	if (pItemTarg) 
 	{
-		// I can't hit this target, try switch to another one
-		if (m_pNPC)
-		{
-			if ( !Fight_Attack(NPC_FightFindBestTarget()) )
-			{
-				Skill_Start(SKILL_NONE);
-				m_Fight_Targ_UID.InitUID();
-				if ( m_pNPC )
-					StatFlag_Clear(STATF_WAR);
-			}
-		}
-		else
-    {
-				Skill_Start(SKILL_NONE);
-				m_Fight_Targ_UID.InitUID();
-		}
-		return;
+		fIsItem = true;
 	}
-	
+
+	/* We still need to check if player is hidden/invisible but do not need to make anything if the attacker is player, 
+	   So we only check Statf_Dead,stone,insub and invul for players to avoid continue attack the not attackable targets. */
+	CChar* pCharTarg = m_Fight_Targ_UID.CharFind();
+	if ( fIsItem == false )
+	{
+		if ( !pCharTarg || (pCharTarg && pCharTarg->IsStatFlag(STATF_DEAD|STATF_STONE|STATF_INSUBSTANTIAL|STATF_INVUL)) || (pCharTarg->IsStatFlag(STATF_HIDDEN|STATF_INVISIBLE) && m_pNPC) )
+		{
+			// I can't hit this target, try switch to another one
+			if (m_pNPC)
+			{
+				if ( !Fight_Attack(NPC_FightFindBestTarget()) )
+				{
+					Skill_Start(SKILL_NONE);
+					m_Fight_Targ_UID.InitUID();
+					if ( m_pNPC )
+						StatFlag_Clear(STATF_WAR);
+				}
+			}
+			else
+		{
+					Skill_Start(SKILL_NONE);
+					m_Fight_Targ_UID.InitUID();
+			}
+			return;
+		}
+	}
+
+
     bool fIH_ShouldInstaHit = false, fIH_LastHitTag_Newer = false;
     int64 iIH_LastHitTag_FullHit = 0;  // Time required to perform a normal hit, without the PreHit delay reduction.
     if (m_atFight.m_iWarSwingState == WAR_SWING_EQUIPPING)
@@ -1406,7 +1410,12 @@ void CChar::Fight_HitTry()
         }
     }
 
-    WAR_SWING_TYPE retHit = Fight_Hit(pCharTarg);
+
+	WAR_SWING_TYPE retHit = WAR_SWING_INVALID;
+	if ( fIsItem )
+		retHit = Fight_Hit(pItemTarg);
+	else
+		retHit = Fight_Hit(pCharTarg);
 
     if (IsSetCombatFlags(COMBAT_FIRSTHIT_INSTANT))
     {
@@ -1432,7 +1441,11 @@ void CChar::Fight_HitTry()
 	{
 		case WAR_SWING_INVALID:		// target is invalid
 		{
-			Fight_Clear(pCharTarg);
+			if (fIsItem)
+				Fight_Clear(pItemTarg);
+			else
+				Fight_Clear(pCharTarg);
+
 			if ( m_pNPC )
             {
 				Fight_Attack(NPC_FightFindBestTarget());
