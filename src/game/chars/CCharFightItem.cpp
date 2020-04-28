@@ -285,15 +285,35 @@ WAR_SWING_TYPE CChar::Fight_Hit(CItem* pItemTarg)
 		return WAR_SWING_EQUIPPING_NOWAIT;
 	}
 
-	int	iDmg = Fight_CalcDamage(pWeapon);
+	if ( pAmmo )
+		pAmmo->ConsumeAmount(1);
+
+	// Check if the weapon will be damaged
+	if ( pWeapon )
+	{
+		// int iDamageChance = (int)(Args.m_VarsLocal.GetKeyNum("ItemDamageChance"));
+		// if (iDamageChance > Calc_GetRandVal(100))
+		//	pWeapon->OnTakeDamage(iDmg, pItemTarg);
+	}
 
 	// FIXME
 	// Apply damage!
 	// We must look how items handle damage
 	// Not really cool :)
 
-	if ( pAmmo )
-		pAmmo->ConsumeAmount(1);
+	// Took my swing. Do Damage !
+	int	iDmg = Fight_CalcDamage(pWeapon);
+	pItemTarg->OnTakeDamage( iDmg, this, iDmgType );
+
+	if (iDmg > 0)
+	{
+		// Check for passive skill gain
+		if (m_pPlayer)
+		{
+			Skill_Experience(skill, m_Act_Difficulty);
+			Skill_Experience(SKILL_TACTICS, m_Act_Difficulty);
+		}
+	}
 
 	return WAR_SWING_EQUIPPING_NOWAIT;
 }
