@@ -384,13 +384,15 @@ public:
 		// IT_SHIP
 		struct
 		{
-			CUID m_UIDCreator;	// more1 = who created this house or ship ?
+			word _iCurHits;
+			word _iMaxHits;
             ShipMovementType _eMovementType;	// more2 & 0x000000FF. From packet 0xBF.0x32: 0 = Stop Movement, 1 = One Tile Movement, 2 = Normal Movement
 			byte m_fAnchored;
 			byte m_DirMove;			// DIR_TYPE
 			byte m_DirFace;
 			// uidLink = my IT_SHIP_TILLER or IT_SIGN_GUMP,
 			CUID m_Pilot;
+			CUID m_UIDCreator;
 		} m_itShip;
 
 		// IT_SHIP_PLANK

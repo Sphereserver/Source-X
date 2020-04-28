@@ -1252,6 +1252,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
 
 enum CML_TYPE
 {
+    CML_OWNER,
     CML_PILOT,
     CML_SHIPSPEED,
     CML_SPEEDMODE,
@@ -1260,6 +1261,7 @@ enum CML_TYPE
 
 lpctstr const CCMultiMovable::sm_szLoadKeys[CML_QTY + 1] =
 {
+    "OWNER",
     "PILOT",
     "SHIPSPEED",
     "SPEEDMODE",
@@ -1281,6 +1283,10 @@ bool CCMultiMovable::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * 
     ASSERT(pItemThis);
     switch (index)
     {
+
+        case CML_OWNER:
+            sVal.FormatHex(pItemThis->m_itShip.m_UIDCreator);
+            break;
         case CML_PILOT:
         {
             if (pItemThis->m_itShip.m_Pilot)
@@ -1406,6 +1412,16 @@ bool CCMultiMovable::r_LoadVal(CScript & s)
 			return true;
         } 
         break;
+        case CML_OWNER:
+        {
+            CChar* pCharNew = CUID::CharFind(s.GetArgVal());
+            if (pCharNew->IsClient())
+            {
+                CItem* pItemThis = dynamic_cast<CItem*>(this);
+                ASSERT(pItemThis);
+                pItemThis->m_itShip.m_UIDCreator = (CUID)s.GetArgVal();
+            }
+        }
         default:
         {
             return false;
