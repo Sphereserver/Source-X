@@ -1223,6 +1223,7 @@ bool CChar::ReadScript(CResourceLock &s, bool fVendor)
 {
 	ADDTOCALLSTACK("CChar::ReadScript");
 	bool fFullInterp = false;
+	bool fBlockItemAttr = false; //Set a temporary boolean to block item attributes to set on Character.
 
 	CItem * pItem = nullptr;
 	while ( s.ReadKeyParse() )
@@ -1240,27 +1241,33 @@ bool CChar::ReadScript(CResourceLock &s, bool fVendor)
 				{
 					case ITC_BUY:
 					case ITC_SELL:
+					{
+						fBlockItemAttr = false; //Make sure we reset the value, if the last input is not a ITEM(NEWBIE) or CONTAINER.
+						CItemContainer * pCont = GetBank((iCmd == ITC_SELL) ? LAYER_VENDOR_STOCK : LAYER_VENDOR_BUYS );
+						if ( pCont )
 						{
-							CItemContainer * pCont = GetBank((iCmd == ITC_SELL) ? LAYER_VENDOR_STOCK : LAYER_VENDOR_BUYS );
-							if ( pCont )
-							{
-								pItem = CItem::CreateHeader(s.GetArgRaw(), pCont, false);
-								if ( pItem )
-									pItem->m_TagDefs.SetNum("NOSAVE", 1);
-							}
-							pItem = nullptr;
-							continue;
+							pItem = CItem::CreateHeader(s.GetArgRaw(), pCont, false);
+							if ( pItem )
+								pItem->m_TagDefs.SetNum("NOSAVE", 1);
 						}
+						pItem = nullptr;
+						continue;
+					}
+					case ITC_ITEM:
+					case ITC_CONTAINER:
+					case ITC_ITEMNEWBIE:					
+						fBlockItemAttr = true; //Set the value to block next Color or Attribute inputs for items.
+						pItem = nullptr;
+						continue;
 					default:
-						//pItem = nullptr;
-						//continue;
-						goto globalswitch; //Continue in global switch event instead of cleaning the item to avoid COLOR override the source's color.
+						fBlockItemAttr = false; //Make sure we reset the value, if the last input is not a ITEM(NEWBIE) or CONTAINER.
+						pItem = nullptr;
+						continue;
 				}
 			}
 		}
 		else
 		{
-globalswitch:
 			switch ( iCmd )
 			{
 				case ITC_FULLINTERP:
@@ -1324,6 +1331,9 @@ globalswitch:
 
 		if ( m_UIDLastNewItem == GetUID() )
 			continue;
+		if ( fBlockItemAttr ) //Did we force to cancel item attributes?
+			continue;
+			
 		if ( pItem != nullptr )
 		{
 			if ( fFullInterp )	// Modify the item.

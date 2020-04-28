@@ -2222,3 +2222,6 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Possible Fix: COLOR variable change the color of human if the human is shop keeper (vendor). (Issue #397)
 - Fixed: Unreferenced variables for new GMPage system to avoid possible issues.
 - Fixed: Archery bug occurs when the attacker is stoned. (Issue #432)
+
+28-04-2020, xwerswoodx
+- Fixed: Possible fix for issue #440 and #397 without change @NPCRestock behaviour.
