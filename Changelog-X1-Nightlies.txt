@@ -2242,3 +2242,4 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: Wrong calculation for height for Containers. (Issue #423)
 - Fixed: Mass Curse doesn't lower the stats. (Issue #446)
 - Fixed: Fixed the issue on XMFHTMLGUMP, XMFHTMLGUMPCOLOR and XMFHTMLTOK. (Issue #441)
+- Fixed: Not cleaning skill when @PreStart trigger return as true. (Issue #450)
