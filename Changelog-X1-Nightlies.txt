@@ -2234,7 +2234,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Added: ARGN2 under @Attack trigger to replace Ignore status. (Issue #439)
 	ARGN2 = 1 //Force to ignore attacker.
 	ARGN2 = 0 //Force to unignore attacker.
-- Added: @ClientTooltip_Sent trigger which triggers after default tooltips sent. (Issue #436)
+- Added: @ClientTooltip_AfterDefault trigger which triggers after default tooltips sent. (Issue #436)
 - Added: REMOVECLILOC and REPLACECLILOC functions to remove/replace default tooltip properties under @ClientTooltip_Sent trigger. (Issue #436)
 - Added: CLILOCLIST on objects to get list of the clilocs.
 - Added: CLILOCCOUNT and CLILOC.n[.ID|.VAL] to get clilocs.

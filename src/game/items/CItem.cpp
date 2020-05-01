@@ -49,7 +49,7 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	"@Buy",
 	"@Click",
 	"@ClientTooltip",	// Sending tooltip to a client
-	"@ClientTooltip_Sent",
+	"@ClientTooltip_AfterDefault",
 	"@ContextMenuRequest",
 	"@ContextMenuSelect",
 	"@Create",
@@ -3247,7 +3247,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
             return CObjBase::r_LoadVal(s);
         }
 	}
-	if ((_iCallingObjTriggerId != ITRIG_CLIENTTOOLTIP) && (_iCallingObjTriggerId != ITRIG_CLIENTTOOLTIP_SENT))
+	if ((_iCallingObjTriggerId != ITRIG_CLIENTTOOLTIP) && (_iCallingObjTriggerId != ITRIG_CLIENTTOOLTIP_AFTERDEFAULT))
 	{
 		// Avoid @ClientTooltip calling TRIGGER @Create, and this calling again UpdatePropertyFlag() and the @ClientTooltip trigger
 		UpdatePropertyFlag();
