@@ -546,9 +546,9 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 	CItemBase *pContDef = Item_GetDef();
 	if (pContDef->m_ttContainer.m_dwMinXY || pContDef->m_ttContainer.m_dwMaxXY)
 	{
-		const short tmp_MinX = (short)( (pContDef->m_ttContainer.m_dwMinXY & 0xFFFF0000) >> 16 );
+		const short tmp_MinX = (short)( pContDef->m_ttContainer.m_dwMinXY >> 16 );
         const short tmp_MinY = (short)( (pContDef->m_ttContainer.m_dwMinXY & 0x0000FFFF) );
-        const short tmp_MaxX = (short)( (pContDef->m_ttContainer.m_dwMaxXY & 0xFFFF0000) >> 16 );
+        const short tmp_MaxX = (short)( pContDef->m_ttContainer.m_dwMaxXY >> 16 );
         const short tmp_MaxY = (short)( (pContDef->m_ttContainer.m_dwMaxXY & 0x0000FFFF) );
 		if (pt.m_x < tmp_MinX)
 			pt.m_x = tmp_MinX;
