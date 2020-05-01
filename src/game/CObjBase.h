@@ -1060,6 +1060,7 @@ enum ITRIG_TYPE
 	ITRIG_Ship_Turn,            // I'm a ship and i'm turning around.
     ITRIG_Spawn,                // This spawn is going to generate something.
 	ITRIG_SPELLEFFECT,          // cast some spell on me.
+    ITRIG_Start,                // Start trigger, right now used only on Champions.
 	ITRIG_STEP,                 // I have been walked on. (or shoved)
 	ITRIG_TARGON_CANCEL,        // Someone requested me (item) to target, now the targeting was canceled.
 	ITRIG_TARGON_CHAR,          // I'm targeting a char.

@@ -77,6 +77,7 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	"@Ship_Turn",
 	"@Spawn",
 	"@SpellEffect",		// cast some spell on me.
+	"@Start",
 	"@STEP",			// I have been walked on.
 	"@TARGON_CANCEL",
 	"@TARGON_CHAR",
