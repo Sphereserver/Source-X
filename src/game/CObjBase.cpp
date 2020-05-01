@@ -2064,7 +2064,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		                if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
         	    	        g_Log.EventDebug("SCRIPT: replacecliloc(%u,'%s')\n", clilocid, sLocArgs.GetPtr());
         	    	    m_TooltipData.erase(m_TooltipData.begin() + i);
-        	    	    m_TooltipData.emplace(m_TooltipData.begin() + i, new CClientTooltip(clilocid, sLocArgs.GetPtr()));
+        	    	    m_TooltipData.emplace(m_TooltipData.begin() + i, std::make_unique<CClientTooltip>(clilocid, sLocArgs.GetPtr()));
 						break;
 					}
 				}
