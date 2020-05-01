@@ -396,36 +396,47 @@ CPointMap CItemContainer::GetRandContainerLoc() const
         { GUMP_TALL_CABINET, 10, 10, 170, 115 },
         { GUMP_CHEST_WOOD_FINISH, 10, 10, 170, 115 },
         { GUMP_DRAWER_RED, 10, 10, 170, 115 },
-        //{ GUMP_BLESSED_STATUE, 0, 0, 0, 0 },		// TO-DO: confirm gump size
-        //{ GUMP_MAILBOX, 0, 0, 0, 0 },			// TO-DO: confirm gump size
+        { GUMP_BLESSED_STATUE, 44, 29, 128, 103 },
+        { GUMP_MAILBOX, 19, 61, 119, 155 },
         { GUMP_GIFT_BOX_CUBE, 23, 51, 163, 151 },
         { GUMP_GIFT_BOX_CYLINDER, 16, 51, 156, 166 },
         { GUMP_GIFT_BOX_OCTOGON, 25, 51, 165, 166 },
         { GUMP_GIFT_BOX_RECTANGLE, 16, 51, 156, 151 },
         { GUMP_GIFT_BOX_ANGEL, 21, 51, 161, 151 },
         { GUMP_GIFT_BOX_HEART_SHAPED, 56, 30, 158, 104 },
-        //{ GUMP_GIFT_BOX_TALL, 0, 0, 0, 0 },		// TO-DO: confirm gump size
+        { GUMP_GIFT_BOX_TALL, 77, 44, 161, 105 },
         { GUMP_GIFT_BOX_CHRISTMAS, 16, 51, 156, 166 },
-        //{ GUMP_WALL_SAFE, 0, 0, 0, 0 },			// TO-DO: confirm gump size
-        { GUMP_CHEST_PIRATE, 0, 0, 0, 0 },		    // TO-DO: confirm gump size
-        //{ GUMP_FOUNTAIN_LIFE, 0, 0, 0, 0 },		// TO-DO: confirm gump size
-		//{ GUMP_SECRET_CHEST, 0, 0, 0, 0 },		// TO-DO: confirm gump size
-		//{ GUMP_MAILBOX_DOLPHIN, 0, 0, 0, 0 },		// TO-DO: confirm gump size
-		//{ GUMP_MAILBOX_SQUIRREL, 0, 0, 0, 0 },	// TO-DO: confirm gump size
-		//{ GUMP_MAILBOX_BARREL, 0, 0, 0, 0 },		// TO-DO: confirm gump size
-		//{ GUMP_MAILBOX_LANTERN, 0, 0, 0, 0 },		// TO-DO: confirm gump size
+        { GUMP_WALL_SAFE, 35, 13, 112, 165 },
+        { GUMP_CHEST_HUGE, 61, 86, 574, 382 },
+        { GUMP_CHEST_PIRATE, 49, 76, 141, 114 },
+        { GUMP_FOUNTAIN_LIFE, 4, 42, 162, 110 },
+		{ GUMP_COMBINATION_CHEST_OPEN, 49, 121, 349, 236 },
+		{ GUMP_MAILBOX_DOLPHIN, 16, 84, 119, 153 },
+		{ GUMP_MAILBOX_SQUIRREL, 16, 66, 116, 149 },
+		{ GUMP_MAILBOX_BARREL, 13, 71, 122, 147 },
+		{ GUMP_MAILBOX_LANTERN, 17, 63, 117, 152 },
+		{ GUMP_WARDROBE_YELLOW, 66, 73, 308, 542 },
+		{ GUMP_WARDROBE_BROWN, 66, 73, 308, 542 },
+		{ GUMP_DRAWER_YELLOW, 57, 54, 545, 300 },
+		{ GUMP_DRAWER_BROWN, 57, 54, 545, 300 },
+		{ GUMP_BARREL_SHORT, 48, 78, 363, 316 },
+		{ GUMP_BOOKCASE_BROWN, 93, 32, 567, 344 },
         { GUMP_SECURE_TRADE, 20, 30, 380, 180 },
+        { GUMP_SEED_BOX, 16, 29, 283, 338 },
+        { GUMP_SECURE_TRADE_TOL, 19, 108, 154, 183 },
         { GUMP_BOARD_CHECKER, 0, 0, 282, 230 },
         { GUMP_BOARD_BACKGAMMON, 0, 0, 282, 210 },
         { GUMP_CHEST_WEDDING, 16, 51, 184, 124 },
         { GUMP_STONE_BASE, 16, 51, 184, 124 },
         { GUMP_PLAGUE_BEAST, 60, 33, 460, 348 },
-        //{ GUMP_KING_COLLECTION_BOX, 0, 0, 0, 0 },	// TO-DO: confirm gump size
+        { GUMP_REGAL_CASE, 32, 72, 226, 150 },
         { GUMP_BACKPACK_SUEDE, 44, 65, 186, 159 },
         { GUMP_BACKPACK_POLAR_BEAR, 44, 65, 186, 159 },
         { GUMP_BACKPACK_GHOUL_SKIN, 44, 65, 186, 159 },
-        //{ GUMP_GIFT_BOX_SQUARE, 0, 0, 0, 0 },		// TO-DO: confirm gump size
+        { GUMP_GIFT_BOX_CHRISTMAS_2, 25, 36, 194, 120 },
+        { GUMP_WALL_SAFE_COMBINATION, 9, 13, 117, 176 },
         { GUMP_CRATE_FLETCHING, 24, 96, 196, 152 },
+        { GUMP_DRAWER_ROYAL, 50, 90, 552, 343 },
         { GUMP_CHEST_WOODEN, 10, 10, 170, 115 },
         //{ GUMP_PILLOW_HEART, 0, 0, 0, 0 },		// TO-DO: confirm gump size
         { GUMP_CHEST_METAL_LARGE, 50, 60, 500, 300 },
@@ -434,6 +445,10 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 		{ GUMP_CHEST_CRATE_LARGE, 50, 60, 500, 300 },
 		{ GUMP_MINERS_SATCHEL, 44, 65, 186, 159 },
 		{ GUMP_LUMBERJACKS_SATCHEL, 44, 65, 186, 159 },
+		{ GUMP_MAILBOX_WOOD, 17, 63, 116, 153 },
+		{ GUMP_MAILBOX_BIRD, 18, 68, 117, 154 },
+		{ GUMP_MAULBOX_IRON, 19, 81, 117, 152 },
+		{ GUMP_MAILBOX_GOLDEN, 23, 65, 112, 155 },
         { GUMP_CHEST_METAL2, 18, 105, 162, 178 }
 	};
 
@@ -445,9 +460,9 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 	// check for custom values in TDATA3/TDATA4
 	if ( pItemDef->m_ttContainer.m_dwMinXY || pItemDef->m_ttContainer.m_dwMaxXY )
 	{
-		int tmp_MinX = (pItemDef->m_ttContainer.m_dwMinXY & 0xFFFF0000) >> 16;
+		int tmp_MinX = pItemDef->m_ttContainer.m_dwMinXY >> 16;
 		int tmp_MinY = (pItemDef->m_ttContainer.m_dwMinXY & 0x0000FFFF);
-		int tmp_MaxX = (pItemDef->m_ttContainer.m_dwMaxXY & 0xFFFF0000) >> 16;
+		int tmp_MaxX = pItemDef->m_ttContainer.m_dwMaxXY >> 16;
 		int tmp_MaxY = (pItemDef->m_ttContainer.m_dwMaxXY & 0x0000FFFF);
 		//DEBUG_WARN(("Custom container gump id %d for 0%x\n", gump, GetDispID()));
 		return CPointMap(

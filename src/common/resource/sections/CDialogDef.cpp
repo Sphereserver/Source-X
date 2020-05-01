@@ -96,6 +96,7 @@ lpctstr const CDialogDef::sm_szLoadKeys[GUMPCTL_QTY+1] =
     "TILEPICHUE",
 
     "TOOLTIP",
+    "ITEMPROPERTY",
 
     "XMFHTMLGUMP",
     "XMFHTMLGUMPCOLOR",

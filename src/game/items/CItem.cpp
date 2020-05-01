@@ -49,6 +49,7 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	"@Buy",
 	"@Click",
 	"@ClientTooltip",	// Sending tooltip to a client
+	"@ClientTooltip_Sent",
 	"@ContextMenuRequest",
 	"@ContextMenuSelect",
 	"@Create",
@@ -3246,7 +3247,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
             return CObjBase::r_LoadVal(s);
         }
 	}
-	if (_iCallingObjTriggerId != ITRIG_CLIENTTOOLTIP)
+	if ((_iCallingObjTriggerId != ITRIG_CLIENTTOOLTIP) && (_iCallingObjTriggerId != ITRIG_CLIENTTOOLTIP_SENT))
 	{
 		// Avoid @ClientTooltip calling TRIGGER @Create, and this calling again UpdatePropertyFlag() and the @ClientTooltip trigger
 		UpdatePropertyFlag();
@@ -3900,6 +3901,17 @@ CObjBase * CItem::GetContainer() const
 	// What is this CItem contained in ?
 	// Container should be a CChar or CItemContainer
 	return ( dynamic_cast <CObjBase*> (GetParent()));
+}
+
+CObjBase * CItem::GetTopContainer()
+{
+	//Get the top container
+	CItem* pItem = this;
+	while ((pItem->GetContainer()) && !(pItem->GetContainer()->IsChar()))
+	{
+		pItem = pItem->GetContainer()->IsItem() ? static_cast <CItem *> (pItem->GetContainer()) : pItem;
+	}
+	return ( dynamic_cast <CObjBase*> (pItem) );
 }
 
 const CObjBaseTemplate * CItem::GetTopLevelObj() const

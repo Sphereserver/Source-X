@@ -41,6 +41,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@charAttack",			// Here starts @charXXX section
 	"@charClick",
 	"@charClientTooltip",
+	"@charClientTooltip_Sent",
 	"@charContextMenuRequest",
 	"@charContextMenuSelect",
 	"@charDClick",
@@ -48,6 +49,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 
 	"@Click",				// I got clicked on by someone.
 	"@ClientTooltip", 		// Sending tooltips to someone
+	"@ClientTooltip_Sent",
 	"@CombatAdd",
 	"@CombatDelete",
 	"@CombatEnd",
@@ -89,6 +91,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@itemBuy",
 	"@itemClick",			// I clicked on an item
 	"@itemClientTooltip", 	// Receiving tooltip for something
+	"@itemClientTooltip_Sent",
 	"@itemContextMenuRequest",
 	"@itemContextMenuSelect",
 	"@itemCreate",			//?

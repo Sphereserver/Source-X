@@ -669,6 +669,7 @@ public:
 	const CObjBaseTemplate* GetTopLevelObj() const override;
 	CObjBaseTemplate* GetTopLevelObj() override;
 	CObjBase * GetContainer() const;
+	CObjBase * GetTopContainer();
 	uchar GetContainedGridIndex() const;
 	void SetContainedGridIndex(uchar index);
 
