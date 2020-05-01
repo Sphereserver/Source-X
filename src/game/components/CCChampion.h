@@ -271,7 +271,7 @@ private:
 public:
     CSString m_sName;                   ///< Champion name
     ushort _iSpawnsMax;                 ///< Max amount of monsters OSI default value = 480.
-    uchar _iLevelMax;                  ///< Max level this champion can have
+    uchar _iLevelMax;                   ///< Max level this champion can have
     idSpawn _idSpawn;
     CREID_TYPE _idChampion;             ///< Boss id
 
