@@ -2638,7 +2638,7 @@ bool CChar::Spell_Unequip( LAYER_TYPE layer )
 		{
 			return false;
 		}
-		else if ( !pItemPrev->IsTypeSpellbook() && !pItemPrev->IsType(IT_WAND) && !pItemPrev->GetPropNum(COMP_PROPS_CHAR, PROPCH_SPELLCHANNELING, true))
+		else if ( !pItemPrev->IsTypeSpellbook() && !pItemPrev->IsType(IT_WAND) && !pItemPrev->GetPropNum(COMP_PROPS_ITEMEQUIPPABLE, PROPIEQUIP_SPELLCHANNELING, true))
 		{
 			ItemBounce( pItemPrev );
 		}
