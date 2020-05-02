@@ -1732,11 +1732,14 @@ PacketAddTarget::PacketAddTarget(const CClient* target, PacketAddTarget::TargetT
 	if ( !pItemDef )
 		return;
 
-	word y = 0;
+	word x, y, z = 0;
 	CItemBaseMulti *pMultiDef = static_cast<CItemBaseMulti *>(pItemDef);
-	if (pMultiDef && (CItemBase::IsID_House(id) || CItemBase::IsID_Ship(id)))
-		y = (word)(pMultiDef->m_rect.m_bottom) - 1;
-
+	if (pMultiDef && CItemBase::IsID_Multi(id))
+	{
+		x = (word)(pMultiDef->m_Offset.m_dx != 0 ? (pMultiDef->m_rect.m_left + pMultiDef->m_Offset.m_dx) : 0);
+		y = (word)(pMultiDef->m_rect.m_bottom + pMultiDef->m_Offset.m_dy);
+		z = (word)(pMultiDef->m_Offset.m_dz);
+	}
 		
 	writeByte((byte)type);
 	writeInt32(context);
@@ -1749,9 +1752,9 @@ PacketAddTarget::PacketAddTarget(const CClient* target, PacketAddTarget::TargetT
 
 	writeInt16((word)(id - ITEMID_MULTI));
 
-	writeInt16(0);	// x
+	writeInt16(x);	// x
 	writeInt16(y);	// y
-	writeInt16(0);	// z
+	writeInt16(z);	// z
 
 	if ( target->GetNetState()->isClientVersion(MINCLIVER_HS) )
 		writeInt32((dword)color);	// hue

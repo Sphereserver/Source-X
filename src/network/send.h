@@ -1932,7 +1932,7 @@ public:
 	virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
 	static bool CanSendTo(const CNetState* state)
 	{
-		return state->isClientKR();
+        return state->isClientVersion(MINCLIVER_SA);
 	}
 };
 

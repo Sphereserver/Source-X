@@ -1,0 +1,23 @@
+- Created base value MULTIOFFSET which is used to display the target multi. (Default 0,-1,0)
+- FeatureUltimaLive has been added at .ini to interact with Ultima Live (Basic).
+- Unused char properties removed from @ItemEquip.
+- Modified character creation professions in the server.
+- TAG.MurdererNPC will return true at Noto_IsEvil but the NPC won't be agressive.
+- Created properties IncreaseBardChance, IncreaseParryChance, CastingFocus.
+- Runes are now stackable and will unstack when marked.
+- Fixed some issues with razor not informing the correct client version.
+- Skillmenus are now opened from CClient::Skillmenu and will pop a dialog (not a menu).
+- Created TAG.Penalty.Magery, Penalty.Stealth, Poison.Chance and Evade.Chance.
+- Created trigger @SpellInterrupt, ARGN1 is the spell number, src is char interrupting.
+- Modified trigger @ArrowQuest now also prevents default messages from behind displayed.
+- Created function SkillUpdate $skill to send update of a specific skill to player.
+- Created TAG.SkillMod$skill to modify the "non-real" value of a skill (GetAdjusted)
+- Created IT_TALISMAN for talisman items to be placed in the LAYER_TALISMAN.
+- ARGN3 = 1 in @MurderMark prevents the Murder for being counted.
+- Stealth is now hardcoded and all the script was removed.
+- Fixed the amount of ingots that smelting an armor was returning (always 100%).
+- Removed unused ATTR flags that were never used at all (_blessed2, cursed2 and _can_decay).
+- Added functionality for ATTR_QUESTITEM.
+- Splited the armor types from only t_armor to t_armor_chain and _ring aswell.
+- Created SPELLFLAG_FREEZEONCAST to prevent the player movement while he casts.
+- Added ANCHOR and DIRFACE for Ships.

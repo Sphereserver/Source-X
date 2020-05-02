@@ -33,7 +33,7 @@ private:
 	bool m_bKrToolbarEnabled;
 
 	// Multis
-	CMultiStorage* _pMultiStorage;	// List of houses.
+	CMultiStorage* _pMultiStorage;	// List of multis (both ship and houses).
 
 public:
 	static const char *m_sClassName;

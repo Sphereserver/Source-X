@@ -2802,7 +2802,7 @@ bool CChar::Spell_CastDone()
 			if (iT1 && iT2)
 			{
 				if (!fieldWidth)
-					fieldWidth = 3;
+					fieldWidth = 5;
 				if (!fieldGauge)
 					fieldGauge = 1;
 
@@ -3534,6 +3534,9 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 				case SPELL_Chain_Lightning:
 					iDmgType = DAMAGE_MAGIC | DAMAGE_ENERGY | DAMAGE_NOREVEAL;
 					break;
+
+				case SPELL_Poison_Field:
+					iDmgType = DAMAGE_MAGIC | DAMAGE_POISON | DAMAGE_NOREVEAL;
 
 				default:
 					iDmgType = DAMAGE_MAGIC | DAMAGE_GENERAL | DAMAGE_NOREVEAL;
