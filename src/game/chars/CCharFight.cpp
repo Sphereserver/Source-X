@@ -1276,14 +1276,18 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool fToldByMaster )
 	}
 
     CChar *pTarget = pCharTarg;
+	bool ignored = Attacker_GetIgnore(pTarget);
 	if ( ((IsTrigUsed(TRIGGER_ATTACK)) || (IsTrigUsed(TRIGGER_CHARATTACK))) && m_Fight_Targ_UID != pCharTarg->GetUID() )
 	{
 		CScriptTriggerArgs Args;
 		Args.m_iN1 = threat;
+		Args.m_iN2 = (int)ignored;
 		if ( OnTrigger(CTRIG_Attack, pTarget, &Args) == TRIGRET_RET_TRUE )
 			return false;
 		threat = (int)Args.m_iN1;
+		ignored = (bool)Args.m_iN2;		
 	}
+	Attacker_SetIgnore(pTarget, ignored);
 
     if (!Attacker_Add(pTarget, threat))
     {

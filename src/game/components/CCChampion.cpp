@@ -81,17 +81,26 @@ void CCChampion::Init()
     _iCandlesNextLevel = 0;
     _iLastActivationTime = 0;
     _fChampionSummoned = false;
-    CResourceDef *pRes = g_Cfg.ResourceGetDef(_idSpawn);
-    CCChampionDef *pChampDef = static_cast<CCChampionDef*>(pRes);
-    if (!pChampDef)
+    if (_idSpawn.IsValidResource() == false)
     {
         return;
     }
-    ASSERT(pChampDef);
+    const int resId = _idSpawn.GetResIndex();
+    const CResourceIDBase rid(RES_CHAMPION, resId);
+    CResourceDef* pResDef = g_Cfg.ResourceGetDef(rid);
+    const CCChampionDef* pChampDef = static_cast<CCChampionDef*>(pResDef);
+    if (pChampDef == nullptr)
+    {
+        return;
+    }
     _iLevelMax = pChampDef->_iLevelMax;
     _iSpawnsMax = pChampDef->_iSpawnsMax;
     _idChampion = pChampDef->_idChampion;
-    _spawnGroupsId.insert(pChampDef->_idSpawn.begin(), pChampDef->_idSpawn.end());
+    _spawnGroupsId.clear();
+    if (pChampDef->_idSpawn.size())
+    {
+        _spawnGroupsId.insert(pChampDef->_idSpawn.begin(), pChampDef->_idSpawn.end());
+    }
 }
 
 void CCChampion::Start()
@@ -109,6 +118,14 @@ void CCChampion::Start()
     _iCandlesNextRed = CANDLESNEXTRED;
 
     SetLevel(1);
+
+    if (IsTrigUsed(TRIGGER_START))
+    {
+        if (OnTrigger(ITRIG_Start, &g_Serv, nullptr) == TRIGRET_RET_TRUE)
+        {
+            return;// Do not spawn anything if the trigger returns 1
+        }
+    }
     for (ushort i = 0; i < _iSpawnsNextWhite; ++i)   // Spawn all the monsters required to get the next White candle. // TODO: a way to prevent this from script.
         SpawnNPC();
 }
@@ -233,11 +250,17 @@ void CCChampion::SpawnNPC()
     CCSpawn* pSpawn = GetSpawnItem();
     if (pSpawn)
     {
-        CChar* spawn = pSpawn->GenerateChar(rid);
-        if (spawn != nullptr)
+        CChar* pChar = CChar::CreateBasic(pNpc);
+        if (!pChar)
         {
-            AddObj(spawn->GetUID());
+            return;
         }
+        CPointMap pt = GetLink()->GetTopPoint();
+        pChar->SetTopPoint(pt);
+        pChar->MoveNear(pt, 10);
+        pChar->Update();
+        pChar->NPC_LoadScript(true);
+        AddObj(pChar->GetUID());
     }
     ++_iSpawnsCur;
 }
@@ -737,7 +760,6 @@ void CCChampion::r_Write(CScript & s)
     }
     s.WriteKeyVal("ACTIVE", _fActive);
     s.WriteKey("CHAMPIONID", g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _idChampion)));
-    s.WriteKey("CHAMPIONSPAWN", g_Cfg.ResourceGetName(_idSpawn));
     s.WriteKeyVal("CHAMPIONSUMMONED", _fChampionSummoned);
     s.WriteKeyVal("CANDLESNEXTLEVEL", _iCandlesNextLevel);
     s.WriteKeyVal("CANDLESNEXTRED", _iCandlesNextRed);
@@ -750,6 +772,10 @@ void CCChampion::r_Write(CScript & s)
     s.WriteKeyVal("SPAWNSCUR", _iSpawnsCur);
     s.WriteKeyVal("SPAWNSMAX", _iSpawnsMax);
 
+    if (_idSpawn.IsValidResource())
+    {
+        s.WriteKey("CHAMPIONSPAWN", g_Cfg.ResourceGetName(_idSpawn));
+    }
     for (const CUID& uidCandle : _pRedCandles)
     {
         const CItem * pCandle = uidCandle.ItemFind();
@@ -1034,7 +1060,10 @@ bool CCChampion::r_LoadVal(CScript & s)
             {
                 g_Log.EventDebug("Invalid champion id"); //todo better log
             }
-            Init();
+            else
+            {
+                Init();
+            }
             break;
         }
         default:

@@ -112,6 +112,13 @@ bool CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 
                 pObj->AddPropsTooltipData(pObj);
 			}
+			
+			if (IsTrigUsed(TRIGGER_CLIENTTOOLTIP_AFTERDEFAULT) || (pItem && IsTrigUsed(TRIGGER_ITEMCLIENTTOOLTIP_AFTERDEFAULT)) || (pChar && IsTrigUsed(TRIGGER_CHARCLIENTTOOLTIP_AFTERDEFAULT)))
+			{
+				CScriptTriggerArgs args(pObj);
+				args.m_iN1 = fRequested;
+				iRet = pObj->OnTrigger("@ClientTooltip_AfterDefault", this->GetChar(), &args); //Save to return on iRet to make sure return value doesn't stuck the boolean.
+			}
 		}
 
 #define DOHASH( value ) dwHash ^= ((value) & 0x3FFFFFF); \

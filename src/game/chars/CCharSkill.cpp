@@ -4093,12 +4093,18 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		if ( IsTrigUsed(TRIGGER_SKILLPRESTART) )
 		{
 			if ( Skill_OnCharTrigger(skill, CTRIG_SkillPreStart) == TRIGRET_RET_TRUE )
+			{
+				Skill_Cleanup();
 				return false;
+			}
 		}
 		if ( IsTrigUsed(TRIGGER_PRESTART) )
 		{
 			if ( Skill_OnTrigger(skill, SKTRIG_PRESTART) == TRIGRET_RET_TRUE )
+			{
+				Skill_Cleanup();
 				return false;
+			}
 		}
 
 		m_Act_SkillCurrent = skill;

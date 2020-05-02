@@ -2222,3 +2222,24 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Possible Fix: COLOR variable change the color of human if the human is shop keeper (vendor). (Issue #397)
 - Fixed: Unreferenced variables for new GMPage system to avoid possible issues.
 - Fixed: Archery bug occurs when the attacker is stoned. (Issue #432)
+
+28-04-2020, xwerswoodx
+- Fixed: Possible fix for issue #440 and #397 without change @NPCRestock behaviour.
+
+30-04-2020, xwerswoodx
+- Added: TOPCONT as reference top container item. (It returns item's itself if it's equipped or on ground)
+	The difference between TOPCONT and TOPOBJ is TOPCONT only returns the top container not characters.
+	If you use topCont on item inside bankbox or inside the subcontainers of bankbox, it returns bankbox uid.
+- Fixed: Improved Julian's bank check code for works on the items inside sub containers. (Issue #429)
+- Added: ARGN2 under @Attack trigger to replace Ignore status. (Issue #439)
+	ARGN2 = 1 //Force to ignore attacker.
+	ARGN2 = 0 //Force to unignore attacker.
+- Added: @ClientTooltip_AfterDefault trigger which triggers after default tooltips sent. (Issue #436)
+- Added: REMOVECLILOC and REPLACECLILOC functions to remove/replace default tooltip properties under @ClientTooltip_Sent trigger. (Issue #436)
+- Added: CLILOCLIST on objects to get list of the clilocs.
+- Added: CLILOCCOUNT and CLILOC.n[.ID|.VAL] to get clilocs.
+- Added: Added missing gumps and gump default sizes.
+- Fixed: Wrong calculation for height for Containers. (Issue #423)
+- Fixed: Mass Curse doesn't lower the stats. (Issue #446)
+- Fixed: Fixed the issue on XMFHTMLGUMP, XMFHTMLGUMPCOLOR and XMFHTMLTOK. (Issue #441)
+- Fixed: Not cleaning skill when @PreStart trigger return as true. (Issue #450)

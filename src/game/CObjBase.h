@@ -1033,6 +1033,7 @@ enum ITRIG_TYPE
 	ITRIG_Buy,
 	ITRIG_Click,
 	ITRIG_CLIENTTOOLTIP,        // Sending tooltip to client for this item
+	ITRIG_CLIENTTOOLTIP_AFTERDEFAULT,
 	ITRIG_ContextMenuRequest,   // A context menu was requested over me.
 	ITRIG_ContextMenuSelect,    // A context menu option was selected, perform actions.
 	ITRIG_Create,               // Item is being created.
@@ -1061,6 +1062,7 @@ enum ITRIG_TYPE
 	ITRIG_Ship_Turn,            // I'm a ship and i'm turning around.
     ITRIG_Spawn,                // This spawn is going to generate something.
 	ITRIG_SPELLEFFECT,          // cast some spell on me.
+    ITRIG_Start,                // Start trigger, right now used only on Champions.
 	ITRIG_STEP,                 // I have been walked on. (or shoved)
 	ITRIG_TARGON_CANCEL,        // Someone requested me (item) to target, now the targeting was canceled.
 	ITRIG_TARGON_CHAR,          // I'm targeting a char.
@@ -1092,6 +1094,7 @@ enum CTRIG_TYPE : short
 	CTRIG_charAttack,           // Calling this trigger over other char.
 	CTRIG_charClick,            // Calling this trigger over other char.
 	CTRIG_charClientTooltip,    // Calling this trigger over other char.
+	CTRIG_charClientTooltip_AfterDefault,
 	CTRIG_charContextMenuRequest,// Calling this trigger over other char.
 	CTRIG_charContextMenuSelect,// Calling this trigger over other char.
 	CTRIG_charDClick,           // Calling this trigger over other char.
@@ -1099,6 +1102,7 @@ enum CTRIG_TYPE : short
 
 	CTRIG_Click,            // I got clicked on by someone.
 	CTRIG_ClientTooltip,    // Sending tooltips for me to someone.
+	CTRIG_ClientTooltip_AfterDefault,
 	CTRIG_CombatAdd,        // I add someone to my attacker list.
 	CTRIG_CombatDelete,     // delete someone from my list.
 	CTRIG_CombatEnd,        // I finished fighting.
@@ -1140,6 +1144,7 @@ enum CTRIG_TYPE : short
 	CTRIG_itemBuy,              // I'm going to buy one item.
 	CTRIG_itemClick,            // I clicked one item
 	CTRIG_itemClientTooltip,    // Requesting ToolTip for one item.
+	CTRIG_itemClientTooltip_AfterDefault,
 	CTRIG_itemContextMenuRequest,// Requesting Context Menu.
 	CTRIG_itemContextMenuSelect,// Selected one option from Context Menu.
 	CTRIG_itemCreate,           // Created one item.

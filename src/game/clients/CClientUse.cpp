@@ -28,6 +28,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		if ( !fScript )
 		{
 			CItemContainer *pContainer = dynamic_cast<CItemContainer *>(pItem->GetParent());
+			CItemContainer *pTopContainer = dynamic_cast<CItemContainer *>(pItem->GetTopContainer());
 			if ( pContainer )
 			{
 				// protect from ,snoop - disallow picking from not opened containers
@@ -36,9 +37,9 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 				{
 					isInOpenedContainer = true;
 				}
-				else if ( pContainer->IsType(IT_EQ_VENDOR_BOX) || pContainer->IsType(IT_EQ_BANK_BOX) )
+				else if ( pTopContainer->IsType(IT_EQ_VENDOR_BOX) || pTopContainer->IsType(IT_EQ_BANK_BOX) )
 				{
-					if ( pContainer->m_itEqBankBox.m_pntOpen == GetChar()->GetTopPoint() )
+					if ( pTopContainer->m_itEqBankBox.m_pntOpen == GetChar()->GetTopPoint() )
 						isInOpenedContainer = true;
 				}
 				else
