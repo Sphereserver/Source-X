@@ -750,6 +750,7 @@ enum OBR_TYPE
 	OBR_ROOM,
 	OBR_SECTOR,
 	OBR_SPAWNITEM,
+	OBR_TOPCONT,
 	OBR_TOPOBJ,
 	OBR_TYPEDEF,
 	OBR_QTY
@@ -760,6 +761,7 @@ lpctstr const CObjBase::sm_szRefKeys[OBR_QTY+1] =
 	"ROOM",
 	"SECTOR",
 	"SPAWNITEM",
+	"TOPCONT",
 	"TOPOBJ",
 	"TYPEDEF",
 	nullptr
@@ -792,6 +794,14 @@ bool CObjBase::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
                 }
             }
 				return true;
+			case OBR_TOPCONT:
+			{
+				CItem *pItem = this->GetUID().ItemFind();
+				if ( ptcKey[-1] != '.' )
+					break;
+				pRef = pItem->GetTopContainer();
+				return true;
+			}
 			case OBR_TOPOBJ:
 				if ( ptcKey[-1] != '.' )	// only used as a ref !
 					break;
@@ -1456,6 +1466,11 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 				return CScriptObj::r_WriteVal( ptcKey, sVal, pSrc );
 			sVal.FormatHex(GetTopLevelObj()->GetUID());
 			break;
+		case OC_TOPCONT:
+			if ( ptcKey[7] == '.' )
+				return CScriptObj::r_WriteVal( ptcKey, sVal, pSrc );
+			sVal.FormatHex(GetUID().ItemFind()->GetTopContainer()->GetUID());
+			break;
 		case OC_UID:
 			if ( ptcKey[3] == '.' )
 				return CScriptObj::r_WriteVal( ptcKey, sVal, pSrc );
@@ -1549,6 +1564,37 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 			break;
 		case OC_TAGCOUNT:
 			sVal.FormatSTVal( m_TagDefs.GetCount() );
+			break;
+		case OC_CLILOC:
+			{
+				ptcKey += 6;
+				if ( *ptcKey == '.' )
+				{
+					SKIP_SEPARATORS( ptcKey );
+					size_t iQty = Exp_GetSTVal( ptcKey );
+					if ( iQty >= m_TooltipData.size() )
+						return false;
+					
+					CClientTooltip* ct = m_TooltipData[iQty].get();
+					if (!ct)
+						return false;
+						
+					SKIP_SEPARATORS( ptcKey );
+					if (! *ptcKey )
+						sVal.Format("%d=%s", ct->m_clilocid, ct->m_args);
+					else if ( !strnicmp( ptcKey, "ID", 2 )) //Cliloc.
+						sVal.FormatDWVal(ct->m_clilocid);
+					else if ( !strnicmp( ptcKey, "VAL", 3 )) //Arguments.
+						sVal = ct->m_args;
+					else
+						return false;
+					break;
+				}
+			return false;
+			}
+			break;
+		case OC_CLILOCCOUNT:
+			sVal.FormatSTVal( m_TooltipData.size() );
 			break;
 		case OC_PROPSAT:
 			{
@@ -1971,6 +2017,59 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
                 m_TooltipData.emplace_back(new CClientTooltip(clilocid, sLocArgs.GetPtr()));
             }
             break;
+        case OV_REMOVECLILOC:
+        	// Remove cliloc in @ClientTooltip trigger
+        	{
+                tchar * ppLocArgs[256];
+                Str_ParseCmds(s.GetArgRaw(), ppLocArgs, CountOf(ppLocArgs), ",");
+        		dword clilocid = Exp_GetVal(ppLocArgs[0]);
+        		for (size_t i = 0; i < m_TooltipData.size(); i++)
+        		{
+        			CClientTooltip* ct = m_TooltipData[i].get();
+        			if (ct->m_clilocid == clilocid)
+        			{
+						if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
+							g_Log.EventDebug("SCRIPT: removecliloc(%u)\n", clilocid);
+        				m_TooltipData.erase(m_TooltipData.begin() + i);
+        				//I did a break, but if same tooltip added as script and default together there could be more than one for same cliloc so we need to push to check if there is another.
+        				//break;
+					}
+				}
+			}
+			break;
+		case OV_REPLACECLILOC:
+			// Replace cliloc in @ClientTooltip trigger
+			{
+				tchar * ppLocArgs[256];
+                int qty = Str_ParseCmds(s.GetArgRaw(), ppLocArgs, CountOf(ppLocArgs), ",");
+                dword clilocid = Exp_GetVal(ppLocArgs[0]);
+                
+                CSString sLocArgs;
+                for (int y = 1 ; y < qty; ++y )
+                {
+                    if ( sLocArgs.GetLength() )
+                        sLocArgs += "\t";
+
+                    if ((*ppLocArgs[y] == '\0') || !strncmp(ppLocArgs[y], "NULL", 4))
+                        sLocArgs += " ";
+                    else
+                        sLocArgs += ppLocArgs[y];
+                }
+                
+                for (size_t i = 0; i < m_TooltipData.size(); i++)
+                {
+                	CClientTooltip* ct = m_TooltipData[i].get();
+                	if (ct->m_clilocid == clilocid)
+                	{
+		                if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
+        	    	        g_Log.EventDebug("SCRIPT: replacecliloc(%u,'%s')\n", clilocid, sLocArgs.GetPtr());
+        	    	    m_TooltipData.erase(m_TooltipData.begin() + i);
+        	    	    m_TooltipData.emplace(m_TooltipData.begin() + i, std::make_unique<CClientTooltip>(clilocid, sLocArgs.GetPtr()));
+						break;
+					}
+				}
+			}
+			break;
 		case OV_DAMAGE:	//	"Dmg, SourceFlags, SourceCharUid, DmgPhysical(%), DmgFire(%), DmgCold(%), DmgPoison(%), DmgEnergy(%)" = do me some damage.
 			{
 				EXC_SET_BLOCK("DAMAGE");
@@ -2358,6 +2457,41 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
                 pSrc = &g_Serv;
             m_TagDefs.DumpKeys(pSrc, "TAG.");
         }break;
+        case OV_CLILOCLIST:
+        {
+        	EXC_SET_BLOCK("CLILOCLIST");
+            if (! strcmpi(s.GetArgStr(), "log"))
+                pSrc = &g_Serv;
+                
+            if (!pSrc)
+            	break;
+				
+            for (size_t i = 0; i < this->m_TooltipData.size(); i++)
+            {
+				CClientTooltip* ct = this->m_TooltipData[i].get();
+				
+				/*
+				//Parse tchar into string.
+                tchar *ppLocArgs = ct->m_args;
+                CSString sLocArgs;
+                for (int y = 1 ; y < qty; ++y )
+                {
+                    if ( sLocArgs.GetLength() )
+                        sLocArgs += "\t";
+
+                    if ((*ppLocArgs[y] == '\0') || !strncmp(ppLocArgs[y], "NULL", 4))
+                        sLocArgs += " ";
+                    else
+                        sLocArgs += ppLocArgs[y];
+                }
+                */
+
+				if (pSrc->GetChar())
+					pSrc->SysMessagef("%d=%s", ct->m_clilocid, ct->m_args);
+				else
+					g_Log.Event(LOGL_EVENT, "%d=%s\n", ct->m_clilocid, ct->m_args);
+			}		
+		}break;
         case OV_BASETAGLIST:
         {
             EXC_SET_BLOCK("BASETAGLIST");

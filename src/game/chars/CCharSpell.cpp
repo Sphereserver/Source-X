@@ -789,6 +789,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 				pClient->removeBuff(BI_WEAKEN);
 			return;
 		case SPELL_Curse:
+		case SPELL_Mass_Curse:
 		{
 			if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && m_pPlayer )
 			{
@@ -801,7 +802,12 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			for (int i = STAT_STR; i < STAT_BASE_QTY; ++i )
 				Stat_AddMod((STAT_TYPE)i, uiStatEffect);
 			if (pClient)
-				pClient->removeBuff(BI_CURSE);
+			{
+				if (spell == SPELL_Mass_Curse)
+					pClient->removeBuff(BI_MASSCURSE);
+				else
+					pClient->removeBuff(BI_CURSE);
+			}
 			return;
 		}
 		case SPELL_Agility:
@@ -1422,6 +1428,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			}
 			return;
 		case SPELL_Curse:
+		case SPELL_Mass_Curse:
 			{
 				if ( pCaster != nullptr && IsSetMagicFlags(MAGICF_OSIFORMULAS) )
 				{
@@ -1446,7 +1453,11 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					pClient->removeBuff(BI_CURSE);
+					if (spell == SPELL_Mass_Curse)
+						pClient->removeBuff(BI_MASSCURSE);
+					else
+						pClient->removeBuff(BI_CURSE);
+
 					for ( int idx = STAT_STR; idx < STAT_BASE_QTY; ++idx )
 						Str_FromI(wStatEffectRef, NumBuff[idx], sizeof(NumBuff[0]), 10);
 					if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
@@ -1454,11 +1465,17 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 						for ( int idx = 3; idx < 7; ++idx )
 							Str_FromI(10, NumBuff[idx], sizeof(NumBuff[0]), 10);
 
-						pClient->addBuff(BI_CURSE, 1075835, 1075836, wTimerEffect, pNumBuff, 7);
+						if (spell == SPELL_Mass_Curse)
+							pClient->addBuff(BI_MASSCURSE, 1075835, 1075836, wTimerEffect, pNumBuff, 7);
+						else
+							pClient->addBuff(BI_CURSE, 1075835, 1075836, wTimerEffect, pNumBuff, 7);
 					}
 					else
 					{
-						pClient->addBuff(BI_CURSE, 1075835, 1075840, wTimerEffect, pNumBuff, 3);
+						if (spell == SPELL_Mass_Curse)
+							pClient->addBuff(BI_MASSCURSE, 1075835, 1075840, wTimerEffect, pNumBuff, 3);
+						else
+							pClient->addBuff(BI_CURSE, 1075835, 1075840, wTimerEffect, pNumBuff, 3);
 					}
 				}
 			}
