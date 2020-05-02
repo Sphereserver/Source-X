@@ -811,7 +811,7 @@ bool PacketStaticUpdate::onReceive(CNetState* net)
     byte UlCmd = readByte();*/
 	TemporaryString tsDump;
 	this->dump(tsDump);
-	g_Log.EventDebug("%x:Parsing %s", net->id(), tsDump.toBuffer());
+	g_Log.EventDebug("%x:Parsing %s", net->id(), tsDump.buffer());
 	return true;
 }
 

@@ -363,7 +363,7 @@ void CServerStaticsBlock::LoadStatics( dword ulBlockIndex, int map )
 		if ((index.GetBlockLength() % sizeof(CUOStaticItemRec)) != 0)
 		{
 			tchar *pszTemp = Str_GetTemp();
-			sprintf(pszTemp, "CServerStaticsBlock: Read Statics - Block Length of %u", index.GetBlockLength());
+			snprintf(pszTemp, STR_TEMPLENGTH, "CServerStaticsBlock: Read Statics - Block Length of %u", index.GetBlockLength());
 			throw CSError(LOGL_CRIT, CSFile::GetLastError(), pszTemp);
 		}
 		m_iStatics = (uint)(index.GetBlockLength()/sizeof(CUOStaticItemRec));

@@ -463,7 +463,7 @@ int CChar::GetHealthPercent() const
 	return IMulDiv(Stat_GetVal(STAT_STR), 100, str);
 }
 
-const CObjBaseTemplate * CChar::GetTopLevelObj() const
+const CObjBaseTemplate* CChar::GetTopLevelObj() const
 {
 	// Get the object that has a location in the world. (Ground level)
 	return this;
@@ -502,13 +502,11 @@ bool CChar::IsSwimming() const
 
 bool CChar::IsNPC() const
 {
-    ADDTOCALLSTACK_INTENSIVE("CChar::IsNPC");
     return (m_pNPC != nullptr);
 }
 
 NPCBRAIN_TYPE CChar::GetNPCBrain() const
 {
-    ADDTOCALLSTACK_INTENSIVE("CChar::GetNPCBrain");
     ASSERT(m_pNPC);
     return m_pNPC->m_Brain;
 }
@@ -978,7 +976,7 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 		len = snprintf(pTemp, STR_TEMPLENGTH, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
 	}
 
-	snprintf(pTemp + len, STR_TEMPLENGTH - len, "%s", g_Cfg.GetSkillDef(skill)->m_sTitle.GetPtr());
+	snprintf(pTemp + len, STR_TEMPLENGTH - len, "%s", g_Cfg.GetSkillDef(skill)->m_sTitle.GetBuffer());
 	return pTemp;
 }
 

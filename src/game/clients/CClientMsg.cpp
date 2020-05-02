@@ -821,7 +821,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		case 3:	// Extended localized message (with affixed ASCII text)
 		{
             tchar * ppArgs[256];
-			int iQty = Str_ParseCmds(const_cast<tchar *>(sBarkBuffer.GetPtr()), ppArgs, CountOf(ppArgs), "," );
+			int iQty = Str_ParseCmds(sBarkBuffer.GetBuffer(), ppArgs, CountOf(ppArgs), "," );
 			int iClilocId = Exp_GetVal( ppArgs[0] );
 			int iAffixType = Exp_GetVal( ppArgs[1] );
 			CSString CArgs;
@@ -832,14 +832,14 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 				CArgs += ( !strcmp(ppArgs[i], "NULL") ? " " : ppArgs[i] );
 			}
 
-			addBarkLocalizedEx( iClilocId, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), (AFFIX_TYPE)(iAffixType), ppArgs[2], CArgs.GetPtr());
+			addBarkLocalizedEx( iClilocId, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), (AFFIX_TYPE)(iAffixType), ppArgs[2], CArgs.GetBuffer());
 			break;
 		}
 
 		case 2:	// Localized
 		{
             tchar * ppArgs[256];
-			int iQty = Str_ParseCmds(const_cast<tchar *>(sBarkBuffer.GetPtr()), ppArgs, CountOf(ppArgs), "," );
+			int iQty = Str_ParseCmds(sBarkBuffer.GetBuffer(), ppArgs, CountOf(ppArgs), "," );
 			int iClilocId = Exp_GetVal( ppArgs[0] );
 			CSString CArgs;
 			for ( int i = 1; i < iQty; ++i )
@@ -849,14 +849,14 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 				CArgs += ( !strcmp(ppArgs[i], "NULL") ? " " : ppArgs[i] );
 			}
 
-			addBarkLocalized( iClilocId, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), CArgs.GetPtr());
+			addBarkLocalized( iClilocId, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), CArgs.GetBuffer());
 			break;
 		}
 
 		case 1:	// Unicode
 		{
 			nchar szBuffer[ MAX_TALK_BUFFER ];
-			CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), sBarkBuffer.GetPtr(), -1 );
+			CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), sBarkBuffer.GetBuffer(), -1 );
 			addBarkUNICODE( szBuffer, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), 0 );
 			break;
 		}
@@ -868,7 +868,7 @@ bark_default:
 			if ( sBarkBuffer.IsEmpty())
                 sBarkBuffer.Format("%s%s", name, pszText);
 
-			addBark( sBarkBuffer.GetPtr(), pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]));
+			addBark( sBarkBuffer.GetBuffer(), pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]));
 			break;
 		}
 	}
@@ -903,11 +903,10 @@ void CClient::addObjMessage( lpctstr pMsg, const CObjBaseTemplate * pSrc, HUE_TY
 
 	if ( IsSetOF(OF_Flood_Protection) && ( GetPrivLevel() <= PLEVEL_Player )  )
 	{
-		if ( !strcmpi(pMsg, m_zLastObjMessage) )
+		if ( !strnicmp(pMsg, m_zLastObjMessage, SCRIPT_MAX_LINE_LEN) )
 			return;
 
-		if ( strlen(pMsg) < SCRIPT_MAX_LINE_LEN )
-			strcpy(m_zLastObjMessage, pMsg);
+		Str_CopyLimitNull(m_zLastObjMessage, pMsg, SCRIPT_MAX_LINE_LEN);
 	}
 
 	addBarkParse(pMsg, pSrc, wHue, mode);
@@ -1155,17 +1154,18 @@ void CClient::addItemName( CItem * pItem )
 	if ( pCont != nullptr )
 	{
 		// ??? Corpses show hair as an item !!
-		len += sprintf( szName+len, g_Cfg.GetDefaultMsg(DEFMSG_CONT_ITEMS), pCont->GetContentCount(), pCont->GetTotalWeight() / WEIGHT_UNITS);
+		len += snprintf( szName+len, sizeof(szName) - len,
+			g_Cfg.GetDefaultMsg(DEFMSG_CONT_ITEMS), pCont->GetContentCount(), pCont->GetTotalWeight() / WEIGHT_UNITS);
 	}
 
 	// obviously damaged ?
 	else if ( pItem->IsTypeArmorWeapon())
 	{
-		int iPercent = pItem->Armor_GetRepairPercent();
+		const int iPercent = pItem->Armor_GetRepairPercent();
 		if ( iPercent < 50 &&
 			( m_pChar->Skill_GetAdjusted( SKILL_ARMSLORE ) / 10 > iPercent ))
 		{
-			len += sprintf( szName+len, " (%s)", pItem->Armor_GetRepairDesc());
+			len += snprintf( szName+len, sizeof(szName) - len, " (%s)", pItem->Armor_GetRepairDesc());
 		}
 	}
 
@@ -1176,7 +1176,7 @@ void CClient::addItemName( CItem * pItem )
 		const CItemVendable * pVendItem = dynamic_cast <const CItemVendable *> (pItem);
 		if ( pVendItem )
 		{
-			len += sprintf( szName+len, " (%u gp)", pVendItem->GetBasePrice());
+			len += snprintf( szName+len, sizeof(szName) - len, " (%u gp)", pVendItem->GetBasePrice());
 		}
 	}
 
@@ -1200,7 +1200,7 @@ void CClient::addItemName( CItem * pItem )
 		// Show the restock count
 		if ( pMyCont != nullptr && pMyCont->IsType(IT_EQ_VENDOR_BOX) )
 		{
-			len += sprintf( szName+len, " (%d restock)", pItem->GetContainedLayer());
+			len += snprintf( szName+len, sizeof(szName) - len, " (%d restock)", pItem->GetContainedLayer());
 		}
 		switch ( pItem->GetType() )
 		{
@@ -1220,7 +1220,7 @@ void CClient::addItemName( CItem * pItem )
 				{
 					CResourceDef *pResDef = g_Cfg.ResourceGetDef(pItem->m_itResource.m_ridRes);
 					if ( pResDef )
-						len += sprintf(szName + len, " (%s)", pResDef->GetName());
+						len += snprintf(szName + len, sizeof(szName) - len, " (%s)", pResDef->GetName());
 				}
 				break;
 
@@ -1229,7 +1229,7 @@ void CClient::addItemName( CItem * pItem )
 		}
 	}
 	if ( IsPriv(PRIV_DEBUG) )
-		len += sprintf(szName+len, " [0%x]", (dword) pItem->GetUID());
+		len += snprintf(szName+len, sizeof(szName) - len, " [0%x]", (dword) pItem->GetUID());
 
 	if (( IsTrigUsed(TRIGGER_AFTERCLICK) ) || ( IsTrigUsed(TRIGGER_ITEMAFTERCLICK) ))
 	{
@@ -1329,9 +1329,13 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 		if ( fAllShow )
 		{
 			if ( pChar->IsStatFlag(STATF_SPAWNED) )
-				strcat(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_SPAWN));
-			if ( IsPriv( PRIV_DEBUG ))
-				sprintf(pszTemp+strlen(pszTemp), " [0%x]", (dword) pChar->GetUID());
+				Str_ConcatLimitNull(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_SPAWN), STR_TEMPLENGTH);
+
+			if (IsPriv(PRIV_DEBUG))
+			{
+				const size_t uiSLen = strlen(pszTemp);
+				snprintf(pszTemp + uiSLen, STR_TEMPLENGTH - uiSLen, " [0%x]", (dword)pChar->GetUID());
+			}
 		}
 	}
 	if ( ! fAllShow && pChar->Skill_GetActive() == NPCACT_NAPPING )
@@ -1365,7 +1369,7 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 		lpctstr pNewStr = Args.m_VarsLocal.GetKeyStr("ClickMsgText");
 
 		if ( pNewStr != nullptr )
-			strcpy(pszTemp, pNewStr);
+			Str_CopyLimitNull(pszTemp, pNewStr, STR_TEMPLENGTH);
 
 		wHue = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("ClickMsgHue"));
 	}
@@ -2666,7 +2670,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 		{
 			addBark(g_szServerDescription, nullptr, HUE_YELLOW, TALKMODE_SAY, FONT_NORMAL);
 
-			sprintf(z, (g_Serv.StatGet(SERV_STAT_CLIENTS)==2) ?
+			snprintf(z, STR_TEMPLENGTH, (g_Serv.StatGet(SERV_STAT_CLIENTS)==2) ?
 				g_Cfg.GetDefaultMsg( DEFMSG_LOGIN_PLAYER ) : g_Cfg.GetDefaultMsg( DEFMSG_LOGIN_PLAYERS ),
 				g_Serv.StatGet(SERV_STAT_CLIENTS)-1 );
 			addSysMessage(z);
@@ -2674,7 +2678,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
             const lpctstr ptcLastLogged = GetAccount()->m_TagDefs.GetKeyStr("LastLogged");
             if (!IsStrEmpty(ptcLastLogged))
             {
-                sprintf(z, g_Cfg.GetDefaultMsg( DEFMSG_LOGIN_LASTLOGGED ), ptcLastLogged);
+                snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg( DEFMSG_LOGIN_LASTLOGGED ), ptcLastLogged);
                 addSysMessage(z);
             }
 		}
@@ -2689,7 +2693,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 
 	if ( IsPriv(PRIV_GM_PAGE) && !g_World.m_GMPages.IsContainerEmpty() )
 	{
-		sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_GMPAGE_PENDING), (int)(g_World.m_GMPages.GetContentCount()), g_Cfg.m_cCommandPrefix);
+		snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_GMPAGE_PENDING), (int)(g_World.m_GMPages.GetContentCount()), g_Cfg.m_cCommandPrefix);
 		addSysMessage(z);
 	}
 	if ( IsPriv(PRIV_JAILED) )
@@ -2990,16 +2994,16 @@ byte CClient::LogIn( lpctstr pszAccName, lpctstr pszPassword, CSString & sMsg )
 	size_t iLen3 = Str_GetBare( szTmp, pszAccName, MAX_NAME_SIZE );
 	if ( iLen1 == 0 || iLen1 != iLen3 || iLen1 > MAX_NAME_SIZE )	// a corrupt message.
 	{
-		char szVersion[ 256 ];
-		sMsg.Format( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_WCLI ), static_cast<lpctstr>(m_Crypt.WriteClientVer( szVersion )));
+		char ptcVersion[ 256 ];
+		sMsg.Format( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_WCLI ), m_Crypt.WriteClientVer(ptcVersion, sizeof(ptcVersion)));
 		return( PacketLoginError::BadAccount );
 	}
 
 	iLen3 = Str_GetBare( szTmp, pszPassword, MAX_NAME_SIZE );
 	if ( iLen2 != iLen3 )	// a corrupt message.
 	{
-		char szVersion[ 256 ];
-		sMsg.Format( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_WCLI ), static_cast<lpctstr>(m_Crypt.WriteClientVer( szVersion )));
+		char ptcVersion[ 256 ];
+		sMsg.Format( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_WCLI ), m_Crypt.WriteClientVer(ptcVersion, sizeof(ptcVersion)));
 		return( PacketLoginError::BadPassword );
 	}
 
@@ -3010,7 +3014,7 @@ byte CClient::LogIn( lpctstr pszAccName, lpctstr pszPassword, CSString & sMsg )
 	else if ( Str_Check(pszPassword) )
 		return( PacketLoginError::BadPassword );
 
-	bool fGuestAccount = ! strnicmp( pszAccName, "GUEST", 5 );
+	const bool fGuestAccount = ! strnicmp( pszAccName, "GUEST", 5 );
 	if ( fGuestAccount )
 	{
 		// trying to log in as some sort of guest.

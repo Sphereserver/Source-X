@@ -1020,9 +1020,9 @@ void CItemContainer::OnOpenEvent( CChar *pCharOpener, const CObjBaseTemplate *pO
 		int iStones = GetWeight() / WEIGHT_UNITS;
 		tchar *pszMsg = Str_GetTemp();
 		if ( pCharTop == pCharOpener )
-			sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_BVBOX_OPEN_SELF), iStones, GetName());
+			snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_BVBOX_OPEN_SELF), iStones, GetName());
 		else
-			sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_BVBOX_OPEN_OTHER), pCharTop->GetPronoun(), iStones, pCharTop->GetPossessPronoun(), GetName());
+			snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_BVBOX_OPEN_OTHER), pCharTop->GetPronoun(), iStones, pCharTop->GetPossessPronoun(), GetName());
 
 		pCharOpener->SysMessage(pszMsg);
 
@@ -1037,7 +1037,7 @@ void CItemContainer::Game_Create()
 	ADDTOCALLSTACK("CItemContainer::Game_Create");
 	ASSERT(IsType(IT_GAME_BOARD));
 
-	if ( GetContentCount() > 0 )
+	if ( !IsContainerEmpty() )
 		return;	// already here.
 
 	static const ITEMID_TYPE sm_Item_ChessPieces[] =

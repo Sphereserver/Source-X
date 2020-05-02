@@ -439,7 +439,7 @@ void CChar::Noto_ChangeDeltaMsg( int iDelta, lpctstr pszType )
 	int iDegree = minimum(abs(iDelta) / NOTO_FACTOR, 7);
 
 	tchar *pszMsg = Str_GetTemp();
-	sprintf( pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_MSG_NOTO_CHANGE_0 ),
+	snprintf( pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg( DEFMSG_MSG_NOTO_CHANGE_0 ),
 		( iDelta < 0 ) ? g_Cfg.GetDefaultMsg( DEFMSG_MSG_NOTO_CHANGE_LOST ) : g_Cfg.GetDefaultMsg( DEFMSG_MSG_NOTO_CHANGE_GAIN ),
 		g_Cfg.GetDefaultMsg(sm_DegreeTable[iDegree]), pszType );
 

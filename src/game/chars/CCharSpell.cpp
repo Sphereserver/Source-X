@@ -954,7 +954,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 	}
 
 	// Buffs related variables
-	tchar NumBuff[7][8];
+	static constexpr uint uiBuffElemSize = MAX_NAME_SIZE;
+	tchar NumBuff[7][uiBuffElemSize];
 	lpctstr pNumBuff[7] = { NumBuff[0], NumBuff[1], NumBuff[2], NumBuff[3], NumBuff[4], NumBuff[5], NumBuff[6] };
 
 	switch (pSpellDef->m_idLayer)
@@ -1252,15 +1253,15 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			{
 				if (pClient)
 				{
-					strcpy(NumBuff[0], pCaster->GetName());
-					strcpy(NumBuff[1], pCaster->GetName());
+					Str_CopyLimitNull(NumBuff[0], pCaster->GetName(), uiBuffElemSize);
+					Str_CopyLimitNull(NumBuff[1], pCaster->GetName(), uiBuffElemSize);
 					pClient->removeBuff(BI_BLOODOATHCURSE);
 					pClient->addBuff(BI_BLOODOATHCURSE, 1075659, 1075660, wTimerEffect, pNumBuff, 2);
 				}
 				CClient *pCasterClient = pCaster->GetClient();
 				if (pCasterClient)
 				{
-					strcpy(NumBuff[0], GetName());
+					Str_CopyLimitNull(NumBuff[0], GetName(), uiBuffElemSize);
 					pCasterClient->removeBuff(BI_BLOODOATHCASTER);
 					pCasterClient->addBuff(BI_BLOODOATHCASTER, 1075661, 1075662, wTimerEffect, pNumBuff, 1);
 				}
@@ -1812,7 +1813,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 				};
 
 				tchar * pszMsg = Str_GetTemp();
-				sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_SPELL_LOOKS), sm_Poison_Message[iLevel]);
+				snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_SPELL_LOOKS), sm_Poison_Message[iLevel]);
 				if ( g_Cfg.m_iEmoteFlags & EMOTEF_POISON )
 					EmoteObj(pszMsg);
 				else
@@ -3258,7 +3259,7 @@ int CChar::Spell_CastStart()
 		// So to avoid this problem we must use TALKMODE_SAY, which is not the correct type but with this type the client only show last 3 messages on screen.
 		if ( pSpellDef->m_sRunes[0] == '.' )
 		{
-			Speak((pSpellDef->m_sRunes.GetPtr()) + 1, (HUE_TYPE)WOPColor, TALKMODE_SAY, (FONT_TYPE)WOPFont);
+			Speak((pSpellDef->m_sRunes.GetBuffer()) + 1, (HUE_TYPE)WOPColor, TALKMODE_SAY, (FONT_TYPE)WOPFont);
 		}
 		else
 		{
@@ -3429,7 +3430,10 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		}
 		else if ( GetPrivLevel() == PLEVEL_Guest )
 		{
-			pCharSrc->SysMessageDefault( DEFMSG_MSG_ACC_GUESTHIT );
+			if (pCharSrc)
+			{
+				pCharSrc->SysMessageDefault(DEFMSG_MSG_ACC_GUESTHIT);
+			}
 			Effect(EFFECT_OBJ, ITEMID_FX_GLOW, this, 10, 16);
 			return false;
 		}

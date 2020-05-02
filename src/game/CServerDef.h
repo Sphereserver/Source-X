@@ -117,8 +117,8 @@ public:
 		return m_timeLastValid > 0;
 	}
 
-	void SetCryptVersion(void) {
-		m_ClientVersion.SetClientVer(m_sClientVersion.GetPtr());
+	void SetCryptVersion() {
+		m_ClientVersion.SetClientVer(m_sClientVersion.GetBuffer());
 	}
 };
 

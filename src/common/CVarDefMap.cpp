@@ -589,20 +589,23 @@ void CVarDefMap::ClearKeys(lpctstr mask)
 		while ( it != m_Container.end() )
 		{
             CVarDefCont *pVarBase = (*it);
+			if (!pVarBase)
+				goto skip_cur;
 
-            CSString sKey(pVarBase->GetKey());
-            sKey.MakeLower();
-			if ( pVarBase && ( strstr(sKey.GetPtr(), sMask.GetPtr()) ) )
 			{
-				DeleteAt(i);
-				it = m_Container.begin();
-                i = 0;
+				CSString sKey(pVarBase->GetKey());
+				sKey.MakeLower();
+				if (strstr(sKey.GetBuffer(), sMask.GetBuffer()))
+				{
+					DeleteAt(i);
+					it = m_Container.begin();
+					i = 0;
+					continue;
+				}
 			}
-			else
-			{
-				++it;
-                ++i;
-			}
+        skip_cur:
+            ++it;
+            ++i;
 		}
 	}
 	else
@@ -621,25 +624,23 @@ bool CVarDefMap::r_LoadVal( CScript & s )
 }
 */
 
-void CVarDefMap::r_WritePrefix( CScript & s, lpctstr pszPrefix, lpctstr pszKeyExclude ) const
+void CVarDefMap::r_WritePrefix( CScript & s, lpctstr ptcPrefix, lpctstr ptcKeyExclude ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::r_WritePrefix");
     if (m_Container.empty())
         return;
 
-	TemporaryString tsZ;
-	tchar* z = static_cast<tchar *>(tsZ);
-	lpctstr	pszVal;
-    const bool fHasPrefix = (pszPrefix && *pszPrefix);
-    const bool fHasExclude = (pszKeyExclude && *pszKeyExclude);
+    const bool fHasPrefix = (ptcPrefix && *ptcPrefix);
+    const bool fHasExclude = (ptcKeyExclude && *ptcKeyExclude);
+	TemporaryString ts;
 
 	// Prefix is usually TAG, VAR, etc...
-    auto _WritePrefix = [z, fHasPrefix, pszPrefix](lpctstr ptcKey) -> void
+    auto _WritePrefix = [&ts, fHasPrefix, ptcPrefix](lpctstr ptcKey) -> void
     {
 		if (fHasPrefix)
-			sprintf(z, "%s.%s", pszPrefix, ptcKey);
+			snprintf(ts.buffer(), ts.capacity(), "%s.%s", ptcPrefix, ptcKey);
 		else
-			Str_CopyLimitNull(z, ptcKey, THREAD_STRING_LENGTH);
+			Str_CopyLimitNull(ts.buffer(), ptcKey, ts.capacity());
     };
 
 	// Write with any prefix.
@@ -649,7 +650,7 @@ void CVarDefMap::r_WritePrefix( CScript & s, lpctstr pszPrefix, lpctstr pszKeyEx
 			continue;	// This should not happen, a warning maybe?
 
         const lpctstr ptcKey = pVar->GetKey();
-		if ( fHasExclude && !strcmpi(pszKeyExclude, ptcKey))
+		if ( fHasExclude && !strcmpi(ptcKeyExclude, ptcKey))
 			continue;
 		
         const CVarDefContNum * pVarNum = dynamic_cast<const CVarDefContNum*>(pVar);
@@ -659,15 +660,15 @@ void CVarDefMap::r_WritePrefix( CScript & s, lpctstr pszPrefix, lpctstr pszKeyEx
             if (pVarNum->GetValNum() != 0)
             {
                 _WritePrefix(ptcKey);
-                pszVal = pVar->GetValStr();
-                s.WriteKey(z, pszVal);
+				lpctstr ptcVal = pVar->GetValStr();
+                s.WriteKey(ts.buffer(), ptcVal);
             }
         }
         else
         {
             _WritePrefix(ptcKey);
-            pszVal = pVar->GetValStr();
-            s.WriteKeyFormat(z, "\"%s\"", pszVal);
+			lpctstr ptcVal = pVar->GetValStr();
+            s.WriteKeyFormat(ts.buffer(), "\"%s\"", ptcVal);
         }
 	}
 }

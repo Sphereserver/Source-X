@@ -235,7 +235,7 @@ bool CItemMulti::MultiRealizeRegion()
     m_pRegion->SetRegionFlags(dwFlags);
 
     tchar *pszTemp = Str_GetTemp();
-    sprintf(pszTemp, "%s (%s)", pRegionBack->GetName(), GetName());
+    snprintf(pszTemp, SCRIPT_MAX_LINE_LEN, "%s (%s)", pRegionBack->GetName(), GetName());
     m_pRegion->SetName(pszTemp);
     m_pRegion->_pMultiLink = this;
 

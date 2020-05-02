@@ -362,9 +362,9 @@ void CEntityProps::DumpComponentProps(CTextConsole *pSrc, lpctstr ptcPrefix) con
             {
                 lpctstr ptcPropName = pCCP->GetPropertyName(iPropIndex);
                 if (fIsClient)
-                    pSrc->SysMessagef("%s[%s]%s=%s", ptcPrefix, ptcCCPName, ptcPropName, sPropVal.GetPtr());
+                    pSrc->SysMessagef("%s[%s]%s=%s", ptcPrefix, ptcCCPName, ptcPropName, sPropVal.GetBuffer());
                 else
-                    g_Log.Event(LOGL_EVENT,"%s[%s]%s=%s\n", ptcPrefix, ptcCCPName, ptcPropName, sPropVal.GetPtr());
+                    g_Log.Event(LOGL_EVENT,"%s[%s]%s=%s\n", ptcPrefix, ptcCCPName, ptcPropName, sPropVal.GetBuffer());
             }
 
         }

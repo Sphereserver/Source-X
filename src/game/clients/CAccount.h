@@ -164,7 +164,7 @@ public:
 	* @brief Removes the current password.
 	* The password can be set on next login.
 	*/
-	void ClearPassword() { m_sCurPassword.Empty(); }
+	void ClearPassword() { m_sCurPassword.Clear(); }
 	/**
 	* @brief Check password agains CAccount password.
 	* If CAccount has no password and password length is 0, check fails.

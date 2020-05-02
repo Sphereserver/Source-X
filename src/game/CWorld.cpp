@@ -958,7 +958,7 @@ bool CWorld::CheckAvailableSpaceForSave(bool fStatics)
 
     // Get the available disk space
     ullong uiFreeSpace;     // in bytes
-    lpctstr ptcSaveDir = g_Cfg.m_sWorldBaseDir.GetPtr();
+    lpctstr ptcSaveDir = g_Cfg.m_sWorldBaseDir.GetBuffer();
 #ifndef _WIN32
     struct statvfs stvfs;
     if (statvfs(ptcSaveDir, &stvfs) != 0)
@@ -986,7 +986,7 @@ bool CWorld::CheckAvailableSpaceForSave(bool fStatics)
     {
         struct stat st;
         CSString strSaveFile = g_Cfg.m_sWorldBaseDir + SPHERE_FILE + ptcSaveName + SPHERE_SCRIPT;
-        stat(strSaveFile.GetPtr(), &st);
+        stat(strSaveFile.GetBuffer(), &st);
         ullong uiCurSavefileSize = (ullong)st.st_size;
         if (uiCurSavefileSize == 0)
             fSizeErr = true;

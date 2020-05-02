@@ -460,10 +460,16 @@ bool CScript::_Open( lpctstr ptcFilename, uint uiFlags )
 	_InitBase();
     _fCacheToBeUpdated = fCacheToBeUpdated;
 
-	if ( ptcFilename == nullptr )
-		ptcFilename = _strFileName.GetPtr();
+	if (ptcFilename == nullptr)
+	{
+		ptcFilename = _strFileName.GetBuffer();
+		if (ptcFilename == nullptr)
+			return false;
+	}
 	else if (_strFileName.Compare(ptcFilename))
-		_SetFilePath( ptcFilename );
+	{
+		_SetFilePath(ptcFilename);
+	}
 
 	lpctstr ptcTitle = _GetFileTitle();
 	if ( !ptcTitle || (ptcTitle[0] == '\0') )
@@ -484,7 +490,7 @@ bool CScript::_Open( lpctstr ptcFilename, uint uiFlags )
         if (!CCacheableScriptFile::_Open(ptcFilename, uiFlags))
         {
             if ( ! ( uiFlags & OF_NONCRIT ))
-                g_Log.Event(LOGL_WARN, "'%s' not found...\n", _strFileName.GetPtr());
+                g_Log.Event(LOGL_WARN, "'%s' not found...\n", _strFileName.GetBuffer());
             return false;
         }
         _fCacheToBeUpdated = false;
@@ -639,9 +645,8 @@ bool CScript::FindSection( lpctstr pszName, uint uModeFlags )
 	}
 
 	TemporaryString tsSec;
-	tchar* pszSec = static_cast<tchar *>(tsSec);
-	sprintf(pszSec, "[%s]", pszName);
-	if ( FindTextHeader(pszSec) )
+	snprintf(tsSec.buffer(), tsSec.capacity(), "[%s]", pszName);
+	if ( FindTextHeader(tsSec.buffer()) )
 	{
 		// Success
 		m_iSectionData = GetPosition();
@@ -651,7 +656,7 @@ bool CScript::FindSection( lpctstr pszName, uint uModeFlags )
 	// Failure Error display. (default)
 
 	if ( ! ( uModeFlags & OF_NONCRIT ))
-		g_Log.Event(LOGL_WARN, "Did not find '%s' section '%s'\n", static_cast<lpctstr>(GetFileTitle()), static_cast<lpctstr>(pszName));
+		g_Log.Event(LOGL_WARN, "Did not find '%s' section '%s'\n", GetFileTitle(), pszName);
 	return false;
 }
 
@@ -711,44 +716,42 @@ bool CScript::ReadKeyParse() // Read line from script
 	};
 
 	EXC_SET_BLOCK("parse");
-	lpctstr	pszArgs	= m_pszArg;
+	tchar* pszArgs = m_pszArg;
 	pszArgs += 2;
 	GETNONWHITESPACE( pszArgs );
+	
+	const int iKeyIndex = (strnicmp(m_pszKey, "FLOAT.", 6) == 0) ? 1 : 0;
 	TemporaryString tsBuf;
-	tchar* pszBuf = static_cast<tchar *>(tsBuf);
-
-	int iKeyIndex = (strnicmp(m_pszKey, "FLOAT.", 6) == 0) ? 1 : 0;
-
 	if ( m_pszArg[0] == '.' )
 	{
 		if ( *pszArgs == '"' )
 		{
-			tchar *	pQuote	= const_cast<tchar*>(strchr( pszArgs+1, '"' ));
+			tchar *	pQuote	= strchr( pszArgs+1, '"' );
 			if ( pQuote )
 			{
 				++pszArgs;
 				*pQuote	= '\0';
 			}
 		}
-		sprintf(pszBuf, "<%s>%s", m_pszKey, pszArgs);
+		snprintf(tsBuf.buffer(), tsBuf.capacity(), "<%s>%s", m_pszKey, pszArgs);
 	}
 	else if ( m_pszArg[0] == m_pszArg[1] && m_pszArg[1] == '+' )
 	{
 		if ( m_pszArg[2] != '\0' )
 			return true;
-		sprintf(pszBuf, "<EVAL (<%s> +1)>", m_pszKey);
+		snprintf(tsBuf.buffer(), tsBuf.capacity(), "<EVAL (<%s> +1)>", m_pszKey);
 	}
 	else if ( m_pszArg[0] == m_pszArg[1] && m_pszArg[1] == '-' )
 	{
 		if ( m_pszArg[2] != '\0' )
 			return true;
-		sprintf(pszBuf, "<EVAL (<%s> -1)>", m_pszKey);
+		snprintf(tsBuf.buffer(), tsBuf.capacity(), "<EVAL (<%s> -1)>", m_pszKey);
 	}
 	else
 	{
-		sprintf(pszBuf, "<%s (<%s> %c (%s))>", sm_szEvalTypes[iKeyIndex], m_pszKey, *m_pszArg, pszArgs);
+		snprintf(tsBuf.buffer(), tsBuf.capacity(), "<%s (<%s> %c (%s))>", sm_szEvalTypes[iKeyIndex], m_pszKey, *m_pszArg, pszArgs);
 	}
-	strcpy(m_pszArg, pszBuf);
+	strcpy(m_pszArg, tsBuf.buffer());
 
 	return true;
 	EXC_CATCH;
@@ -903,11 +906,10 @@ void _cdecl CScript::WriteKeyFormat( lpctstr ptcKey, lpctstr pszVal, ... )
 {
 	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKeyFormat");
 	TemporaryString tsTemp;
-	tchar* pszTemp = static_cast<tchar *>(tsTemp);
 	va_list vargs;
 	va_start( vargs, pszVal );
-	vsnprintf(pszTemp, tsTemp.realLength(), pszVal, vargs);
-	WriteKey(ptcKey, pszTemp);
+	vsnprintf(tsTemp.buffer(), tsTemp.capacity(), pszVal, vargs);
+	WriteKey(ptcKey, tsTemp.buffer());
 	va_end( vargs );
 }
 
@@ -921,6 +923,3 @@ void CScript::WriteKeyHex( lpctstr ptcKey, int64 dwVal )
 	WriteKeyFormat( ptcKey, "0%" PRIx64 , dwVal );
 }
 
-CScript::~CScript()
-{
-}

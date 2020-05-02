@@ -1170,10 +1170,9 @@ bool CItemBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 				for ( size_t i = 0; i < m_flip_id.size(); ++i )
 				{
 					if ( i > 0 )
-						iLen += Str_CopyLen( pszTemp+iLen, "," );
+						iLen += Str_CopyLimitNull( pszTemp + iLen, ",", SCRIPT_MAX_LINE_LEN - iLen);
 
-					iLen += sprintf(pszTemp + iLen, "0%x", (uint)(m_flip_id[i]));
-					ASSERT(iLen < SCRIPT_MAX_LINE_LEN);
+					iLen += snprintf(pszTemp + iLen, SCRIPT_MAX_LINE_LEN - iLen, "0%x", (uint)m_flip_id[i]);
 				}
 				sVal = pszTemp;
 			}

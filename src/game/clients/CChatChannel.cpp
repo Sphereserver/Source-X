@@ -344,7 +344,7 @@ void CChatChannel::SendThisMember(CChatChanMember * pMember, CChatChanMember * p
 {
     ADDTOCALLSTACK("CChatChannel::SendThisMember");
     tchar buffer[2048];
-    sprintf(buffer, "%s%s",
+    snprintf(buffer, sizeof(buffer), "%s%s",
             (IsModerator(pMember->GetChatName()) == true) ? "1" :
             (HasVoice(pMember->GetChatName()) == true) ? "0" : "2", pMember->GetChatName());
     // If no particular member is specified in pToMember, then send it out to all members

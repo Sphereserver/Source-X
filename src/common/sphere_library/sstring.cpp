@@ -42,7 +42,6 @@ void Str_Reverse(char* string)
 
 int Str_ToI (lpctstr ptcStr, int base) noexcept
 {
-    ASSERT(base > 0);
     const auto e = errno;
     const auto ret = int(std::strtol(ptcStr, nullptr, base));
     errno = e;
@@ -51,7 +50,6 @@ int Str_ToI (lpctstr ptcStr, int base) noexcept
 
 uint Str_ToUI(lpctstr ptcStr, int base) noexcept
 {
-    ASSERT(base > 0);
     const auto e = errno;
     const auto ret = uint(std::strtoul(ptcStr, nullptr, base));
     errno = e;
@@ -60,7 +58,6 @@ uint Str_ToUI(lpctstr ptcStr, int base) noexcept
 
 llong Str_ToLL(lpctstr ptcStr, int base) noexcept
 {
-    ASSERT(base > 0);
     const auto e = errno;
     const auto ret = std::strtoll(ptcStr, nullptr, base);
     errno = e;
@@ -69,7 +66,6 @@ llong Str_ToLL(lpctstr ptcStr, int base) noexcept
 
 ullong Str_ToULL(lpctstr ptcStr, int base) noexcept
 {
-    ASSERT(base > 0);
     const auto e = errno;
     const auto ret = std::strtoull(ptcStr, nullptr, base);
     errno = e;

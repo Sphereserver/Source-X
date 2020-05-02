@@ -464,7 +464,6 @@ public:
 
 
 public:
-
     /**
      * @fn  virtual int CObjBase::FixWeirdness() = 0;
      *

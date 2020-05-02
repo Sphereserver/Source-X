@@ -14,7 +14,7 @@ CSString CFloatMath::FloatMath(lpctstr& Expr)
 {
 	ADDTOCALLSTACK("CFloatMath::FloatMath");
 	char szReal[VARDEF_FLOAT_MAXBUFFERSIZE];
-	sprintf(szReal, "%f", MakeFloatMath(Expr));
+	snprintf(szReal, VARDEF_FLOAT_MAXBUFFERSIZE, "%f", MakeFloatMath(Expr));
 	return CSString(szReal);
 }
 
@@ -179,8 +179,9 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 	ADDTOCALLSTACK("CFloatMath::GetSingle");
 	//DEBUG_ERR(("GetSingle  pArgs %s\n",pArgs));
 	GETNONWHITESPACE( pArgs );
-	char * pArgsCopy = new char[strlen(pArgs)+1];
-	strcpy(pArgsCopy,pArgs);
+	const size_t uiArgsCopySize = strlen(pArgs) + 1;
+	char * pArgsCopy = new char[uiArgsCopySize];
+	Str_CopyLimitNull(pArgsCopy, pArgs, uiArgsCopySize);
 	/*bool IsNum = true; // Old Ellessar's code without support for negative numbers
 	for( char ch = tolower(*pArgs); ch; ch = tolower(*(++pArgs)) )
 	{

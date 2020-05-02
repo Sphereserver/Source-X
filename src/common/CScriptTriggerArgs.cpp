@@ -44,8 +44,8 @@ void CScriptTriggerArgs::Clear()
     m_iN2 = 0;
     m_iN3 = 0;
 
-    m_s1_raw.Empty();
-    m_s1.Empty();
+    m_s1_raw.Clear();
+    m_s1.Clear();
 
     m_v.clear();
 
@@ -81,7 +81,7 @@ void CScriptTriggerArgs::Init( lpctstr pszStr )
     // take quote if present.
     if (fQuote)
     {
-        tchar * str = strchr(const_cast<tchar*>(m_s1.GetPtr()), '"');
+        tchar * str = strchr(m_s1.GetBuffer(), '"');
         if ( str != nullptr )
             *str = '\0';
     }
@@ -203,13 +203,14 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
 
     if ( !strnicmp( "FLOAT.", ptcKey, 6 ) )
     {
-        return( m_VarsFloat.Insert( (ptcKey+6), s.GetArgStr(), true ) );
+        tchar* ptcArg = s.GetArgStr();
+        return m_VarsFloat.Insert( (ptcKey+6), ptcArg, true );
     }
     else if ( !strnicmp( "LOCAL.", ptcKey, 6 ) )
     {
         bool fQuoted = false;
-        m_VarsLocal.SetStr( s.GetKey()+6, fQuoted, s.GetArgStr( &fQuoted ), false );
-        return true;
+        tchar* ptcArg = s.GetArgStr(&fQuoted);
+        return (nullptr != m_VarsLocal.SetStr( s.GetKey()+6, fQuoted, ptcArg, false ));
     }
     else if ( !strnicmp( "REF", ptcKey, 3 ) )
     {
@@ -224,8 +225,7 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
                 pszTemp = pEnd;
                 if ( !*pszTemp ) // setting REFx to a new object
                 {
-                    CUID uid = s.GetArgVal();
-                    CObjBase * pObj = uid.ObjFind();
+                    CObjBase * pObj = CUID::ObjFind(s.GetArgVal());
                     m_VarObjs.Insert( number, pObj, true );
                     ptcKey = pszTemp;
                     return true;
@@ -253,7 +253,7 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
         else
         {
             ++ptcKey;
-            CObjBase * pObj = static_cast<CObjBase*>(CUID::ObjFind(Exp_GetSingle(ptcKey)));
+            CObjBase * pObj = CUID::ObjFind(Exp_GetSingle(ptcKey));
             if (!pObj)
                 m_pO1 = nullptr;	// no pObj = cleaning argo
             else
@@ -361,7 +361,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsol
         if ( uiQty <= 0 )
         {
             // PARSE IT HERE
-            tchar * ptcArg = const_cast<tchar *>(m_s1_raw.GetPtr());
+            tchar* ptcArg = m_s1_raw.GetBuffer();
             tchar * s = ptcArg;
             bool fQuotes = false;
             bool fInerQuotes = false;

@@ -267,7 +267,7 @@ bool CPartyDef::MessageEvent( CUID uidDst, CUID uidSrc, const nchar *pText, int 
 	if ( g_Log.IsLoggedMask(LOGM_PLAYER_SPEAK) )
 		g_Log.Event(LOGM_PLAYER_SPEAK|LOGM_NOCONTEXT, "%x:'%s' Says '%s' in party to '%s'\n", pFrom->GetClient()->GetSocketID(), pFrom->GetName(), szText, pTo ? pTo->GetName() : "all");
 
-	sprintf(szText, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_MSG), pText);
+	snprintf(szText, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_MSG), pText);
 	PacketPartyChat cmd(pFrom, pText);
 
 	if ( pTo )
@@ -333,7 +333,7 @@ bool CPartyDef::RemoveMember( CUID uidRemove, CUID uidCommand )
 	pCharRemove->SysMessageDefault(DEFMSG_PARTY_LEAVE_2);
 
 	tchar *pszMsg = Str_GetTemp();
-	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_LEAVE_1), pCharRemove->GetName());
+	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_LEAVE_1), pCharRemove->GetName());
 	SysMessageAll(pszMsg);
 
 	if ( m_Chars.GetCharCount() <= 1 )
@@ -407,10 +407,10 @@ bool CPartyDef::DeclineEvent( CChar *pCharDecline, CUID uidInviter )	// static
 	pCharInviter->DeleteKey("PARTY_LASTINVITE");
 
 	tchar *sTemp = Str_GetTemp();
-	sprintf(sTemp, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_DECLINE_2), pCharInviter->GetName());
+	snprintf(sTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_DECLINE_2), pCharInviter->GetName());
 	pCharDecline->SysMessage(sTemp);
 	sTemp = Str_GetTemp();
-	sprintf(sTemp, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_DECLINE_1), pCharDecline->GetName());
+	snprintf(sTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_DECLINE_1), pCharDecline->GetName());
 	pCharInviter->SysMessage(sTemp);
 	return true;
 }
@@ -454,7 +454,7 @@ bool CPartyDef::AcceptEvent( CChar *pCharAccept, CUID uidInviter, bool bForced, 
 	}
 
 	tchar *pszMsg = Str_GetTemp();
-	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_JOINED), pCharAccept->GetName());
+	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_JOINED), pCharAccept->GetName());
 
 	if ( !pParty )
 	{
@@ -557,7 +557,7 @@ bool CPartyDef::r_LoadVal( CScript &s )
 		case PDC_SPEECHFILTER:
 		{
 			if ( !s.HasArgs() )
-				this->m_pSpeechFunction.Empty();
+				this->m_pSpeechFunction.Clear();
 			else
 			{
 				lpctstr ptcArg = s.GetArgStr();

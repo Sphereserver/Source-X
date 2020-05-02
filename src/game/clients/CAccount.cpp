@@ -72,8 +72,8 @@ bool CAccounts::Account_LoadAll( bool fChanges, bool fClearChanges )
 	pszBaseDir = g_Cfg.m_sAcctBaseDir.IsEmpty() ? g_Cfg.m_sWorldBaseDir : g_Cfg.m_sAcctBaseDir;
 	pszBaseName = ( fChanges ) ? (SPHERE_FILE "acct" SPHERE_SCRIPT) : (SPHERE_FILE "accu" SPHERE_SCRIPT);
 
-	strcpy(z, pszBaseDir);
-	strcat(z, pszBaseName);
+	Str_CopyLimitNull(z, pszBaseDir, STR_TEMPLENGTH);
+	Str_ConcatLimitNull(z, pszBaseName, STR_TEMPLENGTH);
 
 	CScript s;
 	if ( ! s.Open(z, OF_READ|OF_TEXT|OF_DEFAULTMODE| ( fChanges ? OF_NONCRIT : 0) ))
@@ -85,7 +85,7 @@ bool CAccounts::Account_LoadAll( bool fChanges, bool fClearChanges )
 
 											//	auto-creating account files
 			if ( !Account_SaveAll() )
-				g_Log.Event(LOGL_FATAL|LOGM_INIT, "Can't open account file '%s'\n", static_cast<lpctstr>(s.GetFilePath()));
+				g_Log.Event(LOGL_FATAL|LOGM_INIT, "Can't open account file '%s'\n", s.GetFilePath());
 			else
 				return true;
 		}
@@ -465,10 +465,12 @@ bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 		CClient	*pClient = pAccount->FindClient();
 
 		char	*z = Str_GetTemp();
-		sprintf(z, "Account '%s': PLEVEL:%d, BLOCK:%d, IP:%s, CONNECTED:%s, ONLINE:%s\n",
+		snprintf(z, STR_TEMPLENGTH, 
+			"Account '%s': PLEVEL:%d, BLOCK:%d, IP:%s, CONNECTED:%s, ONLINE:%s\n",
 			pAccount->GetName(), pAccount->GetPrivLevel(), pAccount->IsPriv(PRIV_BLOCKED),
 			pAccount->m_Last_IP.GetAddrStr(), pAccount->m_dateLastConnect.Format(nullptr),
-			( pClient ? ( pClient->GetChar() ? pClient->GetChar()->GetName() : "<not logged>" ) : "no" ));
+			( pClient ? ( pClient->GetChar() ? pClient->GetChar()->GetName() : "<not logged>" ) : "no" )
+		);
 		pSrc->SysMessage(z);
 		return true;
 	}
@@ -482,7 +484,7 @@ bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 		else if (ppCmd[2] && ppCmd[2][0])
 			cmdArgs.Format("%s", ppCmd[2]);
 
-		CScript script( ppCmd[1], cmdArgs.GetPtr() );
+		CScript script( ppCmd[1], cmdArgs.GetBuffer() );
 
 		return pAccount->r_Verb( script, pSrc );
 	}
@@ -763,7 +765,7 @@ bool CAccount::Kick( CTextConsole * pSrc, bool fBlock )
 	lpctstr pszAction = fBlock ? "KICK" : "DISCONNECT";
 
 	tchar * z = Str_GetTemp();
-	sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_ACC_KICK), GetName(), pszAction, pSrc->GetName());
+	snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_ACC_KICK), GetName(), pszAction, pSrc->GetName());
 	g_Log.Event(LOGL_EVENT|LOGM_GM_CMDS, "%s.\n", z);
 
 	return true;
@@ -905,7 +907,7 @@ bool CAccount::CheckPassword( lpctstr pszPassword )
 		// using the new password.
 		// kill the old password.
 		SetPassword( m_sNewPassword );
-		m_sNewPassword.Empty();
+		m_sNewPassword.Clear();
 		return true;
 	}
 
@@ -927,7 +929,7 @@ bool CAccount::SetPassword( lpctstr pszPassword, bool isMD5Hash )
 		CScriptTriggerArgs Args;
 		Args.Init(GetName());
 		Args.m_VarsLocal.SetStrNew("password",pszPassword);
-        Args.m_VarsLocal.SetStrNew("oldPassword",m_sCurPassword.GetPtr());
+        Args.m_VarsLocal.SetStrNew("oldPassword",m_sCurPassword.GetBuffer());
 		TRIGRET_TYPE tRet = TRIGRET_RET_FALSE;
 		g_Serv.r_Call("f_onaccount_pwchange", &g_Serv, &Args, nullptr, &tRet);
 		if ( tRet == TRIGRET_RET_TRUE )
@@ -1009,7 +1011,7 @@ void CAccount::SetNewPassword( lpctstr pszPassword )
 
 	m_sNewPassword = pszPassword;
 	if ( m_sNewPassword.GetLength() > MAX_ACCOUNT_PASSWORD_ENTER )
-		m_sNewPassword.SetLength(MAX_ACCOUNT_PASSWORD_ENTER);
+		m_sNewPassword.Resize(MAX_ACCOUNT_PASSWORD_ENTER);
 }
 
 // Set account RESDISP automatically based on player client version
@@ -1548,15 +1550,17 @@ bool CAccount::r_Verb( CScript &s, CTextConsole * pSrc )
 				}
 
 				char *z = Str_GetTemp();
-				sprintf(z, "Account %s deleted.\n", sCurrentName);
-
-				if ( !g_Accounts.Account_Delete(this) )
+				if (g_Accounts.Account_Delete(this))
 				{
-					sprintf(z, "Cannot delete account %s.\n", sCurrentName);
+					snprintf(z, STR_TEMPLENGTH, "Account %s deleted.\n", sCurrentName);
+				}
+				else
+				{
+					snprintf(z, STR_TEMPLENGTH, "Cannot delete account %s.\n", sCurrentName);
 				}
 
 				g_Log.EventStr(0, z);
-				if ( pSrc != &g_Serv )
+				if (pSrc && (pSrc != &g_Serv))
 					pSrc->SysMessage(z);
 
 				return true;

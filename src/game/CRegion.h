@@ -115,9 +115,9 @@ public:
 
 	void SetModified( int iModFlag );
 	void SetName( lpctstr pszName );
-	lpctstr GetName() const
+	virtual lpctstr GetName() const override
 	{
-		return m_sName.GetPtr();
+		return m_sName.GetBuffer();
 	}
 	const CSString & GetNameStr() const
 	{

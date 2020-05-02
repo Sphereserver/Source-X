@@ -84,7 +84,7 @@ void CNTWindow::CStatusDlg::FillClients()
 	CNTWindow::CListTextConsole capture( m_wndListClients.m_hWnd );
 	g_Serv.ListClients( &capture );
 	int iCount = m_wndListClients.GetCount();
-	iCount++;
+	++iCount;
 }
 
 void CNTWindow::CStatusDlg::FillStats()
@@ -226,7 +226,7 @@ void CNTWindow::tick()
 
         for (ConsoleOutput* co : outMessages)
         {
-            theApp.m_wndMain.List_Add((COLORREF)CTColToRGB(co->GetTextColor()), co->GetTextString().GetPtr());
+            theApp.m_wndMain.List_Add((COLORREF)CTColToRGB(co->GetTextColor()), co->GetTextString().GetBuffer());
             delete co;
         }
 
@@ -1081,7 +1081,7 @@ bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
 
 						for ( curmatch = g_AutoComplete.GetHead(); curmatch != nullptr; curmatch = curmatch->GetNext() )
 						{
-							if ( !strnicmp(curmatch->GetPtr(), p, inputLen) )	// matched
+							if ( !strnicmp(curmatch->GetBuffer(), p, inputLen) )	// matched
 							{
 								if ( firstmatch == nullptr )
 								{
@@ -1116,7 +1116,7 @@ bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
 								for ( curmatch = firstmatch; curmatch != lastmatch->GetNext(); curmatch = curmatch->GetNext() )
 								{
 									// found the first next one
-									if ( strnicmp(curmatch->GetPtr() + inputLen, pszCurSel, curselLen) > 0 )
+									if ( strnicmp(curmatch->GetBuffer() + inputLen, pszCurSel, curselLen) > 0 )
 									{
 										break;
 									}
@@ -1127,7 +1127,7 @@ bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
 								}
 							}
 
-							LPCTSTR	tmp = curmatch->GetPtr() + inputLen;
+							LPCTSTR	tmp = curmatch->GetBuffer() + inputLen;
 							inp->ReplaceSel(tmp);
 							if ( !bOnly )
 							{

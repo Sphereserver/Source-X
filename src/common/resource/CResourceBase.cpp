@@ -5,6 +5,7 @@
 #include "../../game/game_enums.h"
 #include "../../game/game_macros.h"
 #include "../sphere_library/CSFileList.h"
+#include "../CException.h"
 #include "../CLog.h"
 #include "CResourceBase.h"
 #include "CResourceHash.h"
@@ -107,12 +108,16 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
 	ASSERT(pszName != nullptr);
 	// Is this really just a dir name ?
 
+	if (strlen(pszName) >= _MAX_PATH)
+		throw CSError(LOGL_ERROR, 0, "Filename too long!");
+
 	tchar szName[_MAX_PATH];
-	ASSERT(strlen(pszName) < CountOf(szName));
 	strcpy(szName, pszName);
 
 	tchar szTitle[_MAX_PATH];
-	strcpy(szTitle, CScript::GetFilesTitle( szName ));
+	lpctstr ptcTitle = CScript::GetFilesTitle(szName);
+	ASSERT(strlen(ptcTitle) < CountOf(szTitle));
+	strcpy(szTitle, ptcTitle);
 
 	if ( szTitle[0] == '\0' )
 	{
@@ -124,8 +129,8 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
 	if ( pszExt == nullptr )
 	{
 		// No file extension provided, so append .scp to the filename
-		strcat( szName, SPHERE_SCRIPT );
-		strcat( szTitle, SPHERE_SCRIPT );
+		Str_ConcatLimitNull( szName,  SPHERE_SCRIPT, sizeof(szName) );
+		Str_ConcatLimitNull( szTitle, SPHERE_SCRIPT, sizeof(szTitle) );
 	}
 
 	if ( ! strnicmp( szTitle, SPHERE_FILE "tables", strlen(SPHERE_FILE "tables")))
@@ -165,7 +170,7 @@ void CResourceBase::AddResourceDir( lpctstr pszDirName )
 	if ( iRet < 0 )
 	{
 		// also check script file path
-		sFilePath = CSFile::GetMergedFileName(m_sSCPBaseDir, sFilePath.GetPtr());
+		sFilePath = CSFile::GetMergedFileName(m_sSCPBaseDir, sFilePath.GetBuffer());
 
 		iRet = filelist.ReadDir( sFilePath, true );
 		if ( iRet < 0 )

@@ -39,7 +39,7 @@ bool CSFileText::_Open(lpctstr ptcFilename, uint uiModeFlags)
     // Open a text file.
     
 	if ( !ptcFilename )
-        ptcFilename = _strFileName.GetPtr();
+        ptcFilename = _strFileName.GetBuffer();
     else
         _strFileName = ptcFilename;
 

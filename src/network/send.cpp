@@ -2158,7 +2158,7 @@ PacketBulletinBoard::PacketBulletinBoard(const CClient* target, BBOARDF_TYPE act
 	writeStringFixedASCII(message->GetName(), (uint)lenstr);
 
 	// message time
-	sprintf(tempstr, "Day %lld", (CWorldGameTime::GetCurrentTimeInGameMinutes(message->GetTimeStamp()) / (MSECS_PER_SEC * 24 * 60)) % 365);
+	snprintf(tempstr, STR_TEMPLENGTH, "Day %lld", (CWorldGameTime::GetCurrentTimeInGameMinutes(message->GetTimeStamp()) / (MSECS_PER_SEC * 24 * 60)) % 365);
 	lenstr = strlen(tempstr) + 1;
 
 	writeByte((byte)lenstr);
@@ -2615,7 +2615,8 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, const CChar* character) 
 		const CStoneMember* guildMember = character->Guild_FindMember(MEMORY_GUILD);
 		if (guildMember != nullptr && guildMember->IsAbbrevOn() && guildMember->GetParentStone()->GetAbbrev()[0])
 		{
-			len = sprintf(text, "%s [%s], %s", character->Noto_GetTitle(), guildMember->GetParentStone()->GetAbbrev(),
+			len = snprintf(text, STR_TEMPLENGTH, "%s [%s], %s",
+				character->Noto_GetTitle(), guildMember->GetParentStone()->GetAbbrev(),
 							( guildMember->GetTitle()[0] ? guildMember->GetTitle() : (IsSetOF(OF_NoPaperdollTradeTitle) ? "" : character->GetTradeTitle()) ) );
 		}
 
@@ -2625,9 +2626,9 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, const CChar* character) 
 			if (!IsSetOF(OF_NoPaperdollTradeTitle))
 				title = character->GetTradeTitle();
 			if ( title && title[0] )
-				sprintf(text, "%s, %s", character->Noto_GetTitle(), title);
+				snprintf(text, STR_TEMPLENGTH, "%s, %s", character->Noto_GetTitle(), title);
 			else
-				sprintf(text, "%s", character->Noto_GetTitle());
+				snprintf(text, STR_TEMPLENGTH, "%s", character->Noto_GetTitle());
 		}
 
 		writeStringFixedASCII(text, 60);
@@ -3413,7 +3414,8 @@ PacketGumpValueInput::PacketGumpValueInput(const CClient* target, bool cancel, I
 	writeInt16(CLIMODE_INPVAL);
 
 	int len = (int)strlen(text) + 1;
-	if (len > 255) len = 255;
+	if (len > 255)
+		len = 255;
 
 	writeInt16((word)(len));
 	writeStringFixedASCII(text, len);
@@ -3422,7 +3424,7 @@ PacketGumpValueInput::PacketGumpValueInput(const CClient* target, bool cancel, I
 	writeByte((byte)(style));
 	writeInt32(maxLength);
 
-	tchar* z(nullptr);
+	tchar* z = nullptr;
 	switch (style)
 	{
 		case INPVAL_STYLE_NOEDIT: // None
@@ -3432,16 +3434,17 @@ PacketGumpValueInput::PacketGumpValueInput(const CClient* target, bool cancel, I
 
 		case INPVAL_STYLE_TEXTEDIT: // Text
 			z = Str_GetTemp();
-			len = sprintf(z, "%s (%u chars max)", caption, maxLength) + 1;
+			len = snprintf(z, STR_TEMPLENGTH, "%s (%u chars max)", caption, maxLength) + 1;
 			break;
 
 		case INPVAL_STYLE_NUMEDIT: // Numeric
 			z = Str_GetTemp();
-			len = sprintf(z, "%s (0 - %u)", caption, maxLength) + 1;
+			len = snprintf(z, STR_TEMPLENGTH, "%s (0 - %u)", caption, maxLength) + 1;
 			break;
 	}
 
-	if (len > 255) len = 255;
+	if (len > 255)
+		len = 255;
 	writeInt16((word)(len));
 	writeStringFixedASCII(z, len);
 
@@ -3554,15 +3557,15 @@ void PacketGumpDialog::writeCompressedControls(const CSString* controls, uint co
 	{
 		// compress and write controls
 		int controlLength = 1;
-		for (uint i = 0; i < controlCount; i++)
+		for (uint i = 0; i < controlCount; ++i)
 			controlLength += (int)controls[i].GetLength() + 2;
 
 		char* toCompress = new char[controlLength];
 
 		int controlLengthActual = 0;
-		for (uint i = 0; i < controlCount; i++)
-			controlLengthActual += sprintf(&toCompress[controlLengthActual], "{%s}", static_cast<lpctstr>(controls[i]));
-		controlLengthActual++;
+		for (uint i = 0; i < controlCount; ++i)
+			controlLengthActual += snprintf(&toCompress[controlLengthActual], size_t(controlLength - controlLengthActual), "{%s}", controls[i].GetBuffer());
+		++ controlLengthActual;
 
 		ASSERT(controlLengthActual == controlLength);
 
@@ -4581,9 +4584,9 @@ PacketDisplayBookNew::PacketDisplayBookNew(const CClient* target, CItem* book) :
 	writeBool(isWritable);
 	writeInt16((word)(pages));
 	writeInt16((word)(title.GetLength() + 1));
-	writeStringFixedASCII(title.GetPtr(), title.GetLength() + 1);
+	writeStringFixedASCII(title.GetBuffer(), title.GetLength() + 1);
 	writeInt16((word)(author.GetLength() + 1));
-	writeStringFixedASCII(author.GetPtr(), author.GetLength() + 1);
+	writeStringFixedASCII(author.GetBuffer(), author.GetLength() + 1);
 
 	push(target);
 }

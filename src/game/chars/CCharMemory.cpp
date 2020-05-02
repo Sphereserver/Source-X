@@ -96,7 +96,7 @@ lpctstr CChar::Guild_AbbrevBracket( MEMORY_TYPE MemType ) const
 	if ( pszAbbrev == nullptr )
 		return nullptr;
 	tchar * pszTemp = Str_GetTemp();
-	sprintf( pszTemp, " [%s]", pszAbbrev );
+	snprintf( pszTemp, STR_TEMPLENGTH, " [%s]", pszAbbrev );
 	return pszTemp;
 }
 

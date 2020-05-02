@@ -291,7 +291,7 @@ void UnixTerminal::tick()
         for (ConsoleOutput* co : outMessages)
         {
             setColor(co->GetTextColor());
-            print(co->GetTextString().GetPtr());
+            print(co->GetTextString().GetBuffer());
             setColor(CTCOL_DEFAULT);
             delete co;
         }

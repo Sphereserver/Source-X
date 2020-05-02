@@ -42,8 +42,8 @@ void CSectorList::Init()
 		const int iMaxX = g_MapList.CalcSectorCols(iMap);
 		const int iMaxY = g_MapList.CalcSectorRows(iMap);
 
-		snprintf(ts, ts.realLength(), " map%d=%d", iMap, iSectorQty);
-		Str_ConcatLimitNull(tsConcat, ts, tsConcat.realLength());
+		snprintf(ts.buffer(), ts.capacity(), " map%d=%d", iMap, iSectorQty);
+		Str_ConcatLimitNull(tsConcat.buffer(), ts.buffer(), tsConcat.capacity());
 
 		sd._pSectors		= std::make_unique<CSector[]>(iSectorQty);
 		sd._iSectorSize		= g_MapList.GetSectorSize(iMap);
@@ -77,7 +77,7 @@ void CSectorList::Init()
 	}
 	_fInitialized = true;
 
-    g_Log.Event(LOGM_INIT, "Allocated map sectors:%s\n", static_cast<lpctstr>(tsConcat));
+    g_Log.Event(LOGM_INIT, "Allocated map sectors:%s\n", tsConcat.buffer());
 }
 
 void CSectorList::Close()

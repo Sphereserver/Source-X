@@ -2219,7 +2219,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		Also, make sure Player has no EmoteColorOverride on himself to make sure emote color change for player.
 - Fixed: Stoned, paralyzed, sleep characters continue attacking.
 - Fixed: Can't attack again after the characters stoned. (Issue #432)
-- Possible Fix: COLOR variable change the color of human if the human is shop keeper (vendor). (Issue #397)
+- Fixed: COLOR variable change the color of human if the human is shop keeper (vendor). (Issue #397)
 - Fixed: Unreferenced variables for new GMPage system to avoid possible issues.
 - Fixed: Archery bug occurs when the attacker is stoned. (Issue #432)
 
@@ -2227,8 +2227,8 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: Possible fix for issue #440 and #397 without change @NPCRestock behaviour.
 
 30-04-2020, xwerswoodx
-- Added: TOPCONT as reference top container item. (It returns item's itself if it's equipped or on ground)
-	The difference between TOPCONT and TOPOBJ is TOPCONT only returns the top container not characters.
+- Added: TOPCONT as reference top container item.
+	The difference between TOPCONT and TOPOBJ is TOPCONT only returns the top item container, not characters.
 	If you use topCont on item inside bankbox or inside the subcontainers of bankbox, it returns bankbox uid.
 - Fixed: Improved Julian's bank check code for works on the items inside sub containers. (Issue #429)
 - Added: ARGN2 under @Attack trigger to replace Ignore status. (Issue #439)

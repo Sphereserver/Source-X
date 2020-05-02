@@ -41,7 +41,7 @@
 
 // CSString:: Capacity
 
-void CSString::Empty(bool fTotal)
+void CSString::Clear(bool fTotal)
 {
 	if (fTotal)
 	{
@@ -65,7 +65,7 @@ bool CSString::IsValid() const
 	return (m_pchData[m_iLength] == '\0');
 }
 
-int CSString::SetLength(int iNewLength)
+int CSString::Resize(int iNewLength)
 {
 	if (iNewLength >= m_iMaxLength)
 	{
@@ -109,7 +109,7 @@ void CSString::SetAt(int nIndex, tchar ch)
 void CSString::Add(tchar ch)
 {
 	int iLen = m_iLength;
-	SetLength(iLen + 1);
+	Resize(iLen + 1);
 	SetAt(iLen, ch);
 }
 
@@ -118,7 +118,7 @@ void CSString::Add(lpctstr pszStr)
 	int iLenCat = (int)strlen(pszStr);
 	if (iLenCat)
 	{
-		SetLength(iLenCat + m_iLength);
+		Resize(iLenCat + m_iLength);
         m_iLength = (int)Str_ConcatLimitNull(m_pchData, pszStr, m_iLength + 1);
 	}
 }
@@ -127,7 +127,7 @@ void CSString::Copy(lpctstr pszStr)
 {
 	if ((pszStr != m_pchData) && pszStr)
 	{
-		SetLength((int)strlen(pszStr));
+		Resize((int)strlen(pszStr));
 		strcpy(m_pchData, pszStr);
 	}
 }
@@ -136,9 +136,42 @@ void CSString::CopyLen(lpctstr pszStr, int iLen)
 {
     if ((pszStr != m_pchData) && pszStr)
     {
-        SetLength(iLen);
+        Resize(iLen); // it adds a +1
         Str_CopyLimitNull(m_pchData, pszStr, iLen + 1);
     }
+}
+
+// CSString:: Operators
+
+const CSString& CSString::operator=(lpctstr pStr)
+{
+	Copy(pStr);
+	return *this;
+}
+
+const CSString& CSString::operator=(const CSString& s)
+{
+	Copy(s.GetBuffer());
+	return *this;
+}
+
+const CSString& CSString::operator+=(lpctstr string)
+{
+	Add(string);
+	return(*this);
+}
+
+CSString CSString::operator+(lpctstr string)
+{
+	CSString temp(*this);
+	temp += string;
+	return temp;
+}
+
+const CSString& CSString::operator+=(tchar ch)
+{
+	Add(ch);
+	return(*this);
 }
 
 // CSString:: Formatting
@@ -154,14 +187,13 @@ void _cdecl CSString::Format(lpctstr pStr, ...)
 void CSString::FormatV(lpctstr pszFormat, va_list args)
 {
 	TemporaryString tsTemp;
-	tchar* pszTemp = static_cast<tchar *>(tsTemp);
-	vsnprintf(pszTemp, tsTemp.realLength(), pszFormat, args);
-	Copy(pszTemp);
+	vsnprintf(tsTemp.buffer(), tsTemp.capacity(), pszFormat, args);
+	Copy(tsTemp.buffer());
 }
 
 #define FORMATNUM_WRAPPER(function, arg, base) \
-    TemporaryString buf; \
-    Copy(function(arg, static_cast<tchar*>(buf), buf.realLength(), base))
+    TemporaryString tsBuf; \
+    Copy(function(arg, tsBuf.buffer(), tsBuf.capacity(), base))
 
 void CSString::FormatLLHex(llong iVal)
 {
@@ -308,7 +340,7 @@ int CSString::indexOf(tchar c, int offset)
 	return -1;
 }
 
-int CSString::indexOf(CSString str, int offset)
+int CSString::indexOf(const CSString& str, int offset)
 {
 	if (offset < 0)
 		return -1;
@@ -322,7 +354,7 @@ int CSString::indexOf(CSString str, int offset)
 		return -1;
 
 	tchar * str_value = new tchar[slen + 1];
-	Str_CopyLimitNull(str_value, str.GetPtr(), slen+1);
+	Str_CopyLimitNull(str_value, str.GetBuffer(), slen+1);
 	tchar firstChar = str_value[0];
 
 	for (int i = offset; i < len; ++i)
@@ -375,7 +407,7 @@ int CSString::lastIndexOf(tchar c, int from)
 	return -1;
 }
 
-int CSString::lastIndexOf(CSString str, int from)
+int CSString::lastIndexOf(const CSString& str, int from)
 {
 	if (from < 0)
 		return -1;
@@ -388,15 +420,14 @@ int CSString::lastIndexOf(CSString str, int from)
 	if (slen > len)
 		return -1;
 
-	lpctstr str_value = str.GetPtr();
+	lpctstr str_value = str.GetBuffer();
 	const tchar firstChar = str_value[0];
 	for (int i = (len - 1); i >= from; --i)
 	{
         const tchar c = m_pchData[i];
 		if (c == firstChar)
 		{
-			int rem = i;
-			if (rem >= slen)
+			if (i >= slen)
 			{
 				int j = i;
 				int k = 0;

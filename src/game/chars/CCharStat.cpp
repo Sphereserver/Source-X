@@ -204,7 +204,7 @@ ushort CChar::Stat_GetVal( STAT_TYPE i ) const
 void CChar::Stat_SetMax( STAT_TYPE i, ushort uiVal )
 {
 	ADDTOCALLSTACK("CChar::Stat_SetMax");
-	ASSERT(i >= 0 && i < STAT_QTY); // allow for food
+	ASSERT(i >= STAT_STR && i < STAT_QTY); // allow for food
 
 	if ( g_Cfg.m_iStatFlag && ((g_Cfg.m_iStatFlag & STAT_FLAG_DENYMAX) || (m_pPlayer && (g_Cfg.m_iStatFlag & STAT_FLAG_DENYMAXP)) || (m_pNPC && (g_Cfg.m_iStatFlag & STAT_FLAG_DENYMAXN))) )
     {
@@ -214,7 +214,7 @@ void CChar::Stat_SetMax( STAT_TYPE i, ushort uiVal )
 	{
 		if ( IsTrigUsed(TRIGGER_STATCHANGE) && !IsTriggerActive("CREATE") )
 		{
-			if ( i >= STAT_STR && i <= STAT_FOOD )		// only STR, DEX, INT, FOOD fire MaxHits, MaxMana, MaxStam, MaxFood for @StatChange
+			if ( i >= STAT_STR && i < STAT_QTY )		// only STR, DEX, INT, FOOD fire MaxHits, MaxMana, MaxStam, MaxFood for @StatChange
 			{
 				CScriptTriggerArgs args;
 				args.m_iN1 = i + 4LL;		// shift by 4 to indicate MaxHits, etc..
@@ -396,7 +396,6 @@ ushort CChar::Stat_GetLimit( STAT_TYPE i ) const
 	ADDTOCALLSTACK("CChar::Stat_GetLimit");
 	const CVarDefCont * pTagStorage = nullptr;
 	TemporaryString tsStatName;
-	tchar* pszStatName = static_cast<tchar *>(tsStatName);
 
 	if ( m_pPlayer )
 	{
@@ -405,8 +404,8 @@ ushort CChar::Stat_GetLimit( STAT_TYPE i ) const
 		ASSERT( i >= 0 && i < STAT_BASE_QTY );
 
         ushort uiStatMax;
-		sprintf(pszStatName, "OVERRIDE.STATCAP_%d", (int)i);
-		if ( (pTagStorage = GetKey(pszStatName, true)) != nullptr )
+		snprintf(tsStatName.buffer(), tsStatName.capacity(), "OVERRIDE.STATCAP_%d", (int)i);
+		if ( (pTagStorage = GetKey(tsStatName, true)) != nullptr )
 			uiStatMax = (ushort)(pTagStorage->GetValNum());
 		else
 			uiStatMax = pSkillClass->m_StatMax[i];
@@ -422,8 +421,8 @@ ushort CChar::Stat_GetLimit( STAT_TYPE i ) const
 	else
 	{
 		ushort uiStatMax = 100;
-		sprintf(pszStatName, "OVERRIDE.STATCAP_%d", (int)i);
-		if ( (pTagStorage = GetKey(pszStatName, true)) != nullptr )
+		snprintf(tsStatName.buffer(), tsStatName.capacity(), "OVERRIDE.STATCAP_%d", (int)i);
+		if ( (pTagStorage = GetKey(tsStatName, true)) != nullptr )
 			uiStatMax = (ushort)(pTagStorage->GetValNum());
 
 		return uiStatMax;

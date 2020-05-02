@@ -99,7 +99,7 @@ bool CSFile::_Open( lpctstr ptcFilename, uint uiModeFlags )
     }
 
     if ( !ptcFilename )
-        ptcFilename = _strFileName.GetPtr();
+        ptcFilename = _strFileName.GetBuffer();
     else
         _strFileName = ptcFilename;
 
@@ -160,11 +160,11 @@ bool CSFile::IsFileOpen() const
 
 lpctstr CSFile::_GetFilePath() const
 {
-    return _strFileName.GetPtr();
+    return _strFileName.GetBuffer();
 }
 lpctstr CSFile::GetFilePath() const
 {
-    THREAD_SHARED_LOCK_RETURN(_strFileName.GetPtr());
+    THREAD_SHARED_LOCK_RETURN(_strFileName.GetBuffer());
 }
 
 bool CSFile::_SetFilePath( lpctstr pszName )
@@ -382,7 +382,7 @@ lpctstr CSFile::GetFilesTitle( lpctstr pszPath )  // static
 lpctstr CSFile::_GetFileTitle() const
 {
     ADDTOCALLSTACK("CFile::_GetFileTitle");
-    return CSFile::GetFilesTitle(_strFileName.GetPtr());
+    return CSFile::GetFilesTitle(_strFileName.GetBuffer());
 }
 lpctstr CSFile::GetFileTitle() const
 {
