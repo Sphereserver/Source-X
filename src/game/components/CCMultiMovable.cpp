@@ -92,7 +92,9 @@ bool CCMultiMovable::SetMoveDir(DIR_TYPE dir, ShipMovementType eMovementType, bo
 
     // SpeedMode, as supported by the 0xF6 packet (sent from server): 0x01 = one tile, 0x02 = rowboat, 0x03 = slow, 0x04 = fast
     // TODO RowBoat's checks.
-    _eSpeedMode = (eMovementType == SMT_SLOW) ? SMS_SLOW : SMS_FAST;
+    if (fWheelMove)
+        _eSpeedMode = (eMovementType == SMT_SLOW) ? SMS_SLOW : SMS_FAST;
+
     SetNextMove();
     return true;
 }
@@ -274,6 +276,7 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta, bool fUpdateViewFull)
 
 
     // Make tiller move and rotate
+    /*
     CItem* pTiller = pMultiThis->Multi_GetSign();
     ASSERT(pTiller);
     ITEMID_TYPE newDispID = pTiller->GetDispID();
@@ -299,7 +302,7 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta, bool fUpdateViewFull)
     }
     pTiller->SetID(newDispID);
     pTiller->Update();
-
+    */
 
     // Move the ship and everything on the deck
     CObjBase * ppObjs[MAX_MULTI_LIST_OBJS + 1];
@@ -1252,7 +1255,8 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
 
 enum CML_TYPE
 {
-    CML_OWNER,
+    CML_ANCHOR,
+    CML_DIRFACE,
     CML_PILOT,
     CML_SHIPSPEED,
     CML_SPEEDMODE,
@@ -1261,7 +1265,8 @@ enum CML_TYPE
 
 lpctstr const CCMultiMovable::sm_szLoadKeys[CML_QTY + 1] =
 {
-    "OWNER",
+    "ANCHOR",
+    "DIRFACE",
     "PILOT",
     "SHIPSPEED",
     "SPEEDMODE",
@@ -1284,8 +1289,11 @@ bool CCMultiMovable::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * 
     switch (index)
     {
 
-        case CML_OWNER:
-            sVal.FormatHex(pItemThis->m_itShip.m_UIDCreator);
+        case CML_ANCHOR:
+            sVal.FormatBVal(pItemThis->m_itShip.m_fAnchored);
+            break;
+        case CML_DIRFACE:
+            sVal.FormatBVal(pItemThis->m_itShip.m_DirFace);
             break;
         case CML_PILOT:
         {
@@ -1412,7 +1420,7 @@ bool CCMultiMovable::r_LoadVal(CScript & s)
 			return true;
         } 
         break;
-        case CML_OWNER:
+        /*case CML_OWNER:
         {
             CChar* pCharNew = CUID::CharFind(s.GetArgVal());
             if (pCharNew->IsClient())
@@ -1421,7 +1429,7 @@ bool CCMultiMovable::r_LoadVal(CScript & s)
                 ASSERT(pItemThis);
                 pItemThis->m_itShip.m_UIDCreator = (CUID)s.GetArgVal();
             }
-        }
+        } break;*/
         default:
         {
             return false;

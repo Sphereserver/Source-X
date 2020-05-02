@@ -2644,6 +2644,21 @@ do_default:
 				}
 			}
 			return true;
+		case CHC_MOVEVALID:
+		{
+			ptcKey += 9;
+			GETNONWHITESPACE(ptcKey);
+			tchar* ppArgs[2];
+			int iQty = Str_ParseCmds(const_cast<tchar*>(ptcKey), ppArgs, CountOf(ppArgs));
+			if (iQty < 2)
+				return false;
+
+			if (MoveToValidSpot(GetDirStr(ppArgs[0]), Exp_GetVal(ppArgs[1]), 1, true))
+				sVal = "1";
+			else
+				sVal = "0";
+			return true;
+		}
 		case CHC_DISPIDDEC:	// for properties dialog.
 			sVal.FormatVal( pCharDef->m_trackID );
 			return true;
