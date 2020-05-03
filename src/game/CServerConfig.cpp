@@ -129,6 +129,7 @@ CServerConfig::CServerConfig()
 	m_fCharTags				= false;
 	m_fVendorTradeTitle		= true;
 	m_iVendorMaxSell		= 255;
+	m_iVendorMarkup			= 15;
 	m_iGameMinuteLength		= 20 * MSECS_PER_SEC; // 20 seconds
 	m_fNoWeather			= true;
 	m_fFlipDroppedItems		= true;
@@ -637,6 +638,7 @@ enum RC_TYPE
 	RC_USEMAPDIFFS,				// m_fUseMapDiffs
 	RC_USENOCRYPT,				// m_Usenocrypt
 	RC_USEPACKETPRIORITY,		// m_fUsePacketPriorities
+	RC_VENDORMARKUP,			// m_iVendorMarkup
 	RC_VENDORMAXSELL,			// m_iVendorMaxSell
 	RC_VENDORTRADETITLE,		// m_fVendorTradeTitle
 	RC_VERSION,
@@ -885,6 +887,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "USEMAPDIFFS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUseMapDiffs),			0 }},
 	{ "USENOCRYPT",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUsenocrypt),			0 }},	// we don't want no-crypt clients
 	{ "USEPACKETPRIORITY",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUsePacketPriorities),	0 }},
+	{ "VENDORMARKUP",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iVendorMarkup),		0 }},
 	{ "VENDORMAXSELL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iVendorMaxSell),		0 }},
 	{ "VENDORTRADETITLE",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fVendorTradeTitle),	0 }},
 	{ "VERSION",				{ ELEM_VOID,	0,											0 }},

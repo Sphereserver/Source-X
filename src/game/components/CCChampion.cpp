@@ -250,17 +250,11 @@ void CCChampion::SpawnNPC()
     CCSpawn* pSpawn = GetSpawnItem();
     if (pSpawn)
     {
-        CChar* pChar = CChar::CreateBasic(pNpc);
-        if (!pChar)
+        CChar* spawn = pSpawn->GenerateChar(rid);
+        if (spawn != nullptr)
         {
-            return;
+            AddObj(spawn->GetUID());
         }
-        CPointMap pt = GetLink()->GetTopPoint();
-        pChar->SetTopPoint(pt);
-        pChar->MoveNear(pt, 10);
-        pChar->Update();
-        pChar->NPC_LoadScript(true);
-        AddObj(pChar->GetUID());
     }
     ++_iSpawnsCur;
 }

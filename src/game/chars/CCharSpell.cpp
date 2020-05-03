@@ -3423,8 +3423,17 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 	if ( pSpellDef->IsSpellType(SPELLFLAG_HARM) )
 	{
-		if ( pCharSrc == this && !IsSetMagicFlags(MAGICF_CANHARMSELF) && !fReflecting )
-			return false;
+		if ( pCharSrc == this )
+		{
+			if (fReflecting)
+			{
+				iDmgType |= DAMAGE_NODISTURB;	// Preventing myself to fail my own cast by receiving damage from it.
+			}
+			else if (!IsSetMagicFlags(MAGICF_CANHARMSELF))
+			{
+				return false;
+			}
+		}
 
 		if ( IsStatFlag(STATF_INVUL) )
 		{
@@ -3445,7 +3454,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			return false;
 
 		// Check if the spell can be reflected
-		if ( pSpellDef->IsSpellType(SPELLFLAG_TARG_CHAR) && pCharSrc && (pCharSrc != this) )		// only spells with direct target can be reflected
+		if (pCharSrc && (pCharSrc != this) )		// only spells with direct target can be reflected
 		{
 			if ( IsStatFlag(STATF_REFLECTION) )
 			{
