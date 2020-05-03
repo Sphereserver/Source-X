@@ -91,7 +91,7 @@ public:
 	void SetContainedPoint( const CPointMap & pt );
 
 	void SetTopPoint( const CPointMap & pt );
-    inline const CPointMap & GetTopPoint() const {
+    inline const CPointMap & GetTopPoint() const noexcept {
         return m_pt;
     }
 	virtual void SetTopZ( char z );
@@ -100,7 +100,7 @@ public:
 	CSector* GetTopSector() const;
 
 	void SetUnkPoint( const CPointMap & pt );
-    inline const CPointMap & GetUnkPoint() const {
+    inline const CPointMap & GetUnkPoint() const noexcept {
         // don't care where this
         return m_pt;
     }

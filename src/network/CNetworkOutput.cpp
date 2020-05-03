@@ -464,7 +464,7 @@ bool CNetworkOutput::sendPacketData(CNetState* state, PacketSend* packet)
 
 	EXC_CATCH;
 	EXC_DEBUG_START;
-	g_Log.EventDebug("id='%x', packet '0x%x', length '%" PRIuSIZE_T "'\n",
+	g_Log.EventDebug("id='%x', packet '0x%x', length '%u'\n",
 		state->id(), *packet->getData(), packet->getLength());
 	EXC_DEBUG_END;
 	return false;
@@ -509,7 +509,7 @@ size_t CNetworkOutput::sendData(CNetState* state, const byte* data, size_t lengt
 #endif
 	{
 		// send via standard api
-		int sent = state->m_socket.Send(data, (int)(length));
+		int sent = state->m_socket.Send(data, (int)length);
 		if (sent > 0)
 			result = (size_t)(sent);
 		else

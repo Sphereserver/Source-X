@@ -409,7 +409,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 	if ( iChance <= 0 )
 		return;
 
-	int64 iRoll = Calc_GetRandVal(1000);
+	int iRoll = Calc_GetRandVal(1000);
 	if ( uiSkillLevelFixed < (ushort)iSkillMax )	// are we in position to gain skill ?
 	{
 		// slightly more chance of decay than gain
@@ -666,9 +666,12 @@ bool CChar::Skill_MakeItem_Success()
 		if ( pItem->IsType(IT_SCROLL) )
 			pItem->m_itSpell.m_spelllevel = iSkillLevel;
 
-		CItemBase *ptItemDef = CItemBase::FindItemBase(m_atCreate.m_iItemID);
-		if ( ptItemDef->IsStackableType() )
+		const CItemBase *ptItemDef = CItemBase::FindItemBase(m_atCreate.m_iItemID);
+		ASSERT(ptItemDef);
+		if (ptItemDef->IsStackableType())
+		{
 			pItem->SetAmount((word)m_atCreate.m_dwAmount);
+		}
 		else
 		{
 			for ( uint n = 1; n < m_atCreate.m_dwAmount; ++n )

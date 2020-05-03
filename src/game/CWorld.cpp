@@ -808,6 +808,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 
 	if ( g_Cfg.m_iSaveBackgroundTime )
 	{
+		ASSERT(iSectorsQty > 0);
 		int64 iNextTime = g_Cfg.m_iSaveBackgroundTime / iSectorsQty;
 		if ( iNextTime > MSECS_PER_SEC *30 * 60 )
 			iNextTime = MSECS_PER_SEC * 30 * 60;	// max out at 30 minutes or so.
@@ -986,12 +987,16 @@ bool CWorld::CheckAvailableSpaceForSave(bool fStatics)
     {
         struct stat st;
         CSString strSaveFile = g_Cfg.m_sWorldBaseDir + SPHERE_FILE + ptcSaveName + SPHERE_SCRIPT;
-        stat(strSaveFile.GetBuffer(), &st);
-        ullong uiCurSavefileSize = (ullong)st.st_size;
-        if (uiCurSavefileSize == 0)
-            fSizeErr = true;
-        else
-            uiPreviousSaveSize += uiCurSavefileSize;
+		if (!stat(strSaveFile.GetBuffer(), &st))
+		{
+			const ullong uiCurSavefileSize = (ullong)st.st_size;
+			if (uiCurSavefileSize == 0)
+				fSizeErr = true;
+			else
+				uiPreviousSaveSize += uiCurSavefileSize;
+		}
+		else
+			fSizeErr = true;        
     };
 
     if (fStatics)
@@ -1035,14 +1040,14 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 {
 	ADDTOCALLSTACK("CWorld::Save");
 
-    if (!CheckAvailableSpaceForSave(false))
-        return false;
-
-    //-- Ok we can start the save process, in which we eventually remove the previous saves and create the other.
-
 	bool fSaved = false;
 	try
 	{
+		if (!CheckAvailableSpaceForSave(false))
+			return false;
+
+		//-- Ok we can start the save process, in which we eventually remove the previous saves and create the other.
+
 		CScriptTriggerArgs Args(fForceImmediate, m_iSaveStage);
 		enum TRIGRET_TYPE tr;
 

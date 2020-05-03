@@ -128,19 +128,14 @@ void ThreadHolder::pop(IThread *thread)
 {
     if (!m_inited)
         init();
-	if( m_threadCount <= 0 )
-		throw CSError(LOGL_ERROR, 0, "Trying to dequeue thread while no threads are active");
 
-	SimpleThreadLock lock(m_mutex);
-	spherethreadlist_t::iterator it = std::find(m_threads.begin(), m_threads.end(), thread);
-	if (it != m_threads.end())
-	{
-		--m_threadCount;
-		m_threads.erase(it);
-		return;
-	}
+    ASSERT(m_threadCount > 0);	// Trying to dequeue thread while no threads are active?
 
-	throw CSError(LOGL_ERROR, 0, "Unable to dequeue a thread (not registered)");
+    SimpleThreadLock lock(m_mutex);
+    spherethreadlist_t::iterator it = std::find(m_threads.begin(), m_threads.end(), thread);
+    ASSERT(it != m_threads.end());	// Ensure that the thread to dequeue is registered
+    --m_threadCount;
+    m_threads.erase(it);
 }
 
 IThread * ThreadHolder::getThreadAt(size_t at)

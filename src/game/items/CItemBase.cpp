@@ -1448,6 +1448,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 			if (!IsType(IT_SHIP))
 				return false;
 			CItemBaseMulti *pItemMulti = dynamic_cast<CItemBaseMulti*>(this);
+			ASSERT(pItemMulti);
             ShipMovementSpeed speed = (ShipMovementSpeed)s.GetArgBVal();
 			if (speed > SMS_FAST)
 				speed = SMS_FAST;

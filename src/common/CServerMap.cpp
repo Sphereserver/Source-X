@@ -661,8 +661,6 @@ void CServerMapDiffCollection::LoadMapDiffs()
 	if ( m_bLoaded ) // already loaded
 		return;
 
-	dword dwLength = 0, dwBlockId = 0;
-	dword dwOffset = 0, dwRead = 0;
 	CServerMapDiffBlock * pMapDiffBlock = nullptr;
 
 	for ( int m = 0; m < MAP_SUPPORTED_QTY; ++m )
@@ -684,11 +682,15 @@ void CServerMapDiffCollection::LoadMapDiffs()
 				pFileMapdif->SeekToBegin();
 				pFileMapdifl->SeekToBegin();
 
-				dwLength = (dword)pFileMapdifl->GetLength();
-				dwRead = dwOffset = 0;
+				const int iLength = pFileMapdifl->GetLength();
+				if (iLength <= 0)
+					continue;
+				dword dwLength = (dword)iLength;
+				dword dwOffset = 0, dwRead = 0;
 
 				for ( ; dwRead < dwLength; dwOffset += sizeof(CUOMapBlock) )
 				{
+					dword dwBlockId = 0;
 					dwRead += (dword)pFileMapdifl->Read( &dwBlockId, sizeof(dwBlockId) );
 					pMapDiffBlock = GetNewBlock( dwBlockId, map );
 
@@ -729,11 +731,15 @@ void CServerMapDiffCollection::LoadMapDiffs()
 			pFileStadifl->SeekToBegin();
 			pFileStadifi->SeekToBegin();
 
-			dwLength = (dword)pFileStadifl->GetLength();
-			dwRead = dwOffset = 0;
+			const int iLength = pFileStadifl->GetLength();
+			if (iLength <= 0)
+				continue;
+			dword dwLength = (dword)iLength;
+			dword dwOffset = 0, dwRead = 0;
 
 			for ( ; dwRead < dwLength; dwOffset += sizeof(CUOIndexRec) )
 			{
+				dword dwBlockId = 0;
 				dwRead += (dword)pFileStadifl->Read( &dwBlockId, sizeof(dwBlockId) );
 
 				pMapDiffBlock = GetNewBlock( dwBlockId, map );

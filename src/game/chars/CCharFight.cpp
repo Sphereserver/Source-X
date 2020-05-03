@@ -1802,7 +1802,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
             //    iSwingAnimationDelayInSeconds += 1; // round up
 
         }
-		UpdateAnimate((ANIM_TYPE)m_atFight.m_iSwingAnimation, false, false, maximum(0,iSwingAnimationDelayInSeconds) );
+		UpdateAnimate((ANIM_TYPE)m_atFight.m_iSwingAnimation, false, false, iSwingAnimationDelayInSeconds );
 
         // Now that i have waited the recoil time, start the hit animation and wait for it to end
         SetTimeoutD(m_atFight.m_iSwingAnimationDelay);

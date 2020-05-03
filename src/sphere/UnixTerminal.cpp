@@ -15,6 +15,8 @@
 UnixTerminal::UnixTerminal() : AbstractSphereThread("T_UnixTerm", IThread::Highest),
 #ifdef _USECURSES
 	m_window(nullptr),
+#else
+	m_original{},
 #endif
  m_nextChar('\0'), m_isColorEnabled(true), m_prepared(false)
 {
@@ -251,7 +253,9 @@ void UnixTerminal::restore()
 #else
 	// restore original terminal state
 	if (tcsetattr(STDIN_FILENO, TCSANOW, &m_original) < 0)
-		throw CSError(LOGL_WARN, 0, "failed to restore terminal attributes");
+	{
+		fprintf(stderr, "SYSWARN: failed to restore terminal attributes.");
+	}
 #endif
 
 	m_prepared = false;

@@ -233,7 +233,7 @@ void CNetworkManager::start(void)
         m_states[l] = new CNetState(l);
     m_stateCount = g_Cfg.m_iClientsMax;
 
-    DEBUGNETWORK(("Created %" PRIuSIZE_T " network slots (system limit of %d clients)\n", m_stateCount, FD_SETSIZE));
+    DEBUGNETWORK(("Created %d network slots (system limit of %d clients)\n", m_stateCount, FD_SETSIZE));
 
     // create network threads
     createNetworkThreads(g_Cfg.m_iNetworkThreads);

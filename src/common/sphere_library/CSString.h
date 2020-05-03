@@ -28,56 +28,70 @@ public:
 	/**
 	* @brief Default constructor.
 	*
-	* Initializes string. If DEBUG_STRINGS setted, update statistical information (total CSString instantiated).
+	* Initializes string. If DEBUG_STRINGS is enabled, update statistical information (total CSString instantiated).
 	* @see Init()
 	*/
-	inline CSString();
+	inline CSString() noexcept;
 
 	/**
 	* @brief CSString destructor.
 	*
-	* If DEBUG_STRINGS setted, updates statistical information (total CSString instantiated).
+	* If DEBUG_STRINGS is enabled, updates statistical information (total CSString instantiated).
 	*/
-	inline ~CSString();
+	inline ~CSString() noexcept;
+
+	/**
+	* @brief "Copy" constructor.
+	*
+	* @see Copy()
+	* @param pStr string to copy.
+	*/
+	CSString(lpctstr pStr) noexcept;
 
     /**
-    * @brief Copy constructor.
-    *
-    * @see Copy()
-    * @param pStr string to copy.
-    */
-    inline CSString(lpctstr pStr);
-
-    /**
-    * @brief Copy constructor.
+    * @brief "Copy" constructor.
     *
     * @see CopyLen()
     * @param pStr string to copy.
     * #param iLen max number of chars (single-byte) to copy.
     */
-    inline CSString(lpctstr pStr, int iLen);
+    CSString(lpctstr pStr, int iLen) noexcept;
 
 	/**
 	* @brief Copy constructor.
 	*
 	* @see Copy()
-	* @param pStr string to copy.
+	* @param s CSString to copy.
 	*/
-    inline CSString(const CSString &s);
+    CSString(const CSString &s) noexcept;
+
+	/**
+	* @brief Move constructor.
+	*
+	* @param pStr string to move the contents from.
+	*/
+	inline CSString(CSString&& s) noexcept;
 
 	/**
 	* @brief Copy supplied string into the CSString.
 	* @param pStr string to copy.
 	* @return the CSString.
 	*/
-	const CSString& operator=(lpctstr pStr);
+	const CSString& operator=(lpctstr pStr) noexcept;
 
 	/**
 	* @brief Copy supplied CSString into the CSString.
 	* @param s CSString to copy.
 	* @return the CSString.
 	*/
-	const CSString& operator=(const CSString &s);
+	const CSString& operator=(const CSString &s) noexcept;
+
+	/**
+	* @brief Move assignment operator.
+	* @param s CSString to move the contents from.
+	* @return this CSString.
+	*/
+	CSString& operator=(CSString&& s) noexcept;
 
 	///@}
 
@@ -90,19 +104,19 @@ public:
 	* If fTotal is true, then free the memory allocated. If DEBUG_STRINGS setted, update statistical information (total memory allocated).
 	* @param fTotal true for free the allocated memory.
 	*/
-	void Clear(bool fTotal = false);
+	void Clear(bool fTotal = false) noexcept;
 
 	/**
 	* @brief Check the length of the CSString.
 	* @return true if length is 0, false otherwise.
 	*/
-	inline bool IsEmpty() const;
+	inline bool IsEmpty() const noexcept;
 
 	/**
 	* @brief Check if there is data allocated and if has zero length.
 	* @return false if no data or zero length, true otherwise.
 	*/
-	bool IsValid() const;
+	bool IsValid() const noexcept;
 
 	/**
 	* @brief Change the capacity (which is not the actual string length) of the CSString internal buffer.
@@ -113,19 +127,19 @@ public:
 	* @param iLen new length of the string.
 	* @return the new length of the CSString.
 	*/
-	int Resize(int iLen);
+	int Resize(int iLen) noexcept;
 
 	/**
 	* @brief Get the length of the held string.
 	* @return the length of the CSString.
 	*/
-	inline int GetLength() const;
+	inline int GetLength() const noexcept;
 
 	/**
 	* @brief Get the length of the internal buffer, which can be greater than the held string length.
 	* @return the length of the CSString.
 	*/
-	inline int GetCapacity() const;
+	inline int GetCapacity() const noexcept;
 
 	///@}
 
@@ -217,7 +231,7 @@ public:
 	* @see strcpy()
 	* @param pStr string to copy.
 	*/
-	void Copy(lpctstr pStr);
+	void Copy(lpctstr pStr) noexcept;
 
     /**
     * @brief Copy a string of known length into the CSString.
@@ -226,22 +240,22 @@ public:
     * @param pStr string to copy.
     * @param iLen max number of chars (single-byte) to copy.
     */
-    void CopyLen(lpctstr pStr, int iLen);
+    void CopyLen(lpctstr pStr, int iLen) noexcept;
 
 	/**
 	* @brief Changes the capitalization of CSString to upper.
 	*/
-	inline void MakeUpper();
+	inline void MakeUpper() noexcept;
 
 	/**
 	* @brief Changes the capitalization of CSString to lower.
 	*/
-	inline void MakeLower();
+	inline void MakeLower() noexcept;
 
 	/**
 	* @brief Reverses the CSString.
 	*/
-	inline void Reverse();
+	inline void Reverse() noexcept;
 
 	///@}
 
@@ -474,7 +488,7 @@ public:
 	* @param c character to look for.
 	* @return position of the character in CSString if any, -1 otherwise.
 	*/
-	inline int indexOf(tchar c);
+	inline int indexOf(tchar c) noexcept;
 
 	/**
 	* @brief Look for the first occurence of c in CSString from a position.
@@ -482,14 +496,14 @@ public:
 	* @param offset position from start the search.
 	* @return position of the character in CSString if any, -1 otherwise.
 	*/
-	int indexOf(tchar c, int offset);
+	int indexOf(tchar c, int offset) noexcept;
 
 	/**
 	* @brief Look for the first occurence of a substring in CSString.
 	* @param str substring to look for.
 	* @return position of the substring in CSString if any, -1 otherwise.
 	*/
-	inline int indexOf(const CSString& str);
+	inline int indexOf(const CSString& str) noexcept;
 
 	/**
 	* @brief Look for the first occurence of a substring in CSString from a position.
@@ -497,14 +511,14 @@ public:
 	* @param offset position from start the search.
 	* @return position of the substring in CSString if any, -1 otherwise.
 	*/
-	int indexOf(const CSString& str, int offset);
+	int indexOf(const CSString& str, int offset) noexcept;
 
 	/**
 	* @brief Look for the last occurence of c in CSString.
 	* @param c character to look for.
 	* @return position of the character in CSString if any, -1 otherwise.
 	*/
-	inline int lastIndexOf(tchar c);
+	inline int lastIndexOf(tchar c) noexcept;
 
 	/**
 	* @brief Look for the last occurence of c in CSString from a position to the end.
@@ -512,14 +526,14 @@ public:
 	* @param from position where stop the search.
 	* @return position of the character in CSString if any, -1 otherwise.
 	*/
-	int lastIndexOf(tchar c, int from);
+	int lastIndexOf(tchar c, int from) noexcept;
 
 	/**
 	* @brief Look for the last occurence of a substring in CSString.
 	* @param str substring to look for.
 	* @return position of the substring in CSString if any, -1 otherwise.
 	*/
-	inline int lastIndexOf(const CSString& str);
+	inline int lastIndexOf(const CSString& str) noexcept;
 
 	/**
 	* @brief Look for the last occurence of a substring in CSString from a position to the end.
@@ -527,7 +541,7 @@ public:
 	* @param from position where stop the search.
 	* @return position of the substring in CSString if any, -1 otherwise.
 	*/
-	int lastIndexOf(const CSString& str, int from);
+	int lastIndexOf(const CSString& str, int from) noexcept;
 
 	///@}
 
@@ -537,7 +551,7 @@ private:
 	*
 	* Allocs STRING_DEFAULT_SIZE by default. If DEBUG_STRINGS setted, updates statistical information (total memory allocated).
 	*/
-	void Init();
+	void Init()  noexcept;
 
 	tchar *m_pchData;	// Data pointer.
 	int	m_iLength;		// Length of string.
@@ -547,7 +561,7 @@ private:
 
 /* Inlined methods are defined here */
 
-CSString::CSString()
+CSString::CSString() noexcept
 {
 #ifdef DEBUG_STRINGS
     ++gAmount;
@@ -555,7 +569,7 @@ CSString::CSString()
     Init();
 }
 
-CSString::~CSString()
+CSString::~CSString() noexcept
 {
 #ifdef DEBUG_STRINGS
     --gAmount;
@@ -563,35 +577,23 @@ CSString::~CSString()
     Clear(true);
 }
 
-CSString::CSString(lpctstr pStr)
+CSString::CSString(CSString&& s) noexcept :
+	m_pchData(nullptr)
 {
-    Init();
-    Copy(pStr);
+	*this = std::move(s); // Call the move assignment operator
 }
 
-CSString::CSString(lpctstr pStr, int iLen)
-{
-    Init();
-    CopyLen(pStr, iLen);
-}
-
-CSString::CSString(const CSString &s)
-{
-    Init();
-    Copy(s.GetBuffer());
-}
-
-bool CSString::IsEmpty() const
+bool CSString::IsEmpty() const noexcept
 {
 	return !m_iLength;
 }
 
-int CSString::GetLength() const
+int CSString::GetLength() const noexcept
 {
 	return m_iLength;
 }
 
-int CSString::GetCapacity() const
+int CSString::GetCapacity() const noexcept
 {
 	return m_iMaxLength;
 }
@@ -620,17 +622,17 @@ tchar& CSString::ReferenceAt(int nIndex)
 	return m_pchData[nIndex];
 }
 
-void CSString::MakeUpper()
+void CSString::MakeUpper() noexcept
 {
 	_strupr(m_pchData);
 }
 
-void CSString::MakeLower()
+void CSString::MakeLower() noexcept
 {
 	_strlwr(m_pchData);
 }
 
-void CSString::Reverse()
+void CSString::Reverse() noexcept
 {
 	Str_Reverse(m_pchData);
 }
@@ -660,22 +662,22 @@ lptstr CSString::GetBuffer() noexcept
 	return m_pchData;
 }
 
-int CSString::indexOf(tchar c)
+int CSString::indexOf(tchar c) noexcept
 {
 	return indexOf(c, 0);
 }
 
-int CSString::indexOf(const CSString& str)
+int CSString::indexOf(const CSString& str) noexcept
 {
 	return indexOf(str, 0);
 }
 
-int CSString::lastIndexOf(tchar c)
+int CSString::lastIndexOf(tchar c) noexcept
 {
 	return lastIndexOf(c, 0);
 }
 
-int CSString::lastIndexOf(const CSString& str)
+int CSString::lastIndexOf(const CSString& str) noexcept
 {
 	return lastIndexOf(str, 0);
 }

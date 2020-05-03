@@ -365,7 +365,8 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 				return;
 			}
 
-			Broadcast(pBy, pszText);
+			if (pszText)
+				Broadcast(pBy, pszText);
 			return;
 		}
 		case 2: // "BCALL"
@@ -373,7 +374,8 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 			if ( ! pByClient->IsPriv( PRIV_GM ))
 				goto need_gm_privs;
 
-			Broadcast(pBy, pszText, "", true);
+			if (pszText)
+				Broadcast(pBy, pszText, "", true);
 			return;
 		}
 		case 3: // "CHATSOK"
@@ -418,12 +420,14 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 			if ( ! pByClient->IsPriv( PRIV_GM ))
 				goto need_gm_privs;
 
-			Broadcast(nullptr, pszText, "", true);
+			if (pszText)
+				Broadcast(nullptr, pszText, "", true);
 			return;
 		}
 		case 8:	// "WHEREIS"
 		{
-			WhereIs(pBy, pszText);
+			if (pszText)
+				WhereIs(pBy, pszText);
 			return;
 		}
 		default:

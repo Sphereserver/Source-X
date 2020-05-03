@@ -301,7 +301,7 @@ bool CScriptObj::r_LoadVal( CScript & s )
 				{
 					bool fQuoted = false;
 					tchar * args = s.GetArgStr(&fQuoted);
-					Str_CopyLimitNull(g_Exp.sm_szMessages[l], args, sizeof(g_Exp.sm_szMsgNames[0]));
+					Str_CopyLimitNull(g_Exp.sm_szMessages[l], args, sizeof(g_Exp.sm_szMessages[0]));
 					return true;
 				}
 			}
@@ -624,8 +624,8 @@ badcmd:
 			return true;
 		case SSC_FVAL:
 			{
-				int64 iVal = Exp_Get64Val(ptcKey);
-				sVal.Format( "%s%" PRId64 ".%" PRId64 , (iVal >= 0) ? "" : "-", llabs(iVal/10), llabs(iVal%10) );
+				llong iVal = Exp_GetLLVal(ptcKey);
+				sVal.Format( "%s%lld.%lld" , ((iVal >= 0) ? "" : "-"), SphereAbs(iVal/10), SphereAbs(iVal%10) );
 				return true;
 			}
 		case SSC_HVAL:
@@ -2195,6 +2195,7 @@ jump_in:
 								if ( pObj && pObj->IsContainer() )
 								{
 									CContainer * pContThis = dynamic_cast<CContainer *>(pObj);
+									ASSERT(pContThis);
 
 									CScriptLineContext StartContext = s.GetContext();
 									CScriptLineContext EndContext = StartContext;

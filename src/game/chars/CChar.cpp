@@ -4620,20 +4620,20 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 
 		if ((g_Cfg.m_iDebugFlags & DEBUGF_EXP) && (delta != 0))
 		{
-			g_Log.EventDebug("%s %s experience change (was %u, delta %d, now %u)\n",
-				(m_pNPC ? "NPC" : "Player"), GetName(), m_exp, delta, m_exp + delta);
+			g_Log.EventDebug("%s %s experience change (was %u, delta %lld, now %u)\n",
+				(m_pNPC ? "NPC" : "Player"), GetName(), m_exp, delta, (uint)(m_exp + delta));
 		}
 
-		bool bShowMsg = (m_pClient != nullptr);
+		bool fShowMsg = (m_pClient != nullptr);
 
 		if (IsTrigUsed(TRIGGER_EXPCHANGE))
 		{
-			CScriptTriggerArgs args(delta, bShowMsg);
+			CScriptTriggerArgs args(delta, fShowMsg);
 			args.m_pO1 = pCharDead;
 			if (OnTrigger(CTRIG_ExpChange, this, &args) == TRIGRET_RET_TRUE)
 				return;
 			delta = args.m_iN1;
-			bShowMsg = (args.m_iN2 != 0);
+			fShowMsg = (args.m_iN2 != 0);
 		}
 
 		// Do not allow an underflow due to negative Exp Change.
@@ -4642,7 +4642,7 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 		else
 			m_exp = (uint)(m_exp + delta);
 
-		if (m_pClient && bShowMsg && delta)
+		if (m_pClient && fShowMsg && delta)
 		{
 			int iWord = 0;
 			llong absval = abs(delta);
@@ -4677,7 +4677,7 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 		{
 			delta = level - m_level;
 
-			bool bShowMsg = (m_pClient != nullptr);
+			bool fShowMsg = (m_pClient != nullptr);
 
 			if (IsTrigUsed(TRIGGER_EXPLEVELCHANGE))
 			{
@@ -4685,7 +4685,7 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 				if (OnTrigger(CTRIG_ExpLevelChange, this, &args) == TRIGRET_RET_TRUE)
 					return;
 				delta = args.m_iN1;
-				bShowMsg = (args.m_iN2 != 0);
+				fShowMsg = (args.m_iN2 != 0);
 			}
 
 			level = delta + m_level;
@@ -4699,7 +4699,7 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 			}
 			m_level = (uint)level;
 
-			if (m_pClient && bShowMsg)
+			if (m_pClient && fShowMsg)
 			{
 				m_pClient->SysMessagef((abs(delta) == 1) ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_0) : g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_1),
 					(delta > 0) ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_GAIN) : g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_LOST));

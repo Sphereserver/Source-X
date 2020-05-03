@@ -96,8 +96,11 @@ bool CAccounts::Account_LoadAll( bool fChanges, bool fClearChanges )
 	{
 		ASSERT( fChanges );
 		// empty the changes file.
+
 		s.Close();
-		s.Open(nullptr, OF_WRITE|OF_TEXT|OF_DEFAULTMODE);
+		if (!s.Open(nullptr, OF_WRITE | OF_TEXT | OF_DEFAULTMODE))
+			return false;
+
 		s.WriteString( "// Accounts are periodically moved to the " SPHERE_FILE "accu" SPHERE_SCRIPT " file.\n"
 			"// All account changes should be made here.\n"
 			"// Use the /ACCOUNT UPDATE command to force accounts to update.\n"
@@ -1216,6 +1219,7 @@ bool CAccount::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 		case AC_TAG0:
 			fZero = true;
 			++ptcKey;
+			FALLTHROUGH;
 		case AC_TAG:			// "TAG" = get/set a local tag.
 			{
 				if ( ptcKey[3] != '.' )

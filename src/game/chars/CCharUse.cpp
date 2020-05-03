@@ -1602,6 +1602,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 				if (!IsPriv(PRIV_GM))
 					return true;
 			}
+			FALLTHROUGH;
 		case IT_DOOR_OPEN:
 		case IT_DOOR:
 		{
@@ -1639,6 +1640,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 				SysMessageDefault(DEFMSG_ITEMUSE_SHIPSIDE);
 				return true;
 			}
+			FALLTHROUGH;
 		case IT_SHIP_SIDE:
 			// Open the plank
 			pItem->Ship_Plank(true);

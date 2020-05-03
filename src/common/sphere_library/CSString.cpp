@@ -39,13 +39,34 @@
 #endif
 
 
+// CSString:: Constructors
+
+CSString::CSString(lpctstr pStr) noexcept
+{
+	Init();
+	Copy(pStr);
+}
+
+CSString::CSString(lpctstr pStr, int iLen) noexcept
+{
+	Init();
+	CopyLen(pStr, iLen);
+}
+
+CSString::CSString(const CSString& s) noexcept
+{
+	Init();
+	Copy(s.GetBuffer());
+}
+
+
 // CSString:: Capacity
 
-void CSString::Clear(bool fTotal)
+void CSString::Clear(bool fTotal) noexcept
 {
 	if (fTotal)
 	{
-		if (m_iMaxLength && m_pchData)
+		if (m_pchData && m_iMaxLength)
 		{
 #ifdef DEBUG_STRINGS
 			gMemAmount -= m_iMaxLength;
@@ -58,14 +79,14 @@ void CSString::Clear(bool fTotal)
 	m_iLength = 0;
 }
 
-bool CSString::IsValid() const
+bool CSString::IsValid() const noexcept
 {
-	if (!m_iMaxLength)
+	if (!m_pchData || !m_iMaxLength)
 		return false;
 	return (m_pchData[m_iLength] == '\0');
 }
 
-int CSString::Resize(int iNewLength)
+int CSString::Resize(int iNewLength) noexcept
 {
 	if (iNewLength >= m_iMaxLength)
 	{
@@ -78,10 +99,7 @@ int CSString::Resize(int iNewLength)
 		++gReallocs;
 #endif
 		tchar *pNewData = new tchar[m_iMaxLength + 1];
-		ASSERT(pNewData);
-
 		int iMinLength = minimum(iNewLength, m_iLength + 1);
-        ASSERT(m_pchData);
 		Str_CopyLimitNull(pNewData, m_pchData, iMinLength);
 		pNewData[m_iLength] = '\0';
 
@@ -94,6 +112,7 @@ int CSString::Resize(int iNewLength)
 	return m_iLength;
 }
 
+
 // CSString:: Element access
 
 void CSString::SetAt(int nIndex, tchar ch)
@@ -104,18 +123,19 @@ void CSString::SetAt(int nIndex, tchar ch)
 		m_iLength = (int)strlen(m_pchData);	// \0 inserted. line truncated
 }
 
+
 // CSString:: Modifiers
 
 void CSString::Add(tchar ch)
 {
-	int iLen = m_iLength;
+	const int iLen = m_iLength;
 	Resize(iLen + 1);
 	SetAt(iLen, ch);
 }
 
 void CSString::Add(lpctstr pszStr)
 {
-	int iLenCat = (int)strlen(pszStr);
+	const int iLenCat = (int)strlen(pszStr);
 	if (iLenCat)
 	{
 		Resize(iLenCat + m_iLength);
@@ -123,7 +143,7 @@ void CSString::Add(lpctstr pszStr)
 	}
 }
 
-void CSString::Copy(lpctstr pszStr)
+void CSString::Copy(lpctstr pszStr) noexcept
 {
 	if ((pszStr != m_pchData) && pszStr)
 	{
@@ -132,7 +152,7 @@ void CSString::Copy(lpctstr pszStr)
 	}
 }
 
-void CSString::CopyLen(lpctstr pszStr, int iLen)
+void CSString::CopyLen(lpctstr pszStr, int iLen) noexcept
 {
     if ((pszStr != m_pchData) && pszStr)
     {
@@ -141,23 +161,30 @@ void CSString::CopyLen(lpctstr pszStr, int iLen)
     }
 }
 
+
 // CSString:: Operators
 
-const CSString& CSString::operator=(lpctstr pStr)
+const CSString& CSString::operator=(const CSString& s) noexcept
 {
-	Copy(pStr);
+	Copy(s.GetBuffer());
 	return *this;
 }
 
-const CSString& CSString::operator=(const CSString& s)
+const CSString& CSString::operator=(lpctstr pStr) noexcept
 {
-	Copy(s.GetBuffer());
+	Copy(pStr);
 	return *this;
 }
 
 const CSString& CSString::operator+=(lpctstr string)
 {
 	Add(string);
+	return(*this);
+}
+
+const CSString& CSString::operator+=(tchar ch)
+{
+	Add(ch);
 	return(*this);
 }
 
@@ -168,10 +195,20 @@ CSString CSString::operator+(lpctstr string)
 	return temp;
 }
 
-const CSString& CSString::operator+=(tchar ch)
+CSString& CSString::operator=(CSString&& s) noexcept
 {
-	Add(ch);
-	return(*this);
+	if (this != &s)
+	{
+		if (m_pchData != nullptr)
+		{
+			delete[] m_pchData;
+		}
+		m_iLength = s.m_iLength;
+		m_iMaxLength = s.m_iMaxLength;
+		m_pchData = s.m_pchData;
+		s.m_pchData = nullptr;
+	}
+	return *this;
 }
 
 // CSString:: Formatting
@@ -323,7 +360,7 @@ void CSString::FormatU64Val(uint64 uiVal)
 
 // CSString:: String operations
 
-int CSString::indexOf(tchar c, int offset)
+int CSString::indexOf(tchar c, int offset) noexcept
 {
 	if (offset < 0)
 		return -1;
@@ -340,7 +377,7 @@ int CSString::indexOf(tchar c, int offset)
 	return -1;
 }
 
-int CSString::indexOf(const CSString& str, int offset)
+int CSString::indexOf(const CSString& str, int offset) noexcept
 {
 	if (offset < 0)
 		return -1;
@@ -390,7 +427,7 @@ int CSString::indexOf(const CSString& str, int offset)
 	return -1;
 }
 
-int CSString::lastIndexOf(tchar c, int from)
+int CSString::lastIndexOf(tchar c, int from) noexcept
 {
 	if (from < 0)
 		return -1;
@@ -407,7 +444,7 @@ int CSString::lastIndexOf(tchar c, int from)
 	return -1;
 }
 
-int CSString::lastIndexOf(const CSString& str, int from)
+int CSString::lastIndexOf(const CSString& str, int from) noexcept
 {
 	if (from < 0)
 		return -1;
@@ -454,7 +491,7 @@ int CSString::lastIndexOf(const CSString& str, int from)
 
 // CSString:: private
 
-void CSString::Init()
+void CSString::Init() noexcept
 {
 	m_iMaxLength = STRING_DEFAULT_SIZE;
 #ifdef DEBUG_STRINGS

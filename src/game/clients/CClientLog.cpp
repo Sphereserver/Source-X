@@ -651,7 +651,7 @@ bool CClient::OnRxPing( const byte * pData, uint iLen )
 		}
 	}
 
-	g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Unknown/invalid ping data '0x%x' from %s (Len: %" PRIuSIZE_T ")\n", GetSocketID(), pData[0], GetPeerStr(), iLen);
+	g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Unknown/invalid ping data '0x%x' from %s (Len: %u)\n", GetSocketID(), pData[0], GetPeerStr(), iLen);
 	return false;
 }
 

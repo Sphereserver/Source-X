@@ -135,7 +135,7 @@ bool CUOMapList::DetectMapSize(int map) // it sets also the default sector size,
     if ( m_maps[map] == false )
         return false;
 
-    int	index = m_mapnum[map];
+    const int index = m_mapnum[map];
     if ( index < 0 )
         return false;
 
@@ -196,7 +196,7 @@ bool CUOMapList::DetectMapSize(int map) // it sets also the default sector size,
             break;
 
         default:
-            DEBUG_ERR(("Unknown map index %d with file size of %" PRIuSIZE_T " bytes. Please specify the correct size manually.\n", index, g_Install.m_Maps[index].GetLength()));
+            DEBUG_ERR(("Unknown map index %d with file size of %d bytes. Please specify the correct size manually.\n", index, g_Install.m_Maps[index].GetLength()));
             break;
     }
 

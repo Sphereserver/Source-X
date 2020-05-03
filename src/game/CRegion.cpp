@@ -481,6 +481,7 @@ bool CRegion::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 		case RC_TAG0:
 			fZero = true;
 			++ptcKey;
+			FALLTHROUGH;
 		case RC_TAG:	// "TAG" = get/set a local tag.
 			{
 				if ( ptcKey[3] != '.' )

@@ -40,7 +40,7 @@ int CSFile::GetLastError()
 void CSFile::_NotifyIOError( lpctstr szMessage ) const
 {
     ADDTOCALLSTACK("CSFile::_NotifyIOError");
-    int iErrorCode = GetLastError();
+    const int iErrorCode = GetLastError();
 #ifdef _WIN32
     lpctstr pMsg;
     LPVOID lpMsgBuf;
@@ -51,11 +51,11 @@ void CSFile::_NotifyIOError( lpctstr szMessage ) const
         pMsg = "No System Error";
     else
         pMsg = static_cast<lptstr>(lpMsgBuf);
-    g_Log.Event(LOGL_ERROR|LOGM_NOCONTEXT, "File I/O \"%s\" failed on file \"%s\" (%lX): %s\n", szMessage, static_cast<lpctstr>(_strFileName), iErrorCode, pMsg );
+    g_Log.Event(LOGL_ERROR|LOGM_NOCONTEXT, "File I/O \"%s\" failed on file \"%s\" (%d): %s\n", szMessage, static_cast<lpctstr>(_strFileName), iErrorCode, pMsg );
     if (lpMsgBuf != nullptr)
         LocalFree( lpMsgBuf );
 #else
-    g_Log.Event(LOGL_ERROR|LOGM_NOCONTEXT, "File I/O \"%s\" failed on file \"%s\" (%lX): %s\n", szMessage, static_cast<lpctstr>(_strFileName), iErrorCode, strerror(iErrorCode) );
+    g_Log.Event(LOGL_ERROR|LOGM_NOCONTEXT, "File I/O \"%s\" failed on file \"%s\" (%d): %s\n", szMessage, static_cast<lpctstr>(_strFileName), iErrorCode, strerror(iErrorCode) );
 #endif
 }
 

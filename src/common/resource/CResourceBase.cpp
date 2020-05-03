@@ -116,8 +116,8 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
 
 	tchar szTitle[_MAX_PATH];
 	lpctstr ptcTitle = CScript::GetFilesTitle(szName);
-	ASSERT(strlen(ptcTitle) < CountOf(szTitle));
-	strcpy(szTitle, ptcTitle);
+	PERSISTANT_ASSERT(strlen(ptcTitle) < sizeof(szTitle));
+	Str_CopyLimitNull(szTitle, ptcTitle, sizeof(szTitle));
 
 	if ( szTitle[0] == '\0' )
 	{

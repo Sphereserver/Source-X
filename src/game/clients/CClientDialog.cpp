@@ -358,7 +358,11 @@ void CClient::Menu_Setup( CResourceID rid, CObjBase * pObj )
 		pObj = m_pChar;
 	}
 
-	s.ReadKey();	// get title for the menu.
+	if (!s.ReadKey())	// get title for the menu.
+	{
+		DEBUG_ERR(("Error getting the menu title.\n"));
+		return;
+	}
 	pObj->ParseText( s.GetKeyBuffer(), m_pChar );
 
 	CMenuItem item[MAX_MENU_ITEMS];
