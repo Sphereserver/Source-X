@@ -1,21 +1,5 @@
-void ASSERT(bool fVal) {
-	if (fVal == false) {
-		__coverity_panic__();
-	}
-}
-void ASSERT(void *ptr) {
-	if (ptr == 0) {
-		__coverity_panic__();
-	}
-}
-
-void PERSISTANT_ASSERT(bool fVal) {
-	if (fVal == false) {
-		__coverity_panic__();
-	}
-}
-void PERSISTANT_ASSERT(void *ptr) {
-	if (ptr == 0) {
-		__coverity_panic__();
-	}
+// Avoid false-positive issues by giving an alternative definition of Assert_Fail, used by ASSERT and PERSISTANT_ASSERT.
+void Assert_Fail(const char *, const char *, long long)
+{
+	__coverity_panic__();
 }

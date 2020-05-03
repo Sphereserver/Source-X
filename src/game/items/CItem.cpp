@@ -1541,7 +1541,7 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 
         iDecayTime = args.m_iN1 * MSECS_PER_TENTH;
 
-        CPointMap ptChanged(args.m_s1.GetBuffer());
+        const CPointMap ptChanged(args.m_s1.GetBuffer());
         if (!ptChanged.IsValidPoint())
             g_Log.EventError("Trying to override item drop P with an invalid P. Using the original one.\n");
         else

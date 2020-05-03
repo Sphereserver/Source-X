@@ -17,10 +17,10 @@ Though, something has changed script-wise, so we suggest to take a look <a href=
 Most notable changes (right now) are:
 * Bug fixes and heavy changing of some internal behaviours, with the aim to achieve truly better **speed** and **stability**;
 * Support for 64 bits architecture and MinGW compiler for Windows;
-* Support for CMake, which is now the standard way to generate updated build and project files;
+* CMake is now the standard way to generate updated build and project files;
 * Added (and still adding) comments to the code to make it more understandable;
 * Reorganization of directories and files, avoiding big files with thousands of lines;
-* Refactoring of the code, updating to most recent programming standards and to the conventions described below.
+* Code refactoring, updating to most recent programming standards and to the conventions described below.
 
 
 ## Running
@@ -130,7 +130,7 @@ Since ASan redirects the error output to stderr, you can retrieve its output by 
 * Rebasing instead of pulling the project is a better practice to avoid unnecessary "merge branch master" commits.
 * Removing/Changing/Adding anything that was working in one way for years should be followed by an ini setting if the changes
   cannot be replicated from script to keep some backwards compatibility.
-* Comment your code, add informations about its logic. It's very important since it helps the other to understand your work.
+* Comment your code, add informations about its logic. It's very important since it helps others to understand your work.
 * Be sure to use Sphere's custom datatypes and the string formatting macros described in src/common/datatypes.h.
 * When casting numeric data types, always prefer C-style casts, like (int), to C++ static_cast&lt;int&gt;().
 * Be wary that in SphereScript unsigned values does not exist, all numbers are considered signed, and that 64 bits integers meant
