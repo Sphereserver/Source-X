@@ -53,8 +53,8 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	"@ContextMenuRequest",
 	"@ContextMenuSelect",
 	"@Create",
-	"@DAMAGE",				// I have been damaged in some way
-	"@DCLICK",				// I have been dclicked.
+	"@Damage",				// I have been damaged in some way
+	"@DClick",				// I have been dclicked.
 	"@Destroy",				//+I am nearly destroyed
 	"@DropOn_Char",			// I have been dropped on this char
 	"@DropOn_Ground",		// I have been dropped on the ground here
@@ -62,8 +62,8 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	"@DropOn_Self",			// An item has been dropped here
 	"@DropOn_Trade",
 	"@Dye",					// My color has been changed
-	"@EQUIP",		// I have been unequipped
-    "@EQUIPTEST",
+	"@Equip",		// I have been unequipped
+    "@EquipTest",
 	"@MemoryEquip",
 	"@PICKUP_GROUND",	// I was picked up off the ground.
 	"@PICKUP_PACK",	// picked up from inside some container.
@@ -75,6 +75,7 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
     "@RegionLeave",
 	"@Sell",
 	"@ShipMove",
+	"@ShipStop",
 	"@ShipTurn",
 	"@Spawn",
 	"@SpellEffect",		// cast some spell on me.

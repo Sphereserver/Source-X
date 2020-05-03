@@ -901,6 +901,8 @@ void CCMultiMovable::Stop()
     CItem *pItemThis = dynamic_cast<CItem*>(this);
     ASSERT(pItemThis);
     pItemThis->m_itShip._eMovementType = SMT_STOP;
+    pItemThis->OnTrigger(ITRIG_Ship_Stop, &this);
+
     _pCaptain = nullptr;
 }
 
@@ -1069,8 +1071,16 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
         dodirmovechange:
             if (pItemThis->m_itShip.m_fAnchored != 0)
                 goto anchored;
+
+            CScriptTriggerArgs Args;
+            Args.m_iN1 = DirMoveChange;
+            Args.m_iN2 = DirFace;
+            if (pMultiThis->OnTrigger(ITRIG_Ship_Move, pChar, &Args) == TRIGRET_RET_TRUE)
+                return false;
+
             if (!SetMoveDir(GetDirTurn(DirFace, DirMoveChange), SMT_NORMAL))
                 return false;
+
             break;
         }
 
