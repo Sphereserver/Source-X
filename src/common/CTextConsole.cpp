@@ -28,7 +28,7 @@ int CTextConsole::OnConsoleKey( CSString & sText, tchar nChar, bool fEcho )
         commandtoolong:
         SysMessage( "Command too long\n" );
 
-        sText.Empty();
+        sText.Clear();
         return 0;
     }
 
@@ -49,12 +49,15 @@ int CTextConsole::OnConsoleKey( CSString & sText, tchar nChar, bool fEcho )
         lpctstr p = nullptr;
         lpctstr tmp = nullptr;
         size_t inputLen = 0;
-        bool matched(false);
+        bool matched = false;
 
         //	extract up to start of the word
-        p = sText.GetPtr() + sText.GetLength();
-        while (( p >= sText.GetPtr() ) && ( *p != '.' ) && ( *p != ' ' ) && ( *p != '/' ) && ( *p != '=' )) p--;
-        p++;
+        p = sText.GetBuffer() + sText.GetLength();
+        while ((p >= sText.GetBuffer()) && (*p != '.') && (*p != ' ') && (*p != '/') && (*p != '='))
+        {
+            --p;
+        }
+        ++p;
         inputLen = strlen(p);
 
         // search in the auto-complete list for starting on P, and save coords of 1st and Last matched
@@ -63,7 +66,7 @@ int CTextConsole::OnConsoleKey( CSString & sText, tchar nChar, bool fEcho )
         for ( curmatch = g_AutoComplete.GetHead(); curmatch != nullptr; curmatch = nextmatch )
         {
             nextmatch = curmatch->GetNext();
-            if ( !strnicmp(curmatch->GetPtr(), p, inputLen) )	// matched
+            if ( !strnicmp(curmatch->GetBuffer(), p, inputLen) )	// matched
             {
                 if ( firstmatch == nullptr )
                     firstmatch = lastmatch = curmatch;
@@ -76,18 +79,18 @@ int CTextConsole::OnConsoleKey( CSString & sText, tchar nChar, bool fEcho )
 
         if (( firstmatch != nullptr ) && ( firstmatch == lastmatch ))	// there IS a match and the ONLY
         {
-            tmp = firstmatch->GetPtr() + inputLen;
+            tmp = firstmatch->GetBuffer() + inputLen;
             matched = true;
         }
         else if ( firstmatch != nullptr )						// also make SE (if SERV/SERVER in dic) to become SERV
         {
-            p = tmp = firstmatch->GetPtr();
+            p = tmp = firstmatch->GetBuffer();
             tmp += inputLen;
             inputLen = strlen(p);
             matched = true;
             for ( curmatch = firstmatch->GetNext(); curmatch != lastmatch->GetNext(); curmatch = curmatch->GetNext() )
             {
-                if (strnicmp(curmatch->GetPtr(), p, inputLen) != 0)	// mismatched
+                if (strnicmp(curmatch->GetBuffer(), p, inputLen) != 0)	// mismatched
                 {
                     matched = false;
                     break;
@@ -120,7 +123,7 @@ int CTextConsole::OnConsoleKey( CSString & sText, tchar nChar, bool fEcho )
     {
         if ( sText.GetLength())	// back key
         {
-            sText.SetLength( sText.GetLength() - 1 );
+            sText.Resize( sText.GetLength() - 1 );
         }
         return 1;
     }
@@ -132,9 +135,8 @@ int CTextConsole::OnConsoleKey( CSString & sText, tchar nChar, bool fEcho )
 void CTextConsole::VSysMessage( lpctstr pszFormat, va_list args ) const
 {
     TemporaryString tsTemp;
-	tchar* pszTemp = static_cast<tchar *>(tsTemp);
-    vsnprintf( pszTemp, tsTemp.realLength(), pszFormat, args );
-    SysMessage( pszTemp );
+    vsnprintf(tsTemp.buffer(), tsTemp.capacity(), pszFormat, args );
+    SysMessage(tsTemp.buffer());
 }
 
 void _cdecl CTextConsole::SysMessagef( lpctstr pszFormat, ... ) const

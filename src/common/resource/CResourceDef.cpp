@@ -67,13 +67,14 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
 lpctstr CResourceDef::GetResourceName() const
 {
     ADDTOCALLSTACK("CResourceDef::GetResourceName");
-    if ( m_pDefName )
+    if (m_pDefName)
+    {
         return m_pDefName->GetKey();
+    }
 
-    TemporaryString tsTemp;
-    tchar* pszTemp = static_cast<tchar *>(tsTemp);
-    sprintf(pszTemp, "0%x", GetResourceID().GetResIndex());
-    return pszTemp;
+    tchar * ptcTemp = Str_GetTemp();
+    snprintf(ptcTemp, STR_TEMPLENGTH, "0%x", GetResourceID().GetResIndex());
+    return ptcTemp;
 }
 
 bool CResourceDef::HasResourceName()

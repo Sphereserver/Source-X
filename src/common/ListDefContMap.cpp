@@ -135,7 +135,7 @@ bool CListDefCont::SetNumAt(size_t nIndex, int64 iVal)
 	if ( !pListElem )
 		return false;
 
-	CListDefContElem* pListNewElem = new CListDefContNum(m_Key.GetPtr(), iVal);
+	CListDefContElem* pListNewElem = new CListDefContNum(m_Key.GetBuffer(), iVal);
 
     DefList::iterator it = m_listElements.begin();
     std::advance(it, nIndex);
@@ -153,7 +153,7 @@ bool CListDefCont::SetStrAt(size_t nIndex, lpctstr pszVal)
 	if ( !pListElem )
 		return false;
 
-	CListDefContElem* pListNewElem = new CListDefContStr(m_Key.GetPtr(), pszVal);
+	CListDefContElem* pListNewElem = new CListDefContStr(m_Key.GetBuffer(), pszVal);
 
     DefList::iterator it = m_listElements.begin();
     std::advance(it, nIndex);
@@ -242,7 +242,7 @@ bool CListDefCont::AddElementNum(int64 iVal)
 	if ( (m_listElements.size() + 1) >= INTPTR_MAX )	// overflow? is it even useful?
 		return false;
 
-	m_listElements.emplace_back( new CListDefContNum(m_Key.GetPtr(), iVal) );
+	m_listElements.emplace_back( new CListDefContNum(m_Key.GetBuffer(), iVal) );
 
 	return true;
 }
@@ -255,7 +255,7 @@ bool CListDefCont::AddElementStr(lpctstr ptcKey)
 
 	REMOVE_QUOTES( ptcKey );
 
-	m_listElements.emplace_back( new CListDefContStr(m_Key.GetPtr(), ptcKey) );
+	m_listElements.emplace_back( new CListDefContStr(m_Key.GetBuffer(), ptcKey) );
 
 	return true;
 }
@@ -403,7 +403,7 @@ bool CListDefCont::InsertElementNum(size_t nIndex, int64 iVal)
     if (it == m_listElements.end())
         return false;
 
-    m_listElements.insert(it, new CListDefContNum(m_Key.GetPtr(), iVal));
+    m_listElements.insert(it, new CListDefContNum(m_Key.GetBuffer(), iVal));
     return true;
 
 	return false;
@@ -420,7 +420,7 @@ bool CListDefCont::InsertElementStr(size_t nIndex, lpctstr ptcKey)
     if (it == m_listElements.end())
         return false;
 
-    m_listElements.insert(it, new CListDefContStr(m_Key.GetPtr(), ptcKey));
+    m_listElements.insert(it, new CListDefContStr(m_Key.GetBuffer(), ptcKey));
     return true;
 }
 
@@ -430,7 +430,7 @@ CListDefCont* CListDefCont::CopySelf()
     if (m_listElements.empty())
         return nullptr;
 	
-    CListDefCont* pNewList = new CListDefCont(m_Key.GetPtr());
+    CListDefCont* pNewList = new CListDefCont(m_Key.GetBuffer());
 	if ( !pNewList )
         return nullptr;
 
@@ -482,11 +482,11 @@ void CListDefCont::DumpElements( CTextConsole * pSrc, lpctstr pszPrefix /* = nul
 
     if (pSrc->GetChar())
     {
-        pSrc->SysMessagef("%s%s=%s\n", pszPrefix, m_Key.GetPtr(), strResult.GetPtr());
+        pSrc->SysMessagef("%s%s=%s\n", pszPrefix, m_Key.GetBuffer(), strResult.GetBuffer());
     }
     else
     {
-        g_Log.Event(LOGL_EVENT, "%s%s=%s\n", pszPrefix, m_Key.GetPtr(), strResult.GetPtr());
+        g_Log.Event(LOGL_EVENT, "%s%s=%s\n", pszPrefix, m_Key.GetBuffer(), strResult.GetBuffer());
     }
 }
 
@@ -499,7 +499,7 @@ void CListDefCont::r_WriteSave( CScript& s ) const
     const CListDefContStr *pListElemStr;
 	CSString strElement;
 
-	s.WriteSection("LIST %s", m_Key.GetPtr());
+	s.WriteSection("LIST %s", m_Key.GetBuffer());
 
     for ( const CListDefContElem *pListElem : m_listElements)
 	{
@@ -508,7 +508,7 @@ void CListDefCont::r_WriteSave( CScript& s ) const
 		if ( pListElemStr )
 		{
 			strElement.Format("\"%s\"", pListElemStr->GetValStr());
-			s.WriteKey("ELEM", strElement.GetPtr());
+			s.WriteKey("ELEM", strElement.GetBuffer());
 		}
 		else if ( pListElem )
 			s.WriteKey("ELEM", pListElem->GetValStr());
@@ -733,7 +733,7 @@ void CListDefMap::ClearKeys(lpctstr mask)
 		{
 			pListBase = (*i);
 
-			if ( pListBase && ( strstr(pListBase->GetKey(), sMask.GetPtr()) ) )
+			if ( pListBase && ( strstr(pListBase->GetKey(), sMask.GetBuffer()) ) )
 			{
 				DeleteAtIterator(i);
 				i = m_Container.begin();

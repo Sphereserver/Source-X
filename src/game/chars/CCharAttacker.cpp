@@ -48,9 +48,10 @@ bool CChar::Attacker_Add(CChar * pChar, int threat)
 
     // Record the start of the fight.
     Memory_Fight_Start(pChar);
-    tchar *z = Str_GetTemp();
     if (!attacker.ignore)
     {
+        tchar *z = Str_GetTemp();
+        CClient *pClient = pChar->GetClient();
         //if ( GetTopSector()->GetCharComplexity() < 7 )
         //{
         if (!( g_Cfg.m_iEmoteFlags & EMOTEF_ATTACKER ))
@@ -60,15 +61,15 @@ bool CChar::Attacker_Add(CChar * pChar, int threat)
        			emoteHue = m_EmoteHueOverride;
             else
                 emoteHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_COLOR"));
-	        sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_COMBAT_ATTACKO), GetName(), pChar->GetName());
-    	    UpdateObjMessage(z, nullptr, pChar->GetClient(), emoteHue, TALKMODE_EMOTE);
+	        snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_COMBAT_ATTACKO), GetName(), pChar->GetName());
+    	    UpdateObjMessage(z, nullptr, pClient, emoteHue, TALKMODE_EMOTE);
 		}
         //}
 
-        if (pChar->IsClient() && pChar->CanSee(this))
+        if (pClient && pChar->CanSee(this))
         {
-            sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_COMBAT_ATTACKS), GetName());
-            pChar->GetClient()->addBarkParse(z, this, HUE_TEXT_DEF, TALKMODE_EMOTE);
+            snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_COMBAT_ATTACKS), GetName());
+            pClient->addBarkParse(z, this, HUE_TEXT_DEF, TALKMODE_EMOTE);
         }
     }
     return true;

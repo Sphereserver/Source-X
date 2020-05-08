@@ -90,8 +90,8 @@ public:
 	void ParseKeyLate();
 
 public:
-	CScriptKeyAlloc() { }
-	virtual ~CScriptKeyAlloc() { }
+	CScriptKeyAlloc() = default;
+	virtual ~CScriptKeyAlloc() = default;
 
 private:
 	CScriptKeyAlloc(const CScriptKeyAlloc& copy);
@@ -148,8 +148,8 @@ public:
 
 	// Write stuff out to a script file.
 	bool _cdecl WriteSection( lpctstr pszSection, ... ) __printfargs(2,3);
-	bool WriteKey( lpctstr ptcKey, lpctstr pszVal );
 	void _cdecl WriteKeyFormat( lpctstr ptcKey, lpctstr pszFormat, ... ) __printfargs(3,4);
+	bool WriteKey(lpctstr ptcKey, lpctstr pszVal);
 
 	void WriteKeyVal( lpctstr ptcKey, int64 dwVal );
 	void WriteKeyHex( lpctstr ptcKey, int64 dwVal );
@@ -157,7 +157,7 @@ public:
 	CScript();
 	CScript( lpctstr ptcKey );
 	CScript( lpctstr ptcKey, lpctstr pszVal );
-	virtual ~CScript();
+	virtual ~CScript() = default;
 };
 
 #endif // CSCRIPT_H

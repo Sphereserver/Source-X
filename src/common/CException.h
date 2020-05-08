@@ -55,7 +55,7 @@ public:
 #ifdef _WIN32
 	static int GetSystemErrorMessage( dword dwError, lptstr lpszError, uint nMaxError );
 #endif
-	virtual bool GetErrorMessage( lptstr lpszError, uint nMaxError ) const;
+	virtual bool GetErrorMessage( lptstr lpszError, uint uiMaxError ) const;
 };
 
 class CAssert : public CSError

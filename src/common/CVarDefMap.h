@@ -53,7 +53,7 @@ private:
 
 public:
     inline virtual lpctstr GetKey() const override {
-        return m_sKey.GetPtr();
+        return m_sKey.GetBuffer();
     }
     inline virtual void SetKey(lpctstr ptcKey) override {
         m_sKey = ptcKey;
@@ -91,7 +91,7 @@ private:
 
 public:
     inline virtual lpctstr GetKey() const override {
-        return m_sKey.GetPtr();
+        return m_sKey.GetBuffer();
     }
     inline virtual void SetKey(lpctstr ptcKey) override {
         m_sKey = ptcKey;
@@ -99,7 +99,7 @@ public:
 
     void SetValStr( lpctstr pszVal );
     inline virtual lpctstr GetValStr() const override {
-        return m_sVal.GetPtr(); 
+        return m_sVal.GetBuffer(); 
     }
     virtual int64 GetValNum() const override;
     virtual CVarDefCont * CopySelf() const override;

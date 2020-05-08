@@ -398,8 +398,8 @@ lpctstr CServerConfig::Calc_MaptoSextant( CPointMap pntCoords )
 	ADDTOCALLSTACK("CServerConfig::Calc_MaptoSextant");
 	// Conversion from map square to degrees, minutes
 	tchar *z = Str_GetTemp();
-	CPointMap zeroPoint;
-	zeroPoint.Read(strcpy(z, g_Cfg.m_sZeroPoint));
+	Str_CopyLimitNull(z, g_Cfg.m_sZeroPoint.GetBuffer(), STR_TEMPLENGTH);
+	CPointMap zeroPoint(z);
 
 	int iLat = (pntCoords.m_y - zeroPoint.m_y) * 360 * 60 / g_MapList.GetMapSizeY(zeroPoint.m_map);
 	int iLong;
@@ -409,7 +409,7 @@ lpctstr CServerConfig::Calc_MaptoSextant( CPointMap pntCoords )
 		iLong = (pntCoords.m_x - zeroPoint.m_x) * 360 * 60 / g_MapList.GetMapSizeX(pntCoords.m_map);
 
 	tchar * pTemp = Str_GetTemp();
-	sprintf( pTemp, "%io %i'%s, %io %i'%s",
+	snprintf( pTemp, STR_TEMPLENGTH, "%io %i'%s, %io %i'%s",
 		abs(iLat / 60),  abs(iLat % 60),  (iLat <= 0) ? "N" : "S",
 		abs(iLong / 60), abs(iLong % 60), (iLong >= 0) ? "E" : "W");
 

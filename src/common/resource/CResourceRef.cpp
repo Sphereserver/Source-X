@@ -141,19 +141,19 @@ void CResourceRefArray::WriteResourceRefList( CSString & sVal ) const
 {
     ADDTOCALLSTACK("CResourceRefArray::WriteResourceRefList");
     TemporaryString tsVal;
-    tchar * pszVal = static_cast<tchar *>(tsVal);
+    tchar * ptcVal = tsVal.buffer();
     size_t len = 0;
     for ( size_t j = 0, sz = size(); j < sz; ++j )
     {
         if ( j > 0 )
-            pszVal[len++] = ',';
+            ptcVal[len++] = ',';
 
-        len += Str_CopyLen( pszVal + len, GetResourceName(j) );
+        len += Str_CopyLimitNull(ptcVal + len, GetResourceName(j), tsVal.capacity() - len);
         if ( len >= SCRIPT_MAX_LINE_LEN-1 )
             break;
     }
-    pszVal[len] = '\0';
-    sVal = pszVal;
+    ptcVal[len] = '\0';
+    sVal.Copy(ptcVal);
 }
 
 size_t CResourceRefArray::FindResourceType( RES_TYPE restype ) const

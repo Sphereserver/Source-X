@@ -214,7 +214,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 					lpctstr pszArgs = s.GetArgStr();
 					if ( pszArgs[0] == '\0' )
 						pszArgs = "<tr><td>%NAME%</td><td>%REGION.NAME%</td></tr>\n";
-					strcpy( pszTmp2, pszArgs );
+					Str_CopyLimitNull( pszTmp2, pszArgs, STR_TEMPLENGTH );
 					pChar->ParseText( Str_MakeFiltered( pszTmp2 ), &g_Serv, 1 );
 					pSrc->SysMessage( pszTmp2 );
 				}
@@ -237,7 +237,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 
 					++sm_iListIndex;
 
-					strcpy(pszTmp2, s.GetArgStr());
+					Str_CopyLimitNull(pszTmp2, s.GetArgStr(), STR_TEMPLENGTH);
 					pStone->ParseText(Str_MakeFiltered(pszTmp2), &g_Serv, 1);
 					pSrc->SysMessage(pszTmp2);
 				}
@@ -252,7 +252,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 				for ( ; pPage!=nullptr; pPage = pPage->GetNext())
 				{
 					++sm_iListIndex;
-					strcpy( pszTmp2, s.GetArgStr() );
+					Str_CopyLimitNull( pszTmp2, s.GetArgStr(), STR_TEMPLENGTH);
 					pPage->ParseText( Str_MakeFiltered( pszTmp2 ), &g_Serv, 1 );
 					pSrc->SysMessage( pszTmp2 );
 				}
@@ -260,7 +260,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 			break;
 
 		default:
-			return( CResourceLink::r_Verb(s,pSrc));
+			return CResourceLink::r_Verb(s,pSrc);
 	}
 	return true;
 	EXC_CATCH;
@@ -318,7 +318,7 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 	while ( FileRead.ReadTextLine( false ))
 	{
 		tchar *pszTmp = Str_GetTemp();
-		strcpy( pszTmp, FileRead.GetKey());
+		Str_CopyLimitNull( pszTmp, FileRead.GetKey(), STR_TEMPLENGTH);
 
 		tchar * pszHead = strstr( pszTmp, "<script language=\"Sphere\">" );
 		if ( pszHead != nullptr )
@@ -387,13 +387,13 @@ void CWebPageDef::WebPageLog()
 	lpctstr pszExt = FileRead.GetFileExt();
 
 	tchar szName[ _MAX_PATH ];
-	strcpy( szName, m_sDstFilePath );
+	Str_CopyLimitNull( szName, m_sDstFilePath, _MAX_PATH);
 	szName[ m_sDstFilePath.GetLength() - strlen(pszExt) ] = '\0';
 
 	CSTime datetime = CSTime::GetCurrentTime();
 
 	tchar *pszTemp = Str_GetTemp();
-	sprintf(pszTemp, "%s%d%02d%02d%s", szName, datetime.GetYear()%100, datetime.GetMonth(), datetime.GetDay(), pszExt);
+	snprintf(pszTemp, STR_TEMPLENGTH, "%s%d%02d%02d%s", szName, datetime.GetYear()%100, datetime.GetMonth(), datetime.GetDay(), pszExt);
 
 	CSFileText FileTest;
 	if ( FileTest.Open(pszTemp, OF_READ|OF_TEXT) )
@@ -578,12 +578,13 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 		return 500;
 	}
 
-	const char *sDate = datetime.FormatGmt(nullptr);	// current date.
+	const char *pcDate = datetime.FormatGmt(nullptr);	// current date.
     // If pdateIfModifiedSince is not valid, it means that "If-Modified-Since:" wasn't sent by the web browser, so we need to send the whole page in any case here.
 	if ( pdateIfModifiedSince->IsTimeValid() && !fGenerate && (pdateIfModifiedSince->GetTime() <= dateChange) )
 	{
 		tchar *pszTemp = Str_GetTemp();
-		sprintf(pszTemp, "HTTP/1.1 304 Not Modified\r\nDate: %s\r\nServer: " SPHERE_TITLE " " SPHERE_VERSION_PREFIX SPHERE_VERSION "\r\nContent-Length: 0\r\n\r\n", sDate);
+		snprintf(pszTemp, STR_TEMPLENGTH,
+			"HTTP/1.1 304 Not Modified\r\nDate: %s\r\nServer: " SPHERE_TITLE " " SPHERE_VERSION_PREFIX SPHERE_VERSION "\r\nContent-Length: 0\r\n\r\n", pcDate);
 		new PacketWeb(pClient, (byte*)pszTemp, (uint)strlen(pszTemp));
 		return 0;
 	}
@@ -598,22 +599,22 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
     std::unique_ptr<tchar[]> ptcWebDataBuf = std::make_unique<tchar[]>(uiWebDataBufSize);
 	tchar* szTmp = ptcWebDataBuf.get();
 
-	int iLen = sprintf(szTmp,
+	int iLen = snprintf(szTmp, uiWebDataBufSize,
 		"HTTP/1.1 200 OK\r\n" // 100 Continue
 		"Date: %s\r\n"
 		"Server: " SPHERE_TITLE " " SPHERE_VERSION_PREFIX SPHERE_VERSION "\r\n"
 		"Accept-Ranges: bytes\r\n"
 		"Content-Type: %s\r\n",
-		static_cast<lpctstr>(sDate),
-		static_cast<lpctstr>(sm_szPageType[m_type]) // type of the file. image/gif, image/x-xbitmap, image/jpeg
+		pcDate,
+		sm_szPageType[m_type] // type of the file. image/gif, image/x-xbitmap, image/jpeg
 		);
 
 	if ( m_type == WEBPAGE_TEMPLATE )
-		iLen += sprintf(szTmp + iLen, "Expires: 0\r\n");
+		iLen += snprintf(szTmp + iLen, uiWebDataBufSize - iLen, "Expires: 0\r\n");
 	else
-		iLen += sprintf(szTmp + iLen, "Last-Modified: %s\r\n",  CSTime(dateChange).FormatGmt(nullptr));
+		iLen += snprintf(szTmp + iLen, uiWebDataBufSize - iLen, "Last-Modified: %s\r\n",  CSTime(dateChange).FormatGmt(nullptr));
 
-	iLen += sprintf( szTmp + iLen,
+	iLen += snprintf( szTmp + iLen, uiWebDataBufSize - iLen,
 		"Content-Length: %u\r\n"
 		"\r\n",
 		dwSize
@@ -858,6 +859,6 @@ void CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateIf
 		sText.GetLength(),
 		static_cast<lpctstr>(sText));
 
-	new PacketWeb(pClient, reinterpret_cast<const byte *>(sMsgHead.GetPtr()), sMsgHead.GetLength());
+	new PacketWeb(pClient, reinterpret_cast<const byte *>(sMsgHead.GetBuffer()), sMsgHead.GetLength());
 }
 

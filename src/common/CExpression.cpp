@@ -583,7 +583,7 @@ try_dec:
 										llong iBase = GetVal(pszArgs);
 										if ( iBase <= 0 )
 										{
-											DEBUG_ERR(( "Exp_GetVal: (%" PRId64 ")Log(%" PRId64 ") is %s\n", iBase, iArgument, (!iBase ? "infinite" : "undefined") ));
+											DEBUG_ERR(( "Exp_GetVal: (%lld)Log(%lld) is %s\n", iBase, iArgument, (!iBase ? "infinite" : "undefined") ));
 											iCount = 0;
 										}
 										else

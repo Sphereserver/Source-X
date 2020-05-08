@@ -267,7 +267,7 @@ void CMD5::digest( char *digest )
     for( uint i = 0; i < 16; ++i )
 	{
 		char temp[3];
-		sprintf( temp, "%02x", buffer[i] );
+		snprintf( temp, sizeof(temp), "%02x", buffer[i] );
 		strcat( digest, temp );
 	}
 }

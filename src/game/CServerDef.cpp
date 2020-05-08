@@ -391,8 +391,8 @@ bool CServerDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 		break;
 	case SC_CLIENTVERSION:
 		{
-			char szVersion[ 128 ];
-			sVal = m_ClientVersion.WriteClientVer( szVersion );
+			char pcVersion[ 128 ];
+			sVal = m_ClientVersion.WriteClientVer(pcVersion, sizeof(pcVersion));
 		}
 		break;
 	case SC_CREATE:

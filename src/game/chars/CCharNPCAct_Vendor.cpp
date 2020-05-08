@@ -200,7 +200,7 @@ bool CChar::NPC_StablePetRetrieve( CChar * pCharPlayer )
 			if ( !pCharPlayer->Use_Figurine(pItem) )
 			{
 				tchar *pszTemp = Str_GetTemp();
-				sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_NPC_STABLEMASTER_CLAIM_FOLLOWER), pItem->GetName());
+				snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_STABLEMASTER_CLAIM_FOLLOWER), pItem->GetName());
 				Speak(pszTemp);
 				return true;
 			}
@@ -269,7 +269,7 @@ ushort CChar::NPC_OnTrainCheck( CChar * pCharSrc, SKILL_TYPE Skill )
 		return (ushort)uiMaxDecrease;
 
 	tchar *z = Str_GetTemp();
-	sprintf(z, pszMsg, g_Cfg.GetSkillKey(Skill));
+	snprintf(z, STR_TEMPLENGTH, pszMsg, g_Cfg.GetSkillKey(Skill));
 	Speak(z);
 	return 0;
 }
@@ -391,8 +391,6 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 
 	// Did they mention a skill name i recognize ?
 	TemporaryString tsMsg;
-	tchar* pszMsg = static_cast<tchar *>(tsMsg);
-
 	// g_Log.EventError("CChar::NPC_OnTrainHear : %s\n", pszMsg);
 
 	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
@@ -409,8 +407,8 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 		if ( iTrainCost <= 0 )
 			return true;
 
-		sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_TRAINER_PRICE), iTrainCost, pSkillKey);
-		Speak(pszMsg);
+		snprintf(tsMsg.buffer(), tsMsg.capacity(), g_Cfg.GetDefaultMsg(DEFMSG_NPC_TRAINER_PRICE), iTrainCost, pSkillKey);
+		Speak(tsMsg);
 		CItemMemory * pMemory = Memory_AddObjTypes( pCharSrc, MEMORY_SPEAK );
 		if ( pMemory )
 		{
@@ -422,7 +420,7 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 
 	// What can he teach me about ?
 	// Just tell them what we can teach them or set up a memory to train.
-	strcpy( pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_PRICE_1 ) );
+	Str_CopyLimitNull(tsMsg.buffer(), g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_PRICE_1 ), tsMsg.capacity());
 
 	lpctstr pPrvSkill = nullptr;
 	uint iCount = 0;
@@ -431,7 +429,7 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) )
 			continue;
 
-		int iDiff = NPC_GetTrainMax(pCharSrc, (SKILL_TYPE)i) - pCharSrc->Skill_GetBase((SKILL_TYPE)i);
+		const int iDiff = NPC_GetTrainMax(pCharSrc, (SKILL_TYPE)i) - pCharSrc->Skill_GetBase((SKILL_TYPE)i);
 		if ( iDiff <= 0 )
 			continue;
 
@@ -442,11 +440,11 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 		}
 		if ( iCount > 1 )
 		{
-			strcat( pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_PRICE_3 ) );
+			Str_ConcatLimitNull(tsMsg.buffer(), g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_PRICE_3 ), tsMsg.capacity());
 		}
 		if ( pPrvSkill )
 		{
-			strcat( pszMsg, pPrvSkill );
+			Str_ConcatLimitNull(tsMsg.buffer(), pPrvSkill, tsMsg.capacity() );
 		}
 
 		pPrvSkill = g_Cfg.GetSkillKey((SKILL_TYPE)i);
@@ -460,12 +458,14 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 	}
 	if ( iCount > 1 )
 	{
-		strcat( pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_THATSALL_4 ) );
+		Str_ConcatLimitNull(tsMsg.buffer(), g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_THATSALL_4 ), tsMsg.capacity());
 	}
 
-    if (pPrvSkill)
-        strcat(pszMsg, pPrvSkill);
-    strcat(pszMsg, ".");
-	Speak( pszMsg );
+	if (pPrvSkill)
+	{
+		Str_ConcatLimitNull(tsMsg.buffer(), pPrvSkill, tsMsg.capacity());
+	}
+	Str_ConcatLimitNull(tsMsg.buffer(), ".", tsMsg.capacity());
+	Speak(tsMsg);
 	return true;
 }

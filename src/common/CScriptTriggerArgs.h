@@ -58,7 +58,8 @@ public:
     bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
     bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
     //bool r_Copy( CTextConsole * pSrc );
-    lpctstr GetName() const
+
+    virtual lpctstr GetName() const override
     {
         return "ARG";
     }

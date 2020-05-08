@@ -804,21 +804,21 @@ int CPointBase::StepLinePath( const CPointBase & ptSrc, int iSteps )
 	return iDist2D;
 }
 
-tchar * CPointBase::WriteUsed( tchar * pszBuffer ) const
+tchar * CPointBase::WriteUsed( tchar * ptcBuffer, uint uiBufferLen) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CPointBase::WriteUsed");
 	if ( m_map )
-		sprintf(pszBuffer, "%" PRId16 ",%" PRId16 ",%" PRId8 ",%" PRIu8, m_x, m_y, m_z, m_map);
+		snprintf(ptcBuffer, uiBufferLen, "%" PRId16 ",%" PRId16 ",%" PRId8 ",%" PRIu8, m_x, m_y, m_z, m_map);
 	else if ( m_z )
-		sprintf(pszBuffer, "%" PRId16 ",%" PRId16 ",%" PRId8, m_x, m_y, m_z);
+		snprintf(ptcBuffer, uiBufferLen, "%" PRId16 ",%" PRId16 ",%" PRId8, m_x, m_y, m_z);
 	else
-		sprintf(pszBuffer, "%" PRId16 ",%" PRId16, m_x, m_y);
-	return pszBuffer;
+		snprintf(ptcBuffer, uiBufferLen, "%" PRId16 ",%" PRId16, m_x, m_y);
+	return ptcBuffer;
 }
 
 lpctstr CPointBase::WriteUsed() const
 {
-	return WriteUsed( Str_GetTemp() );
+	return WriteUsed( Str_GetTemp(), STR_TEMPLENGTH );
 }
 
 int CPointBase::Read( tchar * pszVal )

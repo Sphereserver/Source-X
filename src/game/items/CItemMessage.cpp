@@ -31,12 +31,11 @@ void CItemMessage::r_Write(CScript & s)
 
     // Store the message body lines. MAX_BOOK_PAGES
     TemporaryString tsTemp;
-	tchar* pszTemp = static_cast<tchar *>(tsTemp);
     for ( word i = 0; i < GetPageCount(); ++i )
     {
-        sprintf(pszTemp, "BODY.%" PRIu16, i);
+        snprintf(tsTemp.buffer(), tsTemp.capacity(), "BODY.%" PRIu16, i);
         lpctstr pszText = GetPageText(i);
-        s.WriteKey(pszTemp, pszText != nullptr ? pszText : "");
+        s.WriteKey(tsTemp.buffer(), pszText != nullptr ? pszText : "");
     }
 }
 
@@ -54,8 +53,11 @@ bool CItemMessage::r_LoadVal(CScript &s)
         switch ( FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1) )
         {
             case CIC_AUTHOR:
-                if ( s.GetArgStr()[0] != '0' )
-                    m_sAuthor = s.GetArgStr();
+            {
+                tchar* ptcArg = s.GetArgStr();
+                if (ptcArg[0] != '0')
+                    m_sAuthor = ptcArg;
+            }
                 return true;
             case CIC_BODY:		// handled above
                 return false;
@@ -185,7 +187,7 @@ lpctstr CItemMessage::GetPageText( word wPage ) const
         return nullptr;
     if ( m_sBodyLines[wPage] == nullptr )
         return nullptr;
-    return m_sBodyLines[wPage]->GetPtr();
+    return m_sBodyLines[wPage]->GetBuffer();
 }
 
 void CItemMessage::SetPageText( word wPage, lpctstr pszText )
@@ -197,11 +199,11 @@ void CItemMessage::SetPageText( word wPage, lpctstr pszText )
 
 void CItemMessage::AddPageText( lpctstr pszText )
 {
-    m_sBodyLines.emplace_back(new CSString(pszText) );
+    m_sBodyLines.emplace_back(new CSString(pszText));
 }
 
 void CItemMessage::UnLoadSystemPages()
 {
-    m_sAuthor.Empty();
+    m_sAuthor.Clear();
     m_sBodyLines.clear();
 }

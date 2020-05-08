@@ -449,8 +449,8 @@ private:
 	bool IsVerticalSpace( const CPointMap& ptDest, bool fForceMount = false ) const;
 
 public:
-	const CObjBaseTemplate * GetTopLevelObj() const override;
-	CObjBaseTemplate* GetTopLevelObj() override;
+	virtual CObjBaseTemplate* GetTopLevelObj() override;
+	virtual const CObjBaseTemplate* GetTopLevelObj() const override;
 
 	bool IsSwimming() const;
 
@@ -459,7 +459,7 @@ public:
 	bool MoveTo(const CPointMap& pt, bool fForceFix = false);
 	virtual void SetTopZ( char z );
 	bool MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart = 1, bool fFromShip = false);
-	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, ushort iSteps = 0 );
+	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, ushort iSteps = 0 ) override;
 
 	CRegion * CanMoveWalkTo( CPointMap & pt, bool fCheckChars = true, bool fCheckOnly = false, DIR_TYPE dir = DIR_QTY, bool fPathFinding = false );
 	void CheckRevealOnMove();

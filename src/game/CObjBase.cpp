@@ -298,7 +298,7 @@ bool CObjBase::SetNamePool( lpctstr pszName )
 	{
 		++pszName;
 		tchar *pszTmp = Str_GetTemp();
-		strcpy( pszTmp, pszName );
+		Str_CopyLimitNull( pszTmp, pszName, STR_TEMPLENGTH );
 
 		tchar * ppTitles[2];
 		Str_ParseCmds( pszTmp, ppTitles, CountOf(ppTitles));
@@ -373,7 +373,7 @@ void CObjBase::r_WriteSafe( CScript & s )
 	dword uid = 0;
 	try
 	{
-		uid = GetUID();
+		uid = (dword)GetUID();
 
 		//	objects with TAG.NOSAVE set are not saved
 		const CVarDefCont* pVarNoSave = m_TagDefs.GetKey("NOSAVE");
@@ -508,25 +508,25 @@ void CObjBase::Emote(lpctstr pText, CClient * pClientExclude, bool fForcePossess
 
 		if ( pObjTop != this )
 		{
-			sprintf(pszThem, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_1), pObjTop->GetName(), GetName(), pText);
-			sprintf(pszYou, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_2), GetName(), pText);
+			snprintf(pszThem, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_1), pObjTop->GetName(), GetName(), pText);
+			snprintf(pszYou, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_2), GetName(), pText);
 		}
 		else if ( fForcePossessive )
 		{
 			// ex. "You see joes poor shot ruin an arrow"
-			sprintf(pszThem, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_3), GetName(), pText);
-			sprintf(pszYou, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_4), pText);
+			snprintf(pszThem, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_3), GetName(), pText);
+			snprintf(pszYou, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_4), pText);
 		}
 		else
 		{
-			sprintf(pszThem, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_5), GetName(), pText);
-			sprintf(pszYou, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_6), pText);
+			snprintf(pszThem, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_5), GetName(), pText);
+			snprintf(pszYou, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_6), pText);
 		}
 	}
 	else
 	{
 		// Top level is an item. Article ?
-		sprintf(pszThem, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_7), GetName(), pText);
+		snprintf(pszThem, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_7), GetName(), pText);
 		strcpy(pszYou, pszThem);
 	}
 
@@ -547,9 +547,9 @@ void CObjBase::EmoteObj(lpctstr pText)
 	if ( pObjTop->IsChar() )
 	{
 		if ( pObjTop != this )
-			sprintf(pszYou, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_2), GetName(), pText);
+			snprintf(pszYou, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_2), GetName(), pText);
 		else
-			sprintf(pszYou, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_6), pText);
+			snprintf(pszYou, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_6), pText);
 		pObjTop->UpdateObjMessage(nullptr, pszYou, nullptr, HUE_TEXT_DEF, TALKMODE_EMOTE);
 	}
 }
@@ -574,25 +574,25 @@ void CObjBase::Emote2(lpctstr pText, lpctstr pText1, CClient * pClientExclude, b
 		// Someone has this equipped.
 		if ( pObjTop != this )
 		{
-			sprintf(pszThem, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_1), pObjTop->GetName(), GetName(), pText1);
-			sprintf(pszYou, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_2), GetName(), pText);
+			snprintf(pszThem, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_1), pObjTop->GetName(), GetName(), pText1);
+			snprintf(pszYou, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_2), GetName(), pText);
 		}
 		else if ( fForcePossessive )
 		{
 			// ex. "You see joes poor shot ruin an arrow"
-			sprintf(pszThem, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_3), GetName(), pText1);
-			sprintf(pszYou, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_4), pText);
+			snprintf(pszThem, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_3), GetName(), pText1);
+			snprintf(pszYou, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_4), pText);
 		}
 		else
 		{
-			sprintf(pszThem, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_5), GetName(), pText1);
-			sprintf(pszYou, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_6), pText);
+			snprintf(pszThem, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_5), GetName(), pText1);
+			snprintf(pszYou, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_6), pText);
 		}
 	}
 	else
 	{
 		// Top level is an item. Article ?
-		sprintf(pszThem, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_7), GetName(), pText1);
+		snprintf(pszThem, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_7), GetName(), pText1);
 		strcpy(pszYou, pszThem);
 	}
 
@@ -750,7 +750,6 @@ enum OBR_TYPE
 	OBR_ROOM,
 	OBR_SECTOR,
 	OBR_SPAWNITEM,
-	OBR_TOPCONT,
 	OBR_TOPOBJ,
 	OBR_TYPEDEF,
 	OBR_QTY
@@ -761,7 +760,6 @@ lpctstr const CObjBase::sm_szRefKeys[OBR_QTY+1] =
 	"ROOM",
 	"SECTOR",
 	"SPAWNITEM",
-	"TOPCONT",
 	"TOPOBJ",
 	"TYPEDEF",
 	nullptr
@@ -794,14 +792,6 @@ bool CObjBase::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
                 }
             }
 				return true;
-			case OBR_TOPCONT:
-			{
-				CItem *pItem = this->GetUID().ItemFind();
-				if ( ptcKey[-1] != '.' )
-					break;
-				pRef = pItem->GetTopContainer();
-				return true;
-			}
 			case OBR_TOPOBJ:
 				if ( ptcKey[-1] != '.' )	// only used as a ref !
 					break;
@@ -1466,11 +1456,6 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 				return CScriptObj::r_WriteVal( ptcKey, sVal, pSrc );
 			sVal.FormatHex(GetTopLevelObj()->GetUID());
 			break;
-		case OC_TOPCONT:
-			if ( ptcKey[7] == '.' )
-				return CScriptObj::r_WriteVal( ptcKey, sVal, pSrc );
-			sVal.FormatHex(GetUID().ItemFind()->GetTopContainer()->GetUID());
-			break;
 		case OC_UID:
 			if ( ptcKey[3] == '.' )
 				return CScriptObj::r_WriteVal( ptcKey, sVal, pSrc );
@@ -1997,8 +1982,8 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
             // Add cliloc in @ClientTooltip trigger
             {
                 tchar * ppLocArgs[256];
-                int qty = Str_ParseCmds(s.GetArgRaw(), ppLocArgs, CountOf(ppLocArgs), ",");
-                dword clilocid = Exp_GetVal(ppLocArgs[0]);
+                const int qty = Str_ParseCmds(s.GetArgRaw(), ppLocArgs, CountOf(ppLocArgs), ",");
+				const dword clilocid = Exp_GetDWVal(ppLocArgs[0]);
 
                 CSString sLocArgs;
                 for (int y = 1 ; y < qty; ++y )
@@ -2013,8 +1998,9 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
                 }
 
                 if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
-                    g_Log.EventDebug("SCRIPT: addcliloc(%u,'%s')\n", clilocid, sLocArgs.GetPtr());
-                m_TooltipData.emplace_back(new CClientTooltip(clilocid, sLocArgs.GetPtr()));
+                    g_Log.EventDebug("SCRIPT: addcliloc(%u,'%s')\n", clilocid, sLocArgs.GetBuffer());
+
+                m_TooltipData.emplace_back(std::make_unique<CClientTooltip>(clilocid, sLocArgs.GetBuffer()));
             }
             break;
         case OV_REMOVECLILOC:
@@ -2022,14 +2008,15 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
         	{
                 tchar * ppLocArgs[256];
                 Str_ParseCmds(s.GetArgRaw(), ppLocArgs, CountOf(ppLocArgs), ",");
-        		dword clilocid = Exp_GetVal(ppLocArgs[0]);
-        		for (size_t i = 0; i < m_TooltipData.size(); i++)
+				const dword clilocid = Exp_GetDWVal(ppLocArgs[0]);
+        		for (size_t i = 0; i < m_TooltipData.size(); ++i)
         		{
         			CClientTooltip* ct = m_TooltipData[i].get();
         			if (ct->m_clilocid == clilocid)
         			{
 						if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
 							g_Log.EventDebug("SCRIPT: removecliloc(%u)\n", clilocid);
+
         				m_TooltipData.erase(m_TooltipData.begin() + i);
         				//I did a break, but if same tooltip added as script and default together there could be more than one for same cliloc so we need to push to check if there is another.
         				//break;
@@ -2041,8 +2028,8 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			// Replace cliloc in @ClientTooltip trigger
 			{
 				tchar * ppLocArgs[256];
-                int qty = Str_ParseCmds(s.GetArgRaw(), ppLocArgs, CountOf(ppLocArgs), ",");
-                dword clilocid = Exp_GetVal(ppLocArgs[0]);
+				const int qty = Str_ParseCmds(s.GetArgRaw(), ppLocArgs, CountOf(ppLocArgs), ",");
+				const dword clilocid = Exp_GetDWVal(ppLocArgs[0]);
                 
                 CSString sLocArgs;
                 for (int y = 1 ; y < qty; ++y )
@@ -2056,15 +2043,16 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
                         sLocArgs += ppLocArgs[y];
                 }
                 
-                for (size_t i = 0; i < m_TooltipData.size(); i++)
+                for (size_t i = 0; i < m_TooltipData.size(); ++i)
                 {
                 	CClientTooltip* ct = m_TooltipData[i].get();
                 	if (ct->m_clilocid == clilocid)
                 	{
 		                if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
-        	    	        g_Log.EventDebug("SCRIPT: replacecliloc(%u,'%s')\n", clilocid, sLocArgs.GetPtr());
+        	    	        g_Log.EventDebug("SCRIPT: replacecliloc(%u,'%s')\n", clilocid, sLocArgs.GetBuffer());
+
         	    	    m_TooltipData.erase(m_TooltipData.begin() + i);
-        	    	    m_TooltipData.emplace(m_TooltipData.begin() + i, std::make_unique<CClientTooltip>(clilocid, sLocArgs.GetPtr()));
+        	    	    m_TooltipData.emplace(m_TooltipData.begin() + i, std::make_unique<CClientTooltip>(clilocid, sLocArgs.GetBuffer()));
 						break;
 					}
 				}
@@ -2079,7 +2067,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					return false;
 				if ( iArgQty > 2 )	// Give it a new source char UID
 				{
-					CObjBaseTemplate * pObj = CUID( (dword)(piCmd[2]) ).ObjFind();
+					CObjBaseTemplate * pObj = CUID::ObjFind( (dword)(piCmd[2]) );
 					if ( pObj )
 						pObj = pObj->GetTopLevelObj();
 					pCharSrc = dynamic_cast<CChar*>(pObj);

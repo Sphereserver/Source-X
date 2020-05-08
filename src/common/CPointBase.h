@@ -72,7 +72,7 @@ public:
 	void Set( short x, short y, char z = 0, uchar map = 0 );
 	int Read( tchar * pVal );
 
-	tchar * WriteUsed( tchar * pszBuffer ) const;
+	tchar * WriteUsed( tchar * ptcBuffer, uint uiBufferLen ) const;
 	lpctstr WriteUsed() const;
 
 	void Move( DIR_TYPE dir );

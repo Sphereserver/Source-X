@@ -437,10 +437,9 @@ lpctstr CStoneMember::GetPrivName() const
 	STONEPRIV_TYPE iPriv = GetPriv();
 
 	TemporaryString tsDefname;
-	tchar* pszDefname = static_cast<tchar *>(tsDefname);
-	sprintf(pszDefname, "STONECONFIG_PRIVNAME_PRIVID-%d", (int)iPriv);
+	snprintf(tsDefname.buffer(), tsDefname.capacity(), "STONECONFIG_PRIVNAME_PRIVID-%d", (int)iPriv);
 
-	CVarDefCont * pResult = g_Exp.m_VarDefs.GetKey(pszDefname);
+	CVarDefCont * pResult = g_Exp.m_VarDefs.GetKey(tsDefname);
 	if (pResult)
 		return pResult->GetValStr();
 	else

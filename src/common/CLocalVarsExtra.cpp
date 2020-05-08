@@ -6,7 +6,7 @@
 
 bool CLocalFloatVars::LexNoCaseLess::operator()(const CSString& CGStr, const char* pBeg2) const
 {
-    const char* pBeg1 = CGStr.GetPtr();
+    const char* pBeg1 = CGStr.GetBuffer();
     const char* pEnd1 = pBeg1;
     const char* pEnd2 = pBeg2;
     while (*pEnd1)
@@ -76,7 +76,7 @@ CSString CLocalFloatVars::Get( const char* VarName )
 
 	realtype Real = GetVal(VarName);
 	char szReal[VARDEF_FLOAT_MAXBUFFERSIZE];
-	sprintf(szReal, "%f", Real);
+	snprintf(szReal, sizeof(szReal), "%f", Real);
 
 	return CSString(szReal);
 }

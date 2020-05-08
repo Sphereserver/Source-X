@@ -190,7 +190,7 @@ bool CLog::_OpenLog( lpctstr pszBaseDirName )	// name set previously.
 	CSString sFileName = GetMergedFileName(m_sBaseDir, pszTemp);
 
 	// Use the OF_READWRITE to append to an existing file.
-	if ( CSFileText::_Open( sFileName.GetPtr(), OF_SHARE_DENY_NONE|OF_READWRITE|OF_TEXT ) )
+	if ( CSFileText::_Open( sFileName.GetBuffer(), OF_SHARE_DENY_NONE|OF_READWRITE|OF_TEXT ) )
 	{
 		setvbuf(_pStream, nullptr, _IONBF, 0);
 		return true;
@@ -369,13 +369,13 @@ void _cdecl CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...
 			uiLen = strlen(szMsg);
 		}
 
-		uiLen += sprintf( szMsg + uiLen, ", in " );
+		uiLen += snprintf( szMsg + uiLen, sizeof(szMsg) - uiLen, ", in " );
 
 		va_list vargs;
 		va_start(vargs, pszCatchContext);
 
-		uiLen += vsprintf(szMsg + uiLen, pszCatchContext, vargs);
-		uiLen += sprintf (szMsg + uiLen, "\n");
+		uiLen += vsnprintf(szMsg + uiLen, sizeof(szMsg) - uiLen, pszCatchContext, vargs);
+		uiLen += snprintf (szMsg + uiLen, sizeof(szMsg) - uiLen, "\n");
 
 		EventStr(eSeverity, szMsg);
 		va_end(vargs);

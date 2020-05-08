@@ -450,15 +450,18 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 
 		if ( pContItem != nullptr )
 		{
+			const bool isBank = pContItem->IsType( IT_EQ_BANK_BOX );
 			bool isCheating = false;
-			bool isBank = pContItem->IsType( IT_EQ_BANK_BOX );
-
-			if ( isBank )
-				isCheating = isBank &&
-						pContItem->m_itEqBankBox.m_pntOpen != m_pChar->GetTopPoint();
+			if (isBank)
+			{
+				isCheating = pContItem->m_itEqBankBox.m_pntOpen != m_pChar->GetTopPoint();
+			}
 			else
-				isCheating = m_pChar->GetBank()->IsItemInside( pContItem ) &&
-						m_pChar->GetBank()->m_itEqBankBox.m_pntOpen != m_pChar->GetTopPoint();
+			{
+				const CItemContainer* pBank = m_pChar->GetBank();
+                ASSERT(pBank);
+				isCheating = pBank->IsItemInside(pContItem) && (pBank->m_itEqBankBox.m_pntOpen != m_pChar->GetTopPoint());
+			}
 
 			if ( isCheating )
 			{
@@ -643,7 +646,7 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 		if (pSkillDef != nullptr && pSkillDef->m_sTargetPrompt.IsEmpty() == false)
 		{
 			m_tmSkillTarg.m_iSkill = skill;	// targetting what skill ?
-			addTarget( CLIMODE_TARG_SKILL, pSkillDef->m_sTargetPrompt.GetPtr(), false, fCheckCrime );
+			addTarget( CLIMODE_TARG_SKILL, pSkillDef->m_sTargetPrompt.GetBuffer(), false, fCheckCrime );
 			return;
 		}
 		else
@@ -719,7 +722,7 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 		}
 
 		m_tmSkillTarg.m_iSkill = skill;	// targetting what skill ?
-		addTarget( CLIMODE_TARG_SKILL, pSkillDef->m_sTargetPrompt.GetPtr(), false, fCheckCrime );
+		addTarget( CLIMODE_TARG_SKILL, pSkillDef->m_sTargetPrompt.GetBuffer(), false, fCheckCrime );
 		return;
 	}
 }
@@ -1312,10 +1315,10 @@ do_consume:
 	tchar *sMsg = Str_GetTemp();
 	tchar *pszTemp1 = Str_GetTemp();
 	tchar *pszTemp2 = Str_GetTemp();
-	sprintf(pszTemp1, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_HYARE), m_pChar->GetName());
-	sprintf(pszTemp2, fBoss ? g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_S1) : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_B1),
+	snprintf(pszTemp1, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_HYARE), m_pChar->GetName());
+	snprintf(pszTemp2, STR_TEMPLENGTH, fBoss ? g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_S1) : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_B1),
 		costtotal, (costtotal==1) ? "" : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CA));
-	sprintf(sMsg, "%s %s %s", pszTemp1, pszTemp2, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_TY));
+	snprintf(sMsg, STR_TEMPLENGTH, "%s %s %s", pszTemp1, pszTemp2, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_TY));
 	pVendor->Speak(sMsg);
 
 	//	Step #6
@@ -1452,7 +1455,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 	if ( iGold )
 	{
 		char *z = Str_GetTemp();
-		sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_SELL_TY),
+		snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_SELL_TY),
 			iGold, (iGold==1) ? "" : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CA));
 		pVendor->Speak(z);
 
@@ -1544,7 +1547,7 @@ void CClient::Event_MailMsg( CUID uid1, CUID uid2 )
 	}
 	// Might be an NPC ?
 	tchar * pszMsg = Str_GetTemp();
-	sprintf(pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_MSG_MAILBAG_DROP_2 ), m_pChar->GetName());
+	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg( DEFMSG_MSG_MAILBAG_DROP_2 ), m_pChar->GetName());
 	pChar->SysMessage(pszMsg);
 }
 
@@ -1564,7 +1567,7 @@ void CClient::Event_ToolTip( CUID uid )
 	}
 
 	char *z = Str_GetTemp();
-	sprintf(z, "'%s'", pObj->GetName());
+	snprintf(z, STR_TEMPLENGTH, "'%s'", pObj->GetName());
 	addToolTip(uid.ObjFind(), z);
 }
 
@@ -1721,7 +1724,7 @@ void CClient::Event_PromptResp_GMPage(lpctstr pszReason)
 
 	const CPointMap& pt = m_pChar->GetTopPoint();
 	tchar * pszMsg = Str_GetTemp();
-	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_GMPAGE_RECEIVED), m_pChar->GetName(), (dword)m_pChar->GetUID(), pt.WriteUsed(), pszReason);
+	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_GMPAGE_RECEIVED), m_pChar->GetName(), (dword)m_pChar->GetUID(), pt.WriteUsed(), pszReason);
 	g_Log.Event(LOGM_NOCONTEXT | LOGM_GM_PAGE, "%s\n", pszMsg);
 
 	CGMPage* pGMPage = static_cast<CGMPage*>(g_World.m_GMPages.GetContainerHead());
@@ -1938,7 +1941,7 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 		if ( mode == 13 || mode == 14 )
 			return;
 
-		strcpy(z, pszText);
+		Str_CopyLimitNull(z, pszText, sizeof(z));
 
 		if ( g_Cfg.m_fSuppressCapitals )
 		{
@@ -2161,7 +2164,7 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConso
 				return true;
 			}
 		}
-		sVal.Empty();
+		sVal.Clear();
 		return false;
 	}
 	return (fNoCallParent ? false : CScriptTriggerArgs::r_WriteVal( ptcKey, sVal, pSrc, false ));
@@ -2717,7 +2720,7 @@ void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something 
 		{
 			tchar * pszMsg = Str_GetTemp();
 			SKILL_TYPE iSkill = (SKILL_TYPE)(EntryTag - POPUP_TRAINSKILL);
-			sprintf(pszMsg, "train %s", g_Cfg.GetSkillKey(iSkill));
+			snprintf(pszMsg, STR_TEMPLENGTH, "train %s", g_Cfg.GetSkillKey(iSkill));
 			pChar->NPC_OnHear(pszMsg, m_pChar);
 			return;
 		}
@@ -2832,7 +2835,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 		Args.m_iN1 = type;
 		if ( m_pChar->OnTrigger(CTRIG_UserExtCmd, m_pChar, &Args) == TRIGRET_RET_TRUE )
 			return;
-		strcpy(pszName, Args.m_s1);
+		Str_CopyLimitNull(pszName, Args.m_s1, MAX_TALK_BUFFER);
 	}
 
 	tchar *ppArgs[2];
@@ -3008,7 +3011,7 @@ bool CClient::xPacketFilter( const byte * pData, uint iLen )
 		//	Fill locals [0..X] to the first X bytes of the packet
 		for ( uint i = 0; i < bytes; ++i )
 		{
-			sprintf(idx, "%u", i);
+			snprintf(idx, sizeof(idx), "%u", i);
 			Args.m_VarsLocal.SetNum(idx, (int)(pData[i]));
 		}
 
@@ -3057,7 +3060,7 @@ bool CClient::xOutPacketFilter( const byte * pData, uint iLen )
 		//	Fill locals [0..X] to the first X bytes of the packet
 		for ( size_t i = 0; i < bytes; ++i )
 		{
-			sprintf(idx, "%" PRIuSIZE_T, i);
+			snprintf(idx, sizeof(idx), "%" PRIuSIZE_T, i);
 			Args.m_VarsLocal.SetNum(idx, (int)(pData[i]));
 		}
 

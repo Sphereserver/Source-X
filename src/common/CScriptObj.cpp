@@ -301,7 +301,7 @@ bool CScriptObj::r_LoadVal( CScript & s )
 				{
 					bool fQuoted = false;
 					tchar * args = s.GetArgStr(&fQuoted);
-					strcpy(g_Exp.sm_szMessages[l], args);
+					Str_CopyLimitNull(g_Exp.sm_szMessages[l], args, sizeof(g_Exp.sm_szMessages[0]));
 					return true;
 				}
 			}
@@ -624,8 +624,8 @@ badcmd:
 			return true;
 		case SSC_FVAL:
 			{
-				int64 iVal = Exp_Get64Val(ptcKey);
-				sVal.Format( "%s%" PRId64 ".%" PRId64 , (iVal >= 0) ? "" : "-", llabs(iVal/10), llabs(iVal%10) );
+				llong iVal = Exp_GetLLVal(ptcKey);
+				sVal.Format( "%s%lld.%lld" , ((iVal >= 0) ? "" : "-"), SphereAbs(iVal/10), SphereAbs(iVal%10) );
 				return true;
 			}
 		case SSC_HVAL:
@@ -990,8 +990,8 @@ badcmd:
 				{
 					tchar *ppCmd[255];
 					tchar * z = Str_GetTemp();
-					strcpy(z, p);
-					int count = Str_ParseCmds(z, ppCmd, CountOf(ppCmd), separators);
+					Str_CopyLimitNull(z, p, STR_TEMPLENGTH);
+					const int count = Str_ParseCmds(z, ppCmd, CountOf(ppCmd), separators);
 					if (count > 0)
 					{
 						sVal.Add(ppCmd[0]);
@@ -1020,10 +1020,10 @@ badcmd:
             int iQty = Str_ParseCmds(const_cast<tchar*>(ptcKey), ppCmd, CountOf(ppCmd), ", ");
             if ( iQty < 3 )
                 return false;
-            int iPrefixCode = atoi(ppCmd[0]);
-            int iCost = atoi(ppCmd[1]);
+            int iPrefixCode = Str_ToI(ppCmd[0]);
+            int iCost = Str_ToI(ppCmd[1]);
             CSString sHash = CBCrypt::HashBCrypt(ppCmd[2], iPrefixCode, maximum(4,minimum(31,iCost)));
-            sVal.Format("%s", sHash.GetPtr());
+            sVal.Format("%s", sHash.GetBuffer());
         } return true;
 
         case SSC_BCRYPTVALIDATE:
@@ -1355,7 +1355,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				if ( ! r_WriteVal( s.GetArgStr(), sVal, pSrc ) )
 					return false;
 				tchar * pszMsg = Str_GetTemp();
-				sprintf(pszMsg, "'%s' for '%s' is '%s'\n", sOriginalArg.GetPtr(), GetName(), sVal.GetPtr());
+				snprintf(pszMsg, STR_TEMPLENGTH, "'%s' for '%s' is '%s'\n", sOriginalArg.GetBuffer(), GetName(), sVal.GetBuffer());
 				pSrc->SysMessage(pszMsg);
 				break;
 			}
@@ -1528,23 +1528,22 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 
 	if ( iType & 8 )		// WHILE
 	{
-		tchar * pszCond;
-		CSString pszOrig;
-		TemporaryString tsTemp;
-		tchar* pszTemp = static_cast<tchar *>(tsTemp);
+		tchar * ptcCond;
+		CSString sOrig;
+		CSString sTemp;
 		int iWhile	= 0;
 
-		pszOrig.Copy( s.GetArgStr() );
+		sOrig.Copy( s.GetArgStr() );
 		for (;;)
 		{
 			++LoopsMade;
 			if ( g_Cfg.m_iMaxLoopTimes && ( LoopsMade >= g_Cfg.m_iMaxLoopTimes ))
 				goto toomanyloops;
 			
-			strcpy( pszTemp, pszOrig.GetPtr() );
-			pszCond	= pszTemp;
-			ParseText( pszCond, pSrc, 0, pArgs );
-			if ( !Exp_GetVal( pszCond ) )
+			sTemp.Copy(sOrig);
+			ptcCond	= sTemp.GetBuffer();
+			ParseText(ptcCond, pSrc, 0, pArgs );
+			if ( !Exp_GetVal(ptcCond) )
 				break;
 
             pArgs->m_VarsLocal.SetNum( "_WHILE", iWhile, false );
@@ -1892,7 +1891,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, lpctstr pszTrigName, CTex
 		tchar * pName = Str_GetTemp();
 
 		//	lowercase for speed
-		strcpy(pName, pszTrigName);
+		Str_CopyLimitNull(pName, pszTrigName, STR_TEMPLENGTH);
 		_strlwr(pName);
 
 		if ( g_profiler.initstate != 0xf1 )	// it is not initalised
@@ -2185,17 +2184,18 @@ jump_in:
 						if ( iArgQty >= 1 )
 						{
 							TemporaryString tsOrigValue;
-							tchar* pszOrigValue = static_cast<tchar *>(tsOrigValue);
-							strcpy(pszOrigValue, ppArgs[0]);
-							ParseText( pszOrigValue, pSrc, 0, pArgs );
+							tchar* ptcOrigValue = tsOrigValue.buffer();
+							Str_ConcatLimitNull(ptcOrigValue, ppArgs[0], tsOrigValue.capacity());
+							ParseText(ptcOrigValue, pSrc, 0, pArgs);
 
-							CUID pCurUid = Exp_GetDWVal(pszOrigValue);
+							CUID pCurUid(Exp_GetDWVal(ptcOrigValue));
 							if ( pCurUid.IsValidUID() )
 							{
 								CObjBase * pObj = pCurUid.ObjFind();
 								if ( pObj && pObj->IsContainer() )
 								{
 									CContainer * pContThis = dynamic_cast<CContainer *>(pObj);
+									ASSERT(pContThis);
 
 									CScriptLineContext StartContext = s.GetContext();
 									CScriptLineContext EndContext = StartContext;
@@ -2243,26 +2243,23 @@ jump_in:
 							if ( Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, CountOf(ppArgs), " \t," ) >= 1 )
 							{
 								TemporaryString tsParsedArg0;
-								tchar* pszParsedArg0 = static_cast<tchar *>(tsParsedArg0);
-								strcpy(pszParsedArg0, ppArgs[0]);
-								if ( (ParseText( pszParsedArg0, pSrc, 0, pArgs ) > 0 ) )
+								Str_CopyLimitNull(tsParsedArg0.buffer(), ppArgs[0], tsParsedArg0.capacity());
+								if ( (ParseText(tsParsedArg0.buffer(), pSrc, 0, pArgs ) > 0 ) )
 								{
 									TemporaryString tsParsedArg1;
-									tchar* pszParsedArg1 = static_cast<tchar *>(tsParsedArg1);
                                     if (ppArgs[1] != nullptr)
                                     {
-                                        strcpy(pszParsedArg1, ppArgs[1]);
-                                        if (ParseText(pszParsedArg1, pSrc, 0, pArgs) <= 0)
+										Str_CopyLimitNull(tsParsedArg1.buffer(), ppArgs[1], tsParsedArg0.capacity());
+                                        if (ParseText(tsParsedArg1.buffer(), pSrc, 0, pArgs) <= 0)
                                             goto forcont_incorrect_args;
                                     }
 									
 									CScriptLineContext StartContext = s.GetContext();
 									CScriptLineContext EndContext = StartContext;
-									lpctstr castedParsedArg0 = pszParsedArg0;
+									lpctstr ptcParsedArg1 = tsParsedArg1.buffer();
 									iRet = pCont->OnContTriggerForLoop( s, pSrc, pArgs, pResult, StartContext, EndContext,
-										g_Cfg.ResourceGetID( ( iCmd == SK_FORCONTID ) ? RES_ITEMDEF : RES_TYPEDEF,
-											static_cast<lpctstr &>(castedParsedArg0)),
-										0, ppArgs[1] != nullptr ? Exp_GetVal(pszParsedArg1) : 255 );
+										g_Cfg.ResourceGetID(((iCmd == SK_FORCONTID) ? RES_ITEMDEF : RES_TYPEDEF), tsParsedArg0.buffer()),
+										0, ((ppArgs[1] != nullptr) ? Exp_GetVal(ptcParsedArg1) : 255) );
 								}
 								else
 								{
@@ -2297,14 +2294,12 @@ jump_in:
 					{
 						EXC_SET_BLOCK("parsing <> in a key");
 						TemporaryString tsBuf;
-						tchar* pszBuf = static_cast<tchar *>(tsBuf);
-                        const size_t lenBuf = tsBuf.realLength();
-                        Str_CopyLimitNull(pszBuf, s.GetKey(), lenBuf);
-                        Str_ConcatLimitNull(pszBuf, " ", lenBuf);
-                        Str_ConcatLimitNull(pszBuf, s.GetArgRaw(), lenBuf);
-						ParseText(pszBuf, pSrc, 0, pArgs);
+                        Str_CopyLimitNull(tsBuf.buffer(), s.GetKey(), tsBuf.capacity());
+                        Str_ConcatLimitNull(tsBuf.buffer(), " ", tsBuf.capacity());
+                        Str_ConcatLimitNull(tsBuf.buffer(), s.GetArgRaw(), tsBuf.capacity());
+						ParseText(tsBuf.buffer(), pSrc, 0, pArgs);
 
-						s.ParseKey(pszBuf);
+						s.ParseKey(tsBuf.buffer());
 					}
 					else
 					{
@@ -2458,15 +2453,14 @@ jump_in:
 					else if ( !strnicmp(s.GetKey(), "FullTrigger", 11 ) )
 					{
 						EXC_SET_BLOCK("FullTrigger");
-						CSString sVal;
 						tchar * piCmd[7];
-						tchar *psTmp = Str_GetTemp();
-						strcpy( psTmp, s.GetArgRaw() );
-						int iArgQty = Str_ParseCmds( psTmp, piCmd, CountOf( piCmd ), " ,\t" );
+						tchar *ptcTmp = Str_GetTemp();
+						Str_CopyLimitNull(ptcTmp, s.GetArgRaw(), STR_TEMPLENGTH);
+						int iArgQty = Str_ParseCmds(ptcTmp, piCmd, CountOf( piCmd ), " ,\t" );
 						CScriptObj *pRef = this;
 						if ( iArgQty == 2 )
 						{
-                            CChar *pCharFound = CUID::CharFind(atoi(piCmd[1]));
+                            CChar *pCharFound = CUID::CharFind(Str_ToI(piCmd[1]));
 							if ( pCharFound )
 								pRef = pCharFound;
 						}
@@ -2474,9 +2468,9 @@ jump_in:
 						// Parse object references, src.* is not parsed
 						// by r_GetRef so do it manually
 						//r_GetRef(const_cast<lpctstr &>(static_cast<lptstr &>(argRaw)), pRef);
-						if ( !strnicmp("SRC.", psTmp, 4) )
+						if ( !strnicmp("SRC.", ptcTmp, 4) )
 						{
-							psTmp += 4;
+							ptcTmp += 4;
 							pRef = pSrc->GetChar();
 						}
 
@@ -2485,7 +2479,7 @@ jump_in:
 						{
 							// Locate arguments for the called function
 							TRIGRET_TYPE tRet;
-							tchar *z = strchr(psTmp, ' ');
+							tchar *z = strchr(ptcTmp, ' ');
 
 							if( z )
 							{
@@ -2505,7 +2499,7 @@ jump_in:
 								pArgs->m_v.clear();
 								pArgs->Init(z);
 
-								tRet = pRef->OnTrigger( psTmp, pSrc, pArgs);
+								tRet = pRef->OnTrigger(ptcTmp, pSrc, pArgs);
 
 								pArgs->m_iN1 = iN1;
 								pArgs->m_iN2 = iN2;
@@ -2516,7 +2510,7 @@ jump_in:
 								pArgs->m_v.clear();
 							}
 							else
-								tRet = pRef->OnTrigger( psTmp, pSrc, pArgs);
+								tRet = pRef->OnTrigger(ptcTmp, pSrc, pArgs);
 
 							pArgs->m_VarsLocal.SetNum("return",tRet,false);
 							fRes = (tRet > 0) ? 1 : 0;
@@ -2543,7 +2537,7 @@ jump_in:
 
 	EXC_DEBUG_START;
 	g_Log.EventDebug("key '%s' runtype '%d' pargs '%p' ret '%s' [%p]\n",
-		s.GetKey(), trigrun, static_cast<void *>(pArgs), (pResult == nullptr ? "" : pResult->GetPtr()), static_cast<void *>(pSrc));
+		s.GetKey(), trigrun, static_cast<void *>(pArgs), (pResult == nullptr ? "" : pResult->GetBuffer()), static_cast<void *>(pSrc));
 	EXC_DEBUG_END;
 	return TRIGRET_RET_DEFAULT;
 }
@@ -2559,7 +2553,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerRunVal( CScript &s, TRIGRUN_TYPE trigrun, CTex
 
 	OnTriggerRun( s, trigrun, pSrc, pArgs, &sVal );
 
-	lpctstr pszVal = sVal.GetPtr();
+	lpctstr pszVal = sVal.GetBuffer();
 	if ( pszVal && *pszVal )
 		tr = static_cast<TRIGRET_TYPE>(Exp_GetVal(pszVal));
 

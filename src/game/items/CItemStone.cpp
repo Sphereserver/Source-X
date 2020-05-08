@@ -121,13 +121,12 @@ void CItemStone::r_Write( CScript & s )
 		s.WriteKey( "ABBREV", m_sAbbrev );
 
 	TemporaryString tsTemp;
-	tchar* pszTemp = static_cast<tchar *>(tsTemp);
 	for ( uint i = 0; i < CountOf(m_sCharter); ++i )
 	{
 		if ( ! m_sCharter[i].IsEmpty())
 		{
-			sprintf(pszTemp, "CHARTER%u", i);
-			s.WriteKey(pszTemp, m_sCharter[i] );
+			snprintf(tsTemp.buffer(), tsTemp.capacity(), "CHARTER%u", i);
+			s.WriteKey(tsTemp.buffer(), m_sCharter[i] );
 		}
 	}
 
@@ -160,15 +159,14 @@ lpctstr CItemStone::GetAlignName() const
 	int iAlign = GetAlignType();
 
 	TemporaryString tsDefname;
-	tchar* pszDefname = static_cast<tchar *>(tsDefname);
 	if ( GetType() == IT_STONE_GUILD )
-		sprintf(pszDefname, "GUILDCONFIG_ALIGN_%d", iAlign);
+		snprintf(tsDefname.buffer(), tsDefname.capacity(), "GUILDCONFIG_ALIGN_%d", iAlign);
 	else if ( GetType() == IT_STONE_TOWN )
-		sprintf(pszDefname, "TOWNSCONFIG_ALIGN_%d", iAlign);
+		snprintf(tsDefname.buffer(), tsDefname.capacity(), "TOWNSCONFIG_ALIGN_%d", iAlign);
 	else
 		return "";
 
-	lpctstr sRes = g_Exp.m_VarDefs.GetKeyStr(pszDefname);
+	lpctstr sRes = g_Exp.m_VarDefs.GetKeyStr(tsDefname);
 	return ( sRes == nullptr ) ? "" : sRes;
 }
 
@@ -881,7 +879,7 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 			{
 				SetALIGNTYPE(static_cast<STONEALIGN_TYPE>(s.GetArgVal()));
 				tchar *pszMsg = Str_GetTemp();
-				sprintf(pszMsg, "%s is now a %s %s\n", GetName(), GetAlignName(), GetTypeName());
+				snprintf(pszMsg, SCRIPT_MAX_LINE_LEN, "%s is now a %s %s\n", GetName(), GetAlignName(), GetTypeName());
 				Speak(pszMsg);
 			}
 			break;
@@ -1067,7 +1065,7 @@ CStoneMember * CItemStone::AddRecruit(const CChar * pChar, STONEPRIV_TYPE iPriv,
 	const CItemStone * pStone = pChar->Guild_Find( GetMemoryType());
 	if ( pStone && pStone != this )
 	{
-		sprintf(z, "%s appears to belong to %s. Must resign previous %s", pChar->GetName(), pStone->GetName(), GetTypeName());
+		snprintf(z, SCRIPT_MAX_LINE_LEN, "%s appears to belong to %s. Must resign previous %s", pChar->GetName(), pStone->GetName(), GetTypeName());
 		Speak(z);
 		return nullptr;
 	}
@@ -1084,7 +1082,7 @@ CStoneMember * CItemStone::AddRecruit(const CChar * pChar, STONEPRIV_TYPE iPriv,
 		// I'm already a member of some sort.
 		if ( pMember->GetPriv() == iPriv || iPriv == STONEPRIV_CANDIDATE )
 		{
-			sprintf(z, "%s is already %s %s.", pChar->GetName(), pMember->GetPrivName(), GetName());
+			snprintf(z, SCRIPT_MAX_LINE_LEN, "%s is already %s %s.", pChar->GetName(), pMember->GetPrivName(), GetName());
 			Speak(z);
 			return nullptr;
 		}
@@ -1108,7 +1106,7 @@ CStoneMember * CItemStone::AddRecruit(const CChar * pChar, STONEPRIV_TYPE iPriv,
 		ElectMaster();	// just in case this is the first.
 	}
 
-	sprintf(z, "%s is now %s %s", pChar->GetName(), pMember->GetPrivName(), GetName());
+	snprintf(z, SCRIPT_MAX_LINE_LEN, "%s is now %s %s", pChar->GetName(), pMember->GetPrivName(), GetName());
 	Speak(z);
 	return pMember;
 }
@@ -1401,17 +1399,17 @@ void CItemStone::AnnounceWar( const CItemStone * pEnemyStone, bool fWeDeclare, b
 	bool fAtWar = IsAtWarWith(pEnemyStone);
 
 	tchar *pszTemp = Str_GetTemp();
-	int len = sprintf( pszTemp, (fWar) ? "%s %s declared war on %s." : "%s %s requested peace with %s.",
+	int len = snprintf( pszTemp, STR_TEMPLENGTH, (fWar) ? "%s %s declared war on %s." : "%s %s requested peace with %s.",
 		(fWeDeclare) ? "You" : pEnemyStone->GetName(),
 		(fWeDeclare) ? "have" : "has",
 		(fWeDeclare) ? pEnemyStone->GetName() : "You" );
 
 	if ( fAtWar )
-		sprintf( pszTemp+len, " War is ON!" );
+		snprintf( pszTemp+len, STR_TEMPLENGTH - len, " War is ON!" );
 	else if ( fWar )
-		sprintf( pszTemp+len, " War is NOT yet on." );
+		snprintf( pszTemp+len, STR_TEMPLENGTH - len, " War is NOT yet on." );
 	else
-		sprintf( pszTemp+len, " War is OFF." );
+		snprintf( pszTemp+len, STR_TEMPLENGTH - len, " War is OFF." );
 
 	CStoneMember * pMember = static_cast <CStoneMember *>(GetContainerHead());
 	for ( ; pMember != nullptr; pMember = pMember->GetNext())

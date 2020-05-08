@@ -129,6 +129,7 @@ CServerConfig::CServerConfig()
 	m_fCharTags				= false;
 	m_fVendorTradeTitle		= true;
 	m_iVendorMaxSell		= 255;
+	m_iVendorMarkup			= 15;
 	m_iGameMinuteLength		= 20 * MSECS_PER_SEC; // 20 seconds
 	m_fNoWeather			= true;
 	m_fFlipDroppedItems		= true;
@@ -641,6 +642,7 @@ enum RC_TYPE
 	RC_USEMAPDIFFS,				// m_fUseMapDiffs
 	RC_USENOCRYPT,				// m_Usenocrypt
 	RC_USEPACKETPRIORITY,		// m_fUsePacketPriorities
+	RC_VENDORMARKUP,			// m_iVendorMarkup
 	RC_VENDORMAXSELL,			// m_iVendorMaxSell
 	RC_VENDORTRADETITLE,		// m_fVendorTradeTitle
 	RC_VERSION,
@@ -891,6 +893,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "USEMAPDIFFS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUseMapDiffs),			0 }},
 	{ "USENOCRYPT",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUsenocrypt),			0 }},	// we don't want no-crypt clients
 	{ "USEPACKETPRIORITY",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUsePacketPriorities),	0 }},
+	{ "VENDORMARKUP",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iVendorMarkup),		0 }},
 	{ "VENDORMAXSELL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iVendorMaxSell),		0 }},
 	{ "VENDORTRADETITLE",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fVendorTradeTitle),	0 }},
 	{ "VERSION",				{ ELEM_VOID,	0,											0 }},
@@ -1006,7 +1009,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 					g_Log.EventError("Invalid function name for packet filtering (limit is 30 chars).\n");
 				else
 				{
-					strcpy(g_Serv.m_PacketFilter[index], args);
+					Str_CopyLimitNull(g_Serv.m_PacketFilter[index], args, sizeof(g_Serv.m_PacketFilter[0]));
 					DEBUG_MSG_NOINIT(("PACKET FILTER: Hooked packet 0x%x with function %s.\n", index, args));
 					return true;
 				}
@@ -1024,7 +1027,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 					g_Log.EventError("Invalid function name for outgoing packet filtering (limit is 30 chars).\n");
 				else
 				{
-					strcpy(g_Serv.m_OutPacketFilter[index], args);
+					Str_CopyLimitNull(g_Serv.m_OutPacketFilter[index], args, sizeof(g_Serv.m_OutPacketFilter[0]));
 					DEBUG_MSG_NOINIT(("OUTGOING PACKET FILTER: Hooked packet 0x%x with function %s.\n", index, args));
 					return true;
 				}
@@ -2116,7 +2119,7 @@ lpctstr CServerConfig::GetRune( tchar ch ) const
     uint index = (uint)(toupper(ch) - 'A');
     if ( ! m_Runes.IsValidIndex(index))
         return "?";
-    return m_Runes[index]->GetPtr();
+    return m_Runes[index]->GetBuffer();
 }
 
 lpctstr CServerConfig::GetNotoTitle( int iLevel, bool bFemale ) const
@@ -2131,9 +2134,9 @@ lpctstr CServerConfig::GetNotoTitle( int iLevel, bool bFemale ) const
 	else
 	{
 		// check if a female title is present
-		lpctstr pFemaleTitle = strchr(m_NotoTitles[iLevel]->GetPtr(), ',');
+		lpctstr pFemaleTitle = strchr(m_NotoTitles[iLevel]->GetBuffer(), ',');
 		if (pFemaleTitle == nullptr)
-			return m_NotoTitles[iLevel]->GetPtr();
+			return m_NotoTitles[iLevel]->GetBuffer();
 
 		++pFemaleTitle;
 		if (bFemale)
@@ -2141,7 +2144,7 @@ lpctstr CServerConfig::GetNotoTitle( int iLevel, bool bFemale ) const
 
 		// copy string so that it can be null-terminated without modifying m_NotoTitles
 		tchar* pTitle = Str_GetTemp();
-        Str_CopyLimitNull(pTitle, m_NotoTitles[iLevel]->GetPtr(), (int)(m_NotoTitles[iLevel]->GetLength() - strlen(pFemaleTitle)));
+        Str_CopyLimitNull(pTitle, m_NotoTitles[iLevel]->GetBuffer(), (int)(m_NotoTitles[iLevel]->GetLength() - strlen(pFemaleTitle)));
 		return pTitle;
 	}
 }
@@ -2222,12 +2225,12 @@ bool CServerConfig::IsObscene( lpctstr pszText ) const
 	// does this text contain obscene content?
 	// NOTE: allow partial match syntax *fuck* or ass (alone)
 
+	CSString match;
 	for ( size_t i = 0; i < m_Obscene.size(); ++i )
 	{
-		tchar* match = new tchar[ strlen(m_Obscene[i])+3 ];
-		sprintf(match,"%s%s%s","*",m_Obscene[i],"*");
+		match.Resize(int(2 * strlen(m_Obscene[i])));
+		snprintf(match.GetBuffer(), match.GetCapacity(), "%s%s%s", "*", m_Obscene[i], "*");
 		MATCH_TYPE ematch = Str_Match( match , pszText );
-		delete[] match;
 
 		if ( ematch == MATCH_VALID )
 			return true;
@@ -2455,7 +2458,7 @@ CPointMap CServerConfig::GetRegionPoint( lpctstr pCmd ) const // Decode a telepo
 	if ( IsDigit( pCmd[0] ) || pCmd[0] == '-' )
 	{
 		tchar *pszTemp = Str_GetTemp();
-		strcpy( pszTemp, pCmd );
+		Str_CopyLimitNull( pszTemp, pCmd, STR_TEMPLENGTH );
 		const size_t uiCount = pt.Read( pszTemp );
 		if ( uiCount >= 2 )
 			return pt;
@@ -2725,7 +2728,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 	ASSERT(pScript);
 	CScriptFileContext FileContext( pScript );	// set this as the context.
     CSString sSection = pScript->GetSection();
-    lpctstr pszSection = sSection.GetPtr();
+    lpctstr pszSection = sSection.GetBuffer();
 
 	CVarDefContNum * pVarNum = nullptr;
 	CResourceID rid;
@@ -2894,7 +2897,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				{
 					if ( !strcmpi(ptcKey, g_Exp.sm_szMsgNames[l]) )
 					{
-						strcpy(g_Exp.sm_szMessages[l], pScript->GetArgStr());
+						Str_CopyLimitNull(g_Exp.sm_szMessages[l], pScript->GetArgStr(), sizeof(g_Exp.sm_szMessages[l]));
 						break;
 					}
 				}
@@ -3693,7 +3696,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 				return ridInvalid;
 
 			tchar * pArg1 = Str_GetTemp();
-			strcpy( pArg1, pszName );
+			Str_CopyLimitNull( pArg1, pszName, STR_TEMPLENGTH );
 			pszName = pArg1;
 			tchar * pArg2;
 			Str_Parse( pArg1, &pArg2 );
@@ -3720,7 +3723,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 			if ( pszName[0] == '\0' )
 				return ridInvalid;
 			tchar * pArg1 = Str_GetTemp();
-			strcpy( pArg1, pszName );
+			Str_CopyLimitNull( pArg1, pszName, STR_TEMPLENGTH );
 			pszName = pArg1;
 			tchar * pArg2;
 			Str_Parse( pArg1, &pArg2 );
@@ -4532,7 +4535,7 @@ bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpc
 	if ( !pOutput )
 		return false;
 
-	tchar* buf = const_cast<tchar*>(pOutput->toBuffer());
+	tchar* buf = const_cast<tchar*>(pOutput->buffer());
 	if ( !pObjectName || !pObjectName[0] )
 	{
 		buf[0] = '\0';
@@ -4599,7 +4602,7 @@ bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpc
 			// attach suffix
 			iOut = iEnd;
 			buf[iOut++] = '_';
-            Str_FromI(++iAttempts, &buf[iOut], pOutput->realLength(), 10);
+            Str_FromI(++iAttempts, &buf[iOut], pOutput->capacity(), 10);
 		}
 	}
 
@@ -4626,9 +4629,8 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 	if ( ! s.Open( pszFilename, OF_WRITE|OF_TEXT|OF_DEFAULTMODE ))
 		return false;
 
-	tchar sItemName[21];
+	tchar ptcItemName[21];
 	TemporaryString tsDefnameBuffer;
-	tchar * pDefnameBuffer = static_cast<tchar *>(tsDefnameBuffer);
 	CVarDefMap defnames;
 
 	s.Printf("// Unscripted items, generated by " SPHERE_TITLE " at %s\n", CSTime::GetCurrentTime().Format(nullptr));
@@ -4659,13 +4661,13 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 			 continue;
 
 		s.WriteSection("ITEMDEF 0%04x", i);
-        Str_CopyLimitNull(sItemName, tiledata.m_name, CountOf(sItemName));
+        Str_CopyLimitNull(ptcItemName, tiledata.m_name, CountOf(ptcItemName));
 
 		// generate a suitable defname
-		if (GenerateDefname(sItemName, CountOf(sItemName), "i_", &tsDefnameBuffer, true, &defnames))
+		if (GenerateDefname(ptcItemName, CountOf(ptcItemName), "i_", &tsDefnameBuffer, true, &defnames))
 		{
-			s.Printf("// %s\n", sItemName);
-			s.WriteKey("DEFNAME", pDefnameBuffer);
+			s.Printf("// %s\n", ptcItemName);
+			s.WriteKey("DEFNAME", tsDefnameBuffer);
 		}
 		else
 		{

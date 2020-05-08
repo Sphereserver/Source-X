@@ -238,7 +238,7 @@ bool CItemMulti::MultiRealizeRegion()
     m_pRegion->SetRegionFlags(dwFlags);
 
     tchar *pszTemp = Str_GetTemp();
-    sprintf(pszTemp, "%s (%s)", pRegionBack->GetName(), GetName());
+    snprintf(pszTemp, SCRIPT_MAX_LINE_LEN, "%s (%s)", pRegionBack->GetName(), GetName());
     m_pRegion->SetName(pszTemp);
     m_pRegion->_pMultiLink = this;
 
@@ -2158,12 +2158,12 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
     {
         return true;
     }
-    int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1);
+    const int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1);
     switch (iCmd)
     {
         case SHV_DELACCESS:
         {
-            CUID uidAccess(s.GetArgDWVal());
+            const CUID uidAccess(s.GetArgDWVal());
             if (!uidAccess.IsValidUID())
             {
                 _lAccesses.clear();
@@ -2176,7 +2176,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         }
         case SHV_DELADDON:
         {
-            CUID uidAddon(s.GetArgDWVal());
+            const CUID uidAddon(s.GetArgDWVal());
             if (!uidAddon.IsValidUID())
             {
                 _lAddons.clear();
@@ -2189,7 +2189,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         }
         case SHV_DELBAN:
         {
-            CUID uidBan(s.GetArgDWVal());
+            const CUID uidBan(s.GetArgDWVal());
             if (!uidBan.IsValidUID())
             {
                 _lBans.clear();
@@ -2202,7 +2202,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         }
         case SHV_DELCOMPONENT:
         {
-            CUID uidComp(s.GetArgDWVal());
+            const CUID uidComp(s.GetArgDWVal());
             if (!uidComp.IsValidUID())
             {
                 _lComps.clear();
@@ -2215,7 +2215,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         }
         case SHV_DELCOOWNER:
         {
-            CUID uidCoowner(s.GetArgDWVal());
+            const CUID uidCoowner(s.GetArgDWVal());
             if (!uidCoowner.IsValidUID())
             {
                 _lCoowners.clear();
@@ -2228,7 +2228,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         }
         case SHV_DELFRIEND:
         {
-            CUID uidFriend = s.GetArgDWVal();
+            const CUID uidFriend = s.GetArgDWVal();
             if (!uidFriend.IsValidUID())
             {
                 _lFriends.clear();
@@ -2241,7 +2241,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         }
         case SHV_DELVENDOR:
         {
-            CUID uidVendor(s.GetArgDWVal());
+            const CUID uidVendor(s.GetArgDWVal());
             if (!uidVendor.IsValidUID())
             {
                 _lVendors.clear();
@@ -2254,7 +2254,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         }
         case SHV_UNLOCKITEM:
         {
-            CUID uidItem(s.GetArgDWVal());
+            const CUID uidItem(s.GetArgDWVal());
             if (!uidItem.IsValidUID())
             {
                 _lLockDowns.clear();
@@ -2286,8 +2286,8 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         {
             int64 piCmd[2];
             Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
-            bool fShowMsg = piCmd[0] ? true : false;
-            bool fMoveToBank = piCmd[1] ? true : false;
+            const bool fShowMsg = piCmd[0] ? true : false;
+            const bool fMoveToBank = piCmd[1] ? true : false;
             CUID charUID;
             if (pSrc && pSrc->GetChar())
             {
@@ -2299,7 +2299,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
             }
             else
             {
-                g_Log.EventError("Trying to redeed %s (0x#08) with no redeed target, removing it instead.\n", GetName(), GetUID());
+                g_Log.EventError("Trying to redeed %s (0x%08x) with no redeed target, removing it instead.\n", GetName(), GetUID());
                 Delete();
                 return true;
             }
@@ -2308,7 +2308,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         }
         case SHV_RELEASE:
         {
-            CUID uidRelease(s.GetArgDWVal());
+            const CUID uidRelease(s.GetArgDWVal());
             if (!uidRelease.IsValidUID())
             {
                 _lAccesses.clear();
@@ -2321,7 +2321,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         }
         case SHV_REMOVEKEYS:
         {
-            CUID uidChar(s.GetArgDWVal());
+            const CUID uidChar(s.GetArgDWVal());
             RemoveKeys(uidChar);
             break;
         }

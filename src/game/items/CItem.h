@@ -546,7 +546,6 @@ public:
 	virtual bool Delete(bool fForce = false) override;
 
 public:
-    CCFaction *GetSlayer() const;
 	virtual bool OnTick() override;
 	virtual void OnHear( lpctstr pszCmd, CChar * pSrc );
 	CItemBase * Item_GetDef() const;
@@ -567,6 +566,7 @@ public:
 
 	int IsWeird() const;
 	char GetFixZ(CPointMap pt, dword dwBlockFlags = 0 );
+	CCFaction* GetSlayer() const;
 	byte GetSpeed() const;
 
     /**
@@ -664,10 +664,13 @@ public:
 	bool MoveToCheck(const CPointMap & pt, CChar * pCharMover = nullptr );
 	virtual bool MoveNearObj( const CObjBaseTemplate *pItem, ushort uiSteps = 0 ) override;
 
-	const CObjBaseTemplate* GetTopLevelObj() const override;
-	CObjBaseTemplate* GetTopLevelObj() override;
+	virtual CObjBaseTemplate* GetTopLevelObj() override;
+	virtual const CObjBaseTemplate* GetTopLevelObj() const override;
+
 	CObjBase * GetContainer() const;
-	CObjBase * GetTopContainer();
+	CItem * GetTopContainer();
+	const CItem* GetTopContainer() const;
+
 	uchar GetContainedGridIndex() const;
 	void SetContainedGridIndex(uchar index);
 

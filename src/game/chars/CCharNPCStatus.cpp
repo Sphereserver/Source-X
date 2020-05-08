@@ -358,7 +358,7 @@ int CChar::NPC_GetVendorMarkup() const
 		return static_cast<int>(pVar->GetValNum());
 
 	// Use default value
-	return 15;
+	return g_Cfg.m_iVendorMarkup;
 }
 
 size_t CChar::NPC_OnHearName( lpctstr pszText ) const

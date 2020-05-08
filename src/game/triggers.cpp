@@ -1,9 +1,5 @@
-//
-// Created by rot on 11/03/2016.
-//
 
 #include <vector>
-#include "../common/sphereproto.h"
 #include "../common/CLog.h"
 #include "CServer.h"
 #include "triggers.h"
@@ -12,10 +8,9 @@
 
 struct T_TRIGGERS
 {
-    char	m_name[48];
+    char	m_name[TRIGGER_NAME_MAX_LEN];
     int		m_used;
 };
-
 std::vector<T_TRIGGERS> g_triggers;
 
 bool IsTrigUsed(E_TRIGGERS id)
@@ -42,7 +37,7 @@ void TriglistInit()
     T_TRIGGERS	trig;
     g_triggers.clear();
 
-#define ADD(_a_)	strcpy(trig.m_name, "@"); strcat(trig.m_name, #_a_); trig.m_used = 0; g_triggers.emplace_back(trig);
+#define ADD(_a_)	snprintf(trig.m_name, TRIGGER_NAME_MAX_LEN, "@%s", #_a_); trig.m_used = 0; g_triggers.emplace_back(trig);
 #include "../tables/triggers.tbl"
 #undef ADD
 }

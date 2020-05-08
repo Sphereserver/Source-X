@@ -191,16 +191,16 @@ size_t CRect::Read( lpctstr pszVal )
 	return i;
 }
 
-tchar * CRect::Write( tchar * pBuffer ) const
+tchar * CRect::Write( tchar * pBuffer, uint uiBufferLen) const
 {
-    sprintf(pBuffer, "%d,%d,%d,%d,%d", m_left, m_top, m_right, m_bottom, m_map);
+    snprintf(pBuffer, uiBufferLen, "%d,%d,%d,%d,%d", m_left, m_top, m_right, m_bottom, m_map);
     return pBuffer;
 }
 
 lpctstr CRect::Write() const
 {
 	ADDTOCALLSTACK("CRect::Write");
-	return Write( Str_GetTemp() );
+	return Write( Str_GetTemp(), STR_TEMPLENGTH );
 }
 
 CPointBase CRect::GetCenter() const

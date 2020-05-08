@@ -60,17 +60,14 @@ void xRecordPacket(const CClient* client, Packet* packet, lpctstr heading)
 
     // build file name
     tchar fname[64];
-    strcpy(fname, "packets_");
-    if (client->GetAccount())
-        strcat(fname, client->GetAccount()->GetName());
+	if (client->GetAccount())
+	{
+		snprintf(fname, sizeof(fname), "packets_%s.log", client->GetAccount()->GetName());
+	}
     else
     {
-        strcat(fname, "(");
-        strcat(fname, client->GetPeerStr());
-        strcat(fname, ")");
+		snprintf(fname, sizeof(fname), "packets_(%s).log", client->GetPeerStr());
     }
-
-    strcat(fname, ".log");
 
     CSString sFullFileName = CSFile::GetMergedFileName(g_Log.GetLogDir(), fname);
 
@@ -1067,11 +1064,10 @@ void Packet::dump(AbstractString& output) const
 #	define PROTECT_BYTE(_b_)
 #endif
 
-	TemporaryString tsZ;
-	tchar* z = static_cast<tchar *>(tsZ);
+	TemporaryString ts;
 
-	sprintf(z, "Packet len=%u id=0x%02x [%s]\n", m_length, m_buffer[0], CSTime::GetCurrentTime().Format(nullptr));
-	output.append(z);
+	snprintf(ts.buffer(), ts.capacity(), "Packet len=%u id=0x%02x [%s]\n", m_length, m_buffer[0], CSTime::GetCurrentTime().Format(nullptr));
+	output.append(ts);
 	output.append("        0  1  2  3  4  5  6  7   8  9  A  B  C  D  E  F\n");
 	output.append("       -- -- -- -- -- -- -- --  -- -- -- -- -- -- -- --\n");
 
@@ -1093,22 +1089,22 @@ void Packet::dump(AbstractString& output) const
 			byte c = m_buffer[idx++];
 			PROTECT_BYTE(c);
 
-			sprintf(z, "%02x", (int)c);
-			strcat(bytes, z);
-			strcat(bytes, (j == 7) ? "  " : " ");
+			snprintf(ts.buffer(), ts.capacity(), "%02x", (int)c);
+			Str_ConcatLimitNull(bytes, ts, sizeof(bytes));
+			Str_ConcatLimitNull(bytes, (j == 7) ? "  " : " ", sizeof(bytes));
 
 			if ((c >= 0x20) && (c <= 0x80))
 			{
-				z[0] = c;
-				z[1] = '\0';
-				strcat(chars, z);
+				ts.buffer()[0] = c;
+				ts.buffer()[1] = '\0';
+				Str_ConcatLimitNull(chars, ts.buffer(), sizeof(chars));
 			}
 			else
-				strcat(chars, ".");
+				Str_ConcatLimitNull(chars, ".", sizeof(chars));
 		}
 
-		sprintf(z, "%04x   ", byteIndex);
-		output.append(z);
+		snprintf(ts.buffer(), ts.capacity(), "%04x   ", byteIndex);
+		output.append(ts);
 		output.append(bytes);
 		output.append("  ");
 		output.append(chars);
@@ -1127,25 +1123,25 @@ void Packet::dump(AbstractString& output) const
 				byte c = m_buffer[idx++];
 				PROTECT_BYTE(c);
 
-				sprintf(z, "%02x", (int)(c));
-				strcat(bytes, z);
-				strcat(bytes, (j == 7) ? "  " : " ");
+				snprintf(ts.buffer(), ts.capacity(), "%02x", (int)c);
+				Str_ConcatLimitNull(bytes, ts.buffer(), sizeof(bytes));
+				Str_ConcatLimitNull(bytes, (j == 7) ? "  " : " ", sizeof(bytes));
 
 				if ((c >= 0x20) && (c <= 0x80))
 				{
-					z[0] = c;
-					z[1] = 0;
-					strcat(chars, z);
+					ts.buffer()[0] = c;
+					ts.buffer()[1] = 0;
+					Str_ConcatLimitNull(chars, ts.buffer(), sizeof(chars));
 				}
 				else
-					strcat(chars, ".");
+					Str_ConcatLimitNull(chars, ".", sizeof(chars));
 			}
 			else
-				strcat(bytes, "   ");
+				Str_ConcatLimitNull(bytes, "   ", sizeof(bytes));
 		}
 
-		sprintf(z, "%04x   ", byteIndex);
-		output.append(z);
+		snprintf(ts.buffer(), ts.capacity(), "%04x   ", byteIndex);
+		output.append(ts);
 		output.append(bytes);
 		output.append("  ");
 		output.append(chars);

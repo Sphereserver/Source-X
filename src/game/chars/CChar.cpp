@@ -2406,10 +2406,11 @@ do_default:
 				}
 
 				tchar * ppLevel_sep[100];
-				const CSString* pFameAt0 = g_Cfg.m_Fame.at(0);
+				const CSString* pFameAt0 = g_Cfg.m_Fame[0];
+                const size_t uiLen = (size_t)pFameAt0->GetLength() + 1;
 
-				tchar * pszFameAt0 = new tchar[(size_t)pFameAt0->GetLength() + 1];
-				Str_CopyLen(pszFameAt0, pFameAt0->GetPtr());
+				tchar * pszFameAt0 = new tchar[uiLen];
+				Str_CopyLimitNull(pszFameAt0, pFameAt0->GetBuffer(), uiLen);
 
 				int iFame = GetFame();
 				int i = Str_ParseCmds( pszFameAt0, ppLevel_sep, CountOf(ppLevel_sep), "," ) - 1; //range
@@ -2419,9 +2420,9 @@ do_default:
 					{
 						DEBUG_ERR(("'%s' is not a valid fame value.\n", ppLevel_sep[i]));
 					}
-					else if ( iFame >= atoi(ppLevel_sep[ i ]) )
+					else if ( iFame >= Str_ToI(ppLevel_sep[ i ]) )
 					{
-						sVal = ( !g_Cfg.m_Fame.at((size_t)i + 1)->CompareNoCase( ptcKey + 5 )) ? "1" : "0";
+						sVal = ( !g_Cfg.m_Fame[(size_t)i + 1]->CompareNoCase( ptcKey + 5 )) ? "1" : "0";
 						delete[] pszFameAt0;
 						return true;
 					}
@@ -2501,10 +2502,11 @@ do_default:
 				}
 
 				tchar * ppLevel_sep[100];
-				const CSString* pKarmaAt0 = g_Cfg.m_Karma.at(0);
+				const CSString* pKarmaAt0 = g_Cfg.m_Karma[0];
+				const size_t uiLen = (size_t)pKarmaAt0->GetLength() + 1;
 
-				tchar * pszKarmaAt0 = new tchar[(size_t)pKarmaAt0->GetLength() + 1];
-				Str_CopyLen(pszKarmaAt0, pKarmaAt0->GetPtr());
+				tchar * pszKarmaAt0 = new tchar[uiLen];
+				Str_CopyLimitNull(pszKarmaAt0, pKarmaAt0->GetBuffer(), uiLen);
 
 				short iKarma = GetKarma();
 
@@ -2515,9 +2517,9 @@ do_default:
 					{
 						DEBUG_ERR(("'%s' is not a valid karma value.\n", ppLevel_sep[i]));
 					}
-					else if ( iKarma >= atoi(ppLevel_sep[ i ]) )
+					else if ( iKarma >= Str_ToI(ppLevel_sep[ i ]) )
 					{
-						sVal = ( !g_Cfg.m_Karma.at((size_t)i + 1)->CompareNoCase( ptcKey + 6 )) ? "1" : "0";
+						sVal = ( !g_Cfg.m_Karma[(size_t)i + 1]->CompareNoCase( ptcKey + 6 )) ? "1" : "0";
 						delete[] pszKarmaAt0;
 						return true;
 					}
@@ -2539,8 +2541,13 @@ do_default:
 			sVal.FormatLLVal( CWorldGameTime::GetCurrentTime().GetTimeDiff(_iTimeCreate) / ( MSECS_PER_SEC * 60 * 60 *24 ) ); //displayed in days
 			return true;
 		case CHC_BANKBALANCE:
-			sVal.FormatVal( GetBank()->ContentCount( CResourceID(RES_TYPEDEF,IT_GOLD)));
+		{
+			const CItemContainer* pBank = GetBank();
+			if (!pBank)
+				return false;
+			sVal.FormatVal(pBank->ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD)));
 			return true;
+		}
 		case CHC_CANCAST:
 			{
 				ptcKey += 7;
@@ -2814,7 +2821,7 @@ do_default:
 				}
 			}
 			if ( m_pPlayer == nullptr )
-				sVal.Empty();
+				sVal.Clear();
 			else
 				sVal = m_pPlayer->GetAccount()->GetName();
 			break;
@@ -4150,9 +4157,9 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			{
 				tchar *z = Str_GetTemp();
 				if ( pCharSrc == this )
-					sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_FOOD_LVL_SELF), Food_GetLevelMessage( false, false ));
+					snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_FOOD_LVL_SELF), Food_GetLevelMessage( false, false ));
 				else
-					sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_FOOD_LVL_OTHER), GetName(), Food_GetLevelMessage( false, false ));
+					snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_FOOD_LVL_OTHER), GetName(), Food_GetLevelMessage( false, false ));
 				pCharSrc->ObjMessage(z, this);
 			}
 			break;
@@ -4200,17 +4207,19 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_MAKEITEM:
 		{
 			tchar *psTmp = Str_GetTemp();
-			strcpy( psTmp, s.GetArgRaw() );
+			Str_CopyLimitNull( psTmp, s.GetArgRaw(), STR_TEMPLENGTH );
 			GETNONWHITESPACE( psTmp );
 			tchar * ttVal[2];
 			int iTmp = 1;
 			int iArg = Str_ParseCmds( psTmp, ttVal, CountOf( ttVal ), " ,\t" );
-			if ( !iArg )
+			if (!iArg)
+			{
 				return false;
+			}
 			if ( iArg == 2 )
 			{
 				if ( IsDigit( ttVal[1][0] ) )
-					iTmp = atoi( ttVal[1] );
+					iTmp = Str_ToI( ttVal[1] );
 			}
 			//DEBUG_ERR(( "CHV_MAKEITEM iTmp is %d, arg was %s\n",iTmp,psTmp ));
 
@@ -4449,19 +4458,23 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				tchar *z = Str_GetTemp();
 				if ( m_pArea )
 				{
-					if ( m_pArea->GetResourceID().IsUIDItem())  // Inside a multi region
-						sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE_AREA), m_pArea->GetName(), GetTopPoint().WriteUsed());
+					if (m_pArea->GetResourceID().IsUIDItem())  // Inside a multi region
+					{
+						snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE_AREA), m_pArea->GetName(), GetTopPoint().WriteUsed());
+					}
 					else
 					{
 						const CRegion * pRoom = GetTopPoint().GetRegion( REGION_TYPE_ROOM );
 						if ( ! pRoom )
-							sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE_AREA), m_pArea->GetName(), GetTopPoint().WriteUsed());
+							snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE_AREA), m_pArea->GetName(), GetTopPoint().WriteUsed());
 						else
-							sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE_ROOM), m_pArea->GetName(), pRoom->GetName(), GetTopPoint().WriteUsed());
+							snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE_ROOM), m_pArea->GetName(), pRoom->GetName(), GetTopPoint().WriteUsed());
 					}
 				}
 				else
-					sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE), GetTopPoint().WriteUsed());
+				{
+					snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE), GetTopPoint().WriteUsed());
+				}
 				pCharSrc->ObjMessage(z, this);
 			}
 			break;
@@ -4633,20 +4646,20 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 
 		if ((g_Cfg.m_iDebugFlags & DEBUGF_EXP) && (delta != 0))
 		{
-			g_Log.EventDebug("%s %s experience change (was %u, delta %d, now %u)\n",
-				(m_pNPC ? "NPC" : "Player"), GetName(), m_exp, delta, m_exp + delta);
+			g_Log.EventDebug("%s %s experience change (was %u, delta %lld, now %u)\n",
+				(m_pNPC ? "NPC" : "Player"), GetName(), m_exp, delta, (uint)(m_exp + delta));
 		}
 
-		bool bShowMsg = (m_pClient != nullptr);
+		bool fShowMsg = (m_pClient != nullptr);
 
 		if (IsTrigUsed(TRIGGER_EXPCHANGE))
 		{
-			CScriptTriggerArgs args(delta, bShowMsg);
+			CScriptTriggerArgs args(delta, fShowMsg);
 			args.m_pO1 = pCharDead;
 			if (OnTrigger(CTRIG_ExpChange, this, &args) == TRIGRET_RET_TRUE)
 				return;
 			delta = args.m_iN1;
-			bShowMsg = (args.m_iN2 != 0);
+			fShowMsg = (args.m_iN2 != 0);
 		}
 
 		// Do not allow an underflow due to negative Exp Change.
@@ -4655,7 +4668,7 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 		else
 			m_exp = (uint)(m_exp + delta);
 
-		if (m_pClient && bShowMsg && delta)
+		if (m_pClient && fShowMsg && delta)
 		{
 			int iWord = 0;
 			llong absval = abs(delta);
@@ -4690,7 +4703,7 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 		{
 			delta = level - m_level;
 
-			bool bShowMsg = (m_pClient != nullptr);
+			bool fShowMsg = (m_pClient != nullptr);
 
 			if (IsTrigUsed(TRIGGER_EXPLEVELCHANGE))
 			{
@@ -4698,7 +4711,7 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 				if (OnTrigger(CTRIG_ExpLevelChange, this, &args) == TRIGRET_RET_TRUE)
 					return;
 				delta = args.m_iN1;
-				bShowMsg = (args.m_iN2 != 0);
+				fShowMsg = (args.m_iN2 != 0);
 			}
 
 			level = delta + m_level;
@@ -4712,7 +4725,7 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 			}
 			m_level = (uint)level;
 
-			if (m_pClient && bShowMsg)
+			if (m_pClient && fShowMsg)
 			{
 				m_pClient->SysMessagef((abs(delta) == 1) ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_0) : g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_1),
 					(delta > 0) ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_GAIN) : g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_LOST));

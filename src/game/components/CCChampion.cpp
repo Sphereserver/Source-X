@@ -250,17 +250,11 @@ void CCChampion::SpawnNPC()
     CCSpawn* pSpawn = GetSpawnItem();
     if (pSpawn)
     {
-        CChar* pChar = CChar::CreateBasic(pNpc);
-        if (!pChar)
+        CChar* spawn = pSpawn->GenerateChar(rid);
+        if (spawn != nullptr)
         {
-            return;
+            AddObj(spawn->GetUID());
         }
-        CPointMap pt = GetLink()->GetTopPoint();
-        pChar->SetTopPoint(pt);
-        pChar->MoveNear(pt, 10);
-        pChar->Update();
-        pChar->NPC_LoadScript(true);
-        AddObj(pChar->GetUID());
     }
     ++_iSpawnsCur;
 }
@@ -755,7 +749,7 @@ void CCChampion::r_Write(CScript & s)
     CCChampionDef* pChampDef = static_cast<CCChampionDef*>(pRes);
     if (!pChampDef)
     {
-        g_Log.EventDebug("Trying to save a champion spawn 0%x with bad id %.\n", GetLink()->GetUID(), _idSpawn.GetPrivateUID());
+        g_Log.EventDebug("Trying to save a champion spawn 0%x with bad id 0%x.\n", GetLink()->GetUID(), _idSpawn.GetPrivateUID());
         return;
     }
     s.WriteKeyVal("ACTIVE", _fActive);
@@ -792,7 +786,7 @@ void CCChampion::r_Write(CScript & s)
         s.WriteKeyHex("ADDWHITECANDLE", (dword)uidCandle);
     }
 
-    if (_spawnGroupsId.size())
+    if (!_spawnGroupsId.empty())
     {
         for (auto const& group : _spawnGroupsId)
         {
@@ -827,9 +821,7 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 
     if (iCmd < 0)
     {
-        std::string str = ptcKey;
-        std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return (unsigned char)std::tolower(c); });
-        if (str.compare(0, 8, "npcgroup") == 0)
+        if (!strnicmp(ptcKey, "NPCGROUP", 8))
         {
             ptcKey += 8;
             iCmd = ICHMPL_NPCGROUP;

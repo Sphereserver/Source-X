@@ -128,6 +128,6 @@ lpctstr CServerTime::GetTimeMinDesc(int minutes) // static
         //		pTail = " o'clock in the morning";
     }
 
-    sprintf(pTime, "%s %s %s", pMinDif, sm_ClockHour[hour], pTail);
+    snprintf(pTime, STR_TEMPLENGTH, "%s %s %s", pMinDif, sm_ClockHour[hour], pTail);
     return pTime;
 }

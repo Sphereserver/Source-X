@@ -22,7 +22,7 @@ void CSStringSortArray::AddSortString( lpctstr pszText )
     ASSERT(pszText);
     size_t len = strlen( pszText );
     tchar * pNew = new tchar [ len + 1 ];
-    strcpy( pNew, pszText );
+    Str_CopyLimitNull( pNew, pszText, len + 1 );
     AddSortKey( pNew, pNew );
 }
 
