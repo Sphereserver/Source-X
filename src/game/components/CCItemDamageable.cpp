@@ -34,6 +34,19 @@ bool CCItemDamageable::CanSubscribe(const CItem* pItem) // static
     return pItem->Can(CAN_I_DAMAGEABLE);
 }
 
+void CCItemDamageable::UpdateHits(int iChange)
+{
+    int iVal = _iCurHits + iChange;
+    if (iVal < 0)
+        iVal = 0;
+    if (iVal >= _iMaxHits)
+        iVal = _iMaxHits;
+    if (iVal == _iCurHits)
+        return;
+
+    SetCurHits((word)iVal);
+}
+
 void CCItemDamageable::SetCurHits(word iCurHits)
 {
     if (!g_Serv.IsLoading() && (_iCurHits != iCurHits))

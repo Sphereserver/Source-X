@@ -901,7 +901,7 @@ void CCMultiMovable::Stop()
     CItem *pItemThis = dynamic_cast<CItem*>(this);
     ASSERT(pItemThis);
     pItemThis->m_itShip._eMovementType = SMT_STOP;
-    pItemThis->OnTrigger(ITRIG_Ship_Stop, &this);
+    pItemThis->OnTrigger(ITRIG_Ship_Stop, &g_Serv);
 
     _pCaptain = nullptr;
 }
@@ -1075,8 +1075,15 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
             CScriptTriggerArgs Args;
             Args.m_iN1 = DirMoveChange;
             Args.m_iN2 = DirFace;
+            Args.m_VarsLocal.SetNum("TillerID", 0);
             if (pMultiThis->OnTrigger(ITRIG_Ship_Move, pChar, &Args) == TRIGRET_RET_TRUE)
                 return false;
+
+            if (Args.m_VarsLocal.GetKeyNum("TillerID") != 0)
+            {
+                pTiller->SetDispID((ITEMID_TYPE)Args.m_VarsLocal.GetKeyNum("TillerID"));
+                pTiller->Update();
+            }
 
             if (!SetMoveDir(GetDirTurn(DirFace, DirMoveChange), SMT_NORMAL))
                 return false;

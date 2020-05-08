@@ -28,6 +28,7 @@ public:
 
     static bool CanSubscribe(const CItem* pItem);
 
+    void UpdateHits(int iChange);
     void SetCurHits(word iCurHits);
     void SetMaxHits(word iMaxHits);
     word GetCurHits() const;

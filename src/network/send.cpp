@@ -3076,6 +3076,26 @@ PacketHealthUpdate::PacketHealthUpdate(const CChar* character, bool full) : Pack
 	}
 }
 
+PacketHealthUpdateItem::PacketHealthUpdateItem(const CItem* item, bool full) : PacketSend(XCMD_StatChngStr, 9, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
+{
+	ADDTOCALLSTACK("PacketHealUpdateItem::PacketHealthUpdateItem");
+	CCItemDamageable* pItemDmg = static_cast<CCItemDamageable*>(item->GetComponent(COMP_ITEMDAMAGEABLE));
+	ASSERT(pItemDmg);
+	
+	writeInt32(item->GetUID());
+	if (full)
+	{
+		writeInt16(pItemDmg->GetMaxHits());
+		writeInt16(pItemDmg->GetCurHits());
+	}
+	else
+	{
+		writeInt16(100);
+		ushort iStatMax = pItemDmg->GetMaxHits();
+		writeInt16((pItemDmg->GetCurHits() * 100) / maximum(iStatMax, 1));
+	}
+}
+
 
 /***************************************************************************
  *

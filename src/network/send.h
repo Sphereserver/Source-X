@@ -1075,8 +1075,15 @@ public:
 class PacketHealthUpdate : public PacketSend
 {
 public:
-	PacketHealthUpdate(const CChar* character, bool full);
+    PacketHealthUpdate(const CChar* character, bool full);
 };
+
+class PacketHealthUpdateItem : public PacketSend
+{
+public:
+    PacketHealthUpdateItem(const CItem* item, bool full);
+};
+
 
 /***************************************************************************
  *

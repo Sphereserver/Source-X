@@ -5532,6 +5532,17 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 			return 0;
 	}
 
+	if (Can(CAN_I_DAMAGEABLE))
+	{
+		CCItemDamageable* pItemDmg = static_cast<CCItemDamageable*>(GetComponent(COMP_ITEMDAMAGEABLE));
+		pItemDmg->UpdateHits(-(word)iDmg);
+
+		if (pSrc->IsClient())
+			pSrc->GetClient()->addShowDamage(iDmg, (dword)(GetUID()));
+
+		return 0;
+	}
+
 	switch ( GetType() )
 	{
 	case IT_CLOTHING:
