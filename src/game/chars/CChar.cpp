@@ -388,6 +388,10 @@ bool CChar::NotifyDelete()
 		if (trigReturn == TRIGRET_RET_TRUE)
 			return false;
 	}
+	
+	// Clear follower slots on pet owner
+	if (m_pNPC)
+		NPC_PetClearOwners();
 
 	ContentNotifyDelete();
 	return true;
