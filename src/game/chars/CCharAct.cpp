@@ -3392,7 +3392,8 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 				SysMessage(pszMsg);
 				return nullptr;
 			}
-			else if (pChar->IsStatFlag(STATF_INVISIBLE) && !(g_Cfg.m_iRevealFlags & REVEALF_OSILIKEPERSONALSPACE) ) {
+			else if (pChar->IsStatFlag(STATF_INVISIBLE) && !(g_Cfg.m_iRevealFlags & REVEALF_OSILIKEPERSONALSPACE) ) 
+			{
                 snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE), pChar->GetName());
                 pChar->Reveal(STATF_INVISIBLE | STATF_HIDDEN);
 			}

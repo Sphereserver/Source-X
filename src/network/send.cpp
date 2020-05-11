@@ -3515,11 +3515,12 @@ PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nword* p
  ***************************************************************************/
 PacketDeath::PacketDeath(CChar* dead, CItemCorpse* corpse, bool fFrontFall) : PacketSend(XCMD_CharDeath, 13, PRI_NORMAL)
 {
+	UNREFERENCED_PARAMETER(fFrontFall);
 	ADDTOCALLSTACK("PacketDeath::PacketDeath");
 
 	writeInt32(dead->GetUID());
 	writeInt32(corpse == nullptr ? 0 : (dword)corpse->GetUID());
-	writeInt32((dword)fFrontFall);
+	writeInt32(0);
 }
 
 

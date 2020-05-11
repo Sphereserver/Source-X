@@ -923,11 +923,6 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 	if ( !m_pChar->Spell_CanCast(iSpell, true, pSrc, true) )
 		return false;
 
-	SetTargMode();
-	m_tmSkillMagery.m_iSpell = iSpell;	// m_atMagery.m_iSpell
-	m_Targ_UID = m_pChar->GetUID();		// Default target.
-	m_Targ_Prv_UID = pSrc->GetUID();		// Source of the spell.
-
 	switch ( iSpell )
 	{
 		case SPELL_Polymorph:
@@ -943,13 +938,23 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 
 		case SPELL_Summon:
 		{
-			if ( IsTrigUsed(TRIGGER_SKILLMENU) )
+
+			LPCTSTR dSkillMenu = "d_SummonCreature";
+			CScriptTriggerArgs Args;
+			Args.m_VarsLocal.SetStrNew("SkillMenu", dSkillMenu);
+			Args.m_VarsLocal.SetNumNew("Skill", SKILL_MAGERY);
+			if (IsTrigUsed(TRIGGER_SKILLMENU))
 			{
-				CScriptTriggerArgs args("sm_summon");
-				if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
+				if (m_pChar->Skill_OnCharTrigger(SKILL_MAGERY, CTRIG_SkillMenu, &Args) == TRIGRET_RET_TRUE)
 					return true;
+
+				dSkillMenu = Args.m_VarsLocal.GetKeyStr("Skillmenu", false);
+				if (!IsValidDef(dSkillMenu))
+					return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_summon"));
+
+				Dialog_Setup(CLIMODE_DIALOG, g_Cfg.ResourceGetIDType(RES_DIALOG, dSkillMenu), 0, m_pChar, "skill_magery");
+				return true;			
 			}
-			return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_summon"));
 		}
 
 		case SPELL_Summon_Familiar:
@@ -966,6 +971,11 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 		default:
 			break;
 	}
+
+	SetTargMode();
+	m_tmSkillMagery.m_iSpell = iSpell;	// m_atMagery.m_iSpell
+	m_Targ_UID = m_pChar->GetUID();		// Default target.
+	m_Targ_Prv_UID = pSrc->GetUID();	// Source of the spell.
 
 	// Targeted spells
 	if ( pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ|SPELLFLAG_TARG_XYZ) )

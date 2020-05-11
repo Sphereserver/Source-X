@@ -389,8 +389,8 @@ public:
 	enum Mode
 	{
 		Dead = 0x00,        // Old "server sent"
-        //Resurrect = 0x1,    // Sent by the client
-		//Alive = 0x02        // Sent by the client
+        Resurrect = 0x1,    // Sent by the client
+		Ghost = 0x02        // Sent by the client
 	};
 
 	PacketDeathMenu(const CClient* target, Mode mode);

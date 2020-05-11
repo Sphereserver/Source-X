@@ -14,6 +14,7 @@
 // Introduced in new (SA) clients.
 bool CChar::Fight_Attack(CItem* pItemTarg, bool fToldByMaster)
 {
+	UNREFERENCED_PARAMETER(fToldByMaster);
 	ADDTOCALLSTACK("CChar::Fight_Attack");
 
 	if (!pItemTarg || IsStatFlag(STATF_DEAD))
@@ -52,6 +53,7 @@ bool CChar::Fight_Attack(CItem* pItemTarg, bool fToldByMaster)
 // Is not a "fight" but we must clear our vars.
 bool CChar::Fight_Clear(CItem* pItem, bool fForced)
 {
+	UNREFERENCED_PARAMETER(fForced);
 	ADDTOCALLSTACK("CChar::Fight_Clear");
 	if (!pItem)
 		return false;
