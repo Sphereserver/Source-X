@@ -1090,6 +1090,7 @@ enum CTRIG_TYPE : short
 	CTRIG_AfterClick,       // I'm not yet clicked, name should be generated before.
 	CTRIG_Attack,           // I am attacking someone (SRC).
 	CTRIG_CallGuards,       // I'm calling guards.
+    CTRIG_CarveCorpse,
     // Here starts @charXXX section
 	CTRIG_charAttack,           // Calling this trigger over other char.
 	CTRIG_charClick,            // Calling this trigger over other char.

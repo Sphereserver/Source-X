@@ -37,6 +37,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@AfterClick",
 	"@Attack",				// I am attacking someone (SRC)
 	"@CallGuards",
+	"@CarveCorpse",
 
 	"@charAttack",			// Here starts @charXXX section
 	"@charClick",

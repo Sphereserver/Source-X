@@ -971,18 +971,30 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
 
     CItem *pItemThis = dynamic_cast<CItem*>(this);
     ASSERT(pItemThis);
+
     CItemMulti *pMultiThis = static_cast<CItemMulti*>(pItemThis);
     if (!pSrc || !pItemThis->IsTopLevel())
         return false;
 
+    // Death chars can't command a ship
     CChar * pChar = pSrc->GetChar();
-
-    // Only key holders can command the ship ???
-    // if ( pChar && pChar->ContentFindKeyFor( pItem ))
+    if (pChar->IsStatFlag(STATF_DEAD) && !pChar->IsPriv(PRIV_GM))
+    {
+        pChar->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_CANTMOVE_DEAD));
+        return false;
+    }
 
     // Find the tiller man object.
     CItem * pTiller = pMultiThis->Multi_GetSign();
     ASSERT(pTiller);
+
+    // Only the owner can command the ship
+    // Or a GameMaster
+    if (pMultiThis->GetOwner() != pChar->GetUID() && !pChar->IsPriv(PRIV_GM))
+    {    
+        pTiller->Speak(g_Cfg.GetDefaultMsg(DEFMSG_TILLER_NOTYOURSHIP), HUE_TEXT_DEF, TALKMODE_SAY, FONT_NORMAL);
+        return false;
+    }
 
     // Get current facing dir.
     DIR_TYPE DirFace = sm_FaceDir[GetFaceOffset()];

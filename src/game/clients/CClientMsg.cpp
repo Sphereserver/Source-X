@@ -2223,7 +2223,7 @@ void CClient::addSpellbookOpen( CItem * pBook )
 
 	// New AOS spellbook packet required by client 4.0.0 and above.
 	// Old packet is still required if both FEATURE_AOS_TOOLTIP and FEATURE_AOS_UPDATE aren't sent.
-	if ( PacketSpellbookContent::CanSendTo(GetNetState()) && IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
+	if ( PacketSpellbookContent::CanSendTo(GetNetState()) ) // && IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
 	{
 		// Handle new AOS spellbook stuff (old packets no longer work)
 		new PacketSpellbookContent( this, pBook, (word)(pBook->Item_GetDef()->m_ttSpellbook.m_iOffset + 1) );

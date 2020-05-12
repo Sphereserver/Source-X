@@ -40,7 +40,7 @@ bool CChar::Use_MultiLockDown( CItem * pItemTarg )
 	return false;
 }
 
-void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
+bool CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 {
 	ADDTOCALLSTACK("CChar::Use_CarveCorpse");
 	CREID_TYPE CorpseID = pCorpse->m_itCorpse.m_BaseID;
@@ -48,14 +48,31 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 	if ( !pCorpseDef || pCorpse->m_itCorpse.m_carved )
 	{
 		SysMessageDefault(DEFMSG_CARVE_CORPSE_NOTHING);
-		return;
+		return false;
 	}
 
 	CChar *pChar = pCorpse->m_uidLink.CharFind();
 	CPointMap pnt = pCorpse->GetTopLevelObj()->GetTopPoint();
 
-	UpdateAnimate(ANIM_BOW);
-	if ( pCorpse->m_TagDefs.GetKeyNum("BLOOD") )
+	bool fPlayAnim = true;
+	bool fUseBlood = true;
+	int iResourcesPercent = 100;
+	if (IsTrigUsed(TRIGGER_CARVECORPSE))
+	{
+			CScriptTriggerArgs Args(fPlayAnim, fUseBlood);
+			Args.m_VarsLocal.SetNum("ResourcesPercent", iResourcesPercent);
+			TRIGRET_TYPE iRet = pChar->OnTrigger(CTRIG_CarveCorpse, this, &Args);
+			if (iRet == TRIGRET_RET_TRUE)
+				return false;
+			fPlayAnim = (bool)(Args.m_iN1);
+			fUseBlood = (bool)(Args.m_iN2);
+			iResourcesPercent = (int)Args.m_VarsLocal.GetKeyNum("ResourcesPercent");
+	}
+
+	if ( fPlayAnim )
+		UpdateAnimate(ANIM_BOW);
+
+	if ( pCorpse->m_TagDefs.GetKeyNum("BLOOD") && fUseBlood )
 	{
 		CItem *pBlood = CItem::CreateBase(ITEMID_BLOOD4);
 		ASSERT(pBlood);
@@ -66,7 +83,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 	size_t iItems = 0;
 	for ( size_t i = 0; i < pCorpseDef->m_BaseResources.size(); ++i )
 	{
-		llong iQty = pCorpseDef->m_BaseResources[i].GetResQty();
+		llong iQty = (pCorpseDef->m_BaseResources[i].GetResQty() * iResourcesPercent) / 100;
 		const CResourceID& rid = pCorpseDef->m_BaseResources[i].GetResourceID();
 		if ( rid.GetResType() != RES_ITEMDEF )
 			continue;
@@ -132,6 +149,8 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 
 	if ( pChar && pChar->m_pPlayer )
 		pCorpse->SetTimeout(0);		// reset corpse timer to make it turn bones
+
+	return true;
 }
 
 void CChar::Use_MoonGate( CItem * pItem )

@@ -3326,6 +3326,17 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 				return false;
 			pCharSrc->ItemBounce( this );
 			break;
+		case CIV_CARVE:
+			{
+				if (!pCharSrc)
+					return false;
+
+				CItem* pTarg = CUID(s.GetArgVal()).ItemFind();
+				if (!pTarg->IsType(IT_CORPSE))
+					return false;
+
+				return pCharSrc->Use_CarveCorpse(dynamic_cast <CItemCorpse*>(pTarg));
+			}
 		case CIV_CONSUME:
 			ConsumeAmount( s.HasArgs() ? s.GetArgWVal() : 1 );
 			break;
