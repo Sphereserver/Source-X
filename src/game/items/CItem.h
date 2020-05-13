@@ -743,9 +743,9 @@ public:
 	SKILL_TYPE GetSpellBookSkill();
 	SPELL_TYPE GetScrollSpell() const;
 	bool IsSpellInBook( SPELL_TYPE spell ) const;
-	int GetSpellcountInBook() const;
-	int AddSpellbookScroll( CItem * pItem );
-	int AddSpellbookSpell( SPELL_TYPE spell, bool fUpdate );
+	uint GetSpellcountInBook() const;
+	uint AddSpellbookScroll( CItem * pItem );
+	uint AddSpellbookSpell( SPELL_TYPE spell, bool fUpdate );
 
 	//Doors
 	bool IsDoorOpen() const;

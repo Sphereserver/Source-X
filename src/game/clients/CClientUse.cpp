@@ -326,8 +326,8 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_WAND:
 		case IT_SCROLL:
 		{
-			SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pItem->m_itWeapon.m_spell));
-			CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
+			const SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pItem->m_itWeapon.m_spell));
+			const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
 			if ( !pSpellDef )
 				return false;
 

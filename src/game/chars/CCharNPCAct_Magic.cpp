@@ -126,8 +126,8 @@ void CChar::NPC_AddSpellsFromBook(CItem * pBook)
     if (!pBookDef)
         return;
 
-    uint min = pBookDef->m_ttSpellbook.m_iOffset + 1;
-    uint max = pBookDef->m_ttSpellbook.m_iOffset + pBookDef->m_ttSpellbook.m_iMaxSpells;
+    const uint min = pBookDef->m_ttSpellbook.m_iOffset + 1;
+    const uint max = pBookDef->m_ttSpellbook.m_iOffset + pBookDef->m_ttSpellbook.m_iMaxSpells;
 
     for (uint i = min; i <= max; ++i)
     {

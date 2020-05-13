@@ -2241,16 +2241,16 @@ void CClient::addCustomSpellbookOpen( CItem * pBook, dword gumpID )
 		return;
 
 	int count = 0;
-	for (CSObjContRec* pObjRec : *pContainer)
+	for (const CSObjContRec* pObjRec : *pContainer)
 	{
-		CItem* pItem = static_cast<CItem*>(pObjRec);
+		auto pItem = static_cast<const CItem*>(pObjRec);
 		if ( !pItem->IsType( IT_SCROLL ) )
 			continue;
 		++ count;
 	}
 
 	OpenPacketTransaction transaction(this, PacketSend::PRI_NORMAL);
-	addOpenGump( pBook, static_cast<GUMP_TYPE>(gumpID));
+	addOpenGump( pBook, GUMP_TYPE(gumpID));
 	if (count <= 0)
 		return;
 
@@ -2783,7 +2783,7 @@ byte CClient::Setup_Delete( dword iSlot ) // Deletion of character
 
 	// Make sure the char is at least x seconds old.
 	if ( g_Cfg.m_iMinCharDeleteTime &&
-		(CWorldGameTime::GetCurrentTime().GetTimeDiff(pChar->_iTimeCreate)/MSECS_PER_TENTH) < g_Cfg.m_iMinCharDeleteTime )
+		(CWorldGameTime::GetCurrentTime().GetTimeDiff(pChar->_iTimeCreate) < g_Cfg.m_iMinCharDeleteTime) )
 	{
 		if ( GetPrivLevel() < PLEVEL_Counsel )
 		{

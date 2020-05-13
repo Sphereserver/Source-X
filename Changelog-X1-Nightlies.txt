@@ -2248,3 +2248,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Added VendorMarkup ini setting, allowing to modify the default 15% taxes for all vendors at once.
 	This will work if no other tags are present (in the vendor, region, etc).
 	To disable the taxing, set this value to 1, never to 0.
+
+13-05-2020, Nolok
+- Fixed: Couldn't read correctly MORE1/MORE2 from spellbooks and store properly 32th and 64th spells (Issue #437).
+- Fixed: MinCharDeleteTime wasn't correctly (internally) converted in seconds (Issue #459).
