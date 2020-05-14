@@ -340,7 +340,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsol
     {
         EXC_SET_BLOCK("local");
         ptcKey	+= 6;
-        sVal = m_VarsLocal.GetKeyStr(ptcKey, true);
+        sVal = m_VarsLocal.GetKeyStr(ptcKey, false);
         return true;
     }
 
