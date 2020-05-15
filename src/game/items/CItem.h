@@ -548,7 +548,6 @@ public:
 	virtual bool Delete(bool fForce = false) override;
 
 public:
-    CCFaction *GetSlayer() const;
 	virtual bool OnTick() override;
 	virtual void OnHear( lpctstr pszCmd, CChar * pSrc );
 	CItemBase * Item_GetDef() const;
@@ -569,6 +568,7 @@ public:
 
 	int IsWeird() const;
 	char GetFixZ(CPointMap pt, dword dwBlockFlags = 0 );
+	CCFaction* GetSlayer() const;
 	byte GetSpeed() const;
 
     /**
@@ -666,9 +666,13 @@ public:
 	bool MoveToCheck(const CPointMap & pt, CChar * pCharMover = nullptr );
 	virtual bool MoveNearObj( const CObjBaseTemplate *pItem, ushort uiSteps = 0 ) override;
 
-	const CObjBaseTemplate* GetTopLevelObj() const override;
-	CObjBaseTemplate* GetTopLevelObj() override;
+	virtual CObjBaseTemplate* GetTopLevelObj() override;
+	virtual const CObjBaseTemplate* GetTopLevelObj() const override;
+
 	CObjBase * GetContainer() const;
+	CItem * GetTopContainer();
+	const CItem* GetTopContainer() const;
+
 	uchar GetContainedGridIndex() const;
 	void SetContainedGridIndex(uchar index);
 
@@ -739,9 +743,9 @@ public:
 	SKILL_TYPE GetSpellBookSkill();
 	SPELL_TYPE GetScrollSpell() const;
 	bool IsSpellInBook( SPELL_TYPE spell ) const;
-	int GetSpellcountInBook() const;
-	int AddSpellbookScroll( CItem * pItem );
-	int AddSpellbookSpell( SPELL_TYPE spell, bool fUpdate );
+	uint GetSpellcountInBook() const;
+	uint AddSpellbookScroll( CItem * pItem );
+	uint AddSpellbookSpell( SPELL_TYPE spell, bool fUpdate );
 
 	//Doors
 	bool IsDoorOpen() const;

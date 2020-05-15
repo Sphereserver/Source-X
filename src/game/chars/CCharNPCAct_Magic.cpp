@@ -126,8 +126,8 @@ void CChar::NPC_AddSpellsFromBook(CItem * pBook)
     if (!pBookDef)
         return;
 
-    uint min = pBookDef->m_ttSpellbook.m_iOffset + 1;
-    uint max = pBookDef->m_ttSpellbook.m_iOffset + pBookDef->m_ttSpellbook.m_iMaxSpells;
+    const uint min = pBookDef->m_ttSpellbook.m_iOffset + 1;
+    const uint max = pBookDef->m_ttSpellbook.m_iOffset + pBookDef->m_ttSpellbook.m_iMaxSpells;
 
     for (uint i = min; i <= max; ++i)
     {
@@ -396,7 +396,6 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
             }
             if (pSpellDef->IsSpellType(SPELLFLAG_HEAL)) //Good spells that cannot be targeted
             {
-                bool bSpellSuits = true;
                 switch (spell)
                 {
                     //No spells added ATM until they are created, good example spell to here = SPELL_Healing_Stone
@@ -405,7 +404,7 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                         CItem * pStone = GetBackpackItem(ITEMID_HEALING_STONE);
                         if (!pStone)
                             break;
-                        if ((pStone->m_itNormal.m_morep.m_z == 0) && (Stat_GetVal(STAT_STR) < (int)(pStone->m_itNormal.m_more2)) && (pStone->m_itNormal.m_more1 >= pStone->m_itNormal.m_more2))
+                        if ((pStone->m_itNormal.m_morep.m_z == 0) && (Stat_GetVal(STAT_STR) < pStone->m_itNormal.m_more2) && (pStone->m_itNormal.m_more1 >= pStone->m_itNormal.m_more2))
                         {
                             Use_Obj(pStone, false);
                             return true; // we are not casting any spell but suceeded at using the stone created by this one, we are done now.
@@ -415,9 +414,6 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                     default:
                         break;
                 }
-
-                if (!bSpellSuits)
-                    return false;
 
                 pTarg = this;
                 m_atMagery.m_iSpell = spell;

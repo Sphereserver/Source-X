@@ -114,7 +114,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 		if ( pChar && pChar->m_pPlayer )
 		{
 			tchar *pszMsg = Str_GetTemp();
-			sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_CORPSE_NAME), pPart->GetName(), pChar->GetName());
+			snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_CORPSE_NAME), pPart->GetName(), pChar->GetName());
 			pPart->SetName(pszMsg);
 			pPart->m_uidLink = pChar->GetUID();
 			pPart->MoveToDecay(pnt, pPart->GetDecayTime());
@@ -313,7 +313,7 @@ bool CChar::Use_Train_Dummy( CItem * pItem, bool fSetup )
 			return true;
 
 		char skilltag[38];
-		sprintf(skilltag, "OVERRIDE.PracticeMax.SKILL_%d", (int)(skill & ~0xD2000000));
+		snprintf(skilltag, sizeof(skilltag), "OVERRIDE.PracticeMax.SKILL_%d", (int)(skill & ~0xD2000000));
 		CVarDefCont *pSkillTag = pItem->GetKey(skilltag, true);
 		word iMaxSkill = pSkillTag ? (word)pSkillTag->GetValNum() : (word)g_Cfg.m_iSkillPracticeMax;
 		if ( Skill_GetBase(skill) > iMaxSkill )
@@ -475,7 +475,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 			return true;
 
 		char skilltag[38];
-		sprintf(skilltag, "OVERRIDE.PracticeMax.SKILL_%d", (int)(skill & ~0xD2000000));
+		snprintf(skilltag, sizeof(skilltag), "OVERRIDE.PracticeMax.SKILL_%d", (int)(skill & ~0xD2000000));
 		CVarDefCont *pSkillTag = pButte->GetKey(skilltag, true);
 		word iMaxSkill = pSkillTag ? (word)pSkillTag->GetValNum() : (word)g_Cfg.m_iSkillPracticeMax;
 		if ( Skill_GetBase(skill) > iMaxSkill )
@@ -803,7 +803,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 		pszText = g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_5);
 
 	tchar *pszMsg = Str_GetTemp();
-	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_MSG), pszText, pItemArmor->GetName());
+	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_MSG), pszText, pItemArmor->GetName());
 	Emote(pszMsg);
 
 	if ( pItemArmor->m_itArmor.m_wHitsCur <= 0 )
@@ -1602,6 +1602,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 				if (!IsPriv(PRIV_GM))
 					return true;
 			}
+			FALLTHROUGH;
 		case IT_DOOR_OPEN:
 		case IT_DOOR:
 		{
@@ -1639,6 +1640,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 				SysMessageDefault(DEFMSG_ITEMUSE_SHIPSIDE);
 				return true;
 			}
+			FALLTHROUGH;
 		case IT_SHIP_SIDE:
 			// Open the plank
 			pItem->Ship_Plank(true);
@@ -1745,8 +1747,8 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			else
 			{
 				tchar *pszMsg = Str_GetTemp();
-				sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SEXTANT), m_pArea->GetName(),
-				        pItem->Use_Sextant(GetTopPoint()));
+				snprintf(pszMsg, STR_TEMPLENGTH, 
+					g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SEXTANT), m_pArea->GetName(), pItem->Use_Sextant(GetTopPoint()));
 				ObjMessage(pszMsg, this);
 			}
 			return true;

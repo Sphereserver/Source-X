@@ -9,49 +9,67 @@
  * AbstractString
 */
 
-AbstractString::AbstractString()
+AbstractString::AbstractString() :
+	m_buf(0), m_length(0), m_realLength(0)
 {
-	m_buf = 0;
-	m_length = 0;
-	m_realLength = 0;
-	ensureLength(STRING_DEFAULT_SIZE);
 }
 
-AbstractString::~AbstractString()
+void AbstractString::ensureLengthHeap(size_t newLength)
 {
-	destroy();
+	if (newLength >= m_realLength)
+	{
+		// always grow with 20% extra space to decrease number of future grows
+		m_realLength = newLength + newLength / 5;
+		char* newBuf = new char[m_realLength + 1];
+
+		if (newBuf == nullptr)
+		{
+			throw CSError(LOGL_FATAL, 0, "Run out of memory while allocating memory for string");
+		}
+
+		if (m_buf != nullptr)
+		{
+			Str_CopyLimitNull(newBuf, m_buf, m_length);
+			delete[] m_buf;
+		}
+		newBuf[m_length] = 0;
+		m_buf = newBuf;
+	}
+	m_length = newLength;
+	m_buf[m_length] = '\0';
 }
 
-void AbstractString::ensureLength(size_t newLength)
+
+void AbstractString::destroyHeap() noexcept
 {
-	// child class implements this
-	UNREFERENCED_PARAMETER(newLength);
+	if (m_realLength && (m_buf != nullptr))
+	{
+		delete[] m_buf;
+		m_buf = nullptr;
+		m_realLength = 0;
+		m_length = 0;
+	}
 }
 
-void AbstractString::destroy()
-{
-	// child class implements this
-}
-
-char AbstractString::charAt(size_t index)
+char AbstractString::charAt(size_t index) const noexcept
 {
 	return m_buf[index];
 }
 
-void AbstractString::setAt(size_t index, char c)
+void AbstractString::setAt(size_t index, char c) noexcept
 {
 	m_buf[index] = c;
 }
 
-void AbstractString::append(const char *s)
+void AbstractString::append(const char *s) noexcept
 {
-	ensureLength(m_length + strlen(s));
+	resize(m_length + strlen(s));
 	strcat(m_buf, s);
 }
 
-void AbstractString::replace(char what, char toWhat)
+void AbstractString::replace(char what, char toWhat) noexcept
 {
-	for (size_t i = 0; i < m_length; i++ )
+	for (size_t i = 0; i < m_length; ++i )
 	{
 		if ( m_buf[i] == what )
 		{
@@ -60,32 +78,32 @@ void AbstractString::replace(char what, char toWhat)
 	}
 }
 
-int AbstractString::compareTo(const char *s)
+int AbstractString::compareTo(const char *s) const noexcept
 {
 	return strcmp(m_buf, s);
 }
 
-int AbstractString::compareToIgnoreCase(const char *s)
+int AbstractString::compareToIgnoreCase(const char *s) const noexcept
 {
 	return strcmpi(m_buf, s);
 }
 
-bool AbstractString::equals(const char *s)
+bool AbstractString::equals(const char *s) const noexcept
 {
 	return strcmp(m_buf, s) == 0;
 }
 
-bool AbstractString::equalsIgnoreCase(const char *s)
+bool AbstractString::equalsIgnoreCase(const char *s) const noexcept
 {
 	return strcmpi(m_buf, s) == 0;
 }
 
-bool AbstractString::startsWith(const char *s)
+bool AbstractString::startsWith(const char *s) const noexcept
 {
-	return strnicmp(m_buf, s, strlen(s)) == 0;
+	return (strnicmp(m_buf, s, strlen(s)) == 0);
 }
 
-bool AbstractString::startsWithHead(const char *s)
+bool AbstractString::startsWithHead(const char *s) const noexcept
 {
 	for ( int i = 0; ; ++i )
 	{
@@ -102,19 +120,19 @@ bool AbstractString::startsWithHead(const char *s)
 	}
 }
 
-size_t AbstractString::indexOf(char c)
+size_t AbstractString::indexOf(char c) const noexcept
 {
 	char *pos = strchr(m_buf, c);
 	return (size_t)(( pos == nullptr ) ? -1 : pos - m_buf);
 }
 
-size_t AbstractString::indexOf(const char *s)
+size_t AbstractString::indexOf(const char *s) const noexcept
 {
 	char *pos = strstr(m_buf, s);
 	return (size_t)((pos == nullptr) ? -1 : pos - m_buf);
 }
 
-size_t AbstractString::lastIndexOf(char c)
+size_t AbstractString::lastIndexOf(char c) const noexcept
 {
 	char *pos = strrchr(m_buf, c);
 	return (size_t)((pos == nullptr) ? -1 : pos - m_buf);
@@ -122,48 +140,26 @@ size_t AbstractString::lastIndexOf(char c)
 
 
 /*
- * String
+ * HeapString
 */
 
-String::String()
+/*
+HeapString::HeapString()
 {
+	resize(STRING_DEFAULT_SIZE);
 }
 
-void String::destroy()
+HeapString::~HeapString()
 {
-	if ( m_realLength && ( m_buf != nullptr ))
-	{
-		delete[] m_buf;
-		m_buf = nullptr;
-		m_realLength = 0;
-		m_length = 0;
-	}
+	destroyHeap();
 }
 
-void String::ensureLength(size_t newLength)
+void HeapString::resize(size_t newLength)
 {
-	if ( newLength >= m_realLength )
-	{
-		// always grow with 20% extra space to decrease number of future grows
-		m_realLength = newLength + newLength/5;
-		char *newBuf = new char[m_realLength+1];
-
-		if ( newBuf == nullptr )
-		{
-			throw CSError(LOGL_FATAL, 0, "Run out of memory while allocating memory for string");
-		}
-
-		if ( m_buf != nullptr )
-		{
-			Str_CopyLimitNull(newBuf, m_buf, m_length);
-			delete[] m_buf;
-		}
-		newBuf[m_length] = 0;
-		m_buf = newBuf;
-	}
-	m_length = newLength;
-	m_buf[m_length] = 0;
+	ensureLengthHeap(newLength);
 }
+*/
+
 
 /*
  * TemporaryString
@@ -174,7 +170,6 @@ char TemporaryString::m_tempStrings[MAX_TEMP_LINES_NO_CONTEXT][THREAD_STRING_LEN
 
 TemporaryString::TemporaryString()
 {
-	m_useHeap = true;
 	AbstractSphereThread *current = static_cast<AbstractSphereThread*> (ThreadHolder::current());
 	if ( current != nullptr )
 	{
@@ -190,6 +185,8 @@ TemporaryString::TemporaryString()
 			m_tempPosition = 0;
 		}
 	}
+
+	// At this point, both m_useHeap and m_state should be initialized.
 }
 
 TemporaryString::TemporaryString(char *buffer, char *state)
@@ -199,10 +196,20 @@ TemporaryString::TemporaryString(char *buffer, char *state)
 
 TemporaryString::~TemporaryString()
 {
-	destroy();
+	if (m_useHeap)
+	{
+		destroyHeap();
+	}
+	else
+	{
+		if (m_state != nullptr)
+		{
+			*m_state = '\0';
+		}
+	}
 }
 
-void TemporaryString::init(char *buffer, char *state)
+void TemporaryString::init(char *buffer, char *state) noexcept
 {
 	m_useHeap = false;
 	m_buf = buffer;
@@ -219,58 +226,42 @@ void TemporaryString::init(char *buffer, char *state)
 	m_length = 0;
 }
 
-void TemporaryString::destroy()
+void TemporaryString::resize(size_t newLength)
 {
-	if( m_useHeap )
+	if (m_useHeap)
 	{
-		String::destroy();
+		ensureLengthHeap(newLength);
+		return;
 	}
-	else
-	{
-		if( m_state != nullptr )
-		{
-			*m_state = '\0';
-		}
-	}
-}
 
-void TemporaryString::ensureLength(size_t newLength)
-{
-	if( m_useHeap )
-	{
-		String::ensureLength(newLength);
-	}
-	else
-	{
-		if( newLength >= m_realLength )
-		{
-			// switch back to behaving like a normal string, since the thread context does not have the
-			// capacity we need. To accomplish this we:
-			// 1. create a new buffer with the desired length (+20%)
-			// 2. copy the old buffer content to the new buffer
-			// 3. replace the old buffer with the new buffer
-			// 4. clear the state to allow the old buffer to be used elsewhere
-			// 5. flag this string instance to use the heap (String::)
-			
-			m_realLength = newLength + newLength/5;
-			char *newBuf = new char[m_realLength+1];
-			if ( newBuf == nullptr )
-				throw CSError(LOGL_FATAL, 0, "Run out of memory while allocating memory for string");
+    if (newLength >= m_realLength)
+    {
+        // switch back to behaving like a normal string, since the thread context does not have the
+        // capacity we need. To accomplish this we:
+        // 1. create a new buffer with the desired length (+20%)
+        // 2. copy the old buffer content to the new buffer
+        // 3. replace the old buffer with the new buffer
+        // 4. clear the state to allow the old buffer to be used elsewhere
+        // 5. flag this string instance to use the heap (String::)
 
-			Str_CopyLimitNull(newBuf, m_buf, m_length);
-			newBuf[m_length] = '\0';
-			
-			m_buf = newBuf;
-			if ( m_state != nullptr )
-			{
-				*m_state = '\0';
-				m_state = nullptr;
-			}
+        m_realLength = newLength + newLength / 5;
+        char* newBuf = new char[m_realLength + 1];
+        if (newBuf == nullptr)
+            throw CSError(LOGL_FATAL, 0, "Run out of memory while allocating memory for string");
 
-			m_useHeap = true;
-		}
+        Str_CopyLimitNull(newBuf, m_buf, m_length);
+        newBuf[m_length] = '\0';
 
-		m_length = newLength;
-		m_buf[m_length] = '\0';
-	}
+        m_buf = newBuf;
+        if (m_state != nullptr)
+        {
+            *m_state = '\0';
+            m_state = nullptr;
+        }
+
+        m_useHeap = true;
+    }
+
+    m_length = newLength;
+    m_buf[m_length] = '\0';
 }

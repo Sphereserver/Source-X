@@ -295,6 +295,7 @@ public:
     uint m_iContainerMaxItems;      // Maximum number of items allowed in a container item.
 	int	 m_iBankIMax;				// Maximum number of items allowed in bank.
 	int  m_iBankWMax;				// Maximum weight in WEIGHT_UNITS stones allowed in bank.
+    int m_iVendorMarkup;            // Default markup value, used if no other kind of tag is providen.
 	int  m_iVendorMaxSell;			// Max things a vendor will sell in one shot.
 	uint m_iMaxCharComplexity;		// How many chars per sector.
 	uint m_iMaxItemComplexity;		// How many items per meter.

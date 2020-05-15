@@ -481,6 +481,7 @@ bool CRegion::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 		case RC_TAG0:
 			fZero = true;
 			++ptcKey;
+			FALLTHROUGH;
 		case RC_TAG:	// "TAG" = get/set a local tag.
 			{
 				if ( ptcKey[3] != '.' )
@@ -645,28 +646,27 @@ bool CRegion::r_LoadVal( CScript & s )
 void CRegion::r_WriteBody( CScript & s, lpctstr pszPrefix )
 {
 	ADDTOCALLSTACK("CRegion::r_WriteBody");
-	TemporaryString tsZ;
-	tchar* z = static_cast<tchar *>(tsZ);
+	TemporaryString tsTemp;
 	if ( GetRegionFlags())
 	{
-		sprintf(z, "%sFLAGS", pszPrefix);
-		s.WriteKeyHex(z, GetRegionFlags());
+		snprintf(tsTemp.buffer(), tsTemp.capacity(), "%sFLAGS", pszPrefix);
+		s.WriteKeyHex(tsTemp.buffer(), GetRegionFlags());
 	}
 
 	if (!m_Events.empty())
 	{
 		CSString sVal;
 		m_Events.WriteResourceRefList( sVal );
-		sprintf(z, "%sEVENTS", pszPrefix);
-		s.WriteKey(z, sVal);
+		snprintf(tsTemp.buffer(), tsTemp.capacity(), "%sEVENTS", pszPrefix);
+		s.WriteKey(tsTemp.buffer(), sVal);
 	}
 
 	// Write New variables
 	m_BaseDefs.r_WritePrefix(s);
 
 	// Write out any extra TAGS here.
-	sprintf(z, "%sTAG", pszPrefix);
-	m_TagDefs.r_WritePrefix(s, z);
+	snprintf(tsTemp.buffer(), tsTemp.capacity(), "%sTAG", pszPrefix);
+	m_TagDefs.r_WritePrefix(s, tsTemp.buffer());
 }
 
 
@@ -691,7 +691,6 @@ void CRegion::r_WriteModified( CScript &s )
 		s.WriteKey( "EVENTS", sVal );
 	}
 }
-
 
 
 void CRegion::r_WriteBase( CScript &s )

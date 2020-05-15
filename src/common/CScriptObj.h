@@ -54,9 +54,10 @@ private:
 
 public:
 	static const char *m_sClassName;
-	TRIGRET_TYPE OnTriggerScript( CScript &s, lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = nullptr );
+
 	virtual TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = nullptr );
 	bool OnTriggerFind( CScript & s, lpctstr pszTrigName );
+	TRIGRET_TYPE OnTriggerScript(CScript& s, lpctstr pszTrigName, CTextConsole* pSrc, CScriptTriggerArgs* pArgs = nullptr);
 	TRIGRET_TYPE OnTriggerRun( CScript &s, TRIGRUN_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pReturn );
 	TRIGRET_TYPE OnTriggerRunVal( CScript &s, TRIGRUN_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
 

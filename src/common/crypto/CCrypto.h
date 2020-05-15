@@ -187,14 +187,14 @@ private:
 	bool SetEncryptionType( ENCRYPTION_TYPE etWho );
 
 public:
-	char* WriteClientVer( char * pStr ) const;
-	bool SetClientVerEnum( dword iVer, bool bSetEncrypt = true );
-	bool SetClientVerIndex( size_t iVer, bool bSetEncrypt = true );
+	char* WriteClientVer( char * pcStr, uint uiBufLen) const;
+	bool SetClientVerEnum( dword iVer, bool fSetEncrypt = true );
+	bool SetClientVerIndex( size_t iVer, bool fSetEncrypt = true );
 	void SetClientVer( const CCrypto & crypt );
-	bool SetClientVer( lpctstr pszVersion );
-	static int GetVerFromString( lpctstr pszVersion );
+	bool SetClientVer( lpctstr ptcVersion );
+	static int GetVerFromString( lpctstr ptcVersion );
 	static int GetVerFromNumber( dword maj, dword min, dword rev, dword pat );
-	static char* WriteClientVerString( dword iClientVersion, char * pStr );
+	static char* WriteClientVerString( dword iClientVersion, char * pcStr, uint uiBufLen );
 
 public:
 	dword GetClientVer() const;
@@ -212,7 +212,7 @@ private:
 	CCrypto& operator=(const CCrypto& other);
 
 public:
-	bool Init( dword dwIP, const byte * pEvent, uint inLen, bool isclientKr = false );
+	bool Init( dword dwIP, const byte * pEvent, uint inLen, bool isClientKR = false );
 	void InitFast( dword dwIP, CONNECT_TYPE ctInit, bool fRelay = true );
 	bool Decrypt( byte * pOutput, const byte * pInput, uint outLen, uint inLen );
 	bool Encrypt( byte * pOutput, const byte * pInput, uint outLen, uint inLen );

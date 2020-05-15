@@ -1256,14 +1256,18 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool fToldByMaster )
 	}
 
     CChar *pTarget = pCharTarg;
+	bool ignored = Attacker_GetIgnore(pTarget);
 	if ( ((IsTrigUsed(TRIGGER_ATTACK)) || (IsTrigUsed(TRIGGER_CHARATTACK))) && m_Fight_Targ_UID != pCharTarg->GetUID() )
 	{
 		CScriptTriggerArgs Args;
 		Args.m_iN1 = threat;
+		Args.m_iN2 = (int)ignored;
 		if ( OnTrigger(CTRIG_Attack, pTarget, &Args) == TRIGRET_RET_TRUE )
 			return false;
 		threat = (int)Args.m_iN1;
+		ignored = (bool)Args.m_iN2;		
 	}
+	Attacker_SetIgnore(pTarget, ignored);
 
     if (!Attacker_Add(pTarget, threat))
     {
@@ -1798,7 +1802,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
             //    iSwingAnimationDelayInSeconds += 1; // round up
 
         }
-		UpdateAnimate((ANIM_TYPE)m_atFight.m_iSwingAnimation, false, false, maximum(0,iSwingAnimationDelayInSeconds) );
+		UpdateAnimate((ANIM_TYPE)m_atFight.m_iSwingAnimation, false, false, iSwingAnimationDelayInSeconds );
 
         // Now that i have waited the recoil time, start the hit animation and wait for it to end
         SetTimeoutD(m_atFight.m_iSwingAnimationDelay);

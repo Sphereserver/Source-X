@@ -115,7 +115,7 @@ not_in_a_channel:
 		if (!pChannel)
 			goto not_in_a_channel;
 		tchar buffer[2048];
-		strcpy(buffer, szMsg);
+		Str_CopyLimitNull(buffer, szMsg, sizeof(buffer));
 		// Separate the recipient from the message (look for a space)
 		size_t i = 0;
 		size_t bufferLength = strlen(buffer);
@@ -314,8 +314,7 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 	ASSERT(szMsg != nullptr);
 
 	tchar buffer[2048];
-	ASSERT(strlen(szMsg) < CountOf(buffer));
-	strcpy(buffer, szMsg);
+	Str_CopyLimitNull(buffer, szMsg, sizeof(buffer));
 
 	tchar * pszCommand = buffer;
 	tchar * pszText = nullptr;
@@ -366,7 +365,8 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 				return;
 			}
 
-			Broadcast(pBy, pszText);
+			if (pszText)
+				Broadcast(pBy, pszText);
 			return;
 		}
 		case 2: // "BCALL"
@@ -374,7 +374,8 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 			if ( ! pByClient->IsPriv( PRIV_GM ))
 				goto need_gm_privs;
 
-			Broadcast(pBy, pszText, "", true);
+			if (pszText)
+				Broadcast(pBy, pszText, "", true);
 			return;
 		}
 		case 3: // "CHATSOK"
@@ -419,18 +420,20 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 			if ( ! pByClient->IsPriv( PRIV_GM ))
 				goto need_gm_privs;
 
-			Broadcast(nullptr, pszText, "", true);
+			if (pszText)
+				Broadcast(nullptr, pszText, "", true);
 			return;
 		}
 		case 8:	// "WHEREIS"
 		{
-			WhereIs(pBy, pszText);
+			if (pszText)
+				WhereIs(pBy, pszText);
 			return;
 		}
 		default:
 		{
 			tchar *pszMsg = Str_GetTemp();
-			sprintf(pszMsg, "Unknown command: '%s'", pszCommand);
+			snprintf(pszMsg, STR_TEMPLENGTH, "Unknown command: '%s'", pszCommand);
 
 			DecorateName(sFrom, nullptr, true);
 			pBy->SendChatMsg(CHATMSG_PlayerTalk, sFrom, pszMsg);
@@ -461,9 +464,9 @@ void CChat::WhereIs(CChatChanMember * pBy, lpctstr pszName ) const
 
 		tchar *pszMsg = Str_GetTemp();
 		if (! pClient->IsChatActive() || !pClient->GetChannel())
-			sprintf(pszMsg, "%s is not currently in a conference.", pszName);
+			snprintf(pszMsg, STR_TEMPLENGTH, "%s is not currently in a conference.", pszName);
 		else
-			sprintf(pszMsg, "%s is in conference '%s'.", pszName, pClient->GetChannel()->GetName());
+			snprintf(pszMsg, STR_TEMPLENGTH, "%s is in conference '%s'.", pszName, pClient->GetChannel()->GetName());
 		CSString sFrom;
 		DecorateName(sFrom, nullptr, true);
 		pBy->SendChatMsg(CHATMSG_PlayerTalk, sFrom, pszMsg);
@@ -579,9 +582,9 @@ void CChat::GenerateChatName(CSString &sName, const CClient * pClient) // static
 
 	// try the base name
 	CSString sTempName(pszName);
-	if (g_Accounts.Account_FindChat(sTempName.GetPtr()) != nullptr)
+	if (g_Accounts.Account_FindChat(sTempName.GetBuffer()) != nullptr)
 	{
-		sTempName.Empty();
+		sTempName.Clear();
 
 		// append (n) to the name to make it unique
 		for (uint attempts = 2; attempts <= g_Accounts.Account_GetCount(); attempts++)
@@ -590,12 +593,12 @@ void CChat::GenerateChatName(CSString &sName, const CClient * pClient) // static
 			if (g_Accounts.Account_FindChat(static_cast<lpctstr>(sTempName)) == nullptr)
 				break;
 
-			sTempName.Empty();
+			sTempName.Clear();
 		}
 	}
 
 	// copy name to output
-	sName.Copy(sTempName.GetPtr());
+	sName.Copy(sTempName.GetBuffer());
 }
 
 void CChat::Broadcast(CChatChanMember *pFrom, lpctstr pszText, CLanguageID lang, bool fOverride)

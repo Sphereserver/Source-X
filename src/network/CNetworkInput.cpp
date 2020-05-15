@@ -605,7 +605,7 @@ bool CNetworkInput::processUnknownClientData(CNetState* state, Packet* buffer)
             }
             else
             {
-                DEBUGNETWORK(("%x:Not enough data received to be a valid handshake (%" PRIuSIZE_T ").\n", state->id(), buffer->getRemainingLength()));
+                DEBUGNETWORK(("%x:Not enough data received to be a valid handshake (%u).\n", state->id(), buffer->getRemainingLength()));
             }
         }
         else if (pOrigRemainingData[0] == XCMD_UOGRequest && uiOrigRemainingLength == 8)

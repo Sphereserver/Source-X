@@ -68,32 +68,33 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
     }
     else
     {
-        TemporaryString buf;
+        TemporaryString tsBuf;
+        tchar* ptcBuf = tsBuf.buffer();
         size_t uiStrLen;
         bool fUTF = false, fFirstLine = true;
-        int iFileLength = _GetLength();
+        const int iFileLength = _GetLength();
         _fileContent = new std::vector<std::string>();
         _fileContent->reserve(iFileLength);
 
         while ( !feof(_pStream) ) 
         {
-            buf.setAt(0, '\0');
-            fgets(buf, SCRIPT_MAX_LINE_LEN, _pStream);
-            uiStrLen = strlen(buf);
+            tsBuf.setAt(0, '\0');
+            fgets(ptcBuf, SCRIPT_MAX_LINE_LEN, _pStream);
+            uiStrLen = strlen(ptcBuf);
             ASSERT(SCRIPT_MAX_LINE_LEN < INT_MAX);
             if (uiStrLen > SCRIPT_MAX_LINE_LEN)
                 uiStrLen = SCRIPT_MAX_LINE_LEN;
 
             // first line may contain utf marker (byte order mark)
             if (fFirstLine && uiStrLen >= 3 &&
-                (uchar)(buf[0]) == 0xEF &&
-                (uchar)(buf[1]) == 0xBB &&
-                (uchar)(buf[2]) == 0xBF)
+                (uchar)(ptcBuf[0]) == 0xEF &&
+                (uchar)(ptcBuf[1]) == 0xBB &&
+                (uchar)(ptcBuf[2]) == 0xBF)
             {
                 fUTF = true;
             }
 
-            _fileContent->emplace_back( (fUTF ? &buf[3]:buf), uiStrLen - (fUTF ? 3:0) );
+            _fileContent->emplace_back( (fUTF ? &ptcBuf[3] : ptcBuf), uiStrLen - (fUTF ? 3 : 0) );
             fFirstLine = false;
             fUTF = false;
         }
@@ -181,7 +182,7 @@ tchar * CCacheableScriptFile::_ReadString(tchar *pBuffer, int sizemax)
     if ( !_fileContent->empty() && ((uint)_iCurrentLine < _fileContent->size()) )
     {
         //strcpy(pBuffer, (*_fileContent)[_iCurrentLine].c_str() );
-        strcpy(pBuffer, _fileContent->data()[_iCurrentLine].c_str()); // may be faster with MS compiler
+        Str_CopyLimitNull(pBuffer, _fileContent->data()[_iCurrentLine].c_str(), sizemax); // may be faster with MS compiler
         ++_iCurrentLine;
     }
     else

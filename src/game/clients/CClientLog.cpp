@@ -168,11 +168,10 @@ void CClient::addSysMessage(lpctstr pszMsg) // System message (In lower left cor
 
 	if ( IsSetOF(OF_Flood_Protection) && ( GetPrivLevel() <= PLEVEL_Player )  )
 	{
-		if ( !strcmpi(pszMsg, m_zLastMessage) )
+		if ( !strnicmp(pszMsg, m_zLastMessage, SCRIPT_MAX_LINE_LEN) )
 			return;
 
-		if ( strlen(pszMsg) < SCRIPT_MAX_LINE_LEN )
-			strcpy(m_zLastMessage, pszMsg);
+		Str_CopyLimitNull(m_zLastMessage, pszMsg, SCRIPT_MAX_LINE_LEN);
 	}
 
 	addBarkParse(pszMsg, nullptr, HUE_TEXT_DEF, TALKMODE_SAY);
@@ -224,7 +223,7 @@ bool CClient::addRelay( const CServerDef * pServ )
 		sCustomerID.Add(GetAccount()->GetName());
 
 		dwCustomerId = z_crc32(0L, Z_NULL, 0);
-		dwCustomerId = z_crc32(dwCustomerId, reinterpret_cast<const z_Bytef *>(sCustomerID.GetPtr()), (z_uInt)sCustomerID.GetLength());
+		dwCustomerId = z_crc32(dwCustomerId, reinterpret_cast<const z_Bytef *>(sCustomerID.GetBuffer()), (z_uInt)sCustomerID.GetLength());
 
 		GetAccount()->m_TagDefs.SetNum("customerid", dwCustomerId);
 	}
@@ -362,31 +361,31 @@ bool CClient::OnRxConsole( const byte * pData, uint iLen )
 			{
 				if ( !m_zLogin[0] )
 				{
-					if ( (uint)(m_Targ_Text.GetLength()) > (CountOf(m_zLogin) - 1) )
+					if ( (uint)(m_Targ_Text.GetLength()) > (sizeof(m_zLogin) - 1) )
 					{
 						SysMessage("Login:\n");
 					}
 					else
 					{
-						strcpy(m_zLogin, m_Targ_Text);
+						Str_CopyLimitNull(m_zLogin, m_Targ_Text, sizeof(m_zLogin));
 						SysMessage("Password:\n");
 					}
-					m_Targ_Text.Empty();
+					m_Targ_Text.Clear();
 				}
 				else
 				{
-					CSString sMsg;
-
 					CAccount * pAccount = g_Accounts.Account_Find(m_zLogin);
 					if (( pAccount == nullptr ) || ( pAccount->GetPrivLevel() < PLEVEL_Admin ))
 					{
 						SysMessagef("%s\n", g_Cfg.GetDefaultMsg(DEFMSG_CONSOLE_NOT_PRIV));
-						m_Targ_Text.Empty();
+						m_Targ_Text.Clear();
 						return false;
 					}
+
+					CSString sMsg;
 					if ( LogIn(m_zLogin, m_Targ_Text, sMsg ) == PacketLoginError::Success )
 					{
-						m_Targ_Text.Empty();
+						m_Targ_Text.Clear();
 						return OnRxConsoleLoginComplete();
 					}
 					else if ( ! sMsg.IsEmpty())
@@ -394,7 +393,7 @@ bool CClient::OnRxConsole( const byte * pData, uint iLen )
 						SysMessage( sMsg );
 						return false;
 					}
-					m_Targ_Text.Empty();
+					m_Targ_Text.Clear();
 				}
 				return true;
 			}
@@ -427,24 +426,26 @@ bool CClient::OnRxAxis( const byte * pData, uint iLen )
 			{
 				if ( !m_zLogin[0] )
 				{
-					if ( (uint)(m_Targ_Text.GetLength()) <= (CountOf(m_zLogin) - 1) )
-						strcpy(m_zLogin, m_Targ_Text);
-					m_Targ_Text.Empty();
+					if ((uint)(m_Targ_Text.GetLength()) <= (sizeof(m_zLogin) - 1))
+					{
+						Str_CopyLimitNull(m_zLogin, m_Targ_Text, sizeof(m_zLogin));
+					}
+					m_Targ_Text.Clear();
 				}
 				else
 				{
-					CSString sMsg;
-
 					CAccount * pAccount = g_Accounts.Account_Find(m_zLogin);
 					if (( pAccount == nullptr ) || ( pAccount->GetPrivLevel() < PLEVEL_Counsel ))
 					{
 						SysMessagef("\"MSG:%s\"", g_Cfg.GetDefaultMsg(DEFMSG_AXIS_NOT_PRIV));
-						m_Targ_Text.Empty();
+						m_Targ_Text.Clear();
 						return false;
 					}
+
+					CSString sMsg;
 					if ( LogIn(m_zLogin, m_Targ_Text, sMsg ) == PacketLoginError::Success )
 					{
-						m_Targ_Text.Empty();
+						m_Targ_Text.Clear();
 						if ( GetPrivLevel() < PLEVEL_Counsel )
 						{
 							SysMessagef("\"MSG:%s\"", g_Cfg.GetDefaultMsg(DEFMSG_AXIS_NOT_PRIV));
@@ -502,7 +503,7 @@ bool CClient::OnRxAxis( const byte * pData, uint iLen )
 						SysMessagef("\"MSG:%s\"", (lpctstr)sMsg);
 						return false;
 					}
-					m_Targ_Text.Empty();
+					m_Targ_Text.Clear();
 				}
 				return true;
 			}
@@ -650,7 +651,7 @@ bool CClient::OnRxPing( const byte * pData, uint iLen )
 		}
 	}
 
-	g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Unknown/invalid ping data '0x%x' from %s (Len: %" PRIuSIZE_T ")\n", GetSocketID(), pData[0], GetPeerStr(), iLen);
+	g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Unknown/invalid ping data '0x%x' from %s (Len: %u)\n", GetSocketID(), pData[0], GetPeerStr(), iLen);
 	return false;
 }
 

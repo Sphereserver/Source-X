@@ -463,7 +463,7 @@ int CChar::GetHealthPercent() const
 	return IMulDiv(Stat_GetVal(STAT_STR), 100, str);
 }
 
-const CObjBaseTemplate * CChar::GetTopLevelObj() const
+const CObjBaseTemplate* CChar::GetTopLevelObj() const
 {
 	// Get the object that has a location in the world. (Ground level)
 	return this;
@@ -502,13 +502,11 @@ bool CChar::IsSwimming() const
 
 bool CChar::IsNPC() const
 {
-    ADDTOCALLSTACK_INTENSIVE("CChar::IsNPC");
     return (m_pNPC != nullptr);
 }
 
 NPCBRAIN_TYPE CChar::GetNPCBrain() const
 {
-    ADDTOCALLSTACK_INTENSIVE("CChar::GetNPCBrain");
     ASSERT(m_pNPC);
     return m_pNPC->m_Brain;
 }
@@ -737,9 +735,9 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 	CItem* pItem = LayerFind(LAYER_HAND1);    // Let's do first a direct search for any book in hands.
 	if (pItem && pItem->IsTypeSpellbook() )
     {
-	    CItemBase *pItemDef = pItem->Item_GetDef();
-	    SPELL_TYPE min = (SPELL_TYPE)pItemDef->m_ttSpellbook.m_iOffset;
-	    SPELL_TYPE max = (SPELL_TYPE)(pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells);
+		const CItemBase *pItemDef = pItem->Item_GetDef();
+		const SPELL_TYPE min = (SPELL_TYPE)pItemDef->m_ttSpellbook.m_iOffset;
+		const SPELL_TYPE max = (SPELL_TYPE)(pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells);
 	    if ( (iSpell > min) && (iSpell <= max) ) //Had to replace < with <= otherwise the spell would not be considered a valid one.
 	    {
 		    if (pItem->IsSpellInBook(iSpell) )	//We found a book with this same spell, nothing more to do.
@@ -759,9 +757,9 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 			if ( !pItem->IsTypeSpellbook() )
 				continue;
             // Found a book, let's find each magic school's offsets to search for the desired spell.
-			CItemBase *pItemDef = pItem->Item_GetDef();
-			SPELL_TYPE min = (SPELL_TYPE)pItemDef->m_ttSpellbook.m_iOffset;
-			SPELL_TYPE max = (SPELL_TYPE)(pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells);
+			const CItemBase *pItemDef = pItem->Item_GetDef();
+			const SPELL_TYPE min = (SPELL_TYPE)pItemDef->m_ttSpellbook.m_iOffset;
+			const SPELL_TYPE max = (SPELL_TYPE)(pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells);
 			if ( (iSpell > min) && (iSpell <= max) ) // and check now the spell is within the spells that this book can hold. Had to replace < with <= otherwise the spell would not be considered a valid one.
 			{
 				if ( pItem->IsSpellInBook(iSpell) )	//I found a book with this spell, nothing more to do.
@@ -978,7 +976,7 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 		len = snprintf(pTemp, STR_TEMPLENGTH, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
 	}
 
-	snprintf(pTemp + len, STR_TEMPLENGTH - len, "%s", g_Cfg.GetSkillDef(skill)->m_sTitle.GetPtr());
+	snprintf(pTemp + len, STR_TEMPLENGTH - len, "%s", g_Cfg.GetSkillDef(skill)->m_sTitle.GetBuffer());
 	return pTemp;
 }
 

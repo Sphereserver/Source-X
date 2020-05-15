@@ -81,7 +81,7 @@ void CWorldComm::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE
 				//}
 				//myName = sTextName;
 				if ( !*myName )
-					sprintf(myName, "<%s>", pSrc->GetName());
+					snprintf(myName, STR_TEMPLENGTH, "<%s>", pSrc->GetName());
 			}
 		}
 
@@ -93,7 +93,7 @@ void CWorldComm::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE
 			//}
 			//myName = sTextUID;
 			if ( !*myName )
-				sprintf(myName, "<%s [%x]>", pSrc->GetName(), (dword)pSrc->GetUID());
+				snprintf(myName, STR_TEMPLENGTH, "<%s [%x]>", pSrc->GetName(), (dword)pSrc->GetUID());
 		}
 
 		if (*myName)
@@ -205,7 +205,7 @@ void CWorldComm::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pwTe
 			if ( wTextUID[0] == '\0' )
 			{
 				tchar * pszMsg = Str_GetTemp();
-				sprintf(pszMsg, "<%s [%x]>", pSrc->GetName(), (dword)pSrc->GetUID());
+				snprintf(pszMsg, STR_TEMPLENGTH, "<%s [%x]>", pSrc->GetName(), (dword)pSrc->GetUID());
 				int iLen = CvtSystemToNUNICODE( wTextUID, CountOf(wTextUID), pszMsg, -1 );
 				for ( int i = 0; pwText[i] && iLen < MAX_TALK_BUFFER - 1; i++, iLen++ )
 					wTextUID[iLen] = pwText[i];
@@ -230,10 +230,9 @@ void __cdecl CWorldComm::Broadcastf(lpctstr pMsg, ...) // static
 	// System broadcast in bold text
 	ADDTOCALLSTACK("CWorldComm::Broadcastf");
 	TemporaryString tsTemp;
-	tchar* pszTemp = static_cast<tchar *>(tsTemp);
 	va_list vargs;
 	va_start(vargs, pMsg);
-	vsnprintf(pszTemp, tsTemp.realLength(), pMsg, vargs);
+	vsnprintf(tsTemp.buffer(), tsTemp.capacity(), pMsg, vargs);
 	va_end(vargs);
-	Broadcast(pszTemp);
+	Broadcast(tsTemp.buffer());
 }

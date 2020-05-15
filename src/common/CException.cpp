@@ -160,10 +160,8 @@ CWinException::~CWinException()
 {
 }
 
-bool CWinException::GetErrorMessage(lptstr lpszError, uint nMaxError) const
+bool CWinException::GetErrorMessage(lptstr lpszError, uint uiMaxError) const
 {
-	UNREFERENCED_PARAMETER(nMaxError);
-
 	lpctstr zMsg;
 	switch ( m_hError )
 	{
@@ -173,11 +171,11 @@ bool CWinException::GetErrorMessage(lptstr lpszError, uint nMaxError) const
 		case STATUS_INTEGER_DIVIDE_BY_ZERO:	zMsg = "Integer: Divide by Zero";	break;
 		case STATUS_STACK_OVERFLOW:			zMsg = "Stack Overflow";			break;
 		default:
-			sprintf(lpszError, "code=0x%x, (0x%" PRIxSIZE_T ")", m_hError, m_pAddress);
+			snprintf(lpszError, uiMaxError, "code=0x%x, (0x%" PRIxSIZE_T ")", m_hError, m_pAddress);
 			return true;
 	}
 
-	sprintf(lpszError, "\"%s\" (0x%" PRIxSIZE_T ")", zMsg, m_pAddress);
+	snprintf(lpszError, uiMaxError, "\"%s\" (0x%" PRIxSIZE_T ")", zMsg, m_pAddress);
 	return true;
 }
 

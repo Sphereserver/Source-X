@@ -31,7 +31,7 @@ bool CComponentProps::BaseCont_GetPropertyStr(const BaseContStr_t* container, Pr
     BaseContStr_t::const_iterator it = container->find(iPropIndex);
     if (it != container->end())
     {
-        lpctstr val = it->second.GetPtr();
+        lpctstr val = it->second.GetBuffer();
         ASSERT(val);
         if (val[0] == '\0')
         {
@@ -83,7 +83,7 @@ void CComponentProps::BaseCont_Write_ContStr(const BaseContStr_t* container, con
 {
     for (const BaseContStrPair_t& propPair : *container)
     {
-        lpctstr ptcVal = propPair.second.GetPtr();
+        lpctstr ptcVal = propPair.second.GetBuffer();
         ASSERT(ptcVal);
         if (ptcVal[0] == '\0')
             continue;

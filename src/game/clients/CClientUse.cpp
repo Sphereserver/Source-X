@@ -31,20 +31,21 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			if ( pContainer )
 			{
 				// protect from ,snoop - disallow picking from not opened containers
+				CItemContainer* pTopContainer = dynamic_cast<CItemContainer*>(pItem->GetTopContainer());
 				bool isInOpenedContainer = false;
 				if ( pContainer->IsType(IT_EQ_TRADE_WINDOW) )
 				{
 					isInOpenedContainer = true;
 				}
-				else if ( pContainer->IsType(IT_EQ_VENDOR_BOX) || pContainer->IsType(IT_EQ_BANK_BOX) )
+				else if (pTopContainer && (pTopContainer->IsType(IT_EQ_VENDOR_BOX) || pTopContainer->IsType(IT_EQ_BANK_BOX)))
 				{
-					if ( pContainer->m_itEqBankBox.m_pntOpen == GetChar()->GetTopPoint() )
+					if ( pTopContainer->m_itEqBankBox.m_pntOpen == GetChar()->GetTopPoint() )
 						isInOpenedContainer = true;
 				}
 				else
 				{
-					CClient::OpenedContainerMap_t::iterator itContainerFound = m_openedContainers.find(pContainer->GetUID().GetPrivateUID());
-					if ( itContainerFound != m_openedContainers.end() )
+					auto itContainerFound = m_openedContainers.find(pContainer->GetUID().GetPrivateUID());
+					if ( itContainerFound != m_openedContainers.cend() )
 					{
 						dword dwTopContainerUID = ((itContainerFound->second).first).first;
 						dword dwTopMostContainerUID = ((itContainerFound->second).first).second;
@@ -325,8 +326,8 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_WAND:
 		case IT_SCROLL:
 		{
-			SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pItem->m_itWeapon.m_spell));
-			CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
+			const SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pItem->m_itWeapon.m_spell));
+			const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
 			if ( !pSpellDef )
 				return false;
 
@@ -410,10 +411,10 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			{
 				// Mine at the location
 				tchar *pszTemp = Str_GetTemp();
-				sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_MACEPICK_TARG), pItem->GetName());
+				snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_MACEPICK_TARG), pItem->GetName());
 				addTarget(CLIMODE_TARG_USE_ITEM, pszTemp, true, true);
-				return true;
 			}
+			return true;
 
 		case IT_WEAPON_SWORD:
 		case IT_WEAPON_FENCE:
@@ -447,7 +448,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_CANNON_BALL:
 		{
 			tchar *pszTemp = Str_GetTemp();
-			sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_CBALL_PROMT), pItem->GetName());
+			snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_CBALL_PROMT), pItem->GetName());
 			addTarget(CLIMODE_TARG_USE_ITEM, pszTemp);
 			return true;
 		}
@@ -480,7 +481,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_PITCHER_EMPTY:
 		{
 			tchar *pszTemp = Str_GetTemp();
-			sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_PITCHER_TARG), pItem->GetName());
+			snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_PITCHER_TARG), pItem->GetName());
 			addTarget(CLIMODE_TARG_USE_ITEM, pszTemp, true);
 			return true;
 		}
@@ -565,7 +566,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_SEWING_KIT:
 		{
 			tchar *pszTemp = Str_GetTemp();
-			sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SEWKIT_PROMT), pItem->GetName());
+			snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SEWKIT_PROMT), pItem->GetName());
 			addTarget(CLIMODE_TARG_USE_ITEM, pszTemp);
 			return true;
 		}

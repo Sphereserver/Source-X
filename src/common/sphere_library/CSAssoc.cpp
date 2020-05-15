@@ -22,7 +22,7 @@ lpctstr CValStr::FindName( int iVal ) const
 // -CElementDef
 // Describe the elements of a structure/class
 
-constexpr int CElementDef::sm_Lengths[ELEM_QTY] =
+const int CElementDef::sm_Lengths[ELEM_QTY] =
 {
 	0,	// ELEM_VOID:
 	-1,	// ELEM_CSTRING,

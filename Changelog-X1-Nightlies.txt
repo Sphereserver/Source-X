@@ -1994,7 +1994,7 @@ Added champion's support:
 -Ingame item example 1:
 	[ITEMDEF i_champion_idol]
 	ID=01f18
-	TYPE=t_champion_spawn //this defname should match 300
+	TYPE=t_spawn_champion	//this defname should match 300
 	NAME=Champion Idol
 
 	ON=@Create

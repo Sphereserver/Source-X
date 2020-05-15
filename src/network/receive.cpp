@@ -811,7 +811,7 @@ bool PacketStaticUpdate::onReceive(CNetState* net)
     byte UlCmd = readByte();*/
 	TemporaryString tsDump;
 	this->dump(tsDump);
-	g_Log.EventDebug("%x:Parsing %s", net->id(), tsDump.toBuffer());
+	g_Log.EventDebug("%x:Parsing %s", net->id(), tsDump.buffer());
 	return true;
 }
 
@@ -3119,16 +3119,20 @@ bool PacketBandageMacro::onReceive(CNetState* net)
 
 	CClient* client = net->getClient();
 	ASSERT(client);
-	const CChar* character = client->GetChar();
+	CChar* character = client->GetChar();
 	if (character == nullptr)
+	{
 		return false;
+	}
 
     CUID uidBandage = readInt32();
     CUID uidTarget = readInt32();
 	CItem* bandage = uidBandage.ItemFind();
 	CObjBase* target = uidTarget.ObjFind();
 	if (bandage == nullptr || target == nullptr)
+	{
 		return true;
+	}
 
 	// check the client can see the bandage they're trying to use
 	if (character->CanSee(bandage) == false)
@@ -3139,26 +3143,34 @@ bool PacketBandageMacro::onReceive(CNetState* net)
 
 	// check the client is capable of using the bandage
 	if (character->CanUse(bandage, false) == false)
+	{
 		return true;
+	}
 
 	// check the bandage is in the possession of the client
 	if (bandage->GetTopLevelObj() != character)
+	{
 		return true;
+	}
 
 	// make sure the macro isn't used for other types of items
 	if (bandage->IsType(IT_BANDAGE) == false)
+	{
 		return true;
+	}
 
 	// clear previous target
 	client->SetTargMode();
 
-	// Should we simulate the dclick?
-	// client->m_Targ_UID = bandage->GetUID();
-	// CScriptTriggerArgs extArgs(1); // Signal we're from the macro
-	// if (bandage->OnTrigger( ITRIG_DCLICK, m_pChar, &extArgs ) == TRIGRET_RET_TRUE)
-	// 		return true;
-	//
-	// client->SetTargMode();
+	//Should we simulate the dclick?
+	client->m_Targ_UID = bandage->GetUID();
+	CScriptTriggerArgs extArgs(1); // Signal we're from the macro
+	if (bandage->OnTrigger( ITRIG_DCLICK, character, &extArgs ) == TRIGRET_RET_TRUE)
+	{
+		return true;
+	}
+	
+	client->SetTargMode();
 
 	// prepare targeting information
 	client->m_Targ_UID = uidBandage;

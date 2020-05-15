@@ -55,8 +55,7 @@ bool CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 	// (client doesn't expect us to) but only in the world
 	if (pObj->IsItem())
 	{
-		const CItem * pItem = dynamic_cast<const CItem *>(pObj);
-
+		const CItem * pItem = static_cast<const CItem *>(pObj);
 		if (!pItem->GetContainer() && pItem->IsAttr(/*ATTR_MOVE_NEVER|*/ATTR_STATIC))
 		{
 			if ((!GetChar()->IsPriv(PRIV_GM)) && (!GetChar()->IsPriv(PRIV_ALLMOVE)))
@@ -111,6 +110,13 @@ bool CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 					AOSTooltip_addDefaultItemData(pItem);
 
                 pObj->AddPropsTooltipData(pObj);
+			}
+			
+			if (IsTrigUsed(TRIGGER_CLIENTTOOLTIP_AFTERDEFAULT) || (pItem && IsTrigUsed(TRIGGER_ITEMCLIENTTOOLTIP_AFTERDEFAULT)) || (pChar && IsTrigUsed(TRIGGER_CHARCLIENTTOOLTIP_AFTERDEFAULT)))
+			{
+				CScriptTriggerArgs args(pObj);
+				args.m_iN1 = fRequested;
+				iRet = pObj->OnTrigger("@ClientTooltip_AfterDefault", this->GetChar(), &args); //Save to return on iRet to make sure return value doesn't stuck the boolean.
 			}
 		}
 
@@ -414,6 +420,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		if (pItem->IsContainer())
 		{
 			const CContainer * pContainer = dynamic_cast <const CContainer *> (pItem);
+			ASSERT(pContainer);
 			if ( g_Cfg.m_iFeatureML & FEATURE_ML_UPDATE )
 			{
 				if ( pItem->m_ModMaxWeight )

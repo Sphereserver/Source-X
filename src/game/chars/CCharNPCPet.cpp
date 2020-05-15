@@ -278,21 +278,21 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 				tchar *pszTemp3 = Str_GetTemp();
 				if ( iWage )
 				{
-					sprintf(pszTemp1, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_1), pBank->m_itEqBankBox.m_Check_Amount);
-					sprintf(pszTemp2, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_2), pBank->m_itEqBankBox.m_Check_Amount / iWage);
-					sprintf(pszTemp3, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_3), (int)(pCont->GetContentCount()));
+					snprintf(pszTemp1, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_1), pBank->m_itEqBankBox.m_Check_Amount);
+					snprintf(pszTemp2, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_2), pBank->m_itEqBankBox.m_Check_Amount / iWage);
+					snprintf(pszTemp3, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_3), (int)(pCont->GetContentCount()));
 				}
 				else
 				{
-					sprintf(pszTemp1, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_1), pBank->m_itEqBankBox.m_Check_Amount);
-					sprintf(pszTemp2, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_4), pBank->m_itEqBankBox.m_Check_Restock, pBank->GetTimerAdjusted() / 60);
-					sprintf(pszTemp3, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_3), (int)(pCont->GetContentCount()));
+					snprintf(pszTemp1, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_1), pBank->m_itEqBankBox.m_Check_Amount);
+					snprintf(pszTemp2, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_4), pBank->m_itEqBankBox.m_Check_Restock, pBank->GetTimerAdjusted() / 60);
+					snprintf(pszTemp3, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_3), (int)(pCont->GetContentCount()));
 				}
-				sprintf(pszMsg, "%s %s %s", pszTemp1, pszTemp2, pszTemp3);
+				snprintf(pszMsg, STR_TEMPLENGTH, "%s %s %s", pszTemp1, pszTemp2, pszTemp3);
 			}
 			else if ( iWage )
 			{
-				sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_DAYS_LEFT), pBank->m_itEqBankBox.m_Check_Amount / iWage);
+				snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_DAYS_LEFT), pBank->m_itEqBankBox.m_Check_Amount / iWage);
 			}
 			Speak(pszMsg);
 			return true;
@@ -311,12 +311,12 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 				tchar *pszMsg = Str_GetTemp();
 				if ( pBank->m_itEqBankBox.m_Check_Amount > uiWage )
 				{
-					sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_GETGOLD_1), pBank->m_itEqBankBox.m_Check_Amount - uiWage);
+					snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_GETGOLD_1), pBank->m_itEqBankBox.m_Check_Amount - uiWage);
 					pSrc->AddGoldToPack(pBank->m_itEqBankBox.m_Check_Amount - uiWage);
 					pBank->m_itEqBankBox.m_Check_Amount = uiWage;
 				}
 				else
-					sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_GETGOLD_2), pBank->m_itEqBankBox.m_Check_Amount);
+					snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_GETGOLD_2), pBank->m_itEqBankBox.m_Check_Amount);
 				Speak(pszMsg);
 			}
 			return true;
@@ -666,7 +666,7 @@ bool CChar::NPC_CheckHirelingStatus()
 	else
 	{
 		tchar* pszMsg = Str_GetTemp();
-		sprintf(pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_WAGE_COST ), iWage);
+		snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_WAGE_COST ), iWage);
 		Speak(pszMsg);
 
 		CChar * pOwner = NPC_PetGetOwner();
@@ -714,7 +714,7 @@ void CChar::NPC_OnHirePayMore( CItem * pGold, int iWage, bool fHire )
 	}
 
 	tchar *pszMsg = Str_GetTemp();
-	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_HIRE_TIME), pBank->m_itEqBankBox.m_Check_Amount / iWage);
+	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_HIRE_TIME), pBank->m_itEqBankBox.m_Check_Amount / iWage);
 	Speak(pszMsg);
 }
 
@@ -804,7 +804,7 @@ bool CChar::NPC_OnHireHear( CChar * pCharSrc )
 	}
 
 	tchar *pszMsg = Str_GetTemp();
-	sprintf(pszMsg, Calc_GetRandVal(2) ?
+	snprintf(pszMsg, STR_TEMPLENGTH, Calc_GetRandVal(2) ?
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_HIRE_AMNT ) :
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_HIRE_RATE ), iWage );
 	Speak(pszMsg);
@@ -845,7 +845,7 @@ bool CChar::NPC_SetVendorPrice( CItem * pItem, int iPrice )
 		return true;
 
 	tchar *pszMsg = Str_GetTemp();
-	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_SETPRICE_1), pVendItem->GetName(), iPrice);
+	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_SETPRICE_1), pVendItem->GetName(), iPrice);
 	Speak(pszMsg);
 
 	pVendItem->SetPlayerVendorPrice( iPrice );
@@ -877,7 +877,7 @@ void CChar::NPC_PetDesert()
 		pCharOwn->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_DESERTED), GetName());
 
 	tchar	*pszMsg = Str_GetTemp();
-	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_DECIDE_MASTER), GetName());
+	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_DECIDE_MASTER), GetName());
 	Speak(pszMsg);
 
 	// free to do as i wish !

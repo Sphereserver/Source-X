@@ -258,12 +258,12 @@ void CClient::Announce( bool fArrive ) const
 	if ( (g_Cfg.m_iArriveDepartMsg == 2) && (GetPrivLevel() > PLEVEL_Player) )		// notify of GMs
 	{
 		lpctstr zTitle = m_pChar->Noto_GetFameTitle();
-		sprintf(pszMsg, "@231 STAFF: %s%s logged %s.", zTitle, m_pChar->GetName(), (fArrive ? "in" : "out"));
+		snprintf(pszMsg, STR_TEMPLENGTH, "@231 STAFF: %s%s logged %s.", zTitle, m_pChar->GetName(), (fArrive ? "in" : "out"));
 	}
 	else if ( g_Cfg.m_iArriveDepartMsg == 1 )		// notify of players
 	{
 		const CRegion *pRegion = m_pChar->GetTopPoint().GetRegion(REGION_TYPE_AREA);
-		sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MSG_ARRDEP_1),
+		snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_ARRDEP_1),
 			m_pChar->GetName(),
 			fArrive ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_ARRDEP_2) : g_Cfg.GetDefaultMsg(DEFMSG_MSG_ARRDEP_3),
 			pRegion != nullptr ? pRegion->GetName() : g_Serv.GetName());
@@ -368,7 +368,7 @@ void CClient::addTargetVerb( lpctstr pszCmd, lpctstr ptcArg )
 
 	m_Targ_Text.Format( "%s%s%s", pszCmd, ( ptcArg[0] && pszCmd[0] ) ? " " : "", ptcArg );
 	tchar * pszMsg = Str_GetTemp();
-	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_TARGET_COMMAND), static_cast<lpctstr>(m_Targ_Text));
+	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_TARGET_COMMAND), m_Targ_Text.GetBuffer());
 	addTarget(CLIMODE_TARG_OBJ_SET, pszMsg);
 }
 
@@ -577,7 +577,7 @@ bool CClient::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 		case CC_CLIENTVERSION:
 			{
 				char szVersion[ 128 ];
-				sVal = m_Crypt.WriteClientVer( szVersion );
+				sVal = m_Crypt.WriteClientVer( szVersion, sizeof(szVersion) );
 			}
 			break;
 		case CC_DEBUG:
@@ -611,8 +611,8 @@ bool CClient::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 				if ( ptcKey[0] == '\0' )
 				{
 					// Return full version string (eg: 5.0.2d)
-					tchar szVersion[128];
-					sVal = CCrypto::WriteClientVerString(iCliVer, szVersion);
+					tchar ptcVersion[128];
+					sVal = CCrypto::WriteClientVerString(iCliVer, ptcVersion, sizeof(ptcVersion));
 				}
 				else
 				{
@@ -1463,7 +1463,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 						CArgs += ( !strncmp(ppArgs[i], "NULL", 4) ? " " : ppArgs[i] );
 					}
 
-					addBarkLocalized(iClilocId, nullptr, (HUE_TYPE)(hue), TALKMODE_SAY, FONT_NORMAL, CArgs.GetPtr());
+					addBarkLocalized(iClilocId, nullptr, (HUE_TYPE)(hue), TALKMODE_SAY, FONT_NORMAL, CArgs.GetBuffer());
 				}
 			}
 			break;
@@ -1493,7 +1493,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 						CArgs += ( !strncmp(ppArgs[i], "NULL", 4) ? " " : ppArgs[i] );
 					}
 
-					addBarkLocalizedEx( iClilocId, nullptr, (HUE_TYPE)(hue), TALKMODE_SAY, FONT_NORMAL, (AFFIX_TYPE)(affix), ppArgs[3], CArgs.GetPtr() );
+					addBarkLocalizedEx( iClilocId, nullptr, (HUE_TYPE)(hue), TALKMODE_SAY, FONT_NORMAL, (AFFIX_TYPE)(affix), ppArgs[3], CArgs.GetBuffer() );
 				}
 			}
 			break;

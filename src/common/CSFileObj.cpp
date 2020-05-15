@@ -84,7 +84,7 @@ CSString * CSFileObj::GetWriteBuffer()
     if ( !_psWriteBuffer )
         _psWriteBuffer = new CSString();
 
-    _psWriteBuffer->Empty( ( _psWriteBuffer->GetLength() > (SCRIPT_MAX_LINE_LEN/4) ) );
+    _psWriteBuffer->Clear( (_psWriteBuffer->GetLength() > (SCRIPT_MAX_LINE_LEN/4)) );
 
     return _psWriteBuffer;
 }
@@ -187,7 +187,7 @@ bool CSFileObj::r_LoadVal( CScript & s )
             }
             else if ( fChr )
             {
-                pcsWriteBuf->Format( "%c", static_cast<tchar>(s.GetArgVal()) );
+                pcsWriteBuf->Format( "%c", s.GetArgCVal() );
             }
             else
             {
@@ -198,11 +198,11 @@ bool CSFileObj::r_LoadVal( CScript & s )
 
             if ( fChr )
             {
-                fSuccess = _pFile->Write(pcsWriteBuf->GetPtr(), 1);
+                fSuccess = _pFile->Write(pcsWriteBuf->GetBuffer(), 1);
             }
             else
             {
-                fSuccess = _pFile->WriteString( pcsWriteBuf->GetPtr() );
+                fSuccess = _pFile->WriteString( pcsWriteBuf->GetBuffer() );
             }
 
             if ( !fSuccess )

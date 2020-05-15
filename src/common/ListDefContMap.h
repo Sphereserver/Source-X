@@ -32,7 +32,7 @@ private:
 
 public:
     inline lpctstr GetKey() const {
-        return m_Key.GetPtr();
+        return m_Key.GetBuffer();
     }
     inline void SetKey(lpctstr ptcKey) {
         m_Key = ptcKey;
@@ -94,7 +94,7 @@ private:
 
 public:
     inline lpctstr GetValStr() const {
-        return m_sVal.GetPtr(); 
+        return m_sVal.GetBuffer(); 
     }
 	void SetValStr( lpctstr pszVal );
 	int64 GetValNum() const;
@@ -130,7 +130,7 @@ private:
 
 public:
     inline lpctstr GetKey() const {
-        return m_Key.GetPtr();
+        return m_Key.GetBuffer();
     }
 	void SetKey( lpctstr ptcKey );
 

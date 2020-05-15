@@ -90,7 +90,7 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 			m_Act_Motivation = (uchar)(s.GetArgVal());
 			break;
 		case CNC_NPC:
-			m_Brain = static_cast<NPCBRAIN_TYPE>(s.GetArgVal());
+			m_Brain = NPCBRAIN_TYPE(s.GetArgVal());
 			break;
 		case CNC_HOMEDIST:
 			if ( ! pChar->m_ptHome.IsValidPoint())
@@ -125,18 +125,19 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 		case CNC_SPELLADD:
 		{
 			int64 ppCmd[255];
-			size_t count = Str_ParseCmds(s.GetArgStr(), ppCmd, CountOf(ppCmd));
+			const int count = Str_ParseCmds(s.GetArgStr(), ppCmd, CountOf(ppCmd));
 			if (count < 1)
 				return false;
-			for (size_t i = 0; i < count; i++)
+			for (int i = 0; i < count; ++i)
 				Spells_Add((SPELL_TYPE)(ppCmd[i]));
 		}
+		break;
 
 		default:
 			// Just ignore any player type stuff.
 			if ( FindTableHeadSorted( s.GetKey(), CCharPlayer::sm_szLoadKeys, CPC_QTY ) >= 0 )
 				return true;
-			return(false );
+			return false;
 	}
 	return true;
 	EXC_CATCH;
@@ -250,9 +251,8 @@ void CCharNPC::r_WriteChar( CChar * pChar, CScript & s )
 	if ( m_Need.GetResourceID().IsValidUID())
 	{
 		TemporaryString tsTemp;
-		tchar* pszTemp = static_cast<tchar *>(tsTemp);
-		m_Need.WriteKey( pszTemp );
-		s.WriteKey( "NEED", pszTemp );
+		m_Need.WriteKey(tsTemp.buffer());
+		s.WriteKey( "NEED", tsTemp);
 	}
 }
 

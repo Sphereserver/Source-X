@@ -191,16 +191,16 @@ int CCrypto::GetVerFromNumber( dword maj, dword min, dword rev, dword pat )
 	return (maj * 1000000) + (min * 10000) + (rev * 100) + pat;
 }
 
-char* CCrypto::WriteClientVerString( dword iClientVersion, char * pStr )
+char* CCrypto::WriteClientVerString( dword iClientVersion, char * pStr, uint uiBufLen)
 {
 	ADDTOCALLSTACK("CCrypto::WriteClientVerString");
 	if ( iClientVersion >= MINCLIVER_NEWVERSIONING )
 	{
-		sprintf(pStr, "%u.%u.%u.%u", iClientVersion / 1000000, (iClientVersion / 10000) % 100, (iClientVersion % 10000) / 100, iClientVersion % 100);
+		snprintf(pStr, uiBufLen, "%u.%u.%u.%u", iClientVersion / 1000000, (iClientVersion / 10000) % 100, (iClientVersion % 10000) / 100, iClientVersion % 100);
 	}
 	else
 	{
-		int iVer = sprintf(pStr, "%u.%u.%u", iClientVersion / 1000000, (iClientVersion / 10000) % 100, (iClientVersion % 10000) / 100);
+		int iVer = snprintf(pStr, uiBufLen, "%u.%u.%u", iClientVersion / 1000000, (iClientVersion / 10000) % 100, (iClientVersion % 10000) / 100);
 		char iPatch = iClientVersion % 100;
 		if ( iPatch )
 		{
@@ -218,10 +218,10 @@ int CCrypto::GetVersionFromString( lpctstr pszVersion )
 	return CCrypto::GetVerFromString( pszVersion );
 }
 
-char* CCrypto::WriteClientVer( char * pStr ) const
+char* CCrypto::WriteClientVer( char * pcStr, uint uiBufLen) const
 {
 	ADDTOCALLSTACK("CCrypto::WriteClientVer");
-	return( CCrypto::WriteClientVerString( GetClientVer(), pStr ) );
+	return( CCrypto::WriteClientVerString( GetClientVer(), pcStr, uiBufLen ) );
 }
 
 bool CCrypto::SetClientVerEnum( dword iVer, bool bSetEncrypt )

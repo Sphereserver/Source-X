@@ -232,7 +232,6 @@ ushort CChar::Skill_GetMax( SKILL_TYPE skill, bool ignoreLock ) const
 	ADDTOCALLSTACK("CChar::Skill_GetMax");
 	const CVarDefCont * pTagStorage = nullptr;
 	TemporaryString tsSkillName;
-	tchar* pszSkillName = static_cast<tchar *>(tsSkillName);
 
 	// What is my max potential in this skill ?
 	if ( m_pPlayer )
@@ -241,9 +240,9 @@ ushort CChar::Skill_GetMax( SKILL_TYPE skill, bool ignoreLock ) const
 		ASSERT(pSkillClass);
 		ASSERT( IsSkillBase(skill) );
 
-		sprintf(pszSkillName, "OVERRIDE.SKILLCAP_%d", (int)skill);
+		snprintf(tsSkillName.buffer(), tsSkillName.capacity(), "OVERRIDE.SKILLCAP_%d", (int)skill);
 		ushort uiSkillMax;
-		if ( (pTagStorage = GetKey(pszSkillName, true)) != nullptr )
+		if ( (pTagStorage = GetKey(tsSkillName, true)) != nullptr )
 			uiSkillMax = (ushort)(pTagStorage->GetValNum());
 		else
 			uiSkillMax = pSkillClass->m_SkillLevelMax[skill];
@@ -269,8 +268,8 @@ ushort CChar::Skill_GetMax( SKILL_TYPE skill, bool ignoreLock ) const
 		}
 
 		ushort uiSkillMax = 1000;
-		sprintf(pszSkillName, "OVERRIDE.SKILLCAP_%d", (int)skill);
-		if ( (pTagStorage = GetKey(pszSkillName, true)) != nullptr )
+		snprintf(tsSkillName.buffer(), tsSkillName.capacity(), "OVERRIDE.SKILLCAP_%d", (int)skill);
+		if ( (pTagStorage = GetKey(tsSkillName, true)) != nullptr )
 			uiSkillMax = (ushort)(pTagStorage->GetValNum());
 
 		return uiSkillMax;
@@ -410,7 +409,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 	if ( iChance <= 0 )
 		return;
 
-	int64 iRoll = Calc_GetRandVal(1000);
+	int iRoll = Calc_GetRandVal(1000);
 	if ( uiSkillLevelFixed < (ushort)iSkillMax )	// are we in position to gain skill ?
 	{
 		// slightly more chance of decay than gain
@@ -595,7 +594,7 @@ lpctstr CChar::Skill_GetName( bool fUse ) const
 			return g_Cfg.GetSkillKey(skill);
 
 		tchar * pszText = Str_GetTemp();
-		sprintf( pszText, "%s %s", g_Cfg.GetDefaultMsg(DEFMSG_SKILLACT_USING), g_Cfg.GetSkillKey(skill));
+		snprintf( pszText, STR_TEMPLENGTH, "%s %s", g_Cfg.GetDefaultMsg(DEFMSG_SKILLACT_USING), g_Cfg.GetSkillKey(skill));
 		return( pszText );
 	}
 
@@ -667,9 +666,12 @@ bool CChar::Skill_MakeItem_Success()
 		if ( pItem->IsType(IT_SCROLL) )
 			pItem->m_itSpell.m_spelllevel = iSkillLevel;
 
-		CItemBase *ptItemDef = CItemBase::FindItemBase(m_atCreate.m_iItemID);
-		if ( ptItemDef->IsStackableType() )
+		const CItemBase *ptItemDef = CItemBase::FindItemBase(m_atCreate.m_iItemID);
+		ASSERT(ptItemDef);
+		if (ptItemDef->IsStackableType())
+		{
 			pItem->SetAmount((word)m_atCreate.m_dwAmount);
+		}
 		else
 		{
 			for ( uint n = 1; n < m_atCreate.m_dwAmount; ++n )
@@ -774,7 +776,7 @@ bool CChar::Skill_MakeItem_Success()
 		{
 			// A GM made this, and it is of high quality
 			tchar *szNewName = Str_GetTemp();
-			sprintf(szNewName, g_Cfg.GetDefaultMsg(DEFMSG_GRANDMASTER_MARK), pItem->GetName(), GetName());
+			snprintf(szNewName, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_GRANDMASTER_MARK), pItem->GetName(), GetName());
 			pItem->SetName(szNewName);
 
 			// TO-DO: before enable CRAFTEDBY we must find away to properly clear CRAFTEDBY value on all items when chars got deleted
@@ -1078,7 +1080,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	}
 
 	tchar * pszMsg = Str_GetTemp();
-	sprintf(pszMsg, "%s %s", g_Cfg.GetDefaultMsg( DEFMSG_MINING_SMELT ), pItemOre->GetName());
+	snprintf(pszMsg, STR_TEMPLENGTH, "%s %s", g_Cfg.GetDefaultMsg( DEFMSG_MINING_SMELT ), pItemOre->GetName());
 	Emote(pszMsg);
 
 	ushort iMiningSkill = Skill_GetAdjusted(SKILL_MINING);
@@ -1213,7 +1215,8 @@ bool CChar::Skill_Tracking( CUID uidTarg, DIR_TYPE & dirPrv, int iDistMax )
 	if ( pszDef[0] )
 	{
 		tchar *pszMsg = Str_GetTemp();
-		sprintf(pszMsg, pszDef, pObj->GetName(), pObjTop->IsDisconnected() ? g_Cfg.GetDefaultMsg(DEFMSG_TRACKING_RESULT_DISC) : CPointBase::sm_szDirs[dir]);
+		snprintf(pszMsg, STR_TEMPLENGTH, 
+			pszDef, pObj->GetName(), pObjTop->IsDisconnected() ? g_Cfg.GetDefaultMsg(DEFMSG_TRACKING_RESULT_DISC) : CPointBase::sm_szDirs[dir]);
 		ObjMessage(pszMsg, this);
 	}
 
@@ -2136,7 +2139,7 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 			return 0;
 
 		tchar * pszMsg = Str_GetTemp();
-		sprintf(pszMsg, sm_szTameSpeak[ Calc_GetRandVal( CountOf( sm_szTameSpeak )) ], pChar->GetName());
+		snprintf(pszMsg, STR_TEMPLENGTH, sm_szTameSpeak[ Calc_GetRandVal( CountOf( sm_szTameSpeak )) ], pChar->GetName());
 		Speak(pszMsg);
 
 		// Keep trying and updating the animation
@@ -2156,7 +2159,7 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
         fTamedPrev = true;
 
 		tchar * pszMsg = Str_GetTemp();
-		sprintf(pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_TAMING_REMEMBER ), pChar->GetName());
+		snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg( DEFMSG_TAMING_REMEMBER ), pChar->GetName());
 		ObjMessage(pszMsg, pChar );
 	}
 
@@ -2541,7 +2544,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 		if ( pChar != this )
 		{
 			tchar * pszMsg = Str_GetTemp();
-			sprintf(pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_HEALING_TO ), pChar->GetName());
+			snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg( DEFMSG_HEALING_TO ), pChar->GetName());
 			Emote(pszMsg);
 		}
 		else
@@ -4019,12 +4022,18 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		if ( IsTrigUsed(TRIGGER_SKILLPRESTART) )
 		{
 			if ( Skill_OnCharTrigger(skill, CTRIG_SkillPreStart) == TRIGRET_RET_TRUE )
+			{
+				Skill_Cleanup();
 				return false;
+			}
 		}
 		if ( IsTrigUsed(TRIGGER_PRESTART) )
 		{
 			if ( Skill_OnTrigger(skill, SKTRIG_PRESTART) == TRIGRET_RET_TRUE )
+			{
+				Skill_Cleanup();
 				return false;
+			}
 		}
 
 		m_Act_SkillCurrent = skill;

@@ -789,6 +789,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 				pClient->removeBuff(BI_WEAKEN);
 			return;
 		case SPELL_Curse:
+		case SPELL_Mass_Curse:
 		{
 			if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && m_pPlayer )
 			{
@@ -801,7 +802,12 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			for (int i = STAT_STR; i < STAT_BASE_QTY; ++i )
 				Stat_AddMod((STAT_TYPE)i, uiStatEffect);
 			if (pClient)
-				pClient->removeBuff(BI_CURSE);
+			{
+				if (spell == SPELL_Mass_Curse)
+					pClient->removeBuff(BI_MASSCURSE);
+				else
+					pClient->removeBuff(BI_CURSE);
+			}
 			return;
 		}
 		case SPELL_Agility:
@@ -948,7 +954,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 	}
 
 	// Buffs related variables
-	tchar NumBuff[7][8];
+	static constexpr uint uiBuffElemSize = MAX_NAME_SIZE;
+	tchar NumBuff[7][uiBuffElemSize];
 	lpctstr pNumBuff[7] = { NumBuff[0], NumBuff[1], NumBuff[2], NumBuff[3], NumBuff[4], NumBuff[5], NumBuff[6] };
 
 	switch (pSpellDef->m_idLayer)
@@ -1246,15 +1253,15 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			{
 				if (pClient)
 				{
-					strcpy(NumBuff[0], pCaster->GetName());
-					strcpy(NumBuff[1], pCaster->GetName());
+					Str_CopyLimitNull(NumBuff[0], pCaster->GetName(), uiBuffElemSize);
+					Str_CopyLimitNull(NumBuff[1], pCaster->GetName(), uiBuffElemSize);
 					pClient->removeBuff(BI_BLOODOATHCURSE);
 					pClient->addBuff(BI_BLOODOATHCURSE, 1075659, 1075660, wTimerEffect, pNumBuff, 2);
 				}
 				CClient *pCasterClient = pCaster->GetClient();
 				if (pCasterClient)
 				{
-					strcpy(NumBuff[0], GetName());
+					Str_CopyLimitNull(NumBuff[0], GetName(), uiBuffElemSize);
 					pCasterClient->removeBuff(BI_BLOODOATHCASTER);
 					pCasterClient->addBuff(BI_BLOODOATHCASTER, 1075661, 1075662, wTimerEffect, pNumBuff, 1);
 				}
@@ -1422,6 +1429,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			}
 			return;
 		case SPELL_Curse:
+		case SPELL_Mass_Curse:
 			{
 				if ( pCaster != nullptr && IsSetMagicFlags(MAGICF_OSIFORMULAS) )
 				{
@@ -1446,7 +1454,11 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					pClient->removeBuff(BI_CURSE);
+					if (spell == SPELL_Mass_Curse)
+						pClient->removeBuff(BI_MASSCURSE);
+					else
+						pClient->removeBuff(BI_CURSE);
+
 					for ( int idx = STAT_STR; idx < STAT_BASE_QTY; ++idx )
 						Str_FromI(wStatEffectRef, NumBuff[idx], sizeof(NumBuff[0]), 10);
 					if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
@@ -1454,11 +1466,17 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 						for ( int idx = 3; idx < 7; ++idx )
 							Str_FromI(10, NumBuff[idx], sizeof(NumBuff[0]), 10);
 
-						pClient->addBuff(BI_CURSE, 1075835, 1075836, wTimerEffect, pNumBuff, 7);
+						if (spell == SPELL_Mass_Curse)
+							pClient->addBuff(BI_MASSCURSE, 1075835, 1075836, wTimerEffect, pNumBuff, 7);
+						else
+							pClient->addBuff(BI_CURSE, 1075835, 1075836, wTimerEffect, pNumBuff, 7);
 					}
 					else
 					{
-						pClient->addBuff(BI_CURSE, 1075835, 1075840, wTimerEffect, pNumBuff, 3);
+						if (spell == SPELL_Mass_Curse)
+							pClient->addBuff(BI_MASSCURSE, 1075835, 1075840, wTimerEffect, pNumBuff, 3);
+						else
+							pClient->addBuff(BI_CURSE, 1075835, 1075840, wTimerEffect, pNumBuff, 3);
 					}
 				}
 			}
@@ -1795,7 +1813,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 				};
 
 				tchar * pszMsg = Str_GetTemp();
-				sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_SPELL_LOOKS), sm_Poison_Message[iLevel]);
+				snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_SPELL_LOOKS), sm_Poison_Message[iLevel]);
 				if ( g_Cfg.m_iEmoteFlags & EMOTEF_POISON )
 					EmoteObj(pszMsg);
 				else
@@ -1814,6 +1832,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			}
 			break;
 		}
+
 		case SPELL_Strangle:
 		{
 			int iDiff = pItem->m_itSpell.m_spelllevel - pItem->m_itSpell.m_spellcharges;	// Retrieves the total amount of ticks done substracting spellcharges from spelllevel.
@@ -1847,6 +1866,8 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			For example, suppose the base damage for a Strangle hit is 5. The target currently has 40 out of a maximum of 80 stamina. Final damage for that hit is: 5 x (3 - (40 ÷ 80 x 2) = 10.*/
 			OnTakeDamage(maximum(1, iDmg), pItem->m_uidLink.CharFind(), DAMAGE_MAGIC | DAMAGE_POISON | DAMAGE_NOREVEAL, 0, 0, 0, 100, 0);
 		}
+		break;
+
 		case SPELL_Pain_Spike:
 		{
 			// Receives x amount (stored in pItem->m_itSpell.m_spelllevel) of damage in 10 seconds, so damage each second is equal to total / 10
@@ -2185,15 +2206,16 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 
 	if (pSrc != this)
 	{
-		CItem * pItem = dynamic_cast <CItem*> (pSrc);
+		const CItem * pItem = dynamic_cast <const CItem*> (pSrc);
 		if (pItem)
 		{
-			if (pItem->GetType() == IT_WAND)
+			const IT_TYPE iType = pItem->GetType();
+			if (iType == IT_WAND)
 			{
 				iManaUse = 0;
 				iTithingUse = 0;
 			}
-			else if (pItem->GetType() == IT_SCROLL)
+			else if (iType == IT_SCROLL)
 			{
 				iManaUse /= 2;
 				iTithingUse /= 2;
@@ -2638,7 +2660,7 @@ bool CChar::Spell_Unequip( LAYER_TYPE layer )
 		{
 			return false;
 		}
-		else if ( !pItemPrev->IsTypeSpellbook() && !pItemPrev->IsType(IT_WAND) && !pItemPrev->GetPropNum(COMP_PROPS_CHAR, PROPCH_SPELLCHANNELING, true))
+		else if ( !pItemPrev->IsTypeSpellbook() && !pItemPrev->IsType(IT_WAND) && !pItemPrev->GetPropNum(COMP_PROPS_ITEMEQUIPPABLE, PROPIEQUIP_SPELLCHANNELING, true))
 		{
 			ItemBounce( pItemPrev );
 		}
@@ -3241,7 +3263,7 @@ int CChar::Spell_CastStart()
 		// So to avoid this problem we must use TALKMODE_SAY, which is not the correct type but with this type the client only show last 3 messages on screen.
 		if ( pSpellDef->m_sRunes[0] == '.' )
 		{
-			Speak((pSpellDef->m_sRunes.GetPtr()) + 1, (HUE_TYPE)WOPColor, TALKMODE_SAY, (FONT_TYPE)WOPFont);
+			Speak((pSpellDef->m_sRunes.GetBuffer()) + 1, (HUE_TYPE)WOPColor, TALKMODE_SAY, (FONT_TYPE)WOPFont);
 		}
 		else
 		{
@@ -3402,8 +3424,17 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 	if ( pSpellDef->IsSpellType(SPELLFLAG_HARM) )
 	{
-		if ( pCharSrc == this && !IsSetMagicFlags(MAGICF_CANHARMSELF) && !fReflecting )
-			return false;
+		if ( pCharSrc == this )
+		{
+			if (fReflecting)
+			{
+				iDmgType |= DAMAGE_NODISTURB;	// Preventing myself to fail my own cast by receiving damage from it.
+			}
+			else if (!IsSetMagicFlags(MAGICF_CANHARMSELF))
+			{
+				return false;
+			}
+		}
 
 		if ( IsStatFlag(STATF_INVUL) )
 		{
@@ -3412,7 +3443,10 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		}
 		else if ( GetPrivLevel() == PLEVEL_Guest )
 		{
-			pCharSrc->SysMessageDefault( DEFMSG_MSG_ACC_GUESTHIT );
+			if (pCharSrc)
+			{
+				pCharSrc->SysMessageDefault(DEFMSG_MSG_ACC_GUESTHIT);
+			}
 			Effect(EFFECT_OBJ, ITEMID_FX_GLOW, this, 10, 16);
 			return false;
 		}
@@ -3421,7 +3455,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			return false;
 
 		// Check if the spell can be reflected
-		if ( pSpellDef->IsSpellType(SPELLFLAG_TARG_CHAR) && pCharSrc && (pCharSrc != this) )		// only spells with direct target can be reflected
+		if (pCharSrc && (pCharSrc != this) )		// only spells with direct target can be reflected
 		{
 			if ( IsStatFlag(STATF_REFLECTION) )
 			{

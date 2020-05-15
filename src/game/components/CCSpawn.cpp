@@ -968,7 +968,7 @@ bool CCSpawn::r_LoadVal(CScript & s)
         case ISPW_MOREP:
         {
             tchar *pszTemp = Str_GetTemp();
-            strcpy(pszTemp, s.GetArgStr());
+            Str_CopyLimitNull(pszTemp, s.GetArgStr(), STR_TEMPLENGTH);
             GETNONWHITESPACE(pszTemp);
             size_t iArgs = 0;
             if (IsDigit(pszTemp[0]) || pszTemp[0] == '-')

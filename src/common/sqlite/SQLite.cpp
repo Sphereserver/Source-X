@@ -42,7 +42,7 @@ int CSQLite::Open( lpctstr strFileName )
 
 void CSQLite::Close()
 {
-    _sFileName.Empty();
+    _sFileName.Clear();
     _fInMemory = false;
 	if (m_sqlite3)
 	{

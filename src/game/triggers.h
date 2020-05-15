@@ -8,6 +8,9 @@
 
 
 //	Triggers list
+
+#define TRIGGER_NAME_MAX_LEN    48
+
 enum E_TRIGGERS
 {
 #define ADD(a) TRIGGER_##a,

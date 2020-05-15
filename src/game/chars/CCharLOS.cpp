@@ -21,7 +21,7 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 	if ( !bCombatCheck && IsPriv(PRIV_GM) )	// If i'm checking the LOS during a combat, i don't want to shoot through the walls even if i'm a GM
 		return true;
 
-	CPointMap ptSrc = GetTopPoint();
+	CPointMap ptSrc(GetTopPoint());
 	int iDist = ptSrc.GetDist(ptDst);
 	if ( iDist > iMaxDist )
 	{
@@ -35,11 +35,11 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 	int iDistTry = 0;
 	while ( --iDist >= 0 )
 	{
-		DIR_TYPE dir = ptSrc.GetDir(ptDst);
+		const DIR_TYPE dir = ptSrc.GetDir(ptDst);
 		dword dwBlockFlags;
 		if ( dir % 2 && !IsSetEF(EF_NoDiagonalCheckLOS) )	// test only diagonal dirs
 		{
-			CPointMap ptTest = ptSrc;
+			CPointMap ptTest(ptSrc);
 			DIR_TYPE dirTest1 = (DIR_TYPE)(dir - 1);	// get 1st ortogonal
 			DIR_TYPE dirTest2 = (DIR_TYPE)(dir + 1);	// get 2nd ortogonal
 			if ( dirTest2 == DIR_QTY )		// roll over
@@ -86,7 +86,7 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 		}
 	}
 
-	if ( abs(ptSrc.m_z - ptDst.m_z) >= 20 )
+	if ( SphereAbs(int(ptSrc.m_z) - ptDst.m_z) >= 20 )
 		return false;
 	return true;	// made it all the way to the object with no obstructions.
 }
@@ -116,7 +116,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 		return true;
 	}
 
-	CPointMap ptSrc = GetTopPoint();
+	CPointMap ptSrc(GetTopPoint());
 	CPointMap ptNow(ptSrc);
 
 	if ( ptSrc.m_map != ptDst.m_map )	// Different map
@@ -125,7 +125,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 	if ( ptSrc == ptDst )	// Same point ^^
 		return true;
 
-	short iTotalZ = ptSrc.m_z + GetHeightMount(true);
+	const short iTotalZ = ptSrc.m_z + GetHeightMount(true);
 	ptSrc.m_z = (char)minimum(iTotalZ, UO_SIZE_Z);	//true - substract one from the height because of eyes height
 	WARNLOS(("Total Z: %d\n", ptSrc.m_z));
 
@@ -169,7 +169,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 			// Add point to vector
 			if ( !path.empty() )
 			{
-				CPointMap ptEnd = path[path.size() - 1];
+				const CPointMap& ptEnd = path.back();
 				if ( ptEnd.m_x != dx || ptEnd.m_y != dy || ptEnd.m_z != dz )
 					path.emplace_back((word)dx, (word)dy, (char)dz, ptSrc.m_map);
 			}
@@ -189,7 +189,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 
 	if ( !path.empty() )
 	{
-		if ( path[path.size() - 1] != ptDst )
+		if ( path.back() != ptDst )
 			path.emplace_back(ptDst.m_x, ptDst.m_y, ptDst.m_z, ptDst.m_map);
 	}
 	else
@@ -267,7 +267,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 				terrainid = pBlock->GetTerrain(UO_BLOCK_OFFSET(ptNow.m_x), UO_BLOCK_OFFSET(ptNow.m_y))->m_wTerrainIndex;
 				WARNLOS(("Terrain %d\n", terrainid));
 
-				IT_TYPE itTerrain = CWorldMap::GetTerrainItemType(terrainid);
+				const IT_TYPE itTerrain = CWorldMap::GetTerrainItemType(terrainid);
 				if ( (flags & LOS_FISHING) && (ptSrc.GetDist(ptNow) >= 2) && (itTerrain != IT_WATER) && (itTerrain != IT_NORMAL) )
 				{
 					WARNLOS(("Terrain %d blocked - flags & LOS_FISHING, distance >= 2 and type of pItemDef is not IT_WATER\n", terrainid));
@@ -315,7 +315,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 							bPath = false;
 							break;
 						}
-						CUOTerrainInfo land(terrainid);
+						const CUOTerrainInfo land(terrainid);
 						if ( (land.m_flags & UFLAG1_WATER) && (flags & LOS_NC_WATER) )
 							bNullTerrain = true;
 					}
@@ -331,7 +331,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 		{
 			if ( !((flags & LOS_NB_LOCAL_STATIC) && (pSrcRegion == pNowRegion)) )
 			{
-                uint uiStaticMaxQty = pBlock->m_Statics.GetStaticQty();
+                const uint uiStaticMaxQty = pBlock->m_Statics.GetStaticQty();
 				for ( uint s = 0; s < uiStaticMaxQty; pStatic = nullptr, pItemDef = nullptr, ++s )
 				{
 					pStatic = pBlock->m_Statics.GetStatic(s);
@@ -371,13 +371,14 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 						qwTFlags = pItemDef->GetTFlags();
 						Height = pItemDef->GetHeight();
 
-						if ( pItemDef->GetID() != pStatic->GetDispID() ) //not a parent item
+						const ITEMID_TYPE iStaticDispID = pStatic->GetDispID();
+						if ( pItemDef->GetID() != iStaticDispID) //not a parent item
 						{
 							WARNLOS(("Not a parent item (STATIC)\n"));
-							pDupeDef = CItemBaseDupe::GetDupeRef((ITEMID_TYPE)(pStatic->GetDispID()));
+							pDupeDef = CItemBaseDupe::GetDupeRef(iStaticDispID);
 							if ( !pDupeDef )
 							{
-								g_Log.EventDebug("AdvancedLoS: Failed to get non-parent reference (static) (DispID 0%x) (X: %d Y: %d Z: %hhd M: %hhu)\n", pStatic->GetDispID(), ptNow.m_x, ptNow.m_y, pStatic->m_z, ptNow.m_map);
+								g_Log.EventDebug("AdvancedLoS: Failed to get non-parent reference (static) (DispID 0%x) (X: %d Y: %d Z: %hhd M: %hhu)\n", iStaticDispID, ptNow.m_x, ptNow.m_y, pStatic->m_z, ptNow.m_map);
 							}
 							else
 							{
@@ -394,12 +395,12 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 
 						if ( ((qwTFlags & (UFLAG1_WALL|UFLAG1_BLOCK|UFLAG2_PLATFORM)) || (pItemDef->Can(CAN_I_BLOCKLOS_HEIGHT))) && !((qwTFlags & UFLAG2_WINDOW) && (flags & LOS_NB_WINDOWS)) )
 						{
-							WARNLOS(("pStatic %0x %d,%d,%d - %d\n", pStatic->GetDispID(), pStatic->m_x, pStatic->m_y, pStatic->m_z, Height));
+							WARNLOS(("pStatic %0x %d,%d,%d - %d\n", iStaticDispID, pStatic->m_x, pStatic->m_y, pStatic->m_z, Height));
 							min_z = pStatic->m_z;
 							max_z = minimum(Height + min_z, UO_SIZE_Z);
-							WARNLOS(("qwTFlags(0%x)\n", qwTFlags));
+							WARNLOS(("qwTFlags(0%" PRIx64 ")\n", qwTFlags));
 
-							WARNLOS(("pStatic %0x Z check: %d,%d (Now: %d) (Dest: %d).\n", pStatic->GetDispID(), min_z, max_z, ptNow.m_z, ptDst.m_z));
+							WARNLOS(("pStatic %0x Z check: %d,%d (Now: %d) (Dest: %d).\n", iStaticDispID, min_z, max_z, ptNow.m_z, ptDst.m_z));
 							if ( (min_z <= ptNow.m_z) && (max_z >= ptNow.m_z) )
 							{
 								if ( ptNow.m_x != ptDst.m_x || ptNow.m_y != ptDst.m_y || min_z > ptDst.m_z || max_z < ptDst.m_z )
@@ -475,7 +476,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 							if ( !pDupeDef )
 							{
                                 // Not an error: i have changed the DISPID of the item.
-                                CItemBase* pParentDef = CItemBase::FindItemBase(pItem->GetDispID());
+                                const CItemBase* pParentDef = CItemBase::FindItemBase(pItem->GetDispID());
                                 if (pParentDef)
                                 {
                                     qwTFlags = pParentDef->GetTFlags();
@@ -503,7 +504,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 							WARNLOS(("pItem %0x(%0x) %d,%d,%d - %d\n", (dword)pItem->GetUID(), pItem->GetDispID(), pItem->GetUnkPoint().m_x, pItem->GetUnkPoint().m_y, pItem->GetUnkPoint().m_z, Height));
 							min_z = pItem->GetUnkPoint().m_z;
 							max_z = minimum(Height + min_z, UO_SIZE_Z);
-							WARNLOS(("qwTFlags(0%x)\n", qwTFlags));
+							WARNLOS(("qwTFlags(0%" PRIx64 ")\n", qwTFlags));
 
 							WARNLOS(("pItem %0x(%0x) Z check: %d,%d (Now: %d) (Dest: %d).\n", (dword)pItem->GetUID(), pItem->GetDispID(), min_z, max_z, ptNow.m_z, ptDst.m_z));
 							if ( min_z <= ptNow.m_z && max_z >= ptNow.m_z )
@@ -613,7 +614,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 									WARNLOS(("pMultiItem %0x %d,%d,%d - %d\n", pMultiItem->GetDispID(), pMultiItem->m_dx, pMultiItem->m_dy, pMultiItem->m_dz, Height));
 									min_z = (char)(pMultiItem->m_dz) + pItem->GetTopPoint().m_z;
 									max_z = minimum(Height + min_z, UO_SIZE_Z);
-									WARNLOS(("qwTFlags(0%x)\n", qwTFlags));
+									WARNLOS(("qwTFlags(0%" PRIx64 ")\n", qwTFlags));
 
 									if ( min_z <= ptNow.m_z && max_z >= ptNow.m_z )
 									{

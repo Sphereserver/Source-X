@@ -243,7 +243,7 @@ void CCPropsItemChar::AddPropsTooltipData(CObjBase* pLinkedObj)
     for (const BaseContStrPair_t& propPair : _mPropsStr)
     {
         PropertyIndex_t prop = propPair.first;
-        lpctstr ptcVal = propPair.second.GetPtr();
+        lpctstr ptcVal = propPair.second.GetBuffer();
 
         switch (prop)
         {
