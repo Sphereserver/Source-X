@@ -2215,15 +2215,16 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 
 	if (pSrc != this)
 	{
-		CItem * pItem = dynamic_cast <CItem*> (pSrc);
+		const CItem * pItem = dynamic_cast <const CItem*> (pSrc);
 		if (pItem)
 		{
-			if (pItem->GetType() == IT_WAND)
+			const IT_TYPE iType = pItem->GetType();
+			if (iType == IT_WAND)
 			{
 				iManaUse = 0;
 				iTithingUse = 0;
 			}
-			else if (pItem->GetType() == IT_SCROLL)
+			else if (iType == IT_SCROLL)
 			{
 				iManaUse /= 2;
 				iTithingUse /= 2;

@@ -2162,6 +2162,13 @@ void CItem::r_WriteMore1(CSString & sVal)
 {
     ADDTOCALLSTACK("CItem::r_WriteMore1");
     // do special processing to represent this.
+
+	if (IsTypeSpellbook())
+	{
+		sVal.FormatHex(m_itNormal.m_more1);
+		return;
+	}
+
     switch (GetType())
     {
         case IT_TREE:
@@ -2212,6 +2219,13 @@ void CItem::r_WriteMore2( CSString & sVal )
 {
 	ADDTOCALLSTACK_INTENSIVE("CItem::r_WriteMore2");
 	// do special processing to represent this.
+
+	if (IsTypeSpellbook())
+	{
+		sVal.FormatHex(m_itNormal.m_more2);
+		return;
+	}
+
 	switch ( GetType())
 	{
 		case IT_FRUIT:
@@ -4160,38 +4174,37 @@ bool CItem::IsSpellInBook( SPELL_TYPE spell ) const
 {
 	ADDTOCALLSTACK("CItem::IsSpellInBook");
 	CItemBase *pItemDef = Item_GetDef();
-	if ( spell <= (int)pItemDef->m_ttSpellbook.m_iOffset )
+	if ( uint(spell) <= pItemDef->m_ttSpellbook.m_iOffset || spell < 0)
 		return false;
 
 	// Convert spell back to format of the book and check whatever it is in
-	int i = spell - (pItemDef->m_ttSpellbook.m_iOffset + 1);
-	if ( i < 32 )
-		return ((m_itSpellbook.m_spells1 & (1 << i)) != 0);
-	else if ( i < 64 )
-		return ((m_itSpellbook.m_spells2 & (1 << (i-32))) != 0);
-	//else if ( i < 96 )
-	//	return ((m_itSpellbook.m_spells2 & (1 << (i-64))) != 0);	//not used anymore?
-	else
-		return false;
+	const uint i = uint(spell) - (pItemDef->m_ttSpellbook.m_iOffset + 1u);
+	if ( i <= 32 )
+		return ((m_itSpellbook.m_spells1 & (1u << i)) != 0);
+	else if ( i <= 64 )
+		return ((m_itSpellbook.m_spells2 & (1u << (i-32))) != 0);
+	//else if ( i <= 96 )
+	//	return ((m_itSpellbook.m_spells2 & (1u << (i-64))) != 0);	//not used anymore?
+	return false;
 }
 
-int CItem::GetSpellcountInBook() const
+uint CItem::GetSpellcountInBook() const
 {
 	ADDTOCALLSTACK("CItem::GetSpellcountInBook");
 	// -1 = can't count
 	// n = number of spells
 
 	if ( !IsTypeSpellbook() )
-		return -1;
+		return uint(-1);
 
-	CItemBase *pItemDef = Item_GetDef();
+	const CItemBase *pItemDef = Item_GetDef();
 	if ( !pItemDef )
-		return -1;
+		return uint(-1);
 
-	uint min = pItemDef->m_ttSpellbook.m_iOffset + 1;
-	uint max = pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells;
+	const uint min = pItemDef->m_ttSpellbook.m_iOffset + 1;
+	const uint max = pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells;
 
-	int count = 0;
+	uint count = 0;
 	for ( uint i = min; i <= max; ++i )
 	{
 		if ( IsSpellInBook((SPELL_TYPE)i) )
@@ -4229,7 +4242,7 @@ SKILL_TYPE CItem::GetSpellBookSkill()
 	return SKILL_NONE;// SKILL_NONE returns 1000+ index in CChar::Spell_GetIndex()
 }
 
-int CItem::AddSpellbookSpell( SPELL_TYPE spell, bool fUpdate )
+uint CItem::AddSpellbookSpell( SPELL_TYPE spell, bool fUpdate )
 {
 	ADDTOCALLSTACK("CItem::AddSpellbookSpell");
 	// Add  this scroll to the spellbook.
@@ -4241,7 +4254,7 @@ int CItem::AddSpellbookSpell( SPELL_TYPE spell, bool fUpdate )
 	if ( !IsTypeSpellbook() )
 		return 3;
 	const CItemBase *pBookDef = Item_GetDef();
-	if ( spell <= (int)pBookDef->m_ttSpellbook.m_iOffset )
+	if ( uint(spell) <= pBookDef->m_ttSpellbook.m_iOffset )
 		return 3;
 	const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
 	if ( !pSpellDef )
@@ -4250,23 +4263,23 @@ int CItem::AddSpellbookSpell( SPELL_TYPE spell, bool fUpdate )
 		return 1;
 
 	// Add spell to spellbook bitmask
-	int i = spell - (int)(pBookDef->m_ttSpellbook.m_iOffset + 1);
-	if ( i < 32 )
+	const uint i = spell - (pBookDef->m_ttSpellbook.m_iOffset + 1);
+	if ( i <= 32u )
 		m_itSpellbook.m_spells1 |= (1 << i);
-	else if ( i < 64 )
-		m_itSpellbook.m_spells2 |= (1 << (i-32));
-	//else if ( i < 96 )
+	else if ( i <= 64u )
+		m_itSpellbook.m_spells2 |= (1 << (i-32u));
+	//else if ( i <= 96 )
 	//	m_itSpellbook.m_spells3 |= (1 << (i-64));	//not used anymore?
 	else
 		return 3;
 
-	if ( GetTopLevelObj()->IsChar() )
+	auto pTopObj = static_cast<CObjBase*>(GetTopLevelObj());
+	if (pTopObj)
 	{
 		// Intercepting the spell's addition here for NPCs, they store the spells on vector <Spells>m_spells for better access from their AI
-		CChar *pChar = dynamic_cast<CChar *>( static_cast<CObjBase *>(GetTopLevelObj()) );
+		CChar *pChar = dynamic_cast<CChar *>(pTopObj);
 		if ( pChar && pChar->m_pNPC)
 			pChar->m_pNPC->Spells_Add(spell);
-
 	}
 
 	if ( fUpdate )	// update the spellbook
@@ -4288,7 +4301,7 @@ int CItem::AddSpellbookSpell( SPELL_TYPE spell, bool fUpdate )
 	return 0;
 }
 
-int CItem::AddSpellbookScroll( CItem * pScroll )
+uint CItem::AddSpellbookScroll( CItem * pScroll )
 {
 	ADDTOCALLSTACK("CItem::AddSpellbookScroll");
 	// Add  this scroll to the spellbook.
@@ -4297,9 +4310,9 @@ int CItem::AddSpellbookScroll( CItem * pScroll )
 	// 2 = not a scroll i know about.
 
 	ASSERT(pScroll);
-	int iRet = AddSpellbookSpell( pScroll->GetScrollSpell(), true );
-	if ( iRet )
-		return( iRet );
+	uint iRet = AddSpellbookSpell( pScroll->GetScrollSpell(), true );
+	if ( iRet > 0)
+		return iRet;
 	pScroll->ConsumeAmount(1);	// we only need 1 scroll.
 	return 0;
 }
@@ -4322,8 +4335,8 @@ void CItem::Flip()
 	if ( IsType( IT_DOOR ) || IsType( IT_DOOR_LOCKED ) || IsType(IT_DOOR_OPEN))
 	{
 		ITEMID_TYPE id = GetDispID();
-		int doordir = CItemBase::IsID_Door( id )-1;
-		int iNewID = (id - doordir) + (( doordir &~DOOR_OPENED ) + 2 ) % 16; // next closed door type.
+		int doordir = CItemBase::IsID_Door( id ) - 1;
+		int iNewID = (id - doordir) + (( doordir & ~DOOR_OPENED ) + 2 ) % 16; // next closed door type.
 		SetDispID((ITEMID_TYPE)iNewID);
 		Update();
 		return;
