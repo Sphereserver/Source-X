@@ -1746,11 +1746,14 @@ PacketAddTarget::PacketAddTarget(const CClient* target, PacketAddTarget::TargetT
 	if ( !pItemDef )
 		return;
 
-	word y = 0;
+	word x = 0, y = 0, z = 0;
 	CItemBaseMulti *pMultiDef = static_cast<CItemBaseMulti *>(pItemDef);
-	//if ( pMultiDef && pMultiDef->m_rect.m_bottom > 0 && (pMultiDef->IsType(IT_MULTI) || pMultiDef->IsType(IT_MULTI_CUSTOM)) )
-	if ( pMultiDef && CItemBase::IsID_Multi(id) )
-		y = (word)(pMultiDef->m_rect.m_bottom - 1);
+	if (pMultiDef && CItemBase::IsID_Multi(id))
+	{
+		x = (word)(pMultiDef->m_Offset.m_dx != 0 ? (pMultiDef->m_rect.m_left + pMultiDef->m_Offset.m_dx) : 0);
+		y = (word)(pMultiDef->m_rect.m_bottom + pMultiDef->m_Offset.m_dy);
+		z = (word)(pMultiDef->m_Offset.m_dz);
+	}
 
 	writeByte((byte)type);
 	writeInt32(context);
@@ -1763,9 +1766,9 @@ PacketAddTarget::PacketAddTarget(const CClient* target, PacketAddTarget::TargetT
 
 	writeInt16((word)(id - ITEMID_MULTI));
 
-	writeInt16(0);	// x
+	writeInt16(x);	// x
 	writeInt16(y);	// y
-	writeInt16(0);	// z
+	writeInt16(z);	// z
 
 	if ( target->GetNetState()->isClientVersion(MINCLIVER_HS) )
 		writeInt32((dword)color);	// hue
@@ -3503,11 +3506,12 @@ PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nword* p
  ***************************************************************************/
 PacketDeath::PacketDeath(CChar* dead, CItemCorpse* corpse, bool fFrontFall) : PacketSend(XCMD_CharDeath, 13, PRI_NORMAL)
 {
+	UNREFERENCED_PARAMETER(fFrontFall);
 	ADDTOCALLSTACK("PacketDeath::PacketDeath");
 
 	writeInt32(dead->GetUID());
 	writeInt32(corpse == nullptr ? 0 : (dword)corpse->GetUID());
-	writeInt32((dword)fFrontFall);
+	writeInt32(0);
 }
 
 

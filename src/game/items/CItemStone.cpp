@@ -1340,7 +1340,7 @@ bool CItemStone::IsAlliedWith( const CItemStone * pStone) const
 	CStoneMember * pAllyMember = GetMember(pStone);
 	if ( pAllyMember ) // Ok, we might be ally
 	{
-		if ( pAllyMember->GetTheyDeclaredAlly() && pAllyMember->GetWeDeclaredAlly() )
+		if ( pAllyMember->m_iPriv == STONEPRIV_ALLY && pAllyMember->GetTheyDeclaredAlly() && pAllyMember->GetWeDeclaredAlly() )
 			return true;
 	}
 
@@ -1377,7 +1377,7 @@ bool CItemStone::IsAtWarWith( const CItemStone * pEnemyStone ) const
 	CStoneMember * pEnemyMember = GetMember(pEnemyStone);
 	if (pEnemyMember) // Ok, we might be at war
 	{
-		if ( pEnemyMember->GetTheyDeclaredWar() && pEnemyMember->GetWeDeclaredWar())
+		if ( pEnemyMember->m_iPriv == STONEPRIV_ENEMY && pEnemyMember->GetTheyDeclaredWar() && pEnemyMember->GetWeDeclaredWar())
 			return true;
 	}
 
