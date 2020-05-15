@@ -3517,7 +3517,7 @@ PacketDeath::PacketDeath(CChar* dead, CItemCorpse* corpse, bool fFrontFall) : Pa
 {
 	UNREFERENCED_PARAMETER(fFrontFall);
 	ADDTOCALLSTACK("PacketDeath::PacketDeath");
-
+	
 	writeInt32(dead->GetUID());
 	writeInt32(corpse == nullptr ? 0 : (dword)corpse->GetUID());
 	writeInt32(0);
