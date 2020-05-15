@@ -371,6 +371,11 @@ CStoneMember::CStoneMember( CItemStone * pStone, CUID uid, STONEPRIV_TYPE iType,
 		m_Enemy.m_fTheyDeclared = fVal1;
 		m_Enemy.m_fWeDeclared = fVal2;
 	}
+	else if ( iType == STONEPRIV_ALLY )
+	{
+		m_Ally.m_fTheyDeclared = fVal1;
+		m_Ally.m_fWeDeclared = fVal2;
+	}
 	else
 	{
 		m_Member.m_fAbbrev = fVal1;
