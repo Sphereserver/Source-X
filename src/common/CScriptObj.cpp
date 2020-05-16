@@ -1767,10 +1767,10 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 		// No need to loop if there is no valid resource id
 		if ( rid.IsValidUID() )
 		{
+			const dword dwTotal = g_World.GetUIDCount();
+			dword dwCount = dwTotal - 1;
 			dword dwTotalInstances = 0; // Will acquire the correct value for this during the loop
 			dword dwUID = 0;
-			dword dwTotal = g_World.GetUIDCount();
-			dword dwCount = dwTotal-1;
 			dword dwFound = 0;
 
 			while ( dwCount-- )
@@ -1784,8 +1784,10 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 				if ( pObj == nullptr )
 					continue;
 
+				const CBaseBaseDef* pBase = pObj->Base_GetDef();
+				ASSERT(pBase);
 				// Check to see if the object resource id matches what we're looking for
-				if (pObj->Base_GetDef()->GetResourceID() != rid)
+				if (pBase->GetResourceID() != rid)
 					continue;
 
 				// Check we do not loop too many times
@@ -1809,8 +1811,8 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 				s.SeekContext( StartContext );
 
 				// Acquire the total instances that exist for this item if we can
-				if ( dwTotalInstances == 0 && pObj->Base_GetDef() != nullptr )
-					dwTotalInstances = pObj->Base_GetDef()->GetRefInstances();
+				if ( dwTotalInstances == 0 )
+					dwTotalInstances = pBase->GetRefInstances();
 
 				++dwFound;
 

@@ -3644,7 +3644,7 @@ void CChar::r_Write( CScript & s )
 	EXC_TRY("r_Write");
 
 	s.WriteSection("WORLDCHAR %s", GetResourceName());
-	//s.WriteKeyVal("CREATE", CWorldGameTime::GetCurrentTime().GetTimeDiff(_iTimeCreate) / MSECS_PER_TENTH ); // Do we need to save it?
+	s.WriteKeyVal("CREATE", CWorldGameTime::GetCurrentTime().GetTimeDiff(_iTimeCreate) / MSECS_PER_TENTH );
 
     // Do not save TAG.LastHit (used by PreHit combat flag). It's based on the server uptime, so if this tag isn't zeroed,
     //  after the server restart the char may not be able to attack until the server reaches the serv.time when the previous TAG.LastHit was set.

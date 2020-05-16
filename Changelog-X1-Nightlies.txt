@@ -2260,3 +2260,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: House type wasn't saved with the world save.
 - Fixed: Stones (guilds) not checking correctly for ally/war members. (Issue #442)
 - Fixed: Older clients do not support frontfall in death packet. (Issue #369)
+
+16-05-2020, Nolok
+- Fixed: Character's CREATE property wasn't saved in the savefile (Issue #459).
+- Fixed: Retrieving EVENTS returned only the first event added (Issue #473).

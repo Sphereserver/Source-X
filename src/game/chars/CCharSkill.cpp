@@ -290,7 +290,7 @@ uint CChar::Skill_GetSumMax() const
 {
     ADDTOCALLSTACK("CChar::Skill_GetSumMax");
     const CSkillClassDef * pSkillClass = m_pPlayer->GetSkillClass();
-    CVarDefCont *pTagStorage = GetKey("OVERRIDE.SKILLSUM", true);
+	const CVarDefCont *pTagStorage = GetKey("OVERRIDE.SKILLSUM", true);
     return (pTagStorage ? (uint)pTagStorage->GetValNum() : pSkillClass->m_SkillSumMax);
 }
 
@@ -381,7 +381,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 	// give a bonus or a penalty if the task was too hard or too easy.
 	// no gain at all if it was WAY TOO easy
 	ushort uiSkillLevel = Skill_GetBase( skill );
-	ushort uiSkillLevelFixed = uiSkillLevel < 50 ? 50 : uiSkillLevel;
+	ushort uiSkillLevelFixed = (uiSkillLevel < 50) ? 50 : uiSkillLevel;
 	int iGainRadius = pSkillDef->m_GainRadius;
 	if ((iGainRadius > 0) && ((difficulty + iGainRadius) < uiSkillLevelFixed))
 	{

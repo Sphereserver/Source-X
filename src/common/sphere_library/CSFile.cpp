@@ -426,7 +426,7 @@ CSString CSFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
 	if ( pszBase && pszBase[0] )
 	{
         len = Str_CopyLimitNull( ptcFilePath, pszBase, sizeof(ptcFilePath) - 1); // eventually, leave space for the (back)slash
-		if (len && ptcFilePath[len - 2] != '\\' && ptcFilePath[len - 2] != '/')
+		if (len && ptcFilePath[len - 1] != '\\' && ptcFilePath[len - 1] != '/')
 		{
 #ifdef _WIN32
 			strcat(ptcFilePath, "\\");

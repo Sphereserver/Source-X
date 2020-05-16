@@ -362,7 +362,7 @@ size_t Str_CopyLimitNull(tchar * pDst, lpctstr pSrc, size_t uiMaxSize)
     } while (qty < uiMaxSize);
     memcpy(pDst, pSrc, qty);
     pDst[qty - 1] = '\0'; // null terminate the string
-    return qty; // bytes copied in pDst string (not counting the string terminator)
+    return qty - 1; // bytes copied in pDst string (not counting the string terminator)
 }
 
 size_t Str_CopyLen(tchar * pDst, lpctstr pSrc)

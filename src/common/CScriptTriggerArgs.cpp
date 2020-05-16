@@ -210,7 +210,9 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
     {
         bool fQuoted = false;
         tchar* ptcArg = s.GetArgStr(&fQuoted);
-        return (nullptr != m_VarsLocal.SetStr( s.GetKey()+6, fQuoted, ptcArg, false ));
+        if (!ptcArg || !ptcArg[0])
+            ptcArg = "0";
+        return m_VarsLocal.SetStr( s.GetKey()+6, fQuoted, ptcArg, false );
     }
     else if ( !strnicmp( "REF", ptcKey, 3 ) )
     {
@@ -340,7 +342,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsol
     {
         EXC_SET_BLOCK("local");
         ptcKey	+= 6;
-        sVal = m_VarsLocal.GetKeyStr(ptcKey, false);
+        sVal = m_VarsLocal.GetKeyStr(ptcKey, true);
         return true;
     }
 
