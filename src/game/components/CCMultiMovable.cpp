@@ -1221,6 +1221,8 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
 
 enum CML_TYPE
 {
+    CML_ANCHOR,
+    CML_DIRFACE,
     CML_PILOT,
     CML_SHIPSPEED,
     CML_SPEEDMODE,
@@ -1229,6 +1231,8 @@ enum CML_TYPE
 
 lpctstr const CCMultiMovable::sm_szLoadKeys[CML_QTY + 1] =
 {
+    "ANCHOR",
+    "DIRFACE",
     "PILOT",
     "SHIPSPEED",
     "SPEEDMODE",
@@ -1250,6 +1254,12 @@ bool CCMultiMovable::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * 
     ASSERT(pItemThis);
     switch (index)
     {
+        case CML_ANCHOR:
+            sVal.FormatBVal(pItemThis->m_itShip.m_fAnchored);
+            break;
+        case CML_DIRFACE:
+            sVal.FormatBVal(pItemThis->m_itShip.m_DirFace);
+            break;
         case CML_PILOT:
         {
             if (pItemThis->m_itShip.m_Pilot)

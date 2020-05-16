@@ -410,10 +410,18 @@ public:
 		uchar tiles;	// distance to move
 	};
 
+	struct MultiOffset
+	{
+		short m_dx;
+		short m_dy;
+		char m_dz;
+	};
+
 	std::vector<CMultiComponentItem> m_Components;
 	ShipSpeed _shipSpeed; // Speed of ships (IT_SHIP)
 	ShipMovementSpeed m_SpeedMode;
 	CRect m_rect;		// my region.
+	MultiOffset m_Offset;
 	dword m_dwRegionFlags;	// Base region flags (REGION_FLAG_GUARDED etc)
 	CResourceRefArray m_Speech;	// Speech fragment list (other stuff we know)
     uint16 _iBaseStorage;

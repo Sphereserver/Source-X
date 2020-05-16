@@ -1869,6 +1869,10 @@ CItemBaseMulti::CItemBaseMulti( CItemBase* pBase ) :
 	_shipSpeed.tiles = 0;
 	m_SpeedMode = SMS_SLOW;
 
+	m_Offset.m_dx = 0;
+	m_Offset.m_dy = -1;
+	m_Offset.m_dz = 0;
+
     _iBaseStorage = 489;    // Minimum possible value from 7x7 houses.
     _iBaseVendors = 10;     // Minimum possible value from 7x7 houses.
     _iLockdownsPercent = 50;// Default value
@@ -1948,6 +1952,7 @@ enum MLC_TYPE
     MLC_BASEVENDORS,
 	MLC_COMPONENT,
     MLC_LOCKDOWNSPERCENT,
+	MLC_MULTIOFFSET,
 	MLC_MULTIREGION,
 	MLC_REGIONFLAGS,
 	MLC_SHIPSPEED,
@@ -1962,6 +1967,7 @@ lpctstr const CItemBaseMulti::sm_szLoadKeys[] =
     "BASEVENDORS",
 	"COMPONENT",
     "LOCKDOWNSPERCENT",
+	"MULTIOFFSET",
 	"MULTIREGION",
 	"REGIONFLAGS",
 	"SHIPSPEED",
@@ -1986,6 +1992,17 @@ bool CItemBaseMulti::r_LoadVal(CScript &s)
             break;
         case MLC_COMPONENT:
             return AddComponent(s.GetArgStr());
+		case MLC_MULTIOFFSET:
+		{
+			int64 ppArgs[3];
+			size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, CountOf(ppArgs));
+			if (iQty < 1)
+				return false;
+
+			m_Offset.m_dx = (short)(ppArgs[0]);
+			m_Offset.m_dy = (short)(ppArgs[1]);
+			m_Offset.m_dz = (char)(ppArgs[2]);
+		} break;
         case MLC_MULTIREGION:
             MakeMultiRegion(this, s);
             break;
@@ -2103,6 +2120,9 @@ bool CItemBaseMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * 
                 return false;
             return true;
         }
+		case MLC_MULTIOFFSET:
+			sVal.Format("%d,%d,%d", m_Offset.m_dx, m_Offset.m_dy, m_Offset.m_dz);
+			return true;
         case MLC_MULTIREGION:
             sVal.Format("%d,%d,%d,%d", m_rect.m_left, m_rect.m_top, m_rect.m_right - 1, m_rect.m_bottom - 1);
             return true;

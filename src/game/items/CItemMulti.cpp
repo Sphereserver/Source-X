@@ -2461,6 +2461,10 @@ void CItemMulti::r_Write(CScript & s)
     {
         s.WriteKeyHex("OWNER", (dword)_uidOwner);
     }
+    if (_iHouseType)
+    {
+        s.WriteKeyHex("HOUSETYPE", (dword)_iHouseType);
+    }
     if (!_lCoowners.empty())
     {
         for (const CUID& uid : _lCoowners)

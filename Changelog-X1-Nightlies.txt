@@ -2252,3 +2252,11 @@ Must have event, even if it's empty, since it's applied by the source to generat
 13-05-2020, Nolok
 - Fixed: Couldn't read correctly MORE1/MORE2 from spellbooks and store properly 32th and 64th spells (Issue #437).
 - Fixed: MinCharDeleteTime wasn't correctly (internally) converted in seconds (Issue #459).
+
+15-05-2020, Julian
+- Added: Multi property "MULTIOFFSET x,y,z", it contains the offset for displaying the target multi (as in multi creation).
+		 This way, you can create dynamic targets with multi, for example, using a pentagram as cannon target.
+- Added: Ship keywords ANCHOR and DIRFACE, will return the anchor status (0/1) and the direction the ship is facing (0 to 7).
+- Fixed: House type wasn't saved with the world save.
+- Fixed: Stones (guilds) not checking correctly for ally/war members. (Issue #442)
+- Fixed: Older clients do not support frontfall in death packet. (Issue #369)
