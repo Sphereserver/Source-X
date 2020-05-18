@@ -2264,3 +2264,6 @@ Must have event, even if it's empty, since it's applied by the source to generat
 16-05-2020, Nolok
 - Fixed: Character's CREATE property wasn't saved in the savefile (Issue #459).
 - Fixed: Retrieving EVENTS returned only the first event added (Issue #473).
+
+17-05-2020, Julian
+- Fixed: WeightReduction not being applied to containers. (Issue #407)
