@@ -4,6 +4,7 @@
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
+#include "../components/CCPropsItemChar.h"
 #include "../CServer.h"
 #include "../triggers.h"
 #include "CItem.h"
@@ -330,16 +331,21 @@ int CItemContainer::GetWeight(word amount) const
 void CItemContainer::OnWeightChange( int iChange )
 {
 	ADDTOCALLSTACK("CItemContainer::OnWeightChange");
+	if ( iChange == 0 )
+		return;
+
+	// Use WeightReduction property
+	if (GetPropNum(COMP_PROPS_ITEMCHAR, PROPITCH_WEIGHTREDUCTION, true))
+		iChange = iChange * (100 - (GetPropNum(COMP_PROPS_ITEMCHAR, PROPITCH_WEIGHTREDUCTION, true))) / 100;
+
+	// Apply the weight change on the container
 	CContainer::OnWeightChange(iChange);
 	UpdatePropertyFlag();
 
-	if ( iChange == 0 )
-		return;	// no change
-
-	// some containers do not add weight to you.
+	// Some containers do not add weight to you.
 	if ( !IsWeighed() )
 		return;
-
+	
 	// Propagate the weight change up the stack if there is one.
 	CContainer *pCont = dynamic_cast<CContainer *>(GetParent());
 	if ( !pCont )
