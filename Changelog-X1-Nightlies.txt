@@ -2267,3 +2267,5 @@ Must have event, even if it's empty, since it's applied by the source to generat
 
 17-05-2020, Julian
 - Fixed: WeightReduction not being applied to containers. (Issue #407)
+- Fixed: RangeL is now 0 when it's not set in the weapon. (Issue #480)
+- Modified: Casting now searches for reagents in every pack the player has instead of only the backpack.
