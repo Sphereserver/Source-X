@@ -71,23 +71,12 @@ bool CCPropsItemWeapon::GetPropertyNumPtr(PropertyIndex_t iPropIndex, PropertyVa
     switch (iPropIndex)
     {
         case PROPIWEAP_RANGEL:
-        case PROPIWEAP_RANGEH:
-            if (_uiRange == 0)
-            {
-                *piOutVal = 1;
-                return false;   // not set
-            }
-            if (iPropIndex == PROPIWEAP_RANGEL)
-            {
-                *piOutVal = RANGE_GET_LO(_uiRange);
-                return true;
-            }
-            else
-            {
-                *piOutVal = RANGE_GET_HI(_uiRange);
-                return true;
-            }
+            *piOutVal = maximum(0, RANGE_GET_LO(_uiRange));
+            return true;
 
+        case PROPIWEAP_RANGEH:
+            *piOutVal = maximum(1, RANGE_GET_HI(_uiRange));
+            return true;
         default:
             return BaseCont_GetPropertyNum(&_mPropsNum, iPropIndex, piOutVal);
     }
