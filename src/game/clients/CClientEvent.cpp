@@ -957,6 +957,7 @@ void CClient::Event_CombatMode( bool fWar ) // Only for switching to combat mode
 	if ( fCleanSkill )
 	{
 		m_pChar->Skill_Fail( true );
+		m_pChar->m_Fight_Targ_UID.InitUID();
 		//DEBUG_WARN(("UserWarMode - Cleaning Skill Action\n"));
 	}
 
