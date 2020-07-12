@@ -2719,9 +2719,15 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_START )
 	{
-		m_atFight.m_iWarSwingState = WAR_SWING_EQUIPPING;
-        Fight_HitTry();	// this cleans up itself, executes the code related to the current m_iWarSwingState and sets the needed timers.
-		return m_Act_Difficulty;	// How difficult? 1-10000
+		/*
+		The two lines below need to be moved after the @SkillStart/@Start triggers, otherwise if we are using a custom combat system
+		and we are forcing a miss (actdiff < 0) combat will be blocked because it will not pass the @SkillStart/@Start triggers check.
+		*/
+		//m_atFight.m_iWarSwingState = WAR_SWING_EQUIPPING;
+		//Fight_HitTry();	// this cleans up itself, executes the code related to the current m_iWarSwingState and sets the needed timers.
+
+		//When combat starts we need to set hit chance, otherwise ACTDIFF will be 0 and thus an automatic success.
+		return g_Cfg.Calc_CombatChanceToHit(this,m_Fight_Targ_UID.CharFind());	// How difficult? 1-10000
 	}
 
 	if ( stage == SKTRIG_STROKE )
@@ -4061,8 +4067,10 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 			pArgs.m_VarsLocal.SetNum("GatherStrokeCnt", m_atResource.m_dwStrokeCount);
 		}
 
+
 		if ( IsTrigUsed(TRIGGER_SKILLSTART) )
 		{
+			//If we are using a combat skill and m_Act_Difficult(actdiff) is < 0 combat will be blocked.
 			if ( (Skill_OnCharTrigger(skill, CTRIG_SkillStart, &pArgs) == TRIGRET_RET_TRUE) || (m_Act_Difficulty < 0) )
 			{
 				Skill_Cleanup();
@@ -4072,6 +4080,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 
 		if ( IsTrigUsed(TRIGGER_START) )
 		{
+			//If we are using a combat skill and m_Act_Difficulty(actdiff) is < 0 combat will be blocked.
 			if ( (Skill_OnTrigger(skill, SKTRIG_START, &pArgs) == TRIGRET_RET_TRUE) || (m_Act_Difficulty < 0) )
 			{
 				Skill_Cleanup();
@@ -4120,10 +4129,17 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
         {
             SetTimeoutD(1);		// the skill should have set it's own delay!?
         }
+		
+		//When combat starts, the first @HitTry trigger will be called after the @SkillStart/@Start (as it was before).
+		const bool fFightSkill = g_Cfg.IsSkillFlag(skill, SKF_FIGHT);
+		if ( fFightSkill )
+		{
+			m_atFight.m_iWarSwingState = WAR_SWING_EQUIPPING;
+			Fight_HitTry();	// this cleans up itself, executes the code related to the current m_iWarSwingState and sets the needed timers.
+		}
 
 		if ( m_Act_Difficulty > 0 )
 		{
-			const bool fFightSkill = g_Cfg.IsSkillFlag(skill, SKF_FIGHT);
 			if ( !Skill_CheckSuccess(skill, m_Act_Difficulty, !fFightSkill) )
 				m_Act_Difficulty = -m_Act_Difficulty;	// will result in failure
 		}

@@ -2269,3 +2269,10 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: WeightReduction not being applied to containers. (Issue #407)
 - Fixed: RangeL is now 0 when it's not set in the weapon. (Issue #480)
 - Modified: Casting now searches for reagents in every pack the player has instead of only the backpack.
+
+12-07-2020, Drk84
+- Fixed: Some issues related to combat triggers order and combat actdiff.
+		The issues were the following:
+		1)When combat started, the first @HitTry trigger was fired before the @SkillStart/@Start triggers.
+		  If we were using a custom combat formula and thus overriding  the ACTDIFF in @HitTry, forcing a miss by setting a negative value in ACTDIFF would cause the combat to block.
+		2)When combat started, the chance to hit wasn't calculated so the first hit was always a success because ACTDIFF was set to 0.
