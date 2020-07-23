@@ -4182,7 +4182,7 @@ bool CItem::IsSpellInBook( SPELL_TYPE spell ) const
 
 	// Convert spell back to format of the book and check whatever it is in
 	const uint i = uint(spell) - (pItemDef->m_ttSpellbook.m_iOffset + 1u);
-	if ( i <= 32 )
+	if ( i < 32 ) //Replaced the <= with < because of the formula above, the first 32 spells have an i value from 0 to 31. 
 		return ((m_itSpellbook.m_spells1 & (1u << i)) != 0);
 	else if ( i <= 64 )
 		return ((m_itSpellbook.m_spells2 & (1u << (i-32))) != 0);
@@ -4267,7 +4267,7 @@ uint CItem::AddSpellbookSpell( SPELL_TYPE spell, bool fUpdate )
 
 	// Add spell to spellbook bitmask
 	const uint i = spell - (pBookDef->m_ttSpellbook.m_iOffset + 1);
-	if ( i <= 32u )
+	if ( i < 32u ) //Replaced the <= with < because of the formula above, the first 32 spells have an i value from 0 to 31. 
 		m_itSpellbook.m_spells1 |= (1 << i);
 	else if ( i <= 64u )
 		m_itSpellbook.m_spells2 |= (1 << (i-32u));
