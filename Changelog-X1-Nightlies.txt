@@ -2276,3 +2276,8 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		1)When combat started, the first @HitTry trigger was fired before the @SkillStart/@Start triggers.
 		  If we were using a custom combat formula and thus overriding  the ACTDIFF in @HitTry, forcing a miss by setting a negative value in ACTDIFF would cause the combat to block.
 		2)When combat started, the chance to hit wasn't calculated so the first hit was always a success because ACTDIFF was set to 0.
+
+23-07-2020, Drk8
+- Fixed: Adding the Blade Spirits spell to a spellbook added the Clumsy spell. (Issue #496)
+		 Warning: existing Spellbooks with the Blade Spirits spell added by scroll or addspell have the more1 value corrupted and so need they must be replaced.
+		 Only Magery Spellbooks are affected because other spellsbooks doesn't have more than 32 spells (Mastery Spells are not implemented).
