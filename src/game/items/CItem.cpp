@@ -4180,11 +4180,11 @@ bool CItem::IsSpellInBook( SPELL_TYPE spell ) const
 	if ( uint(spell) <= pItemDef->m_ttSpellbook.m_iOffset || spell < 0)
 		return false;
 
-	// Convert spell back to format of the book and check whatever it is in
+	// Convert spell back to format of the book and check whatever it is in.
 	const uint i = uint(spell) - (pItemDef->m_ttSpellbook.m_iOffset + 1u);
-	if ( i < 32 ) //Replaced the <= with < because of the formula above, the first 32 spells have an i value from 0 to 31. 
+	if ( i < 32 ) // Replaced the <= with < because of the formula above, the first 32 spells have an i value from 0 to 31 and are stored in more1.
 		return ((m_itSpellbook.m_spells1 & (1u << i)) != 0);
-	else if ( i <= 64 )
+	else if ( i < 64 ) // Replaced the <= with < because of the formula above, the remaining 32 spells have an i value from 32 to 63 and are stored in more2.
 		return ((m_itSpellbook.m_spells2 & (1u << (i-32))) != 0);
 	//else if ( i <= 96 )
 	//	return ((m_itSpellbook.m_spells2 & (1u << (i-64))) != 0);	//not used anymore?
@@ -4265,12 +4265,12 @@ uint CItem::AddSpellbookSpell( SPELL_TYPE spell, bool fUpdate )
 	if ( IsSpellInBook(spell) )
 		return 1;
 
-	// Add spell to spellbook bitmask
+	// Add spell to spellbook bitmask:
 	const uint i = spell - (pBookDef->m_ttSpellbook.m_iOffset + 1);
-	if ( i < 32u ) //Replaced the <= with < because of the formula above, the first 32 spells have an i value from 0 to 31. 
+	if ( i < 32u ) // Replaced the <= with < because of the formula above, the first 32 spells have an i value from 0 to 31 and are stored in more1.
 		m_itSpellbook.m_spells1 |= (1 << i);
-	else if ( i <= 64u )
-		m_itSpellbook.m_spells2 |= (1 << (i-32u));
+	else if ( i < 64u ) // Replaced the <= with < because of the formula above, the remaining 32 spells have an i value from 32 to 63 and are stored in more2.
+		m_itSpellbook.m_spells2 |= (1 << (i-32u)); 
 	//else if ( i <= 96 )
 	//	m_itSpellbook.m_spells3 |= (1 << (i-64));	//not used anymore?
 	else
