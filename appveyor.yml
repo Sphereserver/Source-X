@@ -16,21 +16,26 @@ version: 1.1.0.{build}
 # Set up two building environments (two first class elements in the build matrix)
 image:
   - Visual Studio 2017
+  - Ubuntu
 
 # Environmental variables
 environment:
   # Common to all the builds of the matrix
+  BUILD_DIR_32: build-32
   BUILD_DIR_64: build-64
 
 
 # Build scripts
-   # Windows build
+for:
+
+  - # Windows build
     matrix:
       only:
         - image: Visual Studio 2017
 
     environment:
       MSBUILD_FLAGS: /verbosity:minimal /maxcpucount
+      CMAKE_GEN_32: Visual Studio 15 2017 
       CMAKE_GEN_64: Visual Studio 15 2017 Win64
 
     install:
@@ -40,7 +45,7 @@ environment:
 
     # Use our custom script instead of automatic MSBuild
     build_script:    
-      - mkdir %BUILD_DIR_64%
+      - mkdir %BUILD_DIR_32% %BUILD_DIR_64%
       - cd "%BUILD_DIR_64%"
 
       - IF DEFINED APPVEYOR_PULL_REQUEST_NUMBER (
@@ -52,6 +57,16 @@ environment:
       - msbuild SphereServer.sln %MSBUILD_FLAGS% /p:Configuration=Nightly
       - ECHO. && ECHO ** End of the compilation of the 64 bits Nightly version && ECHO.
 
+      # if we are testing a pull request, building only a version will be sufficient, so stop this script
+      - IF DEFINED APPVEYOR_PULL_REQUEST_NUMBER (appveyor exit)
+
+      - cd "..\%BUILD_DIR_32%"
+
+      - ECHO. && ECHO ** Starting to build 32 bits Nightly version && ECHO.
+      - cmake -G "%CMAKE_GEN_32%" ..\src
+      - msbuild SphereServer.sln %MSBUILD_FLAGS% /p:Configuration=Nightly
+      - ECHO. && ECHO ** End of the compilation of the 32 bits Nightly version && ECHO.
+
       - cd ..
 
     after_build:
@@ -61,6 +76,84 @@ environment:
       - ECHO ** Compilation done. Packing the files and uploading to SphereCommunity
       - mkdir accounts logs save scripts
       - 7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_64%\bin64\Nightly\SphereSvrX64_nightly.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\dlls\64\libmysql.dll"
+      - 7z a SphereSvrX-win32-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_32%\bin\Nightly\SphereSvrX32_nightly.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\dlls\32\libmysql.dll"
 
     artifacts:
       - path: SphereSvrX-win64-nightly.zip
+      - path: SphereSvrX-win32-nightly.zip
+
+
+  - # Linux build
+    matrix:
+      only:
+        - image: Ubuntu
+
+    environment:
+      CMAKE_GEN: Unix Makefiles
+      CMAKE_TCH_32: ../src/cmake/toolchains/Linux-GNU-32.cmake
+      CMAKE_TCH_64: ../src/cmake/toolchains/Linux-GNU-64.cmake
+
+    install:
+      - echo && echo "** Setting up GCC compiler" && echo
+      - sudo apt-get -qq update
+      - sudo apt install -yqq --no-install-recommends gcc-7 gcc-7-multilib g++-7 g++-7-multilib > /dev/null
+      - export CC="gcc-7" && export CXX="g++-7"
+
+      # Report our building tools
+      - lsb_release -d
+      - gcc --version
+      - cmake --version
+
+    # Use our custom script
+    build_script:
+      - echo && echo "** Setting up MySQL development packages for 64 bits" && echo
+      - sudo apt install -yqq --no-install-recommends curl libmysql++-dev > /dev/null
+
+      - mkdir "$BUILD_DIR_32" "$BUILD_DIR_64"
+      - cd "$BUILD_DIR_64"
+
+      - |-
+        if [ -n "${APPVEYOR_PULL_REQUEST_NUMBER}" ]; then
+          echo && echo "** Starting to build 64 bits Nightly version to test the Pull Request" && echo
+        else
+          echo && echo "** Starting to build 64 bits Nightly version" && echo
+        fi
+      - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" ../src
+      - make -j4 || exit 1  # if the build fails, stop here
+      - echo && echo "** End of the compilation of the 64 bits Nightly version" && echo
+
+      # if we are testing a pull request, building only a version will be sufficient, so stop this script
+      - |-
+        if [ -n "${APPVEYOR_PULL_REQUEST_NUMBER}" ]; then
+          exit 0
+        fi
+      - cd ..
+
+      - echo && echo "** Setting up MySQL development packages for 32 bits" && echo
+      - sudo apt remove -yqq libmysql++-dev > /dev/null
+      - sudo apt install -yqq --no-install-recommends libmysql++-dev:i386 > /dev/null
+      - export CC="gcc-7" && export CXX="g++-7"
+
+      - cd "$BUILD_DIR_32"
+
+      - echo && echo "** Starting to build 32 bits Nightly version" && echo
+      - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_32" ../src
+      - make -j4 || exit 1  # if the build fails, stop here
+      - echo && echo "** End of the compilation of the 32 bits Nightly version" && echo
+
+      - cd ..
+
+    after_build:
+      # if we are testing a pull request, we don't want to upload the build to the host
+      - |-
+        if [ -n "${APPVEYOR_PULL_REQUEST_NUMBER}" ]; then
+          exit 0
+        fi
+      - echo && echo "** Compilation done. Packing the files and uploading to SphereCommunity" && echo
+      - mkdir accounts logs save scripts
+      - tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_64}/bin64/SphereSvrX64_nightly" -C src/ sphere.ini sphereCrypt.ini
+      - tar -czf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_32}/bin/SphereSvrX32_nightly" -C src/ sphere.ini sphereCrypt.ini
+
+    artifacts:
+      - path: SphereSvrX-linux64-nightly.tar.gz
+      - path: SphereSvrX-linux32-nightly.tar.gz
