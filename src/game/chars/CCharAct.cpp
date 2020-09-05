@@ -1229,8 +1229,8 @@ bool CChar::UpdateAnimate(ANIM_TYPE action, bool fTranslate, bool fBackward , by
 		CNetState* state = pClient->GetNetState();
 		if (state->isClientEnhanced() || state->isClientKR())
 			cmdnew->send(pClient);
-		else if (IsGargoyle() && state->isClientVersion(MINCLIVER_NEWMOBILEANIM))
-			cmdnew->send(pClient);
+		/*else if (IsGargoyle() && state->isClientVersion(MINCLIVER_NEWMOBILEANIM))
+			cmdnew->send(pClient);*/
 		else
 			cmd->send(pClient);
 	}
