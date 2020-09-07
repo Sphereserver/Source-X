@@ -3573,10 +3573,10 @@ void PacketGumpDialog::writeCompressedControls(const CSString* controls, uint co
 
 		ASSERT(controlLengthActual == controlLength);
 
-		z_uLong compressLength = z_compressBound(controlLengthActual);
+		uLong compressLength = compressBound(controlLengthActual);
 		byte* compressBuffer = new byte[compressLength];
 
-		int error = z_compress2(compressBuffer, &compressLength, (byte*)toCompress, controlLengthActual, Z_DEFAULT_COMPRESSION);
+		int error = compress2(compressBuffer, &compressLength, (byte*)toCompress, controlLengthActual, Z_DEFAULT_COMPRESSION);
 		delete[] toCompress;
 
 		if (error != Z_OK || compressLength <= 0)
@@ -3607,10 +3607,10 @@ void PacketGumpDialog::writeCompressedControls(const CSString* controls, uint co
 
 		uint textsLength = getPosition() - textsPosition;
 
-		z_uLong compressLength = z_compressBound((z_uLong)textsLength);
+		uLong compressLength = compressBound((uLong)textsLength);
 		byte* compressBuffer = new byte[compressLength];
 
-		int error = z_compress2(compressBuffer, &compressLength, &m_buffer[textsPosition], (z_uLong)textsLength, Z_DEFAULT_COMPRESSION);
+		int error = compress2(compressBuffer, &compressLength, &m_buffer[textsPosition], (uLong)textsLength, Z_DEFAULT_COMPRESSION);
 		if (error != Z_OK || compressLength <= 0)
 		{
 			delete[] compressBuffer;
@@ -4733,10 +4733,10 @@ bool PacketHouseDesign::writePlaneData(int plane, int itemCount, byte* data, int
 	ADDTOCALLSTACK("PacketHouseDesign::writePlaneData");
 
 	// compress data
-	z_uLong compressLength = z_compressBound(dataSize);
+	uLong compressLength = compressBound(dataSize);
 	byte* compressBuffer = new byte[compressLength];
 
-	int error = z_compress2(compressBuffer, &compressLength, data, dataSize, Z_DEFAULT_COMPRESSION);
+	int error = compress2(compressBuffer, &compressLength, data, dataSize, Z_DEFAULT_COMPRESSION);
 	if ( error != Z_OK )
 	{
 		// an error occured with this floor, but we should be able to continue to the next without problems
@@ -4794,10 +4794,10 @@ void PacketHouseDesign::flushStairData(void)
 	m_stairCount = 0;
 
 	// compress data
-	z_uLong compressLength = z_compressBound(stairSize);
+	uLong compressLength = compressBound(stairSize);
 	byte* compressBuffer = new byte[compressLength];
 
-	int error = z_compress2(compressBuffer, &compressLength, (byte*)m_stairBuffer, stairSize, Z_DEFAULT_COMPRESSION);
+	int error = compress2(compressBuffer, &compressLength, (byte*)m_stairBuffer, stairSize, Z_DEFAULT_COMPRESSION);
 	if ( error != Z_OK )
 	{
 		// an error occured with this block, but we should be able to continue to the next without problems

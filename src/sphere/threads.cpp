@@ -12,9 +12,12 @@
 #if defined(_WIN32)
 	#include <process.h>
 	#include <objbase.h>
+#ifndef __APPLE__
 #elif !defined(_BSD)
 	#include <sys/prctl.h>
 #endif
+#endif
+
 
 // number of exceptions after which we restart thread and think that the thread have gone in exceptioning loops
 #define EXCEPTIONS_ALLOWED	10
