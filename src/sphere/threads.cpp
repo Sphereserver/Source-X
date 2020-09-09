@@ -12,8 +12,8 @@
 #if defined(_WIN32)
 	#include <process.h>
 	#include <objbase.h>
-#ifndef __APPLE__
 #elif !defined(_BSD)
+#ifndef __APPLE__
 	#include <sys/prctl.h>
 #endif
 #endif
