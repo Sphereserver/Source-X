@@ -28,9 +28,16 @@ void CSectorList::Init()
 	// Initialize sector data for every map plane
 	TemporaryString ts;
 	TemporaryString tsConcat;
-	int iSectorIndex = 0;
+	
 	for (int iMap = 0; iMap < MAP_SUPPORTED_QTY; ++iMap)
 	{
+		/*
+			Before iSectorIndex was declared and set to 0 outside the FOR, so I moved it inside because
+			we need to (re)set iSectorIndex to 0 when Sphere finish to initialize every sectors in a map, otherwise
+			iSectorIndex will have the same value of iSectorQty when Sphere finish loading map0.
+		*/
+		int iSectorIndex = 0;
+
 		MapSectorsData& sd = _SectorData[iMap];
 		sd._iSectorSize = sd._iSectorColumns = sd._iSectorRows = sd._iSectorQty = 0;
 		sd._pSectors.release();
@@ -63,6 +70,7 @@ void CSectorList::Init()
 			ASSERT(pSector);
 			pSector->Init(iSectorIndex, (uchar)iMap, iSectorX, iSectorY);
 		}
+		
 	}
 
 	for (MapSectorsData& sd : _SectorData)
