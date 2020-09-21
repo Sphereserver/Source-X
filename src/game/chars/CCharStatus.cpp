@@ -1187,7 +1187,7 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 					return ( Args.m_iN1 != 1 );
 				}
 			}
-			if ( plevelMe <= plevelChar )
+			if ( plevelMe < plevelChar ) //If True, that mean player/GM cannot be see
 				return false;
 		}
 
