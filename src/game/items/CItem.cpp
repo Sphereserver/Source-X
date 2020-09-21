@@ -835,11 +835,15 @@ int CItem::FixWeirdness()
         ClrAttr(ATTR_CURSED | ATTR_CURSED2 | ATTR_BLESSED | ATTR_BLESSED2);
     }
 
+	// Don't know why this check is done.
     if (IsMovableType())
     {
         if (IsType(IT_WATER) || Can(CAN_I_WATER))
         {
-            SetAttr(ATTR_MOVE_NEVER);
+			if ( ! IsAttr(ATTR_MOVE_ALWAYS))	// If item is explicitely set to always movable, it will not lock it.
+			{
+	            SetAttr(ATTR_MOVE_NEVER);
+			}
         }
     }
 
