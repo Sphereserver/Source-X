@@ -3411,8 +3411,10 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 			else if ( pChar->IsStatFlag(STATF_SLEEPING) )
 				snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_STEPON_BODY), pChar->GetName());
 			else
-				snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_PUSH), pChar->GetName());
-
+				if (!pChar->IsStatFlag(STATF_INVISIBLE))
+				{
+					snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_PUSH), pChar->GetName());
+				}
 			if ( iRet != TRIGRET_RET_FALSE )
 				SysMessage(pszMsg);
 
