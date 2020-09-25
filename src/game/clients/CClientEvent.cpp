@@ -2477,7 +2477,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 			else
 			{
 				word iEnabled = pChar->IsStatFlag(STATF_DEAD) ? POPUPFLAG_LOCKED : POPUPFLAG_COLOR;
-				if ((pChar->IsOwnedBy(m_pChar, false)) && (pChar->m_pNPC->m_Brain != NPCBRAIN_BERSERK))
+				if ( (pChar->IsOwnedBy(m_pChar, false)) && ((pChar->m_pNPC->m_Brain != NPCBRAIN_BERSERK)) || (m_pChar->IsPriv(PRIV_GM)))
 				{
 					CREID_TYPE id = pChar->GetID();
 
