@@ -839,7 +839,10 @@ int CItem::FixWeirdness()
     {
         if (IsType(IT_WATER) || Can(CAN_I_WATER))
         {
-            SetAttr(ATTR_MOVE_NEVER);
+		if ( ! IsAttr(ATTR_MOVE_ALWAYS))	// If item is explicitely set to always movable, it will not lock it.
+		{
+	            SetAttr(ATTR_MOVE_NEVER);
+		}
         }
     }
 
