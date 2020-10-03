@@ -2284,3 +2284,6 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		 
 29-08-2020, Drk84
 - Fixed: Cant create areas in the new maps (ilshenar, ter mur, etc) (Issue  #499)
+
+25-09-2020, jhobean
+- Modified: GM can now prompt context menu from NPC and command them. (Ex: Kill follow, guard, etc)
