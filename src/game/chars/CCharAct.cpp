@@ -2007,30 +2007,39 @@ bool CChar::ItemDrop( CItem * pItem, const CPointMap & pt )
 		const char iStackMaxZ = block.m_Top.m_z;	//pt.m_z + 16;
 		const CItem * pStack = nullptr;
 		CWorldSearch AreaItems(ptStack);
-		for (;;)
+		pStack = AreaItems.GetItem();
+		if (pStack != nullptr) //If there nothing  on the ground, drop the item normally and flip it if it's possible
 		{
-			pStack = AreaItems.GetItem();
-			if ( pStack == nullptr )
-				break;
-            const char iStackZ = pStack->GetTopZ();
-			if (iStackZ < pt.m_z || iStackZ > iStackMaxZ )
-				continue;
-
-			const short iStackHeight = pStack->GetHeight();
-			ptStack.m_z += (char)maximum(iStackHeight, 1);
-			//DEBUG_ERR(("(%d > %d) || (%d > %d)\n", ptStack.m_z, iStackMaxZ, ptStack.m_z + maximum(iItemHeight, 1), iStackMaxZ + 3));
-			if ( (ptStack.m_z > iStackMaxZ) || (ptStack.m_z + maximum(iItemHeight, 1) > iStackMaxZ + 3) )
+			for (uint i = 0;; ++i)
 			{
-				ItemBounce( pItem );		// put the item on backpack (or drop it on ground if it's too heavy)
-				return false;
+				if (i != 0) //on first iteration, pStack already contain the item on the ground. If you getitem again, you'll obtain nullptr
+				{
+					pStack = AreaItems.GetItem();
+				}
+				if (pStack == nullptr)
+				{
+					break;
+				}
+				const char iStackZ = pStack->GetTopZ();
+				if (iStackZ < pt.m_z || iStackZ > iStackMaxZ )
+					continue;
+
+				const short iStackHeight = pStack->GetHeight();
+				ptStack.m_z += (char)maximum(iStackHeight, 1);
+				//DEBUG_ERR(("(%d > %d) || (%d > %d)\n", ptStack.m_z, iStackMaxZ, ptStack.m_z + maximum(iItemHeight, 1), iStackMaxZ + 3));
+				if ( (ptStack.m_z > iStackMaxZ) || (ptStack.m_z + maximum(iItemHeight, 1) > iStackMaxZ + 3) )
+				{
+					ItemBounce( pItem );		// put the item on backpack (or drop it on ground if it's too heavy)
+					return false;
+				}
 			}
+			return pItem->MoveToCheck( ptStack, this );	// don't flip the item if it got stacked
 		}
-		return pItem->MoveToCheck( ptStack, this );	// don't flip the item if it got stacked
 	}
 
 	// Does this item have a flipped version?
 	CItemBase * pItemDef = pItem->Item_GetDef();
-	if (( g_Cfg.m_fFlipDroppedItems || pItem->Can(CAN_I_FLIP)) && pItem->IsMovableType() && !pItemDef->IsStackableType())
+	if (( g_Cfg.m_fFlipDroppedItems && pItem->Can(CAN_I_FLIP)) && pItem->IsMovableType() && !pItemDef->IsStackableType())
 		pItem->SetDispID( pItemDef->GetNextFlipID( pItem->GetDispID()));
 
 	return pItem->MoveToCheck( pt, this );

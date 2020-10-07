@@ -2285,5 +2285,10 @@ Must have event, even if it's empty, since it's applied by the source to generat
 29-08-2020, Drk84
 - Fixed: Cant create areas in the new maps (ilshenar, ter mur, etc) (Issue  #499)
 
-25-09-2020, jhobean
+25-09-2020, Jhobean
 - Modified: GM can now prompt context menu from NPC and command them. (Ex: Kill follow, guard, etc)
+
+07-10-2020, Jhobean
+[sphereCrypt.ini]: Added crypt key for classic clients 7.0.86 ~ 7.0.87 and enhanced clients 4.0.80 ~ 4.0.87
+- Fixed: The ini setting FlipDroppedItems now work correctly (Issue  #514)
+- Fixed: When ini setting EF_ItemStacking is active, the first item of the stack can be flip on drop (Issue  #514)
