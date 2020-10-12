@@ -253,7 +253,7 @@ void CChar::Attacker_Clear()
             OnTrigger(CTRIG_CombatEnd, this, 0);
         }
     }
-
+    StatFlag_Clear(STATF_WAR);  // Combat ended, no need to remain in war mode.
     m_lastAttackers.clear();
     UpdateModeFlag();
 }
