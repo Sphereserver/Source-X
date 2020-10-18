@@ -605,12 +605,12 @@ void AbstractSphereThread::exceptionCaught()
 }
 
 #ifdef THREAD_TRACK_CALLSTACK
-void AbstractSphereThread::pushStackCall(const char *name)
+void AbstractSphereThread::pushStackCall(const char *name) noexcept
 {
     if (m_freezeCallStack == false)
     {
         m_stackInfo[m_stackPos].functionName = name;
-        m_stackInfo[m_stackPos].startTime = GetPreciseSysTimeMicro();
+        m_stackInfo[m_stackPos].startTime = CSTime::GetPreciseSysTimeMicro();
         ++m_stackPos;
         m_stackInfo[m_stackPos].startTime = 0;
     }
@@ -667,20 +667,26 @@ void AbstractSphereThread::printStackTrace()
 /*
  * DummySphereThread
 */
-DummySphereThread *DummySphereThread::instance = nullptr;
+DummySphereThread *DummySphereThread::_instance = nullptr;
 
 DummySphereThread::DummySphereThread()
 	: AbstractSphereThread("dummy", IThread::Normal)
 {
 }
 
-DummySphereThread *DummySphereThread::getInstance()
+void DummySphereThread::createInstance() // static
 {
-	if( instance == nullptr )
-	{
-		instance = new DummySphereThread();
-	}
-	return instance;
+	// This dummy thread is created at the very beginning of the application startup.
+	//  Before the server becomes operational, this won't be used anymore, since fully functional threads will be created.
+
+	// Create this only once, it has to be one of the first operations to be done when the application starts.
+	ASSERT(_instance == nullptr);
+	_instance = new DummySphereThread();
+}
+
+DummySphereThread *DummySphereThread::getInstance() noexcept // static
+{
+	return _instance;
 }
 
 void DummySphereThread::tick()

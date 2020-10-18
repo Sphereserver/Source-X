@@ -13,49 +13,49 @@
 #endif
 #include "../common.h"
 
-
+// Similar to the MFC CTime and CTimeSpan or COleDateTime:
+//  Get time stamp in the real world. based on struct tm
+class CSTime
+{
+private:
 #ifdef _WIN32
-    // Set once at server startup; used for Windows high-resolution timer
-    extern llong g_llTimeProfileFrequency;
+    #undef GetCurrentTime
+
+	// Set once at server startup; used for Windows high-resolution timer
+	friend class GlobalInitializer;
+	static llong _kllTimeProfileFrequency;
 #endif
 
-
-llong GetPreciseSysTimeMicro() noexcept;
-llong GetPreciseSysTimeMilli() noexcept;
-
-
-class CSTime	// similar to the MFC CTime and CTimeSpan or COleDateTime
-{
-	// Get time stamp in the real world. based on struct tm
-#undef GetCurrentTime
-private:
 	time_t m_time;
-public:
-	static const char *m_sClassName;
 
-	// Constructors
+public:
+	// Static methods
+	static llong GetPreciseSysTimeMicro() noexcept;
+	static llong GetPreciseSysTimeMilli() noexcept;
+
 	static CSTime GetCurrentTime();
 
+public:
+	static const char* m_sClassName;
+
+	// Constructors
 	CSTime();
 	CSTime(time_t time);
 	CSTime(const CSTime& timeSrc);
 
-	CSTime( struct tm time );
+	CSTime(struct tm time);
 	CSTime(int nYear, int nMonth, int nDay, int nHour, int nMin, int nSec, int nDST = -1);
 
 	const CSTime& operator=(const CSTime& timeSrc);
-
 	const CSTime& operator=(time_t t);
 
-	bool operator<=( time_t t ) const;
-	bool operator==( time_t t ) const;
-	bool operator!=( time_t t ) const;
-
-	time_t GetTime() const;
+	// Operators
+	bool operator<=(time_t t) const;
+	bool operator==(time_t t) const;
+	bool operator!=(time_t t) const;
 
 	// Attributes
-	struct tm* GetLocalTm(struct tm* ptm = nullptr) const;
-
+	time_t GetTime() const;
 	int GetYear() const;
 	int GetMonth() const;
 	int GetDay() const;
@@ -67,10 +67,13 @@ public:
 	lpctstr FormatGmt(lpctstr pszFormat) const;
 
 	// non CTime operations.
-	bool Read( tchar * pVal );
+	bool Read(tchar* pVal);
 	void Init();
 	bool IsTimeValid() const;
 	int GetDaysTotal() const;
+
+private:
+	struct tm* GetLocalTm(struct tm* ptm = nullptr) const;
 };
 
 #endif // _INC_CTIME_H

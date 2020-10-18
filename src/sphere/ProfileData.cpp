@@ -4,7 +4,7 @@
 #include "ProfileData.h"
 #include "threads.h"
 
-ProfileData::ProfileData()
+ProfileData::ProfileData() noexcept
 {
 	// we don't want to use SetActive here because ADDTOCALLSTACK will cause an infinite loop
 
@@ -116,9 +116,16 @@ void ProfileData::Count(PROFILE_TYPE id, dword dwVal)
 	++ m_CurrentTimes[id].m_iCount;
 }
 
-bool ProfileData::IsEnabled(PROFILE_TYPE id) const
+void ProfileData::EnableProfile(PROFILE_TYPE id) noexcept
 {
-	ADDTOCALLSTACK("ProfileData::IsEnabled");
+	if (id >= PROFILE_QTY)
+		return;
+
+	m_EnabledProfiles[id] = true;
+}
+
+bool ProfileData::IsEnabled(PROFILE_TYPE id) const noexcept
+{
 	if (id > PROFILE_QTY)
 		return false;
 
@@ -128,27 +135,19 @@ bool ProfileData::IsEnabled(PROFILE_TYPE id) const
 	// check all profiles
 	for (int i = PROFILE_OVERHEAD; i < PROFILE_QTY; ++i)
 	{
-		if (IsEnabled(static_cast<PROFILE_TYPE>(i)))
+		if (IsEnabled( PROFILE_TYPE(i) ))
 			return true;
 	}
 
 	return false;
 }
 
-void ProfileData::EnableProfile(PROFILE_TYPE id)
-{
-	if (id >= PROFILE_QTY)
-		return;
-
-	m_EnabledProfiles[id] = true;
-}
-
-PROFILE_TYPE ProfileData::GetCurrentTask() const
+PROFILE_TYPE ProfileData::GetCurrentTask() const noexcept
 {
 	return m_CurrentTask;
 }
 
-lpctstr ProfileData::GetName(PROFILE_TYPE id) const
+lpctstr ProfileData::GetName(PROFILE_TYPE id) const noexcept
 {
 	static lpctstr constexpr sm_pszProfileName[PROFILE_QTY] =
 	{

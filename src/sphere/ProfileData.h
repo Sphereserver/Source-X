@@ -61,7 +61,7 @@ protected:
 	llong m_CurrentTime;			// in milliseconds
 
 public:
-	ProfileData();
+	ProfileData() noexcept;
 
 private:
 	ProfileData(const ProfileData& copy);
@@ -76,12 +76,12 @@ public:
 	void SetActive(int iSampleSec);
 	void Start(PROFILE_TYPE id);
 	void Count(PROFILE_TYPE id, dword dwVal);
-	void EnableProfile(PROFILE_TYPE id);
+	void EnableProfile(PROFILE_TYPE id) noexcept;
 
-	PROFILE_TYPE GetCurrentTask() const;
-	lpctstr GetName(PROFILE_TYPE id) const;
+	bool IsEnabled(PROFILE_TYPE id = PROFILE_QTY) const noexcept;
+	PROFILE_TYPE GetCurrentTask() const noexcept;
+	lpctstr GetName(PROFILE_TYPE id) const noexcept;
 	lpctstr GetDescription(PROFILE_TYPE id) const;
-	bool IsEnabled(PROFILE_TYPE id = PROFILE_QTY) const;
 };
 
 #endif // _INC_PROFILEDATA_H

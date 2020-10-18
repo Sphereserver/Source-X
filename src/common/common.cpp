@@ -8,7 +8,6 @@
 extern "C"
 {
     void globalstartsymbol() {}	// put this here as just the starting offset.
-    constexpr int globalstartdata = 0xffffffff;
 }
 
 #ifndef _WIN32
@@ -61,17 +60,20 @@ void CLanguageID::GetStrDef(tchar* pszLang)
         pszLang[3] = '\0';
     }
 }
+
 void CLanguageID::GetStr(tchar* pszLang) const
 {
     memcpy(pszLang, m_codes, 3);
     pszLang[3] = '\0';
 }
+
 lpctstr CLanguageID::GetStr() const
 {
     tchar* pszTmp = Str_GetTemp();
     GetStr(pszTmp);
     return pszTmp;
 }
+
 bool CLanguageID::Set(lpctstr pszLang)
 {
     // needs not be terminated!
@@ -85,12 +87,4 @@ bool CLanguageID::Set(lpctstr pszLang)
     }
     m_codes[0] = 0;
     return false;
-}
-
-
-
-extern "C"
-{
-	void globalendsymbol() {}	// put this here as just the ending offset.
-	constexpr int globalenddata = 0xffffffff;
 }
