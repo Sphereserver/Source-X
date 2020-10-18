@@ -557,7 +557,7 @@ public:
     }
 	bool SetBaseID( ITEMID_TYPE id );
 	bool SetID( ITEMID_TYPE id );
-    inline ITEMID_TYPE GetDispID() const {
+    inline ITEMID_TYPE GetDispID() const noexcept {
         // This is what the item looks like.
         // May not be the same as the item that defines it's type.
         return m_dwDispIndex;
@@ -638,15 +638,15 @@ public:
 	bool Stack( CItem * pItem );
 	word ConsumeAmount( word iQty = 1 );
 
-	virtual void SetAmount( word amount );
+	void SetAmount( word amount );
 	word GetMaxAmount();
 	bool SetMaxAmount( word amount );
 	void SetAmountUpdate( word amount );
-	virtual word GetAmount() const
+	word GetAmount() const noexcept
 	{
 		return m_wAmount;
 	}
-    bool CanSendAmount() const;
+    bool CanSendAmount() const noexcept;
 
     CREID_TYPE GetCorpseType() const;
     void  SetCorpseType( CREID_TYPE id );

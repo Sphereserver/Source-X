@@ -1,5 +1,5 @@
 //
-// CSime.cpp
+// CSTime.cpp
 //
 // Replace the MFC CTime function. Must be usable with file system.
 //
@@ -24,40 +24,47 @@
     #endif
 #endif
 
-llong GetPreciseSysTimeMicro() noexcept
-{
-#ifdef _WIN32
-    // From Windows documentation:
-    //	On systems that run Windows XP or later, the function will always succeed and will thus never return zero.
-    // Since i think no one will run Sphere on a pre XP os, we can avoid checking for overflows, in case QueryPerformanceCounter fails.
-    LARGE_INTEGER liQPCStart;
-    if (!QueryPerformanceCounter(&liQPCStart))
-        return GetSupportedTickCount() * 1000; // GetSupportedTickCount has only millisecond precision
-    return (llong)((liQPCStart.QuadPart * 1.0e6) / g_llTimeProfileFrequency);
-#else
-	struct timespec ts;
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (llong)((ts.tv_sec * (llong)1.0e6) + (llong)round(ts.tv_nsec / 1.0e3)); // microseconds
-#endif
-}
-
-llong GetPreciseSysTimeMilli() noexcept
-{
-#ifdef _WIN32
-    LARGE_INTEGER liQPCStart;
-    if (!QueryPerformanceCounter(&liQPCStart))
-        return GetSupportedTickCount();
-    return (llong)((liQPCStart.QuadPart * 1.0e3) / g_llTimeProfileFrequency);
-#else
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (llong)((ts.tv_sec * (llong)1.0e3) + (llong)round(ts.tv_nsec / 1.0e6)); // milliseconds
-#endif
-}
-
 
 //**************************************************************
 // -CSTime - absolute time
+
+llong CSTime::GetPreciseSysTimeMicro() noexcept // static
+{
+#ifdef _WIN32
+	// From Windows documentation:
+	//	On systems that run Windows XP or later, the function will always succeed and will thus never return zero.
+	// Since i think no one will run Sphere on a pre XP os, we can avoid checking for overflows, in case QueryPerformanceCounter fails.
+	LARGE_INTEGER liQPCStart;
+	if (!QueryPerformanceCounter(&liQPCStart))
+		return GetSupportedTickCount() * 1000; // GetSupportedTickCount has only millisecond precision
+	return (llong)((liQPCStart.QuadPart * 1.0e6) / _kllTimeProfileFrequency);
+#else
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	return (llong)((ts.tv_sec * (llong)1.0e6) + (llong)round(ts.tv_nsec / 1.0e3)); // microseconds
+#endif
+}
+
+llong CSTime::GetPreciseSysTimeMilli() noexcept // static
+{
+#ifdef _WIN32
+	LARGE_INTEGER liQPCStart;
+	if (!QueryPerformanceCounter(&liQPCStart))
+		return GetSupportedTickCount();
+	return (llong)((liQPCStart.QuadPart * 1.0e3) / _kllTimeProfileFrequency);
+#else
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	return (llong)((ts.tv_sec * (llong)1.0e3) + (llong)round(ts.tv_nsec / 1.0e6)); // milliseconds
+#endif
+}
+
+CSTime CSTime::GetCurrentTime()	// static
+{
+	// return the current system time
+	return CSTime(::time(nullptr));
+}
+
 
 CSTime::CSTime(int nYear, int nMonth, int nDay, int nHour, int nMin, int nSec,
 			   int nDST)
@@ -76,12 +83,6 @@ CSTime::CSTime(int nYear, int nMonth, int nDay, int nHour, int nMin, int nSec,
 CSTime::CSTime( struct tm atm )
 {
 	m_time = mktime(&atm);
-}
-
-CSTime CSTime::GetCurrentTime()	// static
-{
-	// return the current system time
-	return CSTime(::time(nullptr));
 }
 
 struct tm* CSTime::GetLocalTm(struct tm* ptm) const

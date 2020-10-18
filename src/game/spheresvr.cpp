@@ -31,89 +31,59 @@
 #include "CWorld.h"
 #include "spheresvr.h"
 
+// Dynamic initialization of some extern global stuff
 lpctstr g_szServerDescription = SPHERE_TITLE " Version " SPHERE_VERSION " " SPHERE_VER_FILEOS_STR	" by www.spherecommunity.net";
 
-
-bool WritePidFile(int iMode = 0)
-{
-	lpctstr	file = SPHERE_FILE ".pid";
-	FILE *pidFile;
-
-	if ( iMode == 1 )		// delete
-	{
-		return ( STDFUNC_UNLINK(file) == 0 );
-	}
-	else if ( iMode == 2 )	// check for .pid file
-	{
-		pidFile = fopen(file, "r");
-		if ( pidFile )
-		{
-			g_Log.Event(LOGM_INIT, SPHERE_FILE ".pid already exists. Secondary launch or unclean shutdown?\n");
-			fclose(pidFile);
-		}
-		return true;
-	}
-	else
-	{
-		pidFile = fopen(file, "w");
-		if ( pidFile )
-		{
-			pid_t spherepid = STDFUNC_GETPID();
-
-			// pid_t is always an int, except on MinGW, where it is int on 32 bits and long long on 64 bits.
-			#if defined(_WIN32) && !defined(_MSC_VER)
-				fprintf(pidFile, "%" PRIdSSIZE_T "\n", spherepid);
-			#else
-				fprintf(pidFile, "%d\n", spherepid);
-			#endif
-			fclose(pidFile);
-			return true;
-		}
-		g_Log.Event(LOGM_INIT, "Cannot create pid file!\n");
-		return false;
-	}
-}
+// Dynamic initialization of some static members of other classes, which are used very soon after the server starts
+dword CObjBase::sm_iCount = 0;				// UID table.
+#ifdef _WIN32
+llong CSTime::_kllTimeProfileFrequency = 1; // Default value.
+#endif
 
 
-// Dynamic initialization of some global stuff
-
-dword CObjBase::sm_iCount = 0;			// UID table.
-llong g_llTimeProfileFrequency = 1;	    // time profiler (default value, will be changed in GlobalInitializer).
-
-
+// This method MUST be the first code running when the application starts!
 GlobalInitializer::GlobalInitializer()
 {
-    constexpr const char* m_sClassName = "GlobalInitializer";
-    EXC_TRY("Pre-startup Init");
-    ASSERT(MAX_BUFFER >= sizeof(CCommand));
-    ASSERT(MAX_BUFFER >= sizeof(CEvent));
-    ASSERT(sizeof(int) == sizeof(dword));	// make this assumption often.
-    ASSERT(sizeof(ITEMID_TYPE) == sizeof(dword));
-    ASSERT(sizeof(word) == 2);
-    ASSERT(sizeof(dword) == 4);
-    ASSERT(sizeof(nword) == 2);
-    ASSERT(sizeof(ndword) == 4);
-    ASSERT(sizeof(CUOItemTypeRec) == 37);	// is byte packing working ?
+	// The order of the instructions is important!
 
 #ifdef _WIN32
-    LARGE_INTEGER liProfFreq;
-    if (QueryPerformanceFrequency(&liProfFreq))
-        g_llTimeProfileFrequency = liProfFreq.QuadPart;
+	// Needed to get precise system time.
+	LARGE_INTEGER liProfFreq;
+	if (QueryPerformanceFrequency(&liProfFreq))
+	{
+		CSTime::_kllTimeProfileFrequency = liProfFreq.QuadPart;
+	}
+#endif // _WIN32
 
-#if defined(_MSC_VER) && !defined(_NIGHTLYBUILD)
+	DummySphereThread::createInstance();
+
+// Set exception catcher?
+#if defined(_WIN32) && defined(_MSC_VER) && !defined(_NIGHTLYBUILD)
     // We don't need an exception translator for the Debug build, since that build would, generally, be used with a debugger.
     // We don't want that for Release build either because, in order to call _set_se_translator, we should set the /EHa
     //	compiler flag, which slows down code a bit.
-    EXC_SET_BLOCK("setting exception catcher");
     SetExceptionTranslator();
 #endif
-#endif // _WIN32
 
+// Set purecall handler?
 #ifndef _DEBUG
     // Same as for SetExceptionTranslator, Debug build doesn't need a purecall handler.
-    EXC_SET_BLOCK("setting purecall handler");
     SetPurecallHandler();
 #endif
+
+	constexpr const char* m_sClassName = "GlobalInitializer";
+	EXC_TRY("Pre-startup Init");
+
+	ASSERT(MAX_BUFFER >= sizeof(CCommand));
+	ASSERT(MAX_BUFFER >= sizeof(CEvent));
+	ASSERT(sizeof(int) == sizeof(dword));	// make this assumption often.
+	ASSERT(sizeof(ITEMID_TYPE) == sizeof(dword));
+	ASSERT(sizeof(word) == 2);
+	ASSERT(sizeof(dword) == 4);
+	ASSERT(sizeof(nword) == 2);
+	ASSERT(sizeof(ndword) == 4);
+	ASSERT(sizeof(CUOItemTypeRec) == 37);	// is byte packing working ?
+
     EXC_CATCH;
 }
 
@@ -195,6 +165,47 @@ bool MainThread::shouldExit()
 
 
 //*******************************************************************
+
+static bool WritePidFile(int iMode = 0)
+{
+	lpctstr	file = SPHERE_FILE ".pid";
+	FILE* pidFile;
+
+	if (iMode == 1)		// delete
+	{
+		return (STDFUNC_UNLINK(file) == 0);
+	}
+	else if (iMode == 2)	// check for .pid file
+	{
+		pidFile = fopen(file, "r");
+		if (pidFile)
+		{
+			g_Log.Event(LOGM_INIT, SPHERE_FILE ".pid already exists. Secondary launch or unclean shutdown?\n");
+			fclose(pidFile);
+		}
+		return true;
+	}
+	else
+	{
+		pidFile = fopen(file, "w");
+		if (pidFile)
+		{
+			pid_t spherepid = STDFUNC_GETPID();
+
+			// pid_t is always an int, except on MinGW, where it is int on 32 bits and long long on 64 bits.
+#if defined(_WIN32) && !defined(_MSC_VER)
+			fprintf(pidFile, "%" PRIdSSIZE_T "\n", spherepid);
+#else
+			fprintf(pidFile, "%d\n", spherepid);
+#endif
+			fclose(pidFile);
+			return true;
+		}
+		g_Log.Event(LOGM_INIT, "Cannot create pid file!\n");
+		return false;
+	}
+}
+
 
 int Sphere_InitServer( int argc, char *argv[] )
 {
