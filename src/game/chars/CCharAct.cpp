@@ -3399,6 +3399,7 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 				SysMessage(pszMsg);
 				return nullptr;
 			}
+			
 			else if (pChar->IsStatFlag(STATF_INVISIBLE) && !(g_Cfg.m_iRevealFlags & REVEALF_OSILIKEPERSONALSPACE) ) {
                 snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE), pChar->GetName());
                 pChar->Reveal(STATF_INVISIBLE | STATF_HIDDEN);
@@ -3412,6 +3413,7 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 				snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_STEPON_BODY), pChar->GetName());
 			else
 				snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_PUSH), pChar->GetName());
+				// REVEALF_OSILIKEPERSONALSPACE block the reveal but DEFMSG_MSG_PUSH is send. To avoid it, simply use return 1 in @PERSONALSPACE 
 
 			if ( iRet != TRIGRET_RET_FALSE )
 				SysMessage(pszMsg);
