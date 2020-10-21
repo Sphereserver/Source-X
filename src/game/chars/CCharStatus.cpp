@@ -1174,21 +1174,37 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 		else if ( pChar->IsStatFlag(STATF_INVISIBLE|STATF_INSUBSTANTIAL|STATF_HIDDEN) )
 		{
 			// Characters can be invisible, but not to GM's (true sight ?)
-			// equal level can see each other if they are staff members or they return 1 in @SeeHidden
+			// equal plevel can see each other if they are staff members or they return 1 in @SeeHidden
 			if ( pChar->GetPrivLevel() <= PLEVEL_Player )
 			{
 				if ( IsTrigUsed( TRIGGER_SEEHIDDEN ) )
 				{
 					CScriptTriggerArgs Args;
-					Args.m_iN1 = (plevelMe <= plevelChar);
+					Args.m_iN1 = (plevelMe < plevelChar);
 					CChar *pChar2 = const_cast< CChar* >( pChar );
 					CChar *this2 = const_cast< CChar* >( this );
 					this2->OnTrigger( CTRIG_SeeHidden, pChar2, &Args );
 					return ( Args.m_iN1 != 1 );
 				}
 			}
-			if ( plevelMe < plevelChar ) //If True, that mean player/GM cannot be see
-				return false;
+			//int a = g_Cfg.m_iOverSkillMultiply;
+			//int b = g_Cfg.m_iVendorMaxSell;
+			//int c = g_Cfg.m_CanSeeSamePLevel;
+			switch (g_Cfg.m_CanSeeSamePLevel) //Evaluate the .ini setting
+			{
+			//If return false, that mean the GM can see the other
+			case 0: 
+
+				if (plevelMe < plevelChar) 
+					return false;
+			case 1:
+				if (plevelMe <= plevelChar)
+					return false;
+			case 2:
+				if (plevelMe <= 2)
+					return false;
+			}
+
 		}
 
 		if ( IsStatFlag(STATF_DEAD) && !CanSeeAsDead(pChar) )

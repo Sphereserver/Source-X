@@ -407,6 +407,7 @@ public:
 
 	bool m_fPayFromPackOnly;    // Pay only from main pack?
 	int  m_iOverSkillMultiply;  // multiplyer to get over skillclass
+    int  m_CanSeeSamePLevel;  // multiplyer to get over skillclass
 	bool m_fSuppressCapitals;   // Enable/Disable capital letters suppression
 
 #define ADVANCEDLOS_DISABLED		0x00
