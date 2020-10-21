@@ -1180,7 +1180,7 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 				if ( IsTrigUsed( TRIGGER_SEEHIDDEN ) )
 				{
 					CScriptTriggerArgs Args;
-					Args.m_iN1 = (plevelMe < plevelChar);
+					Args.m_iN1 = (plevelMe <= plevelChar);
 					CChar *pChar2 = const_cast< CChar* >( pChar );
 					CChar *this2 = const_cast< CChar* >( this );
 					this2->OnTrigger( CTRIG_SeeHidden, pChar2, &Args );
@@ -1188,20 +1188,36 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 				}
 			}
 
-			//To replaec by :m_iCanSeeSamePLevel
-			switch (g_Cfg.m_iOverSkillMultiply) //Evaluate the .ini setting
+			switch (g_Cfg.m_iCanSeeSamePLevel) //Evaluate the .ini setting
 			{
-			//If return false, that mean the GM can see the other
-			case 0: 
-
-				if (plevelMe < plevelChar) 
+			//TRUE = client can see the invisble target (plevelChar)
+			case 0: //GM see all
+				if (plevelMe >= plevelChar) 
+				{
+					return true;
+				}
+				else
+				{
 					return false;
-			case 1:
-				if (plevelMe <= plevelChar)
+				}
+			case 1: //Gm dont see same plevel
+				if (plevelMe > plevelChar)
+				{
+					return true;
+				}
+				else
+				{
 					return false;
-			case 2:
-				if (plevelMe <= 4)
+				}
+			case 2: //Plevel 4 and more see all
+				if (plevelMe >= 4)
+				{
+					return true;
+				}
+				else
+				{
 					return false;
+				}
 			}
 
 		}
