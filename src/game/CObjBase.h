@@ -105,17 +105,17 @@ public:
 	* @brief   Base get definition.
 	* @return  null if it fails, else a pointer to a CBaseBaseDef.
 	*/
-	CBaseBaseDef * Base_GetDef() const noexcept
+	CBaseBaseDef * Base_GetDef() const
 	{
 		return ( static_cast <CBaseBaseDef *>( m_BaseRef.GetRef() ));
 	}
 
-	dword GetCanFlagsBase() const noexcept
+	dword GetCanFlagsBase() const
 	{
 		return Base_GetDef()->m_Can;
 	}
 
-	dword GetCanFlags() const noexcept
+	dword GetCanFlags() const
 	{
 		// m_CanMask is XORed to m_Can:
 		//  If a flag in m_CanMask is enabled in m_Can, it is ignored in this Can check
@@ -124,7 +124,7 @@ public:
 		return (GetCanFlagsBase() ^ m_CanMask);
 	}	
 
-	bool Can(dword dwCan) const noexcept
+	bool Can(dword dwCan) const
 	{
 		return (GetCanFlags() & dwCan);
 	}

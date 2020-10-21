@@ -1095,14 +1095,12 @@ bool CServerConfig::r_LoadVal( CScript &s )
             }
             m_iCombatFlags = uiVal;
         }
-		break;
         case RC_CONTAINERMAXITEMS:
         {
-            const uint uiVal = s.GetArgUVal();
+            uint uiVal = s.GetArgUVal();
             if ((uiVal > 0) && (uiVal < MAX_ITEMS_CONT))
                 m_iContainerMaxItems = uiVal;
         }
-		break;
 		case RC_CORPSENPCDECAY:
 			m_iDecay_CorpseNPC = s.GetArgLLVal()*60*MSECS_PER_SEC;
 			break;
@@ -1494,12 +1492,8 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 				{
 					default:
 					case 4:
-						if (IsDigit(ppVal[3][0]))
-						{
+						if ( IsDigit(ppVal[3][0]) )
 							pt.m_map = (byte)(atoi(ppVal[3]));
-						}
-						FALLTHROUGH;
-
 					case 3:
 						if ( IsDigit(ppVal[2][0]) || (( iArgs == 4 ) && ( ppVal[2][0] == '-' )) )
 						{
@@ -1507,16 +1501,10 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 							if ( iArgs == 3 )
 								pt.m_map = (byte)(atoi(ppVal[2]));
 						}
-						FALLTHROUGH;
-
 					case 2:
 						pt.m_y = (short)(atoi(ppVal[1]));
-						FALLTHROUGH;
-
 					case 1:
 						pt.m_x = (short)(atoi(ppVal[0]));
-						FALLTHROUGH;
-
 					case 0:
 						break;
 				}
@@ -2732,11 +2720,11 @@ uint CServerConfig::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar
 bool CServerConfig::LoadResourceSection( CScript * pScript )
 {
 	ADDTOCALLSTACK("CServerConfig::LoadResourceSection");
-	// Index or read any resource sections we know how to handle.
+	// Index or read any resource blocks we know how to handle.
 
 	ASSERT(pScript);
 	CScriptFileContext FileContext( pScript );	// set this as the context.
-    const CSString sSection = pScript->GetSection();
+    CSString sSection = pScript->GetSection();
     lpctstr pszSection = sSection.GetBuffer();
 
 	CVarDefContNum * pVarNum = nullptr;

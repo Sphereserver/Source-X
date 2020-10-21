@@ -188,11 +188,9 @@ bool CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 			}
 
 			// fall through to send full list
-			FALLTHROUGH;
 
-		default:
-			FALLTHROUGH;
 		case TOOLTIPMODE_SENDFULL:
+		default:
 			// send full property list
 			new PacketPropertyList(this, propertyList);
 			break;
@@ -252,15 +250,11 @@ void CClient::AOSTooltip_addName(CObjBase* pObj)
 			const CItemStone * pParentStone = pGuildMember->GetParentStone();
 			ASSERT(pParentStone != nullptr);
 
-			if (pGuildMember->IsAbbrevOn())
+			if (pGuildMember->IsAbbrevOn() && pParentStone->GetAbbrev()[0])
 			{
-				lpctstr ptcAbbrev = pParentStone->GetAbbrev();
-				if (ptcAbbrev[0])
-				{
-					Str_ConcatLimitNull(lpSuffix, " [", STR_TEMPLENGTH);
-					Str_ConcatLimitNull(lpSuffix, ptcAbbrev, STR_TEMPLENGTH);
-					Str_ConcatLimitNull(lpSuffix, "]", STR_TEMPLENGTH);
-				}
+                Str_ConcatLimitNull(lpSuffix, " [", STR_TEMPLENGTH);
+                Str_ConcatLimitNull(lpSuffix, pParentStone->GetAbbrev(), STR_TEMPLENGTH);
+                Str_ConcatLimitNull(lpSuffix, "]", STR_TEMPLENGTH);
 			}
 		}
 

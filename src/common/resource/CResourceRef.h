@@ -33,11 +33,11 @@ public:
 
 public:
     void SetRef(CResourceLink* pLink);
-    inline CResourceLink* GetRef() const noexcept
+    inline CResourceLink* GetRef() const
     {
         return m_pLink;
     }
-    inline bool operator==(const CResourceRef& comp) const noexcept
+    inline bool operator==(const CResourceRef& comp) const
     {
         return (GetRef() == comp.GetRef());
     }

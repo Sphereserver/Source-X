@@ -2146,10 +2146,10 @@ void CItem::SetAmountUpdate(word amount )
     }
 }
 
-bool CItem::CanSendAmount() const noexcept
+bool CItem::CanSendAmount() const
 {
     // return false -> don't send to the client the real amount for this item (send 1 instead)
-    const ITEMID_TYPE id = GetDispID();
+    ITEMID_TYPE id = GetDispID();
     if (id == ITEMID_WorldGem) // it can be a natural resource worldgem bit (used for lumberjacking, mining...)
         return false;
     return true;

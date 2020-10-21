@@ -15,6 +15,9 @@
 extern "C"
 {
 	extern void globalstartsymbol();
+	extern void globalendsymbol();
+	extern const int globalstartdata;
+	extern const int globalenddata;
 }
 
 void SetPurecallHandler();

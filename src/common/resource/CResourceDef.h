@@ -14,7 +14,7 @@ class CVarDefContNum;
 
 class CResourceDef : public CScriptObj
 {
-    // Define a generic resource section in the scripts.
+    // Define a generic resource block in the scripts.
     // Now the scripts can be modular. resources can be defined any place.
     // NOTE: This may be loaded fully into memory or just an Index to a file.
 

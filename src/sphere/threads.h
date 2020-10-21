@@ -216,7 +216,7 @@ private:
 
 public:
 	AbstractSphereThread(const char *name, Priority priority = IThread::Normal);
-	virtual ~AbstractSphereThread() = default;
+	virtual ~AbstractSphereThread() { };
 
 private:
 	AbstractSphereThread(const AbstractSphereThread& copy);
@@ -233,13 +233,13 @@ public:
     void exceptionCaught();
 
 #ifdef THREAD_TRACK_CALLSTACK
-	inline void freezeCallStack(bool freeze) noexcept
+	inline void freezeCallStack(bool freeze)
 	{
 		m_freezeCallStack = freeze;
 	}
 
-	void pushStackCall(const char *name) noexcept;
-	inline void popStackCall(void) noexcept
+	void pushStackCall(const char *name);
+	inline void popStackCall(void)
 	{
 		if (m_freezeCallStack == false)
 			--m_stackPos;
@@ -259,11 +259,10 @@ protected:
 class DummySphereThread : public AbstractSphereThread
 {
 private:
-	static DummySphereThread *_instance;
+	static DummySphereThread *instance;
 
 public:
-	static void createInstance();
-	static DummySphereThread *getInstance() noexcept;
+	static DummySphereThread *getInstance();
 
 protected:
 	DummySphereThread();
