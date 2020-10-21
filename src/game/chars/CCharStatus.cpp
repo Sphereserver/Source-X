@@ -1188,6 +1188,7 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 				}
 			}
 
+			//To replaec by :m_iCanSeeSamePLevel
 			switch (g_Cfg.m_iOverSkillMultiply) //Evaluate the .ini setting
 			{
 			//If return false, that mean the GM can see the other
@@ -1199,7 +1200,7 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 				if (plevelMe <= plevelChar)
 					return false;
 			case 2:
-				if (plevelMe <= 2)
+				if (plevelMe <= 4)
 					return false;
 			}
 
