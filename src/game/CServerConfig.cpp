@@ -198,6 +198,7 @@ CServerConfig::CServerConfig()
 	m_fPayFromPackOnly	= false;	// pay vendors from packs only
 
 	m_iOverSkillMultiply	= 2;
+	m_iCanSeeSamePLevel		= 0;
 	m_fSuppressCapitals		= false;
 
 	m_iAdvancedLos		= 0;
@@ -585,6 +586,7 @@ enum RC_TYPE
 	RC_NTSERVICE,				// m_fUseNTService
 	RC_OPTIONFLAGS,				// m_iOptionFlags
 	RC_OVERSKILLMULTIPLY,		// m_iOverSkillMultiply
+	//RC_CANSEESAMEPLEVEL,		// m_iCanSeeSamePLevel
 	RC_PACKETDEATHANIMATION,	// m_iPacketDeathAnimation
 	RC_PAYFROMPACKONLY,			// m_fPayFromPackOnly
 	RC_PETSINHERITNOTORIETY,	// m_iPetsInheritNotoriety
@@ -834,6 +836,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "NTSERVICE",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUseNTService),		0 }},
 	{ "OPTIONFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iOptionFlags),			0 }},
 	{ "OVERSKILLMULTIPLY",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iOverSkillMultiply),	0 }},
+	//{ "CANSEESAMEPLEVEL",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCanSeeSamePLevel),	0 }},
 	{ "PACKETDEATHANIMATION",	{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_iPacketDeathAnimation),0 }},
 	{ "PAYFROMPACKONLY",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fPayFromPackOnly),		0 }},
 	{ "PETSINHERITNOTORIETY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iPetsInheritNotoriety),0 }},
