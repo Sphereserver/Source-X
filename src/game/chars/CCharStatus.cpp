@@ -1209,8 +1209,8 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 				{
 					return false;
 				}
-			case 2: //Plevel 4 and more see all
-				if (plevelMe >= 4)
+			case 2: //Plevel 3 and more see all
+				if (plevelMe >= 3)
 				{
 					return true;
 				}
