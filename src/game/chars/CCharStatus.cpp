@@ -1192,32 +1192,23 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 			{
 			//TRUE = client can see the invisble target (plevelChar)
 			case 0: //GM see all
-				if (plevelMe >= plevelChar) 
-				{
-					return true;
-				}
-				else
+				if (plevelMe < plevelChar)
 				{
 					return false;
 				}
+				break;
 			case 1: //Gm dont see same plevel
-				if (plevelMe > plevelChar)
-				{
-					return true;
-				}
-				else
+				if (plevelMe <= plevelChar)
 				{
 					return false;
 				}
+				break;
 			case 2: //Plevel 3 and more see all
-				if (plevelMe >= 3)
-				{
-					return true;
-				}
-				else
+				if (plevelMe < 3)
 				{
 					return false;
 				}
+				break;
 			}
 
 		}
