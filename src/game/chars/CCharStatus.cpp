@@ -1058,6 +1058,7 @@ bool CChar::CanSeeInContainer( const CItemContainer *pContItem ) const
 }
 
 bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
+//true = client can see the invisble target
 {
 	ADDTOCALLSTACK("CChar::CanSee");
 	// Can I see this object (char or item)?
@@ -1190,7 +1191,6 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 
 			switch (g_Cfg.m_iCanSeeSamePLevel) //Evaluate the .ini setting
 			{
-			//TRUE = client can see the invisble target (plevelChar)
 			case 0: //GM see all
 				if (plevelMe < plevelChar)
 				{
@@ -1203,8 +1203,13 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 					return false;
 				}
 				break;
-			case 2: //Plevel 3 and more see all
-				if (plevelMe < 3)
+			case 2: //Plevel x and more see all
+			case 3:
+			case 4:
+			case 5:
+			case 6:
+			case 7:
+				if (plevelMe < g_Cfg.m_iCanSeeSamePLevel)
 				{
 					return false;
 				}
