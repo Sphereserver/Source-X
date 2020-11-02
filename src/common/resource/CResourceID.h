@@ -111,16 +111,16 @@ struct CResourceIDBase : public CUID    // It has not the "page" part/variable. 
 
     void InitUID() = delete;
     void ClearUID() = delete;
-    inline void Init()
+    inline void Init() noexcept
     {
         m_dwInternalVal = UID_UNUSED;
     }
-    inline void Clear()
+    inline void Clear() noexcept
     {
         m_dwInternalVal = UID_CLEAR;
     }
 
-    CResourceIDBase()
+    CResourceIDBase() noexcept
     {
         Init();
     }
@@ -134,15 +134,15 @@ struct CResourceIDBase : public CUID    // It has not the "page" part/variable. 
 
     void FixRes();
 
-    RES_TYPE GetResType() const
+    RES_TYPE GetResType() const noexcept
     {
         return (RES_TYPE)(RES_GET_TYPE(m_dwInternalVal));
     }
-    int GetResIndex() const
+    int GetResIndex() const noexcept
     {
         return RES_GET_INDEX(m_dwInternalVal);
     }
-    bool operator == (const CResourceIDBase & rid) const
+    bool operator == (const CResourceIDBase & rid) const noexcept
     {
         return (rid.m_dwInternalVal == m_dwInternalVal);
     }
@@ -214,11 +214,11 @@ struct CResourceID : public CResourceIDBase     // It has the "page" part. Use i
     CResourceID& operator = (const CResourceID& rid);              // assignment operator
     CResourceID& operator = (const CResourceIDBase& rid);
 
-    word GetResPage() const
+    word GetResPage() const noexcept
     {
         return m_wPage;
     }
-    bool operator == (const CResourceID & rid) const
+    bool operator == (const CResourceID & rid) const noexcept
     {
         return ((rid.m_wPage == m_wPage) && (rid.m_dwInternalVal == m_dwInternalVal));
     }

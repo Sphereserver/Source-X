@@ -197,7 +197,7 @@ bool CClient::Cmd_Control( CChar * pChar2 )
 
 	pChar1->ClientDetach();
 	m_pChar = nullptr;
-	CClient * pClient2 = pChar2->GetClient();
+	CClient * pClient2 = pChar2->GetClientActive();
 	if ( pClient2 )	// controled char is a player/client.
 	{
 		pChar2->ClientDetach();
@@ -1460,7 +1460,7 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 	m_pChar->m_Act_p					= pt;
 	m_Targ_p							= pt;
 
-	if ( IsSetMagicFlags( MAGICF_PRECAST ) && !pSpell->IsSpellType( SPELLFLAG_NOPRECAST ) && m_pChar->IsClient() )
+	if ( IsSetMagicFlags( MAGICF_PRECAST ) && !pSpell->IsSpellType( SPELLFLAG_NOPRECAST ) && m_pChar->IsClientActive() )
 	{
 		if ( g_Cfg.IsSkillFlag(m_pChar->m_Act_SkillCurrent, SKF_MAGIC) )
 		{
@@ -2395,7 +2395,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 		return false;
 	}
 
-	if ( !pChar->IsClient() )
+	if ( !pChar->IsClientActive() )
 	{
 		SysMessageDefault( DEFMSG_PARTY_NONPCADD );
 		return false;
@@ -2416,7 +2416,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 		}
 	}
 
-	if (IsPriv(PRIV_GM) && (pChar->GetClient()->GetPrivLevel() < GetPrivLevel()))
+	if (IsPriv(PRIV_GM) && (pChar->GetClientActive()->GetPrivLevel() < GetPrivLevel()))
 	{
 		CPartyDef::AcceptEvent(pChar, m_pChar->GetUID(), true);
 		return true;
@@ -2464,7 +2464,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 	m_pChar->SetKeyNum("PARTY_LASTINVITE", (dword)(pChar->GetUID()));
 	m_pChar->SetKeyNum("PARTY_LASTINVITETIME", CWorldGameTime::GetCurrentTime().GetTimeRaw() + (Calc_GetRandVal2(2,5) * MSECS_PER_SEC));
 
-	new PacketPartyInvite(pChar->GetClient(), m_pChar);
+	new PacketPartyInvite(pChar->GetClientActive(), m_pChar);
 
 	// Now up to them to decide to accept.
 	return true;

@@ -1186,7 +1186,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
 
 		if (( IsTrigUsed(TRIGGER_BUY) ) || ( IsTrigUsed(TRIGGER_ITEMBUY) ))
 		{
-			CScriptTriggerArgs Args( amount, dword(items[i].m_vcAmount) * items[i].m_price, pVendor );
+			CScriptTriggerArgs Args( amount, int64(items[i].m_vcAmount) * items[i].m_price, pVendor );
 			Args.m_VarsLocal.SetNum( "TOTALCOST", costtotal);
 			if ( pItem->OnTrigger( ITRIG_Buy, this->GetChar(), &Args ) == TRIGRET_RET_TRUE )
 				continue;
@@ -1827,7 +1827,7 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 			pCharAlt = pChar;
 			iAltDist = 1;
 		}
-		else if ( pChar->IsClient() && (iAltDist >= 2) )	// PC's have higher priority
+		else if ( pChar->IsClientActive() && (iAltDist >= 2) )	// PC's have higher priority
 		{
 			pCharAlt = pChar;
 			iAltDist = 2;	// high priority
@@ -2696,7 +2696,7 @@ void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something 
 	switch ( EntryTag )
 	{
 		case POPUP_PAPERDOLL:
-			m_pChar->GetClient()->addCharPaperdoll(pChar);
+			m_pChar->GetClientActive()->addCharPaperdoll(pChar);
 			break;
 
 		case POPUP_BACKPACK:
@@ -2704,7 +2704,7 @@ void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something 
 			break;
 
 		case POPUP_PARTY_ADD:
-			m_pChar->GetClient()->OnTarg_Party_Add(pChar);
+			m_pChar->GetClientActive()->OnTarg_Party_Add(pChar);
 			break;
 
 		case POPUP_PARTY_REMOVE:

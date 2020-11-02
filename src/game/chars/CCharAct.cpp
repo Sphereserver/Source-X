@@ -166,7 +166,7 @@ void CChar::Jail( CTextConsole * pSrc, bool fSet, int iCell )
 			pAccount->SetPrivFlags( PRIV_JAILED );
 			pAccount->m_TagDefs.SetNum("JailCell", iCell, true);
 		}
-		if ( IsClient())
+		if ( IsClientActive())
 		{
 			m_pClient->SetPrivFlags( PRIV_JAILED );
 		}
@@ -191,7 +191,7 @@ void CChar::Jail( CTextConsole * pSrc, bool fSet, int iCell )
 				return;
 		}
 
-		if ( IsClient())
+		if ( IsClientActive())
 		{
 			if ( ! m_pClient->IsPriv( PRIV_JAILED ))
 				return;
@@ -354,8 +354,8 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 			return;
 		case LAYER_FLAG_Stuck:
 			StatFlag_Set( STATF_FREEZE );
-			if ( IsClient() )
-				GetClient()->addBuff(BI_PARALYZE, 1075827, 1075828, (word)(pItem->GetTimerSAdjusted()));
+			if ( IsClientActive() )
+				GetClientActive()->addBuff(BI_PARALYZE, 1075827, 1075828, (word)(pItem->GetTimerSAdjusted()));
 			break;
 		default:
 			break;
@@ -460,10 +460,10 @@ void CChar::OnRemoveObj( CSObjContRec* pObRec )	// Override this = called when r
 			break;
 		case LAYER_FLAG_Stuck:
 			StatFlag_Clear( STATF_FREEZE );
-			if ( IsClient() )
+			if ( IsClientActive() )
 			{
-				GetClient()->removeBuff(BI_PARALYZE);
-				GetClient()->addCharMove(this);		// immediately tell the client that now he's able to move (without this, it will be able to move only on next tick update)
+				GetClientActive()->removeBuff(BI_PARALYZE);
+				GetClientActive()->addCharMove(this);		// immediately tell the client that now he's able to move (without this, it will be able to move only on next tick update)
 			}
 			break;
 		default:
@@ -538,7 +538,7 @@ void CChar::OnRemoveObj( CSObjContRec* pObRec )	// Override this = called when r
         if (pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_NIGHTSIGHT, pItemBaseCCPItemEquippable))
         {
             StatFlag_Mod(STATF_NIGHTSIGHT, 0);
-            if (IsClient())
+            if (IsClientActive())
                 m_pClient->addLight();
         }
 
@@ -678,15 +678,15 @@ void CChar::UpdateDrag( CItem * pItem, CObjBase * pCont, CPointMap * pt )
 
 void CChar::ObjMessage( lpctstr pMsg, const CObjBase * pSrc ) const
 {
-	if ( ! IsClient())
+	if ( ! IsClientActive())
 		return;
-	GetClient()->addObjMessage( pMsg, pSrc );
+	GetClientActive()->addObjMessage( pMsg, pSrc );
 }
 void CChar::SysMessage( lpctstr pMsg ) const	// Push a message back to the client if there is one.
 {
-	if ( ! IsClient())
+	if ( ! IsClientActive())
 		return;
-	GetClient()->SysMessage( pMsg );
+	GetClientActive()->SysMessage( pMsg );
 }
 
 // Push status change to all who can see us.
@@ -698,8 +698,8 @@ void CChar::UpdateStatsFlag() const
 	if ( g_Serv.IsLoading() )
 		return;
 
-	if ( IsClient() )
-		GetClient()->addUpdateStatsFlag();
+	if ( IsClientActive() )
+		GetClientActive()->addUpdateStatsFlag();
 }
 
 // queue updates
@@ -712,8 +712,8 @@ void CChar::UpdateHitsFlag()
 
 	m_fStatusUpdate |= SU_UPDATE_HITS;
 
-	if ( IsClient() )
-		GetClient()->addUpdateHitsFlag();
+	if ( IsClientActive() )
+		GetClientActive()->addUpdateHitsFlag();
 }
 
 void CChar::UpdateModeFlag()
@@ -731,8 +731,8 @@ void CChar::UpdateManaFlag() const
 	if ( g_Serv.IsLoading() )
 		return;
 
-	if ( IsClient() )
-		GetClient()->addUpdateManaFlag();
+	if ( IsClientActive() )
+		GetClientActive()->addUpdateManaFlag();
 }
 
 void CChar::UpdateStamFlag() const
@@ -741,8 +741,8 @@ void CChar::UpdateStamFlag() const
 	if ( g_Serv.IsLoading() )
 		return;
 
-	if ( IsClient() )
-		GetClient()->addUpdateStamFlag();
+	if ( IsClientActive() )
+		GetClientActive()->addUpdateStamFlag();
 }
 
 void CChar::UpdateStatVal( STAT_TYPE type, int iChange, ushort uiLimit )
@@ -1275,8 +1275,8 @@ void CChar::UpdateSpeedMode()
 	if ( g_Serv.IsLoading() || !m_pPlayer )
 		return;
 
-	if ( IsClient() )
-		GetClient()->addSpeedMode( m_pPlayer->m_speedMode );
+	if ( IsClientActive() )
+		GetClientActive()->addSpeedMode( m_pPlayer->m_speedMode );
 }
 
 void CChar::UpdateVisualRange()
@@ -1287,8 +1287,8 @@ void CChar::UpdateVisualRange()
 
 	DEBUG_WARN(("CChar::UpdateVisualRange called, m_iVisualRange is %d\n", m_iVisualRange));
 
-	if ( IsClient() )
-		GetClient()->addVisualRange( m_iVisualRange );
+	if ( IsClientActive() )
+		GetClientActive()->addVisualRange( m_iVisualRange );
 }
 
 // Who now sees this char ?
@@ -1461,6 +1461,7 @@ void CChar::SoundChar( CRESND_TYPE type )
 							break;
 						}
 						// if not two handed, don't break, just fall through and use the same sound ID as a fencing weapon
+						FALLTHROUGH;
 					case IT_WEAPON_FENCE:
 						// 0x23b = sword1
 						// 0x23c = sword7
@@ -1634,9 +1635,9 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	CObjBaseTemplate * pObjTop = pItem->GetTopLevelObj();
     CChar* pCharTop = dynamic_cast<CChar*>(pObjTop);
 
-	if( IsClient() )
+	if( IsClientActive() )
 	{
-		CClient *client    = GetClient();
+		CClient *client    = GetClientActive();
 		CItem   *pItemCont = dynamic_cast <CItem*> (pItemParent);
 
 		if ( pItemCont != nullptr )
@@ -2166,7 +2167,7 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
         if ( pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_NIGHTSIGHT, pItemBaseCCPItemEquippable) )
         {
             StatFlag_Mod( STATF_NIGHTSIGHT, 1 );
-            if ( IsClient() )
+            if ( IsClientActive() )
                 m_pClient->addLight();
         }
 
@@ -2244,7 +2245,7 @@ bool CChar::Reveal( uint64 iFlags )
 	if ( !IsStatFlag(iFlags) )
 		return false;
 
-    CClient* pClient = IsClient() ? GetClient() : nullptr;
+    CClient* pClient = IsClientActive() ? GetClientActive() : nullptr;
 	if (pClient && pClient->m_pHouseDesign)
 	{
 		// No reveal whilst in house design (unless they somehow got out)
@@ -2983,7 +2984,7 @@ bool CChar::SetPoison( int iSkill, int iHits, CChar * pCharSrc )
 		}
 	}
 
-	CClient *pClient = GetClient();
+	CClient *pClient = GetClientActive();
 	if ( pClient && IsSetOF(OF_Buffs) )
 	{
 		pClient->removeBuff(BI_POISON);
@@ -3200,7 +3201,7 @@ bool CChar::Death()
 		SetID( (CREID_TYPE)(g_Cfg.ResourceGetIndexType( RES_CHARDEF, pszGhostName )) );
 		LayerAdd( CItem::CreateScript( ITEMID_DEATHSHROUD, this ) );
 
-        CClient * pClient = GetClient();
+        CClient * pClient = GetClientActive();
 		if ( pClient )
 		{
             if (g_Cfg.m_iPacketDeathAnimation)
@@ -3323,7 +3324,7 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 		}
 	}
 
-	CClient *pClient = GetClient();
+	CClient *pClient = GetClientActive();
 	if ( pClient && pClient->m_pHouseDesign )
 	{
 		if ( pClient->m_pHouseDesign->GetDesignArea().IsInside2d(ptDst) )
@@ -3471,7 +3472,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 {
 	ADDTOCALLSTACK("CChar::CheckLocation");
 
-	CClient *pClient = GetClient();
+	CClient *pClient = GetClientActive();
 	if ( pClient && pClient->m_pHouseDesign )
 	{
 		// Stepping on items doesn't trigger anything whilst in design mode
@@ -3698,7 +3699,7 @@ bool CChar::MoveToRegion( CRegionWorld * pNewArea, bool fAllowReject )
 			}
 		}
 
-		if ( IsClient() && pNewArea )
+		if ( IsClientActive() && pNewArea )
 		{
 			if ( pNewArea->IsFlag(REGION_FLAG_ANNOUNCE) && !pNewArea->IsInside2d( GetTopPoint()) )	// new area.
 			{
@@ -3847,7 +3848,7 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocation,
 	if ( !pt.IsValidPoint() )
 		return false;
 
-	CClient *pClient = GetClient();
+	CClient *pClient = GetClientActive();
 	if ( m_pPlayer && !pClient )	// moving a logged out client !
 	{
 		CSector *pSector = pt.GetSector();
@@ -4228,8 +4229,8 @@ void CChar::OnTickStatusUpdate()
 {
 	ADDTOCALLSTACK("CChar::OnTickStatusUpdate");
 
-	if ( IsClient() )
-		GetClient()->UpdateStats();
+	if ( IsClientActive() )
+		GetClientActive()->UpdateStats();
 
 	const int64 iTimeCur = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 	int64 iTimeDiff = iTimeCur - _iTimeLastHitsUpdate;
@@ -4396,7 +4397,7 @@ bool CChar::OnTick()
 //#ifdef _DEBUG
 //    EXC_DEBUG_START;
 //    g_Log.EventDebug("'%s' isNPC? '%d' isPlayer? '%d' client '%d' [uid=0%" PRIx16 "]\n",
-//        GetName(), (int)(m_pNPC ? m_pNPC->m_Brain : 0), (int)(m_pPlayer != 0), (int)IsClient(), (dword)GetUID());
+//        GetName(), (int)(m_pNPC ? m_pNPC->m_Brain : 0), (int)(m_pPlayer != 0), (int)IsClientActive(), (dword)GetUID());
 //    EXC_DEBUG_END;
 //#endif
 
@@ -4448,9 +4449,9 @@ bool CChar::OnTickPeriodic()
         return true;
     }
 
-    if (IsClient())
+    if (IsClientActive())
     {
-        CClient* pClient = GetClient();
+        CClient* pClient = GetClientActive();
         // Players have a silly "always run" flag that gets stuck on.
         if ( (iTimeCur - pClient->m_timeLastEventWalk) > (2 * MSECS_PER_TENTH) )
         {

@@ -131,10 +131,10 @@ void CItemContainer::Trade_Status( bool bCheck )
 		return;
 
 	CChar *pChar1 = dynamic_cast<CChar *>(GetParent());
-	if ( !pChar1 || !pChar1->IsClient() )
+	if ( !pChar1 || !pChar1->IsClientActive() )
 		return;
 	CChar *pChar2 = dynamic_cast<CChar *>(pPartner->GetParent());
-	if ( !pChar2 || !pChar2->IsClient() )
+	if ( !pChar2 || !pChar2->IsClientActive() )
 		return;
 
 	m_itEqTradeWindow.m_bCheck = bCheck ? 1 : 0;
@@ -143,10 +143,10 @@ void CItemContainer::Trade_Status( bool bCheck )
 
 	PacketTradeAction cmd(SECURE_TRADE_CHANGE);
 	cmd.prepareReadyChange(this, pPartner);
-	cmd.send(pChar1->GetClient());
+	cmd.send(pChar1->GetClientActive());
 
 	cmd.prepareReadyChange(pPartner, this);
-	cmd.send(pChar2->GetClient());
+	cmd.send(pChar2->GetClientActive());
 
 	// Check if both clients had pressed the 'accept' buttom
 	if ( pPartner->m_itEqTradeWindow.m_bCheck == 0 || m_itEqTradeWindow.m_bCheck == 0 )
@@ -248,14 +248,14 @@ void CItemContainer::Trade_UpdateGold( dword platinum, dword gold )
 	if ( !pPartner )
 		return;
 	CChar *pChar1 = dynamic_cast<CChar *>(GetParent());
-	if ( !pChar1 || !pChar1->IsClient() )
+	if ( !pChar1 || !pChar1->IsClientActive() )
 		return;
 	CChar *pChar2 = dynamic_cast<CChar *>(pPartner->GetParent());
-	if ( !pChar2 || !pChar2->IsClient() )
+	if ( !pChar2 || !pChar2->IsClientActive() )
 		return;
 
 	bool bUpdateChar1 = false;
-	bool bUpdateChar2 = pChar2->GetClient()->GetNetState()->isClientVersion(MINCLIVER_NEWSECURETRADE);
+	bool bUpdateChar2 = pChar2->GetClientActive()->GetNetState()->isClientVersion(MINCLIVER_NEWSECURETRADE);
 
 	// To prevent cheating, check if the char really have these gold/platinum values
 	const int64 iMaxValue = pChar1->m_virtualGold;
@@ -272,9 +272,9 @@ void CItemContainer::Trade_UpdateGold( dword platinum, dword gold )
 	PacketTradeAction cmd(SECURE_TRADE_UPDATEGOLD);
 	cmd.prepareUpdateGold(this, gold, platinum);
 	if ( bUpdateChar1 )
-		cmd.send(pChar1->GetClient());
+		cmd.send(pChar1->GetClientActive());
 	if ( bUpdateChar2 )
-		cmd.send(pChar2->GetClient());
+		cmd.send(pChar2->GetClientActive());
 }
 
 bool CItemContainer::Trade_Delete()
@@ -289,12 +289,12 @@ bool CItemContainer::Trade_Delete()
 	if ( !pChar )
 		return false;
 
-	if ( pChar->IsClient() )
+	if ( pChar->IsClientActive() )
 	{
 		// Send the cancel trade message.
 		PacketTradeAction cmd(SECURE_TRADE_CLOSE);
 		cmd.prepareClose(this);
-		cmd.send(pChar->GetClient());
+		cmd.send(pChar->GetClientActive());
 	}
 
 	// Drop items back in my pack.
@@ -1281,9 +1281,9 @@ bool CItemContainer::r_Verb( CScript &s, CTextConsole *pSrc )
 			if ( pSrc->GetChar() )
 			{
 				CChar *pChar = pSrc->GetChar();
-				if ( pChar->IsClient() )
+				if ( pChar->IsClientActive() )
 				{
-					CClient *pClient = pChar->GetClient();
+					CClient *pClient = pChar->GetClientActive();
 					ASSERT(pClient);
 
 					if ( s.HasArgs() )
@@ -1302,9 +1302,9 @@ bool CItemContainer::r_Verb( CScript &s, CTextConsole *pSrc )
 			if ( pSrc->GetChar() )
 			{
 				CChar *pChar = pSrc->GetChar();
-				if ( pChar->IsClient() )
+				if ( pChar->IsClientActive() )
 				{
-					CClient *pClient = pChar->GetClient();
+					CClient *pClient = pChar->GetClientActive();
 					ASSERT(pClient);
 					pClient->closeContainer(this);
 				}

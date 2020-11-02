@@ -190,7 +190,7 @@ protected:
     *
     * @param pObRec removed record.
     */
-    virtual void OnRemoveObj( CSObjContRec* pObRec );
+    virtual void OnRemoveObj( CSObjContRec* pObjRec );
     ///@}
 };
 

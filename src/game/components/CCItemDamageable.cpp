@@ -86,7 +86,7 @@ void CCItemDamageable::OnTickStatsUpdate()
             {
                 break;
             }
-            CClient *pClient = pChar->GetClient();
+            CClient *pClient = pChar->GetClientActive();
             if (!pClient)
             {
                 continue;

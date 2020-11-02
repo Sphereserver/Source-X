@@ -332,7 +332,7 @@ void CEntityProps::DumpComponentProps(CTextConsole *pSrc, lpctstr ptcPrefix) con
     bool fIsClient = false;
     if (const CChar* pChar = pSrc->GetChar())
     {
-        fIsClient = pChar->IsClient();
+        fIsClient = pChar->IsClientActive();
     }
 
     CSString sPropVal;

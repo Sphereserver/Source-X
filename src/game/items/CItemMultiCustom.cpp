@@ -1256,7 +1256,7 @@ void CItemMultiCustom::DeleteComponent(const CUID& uidComponent)
         pt.m_x -= GetTopPoint().m_x;
         pt.m_y -= GetTopPoint().m_y;
         pt.m_z -= GetTopPoint().m_z;
-        RemoveItem(GetOwner().CharFind()->GetClient(), pComp->GetDispID(), pt.m_x, pt.m_y, pt.m_z);
+        RemoveItem(GetOwner().CharFind()->GetClientActive(), pComp->GetDispID(), pt.m_x, pt.m_y, pt.m_z);
     }*/
     CItemMulti::DeleteComponent(uidComponent);
 }
@@ -1605,10 +1605,10 @@ bool CItemMultiCustom::r_Verb(CScript & s, CTextConsole * pSrc) // Execute comma
             else if (pSrc)
                 pChar = pSrc->GetChar();
 
-            if (pChar == nullptr || !pChar->IsClient())
+            if (pChar == nullptr || !pChar->IsClientActive())
                 return false;
 
-            BeginCustomize(pChar->GetClient());
+            BeginCustomize(pChar->GetClientActive());
         }
         break;
 
@@ -1644,10 +1644,10 @@ bool CItemMultiCustom::r_Verb(CScript & s, CTextConsole * pSrc) // Execute comma
             if (s.HasArgs())
                 pChar = CUID::CharFind(s.GetArgVal());
 
-            if (pChar == nullptr || !pChar->IsClient())
+            if (pChar == nullptr || !pChar->IsClientActive())
                 return false;
 
-            SendStructureTo(pChar->GetClient());
+            SendStructureTo(pChar->GetClientActive());
         }
         break;
 

@@ -103,8 +103,8 @@ void CPartyDef::AddStatsUpdate( CChar *pChar, PacketSend *pPacket )
 		CChar *pCharNow = m_Chars.GetChar(i).CharFind();
 		if ( pCharNow && pCharNow != pChar )
 		{
-			if ( pCharNow->IsClient() && pCharNow->CanSee(pChar) )
-				pPacket->send(pCharNow->GetClient());
+			if ( pCharNow->IsClientActive() && pCharNow->CanSee(pChar) )
+				pPacket->send(pCharNow->GetClientActive());
 		}
 	}
 }
@@ -134,9 +134,9 @@ void CPartyDef::UpdateWaypointAll(CChar * pCharSrc, MAPWAYPOINT_TYPE type)
     for (size_t i = 0; i < iQty; i++)
     {
         pChar = m_Chars.GetChar(i).CharFind();
-        if (!pChar || !pChar->GetClient() || (pChar == pCharSrc))
+        if (!pChar || !pChar->GetClientActive() || (pChar == pCharSrc))
             continue;
-        pChar->GetClient()->addMapWaypoint(pCharSrc, type);
+        pChar->GetClientActive()->addMapWaypoint(pCharSrc, type);
     }
 }
 
@@ -163,9 +163,9 @@ bool CPartyDef::SendMemberMsg( CChar *pCharDest, PacketSend *pPacket )
 		return true;
 	}
 
-	if ( pCharDest->IsClient() )
+	if ( pCharDest->IsClientActive() )
 	{
-		CClient *pClient = pCharDest->GetClient();
+		CClient *pClient = pCharDest->GetClientActive();
 		ASSERT(pClient);
 		pPacket->send(pClient);
 		if ( *pPacket->getData() == PARTYMSG_Remove )
@@ -265,7 +265,7 @@ bool CPartyDef::MessageEvent( CUID uidDst, CUID uidSrc, const nchar *pText, int 
 	}
 
 	if ( g_Log.IsLoggedMask(LOGM_PLAYER_SPEAK) )
-		g_Log.Event(LOGM_PLAYER_SPEAK|LOGM_NOCONTEXT, "%x:'%s' Says '%s' in party to '%s'\n", pFrom->GetClient()->GetSocketID(), pFrom->GetName(), szText, pTo ? pTo->GetName() : "all");
+		g_Log.Event(LOGM_PLAYER_SPEAK|LOGM_NOCONTEXT, "%x:'%s' Says '%s' in party to '%s'\n", pFrom->GetClientActive()->GetSocketID(), pFrom->GetName(), szText, pTo ? pTo->GetName() : "all");
 
 	snprintf(szText, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_MSG), pText);
 	PacketPartyChat cmd(pFrom, pText);
@@ -423,7 +423,7 @@ bool CPartyDef::AcceptEvent( CChar *pCharAccept, CUID uidInviter, bool bForced, 
 	// Party master is only one that can add ! GetChar(0)
 
 	CChar *pCharInviter = uidInviter.CharFind();
-	if ( !pCharInviter || !pCharInviter->IsClient() || !pCharAccept || !pCharAccept->IsClient() || (pCharInviter == pCharAccept) )
+	if ( !pCharInviter || !pCharInviter->IsClientActive() || !pCharAccept || !pCharAccept->IsClientActive() || (pCharInviter == pCharAccept) )
 		return false;
 
 	CPartyDef *pParty = pCharInviter->m_pParty;

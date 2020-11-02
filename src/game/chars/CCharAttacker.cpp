@@ -51,7 +51,7 @@ bool CChar::Attacker_Add(CChar * pChar, int threat)
     if (!attacker.ignore)
     {
         tchar *z = Str_GetTemp();
-        CClient *pClient = pChar->GetClient();
+        CClient *pClient = pChar->GetClientActive();
         //if ( GetTopSector()->GetCharComplexity() < 7 )
         //{
         if (!( g_Cfg.m_iEmoteFlags & EMOTEF_ATTACKER ))

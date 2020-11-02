@@ -341,7 +341,7 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta, bool fUpdateViewFull)
                 else
                 {
                     CChar *pChar = static_cast<CChar *>(pObj);
-                    if (pClient == pChar->GetClient())
+                    if (pClient == pChar->GetClientActive())
                     {
                         if (!fClientUsesSmoothSailing)
                             pClient->addPlayerUpdate();     // update my (client) position

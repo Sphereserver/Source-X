@@ -1718,7 +1718,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 					CChar * pChar = AreaChars.GetChar();
 					if ( pChar == nullptr )
 						break;
-					if ( ( iType & 0x10 ) && ( ! pChar->IsClient() ) )	// FORCLIENTS
+					if ( ( iType & 0x10 ) && ( ! pChar->IsClientActive() ) )	// FORCLIENTS
 						continue;
 					if ( ( iType & 0x20 ) && ( pChar->m_pPlayer == nullptr ) )	// FORPLAYERS
 						continue;

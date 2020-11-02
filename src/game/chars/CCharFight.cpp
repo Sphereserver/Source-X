@@ -344,7 +344,7 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, bool fCommandPet, bool fShouldReveal)
 	// Are they a criminal for it ? Is attacking me a crime ?
 	if ((Noto_GetFlag(pCharSrc) == NOTO_GOOD) && fAggreived)
 	{
-		if (IsClient())	// I decide if this is a crime.
+		if (IsClientActive())	// I decide if this is a crime.
 			OnNoticeCrime(pCharSrc, this);
 		else
 		{
@@ -908,21 +908,21 @@ effect_bounce:
 	// Apply damage
 	SoundChar(CRESND_GETHIT);
 	UpdateStatVal( STAT_STR, -iDmg);
-	if ( pSrc->IsClient() )
-		pSrc->GetClient()->addHitsUpdate( this );	// always send updates to src
+	if ( pSrc->IsClientActive() )
+		pSrc->GetClientActive()->addHitsUpdate( this );	// always send updates to src
 
 	if ( IsAosFlagEnabled( FEATURE_AOS_DAMAGE ) )
 	{
-		if ( IsClient() )
+		if ( IsClientActive() )
 			m_pClient->addShowDamage( iDmg, (dword)(GetUID()) );
-		if ( pSrc->IsClient() && (pSrc != this) )
+		if ( pSrc->IsClientActive() && (pSrc != this) )
 			pSrc->m_pClient->addShowDamage( iDmg, (dword)(GetUID()) );
 		else
 		{
 			CChar * pSrcOwner = pSrc->GetOwner();
 			if ( pSrcOwner != nullptr )
 			{
-				if ( pSrcOwner->IsClient() )
+				if ( pSrcOwner->IsClientActive() )
 					pSrcOwner->m_pClient->addShowDamage( iDmg, (dword)(GetUID()) );
 			}
 		}
@@ -1284,8 +1284,8 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool fToldByMaster )
 	{
 		StatFlag_Set(STATF_WAR);
 		UpdateModeFlag();
-		if ( IsClient() )
-			GetClient()->addPlayerWarMode();
+		if ( IsClientActive() )
+			GetClientActive()->addPlayerWarMode();
 	}
 
 	const SKILL_TYPE skillWeapon = Fight_GetWeaponSkill();
@@ -1650,7 +1650,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	}
 
     // Fix of the bounce back effect with dir update for clients to be able to run in combat easily
-    if ( IsClient() && IsSetCombatFlags(COMBAT_FACECOMBAT) )
+    if ( IsClientActive() && IsSetCombatFlags(COMBAT_FACECOMBAT) )
     {
         DIR_TYPE dirOpponent = GetDir(pCharTarg, m_dirFace);
         if ( (dirOpponent != m_dirFace) && (dirOpponent != GetDirTurn(m_dirFace, -1)) && (dirOpponent != GetDirTurn(m_dirFace, 1)) )
