@@ -48,7 +48,7 @@ void CChatChanMember::SetChatActive()
     if ( IsChatActive() )
         return;
 
-    CClient * pClient = GetClient();
+    CClient * pClient = GetClientActive();
     if ( pClient )
     {
         m_fChatActive = true;
@@ -152,14 +152,14 @@ void CChatChanMember::RenameChannel(lpctstr pszName)
 void CChatChanMember::SendChatMsg(CHATMSG_TYPE iType, lpctstr pszName1, lpctstr pszName2, CLanguageID lang )
 {
     ADDTOCALLSTACK("CChatChanMember::SendChatMsg");
-    GetClient()->addChatSystemMessage(iType, pszName1, pszName2, lang );
+    GetClientActive()->addChatSystemMessage(iType, pszName1, pszName2, lang );
 }
 
 void CChatChanMember::ToggleReceiving()
 {
     ADDTOCALLSTACK("CChatChanMember::ToggleReceiving");
     m_fReceiving = !m_fReceiving;
-    GetClient()->addChatSystemMessage((m_fReceiving) ? CHATMSG_ReceivingPrivate : CHATMSG_NoLongerReceivingPrivate);
+    GetClientActive()->addChatSystemMessage((m_fReceiving) ? CHATMSG_ReceivingPrivate : CHATMSG_NoLongerReceivingPrivate);
 }
 
 void CChatChanMember::PermitWhoIs()
@@ -187,22 +187,22 @@ void CChatChanMember::ToggleWhoIs()
     SendChatMsg((GetWhoIs() == true) ? CHATMSG_ShowingName : CHATMSG_NotShowingName);
 }
 
-CClient * CChatChanMember::GetClient()
+CClient * CChatChanMember::GetClientActive()
 {
-    ADDTOCALLSTACK("CChatChanMember::GetClient");
+    ADDTOCALLSTACK("CChatChanMember::GetClientActive");
     return( static_cast <CClient*>( this ));
 }
 
-const CClient * CChatChanMember::GetClient() const
+const CClient * CChatChanMember::GetClientActive() const
 {
-    ADDTOCALLSTACK("CChatChanMember::GetClient");
+    ADDTOCALLSTACK("CChatChanMember::GetClientActive");
     return( static_cast <const CClient*>( this ));
 }
 
 lpctstr CChatChanMember::GetChatName() const
 {
     ADDTOCALLSTACK("CChatChanMember::GetChatName");
-    return( GetClient()->GetAccount()->m_sChatName );
+    return( GetClientActive()->GetAccount()->m_sChatName );
 }
 
 bool CChatChanMember::IsIgnoring(lpctstr pszName) const

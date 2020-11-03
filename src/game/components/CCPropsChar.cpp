@@ -127,8 +127,8 @@ void CCPropsChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iV
         {
             CChar * pChar = static_cast <CChar*>(pLinkedObj);
             pChar->StatFlag_Mod( STATF_NIGHTSIGHT, (iVal > 0) ? true : false );
-            if ( pChar->IsClient() )
-                pChar->GetClient()->addLight();
+            if ( pChar->IsClientActive() )
+                pChar->GetClientActive()->addLight();
             break;
         }
 

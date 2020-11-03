@@ -279,7 +279,7 @@ bool CResourceBase::LoadResourceSection( CScript * pScript )
 }
 
 //*********************************************************
-// Resource Block Definitions
+// Resource Section Definitions
 
 lpctstr CResourceBase::ResourceGetName( const CResourceID& rid ) const
 {
@@ -403,7 +403,7 @@ CScriptObj * CResourceBase::ResourceGetDefByName( RES_TYPE restype, lpctstr pszN
 }
 
 //*******************************************************
-// Open resource blocks.
+// Open resource section.
 
 bool CResourceBase::ResourceLock( CResourceLock & s, const CResourceID& rid )
 {

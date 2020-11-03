@@ -102,7 +102,7 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 
 	if ( pCharPlayer == nullptr )
 		return false;
-	if ( ! pCharPlayer->IsClient())
+	if ( ! pCharPlayer->IsClientActive())
 		return false;
 
 	// Might have too many pets already ?

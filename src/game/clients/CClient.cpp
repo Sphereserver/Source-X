@@ -45,7 +45,7 @@ CClient::CClient(CNetState* state)
 
 	m_iWalkStepCount = 0;
 	m_iWalkTimeAvg	= 100;
-	m_timeWalkStep = GetPreciseSysTimeMilli();
+	m_timeWalkStep = CSTime::GetPreciseSysTimeMilli();
 
     _fShowPublicHouseContent = true;
 
@@ -332,7 +332,7 @@ bool CClient::CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const
 	{
 		const CChar * pCharSrc = dynamic_cast <const CChar*> ( pSrc );
 		ASSERT(pCharSrc);
-		if ( pCharSrc->IsClient() && (pCharSrc->GetPrivLevel() <= GetPrivLevel()) )
+		if ( pCharSrc->IsClientActive() && (pCharSrc->GetPrivLevel() <= GetPrivLevel()) )
 			return true;
 	}
 
@@ -476,7 +476,7 @@ bool CClient::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 						CChar * pChar = CUID::CharFind(Exp_GetDWSingle(ptcKey));
 						if (!pChar)
 							continue;
-						if (!pChar->IsClient())
+						if (!pChar->IsClientActive())
 							continue;
 						CPartyDef::AcceptEvent(pChar, m_pChar->GetUID(), true, fSendMsgs);
 

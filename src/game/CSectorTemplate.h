@@ -32,18 +32,18 @@ private:
 	int64 m_iTimeLastClient;	// age the sector based on last client here.
     
 protected:
-	void OnRemoveObj(CSObjContRec* pObjRec );	// Override this = called when removed from list.
+	void OnRemoveObj(CSObjContRec* pObjRec);	// Override this = called when removed from list.
 
 public:
 	CCharsActiveList();
 	void AddCharActive(CChar* pChar);
-	int GetClientsNumber() const {
+	int GetClientsNumber() const noexcept {
 		return m_iClients;
 	}
-	int64 GetTimeLastClient() const {
+	int64 GetTimeLastClient() const noexcept {
 		return m_iTimeLastClient;
 	}
-	inline void SetTimeLastClient(int64 iTime) {
+	void SetTimeLastClient(int64 iTime) noexcept {
 		m_iTimeLastClient = iTime;
 	}
 

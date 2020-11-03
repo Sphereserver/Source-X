@@ -3279,7 +3279,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
         // Now name the guild
         CItemStone * pStone = dynamic_cast <CItemStone*>(pItemNew);
         pStone->AddRecruit(pChar, STONEPRIV_MASTER);
-        pChar->GetClient()->addPromptConsole(CLIMODE_PROMPT_STONE_NAME, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_GUILDSTONE_NEW), pItemNew->GetUID());
+        pChar->GetClientActive()->addPromptConsole(CLIMODE_PROMPT_STONE_NAME, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_GUILDSTONE_NEW), pItemNew->GetUID());
     }
     else if (pItemDef->IsType(IT_SHIP))
     {
@@ -3508,9 +3508,9 @@ bool CMultiStorage::CanAddHouse(const CUID& uidChar, int16 iHouseCount) const
     uint8 iMaxHouses = pChar->m_pPlayer->_iMaxHouses;
     if (iMaxHouses == 0)
     {
-        if (pChar->GetClient())
+        if (pChar->GetClientActive())
         {
-            iMaxHouses = pChar->GetClient()->GetAccount()->_iMaxHouses;
+            iMaxHouses = pChar->GetClientActive()->GetAccount()->_iMaxHouses;
         }
     }
     if (iMaxHouses == 0)
@@ -3633,9 +3633,9 @@ bool CMultiStorage::CanAddShip(const CUID& uidChar, int16 iShipCount)
     uint8 iMaxShips = pChar->m_pPlayer->_iMaxShips;
     if (iMaxShips == 0)
     {
-        if (pChar->GetClient())
+        if (pChar->GetClientActive())
         {
-            iMaxShips = pChar->GetClient()->GetAccount()->_iMaxShips;
+            iMaxShips = pChar->GetClientActive()->GetAccount()->_iMaxShips;
         }
     }
     if (iMaxShips == 0)

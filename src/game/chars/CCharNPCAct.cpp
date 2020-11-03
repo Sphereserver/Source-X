@@ -116,10 +116,10 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 	case NV_BUY:
 	{
 		// Open up the buy dialog.
-		if ( pCharSrc == nullptr || !pCharSrc->IsClient())
+		if ( pCharSrc == nullptr || !pCharSrc->IsClientActive())
 			return false;
 
-		CClient * pClientSrc = pCharSrc->GetClient();
+		CClient * pClientSrc = pCharSrc->GetClientActive();
 		ASSERT(pClientSrc != nullptr);
 		if ( !pClientSrc->addShopMenuBuy(this) )
 			Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_NO_GOODS));
@@ -170,10 +170,10 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 	case NV_SELL:
 	{
 		// Open up the sell dialog.
-		if ( pCharSrc == nullptr || !pCharSrc->IsClient() )
+		if ( pCharSrc == nullptr || !pCharSrc->IsClientActive() )
 			return false;
 
-		CClient * pClientSrc = pCharSrc->GetClient();
+		CClient * pClientSrc = pCharSrc->GetClientActive();
 		ASSERT(pClientSrc != nullptr);
 		if ( ! pClientSrc->addShopMenuSell( this ))
 			Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_NOTHING_BUY));
@@ -2080,12 +2080,12 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 	if ( NPC_IsVendor() && !IsStatFlag(STATF_PET) )
 	{
 		// Dropping item on vendor means quick sell
-		if ( pCharSrc->IsClient() )
+		if ( pCharSrc->IsClientActive() )
 		{
 			VendorItem item;
 			item.m_serial = pItem->GetUID();
 			item.m_vcAmount = pItem->GetAmount();
-			pCharSrc->GetClient()->Event_VendorSell(this, &item, 1);
+			pCharSrc->GetClientActive()->Event_VendorSell(this, &item, 1);
 		}
 		return false;
 	}

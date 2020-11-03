@@ -61,9 +61,9 @@ CItem * CWorldMap::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, boo
 		if ( !pResBit )
 			break;
 		// NOTE: ??? Not all resource objects are world gems. should they be ?
-		// I wanted to make tree stumps etc be the resource block some day.
+		// I wanted to make tree stumps etc be the resource section some day.
 
-		if ( pResBit->IsType(iType) && pResBit->GetID() == ITEMID_WorldGem )
+		if ( pResBit->IsType(iType) && (pResBit->GetID() == ITEMID_WorldGem) )
 			break;
 	}
 
@@ -83,7 +83,7 @@ CItem * CWorldMap::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, boo
 		return nullptr;
 
 	CWorldSearch AreaItems( pt );
-	AreaItems.SetAllShow(1);
+	AreaItems.SetAllShow(true);
 	for (;;)
 	{
 		CItem *pItem = AreaItems.GetItem();
@@ -353,7 +353,8 @@ CPointMap CWorldMap::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int 
 		if ( ptElem[0].m_z > z ) //if ( ptElem[0].m_z > pItem->GetTopPoint().m_z )
 			continue;
 
-		if ( ((( z - pt.m_z ) > 0) && ( z - pt.m_z ) > RESOURCE_Z_CHECK ) || ((( pt.m_z - z ) < 0) && (( pt.m_z - z ) < - RESOURCE_Z_CHECK ))) //if ( ((( pItem->GetTopPoint().m_z - pt.m_z ) > 0) && ( pItem->GetTopPoint().m_z - pt.m_z ) > RESOURCE_Z_CHECK ) || ((( pt.m_z - pItem->GetTopPoint().m_z ) < 0) && (( pt.m_z - pItem->GetTopPoint().m_z ) < - RESOURCE_Z_CHECK )))
+		//if ( ((( pItem->GetTopPoint().m_z - pt.m_z ) > 0) && ( pItem->GetTopPoint().m_z - pt.m_z ) > RESOURCE_Z_CHECK ) || ((( pt.m_z - pItem->GetTopPoint().m_z ) < 0) && (( pt.m_z - pItem->GetTopPoint().m_z ) < - RESOURCE_Z_CHECK )))
+		if ( ((( z - pt.m_z ) > 0) && ( z - pt.m_z ) > RESOURCE_Z_CHECK ) || ((( pt.m_z - z ) < 0) && (( pt.m_z - z ) < - RESOURCE_Z_CHECK )))
 			continue;
 
 		if (( z < ptElem[0].m_z ) || (( z == ptElem[0].m_z ) && ( fElem[0] )))
@@ -396,7 +397,9 @@ CPointMap CWorldMap::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int 
 				if ( !pMultiItem )
 					break;
 
-				//DEBUG_ERR(("abs( pMultiItem->m_dx ) %x, abs( pMultiItem->m_dy ) %x, abs( pMultiItem->m_dz ) %x,\n             iDistance %x IF STATEMENT %x %x\n", abs( pMultiItem->m_dx ), abs( pMultiItem->m_dy ), abs( pMultiItem->m_dz ), iDistance, ( abs( pMultiItem->m_dx ) <= iDistance ), ( abs( pMultiItem->m_dy ) <= iDistance ) ));
+				//DEBUG_ERR(("abs( pMultiItem->m_dx ) %x, abs( pMultiItem->m_dy ) %x, abs( pMultiItem->m_dz ) %x,\n
+				//	iDistance %x IF STATEMENT %x %x\n",
+				//	abs( pMultiItem->m_dx ), abs( pMultiItem->m_dy ), abs( pMultiItem->m_dz ), iDistance, ( abs( pMultiItem->m_dx ) <= iDistance ), ( abs( pMultiItem->m_dy ) <= iDistance ) ));
 
 				if ( !pMultiItem->m_visible )
 					continue;

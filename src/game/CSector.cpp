@@ -567,7 +567,7 @@ bool CSector::v_AllClients( CScript & s, CTextConsole * pSrc )
 			continue;
 
 		// Check that the character is a client (we only want to affect clients with this)
-		if (!pChar->IsClient())
+		if (!pChar->IsClientActive())
 			continue;
 
 		// Execute the verb on the client
@@ -761,9 +761,9 @@ void CSector::SetLightNow( bool fFlash )
 		if ( pChar->IsStatFlag( STATF_DEAD | STATF_NIGHTSIGHT ))
 			continue;
 
-		if ( pChar->m_pPlayer && pChar->IsClient())
+		if ( pChar->m_pPlayer && pChar->IsClientActive())
 		{
-			CClient * pClient = pChar->GetClient();
+			CClient * pClient = pChar->GetClientActive();
 			ASSERT(pClient);
 
 			if ( fFlash )	// This does not seem to work predicably ! too fast?
@@ -858,8 +858,8 @@ void CSector::SetWeather( WEATHER_TYPE w )
 	for (CSObjContRec* pObjRec : m_Chars_Active)
 	{
 		CChar* pChar = static_cast<CChar*>(pObjRec);
-		if ( pChar->IsClient())
-			pChar->GetClient()->addWeather( w );
+		if ( pChar->IsClientActive())
+			pChar->GetClientActive()->addWeather( w );
 
 		if ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) )
 			pChar->OnTrigger( CTRIG_EnvironChange, pChar );
@@ -879,8 +879,8 @@ void CSector::SetSeason( SEASON_TYPE season )
 	for (CSObjContRec* pObjRec : m_Chars_Active)
 	{
 		CChar* pChar = static_cast<CChar*>(pObjRec);
-		if ( pChar->IsClient() )
-			pChar->GetClient()->addSeason(season);
+		if ( pChar->IsClientActive() )
+			pChar->GetClientActive()->addSeason(season);
 
 		if ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) )
 			pChar->OnTrigger(CTRIG_EnvironChange, pChar);
@@ -992,7 +992,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
 
     if (IsSleeping())
     {
-        CClient *pClient = pChar->GetClient();
+        CClient *pClient = pChar->GetClientActive();
         if (pClient)    // A client just entered
         {
             GoAwake();    // Awake the sector and the chars inside (so, also pChar)
@@ -1252,9 +1252,9 @@ bool CSector::OnTick()
 		if (fEnvironChange && ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) ))
 			pChar->OnTrigger(CTRIG_EnvironChange, pChar);
 
-		if ( pChar->IsClient())
+		if ( pChar->IsClientActive())
 		{
-			CClient * pClient = pChar->GetClient();
+			CClient * pClient = pChar->GetClientActive();
 			ASSERT( pClient );
 			if ( sound )
 				pClient->addSound(sound, pChar);
@@ -1291,7 +1291,7 @@ bool CSector::OnTick()
     SetTimeoutS(30);  // Sector is Awake, make it tick after 30 seconds.
 
 	EXC_DEBUG_START;
-	CPointMap pt = GetBasePoint();
+	const CPointMap pt = GetBasePoint();
 	g_Log.EventError("#4 sector #%d [%hd,%hd,%hhd,%hhu]\n", GetIndex(), pt.m_x, pt.m_y, pt.m_z, pt.m_map);
 	EXC_DEBUG_END;
     return true;

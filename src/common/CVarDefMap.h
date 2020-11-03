@@ -26,7 +26,7 @@ private:
 	CVarDefCont& operator=(const CVarDefCont& other);
 
 public:
-    virtual lpctstr GetKey() const          = 0;
+    virtual lpctstr GetKey() const noexcept = 0;
     virtual void SetKey( lpctstr ptcKey )   = 0;
 
 	virtual lpctstr GetValStr() const       = 0;
@@ -52,7 +52,7 @@ private:
 	CVarDefContNum& operator=(const CVarDefContNum& other);
 
 public:
-    inline virtual lpctstr GetKey() const override {
+    inline virtual lpctstr GetKey() const noexcept override {
         return m_sKey.GetBuffer();
     }
     inline virtual void SetKey(lpctstr ptcKey) override {
@@ -90,7 +90,7 @@ private:
 	CVarDefContStr& operator=(const CVarDefContStr& other);
 
 public:
-    inline virtual lpctstr GetKey() const override {
+    inline virtual lpctstr GetKey() const noexcept override {
         return m_sKey.GetBuffer();
     }
     inline virtual void SetKey(lpctstr ptcKey) override {
@@ -113,7 +113,7 @@ class CVarDefMap
 {
 	struct ltstr
 	{
-		inline bool operator()(const CVarDefCont * s1, const CVarDefCont * s2) const
+		inline bool operator()(const CVarDefCont * s1, const CVarDefCont * s2) const noexcept
         {
             return ( strcmpi(s1->GetKey(), s2->GetKey()) < 0 );
         }

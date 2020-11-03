@@ -14,7 +14,7 @@ class CVarDefContNum;
 
 class CResourceDef : public CScriptObj
 {
-    // Define a generic resource block in the scripts.
+    // Define a generic resource section in the scripts.
     // Now the scripts can be modular. resources can be defined any place.
     // NOTE: This may be loaded fully into memory or just an Index to a file.
 
@@ -44,20 +44,20 @@ private:
     CResourceDef& operator=(const CResourceDef& other);
 
 public:
-    inline const CResourceID& GetResourceID() const
+    inline const CResourceID& GetResourceID() const noexcept
     {
         return m_rid;
     }
-    inline RES_TYPE GetResType() const
+    inline RES_TYPE GetResType() const noexcept
     {
         return m_rid.GetResType();
     }
-    inline int GetResPage() const
+    inline int GetResPage() const noexcept
     {
         return m_rid.GetResPage();
     }
 
-    inline void CopyDef(const CResourceDef * pLink)
+    inline void CopyDef(const CResourceDef * pLink) noexcept
     {
         m_pDefName = pLink->m_pDefName;
     }
@@ -71,16 +71,16 @@ public:
 
     // Give it another DEFNAME= even if it already has one. it's ok to have multiple names.
     bool SetResourceName( lpctstr pszName );
-    void SetResourceVar( const CVarDefContNum* pVarNum )
+    void SetResourceVar( const CVarDefContNum* pVarNum ) noexcept
     {
         if (pVarNum != nullptr && m_pDefName == nullptr)
             m_pDefName = pVarNum;
     }
 
-    // unlink all this data. (tho don't delete the def as the pointer might still be used !)
+    // Unlink all this data (tho don't delete the def as the pointer might still be used !)
     virtual void UnLink()
     {
-        // This does nothing in the CResourceDef case, Only in the CResourceLink case.
+        // This does nothing in the CResourceDef case, only in the case of CBaseBaseDef/CItemDef/CCharDef.
     }
 
     bool HasResourceName();

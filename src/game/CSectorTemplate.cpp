@@ -39,7 +39,7 @@ void CCharsActiveList::OnRemoveObj(CSObjContRec* pObjRec )
 	CSObjCont::OnRemoveObj(pObjRec);
 
 	CChar* pChar = static_cast<CChar*>(pObjRec);
-	if (pChar->IsClient())
+	if (pChar->IsClientType())
 	{
 		--m_iClients;
 		m_iTimeLastClient = CWorldGameTime::GetCurrentTime().GetTimeRaw();	// mark time in case it's the last client
@@ -57,7 +57,7 @@ void CCharsActiveList::AddCharActive( CChar * pChar )
 	if (pParent != this)
 	{
 		CSObjCont::InsertContentTail(pChar); // this also removes the Char from the old sector
-		if (pChar->IsClient())
+		if (pChar->IsClientActive())
 		{
 			++m_iClients;
 		}
