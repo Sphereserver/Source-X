@@ -138,8 +138,8 @@ bool CGMPage::r_LoadVal(CScript& s)
 	case GC_HANDLED:
 	{
 		CChar* pChar = ((CUID)s.GetArgVal()).CharFind();
-		if (pChar && pChar->GetClient())
-			SetHandler(pChar->GetClient());
+		if (pChar && pChar->GetClientActive())
+			SetHandler(pChar->GetClientActive());
 		else
 			ClearHandler();
 		break;

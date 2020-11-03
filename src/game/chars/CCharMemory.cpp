@@ -493,11 +493,11 @@ void CChar::Memory_Fight_Start( const CChar * pTarg )
 		Memory_AddTypes(pMemory, MEMORY_FIGHT | MemTypes); // Update the fight status.
 	}
 
-	if ( IsClient() && (m_Fight_Targ_UID == pTarg->GetUID()) && !IsSetCombatFlags(COMBAT_NODIRCHANGE))
+	if ( IsClientActive() && (m_Fight_Targ_UID == pTarg->GetUID()) && !IsSetCombatFlags(COMBAT_NODIRCHANGE))
 	{
 		// This may be a useless command. How do i say the fight is over ?
 		// This causes the funny turn to the target during combat !
-		new PacketSwing(GetClient(), pTarg);
+		new PacketSwing(GetClientActive(), pTarg);
 	}
 	else
 	{

@@ -206,7 +206,7 @@ void CChar::Skill_SetBase( SKILL_TYPE skill, ushort uiValue )
 	}
 	m_Skill[skill] = uiValue;
 
-	if ( IsClient())
+	if ( IsClientActive())
 		m_pClient->addSkillWindow(skill);	// update the skills list
 
 	if ( g_Cfg.m_iCombatDamageEra )
@@ -413,7 +413,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 	if ( uiSkillLevelFixed < (ushort)iSkillMax )	// are we in position to gain skill ?
 	{
 		// slightly more chance of decay than gain
-		if ( (iRoll * 3) <= (iChance * 4) )
+		if ( (iRoll * 3) <= int(iChance * 4) )
 			Skill_Decay();
 
 		if ( difficulty > 0 )
@@ -1173,7 +1173,7 @@ bool CChar::Skill_Tracking( CUID uidTarg, DIR_TYPE & dirPrv, int iDistMax )
 	// SKILL_TRACKING
 	UNREFERENCED_PARAMETER(dirPrv);
 
-	if ( !IsClient() )		// abort action if the client get disconnected
+	if ( !IsClientActive() )		// abort action if the client get disconnected
 		return false;
 
 	const CObjBase * pObj = uidTarg.ObjFind();
@@ -2255,10 +2255,10 @@ int CChar::Skill_Hiding( SKTRIG_TYPE stage )
 		StatFlag_Set(STATF_HIDDEN);
 		Reveal(STATF_INVISIBLE);	// clear previous invisibility spell effect (this will not reveal the char because STATF_HIDDEN still set)
 		UpdateMode();
-		if ( IsClient() )
+		if ( IsClientActive() )
 		{
-			GetClient()->removeBuff( BI_HIDDEN );
-			GetClient()->addBuff( BI_HIDDEN , 1075655, 1075656 );
+			GetClientActive()->removeBuff( BI_HIDDEN );
+			GetClientActive()->addBuff( BI_HIDDEN , 1075655, 1075656 );
 		}
 		return 0;
 	}
@@ -2389,8 +2389,8 @@ int CChar::Skill_Meditation( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_FAIL || stage == SKTRIG_ABORT )
 	{
-		if ( IsClient() )
-			GetClient()->removeBuff(BI_ACTIVEMEDITATION);
+		if ( IsClientActive() )
+			GetClientActive()->removeBuff(BI_ACTIVEMEDITATION);
 		return 0;
 	}
 
@@ -2413,16 +2413,16 @@ int CChar::Skill_Meditation( SKTRIG_TYPE stage )
 	{
 		if ( Stat_GetVal(STAT_INT) >= Stat_GetMaxAdjusted(STAT_INT))
 		{
-			if ( IsClient() )
-				GetClient()->removeBuff(BI_ACTIVEMEDITATION);
+			if ( IsClientActive() )
+				GetClientActive()->removeBuff(BI_ACTIVEMEDITATION);
 			SysMessageDefault( DEFMSG_MEDITATION_PEACE_2 );
 			return 0;	// only give skill credit now.
 		}
 
 		if ( m_atTaming.m_dwStrokeCount == 0 )
 		{
-			if ( IsClient() )
-				GetClient()->addBuff(BI_ACTIVEMEDITATION, 1075657, 1075658);
+			if ( IsClientActive() )
+				GetClientActive()->addBuff(BI_ACTIVEMEDITATION, 1075657, 1075658);
 			if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOSFX ) )
 				Sound( 0x0f9 );
 		}
@@ -2686,9 +2686,9 @@ int CChar::Skill_Magery( SKTRIG_TYPE stage )
 		if (tSpell == nullptr)
 			return 0;
 
-		if ( IsClient() && IsSetMagicFlags( MAGICF_PRECAST ) && !tSpell->IsSpellType( SPELLFLAG_NOPRECAST ))
+		if ( IsClientActive() && IsSetMagicFlags( MAGICF_PRECAST ) && !tSpell->IsSpellType( SPELLFLAG_NOPRECAST ))
 		{
-			this->GetClient()->Cmd_Skill_Magery( this->m_atMagery.m_iSpell, this->GetClient()->m_Targ_Prv_UID.ObjFind() );
+			this->GetClientActive()->Cmd_Skill_Magery( this->m_atMagery.m_iSpell, this->GetClientActive()->m_Targ_Prv_UID.ObjFind() );
 			return -SKTRIG_QTY;		// don't increase skill at this point. The client should select a target first.
 		}
 		else
@@ -2891,7 +2891,7 @@ int CChar::Skill_Information( SKTRIG_TYPE stage )
 	// Difficulty should depend on the target item !!!??
 	// m_Act_UID = target.
 
-	if ( ! IsClient())	// purely informational
+	if ( ! IsClientActive())	// purely informational
 		return -SKTRIG_QTY;
 
 	if ( stage == SKTRIG_FAIL || stage == SKTRIG_STROKE )
@@ -2900,9 +2900,9 @@ int CChar::Skill_Information( SKTRIG_TYPE stage )
 	SKILL_TYPE skill = Skill_GetActive();
 	int iSkillLevel = Skill_GetAdjusted(skill);
 	if ( stage == SKTRIG_START )
-		return GetClient()->OnSkill_Info( skill, m_Act_UID, iSkillLevel, true );	// How difficult? 1-1000
+		return GetClientActive()->OnSkill_Info( skill, m_Act_UID, iSkillLevel, true );	// How difficult? 1-1000
 	if ( stage == SKTRIG_SUCCESS )
-		return GetClient()->OnSkill_Info( skill, m_Act_UID, iSkillLevel, false );
+		return GetClientActive()->OnSkill_Info( skill, m_Act_UID, iSkillLevel, false );
 
 	ASSERT(0);
 	return -SKTRIG_QTY;
@@ -3787,7 +3787,7 @@ int CChar::Skill_Snooping(SKTRIG_TYPE stage)
 
 	if (stage == SKTRIG_SUCCESS)
 	{
-		if (IsClient())
+		if (IsClientActive())
 			m_pClient->addContainerSetup(pCont);	// open the container
 	}
 	return 0;

@@ -415,8 +415,8 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 
 		case CPC_LIGHT:
 			m_LocalLight = s.GetArgBVal();
-			if (pChar->IsClient())
-				pChar->GetClient()->addLight();
+			if (pChar->IsClientActive())
+				pChar->GetClientActive()->addLight();
 			break;
 
         case CPC_SPEECHCOLOR:
@@ -436,8 +436,8 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 			return true;
 		case CPC_KRTOOLBARSTATUS:
 			m_bKrToolbarEnabled = ( s.GetArgVal() != 0 );
-			if ( pChar->IsClient() )
-				pChar->GetClient()->addKRToolbar( m_bKrToolbarEnabled );
+			if ( pChar->IsClientActive() )
+				pChar->GetClientActive()->addKRToolbar( m_bKrToolbarEnabled );
 			return true;
 		case CPC_LASTUSED:
 			m_timeLastUsed = s.GetArgLLVal() * MSECS_PER_SEC;
@@ -463,8 +463,8 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 				if ( (bState < SKILLLOCK_UP) || (bState > SKILLLOCK_LOCK) )
 					return false;
 				Skill_SetLock(skill, (SKILLLOCK_TYPE)bState);
-				if ( pChar->IsClient() )
-					pChar->GetClient()->addSkillWindow(skill);
+				if ( pChar->IsClientActive() )
+					pChar->GetClientActive()->addSkillWindow(skill);
 			} return true;
 		case CPC_SPEEDMODE:
 			{
@@ -480,8 +480,8 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 				if ( (bState < SKILLLOCK_UP) || (bState > SKILLLOCK_LOCK) )
 					return false;
 				Stat_SetLock(stat, (SKILLLOCK_TYPE)bState );
-				if ( pChar->IsClient() )
-					pChar->GetClient()->addStatusWindow(pChar);
+				if ( pChar->IsClientActive() )
+					pChar->GetClientActive()->addStatusWindow(pChar);
 			} return true;
 
 		default:
@@ -632,7 +632,7 @@ bool CChar::Player_OnVerb( CScript &s, CTextConsole * pSrc )
 	switch ( cpVerb )
 	{
 		case CPV_KICK: // "KICK" = kick and block the account
-			return (IsClient() && GetClient()->addKick(pSrc));
+			return (IsClientActive() && GetClientActive()->addKick(pSrc));
 
 		case CPV_PASSWORD:	// "PASSWORD"
 		{

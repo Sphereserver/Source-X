@@ -50,7 +50,7 @@ void CChatChannel::WhoIs(lpctstr pszBy, lpctstr pszMember)
     ADDTOCALLSTACK("CChatChannel::WhoIs");
     CChatChanMember * pBy = FindMember(pszBy);
     CChatChanMember * pMember = FindMember(pszMember);
-    CChar * pChar = pMember? pMember->GetClient()->GetChar() : nullptr;
+    CChar * pChar = pMember? pMember->GetClientActive()->GetChar() : nullptr;
     if (!pMember||!pChar)
     {
         pBy->SendChatMsg(CHATMSG_NoPlayer, pszMember);
@@ -184,7 +184,7 @@ void CChatChannel::RemoveMember(CChatChanMember * pMember)
     for ( size_t i = 0; i < m_Members.size(); )
     {
         // Tell the other clients in this channel (if any) you are leaving (including yourself)
-        CClient * pClient = m_Members[i]->GetClient();
+        CClient * pClient = m_Members[i]->GetClientActive();
 
         if ( pClient == nullptr )		//	auto-remove offline clients
         {
@@ -402,7 +402,7 @@ void CChatChannel::ChangePassword(CChatChanMember * pByMember, lpctstr pszPasswo
     ADDTOCALLSTACK("CChatChannel::ChangePassword");
     if (!IsModerator(pByMember->GetChatName()))
     {
-        pByMember->GetClient()->addChatSystemMessage(CHATMSG_MustHaveOps);
+        pByMember->GetClientActive()->addChatSystemMessage(CHATMSG_MustHaveOps);
     }
     else
     {

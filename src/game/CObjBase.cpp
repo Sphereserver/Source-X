@@ -427,9 +427,9 @@ void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSour
         if (IsChar())
         {
             const CChar *pChar = static_cast<const CChar *>(this);
-            if (pChar->IsClient())
+            if (pChar->IsClientActive())
             {
-                pChar->GetClient()->addEffect(motion, id, pChar, nullptr);
+                pChar->GetClientActive()->addEffect(motion, id, pChar, nullptr);
             }
         }
         return;
@@ -462,9 +462,9 @@ void CObjBase::EffectLocation(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMa
         if (IsChar())
         {
             const CChar *pChar = static_cast<const CChar *>(this);
-            if (pChar->IsClient())
+            if (pChar->IsClientActive())
             {
-                pChar->GetClient()->addEffect(motion, id, nullptr, nullptr);
+                pChar->GetClientActive()->addEffect(motion, id, nullptr, nullptr);
             }
         }
         return;
@@ -1028,7 +1028,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 				if ( !pChar )
 					sVal.FormatVal( 0 );
 				else
-					sVal.FormatSTVal( pChar->IsClient() ? (pChar->GetClient()->m_TagDefs.GetCount()) : 0 );
+					sVal.FormatSTVal( pChar->IsClientActive() ? (pChar->GetClientActive()->m_TagDefs.GetCount()) : 0 );
 			}
 			break;
 		case OC_TEXTF:
@@ -1071,7 +1071,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 					SKIP_SEPARATORS( ptcKey );
 					GETNONWHITESPACE( ptcKey );
 
-					CClient * pThisClient = pSrc->GetChar() ? ( pSrc->GetChar()->IsClient() ? pSrc->GetChar()->GetClient() : nullptr ) : nullptr;
+					CClient * pThisClient = pSrc->GetChar() ? ( pSrc->GetChar()->IsClientActive() ? pSrc->GetChar()->GetClientActive() : nullptr ) : nullptr;
 					sVal.FormatVal(0);
 
 					if ( pThisClient )
@@ -1294,7 +1294,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 				SKIP_SEPARATORS( ptcKey );
 				GETNONWHITESPACE( ptcKey );
 				CChar * pCharToCheck = dynamic_cast<CChar*>(this);
-				CClient * pClientToCheck = (pCharToCheck && pCharToCheck->IsClient()) ? (pCharToCheck->GetClient()) : nullptr;
+				CClient * pClientToCheck = (pCharToCheck && pCharToCheck->IsClientActive()) ? (pCharToCheck->GetClientActive()) : nullptr;
 
 				if ( pClientToCheck )
 				{
@@ -1974,7 +1974,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
     }
 
 	CChar * pCharSrc = pSrc->GetChar();
-	CClient * pClientSrc = (pCharSrc && pCharSrc->IsClient()) ? (pCharSrc->GetClient()) : nullptr ;
+	CClient * pClientSrc = (pCharSrc && pCharSrc->IsClientActive()) ? (pCharSrc->GetClientActive()) : nullptr ;
 
 	switch (index)
 	{
@@ -2775,7 +2775,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			if (!pCharSrc)
 				return false;
 
-			if (!pCharSrc->IsClient())
+			if (!pCharSrc->IsClientActive())
 				return false;
 
 			if (s.HasArgs())
@@ -2783,10 +2783,10 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				CUID uid = s.GetArgUVal();
 				if ((!uid.ObjFind()) || (!this->IsChar()))
 					return false;
-				pCharSrc->GetClient()->Event_SingleClick(uid);
+				pCharSrc->GetClientActive()->Event_SingleClick(uid);
 			}
 			else
-				pCharSrc->GetClient()->Event_SingleClick(this->GetUID());
+				pCharSrc->GetClientActive()->Event_SingleClick(this->GetUID());
             break;
 
 		case OV_DCLICK:

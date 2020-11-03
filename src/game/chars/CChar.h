@@ -82,7 +82,7 @@ private:
 
 	ushort m_Skill[SKILL_QTY];	// List of skills ( skill * 10 )
 
-	CClient * m_pClient;	// is the char a logged in m_pPlayer ?
+	CClient * m_pClient;	// is the char a currently logged in m_pPlayer ?
 
 public:
 	struct LastAttackers
@@ -468,8 +468,9 @@ public:
 	// Client Player specific stuff. -------------------------
 	void ClientAttach( CClient * pClient );
 	void ClientDetach();
-	bool IsClient() const;
-	CClient * GetClient() const;
+	bool IsClientType() const noexcept;
+	bool IsClientActive() const noexcept;
+	CClient * GetClientActive() const noexcept;
 
 	bool SetPrivLevel( CTextConsole * pSrc, lpctstr pszFlags );
 	bool CanDisturb( const CChar * pChar ) const;

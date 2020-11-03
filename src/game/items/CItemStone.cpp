@@ -1416,7 +1416,7 @@ void CItemStone::AnnounceWar( const CItemStone * pEnemyStone, bool fWeDeclare, b
 		CChar * pChar = pMember->GetLinkUID().CharFind();
 		if ( pChar == nullptr )
 			continue;
-		if ( ! pChar->IsClient())
+		if ( ! pChar->IsClientActive())
 			continue;
 		pChar->SysMessage( pszTemp );
 	}

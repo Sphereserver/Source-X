@@ -1079,7 +1079,7 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
         const CItemMulti* pMultiRegion = static_cast<const CItemMulti*>(pRegionHouse->GetResourceID().ItemFindFromResource());
         // If it's a public house
         {
-            const bool fShowPublicHouseContent = IsClient() ? GetClient()->_fShowPublicHouseContent : false;
+            const bool fShowPublicHouseContent = IsClientActive() ? GetClientActive()->_fShowPublicHouseContent : false;
             if (!fShowPublicHouseContent)
                 return false;
         }
@@ -1128,9 +1128,9 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
                 }
 
 				// A client cannot see the contents of someone else's container, unless they have opened it first
-				if (!fSkip && IsClient() && pObjCont->IsItem() && pObjCont->GetTopLevelObj() != this)
+				if (!fSkip && IsClientActive() && pObjCont->IsItem() && pObjCont->GetTopLevelObj() != this)
 				{
-					const CClient *pClient = GetClient();
+					const CClient *pClient = GetClientActive();
 					if (pClient && (pClient->m_openedContainers.find(pObjCont->GetUID().GetPrivateUID()) == pClient->m_openedContainers.end()))
 					{
 					/*

@@ -2288,5 +2288,8 @@ Must have event, even if it's empty, since it's applied by the source to generat
 25-09-2020, Jhobean
 - Modified: GM can now prompt context menu from NPC and command them. (Ex: Kill follow, guard, etc)
 
-21-10-2020, Jhobean
+02-11-2020, Nolok
+- Fixed: Sector client number does not decrease if the char lingers before being actually detatched. This also caused sectors never going to sleep after a player logged out inside them (Issue #524).
+
+03-11-2020, Jhobean
 - Added: Setting CANSEESAMEPLEVEL add to .ini. Allow GM to change how they see each other when they are invisible
