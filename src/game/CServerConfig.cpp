@@ -198,6 +198,7 @@ CServerConfig::CServerConfig()
 	m_fPayFromPackOnly	= false;	// pay vendors from packs only
 
 	m_iOverSkillMultiply	= 2;
+	m_iCanSeeSamePLevel		= 0;
 	m_fSuppressCapitals		= false;
 
 	m_iAdvancedLos		= 0;
@@ -428,6 +429,7 @@ enum RC_TYPE
 	RC_BANKMAXITEMS,
 	RC_BANKMAXWEIGHT,
 	RC_BUILD,
+	RC_CANSEESAMEPLEVEL,		// m_iCanSeeSamePLevel
 	RC_CANUNDRESSPETS,			// m_fCanUndressPets
 	RC_CHARTAGS,				// m_fCharTags
 	RC_CLIENTLINGER,
@@ -677,6 +679,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "BANKMAXITEMS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iBankIMax),			0 }},
 	{ "BANKMAXWEIGHT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iBankWMax),			0 }},
 	{ "BUILD",					{ ELEM_VOID,	0,											    0 }},
+	{ "CANSEESAMEPLEVEL",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCanSeeSamePLevel),	0 }},
 	{ "CANUNDRESSPETS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fCanUndressPets),		0 }},
 	{ "CHARTAGS",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fCharTags),			0 }},
 	{ "CLIENTLINGER",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientLingerTime),	0 }},

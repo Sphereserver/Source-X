@@ -2292,6 +2292,8 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: Sector client number does not decrease if the char lingers before being actually detatched. This also caused sectors never going to sleep after a player logged out inside them (Issue #524).
 
 03-11-2020, Jhobean
-[sphereCrypt.ini]: Added crypt key for classic clients 7.0.86 ~ 7.0.87 and enhanced clients 4.0.80 ~ 4.0.87
+- Added: Setting CANSEESAMEPLEVEL add to .ini. Allow GM to change how they see each other when they are invisible
 - Fixed: The ini setting FlipDroppedItems now work correctly (Issue  #514)
 - Fixed: When ini setting EF_ItemStacking is active, the first item of the stack can be flip on drop (Issue  #514)
+[sphereCrypt.ini]: Added crypt key for classic clients 7.0.86 ~ 7.0.87 and enhanced clients 4.0.80 ~ 4.0.87
+
