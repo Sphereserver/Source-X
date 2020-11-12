@@ -2110,6 +2110,17 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 			SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_TAMING_TAMED ), pChar->GetName());
 			return -SKTRIG_QTY;
 		}
+
+		if (IsSetOF(OF_PetSlots))
+		{
+			short iFollowerSlots = (short)pChar->GetDefNum("FOLLOWERSLOTS", true);
+			if (!FollowersUpdate(pChar, maximum(1, iFollowerSlots), true))
+			{
+				SysMessageDefault(DEFMSG_PETSLOTS_TRY_TAMING);
+				return -SKTRIG_QTY;
+			}
+		}
+		
 	}
 
 	if ( stage == SKTRIG_START )

@@ -2297,3 +2297,5 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: When ini setting EF_ItemStacking is active, the first item of the stack can be flip on drop (Issue  #514)
 [sphereCrypt.ini]: Added crypt key for classic clients 7.0.86 ~ 7.0.87 and enhanced clients 4.0.80 ~ 4.0.87
 
+11-11-2020, Jhobean
+- Fixed: Animal Taming skill not checking follower slots limit when OF_PetSlots is enabled. (Issue  #534)
