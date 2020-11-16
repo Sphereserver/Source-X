@@ -238,7 +238,7 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 			return true;
 		case CPC_LIGHT:
 			sVal.FormatHex(m_LocalLight);
-			break;
+			return true;
 		case CPC_PFLAG:
 			sVal.FormatVal(m_pflag);
 			return true;
