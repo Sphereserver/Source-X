@@ -1385,7 +1385,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 			amount = pItem->GetAmount();
 		}
 
-		dword dwPrice = pItemSell->GetVendorPrice(iConvertFactor) * amount;
+		dword dwPrice = pItem->GetVendorPrice(iConvertFactor) * amount;
 
 		if (( IsTrigUsed(TRIGGER_SELL) ) || ( IsTrigUsed(TRIGGER_ITEMSELL) ))
 		{
