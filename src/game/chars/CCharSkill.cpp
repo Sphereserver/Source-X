@@ -2695,7 +2695,7 @@ int CChar::Skill_Magery( SKTRIG_TYPE stage )
 	{
 		const CSpellDef * tSpell = g_Cfg.GetSpellDef( m_atMagery.m_iSpell );
 		if (tSpell == nullptr)
-			return 0;
+			return -SKTRIG_ABORT; //Before we returned 0, thus allowing the skill to continue its execution and possible gaining a skill increase when the spell ID was invalid.
 
 		if ( IsClientActive() && IsSetMagicFlags( MAGICF_PRECAST ) && !tSpell->IsSpellType( SPELLFLAG_NOPRECAST ))
 		{
