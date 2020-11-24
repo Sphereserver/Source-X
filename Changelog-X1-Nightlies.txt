@@ -2300,6 +2300,11 @@ Must have event, even if it's empty, since it's applied by the source to generat
 11-11-2020, Jhobean
 - Fixed: Animal Taming skill not checking follower slots limit when OF_PetSlots is enabled. (Issue  #534)
 
+20-11-2020, Drk84
+- Fixed: Dismounting from a NPC cleared the actarg1 value of the rider instead of the NPC mount. (Issue #527)
+		 This means that when unmounting and the character is using a skill that makes use of the Actarg1 value, such  as casting a spell, the skill will continue its execution normally. 
+- Fixed: Invalid spell ID didn't abort the skill execution when the magic skill succeeds (this is related to the issue above), causing a possible skill gain.
+
 24-11-2020, Jhobean
 - Fixed: When selling an item, gold show on dialog and give to player was not the same in some situation. (Issue  #456)
 - Modified: When selling an item to a NPC. Price will no longer be considere. There was a possibility of cheating and fix this price with their vendor.

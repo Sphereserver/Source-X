@@ -2783,7 +2783,14 @@ bool CChar::Horse_UnMount()
 	{
 		Use_Figurine(pMountItem, false);
 		pMountItem->Delete();
-        m_atRidden.m_uidFigurine.InitUID();
+		/*
+		Actarg1 holds the UID of the mount item when the NPC is being ridden and as we can see in the Horse_GetMountItem method
+		this actarg1 value is stored in the NPC not in the player.
+		The commented  line below cleared the actarg1 of the rider instead of the NPC mount.
+		*/
+        //m_atRidden.m_uidFigurine.InitUID(); 
+		if (pPet && !pPet->IsDeleted())
+			pPet->m_atRidden.m_uidFigurine.InitUID(); //This clears the actarg1 of the NPC mount instead of the rider.
 	}
 	return true;
 }
