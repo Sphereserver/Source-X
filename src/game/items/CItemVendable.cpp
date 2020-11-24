@@ -163,7 +163,7 @@ dword CItemVendable::GetVendorPrice( int iConvertFactor )
 {
 	ADDTOCALLSTACK("CItemVendable::GetVendorPrice");
 	// Player is buying/selling from a vendor.
-	// ASSUME this item is on the vendor !
+	// Item is on the vendor or on the player backpack depending  what we doing
 	// Consider: (if not on a player vendor)
 	//  Quality of the item.
 	//  rareity of the item.
@@ -175,8 +175,9 @@ dword CItemVendable::GetVendorPrice( int iConvertFactor )
 	//    0 = base price
 	// +100 = increase price by 100% (vendor selling to player?)
 
-	llong llPrice = m_price;
-	if ( llPrice <= 0 )		// set on player vendor.
+	llong llPrice = m_price; // Price is set on player vendor or define on script on the vendor template
+
+	if ( llPrice <= 0 )	// No price set, we use the value of item.
 	{
 		CItemBase *pItemDef;
 		if ( IsType(IT_DEED) )
@@ -189,7 +190,7 @@ dword CItemVendable::GetVendorPrice( int iConvertFactor )
 		else
 			pItemDef = Item_GetDef();
 
-		llPrice = pItemDef->GetMakeValue(GetQuality());
+		llPrice = pItemDef->GetMakeValue(GetQuality()); //If value is a range(ex:10,20), value change depending quality 
 	}
 
 	llPrice += IMulDivLL(llPrice, maximum(iConvertFactor, -100), 100);

@@ -1380,12 +1380,24 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 		word amount = items[i].m_vcAmount;
 
 		// Now how much did i say i wanted to sell ?
+		dword dwPrice = 0;
 		if ( pItem->GetAmount() < amount )	// Selling more than i have ?
 		{
 			amount = pItem->GetAmount();
 		}
 
-		dword dwPrice = pItemSell->GetVendorPrice(iConvertFactor) * amount;
+		// If price is define on the script and this NPC buy this item at a specific price, we use this price in priority
+		// Else, we calculate the value of the item in the player's backpack
+		if (pItemSell->GetBasePrice())
+		{
+			//Get the price on NPC template
+			dwPrice = pItemSell->GetVendorPrice(iConvertFactor) * amount; //Check the value of item on NPC template or itemdef
+		}
+		else
+		{
+			//Get the price/Value of the real item in the backpack
+			dwPrice = pItem->GetVendorPrice(iConvertFactor) * amount; //Check the value of the item on the player
+		}
 
 		if (( IsTrigUsed(TRIGGER_SELL) ) || ( IsTrigUsed(TRIGGER_ITEMSELL) ))
 		{

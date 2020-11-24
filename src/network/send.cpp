@@ -3036,8 +3036,23 @@ uint PacketVendorSellList::fillSellList(CClient* target, const CItemContainer* c
 						writeInt16((word)vendItem->GetDispID());
 						writeInt16((word)hue);
 						writeInt16(vendItem->GetAmount());
-                        uint price = vendItem->GetVendorPrice(iConvertFactor);
-						writeInt16((word)( (price > UINT16_MAX) ? UINT16_MAX : price ));
+
+						uint price = 0;
+
+						// If price is define on the script and this NPC buy this item at a specific price, we use this price in priority
+						// Else, we calculate the value of the item in the player's backpack
+						if (vendSell->GetBasePrice())
+						{
+							//Get the price on NPC template
+							price = vendSell->GetVendorPrice(iConvertFactor); 
+						}
+						else	
+						{
+							//Get the price/Value of the real item in the backpack
+							price = vendItem->GetVendorPrice(iConvertFactor); 
+						}
+
+						writeInt16((word)((price > UINT16_MAX) ? UINT16_MAX : price));
 						writeInt16((word)len);
 						writeStringFixedASCII(name, len);
 
