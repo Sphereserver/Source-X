@@ -1386,17 +1386,17 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 			amount = pItem->GetAmount();
 		}
 
-		// If price is define on the script and this NPC buy this item at a specific price, we use this price in priority
+		// If OVERRIDE.VALUE is define on the script and this NPC buy this item at a specific price, we use this price in priority
 		// Else, we calculate the value of the item in the player's backpack
-		if (pItemSell->GetBasePrice())
+		if (pItemSell->GetKey("OVERRIDE.VALUE", true))
 		{
 			//Get the price on NPC template
-			dwPrice = pItemSell->GetVendorPrice(iConvertFactor) * amount; //Check the value of item on NPC template or itemdef
+			dwPrice = pItemSell->GetVendorPrice(iConvertFactor,1) * amount; //Check the value of item on NPC template or itemdef
 		}
 		else
 		{
 			//Get the price/Value of the real item in the backpack
-			dwPrice = pItem->GetVendorPrice(iConvertFactor) * amount; //Check the value of the item on the player
+			dwPrice = pItem->GetVendorPrice(iConvertFactor,1) * amount; //Check the value of the item on the player
 		}
 
 		if (( IsTrigUsed(TRIGGER_SELL) ) || ( IsTrigUsed(TRIGGER_ITEMSELL) ))

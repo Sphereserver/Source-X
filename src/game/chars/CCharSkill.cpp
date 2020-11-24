@@ -820,7 +820,7 @@ bool CChar::Skill_MakeItem_Success()
 	{
 		int exp = 0;
 		if ( pItemVend )
-			exp = pItemVend->GetVendorPrice(0) / 100;	// calculate cost for buying this item if it is vendable (gain = +1 exp each 100gp)
+			exp = pItemVend->GetVendorPrice(0,0) / 100;	// calculate cost for buying this item if it is vendable (gain = +1 exp each 100gp)
 		if ( exp )
 			ChangeExperience(exp);
 	}

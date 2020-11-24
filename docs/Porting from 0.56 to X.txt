@@ -60,6 +60,7 @@ Compatibility changes from 0.56d to X1
 - [sphere_defs_types_hardcoded.scp] Added: t_multi_addon=201.
 - [sphere_msgs.scp] Added: PROVOCATION_KIND.
 - [sphere_def.scp] Added: DEFNAMEs house_types, DEFNAMEs house_transfer_types, CAN_I_BLOCKLOS_HEIGHT.
+- Added: tag.override.value. On your vendor template you should replace your price=xxx by tag.override.value=xxx. Will be use to determine the value a NPC buy an item.
 
 Suggestions
 ------------------------

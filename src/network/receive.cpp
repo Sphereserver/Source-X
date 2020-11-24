@@ -775,7 +775,7 @@ bool PacketVendorBuyReq::onReceive(CNetState* net)
 			else if (!items[index].m_serial.IsValidUID())
 			{
 				items[index].m_serial = serial;
-				items[index].m_price = item->GetVendorPrice(iConvertFactor);
+				items[index].m_price = item->GetVendorPrice(iConvertFactor,0);
 				break;
 			}
 		}
