@@ -16,7 +16,7 @@ Changed starting from 0.56c
 - The MOUNT keyword now needs to be called on the rider and required as argument the UID of the npc to be ridden.
 - Added: new .ADD dialog to replace old add menu. (old menu still available in the scripts by removing d_add dialog, but it is full of errors).
 - memory_war_targ is no longer used for npc combats (in the source) but is still present for scripting backwards compat. Sphere now uses the 'Attacker' system.
-- Spellbooks now store spell offset / max spells using TDATA3/TDATA4 instead MOREZ/MOREX.
+- Spellbooks now store spell offset / max spells using TDATA3↨/TDATA4 instead MOREZ/MOREX.
 - [sphere_spells.scp] Added LAYER=layer_spell_* to all magery, necromancy, spellweaving, chivalry and mysticism spells;
   ie LAYER=layer_spell_stats for s_bless,s_cunning, etc. Mysticism Enchant spell: Layer_spell_enchant.
 - [sphere_defs.scp] Removed 'brain_beggar', 'brain_thief', 'brain_undead' and 'brain_vendor_offduty'.
@@ -60,7 +60,9 @@ Compatibility changes from 0.56d to X1
 - [sphere_defs_types_hardcoded.scp] Added: t_multi_addon=201.
 - [sphere_msgs.scp] Added: PROVOCATION_KIND.
 - [sphere_def.scp] Added: DEFNAMEs house_types, DEFNAMEs house_transfer_types, CAN_I_BLOCKLOS_HEIGHT.
-- Added: tag.override.value. On your vendor template you should replace your price=xxx by tag.override.value=xxx. Will be use to determine the value a NPC buy an item.
+- price=xxx will not work anymore to fix a price on an item. Price will be use only when a player vendor sell an item. If an item have a price value, no NPC will buy it at this price.
+  Value is READ only, if you want change the value of an item, you should use the new tag.override.value. When selling your item to NPC, it will look this value first.
+  In your scripts, on your vendor template BUY= or SELL= if you want to set a different value of the itemdef you must use tag.override.value=xxx instead of old syntax price=xxx.
 
 Suggestions
 ------------------------

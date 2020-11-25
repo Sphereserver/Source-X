@@ -181,18 +181,19 @@ dword CItemVendable::GetVendorPrice( int iConvertFactor , bool forselling )
 	CItemBase* pItemDef;
 	llong llPrice = 0;
 
-	if (forselling) //When selling an item, you never check the price
-	{
-		const CVarDefCont* pVarDef = GetKey("OVERRIDE.VALUE", true);
-		if (pVarDef)
-			llPrice= (llong)pVarDef->GetValNum();
-	}
+	//Check if there is an override value first
+	const CVarDefCont* pVarDef = GetKey("OVERRIDE.VALUE", true);
+	if (pVarDef)
+		llPrice = (llong)pVarDef->GetValNum();
 	else
 	{
-		llPrice = m_price; // Price is set on player vendor or define on script on the vendor template
+		if (!forselling) //When selling an item, you never check the price to avoid exploit
+		{
+			llPrice = m_price; // Price is set on player vendor
+		}
 	}
 
-	if ( llPrice <= 0 )	// No price set, we use the value of item.
+	if ( llPrice <= 0 )	// No price/overrride.value set, we use the value of item.
 	{
 		
 		if ( IsType(IT_DEED) )
