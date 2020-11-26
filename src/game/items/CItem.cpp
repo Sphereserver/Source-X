@@ -1900,6 +1900,15 @@ bool CItem::SetName( lpctstr pszName )
 	return SetNamePool( pszName );
 }
 
+HUE_TYPE CItem::GetHue() const
+{
+
+	if (IsAttr(ATTR_INVIS))
+		return(05);
+
+	return(m_wHue);
+}
+
 int CItem::GetWeight(word amount) const
 {
 	int iWeight = m_weight * (amount ? amount : GetAmount());
