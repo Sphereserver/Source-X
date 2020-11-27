@@ -997,6 +997,10 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 		wHue = HUE_STONE;
 	else if ( pChar->IsStatFlag(STATF_INSUBSTANTIAL))
 		wHue = g_Cfg.m_iColorInvis;
+	else if (pChar->IsStatFlag(STATF_HIDDEN))
+		wHue = g_Cfg.m_iColorHidden;
+	else if (pChar->IsStatFlag(STATF_INVISIBLE))
+		wHue = g_Cfg.m_iColorInvisSpell;
 	else
 	{
 		if ( pItemDef && (uiResDisp < pItemDef->GetResLevel() ) )
