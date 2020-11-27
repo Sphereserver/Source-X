@@ -4185,6 +4185,7 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
         if ( IsSetOF(OF_StatAllowValOverMax) )		catresname(zOptionFlags, "StatAllowValOverMax");
         if ( IsSetOF(OF_GuardOutsideGuardedArea) )	catresname(zOptionFlags, "GuardOutsideGuardedArea");
         if ( IsSetOF(OF_OWNoDropCarriedItem) )		catresname(zOptionFlags, "OWNoDropCarriedItem");
+		if ( IsSetOF(OF_ColorInvisItem) )			catresname(zOptionFlags, "ColorInvisItem");
 
 		if ( zOptionFlags[0] != '\0' )
 		{

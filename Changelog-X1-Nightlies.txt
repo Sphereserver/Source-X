@@ -2304,3 +2304,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: Dismounting from a NPC cleared the actarg1 value of the rider instead of the NPC mount. (Issue #527)
 		 This means that when unmounting and the character is using a skill that makes use of the Actarg1 value, such  as casting a spell, the skill will continue its execution normally. 
 - Fixed: Invalid spell ID didn't abort the skill execution when the magic skill succeeds (this is related to the issue above), causing a possible skill gain.
+
+26-11-2020, Jhobean
+- Added: OF_ColorInvisItem ini option allow to see invis item in grey color. (feature request #537)
+This will help GM to make difference of invis or not invis item. The color can be change with the ColorInvis= setting.

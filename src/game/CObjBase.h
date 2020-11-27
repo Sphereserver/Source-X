@@ -29,7 +29,7 @@ class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, pub
 
 private:
 	int64 m_timestamp;          // TimeStamp
-	HUE_TYPE m_wHue;			// Hue or skin color. (CItems must be < 0x4ff or so)
+	HUE_TYPE m_wHue;			// Hue or skin color.
 
 protected:
 	CResourceRef m_BaseRef;     // Pointer to the resource that describes this type.

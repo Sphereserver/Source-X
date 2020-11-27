@@ -58,8 +58,8 @@ public:
 	CUID GetLockDownOfMulti() const;
     void SetComponentOfMulti(const CUID& uidMulti);
     void SetLockDownOfMulti(const CUID& uidMulti);
-	HUE_TYPE m_wHue;			// (CItems must be < 0x4ff or so)
-
+	
+	HUE_TYPE m_wHue;			// (CItems hue must be < 0x4ff )
 	byte	m_speed;
 
 // Attribute flags.
@@ -587,7 +587,7 @@ public:
     byte GetRangeH() const;
 
 	/**
-  * @fn  HUE_TYPE CObjBase::GetHue() const;
+  * @fn  HUE_TYPE GetHue() const;
   *
   * @brief   Gets the hue.
   *
