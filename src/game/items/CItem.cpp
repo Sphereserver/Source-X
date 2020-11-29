@@ -134,7 +134,6 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEM
 	m_containedGridIndex = 0;
 	m_dwDispIndex = ITEMID_NOTHING;
 
-	m_wHue = HUE_DEFAULT;
 
 	m_itNormal.m_more1 = 0;
 	m_itNormal.m_more2 = 0;
@@ -1904,18 +1903,14 @@ bool CItem::SetName( lpctstr pszName )
 
 HUE_TYPE CItem::GetHue() const
 {
-	if (IsSetOF(OF_ColorInvisItem)) //Setting to permit GM to see invis item on particular color
+	if (g_Cfg.m_iColorInvisItem) //If setting ask a specific color
 	{
 		if (IsAttr(ATTR_INVIS))
-		{
-			if (g_Cfg.m_iColorInvis)
-				return(g_Cfg.m_iColorInvis);
-			else
-				return(1000); //Color Ghost's Gray
-		}
+			return(g_Cfg.m_iColorInvisItem);
+
 	}
 	
-	return(m_wHue);
+	return(CObjBase::m_wHue);
 }
 
 int CItem::GetWeight(word amount) const

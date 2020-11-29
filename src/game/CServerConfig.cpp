@@ -269,6 +269,7 @@ CServerConfig::CServerConfig()
 	m_iColorNotoInvulGameMaster = 0x0b;		// purple
 	m_iColorNotoDefault			= 0x3b2;	// grey (if not any other)
 
+	m_iColorInvisItem   = 1000;
 	m_iColorInvis		= 0;
 	m_iColorInvisSpell	= 0;
 	m_iColorHidden		= 0;
@@ -440,6 +441,7 @@ enum RC_TYPE
 	RC_CLIENTS,
 	RC_COLORHIDDEN,
 	RC_COLORINVIS,
+	RC_COLORINVISITEM,
 	RC_COLORINVISSPELL,
 	RC_COLORNOTOCRIMINAL,		// m_iColorNotoCriminal
 	RC_COLORNOTODEFAULT,		// m_iColorNotoDefault
@@ -690,6 +692,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "CLIENTS",				{ ELEM_VOID,	0,											    0 }},	// duplicate
 	{ "COLORHIDDEN",			{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorHidden),			0 }},
 	{ "COLORINVIS",				{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorInvis),			0 }},
+	{ "COLORINVISITEM",			{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorInvisItem),		0 }},
 	{ "COLORINVISSPELL",		{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorInvisSpell),		0 }},
 	{ "COLORNOTOCRIMINAL",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoCriminal),	0 }},
 	{ "COLORNOTODEFAULT",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoDefault),	0 }},
@@ -1075,6 +1078,9 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 		case RC_COLORINVIS:
 			m_iColorInvis = (HUE_TYPE)(s.GetArgVal());
+			break;
+		case RC_COLORINVISITEM:
+			m_iColorInvisItem = (HUE_TYPE)(s.GetArgVal());
 			break;
 		case RC_COLORINVISSPELL:
 			m_iColorInvisSpell = (HUE_TYPE)(s.GetArgVal());
@@ -1837,6 +1843,9 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			break;
 		case RC_COLORINVIS:
 			sVal.FormatHex( m_iColorInvis );
+			break;
+		case RC_COLORINVISITEM:
+			sVal.FormatHex( m_iColorInvisItem );
 			break;
 		case RC_COLORINVISSPELL:
 			sVal.FormatHex( m_iColorInvisSpell );
@@ -4185,7 +4194,6 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
         if ( IsSetOF(OF_StatAllowValOverMax) )		catresname(zOptionFlags, "StatAllowValOverMax");
         if ( IsSetOF(OF_GuardOutsideGuardedArea) )	catresname(zOptionFlags, "GuardOutsideGuardedArea");
         if ( IsSetOF(OF_OWNoDropCarriedItem) )		catresname(zOptionFlags, "OWNoDropCarriedItem");
-		if ( IsSetOF(OF_ColorInvisItem) )			catresname(zOptionFlags, "ColorInvisItem");
 
 		if ( zOptionFlags[0] != '\0' )
 		{

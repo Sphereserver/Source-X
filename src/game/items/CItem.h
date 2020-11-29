@@ -58,8 +58,7 @@ public:
 	CUID GetLockDownOfMulti() const;
     void SetComponentOfMulti(const CUID& uidMulti);
     void SetLockDownOfMulti(const CUID& uidMulti);
-	
-	HUE_TYPE m_wHue;			// (CItems hue must be < 0x4ff )
+
 	byte	m_speed;
 
 // Attribute flags.

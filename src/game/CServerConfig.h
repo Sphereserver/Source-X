@@ -58,8 +58,7 @@ enum OF_TYPE
     OF_NoTargTurn				= 0x0080000,    // Don't turn the player when targetting something
     OF_StatAllowValOverMax      = 0x0100000,    // Allow stats value above their maximum value (i.e. allow hits value > maxhits).
     OF_GuardOutsideGuardedArea  = 0x0200000,    // Allow guards to walk in unguarded areas, instead of being teleported back to their home point.
-    OF_OWNoDropCarriedItem      = 0x0400000,    // When overweighted, don't drop items on ground when moving them (or using BOUNCE) and checking if you can carry them.
-    OF_ColorInvisItem			= 0x0800000     // Invisible item have a hue and GM can easily know they are invis.
+    OF_OWNoDropCarriedItem      = 0x0400000     // When overweighted, don't drop items on ground when moving them (or using BOUNCE) and checking if you can carry them.
 };
 
 /**
@@ -485,6 +484,7 @@ public:
 	HUE_TYPE m_iColorNotoInvulGameMaster;// Purple
 	HUE_TYPE m_iColorNotoDefault;       // Grey
 
+    HUE_TYPE m_iColorInvisItem;	// 04001 = transparent color, 0 = default item color , 1000 = Grey color (Define how the invis item are see by GM)
 	HUE_TYPE m_iColorInvis;     // 04001 = transparent color, 0 = default
 	HUE_TYPE m_iColorInvisSpell;// 04001 = transparent color, 0 = default (This one is for s_invisibility spell, this includes the invis potion.)
 	HUE_TYPE m_iColorHidden;    // 04001 = transparent color, 0 = default
