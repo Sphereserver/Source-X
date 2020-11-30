@@ -2277,30 +2277,33 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		  If we were using a custom combat formula and thus overriding  the ACTDIFF in @HitTry, forcing a miss by setting a negative value in ACTDIFF would cause the combat to block.
 		2)When combat started, the chance to hit wasn't calculated so the first hit was always a success because ACTDIFF was set to 0.
 
-23-07-2020, Drk8
+23-07-2020, Drk84
 - Fixed: Adding the Blade Spirits spell to a spellbook added the Clumsy spell. (Issue #496)
 		 Warning: existing Spellbooks with the Blade Spirits spell added by scroll or addspell have the more1 value corrupted and so need they must be replaced.
 		 Only Magery Spellbooks are affected because other spellsbooks doesn't have more than 32 spells (Mastery Spells are not implemented).
 		 
 29-08-2020, Drk84
-- Fixed: Cant create areas in the new maps (ilshenar, ter mur, etc) (Issue  #499)
+- Fixed: Cant create areas in the new maps (ilshenar, ter mur, etc) (Issue  #499).
 
 25-09-2020, Jhobean
-- Modified: GM can now prompt context menu from NPC and command them. (Ex: Kill follow, guard, etc)
+- Modified: GM can now prompt context menu from NPC and command them. (Ex: Kill follow, guard, etc).
 
 02-11-2020, Nolok
 - Fixed: Sector client number does not decrease if the char lingers before being actually detatched. This also caused sectors never going to sleep after a player logged out inside them (Issue #524).
 
 03-11-2020, Jhobean
-- Added: Setting CANSEESAMEPLEVEL add to .ini. Allow GM to change how they see each other when they are invisible
-- Fixed: The ini setting FlipDroppedItems now work correctly (Issue  #514)
-- Fixed: When ini setting EF_ItemStacking is active, the first item of the stack can be flip on drop (Issue  #514)
-[sphereCrypt.ini]: Added crypt key for classic clients 7.0.86 ~ 7.0.87 and enhanced clients 4.0.80 ~ 4.0.87
+- Added: Setting CANSEESAMEPLEVEL add to .ini. Allow GM to change how they see each other when they are invisible.
+- Fixed: The ini setting FlipDroppedItems now work correctly (Issue  #514).
+- Fixed: When ini setting EF_ItemStacking is active, the first item of the stack can be flip on drop (Issue #514).
+[sphereCrypt.ini]: Added crypt key for classic clients 7.0.86 ~ 7.0.87 and enhanced clients 4.0.80 ~ 4.0.87.
 
 11-11-2020, Jhobean
-- Fixed: Animal Taming skill not checking follower slots limit when OF_PetSlots is enabled. (Issue  #534)
+- Fixed: Animal Taming skill not checking follower slots limit when OF_PetSlots is enabled (Issue  #534).
 
 20-11-2020, Drk84
 - Fixed: Dismounting from a NPC cleared the actarg1 value of the rider instead of the NPC mount. (Issue #527)
 		 This means that when unmounting and the character is using a skill that makes use of the Actarg1 value, such  as casting a spell, the skill will continue its execution normally. 
 - Fixed: Invalid spell ID didn't abort the skill execution when the magic skill succeeds (this is related to the issue above), causing a possible skill gain.
+
+01-12-2020, Nolok
+- Fixed: World Object timers and SERV.TIME didn't freeze after a long process pausing the World activity, like world save or resync (Issue #538).
