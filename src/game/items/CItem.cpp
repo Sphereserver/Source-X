@@ -134,6 +134,7 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEM
 	m_containedGridIndex = 0;
 	m_dwDispIndex = ITEMID_NOTHING;
 
+
 	m_itNormal.m_more1 = 0;
 	m_itNormal.m_more2 = 0;
 	m_itNormal.m_morep.ZeroPoint();
@@ -1898,6 +1899,17 @@ bool CItem::SetName( lpctstr pszName )
 			pszName = "";
 	}
 	return SetNamePool( pszName );
+}
+
+HUE_TYPE CItem::GetHue() const  //Override of CObjBase::GetHue()
+{
+	if (g_Cfg.m_iColorInvisItem) //If setting ask a specific color
+	{
+		if (IsAttr(ATTR_INVIS))
+			return(g_Cfg.m_iColorInvisItem);
+	}
+	
+	return(CObjBase::m_wHue);
 }
 
 int CItem::GetWeight(word amount) const
