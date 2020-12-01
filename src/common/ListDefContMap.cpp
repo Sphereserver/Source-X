@@ -760,14 +760,19 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 	CListDefCont* pListBase = GetKey(ppCmds[0]);
 	lpctstr ptcArg = s.GetArgRaw();
 
-	if ( ppCmds[1] && (*(ppCmds[1])) ) // LIST.<list_name>.<something...>
+	// LIST.<list_name>
+	if ( ppCmds[1] && *(ppCmds[1]) )
 	{
 		Str_Parse(ppCmds[1], &(ppCmds[2]), "." );
 
 		if ( !IsSimpleNumberString(ppCmds[1]) )
 		{
+			// LIST.<list_name>.<operation>
+			// Am i calling a valid operation?
+
 			if ( !strnicmp(ppCmds[1], "clear", 5) )
 			{
+				// Clears LIST.xxx
 				if ( pListBase )
 					DeleteKey(ppCmds[0]);
 
@@ -775,6 +780,7 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 			}
 			else if ( !strnicmp(ppCmds[1], "add", 3) )
 			{
+				// Adds <args> as a new element in LIST.xxx
 				if ( !ptcArg || !(*ptcArg) )
 					return false;
 
@@ -794,12 +800,14 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 				if ( !ptcArg || !(*ptcArg) )
 					return false;
 
-				if (( pListBase ) && ( !strnicmp(ppCmds[1], "set", 3) ))
+				if ( pListBase && ( !strnicmp(ppCmds[1], "set", 3) ))
 				{
+					// Set: Clears the list and sets each <args> as a new element in LIST.xxx
 					DeleteKey(ppCmds[0]);
 					pListBase = nullptr;
 				}
 				
+				// Append: Sets each <args> as a new element in LIST.xxx
 				if ( !pListBase )
 				{
 					pListBase = new CListDefCont(ppCmds[0]);
@@ -816,6 +824,7 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 						pListBase->AddElementStr(ppCmd[0]);
 					ppCmd[0] = ppCmd[1];
 				}
+
 				//insert last element
 				if ( IsSimpleNumberString(ppCmd[0]) )
 					return pListBase->AddElementNum(Exp_Get64Val(ppCmd[0]));
@@ -824,6 +833,7 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 			}
 			else if ( !strnicmp(ppCmds[1], "sort", 4) )
 			{
+				// Re-orders LIST.xxx according to <args>. (possible values are: no args , i , asc , iasc , desc , idesc) 
 				if ( !pListBase )
 					return false;
 
@@ -848,14 +858,21 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 		}
 		else if ( pListBase )
 		{
+			// LIST.<list_name>.<element index (zero-based)>...
 			size_t nIndex = Exp_GetVal(ppCmds[1]);
 
 			if ( ppCmds[2] && *(ppCmds[2]) )
 			{
-				if ( !strnicmp(ppCmds[2], "remove", 6) )
+				// LIST.<list_name>.<element index>.<operation>
+
+				if (!strnicmp(ppCmds[2], "remove", 6))
+				{
+					// Removes the nth element in LIST.xxx
 					return pListBase->RemoveElement(nIndex);
+				}
 				else if ( !strnicmp(ppCmds[2], "insert", 6) && ptcArg && *ptcArg )
 				{
+					// Inserts <args> at the nth index of LIST.xxx
 					const bool fIsNum = ( IsSimpleNumberString(ptcArg) );
 
 					if ( nIndex >= pListBase->GetCount() )
@@ -879,7 +896,7 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 			}
 			else if ( ptcArg && *ptcArg )
 			{
-                // SERV.LIST.xxx.n: References the nth zero based index of the LIST.xxx
+				// LIST.<list_name>.<element index> -> set value
 				CListDefContElem* pListElem = pListBase->GetAt(nIndex);
 
 				if ( !pListElem )
@@ -897,6 +914,9 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 			{
 				if ( !strnicmp(ppCmds[2], "insert", 6) && ptcArg && *ptcArg )
 				{
+					pListBase = new CListDefCont(ppCmds[0]);
+					m_Container.insert(pListBase);
+
 					if ( IsSimpleNumberString(ptcArg) )
 						return pListBase->AddElementNum(Exp_Get64Val(ptcArg));
 					else
@@ -907,8 +927,10 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 	}
 	else if ( ptcArg && *ptcArg )
 	{
-		if ( pListBase )
+		if (pListBase)
+		{
 			pListBase->RemoveAll();
+		}
 		else
 		{
 			pListBase = new CListDefCont(ppCmds[0]);

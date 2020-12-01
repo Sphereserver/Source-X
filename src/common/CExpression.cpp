@@ -559,7 +559,7 @@ try_dec:
 							llong iArgument = GetVal(pszArgs);
 							if ( iArgument <= 0 )
 							{
-								DEBUG_ERR(( "Exp_GetVal: (x)Log(%" PRId64 ") is %s\n", iArgument, (!iArgument) ? "infinite" : "undefined" ));
+								DEBUG_ERR(( "Exp_GetVal: (x)Log(%lld) is %s\n", iArgument, (!iArgument ? "infinite" : "undefined") ));
 							}
 							else
 							{

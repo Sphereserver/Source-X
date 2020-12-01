@@ -530,7 +530,7 @@ bool CPartyDef::r_GetRef( lpctstr &ptcKey, CScriptObj *&pRef )
 	else if ( !strnicmp("MEMBER.", ptcKey, 7) )
 	{
 		ptcKey += 7;
-		size_t nNumber = Exp_GetVal(ptcKey);
+		size_t nNumber = Exp_GetSTVal(ptcKey);
 		SKIP_SEPARATORS(ptcKey);
 		if ( !m_Chars.IsValidIndex(nNumber) )
 			return false;
@@ -768,8 +768,8 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 			lpctstr ptcArg = s.GetArgStr();
 			if ( *ptcArg == '@' )
 			{
-				ptcArg++;
-				size_t nMember = Exp_GetVal(ptcArg);
+				++ptcArg;
+				size_t nMember = Exp_GetSTVal(ptcArg);
 				if ( !m_Chars.IsValidIndex(nMember) )
 					return false;
 
@@ -791,7 +791,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 			if ( *ptcArg == '@' )
 			{
 				ptcArg++;
-				size_t nMember = Exp_GetVal(ptcArg);
+				size_t nMember = Exp_GetSTVal(ptcArg);
 				if ( nMember == 0 || !m_Chars.IsValidIndex(nMember) )
 					return false;
 

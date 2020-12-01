@@ -4704,20 +4704,26 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 			}
 
 			level = delta + m_level;
+
 			// Prevent integer underflow due to negative level change
-			if( delta < 0 && abs(delta) > m_level )
+			if (delta < 0 && abs(delta) > m_level)
+			{
 				level = 0;
+			}
+
 			if (g_Cfg.m_iDebugFlags & DEBUGF_LEVEL)
 			{
-				g_Log.EventDebug("%s %s level change (was %u, delta %d, now %u)\n",
-					(m_pNPC ? "NPC" : "Player"), GetName(), m_level, delta, level);
+				g_Log.EventDebug("%s %s level change (was %u, delta %lld, now %u)\n",
+					(m_pNPC ? "NPC" : "Player"), GetName(), m_level, delta, (uint)level);
 			}
 			m_level = (uint)level;
 
 			if (m_pClient && fShowMsg)
 			{
-				m_pClient->SysMessagef((abs(delta) == 1) ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_0) : g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_1),
-					(delta > 0) ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_GAIN) : g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_LOST));
+				m_pClient->SysMessagef(
+					((abs(delta) == 1) ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_0)    : g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_1)),
+					((delta > 0)       ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_GAIN) : g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_LOST))
+				);
 			}
 		}
 	}

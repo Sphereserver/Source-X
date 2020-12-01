@@ -203,16 +203,16 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
 
     if ( !strnicmp( "FLOAT.", ptcKey, 6 ) )
     {
-        tchar* ptcArg = s.GetArgStr();
+        lpctstr ptcArg = s.GetArgStr();
         return m_VarsFloat.Insert( (ptcKey+6), ptcArg, true );
     }
     else if ( !strnicmp( "LOCAL.", ptcKey, 6 ) )
     {
         bool fQuoted = false;
-        tchar* ptcArg = s.GetArgStr(&fQuoted);
+        lpctstr ptcArg = s.GetArgStr(&fQuoted);
         if (!ptcArg || !ptcArg[0])
             ptcArg = "0";
-        return m_VarsLocal.SetStr( s.GetKey()+6, fQuoted, ptcArg, false );
+        return m_VarsLocal.SetStr( s.GetKey() + 6, fQuoted, ptcArg, false );
     }
     else if ( !strnicmp( "REF", ptcKey, 3 ) )
     {
@@ -287,8 +287,8 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
             if ( *pszTemp == '.' )
             {
                 ++pszTemp;
-                if ( !m_pO1 )
-                    return false;
+                if (!m_pO1)
+                    break;
 
                 CScript script( pszTemp, s.GetArgStr() );
                 script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
@@ -305,6 +305,8 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
             if (r_Verb(script, pSrc))
                 return true;
         }
+        break;
+
         default:
             return false;
     }

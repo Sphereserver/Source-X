@@ -190,8 +190,12 @@ void CNetState::init(SOCKET socket, CSocketAddress addr)
 
     // disable NAGLE algorythm for data compression/coalescing.
     // Send as fast as we can. we handle packing ourselves.
+    int iSockRet;
     char nbool = true;
-    m_socket.SetSockOpt(TCP_NODELAY, &nbool, sizeof(char), IPPROTO_TCP);
+    iSockRet = m_socket.SetSockOpt(TCP_NODELAY, &nbool, sizeof(char), IPPROTO_TCP);
+    ASSERT(iSockRet == 0);
+    //if (iSockRet)
+    //    return;
 
     g_Serv.StatInc(SERV_STAT_CLIENTS);
     CClient* client = new CClient(this);

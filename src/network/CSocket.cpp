@@ -457,16 +457,16 @@ int CSocket::GetSockOpt( int nOptionName, void * optval, int * poptlen, int nLev
 	}
 #endif
 
-void CSocket::SetNonBlocking(bool bEnable)
+int CSocket::SetNonBlocking(bool fEnable)
 {
 #ifdef _WIN32
-	DWORD lVal = bEnable? 1 : 0;	// 0 =  block
-	ioctlsocket(m_hSocket, FIONBIO, &lVal);
+	DWORD lVal = fEnable? 1 : 0;	// 0 =  block
+	return ioctlsocket(m_hSocket, FIONBIO, &lVal);
 #else
-	if (bEnable)
-		fcntl(m_hSocket, F_SETFL, GetIOCtlSocketFlags()|O_NONBLOCK);
+	if (fEnable)
+		return fcntl(m_hSocket, F_SETFL, GetIOCtlSocketFlags() |  O_NONBLOCK);
 	else
-		fcntl(m_hSocket, F_SETFL, GetIOCtlSocketFlags()&~O_NONBLOCK);
+		return fcntl(m_hSocket, F_SETFL, GetIOCtlSocketFlags() & ~O_NONBLOCK);
 #endif
 }
 

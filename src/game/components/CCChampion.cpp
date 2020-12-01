@@ -749,7 +749,7 @@ void CCChampion::r_Write(CScript & s)
     CCChampionDef* pChampDef = static_cast<CCChampionDef*>(pRes);
     if (!pChampDef)
     {
-        g_Log.EventDebug("Trying to save a champion spawn 0%x with bad id 0%x.\n", GetLink()->GetUID(), _idSpawn.GetPrivateUID());
+        g_Log.EventDebug("Trying to save a champion spawn 0%" PRIx32 " with bad id 0%" PRIx32 ".\n", (dword)GetLink()->GetUID(), _idSpawn.GetPrivateUID());
         return;
     }
     s.WriteKeyVal("ACTIVE", _fActive);

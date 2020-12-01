@@ -678,9 +678,11 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 				for ( size_t iThreads = 0; iThreads < iThreadCount; ++iThreads )
 				{
 					IThread * thrCurrent = ThreadHolder::getThreadAt(iThreads);
-					if ( thrCurrent != nullptr )
-						pSrc->SysMessagef("%" PRIuSIZE_T " - Id: %u, Priority: %d, Name: %s.\n", (iThreads + 1), thrCurrent->getId(),
-											thrCurrent->getPriority(), thrCurrent->getName() );
+					if (thrCurrent != nullptr)
+					{
+						pSrc->SysMessagef("%" PRIuSIZE_T " - Id: %lu, Priority: %d, Name: %s.\n",
+							(iThreads + 1), thrCurrent->getId(), thrCurrent->getPriority(), thrCurrent->getName());
+					}
 				}
 			} break;
 		case 'u':
@@ -1072,14 +1074,16 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 
         if (pSrc != this)
         {
-            pSrc->SysMessagef("Thread %u, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
+            pSrc->SysMessagef("Thread %lu, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
         }
         else
         {
-            g_Log.Event(LOGL_EVENT, "Thread %u, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
+            g_Log.Event(LOGL_EVENT, "Thread %lu, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
         }
 		if (ftDump != nullptr)
-			ftDump->Printf("Thread %u, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
+		{
+			ftDump->Printf("Thread %lu, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
+		}
 
 		for (int i = 0; i < PROFILE_QTY; ++i)
 		{

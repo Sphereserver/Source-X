@@ -726,6 +726,8 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t uiLen )
 	if ( strchr(ppRequest[1], '\r') || strchr(ppRequest[1], 0x0c) )
 		return false;
 
+	int iSocketRet = 0;
+
 	// if the client hasn't requested a keep alive, we must act as if they had
 	// when async networking is used, otherwise data may not be completely sent
 	if ( fKeepAlive == false )
@@ -735,20 +737,31 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t uiLen )
 		// must switch to a blocking socket when the connection is not being kept
 		// alive, or else pending data will be lost when the socket shuts down
 
-		if ( fKeepAlive == false )
-			m_net->m_socket.SetNonBlocking(false);
+		if (fKeepAlive == false)
+		{
+			iSocketRet = m_net->m_socket.SetNonBlocking(false);
+			if (iSocketRet)
+				return false;
+		}
 	}
 
 	linger llinger;
 	llinger.l_onoff = 1;
 	llinger.l_linger = 500;	// in mSec
-	m_net->m_socket.SetSockOpt(SO_LINGER, reinterpret_cast<char *>(&llinger), sizeof(linger));
+	iSocketRet = m_net->m_socket.SetSockOpt(SO_LINGER, reinterpret_cast<char *>(&llinger), sizeof(linger));
+	if (iSocketRet)
+		return false;
+
 	char nbool = true;
-	m_net->m_socket.SetSockOpt(SO_KEEPALIVE, &nbool, sizeof(char));
+	iSocketRet = m_net->m_socket.SetSockOpt(SO_KEEPALIVE, &nbool, sizeof(char));
+	if (iSocketRet)
+		return false;
 
 	// disable NAGLE algorythm for data compression
 	nbool = true;
-	m_net->m_socket.SetSockOpt( TCP_NODELAY, &nbool, sizeof(char), IPPROTO_TCP);
+	iSocketRet = m_net->m_socket.SetSockOpt( TCP_NODELAY, &nbool, sizeof(char), IPPROTO_TCP);
+	if (iSocketRet)
+		return false;
 	
 	if ( memcmp(ppLines[0], "POST", 4) == 0 )
 	{
