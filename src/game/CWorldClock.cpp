@@ -4,7 +4,7 @@
 #include <ctime>
 #include <chrono>
 
-static int64 GetSystemClock()
+int64 CWorldClock::GetSystemClock() noexcept // static
 {
 	// Return system wall-clock using high resolution value (milliseconds)
 	const auto timeMaxResolution = std::chrono::high_resolution_clock::now().time_since_epoch();
@@ -16,54 +16,56 @@ static int64 GetSystemClock()
 void CWorldClock::InitTime(int64 iTimeBase)
 {
 	ADDTOCALLSTACK("CWorldClock::InitTime");
-	m_Clock_SysPrev = GetSystemClock();
-	m_timeClock.InitTime(iTimeBase + MSECS_PER_TICK);
-	_iCurTick = 0;
+	_iSysClock_Prev = GetSystemClock();
+	_timeClock.InitTime(iTimeBase + MSECS_PER_TICK);
+	_iTickCur = 0;
 }
 
 void CWorldClock::Init()
 {
 	ADDTOCALLSTACK("CWorldClock::Init");
-	m_Clock_SysPrev = GetSystemClock();
-	m_timeClock = 0;
-	_iCurTick = 0;
+	_iSysClock_Prev = GetSystemClock();
+	_timeClock = 0;
+	_iTickCur = 0;
 }
 
 bool CWorldClock::Advance()
 {
 	ADDTOCALLSTACK("CWorldClock::Advance");
-	const int64 Clock_Sys = GetSystemClock();
-	const int64 iTimeDiff = Clock_Sys - m_Clock_SysPrev;
+	const int64 iSysClock_Cur = GetSystemClock();
+	const int64 iTimeDiff = iSysClock_Cur - _iSysClock_Prev;
+
 	if (iTimeDiff == 0)
 		return false;
+
 	if (iTimeDiff < 0)
 	{
 		// System clock has changed forward
 		// Just wait until next cycle and it should be ok
 		g_Log.Event(LOGL_WARN, "System clock has changed forward (daylight saving change, etc). This may cause strange behavior on some objects.\n");
-		m_Clock_SysPrev = Clock_Sys;
+		_iSysClock_Prev = iSysClock_Cur;
 		return false;
 	}
 
-	m_Clock_SysPrev = Clock_Sys;
-	const CServerTime Clock_New = m_timeClock + iTimeDiff;
+	_iSysClock_Prev = iSysClock_Cur;
+	const CServerTime timeClock_New = _timeClock + iTimeDiff;
 
 	// CServerTime is signed (it's now int64)!
 	// NOTE: This will overflow after 292 millions or so years of run time, good luck!
-	if (Clock_New < m_timeClock)
+	if (timeClock_New < _timeClock)
 	{
 		g_Log.Event(LOGL_WARN, "System clock has changed backward (daylight saving change, etc). This may cause strange behavior on some objects.\n");
-		m_timeClock = Clock_New;
+		_timeClock = timeClock_New;
 		return false;
 	}
 
-	m_timeClock = Clock_New;
+	_timeClock = timeClock_New;
 	// Maths here are done with MSECs precision, if proceed we advance a server's TICK.
-	const CServerTime curTime = GetCurrentTime();
-	if (m_nextTickTime <= curTime)
+	const CServerTime timeCur = GetCurrentTime();
+	if (_timeNextTick <= timeCur)
 	{
-		m_nextTickTime = curTime + MSECS_PER_TICK;	// Next hit time.
-		++_iCurTick;
+		_timeNextTick = timeCur + MSECS_PER_TICK;	// Next hit time.
+		++_iTickCur;
 	}
 	return true;
 }

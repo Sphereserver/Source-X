@@ -129,20 +129,20 @@ private:
 // World data.
 private:
 	// Special purpose timers.
-	int64	_iTimeLastWorldSave;				// when to auto do the worldsave ?
-	bool	_fSaveNotificationSent;// has notification been sent?
-	int64	_iTimeLastDeadRespawn;			// when to res dead NPC's ?
+	int64	_iTimeLastWorldSave;		// when to auto do the worldsave ?
+	bool	_fSaveNotificationSent;		// has notification been sent?
+	int64	_iTimeLastDeadRespawn;		// when to res dead NPC's ?
 	int64	_iTimeLastCallUserFunc;		// when to call next user func
-	ullong	m_ticksWithoutMySQL;	// MySQL should be running constantly if MySQLTicks is true, keep here record of how much ticks since Sphere is not connected.
+	ullong	m_ticksWithoutMySQL;		// MySQL should be running constantly if MySQLTicks is true, keep here record of how much ticks since Sphere is not connected.
     
-	int		m_iSaveStage;	// Current stage of the background save.
-	llong	m_savetimer; // Time it takes to save
+	int		_iSaveStage;	// Current stage of the background save.
+	llong	_iSaveTimer;	// Time it takes to save
 
 public:
 	int m_iSaveCountID;			// Current archival backup id. Whole World must have this same stage id
 	int m_iLoadVersion;			// Previous load version. (only used during load of course)
 	int m_iPrevBuild;			// Previous __GITREVISION__
-	int64 _iTimeStartup;	// When did the system restore load/save ?
+	int64 _iTimeStartup;		// When did the system restore load/save ?
 
 	CUID m_uidLastNewItem;	// for script access.
 	CUID m_uidLastNewChar;	// for script access.
@@ -162,10 +162,17 @@ private:
 	bool LoadFile( lpctstr pszName, bool fError = true );
 	bool LoadWorld();
 
+	// WorldSave methods
+	static void GetBackupName(CSString& sArchive, lpctstr ptcBaseDir, tchar tcType, int iSaveCount);
+
 	bool SaveTry(bool fForceImmediate); // Save world state
 	bool SaveStage();
-	static void GetBackupName( CSString & sArchive, lpctstr pszBaseDir, tchar chType, int savecount );
 	bool SaveForce(); // Save world state
+
+	// Sync again the WorldClock internal timer with the Real World Time after a lengthy operation (WorldSave, Resync...)
+	friend class CServer;
+	void SyncGameTime() noexcept;
+
 
 public:
 	CWorld();
@@ -203,7 +210,7 @@ public:
 	bool Export(lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, int dx = 0, int dy = 0);
 	bool Import(lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, tchar* pszAgs1 = nullptr, tchar* pszAgs2 = nullptr);
 
-	lpctstr GetName() const { return( "World" ); }
+	lpctstr GetName() const { return "World"; }
 
 } g_World;
 
