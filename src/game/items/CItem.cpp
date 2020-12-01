@@ -1901,13 +1901,12 @@ bool CItem::SetName( lpctstr pszName )
 	return SetNamePool( pszName );
 }
 
-HUE_TYPE CItem::GetHue() const
+HUE_TYPE CItem::GetHue() const  //Override of CObjBase::GetHue()
 {
 	if (g_Cfg.m_iColorInvisItem) //If setting ask a specific color
 	{
 		if (IsAttr(ATTR_INVIS))
 			return(g_Cfg.m_iColorInvisItem);
-
 	}
 	
 	return(CObjBase::m_wHue);

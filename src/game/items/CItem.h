@@ -592,7 +592,7 @@ public:
   *
   * @return  The hue.
   */
-	HUE_TYPE GetHue() const;
+	virtual HUE_TYPE GetHue() const override;
 
 	void SetAttr(uint64 uiAttr)
 	{
