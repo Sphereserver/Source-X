@@ -60,6 +60,9 @@ Compatibility changes from 0.56d to X1
 - [sphere_defs_types_hardcoded.scp] Added: t_multi_addon=201.
 - [sphere_msgs.scp] Added: PROVOCATION_KIND.
 - [sphere_def.scp] Added: DEFNAMEs house_types, DEFNAMEs house_transfer_types, CAN_I_BLOCKLOS_HEIGHT.
+- price=xxx will not work anymore to fix a price on an item. Price will be use only when a player vendor sell an item. If an item have a price value, no NPC will buy it at this price.
+  Value is READ only, if you want change the value of an item, you should use the new tag.override.value. When selling your item to NPC, it will look this value first.
+  In your scripts, on your vendor template BUY= or SELL= if you want to set a different value of the itemdef you must use tag.override.value=xxx instead of old syntax price=xxx.
 
 Suggestions
 ------------------------

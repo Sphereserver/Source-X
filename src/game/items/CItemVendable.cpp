@@ -159,11 +159,14 @@ dword CItemVendable::GetBasePrice() const
 	return m_price;
 }
 
-dword CItemVendable::GetVendorPrice( int iConvertFactor )
+dword CItemVendable::GetVendorPrice( int iConvertFactor , bool forselling )
 {
 	ADDTOCALLSTACK("CItemVendable::GetVendorPrice");
-	// Player is buying/selling from a vendor.
-	// ASSUME this item is on the vendor !
+	// forselling = 0 Player is buying from a vendor.
+	// forselling = 1 Player is selling to a vendor.
+	// When selling an item, we must avoid use the Price. Price may be modify and can exploit.
+
+	// Item is on the vendor or on the player's backpack depending  what we doing
 	// Consider: (if not on a player vendor)
 	//  Quality of the item.
 	//  rareity of the item.
@@ -175,10 +178,24 @@ dword CItemVendable::GetVendorPrice( int iConvertFactor )
 	//    0 = base price
 	// +100 = increase price by 100% (vendor selling to player?)
 
-	llong llPrice = m_price;
-	if ( llPrice <= 0 )		// set on player vendor.
+	CItemBase* pItemDef;
+	llong llPrice = 0;
+
+	//Check if there is an override value first
+	const CVarDefCont* pVarDef = GetKey("OVERRIDE.VALUE", true);
+	if (pVarDef)
+		llPrice = (llong)pVarDef->GetValNum();
+	else
 	{
-		CItemBase *pItemDef;
+		if (!forselling) //When selling an item, you never check the price to avoid exploit
+		{
+			llPrice = m_price; // Price is set on player vendor
+		}
+	}
+
+	if ( llPrice <= 0 )	// No price/overrride.value set, we use the value of item.
+	{
+		
 		if ( IsType(IT_DEED) )
 		{
 			// Deeds just represent the item they are deeding.
@@ -189,9 +206,9 @@ dword CItemVendable::GetVendorPrice( int iConvertFactor )
 		else
 			pItemDef = Item_GetDef();
 
-		llPrice = pItemDef->GetMakeValue(GetQuality());
+		llPrice = pItemDef->GetMakeValue(GetQuality()); //If value is a range(ex:10,20), value change depending quality 
 	}
-
+	
 	llPrice += IMulDivLL(llPrice, maximum(iConvertFactor, -100), 100);
 	if ( llPrice > UINT32_MAX )
 		return UINT32_MAX;
