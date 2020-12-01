@@ -1906,7 +1906,10 @@ HUE_TYPE CItem::GetHue() const  //Override of CObjBase::GetHue()
 	if (g_Cfg.m_iColorInvisItem) //If setting ask a specific color
 	{
 		if (IsAttr(ATTR_INVIS))
-			return(g_Cfg.m_iColorInvisItem);
+		{
+			if (!IsType(IT_SPAWN_CHAR) && !IsType(IT_SPAWN_ITEM))  //Spawn point always keep their m_wHue (HUE_RED_DARK)
+				return(g_Cfg.m_iColorInvisItem);
+		}
 	}
 	
 	return(CObjBase::m_wHue);
