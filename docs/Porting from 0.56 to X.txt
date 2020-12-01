@@ -16,7 +16,7 @@ Changed starting from 0.56c
 - The MOUNT keyword now needs to be called on the rider and required as argument the UID of the npc to be ridden.
 - Added: new .ADD dialog to replace old add menu. (old menu still available in the scripts by removing d_add dialog, but it is full of errors).
 - memory_war_targ is no longer used for npc combats (in the source) but is still present for scripting backwards compat. Sphere now uses the 'Attacker' system.
-- Spellbooks now store spell offset / max spells using TDATA3↨/TDATA4 instead MOREZ/MOREX.
+- Spellbooks now store spell offset / max spells using TDATA3/TDATA4 instead MOREZ/MOREX.
 - [sphere_spells.scp] Added LAYER=layer_spell_* to all magery, necromancy, spellweaving, chivalry and mysticism spells;
   ie LAYER=layer_spell_stats for s_bless,s_cunning, etc. Mysticism Enchant spell: Layer_spell_enchant.
 - [sphere_defs.scp] Removed 'brain_beggar', 'brain_thief', 'brain_undead' and 'brain_vendor_offduty'.
