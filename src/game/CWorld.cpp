@@ -591,9 +591,9 @@ CWorld::CWorld() :
 {
 	_iTimeLastWorldSave = 0;
 	m_ticksWithoutMySQL = 0;
-	m_savetimer = 0;
 	m_iSaveCountID = 0;
-	m_iSaveStage = 0;
+	_iSaveStage = 0;
+	_iSaveTimer = 0;
 	m_iPrevBuild = 0;
 	m_iLoadVersion = 0;
 	_fSaveNotificationSent = false;
@@ -650,13 +650,13 @@ bool CWorld::OpenScriptBackup( CScript & s, lpctstr pszBaseDir, lpctstr pszBaseN
 	GetBackupName( sArchive, pszBaseDir, pszBaseName[0], iSaveCount );
 
 	// remove possible previous archive of same name
-	remove( sArchive );
+	::remove( sArchive );
 
 	// rename previous save to archive name.
 	CSString sSaveName;
 	sSaveName.Format( "%s" SPHERE_FILE "%s%s", pszBaseDir, pszBaseName, SPHERE_SCRIPT );
 
-	if ( rename( sSaveName, sArchive ))
+	if ( ::rename(sSaveName, sArchive) )
 	{
 		// May not exist if this is the first time.
 		g_Log.Event(LOGM_SAVE|LOGL_WARN, "Rename %s to '%s' FAILED code %d?\n", static_cast<lpctstr>(sSaveName), static_cast<lpctstr>(sArchive), CSFile::GetLastError() );
@@ -671,6 +671,12 @@ bool CWorld::OpenScriptBackup( CScript & s, lpctstr pszBaseDir, lpctstr pszBaseN
 	return true;
 }
 
+void CWorld::SyncGameTime() noexcept
+{
+	// Restore the GameWorld Clock internal System Clock
+	_GameClock._iSysClock_Prev = CWorldClock::GetSystemClock();
+}
+
 bool CWorld::SaveStage() // Save world state in stages.
 {
 	ADDTOCALLSTACK("CWorld::SaveStage");
@@ -680,14 +686,14 @@ bool CWorld::SaveStage() // Save world state in stages.
 	const int iSectorsQty = _Sectors.GetSectorAbsoluteQty();
 
 	EXC_TRY("SaveStage");
-	bool bRc = true;
+	bool fRc = true;
 
-	if ( m_iSaveStage == -1 )
+	if ( _iSaveStage == -1 )
 	{
 		if ( !g_Cfg.m_fSaveGarbageCollect )
 			GarbageCollection_New();
 	}
-	else if ( m_iSaveStage < iSectorsQty)
+	else if ( _iSaveStage < iSectorsQty)
 	{
 		// NPC Chars in the world secors and the stuff they are carrying.
 		// Sector lighting info.
@@ -695,15 +701,15 @@ bool CWorld::SaveStage() // Save world state in stages.
 		{
 			size_t szComplexity = 0;
 
-			CSector *s = _Sectors.GetSectorAbsolute(m_iSaveStage);
-			if( s )
+			CSector *s = _Sectors.GetSectorAbsolute(_iSaveStage);
+			if (s)
 			{
 				s->r_Write();
 				szComplexity += ( s->GetCharComplexity() + s->GetInactiveChars())*100 + s->GetItemComplexity();
 			}
 
-			int dynStage = m_iSaveStage + 1;
-			if( szComplexity <= g_Cfg.m_iSaveStepMaxComplexity )
+			int dynStage = _iSaveStage + 1;
+			if (szComplexity <= g_Cfg.m_iSaveStepMaxComplexity)
 			{
 				uint szSectorCnt = 1;
 				while(dynStage < iSectorsQty && szSectorCnt <= g_Cfg.m_iSaveSectorsPerTick)
@@ -716,7 +722,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 						if(szComplexity <= g_Cfg.m_iSaveStepMaxComplexity)
 						{
 							s->r_Write();
-							m_iSaveStage = dynStage;
+							_iSaveStage = dynStage;
 							++szSectorCnt;
 						}
 						else
@@ -730,12 +736,14 @@ bool CWorld::SaveStage() // Save world state in stages.
 		}
 		else
 		{
-			CSector* s = _Sectors.GetSectorAbsolute(m_iSaveStage);
-			if ( s )
+			CSector* s = _Sectors.GetSectorAbsolute(_iSaveStage);
+			if (s)
+			{
 				s->r_Write();
+			}
 		}
 	}
-	else if ( m_iSaveStage == iSectorsQty)
+	else if (_iSaveStage == iSectorsQty)
 	{
 		m_FileData.WriteSection( "TIMERF" );
 		_Ticker._TimedFunctions.r_Write(m_FileData);
@@ -745,7 +753,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 
 		g_Exp.m_ListGlobals.r_WriteSave(m_FileData);
 
-		size_t iQty = g_Cfg.m_RegionDefs.size();
+		const size_t iQty = g_Cfg.m_RegionDefs.size();
 		for ( size_t i = 0; i < iQty; ++i )
 		{
 			CRegion *pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs[i]);
@@ -762,16 +770,16 @@ bool CWorld::SaveStage() // Save world state in stages.
 			pGMPage->r_Write(m_FileData);
 		}
 	}
-	else if ( m_iSaveStage == iSectorsQty +1 )
+	else if ( _iSaveStage == iSectorsQty +1 )
 	{
 		//	Empty save stage
 	}
-	else if ( m_iSaveStage == iSectorsQty +2 )
+	else if ( _iSaveStage == iSectorsQty +2 )
 	{
 		// Now make a backup of the account file.
-		bRc = g_Accounts.Account_SaveAll();
+		fRc = g_Accounts.Account_SaveAll();
 	}
-	else if ( m_iSaveStage == iSectorsQty +3 )
+	else if ( _iSaveStage == iSectorsQty +3 )
 	{
 		// EOF marker to show we reached the end.
 		m_FileData.WriteSection("EOF");
@@ -788,7 +796,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		g_Log.Event(LOGM_SAVE, "Context data saved (%s).\n", m_FileData.GetFilePath());
 
 		llong	llTicksEnd;
-		llong	llTicksStart = m_savetimer;
+		llong	llTicksStart = _iSaveTimer;
 		TIME_PROFILE_END;
 
 		tchar * time = Str_GetTemp();
@@ -802,7 +810,12 @@ bool CWorld::SaveStage() // Save world state in stages.
 
 		// Now clean up all the held over UIDs
 		SaveThreadClose();
-		m_iSaveStage = INT32_MAX;
+
+		// Mark the end of the save (background or not).
+		_iSaveStage = INT32_MAX;
+
+		SyncGameTime();
+
 		return false;
 	}
 
@@ -810,20 +823,22 @@ bool CWorld::SaveStage() // Save world state in stages.
 	{
 		ASSERT(iSectorsQty > 0);
 		int64 iNextTime = g_Cfg.m_iSaveBackgroundTime / iSectorsQty;
-		if ( iNextTime > MSECS_PER_SEC *30 * 60 )
-			iNextTime = MSECS_PER_SEC * 30 * 60;	// max out at 30 minutes or so.
+		if ( iNextTime > MSECS_PER_SEC * 30 * 60 )
+			iNextTime = MSECS_PER_SEC  * 30 * 60;	// max out at 30 minutes or so.
 		_iTimeLastWorldSave = _GameClock.GetCurrentTime().GetTimeRaw() + iNextTime;
 	}
-	++m_iSaveStage;
-	return bRc;
+	++_iSaveStage;
+	return fRc;
 
 	EXC_CATCH;
 
+	SyncGameTime();
+
 	EXC_DEBUG_START;
-	g_Log.EventDebug("stage '%d' qty '%d' time '%" PRId64 "'\n", m_iSaveStage, iSectorsQty, _iTimeLastWorldSave);
+	g_Log.EventDebug("stage '%d' qty '%d' time '%" PRId64 "'\n", _iSaveStage, iSectorsQty, _iTimeLastWorldSave);
 	EXC_DEBUG_END;
 
-	++m_iSaveStage;	// to avoid loops, we need to skip the current operation in world save
+	++_iSaveStage;	// to avoid loops, we need to skip the current operation in world save
 	return false;
 }
 
@@ -854,28 +869,28 @@ bool CWorld::SaveForce() // Save world state
 	{
 		try
 		{
-			if (( m_iSaveStage >= 0 ) && ( m_iSaveStage < iSectorsQty))
+			if (( _iSaveStage >= 0 ) && ( _iSaveStage < iSectorsQty))
 				pCurBlock = save_msgs[1];
-			else if ( m_iSaveStage == iSectorsQty)
+			else if ( _iSaveStage == iSectorsQty)
 				pCurBlock = save_msgs[2];
-			else if ( m_iSaveStage == iSectorsQty +1 )
+			else if ( _iSaveStage == iSectorsQty +1 )
 				pCurBlock = save_msgs[3];
-			else if ( m_iSaveStage == iSectorsQty +2 )
+			else if ( _iSaveStage == iSectorsQty +2 )
 				pCurBlock = save_msgs[4];
 			else
 				pCurBlock = save_msgs[5];
 
 			fSave = SaveStage();
-			if (! ( m_iSaveStage & 0x1FF ))
+			if ( !(_iSaveStage & 0x1FF) )
 			{
-				g_Serv.PrintPercent( m_iSaveStage, (ssize_t)iSectorsQty + 3 );
+				g_Serv.PrintPercent( _iSaveStage, (ssize_t)iSectorsQty + 3 );
 			}
-			if ( !fSave && ( pCurBlock != save_msgs[5] ))
+			if ( !fSave && (pCurBlock != save_msgs[5]) )
 				goto failedstage;
 		}
 		catch ( const CSError& e )
 		{
-			g_Log.CatchEvent(&e, "Save FAILED for stage %u (%s).", m_iSaveStage, pCurBlock);
+			g_Log.CatchEvent(&e, "Save FAILED for stage %u (%s).", _iSaveStage, pCurBlock);
 			fSuccess = false;
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		}
@@ -886,7 +901,7 @@ bool CWorld::SaveForce() // Save world state
 		}
 		continue;
 failedstage:
-		g_Log.CatchEvent( nullptr, "Save FAILED for stage %u (%s).", m_iSaveStage, pCurBlock);
+		g_Log.CatchEvent( nullptr, "Save FAILED for stage %u (%s).", _iSaveStage, pCurBlock);
 		fSuccess = false;
 	}
 
@@ -898,10 +913,11 @@ bool CWorld::SaveTry( bool fForceImmediate ) // Save world state
 {
 	ADDTOCALLSTACK("CWorld::SaveTry");
 	EXC_TRY("SaveTry");
+
 	if ( m_FileWorld.IsFileOpen() )
 	{
 		// Save is already active !
-		ASSERT( IsSaving() ) ;
+		ASSERT( IsSaving() );
 		if ( fForceImmediate )	// finish it now !
 			return SaveForce();
 		else if ( g_Cfg.m_iSaveBackgroundTime )
@@ -909,13 +925,16 @@ bool CWorld::SaveTry( bool fForceImmediate ) // Save world state
 		return false;
 	}
 
+	// Start a new save.
+
 	// Do the write async from here in the future.
 	if ( g_Cfg.m_fSaveGarbageCollect )
 		GarbageCollection();
 
+	// Keep track of the world save length
 	llong llTicksStart;
 	TIME_PROFILE_START;
-	m_savetimer = llTicksStart;
+	_iSaveTimer = llTicksStart;
 
 	// Determine the save name based on the time.
 	// exponentially degrade the saves over time.
@@ -931,8 +950,11 @@ bool CWorld::SaveTry( bool fForceImmediate ) // Save world state
 	if ( ! OpenScriptBackup( m_FileMultis, g_Cfg.m_sWorldBaseDir, "multis", m_iSaveCountID ))
 		return false;
 
-	m_fSaveParity = ! m_fSaveParity; // Flip the parity of the save.
-	m_iSaveStage = -1;
+	// Flip the parity of the save.... TODO: explain this a little better...
+	m_fSaveParity = ! m_fSaveParity;
+
+	// Init
+	_iSaveStage = -1;
 	_fSaveNotificationSent = false;
 	_iTimeLastWorldSave = 0;
 
@@ -944,8 +966,11 @@ bool CWorld::SaveTry( bool fForceImmediate ) // Save world state
 
 	if ( fForceImmediate || ! g_Cfg.m_iSaveBackgroundTime )	// Save now !
 		return SaveForce();
+
 	return true;
 	EXC_CATCH;
+
+	SyncGameTime();
 
 	EXC_DEBUG_START;
 	g_Log.EventDebug("Immediate '%d'\n", fForceImmediate? 1 : 0);
@@ -1048,7 +1073,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 
 		//-- Ok we can start the save process, in which we eventually remove the previous saves and create the other.
 
-		CScriptTriggerArgs Args(fForceImmediate, m_iSaveStage);
+		CScriptTriggerArgs Args(fForceImmediate, _iSaveStage);
 		enum TRIGRET_TYPE tr;
 
 		if ( g_Serv.r_Call("f_onserver_save", &g_Serv, &Args, nullptr, &tr) )
@@ -1095,7 +1120,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 	}
 
-	CScriptTriggerArgs Args(fForceImmediate, m_iSaveStage);
+	CScriptTriggerArgs Args(fForceImmediate, _iSaveStage);
 	g_Serv.r_Call((fSaved ? "f_onserver_save_ok" : "f_onserver_save_fail"), &g_Serv, &Args);
 	return fSaved;
 }
@@ -1162,6 +1187,8 @@ void CWorld::SaveStatics()
 		g_Log.CatchEvent(nullptr, "Statics Save FAILED.");
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 	}
+
+	SyncGameTime();
 }
 
 /////////////////////////////////////////////////////////////////////
