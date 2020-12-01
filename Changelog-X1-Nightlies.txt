@@ -2307,3 +2307,8 @@ Must have event, even if it's empty, since it's applied by the source to generat
 
 01-12-2020, Nolok
 - Fixed: World Object timers and SERV.TIME didn't freeze after a long process pausing the World activity, like world save or resync (Issue #538).
+
+01-12-2020, Jhobean
+- Added: ColorInvisItem ini option allow to see invis item in different color (feature request #537).
+		This will help GM to make difference of invis or not invis item. Color can be change this way 
+		ColorInvisItem = (0 = default item color , 01 to 04001 = custom color, 1000 = Invis Grey color)
