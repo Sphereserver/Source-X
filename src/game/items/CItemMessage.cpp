@@ -81,6 +81,7 @@ bool CItemMessage::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc
     UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CItemMessage::r_WriteVal");
     EXC_TRY("WriteVal");
+
     // Load the message body for a book or a bboard message.
     if (!strnicmp(ptcKey, "BODY", 4))
     {

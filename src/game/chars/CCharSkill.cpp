@@ -187,21 +187,25 @@ void CChar::Skill_SetBase( SKILL_TYPE skill, ushort uiValue )
 	if ( IsTrigUsed(TRIGGER_SKILLCHANGE) )
 	{
 		CScriptTriggerArgs args;
-		args.m_iN1 = (llong)skill;
-		args.m_iN2 = (llong)uiValue;
+		args.m_iN1 = (int64)skill;
+		args.m_iN2 = (int64)uiValue;
 		if ( OnTrigger(CTRIG_SkillChange, this, &args) == TRIGRET_RET_TRUE )
 			return;
 
+		const llong iN2Old = args.m_iN2;
 		if (args.m_iN2 > UINT16_MAX)
 		{
-			g_Log.EventWarn("Trying to set skill '%s' to invalid value=%lld. Defaulting it to %d.\n", Skill_GetName(skill), args.m_iN2, UINT16_MAX);
 			args.m_iN2 = UINT16_MAX;
 		}
 		else if (args.m_iN2 < 0)
 		{
-			g_Log.EventWarn("Trying to set skill '%s' to invalid value=%lld. Defaulting it to 0.\n", Skill_GetName(skill), args.m_iN2);
 			args.m_iN2 = 0;
 		}
+		if (iN2Old != args.m_iN2)
+		{
+			g_Log.EventWarn("Trying to set skill '%s' to invalid value=%lld. Defaulting it to %lld.\n", Skill_GetName(skill), iN2Old, args.m_iN2);
+		}
+
 		uiValue = (ushort)(args.m_iN2);
 	}
 	m_Skill[skill] = uiValue;
@@ -820,7 +824,7 @@ bool CChar::Skill_MakeItem_Success()
 	{
 		int exp = 0;
 		if ( pItemVend )
-			exp = pItemVend->GetVendorPrice(0) / 100;	// calculate cost for buying this item if it is vendable (gain = +1 exp each 100gp)
+			exp = pItemVend->GetVendorPrice(0,0) / 100;	// calculate cost for buying this item if it is vendable (gain = +1 exp each 100gp)
 		if ( exp )
 			ChangeExperience(exp);
 	}
@@ -2110,6 +2114,17 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 			SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_TAMING_TAMED ), pChar->GetName());
 			return -SKTRIG_QTY;
 		}
+
+		if (IsSetOF(OF_PetSlots))
+		{
+			short iFollowerSlots = (short)pChar->GetDefNum("FOLLOWERSLOTS", true);
+			if (!FollowersUpdate(pChar, maximum(1, iFollowerSlots), true))
+			{
+				SysMessageDefault(DEFMSG_PETSLOTS_TRY_TAMING);
+				return -SKTRIG_QTY;
+			}
+		}
+		
 	}
 
 	if ( stage == SKTRIG_START )
@@ -2684,7 +2699,7 @@ int CChar::Skill_Magery( SKTRIG_TYPE stage )
 	{
 		const CSpellDef * tSpell = g_Cfg.GetSpellDef( m_atMagery.m_iSpell );
 		if (tSpell == nullptr)
-			return 0;
+			return -SKTRIG_ABORT; //Before we returned 0, thus allowing the skill to continue its execution and possible gaining a skill increase when the spell ID was invalid.
 
 		if ( IsClientActive() && IsSetMagicFlags( MAGICF_PRECAST ) && !tSpell->IsSpellType( SPELLFLAG_NOPRECAST ))
 		{

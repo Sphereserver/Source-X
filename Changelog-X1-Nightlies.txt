@@ -1195,7 +1195,7 @@ transfer_secured	= 08	// Transfer Secured Containers.
 - ADDED: tag.override.movedelay (msec) for NPCS overriding completelly the moverate checks and setting the next movement to the given timer, eg 'tag.override.moverate=250' makes the npc move each 250 milliseconds when walking.
     Notes:  * The final value, with or without tags, running or walking, can't be lower than 1 tenth of second or higher than 5 seconds for the moment until we check the performance impact of lower values (Since walking is direcly engaged with NPC's AI, lowering this value can cause an extreme impact on performance)
             * This is the walking speed, running speed and walking speed while mounted is the half (125 instead of 250 msecs using the previous example), running while mounted is 4 times faster (62.5msecs (rounded to 62), defaulted to 100 because of the tenth's limit)).
-            * Settig this tag completelly overrides default moverate checks, TAG.OVERIDE.MOVERATE gets ignored too.
+            * Settig this tag completelly overrides default moverate checks, TAG.OVERRIDE.MOVERATE gets ignored too.
 
 Here's the code to make NPCs move with the old formula (before 2014) (it's also an example of how to make custom movement formulas):
 // function setting the tag to the desired value
@@ -2277,23 +2277,45 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		  If we were using a custom combat formula and thus overriding  the ACTDIFF in @HitTry, forcing a miss by setting a negative value in ACTDIFF would cause the combat to block.
 		2)When combat started, the chance to hit wasn't calculated so the first hit was always a success because ACTDIFF was set to 0.
 
-23-07-2020, Drk8
+23-07-2020, Drk84
 - Fixed: Adding the Blade Spirits spell to a spellbook added the Clumsy spell. (Issue #496)
 		 Warning: existing Spellbooks with the Blade Spirits spell added by scroll or addspell have the more1 value corrupted and so need they must be replaced.
 		 Only Magery Spellbooks are affected because other spellsbooks doesn't have more than 32 spells (Mastery Spells are not implemented).
 		 
 29-08-2020, Drk84
-- Fixed: Cant create areas in the new maps (ilshenar, ter mur, etc) (Issue  #499)
+- Fixed: Cant create areas in the new maps (ilshenar, ter mur, etc) (Issue  #499).
 
 25-09-2020, Jhobean
-- Modified: GM can now prompt context menu from NPC and command them. (Ex: Kill follow, guard, etc)
+- Modified: GM can now prompt context menu from NPC and command them. (Ex: Kill follow, guard, etc).
 
 02-11-2020, Nolok
 - Fixed: Sector client number does not decrease if the char lingers before being actually detatched. This also caused sectors never going to sleep after a player logged out inside them (Issue #524).
 
 03-11-2020, Jhobean
-- Added: Setting CANSEESAMEPLEVEL add to .ini. Allow GM to change how they see each other when they are invisible
-- Fixed: The ini setting FlipDroppedItems now work correctly (Issue  #514)
-- Fixed: When ini setting EF_ItemStacking is active, the first item of the stack can be flip on drop (Issue  #514)
-[sphereCrypt.ini]: Added crypt key for classic clients 7.0.86 ~ 7.0.87 and enhanced clients 4.0.80 ~ 4.0.87
+- Added: Setting CANSEESAMEPLEVEL add to .ini. Allow GM to change how they see each other when they are invisible.
+- Fixed: The ini setting FlipDroppedItems now work correctly (Issue  #514).
+- Fixed: When ini setting EF_ItemStacking is active, the first item of the stack can be flip on drop (Issue #514).
+[sphereCrypt.ini]: Added crypt key for classic clients 7.0.86 ~ 7.0.87 and enhanced clients 4.0.80 ~ 4.0.87.
 
+11-11-2020, Jhobean
+- Fixed: Animal Taming skill not checking follower slots limit when OF_PetSlots is enabled (Issue  #534).
+
+20-11-2020, Drk84
+- Fixed: Dismounting from a NPC cleared the actarg1 value of the rider instead of the NPC mount. (Issue #527)
+		 This means that when unmounting and the character is using a skill that makes use of the Actarg1 value, such  as casting a spell, the skill will continue its execution normally. 
+- Fixed: Invalid spell ID didn't abort the skill execution when the magic skill succeeds (this is related to the issue above), causing a possible skill gain.
+
+01-12-2020, Nolok
+- Fixed: World Object timers and SERV.TIME didn't freeze after a long process pausing the World activity, like world save or resync (Issue #538).
+- Updated: Internal SQlite to version 3.33.0.
+
+01-12-2020, Jhobean
+- Added: ColorInvisItem ini option allow to see invisible items in a different color (feature request #537).
+		This will help GM to make difference of invis or not invis item. Color can be changed by
+		ColorInvisItem = (0 = default item color, 01 to 04001 = custom color, 1000 = default Grey Invis color).
+- Fixed: When selling an item, gold show on dialog and give to player was not the same in some situation (Issue #456).
+- Modified: Before this modification, because VALUE is READ only, the only way to change the price of an item was changing the PRICE.
+		NOW, PRICE keyword only used to set the selling price of an item sold by a player vendor. PRICE of an item will no longer
+		change the gold you will receive when selling it to a NPC. PRICE is now exclusive to player vendor.
+- Added: tag.override.value can now be add to an item to change his value when trading with a NPC. In scripts, on vendor template 
+		(BUY= or SELL=). For changing the value of the itemdef, you must use tag.override.value=xxx instead of old syntax price=xxx.

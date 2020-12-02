@@ -678,9 +678,11 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 				for ( size_t iThreads = 0; iThreads < iThreadCount; ++iThreads )
 				{
 					IThread * thrCurrent = ThreadHolder::getThreadAt(iThreads);
-					if ( thrCurrent != nullptr )
-						pSrc->SysMessagef("%" PRIuSIZE_T " - Id: %u, Priority: %d, Name: %s.\n", (iThreads + 1), thrCurrent->getId(),
-											thrCurrent->getPriority(), thrCurrent->getName() );
+					if (thrCurrent != nullptr)
+					{
+						pSrc->SysMessagef("%" PRIuSIZE_T " - Id: %lu, Priority: %d, Name: %s.\n",
+							(iThreads + 1), thrCurrent->getId(), thrCurrent->getPriority(), thrCurrent->getName());
+					}
 				}
 			} break;
 		case 'u':
@@ -1072,14 +1074,16 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 
         if (pSrc != this)
         {
-            pSrc->SysMessagef("Thread %u, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
+            pSrc->SysMessagef("Thread %lu, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
         }
         else
         {
-            g_Log.Event(LOGL_EVENT, "Thread %u, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
+            g_Log.Event(LOGL_EVENT, "Thread %lu, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
         }
 		if (ftDump != nullptr)
-			ftDump->Printf("Thread %u, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
+		{
+			ftDump->Printf("Thread %lu, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
+		}
 
 		for (int i = 0; i < PROFILE_QTY; ++i)
 		{
@@ -2012,7 +2016,7 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 	return true;
 }
 
-void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool bMessage)
+void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool fMessage)
 {
 	ADDTOCALLSTACK("CServer::SetResyncPause");
 	if ( fPause )
@@ -2020,7 +2024,7 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool bMessage)
 		m_fResyncPause = true;
         g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
 
-		if ( bMessage )
+		if ( fMessage )
 			CWorldComm::Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
 		else if ( pSrc && pSrc->GetChar() )
 			pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
@@ -2036,7 +2040,7 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool bMessage)
 		if ( !g_Cfg.Load(true) )
 		{
             g_Log.EventError("%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
-			if ( bMessage )
+			if ( fMessage )
 				CWorldComm::Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
 			else if ( pSrc && pSrc->GetChar() )
 				pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
@@ -2044,13 +2048,16 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool bMessage)
 		else
 		{
             g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS));
-			if ( bMessage )
+			if ( fMessage )
 				CWorldComm::Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS));
 			else if ( pSrc && pSrc->GetChar() )
 				pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS));
 		}
 
 		m_fResyncPause = false;
+
+		g_World.SyncGameTime();
+
 		SetServerMode(SERVMODE_Run);
 	}
 }

@@ -2263,11 +2263,11 @@ uint PacketVendorBuyList::fillBuyData(const CItemContainer* container, int iConv
 		if (vendorItem == nullptr || vendorItem->GetAmount() == 0)
 			continue;
 
-		dword price = vendorItem->GetVendorPrice(iConvertFactor);
+		dword price = vendorItem->GetVendorPrice(iConvertFactor,0);
 		if (price == 0)
 		{
 			vendorItem->Item_GetDef()->ResetMakeValue();
-			price = vendorItem->GetVendorPrice(iConvertFactor);
+			price = vendorItem->GetVendorPrice(iConvertFactor,0);
 
 			if (price == 0 && vendorItem->IsValidNPCSaleItem())
 				price = vendorItem->GetBasePrice();
@@ -3036,8 +3036,23 @@ uint PacketVendorSellList::fillSellList(CClient* target, const CItemContainer* c
 						writeInt16((word)vendItem->GetDispID());
 						writeInt16((word)hue);
 						writeInt16(vendItem->GetAmount());
-                        uint price = vendItem->GetVendorPrice(iConvertFactor);
-						writeInt16((word)( (price > UINT16_MAX) ? UINT16_MAX : price ));
+
+						uint price = 0;
+
+						// If OVERRIDE.VALUE is define on the script and this NPC buy this item at a specific price, we use this price in priority
+						// Else, we calculate the value of the item in the player's backpack
+						if (vendSell->GetKey("OVERRIDE.VALUE", true))
+						{
+							//Get the price on NPC template
+							price = vendSell->GetVendorPrice(iConvertFactor,1); 
+						}
+						else	
+						{
+							//Get the price/Value of the real item in the backpack
+							price = vendItem->GetVendorPrice(iConvertFactor,1); 
+						}
+
+						writeInt16((word)((price > UINT16_MAX) ? UINT16_MAX : price));
 						writeInt16((word)len);
 						writeStringFixedASCII(name, len);
 

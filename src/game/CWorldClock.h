@@ -11,10 +11,10 @@
 class CWorldClock
 {
 private:
-	int64 _iCurTick;            // Current TICK count of the server from it's first start.
-	CServerTime m_timeClock;    // Internal clock record, on msecs, used to advance the ticks.
-	int64 m_Clock_SysPrev;	    // SERVER time (in milliseconds) of the last OnTick()
-	CServerTime	m_nextTickTime;	// next time to do sector stuff.
+	int64 _iTickCur;            // Current TICK count of the server from its first start.
+	CServerTime _timeClock;     // SERVER TIME on the current game loop cycle (CWorld::OnTick method), used to advance the ticks.
+	int64 _iSysClock_Prev;	    // REAL WORLD TIME (in milliseconds) of the last game loop cycle.
+	CServerTime	_timeNextTick;	// SERVER TIME we'll run the next tick on (to do sector and other stuff).
 
 public:
 	static const char* m_sClassName;
@@ -31,18 +31,24 @@ public:
 	void Init();
 	void InitTime(int64 iTimeBase);
 	bool Advance();
-	inline void AdvanceTick()
+	inline void AdvanceTick() noexcept
 	{
-		++_iCurTick;
+		++_iTickCur;
 	}
-	inline CServerTime GetCurrentTime() const // in milliseconds
+	inline CServerTime GetCurrentTime() const noexcept // in milliseconds
 	{
-		return m_timeClock;
+		return _timeClock;
 	}
-	inline int64 GetCurrentTick() const
+	inline int64 GetCurrentTick() const noexcept
 	{
-		return _iCurTick;
+		return _iTickCur;
 	}
+
+private:
+	// To update the internal system clock after a WorldSave or Resync
+	friend class CWorld;
+
+	static int64 GetSystemClock() noexcept;
 };
 
 #endif // _INC_CWORLDCLOCK_H

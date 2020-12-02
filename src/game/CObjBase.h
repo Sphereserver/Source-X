@@ -29,7 +29,7 @@ class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, pub
 
 private:
 	int64 m_timestamp;          // TimeStamp
-	HUE_TYPE m_wHue;			// Hue or skin color. (CItems must be < 0x4ff or so)
+    
 
 protected:
 	CResourceRef m_BaseRef;     // Pointer to the resource that describes this type.
@@ -42,6 +42,7 @@ public:
     static const char *m_sClassName;
     static dword sm_iCount;    // how many total objects in the world ?
 
+    
     int _iCreatedResScriptIdx;	// index in g_Cfg.m_ResourceFiles of the script file where this obj was created
     int _iCreatedResScriptLine;	// line in the script file where this obj was created
 
@@ -55,7 +56,7 @@ public:
     word	m_defenseBase;	    // Armor for IsArmor items
     word	m_defenseRange;     // variable range of defense.
     int 	m_ModMaxWeight;		// ModMaxWeight prop.
-
+    HUE_TYPE m_wHue;			// Hue or skin color. (CItems must be < 0x4ff or so)
     CUID 	_uidSpawn;          // SpawnItem for this item
 
     CResourceRefArray m_OEvents;
@@ -567,7 +568,7 @@ public:
      *
      * @return  The hue.
      */
-	HUE_TYPE GetHue() const;
+	virtual HUE_TYPE GetHue() const;
 
 protected:
 

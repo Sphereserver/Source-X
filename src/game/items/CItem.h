@@ -585,6 +585,15 @@ public:
     */
     byte GetRangeH() const;
 
+	/**
+  * @fn  HUE_TYPE GetHue() const;
+  *
+  * @brief   Gets the hue.
+  *
+  * @return  The hue.
+  */
+	virtual HUE_TYPE GetHue() const override;
+
 	void SetAttr(uint64 uiAttr)
 	{
 		m_Attr |= uiAttr;
