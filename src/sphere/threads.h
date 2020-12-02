@@ -315,6 +315,7 @@ TlsValue<T>::TlsValue()
 	_key = TlsAlloc();
 	_ready = (_key != TLS_OUT_OF_INDEXES);
 #else
+	_key = 0;
 	_ready = (pthread_key_create(&_key, nullptr) == 0);
 #endif
 }

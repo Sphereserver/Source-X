@@ -849,7 +849,7 @@ int CClient::OnSkill_ItemID( CUID uid, int iSkillLevel, bool fTest )
 	else
 	{
 		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_ITEMID_GOLD ),
-			(pItemVend->GetVendorPrice(-15) * pItem->GetAmount()), pItemVend->GetNameFull(true));
+			(pItemVend->GetVendorPrice(-15,0) * pItem->GetAmount()), pItemVend->GetNameFull(true));
 	}
 
 	// Whats it made of ?

@@ -163,7 +163,7 @@ bool PacketCreate::doCreate(CNetState* net, lpctstr charname, bool fFemale, RACE
 	{
 		// logging in as a new player whilst already online !
 		client->addSysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_ALREADYONLINE));
-		g_Log.Event(LOGM_CLIENTS_LOG|LOGM_NOCONTEXT, "%lx:Account '%s' already in use\n", net->id(), account->GetName());
+		g_Log.Event(LOGM_CLIENTS_LOG|LOGM_NOCONTEXT, "%x:Account '%s' already in use\n", net->id(), account->GetName());
 		return false;
 	}
 
@@ -229,7 +229,7 @@ block_creation:
 		return false;
 	}
 
-	g_Log.Event(LOGM_CLIENTS_LOG|LOGM_NOCONTEXT, "%lx:Account '%s' created new char '%s' [0%lx]\n", net->id(), account->GetName(), pChar->GetName(), (dword)pChar->GetUID() );
+	g_Log.Event(LOGM_CLIENTS_LOG|LOGM_NOCONTEXT, "%x:Account '%s' created new char '%s' [0%" PRIx32 "]\n", net->id(), account->GetName(), pChar->GetName(), (dword)pChar->GetUID() );
 	client->Setup_Start(pChar);
 	return true;
 }
@@ -775,7 +775,7 @@ bool PacketVendorBuyReq::onReceive(CNetState* net)
 			else if (!items[index].m_serial.IsValidUID())
 			{
 				items[index].m_serial = serial;
-				items[index].m_price = item->GetVendorPrice(iConvertFactor);
+				items[index].m_price = item->GetVendorPrice(iConvertFactor,0);
 				break;
 			}
 		}

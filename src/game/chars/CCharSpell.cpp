@@ -1594,8 +1594,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case SPELL_Protection:
 		case SPELL_Arch_Prot:
 			{
-				ushort uiPhysicalResist = 0;
-				ushort uiMagicResist = 0;
+				int iPhysicalResist = 0;
+				int iMagicResist = 0;
 				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 				{
 					ushort uiCasterEvalInt = pCaster->Skill_GetBase(SKILL_EVALINT), uiCasterMeditation = pCaster->Skill_GetBase(SKILL_MEDITATION);
@@ -1603,14 +1603,15 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					ushort uiMyMagicResistance = Skill_GetBase(SKILL_MAGICRESISTANCE), uiMyInscription = Skill_GetBase(SKILL_INSCRIPTION);
                     wStatEffectRef = (uiCasterEvalInt + uiCasterMeditation + uiCasterInscription) / 40;
                     wStatEffectRef = minimum(75, wStatEffectRef);
-					uiPhysicalResist = 15 - (uiCasterInscription / 200);
-					uiMagicResist = minimum(uiMyMagicResistance, 350 - (uiMyInscription / 20));
+					
+					iPhysicalResist = 15 - (uiCasterInscription / 200);
+					iMagicResist = minimum(uiMyMagicResistance, 350 - (uiMyInscription / 20));
 
-					pSpell->m_itSpell.m_PolyStr = (short)(maximum(-INT16_MAX, minimum(INT16_MAX,uiPhysicalResist)));
-					pSpell->m_itSpell.m_PolyDex = (short)(maximum(-INT16_MAX, minimum(INT16_MAX,uiMagicResist)));
+					pSpell->m_itSpell.m_PolyStr = (short)(maximum(-INT16_MAX, minimum(INT16_MAX, iPhysicalResist)));
+					pSpell->m_itSpell.m_PolyDex = (short)(maximum(-INT16_MAX, minimum(INT16_MAX, iMagicResist)));
                     _CheckLimitEffectSkill(pSpell->m_itSpell.m_PolyDex, this, SKILL_MAGICRESISTANCE);
 
-                    ModPropNum(COMP_PROPS_CHAR, PROPCH_RESPHYSICAL, -uiPhysicalResist, true);
+                    ModPropNum(COMP_PROPS_CHAR, PROPCH_RESPHYSICAL, -iPhysicalResist, true);
                     ModPropNum(COMP_PROPS_CHAR, PROPCH_FASTERCASTING, -2, true);
 					Skill_AddBase(SKILL_MAGICRESISTANCE, - pSpell->m_itSpell.m_PolyDex);
 				}
@@ -1631,8 +1632,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					pClient->removeBuff(BuffIcon);
 					if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 					{
-						Str_FromI(-uiPhysicalResist, NumBuff[0], sizeof(NumBuff[0]), 10);
-						Str_FromI(-uiMagicResist/10, NumBuff[1], sizeof(NumBuff[0]), 10);
+						Str_FromI(-iPhysicalResist, NumBuff[0], sizeof(NumBuff[0]), 10);
+						Str_FromI(-iMagicResist/10, NumBuff[1], sizeof(NumBuff[0]), 10);
 						pClient->addBuff(BuffIcon, BuffCliloc, 1075815, wTimerEffect, pNumBuff, 2);
 					}
 					else
@@ -2348,9 +2349,9 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 			{
 				if ( iLowerReagentCost <= Calc_GetRandVal(100))
 				{
-					const CResourceQtyArray * pRegs = &(pSpellDef->m_Reags);
-					CContainer* pCont = dynamic_cast<CContainer*>(this);
-					size_t iMissing = pCont->ResourceConsumePart( pRegs, 1, 100, fTest );
+					CContainer* pCont = static_cast<CContainer*>(this);
+					const CResourceQtyArray* pRegs = &(pSpellDef->m_Reags);
+					const size_t iMissing = pCont->ResourceConsumePart( pRegs, 1, 100, fTest );
 					if ( iMissing != SCONT_BADINDEX )
 					{
 						if ( fFailMsg )

@@ -484,6 +484,7 @@ public:
 	HUE_TYPE m_iColorNotoInvulGameMaster;// Purple
 	HUE_TYPE m_iColorNotoDefault;       // Grey
 
+    HUE_TYPE m_iColorInvisItem;	// 04001 = transparent color, 0 = default item color , 1000 = Grey color (Define how the invis item are see by GM)
 	HUE_TYPE m_iColorInvis;     // 04001 = transparent color, 0 = default
 	HUE_TYPE m_iColorInvisSpell;// 04001 = transparent color, 0 = default (This one is for s_invisibility spell, this includes the invis potion.)
 	HUE_TYPE m_iColorHidden;    // 04001 = transparent color, 0 = default

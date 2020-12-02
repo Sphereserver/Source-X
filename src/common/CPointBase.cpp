@@ -729,10 +729,9 @@ bool CPointBase::r_LoadVal( lpctstr ptcKey, lpctstr pszArgs )
 {
 	ADDTOCALLSTACK("CPointBase::r_LoadVal");
 	int index = FindTableSorted( ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
-	if ( index <= 0 )
-	{
+	if ( index < 0 )
 		return false;
-	}
+
 	int iVal = Exp_GetVal(pszArgs);
 	switch (index)
 	{
