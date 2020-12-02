@@ -1901,7 +1901,7 @@ bool CItem::SetName( lpctstr pszName )
 	return SetNamePool( pszName );
 }
 
-HUE_TYPE CItem::GetHue() const  //Override of CObjBase::GetHue()
+HUE_TYPE CItem::GetHue_visualforclient() const
 {
 	if (g_Cfg.m_iColorInvisItem) //If setting ask a specific color
 	{
