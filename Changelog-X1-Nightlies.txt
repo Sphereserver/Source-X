@@ -2319,3 +2319,8 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		change the gold you will receive when selling it to a NPC. PRICE is now exclusive to player vendor.
 - Added: tag.override.value can now be add to an item to change his value when trading with a NPC. In scripts, on vendor template 
 		(BUY= or SELL=). For changing the value of the itemdef, you must use tag.override.value=xxx instead of old syntax price=xxx.
+		
+		
+05-12-2020, Drk84
+-Fixed: NPCs stop attacking after being poisoned NPC  (Issue #487).
+-Fixed: Fixweight not working properly (Issue #502).
