@@ -2324,3 +2324,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - [Ports from 0.56d, 12 Mar 2019 , Coruja]
 - Added: Pet command 'release' now will look for new 'd_pet_release' confirmation dialog.
 		Note: If dialog exists it will open the confirmation dialog, otherwise the pet will be released without ask for confirmation
+	
+05-12-2020, Drk84
+-Fixed: NPCs stop attacking after being poisoned NPC  (Issue #487).
+-Fixed: Fixweight not working properly (Issue #502).
