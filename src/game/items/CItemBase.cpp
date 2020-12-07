@@ -1122,14 +1122,17 @@ bool CItemBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 			if (!IsType(IT_SHIP))
 				return false;
 			CItemBaseMulti * pItemMulti = dynamic_cast<CItemBaseMulti*>(this);
+			ASSERT(pItemMulti);
 			sVal.FormatVal(pItemMulti->m_SpeedMode);
-		}break;
+		}
+		break;
 		case IBC_SHIPSPEED:
 		{
 			if (!IsType(IT_SHIP))
 				return false;
 			ptcKey += 9;
 			CItemBaseMulti * pItemMulti = dynamic_cast<CItemBaseMulti*>(this);
+			ASSERT(pItemMulti);
 
 			if (*ptcKey == '.')
 			{
@@ -1463,6 +1466,8 @@ bool CItemBase::r_LoadVal( CScript &s )
 			{
 				++ptcKey;
 				CItemBaseMulti *pItemMulti = dynamic_cast<CItemBaseMulti*>(dynamic_cast<CItemBase*>(this));
+				ASSERT(pItemMulti);
+
 				if (!strnicmp(ptcKey, "TILES", 5))
 				{
 					pItemMulti->_shipSpeed.tiles = (uchar)(s.GetArgVal());
@@ -1473,6 +1478,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 					pItemMulti->_shipSpeed.tiles = (uchar)(s.GetArgVal());
 					return true;
 				}
+
 				int64 piVal[2];
 				size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, CountOf(piVal));
 				if (iQty == 2)
@@ -1492,8 +1498,10 @@ bool CItemBase::r_LoadVal( CScript &s )
                 return false;
             }
             CItemBaseMulti * pItemMulti = dynamic_cast<CItemBaseMulti*>(this);
+			ASSERT(pItemMulti);
             pItemMulti->_iMultiCount = s.GetArgU8Val();
-        }break;
+        }
+		break;
 		case IBC_CANUSE:
 			m_CanUse = s.GetArgVal();
 			break;

@@ -212,7 +212,7 @@ void CChar::Attacker_SetIgnore(const CChar * pChar, bool fIgnore)
 }
 
 // Ignoring this pChar on Hit checks
-void CChar::Attacker_SetIgnore(size_t attackerIndex, bool fIgnore)
+void CChar::Attacker_SetIgnore(int attackerIndex, bool fIgnore)
 {
     ADDTOCALLSTACK("CChar::Attacker_SetIgnore(idx)");
     if (m_lastAttackers.empty())

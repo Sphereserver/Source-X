@@ -18,7 +18,7 @@ bool CClient::Dialog_Setup( CLIMODE_TYPE mode, const CResourceID& rid, int iPage
 
 	CResourceDef *	pRes	= g_Cfg.ResourceGetDef( rid );
 	CDialogDef *	pDlg	= dynamic_cast <CDialogDef*>(pRes);
-	if ( !pRes )
+	if ( !pRes || !pDlg )
 	{
 		DEBUG_ERR(("Invalid RES_DIALOG.\n"));
 		return false;

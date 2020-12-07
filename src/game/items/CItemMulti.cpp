@@ -2294,7 +2294,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
             }
             else
             {
-                g_Log.EventError("Trying to redeed %s (0x%08x) with no redeed target, removing it instead.\n", GetName(), GetUID());
+                g_Log.EventError("Trying to redeed %s (0x%" PRIx32 ") with no redeed target, removing it instead.\n", GetName(), (dword)GetUID());
                 Delete();
                 return true;
             }

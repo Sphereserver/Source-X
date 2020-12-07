@@ -39,3 +39,7 @@ addons:
       
 script:
   - if [ $COVERITY_SCAN_BRANCH != 1 ]; then travis_terminate 0; fi
+
+after_script:
+  - echo "Printing Coverity log..."
+  - cat cov-int/scm_log.txt

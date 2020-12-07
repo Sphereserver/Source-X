@@ -56,21 +56,28 @@ lpctstr CServerTime::GetTimeMinDesc(int minutes) // static
     int hour = (minutes / 60) % 24;
 
     lpctstr pMinDif;
-    if (minute <= 14)
+    if (minute < 15)
+    {
         //		pMinDif = "";
         pMinDif = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_QUARTER_FIRST);
-    else if ((minute >= 15) && (minute <= 30))
+    }
+    else if ((minute >= 15) && (minute < 30))
+    {
         //		pMinDif = "a quarter past";
         pMinDif = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_QUARTER_SECOND);
-    else if ((minute >= 30) && (minute <= 45))
+    }
+    else if ((minute >= 30) && (minute < 45))
+    {
         //pMinDif = "half past";
         pMinDif = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_QUARTER_THIRD);
+    }
     else
     {
         //		pMinDif = "a quarter till";
         pMinDif = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_QUARTER_FOURTH);
         hour = (hour + 1) % 24;
     }
+
     /*
         static lpctstr constexpr sm_ClockHour[] =
         {
