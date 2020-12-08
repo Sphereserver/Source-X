@@ -655,13 +655,13 @@ bool CWorld::OpenScriptBackup( CScript & s, lpctstr pszBaseDir, lpctstr pszBaseN
 	// rename previous save to archive name.
 	CSString sSaveName;
 	sSaveName.Format( "%s" SPHERE_FILE "%s%s", pszBaseDir, pszBaseName, SPHERE_SCRIPT );
-
-	if ( ::rename(sSaveName, sArchive) )
-	{
-		// May not exist if this is the first time.
-		g_Log.Event(LOGM_SAVE|LOGL_WARN, "Rename %s to '%s' FAILED code %d?\n", static_cast<lpctstr>(sSaveName), static_cast<lpctstr>(sArchive), CSFile::GetLastError() );
-	}
-
+    if ( iSaveCount > 0 )
+    {
+        if ( ::rename(sSaveName, sArchive) )
+        {
+            g_Log.Event(LOGM_SAVE|LOGL_WARN, "Rename %s to '%s' FAILED code %d?\n", static_cast<lpctstr>(sSaveName), static_cast<lpctstr>(sArchive), CSFile::GetLastError() );
+        }
+    }
 	if ( ! s.Open( sSaveName, OF_WRITE|OF_TEXT|OF_DEFAULTMODE ))
 	{
 		g_Log.Event(LOGM_SAVE|LOGL_CRIT, "Save '%s' FAILED\n", static_cast<lpctstr>(sSaveName));
@@ -1282,7 +1282,7 @@ bool CWorld::LoadWorld() // Load world from script
 
 		LoadFile(sDataName, false);
 		LoadFile(sStaticsName, false);
-		if ( LoadFile(sWorldName) && LoadFile(sCharsName) && LoadFile(sMultisName, false))
+		if ( LoadFile(sWorldName, false) && LoadFile(sCharsName, false) && LoadFile(sMultisName, false))
 		{
 		    return true;
 		}
@@ -1326,9 +1326,13 @@ bool CWorld::LoadWorld() // Load world from script
 		sDataName = sArchive;
 	}
 
-	g_Log.Event(LOGL_FATAL|LOGM_INIT, "No previous backup available ?\n");
-	EXC_CATCH;
-	return false;
+	g_Log.Event(LOGL_WARN | LOGM_INIT, "No previous backup available ?\n");
+    if ( !Save(true) )
+        g_Log.Event(LOGL_FATAL | LOGM_INIT, "No save found unable to create new one.\n");
+    else
+        return true;
+    EXC_CATCH;
+    return false;
 }
 
 
