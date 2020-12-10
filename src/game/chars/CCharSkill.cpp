@@ -2269,7 +2269,7 @@ int CChar::Skill_Hiding( SKTRIG_TYPE stage )
 		ObjMessage(g_Cfg.GetDefaultMsg(DEFMSG_HIDING_SUCCESS), this);
 		StatFlag_Set(STATF_HIDDEN);
 		Reveal(STATF_INVISIBLE);	// clear previous invisibility spell effect (this will not reveal the char because STATF_HIDDEN still set)
-		UpdateMode();
+		UpdateMode(nullptr, true);
 		if ( IsClientActive() )
 		{
 			GetClientActive()->removeBuff( BI_HIDDEN );
