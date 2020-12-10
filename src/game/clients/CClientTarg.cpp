@@ -160,6 +160,11 @@ bool CClient::Cmd_Control( CChar * pChar2 )
 	ASSERT(m_pChar);
 	CChar * pChar1 = m_pChar;
 
+	//Switch their home position to avoid the pChar1 corpse teleport to his home(far away)
+	CPointMap homeP1 = pChar1->m_ptHome;
+	pChar1->m_ptHome.Set(pChar2->m_ptHome);
+	pChar2->m_ptHome.Set(homeP1);
+
 	// Put my newbie equipped items on it.
 	for (CSObjContRec* pObjRec : pChar1->GetIterationSafeContReverse())
 	{
