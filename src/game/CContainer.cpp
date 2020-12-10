@@ -99,7 +99,13 @@ int CContainer::FixWeight()
 	{
 		CItemContainer *pCont = dynamic_cast<CItemContainer *>(pObjRec);
 		if (!pCont)
+		{
+			//For every non-container item inside this container add its weight to it.
+			CItem* pItem = dynamic_cast<CItem*>(pObjRec);
+			if (pItem)
+				m_totalweight += pItem->GetWeight();
 			continue;
+		}
 
         pCont->FixWeight();
         if (!pCont->IsWeighed())	// bank box doesn't count for weight.
