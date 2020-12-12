@@ -657,14 +657,18 @@ byte CChar::GetModeFlag( const CClient *pViewer ) const
 		mode |= CHARMODE_WAR;
 
 	uint64 iFlags = STATF_SLEEPING;
-	if ( !g_Cfg.m_iColorInvis )	//This is needed for Serv.ColorInvis to work, proper flags must be set
+	
+	//When you want change the color of character anim, you must evitate to send CHARMODE_INVIS because the anim will automaticly be grey
+	//Here we check if it's define on the ini that you need override the color
+	if ( !g_Cfg.m_iColorInvis )			//Serv.ColorInvis
         iFlags |= STATF_INSUBSTANTIAL;
-	if ( !g_Cfg.m_iColorHidden )	//serv.ColorHidden
+	if ( !g_Cfg.m_iColorHidden )		//serv.ColorHidden
         iFlags |= STATF_HIDDEN;
 	if ( !g_Cfg.m_iColorInvisSpell )	//serv.ColorInvisSpell
         iFlags |= STATF_INVISIBLE;
+	
 	if ( IsStatFlag(iFlags) )	// Checking if I have any of these settings enabled on the ini and I have any of them, if so ... CHARMODE_INVIS is set and color applied.
-		mode |= CHARMODE_INVIS;
+	mode |= CHARMODE_INVIS; //When sending CHARMODE_INVIS state to client, your character anim are grey
 
 	return mode;
 }

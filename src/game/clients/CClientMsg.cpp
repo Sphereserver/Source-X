@@ -993,10 +993,19 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 
 	if ( m_pChar->IsStatFlag( STATF_HALLUCINATING ))
 		wHue = (HUE_TYPE)(Calc_GetRandVal( HUE_DYE_HIGH ));
-	else if ( pChar->IsStatFlag(STATF_STONE))
+
+	else if ( pChar->IsStatFlag(STATF_STONE)) //Client do not have stone state. So we must send the hue we want. (Affect the paperdoll hue as well)
 		wHue = HUE_STONE;
-	else if ( pChar->IsStatFlag(STATF_INSUBSTANTIAL))
+	
+	// Normaly, client automaticly change the anim color in grey when someone is insubtantial, hidden or invisible. Paperdoll are never affected by this.
+	// The next 3 state overwrite the client process and force ITEM color to have a specific color. It cause that Paperdoll AND anim get the color.
+	else if ( pChar->IsStatFlag(STATF_INSUBSTANTIAL) && g_Cfg.m_iColorInvis)
 		wHue = g_Cfg.m_iColorInvis;
+	else if (pChar->IsStatFlag(STATF_HIDDEN) && g_Cfg.m_iColorHidden)
+		wHue = g_Cfg.m_iColorHidden;
+	else if (pChar->IsStatFlag(STATF_INVISIBLE) && g_Cfg.m_iColorInvisSpell)
+		wHue = g_Cfg.m_iColorInvisSpell;
+		
 	else
 	{
 		if ( pItemDef && (uiResDisp < pItemDef->GetResLevel() ) )
@@ -1051,13 +1060,16 @@ void CClient::GetAdjustedCharID( const CChar * pChar, CREID_TYPE &id, HUE_TYPE &
 	}
 	else
 	{
-		if ( pChar->IsStatFlag(STATF_STONE) )	// turned to stone.
+		if ( pChar->IsStatFlag(STATF_STONE) )	//Client do not have stone state. So we must send the hue we want. (Affect the paperdoll hue as well)
 			wHue = HUE_STONE;
-		else if ( pChar->IsStatFlag(STATF_INSUBSTANTIAL) )	// turned to stone.
+		
+		// Normaly, client automaticly change the anim color in grey when someone is insubtantial, hidden or invisible. Paperdoll are never affected by this.
+		// The next 3 state overwrite the client process and force SKIN color to have a specific color. It cause that Paperdoll AND anim get the color.
+		else if ( pChar->IsStatFlag(STATF_INSUBSTANTIAL) && g_Cfg.m_iColorInvis)
 			wHue = g_Cfg.m_iColorInvis;
-		else if ( pChar->IsStatFlag(STATF_HIDDEN) )	// turned to stone.
+		else if ( pChar->IsStatFlag(STATF_HIDDEN) && g_Cfg.m_iColorHidden)
 			wHue = g_Cfg.m_iColorHidden;
-		else if ( pChar->IsStatFlag(STATF_INVISIBLE) )	// turned to stone.
+		else if ( pChar->IsStatFlag(STATF_INVISIBLE) && g_Cfg.m_iColorInvisSpell)
 			wHue = g_Cfg.m_iColorInvisSpell;
 		else
 		{

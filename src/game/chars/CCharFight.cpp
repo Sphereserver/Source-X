@@ -874,6 +874,7 @@ effect_bounce:
 			attacker.elapsed = 0;
 			attacker.amountDone = maximum( 0, iDmg );
 			attacker.threat = maximum( 0, iDmg );
+			attacker.ignore = false;
 			m_lastAttackers.emplace_back(std::move(attacker));
 		}
 

@@ -4670,7 +4670,7 @@ bool PacketPropertyList::onSend(const CClient* client)
 
 	const CObjBase* object = m_object.ObjFind();
 	int iCharVisualRange = character->GetVisualRange();
-	if (!object || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, UO_MAP_VIEW_SIZE_DEFAULT))
+	if (!object || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, UO_MAP_VIEW_SIZE_DEFAULT) && !character->IsPriv(PRIV_ALLSHOW))
 		return false;
 
 	if (hasExpired(30 * MSECS_PER_SEC))

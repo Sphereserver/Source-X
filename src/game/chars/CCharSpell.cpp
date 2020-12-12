@@ -1137,6 +1137,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			StatFlag_Set(STATF_INVISIBLE);
 			Reveal(STATF_HIDDEN);	// clear previous Hiding skill effect (this will not reveal the char because STATF_Invisibility still set)
 			UpdateModeFlag();
+			UpdateMode(nullptr, true);
 			if (pClient && IsSetOF(OF_Buffs))
 			{
 				pClient->removeBuff(BI_INVISIBILITY);

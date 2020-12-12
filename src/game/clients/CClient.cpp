@@ -305,11 +305,17 @@ bool CClient::CanSee( const CObjBaseTemplate * pObj ) const
 	if ( !m_pChar || !pObj )
 		return false;
 
-	if (!IsPriv(PRIV_ALLSHOW) && pObj->IsChar())
+	if ( pObj->IsChar() )
 	{
 		const CChar *pChar = static_cast<const CChar*>(pObj);
-		if (pChar->IsDisconnected())
-			return false;
+		if ( pChar->IsDisconnected() )
+        {
+            if( !IsPriv(PRIV_ALLSHOW) )
+                return false;
+            //dont show pet when is ridden (cause double)
+            else if ( pChar->IsStatFlag(STATF_PET) && pChar->IsStatFlag(STATF_RIDDEN) )
+                return false;
+        }
 	}
 	return m_pChar->CanSee( pObj );
 }
