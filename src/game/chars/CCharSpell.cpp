@@ -19,7 +19,7 @@ SPELL_TYPE CChar::Spell_GetIndex(SKILL_TYPE skill)	// Returns the first spell fo
 
 	if (!g_Cfg.IsSkillFlag(skill, SKF_MAGIC))
 		return SPELL_NONE;
-	 
+
 	switch (skill)
 	{
 		case SKILL_MAGERY:
