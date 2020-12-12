@@ -19,7 +19,7 @@ SPELL_TYPE CChar::Spell_GetIndex(SKILL_TYPE skill)	// Returns the first spell fo
 
 	if (!g_Cfg.IsSkillFlag(skill, SKF_MAGIC))
 		return SPELL_NONE;
-
+	 
 	switch (skill)
 	{
 		case SKILL_MAGERY:
@@ -492,7 +492,8 @@ bool CChar::Spell_Resurrection(CItemCorpse * pCorpse, CChar * pCharSrc, bool fNo
 	}
 
 	CSpellDef *pSpellDef = g_Cfg.GetSpellDef(SPELL_Resurrection);
-	Effect(EFFECT_OBJ, pSpellDef->m_idEffect, this, 10, 16);
+	if (pSpellDef->m_idEffect)
+		Effect(EFFECT_OBJ, pSpellDef->m_idEffect, this, 10, 16);
 	Sound(pSpellDef->m_sound);
     if (IsClientActive())
     {
@@ -3616,7 +3617,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		case SPELL_Reveal:
 			if ( !Reveal() )
             {
-                iEffectID = ITEMID_NOTHING;
+				iEffectID = ITEMID_NOTHING;
                 iSound = SOUND_NONE;
             }
 			break;
