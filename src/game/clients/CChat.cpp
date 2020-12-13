@@ -574,8 +574,6 @@ void CChat::GenerateChatName(CSString &sName, const CClient * pClient) // static
 	lpctstr pszName = nullptr;
 	if (pClient->GetChar() != nullptr)
 		pszName = pClient->GetChar()->GetName();
-	else if (pClient->GetAccount() != nullptr)
-		pszName = pClient->GetAccount()->GetName();
 
 	if (pszName == nullptr)
 		return;
