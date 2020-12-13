@@ -825,7 +825,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 		// To get milliseconds precision we must get the system clock manually at each walk request (the server clock advances only at every tick).
 		const int64 iCurTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
-        if ( IsSetEF(EF_FastWalkPrevention) && !m_pChar->IsPriv(PRIV_GM) && !(m_pChar->m_pPlayer->m_speedMode & 0x01))
+        if ( IsSetEF(EF_FastWalkPrevention) && !m_pChar->IsPriv(PRIV_GM) )
         {
             if ( iCurTime < m_timeNextEventWalk )		// fastwalk detected (speedhack)
             {
@@ -834,7 +834,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
             }
 
             int64 iDelay = 0;
-            if ( m_pChar->IsStatFlag(STATF_ONHORSE|STATF_HOVERING) )
+            if ( m_pChar->IsStatFlag(STATF_ONHORSE|STATF_HOVERING) || (m_pChar->m_pPlayer->m_speedMode & 0x01) )
                 iDelay = (rawdir & 0x80) ? 70 : 170;	// 100ms : 200ms
             else
                 iDelay = (rawdir & 0x80) ? 170 : 370;	// 200ms : 400ms
