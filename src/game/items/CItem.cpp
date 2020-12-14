@@ -1587,8 +1587,7 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	 
 	SetDecayTime(iDecayTime);
 	Sound(GetDropSound(nullptr));
-	
-		
+	return true;	
 }
 
 bool CItem::MoveNearObj( const CObjBaseTemplate* pObj, ushort uiSteps )
