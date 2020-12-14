@@ -1579,7 +1579,7 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 		++iItemCount;
 		if ( iItemCount > g_Cfg.m_iMaxItemComplexity )
 		{
-			Speak("Too many items here!");
+			Speak(g_Cfg.GetDefaultMsg(DEFMSG_TOO_MANY_ITEM));
 			iDecayTime = 60 * MSECS_PER_SEC;		// force decay (even when REGION_FLAG_NODECAY is set)
 			break;
 		}
