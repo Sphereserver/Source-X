@@ -836,9 +836,9 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 
             int64 iDelay = 0;
             if ( m_pChar->IsStatFlag(STATF_ONHORSE|STATF_HOVERING) || (m_pChar->m_pPlayer->m_speedMode & 0x01) )
-                iDelay = (rawdir & 0x80) ? 70 : 170;	// 100ms : 200ms
+                iDelay = (rawdir & 0x80) ? 80 : 180;	// 100ms : 200ms  (We add 20ms to be more permisive. May be ajust with FastWalkSetting in ini)
             else
-                iDelay = (rawdir & 0x80) ? 170 : 370;	// 200ms : 400ms
+                iDelay = (rawdir & 0x80) ? 180 : 380;	// 200ms : 400ms
 
             m_timeNextEventWalk = iCurTime + iDelay;
         }
