@@ -1585,6 +1585,20 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 		}
 	}
 	 
+	/*  // From 56b
+        if ( iItemCount > g_Cfg.m_iMaxItemComplexity )
+        {
+            Speak("Too many items here!");
+            if ( iItemCount > g_Cfg.m_iMaxItemComplexity + g_Cfg.m_iMaxItemComplexity/2 )
+            {
+                Speak("The ground collapses!");
+                Delete();
+            }
+            // attempt to reject the move.
+            return false;
+        }
+        */
+	
 	SetDecayTime(iDecayTime);
 	Sound(GetDropSound(nullptr));
 	return true;	
