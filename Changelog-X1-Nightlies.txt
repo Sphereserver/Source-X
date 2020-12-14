@@ -2329,3 +2329,8 @@ Must have event, even if it's empty, since it's applied by the source to generat
 	Fixed: Items inside trade window not firing @DropOn_Item trigger when the trade move the item to player bacpkack.
 	PS: Using return 1 here will not cancel the trade, this must be done directly on @TradeAccepted/@CharTradeAccepted triggers.
 - [Port from 0.56d, 12-11-2016, Coruja] Fixed: Resurrect, showing effect animation even when EFFECT_ID=0 is set
+
+14-12-2020, Jhobean
+-Fixed: FastWalkPrevention will not detect when Speedmode = 1
+-Added: Depending on server configuration, FastWalkPrevention can give False Positive detection. These detection is see like lag for player
+	To avoid this kind of detection, FastWalkSetting is added on the ini and give the possibility to fine tune the setting. You should maintain it to 0 if you can.

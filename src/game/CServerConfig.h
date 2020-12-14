@@ -365,6 +365,7 @@ public:
 	int  m_iAttackerTimeout;    // Timeout for an attacker  (stored in seconds, not in milliseconds).
 	int  m_iNotoTimeout;        // Timeout for NOTOriety checks (stored in seconds, not in milliseconds).
 	uint m_iMaxSkill;           // Records the higher [SKILL ] index.
+    int m_iFastWalkSetting;     // Fine tuning the fastwalk prevention to avoid Lag (false-positive)
 
 	int	m_iDistanceYell;        // Max distance at which Yells can be readed.
 	int	m_iDistanceWhisper;     // Max distance at which Whispers can be readed.
