@@ -749,7 +749,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "EXPERIENCEMODE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iExperienceMode),		0 }},
 	{ "EXPERIENCESYSTEM",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bExperienceSystem),	0 }},
 	{ "EXPERIMENTAL",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iExperimentalFlags),	0 }},
-	{ "FASTWALKSETTING",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFastWalkSetting),		0 }},
+	{ "FASTWALKSETTING",		{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iFastWalkSetting),		0 }},
 	{ "FEATUREAOS",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureAOS),			0 }},
 	{ "FEATUREEXTRA",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureExtra),		0 }},
 	{ "FEATUREKR",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureKR),			0 }},
