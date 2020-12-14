@@ -2325,6 +2325,10 @@ Must have event, even if it's empty, since it's applied by the source to generat
 -Fixed: Fixweight not working properly (Issue #502).
 
 11-12-2020, Jhobean
+- [Ports from 0.56d, 01-08-2016, Coruja]
+	Fixed: Items inside trade window not firing @DropOn_Item trigger when the trade move the item to player bacpkack.
+	PS: Using return 1 here will not cancel the trade, this must be done directly on @TradeAccepted/@CharTradeAccepted triggers.
+- [Ports from 0.56d, 12-11-2016, Coruja] Fixed: Resurrect, showing effect animation even when EFFECT_ID=0 is set
 - [Ports from 0.56d, 12 Mar 2019 , Coruja]
 - Added: Pet command 'release' now will look for new 'd_pet_release' confirmation dialog.
 		Note: If dialog exists it will open the confirmation dialog, otherwise the pet will be released without ask for confirmation
