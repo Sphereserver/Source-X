@@ -879,8 +879,12 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 				CAccount * pAcc = g_Accounts.Account_Find( szAccount );
 				if (pAcc)
 				{
-					pAcc->m_TagDefs.SetNum("clientversion", m_Crypt.GetClientVer());
-					pAcc->m_TagDefs.SetNum("reportedcliver", GetNetState()->getReportedVersion());
+                    if (m_Crypt.GetClientVer())
+                        pAcc->m_TagDefs.SetNum("clientversion", m_Crypt.GetClientVer());
+					if (GetNetState()->getReportedVersion())
+                        pAcc->m_TagDefs.SetNum("reportedcliver", GetNetState()->getReportedVersion());
+                    else
+                        new PacketClientVersionReq(this); // client version 0 ? ask for it.
 				}
 				else
 				{
