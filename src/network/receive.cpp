@@ -2475,6 +2475,9 @@ bool PacketClientVersion::onReceive(CNetState* net)
 
 		if ((g_Serv.m_ClientVersion.GetClientVer() != 0) && (g_Serv.m_ClientVersion.GetClientVer() != version))
 			client->addLoginErr(PacketLoginError::BadVersion);
+        //we have asked client version in serverlist to configure character list and game feature.
+        if ( client->m_pAccount )
+                    client->m_pAccount->m_TagDefs.SetNum("ReportedCliVer", version);
 	}
 
 	return true;
