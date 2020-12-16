@@ -152,10 +152,8 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 	case NV_PETSTABLE:
 		return( NPC_StablePetSelect( pCharSrc ));
 	case NV_RELEASE:
-		Skill_Start( SKILL_NONE );
-		NPC_PetClearOwners();
-		SoundChar( CRESND_RAND );
-		return true;
+		NPC_PetRelease();
+		break;
 	case NV_RESTOCK:	// individual restock command.
 		return NPC_Vendor_Restock(true, s.GetArgVal() != 0);
 	case NV_RUN:
