@@ -221,17 +221,10 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 			break;
 
 		case PC_RELEASE:
-			if ( IsStatFlag(STATF_CONJURED) || (m_pNPC->m_bonded && IsStatFlag(STATF_DEAD)) )
-			{
-				Effect(EFFECT_XYZ, ITEMID_FX_TELE_VANISH, this, 10, 15);
-				Sound(SOUND_TELEPORT);
-				Delete();
-				return true;
-			}
-			SoundChar(CRESND_NOTICE);
-			Skill_Start(SKILL_NONE);
-			NPC_PetClearOwners();
-			UpdatePropertyFlag();
+			if (IsValidDef("d_pet_release"))
+				pSrc->m_pClient->Dialog_Setup(CLIMODE_DIALOG, g_Cfg.ResourceGetIDType(RES_DIALOG, "d_pet_release"), 0, this);
+			else
+				NPC_PetRelease();
 			break;
 
 		case PC_DROP:
@@ -852,6 +845,26 @@ bool CChar::NPC_SetVendorPrice( CItem * pItem, int iPrice )
 	return true;
 }
 
+void CChar::NPC_PetRelease()
+{
+	ADDTOCALLSTACK("CChar::NPC_PetRelease");
+	if (!m_pNPC)
+		return;
+
+	if (IsStatFlag(STATF_CONJURED) || (m_pNPC->m_bonded && IsStatFlag(STATF_DEAD)))
+	{
+		Effect(EFFECT_XYZ, ITEMID_FX_TELE_VANISH, this, 10, 15);
+		Sound(SOUND_TELEPORT);
+		Delete();
+		return;
+	}
+
+	SoundChar(CRESND_NOTICE);
+	Skill_Start(SKILL_NONE);
+	NPC_PetClearOwners();
+	UpdatePropertyFlag();
+}
+
 void CChar::NPC_PetDesert()
 {
 	ADDTOCALLSTACK("CChar::NPC_PetDesert");
@@ -872,7 +885,6 @@ void CChar::NPC_PetDesert()
 			return;
 	}
 
-	NPC_PetClearOwners();
 	if ( ! pCharOwn->CanSee(this))
 		pCharOwn->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_DESERTED), GetName());
 
@@ -881,5 +893,5 @@ void CChar::NPC_PetDesert()
 	Speak(pszMsg);
 
 	// free to do as i wish !
-	Skill_Start( SKILL_NONE );
+	NPC_PetRelease();
 }

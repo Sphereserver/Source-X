@@ -1259,6 +1259,7 @@ public:
 	void NPC_ExtraAI();			//	NPC thread AI - some general extra operations
 	void NPC_AddSpellsFromBook(CItem * pBook);
 
+	void NPC_PetRelease();
 	void NPC_PetDesert();
 	void NPC_PetClearOwners();
 	bool NPC_PetSetOwner( CChar * pChar );
