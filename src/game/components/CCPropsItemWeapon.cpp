@@ -68,10 +68,13 @@ bool CCPropsItemWeapon::GetPropertyNumPtr(PropertyIndex_t iPropIndex, PropertyVa
 {
     ADDTOCALLSTACK("CCPropsItemWeapon::GetPropertyNumPtr");
     ASSERT(!IsPropertyStr(iPropIndex));
+
     if (_uiRange == 0)
     {
-        return false;   // not set
+        *piOutVal = 1;
+        return false;   // not set	
     }
+
     switch (iPropIndex)
     {
         case PROPIWEAP_RANGEL:
