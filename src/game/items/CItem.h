@@ -586,13 +586,13 @@ public:
     byte GetRangeH() const;
 
 	/**
-  * @fn  HUE_TYPE GetHue_visualforclient() const;
+  * @fn  HUE_TYPE GetHueVisible () const;
   *
   * @brief   Gets the "fake" hue before sending the packet to client. The real hue of the item do not change.
   *
   * @return  The hue that the client will see the item.
   */
-	HUE_TYPE GetHue_visualforclient() const;
+	HUE_TYPE GetHueVisible() const;
 
 	void SetAttr(uint64 uiAttr)
 	{
