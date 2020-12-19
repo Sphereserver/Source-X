@@ -2337,5 +2337,11 @@ Must have event, even if it's empty, since it's applied by the source to generat
 -Fixed: UnlockItem -1 doesn't remove flags from items inside multi.
 -Fixed: Serv.Itemdef.<ID>.Instances added dupeitems as instance. (Issue: #444)
 -Added: TAGAT to ACCOUNT reference. (Issue: #531)
--Fixed: Timerf stop space issue. (Issue: #554) [I used Nirad's recommendation, there was some other ways but i thought this was the basic]
+-Fixed: Timerf stop space issue. (Issue: #554)
+  I used Nirad's recommendation, there was some other ways but i thought this was basic solution.
 -Fixed: IDs from dupelist can't able to used as baseid for items. (Issue: 512)
+-Fixed: RangeL and RangeH return values. (Issue: #528)
+  I know Jhobean already sent a pull request for it, but the fix that he did doesn't have default values, which returns 0 on RangeH when doesn't specified.
+  So I thought to make another fix to set default values also.
+  And I think this issue also happening because ITEMDEF doesn't have RANGE value saved directly, so it need to return false first to set default values.
+  I thought that can have a reason to not added saving option, so i haven't changed it and just make a quick fix.
