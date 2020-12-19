@@ -293,6 +293,7 @@ public:
 		return m_qwFlags;
 	}
 	bool IsSameDispID( ITEMID_TYPE id ) const;
+	bool IsDupedItem( ITEMID_TYPE id ) const;
 	ITEMID_TYPE GetNextFlipID( ITEMID_TYPE id ) const;
 
 	virtual bool r_LoadVal( CScript & s ) override;

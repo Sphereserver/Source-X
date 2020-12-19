@@ -2332,3 +2332,10 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - [Ports from 0.56d, 12 Mar 2019 , Coruja]
 - Added: Pet command 'release' now will look for new 'd_pet_release' confirmation dialog.
 		Note: If dialog exists it will open the confirmation dialog, otherwise the pet will be released without ask for confirmation
+
+19-12-2020, xwerswoodx
+-Fixed: UnlockItem -1 doesn't remove flags from items inside multi.
+-Fixed: Serv.Itemdef.<ID>.Instances added dupeitems as instance. (Issue: #444)
+-Added: TAGAT to ACCOUNT reference. (Issue: #531)
+-Fixed: Timerf stop space issue. (Issue: #554) [I used Nirad's recommendation, there was some other ways but i thought this was the basic]
+-Fixed: IDs from dupelist can't able to used as baseid for items. (Issue: 512)

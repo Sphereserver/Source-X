@@ -910,6 +910,18 @@ bool CItemBase::IsSameDispID( ITEMID_TYPE id ) const
 	return false;
 }
 
+bool CItemBase::IsDupedItem( ITEMID_TYPE id ) const
+{
+	ADDTOCALLSTACK("CItemBase::IsDupedItem");
+	if (m_flip_id.empty())
+		return false;
+	for ( size_t i = 0; i < m_flip_id.size(); ++i ) {
+		if ( m_flip_id[i] == id)
+			return true;
+	}
+	return false;
+}
+
 void CItemBase::Restock()
 {
 	ADDTOCALLSTACK("CItemBase::Restock");
@@ -1644,8 +1656,16 @@ bool CItemBase::r_LoadVal( CScript &s )
                     g_Log.EventError( "Setting unknown base ID=0%x for base type %s\n", id, GetResourceName());
 					return false;
 				}
-
-                id = ITEMID_TYPE(pItemDef->m_dwDispIndex);
+				
+				/*
+				 * I add Is Duped Item check to check if item is from DUPELIST of base item, and ID won't change to baseid for unnecessarily.
+				 * I made this change to fix issue #512 (https://github.com/Sphereserver/Source-X/issues/512)
+				 * I leave a note here to know developers why I did this change.
+				 * xwerswoodx
+				 */
+				if (!pItemDef->IsDupedItem(id))
+					id = ITEMID_TYPE(pItemDef->m_dwDispIndex);
+					
                 if ( ! IsValidDispID(id) )
                 {
                     if (id >= g_Install.m_tiledata.GetItemMaxIndex())
