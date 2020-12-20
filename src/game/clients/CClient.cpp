@@ -830,7 +830,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				tchar *ppszArgs[2];
 				size_t iQty = Str_ParseCmds(s.GetArgStr(), ppszArgs, CountOf(ppszArgs));
 
-				if ( !IsValidGameObjDef(static_cast<lpctstr>(ppszArgs[0])) )
+				if ( !IsValidGameObjDef(ppszArgs[0]) )
 				{
 					//g_Log.EventWarn("Invalid ADD argument '%s'\n", pszArgs);
 					SysMessageDefault( DEFMSG_CMD_INVALID );
@@ -858,7 +858,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			}
 			else
 			{
-				if ( IsValidDef( "D_ADD" ) )
+				if ( IsValidResourceDef( "D_ADD" ) )
 					Dialog_Setup( CLIMODE_DIALOG, g_Cfg.ResourceGetIDType(RES_DIALOG, "D_ADD"), 0, this->GetChar() );
 				else
 					Menu_Setup( g_Cfg.ResourceGetIDType( RES_MENU, "MENU_ADDITEM"));

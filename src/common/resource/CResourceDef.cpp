@@ -40,7 +40,7 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
         if ( dwKeyVal == dwResPrivateUID )
         {
             // DEBUG_WARN(("DEFNAME=%s: redefinition (new value same as previous)\n", pszName));
-            // It happens tipically for types pre-defined in sphere_defs.scp and other things. Wanted behaviour.
+            // It happens tipically for types pre-defined in sphere_defs.scp and other things. We want this behaviour.
             return true;
         }
 

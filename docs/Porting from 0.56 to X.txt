@@ -44,15 +44,19 @@ Compatibility changes from 0.56d to X1
 - SPEECHCOLOR can't be used anymore to override the speech color of NPCS. Use SPEECHCOLOROVERRIDE instead.
 - Added: ModMaxHits, ModMaxMana, ModMaxStam properties. To avoid CONFLICTS, remove or comment the scripted functions
   with the same name in the sphere_events_npcs.scp of the default scriptpack.
-- DEF keyword doesn't find the numeric identifier of Resource (ITEMDEF/CHARDEF...) DEFNAMEs anymore. Use RESDEF. DEF is used to retrieve values from [DEFNAME] blocks.
+- DEF keyword doesn't find the numeric identifier of a Sphere Resource (ITEMDEF/CHARDEF...) DEFNAMEs anymore. Use RESDEF. DEF is used to retrieve values from [DEFNAME] sections.
   This can break compatibility with previous scripts, if you used DEF to retrieve items/chars defname numeric value. You have to use RESDEF now.
   You're safe (even if the underlying code is a bit slower) if you just used ID=i_dagger instead of ID=<DEF.i_dagger>.
+- Use the new RESDEFNAME section to define aliases for Sphere Resources defnames (like backwards compatibility defnames).
 - Added/changed some keywords for spawns (read the changelog for more). This causes a SAVE FILES INCOMPATIBILITY between x and 56d, because new x-only
   keywords will be saved, and those won't be recognized by 56d. If you want to port back the saves, you have to replace in sphereworld.scp the
   keyword SPAWNID with MORE1 in t_spawn_char and t_spawn_item items.
 - Changed: RANGEL returns the lowest range value, while RANGEH returns the highest range value (as it should have been, but it looks like it got changed in 56c or 56d).
 - @(Item)DropOn_Ground now fires BEFORE the new P is set! The new P is stored in the ARGS of the trigger. Prior to this change,
   the triggers were called after the new P was set.
+- PRICE=xxx will not work anymore to set a price on an item. Price will now be used only when a player vendor sells an item. If an item has a price value, no NPC will buy it at that value.
+  Value is READ only, if you want change the value of an item, you should use the new TAG.override.value. When selling your item to NPC, it will look this property first.
+  In your scripts, on your vendor template BUY= or SELL= if you want to set a different value of the itemdef you must use TAG.override.value=xxx instead of old syntax PRICE=xxx.
 - Now t_multi objects will be saved too in spheremultis.scp, along with t_multi_custom. This causes a SAVE FILES INCOMPATIBILITY between x and 56d.
   If you want to port back the saves, you'll need to manually move saved multis from spheremultis.scp to sphereworld.scp.
 - Reworked and added MULTIDEF properties.
@@ -60,9 +64,6 @@ Compatibility changes from 0.56d to X1
 - [sphere_defs_types_hardcoded.scp] Added: t_multi_addon=201.
 - [sphere_msgs.scp] Added: PROVOCATION_KIND.
 - [sphere_def.scp] Added: DEFNAMEs house_types, DEFNAMEs house_transfer_types, CAN_I_BLOCKLOS_HEIGHT.
-- price=xxx will not work anymore to fix a price on an item. Price will be use only when a player vendor sell an item. If an item have a price value, no NPC will buy it at this price.
-  Value is READ only, if you want change the value of an item, you should use the new tag.override.value. When selling your item to NPC, it will look this value first.
-  In your scripts, on your vendor template BUY= or SELL= if you want to set a different value of the itemdef you must use tag.override.value=xxx instead of old syntax price=xxx.
 
 Suggestions
 ------------------------

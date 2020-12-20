@@ -885,7 +885,7 @@ PacketItemContainer::PacketItemContainer(const CClient* target, const CItem* ite
 
 	const CItemBase* itemDefinition = item->Item_GetDef();
 	ITEMID_TYPE id = item->GetDispID();
-	HUE_TYPE hue = item->GetHue() & HUE_MASK_HI;
+	HUE_TYPE hue = item->GetHueVisible() & HUE_MASK_HI;
 
 	if (itemDefinition && target->GetResDisp() < itemDefinition->GetResLevel())
 	{
@@ -1228,7 +1228,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 
 		const CItemBase* itemDefinition = item->Item_GetDef();
 		ITEMID_TYPE id = item->GetDispID();
-		HUE_TYPE hue = item->GetHue() & HUE_MASK_HI;
+		HUE_TYPE hue = item->GetHueVisible() & HUE_MASK_HI;
 
 		if ( fFilterLayers )
 		{
@@ -5125,7 +5125,7 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item)
             amount = itemAmount;
     }
 	CPointMap pt = item->GetTopPoint();
-	HUE_TYPE hue = item->GetHue();
+	HUE_TYPE hue = item->GetHueVisible();
 	byte light = 0;
 	byte flags = 0;
 

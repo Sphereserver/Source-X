@@ -221,7 +221,7 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 			break;
 
 		case PC_RELEASE:
-			if (IsValidDef("d_pet_release"))
+			if (IsValidResourceDef("d_pet_release"))
 				pSrc->m_pClient->Dialog_Setup(CLIMODE_DIALOG, g_Cfg.ResourceGetIDType(RES_DIALOG, "d_pet_release"), 0, this);
 			else
 				NPC_PetRelease();

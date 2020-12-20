@@ -165,7 +165,7 @@ private:
 
 uint GetIdentifierString( tchar * szTag, lpctstr pszArgs );
 
-bool IsValidDef( lpctstr pszTest );
+bool IsValidResourceDef( lpctstr pszTest );
 bool IsValidGameObjDef( lpctstr pszTest );
 
 bool IsSimpleNumberString( lpctstr pszTest );
