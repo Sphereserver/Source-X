@@ -568,7 +568,7 @@ public:
      *
      * @return  The hue.
      */
-	virtual HUE_TYPE GetHue() const;
+	HUE_TYPE GetHue() const;
 
 protected:
 
