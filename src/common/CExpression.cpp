@@ -241,15 +241,6 @@ bool IsValidGameObjDef( lpctstr pszTest )
 {
 	if (!IsSimpleNumberString(pszTest))
 	{
-		/*
-		 * We need to check if defname is exist first, and get the value to override pszTest lpctstr to let people can add item from defname.
-		 * Check issue #357 for more information (https://github.com/Sphereserver/Source-X/issues/357)
-		 * xwerswoodx
-		 */
-		const CVarDefCont * pDefBase = g_Exp.m_VarDefs.GetKey(pszTest);
-		if (pDefBase != nullptr)
-			pszTest = pDefBase->GetValStr();
-		
 		const CVarDefCont * pVarBase = g_Exp.m_VarResDefs.CheckParseKey( pszTest );
 		if ( pVarBase == nullptr )
 			return false;
