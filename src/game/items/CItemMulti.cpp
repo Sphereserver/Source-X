@@ -1716,18 +1716,18 @@ void CItemMulti::UnlockItem(const CUID& uidItem)
 void CItemMulti::UnlockAllItems() {
     ADDTOCALLSTACK("CItemMulti::UnlockAllItems");
     for (size_t i = 0; i < _lLockDowns.size(); ++i)
-	{
-    	const CUID& pUID = _lLockDowns[i];
-    	CItem *pItem = pUID.ItemFind();
-    	if (!pItem)
-    		continue;
-    	pItem->ClrAttr(ATTR_LOCKEDDOWN);
-    	pItem->m_uidLink.InitUID();
-    	CScript event("events -ei_house_lockdown");
-    	pItem->r_LoadVal(event);
-    	pItem->SetLockDownOfMulti(CUID());
+    {
+        const CUID& pUID = _lLockDowns[i];
+        CItem *pItem = pUID.ItemFind();
+        if (!pItem)
+            continue;
+        pItem->ClrAttr(ATTR_LOCKEDDOWN);
+        pItem->m_uidLink.InitUID();
+        CScript event("events -ei_house_lockdown");
+        pItem->r_LoadVal(event);
+        pItem->SetLockDownOfMulti(CUID());
     }
-	_lLockDowns.clear();
+    _lLockDowns.clear();
 }
 
 int CItemMulti::GetLockedItemIndex(const CUID& uidItem) const
