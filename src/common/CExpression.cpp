@@ -249,13 +249,23 @@ bool IsValidGameObjDef( lpctstr pszTest )
 {
 	if (!IsSimpleNumberString(pszTest))
 	{
+		/*
+		 * We need to check if defname is exist first, and get the value to override pszTest lpctstr to let people can add item from defname.
+		 * Check issue #357 for more information (https://github.com/Sphereserver/Source-X/issues/357)
+		 * xwerswoodx
+		 */
+		const CVarDefCont * pDefBase = g_Exp.m_VarDefs.GetKey(pszTest);
+		if (pDefBase != nullptr)
+			pszTest = pDefBase->GetValStr();
+		
 		const CVarDefCont * pVarBase = g_Exp.m_VarResDefs.CheckParseKey( pszTest );
 		if ( pVarBase == nullptr )
 			return false;
+
 		const tchar ch = *pVarBase->GetValStr();
 		if (( ! ch ) || ( ch == '<'))
 			return false;
-
+		
 		const CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, pszTest);
         const RES_TYPE resType = rid.GetResType();
 		if ((resType != RES_CHARDEF) && (resType != RES_ITEMDEF) && (resType != RES_SPAWN) && (resType != RES_TEMPLATE) && (resType != RES_CHAMPION))
@@ -626,7 +636,17 @@ try_dec:
 								iResult = (llong)sqrt( (double)iTosquare );
 							}
 							else
-								DEBUG_ERR(( "Exp_GetVal: Sqrt of negative number (%lld) is impossible\n", iTosquare ));
+							{
+								/*
+							 	 * Normally SQRT is impossible to do in negative values for math, but I am just doing it 
+								 * because @nolok added issue #371 (https://github.com/Sphereserver/Source-X/issues/371) as bug.
+							 	 * Also i think it's a good idea to do it instead of just thinking math.
+							 	 */
+								//DEBUG_ERR(( "Exp_GetVal: Sqrt of negative number (%lld) is impossible\n", iTosquare ));
+								++iCount;
+								llong iTosquareNegative = (llong)sqrt((double)(iTosquare * -1));
+								iResult = (llong)(iTosquareNegative * -1);
+							}
 						}
 
 					} break;
@@ -1016,10 +1036,25 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 			++pExpr;
 			{
 				llong iVal = GetVal( pExpr );
+				bool isNegative = false;
 				if (llVal < 0)
 				{
-					g_Log.EventError("Power with negative base is a complex number.\n");
-					break;
+					/*
+					 * We need to turn llVal to positive to avoid this.
+					 * I am doing this change for issue #371 (https://github.com/Sphereserver/Source-X/issues/371)
+					 * xwerswoodx
+					 */
+					//g_Log.EventError("Power with negative base is a complex number.\n");
+					//break;
+					/*
+					 * We need to disable negative values in even numbers, because multiplying 2 or another even number negative value, returns as positive.
+					 * Google Calculator return -2^2 as -4 but it's totally wrong, and honestly negative values can't have powers at all.
+					 * Anyway if we think it by our minds -2^2 means -2 x -2 so it should be 4. -2^3 means -2 x -2 x -2 = -8, etc...
+					 * xwerswoodx
+					 */
+					if (iVal % 2 != (llong)0)
+						isNegative = true;
+					llVal *= -1;
 				}
 				else if ( (llVal == 0) && (iVal < 0) )
 				{
@@ -1027,6 +1062,8 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 					break;
 				}
 				llVal = power(llVal, iVal);
+				if (isNegative)
+					llVal *= -1;
 			}
 			break;
 	}
