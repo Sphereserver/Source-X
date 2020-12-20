@@ -390,16 +390,8 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 						}
 						else
 						{
-							/*
-							 * Normally SQRT is impossible to do in negative values for math, but I am just doing it 
-							 * because @nolok added issue #371 (https://github.com/Sphereserver/Source-X/issues/371) as bug.
-							 * Also i think it's a good idea to do it instead of just thinking math.
-							 */ 
-							//DEBUG_ERR(( "Float_MakeFloatMath: Sqrt of negative number (%f) is impossible\n", dTosquare )); //We don't need to warn people at all.
-							//rResult = 0;
-							++iCount;
-							realtype dTosquareNegative = dTosquare * -1;
-							rResult = (sqrt(dTosquareNegative) * -1);
+							DEBUG_ERR(( "Float_MakeFloatMath: Sqrt of negative number (%f) is impossible\n", dTosquare ));
+							rResult = 0;
 						}
 					}
 					else

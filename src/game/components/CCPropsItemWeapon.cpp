@@ -72,7 +72,8 @@ bool CCPropsItemWeapon::GetPropertyNumPtr(PropertyIndex_t iPropIndex, PropertyVa
     {
         case PROPIWEAP_RANGEL:
         {
-        	if (_uiRange == 0) {
+        	if (_uiRange == 0)
+			{
         		*piOutVal = 0; //Default Low Range limit should be 0 if not specified.
         		return false;
 			}
@@ -81,7 +82,8 @@ bool CCPropsItemWeapon::GetPropertyNumPtr(PropertyIndex_t iPropIndex, PropertyVa
 		}
         case PROPIWEAP_RANGEH:
         {
-        	if (_uiRange == 0) {
+        	if (_uiRange == 0)
+			{
         		*piOutVal = 1; //Default High Range limit should be 1 if not specified.
         		return false;
 			}

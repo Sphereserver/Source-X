@@ -2348,14 +2348,4 @@ Must have event, even if it's empty, since it's applied by the source to generat
 
 20-12-2020, xwerswoodx
 -Fixed: Defnames cannot read as item for backward compatibility. (Issue #357)
--Improvement: Now '@' and SQRT math expressions can able to calculate negative values. (Issue #371)
-  I am not count that as fix because normally power of negative values or sqrt of negative values not possible.
-  But as improvement, sqrt now return negative if the value given is negative.
-  For example:
-    <EVAL SQRT(9)> returns 3
-    <EVAL SQRT(-9)> returns -3
-  And for '@' expression, if the power even, it returns as positive, if odd returns negative.
-  For example:
-    <EVAL -2@2> returns 4
-    <EVAL -2@3> returns -8
-    <EVAL -2@4> returns 16
+-Fixed: Now '@' expressions can able to calculate negative values. (Issue #371)

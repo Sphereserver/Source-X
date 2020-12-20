@@ -915,7 +915,8 @@ bool CItemBase::IsDupedItem( ITEMID_TYPE id ) const
 	ADDTOCALLSTACK("CItemBase::IsDupedItem");
 	if (m_flip_id.empty())
 		return false;
-	for ( size_t i = 0; i < m_flip_id.size(); ++i ) {
+	for ( size_t i = 0; i < m_flip_id.size(); ++i )
+	{
 		if ( m_flip_id[i] == id)
 			return true;
 	}

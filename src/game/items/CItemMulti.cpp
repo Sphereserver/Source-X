@@ -1715,7 +1715,8 @@ void CItemMulti::UnlockItem(const CUID& uidItem)
 
 void CItemMulti::UnlockAllItems() {
     ADDTOCALLSTACK("CItemMulti::UnlockAllItems");
-    for (size_t i = 0; i < _lLockDowns.size(); ++i) {
+    for (size_t i = 0; i < _lLockDowns.size(); ++i)
+	{
     	const CUID& pUID = _lLockDowns[i];
     	CItem *pItem = pUID.ItemFind();
     	if (!pItem)

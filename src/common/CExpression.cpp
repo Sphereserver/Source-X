@@ -637,15 +637,7 @@ try_dec:
 							}
 							else
 							{
-								/*
-							 	 * Normally SQRT is impossible to do in negative values for math, but I am just doing it 
-								 * because @nolok added issue #371 (https://github.com/Sphereserver/Source-X/issues/371) as bug.
-							 	 * Also i think it's a good idea to do it instead of just thinking math.
-							 	 */
-								//DEBUG_ERR(( "Exp_GetVal: Sqrt of negative number (%lld) is impossible\n", iTosquare ));
-								++iCount;
-								llong iTosquareNegative = (llong)sqrt((double)(iTosquare * -1));
-								iResult = (llong)(iTosquareNegative * -1);
+								DEBUG_ERR(( "Exp_GetVal: Sqrt of negative number (%lld) is impossible\n", iTosquare ));
 							}
 						}
 
@@ -1036,34 +1028,12 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 			++pExpr;
 			{
 				llong iVal = GetVal( pExpr );
-				bool isNegative = false;
-				if (llVal < 0)
+				if ( (llVal == 0) && (iVal <= 0) ) //The information from https://en.cppreference.com/w/cpp/numeric/math/pow says if both input are 0, it can cause errors too.
 				{
-					/*
-					 * We need to turn llVal to positive to avoid this.
-					 * I am doing this change for issue #371 (https://github.com/Sphereserver/Source-X/issues/371)
-					 * xwerswoodx
-					 */
-					//g_Log.EventError("Power with negative base is a complex number.\n");
-					//break;
-					/*
-					 * We need to disable negative values in even numbers, because multiplying 2 or another even number negative value, returns as positive.
-					 * Google Calculator return -2^2 as -4 but it's totally wrong, and honestly negative values can't have powers at all.
-					 * Anyway if we think it by our minds -2^2 means -2 x -2 so it should be 4. -2^3 means -2 x -2 x -2 = -8, etc...
-					 * xwerswoodx
-					 */
-					if (iVal % 2 != (llong)0)
-						isNegative = true;
-					llVal *= -1;
-				}
-				else if ( (llVal == 0) && (iVal < 0) )
-				{
-					g_Log.EventError("Power of zero with negative exponent is undefined.\n");
+					g_Log.EventError("Power of zero with zero or negative exponent is undefined.\n");
 					break;
 				}
 				llVal = power(llVal, iVal);
-				if (isNegative)
-					llVal *= -1;
 			}
 			break;
 	}
