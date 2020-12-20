@@ -2929,6 +2929,16 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			}
 		}
 		return true;
+
+	case RES_RESDEFNAME:
+		// just get a block of resource aliases (like a classic DEF).
+		while (pScript->ReadKeyParse())
+		{
+			const lpctstr ptcKey = pScript->GetKey();
+			g_Exp.m_VarResDefs.SetStr(ptcKey, false, pScript->GetArgStr(), false);
+		}
+		return true;
+
 	case RES_RESOURCELIST:
 		{
 			while ( pScript->ReadKey() )
@@ -3684,6 +3694,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 	case RES_MOONGATES:
 	case RES_NOTOTITLES:
 	case RES_OBSCENE:
+	case RES_RESDEFNAME:
 	case RES_RESOURCES:
 	case RES_RUNES:
 	case RES_SERVERS:

@@ -232,17 +232,9 @@ uint GetIdentifierString( tchar * szTag, lpctstr pszArgs )
 	return i;
 }
 
-bool IsValidDef( lpctstr pszTest )
+bool IsValidResourceDef( lpctstr pszTest )
 {
-	const CVarDefCont * pVarBase = g_Exp.m_VarResDefs.CheckParseKey( pszTest );
-	if ( pVarBase == nullptr )
-	{
-		//check VAR.X also
-		pVarBase = g_Exp.m_VarGlobals.CheckParseKey( pszTest );
-		if ( pVarBase == nullptr )
-			return false;
-	}
-	return true;
+	return nullptr != g_Exp.m_VarResDefs.CheckParseKey( pszTest );
 }
 
 bool IsValidGameObjDef( lpctstr pszTest )
@@ -252,8 +244,9 @@ bool IsValidGameObjDef( lpctstr pszTest )
 		const CVarDefCont * pVarBase = g_Exp.m_VarResDefs.CheckParseKey( pszTest );
 		if ( pVarBase == nullptr )
 			return false;
+
 		const tchar ch = *pVarBase->GetValStr();
-		if (( ! ch ) || ( ch == '<'))
+		if ( !ch || (ch == '<') )
 			return false;
 
 		const CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, pszTest);
