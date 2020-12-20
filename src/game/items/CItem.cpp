@@ -1561,29 +1561,31 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
     {
         MoveTo(ptNewPlace);
     }
+	Update();
 
-	if ( ttResult != TRIGRET_RET_TRUE )
+	if ( ttResult == TRIGRET_RET_TRUE )
+		return true;
+	
+	// Check if there's too many items on the same spot
+	uint iItemCount = 0;
+	CItem * pItem = nullptr;
+	CWorldSearch AreaItems(ptNewPlace);
+	for (;;)
 	{
-		// Check if there's too many items on the same spot
-		uint iItemCount = 0;
-		CItem * pItem = nullptr;
-		CWorldSearch AreaItems(ptNewPlace);
-		for (;;)
+		pItem = AreaItems.GetItem();
+		if ( pItem == nullptr )
+			break;
+
+		++iItemCount;
+		if ( iItemCount > g_Cfg.m_iMaxItemComplexity )
 		{
-			pItem = AreaItems.GetItem();
-			if ( pItem == nullptr )
-				break;
-
-			++iItemCount;
-			if ( iItemCount > g_Cfg.m_iMaxItemComplexity )
-			{
-				Speak("Too many items here!");
-				iDecayTime = 60 * MSECS_PER_SEC;		// force decay (even when REGION_FLAG_NODECAY is set)
-				break;
-			}
+			Speak(g_Cfg.GetDefaultMsg(DEFMSG_TOO_MANY_ITEMS));
+			iDecayTime = 60 * MSECS_PER_SEC;		// force decay (even when REGION_FLAG_NODECAY is set)
+			break;
 		}
-
-        /*  // From 56b
+	}
+	 
+	/*  // From 56b
         if ( iItemCount > g_Cfg.m_iMaxItemComplexity )
         {
             Speak("Too many items here!");
@@ -1596,13 +1598,10 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
             return false;
         }
         */
-
-		SetDecayTime(iDecayTime);
-		Sound(GetDropSound(nullptr));
-	}
-
-	Update();
-	return true;
+	
+	SetDecayTime(iDecayTime);
+	Sound(GetDropSound(nullptr));
+	return true;	
 }
 
 bool CItem::MoveNearObj( const CObjBaseTemplate* pObj, ushort uiSteps )
