@@ -277,8 +277,8 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 
     m_zClimbHeight = 0;
 	m_fClimbUpdated = false;
-	m_prev_Hue = HUE_DEFAULT;
-	m_prev_id = CREID_INVALID;
+	_wPrev_Hue = HUE_DEFAULT;
+	_iPrev_id = CREID_INVALID;
 	SetID( baseID );
 
 	CCharBase* pCharDef = Char_GetDef();
@@ -287,7 +287,7 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 	m_attackRange = pCharDef->m_attackRange;
 	m_defenseBase = pCharDef->m_defenseBase;
 	m_defenseRange = pCharDef->m_defenseRange;
-	m_wBloodHue = pCharDef->m_wBloodHue;	// when damaged , what color is the blood (-1) = no blood
+	_wBloodHue = pCharDef->_wBloodHue;	// when damaged , what color is the blood (-1) = no blood
 
 	SetName( pCharDef->GetTypeName());	// set the name in case there is a name template.
 
@@ -479,16 +479,6 @@ void CChar::ClientAttach( CClient * pClient )
 bool CChar::IsClientType() const noexcept
 {
 	return (m_pClient || m_pPlayer);
-}
-
-bool CChar::IsClientActive() const noexcept
-{
-	return ( m_pClient != nullptr );
-}
-
-CClient * CChar::GetClientActive() const noexcept
-{
-	return m_pClient;
 }
 
 // Client logged out or NPC is dead.
@@ -990,8 +980,8 @@ int CChar::FixWeirdness()
 void CChar::CreateNewCharCheck()
 {
 	ADDTOCALLSTACK("CChar::CreateNewCharCheck");
-	m_prev_id = GetID();
-	m_prev_Hue = GetHue();
+	_iPrev_id = GetID();
+	_wPrev_Hue = GetHue();
 
 	Stat_SetVal(STAT_STR, Stat_GetMaxAdjusted(STAT_STR));
 	Stat_SetVal(STAT_DEX, Stat_GetMaxAdjusted(STAT_DEX));
@@ -1075,12 +1065,12 @@ bool CChar::DupeFrom(const CChar * pChar, bool fNewbieItems )
 
 	_iTimeLastHitsUpdate = pChar->_iTimeLastHitsUpdate;
 
-	m_prev_Hue = pChar->m_prev_Hue;
+	_wPrev_Hue = pChar->_wPrev_Hue;
 	SetHue(pChar->GetHue());
-	m_prev_id = pChar->m_prev_id;
+	_iPrev_id = pChar->_iPrev_id;
 	SetID( pChar->GetID() );
 	m_CanMask = pChar->m_CanMask;
-	m_wBloodHue = pChar->m_wBloodHue;
+	_wBloodHue = pChar->_wBloodHue;
 	//m_totalweight = 0;
 
 	Skill_Cleanup();
@@ -1458,7 +1448,7 @@ void CChar::SetID( CREID_TYPE id )
 	CCharBase * pCharDef = CCharBase::FindCharBase(id);
 	if ( pCharDef == nullptr )
 	{
-		if ( id != -1 && id != CREID_INVALID )
+		if ( (id != -1) && (id != CREID_INVALID) )
 			DEBUG_ERR(("Create Invalid Char 0%x\n", id));
 
 		id = (CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, "DEFAULTCHAR"));
@@ -1468,12 +1458,21 @@ void CChar::SetID( CREID_TYPE id )
 		pCharDef = CCharBase::FindCharBase(id);
 	}
 
-	if ( pCharDef == Char_GetDef() )
+	ASSERT(pCharDef != nullptr);
+
+	CCharBase* pCharOldDef = Char_GetDef();
+	if ( pCharDef == pCharOldDef )
 		return;
 
-	m_BaseRef.SetRef(pCharDef);
-	if ( m_prev_id == CREID_INVALID )
-		m_prev_id = GetID();
+	if (pCharOldDef != nullptr)
+	{
+		pCharOldDef->DelInstance();
+	}
+	pCharDef->AddInstance();	// Increase object instance counter (different from the resource reference counter!)
+	m_BaseRef.SetRef(pCharDef);	// Among the other things, it increases the new resource reference counter and decreases the old, if any
+
+	if ( _iPrev_id == CREID_INVALID )
+		_iPrev_id = GetID();
 
 	if ( !IsMountCapable() )	// new body may not be capable of riding mounts
 		Horse_UnMount();
@@ -2390,7 +2389,7 @@ do_default:
 			sVal.FormatVal( Fight_CalcRange( m_uidWeapon.ItemFind() ) );
 			return true;
 		case CHC_BLOODCOLOR:
-			sVal.FormatHex( m_wBloodHue );
+			sVal.FormatHex( _wBloodHue );
 			break;
         case CHC_OFAME:
 		case CHC_FAME:
@@ -3040,11 +3039,11 @@ do_default:
 			goto do_default;
 
 		case CHC_OBODY:
-			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, m_prev_id ));
+			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, _iPrev_id ));
 			break;
 
 		case CHC_OSKIN:
-			sVal.FormatHex( m_prev_Hue );
+			sVal.FormatHex( _wPrev_Hue );
 			break;
 		case CHC_P:
 			goto do_default;
@@ -3212,7 +3211,7 @@ bool CChar::r_LoadVal( CScript & s )
 			break;
 
 		case CHC_BLOODCOLOR:
-			m_wBloodHue = (HUE_TYPE)(s.GetArgVal());
+			_wBloodHue = (HUE_TYPE)(s.GetArgVal());
 			break;
         case CHC_MODSTR:
             Stat_SetMod(STAT_STR, s.GetArgSVal());
@@ -3538,11 +3537,11 @@ bool CChar::r_LoadVal( CScript & s )
 					DEBUG_ERR(( "OBODY Invalid Char 0%x\n", id ));
 					return false;
 				}
-				m_prev_id = id;
+				_iPrev_id = id;
 			}
 			break;
 		case CHC_OSKIN:
-			m_prev_Hue = (HUE_TYPE)(s.GetArgWVal());
+			_wPrev_Hue = (HUE_TYPE)(s.GetArgWVal());
 			break;
 		case CHC_P:
 			{
@@ -3692,10 +3691,10 @@ void CChar::r_Write( CScript & s )
 		s.WriteKeyVal("EMOTECOLOROVERRIDE", m_EmoteHueOverride);
 	if ( m_dirFace != DIR_SE )
 		s.WriteKeyVal("DIR", m_dirFace);
-	if ( m_prev_id != GetID() )
-		s.WriteKey("OBODY", g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, m_prev_id)));
-	if ( m_prev_Hue != HUE_DEFAULT )
-		s.WriteKeyHex("OSKIN", m_prev_Hue);
+	if ( _iPrev_id != GetID() )
+		s.WriteKey("OBODY", g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _iPrev_id)));
+	if ( _wPrev_Hue != HUE_DEFAULT )
+		s.WriteKeyHex("OSKIN", _wPrev_Hue);
 	if ( m_iStatFlag )
 		s.WriteKeyHex("FLAGS", m_iStatFlag);
 	if ( m_attackBase )

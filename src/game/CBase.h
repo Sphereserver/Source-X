@@ -22,10 +22,14 @@ struct CBaseBaseDef : public CResourceLink, public CEntityProps
 	// TAGS
 	static lpctstr const sm_szLoadKeys[];
 	// Base type of both CItemBase and CCharBase
+
 protected:
 	dword       m_dwDispIndex;	// The base artwork id. (may be the same as GetResourceID() in base set.) but can also be "flipped"
 	CSString    m_sName;		// default type name. (ei, "human" vs specific "Dennis")
+
 private:
+    dword       _dwInstances;   // How many CResourceRef objects refer to this ?
+
 	height_t    m_Height;       // Height of the object.
 	// -------------- ResLevel -------------
     byte        m_Expansion;
@@ -188,6 +192,21 @@ private:
 	CBaseBaseDef& operator=(const CBaseBaseDef& other);
 
 public:
+    /**
+     * @brief   Gets the instances number.
+     * @return  Count.
+     */
+    inline dword GetInstances() const noexcept
+    {
+        return _dwInstances;
+    }
+
+    inline void AddInstance() noexcept
+    {
+        ++_dwInstances;
+    }
+
+    void DelInstance();
 
     /**
      * @brief   Gets type name.

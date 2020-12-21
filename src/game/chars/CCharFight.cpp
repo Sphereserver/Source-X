@@ -2088,7 +2088,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			Sound(0x44d);
 
 		// Make blood effects
-		if ( pCharTarg->m_wBloodHue != (HUE_TYPE)(-1) )
+		if ( pCharTarg->_wBloodHue != (HUE_TYPE)(-1) )
 		{
 			static constexpr ITEMID_TYPE sm_Blood[] = { ITEMID_BLOOD1, ITEMID_BLOOD2, ITEMID_BLOOD3, ITEMID_BLOOD4, ITEMID_BLOOD5, ITEMID_BLOOD6, ITEMID_BLOOD_SPLAT };
 			const int iBloodQty = (g_Cfg.m_iFeatureSE & FEATURE_SE_UPDATE) ? Calc_GetRandVal2(4, 5) : Calc_GetRandVal2(1, 2);
@@ -2099,7 +2099,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
                 CItem *pBlood = CItem::CreateBase(iBloodID);
                 ASSERT(pBlood);
-                pBlood->SetHue(pCharTarg->m_wBloodHue);
+                pBlood->SetHue(pCharTarg->_wBloodHue);
                 pBlood->MoveNear(pCharTarg->GetTopPoint(), 1);
                 pBlood->Update();
                 pBlood->SetDecayTimeS(5);
@@ -2109,7 +2109,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
                 CPointMap pt = pCharTarg->GetTopPoint();
                 pt.m_x += (short)Calc_GetRandVal2(-1, 1);
                 pt.m_y += (short)Calc_GetRandVal2(-1, 1);
-                EffectLocation(EFFECT_XYZ, iBloodID, nullptr, &pt, 50, 0, false, pCharTarg->m_wBloodHue);
+                EffectLocation(EFFECT_XYZ, iBloodID, nullptr, &pt, 50, 0, false, pCharTarg->_wBloodHue);
                 */
 			}
 		}

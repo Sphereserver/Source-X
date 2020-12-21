@@ -59,7 +59,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 	{
 		CItem *pBlood = CItem::CreateBase(ITEMID_BLOOD4);
 		ASSERT(pBlood);
-		pBlood->SetHue(pCorpseDef->m_wBloodHue);
+		pBlood->SetHue(pCorpseDef->_wBloodHue);
 		pBlood->MoveToDecay(pnt, 5 * MSECS_PER_SEC);
 	}
 
@@ -1057,7 +1057,7 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool fCheckFollowerSlots )
         const HUE_TYPE iMountHue = pItem->GetHue();
 		if (iMountHue)
 		{
-			pPet->m_prev_Hue = iMountHue;
+			pPet->_wPrev_Hue = iMountHue;
 			pPet->SetHue(iMountHue);
 		}
 	}

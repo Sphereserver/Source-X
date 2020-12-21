@@ -238,7 +238,7 @@ ushort CChar::Skill_GetMax( SKILL_TYPE skill, bool ignoreLock ) const
 	TemporaryString tsSkillName;
 
 	// What is my max potential in this skill ?
-	if ( m_pPlayer )
+	if ( IsPlayer() )
 	{
 		const CSkillClassDef * pSkillClass = m_pPlayer->GetSkillClass();
 		ASSERT(pSkillClass);
@@ -253,11 +253,15 @@ ushort CChar::Skill_GetMax( SKILL_TYPE skill, bool ignoreLock ) const
 
 		if ( !ignoreLock )
 		{
-			if ( m_pPlayer->Skill_GetLock(skill) >= SKILLLOCK_DOWN )
+			const ushort uiSkillLevel = Skill_GetBase(skill);
+			const SKILLLOCK_TYPE sklock = m_pPlayer->Skill_GetLock(skill);
+			if (sklock == SKILLLOCK_DOWN)
 			{
-				ushort uiSkillLevel = Skill_GetBase(skill);
-				if ( uiSkillLevel < uiSkillMax )
-					uiSkillMax = uiSkillLevel;
+				uiSkillMax = uiSkillLevel;
+			}
+			else if ((sklock == SKILLLOCK_LOCK) && (uiSkillLevel < uiSkillMax))
+			{
+				uiSkillMax = uiSkillLevel;
 			}
 		}
 
@@ -313,11 +317,11 @@ void CChar::Skill_Decay()
 			continue;
 
 		// Check that the skill is set to decrease and that it is not already at 0
-		if ( Skill_GetLock((SKILL_TYPE)i) != SKILLLOCK_DOWN || Skill_GetBase((SKILL_TYPE)i) <= 0 )
+		if ( (Skill_GetLock((SKILL_TYPE)i) != SKILLLOCK_DOWN) || (Skill_GetBase((SKILL_TYPE)i) <= 0) )
 			continue;
 
 		// Prefer to deduct from lesser skills
-		if ( skillDeduct != SKILL_NONE && uiSkillLevel > Skill_GetBase((SKILL_TYPE)i))
+		if ( (skillDeduct != SKILL_NONE) && (uiSkillLevel > Skill_GetBase((SKILL_TYPE)i)) )
 			continue;
 
 		skillDeduct = (SKILL_TYPE)i;
@@ -343,7 +347,7 @@ void CChar::Skill_Decay()
 	}
 }
 
-void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
+void CChar::Skill_Experience( SKILL_TYPE skill, int iDifficulty )
 {
 	ADDTOCALLSTACK("CChar::Skill_Experience");
 	// Give the char credit for using the skill.
@@ -361,17 +365,17 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 	if (pSkillDef == nullptr)
 		return;
 
-	difficulty *= 10;
-	if ( difficulty < 1 )
-		difficulty = 1;
-	else if ( difficulty > 1000 )
-		difficulty = 1000;
+	iDifficulty *= 10;
+	if ( iDifficulty < 1 )
+		iDifficulty = 1;
+	else if ( iDifficulty > 1000 )
+		iDifficulty = 1000;
 
-	if ( m_pPlayer )
+	if ( IsPlayer() )
 	{
         if (Skill_GetSum() >= Skill_GetSumMax())
         {
-            difficulty = 0;
+			iDifficulty = 0;
         }
 	}
 
@@ -385,9 +389,9 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 	// give a bonus or a penalty if the task was too hard or too easy.
 	// no gain at all if it was WAY TOO easy
 	ushort uiSkillLevel = Skill_GetBase( skill );
-	ushort uiSkillLevelFixed = (uiSkillLevel < 50) ? 50 : uiSkillLevel;
-	int iGainRadius = pSkillDef->m_GainRadius;
-	if ((iGainRadius > 0) && ((difficulty + iGainRadius) < uiSkillLevelFixed))
+	const ushort uiSkillLevelFixed = (uiSkillLevel < 50) ? 50 : uiSkillLevel;
+	const int iGainRadius = pSkillDef->m_GainRadius;
+	if ((iGainRadius > 0) && ((iDifficulty + iGainRadius) < uiSkillLevelFixed))
 	{
 		if ( GetKeyNum("NOSKILLMSG") )
 			SysMessage( g_Cfg.GetDefaultMsg(DEFMSG_GAINRADIUS_NOT_MET) );
@@ -397,7 +401,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 	int64 iChance = pSkillDef->m_AdvRate.GetChancePercent(uiSkillLevel);
 	int64 iSkillMax = Skill_GetMax(skill);	// max advance for this skill.
 
-	CScriptTriggerArgs pArgs( 0 , iChance, iSkillMax);
+	CScriptTriggerArgs pArgs(0, iChance, iSkillMax);
 	if ( IsTrigUsed(TRIGGER_SKILLGAIN) )
 	{
 		if ( Skill_OnCharTrigger( skill, CTRIG_SkillGain, &pArgs ) == TRIGRET_RET_TRUE )
@@ -413,21 +417,21 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 	if ( iChance <= 0 )
 		return;
 
-	int iRoll = Calc_GetRandVal(1000);
+	const int iRoll = Calc_GetRandVal(1000);
 	if ( uiSkillLevelFixed < (ushort)iSkillMax )	// are we in position to gain skill ?
 	{
 		// slightly more chance of decay than gain
 		if ( (iRoll * 3) <= int(iChance * 4) )
 			Skill_Decay();
 
-		if ( difficulty > 0 )
+		if (iDifficulty > 0 )
 		{
 			if ( IsPriv(PRIV_DETAIL) && (GetPrivLevel() >= PLEVEL_GM) && (g_Cfg.m_iDebugFlags & DEBUGF_ADVANCE_STATS) )
 			{
 				SysMessagef( "%s=%hu.%hu Difficult=%d Gain Chance=%" PRId64 ".%" PRId64 "%% Roll=%d%%",
 					pSkillDef->GetKey(),
 					uiSkillLevel/10, (uiSkillLevel)%10,
-					difficulty/10, iChance/10, iChance%10, iRoll/10 );
+					iDifficulty/10, iChance/10, iChance%10, iRoll/10 );
 			}
 
 			if ( iRoll <= iChance )
@@ -441,8 +445,8 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 	////////////////////////////////////////////////////////
 	// Dish out any stat gains - even for failures.
 
+	const uint uiStatSumMax = Stat_GetSumLimit();
 	uint uiStatSum = Stat_GetSum();
-	uint uiStatSumMax = Stat_GetSumLimit();
 
 	// Stat effects are unrelated to advance in skill !
 	for ( int i = STAT_STR; i < STAT_BASE_QTY; ++i )
@@ -454,7 +458,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 		if ( Stat_GetLock((STAT_TYPE)i) != SKILLLOCK_UP)
 			continue;
 
-		ushort uiStatVal = Stat_GetBase((STAT_TYPE)i);
+		const ushort uiStatVal = Stat_GetBase((STAT_TYPE)i);
 		if ( uiStatVal <= 0 )	// some odd condition
 			continue;
 		
@@ -463,29 +467,29 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 		if (uiStatSum > uiStatSumMax)	// stat cap already reached
 			break;
 
-		ushort uiStatMax = Stat_GetLimit((STAT_TYPE)i);
+		const ushort uiStatMax = Stat_GetLimit((STAT_TYPE)i);
 		if ( uiStatVal >= uiStatMax )
 			continue;	// nothing grows past this. (even for NPC's)
 
 		// You will tend toward these stat vals if you use this skill a lot
-		byte bStatTarg = pSkillDef->m_Stat[i];
+		const byte bStatTarg = pSkillDef->m_Stat[i];
 		if ( uiStatVal >= bStatTarg )
 			continue;		// you've got higher stats than this skill is good for
 
 		// Adjust the chance by the percent of this that the skill uses
-		difficulty = IMulDiv( uiStatVal, 1000, bStatTarg );
-		iChance = g_Cfg.m_StatAdv[i].GetChancePercent( difficulty );
+		iDifficulty = IMulDiv( uiStatVal, 1000, bStatTarg );
+		iChance = g_Cfg.m_StatAdv[i].GetChancePercent(iDifficulty);
 		if ( pSkillDef->m_StatPercent )
 			iChance = ( iChance * pSkillDef->m_StatBonus[i] * pSkillDef->m_StatPercent ) / 10000;
 
 		if ( iChance == 0 )
 			continue;
 
-		bool decrease = Stat_Decrease((STAT_TYPE)i, skill);
-		if (decrease)
+		const bool fDecrease = Stat_Decrease((STAT_TYPE)i, skill);
+		if (fDecrease)
 			uiStatSum = Stat_GetSum();
 
-		if ( (iChance > Calc_GetRandVal(1000)) && decrease )
+		if ( (iChance > Calc_GetRandVal(1000)) && fDecrease)
 		{
 			Stat_SetBase((STAT_TYPE)i, (uiStatVal + 1));
 			break;
@@ -1087,7 +1091,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	snprintf(pszMsg, STR_TEMPLENGTH, "%s %s", g_Cfg.GetDefaultMsg( DEFMSG_MINING_SMELT ), pItemOre->GetName());
 	Emote(pszMsg);
 
-	ushort iMiningSkill = Skill_GetAdjusted(SKILL_MINING);
+	const ushort iMiningSkill = Skill_GetAdjusted(SKILL_MINING);
 	word iOreQty = pItemOre->GetAmount();
 	word iIngotQty = 0;
 	const CItemBase * pIngotDef = nullptr;
@@ -1144,7 +1148,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	}
 
 	iIngotQty *= iOreQty;	// max amount
-	int iSkillRange = pIngotDef->m_ttIngot.m_iSkillMax - pIngotDef->m_ttIngot.m_iSkillMin;
+	const int iSkillRange = pIngotDef->m_ttIngot.m_iSkillMax - pIngotDef->m_ttIngot.m_iSkillMin;
 	int iDifficulty = Calc_GetRandVal(iSkillRange);
 
 	// Try to make ingots
@@ -1200,7 +1204,7 @@ bool CChar::Skill_Tracking( CUID uidTarg, DIR_TYPE & dirPrv, int iDistMax )
 			return false;
 	}
 
-	DIR_TYPE dir = GetDir(pObjTop);
+	const DIR_TYPE dir = GetDir(pObjTop);
 	ASSERT(dir >= 0 && (uint)(dir) < CountOf(CPointBase::sm_szDirs));
 
 	// Select tracking message based on distance
@@ -1220,7 +1224,7 @@ bool CChar::Skill_Tracking( CUID uidTarg, DIR_TYPE & dirPrv, int iDistMax )
 	{
 		tchar *pszMsg = Str_GetTemp();
 		snprintf(pszMsg, STR_TEMPLENGTH, 
-			pszDef, pObj->GetName(), pObjTop->IsDisconnected() ? g_Cfg.GetDefaultMsg(DEFMSG_TRACKING_RESULT_DISC) : CPointBase::sm_szDirs[dir]);
+			pszDef, pObj->GetName(), (pObjTop->IsDisconnected() ? g_Cfg.GetDefaultMsg(DEFMSG_TRACKING_RESULT_DISC) : CPointBase::sm_szDirs[dir]) );
 		ObjMessage(pszMsg, this);
 	}
 

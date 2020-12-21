@@ -22,7 +22,7 @@ CCharBase::CCharBase( CREID_TYPE id ) :
 	m_defenseRange = 0;
 	m_Anims = 0xFFFFFF;
   	m_MaxFood = 0;			// Default value
-	m_wBloodHue = 0;
+	_wBloodHue = 0;
 	m_wColor = 0;
 	m_Str = 0;
 	m_Dex = 0;
@@ -82,7 +82,7 @@ void CCharBase::CopyBasic( const CCharBase * pCharDef )
 	m_soundGetHit = pCharDef->m_soundGetHit;
 	m_soundDie = pCharDef->m_soundDie;
 
-	m_wBloodHue = pCharDef->m_wBloodHue;
+	_wBloodHue = pCharDef->_wBloodHue;
 	m_MaxFood = pCharDef->m_MaxFood;
 	m_FoodType = pCharDef->m_FoodType;
 	m_Desires = pCharDef->m_Desires;
@@ -203,7 +203,7 @@ bool CCharBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 			}
 			break;
 		case CBC_BLOODCOLOR:
-			sVal.FormatHex( m_wBloodHue );
+			sVal.FormatHex( _wBloodHue );
 			break;
 		case CBC_ARMOR:
 			sVal.FormatVal( m_defense );
@@ -359,7 +359,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 			m_Aversions.Load( s.GetArgStr() );
 			break;
 		case CBC_BLOODCOLOR:
-			m_wBloodHue = (HUE_TYPE)(s.GetArgVal());
+			_wBloodHue = (HUE_TYPE)(s.GetArgVal());
 			break;
 		case CBC_ARMOR:
 			m_defense = s.GetArgWVal();

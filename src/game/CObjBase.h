@@ -29,7 +29,6 @@ class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, pub
 
 private:
 	int64 m_timestamp;          // TimeStamp
-    
 
 protected:
 	CResourceRef m_BaseRef;     // Pointer to the resource that describes this type.
@@ -70,8 +69,6 @@ private:
 
 protected:
     /**
-     * @fn  virtual void CObjBase::DeletePrepare();
-     *
      * @brief   Prepares to delete.
      */
     virtual void DeletePrepare();
@@ -82,21 +79,14 @@ public:
     virtual bool IsDeleted() const override;
 
     /**
-     * @fn  virtual void CObjBase::Delete(bool bforce = false);
-     *
      * @brief   Deletes this CObjBase from game (doesn't delete the raw class instance).
-     *
      * @param   bForce  Force deletion.
-     *
      * @return  Was deleted.
      */
     virtual bool Delete(bool fForce = false);
 
     /**
-     * @fn  virtual void CObjBase::DupeCopy( const CObjBase * pObj );
-     *
      * @brief   Dupe copy.
-     *
      * @param   pObj    The object.
      */
     virtual void DupeCopy(const CObjBase* pObj); // overridden by CItem
@@ -133,8 +123,6 @@ public:
     bool IsRunningTrigger() const;
 
 	/**
-	* @fn  inline bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull);
-	*
 	* @brief   Call personal trigger (from scripts).
 	*
 	* @param [in,out]  pArgs       If non-null, the arguments.
@@ -149,47 +137,32 @@ public:
 public:
 
     /**
-    * @fn  CCSpawn *CObjBase::GetSpawn();
-    *
     * @brief   Returns Spawn item.
-    *
     * @return  The CItem.
     */
     CCSpawn *GetSpawn();
 
     /**
-    * @fn  CCSpawn *CObjBase::SetSpawn(CCSpawn *spawn);
-    *
     * @brief   sets the Spawn item.
-    *
     * @param  The CCSpawn.
     */
     void SetSpawn(CCSpawn *spawn);
 
     /**
-    * @fn  CCSpawn *CObjBase::GetFaction();
-    *
     * @brief   Returns Faction CComponent.
-    *
     * @return  The CCFaction.
     */
     CCFaction *GetFaction();
 
 
     /**
-     * @fn  int64 CObjBase::GetTimeStamp() const;
-     *
      * @brief   Gets time stamp.
-     *
      * @return  The time stamp.
      */
 	int64 GetTimeStamp() const;
 
     /**
-     * @fn  void CObjBase::SetTimeStamp(int64 t_time);
-     *
      * @brief   Sets time stamp.
-     *
      * @param   t_time  The time.
      */
 	void SetTimeStamp(int64 t_time);
@@ -546,8 +519,14 @@ public:
      */
 	lpctstr GetResourceName() const;
 
-public:
+protected:
+     /**
+     * @brief   Sets hue without calling triggers or additional checks (internally used by memory objects).
+     * @param   wHue    The hue.
+     */
+     void SetHueQuick(HUE_TYPE wHue);
 
+public:
     /**
      * @fn  void CObjBase::SetHue( HUE_TYPE wHue, bool bAvoidTrigger = true, CTextConsole *pSrc = nullptr, CObjBase *SourceObj = nullptr, llong sound = 0 );
      *
@@ -569,27 +548,6 @@ public:
      * @return  The hue.
      */
 	HUE_TYPE GetHue() const;
-
-protected:
-
-    /**
-     * @fn  word CObjBase::GetHueAlt() const;
-     *
-     * @brief   Gets hue alternate (OColor).
-     *
-     * @return  The hue alternate.
-     */
-
-	word GetHueAlt() const;
-
-    /**
-     * @fn  void CObjBase::SetHueAlt( HUE_TYPE wHue );
-     *
-     * @brief   Sets hue alternate (OColor).
-     *
-     * @param   wHue    The hue.
-     */
-	void SetHueAlt( HUE_TYPE wHue );
 
 
 public:
@@ -1279,12 +1237,8 @@ enum CTRIG_TYPE : short
 
 
 /**
- * @fn  DIR_TYPE GetDirStr( lpctstr pszDir );
- *
  * @brief   Gets dir string.
- *
  * @param   pszDir  The dir.
- *
  * @return  The dir string.
  */
 DIR_TYPE GetDirStr( lpctstr pszDir );

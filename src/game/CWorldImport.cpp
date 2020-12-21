@@ -559,12 +559,12 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("XBODY" ))
 			{
-				pChar->m_prev_id = (CREID_TYPE)(atoi(pArg));
+				pChar->_iPrev_id = (CREID_TYPE)(atoi(pArg));
 				continue;
 			}
 			else if ( s.IsKey("XSKIN" ))
 			{
-				pChar->m_prev_Hue = (HUE_TYPE)( atoi(pArg) );
+				pChar->_wPrev_Hue = (HUE_TYPE)( atoi(pArg) );
 				continue;
 			}
 			else if ( s.IsKey("FONT" ))

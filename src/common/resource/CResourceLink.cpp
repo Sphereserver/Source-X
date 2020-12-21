@@ -20,7 +20,7 @@ CResourceLink::CResourceLink( CResourceID rid, const CVarDefContNum * pDef ) :
 {
     m_pScript = nullptr;
     m_Context.Init(); // not yet tested.
-    m_dwRefInstances = 0;
+    _dwRefInstances = 0;
     ClearTriggers();
 }
 
@@ -101,13 +101,22 @@ void CResourceLink::ScanSection( RES_TYPE restype )
                 }
             }
             else
+            {
                 iTrigger = XTRIG_UNKNOWN;
+            }
 
             SetTrigger(iTrigger);
         }
     }
 }
 
+void CResourceLink::DelRefInstance()
+{
+#ifdef _DEBUG
+    ASSERT(_dwRefInstances != (dword)-1);    // catching underflows
+#endif
+    --_dwRefInstances;
+}
 
 bool CResourceLink::IsLinked() const
 {
@@ -144,8 +153,8 @@ void CResourceLink::CopyTransfer(CResourceLink *pLink)
     m_pScript = pLink->m_pScript;
     m_Context = pLink->m_Context;
     memcpy(m_dwOnTriggers, pLink->m_dwOnTriggers, sizeof(m_dwOnTriggers));
-    m_dwRefInstances = pLink->m_dwRefInstances;
-    pLink->m_dwRefInstances = 0;	// instance has been transfered.
+    _dwRefInstances = pLink->_dwRefInstances;
+    pLink->_dwRefInstances = 0;	// instance has been transfered.
 }
 
 void CResourceLink::ClearTriggers()

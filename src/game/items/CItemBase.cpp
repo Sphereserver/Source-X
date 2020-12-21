@@ -2244,18 +2244,24 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 	CScriptLineContext scriptStartContext = s.GetContext();
 	while ( s.ReadKeyParse())
 	{
-		if ( s.IsKey( "DUPEITEM" ))
-			return MakeDupeReplacement( pBase, (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr() )) );
+		if (s.IsKey("DUPEITEM"))
+		{
+			return MakeDupeReplacement(pBase, (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType(RES_ITEMDEF, s.GetArgStr())));
+		}
 		else if ( s.IsKey( "MULTIREGION" ))
 		{
 			// Upgrade the CItemBase::pBase to the CItemBaseMulti.
 			pBase = CItemBaseMulti::MakeMultiRegion( pBase, s );
 			continue;
 		}
-		else if ( s.IsKeyHead( "ON", 2 ))	// trigger scripting marks the end
+		else if (s.IsKeyHead("ON", 2))	// trigger scripting marks the end
+		{
 			break;
-		else if ( s.IsKey( "ID" ) || s.IsKey( "TYPE" ))	// These are required for CItemBaseMulti::MakeMultiRegion to function correctly
-			pBase->r_LoadVal( s );
+		}
+		else if (s.IsKey("ID") || s.IsKey("TYPE"))	// These are required for CItemBaseMulti::MakeMultiRegion to function correctly
+		{
+			pBase->r_LoadVal(s);
+		}
 	}
 
 	// Return to the start of the item script

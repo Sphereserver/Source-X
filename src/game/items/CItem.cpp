@@ -1911,13 +1911,13 @@ HUE_TYPE CItem::GetHueVisible() const
 		}
 	}
 	
-	return(CObjBase::m_wHue);
+	return CObjBase::GetHue();
 }
 
 int CItem::GetWeight(word amount) const
 {
 	int iWeight = m_weight * (amount ? amount : GetAmount());
-    int iReduction = GetPropNum(COMP_PROPS_ITEMCHAR, PROPITCH_WEIGHTREDUCTION, true);
+    const int iReduction = GetPropNum(COMP_PROPS_ITEMCHAR, PROPITCH_WEIGHTREDUCTION, true);
 	if (iReduction)
 	{
 		iWeight -= (int)IMulDivLL( iWeight, iReduction, 100 );
@@ -1981,11 +1981,14 @@ bool CItem::SetBase( CItemBase * pItemDef )
 
 	if ( pItemOldDef )
 	{
+		pItemOldDef->DelInstance();
 		if ( pParentCont )
 			iWeightOld = GetWeight();
 	}
 
-	m_BaseRef.SetRef(pItemDef);
+	pItemDef->AddInstance();	// Increase object instance counter (different from the resource reference counter!)
+	m_BaseRef.SetRef(pItemDef);	// Among the other things, it increases the new resource reference counter and decreases the old, if any
+
 	m_weight = pItemDef->GetWeight();
 
 	// matex (moved here from constructor so armor/dam is copied too when baseid changes!)
@@ -4912,7 +4915,7 @@ bool CItem::IsMemoryTypes( word wType ) const
 {
 	if ( ! IsType( IT_EQ_MEMORY_OBJ ))
 		return false;
-	return (( GetHueAlt() & wType ) ? true : false );
+	return (( GetHue() & wType ) ? true : false );
 }
 
 lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
