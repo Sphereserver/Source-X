@@ -720,62 +720,112 @@ bool CClient::Event_CheckWalkBuffer()
 
 	if ( !g_Cfg.m_iWalkBuffer )
 		return true;
-	if ( (m_iWalkStepCount % 7) != 0 )	// only check when we have taken 8 steps
+	if ( (m_iWalkStepCount % 4) != 0 )	// only check when we have taken 4 steps
 		return true;
 
 	// Client only allows 4 steps of walk ahead.
 	const int64 iCurTime = CSTime::GetPreciseSysTimeMilli();
     int64 iTimeDiff = (int64)llabs(iCurTime - m_timeWalkStep);	// use absolute value to prevent overflows
-    int64 iTimeMin = m_pChar->IsStatFlag(STATF_ONHORSE|STATF_HOVERING) ? 700 : 1400; // minimum time to move 8 steps in milliseconds
+	int64 iTimeMin = 0;  // minimum time to move 4 steps in milliseconds
 
-	if ( m_pChar->m_pPlayer && (m_pChar->m_pPlayer->m_speedMode != 0) )
+	// First step is to determine the theoric time(iTimeMin) to take the last 4 steps
+	/*		RUN /Walk
+	Mount	400 / 800
+	foot	800 / 1600
+	Speed Modes:
+	0 = Foot=Normal, Mount=Normal
+	1 = Foot=Double Speed, Mount=Normal
+	2 = Foot=Always Walk, Mount=Always Walk (Half Speed)
+	3 = Foot=Always Run, Mount=Always Walk
+	4 = No Movement (handled by OnFreezeCheck)*/
+	if (m_pChar->m_pPlayer && (m_pChar->m_pPlayer->m_speedMode == 3))
 	{
-		// Speed Modes:
-		// 0 = Foot=Normal, Mount=Normal                         1,4s - 0,7s
-		// 1 = Foot=Double Speed, Mount=Normal                   0,7s - 0,7s = 0,7s
-		// 2 = Foot=Always Walk, Mount=Always Walk (Half Speed)  2,8s - 1,4s = x2
-		// 3 = Foot=Always Run, Mount=Always Walk                1,4s - 1,4  = 0,7|x2 (1|2)
-		// 4 = No Movement                                       N/A  - N/A  = (handled by OnFreezeCheck)
-
-		if ( m_pChar->m_pPlayer->m_speedMode & 0x01 )
-			iTimeMin = 70;
-		if ( m_pChar->m_pPlayer->m_speedMode & 0x02 )
-			iTimeMin *= 2;
+		iTimeMin = 800;
 	}
-
-	if ( iTimeDiff > iTimeMin )
+	else
 	{
-		llong iRegen = ((iTimeDiff - iTimeMin) * g_Cfg.m_iWalkRegen) / 150;
-		if ( iRegen > g_Cfg.m_iWalkBuffer )
-			iRegen = g_Cfg.m_iWalkBuffer;
-		else if ( iRegen < -((g_Cfg.m_iWalkBuffer * g_Cfg.m_iWalkRegen) / 100) )
-			iRegen = -((g_Cfg.m_iWalkBuffer * g_Cfg.m_iWalkRegen) / 100);
-		iTimeDiff = iTimeMin + iRegen;
-	}
-
-	m_iWalkTimeAvg += iTimeDiff;
-	const llong oldAvg = m_iWalkTimeAvg;
-	m_iWalkTimeAvg -= iTimeMin;
-
-	if ( m_iWalkTimeAvg > g_Cfg.m_iWalkBuffer )
-		m_iWalkTimeAvg = g_Cfg.m_iWalkBuffer;
-	else if ( m_iWalkTimeAvg < -g_Cfg.m_iWalkBuffer )
-		m_iWalkTimeAvg = -g_Cfg.m_iWalkBuffer;
-
-	if ( IsPriv(PRIV_DETAIL) && IsPriv(PRIV_DEBUG) )
-		SysMessagef("Walkcheck trace: timeDiff(%lld) / timeMin(%lld). oldAvg(%lld) :: curAvg(%lld)", iTimeDiff, iTimeMin, oldAvg, m_iWalkTimeAvg);
-
-	if ( m_iWalkTimeAvg < 0 && iTimeDiff >= 0 )
-	{
-		// Walking too fast.
-		DEBUG_WARN(("%s (%x): Fast Walk ?\n", GetName(), GetSocketID()));
-		if ( IsTrigUsed(TRIGGER_USEREXWALKLIMIT) )
+		if (m_pChar->IsStatFlag(STATF_ONHORSE | STATF_HOVERING)) //on horse or Gargoyle fly
+			iTimeMin = 800;
+		else //on foot
 		{
-			if ( m_pChar->OnTrigger(CTRIG_UserExWalkLimit, m_pChar) != TRIGRET_RET_TRUE )
-				return false;
+			if (m_pChar->m_pPlayer && (m_pChar->m_pPlayer->m_speedMode == 1))
+				iTimeMin = 800;
+			else
+				iTimeMin = 1600;
+		}
+		
+		if (m_pChar->IsStatFlag(STATF_FLY)) // running
+		{
+			if (m_pChar->m_pPlayer && (m_pChar->m_pPlayer->m_speedMode != 2))
+				iTimeMin /= 2;		
 		}
 	}
+	
 
+	if ( !(iTimeDiff < iTimeMin -150 || iTimeDiff > iTimeMin + 150) ) 
+	// If There been a while since last step or if player change direction TimeDiff will be big
+	// We want evaluate only when player go straight and continue
+	// Gap of 150 should be ok, no one should have a ping like this
+
+	{
+
+		/* 06-01-2004, Kell
+		Based on the bit - bucket algorithm used in IP QoS DiffServ routers :
+		there is a maximum speed at which you can walk(it's fixed, different walking or foot). If
+		you walk faster than that speed, every tenth of second you walk faster than expected is a point you
+		loose. Every 10th of second you take above the time expected is a point you win.The number of points
+		you start with and the maximum is WALKBUFFER in sphere.ini, and I've tested it with values
+		around 40 for good connections and 70 for laggy connections.
+		If a player speedwalks, he'll soon drop below 0, and stop moving, then have to compensate with equally
+		slow walking periods, like it happens when there's a burst of lag.
+		WALKREGEN is the speed at which you regen walk points, in percentage.
+		Default values : WALKBUFFER = 50   WALKREGEN = 25
+		Hints :
+		WALKBUFFER	lower for more strict control.However, setting it lower also increases the
+		chance of limiting someone which is just experiencing lag.Raise this value
+		if you lower WALKREGEN.
+		WALKREGEN	set lower for longer - lasting punishments.It makes sense to lower this value
+		if you raise WALKBUFFER.*/
+
+		if ( iTimeDiff > iTimeMin ) 
+		// If the step time is greater than the theoric time it's the serve process + player ping
+
+		{
+			llong iRegen = ((iTimeDiff - iTimeMin) * g_Cfg.m_iWalkRegen) / 150;
+			if ( iRegen > g_Cfg.m_iWalkBuffer )
+				iRegen = g_Cfg.m_iWalkBuffer;
+			else if ( iRegen < -((g_Cfg.m_iWalkBuffer * g_Cfg.m_iWalkRegen) / 100) )
+				iRegen = -((g_Cfg.m_iWalkBuffer * g_Cfg.m_iWalkRegen) / 100);
+			iTimeDiff = iTimeMin + iRegen;
+		}
+
+
+		// Create de average step value
+		m_iWalkTimeAvg += iTimeDiff;
+		const llong oldAvg = m_iWalkTimeAvg;
+		m_iWalkTimeAvg -= iTimeMin;
+
+
+		if ( m_iWalkTimeAvg > g_Cfg.m_iWalkBuffer )
+			m_iWalkTimeAvg = g_Cfg.m_iWalkBuffer;
+		else if ( m_iWalkTimeAvg < -g_Cfg.m_iWalkBuffer )
+			m_iWalkTimeAvg = -g_Cfg.m_iWalkBuffer;
+
+		if ( IsPriv(PRIV_DETAIL) && IsPriv(PRIV_DEBUG) )
+			SysMessagef("Walkcheck trace: timeDiff(%lld) / timeMin(%lld). oldAvg(%lld) :: curAvg(%lld)", iTimeDiff, iTimeMin, oldAvg, m_iWalkTimeAvg);
+
+		// Checking if there a speehack
+		if ( m_iWalkTimeAvg < 0 && iTimeDiff >= 0 )
+		{
+			// Walking too fast.
+			DEBUG_WARN(("%s (%x): Fast Walk ?\n", GetName(), GetSocketID()));
+			if ( IsTrigUsed(TRIGGER_USEREXWALKLIMIT) )
+			{
+				if ( m_pChar->OnTrigger(CTRIG_UserExWalkLimit, m_pChar) != TRIGRET_RET_TRUE )
+					return false;
+			}
+		}
+	}
 	m_timeWalkStep = iCurTime;
 	return true;
 }
@@ -825,23 +875,30 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 		// To get milliseconds precision we must get the system clock manually at each walk request (the server clock advances only at every tick).
 		const int64 iCurTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
-        if ( IsSetEF(EF_FastWalkPrevention) )
+        if ( IsSetEF(EF_FastWalkPrevention) && !m_pChar->IsPriv(PRIV_GM) )
         {
-            if ( iCurTime < m_timeNextEventWalk )		// fastwalk detected
+			// THIS SYSTEM DO NOT WORK SEE DETAIL DOWN
+            if ( iCurTime < m_timeNextEventWalk )		// fastwalk detected (speedhack)
             {
+				g_Log.Event(LOGL_WARN | LOGM_CHEAT, "Fastwalk detection for '%s', this player will notice a lag\n", GetAccount()->GetName());
                 new PacketMovementRej(this, sequence);
                 return false;
             }
 
             int64 iDelay = 0;
-            if ( m_pChar->IsStatFlag(STATF_ONHORSE|STATF_HOVERING) )
-                iDelay = (rawdir & 0x80) ? 70 : 170;	// 100ms : 200ms
+            if ( m_pChar->IsStatFlag(STATF_ONHORSE|STATF_HOVERING) || (m_pChar->m_pPlayer->m_speedMode & 0x01) )
+                iDelay = (rawdir & 0x80) ? 100 : 200;	// 100ms : 200ms 
             else
-                iDelay = (rawdir & 0x80) ? 170 : 370;	// 200ms : 400ms
+                iDelay = (rawdir & 0x80) ? 200 : 400;	// 200ms : 400ms
 
-            m_timeNextEventWalk = iCurTime + iDelay;
+			iDelay -= 30; //Delay offset is set to be more permisif when player have lag or processor lack precision 
+            // This system do not work because the offset must be fine tune for each server and for EACH player and it's ping
+			// For exemple, in local we set offset to 10 and there is no false-positive. If set offset to 30, Speedhack at 1.2 is not detect
+			// On live server, with delay of 30, some player will experience false-positive some not. Player with good ping will be able to use speedhack without detection
+			// FIXME: The offset delay should be calculate using the ping value of each player and a fix value of processor functionnality.
+			m_timeNextEventWalk = iCurTime + iDelay;
         }
-        else if ( !Event_CheckWalkBuffer() )
+        else if (!m_pChar->IsPriv(PRIV_GM) && !Event_CheckWalkBuffer() )
         {
             new PacketMovementRej(this, sequence);
             return false;
