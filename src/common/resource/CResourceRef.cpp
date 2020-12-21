@@ -17,12 +17,7 @@ CResourceRef::CResourceRef()
 CResourceRef::CResourceRef(CResourceLink* pLink) : m_pLink(pLink)
 {
     ASSERT(pLink);
-    /*
-	 * Cancelling this line solve instance issue, because i think this is the reference that called while sphere linking dupeitems to base item.
-	 * I just cancelled it and seems like instance fixed at all but I leave a note here for later issues.
-	 * xwerswoodx
-	 */
-    //pLink->AddRefInstance();
+    pLink->AddRefInstance();
 }
 
 CResourceRef::CResourceRef(const CResourceRef& copy)
