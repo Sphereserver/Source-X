@@ -2579,7 +2579,9 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				}
 				else if ( !strnicmp( s.GetArgStr(), "STOP", 4 ) )
 				{
-					CTimedFunctions::Stop(GetUID(),s.GetArgStr()+5);
+					lpctstr strFunction = s.GetArgStr()+5;
+					GETNONWHITESPACE(strFunction);
+					CTimedFunctions::Stop(GetUID(),strFunction);
 				}
 				else
 				{

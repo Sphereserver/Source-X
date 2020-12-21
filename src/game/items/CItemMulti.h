@@ -510,6 +510,7 @@ public:
     * @param pItem the item.
     */
     void UnlockItem(const CUID& uidItem);
+    void UnlockAllItems();
     /**
     * @brief Returns the position of the given item.
     * @param pItem the item.

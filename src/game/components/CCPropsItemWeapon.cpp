@@ -71,12 +71,25 @@ bool CCPropsItemWeapon::GetPropertyNumPtr(PropertyIndex_t iPropIndex, PropertyVa
     switch (iPropIndex)
     {
         case PROPIWEAP_RANGEL:
+        {
+            if (_uiRange == 0)
+            {
+                *piOutVal = 0; //Default Low Range limit should be 0 if not specified.
+                return false;
+            }
             *piOutVal = RANGE_GET_LO(_uiRange);
             return true;
-
+        }
         case PROPIWEAP_RANGEH:
+        {
+        	if (_uiRange == 0)
+            {
+                *piOutVal = 1; //Default High Range limit should be 1 if not specified.
+                return false;
+            }
             *piOutVal = maximum(1, RANGE_GET_HI(_uiRange));
             return true;
+        }
         default:
             return BaseCont_GetPropertyNum(&_mPropsNum, iPropIndex, piOutVal);
     }
