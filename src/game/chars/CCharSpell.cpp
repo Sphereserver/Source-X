@@ -443,8 +443,8 @@ bool CChar::Spell_Resurrection(CItemCorpse * pCorpse, CChar * pCharSrc, bool fNo
 		hits = (ushort)(Args.m_iN1);
 	}
 
-	SetID(m_prev_id);
-	SetHue(m_prev_Hue);
+	SetID(_iPrev_id);
+	SetHue(_wPrev_Hue);
 	StatFlag_Clear(STATF_DEAD|STATF_INSUBSTANTIAL);
 	Stat_SetVal(STAT_STR, maximum(hits, 1));
 
@@ -623,7 +623,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 					break;
 			}
 
-			SetID(m_prev_id);
+			SetID(_iPrev_id);
 			if ( IsSetMagicFlags(MAGICF_POLYMORPHSTATS) && spell == SPELL_Polymorph )
 			{
 				Stat_AddMod(STAT_STR, -pSpell->m_itSpell.m_PolyStr);
@@ -655,7 +655,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			SetName(pSpell->GetName());		// restore your name
 
 			if (!IsStatFlag(STATF_POLYMORPH) && IsPlayableCharacter())	// polymorph doesn't change the hue of the character, only the id
-				SetHue(m_prev_Hue);
+				SetHue(_wPrev_Hue);
 
 			CItem *pHair = LayerFind(LAYER_HAIR);
 			if (pHair)
@@ -3727,7 +3727,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 					SetID( pCharDef->IsFemale() ? CREID_ELFMAN : CREID_ELFWOMAN );
 				else if ( IsGargoyle() )
 					SetID( pCharDef->IsFemale() ? CREID_GARGMAN : CREID_GARGWOMAN );
-				m_prev_id = GetID();
+				_iPrev_id = GetID();
 			}
 			break;
 

@@ -70,7 +70,7 @@ static bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 // -CObjBase stuff
 // Either a player, npc or item.
 
-CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not a real CTimedObject, it just needs it's virtual inheritance.
+CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not a real CTimedObject, it just needs its virtual inheritance.
 {
 	++ sm_iCount;
 	_iCreatedResScriptIdx	= _iCreatedResScriptLine	= -1;
@@ -130,6 +130,10 @@ CObjBase::~CObjBase()
 
 	FreePropertyList();
 
+	if (CBaseBaseDef* pBase = Base_GetDef())
+	{
+		pBase->DelInstance();
+	}
 	--sm_iCount;
 	ASSERT( IsDisconnected());
 
@@ -176,6 +180,11 @@ bool CObjBase::IsContainer() const
 	return( dynamic_cast <const CContainer*>(this) != nullptr );
 }
 
+void CObjBase::SetHueQuick(HUE_TYPE wHue)
+{
+	m_wHue = wHue;
+}
+
 void CObjBase::SetHue( HUE_TYPE wHue, bool fAvoidTrigger, CTextConsole *pSrc, CObjBase *SourceObj, llong sound )
 {
 	if (g_Serv.IsLoading()) //We do not want tons of @Dye being called during world load, just set the hue then continue...
@@ -209,7 +218,7 @@ void CObjBase::SetHue( HUE_TYPE wHue, bool fAvoidTrigger, CTextConsole *pSrc, CO
 	if (args.m_iN2 > 0) //No sound? No checks for who can hear, packets....
 		Sound((SOUND_TYPE)(args.m_iN2));
 
-	m_wHue = (SOUND_TYPE)(args.m_iN1);
+	m_wHue = (HUE_TYPE)(args.m_iN1);
 }
 
 HUE_TYPE CObjBase::GetHue() const
@@ -217,16 +226,6 @@ HUE_TYPE CObjBase::GetHue() const
 	return( m_wHue );
 }
 
-word CObjBase::GetHueAlt() const
-{
-	// IT_EQ_MEMORY_OBJ = MEMORY_TYPE mask
-	// IT_EQ_VENDOR_BOX = restock time.
-	return( m_wHue );
-}
-void CObjBase::SetHueAlt( HUE_TYPE wHue )
-{
-	m_wHue = wHue;
-}
 
 int CObjBase::IsWeird() const
 {
@@ -875,23 +874,24 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 	bool fZero = false;
 	switch (index)
 	{
-		//return as string or hex number or nullptr if not set
-		//On these ones, check BaseDef if not found on dynamic
-		case OC_NAMELOC:
+		//return as string, empty if not set.
+		//On these ones, check BaseDef if not found on dynamic (CObjBase)
+		case OC_ABILITYPRIMARY:
+		case OC_ABILITYSECONDARY:
+		case OC_ONAME:
 		case OC_SLAYER:
 		case OC_SLAYERLESSER:
 		case OC_SLAYERMISC:
 		case OC_SLAYERSUPER:
-		case OC_ABILITYPRIMARY:
-		case OC_ABILITYSECONDARY:
-			{
-				const CVarDefCont * pVar = GetDefKey(ptcKey, true);
-				sVal = pVar ? pVar->GetValStr() : "";
-			}
-			break;
-		//return as decimal number or 0 if not set
-		//On these ones, check BaseDef if not found on dynamic
+		{
+			const CVarDefCont * pVar = GetDefKey(ptcKey, true);
+			sVal = pVar ? pVar->GetValStr() : "";
+		}
+		break;
 
+		//return as hex number or 0 if not set.
+		//On these ones, check BaseDef if not found on dynamic (CObjBase)
+		case OC_NAMELOC:
         case OC_RECIPEALCHEMY:
         case OC_RECIPEBLACKSMITH:
         case OC_RECIPEBOWCRAFT:
@@ -1179,7 +1179,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 						return true;
 					}
 
-					CUID uid = Exp_GetVal(ptcKey);
+					CUID uid(Exp_GetVal(ptcKey));
 					SKIP_SEPARATORS(ptcKey);
                     GETNONWHITESPACE(ptcKey);
 					pObj = uid.ObjFind();
@@ -1412,6 +1412,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 		case OC_TAG0:
 			fZero = true;
 			++ptcKey;
+			FALLTHROUGH;
 		case OC_TAG:			// "TAG" = get/set a local tag.
 			{
 				if ( ptcKey[3] != '.' )
@@ -1666,18 +1667,20 @@ bool CObjBase::r_LoadVal( CScript & s )
 	switch ( index )
 	{
 		//Set as Strings
+		case OC_ABILITYPRIMARY:
+		case OC_ABILITYSECONDARY:
+		case OC_ONAME:
 		case OC_SLAYER:
 		case OC_SLAYERLESSER:
 		case OC_SLAYERMISC:
 		case OC_SLAYERSUPER:
-		case OC_ABILITYPRIMARY:
-		case OC_ABILITYSECONDARY:
-			{
-				bool fQuoted = false;
-				SetDefStr(s.GetKey(), s.GetArgStr( &fQuoted ), fQuoted);
-                fResendTooltip = true;
-			}
-			break;
+		{
+			bool fQuoted = false;
+			SetDefStr(s.GetKey(), s.GetArgStr( &fQuoted ), fQuoted);
+			fResendTooltip = true;
+		}
+		break;
+
 		//Set as number only
 		case OC_NAMELOC:
         case OC_RECIPEALCHEMY:
@@ -2579,7 +2582,9 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				}
 				else if ( !strnicmp( s.GetArgStr(), "STOP", 4 ) )
 				{
-					CTimedFunctions::Stop(GetUID(),s.GetArgStr()+5);
+					lpctstr strFunction = s.GetArgStr()+5;
+					GETNONWHITESPACE(strFunction);
+					CTimedFunctions::Stop(GetUID(),strFunction);
 				}
 				else
 				{

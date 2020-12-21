@@ -146,9 +146,9 @@ public:
 	HUE_TYPE m_EmoteHueOverride;	// emote hue to use
 
 	// In order to revert to original Hue and body.
-	CREID_TYPE m_prev_id;		// Backup of body type for ghosts and poly
-	HUE_TYPE m_prev_Hue;		// Backup of skin color. in case of polymorph etc.
-	HUE_TYPE m_wBloodHue;		// Replicating CharDef's BloodColor on the char, or overriding it.
+	CREID_TYPE _iPrev_id;		// Backup of body type for ghosts and poly
+	HUE_TYPE _wPrev_Hue;		// Backup of skin color. in case of polymorph etc.
+	HUE_TYPE _wBloodHue;		// Replicating CharDef's BloodColor on the char, or overriding it.
 
 
 	// Skills, Stats and health
@@ -466,24 +466,29 @@ public:
 
 public:
 	// Client Player specific stuff. -------------------------
+	bool IsPlayer() const noexcept			{ return nullptr != m_pPlayer; }
+	bool IsClientActive() const noexcept	{ return nullptr != m_pClient; }
+	bool IsClientType() const noexcept;
+	CClient* GetClientActive() const noexcept { return m_pClient; }
+
 	void ClientAttach( CClient * pClient );
 	void ClientDetach();
-	bool IsClientType() const noexcept;
-	bool IsClientActive() const noexcept;
-	CClient * GetClientActive() const noexcept;
 
 	bool SetPrivLevel( CTextConsole * pSrc, lpctstr pszFlags );
 	bool CanDisturb( const CChar * pChar ) const;
 	void SetDisconnected( CSector *pNewSector = nullptr );
 	bool SetPlayerAccount( CAccount * pAccount );
 	bool SetPlayerAccount( lpctstr pszAccount );
+
+	void ClearPlayer();
+
     bool IsNPC() const;
 	bool SetNPCBrain( NPCBRAIN_TYPE NPCBrain );
 	NPCBRAIN_TYPE GetNPCBrain() const;
-    NPCBRAIN_TYPE GetNPCBrainGroup() const;     // Return NPCBRAIN_ANIMAL for animals, _HUMAN for NPC human and PCs, >= _MONSTER for monsters
-    NPCBRAIN_TYPE GetNPCBrainAuto() const;    // Guess default NPC brain
+    NPCBRAIN_TYPE GetNPCBrainGroup() const;	// Return NPCBRAIN_ANIMAL for animals, _HUMAN for NPC human and PCs, >= _MONSTER for monsters
+	NPCBRAIN_TYPE GetNPCBrainAuto() const;	// Guess default NPC brain
 	void ClearNPC();
-	void ClearPlayer();
+	
 
 public:
 	void ObjMessage( lpctstr pMsg, const CObjBase * pSrc ) const;
@@ -547,21 +552,14 @@ public:
 
 public:
     /**
-    * @fn  bool CObjBase::IsTriggerActive(lpctstr trig);
-    *
     * @brief   Queries if a trigger is active ( m_RunningTrigger ) .
-    *
     * @param   trig    The trig.
-    *
     * @return  true if the trigger is active, false if not.
     */
     bool IsTriggerActive(lpctstr trig) const;
 
     /**
-    * @fn  void CObjBase::SetTriggerActive(lpctstr trig = nullptr);
-    *
     * @brief   Sets trigger active ( m_RunningTrigger ).
-    *
     * @param   trig    The trig.
     */
     void SetTriggerActive(lpctstr trig = nullptr);

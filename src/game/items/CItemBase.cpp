@@ -910,6 +910,19 @@ bool CItemBase::IsSameDispID( ITEMID_TYPE id ) const
 	return false;
 }
 
+bool CItemBase::IsDupedItem( ITEMID_TYPE id ) const
+{
+    ADDTOCALLSTACK("CItemBase::IsDupedItem");
+    if (m_flip_id.empty())
+        return false;
+    for ( size_t i = 0; i < m_flip_id.size(); ++i )
+    {
+        if ( m_flip_id[i] == id)
+            return true;
+    }
+    return false;
+}
+
 void CItemBase::Restock()
 {
 	ADDTOCALLSTACK("CItemBase::Restock");
@@ -1631,21 +1644,29 @@ bool CItemBase::r_LoadVal( CScript &s )
 			break;
 		case IBC_ID:
 			{
-				if ( GetID() < ITEMID_MULTI )
-				{
+            if ( GetID() < ITEMID_MULTI )
+                {
                     g_Log.EventError( "Setting new ID for base type %s not allowed\n", GetResourceName());
-					return false;
-				}
-
-				ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
-				CItemBase * pItemDef = FindItemBase( id );	// make sure the base is loaded.
-				if ( ! pItemDef )
-				{
+                    return false;
+                }
+                
+                ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
+                CItemBase * pItemDef = FindItemBase( id );	// make sure the base is loaded.
+                if ( ! pItemDef )
+                {
                     g_Log.EventError( "Setting unknown base ID=0%x for base type %s\n", id, GetResourceName());
-					return false;
+                    return false;
 				}
+                
+                /*
+                 * I add Is Duped Item check to check if item is from DUPELIST of base item, and ID won't change to baseid for unnecessarily.
+                 * I made this change to fix issue #512 (https://github.com/Sphereserver/Source-X/issues/512)
+                 * I leave a note here to know developers why I did this changed
+                 * xwerswoodx
+                 */
+                 if (!pItemDef->IsDupedItem(id))
+                    id = ITEMID_TYPE(pItemDef->m_dwDispIndex);
 
-                id = ITEMID_TYPE(pItemDef->m_dwDispIndex);
                 if ( ! IsValidDispID(id) )
                 {
                     if (id >= g_Install.m_tiledata.GetItemMaxIndex())
@@ -2223,18 +2244,24 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 	CScriptLineContext scriptStartContext = s.GetContext();
 	while ( s.ReadKeyParse())
 	{
-		if ( s.IsKey( "DUPEITEM" ))
-			return MakeDupeReplacement( pBase, (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr() )) );
+		if (s.IsKey("DUPEITEM"))
+		{
+			return MakeDupeReplacement(pBase, (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType(RES_ITEMDEF, s.GetArgStr())));
+		}
 		else if ( s.IsKey( "MULTIREGION" ))
 		{
 			// Upgrade the CItemBase::pBase to the CItemBaseMulti.
 			pBase = CItemBaseMulti::MakeMultiRegion( pBase, s );
 			continue;
 		}
-		else if ( s.IsKeyHead( "ON", 2 ))	// trigger scripting marks the end
+		else if (s.IsKeyHead("ON", 2))	// trigger scripting marks the end
+		{
 			break;
-		else if ( s.IsKey( "ID" ) || s.IsKey( "TYPE" ))	// These are required for CItemBaseMulti::MakeMultiRegion to function correctly
-			pBase->r_LoadVal( s );
+		}
+		else if (s.IsKey("ID") || s.IsKey("TYPE"))	// These are required for CItemBaseMulti::MakeMultiRegion to function correctly
+		{
+			pBase->r_LoadVal(s);
+		}
 	}
 
 	// Return to the start of the item script

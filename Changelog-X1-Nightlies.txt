@@ -2336,3 +2336,16 @@ Must have event, even if it's empty, since it's applied by the source to generat
 20-12-2020, Nolok
 - Added: RESDEFNAME section, similar to the DEFNAME one but to be used to define aliases for Sphere resources (as example for backward compatibility defnames in scripts).
 	Thus, backwards compatibility defnames should be moved inside a RESDEFNAME section (Issue #357).
+
+21-12-2020, xwerswoodx
+-Fixed: UnlockItem -1 doesn't remove flags from items inside multi.
+-Fixed: Serv.Itemdef.<ID>.Instances added dupeitems as instance. (Issue: #444)
+-Added: TAGAT to ACCOUNT reference. (Issue: #531)
+-Fixed: Timerf stop space issue. (Issue: #554)
+-Fixed: IDs from dupelist can't able to used as baseid for items. (Issue: 512)
+-Fixed: RangeL and RangeH return values. (Issue: #528)
+-Fixed: Now '@' expressions can able to calculate negative values. (Issue #371)
+21-12-2020, Nolok
+- Fixed: INSTANCES not working as intended (Issue #444, thanks to xwerswoodx).
+- Fixed: Skill marked to decrease not decrementing if its value exceeded the skillcap during another skill gain (Issue #447).
+- Added: ONAME property. An useful use case could be for item identification or polymorph scripts.

@@ -43,13 +43,15 @@ CResourceRef& CResourceRef::operator=(const CResourceRef& other)
 
 void CResourceRef::SetRef(CResourceLink* pLink)
 {
+    //ASSERT(pLink != m_pLink);
+
     if (m_pLink != nullptr)
         m_pLink->DelRefInstance();
 
     m_pLink = pLink;
 
-    if (pLink != nullptr)
-        pLink->AddRefInstance();
+    if (m_pLink != nullptr)
+        m_pLink->AddRefInstance();
 }
 
 

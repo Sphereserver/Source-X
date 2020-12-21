@@ -637,8 +637,8 @@ bool CChar::Stat_Decrease(STAT_TYPE stat, SKILL_TYPE skill)
 		return false;
 
 	// Check for stats degrade.
-	const uint uiStatSumLimit = Stat_GetSumLimit();
-	const uint uiStatSum = Stat_GetSum() + 1;	// +1 here assuming we are going to have +1 stat at some point thus we are calling this function
+	const uint uiStatSumLimit = Stat_GetSumLimit();	// Maximum reachable statsum.
+	const uint uiStatSum = Stat_GetSum() + 1;		// Current statsum +1, assuming we are going to have +1 stat at some point thus we are calling this function
 	
 	/*Before there was iStatSum < iStatSumAvg:
 	In that case, if the sum of the player's Stats(iStatSum) was at StatCap - 1 (before adding the +1 above) the selected Stat will not increase

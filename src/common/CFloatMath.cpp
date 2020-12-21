@@ -98,9 +98,9 @@ realtype CFloatMath::GetValMath( realtype dVal, lpctstr & pExpr )
 			++pExpr;
 			{
 				realtype dTempVal = MakeFloatMath( pExpr );
-				if ( (dVal == 0) && (dTempVal < 0) )
+				if ( (dVal == 0) && (dTempVal <= 0) )
 				{
-					DEBUG_ERR(( "Float_MakeFloatMath: Power of zero with negative exponent is undefined\n" ));
+					DEBUG_ERR(( "Float_MakeFloatMath: Power of zero with zero or negative exponent is undefined\n" ));
 					break;
 				}
 				//DEBUG_ERR(("dVal %f  dTempVal %f  Result %f\n",dVal,dTempVal,pow(dVal, dTempVal)));

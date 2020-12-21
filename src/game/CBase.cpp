@@ -32,6 +32,7 @@ CFactionDef CBaseBaseDef::GetFaction()
 CBaseBaseDef::CBaseBaseDef( CResourceID id ) :
 	CResourceLink( id )
 {
+	_dwInstances = 0;
 	m_dwDispIndex			= 0;	// Assume nothing til told differently.
 	m_attackBase			= 0;
 	m_attackRange			= 0;
@@ -51,19 +52,27 @@ CBaseBaseDef::~CBaseBaseDef()
 {
 }
 
+void CBaseBaseDef::DelInstance()
+{
+#ifdef _DEBUG
+	ASSERT(_dwInstances != (dword)-1);    // catching underflows
+#endif
+	--_dwInstances;
+}
+
 lpctstr CBaseBaseDef::GetTypeName() const
 {
-	return( m_sName );
+	return m_sName.GetBuffer();
 }
 
 lpctstr CBaseBaseDef::GetName() const
 {
-	return( GetTypeName());
+	return GetTypeName();
 }
 
 bool CBaseBaseDef::HasTypeName() const	// some CItem may not.
 {
-	return( ! m_sName.IsEmpty());	// default type name.
+	return (! m_sName.IsEmpty());	// default type name.
 }
 
 void CBaseBaseDef::SetTypeName( lpctstr pszName )
@@ -206,7 +215,7 @@ bool CBaseBaseDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * p
 			break;
 
 		case OBC_INSTANCES:
-			sVal.FormatVal( GetRefInstances());
+			sVal.FormatVal( GetInstances() );
 			break;
 		case OBC_NAME:
 			sVal = GetName();

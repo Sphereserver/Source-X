@@ -16,13 +16,13 @@ CItemMemory::~CItemMemory()
 
 word CItemMemory::SetMemoryTypes( word wType )	// For memory type objects.
 {
-	SetHueAlt( wType );
+	SetHueQuick( wType );
 	return( wType );
 }
 
 word CItemMemory::GetMemoryTypes() const
 {
-	return( GetHueAlt());	// MEMORY_FIGHT
+	return GetHue();	// MEMORY_FIGHT
 }
 
 CItemStone *CItemMemory::Guild_GetLink()

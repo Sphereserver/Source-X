@@ -33,7 +33,7 @@ public:
 
 	word  m_defense;		// base defense. (basic to body type) can be modified by armor.
 	dword m_Anims;			// Bitmask of animations available for monsters. ANIM_TYPE
-	HUE_TYPE m_wBloodHue;	// when damaged , what color is the blood (-1) = no blood
+	HUE_TYPE _wBloodHue;	// when damaged , what color is the blood (-1) = no blood
 	HUE_TYPE m_wColor;
 
 	ushort m_Str;		// Base Str for type. (in case of polymorph)
@@ -77,17 +77,17 @@ private:
 public:
 	virtual void UnLink() override;
 
-	CREID_TYPE GetID() const
+	CREID_TYPE GetID() const noexcept
 	{
-		return static_cast<CREID_TYPE>(GetResourceID().GetResIndex());
+		return CREID_TYPE(GetResourceID().GetResIndex());
 	}
-	CREID_TYPE GetDispID() const
+	CREID_TYPE GetDispID() const noexcept
 	{
-		return static_cast<CREID_TYPE>(m_dwDispIndex);
+		return CREID_TYPE(m_dwDispIndex);
 	}
 	bool SetDispID( CREID_TYPE id );
 
-	uint GetHireDayWage() const { return( m_iHireDayWage ); }
+	uint GetHireDayWage() const noexcept { return m_iHireDayWage; }
 
     /**
     * @brief   Returns the RangeLow.

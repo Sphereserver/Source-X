@@ -3059,7 +3059,7 @@ void CChar::SleepStart( bool fFrontFall )
 	UpdateCanSee(new PacketDeath(this, pCorpse, fFrontFall));
     pCorpse->Update();
 
-	SetID(m_prev_id);
+	SetID(_iPrev_id);
 	StatFlag_Set(STATF_SLEEPING);
 	StatFlag_Clear(STATF_HIDDEN);
 	UpdateMode();
@@ -3199,9 +3199,9 @@ bool CChar::Death()
 			Noto_Fame( -GetFame()/10 );
 
 		lpctstr pszGhostName = nullptr;
-		const CCharBase *pCharDefPrev = CCharBase::FindCharBase( m_prev_id );
+		const CCharBase *pCharDefPrev = CCharBase::FindCharBase( _iPrev_id );
         const bool fFemale = pCharDefPrev && pCharDefPrev->IsFemale();
-		switch ( m_prev_id )
+		switch ( _iPrev_id )
 		{
 			case CREID_GARGMAN:
 			case CREID_GARGWOMAN:

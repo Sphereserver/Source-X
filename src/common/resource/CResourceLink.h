@@ -24,7 +24,8 @@ private:
     CResourceScript * m_pScript;	// we already found the script.
     CScriptLineContext m_Context;
 
-    dword m_dwRefInstances;	// How many CResourceRef objects refer to this ?
+    dword _dwRefInstances;	// How many CResourceRef objects refer to this ?
+
 public:
     static const char *m_sClassName;
     dword m_dwOnTriggers[MAX_TRIGGERS_ARRAY];
@@ -32,21 +33,17 @@ public:
 #define XTRIG_UNKNOWN 0	// bit 0 is reserved to say there are triggers here that do not conform.
 
 public:
-    inline void AddRefInstance()
+    inline dword GetRefInstances() const noexcept
     {
-        ++m_dwRefInstances;
+        return _dwRefInstances;
     }
-    inline void DelRefInstance()
+
+    inline void AddRefInstance() noexcept
     {
-#ifdef _DEBUG
-        ASSERT(m_dwRefInstances != (dword)-1);    // catching underflows
-#endif
-        --m_dwRefInstances;
+        ++_dwRefInstances;
     }
-    inline dword GetRefInstances() const
-    {
-        return m_dwRefInstances;
-    }
+    
+    void DelRefInstance();
 
     bool IsLinked() const;	// been loaded from the scripts ?
     CResourceScript * GetLinkFile() const;
