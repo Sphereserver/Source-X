@@ -126,15 +126,19 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
 		mapQueryResult.SetNum("NUMROWS", mysql_num_rows(m_res));
 		mapQueryResult.SetNum("NUMCOLS", num_fields);
 
-		char	key[12];
-		char	**trow = nullptr;
-		int		rownum = 0;
-		char	*zStore = Str_GetTemp();
+        char key[12];
+        char **trow = nullptr;
+        int rownum = 0;
+        char *zStore = Str_GetTemp();
+        char empty = (char)0;
 		while ( (trow = mysql_fetch_row(m_res)) != nullptr )
 		{
 			for ( int i = 0; i < num_fields; ++i )
 			{
 				char *z = trow[i];
+                if (z == nullptr) //We need to check if the row empty, and return char 0 as return, because SetStr clean up \0 chars from vardef and causes the Sphere crash.
+                    z = &empty;
+                    
 				if ( !rownum )
 				{
 					mapQueryResult.SetStr(Str_FromI_Fast(i, key, sizeof(key), 10), true, z);
