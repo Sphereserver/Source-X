@@ -2353,3 +2353,4 @@ Must have event, even if it's empty, since it's applied by the source to generat
 
 22-12-2020, xwerswoodx
 Fixed: Mysql null pointer return causes server debug. (Issue: #544)
+Fixed: Field spells doesn't trigger onSpellEffect when they casted on player (Issue: #526)
