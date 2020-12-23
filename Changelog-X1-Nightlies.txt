@@ -2352,5 +2352,14 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Added: ONAME property. An useful use case could be for item identification or polymorph scripts.
 
 22-12-2020, xwerswoodx
-Fixed: Mysql null pointer return causes server debug. (Issue: #544)
-Fixed: Field spells doesn't trigger onSpellEffect when they casted on player (Issue: #526)
+-Fixed: Mysql null pointer return causes server debug. (Issue: #544)
+-Fixed: Field spells doesn't trigger onSpellEffect when they casted on player (Issue: #526)
+	As Wall of Stone and Energy Field triggered onSpellEffect from now on, you have to add
+	spellflag_nounparalyze to your Wall of Stone and Energy Field spell flags.
+-Fixed: Players can't reach their backpacks.
+	I noted this as fix because in OSI default you can do this.
+-Added: ATTR_CANUSE_PARALYZED flag that allow people to use items while paralyzed status.
+	Value: 010000000.
+	This flag only gives a permission to Double Clicking items, this does mean, you can't be
+	allowed to equip items or using skills (like drum, flute...) or spells (like wands, scrolls).
+	But you can use scripting to equip/unequip items under dclick. (Like src.findlayer.layer_hand1.cont = <src>)

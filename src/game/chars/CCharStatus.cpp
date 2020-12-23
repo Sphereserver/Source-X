@@ -1299,6 +1299,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 	{
         pItem = static_cast<const CItem *>(pObj);
 		bool fDeathImmune = IsPriv(PRIV_GM);
+		bool fFreezeImmune = false;
 		switch ( pItem->GetType() )
 		{
 		case IT_SIGN_GUMP:	// can be seen from a distance.
@@ -1308,6 +1309,12 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 		case IT_TELESCOPE:
             fDeathImmune = true;
 			break;
+        case IT_CONTAINER:
+        case IT_CONTAINER_LOCKED:
+        {
+            if ( pObjTop && pObjTop == this ) //This is default OSI behaviour, you can look through your backpack while frozen.
+                fFreezeImmune = true;
+        }
 
         case IT_ARCHERY_BUTTE:
         {
@@ -1331,8 +1338,14 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 		default:
 			break;
 		}
+        
+        if ( !fDeathImmune && IsStatFlag(STATF_FREEZE) )
+        {
+            if ( !fFreezeImmune && !pItem->IsAttr(ATTR_CANUSE_PARALYZED) )
+                return false;
+        }
 
-		if ( !fDeathImmune && IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_FREEZE|STATF_STONE) )
+		if ( !fDeathImmune && IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_STONE) )
 			return false;
 	}
 
