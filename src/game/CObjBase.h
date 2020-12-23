@@ -32,6 +32,7 @@ private:
 
 protected:
 	CResourceRef m_BaseRef;     // Pointer to the resource that describes this type.
+    bool _fDeleting;
 
     std::string _sRunningTrigger;   // Name of the running trigger (can be custom!) [use std::string instead of CSString because the former is allocated on-demand]
     short _iRunningTriggerId;       // Current trigger being run on this object. Used to prevent the same trigger being called over and over.
@@ -76,6 +77,11 @@ protected:
     void DeleteCleanup(bool fForce);
 
 public:
+    inline bool IsBeingDeleted() const noexcept
+    {
+        return _fDeleting;
+    }
+
     virtual bool IsDeleted() const override;
 
     /**

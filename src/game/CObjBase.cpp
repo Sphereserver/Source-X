@@ -73,6 +73,9 @@ static bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not a real CTimedObject, it just needs its virtual inheritance.
 {
 	++ sm_iCount;
+
+	_fDeleting = false;
+
 	_iCreatedResScriptIdx	= _iCreatedResScriptLine	= -1;
     _iRunningTriggerId		= _iCallingObjTriggerId		= -1;
 
@@ -157,6 +160,7 @@ void CObjBase::DeletePrepare()
 void CObjBase::DeleteCleanup(bool fForce)
 {
 	ADDTOCALLSTACK("CObjBase::DeleteCleanup");
+	_fDeleting = true;
 	CEntity::Delete(fForce);
 	CWorldTickingList::DelObjStatusUpdate(this);
 	CWorldTickingList::DelObjSingle(this);

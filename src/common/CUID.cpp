@@ -12,7 +12,8 @@ CObjBase * CUID::ObjFind(dword dwPrivateUID)   // static
 {
     if ( IsResource(dwPrivateUID) || !IsValidUID(dwPrivateUID) )
         return nullptr;
-    return g_World.FindUID( dwPrivateUID & UID_O_INDEX_MASK );
+	CObjBase* pObj = g_World.FindUID(dwPrivateUID & UID_O_INDEX_MASK);
+    return (pObj && pObj->IsBeingDeleted() ? nullptr : pObj);
 }
 
 CItem * CUID::ItemFind(dword dwPrivateUID)    // static
