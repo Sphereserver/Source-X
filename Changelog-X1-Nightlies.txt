@@ -2339,10 +2339,9 @@ Must have event, even if it's empty, since it's applied by the source to generat
 
 21-12-2020, xwerswoodx
 -Fixed: UnlockItem -1 doesn't remove flags from items inside multi.
--Fixed: Serv.Itemdef.<ID>.Instances added dupeitems as instance. (Issue: #444)
 -Added: TAGAT to ACCOUNT reference. (Issue: #531)
--Fixed: Timerf stop space issue. (Issue: #554)
--Fixed: IDs from dupelist can't able to used as baseid for items. (Issue: 512)
+-Fixed: TIMERF STOP not eating whitespaces before the function name. (Issue: #554)
+-Fixed: IDs from dupelist not able to used as baseid for items. (Issue: 512)
 -Fixed: RangeL and RangeH return values. (Issue: #528)
 -Fixed: Now '@' expressions can able to calculate negative values. (Issue #371)
 
@@ -2363,3 +2362,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 	This flag only gives a permission to Double Clicking items, this does mean, you can't be
 	allowed to equip items or using skills (like drum, flute...) or spells (like wands, scrolls).
 	But you can use scripting to equip/unequip items under dclick. (Like src.findlayer.layer_hand1.cont = <src>)
+
+23-12-2020, Nolok
+- Fixed: Couldn't set item ATTR > 0FFFFFFFF.
+- Fixed: Exception generated during the deletion of an item locked down inside a multi (Issue #552).

@@ -12,7 +12,7 @@ class CObjBase;
 class CItem;
 class CChar;
 
-#define UID_CLEAR			0
+#define UID_CLEAR			(dword)0
 #define UID_UNUSED			0xFFFFFFFF	// 0 = not used as well.
 
 #define UID_F_RESOURCE		0x80000000	// ALSO: pileable or special macro flag passed to client.

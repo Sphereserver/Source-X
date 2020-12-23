@@ -3072,7 +3072,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
             return true;
         }
 		case IC_ATTR:
-			m_Attr = s.GetArgVal();
+			m_Attr = s.GetArgU64Val();
 			break;
 		case IC_BASEWEIGHT:
 			m_weight = s.GetArgWVal();

@@ -1693,14 +1693,8 @@ void CItemMulti::LockItem(const CUID& uidItem)
 void CItemMulti::UnlockItem(const CUID& uidItem)
 {
     ADDTOCALLSTACK("CItemMulti::UnlockItem");
-    for (size_t i = 0; i < _lLockDowns.size(); ++i)
-    {
-        if (_lLockDowns[i] == uidItem)
-        {
-            _lLockDowns.erase(_lLockDowns.begin() + i);
-            break;
-        }
-    }
+    _lLockDowns.erase(std::find(_lLockDowns.begin(), _lLockDowns.end(), uidItem));
+
     CItem *pItem = uidItem.ItemFind();
     if (!pItem)
     {
@@ -1713,14 +1707,15 @@ void CItemMulti::UnlockItem(const CUID& uidItem)
     pItem->SetLockDownOfMulti(CUID());
 }
 
-void CItemMulti::UnlockAllItems() {
+void CItemMulti::UnlockAllItems()
+{
     ADDTOCALLSTACK("CItemMulti::UnlockAllItems");
-    for (size_t i = 0; i < _lLockDowns.size(); ++i)
+    for (const CUID& uidLockeddown : _lLockDowns)
     {
-        const CUID& pUID = _lLockDowns[i];
-        CItem *pItem = pUID.ItemFind();
+        CItem *pItem = uidLockeddown.ItemFind();
         if (!pItem)
             continue;
+
         pItem->ClrAttr(ATTR_LOCKEDDOWN);
         pItem->m_uidLink.InitUID();
         CScript event("events -ei_house_lockdown");
