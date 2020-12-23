@@ -712,57 +712,60 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 
 
 
-bool CClient::Event_CheckWalkBuffer()
+bool CClient::Event_CheckWalkBuffer(byte rawdir)
 {
 	ADDTOCALLSTACK("CClient::Event_CheckWalkBuffer");
 	// Check if the client is trying to walk too fast.
 	// Direction changes don't count.
 
-	if ( !g_Cfg.m_iWalkBuffer )
+	if ( !g_Cfg.m_iWalkBuffer ) //If ini setting is at 0
 		return true;
-	if ( (m_iWalkStepCount % 4) != 0 )	// only check when we have taken 4 steps
+	if ( (m_iWalkStepCount % 2) != 0 )	// only check when we have taken 4 steps
 		return true;
 
 	// Client only allows 4 steps of walk ahead.
 	const int64 iCurTime = CSTime::GetPreciseSysTimeMilli();
     int64 iTimeDiff = (int64)llabs(iCurTime - m_timeWalkStep);	// use absolute value to prevent overflows
-	int64 iTimeMin = 0;  // minimum time to move 4 steps in milliseconds
+	int64 iTimeMin = 0;  // minimum time to move 2 steps in milliseconds
+	m_timeWalkStep = iCurTime; //Take the time of step for the next time we enter here
 
-	// First step is to determine the theoric time(iTimeMin) to take the last 4 steps
+	// 2 situations create some strange timer. We want avoid evaluate them 
+	if (!(rawdir & 0x80)) //Transition Walk-Run, we only evaluate when running
+		return TRUE;
+	
+	if (m_lastDir != rawdir) //Changing direction, we only evaluate when going straight
+	{
+		m_lastDir = rawdir;
+		return TRUE;
+	}
+	
+	
+	// First step is to determine the theoric time(iTimeMin) to take the last steps
 	/*		RUN /Walk
-	Mount	400 / 800
-	foot	800 / 1600
+	Mount	200 / 400
+	foot	400 / 800
 	Speed Modes:
 	0 = Foot=Normal, Mount=Normal
 	1 = Foot=Double Speed, Mount=Normal
 	2 = Foot=Always Walk, Mount=Always Walk (Half Speed)
 	3 = Foot=Always Run, Mount=Always Walk
 	4 = No Movement (handled by OnFreezeCheck)*/
-	if (m_pChar->m_pPlayer && (m_pChar->m_pPlayer->m_speedMode == 3))
+	//Since we only check when we run, we don't care all walk situation
+
+
+	if (m_pChar->IsStatFlag(STATF_ONHORSE | STATF_HOVERING)) //on horse or Gargoyle fly
+		iTimeMin = 200;
+	else //on foot
 	{
-		iTimeMin = 800;
-	}
-	else
-	{
-		if (m_pChar->IsStatFlag(STATF_ONHORSE | STATF_HOVERING)) //on horse or Gargoyle fly
-			iTimeMin = 800;
-		else //on foot
-		{
-			if (m_pChar->m_pPlayer && (m_pChar->m_pPlayer->m_speedMode == 1))
-				iTimeMin = 800;
-			else
-				iTimeMin = 1600;
-		}
-		
-		if (m_pChar->IsStatFlag(STATF_FLY)) // running
-		{
-			if (m_pChar->m_pPlayer && (m_pChar->m_pPlayer->m_speedMode != 2))
-				iTimeMin /= 2;		
-		}
+		if (m_pChar->m_pPlayer && (m_pChar->m_pPlayer->m_speedMode == 1))
+			iTimeMin = 200;
+		else
+			iTimeMin = 400;
 	}
 	
+	
 
-	if ( !(iTimeDiff < iTimeMin -150 || iTimeDiff > iTimeMin + 150) ) 
+	if ( !(iTimeDiff > iTimeMin + 150) ) 
 	// If There been a while since last step or if player change direction TimeDiff will be big
 	// We want evaluate only when player go straight and continue
 	// Gap of 150 should be ok, no one should have a ping like this
@@ -786,9 +789,9 @@ bool CClient::Event_CheckWalkBuffer()
 		if you lower WALKREGEN.
 		WALKREGEN	set lower for longer - lasting punishments.It makes sense to lower this value
 		if you raise WALKBUFFER.*/
-
+		
 		if ( iTimeDiff > iTimeMin ) 
-		// If the step time is greater than the theoric time it's the serve process + player ping
+		// If the step time is greater than the theoric time it's the server process + player ping
 
 		{
 			llong iRegen = ((iTimeDiff - iTimeMin) * g_Cfg.m_iWalkRegen) / 150;
@@ -798,19 +801,19 @@ bool CClient::Event_CheckWalkBuffer()
 				iRegen = -((g_Cfg.m_iWalkBuffer * g_Cfg.m_iWalkRegen) / 100);
 			iTimeDiff = iTimeMin + iRegen;
 		}
-
+		
 
 		// Create de average step value
 		m_iWalkTimeAvg += iTimeDiff;
 		const llong oldAvg = m_iWalkTimeAvg;
 		m_iWalkTimeAvg -= iTimeMin;
 
-
+		
 		if ( m_iWalkTimeAvg > g_Cfg.m_iWalkBuffer )
 			m_iWalkTimeAvg = g_Cfg.m_iWalkBuffer;
 		else if ( m_iWalkTimeAvg < -g_Cfg.m_iWalkBuffer )
 			m_iWalkTimeAvg = -g_Cfg.m_iWalkBuffer;
-
+		
 		if ( IsPriv(PRIV_DETAIL) && IsPriv(PRIV_DEBUG) )
 			SysMessagef("Walkcheck trace: timeDiff(%lld) / timeMin(%lld). oldAvg(%lld) :: curAvg(%lld)", iTimeDiff, iTimeMin, oldAvg, m_iWalkTimeAvg);
 
@@ -826,7 +829,7 @@ bool CClient::Event_CheckWalkBuffer()
 			}
 		}
 	}
-	m_timeWalkStep = iCurTime;
+
 	return true;
 }
 
@@ -898,7 +901,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 			// FIXME: The offset delay should be calculate using the ping value of each player and a fix value of processor functionnality.
 			m_timeNextEventWalk = iCurTime + iDelay;
         }
-        else if (!m_pChar->IsPriv(PRIV_GM) && !Event_CheckWalkBuffer() )
+        else if (!m_pChar->IsPriv(PRIV_GM) && !Event_CheckWalkBuffer(rawdir) )
         {
             new PacketMovementRej(this, sequence);
             return false;

@@ -46,6 +46,7 @@ CClient::CClient(CNetState* state)
 	m_iWalkStepCount = 0;
 	m_iWalkTimeAvg	= 100;
 	m_timeWalkStep = CSTime::GetPreciseSysTimeMilli();
+	m_lastDir = 0;
 
     _fShowPublicHouseContent = true;
 
