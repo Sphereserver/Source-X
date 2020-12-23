@@ -97,11 +97,13 @@ public:
 #define ATTR_SHARDBOUND			0x10000000
 #define ATTR_ACCOUNTBOUND  		0x20000000
 #define ATTR_CHARACTERBOUND		0x40000000
+#define ATTR_CANUSE_PARALYZED   0x80000000          // Can able to be used while paralyzed.
 
 // TODO
 #define ATTR_CANNOTREPAIR		0x400000000000		// No repair, no fortify
 #define ATTR_FACTIONITEM		0x80000000000000	// ? Faction Item (Has cliloc)
 #define ATTR_VVVITEM			0x100000000000000	// ? Vice vs Virtue Item (Has CliLoc)
+
 
 	uint64	m_Attr;
 
