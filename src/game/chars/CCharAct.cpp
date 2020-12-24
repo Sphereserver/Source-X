@@ -3948,7 +3948,7 @@ bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool fFromS
 	pt.m_z += PLAYER_HEIGHT;
 	char startZ = pt.m_z;
 
-	dword dwCan = GetCanMoveFlags(true);	// CAN_C_SWIM
+	dword dwCan = GetCanMoveFlags(GetCanFlags(), true);	// CAN_C_SWIM
 	for ( int i=0; i<iDist; ++i )
 	{
 		if ( pt.IsValidPoint() )
