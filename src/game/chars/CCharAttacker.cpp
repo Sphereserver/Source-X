@@ -217,7 +217,7 @@ void CChar::Attacker_SetIgnore(int attackerIndex, bool fIgnore)
     ADDTOCALLSTACK("CChar::Attacker_SetIgnore(idx)");
     if (m_lastAttackers.empty())
         return;
-    if (m_lastAttackers.size() <= attackerIndex)
+    if (m_lastAttackers.size() <= (size_t)attackerIndex)
         return;
     LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
     refAttacker.ignore = fIgnore;

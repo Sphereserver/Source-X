@@ -177,20 +177,21 @@ lpctstr ProfileData::GetName(PROFILE_TYPE id) const noexcept
 lpctstr ProfileData::GetDescription(PROFILE_TYPE id) const
 {
 	ADDTOCALLSTACK("ProfileData::GetDesc");
-	tchar * pszTmp = Str_GetTemp();
+	ASSERT(id < PROFILE_QTY);
 	const int iCount = m_PreviousTimes[id].m_iCount;
+	tchar* ptcTmp = Str_GetTemp();
 
 	if ( id >= PROFILE_DATA_QTY )
 	{
-		sprintf(pszTmp, "%lld (total: %lld) instances", m_PreviousTimes[id].m_Time, m_AverageTimes[id].m_Time);
+		snprintf(ptcTmp, STR_TEMPLENGTH, "%lld (total: %lld) instances", m_PreviousTimes[id].m_Time, m_AverageTimes[id].m_Time);
 	}
 	else if ( id >= PROFILE_TIME_QTY )
 	{
-		sprintf(pszTmp, "%lld (avg: %lld) bytes", m_PreviousTimes[id].m_Time, m_AverageTimes[id].m_Time);
+		snprintf(ptcTmp, STR_TEMPLENGTH, "%lld (avg: %lld) bytes", m_PreviousTimes[id].m_Time, m_AverageTimes[id].m_Time);
 	}
 	else
 	{
-		sprintf( pszTmp, "%.4fs  avg: %.4fs  [samples:%8i  avg:%7i]  adjusted runtime: %is",
+		snprintf(ptcTmp, STR_TEMPLENGTH, "%.4fs  avg: %.4fs  [samples:%8i  avg:%7i]  adjusted runtime: %is",
 			(m_PreviousTimes[id].m_Time    / 1000.0),
 			(m_AverageTimes[id].m_Time     / 1000.0),
 			iCount,
@@ -198,5 +199,5 @@ lpctstr ProfileData::GetDescription(PROFILE_TYPE id) const
 			m_iAverageCount );
 	}
 
-	return pszTmp;
+	return ptcTmp;
 }

@@ -1,6 +1,6 @@
 #	Main config	#
 
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8.10)
+CMAKE_MINIMUM_REQUIRED (VERSION 3.1)
 
 
 MESSAGE (STATUS "Scanning system for compilers...")

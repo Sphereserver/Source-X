@@ -769,7 +769,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 			if ( *ptcArg == '@' )
 			{
 				++ptcArg;
-				size_t nMember = Exp_GetSTVal(ptcArg);
+				const size_t nMember = Exp_GetSTVal(ptcArg);
 				if ( !m_Chars.IsValidIndex(nMember) )
 					return false;
 
@@ -778,7 +778,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 			else
 				toRemove = (dword)s.GetArgVal();
 
-			if ( toRemove != (dword)0 )
+			if ( toRemove.IsValidUID() )
 				return RemoveMember(toRemove, GetMaster());
 
 			return false;
@@ -790,9 +790,9 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 			lpctstr ptcArg = s.GetArgStr();
 			if ( *ptcArg == '@' )
 			{
-				ptcArg++;
-				size_t nMember = Exp_GetSTVal(ptcArg);
-				if ( nMember == 0 || !m_Chars.IsValidIndex(nMember) )
+				++ptcArg;
+				const size_t nMember = Exp_GetSTVal(ptcArg);
+				if ( (nMember == 0) || !m_Chars.IsValidIndex(nMember) )
 					return false;
 
 				newMaster = m_Chars.GetChar(nMember);
@@ -800,7 +800,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 			else
 				newMaster = (dword)s.GetArgVal();
 
-			if ( newMaster != (dword)0 )
+			if ( newMaster.IsValidUID() )
 				return SetMaster(newMaster.CharFind());
 
 			return false;
@@ -815,18 +815,18 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 
 			if ( *ptcArg == '@' )
 			{
-				ptcArg++;
+				++ptcArg;
 				if ( *ptcArg != '@' )
 				{
 					lpctstr __pszArg = ptcArg;
 					while ( *ptcArg != ' ' )
 					{
-						ptcArg++;
-						x++;
+						++ptcArg;
+						++x;
 					}
                     Str_CopyLimitNull(pUid, __pszArg, ++x);
 
-					int nMember = Exp_GetVal(pUid);
+					const size_t nMember = Exp_GetSTVal(pUid);
 					if ( !m_Chars.IsValidIndex(nMember) )
 						return false;
 
@@ -848,7 +848,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 
 			SKIP_SEPARATORS(ptcArg);
 
-			if ( toSysmessage != (dword)0 )
+			if ( toSysmessage.IsValidUID() )
 			{
 				CChar *pSend = toSysmessage.CharFind();
 				pSend->SysMessage(ptcArg);

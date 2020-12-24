@@ -203,7 +203,7 @@ void CChar::Skill_SetBase( SKILL_TYPE skill, ushort uiValue )
 		}
 		if (iN2Old != args.m_iN2)
 		{
-			g_Log.EventWarn("Trying to set skill '%s' to invalid value=%lld. Defaulting it to %lld.\n", Skill_GetName(skill), iN2Old, args.m_iN2);
+			g_Log.EventWarn("Trying to set skill '%s' to invalid value=%lld. Defaulting it to %" PRId64 ".\n", Skill_GetName(skill), iN2Old, args.m_iN2);
 		}
 
 		uiValue = (ushort)(args.m_iN2);

@@ -105,13 +105,13 @@ public:
     static CObjBase * ObjFindFromUID(dword dwPrivateUID, bool fInvalidateBeingDeleted = false) noexcept;
     static CItem * ItemFindFromUID(dword dwPrivateUID, bool fInvalidateBeingDeleted = false) noexcept;
     static CChar * CharFindFromUID(dword dwPrivateUID, bool fInvalidateBeingDeleted = false) noexcept;
-	inline CObjBase* CUID::ObjFind(bool fInvalidateBeingDeleted = false) const noexcept {
+	inline CObjBase* ObjFind(bool fInvalidateBeingDeleted = false) const noexcept {
 		return ObjFindFromUID(m_dwInternalVal, fInvalidateBeingDeleted);
 	}
-	inline CItem* CUID::ItemFind(bool fInvalidateBeingDeleted = false) const noexcept {
+	inline CItem* ItemFind(bool fInvalidateBeingDeleted = false) const noexcept {
 		return ItemFindFromUID(m_dwInternalVal, fInvalidateBeingDeleted);
 	}
-	inline CChar* CUID::CharFind(bool fInvalidateBeingDeleted = false) const noexcept{
+	inline CChar* CharFind(bool fInvalidateBeingDeleted = false) const noexcept{
 		return CharFindFromUID(m_dwInternalVal, fInvalidateBeingDeleted);
 	}
     
