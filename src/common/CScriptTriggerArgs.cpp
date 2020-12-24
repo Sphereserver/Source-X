@@ -227,7 +227,7 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
                 pszTemp = pEnd;
                 if ( !*pszTemp ) // setting REFx to a new object
                 {
-                    CObjBase * pObj = CUID::ObjFind(s.GetArgVal());
+                    CObjBase * pObj = CUID::ObjFindFromUID(s.GetArgVal());
                     m_VarObjs.Insert( number, pObj, true );
                     ptcKey = pszTemp;
                     return true;
@@ -255,7 +255,7 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
         else
         {
             ++ptcKey;
-            CObjBase * pObj = CUID::ObjFind(Exp_GetSingle(ptcKey));
+            CObjBase * pObj = CUID::ObjFindFromUID(Exp_GetSingle(ptcKey));
             if (!pObj)
                 m_pO1 = nullptr;	// no pObj = cleaning argo
             else

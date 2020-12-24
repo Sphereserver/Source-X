@@ -102,10 +102,7 @@ public:
 	* @brief   Base get definition.
 	* @return  null if it fails, else a pointer to a CBaseBaseDef.
 	*/
-	CBaseBaseDef * Base_GetDef() const noexcept
-	{
-		return ( static_cast <CBaseBaseDef *>( m_BaseRef.GetRef() ));
-	}
+    CBaseBaseDef* Base_GetDef() const noexcept;
 
 	dword GetCanFlagsBase() const noexcept
 	{
@@ -123,8 +120,13 @@ public:
 
 	bool Can(dword dwCan) const noexcept
 	{
-		return (GetCanFlags() & dwCan);
+        return (GetCanFlags() & dwCan);
 	}
+
+    inline bool Can(dword dwCan, dword dwObjCanFlags) const noexcept
+    {
+        return (dwObjCanFlags & dwCan);
+    }
 
     bool IsRunningTrigger() const;
 

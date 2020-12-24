@@ -2868,7 +2868,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 
 		case EXTCMD_AUTOTARG:	// bizarre new autotarget mode. "target x y z"
 		{
-			CObjBase *pObj = CUID::ObjFind(atoi(ppArgs[0]));
+			CObjBase *pObj = CUID::ObjFindFromUID(atoi(ppArgs[0]));
 			if ( pObj )
 				DEBUG_ERR(("%x:Event_ExtCmd AutoTarg '%s' '%s'\n", GetSocketID(), pObj->GetName(), !ppArgs[1] ? TSTRING_NULL : ppArgs[1]));
 			else

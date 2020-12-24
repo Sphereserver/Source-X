@@ -1695,7 +1695,7 @@ void CItemMulti::UnlockItem(const CUID& uidItem)
     ADDTOCALLSTACK("CItemMulti::UnlockItem");
     _lLockDowns.erase(std::find(_lLockDowns.begin(), _lLockDowns.end(), uidItem));
 
-    CItem *pItem = uidItem.ItemFind();
+    CItem *pItem = uidItem.ItemFind(true);
     if (!pItem)
     {
         return;
@@ -1712,7 +1712,7 @@ void CItemMulti::UnlockAllItems()
     ADDTOCALLSTACK("CItemMulti::UnlockAllItems");
     for (const CUID& uidLockeddown : _lLockDowns)
     {
-        CItem *pItem = uidLockeddown.ItemFind();
+        CItem *pItem = uidLockeddown.ItemFind(true);
         if (!pItem)
             continue;
 

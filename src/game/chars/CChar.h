@@ -518,7 +518,7 @@ public:
 	lpctstr GetPossessPronoun() const;	// his
 	byte GetModeFlag( const CClient *pViewer = nullptr ) const;
 	byte GetDirFlag(bool fSquelchForwardStep = false) const;
-	dword GetMoveBlockFlags(bool fIgnoreGM = false) const;
+	dword GetCanMoveFlags(dword dwCanFlags, bool fIgnoreGM = false) const;
 
 	int FixWeirdness();
 	void CreateNewCharCheck();

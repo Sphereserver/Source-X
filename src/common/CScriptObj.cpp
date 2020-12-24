@@ -74,7 +74,7 @@ bool CScriptObj::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
             if (ptcKey[3] != '.')
                 return false;
             ptcKey += 4;
-            pRef = CUID::ObjFind(Exp_GetDWVal(ptcKey));
+            pRef = CUID::ObjFindFromUID(Exp_GetDWVal(ptcKey));
             SKIP_SEPARATORS(ptcKey);
             return true;
         case SREF_OBJ:
@@ -2462,7 +2462,7 @@ jump_in:
 						CScriptObj *pRef = this;
 						if ( iArgQty == 2 )
 						{
-                            CChar *pCharFound = CUID::CharFind(Str_ToI(piCmd[1]));
+                            CChar *pCharFound = CUID::CharFindFromUID(Str_ToI(piCmd[1]));
 							if ( pCharFound )
 								pRef = pCharFound;
 						}

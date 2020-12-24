@@ -1383,7 +1383,7 @@ bool CCMultiMovable::r_LoadVal(CScript & s)
         break;
         case CML_PILOT:
         {
-			SetPilot(CUID::CharFind(s.GetArgVal()));
+			SetPilot(CUID::CharFindFromUID(s.GetArgVal()));
 			return true;
         } 
         break;

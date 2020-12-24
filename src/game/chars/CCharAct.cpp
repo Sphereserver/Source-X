@@ -3112,7 +3112,7 @@ bool CChar::Death()
 	int iKillStrLen = snprintf( pszKillStr, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_KILLED_BY), (m_pPlayer)? 'P':'N', GetNameWithoutIncognito() );
 	for ( size_t count = 0; count < m_lastAttackers.size(); ++count )
 	{
-		pKiller = CUID::CharFind(m_lastAttackers[count].charUID);
+		pKiller = CUID::CharFindFromUID(m_lastAttackers[count].charUID);
 		if ( pKiller && (m_lastAttackers[count].amountDone > 0) )
 		{
 			if ( IsTrigUsed(TRIGGER_KILL) )
@@ -3948,7 +3948,7 @@ bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool fFromS
 	pt.m_z += PLAYER_HEIGHT;
 	char startZ = pt.m_z;
 
-	dword dwCan = GetMoveBlockFlags(true);	// CAN_C_SWIM
+	dword dwCan = GetCanMoveFlags(true);	// CAN_C_SWIM
 	for ( int i=0; i<iDist; ++i )
 	{
 		if ( pt.IsValidPoint() )

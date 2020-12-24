@@ -1660,7 +1660,7 @@ int CChar::Skill_Peacemaking( SKTRIG_TYPE stage )
 			CItem * pInstrument = nullptr;
 			if (m_atBard.m_dwInstrumentUID != 0)
 			{
-				CObjBase * pObj = CUID::ObjFind(m_atBard.m_dwInstrumentUID);
+				CObjBase * pObj = CUID::ObjFindFromUID(m_atBard.m_dwInstrumentUID);
 				if (pObj && pObj->IsItem())
 				{
 					pInstrument = static_cast<CItem*>(pObj);
@@ -1754,7 +1754,7 @@ int CChar::Skill_Enticement( SKTRIG_TYPE stage )
 			CItem * pInstrument = nullptr;
 			if (m_atBard.m_dwInstrumentUID != 0)
 			{
-				CObjBase * pObj = CUID::ObjFind(m_atBard.m_dwInstrumentUID);
+				CObjBase * pObj = CUID::ObjFindFromUID(m_atBard.m_dwInstrumentUID);
 				if (pObj && pObj->IsItem())
 				{
 					pInstrument = static_cast<CItem*>(pObj);
@@ -1854,7 +1854,7 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 			CItem * pInstrument = nullptr;
 			if (m_atBard.m_dwInstrumentUID != 0)
 			{
-				CObjBase * pObj = CUID::ObjFind(m_atBard.m_dwInstrumentUID);
+				CObjBase * pObj = CUID::ObjFindFromUID(m_atBard.m_dwInstrumentUID);
 				if (pObj && pObj->IsItem())
 				{
 					pInstrument = static_cast<CItem*>(pObj);

@@ -629,7 +629,7 @@ bool CPartyDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, 
 			GETNONWHITESPACE(ptcKey);
 			if ( ptcKey[0] != '\0' )
 			{
-				CChar *pCharToCheck = CUID::CharFind(Exp_GetDWVal(ptcKey));
+				CChar *pCharToCheck = CUID::CharFindFromUID(Exp_GetDWVal(ptcKey));
 				sVal.FormatVal(pCharToCheck && (pCharToCheck->m_pParty == this));
 			}
 			else

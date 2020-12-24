@@ -697,14 +697,15 @@ int CChar::IsWeird() const
 // Get the Z we should be at
 char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
 {
-	const dword dwCan = GetMoveBlockFlags();
+	const dword dwCanFlags = GetCanFlags();
+	const dword dwCanMoveFlags = GetCanMoveFlags(dwCanFlags);
 
 	if ( !dwBlockFlags )
-		dwBlockFlags = dwCan;
+		dwBlockFlags = dwCanMoveFlags;
 	
-    if (dwCan == 0xFFFFFFFF)
+    if (dwCanMoveFlags == 0xFFFFFFFF)
         return pt.m_z;
-	if ( dwCan & CAN_C_WALK )
+	if (dwCanMoveFlags & CAN_C_WALK )
 		dwBlockFlags |= CAN_I_CLIMB; // If we can walk than we can climb. Ignore CAN_C_FLY at all here
 
 	const short iZClimbed = pt.m_z + m_zClimbHeight;
@@ -725,13 +726,13 @@ char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
 	}
 	if ( dwBlockFlags != 0x0 )
 	{
-		if ( (dwBlockFlags & CAN_I_DOOR) && Can(CAN_C_GHOST) )
+		if ( (dwBlockFlags & CAN_I_DOOR) && Can(CAN_C_GHOST, dwCanFlags) )
 			dwBlockFlags &= ~CAN_I_BLOCK;
 
-		if ( (dwBlockFlags & CAN_I_WATER) && Can(CAN_C_SWIM) )
+		if ( (dwBlockFlags & CAN_I_WATER) && Can(CAN_C_SWIM, dwCanFlags) )
 			dwBlockFlags &= ~CAN_I_BLOCK;
 
-		if ( !Can(CAN_C_FLY) )
+		if ( !Can(CAN_C_FLY, dwCanFlags) )
 		{
 			if ( ! ( dwBlockFlags & CAN_I_CLIMB ) ) // we can climb anywhere
 			{
@@ -747,7 +748,7 @@ char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
 				}
 			}
 		}
-		if ( (dwBlockFlags & CAN_I_BLOCK) && !Can(CAN_C_PASSWALLS) )
+		if ( (dwBlockFlags & CAN_I_BLOCK) && !Can(CAN_C_PASSWALLS, dwCanFlags) )
 			return pt.m_z;
 
 		if ( block.m_Bottom.m_z >= UO_SIZE_Z )
@@ -1147,25 +1148,25 @@ bool CChar::DupeFrom(const CChar * pChar, bool fNewbieItems )
 					CItem* pItemCont = static_cast<CItem*>(pObjRec);
 					pItemCont->SetAttr(ATTR_NEWBIE);
 
-					const CChar *pTest = CUID::CharFind(pItemCont->m_itNormal.m_more1);
+					const CChar *pTest = CUID::CharFindFromUID(pItemCont->m_itNormal.m_more1);
 					if (pTest && pTest == pChar)
 						pItemCont->m_itNormal.m_more1 = myUID;
 
-					const CChar *pTest2 = CUID::CharFind(pItemCont->m_itNormal.m_more2);
+					const CChar *pTest2 = CUID::CharFindFromUID(pItemCont->m_itNormal.m_more2);
 					if ( pTest2 && pTest2 == pChar )
 						pItemCont->m_itNormal.m_more2 = myUID;
 
-					const CChar *pTest3 = CUID::CharFind(pItemCont->m_uidLink);
+					const CChar *pTest3 = CUID::CharFindFromUID(pItemCont->m_uidLink);
 					if ( pTest3 && pTest3 == pChar )
 						pItemCont->m_uidLink = myUID;
 				}
 			}
 		}
-		const CChar * pTest = CUID::CharFind(pItem->m_itNormal.m_more1);
+		const CChar * pTest = CUID::CharFindFromUID(pItem->m_itNormal.m_more1);
 		if ( pTest && pTest == pChar)
 			pItem->m_itNormal.m_more1 = myUID;
 
-		const CChar * pTest2 = CUID::CharFind(pItem->m_itNormal.m_more2);
+		const CChar * pTest2 = CUID::CharFindFromUID(pItem->m_itNormal.m_more2);
 		if (pTest2)
 		{
 			if (pTest2 == pChar)
@@ -1187,7 +1188,7 @@ bool CChar::DupeFrom(const CChar * pChar, bool fNewbieItems )
 			}
 		}
 
-		const CChar * pTest3 = CUID::CharFind(pItem->m_uidLink);
+		const CChar * pTest3 = CUID::CharFindFromUID(pItem->m_uidLink);
 		if ( pTest3 && pTest3 == pChar)
 			pItem->m_uidLink = myUID;
 	}
@@ -2220,7 +2221,7 @@ do_default:
 					if ( !strnicmp(ptcKey, "ID", 2 ) )
 					{
 						ptcKey += 3;	// ID + whitspace
-						const CChar * pChar = CUID::CharFind(Exp_GetSingle(ptcKey));
+						const CChar * pChar = CUID::CharFindFromUID(Exp_GetSingle(ptcKey));
 						sVal.FormatVal(Attacker_GetID(pChar));
 						return true;
 					}
@@ -2872,7 +2873,7 @@ do_default:
 		case CHC_DIR:
 			{
 				ptcKey +=3;
-				CChar * pChar = CUID::CharFind(Exp_GetSingle(ptcKey));
+				CChar * pChar = CUID::CharFindFromUID(Exp_GetSingle(ptcKey));
 				if ( pChar )
 					sVal.FormatVal( GetDir(pChar) );
 				else
@@ -3322,7 +3323,7 @@ bool CChar::r_LoadVal( CScript & s )
 						if ( !m_lastAttackers.empty() )
 						{
 							int idx = s.GetArgVal();
-							CChar *pChar = CUID::CharFind(idx);
+							CChar *pChar = CUID::CharFindFromUID(idx);
 							if (!pChar)
 								return false;
 							Attacker_Delete(idx, false, ATTACKER_CLEAR_SCRIPT);
@@ -3331,7 +3332,7 @@ bool CChar::r_LoadVal( CScript & s )
 					}
 					else if ( !strnicmp(ptcKey, "ADD", 3) )
 					{
-						CChar *pChar = CUID::CharFind(s.GetArgVal());
+						CChar *pChar = CUID::CharFindFromUID(s.GetArgVal());
 						if ( !pChar )
 							return false;
 						Fight_Attack(pChar);
@@ -3339,7 +3340,7 @@ bool CChar::r_LoadVal( CScript & s )
 					}
 					else if ( !strnicmp(ptcKey, "TARGET", 6) )
 					{
-						CChar *pChar = CUID::CharFind(s.GetArgVal());
+						CChar *pChar = CUID::CharFindFromUID(s.GetArgVal());
 						if ( !pChar || (pChar == this) )	// can't set ourself as target
 						{
 							m_Fight_Targ_UID.InitUID();
@@ -3976,7 +3977,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			}
 			break;
 		case CHV_ATTACK:
-			Fight_Attack(CUID::CharFind(s.GetArgVal()), true);
+			Fight_Attack(CUID::CharFindFromUID(s.GetArgVal()), true);
 			break;
 		case CHV_BANK:
 			// Open the bank box for this person
@@ -3988,10 +3989,10 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			SoundChar(s.HasArgs() ? (CRESND_TYPE)s.GetArgVal() : CRESND_RAND);
 			break;
 		case CHV_BOUNCE: // uid
-			return ItemBounce( CUID::ItemFind( s.GetArgVal()) );
+			return ItemBounce( CUID::ItemFindFromUID( s.GetArgVal()) );
 		case CHV_BOW:
 			if (s.HasArgs())
-				UpdateDir( CUID::ObjFind(s.GetArgVal()) );
+				UpdateDir( CUID::ObjFindFromUID(s.GetArgVal()) );
 			UpdateAnimate(ANIM_BOW);
 			break;
 
@@ -4036,7 +4037,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			SetDisconnected();
 			break;
 		case CHV_DROP:	// uid
-			return ItemDrop( CUID::ItemFind(s.GetArgVal()), GetTopPoint() );
+			return ItemDrop( CUID::ItemFindFromUID(s.GetArgVal()), GetTopPoint() );
 		case CHV_DUPE:	// = dupe a creature !
 			{
 				CChar * pChar = CreateNPC( GetID() );
@@ -4047,7 +4048,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			}
 			break;
 		case CHV_EQUIP:	// uid
-			return ItemEquip( CUID::ItemFind(s.GetArgVal()) );
+			return ItemEquip( CUID::ItemFindFromUID(s.GetArgVal()) );
 		case CHV_EQUIPHALO:
 			{
 				// equip a halo light
@@ -4081,7 +4082,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			}
 			else if (IsStrNumeric(pszVerbArg))
 			{
-				CObjBase* pTowards = CUID::ObjFind(s.GetArgVal());
+				CObjBase* pTowards = CUID::ObjFindFromUID(s.GetArgVal());
 				if (pTowards != nullptr)
 				{
 					UpdateDir(pTowards);
@@ -4125,7 +4126,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_GOUID:	// uid
 			if ( s.HasArgs() )
 			{
-				const CObjBaseTemplate * pObj = CUID::ObjFind(s.GetArgVal());
+				const CObjBaseTemplate * pObj = CUID::ObjFindFromUID(s.GetArgVal());
 				if ( pObj == nullptr )
 					return false;
 				pObj = pObj->GetTopLevelObj();
@@ -4221,7 +4222,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 
 		case CHV_MOUNT:
 			{
-				CChar *pChar = CUID::CharFind(s.GetArgVal());
+				CChar *pChar = CUID::CharFindFromUID(s.GetArgVal());
 				if ( pChar )
 					Horse_Mount(pChar);
 			}
@@ -4286,7 +4287,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
             if (!s.HasArgs())   // If there are no args, direct call on NPC_PetSetOwner.
                 return NPC_PetSetOwner(pCharSrc);
 
-			CChar * pChar = CUID::CharFind(s.GetArgDWVal()); // otherwise we try to run it from the CChar with the given UID.
+			CChar * pChar = CUID::CharFindFromUID(s.GetArgDWVal()); // otherwise we try to run it from the CChar with the given UID.
             if (pChar)
                 return pChar->NPC_PetSetOwner(this);
             return false;   // Something went wrong, giving a warning of it.
@@ -4365,7 +4366,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_SALUTE:	//	salute to player
 		{
 			if (s.HasArgs())
-				UpdateDir( CUID::ObjFind(s.GetArgVal()) );
+				UpdateDir( CUID::ObjFindFromUID(s.GetArgVal()) );
 			UpdateAnimate(ANIM_SALUTE);
 			break;
 		}
@@ -4439,7 +4440,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			UpdateMode();
 			break;
 		case CHV_UNEQUIP:	// uid
-			return ItemBounce( CUID::ItemFind(s.GetArgVal()) );
+			return ItemBounce( CUID::ItemFindFromUID(s.GetArgVal()) );
 		case CHV_WHERE:
 			if ( pCharSrc )
 			{

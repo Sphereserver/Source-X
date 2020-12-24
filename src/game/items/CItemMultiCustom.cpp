@@ -1601,7 +1601,7 @@ bool CItemMultiCustom::r_Verb(CScript & s, CTextConsole * pSrc) // Execute comma
         case IMCV_CUSTOMIZE:
         {
             if (s.HasArgs())
-                pChar = CUID::CharFind(s.GetArgVal());
+                pChar = CUID::CharFindFromUID(s.GetArgVal());
             else if (pSrc)
                 pChar = pSrc->GetChar();
 
@@ -1642,7 +1642,7 @@ bool CItemMultiCustom::r_Verb(CScript & s, CTextConsole * pSrc) // Execute comma
         case IMCV_RESYNC:
         {
             if (s.HasArgs())
-                pChar = CUID::CharFind(s.GetArgVal());
+                pChar = CUID::CharFindFromUID(s.GetArgVal());
 
             if (pChar == nullptr || !pChar->IsClientActive())
                 return false;

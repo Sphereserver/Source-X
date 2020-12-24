@@ -251,6 +251,8 @@ bool IsValidGameObjDef( lpctstr ptcTest )
 		
 		const CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, ptcTest);
         const RES_TYPE resType = rid.GetResType();
+		if (resType == RES_QTY)
+			return true; // It's just a numerical value, so we can't infer the resource type. Suppose it's a valid ID.
 		if ((resType != RES_CHARDEF) && (resType != RES_ITEMDEF) && (resType != RES_SPAWN) && (resType != RES_TEMPLATE) && (resType != RES_CHAMPION))
 			return false;
 	}

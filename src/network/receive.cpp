@@ -2161,7 +2161,7 @@ bool PacketGumpDialogRet::onReceive(CNetState* net)
 			CChar *viewed = character;
 			if ((button == 1) && (checkCount > 0))
 			{
-				viewed = CUID::CharFind(readInt32());
+				viewed = CUID::CharFindFromUID(readInt32());
 				if (!viewed)
 					viewed = character;
 			}
