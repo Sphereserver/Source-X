@@ -1106,7 +1106,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
             
         if ((items[i].m_vcAmount <= 0) || (items[i].m_vcAmount > pItem->GetAmount()))
         {
-            pVendor->Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CANNOT_FULFILL));
+            pVendor->Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CANTFULFILL));
             Event_VendorBuy_Cheater( 0x3 );
             return;
         }
@@ -1163,7 +1163,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
         costtotal += ((int64)(items[i].m_vcAmount) * items[i].m_price);
         if ( costtotal > kuiMaxCost )
         {
-            pVendor->Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CANNOT_FULFILL));
+            pVendor->Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CANTFULFILL));
             Event_VendorBuy_Cheater( 0x4 );
             return;
         }
