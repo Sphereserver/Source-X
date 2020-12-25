@@ -1082,238 +1082,258 @@ void CClient::Event_VendorBuy_Cheater( int iCode )
 
 void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiItemCount)
 {
-	ADDTOCALLSTACK("CClient::Event_VendorBuy");
-	if (m_pChar == nullptr || pVendor == nullptr || items == nullptr || uiItemCount <= 0)
-		return;
+    ADDTOCALLSTACK("CClient::Event_VendorBuy");
+    if (m_pChar == nullptr || pVendor == nullptr || items == nullptr || uiItemCount <= 0)
+        return;
+    
+    const int64 kuiMaxCost = ((g_Cfg.m_iFeatureTOL&FEATURE_TOL_VIRTUALGOLD) ? (INT64_MAX / 2) : (INT32_MAX / 2)); //We don't need to limit virtual golds to 32 bit int.
+    const bool fPlayerVendor = pVendor->IsStatFlag(STATF_PET);
+    pVendor->GetBank(LAYER_VENDOR_STOCK);
+    CItemContainer* pPack = m_pChar->GetPackSafe();
 
-    static constexpr uint kuiMaxCost = (INT32_MAX / 2);
-	const bool fPlayerVendor = pVendor->IsStatFlag(STATF_PET);
-	pVendor->GetBank(LAYER_VENDOR_STOCK);
-	CItemContainer* pPack = m_pChar->GetPackSafe();
+    CItemVendable* pItem;
+    int64 costtotal = 0;
 
-	CItemVendable* pItem;
-	int64 costtotal = 0;
+    //	Check if the vendor really has so much items
+    for (uint i = 0; i < uiItemCount; ++i)
+    {
+        if ( items[i].m_serial.IsValidUID() == false )
+            continue;
 
-	//	Check if the vendor really has so much items
-	for (uint i = 0; i < uiItemCount; ++i)
-	{
-		if ( items[i].m_serial.IsValidUID() == false )
-			continue;
+        pItem = dynamic_cast <CItemVendable *> (items[i].m_serial.ItemFind());
+        if ( pItem == nullptr )
+            continue;
+            
+        if ((items[i].m_vcAmount <= 0) || (items[i].m_vcAmount > pItem->GetAmount()))
+        {
+            pVendor->Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CANNOT_FULFILL));
+            Event_VendorBuy_Cheater( 0x3 );
+            return;
+        }
 
-		pItem = dynamic_cast <CItemVendable *> (items[i].m_serial.ItemFind());
-		if ( pItem == nullptr )
-			continue;
-
-		if ((items[i].m_vcAmount <= 0) || (items[i].m_vcAmount > pItem->GetAmount()))
-		{
-			pVendor->Speak("Your order cannot be fulfilled, please try again.");
-			Event_VendorBuy_Cheater( 0x3 );
-			return;
-		}
-
-		costtotal += ((int64)(items[i].m_vcAmount) * items[i].m_price);
-		if ( costtotal > kuiMaxCost )
-		{
-			pVendor->Speak("Your order cannot be fulfilled, please try again.");
-			Event_VendorBuy_Cheater( 0x4 );
-			return;
-		}
-
-		// If it's a pet, check if we have follower slots to control it
-		if ( pItem->GetType() != IT_FIGURINE )
-			continue;
-		if ( IsSetOF(OF_PetSlots) )
-		{
-			CItemBase* pItemPet = CItemBase::FindItemBase(pItem->GetID());
-			CCharBase* pPetDef = CCharBase::FindCharBase(CREID_TYPE(pItemPet->m_ttFigurine.m_idChar.GetResIndex()));
-			if ( pPetDef )
-			{
-				short iFollowerSlots = (short)pPetDef->GetDefNum("FOLLOWERSLOTS");
-				if ( !m_pChar->FollowersUpdate(pVendor, (maximum(1, iFollowerSlots) * items[i].m_vcAmount), true) )
-				{
-					m_pChar->SysMessageDefault( DEFMSG_PETSLOTS_TRY_CONTROL );
-					return;
-				}
-			}
-		}
-	}
-
+        /*
+         * I like the idea to check if items can be bought or not in first loop instead of second loop.
+         * We don't need to loop again for same items while they are unavailable.
+         * xwerswoodx
+         */
+        switch (pItem->GetType())
+        {
+            case IT_FIGURINE:
+            {
+                if (IsSetOF(OF_PetSlots))
+                {
+                    CItemBase* pItemPet = CItemBase::FindItemBase(pItem->GetID());
+                    CCharBase* pPetDef = CCharBase::FindCharBase(CREID_TYPE(pItemPet->m_ttFigurine.m_idChar.GetResIndex()));
+                    if (pPetDef)
+                    {
+                        short iFollowerSlots = (short)pPetDef->GetDefNum("FOLLOWERSLOTS");
+                        if (!m_pChar->FollowersUpdate(pVendor, (maximum(1, iFollowerSlots) * items[i].m_vcAmount), true))
+                        {
+                            m_pChar->SysMessageDefault(DEFMSG_PETSLOTS_TRY_CONTROL);
+                            return;
+                        }
+                    }
+                }
+                break;
+            }
+            case IT_HAIR:
+            {
+                if (!m_pChar->IsPlayableCharacter())
+                {
+                    pVendor->Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CANTBUY));
+                    return;
+                }
+                break;
+            }
+            case IT_BEARD:
+            {
+                if ((m_pChar->GetDispID() != CREID_MAN) && (m_pChar->GetDispID() != CREID_GARGMAN) && !m_pChar->IsPriv(PRIV_GM))
+                {
+                    pVendor->Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CANTBUY));
+                    return;
+                }
+                break;
+            }
+        }
+        
+        /*
+         * I moved costtotal from above to end. Because we have to check availability first.
+         * xwerswoodx
+         */
+        costtotal += ((int64)(items[i].m_vcAmount) * items[i].m_price);
+        if ( costtotal > kuiMaxCost )
+        {
+            pVendor->Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CANNOT_FULFILL));
+            Event_VendorBuy_Cheater( 0x4 );
+            return;
+        }
+    }
+    
 	if ( costtotal <= 0 )
 	{
-		pVendor->Speak("Thou hast bought nothing!");
+		pVendor->Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_BUY_NOTHING));
 		return;
 	}
     costtotal = m_pChar->PayGold(pVendor, (int)costtotal, nullptr, PAYGOLD_BUY);
-	//	Check for gold being enough to buy this
-	bool fBoss = pVendor->NPC_IsOwnedBy(m_pChar);
-	if ( !fBoss )
-	{
-		if ( g_Cfg.m_iFeatureTOL & FEATURE_TOL_VIRTUALGOLD )
-		{
-			if ( m_pChar->m_virtualGold < costtotal )
-			{
-				pVendor->Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_NOMONEY1));
-				return;
-			}
-			m_pChar->m_virtualGold -= costtotal;
-			m_pChar->UpdateStatsFlag();
-		}
-		else
-		{
-			int iGold = m_pChar->GetPackSafe()->ContentConsumeTest(CResourceID(RES_TYPEDEF, IT_GOLD), (int)(costtotal));
-			if ( !g_Cfg.m_fPayFromPackOnly && iGold )
-				iGold = m_pChar->ContentConsumeTest(CResourceID(RES_TYPEDEF, IT_GOLD), (int)(costtotal));
-
-			if ( iGold )
-			{
-				pVendor->Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_NOMONEY1));
-				return;
-			}
-		}
-	}
-
-	//	Move the items bought into your pack.
-	for ( uint i = 0; i < uiItemCount; ++i )
-	{
-		if ( items[i].m_serial.IsValidUID() == false )
-			break;
-
-		pItem = dynamic_cast <CItemVendable *> (items[i].m_serial.ItemFind());
-		word amount = items[i].m_vcAmount;
-
-		if ( pItem == nullptr )
-			continue;
-
-		if (( IsTrigUsed(TRIGGER_BUY) ) || ( IsTrigUsed(TRIGGER_ITEMBUY) ))
-		{
-			CScriptTriggerArgs Args( amount, int64(items[i].m_vcAmount) * items[i].m_price, pVendor );
-			Args.m_VarsLocal.SetNum( "TOTALCOST", costtotal);
-			if ( pItem->OnTrigger( ITRIG_Buy, this->GetChar(), &Args ) == TRIGRET_RET_TRUE )
-				continue;
-		}
-
-		if ( !fPlayerVendor )   // NPC vendors
-		{
-			pItem->SetAmount(pItem->GetAmount() - amount);
-
-			switch ( pItem->GetType() )
-			{
-				case IT_FIGURINE:
-					{
-						for ( int f = 0; f < amount; ++f )
-							m_pChar->Use_Figurine(pItem);
-					}
-					goto do_consume;
-				case IT_BEARD:
-					if (( m_pChar->GetDispID() != CREID_MAN ) && !m_pChar->IsPriv(PRIV_GM))
-					{
-						pVendor->Speak( g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CANTBUY) );
-						continue;
-					}
-					break;
-				case IT_HAIR:
-					// Must be added directly. can't exist in pack!
-					if ( ! m_pChar->IsPlayableCharacter())
-					{
-						pVendor->Speak( g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CANTBUY) );
-						continue;
-					}
-					{
-						CItem * pItemNew = CItem::CreateDupeItem( pItem );
-						m_pChar->LayerAdd(pItemNew);
-						pItemNew->m_TagDefs.SetNum("NOSAVE", 0, true);
-						pItemNew->SetTimeoutS(55000);	// set the grow timer.
-						pVendor->UpdateAnimate(ANIM_ATTACK_1H_SLASH);
-						m_pChar->Sound( SOUND_SNIP );	// snip noise.
-					}
-					continue;
-
-				default:
-					break;
-			}
-
-			if ( amount > 1 && !pItem->Item_GetDef()->IsStackableType() )
-			{
-				while ( amount -- )
-				{
-					CItem * pItemNew = CItem::CreateDupeItem(pItem);
-					pItemNew->SetAmount(1);
-					pItemNew->m_TagDefs.SetNum("NOSAVE", 0, true);
-					if ( !pPack->CanContainerHold( pItemNew, m_pChar ) || !m_pChar->CanCarry( pItemNew ) )
-						m_pChar->ItemDrop( pItemNew, m_pChar->GetTopPoint() );
-					else
-						pPack->ContentAdd( pItemNew );
-				}
-			}
-			else
-			{
-				CItem * pItemNew = CItem::CreateDupeItem(pItem);
-				pItemNew->SetAmount(amount);
-				pItemNew->m_TagDefs.SetNum("NOSAVE", 0, true);
-				if ( !pPack->CanContainerHold( pItemNew, m_pChar ) || !m_pChar->CanCarry( pItemNew ) )
-					m_pChar->ItemDrop( pItemNew, m_pChar->GetTopPoint() );
-				else
-					pPack->ContentAdd( pItemNew );
-			}
-		}
-		else    //  Player vendors
-		{
-			if ( pItem->GetAmount() <= amount ) // buy the whole item
-			{
-				if ( !pPack->CanContainerHold( pItem, m_pChar ) || !m_pChar->CanCarry( pItem ) )
-					m_pChar->ItemDrop( pItem, m_pChar->GetTopPoint() );
-				else
-					pPack->ContentAdd( pItem );
-
-				pItem->m_TagDefs.SetNum("NOSAVE", 0, true);
-			}
-			else
-			{
-				pItem->SetAmount(pItem->GetAmount() - amount);
-
-				CItem *pItemNew = CItem::CreateDupeItem(pItem);
-				pItemNew->m_TagDefs.SetNum("NOSAVE", 0, true);
-				pItemNew->SetAmount(amount);
-				if ( !pPack->CanContainerHold( pItemNew, m_pChar ) || !m_pChar->CanCarry( pItemNew ) )
-					m_pChar->ItemDrop( pItemNew, m_pChar->GetTopPoint() );
-				else
-					pPack->ContentAdd( pItemNew );
-			}
-		}
+    
+    //	Check for gold being enough to buy this
+    bool fBoss = pVendor->NPC_IsOwnedBy(m_pChar);
+    if ( !fBoss )
+    {
+        if (g_Cfg.m_iFeatureTOL & FEATURE_TOL_VIRTUALGOLD)
+        {
+            if (m_pChar->m_virtualGold < costtotal)
+            {
+                pVendor->Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_NOMONEY1));
+                return;
+            }
+        }
+        else
+        {
+            int iGold = m_pChar->GetPackSafe()->ContentConsumeTest(CResourceID(RES_TYPEDEF, IT_GOLD), (int)(costtotal));
+            if (!g_Cfg.m_fPayFromPackOnly && iGold)
+                iGold = m_pChar->ContentConsumeTest(CResourceID(RES_TYPEDEF, IT_GOLD), (int)(costtotal));
+                
+            if (iGold)
+            {
+                pVendor->Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_NOMONEY1));
+                return;
+            }
+        }
+    }
+    
+    //	Move the items bought into your pack.
+    for (uint i = 0; i < uiItemCount; ++i)
+    {
+        if (items[i].m_serial.IsValidUID() == false)
+            continue; //We need to continue for loop for other items not break.
+            
+        pItem = dynamic_cast <CItemVendable *> (items[i].m_serial.ItemFind());
+        word amount = items[i].m_vcAmount;
+        
+        if (pItem == nullptr)
+            continue;
+            
+        if ((IsTrigUsed(TRIGGER_BUY)) || (IsTrigUsed(TRIGGER_ITEMBUY)))
+        {
+            CScriptTriggerArgs Args( amount, int64(amount) * items[i].m_price, pVendor );
+            Args.m_VarsLocal.SetNum( "TOTALCOST", costtotal);
+            if ( pItem->OnTrigger( ITRIG_Buy, this->GetChar(), &Args ) == TRIGRET_RET_TRUE )
+                continue;
+        }
+        
+        if (!fPlayerVendor) //NPC vendors
+        {
+            pItem->SetAmount(pItem->GetAmount() - amount);
+            
+            switch (pItem->GetType())
+            {
+                case IT_FIGURINE:
+                {
+                    for ( int f = 0; f < amount; ++f )
+                        m_pChar->Use_Figurine(pItem);
+                    goto do_consume;
+                }
+                case IT_BEARD:
+                case IT_HAIR:
+                {
+                    //While we already checked beard and hair requirements we don't need any more checks for it.
+                    CItem* pItemNew = CItem::CreateDupeItem(pItem);
+                    m_pChar->LayerAdd(pItemNew); //Equip it, we don't need to drop it on backpack.
+                    pItemNew->m_TagDefs.SetNum("NOSAVE", 0, true);
+                    pItemNew->SetTimeoutS(55000); //Growing timer.
+                    pVendor->UpdateAnimate(ANIM_ATTACK_1H_SLASH);
+                    m_pChar->Sound(SOUND_SNIP);
+                    break;
+                }
+                default:
+                    break;
+            }
+            
+            if ((amount > 1) && (!pItem->Item_GetDef()->IsStackableType()))
+            {
+                while (amount--)
+                {
+                    CItem * pItemNew = CItem::CreateDupeItem(pItem);
+                    pItemNew->SetAmount(1);
+                    pItemNew->m_TagDefs.SetNum("NOSAVE", 0, true);
+                    
+                    if (!pPack->CanContainerHold(pItemNew, m_pChar) || (!m_pChar->CanCarry(pItemNew)))
+                        m_pChar->ItemDrop( pItemNew, m_pChar->GetTopPoint() );
+                    else
+                        pPack->ContentAdd( pItemNew );
+                }
+            }
+            else
+            {
+                CItem * pItemNew = CItem::CreateDupeItem(pItem);
+                pItemNew->SetAmount(amount);
+                pItemNew->m_TagDefs.SetNum("NOSAVE", 0, true);
+                if (!pPack->CanContainerHold(pItemNew, m_pChar) || (!m_pChar->CanCarry(pItemNew)))
+                    m_pChar->ItemDrop(pItemNew, m_pChar->GetTopPoint());
+                else
+                    pPack->ContentAdd(pItemNew);
+            }
+        }
+        else //Player vendors
+        {
+            if ( pItem->GetAmount() <= amount ) //Buy the whole item
+            {
+                if ((!pPack->CanContainerHold(pItem, m_pChar)) || (!m_pChar->CanCarry(pItem)))
+                    m_pChar->ItemDrop(pItem, m_pChar->GetTopPoint());
+                else
+                    pPack->ContentAdd(pItem);
+                    
+                pItem->m_TagDefs.SetNum("NOSAVE", 0, true);
+            }
+            else
+            {
+                pItem->SetAmount(pItem->GetAmount() - amount);
+                
+                CItem *pItemNew = CItem::CreateDupeItem(pItem);
+                pItemNew->m_TagDefs.SetNum("NOSAVE", 0, true);
+                pItemNew->SetAmount(amount);
+                if ((!pPack->CanContainerHold(pItemNew, m_pChar)) || (!m_pChar->CanCarry(pItemNew)))
+                    m_pChar->ItemDrop(pItemNew, m_pChar->GetTopPoint());
+                else
+                    pPack->ContentAdd(pItemNew);
+            }
+        }
 
 do_consume:
-		pItem->Update();
-	}
-
-	//	Step #5
-	//	Say the message about the bought goods
-	tchar *sMsg = Str_GetTemp();
-	tchar *pszTemp1 = Str_GetTemp();
-	tchar *pszTemp2 = Str_GetTemp();
-	snprintf(pszTemp1, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_HYARE), m_pChar->GetName());
-	snprintf(pszTemp2, STR_TEMPLENGTH, fBoss ? g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_S1) : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_B1),
-		costtotal, (costtotal==1) ? "" : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CA));
-	snprintf(sMsg, STR_TEMPLENGTH, "%s %s %s", pszTemp1, pszTemp2, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_TY));
-	pVendor->Speak(sMsg);
-
-	//	Step #6
-	//	Take the gold and add it to the vendor
-	if ( !fBoss )
-	{
-		int iGold = m_pChar->GetPackSafe()->ContentConsume( CResourceID(RES_TYPEDEF,IT_GOLD), (int)(costtotal));
-		if ( !g_Cfg.m_fPayFromPackOnly && iGold)
-			m_pChar->ContentConsume( CResourceID(RES_TYPEDEF,IT_GOLD), iGold);
-			//m_pChar->ContentConsume( RESOURCE_ID(RES_TYPEDEF,IT_GOLD), (int)(costtotal));
-
-
-		pVendor->GetBank()->m_itEqBankBox.m_Check_Amount += (uint)(costtotal);
-	}
-
-	//	Clear the vendor display.
-	addVendorClose(pVendor);
-
-	if ( costtotal > 0 )	// if anything was sold, sound this
-		addSound( 0x057 );
+        pItem->Update();
+    }
+    
+    //Say the message about the bought goods
+    tchar *sMsg = Str_GetTemp();
+    tchar *pszTemp1 = Str_GetTemp();
+    tchar *pszTemp2 = Str_GetTemp();
+    snprintf(pszTemp1, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_HYARE), m_pChar->GetName());
+    snprintf(pszTemp2, STR_TEMPLENGTH, fBoss ? g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_S1) : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_B1), costtotal, (costtotal==1) ? "" : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CA));
+    snprintf(sMsg, STR_TEMPLENGTH, "%s %s %s", pszTemp1, pszTemp2, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_TY));
+    pVendor->Speak(sMsg);
+    
+    //Take the gold and add it to the vendor
+    if ( !fBoss )
+    {
+        if (g_Cfg.m_iFeatureTOL & FEATURE_TOL_VIRTUALGOLD) //We have to do gold trade in here.
+        {
+            m_pChar->m_virtualGold -= costtotal;
+            m_pChar->UpdateStatsFlag();
+        }
+        else
+        {
+            int iGold = m_pChar->GetPackSafe()->ContentConsume( CResourceID(RES_TYPEDEF,IT_GOLD), (int)(costtotal));
+            if (!g_Cfg.m_fPayFromPackOnly && iGold)
+                m_pChar->ContentConsume( CResourceID(RES_TYPEDEF,IT_GOLD), iGold);
+            pVendor->GetBank()->m_itEqBankBox.m_Check_Amount += (uint)(costtotal);
+        }
+    }
+    
+    //Close vendor gump
+    addVendorClose(pVendor);
+    if (costtotal > 0) //if anything was sold, sound this
+        addSound(SOUND_DROP_GOLD1); //Gold sound is better than cloth one, 0x57 is SOUND_USE_CLOTH
 }
 
 void CClient::Event_VendorSell_Cheater( int iCode )

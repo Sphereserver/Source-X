@@ -2366,3 +2366,9 @@ Must have event, even if it's empty, since it's applied by the source to generat
 23-12-2020, Nolok
 - Fixed: Couldn't set item ATTR > 0FFFFFFFF.
 - Fixed: Exception generated during the deletion of an item locked down inside a multi (Issue #552).
+
+25-12-2020, xwerswoodx
+Port: Improved Vendor buy code by porting from Coruja's build. (Issue: #148)
+	Added 2 missing default messages:
+	NPC_VENDOR_CANNOT_FULFILL,			"Your order cannot be fulfilled, please try again."
+	NPC_VENDOR_BUY_NOTHING,				"Thou hast bought nothing!"
