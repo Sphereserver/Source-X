@@ -286,17 +286,15 @@ bool CItemMulti::Multi_CreateComponent(ITEMID_TYPE id, short dx, short dy, char 
 
     switch (pItem->GetType())
     {
+        case IT_SIGN_GUMP:
         case IT_SHIP_TILLER:
             pItem->m_uidLink = GetUID();
             FALLTHROUGH;
         case IT_KEY:    // it will get locked down with the house ?
-        case IT_SIGN_GUMP:
-        {
             pItem->m_itKey.m_UIDLock.SetPrivateUID(dwKeyCode);    // Set the key id for the key/sign.
             m_uidLink.SetPrivateUID(pItem->GetUID());
-        }
-        // Do not break, those need fNeedKey set to true.
-        FALLTHROUGH;
+            // Do not break, those need fNeedKey set to true.
+            FALLTHROUGH;
         case IT_DOOR:
         case IT_CONTAINER:
             fNeedKey = true;
