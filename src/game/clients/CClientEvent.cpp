@@ -1086,7 +1086,9 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
     if (m_pChar == nullptr || pVendor == nullptr || items == nullptr || uiItemCount <= 0)
         return;
     
-    const int64 kuiMaxCost = ((g_Cfg.m_iFeatureTOL&FEATURE_TOL_VIRTUALGOLD) ? (INT64_MAX / 2) : (INT32_MAX / 2)); //We don't need to limit virtual golds to 32 bit int.
+    //We don't need to limit virtual golds to 32 bit int.
+    const int64 kuiMaxCost = ((g_Cfg.m_iFeatureTOL&FEATURE_TOL_VIRTUALGOLD) ? (INT64_MAX / 2) : (INT32_MAX / 2));
+
     const bool fPlayerVendor = pVendor->IsStatFlag(STATF_PET);
     pVendor->GetBank(LAYER_VENDOR_STOCK);
     CItemContainer* pPack = m_pChar->GetPackSafe();
@@ -1111,11 +1113,6 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
             return;
         }
 
-        /*
-         * I like the idea to check if items can be bought or not in first loop instead of second loop.
-         * We don't need to loop again for same items while they are unavailable.
-         * xwerswoodx
-         */
         switch (pItem->GetType())
         {
             case IT_FIGURINE:
@@ -1156,10 +1153,6 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
             }
         }
         
-        /*
-         * I moved costtotal from above to end. Because we have to check availability first.
-         * xwerswoodx
-         */
         costtotal += ((int64)(items[i].m_vcAmount) * items[i].m_price);
         if ( costtotal > kuiMaxCost )
         {
