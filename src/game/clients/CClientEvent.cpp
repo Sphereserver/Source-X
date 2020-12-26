@@ -782,9 +782,9 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 	WALKREGEN	set lower for longer - lasting punishments.It makes sense to lower this value
 	if you raise WALKBUFFER.*/
 
-	if (!(iTimeDiff > iTimeMin + 150))
-		// We don't want to do process if time is greater of 150 (Ping of player should be lower than this)
-		// Accept a Big number cause a big offset ont the average.
+	if (!(iTimeDiff > iTimeMin + 250))
+		// We don't want to do process if time is greater of 250 (Ping of player should be lower than this)
+		// Accept a Big number cause a big offset on the average.
 
 	{
 		if ( iTimeDiff > iTimeMin )
@@ -792,7 +792,7 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 		// Accept a Big number cause a big offset ont the average.
 
 		// If the step time is greater than the theoric time there 4 reasons
-		// it's the server process tick, player's ping, been a while since last step, change direction during run
+		// It's the server process tick, player's ping, been a while since last step, change direction during run
 		// Here we ajust TimeDiff using ini parameter
 		{
 			llong iRegen = ((iTimeDiff - iTimeMin) * g_Cfg.m_iWalkRegen) / 150;
