@@ -73,6 +73,9 @@ static bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not a real CTimedObject, it just needs its virtual inheritance.
 {
 	++ sm_iCount;
+
+	_fDeleting = false;
+
 	_iCreatedResScriptIdx	= _iCreatedResScriptLine	= -1;
     _iRunningTriggerId		= _iCallingObjTriggerId		= -1;
 
@@ -157,6 +160,7 @@ void CObjBase::DeletePrepare()
 void CObjBase::DeleteCleanup(bool fForce)
 {
 	ADDTOCALLSTACK("CObjBase::DeleteCleanup");
+	_fDeleting = true;
 	CEntity::Delete(fForce);
 	CWorldTickingList::DelObjStatusUpdate(this);
 	CWorldTickingList::DelObjSingle(this);
@@ -173,11 +177,15 @@ bool CObjBase::Delete(bool fForce)
 	return true;
 }
 
+CBaseBaseDef* CObjBase::Base_GetDef() const noexcept
+{
+	return (static_cast <CBaseBaseDef*>(m_BaseRef.GetRef()));
+}
+
 bool CObjBase::IsContainer() const
 {
-	ADDTOCALLSTACK("CObjBase::IsContainer");
 	// Simple test if object is a container.
-	return( dynamic_cast <const CContainer*>(this) != nullptr );
+	return (dynamic_cast <const CContainer*>(this) != nullptr);
 }
 
 void CObjBase::SetHueQuick(HUE_TYPE wHue)
@@ -223,7 +231,7 @@ void CObjBase::SetHue( HUE_TYPE wHue, bool fAvoidTrigger, CTextConsole *pSrc, CO
 
 HUE_TYPE CObjBase::GetHue() const
 {
-	return( m_wHue );
+	return m_wHue;
 }
 
 
@@ -272,7 +280,7 @@ void CObjBase::SetUID( dword dwIndex, bool fItem )
 
 lpctstr CObjBase::GetName() const	// resolve ambiguity w/CScriptObj
 {
-	return( CObjBaseTemplate::GetName());
+	return CObjBaseTemplate::GetName();
 }
 
 lpctstr CObjBase::GetResourceName() const
@@ -1137,7 +1145,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 						return true;
 					}
 
-					pObj = CUID::ObjFind(Exp_GetVal(ptcKey));
+					pObj = CUID::ObjFindFromUID(Exp_GetVal(ptcKey));
                     SKIP_SEPARATORS(ptcKey);
                     GETNONWHITESPACE(ptcKey);
 				}
@@ -1337,7 +1345,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 				tchar * ptcArg = Str_GetTemp();
                 Str_CopyLimitNull( ptcArg, ptcKey, strlen( ptcKey ) + 1 );
 
-                pItem = dynamic_cast<CItem*> (CUID::ObjFind(Exp_GetDWVal(ptcKey)));
+                pItem = CUID::ItemFindFromUID(Exp_GetDWVal(ptcKey));
 				if (pItem == nullptr)
 				{
 					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetID(RES_ITEMDEF, ptcArg).GetResIndex());
@@ -1376,7 +1384,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 				tchar * ptcArg = Str_GetTemp();
 				Str_CopyLimitNull( ptcArg, ptcKey, strlen( ptcKey ) + 1 );
 
-				pItem = dynamic_cast<CItem*> (CUID::ObjFind(Exp_GetDWVal(ptcKey)));
+				pItem = CUID::ItemFindFromUID(Exp_GetDWVal(ptcKey));
 				if ( pItem == nullptr )
 				{
 					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetID(RES_ITEMDEF, ptcArg).GetResIndex());
@@ -2070,7 +2078,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					return false;
 				if ( iArgQty > 2 )	// Give it a new source char UID
 				{
-					CObjBaseTemplate * pObj = CUID::ObjFind( (dword)(piCmd[2]) );
+					CObjBaseTemplate * pObj = CUID::ObjFindFromUID( (dword)(piCmd[2]) );
 					if ( pObj )
 						pObj = pObj->GetTopLevelObj();
 					pCharSrc = dynamic_cast<CChar*>(pObj);
@@ -3455,7 +3463,7 @@ bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_T
 				// ARGO
 				if ( iResultArgs >= 1 )
 				{
-					CObjBase * pTriggerArgObj = CUID::ObjFind(Exp_GetVal(Arg_ppCmd[0]));
+					CObjBase * pTriggerArgObj = CUID::ObjFindFromUID(Exp_GetVal(Arg_ppCmd[0]));
 					if ( pTriggerArgObj )
 						csTriggerArgs.m_pO1 = pTriggerArgObj;
 				}

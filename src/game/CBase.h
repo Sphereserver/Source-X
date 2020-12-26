@@ -115,11 +115,11 @@ public:
 	}
 
 // Map Movement flags.
-#define CAN_C_GHOST         0x0001 // Moves thru doors etc.
+#define CAN_C_GHOST         0x0001  // Moves thru doors etc.
 #define CAN_C_SWIM          0x0002	// dolphin, elemental or is water.
 #define CAN_C_WALK          0x0004	// Can walk on land, climbed on walked over else Frozen by nature(Corpser).
 #define CAN_C_PASSWALLS     0x0008	// Walk thru walls.
-#define CAN_C_FLY           0x0010	// Mongbat etc.
+#define CAN_C_FLY           0x0010	// Can walk to a point with a much higher height difference from our current z.
 #define CAN_C_FIRE_IMMUNE   0x0020	// Has some immunity to fire ? (will walk into it (lava)).
 #define CAN_C_NOINDOORS     0x0040	// Can't go under roof.
 #define CAN_C_HOVER         0x0080	// Can hover.
@@ -128,7 +128,7 @@ public:
 #define CAN_I_WATER			0x0002  // Need to swim in it. UFLAG1_WATER.
 #define CAN_I_PLATFORM      0x0004  // we can walk on top of it. (even tho the item itself might block) UFLAG2_PLATFORM.
 #define CAN_I_BLOCK         0x0008  // need to walk thru walls or fly over. UFLAG1_BLOCK.
-#define CAN_I_CLIMB         0x0010  // Item: step up on it, UFLAG2_CLIMBABLE. Char: can walk to a point with a much higher height difference from our current z
+#define CAN_I_CLIMB         0x0010  // Item: step up on it, UFLAG2_CLIMBABLE.
 #define CAN_I_FIRE          0x0020  // Is a fire. Usually blocks as well. UFLAG1_DAMAGE.
 #define CAN_I_ROOF          0x0040  // We are under a roof. can't rain on us. UFLAG4_ROOF.
 #define CAN_I_HOVER         0x0080  // We are hovering. UFLAG4_HOVEROVER.

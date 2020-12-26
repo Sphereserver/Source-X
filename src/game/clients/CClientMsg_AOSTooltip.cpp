@@ -379,7 +379,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		}
 	}
 
-	const CChar *pCraftsman = CUID::CharFind(dword(pItem->GetDefNum("CRAFTEDBY")));
+	const CChar *pCraftsman = CUID::CharFindFromUID(dword(pItem->GetDefNum("CRAFTEDBY")));
 	if (pCraftsman)
 	{
         PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1050043)); // crafted by ~1_NAME~

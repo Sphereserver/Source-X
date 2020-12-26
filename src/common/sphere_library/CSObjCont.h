@@ -142,7 +142,7 @@ public:
     /**
     * @brief Get the nth element of the list.
     * @param index of the element to get.
-    * @return nth element if lenght is greater or equal to index, nullptr otherwise.
+    * @return nth element if length is greater or equal to index, nullptr otherwise.
     */
     inline CSObjContRec* GetContentIndex(size_t index) const noexcept;
 

@@ -32,6 +32,7 @@ private:
 
 protected:
 	CResourceRef m_BaseRef;     // Pointer to the resource that describes this type.
+    bool _fDeleting;
 
     std::string _sRunningTrigger;   // Name of the running trigger (can be custom!) [use std::string instead of CSString because the former is allocated on-demand]
     short _iRunningTriggerId;       // Current trigger being run on this object. Used to prevent the same trigger being called over and over.
@@ -76,6 +77,11 @@ protected:
     void DeleteCleanup(bool fForce);
 
 public:
+    inline bool IsBeingDeleted() const noexcept
+    {
+        return _fDeleting;
+    }
+
     virtual bool IsDeleted() const override;
 
     /**
@@ -96,10 +102,7 @@ public:
 	* @brief   Base get definition.
 	* @return  null if it fails, else a pointer to a CBaseBaseDef.
 	*/
-	CBaseBaseDef * Base_GetDef() const noexcept
-	{
-		return ( static_cast <CBaseBaseDef *>( m_BaseRef.GetRef() ));
-	}
+    CBaseBaseDef* Base_GetDef() const noexcept;
 
 	dword GetCanFlagsBase() const noexcept
 	{
@@ -117,8 +120,13 @@ public:
 
 	bool Can(dword dwCan) const noexcept
 	{
-		return (GetCanFlags() & dwCan);
+        return (GetCanFlags() & dwCan);
 	}
+
+    inline bool Can(dword dwCan, dword dwObjCanFlags) const noexcept
+    {
+        return (dwObjCanFlags & dwCan);
+    }
 
     bool IsRunningTrigger() const;
 

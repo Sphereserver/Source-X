@@ -232,16 +232,16 @@ uint GetIdentifierString( tchar * szTag, lpctstr pszArgs )
 	return i;
 }
 
-bool IsValidResourceDef( lpctstr pszTest )
+bool IsValidResourceDef( lpctstr ptcTest )
 {
-	return nullptr != g_Exp.m_VarResDefs.CheckParseKey( pszTest );
+	return (nullptr != g_Exp.m_VarResDefs.CheckParseKey( ptcTest ));
 }
 
-bool IsValidGameObjDef( lpctstr pszTest )
+bool IsValidGameObjDef( lpctstr ptcTest )
 {
-	if (!IsSimpleNumberString(pszTest))
+	if (!IsSimpleNumberString(ptcTest))
 	{
-		const CVarDefCont * pVarBase = g_Exp.m_VarResDefs.CheckParseKey( pszTest );
+		const CVarDefCont * pVarBase = g_Exp.m_VarResDefs.CheckParseKey( ptcTest );
 		if ( pVarBase == nullptr )
 			return false;
 
@@ -249,8 +249,10 @@ bool IsValidGameObjDef( lpctstr pszTest )
 		if ( !ch || (ch == '<') )
 			return false;
 		
-		const CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, pszTest);
+		const CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, ptcTest);
         const RES_TYPE resType = rid.GetResType();
+		if (resType == RES_QTY)
+			return true; // It's just a numerical value, so we can't infer the resource type. Suppose it's a valid ID.
 		if ((resType != RES_CHARDEF) && (resType != RES_ITEMDEF) && (resType != RES_SPAWN) && (resType != RES_TEMPLATE) && (resType != RES_CHAMPION))
 			return false;
 	}

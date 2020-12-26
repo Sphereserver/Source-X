@@ -99,39 +99,35 @@ static int CvtUNICODEToSystem(tchar* pOut, int iSizeOutBytes, wchar wChar)
 
     ASSERT(wChar >= 0x80);	// needs special UTF8 encoding.
 
-// MinGW issues this warning, but not GCC on Linux, probably because the wchar type is different between
-// Windows and Linux. It's only an annoying warning: "comparison is always true due to limited range of data type".
-#if defined(__GNUC__)
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wtype-limits"
-#elif defined(__clang__)
-    #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Wtautological-constant-out-of-range-compare"
-#endif
     int iBytes;
     int iStartBits;
+
     if (wChar < (1 << 11))
     {
         iBytes = 2;
         iStartBits = 5;
     }
-    else if (wChar < (1 << 16))
+    else if constexpr (sizeof(wchar) > 16u)
     {
-        iBytes = 3;
-        iStartBits = 4;
+        if (wChar < (1 << 16))
+        {
+            iBytes = 3;
+            iStartBits = 4;
+        }
     }
-    else if (wChar < (1 << 21))
+    else if constexpr (sizeof(wchar) > 21u)
     {
-        iBytes = 4;
-        iStartBits = 3;
+        if (wChar < (1 << 21))
+        {
+            iBytes = 4;
+            iStartBits = 3;
+        }
+
     }
     else
+    {
         return -1;	// not valid UNICODE char.
-#ifdef __GNUC__
-    #pragma GCC diagnostic pop
-#elif __clang__
-    #pragma clang diagnostic pop
-#endif
+    }
 
     if (iBytes > iSizeOutBytes)	// not big enough to hold it.
         return 0;
@@ -185,7 +181,7 @@ int CvtSystemToNUNICODE(nchar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeI
     if (posInfo->dwPlatformId == VER_PLATFORM_WIN32_NT ||
         posInfo->dwMajorVersion > 4)
     {
-        int iOutTmp = MultiByteToWideChar(
+        const int iOutTmp = MultiByteToWideChar(
             CP_UTF8,			// code page
             0,					// character-type options
             pInp,				// address of string to map
@@ -193,6 +189,7 @@ int CvtSystemToNUNICODE(nchar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeI
             reinterpret_cast<lpwstr>(pOut),  // address of wide-character buffer
             iSizeOutChars		// size of buffer
         );
+
         if (iOutTmp <= 0)
         {
             pOut[0] = 0;

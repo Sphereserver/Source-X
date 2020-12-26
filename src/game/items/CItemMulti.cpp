@@ -286,14 +286,17 @@ bool CItemMulti::Multi_CreateComponent(ITEMID_TYPE id, short dx, short dy, char 
 
     switch (pItem->GetType())
     {
+        case IT_SHIP_TILLER:
+            pItem->m_uidLink = GetUID();
+            FALLTHROUGH;
         case IT_KEY:    // it will get locked down with the house ?
         case IT_SIGN_GUMP:
-        case IT_SHIP_TILLER:
         {
             pItem->m_itKey.m_UIDLock.SetPrivateUID(dwKeyCode);    // Set the key id for the key/sign.
             m_uidLink.SetPrivateUID(pItem->GetUID());
-            // Do not break, those need fNeedKey set to true.
         }
+        // Do not break, those need fNeedKey set to true.
+        FALLTHROUGH;
         case IT_DOOR:
         case IT_CONTAINER:
             fNeedKey = true;
@@ -354,7 +357,7 @@ void CItemMulti::Multi_Setup(CChar *pChar, dword dwKeyCode)
         return;
     }
 
-    Multi_GetSign();    // set the m_uidLink
+    Multi_GetSign();    // set the m_uidLink 
 
     if (pChar)
     {
@@ -1693,14 +1696,8 @@ void CItemMulti::LockItem(const CUID& uidItem)
 void CItemMulti::UnlockItem(const CUID& uidItem)
 {
     ADDTOCALLSTACK("CItemMulti::UnlockItem");
-    for (size_t i = 0; i < _lLockDowns.size(); ++i)
-    {
-        if (_lLockDowns[i] == uidItem)
-        {
-            _lLockDowns.erase(_lLockDowns.begin() + i);
-            break;
-        }
-    }
+    _lLockDowns.erase(std::find(_lLockDowns.begin(), _lLockDowns.end(), uidItem));
+
     CItem *pItem = uidItem.ItemFind();
     if (!pItem)
     {
@@ -1713,14 +1710,15 @@ void CItemMulti::UnlockItem(const CUID& uidItem)
     pItem->SetLockDownOfMulti(CUID());
 }
 
-void CItemMulti::UnlockAllItems() {
+void CItemMulti::UnlockAllItems()
+{
     ADDTOCALLSTACK("CItemMulti::UnlockAllItems");
-    for (size_t i = 0; i < _lLockDowns.size(); ++i)
+    for (const CUID& uidLockeddown : _lLockDowns)
     {
-        const CUID& pUID = _lLockDowns[i];
-        CItem *pItem = pUID.ItemFind();
+        CItem *pItem = uidLockeddown.ItemFind(true);
         if (!pItem)
             continue;
+
         pItem->ClrAttr(ATTR_LOCKEDDOWN);
         pItem->m_uidLink.InitUID();
         CScript event("events -ei_house_lockdown");

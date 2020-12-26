@@ -1854,7 +1854,7 @@ bool PacketVendorSellReq::onReceive(CNetState* net)
 	CChar* vendor = vendorSerial.CharFind();
 	if (vendor == nullptr || vendor->m_pNPC == nullptr || !vendor->NPC_IsVendor())
 	{
-		client->Event_VendorBuy_Cheater(0x1);
+		client->Event_VendorSell_Cheater(0x1); //Both gives same message, but we have to use correct event while we already have.
 		return true;
 	}
 
@@ -2161,7 +2161,7 @@ bool PacketGumpDialogRet::onReceive(CNetState* net)
 			CChar *viewed = character;
 			if ((button == 1) && (checkCount > 0))
 			{
-				viewed = CUID::CharFind(readInt32());
+				viewed = CUID::CharFindFromUID(readInt32());
 				if (!viewed)
 					viewed = character;
 			}

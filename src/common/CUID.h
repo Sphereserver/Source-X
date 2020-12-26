@@ -12,7 +12,7 @@ class CObjBase;
 class CItem;
 class CChar;
 
-#define UID_CLEAR			0
+#define UID_CLEAR			(dword)0
 #define UID_UNUSED			0xFFFFFFFF	// 0 = not used as well.
 
 #define UID_F_RESOURCE		0x80000000	// ALSO: pileable or special macro flag passed to client.
@@ -32,82 +32,88 @@ protected:
 	dword m_dwInternalVal;
 
 public:
-	inline void InitUID() {
+	inline void InitUID() noexcept {
 		m_dwInternalVal = UID_UNUSED;
 	}
 
     // Use ClearUID only if the CUID is not used as a pure UID, but it can assume other kind of values.
     //  Example: m_itFigurine.m_UID, m_itKey.m_UIDLock -> a MORE1/MORE2 == 0 is considered legit, also for many many item types MORE* isn't a UID.
-	inline void ClearUID() {
+	inline void ClearUID() noexcept {
 		m_dwInternalVal = UID_CLEAR;
 	}
 
-	inline CUID()
+	inline CUID() noexcept
 	{
 		InitUID();
 	}
-	inline CUID(dword dwPrivateUID)
+	inline CUID(dword dwPrivateUID) noexcept
 	{
 		SetPrivateUID(dwPrivateUID);
 	}
 
-    static bool IsValidUID(dword dwPrivateUID);
-    static bool IsResource(dword dwPrivateUID);
-    static bool IsValidResource(dword dwPrivateUID);
-    static bool IsItem(dword dwPrivateUID);
-    static bool IsChar(dword dwPrivateUID);
+    static bool IsValidUID(dword dwPrivateUID) noexcept;
+    static bool IsResource(dword dwPrivateUID) noexcept;
+    static bool IsValidResource(dword dwPrivateUID) noexcept;
+    static bool IsItem(dword dwPrivateUID) noexcept;
+    static bool IsChar(dword dwPrivateUID) noexcept;
 
-    inline bool IsValidUID() const {
+    inline bool IsValidUID() const noexcept {
         return IsValidUID(m_dwInternalVal);
     }
-    inline bool IsResource() const {
+    inline bool IsResource() const noexcept {
         return IsResource(m_dwInternalVal);
     }
-    inline bool IsValidResource() const {
+    inline bool IsValidResource() const noexcept {
         return IsResource(m_dwInternalVal);
     }
-    inline bool IsItem() const {
+    inline bool IsItem() const noexcept {
         return IsItem(m_dwInternalVal);
     }
-    inline bool IsChar() const {
+    inline bool IsChar() const noexcept {
         return IsChar(m_dwInternalVal);
     }
 
-	bool IsObjDisconnected() const;
-	bool IsObjTopLevel() const;
+	bool IsObjDisconnected() const noexcept;
+	bool IsObjTopLevel() const noexcept;
 
-	bool IsItemEquipped() const;
-	bool IsItemInContainer() const;
+	bool IsItemEquipped() const noexcept;
+	bool IsItemInContainer() const noexcept;
 
-	void SetObjContainerFlags(dword dwFlags);
-    void RemoveObjFlags(dword dwFlags);
+	void SetObjContainerFlags(dword dwFlags) noexcept;
+    void RemoveObjFlags(dword dwFlags) noexcept;
 
-	inline void SetPrivateUID(dword dwVal) {
+	inline void SetPrivateUID(dword dwVal) noexcept {
 		m_dwInternalVal = dwVal;
 	}
-	inline dword GetPrivateUID() const {
+	inline dword GetPrivateUID() const noexcept {
 		return m_dwInternalVal;
 	}
 
-	dword GetObjUID() const;
-	void SetObjUID(dword dwVal);
+	dword GetObjUID() const noexcept;
+	void SetObjUID(dword dwVal) noexcept;
 
-	inline bool operator == (dword index) const {
+	inline bool operator == (dword index) const noexcept {
 		return (GetObjUID() == index);
 	}
-	inline bool operator != (dword index) const {
+	inline bool operator != (dword index) const noexcept {
 		return (GetObjUID() != index);
 	}
-	inline operator dword () const {
+	inline operator dword () const noexcept {
 		return GetObjUID();
 	}
     
-    static CObjBase * ObjFind(dword dwPrivateUID);
-    static CItem * ItemFind(dword dwPrivateUID);
-    static CChar * CharFind(dword dwPrivateUID);
-    CObjBase * ObjFind() const;
-    CItem * ItemFind() const;
-    CChar * CharFind() const;
+    static CObjBase * ObjFindFromUID(dword dwPrivateUID, bool fInvalidateBeingDeleted = false) noexcept;
+    static CItem * ItemFindFromUID(dword dwPrivateUID, bool fInvalidateBeingDeleted = false) noexcept;
+    static CChar * CharFindFromUID(dword dwPrivateUID, bool fInvalidateBeingDeleted = false) noexcept;
+	inline CObjBase* ObjFind(bool fInvalidateBeingDeleted = false) const noexcept {
+		return ObjFindFromUID(m_dwInternalVal, fInvalidateBeingDeleted);
+	}
+	inline CItem* ItemFind(bool fInvalidateBeingDeleted = false) const noexcept {
+		return ItemFindFromUID(m_dwInternalVal, fInvalidateBeingDeleted);
+	}
+	inline CChar* CharFind(bool fInvalidateBeingDeleted = false) const noexcept{
+		return CharFindFromUID(m_dwInternalVal, fInvalidateBeingDeleted);
+	}
     
 };
 

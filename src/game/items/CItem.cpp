@@ -166,6 +166,7 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEM
 void CItem::DeleteCleanup(bool fForce)
 {
 	ADDTOCALLSTACK("CItem::DeleteCleanup");
+	_fDeleting = true;
 
 	// Remove corpse map waypoint on enhanced clients
 	if (IsType(IT_CORPSE) && m_uidLink)
@@ -196,7 +197,7 @@ void CItem::DeleteCleanup(bool fForce)
 
     if (CUID uidMulti = GetComponentOfMulti())
     {
-        CItemMulti *pMulti = static_cast<CItemMulti*>(uidMulti.ItemFind());
+        CItemMulti *pMulti = static_cast<CItemMulti*>(uidMulti.ItemFind(true));
         if (pMulti)
         {
             pMulti->DeleteComponent(GetUID());
@@ -204,7 +205,7 @@ void CItem::DeleteCleanup(bool fForce)
     }
     if (CUID uidMulti = GetLockDownOfMulti())
     {
-        CItemMulti *pMulti = static_cast<CItemMulti*>(uidMulti.ItemFind());
+        CItemMulti *pMulti = static_cast<CItemMulti*>(uidMulti.ItemFind(true));
         if (pMulti)
         {
             pMulti->UnlockItem(GetUID());
@@ -3072,7 +3073,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
             return true;
         }
 		case IC_ATTR:
-			m_Attr = s.GetArgVal();
+			m_Attr = s.GetArgU64Val();
 			break;
 		case IC_BASEWEIGHT:
 			m_weight = s.GetArgWVal();
@@ -4861,7 +4862,7 @@ CItem *CItem::Weapon_FindRangedAmmo(const CResourceID& id)
 	{
 		// Search container using UID
 		lpctstr  ptcAmmoCont = sAmmoCont.GetBuffer();
-		CContainer *pCont = dynamic_cast<CContainer *>(CUID::ItemFind(Exp_GetDWVal(ptcAmmoCont)));
+		CContainer *pCont = dynamic_cast<CContainer *>(CUID::ItemFindFromUID(Exp_GetDWVal(ptcAmmoCont)));
 		if ( pCont )
 		{
             //If the container exist that means the uid was a valid container uid.

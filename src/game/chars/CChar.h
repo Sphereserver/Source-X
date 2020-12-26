@@ -518,7 +518,7 @@ public:
 	lpctstr GetPossessPronoun() const;	// his
 	byte GetModeFlag( const CClient *pViewer = nullptr ) const;
 	byte GetDirFlag(bool fSquelchForwardStep = false) const;
-	dword GetMoveBlockFlags(bool fIgnoreGM = false) const;
+	dword GetCanMoveFlags(dword dwCanFlags, bool fIgnoreGM = false) const;
 
 	int FixWeirdness();
 	void CreateNewCharCheck();
@@ -1213,7 +1213,7 @@ public:
 	bool NPC_OnTrainPay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGold );
 	bool NPC_OnTrainHear( CChar * pCharSrc, lpctstr pCmd );
 	bool NPC_TrainSkill( CChar * pCharSrc, SKILL_TYPE skill, ushort uiAmountToTrain );
-    int PayGold(CChar * pCharSrc, int iGold, CItem * pGold, ePayGold iReason);
+    int64 PayGold(CChar * pCharSrc, int64 iGold, CItem * pGold, ePayGold iReason);
 private:
 	bool NPC_CheckWalkHere( const CPointMap & pt, const CRegion * pArea ) const;
 	void NPC_OnNoticeSnoop( const CChar * pCharThief, const CChar * pCharMark );

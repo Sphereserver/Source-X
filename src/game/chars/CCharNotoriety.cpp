@@ -721,7 +721,7 @@ void CChar::NotoSave_CheckTimeout()
             ++refNoto.time;
             if ((refNoto.time > g_Cfg.m_iNotoTimeout) && (g_Cfg.m_iNotoTimeout > 0))
             {
-                vToResend.emplace_back(CUID::CharFind(refNoto.charUID));
+                vToResend.emplace_back(CUID::CharFindFromUID(refNoto.charUID));
                 it = m_notoSaves.erase(it);
             }
             else

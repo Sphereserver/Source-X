@@ -71,12 +71,12 @@ bool CResourceIDBase::IsUIDItem() const
     return false;
 }
 
-CItem* CResourceIDBase::ItemFindFromResource() const   // replacement for CUID::ItemFind()
+CItem* CResourceIDBase::ItemFindFromResource(bool fInvalidateBeingDeleted) const   // replacement for CUID::ItemFind()
 {
     // Used by multis: when they are realized, a new CRegionWorld is created from a CResourceID with an internal value = to the m_dwInternalVal (private UID) of the multi, plus a | UID_F_RESOURCE.
     //  Remove the reserved UID_* flags (so also UID_F_RESOURCE), and find the item (in our case actually the multi) with that uid.
     ASSERT(IsResource());
-    return CUID::ItemFind(m_dwInternalVal & UID_O_INDEX_MASK);
+    return CUID::ItemFindFromUID(m_dwInternalVal & UID_O_INDEX_MASK, fInvalidateBeingDeleted);
 }
 
 

@@ -74,7 +74,7 @@ bool CScriptObj::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
             if (ptcKey[3] != '.')
                 return false;
             ptcKey += 4;
-            pRef = CUID::ObjFind(Exp_GetDWVal(ptcKey));
+            pRef = CUID::ObjFindFromUID(Exp_GetDWVal(ptcKey));
             SKIP_SEPARATORS(ptcKey);
             return true;
         case SREF_OBJ:
@@ -424,7 +424,7 @@ bool CScriptObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 		if ( pRef == nullptr )	// good command but bad link.
 		{
 			sVal = "0";
-			return true;
+			return false;
 		}
 		if ( ptcKey[0] == '\0' )	// we where just testing the ref.
 		{
@@ -504,15 +504,15 @@ badcmd:
 	switch ( index )
 	{
         case SSC_RESOURCEINDEX:
-            sVal.FormatVal(RES_GET_INDEX(Exp_GetVal(ptcKey)));
+            sVal.FormatHex(RES_GET_INDEX(Exp_GetVal(ptcKey)));
             break;
         case SSC_RESOURCETYPE:
-            sVal.FormatVal(RES_GET_TYPE(Exp_GetVal(ptcKey)));
+            sVal.FormatHex(RES_GET_TYPE(Exp_GetVal(ptcKey)));
             break;
 
 		case SSC_LISTCOL:
 			// Set the alternating color.
-			sVal = (CWebPageDef::sm_iListIndex&1) ? "bgcolor=\"#E8E8E8\"" : "";
+			sVal = (CWebPageDef::sm_iListIndex & 1) ? "bgcolor=\"#E8E8E8\"" : "";
 			return true;
 		case SSC_OBJ:
 			if ( !g_World.m_uidObj.ObjFind() )
@@ -1243,14 +1243,14 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 
 				if ( ppCmd[2] )
 				{
-					CUID uidEquipper = Exp_GetVal(ppCmd[2]);
-					bool bTriggerEquip = ppCmd[3] != nullptr ? (Exp_GetVal(ppCmd[3]) != 0) : false;
+					CUID uidEquipper(Exp_GetVal(ppCmd[2]));
+					bool fTriggerEquip = (ppCmd[3] != nullptr) ? (Exp_GetVal(ppCmd[3]) != 0) : false;
 
-					if ( !bTriggerEquip || uidEquipper.IsItem() )
+					if ( !fTriggerEquip || uidEquipper.IsItem() )
 						pItem->LoadSetContainer(uidEquipper, LAYER_NONE);
 					else
 					{
-						if ( bTriggerEquip )
+						if ( fTriggerEquip )
 						{
 							CChar * pCharEquipper = uidEquipper.CharFind();
 							if ( pCharEquipper != nullptr )
@@ -1278,11 +1278,11 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 
 		case SSV_NEWNPC:
 			{
-				CREID_TYPE id = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgRaw()));
+				CREID_TYPE id = CREID_TYPE(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgRaw()));
 				CChar * pChar = CChar::CreateNPC(id);
 				if ( !pChar )
 				{
-					g_World.m_uidNew = (dword)0;
+					g_World.m_uidNew = UID_CLEAR;
 					return false;
 				}
 
@@ -1312,12 +1312,12 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	            if (iQty <= 0)
 	                return false;
 
-	            CREID_TYPE id = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, ppCmd[0]));
+	            CREID_TYPE id = CREID_TYPE(g_Cfg.ResourceGetIndexType(RES_CHARDEF, ppCmd[0]));
 	            CChar * pChar = CChar::CreateNPC(id);
 	            CChar * pCharSrc = nullptr;
 	            if (!pChar)
 	            {
-	                g_World.m_uidNew = (dword)0;
+	                g_World.m_uidNew = UID_CLEAR;
 	                return false;
 	            }
 
@@ -2462,7 +2462,7 @@ jump_in:
 						CScriptObj *pRef = this;
 						if ( iArgQty == 2 )
 						{
-                            CChar *pCharFound = CUID::CharFind(Str_ToI(piCmd[1]));
+                            CChar *pCharFound = CUID::CharFindFromUID(Str_ToI(piCmd[1]));
 							if ( pCharFound )
 								pRef = pCharFound;
 						}
