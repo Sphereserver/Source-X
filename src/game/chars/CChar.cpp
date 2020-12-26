@@ -348,6 +348,8 @@ CChar::~CChar()
 void CChar::DeleteCleanup(bool fForce)
 {
 	ADDTOCALLSTACK("CChar::DeleteCleanup");
+	_fDeleting = true;
+
 	CWorldTickingList::DelCharPeriodic(this);
 
 	if (IsStatFlag(STATF_RIDDEN))

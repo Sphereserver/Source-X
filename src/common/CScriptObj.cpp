@@ -424,7 +424,7 @@ bool CScriptObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 		if ( pRef == nullptr )	// good command but bad link.
 		{
 			sVal = "0";
-			return true;
+			return false;
 		}
 		if ( ptcKey[0] == '\0' )	// we where just testing the ref.
 		{

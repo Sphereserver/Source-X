@@ -1087,14 +1087,14 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
         return;
     
     //We don't need to limit virtual golds to 32 bit int.
-    const int64 kuiMaxCost = ((g_Cfg.m_iFeatureTOL&FEATURE_TOL_VIRTUALGOLD) ? (INT64_MAX / 2) : (INT32_MAX / 2));
+    const int64 kuiMaxCost = ((g_Cfg.m_iFeatureTOL & FEATURE_TOL_VIRTUALGOLD) ? (INT64_MAX / 2) : (INT32_MAX / 2));
 
     const bool fPlayerVendor = pVendor->IsStatFlag(STATF_PET);
     pVendor->GetBank(LAYER_VENDOR_STOCK);
     CItemContainer* pPack = m_pChar->GetPackSafe();
 
     CItemVendable* pItem;
-    int64 costtotal = 0;
+    int64 iCostTotal = 0;
 
     //	Check if the vendor really has so much items
     for (uint i = 0; i < uiItemCount; ++i)
@@ -1153,8 +1153,8 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
             }
         }
         
-        costtotal += ((int64)(items[i].m_vcAmount) * items[i].m_price);
-        if ( costtotal > kuiMaxCost )
+		iCostTotal += ((int64)(items[i].m_vcAmount) * items[i].m_price);
+        if (iCostTotal > kuiMaxCost)
         {
             pVendor->Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CANTFULFILL));
             Event_VendorBuy_Cheater( 0x4 );
@@ -1162,12 +1162,12 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
         }
     }
     
-	if ( costtotal <= 0 )
+	if (iCostTotal <= 0 )
 	{
 		pVendor->Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_BUY_NOTHING));
 		return;
 	}
-    costtotal = m_pChar->PayGold(pVendor, (int)costtotal, nullptr, PAYGOLD_BUY);
+	iCostTotal = m_pChar->PayGold(pVendor, iCostTotal, nullptr, PAYGOLD_BUY);
     
     //	Check for gold being enough to buy this
     bool fBoss = pVendor->NPC_IsOwnedBy(m_pChar);
@@ -1175,7 +1175,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
     {
         if (g_Cfg.m_iFeatureTOL & FEATURE_TOL_VIRTUALGOLD)
         {
-            if (m_pChar->m_virtualGold < costtotal)
+            if (m_pChar->m_virtualGold < iCostTotal)
             {
                 pVendor->Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_NOMONEY1));
                 return;
@@ -1183,9 +1183,9 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
         }
         else
         {
-            int iGold = m_pChar->GetPackSafe()->ContentConsumeTest(CResourceID(RES_TYPEDEF, IT_GOLD), (int)(costtotal));
+            int iGold = m_pChar->GetPackSafe()->ContentConsumeTest(CResourceID(RES_TYPEDEF, IT_GOLD), (dword)iCostTotal);
             if (!g_Cfg.m_fPayFromPackOnly && iGold)
-                iGold = m_pChar->ContentConsumeTest(CResourceID(RES_TYPEDEF, IT_GOLD), (int)(costtotal));
+                iGold = m_pChar->ContentConsumeTest(CResourceID(RES_TYPEDEF, IT_GOLD), (int)iCostTotal);
                 
             if (iGold)
             {
@@ -1210,7 +1210,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
         if ((IsTrigUsed(TRIGGER_BUY)) || (IsTrigUsed(TRIGGER_ITEMBUY)))
         {
             CScriptTriggerArgs Args( amount, int64(amount) * items[i].m_price, pVendor );
-            Args.m_VarsLocal.SetNum( "TOTALCOST", costtotal);
+            Args.m_VarsLocal.SetNum( "TOTALCOST", iCostTotal);
             if ( pItem->OnTrigger( ITRIG_Buy, this->GetChar(), &Args ) == TRIGRET_RET_TRUE )
                 continue;
         }
@@ -1302,7 +1302,8 @@ do_consume:
     tchar *pszTemp1 = Str_GetTemp();
     tchar *pszTemp2 = Str_GetTemp();
     snprintf(pszTemp1, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_HYARE), m_pChar->GetName());
-    snprintf(pszTemp2, STR_TEMPLENGTH, fBoss ? g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_S1) : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_B1), costtotal, (costtotal==1) ? "" : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CA));
+    snprintf(pszTemp2, STR_TEMPLENGTH, (fBoss ? g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_S1) : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_B1)),
+		iCostTotal, ((iCostTotal ==1) ? "" : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CA)) );
     snprintf(sMsg, STR_TEMPLENGTH, "%s %s %s", pszTemp1, pszTemp2, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_TY));
     pVendor->Speak(sMsg);
     
@@ -1311,21 +1312,21 @@ do_consume:
     {
         if (g_Cfg.m_iFeatureTOL & FEATURE_TOL_VIRTUALGOLD) //We have to do gold trade in here.
         {
-            m_pChar->m_virtualGold -= costtotal;
+            m_pChar->m_virtualGold -= iCostTotal;
             m_pChar->UpdateStatsFlag();
         }
         else
         {
-            int iGold = m_pChar->GetPackSafe()->ContentConsume( CResourceID(RES_TYPEDEF,IT_GOLD), (int)(costtotal));
+            int iGold = m_pChar->GetPackSafe()->ContentConsume( CResourceID(RES_TYPEDEF,IT_GOLD), (int)iCostTotal);
             if (!g_Cfg.m_fPayFromPackOnly && iGold)
                 m_pChar->ContentConsume( CResourceID(RES_TYPEDEF,IT_GOLD), iGold);
-            pVendor->GetBank()->m_itEqBankBox.m_Check_Amount += (uint)(costtotal);
+            pVendor->GetBank()->m_itEqBankBox.m_Check_Amount += (uint)iCostTotal;
         }
     }
     
     //Close vendor gump
     addVendorClose(pVendor);
-    if (costtotal > 0) //if anything was sold, sound this
+    if (iCostTotal > 0) //if anything was sold, sound this
         addSound(SOUND_DROP_GOLD1); //Gold sound is better than cloth one, 0x57 is SOUND_USE_CLOTH
 }
 

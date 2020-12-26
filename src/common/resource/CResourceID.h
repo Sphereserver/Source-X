@@ -157,7 +157,7 @@ struct CResourceIDBase : public CUID    // It has not the "page" part/variable. 
     CChar*      CharFind() const = delete;
 
     bool IsUIDItem() const; //  replacement for CUID::IsItem(), but don't be virtual, since we don't need that and the class size will increase due to the vtable
-    CItem* ItemFindFromResource() const;   //  replacement for CUID::ItemFind()
+    CItem* ItemFindFromResource(bool fInvalidateBeingDeleted = false) const;   //  replacement for CUID::ItemFind()
 };
 
 struct CResourceID : public CResourceIDBase     // It has the "page" part. Use it to handle every other resource section.

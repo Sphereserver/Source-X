@@ -4505,10 +4505,10 @@ bool CChar::OnTickPeriodic()
     return true;
 }
 
-int CChar::PayGold(CChar * pCharSrc, int iGold, CItem * pGold, ePayGold iReason)
+int64 CChar::PayGold(CChar * pCharSrc, int64 iGold, CItem * pGold, ePayGold iReason)
 {
     ADDTOCALLSTACK("CChar::PayGold");
     CScriptTriggerArgs Args(iGold,iReason,pGold);
     OnTrigger(CTRIG_PayGold,pCharSrc,&Args);
-    return (int)Args.m_iN1;
+    return Args.m_iN1;
 }

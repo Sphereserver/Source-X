@@ -166,6 +166,7 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEM
 void CItem::DeleteCleanup(bool fForce)
 {
 	ADDTOCALLSTACK("CItem::DeleteCleanup");
+	_fDeleting = true;
 
 	// Remove corpse map waypoint on enhanced clients
 	if (IsType(IT_CORPSE) && m_uidLink)
@@ -196,7 +197,7 @@ void CItem::DeleteCleanup(bool fForce)
 
     if (CUID uidMulti = GetComponentOfMulti())
     {
-        CItemMulti *pMulti = static_cast<CItemMulti*>(uidMulti.ItemFind());
+        CItemMulti *pMulti = static_cast<CItemMulti*>(uidMulti.ItemFind(true));
         if (pMulti)
         {
             pMulti->DeleteComponent(GetUID());
@@ -204,7 +205,7 @@ void CItem::DeleteCleanup(bool fForce)
     }
     if (CUID uidMulti = GetLockDownOfMulti())
     {
-        CItemMulti *pMulti = static_cast<CItemMulti*>(uidMulti.ItemFind());
+        CItemMulti *pMulti = static_cast<CItemMulti*>(uidMulti.ItemFind(true));
         if (pMulti)
         {
             pMulti->UnlockItem(GetUID());

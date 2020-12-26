@@ -2372,4 +2372,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
     Added 2 missing default messages:
       NPC_VENDOR_CANTFULFILL,				"Your order cannot be fulfilled, please try again."
       NPC_VENDOR_BUY_NOTHING,				"Thou hast bought nothing!"
-     
+
+26-12-2020, Nolok
+- Fixed: LINK.* not returning error if LINK was not set or invalid.
+- Fixed: Multi house sign's LINK wasn't set on multi creation.
