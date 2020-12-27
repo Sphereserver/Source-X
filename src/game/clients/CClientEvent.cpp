@@ -739,9 +739,8 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 		m_lastDir = rawdir;
 		return TRUE;
 	}
-	
-	
-	// First step is to determine the theoric time(iTimeMin) to take the last steps
+		
+	// First step is to determine the theoric time(iTimeMin) to take the last step(s)
 	/*		RUN /Walk
 	Mount	200 / 400
 	foot	400 / 800
@@ -764,61 +763,33 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 			iTimeMin = 400;
 	}
 	
-	/* 06-01-2004, Kell
-	Based on the bit - bucket algorithm used in IP QoS DiffServ routers :
-	there is a maximum speed at which you can walk(it's fixed, different walking or foot). If
-	you walk faster than that speed, every tenth of second you walk faster than expected is a point you
-	loose. Every 10th of second you take above the time expected is a point you win.The number of points
-	you start with and the maximum is WALKBUFFER in sphere.ini, and I've tested it with values
-	around 40 for good connections and 70 for laggy connections.
-	If a player speedwalks, he'll soon drop below 0, and stop moving, then have to compensate with equally
-	slow walking periods, like it happens when there's a burst of lag.
-	WALKREGEN is the speed at which you regen walk points, in percentage.
-	Default values : WALKBUFFER = 50   WALKREGEN = 25
-	Hints :
-	WALKBUFFER	lower for more strict control.However, setting it lower also increases the
-	chance of limiting someone which is just experiencing lag.Raise this value
-	if you lower WALKREGEN.
-	WALKREGEN	set lower for longer - lasting punishments.It makes sense to lower this value
-	if you raise WALKBUFFER.*/
-
 	if (!(iTimeDiff > iTimeMin + 250))
 		// We don't want to do process if time is greater of 250 (Ping of player should be lower than this)
 		// Accept a Big number cause a big offset on the average.
 
 	{
 		if ( iTimeDiff > iTimeMin )
-		// We don't want to do process if time is greater of 150 (Ping of player should be lower than this)
-		// Accept a Big number cause a big offset ont the average.
-
 		// If the step time is greater than the theoric time there 4 reasons
 		// It's the server process tick, player's ping, been a while since last step, change direction during run
 		// Here we ajust TimeDiff using ini parameter
+			//WalkBuffer: Maximum buffer allow on player. Each good step give point what maximum point you want?
+			//WalkRegen: Determine how the TimeDiff is ajust depending of the ping
 		{
 			llong iRegen = ((iTimeDiff - iTimeMin) * g_Cfg.m_iWalkRegen) / 150;
-
-			//iRegen should not be over buffer value and should not be under (buffer * regen) %
-			if ( iRegen > g_Cfg.m_iWalkBuffer )
-				iRegen = g_Cfg.m_iWalkBuffer;
-			else if ( iRegen < -((g_Cfg.m_iWalkBuffer * g_Cfg.m_iWalkRegen) / 100) )
-				iRegen = -((g_Cfg.m_iWalkBuffer * g_Cfg.m_iWalkRegen) / 100);
 
 			// Get the ajust Timediff
 			iTimeDiff = iTimeMin + iRegen;
 		}
-		
-
+	
 		// Create de average step value
 		m_iWalkTimeAvg += iTimeDiff;
 		const llong oldAvg = m_iWalkTimeAvg;
 		m_iWalkTimeAvg -= iTimeMin;
 
 		
-		//Ajust the maximum range of average
+		//Ajust the maximum average to the define buffer
 		if ( m_iWalkTimeAvg > g_Cfg.m_iWalkBuffer )
 			m_iWalkTimeAvg = g_Cfg.m_iWalkBuffer;
-		//else if ( m_iWalkTimeAvg < -g_Cfg.m_iWalkBuffer ) //useless since we set it to 100 if we speedwalk
-		//	m_iWalkTimeAvg = -g_Cfg.m_iWalkBuffer;
 		
 		if ( IsPriv(PRIV_DETAIL) && IsPriv(PRIV_DEBUG) )
 			SysMessagef("Walkcheck trace: timeDiff(%lld) / timeMin(%lld). oldAvg(%lld) :: curAvg(%lld)", iTimeDiff, iTimeMin, oldAvg, m_iWalkTimeAvg);
@@ -827,7 +798,7 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 		if ( m_iWalkTimeAvg < 0 && iTimeDiff >= 0 )
 		{
 			// Walking too fast.
-			m_iWalkTimeAvg = 100; //reset the average
+			m_iWalkTimeAvg = 250; //reset the average
 			DEBUG_WARN(("%s (%x): Fast Walk ?\n", GetName(), GetSocketID()));
 			if ( IsTrigUsed(TRIGGER_USEREXWALKLIMIT) )
 			{
