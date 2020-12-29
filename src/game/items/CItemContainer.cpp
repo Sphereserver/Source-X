@@ -37,7 +37,7 @@ CItemContainer::~CItemContainer()
         pMulti = static_cast<CItemMulti*>(_uidMultiCrate.ItemFind());
         if (pMulti)
         {
-            pMulti->SetMovingCrate(UID_UNUSED);
+            pMulti->SetMovingCrate(CUID(UID_UNUSED));
         }
     }
 }

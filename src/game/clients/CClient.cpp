@@ -414,7 +414,7 @@ void CClient::addPromptConsoleFunction( lpctstr pszFunction, lpctstr pszSysmessa
 	// Target a verb at some object .
 	ASSERT(pszFunction);
 	m_Prompt_Text = pszFunction;
-	addPromptConsole( CLIMODE_PROMPT_SCRIPT_VERB, pszSysmessage, 0, 0, bUnicode );
+	addPromptConsole( CLIMODE_PROMPT_SCRIPT_VERB, pszSysmessage, CUID(), CUID(), bUnicode );
 }
 
 
@@ -757,7 +757,7 @@ bool CClient::r_LoadVal( CScript & s )
 			break;
 
 		case CC_TARG:
-			m_Targ_UID = s.GetArgVal();
+			m_Targ_UID.SetObjUID(s.GetArgVal());
 			break;
 		case CC_TARGP:
 			m_Targ_p.Read( s.GetArgRaw());
@@ -768,10 +768,10 @@ bool CClient::r_LoadVal( CScript & s )
 			}
 			break;
 		case CC_TARGPROP:
-			m_Prop_UID = s.GetArgVal();
+			m_Prop_UID.SetObjUID(s.GetArgVal());
 			break;
 		case CC_TARGPRV:
-			m_Targ_Prv_UID = s.GetArgVal();
+			m_Targ_Prv_UID.SetObjUID(s.GetArgVal());
 			break;
 		default:
 			return false;
@@ -1285,10 +1285,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		{
 			CChar *pChar = m_pChar;
 			if ( s.HasArgs() )
-			{
-				CUID uid = s.GetArgVal();
-				pChar = uid.CharFind();
-			}
+				pChar = CUID::CharFindFromUID(s.GetArgVal());
+			
 			if ( pChar )
 				addCharPaperdoll(pChar);
 			break;

@@ -994,7 +994,6 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 				if ( *ptcKey )		// has an argument - UID to see(los) or POS to los only
 				{
 					CPointMap pt;
-					CUID uid;
 					CObjBase *pObj = nullptr;
 
 					if ( !bCanSee )
@@ -1002,8 +1001,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 
 					if ( bCanSee || !pt.IsValidPoint() )
 					{
-						uid = Exp_GetDWVal( ptcKey );
-						pObj = uid.ObjFind();
+						pObj = CUID::ObjFindFromUID(Exp_GetDWVal(ptcKey));
 						if ( !bCanSee && pObj )
 							pt = pObj->GetTopPoint();
 					}
@@ -1881,7 +1879,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 		case OC_SPAWNITEM:
             if ( !g_Serv.IsLoading() )	// SPAWNITEM is read-only
                 return false;
-            _uidSpawn = s.GetArgDWVal();
+            _uidSpawn.SetObjUID(s.GetArgDWVal());
             break;
 		case OC_UID:
 		case OC_SERIAL:
@@ -2289,8 +2287,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( iArgQty < 2 )
 					piCmd[1] = 1;
 
-				CUID uid = (dword)(piCmd[0]);
-				pObjNear = uid.ObjFind();
+				pObjNear = CUID::ObjFindFromUID((dword)piCmd[0]);
 				if ( !pObjNear )
 					return false;
                 if ( piCmd[2] )
@@ -2427,10 +2424,8 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				switch( iArgs )
 				{
 				case 4:
-					{
-						CUID uid = (dword) piCmd[3];
-						pItemSrc = uid.ItemFind();
-					}
+					pItemSrc = CUID::ItemFindFromUID((dword)piCmd[3]);
+					FALLTHROUGH;
 				case 3:
 					if ( piCmd[2] == -1 )
 					{
@@ -2438,8 +2433,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					}
 					else
 					{
-						CUID uid = (dword) piCmd[2];
-						pCharSrc = uid.CharFind();
+						pCharSrc = CUID::CharFindFromUID((dword)piCmd[2]);
 					}
 					break;
 				default:
@@ -2730,7 +2724,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 				if ( index == OV_TRYSRC )
 				{
-					NewSrc = s.GetArgVal();
+					NewSrc.SetObjUID(s.GetArgDWVal());
 					if ( NewSrc.IsValidUID() )
 						pNewSrc = NewSrc.CharFind();
 				}
@@ -2793,7 +2787,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 			if (s.HasArgs())
 			{
-				CUID uid = s.GetArgUVal();
+				CUID uid(s.GetArgUVal());
 				if ((!uid.ObjFind()) || (!this->IsChar()))
 					return false;
 				pCharSrc->GetClientActive()->Event_SingleClick(uid);
@@ -2808,7 +2802,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				return false;
 			if (s.HasArgs())
 			{
-				CUID uid = s.GetArgVal();
+				CUID uid(s.GetArgDWVal());
 
 				if ((!uid.ObjFind()) || (!this->IsChar()))
 					return false;
@@ -2826,7 +2820,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				return false;
 			if ( s.HasArgs() )
 			{
-				CUID uid = s.GetArgVal();
+				CUID uid(s.GetArgDWVal());
 
 				if (( ! uid.ObjFind()) || ( ! this->IsChar() ))
 					return false;
@@ -3085,7 +3079,7 @@ CCSpawn * CObjBase::GetSpawn()
 void CObjBase::SetSpawn(CCSpawn * spawn)
 {
     if (spawn)
-        _uidSpawn = spawn->GetLink()->GetUID();
+        _uidSpawn.SetObjUID(spawn->GetLink()->GetUID());
     else
         _uidSpawn.InitUID();
 }

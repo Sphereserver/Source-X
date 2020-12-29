@@ -236,7 +236,7 @@ bool CItemStone::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 		if ( !ptcKey[0] )
 			return false;
 
-		CUID pMemberUid = Exp_GetDWVal(ptcKey);
+		CUID pMemberUid(Exp_GetDWVal(ptcKey));
 		SKIP_SEPARATORS(ptcKey);
 
 		CChar * pMemberChar = pMemberUid.CharFind();
@@ -281,7 +281,7 @@ bool CItemStone::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 		if ( !ptcKey[0] )
 			return false;
 
-		CUID pGuildUid = Exp_GetDWVal(ptcKey);
+		CUID pGuildUid(Exp_GetDWVal(ptcKey));
 		SKIP_SEPARATORS(ptcKey);
 
 		CItem * pMemberGuild = pGuildUid.ItemFind();
@@ -352,7 +352,7 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 			{
 				if ( s.HasArgs() )
 				{
-					CUID pNewMASTERUID = (dword) s.GetArgVal();
+					CUID pNewMASTERUID(s.GetArgDWVal());
 					CChar * pChar = pNewMASTERUID.CharFind();
 					if ( !pChar )
 					{
@@ -396,10 +396,10 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 
 			new CStoneMember(
 				this,
-				ahextoi(Arg_ppCmd[0]),													// Member's UID
+				CUID(ahextoi(Arg_ppCmd[0])), 											// Member's UID
 				Arg_Qty > 2 ? (STONEPRIV_TYPE)(atoi(Arg_ppCmd[2])) : STONEPRIV_CANDIDATE,// Members priv level (use as a type)
 				Arg_Qty > 1 ? Arg_ppCmd[1] : "",										// Title
-				ahextoi(Arg_ppCmd[3]),													// Member is loyal to this
+				CUID(ahextoi(Arg_ppCmd[3])),											// Member is loyal to this
 				Arg_Qty > 4 ? (atoi( Arg_ppCmd[4] ) != 0) : 0,							// Paperdoll stone abbreviation (also if they declared war)
 				Arg_Qty > 5 ? (atoi( Arg_ppCmd[5] ) != 0) : 0,							// If we declared war
 				Arg_Qty > 6 ? atoi( Arg_ppCmd[6] ) : 0);								// AccountGold
@@ -514,7 +514,7 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
 		if ( !pszCmd[0] )
 			return true;
 
-		CUID pMemberUid = Exp_GetDWVal(pszCmd);
+		CUID pMemberUid(Exp_GetDWVal(pszCmd));
 		SKIP_SEPARATORS(pszCmd);
 
 		CChar * pMemberChar = pMemberUid.CharFind();
@@ -602,7 +602,7 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
 		if ( !pszCmd[0] )
 			return true;
 
-		CUID pGuildUid = Exp_GetDWVal(pszCmd);
+		CUID pGuildUid(Exp_GetDWVal(pszCmd));
 		SKIP_SEPARATORS(pszCmd);
 
 		CItem * pMemberGuild = pGuildUid.ItemFind();
@@ -867,8 +867,7 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 		case ISV_APPLYTOJOIN:
 			if ( s.HasArgs())
 			{
-				CUID pMemberUid = s.GetArgVal();
-				CChar * pMemberChar = pMemberUid.CharFind();
+				CChar * pMemberChar = CUID::CharFindFromUID(s.GetArgDWVal());
 				if ( pMemberChar )
 					AddRecruit( pMemberChar, STONEPRIV_CANDIDATE );
 			}
@@ -876,7 +875,7 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 		case ISV_CHANGEALIGN:
 			if ( s.HasArgs())
 			{
-				SetALIGNTYPE(static_cast<STONEALIGN_TYPE>(s.GetArgVal()));
+				SetALIGNTYPE(STONEALIGN_TYPE(s.GetArgVal()));
 				tchar *pszMsg = Str_GetTemp();
 				snprintf(pszMsg, SCRIPT_MAX_LINE_LEN, "%s is now a %s %s\n", GetName(), GetAlignName(), GetTypeName());
 				Speak(pszMsg);
@@ -885,14 +884,14 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 		case ISV_DECLAREPEACE:
 			if ( s.HasArgs())
 			{
-				CUID pMemberUid = s.GetArgVal();
+				CUID pMemberUid(s.GetArgDWVal());
 				WeDeclarePeace(pMemberUid);
 			}
 			break;
 		case ISV_DECLAREWAR:
 			if ( s.HasArgs())
 			{
-				CUID pMemberUid = s.GetArgVal();
+				CUID pMemberUid(s.GetArgDWVal());
 				CItem * pEnemyItem = pMemberUid.ItemFind();
 				if ( pEnemyItem )
 				{
@@ -914,16 +913,16 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 					int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
 					if ( iArgQty == 2 )
 					{
-						CUID pGuildUid = (uint)(piCmd[0]);
-						bool bWeDeclared = (piCmd[1] != 0);
-						CItem * pEnemyItem = pGuildUid.ItemFind();
+						const CUID uidGuild((dword)piCmd[0]);
+						bool fWeDeclared = (piCmd[1] != 0);
+						CItem * pEnemyItem = uidGuild.ItemFind();
 						if ( pEnemyItem && (pEnemyItem->IsType(IT_STONE_GUILD) || pEnemyItem->IsType(IT_STONE_TOWN)) )
 						{
 							CStoneMember * pMemberGuild = GetMember( pEnemyItem );
 							if ( !pMemberGuild )
-								pMemberGuild = new CStoneMember(this, pGuildUid, STONEPRIV_ENEMY);
+								pMemberGuild = new CStoneMember(this, uidGuild, STONEPRIV_ENEMY);
 
-							if ( bWeDeclared )
+							if (fWeDeclared)
 								pMemberGuild->SetWeDeclaredWar(true);
 							else
 								pMemberGuild->SetTheyDeclaredWar(true);
@@ -934,8 +933,8 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 		case ISV_JOINASMEMBER:
 			if ( s.HasArgs())
 			{
-				CUID pMemberUid = s.GetArgVal();
-				CChar * pMemberChar = pMemberUid.CharFind();
+				const CUID uidMember(s.GetArgDWVal());
+				CChar * pMemberChar = uidMember.CharFind();
 				if ( pMemberChar )
 				{
 					AddRecruit( pMemberChar, STONEPRIV_MEMBER );
@@ -945,8 +944,8 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 		case ISV_RESIGN:
 			if ( s.HasArgs())
 			{
-				CUID pMemberUid = s.GetArgVal();
-				CChar * pMemberChar = pMemberUid.CharFind();
+				const CUID uidMember(s.GetArgDWVal());
+				CChar* pMemberChar = uidMember.CharFind();
 				if ( pMemberChar )
 				{
 					CStoneMember * pMemberGuild = GetMember( pMemberChar );
@@ -962,11 +961,8 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 			break;
 		case ISV_TOGGLEABBREVIATION:
 			{
-				CUID pMemberUid = pMember->GetLinkUID();
-				if ( s.HasArgs() )
-					pMemberUid = s.GetArgVal();
-
-				CChar * pMemberChar = pMemberUid.CharFind();
+				const CUID uidMember(s.HasArgs() ? s.GetArgDWVal() : pMember->GetLinkUID());
+				CChar * pMemberChar = uidMember.CharFind();
 				if ( pMemberChar )
 				{
 					CStoneMember * pMemberGuild = GetMember( pMemberChar );

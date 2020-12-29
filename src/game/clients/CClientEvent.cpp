@@ -1057,7 +1057,7 @@ void CClient::Event_Attack( CUID uid )
     if (!fFail)
         fFail = !m_pChar->Fight_Attack(pChar);
 
-	new PacketAttack(this, (fFail ? 0 : (dword)pChar->GetUID()));
+	new PacketAttack(this, (fFail ? CUID() : pChar->GetUID()));
 }
 
 // Client/Player buying items from the Vendor
@@ -2407,7 +2407,7 @@ void CClient::Event_Target(dword context, CUID uid, CPointMap pt, byte flags, IT
 void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a client request
 {
 	ADDTOCALLSTACK("CClient::Event_AOSPopupMenuRequest");
-	CUID uObj = uid;
+	CUID uObj(uid);
 	CObjBaseTemplate *pObj = uObj.ObjFind();
 	if ( !m_pChar || m_pChar->IsStatFlag(STATF_DEAD) || !CanSee(pObj) )
 		return;
@@ -2421,7 +2421,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 		delete m_pPopupPacket;
 		m_pPopupPacket = nullptr;
 	}
-	m_pPopupPacket = new PacketDisplayPopup(this, uid);
+	m_pPopupPacket = new PacketDisplayPopup(this, uObj);
 
 	CScriptTriggerArgs Args;
 	bool fPreparePacket = false;
@@ -2595,7 +2595,7 @@ void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something 
 	if ( !m_pChar || !EntryTag )
 		return;
 
-	CUID uObj = uid;
+	CUID uObj(uid);
 	CObjBase *pObj = uObj.ObjFind();
 	if ( !CanSee(pObj) )
 		return;
@@ -2799,7 +2799,7 @@ void CClient::Event_UseToolbar(byte bType, dword dwArg)
 		    break;
 
 		case 0x04: // Item
-			Event_DoubleClick(dwArg, true, true);
+			Event_DoubleClick(CUID(dwArg), true, true);
             break;
 
         case 0x5:	// virtue

@@ -1358,7 +1358,7 @@ bool CAccount::r_LoadVal( CScript & s )
 			m_lang.Set( s.GetArgStr());
 			break;
 		case AC_LASTCHARUID:
-			m_uidLastChar = s.GetArgVal();
+			m_uidLastChar.SetObjUID(s.GetArgDWVal());
 			break;
 		case AC_LASTCONNECTDATE:
 			m_dateLastConnect.Read( s.GetArgStr());

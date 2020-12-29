@@ -615,7 +615,7 @@ void CClient::Cmd_EditItem( CObjBase *pObj, int iSelect )
 			return;
 
 		if ( m_Targ_Text.IsEmpty() )
-			addGumpDialogProps(m_tmMenu.m_Item[iSelect]);
+			addGumpDialogProps(CUID(m_tmMenu.m_Item[iSelect]));
 		else
 			OnTarg_Obj_Set( CUID::ObjFindFromUID(m_tmMenu.m_Item[iSelect]) );
 		return;
@@ -1095,7 +1095,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 		{
 			// Tracking menu got us here. Start tracking the selected creature.
 			m_pChar->SetTimeoutS(1);
-			m_pChar->m_Act_UID = m_tmMenu.m_Item[track_sel];	// selected UID
+			m_pChar->m_Act_UID.SetObjUID(m_tmMenu.m_Item[track_sel]);	// selected UID
 			m_pChar->Skill_Start(SKILL_TRACKING);
 			return true;
 		}

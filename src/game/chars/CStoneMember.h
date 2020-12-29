@@ -67,7 +67,7 @@ private:
 
 public:
 	static const char *m_sClassName;
-	CStoneMember( CItemStone * pStone, CUID uid, STONEPRIV_TYPE iType, lpctstr pTitle = "", CUID loyaluidLink = 0, bool fArg1 = false, bool fArg2 = false, int nAccountGold = 0);
+	CStoneMember(CItemStone* pStone, CUID uid, STONEPRIV_TYPE iType, lpctstr pTitle = "", CUID loyaluidLink = CUID(UID_CLEAR), bool fArg1 = false, bool fArg2 = false, int nAccountGold = 0);
 	virtual ~CStoneMember();
 
 private:

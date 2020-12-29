@@ -838,7 +838,7 @@ bool CCSpawn::r_LoadVal(CScript & s)
     {
         case ISPW_ADDOBJ:
         {
-            AddObj(s.GetArgDWVal());
+            AddObj(CUID(s.GetArgDWVal()));
             return true;
         }
         case ISPW_AMOUNT:

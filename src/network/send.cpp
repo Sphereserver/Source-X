@@ -511,7 +511,7 @@ PacketItemWorld::PacketItemWorld(const CClient* target, const CItem *item) : Pac
 	push(target);
 }
 
-void PacketItemWorld::adjustItemData(const CClient* target, const CItem* item, ITEMID_TYPE &id, HUE_TYPE &hue, word &amount, DIR_TYPE &dir, byte &flags, byte& light)
+void PacketItemWorld::adjustItemData(const CClient* target, const CItem* item, ITEMID_TYPE &id, HUE_TYPE &hue, word &amount, DIR_TYPE &dir, byte &flags, byte& light)  // static
 {
 	ADDTOCALLSTACK("PacketItemWorld::adjustItemData");
 	const CChar* character = target->GetChar();
@@ -5271,10 +5271,12 @@ PacketMoveShip::PacketMoveShip(const CClient* target, const CObjBase* movingObj,
  *
  *
  ***************************************************************************/
-PacketContainer::PacketContainer(const CClient* target, CObjBase** objects, uint objectCount) : PacketItemWorldNew(XCMD_PacketCont, 5, PRI_NORMAL)
+PacketContainer::PacketContainer(const CClient* target, CObjBase** objects, uint objectCount) : PacketSend(XCMD_PacketCont, 5, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketContainer::PacketContainer");
 	ASSERT(objectCount > 0);
+
+	using ds = PacketItemWorldNew::DataSource;
 
 	initLength();
 	writeInt16((word)(objectCount));
@@ -5285,7 +5287,7 @@ PacketContainer::PacketContainer(const CClient* target, CObjBase** objects, uint
 		if (object->IsItem())
 		{
 			CItem* item = static_cast<CItem*>(object);
-			DataSource source = TileData;
+			ds source = ds::TileData;
 			dword uid = item->GetUID();
 			word amount = item->GetAmount();
 			ITEMID_TYPE id = item->GetDispID();
@@ -5295,13 +5297,13 @@ PacketContainer::PacketContainer(const CClient* target, CObjBase** objects, uint
 			byte flags = 0;
 			byte light = 0;
 
-			adjustItemData(target, item, id, hue, amount, dir, flags, light);
+			PacketItemWorld::adjustItemData(target, item, id, hue, amount, dir, flags, light);
 
 			if (id >= ITEMID_MULTI)
 				id = (ITEMID_TYPE)(id - ITEMID_MULTI);
 
 			if (item->IsTypeMulti())
-				source = Multi;
+				source = ds::Multi;
 
 			writeByte(0xF3);
 			writeInt16(1);
@@ -5322,7 +5324,7 @@ PacketContainer::PacketContainer(const CClient* target, CObjBase** objects, uint
 		else
 		{
 			CChar* mobile = static_cast<CChar*>(object);
-			DataSource source = Character;
+			ds source = ds::Character;
 			dword uid = mobile->GetUID();
 			CREID_TYPE id = mobile->GetDispID();
 			CPointMap p = mobile->GetTopPoint();

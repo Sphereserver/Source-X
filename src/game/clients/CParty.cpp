@@ -734,7 +734,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 		case PDV_ADDMEMBERFORCED:
 		{
 			bool bForced = (iIndex == PDV_ADDMEMBERFORCED);
-			CUID toAdd = (dword)s.GetArgVal();
+			CUID toAdd(s.GetArgDWVal());
 			CChar *pCharAdd = toAdd.CharFind();
 			CChar *pCharMaster = GetMaster().CharFind();
 			if ( !pCharAdd || IsInParty(pCharAdd) )
@@ -776,7 +776,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 				toRemove = m_Chars.GetChar(nMember);
 			}
 			else
-				toRemove = (dword)s.GetArgVal();
+				toRemove.SetObjUID(s.GetArgDWVal());
 
 			if ( toRemove.IsValidUID() )
 				return RemoveMember(toRemove, GetMaster());
@@ -798,7 +798,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 				newMaster = m_Chars.GetChar(nMember);
 			}
 			else
-				newMaster = (dword)s.GetArgVal();
+				newMaster.SetObjUID(s.GetArgDWVal());
 
 			if ( newMaster.IsValidUID() )
 				return SetMaster(newMaster.CharFind());
@@ -810,7 +810,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 		{
 			CUID toSysmessage;
 			lpctstr ptcArg = s.GetArgStr();
-			tchar *pUid = Str_GetTemp();
+			tchar *ptcUid = Str_GetTemp();
 			int x = 0;
 
 			if ( *ptcArg == '@' )
@@ -824,9 +824,9 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 						++ptcArg;
 						++x;
 					}
-                    Str_CopyLimitNull(pUid, __pszArg, ++x);
+                    Str_CopyLimitNull(ptcUid, __pszArg, ++x);
 
-					const size_t nMember = Exp_GetSTVal(pUid);
+					const size_t nMember = Exp_GetSTVal(ptcUid);
 					if ( !m_Chars.IsValidIndex(nMember) )
 						return false;
 
@@ -841,9 +841,9 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 					++ptcArg;
 					++x;
 				}
-                Str_CopyLimitNull(pUid, __pszArg, ++x);
+                Str_CopyLimitNull(ptcUid, __pszArg, ++x);
 
-				toSysmessage = Exp_GetDWVal(pUid);
+				toSysmessage.SetObjUID(Exp_GetDWVal(ptcUid));
 			}
 
 			SKIP_SEPARATORS(ptcArg);

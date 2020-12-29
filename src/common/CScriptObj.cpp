@@ -421,19 +421,27 @@ bool CScriptObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 
 	if ( fGetRef )
 	{
-		if ( pRef == nullptr )	// good command but bad link.
-		{
-			sVal = "0";
-			return false;
-		}
 		if ( ptcKey[0] == '\0' )	// we where just testing the ref.
 		{
+			if (pRef == nullptr)
+			{
+				// Invalid ref: just return 0, it isn't an error.
+				sVal.FormatVal(0);
+				return true;
+			}
+
             CObjBase *pObj = dynamic_cast<CObjBase*>(pRef);
 			if ( pObj )
 				sVal.FormatHex( (dword) pObj->GetUID() );
 			else
 				sVal.FormatVal( 1 );
 			return true;
+		}
+
+		if (pRef == nullptr)	// good command but bad reference.
+		{
+			sVal.FormatVal(0);
+			return false;
 		}
 		return pRef->r_WriteVal( ptcKey, sVal, pSrc );
 	}
@@ -516,12 +524,12 @@ badcmd:
 			return true;
 		case SSC_OBJ:
 			if ( !g_World.m_uidObj.ObjFind() )
-				g_World.m_uidObj = 0;
+				g_World.m_uidObj.ClearUID();
 			sVal.FormatHex((dword)g_World.m_uidObj);
 			return true;
 		case SSC_NEW:
 			if ( !g_World.m_uidNew.ObjFind() )
-				g_World.m_uidNew = 0;
+				g_World.m_uidNew.ClearUID();
 			sVal.FormatHex((dword)g_World.m_uidNew);
 			return true;
 		case SSC_SRC:
@@ -1180,15 +1188,15 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	switch (index)
 	{
 		case SSV_OBJ:
-			g_World.m_uidObj = s.GetArgVal();
+			g_World.m_uidObj.SetObjUID(s.GetArgVal());
 			if ( !g_World.m_uidObj.ObjFind() )
-				g_World.m_uidObj = 0;
+				g_World.m_uidObj.ClearUID();
 			break;
 
 		case SSV_NEW:
-			g_World.m_uidNew = s.GetArgVal();
+			g_World.m_uidNew.SetObjUID(s.GetArgVal());
 			if ( !g_World.m_uidNew.ObjFind() )
-				g_World.m_uidNew = 0;
+				g_World.m_uidNew.ClearUID();
 			break;
 
 		case SSV_NEWDUPE:
@@ -1197,7 +1205,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				CObjBase *pObj = uid.ObjFind();
 				if (pObj == nullptr)
 				{
-					g_World.m_uidNew = 0;
+					g_World.m_uidNew.ClearUID();
 					return false;
 				}
 
@@ -1232,7 +1240,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				CItem *pItem = CItem::CreateHeader(ppCmd[0], nullptr, false, pSrc->GetChar());
 				if ( !pItem )
 				{
-					g_World.m_uidNew = (dword)0;
+					g_World.m_uidNew.ClearUID();
 					return false;
 				}
 				pItem->_iCreatedResScriptIdx = s.m_iResourceFileIndex;
@@ -1244,10 +1252,12 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				if ( ppCmd[2] )
 				{
 					CUID uidEquipper(Exp_GetVal(ppCmd[2]));
-					bool fTriggerEquip = (ppCmd[3] != nullptr) ? (Exp_GetVal(ppCmd[3]) != 0) : false;
+					const bool fTriggerEquip = (ppCmd[3] != nullptr) ? (Exp_GetVal(ppCmd[3]) != 0) : false;
 
-					if ( !fTriggerEquip || uidEquipper.IsItem() )
+					if (!fTriggerEquip || uidEquipper.IsItem())
+					{
 						pItem->LoadSetContainer(uidEquipper, LAYER_NONE);
+					}
 					else
 					{
 						if ( fTriggerEquip )
@@ -1259,7 +1269,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 					}
 				}
 
-				g_World.m_uidNew = pItem->GetUID();
+				g_World.m_uidNew.SetObjUID(pItem->GetUID());
 
 				if ( this != &g_Serv )
 				{
@@ -1282,14 +1292,14 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				CChar * pChar = CChar::CreateNPC(id);
 				if ( !pChar )
 				{
-					g_World.m_uidNew = UID_CLEAR;
+					g_World.m_uidNew.ClearUID();
 					return false;
 				}
 
 				pChar->_iCreatedResScriptIdx = s.m_iResourceFileIndex;
 				pChar->_iCreatedResScriptLine = s.m_iLineNum;
 
-				g_World.m_uidNew = pChar->GetUID();
+				g_World.m_uidNew.SetObjUID(pChar->GetUID());
 
 				if ( this != &g_Serv )
 				{
@@ -1317,7 +1327,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	            CChar * pCharSrc = nullptr;
 	            if (!pChar)
 	            {
-	                g_World.m_uidNew = UID_CLEAR;
+	                g_World.m_uidNew.ClearUID();
 	                return false;
 	            }
 
@@ -1338,7 +1348,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	            }
 
 	            pChar->OnSpellEffect(SPELL_Summon, pCharSrc, pChar->Skill_GetAdjusted(SKILL_MAGERY), nullptr, false);
-	            g_World.m_uidNew = pChar->GetUID();
+	            g_World.m_uidNew.SetObjUID(pChar->GetUID());
 	            llong iDuration = Exp_GetVal(ppCmd[1]);
 	            if (iDuration)
 	            {

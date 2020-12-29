@@ -13,8 +13,6 @@ CGMPage::CGMPage( lpctstr pszAccount )
 {
 	m_pClientHandling = nullptr;
 	m_sAccount = pszAccount;
-	m_uidChar = UID_UNUSED;
-	m_pt.InitPoint();
 	m_sReason = nullptr;
 	m_time = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
@@ -130,15 +128,15 @@ bool CGMPage::r_LoadVal(CScript& s)
 	switch (FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1))
 	{
 	case GC_CHARUID:
-		m_uidChar = s.GetArgVal();
+		m_uidChar.SetObjUID(s.GetArgDWVal());
 		break;
 	case GC_DELETE:
 		delete this;
 		break;
 	case GC_HANDLED:
 	{
-		CChar* pChar = ((CUID)s.GetArgVal()).CharFind();
-		if (pChar && pChar->GetClientActive())
+		CChar* pChar = CUID::CharFindFromUID(s.GetArgDWVal());
+		if (pChar && pChar->IsClientActive())
 			SetHandler(pChar->GetClientActive());
 		else
 			ClearHandler();

@@ -755,10 +755,10 @@ int CChar::NotoSave_GetID( CChar * pChar ) const
 	if ( !m_notoSaves.empty() )
 	{
 		int id = 0;
-		for (auto it : m_notoSaves)
+		for (const auto& it : m_notoSaves)
 		{
-			const CUID& uid = it.charUID;
-			if ( uid.CharFind() && uid == pChar->GetUID() )
+			const CUID uid(it.charUID);
+			if ( uid.CharFind() && (uid == pChar->GetUID()) )
 				return id;
 			++id;
 		}

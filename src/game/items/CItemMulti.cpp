@@ -1074,26 +1074,26 @@ void CItemMulti::RemoveAllKeys()
     {
         return;
     }
-    RemoveKeys(GetOwner().GetObjUID());
+    RemoveKeys(GetOwner());
     if (!_lCoowners.empty())
     {
         for (const CUID& itCoowner : _lCoowners)
         {
-            RemoveKeys(itCoowner.GetPrivateUID());
+            RemoveKeys(itCoowner);
         }
     }
     if (!_lFriends.empty())
     {
         for (const CUID& itFriend : _lFriends)
         {
-            RemoveKeys(itFriend.GetPrivateUID());
+            RemoveKeys(itFriend);
         }
     }
     if (!_lAccesses.empty())
     {
         for (const CUID& itAccess : _lAccesses)
         {
-            RemoveKeys(itAccess.GetPrivateUID());
+            RemoveKeys(itAccess);
         }
     }
 }
@@ -2236,7 +2236,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         }
         case SHV_DELFRIEND:
         {
-            const CUID uidFriend = s.GetArgDWVal();
+            const CUID uidFriend(s.GetArgDWVal());
             if (!uidFriend.IsValidUID())
             {
                 _lFriends.clear();
@@ -2876,7 +2876,7 @@ bool CItemMulti::r_LoadVal(CScript & s)
         }
         case SHL_MOVINGCRATE:
         {
-            CUID dwCrate = s.GetArgDWVal();
+            CUID dwCrate(s.GetArgDWVal());
             if (dwCrate.IsValidUID())
             {
                 if ((int)dwCrate == 1) // fix for 'movingcrate 1'

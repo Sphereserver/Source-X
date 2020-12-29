@@ -2291,7 +2291,7 @@ do_default:
 							}
 							else if (( !strnicmp(ptcKey, "UID", 3) ) || ( *ptcKey == '\0' ))
 							{
-                                const CUID& uid = refAttacker.charUID;
+                                const CUID uid(refAttacker.charUID);
 								sVal.FormatHex( uid.CharFind() ? refAttacker.charUID : 0 );
 								return true;
 							}
@@ -2371,7 +2371,7 @@ do_default:
 							}
 							else if (( !strnicmp(ptcKey, "UID", 3) ) || ( *ptcKey == '\0' ))
 							{
-								const CUID& uid = refnoto.charUID;
+								const CUID uid(refnoto.charUID);
 								sVal.FormatHex( uid.CharFind() ? refnoto.charUID : 0 );
 								return true;
 							}
@@ -2583,14 +2583,14 @@ do_default:
 				// use m_Act_UID ?
 				ptcKey += 7;
 				ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, ptcKey ));
-				sVal.FormatVal( Skill_MakeItem( id,	UID_CLEAR, SKTRIG_SELECT ) );
+				sVal.FormatVal( Skill_MakeItem( id,	CUID(UID_CLEAR), SKTRIG_SELECT ) );
 			}
 			return true;
 		case CHC_CANMAKESKILL:
 			{
 				ptcKey += 12;
 				ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, ptcKey ));
-				sVal.FormatVal( Skill_MakeItem( id,	UID_CLEAR, SKTRIG_SELECT, true ) );
+				sVal.FormatVal( Skill_MakeItem( id,	CUID(UID_CLEAR), SKTRIG_SELECT, true ) );
 			}
 			return true;
 		case CHC_SKILLUSEQUICK:
@@ -2745,8 +2745,7 @@ do_default:
 				if ( *ptcKey == '.' )
 				{
 					++ptcKey;
-					CUID uid = Exp_GetVal( ptcKey );
-					pMemory	= Memory_FindObj( uid );
+					pMemory	= Memory_FindObj(CUID(Exp_GetVal(ptcKey)));
 				}
 				else
 					pMemory	= Memory_FindObj( pCharSrc );
@@ -3264,7 +3263,7 @@ bool CChar::r_LoadVal( CScript & s )
 		case CHC_ACCOUNT:
 			return SetPlayerAccount( s.GetArgStr() );
 		case CHC_ACT:
-			m_Act_UID = s.GetArgVal();
+			m_Act_UID.SetObjUID(s.GetArgDWVal());
 			break;
 		case CHC_ACTP:
 			if ( ! s.HasArgs() )
@@ -3273,7 +3272,7 @@ bool CChar::r_LoadVal( CScript & s )
 				m_Act_p.Read( s.GetArgStr() );
 			break;
 		case CHC_ACTPRV:
-			m_Act_Prv_UID = s.GetArgVal();
+			m_Act_Prv_UID.SetObjUID(s.GetArgVal());
 			break;
 		case CHC_ACTDIFF:
 			{
@@ -3524,8 +3523,8 @@ bool CChar::r_LoadVal( CScript & s )
 				if ( iArgQty < 2 )
 					return false;
 
-				CUID	uid		= (dword)piCmd[0];
-				word	wFlags	= (word)piCmd[1];
+				const CUID uid((dword)piCmd[0]);
+				const word wFlags = (word)piCmd[1];
 
 				Memory_AddObjTypes( uid, wFlags );
 			}
@@ -4265,7 +4264,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 					CItem *pItem = CItem::CreateHeader(s.GetArgStr(), nullptr, false, this);
 					if ( !pItem )
                     {
-						g_World.m_uidNew = (dword)0;
+						g_World.m_uidNew.ClearUID();
                     }
 					else
 					{

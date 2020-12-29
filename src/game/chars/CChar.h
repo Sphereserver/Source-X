@@ -1205,7 +1205,7 @@ private:
 	ushort NPC_GetTrainMax( const CChar * pStudent, SKILL_TYPE Skill ) const;
 
 	bool NPC_OnVerb( CScript &s, CTextConsole * pSrc = nullptr );
-	void NPC_OnHirePayMore( CItem * pGold, int iWage, bool fHire = false );
+	void NPC_OnHirePayMore( CItem * pGold, uint uiWage, bool fHire = false );
 public:
 	bool NPC_OnHirePay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGold );
 	bool NPC_OnHireHear( CChar * pCharSrc );

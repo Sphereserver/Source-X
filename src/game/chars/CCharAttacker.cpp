@@ -269,7 +269,7 @@ int CChar::Attacker_GetID(const CChar * pChar) const
     int count = 0;
     for (std::vector<LastAttackers>::const_iterator it = m_lastAttackers.begin(), end = m_lastAttackers.end(); it != end; ++it)
     {
-        const CUID& uid = it->charUID;
+        const CUID uid(it->charUID);
         if (!uid.IsValidUID())
             continue;
 
