@@ -2380,3 +2380,8 @@ Must have event, even if it's empty, since it's applied by the source to generat
 27-12-2020, Nolok
 - Changed: Accessing invalid objects (like REFx/OBJ/ARGO/LINK.something) now returns an error. This was needed because many invalid operations were not executed and there wasn't any trace in the log, leading to difficult script debugging and unexpected behaviors.
 	If you just want to test the object (like <OBJ>), like always, 0 will be returned with no error if it's invalid.
+
+30-12-2020, Nolok
+- Fixed: Exception generated when entering the last column of sectors in a map which X and Y sizes aren't exactly dividable by the sector size (default: 64) specified in the .ini (this happened for example for map4).
+- Fixed: Exception generated when approaching from distance a non-region-generating multi.
+- Fixed: FINDCONT not returning error when trying to access an element with an invalid index.

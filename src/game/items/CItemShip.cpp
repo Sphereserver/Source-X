@@ -294,7 +294,7 @@ CItem * CItemShip::GetShipPlank(size_t index)
     // Find plank(s) if the list is empty
     if (m_uidPlanks.empty())
     {
-        CWorldSearch Area(GetTopPoint(), Multi_GetMaxDist());
+        CWorldSearch Area(GetTopPoint(), Multi_GetDistanceMax());
         for (;;)
         {
             const CItem * pItem = Area.GetItem();

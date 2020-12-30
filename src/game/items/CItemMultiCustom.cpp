@@ -1403,7 +1403,7 @@ void CItemMultiCustom::ClearFloor(char iFloor)
         }
     }
 
-    CWorldSearch Area(m_pRegion->m_pt, Multi_GetMaxDist());	// largest area.
+    CWorldSearch Area(m_pRegion->m_pt, Multi_GetDistanceMax());	// largest area.
     Area.SetSearchSquare(true);
     for (;;)
     {

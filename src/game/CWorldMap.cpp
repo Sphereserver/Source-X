@@ -78,7 +78,7 @@ CItem * CWorldMap::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, boo
 	// RES_REGIONRESOURCE from RES_REGIONTYPE linked to RES_AREA
 
 	EXC_SET_BLOCK("get region");
-	CRegionWorld* pRegion = dynamic_cast<CRegionWorld*>( pt.GetRegion( REGION_TYPE_AREA ));
+	const CRegionWorld* pRegion = dynamic_cast<const CRegionWorld*>( pt.GetRegion( REGION_TYPE_AREA ));
 	if ( !pRegion )
 		return nullptr;
 
@@ -97,7 +97,7 @@ CItem * CWorldMap::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, boo
 	if (pRegion->m_Events.empty())
 	{
 		CPointMap ptZero(0,0,0,pt.m_map);
-		pRegion = dynamic_cast<CRegionWorld*>(ptZero.GetRegion(REGION_TYPE_AREA));
+		pRegion = dynamic_cast<const CRegionWorld*>(ptZero.GetRegion(REGION_TYPE_AREA));
 	}
 
 	// Find RES_REGIONTYPE
@@ -112,7 +112,7 @@ CItem * CWorldMap::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, boo
 	CRegionResourceDef * pOreDef;
 	if ( id == SCONT_BADINDEX )
 	{
-		pOreDef	= dynamic_cast <CRegionResourceDef *> (g_Cfg.ResourceGetDefByName(RES_REGIONRESOURCE, "mr_nothing"));
+		pOreDef	= dynamic_cast <CRegionResourceDef *>(g_Cfg.ResourceGetDefByName(RES_REGIONRESOURCE, "mr_nothing"));
 	}
 	else
 	{
@@ -280,7 +280,7 @@ const CUOMapMeter* CWorldMap::GetMapMeter(const CPointMap& pt) // static
 	const CServerMapBlock* pMapBlock = GetMapBlock(pt);
 	if (!pMapBlock)
 		return nullptr;
-	return(pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y)));
+	return pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y));
 }
 
 bool CWorldMap::IsTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance ) // static
@@ -288,8 +288,8 @@ bool CWorldMap::IsTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistan
 	ADDTOCALLSTACK("CWorldMap::IsTypeNear_Top");
 	if ( !pt.IsValidPoint() )
 		return false;
-	CPointMap ptn = FindTypeNear_Top( pt, iType, iDistance );
-	return( ptn.IsValidPoint());
+	const CPointMap ptn = FindTypeNear_Top( pt, iType, iDistance );
+	return ptn.IsValidPoint();
 }
 
 CPointMap CWorldMap::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance ) // static

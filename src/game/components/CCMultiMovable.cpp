@@ -131,7 +131,7 @@ uint CCMultiMovable::ListObjs(CObjBase ** ppObjList)
     if (!pItemThis->IsTopLevel())
         return 0;
 
-    int iMaxDist = pMulti->Multi_GetMaxDist();
+    int iMaxDist = pMulti->Multi_GetDistanceMax();
     int iShipHeight = pItemThis->GetTopZ() + maximum(3, pItemThis->GetHeight());
 
     // always list myself first. All other items must see my new region !

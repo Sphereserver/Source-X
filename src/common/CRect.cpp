@@ -24,6 +24,7 @@ void CRect::OffsetRect( int x, int y )
     m_right += x;
     m_bottom += y;
 }
+
 void CRect::UnionPoint( int x, int y )
 {
     // Inflate this rect to include this point.
@@ -216,7 +217,9 @@ CPointBase CRect::GetCenter() const
 CPointBase CRect::GetRectCorner( DIR_TYPE dir ) const
 {
 	ADDTOCALLSTACK("CRect::GetRectCorner");
+	ASSERT(dir <= DIR_QTY);
 	// Get the point if a directional corner of the CRectMap.
+
 	CPointBase pt;
 	pt.m_z = 0;	// NOTE: remember this is a nonsense value.
 	pt.m_map = (uchar)m_map;
@@ -274,9 +277,9 @@ CSector * CRect::GetSector( int i ) const	// ge all the sectors that make up thi
 
     const int iSectorSize = pSectors->GetSectorSize(m_map);
 	CRectMap rect;
-	rect.m_left = m_left &~ (iSectorSize-1);
+	rect.m_left = m_left & ~(iSectorSize-1);
 	rect.m_right = ( m_right | (iSectorSize-1)) + 1;
-	rect.m_top = m_top &~ (iSectorSize-1);
+	rect.m_top = m_top & ~(iSectorSize-1);
 	rect.m_bottom = ( m_bottom | (iSectorSize-1)) + 1;
 	rect.m_map = m_map;
 	rect.NormalizeRectMax();

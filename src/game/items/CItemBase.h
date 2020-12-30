@@ -439,7 +439,8 @@ private:
 	CItemBaseMulti& operator=(const CItemBaseMulti& other);
 
 public:
-	int GetMaxDist() const;
+	int GetDistanceMax() const;
+	int GetDistanceDir(DIR_TYPE dir) const;
 
 	bool AddComponent( ITEMID_TYPE id, short dx, short dy, char dz );
 	bool AddComponent( tchar * pArgs );

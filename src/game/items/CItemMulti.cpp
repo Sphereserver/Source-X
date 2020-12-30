@@ -151,7 +151,7 @@ bool CItemMulti::Delete(bool fForce)
 
 const CItemBaseMulti * CItemMulti::Multi_GetDef() const
 {
-    return(static_cast <const CItemBaseMulti *>(Base_GetDef()));
+    return static_cast <const CItemBaseMulti *>(Base_GetDef());
 }
 
 CRegion * CItemMulti::GetRegion() const
@@ -161,19 +161,18 @@ CRegion * CItemMulti::GetRegion() const
 
 int CItemMulti::GetSideDistanceFromCenter(DIR_TYPE dir) const
 {
-    const CPointMap& ptSide = GetRegion()->GetRegionCorner(dir);
-    return ptSide.GetDist(GetTopPoint());
+    ADDTOCALLSTACK("CItemMulti::GetSideDistanceFromCenter");
+    const CItemBaseMulti* pMultiDef = Multi_GetDef();
+    ASSERT(pMultiDef);
+    return pMultiDef->GetDistanceDir(dir);
 }
 
-int CItemMulti::Multi_GetMaxDist() const
+int CItemMulti::Multi_GetDistanceMax() const
 {
-    ADDTOCALLSTACK("CItemMulti::Multi_GetMaxDist");
+    ADDTOCALLSTACK("CItemMulti::Multi_GetDistanceMax");
     const CItemBaseMulti * pMultiDef = Multi_GetDef();
-    if (pMultiDef == nullptr)
-    {
-        return 0;
-    }
-    return pMultiDef->GetMaxDist();
+    ASSERT(pMultiDef);
+    return pMultiDef->GetDistanceMax();
 }
 
 const CItemBaseMulti * CItemMulti::Multi_GetDef(ITEMID_TYPE id) // static
@@ -254,7 +253,7 @@ void CItemMulti::MultiUnRealizeRegion()
     m_pRegion->UnRealizeRegion();
 
     // find all creatures in the region and remove this from them.
-    CWorldSearch Area(m_pRegion->m_pt, Multi_GetMaxDist());
+    CWorldSearch Area(m_pRegion->m_pt, Multi_GetDistanceMax());
     Area.SetSearchSquare(true);
     for (;;)
     {
@@ -441,7 +440,7 @@ CItem * CItemMulti::Multi_FindItemType(IT_TYPE type) const
         return nullptr;
     }
 
-    CWorldSearch Area(GetTopPoint(), Multi_GetMaxDist());
+    CWorldSearch Area(GetTopPoint(), Multi_GetDistanceMax());
     Area.SetSearchSquare(true);
     for (;;)
     {
@@ -975,7 +974,7 @@ void CItemMulti::Eject(const CUID& uidChar)
 
 void CItemMulti::EjectAll(CUID uidCharNoTp)
 {
-    CWorldSearch Area(m_pRegion->m_pt, Multi_GetMaxDist());
+    CWorldSearch Area(m_pRegion->m_pt, Multi_GetDistanceMax());
     Area.SetSearchSquare(true);
     CChar *pCharNoTp = uidCharNoTp.CharFind();
     for (;;)
@@ -1283,7 +1282,7 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
     {
         ptArea = m_pRegion->m_pt;
     }
-    CWorldSearch Area(ptArea, Multi_GetMaxDist());    // largest area.
+    CWorldSearch Area(ptArea, Multi_GetDistanceMax());    // largest area.
     Area.SetSearchSquare(true);
     for (;;)
     {
@@ -3337,6 +3336,7 @@ void CItemMulti::OnComponentCreate(CItem * pComponent, bool fIsAddon)
         {
             CScript event("events +ei_house_telepad");
             pComponent->r_LoadVal(event);
+            break;
         }
         default:
             break;

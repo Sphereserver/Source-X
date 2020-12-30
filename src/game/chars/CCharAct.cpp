@@ -3900,7 +3900,8 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocation,
 	const CPointMap ptOld(GetTopPoint());
     SetTopPoint(pt);
 
-	CSector* pNewSector = GetTopPoint().GetSector();
+	const CPointMap& ptCur = GetTopPoint();
+	CSector* pNewSector = ptCur.GetSector();
 	ASSERT(pNewSector);
     bool fSectorChanged = pNewSector->MoveCharToSector(this);
 

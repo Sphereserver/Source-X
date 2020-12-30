@@ -1958,9 +1958,9 @@ bool CItemBaseMulti::AddComponent( tchar * pArgs )
 	return AddComponent((ITEMID_TYPE)(RES_GET_INDEX(piArgs[0])), (short)piArgs[1], (short)piArgs[2], (char)piArgs[3] );
 }
 
-int CItemBaseMulti::GetMaxDist() const
+int CItemBaseMulti::GetDistanceMax() const
 {
-	ADDTOCALLSTACK("CItemBaseMulti::GetMaxDist");
+	ADDTOCALLSTACK("CItemBaseMulti::GetDistanceMax");
 	int iDist = abs( m_rect.m_left );
 	int iDistTmp = abs( m_rect.m_top );
 	if ( iDistTmp > iDist )
@@ -1971,7 +1971,43 @@ int CItemBaseMulti::GetMaxDist() const
 	iDistTmp = abs( m_rect.m_bottom + 1 );
 	if ( iDistTmp > iDist )
 		iDist = iDistTmp;
-	return( iDist+1 );
+	return (iDist + 1);
+}
+
+int CItemBaseMulti::GetDistanceDir(DIR_TYPE dir) const
+{
+	ADDTOCALLSTACK("CItemBaseMulti::GetDistanceDir");
+	ASSERT(dir < DIR_QTY);
+
+	int iDist = 0;
+	switch (dir)
+	{
+	case DIR_N:
+		iDist = m_rect.m_top;
+		break;
+	case DIR_NE:
+		iDist = (m_rect.m_top + m_rect.m_right) / 2;
+		break;
+	case DIR_E:
+		iDist = m_rect.m_right;
+		break;
+	case DIR_SE:
+		iDist = (m_rect.m_right + m_rect.m_bottom) / 2;
+		break;
+	case DIR_S:
+		iDist = m_rect.m_bottom;
+		break;
+	case DIR_SW:
+		iDist = (m_rect.m_bottom + m_rect.m_left) / 2;
+		break;
+	case DIR_W:
+		iDist = m_rect.m_left;
+		break;
+	case DIR_NW:
+		iDist = (m_rect.m_left + m_rect.m_top) / 2;
+		break;
+	}
+	return abs(iDist);
 }
 
 enum MLC_TYPE

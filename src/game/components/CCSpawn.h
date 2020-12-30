@@ -100,7 +100,7 @@ public:
     * @brief Returns how many Items/Chars are currently spawned from me.
     * @return count
     */
-    uint8 GetMaxDist() const;
+    uint8 GetDistanceMax() const;
 
     /**
     * @brief CCSpawn's custom alternative of CComponent::GetLink retrieving a direct link for the CItem, without const.

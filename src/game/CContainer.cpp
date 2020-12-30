@@ -609,7 +609,10 @@ bool CContainer::r_GetRefContainer( lpctstr &ptcKey, CScriptObj *&pRef )
 		{
 			ptcKey += 4;
 			SKIP_SEPARATORS(ptcKey);
-			pRef = dynamic_cast<CItem*>(GetContentIndex(Exp_GetSTSingle(ptcKey)));
+			const size_t idx = Exp_GetSTSingle(ptcKey);
+			if (idx >= GetContentCount())
+				return false;
+			pRef = dynamic_cast<CItem*>(GetContentIndex(idx));
 			SKIP_SEPARATORS(ptcKey);
 			return true;
 		}

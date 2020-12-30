@@ -144,7 +144,7 @@ CSector* CSectorList::GetSector(int map, short x, short y) const noexcept
 
 	const MapSectorsData& sd = _SectorData[map];
 	const int xSect = (x / sd._iSectorSize), ySect = (y / sd._iSectorSize);
-	if ((xSect > sd._iSectorColumns) || (ySect > sd._iSectorRows))
+	if ((xSect >= sd._iSectorColumns) || (ySect >= sd._iSectorRows))
 		return nullptr;
 
 	const int index = ((ySect * sd._iSectorColumns) + xSect);

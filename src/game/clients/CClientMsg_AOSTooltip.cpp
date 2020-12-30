@@ -631,7 +631,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060658)); // ~1_val~: ~2_val~
 		t->FormatArgs("Character\t%s", pszName ? pszName : "none");
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061169)); // range ~1_val~
-		t->FormatArgs("%hhu", pSpawn->GetMaxDist());
+		t->FormatArgs("%hhu", pSpawn->GetDistanceMax());
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1074247)); // Live Creatures: ~1_NUM~ / ~2_MAX~
 		t->FormatArgs("%hhu\t%hu", pSpawn->GetCurrentSpawned(), pSpawn->GetAmount());
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060659)); // ~1_val~: ~2_val~
@@ -650,7 +650,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060658)); // ~1_val~: ~2_val~
 		t->FormatArgs("Item\t%u %s", pSpawn->GetPile(), pSpawnItemDef ? pSpawnItemDef->GetName() : "none");
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061169)); // range ~1_val~
-		t->FormatArgs("%hhu", pSpawn->GetMaxDist());
+		t->FormatArgs("%hhu", pSpawn->GetDistanceMax());
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1074247)); // Live Creatures: ~1_NUM~ / ~2_MAX~
 		t->FormatArgs("%hhu\t%hu", pSpawn->GetCurrentSpawned(), pSpawn->GetAmount());
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060659)); // ~1_val~: ~2_val~

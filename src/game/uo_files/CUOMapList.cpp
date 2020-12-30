@@ -231,13 +231,21 @@ int CUOMapList::CalcSectorQty(int map) const
 int CUOMapList::CalcSectorCols(int map) const
 {
     ASSERT(IsMapSupported(map));
-    return (m_sizex[map] / GetSectorSize(map));
+    const int a = m_sizex[map];
+    const int b = GetSectorSize(map);
+    // ceil division: some maps may not have x or y size perfectly dividable by 64 (default sector size),
+    //  still we need to make room even for sectors with a smaller number of usable tiles
+    return ((a / b) + ((a % b) != 0));
 }
 
 int CUOMapList::CalcSectorRows(int map) const
 {
     ASSERT(IsMapSupported(map));
-    return (m_sizey[map] / GetSectorSize(map));
+    const int a = m_sizey[map];
+    const int b = GetSectorSize(map);
+    // ceil division: some maps may not have x or y size perfectly dividable by 64 (default sector size),
+    //  still we need to make room even for sectors with a smaller number of usable tiles
+    return ((a / b) + ((a % b) != 0));
 }
 
 int CUOMapList::GetMapCenterX(int map) const
