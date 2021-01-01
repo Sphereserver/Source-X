@@ -2738,7 +2738,7 @@ bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 			{
 				if (!strnicmp("ISVALID", ptcKey+5, 7))
 				{
-					sVal.FormatVal(IsValidRef(m_uidLink.ObjFind()));
+					sVal.FormatVal(IsValidRef(m_uidLink));
 					return true;
 				}
 

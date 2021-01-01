@@ -832,16 +832,28 @@ try_dec:
 
 					case INTRINSIC_QVAL:
 					{
+						// Here is handled the intrinsic QVAL form: QVAL(VALUE1,VALUE2,LESSTHAN,EQUAL,GREATERTHAN)
 						iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 5, "," );
-						if ( iCount < 3 )
+						if (iCount < 3)
+						{
 							iResult = 0;
+						}
 						else
 						{
-							llong a1 = GetSingle(ppCmd[0]);
-							llong a2 = GetSingle(ppCmd[1]);
-							if ( a1 < a2 )			iResult = GetSingle(ppCmd[2]);
-							else if ( a1 == a2 )	iResult = ( iCount < 4 ) ? 0 : GetSingle(ppCmd[3]);
-							else					iResult = ( iCount < 5 ) ? 0 : GetSingle(ppCmd[4]);
+							const llong a1 = GetSingle(ppCmd[0]);
+							const llong a2 = GetSingle(ppCmd[1]);
+							if (a1 < a2)
+							{
+								iResult = GetSingle(ppCmd[2]);
+							}
+							else if (a1 == a2)
+							{
+								iResult = (iCount < 4) ? 0 : GetSingle(ppCmd[3]);
+							}
+							else
+							{
+								iResult = (iCount < 5) ? 0 : GetSingle(ppCmd[4]);
+							}
 						}
 					} break;
 

@@ -2388,3 +2388,8 @@ Must have event, even if it's empty, since it's applied by the source to generat
 
 01-01-2021, Nolok
 - Added: ISVALID keyword to check if a script object is valid (LINK/REFx/ARGO/REGION), instead of having to check them against numbers (0 or -1/0FFFFFFFF).
+
+02-01-2021, Nolok
+- Changed: QVAL in its conditional form (with the '?' symbol), after evaluating the given condition, now evaluates only the expression it has to return.
+    This gives a little performance boost and gets rid of avoidable error logs happening before because the whole expression was fully parsed and evaluated.
+	Example: <QVAL <REF1.ISVALID> ? <REF1.NAME> : "None"> generated an error when REF1 wasn't valid, even if in that case <REF1.NAME> didn't actually need to be evaluated.

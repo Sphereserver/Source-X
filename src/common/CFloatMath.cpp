@@ -621,15 +621,18 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_QVAL:
 				{
+					// Here is handled the intrinsic QVAL form: QVAL(VALUE1,VALUE2,LESSTHAN,EQUAL,GREATERTHAN)
 					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 5, "," );
-					if ( iCount < 3 )
+					if (iCount < 3)
+					{
 						rResult = 0;
+					}
 					else
 					{
 						cparg1 = ppCmd[0];
 						cparg2 = ppCmd[1];
-						realtype a1 = GetSingle(cparg1);
-						realtype a2 = GetSingle(cparg2);
+						const realtype a1 = GetSingle(cparg1);
+						const realtype a2 = GetSingle(cparg2);
 						if ( a1 < a2 )
 						{
 							cparg1 = ppCmd[2];

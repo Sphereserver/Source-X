@@ -9,11 +9,12 @@
 #include "../common/common.h"
 
 class CScript;
+class CScriptTriggerArgs;
 class CTextConsole;
 class CSFileText;
 class CSString;
+class CUID;
 class CChar;
-class CScriptTriggerArgs;
 
 
 enum TRIGRUN_TYPE
@@ -63,7 +64,8 @@ public:
 
 	virtual lpctstr GetName() const = 0;	// ( every object must have at least a type name )
 
-	static bool IsValidRef(const CScriptObj* pRef);
+	static bool IsValidRef(const CScriptObj* pRef) noexcept;
+	static bool IsValidRef(const CUID& uidRef) noexcept;
 
 	// Flags = 1 = html
 	size_t ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFlags = 0, CScriptTriggerArgs * pArgs = nullptr );
