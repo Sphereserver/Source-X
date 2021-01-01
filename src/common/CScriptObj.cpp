@@ -56,6 +56,17 @@ static lpctstr const _ptcSRefKeys[SREF_QTY+1] =
     nullptr
 };
 
+bool CScriptObj::IsValidRef(const CScriptObj* pRef)
+{
+	int iValid = 0;
+	if (pRef)
+	{
+		const CObjBase* pRefObj = dynamic_cast<const CObjBase*>(pRef);
+		iValid = (pRefObj == nullptr) ? 1 : pRefObj->IsValidUID();
+	}
+	return iValid;
+}
+
 bool CScriptObj::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CScriptObj::r_GetRef");
@@ -430,11 +441,17 @@ bool CScriptObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 				return true;
 			}
 
-            CObjBase *pObj = dynamic_cast<CObjBase*>(pRef);
-			if ( pObj )
-				sVal.FormatHex( (dword) pObj->GetUID() );
+            const CObjBase * pRefObj = dynamic_cast<const CObjBase*>(pRef);
+			if (pRefObj)
+				sVal.FormatHex( (dword)pRefObj->GetUID() );
 			else
 				sVal.FormatVal( 1 );
+			return true;
+		}
+
+		if (!strnicmp("ISVALID", ptcKey, 7))
+		{
+			sVal.FormatVal(IsValidRef(pRef));
 			return true;
 		}
 

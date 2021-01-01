@@ -2734,8 +2734,16 @@ bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 			fDoDefault = true;
 			break;
 		case IC_LINK:
-			if ( ptcKey[4] == '.' )
-				return CScriptObj::r_WriteVal( ptcKey, sVal, pSrc, false );
+			if (ptcKey[4] == '.')
+			{
+				if (!strnicmp("ISVALID", ptcKey+5, 7))
+				{
+					sVal.FormatVal(IsValidRef(m_uidLink.ObjFind()));
+					return true;
+				}
+
+				return CScriptObj::r_WriteVal(ptcKey, sVal, pSrc, false);
+			}
 			sVal.FormatHex( m_uidLink );
 			break;
 		case IC_MAXHITS:
