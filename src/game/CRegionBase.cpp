@@ -15,20 +15,20 @@ size_t CRegionBase::GetRegionRectCount() const
 {
 	ADDTOCALLSTACK("CRegionBase::GetRegionRectCount");
 	// How many rectangles in this region ?
-	size_t iQty = m_Rects.size();
+	const size_t iQty = m_Rects.size();
 	if ( iQty <= 0 )
 	{
 		if ( ! IsRegionEmpty())
 			return 1;
 	}
-	return( iQty );
+	return iQty;
 }
 
 CRectMap & CRegionBase::GetRegionRect(size_t i)
 {
 	ADDTOCALLSTACK("CRegionBase::GetRegionRect");
 	// Get a particular rectangle.
-	size_t iQty = m_Rects.size();
+	const size_t iQty = m_Rects.size();
 	if ( iQty <= 0 )
 		return m_rectUnion;
 	return m_Rects[i];
@@ -37,7 +37,7 @@ CRectMap & CRegionBase::GetRegionRect(size_t i)
 const CRectMap & CRegionBase::GetRegionRect(size_t i) const
 {
 	ADDTOCALLSTACK("CRegionBase::GetRegionRect");
-	size_t iQty = m_Rects.size();
+	const size_t iQty = m_Rects.size();
 	if ( iQty <= 0 )
 		return m_rectUnion;
 	return m_Rects[i];

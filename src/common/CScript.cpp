@@ -28,7 +28,6 @@ bool CScriptKey::IsKeyHead( lpctstr pszName, size_t len ) const
 
 void CScriptKey::InitKey()
 {
-	ADDTOCALLSTACK("CScriptKey::InitKey");
 	m_pszArg = m_pszKey = nullptr;
 }
 

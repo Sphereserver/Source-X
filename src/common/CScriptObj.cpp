@@ -58,13 +58,13 @@ static lpctstr const _ptcSRefKeys[SREF_QTY+1] =
 
 bool CScriptObj::IsValidRef(const CScriptObj* pRef)
 {
-	int iValid = 0;
+	bool fValid = false;
 	if (pRef)
 	{
 		const CObjBase* pRefObj = dynamic_cast<const CObjBase*>(pRef);
-		iValid = (pRefObj == nullptr) ? 1 : pRefObj->IsValidUID();
+		fValid = (pRefObj == nullptr) ? true : pRefObj->IsValidUID();
 	}
-	return iValid;
+	return fValid;
 }
 
 bool CScriptObj::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
@@ -687,9 +687,9 @@ badcmd:
 		case SSC_SETBIT:
 		case SSC_CLRBIT:
 			{
-				int64 val = Exp_GetLLVal(ptcKey);
+				const int64 val = Exp_GetLLVal(ptcKey);
 				SKIP_ARGSEP(ptcKey);
-				int64 bit = Exp_GetLLVal(ptcKey);
+				const uint64 bit = Exp_GetULLVal(ptcKey);
 
 				if ( index == SSC_ISBIT )
 					sVal.FormatLLVal(val & (1LL << bit));

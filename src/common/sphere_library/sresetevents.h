@@ -19,10 +19,11 @@ class AutoResetEvent
 {
 public:
 #ifdef _WIN32
-	static const uint _infinite = INFINITE;   // Default wait time.
+	static constexpr uint _kiInfinite = INFINITE;   // Default wait time.
 #else
-	static const uint _infinite = 0xffffffff;   // Default wait time.
+	static constexpr uint _kiInfinite = 0xffffffff;   // Default wait time.
 #endif
+
 	/** @name Constructors, Destructor, Asign operator:
 	*/
 	///@{
@@ -32,6 +33,7 @@ private:
 	AutoResetEvent(const AutoResetEvent& copy);
 	AutoResetEvent& operator=(const AutoResetEvent& other);
 	///@}
+
 public:
 	/** @name Interaction:
 	*/
@@ -40,7 +42,7 @@ public:
 	* @brief Wait until the timeout interval elapses or this object is signaled.
 	* @param timeout max elapsed time to wait.
 	*/
-	void wait(uint timeout = _infinite);
+	void wait(uint timeout = _kiInfinite);
 	/**
 	* @brief Signal this object to stop the wait.
 	*/
@@ -66,10 +68,11 @@ class ManualResetEvent
 {
 public:
 #ifdef _WIN32
-	static const uint _infinite = INFINITE;   // Default wait time.
+	static constexpr uint _kiInfinite = INFINITE;   // Default wait time.
 #else
-	static const uint _infinite = 0xffffffff;   // Default wait time.
+	static constexpr uint _kiInfinite = 0xffffffff;   // Default wait time.
 #endif
+
 	/** @name Constructors, Destructor, Asign operator:
 	*/
 	///@{
@@ -79,6 +82,7 @@ private:
 	ManualResetEvent(const ManualResetEvent& copy);
 	ManualResetEvent& operator=(const ManualResetEvent& other);
 	///@}
+
 public:
 	/** @name Interaction:
 	*/
@@ -87,7 +91,7 @@ public:
 	* @brief Waits until event is set, checking it each time interval.
 	* @param timeout time interval to check.
 	*/
-	void wait(uint timeout = _infinite);
+	void wait(uint timeout = _kiInfinite);
 	/**
 	* @brief resets the event.
 	*/

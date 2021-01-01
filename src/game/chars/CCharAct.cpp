@@ -3931,7 +3931,7 @@ bool CChar::MoveTo(const CPointMap& pt, bool fForceFix)
     return MoveToChar(pt, true, true, fForceFix);
 }
 
-void CChar::SetTopZ( char z )
+void CChar::SetTopZ( char z ) noexcept
 {
 	CObjBaseTemplate::SetTopZ( z );
 	m_fClimbUpdated = false; // update climb height
