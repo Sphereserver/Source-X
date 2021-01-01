@@ -63,6 +63,8 @@ public:
 
 	virtual lpctstr GetName() const = 0;	// ( every object must have at least a type name )
 
+	static bool IsValidRef(const CScriptObj* pRef);
+
 	// Flags = 1 = html
 	size_t ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFlags = 0, CScriptTriggerArgs * pArgs = nullptr );
 

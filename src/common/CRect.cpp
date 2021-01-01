@@ -322,10 +322,10 @@ const CRect CRect::operator += (const CRect& rect)
 bool CRectMap::IsValid() const
 {
     const int iSizeX = GetWidth();
-    if ( iSizeX < 0 || iSizeX > g_MapList.GetMapSizeX(m_map) )
+    if ( (iSizeX < 0) || (iSizeX > g_MapList.GetMapSizeX(m_map)) )
         return false;
     const int iSizeY = GetHeight();
-    if ( iSizeY < 0 || iSizeY > g_MapList.GetMapSizeY(m_map) )
+    if ( (iSizeY < 0) || (iSizeY > g_MapList.GetMapSizeY(m_map)) )
         return false;
     return true;
 }

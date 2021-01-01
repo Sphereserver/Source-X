@@ -2385,3 +2385,6 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: Exception generated when entering the last column of sectors in a map which X and Y sizes aren't exactly dividable by the sector size (default: 64) specified in the .ini (this happened for example for map4).
 - Fixed: Exception generated when approaching from distance a non-region-generating multi.
 - Fixed: FINDCONT not returning error when trying to access an element with an invalid index.
+
+01-01-2021, Nolok
+- Added: ISVALID keyword to check if a script object is valid (LINK/REFx/ARGO/REGION), instead of having to check them against numbers (0 or -1/0FFFFFFFF).

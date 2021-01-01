@@ -56,6 +56,17 @@ static lpctstr const _ptcSRefKeys[SREF_QTY+1] =
     nullptr
 };
 
+bool CScriptObj::IsValidRef(const CScriptObj* pRef)
+{
+	bool fValid = false;
+	if (pRef)
+	{
+		const CObjBase* pRefObj = dynamic_cast<const CObjBase*>(pRef);
+		fValid = (pRefObj == nullptr) ? true : pRefObj->IsValidUID();
+	}
+	return fValid;
+}
+
 bool CScriptObj::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CScriptObj::r_GetRef");
@@ -430,11 +441,17 @@ bool CScriptObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 				return true;
 			}
 
-            CObjBase *pObj = dynamic_cast<CObjBase*>(pRef);
-			if ( pObj )
-				sVal.FormatHex( (dword) pObj->GetUID() );
+            const CObjBase * pRefObj = dynamic_cast<const CObjBase*>(pRef);
+			if (pRefObj)
+				sVal.FormatHex( (dword)pRefObj->GetUID() );
 			else
 				sVal.FormatVal( 1 );
+			return true;
+		}
+
+		if (!strnicmp("ISVALID", ptcKey, 7))
+		{
+			sVal.FormatVal(IsValidRef(pRef));
 			return true;
 		}
 
@@ -670,9 +687,9 @@ badcmd:
 		case SSC_SETBIT:
 		case SSC_CLRBIT:
 			{
-				int64 val = Exp_GetLLVal(ptcKey);
+				const int64 val = Exp_GetLLVal(ptcKey);
 				SKIP_ARGSEP(ptcKey);
-				int64 bit = Exp_GetLLVal(ptcKey);
+				const uint64 bit = Exp_GetULLVal(ptcKey);
 
 				if ( index == SSC_ISBIT )
 					sVal.FormatLLVal(val & (1LL << bit));

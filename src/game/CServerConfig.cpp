@@ -2833,7 +2833,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 	if ( !rid.IsValidUID() )
 	{
-		DEBUG_ERR(( "Invalid %s block, index '%s'\n", pszSection, pScript->GetArgStr()));
+		DEBUG_ERR(( "Invalid %s section, index '%s'\n", pszSection, pScript->GetArgStr()));
 		return false;
 	}
 

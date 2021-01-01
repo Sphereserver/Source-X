@@ -53,7 +53,7 @@ void AutoResetEvent::wait(uint timeout)
 	// without a signal, but there's little we can actually do to check it since we
 	// don't usually care about the condition - if the calling thread does care then
 	// it needs to implement it's own checks
-	if (timeout == _infinite)
+	if (timeout == _kiInfinite)
 	{
 		pthread_cond_wait(&m_condition, &m_criticalSection);
 	}
@@ -124,7 +124,7 @@ void ManualResetEvent::wait(uint timeout)
 	// pthread_cond_timedwait expects the timeout to be the actual time, calculate once here
 	// rather every time inside the loop
 	timespec time;
-	if (timeout != _infinite)
+	if (timeout != _kiInfinite)
 	{
 		clock_gettime(CLOCK_REALTIME, &time);
 		time.tv_sec += timeout / 1000;
@@ -136,7 +136,7 @@ void ManualResetEvent::wait(uint timeout)
 	int result = 0;
 	while (result == 0 && m_value == false)
 	{
-		if (timeout == _infinite)
+		if (timeout == _kiInfinite)
 			result = pthread_cond_wait(&m_condition, &m_criticalSection);
 		else
 			result = pthread_cond_timedwait(&m_condition, &m_criticalSection, &time);
@@ -163,6 +163,9 @@ void ManualResetEvent::reset()
 #ifdef _WIN32
 	ResetEvent(m_handle);
 #else
+	pthread_mutex_lock(&m_criticalSection);
 	m_value = false;
+	pthread_cond_signal(&m_condition);
+	pthread_mutex_unlock(&m_criticalSection);
 #endif
 }
