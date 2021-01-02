@@ -56,7 +56,7 @@ static lpctstr const _ptcSRefKeys[SREF_QTY+1] =
     nullptr
 };
 
-bool CScriptObj::IsValidRef(const CScriptObj* pRef)
+bool CScriptObj::IsValidRef(const CScriptObj* pRef) noexcept // static
 {
 	bool fValid = false;
 	if (pRef)
@@ -65,6 +65,11 @@ bool CScriptObj::IsValidRef(const CScriptObj* pRef)
 		fValid = (pRefObj == nullptr) ? true : pRefObj->IsValidUID();
 	}
 	return fValid;
+}
+
+bool CScriptObj::IsValidRef(const CUID& uidRef) noexcept // static
+{
+	return (nullptr != uidRef.ObjFind(true));
 }
 
 bool CScriptObj::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
@@ -92,13 +97,13 @@ bool CScriptObj::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
             if (ptcKey[3] != '.')
                 return false;
             ptcKey += 4;
-            pRef = ( (dword)g_World.m_uidObj ) ? g_World.m_uidObj.ObjFind() : nullptr;
+            pRef = ( g_World.m_uidObj.IsValidUID() ? g_World.m_uidObj.ObjFind() : nullptr);
             return true;
         case SREF_NEW:
             if (ptcKey[3] != '.')
                 return false;
             ptcKey += 4;
-            pRef = ( (dword)g_World.m_uidNew ) ? g_World.m_uidNew.ObjFind() : nullptr;
+            pRef = ( g_World.m_uidNew.IsValidUID() ? g_World.m_uidNew.ObjFind() : nullptr);
             return true;
         case SREF_I:
             if (ptcKey[1] != '.')
@@ -672,13 +677,21 @@ badcmd:
 //FLOAT STUFF ENDS HERE
 
 		case SSC_QVAL:
-			{	// Do a switch ? type statement <QVAL conditional ? option1 : option2>
+			{
+				// Do a switch ? type statement <QVAL condition ? option1 : option2>
+
 				tchar * ppCmds[3];
 				ppCmds[0] = const_cast<tchar*>(ptcKey);
 				Str_Parse( ppCmds[0], &(ppCmds[1]), "?" );
 				Str_Parse( ppCmds[1], &(ppCmds[2]), ":" );
-				sVal = ppCmds[ Exp_GetVal( ppCmds[0] ) ? 1 : 2 ];
-				if ( sVal.IsEmpty())
+
+				sVal = ppCmds[(Exp_GetVal(ppCmds[0]) ? 1 : 2)];
+
+				// We only partially evaluated the QVAL expression (it's a special case), so we need to parse the expression to return
+				//	(it still has angular brackets at this stage)
+				ParseText(const_cast<tchar*>(sVal.GetBuffer()), pSrc);
+
+				if (sVal.IsEmpty())
 					sVal = "";
 			}
 			return true;
@@ -689,14 +702,14 @@ badcmd:
 			{
 				const int64 val = Exp_GetLLVal(ptcKey);
 				SKIP_ARGSEP(ptcKey);
-				const uint64 bit = Exp_GetULLVal(ptcKey);
+				const uint bit = Exp_GetUVal(ptcKey);
 
 				if ( index == SSC_ISBIT )
-					sVal.FormatLLVal(val & (1LL << bit));
+					sVal.FormatLLVal(val & (1ULL << bit));
 				else if ( index == SSC_SETBIT )
-					sVal.FormatLLVal(val | (1LL << bit));
+					sVal.FormatLLVal(val | (1ULL << bit));
 				else
-					sVal.FormatLLVal(val & (~ (1LL << bit)));
+					sVal.FormatLLVal(val & (~ (1ULL << bit)));
 				break;
 			}
 
@@ -1428,36 +1441,40 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 	static int sm_iReentrant = 0;
 	static bool sm_fBrackets = false;	// allowed to span multi lines.
 
-	//***Qval Fix***
-	bool fQvalCondition = false;
-	const tchar chQval = '?';
-
-	if ((iFlags & 2) == 0)
+	const bool fRecurseBrackets = ((iFlags & 2) != 0);
+	if (!fRecurseBrackets)
 		sm_fBrackets = false;
 
-	size_t iBegin = 0;
+	// General purpose variables
 	tchar chBegin = '<';
 	tchar chEnd = '>';
 
-	const bool fHTML = (iFlags & 1) != 0;
+	const bool fHTML = ((iFlags & 1) != 0);
 	if ( fHTML )
 	{
 		chBegin = '%';
 		chEnd = '%';
 	}
 
+	// Variables used to handle the QVAL special case
+	bool fQvalCondition = false;
+	size_t iOpenBrackets = 1; // The first one is the < opening the QVAL statement
+
+	size_t iBegin = 0;
 	size_t i = 0;
-	EXC_TRY("ParseText");
+	EXC_TRY("ParseText Loop");
 	for ( i = 0; pszResponse[i]; ++i )
 	{
 		const tchar ch = pszResponse[i];
+		const tchar chNext = pszResponse[i + 1];	// Check this to ignore stuff like <=, <<...
 
 		if ( ! sm_fBrackets )	// not in brackets
 		{
 			if ( ch == chBegin )	// found the start !
 			{
-				 if ( !( IsAlnum( pszResponse[i + 1] ) || pszResponse[i + 1] == '<' ) ) // ignore this.
-					continue;
+				if (!(IsAlnum(chNext) || (chNext == '<')))
+					continue;	// Ignore this
+
 				iBegin = i;
 				sm_fBrackets = true;
 			}
@@ -1466,12 +1483,18 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 
 		if ( ch == '<' )	// recursive brackets
 		{
-			if ( !( IsAlnum( pszResponse[i + 1] ) || pszResponse[i + 1] == '<' ) ) // ignore this.
+			if (!(IsAlnum(chNext) || (chNext == '<')))
+				continue;	// Ignore this
+
+			if (fQvalCondition)
+			{
+				++iOpenBrackets;
 				continue;
+			}
 
 			if (sm_iReentrant > 32 )
 			{
-				EXC_SET_BLOCK("reentrant limit");
+				EXC_SET_BLOCK("recursive brackets limit");
 				ASSERT( sm_iReentrant < 32 );
 			}
 			++sm_iReentrant;
@@ -1482,31 +1505,40 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 			i += ilen;
 			continue;
 		}
-		//***Qval Fix***
-		if ( ch == chQval )
+
+		if ( ch == '?' )
 		{
-			if ( !strnicmp( static_cast<lpctstr>(pszResponse) + iBegin + 1, "QVAL", 4 ) )
-                fQvalCondition = true;
+			if ( !strnicmp( pszResponse + iBegin + 1, "QVAL", 4 ) )
+                fQvalCondition = true;  // from now on there are the conditions of a QVAL statement
 		}
 
 		if ( ch == chEnd )
 		{
-			if ( !strnicmp( static_cast<lpctstr>(pszResponse) + iBegin + 1, "QVAL", 4 ) && !fQvalCondition)
-				continue;
-			//***Qval Fix End***
+			if (fQvalCondition)
+			{
+				ASSERT(iOpenBrackets > 0);
+				--iOpenBrackets;
+
+				if (iOpenBrackets == 0)
+					fQvalCondition = false;  // end of the QVAL statement. Proceed and evaluate it (do not 'continue')
+				else
+					continue;
+			}
+
 			sm_fBrackets = false;
 			pszResponse[i] = '\0';
 
-			CSString sVal;
-			ptcKey = static_cast<lpctstr>(pszResponse) + iBegin + 1;
 
 			EXC_SET_BLOCK("writeval");
+
+			CSString sVal;
+			ptcKey = pszResponse + iBegin + 1;
 			fRes = r_WriteVal( ptcKey, sVal, pSrc );
 			if ( fRes == false )
 			{
-				EXC_SET_BLOCK("writeval");
+				EXC_SET_BLOCK("writeval args");
 				// write the value of functions or triggers variables/objects like ARGO, ARGN1/2/3, LOCALs...
-				if ( pArgs != nullptr && pArgs->r_WriteVal( ptcKey, sVal, pSrc ) )
+				if ( (pArgs != nullptr) && pArgs->r_WriteVal( ptcKey, sVal, pSrc ) )
 					fRes = true;
 			}
 
@@ -1517,20 +1549,20 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 				pszResponse[i] = chEnd;
 			}
 
-			if ( sVal.IsEmpty() && fHTML )
+			if (fHTML && sVal.IsEmpty() )
 			{
 				sVal = "&nbsp";
 			}
 
-			size_t len = sVal.GetLength();
 
 			EXC_SET_BLOCK("mem shifting");
 
+			const size_t len = sVal.GetLength();
 			memmove( pszResponse + iBegin + len, pszResponse + i + 1, strlen( pszResponse + i + 1 ) + 1 );
-			memcpy( pszResponse + iBegin, static_cast<lpctstr>(sVal), len );
+			memcpy( pszResponse + iBegin, sVal.GetBuffer(), len );
 			i = iBegin + len - 1;
 
-			if ((iFlags & 2) != 0) // just do this one then bail out.
+			if (fRecurseBrackets) // just do this one then bail out.
 				return i;
 		}
 	}
