@@ -1441,14 +1441,15 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 	static int sm_iReentrant = 0;
 	static bool sm_fBrackets = false;	// allowed to span multi lines.
 
-	if ((iFlags & 2) == 0)
+	const bool fRecurseBrackets = ((iFlags & 2) != 0);
+	if (!fRecurseBrackets)
 		sm_fBrackets = false;
 
 	// General purpose variables
 	tchar chBegin = '<';
 	tchar chEnd = '>';
 
-	const bool fHTML = (iFlags & 1) != 0;
+	const bool fHTML = ((iFlags & 1) != 0);
 	if ( fHTML )
 	{
 		chBegin = '%';
@@ -1457,7 +1458,7 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 
 	// Variables used to handle the QVAL special case
 	bool fQvalCondition = false;
-	size_t iOpenBrackets = 0;
+	size_t iOpenBrackets = 1; // The first one is the < opening the QVAL statement
 
 	size_t iBegin = 0;
 	size_t i = 0;
@@ -1465,13 +1466,15 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 	for ( i = 0; pszResponse[i]; ++i )
 	{
 		const tchar ch = pszResponse[i];
+		const tchar chNext = pszResponse[i + 1];	// Check this to ignore stuff like <=, <<...
 
 		if ( ! sm_fBrackets )	// not in brackets
 		{
 			if ( ch == chBegin )	// found the start !
 			{
-				 if ( !( IsAlnum( pszResponse[i + 1] ) || pszResponse[i + 1] == '<' ) ) // ignore this.
-					continue;
+				if (!(IsAlnum(chNext) || (chNext == '<')))
+					continue;	// Ignore this
+
 				iBegin = i;
 				sm_fBrackets = true;
 			}
@@ -1480,8 +1483,8 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 
 		if ( ch == '<' )	// recursive brackets
 		{
-			if ( !( IsAlnum( pszResponse[i + 1] ) || pszResponse[i + 1] == '<' ) ) // ignore this.
-				continue;
+			if (!(IsAlnum(chNext) || (chNext == '<')))
+				continue;	// Ignore this
 
 			if (fQvalCondition)
 			{
@@ -1503,7 +1506,7 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 			continue;
 		}
 
-		if ( ch == '?')
+		if ( ch == '?' )
 		{
 			if ( !strnicmp( pszResponse + iBegin + 1, "QVAL", 4 ) )
                 fQvalCondition = true;  // from now on there are the conditions of a QVAL statement
@@ -1517,22 +1520,23 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 				--iOpenBrackets;
 
 				if (iOpenBrackets == 0)
-					fQvalCondition = false;  // end of the QVAL statement
-
-				continue;
+					fQvalCondition = false;  // end of the QVAL statement. Proceed and evaluate it (do not 'continue')
+				else
+					continue;
 			}
 
 			sm_fBrackets = false;
 			pszResponse[i] = '\0';
 
-			CSString sVal;
-			ptcKey = pszResponse + iBegin + 1;
 
 			EXC_SET_BLOCK("writeval");
+
+			CSString sVal;
+			ptcKey = pszResponse + iBegin + 1;
 			fRes = r_WriteVal( ptcKey, sVal, pSrc );
 			if ( fRes == false )
 			{
-				EXC_SET_BLOCK("writeval");
+				EXC_SET_BLOCK("writeval args");
 				// write the value of functions or triggers variables/objects like ARGO, ARGN1/2/3, LOCALs...
 				if ( (pArgs != nullptr) && pArgs->r_WriteVal( ptcKey, sVal, pSrc ) )
 					fRes = true;
@@ -1545,20 +1549,20 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 				pszResponse[i] = chEnd;
 			}
 
-			if ( sVal.IsEmpty() && fHTML )
+			if (fHTML && sVal.IsEmpty() )
 			{
 				sVal = "&nbsp";
 			}
 
-			size_t len = sVal.GetLength();
 
 			EXC_SET_BLOCK("mem shifting");
 
+			const size_t len = sVal.GetLength();
 			memmove( pszResponse + iBegin + len, pszResponse + i + 1, strlen( pszResponse + i + 1 ) + 1 );
 			memcpy( pszResponse + iBegin, sVal.GetBuffer(), len );
 			i = iBegin + len - 1;
 
-			if ((iFlags & 2) != 0) // just do this one then bail out.
+			if (fRecurseBrackets) // just do this one then bail out.
 				return i;
 		}
 	}

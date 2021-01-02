@@ -298,7 +298,7 @@ public:
     int m_iVendorMarkup;            // Default markup value, used if no other kind of tag is providen.
 	int  m_iVendorMaxSell;			// Max things a vendor will sell in one shot.
 	uint m_iMaxCharComplexity;		// How many chars per sector.
-	uint m_iMaxItemComplexity;		// How many items per meter.
+	uint m_iMaxItemComplexity;		// How many items per tile.
 	uint m_iMaxSectorComplexity;	// How many items per sector.
 	bool m_fGenericSounds;			// Do players receive generic (not them-devoted) sounds.
     bool m_fAutoNewbieKeys;			// Are house and boat keys newbied automatically?

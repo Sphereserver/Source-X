@@ -791,9 +791,11 @@ int CItem::FixWeirdness()
             {
                 return 0; // get rid of it.	(this is not an ERROR per se)
             }
-            if (IsAttr(ATTR_STOLEN))
-                // The item has been laundered.
-                m_uidLink.InitUID();
+			if (IsAttr(ATTR_STOLEN))
+			{
+				// The item has been laundered.
+				m_uidLink.InitUID();
+			}
             else
             {
                 DEBUG_ERR(("'%s' Bad Link to 0%x\n", GetName(), (dword)(m_uidLink)));
@@ -1487,11 +1489,7 @@ bool CItem::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the groun
 
 	// Is this area too complex ?
 	if ( ! g_Serv.IsLoading())
-	{
-		size_t iCount = pSector->GetItemComplexity();
-		if ( iCount > g_Cfg.m_iMaxSectorComplexity )
-			g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " items at %s. Sector too complex!\n", iCount, pt.WriteUsed());
-	}
+		pSector->CheckItemComplexity();
 
 	SetTopPoint( pt );
 	if ( fForceFix )
@@ -1508,11 +1506,13 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	CPointMap ptNewPlace;
 	if (pt.IsValidPoint())
     {
-        if (pCharMover && pCharMover->IsPriv(PRIV_GM))
-		    ptNewPlace = pt;
+		if (pCharMover && pCharMover->IsPriv(PRIV_GM))
+		{
+			ptNewPlace = pt;
+		}
         else
         {
-            const CPointMap ptNear = CWorldMap::FindItemTypeNearby(pt, IT_WALL, 0, true, true);
+            const CPointMap ptNear(CWorldMap::FindItemTypeNearby(pt, IT_WALL, 0, true, true));
             if (!ptNear.IsValidPoint())
                 ptNewPlace = pt;
         }
@@ -1569,7 +1569,7 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	
 	// Check if there's too many items on the same spot
 	uint iItemCount = 0;
-	CItem * pItem = nullptr;
+	const CItem * pItem = nullptr;
 	CWorldSearch AreaItems(ptNewPlace);
 	for (;;)
 	{
@@ -1587,6 +1587,7 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	}
 	 
 	/*  // From 56b
+		// Too many items on the same spot!
         if ( iItemCount > g_Cfg.m_iMaxItemComplexity )
         {
             Speak("Too many items here!");
@@ -1598,7 +1599,7 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
             // attempt to reject the move.
             return false;
         }
-        */
+    */
 	
 	SetDecayTime(iDecayTime);
 	Sound(GetDropSound(nullptr));

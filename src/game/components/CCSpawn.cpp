@@ -453,11 +453,8 @@ CChar* CCSpawn::GenerateChar(CResourceIDBase rid)
     pChar->NPC_CreateTrigger();		// removed from NPC_LoadScript() and triggered after char placement and attachment to the spawnitem
     pChar->Update();
 
-    size_t iCount = pSpawnItem->GetTopSector()->GetCharComplexity();
-    if (iCount > g_Cfg.m_iMaxCharComplexity)
-    {
-        g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " chars at %s. Sector too complex!\n", iCount, pSpawnItem->GetTopSector()->GetBasePoint().WriteUsed());
-    }
+    pSpawnItem->GetTopSector()->CheckCharComplexity();
+
     return pChar;
 }
 
