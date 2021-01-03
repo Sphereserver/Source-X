@@ -185,7 +185,7 @@ protected:
 public:
 	PacketItemWorld(const CClient* target, const CItem* item);
 
-	void adjustItemData(const CClient* target, const CItem* item, ITEMID_TYPE &id, HUE_TYPE &hue, word &amount, DIR_TYPE &dir, byte &flags, byte &light);
+	static void adjustItemData(const CClient* target, const CItem* item, ITEMID_TYPE &id, HUE_TYPE &hue, word &amount, DIR_TYPE &dir, byte &flags, byte &light);
 
 	virtual bool onSend(const CClient* client);
 };
@@ -2025,8 +2025,7 @@ public:
  *
  *
  ***************************************************************************/
-class PacketContainer : public PacketItemWorldNew// public PacketSend
-	//friend PacketItemWorldNew
+class PacketContainer : public PacketSend
 {
 public:
 	PacketContainer(const CClient* target, CObjBase** objects, uint objectCount);

@@ -109,6 +109,7 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 	ASSERT(m_pNPC);
 	// Stuff that only NPC's do.
 
+	EXC_TRY("OnVerb");
 	CChar * pCharSrc = pSrc->GetChar();
 
 	switch ( FindTableSorted( s.GetKey(), CCharNPC::sm_szVerbKeys, CountOf(CCharNPC::sm_szVerbKeys)-1 ))
@@ -204,6 +205,8 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 		//if ( FindTableSorted(s.GetKey(), CClient::sm_szVerbKeys, CountOf(sm_szVerbKeys)-1) < 0 )
 		return false;
 	}
+
+	EXC_CATCH;
 	return true;
 }
 
@@ -2002,12 +2005,12 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 		{
 			if ( pItem->IsType(IT_GOLD) )
 			{
-                int iWage = Char_GetDef()->GetHireDayWage();
-                iWage = pCharSrc->PayGold(this, iWage, nullptr, PAYGOLD_HIRE);
-                if (iWage > 0)
+                uint uiWage = Char_GetDef()->GetHireDayWage();
+                uiWage = (uint)pCharSrc->PayGold(this, uiWage, nullptr, PAYGOLD_HIRE);
+                if (uiWage > 0)
                 {
                     Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_MONEY));
-                    NPC_OnHirePayMore(pItem, iWage);
+                    NPC_OnHirePayMore(pItem, uiWage);
                     return true;
                 }
 			}

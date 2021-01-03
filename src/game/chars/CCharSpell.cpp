@@ -2713,7 +2713,7 @@ bool CChar::Spell_CastDone()
 	if (pSpellDef == nullptr)
 		return false;
 
-	bool bIsSpellField = pSpellDef->IsSpellType(SPELLFLAG_FIELD);
+	const bool fIsSpellField = pSpellDef->IsSpellType(SPELLFLAG_FIELD);
 
 	int iSkill, iDifficulty;
 	if (!pSpellDef->GetPrimarySkill(&iSkill, &iDifficulty))
@@ -2745,7 +2745,7 @@ bool CChar::Spell_CastDone()
 	Args.m_VarsLocal.SetNum("areaRadius", 0);
 	Args.m_VarsLocal.SetNum("duration", GetSpellDuration(spell, iSkillLevel, this), true);  // tenths of second
 
-	if (bIsSpellField)
+	if (fIsSpellField)
 	{
 		switch (spell)	// Only setting ids and locals for field spells
 		{
@@ -2778,7 +2778,7 @@ bool CChar::Spell_CastDone()
 	ITEMID_TYPE it1test = ITEMID_NOTHING;
 	ITEMID_TYPE it2test = ITEMID_NOTHING;
 
-	if (bIsSpellField)
+	if (fIsSpellField)
 	{
 		//Setting new IDs as another variables to pass as different arguments to the field function.
 		it1test = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1")));
@@ -2814,7 +2814,7 @@ bool CChar::Spell_CastDone()
 		{
 			Spell_Summon_Place(pSummon, m_Act_p);
 		}
-		else if (bIsSpellField)
+		else if (fIsSpellField)
 		{
 			if (iT1 && iT2)
 			{
@@ -2844,7 +2844,7 @@ bool CChar::Spell_CastDone()
 				pObj->OnSpellEffect(spell, this, iSkillLevel, dynamic_cast <CItem*>(pObjSrc));
 		}
 	}
-	else if (bIsSpellField)
+	else if (fIsSpellField)
 	{
 		if (!fieldWidth)
 			fieldWidth = 3;
@@ -2892,8 +2892,9 @@ bool CChar::Spell_CastDone()
 			// Magery
 			case SPELL_Create_Food:
 			{
-				CResourceID food = g_Cfg.ResourceGetIDType(RES_ITEMDEF, "DEFFOOD");
-				CItem *pItem = CItem::CreateScript((iT1 ? iT1 : (ITEMID_TYPE)(food.GetResIndex())), this);
+				const CResourceID ridFoodDefault = g_Cfg.ResourceGetIDType(RES_ITEMDEF, "DEFFOOD");
+				const ITEMID_TYPE idFood = ((iT1 > ITEMID_NOTHING) ? iT1 : (ITEMID_TYPE)(ridFoodDefault.GetResIndex()));
+				CItem *pItem = CItem::CreateScript(idFood, this);
 				ASSERT(pItem);
 				if (pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ|SPELLFLAG_TARG_XYZ))
 				{

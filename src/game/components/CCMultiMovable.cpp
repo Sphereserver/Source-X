@@ -131,7 +131,7 @@ uint CCMultiMovable::ListObjs(CObjBase ** ppObjList)
     if (!pItemThis->IsTopLevel())
         return 0;
 
-    int iMaxDist = pMulti->Multi_GetMaxDist();
+    int iMaxDist = pMulti->Multi_GetDistanceMax();
     int iShipHeight = pItemThis->GetTopZ() + maximum(3, pItemThis->GetHeight());
 
     // always list myself first. All other items must see my new region !
@@ -1215,7 +1215,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
 
         tchar szText[MAX_TALK_BUFFER];
         Str_CopyLimitNull(szText, pszSpeak, MAX_TALK_BUFFER);
-        pChar->ParseText(szText, &g_Serv);
+        pChar->ParseScriptText(szText, &g_Serv);
         pTiller->Speak(szText, HUE_TEXT_DEF, TALKMODE_SAY, FONT_NORMAL);
     }
     return true;

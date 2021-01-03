@@ -3900,7 +3900,8 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocation,
 	const CPointMap ptOld(GetTopPoint());
     SetTopPoint(pt);
 
-	CSector* pNewSector = GetTopPoint().GetSector();
+	const CPointMap& ptCur = GetTopPoint();
+	CSector* pNewSector = ptCur.GetSector();
 	ASSERT(pNewSector);
     bool fSectorChanged = pNewSector->MoveCharToSector(this);
 
@@ -3930,7 +3931,7 @@ bool CChar::MoveTo(const CPointMap& pt, bool fForceFix)
     return MoveToChar(pt, true, true, fForceFix);
 }
 
-void CChar::SetTopZ( char z )
+void CChar::SetTopZ( char z ) noexcept
 {
 	CObjBaseTemplate::SetTopZ( z );
 	m_fClimbUpdated = false; // update climb height
@@ -4370,7 +4371,7 @@ bool CChar::OnTick()
     {
         return true;
     }
-    if (GetTopSector()->IsSleeping())
+    if (GetTopSector()->IsSleeping() && !Calc_GetRandVal(15))
     {
         SetTimeout(1);      //Make it tick after sector's awakening.
         GoSleep();

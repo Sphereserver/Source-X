@@ -306,9 +306,9 @@ bool CMenuItem::ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole 
 	}
 
 	if ( pObjBase != nullptr )
-		pObjBase->ParseText( pszArgs, pSrc );
+		pObjBase->ParseScriptText( pszArgs, pSrc );
 	else
-		g_Serv.ParseText( pszArgs, pSrc );
+		g_Serv.ParseScriptText( pszArgs, pSrc );
 
 	// Parsing @color
 	if ( *pszArgs == '@' )
@@ -363,7 +363,7 @@ void CClient::Menu_Setup( CResourceID rid, CObjBase * pObj )
 		DEBUG_ERR(("Error getting the menu title.\n"));
 		return;
 	}
-	pObj->ParseText( s.GetKeyBuffer(), m_pChar );
+	pObj->ParseScriptText( s.GetKeyBuffer(), m_pChar );
 
 	CMenuItem item[MAX_MENU_ITEMS];
 	item[0].m_sText = s.GetKey();

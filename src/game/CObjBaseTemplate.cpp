@@ -25,7 +25,7 @@ void CObjBaseTemplate::SetUnkZ( char z )
 
 // Location
 
-CSector * CObjBaseTemplate::GetTopSector() const
+CSector * CObjBaseTemplate::GetTopSector() const noexcept
 {
 	return GetTopLevelObj()->GetTopPoint().GetSector();
 }
@@ -40,13 +40,13 @@ void CObjBaseTemplate::SetEquipLayer( LAYER_TYPE layer )
 	m_pt.m_map = 0;
 }
 
-void CObjBaseTemplate::SetContainedLayer( byte layer )
+void CObjBaseTemplate::SetContainedLayer( byte layer ) noexcept
 {
 	// used for corpse or Restock count as well in Vendor container.
 	m_pt.m_z = layer;
 }
 
-void CObjBaseTemplate::SetContainedPoint( const CPointMap & pt )
+void CObjBaseTemplate::SetContainedPoint( const CPointMap & pt ) noexcept
 {
     SetUIDContainerFlags(UID_O_CONTAINED);
 	m_pt.m_x = pt.m_x;
@@ -58,33 +58,23 @@ void CObjBaseTemplate::SetContainedPoint( const CPointMap & pt )
 void CObjBaseTemplate::SetTopPoint( const CPointMap & pt )
 {
     SetUIDContainerFlags(UID_CLEAR);
-	ASSERT(pt.IsValidPoint());	// already checked b4.
+	ASSERT(pt.IsValidPoint());	// already checked before.
 	m_pt = pt;
 }
 
-void CObjBaseTemplate::SetTopZ( char z )
+void CObjBaseTemplate::SetTopZ( char z ) noexcept
 {
 	m_pt.m_z = z;
 }
 
-char CObjBaseTemplate::GetTopZ() const
+char CObjBaseTemplate::GetTopZ() const noexcept
 {
 	return m_pt.m_z;
 }
 
-uchar CObjBaseTemplate::GetTopMap() const
+uchar CObjBaseTemplate::GetTopMap() const noexcept
 {
 	return m_pt.m_map;
-}
-
-void CObjBaseTemplate::SetUnkPoint( const CPointMap & pt )
-{
-	m_pt = pt;
-}
-
-char CObjBaseTemplate::GetUnkZ() const	// Equal to GetTopZ ?
-{
-	return m_pt.m_z;
 }
 
 
@@ -116,7 +106,7 @@ int CObjBaseTemplate::GetTopDistSight( const CObjBaseTemplate * pObj ) const
 	// Assume both already at top level.
 	ASSERT( pObj );
 	if ( pObj->IsDisconnected())
-		return INT16_MAX ;
+		return INT16_MAX;
 	return GetTopPoint().GetDistSight( pObj->GetTopPoint());
 }
 
@@ -164,7 +154,7 @@ int CObjBaseTemplate::GetVisualRange() const    // virtual
 
 lpctstr CObjBaseTemplate::GetIndividualName() const
 {
-	return m_sName;
+	return m_sName.GetBuffer();
 }
 
 bool CObjBaseTemplate::IsIndividualName() const
@@ -174,7 +164,7 @@ bool CObjBaseTemplate::IsIndividualName() const
 
 lpctstr CObjBaseTemplate::GetName() const
 {
-	return m_sName;
+	return m_sName.GetBuffer();
 }
 
 bool CObjBaseTemplate::SetName( lpctstr pszName )

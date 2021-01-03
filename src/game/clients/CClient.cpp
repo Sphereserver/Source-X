@@ -415,7 +415,7 @@ void CClient::addPromptConsoleFunction( lpctstr pszFunction, lpctstr pszSysmessa
 	// Target a verb at some object .
 	ASSERT(pszFunction);
 	m_Prompt_Text = pszFunction;
-	addPromptConsole( CLIMODE_PROMPT_SCRIPT_VERB, pszSysmessage, 0, 0, bUnicode );
+	addPromptConsole( CLIMODE_PROMPT_SCRIPT_VERB, pszSysmessage, CUID(), CUID(), bUnicode );
 }
 
 
@@ -758,7 +758,7 @@ bool CClient::r_LoadVal( CScript & s )
 			break;
 
 		case CC_TARG:
-			m_Targ_UID = s.GetArgVal();
+			m_Targ_UID.SetObjUID(s.GetArgVal());
 			break;
 		case CC_TARGP:
 			m_Targ_p.Read( s.GetArgRaw());
@@ -769,10 +769,10 @@ bool CClient::r_LoadVal( CScript & s )
 			}
 			break;
 		case CC_TARGPROP:
-			m_Prop_UID = s.GetArgVal();
+			m_Prop_UID.SetObjUID(s.GetArgVal());
 			break;
 		case CC_TARGPRV:
-			m_Targ_Prv_UID = s.GetArgVal();
+			m_Targ_Prv_UID.SetObjUID(s.GetArgVal());
 			break;
 		default:
 			return false;
@@ -789,13 +789,14 @@ bool CClient::r_LoadVal( CScript & s )
 bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from script
 {
 	ADDTOCALLSTACK("CClient::r_Verb");
-	EXC_TRY("Verb");
+	ASSERT(pSrc);
+
 	// NOTE: This can be called directly from a RES_WEBPAGE script.
 	//  So do not assume we are a game client !
 	// NOTE: Mostly called from CChar::r_Verb
 	// NOTE: Little security here so watch out for dangerous scripts !
 
-	ASSERT(pSrc);
+	EXC_TRY("Verb-Special");
 	lpctstr ptcKey = s.GetKey();
 
 	// Old ver
@@ -822,6 +823,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		return true;
 	}
 
+	EXC_SET_BLOCK("Verb-Statement");
 	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
 	switch (index)
 	{
@@ -1286,10 +1288,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		{
 			CChar *pChar = m_pChar;
 			if ( s.HasArgs() )
-			{
-				CUID uid = s.GetArgVal();
-				pChar = uid.CharFind();
-			}
+				pChar = CUID::CharFindFromUID(s.GetArgVal());
+			
 			if ( pChar )
 				addCharPaperdoll(pChar);
 			break;
@@ -1538,6 +1538,9 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					return true;
 				}
 			}
+
+			if (GetChar())
+				return false;	// In this case, we were called by CChar::r_Verb, which calls also the other r_Verb virtual (or not) methods.
 
 			return CScriptObj::r_Verb( s, pSrc );	// used in the case of web pages to access server level things..
 	}

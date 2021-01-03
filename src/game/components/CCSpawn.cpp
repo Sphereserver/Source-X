@@ -109,7 +109,7 @@ uint16 CCSpawn::GetTimeHi() const
     return _iTimeHi;
 }
 
-uint8 CCSpawn::GetMaxDist() const
+uint8 CCSpawn::GetDistanceMax() const
 {
     return _iMaxDist;
 }
@@ -453,11 +453,8 @@ CChar* CCSpawn::GenerateChar(CResourceIDBase rid)
     pChar->NPC_CreateTrigger();		// removed from NPC_LoadScript() and triggered after char placement and attachment to the spawnitem
     pChar->Update();
 
-    size_t iCount = pSpawnItem->GetTopSector()->GetCharComplexity();
-    if (iCount > g_Cfg.m_iMaxCharComplexity)
-    {
-        g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " chars at %s. Sector too complex!\n", iCount, pSpawnItem->GetTopSector()->GetBasePoint().WriteUsed());
-    }
+    pSpawnItem->GetTopSector()->CheckCharComplexity();
+
     return pChar;
 }
 
@@ -838,7 +835,7 @@ bool CCSpawn::r_LoadVal(CScript & s)
     {
         case ISPW_ADDOBJ:
         {
-            AddObj(s.GetArgDWVal());
+            AddObj(CUID(s.GetArgDWVal()));
             return true;
         }
         case ISPW_AMOUNT:
@@ -1028,7 +1025,7 @@ void CCSpawn::r_Write(CScript & s)
     }
     s.WriteKeyVal("TIMELO", GetTimeLo());
     s.WriteKeyVal("TIMEHI", GetTimeHi());
-    s.WriteKeyVal("MAXDIST", GetMaxDist());
+    s.WriteKeyVal("MAXDIST", GetDistanceMax());
 
     if (GetCurrentSpawned() <= 0)
     {
@@ -1178,7 +1175,7 @@ void CCSpawn::Copy(const CComponent * target)
     _iAmount = pTarget->GetAmount();
     _iTimeLo = pTarget->GetTimeLo();
     _iTimeHi = pTarget->GetTimeHi();
-    _iMaxDist = pTarget->GetMaxDist();
+    _iMaxDist = pTarget->GetDistanceMax();
     _idSpawn = pTarget->GetSpawnID();
 
     // Not copying created objects.

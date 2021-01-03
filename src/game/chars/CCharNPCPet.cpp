@@ -683,7 +683,7 @@ bool CChar::NPC_CheckHirelingStatus()
 	return true;
 }
 
-void CChar::NPC_OnHirePayMore( CItem * pGold, int iWage, bool fHire )
+void CChar::NPC_OnHirePayMore( CItem * pGold, uint uiWage, bool fHire )
 {
 	ADDTOCALLSTACK("CChar::NPC_OnHirePayMore");
 	ASSERT(m_pNPC);
@@ -691,7 +691,7 @@ void CChar::NPC_OnHirePayMore( CItem * pGold, int iWage, bool fHire )
 	// similar to PC_STATUS
 
 	CItemContainer	*pBank = GetBank();
-	if ( !iWage || !pBank )
+	if ( !uiWage || !pBank )
 		return;
 
 	if ( pGold )
@@ -707,7 +707,7 @@ void CChar::NPC_OnHirePayMore( CItem * pGold, int iWage, bool fHire )
 	}
 
 	tchar *pszMsg = Str_GetTemp();
-	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_HIRE_TIME), pBank->m_itEqBankBox.m_Check_Amount / iWage);
+	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_HIRE_TIME), int(pBank->m_itEqBankBox.m_Check_Amount / uiWage));
 	Speak(pszMsg);
 }
 
@@ -719,7 +719,7 @@ bool CChar::NPC_OnHirePay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGol
 	if ( !pCharSrc || !pMemory )
 		return false;
 
-    int iWage = Char_GetDef()->GetHireDayWage();
+    uint uiWage = Char_GetDef()->GetHireDayWage();
 	if ( IsStatFlag( STATF_PET ))
 	{
 		if ( ! pMemory->IsMemoryTypes(MEMORY_IPET|MEMORY_FRIEND))
@@ -730,13 +730,13 @@ bool CChar::NPC_OnHirePay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGol
 	}
 	else
 	{
-		if ( iWage <= 0 )
+		if ( uiWage <= 0 )
 		{
 			Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_NOT_FOR_HIRE ) );
 			return false;
 		}
-        iWage = pCharSrc->PayGold(this, iWage, pGold, PAYGOLD_HIRE);
-		if ( pGold->GetAmount() < iWage )
+        uiWage = (uint)pCharSrc->PayGold(this, uiWage, pGold, PAYGOLD_HIRE);
+		if ( pGold->GetAmount() < uiWage )
 		{
 			Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_NOT_ENOUGH ) );
 			return false;
@@ -757,7 +757,7 @@ bool CChar::NPC_OnHirePay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGol
 	}
 
 	pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_NONE;
-	NPC_OnHirePayMore( pGold, iWage, true );
+	NPC_OnHirePayMore( pGold, uiWage, true );
 	return true;
 }
 
@@ -767,13 +767,13 @@ bool CChar::NPC_OnHireHear( CChar * pCharSrc )
 	ASSERT(m_pNPC);
 
 	CCharBase * pCharDef = Char_GetDef();
-	uint iWage = pCharDef->GetHireDayWage();
-	if ( ! iWage )
+	uint uiWage = pCharDef->GetHireDayWage();
+	if ( ! uiWage )
 	{
 		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_NOT_FOR_HIRE ) );
 		return false;
 	}
-    iWage = pCharSrc->PayGold(this, iWage, nullptr, PAYGOLD_HIRE);
+    uiWage = (uint)pCharSrc->PayGold(this, uiWage, nullptr, PAYGOLD_HIRE);
 	CItemMemory * pMemory = Memory_FindObj( pCharSrc );
 	if ( pMemory )
 	{
@@ -781,7 +781,7 @@ bool CChar::NPC_OnHireHear( CChar * pCharSrc )
 		{
 			// Next gold i get goes toward hire.
 			pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_SPEAK_HIRE;
-			NPC_OnHirePayMore( nullptr, iWage, false );
+			NPC_OnHirePayMore( nullptr, uiWage, false );
 			return true;
 		}
 		if ( pMemory->IsMemoryTypes( MEMORY_FIGHT|MEMORY_HARMEDBY|MEMORY_IRRITATEDBY ))
@@ -799,7 +799,7 @@ bool CChar::NPC_OnHireHear( CChar * pCharSrc )
 	tchar *pszMsg = Str_GetTemp();
 	snprintf(pszMsg, STR_TEMPLENGTH, Calc_GetRandVal(2) ?
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_HIRE_AMNT ) :
-		g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_HIRE_RATE ), iWage );
+		g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_HIRE_RATE ), (int)uiWage );
 	Speak(pszMsg);
 
 	pMemory = Memory_AddObjTypes( pCharSrc, MEMORY_SPEAK );

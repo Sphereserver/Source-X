@@ -36,35 +36,35 @@ private:
 	CObjBaseTemplate& operator=(const CObjBaseTemplate& other);
 
 public:
-    const CUID& GetUID() const {
+    const CUID& GetUID() const noexcept {
 		return m_UID; 
 	}
-	bool IsItem() const {
+	bool IsItem() const noexcept {
 		return m_UID.IsItem();
 	}
-	bool IsChar() const {
+	bool IsChar() const noexcept {
 		return m_UID.IsChar();
 	}
-	bool IsItemInContainer() const {
+	bool IsItemInContainer() const noexcept {
 		return m_UID.IsItemInContainer();
 	}
-	bool IsItemEquipped() const {
+	bool IsItemEquipped() const noexcept {
 		return m_UID.IsItemEquipped();
 	}
-	bool IsDisconnected() const {
+	bool IsDisconnected() const noexcept {
 		return m_UID.IsObjDisconnected();
 	}
-	bool IsTopLevel() const {
+	bool IsTopLevel() const noexcept {
 		return m_UID.IsObjTopLevel();
 	}
-	bool IsValidUID() const {
+	bool IsValidUID() const noexcept {
 		return m_UID.IsValidUID();
 	}
 
-	void SetUIDContainerFlags(dword dwFlags) {
+	void SetUIDContainerFlags(dword dwFlags) noexcept {
 		m_UID.SetObjContainerFlags( dwFlags );
 	}
-    void RemoveUIDFlags(dword dwFlags) {
+    void RemoveUIDFlags(dword dwFlags) noexcept {
         m_UID.RemoveObjFlags( dwFlags );
     }
 
@@ -75,36 +75,42 @@ public:
 
 	// Location
 
-    LAYER_TYPE GetEquipLayer() const {
+    LAYER_TYPE GetEquipLayer() const noexcept {
         return (LAYER_TYPE)(m_pt.m_z);
     }
 	void SetEquipLayer( LAYER_TYPE layer );
 
-    inline byte GetContainedLayer() const {
+    inline byte GetContainedLayer() const noexcept {
         // used for corpse or Restock count as well in Vendor container.
         return m_pt.m_z;
     }
-	void SetContainedLayer( byte layer );
-    inline const CPointMap & GetContainedPoint() const {
+	void SetContainedLayer( byte layer ) noexcept;
+    inline const CPointMap & GetContainedPoint() const noexcept {
         return m_pt;
     }
-	void SetContainedPoint( const CPointMap & pt );
+	void SetContainedPoint( const CPointMap & pt ) noexcept;
 
-	void SetTopPoint( const CPointMap & pt );
+	// - *Top* methods: are virtual and may do additional checks.
+	void SetTopPoint(const CPointMap& pt);
+	virtual void SetTopZ(char z) noexcept;
     inline const CPointMap & GetTopPoint() const noexcept {
         return m_pt;
     }
-	virtual void SetTopZ( char z );
-	char GetTopZ() const;
-	uchar GetTopMap() const;
-	CSector* GetTopSector() const;
+	char GetTopZ() const noexcept;
+	uchar GetTopMap() const noexcept;
+	CSector* GetTopSector() const noexcept;
 
-	void SetUnkPoint( const CPointMap & pt );
+	// - *Unk* methods: are not virtual and get/set raw values, without any check.
+	void SetUnkPoint(const CPointMap& pt) noexcept {
+		m_pt = pt;
+	}
     inline const CPointMap & GetUnkPoint() const noexcept {
         // don't care where this
         return m_pt;
     }
-	char GetUnkZ() const;
+	inline char GetUnkZ() const noexcept {
+		return m_pt.m_z;
+	}
 
 
 	// Distance and direction

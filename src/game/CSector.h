@@ -51,10 +51,7 @@ private:
 public:
 	virtual void Init(int index, uchar map, short x, short y) override;
 	virtual bool OnTick();
-    inline virtual bool IsDeleted() const override
-    {
-        return false;   // Sectors should never be deleted in runtime.
-    }
+	virtual bool IsDeleted() const override;
 
 	// Time
 	int GetLocalTime() const;
@@ -83,6 +80,7 @@ public:
 
 	// Items in the sector
 	size_t GetItemComplexity() const;
+	void CheckItemComplexity() const noexcept;
 	bool IsItemInSector( const CItem * pItem ) const;
 	void MoveItemToSector( CItem * pItem );
 
@@ -92,9 +90,10 @@ public:
 	void OnHearItem( CChar * pChar, lpctstr pszText );
 
 	// Chars in the sector.
+	size_t GetCharComplexity() const;
+	void CheckCharComplexity() const noexcept;
 	bool IsCharActiveIn( const CChar * pChar );
 	bool IsCharDisconnectedIn( const CChar * pChar );
-	size_t GetCharComplexity() const;
 	size_t GetInactiveChars() const;
 	size_t GetClientsNumber() const;
 	int64 GetLastClientTime() const;

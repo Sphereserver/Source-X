@@ -10,8 +10,7 @@ extern CSStringList g_AutoComplete;
 
 CChar * CTextConsole::GetChar() const
 {
-    ADDTOCALLSTACK("CTextConsole::GetChar");
-    return( const_cast <CChar *>( dynamic_cast <const CChar *>( this )));
+    return const_cast <CChar *>( dynamic_cast <const CChar *>( this ));
 }
 
 int CTextConsole::OnConsoleKey( CSString & sText, tchar nChar, bool fEcho )

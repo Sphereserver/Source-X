@@ -103,17 +103,7 @@ bool CUOMapList::Load(int map, char *args)
                 else m_sizey[map] = maxy;
             }
             if ( sectorsize > 0 )
-            {
-                if (( sectorsize < 8 ) || ( sectorsize % 8 ))
-                {
-                    g_Log.EventError("MAP%d: Sector size must be multiple of 8 (%d is invalid, %d is still effective).\n", map, sectorsize, m_sectorsize[map]);
-                }
-                else if (( m_sizex[map]%sectorsize ) || ( m_sizey[map]%sectorsize ))
-                {
-                    g_Log.EventError("MAP%d: Map dimensions [%d,%d] must be multiple of sector size (%d is invalid, %d is still effective).\n", map, m_sizex[map], m_sizey[map], sectorsize, m_sectorsize[map]);
-                }
-                else m_sectorsize[map] = sectorsize;
-            }
+                m_sectorsize[map] = sectorsize;
             if ( realmapnum >= 0 )
                 m_mapnum[map] = realmapnum;
             if ( mapid >= 0 )
@@ -231,13 +221,21 @@ int CUOMapList::CalcSectorQty(int map) const
 int CUOMapList::CalcSectorCols(int map) const
 {
     ASSERT(IsMapSupported(map));
-    return (m_sizex[map] / GetSectorSize(map));
+    const int a = m_sizex[map];
+    const int b = GetSectorSize(map);
+    // ceil division: some maps may not have x or y size perfectly dividable by 64 (default sector size),
+    //  still we need to make room even for sectors with a smaller number of usable tiles
+    return ((a / b) + ((a % b) != 0));
 }
 
 int CUOMapList::CalcSectorRows(int map) const
 {
     ASSERT(IsMapSupported(map));
-    return (m_sizey[map] / GetSectorSize(map));
+    const int a = m_sizey[map];
+    const int b = GetSectorSize(map);
+    // ceil division: some maps may not have x or y size perfectly dividable by 64 (default sector size),
+    //  still we need to make room even for sectors with a smaller number of usable tiles
+    return ((a / b) + ((a % b) != 0));
 }
 
 int CUOMapList::GetMapCenterX(int map) const

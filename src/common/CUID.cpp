@@ -81,7 +81,7 @@ bool CUID::IsItemEquipped() const noexcept
 {
 	if ( (m_dwInternalVal & (UID_F_RESOURCE|UID_F_ITEM|UID_O_DISCONNECT)) == (UID_F_ITEM|UID_O_EQUIPPED))
 		return IsValidUID();
-	return false ;
+	return false;
 }
 
 bool CUID::IsItemInContainer() const noexcept
@@ -93,7 +93,7 @@ bool CUID::IsItemInContainer() const noexcept
 
 void CUID::SetObjContainerFlags( dword dwFlags ) noexcept
 {
-	m_dwInternalVal = ( m_dwInternalVal & (UID_O_INDEX_MASK|UID_F_ITEM) ) | dwFlags;
+	m_dwInternalVal = (m_dwInternalVal & (UID_O_INDEX_MASK|UID_F_ITEM)) | dwFlags;
 }
 
 void CUID::RemoveObjFlags( dword dwFlags ) noexcept

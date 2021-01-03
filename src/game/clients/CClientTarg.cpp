@@ -1461,7 +1461,7 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 	m_pChar->m_atMagery.m_iSummonID		= m_tmSkillMagery.m_iSummonID;
 
 	m_pChar->m_Act_Prv_UID				= m_Targ_Prv_UID;	// Source (wand or you?)
-	m_pChar->m_Act_UID					= pObj ? (dword) pObj->GetUID() : UID_CLEAR ;
+	m_pChar->m_Act_UID					= pObj ? pObj->GetUID() : CUID(UID_CLEAR);
 	m_pChar->m_Act_p					= pt;
 	m_Targ_p							= pt;
 

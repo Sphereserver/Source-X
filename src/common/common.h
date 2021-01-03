@@ -55,19 +55,19 @@
 //#define IMulDiv(a,b,c)		(((((int)(a)*(int)(b)) + (int)(c / 2)) / (int)(c)) - (IsNegative((int)(a)*(int)(b))))
 inline int IMulDiv(int a, int b, int c) noexcept
 {
-	int ab = a*b;
+	const int ab = a*b;
 	return ((ab + (c/2)) / c) - IsNegative(ab);
 }
 
 //#define IMulDivLL(a,b,c)		(((((llong)(a)*(llong)(b)) + (llong)(c / 2)) / (llong)(c)) - (IsNegative((llong)(a)*(llong)(b))))
 inline llong IMulDivLL(llong a, llong b, llong c) noexcept
 {
-	llong ab = a*b;
+	const llong ab = a*b;
 	return ((ab + (c/2)) / c) - IsNegative(ab);
 }
 inline realtype IMulDivRT(realtype a, realtype b, realtype c) noexcept
 {
-	realtype ab = a*b;
+	const realtype ab = a*b;
 	return ((ab + (c/2)) / c) - IsNegative(ab);
 }
 

@@ -144,8 +144,7 @@ bool CRandGroupDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * p
                 sVal.FormatSTVal( GetRandMemberIndex(nullptr, false) );
             else
             {
-                CUID uidTofind = Exp_GetDWVal(ptcKey);
-                CChar * pSend = uidTofind.CharFind();
+                CChar * pSend = CUID::CharFindFromUID(Exp_GetDWVal(ptcKey));
 
                 if ( pSend )
                     sVal.FormatSTVal( GetRandMemberIndex(pSend, false) );
@@ -249,8 +248,9 @@ size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool fTrigger ) cons
             rid = pOreDef->m_ReapItem;
             if (rid != 0)
             {
-                if (!pCharSrc->Skill_MakeItem((ITEMID_TYPE)(rid), UID_CLEAR, SKTRIG_SELECT))
+                if (!pCharSrc->Skill_MakeItem((ITEMID_TYPE)(rid), CUID(UID_CLEAR), SKTRIG_SELECT))
                     continue;
+
                 if (IsTrigUsed(TRIGGER_RESOURCETEST))
                 {
                     if (fTrigger && pOreDef->OnTrigger("@ResourceTest", pCharSrc, nullptr) == TRIGRET_RET_TRUE)

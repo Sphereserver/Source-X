@@ -423,7 +423,7 @@ bool PacketItemDropReq::onReceive(CNetState* net)
 	if ( !character )
 		return false;
 
-	CUID serial = readInt32();
+	CUID serial(readInt32());
 	word x = readInt16();
 	word y = readInt16();
 	byte z = readByte();
@@ -439,7 +439,7 @@ bool PacketItemDropReq::onReceive(CNetState* net)
 			grid = 0;
 	}
 
-	CUID container = readInt32();
+	CUID container(readInt32());
 	CPointMap pt(x, y, z, character->GetTopMap());
 
 	client->Event_Item_Drop(serial, pt, container, grid);
@@ -3128,8 +3128,8 @@ bool PacketBandageMacro::onReceive(CNetState* net)
 		return false;
 	}
 
-    CUID uidBandage = readInt32();
-    CUID uidTarget = readInt32();
+    CUID uidBandage(readInt32());
+    CUID uidTarget(readInt32());
 	CItem* bandage = uidBandage.ItemFind();
 	CObjBase* target = uidTarget.ObjFind();
 	if (bandage == nullptr || target == nullptr)

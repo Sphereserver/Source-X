@@ -226,7 +226,7 @@ TablePtr CSQLite::QuerySQLPtr( lpctstr strSQL )
 
 void CSQLite::ConvertUTF8ToVString( const char * strInUTF8MB, stdvstring & strOut )
 {
-    size_t len = Str_LengthUTF8(strInUTF8MB);
+    const size_t len = Str_LengthUTF8(strInUTF8MB);
     strOut.resize(len + 1, 0);
     lptstr ptcStrOut = strOut.data();
 	ASSERT(ptcStrOut);

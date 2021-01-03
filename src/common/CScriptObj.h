@@ -9,11 +9,12 @@
 #include "../common/common.h"
 
 class CScript;
+class CScriptTriggerArgs;
 class CTextConsole;
 class CSFileText;
 class CSString;
+class CUID;
 class CChar;
-class CScriptTriggerArgs;
 
 
 enum TRIGRUN_TYPE
@@ -52,6 +53,9 @@ class CScriptObj
 private:
 	TRIGRET_TYPE OnTriggerForLoop( CScript &s, int iType, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult );
 
+	// Special statements evaluations (ES = EvaluateStatement)
+	bool ES_QvalConditional(lpctstr pKey, CSString& sVal, CTextConsole* pSrc, CScriptTriggerArgs* pArgs);
+
 public:
 	static const char *m_sClassName;
 
@@ -63,8 +67,11 @@ public:
 
 	virtual lpctstr GetName() const = 0;	// ( every object must have at least a type name )
 
+	static bool IsValidRef(const CScriptObj* pRef) noexcept;
+	static bool IsValidRef(const CUID& uidRef) noexcept;
+
 	// Flags = 1 = html
-	size_t ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFlags = 0, CScriptTriggerArgs * pArgs = nullptr );
+	size_t ParseScriptText( tchar * pszResponse, CTextConsole * pSrc, int iFlags = 0, CScriptTriggerArgs * pArgs = nullptr );
 
 	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef );
 	virtual bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false );
@@ -78,6 +85,8 @@ public:
 	bool r_SetVal( lpctstr ptcKey, lpctstr pszVal );
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_Load( CScript & s );
+
+	static bool ParseError_UndefinedKeyword(lpctstr ptcKey);
 
 public:
 	CScriptObj() = default;

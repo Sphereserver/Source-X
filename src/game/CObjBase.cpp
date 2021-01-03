@@ -994,7 +994,6 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 				if ( *ptcKey )		// has an argument - UID to see(los) or POS to los only
 				{
 					CPointMap pt;
-					CUID uid;
 					CObjBase *pObj = nullptr;
 
 					if ( !bCanSee )
@@ -1002,8 +1001,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 
 					if ( bCanSee || !pt.IsValidPoint() )
 					{
-						uid = Exp_GetDWVal( ptcKey );
-						pObj = uid.ObjFind();
+						pObj = CUID::ObjFindFromUID(Exp_GetDWVal(ptcKey));
 						if ( !bCanSee && pObj )
 							pt = pObj->GetTopPoint();
 					}
@@ -1881,7 +1879,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 		case OC_SPAWNITEM:
             if ( !g_Serv.IsLoading() )	// SPAWNITEM is read-only
                 return false;
-            _uidSpawn = s.GetArgDWVal();
+            _uidSpawn.SetObjUID(s.GetArgDWVal());
             break;
 		case OC_UID:
 		case OC_SERIAL:
@@ -1949,10 +1947,10 @@ lpctstr const CObjBase::sm_szVerbKeys[OV_QTY+1] =
 bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from script
 {
 	ADDTOCALLSTACK("CObjBase::r_Verb");
-	EXC_TRY("Verb");
 	lpctstr	ptcKey = s.GetKey();
 	ASSERT(pSrc);
-	int	index;
+
+	EXC_TRY("Verb-Special");
 
 	if ( !strnicmp(ptcKey, "CLEARTAGS", 9) )
 	{
@@ -1962,6 +1960,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		return true;
 	}
 
+	int	index;
 	if ( !strnicmp( ptcKey, "TARGET", 6 ) )
 		index = OV_TARGET;
 	else
@@ -1984,6 +1983,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
         return false;
     }
 
+	EXC_SET_BLOCK("Verb-Statement");
 	CChar * pCharSrc = pSrc->GetChar();
 	CClient * pClientSrc = (pCharSrc && pCharSrc->IsClientActive()) ? (pCharSrc->GetClientActive()) : nullptr ;
 
@@ -2289,8 +2289,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( iArgQty < 2 )
 					piCmd[1] = 1;
 
-				CUID uid = (dword)(piCmd[0]);
-				pObjNear = uid.ObjFind();
+				pObjNear = CUID::ObjFindFromUID((dword)piCmd[0]);
 				if ( !pObjNear )
 					return false;
                 if ( piCmd[2] )
@@ -2427,10 +2426,8 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				switch( iArgs )
 				{
 				case 4:
-					{
-						CUID uid = (dword) piCmd[3];
-						pItemSrc = uid.ItemFind();
-					}
+					pItemSrc = CUID::ItemFindFromUID((dword)piCmd[3]);
+					FALLTHROUGH;
 				case 3:
 					if ( piCmd[2] == -1 )
 					{
@@ -2438,8 +2435,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					}
 					else
 					{
-						CUID uid = (dword) piCmd[2];
-						pCharSrc = uid.CharFind();
+						pCharSrc = CUID::CharFindFromUID((dword)piCmd[2]);
 					}
 					break;
 				default:
@@ -2686,13 +2682,13 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 				if ( iMinPriv >= PLEVEL_QTY )
 				{
-					pSrc->SysMessagef("The %s property can't be changed.", static_cast<lpctstr>(s.GetArgStr()));
+					pSrc->SysMessagef("The %s property can't be changed.", s.GetArgStr());
 					return false;
 				}
 
 				if ( pSrc->GetPrivLevel() < iMinPriv )
 				{
-					pSrc->SysMessagef( "You lack the privilege to change the %s property.", static_cast<lpctstr>(s.GetArgStr()));
+					pSrc->SysMessagef( "You lack the privilege to change the %s property.", s.GetArgStr());
 					return false;
 				}
 
@@ -2701,21 +2697,27 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				{
 					if ( pCharSrc == nullptr || !pCharSrc->CanTouch(this) )
 					{
-						pSrc->SysMessagef("Can't touch %s object %s", static_cast<lpctstr>(s.GetArgStr()), GetName());
+						pSrc->SysMessagef("Can't touch %s object %s", s.GetArgStr(), GetName());
 						return false;
 					}
 				}
 			}
 			// no break here, TRYP only does extra checks
+			FALLTHROUGH;
 		case OV_TRY:
 			{
 				EXC_SET_BLOCK("TRY or TRYP");
 				lpctstr pszVerb = s.GetArgStr();
 				CScript script(pszVerb);
-				script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-				script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+				script.CopyParseState(s);
+				if (index == OV_TRY)
+					script._eParseFlags = CScript::ParseFlags::IgnoreInvalidRef;
+
 				if ( !r_Verb(script, pSrc) )
 				{
+					if (script._eParseFlags == CScript::ParseFlags::IgnoreInvalidRef)
+						return true;
+
 					DEBUG_ERR(( "Can't try %s object %s (0%x)\n", pszVerb, GetName(), (dword)(GetUID())));
 					return false;
 				}
@@ -2730,7 +2732,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 				if ( index == OV_TRYSRC )
 				{
-					NewSrc = s.GetArgVal();
+					NewSrc.SetObjUID(s.GetArgDWVal());
 					if ( NewSrc.IsValidUID() )
 						pNewSrc = NewSrc.CharFind();
 				}
@@ -2748,8 +2750,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					return false;
 				}
 				CScript script(pszVerb);
-				script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-				script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+				script.CopyParseState(s);
 				if (!r_Verb(script, pNewSrc))
 				{
 					if ( index == OV_TRYSRC )
@@ -2793,7 +2794,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 			if (s.HasArgs())
 			{
-				CUID uid = s.GetArgUVal();
+				CUID uid(s.GetArgUVal());
 				if ((!uid.ObjFind()) || (!this->IsChar()))
 					return false;
 				pCharSrc->GetClientActive()->Event_SingleClick(uid);
@@ -2808,7 +2809,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				return false;
 			if (s.HasArgs())
 			{
-				CUID uid = s.GetArgVal();
+				CUID uid(s.GetArgDWVal());
 
 				if ((!uid.ObjFind()) || (!this->IsChar()))
 					return false;
@@ -2826,7 +2827,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				return false;
 			if ( s.HasArgs() )
 			{
-				CUID uid = s.GetArgVal();
+				CUID uid(s.GetArgDWVal());
 
 				if (( ! uid.ObjFind()) || ( ! this->IsChar() ))
 					return false;
@@ -3085,7 +3086,7 @@ CCSpawn * CObjBase::GetSpawn()
 void CObjBase::SetSpawn(CCSpawn * spawn)
 {
     if (spawn)
-        _uidSpawn = spawn->GetLink()->GetUID();
+        _uidSpawn.SetObjUID(spawn->GetLink()->GetUID());
     else
         _uidSpawn.InitUID();
 }

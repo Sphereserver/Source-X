@@ -2376,3 +2376,33 @@ Must have event, even if it's empty, since it's applied by the source to generat
 26-12-2020, Nolok
 - Fixed: LINK.* not returning error if LINK was not set or invalid.
 - Fixed: Multi house sign's LINK wasn't set on multi creation.
+
+27-12-2020, Nolok
+- Changed: Accessing invalid objects (like REFx/OBJ/ARGO/LINK.something) now returns an error. This was needed because many invalid operations were not executed and there wasn't any trace in the log, leading to difficult script debugging and unexpected behaviors.
+	If you just want to test the object (like <OBJ>), like always, 0 will be returned with no error if it's invalid.
+
+30-12-2020, Nolok
+- Fixed: Exception generated when entering the last column of sectors in a map which X and Y sizes aren't exactly dividable by the sector size (default: 64) specified in the .ini (this happened for example for map4).
+- Fixed: Exception generated when approaching from distance a non-region-generating multi.
+- Fixed: FINDCONT not returning error when trying to access an element with an invalid index.
+
+01-01-2021, Nolok
+- Added: ISVALID keyword to check if a script object is valid (LINK/REFx/ARGO/REGION), instead of having to check them against numbers (0 or -1/0FFFFFFFF).
+
+02-01-2021, Nolok
+- Changed: QVAL in its conditional form (with the '?' symbol), after evaluating the given condition, now evaluates only the expression it has to return.
+    This gives a little performance boost and gets rid of avoidable error logs happening before because the whole expression was fully parsed and evaluated.
+	Example: <QVAL <REF1.ISVALID> ? <REF1.NAME> : "None"> generated an error when REF1 wasn't valid, even if in that case <REF1.NAME> didn't actually need to be evaluated.
+
+03-01-2021, Nolok
+- Changed: Now TRY can be used to explicitly "TRY" to execute a command or set a property on an object which may or may not exist.
+  If the object doesn't exist, no operation is done and no error is returned. It can't be used to TRY to retrieve a value (like <TRY FINDID.invalid_item.NAME>).
+  Its use is DISCOURAGED, but sometimes it might be an easy way to execute trivial operations without a lot of if/endif clauses.
+  This is a way to explicitly allow what Sphere already did by default in the past (not checking if the object is valid and not returning an error),
+  which is something that only sometimes we expect and we want, most of the times it caused obscure bugs.
+
+03-01-2021, Ben
+- Fixed: REF1 being skipped in @tradeaccepted trigger.
+- Fixed: <I> returning error when used alone.
+- Removed: sectorsize checks when loading from sphere.ini to allow more customizations. (Recent changes prevented from setting sectorsize to 64 for map4)
+- Added: Random chance to sleep for NPCs walking into a sleeping sector to try and prevent NPCs lining up at the sector edges.

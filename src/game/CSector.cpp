@@ -313,8 +313,8 @@ lpctstr const CSector::sm_szVerbKeys[SEV_QTY+1] =
 bool CSector::r_Verb( CScript & s, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSector::r_Verb");
-	EXC_TRY("Verb");
 	ASSERT(pSrc);
+	EXC_TRY("Verb-Statement");
 	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
 	switch (index)
 	{
@@ -475,8 +475,7 @@ bool CSector::v_AllChars( CScript & s, CTextConsole * pSrc )
 	ADDTOCALLSTACK("CSector::v_AllChars");
 
 	CScript script(s.GetArgStr());
-	script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-	script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+	script.CopyParseState(s);
 
 	bool fRet = false;
 
@@ -500,8 +499,7 @@ bool CSector::v_AllCharsIdle( CScript & s, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSector::v_AllCharsIdle");
 	CScript script(s.GetArgStr());
-	script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-	script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+	script.CopyParseState(s);
 
 	bool fRet = false;
 
@@ -525,8 +523,7 @@ bool CSector::v_AllItems( CScript & s, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSector::v_AllItems");
 	CScript script(s.GetArgStr());
-	script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-	script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+	script.CopyParseState(s);
 
 	bool fRet = false;
 
@@ -551,8 +548,7 @@ bool CSector::v_AllClients( CScript & s, CTextConsole * pSrc )
 	ADDTOCALLSTACK("CSector::v_AllClients");
 
 	CScript script(s.GetArgStr());
-	script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-	script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+	script.CopyParseState(s);
 
 	bool fRet = false;
 
@@ -1135,6 +1131,11 @@ void CSector::Restock()
     }
 }
 
+bool CSector::IsDeleted() const
+{
+	return false;   // Sectors should never be deleted in runtime.
+}
+
 bool CSector::OnTick()
 {
 	ADDTOCALLSTACK("CSector::OnTick");
@@ -1311,44 +1312,44 @@ WEATHER_TYPE CSector::GetWeather() const	// current weather.
 
 bool CSector::IsRainOverriden() const
 {
-	return(( m_RainChance & LIGHT_OVERRIDE ) ? true : false );
+	return (( m_RainChance & LIGHT_OVERRIDE ) ? true : false );
 }
 
 byte CSector::GetRainChance() const
 {
-	return( m_RainChance &~ LIGHT_OVERRIDE );
+	return ( m_RainChance &~ LIGHT_OVERRIDE );
 }
 
 bool CSector::IsColdOverriden() const
 {
-	return(( m_ColdChance & LIGHT_OVERRIDE ) ? true : false );
+	return (( m_ColdChance & LIGHT_OVERRIDE ) ? true : false );
 }
 
 byte CSector::GetColdChance() const
 {
-	return( m_ColdChance &~ LIGHT_OVERRIDE );
+	return ( m_ColdChance &~ LIGHT_OVERRIDE );
 }
 
 // Light
 bool CSector::IsLightOverriden() const
 {
-	return(( m_Env.m_Light & LIGHT_OVERRIDE ) ? true : false );
+	return (( m_Env.m_Light & LIGHT_OVERRIDE ) ? true : false );
 }
 
 byte CSector::GetLight() const
 {
-	return( m_Env.m_Light &~ LIGHT_OVERRIDE );
+	return ( m_Env.m_Light &~ LIGHT_OVERRIDE );
 }
 
 bool CSector::IsDark() const
 {
-	return( GetLight() > 6 );
+	return ( GetLight() > 6 );
 }
 
 bool CSector::IsNight() const
 {
 	int iMinutes = GetLocalTime();
-	return( iMinutes < 7*60 || iMinutes > (9+12)*60 );
+	return ((iMinutes < 7*60) || (iMinutes > (9+12)*60) );
 }
 
 void CSector::LightFlash()
@@ -1359,6 +1360,13 @@ void CSector::LightFlash()
 size_t CSector::GetItemComplexity() const
 {
 	return m_Items.GetContentCount();
+}
+
+void CSector::CheckItemComplexity() const noexcept
+{
+	const size_t uiCount = GetItemComplexity();
+	if (uiCount > g_Cfg.m_iMaxSectorComplexity)
+		g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " items at %s. Sector too complex!\n", uiCount, GetBasePoint().WriteUsed());
 }
 
 bool CSector::IsItemInSector( const CItem * pItem ) const
@@ -1381,38 +1389,45 @@ void CSector::RemoveListenItem()
 
 bool CSector::HasListenItems() const
 {
-	return m_ListenItems ? true : false;
+	return (m_ListenItems ? true : false);
 }
 
 bool CSector::IsCharActiveIn( const CChar * pChar ) //const
 {
 	// assume the char is active (not disconnected)
-	return( pChar->GetParent() == &m_Chars_Active );
+	return ( pChar->GetParent() == &m_Chars_Active );
 }
 
 bool CSector::IsCharDisconnectedIn( const CChar * pChar ) //const
 {
 	// assume the char is active (not disconnected)
-	return( pChar->GetParent() == &m_Chars_Disconnect );
+	return ( pChar->GetParent() == &m_Chars_Disconnect );
 }
 
 size_t CSector::GetCharComplexity() const
 {
-	return( m_Chars_Active.GetContentCount());
+	return m_Chars_Active.GetContentCount();
+}
+
+void CSector::CheckCharComplexity() const noexcept
+{
+	const size_t uiCount = GetCharComplexity();
+	if (uiCount > g_Cfg.m_iMaxCharComplexity)
+		g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " chars at %s. Sector too complex!\n", uiCount, GetBasePoint().WriteUsed());
 }
 
 size_t CSector::GetInactiveChars() const
 {
-	return( m_Chars_Disconnect.GetContentCount());
+	return m_Chars_Disconnect.GetContentCount();
 }
 
 size_t CSector::GetClientsNumber() const
 {
-	return( m_Chars_Active.GetClientsNumber());
+	return m_Chars_Active.GetClientsNumber();
 }
 
 int64 CSector::GetLastClientTime() const
 {
-	return( m_Chars_Active.GetTimeLastClient() );
+	return m_Chars_Active.GetTimeLastClient() ;
 }
 

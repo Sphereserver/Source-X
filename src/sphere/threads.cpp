@@ -496,7 +496,7 @@ void AbstractThread::setPriority(IThread::Priority pri)
 			m_tickPeriod = 0;
 			break;
 		case IThread::Disabled:
-			m_tickPeriod = AutoResetEvent::_infinite;
+			m_tickPeriod = AutoResetEvent::_kiInfinite;
 			break;
 	}
 }

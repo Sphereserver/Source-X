@@ -191,12 +191,12 @@ bool CItemShip::r_LoadVal(CScript & s)
         {
             case IMCS_HATCH:
             {
-                m_uidHold = s.GetArgDWVal();
+                m_uidHold.SetObjUID(s.GetArgDWVal());
                 return true;
             }
             case IMCS_TILLER:
             {
-                m_uidLink = s.GetArgDWVal();
+                m_uidLink.SetObjUID(s.GetArgDWVal());
                 return true;
             }
             case IMCS_PLANK:
@@ -294,7 +294,7 @@ CItem * CItemShip::GetShipPlank(size_t index)
     // Find plank(s) if the list is empty
     if (m_uidPlanks.empty())
     {
-        CWorldSearch Area(GetTopPoint(), Multi_GetMaxDist());
+        CWorldSearch Area(GetTopPoint(), Multi_GetDistanceMax());
         for (;;)
         {
             const CItem * pItem = Area.GetItem();

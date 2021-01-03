@@ -574,7 +574,7 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, lp
         {
             if ( m_uiTexts >= (CountOf(m_sText) - 1) )
                 break;
-            m_pObj->ParseText( s.GetKeyBuffer(), pClient->GetChar() );
+            m_pObj->ParseScriptText( s.GetKeyBuffer(), pClient->GetChar() );
             m_sText[m_uiTexts] = s.GetKey();
             ++m_uiTexts;
         }
@@ -593,7 +593,7 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, lp
     // starting x,y location.
     int64 iSizes[2];
     tchar * pszBuf = s.GetKeyBuffer();
-    m_pObj->ParseText( pszBuf, pClient->GetChar() );
+    m_pObj->ParseScriptText( pszBuf, pClient->GetChar() );
 
     Str_ParseCmds( pszBuf, iSizes, CountOf(iSizes) );
     m_x		= (int)(iSizes[0]);

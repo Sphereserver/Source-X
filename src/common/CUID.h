@@ -13,7 +13,7 @@ class CItem;
 class CChar;
 
 #define UID_CLEAR			(dword)0
-#define UID_UNUSED			0xFFFFFFFF	// 0 = not used as well.
+#define UID_UNUSED			(dword)0xFFFFFFFF	// 0 = not used as well.
 
 #define UID_F_RESOURCE		0x80000000	// ALSO: pileable or special macro flag passed to client.
 #define UID_F_ITEM			0x40000000	// CItem as apposed to CChar based
@@ -46,8 +46,15 @@ public:
 	{
 		InitUID();
 	}
-	inline CUID(dword dwPrivateUID) noexcept
+	inline CUID(const CUID& uid) noexcept
 	{
+		SetPrivateUID(uid.GetPrivateUID());
+	}
+	inline explicit CUID(dword dwPrivateUID) noexcept
+	{
+		// TODO: directly setting the private UID can led to unexpected results...
+		//	it's better to use SetObjUID in order to "filter" the raw value passed.
+		//  Though, it needs some testing before, who knows if in the big sea of misuses there's a legit use...
 		SetPrivateUID(dwPrivateUID);
 	}
 
@@ -92,16 +99,28 @@ public:
 	dword GetObjUID() const noexcept;
 	void SetObjUID(dword dwVal) noexcept;
 
-	inline bool operator == (dword index) const noexcept {
-		return (GetObjUID() == index);
-	}
+public:
 	inline bool operator != (dword index) const noexcept {
 		return (GetObjUID() != index);
 	}
 	inline operator dword () const noexcept {
 		return GetObjUID();
 	}
-    
+	inline bool operator == (dword index) const noexcept {
+		return (GetObjUID() == index);
+	}
+	CUID& operator = (const CUID&) noexcept = default;
+
+protected:
+	// Be sure that, when doing an assignment directly via a dword (so directly assigning a m_dwInternalVal), we know what we are doing.
+	// To enforce that we make this method protected, so that the only public way to assign the m_dwInternalVal is via SetPrivateUID.
+	// That's very necessary also because most of the times we want to do the assignment via SetObjUID, not SetPrivateUID.
+	CUID& operator = (dword index) noexcept {
+		SetPrivateUID(index);
+		return *this;
+	}
+
+public:
     static CObjBase * ObjFindFromUID(dword dwPrivateUID, bool fInvalidateBeingDeleted = false) noexcept;
     static CItem * ItemFindFromUID(dword dwPrivateUID, bool fInvalidateBeingDeleted = false) noexcept;
     static CChar * CharFindFromUID(dword dwPrivateUID, bool fInvalidateBeingDeleted = false) noexcept;
