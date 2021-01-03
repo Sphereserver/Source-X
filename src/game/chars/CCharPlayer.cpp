@@ -620,8 +620,7 @@ bool CChar::Player_OnVerb( CScript &s, CTextConsole * pSrc )
                 if ( pMyGuild )
                 {
 					CScript script(ptcKey, s.GetArgRaw());
-					script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-					script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+					script.CopyParseState(s);
                    	return pMyGuild->r_Verb(script, pSrc);
                 }
 			}

@@ -1947,10 +1947,10 @@ lpctstr const CObjBase::sm_szVerbKeys[OV_QTY+1] =
 bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from script
 {
 	ADDTOCALLSTACK("CObjBase::r_Verb");
-	EXC_TRY("Verb");
 	lpctstr	ptcKey = s.GetKey();
 	ASSERT(pSrc);
-	int	index;
+
+	EXC_TRY("Verb-Special");
 
 	if ( !strnicmp(ptcKey, "CLEARTAGS", 9) )
 	{
@@ -1960,6 +1960,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		return true;
 	}
 
+	int	index;
 	if ( !strnicmp( ptcKey, "TARGET", 6 ) )
 		index = OV_TARGET;
 	else
@@ -1982,6 +1983,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
         return false;
     }
 
+	EXC_SET_BLOCK("Verb-Statement");
 	CChar * pCharSrc = pSrc->GetChar();
 	CClient * pClientSrc = (pCharSrc && pCharSrc->IsClientActive()) ? (pCharSrc->GetClientActive()) : nullptr ;
 
@@ -2680,13 +2682,13 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 				if ( iMinPriv >= PLEVEL_QTY )
 				{
-					pSrc->SysMessagef("The %s property can't be changed.", static_cast<lpctstr>(s.GetArgStr()));
+					pSrc->SysMessagef("The %s property can't be changed.", s.GetArgStr());
 					return false;
 				}
 
 				if ( pSrc->GetPrivLevel() < iMinPriv )
 				{
-					pSrc->SysMessagef( "You lack the privilege to change the %s property.", static_cast<lpctstr>(s.GetArgStr()));
+					pSrc->SysMessagef( "You lack the privilege to change the %s property.", s.GetArgStr());
 					return false;
 				}
 
@@ -2695,21 +2697,27 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				{
 					if ( pCharSrc == nullptr || !pCharSrc->CanTouch(this) )
 					{
-						pSrc->SysMessagef("Can't touch %s object %s", static_cast<lpctstr>(s.GetArgStr()), GetName());
+						pSrc->SysMessagef("Can't touch %s object %s", s.GetArgStr(), GetName());
 						return false;
 					}
 				}
 			}
 			// no break here, TRYP only does extra checks
+			FALLTHROUGH;
 		case OV_TRY:
 			{
 				EXC_SET_BLOCK("TRY or TRYP");
 				lpctstr pszVerb = s.GetArgStr();
 				CScript script(pszVerb);
-				script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-				script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+				script.CopyParseState(s);
+				if (index == OV_TRY)
+					script._eParseFlags = CScript::ParseFlags::IgnoreInvalidRef;
+
 				if ( !r_Verb(script, pSrc) )
 				{
+					if (script._eParseFlags == CScript::ParseFlags::IgnoreInvalidRef)
+						return true;
+
 					DEBUG_ERR(( "Can't try %s object %s (0%x)\n", pszVerb, GetName(), (dword)(GetUID())));
 					return false;
 				}
@@ -2742,8 +2750,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					return false;
 				}
 				CScript script(pszVerb);
-				script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-				script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+				script.CopyParseState(s);
 				if (!r_Verb(script, pNewSrc))
 				{
 					if ( index == OV_TRYSRC )

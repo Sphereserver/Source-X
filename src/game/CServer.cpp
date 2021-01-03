@@ -1476,8 +1476,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			if ( pAccount && *ptcKey )
 			{
 				CScript script(ptcKey, s.GetArgStr());
-				script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-				script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+				script.CopyParseState(s);
 				return pAccount->r_LoadVal(script);
 			}
 			return false;
@@ -1527,8 +1526,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 					if ( pClient->GetChar() == nullptr )
 						continue;
 					CScript script(s.GetArgStr());
-					script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-					script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+					script.CopyParseState(s);
 					pClient->GetChar()->r_Verb( script, pSrc );
 				}
 			}

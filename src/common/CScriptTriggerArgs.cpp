@@ -197,7 +197,7 @@ lpctstr const CScriptTriggerArgs::sm_szLoadKeys[AGC_QTY+1] =
 bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
 {
     ADDTOCALLSTACK("CScriptTriggerArgs::r_Verb");
-    EXC_TRY("Verb");
+    EXC_TRY("Verb-Special");
     int	index = -1;
     lpctstr ptcKey = s.GetKey();
 
@@ -236,12 +236,15 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
                 {
                     ptcKey = ++pszTemp;
                     CObjBase * pObj = m_VarObjs.Get( number );
-                    if ( !pObj )
-                        return false;
+                    if (!pObj)
+                    {
+                        if (s._eParseFlags == CScript::ParseFlags::IgnoreInvalidRef)
+                            return true;
+                        return ParseError_UndefinedKeyword(s.GetKey());
+                    }
 
                     CScript script( ptcKey, s.GetArgStr());
-                    script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
-                    script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
+                    script.CopyParseState(s);
                     return pObj->r_Verb( script, pSrc );
                 }
             }
@@ -266,6 +269,7 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
     else
         index = FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
 
+    EXC_SET_BLOCK("Verb-Statement");
     switch (index)
     {
         case AGC_N:
@@ -288,22 +292,30 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
             {
                 ++pszTemp;
                 if (!m_pO1)
-                    break;
+                {
+                    if (s._eParseFlags == CScript::ParseFlags::IgnoreInvalidRef)
+                        return true;
+                    return ParseError_UndefinedKeyword(s.GetKey());
+                }
 
                 CScript script( pszTemp, s.GetArgStr() );
-                script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
-                script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
+                script.CopyParseState(s);
                 return m_pO1->r_Verb( script, pSrc );
             }
         } return false;
         case AGC_TRY:
         case AGC_TRYSRV:
         {
+            EXC_SET_BLOCK("TRY or TRYSRV");
             CScript script(s.GetArgStr());
-            script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
-            script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
+            script.CopyParseState(s);
+            if (index == AGC_TRY)
+                script._eParseFlags = CScript::ParseFlags::IgnoreInvalidRef;
+
             if (r_Verb(script, pSrc))
                 return true;
+            else
+                return ParseError_UndefinedKeyword(s.GetKey());
         }
         break;
 

@@ -3907,6 +3907,8 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 	if ( !pSrc )
 		return false;
 
+	EXC_TRY("Verb");
+
 	if ( IsClientActive() && GetClientActive()->r_Verb(s, pSrc) )
 		return true;
 
@@ -3915,7 +3917,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
         return true;
     }
 
-	EXC_TRY("Verb");
+	EXC_SET_BLOCK("Verb-statement");
 
 	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
 	if ( index < 0 )

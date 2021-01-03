@@ -440,12 +440,20 @@ CScript::CScript( lpctstr ptcKey, lpctstr pszVal )
 void CScript::_InitBase()
 {
 	//ADDTOCALLSTACK("CScript::InitBase");
+	_eParseFlags = ParseFlags::None;
 	m_iResourceFileIndex = -1;
 	m_iLineNum		= 0;
 	m_fSectionHead	= false;
 	m_iSectionData	= 0;
     _fCacheToBeUpdated = false;
 	InitKey();
+}
+
+void CScript::CopyParseState(const CScript& other) noexcept
+{
+	_eParseFlags = other._eParseFlags;  // Special parsing conditions
+	m_iResourceFileIndex = other.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+	m_iLineNum = other.m_iLineNum;	// Line in the script file where Key/Arg were read
 }
 
 bool CScript::_Open( lpctstr ptcFilename, uint uiFlags )

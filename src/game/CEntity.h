@@ -17,6 +17,8 @@ class CEntity
     using const_iterator    = decltype(_lComponents)::const_iterator;
 
 public:
+    static const char* m_sClassName;
+
     CEntity();
     ~CEntity();
     /**

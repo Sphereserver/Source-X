@@ -1212,6 +1212,35 @@ int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError)
     }
 }
 
+void Str_SkipEnclosedAngularBrackets(tchar* & ptcLine)
+{
+    bool fOpenedOne = false;
+    int iOpenBrackets = 0;
+    tchar* ptcTest = ptcLine;
+    while (const tchar ch = *ptcTest)
+    {
+        if (ISWHITESPACE(ch))
+            ;
+        else if (ch == '<')
+        {
+            fOpenedOne = true;
+            ++iOpenBrackets;
+        }
+        else if (ch == '>')
+        {
+            --iOpenBrackets;
+            if (fOpenedOne && !iOpenBrackets)
+            {
+                ptcLine = ptcTest + 1;
+                return;
+            }
+        }
+        ++ptcTest;
+    }
+}
+
+//--
+
 void CharToMultiByteNonNull(byte * Dest, const char * Src, int MBytes)
 {
     for (int idx = 0; idx != MBytes * 2; idx += 2) {

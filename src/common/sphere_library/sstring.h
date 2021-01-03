@@ -323,13 +323,20 @@ int Str_ParseCmds(tchar * pCmdLine, int64 * piCmd, int iMax, lpctstr pSep = null
 int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError);
 ///@}
 
-void CharToMultiByteNonNull(byte * Dest, const char * Src, int MBytes);
+//--
+
+void Str_SkipEnclosedAngularBrackets(tchar* & ptcLine);
+
+//--
 
 // extern tchar * Str_GetTemporary(int amount = 1);
 #define Str_GetTemp static_cast<AbstractSphereThread *>(ThreadHolder::current())->allocateBuffer
 #define Str_GetWTemp static_cast<AbstractSphereThread *>(ThreadHolder::current())->allocateWBuffer
 #define STR_TEMPLENGTH (size_t)(THREAD_STRING_LENGTH)
 
+//--
+
+void CharToMultiByteNonNull(byte* Dest, const char* Src, int MBytes);
 
 // Class for converting tchar to Multi-Byte UTF-8 and vice versa
 //  SHOULDN'T really be used nowadays, because we don't #define UNICODE, thus tchar will always have UTF-8 encoding.

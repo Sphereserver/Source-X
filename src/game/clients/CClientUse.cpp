@@ -864,7 +864,7 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 		// Check for a skill / non-consumables required.
 		if ( s.IsKey("TEST") )
 		{
-			m_pChar->ParseText(s.GetArgRaw(), m_pChar);
+			m_pChar->ParseScriptText(s.GetArgRaw(), m_pChar);
 			CResourceQtyArray skills(s.GetArgStr());
 			if ( !skills.IsResourceMatchAll(m_pChar) )
 			{
@@ -875,7 +875,7 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 
 		if ( s.IsKey("TESTIF") )
 		{
-			m_pChar->ParseText(s.GetArgRaw(), m_pChar);
+			m_pChar->ParseScriptText(s.GetArgRaw(), m_pChar);
 			if ( !s.GetArgVal() )
 			{
                 fSkipNeedCleanup = true;

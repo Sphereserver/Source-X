@@ -13,6 +13,7 @@
 #include "../common/sqlite/SQLite.h"
 #include "../common/CSFileObjContainer.h"
 
+#include "../game/CEntity.h"
 #include "../game/chars/CCharBase.h"
 #include "../game/chars/CCharPlayer.h"
 #include "../game/chars/CCharNPC.h"
@@ -46,6 +47,7 @@ ADD(CCharPlayer,			"CCharPlayer");
 ADD(CClient,				"CClient");
 ADD(CDialogDef,				"CDialogDef");
 ADD(CDialogResponseArgs,	"CDialogResponseArgs");
+ADD(CEntity,				"CEntity");
 ADD(CSFileObj,				"CSFileObj");
 ADD(CSFileObjContainer,		"CSFileObjContainer");
 ADD(CScriptObj,				"CScriptObj");

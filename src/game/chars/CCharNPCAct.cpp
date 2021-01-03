@@ -109,6 +109,7 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 	ASSERT(m_pNPC);
 	// Stuff that only NPC's do.
 
+	EXC_TRY("OnVerb");
 	CChar * pCharSrc = pSrc->GetChar();
 
 	switch ( FindTableSorted( s.GetKey(), CCharNPC::sm_szVerbKeys, CountOf(CCharNPC::sm_szVerbKeys)-1 ))
@@ -204,6 +205,8 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 		//if ( FindTableSorted(s.GetKey(), CClient::sm_szVerbKeys, CountOf(sm_szVerbKeys)-1) < 0 )
 		return false;
 	}
+
+	EXC_CATCH;
 	return true;
 }
 

@@ -3368,14 +3368,15 @@ lpctstr const CItem::sm_szVerbKeys[CIV_QTY+1] =
 bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from script
 {
 	ADDTOCALLSTACK("CItem::r_Verb");
-	EXC_TRY("Verb");
 	ASSERT(pSrc);
+	EXC_TRY("Pre-Verb");
 
     if (CEntity::r_Verb(s, pSrc))
     {
         return true;
     }
 
+	EXC_SET_BLOCK("Verb-Statement");
 	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 	if ( index < 0 )
 	{

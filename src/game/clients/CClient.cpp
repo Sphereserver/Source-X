@@ -788,13 +788,14 @@ bool CClient::r_LoadVal( CScript & s )
 bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from script
 {
 	ADDTOCALLSTACK("CClient::r_Verb");
-	EXC_TRY("Verb");
+	ASSERT(pSrc);
+
 	// NOTE: This can be called directly from a RES_WEBPAGE script.
 	//  So do not assume we are a game client !
 	// NOTE: Mostly called from CChar::r_Verb
 	// NOTE: Little security here so watch out for dangerous scripts !
 
-	ASSERT(pSrc);
+	EXC_TRY("Verb-Special");
 	lpctstr ptcKey = s.GetKey();
 
 	// Old ver
@@ -821,6 +822,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		return true;
 	}
 
+	EXC_SET_BLOCK("Verb-Statement");
 	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
 	switch (index)
 	{
@@ -1535,6 +1537,9 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					return true;
 				}
 			}
+
+			if (GetChar())
+				return false;	// In this case, we were called by CChar::r_Verb, which calls also the other r_Verb virtual (or not) methods.
 
 			return CScriptObj::r_Verb( s, pSrc );	// used in the case of web pages to access server level things..
 	}
