@@ -314,8 +314,8 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
 
             if (r_Verb(script, pSrc))
                 return true;
-            else
-                return ParseError_UndefinedKeyword(s.GetKey());
+            else if (script._eParseFlags != CScript::ParseFlags::IgnoreInvalidRef)
+                return ParseError_UndefinedKeyword(script.GetKey());
         }
         break;
 
