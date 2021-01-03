@@ -112,9 +112,9 @@ bool CScriptObj::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
             pRef = ( g_World.m_uidNew.IsValidUID() ? g_World.m_uidNew.ObjFind() : nullptr);
             return true;
         case SREF_I:
-            if (ptcKey[1] != '.')
-                return false;
-            ptcKey += 2;
+			ptcKey += 1;
+            if (ptcKey[0] == '.')
+				ptcKey += 1;
             pRef = this;
             return true;
         case SREF_FILE:

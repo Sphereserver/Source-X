@@ -4371,7 +4371,7 @@ bool CChar::OnTick()
     {
         return true;
     }
-    if (GetTopSector()->IsSleeping())
+    if (GetTopSector()->IsSleeping() && !Calc_GetRandVal(15))
     {
         SetTimeout(1);      //Make it tick after sector's awakening.
         GoSleep();
