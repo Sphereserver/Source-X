@@ -1151,7 +1151,27 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	EXC_TRY("Verb-Ref");
 
 	CScriptObj * pRef = nullptr;
-	if ( r_GetRef( ptcKey, pRef ))
+	bool fRef = false;
+
+	// Special refs
+	if (CChar* pThisChar = dynamic_cast<CChar*>(this))
+	{
+		// r_GetRef is a virtual method, but if the Client is attached to a Char, its r_GetRef won't be called,
+		//	since CClient doesn't inherit from CChar and the pointer to the attached Client is stored in the Char's Class.
+		// For Webpages or other stuff CClient::r_GetRef will be called, since it's a parent class.
+		if (CClient* pThisClient = pThisChar->GetClientActive())
+		{
+			fRef = pThisClient->r_GetRef(ptcKey, pRef);
+		}
+	}
+	
+	// Standard Refs
+	if (!fRef)
+	{
+		fRef = r_GetRef(ptcKey, pRef);
+	}
+
+	if (fRef)
 	{
 		if ( ptcKey[0] )
 		{
