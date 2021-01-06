@@ -78,6 +78,37 @@ bool CScriptObj::IsValidRef(const CUID& uidRef) noexcept // static
 	return (nullptr != uidRef.ObjFind(true));
 }
 
+bool CScriptObj::r_GetRefFull(lpctstr& ptcKey, CScriptObj*& pRef)
+{
+	ADDTOCALLSTACK("CScriptObj::r_GetRefFull");
+	bool fRef = false;
+
+	// Special refs
+	CClient* pThisClient = nullptr;
+	if (CChar* pThisChar = dynamic_cast<CChar*>(this))
+	{
+		// r_GetRef is a virtual method, but if the Client is attached to a Char, its r_GetRef won't be called,
+		//	since CClient doesn't inherit from CChar and the pointer to the attached Client is stored in the Char's Class.
+		// For Webpages or other stuff CClient::r_GetRef will be called, since it's a parent class.
+		pThisClient = pThisChar->GetClientActive();
+		if (pThisClient)
+		{
+			fRef = pThisClient->r_GetRef(ptcKey, pRef);
+
+			if (fRef && (pRef == pThisClient))
+				pRef = this;	// Special handling of "I" ref.
+		}
+	}
+
+	// Standard Refs
+	if (!fRef)
+	{
+		fRef = r_GetRef(ptcKey, pRef);
+	}
+
+	return fRef;
+}
+
 bool CScriptObj::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CScriptObj::r_GetRef");
@@ -112,9 +143,9 @@ bool CScriptObj::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
             pRef = ( g_World.m_uidNew.IsValidUID() ? g_World.m_uidNew.ObjFind() : nullptr);
             return true;
         case SREF_I:
-			ptcKey += 1;
-            if (ptcKey[0] == '.')
-				ptcKey += 1;
+			if (ptcKey[1] != '.')
+				return false;
+			ptcKey += 2;
             pRef = this;
             return true;
         case SREF_FILE:
@@ -284,14 +315,6 @@ bool CScriptObj::r_LoadVal( CScript & s )
 	EXC_TRY("LoadVal");
 	lpctstr ptcKey = s.GetKey();
 
-	if ( !strnicmp(ptcKey, "CLEARVARS", 9) )
-	{
-		ptcKey = s.GetArgStr();
-		SKIP_SEPARATORS(ptcKey);
-		g_Exp.m_VarGlobals.ClearKeys(ptcKey);
-		return true;
-	}
-
 	// ignore these.
 	int index = FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
 	if ( index < 0 )
@@ -378,9 +401,11 @@ bool CScriptObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 {
     UNREFERENCED_PARAMETER(fNoCallParent);
 	ADDTOCALLSTACK("CScriptObj::r_WriteVal");
-	EXC_TRY("WriteVal");
-	CScriptObj * pRef = nullptr;
-	bool fGetRef = r_GetRef( ptcKey, pRef );
+
+	EXC_TRY("WriteVal-Ref");
+
+	CScriptObj* pRef = nullptr;
+	bool fRef = r_GetRefFull(ptcKey, pRef);
 
 	if ( !strnicmp(ptcKey, "GetRefType", 10) )
 	{
@@ -442,9 +467,9 @@ bool CScriptObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 		return true;
 	}
 
-	if ( fGetRef )
+	if (fRef)
 	{
-		if ( ptcKey[0] == '\0' )	// we where just testing the ref.
+		if ( ptcKey[0] == '\0' )	// we were just testing the ref.
 		{
 			if (pRef == nullptr)
 			{
@@ -482,6 +507,7 @@ bool CScriptObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
         return false;
     }
 
+	EXC_SET_BLOCK("Writeval-Statement");
 	int index = FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( index < 0 )
 	{
@@ -1151,29 +1177,26 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	EXC_TRY("Verb-Ref");
 
 	CScriptObj * pRef = nullptr;
-	bool fRef = false;
-
-	// Special refs
-	if (CChar* pThisChar = dynamic_cast<CChar*>(this))
-	{
-		// r_GetRef is a virtual method, but if the Client is attached to a Char, its r_GetRef won't be called,
-		//	since CClient doesn't inherit from CChar and the pointer to the attached Client is stored in the Char's Class.
-		// For Webpages or other stuff CClient::r_GetRef will be called, since it's a parent class.
-		if (CClient* pThisClient = pThisChar->GetClientActive())
-		{
-			fRef = pThisClient->r_GetRef(ptcKey, pRef);
-		}
-	}
-	
-	// Standard Refs
-	if (!fRef)
-	{
-		fRef = r_GetRef(ptcKey, pRef);
-	}
+	bool fRef = r_GetRefFull(ptcKey, pRef);
 
 	if (fRef)
 	{
-		if ( ptcKey[0] )
+		if (pRef == this)
+		{
+			// "I." ref. For players, *this (so pRef) is the CClient instance.
+
+			if (ptcKey[0] == '\0')
+			{
+				return ParseError_UndefinedKeyword(s.GetKey()); // We can't change the UID via the I ref.
+			}
+
+			//fRef = false;
+			//pRef = nullptr;
+			CScript script(ptcKey, s.GetArgStr());
+			script.CopyParseState(s);
+			return r_Verb(script, pSrc);
+		}
+		else if ( ptcKey[0] )
 		{
 			if (!pRef)
 			{
@@ -1209,7 +1232,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	if ( s.IsKeyHead("SRC.", 4 ))
 	{
 		ptcKey += 4;
-		pRef = dynamic_cast <CScriptObj*> (pSrc->GetChar());	// if it can be converted .
+		pRef = dynamic_cast <CScriptObj*> (pSrc->GetChar());	// if it can be converted.
 		if ( ! pRef )
 		{
 			pRef = dynamic_cast <CScriptObj*> (pSrc);
@@ -1222,9 +1245,18 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 		return pRef->r_Verb(script, pSrc);
 	}
 
-	EXC_SET_BLOCK("Verb-Statement");
-	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 
+	EXC_SET_BLOCK("Verb-Statement");
+
+	if (!strnicmp(ptcKey, "CLEARVARS", 9))
+	{
+		ptcKey = s.GetArgStr();
+		SKIP_SEPARATORS(ptcKey);
+		g_Exp.m_VarGlobals.ClearKeys(ptcKey);
+		return true;
+	}
+
+	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 	switch (index)
 	{
 		case SSV_OBJ:
@@ -1478,7 +1510,11 @@ static void ES_QvalConditional_ParseArg(tchar* ptcSrc, tchar** ptcDest, lpctstr 
 
 		// Found a nested QVAL. Skip it, otherwise we'll catch the wrong separator
 		Str_SkipEnclosedAngularBrackets(ptcBracketPos);
-		ptcSrc = ptcLine = ptcBracketPos;
+		if (ptcBracketPos <= ptcLine)
+			++ptcLine;
+		else
+			ptcSrc = ptcLine = ptcBracketPos;
+
 		ptcBracketPos = ptcSepPos = nullptr;
 	}
 
@@ -1490,10 +1526,13 @@ bool CScriptObj::ES_QvalConditional(lpctstr ptcKey, CSString& sVal, CTextConsole
 	ADDTOCALLSTACK("CScriptObj::ES_QvalConditional");
 	// Do a switch ? type statement <QVAL condition ? option1 : option2>
 
-	tchar* ppCmds[3];
-	ppCmds[0] = const_cast<tchar*>(ptcKey);
+	// Do NOT work on the original arguments, it WILL fuck up the original string!
+	tchar* ptcArgs = Str_GetTemp();
+	Str_CopyLimitNull(ptcArgs, ptcKey, STR_TEMPLENGTH);
 
 	// We only partially evaluated the QVAL parameters (it's a special case), so we need to parse the expressions (still have angular brackets at this stage)
+	tchar* ppCmds[3];
+	ppCmds[0] = ptcArgs;
 
 	// Get the condition
 	ES_QvalConditional_ParseArg(ppCmds[0], &(ppCmds[1]), "?");
@@ -1503,17 +1542,17 @@ bool CScriptObj::ES_QvalConditional(lpctstr ptcKey, CSString& sVal, CTextConsole
 
 	// Complete evaluation of the condition
 	//  (do that in another string, since it may overwrite the arguments, which are written later in the same string).
-	tchar* ptcCondition = Str_GetTemp();
-	Str_CopyLimitNull(ptcCondition, ppCmds[0], STR_TEMPLENGTH);
-	ParseScriptText(ptcCondition, pSrc, 0, pArgs);
-	const bool fCondition = Exp_GetVal(ptcCondition);
+	tchar* ptcTemp = Str_GetTemp();
+	Str_CopyLimitNull(ptcTemp, ppCmds[0], STR_TEMPLENGTH);
+	ParseScriptText(ptcTemp, pSrc, 0, pArgs);
+	const bool fCondition = Exp_GetVal(ptcTemp);
 
 	// Get the retval we want
 	//	(we might as well work on the transformed original string, since at this point we don't care if we corrupt other arguments)
-	ppCmds[0] = ppCmds[(fCondition ? 1 : 2)];
-	ParseScriptText(ppCmds[0], pSrc, 0, pArgs);
+	ptcTemp = ppCmds[(fCondition ? 1 : 2)];
+	ParseScriptText(ptcTemp, pSrc, 0, pArgs);
 
-	sVal = ppCmds[0];
+	sVal = ptcTemp;
 	if (sVal.IsEmpty())
 		sVal = "";
 	return true;
@@ -1616,7 +1655,8 @@ size_t CScriptObj::ParseScriptText( tchar * pszResponse, CTextConsole * pSrc, in
 					++sm_iReentrant;
 					sm_fBrackets = false;
 
-					const size_t iLen = ParseScriptText(pszResponse + i, pSrc, 4, pArgs);
+					tchar* ptcRecurseParse = pszResponse + i;
+					const size_t iLen = ParseScriptText(ptcRecurseParse, pSrc, 4, pArgs);
 
 					sm_fBrackets = true;
 					--sm_iReentrant;
@@ -1648,7 +1688,8 @@ size_t CScriptObj::ParseScriptText( tchar * pszResponse, CTextConsole * pSrc, in
 			sm_fBrackets = false;
 
 			// Parse what's inside the open bracket
-			const size_t ilen = ParseScriptText( pszResponse + i, pSrc, 2, pArgs );
+			tchar* ptcRecurseParse = pszResponse + i;
+			const size_t ilen = ParseScriptText(ptcRecurseParse, pSrc, 2, pArgs );
 
 			sm_fBrackets = true;
 			--sm_iReentrant;
@@ -1713,7 +1754,7 @@ size_t CScriptObj::ParseScriptText( tchar * pszResponse, CTextConsole * pSrc, in
 
 			pszResponse[i] = '\0'; // Needed for r_WriteVal
 
-			lpctstr ptcKey = pszResponse + iBegin + 1;
+			lpctstr ptcKey = pszResponse + iBegin + 1; // move past the opening bracket
 			CSString sVal;
 			bool fRes;
 			if (eQval != QvalStatus::None)
@@ -1756,14 +1797,12 @@ size_t CScriptObj::ParseScriptText( tchar * pszResponse, CTextConsole * pSrc, in
 
 			const size_t iWriteValLen = sVal.GetLength();
 
-			tchar* ptcDest = pszResponse + iBegin + iWriteValLen; // + iWriteValLen because we need to leave the space for the 
-			tchar* ptcLeftover = pszResponse + i + 1;	// What should remain after (at "right") the stuff we evaluated with WriteVal
+			tchar* ptcDest = pszResponse + iBegin + iWriteValLen; // + iWriteValLen because we need to leave the space for the replacing keyword
+			tchar* ptcLeftover = pszResponse + i + 1;	// End of the statement we just evaluated
 			size_t iSrcLen = strlen(ptcLeftover) + 1;
 			memmove(ptcDest, ptcLeftover, iSrcLen);
-
 			ptcDest = pszResponse + iBegin;
 			memcpy(ptcDest, sVal.GetBuffer(), iWriteValLen);
-
 			i = iBegin + iWriteValLen - 1;
 
 			if (fRecurseBrackets) // just do this one then bail out.

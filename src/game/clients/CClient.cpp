@@ -464,37 +464,41 @@ bool CClient::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 				pRef = m_pHouseDesign;
 				return true;
 			case CLIR_PARTY:
-				if (!strnicmp(ptcKey, "CREATE", 7))
+				if (CChar* pCharThis = GetChar())
 				{
-					if (m_pChar->m_pParty)
-						return false;
-
-					lpctstr oldKey = ptcKey;
-					ptcKey += 7;
-
-					// Do i want to send the "joined" message to the party members?
-					bool fSendMsgs = (Exp_GetSingle(ptcKey) != 0) ? true : false;
-
-					// Add all the UIDs to the party
-					for (int ip = 0; ip < 10; ++ip)
+					if (!strnicmp(ptcKey, "CREATE", 7))
 					{
-						SKIP_ARGSEP(ptcKey);
-						CChar * pChar = CUID::CharFindFromUID(Exp_GetDWSingle(ptcKey));
-						if (!pChar)
-							continue;
-						if (!pChar->IsClientActive())
-							continue;
-						CPartyDef::AcceptEvent(pChar, m_pChar->GetUID(), true, fSendMsgs);
+						if (pCharThis->m_pParty)
+							return false;
 
-						if (*ptcKey == '\0')
-							break;
+						lpctstr oldKey = ptcKey;
+						ptcKey += 7;
+
+						// Do i want to send the "joined" message to the party members?
+						bool fSendMsgs = (Exp_GetSingle(ptcKey) != 0) ? true : false;
+
+						// Add all the UIDs to the party
+						for (int ip = 0; ip < 10; ++ip)
+						{
+							SKIP_ARGSEP(ptcKey);
+							CChar* pChar = CUID::CharFindFromUID(Exp_GetDWSingle(ptcKey));
+							if (!pChar)
+								continue;
+							if (!pChar->IsClientActive())
+								continue;
+							CPartyDef::AcceptEvent(pChar, pChar->GetUID(), true, fSendMsgs);
+
+							if (*ptcKey == '\0')
+								break;
+						}
+						ptcKey = oldKey;	// Restoring back to real ptcKey, so we don't get errors for giving an uid instead of PDV_CREATE.
 					}
-					ptcKey = oldKey;	// Restoring back to real ptcKey, so we don't get errors for giving an uid instead of PDV_CREATE.
+					if (!pCharThis->m_pParty)
+						return false;
+					pRef = pCharThis->m_pParty;
+					return true;
 				}
-				if (!this->m_pChar->m_pParty)
-					return false;
-				pRef = this->m_pChar->m_pParty;
-				return true;
+				return false;
 			case CLIR_TARG:
 				pRef = m_Targ_UID.ObjFind();
 				return true;
@@ -506,6 +510,7 @@ bool CClient::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 				return true;
 		}
 	}
+
 	return CScriptObj::r_GetRef( ptcKey, pRef );
 }
 

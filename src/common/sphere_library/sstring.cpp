@@ -1214,25 +1214,33 @@ int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError)
 
 void Str_SkipEnclosedAngularBrackets(tchar* & ptcLine)
 {
-    bool fOpenedOne = false;
-    int iOpenBrackets = 0;
+    // Move past a < > statement. It can have ( ) inside, if it happens, ignore < > characters inside ().
+    bool fOpenedOneAngular = false;
+    int iOpenAngular = 0, iOpenCurly = 0;
     tchar* ptcTest = ptcLine;
     while (const tchar ch = *ptcTest)
     {
         if (ISWHITESPACE(ch))
             ;
-        else if (ch == '<')
+        else if (ch == '(')
+            ++iOpenCurly;
+        else if (ch == ')')
+            --iOpenCurly;
+        else if (iOpenCurly == 0)
         {
-            fOpenedOne = true;
-            ++iOpenBrackets;
-        }
-        else if (ch == '>')
-        {
-            --iOpenBrackets;
-            if (fOpenedOne && !iOpenBrackets)
+            if (ch == '<')
             {
-                ptcLine = ptcTest + 1;
-                return;
+                fOpenedOneAngular = true;
+                ++iOpenAngular;
+            }
+            else if (ch == '>')
+            {
+                --iOpenAngular;
+                if (fOpenedOneAngular && !iOpenAngular)
+                {
+                    ptcLine = ptcTest + 1;
+                    return;
+                }
             }
         }
         ++ptcTest;
