@@ -158,9 +158,9 @@ void CItemContainer::Trade_Status( bool bCheck )
 		ushort i = 1;
 		for (CSObjContRec* pObjRec : *pPartner)
 		{
-			++i;
 			CItem* pItem = static_cast<CItem*>(pObjRec);
 			Args1.m_VarObjs.Insert(i, pItem, true);
+			++i;
 		}
 		Args1.m_iN1 = --i;
 
@@ -168,14 +168,14 @@ void CItemContainer::Trade_Status( bool bCheck )
 		i = 1;
 		for (CSObjContRec * pObjRec : *this)
 		{
-			++i;
 			CItem* pItem = static_cast<CItem*>(pObjRec);
 			Args2.m_VarObjs.Insert(i, pItem, true);
+			++i;
 		}
-		Args2.m_iN2 = --i;
+		Args2.m_iN1 = --i;
 
-		Args1.m_iN2 = Args2.m_iN2;
-		Args2.m_iN1 = Args1.m_iN1;
+		Args1.m_iN2 = Args2.m_iN1;
+		Args2.m_iN2 = Args1.m_iN1;
 		if ( (pChar1->OnTrigger(CTRIG_TradeAccepted, pChar2, &Args1) == TRIGRET_RET_TRUE) || (pChar2->OnTrigger(CTRIG_TradeAccepted, pChar1, &Args2) == TRIGRET_RET_TRUE) )
 			return;
 	}

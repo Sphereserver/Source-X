@@ -1212,6 +1212,43 @@ int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError)
     }
 }
 
+void Str_SkipEnclosedAngularBrackets(tchar* & ptcLine)
+{
+    // Move past a < > statement. It can have ( ) inside, if it happens, ignore < > characters inside ().
+    bool fOpenedOneAngular = false;
+    int iOpenAngular = 0, iOpenCurly = 0;
+    tchar* ptcTest = ptcLine;
+    while (const tchar ch = *ptcTest)
+    {
+        if (ISWHITESPACE(ch))
+            ;
+        else if (ch == '(')
+            ++iOpenCurly;
+        else if (ch == ')')
+            --iOpenCurly;
+        else if (iOpenCurly == 0)
+        {
+            if (ch == '<')
+            {
+                fOpenedOneAngular = true;
+                ++iOpenAngular;
+            }
+            else if (ch == '>')
+            {
+                --iOpenAngular;
+                if (fOpenedOneAngular && !iOpenAngular)
+                {
+                    ptcLine = ptcTest + 1;
+                    return;
+                }
+            }
+        }
+        ++ptcTest;
+    }
+}
+
+//--
+
 void CharToMultiByteNonNull(byte * Dest, const char * Src, int MBytes)
 {
     for (int idx = 0; idx != MBytes * 2; idx += 2) {

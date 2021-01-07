@@ -795,8 +795,7 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 							pMember = static_cast <CStoneMember *>(GetContainerHead());
 							SKIP_ARGSEP(pszArgs);
 							CScript script(pszArgs);
-							script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-							script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+							script.CopyParseState(s);
 
 							for (; pMember != nullptr; pMember = pMember->GetNext())
 							{
@@ -841,8 +840,7 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 							pMember = static_cast <CStoneMember *>(GetContainerHead());
 							SKIP_ARGSEP(pszArgs);
 							CScript script(pszArgs);
-							script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-							script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+							script.CopyParseState(s);
 
 							for (; pMember != nullptr; pMember = pMember->GetNext())
 							{

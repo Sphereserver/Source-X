@@ -2393,3 +2393,16 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Changed: QVAL in its conditional form (with the '?' symbol), after evaluating the given condition, now evaluates only the expression it has to return.
     This gives a little performance boost and gets rid of avoidable error logs happening before because the whole expression was fully parsed and evaluated.
 	Example: <QVAL <REF1.ISVALID> ? <REF1.NAME> : "None"> generated an error when REF1 wasn't valid, even if in that case <REF1.NAME> didn't actually need to be evaluated.
+
+03-01-2021, Nolok
+- Changed: Now TRY can be used to explicitly "TRY" to execute a command or set a property on an object which may or may not exist.
+  If the object doesn't exist, no operation is done and no error is returned. It can't be used to TRY to retrieve a value (like <TRY FINDID.invalid_item.NAME>).
+  Its use is DISCOURAGED, but sometimes it might be an easy way to execute trivial operations without a lot of if/endif clauses.
+  This is a way to explicitly allow what Sphere already did by default in the past (not checking if the object is valid and not returning an error),
+  which is something that only sometimes we expect and we want, most of the times it caused obscure bugs.
+
+03-01-2021, Ben
+- Fixed: REF1 being skipped in @tradeaccepted trigger.
+- Fixed: <I> returning error when used alone.
+- Removed: sectorsize checks when loading from sphere.ini to allow more customizations. (Recent changes prevented from setting sectorsize to 64 for map4)
+- Added: Random chance to sleep for NPCs walking into a sleeping sector to try and prevent NPCs lining up at the sector edges.

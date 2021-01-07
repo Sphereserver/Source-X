@@ -260,8 +260,6 @@ private:
 	static CHuffman m_Comp;
 
 private:
-	bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef );
-
 	bool OnRxConsoleLoginComplete();
 	bool OnRxConsole( const byte * pData, uint len );
 	bool OnRxAxis( const byte * pData, uint len );
@@ -399,6 +397,7 @@ public:
 		return ( static_cast <CClient*>( CSObjListRec::GetNext()));
 	}
 
+	virtual bool r_GetRef(lpctstr& ptcKey, CScriptObj*& pRef) override;
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute script type command on me
 	virtual bool r_WriteVal( lpctstr ptcKey, CSString & s, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_LoadVal( CScript & s ) override;

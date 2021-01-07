@@ -103,17 +103,7 @@ bool CUOMapList::Load(int map, char *args)
                 else m_sizey[map] = maxy;
             }
             if ( sectorsize > 0 )
-            {
-                if (( sectorsize < 8 ) || ( sectorsize % 8 ))
-                {
-                    g_Log.EventError("MAP%d: Sector size must be multiple of 8 (%d is invalid, %d is still effective).\n", map, sectorsize, m_sectorsize[map]);
-                }
-                else if (( m_sizex[map]%sectorsize ) || ( m_sizey[map]%sectorsize ))
-                {
-                    g_Log.EventError("MAP%d: Map dimensions [%d,%d] must be multiple of sector size (%d is invalid, %d is still effective).\n", map, m_sizex[map], m_sizey[map], sectorsize, m_sectorsize[map]);
-                }
-                else m_sectorsize[map] = sectorsize;
-            }
+                m_sectorsize[map] = sectorsize;
             if ( realmapnum >= 0 )
                 m_mapnum[map] = realmapnum;
             if ( mapid >= 0 )

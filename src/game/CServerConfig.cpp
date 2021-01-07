@@ -961,8 +961,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 						if ( pszStr && *pszStr )
 						{
 							CScript script(pszStr);
-							script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
-							script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
+							script.CopyParseState(s);
 							for (int nIndex = 0; nIndex < nSectors; ++nIndex)
 							{
 								CSector* pSector = CWorldMap::GetSector(nMapNumber, nIndex);
@@ -986,8 +985,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
                             if (pSector)
                             {
                                 CScript script(pszStr);
-                                script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
-                                script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
+								script.CopyParseState(s);
                                 return pSector->r_Verb(script, &g_Serv);
                             }
 

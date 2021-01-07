@@ -337,8 +337,7 @@ bool CSFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
                     {
                         SKIP_SEPARATORS(ptcKey);
                         CScript script(ptcKey, s.GetArgStr());
-                        script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-                        script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+                        script.CopyParseState(s);
                         return pObj->r_Verb(script, pSrc);
                     }
                 }

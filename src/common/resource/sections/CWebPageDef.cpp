@@ -215,7 +215,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 					if ( pszArgs[0] == '\0' )
 						pszArgs = "<tr><td>%NAME%</td><td>%REGION.NAME%</td></tr>\n";
 					Str_CopyLimitNull( pszTmp2, pszArgs, STR_TEMPLENGTH );
-					pChar->ParseText( Str_MakeFiltered( pszTmp2 ), &g_Serv, 1 );
+					pChar->ParseScriptText( Str_MakeFiltered( pszTmp2 ), &g_Serv, 1 );
 					pSrc->SysMessage( pszTmp2 );
 				}
 			}
@@ -238,7 +238,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 					++sm_iListIndex;
 
 					Str_CopyLimitNull(pszTmp2, s.GetArgStr(), STR_TEMPLENGTH);
-					pStone->ParseText(Str_MakeFiltered(pszTmp2), &g_Serv, 1);
+					pStone->ParseScriptText(Str_MakeFiltered(pszTmp2), &g_Serv, 1);
 					pSrc->SysMessage(pszTmp2);
 				}
 			}
@@ -253,7 +253,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 				{
 					++sm_iListIndex;
 					Str_CopyLimitNull( pszTmp2, s.GetArgStr(), STR_TEMPLENGTH);
-					pPage->ParseText( Str_MakeFiltered( pszTmp2 ), &g_Serv, 1 );
+					pPage->ParseScriptText( Str_MakeFiltered( pszTmp2 ), &g_Serv, 1 );
 					pSrc->SysMessage( pszTmp2 );
 				}
 			}
@@ -326,7 +326,7 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 			// Deal with the stuff preceding the scripts.
 			*pszHead = '\0';
 			pszHead += 26;
-			ParseText( pszTmp, pSrc, 1 );
+			ParseScriptText( pszTmp, pSrc, 1 );
 			FileOut.SysMessage( pszTmp );
 			fScriptMode = true;
 		}
@@ -365,7 +365,7 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 		}
 
 		// Look for stuff we can displace here. %STUFF%
-		ParseText( pszHead, pSrc, 1 );
+		ParseScriptText( pszHead, pSrc, 1 );
 		FileOut.SysMessage( pszHead );
 	}
 

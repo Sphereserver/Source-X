@@ -2863,8 +2863,7 @@ bool CItemMulti::r_LoadVal(CScript & s)
             }
             ASSERT(m_pRegion);
             CScript script(s.GetKey() + 7, s.GetArgStr());
-            script.m_iResourceFileIndex = s.m_iResourceFileIndex;    // Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-            script.m_iLineNum = s.m_iLineNum;                        // Line in the script file where Key/Arg were read
+            script.CopyParseState(s);
             return m_pRegion->r_LoadVal(script);
         }
         // misc

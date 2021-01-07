@@ -52,6 +52,11 @@ Compatibility changes from 0.56d to X1
   If you just want to test the object (like <OBJ>), like before, 0 will be returned with no error if it's invalid.
   Assigning to REFx an invalid value is legit.
   Using ISVALID to check an object validity/existence is now the preferred way (instead of checking its value with magic numbers like 0 or -1/0FFFFFFFF).
+- Now TRY can be used to explicitly "TRY" to execute a command or set a property on an object which may or may not exist.
+  If the object doesn't exist, no operation is done and no error is returned. It can't be used to TRY to retrieve a value (like <TRY FINDID.invalid_item.NAME>).
+  Its use is DISCOURAGED but sometimes it might be an easy way to execute trivial operations without a lot of if/endif clauses.
+  This is a way to explicitly allow what Sphere already did by default in the past (not checking if the object is valid and not returning an error),
+  which is something that only sometimes we expect and we want, most of the times it caused obscure bugs.
 - Added/changed some keywords for spawns (read the changelog for more). This causes a SAVE FILES INCOMPATIBILITY between x and 56d, because new x-only
   keywords will be saved, and those won't be recognized by 56d. If you want to port back the saves, you have to replace in sphereworld.scp the
   keyword SPAWNID with MORE1 in t_spawn_char and t_spawn_item items.

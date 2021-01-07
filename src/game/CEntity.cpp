@@ -1,10 +1,11 @@
 
 #include "CEntity.h"
 #include "CComponent.h"
+#include "../CException.h"
 #include "../CLog.h"
-#include "CObjBase.h"
 #include "chars/CChar.h"
 #include "items/CItem.h"
+#include "CObjBase.h"
 
 
 CEntity::CEntity()
@@ -164,6 +165,8 @@ bool CEntity::r_LoadVal(CScript & s)
 bool CEntity::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from script.
 {
     ADDTOCALLSTACK_INTENSIVE("CEntity::r_Verb");
+    EXC_TRY("Verb");
+
     if (_lComponents.empty())
         return false;
     for (auto it = _lComponents.begin(), itEnd = _lComponents.end(); it != itEnd; ++it)
@@ -175,6 +178,8 @@ bool CEntity::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from s
             return true;
         }
     }
+
+    EXC_CATCH;
     return false;
 }
 
