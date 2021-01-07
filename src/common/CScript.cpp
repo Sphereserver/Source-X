@@ -729,7 +729,7 @@ bool CScript::ReadKeyParse() // Read line from script
 	
 	const int iKeyIndex = (strnicmp(m_pszKey, "FLOAT.", 6) == 0) ? 1 : 0;
 	TemporaryString tsBuf;
-	if ( m_pszArg[0] == '.' )
+	if ( m_pszArg[0] == '.' )	// ".=" concatenation operator
 	{
 		if ( *pszArgs == '"' )
 		{
