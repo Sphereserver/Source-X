@@ -802,7 +802,7 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 			DEBUG_WARN(("%s (%x): Fast Walk ?\n", GetName(), GetSocketID()));
 			if ( IsTrigUsed(TRIGGER_USEREXWALKLIMIT) )
 			{
-				if ( m_pChar->OnTrigger(CTRIG_UserExWalkLimit, m_pChar) != TRIGRET_RET_TRUE )
+				if ( m_pChar->OnTrigger(CTRIG_UserExWalkLimit, m_pChar) == TRIGRET_RET_TRUE )
 					return false;
 			}
 		}
@@ -855,36 +855,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 		// To get milliseconds precision we must get the system clock manually at each walk request (the server clock advances only at every tick).
 		const int64 iCurTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
-        if ( IsSetEF(EF_FastWalkPrevention) && !m_pChar->IsPriv(PRIV_GM) )
-        {
-			// THIS SYSTEM DO NOT WORK SEE DETAIL DOWN
-            if ( iCurTime < m_timeNextEventWalk )		// fastwalk detected (speedhack)
-            {
-				g_Log.Event(LOGL_WARN | LOGM_CHEAT, "Fastwalk detection for '%s', this player will notice a lag\n", GetAccount()->GetName());
-                new PacketMovementRej(this, sequence);
-                return false;
-            }
-
-            int64 iDelay = 0;
-            if ( m_pChar->IsStatFlag(STATF_ONHORSE|STATF_HOVERING) || (m_pChar->m_pPlayer->m_speedMode & 0x01) )
-                iDelay = (rawdir & 0x80) ? 100 : 200;	// 100ms : 200ms 
-            else
-                iDelay = (rawdir & 0x80) ? 200 : 400;	// 200ms : 400ms
-
-			iDelay -= 30; //Delay offset is set to be more permisif when player have lag or processor lack precision 
-            // This system do not work because the offset must be fine tune for each server and for EACH player and it's ping
-			// For exemple, in local we set offset to 10 and there is no false-positive. If set offset to 30, Speedhack at 1.2 is not detect
-			// On live server, with delay of 30, some player will experience false-positive some not. Player with good ping will be able to use speedhack without detection
-			// FIXME: The offset delay should be calculate using the ping value of each player and a fix value of processor functionnality.
-			m_timeNextEventWalk = iCurTime + iDelay;
-        }
-        else if (!m_pChar->IsPriv(PRIV_GM) && !Event_CheckWalkBuffer(rawdir) )
-        {
-            new PacketMovementRej(this, sequence);
-            return false;
-        }
-
-		if ( !m_pChar->MoveToChar(pt, false, false) )
+		if (!m_pChar->MoveToChar(pt, false, false))
 		{
 			new PacketMovementRej(this, sequence);
 			return false;
@@ -892,12 +863,45 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 
 		// Check if I stepped on any item/teleport
 		TRIGRET_TYPE iRet = m_pChar->CheckLocation(false);
-		if ( iRet == TRIGRET_RET_FALSE )
+		if (iRet == TRIGRET_RET_FALSE)
 		{
 			m_pChar->SetUnkPoint(ptOld);	// we already moved, so move back to previous location
 			new PacketMovementRej(this, sequence);
 			return false;
 		}
+
+		if (IsSetEF(EF_FastWalkPrevention) && !m_pChar->IsPriv(PRIV_GM))
+		{
+			// FIXME:THIS SYSTEM DO NOT WORK SEE DETAIL DOWN
+			if (iCurTime < m_timeNextEventWalk)		// fastwalk detected (speedhack)
+			{
+				g_Log.Event(LOGL_WARN | LOGM_CHEAT, "Fastwalk detection for '%s', this player will notice a lag\n", GetAccount()->GetName());
+				new PacketMovementRej(this, sequence);
+				return false;
+			}
+
+			int64 iDelay = 0;
+			if (m_pChar->IsStatFlag(STATF_ONHORSE | STATF_HOVERING) || (m_pChar->m_pPlayer->m_speedMode & 0x01))
+				iDelay = (rawdir & 0x80) ? 100 : 200;	// 100ms : 200ms 
+			else
+				iDelay = (rawdir & 0x80) ? 200 : 400;	// 200ms : 400ms
+
+			iDelay -= 30; //Delay offset is set to be more permisif when player have lag or processor lack precision 
+			// This system do not work because the offset must be fine tune for each server and for EACH player and it's ping
+			// For exemple, in local we set offset to 10 and there is no false-positive. If set offset to 30, Speedhack at 1.2 is not detect
+			// On live server, with delay of 30, some player will experience false-positive some not. Player with good ping will be able to use speedhack without detection
+			// FIXME: The offset delay should be calculate using the ping value of each player and a fix value of processor functionnality. The iDelay must ajust each tick depending of the ping
+			// The buffer system Event_CheckWalkBuffer seem more acurate because it permit some ajustment.
+			m_timeNextEventWalk = iCurTime + iDelay;
+		}
+		else if (!m_pChar->IsPriv(PRIV_GM) && !Event_CheckWalkBuffer(rawdir))
+		{
+			new PacketMovementRej(this, sequence);
+			m_timeLastEventWalk = iCurTime;
+			++m_iWalkStepCount;					// Increase step count to use on walk buffer checks
+			return false;
+		}
+
 
 		// Set running flag if I'm running
 		m_pChar->StatFlag_Mod(STATF_FLY, (rawdir & 0x80) ? true : false);
