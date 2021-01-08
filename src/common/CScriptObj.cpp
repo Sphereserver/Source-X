@@ -770,37 +770,48 @@ badcmd:
 					sVal.FormatVal((int)( pszPos - ptcKey ) );
 			}
 			return true;
-		case SSC_StrSub:
-			{
-				tchar * ppArgs[3];
-				int iQty = Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, CountOf(ppArgs));
-				if ( iQty < 3 )
-					return false;
-
-				int64 iPos = Exp_GetVal( ppArgs[0] );
-				int64 iCnt = Exp_GetVal( ppArgs[1] );
-				if ( iCnt < 0 )
-					return false;
-
-				int64 iLen = strlen( ppArgs[2] );
-                const bool fBackwards = (iPos < 0);
-				if ( fBackwards )
-                    iPos = iLen - iCnt;
-				if ( (iPos > iLen) || (iPos < 0) )
+        case SSC_StrSub:
+        {
+            tchar * ppArgs[3];
+            int iQty = Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, CountOf(ppArgs));
+            if ( iQty < 3 )
+                return false;
+                
+            int64 iPos = Exp_GetVal( ppArgs[0] );
+            int64 iCnt = Exp_GetVal( ppArgs[1] );
+            if (iCnt < 0)
+                return false;
+            
+            if ( *ppArgs[2] == '"')
+                ++ppArgs[2];
+                
+            for (tchar *pEnd = ppArgs[2] + strlen(ppArgs[2]) - 1; pEnd >= ppArgs[2]; --pEnd)
+            {
+                if ( *pEnd == '"')
+                {
+                    *pEnd = '\0';
+                    break;
+                }
+            }
+            int64 iLen = strlen(ppArgs[2]);
+            
+            const bool fBackwards = (iPos < 0);
+            if ( fBackwards )
+                iPos = iLen - iCnt;
+                if ( (iPos > iLen) || (iPos < 0) )
                     iPos = 0;
-
-				if ( (iPos + iCnt > iLen) || (iCnt == 0) )
-					iCnt = iLen - iPos;
-
-				tchar *buf = Str_GetTemp();
-				Str_CopyLimitNull( buf, ppArgs[2] + iPos, (size_t)(iCnt + 1) );
-
-				if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
-					g_Log.EventDebug("SCRIPT: strsub(%" PRId64 ",%" PRId64 ",'%s') -> '%s'\n", iPos, iCnt, ppArgs[2], buf);
-
-				sVal = buf;
-			}
-			return true;
+                    
+                if ( (iPos + iCnt > iLen) || (iCnt == 0) )
+                    iCnt = iLen - iPos;
+                    
+                tchar *buf = Str_GetTemp();
+                Str_CopyLimitNull( buf, ppArgs[2] + iPos, (size_t)(iCnt + 1) );
+                
+                if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
+                    g_Log.EventDebug("SCRIPT: strsub(%" PRId64 ",%" PRId64 ",'%s') -> '%s'\n", iPos, iCnt, ppArgs[2], buf);
+                sVal = buf;
+            }
+            return true;
 		case SSC_StrArg:
 			{
 				tchar * buf = Str_GetTemp();

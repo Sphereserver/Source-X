@@ -2406,3 +2406,6 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: <I> returning error when used alone.
 - Removed: sectorsize checks when loading from sphere.ini to allow more customizations. (Recent changes prevented from setting sectorsize to 64 for map4)
 - Added: Random chance to sleep for NPCs walking into a sleeping sector to try and prevent NPCs lining up at the sector edges.
+
+08-01-2021
+- Added: Quote support for STRSUB function to avoid whitespace issues.
