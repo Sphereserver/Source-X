@@ -17,6 +17,8 @@ class CUID;
 class CChar;
 
 
+enum SK_TYPE : int;
+
 enum TRIGRUN_TYPE
 {
 	TRIGRUN_SECTION_EXEC,	// Just execute this. (first line already read!)
@@ -121,10 +123,18 @@ public:
 
 // Special statements
 private:
-	TRIGRET_TYPE OnTriggerForLoop(CScript& s, int iType, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, CSString* pResult);
+	// While, standard for loop and some special for loops
+	TRIGRET_TYPE OnTriggerLoopGeneric(CScript& s, int iType, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, CSString* pResult);
+	TRIGRET_TYPE OnTriggerLoopForCharSpecial(CScript& s, SK_TYPE iCmd, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, CSString* pResult);
+	TRIGRET_TYPE OnTriggerLoopForCont(CScript& s, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, CSString* pResult);
+	TRIGRET_TYPE OnTriggerLoopForContSpecial(CScript& s, SK_TYPE iCmd, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, CSString* pResult);
 
-	// Special statements evaluations (ES = EvaluateStatement)
-	bool ES_QvalConditional(lpctstr pKey, CSString& sVal, CTextConsole* pSrc, CScriptTriggerArgs* pArgs);
+	// Special statements
+	//bool Evaluate_Conditional(lpctstr ptcExpression, CTextConsole* pSrc, CScriptTriggerArgs* pArgs); // IF, ELIF, ELSEIF
+	bool Evaluate_QvalConditional(lpctstr ptcKey, CSString& sVal, CTextConsole* pSrc, CScriptTriggerArgs* pArgs);
+
+	bool Execute_Call(CScript& s, CTextConsole* pSrc, CScriptTriggerArgs* pArgs);
+	bool Execute_FullTrigger(CScript& s, CTextConsole* pSrc, CScriptTriggerArgs* pArgs);
 
 
 // Utilities

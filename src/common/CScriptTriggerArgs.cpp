@@ -458,7 +458,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsol
                         {
                             ptcArgEnd = s;
                             GETNONWHITESPACE(ptcArgEnd);
-                            if ((ptcArgEnd == '\0') || (ptcArgEnd == s))
+                            if ((*ptcArgEnd == '\0') || (ptcArgEnd == s))
                             {
                                 *s = '\0';
                             }
