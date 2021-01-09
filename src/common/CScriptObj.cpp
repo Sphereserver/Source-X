@@ -1569,58 +1569,55 @@ bool CScriptObj::ES_QvalConditional(lpctstr ptcKey, CSString& sVal, CTextConsole
 	return true;
 }
 
-size_t CScriptObj::ParseScriptText( tchar * pszResponse, CTextConsole * pSrc, int iFlags, CScriptTriggerArgs * pArgs )
+size_t CScriptObj::ParseScriptText( tchar * ptcResponse, CTextConsole * pSrc, int iFlags, CScriptTriggerArgs * pArgs )
 {
 	ADDTOCALLSTACK("CScriptObj::ParseScriptText");
-	//ASSERT(pszResponse[0] != ' ');	// Not needed: i remove whitespaces and invalid characters here.
+	//ASSERT(ptcResponse[0] != ' ');	// Not needed: i remove whitespaces and invalid characters here.
 
 	// Take in a line of text that may have fields that can be replaced with operators here.
 	// ARGS:
-	// iFlags & 1: Use HTML-compatible delimiters (%).
+	// iFlags & 1: Use HTML-compatible delimiters (%). Inside those, angular brackets are allowed to do nested evaluations.
 	// iFlags & 2: Allow recusive bracket count. 1=use HTML %% as the delimiters.
 	// iFlags & 4: Just parsing a nested QVAL.
 	// NOTE:
 	//  html will have opening <script language="SPHERE_FILE"> and then closing </script>
 	// RETURN:
-	//  New length of the string.
+	//  iFlags & 4: Position of the ending bracket/delimiter of a QVAL statement.
+	//  Otherwise: New length of the string.
 
+	// Recursion control variables.
 	static int sm_iReentrant = 0;
-	static bool sm_fBrackets = false;	// allowed to span multi lines.
+	static bool sm_fBrackets = false;	// Am i evaluating a statement? (Am i inside < > brackets of a statement i am currently evaluating?)
 
 	const bool fRecurseBrackets = ((iFlags & 2) != 0);
 	if (!fRecurseBrackets)
 		sm_fBrackets = false;
 
-	// General purpose variables
-	tchar chBegin = '<';
-	tchar chEnd = '>';
-
+	// General purpose variables.
 	const bool fHTML = ((iFlags & 1) != 0);
-	if ( fHTML )
-	{
-		// If we are parsing a string from a HTML file, we are using '%' as a delimiter for Sphere expressions, since < > are reserved characters in HTML.
-		chBegin = '%';
-		chEnd = '%';
-	}
 
-	// Variables used to handle the QVAL special case and do lazy evaluation, instead of fully evaluating the whole string on the first pass
+	// If we are parsing a string from a HTML file, we are using '%' as a delimiter for Sphere expressions, since < > are reserved characters in HTML.
+	const tchar chBegin = fHTML ? '%' : '<';
+	const tchar chEnd	= fHTML ? '%' : '>';
+
+	// Variables used to handle the QVAL special case and do lazy evaluation, instead of fully evaluating the whole string on the first pass.
 	enum class QvalStatus { None, Condition, Returns, End } eQval = QvalStatus::None;
 	int iQvalOpenBrackets = 0;
 
 	size_t iBegin = 0;
 	size_t i = 0;
-	EXC_TRY("ParseScriptText Loop");
-	for ( i = 0; pszResponse[i]; ++i )
+	EXC_TRY("ParseScriptText Main Loop");
+	for ( i = 0; ptcResponse[i]; ++i )
 	{
-		const tchar ch = pszResponse[i];
-		const tchar chNext = pszResponse[i + 1];	// Check this to ignore stuff like <=, <<...
+		const tchar ch = ptcResponse[i];
+		const tchar chNext = ptcResponse[i + 1];	// Check this to ignore stuff like <=, <<...
 
 		// Are we looking for the current statement start?
 		if ( ! sm_fBrackets )	// not in brackets
 		{
 			if ( ch == chBegin )	// found the start !
 			{
-				if (!(IsAlnum(chNext) || (chNext == '<')))
+				if ((chNext == '<') || !(IsAlnum(chNext)))
 					continue;	// Ignore this
 
 				// Set the statement start
@@ -1628,7 +1625,7 @@ size_t CScriptObj::ParseScriptText( tchar * pszResponse, CTextConsole * pSrc, in
 				sm_fBrackets = true;
 
 				// Set-up to process special statements: is it a QVAL?
-				const bool fIsQval = !strnicmp(pszResponse + i + 1, "QVAL", 4);
+				const bool fIsQval = !strnicmp(ptcResponse + i + 1, "QVAL", 4);
 				if (fIsQval)
 				{
 					++iQvalOpenBrackets;
@@ -1652,13 +1649,13 @@ size_t CScriptObj::ParseScriptText( tchar * pszResponse, CTextConsole * pSrc, in
 		// Handle possibly recursive angular brackets (i'm already inside an open bracket)
 		if ( ch == '<' )
 		{
-			if (!(IsAlnum(chNext) || (chNext == '<')))
+			if ((chNext == '<') || !(IsAlnum(chNext)))
 				continue;	// Ignore this
 
 			// Detect nested QVALs
 			if (eQval != QvalStatus::None)
 			{
-				const bool fIsQval = !strnicmp(pszResponse + i + 1, "QVAL", 4);
+				const bool fIsQval = !strnicmp(ptcResponse + i + 1, "QVAL", 4);
 				if (fIsQval)
 				{
 					// Nested QVAL... Needs to be evaluated separately, but we only want to know where it ends.
@@ -1666,7 +1663,7 @@ size_t CScriptObj::ParseScriptText( tchar * pszResponse, CTextConsole * pSrc, in
 					++sm_iReentrant;
 					sm_fBrackets = false;
 
-					tchar* ptcRecurseParse = pszResponse + i;
+					tchar* ptcRecurseParse = ptcResponse + i;
 					const size_t iLen = ParseScriptText(ptcRecurseParse, pSrc, 4, pArgs);
 
 					sm_fBrackets = true;
@@ -1699,7 +1696,7 @@ size_t CScriptObj::ParseScriptText( tchar * pszResponse, CTextConsole * pSrc, in
 			sm_fBrackets = false;
 
 			// Parse what's inside the open bracket
-			tchar* ptcRecurseParse = pszResponse + i;
+			tchar* ptcRecurseParse = ptcResponse + i;
 			const size_t ilen = ParseScriptText(ptcRecurseParse, pSrc, 2, pArgs );
 
 			sm_fBrackets = true;
@@ -1763,9 +1760,9 @@ size_t CScriptObj::ParseScriptText( tchar * pszResponse, CTextConsole * pSrc, in
 			//-- Write to our temporary sVal the evaluated script
 			EXC_SET_BLOCK("writeval");
 
-			pszResponse[i] = '\0'; // Needed for r_WriteVal
+			ptcResponse[i] = '\0'; // Needed for r_WriteVal
 
-			lpctstr ptcKey = pszResponse + iBegin + 1; // move past the opening bracket
+			lpctstr ptcKey = ptcResponse + iBegin + 1; // move past the opening bracket
 			CSString sVal;
 			bool fRes;
 			if (eQval != QvalStatus::None)
@@ -1795,7 +1792,7 @@ size_t CScriptObj::ParseScriptText( tchar * pszResponse, CTextConsole * pSrc, in
 			{
 				DEBUG_ERR(( "Can't resolve <%s>.\n", ptcKey ));
 				// Just in case this really is a <= operator ?
-				pszResponse[i] = chEnd; // it's the char we overwrote with '\0'
+				ptcResponse[i] = chEnd; // it's the char we overwrote with '\0'
 			}
 
 			if (fHTML && sVal.IsEmpty())
@@ -1808,12 +1805,16 @@ size_t CScriptObj::ParseScriptText( tchar * pszResponse, CTextConsole * pSrc, in
 
 			const size_t iWriteValLen = sVal.GetLength();
 
-			tchar* ptcDest = pszResponse + iBegin + iWriteValLen; // + iWriteValLen because we need to leave the space for the replacing keyword
-			tchar* ptcLeftover = pszResponse + i + 1;	// End of the statement we just evaluated
-			size_t iSrcLen = strlen(ptcLeftover) + 1;
-			memmove(ptcDest, ptcLeftover, iSrcLen);
-			ptcDest = pszResponse + iBegin;
+			// Make room for the obtained value, moving to left (if it's shorter than the scripted statement) or right (if longer) the string characters after it.
+			tchar* ptcDest = ptcResponse + iBegin + iWriteValLen; // + iWriteValLen because we need to leave the space for the replacing keyword
+			const tchar * const ptcLeftover = ptcResponse + i + 1;	// End of the statement we just evaluated
+			const size_t iLeftoverLen = strlen(ptcLeftover) + 1;
+			memmove(ptcDest, ptcLeftover, iLeftoverLen);
+
+			// Insert the obtained value in the room we created.
+			ptcDest = ptcResponse + iBegin;
 			memcpy(ptcDest, sVal.GetBuffer(), iWriteValLen);
+
 			i = iBegin + iWriteValLen - 1;
 
 			if (fRecurseBrackets) // just do this one then bail out.
@@ -1823,7 +1824,7 @@ size_t CScriptObj::ParseScriptText( tchar * pszResponse, CTextConsole * pSrc, in
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("response '%s' source addr '0%p' flags '%d' args '%p'\n", pszResponse, static_cast<void *>(pSrc), iFlags, static_cast<void *>(pArgs));
+	g_Log.EventDebug("response '%s' source addr '0%p' flags '%d' args '%p'\n", ptcResponse, static_cast<void *>(pSrc), iFlags, static_cast<void *>(pArgs));
 	EXC_DEBUG_END;
 	
 	return i;
@@ -2755,7 +2756,7 @@ jump_in:
 								int64 iN3 = pArgs->m_iN3;
 								CScriptObj *pO1 = pArgs->m_pO1;
 								CSString s1 = pArgs->m_s1;
-								CSString s1_raw = pArgs->m_s1_raw;
+								CSString s1_raw = pArgs->m_s1_buf_vec;
 								pArgs->m_v.clear();
 								pArgs->Init(z);
 
@@ -2766,7 +2767,7 @@ jump_in:
 								pArgs->m_iN3 = iN3;
 								pArgs->m_pO1 = pO1;
 								pArgs->m_s1 = s1;
-								pArgs->m_s1_raw = s1_raw;
+								pArgs->m_s1_buf_vec = s1_raw;
 								pArgs->m_v.clear();
 							}
 							else
@@ -2820,7 +2821,7 @@ jump_in:
 								int64 iN3 = pArgs->m_iN3;
 								CScriptObj *pO1 = pArgs->m_pO1;
 								CSString s1 = pArgs->m_s1;
-								CSString s1_raw = pArgs->m_s1_raw;
+								CSString s1_raw = pArgs->m_s1_buf_vec;
 								pArgs->m_v.clear();
 								pArgs->Init(z);
 
@@ -2831,7 +2832,7 @@ jump_in:
 								pArgs->m_iN3 = iN3;
 								pArgs->m_pO1 = pO1;
 								pArgs->m_s1 = s1;
-								pArgs->m_s1_raw = s1_raw;
+								pArgs->m_s1_buf_vec = s1_raw;
 								pArgs->m_v.clear();
 							}
 							else

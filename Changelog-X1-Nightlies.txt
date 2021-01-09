@@ -2402,10 +2402,15 @@ Must have event, even if it's empty, since it's applied by the source to generat
   which is something that only sometimes we expect and we want, most of the times it caused obscure bugs.
 
 03-01-2021, Ben
-- Fixed: REF1 being skipped in @tradeaccepted trigger.
-- Fixed: <I> returning error when used alone.
+- Fixed: REF1 being skipped in @TradeAccepted trigger.
 - Removed: sectorsize checks when loading from sphere.ini to allow more customizations. (Recent changes prevented from setting sectorsize to 64 for map4)
 - Added: Random chance to sleep for NPCs walking into a sleeping sector to try and prevent NPCs lining up at the sector edges.
 
-08-01-2021
+08-01-2021, xwerswoodx
 - Added: Quote support for STRSUB function to avoid whitespace issues.
+
+09-01-2021, Nolok
+- Fixed: Explicitly setting a LOCAL to "" set its value to 0, instead of to an empty string. Setting it to an empty argument still sets it to 0.
+- Fixed: ARGS not returning the full string but only the first argument if we pass to a function multiple quoted arguments (like "Test1", "Test2", test).
+- Fixed: ARGV truncating the value of a quoted argument to the last quote character ("), even if there was other text after it.
+- Fixed: Console error when @CreateLoot or @NPCRestock couldn't create an item (example: the char or the corpse got immediately removed after creation, if ever created) (Issue: #592).

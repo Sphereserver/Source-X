@@ -44,9 +44,9 @@ void CScriptTriggerArgs::Clear()
     m_iN2 = 0;
     m_iN3 = 0;
 
-    m_s1_raw.Clear();
     m_s1.Clear();
 
+    m_s1_buf_vec.Clear();
     m_v.clear();
 
     m_pO1 = nullptr;
@@ -63,34 +63,70 @@ void CScriptTriggerArgs::Clear()
 
 void CScriptTriggerArgs::Init( lpctstr pszStr )
 {
+    ASSERT(!ISWHITESPACE(*pszStr));
+
     m_pO1 = nullptr;
 
     if ( pszStr == nullptr )
-        pszStr	= "";
-    // raw is left untouched for now - it'll be split the 1st time argv is accessed
-    m_s1_raw = pszStr;
-    bool fQuote = false;
-    if ( *pszStr == '"' )
+        pszStr = "";
+
+    // this string buffer is left untouched for now - it'll be split the 1st time argv is accessed
+    m_s1_buf_vec = pszStr;
+
+    // ensure argv will be recalculated next time it is accessed
+    m_v.clear();
+
+    // assign the proper value to ARGS
+    bool fActiveQuote = false;
+    lpctstr ptcFirstQuote = nullptr;
+    int iArgs = 0;
+
+    lptstr ptcParse;
+    for (ptcParse = m_s1_buf_vec.GetBuffer(); *ptcParse != '\0'; ++ptcParse)
     {
-        fQuote = true;
-        ++pszStr;
+        if (*ptcParse == '"')
+        {
+            fActiveQuote = !fActiveQuote;
+            ptcFirstQuote = (!iArgs && fActiveQuote) ? ptcParse : nullptr;
+        }
+        else if ((*ptcParse == ',') && !fActiveQuote)
+        {
+            ++iArgs;
+        }
+    }
+
+    const bool fWholeArgQuoted = (ptcFirstQuote && (iArgs == 1));
+    if (fWholeArgQuoted)
+    {
+        ASSERT(*pszStr == '"');
+        ++pszStr;   // take out the first quote symbol.
     }
 
     m_s1 = pszStr;
 
-    // take quote if present.
-    if (fQuote)
+    // take out the last quote symbol (if present).
+    if (fWholeArgQuoted)
     {
-        tchar * str = strchr(m_s1.GetBuffer(), '"');
-        if ( str != nullptr )
-            *str = '\0';
+        lptstr ptcArgEnd = ptcParse, ptcArgStart = m_s1_buf_vec.GetBuffer();
+        for (ptcParse = ptcArgEnd - 1; ptcParse != ptcArgStart; --ptcParse)
+        {
+            if (ISWHITESPACE(*ptcParse))
+                continue;
+
+            // If we have other characters after the quote symbol we can't really say that the whole argument is quoted
+            if (*ptcParse != '"')
+                break;
+
+            *ptcParse = '\0';
+            break;
+        }
     }
 
+    // Try to parse out numerical values from the string.
     m_iN1 = 0;
     m_iN2 = 0;
     m_iN3 = 0;
 
-    // attempt to parse this.
     if ( IsDigit(*pszStr) || ((*pszStr == '-') && IsDigit(*(pszStr+1))) )
     {
         m_iN1 = Exp_GetSingle(pszStr);
@@ -105,9 +141,6 @@ void CScriptTriggerArgs::Init( lpctstr pszStr )
             }
         }
     }
-
-    // ensure argv will be recalculated next time it is accessed
-    m_v.clear();
 }
 
 
@@ -210,7 +243,7 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
     {
         bool fQuoted = false;
         lpctstr ptcArg = s.GetArgStr(&fQuoted);
-        if (!ptcArg || !ptcArg[0])
+        if (!ptcArg || (fQuoted && !ptcArg[0]))
             ptcArg = "0";
         return m_VarsLocal.SetStr( s.GetKey() + 6, fQuoted, ptcArg, false );
     }
@@ -267,7 +300,9 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
         }
     }
     else
-        index = FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
+    {
+        index = FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    }
 
     EXC_SET_BLOCK("Verb-Statement");
     switch (index)
@@ -377,7 +412,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsol
         if ( uiQty <= 0 )
         {
             // PARSE IT HERE
-            tchar* ptcArg = m_s1_raw.GetBuffer();
+            tchar* ptcArg = m_s1_buf_vec.GetBuffer();
             tchar * s = ptcArg;
             bool fQuotes = false;
             bool fInerQuotes = false;
@@ -398,7 +433,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsol
                     continue;
                 }
 
-                // check to see if the argument is quoted (incase it contains commas)
+                // check to see if the argument is quoted (in case it contains commas)
                 if ( *s == '"' )
                 {
                     ++s;
@@ -413,8 +448,26 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsol
                 {
                     if ( (*s == '"' ) && fQuotes )
                     {
-                        *s	= '\0';
                         fQuotes = false;
+                        lptstr ptcArgEnd = strpbrk(s+1, "\",");
+                        if (ptcArgEnd > s)
+                        {
+                            *(ptcArgEnd - 1) = '\0';
+                        }
+                        else
+                        {
+                            ptcArgEnd = s;
+                            GETNONWHITESPACE(ptcArgEnd);
+                            if ((ptcArgEnd == '\0') || (ptcArgEnd == s))
+                            {
+                                *s = '\0';
+                            }
+                            else
+                            {
+                                s = ptcArgEnd;
+                                continue;
+                            }
+                        }
                     }
                     else if ( *s == '"' )
                     {
@@ -439,6 +492,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsol
                         ++s;
                         break;
                     }
+
                     ++s;
                 }
                 m_v.emplace_back( ptcArg );

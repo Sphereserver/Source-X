@@ -255,7 +255,7 @@ bool CPartyDef::MessageEvent( CUID uidDst, CUID uidSrc, const nchar *pText, int 
 		Args.m_iN1 = uidSrc;
 		Args.m_iN2 = uidDst;
 		Args.m_s1 = szText;
-		Args.m_s1_raw = szText;
+		Args.m_s1_buf_vec = szText;
 
 		if ( r_Call(m_pSpeechFunction, &g_Serv, &Args, nullptr, &tr) )
 		{

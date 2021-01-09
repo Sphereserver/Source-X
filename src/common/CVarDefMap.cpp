@@ -442,16 +442,20 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, 
 		return nullptr;
 
     ASSERT(pszVal);
-	if ( pszVal[0] == '\0' )	// if Val is an empty string, remove any previous def (and do not add a new def)
+	if (!fQuoted)
 	{
-		DeleteAtKey(pszName);
-		return nullptr;
-	}
+		if (pszVal[0] == '\0')
+		{
+			// If Val is an empty string, remove any previous def (and do not add a new def)
+			DeleteAtKey(pszName);
+			return nullptr;
+		}
 
-	if ( !fQuoted && IsSimpleNumberString(pszVal))
-	{
-		// Just store the number and not the string.
-		return SetNum( pszName, Exp_Get64Val( pszVal ), fDeleteZero, fWarnOverwrite);
+		if (IsSimpleNumberString(pszVal))
+		{
+			// Just store the number and not the string.
+			return SetNum(pszName, Exp_Get64Val(pszVal), fDeleteZero, fWarnOverwrite);
+		}
 	}
 
     const size_t idx = m_Container.find_predicate(pszName, VarDefCompare);

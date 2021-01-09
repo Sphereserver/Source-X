@@ -3156,7 +3156,7 @@ bool CChar::Death()
     if ( IsTrigUsed(TRIGGER_CREATELOOT) )
     {
         //OnTrigger(CTRIG_CreateLoot, this);
-        ReadScriptTrig(Char_GetDef(), CTRIG_CreateLoot, false);
+        ReadScriptReducedTrig(Char_GetDef(), CTRIG_CreateLoot, false);
     }
 
 	// Create the corpse item
