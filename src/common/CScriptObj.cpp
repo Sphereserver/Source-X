@@ -960,11 +960,8 @@ badcmd:
 		case SSC_StrToken:
 			{
 				tchar *ppArgs[3];
-				int iQty = Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, CountOf(ppArgs), ",");
+				int iQty = Str_ParseCmdsAdv(const_cast<tchar *>(ptcKey), ppArgs, CountOf(ppArgs), ",");
 				if ( iQty < 3 )
-					return false;
-				
-				if (!IsStrNumeric(ppArgs[1]))
 					return false;
 
 				if ( *ppArgs[2] == '"')

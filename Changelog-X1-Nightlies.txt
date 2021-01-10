@@ -2414,3 +2414,6 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: ARGS not returning the full string but only the first argument if we pass to a function multiple quoted arguments (like "Test1", "Test2", test).
 - Fixed: ARGV truncating the value of a quoted argument to the last quote character ("), even if there was other text after it.
 - Fixed: Console error when @CreateLoot or @NPCRestock couldn't create an item (example: the char or the corpse got immediately removed after creation, if ever created) (Issue: #592).
+
+10-01-2021, xwerswoodx
+- Fixed: STRTOKEN can't parse commands correctly if argument has more than one quotes.

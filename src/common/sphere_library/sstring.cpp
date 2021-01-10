@@ -1187,6 +1187,195 @@ int Str_ParseCmds(tchar * pszCmdLine, int64 * piCmd, int iMax, lpctstr pszSep)
     return iQty;
 }
 
+//I added this to parse commands by checking inline quotes directly.
+//I tested it on every type of things but this is still experimental and being using under STRTOKEN.
+//xwerswoodx
+bool Str_ParseAdv(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
+{
+    // Parse a list of args. Just get the next arg.
+    // similar to strtok()
+    // RETURN: true = the second arg is valid.
+
+    if (pszSep == nullptr)	// default sep.
+        pszSep = "=, \t";
+
+    // skip leading white space.
+    GETNONWHITESPACE(pLine);
+
+    tchar ch, chNext;
+    // variables used to track opened/closed quotes and brackets
+    bool fQuotes = false;
+    bool fInnerQuotes = false;
+    int iQuotes = 0;
+    int iCurly, iSquare, iRound, iAngle;
+    iCurly = iSquare = iRound = iAngle = 0;
+
+    // ignore opened/closed brackets if that type of bracket is also a separator
+    bool fSepHasCurly, fSepHasSquare, fSepHasRound, fSepHasAngle;
+    fSepHasCurly = fSepHasSquare = fSepHasRound = fSepHasAngle = false;
+    for (uint j = 0; pszSep[j] != '\0'; ++j)		// loop through each separator
+    {
+        const tchar & sep = pszSep[j];
+        if (sep == '{' || sep == '}')
+            fSepHasCurly = true;
+        else if (sep == '[' || sep == ']')
+            fSepHasSquare = true;
+        else if (sep == '(' || sep == ')')
+            fSepHasRound = true;
+        else if (sep == '<' || sep == '>')
+            fSepHasAngle = true;
+    }
+    
+    for (; ; ++pLine)
+    {
+        tchar * pLineNext = pLine;
+        ++pLineNext;
+        ch = *pLine;
+        chNext = *pLineNext;
+        if (ch == '"')
+        {
+            if (!fQuotes) //Has first quote?
+            {
+                fQuotes = true;
+            }
+            else if ((fQuotes) && (chNext != '\0') && (chNext != ',') && (chNext != '"')) //We already has quote? Check for inner quotes...
+            {
+                fInnerQuotes = true;
+                ++iQuotes;
+            }
+            else if ((fInnerQuotes) && ((chNext == '\0') || (chNext == ',') || (chNext == '"'))) //Is it end of inner quotes?
+            {
+                --iQuotes;
+                if (iQuotes <= 0)
+                    fInnerQuotes = false;
+            }
+            else if ((fQuotes) && (iQuotes <= 0)) //If we have no inner quote, next quote is end of the first quote.
+            {
+                fQuotes = false;
+            }
+            continue;
+        }
+        else if (ch == '\0')
+        {
+            if (ppArg != nullptr)
+                *ppArg = pLine;
+            return false;
+        }
+        else if (!fQuotes)
+        {
+            // We are not inside a quote, so let's check if the char is a bracket or a separator
+
+            // Here we track opened and closed brackets.
+            //	we'll ignore items inside brackets, if the bracket isn't a separator in the list
+            if (ch == '{') {
+                if (!fSepHasCurly) {
+                    if (!iSquare && !iRound && !iAngle)
+                        ++iCurly;
+                }
+            }
+            else if (ch == '[') {
+                if (!fSepHasSquare) {
+                    if (!iCurly && !iRound && !iAngle)
+                        ++iSquare;
+                }
+            }
+            else if (ch == '(') {
+                if (!fSepHasRound) {
+                    if (!iCurly && !iSquare && !iAngle)
+                        ++iRound;
+                }
+            }
+            else if (ch == '<') {
+                if (!fSepHasAngle) {
+                    if (!iCurly && !iSquare && !iRound)
+                        ++iAngle;
+                }
+            }
+            else if (ch == '}') {
+                if (!fSepHasCurly) {
+                    if (iCurly)
+                        --iCurly;
+                }
+            }
+            else if (ch == ']') {
+                if (!fSepHasSquare) {
+                    if (iSquare)
+                        --iSquare;
+                }
+            }
+            else if (ch == ')') {
+                if (!fSepHasRound) {
+                    if (iRound)
+                        --iRound;
+                }
+            }
+            else if (ch == '>') {
+                if (!fSepHasAngle) {
+                    if (iAngle)
+                        --iAngle;
+                }
+            }
+            
+            // separate the string when i encounter a separator, but only if at this point of the string we aren't inside an argument
+            // enclosed by brackets. but, if one of the separators is a bracket, don't care if we are inside or outside, separate anyways.
+
+            //	don't turn this if into an else if!
+            //	We can choose as a separator also one of {[(< >)]} and they have to be treated as such!
+            if ((iCurly<=0) && (iSquare<=0) && (iRound<=0))
+            {
+                if (strchr(pszSep, ch))		// if ch is a separator
+                    break;
+            }
+        }
+    }
+
+    if (*pLine == '\0')
+        return false;
+
+    *pLine = '\0';
+    ++pLine;
+    if (IsSpace(ch))	// space separators might have other seps as well ?
+    {
+        GETNONWHITESPACE(pLine);
+        ch = *pLine;
+        if (ch && strchr(pszSep, ch))
+            ++pLine;
+    }
+
+    // skip trailing white space on args as well.
+    if (ppArg != nullptr)
+        *ppArg = Str_TrimWhitespace(pLine);
+
+    if (iCurly || iSquare || iRound || fQuotes)
+    {
+        //g_Log.EventError("Not every bracket or quote was closed.\n");
+        return false;
+    }
+
+    return true;
+}
+
+int Str_ParseCmdsAdv(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSep)
+{
+    ASSERT(iMax > 1);
+    int iQty = 0;
+    GETNONWHITESPACE(pszCmdLine);
+
+    if (pszCmdLine[0] != '\0')
+    {
+        ppCmd[0] = pszCmdLine;
+        ++iQty;
+        while (Str_ParseAdv(ppCmd[iQty - 1], &(ppCmd[iQty]), pszSep))
+        {
+            if (++iQty >= iMax)
+                break;
+        }
+    }
+    for (int j = iQty; j < iMax; ++j)
+        ppCmd[j] = nullptr;	// terminate if possible.
+    return iQty;
+}
+
 int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError)
 {
     try

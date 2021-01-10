@@ -292,6 +292,7 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText);
 * @return false if there are no more args to parse, true otherwise.
 */
 bool Str_Parse(tchar * pLine, tchar ** ppArg = nullptr, lpctstr pSep = nullptr);
+bool Str_ParseAdv(tchar * pLine, tchar ** ppArg = nullptr, lpctstr pSep = nullptr);
 
 /**
 * @brief Parse a list of arguments.
@@ -302,6 +303,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg = nullptr, lpctstr pSep = nullptr);
 * @return count of arguments parsed.
 */
 int Str_ParseCmds(tchar * pCmdLine, tchar ** ppCmd, int iMax, lpctstr pSep = nullptr);
+int Str_ParseCmdsAdv(tchar * pCmdLine, tchar ** ppCmd, int iMax, lpctstr pSep = nullptr);
 
 /**
 * @brief Parse a list of arguments (integer version).
