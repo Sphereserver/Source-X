@@ -1238,12 +1238,12 @@ bool Str_ParseAdv(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
             {
                 fQuotes = true;
             }
-            else if ((fQuotes) && (chNext != '\0') && (chNext != ',') && (chNext != '"')) //We already has quote? Check for inner quotes...
+            else if ((fQuotes) && (chNext != '\0') && (chNext != ',') && (chNext != '"') && (chNext != ' ')) //We already has quote? Check for inner quotes...
             {
                 fInnerQuotes = true;
                 ++iQuotes;
             }
-            else if ((fInnerQuotes) && ((chNext == '\0') || (chNext == ',') || (chNext == '"'))) //Is it end of inner quotes?
+            else if ((fInnerQuotes) && ((chNext == '\0') || (chNext == ',') || (chNext == '"') || (chNext == ' '))) //Is it end of inner quotes?
             {
                 --iQuotes;
                 if (iQuotes <= 0)
