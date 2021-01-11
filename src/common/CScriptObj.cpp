@@ -970,11 +970,11 @@ badcmd:
             tchar *pArgs = Str_UnQuote(ppArgs[0]);
             sVal = "";
             tchar *ppCmd[255];
-            int count = Str_ParseCmdsAdv(pArgs, ppCmd, CountOf(ppCmd), iSep);
+            int count = Str_ParseCmdsAdv(pArgs, ppCmd, CountOf(ppCmd), iSep); //Remove unnecessary chars from seperator to avoid issues.
             tchar *ppArrays[2];
             
             //Getting range of array index...
-			int iArrays = Str_ParseCmdsAdv(ppArgs[1], ppArrays, CountOf(ppArrays), "-");
+            int iArrays = Str_ParseCmdsAdv(ppArgs[1], ppArrays, CountOf(ppArrays), "-");
             llong iValue = Exp_GetLLVal(ppArgs[1]);
             llong iValueEnd = iValue;
             if (iArrays > 1)
