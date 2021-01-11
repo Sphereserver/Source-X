@@ -39,28 +39,28 @@ public:
 	static const char* m_sClassName;
 
 	// Constructors
-	CSTime();
-	CSTime(time_t time);
-	CSTime(const CSTime& timeSrc);
+	CSTime() noexcept;
+	CSTime(time_t time) noexcept;
+	CSTime(const CSTime& timeSrc) noexcept;
 
-	CSTime(struct tm time);
+	CSTime(struct tm time) noexcept;
 	CSTime(int nYear, int nMonth, int nDay, int nHour, int nMin, int nSec, int nDST = -1);
 
-	const CSTime& operator=(const CSTime& timeSrc);
-	const CSTime& operator=(time_t t);
+	const CSTime& operator=(const CSTime& timeSrc) noexcept;
+	const CSTime& operator=(time_t t) noexcept;
 
 	// Operators
-	bool operator<=(time_t t) const;
-	bool operator==(time_t t) const;
-	bool operator!=(time_t t) const;
+	bool operator<=(time_t t) const noexcept;
+	bool operator==(time_t t) const noexcept;
+	bool operator!=(time_t t) const noexcept;
 
 	// Attributes
-	time_t GetTime() const;
-	int GetYear() const;
-	int GetMonth() const;
-	int GetDay() const;
-	int GetHour() const;
-	int GetMinute() const;
+	time_t GetTime() const noexcept;
+	int GetYear() const noexcept;
+	int GetMonth() const noexcept;
+	int GetDay() const noexcept;
+	int GetHour() const noexcept;
+	int GetMinute() const noexcept;
 
 	// Operations
 	lpctstr Format(lpctstr pszFormat) const;
@@ -68,12 +68,12 @@ public:
 
 	// non CTime operations.
 	bool Read(tchar* pVal);
-	void Init();
-	bool IsTimeValid() const;
-	int GetDaysTotal() const;
+	void Init() noexcept;
+	bool IsTimeValid() const noexcept;
+	int GetDaysTotal() const noexcept;
 
 private:
-	struct tm* GetLocalTm(struct tm* ptm = nullptr) const;
+	struct tm* GetLocalTm(struct tm* ptm = nullptr) const noexcept;
 };
 
 #endif // _INC_CTIME_H

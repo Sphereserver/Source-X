@@ -2,7 +2,6 @@
 #include "CSectorEnviron.h"
 
 
-
 CSectorEnviron::CSectorEnviron()
 {
     m_Light = LIGHT_BRIGHT;	// set based on time later.

@@ -48,9 +48,15 @@ class CScriptObj
 {
 	// This object can be scripted. (but might not be)
 
+	// Script keywords
 	static lpctstr const sm_szScriptKeys[];
 	static lpctstr const sm_szLoadKeys[];
 	static lpctstr const sm_szVerbKeys[];
+
+	// Recursion counters and state variables
+	short _iParseScriptText_Reentrant;
+	bool  _fParseScriptText_Brackets;
+	short _iEvaluate_Conditional_Reentrant;
 
 public:
 	static const char* m_sClassName;
@@ -130,7 +136,9 @@ private:
 	TRIGRET_TYPE OnTriggerLoopForContSpecial(CScript& s, SK_TYPE iCmd, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, CSString* pResult);
 
 	// Special statements
-	//bool Evaluate_Conditional(lpctstr ptcExpression, CTextConsole* pSrc, CScriptTriggerArgs* pArgs); // IF, ELIF, ELSEIF
+	bool Evaluate_Conditional(lptstr ptcExpression, CTextConsole* pSrc, CScriptTriggerArgs* pArgs); // IF, ELIF, ELSEIF
+	bool _Evaluate_Conditional_SubexprVal(tchar* ptcBuf, bool fNested, CTextConsole* pSrc, CScriptTriggerArgs* pArgs);
+
 	bool Evaluate_QvalConditional(lpctstr ptcKey, CSString& sVal, CTextConsole* pSrc, CScriptTriggerArgs* pArgs);
 
 	bool Execute_Call(CScript& s, CTextConsole* pSrc, CScriptTriggerArgs* pArgs);
@@ -144,7 +152,7 @@ protected:
 
 // Constructors/operators
 public:
-	CScriptObj() = default;
+	CScriptObj();
 	virtual ~CScriptObj() = default;
 
 private:

@@ -56,6 +56,14 @@ static lpctstr const _ptcSRefKeys[SREF_QTY+1] =
     nullptr
 };
 
+CScriptObj::CScriptObj()
+{
+	_iParseScriptText_Reentrant = 0;
+	_fParseScriptText_Brackets = false;
+
+	_iEvaluate_Conditional_Reentrant = 0;
+}
+
 bool CScriptObj::ParseError_UndefinedKeyword(lpctstr ptcKey) // static
 {
 	g_Log.EventError("Undefined keyword '%s'.\n", ptcKey);
@@ -1478,27 +1486,130 @@ bool CScriptObj::r_Load( CScript & s )
 	return true;
 }
 
-/*
-bool CScriptObj::Evaluate_Conditional(lpctstr ptcExpr, CTextConsole* pSrc, CScriptTriggerArgs* pArgs)
+bool CScriptObj::_Evaluate_Conditional_SubexprVal(tchar* ptcBuf, bool fNested, CTextConsole* pSrc, CScriptTriggerArgs* pArgs)
+{
+	ADDTOCALLSTACK("CScriptObj::Evaluate_Conditional_SubexprVal");
+
+	if (_iEvaluate_Conditional_Reentrant >= 16)
+	{
+		g_Log.EventError("Exceeding the limit of 16 subexpressions. Further parsing is halted.\n");
+		return false;
+	}
+
+	++ _iEvaluate_Conditional_Reentrant;
+
+	bool fVal;
+	if (fNested)
+	{
+		fVal = Evaluate_Conditional(ptcBuf, pSrc, pArgs);
+	}
+	else
+	{
+		ParseScriptText(ptcBuf, pSrc, 0, pArgs);
+		fVal = bool(Exp_GetVal(ptcBuf));
+	}
+
+	-- _iEvaluate_Conditional_Reentrant;
+
+	return fVal;
+}
+
+bool CScriptObj::Evaluate_Conditional(lptstr ptcExpr, CTextConsole* pSrc, CScriptTriggerArgs* pArgs)
 {
 	ADDTOCALLSTACK("CScriptObj::Evaluate_Conditional");
 
 	CExpression::SubexprData psSubexprData[32]{};
-	int iQty = CExpression::GetConditionalSubexpressions(ptcExpr, psSubexprData, CountOf(psSubexprData));	// number of arguments (not of value-weight couples)
+	const int iQty = CExpression::GetConditionalSubexpressions(ptcExpr, psSubexprData, CountOf(psSubexprData));	// number of arguments
 
 	if (iQty == 0)
 		return 0;
 
+	using SType = CExpression::SubexprData::Type;
+
+	if (iQty == 1)
+	{
+		// We don't have subexpressions, but only a simple expression.
+		CExpression::SubexprData& sCur = psSubexprData[0];
+		ASSERT(sCur.uiType & SType::None);
+
+		tchar* ptcBuf;
+		bool fNested = (sCur.uiType & SType::NestedSubexpr);
+		if (fNested)
+		{
+			ptcBuf = Str_GetTemp();
+			const size_t len = sCur.ptcEnd - sCur.ptcStart + 2; // +1 to include the last valid char, +1 to include \0
+			memcpy(ptcBuf, sCur.ptcStart, len);
+		}
+		else
+		{
+			ptcBuf = sCur.ptcStart;
+		}
+
+		bool fVal = _Evaluate_Conditional_SubexprVal(ptcBuf, fNested, pSrc, pArgs);
+		return fVal;
+	}
+
+	// We have some subexpressions, connected between them by logical operators.
 	tchar* ptcTemp = Str_GetTemp();
+	bool fWholeExprVal = false;
+	for (int i = 1; i < iQty; ++i)
+	{
+		CExpression::SubexprData& sPrev = psSubexprData[i-1];
+		ASSERT(sPrev.uiType != SType::None);
+		ASSERT(sPrev.uiType != SType::Unknown);
+		/*
+		if (sPrev.uiType & SType::None)
+		{
+			fWholeExprVal |= true;
+			continue;
+		}
+		*/
 
-	// Get expression i'm interested
-	// ParseScript
-	// If necessary, go forward. Otherwise, return.
+		size_t len = sPrev.ptcEnd - sPrev.ptcStart + 2; // +1 to include the last valid char, +1 to include \0
+		memcpy(ptcTemp, sPrev.ptcStart, len);
+		bool fVal = _Evaluate_Conditional_SubexprVal(ptcTemp, (sPrev.uiType & SType::NestedSubexpr), pSrc, pArgs);
 
-	int iRet = Exp_GetVal(ptcTemp);
-	return bool(iRet);
+		if (sPrev.uiType & SType::Or)
+		{
+			if (fVal)
+				return true;
+
+			fWholeExprVal = fWholeExprVal || fVal;
+		}
+		else if (sPrev.uiType & SType::And)
+		{
+			if (!fVal)
+				return false;
+
+			fWholeExprVal = (i == 1) ? fVal : (fWholeExprVal && fVal);
+		}
+
+		CExpression::SubexprData& sCur = psSubexprData[i];
+		if (sCur.uiType & SType::None)
+		{
+			ASSERT(i == iQty - 1);	// It should be the last subexpression
+
+			len = sCur.ptcEnd - sCur.ptcStart + 2;
+			memcpy(ptcTemp, sCur.ptcStart, len);
+
+			fVal = _Evaluate_Conditional_SubexprVal(ptcTemp, (sCur.uiType & SType::NestedSubexpr), pSrc, pArgs);
+
+			if (sPrev.uiType & SType::Or)
+			{
+				fWholeExprVal = fWholeExprVal || fVal;
+			}
+			else
+			{
+				ASSERT(sPrev.uiType & SType::And);
+				ASSERT(iQty > 1);
+				fWholeExprVal = (fWholeExprVal && fVal);
+			}
+		}
+		
+	}
+
+	return fWholeExprVal;
 }
-*/
 
 static void Evaluate_QvalConditional_ParseArg(tchar* ptcSrc, tchar** ptcDest, lpctstr ptcSep)
 {
@@ -1611,12 +1722,12 @@ size_t CScriptObj::ParseScriptText( tchar * ptcResponse, CTextConsole * pSrc, in
 	//  Otherwise: New length of the string.
 
 	// Recursion control variables.
-	static int sm_iReentrant = 0;
-	static bool sm_fBrackets = false;	// Am i evaluating a statement? (Am i inside < > brackets of a statement i am currently evaluating?)
+	//  _iParseScriptText_Reentrant = 0;
+	//  _fParseScriptText_Brackets = false;	// Am i evaluating a statement? (Am i inside < > brackets of a statement i am currently evaluating?)
 
 	const bool fRecurseBrackets = ((iFlags & 2) != 0);
 	if (!fRecurseBrackets)
-		sm_fBrackets = false;
+		_fParseScriptText_Brackets = false;
 
 	// General purpose variables.
 	const bool fHTML = ((iFlags & 1) != 0);
@@ -1638,7 +1749,7 @@ size_t CScriptObj::ParseScriptText( tchar * ptcResponse, CTextConsole * pSrc, in
 		const tchar chNext = ptcResponse[i + 1];	// Check this to ignore stuff like <=, <<...
 
 		// Are we looking for the current statement start?
-		if ( ! sm_fBrackets )	// not in brackets
+		if ( !_fParseScriptText_Brackets)	// not in brackets
 		{
 			if ( ch == chBegin )	// found the start !
 			{
@@ -1647,7 +1758,7 @@ size_t CScriptObj::ParseScriptText( tchar * ptcResponse, CTextConsole * pSrc, in
 
 				// Set the statement start
 				iBegin = i;
-				sm_fBrackets = true;
+				_fParseScriptText_Brackets = true;
 
 				// Set-up to process special statements: is it a QVAL?
 				const bool fIsQval = !strnicmp(ptcResponse + i + 1, "QVAL", 4);
@@ -1684,15 +1795,15 @@ size_t CScriptObj::ParseScriptText( tchar * ptcResponse, CTextConsole * pSrc, in
 				if (fIsQval)
 				{
 					// Nested QVAL... Needs to be evaluated separately, but we only want to know where it ends.
-					ASSERT(sm_fBrackets == true);
-					++sm_iReentrant;
-					sm_fBrackets = false;
+					ASSERT(_fParseScriptText_Brackets == true);
+					++_iParseScriptText_Reentrant;
+					_fParseScriptText_Brackets = false;
 
 					tchar* ptcRecurseParse = ptcResponse + i;
 					const size_t iLen = ParseScriptText(ptcRecurseParse, pSrc, 4, pArgs);
 
-					sm_fBrackets = true;
-					--sm_iReentrant;
+					_fParseScriptText_Brackets = true;
+					--_iParseScriptText_Reentrant;
 
 					i += iLen;
 					continue;
@@ -1710,22 +1821,22 @@ size_t CScriptObj::ParseScriptText( tchar * ptcResponse, CTextConsole * pSrc, in
 				continue;
 			}
 
-			if (sm_iReentrant > 32 )
+			if (_iParseScriptText_Reentrant > 32 )
 			{
 				EXC_SET_BLOCK("recursive brackets limit");
-				ASSERT( sm_iReentrant < 32 );
+				PERSISTANT_ASSERT( _iParseScriptText_Reentrant < 32 );
 			}
 
-			ASSERT(sm_fBrackets == true);
-			++sm_iReentrant;
-			sm_fBrackets = false;
+			ASSERT(_fParseScriptText_Brackets == true);
+			++_iParseScriptText_Reentrant;
+			_fParseScriptText_Brackets = false;
 
 			// Parse what's inside the open bracket
 			tchar* ptcRecurseParse = ptcResponse + i;
 			const size_t ilen = ParseScriptText(ptcRecurseParse, pSrc, 2, pArgs );
 
-			sm_fBrackets = true;
-			--sm_iReentrant;
+			_fParseScriptText_Brackets = true;
+			--_iParseScriptText_Reentrant;
 
 			i += ilen;
 			continue;
@@ -1749,8 +1860,8 @@ size_t CScriptObj::ParseScriptText( tchar * ptcResponse, CTextConsole * pSrc, in
 						if (iFlags & 04)
 						{
 							// I was just checking for the QVAL statement end.
-							ASSERT(sm_fBrackets == true);
-							sm_fBrackets = false;
+							ASSERT(_fParseScriptText_Brackets == true);
+							_fParseScriptText_Brackets = false;
 							return i;
 						}
 
@@ -1773,7 +1884,7 @@ size_t CScriptObj::ParseScriptText( tchar * ptcResponse, CTextConsole * pSrc, in
 
 			// If i'm here it means that finally i'm at the end of the statement inside brackets.
 
-			sm_fBrackets = false; // Close the statement.
+			_fParseScriptText_Brackets = false; // Close the statement.
 	
 			if ((eQval == QvalStatus::End) && (iQvalOpenBrackets != 0))
 			{
@@ -2793,13 +2904,11 @@ jump_in:
 					iRet = OnTriggerLoopForContSpecial(s, iCmd, pSrc, pArgs, pResult);
 				} break;
 
-/*
 			case SK_IF:
 			case SK_ELIF:
 			case SK_ELSEIF:
 				// We want to do a lazy evaluation of the arguments. Don't parse this stuff now.
 				break;
-*/
 
 			default:
 				{
@@ -2875,8 +2984,7 @@ jump_in:
 				{
 					EXC_SET_BLOCK("if statement");
 					// At this point, we have to parse the conditional expression
-					//bool fTrigger = Evaluate_Conditional(s.GetArgStr(), pSrc, pArgs);
-					bool fTrigger = s.GetArgLLVal() ? true : false;
+					bool fTrigger = Evaluate_Conditional(s.GetArgStr(), pSrc, pArgs);
 					bool fBeenTrue = false;
 					for (;;)
 					{
@@ -2893,9 +3001,7 @@ jump_in:
 							fTrigger = true;
 						else if ( iRet == TRIGRET_ELSEIF )
 						{
-							//fTrigger = Evaluate_Conditional(s.GetArgStr(), pSrc, pArgs);
-							ParseScriptText(s.GetArgStr(), pSrc, 0, pArgs);
-							fTrigger = s.GetArgLLVal() ? true : false;
+							fTrigger = Evaluate_Conditional(s.GetArgStr(), pSrc, pArgs);
 						}
 					}
 				}

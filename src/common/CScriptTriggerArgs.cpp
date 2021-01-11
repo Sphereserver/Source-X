@@ -286,8 +286,10 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
     else if ( !strnicmp(ptcKey, "ARGO", 4) )
     {
         ptcKey += 4;
-        if ( *ptcKey == '.' )
+        if (*ptcKey == '.')
+        {
             index = AGC_O;
+        }
         else
         {
             ++ptcKey;
@@ -367,7 +369,7 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
 
 bool CScriptTriggerArgs::r_LoadVal( CScript & s )
 {
-    ADDTOCALLSTACK("CScriptTriggerArgs::r_LoadVal");
+    //ADDTOCALLSTACK("CScriptTriggerArgs::r_LoadVal");
     UNREFERENCED_PARAMETER(s);
     return false;
 }
@@ -409,9 +411,10 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsol
         SKIP_SEPARATORS(ptcKey);
 
         size_t uiQty = m_v.size();
-        if ( uiQty <= 0 )
+        if ( uiQty == 0 )
         {
-            // PARSE IT HERE
+            // We haven't yet parsed the ARGS. Do it now, so we can find the elements of ARGV.
+
             tchar* ptcArg = m_s1_buf_vec.GetBuffer();
             tchar * s = ptcArg;
             bool fQuotes = false;

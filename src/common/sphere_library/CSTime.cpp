@@ -80,12 +80,12 @@ CSTime::CSTime(int nYear, int nMonth, int nDay, int nHour, int nMin, int nSec,
 	m_time = mktime(&atm);
 }
 
-CSTime::CSTime( struct tm atm )
+CSTime::CSTime( struct tm atm ) noexcept
 {
 	m_time = mktime(&atm);
 }
 
-struct tm* CSTime::GetLocalTm(struct tm* ptm) const
+struct tm* CSTime::GetLocalTm(struct tm* ptm) const noexcept
 {
 	if (ptm != nullptr)
 	{
@@ -108,7 +108,7 @@ struct tm* CSTime::GetLocalTm(struct tm* ptm) const
 #endif
 
 #ifdef _WIN32
-void __cdecl invalidParameterHandler(const wchar_t* expression, const wchar_t* function, const wchar_t* file, uint line, uintptr_t pReserved)
+static void __cdecl invalidParameterHandler(const wchar_t* expression, const wchar_t* function, const wchar_t* file, uint line, uintptr_t pReserved)
 {
 	// bad format has been specified
 	UNREFERENCED_PARAMETER(expression);
@@ -120,7 +120,7 @@ void __cdecl invalidParameterHandler(const wchar_t* expression, const wchar_t* f
 }
 #endif
 
-void FormatDateTime(tchar * pszTemp, lpctstr pszFormat, const struct tm * ptmTemp)
+static void FormatDateTime(tchar * pszTemp, lpctstr pszFormat, const struct tm * ptmTemp)
 {
 	ASSERT(pszTemp != nullptr);
 	ASSERT(pszFormat != nullptr);
@@ -220,89 +220,89 @@ bool CSTime::Read(tchar *pszVal)
 	return true;
 }
 
-CSTime::CSTime()
+CSTime::CSTime() noexcept
 {
 	m_time = 0;
 }
 
-CSTime::CSTime(time_t time)
+CSTime::CSTime(time_t time) noexcept
 {
 	m_time = time;
 }
 
-CSTime::CSTime(const CSTime& timeSrc)
+CSTime::CSTime(const CSTime& timeSrc) noexcept
 {
 	m_time = timeSrc.m_time;
 }
 
-const CSTime& CSTime::operator=(const CSTime& timeSrc)
+const CSTime& CSTime::operator=(const CSTime& timeSrc) noexcept
 {
 	m_time = timeSrc.m_time;
 	return *this;
 }
 
-const CSTime& CSTime::operator=(time_t t)
+const CSTime& CSTime::operator=(time_t t) noexcept
 {
 	m_time = t;
 	return *this;
 }
 
-bool CSTime::operator<=( time_t t ) const
+bool CSTime::operator<=( time_t t ) const noexcept
 {
 	return( m_time <= t );
 }
 
-bool CSTime::operator==( time_t t ) const
+bool CSTime::operator==( time_t t ) const noexcept
 {
 	return( m_time == t );
 }
 
-bool CSTime::operator!=( time_t t ) const
+bool CSTime::operator!=( time_t t ) const noexcept
 {
 	return( m_time != t );
 }
 
-time_t CSTime::GetTime() const
+time_t CSTime::GetTime() const noexcept
 {
 	return m_time;
 }
 
-int CSTime::GetYear() const
+int CSTime::GetYear() const noexcept
 {
 	return (GetLocalTm(nullptr)->tm_year) + 1900;
 }
 
-int CSTime::GetMonth() const       // month of year (1 = Jan)
+int CSTime::GetMonth() const noexcept       // month of year (1 = Jan)
 {
 	return GetLocalTm(nullptr)->tm_mon + 1;
 }
 
-int CSTime::GetDay() const         // day of month
+int CSTime::GetDay() const noexcept         // day of month
 {
 	return GetLocalTm(nullptr)->tm_mday;
 }
 
-int CSTime::GetHour() const
+int CSTime::GetHour() const noexcept
 {
 	return GetLocalTm(nullptr)->tm_hour;
 }
 
-int CSTime::GetMinute() const
+int CSTime::GetMinute() const noexcept
 {
 	return GetLocalTm(nullptr)->tm_min;
 }
 
-void CSTime::Init()
+void CSTime::Init() noexcept
 {
 	m_time = -1;
 }
 
-bool CSTime::IsTimeValid() const
+bool CSTime::IsTimeValid() const noexcept
 {
 	return (( m_time && m_time != -1 ) ? true : false );
 }
 
-int CSTime::GetDaysTotal() const
+int CSTime::GetDaysTotal() const noexcept
 {
 	// Needs to be more consistant than accurate. just for compares.
 	return (( GetYear() * 366) + (GetMonth()*31) + GetDay() );

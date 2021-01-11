@@ -29,21 +29,19 @@ Changed starting from 0.56d, before the creation of the new X branch
 Compatibility changes from 0.56d to X1
 -----------------------
 - Change the whole sphere.ini file and tweak its settings (updating it doesn't usually work, people misses a lot of settings and flags).
-- Renamed CLIENTISSA command to CLIENTISENHANCED.
-- Removed CHARGESCUR and CHARGESMAX.
-- TAG.SlayerGroup isn't used anymore. Use FACTION.
-- ADDCLILOC needs to be called on the object, instead of on the player. So in the scripts, in the @ClientTooltip trigger,
-  calls to SRC.ADDCLILOC have to be changed to ADDCLILOC; in @ItemClientTooltip and @CharClientTooltip, ACT.ADDCLILOC has to be used instead.
+
+Changes to script parsing:
+- Changed: Now conditional statements (IF/ELIF/ELSEIF) will perform a lazy evaluation of the conditional expression, whereas before they fully evaluated the whole expression.
+  Lazy evaluation means that the expression will be evaluated one piece (or, one subexpression) at a time. At each stage, if it's sure that the whole expression value (true or false) won't change
+  even if new subexpressions will be evaluated, the evaluation will stop there.
+  Example: IF (<LINK.ISVALID> && (<LINK.TAG0.test> == 1))
+   Won't return an error if item's LINK is invalid or not set, because the evaluation will only halt to <LINK.ISVALID>.
+  Other than allowing more flexible IF tests in just one line, this change will grant faster evaluation times for complex IF tests.
+- When parsing weighted ranges (expressions inside curly brackets: { }), only the randomly extracted argument will be completely evaluated,
+  instead of parsing recursively each argument of the range.
 - Changed: Defname numeric value has a different byte order now. For example, <hval s_clumsy> returned 0ce000001,
   so you could retrieve the spell number by doing <hval s_clumsy&(~0ce000000)>, which removed the resource type bits.
   Now <hval s_clumsy> returns 082700001, so you can't use the previous code anymore. Use RESOURCEINDEX instead (e.g. <RESOURCEINDEX s_clumsy>).
-- CAN property is no more RW, but now it's read-only. Use CANMASK to change it on a per-char basis.
-- Changed how combat skills work: now @SkillStart is called only once, when starting the fight, then the other triggers (@HitTry, @Hit*, @GetHit, etc)
-  are called. Before, @SkillStart was called before each @HitTry call, so at every hit attempt. If you need a trigger firing before @HitTry, try @HitCheck.
-- Added Focus skill functionality. Add to its flags SKF_DISABLED if you aren't interested.
-- SPEECHCOLOR can't be used anymore to override the speech color of NPCS. Use SPEECHCOLOROVERRIDE instead.
-- Added: ModMaxHits, ModMaxMana, ModMaxStam properties. To avoid CONFLICTS, remove or comment the scripted functions
-  with the same name in the sphere_events_npcs.scp of the default scriptpack.
 - DEF keyword doesn't find the numeric identifier of a Sphere Resource (ITEMDEF/CHARDEF...) DEFNAMEs anymore. Use RESDEF. DEF is used to retrieve values from [DEFNAME] sections.
   This can break compatibility with previous scripts, if you used DEF to retrieve items/chars defname numeric value. You have to use RESDEF now.
   You're safe (even if the underlying code is a bit slower) if you just used ID=i_dagger instead of ID=<DEF.i_dagger> (which now should be ID=<RESDEF.i_dagger>).
@@ -57,19 +55,39 @@ Compatibility changes from 0.56d to X1
   Its use is DISCOURAGED but sometimes it might be an easy way to execute trivial operations without a lot of if/endif clauses.
   This is a way to explicitly allow what Sphere already did by default in the past (not checking if the object is valid and not returning an error),
   which is something that only sometimes we expect and we want, most of the times it caused obscure bugs.
+
+Changes to script keywords:
+- CAN property is no more RW, but now it's read-only. Use CANMASK to change it on a per-char basis.
+- Renamed CLIENTISSA command to CLIENTISENHANCED.
+- Removed CHARGESCUR and CHARGESMAX.
+- TAG.SlayerGroup isn't used anymore. Use FACTION.
+- ADDCLILOC needs to be called on the object, instead of on the player. So in the scripts, in the @ClientTooltip trigger,
+  calls to SRC.ADDCLILOC have to be changed to ADDCLILOC; in @ItemClientTooltip and @CharClientTooltip, ACT.ADDCLILOC has to be used instead.
+- SPEECHCOLOR can't be used anymore to override the speech color of NPCS. Use SPEECHCOLOROVERRIDE instead.
+- Added: ModMaxHits, ModMaxMana, ModMaxStam properties. To avoid CONFLICTS, remove or comment the scripted functions
+  with the same name in the sphere_events_npcs.scp of the default scriptpack.
 - Added/changed some keywords for spawns (read the changelog for more). This causes a SAVE FILES INCOMPATIBILITY between x and 56d, because new x-only
   keywords will be saved, and those won't be recognized by 56d. If you want to port back the saves, you have to replace in sphereworld.scp the
   keyword SPAWNID with MORE1 in t_spawn_char and t_spawn_item items.
 - Changed: RANGEL returns the lowest range value, while RANGEH returns the highest range value (as it should have been, but it looks like it got changed in 56c or 56d).
-- @(Item)DropOn_Ground now fires BEFORE the new P is set! The new P is stored in the ARGS of the trigger. Prior to this change,
-  the triggers were called after the new P was set.
 - PRICE=xxx will not work anymore to set a price on an item. Price will now be used only when a player vendor sells an item. If an item has a price value, no NPC will buy it at that value.
   Value is READ only, if you want change the value of an item, you should use the new TAG.override.value. When selling your item to NPC, it will look this property first.
   In your scripts, on your vendor template BUY= or SELL= if you want to set a different value of the itemdef you must use TAG.override.value=xxx instead of old syntax PRICE=xxx.
+
+Changes to triggers and skills:
+- Changed how combat skills work: now @SkillStart is called only once, when starting the fight, then the other triggers (@HitTry, @Hit*, @GetHit, etc)
+  are called. Before, @SkillStart was called before each @HitTry call, so at every hit attempt. If you need a trigger firing before @HitTry, try @HitCheck.
+- @(Item)DropOn_Ground now fires BEFORE the new P is set! The new P is stored in the ARGS of the trigger. Prior to this change,
+  the triggers were called after the new P was set.
+- Added Focus skill functionality. Add to its flags SKF_DISABLED if you aren't interested.
+
+Changes to multis:
 - Now t_multi objects will be saved too in spheremultis.scp, along with t_multi_custom. This causes a SAVE FILES INCOMPATIBILITY between x and 56d.
   If you want to port back the saves, you'll need to manually move saved multis from spheremultis.scp to sphereworld.scp.
 - Reworked and added MULTIDEF properties.
 - Some decoration multis must have t_multi_addon instead of t_multi.
+
+Mandatory scripts additions:
 - [sphere_defs_types_hardcoded.scp] Added: t_multi_addon=201.
 - [sphere_msgs.scp] Added: PROVOCATION_KIND.
 - [sphere_def.scp] Added: DEFNAMEs house_types, DEFNAMEs house_transfer_types, CAN_I_BLOCKLOS_HEIGHT.
