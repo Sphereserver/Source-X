@@ -719,21 +719,17 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 	// Direction changes don't count.
 	//NOTE: If WalkBuffer=50 in ini, it's egal 5000 here
 
-	if ( !g_Cfg.m_iWalkBuffer ) //If ini setting is at 0
-		return true;
-	if ( (m_iWalkStepCount % 2) != 0 )	// only check when we have taken 4 steps
-		return true;
+
+	//if ( (m_iWalkStepCount % 2) != 0 )	// only check when we have taken 2 steps
+	//	return true;
 
 	// Client only allows 4 steps of walk ahead.
 	const int64 iCurTime = CSTime::GetPreciseSysTimeMilli();
     int64 iTimeDiff = (int64)llabs(iCurTime - m_timeWalkStep);	// use absolute value to prevent overflows
-	int64 iTimeMin = 0;  // minimum time to move 2 steps in milliseconds
+	int64 iTimeMin = 0;  // minimum time to move 1 step in milliseconds
 	m_timeWalkStep = iCurTime; //Take the time of step for the next time we enter here
 
-	// 2 situations create some strange timer. We want avoid evaluate them 
-	if (!(rawdir & 0x80)) //Transition Walk-Run, we only evaluate when running
-		return TRUE;
-	
+	// 1 situation create some strange timer. We want avoid evaluate them 
 	if (m_lastDir != rawdir) //Changing direction, we only evaluate when going straight
 	{
 		m_lastDir = rawdir;
@@ -742,8 +738,8 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 		
 	// First step is to determine the theoric time(iTimeMin) to take the last step(s)
 	/*		RUN /Walk
-	Mount	200 / 400
-	foot	400 / 800
+	Mount	100 / 200
+	foot	200 / 400
 	Speed Modes:
 	0 = Foot=Normal, Mount=Normal
 	1 = Foot=Double Speed, Mount=Normal
@@ -754,13 +750,13 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 
 
 	if (m_pChar->IsStatFlag(STATF_ONHORSE | STATF_HOVERING)) //on horse or Gargoyle fly
-		iTimeMin = 200;
+		iTimeMin = 100;
 	else //on foot
 	{
 		if (m_pChar->m_pPlayer && (m_pChar->m_pPlayer->m_speedMode == 1))
-			iTimeMin = 200;
+			iTimeMin = 100;
 		else
-			iTimeMin = 400;
+			iTimeMin = 200;
 	}
 	
 	if (!(iTimeDiff > iTimeMin + 250))
@@ -783,7 +779,6 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 	
 		// Create de average step value
 		m_iWalkTimeAvg += iTimeDiff;
-		const llong oldAvg = m_iWalkTimeAvg;
 		m_iWalkTimeAvg -= iTimeMin;
 
 		
@@ -792,7 +787,7 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 			m_iWalkTimeAvg = g_Cfg.m_iWalkBuffer;
 		
 		if ( IsPriv(PRIV_DETAIL) && IsPriv(PRIV_DEBUG) )
-			SysMessagef("Walkcheck trace: timeDiff(%lld) / timeMin(%lld). oldAvg(%lld) :: curAvg(%lld)", iTimeDiff, iTimeMin, oldAvg, m_iWalkTimeAvg);
+			SysMessagef("Walkcheck trace: timeDiff(%lld) / timeMin(%lld). curAvg(%lld)", iTimeDiff, iTimeMin, m_iWalkTimeAvg);
 
 		// Checking if there a speehack
 		if ( m_iWalkTimeAvg < 0 && iTimeDiff >= 0 )
@@ -870,6 +865,9 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 			return false;
 		}
 
+		// Set running flag if I'm running
+		m_pChar->StatFlag_Mod(STATF_FLY, (rawdir & 0x80) ? true : false);
+
 		if (IsSetEF(EF_FastWalkPrevention) && !m_pChar->IsPriv(PRIV_GM))
 		{
 			// FIXME:THIS SYSTEM DO NOT WORK SEE DETAIL DOWN
@@ -894,17 +892,14 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 			// The buffer system Event_CheckWalkBuffer seem more acurate because it permit some ajustment.
 			m_timeNextEventWalk = iCurTime + iDelay;
 		}
-		else if (!m_pChar->IsPriv(PRIV_GM) && !Event_CheckWalkBuffer(rawdir))
+		else if (m_pChar->IsStatFlag(STATF_FLY) && !m_pChar->IsPriv(PRIV_GM) && (g_Cfg.m_iWalkBuffer) && !Event_CheckWalkBuffer(rawdir) )
+				//Run, Not GM , walkbuffer active on ini, 
 		{
 			new PacketMovementRej(this, sequence);
 			m_timeLastEventWalk = iCurTime;
 			++m_iWalkStepCount;					// Increase step count to use on walk buffer checks
 			return false;
 		}
-
-
-		// Set running flag if I'm running
-		m_pChar->StatFlag_Mod(STATF_FLY, (rawdir & 0x80) ? true : false);
 
 		// Are we invis ?
 		m_pChar->CheckRevealOnMove();
