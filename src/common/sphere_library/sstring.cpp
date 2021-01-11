@@ -1,5 +1,6 @@
 #include "sstring.h"
 #include "../../sphere/threads.h"
+#include "../../common/CLog.h"
 #include "../../sphere/ProfileTask.h"
 #include "../CExpression.h"
 #include "../CScript.h"
@@ -1205,7 +1206,6 @@ bool Str_ParseAdv(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
     tchar ch, chNext;
     // variables used to track opened/closed quotes and brackets
     bool fQuotes = false;
-    bool fInnerQuotes = false;
     int iQuotes = 0;
     int iCurly, iSquare, iRound, iAngle;
     iCurly = iSquare = iRound = iAngle = 0;
@@ -1232,28 +1232,31 @@ bool Str_ParseAdv(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
         ++pLineNext;
         ch = *pLine;
         chNext = *pLineNext;
-        if (ch == '"')
+        if ((ch == '"') || (ch == '\''))
         {
             if (!fQuotes) //Has first quote?
             {
                 fQuotes = true;
             }
-            else if ((fQuotes) && (chNext != '\0') && (chNext != ',') && (chNext != '"') && (chNext != ' ')) //We already has quote? Check for inner quotes...
+            else if (fQuotes) //We already has quote? Check for inner quotes...
             {
-                fInnerQuotes = true;
-                ++iQuotes;
+                while ((chNext == '"') || (chNext == '\''))
+                {
+                    ++pLineNext;
+                    chNext = *pLineNext;
+                }
+                    
+                if ((chNext == '\0') || (chNext == ',') || (chNext == ' ') || (chNext == '\''))
+                    --iQuotes;
+                else
+                    ++iQuotes;
+                    
+                if (iQuotes < 0)
+                {
+                    iQuotes = 0;
+                    fQuotes = false;
+                }
             }
-            else if ((fInnerQuotes) && ((chNext == '\0') || (chNext == ',') || (chNext == '"') || (chNext == ' '))) //Is it end of inner quotes?
-            {
-                --iQuotes;
-                if (iQuotes <= 0)
-                    fInnerQuotes = false;
-            }
-            else if ((fQuotes) && (iQuotes <= 0)) //If we have no inner quote, next quote is end of the first quote.
-            {
-                fQuotes = false;
-            }
-            continue;
         }
         else if (ch == '\0')
         {
@@ -1328,7 +1331,6 @@ bool Str_ParseAdv(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
             }
         }
     }
-
     if (*pLine == '\0')
         return false;
 
@@ -1374,6 +1376,25 @@ int Str_ParseCmdsAdv(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSe
     for (int j = iQty; j < iMax; ++j)
         ppCmd[j] = nullptr;	// terminate if possible.
     return iQty;
+}
+
+tchar * Str_UnQuote(tchar * pStr)
+{
+    GETNONWHITESPACE(pStr);
+    
+    tchar ch = *pStr;
+    if ((ch == '"') || (ch == '\''))
+        ++pStr;
+        
+    for (tchar *pEnd = pStr + strlen(pStr) - 1; pEnd >= pStr; --pEnd)
+    {
+        if ((*pEnd == '"') || (*pEnd == '\''))
+        {
+            *pEnd = '\0';
+            break;
+        }
+    }
+    return pStr;
 }
 
 int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError)

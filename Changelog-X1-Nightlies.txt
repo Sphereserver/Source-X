@@ -2417,3 +2417,4 @@ Must have event, even if it's empty, since it's applied by the source to generat
 
 10-01-2021, xwerswoodx
 - Fixed: STRTOKEN can't parse commands correctly if argument has more than one quotes.
+- Added: Apostrophe support for STRTOKEN that let you go deeper with using STRTOKEN.

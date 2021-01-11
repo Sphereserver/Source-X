@@ -292,6 +292,10 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText);
 * @return false if there are no more args to parse, true otherwise.
 */
 bool Str_Parse(tchar * pLine, tchar ** ppArg = nullptr, lpctstr pSep = nullptr);
+/*
+ * @brief Totally works like Str_Parse but difference between both function is Str_ParseAdv
+ * parsing line with inner quotes and has double quote and apostrophe support.
+ */
 bool Str_ParseAdv(tchar * pLine, tchar ** ppArg = nullptr, lpctstr pSep = nullptr);
 
 /**
@@ -303,6 +307,10 @@ bool Str_ParseAdv(tchar * pLine, tchar ** ppArg = nullptr, lpctstr pSep = nullpt
 * @return count of arguments parsed.
 */
 int Str_ParseCmds(tchar * pCmdLine, tchar ** ppCmd, int iMax, lpctstr pSep = nullptr);
+/*
+ * @brief Totally works like Str_ParseCmds but difference between both function is Str_ParseCmdsAdv
+ * parsing line with inner quotes and has double quote and apostrophe support.
+ */
 int Str_ParseCmdsAdv(tchar * pCmdLine, tchar ** ppCmd, int iMax, lpctstr pSep = nullptr);
 
 /**
@@ -323,7 +331,15 @@ int Str_ParseCmds(tchar * pCmdLine, int64 * piCmd, int iMax, lpctstr pSep = null
 * @return 1 is regex is matched, 0 if not, -1 if errors.
 */
 int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError);
+
+/*
+ * @brief Removes heading and trailing double quotes and apostrophes in a string.
+ * @param pStr string where remove the quotes.
+ * @return string with the heading and trailing quotes removed.
+ */
+tchar * Str_UnQuote(tchar * pStr);
 ///@}
+
 
 //--
 
