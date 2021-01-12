@@ -715,15 +715,12 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 bool CClient::Event_CheckWalkBuffer(byte rawdir)
 {
 	ADDTOCALLSTACK("CClient::Event_CheckWalkBuffer");
+	//Return False: block the step
 	// Check if the client is trying to walk too fast.
 	// Direction changes don't count.
-	//NOTE: If WalkBuffer=50 in ini, it's egal 5000 here
+	//NOTE: If WalkBuffer=20 in ini, it's egal 2000 here
 
 
-	//if ( (m_iWalkStepCount % 2) != 0 )	// only check when we have taken 2 steps
-	//	return true;
-
-	// Client only allows 4 steps of walk ahead.
 	const int64 iCurTime = CSTime::GetPreciseSysTimeMilli();
     int64 iTimeDiff = (int64)llabs(iCurTime - m_timeWalkStep);	// use absolute value to prevent overflows
 	int64 iTimeMin = 0;  // minimum time to move 1 step in milliseconds
@@ -733,7 +730,7 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 	if (m_lastDir != rawdir) //Changing direction, we only evaluate when going straight
 	{
 		m_lastDir = rawdir;
-		return TRUE;
+		return true;
 	}
 		
 	// First step is to determine the theoric time(iTimeMin) to take the last step(s)
@@ -748,7 +745,6 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 	4 = No Movement (handled by OnFreezeCheck)*/
 	//Since we only check when we run, we don't care all walk situation
 
-
 	if (m_pChar->IsStatFlag(STATF_ONHORSE | STATF_HOVERING)) //on horse or Gargoyle fly
 		iTimeMin = 100;
 	else //on foot
@@ -759,8 +755,8 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 			iTimeMin = 200;
 	}
 	
-	if (!(iTimeDiff > iTimeMin + 250))
-		// We don't want to do process if time is greater of 250 (Ping of player should be lower than this)
+	if (!(iTimeDiff > iTimeMin + 300))
+		// We don't want to do process if time is greater of 300 (Ping of player should be lower than this)
 		// Accept a Big number cause a big offset on the average.
 
 	{
@@ -793,11 +789,11 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 		if ( m_iWalkTimeAvg < 0 && iTimeDiff >= 0 )
 		{
 			// Walking too fast.
-			m_iWalkTimeAvg = 250; //reset the average
+			m_iWalkTimeAvg = 200; //reset the average
 			DEBUG_WARN(("%s (%x): Fast Walk ?\n", GetName(), GetSocketID()));
 			if ( IsTrigUsed(TRIGGER_USEREXWALKLIMIT) )
 			{
-				if ( m_pChar->OnTrigger(CTRIG_UserExWalkLimit, m_pChar) == TRIGRET_RET_TRUE )
+				if ( m_pChar->OnTrigger(CTRIG_UserExWalkLimit, m_pChar) != TRIGRET_RET_TRUE )
 					return false;
 			}
 		}
@@ -896,8 +892,9 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 				//Run, Not GM , walkbuffer active on ini, 
 		{
 			new PacketMovementRej(this, sequence);
+			g_Log.Event(LOGL_WARN | LOGM_CHEAT, "PacketMovement Rejected (Speedhack) for '%s', this player will notice a lag\n", GetAccount()->GetName());
 			m_timeLastEventWalk = iCurTime;
-			++m_iWalkStepCount;					// Increase step count to use on walk buffer checks
+			++m_iWalkStepCount;					// Increase step count to use on next walk buffer checks
 			return false;
 		}
 
@@ -917,7 +914,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 		}
 
 		m_timeLastEventWalk = iCurTime;
-		++m_iWalkStepCount;					// Increase step count to use on walk buffer checks
+		++m_iWalkStepCount;					// Increase step count to use on next walk buffer checks
 	}
 	else
 	{
