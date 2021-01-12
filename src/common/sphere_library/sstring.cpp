@@ -482,7 +482,7 @@ int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxOutSize, lpctstr pszStri
     // RETURN: Output length.
 
     if (!pszStrip)
-        pszStrip = "{|}~";	// client cant print these.
+        pszStrip = "{|}~";	// client can't print these.
 
     //GETNONWHITESPACE( pszInp );	// kill leading white space.
 
@@ -512,7 +512,7 @@ int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxOutSize, lpctstr pszStri
     return (j - 1);
 }
 
-tchar * Str_MakeFiltered(tchar * pStr)
+tchar * Str_MakeFiltered(tchar * pStr) noexcept
 {
     int len = (int)strlen(pStr);
     for (int i = 0; len; ++i, --len)
@@ -534,7 +534,7 @@ tchar * Str_MakeFiltered(tchar * pStr)
     return pStr;
 }
 
-void Str_MakeUnFiltered(tchar * pStrOut, lpctstr pStrIn, int iSizeMax)
+void Str_MakeUnFiltered(tchar * pStrOut, lpctstr pStrIn, int iSizeMax) noexcept
 {
     int len = (int)strlen(pStrIn);
     int iIn = 0;
@@ -559,7 +559,7 @@ void Str_MakeUnFiltered(tchar * pStrOut, lpctstr pStrIn, int iSizeMax)
     }
 }
 
-tchar * Str_GetUnQuoted(tchar * pStr)
+tchar * Str_GetUnQuoted(tchar * pStr) noexcept
 {
     // TODO: WARNING! Possible Memory Leak here!
     GETNONWHITESPACE(pStr);
@@ -585,7 +585,7 @@ tchar * Str_GetUnQuoted(tchar * pStr)
     return pStr;
 }
 
-int Str_TrimEndWhitespace(tchar * pStr, int len)
+int Str_TrimEndWhitespace(tchar * pStr, int len) noexcept
 {
     while (len > 0)
     {
@@ -600,12 +600,63 @@ int Str_TrimEndWhitespace(tchar * pStr, int len)
     return len;
 }
 
-tchar * Str_TrimWhitespace(tchar * pStr)
+tchar * Str_TrimWhitespace(tchar * pStr) noexcept
 {
     // TODO: WARNING! Possible Memory Leak here!
     GETNONWHITESPACE(pStr);
     Str_TrimEndWhitespace(pStr, (int)strlen(pStr));
     return pStr;
+}
+
+void Str_EatEndWhitespace(const tchar* const pStrBegin, tchar*& pStrEnd) noexcept
+{
+    if (pStrBegin == pStrEnd)
+        return;
+
+    tchar* ptcPrev = pStrEnd - 1;
+    while ((ptcPrev != pStrBegin) && ISWHITESPACE(*pStrEnd))
+    {
+        if (*ptcPrev == '\0')
+            return;
+
+        --pStrEnd;
+        ptcPrev = pStrEnd - 1;
+    }
+}
+
+void Str_SkipEnclosedAngularBrackets(tchar*& ptcLine) noexcept
+{
+    // Move past a < > statement. It can have ( ) inside, if it happens, ignore < > characters inside ().
+    bool fOpenedOneAngular = false;
+    int iOpenAngular = 0, iOpenCurly = 0;
+    tchar* ptcTest = ptcLine;
+    while (const tchar ch = *ptcTest)
+    {
+        if (ISWHITESPACE(ch))
+            ;
+        else if (ch == '(')
+            ++iOpenCurly;
+        else if (ch == ')')
+            --iOpenCurly;
+        else if (iOpenCurly == 0)
+        {
+            if (ch == '<')
+            {
+                fOpenedOneAngular = true;
+                ++iOpenAngular;
+            }
+            else if (ch == '>')
+            {
+                --iOpenAngular;
+                if (fOpenedOneAngular && !iOpenAngular)
+                {
+                    ptcLine = ptcTest + 1;
+                    return;
+                }
+            }
+        }
+        ++ptcTest;
+    }
 }
 
 
@@ -1419,41 +1470,6 @@ int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError)
         Str_CopyLimitNull(lastError, "Unknown", SCRIPT_MAX_LINE_LEN);
         CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
         return -1;
-    }
-}
-
-void Str_SkipEnclosedAngularBrackets(tchar* & ptcLine)
-{
-    // Move past a < > statement. It can have ( ) inside, if it happens, ignore < > characters inside ().
-    bool fOpenedOneAngular = false;
-    int iOpenAngular = 0, iOpenCurly = 0;
-    tchar* ptcTest = ptcLine;
-    while (const tchar ch = *ptcTest)
-    {
-        if (ISWHITESPACE(ch))
-            ;
-        else if (ch == '(')
-            ++iOpenCurly;
-        else if (ch == ')')
-            --iOpenCurly;
-        else if (iOpenCurly == 0)
-        {
-            if (ch == '<')
-            {
-                fOpenedOneAngular = true;
-                ++iOpenAngular;
-            }
-            else if (ch == '>')
-            {
-                --iOpenAngular;
-                if (fOpenedOneAngular && !iOpenAngular)
-                {
-                    ptcLine = ptcTest + 1;
-                    return;
-                }
-            }
-        }
-        ++ptcTest;
     }
 }
 

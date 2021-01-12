@@ -40,7 +40,7 @@ public:
     {
         _Init();
     }
-    virtual ~CResourceScript() { }
+    virtual ~CResourceScript() = default;
 
 private:    bool _CheckForChange();
 public:     bool CheckForChange();
@@ -50,14 +50,14 @@ private:
     CResourceScript& operator=(const CResourceScript& other);
 
 public:
-    bool IsFirstCheck() const
+    bool IsFirstCheck() const noexcept
     {
         return (m_dwSize == UINT32_MAX && !m_dateChange.IsTimeValid());
     }
     void ReSync();
     bool Open( lpctstr pszFilename = nullptr, uint wFlags = OF_READ );
-    virtual void Close();
-    virtual void CloseForce();
+    virtual void Close() override;
+    virtual void CloseForce() override;
 };
 
 

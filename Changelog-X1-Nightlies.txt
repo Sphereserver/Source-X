@@ -2418,3 +2418,12 @@ Must have event, even if it's empty, since it's applied by the source to generat
 10-01-2021, xwerswoodx
 - Fixed: STRTOKEN can't parse commands correctly if argument has more than one quotes.
 - Added: Apostrophe support for STRTOKEN that let you go deeper with using STRTOKEN.
+
+11-01-2021, Nolok
+- Changed: Now conditional statements (IF/ELIF/ELSEIF) will perform a lazy evaluation of the conditional expression, whereas before they fully evaluated the whole expression.
+	Lazy evaluation means that the expression will be evaluated one piece (or, one subexpression) at a time. At each stage, if it's sure that the whole expression value (true or false) won't change
+	even if new subexpressions will be evaluated, the evaluation will stop there.
+	Example:
+		IF (<LINK.ISVALID> && (<LINK.TAG0.test> == 1))
+	Won't return an error if item's LINK is invalid or not set, because the evaluation will only halt to <LINK.ISVALID>.
+	Other than allowing more flexible IF tests in just one line, this change will grant faster evaluation times for complex IF tests.

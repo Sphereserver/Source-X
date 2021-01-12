@@ -32,6 +32,8 @@ public:
 	virtual lpctstr GetValStr() const       = 0;
 	virtual int64 GetValNum() const         = 0;
 	virtual CVarDefCont * CopySelf() const  = 0;
+
+	static lpctstr GetValStrZeroed(const CVarDefCont* pVar, bool fZero = false);
 };
 
 class CVarDefContNum : public CVarDefCont

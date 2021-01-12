@@ -116,6 +116,8 @@ static lpctstr constexpr sm_IntrinsicFunctions[INTRINSIC_QTY+1] =
 
 extern class CExpression
 {
+	short _iGetVal_Reentrant;
+
 public:
 	static const char *m_sClassName;
     CVarDefMap		m_VarResDefs;		// Defined variables in sorted order (RESDEF/RESDEF0).
@@ -132,16 +134,33 @@ public:
 public:
 	// Evaluate using the stuff we know.
 	llong GetSingle(lpctstr & pExpr);
-	int GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty, bool bNoWarn = false);
-	int64 GetRangeNumber(lpctstr & pExpr);
-	CSString GetRangeString(lpctstr & pExpr);
+
 	llong GetValMath(llong llVal, lpctstr & pExpr);
 	llong GetVal(lpctstr & pExpr);
 
+	int GetRangeVals(lpctstr& pExpr, int64* piVals, int iMaxQty, bool bNoWarn = false);
+	int64 GetRangeNumber(lpctstr& pExpr);		// Evaluate a { } range
+	CSString GetRangeString(lpctstr& pExpr);	// STRRANDRANGE
+
+	struct SubexprData
+	{
+		lptstr ptcStart, ptcEnd;
+		enum Type : uchar
+		{
+			Unknown = 0, None = 0x1, And = 0x2, Or = 0x4, NestedSubexpr = 0x8
+		};
+		uchar uiType;
+	};
+	static int GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSubexprData)[32], int iMaxQty);
+
+
 	// Strict G++ Prototyping produces an error when not casting char*& to const char*&
-	// So this is a rather lazy workaround
+	// So this is a rather lazy and const-UNsafe workaround
 	inline llong GetSingle(lptstr &pArgs) {
 		return GetSingle(const_cast<lpctstr &>(pArgs));
+	}
+	inline llong GetVal(lptstr& pArgs) {
+		return GetVal(const_cast<lpctstr&>(pArgs));
 	}
 	inline int GetRangeVals(lptstr &pExpr, int64 * piVals, int iMaxQty, bool bNoWarn = false) {
 		return GetRangeVals(const_cast<lpctstr &>(pExpr), piVals, iMaxQty, bNoWarn);
@@ -149,9 +168,7 @@ public:
 	inline int64 GetRangeNumber(lptstr &pArgs) {
 		return GetRangeNumber(const_cast<lpctstr &>(pArgs));
 	}
-	inline llong GetVal(lptstr &pArgs) {
-		return GetVal(const_cast<lpctstr &>(pArgs));
-	}
+	
 
 public:
 	CExpression();

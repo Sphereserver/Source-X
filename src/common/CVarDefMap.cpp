@@ -13,6 +13,18 @@ inline static int VarDefCompare(const CVarDefCont* pVar, lpctstr ptcKey)
     return strcmpi(pVar->GetKey(), ptcKey);
 }
 
+lpctstr CVarDefCont::GetValStrZeroed(const CVarDefCont* pVar, bool fZero) // static
+{
+	ADDTOCALLSTACK_INTENSIVE("CVarDefCont::GetValStrZeroed");
+	if (pVar)
+	{
+		lpctstr ptcValStr = pVar->GetValStr();
+		if (!fZero || (ptcValStr[0] != '\0'))
+			return ptcValStr;
+	}
+	return (fZero ? "0" : "");
+}
+
 /***************************************************************************
 *
 *
@@ -444,7 +456,7 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, 
     ASSERT(pszVal);
 	if (!fQuoted)
 	{
-		if (pszVal[0] == '\0')
+		if (fDeleteZero && (pszVal[0] == '\0'))
 		{
 			// If Val is an empty string, remove any previous def (and do not add a new def)
 			DeleteAtKey(pszName);
@@ -512,9 +524,7 @@ lpctstr CVarDefMap::GetKeyStr( lpctstr ptcKey, bool fZero ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetKeyStr");
 	const CVarDefCont * pVar = GetKey(ptcKey);
-	if ( pVar == nullptr )
-		return (fZero ? "0" : "");
-	return pVar->GetValStr();
+	return CVarDefCont::GetValStrZeroed(pVar, fZero);
 }
 
 CVarDefCont * CVarDefMap::CheckParseKey( lpctstr pszArgs ) const
