@@ -17,6 +17,8 @@ class CUID;
 class CChar;
 
 
+enum SK_TYPE : int;
+
 enum TRIGRUN_TYPE
 {
 	TRIGRUN_SECTION_EXEC,	// Just execute this. (first line already read!)
@@ -46,9 +48,15 @@ class CScriptObj
 {
 	// This object can be scripted. (but might not be)
 
+	// Script keywords
 	static lpctstr const sm_szScriptKeys[];
 	static lpctstr const sm_szLoadKeys[];
 	static lpctstr const sm_szVerbKeys[];
+
+	// Recursion counters and state variables
+	short _iParseScriptText_Reentrant;
+	bool  _fParseScriptText_Brackets;
+	short _iEvaluate_Conditional_Reentrant;
 
 public:
 	static const char* m_sClassName;
@@ -121,10 +129,20 @@ public:
 
 // Special statements
 private:
-	TRIGRET_TYPE OnTriggerForLoop(CScript& s, int iType, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, CSString* pResult);
+	// While, standard for loop and some special for loops
+	TRIGRET_TYPE OnTriggerLoopGeneric(CScript& s, int iType, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, CSString* pResult);
+	TRIGRET_TYPE OnTriggerLoopForCharSpecial(CScript& s, SK_TYPE iCmd, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, CSString* pResult);
+	TRIGRET_TYPE OnTriggerLoopForCont(CScript& s, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, CSString* pResult);
+	TRIGRET_TYPE OnTriggerLoopForContSpecial(CScript& s, SK_TYPE iCmd, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, CSString* pResult);
 
-	// Special statements evaluations (ES = EvaluateStatement)
-	bool ES_QvalConditional(lpctstr pKey, CSString& sVal, CTextConsole* pSrc, CScriptTriggerArgs* pArgs);
+	// Special statements
+	bool Evaluate_Conditional(lptstr ptcExpression, CTextConsole* pSrc, CScriptTriggerArgs* pArgs); // IF, ELIF, ELSEIF
+	bool _Evaluate_Conditional_SubexprVal(tchar* ptcBuf, bool fNested, CTextConsole* pSrc, CScriptTriggerArgs* pArgs);
+
+	bool Evaluate_QvalConditional(lpctstr ptcKey, CSString& sVal, CTextConsole* pSrc, CScriptTriggerArgs* pArgs);
+
+	bool Execute_Call(CScript& s, CTextConsole* pSrc, CScriptTriggerArgs* pArgs);
+	bool Execute_FullTrigger(CScript& s, CTextConsole* pSrc, CScriptTriggerArgs* pArgs);
 
 
 // Utilities
@@ -134,7 +152,7 @@ protected:
 
 // Constructors/operators
 public:
-	CScriptObj() = default;
+	CScriptObj();
 	virtual ~CScriptObj() = default;
 
 private:

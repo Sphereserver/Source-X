@@ -17,25 +17,25 @@ class CScriptTriggerArgs : public CScriptObj
 
 public:
     static const char *m_sClassName;
-    int64                   m_iN1;		// "ARGN" or "ARGN1" = a modifying numeric arg to the current trigger.
-    int64					m_iN2;		// "ARGN2" = a modifying numeric arg to the current trigger.
-    int64					m_iN3;		// "ARGN3" = a modifying numeric arg to the current trigger.
+    int64                   m_iN1;      // "ARGN" or "ARGN1" = a modifying numeric arg to the current trigger.
+    int64					m_iN2;      // "ARGN2" = a modifying numeric arg to the current trigger.
+    int64					m_iN3;      // "ARGN3" = a modifying numeric arg to the current trigger.
 
-    CScriptObj *			m_pO1;		// "ARGO" or "ARGO1" = object 1
+    CScriptObj *			m_pO1;      // "ARGO" or "ARGO1" = object 1
                                         // these can go out of date ! get deleted etc.
 
-    CSString				m_s1;			// ""ARGS" or "ARGS1" = string 1
-    CSString				m_s1_raw;		// RAW, used to build argv in runtime
+    CSString				m_s1;           // ""ARGS" or "ARGS1" = string 1
+    CSString				m_s1_buf_vec;   // RAW, used to build argv in runtime
 
     std::vector<lpctstr>	m_v;
 
-    CVarDefMap 				m_VarsLocal;	// "LOCAL.x" = local variable x
-    CLocalFloatVars			m_VarsFloat;	// "FLOAT.x" = float local variable x
-    CLocalObjMap			m_VarObjs;		// "REFx" = local object x
+    CVarDefMap 				m_VarsLocal;    // "LOCAL.x" = local variable x
+    CLocalFloatVars			m_VarsFloat;    // "FLOAT.x" = float local variable x
+    CLocalObjMap			m_VarObjs;      // "REFx" = local object x
 
 public:
     CScriptTriggerArgs();
-    explicit CScriptTriggerArgs( lpctstr pszStr );
+    explicit CScriptTriggerArgs(lpctstr pszStr);
     explicit CScriptTriggerArgs(CScriptObj* pObj);
     explicit CScriptTriggerArgs(int64 iVal1);
     CScriptTriggerArgs(int64 iVal1, int64 iVal2, int64 iVal3 = 0);

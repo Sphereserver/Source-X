@@ -81,7 +81,7 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 		if ( IsTrigUsed(TRIGGER_NPCRESTOCK) )
 		{
 			CCharBase *pCharDef = Char_GetDef();
-			ReadScriptTrig(pCharDef, CTRIG_NPCRestock, true);
+			ReadScriptReducedTrig(pCharDef, CTRIG_NPCRestock, true);
 		}
 
 		//	we need restock vendor money as well

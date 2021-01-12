@@ -1208,9 +1208,9 @@ bool CChar::DupeFrom(const CChar * pChar, bool fNewbieItems )
 }
 
 // Reading triggers from CHARDEF
-bool CChar::ReadScriptTrig(CCharBase * pCharDef, CTRIG_TYPE trig, bool fVendor)
+bool CChar::ReadScriptReducedTrig(CCharBase * pCharDef, CTRIG_TYPE trig, bool fVendor)
 {
-	ADDTOCALLSTACK("CChar::ReadScriptTrig");
+	ADDTOCALLSTACK("CChar::ReadScriptReducedTrig");
 	if ( !pCharDef || !pCharDef->HasTrigger(trig) )
 		return false;
 
@@ -1218,15 +1218,15 @@ bool CChar::ReadScriptTrig(CCharBase * pCharDef, CTRIG_TYPE trig, bool fVendor)
 	if ( !pCharDef->ResourceLock(s) || !OnTriggerFind(s, sm_szTrigName[trig]) )
 		return false;
 
-	return ReadScript(s, fVendor);
+	return ReadScriptReduced(s, fVendor);
 }
 
 // If this is a regen they will have a pack already.
 // RETURN:
 //  true = default return. (mostly ignored).
-bool CChar::ReadScript(CResourceLock &s, bool fVendor)
+bool CChar::ReadScriptReduced(CResourceLock &s, bool fVendor)
 {
-	ADDTOCALLSTACK("CChar::ReadScript");
+	ADDTOCALLSTACK("CChar::ReadScriptReduced");
 	bool fFullInterp = false;
 	bool fBlockItemAttr = false; //Set a temporary boolean to block item attributes to set on Character.
 
@@ -1237,7 +1237,7 @@ bool CChar::ReadScript(CResourceLock &s, bool fVendor)
 			break;
 
 		int iCmd = FindTableSorted(s.GetKey(), CItem::sm_szTemplateTable, CountOf(CItem::sm_szTemplateTable)-1);
-
+		bool fItemCreation = false;
 		if ( fVendor )
 		{
 			if (iCmd != -1)
@@ -1303,6 +1303,8 @@ bool CChar::ReadScript(CResourceLock &s, bool fVendor)
 				case ITC_CONTAINER:
 				case ITC_ITEMNEWBIE:
 					{
+						fItemCreation = true;
+
 						if ( IsStatFlag( STATF_CONJURED ) && iCmd != ITC_ITEMNEWBIE ) // This check is not needed.
 							break; // conjured creates have no loot.
 
@@ -1346,7 +1348,7 @@ bool CChar::ReadScript(CResourceLock &s, bool fVendor)
 			else
 				pItem->r_LoadVal( s );
 		}
-		else
+		else if (!fItemCreation)
 		{
 			TRIGRET_TYPE tRet = OnTriggerRun( s, TRIGRUN_SINGLE_EXEC, &g_Serv, nullptr, nullptr );
 			if ( (tRet == TRIGRET_RET_FALSE) && fFullInterp )
@@ -1941,16 +1943,16 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 
 	CResourceLock s;
 	if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, fFemale ? RES_NEWBIE_FEMALE_DEFAULT : RES_NEWBIE_MALE_DEFAULT, (word)rtRace)) )
-		ReadScript(s);
+		ReadScriptReduced(s);
 	else if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, fFemale ? RES_NEWBIE_FEMALE_DEFAULT : RES_NEWBIE_MALE_DEFAULT)) )
-		ReadScript(s);
+		ReadScriptReduced(s);
 
     if (iProfession != INT32_MAX)
     {
         if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, iProfession, (word)rtRace)) )
-            ReadScript(s);
+            ReadScriptReduced(s);
         else if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, iProfession)) )
-            ReadScript(s);
+            ReadScriptReduced(s);
     }
 
 	if ( fCreateSkillItems )
@@ -1979,7 +1981,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 				if ( !g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, iSkill)) )
 					continue;
 			}
-			ReadScript(s);
+			ReadScriptReduced(s);
 		}
 	}
 
@@ -4236,7 +4238,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				CResourceLock t;
 				if ( !g_Cfg.ResourceLock( t, RES_NEWBIE, s.GetArgStr()) )
 					return false;
-				ReadScript(t);
+				ReadScriptReduced(t);
 			}
 			break;
 

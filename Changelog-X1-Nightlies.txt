@@ -2402,7 +2402,24 @@ Must have event, even if it's empty, since it's applied by the source to generat
   which is something that only sometimes we expect and we want, most of the times it caused obscure bugs.
 
 03-01-2021, Ben
-- Fixed: REF1 being skipped in @tradeaccepted trigger.
-- Fixed: <I> returning error when used alone.
+- Fixed: REF1 being skipped in @TradeAccepted trigger.
 - Removed: sectorsize checks when loading from sphere.ini to allow more customizations. (Recent changes prevented from setting sectorsize to 64 for map4)
 - Added: Random chance to sleep for NPCs walking into a sleeping sector to try and prevent NPCs lining up at the sector edges.
+
+08-01-2021, xwerswoodx
+- Added: Quote support for STRSUB function to avoid whitespace issues.
+
+09-01-2021, Nolok
+- Fixed: Explicitly setting a LOCAL to "" set its value to 0, instead of to an empty string. Setting it to an empty argument still sets it to 0.
+- Fixed: ARGS not returning the full string but only the first argument if we pass to a function multiple quoted arguments (like "Test1", "Test2", test).
+- Fixed: ARGV truncating the value of a quoted argument to the last quote character ("), even if there was other text after it.
+- Fixed: Console error when @CreateLoot or @NPCRestock couldn't create an item (example: the char or the corpse got immediately removed after creation, if ever created) (Issue: #592).
+
+11-01-2021, Nolok
+- Changed: Now conditional statements (IF/ELIF/ELSEIF) will perform a lazy evaluation of the conditional expression, whereas before they fully evaluated the whole expression.
+	Lazy evaluation means that the expression will be evaluated one piece (or, one subexpression) at a time. At each stage, if it's sure that the whole expression value (true or false) won't change
+	even if new subexpressions will be evaluated, the evaluation will stop there.
+	Example:
+		IF (<LINK.ISVALID> && (<LINK.TAG0.test> == 1))
+	Won't return an error if item's LINK is invalid or not set, because the evaluation will only halt to <LINK.ISVALID>.
+	Other than allowing more flexible IF tests in just one line, this change will grant faster evaluation times for complex IF tests.

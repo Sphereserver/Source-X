@@ -290,13 +290,13 @@ void CChar::NPC_LoadScript( bool fRestock )
 		{
 			CUID uidOldAct = pChar->m_Act_UID;
 			pChar->m_Act_UID = GetUID();
-			pChar->ReadScriptTrig(pCharDef, CTRIG_Create);
+			pChar->ReadScriptReducedTrig(pCharDef, CTRIG_Create);
 			pChar->m_Act_UID = uidOldAct;
 		}
 	}
 	//This remains untouched but moved after the chardef's section
 	if ( fRestock && IsTrigUsed(TRIGGER_NPCRESTOCK) )
-		ReadScriptTrig(pCharDef, CTRIG_NPCRestock);
+		ReadScriptReducedTrig(pCharDef, CTRIG_NPCRestock);
 
 	CreateNewCharCheck();	//This one is giving stats, etc to the char, so we can read/set them in the next triggers.
 }
