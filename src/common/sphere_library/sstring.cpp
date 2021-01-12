@@ -481,7 +481,7 @@ int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxOutSize, lpctstr pszStri
     // RETURN: Output length.
 
     if (!pszStrip)
-        pszStrip = "{|}~";	// client cant print these.
+        pszStrip = "{|}~";	// client can't print these.
 
     //GETNONWHITESPACE( pszInp );	// kill leading white space.
 

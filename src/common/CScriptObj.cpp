@@ -1713,7 +1713,7 @@ size_t CScriptObj::ParseScriptText( tchar * ptcResponse, CTextConsole * pSrc, in
 	// Take in a line of text that may have fields that can be replaced with operators here.
 	// ARGS:
 	// iFlags & 1: Use HTML-compatible delimiters (%). Inside those, angular brackets are allowed to do nested evaluations.
-	// iFlags & 2: Allow recusive bracket count. 1=use HTML %% as the delimiters.
+	// iFlags & 2: Don't allow recusive bracket count.
 	// iFlags & 4: Just parsing a nested QVAL.
 	// NOTE:
 	//  html will have opening <script language="SPHERE_FILE"> and then closing </script>
@@ -1725,9 +1725,8 @@ size_t CScriptObj::ParseScriptText( tchar * ptcResponse, CTextConsole * pSrc, in
 	//  _iParseScriptText_Reentrant = 0;
 	//  _fParseScriptText_Brackets = false;	// Am i evaluating a statement? (Am i inside < > brackets of a statement i am currently evaluating?)
 
-	const bool fRecurseBrackets = ((iFlags & 2) != 0);
-	if (!fRecurseBrackets)
-		_fParseScriptText_Brackets = false;
+	ASSERT(_fParseScriptText_Brackets == false);
+	const bool fNoRecurseBrackets = ((iFlags & 2) != 0);
 
 	// General purpose variables.
 	const bool fHTML = ((iFlags & 1) != 0);
@@ -1746,14 +1745,14 @@ size_t CScriptObj::ParseScriptText( tchar * ptcResponse, CTextConsole * pSrc, in
 	for ( i = 0; ptcResponse[i]; ++i )
 	{
 		const tchar ch = ptcResponse[i];
-		const tchar chNext = ptcResponse[i + 1];	// Check this to ignore stuff like <=, <<...
 
 		// Are we looking for the current statement start?
 		if ( !_fParseScriptText_Brackets)	// not in brackets
 		{
 			if ( ch == chBegin )	// found the start !
 			{
-				if ((chNext == '<') || !(IsAlnum(chNext)))
+                const tchar chNext = ptcResponse[i + 1];
+				if ((chNext != '<') && !IsAlnum(chNext))
 					continue;	// Ignore this
 
 				// Set the statement start
@@ -1783,11 +1782,8 @@ size_t CScriptObj::ParseScriptText( tchar * ptcResponse, CTextConsole * pSrc, in
 		}
 
 		// Handle possibly recursive angular brackets (i'm already inside an open bracket)
-		if ( ch == '<' )
+		if (_fParseScriptText_Brackets && (ch == '<'))
 		{
-			if ((chNext == '<') || !(IsAlnum(chNext)))
-				continue;	// Ignore this
-
 			// Detect nested QVALs
 			if (eQval != QvalStatus::None)
 			{
@@ -1897,13 +1893,19 @@ size_t CScriptObj::ParseScriptText( tchar * ptcResponse, CTextConsole * pSrc, in
 			EXC_SET_BLOCK("writeval");
 
 			ptcResponse[i] = '\0'; // Needed for r_WriteVal
-
 			lpctstr ptcKey = ptcResponse + iBegin + 1; // move past the opening bracket
+
+			if (ptcKey[0] == '<')
+			{
+				// Nested angular brackets, like: <<SKILL>>
+				ParseScriptText(ptcResponse, pSrc, iFlags, pArgs);
+			}
+
 			CSString sVal;
 			bool fRes;
 			if (eQval != QvalStatus::None)
 			{
-				// Separate evaluation for QVAL. I may need additional script context for it (pArgs isnt' available in r_WriteVal).
+				// Separate evaluation for QVAL. I may need additional script context for it (pArgs isn't available in r_WriteVal).
 				EXC_SET_BLOCK("writeval qval");
 				ptcKey += 4; // Skip the letters QVAL and pass only the arguments
 				fRes = Evaluate_QvalConditional(ptcKey, sVal, pSrc, pArgs);
@@ -1953,8 +1955,11 @@ size_t CScriptObj::ParseScriptText( tchar * ptcResponse, CTextConsole * pSrc, in
 
 			i = iBegin + iWriteValLen - 1;
 
-			if (fRecurseBrackets) // just do this one then bail out.
+			if (fNoRecurseBrackets) // just do this one then bail out.
+			{
+				_fParseScriptText_Brackets = false;
 				return i;
+			}
 		}
 	}
 	EXC_CATCH;
@@ -1963,6 +1968,7 @@ size_t CScriptObj::ParseScriptText( tchar * ptcResponse, CTextConsole * pSrc, in
 	g_Log.EventDebug("response '%s' source addr '0%p' flags '%d' args '%p'\n", ptcResponse, static_cast<void *>(pSrc), iFlags, static_cast<void *>(pArgs));
 	EXC_DEBUG_END;
 	
+	_fParseScriptText_Brackets = false;
 	return i;
 }
 

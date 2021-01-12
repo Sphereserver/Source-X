@@ -444,7 +444,7 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, 
     ASSERT(pszVal);
 	if (!fQuoted)
 	{
-		if (pszVal[0] == '\0')
+		if (fDeleteZero && (pszVal[0] == '\0'))
 		{
 			// If Val is an empty string, remove any previous def (and do not add a new def)
 			DeleteAtKey(pszName);

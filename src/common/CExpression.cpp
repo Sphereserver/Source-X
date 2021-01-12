@@ -900,7 +900,7 @@ try_dec:
 		tchar szTag[EXPRESSION_MAX_KEY_LEN];
 		GetIdentifierString(szTag, ptcStartingString);
 		const lpctstr ptcLast = (ptcStartingString[0] == '<') ? ">'" : "'";
-		DEBUG_ERR(("Undefined symbol '%s' [Evaluated: '%s%s].\n", szTag, ptcStartingString, ptcLast));
+		DEBUG_ERR(("Undefined symbol '%s' [Evaluated expression: '%s%s].\n", szTag, ptcStartingString, ptcLast));
 	}
 	else
 	{
