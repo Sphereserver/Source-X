@@ -624,9 +624,9 @@ badcmd:
 			{
 				const CVarDefCont * pVar = g_Exp.m_VarGlobals.GetKey(ptcKey);
 				if ( pVar )
-					sVal	= pVar->GetValStr();
+					sVal = pVar->GetValStr();
 				else if ( fZero )
-					sVal	= "0";
+					sVal = "0";
 			}
 			return true;
 		case SSC_DEFLIST:
@@ -643,9 +643,9 @@ badcmd:
 			{
 				const CVarDefCont * pVar = g_Exp.m_VarDefs.GetKey(ptcKey);
 				if ( pVar )
-					sVal	= pVar->GetValStr();
+					sVal = pVar->GetValStr();
 				else if ( fZero )
-					sVal	= "0";
+					sVal = "0";
 			}
 			return true;
         case SSC_RESDEF0:
@@ -655,9 +655,9 @@ badcmd:
         {
             const CVarDefCont * pVar = g_Exp.m_VarResDefs.GetKey(ptcKey);
             if ( pVar )
-                sVal	= pVar->GetValStr();
+                sVal = pVar->GetValStr();
             else if ( fZero )
-                sVal	= "0";
+                sVal = "0";
         }
         return true;
 		case SSC_DEFMSG:
