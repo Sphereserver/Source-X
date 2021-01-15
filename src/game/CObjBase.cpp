@@ -1429,7 +1429,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 				if ( !pVarKey )
 					sVal = Base_GetDef()->m_TagDefs.GetKeyStr( ptcKey, fZero );
 				else
-					sVal = pVarKey->GetValStr();
+					sVal = CVarDefCont::GetValStrZeroed(pVarKey, fZero);
 			}
             break;
 		case OC_TIMER:

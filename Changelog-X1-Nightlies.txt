@@ -2415,6 +2415,10 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: ARGV truncating the value of a quoted argument to the last quote character ("), even if there was other text after it.
 - Fixed: Console error when @CreateLoot or @NPCRestock couldn't create an item (example: the char or the corpse got immediately removed after creation, if ever created) (Issue: #592).
 
+10-01-2021, xwerswoodx
+- Fixed: STRTOKEN can't parse commands correctly if argument has more than one quotes.
+- Added: Apostrophe support for STRTOKEN that let you go deeper with using STRTOKEN.
+
 11-01-2021, Nolok
 - Changed: Now conditional statements (IF/ELIF/ELSEIF) will perform a lazy evaluation of the conditional expression, whereas before they fully evaluated the whole expression.
 	Lazy evaluation means that the expression will be evaluated one piece (or, one subexpression) at a time. At each stage, if it's sure that the whole expression value (true or false) won't change

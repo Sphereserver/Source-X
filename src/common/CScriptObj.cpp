@@ -623,10 +623,7 @@ badcmd:
 			// "VAR." = get/set a system wide variable.
 			{
 				const CVarDefCont * pVar = g_Exp.m_VarGlobals.GetKey(ptcKey);
-				if ( pVar )
-					sVal	= pVar->GetValStr();
-				else if ( fZero )
-					sVal	= "0";
+				sVal = CVarDefCont::GetValStrZeroed(pVar, fZero);
 			}
 			return true;
 		case SSC_DEFLIST:
@@ -643,9 +640,9 @@ badcmd:
 			{
 				const CVarDefCont * pVar = g_Exp.m_VarDefs.GetKey(ptcKey);
 				if ( pVar )
-					sVal	= pVar->GetValStr();
+					sVal = pVar->GetValStr();
 				else if ( fZero )
-					sVal	= "0";
+					sVal = "0";
 			}
 			return true;
         case SSC_RESDEF0:
@@ -655,9 +652,9 @@ badcmd:
         {
             const CVarDefCont * pVar = g_Exp.m_VarResDefs.GetKey(ptcKey);
             if ( pVar )
-                sVal	= pVar->GetValStr();
+                sVal = pVar->GetValStr();
             else if ( fZero )
-                sVal	= "0";
+                sVal = "0";
         }
         return true;
 		case SSC_DEFMSG:
@@ -964,86 +961,58 @@ badcmd:
 				g_Log.EventDebug("Process execution finished.\n");
 				return true;
 			}
-			
-		case SSC_StrToken:
-			{
-				tchar *ppArgs[3];
-				int iQty = Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, CountOf(ppArgs), ",");
-				if ( iQty < 3 )
-					return false;
-				
-				if (!IsStrNumeric(ppArgs[1]))
-					return false;
-
-				if ( *ppArgs[2] == '"')
-					++ppArgs[2];
-					
-                const size_t uiArgs2Len = strlen(ppArgs[2]);
-				for (tchar *pEnd = ppArgs[2] + uiArgs2Len - 1; pEnd >= ppArgs[2]; --pEnd)
-				{
-					if ( *pEnd == '"')
-					{
-						*pEnd = '\0';
-						break;
-					}
-				}
-				tchar *iSep = ppArgs[2];
-				for (tchar *iSeperator = ppArgs[2] + uiArgs2Len - 1; iSeperator > ppArgs[2]; --iSeperator)
-				{
-					*iSeperator = '\0';
-				}
-				
-				if ( *ppArgs[0] == '"')
-					++ppArgs[0];
-					
-				for (tchar *pEnd = ppArgs[0] + strlen(ppArgs[0]) - 1; pEnd >= ppArgs[0]; --pEnd)
-				{
-					if ( *pEnd == '"')
-					{
-						*pEnd = '\0';
-						break;
-					}
-				}
-				sVal = "";
-				tchar *ppCmd[255];
-				int count = Str_ParseCmds(ppArgs[0], ppCmd, CountOf(ppCmd), iSep);
-				tchar *ppArrays[2];
-				int iArrays = Str_ParseCmds(ppArgs[1], ppArrays, CountOf(ppArrays), "-");
-				llong iValue = Exp_GetLLVal(ppArgs[1]);
-				llong iValueEnd = iValue;
-				
-				if (iArrays > 1)
-				{
-					iValue = Exp_GetLLVal(ppArrays[0]);
-					iValueEnd = Exp_GetLLVal(ppArrays[1]);
-					if (iValueEnd <= 0 || iValueEnd > count)
-						iValueEnd = count;
-				}
-				
-				if (iValue < 0)
-					return false;
-				else if (iValue > 0)
-				{
-					if (iValue > count)
-						return false;
-					else if (iValue == iValueEnd)
-						sVal = ppCmd[iValue - 1];
-					else
-					{
-						sVal.Add(ppCmd[iValue - 1]);
-						int64 i = iValue + 1;
-						for ( ; i <= iValueEnd; ++i)
-						{
-							sVal.Add(iSep);
-							sVal.Add(ppCmd[i - 1]);
-						}
-					}
-				}
-				else
-					sVal.FormatVal(count);
-			} return true;
-			
-
+        case SSC_StrToken:
+        {
+            tchar *ppArgs[3];
+            int iQty = Str_ParseCmdsAdv(const_cast<tchar *>(ptcKey), ppArgs, CountOf(ppArgs), ",");
+            if ( iQty < 3 )
+                return false;
+                
+            tchar *iSep = Str_UnQuote(ppArgs[2]); //New function, trim (") and (') chars directly.
+            for (tchar *iSeperator = iSep + strlen(iSep) - 1; iSeperator > iSep; --iSeperator)
+                *iSeperator = '\0';
+            
+            tchar *pArgs = Str_UnQuote(ppArgs[0]);
+            sVal = "";
+            tchar *ppCmd[255];
+            int count = Str_ParseCmdsAdv(pArgs, ppCmd, CountOf(ppCmd), iSep); //Remove unnecessary chars from seperator to avoid issues.
+            tchar *ppArrays[2];
+            
+            //Getting range of array index...
+            int iArrays = Str_ParseCmdsAdv(ppArgs[1], ppArrays, CountOf(ppArrays), "-");
+            llong iValue = Exp_GetLLVal(ppArgs[1]);
+            llong iValueEnd = iValue;
+            if (iArrays > 1)
+            {
+                iValue = Exp_GetLLVal(ppArrays[0]);
+                iValueEnd = Exp_GetLLVal(ppArrays[1]);
+                if (iValueEnd <= 0 || iValueEnd > count)
+                    iValueEnd = count;
+            }
+            
+            if (iValue < 0)
+                return false;
+            else if (iValue > 0)
+            {
+                if (iValue > count)
+                    return false;
+                else if (iValue == iValueEnd) {
+                    sVal.Format(ppCmd[iValue - 1]);
+                }
+                else
+                {
+                    sVal.Add(ppCmd[iValue - 1]);
+                    int64 i = iValue + 1;
+                    for ( ; i <= iValueEnd; ++i)
+                    {
+                        sVal.Add(iSep);
+                        sVal.Add(ppCmd[i - 1]);
+                    }
+                }
+            }
+            else
+                sVal.FormatVal(count);
+        } return true;
 		case SSC_EXPLODE:
 			{
 				char separators[16];
