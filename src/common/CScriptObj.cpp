@@ -623,10 +623,7 @@ badcmd:
 			// "VAR." = get/set a system wide variable.
 			{
 				const CVarDefCont * pVar = g_Exp.m_VarGlobals.GetKey(ptcKey);
-				if ( pVar )
-					sVal = pVar->GetValStr();
-				else if ( fZero )
-					sVal = "0";
+				sVal = CVarDefCont::GetValStrZeroed(pVar, fZero);
 			}
 			return true;
 		case SSC_DEFLIST:
