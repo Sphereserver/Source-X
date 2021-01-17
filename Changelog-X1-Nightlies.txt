@@ -2427,3 +2427,8 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		IF (<LINK.ISVALID> && (<LINK.TAG0.test> == 1))
 	Won't return an error if item's LINK is invalid or not set, because the evaluation will only halt to <LINK.ISVALID>.
 	Other than allowing more flexible IF tests in just one line, this change will grant faster evaluation times for complex IF tests.
+
+17-01-2021, Ben
+-Fixed #589: Items that are denied placement and not able to return to their previous locations will drop at the chars location.
+-Fixed: CREATE on chars not loading from save causing it to restart on reboot.
+-Fixed #600: Changed old dating method on bboards to now have actual dates. (This affects dates of old messages as the timestamps is different)

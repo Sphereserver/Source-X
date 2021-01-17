@@ -391,7 +391,7 @@ void CClient::addItem_Equipped( const CItem * pItem )
 		return;
 
 	new PacketItemEquipped(this, pItem);
-	
+
 	//addAOSTooltip(pItem);		// tooltips for equipped items are handled on packet 0x78 (PacketCharacter)
 }
 
@@ -749,7 +749,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	}
 
 	word Args[] = { (word)wHue, (word)font, (word)fUnicode };
-    CSString sBarkBuffer;
+    lptstr ptcBarkBuffer = Str_GetTemp();  // Be sure to init this before the goto instruction
 
 	if ( *pszText == '@' )
 	{
@@ -798,7 +798,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	else if (mode <= TALKMODE_YELL)
 	I removed else from the beginning of the condition, because if pSrcChar->m_SpeechHueOverride or pSrcChar->m_EmoteHueOverride not set, we still need to set default value.
 	It should not block the overrides, because Args[0] changed another value from "HUE_TEXT_DEF".
-	
+
 	- xwerswoodx
 	*/
     if (mode <= TALKMODE_YELL)
@@ -816,14 +816,15 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	if ( Args[2] == 0 )
 		Args[2] = (word)defaultUnicode;
 
-    sBarkBuffer.Format( "%s%s", name, pszText);
+	Str_CopyLimitNull(	ptcBarkBuffer, name,	STR_TEMPLENGTH);
+	Str_ConcatLimitNull(ptcBarkBuffer, pszText, STR_TEMPLENGTH);
 
 	switch ( Args[2] )
 	{
 		case 3:	// Extended localized message (with affixed ASCII text)
 		{
             tchar * ppArgs[256];
-			int iQty = Str_ParseCmds(sBarkBuffer.GetBuffer(), ppArgs, CountOf(ppArgs), "," );
+			int iQty = Str_ParseCmds(ptcBarkBuffer, ppArgs, CountOf(ppArgs), "," );
 			int iClilocId = Exp_GetVal( ppArgs[0] );
 			int iAffixType = Exp_GetVal( ppArgs[1] );
 			CSString CArgs;
@@ -841,7 +842,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		case 2:	// Localized
 		{
             tchar * ppArgs[256];
-			int iQty = Str_ParseCmds(sBarkBuffer.GetBuffer(), ppArgs, CountOf(ppArgs), "," );
+			int iQty = Str_ParseCmds(ptcBarkBuffer, ppArgs, CountOf(ppArgs), "," );
 			int iClilocId = Exp_GetVal( ppArgs[0] );
 			CSString CArgs;
 			for ( int i = 1; i < iQty; ++i )
@@ -858,7 +859,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		case 1:	// Unicode
 		{
 			nchar szBuffer[ MAX_TALK_BUFFER ];
-			CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), sBarkBuffer.GetBuffer(), -1 );
+			CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), ptcBarkBuffer, -1 );
 			addBarkUNICODE( szBuffer, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), 0 );
 			break;
 		}
@@ -867,10 +868,13 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		default:
 		{
 bark_default:
-			if ( sBarkBuffer.IsEmpty())
-                sBarkBuffer.Format("%s%s", name, pszText);
+			if (ptcBarkBuffer[0] == '\0')
+			{
+				Str_CopyLimitNull(ptcBarkBuffer, name, STR_TEMPLENGTH);
+				Str_ConcatLimitNull(ptcBarkBuffer, pszText, STR_TEMPLENGTH);
+			}
 
-			addBark( sBarkBuffer.GetBuffer(), pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]));
+			addBark(ptcBarkBuffer, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]));
 			break;
 		}
 	}
@@ -996,7 +1000,7 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 
 	else if ( pChar->IsStatFlag(STATF_STONE)) //Client do not have stone state. So we must send the hue we want. (Affect the paperdoll hue as well)
 		wHue = HUE_STONE;
-	
+
 	// Normaly, client automaticly change the anim color in grey when someone is insubtantial, hidden or invisible. Paperdoll are never affected by this.
 	// The next 3 state overwrite the client process and force ITEM color to have a specific color. It cause that Paperdoll AND anim get the color.
 	else if ( pChar->IsStatFlag(STATF_INSUBSTANTIAL) && g_Cfg.m_iColorInvis)
@@ -1005,7 +1009,7 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 		wHue = g_Cfg.m_iColorHidden;
 	else if (pChar->IsStatFlag(STATF_INVISIBLE) && g_Cfg.m_iColorInvisSpell)
 		wHue = g_Cfg.m_iColorInvisSpell;
-		
+
 	else
 	{
 		if ( pItemDef && (uiResDisp < pItemDef->GetResLevel() ) )
@@ -1062,7 +1066,7 @@ void CClient::GetAdjustedCharID( const CChar * pChar, CREID_TYPE &id, HUE_TYPE &
 	{
 		if ( pChar->IsStatFlag(STATF_STONE) )	//Client do not have stone state. So we must send the hue we want. (Affect the paperdoll hue as well)
 			wHue = HUE_STONE;
-		
+
 		// Normaly, client automaticly change the anim color in grey when someone is insubtantial, hidden or invisible. Paperdoll are never affected by this.
 		// The next 3 state overwrite the client process and force SKIN color to have a specific color. It cause that Paperdoll AND anim get the color.
 		else if ( pChar->IsStatFlag(STATF_INSUBSTANTIAL) && g_Cfg.m_iColorInvis)
@@ -1112,7 +1116,7 @@ void CClient::addChar( CChar * pChar, bool fFull )
 	ADDTOCALLSTACK("CClient::addChar");
 	// Full update about a char.
 	EXC_TRY("addChar");
-    
+
     if (fFull)
 	    new PacketCharacter(this, pChar);
     else
@@ -1884,12 +1888,12 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 		if ( !pItem )
 			break;
 
-        const CPointMap& ptItemTop = pItem->GetTopLevelObj()->GetTopPoint();       
+        const CPointMap& ptItemTop = pItem->GetTopLevelObj()->GetTopPoint();
         if ( pItem->IsTypeMulti() )		// incoming multi on radar view
 		{
             const DIR_TYPE dirFace = pItem->GetDir(pCharThis);
             const CItemMulti* pMulti = static_cast<const CItemMulti*>(pItem);
-            
+
             // This looks like the only way to make this thing work. Even if i send the worldobj packet with the commented code, the client
             //  will ignore it (and SpyUO 2 doesn't show that packet ?! it only shows packets that actually result in the generation of a world item, how weird)
             const int iOldDist = ptOld.GetDistSight(ptItemTop);  // handles also the case of an invalid point
@@ -1913,7 +1917,7 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
             }
             */
 
-            continue;            
+            continue;
 		}
 
 		if ( (iSeeCurrent > iSeeMax) || !pCharThis->CanSee(pItem) )
@@ -1928,7 +1932,7 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
             {
                 bSee = true;    // item is in same house as me
             }
-            else if ((ptOld.GetDistSight(ptItemTop) > iViewDist) && (ptCharThis.GetDistSight(ptItemTop) <= iViewDist))	// item just came into view 
+            else if ((ptOld.GetDistSight(ptItemTop) > iViewDist) && (ptCharThis.GetDistSight(ptItemTop) <= iViewDist))	// item just came into view
             {
                 if (!ptItemTop.GetRegion(REGION_TYPE_HOUSE)		// item is not in a house (ships are ok)
                     || (pItem->m_uidLink.IsValidUID() && pItem->m_uidLink.IsItem() && pItem->m_uidLink.ItemFind()->IsTypeMulti())	// item is linked to a multi

@@ -1916,8 +1916,14 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
             {
 				fCanAddToPack = false;
                 const CItem* pCont = dynamic_cast<const CItem*>(pItem->GetContainer());
-                if ((pPrevCont == pCont) && (pPrevCont != nullptr))
-                    fDropOnGround = true;
+				if (pPrevCont == pCont) //In the same cont, but unable to go there
+					fDropOnGround = true;
+				else //we changed the cont in the script
+				{
+					tchar* pszMsg = Str_GetTemp();
+					snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_BOUNCE_CONT), pCont->GetName());
+					pszWhere = pszMsg;
+				}
             }
 		}
 	}
@@ -1963,7 +1969,9 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
 
             iDecayTime = args.m_iN1 * MSECS_PER_TENTH;
 
-            CPointMap ptDropNew(args.m_s1.GetBuffer());
+			// Warning: here we ignore the read-onlyness of CSString's buffer only because we know that CPointMap constructor won't write past the end, but only replace some characters with '\0'. It's not worth it to build another string just for that.
+			tchar* ptcArgs = const_cast<tchar*>(args.m_s1.GetBuffer());
+			const CPointMap ptDropNew(ptcArgs);
             if (!ptDropNew.IsValidPoint())
                 g_Log.EventError("Trying to override item drop P with an invalid P. Using the original one.\n");
             else

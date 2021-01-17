@@ -26,11 +26,13 @@ protected:
 
 public:
     static const char *m_sClassName;
-    CResourceDef(CResourceID rid, lpctstr pszDefName) : m_rid(rid), m_pDefName(nullptr)
+    CResourceDef(const CResourceID& rid, lpctstr pszDefName) :
+        m_rid(rid), m_pDefName(nullptr)
     {
         SetResourceName(pszDefName);
     }
-    CResourceDef(CResourceID rid, const CVarDefContNum * pDefName = nullptr) : m_rid(rid), m_pDefName(pDefName)
+    CResourceDef(const CResourceID& rid, const CVarDefContNum * pDefName = nullptr) :
+        m_rid(rid), m_pDefName(pDefName)
     {
     }
     virtual ~CResourceDef()

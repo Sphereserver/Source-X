@@ -208,6 +208,7 @@ common/resource/sections/CRandGroupDef.cpp
 common/resource/sections/CRandGroupDef.h
 common/resource/sections/CRegionResourceDef.cpp
 common/resource/sections/CRegionResourceDef.h
+common/resource/sections/CResourceNamedDef.cpp
 common/resource/sections/CResourceNamedDef.h
 common/resource/sections/CSkillClassDef.cpp
 common/resource/sections/CSkillClassDef.h

@@ -147,7 +147,7 @@ public:
 		lptstr ptcStart, ptcEnd;
 		enum Type : uchar
 		{
-			Unknown = 0, None = 0x1, And = 0x2, Or = 0x4, NestedSubexpr = 0x8
+			Unknown = 0, None = 0x1, And = 0x2, Or = 0x4, MaybeNestedSubexpr = 0x8, HasNonAssociative = 0x10
 		};
 		uchar uiType;
 	};

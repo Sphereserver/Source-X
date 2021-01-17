@@ -107,7 +107,7 @@ struct tm* CSTime::GetLocalTm(struct tm* ptm) const noexcept
 	#define maxTimeBufferSize 128
 #endif
 
-#ifdef _WIN32
+#if defined(_WIN32) && defined (_MSC_VER)
 static void __cdecl invalidParameterHandler(const wchar_t* expression, const wchar_t* function, const wchar_t* file, uint line, uintptr_t pReserved)
 {
 	// bad format has been specified

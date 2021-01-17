@@ -63,7 +63,7 @@ void CScriptTriggerArgs::Clear()
 
 void CScriptTriggerArgs::Init( lpctstr pszStr )
 {
-    ASSERT(!ISWHITESPACE(*pszStr));
+    //ASSERT(!ISWHITESPACE(*pszStr));   // Allowed
 
     m_pO1 = nullptr;
 
@@ -81,8 +81,10 @@ void CScriptTriggerArgs::Init( lpctstr pszStr )
     lpctstr ptcFirstQuote = nullptr;
     int iArgs = 0;
 
-    lptstr ptcParse;
-    for (ptcParse = m_s1_buf_vec.GetBuffer(); *ptcParse != '\0'; ++ptcParse)
+    // Warning: here we ignore the read-onlyness of CSString's buffer only because we know we won't write past the end, but only replace some characters with '\0'.
+    // It's not worth it to build another string just for that.
+    lptstr ptcParse = const_cast<lptstr>(m_s1_buf_vec.GetBuffer());
+    for (; *ptcParse != '\0'; ++ptcParse)
     {
         if (*ptcParse == '"')
         {
@@ -107,7 +109,8 @@ void CScriptTriggerArgs::Init( lpctstr pszStr )
     // take out the last quote symbol (if present).
     if (fWholeArgQuoted)
     {
-        lptstr ptcArgEnd = ptcParse, ptcArgStart = m_s1_buf_vec.GetBuffer();
+        lpctstr ptcArgStart = m_s1_buf_vec.GetBuffer();
+        lptstr ptcArgEnd = ptcParse;
         for (ptcParse = ptcArgEnd - 1; ptcParse != ptcArgStart; --ptcParse)
         {
             if (ISWHITESPACE(*ptcParse))
@@ -415,8 +418,11 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsol
         {
             // We haven't yet parsed the ARGS. Do it now, so we can find the elements of ARGV.
 
-            tchar* ptcArg = m_s1_buf_vec.GetBuffer();
-            tchar * s = ptcArg;
+            // Warning: here we ignore the read-onlyness of CSString's buffer only because we know we won't write past the end, but only replace some characters with '\0'.
+            // It's not worth it to build another string just for that.
+            lpctstr ptcArg = m_s1_buf_vec.GetBuffer();
+            tchar * s = const_cast<tchar*>(ptcArg);
+
             bool fQuotes = false;
             bool fInerQuotes = false;
             while ( *s )

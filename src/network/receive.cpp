@@ -1222,10 +1222,10 @@ bool PacketBulletinBoardReq::onReceive(CNetState* net)
 				DEBUG_ERR(("%x:BBoard can't create message item\n", net->id()));
 				return true;
 			}
-
+			CSTime datetime = CSTime::GetCurrentTime();
 			newMessage->SetAttr(ATTR_MOVE_NEVER);
 			newMessage->SetName(str);
-			newMessage->SetTimeStamp(CWorldGameTime::GetCurrentTime().GetTimeRaw());
+			newMessage->SetTimeStamp(datetime.GetTime());
 			newMessage->m_sAuthor = character->GetName();
 			newMessage->m_uidLink = character->GetUID();
 

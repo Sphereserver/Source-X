@@ -1455,6 +1455,31 @@ bool CScriptObj::r_Load( CScript & s )
 	return true;
 }
 
+static bool _Evaluate_Conditional_ApplyNonAssociative(const CExpression::SubexprData& sCur, bool fExprVal)
+{
+	using SType = CExpression::SubexprData::Type;
+
+	if (sCur.uiType & SType::HasNonAssociative)
+	{
+		lpctstr ptcStart = sCur.ptcStart;
+		ASSERT(!ISWHITESPACE(*ptcStart));
+		while (const tchar chOperator = *ptcStart)
+		{
+			if (chOperator == '\0')
+				break; 
+			else if (chOperator == '!')
+				fExprVal = !fExprVal;
+			else if (ISWHITESPACE(chOperator))
+				; // Allowed, skip it
+			else
+				break;
+			++ptcStart;
+		}
+	}
+
+	return fExprVal;
+}
+
 bool CScriptObj::_Evaluate_Conditional_SubexprVal(tchar* ptcBuf, bool fNested, CTextConsole* pSrc, CScriptTriggerArgs* pArgs)
 {
 	ADDTOCALLSTACK("CScriptObj::Evaluate_Conditional_SubexprVal");
@@ -1502,7 +1527,7 @@ bool CScriptObj::Evaluate_Conditional(lptstr ptcExpr, CTextConsole* pSrc, CScrip
 		ASSERT(sCur.uiType & SType::None);
 
 		tchar* ptcBuf;
-		bool fNested = (sCur.uiType & SType::NestedSubexpr);
+		bool fNested = (sCur.uiType & SType::MaybeNestedSubexpr);
 		if (fNested)
 		{
 			ptcBuf = Str_GetTemp();
@@ -1515,40 +1540,54 @@ bool CScriptObj::Evaluate_Conditional(lptstr ptcExpr, CTextConsole* pSrc, CScrip
 		}
 
 		bool fVal = _Evaluate_Conditional_SubexprVal(ptcBuf, fNested, pSrc, pArgs);
+		
+		// This is used only to apply the non-associative operator for a whole expression, containing multiple subexpressions (iQty > 1).
+		// In the case of a single subexpression, it already includes the operator, thus it's already applied by _Evaluate_Conditional_SubexprVal.
+		// fVal = _Evaluate_Conditional_ApplyNonAssociative(sCur, fVal);
+
 		return fVal;
 	}
 
 	// We have some subexpressions, connected between them by logical operators.
-	tchar* ptcTemp = Str_GetTemp();
+	
+	const CExpression::SubexprData& sLeading = psSubexprData[0];
+	const bool fHasNonAssociativeOp = (sLeading.uiType & SType::HasNonAssociative);
 	bool fWholeExprVal = false;
+	tchar* ptcTemp = Str_GetTemp();
 	for (int i = 1; i < iQty; ++i)
 	{
 		CExpression::SubexprData& sPrev = psSubexprData[i-1];
 		ASSERT(sPrev.uiType != SType::None);
 		ASSERT(sPrev.uiType != SType::Unknown);
-		/*
-		if (sPrev.uiType & SType::None)
-		{
-			fWholeExprVal |= true;
-			continue;
-		}
-		*/
 
-		size_t len = sPrev.ptcEnd - sPrev.ptcStart + 2; // +1 to include the last valid char, +1 to include \0
-		memcpy(ptcTemp, sPrev.ptcStart, len);
-		bool fVal = _Evaluate_Conditional_SubexprVal(ptcTemp, (sPrev.uiType & SType::NestedSubexpr), pSrc, pArgs);
+		lptstr ptcNewStart = sPrev.ptcStart;
+		if (sPrev.uiType & SType::HasNonAssociative)
+		{
+			while ((*ptcNewStart != '(') && (*ptcNewStart != '\0'))
+			{
+				++ptcNewStart;
+			}
+			if (*ptcNewStart == '(')
+				++ptcNewStart; // I want the first char after '('
+		}
+
+		size_t len = sPrev.ptcEnd - ptcNewStart + 2; // +1 to include the last valid char, +1 to include \0
+		memcpy(ptcTemp, ptcNewStart, len);
+
+		const bool fNested = (sPrev.uiType & SType::MaybeNestedSubexpr);
+		bool fVal = _Evaluate_Conditional_SubexprVal(ptcTemp, fNested, pSrc, pArgs);
 
 		if (sPrev.uiType & SType::Or)
 		{
 			if (fVal)
-				return true;
+				return _Evaluate_Conditional_ApplyNonAssociative(sLeading, true);
 
 			fWholeExprVal = fWholeExprVal || fVal;
 		}
 		else if (sPrev.uiType & SType::And)
 		{
 			if (!fVal)
-				return false;
+				return _Evaluate_Conditional_ApplyNonAssociative(sLeading, false);
 
 			fWholeExprVal = (i == 1) ? fVal : (fWholeExprVal && fVal);
 		}
@@ -1561,7 +1600,7 @@ bool CScriptObj::Evaluate_Conditional(lptstr ptcExpr, CTextConsole* pSrc, CScrip
 			len = sCur.ptcEnd - sCur.ptcStart + 2;
 			memcpy(ptcTemp, sCur.ptcStart, len);
 
-			fVal = _Evaluate_Conditional_SubexprVal(ptcTemp, (sCur.uiType & SType::NestedSubexpr), pSrc, pArgs);
+			fVal = _Evaluate_Conditional_SubexprVal(ptcTemp, (sCur.uiType & SType::MaybeNestedSubexpr), pSrc, pArgs);
 
 			if (sPrev.uiType & SType::Or)
 			{
@@ -1577,7 +1616,7 @@ bool CScriptObj::Evaluate_Conditional(lptstr ptcExpr, CTextConsole* pSrc, CScrip
 		
 	}
 
-	return fWholeExprVal;
+	return _Evaluate_Conditional_ApplyNonAssociative(sLeading, fWholeExprVal);
 }
 
 static void Evaluate_QvalConditional_ParseArg(tchar* ptcSrc, tchar** ptcDest, lpctstr ptcSep)
@@ -2256,20 +2295,16 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopGeneric(CScript& s, int iType, CTextConsol
 
 	if (iType & 8)		// WHILE
 	{
-		tchar* ptcCond;
-		CSString sOrig;
-		CSString sTemp;
+		const tchar* ptcOrig = s.GetArgStr();
+		tchar* ptcCond = Str_GetTemp();
 		int iWhile = 0;
-
-		sOrig.Copy(s.GetArgStr());
 		for (;;)
 		{
 			++LoopsMade;
 			if (g_Cfg.m_iMaxLoopTimes && (LoopsMade >= g_Cfg.m_iMaxLoopTimes))
 				goto toomanyloops;
 
-			sTemp.Copy(sOrig);
-			ptcCond = sTemp.GetBuffer();
+			Str_CopyLimitNull(ptcCond, ptcOrig, STR_TEMPLENGTH);
 			ParseScriptText(ptcCond, pSrc, 0, pArgs);
 			if (!Exp_GetVal(ptcCond))
 				break;
