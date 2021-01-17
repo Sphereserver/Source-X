@@ -3401,6 +3401,15 @@ bool CChar::r_LoadVal( CScript & s )
 				}
 				return false;
 			}break;
+        case CHC_CREATE:
+            {
+                if (g_Serv.IsLoading())
+                    {
+                        _iTimeCreate = (CWorldGameTime::GetCurrentTime().GetTimeRaw() - (s.GetArgLLVal() * MSECS_PER_TENTH));
+                        break;
+                    }
+                return false;
+            }
 		case CHC_DIR:
 			{
 				DIR_TYPE dir = static_cast<DIR_TYPE>(s.GetArgVal());

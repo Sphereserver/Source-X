@@ -11,6 +11,7 @@
 #include "../game/uo_files/uofiles_enums.h"
 #include "../game/uo_files/uofiles_enums_itemid.h"
 #include "../game/uo_files/uofiles_types.h"
+#include "../sphere_library/CSTime.h"
 #include "packet.h"
 
 

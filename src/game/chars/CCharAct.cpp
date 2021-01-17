@@ -1916,8 +1916,14 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
             {
 				fCanAddToPack = false;
                 const CItem* pCont = dynamic_cast<const CItem*>(pItem->GetContainer());
-                if ((pPrevCont == pCont) && (pPrevCont != nullptr))
-                    fDropOnGround = true;
+				if (pPrevCont == pCont) //In the same cont, but unable to go there
+					fDropOnGround = true;
+				else //we changed the cont in the script
+				{
+					tchar* pszMsg = Str_GetTemp();
+					snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_BOUNCE_CONT), pCont->GetName());
+					pszWhere = pszMsg;
+				}
             }
 		}
 	}

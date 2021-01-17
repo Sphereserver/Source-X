@@ -2161,7 +2161,8 @@ PacketBulletinBoard::PacketBulletinBoard(const CClient* target, BBOARDF_TYPE act
 	writeStringFixedASCII(message->GetName(), (uint)lenstr);
 
 	// message time
-	snprintf(tempstr, STR_TEMPLENGTH, "Day %lld", (CWorldGameTime::GetCurrentTimeInGameMinutes(message->GetTimeStamp()) / (MSECS_PER_SEC * 24 * 60)) % 365);
+	CSTime datetime(message->GetTimeStamp());
+	snprintf(tempstr, STR_TEMPLENGTH, "%s", datetime.Format("%b %d, %Y"));
 	lenstr = strlen(tempstr) + 1;
 
 	writeByte((byte)lenstr);
