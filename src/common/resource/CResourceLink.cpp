@@ -15,11 +15,10 @@
 #include "CResourceLink.h"
 
 
-CResourceLink::CResourceLink( CResourceID rid, const CVarDefContNum * pDef ) :
+CResourceLink::CResourceLink(const CResourceID& rid, const CVarDefContNum * pDef) :
     CResourceDef( rid, pDef )
 {
     m_pScript = nullptr;
-    m_Context.Init(); // not yet tested.
     _dwRefInstances = 0;
     ClearTriggers();
 }
@@ -159,7 +158,6 @@ void CResourceLink::CopyTransfer(CResourceLink *pLink)
 
 void CResourceLink::ClearTriggers()
 {
-    ADDTOCALLSTACK("CResourceLink::ClearTriggers");
     memset(m_dwOnTriggers, 0, sizeof(m_dwOnTriggers));
 }
 
@@ -172,7 +170,7 @@ void CResourceLink::SetTrigger(int i)
         {
             if ( i < 32 )
             {
-                dword flag = 1 << i;
+                const dword flag = 1 << i;
                 m_dwOnTriggers[j] |= flag;
                 return;
             }

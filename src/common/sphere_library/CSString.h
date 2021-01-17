@@ -21,6 +21,19 @@ class CSString
 public:
 	static const char *m_sClassName;
 
+private:
+	/**
+	* @brief Initializes internal data.
+	*
+	* Allocs STRING_DEFAULT_SIZE by default. If DEBUG_STRINGS setted, updates statistical information (total memory allocated).
+	*/
+	void Init();
+
+	tchar* m_pchData;	// Data pointer.
+	int	m_iLength;		// Length of string.
+	int	m_iMaxLength;	// Size of memory allocated pointed by m_pchData.
+
+public:
 	/** @name Constructors, Destructor, Asign operator:
 	 */
 	///@{
@@ -31,7 +44,7 @@ public:
 	* Initializes string. If DEBUG_STRINGS is enabled, update statistical information (total CSString instantiated).
 	* @see Init()
 	*/
-	inline CSString() noexcept;
+	inline CSString();
 
 	/**
 	* @brief CSString destructor.
@@ -46,7 +59,7 @@ public:
 	* @see Copy()
 	* @param pStr string to copy.
 	*/
-	CSString(lpctstr pStr) noexcept;
+	CSString(lpctstr pStr);
 
     /**
     * @brief "Copy" constructor.
@@ -55,7 +68,7 @@ public:
     * @param pStr string to copy.
     * #param iLen max number of chars (single-byte) to copy.
     */
-    CSString(lpctstr pStr, int iLen) noexcept;
+    CSString(lpctstr pStr, int iLen);
 
 	/**
 	* @brief Copy constructor.
@@ -63,7 +76,7 @@ public:
 	* @see Copy()
 	* @param s CSString to copy.
 	*/
-    CSString(const CSString &s) noexcept;
+    CSString(const CSString &s);
 
 	/**
 	* @brief Move constructor.
@@ -77,14 +90,14 @@ public:
 	* @param pStr string to copy.
 	* @return the CSString.
 	*/
-	const CSString& operator=(lpctstr pStr) noexcept;
+	const CSString& operator=(lpctstr pStr);
 
 	/**
 	* @brief Copy supplied CSString into the CSString.
 	* @param s CSString to copy.
 	* @return the CSString.
 	*/
-	const CSString& operator=(const CSString &s) noexcept;
+	const CSString& operator=(const CSString &s);
 
 	/**
 	* @brief Move assignment operator.
@@ -127,7 +140,7 @@ public:
 	* @param iLen new length of the string.
 	* @return the new length of the CSString.
 	*/
-	int Resize(int iLen) noexcept;
+	int Resize(int iLen);
 
 	/**
 	* @brief Get the length of the held string.
@@ -231,7 +244,7 @@ public:
 	* @see strcpy()
 	* @param pStr string to copy.
 	*/
-	void Copy(lpctstr pStr) noexcept;
+	void Copy(lpctstr pStr);
 
     /**
     * @brief Copy a string of known length into the CSString.
@@ -240,7 +253,7 @@ public:
     * @param pStr string to copy.
     * @param iLen max number of chars (single-byte) to copy.
     */
-    void CopyLen(lpctstr pStr, int iLen) noexcept;
+    void CopyLen(lpctstr pStr, int iLen);
 
 	/**
 	* @brief Changes the capitalization of CSString to upper.
@@ -481,7 +494,9 @@ public:
 	* @return Pointer to internal data.
 	*/
 	inline lpctstr GetBuffer() const noexcept;
-	inline lptstr GetBuffer() noexcept;
+	
+	// Provide only a read-only buffer: if we modify it we'll break the internal length counter, other than possibly write past the end of the string (the buffer is small).
+	//inline lptstr GetBuffer() noexcept;
 
 	/**
 	* @brief Look for the first occurence of c in CSString.
@@ -544,24 +559,12 @@ public:
 	int lastIndexOf(const CSString& str, int from) noexcept;
 
 	///@}
-
-private:
-	/**
-	* @brief Initializes internal data.
-	*
-	* Allocs STRING_DEFAULT_SIZE by default. If DEBUG_STRINGS setted, updates statistical information (total memory allocated).
-	*/
-	void Init()  noexcept;
-
-	tchar *m_pchData;	// Data pointer.
-	int	m_iLength;		// Length of string.
-	int	m_iMaxLength;	// Size of memory allocated pointed by m_pchData.
 };
 
 
 /* Inlined methods are defined here */
 
-CSString::CSString() noexcept
+CSString::CSString()
 {
 #ifdef DEBUG_STRINGS
     ++gAmount;
@@ -657,10 +660,12 @@ lpctstr CSString::GetBuffer() const noexcept
 	return m_pchData;
 }
 
+/*
 lptstr CSString::GetBuffer() noexcept
 {
 	return m_pchData;
 }
+*/
 
 int CSString::indexOf(tchar c) noexcept
 {

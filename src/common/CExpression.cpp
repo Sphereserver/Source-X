@@ -1188,7 +1188,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 
 	//memset((void*)&pSubexprPos, 0, CountOf(pSubexprPos));
 	int iQty = 0;	// number of subexpressions 
-
+	using SType = CExpression::SubexprData::Type;
 	while (pExpr[0] != '\0')
 	{
 		if (++iQty >= iMaxQty)
@@ -1202,12 +1202,23 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 		tchar ch = pExpr[0];
 
 		// Init the data for the current subexpression and set the position of the first character of the subexpression.
-		sCurSubexpr = {pExpr, nullptr, SubexprData::Type::None};
+		sCurSubexpr = {pExpr, nullptr, SType::None};
 
-		if (ch == '(')
+		// Handle special characters: non associative operators (like !) and curly brackets
+		if (ch == '!')
 		{
-			// Start of a subexpression delimited by brackets. I want only to see where's the matching closing bracket.
-			sCurSubexpr.ptcStart += 1; // Eat the first opening bracket.
+			// Actually i'm interested only in the special case of subexpressions preceded by '!'.
+			//	If it's inside the subexpression, it will already be handled correctly.
+			sCurSubexpr.uiType |= SType::HasNonAssociative;
+		}
+		else if (ch == '(')
+		{
+			// Start of a subexpression delimited by brackets (it can be preceded by an operator like '!').
+			// Now i want only to see where's the matching closing bracket.
+			// This subexpression can contain other special characters, like non-associative operators, but we don't care at this stage.
+			// Those will be considered and eventually evaluated when fully parsing this subexpression.
+			sCurSubexpr.ptcStart += 1;
+
 			ushort uiOpenedCurlyBrackets = 1;
 			while (uiOpenedCurlyBrackets != 0)	// i'm interested only to the outermost range, not eventual sub-sub-sub-blah ranges
 			{
@@ -1225,7 +1236,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 
 			sCurSubexpr.ptcEnd = pExpr - 1;	// Position of the char just before the last ')' of the bracketed subexpression -> this eats away the last closing bracket
 			ch = *(++pExpr);
-			// Okay, i've eaten the expression in brackets, now fall through an dlook for the operators, if any
+			// Okay, i've eaten the expression in brackets, now fall through and look for the operators, if any
 		}
 
 		// Not a bracket-delimited subexpression, or inside a bracketed subexpression
@@ -1242,7 +1253,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 			else if ((ch == '|') && (pExpr[1] == '|'))
 			{
 				// Logical OR operator: ||
-				sCurSubexpr.uiType = SubexprData::Type::Or  | (sCurSubexpr.uiType & ~SubexprData::Type::None);
+				sCurSubexpr.uiType = SType::Or  | (sCurSubexpr.uiType & ~SType::None);
 				sCurSubexpr.ptcEnd = pExpr - 1;
 				pExpr += 2u; // Skip the second char of the operator
 				break; // End of subexpr...
@@ -1250,7 +1261,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 			else if ((ch == '&') && (pExpr[1] == '&'))
 			{
 				// Logical AND operator: &&
-				sCurSubexpr.uiType = SubexprData::Type::And | (sCurSubexpr.uiType & ~SubexprData::Type::None);
+				sCurSubexpr.uiType = SType::And | (sCurSubexpr.uiType & ~SType::None);
 				sCurSubexpr.ptcEnd = pExpr - 1;
 				pExpr += 2u; // Skip the second char of the operator
 				break; // End of subexpr...
@@ -1273,14 +1284,16 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 			if (((ptcTest[0] == '|') && (ptcTest[1] == '|')) || ((ptcTest[0] == '&') && (ptcTest[1] == '&')))
 			{
 				// We have logical operators inside, so it's a nested subexpression.
-				sCurSubexpr.uiType |= SubexprData::Type::NestedSubexpr;
+				sCurSubexpr.uiType |= SType::MaybeNestedSubexpr;
 				break;
 			}
 		}
 
-		//const bool fNested = (sCurSubexpr.uiType & SubexprData::Type::NestedSubexpr);
+		if (sCurSubexpr.uiType & SType::MaybeNestedSubexpr)
+		{
+			sCurSubexpr.uiType = sCurSubexpr.uiType & (~ SType::HasNonAssociative);
+		}
 
-	 //eat_again:
 		GETNONWHITESPACE(ptcStart);				// After this, ptcStart is the first char of the expression
 		Str_EatEndWhitespace(ptcStart, ptcEnd);	// After this, ptcEnd is the last char of the expression (so it's before the \0)
 
@@ -1292,22 +1305,6 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 			*(ptcEnd + 1) = '\0';
 			continue;
 		}
-
-		/*if (!fNested)
-		{
-			if ((ptcStart[1] != ')') && (ptcEnd[-1] != '('))
-			{
-				// This simple value is fully enclosed by brackets -> eat them
-				++ptcStart, --ptcEnd;
-				goto eat_again;
-			}
-			else
-			{
-			*/
-				// Empty brackets?
-				sCurSubexpr.uiType |= SubexprData::Type::None;
-		//	}
-		//}
 
 		*(ptcEnd + 1) = '\0';
 	}

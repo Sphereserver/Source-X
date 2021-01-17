@@ -5,24 +5,19 @@ class CResourceNamedDef : public CResourceLink
 {
     // Private name pool. (does not use DEFNAME) RES_FUNCTION
 public:
-    static const char *m_sClassName;
+    static const char* m_sClassName;
+private:
     const CSString m_sName;
+
 public:
-    CResourceNamedDef(CResourceID rid, lpctstr pszName) : CResourceLink(rid), m_sName(pszName)
-    {
-    }
-    virtual ~CResourceNamedDef()
-    {
-    }
+    CResourceNamedDef(const CResourceID& rid, lpctstr pszName);
+    virtual ~CResourceNamedDef() = default;
 
 private:
     CResourceNamedDef(const CResourceNamedDef& copy);
     CResourceNamedDef& operator=(const CResourceNamedDef& other);
 
 public:
-    lpctstr GetName() const
-    {
-        return m_sName;
-    }
-};
+    virtual lpctstr GetName() const override;
 
+};

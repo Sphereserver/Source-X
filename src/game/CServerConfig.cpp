@@ -2245,8 +2245,10 @@ bool CServerConfig::IsObscene( lpctstr pszText ) const
 	for ( size_t i = 0; i < m_Obscene.size(); ++i )
 	{
 		match.Resize(int(2 * strlen(m_Obscene[i])));
-		snprintf(match.GetBuffer(), match.GetCapacity(), "%s%s%s", "*", m_Obscene[i], "*");
+        lptstr ptcMatch = const_cast<lptstr>(match.GetBuffer()); // Do that just because we know that the buffer has the right size and we won't write past the buffer's end.
+		snprintf(ptcMatch, match.GetCapacity(), "%s%s%s", "*", m_Obscene[i], "*");
 		MATCH_TYPE ematch = Str_Match( match , pszText );
+		MATCH_TYPE ematch = Str_Match( ptcMatch , pszText );
 
 		if ( ematch == MATCH_VALID )
 			return true;

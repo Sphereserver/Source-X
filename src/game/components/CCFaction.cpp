@@ -362,8 +362,6 @@ bool CCFaction::IsSuperSlayer() const
         case FACTION_ARACHNID:
         case FACTION_REPTILE:
             return true;
-        default:
-            return false;
     }
     return false;
 }

@@ -749,7 +749,6 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	}
 
 	word Args[] = { (word)wHue, (word)font, (word)fUnicode };
-    CSString sBarkBuffer;
 
 	if ( *pszText == '@' )
 	{
@@ -816,14 +815,16 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	if ( Args[2] == 0 )
 		Args[2] = (word)defaultUnicode;
 
-    sBarkBuffer.Format( "%s%s", name, pszText);
+	lptstr ptcBarkBuffer = Str_GetTemp();
+	Str_CopyLimitNull(	ptcBarkBuffer, name,	STR_TEMPLENGTH);
+	Str_ConcatLimitNull(ptcBarkBuffer, pszText, STR_TEMPLENGTH);
 
 	switch ( Args[2] )
 	{
 		case 3:	// Extended localized message (with affixed ASCII text)
 		{
             tchar * ppArgs[256];
-			int iQty = Str_ParseCmds(sBarkBuffer.GetBuffer(), ppArgs, CountOf(ppArgs), "," );
+			int iQty = Str_ParseCmds(ptcBarkBuffer, ppArgs, CountOf(ppArgs), "," );
 			int iClilocId = Exp_GetVal( ppArgs[0] );
 			int iAffixType = Exp_GetVal( ppArgs[1] );
 			CSString CArgs;
@@ -841,7 +842,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		case 2:	// Localized
 		{
             tchar * ppArgs[256];
-			int iQty = Str_ParseCmds(sBarkBuffer.GetBuffer(), ppArgs, CountOf(ppArgs), "," );
+			int iQty = Str_ParseCmds(ptcBarkBuffer, ppArgs, CountOf(ppArgs), "," );
 			int iClilocId = Exp_GetVal( ppArgs[0] );
 			CSString CArgs;
 			for ( int i = 1; i < iQty; ++i )
@@ -858,7 +859,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		case 1:	// Unicode
 		{
 			nchar szBuffer[ MAX_TALK_BUFFER ];
-			CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), sBarkBuffer.GetBuffer(), -1 );
+			CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), ptcBarkBuffer, -1 );
 			addBarkUNICODE( szBuffer, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), 0 );
 			break;
 		}
@@ -867,10 +868,13 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		default:
 		{
 bark_default:
-			if ( sBarkBuffer.IsEmpty())
-                sBarkBuffer.Format("%s%s", name, pszText);
+			if (ptcBarkBuffer == '\0')
+			{
+				Str_CopyLimitNull(ptcBarkBuffer, name, STR_TEMPLENGTH);
+				Str_ConcatLimitNull(ptcBarkBuffer, pszText, STR_TEMPLENGTH);
+			}
 
-			addBark( sBarkBuffer.GetBuffer(), pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]));
+			addBark(ptcBarkBuffer, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]));
 			break;
 		}
 	}

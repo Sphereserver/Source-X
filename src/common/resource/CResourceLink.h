@@ -57,7 +57,7 @@ public:
     bool ResourceLock( CResourceLock & s );
 
 public:
-    CResourceLink( CResourceID rid, const CVarDefContNum * pDef = nullptr );
+    CResourceLink(const CResourceID& rid, const CVarDefContNum * pDef = nullptr);
     virtual ~CResourceLink() = default;
 
 private:

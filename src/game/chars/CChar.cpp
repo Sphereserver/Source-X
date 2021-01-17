@@ -3149,7 +3149,7 @@ bool CChar::r_LoadVal( CScript & s )
 
         // special load values
 		int i = g_Cfg.FindSkillKey( ptcKey );
-		if ( i != SKILL_NONE )
+		if ( IsSkillBase((SKILL_TYPE)i) )
 		{
 			// Check some skill name.
 			Skill_SetBase((SKILL_TYPE)i, s.GetArgUSVal() );
