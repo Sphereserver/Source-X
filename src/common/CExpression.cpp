@@ -1274,23 +1274,26 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 			{
 				if (sCurSubexpr.ptcEnd == nullptr)
 				{
-					sCurSubexpr.ptcEnd = pExpr;	// If it's not nullptr, then it's the closing bracket of the subexpr
+					// If it's not nullptr, then it's the closing bracket of the subexpr, and we want to keep that as the end.
+					sCurSubexpr.ptcEnd = pExpr;
 				}
 				break; // End of the current subexpr, go back to find another one
 			}
 			else if ((ch == '|') && (pExpr[1] == '|'))
 			{
 				// Logical OR operator: ||
+				if (sCurSubexpr.ptcEnd == nullptr)
+					sCurSubexpr.ptcEnd = pExpr - 1;
 				sCurSubexpr.uiType = SType::Or  | (sCurSubexpr.uiType & ~SType::None);
-				sCurSubexpr.ptcEnd = pExpr - 1;
 				pExpr += 2u; // Skip the second char of the operator
 				break; // End of subexpr...
 			}
 			else if ((ch == '&') && (pExpr[1] == '&'))
 			{
 				// Logical AND operator: &&
+				if (sCurSubexpr.ptcEnd == nullptr)
+					sCurSubexpr.ptcEnd = pExpr - 1;
 				sCurSubexpr.uiType = SType::And | (sCurSubexpr.uiType & ~SType::None);
-				sCurSubexpr.ptcEnd = pExpr - 1;
 				pExpr += 2u; // Skip the second char of the operator
 				break; // End of subexpr...
 			}
