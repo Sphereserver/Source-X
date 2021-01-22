@@ -8,6 +8,7 @@
 
 #include "../common/common.h"
 
+struct SubexprData;
 class CScript;
 class CScriptTriggerArgs;
 class CTextConsole;
@@ -136,8 +137,8 @@ private:
 	TRIGRET_TYPE OnTriggerLoopForContSpecial(CScript& s, SK_TYPE iCmd, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, CSString* pResult);
 
 	// Special statements
+	bool _Evaluate_Conditional_EvalSingle(const SubexprData& sdata, CTextConsole* pSrc, CScriptTriggerArgs* pArgs);
 	bool Evaluate_Conditional(lptstr ptcExpression, CTextConsole* pSrc, CScriptTriggerArgs* pArgs); // IF, ELIF, ELSEIF
-	bool _Evaluate_Conditional_SubexprVal(tchar* ptcBuf, bool fNested, CTextConsole* pSrc, CScriptTriggerArgs* pArgs);
 
 	bool Evaluate_QvalConditional(lpctstr ptcKey, CSString& sVal, CTextConsole* pSrc, CScriptTriggerArgs* pArgs);
 
