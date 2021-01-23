@@ -1232,7 +1232,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 
 			if (fSpecialChar)
 			{
-				uint uiTempOffset = uint(pExpr + 1 - sCurSubexpr.ptcStart);
+				uint uiTempOffset = uint(pExpr + 1U - sCurSubexpr.ptcStart);
 				if (uiTempOffset > UCHAR_MAX)
 				{
 					g_Log.EventError("Too much non-associative operands before the expression. Trimming to %d.\n", UCHAR_MAX);
@@ -1323,6 +1323,14 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 		GETNONWHITESPACE(ptcStart);				// After this, ptcStart is the first char of the expression
 		Str_EatEndWhitespace(ptcStart, ptcEnd);	// After this, ptcEnd is the last char of the expression (so it's before the \0)
 
+		if (sCurSubexpr.uiNonAssociativeOffset)
+		{
+			// ptcStart might have changed, so update uiNonAssociativeOffset accordingly (given that it's relative to ptcStart).
+			const int iDiff = int(ptcStart - sCurSubexpr.ptcStart);
+			ASSERT(iDiff >= 0);
+			const uint uiNewOff = std::min((uint)UCHAR_MAX, (uint)iDiff);
+			sCurSubexpr.uiNonAssociativeOffset += uchar(uiNewOff);
+		}
 		sCurSubexpr.ptcStart = ptcStart;
 		sCurSubexpr.ptcEnd   = ptcEnd;
 	}

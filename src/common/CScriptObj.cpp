@@ -1478,7 +1478,7 @@ bool CScriptObj::_Evaluate_Conditional_EvalSingle(const SubexprData& sdata, CTex
 	++_iEvaluate_Conditional_Reentrant;
 
 	// Length to copy: +1 to include the last valid char (i'm not copying the subsequent char, which can be another char or '\0'
-	const size_t len = std::min(STR_TEMPLENGTH, size_t(sdata.ptcEnd - sdata.ptcStart + 1u));
+	const size_t len = std::min(STR_TEMPLENGTH - 1U, size_t(sdata.ptcEnd - sdata.ptcStart + 1U));
 
 	ptcSubexpr = Str_GetTemp();
 	memcpy(ptcSubexpr, sdata.ptcStart, len);
