@@ -1789,14 +1789,18 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 	CChar *pChar = nullptr;
 	CChar *pCharAlt = nullptr;
 	size_t i = 0;
-	int iAltDist;
-	if (g_Cfg.m_iDistanceTalk > 0)
-		iAltDist = g_Cfg.m_iDistanceTalk;
-	else
-		iAltDist = UO_MAP_VIEW_SIGHT;
+	int iAltDist = UO_MAP_VIEW_SIGHT;
+    int iFullDist = UO_MAP_VIEW_SIGHT;
+    if (g_Cfg.m_iNPCDistanceHear > 0)
+    {
+        iFullDist = g_Cfg.m_iNPCDistanceHear;
+    }
 	bool bGhostSpeak = m_pChar->IsSpeakAsGhost();
 
 	CWorldSearch AreaChars(m_pChar->GetTopPoint(), iAltDist);
+    //Reduce NPC hear distance for non pets
+    iAltDist = iFullDist;
+
 	for (;;)
 	{
 		pChar = AreaChars.GetChar();
@@ -1812,12 +1816,26 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 			}
 		}
 
-		if ( pChar == m_pChar )
-			continue;
+        //Skik myself
+        if (pChar == m_pChar)
+        {
+            continue;
+        }
+        //Skip non NPCs
 		if ( !pChar->m_pNPC )
-			continue;
+        {
+            continue;
+        }
+        // Skip NPCs that can't understand ghosts if you are dead
 		if ( bGhostSpeak && !pChar->CanUnderstandGhost() )
-			continue;
+        {
+            continue;
+        }
+        //Skip Vendors that are too far when buying or selling
+        if (pChar->NPC_IsVendor() && (m_pChar->CanTouch(pChar) == false) && (FindStrWord(pszText, "buy,sell") > 0))
+        {
+            continue;
+        }
 
 		bool bNamed = false;
 		i = 0;
@@ -1846,19 +1864,26 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 				break;
 		}
 
-		// Are we close to the char ?
-		int iDist = m_pChar->GetTopDist3D(pChar);
-		if ( (pChar->Skill_GetActive() == NPCACT_TALK) && (pChar->m_Act_UID == m_pChar->GetUID()) )	// already talking to him
+        int iDist = m_pChar->GetTopDist3D(pChar);
+
+        //Can't see or too far, Can't hear!
+        if (!m_pChar->CanSeeLOS(pChar) || (iDist > iFullDist))
+            continue;
+
+        // already talking to him
+		if ( (pChar->Skill_GetActive() == NPCACT_TALK) && (pChar->m_Act_UID == m_pChar->GetUID()) )
 		{
 			pCharAlt = pChar;
 			iAltDist = 1;
 		}
-		else if ( pChar->IsClientActive() && (iAltDist >= 2) )	// PC's have higher priority
+        // Clients should not react here!
+		/*else if ( pChar->IsClientActive() && (iAltDist >= 2) )	// PC's have higher priority
 		{
 			pCharAlt = pChar;
 			iAltDist = 2;	// high priority
-		}
-		else if ( iDist < iAltDist )	// closest NPC guy ?
+		}*/
+        // Pick closest NPC?
+		else if ( iDist < iAltDist )
 		{
 			pCharAlt = pChar;
 			iAltDist = iDist;

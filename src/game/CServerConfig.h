@@ -369,6 +369,7 @@ public:
 	int	m_iDistanceYell;        // Max distance at which Yells can be readed.
 	int	m_iDistanceWhisper;     // Max distance at which Whispers can be readed.
 	int m_iDistanceTalk;        // Max distance at which Talking can be readed.
+    int m_iNPCDistanceHear;     // Max distance at which NPCs can hear.
 
 	CSString	m_sSpeechSelf;  // [SPEECH ] associated to players.
 	CSString	m_sSpeechPet;   // [SPEECH ] associated to pets.
