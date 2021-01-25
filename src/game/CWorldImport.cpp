@@ -601,15 +601,15 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("HITPOINTS" ))
 			{
-				pChar->Stat_SetVal(STAT_STR,(ushort)(atoi(pArg)));
+				pChar->Stat_SetVal(STAT_STR,(int)(atoi(pArg)));
 			}
 			else if ( s.IsKey("STAMINA" ))
 			{
-				pChar->Stat_SetVal(STAT_DEX,(ushort)(atoi(pArg)));
+				pChar->Stat_SetVal(STAT_DEX,(int)(atoi(pArg)));
 			}
 			else if ( s.IsKey( "MANA" ))
 			{
-				pChar->Stat_SetVal(STAT_INT,(ushort)(atoi(pArg)));
+				pChar->Stat_SetVal(STAT_INT,(int)(atoi(pArg)));
 			}
 			else if ( s.IsKeyHead( "SKILL", 5 ))
 			{

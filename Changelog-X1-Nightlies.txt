@@ -2432,3 +2432,6 @@ Must have event, even if it's empty, since it's applied by the source to generat
 -Fixed #589: Items that are denied placement and not able to return to their previous locations will drop at the chars location.
 -Fixed: CREATE on chars not loading from save causing it to restart on reboot.
 -Fixed #600: Changed old dating method on bboards to now have actual dates. (This affects dates of old messages as the timestamps is different)
+
+24-01-2021, Jhobean
+-Fixed: Impossible to kill a char by setting his hitpoints in negative. ex: If hits was 10 and a script do hits -= 10. (Issue #406) 

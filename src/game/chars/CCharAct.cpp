@@ -770,7 +770,7 @@ void CChar::UpdateStatVal( STAT_TYPE type, int iChange, ushort uiLimit )
 	if (iVal > UINT16_MAX)
 		iVal = UINT16_MAX;
 
-	Stat_SetVal(type, (ushort)iVal);
+	Stat_SetVal(type, (int)iVal);
 
 	switch ( type )
 	{
@@ -4308,7 +4308,7 @@ void CChar::OnTickFood(ushort uiVal, int HitsHungerLoss)
 	int iFood = Stat_GetVal(STAT_FOOD) - uiVal;
 	if ( iFood < 0 )
 		iFood = 0;
-	Stat_SetVal(STAT_FOOD, (ushort)iFood);
+	Stat_SetVal(STAT_FOOD, (int)iFood);
 
 	// Show hunger message if food level is getting low
 	short iFoodLevel = Food_GetLevelPercent();

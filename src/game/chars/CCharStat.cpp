@@ -151,19 +151,23 @@ int CChar::Stat_GetMaxMod( STAT_TYPE i ) const
     return m_Stat[i].m_maxMod;
 }
 
-void CChar::Stat_SetVal( STAT_TYPE i, ushort uiVal )
+void CChar::Stat_SetVal( STAT_TYPE i, int iVal )
 {
 	ADDTOCALLSTACK("CChar::Stat_SetVal");
 	if (i > STAT_BASE_QTY || i == STAT_FOOD) // Food must trigger Statchange. Redirect to Base value
 	{
-		Stat_SetBase(i, uiVal);
+		Stat_SetBase(i, iVal);
 		return;
 	}
 
 	ASSERT((i >= 0) && (i < STAT_QTY)); // allow for food
-	m_Stat[i].m_val = uiVal;
 
-    if ((i == STAT_STR) && (uiVal == 0))
+	if (iVal < 0) //Avoid negative value because stat are unsigned. So -1 hits will give like 65k hits.
+		iVal = 0;
+
+	m_Stat[i].m_val = iVal;
+
+    if ((i == STAT_STR) && (iVal == 0))
     {   // Ensure this char will tick and die
         CWorldTickingList::AddCharPeriodic(this, true);
     }
