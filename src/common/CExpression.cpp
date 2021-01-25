@@ -1188,7 +1188,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 
 	//memset((void*)&pSubexprPos, 0, CountOf(pSubexprPos));
 	int iQty = 0;	// number of subexpressions 
-	using SType = CExpression::SubexprData::Type;
+	using SType = SubexprData::Type;
 	while (pExpr[0] != '\0')
 	{
 		if (++iQty >= iMaxQty)
@@ -1202,23 +1202,48 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 		tchar ch = pExpr[0];
 
 		// Init the data for the current subexpression and set the position of the first character of the subexpression.
-		sCurSubexpr = {pExpr, nullptr, SType::None};
+		sCurSubexpr = {pExpr, nullptr, SType::None, 0};
 
-		// Handle special characters: non associative operators (like !) and curly brackets
-		if (ch == '!')
+		// Handle special characters: non associative operators (like !)
+		bool fSpecialChar = false;
+		if (0 == sCurSubexpr.uiNonAssociativeOffset) // I want only the first one
 		{
-			// Actually i'm interested only in the special case of subexpressions preceded by '!'.
-			//	If it's inside the subexpression, it will already be handled correctly.
-			sCurSubexpr.uiType |= SType::HasNonAssociative;
+			if (ch == '!')
+			{
+				// Actually i'm interested only in the special case of subexpressions preceded by '!'.
+				//	If it's inside the subexpression, it will already be handled correctly.
+				fSpecialChar = true;
+			}
 		}
-		else if (ch == '(')
+
+		if (fSpecialChar)
+		{
+			++pExpr;
+			GETNONWHITESPACE(pExpr);
+			ch = *pExpr;
+		}
+
+		if (ch == '(')
 		{
 			// Start of a subexpression delimited by brackets (it can be preceded by an operator like '!').
 			// Now i want only to see where's the matching closing bracket.
 			// This subexpression can contain other special characters, like non-associative operators, but we don't care at this stage.
 			// Those will be considered and eventually evaluated when fully parsing this subexpression.
-			sCurSubexpr.ptcStart += 1;
 
+			if (fSpecialChar)
+			{
+				uint uiTempOffset = uint(pExpr + 1U - sCurSubexpr.ptcStart);
+				if (uiTempOffset > UCHAR_MAX)
+				{
+					g_Log.EventError("Too much non-associative operands before the expression. Trimming to %d.\n", UCHAR_MAX);
+					uiTempOffset = UCHAR_MAX;
+				}
+				sCurSubexpr.uiNonAssociativeOffset = uchar(uiTempOffset);
+				sCurSubexpr.ptcStart = pExpr;
+			}
+
+			sCurSubexpr.ptcStart += 1;	// Eat the opening bracket
+			
 			ushort uiOpenedCurlyBrackets = 1;
 			while (uiOpenedCurlyBrackets != 0)	// i'm interested only to the outermost range, not eventual sub-sub-sub-blah ranges
 			{
@@ -1230,11 +1255,14 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 				else if (ch == '\0')
 				{
 					g_Log.EventError("Expression started with '(' but isn't closed by a ')' character.\n");
+					sCurSubexpr.ptcEnd = pExpr - 1;
 					return iQty;
 				}
 			}
 
+			ASSERT(pExpr[0] == ')');
 			sCurSubexpr.ptcEnd = pExpr - 1;	// Position of the char just before the last ')' of the bracketed subexpression -> this eats away the last closing bracket
+			
 			ch = *(++pExpr);
 			// Okay, i've eaten the expression in brackets, now fall through and look for the operators, if any
 		}
@@ -1246,23 +1274,26 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 			{
 				if (sCurSubexpr.ptcEnd == nullptr)
 				{
-					sCurSubexpr.ptcEnd = pExpr;	// If it's not nullptr, then it's the closing bracket of the subexpr
+					// If it's not nullptr, then it's the closing bracket of the subexpr, and we want to keep that as the end.
+					sCurSubexpr.ptcEnd = pExpr;
 				}
 				break; // End of the current subexpr, go back to find another one
 			}
 			else if ((ch == '|') && (pExpr[1] == '|'))
 			{
 				// Logical OR operator: ||
+				if (sCurSubexpr.ptcEnd == nullptr)
+					sCurSubexpr.ptcEnd = pExpr - 1;
 				sCurSubexpr.uiType = SType::Or  | (sCurSubexpr.uiType & ~SType::None);
-				sCurSubexpr.ptcEnd = pExpr - 1;
 				pExpr += 2u; // Skip the second char of the operator
 				break; // End of subexpr...
 			}
 			else if ((ch == '&') && (pExpr[1] == '&'))
 			{
 				// Logical AND operator: &&
+				if (sCurSubexpr.ptcEnd == nullptr)
+					sCurSubexpr.ptcEnd = pExpr - 1;
 				sCurSubexpr.uiType = SType::And | (sCurSubexpr.uiType & ~SType::None);
-				sCurSubexpr.ptcEnd = pExpr - 1;
 				pExpr += 2u; // Skip the second char of the operator
 				break; // End of subexpr...
 			}
@@ -1289,24 +1320,19 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 			}
 		}
 
-		if (sCurSubexpr.uiType & SType::MaybeNestedSubexpr)
-		{
-			sCurSubexpr.uiType = sCurSubexpr.uiType & (~ SType::HasNonAssociative);
-		}
-
 		GETNONWHITESPACE(ptcStart);				// After this, ptcStart is the first char of the expression
 		Str_EatEndWhitespace(ptcStart, ptcEnd);	// After this, ptcEnd is the last char of the expression (so it's before the \0)
 
+		if (sCurSubexpr.uiNonAssociativeOffset)
+		{
+			// ptcStart might have changed, so update uiNonAssociativeOffset accordingly (given that it's relative to ptcStart).
+			const int iDiff = int(ptcStart - sCurSubexpr.ptcStart);
+			ASSERT(iDiff >= 0);
+			const uint uiNewOff = std::min((uint)UCHAR_MAX, (uint)iDiff);
+			sCurSubexpr.uiNonAssociativeOffset += uchar(uiNewOff);
+		}
 		sCurSubexpr.ptcStart = ptcStart;
 		sCurSubexpr.ptcEnd   = ptcEnd;
-
-		if ((*ptcStart != '(') || (*ptcEnd != ')'))
-		{
-			*(ptcEnd + 1) = '\0';
-			continue;
-		}
-
-		*(ptcEnd + 1) = '\0';
 	}
 
 	return iQty;

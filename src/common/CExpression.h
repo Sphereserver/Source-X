@@ -114,6 +114,17 @@ static lpctstr constexpr sm_IntrinsicFunctions[INTRINSIC_QTY+1] =
 	nullptr
 };
 
+struct SubexprData
+{
+	lptstr ptcStart, ptcEnd;
+	enum Type : uchar
+	{
+		Unknown = 0, None = 0x1, And = 0x2, Or = 0x4, MaybeNestedSubexpr = 0x8
+	};
+	uchar uiType;
+	uchar uiNonAssociativeOffset; // How much bytes/characters before the start is (if any) the first non-associative operator preceding the subexpression.
+};
+
 extern class CExpression
 {
 	short _iGetVal_Reentrant;
@@ -142,17 +153,7 @@ public:
 	int64 GetRangeNumber(lpctstr& pExpr);		// Evaluate a { } range
 	CSString GetRangeString(lpctstr& pExpr);	// STRRANDRANGE
 
-	struct SubexprData
-	{
-		lptstr ptcStart, ptcEnd;
-		enum Type : uchar
-		{
-			Unknown = 0, None = 0x1, And = 0x2, Or = 0x4, MaybeNestedSubexpr = 0x8, HasNonAssociative = 0x10
-		};
-		uchar uiType;
-	};
 	static int GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSubexprData)[32], int iMaxQty);
-
 
 	// Strict G++ Prototyping produces an error when not casting char*& to const char*&
 	// So this is a rather lazy and const-UNsafe workaround

@@ -611,8 +611,9 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 
 	case IT_SPAWN_CHAR:
 	{
-        CCSpawn *pSpawn = pItem->GetSpawn();
-        if (!pSpawn)
+
+		CCSpawn* pSpawn = static_cast<CCSpawn*>(pItem->GetComponent(COMP_SPAWN));
+		if (!pSpawn)
             break;
         CResourceDef * pSpawnCharDef = g_Cfg.ResourceGetDef(pSpawn->GetSpawnID());
 		lpctstr pszName = nullptr;
@@ -638,11 +639,12 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		t->FormatArgs("Time range\t%hu min / %hu max", pSpawn->GetTimeLo(), pSpawn->GetTimeHi());
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060660)); // ~1_val~: ~2_val~
 		t->FormatArgs("Time until next spawn\t%" PRId64 " sec", pItem->GetTimerSAdjusted());
+		
 	} break;
 
 	case IT_SPAWN_ITEM:
 	{
-        CCSpawn *pSpawn = pItem->GetSpawn();
+		CCSpawn* pSpawn = static_cast<CCSpawn*>(pItem->GetComponent(COMP_SPAWN));
         if (!pSpawn)
             break;
 		CResourceDef * pSpawnItemDef = g_Cfg.ResourceGetDef(pSpawn->GetSpawnID());

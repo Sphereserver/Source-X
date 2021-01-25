@@ -1313,6 +1313,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
         {
             if ( pObjTop && pObjTop == this ) //This is default OSI behaviour, you can look through your backpack while frozen.
                 fFreezeImmune = true;
+            break;
         }
 
         case IT_ARCHERY_BUTTE:
@@ -1324,6 +1325,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
                 if ((iType == IT_WEAPON_BOW) || (iType == IT_WEAPON_XBOW))
                     return (iDist <= pWeapon->GetRangeH());
             }
+            break;
         }
 
 		case IT_SHIP_PLANK:
@@ -1388,27 +1390,28 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 	if ( IsPriv(PRIV_GM) )
 		return true;
 
+    bool fCanTouch = true;
 	if ( !CanSeeLOS(pObjTop) )
 	{
 		if ( Can(CAN_C_DCIGNORELOS) )
-			return true;
+            fCanTouch = true;
 		else if ( pChar && pChar->Can(CAN_C_DCIGNORELOS) )
-			return true;
+            fCanTouch = true;
 		else if ( pItem && pItem->Can(CAN_I_DCIGNORELOS) )
-			return true;
-		return false;
+            fCanTouch = true;
+        fCanTouch = false;
 	}
-	if ( iDist > 2 )
+	if (( iDist > 2 ) && fCanTouch)
 	{
 		if ( Can(CAN_C_DCIGNOREDIST) )
-			return true;
+            fCanTouch = true;
 		else if ( pChar && pChar->Can(CAN_C_DCIGNOREDIST) )
-			return true;
+            fCanTouch = true;
 		else if ( pItem && pItem->Can(CAN_I_DCIGNOREDIST) )
-			return true;
-		return false;
+            fCanTouch = true;
+        fCanTouch = false;
 	}
-	return true;
+	return fCanTouch;
 }
 
 IT_TYPE CChar::CanTouchStatic( CPointMap *pPt, ITEMID_TYPE id, const CItem *pItem ) const

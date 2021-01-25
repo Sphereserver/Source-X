@@ -69,9 +69,10 @@ public:
 	inline operator lpctstr() const noexcept {      // as a C string
         return m_buf;
     }
+	/* // Those dangerous casts need to be explicit!
 	inline operator const char*&() noexcept {		// as a C string
         return const_cast<const char*&>(m_buf);
-    }
+    } */
 
 protected:
 	// not implemented, should take care that newLength should fit in the buffer

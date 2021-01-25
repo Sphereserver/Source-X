@@ -110,7 +110,7 @@ int CTimedFunctionHandler::IsTimer( CUID uid, lpctstr funcname )
 		for ( auto it = m_timedFunctions[tick].begin(), end = m_timedFunctions[tick].end(); it != end; ++it)
 		{
 			TimedFunction* tf = *it;
-			if ( (tf->uid == uid) && (!strcmpi( tf->funcname, funcname)) )
+			if ( (tf->uid == uid) && (Str_Match(funcname, tf->funcname) == MATCH_VALID))
 				return tf->elapsed;
 		}
 	}
@@ -125,7 +125,7 @@ void CTimedFunctionHandler::Stop( CUID uid, lpctstr funcname )
 		for ( auto it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )	// the end iterator changes at each erase call
 		{
 			TimedFunction* tf = *it;
-			if (( tf->uid == uid) && (!strcmpi( tf->funcname, funcname)))
+            if ((tf->uid == uid) && (Str_Match(funcname, tf->funcname) == MATCH_VALID))
 			{
 				m_tfRecycled.emplace_back( tf );
 				it = m_timedFunctions[tick].erase( it );
