@@ -726,13 +726,13 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 	int64 iTimeMin = 0;  // minimum time to move 1 step in milliseconds
 	m_timeWalkStep = iCurTime; //Take the time of step for the next time we enter here
 
-	// 1 situation create some strange timer. We want avoid evaluate them 
-	if (m_lastDir != rawdir) //Changing direction, we only evaluate when going straight
+	if (m_lastDir != rawdir) //Changing direction create some strange timer we only evaluate when going straight
 	{
 		m_lastDir = rawdir;
 		return true;
 	}
-		
+
+	
 	// First step is to determine the theoric time(iTimeMin) to take the last step(s)
 	/*		RUN /Walk
 	Mount	100 / 200
@@ -755,19 +755,21 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 			iTimeMin = 200;
 	}
 	
-	if (!(iTimeDiff > iTimeMin + 300))
-		// We don't want to do process if time is greater of 300 (Ping of player should be lower than this)
-		// Accept a Big number cause a big offset on the average.
+	if (!(iTimeDiff > iTimeMin + 350))
+		// We don't want to do process if time is greater of 350 (Ping of player should be lower than this)
+		// Accept a Big number cause a big offset on the average. When player stop moving, you'll always get big number.
 
 	{
 		if ( iTimeDiff > iTimeMin )
 		// If the step time is greater than the theoric time there 4 reasons
 		// It's the server process tick, player's ping, been a while since last step, change direction during run
 		// Here we ajust TimeDiff using ini parameter
-			//WalkBuffer: Maximum buffer allow on player. Each good step give point what maximum point you want?
-			//WalkRegen: Determine how the TimeDiff is ajust depending of the ping
+			//WalkRegen: Determine how the TimeDiff is ajust depending of the ping. Depending on setting, player will gain more point.
+			//Default Value is 25
+			//OVER default value: More permissive, more point earn, less false positive, more possibility to don't see high ping player
+			//UNDER default value: Strick verification, more false positive (Not recommand to go under default value)
 		{
-			llong iRegen = ((iTimeDiff - iTimeMin) * g_Cfg.m_iWalkRegen) / 150;
+			int64 iRegen = ((iTimeDiff - iTimeMin) * g_Cfg.m_iWalkRegen) / 20;
 
 			// Get the ajust Timediff
 			iTimeDiff = iTimeMin + iRegen;
@@ -778,6 +780,7 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 		m_iWalkTimeAvg -= iTimeMin;
 
 		
+		//WalkBuffer: Maximum buffer allow on player. Each good step give point what maximum point you want?
 		//Ajust the maximum average to the define buffer
 		if ( m_iWalkTimeAvg > g_Cfg.m_iWalkBuffer )
 			m_iWalkTimeAvg = g_Cfg.m_iWalkBuffer;
