@@ -1789,24 +1789,27 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 	CChar *pChar = nullptr;
 	CChar *pCharAlt = nullptr;
 	size_t i = 0;
-	int iAltDist = UO_MAP_VIEW_SIGHT;
+    bool bGhostSpeak = m_pChar->IsSpeakAsGhost();
     int iFullDist = UO_MAP_VIEW_SIGHT;
     if (g_Cfg.m_iNPCDistanceHear > 0)
     {
         iFullDist = g_Cfg.m_iNPCDistanceHear;
     }
-	bool bGhostSpeak = m_pChar->IsSpeakAsGhost();
 
-	CWorldSearch AreaChars(m_pChar->GetTopPoint(), iAltDist);
     //Reduce NPC hear distance for non pets
-    iAltDist = iFullDist;
+    int iAltDist = iFullDist;
+
+	CWorldSearch AreaChars(m_pChar->GetTopPoint(), UO_MAP_VIEW_SIGHT);
 
 	for (;;)
 	{
 		pChar = AreaChars.GetChar();
+
+        //No more Chars to check
 		if ( !pChar )
 			break;
 
+        //Has Communication Crystal Flag on?
 		if ( pChar->IsStatFlag(STATF_COMM_CRYSTAL) )
 		{
 			for (CSObjContRec* pObjRec : pChar->GetIterationSafeCont())
@@ -1851,15 +1854,21 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 		}
 		if ( i > 0 )
 		{
-			while ( ISWHITESPACE(pszText[i]) )
-				++i;
+            while ( ISWHITESPACE(pszText[i]) )
+            {
+                ++i;
+            }
 
-			if ( pChar->NPC_OnHearPetCmd(pszText + i, m_pChar, !bNamed) )
+			if ( (pChar->NPC_IsOwnedBy(m_pChar)) && (pChar->NPC_OnHearPetCmd(pszText + i, m_pChar, !bNamed)) )
 			{
+                //Stop for single pet target or named
 				if ( bNamed || (GetTargMode() == CLIMODE_TARG_PET_CMD) )
 					return;
-				continue;	// the command might apply to others pets
+
+                // the command might apply to others pets
+				continue;
 			}
+
 			if ( bNamed )
 				break;
 		}
@@ -1867,21 +1876,15 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
         int iDist = m_pChar->GetTopDist3D(pChar);
 
         //Can't see or too far, Can't hear!
-        if (!m_pChar->CanSeeLOS(pChar) || (iDist > iFullDist))
+        if ( (!m_pChar->CanSeeLOS(pChar)) || (iDist > iFullDist) )
             continue;
 
         // already talking to him
 		if ( (pChar->Skill_GetActive() == NPCACT_TALK) && (pChar->m_Act_UID == m_pChar->GetUID()) )
 		{
 			pCharAlt = pChar;
-			iAltDist = 1;
+            break;
 		}
-        // Clients should not react here!
-		/*else if ( pChar->IsClientActive() && (iAltDist >= 2) )	// PC's have higher priority
-		{
-			pCharAlt = pChar;
-			iAltDist = 2;	// high priority
-		}*/
         // Pick closest NPC?
 		else if ( iDist < iAltDist )
 		{
