@@ -3461,16 +3461,16 @@ bool CChar::r_LoadVal( CScript & s )
 			break;
 		case CHC_HITPOINTS:
 		case CHC_HITS:
-			Stat_SetVal(STAT_STR, (USHORT)std::max(s.GetArgVal(), 0));
+			Stat_SetVal(STAT_STR, (ushort)std::max(s.GetArgVal(), 0));
 			UpdateHitsFlag();
 			break;
 		case CHC_MANA:
-			Stat_SetVal(STAT_INT, (USHORT)std::max(s.GetArgVal(), 0));
+			Stat_SetVal(STAT_INT, (ushort)std::max(s.GetArgVal(), 0));
 			UpdateManaFlag();
 			break;
 		case CHC_STAM:
 		case CHC_STAMINA:
-			Stat_SetVal(STAT_DEX, (USHORT)std::max(s.GetArgVal(), 0));
+			Stat_SetVal(STAT_DEX, (ushort)std::max(s.GetArgVal(), 0));
 			UpdateStamFlag();
 			break;
 		case CHC_STEPSTEALTH:
