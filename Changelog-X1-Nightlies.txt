@@ -2434,4 +2434,4 @@ Must have event, even if it's empty, since it's applied by the source to generat
 -Fixed #600: Changed old dating method on bboards to now have actual dates. (This affects dates of old messages as the timestamps is different)
 
 24-01-2021, Jhobean
--Fixed: Impossible to kill a char by setting his hitpoints in negative. ex: If hits was 10 and a script do hits -= 10. (Issue #406) 
+-Fixed: when hits, stam or mana was set to negative value, overflow occur and stat was reset at max. Now a negative value will set stat to 0. (Issue #406) 
