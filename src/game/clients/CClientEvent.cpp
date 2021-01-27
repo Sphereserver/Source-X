@@ -792,7 +792,7 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 		if ( m_iWalkTimeAvg < 0 && iTimeDiff >= 0 )
 		{
 			// Walking too fast.
-			m_iWalkTimeAvg = 200; //reset the average
+			m_iWalkTimeAvg = 500; //reset the average
 			DEBUG_WARN(("%s (%x): Fast Walk ?\n", GetName(), GetSocketID()));
 			if ( IsTrigUsed(TRIGGER_USEREXWALKLIMIT) )
 			{

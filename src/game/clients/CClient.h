@@ -108,8 +108,8 @@ private:
 
 	// Walk limiting code
 	int m_iWalkStepCount;	// Count the actual steps. Turning does not count.
-    llong m_iWalkTimeAvg;
-	int64 m_timeWalkStep;	// the last %8 walk step time.
+    llong m_iWalkTimeAvg;	// Average time betwwen 2 running step
+	int64 m_timeWalkStep;	// the last walk step time.
 	byte m_lastDir;
 
     // Client last know state stuff.
