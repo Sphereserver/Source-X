@@ -9,6 +9,9 @@ Game server for Ultima Online.
 ## Join SphereServer Discord channel!
 https://discord.gg/ZrMTXrs
 
+## Use the specific script pack! 
+The X-script pack have all the new features of X already embeded on it.
+https://github.com/cbnolok/SphereX-Scriptpack
 
 ## Why a fork?
 
@@ -189,7 +192,7 @@ if (fTrue)<br>
 
 ## Licensing
 
-Copyright 2020 SphereServer development team.<br>
+Copyright 2021 SphereServer development team.<br>
 
 Licensed under the Apache License, Version 2.0 (the "License").<br>
 You may not use any file of this project except in compliance with the License.<br>
