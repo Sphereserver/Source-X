@@ -127,9 +127,9 @@ public:
 
 	int GetTopDist3D( const CObjBaseTemplate * pObj ) const;
 
-	DIR_TYPE GetTopDir( const CObjBaseTemplate * pObj, DIR_TYPE DirDefault = DIR_QTY ) const;
+	DIR_TYPE GetTopDir( const CObjBaseTemplate * pObj, DIR_TYPE DirDefault = DIR_QTY ) const; // Can return DIR_QTY if are on the same tile!
 
-	DIR_TYPE GetDir( const CObjBaseTemplate * pObj, DIR_TYPE DirDefault = DIR_QTY ) const;
+	DIR_TYPE GetDir( const CObjBaseTemplate * pObj, DIR_TYPE DirDefault = DIR_QTY ) const; // Can return DIR_QTY if are on the same tile!
 
 	virtual int GetVisualRange() const;
 

@@ -1917,10 +1917,10 @@ bool CItemBaseMulti::AddComponent( ITEMID_TYPE id, short dx, short dy, char dz )
 	m_rect.UnionPoint( dx, dy );
 	if ( id > 0 )
 	{
-		CItemBase * pItemBase = FindItemBase(id);
+		const CItemBase * pItemBase = FindItemBase(id);
 		if ( pItemBase == nullptr )	// make sure the item is valid
 		{
-			DEBUG_ERR(( "Bad COMPONENT 0%x\n", id ));
+			g_Log.EventError( "Bad Multi COMPONENT 0%x\n", id );
 			return false;
 		}
 
@@ -1977,7 +1977,7 @@ int CItemBaseMulti::GetDistanceMax() const
 int CItemBaseMulti::GetDistanceDir(DIR_TYPE dir) const
 {
 	ADDTOCALLSTACK("CItemBaseMulti::GetDistanceDir");
-	ASSERT(dir < DIR_QTY);
+	ASSERT(dir <= DIR_QTY);
 
 	int iDist = 0;
 	switch (dir)
@@ -2006,6 +2006,8 @@ int CItemBaseMulti::GetDistanceDir(DIR_TYPE dir) const
 	case DIR_NW:
 		iDist = (m_rect.m_left + m_rect.m_top) / 2;
 		break;
+	default:
+		return 0;
 	}
 	return abs(iDist);
 }
