@@ -1610,7 +1610,7 @@ bool CClient::OnTarg_Use_Deed( CItem * pDeed, CPointMap & pt )
         return false;
     }
 
-	pDeed->Delete();	// consume the deed.
+	pDeed->ConsumeAmount(1);	// consume the deed.
 	return true;
 }
 
