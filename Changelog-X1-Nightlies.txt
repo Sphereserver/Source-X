@@ -2429,6 +2429,10 @@ Must have event, even if it's empty, since it's applied by the source to generat
 	Other than allowing more flexible IF tests in just one line, this change will grant faster evaluation times for complex IF tests.
 
 17-01-2021, Ben
--Fixed #589: Items that are denied placement and not able to return to their previous locations will drop at the chars location.
--Fixed: CREATE on chars not loading from save causing it to restart on reboot.
--Fixed #600: Changed old dating method on bboards to now have actual dates. (This affects dates of old messages as the timestamps is different)
+- Fixed #589: Items that are denied placement and not able to return to their previous locations will drop at the chars location.
+- Fixed: CREATE on chars not loading from save causing it to restart on reboot.
+- Fixed #600: Changed old dating method on bboards to now have actual dates. (This affects dates of old messages as the timestamps is different)
+
+31-01-2021, Jhobean
+- Fixed: when hits, stam or mana were set to negative value, overflow occurred and the stat was set at near maximum values. Now setting a stat to a negative value will set it to 0. (Issue #406) 
+- Fixed: Using stacked deeds consumed the whole pile.

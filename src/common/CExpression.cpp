@@ -1339,7 +1339,8 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 }
 
 
-static int GetRangeArgsPos(lpctstr & pExpr, lpctstr (&pArgPos)[64][2], int iMaxQty, bool fIgnoreMissingEndBracket)
+static constexpr int kiRangeMaxArgs = 96;
+static int GetRangeArgsPos(lpctstr & pExpr, lpctstr (&pArgPos)[kiRangeMaxArgs][2], bool fIgnoreMissingEndBracket)
 {
 	ADDTOCALLSTACK("CExpression::GetRangeArgsPos");
 	// Get the start and end pointers for each argument in the range
@@ -1356,9 +1357,9 @@ static int GetRangeArgsPos(lpctstr & pExpr, lpctstr (&pArgPos)[64][2], int iMaxQ
 		if ( pExpr[0] == ',' )
 			++pExpr;	// ignore
 
-		if (++iQty >= iMaxQty)
+		if (++iQty >= kiRangeMaxArgs)
 		{
-			g_Log.EventWarn("Exceeded maximum allowed number of sub-ranges (%d). Parsing halted.\n", iMaxQty);
+			g_Log.EventWarn("Exceeded maximum allowed number of arguments in a range (%d). Parsing halted.\n", kiRangeMaxArgs);
 			return iQty;
 		}
 
@@ -1436,8 +1437,8 @@ int64 CExpression::GetRangeNumber(lpctstr & pExpr)
 	// If iQty (number of arguments) is > 2, it's a weighted range; in this case, parse only the weights
 	//	of the elements and then only the element which was randomly chosen.
 
-	lpctstr pElementsStart[64][2];
-	int iQty = GetRangeArgsPos( pExpr, pElementsStart, CountOf(pElementsStart), false );	// number of arguments (not of value-weight couples)
+	lpctstr pElementsStart[kiRangeMaxArgs][2] {};
+	int iQty = GetRangeArgsPos( pExpr, pElementsStart, false );	// number of arguments (not of value-weight couples)
 
 	if (iQty == 0)
 		return 0;
@@ -1453,6 +1454,8 @@ int64 CExpression::GetRangeNumber(lpctstr & pExpr)
 
 	if (iQty == 1) // It's just a simple value
 	{
+		ASSERT(pElementsStart[0] != nullptr);
+
 		// Copy the value in a new string
 		const size_t iToParseLen = (pElementsStart[0][1] - pElementsStart[0][0]);
 		memcpy((void*)pToParse, pElementsStart[0][0], iToParseLen * sizeof(tchar));
@@ -1464,6 +1467,9 @@ int64 CExpression::GetRangeNumber(lpctstr & pExpr)
 
 	if (iQty == 2) // It's just a simple range... pick one in range at random
 	{
+		ASSERT(pElementsStart[0] != nullptr);
+		ASSERT(pElementsStart[1] != nullptr);
+
 		// Copy the first element in a new string
 		size_t iToParseLen = (pElementsStart[0][1] - pElementsStart[0][0]);
 		memcpy((void*)pToParse, pElementsStart[0][0], iToParseLen * sizeof(tchar));
@@ -1491,9 +1497,12 @@ int64 CExpression::GetRangeNumber(lpctstr & pExpr)
 
 	// First get the total of the weights
 	llong llTotalWeight = 0;
-	llong llWeights[128];
+	llong llWeights[kiRangeMaxArgs]{};
 	for ( int i = 1; i+1 <= iQty; i += 2 )
 	{
+		if (pElementsStart[i] == nullptr)
+			break;	// Shouldn't really happen...
+
 		// Copy the weight element in a new string
 		const size_t iToParseLen = (pElementsStart[i][1] - pElementsStart[i][0]);
 		memcpy((void*)pToParse, pElementsStart[i][0], iToParseLen * sizeof(tchar));
@@ -1503,7 +1512,7 @@ int64 CExpression::GetRangeNumber(lpctstr & pExpr)
 		llWeights[i] = GetSingle(pToParseCasted);	// GetSingle changes the pointer value, so i need to work with a copy
 
 		if ( ! llWeights[i] )	// having a weight of 0 is very strange !
-			g_Log.EventError( "Weight of 0 in random range: invalid. Value-weight couple number %d\n", i );	// the whole table should really just be invalid here !
+			g_Log.EventError( "Weight of 0 in random range: invalid. Value-weight couple number %d.\n", i ); // the whole table should really just be invalid here !
 		llTotalWeight += llWeights[i];
 	}
 
@@ -1519,7 +1528,8 @@ int64 CExpression::GetRangeNumber(lpctstr & pExpr)
 			break;
 	}
 	
-	--i;	// pick the value instead of the weight
+	ASSERT(i < iQty);
+	i -= 1;	// pick the value instead of the weight
 	const size_t iToParseLen = (pElementsStart[i][1] - pElementsStart[i][0]);
 
 	// Copy the value element in a new string
@@ -1540,14 +1550,15 @@ CSString CExpression::GetRangeString(lpctstr & pExpr)
     // If iQty (number of arguments) is > 2, it's a weighted range; in this case, parse only the weights
     //	of the elements and then only the element which was randomly chosen.
 
-    lpctstr pElementsStart[64][2];
-    int iQty = GetRangeArgsPos( pExpr, pElementsStart, CountOf(pElementsStart), true );	// number of arguments (not of value-weight couples)
+	lpctstr pElementsStart[kiRangeMaxArgs][2]{};
+    int iQty = GetRangeArgsPos( pExpr, pElementsStart, true );	// number of arguments (not of value-weight couples)
     if (iQty <= 0)
         return {};
 
     if (iQty == 1) // It's just a simple value
     {
-        const int iToParseLen = int(pElementsStart[0][1] - pElementsStart[0][0]);
+		ASSERT(pElementsStart[0] != nullptr);
+		const int iToParseLen = int(pElementsStart[0][1] - pElementsStart[0][0]);
         return CSString(pElementsStart[0][0], iToParseLen - 1);
     }
 
@@ -1560,10 +1571,13 @@ CSString CExpression::GetRangeString(lpctstr & pExpr)
 
     // First get the total of the weights
     llong llTotalWeight = 0;
-    llong llWeights[128];
+	llong llWeights[kiRangeMaxArgs]{};
     tchar pToParse[THREAD_STRING_LENGTH];
     for ( int i = 1; i+1 <= iQty; i += 2 )
     {
+		if (pElementsStart[i] == nullptr)
+			break;	// Shouldn't really happen...
+
         // Copy the weight element in a new string
         const size_t iToParseLen = (pElementsStart[i][1] - pElementsStart[i][0]);
         memcpy((void*)pToParse, pElementsStart[i][0], iToParseLen * sizeof(tchar));
@@ -1571,13 +1585,13 @@ CSString CExpression::GetRangeString(lpctstr & pExpr)
         lptstr pToParseCasted = reinterpret_cast<lptstr>(pToParse);
         if (!IsSimpleNumberString(pToParseCasted))
         {
-            DEBUG_ERR(( "Non-numeric weight in random string range: invalid. Value-weight couple number %d\n", i ));
+            g_Log.EventError( "Non-numeric weight in random string range: invalid. Value-weight couple number %d\n", i );
             return {};
         }
         llWeights[i] = GetSingle(pToParseCasted);	// GetSingle changes the pointer value, so i need to work with a copy
 
         if ( ! llWeights[i] )	// having a weight of 0 is very strange !
-            DEBUG_ERR(( "Weight of 0 in random string range: invalid. Value-weight couple number %d\n", i ));	// the whole table should really just be invalid here !
+			g_Log.EventError( "Weight of 0 in random string range: invalid. Value-weight couple number %d\n", i );	// the whole table should really just be invalid here !
         llTotalWeight += llWeights[i];
     }
 
@@ -1593,7 +1607,8 @@ CSString CExpression::GetRangeString(lpctstr & pExpr)
             break;
     }
 
-    --i;	// pick the value instead of the weight
+	ASSERT(i < iQty);
+    i -= 1; // pick the value instead of the weight
     const int iToParseLen = int(pElementsStart[i][1] - pElementsStart[i][0]);
     return CSString(pElementsStart[i][0], iToParseLen);
 }

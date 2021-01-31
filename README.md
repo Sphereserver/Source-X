@@ -6,12 +6,23 @@ Game server for Ultima Online.
 <br><a href="https://forum.spherecommunity.net/sshare.php?srt=4">Get the automated builds here!</a>
 
 
-## Join SphereServer Discord channel!
+### Join SphereServer Discord channel!
 https://discord.gg/ZrMTXrs
 
 
-## Why a fork?
+### Use the specific script pack!
+The official script pack is fully compatible with X new syntax, has all the new X features and preserves legacy/classic systems, which can be activated back in place
+of the new ones.<br>
+Beware, it's still not 100% complete!<br>
+https://github.com/cbnolok/SphereX-Scriptpack
 
+
+### Coming from a different SphereServer version?
+* From 0.56d? <a href="https://github.com/Sphereserver/Source-X/blob/master/docs/Porting%20from%200.56%20to%20X.txt">Here</a> a list of major scripting changes!
+* From an older 0.56 version? <a href="https://github.com/Sphereserver/Source-X/blob/master/docs/Porting%20from%200.55%20to%200.56.txt">This</a> might help resuming major changes until 0.56d.
+
+
+## Why a fork?
 This branch started in 2016 from a slow and radical rework of SphereServer 0.56d, while trying to preserve script compatibility with the starting branch.<br>
 Though, something has changed script-wise, so we suggest to take a look <a href="https://github.com/Sphereserver/Source-X/blob/master/docs/Porting%20from%200.56%20to%20X.txt">here</a>.<br>
 Most notable changes (right now) are:
@@ -189,7 +200,7 @@ if (fTrue)<br>
 
 ## Licensing
 
-Copyright 2020 SphereServer development team.<br>
+Copyright 2021 SphereServer development team.<br>
 
 Licensed under the Apache License, Version 2.0 (the "License").<br>
 You may not use any file of this project except in compliance with the License.<br>
