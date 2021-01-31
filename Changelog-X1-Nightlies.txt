@@ -2433,6 +2433,22 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: CREATE on chars not loading from save causing it to restart on reboot.
 - Fixed #600: Changed old dating method on bboards to now have actual dates. (This affects dates of old messages as the timestamps is different)
 
+24-01-2021, Ben
+-Fixed: Cantouch not respecting both CAN_C_DCIGNORELOS and CAN_C_DCIGNOREDIST seperately.
+-Changes to NPC hearing behaviour:
+    -Vendors will not initiate buy/sell unless the transaction can be completed.
+    -NPCs will not react if doesn't pass canseelos and is too far. (does not apply to pets or calling npc by name)
+-Added: NPCDistanceHear to sphere.ini with a default value of 4 to control the distance NPCs can hear you.
+-Fixed: bug where you were able to move containers through walls and from any distance.
+Changed: istimerf to also accept strmatch style arguments.
+
 31-01-2021, Jhobean
 - Fixed: when hits, stam or mana were set to negative value, overflow occurred and the stat was set at near maximum values. Now setting a stat to a negative value will set it to 0. (Issue #406) 
 - Fixed: Using stacked deeds consumed the whole pile.
+
+30-01-2021, Ben
+-Fixed: TAG= not deleting tags (issue #626)
+    Also reverted an old change which now allows setting TAG0=0 to delete the tag
+-Fixed: NPCs attacking sleeping NPCs
+-Fixed: RaiseCorpse causing items to fall to the floor if weight modifying objects are not equiped first (issue #620)
+-Change: Setting NPCDistanceHear to a negative value will set a hear distance of the absolute value without LOS check.

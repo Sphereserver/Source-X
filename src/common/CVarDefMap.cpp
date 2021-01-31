@@ -18,9 +18,8 @@ lpctstr CVarDefCont::GetValStrZeroed(const CVarDefCont* pVar, bool fZero) // sta
 	ADDTOCALLSTACK_INTENSIVE("CVarDefCont::GetValStrZeroed");
 	if (pVar)
 	{
-		lpctstr ptcValStr = pVar->GetValStr();
-		if (!fZero || (ptcValStr[0] != '\0'))
-			return ptcValStr;
+        lpctstr ptcValStr = pVar->GetValStr();
+		return ptcValStr;
 	}
 	return (fZero ? "0" : "");
 }
@@ -456,7 +455,7 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, 
     ASSERT(pszVal);
 	if (!fQuoted)
 	{
-		if (fDeleteZero && (pszVal[0] == '\0'))
+		if (pszVal[0] == '\0')
 		{
 			// If Val is an empty string, remove any previous def (and do not add a new def)
 			DeleteAtKey(pszName);
@@ -668,20 +667,14 @@ void CVarDefMap::r_WritePrefix( CScript & s, lpctstr ptcPrefix, lpctstr ptcKeyEx
 			continue;
 		
         const CVarDefContNum * pVarNum = dynamic_cast<const CVarDefContNum*>(pVar);
+        _WritePrefix(ptcKey);
+        lpctstr ptcVal = pVar->GetValStr();
         if (pVarNum)
         {
-            // Save VarNums only if they are != 0, otherwise it's a waste of space in the save file
-            if (pVarNum->GetValNum() != 0)
-            {
-                _WritePrefix(ptcKey);
-				lpctstr ptcVal = pVar->GetValStr();
-                s.WriteKey(ts.buffer(), ptcVal);
-            }
+            s.WriteKey(ts.buffer(), ptcVal);
         }
         else
         {
-            _WritePrefix(ptcKey);
-			lpctstr ptcVal = pVar->GetValStr();
             s.WriteKeyFormat(ts.buffer(), "\"%s\"", ptcVal);
         }
 	}

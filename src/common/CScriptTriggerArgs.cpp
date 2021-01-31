@@ -246,9 +246,9 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
     {
         bool fQuoted = false;
         lpctstr ptcArg = s.GetArgStr(&fQuoted);
-        if (!ptcArg || (fQuoted && !ptcArg[0]))
-            ptcArg = "0";
-        return m_VarsLocal.SetStr( s.GetKey() + 6, fQuoted, ptcArg, false );
+        m_VarsLocal.SetStr( s.GetKey() + 6, fQuoted, ptcArg, false); // don't change fZero to true! it would break some scripts!
+        return true;
+
     }
     else if ( !strnicmp( "REF", ptcKey, 3 ) )
     {

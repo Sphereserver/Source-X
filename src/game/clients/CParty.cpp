@@ -578,7 +578,7 @@ bool CPartyDef::r_LoadVal( CScript &s )
             ptcKey += (fZero ? 5 : 4);
             bool fQuoted = false;
             lpctstr ptcArg = s.GetArgStr(&fQuoted);
-            m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, false);
+            m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, fZero);
 		} break;
 		
 		default:
