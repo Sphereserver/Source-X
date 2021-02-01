@@ -1827,9 +1827,10 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 	size_t i = 0;
     bool bGhostSpeak = m_pChar->IsSpeakAsGhost();
     int iFullDist = UO_MAP_VIEW_SIGHT;
-    if (g_Cfg.m_iNPCDistanceHear > 0)
+    bool fIgnoreLOS = (g_Cfg.m_iNPCDistanceHear < 0);
+    if (g_Cfg.m_iNPCDistanceHear != 0)
     {
-        iFullDist = g_Cfg.m_iNPCDistanceHear;
+        iFullDist = abs(g_Cfg.m_iNPCDistanceHear);
     }
 
     //Reduce NPC hear distance for non pets
@@ -1912,7 +1913,7 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
         int iDist = m_pChar->GetTopDist3D(pChar);
 
         //Can't see or too far, Can't hear!
-        if ( (!m_pChar->CanSeeLOS(pChar)) || (iDist > iFullDist) )
+        if (((!m_pChar->CanSeeLOS(pChar)) && (!fIgnoreLOS)) || (iDist > iFullDist))
             continue;
 
         // already talking to him
@@ -3055,7 +3056,7 @@ bool CClient::xPacketFilter( const byte * pData, uint iLen )
 		Args.m_VarsLocal.SetNum("NUM", bytes);
 		memcpy(zBuf, &(pData[0]), bytestr);
 		zBuf[bytestr] = 0;
-		Args.m_VarsLocal.SetStr("STR", true, zBuf, true);
+		Args.m_VarsLocal.SetStr("STR", true, zBuf);
 		if ( m_pAccount )
 		{
 			Args.m_VarsLocal.SetStr("ACCOUNT", false, m_pAccount->GetName());
@@ -3104,7 +3105,7 @@ bool CClient::xOutPacketFilter( const byte * pData, uint iLen )
 		Args.m_VarsLocal.SetNum("NUM", bytes);
 		memcpy(zBuf, &(pData[0]), bytestr);
 		zBuf[bytestr] = 0;
-		Args.m_VarsLocal.SetStr("STR", true, zBuf, true);
+		Args.m_VarsLocal.SetStr("STR", true, zBuf);
 		if ( m_pAccount )
 		{
 			Args.m_VarsLocal.SetStr("ACCOUNT", false, m_pAccount->GetName());

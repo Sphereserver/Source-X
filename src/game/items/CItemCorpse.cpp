@@ -233,6 +233,7 @@ bool CChar::RaiseCorpse( CItemCorpse * pCorpse )
 	if ( !pCorpse->IsContainerEmpty() )
 	{
 		CItemContainer *pPack = GetPackSafe();
+        //Looping 2x to equip items first then send rest to pack
 		for ( CSObjContRec *pObjRec : pCorpse->GetIterationSafeContReverse() )
 		{
 			CItem* pItem = static_cast<CItem*>(pObjRec);
@@ -241,9 +242,16 @@ bool CChar::RaiseCorpse( CItemCorpse * pCorpse )
 
 			if ( pItem->GetContainedLayer() )
 				ItemEquip(pItem);
-			else if ( pPack )
-				pPack->ContentAdd(pItem);
 		}
+        for (CSObjContRec* pObjRec : pCorpse->GetIterationSafeContReverse())
+        {
+            CItem* pItem = static_cast<CItem*>(pObjRec);
+            if (pItem->IsType(IT_HAIR) || pItem->IsType(IT_BEARD))	// hair on corpse was copied!
+                continue;
+
+            if (pPack)
+                pPack->ContentAdd(pItem);
+        }
 
 		pCorpse->ContentsDump( GetTopPoint() );		// drop left items on ground
 	}

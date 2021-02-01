@@ -698,7 +698,7 @@ bool CClient::r_LoadVal( CScript & s )
             ptcKey = ptcKey + (fZero ? 6 : 5);
             bool fQuoted = false;
             lpctstr ptcArg = s.GetArgStr(&fQuoted);
-            m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, false);
+            m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, fZero);
             return true;
         }
     }
