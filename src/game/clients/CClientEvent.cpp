@@ -895,7 +895,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 				//Run, Not GM , walkbuffer active on ini, 
 		{
 			new PacketMovementRej(this, sequence);
-			g_Log.Event(LOGL_WARN | LOGM_CHEAT, "PacketMovement Rejected (Speedhack) for '%s', this player will notice a lag\n", GetAccount()->GetName());
+			g_Log.Event(LOGL_WARN | LOGM_CHEAT, "PacketMovement Rejected for '%s', Speedhack or WalkRegen ini setting?\n", GetAccount()->GetName());
 			m_timeLastEventWalk = iCurTime;
 			++m_iWalkStepCount;					// Increase step count to use on next walk buffer checks
 			return false;
