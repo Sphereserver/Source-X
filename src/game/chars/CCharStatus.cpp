@@ -1393,23 +1393,19 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
     bool fCanTouch = true;
 	if ( !CanSeeLOS(pObjTop) )
 	{
-		if ( Can(CAN_C_DCIGNORELOS) )
-            fCanTouch = true;
-		else if ( pChar && pChar->Can(CAN_C_DCIGNORELOS) )
-            fCanTouch = true;
-		else if ( pItem && pItem->Can(CAN_I_DCIGNORELOS) )
-            fCanTouch = true;
         fCanTouch = false;
+        if ((Can(CAN_C_DCIGNORELOS)) || (pChar && pChar->Can(CAN_C_DCIGNORELOS)) || (pItem && pItem->Can(CAN_I_DCIGNORELOS)))
+        {
+            fCanTouch = true;
+        }
 	}
 	if (( iDist > 2 ) && fCanTouch)
 	{
-		if ( Can(CAN_C_DCIGNOREDIST) )
-            fCanTouch = true;
-		else if ( pChar && pChar->Can(CAN_C_DCIGNOREDIST) )
-            fCanTouch = true;
-		else if ( pItem && pItem->Can(CAN_I_DCIGNOREDIST) )
-            fCanTouch = true;
         fCanTouch = false;
+        if ((Can(CAN_C_DCIGNOREDIST)) || (pChar && pChar->Can(CAN_C_DCIGNOREDIST)) || (pItem && pItem->Can(CAN_I_DCIGNOREDIST)))
+        {
+            fCanTouch = true;
+        }
 	}
 	return fCanTouch;
 }
