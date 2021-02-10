@@ -1512,9 +1512,15 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 		}
         else
         {
-            const CPointMap ptNear(CWorldMap::FindItemTypeNearby(pt, IT_WALL, 0, true, true));
-            if (!ptNear.IsValidPoint())
-                ptNewPlace = pt;
+            const CPointMap ptWall(CWorldMap::FindItemTypeNearby(pt, IT_WALL, 0, true, true));
+            if (!ptWall.IsValidPoint())
+            {
+                const CPointMap ptWindow(CWorldMap::FindItemTypeNearby(pt, IT_WINDOW, 0, true, true));
+                if (!ptWindow.IsValidPoint())
+                {
+                    ptNewPlace = pt;
+                }
+            }
         }
     }
 	if (pCharMover && !ptNewPlace.IsValidPoint())
@@ -4149,19 +4155,30 @@ void CItem::ConvertBolttoCloth()
 		if ( pBaseDef == nullptr )
 			continue;
 
-		CItem * pItemNew = CItem::CreateTemplate( pBaseDef->GetID() );
-		ASSERT(pItemNew);
-		pItemNew->SetAmount( iOutAmount * (word)(pDefCloth->m_BaseResources[i].GetResQty()) );
-		if ( pItemNew->IsType( IT_CLOTH ))
-			pItemNew->SetHue( GetHue() );
-		if ( pCont )
-		{
-			pCont->ContentAdd( pItemNew );
-		}
-		else
-		{
-			pItemNew->MoveToDecay(GetTopPoint(), g_Cfg.m_iDecay_Item);
-		}
+        uint iTotalAmount = iOutAmount * pDefCloth->m_BaseResources[i].GetResQty();
+        
+        CItem* pItemNew = nullptr;
+        while (iTotalAmount > 0)
+        {
+            pItemNew = CItem::CreateTemplate(pBaseDef->GetID());
+            ASSERT(pItemNew);
+            word iStack = (word)minimum(iTotalAmount, pItemNew->GetMaxAmount());
+            pItemNew->SetAmount(iStack);
+
+            if (pItemNew->IsType(IT_CLOTH))
+            {
+                pItemNew->SetHue(GetHue());
+            }
+            if (pCont)
+            {
+                pCont->ContentAdd(pItemNew);
+            }
+            else
+            {
+                pItemNew->MoveToDecay(GetTopPoint(), g_Cfg.m_iDecay_Item);
+            }
+            iTotalAmount -= iStack;
+        }
 	}
 }
 
