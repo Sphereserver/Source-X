@@ -2121,8 +2121,8 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 
 		if (IsSetOF(OF_PetSlots))
 		{
-			short iFollowerSlots = (short)pChar->GetDefNum("FOLLOWERSLOTS", true);
-			if (!FollowersUpdate(pChar, maximum(1, iFollowerSlots), true))
+			short iFollowerSlots = (short)pChar->GetDefNum("FOLLOWERSLOTS", true, 1);
+			if (!FollowersUpdate(pChar, maximum(0, iFollowerSlots), true))
 			{
 				SysMessageDefault(DEFMSG_PETSLOTS_TRY_TAMING);
 				return -SKTRIG_QTY;

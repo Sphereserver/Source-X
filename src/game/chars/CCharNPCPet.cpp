@@ -511,8 +511,8 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 				break;
 			if ( IsSetOF(OF_PetSlots) )
 			{
-				short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true);
-				if ( !pCharTarg->FollowersUpdate(this, (maximum(1, iFollowerSlots)), true) )
+				short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true, 1);
+				if ( !pCharTarg->FollowersUpdate(this, (maximum(0, iFollowerSlots)), true) )
 				{
 					pSrc->SysMessageDefault(DEFMSG_PETSLOTS_TRY_TRANSFER);
 					break;
@@ -583,8 +583,8 @@ void CChar::NPC_PetClearOwners()
 
 	if ( pOwner && IsSetOF(OF_PetSlots) )
 	{
-		short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true);
-		pOwner->FollowersUpdate(this, -maximum(1, iFollowerSlots));
+		short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true, 1);
+		pOwner->FollowersUpdate(this, -maximum(0, iFollowerSlots));
 	}
 }
 
@@ -617,8 +617,8 @@ bool CChar::NPC_PetSetOwner( CChar * pChar )
 
 	if ( IsSetOF(OF_PetSlots) )
 	{
-		const short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true);
-		pChar->FollowersUpdate(this, maximum(1, iFollowerSlots));
+		const short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true, 1);
+		pChar->FollowersUpdate(this, maximum(0, iFollowerSlots));
 	}
 
 	return true;

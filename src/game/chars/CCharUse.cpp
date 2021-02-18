@@ -1064,8 +1064,8 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool fCheckFollowerSlots )
 
 	if ( fCheckFollowerSlots && IsSetOF(OF_PetSlots) )
 	{
-		const short iFollowerSlots = (short)pPet->GetDefNum("FOLLOWERSLOTS", true);
-		if ( !FollowersUpdate(pPet, (maximum(1, iFollowerSlots)), true) )
+		const short iFollowerSlots = (short)pPet->GetDefNum("FOLLOWERSLOTS", true, 1);
+		if ( !FollowersUpdate(pPet, (maximum(0, iFollowerSlots)), true) )
 		{
 			SysMessageDefault(DEFMSG_PETSLOTS_TRY_CONTROL);
 			if ( fCreatedNewNpc )
@@ -1092,18 +1092,24 @@ bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool fCheckOnl
 {
 	ADDTOCALLSTACK("CChar::FollowersUpdate");
 	// Attemp to update followers on this character based on pChar
-	// bSustract = true for pet's release, shrink, etc ...
 	// This is supossed to be called only when OF_PetSlots is enabled, so no need to check it here.
 
-	if ( !fCheckOnly && IsTrigUsed(TRIGGER_FOLLOWERSUPDATE) )
-	{
-		CScriptTriggerArgs Args;
-		Args.m_iN1 = (iFollowerSlots > 0) ? 0 : 1;
-		Args.m_iN2 = abs(iFollowerSlots);
-		if ( OnTrigger(CTRIG_FollowersUpdate, pChar, &Args) == TRIGRET_RET_TRUE )
-			return false;
+    if (!fCheckOnly && IsTrigUsed(TRIGGER_FOLLOWERSUPDATE))
+    {
+        CScriptTriggerArgs Args;
+        Args.m_iN1 = (iFollowerSlots >= 0) ? 0 : 1;
+        Args.m_iN2 = abs(iFollowerSlots);
+        if (OnTrigger(CTRIG_FollowersUpdate, pChar, &Args) == TRIGRET_RET_TRUE)
+            return false;
 
-		iFollowerSlots = (short)(Args.m_iN2);
+        if (Args.m_iN1 == 1)
+        {
+            iFollowerSlots = -(short)(Args.m_iN2);
+        }
+        else
+        {
+            iFollowerSlots = (short)(Args.m_iN2);
+        }
 	}
 
 	short iCurFollower = (short)(GetDefNum("CURFOLLOWER", true));
@@ -1115,7 +1121,7 @@ bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool fCheckOnl
 
 	if ( !fCheckOnly )
 	{
-		SetDefNum("CURFOLLOWER", maximum(iSetFollower, 0));
+        SetDefNum("CURFOLLOWER", maximum(iSetFollower, 0));
 		UpdateStatsFlag();
 	}
 	return true;

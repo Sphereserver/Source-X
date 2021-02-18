@@ -2542,8 +2542,8 @@ CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE i
 
 		if (IsSetOF(OF_PetSlots))
 		{
-			short iFollowerSlots = (short)pChar->GetDefNum("FOLLOWERSLOTS", true);
-			if (!FollowersUpdate(pChar, maximum(1, iFollowerSlots), true))
+			short iFollowerSlots = (short)pChar->GetDefNum("FOLLOWERSLOTS", true, 1);
+			if (!FollowersUpdate(pChar, maximum(0, iFollowerSlots), true))
 			{
 				SysMessageDefault(DEFMSG_PETSLOTS_TRY_SUMMON);
 				pChar->Delete();

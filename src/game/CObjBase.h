@@ -276,18 +276,18 @@ public:
 	lpctstr GetDefStr( lpctstr ptcKey, bool fZero = false, bool fBaseDef = false ) const;
 
     /**
-     * @fn  int64 CObjBase::GetDefNum( lpctstr ptcKey, bool fZero = false, bool fDef = false ) const;
+     * @fn  int64 CObjBase::GetDefNum( lpctstr ptcKey, bool fDef = false, int64 iDefault = 0 ) const;
      *
      * @brief   Gets definition number from m_BaseDefs.
      *
      * @param   ptcKey      The key.
-     * @param   fZero       true to zero.
+     * @param   iDefault    Default value to return if not existant.
      * @param   fBaseDef    if the def doesn't exist, then check for a base def.
      *
      * @return  The definition number.
      */
 
-	int64 GetDefNum( lpctstr ptcKey, bool fBaseDef = false ) const;
+	int64 GetDefNum( lpctstr ptcKey, bool fBaseDef = false, int64 iDefault = 0) const;
 
     /**
      * @fn  void CObjBase::SetDefNum(lpctstr ptcKey, int64 iVal, bool fZero = true);

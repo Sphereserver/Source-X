@@ -3248,11 +3248,11 @@ lpctstr CObjBase::GetDefStr( lpctstr ptcKey, bool fZero, bool fDef ) const
 	return pVar->GetValStr();
 }
 
-int64 CObjBase::GetDefNum( lpctstr ptcKey, bool fDef ) const
+int64 CObjBase::GetDefNum( lpctstr ptcKey, bool fDef, int64 iDefault) const
 {
 	const CVarDefCont * pVar = GetDefKey( ptcKey, fDef );
 	if ( pVar == nullptr )
-		return 0;
+		return iDefault;
 	return pVar->GetValNum();
 }
 
