@@ -891,8 +891,8 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 			// The buffer system Event_CheckWalkBuffer seem more acurate because it permit some ajustment.
 			m_timeNextEventWalk = iCurTime + iDelay;
 		}
-		else if (m_pChar->IsStatFlag(STATF_FLY) && !m_pChar->IsPriv(PRIV_GM) && (g_Cfg.m_iWalkBuffer) && !Event_CheckWalkBuffer(rawdir) )
-				//Run, Not GM , walkbuffer active on ini, 
+		else if (m_pChar->IsStatFlag(STATF_FLY) && !m_pChar->IsPriv(PRIV_GM) && (g_Cfg.m_iWalkBuffer) && !m_pChar->GetRegion()->_pMultiLink && !Event_CheckWalkBuffer(rawdir) )
+				//Run, Not GM , walkbuffer active on ini, not on multi (boat) 
 		{
 			new PacketMovementRej(this, sequence);
 			g_Log.Event(LOGL_WARN | LOGM_CHEAT, "PacketMovement Rejected for '%s', Speedhack or WalkRegen ini setting?\n", GetAccount()->GetName());
