@@ -2452,3 +2452,9 @@ Changed: istimerf to also accept strmatch style arguments.
 -Fixed: NPCs attacking sleeping NPCs
 -Fixed: RaiseCorpse causing items to fall to the floor if weight modifying objects are not equiped first (issue #620)
 -Change: Setting NPCDistanceHear to a negative value will set a hear distance of the absolute value without LOS check.
+
+26-02-2021, Jhobean
+Reworked and improved Fastwalk (speedhack) dectection. It can be fine tuned with the existing WalkRegen and WalkBuffer ini settings (which you may need to update).
+Depending of the latency of the server, there's the possibility to have false positive speedhack detection on the console. Walkregen ini setting should be raised until you don't have false positives.
+You can disable this detection for everyone by setting WalkBuffer=0. At all time, the detection is not active on GM player.
+Fastwalk detection will trigger @UserExWalkLimit. Like before you can avoid a rejected step with RETURN 1.

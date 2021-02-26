@@ -108,8 +108,9 @@ private:
 
 	// Walk limiting code
 	int m_iWalkStepCount;	// Count the actual steps. Turning does not count.
-    llong m_iWalkTimeAvg;
-	int64 m_timeWalkStep;	// the last %8 walk step time.
+    llong m_iWalkTimeAvg;	// Average time betwwen 2 running step
+	int64 m_timeWalkStep;	// the last walk step time.
+	byte m_lastDir;
 
     // Client last know state stuff.
     CSectorEnviron m_Env;	// Last Environment Info Sent. so i don't have to keep resending if it's the same.
@@ -348,7 +349,7 @@ public:
 	void Event_VendorSell_Cheater( int iCode = 0 );
     void Event_VirtueSelect(dword dwVirtue, CChar *pCharTarg);
 	bool Event_Walk( byte rawdir, byte sequence = 0 ); // Player moves
-	bool Event_CheckWalkBuffer();
+	bool Event_CheckWalkBuffer(byte rawdir);
 
 	TRIGRET_TYPE Menu_OnSelect( const CResourceID& rid, int iSelect, CObjBase * pObj );
 	TRIGRET_TYPE Dialog_OnButton( const CResourceID& rid, dword dwButtonID, CObjBase * pObj, CDialogResponseArgs * pArgs );

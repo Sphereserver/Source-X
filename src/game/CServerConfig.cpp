@@ -186,7 +186,7 @@ CServerConfig::CServerConfig()
 	m_iOptionFlags		= (OF_Command_Sysmsgs|OF_NoHouseMuteSpeech);
 
 	m_iMaxSkill			= SKILL_QTY;
-	m_iWalkBuffer		= 75;
+	m_iWalkBuffer		= 15;
 	m_iWalkRegen		= 25;
 	m_iWoolGrowthTime	= 30*60 * MSECS_PER_SEC;
 	m_iAttackerTimeout	= 30;
