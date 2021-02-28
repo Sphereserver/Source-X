@@ -3819,6 +3819,19 @@ void CChar::r_Write( CScript & s )
         s.WriteKeyVal("MAXMANA", iVal);     // should be OMAXMANA, but we keep it like this for backwards compatibility
     s.WriteKeyVal("MANA", Stat_GetVal(STAT_INT));
 
+	static constexpr lpctstr _ptcKeyRegen[STAT_QTY] =
+	{
+		"REGENHITS",
+		"REGENMANA",
+		"REGENSTAM",
+		"REGENFOOD"
+	};
+	for (ushort j = 0; j < STAT_QTY; ++j)
+	{
+		const int uiRegen = Stats_GetRegenRate((STAT_TYPE)j); //we cannot use ushort here because by default REGENFOOD has a value higher than 65k.
+		if (uiRegen > 1 && uiRegen != g_Cfg.m_iRegenRate[j])
+			s.WriteKeyVal(_ptcKeyRegen[j], uiRegen / MSECS_PER_SEC);
+	}
     static constexpr lpctstr _ptcKeyRegenVal[STAT_QTY] =
     {
         "REGENVALHITS",
