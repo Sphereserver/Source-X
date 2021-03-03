@@ -74,35 +74,36 @@ typedef dword DAMAGE_TYPE;		// describe a type of damage.
 
 
 //--Spellflags
-#define SPELLFLAG_DIR_ANIM			0x0000001 // Evoke type cast or directed. (animation)
-#define SPELLFLAG_TARG_ITEM			0x0000002 // Need to target an object
-#define SPELLFLAG_TARG_CHAR			0x0000004 // Needs to target a living thing
+#define SPELLFLAG_DIR_ANIM			0x0000001	// Evoke type cast or directed. (animation)
+#define SPELLFLAG_TARG_ITEM			0x0000002	// Need to target an object
+#define SPELLFLAG_TARG_CHAR			0x0000004	// Needs to target a living thing
 #define SPELLFLAG_TARG_OBJ			(SPELLFLAG_TARG_ITEM|SPELLFLAG_TARG_CHAR)
-#define SPELLFLAG_TARG_XYZ			0x0000008 // Can just target a location.
-#define SPELLFLAG_HARM				0x0000010 // The spell is in some way harmfull.
-#define SPELLFLAG_FX_BOLT			0x0000020 // Effect is a bolt to the target.
-#define SPELLFLAG_FX_TARG			0x0000040 // Effect is at the target.
-#define SPELLFLAG_FIELD				0x0000080 // create a field of stuff. (fire,poison,wall)
-#define SPELLFLAG_SUMMON			0x0000100 // summon a creature.
-#define SPELLFLAG_GOOD				0x0000200 // The spell is a good spell. u intend to help to receiver.
-#define SPELLFLAG_RESIST			0x0000400 // Allowed to resist this.	
+#define SPELLFLAG_TARG_XYZ			0x0000008	// Can just target a location.
+#define SPELLFLAG_HARM				0x0000010	// The spell is in some way harmfull.
+#define SPELLFLAG_FX_BOLT			0x0000020	// Effect is a bolt to the target.
+#define SPELLFLAG_FX_TARG			0x0000040	// Effect is at the target.
+#define SPELLFLAG_FIELD				0x0000080	// create a field of stuff. (fire,poison,wall)
+#define SPELLFLAG_SUMMON			0x0000100	// summon a creature.
+#define SPELLFLAG_GOOD				0x0000200	// The spell is a good spell. u intend to help to receiver.
+#define SPELLFLAG_RESIST			0x0000400	// Allowed to resist this.	
 #define SPELLFLAG_TARG_NOSELF		0x0000800
 #define SPELLFLAG_DISABLED			0x0008000
 #define SPELLFLAG_SCRIPTED			0x0010000
-#define	SPELLFLAG_PLAYERONLY		0x0020000 // casted by players only
-#define	SPELLFLAG_NOUNPARALYZE		0x0040000 // casted by players only
-#define SPELLFLAG_NO_CASTANIM		0x0080000 // play no anim while casting (also override SPELLFLAG_DIR_ANIM)
-#define SPELLFLAG_TARG_NO_PLAYER	0x0100000 // if a char may be targetted, it may not be a player
-#define SPELLFLAG_TARG_NO_NPC		0x0200000 // if a char may be targetted, it may not be an NPC
-#define SPELLFLAG_NOPRECAST			0x0400000 // disable precasting for this spell
-#define SPELLFLAG_NOFREEZEONCAST	0x0800000 // disable freeze on cast for this spell
-#define SPELLFLAG_AREA				0x1000000 // area effect (uses local.arearadius)
-#define SPELLFLAG_POLY				0x2000000
-#define SPELLFLAG_TARG_DEAD			0x4000000 // allowed to targ dead chars
-#define SPELLFLAG_DAMAGE			0x8000000 // damage intended
-#define SPELLFLAG_BLESS				0x10000000	//Benefitial spells like Bless,Agility,etc.
-#define SPELLFLAG_CURSE				0x20000000	//Curses just like Weaken,Purge Magic,Curse,etc.
+#define	SPELLFLAG_PLAYERONLY		0x0020000	// casted by players only
+#define	SPELLFLAG_NOUNPARALYZE		0x0040000	// casted by players only
+#define SPELLFLAG_NO_CASTANIM		0x0080000	// play no anim while casting (also override SPELLFLAG_DIR_ANIM)
+#define SPELLFLAG_TARG_NO_PLAYER	0x0100000	// if a char may be targetted, it may not be a player
+#define SPELLFLAG_TARG_NO_NPC		0x0200000	// if a char may be targetted, it may not be an NPC
+#define SPELLFLAG_NOPRECAST			0x0400000	// disable precasting for this spell
+#define SPELLFLAG_NOFREEZEONCAST	0x0800000	// disable freeze on cast for this spell
+#define SPELLFLAG_AREA				0x1000000	// area effect (uses local.arearadius)
+#define SPELLFLAG_POLY				0x2000000	
+#define SPELLFLAG_TARG_DEAD			0x4000000	// Allowed to targ dead chars
+#define SPELLFLAG_DAMAGE			0x8000000	// Damage intended
+#define SPELLFLAG_BLESS				0x10000000	// Benefitial spells like Bless,Agility,etc.
+#define SPELLFLAG_CURSE				0x20000000	// Curses just like Weaken,Purge Magic,Curse,etc.
 #define SPELLFLAG_HEAL				0x40000000	// Healing spell
+#define SPELLFLAG_TICK				0x80000000	// A ticking spell like Poison.
 
 
 #endif // _INC_GAME_MACROS_H
