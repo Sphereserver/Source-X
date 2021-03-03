@@ -1209,6 +1209,7 @@ enum CTRIG_TYPE : short
 	CTRIG_SpellBook,        // Opening a spellbook
 	CTRIG_SpellCast,        // Char is casting a spell.
 	CTRIG_SpellEffect,      // A spell just hit me.
+    CTRIG_SpellEffectTick,  // A spell with SPELLFLAG_TICK just ticked.
 	CTRIG_SpellFail,        // The spell failed.
 	CTRIG_SpellSelect,      // selected a spell.
 	CTRIG_SpellSuccess,     // The spell succeeded.

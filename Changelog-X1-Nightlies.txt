@@ -2464,3 +2464,35 @@ Fastwalk detection will trigger @UserExWalkLimit. Like before you can avoid a re
 	RegenHits, RegenMana, RegenStam and RegenFood will now be saved only if their value is equal or above to 1 and different from the default value in the ini setting.
 	Default values in the ini are: 40 seconds for RegenHits, 20 seconds for RegenMana, 10 seconds for RegenStam and 86400 seconds (one day) for RegenFood.
 	
+03-03-2021, Drk84
+-Fixed: Reagents consumed on magical skill abortion (issue #605).
+-Fixed: RegenHits, RegenMana, RegenStam and RegenFood are not saved when their value is 1.
+-Added: @SpellEffectTick and @EffectTick triggers, they are fired when a spell memory has one or more charges(more2) and the spellflag_tick
+	ON=@SpellEffectTick / ON=@EffectTick
+	Default Object: The object that is going to be affected.
+	Src: The object that is going to be affected.
+	ARGN1: Spell Id
+	ARGN2: Spell Level
+	ARGO: The spell memory.(Argo.link holds the caster UID)
+	local.charges (R/W) = How many charges are left on the spell memory, this will be automatically decreased by 1 at the end of the method execution. Default value is 1.
+	local.delay (R/W) = How many seconds until the next spell effect tick. Default value is 5 seconds.
+	local.effect (R/W) = The effect value of the spell, harmful or beneficial (if SPELLFLAG_HEAL is enabled).
+	local.damagetype (R/W) = The damage type of the spell, if you are making a custom spell you must set a value otherwise the spell will not cause damage.
+	return 1: Destroy the spell memory and block the spell execution.
+	return 0: If the spell has the flag SPELLFLAG_SCRIPTED blocks the spell execution
+	
+	These triggers fires on the following spells and any custom spells with the SPELLFLAG_TICK:
+		Poison: You can now change the damage and damage type by changing the local.effect and local.damage value in these triggers.
+		Strangle and Pain Spike: You can now change the damage and damage type in these triggers.
+		Regeneration: A Sphere custom spell, you can change the healing value by changing the local.effect value.
+		Hallucination: A Sphere custom spell, you can change the duration of the hangover by using local.charges and local.delay.
+		Alchool: Unlike in real life, you can change the duration of the hangover by using local.charges and local.delay.
+		Custom Spells: Simply add SPELLFLAG_TICK to the spell spellflags. By default every spell memory starts with one charge.
+			Spells with SPELLFLAG_HARM and local.damagetype set will cause damage every local.delay seconds.
+			Spells with SPELLFLAG_HEAL will heal hitpoints every local.delay seconds.
+			Remember that is not mandatory to use  SPELLFLAG_SCRIPTED to make a custom spell, you can just use a spell id higher than 1055, usually i choose 2000. 
+	It's recommended to update the spells scripts file and sphere defs file, alternatively just add the following line, in the spellflag section in defs.scp/sphere_defs.scp:
+		spellflag_tick			   080000000  // A spell is going to tick and causing an effect.
+	And add SPELLFLAG_TICK to the following spells: Poison, Strangle, Pain Spike, Regeneration, Hallucination.
+-Updated SphereCrypt.ini
+	

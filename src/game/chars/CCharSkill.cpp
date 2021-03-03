@@ -2694,6 +2694,12 @@ int CChar::Skill_Magery( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_STROKE )
 		return 0;
 
+	if (stage == SKTRIG_ABORT)
+	{
+		Spell_CastFail(true);
+		return -SKTRIG_ABORT;
+	}
+
 	if ( stage == SKTRIG_FAIL )
 	{
 		Spell_CastFail();
@@ -3457,6 +3463,7 @@ void CChar::Skill_Fail( bool fCancel )
 	//  else We still get some credit for having tried.
 
 	SKILL_TYPE skill = Skill_GetActive();
+	
 	if ( skill == SKILL_NONE )
 		return;
 
@@ -3502,7 +3509,7 @@ void CChar::Skill_Fail( bool fCancel )
 		}
 	}
 
-	if ( Skill_Stage(SKTRIG_FAIL) >= 0 )
+	if ( Skill_Stage((fCancel)? SKTRIG_ABORT:SKTRIG_FAIL) >= 0 )
 	{
 		// Get some experience for failure ?
 		if ( !fCancel )

@@ -1071,7 +1071,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			}
 			return;
 		}
-		case LAYER_FLAG_Poison:
+		case LAYER_FLAG_Poison:  //Charges are set in SetPoison method.
 			StatFlag_Set(STATF_POISONED);
 			UpdateModeFlag();
 			if (pClient && IsSetOF(OF_Buffs))
@@ -1672,9 +1672,15 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 	ASSERT(pItem);
 
 	SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pItem->m_itSpell.m_spell));
+	const CSpellDef* pSpellDef = g_Cfg.GetSpellDef(spell);
+	if (!pSpellDef)
+		return false;
 	int iCharges = pItem->m_itSpell.m_spellcharges;
 	int iLevel = pItem->m_itSpell.m_spelllevel;
-
+	int iEffect = 0;
+	DAMAGE_TYPE iDmgType = 0;
+	int64 iSecondsDelay = 5; //default value for custom spells, can be overriden by Sphere spells below.
+	
 	switch ( spell )
 	{
 		case SPELL_Ale:		// 90 = drunkeness ?
@@ -1682,8 +1688,8 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 		case SPELL_Liquor:	// 92 = extreme drunkeness ?
 		{
 			// Chance to get sober quickly
-			if ( 10 > Calc_GetRandVal(100) )
-				--pItem->m_itSpell.m_spellcharges;
+			if (10 > Calc_GetRandVal(100))
+				--iCharges;
 
 			Stat_AddVal(STAT_INT, -1);
 			Stat_AddVal(STAT_DEX, -1);
@@ -1697,27 +1703,23 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 					UpdateAnimate(ANIM_BOW);
 				}
 			}
-
-			// We will have this effect again
-			pItem->SetTimeoutS(5);
 		}
 		break;
 
 		case SPELL_Regenerate:
 		{
-			if (iCharges <= 0 || iLevel <= 0)
+			if (iCharges <=0 || iLevel <= 0)
 				return false;
-
-			// Gain HP.
-			UpdateStatVal(STAT_STR, (ushort)(g_Cfg.GetSpellEffect(spell, iLevel)));
-			pItem->SetTimeoutS(2);
+			iSecondsDelay = 2;
+			iEffect = g_Cfg.GetSpellEffect(spell, iLevel);
 		}	break;
 
 		case SPELL_Hallucination:
 		{
-			if (iCharges <= 0 || iLevel <= 0)
+			if (iCharges <=0 || iLevel <= 0)
 				return false;
-
+			iSecondsDelay = Calc_GetRandLLVal2(15, 30);
+		
 			if (IsClientActive())
 			{
 				static const SOUND_TYPE sm_sounds[] = { 0x243, 0x244 };
@@ -1725,7 +1727,6 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 				m_pClient->addChar(this);
 				m_pClient->addPlayerSee(CPointMap());
 			}
-			pItem->SetTimeoutS(Calc_GetRandLLVal2(15, 30));
 		}
 		break;
 
@@ -1733,40 +1734,35 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 		{
 			// Both potions and poison spells use this.
 			// The poison in your body is having an effect.
-
 			if (iCharges <= 0)
 				return false;
-
-			int iDmg = 0;
 			if (IsSetMagicFlags(MAGICF_OSIFORMULAS))
 			{
 				// m_itSpell.m_spelllevel = level of the poison ! 0-4
-                int64 iSecondsDelay = 5;
-				switch (pItem->m_itSpell.m_spelllevel)
+				switch (iLevel)
 				{
 					case 4:
-						iDmg = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(16, 33), 100);
+						iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(16, 33), 100);
                         iSecondsDelay = 5;
 						break;
 					case 3:
-						iDmg = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(15, 30), 100);
+						iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(15, 30), 100);
                         iSecondsDelay = 5;
 						break;
 					case 2:
-						iDmg = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(7, 15), 100);
+						iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(7, 15), 100);
                         iSecondsDelay = 4;
 						break;
 					case 1:
-						iDmg = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(5, 10), 100);;
+						iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(5, 10), 100);;
                         iSecondsDelay = 3;
 						break;
 					default:
 					case 0:
-						iDmg = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(4, 7), 100);
+						iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(4, 7), 100);
                         iSecondsDelay = 2;
 						break;
 				}
-				pItem->SetTimeoutS(iSecondsDelay);
 
 				static lpctstr const sm_Poison_MessageOSI[] =
 				{
@@ -1804,9 +1800,9 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 					iLevel = 3;
 
 				pItem->m_itSpell.m_spelllevel -= 50;	// gets weaker too.	Only on old formulas
-				iDmg = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), iLevel * 2, 100);
-				pItem->SetTimeout((5 + Calc_GetRandLLVal(4)) * MSECS_PER_SEC);
-
+				iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), iLevel * 2, 100);
+				iSecondsDelay = (5 + Calc_GetRandLLVal(4));
+				
 				static lpctstr const sm_Poison_Message[] =
 				{
 					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_1),
@@ -1823,10 +1819,11 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 					Emote(pszMsg, GetClientActive());
 				SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_YOUFEEL), sm_Poison_Message[iLevel]);
 			}
-
+			
 			static const int sm_iPoisonMax[] = { 2, 4, 6, 8, 10 };
-			OnTakeDamage(maximum(sm_iPoisonMax[iLevel], iDmg), pItem->m_uidLink.CharFind(), DAMAGE_MAGIC|DAMAGE_POISON|DAMAGE_NODISTURB|DAMAGE_NOREVEAL, 0, 0, 0, 100, 0);
-
+			iEffect = maximum(sm_iPoisonMax[iLevel], iEffect);
+			iDmgType = DAMAGE_MAGIC | DAMAGE_POISON | DAMAGE_NODISTURB | DAMAGE_NOREVEAL;
+	
 			// We will have this effect again.
 			if (IsSetOF(OF_Buffs) && IsClientActive())
 			{
@@ -1838,27 +1835,8 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 
 		case SPELL_Strangle:
 		{
-			int iDiff = pItem->m_itSpell.m_spelllevel - pItem->m_itSpell.m_spellcharges;	// Retrieves the total amount of ticks done substracting spellcharges from spelllevel.
-
-			switch (iDiff) //First tick is in 5 seconds (when mem was created), second one in 4, next one in 3, 2 ... and following ones in each second.
-			{
-				case 0:
-					pItem->SetTimeoutS(4);
-					break;
-				case 1:
-					pItem->SetTimeoutS(3);
-					break;
-				case 2:
-					pItem->SetTimeoutS(2);
-					break;
-				default:
-					pItem->SetTimeoutS(1);
-					break;
-			}
-
-			int iSpellPower = (int)(Calc_GetRandLLVal2(pItem->m_itSpell.m_spelllevel - 2, pItem->m_itSpell.m_spelllevel + 1));
-			int iDmg = iSpellPower * ( 3 - ( (Stat_GetBase(STAT_DEX) / Stat_GetAdjusted(STAT_DEX) ) * 2));
-			/*Chokes an enemy with poison, doing more damage as their Stamina drops.The power of the effect is equal to the Caster's Spirit Speak skill divided by 10.
+			/*
+			Chokes an enemy with poison, doing more damage as their Stamina drops.The power of the effect is equal to the Caster's Spirit Speak skill divided by 10.
 			The minimum power is 4. The power number determines the duration and base damage of the Strangle effect.
 			Each point of power causes the Strangle effect to damage the target one time.The first round of damage is done after five seconds.
 			Four seconds later, the second round hits.Each round after that comes one second more quickly than the last, until there is only 1 second between hits.
@@ -1866,23 +1844,96 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			Then the damage is multiplied based on the victim's current and maximum Stamina values.
 			The more the victim is fatigued, the more damage this spell deals.
 			The damage is multiplied by the result of this formula: 3 - (Cur Stamina ÷ Max Stamina x 2.
-			For example, suppose the base damage for a Strangle hit is 5. The target currently has 40 out of a maximum of 80 stamina. Final damage for that hit is: 5 x (3 - (40 ÷ 80 x 2) = 10.*/
-			OnTakeDamage(maximum(1, iDmg), pItem->m_uidLink.CharFind(), DAMAGE_MAGIC | DAMAGE_POISON | DAMAGE_NOREVEAL, 0, 0, 0, 100, 0);
+			For example, suppose the base damage for a Strangle hit is 5. The target currently has 40 out of a maximum of 80 stamina. Final damage for that hit is: 5 x (3 - (40 ÷ 80 x 2) = 10.
+			*/
+
+			int iDiff = iLevel - iCharges;	// Retrieves the total amount of ticks done substracting spellcharges from spelllevel.
+			switch (iDiff) //First tick is in 5 seconds (when mem was created), second one in 4, next one in 3, 2 ... and following ones in each second.
+			{
+				case 0:
+					iSecondsDelay = 4;
+					break;
+				case 1:
+					iSecondsDelay = 3;
+					break;
+				case 2:
+					iSecondsDelay = 2;
+					break;
+				default:
+					iSecondsDelay = 1;
+					break;
+			}
+
+			int iSpellPower = (int)(Calc_GetRandLLVal2((int64)iLevel - 2, (int64)iLevel + 1));
+			iEffect = iSpellPower * ( 3 - ( (Stat_GetBase(STAT_DEX) / Stat_GetAdjusted(STAT_DEX) ) * 2));
+			iDmgType = DAMAGE_MAGIC | DAMAGE_POISON | DAMAGE_NOREVEAL;
 		}
 		break;
 
 		case SPELL_Pain_Spike:
 		{
 			// Receives x amount (stored in pItem->m_itSpell.m_spelllevel) of damage in 10 seconds, so damage each second is equal to total / 10
-			OnTakeDamage(pItem->m_itSpell.m_spelllevel / 10, pItem->m_uidLink.CharFind(), DAMAGE_MAGIC | DAMAGE_GOD);	// DIRECT? damage
-			pItem->SetTimeoutS(1);
+			iEffect = iLevel / 10;
+			iDmgType = DAMAGE_MAGIC | DAMAGE_GOD;	// DIRECT? damage
+			iSecondsDelay = 1;
 		}
 		break;
 
 		default:
-			return false;
+		{
+			if (!pSpellDef->IsSpellType(SPELLFLAG_TICK))
+				return false;
+		}
+		break;
+	}
+	CScriptTriggerArgs Args((int)(spell), iLevel, pItem);
+	Args.m_VarsLocal.SetNum("Charges", iCharges);
+	Args.m_VarsLocal.SetNum("Delay", iSecondsDelay);
+	Args.m_VarsLocal.SetNum("DamageType", iDmgType);
+	Args.m_VarsLocal.SetNum("Effect", iEffect);
+	
+	if (IsTrigUsed(TRIGGER_SPELLEFFECTTICK))
+	{
+		switch (OnTrigger(CTRIG_SpellEffectTick, this, &Args))
+		{
+		case TRIGRET_RET_TRUE:	pItem->Delete(true); return false;
+		case TRIGRET_RET_FALSE:	if (pSpellDef->IsSpellType(SPELLFLAG_SCRIPTED)) return true;
+		default:				break;
+		}
 	}
 
+	if (IsTrigUsed(TRIGGER_EFFECTTICK))
+	{
+		switch (Spell_OnTrigger(spell, SPTRIG_EFFECTTICK, this, &Args))
+		{
+		case TRIGRET_RET_TRUE:	pItem->Delete(true); return false;
+		case TRIGRET_RET_FALSE:	if (pSpellDef->IsSpellType(SPELLFLAG_SCRIPTED)) return true;
+		default:				break;
+		}
+	}
+	iLevel = (int)(Args.m_iN2); //This is probably not necessary.
+	iSecondsDelay = (int64)(Args.m_VarsLocal.GetKeyNum("Delay"));
+	iEffect = (int)(Args.m_VarsLocal.GetKeyNum("Effect"));
+	iCharges = (int)(Args.m_VarsLocal.GetKeyNum("Charges"));
+
+	if (pSpellDef->IsSpellType(SPELLFLAG_HARM))
+	{
+		iDmgType = (DAMAGE_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("DamageType")));
+		if (iDmgType > 0 && iEffect > 0) // This is necessary if we have a spell that is harmful but does no damage periodically.
+		{
+			OnTakeDamage(iEffect, pItem->m_uidLink.CharFind(), iDmgType,
+				(iDmgType & (DAMAGE_HIT_BLUNT | DAMAGE_HIT_PIERCE | DAMAGE_HIT_SLASH)) ? 100 : 0,
+				(iDmgType & DAMAGE_FIRE) ? 100 : 0,
+				(iDmgType & DAMAGE_COLD) ? 100 : 0,
+				(iDmgType & DAMAGE_POISON) ? 100 : 0,
+				(iDmgType & DAMAGE_ENERGY) ? 100 : 0);
+		}
+	}
+	else if (pSpellDef->IsSpellType(SPELLFLAG_HEAL))
+		UpdateStatVal(STAT_STR, (ushort)iEffect); // Gain HP.
+
+	pItem->SetTimeoutS(iSecondsDelay);
+	pItem->m_itSpell.m_spellcharges = iCharges;
 	// Total number of ticks to come back here.
 	if ( --pItem->m_itSpell.m_spellcharges > 0 )
 		return true;
@@ -3100,7 +3151,7 @@ bool CChar::Spell_CastDone()
 	return true;
 }
 
-void CChar::Spell_CastFail()
+void CChar::Spell_CastFail(bool fAbort)
 {
 	ADDTOCALLSTACK("CChar::Spell_CastFail");
 	ITEMID_TYPE iT1 = ITEMID_FX_SPELL_FAIL;
@@ -3129,7 +3180,7 @@ void CChar::Spell_CastFail()
 	if ( IsClientActive() )
 		GetClientActive()->addObjMessage( g_Cfg.GetDefaultMsg( DEFMSG_SPELL_GEN_FIZZLES ), this );
 
-	if ( g_Cfg.m_fReagentLossFail )
+	if ( g_Cfg.m_fReagentLossFail && !fAbort )
 	{
 		// consume the regs.
 		Spell_CanCast( m_atMagery.m_iSpell, false, m_Act_Prv_UID.ObjFind(), false );

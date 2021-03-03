@@ -946,7 +946,7 @@ private:
 	bool Spell_Unequip( LAYER_TYPE layer );
 
 	int  Spell_CastStart();
-	void Spell_CastFail();
+	void Spell_CastFail(bool fAbort = false);
 
 public:
     bool Spell_Resurrection(CItemCorpse * pCorpse = nullptr, CChar * pCharSrc = nullptr, bool fNoFail = false);
