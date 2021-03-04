@@ -1241,6 +1241,10 @@ int CChar::Skill_Tracking( SKTRIG_TYPE stage )
 	// m_Act_UID = what am i tracking ?
 	// m_atTracking.m_iPrvDir = the previous dir it was in.
 	// m_atTracking.m_dwDistMax = the maximum tracking distance.
+
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
+
 	if ( stage == SKTRIG_START )
 		return 0;	// already checked difficulty earlier
 
@@ -1277,6 +1281,9 @@ int CChar::Skill_Mining( SKTRIG_TYPE stage )
 	// resource check  to IT_ORE. How much can we get ?
 	// RETURN:
 	//  Difficulty 0-100
+
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
 
 	if ( stage == SKTRIG_FAIL )
 		return 0;
@@ -1372,6 +1379,9 @@ int CChar::Skill_Fishing( SKTRIG_TYPE stage )
 	// RETURN:
 	//   difficulty = 0-100
 
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
+
 	if ( stage == SKTRIG_FAIL )
 		return 0;
 
@@ -1466,6 +1476,9 @@ int CChar::Skill_Lumberjack( SKTRIG_TYPE stage )
 	//
 	// RETURN:
 	//   difficulty = 0-100
+
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
 
 	if ( stage == SKTRIG_FAIL )
 		return 0;
@@ -1563,6 +1576,9 @@ int CChar::Skill_DetectHidden( SKTRIG_TYPE stage )
 	// Detect them based on skill diff.
 	// ??? Hidden objects ?
 
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
+
 	if ( stage == SKTRIG_START )
 		return 10;		// difficulty based on who is hiding ?
 
@@ -1634,7 +1650,10 @@ int CChar::Skill_Musicianship( SKTRIG_TYPE stage )
 	ADDTOCALLSTACK("CChar::Skill_Musicianship");
 	// m_Act_UID = the intrument i targetted to play.
 
-	if ( stage == SKTRIG_STROKE )
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
+
+	if ( stage == SKTRIG_STROKE  )
 		return 0;
 	if ( stage == SKTRIG_START )
 		return Use_PlayMusic( m_Act_UID.ItemFind(), Calc_GetRandVal(90));	// How difficult? 1-1000. If no instrument, it immediately fails
@@ -1651,6 +1670,9 @@ int CChar::Skill_Peacemaking( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_STROKE )
 		return 0;
+
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
 
 	switch ( stage )
 	{
@@ -1739,6 +1761,9 @@ int CChar::Skill_Enticement( SKTRIG_TYPE stage )
 	// Just keep playing and trying to allure them til we can't
 	// Must have a musical instrument.
 
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
+
 	if ( stage == SKTRIG_STROKE )
 		return 0;
 
@@ -1822,6 +1847,9 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 	ADDTOCALLSTACK("CChar::Skill_Provocation");
 	// m_Act_Prv_UID = provoke this person
 	// m_Act_UID = against this person.
+
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
 
 	if ( stage == SKTRIG_STROKE )
 		return 0;
@@ -1967,6 +1995,9 @@ int CChar::Skill_Poisoning( SKTRIG_TYPE stage )
 	// Act_TargPrv = poison this weapon/food
 	// Act_Targ = with this poison.
 
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
+
 	if ( stage == SKTRIG_STROKE )
 		return 0;
 
@@ -2063,6 +2094,9 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 	// m_Act_UID = creature to tame.
 	// Check the min required skill for this creature.
 	// Related to INT ?
+
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
 
 	CChar * pChar = m_Act_UID.CharFind();
 	if ( pChar == nullptr )
@@ -2206,6 +2240,9 @@ int CChar::Skill_Lockpicking( SKTRIG_TYPE stage )
 	// m_Act_UID = the item to be picked.
 	// m_Act_Prv_UID = The pick.
 
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
+
 	if ( stage == SKTRIG_STROKE )
 		return 0;
 
@@ -2259,6 +2296,9 @@ int CChar::Skill_Hiding( SKTRIG_TYPE stage )
 	// Skill required varies with terrain and situation ?
 	// if we are carrying a light source then this should not work.
 
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
+
 	if ( stage == SKTRIG_STROKE )	// we shoud just stay in HIDING skill ?
 		return 0;
 
@@ -2309,6 +2349,9 @@ int CChar::Skill_Herding( SKTRIG_TYPE stage )
 	// m_Act_UID = move this creature.
 	// m_Act_p = move to here.
 	// How do I make them move fast ? or with proper speed ???
+
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
 
 	if ( stage == SKTRIG_STROKE )
 		return 0;
@@ -2377,6 +2420,10 @@ int CChar::Skill_Herding( SKTRIG_TYPE stage )
 int CChar::Skill_SpiritSpeak( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_SpiritSpeak");
+
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
+
 	if ( stage == SKTRIG_FAIL || stage == SKTRIG_STROKE )
 		return 0;
 
@@ -2406,7 +2453,10 @@ int CChar::Skill_Meditation( SKTRIG_TYPE stage )
 	// Try to regen your mana even faster than normal.
 	// Give experience only when we max out.
 
-	if ( stage == SKTRIG_FAIL || stage == SKTRIG_ABORT )
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
+
+	if ( stage == SKTRIG_FAIL )
 	{
 		if ( IsClientActive() )
 			GetClientActive()->removeBuff(BI_ACTIVEMEDITATION);
@@ -2474,6 +2524,9 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 	// should be just a fast regen over time ?
 	// RETURN:
 	//  = -3 = failure.
+
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
 
 	if ( stage == SKTRIG_STROKE )
 		return 0;
@@ -2618,7 +2671,10 @@ int CChar::Skill_RemoveTrap( SKTRIG_TYPE stage )
 	// m_Act_UID = trap
 	// Is it a trap ?
 
-	if ( stage == SKTRIG_STROKE )
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
+
+	if ( stage == SKTRIG_STROKE  )
 		return 0;
 
 	CItem * pTrap = m_Act_UID.ItemFind();
@@ -2659,6 +2715,9 @@ int CChar::Skill_Begging( SKTRIG_TYPE stage )
 	if ( pChar == nullptr || pChar == this )
 		return -SKTRIG_QTY;
 
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
+
 	if ( stage == SKTRIG_START )
 	{
 		UpdateAnimate( ANIM_BOW );
@@ -2694,7 +2753,7 @@ int CChar::Skill_Magery( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_STROKE )
 		return 0;
 
-	if (stage == SKTRIG_ABORT)
+	if ( stage == SKTRIG_ABORT )
 	{
 		Spell_CastFail(true);
 		return -SKTRIG_ABORT;
@@ -2801,6 +2860,9 @@ int CChar::Skill_MakeItem( SKTRIG_TYPE stage )
 	// m_Act_UID = the item we want to be part of this process.
 	// m_atCreate.m_iItemID = new item we are making
 	// m_atCreate.m_dwAmount = amount of said item.
+
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
 
 	if ( stage == SKTRIG_START )
 		return m_Act_Difficulty;	// keep the already set difficulty
@@ -2919,6 +2981,9 @@ int CChar::Skill_Information( SKTRIG_TYPE stage )
 	if ( ! IsClientActive())	// purely informational
 		return -SKTRIG_QTY;
 
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
+
 	if ( stage == SKTRIG_FAIL || stage == SKTRIG_STROKE )
 		return 0;
 
@@ -2939,6 +3004,9 @@ int CChar::Skill_Act_Napping( SKTRIG_TYPE stage )
 	// NPCACT_NAPPING:
 	// we are taking a small nap. keep napping til we wake. (or move)
 	// AFK command
+
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
 
 	if ( stage == SKTRIG_START )
 	{
@@ -2964,6 +3032,9 @@ int CChar::Skill_Act_Breath( SKTRIG_TYPE stage )
 	// NPCACT_BREATH
 	// A Dragon I assume.
 	// m_Fight_Targ_UID = my target.
+
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
 
 	if ( stage == SKTRIG_STROKE || stage == SKTRIG_FAIL )
 		return 0;
@@ -3045,6 +3116,9 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 	ADDTOCALLSTACK("CChar::Skill_Act_Throwing");
 	// NPCACT_THROWING
 	// m_Fight_Targ_UID = my target.
+
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT; 
 
 	if ( stage == SKTRIG_STROKE )
 		return 0;
@@ -3164,6 +3238,9 @@ int CChar::Skill_Act_Training( SKTRIG_TYPE stage )
 	ADDTOCALLSTACK("CChar::Skill_Act_Training");
 	// NPCACT_TRAINING
 	// finished some traing maneuver.
+
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
 
 	if ( stage == SKTRIG_START )
 	{
@@ -3763,7 +3840,10 @@ int CChar::Skill_Snooping(SKTRIG_TYPE stage)
 {
 	ADDTOCALLSTACK("CChar::Skill_Snooping");
 
-	if (stage == SKTRIG_STROKE)
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
+
+	if ( stage == SKTRIG_STROKE )
 		return 0;
 
 	// Assume the container is not locked.
@@ -3827,7 +3907,11 @@ int CChar::Skill_Snooping(SKTRIG_TYPE stage)
 int CChar::Skill_Stealing(SKTRIG_TYPE stage)
 {
 	ADDTOCALLSTACK("CChar::Skill_Stealing");
-	if (stage == SKTRIG_STROKE)
+
+	if ( stage == SKTRIG_ABORT )
+		return -SKTRIG_ABORT;
+
+	if (stage == SKTRIG_STROKE )
 		return 0;
 
 	CItem * pItem = m_Act_UID.ItemFind();
