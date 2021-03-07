@@ -30,8 +30,8 @@ bool CChar::TeleportToObj( int iType, tchar * pszArgs )
 {
 	ADDTOCALLSTACK("CChar::TeleportToObj");
 
-	dword dwUID = m_Act_UID.GetObjUID() &~ UID_F_ITEM;
-	dword dwTotal = g_World.GetUIDCount();
+	const dword dwTotal = g_World.GetUIDCount();
+	dword dwUID = m_Act_UID.GetObjUID() & ~UID_F_ITEM;
 	dword dwCount = dwTotal-1;
 
 	int iArg = 0;
@@ -2980,7 +2980,7 @@ bool CChar::SetPoison( int iSkill, int iHits, CChar * pCharSrc )
 		if (iDist <= UO_MAP_VIEW_SIZE_MAX)
 		{
 			if (iSkill >= 1000)		//Lethal-Deadly
-				iPoisonLevel = 3 + !Calc_GetRandVal(10);
+				iPoisonLevel = 3 + !bool(Calc_GetRandVal(10));
 			else if (iSkill > 850)	//Greater
 				iPoisonLevel = 2;
 			else if (iSkill > 650)	//Standard

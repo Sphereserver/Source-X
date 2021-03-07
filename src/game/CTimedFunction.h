@@ -10,6 +10,8 @@
 #include "CTimedObject.h"
 
 
+class CTimedFunctionHandler;
+
 class CTimedFunction : public CTimedObject
 {
 public:

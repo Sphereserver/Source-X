@@ -5,7 +5,7 @@
 #include "../sphere/ProfileTask.h"
 #include "chars/CChar.h"
 #include "items/CItemShip.h"
-#include "CWorld.h"
+#include "CSectorList.h"
 #include "CWorldGameTime.h"
 #include "CSectorTemplate.h"
 
