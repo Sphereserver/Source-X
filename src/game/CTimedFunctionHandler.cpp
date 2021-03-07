@@ -1,138 +1,72 @@
 #include "../common/CLog.h"
+#include "../common/CUID.h"
 #include "../sphere/ProfileTask.h"
 #include "CObjBase.h"
-#include "CServer.h"
 #include "CServerConfig.h"
+#include "CServerTime.h"
 #include "CTimedFunctionHandler.h"
 
-CTimedFunctionHandler::CTimedFunctionHandler()
+
+#define TF_TICK_MAGIC_NUMBER		99
+#define TF_TICK_MAGIC_NUMBER_STR	"99"
+
+
+CTimedFunctionHandler::CTimedFunctionHandler() :
+	_strLoadBufferCommand(CTimedFunction::kuiCommandSize, '\0'),
+	_strLoadBufferNumbers(CTimedFunction::kuiCommandSize, '\0')
 {
-	m_curTick = 0;
-	m_processedFunctionsPerTick = 0;
-	m_isBeingProcessed = false;
 }
 
-void CTimedFunctionHandler::OnTick()
+void CTimedFunctionHandler::OnChildDestruct(CTimedFunction* tf)
 {
-	ADDTOCALLSTACK("CTimedFunctionHandler::OnTick");
-	m_isBeingProcessed = true;
-
-	++m_curTick;
-
-	if ( m_curTick >= TICKS_PER_SEC)
-		m_curTick = 0;
-
-	int tick = m_curTick;
-	const ProfileTask scriptsTask(PROFILE_TIMEDFUNCTIONS);
-
-
-	if ( !m_timedFunctions[tick].empty() )
+	ADDTOCALLSTACK("CTimedFunctionHandler::OnChildDestruct");
+	for (auto it = _timedFunctions.begin(), itEnd = _timedFunctions.end(); it != itEnd; ++it)
 	{
-		for ( auto it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )	
+		if (it->get() == tf)
 		{
-			++m_processedFunctionsPerTick;
-			if (g_Cfg.m_iMaxLoopTimes && (m_processedFunctionsPerTick >= g_Cfg.m_iMaxLoopTimes))
-			{
-				g_Log.EventError("Terminating TIMERF executions for this tick, since it seems being dead-locked (%d iterations already passed)\n", m_processedFunctionsPerTick);
-				break;
-			}
-			TimedFunction* tf = *it;
-			tf->elapsed -= 1;
-			if ( tf->elapsed <= 1 )
-			{
-				CObjBase * obj = tf->uid.ObjFind();
-
-				if ( obj != nullptr ) //just in case
-				{
-                    CScript s(tf->funcname);
-					CObjBaseTemplate * topobj = obj->GetTopLevelObj();
-                    ASSERT(topobj);
-					CTextConsole* src;
-
-					if ( topobj->IsChar() ) // only chars are derived classes from CTextConsole
-						src = dynamic_cast <CTextConsole*> ( topobj );
-					else
-						src = &g_Serv;
-
-					m_tfRecycled.emplace_back( tf );
-					it = m_timedFunctions[tick].erase( it );
-
-					obj->r_Verb( s, src );
-				}
-				else
-				{
-					m_tfRecycled.emplace_back( tf );
-					it = m_timedFunctions[tick].erase( it );
-				}
-			}
-			else
-			{
-				++it;
-			}
+			_timedFunctions.erase(it);
+			return;
 		}
 	}
-
-	m_isBeingProcessed = false;
-	m_processedFunctionsPerTick = 0;
-
-	while ( !m_tfQueuedToBeAdded.empty() )
-	{
-		TimedFunction *tf = m_tfQueuedToBeAdded.back();
-		m_tfQueuedToBeAdded.pop_back();
-		m_timedFunctions[tick].emplace_back( tf );
-	}
+	ASSERT(false);
 }
 
-void CTimedFunctionHandler::Erase( CUID uid )
-{
-	ADDTOCALLSTACK("CTimedFunctionHandler::Erase");
-	for ( int tick = 0; tick < TICKS_PER_SEC; ++tick )
-	{
-		for ( auto it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )	// the end iterator changes at each stl container erase call
-		{
-			TimedFunction* tf = *it;
-			if ( tf->uid == uid)
-			{
-				m_tfRecycled.emplace_back( tf );
-				it = m_timedFunctions[tick].erase( it );
-			}
-			else
-				++it;
-		}
-	}
-}
-
-int CTimedFunctionHandler::IsTimer( CUID uid, lpctstr funcname )
+int64 CTimedFunctionHandler::IsTimer(const CUID& uid, lpctstr ptcCommand) const
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::IsTimer");
-	for ( int tick = 0; tick < TICKS_PER_SEC; ++tick )
+	for (std::unique_ptr<CTimedFunction> const& tf : _timedFunctions)	// the end iterator changes at each stl container erase call
 	{
-		for ( auto it = m_timedFunctions[tick].begin(), end = m_timedFunctions[tick].end(); it != end; ++it)
-		{
-			TimedFunction* tf = *it;
-			if ( (tf->uid == uid) && (Str_Match(funcname, tf->funcname) == MATCH_VALID))
-				return tf->elapsed;
-		}
+		if ((tf->GetUID() == uid) && (Str_Match(ptcCommand, tf->GetCommand()) == MATCH_VALID))
+			return tf->GetTimerDiff();
 	}
 	return 0;
 }
 
-void CTimedFunctionHandler::Stop( CUID uid, lpctstr funcname )
+void CTimedFunctionHandler::ClearUID( const CUID& uid )
+{
+	ADDTOCALLSTACK("CTimedFunctionHandler::Erase");
+	for (auto it = _timedFunctions.begin(); it != _timedFunctions.end(); )	// the end iterator changes at each stl container erase call
+	{
+		std::unique_ptr<CTimedFunction>& tf = *it;
+		if (tf->GetUID() == uid)
+			it =_timedFunctions.erase(it);
+		else
+			++it;
+	}
+}
+
+void CTimedFunctionHandler::Stop(const CUID& uid, lpctstr ptcCommand)
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Stop");
-	for ( int tick = 0; tick < TICKS_PER_SEC; ++tick )
+	for (auto it = _timedFunctions.begin(); it != _timedFunctions.end(); )	// the end iterator changes at each stl container erase call
 	{
-		for ( auto it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )	// the end iterator changes at each erase call
+		std::unique_ptr<CTimedFunction>& tf = *it;
+		if ((tf->GetUID() == uid) && (Str_Match(ptcCommand, tf->GetCommand()) == MATCH_VALID))
 		{
-			TimedFunction* tf = *it;
-            if ((tf->uid == uid) && (Str_Match(funcname, tf->funcname) == MATCH_VALID))
-			{
-				m_tfRecycled.emplace_back( tf );
-				it = m_timedFunctions[tick].erase( it );
-			}
-			else
-				++it;
+			it = _timedFunctions.erase(it);
 		}
+		else
+			++it;
 	}
 }
 
@@ -140,185 +74,139 @@ void CTimedFunctionHandler::Clear()
 {
     ADDTOCALLSTACK("CTimedFunctionHandler::Clear");
 
-    m_curTick = 0;
-    m_processedFunctionsPerTick = 0;
-
-    for (uint i = 0; i < TICKS_PER_SEC; ++i)
-    {
-        m_timedFunctions[i].clear();
-    }
-    m_tfQueuedToBeAdded.clear();
-    m_tfRecycled.clear();
+    _timedFunctions.clear();
 }
 
-TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext,
+TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr ptcCommand, int iLoopsMade, CScriptLineContext StartContext,
     CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult)
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Loop");
-	bool endLooping = false;
-	for (int tick = 0; (tick < TICKS_PER_SEC) && !endLooping; ++tick)
+	bool fEndLooping = false;
+	for (auto it = _timedFunctions.begin(); it != _timedFunctions.end(); )	// the end iterator changes at each stl container erase call
 	{
-		for (auto it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )
+		++iLoopsMade;
+		if (g_Cfg.m_iMaxLoopTimes && (iLoopsMade >= g_Cfg.m_iMaxLoopTimes))
 		{
-			++LoopsMade;
-			if (g_Cfg.m_iMaxLoopTimes && (LoopsMade >= g_Cfg.m_iMaxLoopTimes))
+			g_Log.EventError("Terminating loop cycle since it seems being dead-locked (%d iterations already passed).\n", iLoopsMade);
+			return TRIGRET_ENDIF;
+		}
+
+		std::unique_ptr<CTimedFunction>& tf = *it;
+		if (!strcmpi(tf->GetCommand(), ptcCommand))
+		{
+			CObjBase* pObj = tf->GetUID().ObjFind();
+			if (!pObj)
 			{
-				g_Log.EventError("Terminating loop cycle since it seems being dead-locked (%d iterations already passed)\n", LoopsMade);
-				return TRIGRET_ENDIF;
+			LoopStop:
+				fEndLooping = true;
+				break;
 			}
 
-			TimedFunction* tf = *it;
-			if (!strcmpi(tf->funcname, funcname))
+			TRIGRET_TYPE iRet = pObj->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult);
+
+			if (iRet == TRIGRET_BREAK)
 			{
-				CObjBase * pObj = tf->uid.ObjFind();
-                if (!pObj)
-                {
-                LoopStop:
-                    endLooping = true;
-                    break;
-                }
-				TRIGRET_TYPE iRet = pObj->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult);
-				if (iRet == TRIGRET_BREAK)
-				{
-                    goto LoopStop;
-				}
-				if ((iRet != TRIGRET_ENDIF) && (iRet != TRIGRET_CONTINUE))
-					return iRet;
-				s.SeekContext(StartContext);
+				goto LoopStop;
 			}
-			++it;
+			if ((iRet != TRIGRET_ENDIF) && (iRet != TRIGRET_CONTINUE))
+				return iRet;
+			s.SeekContext(StartContext);
 		}
+
+		++it;
 	}
+
 	return TRIGRET_ENDIF;
 }
 
-void CTimedFunctionHandler::Add( CUID uid, int numSeconds, lpctstr funcname )
+void CTimedFunctionHandler::Add(const CUID& uid, int64 iTimeout, const char* pcCommand)
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Add");
-	ASSERT(funcname != nullptr);
-	ASSERT(strlen(funcname) < 1024);
+	ASSERT(pcCommand != nullptr);
+	ASSERT(strlen(pcCommand) < CTimedFunction::kuiCommandSize);
 
-	int tick = m_curTick;
-	TimedFunction *tf;
-	if ( !m_tfRecycled.empty() )
-	{
-		tf = m_tfRecycled.back();
-		m_tfRecycled.pop_back();
-	}
-	else
-	{
-		tf = new TimedFunction;
-	}
-	tf->uid = uid;
-	tf->elapsed = numSeconds;
-	Str_CopyLimitNull( tf->funcname, funcname, sizeof(tf->funcname) );
-	if ( m_isBeingProcessed )
-		m_tfQueuedToBeAdded.emplace_back( tf );
-	else
-		m_timedFunctions[tick].emplace_back( tf );
+	auto& tf = _timedFunctions.emplace_back(std::make_unique<CTimedFunction>(this, uid, pcCommand));
+	tf->SetTimeout(iTimeout);
 }
 
-int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *pszVal)
+int CTimedFunctionHandler::Load(lpctstr ptcKeyword, bool fQuoted, lpctstr ptcArg)
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Load");
 	UNREFERENCED_PARAMETER(fQuoted);
-	static char tempBuffer[1024];
-	static TimedFunction *tf = nullptr;
-
-	if ( !pszName )
+	if (!ptcKeyword)
 		return -1;
 
-	if ( !strnicmp( pszName, "CurTick", 7 ) )
+	static constexpr lpctstr ptcErrorPair = "Invalid TimerF in %sdata.scp. Each TimerFCall and TimerFNumbers pair must be in that order.\n";
+	if (!strnicmp(ptcKeyword, "TimerFCall", 11))
 	{
-		if ( !IsDigit(pszVal[0] ) )
-        {
-            g_Log.Event( LOGM_INIT|LOGL_ERROR,"Invalid CurTick line in %sdata.scp (value=%s).\n", SPHERE_FILE, pszVal );
-            return -1;
-        }
-
-        auto oldErrno = errno;
-        int tick = (int)std::strtol(pszVal, nullptr, 10);
-        if (tick >= TICKS_PER_SEC)
-        {
-            g_Log.Event(LOGM_INIT|LOGL_ERROR, "Invalid CurTick in %sdata.scp (value=%d is too high).\n", SPHERE_FILE, tick);
-            errno = oldErrno;
-            return -1;
-        }
-        errno = oldErrno;
-
-        m_curTick = tick;
+		if (_strLoadBufferCommand[0] != '\0')
+		{
+			// A TimerFCall wasn't called before this TimerFNumbers, so tf doesn't contain a valid CTimedFunction object.
+			g_Log.Event(LOGM_INIT | LOGL_ERROR, ptcErrorPair, SPHERE_FILE);
+			return -1;
+		}
+		ASSERT(_strLoadBufferNumbers[0] == '\0');
+		Str_CopyLimitNull(_strLoadBufferCommand.data(), ptcArg, _strLoadBufferCommand.size());
 	}
-	else if ( !strnicmp( pszName, "TimerFNumbers", 13 ) )
+	else if ( !strnicmp(ptcKeyword, "TimerFNumbers", 13) )
 	{
-		tchar * ppVal[4];
-		Str_CopyLimitNull( tempBuffer, pszVal, sizeof(tempBuffer) );	//because pszVal is constant and Str_ParseCmds wants a non-constant string
-		size_t iArgs = Str_ParseCmds( tempBuffer, ppVal, CountOf( ppVal ), " ,\t" );
+		if (_strLoadBufferCommand[0] == '\0')
+		{
+			// A TimerFCall wasn't called before this TimerFNumbers, so tf doesn't contain a valid CTimedFunction object.
+			g_Log.Event(LOGM_INIT | LOGL_ERROR, ptcErrorPair, SPHERE_FILE);
+			return -1;
+		}
+
+		Str_CopyLimitNull(_strLoadBufferNumbers.data(), ptcArg, _strLoadBufferNumbers.size());	// because ptcArg is constant and Str_ParseCmds wants a non-constant string
+		tchar* ppVal[3];
+		const size_t iArgs = Str_ParseCmds(_strLoadBufferNumbers.data(), ppVal, CountOf(ppVal), " ,\t" );
 		if ( iArgs != 3 )
         {
-            g_Log.Event( LOGM_INIT|LOGL_ERROR, "Invalid Timerf line in %sdata.scp: %s=%s (too few values)\n", SPHERE_FILE, pszName, pszVal );
-            return -1;
-        }
-        if (!IsDigit(ppVal[0][0]) || !IsDigit(ppVal[1][0]) || !IsDigit(ppVal[2][0]))
-        {
-            g_Log.Event( LOGM_INIT|LOGL_ERROR, "Invalid Timerf line in %sdata.scp: %s=%s (encountered a non numeric value)\n", SPHERE_FILE, pszName, pszVal );
+            g_Log.Event( LOGM_INIT|LOGL_ERROR, "Invalid TimerF line in %sdata.scp: %s=%s (arguments mismatch: 3 needed).\n", SPHERE_FILE, ptcKeyword, ptcArg);
             return -1;
         }
         
-        auto oldErrno = errno;
-        int tick = (int)std::strtol(ppVal[0], nullptr, 10);
-        if (tick > TICKS_PER_SEC)
-        {
-            g_Log.Event(LOGM_INIT|LOGL_ERROR, "Invalid TimerFNumbers in %sdata.scp. Tick (first value=%d) is too high.\n", SPHERE_FILE, tick);
-            errno = oldErrno;
-            return -1;
-        }
+        const auto oldErrno = errno;
+		errno = 0;
 
-        errno = 0;
-        unsigned long uidTest = std::strtoul(ppVal[1], nullptr, 10);
+		// The "tick" value was used on the old 56* timerf ticking system. It always was a positive number.
+		//  Now X replaces this value in the save files to TF_TICK_MAGIC_NUMBER, so that we know that it comes from a X save file.
+		//  We need that info because on X we save the timeout in milliseconds, on 0.56 it was stored in tenths of second.
+        const int tick = (int)std::strtol(ppVal[0], nullptr, 10);
+		if (errno == ERANGE)
+		{
+			g_Log.Event(LOGM_INIT | LOGL_ERROR, "Invalid TimerFNumbers in %sdata.scp. Invalid legacy tick (first value=%s).\n", SPHERE_FILE, ppVal[0]);
+			errno = oldErrno;
+			return -1;
+		}
+
+		const unsigned long uidTest = std::strtoul(ppVal[1], nullptr, 10);
         if ((errno == ERANGE) || (uidTest > UINT32_MAX))
         {
-            g_Log.Event(LOGM_INIT|LOGL_ERROR, "Invalid TimerFNumbers in %sdata.scp. Invalid UID (second value=%lu).\n", SPHERE_FILE, uidTest);
+            g_Log.Event(LOGM_INIT|LOGL_ERROR, "Invalid TimerFNumbers in %sdata.scp. Invalid UID (second value=%s).\n", SPHERE_FILE, ppVal[1]);
             errno = oldErrno;
             return -1;
         }
-        uint uid = (uint)uidTest;
+		const uint uid = (uint)uidTest;
 
         errno = 0;
-        int elapsed = (int)std::strtol(ppVal[2], nullptr, 10);
+		int64 elapsed = (int64)std::strtoll(ppVal[2], nullptr, 10);
         if (errno == ERANGE)
         {
-            g_Log.Event(LOGM_INIT|LOGL_ERROR, "Invalid TimerFNumbers in %sdata.scp. Invalid elapsed time (third value=%d).\n", SPHERE_FILE, elapsed);
+            g_Log.Event(LOGM_INIT|LOGL_ERROR, "Invalid TimerFNumbers in %sdata.scp. Invalid elapsed time (third value=%s).\n", SPHERE_FILE, ppVal[2]);
             errno = oldErrno;
             return -1;
         }
         errno = oldErrno;
 
-        if (tf == nullptr)
-        {
-            // A TimerFCall wasn't called before this TimerFNumbers, so tf doesn't contain a valid TimedFunction object.
-            g_Log.Event(LOGM_INIT|LOGL_ERROR, "Invalid Timerf in %sdata.scp. Each TimerFCall and TimerFNumbers pair must be in that order.\n", SPHERE_FILE);
-            return -1;
-        }
-        tf->elapsed = elapsed;
-        tf->uid.SetPrivateUID(uid);
-        m_timedFunctions[tick].emplace_back(tf);
-        tf = nullptr;
-	}
-	else if ( !strnicmp( pszName, "TimerFCall", 11 ) )
-	{
-		bool isNew = false;
-		if ( tf == nullptr )
+		if (tick < TF_TICK_MAGIC_NUMBER)
 		{
-			tf = new TimedFunction;
-			isNew = true;
+			// It's a 0.56 save file. Convert this timeout from ticks (tenths of second) in milliseconds.
+			elapsed *= MSECS_PER_TENTH;
 		}
-		Str_CopyLimitNull( tf->funcname, pszVal, sizeof(tf->funcname) );
-
-		if ( !isNew )
-        {
-			g_Log.Event( LOGM_INIT|LOGL_ERROR, "Invalid Timerf in %sdata.scp. Each TimerFCall and TimerFNumbers pair must be in that order.\n", SPHERE_FILE );
-            return -1;
-        }
+		Add(CUID(uid), elapsed, _strLoadBufferCommand.c_str());
+		_strLoadBufferCommand[0] = '\0';
+		_strLoadBufferNumbers[0] = '\0';
 	}
 
 	return 0;
@@ -327,17 +215,13 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
 void CTimedFunctionHandler::r_Write( CScript & s )
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::r_Write");
-	s.WriteKeyFormat( "CurTick", "%d", m_curTick );
-	for ( int tick = 0; tick < TICKS_PER_SEC; ++tick )
+	for (std::unique_ptr<CTimedFunction> const& tf : _timedFunctions)
 	{
-		for ( auto it = m_timedFunctions[tick].begin(), end = m_timedFunctions[tick].end(); it != end; ++it )
+		const CUID& uid = tf->GetUID();
+		if (uid.IsValidUID())
 		{
-			TimedFunction* tf = *it;
-			if ( tf->uid.IsValidUID() )
-			{
-				s.WriteKeyFormat( "TimerFCall", "%s", tf->funcname );
-				s.WriteKeyFormat( "TimerFNumbers", "%d,%u,%d", tick, tf->uid.GetObjUID(), tf->elapsed );
-			}
+			s.WriteKeyFormat("TimerFCall", "%s", tf->GetCommand());
+			s.WriteKeyFormat("TimerFNumbers", TF_TICK_MAGIC_NUMBER_STR ",%u,%d", uid.GetObjUID(), tf->GetTimerDiff());
 		}
 	}
 }

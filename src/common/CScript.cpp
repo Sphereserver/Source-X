@@ -920,13 +920,13 @@ void _cdecl CScript::WriteKeyFormat( lpctstr ptcKey, lpctstr pszVal, ... )
 	va_end( vargs );
 }
 
-void CScript::WriteKeyVal( lpctstr ptcKey, int64 dwVal )
+void CScript::WriteKeyVal( lpctstr ptcKey, int64 iVal )
 {
-	WriteKeyFormat( ptcKey, "%" PRId64 , dwVal );
+	WriteKeyFormat( ptcKey, "%" PRId64 , iVal);
 }
 
-void CScript::WriteKeyHex( lpctstr ptcKey, int64 dwVal )
+void CScript::WriteKeyHex( lpctstr ptcKey, int64 iVal )
 {
-	WriteKeyFormat( ptcKey, "0%" PRIx64 , dwVal );
+	WriteKeyFormat( ptcKey, "0%" PRIx64 , iVal );
 }
 

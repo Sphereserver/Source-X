@@ -114,7 +114,7 @@ private:
 
 	// Ticking world objects
 	friend class CWorldTickingList;
-	friend class CTimedFunctions;
+	friend class CWorldTimedFunctions;
 	CWorldTicker _Ticker;
 
 	// Map cache

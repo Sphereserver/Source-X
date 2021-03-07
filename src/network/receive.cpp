@@ -2198,14 +2198,14 @@ bool PacketGumpDialogRet::onReceive(CNetState* net)
 	{
 		const CResourceDef* resource = g_Cfg.ResourceGetDef(CResourceID(RES_DIALOG, RES_GET_INDEX(context)));
 		if (resource == nullptr)
-			g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "Gump context: %x (%s), UID: 0x%x, Button: %u.\n", context, "undefined resource", (dword)serial, button);
+			g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "[DEBUG_SCRIPTS] Gump context: %x (%s), UID: 0x%x, Button: %u.\n", context, "undefined resource", (dword)serial, button);
 		else
 		{
 			const CDialogDef* dialog = dynamic_cast<const CDialogDef*>(resource);
 			if (dialog == nullptr)
-				g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "Gump context: %x (%s), UID: 0x%x, Button: %u.\n", context, "undefined dialog", (dword)serial, button);
+				g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "[DEBUG_SCRIPTS] Gump context: %x (%s), UID: 0x%x, Button: %u.\n", context, "undefined dialog", (dword)serial, button);
 			else
-				g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "Gump context: %x (%s), UID: 0x%x, Button: %u.\n", context, (lpctstr)dialog->GetName(), (dword)serial, button);
+				g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "[DEBUG_SCRIPTS] Gump context: %x (%s), UID: 0x%x, Button: %u.\n", context, dialog->GetName(), (dword)serial, button);
 		}
 	}
 #endif

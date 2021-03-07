@@ -194,7 +194,7 @@ void CWorldTicker::Tick()
 
     EXC_SET_BLOCK("Once per tick stuff");
     // Do this once per tick.
-    // Update status flags from objects, update current tick.
+    //  Update status flags from objects, update current tick.
     if (_iLastTickDone <= _pWorldClock->GetCurrentTick())
     {
         ++_iLastTickDone;   // Update current tick.
@@ -234,13 +234,6 @@ void CWorldTicker::Tick()
 
             vecObjs.clear();
         }
-
-        // TimerF
-        {
-            EXC_TRYSUB("Tick::TimerF");
-            _TimedFunctions.OnTick();
-            EXC_CATCHSUB("CTimedFunctionHandler");
-        }
     }
 
 
@@ -249,7 +242,7 @@ void CWorldTicker::Tick()
     // Items, Chars ... Everything relying on CTimedObject (excepting CObjBase, which inheritance is only virtual)
     int64 iCurTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
 
-    EXC_SET_BLOCK("WorldObjects");
+    EXC_SET_BLOCK("TimedObjects");
     {
         const ProfileTask timersTask(PROFILE_TIMERS);
         {
@@ -306,18 +299,22 @@ void CWorldTicker::Tick()
             EXC_CATCHSUB("");
         }
 
-        lpctstr ptcSubDesc = TSTRING_NULL;
+        lpctstr ptcSubDesc;
         for (void* pObjVoid : vecObjs)    // Loop through all msecs stored, unless we passed the timestamp.
         {
+            ptcSubDesc = "Generic";
+
             EXC_TRYSUB("Timed Object Tick");
             EXC_SETSUB_BLOCK("Elapsed");
-            ptcSubDesc = "Generic";
 
             CTimedObject* pObj = static_cast<CTimedObject*>(pObjVoid);
             const PROFILE_TYPE profile = pObj->GetProfileType();
             const ProfileTask  profileTask(profile);
 
-            bool fRemove = true;    // Default to true, so if any error occurs it gets deleted for safety.
+            // Default to true, so if any error occurs it gets deleted for safety
+            //  (valid only for classes having the Delete method, which, for everyone to know, does NOT destroy the object).
+            bool fDelete = true;
+
             switch (profile)
             {
                 case PROFILE_ITEMS:
@@ -331,13 +328,13 @@ void CWorldTicker::Tick()
                         ASSERT(pObjTop);
                         CChar* pChar = dynamic_cast<CChar*>(pObjTop);
                         ASSERT(pChar);
-                        fRemove = !pChar->OnTickEquip(pItem);
+                        fDelete = !pChar->OnTickEquip(pItem);
                         break;
                     }
                     else
                     {
                         ptcSubDesc = "Item";
-                        fRemove = (pItem->OnTick() == false);
+                        fDelete = (pItem->OnTick() == false);
                         break;
                     }
                 }
@@ -348,7 +345,7 @@ void CWorldTicker::Tick()
                     ptcSubDesc = "Char";
                     CChar* pChar = dynamic_cast<CChar*>(pObj);
                     ASSERT(pChar);
-                    fRemove = !pChar->OnTick();
+                    fDelete = !pChar->OnTick();
                     if (pChar->m_pNPC && !pObj->IsTimerSet())
                     {
                         pObj->SetTimeoutS(3);   //3 seconds timeout to keep NPCs 'alive'
@@ -359,7 +356,7 @@ void CWorldTicker::Tick()
                 case PROFILE_SECTORS:
                 {
                     ptcSubDesc = "Sector";
-                    fRemove = false;    // sectors should NEVER be deleted.
+                    fDelete = false;    // sectors should NEVER be deleted.
                     pObj->OnTick();
                 }
                 break;
@@ -367,30 +364,38 @@ void CWorldTicker::Tick()
                 case PROFILE_MULTIS:
                 {
                     ptcSubDesc = "Multi";
-                    fRemove = !pObj->OnTick();
+                    fDelete = !pObj->OnTick();
                 }
                 break;
 
                 case PROFILE_SHIPS:
                 {
                     ptcSubDesc = "ItemShip";
-                    fRemove = !pObj->OnTick();
+                    fDelete = !pObj->OnTick();
+                }
+                break;
+
+                case PROFILE_TIMEDFUNCTIONS:
+                {
+                    ptcSubDesc = "TimedFunction";
+                    fDelete = false;
+                    pObj->OnTick();
                 }
                 break;
 
                 default:
                 {
                     ptcSubDesc = "Default";
-                    fRemove = !pObj->OnTick();
+                    fDelete = !pObj->OnTick();
                 }
                 break;
             }
 
-            if (fRemove)
+            if (fDelete)
             {
                 EXC_SETSUB_BLOCK("Delete");
                 CObjBase* pObjBase = dynamic_cast<CObjBase*>(pObj);
-                ASSERT(pObjBase);
+                ASSERT(pObjBase); // Only CObjBase-derived objects have the Delete method, and should be Delete-d.
                 pObjBase->Delete();
             }
 

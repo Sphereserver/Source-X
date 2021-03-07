@@ -4155,7 +4155,7 @@ void CItem::ConvertBolttoCloth()
 		if ( pBaseDef == nullptr )
 			continue;
 
-        uint iTotalAmount = iOutAmount * pDefCloth->m_BaseResources[i].GetResQty();
+        int64 iTotalAmount = iOutAmount * pDefCloth->m_BaseResources[i].GetResQty();
         
         CItem* pItemNew = nullptr;
         while (iTotalAmount > 0)

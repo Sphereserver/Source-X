@@ -13,13 +13,14 @@
 #include "components/CCPropsItemWeapon.h"
 #include "components/CCSpawn.h"
 #include "components/CCItemDamageable.h"
-#include "CTimedFunctions.h"
 #include "CSector.h"
 #include "CServer.h"
 #include "CWorld.h"
 #include "CWorldComm.h"
 #include "CWorldMap.h"
 #include "CWorldTickingList.h"
+#include "CWorldTimedFunctions.h"
+#include "CTimedFunction.h"
 #include "spheresvr.h"
 #include "triggers.h"
 #include "CObjBase.h"
@@ -164,7 +165,7 @@ void CObjBase::DeleteCleanup(bool fForce)
 	CEntity::Delete(fForce);
 	CWorldTickingList::DelObjStatusUpdate(this);
 	CWorldTickingList::DelObjSingle(this);
-	CTimedFunctions::Erase(GetUID());
+	CWorldTimedFunctions::ClearUID(GetUID());
 }
 
 bool CObjBase::Delete(bool fForce)
@@ -1367,7 +1368,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 					return false;
 				ptcKey += 9;
 				//sVal.FormatVal( (g_World._TimedFunctions.IsTimer(GetUID(),ptcKey)) ? 1 : 0 );
-				sVal.FormatVal( CTimedFunctions::IsTimer(GetUID(),ptcKey) );
+				sVal.FormatLLVal( CWorldTimedFunctions::IsTimer(GetUID(), ptcKey) );
                 break;
 			}
 			break;
@@ -2007,10 +2008,6 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
                     else
                         sLocArgs += ppLocArgs[y];
                 }
-
-                if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
-                    g_Log.EventDebug("SCRIPT: addcliloc(%u,'%s')\n", clilocid, sLocArgs.GetBuffer());
-
                 m_TooltipData.emplace_back(std::make_unique<CClientTooltip>(clilocid, sLocArgs.GetBuffer()));
             }
             break;
@@ -2025,9 +2022,6 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
         			CClientTooltip* ct = m_TooltipData[i].get();
         			if (ct->m_clilocid == clilocid)
         			{
-						if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
-							g_Log.EventDebug("SCRIPT: removecliloc(%u)\n", clilocid);
-
         				m_TooltipData.erase(m_TooltipData.begin() + i);
         				//I did a break, but if same tooltip added as script and default together there could be more than one for same cliloc so we need to push to check if there is another.
         				//break;
@@ -2059,9 +2053,6 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
                 	CClientTooltip* ct = m_TooltipData[i].get();
                 	if (ct->m_clilocid == clilocid)
                 	{
-		                if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
-        	    	        g_Log.EventDebug("SCRIPT: replacecliloc(%u,'%s')\n", clilocid, sLocArgs.GetBuffer());
-
         	    	    m_TooltipData.erase(m_TooltipData.begin() + i);
         	    	    m_TooltipData.emplace(m_TooltipData.begin() + i, std::make_unique<CClientTooltip>(clilocid, sLocArgs.GetBuffer()));
 						break;
@@ -2086,21 +2077,25 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 				CChar *pChar = dynamic_cast<CChar *>(this);
 				CItem *pItem = dynamic_cast<CItem *>(this);
-				if ( pChar )
+				if (pChar)
+				{
 					pChar->OnTakeDamage((int)(piCmd[0]),
 						pCharSrc,
-						(iArgQty >= 1) ? (DAMAGE_TYPE)(piCmd[1]) : DAMAGE_HIT_BLUNT|DAMAGE_GENERAL,
-						(iArgQty >= 3) ? (int)(piCmd[3]) : 0,		// physical damage %
-						(iArgQty >= 4) ? (int)(piCmd[4]) : 0,		// fire damage %
-						(iArgQty >= 5) ? (int)(piCmd[5]) : 0,		// cold damage %
-						(iArgQty >= 6) ? (int)(piCmd[6]) : 0,		// poison damage %
-						(iArgQty >= 7) ? (int)(piCmd[7]) : 0			// energy damage %
+						(iArgQty >= 1) ? (DAMAGE_TYPE)(piCmd[1]) : DAMAGE_HIT_BLUNT | DAMAGE_GENERAL,
+						(iArgQty >= 3) ? (int)(piCmd[3]) : 0,	// physical damage %
+						(iArgQty >= 4) ? (int)(piCmd[4]) : 0,	// fire damage %
+						(iArgQty >= 5) ? (int)(piCmd[5]) : 0,	// cold damage %
+						(iArgQty >= 6) ? (int)(piCmd[6]) : 0,	// poison damage %
+						(iArgQty >= 7) ? (int)(piCmd[7]) : 0	// energy damage %
 					);
-				else if ( pItem )
+				}
+				else if (pItem)
+				{
 					pItem->OnTakeDamage((int)(piCmd[0]),
 						pCharSrc,
-						(iArgQty >= 1) ? (DAMAGE_TYPE)(piCmd[1]) : DAMAGE_HIT_BLUNT|DAMAGE_GENERAL
+						(iArgQty >= 1) ? (DAMAGE_TYPE)(piCmd[1]) : DAMAGE_HIT_BLUNT | DAMAGE_GENERAL
 					);
+				}
 			}
 			break;
 
@@ -2235,10 +2230,11 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_MSG:
 			{
 				EXC_SET_BLOCK("MESSAGE or MSG");
+				lpctstr ptcArg = s.GetArgStr();
 				if ( pCharSrc == nullptr )
-					UpdateObjMessage(s.GetArgStr(), s.GetArgStr(), nullptr, HUE_TEXT_DEF, TALKMODE_SAY);
+					UpdateObjMessage(ptcArg, ptcArg, nullptr, HUE_TEXT_DEF, TALKMODE_SAY);
 				else
-					pCharSrc->ObjMessage(s.GetArgStr(), this);
+					pCharSrc->ObjMessage(ptcArg, this);
 			}
 			break;
 		case OV_MESSAGEUA:
@@ -2578,38 +2574,49 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			break;
 
 		case OV_TIMERF:
+		case OV_TIMERFMS:
 			{
-				EXC_SET_BLOCK("TIMERF");
-				if ( !strnicmp( s.GetArgStr(), "CLEAR", 5 ) )
+				EXC_SET_BLOCK("TIMERF(MS)");
+				const bool fSeconds = (index == OV_TIMERF);
+				lpctstr ptcArgStr = s.GetArgStr();
+				
+				if ( !strnicmp(ptcArgStr, "CLEAR", 5 ) )
 				{
-					CTimedFunctions::Erase(GetUID());
+					CWorldTimedFunctions::ClearUID(GetUID());
 				}
-				else if ( !strnicmp( s.GetArgStr(), "STOP", 4 ) )
+				else if ( !strnicmp(ptcArgStr, "STOP", 4 ) )
 				{
-					lpctstr strFunction = s.GetArgStr()+5;
+					lpctstr strFunction = ptcArgStr + 5;
 					GETNONWHITESPACE(strFunction);
-					CTimedFunctions::Stop(GetUID(),strFunction);
+					CWorldTimedFunctions::Stop(GetUID(), strFunction);
 				}
 				else
 				{
-					char *p = s.GetArgRaw();
-					int el = Exp_GetVal(p);
-					if ( el < 0 )
+					tchar *ptcCmd = s.GetArgRaw();
+
+					// Extract the timeout and advance the string pointer to the command position
+					int64 iTimeout = Exp_Get64Val(ptcCmd);
+
+					if (iTimeout < 0)
 					{
-						g_Log.EventError("TimerF function invalid parameter '%i'.\n", el);
+						g_Log.EventError("Timed function: invalid parameter '%" PRId64 "'.\n", iTimeout);
 						return false;
 					}
 					else
 					{
-						SKIP_ARGSEP(p);
-						if ( !*p || ( strlen(p) >= 1024 ))
+						SKIP_ARGSEP(ptcCmd);
+						if ( !(*ptcCmd) || (strlen(ptcCmd) >= CTimedFunction::kuiCommandSize) )
 						{
-							g_Log.EventError("TimerF function name empty or args too long - total length must be less than 1024 characters\n");
+							g_Log.EventError("TimerF function name empty or args too long - total length must be less than %u characters.\n", CTimedFunction::kuiCommandSize);
 							return false;
 						}
 						else
 						{
-							CTimedFunctions::Add(GetUID(), el, p);
+							if (fSeconds)
+							{
+								iTimeout *= MSECS_PER_SEC;
+							}
+							CWorldTimedFunctions::Add(GetUID(), iTimeout, ptcCmd);
 						}
 					}
 				}

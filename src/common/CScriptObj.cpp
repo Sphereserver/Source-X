@@ -14,7 +14,7 @@
 #include "../game/CServer.h"
 #include "../game/CWorld.h"
 #include "../game/CWorldMap.h"
-#include "../game/CTimedFunctions.h"
+#include "../game/CWorldTimedFunctions.h"
 #include "../sphere/ProfileTask.h"
 #include "crypto/CBCrypt.h"
 #include "crypto/CMD5.h"
@@ -815,9 +815,6 @@ badcmd:
 			tchar* buf = Str_GetTemp();
 			Str_CopyLimitNull(buf, ppArgs[2] + iPos, (size_t)(iCnt + 1));
 
-			if (g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS)
-				g_Log.EventDebug("SCRIPT: strsub(%" PRId64 ",%" PRId64 ",'%s') -> '%s'\n", iPos, iCnt, ppArgs[2], buf);
-            
 			sVal = buf;
             }
             return true;
@@ -1095,9 +1092,6 @@ badcmd:
 					g_Log.EventWarn("MULDIV(%" PRId64 ",%" PRId64 ",%" PRId64 ") -> Dividing by '0'\n", iNum, iMul, iDiv);
 				else
 					iRes = IMulDivLL(iNum,iMul,iDiv);
-
-				if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
-					g_Log.EventDebug("SCRIPT: muldiv(%" PRId64 ",%" PRId64 ",%" PRId64 ") -> %" PRId64 "\n", iNum, iMul, iDiv, iRes);
 
 				sVal.FormatLLVal(iRes);
 			}
@@ -2579,7 +2573,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopGeneric(CScript& s, int iType, CTextConsol
 			char funcname[1024];
 			Str_CopyLimitNull(funcname, ptcArgs, sizeof(funcname));
 
-			TRIGRET_TYPE iRet = CTimedFunctions::Loop(funcname, LoopsMade, StartContext, s, pSrc, pArgs, pResult);
+			TRIGRET_TYPE iRet = CWorldTimedFunctions::Loop(funcname, LoopsMade, StartContext, s, pSrc, pArgs, pResult);
 			if ((iRet != TRIGRET_ENDIF) && (iRet != TRIGRET_CONTINUE))
 				return iRet;
 		}

@@ -3829,9 +3829,9 @@ void CChar::r_Write( CScript & s )
 	};
 	for (ushort j = 0; j < STAT_QTY; ++j)
 	{
-		const int uiRegen = Stats_GetRegenRate((STAT_TYPE)j); //we cannot use ushort here because by default REGENFOOD has a value higher than 65k.
-		if (uiRegen >= 1 && uiRegen != g_Cfg.m_iRegenRate[j])
-			s.WriteKeyVal(_ptcKeyRegen[j], uiRegen / MSECS_PER_SEC);
+		const int64 iRegen = Stats_GetRegenRate((STAT_TYPE)j); //we cannot use ushort here because by default REGENFOOD has a value higher than 65k.
+		if ((iRegen >= 1) && (iRegen != g_Cfg.m_iRegenRate[j]))
+			s.WriteKeyVal(_ptcKeyRegen[j], iRegen / MSECS_PER_SEC);
 	}
     static constexpr lpctstr _ptcKeyRegenVal[STAT_QTY] =
     {

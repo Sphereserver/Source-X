@@ -310,10 +310,10 @@ game/CServerDef.cpp
 game/CServerDef.h
 game/CServerTime.cpp
 game/CServerTime.h
+game/CTimedFunction.cpp
+game/CTimedFunction.h
 game/CTimedFunctionHandler.cpp
 game/CTimedFunctionHandler.h
-game/CTimedFunctions.cpp
-game/CTimedFunctions.h
 game/CTimedObject.cpp
 game/CTimedObject.h
 game/CWorld.cpp
@@ -333,6 +333,8 @@ game/CWorldTicker.cpp
 game/CWorldTicker.h
 game/CWorldTickingList.cpp
 game/CWorldTickingList.h
+game/CWorldTimedFunctions.cpp
+game/CWorldTimedFunctions.h
 game/game_enums.h
 game/game_macros.h
 game/spheresvr.cpp

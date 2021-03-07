@@ -6,7 +6,7 @@
 #ifndef _INC_CRESOURCEQTY_H
 #define _INC_CRESOURCEQTY_H
 
-#include "../sphere_library/CSTypedArray.h"
+#include "../sphere_library/CSTypedArray.h" // Needed for constants
 #include "CResourceID.h"
 
 
@@ -37,9 +37,9 @@ public:
     {
         return m_iQty;
     }
-    inline void SetResQty(int64 wQty)
+    inline void SetResQty(int64 iQuantity)
     {
-        m_iQty = wQty;
+        m_iQty = iQuantity;
     }
     inline bool Load( lptstr & arg )
     {
@@ -48,6 +48,7 @@ public:
     bool Load( lpctstr & pszCmds );
     size_t WriteKey( tchar * pszArgs, bool fQtyOnly = false, bool fKeyOnly = false ) const;
     size_t WriteNameSingle( tchar * pszArgs, int iQty = 0 ) const;
+
 public:
     CResourceQty() : m_iQty(0) { };
 };

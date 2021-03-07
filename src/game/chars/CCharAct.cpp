@@ -4256,7 +4256,7 @@ stopandret:
 
 TRIGRET_TYPE CChar::OnTrigger( CTRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
 {
-	ASSERT( trigger < CTRIG_QTY );
+	ASSERT( (trigger > CTRIG_AAAUNUSED) && (trigger < CTRIG_QTY) );
 	return OnTrigger( CChar::sm_szTrigName[trigger], pSrc, pArgs );
 }
 

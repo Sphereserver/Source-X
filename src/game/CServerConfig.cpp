@@ -25,7 +25,7 @@
 #include "uo_files/CUOTerrainInfo.h"
 #include "CServer.h"
 #include "CServerTime.h"
-#include "CTimedFunctions.h"
+#include "CWorldTimedFunctions.h"
 #include "CWorld.h"
 #include "CWorldGameTime.h"
 #include "CWorldMap.h"
@@ -3582,7 +3582,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		{
 			bool fQuoted = false;
             lpctstr ptcArg = pScript->GetArgStr( &fQuoted );
-			CTimedFunctions::Load( pScript->GetKey(), fQuoted, ptcArg );
+			CWorldTimedFunctions::Load( pScript->GetKey(), fQuoted, ptcArg );
 		}
 		return true;
 	case RES_TELEPORTERS:

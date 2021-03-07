@@ -47,8 +47,8 @@ private:
     StatusUpdatesList _ObjStatusUpdates;   // objects that need OnTickStatusUpdate called
 
     friend class CWorld;
-    friend class CTimedFunctions;
-    CTimedFunctionHandler _TimedFunctions; // TimedFunction Container/Wrapper
+    friend class CWorldTimedFunctions;
+    CTimedFunctionHandler _TimedFunctions; // CTimedFunction Container/Wrapper
 
     CWorldClock* _pWorldClock;
     int64        _iLastTickDone;  
