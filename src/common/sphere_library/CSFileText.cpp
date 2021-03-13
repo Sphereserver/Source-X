@@ -142,7 +142,7 @@ void CSFileText::Flush() const
 
 bool CSFileText::_IsEOF() const
 {
-    ADDTOCALLSTACK("CSFileText::_IsEOF");
+    //ADDTOCALLSTACK("CSFileText::_IsEOF");
 
     if ( !_IsFileOpen() )
         return true;
@@ -151,7 +151,7 @@ bool CSFileText::_IsEOF() const
 }
 bool CSFileText::IsEOF() const
 {
-    ADDTOCALLSTACK("CSFileText::IsEOF");
+    //ADDTOCALLSTACK("CSFileText::IsEOF");
     THREAD_SHARED_LOCK_RETURN(CSFileText::_IsEOF());
 }
 

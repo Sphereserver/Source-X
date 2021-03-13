@@ -34,7 +34,7 @@ struct CServerTime
 	/*
 	* @brief Get the time value in milliseconds.
 	*/
-	int64 GetTimeRaw() const;
+	int64 GetTimeRaw() const noexcept;
 
 	CServerTime operator+(int64 iTimeDiff) const noexcept;
 	CServerTime operator-(int64 iTimeDiff) const noexcept;

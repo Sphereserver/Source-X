@@ -415,38 +415,45 @@ bool CSectorBase::AddTeleport( CTeleport * pTeleport )
 	return true;
 }
 
-bool CSectorBase::IsFlagSet( dword dwFlag ) const
+bool CSectorBase::IsFlagSet( dword dwFlag ) const noexcept
 {
 	return (( m_dwFlags & dwFlag) ? true : false );
 }
 
 CPointMap CSectorBase::GetBasePoint() const
 {
-	ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetBasePoint");
+	// ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetBasePoint"); // It's commented because it's slow and this method is called VERY often!
 	// What is the coord base of this sector. upper left point.
 	const CSectorList* pSectors = CSectorList::Get();
+#if _DEBUG
 	ASSERT( m_index >= 0 && m_index < pSectors->GetSectorQty(m_map) );
+	// Again this method is called very often, so call the least functions possible and do the minimum amount of checks required
+#endif
     const int iCols = pSectors->GetSectorCols(m_map);
     const int iSize = pSectors->GetSectorSize(m_map);
-	CPointMap pt(
-        (short)((m_index % iCols) * iSize),
-		(short)((m_index / iCols) * iSize),
-		0,
-		m_map);
-	return pt;
+	
+	const int iQuot = (m_index % iCols), iRem = (m_index / iCols); // Help the compiler to optimize the division
+	return // Initializer list for CPointMap, it's the fastest way to return an object (requires less optimizations, which aren't used in debug build)
+	{
+		(short)(iQuot * iSize),	// x
+		(short)(iRem * iSize),	// y
+		0,						// z
+		m_map					// m
+	};
 }
 
-CRectMap CSectorBase::GetRect() const
+CRectMap CSectorBase::GetRect() const noexcept
 {
-    ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetRect");
+    //ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetRect"); // It's commented because it's slow and this method is called VERY often!
 	// Get a rectangle for the sector.
 	const CPointMap& pt = GetBasePoint();
     const int iSectorSize = CSectorList::Get()->GetSectorSize(pt.m_map);
-	CRectMap rect;
-	rect.m_left = pt.m_x;
-	rect.m_top = pt.m_y;
-	rect.m_right = pt.m_x + iSectorSize;	// East
-	rect.m_bottom = pt.m_y + iSectorSize;	// South
-	rect.m_map = pt.m_map;
-	return rect;
+	return // Initializer list for CRectMap, it's the fastest way to return an object (requires less optimizations, which aren't used in debug build)
+	{
+		pt.m_x,					// left
+		pt.m_y,					// yop
+		pt.m_x + iSectorSize,	// right: East
+		pt.m_y + iSectorSize,	// bottom: South
+		pt.m_map				// map
+	};
 }

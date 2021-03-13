@@ -28,7 +28,8 @@ public:
 		int _iSectorQty;      // how much sectors are in a map
 	};
 
-	std::array<MapSectorsData, MAP_SUPPORTED_QTY> _SectorData;
+	//std::array<MapSectorsData, MAP_SUPPORTED_QTY> _SectorData; // Use plain C-style vectors, to remove even the minimum overhead of std::array methods
+	MapSectorsData _SectorData[MAP_SUPPORTED_QTY];
 	bool _fInitialized;
 
 public:

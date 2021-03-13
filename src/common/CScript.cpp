@@ -847,53 +847,68 @@ bool _cdecl CScript::WriteSection( lpctstr pszSection, ... )
 	return true;
 }
 
-bool CScript::WriteKey( lpctstr ptcKey, lpctstr pszVal )
+bool CScript::WriteKeySingle(lptstr ptcKey)
 {
-	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKey");
-	if ( ptcKey == nullptr || ptcKey[0] == '\0' )
+	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKeySingle");
+	if (ptcKey == nullptr || ptcKey[0] == '\0')
 	{
 		return false;
 	}
 
 	tchar ch = '\0';
-	tchar * pszSep;
-	if ( pszVal == nullptr || pszVal[0] == '\0' )
+	tchar* ptcSep = strpbrk(ptcKey, "\n\r");
+
+	if (ptcSep != nullptr)
 	{
-		pszSep = const_cast<tchar*>(strchr( ptcKey, '\n' ));
-		if ( pszSep == nullptr )
-			pszSep = const_cast<tchar*>(strchr( ptcKey, '\r' )); // acts like const_cast
-
-		if ( pszSep != nullptr )
-		{
-			g_Log.Event( LOGL_WARN|LOGM_CHEAT, "carriage return in key (book?) - truncating\n" );
-			ch = *pszSep;
-			*pszSep	= '\0';
-		}
-
-		// Books are like this. No real keys.
-		Printf( "%s\n", ptcKey );
-
-		if ( pszSep != nullptr )
-			*pszSep	= ch;
+		g_Log.Event(LOGL_WARN | LOGM_CHEAT, "Carriage return in key string (book?) - truncating.\n");
+		ch = *ptcSep;
+		*ptcSep = '\0';
 	}
-	else
+
+	// Books are like this. No real keys.
+	// Write: "KEY\n"
+	size_t uiStrLen = strlen(ptcKey);
+	ptcKey[uiStrLen++] = '\n'; // No need for string terminator, since i'm explicitly passing the number of bytes to write
+	Write(ptcKey, int(uiStrLen));
+
+	if (ptcSep != nullptr)
+		*ptcSep = ch;
+
+	return true;
+}
+
+bool CScript::WriteKeyVal(lpctstr ptcKey, lpctstr ptcVal)
+{
+	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKeyVal");
+	if (ptcKey == nullptr || ptcKey[0] == '\0')
 	{
-		pszSep = const_cast<tchar*>(strchr( pszVal, '\n' ));
-		if ( pszSep == nullptr )
-			pszSep = const_cast<tchar*>(strchr( pszVal, '\r' )); // acts like const_cast
-
-		if ( pszSep != nullptr )
-		{
-			g_Log.Event( LOGL_WARN|LOGM_CHEAT, "carriage return in key value - truncating\n" );
-			ch = *pszSep;
-			*pszSep	= '\0';
-		}
-
-		Printf( "%s=%s\n", ptcKey, pszVal );
-
-		if ( pszSep != nullptr )
-			*pszSep	= ch;
+		return false;
 	}
+	ASSERT(ptcVal);
+
+#ifdef _DEBUG
+	ASSERT(nullptr == strpbrk(ptcKey, "\n\r"));	// Ensure that the Key value is always valid!
+#endif
+
+	if (const tchar* ptcSep = strpbrk(ptcVal, "\n\r"))
+	{
+		g_Log.Event(LOGL_WARN | LOGM_CHEAT, "Carriage return in value string - truncating.\n");
+		lptstr ptcTruncated = Str_GetTemp();
+		Str_CopyLimitNull(ptcTruncated, ptcVal, size_t(ptcSep - ptcVal));
+		ptcVal = ptcTruncated;
+	}
+
+	// Write: "KEY=VAL\n"
+	_sBuffer2.resize(SCRIPT_MAX_LINE_LEN);
+	const size_t uiCapacity = _sBuffer2.capacity();
+	lptstr ptcBuf = _sBuffer2.data();
+
+	size_t uiStrLen = Str_CopyLimitNull(ptcBuf, ptcKey, uiCapacity);
+	ptcBuf[uiStrLen++] = '=';
+	ptcBuf[uiStrLen]   = '\0'; // Needed by Str_ConcatLimitNull
+	uiStrLen += Str_ConcatLimitNull(ptcBuf + uiStrLen, ptcVal, uiCapacity - uiStrLen);
+	ptcBuf[uiStrLen++] = '\n';
+	Write(ptcBuf, int(uiStrLen));
 
 	return true;
 }
@@ -905,28 +920,29 @@ bool CScript::WriteKey( lpctstr ptcKey, lpctstr pszVal )
 //	va_list vargs;
 //	va_start( vargs, pszVal );
 //	vsprintf(pszTemp, pszVal, vargs);
-//	WriteKey(ptcKey, pszTemp);
+//	WriteKeyVal(ptcKey, pszTemp);
 //	va_end( vargs );
 //}
 
-void _cdecl CScript::WriteKeyFormat( lpctstr ptcKey, lpctstr pszVal, ... )
+void _cdecl CScript::WriteKeyFormat(lptstr ptcKey, lptstr pszVal, ...)
 {
 	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKeyFormat");
-	TemporaryString tsTemp;
 	va_list vargs;
 	va_start( vargs, pszVal );
-	vsnprintf(tsTemp.buffer(), tsTemp.capacity(), pszVal, vargs);
-	WriteKey(ptcKey, tsTemp.buffer());
+	vsnprintf(const_cast<tchar*>(_sBuffer1.GetBuffer()), _sBuffer1.GetCapacity(), pszVal, vargs);
+	WriteKeyVal(ptcKey, _sBuffer1.GetBuffer());
 	va_end( vargs );
 }
 
-void CScript::WriteKeyVal( lpctstr ptcKey, int64 iVal )
+void CScript::WriteKeyVal(lpctstr ptcKey, int64 iVal )
 {
-	WriteKeyFormat( ptcKey, "%" PRId64 , iVal);
+	Str_FromLL(iVal, const_cast<tchar*>(_sBuffer1.GetBuffer()), _sBuffer1.GetCapacity(), 10);
+	WriteKeyVal(ptcKey, _sBuffer1.GetBuffer());
 }
 
 void CScript::WriteKeyHex( lpctstr ptcKey, int64 iVal )
 {
-	WriteKeyFormat( ptcKey, "0%" PRIx64 , iVal );
+	Str_FromLL(iVal, const_cast<tchar*>(_sBuffer1.GetBuffer()), _sBuffer1.GetCapacity(), 16);
+	WriteKeyVal(ptcKey, _sBuffer1.GetBuffer());
 }
 

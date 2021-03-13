@@ -658,7 +658,7 @@ void CRegion::r_WriteBody( CScript & s, lpctstr pszPrefix )
 		CSString sVal;
 		m_Events.WriteResourceRefList( sVal );
 		snprintf(tsTemp.buffer(), tsTemp.capacity(), "%sEVENTS", pszPrefix);
-		s.WriteKey(tsTemp.buffer(), sVal);
+		s.WriteKeyVal(tsTemp.buffer(), sVal);
 	}
 
 	// Write New variables
@@ -674,10 +674,10 @@ void CRegion::r_WriteModified( CScript &s )
 {
 	ADDTOCALLSTACK("CRegion::r_WriteModified");
 	if ( m_iModified & REGMOD_NAME )
-		s.WriteKey("NAME", GetName() );
+		s.WriteKeyVal("NAME", GetName() );
 
 	if ( m_iModified & REGMOD_GROUP )
-		s.WriteKey("GROUP", m_sGroup );
+		s.WriteKeyVal("GROUP", m_sGroup );
 
 	if ( m_iModified & REGMOD_FLAGS )
 	{
@@ -688,7 +688,7 @@ void CRegion::r_WriteModified( CScript &s )
 	{
 		CSString sVal;
 		m_Events.WriteResourceRefList( sVal );
-		s.WriteKey( "EVENTS", sVal );
+		s.WriteKeyVal( "EVENTS", sVal );
 	}
 }
 
@@ -698,22 +698,22 @@ void CRegion::r_WriteBase( CScript &s )
 	ADDTOCALLSTACK("CRegion::r_WriteBase");
     lpctstr ptcName = GetName();
 	if ( ptcName && ptcName[0] )
-		s.WriteKey("NAME", ptcName);
+		s.WriteKeyVal("NAME", ptcName);
 
 	if ( ! m_sGroup.IsEmpty() )
-		s.WriteKey("GROUP", static_cast<lpctstr>(m_sGroup));
+		s.WriteKeyVal("GROUP", static_cast<lpctstr>(m_sGroup));
 
 	CRegion::r_WriteBody( s, "" );
 
 	if ( m_pt.IsValidPoint())
-		s.WriteKey("P", m_pt.WriteUsed());
+		s.WriteKeyVal("P", m_pt.WriteUsed());
 	else if ( m_pt.m_map )
 		s.WriteKeyVal("MAP", m_pt.m_map);
 
 	size_t iQty = GetRegionRectCount();
 	for ( size_t i = 0; i < iQty; ++i )
 	{
-		s.WriteKey("RECT", GetRegionRect(i).Write() );
+		s.WriteKeyVal("RECT", GetRegionRect(i).Write() );
 	}
 }
 

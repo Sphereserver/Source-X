@@ -753,7 +753,7 @@ void CCChampion::r_Write(CScript & s)
         return;
     }
     s.WriteKeyVal("ACTIVE", _fActive);
-    s.WriteKey("CHAMPIONID", g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _idChampion)));
+    s.WriteKeyVal("CHAMPIONID", g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _idChampion)));
     s.WriteKeyVal("CHAMPIONSUMMONED", _fChampionSummoned);
     s.WriteKeyVal("CANDLESNEXTLEVEL", _iCandlesNextLevel);
     s.WriteKeyVal("CANDLESNEXTRED", _iCandlesNextRed);
@@ -768,7 +768,7 @@ void CCChampion::r_Write(CScript & s)
 
     if (_idSpawn.IsValidResource())
     {
-        s.WriteKey("CHAMPIONSPAWN", g_Cfg.ResourceGetName(_idSpawn));
+        s.WriteKeyVal("CHAMPIONSPAWN", g_Cfg.ResourceGetName(_idSpawn));
     }
     for (const CUID& uidCandle : _pRedCandles)
     {
@@ -807,7 +807,7 @@ void CCChampion::r_Write(CScript & s)
             std::stringstream finalStream;
             finalStream << "npcgroup[" << (int)group.first << "]";
             
-            s.WriteKey(finalStream.str().c_str(), groupString.c_str());
+            s.WriteKeyVal(finalStream.str().c_str(), groupString.c_str());
         }
     }
     return;

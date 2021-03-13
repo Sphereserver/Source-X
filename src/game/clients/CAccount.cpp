@@ -1470,7 +1470,7 @@ void CAccount::r_Write(CScript &s)
 
 	if ( GetPrivLevel() != PLEVEL_Player )
 	{
-		s.WriteKey( "PLEVEL", sm_szPrivLevels[ GetPrivLevel() ] );
+		s.WriteKeyVal( "PLEVEL", sm_szPrivLevels[ GetPrivLevel() ] );
 	}
 	if ( m_PrivFlags != PRIV_DETAIL )
 	{
@@ -1494,11 +1494,11 @@ void CAccount::r_Write(CScript &s)
 	}
 	if ( ! m_sCurPassword.IsEmpty())
 	{
-		s.WriteKey( "PASSWORD", GetPassword() );
+		s.WriteKeyVal( "PASSWORD", GetPassword() );
 	}
 	if ( ! m_sNewPassword.IsEmpty())
 	{
-		s.WriteKey( "NEWPASSWORD", GetNewPassword() );
+		s.WriteKeyVal( "NEWPASSWORD", GetNewPassword() );
 	}
 	if ( _iTimeConnectedTotal )
 	{
@@ -1525,28 +1525,28 @@ void CAccount::r_Write(CScript &s)
 
 	if ( _dateConnectedFirst.IsTimeValid())
 	{
-		s.WriteKey( "FIRSTCONNECTDATE", _dateConnectedFirst.Format(nullptr));
+		s.WriteKeyVal( "FIRSTCONNECTDATE", _dateConnectedFirst.Format(nullptr));
 	}
 	if ( m_First_IP.IsValidAddr() )
 	{
-		s.WriteKey( "FIRSTIP", m_First_IP.GetAddrStr());
+		s.WriteKeyVal( "FIRSTIP", m_First_IP.GetAddrStr());
 	}
 
 	if ( _dateConnectedLast.IsTimeValid())
 	{
-		s.WriteKey( "LASTCONNECTDATE", _dateConnectedLast.Format(nullptr));
+		s.WriteKeyVal( "LASTCONNECTDATE", _dateConnectedLast.Format(nullptr));
 	}
 	if ( m_Last_IP.IsValidAddr() )
 	{
-		s.WriteKey( "LASTIP", m_Last_IP.GetAddrStr());
+		s.WriteKeyVal( "LASTIP", m_Last_IP.GetAddrStr());
 	}
 	if ( ! m_sChatName.IsEmpty())
 	{
-		s.WriteKey( "CHATNAME", static_cast<lpctstr>(m_sChatName));
+		s.WriteKeyVal( "CHATNAME", static_cast<lpctstr>(m_sChatName));
 	}
 	if ( m_lang.IsDef())
 	{
-		s.WriteKey( "LANG", m_lang.GetStr());
+		s.WriteKeyVal( "LANG", m_lang.GetStr());
 	}
 
 	// Write New variables

@@ -108,9 +108,9 @@ bool CRegionBase::AddRegionRect( const CRectMap & rect )
 	return true;
 }
 
-bool CRegionBase::IsOverlapped( const CRectMap & rect ) const
+bool CRegionBase::IsOverlapped( const CRectMap & rect ) const noexcept
 {
-	ADDTOCALLSTACK("CRegionBase::IsOverlapped");
+	// ADDTOCALLSTACK("CRegionBase::IsOverlapped"); // It's called very frequently on server startup, so avoid this call
 	// Does the region overlap this rectangle.
 	if ( !m_rectUnion.IsOverlapped(rect) )
 		return false;

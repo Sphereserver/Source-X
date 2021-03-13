@@ -16,9 +16,9 @@
 //**********************************************
 // -CResourceQty
 
-size_t CResourceQty::WriteKey( tchar * pszArgs, bool fQtyOnly, bool fKeyOnly ) const
+size_t CResourceQty::WriteKeyVal( tchar * pszArgs, bool fQtyOnly, bool fKeyOnly ) const
 {
-    ADDTOCALLSTACK("CResourceQty::WriteKey");
+    ADDTOCALLSTACK("CResourceQty::WriteKeyVal");
     size_t i = 0;
     if ( (GetResQty() || fQtyOnly) && !fKeyOnly )
         i = sprintf( pszArgs, "%" PRId64 " ", GetResQty());
@@ -235,7 +235,7 @@ void CResourceQtyArray::WriteKeys( tchar * pszArgs, size_t index, bool fQtyOnly,
         {
             pszArgs += sprintf( pszArgs, "," );
         }
-        pszArgs += (*this)[i].WriteKey( pszArgs, fQtyOnly, fKeyOnly );
+        pszArgs += (*this)[i].WriteKeyVal( pszArgs, fQtyOnly, fKeyOnly );
     }
     *pszArgs = '\0';
 }

@@ -82,17 +82,22 @@ lpctstr const CPointBase::sm_szLoadKeys[PT_QTY+1] =
 	nullptr
 };
 
-bool CPointBase::operator== ( const CPointBase & pt ) const
+CPointBase::CPointBase(short x, short y, char z, uchar map) noexcept :
+	m_x(x), m_y(y), m_z(z), m_map(map)
+{
+}
+
+bool CPointBase::operator== ( const CPointBase & pt ) const noexcept
 {
 	return( m_x == pt.m_x && m_y == pt.m_y && m_z == pt.m_z && m_map == pt.m_map );
 }
 
-bool CPointBase::operator!= ( const CPointBase & pt ) const
+bool CPointBase::operator!= ( const CPointBase & pt ) const noexcept
 {
 	return ( ! ( *this == pt ));
 }
 
-const CPointBase& CPointBase::operator+= ( const CPointBase & pt )
+const CPointBase& CPointBase::operator+= ( const CPointBase & pt ) noexcept
 {
 	m_x += pt.m_x;
 	m_y += pt.m_y;
@@ -100,7 +105,7 @@ const CPointBase& CPointBase::operator+= ( const CPointBase & pt )
 	return( * this );
 }
 
-const CPointBase& CPointBase::operator-= ( const CPointBase & pt )
+const CPointBase& CPointBase::operator-= ( const CPointBase & pt ) noexcept
 {
 	m_x -= pt.m_x;
 	m_y -= pt.m_y;
@@ -108,14 +113,14 @@ const CPointBase& CPointBase::operator-= ( const CPointBase & pt )
 	return( * this );
 }
 
-void CPointBase::InitPoint()
+void CPointBase::InitPoint() noexcept
 {
 	m_x = -1;	// invalid location.
 	m_y = -1;
 	m_z = 0;
 	m_map = 0;
 }
-void CPointBase::ZeroPoint()
+void CPointBase::ZeroPoint() noexcept
 {
 	m_x = 0;	// invalid location.
 	m_y = 0;
@@ -219,7 +224,7 @@ bool CPointBase::IsCharValid() const noexcept
 	return true;
 }
 
-void CPointBase::ValidatePoint()
+void CPointBase::ValidatePoint() noexcept
 {
 	if ( m_x < 0 )
 		m_x = 0;
@@ -239,7 +244,7 @@ bool CPointBase::IsSame2D( const CPointBase & pt ) const noexcept
 	return ( m_x == pt.m_x && m_y == pt.m_y );
 }
 
-void CPointBase::Set( const CPointBase & pt )
+void CPointBase::Set( const CPointBase & pt ) noexcept
 {
 	m_x = pt.m_x;
 	m_y = pt.m_y;
@@ -247,7 +252,7 @@ void CPointBase::Set( const CPointBase & pt )
 	m_map = pt.m_map;
 }
 
-void CPointBase::Set( short x, short y, char z, uchar map )
+void CPointBase::Set( short x, short y, char z, uchar map ) noexcept
 {
 	m_x = x;
 	m_y = y;
@@ -258,7 +263,7 @@ void CPointBase::Set( short x, short y, char z, uchar map )
 void CPointBase::Move( DIR_TYPE dir )
 {
 	// Move a point in a direction.
-	ASSERT( dir <= DIR_QTY );
+	ASSERT( (dir > DIR_INVALID) && (dir <= DIR_QTY) );
 	m_x += (short)(sm_Moves[dir][0]);
 	m_y += (short)(sm_Moves[dir][1]);
 }
@@ -277,8 +282,9 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 	if ( !strnicmp( ptcKey, "STATICS", 7 ) )
 	{
 		ptcKey	+= 7;
-		const CServerMapBlock * pBlock = CWorldMap::GetMapBlock( *(this) );
-		if ( !pBlock ) return false;
+		const CServerMapBlock * pBlock = CWorldMap::GetMapBlock( static_cast<CPointMap>(*this) );
+		if ( !pBlock )
+			return false;
 
 		if ( *ptcKey == '\0' )
 		{
@@ -627,7 +633,7 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 
 			if ( *ptcKey ) iDistance = Exp_GetVal(ptcKey);
 			if ( *ptcKey ) bCheckMulti = Exp_GetVal(ptcKey) != 0;
-			sVal.FormatVal( CWorldMap::IsItemTypeNear(*this, static_cast<IT_TYPE>(iType), iDistance, bCheckMulti));
+			sVal.FormatVal( CWorldMap::IsItemTypeNear(*this, IT_TYPE(iType), iDistance, bCheckMulti));
 			break;
 		}
 		case PT_REGION:
@@ -929,18 +935,37 @@ int CPointBase::GetPointSortIndex() const
 //*************************************************************************
 // -CPointMap
 
-CPointMap::CPointMap( short x, short y, char z, uchar map )
+CPointMap::CPointMap( short x, short y, char z, uchar map ) noexcept :
+	CPointBase(x, y, z, map)
 {
-    m_x = x;
-    m_y = y;
-    m_z = z;
-    m_map = map;
 }
+
+CPointMap::CPointMap(const CPointMap& pt) noexcept :
+	CPointBase(pt.m_x, pt.m_y, pt.m_z, pt.m_map)
+{
+
+}
+
+CPointMap::CPointMap(const CPointBase& pt) noexcept :
+	CPointBase(pt.m_x, pt.m_y, pt.m_z, pt.m_map)
+{
+}
+
+CPointMap& CPointMap::operator = (const CPointBase& pt) noexcept
+{
+	return CPointMap::operator=(static_cast<const CPointMap&>(pt));
+}
+
 
 //*************************************************************************
 // -CPointSort
 
-CPointSort::CPointSort(short x, short y, char z, uchar map ) :
+CPointSort::CPointSort(short x, short y, char z, uchar map ) noexcept :
     CPointMap(x, y, z, map)
+{
+}
+
+CPointSort::CPointSort(const CPointBase& pt) noexcept :
+	CPointMap(pt.m_x, pt.m_y, pt.m_z, pt.m_map)
 {
 }

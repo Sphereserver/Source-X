@@ -4694,14 +4694,14 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 		if (GenerateDefname(ptcItemName, CountOf(ptcItemName), "i_", &tsDefnameBuffer, true, &defnames))
 		{
 			s.Printf("// %s\n", ptcItemName);
-			s.WriteKey("DEFNAME", tsDefnameBuffer);
+			s.WriteKeyVal("DEFNAME", tsDefnameBuffer);
 		}
 		else
 		{
 			s.Printf("// (unnamed object)\n");
 		}
 
-		s.WriteKey("TYPE", ResourceGetName(CResourceID(RES_TYPEDEF, CItemBase::GetTypeBase((ITEMID_TYPE)i, tiledata))));
+		s.WriteKeyVal("TYPE", ResourceGetName(CResourceID(RES_TYPEDEF, CItemBase::GetTypeBase((ITEMID_TYPE)i, tiledata))));
 	}
 
 	s.WriteSection("EOF");

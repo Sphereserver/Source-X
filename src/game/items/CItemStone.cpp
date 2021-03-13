@@ -118,7 +118,7 @@ void CItemStone::r_Write( CScript & s )
 	CItem::r_Write( s );
 	s.WriteKeyVal( "ALIGN", GetAlignType());
 	if ( ! m_sAbbrev.IsEmpty())
-		s.WriteKey( "ABBREV", m_sAbbrev );
+		s.WriteKeyVal( "ABBREV", m_sAbbrev );
 
 	TemporaryString tsTemp;
 	for ( uint i = 0; i < CountOf(m_sCharter); ++i )
@@ -126,14 +126,14 @@ void CItemStone::r_Write( CScript & s )
 		if ( ! m_sCharter[i].IsEmpty())
 		{
 			snprintf(tsTemp.buffer(), tsTemp.capacity(), "CHARTER%u", i);
-			s.WriteKey(tsTemp.buffer(), m_sCharter[i] );
+			s.WriteKeyVal(tsTemp.buffer(), m_sCharter[i] );
 		}
 	}
 
 	if ( ! m_sWebPageURL.IsEmpty())
-		s.WriteKey( "WEBPAGE", GetWebPageURL() );
+		s.WriteKeyVal( "WEBPAGE", GetWebPageURL() );
 
-	// s.WriteKey( "//", "uid,title,priv,loyaluid,abbr&theydecl,wedecl");
+	// s.WriteKeyVal( "//", "uid,title,priv,loyaluid,abbr&theydecl,wedecl");
 
 	CStoneMember * pMember = static_cast <CStoneMember *>(GetContainerHead());
 	for ( ; pMember != nullptr; pMember = pMember->GetNext())

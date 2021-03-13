@@ -508,10 +508,10 @@ void CListDefCont::r_WriteSave( CScript& s ) const
 		if ( pListElemStr )
 		{
 			strElement.Format("\"%s\"", pListElemStr->GetValStr());
-			s.WriteKey("ELEM", strElement.GetBuffer());
+			s.WriteKeyVal("ELEM", strElement.GetBuffer());
 		}
 		else if ( pListElem )
-			s.WriteKey("ELEM", pListElem->GetValStr());
+			s.WriteKeyVal("ELEM", pListElem->GetValStr());
 	}
 }
 

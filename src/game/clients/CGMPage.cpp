@@ -52,8 +52,8 @@ void CGMPage::r_Write(CScript& s) const
 	ADDTOCALLSTACK_INTENSIVE("CGMPage::r_Write");
 	s.WriteSection("GMPAGE %s", GetName());
 	s.WriteKeyHex("CHARUID", m_uidChar);
-	s.WriteKey("P", m_pt.WriteUsed());
-	s.WriteKey("REASON", m_sReason);
+	s.WriteKeyVal("P", m_pt.WriteUsed());
+	s.WriteKeyVal("REASON", m_sReason);
 	s.WriteKeyVal("TIME", CWorldGameTime::GetCurrentTime().GetTimeDiff(m_time) / MSECS_PER_SEC);
 }
 

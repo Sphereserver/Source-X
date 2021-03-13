@@ -27,7 +27,7 @@ void CItemMessage::r_Write(CScript & s)
 {
     ADDTOCALLSTACK_INTENSIVE("CItemMessage::r_Write");
     CItemVendable::r_Write(s);
-    s.WriteKey("AUTHOR", m_sAuthor);
+    s.WriteKeyVal("AUTHOR", m_sAuthor);
 
     // Store the message body lines. MAX_BOOK_PAGES
     TemporaryString tsTemp;
@@ -35,7 +35,7 @@ void CItemMessage::r_Write(CScript & s)
     {
         snprintf(tsTemp.buffer(), tsTemp.capacity(), "BODY.%" PRIu16, i);
         lpctstr pszText = GetPageText(i);
-        s.WriteKey(tsTemp.buffer(), pszText != nullptr ? pszText : "");
+        s.WriteKeyVal(tsTemp.buffer(), pszText != nullptr ? pszText : "");
     }
 }
 

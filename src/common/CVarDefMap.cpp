@@ -671,7 +671,7 @@ void CVarDefMap::r_WritePrefix( CScript & s, lpctstr ptcPrefix, lpctstr ptcKeyEx
         lpctstr ptcVal = pVar->GetValStr();
         if (pVarNum)
         {
-            s.WriteKey(ts.buffer(), ptcVal);
+            s.WriteKeyVal(ts.buffer(), ptcVal);
         }
         else
         {

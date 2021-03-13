@@ -26,6 +26,7 @@ public:
 	static lpctstr const sm_szLoadKeys[];
 	static const short sm_Moves[DIR_QTY+1][2];
 	static lpctstr sm_szDirs[DIR_QTY+1];
+
 public:
 	// Do NOT change these datatypes: they seem to not have much sense, but are stored this way inside the mul files.
 	short m_x;		// equipped items dont need x,y
@@ -34,18 +35,22 @@ public:
 	uchar m_map;		// another map? (only if top level.)
 
 public:
-	void InitPoint();
-	void ZeroPoint();
+	void InitPoint() noexcept;
+	void ZeroPoint() noexcept;
 
-	CPointBase()
+	CPointBase() noexcept
 	{
 		InitPoint();
 	}
+	CPointBase(short x, short y, char z = 0, uchar map = 0) noexcept;
+	CPointBase(const CPointBase&) noexcept = default;
+	CPointBase(CPointBase&&) noexcept = default;
 
-	bool operator == ( const CPointBase & pt ) const;
-	bool operator != ( const CPointBase & pt ) const;
-	const CPointBase& operator += ( const CPointBase & pt );
-	const CPointBase& operator -= ( const CPointBase & pt );
+	CPointBase& operator = (const CPointBase&) noexcept = default;
+	bool operator == ( const CPointBase & pt ) const noexcept;
+	bool operator != ( const CPointBase & pt ) const noexcept;
+	const CPointBase& operator += ( const CPointBase & pt ) noexcept;
+	const CPointBase& operator -= ( const CPointBase & pt ) noexcept;
 
 	
 	int GetDistZ( const CPointBase & pt ) const noexcept;
@@ -64,12 +69,12 @@ public:
 		return (IsValidXY() && IsValidZ());
 	}
 
-	void ValidatePoint();
+	void ValidatePoint() noexcept;
 
 	bool IsSame2D( const CPointBase & pt ) const noexcept;
 
-	void Set( const CPointBase & pt );
-	void Set( short x, short y, char z = 0, uchar map = 0 );
+	void Set( const CPointBase & pt ) noexcept;
+	void Set( short x, short y, char z = 0, uchar map = 0 ) noexcept;
 	int Read( tchar * pVal );
 
 	tchar * WriteUsed( tchar * ptcBuffer, uint uiBufferLen ) const;
@@ -102,17 +107,17 @@ public:
 struct CPointMap : public CPointBase
 {
 	// A point in the world (or in a container) (initialized)
-    CPointMap() = default;
-	CPointMap( short x, short y, char z = 0, uchar map = 0 );
-    inline CPointMap & operator = (const CPointBase & pt)
-    {
-        Set( pt );
-        return ( * this );
-    }
-    inline CPointMap(const CPointBase & pt)
-    {
-        Set( pt );
-    }
+    CPointMap() noexcept = default;
+	CPointMap(short x, short y, char z = 0, uchar map = 0) noexcept;
+
+	CPointMap(const CPointMap&) noexcept;
+	CPointMap(const CPointBase&) noexcept;
+	CPointMap(CPointMap&&) noexcept = default;
+	CPointMap(CPointBase&& pt) noexcept : CPointMap(static_cast<CPointMap&&>(pt)) {}
+
+	CPointMap& operator = (const CPointMap&) noexcept = default;
+	CPointMap& operator = (const CPointBase&) noexcept;
+    
     inline CPointMap(tchar * pVal)
     {
         Read( pVal );
@@ -121,12 +126,9 @@ struct CPointMap : public CPointBase
 
 struct CPointSort : public CPointMap
 {
-    CPointSort() = default; // InitPoint() already called by CPointBase constructor
-	CPointSort( short x, short y, char z = 0, uchar map = 0 );
-    inline CPointSort(const CPointBase & pt)
-    {
-        Set( pt );
-    }
+    CPointSort() noexcept = default; // InitPoint() already called by CPointBase constructor
+	CPointSort( short x, short y, char z = 0, uchar map = 0 ) noexcept;
+	explicit CPointSort(const CPointBase& pt) noexcept;
     virtual ~CPointSort() = default; // just to make this dynamic
 };
 

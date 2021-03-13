@@ -156,7 +156,7 @@ bool CCacheableScriptFile::IsFileOpen() const
 
 bool CCacheableScriptFile::_IsEOF() const 
 {
-    ADDTOCALLSTACK("CCacheableScriptFile::_IsEOF");
+    //ADDTOCALLSTACK("CCacheableScriptFile::_IsEOF");
     if ( _useDefaultFile() ) 
         return CSFileText::_IsEOF();
 
@@ -164,7 +164,7 @@ bool CCacheableScriptFile::_IsEOF() const
 }
 bool CCacheableScriptFile::IsEOF() const 
 {
-    ADDTOCALLSTACK("CCacheableScriptFile::IsEOF");
+    //ADDTOCALLSTACK("CCacheableScriptFile::IsEOF");
     THREAD_SHARED_LOCK_RETURN(_IsEOF());
 }
 

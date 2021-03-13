@@ -9,12 +9,24 @@
 //*************************************************************************
 // -CRect
 
-
-void CRect::SetRectEmpty()
+CRect::CRect() noexcept :
+	m_left(0), m_top(0), m_right(0), m_bottom(0), m_map(0)
 {
+}
+
+CRect::CRect(int left, int top, int right, int bottom, int map) noexcept :
+	m_left(left), m_top(top), m_right(right), m_bottom(bottom), m_map(map)
+{
+}
+
+void CRect::SetRectEmpty() noexcept
+{
+	/*
     m_left = m_top = 0;	// 0x7ffe
     m_right = m_bottom = 0;
     m_map = 0;
+	*/
+	m_left = m_top = m_right = m_bottom = m_map = 0;
 }
 
 void CRect::OffsetRect( int x, int y )
@@ -55,7 +67,7 @@ void CRect::UnionRect( const CRect & rect )
         DEBUG_ERR(("Uniting regions from different maps!\n"));
     }
 }
-bool CRect::IsInside( const CRect & rect ) const
+bool CRect::IsInside( const CRect & rect ) const noexcept
 {
     // Is &rect inside me ?
     // ASSUME: Normalized rect
@@ -71,7 +83,8 @@ bool CRect::IsInside( const CRect & rect ) const
         return false;
     return true;
 }
-bool CRect::IsOverlapped( const CRect & rect ) const
+
+bool CRect::IsOverlapped( const CRect & rect ) const noexcept
 {
     // are the 2 rects overlapped at all ?
     // NON inclusive rect.
@@ -88,7 +101,7 @@ bool CRect::IsOverlapped( const CRect & rect ) const
     return true;
 }
 
-bool CRect::IsEqual( const CRect & rect ) const
+bool CRect::IsEqual( const CRect & rect ) const noexcept
 {
     return m_left == rect.m_left &&
         m_top == rect.m_top &&
@@ -307,7 +320,7 @@ CSector * CRect::GetSector( int i ) const	// ge all the sectors that make up thi
 }
 
 
-const CRect CRect::operator += (const CRect& rect)
+const CRect& CRect::operator += (const CRect& rect)
 {
     m_top += rect.m_top;
     m_bottom += rect.m_bottom;
@@ -319,7 +332,12 @@ const CRect CRect::operator += (const CRect& rect)
 //*************************************************************************
 // -CRectMap
 
-bool CRectMap::IsValid() const
+CRectMap::CRectMap(int left, int top, int right, int bottom, int map) noexcept :
+	CRect(left, top, right, bottom, map)
+{
+}
+
+bool CRectMap::IsValid() const noexcept
 {
     const int iSizeX = GetWidth();
     if ( (iSizeX < 0) || (iSizeX > g_MapList.GetMapSizeX(m_map)) )
