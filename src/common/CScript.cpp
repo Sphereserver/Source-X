@@ -420,32 +420,32 @@ void CScriptKeyAlloc::ParseKeyLate()
 ///////////////////////////////////////////////////////////////
 // -CScript
 
-CScript::CScript()
+CScript::CScript() :
+	_sBuffer1(false)
 {
 	_InitBase();
 }
 
-CScript::CScript( lpctstr ptcKey )
+CScript::CScript(lpctstr ptcKey) :
+	_sBuffer1(false)
 {
 	_InitBase();
 	ParseKey(ptcKey);
 }
 
-CScript::CScript( lpctstr ptcKey, lpctstr pszVal )
+CScript::CScript(lpctstr ptcKey, lpctstr ptcVal) :
+	_sBuffer1(false)
 {
 	_InitBase();
-	ParseKey( ptcKey, pszVal );
+	ParseKey( ptcKey, ptcVal );
 }
 
 void CScript::_InitBase()
 {
-	//ADDTOCALLSTACK("CScript::InitBase");
 	_eParseFlags = ParseFlags::None;
 	m_iResourceFileIndex = -1;
-	m_iLineNum		= 0;
-	m_fSectionHead	= false;
-	m_iSectionData	= 0;
-    _fCacheToBeUpdated = false;
+	m_iLineNum = m_iSectionData = 0;
+	m_fSectionHead = _fCacheToBeUpdated = false;
 	InitKey();
 }
 

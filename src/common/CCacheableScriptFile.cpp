@@ -104,6 +104,7 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
         _fileDescriptor = _kInvalidFD;
         _uiMode = 0;
         _iCurrentLine = 0;
+        _fileContent->shrink_to_fit();
     }
 
     return true;

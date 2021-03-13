@@ -26,18 +26,6 @@
 #include "CObjBase.h"
 
 
-int CObjBaseTemplate::IsWeird() const
-{
-	ADDTOCALLSTACK("CObjBaseTemplate::IsWeird");
-	if ( !GetParent() )
-		return 0x3101;
-
-	if ( !IsValidUID() )
-		return 0x3102;
-
-	return 0;
-}
-
 static bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 {
 	tchar * ppCmd[3];

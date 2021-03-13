@@ -44,7 +44,7 @@ public:
 	* Initializes string. If DEBUG_STRINGS is enabled, update statistical information (total CSString instantiated).
 	* @see Init()
 	*/
-	inline CSString();
+	CSString(bool fDefaultInit = true);
 
 	/**
 	* @brief CSString destructor.
@@ -563,14 +563,6 @@ public:
 
 
 /* Inlined methods are defined here */
-
-CSString::CSString()
-{
-#ifdef DEBUG_STRINGS
-    ++gAmount;
-#endif
-    Init();
-}
 
 CSString::~CSString() noexcept
 {

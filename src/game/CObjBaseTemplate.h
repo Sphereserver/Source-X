@@ -28,7 +28,7 @@ protected:
 
 public:
 	static const char *m_sClassName;
-	CObjBaseTemplate() = default;
+	CObjBaseTemplate();
 	virtual ~CObjBaseTemplate() = default;
 
 private:

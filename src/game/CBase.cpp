@@ -24,13 +24,9 @@ lpctstr const CBaseBaseDef::sm_szLoadKeys[OBC_QTY+1] =
 };
 
 
-CFactionDef CBaseBaseDef::GetFaction()
-{
-    return _pFaction;
-}
-
 CBaseBaseDef::CBaseBaseDef( CResourceID id ) :
-	CResourceLink( id )
+	CResourceLink( id ),
+	m_sName(false)
 {
 	_dwInstances = 0;
 	m_dwDispIndex			= 0;	// Assume nothing til told differently.
@@ -58,6 +54,11 @@ void CBaseBaseDef::DelInstance()
 	ASSERT(_dwInstances != (dword)-1);    // catching underflows
 #endif
 	--_dwInstances;
+}
+
+CFactionDef CBaseBaseDef::GetFaction()
+{
+	return _pFaction;
 }
 
 lpctstr CBaseBaseDef::GetTypeName() const

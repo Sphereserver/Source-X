@@ -1,7 +1,24 @@
-
-#include "../game/uo_files/uofiles_macros.h"
+#include "../sphere/threads.h"
+#include "uo_files/uofiles_macros.h"
 #include "CObjBaseTemplate.h"
 
+
+CObjBaseTemplate::CObjBaseTemplate() :
+	m_sName(false)
+{
+}
+
+int CObjBaseTemplate::IsWeird() const
+{
+	ADDTOCALLSTACK("CObjBaseTemplate::IsWeird");
+	if (!GetParent())
+		return 0x3101;
+
+	if (!IsValidUID())
+		return 0x3102;
+
+	return 0;
+}
 
 void CObjBaseTemplate::DupeCopy( const CObjBaseTemplate * pObj )
 {
