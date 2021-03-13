@@ -50,7 +50,7 @@ private:
 
 public:
 	virtual void Init(int index, uchar map, short x, short y) override;
-	virtual bool OnTick();
+	virtual bool OnTick() override;
 	virtual bool IsDeleted() const override;
 
 	// Time

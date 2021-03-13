@@ -36,8 +36,15 @@ void CTimedObject::GoAwake()
     _fIsSleeping = false;
 }
 
+bool CTimedObject::CanTick() const
+{
+    //ADDTOCALLSTACK_INTENSIVE("CTimedObject::CanTick");
+    return true;
+}
+
 bool CTimedObject::OnTick()
 {
+    //ADDTOCALLSTACK("CTimedObject::OnTick");
     CWorldTickingList::DelObjSingle(this);  // this also sets _iTimeOut = 0;
     return true;
 }

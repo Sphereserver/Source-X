@@ -68,7 +68,10 @@ public:
         m_UID.RemoveObjFlags( dwFlags );
     }
 
+	// Attributes
 	virtual int IsWeird() const;
+
+	// Parent objects
 	virtual const CObjBaseTemplate * GetTopLevelObj() const = 0;
 	virtual CObjBaseTemplate* GetTopLevelObj() = 0;
 

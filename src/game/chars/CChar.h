@@ -170,10 +170,9 @@ public:
 	int64  _iTimePeriodicTick;
 	int64  _iTimeNextRegen;	    // When did i get my last regen tick ?
     ushort _iRegenTickCount;    // ticks until next regen.
-	
 
 	int64 _iTimeLastHitsUpdate;
-	int64 m_timeLastCallGuards;
+	int64 _iTimeLastCallGuards;
 
 	// Some character action in progress.
 	SKILL_TYPE	m_Act_SkillCurrent;	// Currently using a skill. Could be combat skill.
@@ -321,8 +320,9 @@ public:
     virtual void GoSleep() override;
     virtual void GoAwake() override;
 
-	// Status and attributes ------------------------------------	
+	// Status and attributes ------------------------------------
 	int IsWeird() const;
+
 	char GetFixZ(const CPointMap& pt, dword dwBlockFlags = 0);
 	bool IsStatFlag( uint64 iStatFlag ) const;
 	void StatFlag_Set(uint64 iStatFlag);
@@ -457,8 +457,9 @@ public:
 	bool MoveToChar(const CPointMap& pt, bool fStanding = true, bool fCheckLocation = true, bool fForceFix = false, bool fAllowReject = true);
 	bool MoveTo(const CPointMap& pt, bool fForceFix = false);
 	virtual void SetTopZ( char z ) noexcept override;
-	bool MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart = 1, bool fFromShip = false);
 	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, ushort iSteps = 0 ) override;
+	bool MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart = 1, bool fFromShip = false);
+	bool MoveToNearestShore(bool fNoMsg = false);
 
 	CRegion * CanMoveWalkTo( CPointMap & pt, bool fCheckChars = true, bool fCheckOnly = false, DIR_TYPE dir = DIR_QTY, bool fPathFinding = false );
 	void CheckRevealOnMove();
@@ -1287,10 +1288,11 @@ public:
 	void OnHarmedBy( CChar * pCharSrc );
 	bool OnAttackedBy( CChar * pCharSrc, bool fPetsCommand = false, bool fShouldReveal = true );
 
+	virtual bool CanTick() const override;
+	virtual bool OnTick() override;  // OnTick timeout for skills, AI, etc
 	bool OnTickEquip( CItem * pItem );
 	void OnTickFood( ushort uiVal, int HitsHungerLoss );
 	void OnTickStatusUpdate();
-	bool OnTick();  // OnTick timeout for skills, AI, etc
     void OnTickSkill(); // OnTick timeout specific for the skill behavior
     bool OnTickPeriodic();  // Periodic tick calls (update stats, status bar, notoriety & attackers, death check, etc)
 

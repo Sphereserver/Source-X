@@ -21,27 +21,31 @@ struct CServerTime
 
 
 	static const char *m_sClassName;
-	int64 m_llPrivateTime;
+	int64 m_llPrivateTime; // in milliseconds
 
 
-    inline CServerTime();
-    inline CServerTime(int64 iTimeInMilliseconds);
+    inline CServerTime() noexcept;
+    inline CServerTime(int64 iTimeInMilliseconds) noexcept;
 
-    void Init();
-    void InitTime(int64 iTimeBase);
-    bool IsTimeValid() const;
+    void Init() noexcept;
+    void InitTime(int64 iTimeBase) noexcept;
+    bool IsTimeValid() const noexcept;
+
+	/*
+	* @brief Get the time value in milliseconds.
+	*/
 	int64 GetTimeRaw() const;
 
-	CServerTime operator+(int64 iTimeDiff) const;
-	CServerTime operator-(int64 iTimeDiff) const;
-	inline int64 operator-(CServerTime time) const;
-	inline bool operator==(CServerTime time) const;
-	inline bool operator!=(CServerTime time) const;
-	inline bool operator<(CServerTime time) const;
-	inline bool operator>(CServerTime time) const;
-	inline bool operator<=(CServerTime time) const;
-	inline bool operator>=(CServerTime time) const;
-    inline int64 GetTimeDiff( const CServerTime & time ) const;
+	CServerTime operator+(int64 iTimeDiff) const noexcept;
+	CServerTime operator-(int64 iTimeDiff) const noexcept;
+	inline int64 operator-(const CServerTime& time) const noexcept;
+	inline bool operator==(const CServerTime& time) const noexcept;
+	inline bool operator!=(const CServerTime& time) const noexcept;
+	inline bool operator<(const CServerTime& time) const noexcept;
+	inline bool operator>(const CServerTime& time) const noexcept;
+	inline bool operator<=(const CServerTime& time) const noexcept;
+	inline bool operator>=(const CServerTime& time) const noexcept;
+    inline int64 GetTimeDiff(const CServerTime & time) const noexcept;
 
     static lpctstr GetTimeMinDesc(int iMinutes);
 };
@@ -49,45 +53,45 @@ struct CServerTime
 
 /* Inline Methods Definitions */
 
-CServerTime::CServerTime()
+CServerTime::CServerTime() noexcept
 {
     Init();
 }
-CServerTime::CServerTime(int64 iTimeInMilliseconds)
+CServerTime::CServerTime(int64 iTimeInMilliseconds) noexcept
 {
     InitTime(iTimeInMilliseconds);
 }
 
-int64 CServerTime::GetTimeDiff( const CServerTime & time ) const
+int64 CServerTime::GetTimeDiff(const CServerTime & time) const noexcept
 {
     return ( m_llPrivateTime - time.m_llPrivateTime );
 }
 
-int64 CServerTime::operator-(CServerTime time) const
+int64 CServerTime::operator-(const CServerTime& time) const noexcept
 {
 	return (m_llPrivateTime - time.m_llPrivateTime);
 }
-bool CServerTime::operator==(CServerTime time) const
+bool CServerTime::operator==(const CServerTime& time) const noexcept
 {
 	return (m_llPrivateTime == time.m_llPrivateTime);
 }
-bool CServerTime::operator!=(CServerTime time) const
+bool CServerTime::operator!=(const CServerTime& time) const noexcept
 {
 	return (m_llPrivateTime != time.m_llPrivateTime);
 }
-bool CServerTime::operator<(CServerTime time) const
+bool CServerTime::operator<(const CServerTime& time) const noexcept
 {
 	return (m_llPrivateTime < time.m_llPrivateTime);
 }
-bool CServerTime::operator>(CServerTime time) const
+bool CServerTime::operator>(const CServerTime& time) const noexcept
 {
 	return (m_llPrivateTime > time.m_llPrivateTime);
 }
-bool CServerTime::operator<=(CServerTime time) const
+bool CServerTime::operator<=(const CServerTime& time) const noexcept
 {
 	return (m_llPrivateTime <= time.m_llPrivateTime);
 }
-bool CServerTime::operator>=(CServerTime time) const
+bool CServerTime::operator>=(const CServerTime& time) const noexcept
 {
 	return (m_llPrivateTime >= time.m_llPrivateTime);
 }

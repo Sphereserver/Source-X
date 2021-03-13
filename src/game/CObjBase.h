@@ -164,8 +164,8 @@ public:
 
 
     /**
-     * @brief   Gets time stamp.
-     * @return  The time stamp.
+     * @brief   Gets timestamp of the item (it's a property and not related at all with TIMER).
+     * @return  The timestamp.
      */
 	int64 GetTimeStamp() const;
 
@@ -174,6 +174,21 @@ public:
      * @param   t_time  The time.
      */
 	void SetTimeStamp(int64 t_time);
+
+    /*
+    * @brief    Add (if not present) this object and its children objects to the world ticking list.
+    */
+    void TickingListRecursiveAdd();
+
+    /*
+    * @brief    Remove (if present) this object and its children objects to the world ticking list.
+    */
+    void TickingListRecursiveDel();
+
+    /*
+    * @brief    Add iDelta to this object's timer (if active) and its child objects.
+    */
+    void TimeoutRecursiveResync(int64 iDelta);
 
     /**
     *@brief Returns the value of the string-type prop from the CComponentProps. Faster than the variant accepting a COMPPROPS_TYPE if you need to retrieve multiple props from the same CComponentProps
@@ -546,7 +561,7 @@ public:
      * @param [in,out]  SourceObj   (Optional) If non-null, source object.
      * @param   sound               The sound.
      */
-	void SetHue( HUE_TYPE wHue, bool fAvoidTrigger = true, CTextConsole *pSrc = nullptr, CObjBase *SourceObj = nullptr, llong sound = 0 );
+	void SetHue( HUE_TYPE wHue, bool fAvoidTrigger = true, CTextConsole *pSrc = nullptr, CObjBase * pSourceObj = nullptr, llong iSound = 0 );
 
     /**
      * @fn  HUE_TYPE CObjBase::GetHue() const;
@@ -603,7 +618,7 @@ public:
      *
      * @param [in,out]  ppTitles    If non-null, the titles.
      */
-	void inline SetNamePool_Fail( tchar * ppTitles );
+	void SetNamePool_Fail( tchar * ppTitles );
 
     /**
      * @fn  bool CObjBase::SetNamePool( lpctstr pszName );
@@ -875,11 +890,11 @@ public:
 	uchar m_fStatusUpdate;  // update flags for next tick
 
     /**
-     * @fn  virtual void CObjBase::OnTickStatusUpdate();
-     *
      * @brief   Update Status window if any flag requires it on m_fStatusUpdate.
      */
 	virtual void OnTickStatusUpdate();
+
+    virtual bool CanTick() const override;
 
 public:
     std::vector<std::unique_ptr<CClientTooltip>> m_TooltipData; // Storage for tooltip data while in trigger

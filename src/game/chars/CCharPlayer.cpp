@@ -22,23 +22,23 @@ lpctstr const CCharPlayer::sm_szLoadKeys[CPC_QTY+1] =
 };
 
 
-CCharPlayer::CCharPlayer(CChar *pChar, CAccount *pAccount) : m_pAccount(pAccount)
+CCharPlayer::CCharPlayer(CChar *pChar, CAccount *pAccount) : 
+	m_pAccount(pAccount),
+	m_SkillLock{}, m_StatLock{}
 {
-    m_SpeechHue = 0;
-    m_EmoteHue = 0;
+	_iTimeLastUsed = _iTimeLastDisconnected = 0;
+
+    m_SpeechHue = m_EmoteHue = 0;
 	m_wDeaths = m_wMurders = 0;
 	m_speedMode = 0;
 	m_pflag = 0;
-	m_bKrToolbarEnabled = false;
-	m_timeLastUsed = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+	m_fKrToolbarEnabled = false;
 	m_LocalLight = 0;
 
 	_iMaxHouses = g_Cfg._iMaxHousesPlayer;
 	_iMaxShips = g_Cfg._iMaxShipsPlayer;
 	_pMultiStorage = new CMultiStorage(pChar->GetUID());
 
-	memset(m_SkillLock, 0, sizeof(m_SkillLock));
-	memset(m_StatLock, 0, sizeof(m_StatLock));
 	SetSkillClass(pChar, CResourceID(RES_SKILLCLASS));
 }
 
@@ -55,9 +55,9 @@ CAccount * CCharPlayer::GetAccount() const
 	return m_pAccount;
 }
 
-bool CCharPlayer::getKrToolbarStatus()
+bool CCharPlayer::getKrToolbarStatus() const noexcept
 {
-	return m_bKrToolbarEnabled;
+	return m_fKrToolbarEnabled;
 }
 
 CMultiStorage* CCharPlayer::GetMultiStorage()
@@ -179,15 +179,17 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 
 	if ( !strnicmp(ptcKey, "SKILLCLASS.", 11) )
 	{
-		return GetSkillClass()->r_WriteVal(ptcKey + 11, sVal, pChar);
+		CSkillClassDef* pSkillClass = GetSkillClass();
+		ASSERT(pSkillClass);
+		return pSkillClass->r_WriteVal(ptcKey + 11, sVal, pChar);
 	}
 	else if ( ( !strnicmp(ptcKey, "GUILD", 5) ) || ( !strnicmp(ptcKey, "TOWN", 4) ) )
 	{
-		bool bIsGuild = !strnicmp(ptcKey, "GUILD", 5);
-		ptcKey += bIsGuild ? 5 : 4;
+		const bool fIsGuild = !strnicmp(ptcKey, "GUILD", 5);
+		ptcKey += fIsGuild ? 5 : 4;
 		if ( *ptcKey == 0 )
 		{
-			CItemStone *pMyGuild = pChar->Guild_Find(bIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
+			CItemStone *pMyGuild = pChar->Guild_Find(fIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
 			if ( pMyGuild )
                 sVal.FormatHex((dword)pMyGuild->GetUID());
 			else
@@ -197,7 +199,7 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 		else if ( *ptcKey == '.' )
 		{
 			ptcKey += 1;
-			CItemStone *pMyGuild = pChar->Guild_Find(bIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
+			CItemStone *pMyGuild = pChar->Guild_Find(fIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
 			if ( pMyGuild )
                 return pMyGuild->r_WriteVal(ptcKey, sVal, pChar);
 		}
@@ -225,7 +227,7 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 			sVal.FormatVal( m_wMurders );
 			return true;
 		case CPC_KRTOOLBARSTATUS:
-			sVal.FormatVal( m_bKrToolbarEnabled );
+			sVal.FormatVal( m_fKrToolbarEnabled );
 			return true;
 		case CPC_ISDSPEECH:
 			if ( ptcKey[9] != '.' )
@@ -233,8 +235,11 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 			ptcKey += 10;
 			sVal = m_Speech.ContainsResourceName(RES_SPEECH, ptcKey) ? "1" : "0";
 			return true;
+		case CPC_LASTDISCONNECTED:
+			sVal.FormatLLVal(CWorldGameTime::GetCurrentTime().GetTimeDiff(_iTimeLastDisconnected) / MSECS_PER_SEC);  //seconds
+			return true;
 		case CPC_LASTUSED:
-			sVal.FormatLLVal( CWorldGameTime::GetCurrentTime().GetTimeDiff( m_timeLastUsed ) / MSECS_PER_SEC );  //seconds
+			sVal.FormatLLVal( CWorldGameTime::GetCurrentTime().GetTimeDiff( _iTimeLastUsed ) / MSECS_PER_SEC );  //seconds
 			return true;
 		case CPC_LIGHT:
 			sVal.FormatHex(m_LocalLight);
@@ -256,7 +261,11 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 			}
 			return true;
 		case CPC_SKILLCLASS:
-			sVal = GetSkillClass()->GetResourceName();
+			{
+				CSkillClassDef* pSkillClass = GetSkillClass();
+				ASSERT(pSkillClass);
+				sVal = pSkillClass->GetResourceName();
+			}
 			return true;
 		case CPC_SKILLLOCK:
 			{
@@ -435,12 +444,15 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 			pChar->NotoSave_Update();
 			return true;
 		case CPC_KRTOOLBARSTATUS:
-			m_bKrToolbarEnabled = ( s.GetArgVal() != 0 );
+			m_fKrToolbarEnabled = ( s.GetArgVal() != 0 );
 			if ( pChar->IsClientActive() )
-				pChar->GetClientActive()->addKRToolbar( m_bKrToolbarEnabled );
+				pChar->GetClientActive()->addKRToolbar( m_fKrToolbarEnabled );
+			return true;
+		case CPC_LASTDISCONNECTED:
+			_iTimeLastDisconnected = s.GetArgLLVal() * MSECS_PER_SEC;
 			return true;
 		case CPC_LASTUSED:
-			m_timeLastUsed = s.GetArgLLVal() * MSECS_PER_SEC;
+			_iTimeLastUsed = s.GetArgLLVal() * MSECS_PER_SEC;
 			return true;
 		case CPC_PFLAG:
 			{
@@ -509,18 +521,26 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 
 	s.WriteKey("ACCOUNT", pAccount->GetName());
 
+	if (_iTimeLastUsed > 0)
+		s.WriteKeyVal("LASTUSED", _iTimeLastUsed);
+	if (_iTimeLastDisconnected > 0)
+		s.WriteKeyVal("LASTDISCONNECTED", _iTimeLastDisconnected);
+
 	if ( m_wDeaths )
 		s.WriteKeyVal( "DEATHS", m_wDeaths );
 	if ( m_wMurders )
 		s.WriteKeyVal( "KILLS", m_wMurders );
-	if ( GetSkillClass()->GetResourceID().GetResIndex() )
-		s.WriteKey( "SKILLCLASS", GetSkillClass()->GetResourceName());
+	if (CSkillClassDef* pSkillClass = GetSkillClass())
+	{
+		if (pSkillClass->GetResourceID().GetResIndex())
+			s.WriteKey("SKILLCLASS", pSkillClass->GetResourceName());
+	}
 	if ( m_pflag )
 		s.WriteKeyVal( "PFLAG", m_pflag );
 	if ( m_speedMode )
 		s.WriteKeyVal("SPEEDMODE", m_speedMode);
-	if ((pAccount->GetResDisp() >= RDS_KR) && m_bKrToolbarEnabled )
-		s.WriteKeyVal("KRTOOLBARSTATUS", m_bKrToolbarEnabled);
+	if (m_fKrToolbarEnabled && (pAccount->GetResDisp() >= RDS_KR))
+		s.WriteKeyVal("KRTOOLBARSTATUS", m_fKrToolbarEnabled);
 	if (m_LocalLight)
 		s.WriteKeyHex("LIGHT", m_LocalLight);
     if ( m_SpeechHue )
@@ -544,7 +564,7 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 		s.WriteKey( "PROFILE", szLine );
 	}
 
-	tchar szTemp[128];
+	tchar szTemp[64];
 
 	EXC_SET_BLOCK("saving stats locks");
 	for ( int x = 0; x < STAT_BASE_QTY; ++x)	// Don't write all lock states!
@@ -556,12 +576,12 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 	}
 
 	EXC_SET_BLOCK("saving skill locks");
-	for ( size_t j = 0; j < g_Cfg.m_iMaxSkill; ++j )	// Don't write all lock states!
+	for ( uint j = 0; j < g_Cfg.m_iMaxSkill; ++j )	// Don't write all lock states!
 	{
 		ASSERT(j < CountOf(m_SkillLock));
 		if ( ! m_SkillLock[j] )
 			continue;
-		sprintf( szTemp, "SkillLock[%" PRIuSIZE_T "]", j );	// smaller storage space.
+		sprintf( szTemp, "SkillLock[%d]", j );	// smaller storage space.
 		s.WriteKeyVal( szTemp, m_SkillLock[j] );
 	}
 

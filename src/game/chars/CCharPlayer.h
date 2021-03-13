@@ -30,7 +30,7 @@ private:
 	byte m_SkillLock[SKILL_QTY];	// SKILLLOCK_TYPE List of skill lock states for this player character
 	byte m_StatLock[STAT_BASE_QTY]; // SKILLLOCK_TYPE Applied to stats
 	CResourceRef m_SkillClass;		// RES_SKILLCLASS CSkillClassDef What skill class group have we selected.
-	bool m_bKrToolbarEnabled;
+	bool m_fKrToolbarEnabled;
 
 	// Multis
 	CMultiStorage* _pMultiStorage;	// List of houses.
@@ -39,7 +39,8 @@ public:
 	static const char *m_sClassName;
 	CAccount * m_pAccount;		// The account index. (for idle players mostly)
 
-	int64 m_timeLastUsed;	// Time the player char was last used.
+	int64 _iTimeLastUsed;			// Time the player char was last used (connected).
+	int64 _iTimeLastDisconnected;
 
 	CSString m_sProfile;	// limited to SCRIPT_MAX_LINE_LEN-16
     HUE_TYPE m_SpeechHue;	// speech hue used (sent by client)
@@ -74,7 +75,7 @@ public:
 	SKILLLOCK_TYPE Stat_GetLock( STAT_TYPE stat ) const;
 	void Stat_SetLock( STAT_TYPE stat, SKILLLOCK_TYPE state );
 
-	bool getKrToolbarStatus();
+	bool getKrToolbarStatus() const noexcept;
 	CMultiStorage* GetMultiStorage();
 
 	bool SetSkillClass(CChar* pChar, CResourceID rid);

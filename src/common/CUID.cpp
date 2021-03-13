@@ -1,12 +1,7 @@
-
 #include "../game/chars/CChar.h"
 #include "../game/CWorld.h"
 #include "CUID.h"
 
-
-// -----------------------------
-//	CUID
-// -----------------------------
 
 CObjBase * CUID::ObjFindFromUID(dword dwPrivateUID, bool fInvalidateBeingDeleted) noexcept    // static
 {

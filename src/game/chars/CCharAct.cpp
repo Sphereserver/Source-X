@@ -3995,6 +3995,32 @@ bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool fFromS
 	return false;
 }
 
+bool CChar::MoveToNearestShore(bool fNoMsg)
+{
+	int iDist = 1;
+	int i;
+	for (i = 0; i < 20; ++i)
+	{
+		int iDistNew = iDist + 20;
+		for (int iDir = DIR_NE; iDir <= DIR_NW; iDir += 2)	// try diagonal in all directions
+		{
+			if (MoveToValidSpot((DIR_TYPE)iDir, iDistNew, iDist))
+			{
+				i = 100;
+				break;
+			}
+		}
+		iDist = iDistNew;
+	}
+
+	if (!fNoMsg)
+	{
+		SysMessageDefault(i < 100 ? DEFMSG_MSG_REGION_WATER_1 : DEFMSG_MSG_REGION_WATER_2);
+	}
+
+	return (i == 100);
+}
+
 bool CChar::MoveNearObj( const CObjBaseTemplate *pObj, ushort iSteps )
 {
 	return CObjBase::MoveNearObj(pObj, iSteps);
@@ -4363,6 +4389,18 @@ void CChar::OnTickSkill()
     EXC_CATCHSUB("Skill tick");
 }
 
+bool CChar::CanTick() const
+{
+	//ADDTOCALLSTACK_INTENSIVE("CChar::CanTick");
+	if (IsDisconnected() && (Skill_GetActive() != NPCACT_RIDDEN))
+	{
+		// mounted horses can still get a tick.
+		return false;
+	}
+
+	return CObjBase::CanTick();
+}
+
 // Assume this is only called 1 time per sec.
 // Get a timer tick when our timer expires.
 // RETURN: false = delete this.
@@ -4375,10 +4413,12 @@ bool CChar::OnTick()
     // RETURN: false = delete this.
     EXC_TRY("Tick");
 
-    if (IsSleeping())
-    {
-        return true;
-    }
+	EXC_SET_BLOCK("Can Tick?");
+	if ((IsSleeping() || IsDisconnected()) && (Skill_GetActive() != NPCACT_RIDDEN))
+	{
+		// mounted horses can still get a tick.
+		return true;
+	}
     if (GetTopSector()->IsSleeping() && !Calc_GetRandVal(15))
     {
         SetTimeout(1);      //Make it tick after sector's awakening.
@@ -4386,20 +4426,18 @@ bool CChar::OnTick()
         return true;
     }
 
-    /*
-    * CComponent's ticking:
-    * Be aware that return CCRET_FALSE will return false (and delete the char),
-    * take in mind that return will prevent this char's stats updates,
-    *  attacker, notoriety, death status, etc from happening.
-    */
-    const CCRET_TYPE iCompRet = CEntity::OnTick();
-    if (iCompRet != CCRET_CONTINUE) // if return != CCRET_TRUE
-    {
-        return iCompRet;    // Stop here
-    }
-
-    if (IsDisconnected())		// mounted horses can still get a tick.
-        return true;
+	EXC_SET_BLOCK("Components Tick");
+	/*
+	* CComponent's ticking:
+	* Be aware that return CCRET_FALSE will return false (and delete the char),
+	* take in mind that return will prevent this char's stats updates,
+	*  attacker, notoriety, death status, etc from happening.
+	*/
+	const CCRET_TYPE iCompRet = CEntity::OnTick();
+	if (iCompRet != CCRET_CONTINUE) // if return != CCRET_TRUE
+	{
+		return iCompRet;    // Stop here
+	}
 
     // My turn to do some action.
     EXC_SET_BLOCK("Timer expired");

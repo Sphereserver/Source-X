@@ -2504,3 +2504,11 @@ Must have event, even if it's empty, since it's applied by the source to generat
     Now an item with TIMER=10 and TIMERF with delay 10 will immediately be executed one after another, without delays caused by the different ticking systems used before.
 - Fixed: Server crash when a TIMERF executed TIMERF STOP/CLEAR, altering the timed functions list while one of them was running (Issue #516).
 - Removed: DEBUGF_SCRIPTS log messages for the following instructions: ADDCLILOC, REPLACECLILOC, REMOVECLILOC, STRSUB, MULDIV.
+
+13-03-2021, Nolok
+- Added: LASTDISCONNECTED player keyword, holding the SERV.TIMEHIRES at the time of the last client disconnection.
+- Fixed: LASTUSED player attribute was not saved.
+- Fixed: Object not being removed from client view when its CONT was changed.
+- Fixed: If Timer elapsed on an object in a disconnected or sleeping state, the trigger wouldn't fire when the object got active again (Issues #535, #596).
+- Fixed: Timer and REGENs not firing on a ridden characters (Issue #353). Now it fires even if the original character (which gets detatched from its physical REGION) is in a sleeping sector,
+    given that the riding character is in an active (not sleeping nor disconnected) state.

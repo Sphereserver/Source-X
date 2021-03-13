@@ -65,16 +65,16 @@ public:
 	CLanguageID m_lang;			// UNICODE language preference (ENU=english).
 	CSString m_sChatName;		// Chat System Name
 
-	int64 m_Total_Connect_Time;	// Previous total amount of time in game (minutes). "TOTALCONNECTTIME"
-
+	CSocketAddressIP m_First_IP;// First ip logged in from.
 	CSocketAddressIP m_Last_IP;	// last ip logged in from.
-	CSTime m_dateLastConnect;	// Last logged in date (use localtime()).
-	int64  m_Last_Connect_Time;	// Amount of time spent online last time (in minutes).
 
-	CSocketAddressIP m_First_IP;	// First ip logged in from.
-	CSTime m_dateFirstConnect;	// First date logged in (use localtime()).
+	int64 _iTimeConnectedTotal;	// Previous total amount of time in game (minutes). "TOTALCONNECTTIME"
 
-	CUID m_uidLastChar;		// Last CChar logged with this CAccount.
+	CSTime _dateConnectedFirst;	// First date logged in (use localtime()).
+	CSTime _dateConnectedLast;	// Last logged in date (use localtime()).
+	int64  _iTimeConnectedLast;	// Amount of time spent online last time (in minutes).
+
+	CUID m_uidLastChar;			// Last CChar logged with this CAccount.
 	CCharRefArray m_Chars;		// CChars attached to this CAccount.
 	CVarDefMap m_TagDefs;		// Tags storage system.
 	CVarDefMap m_BaseDefs;		// New Variable storage system.
@@ -93,8 +93,8 @@ public:
 private:
 	CAccount(const CAccount& copy);
 	CAccount& operator=(const CAccount& other);
-public:
 
+public:
 	lpctstr GetDefStr( lpctstr ptcKey, bool fZero = false ) const
     {
         return m_BaseDefs.GetKeyStr( ptcKey, fZero );
@@ -204,15 +204,7 @@ public:
 	* @param what resdisp to set.
 	* @return true on success, false otherwise.
 	*/
-	bool SetResDisp(byte what)
-	{
-		if (what >= RDS_T2A && what < RDS_QTY)
-		{
-			m_ResDisp = what;
-			return true;
-		}
-		return false;
-	}
+	bool SetResDisp(byte what);
 	/**
 	* @brief Gets the current resdisp on this CAccount.
 	* @return The current resdisp.
@@ -223,12 +215,7 @@ public:
 	* @param what the resdisp to update.
 	* @return true if success, false otherwise.
 	*/
-	bool SetGreaterResDisp(byte what)
-	{
-		if ( what > m_ResDisp )
-			return SetResDisp( what );
-		return false;
-	}
+	bool SetGreaterResDisp(byte what);
 	/**
 	* @brief Sets the resdisp on this CAccount based on pClient version.
 	* @return true if success, false otherwise.
@@ -301,9 +288,9 @@ public:
 	* @brief Updates context information on logout.
 	* Updates total time connected.
 	* @param pClient client logging out from this CAccount.
-	* @param bWasChar true if is logged with a CChar.
+	* @param fWasChar true if is logged with a CChar.
 	*/
-	void OnLogout(CClient *pClient, bool bWasChar = false);
+	void OnLogout(CClient *pClient, bool fWasChar = false);
 	/**
 	* @brief Kick / Ban a player.
 	* Only if plevel of CAccount is higher than SRC plevel, do not kick or ban.
@@ -320,16 +307,13 @@ public:
 	* @brief Get the max chars count for this CAccount.
 	* @return the max chars for this CAccount.
 	*/
-	byte GetMaxChars() const
-	{
-		return minimum(m_MaxChars > 0? m_MaxChars : g_Cfg.m_iMaxCharsPerAccount, MAX_CHARS_PER_ACCT);
-	}
+	byte GetMaxChars() const;
 	/**
 	* @brief Set the max chars for this acc.
 	* The max is set only if the current number of chars is lesser than the new value.
 	* @param chars New value for max chars.
 	*/
-	void SetMaxChars(byte chars) { m_MaxChars = minimum(chars, MAX_CHARS_PER_ACCT); }
+	void SetMaxChars(byte chars);
 	/**
 	* @brief Check if a CChar is owned by this CAccount.
 	* @param pChar CChar to check.

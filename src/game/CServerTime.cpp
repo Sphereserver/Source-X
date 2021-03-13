@@ -3,10 +3,7 @@
 
 int64 CServerTime::GetTimeRaw() const
 {
-	if ( m_llPrivateTime < 0 )
-		return 0;
-
-	return m_llPrivateTime;
+	return (m_llPrivateTime < 0) ? 0 : m_llPrivateTime;
 }
 
 void CServerTime::Init()
@@ -14,45 +11,30 @@ void CServerTime::Init()
 	m_llPrivateTime = 0;
 }
 
-void CServerTime::InitTime( int64 llTimeBase )
+void CServerTime::InitTime( int64 llTimeBase ) noexcept
 {
-	if ( llTimeBase < 0 )
-		llTimeBase = 0;
-
-	m_llPrivateTime = llTimeBase;
+	m_llPrivateTime = (llTimeBase < 0) ? 0 : llTimeBase;
 }
 
-bool CServerTime::IsTimeValid() const
+bool CServerTime::IsTimeValid() const noexcept
 {
-	return ( m_llPrivateTime > 0 ? true : false );
+	return bool(m_llPrivateTime > 0);
 }
 
-CServerTime CServerTime::operator+( int64 llTimeDiff ) const
+CServerTime CServerTime::operator+( int64 llTimeDiff ) const noexcept
 {
-	CServerTime time;
-	time.m_llPrivateTime = m_llPrivateTime + llTimeDiff;
-	if ( time.m_llPrivateTime < 0 )
-		time.m_llPrivateTime = 0;
-
-	return time;
+	return CServerTime(m_llPrivateTime + llTimeDiff);
 }
 
-CServerTime CServerTime::operator-( int64 llTimeDiff ) const
+CServerTime CServerTime::operator-( int64 llTimeDiff ) const noexcept
 {
-	CServerTime time;
-	time.m_llPrivateTime = m_llPrivateTime - llTimeDiff;
-	if ( time.m_llPrivateTime < 0 )
-		time.m_llPrivateTime = 0;
-
-	return time;
+    return CServerTime(m_llPrivateTime - llTimeDiff);
 }
 
 
 lpctstr CServerTime::GetTimeMinDesc(int minutes) // static
 {
-    tchar* pTime = Str_GetTemp();
-
-    int minute = minutes % 60;
+    const int minute = minutes % 60;
     int hour = (minutes / 60) % 24;
 
     lpctstr pMinDif;
@@ -115,7 +97,9 @@ lpctstr CServerTime::GetTimeMinDesc(int minutes) // static
 
     lpctstr pTail;
     if (hour == 0 || hour == 12)
+    {
         pTail = "";
+    }
     else if (hour > 12)
     {
         hour -= 12;
@@ -135,6 +119,7 @@ lpctstr CServerTime::GetTimeMinDesc(int minutes) // static
         //		pTail = " o'clock in the morning";
     }
 
+    tchar* pTime = Str_GetTemp();
     snprintf(pTime, STR_TEMPLENGTH, "%s %s %s", pMinDif, sm_ClockHour[hour], pTail);
     return pTime;
 }

@@ -2649,13 +2649,16 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 {
 	ADDTOCALLSTACK("CClient::Setup_Start");
 	// Play this char.
+
 	ASSERT( GetAccount() );
 	ASSERT( pChar );
 
-	CharDisconnect();	// I'm already logged in as someone else ?
-	m_pAccount->m_uidLastChar = pChar->GetUID();
+	CAccount* pAccount = GetAccount();
 
-	g_Log.Event( LOGM_CLIENTS_LOG, "%x:Character startup for account '%s', char '%s'. IP='%s'.\n", GetSocketID(), GetAccount()->GetName(), pChar->GetName(), GetPeerStr() );
+	CharDisconnect();	// I'm already logged in as someone else ?
+	pAccount->m_uidLastChar = pChar->GetUID();
+
+	g_Log.Event( LOGM_CLIENTS_LOG, "%x:Character startup for account '%s', char '%s'. IP='%s'.\n", GetSocketID(), pAccount->GetName(), pChar->GetName(), GetPeerStr() );
 
 	if ( GetPrivLevel() > PLEVEL_Player )		// GMs should login with invul and without allshow flag set
 	{
@@ -2693,7 +2696,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 				g_Serv.StatGet(SERV_STAT_CLIENTS)-1 );
 			addSysMessage(z);
 
-            const lpctstr ptcLastLogged = GetAccount()->m_TagDefs.GetKeyStr("LastLogged");
+            const lpctstr ptcLastLogged = pAccount->m_TagDefs.GetKeyStr("LastLogged");
             if (!IsStrEmpty(ptcLastLogged))
             {
                 snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg( DEFMSG_LOGIN_LASTLOGGED ), ptcLastLogged);
@@ -2703,7 +2706,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 		if ( m_pChar->m_pArea && m_pChar->m_pArea->IsGuarded() && !m_pChar->m_pArea->IsFlag(REGION_FLAG_ANNOUNCE) )
 		{
 			const CVarDefContStr * pVarStr = dynamic_cast <CVarDefContStr *>( m_pChar->m_pArea->m_TagDefs.GetKey("GUARDOWNER"));
-			SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_GUARDSP), ( pVarStr ) ? pVarStr->GetValStr() : g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_GUARDSPT));
+			SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_GUARDSP), (pVarStr ? pVarStr->GetValStr() : g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_GUARDSPT)) );
 			if ( m_pChar->m_pArea->m_TagDefs.GetKeyNum("RED") )
 				SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_REDDEF), g_Cfg.GetDefaultMsg(DEFMSG_MSG_REGION_REDENTER));
 		}
@@ -2715,33 +2718,46 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 		addSysMessage(z);
 	}
 	if ( IsPriv(PRIV_JAILED) )
-		m_pChar->Jail(&g_Serv, true, (int)(GetAccount()->m_TagDefs.GetKeyNum("JailCell")));
+		m_pChar->Jail(&g_Serv, true, (int)(pAccount->m_TagDefs.GetKeyNum("JailCell")));
 	if ( g_Serv.m_timeShutdown > 0 )
 		addBarkParse(g_Cfg.GetDefaultMsg(DEFMSG_MSG_SERV_SHUTDOWN_SOON), nullptr, HUE_TEXT_DEF, TALKMODE_SAY, FONT_BOLD);
 
-	GetAccount()->m_TagDefs.DeleteKey("LastLogged");
+	pAccount->m_TagDefs.DeleteKey("LastLogged");
 	Announce(true);		// announce you to the world
 
 	// Don't login on the water, bring us to nearest shore (unless I can swim)
 	if ( !IsPriv(PRIV_GM) && !m_pChar->Can(CAN_C_SWIM) && m_pChar->IsSwimming() )
 	{
-		int iDist = 1;
-		int i;
-		for ( i = 0; i < 20; ++i )
-		{
-			int iDistNew = iDist + 20;
-			for ( int iDir = DIR_NE; iDir <= DIR_NW; iDir += 2 )	// try diagonal in all directions
-			{
-				if ( m_pChar->MoveToValidSpot((DIR_TYPE)(iDir), iDistNew, iDist) )
-				{
-					i = 100;
-					break;
-				}
-			}
-			iDist = iDistNew;
-		}
-		addSysMessage( g_Cfg.GetDefaultMsg( i < 100 ? DEFMSG_MSG_REGION_WATER_1 : DEFMSG_MSG_REGION_WATER_2) );
+		m_pChar->MoveToNearestShore();
 	}
+
+	// If the char goes offline, we don't want its items to tick anymore when the timer expires.
+	// In the case the offline char logs in again, add its items with a TIMER to the ticking list.
+	m_pChar->TickingListRecursiveAdd();
+
+	/*
+	* // If ever we want to change how timers are suspended...
+	* 
+	if (m_pChar->IsPlayer())
+	{
+		// When a character logs out, its timer and its contents' timers has to freeze.
+		// The timeout is stored as server time (not real world time) in milliseconds.
+		// When a char logs out, the logout server time is stored.
+		// When the char logs in again, move forward its timers by the time it spent offline.
+		if (m_pChar->m_pPlayer->_iTimeLastDisconnected > 0)
+		{
+			const int64 iDelta = CWorldGameTime::GetCurrentTime().GetTimeRaw() - m_pChar->m_pPlayer->_iTimeLastDisconnected;
+			if (iDelta < 0)
+			{
+				g_Log.EventWarn("World Time was manually changed. The TIMERs belonging to the char '%s' (UID=0%x) couldn't be frozen during its logout.\n", m_pChar->GetName(), m_pChar->GetUID().GetObjUID());
+			}
+			else
+			{
+				m_pChar->TimeoutRecursiveResync(iDelta);
+			}
+		}
+	}
+	*/
 
 	DEBUG_MSG(( "%x:Setup_Start done\n", GetSocketID()));
 
@@ -2776,8 +2792,8 @@ byte CClient::Setup_Play( uint iSlot ) // After hitting "Play Character" button
 
 	// LastLogged update
 	CSTime datetime = CSTime::GetCurrentTime();
-	pAccount->m_TagDefs.SetStr("LastLogged", false, pAccount->m_dateLastConnect.Format(nullptr));
-	pAccount->m_dateLastConnect = datetime;
+	pAccount->m_TagDefs.SetStr("LastLogged", false, pAccount->_dateConnectedLast.Format(nullptr));
+	pAccount->_dateConnectedLast = datetime;
 
 	return Setup_Start( pChar );
 }

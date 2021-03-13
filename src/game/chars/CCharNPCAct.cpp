@@ -2127,17 +2127,25 @@ void CChar::NPC_OnTickAction()
 	// What action should we take now ?
 	EXC_TRY("NPC_TickAction");
 
+	const SKILL_TYPE iSkillActive = Skill_GetActive();
     if (!m_pArea)
     {
         const CPointMap& pt = GetUnkPoint();
-        if (pt.IsValidPoint())
-            DEBUG_WARN(("Trying to Tick Action on an NPC placed in an invalid area (P=%s). UID=0% " PRIx32 ", defname=%s.\n", pt.WriteUsed(), GetUID().GetObjUID(), GetResourceName()));
-        else
-            DEBUG_WARN(("Trying to Tick Action on unplaced NPC. UID=0% " PRIx32 ", defname=%s.\n", GetUID().GetObjUID(), GetResourceName()));
+		if (pt.IsValidPoint())
+		{
+			if (iSkillActive != NPCACT_RIDDEN)
+			{
+				g_Log.EventWarn("Trying to Tick Action on an NPC placed in an invalid area (P=%s). UID=0% " PRIx32 ", defname=%s.\n", pt.WriteUsed(), GetUID().GetObjUID(), GetResourceName());
+			}
+		}
+		else
+		{
+			g_Log.EventWarn("Trying to Tick Action on unplaced NPC. UID=0% " PRIx32 ", defname=%s.\n", GetUID().GetObjUID(), GetResourceName());
+		}
         return;
     }
 
-	const SKILL_TYPE iSkillActive = Skill_GetActive();
+	
     bool fSkillFight = false;
 	if ( g_Cfg.IsSkillFlag( iSkillActive, SKF_SCRIPTED ) )
 	{

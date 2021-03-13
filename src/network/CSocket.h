@@ -38,7 +38,7 @@
 void AddSocketToSet(fd_set& fds, SOCKET socket, int& count);
 
 
-struct CSocketAddressIP : public in_addr
+struct CSocketAddressIP : protected in_addr
 {
 	// Just the ip address. Not the port.
 #define SOCKET_LOCAL_ADDRESS 0x0100007f
@@ -64,8 +64,8 @@ public:
 	bool IsMatchIP( const CSocketAddressIP & ip ) const;
 
 	bool SetHostStruct( const struct hostent * pHost );
-
 	bool SetHostStr( lpctstr pszHostName );
+
 	bool operator==( const CSocketAddressIP & ip ) const;
 };
 
@@ -84,8 +84,12 @@ public:
 	explicit CSocketAddress( const sockaddr_in & SockAddrIn );
 	
 	bool operator==( const CSocketAddress & SockAddr ) const;
-	CSocketAddress & operator = ( const struct sockaddr_in & SockAddrIn );
 	bool operator==( const struct sockaddr_in & SockAddrIn ) const;
+	CSocketAddress& operator = (const struct sockaddr_in& SockAddrIn);
+
+	CSocketAddress& operator = (const CSocketAddressIP&) = delete;
+	operator const CSocketAddressIP& () const = delete;
+	operator CSocketAddressIP& () = delete;
 
 	// compare to sockaddr_in
 	struct sockaddr_in GetAddrPort() const;

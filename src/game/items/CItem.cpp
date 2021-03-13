@@ -2318,12 +2318,18 @@ void CItem::r_Write( CScript & s )
 
 	CObjBase::r_Write(s);
 
-    const ITEMID_TYPE iDispID = GetDispID();
-	if ( iDispID != GetID() )	// the item is flipped.
+	{
+	const ITEMID_TYPE iDispID = GetDispID();
+	if (iDispID != GetID())	// the item is flipped.
 		s.WriteKey("DISPID", g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, iDispID)));
-    const int iAmount = GetAmount();
-	if ( iAmount != 1 )
+	}
+
+	{
+	const int iAmount = GetAmount();
+	if (iAmount != 1)
 		s.WriteKeyVal("AMOUNT", iAmount);
+	}
+
 	if ( !pItemDef->IsType(m_type) )
 		s.WriteKey("TYPE", g_Cfg.ResourceGetName(CResourceID(RES_TYPEDEF, m_type)));
 	if ( m_uidLink.IsValidUID() )
@@ -2336,15 +2342,14 @@ void CItem::r_Write( CScript & s )
 		s.WriteKeyFormat("ARMOR", "%hu,%hu", m_defenseBase, m_defenseBase + m_defenseRange);
     if (!GetSpawn())
     {
+		CSString sVal;
         if ( m_itNormal.m_more1 )
         {
-            CSString sVal;
             r_WriteMore1(sVal);
             s.WriteKey("MORE1", sVal);
         }
         if ( m_itNormal.m_more2 )
         {
-            CSString sVal;
             r_WriteMore2(sVal);
             s.WriteKey("MORE2", sVal);
         }
@@ -2352,8 +2357,7 @@ void CItem::r_Write( CScript & s )
             s.WriteKey("MOREP", m_itNormal.m_morep.WriteUsed());
     }
 
-	const CObjBase *pCont = GetContainer();
-	if ( pCont )
+	if (const CObjBase* pCont = GetContainer())
 	{
 		if ( pCont->IsChar() )
 		{
@@ -2361,6 +2365,7 @@ void CItem::r_Write( CScript & s )
 			if ( iEqLayer >= LAYER_HORSE )
 				s.WriteKeyVal("LAYER", iEqLayer);
 		}
+
 		s.WriteKeyHex("CONT", pCont->GetUID());
 		if ( pCont->IsItem() )
 		{
@@ -3106,6 +3111,10 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 					SERVMODE_TYPE iModeCode = g_Serv.GetServerMode();
 					if ((iModeCode == SERVMODE_Loading) || (iModeCode == SERVMODE_GarbageCollection))
 						Delete();	//	since the item is no longer in container, it should be deleted
+				}
+				else
+				{
+					RemoveFromView(nullptr, true);
 				}
 				return normcont;
 			}

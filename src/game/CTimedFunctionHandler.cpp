@@ -8,7 +8,6 @@
 
 
 #define TF_TICK_MAGIC_NUMBER		99
-#define TF_TICK_MAGIC_NUMBER_STR	"99"
 
 
 CTimedFunctionHandler::CTimedFunctionHandler() :
@@ -221,7 +220,7 @@ void CTimedFunctionHandler::r_Write( CScript & s )
 		if (uid.IsValidUID())
 		{
 			s.WriteKeyFormat("TimerFCall", "%s", tf->GetCommand());
-			s.WriteKeyFormat("TimerFNumbers", TF_TICK_MAGIC_NUMBER_STR ",%u,%d", uid.GetObjUID(), tf->GetTimerDiff());
+			s.WriteKeyFormat("TimerFNumbers", STRINGIFY(TF_TICK_MAGIC_NUMBER) ",%u,%d", uid.GetObjUID(), tf->GetTimerDiff());
 		}
 	}
 }

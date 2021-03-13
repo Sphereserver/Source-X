@@ -8,6 +8,7 @@
 #include "../CWorldGameTime.h"
 #include "CAccount.h"
 #include "CClient.h"
+#include <algorithm>
 
 
 //**********************************************************************
@@ -278,7 +279,7 @@ bool CAccounts::Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr ptcArg
 
 	pAccount = new CAccount(szName);
 	ASSERT(pAccount);
-	pAccount->m_dateFirstConnect = pAccount->m_dateLastConnect = CSTime::GetCurrentTime();
+	pAccount->_dateConnectedFirst = pAccount->_dateConnectedLast = CSTime::GetCurrentTime();
 
 	pAccount->SetPassword(ptcArg, md5);
 	return true;
@@ -334,11 +335,11 @@ bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, lpctstr pszDays, lpctstr psz
 		if ( pAccount == nullptr )
 			break;
 
-		int iDaysAcc = pAccount->m_dateLastConnect.GetDaysTotal();
+		int iDaysAcc = pAccount->_dateConnectedLast.GetDaysTotal();
 		if ( ! iDaysAcc )
 		{
 			// account has never been used ? (get create date instead)
-			iDaysAcc = pAccount->m_dateFirstConnect.GetDaysTotal();
+			iDaysAcc = pAccount->_dateConnectedFirst.GetDaysTotal();
 		}
 
 		if ( (iDaysCur - iDaysAcc) < iDaysTest ) continue;
@@ -471,7 +472,7 @@ bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 		snprintf(z, STR_TEMPLENGTH, 
 			"Account '%s': PLEVEL:%d, BLOCK:%d, IP:%s, CONNECTED:%s, ONLINE:%s\n",
 			pAccount->GetName(), pAccount->GetPrivLevel(), pAccount->IsPriv(PRIV_BLOCKED),
-			pAccount->m_Last_IP.GetAddrStr(), pAccount->m_dateLastConnect.Format(nullptr),
+			pAccount->m_Last_IP.GetAddrStr(), pAccount->_dateConnectedLast.Format(nullptr),
 			( pClient ? ( pClient->GetChar() ? pClient->GetChar()->GetName() : "<not logged>" ) : "no" )
 		);
 		pSrc->SysMessage(z);
@@ -568,8 +569,8 @@ CAccount::CAccount( lpctstr pszName, bool fGuest )
     _iMaxHouses = g_Cfg._iMaxHousesAccount;
     _iMaxShips = g_Cfg._iMaxShipsAccount;
 
-	m_Total_Connect_Time = 0;
-	m_Last_Connect_Time = 0;
+	_iTimeConnectedTotal = 0;
+	_iTimeConnectedLast = 0;
 	// Add myself to the list.
 	g_Accounts.Account_Add( this );
 }
@@ -630,6 +631,16 @@ CClient * CAccount::FindClient( const CClient * pExclude ) const
 			break;
 	}
 	return( pClient );
+}
+
+byte CAccount::GetMaxChars() const
+{
+	return std::min((m_MaxChars > 0 ? m_MaxChars : g_Cfg.m_iMaxCharsPerAccount), MAX_CHARS_PER_ACCT);
+}
+
+void CAccount::SetMaxChars(byte chars)
+{
+	m_MaxChars = minimum(chars, MAX_CHARS_PER_ACCT);
 }
 
 bool CAccount::IsMyAccountChar( const CChar * pChar ) const
@@ -709,10 +720,10 @@ void CAccount::OnLogin( CClient * pClient )
 	// Get the real world time/date.
 	CSTime datetime = CSTime::GetCurrentTime();
 
-	if ( !m_Total_Connect_Time )	// first time - save first ip and timestamp
+	if ( !_iTimeConnectedTotal )	// first time - save first ip and timestamp
 	{
-		m_First_IP = pClient->GetPeer();
-		m_dateFirstConnect = datetime;
+		m_First_IP.SetAddrIP(pClient->GetPeer().GetAddrIP());
+		_dateConnectedFirst = datetime;
 	}
 
 	if ( pClient->GetConnectType() == CONNECT_TELNET )
@@ -724,29 +735,29 @@ void CAccount::OnLogin( CClient * pClient )
 	g_Log.Event( LOGM_CLIENTS_LOG, "%x:Login for account '%s'. IP='%s'. ConnectionType: %s.\n",
 		pClient->GetSocketID(), GetName(), pClient->GetPeerStr(), pClient->GetConnectTypeStr(pClient->GetConnectType()) );
 
-	m_Last_IP = pClient->GetPeer();
-	//m_TagDefs.SetStr("LastLogged", false, m_dateLastConnect.Format(nullptr));
-	//m_dateLastConnect = datetime;
+	m_Last_IP.SetAddrIP(pClient->GetPeer().GetAddrIP());
+	//m_TagDefs.SetStr("LastLogged", false, _dateConnectedLast.Format(nullptr));
+	//_dateConnectedLast = datetime;
 }
 
-void CAccount::OnLogout(CClient *pClient, bool bWasChar)
+void CAccount::OnLogout(CClient *pClient, bool fWasChar)
 {
 	ADDTOCALLSTACK("CAccount::OnLogout");
 	ASSERT(pClient);
 
 	if ( pClient->GetConnectType() == CONNECT_TELNET ) // unlink the admin client.
-		g_Serv.m_iAdminClients --;
+		-- g_Serv.m_iAdminClients;
 
 	// calculate total game time. skip this calculation in
 	// case if it was login type packet. it has the same type,
 	// so we should check whatever player is attached to a char
-	if ( pClient->IsConnectTypePacket() && bWasChar )
+	if ( pClient->IsConnectTypePacket() && fWasChar )
 	{
-		m_Last_Connect_Time = ( CWorldGameTime::GetCurrentTime().GetTimeDiff(pClient->m_timeLogin) ) / (MSECS_PER_SEC * 60 );
-		if ( m_Last_Connect_Time < 0 )
-			m_Last_Connect_Time = 0;
+		_iTimeConnectedLast = (CWorldGameTime::GetCurrentTime().GetTimeDiff(pClient->m_timeLogin) ) / (MSECS_PER_SEC * 60 );
+		if ( _iTimeConnectedLast < 0 )
+			_iTimeConnectedLast = 0;
 
-		m_Total_Connect_Time += m_Last_Connect_Time;
+		_iTimeConnectedTotal += _iTimeConnectedLast;
 	}
 }
 
@@ -773,7 +784,6 @@ bool CAccount::Kick( CTextConsole * pSrc, bool fBlock )
 
 	return true;
 }
-
 
 bool CAccount::CheckPasswordTries(CSocketAddress csaPeerName)
 {
@@ -1017,6 +1027,23 @@ void CAccount::SetNewPassword( lpctstr pszPassword )
 		m_sNewPassword.Resize(MAX_ACCOUNT_PASSWORD_ENTER);
 }
 
+bool CAccount::SetResDisp(byte what)
+{
+	if (what >= RDS_T2A && what < RDS_QTY)
+	{
+		m_ResDisp = what;
+		return true;
+	}
+	return false;
+}
+
+bool CAccount::SetGreaterResDisp(byte what)
+{
+	if (what > m_ResDisp)
+		return SetResDisp(what);
+	return false;
+}
+
 // Set account RESDISP automatically based on player client version
 bool CAccount::SetAutoResDisp(CClient *pClient)
 {
@@ -1024,19 +1051,20 @@ bool CAccount::SetAutoResDisp(CClient *pClient)
 	if ( !pClient )
 		return false;
 
-	if ( pClient->GetNetState()->isClientVersion(MINCLIVER_TOL) )
+	const CNetState* pNS = pClient->GetNetState();
+	if (pNS->isClientVersion(MINCLIVER_TOL))
 		return SetResDisp(RDS_TOL);
-	else if ( pClient->GetNetState()->isClientVersion(MINCLIVER_HS) )
+	else if (pNS->isClientVersion(MINCLIVER_HS))
 		return SetResDisp(RDS_HS);
-	else if ( pClient->GetNetState()->isClientVersion(MINCLIVER_SA) )
+	else if (pNS->isClientVersion(MINCLIVER_SA))
 		return SetResDisp(RDS_SA);
-	else if ( pClient->GetNetState()->isClientVersion(MINCLIVER_ML) )
+	else if (pNS->isClientVersion(MINCLIVER_ML))
 		return SetResDisp(RDS_ML);
-	else if ( pClient->GetNetState()->isClientVersion(MINCLIVER_SE) )
+	else if (pNS->isClientVersion(MINCLIVER_SE))
 		return SetResDisp(RDS_SE);
-	else if ( pClient->GetNetState()->isClientVersion(MINCLIVER_AOS) )
+	else if (pNS->isClientVersion(MINCLIVER_AOS))
 		return SetResDisp(RDS_AOS);
-	else if ( pClient->GetNetState()->isClientVersion(MINCLIVER_LBR) )
+	else if (pNS->isClientVersion(MINCLIVER_LBR))
 		return SetResDisp(RDS_LBR);
 	else
 		return SetResDisp(RDS_T2A);
@@ -1193,7 +1221,7 @@ bool CAccount::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 			sVal.FormatSTVal( m_TagDefs.GetCount() );
 			break;
 		case AC_FIRSTCONNECTDATE:
-			sVal = m_dateFirstConnect.Format(nullptr);
+			sVal = _dateConnectedFirst.Format(nullptr);
 			break;
 		case AC_FIRSTIP:
 			sVal = m_First_IP.GetAddrStr();
@@ -1211,10 +1239,10 @@ bool CAccount::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 			sVal.FormatHex( m_uidLastChar );
 			break;
 		case AC_LASTCONNECTDATE:
-			sVal = m_dateLastConnect.Format(nullptr);
+			sVal = _dateConnectedLast.Format(nullptr);
 			break;
 		case AC_LASTCONNECTTIME:
-			sVal.FormatLLVal( m_Last_Connect_Time );
+			sVal.FormatLLVal( _iTimeConnectedLast );
 			break;
 		case AC_LASTIP:
 			sVal = m_Last_IP.GetAddrStr();
@@ -1267,7 +1295,7 @@ bool CAccount::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 				break;
 			}
 		case AC_TOTALCONNECTTIME:
-			sVal.FormatLLVal( m_Total_Connect_Time );
+			sVal.FormatLLVal( _iTimeConnectedTotal );
 			break;
 
 		default:
@@ -1309,7 +1337,7 @@ bool CAccount::r_LoadVal( CScript & s )
 			// just ignore this ? chars are loaded later !
 			if ( ! g_Serv.IsLoading())
 			{
-				CUID uid( s.GetArgVal());
+				const CUID uid( s.GetArgVal());
 				CChar * pChar = uid.CharFind();
 				if (pChar == nullptr)
 				{
@@ -1328,7 +1356,7 @@ bool CAccount::r_LoadVal( CScript & s )
 			m_sChatName = s.GetArgStr();
 			break;
 		case AC_FIRSTCONNECTDATE:
-			m_dateFirstConnect.Read( s.GetArgStr());
+			_dateConnectedFirst.Read( s.GetArgStr());
 			break;
 		case AC_FIRSTIP:
 			m_First_IP.SetAddrStr( s.GetArgStr());
@@ -1361,17 +1389,17 @@ bool CAccount::r_LoadVal( CScript & s )
 			m_uidLastChar.SetObjUID(s.GetArgDWVal());
 			break;
 		case AC_LASTCONNECTDATE:
-			m_dateLastConnect.Read( s.GetArgStr());
+			_dateConnectedLast.Read( s.GetArgStr());
 			break;
 		case AC_LASTCONNECTTIME:
 			// Previous total amount of time in game
-			m_Last_Connect_Time = s.GetArgVal();
+			_iTimeConnectedLast = s.GetArgLLVal();
 			break;
 		case AC_LASTIP:
 			m_Last_IP.SetAddrStr( s.GetArgStr());
 			break;
 		case AC_MAXCHARS:
-			SetMaxChars( (uchar)(s.GetArgVal()) );
+			SetMaxChars( s.GetArgUCVal() );
 			break;
         case AC_MAXHOUSES:
             _iMaxHouses = s.GetArgUCVal();
@@ -1417,7 +1445,7 @@ bool CAccount::r_LoadVal( CScript & s )
 
 		case AC_TOTALCONNECTTIME:
 			// Previous total amount of time in game
-			m_Total_Connect_Time = s.GetArgVal();
+			_iTimeConnectedTotal = s.GetArgLLVal();
 			break;
 
 		default:
@@ -1472,13 +1500,13 @@ void CAccount::r_Write(CScript &s)
 	{
 		s.WriteKey( "NEWPASSWORD", GetNewPassword() );
 	}
-	if ( m_Total_Connect_Time )
+	if ( _iTimeConnectedTotal )
 	{
-		s.WriteKeyVal( "TOTALCONNECTTIME", m_Total_Connect_Time );
+		s.WriteKeyVal( "TOTALCONNECTTIME", _iTimeConnectedTotal );
 	}
-	if ( m_Last_Connect_Time )
+	if ( _iTimeConnectedLast )
 	{
-		s.WriteKeyVal( "LASTCONNECTTIME", m_Last_Connect_Time );
+		s.WriteKeyVal( "LASTCONNECTTIME", _iTimeConnectedLast );
 	}
 	if ( m_uidLastChar.IsValidUID())
 	{
@@ -1495,18 +1523,18 @@ void CAccount::r_Write(CScript &s)
 
 	m_Chars.WritePartyChars(s);
 
-	if ( m_dateFirstConnect.IsTimeValid())
+	if ( _dateConnectedFirst.IsTimeValid())
 	{
-		s.WriteKey( "FIRSTCONNECTDATE", m_dateFirstConnect.Format(nullptr));
+		s.WriteKey( "FIRSTCONNECTDATE", _dateConnectedFirst.Format(nullptr));
 	}
 	if ( m_First_IP.IsValidAddr() )
 	{
 		s.WriteKey( "FIRSTIP", m_First_IP.GetAddrStr());
 	}
 
-	if ( m_dateLastConnect.IsTimeValid())
+	if ( _dateConnectedLast.IsTimeValid())
 	{
-		s.WriteKey( "LASTCONNECTDATE", m_dateLastConnect.Format(nullptr));
+		s.WriteKey( "LASTCONNECTDATE", _dateConnectedLast.Format(nullptr));
 	}
 	if ( m_Last_IP.IsValidAddr() )
 	{

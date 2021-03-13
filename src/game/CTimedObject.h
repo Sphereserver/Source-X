@@ -38,12 +38,17 @@ public:
     * @brief returns the profiler type.
     * @return the type.
     */
-    inline PROFILE_TYPE GetProfileType() const;
+    inline PROFILE_TYPE GetProfileType() const noexcept;
+
+    /**
+     * @brief   Determine if the object is in a "tickable" state.
+    */
+    virtual bool CanTick() const;
 
     /**
      * @brief   Executes the tick action.
      * @return  true if it succeeds, false if it fails.
-     */
+    */
     virtual bool OnTick();
 
     /*
@@ -53,20 +58,26 @@ public:
     virtual bool IsDeleted() const = 0;
 
     /**
-     * @brief   &lt; Timer.
-     * @param   iDelayInMsecs   Zero-based index of the delay in milliseconds.
+     * @brief   &lt; Gets raw Timeout.
+     * @return  Delay in milliseconds.
+     */
+    inline int64 GetTimeoutRaw() const noexcept;
+
+    /**
+     * @brief   &lt; Set raw Timeout.
+     * @param   iDelayInMsecs   Delay in milliseconds.
      */
     virtual void SetTimeout(int64 iDelayInMsecs);
 
     /**
     * @brief   &lt; Timer.
-    * @param   iDelayInSecs   Zero-based index of the delay in seconds.
+    * @param   iDelayInSecs   Delay in seconds.
     */
     void SetTimeoutS(int64 iSeconds);
 
     /**
     * @brief   &lt; Timer.
-    * @param   iDelayInTenths   Zero-based index of the delay in tenths of second.
+    * @param   iDelayInTenths   Delay in tenths of second.
     */
     void SetTimeoutD(int64 iTenths);
 
@@ -74,7 +85,7 @@ public:
      * @brief   Query if this object is timer set.
      * @return  true if timer set, false if not.
      */
-    inline bool IsTimerSet() const;
+    inline bool IsTimerSet() const noexcept;
 
     /**
      * @brief   Gets timer difference between current time and stored time.
@@ -110,6 +121,11 @@ public:
 
 /* Inlined methods are defined here */
 
+int64 CTimedObject::GetTimeoutRaw() const noexcept
+{
+    return _iTimeout;
+}
+
 void CTimedObject::ClearTimeout()
 {
     _iTimeout = 0;
@@ -125,9 +141,9 @@ void CTimedObject::GoSleep()
     _fIsSleeping = true;
 }
 
-bool CTimedObject::IsTimerSet() const
+bool CTimedObject::IsTimerSet() const noexcept
 {
-    return _iTimeout > 0;
+    return (_iTimeout > 0);
 }
 
 bool CTimedObject::IsTimerExpired() const
@@ -135,7 +151,7 @@ bool CTimedObject::IsTimerExpired() const
     return (GetTimerDiff() <= 0);
 }
 
-PROFILE_TYPE CTimedObject::GetProfileType() const
+PROFILE_TYPE CTimedObject::GetProfileType() const noexcept
 {
     return _profileType;
 }

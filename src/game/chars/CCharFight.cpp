@@ -174,7 +174,7 @@ void CChar::CallGuards()
 		return;
 
     // Spam check, not calling this more than once per second, which will cause an excess of calls and checks on crowded areas because of the 2 CWorldSearch.
-	if (CWorldGameTime::GetCurrentTime().GetTimeDiff(m_timeLastCallGuards + (1 * MSECS_PER_SEC)) <= 0)
+	if (CWorldGameTime::GetCurrentTime().GetTimeDiff(_iTimeLastCallGuards + (1 * MSECS_PER_SEC)) <= 0)
 		return;
 
 	// We don't have any target yet, let's check everyone nearby
@@ -214,10 +214,10 @@ bool CChar::CallGuards( CChar * pCriminal )
 		return false;
     }
 
-    if (CWorldGameTime::GetCurrentTime().GetTimeDiff(m_timeLastCallGuards + (25 * MSECS_PER_TENTH)) <= 0)	// Spam check
+    if (CWorldGameTime::GetCurrentTime().GetTimeDiff(_iTimeLastCallGuards + (25 * MSECS_PER_TENTH)) <= 0)	// Spam check
         return false;
 
-    m_timeLastCallGuards = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+    _iTimeLastCallGuards = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
 	CChar *pGuard = nullptr;
 	if (m_pNPC && m_pNPC->m_Brain == NPCBRAIN_GUARD)

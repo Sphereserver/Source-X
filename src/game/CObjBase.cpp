@@ -189,22 +189,91 @@ bool CObjBase::IsContainer() const
 	return (dynamic_cast <const CContainer*>(this) != nullptr);
 }
 
+int64 CObjBase::GetTimeStamp() const
+{
+	return m_timestamp;
+}
+
+void CObjBase::SetTimeStamp(int64 t_time)
+{
+	m_timestamp = t_time;
+}
+
+
+void CObjBase::TickingListRecursiveAdd()
+{
+	ADDTOCALLSTACK("CObjBase::TickingListRecursiveAdd");
+	if (IsTimerSet())
+	{
+		CWorldTickingList::AddObjSingle(GetTimeoutRaw(), this);
+	}
+
+	if (CContainer* pCont = dynamic_cast<CContainer*>(this))
+	{
+		for (CSObjContRec* pContRec : pCont->GetIterationSafeContReverse())
+		{
+			CObjBase* pObj = dynamic_cast<CObjBase*>(pContRec);
+			if (pObj && pObj->IsTimerSet())
+			{
+				CWorldTickingList::AddObjSingle(pObj->GetTimeoutRaw(), pObj);
+			}
+		}
+	}
+}
+
+void CObjBase::TickingListRecursiveDel()
+{
+	ADDTOCALLSTACK("CObjBase::TickingListRecursiveDel");
+	if (IsTimerSet())
+	{
+		CWorldTickingList::DelObjSingle(this);
+	}
+
+	if (CContainer* pCont = dynamic_cast<CContainer*>(this))
+	{
+		for (CSObjContRec* pContRec : pCont->GetIterationSafeContReverse())
+		{
+			CObjBase* pObj = dynamic_cast<CObjBase*>(pContRec);
+			if (pObj && pObj->IsTimerSet())
+			{
+				CWorldTickingList::DelObjSingle(pObj);
+			}
+		}
+	}
+}
+
+void CObjBase::TimeoutRecursiveResync(int64 iDelta)
+{
+	ADDTOCALLSTACK("CObjBase::TimeoutRecursiveResync");
+	if (IsTimerSet())
+	{
+		SetTimeout(GetTimeoutRaw() + iDelta);
+	}
+
+	if (CContainer* pCont = dynamic_cast<CContainer*>(this))
+	{
+		for (CSObjContRec* pObjRec : pCont->GetIterationSafeContReverse())
+		{
+			CObjBase* pObj = dynamic_cast<CObjBase*>(pObjRec);
+			ASSERT(pObj);
+			pObj->TimeoutRecursiveResync(iDelta);
+		}
+	}
+}
+
 void CObjBase::SetHueQuick(HUE_TYPE wHue)
 {
 	m_wHue = wHue;
 }
 
-void CObjBase::SetHue( HUE_TYPE wHue, bool fAvoidTrigger, CTextConsole *pSrc, CObjBase *SourceObj, llong sound )
+void CObjBase::SetHue( HUE_TYPE wHue, bool fAvoidTrigger, CTextConsole *pSrc, CObjBase *pSourceObj, llong iSound)
 {
+	ADDTOCALLSTACK("CObjBase::SetHue");
 	if (g_Serv.IsLoading()) //We do not want tons of @Dye being called during world load, just set the hue then continue...
 	{
 		m_wHue = wHue;
 		return;
 	}
-
-	CScriptTriggerArgs args;
-	args.m_iN1=wHue;
-	args.m_iN2=sound;
 
 	/*	@Dye is now more universal, it is called on EVERY CObjBase color change.
 		Sanity checks are recommended and if possible, avoid using it on universal events. */
@@ -213,21 +282,28 @@ void CObjBase::SetHue( HUE_TYPE wHue, bool fAvoidTrigger, CTextConsole *pSrc, CO
         lpctstr ptcTrig = (IsChar() ? CChar::sm_szTrigName[CTRIG_DYE] : CItem::sm_szTrigName[ITRIG_DYE]);
 		if (IsTrigUsed(ptcTrig))
 		{
-			TRIGRET_TYPE iRet;
-			if (SourceObj)
-				args.m_pO1 = SourceObj;
-
-			iRet = OnTrigger(ptcTrig, pSrc, &args);
+			CScriptTriggerArgs args(wHue, iSound, pSourceObj);
+			TRIGRET_TYPE iRet = OnTrigger(ptcTrig, pSrc, &args);
 
 			if (iRet == TRIGRET_RET_TRUE)
 				return;
+
+			if (args.m_iN2 > 0) // No sound? No checks for who can hear, packets...
+			{
+				Sound((SOUND_TYPE)(args.m_iN2));
+			}
+
+			m_wHue = (HUE_TYPE)(args.m_iN1);
+			return;
 		}
 	}
 
-	if (args.m_iN2 > 0) //No sound? No checks for who can hear, packets....
-		Sound((SOUND_TYPE)(args.m_iN2));
+	if (iSound > 0) // No sound? No checks for who can hear, packets...
+	{
+		Sound((SOUND_TYPE)iSound);
+	}
 
-	m_wHue = (HUE_TYPE)(args.m_iN1);
+	m_wHue = wHue;
 }
 
 HUE_TYPE CObjBase::GetHue() const
@@ -289,10 +365,10 @@ lpctstr CObjBase::GetResourceName() const
 	return Base_GetDef()->GetResourceName();
 }
 
-void inline CObjBase::SetNamePool_Fail( tchar * ppTitles )
+void CObjBase::SetNamePool_Fail( tchar * ppTitles )
 {
 	ADDTOCALLSTACK("CObjBase::SetNamePool_Fail");
-	DEBUG_ERR(( "Name pool '%s' could not be found\n", ppTitles ));
+	g_Log.EventError("Name pool '%s' could not be found\n", ppTitles);
 	CObjBase::SetName( ppTitles );
 }
 
@@ -2793,16 +2869,16 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_CLICK:
 			EXC_SET_BLOCK("CLICK");
 
-			if (!pCharSrc)
-				return false;
-
-			if (!pCharSrc->IsClientActive())
+			if (!pCharSrc || !pCharSrc->IsClientActive())
 				return false;
 
 			if (s.HasArgs())
 			{
-				CUID uid(s.GetArgUVal());
-				if ((!uid.ObjFind()) || (!this->IsChar()))
+				if (!IsChar())
+					return false;
+
+				const CUID uid(s.GetArgUVal());
+				if (!uid.ObjFind())
 					return false;
 				pCharSrc->GetClientActive()->Event_SingleClick(uid);
 			}
@@ -2816,14 +2892,15 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				return false;
 			if (s.HasArgs())
 			{
-				CUID uid(s.GetArgDWVal());
-
-				if ((!uid.ObjFind()) || (!this->IsChar()))
+				if (!IsChar())
 					return false;
 
-				CChar *pChar = dynamic_cast <CChar *> (this);
+				CObjBase* pObj = CUID::ObjFindFromUID(s.GetArgDWVal());
+				if (!pObj)
+					return false;
 
-				return pChar->Use_Obj(uid.ObjFind(), true, true);
+				CChar* pChar = static_cast <CChar*> (this);
+				return pChar->Use_Obj(pObj, true, true);
 			}
 			else
 				return pCharSrc->Use_Obj(this, true, true);
@@ -2834,20 +2911,22 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				return false;
 			if ( s.HasArgs() )
 			{
-				CUID uid(s.GetArgDWVal());
-
-				if (( ! uid.ObjFind()) || ( ! this->IsChar() ))
+				if (!IsChar())
 					return false;
 
-				CChar *pChar = dynamic_cast <CChar *> (this);
+				CObjBase* pObj = CUID::ObjFindFromUID(s.GetArgDWVal());
+				if (!pObj)
+					return false;
 
-				return pChar->Use_Obj( uid.ObjFind(), false, true );
+				CChar *pChar = static_cast <CChar *> (this);
+				return pChar->Use_Obj( pObj, false, true );
 			}
 			else
 				return pCharSrc->Use_Obj( this, false, true );
 
 		case OV_FIX:
 			s.GetArgStr()[0] = '\0';
+			FALLTHROUGH;
 		case OV_Z:	//	ussually in "SETZ" form
 			EXC_SET_BLOCK("FIX or Z");
 			if ( IsItemEquipped())
@@ -2858,11 +2937,9 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			}
 			else if ( IsTopLevel())
 			{
-				CChar *pChar = dynamic_cast <CChar *>(this);
-				CItem *pItem = dynamic_cast <CItem *>(this);
-				if ( pChar )
+				if (CChar* pChar = dynamic_cast <CChar*>(this))
 					SetTopZ(pChar->GetFixZ(GetTopPoint()));
-				else if ( pItem )
+				else if (CItem* pItem = dynamic_cast <CItem*>(this))
 					SetTopZ(pItem->GetFixZ(GetTopPoint()));
 				else
 				{
@@ -2911,11 +2988,12 @@ void CObjBase::RemoveFromView( CClient * pClientExclude, bool fHardcoded )
 			continue;
 		if ( pItem && pItem->IsItemEquipped() )
 		{
-			if (( pItem->GetEquipLayer() > LAYER_HORSE ) && ( pItem->GetEquipLayer() != LAYER_BANKBOX ) && ( pItem->GetEquipLayer() != LAYER_DRAGGING ))
+			const LAYER_TYPE iItemLayer = pItem->GetEquipLayer();
+			if ((iItemLayer > LAYER_HORSE) && (iItemLayer != LAYER_BANKBOX) && (iItemLayer != LAYER_DRAGGING))
 				continue;
 		}
 
-		if (this->GetEquipLayer() == LAYER_BANKBOX)
+		if (GetEquipLayer() == LAYER_BANKBOX)
 			pClient->closeContainer(this);
 
 		pClient->addObjectRemove( this );
@@ -2949,7 +3027,8 @@ void CObjBase::ResendOnEquip( bool fAllClients )
 		{
 			if (( pItem->IsItemEquipped() ) && ( !pChar->IsPriv(PRIV_GM) ))
 			{
-				if (( pItem->GetEquipLayer() > LAYER_HORSE ) && ( pItem->GetEquipLayer() != LAYER_BANKBOX ) && ( pItem->GetEquipLayer() != LAYER_DRAGGING ))
+				const LAYER_TYPE iItemLayer = pItem->GetEquipLayer();
+				if ((iItemLayer > LAYER_HORSE) && (iItemLayer != LAYER_BANKBOX) && (iItemLayer != LAYER_DRAGGING))
 					continue;
 			}
 
@@ -2957,7 +3036,7 @@ void CObjBase::ResendOnEquip( bool fAllClients )
 				continue;	// items must be removed from view before equipping in EC when on the floor, however spellbooks cannot be removed from view or client will crash
 		}
 
-		if (this->GetEquipLayer() == LAYER_BANKBOX)
+		if (GetEquipLayer() == LAYER_BANKBOX)
 			pClient->closeContainer(this);
 
 		pClient->addObjectRemove( this );
@@ -3040,6 +3119,22 @@ void CObjBase::OnTickStatusUpdate()
     }
 }
 
+bool CObjBase::CanTick() const
+{
+	ADDTOCALLSTACK_INTENSIVE("CObjBase::CanTick");
+	if (IsSleeping())
+		return false;
+
+	if (const CSObjCont* pParent = GetParent())
+	{
+		const CObjBase* pObjParent = dynamic_cast<const CObjBase*>(pParent);
+		if (pObjParent && !pObjParent->CanTick())	// It calls the virtuals obviously (case of CChar)
+			return false;
+	}
+
+	return true;
+}
+
 void CObjBase::ResendTooltip(bool fSendFull, bool fUseCache)
 {
 	ADDTOCALLSTACK("CObjBase::UpdatePropertyFlag");
@@ -3101,16 +3196,6 @@ void CObjBase::SetSpawn(CCSpawn * spawn)
 CCFaction * CObjBase::GetFaction()
 {
     return static_cast<CCFaction*>(GetComponent(COMP_FACTION));
-}
-
-int64 CObjBase::GetTimeStamp() const
-{
-	return m_timestamp;
-}
-
-void CObjBase::SetTimeStamp( int64 t_time)
-{
-	m_timestamp = t_time;
 }
 
 CSString CObjBase::GetPropStr( const CComponentProps* pCompProps, CComponentProps::PropertyIndex_t iPropIndex, bool fZero, const CComponentProps* pBaseCompProps ) const

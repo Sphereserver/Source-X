@@ -262,22 +262,22 @@ void CWorldTicker::Tick()
                 for (auto it = cont.begin(); it != itContEnd;)
                 {
                     CTimedObject* pTimedObj = *it;
-                    if (pTimedObj->IsTimerSet() && !pTimedObj->IsSleeping()) // Double check
+                    if (pTimedObj->IsTimerSet() && pTimedObj->CanTick())
                     {
                         if (pTimedObj->_iTimeout <= iTime)
                         {
                             vecObjs.emplace_back(static_cast<void*>(pTimedObj));
+
+                            /*
+                            * Doing a SetTimeout() in the object's tick will force CWorld to search for that object's
+                            * current timeout to remove it from any list, prevent that to happen here since it should
+                            * not belong to any other tick than the current one.
+                            */
+                            pTimedObj->ClearTimeout();
+
+                            it = cont.erase(it);
+                            itContEnd = cont.end();
                         }
-
-                        /*
-                        * Doing a SetTimeout() in the object's tick will force CWorld to search for that object's
-                        * current timeout to remove it from any list, prevent that to happen here since it should
-                        * not belong to any other tick than the current one.
-                        */
-                        pTimedObj->ClearTimeout();
-
-                        it = cont.erase(it);
-                        itContEnd = cont.end();
                     }
                     else
                     {
