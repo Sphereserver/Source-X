@@ -472,17 +472,13 @@ void defragSphere(char *path)
 	char	c,c1,c2;
 	dword	d;
 
-	//	NOTE: Sure I could use CVarDefArray, but it is extremely slow with memory allocation, takes hours
-	//		to read and save the data. Moreover, it takes less memory in this case and does less convertations.
-#define	MAX_UID	5000000L	// limit to 5mln of objects, takes 5mln*4 = 20mb
-	dword	*uids;
-
 	g_Log.Event(LOGM_INIT,	"Defragmentation (UID alteration) of " SPHERE_TITLE " saves.\n"
 		"Use it on your risk and if you know what you are doing since it can possibly harm your server.\n"
 		"The process can take up to several hours depending on the CPU you have.\n"
 		"After finished, you will have your '" SPHERE_FILE "*.scp' files converted and saved as '" SPHERE_FILE "*.scp.new'.\n");
 
-	uids = (dword*)calloc(MAX_UID, sizeof(dword));
+	constexpr size_t MAX_UID = 10'000'000L; // limit to 10mln of objects, takes 10mln*4 = 40mb
+	dword* puids = (dword*)calloc(MAX_UID, sizeof(dword));
 	for ( i = 0; i < 3; ++i )
 	{
 		Str_CopyLimitNull(z, path, sizeof(z));
@@ -497,7 +493,7 @@ void defragSphere(char *path)
 			continue;
 		}
 		dBytesRead = dTotalMb = 0;
-		while ( !feof(inf._pStream) )
+		while ((uid < MAX_UID) && !feof(inf._pStream))
 		{
 			fgets(buf, sizeof(buf), inf._pStream);
 			dBytesRead += strlen(buf);
@@ -519,16 +515,16 @@ void defragSphere(char *path)
 				*(p-1) = '0';
 				*p = 'x';
 				--p;
-				uids[uid++] = strtoul(p, &p1, 16);
+				puids[uid++] = strtoul(p, &p1, 16);
 			}
 		}
 		inf.Close();
 	}
 	dTotalUIDs = uid;
-	g_Log.Event(LOGM_INIT, "Totally having %u unique objects (UIDs), latest: 0%x\n", uid, uids[uid]);
+	g_Log.Event(LOGM_INIT, "Totally having %" PRIuSIZE_T " unique objects (UIDs), latest: 0%x\n", uid, puids[uid]);
 
 	g_Log.Event(LOGM_INIT, "Quick-Sorting the UIDs array...\n");
-	dword_q_sort(uids, 0, dTotalUIDs-1);
+	dword_q_sort(puids, 0, dTotalUIDs-1);
 
 	for ( i = 0; i < 5; ++i )
 	{
@@ -660,13 +656,13 @@ void defragSphere(char *path)
 					{
 						dStep /= 2;
 
-						if ( uids[d] == uid )
+						if ( puids[d] == uid )
 						{
-							uid = d | (uids[d]&0xF0000000);	// do not forget attach item and special flags like 04..
+							uid = d | (puids[d]&0xF0000000);	// do not forget attach item and special flags like 04..
 							break;
 						}
 						else
-                            if ( uids[d] < uid ) d += dStep;
+                            if ( puids[d] < uid ) d += dStep;
 						else
                             d -= dStep;
 
@@ -710,7 +706,7 @@ void defragSphere(char *path)
 		inf.Close();
 		ouf.Close();
 	}
-	free(uids);
+	free(puids);
 	g_Log.Event(LOGM_INIT,	"Defragmentation complete.\n");
 }
 
@@ -721,6 +717,8 @@ int Sphere_MainEntryPoint( int argc, char *argv[] )
 int _cdecl main( int argc, char * argv[] )
 #endif
 {
+	static constexpr lpctstr m_sClassName = "main";
+	EXC_TRY("MAIN");
 
 #ifndef _WIN32
     IThread::setThreadName("T_SphereStartup");
@@ -779,6 +777,9 @@ int _cdecl main( int argc, char * argv[] )
 #endif
 
 	return g_Serv.GetExitFlag();
+	EXC_CATCH;
+
+	return -1;
 }
 
 

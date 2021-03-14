@@ -142,6 +142,6 @@ bool CSVFile::_ReadNextRowContent(CSVRowData& target)
 bool CSVFile::ReadNextRowContent(CSVRowData& target)
 {
     ADDTOCALLSTACK("CSVFile::ReadNextRowContent");
-    THREAD_UNIQUE_LOCK_RETURN(_ReadNextRowContent(target));
+    THREAD_UNIQUE_LOCK_RETURN(CSVFile::_ReadNextRowContent(target));
 }
 

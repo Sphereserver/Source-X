@@ -98,6 +98,7 @@ CItem * CWorldMap::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, boo
 	{
 		CPointMap ptZero(0,0,0,pt.m_map);
 		pRegion = dynamic_cast<const CRegionWorld*>(ptZero.GetRegion(REGION_TYPE_AREA));
+		ASSERT(pRegion);
 	}
 
 	// Find RES_REGIONTYPE

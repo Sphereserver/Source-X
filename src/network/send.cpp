@@ -1233,19 +1233,22 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 		if ( fFilterLayers )
 		{
 			const LAYER_TYPE layer = (LAYER_TYPE)(item->GetContainedLayer());
-			ASSERT(layer < LAYER_HORSE);
-			switch ( layer )	// don't put these on a corpse.
+			if ((layer > 0) && (layer < LAYER_HORSE))
 			{
+				switch (layer)	// don't put these on a corpse.
+				{
 				case LAYER_NONE:
 				case LAYER_PACK: // these display strange.
 					continue;
 
 				default:
 					// Make sure that no more than one of each layer goes out to client....crashes otherwise!!
-					if ( fIsLayerSent[layer] )
+					if (fIsLayerSent[layer])
 						continue;
+
 					fIsLayerSent[layer] = true;
 					break;
+				}
 			}
 		}
 
@@ -2407,13 +2410,12 @@ PacketCharacter::PacketCharacter(CClient* target, const CChar* character) : Pack
 		{
 			CItem* item = static_cast<CItem*>(pObjRec);
 			LAYER_TYPE layer = item->GetEquipLayer();
-			if (CItemBase::IsVisibleLayer(layer) == false)
+			if (CItemBase::IsVisibleLayer(layer) == false)	// sanity check for layer value, ensure we don't get out of bounds in isLayerSent array
 				continue;
 			if (viewer->CanSeeItem(item) == false && viewer != character)
 				continue;
 
 			// prevent same layer being sent twice
-			ASSERT(layer <= LAYER_HORSE);
 			if (isLayerSent[layer])
 				continue;
 
@@ -3584,7 +3586,7 @@ void PacketGumpDialog::writeCompressedControls(const CSString* controls, uint co
 
 		int controlLengthActual = 0;
 		for (uint i = 0; i < controlCount; ++i)
-			controlLengthActual += snprintf(&toCompress[controlLengthActual], size_t(controlLength - controlLengthActual), "{%s}", controls[i].GetBuffer());
+			controlLengthActual += snprintf(&toCompress[controlLengthActual], (size_t(controlLength) - controlLengthActual), "{%s}", controls[i].GetBuffer());
 		++ controlLengthActual;
 
 		ASSERT(controlLengthActual == controlLength);

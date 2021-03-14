@@ -218,7 +218,7 @@ tchar * CSFileText::_ReadString( tchar * pBuffer, int sizemax )
 tchar * CSFileText::ReadString( tchar * pBuffer, int sizemax )
 {
     ADDTOCALLSTACK("CSFileText::ReadString");
-    THREAD_UNIQUE_LOCK_RETURN(_ReadString(pBuffer, sizemax));
+    THREAD_UNIQUE_LOCK_RETURN(CSFileText::_ReadString(pBuffer, sizemax));
 }
 
 int CSFileText::_VPrintf( lpctstr pFormat, va_list args )
@@ -237,7 +237,7 @@ int CSFileText::VPrintf(lpctstr pFormat, va_list args)
     ADDTOCALLSTACK("CSFileText::VPrintf");
     ASSERT(pFormat);
 
-    THREAD_UNIQUE_LOCK_RETURN(_VPrintf(pFormat, args));
+    THREAD_UNIQUE_LOCK_RETURN(CSFileText::_VPrintf(pFormat, args));
 }
 
 bool CSFileText::_Write( const void * pData, int iLen )
@@ -267,7 +267,7 @@ bool CSFileText::Write(const void* pData, int iLen)
 {
     // RETURN: 1 = success else fail.
     ADDTOCALLSTACK("CSFileText::Write");
-    THREAD_UNIQUE_LOCK_RETURN(_Write(pData, iLen));
+    THREAD_UNIQUE_LOCK_RETURN(CSFileText::_Write(pData, iLen));
 }
 
 bool CSFileText::_WriteString( lpctstr pStr )
@@ -282,7 +282,7 @@ bool CSFileText::_WriteString( lpctstr pStr )
 bool CSFileText::WriteString(lpctstr pStr)
 {
     ADDTOCALLSTACK("CSFileText::WriteString");
-    THREAD_UNIQUE_LOCK_RETURN(_WriteString(pStr));
+    THREAD_UNIQUE_LOCK_RETURN(CSFileText::_WriteString(pStr));
 }
 
 // CSFileText:: Mode operations.

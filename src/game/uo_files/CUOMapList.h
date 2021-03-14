@@ -11,7 +11,7 @@ class CServerMapDiffCollection;
 
 extern class CUOMapList
 {
-#define MAP_SUPPORTED_QTY 255
+#define MAP_SUPPORTED_QTY 256
 
     friend struct CUOInstall;
     friend class  CSectorList;

@@ -22,9 +22,9 @@ lpctstr const CCharPlayer::sm_szLoadKeys[CPC_QTY+1] =
 };
 
 
-CCharPlayer::CCharPlayer(CChar *pChar, CAccount *pAccount) : 
-	m_pAccount(pAccount),
-	m_SkillLock{}, m_StatLock{}
+CCharPlayer::CCharPlayer(CChar *pChar, CAccount *pAccount) :
+	m_SkillLock{}, m_StatLock{},
+	m_pAccount(pAccount)
 {
 	_iTimeLastUsed = _iTimeLastDisconnected = 0;
 
@@ -116,7 +116,7 @@ SKILL_TYPE CCharPlayer::Skill_GetLockType( lpctstr ptcKey ) const
 		i = atoi( ppArgs[1] );
 	else
 		i = g_Cfg.FindSkillKey( ppArgs[1] );
-	
+
 	if ( i >= g_Cfg.m_iMaxSkill )
 		return SKILL_NONE;
 	return (SKILL_TYPE)i;
@@ -547,7 +547,7 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
         s.WriteKeyVal("SPEECHCOLOR", m_SpeechHue);
     if ( m_EmoteHue )
     	s.WriteKeyVal("EMOTECOLOR", m_EmoteHue);
-        
+
 	EXC_SET_BLOCK("saving dynamic speech");
 	if (!m_Speech.empty())
 	{
@@ -593,7 +593,7 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 	{
 		s.WriteKeyVal("MaxShips", _iMaxShips);
 	}
-	
+
 	const CMultiStorage* pMultiStorage = GetMultiStorage();
 	ASSERT(pMultiStorage);
 	pMultiStorage->r_Write(s);

@@ -41,7 +41,7 @@ enum NPCBRAIN_TYPE	// General AI type.
 class CChar : public CObjBase, public CContainer, public CTextConsole
 {
 	// RES_WORLDCHAR
-    THREAD_CMUTEX_DEF;
+    // THREAD_CMUTEX_DEF; // It inherits from CObjBase which inherits CTimedObject, which already has a class mutex.
 
 private:
 	// Spell type effects.
@@ -78,7 +78,7 @@ private:
 #define STATF_RIDDEN		0x40000000	// This is the horse. (don't display me) I am being ridden
 #define STATF_ONHORSE		0x80000000	// Mounted on horseback.
 
-	uint64 m_iStatFlag;		// Flags above
+	uint64 _uiStatFlag;		// Flags above
 
 	ushort m_Skill[SKILL_QTY];	// List of skills ( skill * 10 )
 
@@ -317,17 +317,28 @@ public:
 	bool NotifyDelete();
 	virtual bool Delete(bool fForce = false) override;
 
-    virtual void GoSleep() override;
-    virtual void GoAwake() override;
+protected:  virtual void _GoSleep() override;
+public:		virtual void  GoSleep() override;
+
+protected:  virtual void _GoAwake() override;
+public:		virtual void  GoAwake() override;
 
 	// Status and attributes ------------------------------------
 	int IsWeird() const;
 
+//protected:	bool _IsStatFlag(uint64 uiStatFlag) const noexcept;
+public:		bool  IsStatFlag(uint64 uiStatFlag) const noexcept;
+
+//protected:	void _StatFlag_Set(uint64 uiStatFlag) noexcept;
+public:		void  StatFlag_Set(uint64 uiStatFlag) noexcept;
+
+//protected:	void _StatFlag_Clear(uint64 uiStatFlag) noexcept;
+public:		void  StatFlag_Clear(uint64 uiStatFlag) noexcept;
+
+//protected:	void _StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
+public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
+
 	char GetFixZ(const CPointMap& pt, dword dwBlockFlags = 0);
-	bool IsStatFlag( uint64 iStatFlag ) const;
-	void StatFlag_Set(uint64 iStatFlag);
-	void StatFlag_Clear(uint64 iStatFlag);
-	void StatFlag_Mod(uint64 iStatFlagStatFlag, bool fMod );
 	bool IsPriv( word flag ) const;
 	PLEVEL_TYPE GetPrivLevel() const;
 
@@ -456,7 +467,7 @@ public:
 	bool MoveToRegionReTest( dword dwType );
 	bool MoveToChar(const CPointMap& pt, bool fStanding = true, bool fCheckLocation = true, bool fForceFix = false, bool fAllowReject = true);
 	bool MoveTo(const CPointMap& pt, bool fForceFix = false);
-	virtual void SetTopZ( char z ) noexcept override;
+	virtual void SetTopZ( char z ) override;
 	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, ushort iSteps = 0 ) override;
 	bool MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart = 1, bool fFromShip = false);
 	bool MoveToNearestShore(bool fNoMsg = false);
@@ -1289,7 +1300,10 @@ public:
 	bool OnAttackedBy( CChar * pCharSrc, bool fPetsCommand = false, bool fShouldReveal = true );
 
 	virtual bool CanTick() const override;
-	virtual bool OnTick() override;  // OnTick timeout for skills, AI, etc
+	
+protected:	virtual bool _OnTick() override final;  // OnTick timeout for skills, AI, etc
+public:		virtual bool  OnTick() override final;
+
 	bool OnTickEquip( CItem * pItem );
 	void OnTickFood( ushort uiVal, int HitsHungerLoss );
 	void OnTickStatusUpdate();

@@ -31,8 +31,8 @@ public:
 	CResourceQtyArray m_FoodType; // FOODTYPE=MEAT 15 (3)
 	ushort m_MaxFood;		// Derived from foodtype...this is the max amount of food we can eat. (based on str ?)
 
-	word  m_defense;		// base defense. (basic to body type) can be modified by armor.
-	dword m_Anims;			// Bitmask of animations available for monsters. ANIM_TYPE
+	word   m_defense;		// base defense. (basic to body type) can be modified by armor.
+	uint64 m_Anims;			// Bitmask of animations available for monsters. ANIM_TYPE
 	HUE_TYPE _wBloodHue;	// when damaged , what color is the blood (-1) = no blood
 	HUE_TYPE m_wColor;
 

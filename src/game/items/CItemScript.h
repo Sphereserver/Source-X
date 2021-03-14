@@ -9,7 +9,7 @@
 #include "CItemVendable.h"
 
 
-class CItemScript : public CItemVendable	// A message for a bboard or book text.
+class CItemScript : public CItemVendable
 {
     // IT_SCRIPT, IT_EQ_SCRIPT
 public:

@@ -2270,9 +2270,9 @@ bool CClient::Event_DoubleClick( CUID uid, bool fMacro, bool fTestTouch, bool fS
 	}
 
 	if ( pObj->IsItem() )
-		return Cmd_Use_Item(dynamic_cast<CItem *>(pObj), fTestTouch, fScript);
+		return Cmd_Use_Item(static_cast<CItem *>(pObj), fTestTouch, fScript);
 
-	CChar * pChar = dynamic_cast<CChar *>(pObj);
+	CChar * pChar = static_cast<CChar *>(pObj);
 	if ( IsTrigUsed(TRIGGER_DCLICK) || IsTrigUsed(TRIGGER_CHARDCLICK) )
 	{
 		if ( pChar->OnTrigger(CTRIG_DClick, m_pChar) == TRIGRET_RET_TRUE )

@@ -215,7 +215,7 @@ CServerConfig::CServerConfig()
 	m_iFeatureTOL		= 0;
 	m_iFeatureExtra		= 0;
 
-	m_iStatFlag			= 0;
+	_uiStatFlag			= 0;
 
 	m_iNpcAi			= 0;
 	m_iMaxLoopTimes		= 100000;
@@ -379,7 +379,7 @@ bool CServerConfig::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 	else if ( iResType == RES_SPELL && *ptcKey == '-' )
 	{
 		++ptcKey;
-		size_t uiOrder = Exp_GetUVal( ptcKey );
+		size_t uiOrder = Exp_GetSTVal( ptcKey );
 		if ( !m_SpellDefs_Sorted.IsValidIndex( uiOrder ) )
 			pRef = nullptr;
 		else
@@ -619,7 +619,7 @@ enum RC_TYPE
 	RC_SPEEDSCALEFACTOR,
 	RC_SPELLTIMEOUT,
 	RC_STAMINALOSSATWEIGHT,		// m_iStaminaLossAtWeight
-	RC_STATSFLAGS,				// m_iStatFlag
+	RC_STATSFLAGS,				// _uiStatFlag
 	RC_STRIPPATH,				// for TNG
 	RC_SUPPRESSCAPITALS,
 	RC_TELEPORTEFFECTNPC,		// m_iSpell_Teleport_Effect_NPC
@@ -871,7 +871,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "SPEEDSCALEFACTOR",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpeedScaleFactor),	0 }},
 	{ "SPELLTIMEOUT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpellTimeout),		0 }},
 	{ "STAMINALOSSATWEIGHT",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStaminaLossAtWeight),	0 }},
-	{ "STATSFLAGS",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStatFlag),			0 }},
+	{ "STATSFLAGS",				{ ELEM_INT,		OFFSETOF(CServerConfig,_uiStatFlag),			0 }},
 	{ "STRIPPATH",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_sStripPath),			0 }},
 	{ "SUPPRESSCAPITALS",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fSuppressCapitals),	0 }},
 	{ "TELEPORTEFFECTNPC",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Effect_NPC),		0 }},
@@ -1368,7 +1368,7 @@ const CSpellDef * CServerConfig::GetSpellDef( SPELL_TYPE index ) const
     // future: underlying type for SPELL_TYPE to avoid casts
     if (index <= SPELL_NONE)
         return nullptr;
-    size_t uiIndex = (size_t)index;
+	const size_t uiIndex = (size_t)index;
     if (!m_SpellDefs.IsValidIndex(uiIndex))
         return nullptr;
     return m_SpellDefs[uiIndex];
@@ -1379,7 +1379,7 @@ CSpellDef * CServerConfig::GetSpellDef( SPELL_TYPE index )
     // future: underlying type for SPELL_TYPE to avoid casts
     if (index <= SPELL_NONE)
         return nullptr;
-    size_t uiIndex = (size_t)index;
+    const size_t uiIndex = (size_t)index;
     if (!m_SpellDefs.IsValidIndex(uiIndex))
         return nullptr;
     return m_SpellDefs[uiIndex];
@@ -1390,7 +1390,7 @@ lpctstr CServerConfig::GetSkillKey( SKILL_TYPE index ) const
     // future: underlying type for SPELL_TYPE to avoid casts
     if (index < 0)
         return nullptr;
-    size_t uiIndex = (size_t)index;
+	const size_t uiIndex = (size_t)index;
     if (!m_SkillIndexDefs.IsValidIndex(uiIndex))
         return nullptr;
     return m_SkillIndexDefs[uiIndex]->GetKey();
@@ -1400,7 +1400,7 @@ const CSkillDef* CServerConfig::GetSkillDef( SKILL_TYPE index ) const
 {
     if (index < 0)
         return nullptr;
-    size_t uiIndex = (size_t)index;
+	const size_t uiIndex = (size_t)index;
     if (!m_SkillIndexDefs.IsValidIndex(uiIndex) )
         return nullptr;
     return m_SkillIndexDefs[uiIndex];
@@ -1410,7 +1410,7 @@ CSkillDef* CServerConfig::GetSkillDef( SKILL_TYPE index )
 {
     if (index < 0)
         return nullptr;
-    size_t uiIndex = (size_t)index;
+	const size_t uiIndex = (size_t)index;
     if (!m_SkillIndexDefs.IsValidIndex(uiIndex) )
         return nullptr;
     return m_SkillIndexDefs[uiIndex];
@@ -1420,7 +1420,7 @@ const CSkillDef* CServerConfig::FindSkillDef( lpctstr ptcKey ) const
 {
     // Find the skill name in the alpha sorted list.
     // RETURN: SKILL_NONE = error.
-    size_t i = m_SkillNameDefs.find_sorted(ptcKey);
+	const size_t i = m_SkillNameDefs.find_sorted(ptcKey);
     if ( i == SCONT_BADINDEX )
         return nullptr;
     return static_cast <const CSkillDef*>(m_SkillNameDefs[i]);
@@ -1430,14 +1430,13 @@ const CSkillDef * CServerConfig::SkillLookup( lpctstr ptcKey )
 {
 	ADDTOCALLSTACK("CServerConfig::SkillLookup");
 
-	size_t iLen = strlen( ptcKey );
+	const size_t iLen = strlen( ptcKey );
     const CSkillDef * pDef;
 	for ( size_t i = 0; i < m_SkillIndexDefs.size(); ++i )
 	{
 		pDef = static_cast<const CSkillDef *>(m_SkillIndexDefs[i]);
-		if ( pDef->m_sName.IsEmpty() ?
-				!strnicmp( ptcKey, pDef->GetKey(), iLen )
-			:	!strnicmp( ptcKey, pDef->m_sName, iLen ) )
+		ASSERT(pDef);
+		if ( !strnicmp(ptcKey, (pDef->m_sName.IsEmpty() ? pDef->GetKey() : pDef->m_sName.GetBuffer()), iLen) )
 			return pDef;
 	}
 	return nullptr;

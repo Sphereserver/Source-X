@@ -315,7 +315,7 @@ tchar * CScriptKeyAlloc::_GetKeyBufferRaw( size_t iLen )
 tchar * CScriptKeyAlloc::GetKeyBufferRaw( size_t iLen )
 {
     ADDTOCALLSTACK("CScriptKeyAlloc::GetKeyBufferRaw");
-    THREAD_UNIQUE_LOCK_RETURN(_GetKeyBufferRaw(iLen));
+    THREAD_UNIQUE_LOCK_RETURN(CScriptKeyAlloc::_GetKeyBufferRaw(iLen));
 }
 */
 
@@ -534,7 +534,7 @@ bool CScript::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened
 }
 bool CScript::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
 {
-    THREAD_UNIQUE_LOCK_RETURN(_ReadTextLine(fRemoveBlanks));
+    THREAD_UNIQUE_LOCK_RETURN(CScript::_ReadTextLine(fRemoveBlanks));
 }
 
 bool CScript::FindTextHeader( lpctstr pszName ) // Find a section in the current script
@@ -808,7 +808,7 @@ bool CScript::_SeekContext( CScriptLineContext LineContext )
 }
 bool CScript::SeekContext( CScriptLineContext LineContext )
 {
-    THREAD_UNIQUE_LOCK_RETURN(_SeekContext(LineContext));
+    THREAD_UNIQUE_LOCK_RETURN(CScript::_SeekContext(LineContext));
 }
 
 CScriptLineContext CScript::_GetContext() const
@@ -921,7 +921,7 @@ bool CScript::WriteKeyStr(lpctstr ptcKey, lpctstr ptcVal)
 //	va_end( vargs );
 //}
 
-void _cdecl CScript::WriteKeyFormat(lptstr ptcKey, lptstr pszVal, ...)
+void _cdecl CScript::WriteKeyFormat(lpctstr ptcKey, lpctstr pszVal, ...)
 {
 	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKeyFormat");
 	_sBuffer1.resize(SCRIPT_MAX_LINE_LEN);

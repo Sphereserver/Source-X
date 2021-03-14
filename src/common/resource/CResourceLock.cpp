@@ -91,7 +91,7 @@ bool CResourceLock::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the 
 bool CResourceLock::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
 {
     ADDTOCALLSTACK_INTENSIVE("CResourceLock::ReadTextLine");
-    THREAD_UNIQUE_LOCK_RETURN(_ReadTextLine(fRemoveBlanks));
+    THREAD_UNIQUE_LOCK_RETURN(CResourceLock::_ReadTextLine(fRemoveBlanks));
 }
 
 int CResourceLock::OpenLock( CResourceScript * pLock, CScriptLineContext context )

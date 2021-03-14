@@ -959,6 +959,9 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 			break;
 		case ISV_TOGGLEABBREVIATION:
 			{
+				if (!s.HasArgs() && !pMember)
+					return false;
+
 				const CUID uidMember(s.HasArgs() ? s.GetArgDWVal() : pMember->GetLinkUID());
 				CChar * pMemberChar = uidMember.CharFind();
 				if ( pMemberChar )

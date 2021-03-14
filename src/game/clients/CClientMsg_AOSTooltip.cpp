@@ -483,7 +483,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
         if ( pItem->m_itArmor.m_wHitsMax > 0 )
         {
 		    PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060639)); // durability ~1_val~ / ~2_val~
-		    t->FormatArgs("%hu\t%hu", pItem->m_itArmor.m_wHitsCur, pItem->m_itArmor.m_wHitsMax);
+		    t->FormatArgs("%hu\t%hu", pItem->m_itArmor.m_dwHitsCur, pItem->m_itArmor.m_wHitsMax);
         }
 	}
 	break;
@@ -543,7 +543,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
         if ( pItem->m_itWeapon.m_wHitsMax > 0 )
         {
 		    PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060639)); // durability ~1_val~ / ~2_val~
-		    t->FormatArgs("%hu\t%hu", pItem->m_itWeapon.m_wHitsCur, pItem->m_itWeapon.m_wHitsMax);
+		    t->FormatArgs("%hu\t%hu", pItem->m_itWeapon.m_dwHitsCur, pItem->m_itWeapon.m_wHitsMax);
         }
 	}
 	break;

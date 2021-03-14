@@ -170,7 +170,7 @@ public:
 		// IT_WEAPON_*
 		struct
 		{
-			word m_wHitsCur;		// more1l=eqiv to quality of the item (armor/weapon).
+			word m_dwHitsCur;		// more1l=eqiv to quality of the item (armor/weapon).
 			word m_wHitsMax;		// more1h=can only be repaired up to this level.
 			int32 m_spellcharges;	// more2=for a wand etc.
 			word m_spell;			// morex=SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
@@ -186,7 +186,7 @@ public:
 		// IT_JEWELRY
 		struct
 		{
-			word m_wHitsCur;		// more1l= eqiv to quality of the item (armor/weapon).
+			word m_dwHitsCur;		// more1l= eqiv to quality of the item (armor/weapon).
 			word m_wHitsMax;		// more1h= can only be repaired up to this level.
 			int32 m_spellcharges;	// more2 = ? spell charges ? not sure how used here..
 			word m_spell;			// morex = SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
@@ -463,7 +463,7 @@ public:
 		// IT_WEB
 		struct
 		{
-			dword m_wHitsCur;	// more1 = how much damage the web can take.
+			dword m_dwHitsCur;	// more1 = how much damage the web can take.
 		} m_itWeb;
 
 		// IT_DREAM_GATE
@@ -545,12 +545,17 @@ private:
 protected:
 	virtual int FixWeirdness() override;
 	void DeleteCleanup(bool fForce);
+
 public:
 	virtual bool NotifyDelete(); // overridden CItemContainer:: method
 	virtual bool Delete(bool fForce = false) override;
 
-public:
-	virtual bool OnTick() override;
+
+	// On CItem, OnTick is virtual also because we need to call the topmost superclass:
+	//	a CItem can be the base class for CItemShip, CItemMessage...
+protected:	virtual bool _OnTick();
+public:		virtual bool  OnTick();
+
 	virtual void OnHear( lpctstr pszCmd, CChar * pSrc );
 	CItemBase * Item_GetDef() const;
 	ITEMID_TYPE GetID() const;
@@ -668,7 +673,8 @@ public:
 
 	virtual int GetWeight(word amount = 0) const;
 
-    virtual void SetTimeout(int64 iMsecs) override;
+protected:	virtual void _SetTimeout(int64 iMsecs) override;
+public:		virtual void  SetTimeout(int64 iMsecs) override;
 
 	virtual void OnMoveFrom();
 	virtual bool MoveTo(const CPointMap& pt, bool fForceFix = false); // Put item on the ground here.

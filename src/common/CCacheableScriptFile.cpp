@@ -197,7 +197,7 @@ tchar * CCacheableScriptFile::_ReadString(tchar *pBuffer, int sizemax)
 tchar * CCacheableScriptFile::ReadString(tchar *pBuffer, int sizemax) 
 {
     ADDTOCALLSTACK_INTENSIVE("CCacheableScriptFile::ReadString");
-    THREAD_UNIQUE_LOCK_RETURN(_ReadString(pBuffer, sizemax));
+    THREAD_UNIQUE_LOCK_RETURN(CCacheableScriptFile::_ReadString(pBuffer, sizemax));
 }
 
 void CCacheableScriptFile::_dupeFrom(CCacheableScriptFile *other) 
@@ -274,5 +274,5 @@ int CCacheableScriptFile::_GetPosition() const
 int CCacheableScriptFile::GetPosition() const
 {
     ADDTOCALLSTACK("CCacheableScriptFile::GetPosition");
-    THREAD_UNIQUE_LOCK_RETURN(_GetPosition());
+    THREAD_UNIQUE_LOCK_RETURN(CCacheableScriptFile::_GetPosition());
 }

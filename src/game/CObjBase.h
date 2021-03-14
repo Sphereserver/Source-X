@@ -20,12 +20,15 @@
 class PacketSend;
 class PacketPropertyList;
 class CCSpawn;
+class CSector;
 
 class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, public CEntityProps, public virtual CTimedObject
 {
 	static lpctstr const sm_szLoadKeys[];   // All Instances of CItem or CChar have these base attributes.
 	static lpctstr const sm_szVerbKeys[];   // All Instances of CItem or CChar have these base attributes.
 	static lpctstr const sm_szRefKeys[];    // All Instances of CItem or CChar have these base attributes.
+
+    friend class CSector;
 
 private:
 	int64 m_timestamp;          // TimeStamp
@@ -82,7 +85,8 @@ public:
         return _fDeleting;
     }
 
-    virtual bool IsDeleted() const override;
+protected:  virtual bool _IsDeleted() const override;
+public:     virtual bool  IsDeleted() const override;
 
     /**
      * @brief   Deletes this CObjBase from game (doesn't delete the raw class instance).

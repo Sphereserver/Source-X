@@ -357,7 +357,7 @@ bool CSFile::_Write( const void * pData, int iLength )
 bool CSFile::Write(const void* pData, int iLength)
 {
     ADDTOCALLSTACK("CSFile::Write");
-    THREAD_UNIQUE_LOCK_RETURN(_Write(pData, iLength));
+    THREAD_UNIQUE_LOCK_RETURN(CSFile::_Write(pData, iLength));
 }
 
 // CSFile:: File name operations.

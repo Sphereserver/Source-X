@@ -17,7 +17,8 @@
 /////////////////////////////////////////////////////////////////////////////
 
 CItemMultiCustom::CItemMultiCustom(ITEMID_TYPE id, CItemBase * pItemDef) : 
-    CTimedObject(PROFILE_MULTIS), CItemMulti(id, pItemDef, true)
+    CTimedObject(PROFILE_MULTIS),
+    CItemMulti(id, pItemDef, true)
 {
     m_designMain = {};
     m_designWorking = {};
@@ -272,24 +273,25 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
     if (pCharClient)
     {
         const bool fSendFullTrigger = IsTrigUsed(TRIGGER_HOUSEDESIGNCOMMITITEM);
+        CScriptTriggerArgs Args;
         short iMaxZ = 0;
 
-        for (auto i = m_designWorking.m_vectorComponents.begin(); i != m_designWorking.m_vectorComponents.end(); ++i)
+        for (auto it = m_designWorking.m_vectorComponents.begin(); it != m_designWorking.m_vectorComponents.end();)
         {
-            const CMultiComponent* pComp = *i;
+            const CMultiComponent* pComp = *it;
             if (fSendFullTrigger)
             {
-                CScriptTriggerArgs Args;
+                Args.Clear();
                 Args.m_VarsLocal.SetNum("ID", pComp->m_item.m_wTileID);
                 Args.m_VarsLocal.SetNum("P.X", pComp->m_item.m_dx);
                 Args.m_VarsLocal.SetNum("P.Y", pComp->m_item.m_dy);
                 Args.m_VarsLocal.SetNum("P.Z", pComp->m_item.m_dz);
                 Args.m_VarsLocal.SetNum("VISIBLE", pComp->m_item.m_visible);
 
-                TRIGRET_TYPE iRet = pCharClient->OnTrigger(CTRIG_HouseDesignCommitItem, pCharClient, &Args);
+                const TRIGRET_TYPE iRet = pCharClient->OnTrigger(CTRIG_HouseDesignCommitItem, pCharClient, &Args);
                 if (iRet == TRIGRET_RET_FALSE)
                 {
-                    m_designWorking.m_vectorComponents.erase(i);
+                    it = m_designWorking.m_vectorComponents.erase(it);
                     continue;
                 }
             }
@@ -298,10 +300,11 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
                 iMaxZ = pComp->m_item.m_dz;
                 _iMaxPlane = GetPlane((char)pComp->m_item.m_dz);
             }
+            ++it;
         }
         if (IsTrigUsed(TRIGGER_HOUSEDESIGNCOMMIT))
         {
-            CScriptTriggerArgs Args;
+            Args.Clear();
             Args.m_iN1 = m_designMain.m_vectorComponents.size();
             Args.m_iN2 = m_designWorking.m_vectorComponents.size();
             Args.m_iN3 = m_designWorking.m_iRevision;
@@ -471,7 +474,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
             {
                 if (!rectDesign.IsInsideX(pt.m_x) || !rectDesign.IsInsideY(pt.m_y - 1))
                 {
-                    g_Log.EventWarn("Item 0%x being added to building 0%x outside of boundaries by 0%x (%s).\n", id, (dword)GetUID(), pCharSrc != nullptr ? (dword)pCharSrc->GetUID() : 0, pt.WriteUsed());
+                    g_Log.EventWarn("Item 0%x being added to building 0%x outside of boundaries by 0%x (%s).\n", id, (dword)GetUID(), (dword)pCharSrc->GetUID(), pt.WriteUsed());
                     SendStructureTo(pClientSrc);
                     return;
                 }

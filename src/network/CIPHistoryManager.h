@@ -61,7 +61,7 @@ private:
 public:
     void tick(void);	// period events
 
-    HistoryIP& getHistoryForIP(const CSocketAddressIP& ip);	// get history for an ip
+    HistoryIP& getHistoryForIP(const CSocketAddressIP& ip) noexcept;	// get history for an ip
     HistoryIP& getHistoryForIP(const char* ip);				// get history for an ip
 };
 

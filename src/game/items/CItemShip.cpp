@@ -86,13 +86,13 @@ bool CItemShip::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
     else if (!strnicmp(ptcKey, "PLANK.", 6))
     {
         ptcKey += 6;
-        uint i = Exp_GetUVal(ptcKey);
+        size_t i = Exp_GetSTVal(ptcKey);
         SKIP_SEPARATORS(ptcKey);
         pRef = GetShipPlank(i);
         return true;
     }
 
-    return(CItemMulti::r_GetRef(ptcKey, pRef));
+    return CItemMulti::r_GetRef(ptcKey, pRef);
 }
 
 bool CItemShip::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from script

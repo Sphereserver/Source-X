@@ -5,7 +5,8 @@
 #include "CItemStone.h"
 
 CItemMemory::CItemMemory( ITEMID_TYPE id, CItemBase * pItemDef ) :
-    CTimedObject(PROFILE_ITEMS), CItem( ITEMID_MEMORY, pItemDef )
+    CTimedObject(PROFILE_ITEMS),
+	CItem( ITEMID_MEMORY, pItemDef )
 {
 	UNREFERENCED_PARAMETER(id);
 }

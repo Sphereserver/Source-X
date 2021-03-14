@@ -29,7 +29,7 @@ lpctstr const CItemScript::sm_szVerbKeys[] =
 
 void CItemScript::r_Write(CScript & s)
 {
-    ADDTOCALLSTACK_INTENSIVE("CItemScript::r_Write");
+    ADDTOCALLSTACK("CItemScript::r_Write");
     CItemVendable::r_Write(s);
 }
 

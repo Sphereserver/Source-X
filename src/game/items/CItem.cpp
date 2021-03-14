@@ -122,7 +122,9 @@ void CItem::SetLockDownOfMulti(const CUID& uidMulti)
 		m_TagDefs.SetNum("MultiLockDown", uidMulti.GetObjUID(), false, false);
 }
 
-CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEMS), CObjBase( true )
+CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) :
+	CTimedObject(PROFILE_ITEMS),
+	CObjBase( true )
 {
 	ASSERT( pItemDef );
 
@@ -1358,16 +1360,16 @@ int64 CItem::GetDecayTime() const
 	return g_Cfg.m_iDecay_Item;
 }
 
-void CItem::SetTimeout( int64 iMsecs )
+void CItem::_SetTimeout( int64 iMsecs )
 {
-	ADDTOCALLSTACK("CItem::SetTimeout");
+	ADDTOCALLSTACK("CItem::_SetTimeout");
 	// PURPOSE:
 	//  Set delay in msecs.
 	//  -1 = never.
 	// NOTE:
 	//  It may be a decay timer or it might be a trigger timer
 
-	CObjBase::SetTimeout(iMsecs);
+	CTimedObject::_SetTimeout(iMsecs);
 
 	// Items on the ground must be put in sector list correctly.
 	if ( !IsTopLevel() )
@@ -1381,6 +1383,13 @@ void CItem::SetTimeout( int64 iMsecs )
 	pSector->MoveItemToSector(this);
 	CItemsList::sm_fNotAMove = false;
 	SetUIDContainerFlags(0);
+}
+
+void CItem::SetTimeout(int64 iMsecs)
+{
+	ADDTOCALLSTACK("CItem::SetTimeout");
+	THREAD_UNIQUE_LOCK_SET;
+	_SetTimeout(iMsecs);
 }
 
 void CItem::OnMoveFrom()	// Moving from current location.
@@ -2734,7 +2743,7 @@ bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 			sVal.FormatVal(LOWORD(m_itNormal.m_more1));
 			break;
 		case IC_HITPOINTS:
-			sVal.FormatVal( IsTypeArmorWeapon() ? m_itArmor.m_wHitsCur : 0 );
+			sVal.FormatVal( IsTypeArmorWeapon() ? m_itArmor.m_dwHitsCur : 0 );
 			break;
 		case IC_ID:
 			fDoDefault = true;
@@ -3184,7 +3193,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				DEBUG_ERR(("Item:Hitpoints assigned for non-weapon %s\n", GetResourceName()));
 				return false;
 			}
-			m_itArmor.m_wHitsCur = m_itArmor.m_wHitsMax = (word)(s.GetArgVal());
+			m_itArmor.m_dwHitsCur = m_itArmor.m_wHitsMax = (word)(s.GetArgVal());
             break;
 		case IC_ID:
 		{
@@ -3714,7 +3723,7 @@ stopandret:
 
 TRIGRET_TYPE CItem::OnTrigger( ITRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
 {
-	ASSERT( trigger < ITRIG_QTY );
+	ASSERT((trigger >= 0) && (trigger < ITRIG_QTY));
 	return OnTrigger( CItem::sm_szTrigName[trigger], pSrc, pArgs );
 }
 
@@ -4743,9 +4752,9 @@ int CItem::Armor_GetDefense() const
 		return 0;
 
 	int iVal = m_defenseBase + m_ModAr;
-	if ( IsSetOF(OF_ScaleDamageByDurability) && m_itArmor.m_wHitsMax > 0 && m_itArmor.m_wHitsCur < m_itArmor.m_wHitsMax )
+	if ( IsSetOF(OF_ScaleDamageByDurability) && m_itArmor.m_wHitsMax > 0 && m_itArmor.m_dwHitsCur < m_itArmor.m_wHitsMax )
 	{
-		int iRepairPercent = 50 + ((50 * m_itArmor.m_wHitsCur) / m_itArmor.m_wHitsMax);
+		int iRepairPercent = 50 + ((50 * m_itArmor.m_dwHitsCur) / m_itArmor.m_wHitsMax);
 		iVal = (int)IMulDivLL( iVal, iRepairPercent, 100 );
 	}
 	if ( IsAttr(ATTR_MAGIC) )
@@ -4767,9 +4776,9 @@ int CItem::Weapon_GetAttack(bool fGetRange) const
 	if ( fGetRange )
 		iVal += m_attackRange;
 
-	if ( IsSetOF(OF_ScaleDamageByDurability) && m_itArmor.m_wHitsMax > 0 && m_itArmor.m_wHitsCur < m_itArmor.m_wHitsMax )
+	if ( IsSetOF(OF_ScaleDamageByDurability) && m_itArmor.m_wHitsMax > 0 && m_itArmor.m_dwHitsCur < m_itArmor.m_wHitsMax )
 	{
-		int iRepairPercent = 50 + ((50 * m_itArmor.m_wHitsCur) / m_itArmor.m_wHitsMax);
+		int iRepairPercent = 50 + ((50 * m_itArmor.m_dwHitsCur) / m_itArmor.m_wHitsMax);
 		iVal = (int)IMulDivLL( iVal, iRepairPercent, 100 );
 	}
 	if ( IsAttr(ATTR_MAGIC) && ! IsType(IT_WAND))
@@ -5593,23 +5602,23 @@ int CItem::Armor_GetRepairPercent() const
 {
 	ADDTOCALLSTACK("CItem::Armor_GetRepairPercent");
 
-	if ( !m_itArmor.m_wHitsMax || ( m_itArmor.m_wHitsMax < m_itArmor.m_wHitsCur ))
+	if ( !m_itArmor.m_wHitsMax || ( m_itArmor.m_wHitsMax < m_itArmor.m_dwHitsCur ))
 		return 100;
- 	return IMulDiv( m_itArmor.m_wHitsCur, 100, m_itArmor.m_wHitsMax );
+ 	return IMulDiv( m_itArmor.m_dwHitsCur, 100, m_itArmor.m_wHitsMax );
 }
 
 lpctstr CItem::Armor_GetRepairDesc() const
 {
 	ADDTOCALLSTACK("CItem::Armor_GetRepairDesc");
-	if ( m_itArmor.m_wHitsCur > m_itArmor.m_wHitsMax )
+	if ( m_itArmor.m_dwHitsCur > m_itArmor.m_wHitsMax )
 		return g_Cfg.GetDefaultMsg( DEFMSG_ITEMSTATUS_PERFECT );
-	else if ( m_itArmor.m_wHitsCur == m_itArmor.m_wHitsMax )
+	else if ( m_itArmor.m_dwHitsCur == m_itArmor.m_wHitsMax )
 		return g_Cfg.GetDefaultMsg( DEFMSG_ITEMSTATUS_FULL );
-	else if ( m_itArmor.m_wHitsCur > m_itArmor.m_wHitsMax / 2 )
+	else if ( m_itArmor.m_dwHitsCur > m_itArmor.m_wHitsMax / 2 )
 		return g_Cfg.GetDefaultMsg( DEFMSG_ITEMSTATUS_SCRATCHED );
-	else if ( m_itArmor.m_wHitsCur > m_itArmor.m_wHitsMax / 3 )
+	else if ( m_itArmor.m_dwHitsCur > m_itArmor.m_wHitsMax / 3 )
 		return g_Cfg.GetDefaultMsg( DEFMSG_ITEMSTATUS_WELLWORN );
-	else if ( m_itArmor.m_wHitsCur > 3 )
+	else if ( m_itArmor.m_dwHitsCur > 3 )
 		return g_Cfg.GetDefaultMsg( DEFMSG_ITEMSTATUS_BADLY );
 	else
 		return g_Cfg.GetDefaultMsg( DEFMSG_ITEMSTATUS_FALL_APART );
@@ -5637,12 +5646,12 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
         const int64 iSelfRepair = GetDefNum("SELFREPAIR", true);
         if (iSelfRepair > Calc_GetRandVal(10))
         {
-            const ushort uiOldHits = m_itArmor.m_wHitsCur;
-            m_itArmor.m_wHitsCur += 2;
-            if (m_itArmor.m_wHitsCur > m_itArmor.m_wHitsMax)
-                m_itArmor.m_wHitsCur = m_itArmor.m_wHitsMax;
+            const ushort uiOldHits = m_itArmor.m_dwHitsCur;
+            m_itArmor.m_dwHitsCur += 2;
+            if (m_itArmor.m_dwHitsCur > m_itArmor.m_wHitsMax)
+                m_itArmor.m_dwHitsCur = m_itArmor.m_wHitsMax;
 
-            if (uiOldHits != m_itArmor.m_wHitsCur)
+            if (uiOldHits != m_itArmor.m_dwHitsCur)
                 UpdatePropertyFlag();
 
             return 0;
@@ -5687,6 +5696,9 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 		if ( RES_GET_INDEX(m_itPotion.m_Type) == SPELL_Explosion )
 		{
 			CSpellDef *pSpell = g_Cfg.GetSpellDef(SPELL_Explosion);
+			if (!pSpell)
+				return 0;
+
 			CItem *pItem = CItem::CreateBase(ITEMID_FX_EXPLODE_3);
 			if ( !pItem )
 				return 0;
@@ -5713,7 +5725,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 			return 0;
 		}
 
-		if ( (dword)iDmg > m_itWeb.m_wHitsCur || ( uType & DAMAGE_FIRE ))
+		if ( (dword)iDmg > m_itWeb.m_dwHitsCur || ( uType & DAMAGE_FIRE ))
 		{
 			if ( pSrc )
 				pSrc->SysMessage( g_Cfg.GetDefaultMsg( DEFMSG_WEB_DESTROY ) );
@@ -5723,7 +5735,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 
 		if ( pSrc )
 			pSrc->SysMessage( g_Cfg.GetDefaultMsg( DEFMSG_WEB_WEAKEN ) );
-		m_itWeb.m_wHitsCur -= iDmg;
+		m_itWeb.m_dwHitsCur -= iDmg;
 		return 1;
 
 	default:
@@ -5736,9 +5748,9 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 forcedamage:
 		CChar * pChar = dynamic_cast <CChar*> ( GetTopLevelObj());
 
-		if ( m_itArmor.m_wHitsCur <= 1 )
+		if ( m_itArmor.m_dwHitsCur <= 1 )
 		{
-			m_itArmor.m_wHitsCur = 0;
+			m_itArmor.m_dwHitsCur = 0;
 			if ( g_Cfg.m_iEmoteFlags & EMOTEF_DESTROY )
 				EmoteObj( g_Cfg.GetDefaultMsg( DEFMSG_ITEM_DMG_DESTROYED ) );
 			else
@@ -5750,7 +5762,7 @@ forcedamage:
 		const int previousDefense = Armor_GetDefense();
 		const int previousDamage = Weapon_GetAttack();
 
-		--m_itArmor.m_wHitsCur;
+		--m_itArmor.m_dwHitsCur;
 		UpdatePropertyFlag();
 
 		if (pChar != nullptr && IsItemEquipped() )
@@ -5790,7 +5802,7 @@ forcedamage:
 			{
 				// Tell target they got damaged.
 				*pszMsg = 0;
-				if (m_itArmor.m_wHitsCur < m_itArmor.m_wHitsMax / 2)
+				if (m_itArmor.m_dwHitsCur < m_itArmor.m_wHitsMax / 2)
 				{
 					const int iPercent = Armor_GetRepairPercent();
 					if (pChar->Skill_GetAdjusted(SKILL_ARMSLORE) / 10 > iPercent)
@@ -5929,6 +5941,12 @@ CCFaction * CItem::GetSlayer() const
 bool CItem::OnTick()
 {
 	ADDTOCALLSTACK("CItem::OnTick");
+	THREAD_UNIQUE_LOCK_RETURN(CItem::_OnTick());
+}
+
+bool CItem::_OnTick()
+{
+	ADDTOCALLSTACK("CItem::_OnTick");
 	// Timer expired. Time to do something.
 	// RETURN: false = delete it.
 
@@ -5938,8 +5956,8 @@ bool CItem::OnTick()
 
     if (GetTopSector()->IsSleeping())
     {
-        SetTimeout(1);      //Make it tick after sector's awakening.
-        GoSleep();
+        _SetTimeout(1);      //Make it tick after sector's awakening.
+        _GoSleep();
         return true;
     }
 
@@ -5956,10 +5974,10 @@ bool CItem::OnTick()
         }
 	}
 
-    EXC_SET_BLOCK("component's ticking");
+    EXC_SET_BLOCK("components ticking");
 
     /*
-    * CComponent's ticking:
+    * CComponents ticking:
     * Note that CCRET_TRUE will force a return true and skip default behaviour,
     * CCRET_FALSE will force a return false and delete the item without it's default
     * timer checks.

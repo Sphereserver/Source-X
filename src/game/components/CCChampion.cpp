@@ -884,7 +884,7 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
                     }
                 }
             }
-            if (spawnGroup.count(uiGroup) <= 0 || uiGroup > UCHAR_MAX)  // Didn't found any group for the given level, stop!
+            if (spawnGroup.count(uiGroup) <= 0)  // Didn't found any group for the given level, stop!
             {
                 sVal.FormatVal(-1);
                 break;
@@ -1079,9 +1079,9 @@ bool CCChampion::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
     if (!strnicmp(ptcKey, "WHITECANDLE", 11))
     {
         ptcKey += 11;
-        int iCandle = Exp_GetVal(ptcKey);
+        size_t uiCandle = Exp_GetSTVal(ptcKey);
         SKIP_SEPARATORS(ptcKey);
-        CItem * pCandle = _pWhiteCandles[iCandle].ItemFind();
+        CItem * pCandle = _pWhiteCandles[uiCandle].ItemFind();
         if (pCandle)
         {
             pRef = pCandle;
@@ -1091,9 +1091,9 @@ bool CCChampion::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
     if (!strnicmp(ptcKey, "REDCANDLE", 9))
     {
         ptcKey += 9;
-        int iCandle = Exp_GetVal(ptcKey);
+        size_t uiCandle = Exp_GetSTVal(ptcKey);
         SKIP_SEPARATORS(ptcKey);
-        CItem * pCandle = _pRedCandles[iCandle].ItemFind();
+        CItem * pCandle = _pRedCandles[uiCandle].ItemFind();
         if (pCandle)
         {
             pRef = pCandle;

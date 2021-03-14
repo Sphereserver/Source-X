@@ -888,16 +888,19 @@ effect_bounce:
 				if ( GetTopDist3D(pSrc) < 2 )
 				{
 					CItem* pReactive = LayerFind(LAYER_SPELL_Reactive);
-					int iReactiveDamage = (iDmg * pReactive->m_itSpell.m_PolyStr) / 100;
-					if (iReactiveDamage < 1)
+					if (pReactive)
 					{
-						iReactiveDamage = 1;
-					}
+						int iReactiveDamage = (iDmg * pReactive->m_itSpell.m_PolyStr) / 100;
+						if (iReactiveDamage < 1)
+						{
+							iReactiveDamage = 1;
+						}
 
-					iDmg -= iReactiveDamage;
-					pSrc->OnTakeDamage( iReactiveDamage, this, (DAMAGE_TYPE)(DAMAGE_FIXED | DAMAGE_REACTIVE), iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy );
-					pSrc->Sound( 0x1F1 );
-					pSrc->Effect( EFFECT_OBJ, ITEMID_FX_CURSE_EFFECT, this, 10, 16 );
+						iDmg -= iReactiveDamage;
+						pSrc->OnTakeDamage(iReactiveDamage, this, (DAMAGE_TYPE)(DAMAGE_FIXED | DAMAGE_REACTIVE), iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy);
+						pSrc->Sound(0x1F1);
+						pSrc->Effect(EFFECT_OBJ, ITEMID_FX_CURSE_EFFECT, this, 10, 16);
+					}
 				}
 			}
 		}

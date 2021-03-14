@@ -538,32 +538,23 @@ NPCBRAIN_TYPE CChar::GetNPCBrainAuto() const
 	ADDTOCALLSTACK("CChar::GetNPCBrainAuto");
 	// Auto-detect the brain
 	const CREID_TYPE id = GetDispID();
-	if ( id >= CREID_IRON_GOLEM )
+	
+	switch (id)
 	{
-		switch ( id )
-		{
-			//TODO: add other dragons
-			case CREID_DRAGON_SERPENTINE:
-			case CREID_DRAGON_SKELETAL:
-			case CREID_REPTILE_LORD:
-			case CREID_WYRM_ANCIENT:
-			case CREID_SWAMP_DRAGON:
-			case CREID_SWAMP_DRAGON_AR:
-				return NPCBRAIN_DRAGON;
-			default:
-				break;
-		}
-		return NPCBRAIN_MONSTER;
+		//TODO: add other dragons
+		case CREID_DRAGON_SERPENTINE:
+		case CREID_DRAGON_SKELETAL:
+		case CREID_REPTILE_LORD:
+		case CREID_WYRM_ANCIENT:
+		case CREID_SWAMP_DRAGON:
+		case CREID_SWAMP_DRAGON_AR:
+			return NPCBRAIN_DRAGON;
+		default:
+			break;
 	}
 
-	if ( (id == CREID_ENERGY_VORTEX) || (id == CREID_BLADE_SPIRIT) )
+	if ((id == CREID_ENERGY_VORTEX) || (id == CREID_BLADE_SPIRIT))
 		return NPCBRAIN_BERSERK;
-
-	if ( id >= CREID_MAN )
-		return NPCBRAIN_HUMAN;
-
-	if ( id >= CREID_HORSE_TAN )
-		return NPCBRAIN_ANIMAL;
 
 	switch ( id )
 	{
@@ -574,9 +565,18 @@ NPCBRAIN_TYPE CChar::GetNPCBrainAuto() const
 		case CREID_BULL_FROG:
 		case CREID_DOLPHIN:
 			return NPCBRAIN_ANIMAL;
-		default:
-			return NPCBRAIN_MONSTER;
 	}
+
+	if (id >= CREID_IRON_GOLEM)
+		return NPCBRAIN_MONSTER;
+
+	if ( id >= CREID_MAN )
+		return NPCBRAIN_HUMAN;
+
+	if ( id >= CREID_HORSE_TAN )
+		return NPCBRAIN_ANIMAL;
+
+	return NPCBRAIN_MONSTER;
 }
 
 lpctstr CChar::GetPronoun() const

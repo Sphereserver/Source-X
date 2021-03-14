@@ -15,6 +15,7 @@
 
 #define NETWORK_DISCONNECTPRI	PacketSend::PRI_HIGHEST			// packet priorty to continue sending before closing sockets
 
+
 CNetState::CNetState(int id)
 {
     m_id = id;
@@ -196,7 +197,7 @@ void CNetState::init(SOCKET socket, CSocketAddress addr)
     
     char nbool = true;
     iSockRet = m_socket.SetSockOpt(TCP_NODELAY, &nbool, sizeof(char), IPPROTO_TCP);
-    ASSERT(iSockRet == 0);
+    CheckReportNetAPIErr(iSockRet, "TCP_NODELAY");
     //if (iSockRet)
     //    return;
 

@@ -617,7 +617,11 @@ void CWorld::Init()
 
 CWorld::~CWorld()
 {
+	EXC_TRY("Destructor");
+
 	Close();
+
+	EXC_CATCH;
 }
 
 ///////////////////////////////////////////////

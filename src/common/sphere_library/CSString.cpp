@@ -55,7 +55,10 @@ CSString::CSString(bool fDefaultInit)
 	else
 	{
 		m_iMaxLength = m_iLength = 0;
-		m_pchData = "";
+
+		// Suppress GCC warning by using the const_cast.
+		// I know that i shouldn't set the non-cast buffer to a string constant, but i make sure in every method that i can't modify it.
+		m_pchData = const_cast<char*>("");
 	}
 }
 
@@ -231,7 +234,7 @@ CSString CSString::operator+(lpctstr string)
 {
 	CSString temp(*this);
 	temp += string;
-	return std::move(temp);
+	return temp;
 }
 
 CSString& CSString::operator=(CSString&& s) noexcept

@@ -720,7 +720,13 @@ badcmd:
 			{
 				const int64 val = Exp_GetLLVal(ptcKey);
 				SKIP_ARGSEP(ptcKey);
+				
 				const uint bit = Exp_GetUVal(ptcKey);
+				if (bit >= 64)
+				{
+					g_Log.EventError("%s shift argument ('%u') exceeds the maximum value of 63.\n", sm_szLoadKeys[index], bit);
+					return false;
+				}
 
 				if ( index == SSC_ISBIT )
 					sVal.FormatLLVal(val & (1ULL << bit));

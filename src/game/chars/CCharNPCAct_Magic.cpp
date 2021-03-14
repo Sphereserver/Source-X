@@ -258,6 +258,9 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
     ASSERT(m_pNPC);
 
     const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
+    if (!pSpellDef)
+        return false;
+
     if (skill == SKILL_NONE)
     {
         int iSkillTest = 0;

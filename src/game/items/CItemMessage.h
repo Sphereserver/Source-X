@@ -19,8 +19,9 @@ enum CIC_TYPE
 	CIC_QTY
 };
 
-class CItemMessage : public CItemVendable	// A message for a bboard or book text.
+class CItemMessage : public CItemVendable
 {
+    // A message for a bboard or book text.
     // IT_BOOK, IT_MESSAGE = can be written into.
     // the name is the title for the message. (ITEMID_BBOARD_MSG)
 protected:

@@ -50,7 +50,7 @@ public:
     *
     * @param pComponent the CComponentProps to suscribe.
     */
-    void SubscribeComponentProps(CComponentProps *pCCProp);
+    CComponentProps* SubscribeComponentProps(CComponentProps *pCCProp);
 
     /**
     * @brief Unsubscribes a CComponentProps. Use this if looping through the components with an iterator!
@@ -80,7 +80,7 @@ public:
     *
     * @param iComponentPropsType The CComponentProps type to create suscribe.
     */
-    void CreateSubscribeComponentProps(COMPPROPS_TYPE iComponentPropsType);
+    CComponentProps* CreateSubscribeComponentProps(COMPPROPS_TYPE iComponentPropsType);
 
     /**
     * @brief Gets a pointer to the given CComponent type.

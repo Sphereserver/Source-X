@@ -1500,8 +1500,8 @@ int64 CExpression::GetRangeNumber(lpctstr & pExpr)
 	llong llWeights[kiRangeMaxArgs]{};
 	for ( int i = 1; i+1 <= iQty; i += 2 )
 	{
-		if (pElementsStart[i] == nullptr)
-			break;	// Shouldn't really happen...
+		//if (pElementsStart[i] == nullptr)
+		//	break;	// Shouldn't really happen...
 
 		// Copy the weight element in a new string
 		const size_t iToParseLen = (pElementsStart[i][1] - pElementsStart[i][0]);
@@ -1533,6 +1533,7 @@ int64 CExpression::GetRangeNumber(lpctstr & pExpr)
 	const size_t iToParseLen = (pElementsStart[i][1] - pElementsStart[i][0]);
 
 	// Copy the value element in a new string
+	ASSERT(nullptr != pElementsStart[i][0]);
 	memcpy((void*)pToParse, pElementsStart[i][0], iToParseLen * sizeof(tchar));
 	pToParse[iToParseLen] = '\0';
 	

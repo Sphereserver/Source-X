@@ -491,10 +491,14 @@ bool CChar::Spell_Resurrection(CItemCorpse * pCorpse, CChar * pCharSrc, bool fNo
 
 	}
 
-	CSpellDef *pSpellDef = g_Cfg.GetSpellDef(SPELL_Resurrection);
-	if (pSpellDef->m_idEffect)
-		Effect(EFFECT_OBJ, pSpellDef->m_idEffect, this, 10, 16);
-	Sound(pSpellDef->m_sound);
+	const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(SPELL_Resurrection);
+	if (pSpellDef)
+	{
+		if (pSpellDef->m_idEffect)
+			Effect(EFFECT_OBJ, pSpellDef->m_idEffect, this, 10, 16);
+		Sound(pSpellDef->m_sound);
+	}
+	
     if (IsClientActive())
     {
         CClient *pClient = GetClientActive();

@@ -238,7 +238,9 @@ CChar * CChar::CreateBasic(CREID_TYPE baseID) // static
 	return pChar;
 }
 
-CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false ),
+CChar::CChar( CREID_TYPE baseID ) :
+	CTimedObject(PROFILE_CHARS),
+	CObjBase( false ),
     m_Skill{}, m_Stat{}
 {
 	g_Serv.StatInc( SERV_STAT_CHARS );	// Count created CChars.
@@ -249,7 +251,7 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 	m_pPlayer = nullptr;	// May even be an off-line player!
 	m_pNPC	  = nullptr;
 	m_pRoom = nullptr;
-	m_iStatFlag = 0;
+	_uiStatFlag = 0;
 
 	if ( g_World.m_fSaveParity )
 		StatFlag_Set(STATF_SAVEPARITY);	// It will get saved next time.
@@ -318,8 +320,6 @@ CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false
 // Delete character
 CChar::~CChar()
 {
-	ADDTOCALLSTACK("CChar::~CChar");
-
 	DeleteCleanup(true);
 	ClearContainer();
 
@@ -615,15 +615,14 @@ bool CChar::SetNPCBrain( NPCBRAIN_TYPE NPCBrain )
     return true;
 }
 
-void CChar::GoSleep()
+void CChar::_GoSleep()
 {
-    ADDTOCALLSTACK("CChar::GoSleep");
-    ASSERT(!IsSleeping());
+    ADDTOCALLSTACK("CChar::_GoSleep");
+    ASSERT(!_IsSleeping());
 
 	CWorldTickingList::DelCharPeriodic(this);   // do not insert into the mutex lock, it access back to this char.
 
-    THREAD_UNIQUE_LOCK_SET;
-    CTimedObject::GoSleep();
+    CTimedObject::_GoSleep();
 
 	for (CSObjContRec* pObjRec : *this)
 	{
@@ -633,16 +632,22 @@ void CChar::GoSleep()
     }
 }
 
-void CChar::GoAwake()
+void CChar::GoSleep()
 {
-    ADDTOCALLSTACK("CChar::GoAwake");
-    ASSERT(IsSleeping());
+	ADDTOCALLSTACK("CChar::GoSleep");
+	THREAD_UNIQUE_LOCK_SET;
+	CChar::_GoSleep();
+}
+
+void CChar::_GoAwake()
+{
+    ADDTOCALLSTACK("CChar::_GoAwake");
+    ASSERT(_IsSleeping());
 
 	CWorldTickingList::AddCharPeriodic(this, true);
 
-    THREAD_UNIQUE_LOCK_SET;
-    CTimedObject::GoAwake();       // Awake it first, otherwise some other things won't work
-    SetTimeout(Calc_GetRandVal(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
+    CTimedObject::_GoAwake();       // Awake it first, otherwise some other things won't work
+    _SetTimeout(Calc_GetRandVal(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
 
 	for (CSObjContRec* pObjRec : *this)
 	{
@@ -650,6 +655,13 @@ void CChar::GoAwake()
         if (pItem->IsSleeping())
             pItem->GoAwake();
     }
+}
+
+void CChar::GoAwake()
+{
+	ADDTOCALLSTACK("CChar::GoAwake");
+	THREAD_UNIQUE_LOCK_SET;
+	CChar::_GoAwake();
 }
 
 // Is there something wrong with this char?
@@ -779,31 +791,59 @@ char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
 }
 
 
-bool CChar::IsStatFlag( uint64 iStatFlag ) const
+/*
+bool CChar::_IsStatFlag(uint64 uiStatFlag) const noexcept
 {
-	THREAD_SHARED_LOCK_SET;
-	return ((m_iStatFlag & iStatFlag) ? true : false );
+	return (_uiStatFlag & uiStatFlag);
+}
+*/
+bool CChar::IsStatFlag( uint64 uiStatFlag) const noexcept
+{
+//	THREAD_SHARED_LOCK_SET;
+	return (_uiStatFlag & uiStatFlag);
 }
 
-void CChar::StatFlag_Set( uint64 iStatFlag)
+/*
+void CChar::_StatFlag_Set( uint64 uiStatFlag) noexcept
 {
-    THREAD_UNIQUE_LOCK_SET;
-    m_iStatFlag |= iStatFlag;
+    _uiStatFlag |= uiStatFlag;
+}
+*/
+void CChar::StatFlag_Set(uint64 uiStatFlag) noexcept
+{
+//	THREAD_UNIQUE_LOCK_SET;
+	_uiStatFlag |= uiStatFlag;
 }
 
-void CChar::StatFlag_Clear( uint64 iStatFlag)
+/*
+void CChar::_StatFlag_Clear(uint64 uiStatFlag) noexcept
 {
-    THREAD_UNIQUE_LOCK_SET;
-    m_iStatFlag &= ~iStatFlag;
+    _uiStatFlag &= ~uiStatFlag;
+}
+*/
+void CChar::StatFlag_Clear(uint64 uiStatFlag) noexcept
+{
+//	THREAD_UNIQUE_LOCK_SET;
+	_uiStatFlag &= ~uiStatFlag;
 }
 
-void CChar::StatFlag_Mod(uint64 iStatFlag, bool fMod )
+/*
+void CChar::_StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept
 {
-    THREAD_UNIQUE_LOCK_SET;
 	if ( fMod )
-        m_iStatFlag |= iStatFlag;
+        _uiStatFlag |= uiStatFlag;
 	else
-        m_iStatFlag &= ~iStatFlag;
+        _uiStatFlag &= ~uiStatFlag;
+}
+*/
+void CChar::StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept
+{
+//	THREAD_UNIQUE_LOCK_SET;
+//	_StatFlag_Mod(uiStatFlag, fMod);
+	if (fMod)
+		_uiStatFlag |= uiStatFlag;
+	else
+		_uiStatFlag &= ~uiStatFlag;
 }
 
 bool CChar::IsPriv( word flag ) const
@@ -1053,7 +1093,7 @@ bool CChar::DupeFrom(const CChar * pChar, bool fNewbieItems )
 
 	m_pArea = pChar->m_pArea;
 	m_pRoom = pChar->m_pRoom;
-    m_iStatFlag = pChar->m_iStatFlag;
+    _uiStatFlag = pChar->_uiStatFlag;
 
 	if ( g_World.m_fSaveParity )
 		StatFlag_Set(STATF_SAVEPARITY);	// It will get saved next time.
@@ -2901,7 +2941,7 @@ do_default:
 			sVal.FormatVal( IsStatFlag(STATF_EMOTEACTION) );
 			break;
 		case CHC_FLAGS:
-			sVal.FormatULLHex(m_iStatFlag);
+			sVal.FormatULLHex(_uiStatFlag);
 			break;
 		case CHC_FONT:
 			sVal.FormatVal( m_fonttype );
@@ -3450,11 +3490,11 @@ bool CChar::r_LoadVal( CScript & s )
 			if (g_Serv.IsLoading())
 			{
 				// Don't set STATF_SAVEPARITY at server startup, otherwise the first worldsave will not save these chars
-				m_iStatFlag = s.GetArgLLVal() & ~STATF_SAVEPARITY;
+				_uiStatFlag = s.GetArgLLVal() & ~STATF_SAVEPARITY;
 				break;
 			}
 			// Don't modify STATF_SAVEPARITY, STATF_PET, STATF_SPAWNED here
-			m_iStatFlag = (m_iStatFlag & (STATF_SAVEPARITY | STATF_PET | STATF_SPAWNED)) | (s.GetArgLLVal() & ~(STATF_SAVEPARITY | STATF_PET | STATF_SPAWNED));
+			_uiStatFlag = (_uiStatFlag & (STATF_SAVEPARITY | STATF_PET | STATF_SPAWNED)) | (s.GetArgLLVal() & ~(STATF_SAVEPARITY | STATF_PET | STATF_SPAWNED));
 			NotoSave_Update();
 			break;
 		case CHC_FONT:
@@ -3726,8 +3766,8 @@ void CChar::r_Write( CScript & s )
 		s.WriteKeyStr("OBODY", g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _iPrev_id)));
 	if ( _wPrev_Hue != HUE_DEFAULT )
 		s.WriteKeyHex("OSKIN", _wPrev_Hue);
-	if ( m_iStatFlag )
-		s.WriteKeyHex("FLAGS", m_iStatFlag);
+	if ( _uiStatFlag )
+		s.WriteKeyHex("FLAGS", _uiStatFlag);
 	if ( m_attackBase )
 		s.WriteKeyFormat("DAM", "%" PRIu16 ",%" PRIu16, m_attackBase, m_attackBase + m_attackRange);
 	if ( m_defense )
@@ -4205,7 +4245,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_INVIS:
 			if ( pSrc )
 			{
-                m_iStatFlag = s.GetArgLLFlag( m_iStatFlag, STATF_INSUBSTANTIAL );
+                _uiStatFlag = s.GetArgLLFlag( _uiStatFlag, STATF_INSUBSTANTIAL );
 				UpdateMode(nullptr, true);
 				if ( IsStatFlag(STATF_INSUBSTANTIAL) )
 				{
@@ -4226,7 +4266,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_INVUL:
 			if ( pSrc )
 			{
-                m_iStatFlag = s.GetArgLLFlag( m_iStatFlag, STATF_INVUL );
+                _uiStatFlag = s.GetArgLLFlag( _uiStatFlag, STATF_INVUL );
 				NotoSave_Update();
 				if ( IsSetOF( OF_Command_Sysmsgs ) )
 					pSrc->SysMessage( IsStatFlag( STATF_INVUL )? g_Cfg.GetDefaultMsg(DEFMSG_MSG_INVUL_ON) : g_Cfg.GetDefaultMsg(DEFMSG_MSG_INVUL_OFF) );

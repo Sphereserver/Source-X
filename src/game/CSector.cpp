@@ -105,7 +105,7 @@ bool CSector::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
             {
                 ptcKey += 8;
                 const bool fCheckAdjacents = Exp_GetVal(ptcKey);
-                sVal.FormatBVal(CanSleep(fCheckAdjacents));
+                sVal.FormatBVal(_CanSleep(fCheckAdjacents));
                 return true;
             }
 		case SC_CLIENTS:
@@ -171,11 +171,11 @@ bool CSector::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 	return false;
 }
 
-void CSector::GoSleep()
+void CSector::_GoSleep()
 {
-    ADDTOCALLSTACK("CSector::GoSleep");
+    ADDTOCALLSTACK("CSector::_GoSleep");
     const ProfileTask charactersTask(PROFILE_TIMERS);
-    CTimedObject::GoSleep();
+    CTimedObject::_GoSleep();
 
 	for (CSObjContRec* pObjRec : m_Chars_Active)
 	{
@@ -204,11 +204,18 @@ void CSector::GoSleep()
     }
 }
 
-void CSector::GoAwake()
+void CSector::GoSleep()
 {
-    ADDTOCALLSTACK("CSector::GoAwake");
+	ADDTOCALLSTACK("CSector::GoSleep");
+	THREAD_UNIQUE_LOCK_SET;
+	CSector::_GoSleep();
+}
+
+void CSector::_GoAwake()
+{
+    ADDTOCALLSTACK("CSector::_GoAwake");
     const ProfileTask charactersTask(PROFILE_TIMERS);
-    CTimedObject::GoAwake();  // Awake it first, otherwise other things won't work.
+    CTimedObject::_GoAwake();  // Awake it first, otherwise other things won't work.
 
 	for (CSObjContRec* pObjRec : m_Chars_Active)
 	{
@@ -247,7 +254,7 @@ void CSector::GoAwake()
         pCentral = this;
         for (int i = 0; i < (int)DIR_QTY; ++i)
         {
-            CSector *pSector = GetAdjacentSector((DIR_TYPE)i);
+            CSector *pSector = _GetAdjacentSector((DIR_TYPE)i);
             if (pSector && pSector->IsSleeping())
             {
                 pSector->GoAwake();
@@ -255,7 +262,15 @@ void CSector::GoAwake()
         }
         pCentral = nullptr;
     }
-    OnTick();   // Unknown time passed, make the sector tick now to reflect any possible environ changes.
+
+    _OnTick();   // Unknown time passed, make the sector tick now to reflect any possible environ changes.
+}
+
+void CSector::GoAwake()
+{
+	ADDTOCALLSTACK("CSector::GoAwake");
+	THREAD_UNIQUE_LOCK_SET;
+	CSector::_GoAwake();
 }
 
 bool CSector::r_LoadVal( CScript &s )
@@ -367,7 +382,7 @@ bool CSector::r_Verb( CScript & s, CTextConsole * pSrc )
                 }
                 if (!s.HasArgs())// with no args it will check if it can sleep before, to avoid possible problems.
                 {
-                    if (!CanSleep(true))
+                    if (!_CanSleep(true))
                     {
                         break;
                     }
@@ -930,23 +945,23 @@ void CSector::MoveItemToSector( CItem * pItem )
 	// May just be setting a timer. SetTimer or MoveTo()
 	ASSERT( pItem );
 
-    if (IsSleeping())
+    if (_IsSleeping())
     {
-        if (CanSleep(true))
+        if (_CanSleep(true))
         {
-            pItem->GoSleep();
+            pItem->_GoSleep();
         }
         else
         {
-            GoAwake();
-            if (pItem->IsSleeping())
-                pItem->GoAwake();
+            _GoAwake();
+            if (pItem->_IsSleeping())
+                pItem->_GoAwake();
         }
     }
     else
     {
-        if (pItem->IsSleeping())
-            pItem->GoAwake();
+        if (pItem->_IsSleeping())
+            pItem->_GoAwake();
     }
 
 	m_Items.AddItemToSector(pItem);
@@ -1010,7 +1025,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
 	return true;
 }
 
-bool CSector::CanSleep(bool fCheckAdjacents) const
+bool CSector::_CanSleep(bool fCheckAdjacents) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CSector::CanSleep");
 	if ( (g_Cfg._iSectorSleepDelay == 0) || IsFlagSet(SECF_NoSleep) )
@@ -1024,7 +1039,7 @@ bool CSector::CanSleep(bool fCheckAdjacents) const
     {
         for (int i = 0; i < (int)DIR_QTY; ++i)// Check for adjacent's sectors sleeping allowance.
         {
-            const CSector *pAdjacent = GetAdjacentSector((DIR_TYPE)i);    // set this as the last sector to avoid this code in the adjacent one and return if it can sleep or not instead of searching its adjacents.
+            const CSector *pAdjacent = _GetAdjacentSector((DIR_TYPE)i);    // set this as the last sector to avoid this code in the adjacent one and return if it can sleep or not instead of searching its adjacents.
             /*
             * Only check if this sector exist and it's not the last checked (sectors in the edges of the map doesn't have adjacent on those directions)
             * && Only check if the sector isn't sleeping (IsSleeping()) and then check if CanSleep().
@@ -1033,7 +1048,7 @@ bool CSector::CanSleep(bool fCheckAdjacents) const
             {
                 continue;
             }
-            if (!pAdjacent->CanSleep(false))
+            if (!pAdjacent->_CanSleep(false))
             {
                 return false;   // assume the base sector can't sleep.
             }
@@ -1131,14 +1146,19 @@ void CSector::Restock()
     }
 }
 
+bool CSector::_IsDeleted() const
+{
+	return false;   // Sectors should never be deleted in runtime.
+}
+
 bool CSector::IsDeleted() const
 {
 	return false;   // Sectors should never be deleted in runtime.
 }
 
-bool CSector::OnTick()
+bool CSector::_OnTick()
 {
-	ADDTOCALLSTACK("CSector::OnTick");
+	ADDTOCALLSTACK("CSector::_OnTick");
 	/*Ticking sectors from CWorld
     * Timer is automatically updated at the end with a 30 seconds default delay
     * Any return before it will threat this CSector as Sleep and will make it
@@ -1146,11 +1166,13 @@ bool CSector::OnTick()
     * players already inside).
     */
 
-	EXC_TRY("Tick");
-
 	//	do not tick sectors on maps not supported by server
 	if ( !g_MapList.IsMapSupported(m_map) )
 		return true;
+
+	EXC_TRY("Tick");
+
+	const ProfileTask sectorsTask(PROFILE_SECTORS);
 
     EXC_SET_BLOCK("light change");
 	// Check for light change before putting the sector to sleep, since in other case the
@@ -1169,12 +1191,12 @@ bool CSector::OnTick()
 
 	EXC_SET_BLOCK("sector sleeping?");
 	// Put the sector to sleep if no clients been here in a while.
-    const bool fCanSleep = CanSleep(true);
+    const bool fCanSleep = _CanSleep(true);
 	if (fCanSleep)
 	{
-        if (!IsSleeping())
+        if (!_IsSleeping())
         {
-            GoSleep();
+            _GoSleep();
         }
 		return true;
 	}
@@ -1202,9 +1224,9 @@ bool CSector::OnTick()
 	{
 		iRegionPeriodic = 2;
 
-		static const SOUND_TYPE sm_SfxRain[] = { 0x10, 0x11 };
-		static const SOUND_TYPE sm_SfxWind[] = { 0x14, 0x15, 0x16 };
-		static const SOUND_TYPE sm_SfxThunder[] = { 0x28, 0x29 , 0x206 };
+		static constexpr SOUND_TYPE sm_SfxRain[] = { 0x10, 0x11 };
+		static constexpr SOUND_TYPE sm_SfxWind[] = { 0x14, 0x15, 0x16 };
+		static constexpr SOUND_TYPE sm_SfxThunder[] = { 0x28, 0x29 , 0x206 };
 
 		// Lightning ?	// wind, rain,
 		switch ( GetWeather() )
@@ -1289,13 +1311,19 @@ bool CSector::OnTick()
 
 	EXC_CATCH;
 
-    SetTimeoutS(30);  // Sector is Awake, make it tick after 30 seconds.
+    _SetTimeoutS(30);  // Sector is Awake, make it tick after 30 seconds.
 
 	EXC_DEBUG_START;
 	const CPointMap pt = GetBasePoint();
 	g_Log.EventError("#4 sector #%d [%hd,%hd,%hhd,%hhu]\n", GetIndex(), pt.m_x, pt.m_y, pt.m_z, pt.m_map);
 	EXC_DEBUG_END;
     return true;
+}
+
+bool CSector::OnTick()
+{
+	ADDTOCALLSTACK("CSector::OnTick");
+	THREAD_UNIQUE_LOCK_RETURN(CSector::_OnTick());
 }
 
 

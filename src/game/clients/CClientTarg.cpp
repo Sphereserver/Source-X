@@ -1009,7 +1009,7 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 		case IT_CLOTHING:
 		case IT_JEWELRY:
 			fWeapon = false;
-			iHitsCur = pItem->m_itArmor.m_wHitsCur;
+			iHitsCur = pItem->m_itArmor.m_dwHitsCur;
 			iHitsMax = pItem->m_itArmor.m_wHitsMax;
 			len += snprintf( pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_DEF ), pItem->Armor_GetDefense());
 			break;
@@ -1025,7 +1025,7 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 		case IT_WEAPON_XBOW:
 		case IT_WEAPON_THROWING:
 			fWeapon = true;
-			iHitsCur = pItem->m_itWeapon.m_wHitsCur;
+			iHitsCur = pItem->m_itWeapon.m_dwHitsCur;
 			iHitsMax = pItem->m_itWeapon.m_wHitsMax;
 			len += snprintf( pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_DAM ), pItem->Weapon_GetAttack());
 			break;
@@ -1437,7 +1437,7 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 				SysMessageDefault( DEFMSG_MAGERY_2 );
 				return true;
 			}
-			CChar * pChar = dynamic_cast<CChar*>(pObj);
+			CChar * pChar = static_cast<CChar*>(pObj);
 			if ( pSpell->IsSpellType( SPELLFLAG_TARG_NO_PLAYER ) && pChar->m_pPlayer )
 			{
 				SysMessageDefault( DEFMSG_MAGERY_7 );
@@ -1889,7 +1889,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			return false;
 
 		case IT_FISH:
-			if ( ! m_pChar->CanUse( pItemTarg, true ))
+			if ( !pItemTarg || !m_pChar->CanUse(pItemTarg, true) )
 			{
 				SysMessageDefault( DEFMSG_ITEMUSE_FISH_UNABLE );
 				return false;

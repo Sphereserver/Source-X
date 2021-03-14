@@ -50,8 +50,13 @@ private:
 
 public:
 	virtual void Init(int index, uchar map, short x, short y) override;
-	virtual bool OnTick() override;
-	virtual bool IsDeleted() const override;
+
+
+protected:	virtual bool _OnTick() override;
+public:		virtual bool  OnTick() override;
+
+protected:	virtual bool _IsDeleted() const override;
+public:		virtual bool IsDeleted() const override;
 
 	// Time
 	int GetLocalTime() const;
@@ -91,20 +96,25 @@ public:
 
 	// Chars in the sector.
 	size_t GetCharComplexity() const;
+
 	void CheckCharComplexity() const noexcept;
 	bool IsCharActiveIn( const CChar * pChar );
 	bool IsCharDisconnectedIn( const CChar * pChar );
 	size_t GetInactiveChars() const;
 	size_t GetClientsNumber() const;
 	int64 GetLastClientTime() const;
-	bool CanSleep(bool fCheckAdjacents) const;
+	bool MoveCharToSector(CChar* pChar);
+
+	bool _CanSleep(bool fCheckAdjacents) const;
 	void SetSectorWakeStatus();	// Ships may enter a sector before it's riders !
-	bool MoveCharToSector( CChar * pChar );
 
 	// CTimedObject
 private:
-    virtual void GoSleep() override;
-    virtual void GoAwake() override;
+    virtual void _GoSleep() override;
+	virtual void  GoSleep() override;
+
+    virtual void _GoAwake() override;
+	virtual void  GoAwake() override;
 
     // General.
 public:

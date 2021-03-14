@@ -80,7 +80,6 @@ TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr ptcCommand, int iLoopsMade, CSc
     CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult)
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Loop");
-	bool fEndLooping = false;
 	for (auto it = _timedFunctions.begin(); it != _timedFunctions.end(); )	// the end iterator changes at each stl container erase call
 	{
 		++iLoopsMade;
@@ -97,7 +96,6 @@ TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr ptcCommand, int iLoopsMade, CSc
 			if (!pObj)
 			{
 			LoopStop:
-				fEndLooping = true;
 				break;
 			}
 
@@ -164,7 +162,7 @@ int CTimedFunctionHandler::Load(lpctstr ptcKeyword, bool fQuoted, lpctstr ptcArg
             g_Log.Event( LOGM_INIT|LOGL_ERROR, "Invalid TimerF line in %sdata.scp: %s=%s (arguments mismatch: 3 needed).\n", SPHERE_FILE, ptcKeyword, ptcArg);
             return -1;
         }
-        
+
         const auto oldErrno = errno;
 		errno = 0;
 
@@ -220,7 +218,7 @@ void CTimedFunctionHandler::r_Write( CScript & s )
 		if (uid.IsValidUID())
 		{
 			s.WriteKeyFormat("TimerFCall", "%s", tf->GetCommand());
-			s.WriteKeyFormat("TimerFNumbers", STRINGIFY(TF_TICK_MAGIC_NUMBER) ",%u,%d", uid.GetObjUID(), tf->GetTimerDiff());
+			s.WriteKeyFormat("TimerFNumbers", STRINGIFY(TF_TICK_MAGIC_NUMBER) ",%" PRIu32 ",%" PRId64, uid.GetObjUID(), tf->GetTimerDiff());
 		}
 	}
 }

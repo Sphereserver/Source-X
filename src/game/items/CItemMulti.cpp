@@ -37,6 +37,10 @@ CItemMulti::CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef, bool fTurnable) :  
 
 CItemMulti::~CItemMulti()
 {
+    EXC_TRY("Cleanup in destructor");
+
+    ADDTOCALLSTACK("CItemMulti::~CItemMulti");
+
     if (!m_pRegion)
     {
         return;
@@ -134,13 +138,16 @@ CItemMulti::~CItemMulti()
     {
         SetMovingCrate(CUID());
     }
-    MultiUnRealizeRegion();    // unrealize before removed from ground.
-    DeletePrepare();    // Must remove early because virtuals will fail in child destructor.
-                        // NOTE: ??? This is dangerous to iterators. The "next" item may no longer be valid !
 
-                        // Attempt to remove all the accessory junk.
-                        // NOTE: assume we have already been removed from Top Level
+    MultiUnRealizeRegion();    // unrealize before removed from ground.
+    
+    // Must remove early because virtuals will fail in child destructor.
+    // Attempt to remove all the accessory junk.
+    // NOTE: assume we have already been removed from Top Level
+    DeletePrepare();    
     delete m_pRegion;
+
+    EXC_CATCH;
 }
 
 bool CItemMulti::Delete(bool fForce)
@@ -1110,21 +1117,15 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
         return;
     }
 
-    CChar *pOwner = GetOwner().CharFind();
-    ITEMID_TYPE itDeed;
-    if (IsType(IT_SHIP))
-    {
-        itDeed = ITEMID_SHIP_PLANS1;
-    }
-    else
-    {
-        itDeed = ITEMID_DEED1;
-    }
     TRIGRET_TYPE tRet = TRIGRET_RET_FALSE;
     bool fTransferAll = false;
-    CItem *pDeed = CItem::CreateBase(itDeed <= ITEMID_NOTHING ? itDeed : ITEMID_DEED1);
+
+    ITEMID_TYPE itDeed = IsType(IT_SHIP) ? ITEMID_SHIP_PLANS1 : ITEMID_DEED1;
+    CItem *pDeed = CItem::CreateBase(itDeed);
+    ASSERT(pDeed);
+
     tchar *pszName = Str_GetTemp();
-    CItemBaseMulti * pItemBase = static_cast<CItemBaseMulti*>(Base_GetDef());
+    const CItemBaseMulti * pItemBase = static_cast<const CItemBaseMulti*>(Base_GetDef());
     snprintf(pszName, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_DEED_NAME), pItemBase->GetName());
     pDeed->SetName(pszName);
 
@@ -1163,6 +1164,7 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
         }
     }
 
+    CChar* pOwner = GetOwner().CharFind();
     if (!pOwner || !pOwner->m_pPlayer)
     {
         return;
@@ -1183,23 +1185,21 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
         pDeed->Delete();
         return;
     }
-    if (pDeed)
-    {
-        pDeed->SetHue(GetHue());
-        pDeed->m_itDeed.m_Type = GetID();
-        if (m_Attr & ATTR_MAGIC)
-        {
-            pDeed->SetAttr(ATTR_MAGIC);
-        }
-        if (fMoveToBank)
-        {
-            pOwner->GetBank(LAYER_BANKBOX)->ContentAdd(pDeed);
-        }
-        else
-        {
-            pOwner->ItemBounce(pDeed, fDisplayMsg);
-        }
-    }
+
+	pDeed->SetHue(GetHue());
+	pDeed->m_itDeed.m_Type = GetID();
+	if (m_Attr & ATTR_MAGIC)
+	{
+		pDeed->SetAttr(ATTR_MAGIC);
+	}
+	if (fMoveToBank)
+	{
+		pOwner->GetBank(LAYER_BANKBOX)->ContentAdd(pDeed);
+	}
+	else
+	{
+		pOwner->ItemBounce(pDeed, fDisplayMsg);
+	}
 
     SetKeyNum("REMOVED", 1);
     Delete();
@@ -1946,11 +1946,11 @@ bool CItemMulti::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
     {
         case SHR_ACCESS:
         {
-            int i = Exp_GetVal(ptcKey);
+            const size_t idx = Exp_GetSTVal(ptcKey);
             SKIP_SEPARATORS(ptcKey);
-            if ((int)_lAccesses.size() > i)
+            if (_lAccesses.size() > idx)
             {
-                CChar *pAccess = _lAccesses[i].CharFind();
+                CChar *pAccess = _lAccesses[idx].CharFind();
                 if (pAccess)
                 {
                     pRef = pAccess;
@@ -1961,11 +1961,11 @@ bool CItemMulti::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
         }
         case SHR_ADDON:
         {
-            int i = Exp_GetVal(ptcKey);
+            const size_t idx = Exp_GetSTVal(ptcKey);
             SKIP_SEPARATORS(ptcKey);
-            if ((int)_lAddons.size() > i)
+            if (_lAddons.size() > idx)
             {
-                CItemMulti *pAddon = static_cast<CItemMulti*>(_lAddons[i].ItemFind());
+                CItemMulti *pAddon = static_cast<CItemMulti*>(_lAddons[idx].ItemFind());
                 if (pAddon)
                 {
                     pRef = pAddon;
@@ -1976,11 +1976,11 @@ bool CItemMulti::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
         }
         case SHR_BAN:
         {
-            int i = Exp_GetVal(ptcKey);
+            const size_t idx = Exp_GetSTVal(ptcKey);
             SKIP_SEPARATORS(ptcKey);
-            if ((int)_lBans.size() > i)
+            if (_lBans.size() > idx)
             {
-                CChar *pBan = _lBans[i].CharFind();
+                CChar *pBan = _lBans[idx].CharFind();
                 if (pBan)
                 {
                     pRef = pBan;
@@ -1991,9 +1991,9 @@ bool CItemMulti::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
         }
         case SHR_COMP:
         {
-            int i = Exp_GetVal(ptcKey);
+            const int idx = Exp_GetVal(ptcKey);
             SKIP_SEPARATORS(ptcKey);
-            CItem *pComp = Multi_FindItemComponent(i);
+            CItem *pComp = Multi_FindItemComponent(idx);
             if (pComp)
             {
                 pRef = pComp;
@@ -2003,11 +2003,11 @@ bool CItemMulti::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
         }
         case SHR_COOWNER:
         {
-            int i = Exp_GetVal(ptcKey);
+            const size_t idx = Exp_GetSTVal(ptcKey);
             SKIP_SEPARATORS(ptcKey);
-            if ((int)_lCoowners.size() > i)
+            if (_lCoowners.size() > idx)
             {
-                CChar *pCoowner = _lCoowners[i].CharFind();
+                CChar *pCoowner = _lCoowners[idx].CharFind();
                 if (pCoowner)
                 {
                     pRef = pCoowner;
@@ -2018,11 +2018,11 @@ bool CItemMulti::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
         }
         case SHR_FRIEND:
         {
-            int i = Exp_GetVal(ptcKey);
+            const size_t idx = Exp_GetSTVal(ptcKey);
             SKIP_SEPARATORS(ptcKey);
-            if ((int)_lFriends.size() > i)
+            if (_lFriends.size() > idx)
             {
-                CChar *pFriend = _lFriends[i].CharFind();
+                CChar *pFriend = _lFriends[idx].CharFind();
                 if (pFriend)
                 {
                     pRef = pFriend;
@@ -2033,11 +2033,11 @@ bool CItemMulti::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
         }
         case SHR_LOCKDOWN:
         {
-            int i = Exp_GetVal(ptcKey);
+            const size_t idx = Exp_GetSTVal(ptcKey);
             SKIP_SEPARATORS(ptcKey);
-            if ((int)_lLockDowns.size() > i)
+            if (_lLockDowns.size() > idx)
             {
-                CItem *plockdown = _lLockDowns[i].ItemFind();
+                CItem *plockdown = _lLockDowns[idx].ItemFind();
                 if (plockdown)
                 {
                     pRef = plockdown;
@@ -2076,11 +2076,11 @@ bool CItemMulti::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
         }
         case SHR_SECURED:
         {
-            int i = Exp_GetVal(ptcKey);
+            const size_t idx = Exp_GetSTVal(ptcKey);
             SKIP_SEPARATORS(ptcKey);
-            if ((int)_lSecureContainers.size() > i)
+            if (_lSecureContainers.size() > idx)
             {
-                CItem *pItem = _lSecureContainers[i].ItemFind();
+                CItem *pItem = _lSecureContainers[idx].ItemFind();
                 if (pItem)
                 {
                     CItemContainer *pCont = static_cast<CItemContainer*>(pItem);
@@ -2092,11 +2092,11 @@ bool CItemMulti::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
         }
         case SHR_VENDOR:
         {
-            int i = Exp_GetVal(ptcKey);
+            const size_t idx = Exp_GetSTVal(ptcKey);
             SKIP_SEPARATORS(ptcKey);
-            if ((int)_lVendors.size() > i)
+            if (_lVendors.size() > idx)
             {
-                CChar *pVendor = _lVendors[i].CharFind();
+                CChar *pVendor = _lVendors[idx].CharFind();
                 if (pVendor)
                 {
                     pRef = pVendor;
@@ -3289,8 +3289,12 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
     {
         // Now name the guild
         CItemStone * pStone = dynamic_cast <CItemStone*>(pItemNew);
+        ASSERT(pStone);
         pStone->AddRecruit(pChar, STONEPRIV_MASTER);
-        pChar->GetClientActive()->addPromptConsole(CLIMODE_PROMPT_STONE_NAME, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_GUILDSTONE_NEW), pItemNew->GetUID());
+        if (CClient* pClient = pChar->GetClientActive())
+        {
+            pClient->addPromptConsole(CLIMODE_PROMPT_STONE_NAME, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_GUILDSTONE_NEW), pItemNew->GetUID());
+        }
     }
     else if (pItemDef->IsType(IT_SHIP))
     {

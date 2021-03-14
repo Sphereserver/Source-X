@@ -107,7 +107,7 @@ void CSectorList::Close()
 }
 
 
-#define IsMapInvalid(map)	((map < 0) || (map > MAP_SUPPORTED_QTY))
+#define IsMapInvalid(map)	((map < 0) || (map >= MAP_SUPPORTED_QTY))
 
 int CSectorList::GetSectorSize(int map) const noexcept
 {

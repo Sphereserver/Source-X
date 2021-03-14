@@ -40,16 +40,13 @@ CScriptTriggerArgs::CScriptTriggerArgs(int64 iVal1, int64 iVal2, CScriptObj* pOb
 
 void CScriptTriggerArgs::Clear()
 {
-    m_iN1 = 0;
-    m_iN2 = 0;
-    m_iN3 = 0;
+    m_iN1 = m_iN2 = m_iN3 = 0;
+    m_pO1 = nullptr;
 
     m_s1.Clear();
 
     m_s1_buf_vec.Clear();
     m_v.clear();
-
-    m_pO1 = nullptr;
 
     // Clear LOCALs
     m_VarsLocal.Clear();

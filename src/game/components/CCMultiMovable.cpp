@@ -108,14 +108,16 @@ void CCMultiMovable::SetNextMove()
         return;
     }
     int64 iDelay;
+    /*
     if (IsSetOF(OF_NoSmoothSailing))
     {
         iDelay = (_eSpeedMode == SMS_SLOW) ? (_shipSpeed.period * MSECS_PER_TENTH) : ((_shipSpeed.period * MSECS_PER_TENTH) / 2);
     }
     else
     {
+    */
         iDelay = (_eSpeedMode == SMS_SLOW) ? (_shipSpeed.period * MSECS_PER_TENTH) : ((_shipSpeed.period * MSECS_PER_TENTH) / 2);
-    }
+    //}
     pItemThis->SetTimeout(iDelay);
 }
 

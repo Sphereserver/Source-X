@@ -56,14 +56,14 @@ private:
 public:
     void Tick();
 
-    void AddTimedObject(int64 iTimeout, CTimedObject* pTimedObject);
-    void DelTimedObject(CTimedObject* pTimedObject);
+    void AddTimedObject(int64 iTimeout, CTimedObject* pTimedObject, bool fLockNeeded);
+    void DelTimedObject(CTimedObject* pTimedObject, bool fLockNeeded);
     void AddCharTicking(CChar* pChar, bool fIgnoreSleep);
     void DelCharTicking(CChar* pChar);
 
 private:
-    void _InsertTimedObject(const int64 iTimeout, CTimedObject* pTimedObject);
-    void _RemoveTimedObject(const int64 iOldTimeout, CTimedObject* pTimedObject);
+    void _InsertTimedObject(const int64 iTimeout, CTimedObject* pTimedObject, bool fLockNeeded);
+    void _RemoveTimedObject(const int64 iOldTimeout, CTimedObject* pTimedObject, bool fLockNeeded);
     void _InsertCharTicking(const int64 iTickNext, CChar* pChar);
     void _RemoveCharTicking(const int64 iOldTimeout, CChar* pChar);
 };

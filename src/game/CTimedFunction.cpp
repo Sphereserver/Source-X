@@ -15,25 +15,20 @@ CTimedFunction::CTimedFunction(CTimedFunctionHandler* pHandler, const CUID& uidA
 	Str_CopyLimitNull(_ptcCommand, pcCommand, kuiCommandSize);
 }
 
+
+bool CTimedFunction::_IsDeleted() const // virtual
+{
+	return false;
+}
+
 bool CTimedFunction::IsDeleted() const // virtual
 {
 	return false;
 }
 
-bool CTimedFunction::OnTick() // virtual
+
+static bool _ExecTimedFunction(CUID&& uid, CScript&& s)
 {
-	ADDTOCALLSTACK("CTimedFunction::OnTick");
-
-	const ProfileTask scriptsTask(PROFILE_TIMEDFUNCTIONS);
-
-	const CUID uid(_uidAttached);
-	CScript s(_ptcCommand);
-	
-	CTimedObject::OnTick();
-	_pHandler->OnChildDestruct(this); // This has to be the last function call to ever access this object!
-
-	// From now on, this object does NOT exist anymore!
-
 	CObjBase* obj = uid.ObjFind();
 	if (obj != nullptr) //just in case
 	{
@@ -54,9 +49,44 @@ bool CTimedFunction::OnTick() // virtual
 		if (g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS)
 		{
 			const uint uiUid = uid.GetObjUID();
-			g_Log.EventDebug("[DEBUG_SCRIPTS] Blocked TIMERF(MS) execution on unused UID (0%x, dec %u'): '%s'.\n", uiUid, uiUid, _ptcCommand);
+			g_Log.EventDebug("[DEBUG_SCRIPTS] Blocked TIMERF(MS) execution on unused UID (0%x, dec %u'): '%s'.\n", uiUid, uiUid, s.GetKey());
 		}
 	}
 
 	return false;
+}
+
+bool CTimedFunction::_OnTick() // virtual
+{
+	ADDTOCALLSTACK("CTimedFunction::_OnTick");
+
+	const ProfileTask scriptsTask(PROFILE_TIMEDFUNCTIONS);
+
+	CUID uid(_uidAttached);
+	CScript s(_ptcCommand);
+	
+	_pHandler->OnChildDestruct(this); // This has to be the last function call to ever access this object!
+
+	// From now on, this object does NOT exist anymore!
+	return _ExecTimedFunction(std::move(uid), std::move(s));	
+}
+
+bool CTimedFunction::OnTick() // virtual
+{
+	ADDTOCALLSTACK("CTimedFunction::OnTick");
+
+	const ProfileTask scriptsTask(PROFILE_TIMEDFUNCTIONS);
+
+	CUID uid;
+	CScript s;
+	{
+		THREAD_SHARED_LOCK_SET;
+		uid.SetPrivateUID(_uidAttached);
+		s.ParseKey(_ptcCommand);
+	}
+
+	_pHandler->OnChildDestruct(this); // This has to be the last function call to ever access this object!
+
+	// From now on, this object does NOT exist anymore!
+	return _ExecTimedFunction(std::move(uid), std::move(s));
 }

@@ -95,7 +95,7 @@ public:
 
 	// - *Top* methods: are virtual and may do additional checks.
 	void SetTopPoint(const CPointMap& pt);
-	virtual void SetTopZ(char z) noexcept;
+	virtual void SetTopZ(char z);
     inline const CPointMap & GetTopPoint() const noexcept {
         return m_pt;
     }

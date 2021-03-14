@@ -2,16 +2,16 @@
 #include "CWorldTicker.h"
 #include "CWorldTickingList.h"
 
-void CWorldTickingList::AddObjSingle(int64 iTimeout, CTimedObject* pObj) // static
+void CWorldTickingList::AddObjSingle(int64 iTimeout, CTimedObject* pObj, bool fNeedsLock) // static
 {
     //The lock on pObj should already be acquired by CTimedObject::SetTimeout
-    g_World._Ticker.AddTimedObject(iTimeout, pObj);
+    g_World._Ticker.AddTimedObject(iTimeout, pObj, fNeedsLock);
 }
 
-void CWorldTickingList::DelObjSingle(CTimedObject* pObj) // static
+void CWorldTickingList::DelObjSingle(CTimedObject* pObj, bool fNeedsLock) // static
 {
     //The lock on pObj should already be acquired by CTimedObject::SetTimeout
-    g_World._Ticker.DelTimedObject(pObj);
+    g_World._Ticker.DelTimedObject(pObj, fNeedsLock);
 }
 
 void CWorldTickingList::AddCharPeriodic(CChar* pChar, bool fIgnoreSleep) // static

@@ -241,8 +241,8 @@ bool CClient::addDeleteErr(byte code, dword iSlot) const
 	// code
 	if ( code == PacketDeleteError::Success )
 		return true;
-	CChar *pChar = m_tmSetupCharList[iSlot].CharFind();
-	g_Log.EventWarn("%x:Bad Char Delete Attempted %d (acct='%s', char='%s', IP='%s')\n", GetSocketID(), code, GetAccount()->GetName(), (pChar ? pChar->GetName() : ""), GetPeerStr());
+	const CChar *pChar = (code == PacketDeleteError::NotExist) ? nullptr : m_tmSetupCharList[iSlot].CharFind();
+	g_Log.EventWarn("%x:Bad Char Delete Attempted %d (acct='%s', char='%s', IP='%s')\n", GetSocketID(), code, GetAccount()->GetName(), (pChar ? pChar->GetName() : "INVALID"), GetPeerStr());
 	new PacketDeleteError(this, static_cast<PacketDeleteError::Reason>(code));
 	return false;
 }
@@ -730,7 +730,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		}
 		case TALKMODE_ITEM:
 		{
-			if ( pSrc->IsChar() )
+			if ( pSrc && pSrc->IsChar() )
 			{
 				defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("CMSG_DEF_FONT"));
 				defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("CMSG_DEF_UNICODE") > 0 ? true : false;
@@ -1379,7 +1379,7 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 		Args.m_VarsLocal.SetStrNew("ClickMsgText", pszTemp);
 		Args.m_VarsLocal.SetNumNew("ClickMsgHue", (int64)(wHue));
 
-		TRIGRET_TYPE ret = dynamic_cast<CObjBase*>(const_cast<CChar*>(pChar))->OnTrigger( "@AfterClick", m_pChar, &Args );	// CTRIG_AfterClick, ITRIG_AfterClick
+		TRIGRET_TYPE ret = const_cast<CChar*>(pChar)->OnTrigger( "@AfterClick", m_pChar, &Args );	// CTRIG_AfterClick, ITRIG_AfterClick
 
 		if ( ret == TRIGRET_RET_TRUE )
 			return;
@@ -1576,8 +1576,11 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 	// Cancel a cursor input.
 
 	bool fSuppressCancelMessage = false;
+	CChar *pCharThis = GetChar();
+	ASSERT(pCharThis);
 
-	switch ( GetTargMode() )
+	const CLIMODE_TYPE curTargMode = GetTargMode();
+	switch (curTargMode)
 	{
 		case CLIMODE_TARG_OBJ_FUNC:
 		{
@@ -1585,16 +1588,16 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 			{
 				CScriptTriggerArgs Args;
 				Args.m_s1 =  m_Targ_Text;
-				if ( GetChar()->OnTrigger( CTRIG_Targon_Cancel, m_pChar, &Args ) == TRIGRET_RET_TRUE )
+				if (pCharThis->OnTrigger( CTRIG_Targon_Cancel, pCharThis, &Args ) == TRIGRET_RET_TRUE )
 					fSuppressCancelMessage = true;
 			}
 		} break;
 		case CLIMODE_TARG_USE_ITEM:
 		{
 			CItem * pItemUse = m_Targ_UID.ItemFind();
-			if ( pItemUse != nullptr && (( IsTrigUsed(TRIGGER_TARGON_CANCEL) ) || ( IsTrigUsed(TRIGGER_ITEMTARGON_CANCEL) ) ))
+			if (pItemUse && (IsTrigUsed(TRIGGER_TARGON_CANCEL) || IsTrigUsed(TRIGGER_ITEMTARGON_CANCEL)))
 			{
-				if ( pItemUse->OnTrigger( ITRIG_TARGON_CANCEL, m_pChar ) == TRIGRET_RET_TRUE )
+				if ( pItemUse->OnTrigger( ITRIG_TARGON_CANCEL, pCharThis) == TRIGRET_RET_TRUE )
 					fSuppressCancelMessage = true;
 			}
 		} break;
@@ -1602,13 +1605,13 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 		case CLIMODE_TARG_SKILL_MAGERY:
 		{
 			const CSpellDef* pSpellDef = g_Cfg.GetSpellDef(m_tmSkillMagery.m_iSpell);
-			if (m_pChar != nullptr && pSpellDef != nullptr)
+			if (pSpellDef)
 			{
 				CScriptTriggerArgs Args(m_tmSkillMagery.m_iSpell, 0, m_Targ_Prv_UID.ObjFind());
 
 				if ( IsTrigUsed(TRIGGER_SPELLTARGETCANCEL) )
 				{
-					if ( m_pChar->OnTrigger( CTRIG_SpellTargetCancel, this, &Args ) == TRIGRET_RET_TRUE )
+					if (pCharThis->OnTrigger( CTRIG_SpellTargetCancel, this, &Args ) == TRIGRET_RET_TRUE )
 					{
 						fSuppressCancelMessage = true;
 						break;
@@ -1617,7 +1620,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 
 				if ( IsTrigUsed(TRIGGER_TARGETCANCEL) )
 				{
-					if ( m_pChar->Spell_OnTrigger( m_tmSkillMagery.m_iSpell, SPTRIG_TARGETCANCEL, m_pChar, &Args ) == TRIGRET_RET_TRUE )
+					if (pCharThis->Spell_OnTrigger( m_tmSkillMagery.m_iSpell, SPTRIG_TARGETCANCEL, pCharThis, &Args ) == TRIGRET_RET_TRUE )
 						fSuppressCancelMessage = true;
 				}
 			}
@@ -1629,7 +1632,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 		case CLIMODE_TARG_SKILL_POISON:
 		{
 			SKILL_TYPE action = SKILL_NONE;
-			switch (GetTargMode())
+			switch (curTargMode)
 			{
 				case CLIMODE_TARG_SKILL:
 					action = m_tmSkillTarg.m_iSkill;
@@ -1647,11 +1650,11 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 					break;
 			}
 
-			if (action != SKILL_NONE && m_pChar != nullptr)
+			if (action != SKILL_NONE)
 			{
 				if ( IsTrigUsed(TRIGGER_SKILLTARGETCANCEL) )
 				{
-					if ( m_pChar->Skill_OnCharTrigger(action, CTRIG_SkillTargetCancel) == TRIGRET_RET_TRUE )
+					if (pCharThis->Skill_OnCharTrigger(action, CTRIG_SkillTargetCancel) == TRIGRET_RET_TRUE )
 					{
 						fSuppressCancelMessage = true;
 						break;
@@ -1659,7 +1662,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 				}
 				if ( IsTrigUsed(TRIGGER_TARGETCANCEL) )
 				{
-					if ( m_pChar->Skill_OnTrigger(action, SKTRIG_TARGETCANCEL) == TRIGRET_RET_TRUE )
+					if (pCharThis->Skill_OnTrigger(action, SKTRIG_TARGETCANCEL) == TRIGRET_RET_TRUE )
 						fSuppressCancelMessage = true;
 				}
 			}
@@ -1675,17 +1678,17 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
     else
         m_Targ_Timeout = 0;
 
-	if ( GetTargMode() == targmode )
+	if (curTargMode == targmode)
 		return;
 
-	if ( GetTargMode() != CLIMODE_NORMAL && targmode != CLIMODE_NORMAL )
+	if ((curTargMode != CLIMODE_NORMAL) && (targmode != CLIMODE_NORMAL))
 	{
 		//If there's any item in LAYER_DRAGGING we remove it from view and then bounce it
-		CItem * pItem = m_pChar->LayerFind( LAYER_DRAGGING );
+		CItem * pItem = pCharThis->LayerFind( LAYER_DRAGGING );
 		if (pItem != nullptr)
 		{
 			pItem->RemoveFromView();		//Removing from view to avoid seeing it in the cursor
-			m_pChar->ItemBounce(pItem);
+			pCharThis->ItemBounce(pItem);
 			// Just clear the old target mode
 			if (fSuppressCancelMessage == false)
 				addSysMessage(g_Cfg.GetDefaultMsg(DEFMSG_TARGET_CANCEL_2));

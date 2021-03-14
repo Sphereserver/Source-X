@@ -297,9 +297,13 @@ uint CChar::Skill_GetSum() const
 uint CChar::Skill_GetSumMax() const
 {
     ADDTOCALLSTACK("CChar::Skill_GetSumMax");
-    const CSkillClassDef * pSkillClass = m_pPlayer->GetSkillClass();
 	const CVarDefCont *pTagStorage = GetKey("OVERRIDE.SKILLSUM", true);
-    return (pTagStorage ? (uint)pTagStorage->GetValNum() : pSkillClass->m_SkillSumMax);
+	if (pTagStorage)
+		return (uint)pTagStorage->GetValNum();
+
+	const CSkillClassDef* pSkillClass = m_pPlayer->GetSkillClass();
+	ASSERT(pSkillClass);
+    return pSkillClass->m_SkillSumMax;
 }
 
 void CChar::Skill_Decay()
@@ -584,7 +588,7 @@ void CChar::Skill_Cleanup()
 	// We are starting the skill or ended dealing with it (started / succeeded / failed / aborted)
 	m_Act_Difficulty = 0;
 	m_Act_SkillCurrent = SKILL_NONE;
-	SetTimeoutD( m_pPlayer ? -1 : 1 );	// we should get a brain tick next time
+	_SetTimeoutD( m_pPlayer ? -1 : 1 );	// we should get a brain tick next time
 }
 
 lpctstr CChar::Skill_GetName( bool fUse ) const

@@ -159,7 +159,7 @@ public:
 
 	// Write stuff out to a script file.
 	bool _cdecl WriteSection(lpctstr pszSection, ...) __printfargs(2,3);
-	void _cdecl WriteKeyFormat(lptstr ptcKey, lptstr pszFormat, ...) __printfargs(3,4);
+	void _cdecl WriteKeyFormat(lpctstr ptcKey, lpctstr pszFormat, ...) __printfargs(3,4);
 	bool WriteKeySingle(lptstr ptcKey);
 	bool WriteKeyStr(lpctstr ptcKey, lpctstr ptcVal);
 

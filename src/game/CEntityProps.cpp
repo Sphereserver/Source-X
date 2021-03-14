@@ -33,7 +33,7 @@ void CEntityProps::ClearPropComponents()
     _lComponentProps.clear();
 }
 
-void CEntityProps::SubscribeComponentProps(CComponentProps * pComponent)
+CComponentProps* CEntityProps::SubscribeComponentProps(CComponentProps * pComponent)
 {
     ADDTOCALLSTACK("CEntityProps::SubscribeComponentProps");
     const COMPPROPS_TYPE compType = pComponent->GetType();
@@ -43,9 +43,10 @@ void CEntityProps::SubscribeComponentProps(CComponentProps * pComponent)
         delete pComponent;
         ASSERT(false);  // This should never happen
         //g_Log.EventError("Trying to duplicate prop component (%d) for %s '0x%08x'\n", (int)pComponent->GetType(), pComponent->GetLink()->GetName(), pComponent->GetLink()->GetUID());
-        return;
+        return nullptr;
     }
     //_lComponentProps.container.shrink_to_fit();
+    return pairResult.first->second;
 }
 
 void CEntityProps::UnsubscribeComponentProps(iterator& it, bool fEraseFromMap)
@@ -77,34 +78,29 @@ void CEntityProps::UnsubscribeComponentProps(CComponentProps *pComponent)
     _lComponentProps.erase(it);  // iterator invalidation!
 }
 
-void CEntityProps::CreateSubscribeComponentProps(COMPPROPS_TYPE iComponentPropsType)
+CComponentProps* CEntityProps::CreateSubscribeComponentProps(COMPPROPS_TYPE iComponentPropsType)
 {
     ADDTOCALLSTACK("CEntityProps::CreateSubscribeComponentProps");
     switch (iComponentPropsType)
     {
         case COMP_PROPS_CHAR:
-            SubscribeComponentProps(new CCPropsChar());
-            break;
+            return SubscribeComponentProps(new CCPropsChar());
         case COMP_PROPS_ITEM:
-            SubscribeComponentProps(new CCPropsItem());
-            break;
+            return SubscribeComponentProps(new CCPropsItem());
         case COMP_PROPS_ITEMCHAR:
-            SubscribeComponentProps(new CCPropsItemChar());
-            break;
+            return SubscribeComponentProps(new CCPropsItemChar());
         case COMP_PROPS_ITEMEQUIPPABLE:
-            SubscribeComponentProps(new CCPropsItemEquippable());
-            break;
+            return SubscribeComponentProps(new CCPropsItemEquippable());
         case COMP_PROPS_ITEMWEAPON:
-            SubscribeComponentProps(new CCPropsItemWeapon());
-            break;
+            return SubscribeComponentProps(new CCPropsItemWeapon());
         case COMP_PROPS_ITEMWEAPONRANGED:
-            SubscribeComponentProps(new CCPropsItemWeaponRanged());
-            break;
+            return SubscribeComponentProps(new CCPropsItemWeaponRanged());
         default:
             // This should NEVER happen! Add the new components here if missing, or check why an invalid component type was passed as argument
             PERSISTANT_ASSERT(0);
             break;
     }
+    return nullptr;
 }
 
 bool CEntityProps::IsSubscribedComponentProps(CComponentProps *pComponent) const

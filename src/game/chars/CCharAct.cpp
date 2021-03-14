@@ -55,55 +55,55 @@ bool CChar::TeleportToObj( int iType, tchar * pszArgs )
 		switch ( iType )
 		{
 			case 0:
-				{
-					MATCH_TYPE match = Str_Match( pszArgs, pObj->GetName());
-					if ( match != MATCH_VALID )
-						continue;
-				}
-				break;
+			{
+				MATCH_TYPE match = Str_Match(pszArgs, pObj->GetName());
+				if (match != MATCH_VALID)
+					continue;
+			}
+			break;
 			case 1:	// char
-				{
-					if ( ! pObj->IsChar())
-						continue;
-					if ( iArg-- > 0 )
-						continue;
-				}
-				break;
+			{
+				if (!pObj->IsChar())
+					continue;
+				if (iArg-- > 0)
+					continue;
+			}
+			break;
 			case 2:	// item type
-				{
-					if ( ! pObj->IsItem())
-						continue;
-					CItem * pItem = dynamic_cast <CItem*>(pObj);
-					if ( ! pItem->IsType(static_cast<IT_TYPE>(iArg)))
-						continue;
-				}
-				break;
+			{
+				if (!pObj->IsItem())
+					continue;
+				const CItem* pItem = static_cast<CItem*>(pObj);
+				if (!pItem->IsType((IT_TYPE)iArg))
+					continue;
+			}
+			break;
 			case 3: // char id
-				{
-					if ( ! pObj->IsChar())
-						continue;
-					CChar * pChar = dynamic_cast <CChar*>(pObj);
-					if ( pChar->GetID() != iArg )
-						continue;
-				}
-				break;
+			{
+				if (!pObj->IsChar())
+					continue;
+				const CChar* pChar = static_cast<CChar*>(pObj);
+				if (pChar->GetID() != iArg)
+					continue;
+			}
+			break;
 			case 4:	// item id
-				{
-					if ( ! pObj->IsItem())
-						continue;
-					CItem * pItem = dynamic_cast <CItem*>(pObj);
-					if ( pItem->GetID() != iArg )
-						continue;
-				}
-				break;
+			{
+				if (!pObj->IsItem())
+					continue;
+				const CItem* pItem = static_cast<CItem*>(pObj);
+				if (pItem->GetID() != iArg)
+					continue;
+			}
+			break;
 		}
 
-		CObjBaseTemplate * pObjTop = pObj->GetTopLevelObj();
+		const CObjBaseTemplate * pObjTop = pObj->GetTopLevelObj();
 		if ( pObjTop == nullptr || pObjTop == this )
 			continue;
 		if ( pObjTop->IsChar() )
 		{
-			if ( ! CanDisturb( dynamic_cast<CChar*>(pObjTop)))
+			if (!CanDisturb(static_cast<const CChar*>(pObjTop)))
 				continue;
 		}
 
@@ -960,7 +960,8 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 						break;
 				}
 
-				while (action != ANIM_WALK_UNARM && !(pCharDef->m_Anims & (1 << action)))
+				ASSERT(action < ANIM_MASK_MAX);
+				while (action != ANIM_WALK_UNARM && !(pCharDef->m_Anims & (1ULL << action)))
 				{
 					// This anim is not supported. Try to use one that is.
 					switch (action)
@@ -1015,7 +1016,8 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 				// NOTE: Available actions depend HEAVILY on creature type !
 				// ??? Monsters don't have all anims in common !
 				// translate these !
-				while (action != ANIM_WALK_UNARM && !(pCharDef->m_Anims & (1 << action)))
+				ASSERT(action < ANIM_MASK_MAX);
+				while (action != ANIM_WALK_UNARM && !(pCharDef->m_Anims & (1ULL << action)))
 				{
 					// This anim is not supported. Try to use one that is.
 					switch (action)
@@ -1520,10 +1522,10 @@ void CChar::SoundChar( CRESND_TYPE type )
 			default: break;
 		}
 
+		if (idOverride == (SOUND_TYPE)-1)
+			return;		// if the override is = -1, the creature shouldn't play any sound for this action
 		if (idOverride != SOUND_NONE)
 			id = idOverride;
-		else if (idOverride == (SOUND_TYPE)-1)
-			return;		// if the override is = -1, the creature shouldn't play any sound for this action
 		else
 		{
 			// I have no override, check that i have a valid SOUND (m_soundBase) property.
@@ -3939,11 +3941,11 @@ bool CChar::MoveTo(const CPointMap& pt, bool fForceFix)
     return MoveToChar(pt, true, true, fForceFix);
 }
 
-void CChar::SetTopZ( char z ) noexcept
+void CChar::SetTopZ( char z )
 {
 	CObjBaseTemplate::SetTopZ( z );
 	m_fClimbUpdated = false; // update climb height
-	FixClimbHeight();
+	FixClimbHeight();	// can throw an exception
 }
 
 // Move from here to a valid spot.
@@ -4406,7 +4408,14 @@ bool CChar::CanTick() const
 // RETURN: false = delete this.
 bool CChar::OnTick()
 {
-    ADDTOCALLSTACK("CChar::OnTick");
+	//ADDTOCALLSTACK("CChar::OnTick");
+	//THREAD_UNIQUE_LOCK_RETURN(CChar::_OnTick());
+	return CChar::_OnTick();
+}
+
+bool CChar::_OnTick()
+{
+    ADDTOCALLSTACK("CChar::_OnTick");
 
     // Assume this is only called 1 time per sec.
     // Get a timer tick when our timer expires.
@@ -4414,15 +4423,15 @@ bool CChar::OnTick()
     EXC_TRY("Tick");
 
 	EXC_SET_BLOCK("Can Tick?");
-	if ((IsSleeping() || IsDisconnected()) && (Skill_GetActive() != NPCACT_RIDDEN))
+	if ((_IsSleeping() || IsDisconnected()) && (Skill_GetActive() != NPCACT_RIDDEN))
 	{
 		// mounted horses can still get a tick.
 		return true;
 	}
     if (GetTopSector()->IsSleeping() && !Calc_GetRandVal(15))
     {
-        SetTimeout(1);      //Make it tick after sector's awakening.
-        GoSleep();
+        _SetTimeout(1);      //Make it tick after sector's awakening.
+        _GoSleep();
         return true;
     }
 

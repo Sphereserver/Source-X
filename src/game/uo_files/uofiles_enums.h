@@ -229,7 +229,8 @@ enum ANIM_TYPE	// not all creatures animate the same for some reason.
 
     ANIM_QTY_ANI	= 13,
 
-    ANIM_QTY		= 0x32
+    ANIM_QTY		= 0x32,
+    ANIM_MASK_MAX   = 64    // CCharBase::m_Anims bitmask can hold a maximum of 64 values (1 << 63)
 };
 
 

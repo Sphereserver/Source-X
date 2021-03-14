@@ -104,11 +104,14 @@ private:
 
 public:
     /*
-    * @brief Asign it's adjacent's sectors
+    * @brief Assign its adjacent sectors
     */
     void SetAdjacentSectors();
-    CSector *GetAdjacentSector(DIR_TYPE dir) const;
 
+protected:
+    CSector *_GetAdjacentSector(DIR_TYPE dir) const;
+
+public:
 	CSectorBase();
 	virtual ~CSectorBase() = default;
 

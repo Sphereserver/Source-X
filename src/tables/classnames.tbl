@@ -98,6 +98,7 @@ ADD(CSObjCont,              "CSObjCont");
 ADD(CSObjList,              "CSObjList");
 ADD(CSQLite,                "CSQLite");
 ADD(CStoneMember,			"CStoneMember");
+ADD(CTimedObject,			"CTimedObject");
 ADD(CVarDefCont,			"CVarDefCont");
 ADD(CVarDefContNum,			"CVarDefContNum");
 ADD(CVarDefContStr,			"CVarDefContStr");

@@ -35,6 +35,7 @@ class CChar;
 class CItemStone;
 class CItemContainer;
 class CItemShip;
+
 class CItemMulti : public CItem, public CCMultiMovable
 {
     friend class CCMultiMovable;

@@ -103,6 +103,8 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 
 CObjBase::~CObjBase()
 {
+	EXC_TRY("Cleanup in destructor");
+
 	ADDTOCALLSTACK("CObjBase::~CObjBase");
     if (CCSpawn *pSpawn = GetSpawn())    // If I was created from a Spawn
     {
@@ -131,11 +133,18 @@ CObjBase::~CObjBase()
 
 	// free up the UID slot.
 	SetUID( UID_UNUSED, false );
+
+	EXC_CATCH;
+}
+
+bool CObjBase::_IsDeleted() const
+{
+	return (!GetUID().IsValidUID() || (GetParent() == &g_World.m_ObjDelete));
 }
 
 bool CObjBase::IsDeleted() const
 {
-	return (!GetUID().IsValidUID() || (GetParent() == &g_World.m_ObjDelete));
+	THREAD_SHARED_LOCK_RETURN(_IsDeleted());	
 }
 
 void CObjBase::DeletePrepare()
@@ -152,7 +161,7 @@ void CObjBase::DeleteCleanup(bool fForce)
 	_fDeleting = true;
 	CEntity::Delete(fForce);
 	CWorldTickingList::DelObjStatusUpdate(this);
-	CWorldTickingList::DelObjSingle(this);
+	CWorldTickingList::DelObjSingle(this, false);
 	CWorldTimedFunctions::ClearUID(GetUID());
 }
 
@@ -193,7 +202,7 @@ void CObjBase::TickingListRecursiveAdd()
 	ADDTOCALLSTACK("CObjBase::TickingListRecursiveAdd");
 	if (IsTimerSet())
 	{
-		CWorldTickingList::AddObjSingle(GetTimeoutRaw(), this);
+		CWorldTickingList::AddObjSingle(GetTimeoutRaw(), this, false);
 	}
 
 	if (CContainer* pCont = dynamic_cast<CContainer*>(this))
@@ -203,7 +212,7 @@ void CObjBase::TickingListRecursiveAdd()
 			CObjBase* pObj = dynamic_cast<CObjBase*>(pContRec);
 			if (pObj && pObj->IsTimerSet())
 			{
-				CWorldTickingList::AddObjSingle(pObj->GetTimeoutRaw(), pObj);
+				CWorldTickingList::AddObjSingle(pObj->GetTimeoutRaw(), pObj, false);
 			}
 		}
 	}
@@ -214,7 +223,7 @@ void CObjBase::TickingListRecursiveDel()
 	ADDTOCALLSTACK("CObjBase::TickingListRecursiveDel");
 	if (IsTimerSet())
 	{
-		CWorldTickingList::DelObjSingle(this);
+		CWorldTickingList::DelObjSingle(this, false);
 	}
 
 	if (CContainer* pCont = dynamic_cast<CContainer*>(this))
@@ -224,7 +233,7 @@ void CObjBase::TickingListRecursiveDel()
 			CObjBase* pObj = dynamic_cast<CObjBase*>(pContRec);
 			if (pObj && pObj->IsTimerSet())
 			{
-				CWorldTickingList::DelObjSingle(pObj);
+				CWorldTickingList::DelObjSingle(pObj, false);
 			}
 		}
 	}
@@ -3120,6 +3129,7 @@ bool CObjBase::CanTick() const
 			return false;
 	}
 
+	// return CTimedObject::CanTick();
 	return true;
 }
 
@@ -3253,7 +3263,8 @@ void CObjBase::SetPropStr( COMPPROPS_TYPE iCompPropsType, CComponentProps::Prope
     if (!pCompProps)
     {
         g_Log.EventDebug("CEntityProps: SetPropStr on unsubscribed CCProps. iCompPropsType %d, iPropIndex %d.\n", iCompPropsType, iPropIndex);
-        CreateSubscribeComponentProps(iCompPropsType);
+		pCompProps = CreateSubscribeComponentProps(iCompPropsType);
+		ASSERT(pCompProps);
     }
     const RESDISPLAY_VERSION iLimitToEra = Base_GetDef()->_iEraLimitProps;
     pCompProps->SetPropertyStr(iPropIndex, ptcVal, this, iLimitToEra, fDeleteZero);
@@ -3301,7 +3312,8 @@ void CObjBase::ModPropNum( COMPPROPS_TYPE iCompPropsType, CComponentProps::Prope
     if (!pCompProps)
     {
         g_Log.EventDebug("CEntityProps: ModPropNum on unsubscribed CCProps. iCompPropsType %d, iPropIndex %d, fBaseDef %d.\n", iCompPropsType, iPropIndex, (int)fBaseDef);
-        CreateSubscribeComponentProps(iCompPropsType);
+		pCompProps = CreateSubscribeComponentProps(iCompPropsType);
+		ASSERT(pCompProps);
         fPropExists = false;
     }
     else

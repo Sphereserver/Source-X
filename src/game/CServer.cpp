@@ -2075,8 +2075,12 @@ bool CServer::SocketsInit( CSocket & socket )
 	linger lval;
 	lval.l_onoff = 0;
 	lval.l_linger = 10;
-	socket.SetSockOpt(SO_LINGER, reinterpret_cast<const char *>(&lval), sizeof(lval));
-	socket.SetNonBlocking();
+	if ((0 != socket.SetSockOpt(SO_LINGER, reinterpret_cast<const char*>(&lval), sizeof(lval))) ||
+		(0 != socket.SetNonBlocking()))
+	{
+		g_Log.Event(LOGL_FATAL | LOGM_INIT, "Unable to initialize socket!\n");
+		return false;
+	}
 
 #ifndef _WIN32
 	int onNotOff = 1;

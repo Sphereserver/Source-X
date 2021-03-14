@@ -75,12 +75,17 @@ CClient::CClient(CNetState* state)
 
     m_timeLastSkillThrowing = 0;
     m_pSkillThrowingTarg = nullptr;
+	m_SkillThrowingAnimID = ITEMID_NOTHING;
+	m_SkillThrowingAnimHue = 0;
+	m_SkillThrowingAnimRender = 0;
 }
 
 
 CClient::~CClient()
 {
-	bool fWasChar;
+	EXC_TRY("Cleanup in destructor");
+
+	ADDTOCALLSTACK("CClient::~CClient");
 
 	// update ip history
 	HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(GetPeer());
@@ -88,7 +93,8 @@ CClient::~CClient()
 		--history.m_connecting;
 	--history.m_connected;
 
-	fWasChar = ( m_pChar != nullptr );
+	const bool fWasChar = ( m_pChar != nullptr );
+
 	CharDisconnect();	// am i a char in game ?
 
 	if (m_pGMPage)
@@ -112,6 +118,8 @@ CClient::~CClient()
 
 	if (m_net->isClosed() == false)
 		g_Log.EventError("Client being deleted without being safely removed from the network system\n");
+
+	EXC_CATCH;
 }
 
 bool CClient::CanInstantLogOut() const

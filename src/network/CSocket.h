@@ -37,6 +37,8 @@
 
 void AddSocketToSet(fd_set& fds, SOCKET socket, int& count);
 
+void CheckReportNetAPIErr(int retval, lpctstr ptcOperation);
+
 
 struct CSocketAddressIP : protected in_addr
 {
@@ -81,15 +83,14 @@ public:
 	CSocketAddress( in_addr dwIP, word uPort );
 	CSocketAddress( CSocketAddressIP ip, word uPort );
 	CSocketAddress( dword dwIP, word uPort );
-	explicit CSocketAddress( const sockaddr_in & SockAddrIn );
+	explicit CSocketAddress(const sockaddr_in & SockAddrIn);
+	explicit CSocketAddress(const CSocketAddressIP&) = delete;
+	explicit CSocketAddress(CSocketAddressIP&) = delete;
 	
 	bool operator==( const CSocketAddress & SockAddr ) const;
 	bool operator==( const struct sockaddr_in & SockAddrIn ) const;
 	CSocketAddress& operator = (const struct sockaddr_in& SockAddrIn);
-
 	CSocketAddress& operator = (const CSocketAddressIP&) = delete;
-	operator const CSocketAddressIP& () const = delete;
-	operator CSocketAddressIP& () = delete;
 
 	// compare to sockaddr_in
 	struct sockaddr_in GetAddrPort() const;

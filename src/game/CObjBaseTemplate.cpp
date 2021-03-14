@@ -79,7 +79,7 @@ void CObjBaseTemplate::SetTopPoint( const CPointMap & pt )
 	m_pt = pt;
 }
 
-void CObjBaseTemplate::SetTopZ( char z ) noexcept
+void CObjBaseTemplate::SetTopZ( char z )
 {
 	m_pt.m_z = z;
 }

@@ -193,7 +193,7 @@ bool CCharBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 			sVal.FormatLLVal(GetDefNum(ptcKey));
 			break;
 		case CBC_ANIM:
-			sVal.FormatHex( m_Anims );
+			sVal.FormatLLHex( m_Anims );
 			break;
 		case CBC_AVERSIONS:
 			{

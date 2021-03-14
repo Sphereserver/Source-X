@@ -113,10 +113,9 @@ void IPHistoryManager::tick(void)
     }
 }
 
-HistoryIP& IPHistoryManager::getHistoryForIP(const CSocketAddressIP& ip)
+HistoryIP& IPHistoryManager::getHistoryForIP(const CSocketAddressIP& ip) noexcept
 {
     // get history for an ip
-    ADDTOCALLSTACK("IPHistoryManager::getHistoryForIP");
 
     // find existing entry
     for (IPHistoryList::iterator it = m_ips.begin(), end = m_ips.end(); it != end; ++it)
@@ -130,6 +129,7 @@ HistoryIP& IPHistoryManager::getHistoryForIP(const CSocketAddressIP& ip)
     hist.m_ip = ip;
     hist.m_pingDecay = NETHISTORY_PINGDECAY;
     hist.update();
+
     m_ips.emplace_back(std::move(hist));
 
     return getHistoryForIP(ip);

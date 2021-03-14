@@ -2512,3 +2512,8 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: If Timer elapsed on an object in a disconnected or sleeping state, the trigger wouldn't fire when the object got active again (Issues #535, #596).
 - Fixed: Timer and REGENs not firing on a ridden characters (Issue #353). Now it fires even if the original character (which gets detatched from its physical REGION) is in a sleeping sector,
     given that the riding character is in an active (not sleeping nor disconnected) state.
+
+14-03-2021, Nolok
+- Fixed: ANIM being able to hold a bitmask of only 32 bits (insufficient to hold a bit for every animation). Extended that limit to 64.
+- Fixed: ISBIT, SETBIT, CLRBIT non throwing an error if the bit argument was > 63 (maximum supported value).
+- Fixed: SOUND* overrides not working when their value was -1.

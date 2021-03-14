@@ -92,7 +92,7 @@ const CScript * CLog::_SetScriptContext( const CScript * pScriptContext )
 
 const CScript * CLog::SetScriptContext(const CScript * pScriptContext)
 {
-    THREAD_UNIQUE_LOCK_RETURN(_SetScriptContext(pScriptContext));
+    THREAD_UNIQUE_LOCK_RETURN(CLog::_SetScriptContext(pScriptContext));
 }
 
 const CScriptObj * CLog::_SetObjectContext( const CScriptObj * pObjectContext )
@@ -104,7 +104,7 @@ const CScriptObj * CLog::_SetObjectContext( const CScriptObj * pObjectContext )
 
 const CScriptObj * CLog::SetObjectContext(const CScriptObj * pObjectContext)
 {
-    THREAD_UNIQUE_LOCK_RETURN(_SetObjectContext(pObjectContext));
+    THREAD_UNIQUE_LOCK_RETURN(CLog::_SetObjectContext(pObjectContext));
 }
 
 bool CLog::SetFilePath( lpctstr pszName )
@@ -201,7 +201,7 @@ bool CLog::_OpenLog( lpctstr pszBaseDirName )	// name set previously.
 bool CLog::OpenLog(lpctstr pszBaseDirName)	// name set previously.
 {
 	ADDTOCALLSTACK("CLog::OpenLog");
-	THREAD_UNIQUE_LOCK_RETURN(_OpenLog(pszBaseDirName));
+	THREAD_UNIQUE_LOCK_RETURN(CLog::_OpenLog(pszBaseDirName));
 }
 
 int CLog::EventStr( dword dwMask, lpctstr pszMsg )
