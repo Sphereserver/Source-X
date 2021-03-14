@@ -46,7 +46,7 @@ public:
         return Load( const_cast<lpctstr&>(arg) );
     }
     bool Load( lpctstr & pszCmds );
-    size_t WriteKeyVal( tchar * pszArgs, bool fQtyOnly = false, bool fKeyOnly = false ) const;
+    size_t WriteKey( tchar * pszArgs, bool fQtyOnly = false, bool fKeyOnly = false ) const;
     size_t WriteNameSingle( tchar * pszArgs, int iQty = 0 ) const;
 
 public:

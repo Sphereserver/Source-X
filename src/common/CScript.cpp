@@ -420,21 +420,18 @@ void CScriptKeyAlloc::ParseKeyLate()
 ///////////////////////////////////////////////////////////////
 // -CScript
 
-CScript::CScript() :
-	_sBuffer1(false)
+CScript::CScript()
 {
 	_InitBase();
 }
 
-CScript::CScript(lpctstr ptcKey) :
-	_sBuffer1(false)
+CScript::CScript(lpctstr ptcKey)
 {
 	_InitBase();
 	ParseKey(ptcKey);
 }
 
-CScript::CScript(lpctstr ptcKey, lpctstr ptcVal) :
-	_sBuffer1(false)
+CScript::CScript(lpctstr ptcKey, lpctstr ptcVal)
 {
 	_InitBase();
 	ParseKey( ptcKey, ptcVal );
@@ -877,9 +874,9 @@ bool CScript::WriteKeySingle(lptstr ptcKey)
 	return true;
 }
 
-bool CScript::WriteKeyVal(lpctstr ptcKey, lpctstr ptcVal)
+bool CScript::WriteKeyStr(lpctstr ptcKey, lpctstr ptcVal)
 {
-	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKeyVal");
+	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKeyStr");
 	if (ptcKey == nullptr || ptcKey[0] == '\0')
 	{
 		return false;
@@ -927,22 +924,25 @@ bool CScript::WriteKeyVal(lpctstr ptcKey, lpctstr ptcVal)
 void _cdecl CScript::WriteKeyFormat(lptstr ptcKey, lptstr pszVal, ...)
 {
 	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKeyFormat");
+	_sBuffer1.resize(SCRIPT_MAX_LINE_LEN);
 	va_list vargs;
 	va_start( vargs, pszVal );
-	vsnprintf(const_cast<tchar*>(_sBuffer1.GetBuffer()), _sBuffer1.GetCapacity(), pszVal, vargs);
-	WriteKeyVal(ptcKey, _sBuffer1.GetBuffer());
+	vsnprintf(_sBuffer1.data(), _sBuffer1.capacity(), pszVal, vargs);
+	WriteKeyStr(ptcKey, _sBuffer1.data());
 	va_end( vargs );
 }
 
-void CScript::WriteKeyVal(lpctstr ptcKey, int64 iVal )
+void CScript::WriteKeyVal(lpctstr ptcKey, int64 iVal)
 {
-	Str_FromLL(iVal, const_cast<tchar*>(_sBuffer1.GetBuffer()), _sBuffer1.GetCapacity(), 10);
-	WriteKeyVal(ptcKey, _sBuffer1.GetBuffer());
+	_sBuffer1.resize(SCRIPT_MAX_LINE_LEN);
+	Str_FromLL(iVal, _sBuffer1.data(), _sBuffer1.capacity(), 10);
+	WriteKeyStr(ptcKey, _sBuffer1.data());
 }
 
-void CScript::WriteKeyHex( lpctstr ptcKey, int64 iVal )
+void CScript::WriteKeyHex(lpctstr ptcKey, int64 iVal)
 {
-	Str_FromLL(iVal, const_cast<tchar*>(_sBuffer1.GetBuffer()), _sBuffer1.GetCapacity(), 16);
-	WriteKeyVal(ptcKey, _sBuffer1.GetBuffer());
+	_sBuffer1.resize(SCRIPT_MAX_LINE_LEN);
+	Str_FromLL(iVal, _sBuffer1.data(), _sBuffer1.capacity(), 16);
+	WriteKeyStr(ptcKey, _sBuffer1.data());
 }
 

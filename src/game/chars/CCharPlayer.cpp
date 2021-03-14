@@ -519,7 +519,7 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 	const CAccount* pAccount = GetAccount();
 	ASSERT (pAccount);
 
-	s.WriteKeyVal("ACCOUNT", pAccount->GetName());
+	s.WriteKeyStr("ACCOUNT", pAccount->GetName());
 
 	if (_iTimeLastUsed > 0)
 		s.WriteKeyVal("LASTUSED", _iTimeLastUsed);
@@ -533,7 +533,7 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 	if (CSkillClassDef* pSkillClass = GetSkillClass())
 	{
 		if (pSkillClass->GetResourceID().GetResIndex())
-			s.WriteKeyVal("SKILLCLASS", pSkillClass->GetResourceName());
+			s.WriteKeyStr("SKILLCLASS", pSkillClass->GetResourceName());
 	}
 	if ( m_pflag )
 		s.WriteKeyVal( "PFLAG", m_pflag );
@@ -553,7 +553,7 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 	{
 		CSString sVal;
 		m_Speech.WriteResourceRefList( sVal );
-		s.WriteKeyVal("DSPEECH", sVal);
+		s.WriteKeyStr("DSPEECH", sVal.GetBuffer());
 	}
 
 	EXC_SET_BLOCK("saving profile");
@@ -561,7 +561,7 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 	{
 		tchar szLine[SCRIPT_MAX_LINE_LEN - 16];
 		Str_MakeUnFiltered( szLine, m_sProfile, sizeof(szLine));
-		s.WriteKeyVal( "PROFILE", szLine );
+		s.WriteKeyStr( "PROFILE", szLine );
 	}
 
 	tchar szTemp[64];

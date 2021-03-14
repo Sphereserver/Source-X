@@ -79,8 +79,13 @@ ullong Str_ToULL(lpctstr ptcStr, int base) noexcept
 
 tchar* Str_FromI_Fast(int val, tchar* buf, size_t buf_length, uint base) noexcept
 {
+    if (!buf || !buf_length) {
+        return nullptr;
+    }
+
     const bool hex = (base == 16);
-    if (!val || !buf_length || !base)
+
+    if (!val || !base)
     {
         STR_FROM_SET_ZEROSTR;
         return buf;
@@ -117,8 +122,13 @@ tchar* Str_FromI_Fast(int val, tchar* buf, size_t buf_length, uint base) noexcep
 
 tchar* Str_FromUI_Fast(uint val, tchar* buf, size_t buf_length, uint base) noexcept
 {
+    if (!buf || !buf_length) {
+        return nullptr;
+    }
+
     const bool hex = (base == 16);
-    if (!val || !buf_length || !base)
+
+    if (!val || !base)
     {
         STR_FROM_SET_ZEROSTR;
         return buf;
@@ -140,8 +150,13 @@ tchar* Str_FromUI_Fast(uint val, tchar* buf, size_t buf_length, uint base) noexc
 
 tchar* Str_FromLL_Fast (llong val, tchar* buf, size_t buf_length, uint base) noexcept
 {
+    if (!buf || !buf_length) {
+        return nullptr;
+    }
+
     const bool hex = (base == 16);
-    if (!val || !buf_length || !base)
+
+    if (!val || !base)
     {
         STR_FROM_SET_ZEROSTR;
         return buf;
@@ -178,8 +193,13 @@ tchar* Str_FromLL_Fast (llong val, tchar* buf, size_t buf_length, uint base) noe
 
 tchar* Str_FromULL_Fast (ullong val, tchar* buf, size_t buf_length, uint base) noexcept
 {
+    if (!buf || !buf_length) {
+        return nullptr;
+    }
+
     const bool hex = (base == 16);
-    if (!val || !buf_length || !base)
+
+    if (!val || !base)
     {
         STR_FROM_SET_ZEROSTR;
         return buf;

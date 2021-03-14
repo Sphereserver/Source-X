@@ -1009,7 +1009,7 @@ void CCSpawn::r_Write(CScript & s)
         }
         if (_idSpawn.IsValidResource())
         {
-            s.WriteKeyVal("SPAWNID", g_Cfg.ResourceGetName(_idSpawn));
+            s.WriteKeyStr("SPAWNID", g_Cfg.ResourceGetName(_idSpawn));
         }
     }
 

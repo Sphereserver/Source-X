@@ -182,7 +182,7 @@ bool CCharNPC::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 		case CNC_NEED:
 		{
 			tchar *pszTmp = Str_GetTemp();
-			m_Need.WriteKeyVal( pszTmp );
+			m_Need.WriteKey( pszTmp );
 			sVal = pszTmp;
 		}
 		break;
@@ -251,8 +251,8 @@ void CCharNPC::r_WriteChar( CChar * pChar, CScript & s )
 	if ( m_Need.GetResourceID().IsValidUID())
 	{
 		TemporaryString tsTemp;
-		m_Need.WriteKeyVal(tsTemp.buffer());
-		s.WriteKeyVal( "NEED", tsTemp);
+		m_Need.WriteKey(tsTemp.buffer());
+		s.WriteKeyStr( "NEED", tsTemp.buffer());
 	}
 }
 

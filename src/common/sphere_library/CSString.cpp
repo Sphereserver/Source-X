@@ -9,6 +9,8 @@
 /**
 * @brief Default memory alloc size for CSString.
 *
+* Those tests are OUTDATED!
+* 
 * - Empty World! (total strings on start =480,154)
 *  - 16 bytes : memory:  8,265,143 [Mem=42,516 K] [reallocations=12,853]
 *  - 32 bytes : memory: 16,235,008 [Mem=50,916 K] [reallocations=11,232]

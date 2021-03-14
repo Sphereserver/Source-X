@@ -87,7 +87,7 @@ void CComponentProps::BaseCont_Write_ContStr(const BaseContStr_t* container, con
         ASSERT(ptcVal);
         if (ptcVal[0] == '\0')
             continue;
-        s.WriteKeyVal(ptcPropsTable[propPair.first], ptcVal);
+        s.WriteKeyStr(ptcPropsTable[propPair.first], ptcVal);
     }
 }
 

@@ -3710,10 +3710,10 @@ void CChar::r_Write( CScript & s )
 	{
 	const CPointMap& pt = GetTopPoint();
 	if (pt.IsValidPoint())
-		s.WriteKeyVal("P", pt.WriteUsed());
+		s.WriteKeyStr("P", pt.WriteUsed());
 	}
 	if ( !m_sTitle.empty() )
-		s.WriteKeyVal("TITLE", m_sTitle.c_str());
+		s.WriteKeyStr("TITLE", m_sTitle.c_str());
 	if ( m_fonttype != FONT_NORMAL )
 		s.WriteKeyVal("FONT", m_fonttype);
 	if (m_SpeechHueOverride)
@@ -3723,7 +3723,7 @@ void CChar::r_Write( CScript & s )
 	if ( m_dirFace != DIR_SE )
 		s.WriteKeyVal("DIR", m_dirFace);
 	if ( _iPrev_id != GetID() )
-		s.WriteKeyVal("OBODY", g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _iPrev_id)));
+		s.WriteKeyStr("OBODY", g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _iPrev_id)));
 	if ( _wPrev_Hue != HUE_DEFAULT )
 		s.WriteKeyHex("OSKIN", _wPrev_Hue);
 	if ( m_iStatFlag )
@@ -3740,7 +3740,7 @@ void CChar::r_Write( CScript & s )
 	}
 
 	if ( m_Act_p.IsValidPoint() )
-		s.WriteKeyVal("ACTP", m_Act_p.WriteUsed());
+		s.WriteKeyStr("ACTP", m_Act_p.WriteUsed());
 
 	{
 	const SKILL_TYPE action = Skill_GetActive();
@@ -3752,7 +3752,7 @@ void CChar::r_Write( CScript & s )
 			pszActionTemp = const_cast<tchar*>(pSkillDef->GetKey());
 		else
 			pszActionTemp = Str_FromI_Fast(action, Str_GetTemp(), STR_TEMPLENGTH, 10);
-		s.WriteKeyVal("ACTION", pszActionTemp);
+		s.WriteKeyStr("ACTION", pszActionTemp);
 
 			/* We save ACTARG1/ACTARG2/ACTARG3 only if the following conditions are satisfied:
 			ACTARG1/ACTARG2/ACTARG3 is different from 0 AND
@@ -3782,7 +3782,7 @@ void CChar::r_Write( CScript & s )
 	if ( m_height )
 		s.WriteKeyVal("HEIGHT", m_height);
 	if ( m_ptHome.IsValidPoint() )
-		s.WriteKeyVal("HOME", m_ptHome.WriteUsed());
+		s.WriteKeyStr("HOME", m_ptHome.WriteUsed());
 	if ( m_StepStealth )
 		s.WriteKeyVal("STEPSTEALTH", m_StepStealth);
 

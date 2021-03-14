@@ -1972,7 +1972,7 @@ void CObjBase::r_Write( CScript & s )
 	ADDTOCALLSTACK_INTENSIVE("CObjBase::r_Write");
 	s.WriteKeyHex( "SERIAL", GetUID());
 	if ( IsIndividualName() )
-		s.WriteKeyVal( "NAME", GetIndividualName());
+		s.WriteKeyStr( "NAME", GetIndividualName());
 	if ( m_wHue != HUE_DEFAULT )
 		s.WriteKeyHex( "COLOR", GetHue());
 	if ( IsTimerSet() )

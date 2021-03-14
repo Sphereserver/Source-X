@@ -201,6 +201,6 @@ void CResourceRefArray::r_Write( CScript & s, lpctstr ptcKey ) const
     ADDTOCALLSTACK_INTENSIVE("CResourceRefArray::r_Write");
     for ( size_t j = 0, sz = size(); j < sz; ++j )
     {
-        s.WriteKeyVal( ptcKey, GetResourceName( j ));
+        s.WriteKeyStr( ptcKey, GetResourceName( j ));
     }
 }

@@ -1394,8 +1394,8 @@ void CWorld::r_Write( CScript & s )
 {
 	ADDTOCALLSTACK("CWorld::r_Write");
 	// Write out the safe header.
-	s.WriteKeyVal("TITLE", SPHERE_TITLE " World Script");
-	s.WriteKeyVal("VERSION", SPHERE_VER_ID_STR);
+	s.WriteKeyStr("TITLE", SPHERE_TITLE " World Script");
+	s.WriteKeyStr("VERSION", SPHERE_VER_ID_STR);
 	#ifdef __GITREVISION__
 		s.WriteKeyVal("PREVBUILD", __GITREVISION__);
 	#endif

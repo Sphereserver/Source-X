@@ -2321,7 +2321,7 @@ void CItem::r_Write( CScript & s )
 	{
 	const ITEMID_TYPE iDispID = GetDispID();
 	if (iDispID != GetID())	// the item is flipped.
-		s.WriteKeyVal("DISPID", g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, iDispID)));
+		s.WriteKeyStr("DISPID", g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, iDispID)));
 	}
 
 	{
@@ -2331,7 +2331,7 @@ void CItem::r_Write( CScript & s )
 	}
 
 	if ( !pItemDef->IsType(m_type) )
-		s.WriteKeyVal("TYPE", g_Cfg.ResourceGetName(CResourceID(RES_TYPEDEF, m_type)));
+		s.WriteKeyStr("TYPE", g_Cfg.ResourceGetName(CResourceID(RES_TYPEDEF, m_type)));
 	if ( m_uidLink.IsValidUID() )
 		s.WriteKeyHex("LINK", m_uidLink);
 	if ( m_Attr )
@@ -2346,15 +2346,15 @@ void CItem::r_Write( CScript & s )
         if ( m_itNormal.m_more1 )
         {
             r_WriteMore1(sVal);
-            s.WriteKeyVal("MORE1", sVal);
+            s.WriteKeyStr("MORE1", sVal.GetBuffer());
         }
         if ( m_itNormal.m_more2 )
         {
             r_WriteMore2(sVal);
-            s.WriteKeyVal("MORE2", sVal);
+            s.WriteKeyStr("MORE2", sVal.GetBuffer());
         }
         if ( m_itNormal.m_morep.m_x || m_itNormal.m_morep.m_y || m_itNormal.m_morep.m_z || m_itNormal.m_morep.m_map )
-            s.WriteKeyVal("MOREP", m_itNormal.m_morep.WriteUsed());
+            s.WriteKeyStr("MOREP", m_itNormal.m_morep.WriteUsed());
     }
 
 	if (const CObjBase* pCont = GetContainer())
@@ -2369,14 +2369,14 @@ void CItem::r_Write( CScript & s )
 		s.WriteKeyHex("CONT", pCont->GetUID());
 		if ( pCont->IsItem() )
 		{
-			s.WriteKeyVal("P", GetContainedPoint().WriteUsed());
+			s.WriteKeyStr("P", GetContainedPoint().WriteUsed());
             const uchar uiGridIdx = GetContainedGridIndex();
 			if ( uiGridIdx )
 				s.WriteKeyVal("CONTGRID", uiGridIdx);
 		}
 	}
 	else
-		s.WriteKeyVal("P", GetTopPoint().WriteUsed());
+		s.WriteKeyStr("P", GetTopPoint().WriteUsed());
 
     CEntity::r_Write(s);
     CEntityProps::r_Write(s);
