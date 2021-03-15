@@ -60,8 +60,6 @@ bool CTimedFunction::_OnTick() // virtual
 {
 	ADDTOCALLSTACK("CTimedFunction::_OnTick");
 
-	const ProfileTask scriptsTask(PROFILE_TIMEDFUNCTIONS);
-
 	CUID uid(_uidAttached);
 	CScript s(_ptcCommand);
 	
@@ -74,8 +72,6 @@ bool CTimedFunction::_OnTick() // virtual
 bool CTimedFunction::OnTick() // virtual
 {
 	ADDTOCALLSTACK("CTimedFunction::OnTick");
-
-	const ProfileTask scriptsTask(PROFILE_TIMEDFUNCTIONS);
 
 	CUID uid;
 	CScript s;

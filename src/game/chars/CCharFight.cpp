@@ -1430,17 +1430,17 @@ void CChar::Fight_HitTry()
             {
                 if (retHit == WAR_SWING_EQUIPPING_NOWAIT)
                 {
-                    // Reactivate as soon as possible (without waiting for a new tick) the fighting routines, which are normally called by OnTick(), which in turn calls
+                    // Reactivate as soon as possible (without waiting for a new tick) the fighting routines, which are normally called by _OnTick(), which in turn calls
                     //  OnTickSkill() -> Skill_Done() -> Skill_Stage() -> Skill_Fighting() ->
                     //  -> Fight_HitTry() (which is this method) -> Fight_Hit() (which sets the recoil and swing delays and more) ...
-                    // If i use SetTimeout(1), i will lose a tick, since i'll start to set the timers for the new swing only on the next tick, not on the current.
+                    // If i use _SetTimeout(1), i will lose a tick, since i'll start to set the timers for the new swing only on the next tick, not on the current.
                     OnTickSkill();
                 }
                 else
                 {
                     // Wait a bit, then check again if i can hit. If i don't wait, the condition that leaded to this point will always be the same,
                     //  and the combat code and this function will be called recursively.
-                    SetTimeoutD(1);
+                    _SetTimeoutD(1);
                 }
             }
 			return;
@@ -1455,7 +1455,7 @@ void CChar::Fight_HitTry()
             {
                 // Player & NPC: wait some time and check again if i can land the hit
                 // NPC: also keeps its AI alive, so that in NPCActFight the NPC can further approach his target.
-                SetTimeoutD(1);
+                _SetTimeoutD(1);
             }
 			return;
 		}
@@ -1465,7 +1465,7 @@ void CChar::Fight_HitTry()
                 // This happens (only with both PreHit and Swing_NoRange on) if i can't land the hit right now, otherwise retHit
                 //  should be WAR_SWING_EQUIPPING. If this isn't the case, there's something wrong (asserts are placed to intercept this situations).
                 // Though, consider the case of custom combat systems, in that case the asserts may be invalid.
-                SetTimeoutD(1);
+                _SetTimeoutD(1);
                 //ASSERT(IsSetCombatFlags(COMBAT_FIRSTHIT_INSTANT) && IsSetCombatFlags(COMBAT_SWING_NORANGE|COMBAT_PREHIT));
             }
 			return;
@@ -1777,7 +1777,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
                 m_atFight.m_iSwingAnimationDelay = 0;
         }
 
-        SetTimeoutD(m_atFight.m_iRecoilDelay);   // Wait for the recoil time.
+        _SetTimeoutD(m_atFight.m_iRecoilDelay);   // Wait for the recoil time.
         m_atFight.m_iWarSwingState = WAR_SWING_READY;
         return WAR_SWING_READY;
     }
@@ -1810,7 +1810,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		UpdateAnimate((ANIM_TYPE)m_atFight.m_iSwingAnimation, false, false, iSwingAnimationDelayInSeconds );
 
         // Now that i have waited the recoil time, start the hit animation and wait for it to end
-        SetTimeoutD(m_atFight.m_iSwingAnimationDelay);
+        _SetTimeoutD(m_atFight.m_iSwingAnimationDelay);
 		return WAR_SWING_SWINGING;
 	}
 

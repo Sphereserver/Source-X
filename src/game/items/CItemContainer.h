@@ -65,7 +65,7 @@ public:
 	void SetKeyRing();
 	void Game_Create();
 	void Restock();
-	bool OnTick();
+	bool _OnTick();
 
 	virtual void DupeCopy( const CItem * pItem ) override;  // overriding CItem::DupeCopy
 

@@ -28,7 +28,7 @@ public:
     virtual ~CCMultiMovable() = default;
     //CItem *GetLink() const;
 
-    bool OnTick();
+    bool _OnTick();
     bool r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc);
     bool r_LoadVal(CScript & s);
     bool r_Verb(CScript & s, CTextConsole * pSrc); // Execute command from script

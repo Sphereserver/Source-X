@@ -837,9 +837,9 @@ bool CCMultiMovable::OnMoveTick()
     return true;
 }
 
-bool CCMultiMovable::OnTick()
+bool CCMultiMovable::_OnTick()
 {
-    ADDTOCALLSTACK("CCMultiMovable::OnTick");
+    ADDTOCALLSTACK("CCMultiMovable::_OnTick");
     // Ships move on their tick.
 
     if (_shipSpeed.period == 0 && _shipSpeed.tiles == 0)    // Multis without movement values can decay as normal items.

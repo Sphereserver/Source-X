@@ -57,7 +57,7 @@ void CNTService::ReportEvent( WORD wType, DWORD dwEventID, LPCTSTR lpszMsg, LPCT
 }
 
 // RETURN: false = exit app.
-bool CNTService::OnTick()
+bool CNTService::_OnTick()
 {
 	if (( !m_fIsNTService ) || ( m_sStatus.dwCurrentState != SERVICE_STOP_PENDING ) )
 		return true;

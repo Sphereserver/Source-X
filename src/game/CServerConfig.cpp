@@ -353,8 +353,11 @@ bool CServerConfig::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 
 	// Now get the index.
 	ptcKey = pszSep + 1;
-	if ( ptcKey[0] == '\0' )
+	if (ptcKey[0] == '\0')
+	{
+		*pszSep = oldChar;
 		return false;
+	}
 
 	pszSep = const_cast<tchar*>(strchr( ptcKey, '.' ));
 	if ( pszSep != nullptr )
@@ -2746,7 +2749,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 	ASSERT(pScript);
 	CScriptFileContext FileContext( pScript );	// set this as the context.
-    const CSString sSection = pScript->GetSection();
+    const CSString sSection(pScript->GetSection());
     lpctstr pszSection = sSection.GetBuffer();
 
 	CVarDefContNum * pVarNum = nullptr;
@@ -4133,9 +4136,9 @@ CResourceDef * CServerConfig::ResourceGetDef( const CResourceID& rid ) const
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void CServerConfig::OnTick( bool fNow )
+void CServerConfig::_OnTick( bool fNow )
 {
-	ADDTOCALLSTACK("CServerConfig::OnTick");
+	ADDTOCALLSTACK("CServerConfig::_OnTick");
 	// Give a tick to the less critical stuff.
 	if ( !fNow && ( g_Serv.IsLoading() || ( m_timePeriodic > CWorldGameTime::GetCurrentTime().GetTimeRaw()) ) )
 		return;

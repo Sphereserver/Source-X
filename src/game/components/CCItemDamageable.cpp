@@ -216,6 +216,6 @@ void CCItemDamageable::Copy(const CComponent * target)
 
 CCRET_TYPE CCItemDamageable::OnTickComponent()
 {
-    ADDTOCALLSTACK("CCItemDamageable::OnTick");
-    return CCRET_CONTINUE;  // Skip code here, OnTick is done separately from OnTickStatsUpdate
+    ADDTOCALLSTACK("CCItemDamageable::_OnTick");
+    return CCRET_CONTINUE;  // Skip code here, _OnTick is done separately from OnTickStatsUpdate
 }

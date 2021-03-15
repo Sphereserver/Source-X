@@ -14,15 +14,21 @@ CItemStone::CItemStone( ITEMID_TYPE id, CItemBase * pItemDef ) :
     CTimedObject(PROFILE_ITEMS),
     CItem( id, pItemDef )
 {
+	EXC_TRY("Constructor");
+
 	m_itStone.m_iAlign = STONEALIGN_STANDARD;
     g_World.m_Stones.emplace_back(this);
     _pMultiStorage = new CMultiStorage(CUID());
     _iMaxShips = g_Cfg._iMaxShipsGuild;
     _iMaxHouses = g_Cfg._iMaxHousesGuild;
+
+	EXC_CATCH;
 }
 
 CItemStone::~CItemStone()
 {
+	EXC_TRY("Cleanup in destructor");
+
 	SetAmount(0);	// Tell everyone we are deleting.
 	DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
 
@@ -32,6 +38,8 @@ CItemStone::~CItemStone()
     delete _pMultiStorage;
 	// all members are deleted automatically.
 	ClearContainer();	// do this manually to preserve the parents type cast
+
+	EXC_CATCH;
 }
 
 MEMORY_TYPE CItemStone::GetMemoryType() const

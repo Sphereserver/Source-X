@@ -168,7 +168,7 @@ void CChar::NPC_Act_Fight()
         {
             if (NPC_LookAround())
             {
-                SetTimeoutD(5); // half of a second until the next check
+                _SetTimeoutD(5); // half of a second until the next check
                 return;
             }
         }
@@ -327,7 +327,7 @@ void CChar::NPC_Act_Fight()
     {
         // Enemy gone?
         m_Act_UID.InitUID();
-        SetTimeoutD(1);
+        _SetTimeoutD(1);
         return;
     }
     if (!IsTimerSet()) // Nothing could be done, tick again in a while
@@ -336,7 +336,7 @@ void CChar::NPC_Act_Fight()
         if (!IsTimerSet())
         {
             DEBUG_MSG(("%s [0x%04x] found nothing to do in the fight routines.\n", GetName(), (dword)GetUID()));
-            SetTimeoutS(1);
+            _SetTimeoutS(1);
         }
     }
 }

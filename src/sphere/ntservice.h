@@ -53,7 +53,7 @@ public:
 	void CmdRemoveService();
 	void CmdMainStart();
 
-	bool OnTick();
+	bool _OnTick();
 	bool IsRunningAsService() const
 	{
 		return( m_fIsNTService );

@@ -625,7 +625,7 @@ public:
      * @param   fResync true to resync.
      */
 	void Unload( bool fResync );
-	void OnTick( bool fNow );
+	void _OnTick( bool fNow );
 
     /**
      * @brief   Loads resource section ([SKILL ], [SPELL ], [CHARDEF ]...).

@@ -745,21 +745,24 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t uiLen )
 		}
 	}
 
-	linger llinger;
+	linger llinger{};
 	llinger.l_onoff = 1;
 	llinger.l_linger = 500;	// in mSec
 	iSocketRet = m_net->m_socket.SetSockOpt(SO_LINGER, reinterpret_cast<char *>(&llinger), sizeof(linger));
+	CheckReportNetAPIErr(iSocketRet, "CClient::Webpage.SO_LINGER");
 	if (iSocketRet)
 		return false;
 
-	char nbool = true;
-	iSocketRet = m_net->m_socket.SetSockOpt(SO_KEEPALIVE, &nbool, sizeof(char));
+	int iSockFlag = 1;
+	iSocketRet = m_net->m_socket.SetSockOpt(SO_KEEPALIVE, &iSockFlag, sizeof(iSockFlag));
+	CheckReportNetAPIErr(iSocketRet, "CClient::Webpage.SO_KEEPALIVE");
 	if (iSocketRet)
 		return false;
 
 	// disable NAGLE algorythm for data compression
-	nbool = true;
-	iSocketRet = m_net->m_socket.SetSockOpt( TCP_NODELAY, &nbool, sizeof(char), IPPROTO_TCP);
+	iSockFlag = 1;
+	iSocketRet = m_net->m_socket.SetSockOpt(TCP_NODELAY, &iSockFlag, sizeof(iSockFlag), IPPROTO_TCP);
+	CheckReportNetAPIErr(iSocketRet, "CClient::Webpage.TCP_NODELAY");
 	if (iSocketRet)
 		return false;
 	
@@ -802,7 +805,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t uiLen )
 		if ( !Str_GetBare( szPageName, Str_TrimWhitespace(ppRequest[1]), sizeof(szPageName), "!\"#$%&()*,:;<=>?[]^{|}-+'`" ) )
 			return false;
 
-		g_Log.Event(LOGM_HTTP|LOGL_EVENT, "%x:HTTP Page Request '%s', alive=%d\n", GetSocketID(), static_cast<lpctstr>(szPageName), fKeepAlive);
+		g_Log.Event(LOGM_HTTP|LOGL_EVENT, "%x:HTTP Page Request '%s', alive=%d\n", GetSocketID(), szPageName, fKeepAlive);
         CWebPageDef::ServPage(this, szPageName, &dateIfModifiedSince);
 		/*if ( CWebPageDef::ServPage(this, szPageName, &dateIfModifiedSince) )
 		{

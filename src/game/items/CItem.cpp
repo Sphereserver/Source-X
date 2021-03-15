@@ -1159,10 +1159,10 @@ int CItem::FixWeirdness()
         }
 
         // unreasonably long for a top level item ?
-        if (GetTimerSAdjusted() > 90ll * 24 * 60 * 60)
+        if (_GetTimerSAdjusted() > 90ll * 24 * 60 * 60)
         {
             g_Log.EventWarn("FixWeirdness on Item (UID=0%x): timer unreasonably long (> 90 days) on a top level object.\n", (uint)GetUID());
-            SetTimeoutS(60 * 60);
+            _SetTimeoutS(60 * 60);
         }
     }
 
@@ -1426,7 +1426,7 @@ void CItem::SetDecayTime(int64 iMsecsTimeout)
 		else
             iMsecsTimeout = -1;
 	}
-	SetTimeout(iMsecsTimeout);
+	_SetTimeout(iMsecsTimeout);
 	if (iMsecsTimeout >= 0)
 		SetAttr(ATTR_DECAY);
 	else
@@ -3957,7 +3957,7 @@ void CItem::DupeCopy( const CItem * pItem )
 
 	m_dwDispIndex = pItem->m_dwDispIndex;
 	SetBase( pItem->Item_GetDef() );
-	SetTimeout( pItem->GetTimerDiff() );
+	_SetTimeout( pItem->GetTimerDiff() );
 	SetType(pItem->m_type);
 	m_wAmount = pItem->m_wAmount;
 	m_Attr  = pItem->m_Attr;
@@ -3984,7 +3984,7 @@ void CItem::SetAnim( ITEMID_TYPE id, int64 iTicksTimeout)
 	m_itAnim.m_PrevType = m_type;
 	SetDispID( id );
 	m_type = IT_ANIM_ACTIVE;    // Do not change the components? SetType(IT_ANIM_ACTIVE);
-	SetTimeout(iTicksTimeout);
+	_SetTimeout(iTicksTimeout);
 	//RemoveFromView();
 	Update();
 }
@@ -4542,7 +4542,7 @@ bool CItem::Use_DoorNew( bool bJustOpen )
 
 	MoveToUpdate(pt);
 	Sound( bClosing ? iCloseSnd : iOpenSnd );
-	SetTimeoutS( bClosing ? -1 : 20);
+	_SetTimeoutS( bClosing ? -1 : 20);
 	bClosing ? ClrAttr(ATTR_OPENED) : SetAttr(ATTR_OPENED);
 	return( ! bClosing );
 }
@@ -4694,7 +4694,7 @@ bool CItem::Use_Door( bool fJustOpen )
 	Sound( fClosing ? iCloseSnd : iOpenSnd );
 
 	// Auto close the door in n seconds.
-	SetTimeoutS( fClosing ? -1 : 60);
+	_SetTimeoutS( fClosing ? -1 : 60);
 	return ( ! fClosing );
 }
 
@@ -5199,7 +5199,7 @@ bool CItem::Use_Light()
 	if ( IsType(IT_LIGHT_LIT) )
 	{
 		Sound(0x47);
-		SetTimeoutS(60);
+		_SetTimeoutS(60);
 		if ( !m_itLight.m_charges )
 			m_itLight.m_charges = 20;
 	}
@@ -5323,7 +5323,7 @@ void CItem::SetTrapState( IT_TYPE state, ITEMID_TYPE id, int iTimeSec )
 	}
 
 	SetType( state );
-	SetTimeout( iTimeSec );
+	_SetTimeout( iTimeSec );
 	Update();
 }
 
@@ -5493,7 +5493,7 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		return false;
 	}
 
-    ITEMID_TYPE iEffectID = pSpellDef->m_idEffect;
+	ITEMID_TYPE iEffectID = !pSpellDef ? ITEMID_NOTHING : pSpellDef->m_idEffect;
 	DAMAGE_TYPE uiDamageType = 0;
 	switch ( spell )
 	{
@@ -5938,11 +5938,6 @@ CCFaction * CItem::GetSlayer() const
     return static_cast<CCFaction*>(GetComponent(COMP_FACTION));
 }
 
-bool CItem::OnTick()
-{
-	ADDTOCALLSTACK("CItem::OnTick");
-	THREAD_UNIQUE_LOCK_RETURN(CItem::_OnTick());
-}
 
 bool CItem::_OnTick()
 {
@@ -5983,7 +5978,7 @@ bool CItem::_OnTick()
     * timer checks.
     * CCRET_CONTINUE will allow the normal ticking proccess to happen.
     */
-    const CCRET_TYPE iCompRet = CEntity::OnTick();
+    const CCRET_TYPE iCompRet = CEntity::_OnTick();
     if (iCompRet != CCRET_CONTINUE) // if return = CCRET_TRUE or CCRET_FALSE
     {
         return !iCompRet;    // Stop here
@@ -6007,7 +6002,7 @@ bool CItem::_OnTick()
                     }
 					SetID((ITEMID_TYPE)(Calc_GetRandVal2(ITEMID_SKELETON_1, ITEMID_SKELETON_9)));
 					SetHue((HUE_TYPE)(HUE_DEFAULT));
-					SetTimeout(g_Cfg.m_iDecay_CorpsePlayer);
+					_SetTimeout(g_Cfg.m_iDecay_CorpsePlayer);
 					m_itCorpse.m_carved = 1;	// the corpse can't be carved anymore
 					m_uidLink.InitUID();		// and also it's not linked to the char anymore (others players can loot it without get flagged criminal)
 					RemoveFromView();
@@ -6025,7 +6020,7 @@ bool CItem::_OnTick()
 
 				--m_itLight.m_charges;
 				if ( m_itLight.m_charges > 0 )
-					SetTimeoutS(60);
+					_SetTimeoutS(60);
 				else
 				{
 					// Burn out the light
@@ -6075,7 +6070,7 @@ bool CItem::_OnTick()
 				RemoveFromView();
 				SetDispID( m_itAnim.m_PrevID );
 				m_type = m_itAnim.m_PrevType;   // don't change the components SetType(m_itAnim.m_PrevType);
-				SetTimeout( -1 );
+				_SetTimeout( -1 );
 				Update();
 			}
 			return true;
@@ -6108,7 +6103,7 @@ bool CItem::_OnTick()
 						CObjBase* pObj = static_cast<CObjBase*>(GetTopLevelObj());
 						ASSERT(pObj);
 						pObj->Speak(Str_FromI_Fast(m_itPotion.m_tick, pszMsg, STR_TEMPLENGTH, 10), HUE_RED);
-						SetTimeoutS(1);
+						_SetTimeoutS(1);
 					}
 					return true;
 				}
@@ -6130,7 +6125,7 @@ bool CItem::_OnTick()
 				// Regenerate honey count
 				if ( m_itBeeHive.m_iHoneyCount < 5 )
 					++m_itBeeHive.m_iHoneyCount;
-				SetTimeoutS( 15 * 60);
+				_SetTimeoutS( 15 * 60);
 			}
 			return true;
 
@@ -6169,7 +6164,7 @@ bool CItem::_OnTick()
     EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("CItem::OnTick: '%s' item [0%x]\n", GetName(), (dword)GetUID());
+	g_Log.EventDebug("CItem::_OnTick: '%s' item [0%x]\n", GetName(), (dword)GetUID());
 	//g_Log.EventError("'%s' item [0%x]\n", GetName(), GetUID());
 	EXC_DEBUG_END;
 

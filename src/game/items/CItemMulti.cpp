@@ -433,7 +433,7 @@ CItem * CItemMulti::Multi_FindItemComponent(int iComp) const
 
     if ((int)_lComps.size() > iComp)
     {
-        return _lComps[iComp].ItemFind();
+        return _lComps[(size_t)iComp].ItemFind();
     }
     return nullptr;
 }
@@ -467,11 +467,11 @@ CItem * CItemMulti::Multi_FindItemType(IT_TYPE type) const
     }
 }
 
-bool CItemMulti::OnTick()
+bool CItemMulti::_OnTick()
 {
-    if (!CCMultiMovable::OnTick())
+    if (!CCMultiMovable::_OnTick())
     {
-        return CItem::OnTick();
+        return CItem::_OnTick();
     }
     return true;
 }
@@ -618,24 +618,37 @@ void CItemMulti::SetOwner(const CUID& uidOwner)
     _uidOwner.InitUID();
     if (pOldOwner)  // Old Owner may not exist, was removed?
     {
-        ASSERT(pOldOwner->m_pPlayer);
-        CMultiStorage* pMultiStorage = pOldOwner->m_pPlayer->GetMultiStorage();
-        ASSERT(pMultiStorage);
-        pMultiStorage->DelMulti(GetUID());
+        if (!pOldOwner->m_pPlayer)
+        {
+            g_Log.EventWarn("Multi (UID 0%x) owned by a NPC (UID 0%x)?\n", (dword)GetUID(), (dword)pOldOwner->GetUID());
+        }
+        else
+        {
+            CMultiStorage* pMultiStorage = pOldOwner->m_pPlayer->GetMultiStorage();
+            ASSERT(pMultiStorage);
+            pMultiStorage->DelMulti(GetUID());
+        }
         RemoveKeys(pOldOwner->GetUID());
     }
     if (!uidOwner.IsValidUID())
     {
         return;
     }
+
     RevokePrivs(uidOwner);
     CChar *pOwner = uidOwner.CharFind();
     if (pOwner)
     {
-        ASSERT(pOwner->m_pPlayer);
-        CMultiStorage* pMultiStorage = pOwner->m_pPlayer->GetMultiStorage();
-        ASSERT(pMultiStorage);
-        pMultiStorage->AddMulti(GetUID(), HP_OWNER);
+        if (!pOwner->m_pPlayer)
+        {
+            g_Log.EventWarn("Multi (UID 0%x): trying to set owner to a non-playing character (UID 0%x)?\n", (dword)GetUID(), (dword)uidOwner);
+        }
+        else
+        {
+            CMultiStorage* pMultiStorage = pOwner->m_pPlayer->GetMultiStorage();
+            ASSERT(pMultiStorage);
+            pMultiStorage->AddMulti(GetUID(), HP_OWNER);
+        }
     }
     _uidOwner = uidOwner;
 }

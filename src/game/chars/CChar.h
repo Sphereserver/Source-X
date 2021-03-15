@@ -20,7 +20,10 @@
 #include "CCharPlayer.h"
 
 
+class CWorldTicker;
+
 class CCharNPC;
+
 
 enum NPCBRAIN_TYPE	// General AI type.
 {
@@ -41,6 +44,9 @@ enum NPCBRAIN_TYPE	// General AI type.
 class CChar : public CObjBase, public CContainer, public CTextConsole
 {
 	// RES_WORLDCHAR
+
+	friend class CWorldTicker;
+
     // THREAD_CMUTEX_DEF; // It inherits from CObjBase which inherits CTimedObject, which already has a class mutex.
 
 private:
@@ -1299,15 +1305,16 @@ public:
 	void OnHarmedBy( CChar * pCharSrc );
 	bool OnAttackedBy( CChar * pCharSrc, bool fPetsCommand = false, bool fShouldReveal = true );
 
-	virtual bool CanTick() const override;
+	virtual bool _CanTick() const override;
 	
-protected:	virtual bool _OnTick() override final;  // OnTick timeout for skills, AI, etc
-public:		virtual bool  OnTick() override final;
+protected:	virtual bool _OnTick() override final;  // _OnTick timeout for skills, AI, etc
+//public:	virtual bool  _OnTick() override final;
 
+public:
 	bool OnTickEquip( CItem * pItem );
 	void OnTickFood( ushort uiVal, int HitsHungerLoss );
 	void OnTickStatusUpdate();
-    void OnTickSkill(); // OnTick timeout specific for the skill behavior
+    void OnTickSkill(); // _OnTick timeout specific for the skill behavior
     bool OnTickPeriodic();  // Periodic tick calls (update stats, status bar, notoriety & attackers, death check, etc)
 
 	static CChar * CreateBasic( CREID_TYPE baseID );

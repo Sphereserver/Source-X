@@ -588,24 +588,33 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 	}
 
     // Try drop it on given container grid index (if not available, drop it on next free index)
-    bool fGridAvailable;
-    for ( uint i = 0; i < UCHAR_MAX; ++i )
-    {
-        fGridAvailable = true;
+	{
+		bool fGridCellUsed[UCHAR_MAX]{};
 		for (const CSObjContRec* pObjRec : *this)
 		{
 			const CItem* pTry = static_cast<const CItem*>(pObjRec);
-            if ( pTry->GetContainedGridIndex() == gridIndex )
-            {
-                fGridAvailable = false;
-                break;
-            }
-        }
-        if ( fGridAvailable )
-            break;
+			const auto idxGridTest = pTry->GetContainedGridIndex();
 
-        if ( ++gridIndex >= g_Cfg.m_iContainerMaxItems )
-            gridIndex = 0;
+			static_assert(sizeof(idxGridTest) == sizeof(uchar));
+			fGridCellUsed[idxGridTest] = true;
+		}
+
+		static_assert(sizeof(gridIndex) == sizeof(uchar));
+		if (fGridCellUsed[gridIndex])
+		{
+			gridIndex = 0;
+			for (uint i = 0; i < UCHAR_MAX; ++i)
+			{
+				if (!fGridCellUsed[i])
+					break;
+
+				if (++gridIndex >= g_Cfg.m_iContainerMaxItems)
+				{
+					gridIndex = 0;
+					break;
+				}
+			}
+		}
 	}
 
 	CContainer::ContentAddPrivate(pItem);
@@ -939,7 +948,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 		case IT_TRASH_CAN:
 			Sound(0x235); // a little sound so we know it "ate" it.
 			pCharMsg->SysMessageDefault(DEFMSG_ITEMUSE_TRASHCAN);
-			SetTimeoutS(15);
+			_SetTimeoutS(15);
 			break;
 
 		default:
@@ -1320,9 +1329,9 @@ bool CItemContainer::r_Verb( CScript &s, CTextConsole *pSrc )
 	return false;
 }
 
-bool CItemContainer::OnTick()
+bool CItemContainer::_OnTick()
 {
-	ADDTOCALLSTACK("CItemContainer::OnTick");
+	ADDTOCALLSTACK("CItemContainer::_OnTick");
 	// equipped or not.
 	switch ( GetType() )
 	{
@@ -1343,10 +1352,10 @@ bool CItemContainer::OnTick()
 			// Restock this box.
 			// Magic restocking container.
 			Restock();
-			SetTimeout(-1);
+			_SetTimeout(-1);
 			return true;
 		default:
 			break;
 	}
-	return CItemVendable::OnTick();
+	return CItemVendable::_OnTick();
 }

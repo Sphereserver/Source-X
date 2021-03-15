@@ -83,7 +83,7 @@ int CChar::Attacker_GetDam(int attackerIndex) const
         return -1;
     if ((attackerIndex < 0) || (m_lastAttackers.size() <= (size_t)attackerIndex))
         return -1;
-    const LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
+    const LastAttackers & refAttacker = m_lastAttackers[(size_t)attackerIndex];
     return refAttacker.amountDone;
 }
 
@@ -95,7 +95,7 @@ int64 CChar::Attacker_GetElapsed(int attackerIndex) const
         return -1;
     if ((attackerIndex < 0) || (m_lastAttackers.size() <= (size_t)attackerIndex))
         return -1;
-    const LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
+    const LastAttackers & refAttacker = m_lastAttackers[(size_t)attackerIndex];
     return refAttacker.elapsed;
 }
 
@@ -107,7 +107,7 @@ int CChar::Attacker_GetThreat(int attackerIndex) const
         return -1;
     if ((attackerIndex < 0) || (m_lastAttackers.size() <= (size_t)attackerIndex))
         return -1;
-    const LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
+    const LastAttackers & refAttacker = m_lastAttackers[(size_t)attackerIndex];
     return (refAttacker.threat > 0) ? refAttacker.threat : 0;
 }
 
@@ -238,7 +238,7 @@ bool CChar::Attacker_GetIgnore(int attackerIndex) const
         return false;
     if ((attackerIndex < 0) || (m_lastAttackers.size() <= (size_t)attackerIndex))
         return false;
-    const LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
+    const LastAttackers & refAttacker = m_lastAttackers[(size_t)attackerIndex];
     return (refAttacker.ignore != 0);
 }
 
@@ -300,7 +300,7 @@ CChar * CChar::Attacker_GetUID(int attackerIndex) const
         return nullptr;
     if ((attackerIndex < 0) || (m_lastAttackers.size() <= (size_t)attackerIndex))
         return nullptr;
-    const LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
+    const LastAttackers & refAttacker = m_lastAttackers[(size_t)attackerIndex];
     CChar * pChar = CUID::CharFindFromUID(refAttacker.charUID);
     return pChar;
 }

@@ -108,9 +108,9 @@ void CSFileObjContainer::SetFilenumber( int iHowMuch )
     iFilenumber = iHowMuch;
 }
 
-bool CSFileObjContainer::OnTick()
+bool CSFileObjContainer::_OnTick()
 {
-    ADDTOCALLSTACK("CSFileObjContainer::OnTick");
+    ADDTOCALLSTACK("CSFileObjContainer::_OnTick");
     EXC_TRY("Tick");
 
     if ( !iGlobalTimeout )
@@ -122,7 +122,7 @@ bool CSFileObjContainer::OnTick()
 
         for ( std::vector<CSFileObj *>::iterator i = sFileList.begin(); i != sFileList.end(); ++i )
         {
-            if ( !(*i)->OnTick() )
+            if ( !(*i)->_OnTick() )
             {
                 // Error and fixweirdness
             }

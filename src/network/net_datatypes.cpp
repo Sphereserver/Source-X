@@ -284,14 +284,14 @@ int CvtNUNICODEToSystem(tchar* pOut, int iSizeOutBytes, const nchar* pInp, int i
 
         // Convert to proper UTF8
         iOut = WideCharToMultiByte(
-            CP_UTF8,		// code page
-            0,				// performance and mapping flags
-            szBuffer,		// address of wide-character string
-            iInp,			// number of characters in string
-            pOut,			// address of buffer for new string
-            iSizeOutBytes,	// size of buffer in bytes
-            nullptr,			// address of default for unmappable characters
-            nullptr			// address of flag set when default char. used
+            CP_UTF8,        // code page
+            0,              // performance and mapping flags
+            szBuffer,       // address of wide-character string
+            iInp,           // number of characters in string
+            pOut,           // address of buffer for new string
+            iSizeOutBytes,  // size of buffer in bytes
+            nullptr,        // address of default for unmappable characters
+            nullptr         // address of flag set when default char. used
         );
         if (iOut < 0)
         {

@@ -41,7 +41,7 @@ private:
     CSFileObj& operator=(const CSFileObj& other);
 
 public:
-    bool OnTick();
+    bool _OnTick();
     int FixWeirdness();
     bool IsInUse();
     void FlushAndClose();

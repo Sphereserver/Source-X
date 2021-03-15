@@ -1658,9 +1658,9 @@ void CWorld::GarbageCollection()
 	g_Log.Flush();
 }
 
-void CWorld::OnTick()
+void CWorld::_OnTick()
 {
-	ADDTOCALLSTACK("CWorld::OnTick");
+	ADDTOCALLSTACK("CWorld::_OnTick");
 	// 256 real secs = 1 server hour. 19 light levels. check every 10 minutes or so.
 
 	// Do not tick while loading (startup, resync, exiting...) or when double ticking in the same msec?.

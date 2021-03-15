@@ -678,9 +678,12 @@ bool CScript::IsSectionType( lpctstr pszName ) //const
 
 bool CScript::ReadKey( bool fRemoveBlanks )
 {
-	ADDTOCALLSTACK("CScript::ReadKey");
-	if ( ! ReadTextLine(fRemoveBlanks))
+	// This function is called for each script line which is being parsed (so VERY frequently), and ADDTOCALLSTACK is expensive
+	//ADDTOCALLSTACK("CScript::ReadKey");
+
+	if ( ! _ReadTextLine(fRemoveBlanks))	// Assume it's an internal method or, if interface, i already acquired the lock
 		return false;
+
     tchar* ptcKey = m_pszKey;
     GETNONWHITESPACE(ptcKey);
 	if ( ptcKey[0] == '[' )	// hit the end of our section.
@@ -693,7 +696,9 @@ bool CScript::ReadKey( bool fRemoveBlanks )
 
 bool CScript::ReadKeyParse() // Read line from script
 {
-	ADDTOCALLSTACK("CScript::ReadKeyParse");
+	// This function is called for each script line which is being parsed (so VERY frequently), and ADDTOCALLSTACK is expensive
+	//ADDTOCALLSTACK("CScript::ReadKeyParse");
+
 	EXC_TRY("ReadKeyParse");
 	EXC_SET_BLOCK("read");
 	if ( !ReadKey(true) )
@@ -836,9 +841,12 @@ bool _cdecl CScript::WriteSection( lpctstr pszSection, ... )
 	va_start( vargs, pszSection );
 
 	// EndSection();	// End any previous section.
-	Printf( "\n[");
-	VPrintf( pszSection, vargs );
-	Printf( "]\n" );
+
+	THREAD_UNIQUE_LOCK_SET;
+	_Printf( "\n[");
+	_VPrintf( pszSection, vargs );
+	_Printf( "]\n" );
+
 	va_end( vargs );
 
 	return true;
@@ -896,9 +904,9 @@ bool CScript::WriteKeyStr(lpctstr ptcKey, lpctstr ptcVal)
 	}
 
 	// Write: "KEY=VAL\n"
-	_sBuffer2.resize(SCRIPT_MAX_LINE_LEN);
-	const size_t uiCapacity = _sBuffer2.capacity();
-	lptstr ptcBuf = _sBuffer2.data();
+	_sWriteBuffer_keyVal.resize(SCRIPT_MAX_LINE_LEN);
+	const size_t uiCapacity = _sWriteBuffer_keyVal.capacity();
+	lptstr ptcBuf = _sWriteBuffer_keyVal.data();
 
 	size_t uiStrLen = Str_CopyLimitNull(ptcBuf, ptcKey, uiCapacity);
 	ptcBuf[uiStrLen++] = '=';
@@ -924,25 +932,25 @@ bool CScript::WriteKeyStr(lpctstr ptcKey, lpctstr ptcVal)
 void _cdecl CScript::WriteKeyFormat(lpctstr ptcKey, lpctstr pszVal, ...)
 {
 	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKeyFormat");
-	_sBuffer1.resize(SCRIPT_MAX_LINE_LEN);
+	_sWriteBuffer_num.resize(SCRIPT_MAX_LINE_LEN);
 	va_list vargs;
 	va_start( vargs, pszVal );
-	vsnprintf(_sBuffer1.data(), _sBuffer1.capacity(), pszVal, vargs);
-	WriteKeyStr(ptcKey, _sBuffer1.data());
+	vsnprintf(_sWriteBuffer_num.data(), _sWriteBuffer_num.capacity(), pszVal, vargs);
+	WriteKeyStr(ptcKey, _sWriteBuffer_num.data());
 	va_end( vargs );
 }
 
 void CScript::WriteKeyVal(lpctstr ptcKey, int64 iVal)
 {
-	_sBuffer1.resize(SCRIPT_MAX_LINE_LEN);
-	Str_FromLL(iVal, _sBuffer1.data(), _sBuffer1.capacity(), 10);
-	WriteKeyStr(ptcKey, _sBuffer1.data());
+	_sWriteBuffer_num.resize(SCRIPT_MAX_LINE_LEN);
+	Str_FromLL(iVal, _sWriteBuffer_num.data(), _sWriteBuffer_num.capacity(), 10);
+	WriteKeyStr(ptcKey, _sWriteBuffer_num.data());
 }
 
 void CScript::WriteKeyHex(lpctstr ptcKey, int64 iVal)
 {
-	_sBuffer1.resize(SCRIPT_MAX_LINE_LEN);
-	Str_FromLL(iVal, _sBuffer1.data(), _sBuffer1.capacity(), 16);
-	WriteKeyStr(ptcKey, _sBuffer1.data());
+	_sWriteBuffer_num.resize(SCRIPT_MAX_LINE_LEN);
+	Str_FromLL(iVal, _sWriteBuffer_num.data(), _sWriteBuffer_num.capacity(), 16);
+	WriteKeyStr(ptcKey, _sWriteBuffer_num.data());
 }
 

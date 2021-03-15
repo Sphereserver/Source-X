@@ -1320,13 +1320,6 @@ bool CSector::_OnTick()
     return true;
 }
 
-bool CSector::OnTick()
-{
-	ADDTOCALLSTACK("CSector::OnTick");
-	THREAD_UNIQUE_LOCK_RETURN(CSector::_OnTick());
-}
-
-
 SEASON_TYPE CSector::GetSeason() const
 {
 	return m_Env.m_Season;

@@ -595,7 +595,7 @@ public:
     * @brief Tick override.
     * @return true
     */
-    virtual bool OnTick();
+    virtual bool _OnTick();
     /**
     * @brief Place the multi.
     * @param pt Position.

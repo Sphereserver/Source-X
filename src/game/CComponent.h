@@ -62,7 +62,7 @@ public:
     virtual bool r_LoadVal(CScript & s) = 0;                                            // Sets a value from scripts or game commands.
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) = 0;                          // Execute command from script.
     virtual void Copy(const CComponent* copy) = 0;                                      // Copy the contents to a new object.
-    virtual CCRET_TYPE OnTickComponent() = 0;                                           // Custom implementation of OnTick.
+    virtual CCRET_TYPE OnTickComponent() = 0;                                           // Custom implementation of _OnTick.
 };
 
 #endif // _INC_CCOMPONENT_H

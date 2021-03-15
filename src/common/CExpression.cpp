@@ -1576,8 +1576,8 @@ CSString CExpression::GetRangeString(lpctstr & pExpr)
     tchar pToParse[THREAD_STRING_LENGTH];
     for ( int i = 1; i+1 <= iQty; i += 2 )
     {
-		if (pElementsStart[i] == nullptr)
-			break;	// Shouldn't really happen...
+		//if (pElementsStart[i] == nullptr)
+		//	break;	// Shouldn't really happen...
 
         // Copy the weight element in a new string
         const size_t iToParseLen = (pElementsStart[i][1] - pElementsStart[i][0]);

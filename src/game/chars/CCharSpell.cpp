@@ -3346,7 +3346,7 @@ int CChar::Spell_CastStart()
 		}
 	}
 
-	SetTimeoutD(iWaitTime);
+	_SetTimeoutD(iWaitTime);
 	return iDifficulty;
 }
 

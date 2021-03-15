@@ -615,7 +615,7 @@ CCRET_TYPE CCSpawn::OnTickComponent()
     {
         iMinutes = 1;
     }
-    pSpawnItem->SetTimeoutS(iMinutes * 60);	// set time to check again.
+    pSpawnItem->_SetTimeoutS(iMinutes * 60);	// set time to check again.
 
     if (GetCurrentSpawned() >= GetAmount())
     {

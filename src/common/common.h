@@ -31,7 +31,8 @@
 #endif
 
 
-#define STRINGIFY(x)	#x
+#define _STRINGIFY_AUX(x)	#x
+#define STRINGIFY(x)		_STRINGIFY_AUX(x)
 
 #define CountOf(a)		(sizeof(a)/sizeof((a)[0]))
 

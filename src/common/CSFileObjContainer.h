@@ -39,7 +39,7 @@ public:
     void SetFilenumber(int);
 
 public:
-    bool OnTick();
+    bool _OnTick();
     int FixWeirdness();
 
     virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;

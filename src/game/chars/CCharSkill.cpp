@@ -641,7 +641,7 @@ ushort CChar::Skill_GetBase( SKILL_TYPE skill ) const
 void CChar::Skill_SetTimeout()
 {
 	ADDTOCALLSTACK("CChar::Skill_SetTimeout");
-	SetTimeout(Skill_GetTimeout());
+	_SetTimeout(Skill_GetTimeout());
 }
 
 int64 CChar::Skill_GetTimeout()
@@ -3014,7 +3014,7 @@ int CChar::Skill_Act_Napping( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_START )
 	{
-		SetTimeoutS(2);
+		_SetTimeout(2);
 		return 0;
 	}
 
@@ -3022,7 +3022,7 @@ int CChar::Skill_Act_Napping( SKTRIG_TYPE stage )
 	{
 		if ( m_Act_p != GetTopPoint())
 			return -SKTRIG_QTY;	// we moved.
-		SetTimeoutS(8);
+		_SetTimeout(8);
 		Speak( "z", HUE_WHITE, TALKMODE_WHISPER );
 		return -SKTRIG_STROKE;	// Stay in the skill till we hit.
 	}
@@ -3057,7 +3057,7 @@ int CChar::Skill_Act_Breath( SKTRIG_TYPE stage )
 		if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOANIM ) )
 			UpdateAnimate( ANIM_MON_Stomp );
 
-		SetTimeoutS(3);
+		_SetTimeout(3);
 		return 0;
 	}
 
@@ -3141,7 +3141,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 		if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOANIM ) )
 			UpdateAnimate( ANIM_MON_Stomp );
 
-		SetTimeoutS(3);
+		_SetTimeout(3);
 		return 0;
 	}
 
@@ -3248,7 +3248,7 @@ int CChar::Skill_Act_Training( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_START )
 	{
-		SetTimeoutS(1);
+		_SetTimeout(1);
 		return 0;	// How difficult? 1-1000
 	}
 	if ( stage == SKTRIG_STROKE )
@@ -4239,9 +4239,9 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 			}
 		}
 
-        if (IsTimerExpired())
+        if (_IsTimerExpired())
         {
-            SetTimeoutD(1);		// the skill should have set it's own delay!?
+            _SetTimeoutD(1);		// the skill should have set it's own delay!?
         }
 		
 		//When combat starts, the first @HitTry trigger will be called after the @SkillStart/@Start (as it was before).

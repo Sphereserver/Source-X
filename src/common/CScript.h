@@ -104,8 +104,8 @@ class CResourceLock;
 class CScript : public CCacheableScriptFile, public CScriptKeyAlloc
 {
 private:
-	std::string	_sBuffer1;
-	std::string _sBuffer2;
+	std::string	_sWriteBuffer_num;
+	std::string _sWriteBuffer_keyVal;
 	bool m_fSectionHead;	// Does the File Offset point to current section header? [HEADER]
 	int  m_iSectionData;	// File Offset to current section data, under section header.
 

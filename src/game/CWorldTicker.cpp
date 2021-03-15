@@ -206,7 +206,7 @@ void CWorldTicker::Tick()
         ++_iLastTickDone;   // Update current tick.
 
         /* process objects that need status updates
-        * these objects will normally be in containers which don't have any period OnTick method
+        * these objects will normally be in containers which don't have any period _OnTick method
         * called (whereas other items can receive the OnTickStatusUpdate() call via their normal
         * tick method).
         * note: ideally, a better solution to accomplish this should be found if possible
@@ -268,9 +268,13 @@ void CWorldTicker::Tick()
                 for (auto it = cont.begin(); it != itContEnd;)
                 {
                     CTimedObject* pTimedObj = *it;
-                    if (pTimedObj->IsTimerSet() && pTimedObj->CanTick())
+                    
+                    // FIXME / TODO: For now, since we don't have multithreading fully working, locking an unneeded mutex causes only useless slowdowns.
+                    //std::unique_lock<std::shared_mutex> lockTimeObj(pTimedObj->THREAD_CMUTEX);
+                    
+                    if (pTimedObj->_IsTimerSet() && pTimedObj->_CanTick())
                     {
-                        if (pTimedObj->_iTimeout <= iTime)
+                        if (pTimedObj->_GetTimeoutRaw() <= iTime)
                         {
                             vecObjs.emplace_back(static_cast<void*>(pTimedObj));
 
@@ -279,7 +283,7 @@ void CWorldTicker::Tick()
                             * current timeout to remove it from any list, prevent that to happen here since it should
                             * not belong to any other tick than the current one.
                             */
-                            pTimedObj->ClearTimeout();
+                            pTimedObj->_ClearTimeout();
 
                             it = cont.erase(it);
                             itContEnd = cont.end();
@@ -313,8 +317,12 @@ void CWorldTicker::Tick()
             EXC_TRYSUB("Timed Object Tick");
             EXC_SETSUB_BLOCK("Elapsed");
 
-            CTimedObject* pObj = static_cast<CTimedObject*>(pObjVoid);
-            const PROFILE_TYPE profile = pObj->GetProfileType();
+            CTimedObject* pTimedObj = static_cast<CTimedObject*>(pObjVoid);
+
+            // FIXME / TODO: For now, since we don't have multithreading fully working, locking an unneeded mutex causes only useless slowdowns.
+            //std::unique_lock<std::shared_mutex> lockTimeObj(pTimedObj->THREAD_CMUTEX);
+
+            const PROFILE_TYPE profile = pTimedObj->_GetProfileType();
             const ProfileTask  profileTask(profile);
 
             // Default to true, so if any error occurs it gets deleted for safety
@@ -325,7 +333,7 @@ void CWorldTicker::Tick()
             {
                 case PROFILE_ITEMS:
                 {
-                    CItem* pItem = dynamic_cast<CItem*>(pObj);
+                    CItem* pItem = dynamic_cast<CItem*>(pTimedObj);
                     ASSERT(pItem);
                     if (pItem->IsItemEquipped())
                     {
@@ -340,7 +348,7 @@ void CWorldTicker::Tick()
                     else
                     {
                         ptcSubDesc = "Item";
-                        fDelete = (pItem->OnTick() == false);
+                        fDelete = (pItem->_OnTick() == false);
                         break;
                     }
                 }
@@ -349,12 +357,12 @@ void CWorldTicker::Tick()
                 case PROFILE_CHARS:
                 {
                     ptcSubDesc = "Char";
-                    CChar* pChar = dynamic_cast<CChar*>(pObj);
+                    CChar* pChar = dynamic_cast<CChar*>(pTimedObj);
                     ASSERT(pChar);
-                    fDelete = !pChar->OnTick();
-                    if (pChar->m_pNPC && !pObj->IsTimerSet())
+                    fDelete = !pChar->_OnTick();
+                    if (pChar->m_pNPC && !pTimedObj->_IsTimerSet())
                     {
-                        pObj->SetTimeoutS(3);   //3 seconds timeout to keep NPCs 'alive'
+                        pTimedObj->_SetTimeoutS(3);   //3 seconds timeout to keep NPCs 'alive'
                     }
                 }
                 break;
@@ -363,21 +371,21 @@ void CWorldTicker::Tick()
                 {
                     ptcSubDesc = "Sector";
                     fDelete = false;    // sectors should NEVER be deleted.
-                    pObj->OnTick();
+                    pTimedObj->_OnTick();
                 }
                 break;
 
                 case PROFILE_MULTIS:
                 {
                     ptcSubDesc = "Multi";
-                    fDelete = !pObj->OnTick();
+                    fDelete = !pTimedObj->_OnTick();
                 }
                 break;
 
                 case PROFILE_SHIPS:
                 {
                     ptcSubDesc = "ItemShip";
-                    fDelete = !pObj->OnTick();
+                    fDelete = !pTimedObj->_OnTick();
                 }
                 break;
 
@@ -385,14 +393,14 @@ void CWorldTicker::Tick()
                 {
                     ptcSubDesc = "TimedFunction";
                     fDelete = false;
-                    pObj->OnTick();
+                    pTimedObj->_OnTick();
                 }
                 break;
 
                 default:
                 {
                     ptcSubDesc = "Default";
-                    fDelete = !pObj->OnTick();
+                    fDelete = !pTimedObj->_OnTick();
                 }
                 break;
             }
@@ -400,7 +408,7 @@ void CWorldTicker::Tick()
             if (fDelete)
             {
                 EXC_SETSUB_BLOCK("Delete");
-                CObjBase* pObjBase = dynamic_cast<CObjBase*>(pObj);
+                CObjBase* pObjBase = dynamic_cast<CObjBase*>(pTimedObj);
                 ASSERT(pObjBase); // Only CObjBase-derived objects have the Delete method, and should be Delete-d.
                 pObjBase->Delete();
             }

@@ -49,7 +49,7 @@ CItem * CCChampion::GetLink() const
 
 CCRET_TYPE CCChampion::OnTickComponent()
 {
-    ADDTOCALLSTACK("CCChampion::OnTick");
+    ADDTOCALLSTACK("CCChampion::_OnTick");
     if (!_pRedCandles.empty())
     {
         _iSpawnsMax += _iSpawnsNextRed;

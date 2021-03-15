@@ -43,14 +43,20 @@ void CTimedObject::_GoAwake()
 
 bool CTimedObject::_CanTick() const
 {
-    //ADDTOCALLSTACK_INTENSIVE("_CTimedObject::CanTick");
+    //ADDTOCALLSTACK_INTENSIVE("_CTimedObject::_CanTick");
     return _IsSleeping();
 }
 
 bool CTimedObject::CanTick() const
 {
-    //ADDTOCALLSTACK_INTENSIVE("CTimedObject::CanTick");
+    //ADDTOCALLSTACK_INTENSIVE("CTimedObject::_CanTick");
     return IsSleeping();
+}
+
+bool CTimedObject::OnTick()
+{
+    ADDTOCALLSTACK("CTimedObject::OnTick");
+    THREAD_UNIQUE_LOCK_RETURN(_OnTick());
 }
 
 void CTimedObject::SetTimeoutRaw(int64 iDelayInMsecs) noexcept
@@ -135,8 +141,12 @@ int64 CTimedObject::_GetTimerDiff() const noexcept
     // How long till this will expire ?
     return _iTimeout - CWorldGameTime::GetCurrentTime().GetTimeRaw();
 }
+int64 CTimedObject::GetTimerDiff() const noexcept
+{
+    THREAD_SHARED_LOCK_RETURN(CTimedObject::_GetTimerDiff());
+}
 
-int64 CTimedObject::GetTimerAdjusted() const noexcept
+int64 CTimedObject::_GetTimerAdjusted() const noexcept
 {
     // RETURN: time in msecs from now.
     THREAD_SHARED_LOCK_SET;
@@ -149,8 +159,12 @@ int64 CTimedObject::GetTimerAdjusted() const noexcept
 
     return iDiffInMsecs;
 }
+int64 CTimedObject::GetTimerAdjusted() const noexcept
+{
+    THREAD_SHARED_LOCK_RETURN(_GetTimerAdjusted());
+}
 
-int64 CTimedObject::GetTimerDAdjusted() const noexcept
+int64 CTimedObject::_GetTimerDAdjusted() const noexcept
 {
     // RETURN: time in tenths of second from now.
     THREAD_SHARED_LOCK_SET;
@@ -163,8 +177,12 @@ int64 CTimedObject::GetTimerDAdjusted() const noexcept
 
     return (iDiffInMsecs / MSECS_PER_TENTH);
 }
+int64 CTimedObject::GetTimerDAdjusted() const noexcept
+{
+    THREAD_SHARED_LOCK_RETURN(_GetTimerDAdjusted());
+}
 
-int64 CTimedObject::GetTimerSAdjusted() const noexcept
+int64 CTimedObject::_GetTimerSAdjusted() const noexcept
 {
     // RETURN: time in seconds from now.
     THREAD_SHARED_LOCK_SET;
@@ -176,6 +194,10 @@ int64 CTimedObject::GetTimerSAdjusted() const noexcept
         return 0;
 
     return (iDiffInMsecs / MSECS_PER_SEC);
+}
+int64 CTimedObject::GetTimerSAdjusted() const noexcept
+{
+    THREAD_SHARED_LOCK_RETURN(_GetTimerSAdjusted());
 }
 
 
@@ -194,11 +216,6 @@ void CTimedObject::GoAwake()
 PROFILE_TYPE CTimedObject::GetProfileType() const noexcept
 {
     THREAD_SHARED_LOCK_RETURN(CTimedObject::_GetProfileType());
-}
-
-int64 CTimedObject::GetTimerDiff() const noexcept
-{
-    THREAD_SHARED_LOCK_RETURN(CTimedObject::_GetTimerDiff());
 }
 
 void CTimedObject::ClearTimeout() noexcept

@@ -1233,11 +1233,10 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 		if ( fFilterLayers )
 		{
 			const LAYER_TYPE layer = (LAYER_TYPE)(item->GetContainedLayer());
-			if ((layer > 0) && (layer < LAYER_HORSE))
+			if ((layer > LAYER_NONE) && (layer < LAYER_HORSE))
 			{
 				switch (layer)	// don't put these on a corpse.
 				{
-				case LAYER_NONE:
 				case LAYER_PACK: // these display strange.
 					continue;
 

@@ -2867,7 +2867,7 @@ bool CChar::OnTickEquip( CItem * pItem )
 				if ( pHorse == nullptr )
 					return false;
 				if ( pHorse != this )				//Some scripts can force mounts to have as 'mount' the rider itself (like old ethereal scripts)
-					return pHorse->OnTick();	    // if we call OnTick again on them we'll have an infinite loop.
+					return pHorse->_OnTick();	    // if we call _OnTick again on them we'll have an infinite loop.
 				pItem->SetTimeout( 1 );
 				return true;
 			}
@@ -3528,7 +3528,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 		{
 			// Keep timer active holding the swing action until the char stops moving
 			m_atFight.m_iWarSwingState = WAR_SWING_EQUIPPING;
-			SetTimeoutD(1);
+			_SetTimeoutD(1);
 		}
 
 		// This could get REALLY EXPENSIVE !
@@ -4391,28 +4391,23 @@ void CChar::OnTickSkill()
     EXC_CATCHSUB("Skill tick");
 }
 
-bool CChar::CanTick() const
+bool CChar::_CanTick() const
 {
-	//ADDTOCALLSTACK_INTENSIVE("CChar::CanTick");
+	EXC_TRY("Can tick?");
+
 	if (IsDisconnected() && (Skill_GetActive() != NPCACT_RIDDEN))
 	{
 		// mounted horses can still get a tick.
 		return false;
 	}
 
-	return CObjBase::CanTick();
+	return CObjBase::_CanTick();
+
+	EXC_CATCH;
 }
 
-// Assume this is only called 1 time per sec.
 // Get a timer tick when our timer expires.
 // RETURN: false = delete this.
-bool CChar::OnTick()
-{
-	//ADDTOCALLSTACK("CChar::OnTick");
-	//THREAD_UNIQUE_LOCK_RETURN(CChar::_OnTick());
-	return CChar::_OnTick();
-}
-
 bool CChar::_OnTick()
 {
     ADDTOCALLSTACK("CChar::_OnTick");
@@ -4442,7 +4437,7 @@ bool CChar::_OnTick()
 	* take in mind that return will prevent this char's stats updates,
 	*  attacker, notoriety, death status, etc from happening.
 	*/
-	const CCRET_TYPE iCompRet = CEntity::OnTick();
+	const CCRET_TYPE iCompRet = CEntity::_OnTick();
 	if (iCompRet != CCRET_CONTINUE) // if return != CCRET_TRUE
 	{
 		return iCompRet;    // Stop here

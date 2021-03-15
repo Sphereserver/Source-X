@@ -48,7 +48,7 @@ public:
 
 	//	set / get / info methods
 	bool isConnected();
-	bool OnTick();
+	bool _OnTick();
 
 	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 	virtual bool r_LoadVal( CScript & s ) override;

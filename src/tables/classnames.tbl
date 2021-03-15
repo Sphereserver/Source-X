@@ -20,6 +20,7 @@
 #include "../game/clients/CClient.h"
 #include "../game/components/CCSpawn.h"
 #include "../game/components/CCChampion.h"
+#include "../game/items/CItemCommCrystal.h"
 #include "../game/items/CItemMultiCustom.h"
 #include "../game/items/CItemShip.h"
 #include "../game/CSectorList.h"
@@ -82,6 +83,8 @@ ADD(CItemContainer,			"CItemContainer");
 ADD(CGMPage,				"CGMPage");
 ADD(CItemBase,				"CItemBase");
 ADD(CItem,					"CItem");
+ADD(CItemCommCrystal,		"CItemCommCrystal");
+ADD(CItemCorpse,			"CItemCorpse");
 ADD(CItemMulti,				"CItemMulti");
 ADD(CItemMultiCustom,		"CItemMultiCustom");
 ADD(CItemMap,				"CItemMap");

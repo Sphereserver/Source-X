@@ -6,7 +6,7 @@
 void CItem::Plant_SetTimer()
 {
 	ADDTOCALLSTACK("CItem::Plant_SetTimer");
-	SetTimeout(GetDecayTime());
+	_SetTimeout(GetDecayTime());
 }
 
 // Pick cotton/hay/etc...

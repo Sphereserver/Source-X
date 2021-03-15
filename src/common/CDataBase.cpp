@@ -252,9 +252,9 @@ void CDataBase::addQueryResult(CSString & theFunction, CScriptTriggerArgs * theR
 	m_QueryArgs.push(FunctionArgsPair_t(theFunction, theResult));
 }
 
-bool CDataBase::OnTick()
+bool CDataBase::_OnTick()
 {
-	ADDTOCALLSTACK("CDataBase::OnTick");
+	ADDTOCALLSTACK("CDataBase::_OnTick");
 	static int tickcnt = 0;
 	EXC_TRY("Tick");
 

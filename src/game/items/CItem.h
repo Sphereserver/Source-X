@@ -20,6 +20,7 @@
 #include "../CEntity.h"
 #include "CItemBase.h"
 
+class CWorldTicker;
 
 enum ITC_TYPE	// Item Template commands
 {
@@ -37,6 +38,9 @@ enum ITC_TYPE	// Item Template commands
 class CItem : public CObjBase
 {
 	// RES_WORLDITEM
+
+	friend class CWorldTicker;
+
 public:
 	static const char *m_sClassName;
 	static lpctstr const sm_szLoadKeys[];
@@ -551,11 +555,12 @@ public:
 	virtual bool Delete(bool fForce = false) override;
 
 
-	// On CItem, OnTick is virtual also because we need to call the topmost superclass:
+	// On CItem, _OnTick is virtual also because we need to call the topmost superclass:
 	//	a CItem can be the base class for CItemShip, CItemMessage...
-protected:	virtual bool _OnTick();
-public:		virtual bool  OnTick();
+protected:	virtual bool _OnTick() override;
+//public:	virtual bool  OnTick() override;
 
+public:
 	virtual void OnHear( lpctstr pszCmd, CChar * pSrc );
 	CItemBase * Item_GetDef() const;
 	ITEMID_TYPE GetID() const;

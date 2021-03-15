@@ -295,7 +295,7 @@ ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal ) const
 
 #ifdef _WIN32
     g_NTWindow.SetWindowTitle(pszTemp);
-	g_NTService.OnTick();
+	g_NTService._OnTick();
 #endif
 	return iPercent;
 }
@@ -485,7 +485,7 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 			{
 				// Force periodic stuff
 				g_Accounts.Account_SaveAll();
-				g_Cfg.OnTick(true);
+				g_Cfg._OnTick(true);
 			} break;
 		case 'c':	// List all clients on line.
 			{
@@ -2160,9 +2160,9 @@ void CServer::SocketsClose()
 	m_SocketMain.Close();
 }
 
-void CServer::OnTick()
+void CServer::_OnTick()
 {
-	ADDTOCALLSTACK("CServer::OnTick");
+	ADDTOCALLSTACK("CServer::_OnTick");
 	EXC_TRY("Tick");
 
 #ifndef _WIN32
@@ -2210,8 +2210,8 @@ void CServer::OnTick()
 	}
 
 	EXC_SET_BLOCK("generic");
-	g_Cfg.OnTick(false);
-	_hDb.OnTick();
+	g_Cfg._OnTick(false);
+	_hDb._OnTick();
 	EXC_CATCH;
 }
 

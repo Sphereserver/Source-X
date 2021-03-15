@@ -115,7 +115,7 @@ public:
 
 	bool OnConsoleCmd( CSString & sText, CTextConsole * pSrc );
 
-	void OnTick();
+	void _OnTick();
 
 public:
 	void ListClients( CTextConsole * pClient ) const;

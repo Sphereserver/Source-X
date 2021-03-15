@@ -74,7 +74,7 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
         bool fUTF = false, fFirstLine = true;
         const int iFileLength = _GetLength();
         _fileContent = new std::vector<std::string>();
-        _fileContent->reserve(iFileLength);
+        _fileContent->reserve(iFileLength / 10);
 
         while ( !feof(_pStream) ) 
         {
@@ -173,7 +173,7 @@ tchar * CCacheableScriptFile::_ReadString(tchar *pBuffer, int sizemax)
 {
     // This function is called for each script line which is being parsed (so VERY frequently), and ADDTOCALLSTACK is expensive if called
     // this much often, so here it's to be preferred ADDTOCALLSTACK_INTENSIVE, even if we'll lose stack trace precision.
-    ADDTOCALLSTACK_INTENSIVE("CCacheableScriptFile::_ReadString");
+    //ADDTOCALLSTACK_INTENSIVE("CCacheableScriptFile::_ReadString");
 
     if ( _useDefaultFile() ) 
         return CSFileText::_ReadString(pBuffer, sizemax);
@@ -196,7 +196,7 @@ tchar * CCacheableScriptFile::_ReadString(tchar *pBuffer, int sizemax)
 
 tchar * CCacheableScriptFile::ReadString(tchar *pBuffer, int sizemax) 
 {
-    ADDTOCALLSTACK_INTENSIVE("CCacheableScriptFile::ReadString");
+    //ADDTOCALLSTACK_INTENSIVE("CCacheableScriptFile::ReadString");
     THREAD_UNIQUE_LOCK_RETURN(CCacheableScriptFile::_ReadString(pBuffer, sizemax));
 }
 

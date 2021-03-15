@@ -237,9 +237,9 @@ int CItemShip::FixWeirdness()
     return iResultCode;
 }
 
-bool CItemShip::OnTick()
+bool CItemShip::_OnTick()
 {
-    CCMultiMovable::OnTick();
+    CCMultiMovable::_OnTick();
     return true;    // Ships always return true, can't 'decay'
 }
 

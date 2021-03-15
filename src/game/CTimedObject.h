@@ -63,7 +63,7 @@ public:     virtual bool  CanTick() const;
      * @return  true if it succeeds, false if it fails.
     */
 protected:  virtual bool _OnTick() = 0;
-public:     virtual bool  OnTick() = 0;
+public:     virtual bool  OnTick(); // = 0;
 
     /*
     * @brief Check if IsDeleted();
@@ -127,20 +127,24 @@ public:             bool IsTimerExpired() const noexcept;
     /**
      * @brief   Gets timer (in milliseconds).
      * @return  The adjusted timer.
-     */
-    int64 GetTimerAdjusted() const noexcept;
+    
+    */
+protected:  int64 _GetTimerAdjusted() const noexcept;
+public:     int64  GetTimerAdjusted() const noexcept;
 
     /**
     * @brief   Gets timer in tenths of seconds.
     * @return  The adjusted timer.
     */
-    int64 GetTimerDAdjusted() const noexcept;
+protected:  int64 _GetTimerDAdjusted() const noexcept;
+public:     int64  GetTimerDAdjusted() const noexcept;
 
     /**
     * @brief    Gets timer in seconds.
     * @return   The adjusted timer.
     */
-    int64 GetTimerSAdjusted() const noexcept;
+protected:  int64 _GetTimerSAdjusted() const noexcept;
+public:     int64  GetTimerSAdjusted() const noexcept;
 };
 
 

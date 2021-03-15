@@ -242,9 +242,9 @@ void CObjBase::TickingListRecursiveDel()
 void CObjBase::TimeoutRecursiveResync(int64 iDelta)
 {
 	ADDTOCALLSTACK("CObjBase::TimeoutRecursiveResync");
-	if (IsTimerSet())
+	if (_IsTimerSet())
 	{
-		SetTimeout(GetTimeoutRaw() + iDelta);
+		_SetTimeout(GetTimeoutRaw() + iDelta);
 	}
 
 	if (CContainer* pCont = dynamic_cast<CContainer*>(this))
@@ -1507,13 +1507,13 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 			}
             break;
 		case OC_TIMER:
-			sVal.FormatLLVal( GetTimerSAdjusted() );
+			sVal.FormatLLVal(_GetTimerSAdjusted() );
 			break;
 		case OC_TIMERD:
-            sVal.FormatLLVal(GetTimerDAdjusted());
+            sVal.FormatLLVal(_GetTimerDAdjusted());
             break;
         case OC_TIMERMS:
-            sVal.FormatLLVal(GetTimerAdjusted());
+            sVal.FormatLLVal(_GetTimerAdjusted());
             break;
 		case OC_TRIGGER:
 			{
@@ -1921,30 +1921,28 @@ bool CObjBase::r_LoadVal( CScript & s )
             int64 iTimeout = s.GetArg64Val();
             if (g_Serv.IsLoading())
             {
-                int iPrevBuild = g_World.m_iPrevBuild;
+                const int iPrevBuild = g_World.m_iPrevBuild;
                 /*
-                * Newer builds have a different timer stored on saves (storing the msec in which it is going to tick instead of the seconds until it ticks)
-                *
+                * Newer X builds have a different timer stored on saves (storing the msec in which it is going to tick instead of the seconds until it ticks)
                 * So the new timer will be the current time in msecs (SetTimeout)
-                *
                 * For older builds, the timer is stored in seconds (SetTimeoutD)
                 */
                 if (iPrevBuild && (iPrevBuild >= 2866)) // commit #e08723c54b0a4a3b1601eba6f34a6118891f1313
                 {
-                    SetTimeout(iTimeout);   // new timer: set msecs timer
+                    _SetTimeout(iTimeout);   // new timer: set msecs timer
                     break;
                 }
             }
             fResendTooltip = true;  // not really need to even try to resend it on load, but resend otherwise.
-            SetTimeoutS(iTimeout);   // old timer: in seconds.
+            _SetTimeoutS(iTimeout);   // old timer: in seconds.
             break;
         }
         case OC_TIMERD:
-            SetTimeoutD(s.GetArgLLVal());
+			_SetTimeoutD(s.GetArgLLVal());
             fResendTooltip = true;
             break;
         case OC_TIMERMS:
-            SetTimeout(s.GetArgLLVal());
+			_SetTimeout(s.GetArgLLVal());
             fResendTooltip = true;
             break;
 		case OC_TIMESTAMP:
@@ -1985,7 +1983,7 @@ void CObjBase::r_Write( CScript & s )
 	if ( m_wHue != HUE_DEFAULT )
 		s.WriteKeyHex( "COLOR", GetHue());
 	if ( IsTimerSet() )
-		s.WriteKeyVal( "TIMER", GetTimerAdjusted());
+		s.WriteKeyVal( "TIMER", _GetTimerAdjusted());
 	if ( m_timestamp > 0 )
 		s.WriteKeyVal( "TIMESTAMP", GetTimeStamp());
 	if ( const CCSpawn* pSpawn = GetSpawn() )
@@ -3088,7 +3086,7 @@ void CObjBase::UpdatePropertyFlag()
 	m_fStatusUpdate |= SU_UPDATE_TOOLTIP;
 
     // Items equipped, inside containers or with timer expired doesn't receive ticks and need to be added to a list of items to be processed separately
-    if (!IsTopLevel() || IsTimerExpired())
+    if (!IsTopLevel() || _IsTimerExpired())
     {
 		CWorldTickingList::AddObjStatusUpdate(this);
     }
@@ -3116,10 +3114,11 @@ void CObjBase::OnTickStatusUpdate()
     }
 }
 
-bool CObjBase::CanTick() const
+bool CObjBase::_CanTick() const
 {
-	ADDTOCALLSTACK_INTENSIVE("CObjBase::CanTick");
-	if (IsSleeping())
+	EXC_TRY("Can tick?");
+
+	if (_IsSleeping())
 		return false;
 
 	if (const CSObjCont* pParent = GetParent())
@@ -3129,7 +3128,10 @@ bool CObjBase::CanTick() const
 			return false;
 	}
 
-	// return CTimedObject::CanTick();
+	// return CTimedObject::_CanTick();
+
+	EXC_CATCH;
+
 	return true;
 }
 
@@ -3283,7 +3285,8 @@ void CObjBase::SetPropNum( COMPPROPS_TYPE iCompPropsType, CComponentProps::Prope
     if (!pCompProps)
     {
         g_Log.EventDebug("CEntityProps: SetPropNum on unsubscribed CCProps. iCompPropsType %d, iPropIndex %d.\n", iCompPropsType, iPropIndex);
-        CreateSubscribeComponentProps(iCompPropsType);
+        pCompProps = CreateSubscribeComponentProps(iCompPropsType);
+		ASSERT(pCompProps);
     }
     const RESDISPLAY_VERSION iLimitToEra = Base_GetDef()->_iEraLimitProps;
     pCompProps->SetPropertyNum(iPropIndex, iVal, this, iLimitToEra);
@@ -3463,7 +3466,7 @@ void CObjBase::DupeCopy( const CObjBase * pObj )
 	m_wHue = pObj->GetHue();
     if (pObj->IsTimerSet())
     {
-        SetTimeout(pObj->GetTimerAdjusted());
+        _SetTimeout(pObj->GetTimerAdjusted());
     }
 	m_TagDefs.Copy( &(pObj->m_TagDefs) );
 	m_BaseDefs.Copy(&(pObj->m_BaseDefs));

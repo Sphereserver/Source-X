@@ -320,6 +320,8 @@ CChar::CChar( CREID_TYPE baseID ) :
 // Delete character
 CChar::~CChar()
 {
+	EXC_TRY("Cleanup in destructor");
+
 	DeleteCleanup(true);
 	ClearContainer();
 
@@ -344,6 +346,8 @@ CChar::~CChar()
     ClearPlayer();
 
     g_Serv.StatDec( SERV_STAT_CHARS );
+
+	EXC_CATCH;
 }
 
 void CChar::DeleteCleanup(bool fForce)
@@ -1028,8 +1032,8 @@ int CChar::FixWeirdness()
 		}
 	}
 
-	if ( GetTimerSAdjusted() > 60*60 )
-		SetTimeout(1);	// unreasonably long for a char?
+	if ( _GetTimerSAdjusted() > 60*60 )
+		_SetTimeout(1);	// unreasonably long for a char?
 
 	return IsWeird();
 }
@@ -1081,7 +1085,7 @@ void CChar::CreateNewCharCheck()
 				ChangeExperience();
 		}
 
-		SetTimeout(1);
+		_SetTimeout(1);
 	}
 }
 
@@ -2334,7 +2338,7 @@ do_default:
 						SKIP_SEPARATORS(ptcKey);
 						if ( attackerIndex < (int)m_lastAttackers.size() )
 						{
-							const LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
+							const LastAttackers & refAttacker = m_lastAttackers[(size_t)attackerIndex];
 
 							if( !strnicmp(ptcKey, "DAM", 3) )
 							{

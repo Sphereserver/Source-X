@@ -193,7 +193,7 @@ public:
 
 	// World stuff
 
-	void OnTick();
+	void _OnTick();
 
 	void GarbageCollection();
 	void Restock();

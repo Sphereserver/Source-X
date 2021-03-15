@@ -1003,6 +1003,10 @@ bool PacketBookPageEdit::onReceive(CNetState* net)
 		// read next page to change with line count
 		page = readInt16();
 		lineCount = readInt16();
+
+		if (lineCount > 100)	// hard and arbitrary limit, to limit the effectmalicious packets
+			break;
+
 		if (page < 1 || page > MAX_BOOK_PAGES || lineCount == 0u)
 			continue;
 
@@ -2233,12 +2237,11 @@ bool PacketGumpDialogRet::onReceive(CNetState* net)
 	{
 		word id = readInt16();
 		word length = readInt16();
+		length = minimum(length, THREAD_STRING_LENGTH);
 		readStringNUNICODE(text, THREAD_STRING_LENGTH, length, false);
 
 		tchar* fix;
-		if ((fix = strchr(text, '\n')) != nullptr)
-			*fix = '\0';
-		if ((fix = strchr(text, '\r')) != nullptr)
+		if ((fix = strpbrk(text, "\n\r")) != nullptr)
 			*fix = '\0';
 		if ((fix = strchr(text, '\t')) != nullptr)
 			*fix = ' ';

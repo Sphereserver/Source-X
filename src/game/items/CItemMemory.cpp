@@ -137,7 +137,7 @@ int CItemMemory::FixWeirdness()
 	if ( IsMemoryTypes(MEMORY_GUARD) && !m_uidLink.ObjFind() )
 	{
 		SetAttr(ATTR_DECAY);
-		SetTimeout(0);
+		_SetTimeout(0);
 	}
 
 	return 0;

@@ -221,7 +221,7 @@ void CChar::NPC_ActStart_SpeakTo( CChar * pSrc )
 	m_atTalk.m_dwHearUnknown = 0;
 
 	Skill_Start( ( pSrc->GetFame() > 7000 ) ? NPCACT_TALK_FOLLOW : NPCACT_TALK );
-	SetTimeoutS(3);
+	_SetTimeoutS(3);
 	UpdateDir(pSrc);
 }
 
@@ -472,7 +472,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 			// whilst pathfinding we should keep trying to find new ways to our destination
 			if ( fUsePathfinding == true )
 			{
-				SetTimeoutD( 5 ); // wait a moment before finding a new route
+				_SetTimeoutD( 5 ); // wait a moment before finding a new route
 				return 1;
 			}
 			return 2;
@@ -544,7 +544,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 				// whilst pathfinding we should keep trying to find new ways to our destination
 				if ( fUsePathfinding )
 				{
-					SetTimeoutD( 5 ); // wait a moment before finding a new route
+					_SetTimeoutD( 5 ); // wait a moment before finding a new route
 					return 1;
 				}
 				return 2;
@@ -632,7 +632,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 	else if (iTickNext > 5 * MSECS_PER_SEC)  // neither more than 5 seconds.
 		iTickNext = 5 * MSECS_PER_SEC;
 
-	SetTimeout(iTickNext);
+	_SetTimeout(iTickNext);
 	EXC_CATCH;
 	return 1;
 }
@@ -1838,7 +1838,7 @@ bool CChar::NPC_Act_Food()
 				pResBit->SetTimeoutS(60*10);
 				//DEBUG_ERR(("Starting skill food\n"));
 				Skill_Start( NPCACT_FOOD );
-				SetTimeoutS(5);
+				_SetTimeoutS(5);
 				return true;
 			}
 			else									//	search for grass nearby
@@ -1961,7 +1961,7 @@ void CChar::NPC_Act_Idle()
 
 	// just stand here for a bit.
 	Skill_Start(SKILL_NONE);
-	SetTimeoutS(1 + Calc_GetRandLLVal(2));
+	_SetTimeoutS(1 + Calc_GetRandLLVal(2));
 }
 
 bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
@@ -2276,13 +2276,13 @@ void CChar::NPC_OnTickAction()
 	}
 
 	EXC_SET_BLOCK("timer expired (NPC)");
-	if ( IsTimerExpired() && !fSkillFight) // If i'm fighting, i don't want to wait to start another swing
+	if ( _IsTimerExpired() && !fSkillFight) // If i'm fighting, i don't want to wait to start another swing
 	{
 		int64 timeout = (150-Stat_GetAdjusted(STAT_DEX))/2;
 		timeout = maximum(timeout, 0);
 		timeout = Calc_GetRandLLVal2(timeout/2, timeout);
 		// default next brain/move tick
-		SetTimeoutD(1 + timeout);   // In Tenths of Second.
+		_SetTimeoutD(1 + timeout);   // In Tenths of Second.
 	}
 
 	//	vendors restock periodically
