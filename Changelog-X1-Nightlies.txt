@@ -2525,7 +2525,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
    Remember: it's always better to set the TIMER *AFTER* the object has been placed in the world. It's the correct sequence and it prevents the source having to do useless additional checks on the object.
 - Fixed: Setting TIMER woke up the object even if it was in a sleeping sector and it was sleeping or should have been sleeping.
    This caused a lot of useless world-object loops and CPU usage on startup, since TIMER was set on some objects when reading the save files.
-- Added: CAN_NOSLEEP (010000000) flag for both items and chars intended to not go into sleeping state when a sector goes to sleep. Use this only if you know that it's absolutely necessary!
+- Added: CAN_O_NOSLEEP (010000000) flag for both items and chars intended to not go into sleeping state when a sector goes to sleep. Use this only if you know that it's absolutely necessary!
 - Added: GOAWAKE and GOSLEEP keywords to force an object into an active or sleeping state, regardless from its parent sector being asleep or not. Use this even more sparingly!
    Keep in mind that even if you wake up an object, if it has not the CAN_NOSLEEP flag, it can still go to sleep when the sector does so.
    This command can be useful when you set the TIMER of a sleeping object and you want it to trigger soon, so you use GOAWAKE *AND* CANMASK |= <def.CAN_NOSLEEP> after setting the TIMER,
