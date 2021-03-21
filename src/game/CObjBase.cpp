@@ -3101,7 +3101,7 @@ void CObjBase::_GoAwake()
 
 	if (_IsTimerSet())
 	{
-		CWorldTickingList::AddObjSingle(_GetTimeoutRaw(), this, false);
+		CWorldTickingList::AddObjSingle(_GetTimeoutRaw(), this, true, false);
 	}
 	// CWorldTickingList::AddObjStatusUpdate(this, false);	// Don't! It's done when needed in UpdatePropertyFlag()
 }

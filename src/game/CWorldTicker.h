@@ -56,7 +56,7 @@ private:
 public:
     void Tick();
 
-    void AddTimedObject(int64 iTimeout, CTimedObject* pTimedObject, bool fLockNeeded);
+    void AddTimedObject(int64 iTimeout, CTimedObject* pTimedObject, bool fForce, bool fLockNeeded);
     void DelTimedObject(CTimedObject* pTimedObject, bool fLockNeeded);
     void AddCharTicking(CChar* pChar, bool fNeedsLock);
     void DelCharTicking(CChar* pChar, bool fNeedsLock);

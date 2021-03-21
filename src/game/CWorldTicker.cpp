@@ -58,22 +58,13 @@ void CWorldTicker::_RemoveTimedObject(const int64 iOldTimeout, CTimedObject* pTi
         pTimedObject->_ClearTimeout();
 }
 
-void CWorldTicker::AddTimedObject(const int64 iTimeout, CTimedObject* pTimedObject, bool fNeedsLock)
+void CWorldTicker::AddTimedObject(const int64 iTimeout, CTimedObject* pTimedObject, bool fForce, bool fNeedsLock)
 {
     //if (iTimeout < CWorldGameTime::GetCurrentTime().GetTimeRaw())    // We do that to get them tick as sooner as possible
     //    return;
 
     EXC_TRY("AddTimedObject");
     const ProfileTask timersTask(PROFILE_TIMERS);
-
-    /*
-    if (!fIgnoreSleep)
-    {
-        const CSector* pSector = pChar->GetTopSector();
-        if (pSector && pSector->IsSleeping())
-            return; // Do not allow ticks on sleeping sectors;
-    }
-    */
 
     EXC_SET_BLOCK("Already ticking?");
     const int64 iTickOld = fNeedsLock ? pTimedObject->GetTimeoutRaw() : pTimedObject->_GetTimeoutRaw();
@@ -85,17 +76,26 @@ void CWorldTicker::AddTimedObject(const int64 iTimeout, CTimedObject* pTimedObje
     }
 
     EXC_SET_BLOCK("Insert");
-    bool fCanTick = fNeedsLock ? pTimedObject->CanTick() : pTimedObject->_CanTick();
-    if (!fCanTick)
+    bool fCanTick;
+    if (fForce)
     {
-        if (auto pObjBase = dynamic_cast<const CObjBase*>(pTimedObject))
+        fCanTick = true;
+    }
+    else
+    {
+        fCanTick = fNeedsLock ? pTimedObject->CanTick() : pTimedObject->_CanTick();
+        if (!fCanTick)
         {
-            // Not yet placed in the world? We could have set the TIMER before setting its P or CONT, we can't know at this point...
-            // In this case, add it to the list and check if it can tick in the tick loop. We have maybe useless object in the ticking list and this hampers
-            //  performance, but it would be a pain to fix every script by setting the TIMER only after the item is placed in the world...
-            fCanTick = pObjBase->GetTopLevelObj()->GetTopPoint().IsValidPoint();
+            if (auto pObjBase = dynamic_cast<const CObjBase*>(pTimedObject))
+            {
+                // Not yet placed in the world? We could have set the TIMER before setting its P or CONT, we can't know at this point...
+                // In this case, add it to the list and check if it can tick in the tick loop. We have maybe useless object in the ticking list and this hampers
+                //  performance, but it would be a pain to fix every script by setting the TIMER only after the item is placed in the world...
+                fCanTick = !pObjBase->GetTopLevelObj()->GetTopPoint().IsValidPoint();
+            }
         }
     }
+    
     if (fCanTick)
     {
         _InsertTimedObject(iTimeout, pTimedObject, fNeedsLock);
@@ -171,6 +171,10 @@ void CWorldTicker::AddCharTicking(CChar* pChar, bool fNeedsLock)
         iTickNext = pChar->_iTimeNextRegen;
         iTickOld = pChar->_iTimePeriodicTick;
     }
+
+    if (iTickNext == iTickOld)
+        return;
+
     //if (iTickNext < CWorldGameTime::GetCurrentTime().GetTimeRaw())    // We do that to get them tick as sooner as possible
     //    return;
 
