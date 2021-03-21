@@ -2519,7 +2519,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: SOUND* overrides not working when their value was -1.
 
 21-03-2021, Nolok
-- Fixed: Timers not firing on top top-level equipped items, or objects not yet placed in the world (Issue #535, #648).
+- Fixed: Timers not firing on top top-level equipped items, or objects not yet placed in the world (Issue #535, #648, #649).
    The latter case should not happen, but it's of wide (even if not correct) use in scripts to set the TIMER before the object has been placed in the world
    (setting its P or CONT or equipping it, etc), so there's now a workaround in the source code for that case.
    Remember: it's always better to set the TIMER *AFTER* the object has been placed in the world. It's the correct sequence and it prevents the source having to do useless additional checks on the object.

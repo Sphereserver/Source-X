@@ -151,6 +151,25 @@ void CContainer::ContentAddPrivate( CItem *pItem )
 
 	CSObjCont::InsertContentTail( pItem );
 	OnWeightChange(pItem->GetWeight());
+
+	if (auto pObj = dynamic_cast<CObjBase*>(this))
+	{
+		if (pObj->IsSleeping())
+		{
+			if (!pItem->IsSleeping())
+			{
+				pItem->GoSleep();
+			}
+		}
+		else
+		{
+			if (pItem->IsSleeping())
+			{
+				pItem->GoAwake();
+			}
+		}
+	}
+
 }
 
 void CContainer::OnRemoveObj( CSObjContRec *pObRec )	// Override this = called when removed from list.

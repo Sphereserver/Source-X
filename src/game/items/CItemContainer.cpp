@@ -622,21 +622,6 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 	pItem->SetContainedPoint(pt);
 	pItem->SetContainedGridIndex(gridIndex);
 
-	if (IsSleeping())
-	{
-		if (!pItem->IsSleeping())
-		{
-			pItem->GoSleep();
-		}
-	}
-	else
-	{
-		if (pItem->IsSleeping())
-		{
-			pItem->GoAwake();
-		}
-	}		
-
 	switch ( GetType() )
 	{
 		case IT_KEYRING: // empty key ring.
