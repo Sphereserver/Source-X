@@ -2646,7 +2646,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopForCont(CScript& s, CTextConsole* pSrc, CS
 		tchar* ppArgs[2];
 		int iArgQty = Str_ParseCmds(const_cast<tchar*>(s.GetArgRaw()), ppArgs, CountOf(ppArgs), " \t,");
 
-		if (iArgQty >= 1)
+		if (iArgQty > 1)
 		{
 			TemporaryString tsOrigValue;
 			tchar* ptcOrigValue = tsOrigValue.buffer();
@@ -2680,7 +2680,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopForCont(CScript& s, CTextConsole* pSrc, CS
 		}
 		else
 		{
-			g_Log.EventError("FORCONT called without arguments.\n");
+			g_Log.EventError("FORCONT called with insufficient arguments.\n");
 			iRet = OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult);
 		}
 	}

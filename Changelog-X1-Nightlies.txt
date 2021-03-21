@@ -2531,3 +2531,4 @@ Must have event, even if it's empty, since it's applied by the source to generat
    This command can be useful when you set the TIMER of a sleeping object and you want it to trigger soon, so you use GOAWAKE *AND* CANMASK |= <def.CAN_NOSLEEP> after setting the TIMER,
    remembering to remove the flag (CANMASK &= ~<def.CAN_NOSLEEP>) if you don't need it anymore.
 - Fixed: Items created under @CreateLoot trigger played the drop sound before being put in the corpse.
+- Fixed: FORCONT not giving a warning if it was called with only 1 argument.
