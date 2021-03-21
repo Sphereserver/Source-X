@@ -123,7 +123,7 @@ size_t Str_LengthUTF8(const char* pStr);
 * @param pDst dest memory space.
 * @param pSrc source data.
 * @param uiMaxSize max bytes that pDst can hold.
-* @return strlen(src) + MIN(uiMaxSize, strlen(initial dst)).
+* @return Number of characters in the concatenated string, excluding the '\0' terminator.
 */
 size_t Str_ConcatLimitNull(tchar *pDst, const tchar *pSrc, size_t uiMaxSize);
 

@@ -2518,7 +2518,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: ISBIT, SETBIT, CLRBIT non throwing an error if the bit argument was > 63 (maximum supported value).
 - Fixed: SOUND* overrides not working when their value was -1.
 
-16-03-2021,
+21-03-2021, Nolok
 - Fixed: Timers not firing on top top-level equipped items, or objects not yet placed in the world (Issue #535, #648).
    The latter case should not happen, but it's of wide (even if not correct) use in scripts to set the TIMER before the object has been placed in the world
    (setting its P or CONT or equipping it, etc), so there's now a workaround in the source code for that case.
@@ -2530,3 +2530,4 @@ Must have event, even if it's empty, since it's applied by the source to generat
    Keep in mind that even if you wake up an object, if it has not the CAN_NOSLEEP flag, it can still go to sleep when the sector does so.
    This command can be useful when you set the TIMER of a sleeping object and you want it to trigger soon, so you use GOAWAKE *AND* CANMASK |= <def.CAN_NOSLEEP> after setting the TIMER,
    remembering to remove the flag (CANMASK &= ~<def.CAN_NOSLEEP>) if you don't need it anymore.
+- Fixed: Items created under @CreateLoot trigger played the drop sound before being put in the corpse.

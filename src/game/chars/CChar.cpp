@@ -352,7 +352,9 @@ void CChar::DeleteCleanup(bool fForce)
 {
 	ADDTOCALLSTACK("CChar::DeleteCleanup");
 	_fDeleting = true;
-	_GoSleep();
+
+	// Just to be extra sure we won't have invalid pointers over there
+	CWorldTickingList::DelCharPeriodic(this, false);
 
 	if (IsStatFlag(STATF_RIDDEN))
 	{
@@ -404,7 +406,7 @@ bool CChar::NotifyDelete()
 void CChar::DeletePrepare()
 {
 	ADDTOCALLSTACK("CChar::DeletePrepare");
-	ContentDelete(false);		// This object and its contents need to be deleted on the same tick
+	CContainer::ContentDelete(false);	// This object and its contents need to be deleted on the same tick
 	CObjBase::DeletePrepare();
 }
 
@@ -424,9 +426,6 @@ bool CChar::Delete(bool fForce)
 	}
 	
 	DeleteCleanup(fForce);	// not virtual
-
-	// Detach from account now
-	ClearPlayer();
 
 	return CObjBase::Delete();
 }

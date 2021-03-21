@@ -126,6 +126,7 @@ void CWorldTicker::DelTimedObject(CTimedObject* pTimedObject, bool fNeedsLock)
 void CWorldTicker::_InsertCharTicking(const int64 iTickNext, CChar* pChar)
 {
     std::unique_lock<std::shared_mutex> lock(_mCharTickList.THREAD_CMUTEX);
+
     TimedCharsContainer& cont = _mCharTickList[iTickNext];
     cont.emplace_back(pChar);
 
@@ -179,6 +180,18 @@ void CWorldTicker::AddCharTicking(CChar* pChar, bool fNeedsLock)
         EXC_SET_BLOCK("Remove");
         _RemoveCharTicking(iTickOld, pChar);
     }
+
+/*
+#ifdef _DEBUG
+    for (auto& elemList : _mCharTickList)
+    {
+        for (auto& elemChar : elemList.second)
+        {
+            ASSERT(elemChar != pChar);
+        }
+    }
+#endif
+*/
 
     EXC_SET_BLOCK("Insert");
     _InsertCharTicking(iTickNext, pChar);
@@ -497,11 +510,13 @@ void CWorldTicker::Tick()
                     if (pChar->_iTimePeriodicTick <= iTime)
                     {
                         vecObjs.emplace_back(static_cast<void*>(pChar));
-                    }
-                    pChar->_iTimePeriodicTick = 0;
 
-                    it = cont.erase(it);
-                    itContEnd = cont.end();
+                        pChar->_iTimePeriodicTick = 0;
+
+                        it = cont.erase(it);
+                        itContEnd = cont.end();
+                    }
+                    
                 }
                 else
                 {
@@ -534,7 +549,7 @@ void CWorldTicker::Tick()
             }
             else
             {
-                pChar->Delete();
+                pChar->Delete(true);
             }
         }
         EXC_CATCHSUB("");

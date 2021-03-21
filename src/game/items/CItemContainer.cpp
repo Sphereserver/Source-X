@@ -63,17 +63,16 @@ void CItemContainer::DeletePrepare()
 	if ( IsType( IT_EQ_TRADE_WINDOW ))
 		Trade_Delete();
 	
-	CContainer::_GoSleep();
 	CContainer::ContentDelete(false);	// This object and its contents need to be deleted on the same tick
 	CItem::DeletePrepare();
 }
 
-void CItemContainer::SetSecuredOfMulti(CUID uidMulti)
+void CItemContainer::SetSecuredOfMulti(const CUID& uidMulti)
 {
     _uidMultiSecured = uidMulti;
 }
 
-void CItemContainer::SetCrateOfMulti(CUID uidMulti)
+void CItemContainer::SetCrateOfMulti(const CUID& uidMulti)
 {
     _uidMultiCrate = uidMulti;
 }

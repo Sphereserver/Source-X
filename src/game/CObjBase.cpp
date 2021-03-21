@@ -129,7 +129,8 @@ CObjBase::~CObjBase()
 		pBase->DelInstance();
 	}
 	--sm_iCount;
-	ASSERT( IsDisconnected());
+
+	// ASSERT( IsDisconnected()); // It won't be disconnected if removed by CSObjCont::ClearCont
 
 	// free up the UID slot.
 	SetUID( UID_UNUSED, false );
@@ -160,6 +161,15 @@ void CObjBase::DeleteCleanup(bool fForce)
 {
 	ADDTOCALLSTACK("CObjBase::DeleteCleanup");
 	_fDeleting = true;
+
+	// As a safety net. If we are calling those methods via the class destructor, we know that calling virtual methods won't work,
+	//  since the superclasses were already destructed. At least, do minimal cleanup here with CObjBase methods.
+	RemoveSelf();	// Should be virtual
+
+	// Just to be extra sure we won't have invalid pointers over there
+	CWorldTickingList::DelObjSingle(this, false);
+	CWorldTickingList::DelObjStatusUpdate(this, false);
+
 	CEntity::Delete(fForce);
 	CWorldTimedFunctions::ClearUID(GetUID());
 }
@@ -167,10 +177,12 @@ void CObjBase::DeleteCleanup(bool fForce)
 bool CObjBase::Delete(bool fForce)
 {
 	ADDTOCALLSTACK("CObjBase::Delete");
+
 	DeletePrepare();		// virtual!
 	DeleteCleanup(fForce);	// not virtual!
-	
+
 	g_World.m_ObjDelete.InsertContentTail(this);
+	
 	return true;
 }
 

@@ -436,9 +436,9 @@ size_t Str_LengthUTF8(const char* strInUTF8MB)
 /*
 * Appends src to string dst of size siz (unlike strncat, siz is the
 * full size of dst, not space left). At most siz-1 characters
-* will be copied. Always NUL terminates (unless siz <= strlen(dst)).
-* Returns strlen(src) + MIN(siz, strlen(initial dst)).
-* If retval >= siz, truncation occurred.
+* will be copied. Always NULL terminates (unless siz <= strlen(dst)).
+* Returns strlen(src) + MIN(siz, strlen(initial dst)). Count does not include '\0'
+* If retval >= siz, truncation occurs.
 */
 // Adapted from: OpenBSD: strlcpy.c,v 1.11 2006/05/05 15:27:38
 size_t Str_ConcatLimitNull(tchar *dst, const tchar *src, size_t siz)

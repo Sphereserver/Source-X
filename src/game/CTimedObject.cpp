@@ -9,7 +9,7 @@
 CTimedObject::CTimedObject(PROFILE_TYPE profile)
 {
     _profileType = profile;
-    _fIsSleeping = false;
+    _fIsSleeping = true;
     _iTimeout = 0;
 }
 

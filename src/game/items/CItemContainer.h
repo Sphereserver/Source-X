@@ -23,8 +23,8 @@ public:
 	virtual bool NotifyDelete() override;	// overrides CItem:: method
 	virtual void DeletePrepare() override;
 
-    void SetSecuredOfMulti(CUID uidMulti);
-    void SetCrateOfMulti(CUID uidMulti);
+    void SetSecuredOfMulti(const CUID& uidMulti);
+    void SetCrateOfMulti(const CUID& uidMulti);
 
 public:
 	CItemContainer( ITEMID_TYPE id, CItemBase * pItemDef );

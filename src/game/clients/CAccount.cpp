@@ -1466,7 +1466,7 @@ void CAccount::r_Write(CScript &s)
 	if ( GetPrivLevel() >= PLEVEL_QTY )
 		return;
 
-	s.WriteSection("%s", static_cast<lpctstr>(m_sName));
+	s.WriteSection("%s", m_sName.GetBuffer());
 
 	if ( GetPrivLevel() != PLEVEL_Player )
 	{

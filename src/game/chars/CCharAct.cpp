@@ -2004,7 +2004,11 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
         }
 	}
 
-	Sound(pItem->GetDropSound(pPack));
+	if (!IsStatFlag(STATF_DEAD | STATF_CONJURED))
+	{
+		// Ensure i am not summon, or inside CreateLoot trigger
+		Sound(pItem->GetDropSound(pPack));
+	}
 	if (fDisplayMsg)
 		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ITEMPLACE ), pItem->GetName(), pszWhere );
 	return true;
