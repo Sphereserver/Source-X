@@ -554,6 +554,9 @@ public:
 	virtual bool NotifyDelete(); // overridden CItemContainer:: method
 	virtual bool Delete(bool fForce = false) override;
 
+protected:
+	virtual void _GoAwake() override;
+	virtual void _GoSleep() override;
 
 	// On CItem, _OnTick is virtual also because we need to call the topmost superclass:
 	//	a CItem can be the base class for CItemShip, CItemMessage...
@@ -678,8 +681,8 @@ public:
 
 	virtual int GetWeight(word amount = 0) const;
 
-protected:	virtual void _SetTimeout(int64 iMsecs) override;
-public:		virtual void  SetTimeout(int64 iMsecs) override;
+protected:	virtual void _SetTimeout(int64 iMsecs) override final;
+public:		virtual void  SetTimeout(int64 iMsecs) override final;
 
 	virtual void OnMoveFrom();
 	virtual bool MoveTo(const CPointMap& pt, bool fForceFix = false); // Put item on the ground here.

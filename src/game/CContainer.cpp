@@ -20,6 +20,31 @@ CContainer::~CContainer()
 {
 }
 
+void CContainer::_GoAwake()
+{
+	ADDTOCALLSTACK("CContainer::_GoAwake");
+	for (CSObjContRec* pObjRec : GetIterationSafeContReverse())
+	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
+		//std::unique_lock<std::shared_mutex> lock(pItem->THREAD_CMUTEX);
+		if (pItem->IsSleeping())
+			pItem->GoAwake();
+	}
+}
+
+void CContainer::_GoSleep()
+{
+	ADDTOCALLSTACK("CContainer::_GoSleep");
+	for (CSObjContRec* pObjRec : GetIterationSafeContReverse())
+	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
+		//std::unique_lock<std::shared_mutex> lock(pItem->THREAD_CMUTEX);
+		if (!pItem->IsSleeping())
+			pItem->GoSleep();
+	}
+}
+
+
 void CContainer::ContentDelete(bool fForce)
 {
     ADDTOCALLSTACK("CContainer::ContentDelete");

@@ -50,7 +50,7 @@ bool CTimedObject::_CanTick() const
 bool CTimedObject::CanTick() const
 {
     //ADDTOCALLSTACK_INTENSIVE("CTimedObject::_CanTick");
-    return IsSleeping();
+    THREAD_SHARED_LOCK_RETURN(_CanTick());
 }
 
 bool CTimedObject::OnTick()
@@ -204,13 +204,13 @@ int64 CTimedObject::GetTimerSAdjusted() const noexcept
 void CTimedObject::GoSleep()
 {
     THREAD_UNIQUE_LOCK_SET;
-    CTimedObject::_GoSleep();
+    _GoSleep();
 }
 
 void CTimedObject::GoAwake()
 {
     THREAD_UNIQUE_LOCK_SET;
-    CTimedObject::_GoAwake();
+    _GoAwake(); // Call virtuals!
 }
 
 PROFILE_TYPE CTimedObject::GetProfileType() const noexcept

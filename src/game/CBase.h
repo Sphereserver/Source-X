@@ -143,13 +143,13 @@ public:
 #define CAN_I_DCIGNORELOS       0x4000      // when dclicked, ignore LOS checks.
 #define CAN_I_DCIGNOREDIST      0x8000      // when dclicked, ignore distance checks.
 #define CAN_I_BLOCKLOS          0x10000     // blocks LOS without blocking walkchecks.
-#define CAN_I_EXCEPTIONAL       0x20000     // can items be exceptional.
-#define CAN_I_MAKERSMARK        0x40000     // can items hold makers mark.
-#define CAN_I_RETAINCOLOR       0x80000     // can items retain material colors.
-#define CAN_I_ENCHANT           0x100000    // can items be enchanted (runic).
-#define CAN_I_IMBUE             0x200000    // can items be imbued (imbuing).
-#define CAN_I_RECYCLE           0x400000    // Can items be recycled.
-#define CAN_I_REFORGE           0x800000    // Can items be Runic Reforged.
+#define CAN_I_EXCEPTIONAL       0x20000     // can items be exceptional.    -> TODO: convert to property, to free limited attr values
+#define CAN_I_MAKERSMARK        0x40000     // can items hold makers mark.  -> TODO: convert to property, to free limited attr values
+#define CAN_I_RETAINCOLOR       0x80000     // can items retain material colors.-> TODO: convert to property, to free limited attr values
+#define CAN_I_ENCHANT           0x100000    // can items be enchanted (runic).  -> TODO: convert to property, to free limited attr values
+#define CAN_I_IMBUE             0x200000    // can items be imbued (imbuing).   -> TODO: convert to property, to free limited attr values
+#define CAN_I_RECYCLE           0x400000    // Can items be recycled.           -> TODO: convert to property, to free limited attr values
+#define CAN_I_REFORGE           0x800000    // Can items be Runic Reforged.     -> TODO: convert to property, to free limited attr values
 #define CAN_I_FORCEDC           0x1000000   // Can force DClick skipping other checks (LOS,Distance, Cont...).
 #define CAN_I_DAMAGEABLE	    0x2000000	// Display item health bar on HS clients >= 7.0.30.0 (MORE1L = cur hitpoints / MORE1H = max hitpoints)
 #define CAN_I_BLOCKLOS_HEIGHT   0x4000000   // blocks LOS without blocking walkchecks, but only if the item is too high for the viewer.
@@ -176,6 +176,9 @@ public:
 #define CAN_C_NOBLOCKHEIGHT 0x20000 // Do not consider char's height when checking if it can move to a point
 #define CAN_C_STATUE        0x40000 // Statue: do not move, PacketStatueAnimation with tag.statue_animation and tag.statue_frame
 #define CAN_C_NONSELECTABLE 0x80000 // Can't be selected/targeted (useful for chars with mt_statue which need to act as an item)
+
+// Special flags common to items and chars (O = Object, generic)
+#define CAN_O_NOSLEEP       0x10000000
 
 // masks for movement-affecting flags
 #define CAN_C_MOVEMENTCAPABLEMASK (CAN_C_SWIM| CAN_C_WALK|CAN_C_FLY|CAN_C_RUN|CAN_C_HOVER)

@@ -16,12 +16,10 @@ CCItemDamageable::CCItemDamageable(CItem * pLink) : CComponent(COMP_ITEMDAMAGEAB
     _iMaxHits = 0;
     _iTimeLastUpdate = 0;
     _fNeedUpdate = true;
-    CWorldTickingList::AddObjStatusUpdate(pLink);
 }
 
 CCItemDamageable::~CCItemDamageable()
 {
-    CWorldTickingList::DelObjStatusUpdate(GetLink());
 }
 
 CItem * CCItemDamageable::GetLink() const

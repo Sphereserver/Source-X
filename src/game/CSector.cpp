@@ -949,19 +949,19 @@ void CSector::MoveItemToSector( CItem * pItem )
     {
         if (_CanSleep(true))
         {
-            pItem->_GoSleep();
+            pItem->GoSleep();
         }
         else
         {
             _GoAwake();
-            if (pItem->_IsSleeping())
-                pItem->_GoAwake();
+            if (pItem->IsSleeping())
+                pItem->GoAwake();
         }
     }
     else
     {
-        if (pItem->_IsSleeping())
-            pItem->_GoAwake();
+        if (pItem->IsSleeping())
+            pItem->GoAwake();
     }
 
 	m_Items.AddItemToSector(pItem);

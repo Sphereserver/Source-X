@@ -18,6 +18,7 @@
 #include "../CSector.h"
 #include "../CServer.h"
 #include "../CWorld.h"
+#include "../CWorldTickingList.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "../triggers.h"
@@ -1415,7 +1416,7 @@ void CItem::SetDecayTime(int64 iMsecsTimeout)
 	// 0 = default (decay on the next tick)
 	// -1 = set none. (clear it)
 
-	if (IsTimerSet() && ! IsAttr(ATTR_DECAY))
+	if (_IsTimerSet() && ! IsAttr(ATTR_DECAY))
 	{
 		return;	// already a timer here. let it expire on it's own
 	}
@@ -1472,8 +1473,8 @@ SOUND_TYPE CItem::GetDropSound( const CObjBase * pObjOn ) const
 	CVarDefCont * pVar = GetDefKey("DROPSOUND", true);
 	if ( pVar )
 	{
-		if ( pVar->GetValNum() )
-			iSnd = (SOUND_TYPE)(pVar->GetValNum());
+		if (int64 iVal = pVar->GetValNum())
+			iSnd = (SOUND_TYPE)iVal;
 	}
 
 	// normal drop sound for what dropped in/on.
@@ -5934,10 +5935,33 @@ bool CItem::IsResourceMatch( const CResourceID& rid, dword dwArg ) const
 
 CCFaction * CItem::GetSlayer() const
 {
-    ADDTOCALLSTACK("CItem::GetSlayer");
     return static_cast<CCFaction*>(GetComponent(COMP_FACTION));
 }
 
+
+void CItem::_GoAwake()
+{
+	ADDTOCALLSTACK("CItem::_GoAwake");
+	CObjBase::_GoAwake();
+	
+	// Items equipped or inside containers don't receive ticks and need to be added to a list of items to be processed separately
+	if (!IsTopLevel())
+	{
+		CWorldTickingList::AddObjStatusUpdate(this, false);
+	}
+}
+
+void CItem::_GoSleep()
+{
+	ADDTOCALLSTACK("CItem::_GoSleep");
+	CObjBase::_GoSleep();
+
+	// Items equipped or inside containers don't receive ticks and need to be added to a list of items to be processed separately
+	if (IsTopLevel())
+	{
+		CWorldTickingList::DelObjStatusUpdate(this, false);
+	}
+}
 
 bool CItem::_OnTick()
 {
@@ -5949,9 +5973,11 @@ bool CItem::_OnTick()
 
     EXC_SET_BLOCK("sleep check");
 
-    if (GetTopSector()->IsSleeping())
+	const CSector* pSector = GetTopSector();	// It prints an error if it belongs to an invalid sector.
+    if (pSector && pSector->IsSleeping())
     {
-        _SetTimeout(1);      //Make it tick after sector's awakening.
+		//Make it tick after sector's awakening.
+		_SetTimeout(1);
         _GoSleep();
         return true;
     }
@@ -6019,8 +6045,10 @@ bool CItem::_OnTick()
 					return true;
 
 				--m_itLight.m_charges;
-				if ( m_itLight.m_charges > 0 )
+				if (m_itLight.m_charges > 0)
+				{
 					_SetTimeoutS(60);
+				}
 				else
 				{
 					// Burn out the light
@@ -6099,9 +6127,9 @@ bool CItem::_OnTick()
 					else
 					{
 						--m_itPotion.m_tick;
-						tchar *pszMsg = Str_GetTemp();
 						CObjBase* pObj = static_cast<CObjBase*>(GetTopLevelObj());
 						ASSERT(pObj);
+						tchar* pszMsg = Str_GetTemp();
 						pObj->Speak(Str_FromI_Fast(m_itPotion.m_tick, pszMsg, STR_TEMPLENGTH, 10), HUE_RED);
 						_SetTimeoutS(1);
 					}

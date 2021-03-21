@@ -312,8 +312,6 @@ CChar::CChar( CREID_TYPE baseID ) :
     // SubscribeComponent regular Components
     SubscribeComponent(new CCFaction());
 
-    CTimedObject::GoSleep();  // Make it be sleeping at first, to awake it when placing it in the world (errors will show up otherwise).
-
 	ASSERT(IsDisconnected());
 }
 
@@ -322,8 +320,8 @@ CChar::~CChar()
 {
 	EXC_TRY("Cleanup in destructor");
 
-	DeleteCleanup(true);
-	ClearContainer();
+	CChar::DeleteCleanup(true);
+	CContainer::ClearContainer();
 
     if (IsClientActive())    // this should never happen.
     {
@@ -354,8 +352,7 @@ void CChar::DeleteCleanup(bool fForce)
 {
 	ADDTOCALLSTACK("CChar::DeleteCleanup");
 	_fDeleting = true;
-
-	CWorldTickingList::DelCharPeriodic(this);
+	_GoSleep();
 
 	if (IsStatFlag(STATF_RIDDEN))
 	{
@@ -407,7 +404,7 @@ bool CChar::NotifyDelete()
 void CChar::DeletePrepare()
 {
 	ADDTOCALLSTACK("CChar::DeletePrepare");
-	ContentDelete(false);	// This object and its contents need to be deleted on the same tick
+	ContentDelete(false);		// This object and its contents need to be deleted on the same tick
 	CObjBase::DeletePrepare();
 }
 
@@ -426,7 +423,7 @@ bool CChar::Delete(bool fForce)
 		pClient->GetNetState()->markReadClosed();
 	}
 	
-	DeleteCleanup(fForce);
+	DeleteCleanup(fForce);	// not virtual
 
 	// Detach from account now
 	ClearPlayer();
@@ -508,13 +505,11 @@ void CChar::SetDisconnected(CSector* pNewSector)
         m_pParty = nullptr;
     }
 
-    CWorldTickingList::DelCharPeriodic(this);
-
     if ( IsDisconnected() )
         return;
 
 	// If the char goes offline, we don't want its items to tick anymore when the timer expires.
-	TickingListRecursiveDel();
+	_GoSleep();
 
     RemoveFromView();	// Remove from views.
     MoveToRegion(nullptr, false);
@@ -619,54 +614,6 @@ bool CChar::SetNPCBrain( NPCBRAIN_TYPE NPCBrain )
     return true;
 }
 
-void CChar::_GoSleep()
-{
-    ADDTOCALLSTACK("CChar::_GoSleep");
-    ASSERT(!_IsSleeping());
-
-	CWorldTickingList::DelCharPeriodic(this);   // do not insert into the mutex lock, it access back to this char.
-
-    CTimedObject::_GoSleep();
-
-	for (CSObjContRec* pObjRec : *this)
-	{
-		CItem* pItem = static_cast<CItem*>(pObjRec);
-        if (!pItem->IsSleeping())
-            pItem->GoSleep();
-    }
-}
-
-void CChar::GoSleep()
-{
-	ADDTOCALLSTACK("CChar::GoSleep");
-	THREAD_UNIQUE_LOCK_SET;
-	CChar::_GoSleep();
-}
-
-void CChar::_GoAwake()
-{
-    ADDTOCALLSTACK("CChar::_GoAwake");
-    ASSERT(_IsSleeping());
-
-	CWorldTickingList::AddCharPeriodic(this, true);
-
-    CTimedObject::_GoAwake();       // Awake it first, otherwise some other things won't work
-    _SetTimeout(Calc_GetRandVal(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
-
-	for (CSObjContRec* pObjRec : *this)
-	{
-		CItem* pItem = static_cast<CItem*>(pObjRec);
-        if (pItem->IsSleeping())
-            pItem->GoAwake();
-    }
-}
-
-void CChar::GoAwake()
-{
-	ADDTOCALLSTACK("CChar::GoAwake");
-	THREAD_UNIQUE_LOCK_SET;
-	CChar::_GoAwake();
-}
 
 // Is there something wrong with this char?
 // RETURN: invalid code.
@@ -1257,9 +1204,9 @@ bool CChar::DupeFrom(const CChar * pChar, bool fNewbieItems )
 
 	FixWeight();
 
-	if (pChar->_iTimePeriodicTick != 0)
+	if (!pChar->IsSleeping())
 	{
-		CWorldTickingList::AddCharPeriodic(this);
+		_GoAwake();
 	}
 
 	Update();

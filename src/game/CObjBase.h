@@ -20,7 +20,9 @@
 class PacketSend;
 class PacketPropertyList;
 class CCSpawn;
+
 class CSector;
+class CWorldTicker;
 
 class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, public CEntityProps, public virtual CTimedObject
 {
@@ -29,6 +31,7 @@ class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, pub
 	static lpctstr const sm_szRefKeys[];    // All Instances of CItem or CChar have these base attributes.
 
     friend class CSector;
+    friend class CWorldTicker;
 
 private:
 	int64 m_timestamp;          // TimeStamp
@@ -77,7 +80,7 @@ protected:
      */
     virtual void DeletePrepare();
 
-    void DeleteCleanup(bool fForce);
+    void DeleteCleanup(bool fForce);    // not virtual!
 
 public:
     inline bool IsBeingDeleted() const noexcept
@@ -178,16 +181,6 @@ public:
      * @param   t_time  The time.
      */
 	void SetTimeStamp(int64 t_time);
-
-    /*
-    * @brief    Add (if not present) this object and its children objects to the world ticking list.
-    */
-    void TickingListRecursiveAdd();
-
-    /*
-    * @brief    Remove (if present) this object and its children objects to the world ticking list.
-    */
-    void TickingListRecursiveDel();
 
     /*
     * @brief    Add iDelta to this object's timer (if active) and its child objects.
@@ -893,10 +886,16 @@ public:
 #define SU_UPDATE_TOOLTIP   0x04    // update tooltip to all
 	uchar m_fStatusUpdate;  // update flags for next tick
 
+ 
+protected:
+    virtual void _GoAwake() override;
+    virtual void _GoSleep() override;
+
+protected:
     /**
      * @brief   Update Status window if any flag requires it on m_fStatusUpdate.
      */
-	virtual void OnTickStatusUpdate();
+    virtual void OnTickStatusUpdate();
 
     virtual bool _CanTick() const override;
     //virtual bool  _CanTick() const override;   // Not needed: the right virtual is called by CTimedObj::_CanTick.

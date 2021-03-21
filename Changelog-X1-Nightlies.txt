@@ -2517,3 +2517,16 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: ANIM being able to hold a bitmask of only 32 bits (insufficient to hold a bit for every animation). Extended that limit to 64.
 - Fixed: ISBIT, SETBIT, CLRBIT non throwing an error if the bit argument was > 63 (maximum supported value).
 - Fixed: SOUND* overrides not working when their value was -1.
+
+16-03-2021,
+- Fixed: Timers not firing on top top-level equipped items, or objects not yet placed in the world (Issue #535, #648).
+   The latter case should not happen, but it's of wide (even if not correct) use in scripts to set the TIMER before the object has been placed in the world
+   (setting its P or CONT or equipping it, etc), so there's now a workaround in the source code for that case.
+   Remember: it's always better to set the TIMER *AFTER* the object has been placed in the world. It's the correct sequence and it prevents the source having to do useless additional checks on the object.
+- Fixed: Setting TIMER woke up the object even if it was in a sleeping sector and it was sleeping or should have been sleeping.
+   This caused a lot of useless world-object loops and CPU usage on startup, since TIMER was set on some objects when reading the save files.
+- Added: CAN_NOSLEEP (010000000) flag for both items and chars intended to not go into sleeping state when a sector goes to sleep. Use this only if you know that it's absolutely necessary!
+- Added: GOAWAKE and GOSLEEP keywords to force an object into an active or sleeping state, regardless from its parent sector being asleep or not. Use this even more sparingly!
+   Keep in mind that even if you wake up an object, if it has not the CAN_NOSLEEP flag, it can still go to sleep when the sector does so.
+   This command can be useful when you set the TIMER of a sleeping object and you want it to trigger soon, so you use GOAWAKE *AND* CANMASK |= <def.CAN_NOSLEEP> after setting the TIMER,
+   remembering to remove the flag (CANMASK &= ~<def.CAN_NOSLEEP>) if you don't need it anymore.

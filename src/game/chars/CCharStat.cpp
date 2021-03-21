@@ -165,7 +165,7 @@ void CChar::Stat_SetVal( STAT_TYPE i, ushort uiVal )
 
     if ((i == STAT_STR) && (uiVal == 0))
     {   // Ensure this char will tick and die
-        CWorldTickingList::AddCharPeriodic(this, true);
+        CWorldTickingList::AddCharPeriodic(this, false);
     }
 }
 
@@ -187,7 +187,7 @@ void CChar::Stat_AddVal( STAT_TYPE i, int iVal )
 
     if ((i == STAT_STR) && (iVal <= 0))
     {   // Ensure this char will tick and die
-		CWorldTickingList::AddCharPeriodic(this, true);
+		CWorldTickingList::AddCharPeriodic(this, false);
     }
 }
 
@@ -254,7 +254,7 @@ ushort CChar::Stat_GetMax( STAT_TYPE i ) const
 	{
 		if ( i == STAT_FOOD )
 		{
-			CCharBase * pCharDef = Char_GetDef();
+			const CCharBase * pCharDef = Char_GetDef();
 			ASSERT(pCharDef);
             uiVal = pCharDef->m_MaxFood;
 		}
@@ -433,18 +433,14 @@ uint CChar::Stat_GetSumLimit() const
 {
     ADDTOCALLSTACK("CChar::Stat_GetSumLimit");
     // The return value is uint, but the value supported by the packets is a word (which is smaller)
+	const CVarDefCont* pTagStorage = GetKey("OVERRIDE.STATSUM", true);
     if ( m_pPlayer )
     {
         const CSkillClassDef * pSkillClass = m_pPlayer->GetSkillClass();
         ASSERT(pSkillClass);
-        const CVarDefCont * pTagStorage = GetKey("OVERRIDE.STATSUM", true);
         return pTagStorage ? ((uint)(pTagStorage->GetValNum())) : (uint)(pSkillClass->m_StatSumMax);
     }
-    else
-    {
-        const CVarDefCont * pTagStorage = GetKey("OVERRIDE.STATSUM", true);
-        return pTagStorage ? (uint)(pTagStorage->GetValNum()) : 300;
-    }
+    return pTagStorage ? (uint)(pTagStorage->GetValNum()) : 300;
 }
 
 bool CChar::Stats_Regen()
@@ -468,17 +464,18 @@ bool CChar::Stats_Regen()
         }
         m_Stat[i].m_regenLast = iCurTime; // in msecs
 
+		const ushort uiStatVal = Stat_GetVal(i);
 		int iMod = (int)Stats_GetRegenVal(i);
         ushort uiStatLimit = Stat_GetMaxAdjusted(i);
 		int iFocusGain = 0;
-        if (Stat_GetVal(i) <= uiStatLimit)
+        if (uiStatVal <= uiStatLimit)
         {
             if ((i == STAT_STR) && (g_Cfg.m_iRacialFlags & RACIALF_HUMAN_TOUGH) && IsHuman())
                 iMod += 2;		// Humans always have +2 hitpoint regeneration (Tough racial trait)
 
             if (g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B 
 				&& (i == STAT_DEX || i == STAT_INT) 
-				&& Stat_GetVal(i) < uiStatLimit)
+				&& uiStatVal < uiStatLimit)
             {
                 iFocusGain = Skill_Focus(i);
 				if (iFocusGain < 0)

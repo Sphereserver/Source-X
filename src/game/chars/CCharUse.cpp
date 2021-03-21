@@ -1084,7 +1084,6 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool fCheckFollowerSlots )
 	pPet->Update();
 	pPet->Skill_Start(SKILL_NONE);	// was NPCACT_RIDDEN
 	pPet->SoundChar(CRESND_IDLE);
-	CWorldTickingList::AddCharPeriodic(pPet);
 	return pPet;
 }
 

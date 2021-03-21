@@ -21,8 +21,9 @@ CItemContainer::CItemContainer( ITEMID_TYPE id, CItemBase *pItemDef ) :
 
 CItemContainer::~CItemContainer()
 {
-    ClearContainer();		// get rid of my contents first to protect against weight calc errors.
-    DeletePrepare();
+	CItemContainer::DeletePrepare();
+	CContainer::ClearContainer();		// get rid of my contents first to protect against weight calc errors.
+
     CItemMulti *pMulti = nullptr;
     if (_uidMultiSecured.IsValidUID())
     {
@@ -62,7 +63,8 @@ void CItemContainer::DeletePrepare()
 	if ( IsType( IT_EQ_TRADE_WINDOW ))
 		Trade_Delete();
 	
-	ContentDelete(false);	// This object and its contents need to be deleted on the same tick
+	CContainer::_GoSleep();
+	CContainer::ContentDelete(false);	// This object and its contents need to be deleted on the same tick
 	CItem::DeletePrepare();
 }
 
@@ -621,6 +623,21 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 	pItem->SetContainedPoint(pt);
 	pItem->SetContainedGridIndex(gridIndex);
 
+	if (IsSleeping())
+	{
+		if (!pItem->IsSleeping())
+		{
+			pItem->GoSleep();
+		}
+	}
+	else
+	{
+		if (pItem->IsSleeping())
+		{
+			pItem->GoAwake();
+		}
+	}		
+
 	switch ( GetType() )
 	{
 		case IT_KEYRING: // empty key ring.
@@ -752,6 +769,22 @@ void CItemContainer::OnRemoveObj( CSObjContRec *pObjRec )	// Override this = cal
 	if ( IsType(IT_KEYRING) )	// key ring.
 		SetKeyRing();
     pItem->GoAwake();
+}
+
+void CItemContainer::_GoAwake()
+{
+	ADDTOCALLSTACK("CItemContainer::_GoAwake");
+
+	CItem::_GoAwake();
+	CContainer::_GoAwake();	// This method isn't virtual
+}
+
+void CItemContainer::_GoSleep()
+{
+	ADDTOCALLSTACK("CItemContainer::_GoSleep");
+
+	CContainer::_GoSleep(); // This method isn't virtual
+	CItem::_GoSleep();
 }
 
 void CItemContainer::DupeCopy( const CItem *pItem )

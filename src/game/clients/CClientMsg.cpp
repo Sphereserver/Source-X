@@ -2734,10 +2734,6 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 		m_pChar->MoveToNearestShore();
 	}
 
-	// If the char goes offline, we don't want its items to tick anymore when the timer expires.
-	// In the case the offline char logs in again, add its items with a TIMER to the ticking list.
-	m_pChar->TickingListRecursiveAdd();
-
 	/*
 	* // If ever we want to change how timers are suspended...
 	* 
@@ -2764,7 +2760,6 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 
 	DEBUG_MSG(( "%x:Setup_Start done\n", GetSocketID()));
 
-    CWorldTickingList::AddCharPeriodic(m_pChar);
 	return PacketLoginError::Success;
 }
 

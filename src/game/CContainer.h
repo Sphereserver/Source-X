@@ -13,6 +13,7 @@
 
 
 class CItemContainer;
+class CObjBase;
 
 class CContainer : public CSObjCont	// This class contains a list of items but may or may not be an item itself.
 {
@@ -28,6 +29,11 @@ private:
 public:
     int	m_totalweight;      // weight of all the items it has. (1/WEIGHT_UNITS pound)
 
+protected:
+    friend class CObjBase;
+    // Not virtuals!
+    void _GoAwake();
+    void _GoSleep();
 
 public:
     void ContentDelete(bool fForce);

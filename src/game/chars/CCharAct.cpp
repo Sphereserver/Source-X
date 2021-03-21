@@ -17,6 +17,7 @@
 #include "../CWorld.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
+#include "../CWorldTickingList.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CChar.h"
@@ -4297,7 +4298,7 @@ void CChar::OnTickStatusUpdate()
 		GetClientActive()->UpdateStats();
 
 	const int64 iTimeCur = CWorldGameTime::GetCurrentTime().GetTimeRaw();
-	int64 iTimeDiff = iTimeCur - _iTimeLastHitsUpdate;
+	const int64 iTimeDiff = iTimeCur - _iTimeLastHitsUpdate;
 	if ( g_Cfg.m_iHitsUpdateRate && ( iTimeDiff >= g_Cfg.m_iHitsUpdateRate ) )
 	{
 		if ( m_fStatusUpdate & SU_UPDATE_HITS )
@@ -4404,6 +4405,30 @@ bool CChar::_CanTick() const
 	return CObjBase::_CanTick();
 
 	EXC_CATCH;
+
+	return false;
+}
+
+void CChar::_GoAwake()
+{
+	ADDTOCALLSTACK("CChar::_GoAwake");
+
+	CObjBase::_GoAwake();
+	CContainer::_GoAwake();
+
+	CWorldTickingList::AddCharPeriodic(this, false);
+
+	_SetTimeout(Calc_GetRandVal(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
+}
+
+void CChar::_GoSleep()
+{
+	ADDTOCALLSTACK("CChar::_GoSleep");
+
+	CContainer::_GoSleep(); // This method isn't virtual
+	CObjBase::_GoSleep();
+
+	CWorldTickingList::DelCharPeriodic(this, false);
 }
 
 // Get a timer tick when our timer expires.

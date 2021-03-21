@@ -317,17 +317,11 @@ private:
 	CChar& operator=(const CChar& other);
 
 protected:
-	void DeleteCleanup(bool fForce);
+	void DeleteCleanup(bool fForce);	// Not virtual!
 	virtual void DeletePrepare() override;
 public:
 	bool NotifyDelete();
 	virtual bool Delete(bool fForce = false) override;
-
-protected:  virtual void _GoSleep() override;
-public:		virtual void  GoSleep() override;
-
-protected:  virtual void _GoAwake() override;
-public:		virtual void  GoAwake() override;
 
 	// Status and attributes ------------------------------------
 	int IsWeird() const;
@@ -1305,17 +1299,23 @@ public:
 	void OnHarmedBy( CChar * pCharSrc );
 	bool OnAttackedBy( CChar * pCharSrc, bool fPetsCommand = false, bool fShouldReveal = true );
 
-	virtual bool _CanTick() const override;
-	
+protected:
+	virtual void _GoAwake() override final;
+	virtual void _GoSleep() override final;
+
+	virtual bool _CanTick() const override final;
+
 protected:	virtual bool _OnTick() override final;  // _OnTick timeout for skills, AI, etc
 //public:	virtual bool  _OnTick() override final;
 
 public:
 	bool OnTickEquip( CItem * pItem );
 	void OnTickFood( ushort uiVal, int HitsHungerLoss );
-	void OnTickStatusUpdate();
-    void OnTickSkill(); // _OnTick timeout specific for the skill behavior
-    bool OnTickPeriodic();  // Periodic tick calls (update stats, status bar, notoriety & attackers, death check, etc)
+
+	virtual void OnTickStatusUpdate() override;
+	bool OnTickPeriodic();  // Periodic tick calls (update stats, status bar, notoriety & attackers, death check, etc)
+    
+	void OnTickSkill(); // _OnTick timeout specific for the skill behavior
 
 	static CChar * CreateBasic( CREID_TYPE baseID );
 	static CChar * CreateNPC( CREID_TYPE id );
