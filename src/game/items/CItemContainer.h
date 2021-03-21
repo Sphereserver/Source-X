@@ -50,10 +50,15 @@ public:
 	void OnWeightChange( int iChange );
 
 	// Contents/Carry stuff. ---------------------------------
+public:
 	virtual void ContentAdd( CItem * pItem, bool bForceNoStack = false ) override;
 	void ContentAdd( CItem * pItem, CPointMap pt, bool fForceNoStack = false, uchar gridIndex = 0 );
 protected:
 	virtual void OnRemoveObj( CSObjContRec* pObRec ) override;	// Override this = called when removed from list.
+
+protected:
+	virtual void _GoAwake() override final;
+	virtual void _GoSleep() override final;
 
 public:
 	bool IsItemInTrade() const;
