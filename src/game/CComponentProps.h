@@ -45,7 +45,9 @@ public:
     using BaseContStrPair_t = BaseContStr_t::value_type;
 
 
-    CComponentProps(COMPPROPS_TYPE type);
+    CComponentProps(COMPPROPS_TYPE type) noexcept {
+        _iType = type;
+    }
 
     virtual lpctstr GetName() const = 0;
     virtual PropertyIndex_t GetPropsQty() const = 0;
@@ -135,8 +137,11 @@ protected:
     static void BaseCont_Write_ContStr(const BaseContStr_t* container, const lpctstr *ptcPropsTable, CScript &s);
 
 public:
-    virtual ~CComponentProps() = default;
-    COMPPROPS_TYPE GetType() const;
+    virtual ~CComponentProps() noexcept = default;
+    
+    COMPPROPS_TYPE GetType() const noexcept {
+        return _iType;
+    }
 
     /**
     *@brief Check if a property can be stored inside this CComponentProps, if it can, store it.

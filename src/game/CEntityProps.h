@@ -8,6 +8,7 @@
 
 #include "../common/flat_containers/flat_map.hpp"
 #include "CComponentProps.h"
+#include <memory>
 
 class CCPropsChar;
 class CCPropsItem;
@@ -23,7 +24,7 @@ struct CBaseBaseDef;
 
 class CEntityProps
 {
-    fc::vector_map<COMPPROPS_TYPE, CComponentProps*> _lComponentProps;
+    fc::vector_map<COMPPROPS_TYPE, std::unique_ptr<CComponentProps>> _lComponentProps;
     using iterator          = decltype(_lComponentProps)::iterator;
     using const_iterator    = decltype(_lComponentProps)::const_iterator;
 
@@ -47,18 +48,23 @@ public:
 
     /**
     * @brief Subscribes a CComponentProps.
-    *
-    * @param pComponent the CComponentProps to suscribe.
     */
-    CComponentProps* SubscribeComponentProps(CComponentProps *pCCProp);
+    template<class _ComponentType, class... _ArgsType>
+    _ComponentType* TrySubscribeComponentProps(_ArgsType&&... args);
 
     /**
-    * @brief Unsubscribes a CComponentProps. Use this if looping through the components with an iterator!
-    *
-    * @param it Iterator to the component to unsubscribe.
-    * @param fEraseFromMap Should i erase this component from the internal map? Use false if you're going to erase it manually later
+    * @brief Subscribes a CComponentProps, if it can be subscribed.
     */
-    void UnsubscribeComponentProps(iterator& it, bool fEraseFromMap = true);
+    template<class _ComponentType, class _SubscriberType, class... _ArgsType>
+    _ComponentType* TrySubscribeAllowedComponentProps(const _SubscriberType* pSubscriber, _ArgsType&&... args);
+
+    /**
+    * @brief Unsubscribes a CComponentProps.
+    *   Never unsubscribe Props Components, because if the type is changed to an unsubscribable type and then again to the previous type, the component will be deleted and created again.
+    *   This means that all the properties (base and "dynamic") are lost.
+    */
+    template<class _ComponentType>
+    bool UnsubscribeComponentProps();
 
     /**
     * @brief Unsubscribes a CComponentProps.
@@ -68,19 +74,15 @@ public:
     void UnsubscribeComponentProps(CComponentProps *pCCProp);
 
     /**
-    * @brief Checks if a CComponentProps is actually susbcribed.
+    * @brief Gets a pointer to the given CComponent type.
     *
-    * @param pComponent the CComponentProps to check.
-    * @return true if the CComponentProps is suscribed.
+    * @return a pointer to the CComponentProps, if it is subscribed.
     */
-    bool IsSubscribedComponentProps(CComponentProps *pCCProp) const;
+    template<class _ComponentType>
+    const _ComponentType* GetComponentProps() const noexcept;
 
-    /**
-    * @brief Creates and subscribes a CComponentProps to this CEntityProps.
-    *
-    * @param iComponentPropsType The CComponentProps type to create suscribe.
-    */
-    CComponentProps* CreateSubscribeComponentProps(COMPPROPS_TYPE iComponentPropsType);
+    template<class _ComponentType>
+    _ComponentType* GetComponentProps() noexcept;
 
     /**
     * @brief Gets a pointer to the given CComponent type.
@@ -88,8 +90,8 @@ public:
     * @param type the type of the CComponentProps to retrieve.
     * @return a pointer to the CComponentProps, if it is suscribed.
     */
-    CComponentProps *GetComponentProps(COMPPROPS_TYPE type);
-    const CComponentProps *GetComponentProps(COMPPROPS_TYPE type) const;
+    CComponentProps* GetComponentProps(COMPPROPS_TYPE type);
+    const CComponentProps* GetComponentProps(COMPPROPS_TYPE type) const;
 
     /**
     * @brief Wrapper of base method.
@@ -138,26 +140,56 @@ public:
     * @brief Copies contents of the components from the target
     */
     void DumpComponentProps(CTextConsole *pSrc, lpctstr ptcPrefix = nullptr) const;
-
-
-    // Get the pointer for a given component, if found. Basically a wrapper, to avoid writing long lines of code
-    const CCPropsChar* GetCCPropsChar() const;
-    CCPropsChar* GetCCPropsChar();
-
-    const CCPropsItem* GetCCPropsItem() const;
-    CCPropsItem* GetCCPropsItem();
-
-    const CCPropsItemChar* GetCCPropsItemChar() const;
-    CCPropsItemChar* GetCCPropsItemChar();
-
-    const CCPropsItemEquippable* GetCCPropsItemEquippable() const;
-    CCPropsItemEquippable* GetCCPropsItemEquippable();
-
-    const CCPropsItemWeapon* GetCCPropsItemWeapon() const;
-    CCPropsItemWeapon* GetCCPropsItemWeapon();
-
-    const CCPropsItemWeaponRanged* GetCCPropsItemWeaponRanged() const;
-    CCPropsItemWeaponRanged* GetCCPropsItemWeaponRanged();
 };
+
+
+// Template methods definition
+
+template<class _ComponentType>
+const _ComponentType* CEntityProps::GetComponentProps() const noexcept
+{
+    if (_lComponentProps.empty()) {
+        return nullptr;
+    }
+    auto it = _lComponentProps.find(_ComponentType::_kiType);
+    return (it == _lComponentProps.end()) ? nullptr : static_cast<_ComponentType*>(it->second.get());
+}
+
+template<class _ComponentType>
+_ComponentType* CEntityProps::GetComponentProps() noexcept
+{
+    if (_lComponentProps.empty()) {
+        return nullptr;
+    }
+    auto it = _lComponentProps.find(_ComponentType::_kiType);
+    return (it == _lComponentProps.end()) ? nullptr : static_cast<_ComponentType*>(it->second.get());
+}
+
+template<class _ComponentType, class... _ArgsType>
+_ComponentType* CEntityProps::TrySubscribeComponentProps(_ArgsType&&... args)
+{
+    auto retPair = _lComponentProps.try_emplace(_ComponentType::_kiType, std::make_unique<_ComponentType>(std::forward<_ArgsType>(args)...));
+    return static_cast<_ComponentType*>(retPair.first->second.get());
+}
+
+template<class _ComponentType, class _SubscriberType, class... _ArgsType>
+_ComponentType* CEntityProps::TrySubscribeAllowedComponentProps(const _SubscriberType *pSubscriber, _ArgsType&&... args)
+{
+    if (!_ComponentType::CanSubscribe(pSubscriber))
+        return nullptr;
+    
+    return TrySubscribeComponentProps<_ComponentType, _ArgsType...>(std::forward<_ArgsType>(args)...);
+}
+
+template<class _ComponentType>
+bool CEntityProps::UnsubscribeComponentProps()
+{
+    auto it = _lComponentProps.find(_ComponentType::_kiType);
+    if (it == _lComponentProps.end()) {
+        return false;
+    }
+    _lComponentProps.erase(it);
+    return true;
+}
 
 #endif // _INC_CENTITYPROPS_H

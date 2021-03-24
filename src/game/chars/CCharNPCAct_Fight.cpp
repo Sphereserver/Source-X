@@ -330,10 +330,10 @@ void CChar::NPC_Act_Fight()
         _SetTimeoutD(1);
         return;
     }
-    if (!IsTimerSet()) // Nothing could be done, tick again in a while
+    if (!_IsTimerSet()) // Nothing could be done, tick again in a while
     {
         NPC_LookAround();
-        if (!IsTimerSet())
+        if (!_IsTimerSet())
         {
             DEBUG_MSG(("%s [0x%04x] found nothing to do in the fight routines.\n", GetName(), (dword)GetUID()));
             _SetTimeoutS(1);

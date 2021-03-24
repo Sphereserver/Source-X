@@ -27,6 +27,8 @@ class CCPropsItemWeapon : public CComponentProps
     static RESDISPLAY_VERSION   _iPropertyExpansion[];
 
 public:
+    static constexpr COMPPROPS_TYPE _kiType = COMP_PROPS_ITEMWEAPON;
+
     CCPropsItemWeapon();
     virtual ~CCPropsItemWeapon() = default;
 

@@ -306,8 +306,8 @@ CChar::CChar( CREID_TYPE baseID ) :
 	g_World.m_uidLastNewChar = GetUID();	// for script access.
 
     // SubscribeComponent Prop Components
-    SubscribeComponentProps(new CCPropsChar());
-    SubscribeComponentProps(new CCPropsItemChar());
+	TrySubscribeComponentProps<CCPropsChar>();
+	TrySubscribeComponentProps<CCPropsItemChar>();
 
     // SubscribeComponent regular Components
     SubscribeComponent(new CCFaction());

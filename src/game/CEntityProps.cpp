@@ -24,45 +24,20 @@ void CEntityProps::ClearPropComponents()
     ADDTOCALLSTACK("CEntityProps::ClearPropComponents");
     if (_lComponentProps.empty())
         return;
+
+#ifdef _DEBUG
     for (auto it = _lComponentProps.begin(), itEnd = _lComponentProps.end(); it != itEnd; ++it)
     {
-        CComponentProps *pComponent = it->second;
+        CComponentProps *pComponent = it->second.get();
         ASSERT(pComponent);
-        delete pComponent;
     }
+#endif
+
     _lComponentProps.clear();
-}
-
-CComponentProps* CEntityProps::SubscribeComponentProps(CComponentProps * pComponent)
-{
-    ADDTOCALLSTACK("CEntityProps::SubscribeComponentProps");
-    const COMPPROPS_TYPE compType = pComponent->GetType();
-    const auto pairResult = _lComponentProps.try_emplace(compType, pComponent);
-    if (pairResult.second == false)
-    {
-        delete pComponent;
-        ASSERT(false);  // This should never happen
-        //g_Log.EventError("Trying to duplicate prop component (%d) for %s '0x%08x'\n", (int)pComponent->GetType(), pComponent->GetLink()->GetName(), pComponent->GetLink()->GetUID());
-        return nullptr;
-    }
-    //_lComponentProps.container.shrink_to_fit();
-    return pairResult.first->second;
-}
-
-void CEntityProps::UnsubscribeComponentProps(iterator& it, bool fEraseFromMap)
-{
-    ADDTOCALLSTACK("CEntityProps::UnsubscribeComponentProps(it)");
-    delete it->second;
-    if (fEraseFromMap)
-    {
-        it = _lComponentProps.erase(it);
-    }
-    //_lComponentProps.container.shrink_to_fit();
 }
 
 void CEntityProps::UnsubscribeComponentProps(CComponentProps *pComponent)
 {
-    ADDTOCALLSTACK("CEntityProps::UnsubscribeComponentProps");
     if (_lComponentProps.empty())
     {
         return;
@@ -72,62 +47,28 @@ void CEntityProps::UnsubscribeComponentProps(CComponentProps *pComponent)
     if (it == _lComponentProps.end())
     {
         g_Log.EventError("Trying to unsuscribe not suscribed prop component (%d)\n", (int)pComponent->GetType());    // Should never happen?
-        delete pComponent;
         return;
     }
     _lComponentProps.erase(it);  // iterator invalidation!
 }
 
-CComponentProps* CEntityProps::CreateSubscribeComponentProps(COMPPROPS_TYPE iComponentPropsType)
-{
-    ADDTOCALLSTACK("CEntityProps::CreateSubscribeComponentProps");
-    switch (iComponentPropsType)
-    {
-        case COMP_PROPS_CHAR:
-            return SubscribeComponentProps(new CCPropsChar());
-        case COMP_PROPS_ITEM:
-            return SubscribeComponentProps(new CCPropsItem());
-        case COMP_PROPS_ITEMCHAR:
-            return SubscribeComponentProps(new CCPropsItemChar());
-        case COMP_PROPS_ITEMEQUIPPABLE:
-            return SubscribeComponentProps(new CCPropsItemEquippable());
-        case COMP_PROPS_ITEMWEAPON:
-            return SubscribeComponentProps(new CCPropsItemWeapon());
-        case COMP_PROPS_ITEMWEAPONRANGED:
-            return SubscribeComponentProps(new CCPropsItemWeaponRanged());
-        default:
-            // This should NEVER happen! Add the new components here if missing, or check why an invalid component type was passed as argument
-            PERSISTANT_ASSERT(0);
-            break;
-    }
-    return nullptr;
-}
-
-bool CEntityProps::IsSubscribedComponentProps(CComponentProps *pComponent) const
-{
-    ADDTOCALLSTACK("CEntityProps::IsSubscribedComponentProps");
-    return ( !_lComponentProps.empty() && (_lComponentProps.end() != _lComponentProps.find(pComponent->GetType())) );
-}
-
 CComponentProps * CEntityProps::GetComponentProps(COMPPROPS_TYPE type)
 {
-    ADDTOCALLSTACK("CEntityProps::GetComponentProps");
     ASSERT(type < COMP_PROPS_QTY);
     if (_lComponentProps.empty())
     {
         return nullptr;
     }
     auto it = _lComponentProps.find(type);
-    return (it != _lComponentProps.end()) ? it->second : nullptr;
+    return (it == _lComponentProps.end()) ? nullptr : it->second.get();
 }
 
 const CComponentProps * CEntityProps::GetComponentProps(COMPPROPS_TYPE type) const
 {
-    ADDTOCALLSTACK("CEntityProps::GetComponentProps(const)");
     if (!_lComponentProps.empty())
     {
         auto it = _lComponentProps.find(type);
-        return (it == _lComponentProps.end()) ? nullptr : it->second;
+        return (it == _lComponentProps.end()) ? nullptr : it->second.get();
     }
     return nullptr;
 }
@@ -139,7 +80,7 @@ void CEntityProps::r_Write(CScript & s) // Storing data in the worldsave.
         return;
     for (auto it = _lComponentProps.begin(), itEnd = _lComponentProps.end(); it != itEnd; ++it)
     {
-        CComponentProps *pComponent = it->second;
+        CComponentProps *pComponent = it->second.get();
         ASSERT(pComponent);
         pComponent->r_Write(s);
     }
@@ -151,7 +92,7 @@ bool CEntityProps::CEPLoopLoad(CEPLoopRet_t *pRet, CScript& s, CObjBase* pLinked
     const lpctstr ptcKey = s.GetKey();
     for (const auto& pairElem : _lComponentProps)
     {
-        if (CComponentProps* pComponent = pairElem.second)
+        if (CComponentProps* pComponent = pairElem.second.get())
         {
             const KeyTableDesc_s ktd = pComponent->GetPropertyKeysData();
             pRet->iPropIndex = (CComponentProps::PropertyIndex_t) FindTableSorted(ptcKey, ktd.pptcTable, ktd.iTableSize - 1);
@@ -220,7 +161,7 @@ bool CEntityProps::CEPLoopWrite(CEPLoopRet_t* pRet, lpctstr ptcKey, CSString& sV
 {
     for (const auto& pairElem : _lComponentProps)
     {
-        if (CComponentProps* pComponent = pairElem.second)
+        if (CComponentProps* pComponent = pairElem.second.get())
         {
             const KeyTableDesc_s ktd = pComponent->GetPropertyKeysData();
             pRet->iPropIndex = (COMPPROPS_TYPE)FindTableSorted(ptcKey, ktd.pptcTable, ktd.iTableSize - 1);
@@ -292,7 +233,7 @@ void CEntityProps::AddPropsTooltipData(CObjBase* pObj)
         return;
     for (auto it = _lComponentProps.begin(), itEnd = _lComponentProps.end(); it != itEnd; ++it)
     {
-        CComponentProps *pComponent = it->second;
+        CComponentProps *pComponent = it->second.get();
         ASSERT(pComponent);
         pComponent->AddPropsTooltipData(pObj);
     }
@@ -306,7 +247,7 @@ void CEntityProps::Copy(const CEntityProps *target)
         return;
     for (auto it = target->_lComponentProps.begin(), itEnd = target->_lComponentProps.end(); it != itEnd; ++it)
     {
-        CComponentProps *pTarget = it->second;    // the CComponent to copy from
+        CComponentProps *pTarget = it->second.get();    // the CComponent to copy from
         ASSERT(pTarget);
         CComponentProps *pCopy = GetComponentProps(pTarget->GetType());    // the CComponent to copy to.
         if (pCopy)
@@ -365,61 +306,4 @@ void CEntityProps::DumpComponentProps(CTextConsole *pSrc, lpctstr ptcPrefix) con
 
         }
     }
-}
-
-
-//--
-
-const CCPropsChar* CEntityProps::GetCCPropsChar() const
-{
-    return static_cast<const CCPropsChar*>(GetComponentProps(COMP_PROPS_CHAR));
-}
-CCPropsChar* CEntityProps::GetCCPropsChar()
-{
-    return static_cast<CCPropsChar*>(GetComponentProps(COMP_PROPS_CHAR));
-}
-
-const CCPropsItem* CEntityProps::GetCCPropsItem() const
-{
-    return static_cast<const CCPropsItem*>(GetComponentProps(COMP_PROPS_ITEM));
-}
-CCPropsItem* CEntityProps::GetCCPropsItem()
-{
-    return static_cast<CCPropsItem*>(GetComponentProps(COMP_PROPS_ITEM));
-}
-
-const CCPropsItemChar* CEntityProps::GetCCPropsItemChar() const
-{
-    return static_cast<const CCPropsItemChar*>(GetComponentProps(COMP_PROPS_ITEMCHAR));
-}
-CCPropsItemChar* CEntityProps::GetCCPropsItemChar()
-{
-    return static_cast<CCPropsItemChar*>(GetComponentProps(COMP_PROPS_ITEMCHAR));
-}
-
-const CCPropsItemEquippable* CEntityProps::GetCCPropsItemEquippable() const
-{
-    return static_cast<const CCPropsItemEquippable*>(GetComponentProps(COMP_PROPS_ITEMEQUIPPABLE));
-}
-CCPropsItemEquippable* CEntityProps::GetCCPropsItemEquippable()
-{
-    return static_cast<CCPropsItemEquippable*>(GetComponentProps(COMP_PROPS_ITEMEQUIPPABLE));
-}
-
-const CCPropsItemWeapon* CEntityProps::GetCCPropsItemWeapon() const
-{
-    return static_cast<const CCPropsItemWeapon*>(GetComponentProps(COMP_PROPS_ITEMWEAPON));
-}
-CCPropsItemWeapon* CEntityProps::GetCCPropsItemWeapon()
-{
-    return static_cast<CCPropsItemWeapon*>(GetComponentProps(COMP_PROPS_ITEMWEAPON));
-}
-
-const CCPropsItemWeaponRanged* CEntityProps::GetCCPropsItemWeaponRanged() const
-{
-    return static_cast<const CCPropsItemWeaponRanged*>(GetComponentProps(COMP_PROPS_ITEMWEAPONRANGED));
-}
-CCPropsItemWeaponRanged* CEntityProps::GetCCPropsItemWeaponRanged()
-{
-    return static_cast<CCPropsItemWeaponRanged*>(GetComponentProps(COMP_PROPS_ITEMWEAPONRANGED));
 }

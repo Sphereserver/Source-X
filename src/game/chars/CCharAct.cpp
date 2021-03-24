@@ -500,9 +500,9 @@ void CChar::OnRemoveObj( CSObjContRec* pObRec )	// Override this = called when r
     const CBaseBaseDef* pItemBase = pItem->Base_GetDef();
 
     // Start of CCPropsItemEquippable props
-    CCPropsChar *pCCPChar = GetCCPropsChar();
-    CCPropsItemEquippable *pItemCCPItemEquippable = pItem->GetCCPropsItemEquippable();
-    const CCPropsItemEquippable *pItemBaseCCPItemEquippable = pItemBase->GetCCPropsItemEquippable();
+    CCPropsChar *pCCPChar = GetComponentProps<CCPropsChar>();
+    CCPropsItemEquippable *pItemCCPItemEquippable = pItem->GetComponentProps<CCPropsItemEquippable>();
+    const CCPropsItemEquippable *pItemBaseCCPItemEquippable = pItemBase->GetComponentProps<CCPropsItemEquippable>();
 
     if (pItemCCPItemEquippable || pItemBaseCCPItemEquippable)
     {
@@ -2161,9 +2161,9 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
     const CBaseBaseDef* pItemBase = pItem->Base_GetDef();
 
     // Start of CCPropsItemEquippable props
-    CCPropsChar *pCCPChar = GetCCPropsChar();
-    const CCPropsItemEquippable *pItemBaseCCPItemEquippable = pItemBase->GetCCPropsItemEquippable();
-    CCPropsItemEquippable *pItemCCPItemEquippable = pItem->GetCCPropsItemEquippable();
+	CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
+	CCPropsItemEquippable* pItemCCPItemEquippable = pItem->GetComponentProps<CCPropsItemEquippable>();
+	const CCPropsItemEquippable* pItemBaseCCPItemEquippable = pItemBase->GetComponentProps<CCPropsItemEquippable>();
 
     if (pItemCCPItemEquippable || pItemBaseCCPItemEquippable)
     {

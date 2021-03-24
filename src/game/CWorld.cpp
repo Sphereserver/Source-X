@@ -1213,7 +1213,7 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 	}
 
 	// Find the size of the file.
-	int iLoadSize = s.GetLength();
+	const int iLoadSize = s.GetLength();
     int iLoadStage = 0;
 
 	CScriptFileContext ScriptContext( &s );

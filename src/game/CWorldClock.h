@@ -31,14 +31,18 @@ public:
 	void Init();
 	void InitTime(int64 iTimeBase);
 	bool Advance();
+
 	inline void AdvanceTick() noexcept
 	{
 		++_iTickCur;
 	}
-	inline CServerTime GetCurrentTime() const noexcept // in milliseconds
+
+#undef GetCurrentTime
+	inline const CServerTime& GetCurrentTime() const noexcept // in milliseconds
 	{
 		return _timeClock;
 	}
+
 	inline int64 GetCurrentTick() const noexcept
 	{
 		return _iTickCur;

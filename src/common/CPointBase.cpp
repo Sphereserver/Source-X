@@ -82,6 +82,12 @@ lpctstr const CPointBase::sm_szLoadKeys[PT_QTY+1] =
 	nullptr
 };
 
+CPointBase::CPointBase() noexcept :
+	m_x(-1), m_y(-1), m_z(0), m_map(0)	// Same thing as calling InitPoint(), but without this extra cuntion call
+{
+	//InitPoint();
+}
+
 CPointBase::CPointBase(short x, short y, char z, uchar map) noexcept :
 	m_x(x), m_y(y), m_z(z), m_map(map)
 {
@@ -115,15 +121,13 @@ const CPointBase& CPointBase::operator-= ( const CPointBase & pt ) noexcept
 
 void CPointBase::InitPoint() noexcept
 {
-	m_x = -1;	// invalid location.
-	m_y = -1;
+	m_x = m_y = -1;	// invalid location.
 	m_z = 0;
 	m_map = 0;
 }
 void CPointBase::ZeroPoint() noexcept
 {
-	m_x = 0;	// invalid location.
-	m_y = 0;
+	m_x = m_y = 0;	// invalid location.
 	m_z = 0;
 	m_map = 0;
 }
@@ -926,7 +930,7 @@ size_t CPointBase::GetRegions( dword dwType, CRegionLinks *pRLinks ) const
 	return 0;
 }
 
-int CPointBase::GetPointSortIndex() const
+int CPointBase::GetPointSortIndex() const noexcept
 {
 	return (int)MAKEDWORD( m_x, m_y );
 }

@@ -2,15 +2,6 @@
 #include "../common/CScript.h"
 #include "CComponentProps.h"
 
-CComponentProps::CComponentProps(COMPPROPS_TYPE type)
-{
-    _iType = type;
-}
-
-COMPPROPS_TYPE CComponentProps::GetType() const
-{
-    return _iType;
-}
 
 bool CComponentProps::BaseCont_GetPropertyNum(const BaseContNum_t* container, PropertyIndex_t iPropIndex, PropertyValNum_t* piOutVal) const
 {

@@ -23,6 +23,8 @@ class CCPropsChar : public CComponentProps
     static RESDISPLAY_VERSION   _iPropertyExpansion[];
 
 public:
+    static constexpr COMPPROPS_TYPE _kiType = COMP_PROPS_CHAR;
+
     CCPropsChar();
     virtual ~CCPropsChar() = default;
 

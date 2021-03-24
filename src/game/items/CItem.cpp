@@ -154,7 +154,7 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) :
     /* CCItemDamageable is also added from CObjBase::r_LoadVal(OC_CANMASK) for manual override of can flags
     * but it's required to add it also on item's creation depending on it's CItemBase can flags.
     */
-    if (CCItemDamageable::CanSubscribe(this))
+	if (CCItemDamageable::CanSubscribe(this))
     {
         SubscribeComponent(new CCItemDamageable(this));
     }
@@ -162,8 +162,9 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) :
     {
         SubscribeComponent(new CCFaction());  // Adding it only to equippable items
     }
-    SubscribeComponentProps(new CCPropsItem());
-    SubscribeComponentProps(new CCPropsItemChar());
+
+	TrySubscribeComponentProps<CCPropsItem>();
+	TrySubscribeComponentProps<CCPropsItemChar>();
 }
 
 void CItem::DeleteCleanup(bool fForce)
@@ -1153,8 +1154,10 @@ int CItem::FixWeirdness()
 
     else if (IsTopLevel())
     {
-        if (IsAttr(ATTR_DECAY) && !IsTimerSet())
+        if (IsAttr(ATTR_DECAY) && !_IsTimerSet() /*&& !_IsSleeping()*/)
         {
+			// An item marked to decay but with an elapsed or immediately about to elapse timer.
+			// // Ignore sleeping items. Maybe it's not broken and it will decay immediately after its sector goes awake.
             iResultCode = 0x2236;
             return iResultCode;	// get rid of it.
         }
@@ -1379,19 +1382,8 @@ void CItem::_SetTimeout( int64 iMsecs )
 	CSector * pSector = GetTopSector();
 	if ( !pSector )
 		return;
-
-	CItemsList::sm_fNotAMove = true;
-	pSector->MoveItemToSector(this);
-	CItemsList::sm_fNotAMove = false;
-	SetUIDContainerFlags(0);
 }
 
-void CItem::SetTimeout(int64 iMsecs)
-{
-	ADDTOCALLSTACK("CItem::SetTimeout");
-	THREAD_UNIQUE_LOCK_SET;
-	_SetTimeout(iMsecs);
-}
 
 void CItem::OnMoveFrom()	// Moving from current location.
 {
@@ -3360,8 +3352,9 @@ bool CItem::r_Load( CScript & s ) // Load an item from script
 	ADDTOCALLSTACK("CItem::r_Load");
 	CScriptObj::r_Load( s );
 
-	if ( GetContainer() == nullptr )	// Place into the world.
+	if ( GetContainer() == nullptr )
 	{
+        // Actually place the item into the world.
 		if ( GetTopPoint().IsCharValid())
 			MoveToUpdate( GetTopPoint());
 	}
@@ -3748,35 +3741,18 @@ bool CItem::SetType(IT_TYPE type, bool fPreCheck)
 
     // Post-assignment checks
     // CComponents sanity check.
-    CComponent* pComp;
-    CComponentProps* pCompProps;
 
     // Never unsubscribe Props Components, because if the type is changed to an unsubscribable type and then again to the previous type, the component will be deleted and created again.
     //  This means that all the properties (base and "dynamic") are lost.
     // Add first the most specific components, so that the tooltips will be better ordered
-    pCompProps = GetComponentProps(COMP_PROPS_ITEMWEAPONRANGED);
-    if (!pCompProps && CCPropsItemWeaponRanged::CanSubscribe(this))
-    {
-        SubscribeComponentProps(new CCPropsItemWeaponRanged());
-    }
-    pCompProps = GetComponentProps(COMP_PROPS_ITEMWEAPON);
-    if (!pCompProps && CCPropsItemWeapon::CanSubscribe(this))
-    {
-        SubscribeComponentProps(new CCPropsItemWeapon());
-    }
-    pCompProps = GetComponentProps(COMP_PROPS_ITEMEQUIPPABLE);
-    if (!pCompProps && CCPropsItemEquippable::CanSubscribe(this))
-    {
-        SubscribeComponentProps(new CCPropsItemEquippable());
-    }
-    pCompProps = GetComponentProps(COMP_PROPS_ITEMCHAR);
-    if (!pCompProps)
-    {
-        SubscribeComponentProps(new CCPropsItemChar());
-    }
+	TrySubscribeAllowedComponentProps<CCPropsItemWeaponRanged>(this);
+	TrySubscribeAllowedComponentProps<CCPropsItemWeapon>(this);
+	TrySubscribeAllowedComponentProps<CCPropsItemEquippable>(this);
+
+	TrySubscribeComponentProps<CCPropsItemChar>();
 
     // Ensure that an item that should have a given component has it, and if the item shouldn't have a given component, check if it's subscribed, in that case unsubscribe it.
-    pComp = GetComponent(COMP_SPAWN);
+	CComponent* pComp = GetComponent(COMP_SPAWN);
     bool fIsSpawn = false;
     if ((type != IT_SPAWN_CHAR) && (type != IT_SPAWN_ITEM))
     {

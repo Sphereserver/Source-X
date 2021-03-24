@@ -38,10 +38,7 @@ public:
 	void InitPoint() noexcept;
 	void ZeroPoint() noexcept;
 
-	CPointBase() noexcept
-	{
-		InitPoint();
-	}
+	CPointBase() noexcept;
 	CPointBase(short x, short y, char z = 0, uchar map = 0) noexcept;
 	CPointBase(const CPointBase&) noexcept = default;
 	CPointBase(CPointBase&&) noexcept = default;
@@ -98,7 +95,7 @@ public:
 	CRegion * GetRegion( dword dwType ) const;
 	size_t GetRegions( dword dwType, CRegionLinks *pRLinks ) const;
 
-	int GetPointSortIndex() const;
+	int GetPointSortIndex() const noexcept;
 
 	bool r_WriteVal( lpctstr ptcKey, CSString & sVal ) const;
 	bool r_LoadVal( lpctstr ptcKey, lpctstr pszArgs );
@@ -129,7 +126,7 @@ struct CPointSort : public CPointMap
     CPointSort() noexcept = default; // InitPoint() already called by CPointBase constructor
 	CPointSort( short x, short y, char z = 0, uchar map = 0 ) noexcept;
 	explicit CPointSort(const CPointBase& pt) noexcept;
-    virtual ~CPointSort() = default; // just to make this dynamic
+    ~CPointSort() = default;
 };
 
 

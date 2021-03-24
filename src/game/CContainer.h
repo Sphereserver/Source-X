@@ -20,7 +20,7 @@ class CContainer : public CSObjCont	// This class contains a list of items but m
 public:
 	static const char *m_sClassName;
 	CContainer();
-	virtual ~CContainer();
+	virtual ~CContainer() = default;
 
 private:
 	CContainer(const CContainer& copy);

@@ -148,7 +148,7 @@ bool CSector::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 			}
 			return true;
         case SC_ISSLEEPING:
-            sVal.FormatVal(IsSleeping());
+            sVal.FormatVal(_IsSleeping());
             return true;
 		case SC_RAINCHANCE:
 			sVal.FormatVal( GetRainChance());
@@ -346,11 +346,11 @@ bool CSector::r_Verb( CScript & s, CTextConsole * pSrc )
 			v_AllItems( s, pSrc );
 			break;
         case SEV_AWAKE:
-            if (!IsSleeping())
+            if (!_IsSleeping())
             {
                 break;
             }
-            GoAwake();
+            _GoAwake();
             break;
 		case SEV_DRY:	// "DRY"
 			SetWeather( WEATHER_DRY );
@@ -376,7 +376,7 @@ bool CSector::r_Verb( CScript & s, CTextConsole * pSrc )
 			break;
         case SEV_SLEEP:
             {
-                if (IsSleeping())
+                if (_IsSleeping())
                 {
                     break;
                 }
@@ -387,7 +387,7 @@ bool CSector::r_Verb( CScript & s, CTextConsole * pSrc )
                         break;
                     }
                 }
-                GoSleep();
+                _GoSleep();
             }
             break;
 		case SEV_SNOW:
@@ -1001,12 +1001,12 @@ bool CSector::MoveCharToSector( CChar * pChar )
 	// Remove from previous spot.
 	m_Chars_Active.AddCharActive(pChar);
 
-    if (IsSleeping())
+    if (_IsSleeping())
     {
         CClient *pClient = pChar->GetClientActive();
         if (pClient)    // A client just entered
         {
-            GoAwake();    // Awake the sector and the chars inside (so, also pChar)
+            _GoAwake();    // Awake the sector and the chars inside (so, also pChar)
             ASSERT(!pChar->IsSleeping());
         }
         else if (!pChar->IsSleeping())    // An NPC entered, but the sector is sleeping
@@ -1065,9 +1065,9 @@ void CSector::SetSectorWakeStatus()
 	ADDTOCALLSTACK("CSector::SetSectorWakeStatus");
 	// Ships may enter a sector before it's riders ! ships need working timers to move !
 	m_Chars_Active.SetTimeLastClient(CWorldGameTime::GetCurrentTime().GetTimeRaw());
-    if (IsSleeping())
+    if (_IsSleeping())
     {
-        GoAwake();
+        _GoAwake();
     }
 }
 

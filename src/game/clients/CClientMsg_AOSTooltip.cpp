@@ -333,8 +333,9 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 {
 	// TODO: add check to ATTR_IDENTIFIED, then add tooltips: stolen, BonusSkill1/2/3/4/5, minlevel/maxlevel, shurikencount
 
-    //const CCPropsItemChar *pCCPItemChar = pItem->GetCCPropsItemChar(), *pBaseCCPItemChar = pItem->Base_GetDef()->GetCCPropsItemChar();
-    const CCPropsItemEquippable *pCCPItemEquip = pItem->GetCCPropsItemEquippable(), *pBaseCCPItemEquip = pItem->Base_GetDef()->GetCCPropsItemEquippable();
+    //const CCPropsItemChar *pCCPItemChar = pItem->GetCCPropsItemChar(), *pBaseCCPItemChar = pItem->Base_GetDef()->GetCCPropsItemChar
+	const auto pCCPItemEquip = pItem->GetComponentProps<CCPropsItemEquippable>();
+	const auto pBaseCCPItemEquip = pItem->Base_GetDef()->GetComponentProps<CCPropsItemEquippable>();
 	CClientTooltip* t = nullptr;
 
 	if (pItem->IsAttr(ATTR_LOCKEDDOWN))

@@ -11,14 +11,11 @@
 #include "CContainer.h"
 
 
-CContainer::CContainer()
+CContainer::CContainer() :
+	m_totalweight(0)
 {
-	m_totalweight = 0;
 }
 
-CContainer::~CContainer()
-{
-}
 
 void CContainer::_GoAwake()
 {
@@ -150,9 +147,11 @@ void CContainer::ContentAddPrivate( CItem *pItem )
 		return;
 
 	CSObjCont::InsertContentTail( pItem );
+	//pItem->RemoveUIDFlags(UID_O_DISCONNECT);
+
 	OnWeightChange(pItem->GetWeight());
 
-	if (auto pObj = dynamic_cast<CObjBase*>(this))
+	if (auto pObj = dynamic_cast<const CObjBase*>(this))
 	{
 		if (pObj->IsSleeping())
 		{
@@ -169,7 +168,6 @@ void CContainer::ContentAddPrivate( CItem *pItem )
 			}
 		}
 	}
-
 }
 
 void CContainer::OnRemoveObj( CSObjContRec *pObRec )	// Override this = called when removed from list.

@@ -21,20 +21,14 @@ CWorldTicker::CWorldTicker(CWorldClock *pClock)
 
 // CTimedObject TIMERs
 
-void CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimedObject, bool fNeedsLock)
+void CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimedObject)
 {
     std::unique_lock<std::shared_mutex> lock(_mWorldTickList.THREAD_CMUTEX);
     TimedObjectsContainer& cont = _mWorldTickList[iTimeout];
     cont.emplace_back(pTimedObject);
-
-    // pTimedObject should already have its mutex locked by CTimedObject::SetTimeout
-    if (fNeedsLock)
-        pTimedObject->SetTimeoutRaw(iTimeout);
-    else
-        pTimedObject->_SetTimeoutRaw(iTimeout);
 }
 
-void CWorldTicker::_RemoveTimedObject(const int64 iOldTimeout, CTimedObject* pTimedObject, bool fNeedsLock)
+void CWorldTicker::_RemoveTimedObject(const int64 iOldTimeout, CTimedObject* pTimedObject)
 {
     std::unique_lock<std::shared_mutex> lock(_mWorldTickList.THREAD_CMUTEX);
     auto itList = _mWorldTickList.find(iOldTimeout);
@@ -50,12 +44,6 @@ void CWorldTicker::_RemoveTimedObject(const int64 iOldTimeout, CTimedObject* pTi
     {
         _mWorldTickList.erase(itList);
     }
-
-    // pTimedObject should already have its mutex locked by CTimedObject::SetTimeout
-    if (fNeedsLock)
-        pTimedObject->ClearTimeout();
-    else
-        pTimedObject->_ClearTimeout();
 }
 
 void CWorldTicker::AddTimedObject(const int64 iTimeout, CTimedObject* pTimedObject, bool fForce, bool fNeedsLock)
@@ -72,7 +60,7 @@ void CWorldTicker::AddTimedObject(const int64 iTimeout, CTimedObject* pTimedObje
     {
         // Adding an object already on the list? Am i setting a new timeout without deleting the previous one?
         EXC_SET_BLOCK("Remove");
-        _RemoveTimedObject(iTickOld, pTimedObject, fNeedsLock);
+        _RemoveTimedObject(iTickOld, pTimedObject);
     }
 
     EXC_SET_BLOCK("Insert");
@@ -96,9 +84,14 @@ void CWorldTicker::AddTimedObject(const int64 iTimeout, CTimedObject* pTimedObje
         }
     }
     
+    if (fNeedsLock)
+        pTimedObject->SetTimeoutRaw(iTimeout);
+    else
+        pTimedObject->_SetTimeoutRaw(iTimeout);
+
     if (fCanTick)
     {
-        _InsertTimedObject(iTimeout, pTimedObject, fNeedsLock);
+        _InsertTimedObject(iTimeout, pTimedObject);
     }
 
     EXC_CATCH;
@@ -115,7 +108,7 @@ void CWorldTicker::DelTimedObject(CTimedObject* pTimedObject, bool fNeedsLock)
         return;
 
     EXC_SET_BLOCK("Remove");
-    _RemoveTimedObject(iTickOld, pTimedObject, fNeedsLock);
+    _RemoveTimedObject(iTickOld, pTimedObject);
 
     EXC_CATCH;
 }
@@ -342,11 +335,6 @@ void CWorldTicker::Tick()
                         {
                             vecObjs.emplace_back(static_cast<void*>(pTimedObj));
 
-                            /*
-                            * Doing a SetTimeout() in the object's tick will force CWorld to search for that object's
-                            * current timeout to remove it from any list, prevent that to happen here since it should
-                            * not belong to any other tick than the current one.
-                            */
                             pTimedObj->_ClearTimeout();
 
                             it = cont.erase(it);

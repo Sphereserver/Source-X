@@ -212,7 +212,7 @@ void CObjBase::TimeoutRecursiveResync(int64 iDelta)
 	ADDTOCALLSTACK("CObjBase::TimeoutRecursiveResync");
 	if (_IsTimerSet())
 	{
-		_SetTimeout(GetTimeoutRaw() + iDelta);
+		_SetTimeout(_GetTimeoutRaw() + iDelta);
 	}
 
 	if (CContainer* pCont = dynamic_cast<CContainer*>(this))
@@ -682,7 +682,7 @@ bool CObjBase::MoveNear(CPointMap pt, ushort iSteps )
 	// Move to nearby this other object.
 	// Actually move it within +/- iSteps
 
-	CPointMap ptOld = pt;
+	CPointMap ptOld(pt);
 	for ( uint i = 0; i < iSteps; ++i )
 	{
 		pt = ptOld;
@@ -1897,12 +1897,14 @@ bool CObjBase::r_LoadVal( CScript & s )
                 */
                 if (iPrevBuild && (iPrevBuild >= 2866)) // commit #e08723c54b0a4a3b1601eba6f34a6118891f1313
                 {
+					// If TIMER = 0 was saved it means that at the moment of the worldsave the timer was elapsed but its object could not tick,
+					//	since it was waiting a GoAwake() call. Now set the timer to tick asap.
                     _SetTimeout(iTimeout);   // new timer: set msecs timer
                     break;
                 }
             }
             fResendTooltip = true;  // not really need to even try to resend it on load, but resend otherwise.
-            _SetTimeoutS(iTimeout);   // old timer: in seconds.
+            _SetTimeoutS(iTimeout); // old timer: in seconds.
             break;
         }
         case OC_TIMERD:
@@ -1950,7 +1952,7 @@ void CObjBase::r_Write( CScript & s )
 		s.WriteKeyStr( "NAME", GetIndividualName());
 	if ( m_wHue != HUE_DEFAULT )
 		s.WriteKeyHex( "COLOR", GetHue());
-	if ( IsTimerSet() )
+	if ( _IsTimerSet() )
 		s.WriteKeyVal( "TIMER", _GetTimerAdjusted());
 	if ( m_timestamp > 0 )
 		s.WriteKeyVal( "TIMESTAMP", GetTimeStamp());
@@ -3130,7 +3132,7 @@ bool CObjBase::_CanTick() const
 		if (const CSObjCont* pParent = GetParent())
 		{
 			const CObjBase* pObjParent = dynamic_cast<const CObjBase*>(pParent);
-			// The parent can be another CObjBase or even a Sector
+			// The parent can be another CObjBase or even a Sector -> Do not use CTimedObject* ?
 			if (pObjParent && !pObjParent->CanTick())	// It calls the virtuals obviously
 				fCanTick = false;
 		}
@@ -3279,7 +3281,6 @@ void CObjBase::SetPropStr( COMPPROPS_TYPE iCompPropsType, CComponentProps::Prope
     if (!pCompProps)
     {
         g_Log.EventDebug("CEntityProps: SetPropStr on unsubscribed CCProps. iCompPropsType %d, iPropIndex %d.\n", iCompPropsType, iPropIndex);
-		pCompProps = CreateSubscribeComponentProps(iCompPropsType);
 		ASSERT(pCompProps);
     }
     const RESDISPLAY_VERSION iLimitToEra = Base_GetDef()->_iEraLimitProps;
@@ -3299,7 +3300,6 @@ void CObjBase::SetPropNum( COMPPROPS_TYPE iCompPropsType, CComponentProps::Prope
     if (!pCompProps)
     {
         g_Log.EventDebug("CEntityProps: SetPropNum on unsubscribed CCProps. iCompPropsType %d, iPropIndex %d.\n", iCompPropsType, iPropIndex);
-        pCompProps = CreateSubscribeComponentProps(iCompPropsType);
 		ASSERT(pCompProps);
     }
     const RESDISPLAY_VERSION iLimitToEra = Base_GetDef()->_iEraLimitProps;
@@ -3329,7 +3329,6 @@ void CObjBase::ModPropNum( COMPPROPS_TYPE iCompPropsType, CComponentProps::Prope
     if (!pCompProps)
     {
         g_Log.EventDebug("CEntityProps: ModPropNum on unsubscribed CCProps. iCompPropsType %d, iPropIndex %d, fBaseDef %d.\n", iCompPropsType, iPropIndex, (int)fBaseDef);
-		pCompProps = CreateSubscribeComponentProps(iCompPropsType);
 		ASSERT(pCompProps);
         fPropExists = false;
     }

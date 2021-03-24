@@ -196,8 +196,10 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 		writeBool(fCanRename);
 		writeByte(version);
 		if (state->isClientEnhanced() && objectChar && objectChar->IsPlayableCharacter())
+		{
 			// The Enhanced Client wants the char race and other things when showing paperdolls (otherwise the interface throws an "unnoticeable" internal error)
 			WriteVersionSpecific(target, objectChar, version);
+		}
 	}
 
 	push(target);
@@ -207,7 +209,8 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
 {
     bool fElemental = IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE);
 	const CCharBase * otherDefinition = other->Char_GetDef();
-    const CCPropsChar* pCCPChar = other->GetCCPropsChar(), *pBaseCCPChar = otherDefinition->GetCCPropsChar();
+	const CCPropsChar* pCCPChar = other->GetComponentProps<CCPropsChar>();
+	const CCPropsChar* pBaseCCPChar = otherDefinition->GetComponentProps<CCPropsChar>();
 
 	writeBool(otherDefinition->IsFemale());
 	writeInt16((word)(other->Stat_GetAdjusted(STAT_STR)));

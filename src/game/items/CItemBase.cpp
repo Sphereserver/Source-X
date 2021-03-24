@@ -67,8 +67,8 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 
 	m_qwFlags = tiledata.m_flags;
 
-    SubscribeComponentProps(new CCPropsItem());
-    SubscribeComponentProps(new CCPropsItemChar());
+    TrySubscribeComponentProps<CCPropsItem>();
+    TrySubscribeComponentProps<CCPropsItemChar>();
 
 	SetType(GetTypeBase( id, tiledata ));
 
@@ -1004,13 +1004,13 @@ byte CItemBase::GetSpeed() const
 
 byte CItemBase::GetRangeL() const
 {
-    const CCPropsItemWeapon *pCCPItemWeapon = GetCCPropsItemWeapon();
+	const auto pCCPItemWeapon = GetComponentProps<CCPropsItemWeapon>();
     return (byte)pCCPItemWeapon->GetPropertyNum(PROPIWEAP_RANGEL);
 }
 
 byte CItemBase::GetRangeH() const
 {
-    const CCPropsItemWeapon *pCCPItemWeapon = GetCCPropsItemWeapon();
+    const auto pCCPItemWeapon = GetComponentProps<CCPropsItemWeapon>();
     return (byte)pCCPItemWeapon->GetPropertyNum(PROPIWEAP_RANGEH);
 }
 
@@ -1832,26 +1832,10 @@ void CItemBase::SetType(IT_TYPE type)
 {
     m_type = type;
 
-    CComponentProps* pCompProps;
-
-    // Never unsubscribe Props Components, because if the type is changed to an unsubscribable type and then again to the previous type, the component will be deleted and created again.
-    //  This means that all the properties (base and "dynamic") are lost.
     // Add first the most specific components, so that the tooltips will be better ordered
-    pCompProps = GetComponentProps(COMP_PROPS_ITEMWEAPONRANGED);
-    if (!pCompProps && CCPropsItemWeaponRanged::CanSubscribe(this))
-    {
-        SubscribeComponentProps(new CCPropsItemWeaponRanged());
-    }
-    pCompProps = GetComponentProps(COMP_PROPS_ITEMWEAPON);
-    if (!pCompProps && CCPropsItemWeapon::CanSubscribe(this))
-    {
-        SubscribeComponentProps(new CCPropsItemWeapon());
-    }
-    pCompProps = GetComponentProps(COMP_PROPS_ITEMEQUIPPABLE);
-    if (!pCompProps && CCPropsItemEquippable::CanSubscribe(this))
-    {
-        SubscribeComponentProps(new CCPropsItemEquippable());
-    }
+	TrySubscribeAllowedComponentProps<CCPropsItemWeaponRanged>(this);
+	TrySubscribeAllowedComponentProps<CCPropsItemWeapon>(this);
+	TrySubscribeAllowedComponentProps<CCPropsItemEquippable>(this);
 }
 
 //**************************************************

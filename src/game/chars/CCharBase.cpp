@@ -42,14 +42,10 @@ CCharBase::CCharBase( CREID_TYPE id ) :
 	SetResDispDnId(CREID_MAN);
 
     // SubscribeComponent Prop Components
-    SubscribeComponentProps(new CCPropsChar());
-    SubscribeComponentProps(new CCPropsItemChar());
+    TrySubscribeComponentProps<CCPropsChar>();
+    TrySubscribeComponentProps<CCPropsItemChar>();
 }
 
-CCharBase::~CCharBase()
-{
-    ADDTOCALLSTACK("CCharBase::~CCharBase");
-}
 
 // From "Bill the carpenter" or "#HUMANMALE the Carpenter",
 // Get "Carpenter"
