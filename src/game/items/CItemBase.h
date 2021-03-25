@@ -22,15 +22,17 @@ class CItemBase : public CBaseBaseDef
 	// Describe basic stuff about all items.
 	// Partly based on CUOItemTypeRec/CUOItemTypeRec_HS
 private:
-	word	m_weight;			// weight in WEIGHT_UNITS (UINT16_MAX=not movable) defaults from the .MUL file.
 	CSTypedArray<ITEMID_TYPE> m_flip_id;	//  can be flipped to make these display ids.
-	IT_TYPE	m_type;				// default double click action type. (if any)
 	CValueRangeDef m_values;	// range of values given a quality skill
-	byte    m_layer;			// Is this item equippable on paperdoll? LAYER=LAYER_TYPE defaults from the .MUL file.
+	IT_TYPE	m_type;				// default double click action type. (if any)
 	uint64  m_qwFlags;			//  UFLAG4_DOOR from CUOItemTypeRec/CUOItemTypeRec_HS
+	word	m_weight;			// weight in WEIGHT_UNITS (UINT16_MAX=not movable) defaults from the .MUL file.
+	byte    m_layer;			// Is this item equippable on paperdoll? LAYER=LAYER_TYPE defaults from the .MUL file.
 	byte	m_speed;
+
 public:
 	static const char *m_sClassName;
+
 	SKILL_TYPE m_iSkill;
 	dword	m_CanUse;		// CanUse flags.
 							// Not applicable to all.
@@ -224,31 +226,34 @@ public:
 	static void GetItemTiledataFlags( dword *pdwCanFlags, ITEMID_TYPE id );
 	static height_t GetItemHeightFlags( const CUOItemTypeRec_HS & tile, dword *pdwCanFlags );
 	static void GetItemSpecificFlags( const CUOItemTypeRec_HS & tile, dword *pdwCanFlags, IT_TYPE type, ITEMID_TYPE id );
-	static bool IsTypeArmor( IT_TYPE type );
-	static bool IsTypeWeapon( IT_TYPE type );
-	static bool IsTypeSpellbook( IT_TYPE type );
-	static bool IsTypeMulti( IT_TYPE type );
+	static bool IsTypeArmor( IT_TYPE type ) noexcept;
+	static bool IsTypeWeapon( IT_TYPE type ) noexcept;
+	static bool IsTypeSpellbook( IT_TYPE type ) noexcept;
+	static bool IsTypeMulti( IT_TYPE type ) noexcept;
+	static bool IsTypeEquippable(IT_TYPE type, LAYER_TYPE layer) noexcept;
+	bool IsTypeEquippable() const noexcept;
+	GUMP_TYPE IsTypeContainer() const noexcept;
 	static IT_TYPE GetTypeBase( ITEMID_TYPE id, const CUOItemTypeRec_HS &tile );
 	word GetMaxAmount();
 	bool SetMaxAmount(word amount);
 
 	static CItemBase * FindItemBase( ITEMID_TYPE id );
-	inline static bool IsValidDispID( ITEMID_TYPE id );
+	inline static bool IsValidDispID( ITEMID_TYPE id ) noexcept;
 
 	// NOTE: ??? All this stuff should be moved to scripts !
 	// Classify item by ID
-	static bool IsID_Multi( ITEMID_TYPE id );
-    static bool IsID_House( ITEMID_TYPE id );
-	static int	IsID_Door( ITEMID_TYPE id );
-	static bool IsID_DoorOpen( ITEMID_TYPE id );
-    static bool IsID_Ship( ITEMID_TYPE id );
-    static bool IsID_GamePiece( ITEMID_TYPE id );
-    static bool IsID_Track( ITEMID_TYPE id );
-    static bool IsID_WaterFish( ITEMID_TYPE id );
-    static bool IsID_WaterWash( ITEMID_TYPE id );
-    static bool IsID_Chair( ITEMID_TYPE id );
+	static bool IsID_Multi( ITEMID_TYPE id ) noexcept;
+    static bool IsID_House( ITEMID_TYPE id ) noexcept;
+	static int	IsID_Door( ITEMID_TYPE id ) noexcept;
+	static bool IsID_DoorOpen( ITEMID_TYPE id ) noexcept;
+    static bool IsID_Ship( ITEMID_TYPE id ) noexcept;
+    static bool IsID_GamePiece( ITEMID_TYPE id ) noexcept;
+    static bool IsID_Track( ITEMID_TYPE id ) noexcept;
+    static bool IsID_WaterFish( ITEMID_TYPE id ) noexcept;
+    static bool IsID_WaterWash( ITEMID_TYPE id ) noexcept;
+    static bool IsID_Chair( ITEMID_TYPE id ) noexcept;
 
-	inline static bool IsVisibleLayer( LAYER_TYPE layer );
+	inline static bool IsVisibleLayer( LAYER_TYPE layer ) noexcept;
 
 	static tchar * GetNamePluralize( lpctstr pszNameBase, bool fPluralize );
 	static bool GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * ptile );
@@ -273,22 +278,19 @@ public:
 		// Is this item really equippable ?
 		return (LAYER_TYPE)m_layer;
 	}
-    static bool IsTypeEquippable(IT_TYPE type, LAYER_TYPE layer);
-	bool IsTypeEquippable() const;
-	GUMP_TYPE IsTypeContainer() const;
 
 	lpctstr GetName() const;
 	lpctstr GetArticleAndSpace() const;
 
-	ITEMID_TYPE GetID() const
+	ITEMID_TYPE GetID() const noexcept
 	{
 		return (ITEMID_TYPE)(GetResourceID().GetResIndex());
 	}
-	ITEMID_TYPE GetDispID() const
+	ITEMID_TYPE GetDispID() const noexcept
 	{
 		return (ITEMID_TYPE)(m_dwDispIndex);
 	}
-	uint64 GetTFlags() const
+	uint64 GetTFlags() const noexcept
 	{
 		return m_qwFlags;
 	}
@@ -299,16 +301,16 @@ public:
 	virtual bool r_LoadVal( CScript & s ) override;
 	virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 
-	bool IsMovableType() const
+	bool IsMovableType() const noexcept
 	{
 		return ( m_weight != UINT16_MAX );
 	}
-	bool IsStackableType() const
+	bool IsStackableType() const noexcept
 	{
 		return Can( CAN_I_PILE );
 	}
 #define WEIGHT_UNITS 10
-	word GetWeight() const; // Get weight in tenths of a stone.
+	word GetWeight() const noexcept; // Get weight in tenths of a stone.
 	byte GetSpeed() const;
 
     /**
@@ -316,16 +318,16 @@ public:
     * @brief   Returns the RangeLow.
     * @return  Value.
     */
-    byte GetRangeL() const;
+    byte GetRangeL() const noexcept;
 
     /**
     * @fn  byte GetRangeH() const;
     * @brief   Returns the RangeHigh.
     * @return  Value.
     */
-    byte GetRangeH() const;
+    byte GetRangeH() const noexcept;
 
-	word GetVolume() const
+	word GetVolume() const noexcept
 	{
 		return ( m_weight / WEIGHT_UNITS );
 	}
@@ -341,7 +343,9 @@ public:
 
 public:
 	explicit CItemBase( ITEMID_TYPE id );
-	virtual ~CItemBase();
+
+	// These don't really get destroyed til the server is shut down but keep this around anyhow.
+	virtual ~CItemBase() = default;
 
 private:
 	CItemBase(const CItemBase& copy);
@@ -372,19 +376,19 @@ public:
 	virtual void UnLink() override;
 	CItemBase* GetItemDef() const;	
 
-	inline uint64 GetTFlags() const
+	inline uint64 GetTFlags() const noexcept
 	{
 		return( m_qwFlags );
 	}
-	inline height_t GetHeight() const
+	inline height_t GetHeight() const noexcept
 	{
 		return( m_Height );
 	}
-	void SetTFlags( uint64 Flags )
+	void SetTFlags( uint64 Flags ) noexcept
 	{
 		m_qwFlags = Flags;
 	}
-	void SetHeight( height_t Height)
+	void SetHeight( height_t Height) noexcept
 	{
 		m_Height = Height;
 	}
@@ -454,12 +458,12 @@ public:
 
 /* Inline Methods Definitions */
 
-bool CItemBase::IsVisibleLayer( LAYER_TYPE layer ) // static
+bool CItemBase::IsVisibleLayer( LAYER_TYPE layer ) noexcept // static
 {
 	return ((layer > LAYER_NONE) && (layer <= LAYER_HORSE) );
 }
 
-bool CItemBase::IsValidDispID( ITEMID_TYPE id ) // static
+bool CItemBase::IsValidDispID( ITEMID_TYPE id ) noexcept // static
 {
 	// Is this id in the base artwork set ? tile or multi.
 	return ( id > ITEMID_NOTHING && id < ITEMID_MULTI_MAX );

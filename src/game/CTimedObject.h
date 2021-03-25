@@ -8,10 +8,12 @@
 
 #include "../sphere/ProfileData.h"
 
-// TODO: here only a couple of methods use the mutex lock...
+class CComponent;
+class CWorldTicker;
 
 class CTimedObject
 {
+    friend class CComponent;
     friend class CWorldTicker;
 
 public:
@@ -46,7 +48,7 @@ protected:  virtual void _GoAwake();
 public:     virtual void  GoAwake();
 
     /**
-    * @brief returns the profiler type.
+    * @brief returns the type of ticking object.
     * @return the type.
     */
 protected:  inline PROFILE_TYPE _GetProfileType() const noexcept;
@@ -69,8 +71,8 @@ public:     virtual bool  OnTick(); // = 0;
     * @brief Check if IsDeleted();
     * @return true if it's deleted.
     */
-    virtual bool _IsDeleted() const = 0;
-    virtual bool  IsDeleted() const = 0;
+protected:  virtual bool _IsDeleted() const = 0;
+public:     virtual bool  IsDeleted() const = 0;
 
     /**
      * @brief   &lt; Gets raw Timeout.
@@ -93,15 +95,15 @@ public:     virtual void  SetTimeout(int64 iDelayInMsecs);
     * @brief   &lt; Timer.
     * @param   iDelayInSecs   Delay in seconds.
     */
-    void _SetTimeoutS(int64 iSeconds);
-    void  SetTimeoutS(int64 iSeconds);
+protected:  void _SetTimeoutS(int64 iSeconds);
+public:     void  SetTimeoutS(int64 iSeconds);
 
     /**
     * @brief   &lt; Timer.
     * @param   iDelayInTenths   Delay in tenths of second.
     */
-    void _SetTimeoutD(int64 iTenths);
-    void  SetTimeoutD(int64 iTenths);
+protected:  void _SetTimeoutD(int64 iTenths);
+public:     void  SetTimeoutD(int64 iTenths);
 
     /**
      * @brief   Query if this object is timer set.

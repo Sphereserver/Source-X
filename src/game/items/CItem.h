@@ -20,7 +20,9 @@
 #include "../CEntity.h"
 #include "CItemBase.h"
 
+
 class CWorldTicker;
+class CCSpawn;
 
 enum ITC_TYPE	// Item Template commands
 {
@@ -40,6 +42,7 @@ class CItem : public CObjBase
 	// RES_WORLDITEM
 
 	friend class CWorldTicker;
+	friend class CCSpawn;
 
 public:
 	static const char *m_sClassName;
@@ -684,7 +687,7 @@ public:
 protected:	virtual void _SetTimeout(int64 iMsecs) override final;
 
 public:
-	virtual void OnMoveFrom();
+	virtual void OnMoveFrom() {};	// Moving from current location.
 	virtual bool MoveTo(const CPointMap& pt, bool fForceFix = false); // Put item on the ground here.
 	bool MoveToUpdate(const CPointMap& pt, bool fForceFix = false);
 	bool MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool fForceFix = false);

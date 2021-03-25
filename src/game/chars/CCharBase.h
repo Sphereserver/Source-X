@@ -93,23 +93,23 @@ public:
     * @brief   Returns the RangeLow.
     * @return  Value.
     */
-    byte GetRangeL() const;
+    byte GetRangeL() const noexcept;
 
     /**
     * @brief   Returns the RangeHigh.
     * @return  Value.
     */
-    byte GetRangeH() const;
+    byte GetRangeH() const noexcept;
 
 
 	static CCharBase * FindCharBase( CREID_TYPE id );
-	static bool IsValidDispID( CREID_TYPE id );
-	static bool IsPlayableID( CREID_TYPE id, bool fCheckGhost = false);
-	static bool IsHumanID( CREID_TYPE id, bool fCheckGhost = false );
-	static bool IsElfID( CREID_TYPE id, bool fCheckGhost = false);
-	static bool IsGargoyleID( CREID_TYPE id, bool fCheckGhost = false );
+	static bool IsValidDispID( CREID_TYPE id ) noexcept;
+	static bool IsPlayableID( CREID_TYPE id, bool fCheckGhost = false) noexcept;
+	static bool IsHumanID( CREID_TYPE id, bool fCheckGhost = false ) noexcept;
+	static bool IsElfID( CREID_TYPE id, bool fCheckGhost = false) noexcept;
+	static bool IsGargoyleID( CREID_TYPE id, bool fCheckGhost = false ) noexcept;
 
-	bool IsFemale() const
+	bool IsFemale() const noexcept
 	{
 		return (( m_Can & CAN_C_FEMALE ) ? true : false );
 	}

@@ -1376,17 +1376,7 @@ void CItem::_SetTimeout( int64 iMsecs )
 	CTimedObject::_SetTimeout(iMsecs);
 
 	// Items on the ground must be put in sector list correctly.
-	if ( !IsTopLevel() )
-		return;
-
-	CSector * pSector = GetTopSector();
-	if ( !pSector )
-		return;
-}
-
-
-void CItem::OnMoveFrom()	// Moving from current location.
-{
+	ASSERT(IsTopLevel() || GetTopSector());
 }
 
 bool CItem::MoveToUpdate(const CPointMap& pt, bool fForceFix)

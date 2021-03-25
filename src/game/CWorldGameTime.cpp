@@ -8,16 +8,15 @@
 #define FELUCCA_SYNODIC_PERIOD		840		// in game world minutes
 
 
-CServerTime CWorldGameTime::GetCurrentTime() // static
+const CServerTime& CWorldGameTime::GetCurrentTime() noexcept // static
 {
 	//ADDTOCALLSTACK_INTENSIVE("CWorldGameTime::GetCurrentTime");
 	return g_World._GameClock.GetCurrentTime();  // Time in milliseconds
 }
 
 
-int64 CWorldGameTime::GetCurrentTimeInGameMinutes( int64 basetime ) // static
+int64 CWorldGameTime::GetCurrentTimeInGameMinutes( int64 basetime ) noexcept // static
 {
-	ADDTOCALLSTACK("CWorldGameTime::GetCurrentTimeInGameMinutes(int64)");
 	// Get the time of the day in GameWorld minutes.
     // basetime = ticks.
 	// 8 real world seconds = 1 game minute.
@@ -27,9 +26,8 @@ int64 CWorldGameTime::GetCurrentTimeInGameMinutes( int64 basetime ) // static
 	return ( basetime / g_Cfg.m_iGameMinuteLength );
 }
 
-int64 CWorldGameTime::GetCurrentTimeInGameMinutes() // static
+int64 CWorldGameTime::GetCurrentTimeInGameMinutes() noexcept // static
 {
-	ADDTOCALLSTACK("CWorldGameTime::GetCurrentTimeInGameMinutes");
 	return GetCurrentTimeInGameMinutes(GetCurrentTime().GetTimeRaw());
 }
 

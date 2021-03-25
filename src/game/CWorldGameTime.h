@@ -15,10 +15,10 @@ public:
 	static const char* m_sClassName;
 
 	#undef GetCurrentTime
-	static CServerTime GetCurrentTime();
+	static const CServerTime& GetCurrentTime() noexcept;
 
-	static int64 GetCurrentTimeInGameMinutes(int64 basetime);	// return game world minutes
-	static int64 GetCurrentTimeInGameMinutes();
+	static int64 GetCurrentTimeInGameMinutes(int64 basetime) noexcept;	// return game world minutes
+	static int64 GetCurrentTimeInGameMinutes() noexcept;
 	
 	static uint GetMoonPhase( bool fMoonIndex = false );
 	static int64 GetNextNewMoon( bool fMoonIndex );

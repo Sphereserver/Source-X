@@ -116,11 +116,6 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	SetResDispDnId(ITEMID_GOLD_C1);
 }
 
-CItemBase::~CItemBase()
-{
-	// These don't really get destroyed til the server is shut down but keep this around anyhow.
-}
-
 word CItemBase::GetMaxAmount()
 {
 	ADDTOCALLSTACK("CItemBase::GetMaxAmount");
@@ -266,7 +261,7 @@ CREID_TYPE CItemBase::FindCharTrack( ITEMID_TYPE trackID )	// static
 	return (CREID_TYPE)(pItemDef->m_ttFigurine.m_idChar.GetResIndex());
 }
 
-bool CItemBase::IsTypeArmor( IT_TYPE type )  // static
+bool CItemBase::IsTypeArmor( IT_TYPE type ) noexcept // static
 {
 	switch( type )
 	{
@@ -275,12 +270,11 @@ bool CItemBase::IsTypeArmor( IT_TYPE type )  // static
 		case IT_ARMOR_LEATHER:
 		case IT_SHIELD:
 			return true;
-
-		default:
-			return false;
 	}
+	return false;
 }
-bool CItemBase::IsTypeWeapon( IT_TYPE type )  // static
+
+bool CItemBase::IsTypeWeapon( IT_TYPE type ) noexcept // static
 {
 	// NOTE: a wand can be a weapon.
 	switch( type )
@@ -305,9 +299,8 @@ bool CItemBase::IsTypeWeapon( IT_TYPE type )  // static
 	}
 }
 
-GUMP_TYPE CItemBase::IsTypeContainer() const
+GUMP_TYPE CItemBase::IsTypeContainer() const noexcept
 {
-	ADDTOCALLSTACK("CItemBase::IsTypeContainer");
 	// IT_CONTAINER
 	// return the container gump id.
 
@@ -329,7 +322,7 @@ GUMP_TYPE CItemBase::IsTypeContainer() const
 	}
 }
 
-bool CItemBase::IsTypeSpellbook( IT_TYPE type )  // static
+bool CItemBase::IsTypeSpellbook( IT_TYPE type ) noexcept // static
 {
 	switch( type )
 	{
@@ -348,7 +341,7 @@ bool CItemBase::IsTypeSpellbook( IT_TYPE type )  // static
 	}
 }
 
-bool CItemBase::IsTypeMulti( IT_TYPE type )	// static
+bool CItemBase::IsTypeMulti( IT_TYPE type ) noexcept	// static
 {
 	switch( type )
 	{
@@ -363,10 +356,8 @@ bool CItemBase::IsTypeMulti( IT_TYPE type )	// static
 	}
 }
 
-bool CItemBase::IsTypeEquippable(IT_TYPE type, LAYER_TYPE layer)  // static
+bool CItemBase::IsTypeEquippable(IT_TYPE type, LAYER_TYPE layer) noexcept // static
 {
-    ADDTOCALLSTACK("CItemBase::IsTypeEquippable(static)");
-
     // Equippable on (possibly) visible layers.
 
     switch ( type )
@@ -410,28 +401,26 @@ bool CItemBase::IsTypeEquippable(IT_TYPE type, LAYER_TYPE layer)  // static
     return false;
 }
 
-bool CItemBase::IsTypeEquippable() const
+bool CItemBase::IsTypeEquippable() const noexcept
 {
-	ADDTOCALLSTACK("CItemBase::IsTypeEquippable");
 	return IsTypeEquippable(m_type, (LAYER_TYPE)m_layer);
 }
 
-bool CItemBase::IsID_Multi( ITEMID_TYPE id ) // static
+bool CItemBase::IsID_Multi( ITEMID_TYPE id ) noexcept // static
 {
 	// NOTE: Ships are also multi's
 	return ( id >= ITEMID_MULTI && id < ITEMID_MULTI_MAX );
 }
 
-bool CItemBase::IsID_House(ITEMID_TYPE id)
+bool CItemBase::IsID_House(ITEMID_TYPE id) noexcept
 {
     // IT_MULTI
     // IT_MULTI_CUSTOM
     return (((id >= ITEMID_HOUSE_SMALL_ST_PL) && (id <= ITEMID_HOUSE_SMALL_SHOP_MB)) || ((id >= ITEMID_HOUSEFOUNDATION_7x7) && (id <= ITEMID_HOUSEFOUNDATION_30x30)));
 }
 
-int CItemBase::IsID_Door( ITEMID_TYPE id ) // static
+int CItemBase::IsID_Door( ITEMID_TYPE id ) noexcept // static
 {
-	ADDTOCALLSTACK("CItemBase::IsID_Door");
 	// IT_DOOR
 	static const ITEMID_TYPE sm_Item_DoorBase[] =
 	{
@@ -487,16 +476,15 @@ int CItemBase::IsID_Door( ITEMID_TYPE id ) // static
 
 	for ( uint i = 0; i < CountOf(sm_Item_DoorBase); ++i)
 	{
-		int did = id - sm_Item_DoorBase[i];
+		const int did = id - sm_Item_DoorBase[i];
 		if ( did >= 0 && did <= 15 )
 			return ( did+1 );
 	}
 	return 0;
 }
 
-bool CItemBase::IsID_DoorOpen( ITEMID_TYPE id ) // static
+bool CItemBase::IsID_DoorOpen( ITEMID_TYPE id ) noexcept // static
 {
-	ADDTOCALLSTACK("CItemBase::IsID_DoorOpen");
   	int doordir = IsID_Door(id)-1;
     if ( doordir < 0 )
 		return false;
@@ -505,23 +493,23 @@ bool CItemBase::IsID_DoorOpen( ITEMID_TYPE id ) // static
 	return false;
 }
 
-bool CItemBase::IsID_Ship( ITEMID_TYPE id )
+bool CItemBase::IsID_Ship( ITEMID_TYPE id ) noexcept
 {
 	// IT_SHIP
 	return ( id >= ITEMID_MULTI && id <= ITEMID_GALLEON_BRIT2_W );
 }
 
-bool CItemBase::IsID_GamePiece( ITEMID_TYPE id ) // static
+bool CItemBase::IsID_GamePiece( ITEMID_TYPE id ) noexcept // static
 {
 	return ( id >= ITEMID_GAME1_CHECKER && id <= ITEMID_GAME_HI );
 }
 
-bool CItemBase::IsID_Track( ITEMID_TYPE id ) // static
+bool CItemBase::IsID_Track( ITEMID_TYPE id ) noexcept // static
 {
 	return ( id >= ITEMID_TRACK_BEGIN && id <= ITEMID_TRACK_END );
 }
 
-bool CItemBase::IsID_WaterFish( ITEMID_TYPE id ) // static
+bool CItemBase::IsID_WaterFish( ITEMID_TYPE id ) noexcept // static
 {
 	// IT_WATER
 	// Assume this means water we can fish in.
@@ -533,7 +521,7 @@ bool CItemBase::IsID_WaterFish( ITEMID_TYPE id ) // static
 	return false;
 }
 
-bool CItemBase::IsID_WaterWash( ITEMID_TYPE id ) // static
+bool CItemBase::IsID_WaterWash( ITEMID_TYPE id ) noexcept // static
 {
 	// IT_WATER_WASH
 	if ( id >= ITEMID_WATER_TROUGH_1 && id <= ITEMID_WATER_TROUGH_2	)
@@ -541,7 +529,7 @@ bool CItemBase::IsID_WaterWash( ITEMID_TYPE id ) // static
 	return IsID_WaterFish( id );
 }
 
-bool CItemBase::IsID_Chair( ITEMID_TYPE id ) // static
+bool CItemBase::IsID_Chair( ITEMID_TYPE id ) noexcept // static
 {
 	// Strangely there is not chair flag in the statics.mul file ??? !!!
 	// IT_CHAIR
@@ -729,7 +717,7 @@ void CItemBase::GetItemTiledataFlags( dword *pdwCanFlags, ITEMID_TYPE id ) // st
 {
 	ADDTOCALLSTACK("CItemBase::GetItemTiledataFlags");
 
-    CUOItemTypeRec_HS tiledata = {};
+    CUOItemTypeRec_HS tiledata{};
 	if ( ! CItemBase::GetItemData( id, &tiledata ))
 	{
         *pdwCanFlags = 0;
@@ -986,7 +974,7 @@ int CItemBase::CalculateMakeValue( int iQualityLevel ) const
 	return lValue;
 }
 
-word CItemBase::GetWeight() const
+word CItemBase::GetWeight() const noexcept
 {
     // Get weight in tenths of a stone.
     if ( ! IsMovableType())
@@ -1002,13 +990,13 @@ byte CItemBase::GetSpeed() const
 	return m_speed;
 }
 
-byte CItemBase::GetRangeL() const
+byte CItemBase::GetRangeL() const noexcept
 {
 	const auto pCCPItemWeapon = GetComponentProps<CCPropsItemWeapon>();
     return (byte)pCCPItemWeapon->GetPropertyNum(PROPIWEAP_RANGEL);
 }
 
-byte CItemBase::GetRangeH() const
+byte CItemBase::GetRangeH() const noexcept
 {
     const auto pCCPItemWeapon = GetComponentProps<CCPropsItemWeapon>();
     return (byte)pCCPItemWeapon->GetPropertyNum(PROPIWEAP_RANGEH);

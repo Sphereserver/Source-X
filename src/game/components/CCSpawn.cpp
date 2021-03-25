@@ -598,7 +598,7 @@ CCRET_TYPE CCSpawn::OnTickComponent()
 {
     ADDTOCALLSTACK("CCSpawn::OnTickComponent");
     int64 iMinutes;
-    CItem *pSpawnItem = static_cast<CItem*>(GetLink());
+    CItem *pSpawnItem = GetLink();
     if (_iTimeHi <= 0)
     {
         iMinutes = Calc_GetRandLLVal(30) + 1;
@@ -746,7 +746,7 @@ bool CCSpawn::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole *pSrc)
     {
         return false;
     }
-    CItem *pSpawnItem = static_cast<CItem*>(GetLink());
+    CItem *pSpawnItem = GetLink();
     switch (iCmd)
     {
         case ISPW_AMOUNT:
@@ -826,7 +826,7 @@ bool CCSpawn::r_LoadVal(CScript & s)
     {
         return false;
     }
-    CItem *pSpawnItem = static_cast<CItem*>(GetLink());
+    CItem *pSpawnItem = GetLink();
 
     switch (iCmd)
     {
@@ -997,7 +997,7 @@ void CCSpawn::r_Write(CScript & s)
     ADDTOCALLSTACK("CCSpawn:r_Write");
     EXC_TRY("Write");
 
-    CItem *pItem = static_cast<CItem*>(GetLink());
+    CItem *pItem = GetLink();
     if (_fIsChampion == false)
     {
         if (!FixDef())
