@@ -958,24 +958,33 @@ public:
     *@brief Calculates mana cost of a spell, taking in consideration the LowerManaCost and and if is  being cast by a wand or scroll.
     * 
     * @param pCharCaster: The caster casting the spell.
-    * @param iMana: The base cost in mana of the spell being cast.
+    * @param pSpell: The spell being cast.
     * @param pObj: The item (if any) from whom the spell is being cast.
     * 
-    * @return The mana cost of the spell.
+    * @return The mana cost of the spell if any.
     */
     ushort Calc_SpellManaCost(CChar * pCharCaster, const CSpellDef * pSpell, CObjBase * pObj);
 
+    /*
+    *@brief Calculates tithing cost of a spell, taking in consideration the LowerReagentCost property and if is  being cast by a wand or scroll.
+    *
+    * @param pCharCaster: The caster casting the spell.
+    * @param pSpell: The spell being cast.
+    * @param pObj: The item (if any) from whom the spell is being cast.
+    * @param fTest: Flag that determines when to consume the reagents.
+    * @return SCONT_BADINDEX if all the reagents are found, otherwise returns the first missing reagent.
+    */
     size_t Calc_SpellReagentsConsume(CChar* pCharCaster, const CSpellDef* pSpell, CObjBase* pObj, bool fTest = false);
 
     /*
-   *@brief Calculates tithing cost of a spell, taking in consideration the LowerReagentCost property and if is  being cast by a wand or scroll.
-   *        
-   * @param pCharCaster: The caster casting the spell.
-   * @param iMana: The base cost in tithing points of the spell being cast.
-   * @param pObj: The item (if any) from whom the spell is being cast.
-   *
-   * @return The tithing cost of the spell, could be 0 if the LowerReagentCost check is passed.
-   */
+    *@brief Calculates tithing cost of a spell, taking in consideration the LowerReagentCost property and if is  being cast by a wand or scroll.
+    *        
+    * @param pCharCaster: The caster casting the spell.
+    * @param pSpell: The spell being cast.
+    * @param pObj: The item (if any) from whom the spell is being cast.
+    *
+    * @return The tithing cost of the spell, could be 0 if the LowerReagentCost check is passed.
+    */
     ushort Calc_SpellTithingCost(CChar* pCharCaster, const CSpellDef* pSpell, CObjBase* pObj);
 
 #define SysMessageDefault( msg )	SysMessage( g_Cfg.GetDefaultMsg( msg ) )
