@@ -1350,7 +1350,7 @@ void CChar::Fight_HitTry()
 			}
 		}
 		else
-    {
+		{
 				Skill_Start(SKILL_NONE);
 				m_Fight_Targ_UID.InitUID();
 		}
