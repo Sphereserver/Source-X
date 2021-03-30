@@ -2457,9 +2457,13 @@ int CChar::Skill_Meditation( SKTRIG_TYPE stage )
 	// Try to regen your mana even faster than normal.
 	// Give experience only when we max out.
 
-	if ( stage == SKTRIG_ABORT )
-		return -SKTRIG_ABORT;
+	if (stage == SKTRIG_ABORT)
+	{
+		if ( IsClientActive() )
+			GetClientActive()->removeBuff(BI_ACTIVEMEDITATION);
 
+		return -SKTRIG_ABORT;
+	}
 	if ( stage == SKTRIG_FAIL )
 	{
 		if ( IsClientActive() )

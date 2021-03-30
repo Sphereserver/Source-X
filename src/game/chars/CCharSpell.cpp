@@ -2268,32 +2268,8 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 	if ( !Skill_CanUse(skill) )
 		return false;
 
-	const CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
-	const CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
-	const int iLowerManaCost = (int)GetPropNum(pCCPChar, PROPCH_LOWERMANACOST, pBaseCCPChar);
-	const int iLowerReagentCost = (int)GetPropNum(pCCPChar, PROPCH_LOWERREAGENTCOST, pBaseCCPChar);
-	ushort iManaUse = (ushort)(pSpellDef->m_wManaUse * (100 - minimum(iLowerManaCost, 40)) / 100);
-	ushort iTithingUse = (ushort)(pSpellDef->m_wTithingUse * (100 - minimum(iLowerReagentCost, 40)) / 100);
-
-	if (pSrc != this)
-	{
-		const CItem * pItem = dynamic_cast <const CItem*> (pSrc);
-		if (pItem)
-		{
-			const IT_TYPE iType = pItem->GetType();
-			if (iType == IT_WAND)
-			{
-				iManaUse = 0;
-				iTithingUse = 0;
-			}
-			else if (iType == IT_SCROLL)
-			{
-				iManaUse /= 2;
-				iTithingUse /= 2;
-			}
-		}
-	}
-
+	ushort iManaUse = g_Cfg.Calc_SpellManaCost(this, pSpellDef, pSrc);
+	ushort iTithingUse = g_Cfg.Calc_SpellTithingCost(this, pSpellDef, pSrc);
 
 	CScriptTriggerArgs Args( spellRef, iManaUse, pSrc );
 	if ( fTest )
@@ -2414,24 +2390,29 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 			}
 
 			// check for reagents
-			if ( g_Cfg.m_fReagentsRequired && ! m_pNPC && (pSrc == this) )
+			const size_t iMissingReagents = g_Cfg.Calc_SpellReagentsConsume(this, pSpellDef, pSrc, fTest);
+			if ( iMissingReagents != SCONT_BADINDEX )
 			{
-				if ( iLowerReagentCost <= Calc_GetRandVal(100))
+				if ( fFailMsg )
 				{
-					CContainer* pCont = static_cast<CContainer*>(this);
-					const CResourceQtyArray* pRegs = &(pSpellDef->m_Reags);
-					const size_t iMissing = pCont->ResourceConsumePart( pRegs, 1, 100, fTest );
-					if ( iMissing != SCONT_BADINDEX )
-					{
-						if ( fFailMsg )
-						{
-							const CResourceDef * pReagDef = g_Cfg.ResourceGetDef((*pRegs)[iMissing].GetResourceID() );
-							SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_SPELL_TRY_NOREGS ), pReagDef ? pReagDef->GetName() : g_Cfg.GetDefaultMsg( DEFMSG_SPELL_TRY_THEREG ) );
-						}
-						return false;
-					}
+					const CResourceDef * pReagDef = g_Cfg.ResourceGetDef((pSpellDef->m_Reags)[iMissingReagents].GetResourceID() );
+					SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_SPELL_TRY_NOREGS ), pReagDef ? pReagDef->GetName() : g_Cfg.GetDefaultMsg( DEFMSG_SPELL_TRY_THEREG ) );
 				}
+				return false;
+			}	
+
+			// Check for Tithing
+			CVarDefContNum* pVarTithing = GetDefKeyNum("Tithing", false);
+			int64 iValTithing = pVarTithing ? pVarTithing->GetValNum() : 0;
+			if (iValTithing < iTithingUse)
+			{
+				if (fFailMsg)
+					SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TRY_NOTITHING), iTithingUse);
+				return false;
 			}
+			// Consume tithing points if casting is successfull.
+			if (!fTest && iTithingUse)
+				pVarTithing->SetValNum(iValTithing - iTithingUse);
 		}
 	}
 
@@ -2453,39 +2434,9 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 			SysMessageDefault(DEFMSG_SPELL_TRY_NOMANA);
 		return false;
 	}
+	// Consume mana if casting is successfull
 	if (!fTest && iManaUse)
-	{
-		// Consume mana.
-        bool fConsumeMana = true;
-		if (m_Act_Difficulty < 0)	// use diff amount of mana if we fail.
-		{
-            if (g_Cfg.m_fManaLossFail)
-			    iManaUse = iManaUse / 2 + (ushort)(Calc_GetRandVal(iManaUse / 2 + iManaUse / 4));
-            else
-                fConsumeMana = false;
-		}
-        if (fConsumeMana)
-		    UpdateStatVal(STAT_INT, -iManaUse);
-	}
-
-	// Check for Tithing
-    CVarDefContNum* pVarTithing = GetDefKeyNum("Tithing", false);
-    int64 iValTithing = pVarTithing ? pVarTithing->GetValNum() : 0;
-	if (iValTithing < iTithingUse)
-	{
-		if (fFailMsg)
-			SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TRY_NOTITHING), iTithingUse);
-		return false;
-	}
-	if (!fTest && iTithingUse)
-	{
-		// Consume points
-		if (m_Act_Difficulty < 0)	// use diff amount of points if we fail.
-		{
-			iTithingUse = iTithingUse / 2 + (ushort)(Calc_GetRandVal(iTithingUse / 2 + iTithingUse / 4));
-		}
-        pVarTithing->SetValNum(iValTithing - iTithingUse);
-	}
+		UpdateStatVal(STAT_INT, -iManaUse);
 
 	return true;
 }
@@ -3171,8 +3122,20 @@ void CChar::Spell_CastFail(bool fAbort)
 {
 	ADDTOCALLSTACK("CChar::Spell_CastFail");
 	ITEMID_TYPE iT1 = ITEMID_FX_SPELL_FAIL;
-	CScriptTriggerArgs	Args( m_atMagery.m_iSpell, 0, m_Act_Prv_UID.ObjFind() );
+
+	ushort iManaLoss = 0, iTithingLoss = 0;
+	CSpellDef *pSpell = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
+	if (g_Cfg.m_fManaLossFail && !fAbort)
+		iManaLoss = g_Cfg.Calc_SpellManaCost(this, pSpell, m_Act_Prv_UID.ObjFind());
+
+	if (g_Cfg.m_fReagentLossFail && !fAbort)
+		iTithingLoss = g_Cfg.Calc_SpellTithingCost(this, pSpell, m_Act_Prv_UID.ObjFind());
+
+	CScriptTriggerArgs	Args( m_atMagery.m_iSpell, iManaLoss, m_Act_Prv_UID.ObjFind() );
+
 	Args.m_VarsLocal.SetNum("CreateObject1",iT1);
+	Args.m_VarsLocal.SetNum("TithingLoss", iTithingLoss);
+
 	if ( IsTrigUsed(TRIGGER_SPELLFAIL) )
 	{
 		if ( OnTrigger( CTRIG_SpellFail, this, &Args ) == TRIGRET_RET_TRUE )
@@ -3185,9 +3148,12 @@ void CChar::Spell_CastFail(bool fAbort)
 			return;
 	}
 
+	iManaLoss = (ushort)Args.m_iN2;
+	iTithingLoss = (ushort)Args.m_VarsLocal.GetKeyNum("TithingLoss");
+
 	HUE_TYPE iColor = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("EffectColor"));
 	dword dwRender = (dword)Args.m_VarsLocal.GetKeyNum("EffectRender");
-
+	
 	iT1 = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1")));
 	if (iT1)
 		Effect(EFFECT_OBJ, iT1, this, 1, 30, false, iColor, dwRender);
@@ -3196,11 +3162,23 @@ void CChar::Spell_CastFail(bool fAbort)
 	if ( IsClientActive() )
 		GetClientActive()->addObjMessage( g_Cfg.GetDefaultMsg( DEFMSG_SPELL_GEN_FIZZLES ), this );
 
-	if ( g_Cfg.m_fReagentLossFail && !fAbort )
+	//consume the reagents and tithing points (if any).
+	if (g_Cfg.m_fReagentLossFail && !fAbort)
 	{
-		// consume the regs.
-		Spell_CanCast( m_atMagery.m_iSpell, false, m_Act_Prv_UID.ObjFind(), false );
+		//Spell_CanCast(m_atMagery.m_iSpell, false, m_Act_Prv_UID.ObjFind(), false);
+		g_Cfg.Calc_SpellReagentsConsume(this, pSpell, m_Act_Prv_UID.ObjFind());
+		if ( iTithingLoss > 0)
+		{
+			CVarDefContNum* pVarTithing = GetDefKeyNum("Tithing", false);
+			int64 iValTithing = pVarTithing ? pVarTithing->GetValNum() : 0;
+			pVarTithing->SetValNum(iValTithing - iTithingLoss);
+		}
 	}
+
+	//consume mana.
+	if (g_Cfg.m_fManaLossFail && !fAbort)
+		UpdateStatVal(STAT_INT, -iManaLoss);
+
 }
 
 int CChar::Spell_CastStart()

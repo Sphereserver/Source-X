@@ -2532,3 +2532,12 @@ Must have event, even if it's empty, since it's applied by the source to generat
    remembering to remove the flag (CANMASK &= ~<def.CAN_NOSLEEP>) if you don't need it anymore.
 - Fixed: Items created under @CreateLoot trigger played the drop sound before being put in the corpse.
 - Fixed: FORCONT not giving a warning if it was called with only 1 argument.
+
+29-03-2021, Drk84
+- Fixed: ManaLoss fail not working (Issue #602).
+- Fixed: Meditation Buff Icon not removed when the skill was aborted (Issue #646).
+- Added: New arguments in @SpellFail / @Fail trigger:
+		 ARGN2: The mana loss if the spell is failed.
+		 local.tithingloss: The tithing points loss if the spell is failed.
+		 While both are writeable, they only works if  ManaLossFail or ReagentLossFail ( also for tithing points) are enabled in the sphere.ini
+- Updated SphereCrypt.ini
