@@ -2486,6 +2486,8 @@ void CItemMulti::r_Write(CScript & s)
     {
         s.WriteKeyHex("OWNER", (dword)_uidOwner);
     }
+
+    // House general
     if (_iHouseType)
     {
         s.WriteKeyHex("HOUSETYPE", (dword)_iHouseType);
@@ -2509,27 +2511,8 @@ void CItemMulti::r_Write(CScript & s)
                 s.WriteKeyHex("ADDFRIEND", (dword)uid);
             }
         }
-    }
-    if (!_lVendors.empty())
-    {
-        for (const CUID& uid : _lVendors)
-        {
-            if (uid.IsValidUID())
-            {
-                s.WriteKeyHex("ADDVENDOR", (dword)uid);
-            }
-        }
-    }
-    if (!_lLockDowns.empty())
-    {
-        for (const CUID& uid : _lLockDowns)
-        {
-            if (uid.IsValidUID())
-            {
-                s.WriteKeyHex("LOCKITEM", (dword)uid);
-            }
-        }
-    }
+    }   
+
     if (!_lComps.empty())
     {
         for (const CUID& uid : _lComps)
@@ -2537,16 +2520,6 @@ void CItemMulti::r_Write(CScript & s)
             if (uid.IsValidUID())
             {
                 s.WriteKeyHex("ADDCOMP", (dword)uid);
-            }
-        }
-    }
-    if (!_lSecureContainers.empty())
-    {
-        for (const CUID& uid : _lSecureContainers)
-        {
-            if (uid.IsValidUID())
-            {
-                s.WriteKeyHex("SECURE", (dword)uid);
             }
         }
     }
@@ -2560,10 +2533,62 @@ void CItemMulti::r_Write(CScript & s)
             }
         }
     }
+    if (!_lSecureContainers.empty())
+    {
+        for (const CUID& uid : _lSecureContainers)
+        {
+            if (uid.IsValidUID())
+            {
+                s.WriteKeyHex("SECURE", (dword)uid);
+            }
+        }
+    }
+
+    if (!_lLockDowns.empty())
+    {
+        for (const CUID& uid : _lLockDowns)
+        {
+            if (uid.IsValidUID())
+            {
+                s.WriteKeyHex("LOCKITEM", (dword)uid);
+            }
+        }
+    }
+    if (auto val = GetLockdownsPercent())
+    {
+        s.WriteKeyVal("LOCKDOWNSPERCENT", val);
+    }
+
     const CUID uidCrate = GetMovingCrate(false);
     if (uidCrate.IsValidUID())
     {
         s.WriteKeyHex("MOVINGCRATE", uidCrate);
+    }
+    
+    // House vendors
+    if (!_lVendors.empty())
+    {
+        for (const CUID& uid : _lVendors)
+        {
+            if (uid.IsValidUID())
+            {
+                s.WriteKeyHex("ADDVENDOR", (dword)uid);
+            }
+        }
+    }
+    if (auto val = GetBaseVendors())
+    {
+        s.WriteKeyVal("BASEVENDORS", val);
+    }
+
+    // House Storage
+    if (auto val = GetBaseStorage())
+    {
+        s.WriteKeyVal("BASESTORAGE", val);
+    }
+    if (auto val = GetIncreasedStorage())
+    {
+        s.WriteKeyVal("INCREASEDSTORAGE", val);
     }
 }
 

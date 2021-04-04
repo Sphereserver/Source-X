@@ -3675,7 +3675,6 @@ void CChar::r_Write( CScript & s )
 
     // Do not save TAG.LastHit (used by PreHit combat flag). It's based on the server uptime, so if this tag isn't zeroed,
     //  after the server restart the char may not be able to attack until the server reaches the serv.time when the previous TAG.LastHit was set.
-	{
 	int64 iValLastHit = 0;
 	CVarDefContNum* pVarLastHit = m_TagDefs.GetKeyDefNum("LastHit");
 	if (pVarLastHit)
@@ -3690,18 +3689,16 @@ void CChar::r_Write( CScript & s )
 	{
 		pVarLastHit->SetValNum(iValLastHit);
 	}
-	}
 
 	if ( m_pPlayer )
 		m_pPlayer->r_WriteChar(this, s);
 	if ( m_pNPC )
 		m_pNPC->r_WriteChar(this, s);
 
-	{
 	const CPointMap& pt = GetTopPoint();
 	if (pt.IsValidPoint())
 		s.WriteKeyStr("P", pt.WriteUsed());
-	}
+
 	if ( !m_sTitle.empty() )
 		s.WriteKeyStr("TITLE", m_sTitle.c_str());
 	if ( m_fonttype != FONT_NORMAL )
@@ -3723,16 +3720,13 @@ void CChar::r_Write( CScript & s )
 	if ( m_defense )
 		s.WriteKeyVal("ARMOR", m_defense);
 
-	{
 	const uint uiActUID = m_Act_UID.GetObjUID();
 	if ((uiActUID & UID_UNUSED) != UID_UNUSED)
 		s.WriteKeyHex("ACT", uiActUID);
-	}
 
 	if ( m_Act_p.IsValidPoint() )
 		s.WriteKeyStr("ACTP", m_Act_p.WriteUsed());
 
-	{
 	const SKILL_TYPE action = Skill_GetActive();
 	if (action != SKILL_NONE)
 	{
@@ -3759,7 +3753,6 @@ void CChar::r_Write( CScript & s )
 				s.WriteKeyHex("ACTARG3", m_atUnk.m_dwArg3);
 		}
 	}
-	}
 
 	if ( m_virtualGold )
 		s.WriteKeyVal("VIRTUALGOLD", m_virtualGold);
@@ -3780,7 +3773,6 @@ void CChar::r_Write( CScript & s )
     s.WriteKeyVal("OKARMA", GetKarma() );
     s.WriteKeyVal("OFAME", GetFame() );
 
-	{
 	int iVal;
 	if ((iVal = Stat_GetMod(STAT_FOOD)) != 0)
 		s.WriteKeyVal("MODFOOD", iVal);
@@ -3831,7 +3823,6 @@ void CChar::r_Write( CScript & s )
 	if ((iVal = Stat_GetMax(STAT_INT)) != Stat_GetAdjusted(STAT_INT))
 		s.WriteKeyVal("MAXMANA", iVal);     // should be OMAXMANA, but we keep it like this for backwards compatibility
 	s.WriteKeyVal("MANA", Stat_GetVal(STAT_INT));
-	}
 
 	static constexpr lpctstr _ptcKeyRegen[STAT_QTY] =
 	{

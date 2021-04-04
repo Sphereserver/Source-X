@@ -90,25 +90,28 @@ void CEntityProps::r_Write(CScript & s) // Storing data in the worldsave.
 bool CEntityProps::CEPLoopLoad(CEPLoopRet_t *pRet, CScript& s, CObjBase* pLinkedObj, const RESDISPLAY_VERSION iLimitToExpansion)
 {
     const lpctstr ptcKey = s.GetKey();
+    CEPLoopRet_t localRet(*pRet); // init with implicit copy constructor (working with a copy on the stack should be faster?)
     for (const auto& pairElem : _lComponentProps)
     {
         if (CComponentProps* pComponent = pairElem.second.get())
         {
             const KeyTableDesc_s ktd = pComponent->GetPropertyKeysData();
-            pRet->iPropIndex = (CComponentProps::PropertyIndex_t) FindTableSorted(ptcKey, ktd.pptcTable, ktd.iTableSize - 1);
-            if (pRet->iPropIndex == (CComponentProps::PropertyIndex_t) - 1)
+            localRet.iPropIndex = (CComponentProps::PropertyIndex_t) FindTableSorted(ptcKey, ktd.pptcTable, ktd.iTableSize - 1);
+            if (localRet.iPropIndex == (CComponentProps::PropertyIndex_t) - 1)
             {
                 // The key doesn't belong to this CComponentProps.
                 continue;
             }
-            pRet->fPropStr = pComponent->IsPropertyStr(pRet->iPropIndex);
-            if (pComponent->FindLoadPropVal(s, pLinkedObj, iLimitToExpansion, pRet->iPropIndex, pRet->fPropStr))
+            localRet.fPropStr = pComponent->IsPropertyStr(localRet.iPropIndex);
+            if (pComponent->FindLoadPropVal(s, pLinkedObj, iLimitToExpansion, localRet.iPropIndex, localRet.fPropStr))
             {
                 // The property belongs to this CCP and it is set.
+                *pRet = localRet;
                 return true;
             }
             // The property belongs to this CCP but is not set. Remember which CCP this is, so if needed we can search directly for this CCP type instead of looping through all of them again.
-            pRet->iCCPType = pComponent->GetType();
+            localRet.iCCPType = pComponent->GetType();
+            *pRet = localRet;
             return true;
         }
     }

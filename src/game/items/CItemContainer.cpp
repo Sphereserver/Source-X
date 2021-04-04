@@ -544,11 +544,6 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 		}
 	}
 
-	if (/*pItem->IsTimerSet() &&*/ !pItem->IsSleeping())
-	{
-		pItem->GoSleep();		// prevent the timer from firing if the item is inside a container
-	}
-
 	// check for custom values in TDATA3/TDATA4
 	CItemBase *pContDef = Item_GetDef();
 	if (pContDef->m_ttContainer.m_dwMinXY || pContDef->m_ttContainer.m_dwMaxXY)
@@ -590,7 +585,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 
     // Try drop it on given container grid index (if not available, drop it on next free index)
 	{
-		bool fGridCellUsed[UCHAR_MAX]{};
+		bool fGridCellUsed[UCHAR_MAX] {false};
 		for (const CSObjContRec* pObjRec : *this)
 		{
 			const CItem* pTry = static_cast<const CItem*>(pObjRec);

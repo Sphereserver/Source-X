@@ -84,11 +84,6 @@ void CWorldTicker::AddTimedObject(const int64 iTimeout, CTimedObject* pTimedObje
         }
     }
     
-    if (fNeedsLock)
-        pTimedObject->SetTimeoutRaw(iTimeout);
-    else
-        pTimedObject->_SetTimeoutRaw(iTimeout);
-
     if (fCanTick)
     {
         _InsertTimedObject(iTimeout, pTimedObject);

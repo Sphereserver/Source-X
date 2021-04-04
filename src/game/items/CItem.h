@@ -563,8 +563,8 @@ protected:
 
 	// On CItem, _OnTick is virtual also because we need to call the topmost superclass:
 	//	a CItem can be the base class for CItemShip, CItemMessage...
-protected:	virtual bool _OnTick() override;
-//public:	virtual bool  OnTick() override;
+public:
+	virtual bool _OnTick() override;
 
 public:
 	virtual void OnHear( lpctstr pszCmd, CChar * pSrc );

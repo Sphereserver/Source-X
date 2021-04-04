@@ -86,11 +86,13 @@ void CTimedObject::_SetTimeout(int64 iDelayInMsecs)
     if (iDelayInMsecs < 0)
     {
         CWorldTickingList::DelObjSingle(this, false);
+        _SetTimeoutRaw(0);
     }
     else
     {
         const int64 iNewTimeout = CWorldGameTime::GetCurrentTime().GetTimeRaw() + iDelayInMsecs;
-        CWorldTickingList::AddObjSingle(iNewTimeout, this, false, false); // Adding this object to the tick's list.
+        CWorldTickingList::AddObjSingle(iNewTimeout, this, false, false); // Adding this object to the ticks list.
+        _SetTimeoutRaw(iNewTimeout);
     }
 }
 

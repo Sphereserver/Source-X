@@ -2910,7 +2910,8 @@ bool CChar::OnTickEquip( CItem * pItem )
 		return Spell_Equip_OnTick(pItem);
 	}
 
-	return( pItem->OnTick());
+	// Do not acquire the mutex lock here, or we'll have deadlocks in multiple situations
+	return pItem->_OnTick();
 }
 
 // Leave the antidote in your body for a while.

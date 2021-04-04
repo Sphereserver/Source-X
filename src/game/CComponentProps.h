@@ -139,7 +139,7 @@ protected:
 public:
     virtual ~CComponentProps() noexcept = default;
     
-    COMPPROPS_TYPE GetType() const noexcept {
+    inline COMPPROPS_TYPE GetType() const noexcept {
         return _iType;
     }
 

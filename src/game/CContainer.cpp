@@ -151,20 +151,33 @@ void CContainer::ContentAddPrivate( CItem *pItem )
 
 	OnWeightChange(pItem->GetWeight());
 
-	if (auto pObj = dynamic_cast<const CObjBase*>(this))
+	if (auto pThisObj = dynamic_cast<const CObjBase*>(this))
 	{
-		if (pObj->IsSleeping())
+		if (pThisObj->IsItem())
 		{
+			// prevent the timer from firing if the item is inside a container-type item
 			if (!pItem->IsSleeping())
 			{
 				pItem->GoSleep();
 			}
+			pItem->SetDecayTime(-1);
 		}
 		else
 		{
-			if (pItem->IsSleeping())
+			// It's a char
+			if (pThisObj->IsSleeping())
 			{
-				pItem->GoAwake();
+				if (!pItem->IsSleeping())
+				{
+					pItem->GoSleep();
+				}
+			}
+			else
+			{
+				if (pItem->IsSleeping())
+				{
+					pItem->GoAwake();
+				}
 			}
 		}
 	}

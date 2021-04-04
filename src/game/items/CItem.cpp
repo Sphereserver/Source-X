@@ -1374,9 +1374,6 @@ void CItem::_SetTimeout( int64 iMsecs )
 	//  It may be a decay timer or it might be a trigger timer
 
 	CTimedObject::_SetTimeout(iMsecs);
-
-	// Items on the ground must be put in sector list correctly.
-	ASSERT(IsTopLevel() || GetTopSector());
 }
 
 bool CItem::MoveToUpdate(const CPointMap& pt, bool fForceFix)
@@ -1402,6 +1399,7 @@ void CItem::SetDecayTime(int64 iMsecsTimeout)
 	{
 		return;	// already a timer here. let it expire on it's own
 	}
+
 	if (iMsecsTimeout == 0)
 	{
 		if (IsTopLevel())
@@ -1410,6 +1408,7 @@ void CItem::SetDecayTime(int64 iMsecsTimeout)
             iMsecsTimeout = -1;
 	}
 	_SetTimeout(iMsecsTimeout);
+
 	if (iMsecsTimeout >= 0)
 		SetAttr(ATTR_DECAY);
 	else
@@ -2310,17 +2309,13 @@ void CItem::r_Write( CScript & s )
 
 	CObjBase::r_Write(s);
 
-	{
 	const ITEMID_TYPE iDispID = GetDispID();
 	if (iDispID != GetID())	// the item is flipped.
 		s.WriteKeyStr("DISPID", g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, iDispID)));
-	}
 
-	{
 	const int iAmount = GetAmount();
 	if (iAmount != 1)
 		s.WriteKeyVal("AMOUNT", iAmount);
-	}
 
 	if ( !pItemDef->IsType(m_type) )
 		s.WriteKeyStr("TYPE", g_Cfg.ResourceGetName(CResourceID(RES_TYPEDEF, m_type)));
@@ -2334,14 +2329,15 @@ void CItem::r_Write( CScript & s )
 		s.WriteKeyFormat("ARMOR", "%hu,%hu", m_defenseBase, m_defenseBase + m_defenseRange);
     if (!GetSpawn())
     {
-		CSString sVal;
         if ( m_itNormal.m_more1 )
         {
+			CSString sVal(false);
             r_WriteMore1(sVal);
             s.WriteKeyStr("MORE1", sVal.GetBuffer());
         }
         if ( m_itNormal.m_more2 )
         {
+			CSString sVal(false);
             r_WriteMore2(sVal);
             s.WriteKeyStr("MORE2", sVal.GetBuffer());
         }
@@ -5106,7 +5102,7 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 		int iDist = ptCoords.GetDist(pChar->GetTopPoint());
 		if ( iDist > iVisibility ) // Can we see it?
 			continue;
-		iCharSighted ++;
+		++ iCharSighted;
 		if ( !pCharSighted || iDist < ptCoords.GetDist(pCharSighted->GetTopPoint())) // Only find the closest char to us
 		{
 			pCharSighted = pChar;

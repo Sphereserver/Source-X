@@ -271,8 +271,8 @@ void CSString::FormatV(lpctstr pszFormat, va_list args)
 }
 
 #define FORMATNUM_WRAPPER(function, arg, base) \
-    TemporaryString tsBuf; \
-    Copy(function(arg, tsBuf.buffer(), tsBuf.capacity(), base))
+    tchar ptcBuf[24]; \
+    Copy(function(arg, ptcBuf, sizeof(ptcBuf), base))
 
 void CSString::FormatLLHex(llong iVal)
 {
@@ -286,7 +286,7 @@ void CSString::FormatULLHex(ullong uiVal)
 }
 void CSString::FormatHex(dword dwVal)
 {
-    // In principle, all values in sphere logic are signed...
+    // As a general rule, all values in sphere logic are signed...
     // dwVal may contain a (signed) number "big" as the numeric representation of an unsigned ( +(INT_MAX*2) ),
     // but in this case its bit representation would be considered as negative, yet we know it's a positive number.
     // So if it's negative we MUST hexformat it as 64 bit int or reinterpreting it in a
