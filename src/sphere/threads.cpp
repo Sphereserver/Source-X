@@ -610,9 +610,7 @@ void AbstractSphereThread::pushStackCall(const char *name) noexcept
     if (m_freezeCallStack == false)
     {
         m_stackInfo[m_stackPos].functionName = name;
-        m_stackInfo[m_stackPos].startTime = CSTime::GetPreciseSysTimeMicro();
         ++m_stackPos;
-        m_stackInfo[m_stackPos].startTime = 0;
     }
 }
 
@@ -633,14 +631,12 @@ void AbstractSphereThread::printStackTrace()
     
     const uint threadId = getId();
     const lpctstr threadName = getName();
-    llong startTime = m_stackInfo[0].startTime;
 
 	g_Log.EventDebug("Printing STACK TRACE for debugging purposes.\n");
-    // On Windows versions prior to XP, startTime is the number of ticks, not microseconds
-	g_Log.EventDebug(" __ thread (id) name __ |  # | _____________ function _____________ | microseconds passed from previous function start\n");
+	g_Log.EventDebug(" __ thread (id) name __ |  # | _____________ function _____________ |\n");
 	for ( size_t i = 0; i < CountOf(m_stackInfo); ++i )
 	{
-		if( m_stackInfo[i].startTime == 0 )
+		if( m_stackInfo[i].functionName == nullptr )
 			break;
 
         const bool origin = (i == (m_stackPos - 1));
@@ -653,11 +649,8 @@ void AbstractSphereThread::printStackTrace()
                 extra = "<-- exception catch point (below is guessed and could be incorrect!)";
         }
 
-        const int timedelta = (int)(m_stackInfo[i].startTime - startTime);
-		g_Log.EventDebug("(%0.5u)%16.16s | %2u | %36.36s | +%d %s\n",
-			threadId, threadName, (uint)i, m_stackInfo[i].functionName, timedelta, extra);
-
-		startTime = m_stackInfo[i].startTime;
+		g_Log.EventDebug("(%0.5u)%16.16s | %2u | %36.36s | %s\n",
+			threadId, threadName, (uint)i, m_stackInfo[i].functionName, extra);
 	}
 
 	freezeCallStack(false);

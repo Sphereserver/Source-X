@@ -105,20 +105,25 @@ struct CPointMap : public CPointBase
 {
 	// A point in the world (or in a container) (initialized)
     CPointMap() noexcept = default;
-	CPointMap(short x, short y, char z = 0, uchar map = 0) noexcept;
+	CPointMap(short x, short y, char z = 0, uchar map = 0) noexcept :
+		CPointBase(x, y, z, map) { }
 
-	CPointMap(const CPointMap&) noexcept;
-	CPointMap(const CPointBase&) noexcept;
+	CPointMap(const CPointMap& pt) noexcept :
+		CPointBase(pt.m_x, pt.m_y, pt.m_z, pt.m_map) { }
+	CPointMap(const CPointBase& pt) noexcept :
+		CPointBase(pt.m_x, pt.m_y, pt.m_z, pt.m_map) { }
+
 	CPointMap(CPointMap&&) noexcept = default;
-	CPointMap(CPointBase&& pt) noexcept : CPointMap(static_cast<CPointMap&&>(pt)) {}
+	CPointMap(CPointBase&& pt) noexcept : CPointMap(static_cast<CPointMap&&>(pt)) { }
+
+	CPointMap(tchar* pVal) {
+		Read(pVal);
+	}
 
 	CPointMap& operator = (const CPointMap&) noexcept = default;
-	CPointMap& operator = (const CPointBase&) noexcept;
-    
-    inline CPointMap(tchar * pVal)
-    {
-        Read( pVal );
-    }
+	CPointMap& operator = (const CPointBase& pt) noexcept {
+		return CPointMap::operator=(static_cast<const CPointMap&>(pt));
+	}
 };
 
 struct CPointSort : public CPointMap

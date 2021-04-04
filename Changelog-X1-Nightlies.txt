@@ -2546,3 +2546,5 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: Item TIMER not reset and ATTR_DECAY not cleared after moving the item into a container (Issue #655).
 - Fixed: BaseVendors and BaseStorage house properties not being saved (Issue #643).
 - Fixed: cont.consume on @Timer freezes the server if char does not have the item and amount (Issue #654).
+- Changed: To achieve better overall server speed, removed the report of time difference between two consecutive function calls in the call stack trace.
+   Getting the system time so often with a decent precision is fairly slow.

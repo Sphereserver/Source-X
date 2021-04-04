@@ -898,8 +898,8 @@ bool CChar::IsOwnedBy( const CChar * pChar, bool fAllowGM ) const
 lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 {
 	ADDTOCALLSTACK("CChar::GetTradeTitle");
-	if ( !m_sTitle.empty() )
-		return m_sTitle.c_str();
+	if ( !m_sTitle.IsEmpty() )
+		return m_sTitle.GetBuffer();
 
 	tchar *pTemp = Str_GetTemp();
     const CCharBase *pCharDef = Char_GetDef();
@@ -911,7 +911,8 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 	{
 		if ( !IsIndividualName() )
 			return "";	// same as type anyhow.
-		snprintf(pTemp, STR_TEMPLENGTH, "%s %s", pCharDef->IsFemale() ? g_Cfg.GetDefaultMsg(DEFMSG_TRADETITLE_ARTICLE_FEMALE) : g_Cfg.GetDefaultMsg(DEFMSG_TRADETITLE_ARTICLE_MALE), pCharDef->GetTradeName());
+		lpctstr ptcArticle = pCharDef->IsFemale() ? g_Cfg.GetDefaultMsg(DEFMSG_TRADETITLE_ARTICLE_FEMALE) : g_Cfg.GetDefaultMsg(DEFMSG_TRADETITLE_ARTICLE_MALE);
+		snprintf(pTemp, STR_TEMPLENGTH, "%s %s", ptcArticle, pCharDef->GetTradeName());
 		return pTemp;
 	}
 

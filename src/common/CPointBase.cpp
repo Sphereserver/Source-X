@@ -937,31 +937,6 @@ int CPointBase::GetPointSortIndex() const noexcept
 
 
 //*************************************************************************
-// -CPointMap
-
-CPointMap::CPointMap( short x, short y, char z, uchar map ) noexcept :
-	CPointBase(x, y, z, map)
-{
-}
-
-CPointMap::CPointMap(const CPointMap& pt) noexcept :
-	CPointBase(pt.m_x, pt.m_y, pt.m_z, pt.m_map)
-{
-
-}
-
-CPointMap::CPointMap(const CPointBase& pt) noexcept :
-	CPointBase(pt.m_x, pt.m_y, pt.m_z, pt.m_map)
-{
-}
-
-CPointMap& CPointMap::operator = (const CPointBase& pt) noexcept
-{
-	return CPointMap::operator=(static_cast<const CPointMap&>(pt));
-}
-
-
-//*************************************************************************
 // -CPointSort
 
 CPointSort::CPointSort(short x, short y, char z, uchar map ) noexcept :

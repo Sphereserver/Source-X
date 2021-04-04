@@ -497,10 +497,11 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 		}
 	}
 
-	return CPointMap(
-		(word)(sm_ContSize[i].m_minx + Calc_GetRandVal(sm_ContSize[i].m_maxx - sm_ContSize[i].m_minx)),
-		(word)(sm_ContSize[i].m_miny + Calc_GetRandVal(sm_ContSize[i].m_maxy - sm_ContSize[i].m_miny)),
-		0);
+	const int iRandOnce = (int)Calc_GetRandVal(UINT16_MAX);
+	return {
+		(short)(sm_ContSize[i].m_minx + (iRandOnce % (sm_ContSize[i].m_maxx - sm_ContSize[i].m_minx))),
+		(short)(sm_ContSize[i].m_miny + (iRandOnce % (sm_ContSize[i].m_maxy - sm_ContSize[i].m_miny))),
+		0 };
 }
 
 void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack, uchar gridIndex )

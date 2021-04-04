@@ -65,7 +65,7 @@ public:
 public:
 	CScriptKey();
 	CScriptKey( tchar * ptcKey, tchar * ptcArg );
-	virtual ~CScriptKey();
+	virtual ~CScriptKey() = default;
 private:
 	CScriptKey(const CScriptKey& copy);
 	CScriptKey& operator=(const CScriptKey& other);

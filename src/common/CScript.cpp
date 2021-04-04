@@ -280,17 +280,16 @@ int CScriptKey::GetArgRange()
 	return Exp_GetRange( m_pszArg );
 }
 
-CScriptKey::CScriptKey() : m_pszKey(nullptr), m_pszArg(nullptr)
+CScriptKey::CScriptKey() :
+	m_pszKey(nullptr), m_pszArg(nullptr)
 {
 }
 
-CScriptKey::CScriptKey( tchar * ptcKey, tchar * ptcArg ) : m_pszKey( ptcKey ), m_pszArg( ptcArg )
+CScriptKey::CScriptKey( tchar * ptcKey, tchar * ptcArg ) : 
+	m_pszKey( ptcKey ), m_pszArg( ptcArg )
 {
 }
 
-CScriptKey::~CScriptKey()
-{
-}
 
 ///////////////////////////////////////////////////////////////
 // -CScriptKeyAlloc
@@ -425,15 +424,13 @@ CScript::CScript()
 	_InitBase();
 }
 
-CScript::CScript(lpctstr ptcKey)
+CScript::CScript(lpctstr ptcKey) : CScript()
 {
-	_InitBase();
 	ParseKey(ptcKey);
 }
 
-CScript::CScript(lpctstr ptcKey, lpctstr ptcVal)
+CScript::CScript(lpctstr ptcKey, lpctstr ptcVal) : CScript()
 {
-	_InitBase();
 	ParseKey( ptcKey, ptcVal );
 }
 
