@@ -468,10 +468,10 @@ int CWorldThread::FixObj( CObjBase * pObj, dword dwUID )
 	return iResultCode;
 }
 
-void CWorldThread::GarbageCollection_New()
+void CWorldThread::GarbageCollection_NewObjs()
 {
-	ADDTOCALLSTACK("CWorldThread::GarbageCollection_New");
-	EXC_TRY("GarbageCollection_New");
+	ADDTOCALLSTACK("CWorldThread::GarbageCollection_NewObjs");
+	EXC_TRY("GarbageCollection_NewObjs");
 	// Clean up new objects that are never placed.
 	size_t iObjCount = m_ObjNew.GetContentCount();
 	if (iObjCount > 0 )
@@ -518,7 +518,7 @@ void CWorldThread::GarbageCollection_UIDs()
 	// Go through the m_ppUIDs looking for Objects without links to reality.
 	// This can take a while.
 
-	GarbageCollection_New();
+	GarbageCollection_NewObjs();
 
 	dword iCount = 0;
 	for (dword i = 1; i < GetUIDCount(); ++i )
@@ -533,9 +533,19 @@ void CWorldThread::GarbageCollection_UIDs()
 			int iResultCode = FixObj(pObj, i);
 			if ( iResultCode )
 			{
-				// Do an immediate delete here instead of Delete()
-				delete pObj;
-				FreeUID(i);	// Get rid of junk uid if all fails..
+				// FixObj directly calls Delete method
+				//if (pObj->IsBeingDeleted() || pObj->IsDeleted())
+				//{
+					// Do an immediate delete here instead of Delete()
+					delete pObj;
+					FreeUID(i);	// Get rid of junk uid if all fails..
+				//}
+				/*
+				else
+				{
+					pObj->Delete();
+				}
+				*/
 				continue;
 			}
 
@@ -555,7 +565,7 @@ void CWorldThread::GarbageCollection_UIDs()
 		}
 	}
 
-	GarbageCollection_New();
+	GarbageCollection_NewObjs();
 
 	if ( iCount != CObjBase::sm_iCount )	// All objects must be accounted for.
 		g_Log.Event(LOGL_ERROR|LOGM_NOCONTEXT, "Garbage Collection: done. Object memory leak %" PRIu32 "!=%" PRIu32 ".\n", iCount, CObjBase::sm_iCount);
@@ -695,7 +705,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 	if ( _iSaveStage == -1 )
 	{
 		if ( !g_Cfg.m_fSaveGarbageCollect )
-			GarbageCollection_New();
+			GarbageCollection_NewObjs();
 	}
 	else if ( _iSaveStage < iSectorsQty)
 	{
@@ -1139,7 +1149,7 @@ void CWorld::SaveStatics()
 	try
 	{
 		if ( !g_Cfg.m_fSaveGarbageCollect )
-			GarbageCollection_New();
+			GarbageCollection_NewObjs();
 
 		CScript m_FileStatics;
 		if ( !OpenScriptBackup(m_FileStatics, g_Cfg.m_sWorldBaseDir, "statics", m_iSaveCountID) )

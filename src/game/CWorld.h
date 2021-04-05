@@ -84,7 +84,7 @@ public:
 
 	void SaveThreadClose();
 	void GarbageCollection_UIDs();
-	void GarbageCollection_New();
+	void GarbageCollection_NewObjs();
 
 	void InitUIDs();
 	void CloseAllUIDs();

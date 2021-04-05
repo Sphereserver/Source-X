@@ -147,7 +147,7 @@ bool CObjBase::_IsDeleted() const
 }
 
 bool CObjBase::IsDeleted() const
-{
+{ 
 	THREAD_SHARED_LOCK_RETURN(_IsDeleted());	
 }
 
@@ -155,9 +155,9 @@ void CObjBase::DeletePrepare()
 {
 	ADDTOCALLSTACK("CObjBase::DeletePrepare");
 	// Prepare to delete.
+	CObjBase::_GoSleep();	// virtual, but superclass methods are called in their ::DeletePrepare methods
 	RemoveFromView();
 	RemoveSelf();
-	CObjBase::_GoSleep();	// virtual, but superclass methods are called in their ::DeletePrepare methods
 }
 
 void CObjBase::DeleteCleanup(bool fForce)
@@ -165,7 +165,6 @@ void CObjBase::DeleteCleanup(bool fForce)
 	ADDTOCALLSTACK("CObjBase::DeleteCleanup");
 	_fDeleting = true;
 
-	
 	RemoveSelf();
 
 	CEntity::Delete(fForce);
@@ -3101,7 +3100,7 @@ void CObjBase::_GoAwake()
 
 	if (_IsTimerSet())
 	{
-		CWorldTickingList::AddObjSingle(_GetTimerAdjusted(), this, true);
+		CWorldTickingList::AddObjSingle(_GetTimeoutRaw(), this, true);
 	}
 	// CWorldTickingList::AddObjStatusUpdate(this, false);	// Don't! It's done when needed in UpdatePropertyFlag()
 }

@@ -67,7 +67,8 @@ void CPathFinderPoint::operator = (const CPointMap& copy)
 }
 */
 
-CPathFinder::CPathFinder(CChar *pChar, const CPointMap& ptTarget)
+CPathFinder::CPathFinder(CChar *pChar, const CPointMap& ptTarget) :
+	m_Points{ {} }
 {
 	ADDTOCALLSTACK("CPathFinder::CPathFinder");
 	EXC_TRY("CPathFinder Constructor");

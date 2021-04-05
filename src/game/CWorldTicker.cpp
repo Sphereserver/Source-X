@@ -23,6 +23,20 @@ CWorldTicker::CWorldTicker(CWorldClock *pClock)
 
 void CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimedObject)
 {
+    ASSERT(iTimeout != 0);
+
+/*
+#ifdef _DEBUG
+    for (auto& elemList : _mWorldTickList)
+    {
+        for (auto& elem : elemList.second)
+        {
+            ASSERT(elem != pTimedObject);
+        }
+    }
+#endif
+*/
+
     std::unique_lock<std::shared_mutex> lock(_mWorldTickList.THREAD_CMUTEX);
     TimedObjectsContainer& cont = _mWorldTickList[iTimeout];
     cont.emplace_back(pTimedObject);
@@ -30,11 +44,24 @@ void CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimed
 
 void CWorldTicker::_RemoveTimedObject(const int64 iOldTimeout, CTimedObject* pTimedObject)
 {
+    ASSERT(iOldTimeout != 0);
+
     std::unique_lock<std::shared_mutex> lock(_mWorldTickList.THREAD_CMUTEX);
     auto itList = _mWorldTickList.find(iOldTimeout);
     if (itList == _mWorldTickList.end())
     {
         // The object might have a timeout while being in a non-tickable state, so it isn't in the list.
+/*
+#ifdef _DEBUG
+        for (auto& elemList : _mWorldTickList)
+        {
+            for (auto& elem : elemList.second)
+            {
+                ASSERT(elem != pTimedObject);
+            }
+        }
+#endif
+*/
         return;
     }
     TimedObjectsContainer& cont = itList->second;  // direct access to the container.
@@ -44,6 +71,17 @@ void CWorldTicker::_RemoveTimedObject(const int64 iOldTimeout, CTimedObject* pTi
     {
         _mWorldTickList.erase(itList);
     }
+/*
+#ifdef _DEBUG
+    for (auto& elemList : _mWorldTickList)
+    {
+        for (auto& elem : elemList.second)
+        {
+            ASSERT(elem != pTimedObject);
+        }
+    }
+#endif
+*/
 }
 
 void CWorldTicker::AddTimedObject(const int64 iTimeout, CTimedObject* pTimedObject, bool fForce)

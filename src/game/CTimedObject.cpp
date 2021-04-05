@@ -67,6 +67,7 @@ void CTimedObject::_SetTimeout(int64 iDelayInMsecs)
     const ProfileTask timersTask(PROFILE_TIMERS); // profile the settimeout proccess.
     if (_IsDeleted()) //prevent deleted objects from setting new timers to avoid nullptr calls
     {
+        //CWorldTickingList::DelObjSingle(this); // This should already by done upon object deletion.
         return;
     }
 
@@ -105,11 +106,13 @@ void CTimedObject::SetTimeout(int64 iDelayInMsecs)
     if (iDelayInMsecs < 0)
     {
         CWorldTickingList::DelObjSingle(this);
+        _SetTimeoutRaw(0);
     }
     else
     {
         const int64 iNewTimeout = CWorldGameTime::GetCurrentTime().GetTimeRaw() + iDelayInMsecs;
         CWorldTickingList::AddObjSingle(iNewTimeout, this, false); // Adding this object to the tick list.
+        _SetTimeoutRaw(iNewTimeout);
     }
 }
 

@@ -74,13 +74,14 @@ public:     virtual bool  OnTick(); // = 0;
 protected:  virtual bool _IsDeleted() const = 0;
 public:     virtual bool  IsDeleted() const = 0;
 
-private:
+protected:
     /**
      * @brief   &lt; Gets raw Timeout.
      * @return  Delay in milliseconds.
      */
     inline  int64 _GetTimeoutRaw() const noexcept;
 
+private:
     /**
      * @brief   &lt; Set raw Timeout.
      * @param   iDelayInMsecs   Delay in milliseconds.

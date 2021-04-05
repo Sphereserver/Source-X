@@ -299,7 +299,8 @@ CChar::CChar( CREID_TYPE baseID ) :
     m_uiFame = 0;
     m_iKarma = 0;
 
-	Skill_Cleanup();
+	m_Act_Difficulty = 0;
+	m_Act_SkillCurrent = SKILL_NONE;
     m_atUnk.m_dwArg1 = 0;
     m_atUnk.m_dwArg2 = 0;
     m_atUnk.m_dwArg3 = 0;
@@ -322,8 +323,8 @@ CChar::~CChar()
 	EXC_TRY("Cleanup in destructor");
 	ADDTOCALLSTACK("CChar::~CChar");
 
+	CChar::DeletePrepare();
 	CChar::DeleteCleanup(true);
-	CContainer::ClearContainer();
 
     if (IsClientActive())    // this should never happen.
     {
@@ -356,8 +357,9 @@ void CChar::DeleteCleanup(bool fForce)
 	_fDeleting = true;
 
 	// We don't want to have invalid pointers over there
-	CWorldTickingList::DelObjSingle(this);
-	CWorldTickingList::DelObjStatusUpdate(this, false);
+	// Already called by CObjBase::DeletePrepare -> CObjBase::_GoSleep
+	//CWorldTickingList::DelObjSingle(this);
+	//CWorldTickingList::DelObjStatusUpdate(this, false);
 
 	CWorldTickingList::DelCharPeriodic(this, false);
 
@@ -412,7 +414,7 @@ bool CChar::NotifyDelete()
 void CChar::DeletePrepare()
 {
 	ADDTOCALLSTACK("CChar::DeletePrepare");
-	CContainer::ContentDelete(false);	// This object and its contents need to be deleted on the same tick
+	CContainer::ContentDelete(true);	// This object and its contents need to be deleted on the same tick
 	CObjBase::DeletePrepare();
 }
 

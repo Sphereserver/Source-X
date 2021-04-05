@@ -173,8 +173,9 @@ void CItem::DeleteCleanup(bool fForce)
 	_fDeleting = true;
 
 	// We don't want to have invalid pointers over there
-	CWorldTickingList::DelObjSingle(this);
-	CWorldTickingList::DelObjStatusUpdate(this, false);
+	// Already called by CObjBase::DeletePrepare -> CObjBase::_GoSleep
+	//CWorldTickingList::DelObjSingle(this);
+	//CWorldTickingList::DelObjStatusUpdate(this, false);
 
 	// Remove corpse map waypoint on enhanced clients
 	if (IsType(IT_CORPSE) && m_uidLink)
