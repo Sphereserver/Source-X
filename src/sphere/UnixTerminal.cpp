@@ -289,7 +289,7 @@ void UnixTerminal::tick()
 			outMessages.swap(this->ConsoleInterface::_qOutput);
 		}
 
-		for (std::unique_ptr<ConsoleOutput> const& co : msgs)
+		for (std::unique_ptr<ConsoleOutput> const& co : outMessages)
         {
             setColor(co->GetTextColor());
             print(co->GetTextString().GetBuffer());

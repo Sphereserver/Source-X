@@ -80,7 +80,7 @@ private:
     void ClearFloor(char iFloor);
 
 private:
-    using ValidItemsContainer = phmap::btree_map<ITEMID_TYPE, uint>;	// ItemID, FeatureMask
+    using ValidItemsContainer = std::map<ITEMID_TYPE, uint>;	// ItemID, FeatureMask
     static ValidItemsContainer sm_mapValidItems;
 
     static bool LoadValidItems();

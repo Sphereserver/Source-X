@@ -393,17 +393,23 @@ void CWorldTicker::Tick()
                         ptcSubDesc = "ItemEquipped";
                         CObjBaseTemplate* pObjTop = pItem->GetTopLevelObj();
                         ASSERT(pObjTop);
+                        
                         CChar* pChar = dynamic_cast<CChar*>(pObjTop);
-                        ASSERT(pChar);
-                        fDelete = !pChar->OnTickEquip(pItem);
-                        break;
+                        if (pChar)
+                        {
+                            fDelete = !pChar->OnTickEquip(pItem);
+                            break;
+                        }
+                        
+                        ptcSubDesc = "Item (fallback)";
+                        g_Log.Event(LOGL_CRIT, "Item equipped, but not contained in a character? (UID: 0%" PRIx32 ")\n.", pItem->GetUID().GetObjUID());
                     }
                     else
                     {
                         ptcSubDesc = "Item";
-                        fDelete = (pItem->_OnTick() == false);
-                        break;
                     }
+                    fDelete = (pItem->_OnTick() == false);
+                    break;
                 }
                 break;
 
