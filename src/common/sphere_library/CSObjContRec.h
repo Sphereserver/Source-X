@@ -46,7 +46,7 @@ public:
     * @brief get the CSObjCont propietary of this record.
     * @return CSObjCont propietary of this record.
     */
-    inline CSObjCont * GetParent() const;
+    inline CSObjCont * GetParent() const noexcept;
     ///@}
     /** @name Capacity:
     */
@@ -64,7 +64,7 @@ private:
 
 /* Inline Methods Definitions */
 
-inline CSObjCont * CSObjContRec::GetParent() const
+inline CSObjCont * CSObjContRec::GetParent() const noexcept
 {
     return m_pParent;
 }

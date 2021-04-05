@@ -43,13 +43,13 @@ void CTimedObject::_GoAwake()
 
 bool CTimedObject::_CanTick() const
 {
-    //ADDTOCALLSTACK_INTENSIVE("_CTimedObject::_CanTick");
+    //ADDTOCALLSTACK_INTENSIVE("CTimedObject::_CanTick");
     return _IsSleeping();
 }
 
 bool CTimedObject::CanTick() const
 {
-    //ADDTOCALLSTACK_INTENSIVE("CTimedObject::_CanTick");
+    //ADDTOCALLSTACK_INTENSIVE("CTimedObject::CanTick");
     THREAD_SHARED_LOCK_RETURN(_CanTick());
 }
 

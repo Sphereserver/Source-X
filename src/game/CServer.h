@@ -98,11 +98,10 @@ public:
 	bool Load();
 
 	void SysMessage( lpctstr pMsg ) const;
-    void SysMessage(ConsoleOutput *pMsg) const;
+    void SysMessage(std::unique_ptr<ConsoleOutput>&& pMsg) const;
 	void PrintTelnet( lpctstr pszMsg ) const;
     void PrintStr(lpctstr pMsg) const;
     void PrintStr(ConsoleTextColor iColor, lpctstr pMsg) const;
-    void PrintOutput(ConsoleOutput *pOutput) const;
 	ssize_t PrintPercent( ssize_t iCount, ssize_t iTotal ) const;
 
 	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;

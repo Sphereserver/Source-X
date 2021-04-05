@@ -209,22 +209,19 @@ void CServer::SysMessage( lpctstr pszMsg ) const
 		return;
 
 #ifdef _WIN32
-    g_NTWindow.AddConsoleOutput(new ConsoleOutput(pszMsg));
+    g_NTWindow.AddConsoleOutput(std::make_unique<ConsoleOutput>(pszMsg));
 #else
-    g_UnixTerminal.AddConsoleOutput(new ConsoleOutput(pszMsg));
+    g_UnixTerminal.AddConsoleOutput(std::make_unique<ConsoleOutput>(pszMsg));
 #endif
 }
 
-void CServer::SysMessage(ConsoleOutput *pszMsg) const
+void CServer::SysMessage(std::unique_ptr<ConsoleOutput>&& pMsg) const
 {
     // Print just to the main console.
-    if ( !pszMsg )
-        return;
-
 #ifdef _WIN32
-    g_NTWindow.AddConsoleOutput(pszMsg);
+    g_NTWindow.AddConsoleOutput(std::move(pMsg));
 #else
-    g_UnixTerminal.AddConsoleOutput(pszMsg);
+    g_UnixTerminal.AddConsoleOutput(std::move(pMsg));
 #endif
 }
 
@@ -244,23 +241,24 @@ void CServer::PrintTelnet( lpctstr pszMsg ) const
 	}
 }
 
-void CServer::PrintStr( lpctstr pszMsg ) const
+void CServer::PrintStr(lpctstr ptcMsg) const
 {
 	// print to all consoles.
-	SysMessage( pszMsg );
-	PrintTelnet( pszMsg );
+	if (!ptcMsg)
+		return;
+
+	SysMessage(ptcMsg);
+	PrintTelnet(ptcMsg);
 }
 
-void CServer::PrintStr(ConsoleTextColor iColor, lpctstr pMsg) const
+void CServer::PrintStr(ConsoleTextColor iColor, lpctstr ptcMsg) const
 {
     // print to all consoles.
-    SysMessage(new ConsoleOutput(iColor, pMsg));
-    PrintTelnet(pMsg);
-}
+	if (!ptcMsg)
+		return;
 
-void CServer::PrintOutput(ConsoleOutput * pOutput) const
-{
-    SysMessage(pOutput);
+    SysMessage(std::make_unique<ConsoleOutput>(iColor, ptcMsg));
+    PrintTelnet(ptcMsg);
 }
 
 ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal ) const

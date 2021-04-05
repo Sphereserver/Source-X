@@ -208,35 +208,15 @@ void CNTWindow::tick()
 {
     if (!_qOutput.empty())
     {
-        ConsoleInterface::_ciQueueMutex.lock();
+		std::deque<std::unique_ptr<ConsoleOutput>> outMessages;
+		{
+			// No idea of the reason, but it seems that if we have some mutex locked while doing List_Add, sometimes we'll have a deadlock.
+			//  In any case, it's best to keep the mutex locked for the least time possible.
+			std::unique_lock<std::mutex> lock(this->ConsoleInterface::_ciQueueMutex);
+			outMessages.swap(this->ConsoleInterface::_qOutput);
+		}
 
-        std::vector<ConsoleOutput*> outMessages;
-        outMessages.reserve(_qOutput.size());
-        while (!_qOutput.empty())
-        {
-            outMessages.emplace_back(_qOutput.front());
-            _qOutput.pop();
-        }
-
-        // No idea of the reason, but it seems that if we have some mutex locked while doing List_Add, sometimes we'll have a deadlock.
-        //  In any case, it's best to keep the mutex locked for the least time possible.
-        ConsoleInterface::_ciQueueMutex.unlock();
-
-        //theApp.m_wndMain.m_wndLog.SetCaretHide(TRUE);
-
-        for (ConsoleOutput* co : outMessages)
-        {
-            theApp.m_wndMain.List_Add((COLORREF)CTColToRGB(co->GetTextColor()), co->GetTextString().GetBuffer());
-            delete co;
-        }
-
-        /*
-        // Just scroll once, after we have printed all the output
-        if (NTWindow_CanScroll())
-            theApp.m_wndMain.m_wndLog.ScrollBottomRight();
-        */
-        
-        //theApp.m_wndMain.m_wndLog.SetCaretHide(FALSE);
+		theApp.m_wndMain.List_AddGroup(std::move(outMessages));
     }
 
     NTWindow_CheckUpdateWindowTitle();
@@ -267,42 +247,38 @@ void CNTWindow::List_Clear()
 	m_iLogTextLen = 0;
 }
 
-void CNTWindow::List_Add( COLORREF color, LPCTSTR pszText )
+void CNTWindow::List_AddSingle(COLORREF color, LPCTSTR ptcText)
 {
-	int iMaxTextLen = (64 * 1024);
+	const int iMaxTextLen = (64 * 1024);
 
-	const int iTextLen = (int)strlen( pszText );
+	const int iTextLen = (int)strlen(ptcText);
 	const int iNewLen = m_iLogTextLen + iTextLen;
 
 	if ( iNewLen > iMaxTextLen )
 	{
-        iMaxTextLen -= 256; // Remove more than we need, so that we have to remove text less often
 		const int iCut = iNewLen - iMaxTextLen; 
 
 		m_wndLog.SetSel( 0, iCut );
 
 		// These SetRedraw FALSE/TRUE calls will make the log panel scroll much faster when spamming text, but
 		//  it will generate some drawing artifact
-		m_wndLog.SetRedraw(FALSE);
+		//m_wndLog.SetRedraw(FALSE);
 		m_wndLog.ReplaceSel( "" );	
-
-        m_iLogTextLen = iMaxTextLen;
 	}
     else if (NTWindow_CanScroll())
         theApp.m_wndMain.m_wndLog.ScrollLine();
 
-	m_wndLog.SetSel( m_iLogTextLen, m_iLogTextLen );
+	m_wndLog.SetSel(m_iLogTextLen, m_iLogTextLen + iTextLen);
 
 	// set the blocks color.
-	CHARFORMAT cf;
-	memset( &cf, 0, sizeof(cf));
+	CHARFORMAT cf{};
 	cf.cbSize = sizeof(cf);
 	cf.dwMask = CFM_COLOR;
 	cf.crTextColor = color;
 	m_wndLog.SetSelectionCharFormat( cf );
 
-    m_wndLog.SetRedraw(TRUE);
-	m_wndLog.ReplaceSel( pszText );
+    //m_wndLog.SetRedraw(TRUE);
+	m_wndLog.ReplaceSel(ptcText);
 
 	m_iLogTextLen += iTextLen;
 	m_wndLog.SetSel( m_iLogTextLen, m_iLogTextLen );
@@ -311,6 +287,60 @@ void CNTWindow::List_Add( COLORREF color, LPCTSTR pszText )
 	int iSelEnd;
 	m_wndLog.GetSel( iSelBegin, iSelEnd );
 	m_iLogTextLen = iSelBegin;	// make sure it's correct.
+}
+
+void CNTWindow::List_AddGroup(std::deque<std::unique_ptr<ConsoleOutput>>&& msgs)
+{
+	const int iMaxTextLen = (64 * 1024);
+
+	// Erase the old text to make space for all the message queue at once
+	int iTotalTextLen = 0;
+	for (std::unique_ptr<ConsoleOutput> const& co : msgs)
+	{
+		iTotalTextLen += co->GetTextString().GetLength();
+	}
+	
+	const int iNewLen = m_iLogTextLen + iTotalTextLen;
+
+	if (iNewLen > iMaxTextLen)
+	{
+		int iCut = iNewLen - iMaxTextLen;
+		iCut = minimum(iCut, iMaxTextLen);
+
+		m_wndLog.SetSel(0, iCut);
+		m_wndLog.ReplaceSel("");
+	}
+
+	// Append all the messages at once
+	for (std::unique_ptr<ConsoleOutput> const& co : msgs)
+	{
+		const COLORREF color = (COLORREF)CTColToRGB(co->GetTextColor());
+		const lpctstr ptcText = co->GetTextString().GetBuffer();
+		const int iTextLen = co->GetTextString().GetLength();
+
+		m_wndLog.SetSel(m_iLogTextLen, m_iLogTextLen + iTextLen);
+
+		// set the blocks color.
+		CHARFORMAT cf{};
+		cf.cbSize = sizeof(cf);
+		cf.dwMask = CFM_COLOR;
+		cf.crTextColor = color;
+		m_wndLog.SetSelectionCharFormat(cf);
+
+		m_wndLog.ReplaceSel(ptcText);
+
+		m_iLogTextLen += iTextLen;
+		m_wndLog.SetSel(m_iLogTextLen, m_iLogTextLen);
+
+		int iSelBegin;
+		int iSelEnd;
+		m_wndLog.GetSel(iSelBegin, iSelEnd);
+		m_iLogTextLen = iSelBegin;	// make sure it's correct.
+	}
+
+	// Scroll just one time, after all the new messages are added
+	if (NTWindow_CanScroll())
+		theApp.m_wndMain.m_wndLog.ScrollBottomRight();
 }
 
 void CNTWindow::SetWindowTitle(LPCTSTR pText)
@@ -459,7 +489,7 @@ void CNTWindow::OnUserPostMessage( COLORREF color, CSString * psMsg )
 	// WM_USER_POST_MSG
 	if ( psMsg )
 	{
-		List_Add(color, *psMsg);
+		List_AddSingle(color, *psMsg);
 		delete psMsg;
 
         // Scroll down a line each time we print a message

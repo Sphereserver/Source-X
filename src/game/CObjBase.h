@@ -111,12 +111,12 @@ public:
 	*/
     CBaseBaseDef* Base_GetDef() const noexcept;
 
-	dword GetCanFlagsBase() const noexcept
+	inline dword GetCanFlagsBase() const noexcept
 	{
 		return Base_GetDef()->m_Can;
 	}
 
-	dword GetCanFlags() const noexcept
+    inline dword GetCanFlags() const noexcept
 	{
 		// m_CanMask is XORed to m_Can:
 		//  If a flag in m_CanMask is enabled in m_Can, it is ignored in this Can check

@@ -2548,3 +2548,6 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: cont.consume on @Timer freezes the server if char does not have the item and amount (Issue #654).
 - Changed: To achieve better overall server speed, removed the report of time difference between two consecutive function calls in the call stack trace.
    Getting the system time so often with a decent precision is fairly slow.
+
+05-04-2021, Nolok
+- Changed: improved text rendering speed on the Windows console window (now the whole message queue is appended in block, then the whole view is updated and scrolled down, instead of doing this per line) and removed drawing artifacts.

@@ -6,7 +6,7 @@
 #ifndef _WIN32
     #include <condition_variable>
 #endif
-#include <queue>
+#include <deque>
 
 
 enum ConsoleTextColor			// needed by both windows and unix
@@ -29,11 +29,16 @@ class ConsoleOutput
     CSString _sTextString;
 
 public:
-    ConsoleOutput(ConsoleTextColor iLogColor, CSString sLogString);
-    ConsoleOutput(CSString sLogString);
-    ~ConsoleOutput();
-    ConsoleTextColor GetTextColor() const;
-    const CSString& GetTextString() const;
+    explicit ConsoleOutput(ConsoleTextColor iLogColor, lpctstr ptcLogString) noexcept;
+    explicit ConsoleOutput(lpctstr ptcLogString) noexcept;
+    ~ConsoleOutput() noexcept = default;
+
+    ConsoleTextColor GetTextColor() const noexcept {
+        return _iTextColor;
+    }
+    const CSString& GetTextString() const noexcept {
+        return _sTextString;
+    }
 };
 
 class ConsoleInterface
@@ -44,14 +49,14 @@ protected:
     std::condition_variable _ciQueueCV;
 #endif
 
-    ConsoleInterface();
-    ~ConsoleInterface();
+    ConsoleInterface() = default;
+    ~ConsoleInterface() = default;
 
-    std::queue<ConsoleOutput*> _qOutput;
+    std::deque<std::unique_ptr<ConsoleOutput>> _qOutput;
 
 public:
-    static uint CTColToRGB(ConsoleTextColor color);
-    void AddConsoleOutput(ConsoleOutput *output);
+    static uint CTColToRGB(ConsoleTextColor color) noexcept;
+    void AddConsoleOutput(std::unique_ptr<ConsoleOutput>&& output) noexcept;
 };
 
 #endif //_INC_CONSOLEINTERFACE_H
