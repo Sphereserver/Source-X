@@ -36,7 +36,7 @@ int64 CTimedFunctionHandler::IsTimer(const CUID& uid, lpctstr ptcCommand) const
 	for (std::unique_ptr<CTimedFunction> const& tf : _timedFunctions)	// the end iterator changes at each stl container erase call
 	{
 		if ((tf->GetUID() == uid) && (Str_Match(ptcCommand, tf->GetCommand()) == MATCH_VALID))
-			return tf->GetTimerDiff();
+			return tf->GetTimerAdjusted();
 	}
 	return 0;
 }
@@ -218,7 +218,7 @@ void CTimedFunctionHandler::r_Write( CScript & s )
 		if (uid.IsValidUID())
 		{
 			s.WriteKeyFormat("TimerFCall", "%s", tf->GetCommand());
-			s.WriteKeyFormat("TimerFNumbers", STRINGIFY(TF_TICK_MAGIC_NUMBER) ",%" PRIu32 ",%" PRId64, uid.GetObjUID(), tf->GetTimerDiff());
+			s.WriteKeyFormat("TimerFNumbers", STRINGIFY(TF_TICK_MAGIC_NUMBER) ",%" PRIu32 ",%" PRId64, uid.GetObjUID(), tf->GetTimerAdjusted());
 		}
 	}
 }

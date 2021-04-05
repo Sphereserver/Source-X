@@ -14,8 +14,8 @@ class CWorldTickingList
 public:
     static const char* m_sClassName;
 
-    static void AddObjSingle(int64 iTimeout, CTimedObject* pObj, bool fForce, bool fNeedsLock);
-    static void DelObjSingle(CTimedObject* pObj, bool fNeedsLock);
+    static void AddObjSingle(int64 iTimeout, CTimedObject* pObj, bool fForce);
+    static void DelObjSingle(CTimedObject* pObj);
 
     static void AddCharPeriodic(CChar* pChar, bool fNeedsLock);
     static void DelCharPeriodic(CChar* pChar, bool fNeedsLock);

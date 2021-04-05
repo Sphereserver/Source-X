@@ -167,7 +167,7 @@ void CObjBase::DeleteCleanup(bool fForce)
 	RemoveSelf();	// Should be virtual
 
 	// Just to be extra sure we won't have invalid pointers over there
-	CWorldTickingList::DelObjSingle(this, false);
+	CWorldTickingList::DelObjSingle(this);
 	CWorldTickingList::DelObjStatusUpdate(this, false);
 
 	CEntity::Delete(fForce);
@@ -212,7 +212,7 @@ void CObjBase::TimeoutRecursiveResync(int64 iDelta)
 	ADDTOCALLSTACK("CObjBase::TimeoutRecursiveResync");
 	if (_IsTimerSet())
 	{
-		_SetTimeout(_GetTimeoutRaw() + iDelta);
+		_SetTimeout(_GetTimerAdjusted() + iDelta);
 	}
 
 	if (CContainer* pCont = dynamic_cast<CContainer*>(this))
@@ -3103,7 +3103,7 @@ void CObjBase::_GoAwake()
 
 	if (_IsTimerSet())
 	{
-		CWorldTickingList::AddObjSingle(_GetTimeoutRaw(), this, true, false);
+		CWorldTickingList::AddObjSingle(_GetTimerAdjusted(), this, true);
 	}
 	// CWorldTickingList::AddObjStatusUpdate(this, false);	// Don't! It's done when needed in UpdatePropertyFlag()
 }
@@ -3115,7 +3115,7 @@ void CObjBase::_GoSleep()
 
 	if (_IsTimerSet())
 	{
-		CWorldTickingList::DelObjSingle(this, false);
+		CWorldTickingList::DelObjSingle(this);
 	}
 	CWorldTickingList::DelObjStatusUpdate(this, false);
 }

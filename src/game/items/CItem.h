@@ -639,12 +639,12 @@ public:
 
 	height_t GetHeight() const;
 	int64  GetDecayTime() const;
-	void SetDecayTime( int64 iMsecsTimeout = 0 );
-    void SetDecayTimeD(int64 iTenthsTimeout = 0)
+	void SetDecayTime(int64 iMsecsTimeout);
+    void SetDecayTimeD(int64 iTenthsTimeout)
     {
         SetDecayTime(iTenthsTimeout * MSECS_PER_TENTH);
     }
-    void SetDecayTimeS(int64 iSecondsTimeout = 0)
+    void SetDecayTimeS(int64 iSecondsTimeout)
     {
         SetDecayTime(iSecondsTimeout * MSECS_PER_SEC);
     }

@@ -1501,7 +1501,7 @@ void CChar::NPC_LootMemory( CItem * pItem )
 	// If the item is set to decay.
 	if (pItem->IsTimerSet())
 	{
-		const int64 iTimerDiff = pItem->GetTimerDiff();
+		const int64 iTimerDiff = pItem->GetTimerAdjusted();
 		if (iTimerDiff > 0)
 			pMemory->SetTimeout(iTimerDiff);		// forget about this once the item is gone
 	}

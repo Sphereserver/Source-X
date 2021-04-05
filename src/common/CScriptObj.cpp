@@ -1668,13 +1668,13 @@ bool CScriptObj::Evaluate_QvalConditional(lpctstr ptcKey, CSString& sVal, CTextC
 	//  (do that in another string, since it may overwrite the arguments, which are written later in the same string).
 	tchar* ptcTemp = Str_GetTemp();
 	Str_CopyLimitNull(ptcTemp, ppCmds[0], STR_TEMPLENGTH);
-	ParseScriptText(ptcTemp, pSrc, 0, pArgs);
+	ParseScriptText(ptcTemp, pSrc, 0, pArgs, pContext);
 	const bool fCondition = Exp_GetVal(ptcTemp);
 
 	// Get the retval we want
 	//	(we might as well work on the transformed original string, since at this point we don't care if we corrupt other arguments)
 	ptcTemp = ppCmds[(fCondition ? 1 : 2)];
-	ParseScriptText(ptcTemp, pSrc, 0, pArgs);
+	ParseScriptText(ptcTemp, pSrc, 0, pArgs, pContext);
 
 	sVal = ptcTemp;
 	if (sVal.IsEmpty())

@@ -1,9 +1,9 @@
-
-#include <cmath>
 #include "../game/CServerConfig.h"
 #include "sphere_library/CSRand.h"
 #include "CException.h"
 #include "CExpression.h"
+#include <algorithm>
+#include <cmath>
 
 tchar CExpression::sm_szMessages[DEFMSG_QTY][DEFMSG_MAX_LEN] =
 {

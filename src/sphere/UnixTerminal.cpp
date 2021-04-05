@@ -277,27 +277,23 @@ void UnixTerminal::tick()
 {
     while (!shouldExit())
     {
-        std::unique_lock<std::mutex> lock(ConsoleInterface::_ciQueueMutex);
-        while (_qOutput.empty())
-        {
-            ConsoleInterface::_ciQueueCV.wait(lock);
-        }
+		std::deque<std::unique_ptr<ConsoleOutput>> outMessages;
+		{
+			// Better keep the mutex locked for the least time possible.
+			std::unique_lock<std::mutex> lock(this->ConsoleInterface::_ciQueueMutex);
+			while (_qOutput.empty())
+			{
+				this->ConsoleInterface::_ciQueueCV.wait(lock);
+			}
 
-        std::vector<ConsoleOutput*> outMessages;
-        outMessages.reserve(_qOutput.size());
-        while (!_qOutput.empty())
-        {
-            outMessages.emplace_back(_qOutput.front());
-            _qOutput.pop();
-        }
-        lock.unlock();   // Better keep the mutex locked for the least time possible.
+			outMessages.swap(this->ConsoleInterface::_qOutput);
+		}
 
-        for (ConsoleOutput* co : outMessages)
+		for (std::unique_ptr<ConsoleOutput> const& co : msgs)
         {
             setColor(co->GetTextColor());
             print(co->GetTextString().GetBuffer());
             setColor(CTCOL_DEFAULT);
-            delete co;
         }
     }
 }

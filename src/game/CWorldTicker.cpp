@@ -34,7 +34,7 @@ void CWorldTicker::_RemoveTimedObject(const int64 iOldTimeout, CTimedObject* pTi
     auto itList = _mWorldTickList.find(iOldTimeout);
     if (itList == _mWorldTickList.end())
     {
-        //ASSERT(0);  // This shouldn't happen
+        // The object might have a timeout while being in a non-tickable state, so it isn't in the list.
         return;
     }
     TimedObjectsContainer& cont = itList->second;  // direct access to the container.
@@ -46,7 +46,7 @@ void CWorldTicker::_RemoveTimedObject(const int64 iOldTimeout, CTimedObject* pTi
     }
 }
 
-void CWorldTicker::AddTimedObject(const int64 iTimeout, CTimedObject* pTimedObject, bool fForce, bool fNeedsLock)
+void CWorldTicker::AddTimedObject(const int64 iTimeout, CTimedObject* pTimedObject, bool fForce)
 {
     //if (iTimeout < CWorldGameTime::GetCurrentTime().GetTimeRaw())    // We do that to get them tick as sooner as possible
     //    return;
@@ -55,7 +55,7 @@ void CWorldTicker::AddTimedObject(const int64 iTimeout, CTimedObject* pTimedObje
     const ProfileTask timersTask(PROFILE_TIMERS);
 
     EXC_SET_BLOCK("Already ticking?");
-    const int64 iTickOld = fNeedsLock ? pTimedObject->GetTimeoutRaw() : pTimedObject->_GetTimeoutRaw();
+    const int64 iTickOld = pTimedObject->_GetTimeoutRaw();
     if (iTickOld != 0)
     {
         // Adding an object already on the list? Am i setting a new timeout without deleting the previous one?
@@ -71,7 +71,7 @@ void CWorldTicker::AddTimedObject(const int64 iTimeout, CTimedObject* pTimedObje
     }
     else
     {
-        fCanTick = fNeedsLock ? pTimedObject->CanTick() : pTimedObject->_CanTick();
+        fCanTick = pTimedObject->_CanTick();
         if (!fCanTick)
         {
             if (auto pObjBase = dynamic_cast<const CObjBase*>(pTimedObject))
@@ -92,13 +92,13 @@ void CWorldTicker::AddTimedObject(const int64 iTimeout, CTimedObject* pTimedObje
     EXC_CATCH;
 }
 
-void CWorldTicker::DelTimedObject(CTimedObject* pTimedObject, bool fNeedsLock)
+void CWorldTicker::DelTimedObject(CTimedObject* pTimedObject)
 {
     EXC_TRY("DelTimedObject");
     const ProfileTask timersTask(PROFILE_TIMERS);
 
     EXC_SET_BLOCK("Not ticking?");
-    const int64 iTickOld = fNeedsLock ? pTimedObject->GetTimeoutRaw() : pTimedObject->_GetTimeoutRaw();
+    const int64 iTickOld = pTimedObject->_GetTimeoutRaw();
     if (iTickOld == 0)
         return;
 
@@ -326,15 +326,21 @@ void CWorldTicker::Tick()
                     
                     if (pTimedObj->_IsTimerSet() && pTimedObj->_CanTick())
                     {
-                        if (pTimedObj->_GetTimeoutRaw() <= iTime)
+                        if (pTimedObj->_GetTimeoutRaw() <= iCurTime)
                         {
                             vecObjs.emplace_back(static_cast<void*>(pTimedObj));
-
                             pTimedObj->_ClearTimeout();
-
-                            it = cont.erase(it);
-                            itContEnd = cont.end();
                         }
+                        /*
+                        else
+                        {
+                            // This shouldn't happen... If it does, get rid of the entry on the list anyways,
+                            //  it got desynchronized in some way and might be an invalid or even deleted and deallocated object!
+                        }
+                        */
+
+                        it = cont.erase(it);
+                        itContEnd = cont.end();
                     }
                     else
                     {
@@ -407,7 +413,7 @@ void CWorldTicker::Tick()
                     CChar* pChar = dynamic_cast<CChar*>(pTimedObj);
                     ASSERT(pChar);
                     fDelete = !pChar->_OnTick();
-                    if (pChar->m_pNPC && !pTimedObj->_IsTimerSet())
+                    if (!fDelete && pChar->m_pNPC && !pTimedObj->_IsTimerSet())
                     {
                         pTimedObj->_SetTimeoutS(3);   //3 seconds timeout to keep NPCs 'alive'
                     }
@@ -494,16 +500,20 @@ void CWorldTicker::Tick()
 
                 if ((pChar->_iTimePeriodicTick != 0) && pChar->_CanTick())
                 {
-                    if (pChar->_iTimePeriodicTick <= iTime)
+                    if (pChar->_iTimePeriodicTick <= iCurTime)
                     {
                         vecObjs.emplace_back(static_cast<void*>(pChar));
-
                         pChar->_iTimePeriodicTick = 0;
-
-                        it = cont.erase(it);
-                        itContEnd = cont.end();
                     }
-                    
+                    /*
+                    else
+                    {
+                        // This shouldn't happen... If it does, get rid of the entry on the list anyways,
+                        //  it got desynchronized in some way and might be an invalid or even deleted and deallocated object!
+                    }
+                    */
+                    it = cont.erase(it);
+                    itContEnd = cont.end();
                 }
                 else
                 {

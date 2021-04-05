@@ -1395,9 +1395,15 @@ void CItem::SetDecayTime(int64 iMsecsTimeout)
 	// 0 = default (decay on the next tick)
 	// -1 = set none. (clear it)
 
-	if (_IsTimerSet() && ! IsAttr(ATTR_DECAY))
+	if (iMsecsTimeout != -1)
 	{
-		return;	// already a timer here. let it expire on it's own
+		// Otherwise i want to disable its timer!
+
+		if (_IsTimerSet() && !IsAttr(ATTR_DECAY))
+		{
+			// Already a timer here. let it expire on it's own
+			return;
+		}
 	}
 
 	if (iMsecsTimeout == 0)
@@ -3920,7 +3926,7 @@ void CItem::DupeCopy( const CItem * pItem )
 
 	m_dwDispIndex = pItem->m_dwDispIndex;
 	SetBase( pItem->Item_GetDef() );
-	_SetTimeout( pItem->GetTimerDiff() );
+	_SetTimeout( pItem->_GetTimerAdjusted() );
 	SetType(pItem->m_type);
 	m_wAmount = pItem->m_wAmount;
 	m_Attr  = pItem->m_Attr;
@@ -5169,7 +5175,7 @@ bool CItem::Use_Light()
 	else if ( IsType(IT_LIGHT_OUT) )
 	{
 		Sound(m_itLight.m_burned ? 0x4b8 : 0x3be);
-		SetDecayTime();
+		SetDecayTime(0);
 	}
 
 	return true;
@@ -5939,8 +5945,11 @@ bool CItem::_OnTick()
     if (pSector && pSector->IsSleeping())
     {
 		//Make it tick after sector's awakening.
+		if (!_IsSleeping())
+		{
+			_GoSleep();
+		}
 		_SetTimeout(1);
-        _GoSleep();
         return true;
     }
 

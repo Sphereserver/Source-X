@@ -74,19 +74,18 @@ public:     virtual bool  OnTick(); // = 0;
 protected:  virtual bool _IsDeleted() const = 0;
 public:     virtual bool  IsDeleted() const = 0;
 
+private:
     /**
      * @brief   &lt; Gets raw Timeout.
      * @return  Delay in milliseconds.
      */
-protected:  inline  int64 _GetTimeoutRaw() const noexcept;
-public:             int64 GetTimeoutRaw() const noexcept;
+    inline  int64 _GetTimeoutRaw() const noexcept;
 
     /**
      * @brief   &lt; Set raw Timeout.
      * @param   iDelayInMsecs   Delay in milliseconds.
      */
-private:    inline  void _SetTimeoutRaw(int64 iDelayInMsecs) noexcept;
-private:            void  SetTimeoutRaw(int64 iDelayInMsecs) noexcept;
+    inline  void _SetTimeoutRaw(int64 iDelayInMsecs) noexcept;
 
 protected:  virtual void _SetTimeout(int64 iDelayInMsecs);
 public:     virtual void  SetTimeout(int64 iDelayInMsecs);
@@ -116,8 +115,8 @@ public:             bool IsTimerSet() const noexcept;
      * @brief   Gets timer difference between current time and stored time.
      * @return  The timer difference.
      */
-protected:  int64 _GetTimerDiff() const noexcept;
-public:     int64  GetTimerDiff() const noexcept;
+private:
+    int64 _GetTimerDiff() const noexcept;
 
     /**
      * @brief   Query if this object is timer expired.
