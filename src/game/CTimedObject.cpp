@@ -141,7 +141,6 @@ int64 CTimedObject::_GetTimerAdjusted() const noexcept
 {
     // How long till this will expire ?
     // RETURN: time in msecs from now.
-    THREAD_SHARED_LOCK_SET;
     if (!_IsTimerSet())
         return -1;
 
