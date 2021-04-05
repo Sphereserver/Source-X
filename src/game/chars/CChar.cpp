@@ -320,6 +320,7 @@ CChar::CChar( CREID_TYPE baseID ) :
 CChar::~CChar()
 {
 	EXC_TRY("Cleanup in destructor");
+	ADDTOCALLSTACK("CChar::~CChar");
 
 	CChar::DeleteCleanup(true);
 	CContainer::ClearContainer();
@@ -354,8 +355,12 @@ void CChar::DeleteCleanup(bool fForce)
 	ADDTOCALLSTACK("CChar::DeleteCleanup");
 	_fDeleting = true;
 
-	// Just to be extra sure we won't have invalid pointers over there
+	// We don't want to have invalid pointers over there
+	CWorldTickingList::DelObjSingle(this);
+	CWorldTickingList::DelObjStatusUpdate(this, false);
+
 	CWorldTickingList::DelCharPeriodic(this, false);
+
 
 	if (IsStatFlag(STATF_RIDDEN))
 	{

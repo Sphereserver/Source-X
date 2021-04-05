@@ -41,13 +41,9 @@ void CPathFinder::GetAdjacentCells(const CPathFinderPoint* Point, std::deque<CPa
 }
 
 CPathFinderPoint::CPathFinderPoint() :
+	CPointMap(0, 0, 0, 0),
     _Parent(nullptr), _Walkable(false), _FValue(0), _GValue(0), _HValue(0)
 {
-	//ADDTOCALLSTACK("CPathFinderPoint::CPathFinderPoint");
-	m_x = 0;
-	m_y = 0;
-	m_z = 0;
-	m_map = 0;
 }
 
 /*
@@ -117,6 +113,7 @@ bool CPathFinder::FindPath() //A* algorithm
 	ASSERT(Start);
 	ASSERT(End);
 
+	Start->_Walkable = false;
 	Start->_GValue = 0;
     Start->_HValue = Heuristic(Start, End);
     Start->_FValue = Start->_HValue;
@@ -137,7 +134,7 @@ bool CPathFinder::FindPath() //A* algorithm
 			while (Current->_Parent)
 			{
                 Current = Current->_Parent;
-                m_LastPath.emplace_front(CPointMap((Current->m_x + m_RealX), (Current->m_y + m_RealY), 0, Current->m_map));
+				m_LastPath.emplace_front(short(Current->m_x + m_RealX), short(Current->m_y + m_RealY), char(0), Current->m_map);
 			}
 			Clear();
 			return true; // path found
@@ -209,11 +206,10 @@ void CPathFinder::Clear()
 {
 	ADDTOCALLSTACK("CPathFinder::Clear");
 	m_Target = CPointMap(0,0);
-	m_pChar = 0;
+	m_pChar = nullptr;
 	m_Opened.clear();
 	m_Closed.clear();
-	m_RealX = 0;
-	m_RealY = 0;
+	m_RealX = m_RealY = 0;
 }
 
 void CPathFinder::FillMap()
@@ -221,7 +217,7 @@ void CPathFinder::FillMap()
 	ADDTOCALLSTACK("CPathFinder::FillMap");
     EXC_TRY("FillMap");
 
-    CPointMap pt = m_pChar->GetTopPoint();
+    CPointMap pt(m_pChar->GetTopPoint());
 	for ( short x = 0 ; x != MAX_NPC_PATH_STORAGE_SIZE; ++x )
 	{
 		for ( short y = 0; y != MAX_NPC_PATH_STORAGE_SIZE; ++y )

@@ -172,6 +172,10 @@ void CItem::DeleteCleanup(bool fForce)
 	ADDTOCALLSTACK("CItem::DeleteCleanup");
 	_fDeleting = true;
 
+	// We don't want to have invalid pointers over there
+	CWorldTickingList::DelObjSingle(this);
+	CWorldTickingList::DelObjStatusUpdate(this, false);
+
 	// Remove corpse map waypoint on enhanced clients
 	if (IsType(IT_CORPSE) && m_uidLink)
 	{
@@ -235,7 +239,7 @@ bool CItem::Delete(bool fForce)
 	if (( NotifyDelete() == false ) && !fForce)
 		return false;
 
-	DeletePrepare();
+	DeletePrepare();	// Virtual -> Must remove early because virtuals will fail in child destructor.
 	DeleteCleanup(fForce);
 
 	return CObjBase::Delete(fForce);
@@ -243,11 +247,15 @@ bool CItem::Delete(bool fForce)
 
 CItem::~CItem()
 {
+	EXC_TRY("Cleanup in destructor");
 	ADDTOCALLSTACK("CItem::~CItem");
-	DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
-	DeleteCleanup(true);
+
+	DeletePrepare();	// Using this in the destructor will fail to call virtuals, but it's better than nothing.
+	CItem::DeleteCleanup(true);
 	
 	g_Serv.StatDec(SERV_STAT_ITEMS);
+
+	EXC_CATCH;
 }
 
 CItem * CItem::CreateBase( ITEMID_TYPE id, IT_TYPE type )	// static
