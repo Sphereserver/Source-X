@@ -1102,8 +1102,6 @@ enum CTRIG_TYPE : short
 	CTRIG_Dismount,         // I'm dismounting.
 	CTRIG_DYE,
 	CTRIG_Eat,              // I'm eating something.
-	CTRIG_EffectAdd,        // A spell effected me, i'm getting bonus/penalties from it.
-	CTRIG_EffectRemove,		// Removing spell item from character.
 	CTRIG_EnvironChange,    // my environment changed somehow (light,weather,season,region)
 	CTRIG_ExpChange,        // EXP is going to change
 	CTRIG_ExpLevelChange,   // Experience LEVEL is going to change
@@ -1228,6 +1226,8 @@ enum CTRIG_TYPE : short
 	CTRIG_SpellBook,        // Opening a spellbook
 	CTRIG_SpellCast,        // Char is casting a spell.
 	CTRIG_SpellEffect,      // A spell just hit me.
+    CTRIG_SpellEffectAdd,        // A spell effected me, i'm getting bonus/penalties from it.
+    CTRIG_SpellEffectRemove,		// Removing spell item from character.
     CTRIG_SpellEffectTick,  // A spell with SPELLFLAG_TICK just ticked.
 	CTRIG_SpellFail,        // The spell failed.
 	CTRIG_SpellSelect,      // selected a spell.

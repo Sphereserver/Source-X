@@ -987,6 +987,15 @@ public:
     */
     ushort Calc_SpellTithingCost(CChar* pCharCaster, const CSpellDef* pSpell, CObjBase* pObj);
 
+    /*
+    * @brief Calculates the chance of curing a poison effect.
+    * 
+    * @param pPoison: The poison item.
+    * @param iCureLevel: The power level of the cure, this can be from a cure spell/potion or from healing/veterinary.
+    * 
+    * @return True the check passed and the poison is removed, false the check failed and the poison is not removed.
+    */
+    bool CServerConfig::Calc_CurePoisonChance(const CItem* pPoison, int iCureLevel);
 #define SysMessageDefault( msg )	SysMessage( g_Cfg.GetDefaultMsg( msg ) )
 
     /**

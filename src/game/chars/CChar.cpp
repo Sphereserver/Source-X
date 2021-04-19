@@ -66,8 +66,6 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@Dismount",			// I am trying to get rid of my ride right now
 	"@Dye",					// My color has been changed
 	"@Eat",
-	"@EffectAdd",
-	"@EffectRemove",
 	"@EnvironChange",		// my environment changed somehow (light,weather,season,region)
 	"@ExpChange",			// EXP is going to change
 	"@ExpLevelChange",		// Experience LEVEL is going to change
@@ -192,6 +190,8 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@SpellBook",
 	"@SpellCast",			// Char is casting a spell.
 	"@SpellEffect",			// A spell just hit me.
+	"@SpellEffectAdd",		// A spell memory item is going to be placed upon me.
+	"@SpellEffectRemove",   // A spell memory item is going to be removed from me.
     "@SpellEffectTick",		// A spell is going to tick and have an effect on me.
 	"@SpellFail",			// The spell failed
 	"@SpellSelect",			// Selected a spell

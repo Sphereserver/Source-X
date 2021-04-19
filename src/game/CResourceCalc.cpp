@@ -492,3 +492,84 @@ ushort CServerConfig:: Calc_SpellTithingCost(CChar* pCharCaster, const CSpellDef
 	}
 	return 0; //No tithing points consumed.
 }
+
+bool CServerConfig::Calc_CurePoisonChance(const CItem* pPoison, int iCureLevel)
+{
+	ADDTOCALLSTACK("CServerConfig::Calc_CurePoisonChance");
+
+	if (!pPoison)
+		return false;
+
+	int iCureChance = 0, iPoisonLevel = pPoison->m_itSpell.m_spelllevel;
+
+	//Override the Cure Poison Chance.
+	const CVarDefCont* pTagStorage = pPoison->GetKey("OVERRIDE.CUREPOISONCHANCE", true);
+	if (pTagStorage)
+		return (Calc_GetRandVal(100) <= (uint)pTagStorage->GetValNum());
+
+	if (!IsSetMagicFlags(MAGICF_OSIFORMULAS))
+	{
+		iCureChance = Calc_GetSCurve(iCureLevel - iPoisonLevel, 100);
+		return (Calc_GetRandVal(1000) <= iCureChance);
+	}
+	//If we use MAGICF_OSIFORMULAS, the poison level is in the 0-4+ range.
+	if (!iPoisonLevel) //Lesser Poison (iPoisonLevel 0) is always cured no matter the potion or spell/skill level value
+		return true;
+
+	if (iCureLevel < 410)	//Lesser Cure Potion or our healing/veterinary/magery skill is less than 41.0
+	{
+		switch (iPoisonLevel)
+		{
+		case 1:
+			iCureChance = 35;
+			break;
+		case 2:
+			iCureChance = 15;
+			break;
+		case 3:
+			iCureChance = 10;
+			break;
+		default:
+			iCureChance = 5;
+			break;
+		}
+	}
+	else if (iCureLevel < 1010) //Cure Potion or our healing/veterinary/magery skill is between 41.0 and 100.9
+	{
+		switch (iPoisonLevel)
+		{
+		case 1:
+			iCureChance = 95;
+			break;
+		case 2:
+			iCureChance = 45;
+			break;
+		case 3:
+			iCureChance = 25;
+			break;
+		default:
+			iCureChance = 15;
+			break;
+		}
+	}
+	else //Greater Cure Potion or our healing/veterinary/magery skill is equal or above 101.0
+	{
+		switch (iPoisonLevel)
+		{
+		case 1:
+			iCureChance = 100;
+			break;
+		case 2:
+			iCureChance = 75;
+			break;
+		case 3:
+			iCureChance = 45;
+			break;
+		default:
+			iCureChance = 25;
+			break;
+		}
+	}
+
+	return (Calc_GetRandVal(100) <= iCureChance);
+}

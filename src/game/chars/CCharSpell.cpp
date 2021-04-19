@@ -536,13 +536,22 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 	CChar *pCaster = pSpell->m_uidLink.CharFind();
 	ushort uiStatEffect = (ushort)(pSpell->m_itSpell.m_spelllevel);
 
+	if (IsTrigUsed(TRIGGER_SPELLEFFECTREMOVE))
+	{
+		CScriptTriggerArgs Args;
+		Args.m_pO1 = pSpell;
+		Args.m_iN1 = spell;
+		TRIGRET_TYPE iRet = OnTrigger(CTRIG_SpellEffectRemove, pCaster, &Args);
+		if (iRet == TRIGRET_RET_FALSE)	// Return 0: remove the spell memory item but don't execute the default spell behaviour.
+			return;
+	}
 	if (IsTrigUsed(TRIGGER_EFFECTREMOVE))
 	{
 		CScriptTriggerArgs Args;
 		Args.m_pO1 = pSpell;
 		Args.m_iN1 = spell;
-		TRIGRET_TYPE iRet = OnTrigger(CTRIG_EffectRemove, pCaster, &Args);
-		if (iRet == TRIGRET_RET_FALSE)	// Return 0: remove the spell memory item but don't execute the default spell behaviour.
+		TRIGRET_TYPE iRet = Spell_OnTrigger(spell, SPTRIG_EFFECTREMOVE, pCaster, &Args);
+		if (iRet == TRIGRET_RET_FALSE)		// return 0: we want the memory to be equipped but we want custom things to happen: don't remove memory but stop here,
 			return;
 	}
 
@@ -949,12 +958,27 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
     int64 iTimerEffectSigned = pSpell->GetTimerSAdjusted();
 	word wTimerEffect = (word)maximum(iTimerEffectSigned, 0);
 
+	if (IsTrigUsed(TRIGGER_SPELLEFFECTADD))
+	{
+		CScriptTriggerArgs Args;
+		Args.m_pO1 = pSpell;
+		Args.m_iN1 = spell;
+		TRIGRET_TYPE iRet = OnTrigger(CTRIG_SpellEffectAdd, pCaster, &Args);
+		if (iRet == TRIGRET_RET_TRUE)	// Return 1: We don't want nothing to happen, removing memory also.
+		{
+			pSpell->Delete(true);
+			return;
+		}
+		else if (iRet == TRIGRET_RET_FALSE)		// return 0: we want the memory to be equipped but we want custom things to happen: don't remove memory but stop here,
+			return;
+	}
+
 	if (IsTrigUsed(TRIGGER_EFFECTADD))
 	{
 		CScriptTriggerArgs Args;
 		Args.m_pO1 = pSpell;
 		Args.m_iN1 = spell;
-		TRIGRET_TYPE iRet = OnTrigger(CTRIG_EffectAdd, pCaster, &Args);
+		TRIGRET_TYPE iRet = Spell_OnTrigger(spell,SPTRIG_EFFECTADD, pCaster, &Args);
 		if (iRet == TRIGRET_RET_TRUE)	// Return 1: We don't want nothing to happen, removing memory also.
 		{
 			pSpell->Delete(true);
@@ -3639,12 +3663,21 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			break;
 
 		case SPELL_Cure:
-			SetPoisonCure( iSkillLevel, iSkillLevel > 900 );
-			break;
-
 		case SPELL_Arch_Cure:
-			SetPoisonCure( iSkillLevel, true );
+			if (g_Cfg.Calc_CurePoisonChance(LayerFind(LAYER_FLAG_Poison), iSkillLevel))
+			{
+				SetPoisonCure((spell == SPELL_Arch_Cure || iSkillLevel > 900) ? true : false);
+				pCharSrc->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_1), (pCharSrc == this) ? g_Cfg.GetDefaultMsg(DEFMSG_HEALING_YOURSELF) : (GetName()));
+				if (pCharSrc != this)
+					SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_2), pCharSrc->GetName());
+			}
+			else
+			{
+				pCharSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_3));
+				SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_4));
+			}
 			break;
+	
 
 		case SPELL_Protection:
 		case SPELL_Arch_Prot:

@@ -2916,10 +2916,9 @@ bool CChar::OnTickEquip( CItem * pItem )
 
 // Leave the antidote in your body for a while.
 // iSkill = 0-1000
-bool CChar::SetPoisonCure( int iSkill, bool fExtra )
+bool CChar::SetPoisonCure( bool fExtra )
 {
 	ADDTOCALLSTACK("CChar::SetPoisonCure");
-	UNREFERENCED_PARAMETER(iSkill);
 
 	CItem * pPoison = LayerFind( LAYER_FLAG_Poison );
 	if ( pPoison )
@@ -3162,7 +3161,7 @@ bool CChar::Death()
 	SoundChar(CRESND_DIE);
 	StatFlag_Set(STATF_DEAD);
 	StatFlag_Clear(STATF_STONE|STATF_FREEZE|STATF_HIDDEN|STATF_SLEEPING|STATF_HOVERING);
-	SetPoisonCure(0, true);
+	SetPoisonCure(true);
 	Skill_Cleanup();
 	Spell_Dispel(100);		// get rid of all spell effects (moved here to prevent double @Destroy trigger)
 

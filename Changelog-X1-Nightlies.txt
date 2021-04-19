@@ -2551,3 +2551,42 @@ Must have event, even if it's empty, since it's applied by the source to generat
 
 05-04-2021, Nolok
 - Changed: improved text rendering speed on the Windows console window (now the whole message queue is appended in block, then the whole view is updated and scrolled down, instead of doing this per line) and removed drawing artifacts.
+
+19-04-2021, Drk84
+- Fixed: Curing poison is always successfull (Issue #381).
+		 When a character is attemping to cure poison by skill, spell or potion another check is made, the check formula depends on the MAGICF_OSIFORMULAS ini flag.
+		 If MAGICF_OSIFORMULAS is enabled the chance to cure is based upon the following values:
+		 https://www.uoguide.com/Lesser_Cure_Potion
+		 https://www.uoguide.com/Cure_Potion
+		 https://www.uoguide.com/Greater_Cure_Potion
+		 
+		 If MAGICF_OSIFORMULAS is disabled the chance to cure is based upon sphere classic bell formula:
+		 Example if the poison level is 60.0 and the healing skill is 50.0, the chance of curing the poison is around 25%.
+		 
+		 In addition, you can override the cure poison chance by using the TAG.OVERRIDE.CUREPOISONCHANCE in the poison item that will be placed upon the character.
+		 In this case a simple percent check is made,
+		 You can add this tag by using @SpellEffectAdd/@EffectAdd (see also below), example:
+		  ON=@EffectAdd
+			argo.tag.override.curepoisonchance = 25 //a 25% chance of curing the poison.
+			
+- Changed: For consistency renamed characters triggers @EffectAdd and @EffectRemove to @SpellEffectAdd and SpellEffectRemove
+.		Added spell triggers @EffectAdd and @EffectRemove (spell triggers  must be defined in the spell block).
+		Quick summary for @SpellEffectAdd/@EffectAdd and @SpellEffectRemove/@EffectRemove:
+		
+		@SpellEffectAdd/@EffectAdd
+		Argo: the spell item.
+		Src: the caster.
+		Default object: the target of the spell.
+		Argn1: the spell number.
+		return 0: Let default checks to happen.
+		return 1: Blocks any action and stops everything, also deletes the memory (Blocking any changes, this will cause also the effect to do not have duration)
+		
+		@SpellEffectRemove/@EffectRemove
+		Argo: the spell item.
+		Src: the caster.
+		Default object: the target of the spell.
+		Argn1: the spell number.
+		Return 0: remove the spell memory item but don't execute the default spell behaviour when the spell item is removed.
+		
+		
+		
