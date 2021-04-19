@@ -1123,7 +1123,7 @@ public:
 
 	void Flip();
 	bool SetPoison( int iSkill, int iHits, CChar * pCharSrc );
-	bool SetPoisonCure( int iLevel, bool fExtra );
+	bool SetPoisonCure( bool fExtra );
 	bool CheckCorpseCrime( CItemCorpse *pCorpse, bool fLooting, bool fTest );
 	CItemCorpse * FindMyCorpse( bool fIgnoreLOS = false, int iRadius = 2) const;
 	CItemCorpse * MakeCorpse( bool fFrontFall );

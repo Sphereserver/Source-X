@@ -2658,13 +2658,19 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 	int iSkillLevel = Skill_GetAdjusted( Skill_GetActive());
 	if ( pChar->IsStatFlag( STATF_POISONED ))
 	{
-		if ( !SetPoisonCure( iSkillLevel, true ))
+		if ( g_Cfg.Calc_CurePoisonChance(pChar->LayerFind(LAYER_FLAG_Poison), iSkillLevel) )
+		{
+			pChar->SetPoisonCure(true);
+			SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_1), (pChar == this) ? g_Cfg.GetDefaultMsg(DEFMSG_HEALING_YOURSELF) : (pChar->GetName()));
+			if (pChar != this)
+				pChar->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_2), GetName());
+		}
+		else 
+		{
+			SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_3));
+			pChar->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_4));
 			return -SKTRIG_ABORT;
-
-		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_HEALING_CURE_1 ), (pChar == this) ? g_Cfg.GetDefaultMsg(DEFMSG_HEALING_YOURSELF) : ( pChar->GetName()));
-		if ( pChar != this )
-			pChar->SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_HEALING_CURE_2 ), GetName());
-
+		}
 		return 0;
 	}
 
