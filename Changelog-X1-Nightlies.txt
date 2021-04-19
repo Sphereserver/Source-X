@@ -2569,8 +2569,8 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		  ON=@EffectAdd
 			argo.tag.override.curepoisonchance = 25 //a 25% chance of curing the poison.
 			
-- Changed: For consistency renamed characters triggers @EffectAdd and @EffectRemove to @SpellEffectAdd and SpellEffectRemove
-.		Added spell triggers @EffectAdd and @EffectRemove (spell triggers  must be defined in the spell block).
+- Changed: For consistency renamed characters triggers @EffectAdd and @EffectRemove to @SpellEffectAdd and SpellEffectRemove.
+		Added spell triggers @EffectAdd and @EffectRemove (spell triggers  must be defined in the spell block).
 		Quick summary for @SpellEffectAdd/@EffectAdd and @SpellEffectRemove/@EffectRemove:
 		
 		@SpellEffectAdd/@EffectAdd

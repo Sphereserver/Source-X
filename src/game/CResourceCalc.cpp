@@ -473,7 +473,7 @@ size_t CServerConfig::Calc_SpellReagentsConsume(CChar* pCharCaster, const CSpell
 	return SCONT_BADINDEX;
 }
 
-ushort CServerConfig:: Calc_SpellTithingCost(CChar* pCharCaster, const CSpellDef* pSpell, CObjBase* pObj)
+ushort CServerConfig::Calc_SpellTithingCost(CChar* pCharCaster, const CSpellDef* pSpell, CObjBase* pObj)
 {
 	ADDTOCALLSTACK("CServerConfig::Calc_SpellTithingCost");
 
