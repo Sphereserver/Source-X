@@ -2589,4 +2589,10 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		Return 0: remove the spell memory item but don't execute the default spell behaviour when the spell item is removed.
 		
 		
-		
+20-04-2021, Drk84
+Fixed: Trading layer item was added to the character weight when starting a trade (Issue #660).
+Fixed: MonsterFear in Sphere.ini does not seem to affect monsters (Issue #603).
+	   I also changed a little the motivation formula, now the remaining health of the NPC counts more towards the fleeing chance.
+	   Take in consideration that if the NPC has a big STR value it will be unlikely to flee.
+	   Remember that you can modify ARGN2 in @NpcActFight trigger to set the motivation value (ARGN2 <= 0 the NPC will flee).
+	   
