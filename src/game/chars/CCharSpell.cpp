@@ -551,7 +551,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		Args.m_pO1 = pSpell;
 		Args.m_iN1 = spell;
 		TRIGRET_TYPE iRet = Spell_OnTrigger(spell, SPTRIG_EFFECTREMOVE, pCaster, &Args);
-		if (iRet == TRIGRET_RET_FALSE)		// return 0: we want the memory to be equipped but we want custom things to happen: don't remove memory but stop here,
+		if (iRet == TRIGRET_RET_FALSE)		// Return 0: remove the spell memory item but don't execute the default spell behaviour.
 			return;
 	}
 

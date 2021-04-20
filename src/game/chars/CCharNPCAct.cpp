@@ -1264,7 +1264,16 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 		return false;
 
 	EXC_TRY("NPC_Act_Follow");
-	CChar * pChar = Fight_IsActive() ? m_Fight_Targ_UID.CharFind() : m_Act_UID.CharFind();
+
+	/*
+	* Replaced the Fight_IsActive() check with a check on m_fight_targ_UID.
+	* Red npcs usually never interact "in a peaceful way" with the players and thus m_act_UID is usually never set preventing the creature from fleeing and putting it in an immobile "state".
+	* Fight_IsActive returns true if the character is actively fighting (using a combat skill) in this case it's false because of the NPC'sFleeing
+	* Action and thus it will never pass the Fight_IsActive() check
+	*/
+	//CChar * pChar =  Fight_IsActive() ? m_Fight_Targ_UID.CharFind() : m_Act_UID.CharFind();
+	CChar * pChar =  m_Fight_Targ_UID ? m_Fight_Targ_UID.CharFind() : m_Act_UID.CharFind();
+
 	if (pChar == nullptr)
 	{
 		// free to do as i wish !
