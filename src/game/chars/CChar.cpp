@@ -1215,7 +1215,8 @@ bool CChar::DupeFrom(const CChar * pChar, bool fNewbieItems )
 	{
 		_GoAwake();
 	}
-
+	//g_World.m_uidNew stored the last duped item, so we need to set back again the newly duped character.
+	g_World.m_uidNew.SetObjUID(GetUID());
 	Update();
 	return true;
 }
