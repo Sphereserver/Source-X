@@ -3149,6 +3149,9 @@ void CChar::Spell_CastFail(bool fAbort)
 
 	ushort iManaLoss = 0, iTithingLoss = 0;
 	CSpellDef *pSpell = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
+ 	if (!pSpell)
+		return;
+
 	if (g_Cfg.m_fManaLossFail && !fAbort)
 		iManaLoss = g_Cfg.Calc_SpellManaCost(this, pSpell, m_Act_Prv_UID.ObjFind());
 

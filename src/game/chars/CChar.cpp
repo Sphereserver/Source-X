@@ -1203,9 +1203,19 @@ bool CChar::DupeFrom(const CChar * pChar, bool fNewbieItems )
 			}
 		}
 
-		const CChar * pTest3 = CUID::CharFindFromUID(pItem->m_uidLink);
-		if ( pTest3 && pTest3 == pChar)
-			pItem->m_uidLink = myUID;
+		CChar * pTest3 = CUID::CharFindFromUID(pItem->m_uidLink);
+		if (pTest3)
+		{
+			if (pTest3 == pChar)
+				pItem->m_uidLink = myUID; //If the character being duped has an item which linked to himself, set the newly duped character link instead.
+			else if (IsSetOF(OF_PetSlots) &&  pItem->IsMemoryTypes(MEMORY_IPET) && pTest3 == NPC_PetGetOwner())
+			{
+				const short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true, 1);
+				//If we have reached the maximum follower slots we remove the ownership of the pet by clearing the memory flag instead of using NPC_PetClearOwners().
+				if (!pTest3->FollowersUpdate(this, maximum(0, iFollowerSlots)))
+					Memory_ClearTypes(MEMORY_IPET); 
+			}
+		}
 	}
 	// End copying items.
 
