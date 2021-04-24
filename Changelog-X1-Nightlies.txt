@@ -2599,5 +2599,8 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: The NEW object after executing the NEWDUPE command always returned the last created item instead of the newly duped character (Issue #661).
 
 23-04-2021, Drk84
-- Fixed: Crash on failed spell.(Issue #666).
+- Fixed: Crash on failed spell(Issue #666).
 - Fixed: Duped tamed creatures do not increase followerslots (Issue #663).
+
+24-04-2021, Drk84
+- Fixed: Sound loop when dismounting (Issue #673).

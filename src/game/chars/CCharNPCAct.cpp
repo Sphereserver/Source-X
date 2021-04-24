@@ -1272,7 +1272,7 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 	* Action and thus it will never pass the Fight_IsActive() check
 	*/
 	//CChar * pChar =  Fight_IsActive() ? m_Fight_Targ_UID.CharFind() : m_Act_UID.CharFind();
-	CChar * pChar =  m_Fight_Targ_UID ? m_Fight_Targ_UID.CharFind() : m_Act_UID.CharFind();
+	CChar * pChar =  m_Fight_Targ_UID.IsValidUID() ? m_Fight_Targ_UID.CharFind() : m_Act_UID.CharFind();
 
 	if (pChar == nullptr)
 	{
