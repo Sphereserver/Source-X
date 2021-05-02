@@ -1906,7 +1906,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		case IT_CORPSE:
 			if ( ! m_pChar->CanUse( pItemTarg, false ))
 				return false;
-			m_pChar->Use_CarveCorpse( dynamic_cast <CItemCorpse*>( pItemTarg ));
+			m_pChar->Use_CarveCorpse( dynamic_cast <CItemCorpse*>( pItemTarg ), pItemUse);
 			return true;
 
 		case IT_FRUIT:

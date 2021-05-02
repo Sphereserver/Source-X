@@ -1098,8 +1098,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	ushort iMiningSkill = Skill_GetAdjusted(SKILL_MINING);
 	word iOreQty = pItemOre->GetAmount();
 	word iResourceQty = 0;
-	word iResourceTotalQty = pOreDef->m_BaseResources.size(); //This is the total amount of different resources obtained from smelting.
-	const CItemBase * pResourceDef = nullptr;		
+	size_t iResourceTotalQty = pOreDef->m_BaseResources.size(); //This is the total amount of different resources obtained from smelting.		
 
 	CScriptTriggerArgs Args(iMiningSkill, iResourceTotalQty);
 	
@@ -1128,13 +1127,13 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 			if ( rid.GetResType() != RES_ITEMDEF )
 				continue;
 
-			const CItemBase * pBaseDef = CItemBase::FindItemBase((ITEMID_TYPE)(rid.GetResIndex()));
-			if ( pBaseDef == nullptr )
-				continue;
+			ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
+			if (id == ITEMID_NOTHING)
+				break;
 
 			tchar* pszTmp = Str_GetTemp();
 			snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.ID", (int)i);
-			Args.m_VarsLocal.SetNum(pszTmp, pBaseDef->GetResourceID());
+			Args.m_VarsLocal.SetNum(pszTmp,(int64)id);
 
 			iResourceQty = (word)(pOreDef->m_BaseResources[i].GetResQty());
 			snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.amount", (int)i);
@@ -1148,28 +1147,32 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 		switch (pItemOre->OnTrigger(ITRIG_Smelt, this, &Args))
 		{
 		case TRIGRET_RET_TRUE:	return false;
-		case TRIGRET_RET_FALSE: return true;
 		default:				break;
 		}
 	}
 
 	iMiningSkill = (ushort)Args.m_iN1;
-
 	for (size_t i = 0; i < iResourceTotalQty; ++i)
 	{
 		tchar* pszTmp = Str_GetTemp();
 		snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.ID", (int)i);
 		const CItemBase* pBaseDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum(pszTmp))));
 		
-		if (pBaseDef == nullptr || (!pBaseDef->IsType(IT_INGOT) && !pBaseDef->IsType(IT_GEM)))
+		//We have finished the ore or item being smelted.
+		if (iOreQty <= 0)
+		{
+			SysMessageDefault(DEFMSG_MINING_CONSUMED);
+			return false;
+		}
+
+		if (pBaseDef == nullptr  || (!pBaseDef->IsType(IT_INGOT) && !pBaseDef->IsType(IT_GEM)))
 		{
 			SysMessageDefault( DEFMSG_MINING_CONSUMED );
-			//pItemOre->ConsumeAmount( iOreQty );
-			//return true;
 			continue;
 		}
+
 		snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.amount", (int)i);
-		iResourceQty = Args.m_VarsLocal.GetKeyNum(pszTmp);
+		iResourceQty =(word)Args.m_VarsLocal.GetKeyNum(pszTmp);
 		iResourceQty *= iOreQty;	// max amount
 
 		if (pBaseDef->IsType(IT_GEM))
@@ -1198,7 +1201,9 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 		if ( !iResourceQty || !Skill_UseQuick( SKILL_MINING, iSmeltingDifficulty))
 		{
 			SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_MINING_NOTHING ), pItemOre->GetName());
-			pItemOre->ConsumeAmount( (word)(Calc_GetRandVal( pItemOre->GetAmount() / 2 ) + 1) );	// lose up to half the resources.
+			word iAmountLost = (word)(Calc_GetRandVal(pItemOre->GetAmount() / 2) + 1);
+			pItemOre->ConsumeAmount(iAmountLost);	// lose up to half the resources.
+			iOreQty -= iAmountLost;
 			continue;
 		}
 		// Payoff - Amount of ingots i get.
@@ -1206,7 +1211,6 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 		if ( pIngots == nullptr )
 		{
 			SysMessageDefault( DEFMSG_MINING_NOTHING );
-			//return false;
 			continue;
 		}
 		pIngots->SetAmount(iResourceQty);

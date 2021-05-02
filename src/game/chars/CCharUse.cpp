@@ -40,9 +40,13 @@ bool CChar::Use_MultiLockDown( CItem * pItemTarg )
 	return false;
 }
 
-void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
+void CChar::Use_CarveCorpse( CItemCorpse * pCorpse, CItem * pItemCarving )
 {
 	ADDTOCALLSTACK("CChar::Use_CarveCorpse");
+
+	if (!pItemCarving)
+		return;
+
 	CREID_TYPE CorpseID = pCorpse->m_itCorpse.m_BaseID;
 	CCharBase *pCorpseDef = CCharBase::FindCharBase(CorpseID);
 	if ( !pCorpseDef || pCorpse->m_itCorpse.m_carved )
@@ -64,9 +68,9 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 	}
 
 	word iResourceQty = 0;
-	word iResourceTotalQty = pCorpseDef->m_BaseResources.size();
+	size_t iResourceTotalQty = pCorpseDef->m_BaseResources.size();
 
-	CScriptTriggerArgs Args(iResourceTotalQty);
+	CScriptTriggerArgs Args(iResourceTotalQty,0,pItemCarving);
 
 	for (size_t i = 0; i < iResourceTotalQty; ++i)
 	{
@@ -81,7 +85,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 
 		tchar* pszTmp = Str_GetTemp();
 		snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.ID", (int)i);
-		Args.m_VarsLocal.SetNum(pszTmp, id);
+		Args.m_VarsLocal.SetNum(pszTmp, (int64)id);
 
 		iResourceQty = (word)pCorpseDef->m_BaseResources[i].GetResQty();
 		snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.amount", (int)i);
@@ -115,7 +119,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 			break; 
 
 		snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.amount", (int)i);
-		iResourceQty = Args.m_VarsLocal.GetKeyNum(pszTmp);
+		iResourceQty =(word)Args.m_VarsLocal.GetKeyNum(pszTmp);
 
 		++ iItems;
 		CItem *pPart = CItem::CreateTemplate(id, nullptr, this);

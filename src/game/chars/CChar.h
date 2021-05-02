@@ -1175,7 +1175,7 @@ public:
 	void Use_EatQty( CItem * pFood, ushort uiQty = 1 );
 	bool Use_Eat( CItem * pItem, ushort uiQty = 1 );
 	bool Use_MultiLockDown( CItem * pItemTarg );
-	void Use_CarveCorpse( CItemCorpse * pCorpse );
+	void Use_CarveCorpse( CItemCorpse * pCorpse, CItem * pItemCarving );
 	bool Use_Repair( CItem * pItem );
 	int  Use_PlayMusic( CItem * pInstrument, int iDifficultyToPlay );
 	void Use_Drink(CItem *pItem);

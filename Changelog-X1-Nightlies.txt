@@ -2604,3 +2604,90 @@ Must have event, even if it's empty, since it's applied by the source to generat
 
 24-04-2021, Drk84
 - Fixed: Sound loop when dismounting (Issue #673).
+
+02-05-2021, Drk84
+- Added: New item/char triggers @Smelt/@ItemSmelt and @CarveCorpse/@ItemCarveCorpse (Issue #616).
+		@Smelt(Item Trigger)/@ItemSmelt (Character Trigger)
+		These triggers are fired when a character attempts to smelt ores and items on a forge or by the SMELT command but also:
+		
+		Src: The character smelting the item.
+		Default Object: The item being smelted in the @Smelt trigger.
+						The character smelting the item in the @ItemSmelt trigger.
+						
+		Argn1: R/W, the adjusted mining skill of the character. 
+		Argn2: R, the total amount of different resources the item being smelted has.
+				  For example a mace is made of iron  ingots and logs, so the number of different resources is 2.
+				  For ores the total amount of different resources is always 1.
+				  
+		local.resource.n.ID: R/W, The ID of the itemdef that will be created if the smelting check is succesfull, n starts at 0.
+		local.resource.n.amount: R/W, The amount value that will set on that particular resource if the smelting check is succesfull, n starts at 0.
+		
+		Return 1: Fails the smelting attempt and block default smelting behaviour.
+		Return 0: Succeeds the smel attempt and block default smelting behaviour.
+		
+		Notes:
+		If you are using the ScriptPack X you need to COMMENT the following lines in the types_forge.scp file for enabling  the smelting of items/ores by forge:
+		TARGETF f_craft_blacksmith_smelt_targ
+		RETURN 1
+		
+		Reading local.resource.n.ID:
+		The itemdef of the resource being created is in numerical format so for outputting it in readable format you need to use:
+		serv.itemdef.<local.resource.<dlocal._for>.iD>>
+		
+		For assigning the value just use the plain itemdef instead:
+		local.resource.n.ID = i_ingot_gold
+		local.resource.n.amount = 30
+		
+		Only ingots and gems will "survive" the smelting process, the rest of resources is not created.
+		For every ingots that can be created Sphere makes two additional check:
+		First, the character need to have the minimum skill to smelt the ores 
+		Second, the character must pass a skillquick check, if fail up to half of the item amount value is consumed (so non-ores items are usually destroyed).
+		
+		Example:
+		Given an item with the following resource property
+		RESOURCES=6 i_ingot_iron,1 i_log,1 i_gem_diamond,3 i_ingot_bronze
+		ON=@ItemSmelt //
+		FOR 0 <eval <argn2> - 1>
+			serv.log resource obtained <serv.itemdef.<local.resource.<dlocal._for>.ID>.baseid> - Amount: <local.resource.<dlocal._for>.amount>
+		endfor 
+		Argn2 is 4 (i_ingot_iron, i_log, i_gem_diamond and i_ingot_bronze)
+		The output will be:
+		i_ingot_iron - 6, i_log 1 - ,i_gem_diamond -3, i_ingot_bronze - 3
+		
+		
+		@CarveCorpse (Item Trigger)/@ItemCarveCorpse(Character Trigger)
+		These triggers are fired when a character attempts to carve a corpse or a corpse is being  carved:
+		
+		Src: The character carving the corpse.
+		Default Object: The corpse being carved in the @CarveCorpse trigger.
+						The character carving the corpse in the @ItemCarveCorpse trigger.
+		Argo: 			The item used for carving the corpse.
+						
+		Argn1:	R	The total amount of different resources the corpse being carved has.
+					For example the ogre resources property contains only the i_ribs_raw item so the number of different resources is just 1.
+						
+		local.resource.n.ID: R/W, The ID of the itemdef that will be created when carving the corpse, n starts at 0.
+		local.resource.n.amount: R/W, The amount of value that will be set on that particular resource, n starts at 0.
+		
+		Return 1: Block the default carving behaviour.
+		
+		Notes
+		local.resource.n.ID stores the itemdef of the resource being created in numerical format so for outputting it in readable format you need to use:
+		serv.itemdef.<local.resource.<dlocal._for>.iD>>
+		
+		For assigning the value just use the plain itemdef instead:
+		local.resource.n.ID = i_gem_ruby
+		local.resource.n.amount = 5
+		
+		Example:
+		[TYPEDEF t_corpse]
+		ON=@CorpseCarve
+		FOR 0 <eval <argn1> - 1>
+			serv.log resource obtained <serv.itemdef.<local.resource.<dlocal._for>.ID>.name> - Amount: <local.resource.<dlocal._for>.amount>
+			if (<src.forensics> >= 900) && (<argo.baseid> == i_dagger)
+				local.resource.<dlocal._for>.amount += 5
+			endif
+		endfor 
+		If we are carving an ogre, ARGN1 will be 1 and the output will be 
+		Raw Ribs- 2
+		If player forensics skill is >= 90.0% and we are using a dagger for carving we get an additional 5 i_ribs_raw
