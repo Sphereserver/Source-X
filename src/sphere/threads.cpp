@@ -99,10 +99,16 @@ bool ThreadHolder::m_inited = false;
 SimpleMutex ThreadHolder::m_mutex;
 TlsValue<IThread *> ThreadHolder::m_currentThread;
 
-IThread *ThreadHolder::current()
+IThread *ThreadHolder::current() noexcept
 {
-    if (!m_inited)
-	    init();
+	if (!m_inited)
+	{
+		EXC_TRY("Uninitialized");
+
+		init();
+
+		EXC_CATCH;
+	}
 
 	IThread * thread = m_currentThread;
 	if (thread == nullptr)
@@ -693,11 +699,13 @@ void DummySphereThread::tick()
 
 #ifdef THREAD_TRACK_CALLSTACK
 
-StackDebugInformation::StackDebugInformation(const char *name)
+StackDebugInformation::StackDebugInformation(const char *name) noexcept
 {
     m_context = static_cast<AbstractSphereThread *>(ThreadHolder::current());
-    if (m_context != nullptr)
-        m_context->pushStackCall(name);
+	if (m_context != nullptr)
+	{
+		m_context->pushStackCall(name);
+	}
 }
 
 StackDebugInformation::~StackDebugInformation()

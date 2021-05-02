@@ -3062,7 +3062,7 @@ bool CClient::xPacketFilter( const byte * pData, uint iLen )
 			Args.m_VarsLocal.SetStr("ACCOUNT", false, m_pAccount->GetName());
 			if ( m_pChar )
 			{
-				Args.m_VarsLocal.SetNum("CHAR", m_pChar->GetUID());
+				Args.m_VarsLocal.SetNum("CHAR", m_pChar->GetUID().GetObjUID());
 			}
 		}
 
@@ -3111,7 +3111,7 @@ bool CClient::xOutPacketFilter( const byte * pData, uint iLen )
 			Args.m_VarsLocal.SetStr("ACCOUNT", false, m_pAccount->GetName());
 			if ( m_pChar )
 			{
-				Args.m_VarsLocal.SetNum("CHAR", m_pChar->GetUID());
+				Args.m_VarsLocal.SetNum("CHAR", m_pChar->GetUID().GetObjUID());
 			}
 		}
 

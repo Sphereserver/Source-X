@@ -410,7 +410,7 @@ public:
     * @brief Removes a CMultiComponent from the components list.
     * @param pComponent the component.
     */
-    virtual void DeleteComponent(const CUID& uidComponent);
+    virtual void DeleteComponent(const CUID& uidComponent, bool fRemoveFromList);
     /**
     * @brief Returns the position of a given CMultiComponent.
     * @param pComponent the component
@@ -423,7 +423,7 @@ public:
     */
     size_t GetComponentCount() const;
     /**
-    * @brief Removes all Components.
+    * @brief Destroys all Components.
     */
     void RemoveAllComponents();
     /**
@@ -510,7 +510,7 @@ public:
     * @brief Unlocks an item and remove it from the Lockdowns list.
     * @param pItem the item.
     */
-    void UnlockItem(const CUID& uidItem);
+    void UnlockItem(const CUID& uidItem, bool fRemoveFromList);
     void UnlockAllItems();
     /**
     * @brief Returns the position of the given item.
@@ -532,7 +532,7 @@ public:
     * @brief Releases a container and removes it from the containers list.
     * @param pContainer the container.
     */
-    void Release(const CUID& uidContainer);
+    void Release(const CUID& uidContainer, bool fRemoveFromList);
     /**
     * @brief Returns the position of the given container
     * @param pContainer the container

@@ -33,7 +33,7 @@ size_t CCharRefArray::AttachChar( const CChar *pChar )
     size_t i = FindChar(pChar);
     if ( i != SCONT_BADINDEX )
         return i;
-    return m_uidCharArray.emplace_back(pChar->GetUID());
+    return m_uidCharArray.emplace_back(pChar->GetUID()).GetObjUID();
 }
 
 size_t CCharRefArray::InsertChar( const CChar *pChar, size_t i )
@@ -86,7 +86,9 @@ void CCharRefArray::WritePartyChars( CScript &s )
 {
     ADDTOCALLSTACK("CCharRefArray::WritePartyChars");
     size_t iQty = m_uidCharArray.size();
-    for ( size_t j = 0; j < iQty; ++j )		// write out links to all my chars
-        s.WriteKeyHex("CHARUID", m_uidCharArray[j]);
+    for (size_t j = 0; j < iQty; ++j)		// write out links to all my chars
+    {
+        s.WriteKeyHex("CHARUID", m_uidCharArray[j].GetObjUID());
+    }
 }
 

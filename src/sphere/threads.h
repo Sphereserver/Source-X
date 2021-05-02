@@ -109,8 +109,10 @@ class TlsValue;
 class ThreadHolder
 {
 public:
+	static constexpr lpctstr m_sClassName = "ThreadHolder";
+
 	// returns current working thread or DummySphereThread * if no IThread threads are running
-	static IThread *current();
+	static IThread *current() noexcept;
 	// records a thread to the list. Sould NOT be called, internal usage
 	static void push(IThread *thread);
 	// removes a thread from the list. Sould NOT be called, internal usage
@@ -134,7 +136,7 @@ public:
 	static TlsValue<IThread *> m_currentThread;
 
 private:
-	ThreadHolder() { };
+	ThreadHolder() = delete;
 };
 
 // Thread implementation. See IThread for list of available methods.
@@ -364,7 +366,7 @@ private:
 	AbstractSphereThread* m_context;
 
 public:
-	StackDebugInformation(const char *name);
+	StackDebugInformation(const char *name) noexcept;
 	~StackDebugInformation();
 
 private:

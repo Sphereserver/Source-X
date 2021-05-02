@@ -556,7 +556,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
                 CItem *pItem = static_cast<CItem*>(uid.ItemFind());
                 if (pItem)
                 {
-                    UnlockItem(uid);
+                    UnlockItem(uid, true);
                     pMovingCrate->ContentAdd(pItem);
                     pItem->RemoveFromView();
                 }
@@ -573,7 +573,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
                 CItemContainer *pCont = static_cast<CItemContainer*>(uid.ItemFind());
                 if (pCont)
                 {
-                    Release(uid);
+                    Release(uid, true);
                     pMovingCrate->ContentAdd(pCont);
                     pCont->RemoveFromView();
                 }
@@ -1245,7 +1245,7 @@ const CRect CItemMultiCustom::GetDesignArea()
     return rect;
 }
 
-void CItemMultiCustom::DeleteComponent(const CUID& uidComponent)
+void CItemMultiCustom::DeleteComponent(const CUID& uidComponent, bool fRemoveFromList)
 {
     /* The code below should remove the item from the m_mainDesign, however it's not being deleted from there even if the world item is
         So, in the next customize, the item will appear again.
@@ -1261,7 +1261,7 @@ void CItemMultiCustom::DeleteComponent(const CUID& uidComponent)
         pt.m_z -= GetTopPoint().m_z;
         RemoveItem(GetOwner().CharFind()->GetClientActive(), pComp->GetDispID(), pt.m_x, pt.m_y, pt.m_z);
     }*/
-    CItemMulti::DeleteComponent(uidComponent);
+    CItemMulti::DeleteComponent(uidComponent, fRemoveFromList);
 }
 
 void CItemMultiCustom::CopyDesign(CDesignDetails * designFrom, CDesignDetails * designTo)
@@ -1369,7 +1369,7 @@ void CItemMultiCustom::ClearFloor(char iFloor)
             CItemContainer *pCont = static_cast<CItemContainer*>(uid.ItemFind());
             if ((pCont->GetTopPoint().m_z >= iMinZ) && (pCont->GetTopPoint().m_z <= iMaxZ))
             {
-                Release(uid);
+                Release(uid, true);
                 pCont->RemoveFromView();
                 pCrate->ContentAdd(pCont);
             }
@@ -1385,7 +1385,7 @@ void CItemMultiCustom::ClearFloor(char iFloor)
             CItem *pItem = uid.ItemFind();
             if ((pItem->GetTopPoint().m_z >= iMinZ) && (pItem->GetTopPoint().m_z <= iMaxZ))
             {
-                UnlockItem(uid);
+                UnlockItem(uid, true);
                 pItem->RemoveFromView();
                 pCrate->ContentAdd(pItem);
             }

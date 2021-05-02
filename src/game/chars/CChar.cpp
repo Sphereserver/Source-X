@@ -2256,7 +2256,7 @@ do_default:
 					else if ( !strnicmp(ptcKey, "TARGET", 6 ) )
 					{
 						ptcKey += 6;
-						if ( m_Act_UID )
+						if (m_Act_UID.IsValidUID())
 							sVal.FormatHex((dword)(m_Fight_Targ_UID));
 						else
 							sVal.FormatVal(-1);
@@ -2666,7 +2666,7 @@ do_default:
 				dword		dwBlockFlags = 0;
 				CRegion	*	pArea;
 				pArea = CheckValidMove( ptDst, &dwBlockFlags, dir, nullptr );
-				sVal.FormatHex( pArea ? pArea->GetResourceID() : 0 );
+				sVal.FormatHex( pArea ? pArea->GetResourceID().IsValidUID() : 0 );
 			}
 			return true;
 

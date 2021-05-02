@@ -237,7 +237,7 @@ bool CPartyDef::MessageEvent( CUID uidDst, CUID uidSrc, const nchar *pText, int 
 	UNREFERENCED_PARAMETER(ilenmsg);
 	if ( pText == nullptr )
 		return false;
-	if ( uidDst && !IsInParty(uidDst.CharFind()) )
+	if ( uidDst.IsValidUID() && !IsInParty(uidDst.CharFind()) )
 		return false;
 
 	CChar *pFrom = uidSrc.CharFind();
@@ -252,8 +252,8 @@ bool CPartyDef::MessageEvent( CUID uidDst, CUID uidSrc, const nchar *pText, int 
 	{
 		TRIGRET_TYPE tr = TRIGRET_RET_FALSE;
 		CScriptTriggerArgs Args;
-		Args.m_iN1 = uidSrc;
-		Args.m_iN2 = uidDst;
+		Args.m_iN1 = uidSrc.GetObjUID();
+		Args.m_iN2 = uidDst.GetObjUID();
 		Args.m_s1 = szText;
 		Args.m_s1_buf_vec = szText;
 

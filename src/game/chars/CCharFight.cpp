@@ -1695,8 +1695,8 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
         if ( pWeapon )
         {
-            CResourceID ridAmmo = pWeapon->Weapon_GetRangedAmmoRes();
-            if ( ridAmmo )
+            const CResourceID ridAmmo(pWeapon->Weapon_GetRangedAmmoRes());
+            if (ridAmmo.IsValidUID())
             {
                 pAmmo = pWeapon->Weapon_FindRangedAmmo(ridAmmo);
                 if ( !pAmmo && m_pPlayer )
@@ -1844,7 +1844,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		{
 			CScriptTriggerArgs Args(0, 0, pWeapon);
 			if ( pAmmo )
-				Args.m_VarsLocal.SetNum("Arrow", pAmmo->GetUID());
+				Args.m_VarsLocal.SetNum("Arrow", pAmmo->GetUID().IsValidUID());
 			if ( OnTrigger(CTRIG_HitMiss, pCharTarg, &Args) == TRIGRET_RET_TRUE )
 				return WAR_SWING_EQUIPPING_NOWAIT;
 
@@ -1945,7 +1945,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	CScriptTriggerArgs Args(iDmg, iDmgType, pWeapon);
 	Args.m_VarsLocal.SetNum("ItemDamageChance", 25);
 	if ( pAmmo )
-		Args.m_VarsLocal.SetNum("Arrow", pAmmo->GetUID());
+		Args.m_VarsLocal.SetNum("Arrow", pAmmo->GetUID().IsValidUID());
 
 	if ( IsTrigUsed(TRIGGER_SKILLSUCCESS) )
 	{

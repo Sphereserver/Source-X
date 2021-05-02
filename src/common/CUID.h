@@ -100,11 +100,20 @@ public:
 	void SetObjUID(dword dwVal) noexcept;
 
 public:
-	inline bool operator != (dword index) const noexcept {
-		return (GetObjUID() != index);
-	}
+	operator bool() const noexcept = delete;
 	inline operator dword () const noexcept {
 		return GetObjUID();
+	}
+	inline operator int64 () const noexcept {
+		return GetObjUID();
+	}
+
+	inline bool operator < (CUID const& rhs) const noexcept {	// for std::less
+		return m_dwInternalVal < rhs.m_dwInternalVal;
+	}
+
+	inline bool operator != (dword index) const noexcept {
+		return (GetObjUID() != index);
 	}
 	inline bool operator == (dword index) const noexcept {
 		return (GetObjUID() == index);

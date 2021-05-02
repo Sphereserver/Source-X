@@ -497,8 +497,8 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 		return false;
 
 	CItem *pAmmo = nullptr;
-	CResourceID ridAmmo = pWeapon->Weapon_GetRangedAmmoRes();
-	if ( ridAmmo )
+	const CResourceID ridAmmo(pWeapon->Weapon_GetRangedAmmoRes());
+	if (ridAmmo.IsValidUID())
 	{
 		pAmmo = pWeapon->Weapon_FindRangedAmmo(ridAmmo);
 		if ( !pAmmo )
@@ -1146,12 +1146,12 @@ bool CChar::Use_Key( CItem * pKey, CItem * pItemTarg )
 			return false;
 		}
 
-		if ( !pKey->m_itKey.m_UIDLock && !pItemTarg->m_itKey.m_UIDLock )
+		if ( !pKey->m_itKey.m_UIDLock.IsValidUID() && !pItemTarg->m_itKey.m_UIDLock.IsValidUID())
 		{
 			SysMessageDefault(DEFMSG_MSG_KEY_BLANKS);
 			return false;
 		}
-		if ( pItemTarg->m_itKey.m_UIDLock && pKey->m_itKey.m_UIDLock )
+		if ( pItemTarg->m_itKey.m_UIDLock.IsValidUID() && pKey->m_itKey.m_UIDLock.IsValidUID())
 		{
 			SysMessageDefault(DEFMSG_MSG_KEY_NOTBLANKS);
 			return false;
@@ -1163,14 +1163,14 @@ bool CChar::Use_Key( CItem * pKey, CItem * pItemTarg )
 			SysMessageDefault(DEFMSG_MSG_KEY_FAILC);
 			return false;
 		}
-		if ( pItemTarg->m_itKey.m_UIDLock )
+		if ( pItemTarg->m_itKey.m_UIDLock.IsValidUID())
 			pKey->m_itKey.m_UIDLock = pItemTarg->m_itKey.m_UIDLock;
 		else
 			pItemTarg->m_itKey.m_UIDLock = pKey->m_itKey.m_UIDLock;
 		return true;
 	}
 
-	if ( !pKey->m_itKey.m_UIDLock )
+	if ( !pKey->m_itKey.m_UIDLock.IsValidUID())
 	{
 		SysMessageDefault(DEFMSG_MSG_KEY_ISBLANK);
 		return false;
@@ -1188,13 +1188,13 @@ bool CChar::Use_Key( CItem * pKey, CItem * pItemTarg )
 		return false;
 	}
 
-	if ( m_pArea->GetResourceID() == pKey->m_itKey.m_UIDLock )
+	if ( m_pArea->GetResourceID().GetObjUID() == pKey->m_itKey.m_UIDLock.GetObjUID() )
 	{
 		if ( Use_MultiLockDown(pItemTarg) )
 			return true;
 	}
 
-	if ( !pItemTarg->m_itContainer.m_UIDLock )	// or m_itContainer.m_UIDLock
+	if ( !pItemTarg->m_itContainer.m_UIDLock.IsValidUID())	// or m_itContainer.m_UIDLock
 	{
 		SysMessageDefault(DEFMSG_MSG_KEY_NOLOCK);
 		return false;
@@ -1620,7 +1620,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 		case IT_SHIP_PLANK:
 		{
 			// Close the plank if I'm inside the ship
-			if (m_pArea->IsFlag(REGION_FLAG_SHIP) && m_pArea->GetResourceID() == pItem->m_uidLink)
+			if (m_pArea->IsFlag(REGION_FLAG_SHIP) && (m_pArea->GetResourceID().GetObjUID() == pItem->m_uidLink.GetObjUID()))
 			{
 				if (pItem->m_itShipPlank.m_wSideType == IT_SHIP_SIDE_LOCKED && !ContentFindKeyFor(pItem))
 				{

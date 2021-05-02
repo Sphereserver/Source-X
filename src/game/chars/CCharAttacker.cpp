@@ -8,7 +8,7 @@
 bool CChar::Attacker_Add(CChar * pChar, int threat)
 {
     ADDTOCALLSTACK("CChar::Attacker_Add");
-    CUID uid = pChar->GetUID();
+    const dword uid = pChar->GetUID().GetObjUID();
     if (!m_lastAttackers.empty())	// Must only check for existing attackers if there are any attacker already.
     {
         for (auto it = m_lastAttackers.begin(), end = m_lastAttackers.end(); it != end; ++it)

@@ -30,7 +30,7 @@ CItemContainer::~CItemContainer()
         pMulti = static_cast<CItemMulti*>(_uidMultiSecured.ItemFind());
         if (pMulti)
         {
-            pMulti->Release(GetUID());
+            pMulti->Release(GetUID(), true);
         }
     }
     if (_uidMultiCrate.IsValidUID())
@@ -38,7 +38,7 @@ CItemContainer::~CItemContainer()
         pMulti = static_cast<CItemMulti*>(_uidMultiCrate.ItemFind());
         if (pMulti)
         {
-            pMulti->SetMovingCrate(CUID(UID_UNUSED));
+			pMulti->SetMovingCrate({});
         }
     }
 }
@@ -929,7 +929,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 				pCharMsg->SysMessageDefault(DEFMSG_MSG_ERR_NOTKEY);
 				return false;
 			}
-			if ( !pItem->m_itKey.m_UIDLock )
+			if ( !pItem->m_itKey.m_UIDLock.IsValidUID())
 			{
 				pCharMsg->SysMessageDefault(DEFMSG_MSG_ERR_NOBLANKRING);
 				return false;

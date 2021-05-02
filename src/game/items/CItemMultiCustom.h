@@ -71,7 +71,7 @@ private:
     * @brief Removes a CMultiComponent from the components list.
     * @param pComponent the component.
     */
-    virtual void DeleteComponent(const CUID& uidComponent) override;
+    virtual void DeleteComponent(const CUID& uidComponent, bool fRemoveFromList) override final;
 
     void CopyDesign(CDesignDetails * designFrom, CDesignDetails * designTo);
     void GetLockdownsAt(short dx, short dy, char dz, std::vector<CUID> &vList);

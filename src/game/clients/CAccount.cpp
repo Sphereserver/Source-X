@@ -1510,7 +1510,7 @@ void CAccount::r_Write(CScript &s)
 	}
 	if ( m_uidLastChar.IsValidUID())
 	{
-		s.WriteKeyHex( "LASTCHARUID", m_uidLastChar );
+		s.WriteKeyHex( "LASTCHARUID", m_uidLastChar.GetObjUID() );
 	}
     if (_iMaxHouses != g_Cfg._iMaxHousesAccount)
     {

@@ -1944,7 +1944,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 void CObjBase::r_Write( CScript & s )
 {
 	ADDTOCALLSTACK_INTENSIVE("CObjBase::r_Write");
-	s.WriteKeyHex( "SERIAL", GetUID());
+	s.WriteKeyHex( "SERIAL", GetUID().IsValidUID());
 	if ( IsIndividualName() )
 		s.WriteKeyStr( "NAME", GetIndividualName());
 	if ( m_wHue != HUE_DEFAULT )
@@ -1954,7 +1954,7 @@ void CObjBase::r_Write( CScript & s )
 	if ( m_timestamp > 0 )
 		s.WriteKeyVal( "TIMESTAMP", GetTimeStamp());
 	if ( const CCSpawn* pSpawn = GetSpawn() )
-		s.WriteKeyHex("SPAWNITEM", pSpawn->GetLink()->GetUID());
+		s.WriteKeyHex("SPAWNITEM", pSpawn->GetLink()->GetUID().GetObjUID());
 	if ( m_ModAr )
 		s.WriteKeyVal("MODAR", m_ModAr);
 	if ( m_ModMaxWeight )

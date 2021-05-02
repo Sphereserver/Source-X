@@ -105,12 +105,14 @@ void CItemShip::r_Write(CScript & s)
 {
     ADDTOCALLSTACK_INTENSIVE("CItemShip::r_Write");
     CItemMulti::r_Write(s);
-    if (m_uidHold)
-        s.WriteKeyHex("HATCH", m_uidHold);
-    if (GetShipPlankCount() > 0)
+    if (m_uidHold.IsValidUID())
+        s.WriteKeyHex("HATCH", m_uidHold.GetObjUID());
+
+    const size_t uiCount = GetShipPlankCount();
+    if (uiCount > 0)
     {
-        for (size_t i = 0; i < m_uidPlanks.size(); i++)
-            s.WriteKeyHex("PLANK", m_uidPlanks.at(i));
+        for (size_t i = 0; i < uiCount; ++i)
+            s.WriteKeyHex("PLANK", m_uidPlanks[i]);
     }
 }
 

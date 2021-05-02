@@ -132,7 +132,7 @@ bool CRandGroupDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * p
         {
             size_t i = GetRandMemberIndex();
             if ( i != SCONT_BADINDEX )
-                sVal.FormatHex(GetMemberID(i) & 0xFFFFFF);
+                sVal.FormatHex(GetMemberID(i).GetResIndex());
             break;
         }
         case RGC_CALCMEMBERINDEX:

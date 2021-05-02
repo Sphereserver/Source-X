@@ -215,7 +215,7 @@ void CCMultiMovable::SetPilot(CChar *pChar)
 	// Create memory on new pilot
 	if (pChar)
 	{
-		if (pChar->GetRegion()->GetResourceID().GetObjUID() != pItemThis->GetUID())
+		if (pChar->GetRegion()->GetResourceID().GetObjUID() != pItemThis->GetUID().GetObjUID())
 		{
 			pChar->SysMessageDefault(DEFMSG_SHIP_PILOT_CANTABOARD);
 			return;
@@ -375,7 +375,7 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta, bool fUpdateViewFull)
                     }
 
                     // If client is on Ship
-                    if (pCharClient->GetRegion()->GetResourceID().GetObjUID() == pItemThis->GetUID())
+                    if (pCharClient->GetRegion()->GetResourceID().GetObjUID() == pItemThis->GetUID().GetObjUID())
                     {
                         // Is there any new object (outside of the ship) that i can see?
                         if (fClientUsesSmoothSailing && !fUpdateViewFull)
@@ -1266,7 +1266,7 @@ bool CCMultiMovable::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * 
             break;
         case CML_PILOT:
         {
-            if (pItemThis->m_itShip.m_Pilot)
+            if (pItemThis->m_itShip.m_Pilot.IsValidUID())
                 sVal.FormatHex(pItemThis->m_itShip.m_Pilot);
             else
                 sVal.FormatVal(0);

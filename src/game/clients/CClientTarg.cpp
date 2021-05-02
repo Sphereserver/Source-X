@@ -411,19 +411,20 @@ bool CClient::OnTarg_Item_Link( CObjBase * pObj2 )
 			pItem1 = pItem2;
 			pItem2 = pTmp;
 		}
+
 		// pItem1 = the IT_KEY
-		if ( pItem2->m_itContainer.m_UIDLock )
-
+		if (pItem2->m_itContainer.m_UIDLock.IsValidUID())
+		{
 			pItem1->m_itKey.m_UIDLock = pItem2->m_itContainer.m_UIDLock;
-
-		else if ( pItem1->m_itKey.m_UIDLock )
-
+		}
+		else if (pItem1->m_itKey.m_UIDLock.IsValidUID())
+		{
 			pItem2->m_itContainer.m_UIDLock = pItem1->m_itKey.m_UIDLock;
-
+		}
 		else
-
+		{
 			pItem1->m_itKey.m_UIDLock = pItem2->m_itContainer.m_UIDLock = pItem2->GetUID();
-
+		}
 	}
 	else
 	{
@@ -2052,7 +2053,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		CItem * pKey = nullptr;
 		bool fLockable = pItemTarg->IsTypeLockable();
 
-		if ( fLockable && pItemTarg->m_itContainer.m_UIDLock )
+		if ( fLockable && pItemTarg->m_itContainer.m_UIDLock.IsValidUID())
 		{
 			// try all the keys on the object.
 			pKey = pKeyRing->ContentFind( CResourceID(RES_TYPEDEF,IT_KEY), pItemTarg->m_itContainer.m_UIDLock );
@@ -2070,7 +2071,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 				}
 			}
 
-			if ( ! fLockable || ! pItemTarg->m_itContainer.m_UIDLock )
+			if ( ! fLockable || ! pItemTarg->m_itContainer.m_UIDLock.IsValidUID())
 				SysMessageDefault( DEFMSG_ITEMUSE_KEY_NOLOCK );
 			else
 				SysMessageDefault( DEFMSG_ITEMUSE_KEY_NOKEY );

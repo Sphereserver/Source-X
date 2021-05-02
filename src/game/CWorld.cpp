@@ -387,7 +387,7 @@ int CWorldThread::FixObjTry( CObjBase * pObj, dword dwUID )
 
 	if ( dwUID != 0 )
 	{
-		if (( pObj->GetUID() & UID_O_INDEX_MASK ) != dwUID )
+		if (( pObj->GetUID().GetPrivateUID() & UID_O_INDEX_MASK ) != dwUID )
 		{
 			// Miss linked in the UID table !!! BAD
 			// Hopefully it was just not linked at all. else How the hell should i clean this up ???
