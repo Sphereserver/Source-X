@@ -1944,7 +1944,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 void CObjBase::r_Write( CScript & s )
 {
 	ADDTOCALLSTACK_INTENSIVE("CObjBase::r_Write");
-	s.WriteKeyHex( "SERIAL", GetUID().IsValidUID());
+	s.WriteKeyHex( "SERIAL", GetUID().GetObjUID());
 	if ( IsIndividualName() )
 		s.WriteKeyStr( "NAME", GetIndividualName());
 	if ( m_wHue != HUE_DEFAULT )
