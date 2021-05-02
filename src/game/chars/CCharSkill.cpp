@@ -1158,7 +1158,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 		snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.ID", (int)i);
 		const CItemBase* pBaseDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum(pszTmp))));
 		
-		//We have finished the ore or item being smelted.
+		//We have finished the ore or the item being smelted.
 		if (iOreQty <= 0)
 		{
 			SysMessageDefault(DEFMSG_MINING_CONSUMED);
