@@ -87,6 +87,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	// ITRIG_QTY
 	"@itemAfterClick",
 	"@itemBuy",
+	"@itemCarveCorpse",			// I am carving a corpse.
 	"@itemClick",			// I clicked on an item
 	"@itemClientTooltip", 	// Receiving tooltip for something
 	"@itemClientTooltip_AfterDefault",
@@ -112,6 +113,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
     "@ItemRegionEnter",
     "@ItemRegionLeave",
 	"@itemSELL",
+	"@itemSmelt",			// I am smelting an item.
 	"@itemSPELL",			// cast some spell on the item.
 	"@itemSTEP",			// stepped on an item
 	"@itemTARGON_CANCEL",

@@ -63,17 +63,59 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 		pBlood->MoveToDecay(pnt, 5 * MSECS_PER_SEC);
 	}
 
-	size_t iItems = 0;
-	for ( size_t i = 0; i < pCorpseDef->m_BaseResources.size(); ++i )
+	word iResourceQty = 0;
+	word iResourceTotalQty = pCorpseDef->m_BaseResources.size();
+
+	CScriptTriggerArgs Args(iResourceTotalQty);
+
+	for (size_t i = 0; i < iResourceTotalQty; ++i)
 	{
-		llong iQty = pCorpseDef->m_BaseResources[i].GetResQty();
+		
+		const CResourceID& rid = pCorpseDef->m_BaseResources[i].GetResourceID();
+		if (rid.GetResType() != RES_ITEMDEF)
+			continue;
+
+		ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
+		if (id == ITEMID_NOTHING)
+			break;
+
+		tchar* pszTmp = Str_GetTemp();
+		snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.ID", (int)i);
+		Args.m_VarsLocal.SetNum(pszTmp, id);
+
+		iResourceQty = (word)pCorpseDef->m_BaseResources[i].GetResQty();
+		snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.amount", (int)i);
+		Args.m_VarsLocal.SetNum(pszTmp, iResourceQty);
+	}
+	if (IsTrigUsed(TRIGGER_CARVECORPSE) || IsTrigUsed(TRIGGER_ITEMCARVECORPSE))
+	{
+		switch (static_cast<CItem*>(pCorpse)->OnTrigger(ITRIG_CarveCorpse, this, &Args))
+		{
+		case TRIGRET_RET_TRUE:	return;
+		default:				break;
+		}
+	}
+
+	size_t iItems = 0;
+	for ( size_t i = 0; i < iResourceTotalQty; ++i )
+	{
+		/*llong iQty = pCorpseDef->m_BaseResources[i].GetResQty();
 		const CResourceID& rid = pCorpseDef->m_BaseResources[i].GetResourceID();
 		if ( rid.GetResType() != RES_ITEMDEF )
 			continue;
 
 		ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
 		if ( id == ITEMID_NOTHING )
-			break;
+			break;*/
+
+		tchar* pszTmp = Str_GetTemp();
+		snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.ID", (int)i);
+		ITEMID_TYPE id = (ITEMID_TYPE)RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum(pszTmp));
+		if (id == ITEMID_NOTHING)
+			break; 
+
+		snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.amount", (int)i);
+		iResourceQty = Args.m_VarsLocal.GetKeyNum(pszTmp);
 
 		++ iItems;
 		CItem *pPart = CItem::CreateTemplate(id, nullptr, this);
@@ -90,7 +132,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 				SysMessageDefault(DEFMSG_CARVE_CORPSE_HIDES);
 				//pPart->m_itSkin.m_creid = CorpseID;
 				if ( (g_Cfg.m_iRacialFlags & RACIALF_HUMAN_WORKHORSE) && IsHuman() )	// humans always find 10% bonus when gathering hides, ores and logs (Workhorse racial trait)
-					iQty = iQty * 110 / 100;
+					iResourceQty = iResourceQty * 110 / 100;
 				break;
 			case IT_FEATHER:
 				SysMessageDefault(DEFMSG_CARVE_CORPSE_FEATHERS);
@@ -108,8 +150,8 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 				break;
 		}
 
-		if ( iQty > 1 )
-			pPart->SetAmount((word)iQty);
+		if (iResourceQty > 1 )
+			pPart->SetAmount((word)iResourceQty);
 
 		if ( pChar && pChar->m_pPlayer )
 		{

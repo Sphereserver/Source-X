@@ -493,22 +493,22 @@ ushort CServerConfig::Calc_SpellTithingCost(CChar* pCharCaster, const CSpellDef*
 	return 0; //No tithing points consumed.
 }
 
-bool CServerConfig::Calc_CurePoisonChance(const CItem* pPoison, int iCureLevel)
+bool CServerConfig::Calc_CurePoisonChance(const CItem* pPoison, int iCureLevel, bool fIsGm)
 {
 	ADDTOCALLSTACK("CServerConfig::Calc_CurePoisonChance");
 
 	if (!pPoison)
 		return false;
 
+	if (fIsGm)
+		return true;
+
 	int iCureChance = 0, iPoisonLevel = pPoison->m_itSpell.m_spelllevel;
 
 	//Override the Cure Poison Chance.
 	const CVarDefCont* pTagStorage = pPoison->GetKey("OVERRIDE.CUREPOISONCHANCE", true);
 	if (pTagStorage)
-	{
-		iCureChance = (int)pTagStorage->GetValNum();
-		return (Calc_GetRandVal(100) <= iCureChance);
-	}
+		return (Calc_GetRandVal(100) <= (int)pTagStorage->GetValNum());
 
 	if (!IsSetMagicFlags(MAGICF_OSIFORMULAS))
 	{

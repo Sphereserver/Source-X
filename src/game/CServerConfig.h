@@ -995,7 +995,7 @@ public:
     * 
     * @return True the check passed and the poison is removed, false the check failed and the poison is not removed.
     */
-    bool Calc_CurePoisonChance(const CItem* pPoison, int iCureLevel);
+    bool Calc_CurePoisonChance(const CItem* pPoison, int iCureLevel, bool fIsGm = false );
 
 #define SysMessageDefault( msg )	SysMessage( g_Cfg.GetDefaultMsg( msg ) )
 
