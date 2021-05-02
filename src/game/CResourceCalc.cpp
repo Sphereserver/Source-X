@@ -508,7 +508,10 @@ bool CServerConfig::Calc_CurePoisonChance(const CItem* pPoison, int iCureLevel, 
 	//Override the Cure Poison Chance.
 	const CVarDefCont* pTagStorage = pPoison->GetKey("OVERRIDE.CUREPOISONCHANCE", true);
 	if (pTagStorage)
-		return (Calc_GetRandVal(100) <= (int)pTagStorage->GetValNum());
+	{
+		iCureChance = (int)pTagStorage->GetValNum();
+		return (Calc_GetRandVal(100) <= iCureChance);
+	}
 
 	if (!IsSetMagicFlags(MAGICF_OSIFORMULAS))
 	{
