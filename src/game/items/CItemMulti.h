@@ -206,7 +206,7 @@ public:
     * @brief Deletes a coowner to the _lCoowners list.
     * @param pCoowner the coowner
     */
-    void DeleteCoowner(const CUID& uidCoowner);
+    void DeleteCoowner(const CUID& uidCoowner, bool fRemoveFromList);
     /**
     * @brief Returns the total count of coowners on the list.
     * @return the count.
@@ -229,7 +229,7 @@ public:
     * @brief Deletes a friend to the _lFriends list.
     * @param pFriend the friend
     */
-    void DeleteFriend(const CUID& uidFriend);
+    void DeleteFriend(const CUID& uidFriend, bool fRemoveFromList);
     /**
     * @brief Returns the total count of friends on the list.
     * @return the count.
@@ -252,7 +252,7 @@ public:
     * @brief Deletes a char from the _lBans list.
     * @param pBan the char.
     */
-    void DeleteBan(const CUID& uidBan);
+    void DeleteBan(const CUID& uidBan, bool fRemoveFromList);
     /**
     * @brief Returns the total count of banned chars.
     * @return the count
@@ -277,7 +277,7 @@ public:
     * Note: This removes the char from the list, but won't prevent it from enter like a Ban.
     * @param pAccess the char.
     */
-    void DeleteAccess(const CUID& uidAccess);
+    void DeleteAccess(const CUID& uidAccess, bool fRemoveFromList);
     /**
     * @brief Returns the count of chars with access.
     * @return the count.
@@ -559,7 +559,7 @@ public:
     * @brief Removes a char from the vendors list.
     * @param pVendor the vendor
     */
-    void DeleteVendor(const CUID& uidVendor);
+    void DeleteVendor(const CUID& uidVendor, bool fRemoveFromList);
     /**
     * @brief Returns the position of the given char.
     * @param pVendor the char

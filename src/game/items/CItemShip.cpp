@@ -112,7 +112,7 @@ void CItemShip::r_Write(CScript & s)
     if (uiCount > 0)
     {
         for (size_t i = 0; i < uiCount; ++i)
-            s.WriteKeyHex("PLANK", m_uidPlanks[i]);
+            s.WriteKeyHex("PLANK", m_uidPlanks[i].GetObjUID());
     }
 }
 
