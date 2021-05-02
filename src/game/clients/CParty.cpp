@@ -732,17 +732,17 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 		case PDV_ADDMEMBER:
 		case PDV_ADDMEMBERFORCED:
 		{
-			bool bForced = (iIndex == PDV_ADDMEMBERFORCED);
+			const bool fForced = (iIndex == PDV_ADDMEMBERFORCED);
 			CUID toAdd(s.GetArgDWVal());
 			CChar *pCharAdd = toAdd.CharFind();
 			CChar *pCharMaster = GetMaster().CharFind();
 			if ( !pCharAdd || IsInParty(pCharAdd) )
 				return false;
 
-			if ( pCharMaster && !bForced )
-				pCharMaster->SetKeyNum("PARTY_LASTINVITE", (llong)toAdd);
+			if ( pCharMaster && !fForced )
+				pCharMaster->SetKeyNum("PARTY_LASTINVITE", toAdd.GetObjUID());
 			
-			return CPartyDef::AcceptEvent(pCharAdd, GetMaster(), bForced);
+			return CPartyDef::AcceptEvent(pCharAdd, GetMaster(), fForced);
 		} break;
 
 		case PDV_CLEARTAGS:
