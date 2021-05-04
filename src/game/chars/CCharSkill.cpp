@@ -1095,87 +1095,128 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	snprintf(pszMsg, STR_TEMPLENGTH, "%s %s", g_Cfg.GetDefaultMsg( DEFMSG_MINING_SMELT ), pItemOre->GetName());
 	Emote(pszMsg);
 
-	const ushort iMiningSkill = Skill_GetAdjusted(SKILL_MINING);
+	ushort iMiningSkill = Skill_GetAdjusted(SKILL_MINING);
 	word iOreQty = pItemOre->GetAmount();
-	word iIngotQty = 0;
-	const CItemBase * pIngotDef = nullptr;
+	word iResourceQty = 0;
+	size_t iResourceTotalQty = pOreDef->m_BaseResources.size(); //This is the total amount of different resources obtained from smelting.		
 
+	CScriptTriggerArgs Args(iMiningSkill, iResourceTotalQty);
+	
 	if ( pOreDef->IsType( IT_ORE ))
 	{
 		ITEMID_TYPE idIngot = (ITEMID_TYPE)(RES_GET_INDEX( pOreDef->m_ttOre.m_idIngot));
-		pIngotDef = CItemBase::FindItemBase(idIngot);
-		iIngotQty = 1;	// ingots per ore.
+		const CItemBase* pBaseDef = CItemBase::FindItemBase(idIngot); //Usually a lingot, but could be a a gem also.
+		if (!pBaseDef)
+		{
+			SysMessageDefault(DEFMSG_MINING_NOTHING);
+			return false;
+		}
+		iResourceQty = 1;	// ingots per ore.
+		iResourceTotalQty = 1; //Ores only gives one type of resouce.
+		Args.m_iN2 = iResourceTotalQty;
+		Args.m_VarsLocal.SetNum("resource.0.ID", pBaseDef->GetID());
+		Args.m_VarsLocal.SetNum("resource.0.amount", iResourceQty);
 	}
 	else
 	{
 		// Smelting something like armor etc.
-		// find the ingot type resources.
-		for ( size_t i = 0; i < pOreDef->m_BaseResources.size(); ++i )
+		// find the ingot or gem type resources.
+		for ( size_t i = 0; i < iResourceTotalQty; ++i )
 		{
 			CResourceID rid = pOreDef->m_BaseResources[i].GetResourceID();
 			if ( rid.GetResType() != RES_ITEMDEF )
 				continue;
 
-			const CItemBase * pBaseDef = CItemBase::FindItemBase((ITEMID_TYPE)(rid.GetResIndex()));
-			if ( pBaseDef == nullptr )
-				continue;
+			ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
+			if (id == ITEMID_NOTHING)
+				break;
 
-			if ( pBaseDef->IsType( IT_GEM ))
-			{
-				// bounce the gems out of this.
-				CItem * pGem = CItem::CreateScript(pBaseDef->GetID(), this);
-				if ( pGem )
-				{
-					pGem->SetAmount((word)(iOreQty * pBaseDef->m_BaseResources[i].GetResQty()));
-					ItemBounce(pGem);
-				}
-				continue;
-			}
-			if ( pBaseDef->IsType( IT_INGOT ))
-			{
-				if ( iMiningSkill < pBaseDef->m_ttIngot.m_iSkillMin )
-				{
-					SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_MINING_SKILL ), pBaseDef->GetName());
-					continue;
-				}
-				pIngotDef = pBaseDef;
-				iIngotQty = (word)(pOreDef->m_BaseResources[i].GetResQty());
-			}
+			tchar* pszTmp = Str_GetTemp();
+			snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.ID", (int)i);
+			Args.m_VarsLocal.SetNum(pszTmp,(int64)id);
+
+			iResourceQty = (word)(pOreDef->m_BaseResources[i].GetResQty());
+			snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.amount", (int)i);
+			Args.m_VarsLocal.SetNum(pszTmp, iResourceQty);
+			
 		}
 	}
 
-	if ( pIngotDef == nullptr || !pIngotDef->IsType(IT_INGOT))
+	if (IsTrigUsed(TRIGGER_SMELT) || IsTrigUsed(TRIGGER_ITEMSMELT))
 	{
-		SysMessageDefault( DEFMSG_MINING_CONSUMED );
-		pItemOre->ConsumeAmount( iOreQty );
-		return true;
+		switch (pItemOre->OnTrigger(ITRIG_Smelt, this, &Args))
+		{
+		case TRIGRET_RET_TRUE:	return false;
+		default:				break;
+		}
 	}
 
-	iIngotQty *= iOreQty;	// max amount
-	const int iSkillRange = pIngotDef->m_ttIngot.m_iSkillMax - pIngotDef->m_ttIngot.m_iSkillMin;
-	int iDifficulty = Calc_GetRandVal(iSkillRange);
-
-	// Try to make ingots
-	iDifficulty = ( pIngotDef->m_ttIngot.m_iSkillMin + iDifficulty ) / 10;
-	if ( !iIngotQty || !Skill_UseQuick( SKILL_MINING, iDifficulty ))
+	iMiningSkill = (ushort)Args.m_iN1;
+	for (size_t i = 0; i < iResourceTotalQty; ++i)
 	{
-		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_MINING_NOTHING ), pItemOre->GetName());
-		pItemOre->ConsumeAmount( (word)(Calc_GetRandVal( pItemOre->GetAmount() / 2 ) + 1) );	// lose up to half the resources.
-		return false;
-	}
+		tchar* pszTmp = Str_GetTemp();
+		snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.ID", (int)i);
+		const CItemBase* pBaseDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum(pszTmp))));
+		
+		//We have finished the ore or the item being smelted.
+		if (iOreQty <= 0)
+		{
+			SysMessageDefault(DEFMSG_MINING_CONSUMED);
+			return false;
+		}
 
-	// Payoff - What do i get ?
-	// This is the one
-	CItem * pIngots = CItem::CreateScript( pIngotDef->GetID(), this );
-	if ( pIngots == nullptr )
-	{
-		SysMessageDefault( DEFMSG_MINING_NOTHING );
-		return false;
-	}
+		if (pBaseDef == nullptr  || (!pBaseDef->IsType(IT_INGOT) && !pBaseDef->IsType(IT_GEM)))
+		{
+			SysMessageDefault( DEFMSG_MINING_CONSUMED );
+			continue;
+		}
 
-	pIngots->SetAmount( iIngotQty );
-	pItemOre->ConsumeAmount( pItemOre->GetAmount());
-	ItemBounce( pIngots );
+		snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.amount", (int)i);
+		iResourceQty =(word)Args.m_VarsLocal.GetKeyNum(pszTmp);
+		iResourceQty *= iOreQty;	// max amount
+
+		if (pBaseDef->IsType(IT_GEM))
+		{
+			// bounce the gems out of this.
+			CItem* pGem = CItem::CreateScript(pBaseDef->GetID(), this);
+			if (pGem)
+			{
+				pGem->SetAmount((word)(iResourceQty));
+				ItemBounce(pGem);
+			}
+			continue;
+		}
+
+		// Try to make ingots
+		if (iMiningSkill < pBaseDef->m_ttIngot.m_iSkillMin)
+		{
+				SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MINING_SKILL), pBaseDef->GetName());
+				continue;
+		}
+		
+		const int iSkillRange = pBaseDef->m_ttIngot.m_iSkillMax - pBaseDef->m_ttIngot.m_iSkillMin;
+		int iSmeltingDifficulty = Calc_GetRandVal(iSkillRange);
+
+		iSmeltingDifficulty = (pBaseDef->m_ttIngot.m_iSkillMin + iSmeltingDifficulty) / 10;
+		if ( !iResourceQty || !Skill_UseQuick( SKILL_MINING, iSmeltingDifficulty))
+		{
+			SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_MINING_NOTHING ), pItemOre->GetName());
+			word iAmountLost = (word)(Calc_GetRandVal(pItemOre->GetAmount() / 2) + 1);
+			pItemOre->ConsumeAmount(iAmountLost);	// lose up to half the resources.
+			iOreQty -= iAmountLost;
+			continue;
+		}
+		// Payoff - Amount of ingots i get.
+		CItem * pIngots = CItem::CreateScript(pBaseDef->GetID(), this );
+		if ( pIngots == nullptr )
+		{
+			SysMessageDefault( DEFMSG_MINING_NOTHING );
+			continue;
+		}
+		pIngots->SetAmount(iResourceQty);
+		ItemBounce( pIngots );
+	}
+	pItemOre->ConsumeAmount(pItemOre->GetAmount());
 	return true;
 }
 
@@ -2658,7 +2699,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 	int iSkillLevel = Skill_GetAdjusted( Skill_GetActive());
 	if ( pChar->IsStatFlag( STATF_POISONED ))
 	{
-		if ( g_Cfg.Calc_CurePoisonChance(pChar->LayerFind(LAYER_FLAG_Poison), iSkillLevel) )
+		if ( g_Cfg.Calc_CurePoisonChance(pChar->LayerFind(LAYER_FLAG_Poison), iSkillLevel, IsPriv(PRIV_GM) ))
 		{
 			pChar->SetPoisonCure(true);
 			SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_1), (pChar == this) ? g_Cfg.GetDefaultMsg(DEFMSG_HEALING_YOURSELF) : (pChar->GetName()));

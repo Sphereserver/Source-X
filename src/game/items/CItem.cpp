@@ -48,6 +48,7 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	"@AddWhiteCandle",
 	"@AfterClick",
 	"@Buy",
+	"@CarveCorpse",			//I am a corpse and i am going to be carved.
 	"@Click",
 	"@ClientTooltip",	// Sending tooltip to a client
 	"@ClientTooltip_AfterDefault",
@@ -76,6 +77,7 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
     "@RegionLeave",
 	"@SELL",
 	"@Ship_Turn",
+	"@Smelt",			// I am going to be smelted.
 	"@Spawn",
 	"@SpellEffect",		// cast some spell on me.
 	"@Start",

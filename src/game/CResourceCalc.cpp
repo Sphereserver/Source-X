@@ -493,12 +493,15 @@ ushort CServerConfig::Calc_SpellTithingCost(CChar* pCharCaster, const CSpellDef*
 	return 0; //No tithing points consumed.
 }
 
-bool CServerConfig::Calc_CurePoisonChance(const CItem* pPoison, int iCureLevel)
+bool CServerConfig::Calc_CurePoisonChance(const CItem* pPoison, int iCureLevel, bool fIsGm)
 {
 	ADDTOCALLSTACK("CServerConfig::Calc_CurePoisonChance");
 
 	if (!pPoison)
 		return false;
+
+	if (fIsGm)
+		return true;
 
 	int iCureChance = 0, iPoisonLevel = pPoison->m_itSpell.m_spelllevel;
 
@@ -519,7 +522,8 @@ bool CServerConfig::Calc_CurePoisonChance(const CItem* pPoison, int iCureLevel)
 	if (!iPoisonLevel) //Lesser Poison (iPoisonLevel 0) is always cured no matter the potion or spell/skill level value
 		return true;
 
-	if (iCureLevel < 410)	//Lesser Cure Potion or our healing/veterinary/magery skill is less than 41.0
+	//Cure Chance taken from: 
+	if (iCureLevel < 410)	//Lesser Cure Potion or our healing/veterinary/magery skill is less than 41.0 https://www.uoguide.com/Lesser_Cure_Potion
 	{
 		switch (iPoisonLevel)
 		{
@@ -537,7 +541,7 @@ bool CServerConfig::Calc_CurePoisonChance(const CItem* pPoison, int iCureLevel)
 			break;
 		}
 	}
-	else if (iCureLevel < 1010) //Cure Potion or our healing/veterinary/magery skill is between 41.0 and 100.9
+	else if (iCureLevel < 1010) //Cure Potion or our healing/veterinary/magery skill is between 41.0 and 100.9 https://www.uoguide.com/Cure_Potion 
 	{
 		switch (iPoisonLevel)
 		{
@@ -555,7 +559,7 @@ bool CServerConfig::Calc_CurePoisonChance(const CItem* pPoison, int iCureLevel)
 			break;
 		}
 	}
-	else //Greater Cure Potion or our healing/veterinary/magery skill is equal or above 101.0
+	else //Greater Cure Potion or our healing/veterinary/magery skill is equal or above 101.0 https://www.uoguide.com/Greater_Cure_Potion
 	{
 		switch (iPoisonLevel)
 		{
