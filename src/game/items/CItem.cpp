@@ -1400,21 +1400,16 @@ bool CItem::MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool fForceFi
 	return MoveToUpdate(pt, fForceFix);
 }
 
-void CItem::SetDecayTime(int64 iMsecsTimeout)
+void CItem::SetDecayTime(int64 iMsecsTimeout, bool fOverrideAlways)
 {
 	ADDTOCALLSTACK("CItem::SetDecayTime");
 	// 0 = default (decay on the next tick)
 	// -1 = set none. (clear it)
 
-	if (iMsecsTimeout != -1)
+	if (!fOverrideAlways && _IsTimerSet() && !IsAttr(ATTR_DECAY))
 	{
-		// Otherwise i want to disable its timer!
-
-		if (_IsTimerSet() && !IsAttr(ATTR_DECAY))
-		{
-			// Already a timer here. let it expire on it's own
-			return;
-		}
+		// Already a timer here (and it's not a decay timer). Let it expire on it's own.
+		return;
 	}
 
 	if (iMsecsTimeout == 0)

@@ -144,7 +144,6 @@ int64 CTimedObject::GetTimerAdjusted() const noexcept
 int64 CTimedObject::_GetTimerDAdjusted() const noexcept
 {
     // RETURN: time in tenths of second from now.
-    THREAD_SHARED_LOCK_SET;
     if (!_IsTimerSet())
         return -1;
 
@@ -162,7 +161,6 @@ int64 CTimedObject::GetTimerDAdjusted() const noexcept
 int64 CTimedObject::_GetTimerSAdjusted() const noexcept
 {
     // RETURN: time in seconds from now.
-    THREAD_SHARED_LOCK_SET;
     if (!_IsTimerSet())
         return -1;
 

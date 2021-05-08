@@ -45,8 +45,10 @@ CCharPlayer::CCharPlayer(CChar *pChar, CAccount *pAccount) :
 CCharPlayer::~CCharPlayer()
 {
 	m_Speech.clear();
-	delete _pMultiStorage;
-	//_pMultiStorage = nullptr;
+
+	CMultiStorage* pOldStorage = _pMultiStorage;
+	_pMultiStorage = nullptr;
+	delete pOldStorage;			// I need _pMultiStorage to be nullptr before CMultiStorage destructor is called
 }
 
 CAccount * CCharPlayer::GetAccount() const

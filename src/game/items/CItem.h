@@ -639,14 +639,14 @@ public:
 
 	height_t GetHeight() const;
 	int64  GetDecayTime() const;
-	void SetDecayTime(int64 iMsecsTimeout);
-    void SetDecayTimeD(int64 iTenthsTimeout)
+	void SetDecayTime(int64 iMsecsTimeout, bool fOverrideAlways = false);
+    void SetDecayTimeD(int64 iTenthsTimeout, bool fOverrideAlways = false)
     {
-        SetDecayTime(iTenthsTimeout * MSECS_PER_TENTH);
+        SetDecayTime(iTenthsTimeout * MSECS_PER_TENTH, fOverrideAlways);
     }
-    void SetDecayTimeS(int64 iSecondsTimeout)
+    void SetDecayTimeS(int64 iSecondsTimeout, bool fOverrideAlways = false)
     {
-        SetDecayTime(iSecondsTimeout * MSECS_PER_SEC);
+        SetDecayTime(iSecondsTimeout * MSECS_PER_SEC, fOverrideAlways);
     }
 	SOUND_TYPE GetDropSound( const CObjBase * pObjOn ) const;
 	bool IsTopLevelMultiLocked() const;

@@ -2127,7 +2127,7 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 		pItem->UnStackSplit(1, this);
 
 	pItem->RemoveSelf();		// Remove it from the container so that nothing will be stacked with it if unequipped
-	pItem->SetDecayTime(-1);	// Kill any decay timer.
+	pItem->SetDecayTime(-1);	// Kill any DECAY timer.
 	LayerAdd(pItem, layer);
 	if ( !pItem->IsItemEquipped() )	// Equip failed ? (cursed?) Did it just go into pack ?
 		return false;

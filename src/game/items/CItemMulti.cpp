@@ -605,8 +605,10 @@ void CItemMulti::SetOwner(const CUID& uidOwner)
         else
         {
             CMultiStorage* pMultiStorage = pOldOwner->m_pPlayer->GetMultiStorage();
-            ASSERT(pMultiStorage);
-            pMultiStorage->DelMulti(GetUID());
+            if (pMultiStorage)
+            {
+                pMultiStorage->DelMulti(GetUID());
+            }
         }
         RemoveKeys(pOldOwner->GetUID());
     }
@@ -626,8 +628,10 @@ void CItemMulti::SetOwner(const CUID& uidOwner)
         else
         {
             CMultiStorage* pMultiStorage = pOwner->m_pPlayer->GetMultiStorage();
-            ASSERT(pMultiStorage);
-            pMultiStorage->AddMulti(GetUID(), HP_OWNER);
+            if (pMultiStorage)
+            {
+                pMultiStorage->AddMulti(GetUID(), HP_OWNER);
+            }
         }
     }
     _uidOwner = uidOwner;
@@ -655,8 +659,10 @@ void CItemMulti::SetGuild(const CUID& uidGuild)
     if (pGuildStone)  // Old Guild may not exist, was it removed...?
     {
         CMultiStorage* pMultiStorage = pGuildStone->GetMultiStorage();
-        ASSERT(pMultiStorage);
-        pMultiStorage->DelMulti(GetUID());   // ... if not, unlink it from this multi.
+        if (pMultiStorage)
+        {
+            pMultiStorage->DelMulti(GetUID());   // ... if not, unlink it from this multi.
+        }
     }
     if (!uidGuild.IsValidUID())  // Just clearing it
     {
@@ -729,8 +735,10 @@ void CItemMulti::DeleteCoowner(const CUID& uidCoowner, bool fRemoveFromList)
             }
 
             CMultiStorage* pMultiStorage = pCoowner->m_pPlayer->GetMultiStorage();
-            ASSERT(pMultiStorage);
-            pMultiStorage->DelMulti(GetUID());
+            if (pMultiStorage)
+            {
+                pMultiStorage->DelMulti(GetUID());
+            }
             RemoveKeys(uid);
             return;
         }
@@ -804,8 +812,10 @@ void CItemMulti::DeleteFriend(const CUID& uidFriend, bool fRemoveFromList)
             }
 
             CMultiStorage* pMultiStorage = pFriend->m_pPlayer->GetMultiStorage();
-            ASSERT(pMultiStorage);
-            pMultiStorage->DelMulti(GetUID());
+            if (pMultiStorage)
+            {
+                pMultiStorage->DelMulti(GetUID());
+            }
             RemoveKeys(uidFriend);
             return;
         }
@@ -876,8 +886,10 @@ void CItemMulti::DeleteBan(const CUID& uidBan, bool fRemoveFromList)
             if (pBan && pBan->m_pPlayer)
             {
                 CMultiStorage* pMultiStorage = pBan->m_pPlayer->GetMultiStorage();
-                ASSERT(pMultiStorage);
-                pMultiStorage->DelMulti(GetUID());
+                if (pMultiStorage)
+                {
+                    pMultiStorage->DelMulti(GetUID());
+                }
             }
             return;
         }
@@ -949,8 +961,10 @@ void CItemMulti::DeleteAccess(const CUID& uidAccess, bool fRemoveFromList)
             if (pAccess && pAccess->m_pPlayer)
             {
                 CMultiStorage* pMultiStorage = pAccess->m_pPlayer->GetMultiStorage();
-                ASSERT(pMultiStorage);
-                pMultiStorage->DelMulti(GetUID());
+                if (pMultiStorage)
+                {
+                    pMultiStorage->DelMulti(GetUID());
+                }
             }
             return;
         }
@@ -1188,8 +1202,10 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
             TransferMovingCrateToBank();
         }
         CMultiStorage* pMultiStorage = pOwner->m_pPlayer->GetMultiStorage();
-        ASSERT(pMultiStorage);
-        pMultiStorage->DelMulti(GetUID());
+        if (pMultiStorage)
+        {
+            pMultiStorage->DelMulti(GetUID());
+        }
     }
     if (tRet == TRIGRET_RET_TRUE)
     {
@@ -1874,8 +1890,10 @@ void CItemMulti::DeleteVendor(const CUID& uidVendor, bool fRemoveFromList)
             if (pVendor && pVendor->m_pPlayer)
             {
                 CMultiStorage* pMultiStorage = pVendor->m_pPlayer->GetMultiStorage();
-                ASSERT(pMultiStorage);
-                pMultiStorage->DelMulti(GetUID());
+                if (pMultiStorage)
+                {
+                    pMultiStorage->DelMulti(GetUID());
+                }
             }
             break;
         }

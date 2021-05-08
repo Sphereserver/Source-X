@@ -2691,3 +2691,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		If we are carving an ogre, ARGN1 will be 1 and the output will be 
 		Raw Ribs- 2
 		If player forensics skill is >= 90.0% and we are using a dagger for carving we get an additional 5 i_ribs_raw
+
+08-05-2021, Nolok
+- Fixed: Item timer set on @Create being reset when the item is equipped on a char immediately after (Issue #662).
+- Fixed: Exception generated upon server closure, if a char existed with an attached MultiStorage.
