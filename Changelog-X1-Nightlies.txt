@@ -2695,3 +2695,6 @@ Must have event, even if it's empty, since it's applied by the source to generat
 08-05-2021, Nolok
 - Fixed: Item timer set on @Create being reset when the item is equipped on a char immediately after (Issue #662).
 - Fixed: Exception generated upon server closure, if a char existed with an attached MultiStorage.
+
+15-05-2021, Drk84
+- Fixed: Player's pet getting stuck when giving follow order while in combat (Issue #681).

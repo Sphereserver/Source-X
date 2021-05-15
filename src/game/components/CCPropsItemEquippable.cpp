@@ -262,10 +262,10 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
             case PROPIEQUIP_CASTINGFOCUS: // unimplemented
                 ADDTNUM(1113696);
                 break;
-            case PROPIEQUIP_COMBATBONUSPERCENT: // unimplemented -> it should raise char's prop
+            case PROPIEQUIP_COMBATBONUSPERCENT: // Implemented the 15/03/2015 by Xun (Sphere 56c), it determines the % of the stat used for bonus combat damage.
                 //Missing cliloc id
                 break;
-            case PROPIEQUIP_COMBATBONUSSTAT: // unimplemented (what should this do?)
+            case PROPIEQUIP_COMBATBONUSSTAT: // Implemented the 15/03/2015 by Xun (Sphere 56c), it determines what stat (Str, Dex, or Int) is used for bonus combat damage.
                 //Missing cliloc id
                 break;
             case PROPIEQUIP_DAMCHAOS: // unimplemented
