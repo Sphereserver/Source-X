@@ -2111,6 +2111,14 @@ TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, lpctstr pszTrigName, CTex
 	if ( !OnTriggerFind(s, pszTrigName) )
 		return TRIGRET_RET_DEFAULT;
 
+	/*
+	This is the same assignement found in the CChar::OnTrigger method (CCharAct.cpp).
+	If pSrc is null (for example the caster is dead when the spell triggers @EffectRemove or @EffectTick are fired) we assign the server object to it.
+	So the script can use safely use the isvalid command, otherwise Sphere will crash when accessing src in these scripts.
+	*/
+	if (!pSrc)
+		pSrc = &g_Serv;
+
 	const ProfileTask scriptsTask(PROFILE_SCRIPTS);
 
 	CScriptProfiler::CScriptProfilerTrigger	*pTrig = nullptr;
