@@ -1199,6 +1199,10 @@ void CClient::addItemName( CItem * pItem )
 	}
 
 	HUE_TYPE wHue = HUE_TEXT_DEF;
+	const CVarDefCont* sVal = pItem->GetKey("NAME.HUE", true);
+	if (sVal)
+		wHue = (HUE_TYPE)(sVal->GetValNum());
+
 	const CItemCorpse * pCorpseItem = dynamic_cast <const CItemCorpse *>(pItem);
 	if ( pCorpseItem )
 	{

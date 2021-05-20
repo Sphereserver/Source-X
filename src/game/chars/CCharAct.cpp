@@ -2955,24 +2955,12 @@ bool CChar::SetPoison( int iSkill, int iHits, CChar * pCharSrc )
 			pParalyze->Delete();
 	}
 
-	CItem *pPoison = LayerFind(LAYER_FLAG_Poison);
-	if ( pPoison )
-	{
-		if ( !IsSetMagicFlags(MAGICF_OSIFORMULAS) )		// strengthen the poison
-		{
-			pPoison->m_itSpell.m_spellcharges += iHits;
-			return true;
-		}
-	}
-	else
-	{
-		int64 iPoisonDuration = (1 + Calc_GetRandLLVal(2)) * TENTHS_PER_SEC;	//in TENTHS of second
-		pPoison = Spell_Effect_Create(SPELL_Poison, LAYER_FLAG_Poison, iSkill, iPoisonDuration, pCharSrc, false);
-		if ( !pPoison )
-			return false;
-		LayerAdd(pPoison, LAYER_FLAG_Poison);
-	}
-
+	int64 iPoisonDuration = (1 + Calc_GetRandLLVal(2)) * TENTHS_PER_SEC;	//in TENTHS of second
+	CItem* pPoison = Spell_Effect_Create(SPELL_Poison, LAYER_FLAG_Poison, iSkill, iPoisonDuration, pCharSrc, false);
+	if ( !pPoison )
+		return false;
+	LayerAdd(pPoison, LAYER_FLAG_Poison);
+	
 	if (!IsSetMagicFlags(MAGICF_OSIFORMULAS))
 	{
 		//pPoison->m_itSpell.m_spellcharges has already been set by Spell_Effect_Create (and it's equal to iSkill)
@@ -3012,17 +3000,19 @@ bool CChar::SetPoison( int iSkill, int iHits, CChar * pCharSrc )
 			default:
 			case 0:		pPoison->m_itSpell.m_spellcharges = 3; break;
 		}
-	}
 
-	if (IsAosFlagEnabled(FEATURE_AOS_UPDATE_B))
-	{
-		CItem * pEvilOmen = LayerFind(LAYER_SPELL_Evil_Omen);
-		if (pEvilOmen)
+		if (IsAosFlagEnabled(FEATURE_AOS_UPDATE_B))
 		{
-			++pPoison->m_itSpell.m_spelllevel;	// Effect 2: next poison will have one additional level of poison.
-			pEvilOmen->Delete();
+			CItem* pEvilOmen = LayerFind(LAYER_SPELL_Evil_Omen);
+			if (pEvilOmen && !g_Cfg.GetSpellDef(SPELL_Evil_Omen)->IsSpellType(SPELLFLAG_SCRIPTED))
+			{
+				++pPoison->m_itSpell.m_spelllevel;	// Effect 2: next poison will have one additional level of poison, this makes sense only with MAGICF_OSIFORMULAS enabled.
+				pEvilOmen->Delete();
+			}
 		}
 	}
+
+	
 
 	CClient *pClient = GetClientActive();
 	if ( pClient && IsSetOF(OF_Buffs) )

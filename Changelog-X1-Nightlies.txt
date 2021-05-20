@@ -2698,3 +2698,11 @@ Must have event, even if it's empty, since it's applied by the source to generat
 
 15-05-2021, Drk84
 - Fixed: Player's pet getting stuck when giving follow order while in combat (Issue #681).
+
+20-05-2021, Drk84
+- Added: TAG.NAME.HUE for items. This works only if tooltips are disabled (FEATURE_AOS_UPDATE_B not set).
+- Fixed: Crash when accessing  a non-existant SRC (the caster) in the @EffectRemove and @EffectTick triggers.
+		 Remember to use the ISVALID command by assigning SRC to a REF to check if the caster is still valid
+- Fixed: Necromancy spells Blood Oath and Evil Omen have their default behaviour executed even if their spell definition has the SPELLFLAG_SCRIPTED set.
+- Fixed: Poison memory item  was not re-created after a character was poisoned again. 
+- Changed: At great request set cap to 100 for LOWERMANACOST.
