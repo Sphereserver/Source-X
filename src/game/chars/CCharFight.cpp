@@ -1696,8 +1696,9 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
         if ( pWeapon )
         {
             const CResourceID ridAmmo(pWeapon->Weapon_GetRangedAmmoRes());
-            if (ridAmmo.IsValidUID())
+			if (ridAmmo.IsUIDItem() && ridAmmo.IsValidResource()) // Illimited ammo (TDATA3=0) mean ridAmmo.IsUIDItem()=0
             {
+				
                 pAmmo = pWeapon->Weapon_FindRangedAmmo(ridAmmo);
                 if ( !pAmmo && m_pPlayer )
                 {
