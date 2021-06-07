@@ -2951,9 +2951,12 @@ bool CChar::Spell_CastDone()
 			break;
 
 			case SPELL_Magic_Trap:
-			case SPELL_Magic_Untrap:
 				/* Create the trap object and link it to the target.
 				   A container is diff from door or stationary object */
+				pObj->OnSpellEffect(SPELL_Magic_Trap, this, iSkillLevel, nullptr);
+				break;
+			case SPELL_Magic_Untrap:
+				pObj->OnSpellEffect(SPELL_Magic_Untrap, this, iSkillLevel, nullptr);
 				break;
 
 			case SPELL_Telekin:	// Act as DClick on the object.
@@ -3381,7 +3384,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
 	if ( !pSpellDef )
 		return false;
-	if ( iSkillLevel <= 0 )		// spell died or fizzled
+	if ( iSkillLevel < 0 )		// spell died or fizzled
 		return false;
 	if ( IsStatFlag(STATF_DEAD) && !pSpellDef->IsSpellType(SPELLFLAG_TARG_DEAD) )
 		return false;

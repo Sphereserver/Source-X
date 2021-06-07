@@ -3065,7 +3065,7 @@ int CChar::Skill_Act_Napping( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_START )
 	{
-		_SetTimeout(2);
+		_SetTimeout(2000);
 		return 0;
 	}
 
@@ -3073,7 +3073,7 @@ int CChar::Skill_Act_Napping( SKTRIG_TYPE stage )
 	{
 		if ( m_Act_p != GetTopPoint())
 			return -SKTRIG_QTY;	// we moved.
-		_SetTimeout(8);
+		_SetTimeout(8000);
 		Speak( "z", HUE_WHITE, TALKMODE_WHISPER );
 		return -SKTRIG_STROKE;	// Stay in the skill till we hit.
 	}
@@ -3108,7 +3108,7 @@ int CChar::Skill_Act_Breath( SKTRIG_TYPE stage )
 		if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOANIM ) )
 			UpdateAnimate( ANIM_MON_Stomp );
 
-		_SetTimeout(3);
+		_SetTimeout(3000);
 		return 0;
 	}
 
@@ -3192,7 +3192,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 		if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOANIM ) )
 			UpdateAnimate( ANIM_MON_Stomp );
 
-		_SetTimeout(3);
+		_SetTimeout(3000);
 		return 0;
 	}
 
