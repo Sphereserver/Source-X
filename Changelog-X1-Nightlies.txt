@@ -2706,3 +2706,12 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: Necromancy spells Blood Oath and Evil Omen have their default behaviour executed even if their spell definition has the SPELLFLAG_SCRIPTED set.
 - Fixed: Poison memory item  was not re-created after a character was poisoned again. 
 - Changed: At great request set cap to 100 for LOWERMANACOST.
+
+06-06-2021, Jhobean
+- Fixed: Fix illimited arrow with Tdata3=0 for bow (Issue #698). 
+
+07-06-2021, Drk84
+- Fixed: Dragon breath action and Throwing Action (not the Throwing skill) spam.(Issue #689).
+- Fixed: Magic Trap and Magic Untrap spells not calling the @SpellEffect/@Effect triggers (Issue #697).
+- Fixed: Mind Blast not triggering effect if the spell level was equal to 0 (Issue #696).
+- Fixed: Text spam when using the AFK command (Issue #694).
