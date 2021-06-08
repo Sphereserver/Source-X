@@ -2715,3 +2715,21 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: Magic Trap and Magic Untrap spells not calling the @SpellEffect/@Effect triggers (Issue #697).
 - Fixed: Mind Blast not triggering effect if the spell level was equal to 0 (Issue #696).
 - Fixed: Text spam when using the AFK command (Issue #694).
+
+08-06-2021, Drk84
+- Fixed: Ranged weapons ammunitions were not consumed.
+- Fixed: Bushido skill never raised when performing a succesfully parrying action with Samurai Empire Formula enabled.
+- Changed: The @HitParry trigger is now fired before the @SkillUseQuick/@UseQuick trigger.
+		Quick summary of the HitParry trigger:
+		Default Object:  The character that succesfully parried the strike.
+		SRC: The character that did the strike.
+		Argn1: Percent of damage that will be reduced (default 100%).
+		Argn2: Damage type.
+		Argo: The weapon/shield used for parry, if any.
+		Local.ParryChance: The chance to parry the blow. The chance will be passed to the SkillUseQuick/UseQuick triggers.
+		Local.ParrySkillID: The skill used for parrying, this can be changed by setting the appropriate skill ID.
+			Example by setting  local.ParrySkillID = <weapon.skill> the parrying check will be made by using the weapon skill and thus the UseQuick trigger of the weapon 
+			skill will be called.
+		Local.ItemParryDamageChance: The chance that the parrying item will be damaged (default 100%).
+		Local.Damage: The amount of damage (raw) before the parry reduction.
+		Return 1: Completely blocks the damage as if the parry damage reduction was set to 100.

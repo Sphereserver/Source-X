@@ -891,6 +891,15 @@ public:
 	int Calc_CombatChanceToHit( CChar * pChar, CChar * pCharTarg);
 
     /**
+     * @brief   Calculates the combat chance to parry.
+     *
+     * @param [in,out]  pChar       If non-null, the character attempting to parry.
+     * @param   skill               The skill.
+     *
+     * @return  The calculated combat chance to parry.
+     */
+    int Calc_CombatChanceToParry(CChar* pChar, CItem*& pItemParry);
+    /**
      * @brief   Chance to steal and retrieve the item successfully
      *
      * @param [in,out]  pCharThief  If non-null, the character thief.

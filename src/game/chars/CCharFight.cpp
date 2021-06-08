@@ -1696,9 +1696,9 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
         if ( pWeapon )
         {
             const CResourceID ridAmmo(pWeapon->Weapon_GetRangedAmmoRes());
-			if (ridAmmo.IsUIDItem() && ridAmmo.IsValidResource()) // Illimited ammo (TDATA3=0) mean ridAmmo.IsUIDItem()=0
+	
+			if (ridAmmo.IsValidUID() && ridAmmo.GetObjUID() > 0 ) 
             {
-				
                 pAmmo = pWeapon->Weapon_FindRangedAmmo(ridAmmo);
                 if ( !pAmmo && m_pPlayer )
                 {
@@ -1893,42 +1893,55 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	// We hit
 	// Calculate the damage and check for parrying
 	int	iDmg = Fight_CalcDamage(pWeapon);
-	int iParryReduction = 0;
+	int iParryReduction = 100;
 
 	if ( !(iDmgType & DAMAGE_GOD) )
 	{
-		CItem * pItemHit = nullptr;
-		if (pCharTarg->Fight_Parry(pItemHit))
-		{
-			const CSkillDef * pSkillDef = g_Cfg.GetSkillDef(SKILL_PARRYING);
-			
-			if ( IsPriv(PRIV_DETAIL) )
-				SysMessageDefault(DEFMSG_COMBAT_PARRY);
+		CItem* pItemHit = nullptr;
+		SKILL_TYPE ParrySkill = SKILL_PARRYING;
+		const CSkillDef* pSkillDef = g_Cfg.GetSkillDef(ParrySkill);
+		int iParryChance = g_Cfg.Calc_CombatChanceToParry(pCharTarg, pItemHit);
 
-			// If Effect property is defined on the Parrying skill use it instead of the hardcoded value of 100.
-			iParryReduction = 100;
-			if (!pSkillDef->m_vcEffect.m_aiValues.empty())
-				iParryReduction = pSkillDef->m_vcEffect.GetLinear(pCharTarg->Skill_GetAdjusted(SKILL_PARRYING));
-
-			/*
+		// If Effect property is defined on the Parrying skill use it instead of the hardcoded value of 100.
+		if (!pSkillDef->m_vcEffect.m_aiValues.empty())
+			iParryReduction = pSkillDef->m_vcEffect.GetLinear(pCharTarg->Skill_GetAdjusted(ParrySkill));
+	
+		/*
 			ARGN1 = Percent of damage that will be reduced.
 			ARGN2 =  Damage type.
 			ARGO  = The weapon/shield used for parry, if any.
+			local.ParryChance = The chance to parry, will be used in SkillUseQuick check, default 100.
+			local.ParrySkill = The skill used for parrying, default is Parrying.
 			local.ItemParryDamage = The chance that the parrying item will be damaged.
 			local.Damage = The amount of damage (raw) before parrying reduction.
-			*/
-			CScriptTriggerArgs Args(iParryReduction, iDmgType, pItemHit);
-			Args.m_VarsLocal.SetNum("ItemParryDamageChance", 100);
-			Args.m_VarsLocal.SetNum("Damage", iDmg);
-			if (IsTrigUsed(TRIGGER_HITPARRY))
-			{
-				if (pCharTarg->OnTrigger(CTRIG_HitParry, this, &Args) == TRIGRET_RET_TRUE)
-					return WAR_SWING_EQUIPPING_NOWAIT;
+		*/
+		CScriptTriggerArgs Args(iParryReduction, iDmgType, pItemHit);
+		Args.m_VarsLocal.SetNum("ParryChance", iParryChance);
+		Args.m_VarsLocal.SetNum("ParrySkillID", ParrySkill);
+		Args.m_VarsLocal.SetNum("ItemParryDamageChance", 100);
+		Args.m_VarsLocal.SetNum("Damage", iDmg);
 
-				iParryReduction  = (int)(Args.m_iN1);
-				iDmgType = (DAMAGE_TYPE)(Args.m_iN2);
-				iDmg = (int)Args.m_VarsLocal.GetKeyNum("Damage");
-			}
+		if (IsTrigUsed(TRIGGER_HITPARRY))
+		{
+			if (pCharTarg->OnTrigger(CTRIG_HitParry, this, &Args) == TRIGRET_RET_TRUE)
+				return WAR_SWING_EQUIPPING_NOWAIT;
+
+			iParryReduction = (int)(Args.m_iN1);
+			iDmgType = (DAMAGE_TYPE)(Args.m_iN2);
+			iDmg = (int)Args.m_VarsLocal.GetKeyNum("Damage");
+			iParryChance = (int)Args.m_VarsLocal.GetKeyNum("ParryChance");
+			ParrySkill = (SKILL_TYPE)Args.m_VarsLocal.GetKeyNum("ParrySkillID");
+		}
+
+		if (iParryChance > 0 && pCharTarg->Skill_UseQuick(ParrySkill, iParryChance, true, false))
+		{
+			if ( IsPriv(PRIV_DETAIL) )
+				SysMessageDefault(DEFMSG_COMBAT_PARRY);
+
+			//If we are using the Samurai Empire Formula and we are not wearing a shield also raise Bushido.
+			if (g_Cfg.m_iFeatureSE & FEATURE_SE_NINJASAM && g_Cfg.m_iCombatParryingEra & PARRYERA_SEFORMULA && !pCharTarg->IsStatFlag(STATF_HASSHIELD))
+				pCharTarg->Skill_Experience(SKILL_BUSHIDO, iParryChance);
+
 			int iParryDamageChance = (int)(Args.m_VarsLocal.GetKeyNum("ItemParryDamageChance"));
 			if ( pItemHit && (iParryDamageChance > Calc_GetRandVal(100)) )
 				pItemHit->OnTakeDamage(1, this, iDmgType);
@@ -2132,105 +2145,3 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	return WAR_SWING_EQUIPPING_NOWAIT;
 }
 
-bool CChar::Fight_Parry(CItem * &pItemParry)
-{
-	// Check if target will block the hit
-	// Legacy pre-SE formula
-    const bool fCanShield = g_Cfg.m_iCombatParryingEra & PARRYERA_SHIELDBLOCK;
-    const bool fCanOneHanded = g_Cfg.m_iCombatParryingEra & PARRYERA_ONEHANDBLOCK;
-    const bool fCanTwoHanded = g_Cfg.m_iCombatParryingEra & PARRYERA_TWOHANDBLOCK;
-
-    const int iParrying = Skill_GetBase(SKILL_PARRYING);
-	/*
-	While the difficulty range is 0-100 (without decimal) we initialize iParryChance to -1 for avoiding the player
-	to gain parrying skill when his combination of weapon/shield does not match the values set in the CombatParryingEra  in the sphere.ini.
-	*/
-    int iParryChance = -1;
-    if (g_Cfg.m_iCombatParryingEra & PARRYERA_SEFORMULA)   // Samurai Empire formula
-    {
-        const int iBushido = Skill_GetBase(SKILL_BUSHIDO);
-        int iChanceSE = 0, iChanceLegacy = 0;
-
-        if (fCanShield && IsStatFlag(STATF_HASSHIELD))	// parry using shield
-        {
-            pItemParry = LayerFind(LAYER_HAND2);
-            iParryChance = (iParrying - iBushido) / 40;
-            if ((iParrying >= 1000) || (iBushido >= 1000))
-                iParryChance += 5;
-            if (iParryChance < 0)
-                iParryChance = 0;
-        }
-        else if (m_uidWeapon.IsItem())		// parry using weapon
-        {
-            CItem* pTempItemParry = m_uidWeapon.ItemFind();
-            if (fCanOneHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND1))
-            {
-                pItemParry = pTempItemParry;
-
-                iChanceSE = iParrying * iBushido / 48000;
-                if ((iParrying >= 1000) || (iBushido >= 1000))
-                    iChanceSE += 5;
-
-                iChanceLegacy = iParrying / 80;
-                if (iParrying >= 1000)
-                    iChanceLegacy += 5;
-
-                iParryChance = maximum(iChanceSE, iChanceLegacy);
-            }
-            else if (fCanTwoHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND2))
-            {
-                pItemParry = pTempItemParry;
-
-                iChanceSE = iParrying * iBushido / 41140;
-                if ((iParrying >= 1000) || (iBushido >= 1000))
-                    iChanceSE += 5;
-
-                iChanceLegacy = iParrying / 80;
-                if (iParrying >= 1000)
-                    iChanceLegacy += 5;
-
-                iParryChance = maximum(iChanceSE, iChanceLegacy);
-            }
-        }
-    }
-    else    // Legacy formula (pre Samurai Empire)
-    {
-        if (fCanShield && IsStatFlag(STATF_HASSHIELD))	// parry using shield
-        {
-            pItemParry = LayerFind(LAYER_HAND2);
-            iParryChance = iParrying / 40;
-        }
-        else if (m_uidWeapon.IsItem())		// parry using weapon
-        {
-            CItem* pTempItemParry =  m_uidWeapon.ItemFind();
-            if ( (fCanOneHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND1)) ||
-                 (fCanTwoHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND2)) )
-            {
-                pItemParry = pTempItemParry;
-                iParryChance = iParrying / 80;
-            }
-        }
-
-        if ((iParryChance > 0) && (iParrying >= 1000))
-            iParryChance += 5;
-    }
-	/* 
-	Had to replace <= with < otherwise we will never be able to increase the parrying  skill if the Parrying skill is too low.
-	For example, without a shield and using the legacy formula we will not be able to get a gain in the skill if the character
-	Parrying skill is less than 8.0.
-	*/
-    if (iParryChance < 0)
-        return false;
-	
-    int iDex = Stat_GetAdjusted(STAT_DEX);
-    if (iDex < 80)
-    {
-        const float fDexMod = (80 - iDex)/100.0f;
-        iParryChance = int((float)iParryChance * (1.0f - fDexMod));
-    }
-        
-    if (Skill_UseQuick(SKILL_PARRYING, iParryChance, true, false))
-        return true;
-
-	return false;
-}
