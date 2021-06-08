@@ -544,7 +544,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 
 	CItem *pAmmo = nullptr;
 	const CResourceID ridAmmo(pWeapon->Weapon_GetRangedAmmoRes());
-	if (ridAmmo.IsUIDItem() && ridAmmo.IsValidResource()) // Illimited ammo (TDATA3=0) mean ridAmmo.IsUIDItem()=0
+	if (ridAmmo.IsValidUID() && ridAmmo.GetObjUID() > 0)
 	{
 		pAmmo = pWeapon->Weapon_FindRangedAmmo(ridAmmo);
 		if ( !pAmmo )

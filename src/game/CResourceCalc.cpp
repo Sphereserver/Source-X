@@ -231,6 +231,108 @@ int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg)
 	}
 }
 
+int CServerConfig::Calc_CombatChanceToParry(CChar* pChar, CItem*& pItemParry)
+{
+	ADDTOCALLSTACK("CServerConfig::Calc_CombatChanceToParry");
+	// Check if target will block the hit
+	// Legacy pre-SE formula
+	const bool fCanShield = g_Cfg.m_iCombatParryingEra & PARRYERA_SHIELDBLOCK;
+	const bool fCanOneHanded = g_Cfg.m_iCombatParryingEra & PARRYERA_ONEHANDBLOCK;
+	const bool fCanTwoHanded = g_Cfg.m_iCombatParryingEra & PARRYERA_TWOHANDBLOCK;
+
+	const int iParrying = pChar->Skill_GetBase(SKILL_PARRYING);
+	/*
+	While the difficulty range is 0-100 (without decimal) we initialize iParryChance to -1 for avoiding the player
+	to gain parrying skill when his combination of weapon/shield does not match the values set in the CombatParryingEra  in the sphere.ini.
+	*/
+	int iParryChance = -1;
+	if (g_Cfg.m_iFeatureSE & FEATURE_SE_NINJASAM && g_Cfg.m_iCombatParryingEra & PARRYERA_SEFORMULA )   // Samurai Empire formula
+	{
+		const int iBushido = pChar->Skill_GetBase(SKILL_BUSHIDO);
+		int iChanceSE = 0, iChanceLegacy = 0;
+
+		if (fCanShield && pChar->IsStatFlag(STATF_HASSHIELD))	// parry using shield
+		{
+			pItemParry = pChar->LayerFind(LAYER_HAND2);
+			iParryChance = (iParrying - iBushido) / 40;
+			if ((iParrying >= 1000) || (iBushido >= 1000))
+				iParryChance += 5;
+			if (iParryChance < 0)
+				iParryChance = 0;
+		}
+		else if (pChar->m_uidWeapon.IsItem())		// parry using weapon
+		{
+			CItem* pTempItemParry = pChar->m_uidWeapon.ItemFind();
+			if (fCanOneHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND1))
+			{
+				pItemParry = pTempItemParry;
+
+				iChanceSE = iParrying * iBushido / 48000;
+				if ((iParrying >= 1000) || (iBushido >= 1000))
+					iChanceSE += 5;
+
+				iChanceLegacy = iParrying / 80;
+				if (iParrying >= 1000)
+					iChanceLegacy += 5;
+
+				iParryChance = maximum(iChanceSE, iChanceLegacy);
+			}
+			else if (fCanTwoHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND2))
+			{
+				pItemParry = pTempItemParry;
+
+				iChanceSE = iParrying * iBushido / 41140;
+				if ((iParrying >= 1000) || (iBushido >= 1000))
+					iChanceSE += 5;
+
+				iChanceLegacy = iParrying / 80;
+				if (iParrying >= 1000)
+					iChanceLegacy += 5;
+
+				iParryChance = maximum(iChanceSE, iChanceLegacy);
+			}
+		}
+	}
+	else    // Legacy formula (pre Samurai Empire)
+	{
+		if (fCanShield && pChar->IsStatFlag(STATF_HASSHIELD))	// parry using shield
+		{
+			pItemParry = pChar->LayerFind(LAYER_HAND2);
+			iParryChance = iParrying / 40;
+		}
+		else if (pChar->m_uidWeapon.IsItem())		// parry using weapon
+		{
+			CItem* pTempItemParry = pChar->m_uidWeapon.ItemFind();
+			if ((fCanOneHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND1)) ||
+				(fCanTwoHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND2)))
+			{
+				pItemParry = pTempItemParry;
+				iParryChance = iParrying / 80;
+			}
+		}
+
+		if ((iParryChance > 0) && (iParrying >= 1000))
+			iParryChance += 5;
+	}
+	/*
+	Had to replace <= with < otherwise we will never be able to increase the parrying  skill if the Parrying skill is too low.
+	For example, without a shield and using the legacy formula we will not be able to get a gain in the skill if the character
+	Parrying skill is less than 8.0.
+	*/
+	if (iParryChance < 0)
+		return 0;
+
+	int iDex = pChar->Stat_GetAdjusted(STAT_DEX);
+	if (iDex < 80)
+	{
+		const float fDexMod = (80 - iDex) / 100.0f;
+		iParryChance = int((float)iParryChance * (1.0f - fDexMod));
+	}
+
+	return iParryChance;
+
+}
+
 int CServerConfig::Calc_FameKill( CChar * pKill )
 {
 	ADDTOCALLSTACK("CServerConfig::Calc_FameKill");
