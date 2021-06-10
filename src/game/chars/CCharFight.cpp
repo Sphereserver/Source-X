@@ -1949,12 +1949,14 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			//Effect(EFFECT_OBJ, ITEMID_FX_GLOW, this, 10, 16);		// moved to scripts (@UseQuick on Parrying skill)
 			if (iParryReduction >= 100)
 				return WAR_SWING_EQUIPPING_NOWAIT;
+
+			// Apply parrying reduction (if there's any)
+			if (iParryReduction > 0)
+				iDmg -= IMulDiv(iDmg, iParryReduction, 100);
 		}
 	}
 
-	// Apply parrying reduction (if there's any)
-	if (iParryReduction > 0)
-		iDmg -= IMulDiv(iDmg, iParryReduction, 100);
+	
 
 	CScriptTriggerArgs Args(iDmg, iDmgType, pWeapon);
 	Args.m_VarsLocal.SetNum("ItemDamageChance", 25);

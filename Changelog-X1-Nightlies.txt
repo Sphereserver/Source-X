@@ -2733,3 +2733,6 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		Local.ItemParryDamageChance: The chance that the parrying item will be damaged (default 100%).
 		Local.Damage: The amount of damage (raw) before the parry reduction.
 		Return 1: Completely blocks the damage as if the parry damage reduction was set to 100.
+		
+10-06-2021, Drk84
+-Fixed: Damage was always reduced by parry even if the character failed the parry action.
