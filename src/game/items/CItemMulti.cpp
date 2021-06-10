@@ -1799,7 +1799,11 @@ void CItemMulti::Release(const CUID& uidContainer, bool fRemoveFromList)
     ADDTOCALLSTACK("CItemMulti::Release");
     if (fRemoveFromList)
     {
-        _lLockDowns.erase(std::find(_lLockDowns.begin(), _lLockDowns.end(), uidContainer));
+        auto it = std::find(_lSecureContainers.begin(), _lSecureContainers.end(), uidContainer);
+        if (it != _lSecureContainers.end())
+        {
+            _lSecureContainers.erase(it);
+        }
     }
 
     CItemContainer *pContainer = static_cast<CItemContainer*>(uidContainer.ItemFind());
