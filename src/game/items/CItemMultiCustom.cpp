@@ -287,6 +287,7 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
                 Args.m_VarsLocal.SetNum("P.Y", pComp->m_item.m_dy);
                 Args.m_VarsLocal.SetNum("P.Z", pComp->m_item.m_dz);
                 Args.m_VarsLocal.SetNum("VISIBLE", pComp->m_item.m_visible);
+                Args.m_pO1 = this;
 
                 const TRIGRET_TYPE iRet = pCharClient->OnTrigger(CTRIG_HouseDesignCommitItem, pCharClient, &Args);
                 if (iRet == TRIGRET_RET_FALSE)
